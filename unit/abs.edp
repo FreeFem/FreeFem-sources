@@ -51,7 +51,6 @@ t = clock() - t;
 cout << IND << IND << t << endl;
 test(arzero == rzero);
 
-
 cout << IND << "complex" << endl;
 
 complex cplusplus = 5. + 1i * 3.;
@@ -60,7 +59,6 @@ complex cmoinsplus = -5. + 1i * 3;
 complex cmoinsmoins = -5. - 1i * 3;
 complex czero = 0.;
 real cabs = sqrt(5^2+3^2);
-
 
 t = clock();
 real acplusplus = abs(cplusplus);
@@ -106,17 +104,48 @@ for (int i = 0; i < n; i++) {
   test(B[i] == abs(A[i]));
 }
 
-// int tab = 2;
-// real[int, int] AA = [[-1.,5.,8.,-9.],[5., 6.,-8.,-9.]];
-// real[int, int] BB(tab, n);
+int tab = 2;
+real[int, int] AA = [[-1.,5.,8.,-9.],[5., 6.,-8.,-9.]];
+real[int, int] BB(tab, n);
+
+t = clock();
+BB = abs(AA);
+t = clock() - t;
+cout << IND << IND << t << endl;
+for (int i = 0; i < tab; i++) {
+  for (int j = 0; j < n; j++) {
+    test(BB(i,j) == abs(AA(i,j)));
+  }
+}
+
+// cout << IND << "int array" << endl;
+//
+// int[int] Aint = [1,-1,5,-58];
+// int[int] Bint(n);
+//
 // t = clock();
-// BB = abs (AA);
+// for (int i = 0; i < n; i++) {
+//   Bint[i] = abs(Aint[i]);
+// }
+// t = clock() - t;
+// cout << IND << IND << t << endl;
+// for (int i = 0; i < n; i++) {
+//   test(Bint[i] == abs(Aint[i]));
+// }
+//
+// int[int, int] AAint = [[-1,5,8,-9],[5, 6,-8,-9]];
+// int[int, int] BBint(tab, n);
+//
+// t = clock();
 // for (int i = 0; i < tab; i++) {
 //   for (int j = 0; j < n; j++) {
-//     test(BB[i][j] == abs(AA[i][j]));
+//     BBint(i,j) = abs(AAint(i,j));
 //   }
 // }
 // t = clock() - t;
 // cout << IND << IND << t << endl;
-
-//Il faut tester encore un type
+// for (int i = 0; i < tab; i++) {
+//   for (int j = 0; j < n; j++) {
+//     test(BBint(i,j) == abs(AAint(i,j)));
+//   }
+// }

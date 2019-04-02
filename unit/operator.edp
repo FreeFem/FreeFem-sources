@@ -1,0 +1,384 @@
+include "test.idp"
+
+cout << "operator +" << endl;
+real t;
+
+cout << IND << "int" << endl;
+
+int i1 = 2;
+int i2 = 3;
+real ir = 1.;
+complex ic = 5.0 + 1i * 6;
+complex ic2 = 1. + 1i;
+string is = "6 + 1i * 7";
+
+t = clock();
+int resi1 = i1 + i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resi1 == 5);
+
+t = clock();
+real resi2 = i1 + ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resi2 == 3.);
+
+t = clock();
+complex resi3 = i1 + ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resi3 == 7 + 1i * 6);
+
+t = clock();
+string resi4 = i1 + is;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resi4 == "26 + 1i * 7");
+
+cout << IND << "real" << endl;
+
+t = clock();
+real resr1 = ir + ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resr1 == 2.);
+
+t = clock();
+real resr2 = ir  + i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resr2 == 3.);
+
+t = clock();
+complex resr3 = ir + ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resr3 == 6 + 1i * 6);
+
+t = clock();
+string resr4 = ir + is;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resr4 == "16 + 1i * 7");
+
+cout << IND << "complex" << endl;
+
+t = clock();
+complex resc1 = ic + ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resc1 == 10 + 1i * 12);
+
+t = clock();
+complex resc2 = ic + i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resc2 == 7. + 1i * 6);
+
+t = clock();
+complex resc3 = ic + ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resc3 == 6. + 1i * 6);
+
+t = clock();
+string resc4 = ic + is;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resc4 == "5+6i6 + 1i * 7");
+
+cout << IND << "string" << endl;
+
+t = clock();
+string ress1 = is + is;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ress1 == "6 + 1i * 76 + 1i * 7");
+
+t = clock();
+string ress2 = is + i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ress2 == "6 + 1i * 72");
+
+t = clock();
+string ress3 = is + ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ress3 == "6 + 1i * 71");
+
+t = clock();
+string ress4 = is + ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ress4 == "6 + 1i * 75+6i");
+
+
+cout << "operator -" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+int ressi1 = i1 - i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressi1 == -1);
+
+t = clock();
+real ressi2 = i1 - ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressi2 == 1.);
+
+t = clock();
+complex ressi3 = i1 - ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressi3 == -3 - 6i);
+
+cout << IND << "real" << endl;
+
+t = clock();
+real ressr1 = ir - ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressr1 == 0.);
+
+t = clock();
+real ressr2 = ir - i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressr2 == -1.);
+
+t = clock();
+complex ressr3 = ir - ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressr3 == -4 - 6i);
+
+cout << IND << "complex" << endl;
+
+t = clock();
+complex ressc1 = ic - ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressc1 == 0.);
+
+t = clock();
+complex ressc2 = ic - i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressc2 == 3. + 1i * 6);
+
+t = clock();
+complex ressc3 = ic - ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressc3 == 4. + 1i * 6);
+
+
+cout << "operator *" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+int resmi1 = i1 * i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resmi1 == 6);
+
+t = clock();
+real resmi2 = i1 * ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resmi2 == 2.);
+
+t = clock();
+complex resmi3 = i1 * ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resmi3 == 10+12i);
+
+cout << IND << "real" << endl;
+
+t = clock();
+real resmr1 = ir * ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resmr1 == 1.);
+
+t = clock();
+real resmr2 = ir * i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resmr2 == 2.);
+
+t = clock();
+complex resmr3 = ir * ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resmr3 == 5 + 1i * 6);
+
+cout << IND << "complex" << endl;
+
+t = clock();
+complex resmc1 = ic * ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+  test(resmc1 == -11 + 60i);
+
+t = clock();
+complex resmc2 = ic * i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resmc2 == 10 + 12i);
+
+t = clock();
+complex resmc3 = ic * ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resmc3 == 5. + 1i * 6);
+
+
+cout << "operator /" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+int i3 = 4;
+int resdi1 = i3 / i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdi1 == 2);
+
+t = clock();
+real resdi2 = i1 / ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdi2 == 2.);
+
+t = clock();
+complex resdi3 = i1 / ic2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdi3 == 1-1i);
+
+cout << IND << "real" << endl;
+
+t = clock();
+real resdr1 = ir / ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdr1 == 1.);
+
+t = clock();
+real resdr2 = ir / i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdr2 == 0.5);
+
+t = clock();
+complex resdr3 = ir / (ic2);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdr3 == 0.5-0.5i);
+
+cout << IND << "complex" << endl;
+t = clock();
+complex resdc1 = ic / ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdc1 == 1);
+
+t = clock();
+complex resdc2 = ic / i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdc2 == 2.5 + 3i);
+
+t = clock();
+complex resdc3 = ic / ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdc3 == 5. + 1i * 6);
+
+
+cout << "operator %" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+int resmodi1 = i3 % i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resmodi1 == 0);
+
+real ir2 = 2.;
+t = clock();
+real resmodi2 = i2 % ir2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resmodi2 == 1.);
+
+cout << IND << "real" << endl;
+
+t = clock();
+real resmodr1 = ir % ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resmodr1 == 0);
+
+t = clock();
+real resmodr2 = ir % i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resmodr2 == 1);
+
+
+cout << "operator ^" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+int respowi1 = i3 ^ i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(respowi1 == 16);
+
+t = clock();
+real respowi2 = i2 ^ ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(respowi2 == 3);
+
+//matrix
+
+cout << IND << "real" << endl;
+
+t = clock();
+real respowr1 = ir ^ ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(respowr1 == 1.);
+
+t = clock();
+real respowr2 = ir ^ i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(respowr2 == 1.);
+
+cout << IND << "complex" << endl;
+
+t = clock();
+complex respowc1 = (ic) ^ i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+cout << respowc1 << endl;
+//test(respowc1 == 11 + 60i); //to fix
+
+t = clock();
+complex respowc2 = ic ^ ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(respowc2 == 5.+6i);
