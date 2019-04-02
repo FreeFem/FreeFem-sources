@@ -146,7 +146,7 @@ IFMPI Source: "examples\hpddm\*.edp"; DestDir: "{app}\examples\hpddm"
 ; Documentation files may need to be copied from another machine if
 ; Cygwin refuses to build them.
 
-Source: "freefem++doc.pdf"; DestDir: "{app}"
+Source: "FreeFEM-documentation.pdf"; DestDir: "{app}"
 
 ; Icons for Windows can be created from a 32x32 image with icotool
 ; (Linux Debian unstable), or IrfanView (Windows, not very good

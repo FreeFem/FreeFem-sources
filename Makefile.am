@@ -110,11 +110,11 @@ speedtest: all
 # Windows package script (for Inno Setup). We extract version
 # information from the Debian Changelog to get the package release
 # number as well.
-win32:WindowsPackage.iss
+win32:WindowsPackage.iss:FreeFEM-documentation.pdf
 	test ! -d plugin/include-tmp  || rm -r plugin/include-tmp
 	cd plugin;mkdir include-tmp;cp -Lr seq/include/*  */*.h  include-tmp
 	/c/Program\ Files\ \(x86\)/Inno\ Setup\ 5/ISCC.exe  "`cygpath.exe WindowsPackage.iss`"
-WindowsPackage.iss: etc/config/m4/WindowsPackage.m4 configure.ac Makefile.am
+WindowsPackage.iss: etc/config/m4/WindowsPackage.m4 configure.ac Makefile.am 
 	m4 -DVERSION='$(VERSION)$(ADD_PACKAGE_NAME)' \
 	-DMPIPROG='$(MPIPROG)' -DSIZEOFPTR='$(SIZEOF_PTRINBIT)' \
 	-DHOSTOS='$(host_os)'  etc/config/m4/WindowsPackage.m4  > WindowsPackage.iss
@@ -165,7 +165,9 @@ script/PostInstall.sh:./Makefile bin/script/PostInstall.m4
 	chmod a+x bin/script/PostInstall.sh
 
 
-
+FreeFEM-documentation.pdf:Makefile
+	$(WGET) https://doc.freefem.org/pdf/FreeFEM-documentation.pdf
+	
 ListFiles-natives: .FORCE
 	test `uname` != Darwin || $(MAKE)  FreeFem++-CoCoa
 	echo $(FF_EXAMPLES_FILES) >$@
@@ -186,11 +188,11 @@ $(FF_MAC_PREFIX)_Macos:documentation ListFiles-natives
 	-mkdir $@
 	cat ListFiles-natives|xargs tar chf - | (cd $@ ; tar xf - )
 	/Developer/Tools/CpMac "FreeFem++(Carbon)" $@/FreeFem++
-	cp   freefem++-doc.pdf $@
+	cp   FreeFEM-documentation.pdf $@
 
 $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives List-agl-dylib
 	-mkdir $@
-	cp   freefem++doc.pdf $@
+	cp   FreeFEM-documentation.pdf $@
 	cat ListFiles-natives|xargs tar chf - | (cd $@ ; tar xf - )
 	cd  $@ ; tar zxf ../src/agl/FreeFem++.app.tgz
 	sed <src/agl/Info-plist.am >$@/FreeFem++.app/Contents/Info.plist \
