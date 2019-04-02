@@ -117,3 +117,7 @@ long npichon2d1=0, npichon3d1=0;
 
 //  add F. Hecht
 EnvironmentData  ffenvironment;
+// April 2019
+using std::ostream;
+#include <RefCounter.hpp>
+RefCounter *RefCounter::tnull=0;
