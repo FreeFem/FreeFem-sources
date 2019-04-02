@@ -113,7 +113,7 @@ speedtest: all
 # Windows package script (for Inno Setup). We extract version
 # information from the Debian Changelog to get the package release
 # number as well.
-win32:WindowsPackage.iss:FreeFEM-documentation.pdf
+win32:WindowsPackage.iss FreeFEM-documentation.pdf
 	test ! -d plugin/include-tmp  || rm -r plugin/include-tmp
 	cd plugin;mkdir include-tmp;cp -Lr seq/include/*  */*.h  include-tmp
 	/c/Program\ Files\ \(x86\)/Inno\ Setup\ 5/ISCC.exe  "`cygpath.exe WindowsPackage.iss`"
