@@ -3787,19 +3787,23 @@ void  init_lgmat()
     
     Dcl_Type<const  RestrictArray<pfes>::Op *>();
     Dcl_Type<const  RestrictArray<pfes3>::Op *>();
+    Dcl_Type<const  RestrictArray<pfesS>::Op *>();
   //  Add<const RestrictArray<pfes>::Op *>("<-","(", new RestrictArray<pfes>);
   //  Add<const RestrictArray<pfes3>::Op *>("<-","(", new RestrictArray<pfes3>);
   
   Global.Add("restrict","(",new RestrictArray<pfes>);// FH Jan 2014
   Global.Add("restrict","(",new RestrictArray<pfes3>);// FH Jan 2014
+  Global.Add("restrict","(",new RestrictArray<pfesS>);// PHT Apr 2019
     
   TheOperators->Add("=",
                       new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfes>::Op*,E_F_StackF0F0>(SetRestrict<pfes,1>),
-                      new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfes3>::Op*,E_F_StackF0F0>(SetRestrict<pfes3,1>)
+                      new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfes3>::Op*,E_F_StackF0F0>(SetRestrict<pfes3,1>),
+                      new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfesS>::Op*,E_F_StackF0F0>(SetRestrict<pfesS,1>)
                       );
     TheOperators->Add("<-",
                       new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfes>::Op*,E_F_StackF0F0>(SetRestrict<pfes,0>),
-                      new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfes3>::Op*,E_F_StackF0F0>(SetRestrict<pfes3,0>)
+                      new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfes3>::Op*,E_F_StackF0F0>(SetRestrict<pfes3,0>),
+                      new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfesS>::Op*,E_F_StackF0F0>(SetRestrict<pfesS,0>)
                       );
   
 
