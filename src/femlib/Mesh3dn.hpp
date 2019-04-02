@@ -274,7 +274,11 @@ public:
    return meshS;
  }
     ~Mesh3() {
-        if (meshS) meshS->destroy();//  Add clean mesh if necessary ...FH and AF. april 2019 
+        
+        if (meshS) {
+            if (meshS->vertices == vertices) vertices = 0; // Hack FH april to remove double free (very ..Bad )
+            meshS->destroy();//  Add clean mesh if necessary ...FH and AF. april 2019
+        }
         SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl);}
 private:
   int load(const string & filename); 
