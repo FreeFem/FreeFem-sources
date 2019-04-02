@@ -1631,18 +1631,20 @@ AnyType pfSr2R(Stack s,const AnyType &a)
   R2 PHat;
   bool outside=false;
   bool qnu=true;
-  if ( 0 && mp.ThS && mp.ThS->elements == Th.elements && mp.T)
+  if (mp.ThS && mp.ThS->elements == Th.elements && mp.T)
    {
      qnu=false;
      K=mp.TS;
-     //PHat=mp.PHat;
+     PHat.x = mp.PHat.x;
+     PHat.y = mp.PHat.y;
    }
-  else if ( 0 && mp.other.ThS
+  else if (mp.other.ThS
             && (mp.other.ThS->elements ==  Th.elements)
             && (mp.other.P.x == mp.P.x) && (mp.other.P.y == mp.P.y) && (mp.other.P.z == mp.P.z)   )
     {
       K=mp.other.TS;
-      //PHat=mp.other.PHat;
+      PHat.x = mp.other.PHat.x;
+      PHat.y = mp.other.PHat.y;
       outside = mp.other.outside;
     }
   else {
