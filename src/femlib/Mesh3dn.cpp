@@ -176,7 +176,6 @@ namespace Fem2D
     int ok=load(filename);
     if(verbosity) {
       cout << "read mesh ok " << ok ;
-       // typeMesh3=typeMsh3;
       if (typeMesh3==0) cout << " ---- pure surface Mesh"<< endl;
       else if (typeMesh3==1) cout << " ---- pure volume Mesh"<< endl;
       else if (typeMesh3==2) cout << " ---- volume and surface Meshes"<< endl;
@@ -770,11 +769,21 @@ namespace Fem2D
      
     //define the type of meshes present in the data file .mesh
 
-    if(nTet==0 && nTri>0 /*&& nSeg>0*/) { if(verbosity) {cout << "data file "<< pfile <<  " contains only a surface Mesh" <<endl; typeMesh3=0;
-    if (nSeg==0) cout << "Caution, no boundary element to apply BC " << endl;}}
-    if (nTet>0 && nTri>0 && nSeg==0) { if(verbosity) cout << "data file "<< pfile <<  " contains only a volume Mesh"<<endl; typeMesh3=1; }
-    if (nTet==0 && nTri>0 && nSeg==0) { if(verbosity) cout << "data file "<< pfile << " contains only an old surface mesh3 surface"<<endl; typeMesh3=1; }
-    if(nTet>0 && nTri>0 && nSeg>0){ if(verbosity) cout << "data file "<< pfile << " contains a volume and surface Meshes"<<endl; typeMesh3=2; }
+    if (nTet==0 && nTri>0 && nSeg>0) {  // Mesh3 null, MeshS (real surface with boundaries)
+        if(verbosity) cout << "data file "<< pfile <<  " contains only a surface MeshS" <<endl;
+        typeMesh3=0;}
+     if (nTet==0 && nTri>0 && nSeg==0) { // Mesh3(old surface), MeshS null
+        if(verbosity) cout << "data file "<< pfile <<  " contains only a old surface Mesh3" <<endl;
+          typeMesh3=1;}
+    if (nTet>0 && nTri>0 && nSeg==0) { // Mesh3 (volume), MeshS null
+        if(verbosity) cout << "data file "<< pfile <<  " contains only a volume Mesh"<<endl;
+        typeMesh3=1; }
+    if (nTet==0 && nTri>0 && nSeg>0) { // Mesh3(old surface), MeshS(real surface with boundaries)
+        if(verbosity) cout << "data file "<< pfile << " contains only an old surface mesh3 surface and meshS"<<endl;
+        typeMesh3=2; }
+    if (nTet>0 && nTri>0 && nSeg>0) { // Mesh3(volume with boundaries), MeshS(real surface with boundaries)
+        if(verbosity) cout << "data file "<< pfile << " contains a volume and surface Meshes"<<endl;
+        typeMesh3=2; }
 
     // By default, there is a mesh3 volume mesh. If pure surface mesh, mesh3 is empty except to the pointer on meshS
     // Initialize num of vertice, tetra, triang in the volume mesh
@@ -801,7 +810,7 @@ namespace Fem2D
         
       int mxlab=0, mnlab=0;
     // 1st case, the .mesh contains tetrahedrons -> volume mesh -> mesh3 is iniatiazed
-    if (typeMesh3!=0) {
+    if (typeMesh3!=0) { // ! Mesh3 null
       // read vertices
       GmfGotoKwd(inm,GmfVertices);
       for(int i=0;i<nv;++i) {
@@ -863,7 +872,7 @@ namespace Fem2D
    // 2nd case, the .mesh don't contains tetrahedrons, that means it's only a surface mesh
    // the vertices given are the surface mesh vertices
    int mxlabSurf=0, mnlabSurf=0;
-   if (typeMesh3==0) {
+   if (typeMesh3==0) { // Mesh3 null
        meshS = new MeshS();
        this->meshS->set(nv,nTri,nSeg);
        // read vertices
@@ -921,11 +930,12 @@ namespace Fem2D
         meshS->mesb += this->meshS->borderelements[i].mesure();
       }
     } // end typeMesh==0
+      
     // 3rd case, the .mesh contains tetrahedrons, triangles and edges
     // we are able to build a volume and surface mesh
     // for this, surface vertices must be extract of the original vertice list and a mapping must be created between surface and volume vertices
   
-      if (typeMesh3==2) {
+      if (typeMesh3==2) {  // ! MeshS null and Mesh3 null
       meshS = new MeshS();
       // Number of Vertex in the surface
       meshS->v_num_surf=new int[nv];
@@ -985,14 +995,14 @@ namespace Fem2D
         meshS->borderelements[i].set(meshS->vertices,iv,lab);
 	    meshS->mesb += meshS->borderelements[i].mesure();
 	  }
-     // delete [ ] v_num_surf;
     } // end typeMesh3==2
 
-    if(verbosity>1 && (typeMesh3!=1) )
+    if(verbosity>1 && (meshS) )
       cout << "  -- MeshS(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
 	   << ", Triangle elts:= " << meshS->nt << ", num vertice:= " << meshS->nv << ", num edges boundaries:= " << meshS->nbe << endl;
     
     GmfCloseMesh(inm);
+    delete[] data;
     return 0; // OK
   }
        
@@ -2044,7 +2054,6 @@ namespace Fem2D
   MeshS::MeshS(FILE *f,int offset)
     :liste_v_num_surf(0),v_num_surf(0)
   {
-      cout << "write here " << endl;
     GRead(f,offset);// remove 1
     assert( (nt >= 0 || nbe>=0)  && nv>0) ;
     BuildBound();
@@ -2171,7 +2180,7 @@ namespace Fem2D
   
         
   MeshS::MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb)
-    :/*v_num_surf(0),*/liste_v_num_surf(0)
+    :v_num_surf(0),liste_v_num_surf(0)
  {
     nv = nnv;
     nt = nnt;
@@ -2204,7 +2213,7 @@ namespace Fem2D
   {
     int ver = GmfFloat, outm;
     if ( !(outm = GmfOpenMesh(filename.c_str(),GmfWrite,ver,3)) ) {
-      cerr <<"  -- MeshS::Save  UNABLE TO OPEN  :"<< filename << endl;
+      cerr <<"  -- MeshS**::Save  UNABLE TO OPEN  :"<< filename << endl;
       return(1);
     }
     float fx,fy,fz;
