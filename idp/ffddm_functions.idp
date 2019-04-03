@@ -354,11 +354,14 @@ func preffe#K[int] pr#PREC2level(preffe#K[int] &l)
     else
     ltemp = l; 
     
-    preffe#K[int] s(l.n);
+    preffe#prmesh#toc(pr#tpreci,"",pr#tprec)
     
     /* M^-1 */
+    preffe#K[int] s(l.n);
     s = pr#PREC1(ltemp);
     
+    preffe#prmesh#tic(pr#tpreci)
+
     /* P^T */
     if (pr#corr == "ADEF2" || pr#corr == "BNN" || pr#corr == "RBNN1" || pr#corr == "RBNN2") {
       if (pr#bCM)

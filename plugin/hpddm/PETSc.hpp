@@ -36,6 +36,9 @@ class DistributedCSR {
         unsigned int                       _clast;
         DistributedCSR() : _A(), _petsc(), _ksp(), _exchange(), _num(), _first(), _last(), _cnum(), _cfirst(), _clast() { _S.clear(); }
         ~DistributedCSR() {
+            dtor();
+        }
+        void dtor() {
             if(_petsc) {
                 MatType type;
                 PetscBool isType;
@@ -78,31 +81,31 @@ class DistributedCSR {
                     }
                 }
                 MatDestroy(&_petsc);
-                for(int i = 0; i < _S.size(); ++i)
-                    MatDestroy(&_S[i]);
-                if(_ksp)
-                    KSPDestroy(&_ksp);
-                if(_exchange) {
-                    _exchange[0]->clearBuffer();
-                    delete _exchange[0];
-                    if(_exchange[1]) {
-                        _exchange[1]->clearBuffer();
-                        delete _exchange[1];
-                    }
-                    delete [] _exchange;
-                    _exchange = nullptr;
-                }
-                if(_A) {
-                    if(!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value)
-                        VecScatterDestroy(&_scatter);
-                    else
-                        _A->clearBuffer();
-                    delete _A;
-                    _A = nullptr;
-                }
-                delete [] _num;
-                _num = nullptr;
             }
+            for(int i = 0; i < _S.size(); ++i)
+                MatDestroy(&_S[i]);
+            if(_ksp)
+                KSPDestroy(&_ksp);
+            if(_exchange) {
+                _exchange[0]->clearBuffer();
+                delete _exchange[0];
+                if(_exchange[1]) {
+                    _exchange[1]->clearBuffer();
+                    delete _exchange[1];
+                }
+                delete [] _exchange;
+                _exchange = nullptr;
+            }
+            if(_A) {
+                if(!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value)
+                    VecScatterDestroy(&_scatter);
+                else
+                    _A->clearBuffer();
+                delete _A;
+                _A = nullptr;
+            }
+            delete [] _num;
+            _num = nullptr;
         }
 };
 

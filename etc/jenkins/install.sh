@@ -3,4 +3,10 @@
 # if sudo is needed
 # lanuch ./install.sh sudo
 
-$1 make install
+WITH_SUDO=""
+if [ "$1" = "sudo" ]
+then
+	WITH_SUDO=sudo
+fi
+
+${WITH_SUDO} make install

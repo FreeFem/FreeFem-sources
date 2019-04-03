@@ -1,0 +1,15 @@
+INCLUDE(FindPackageHandleStandardArgs)
+INCLUDE(PackageManagerPaths)
+
+FIND_PATH(GMM_INCLUDES NAMES gmm.h 
+                       PATHS ${PACKMAN_INCLUDE_PATHS} 
+                       PATH_SUFFIXES gmm)
+
+IF(GMM_INCLUDES)
+  SET(GMM_FOUND True)
+ENDIF(GMM_INCLUDES)
+
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(GMM DEFAULT_MSG GMM_INCLUDES)
+
+
+

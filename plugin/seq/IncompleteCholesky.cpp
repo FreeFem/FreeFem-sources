@@ -26,7 +26,9 @@
 // *INDENT-ON* //
 
 #include "ff++.hpp"
+#include "AFunction.hpp"
 #include "AFunction_ext.hpp"
+#include <iostream>
 #include <vector>
 
 #ifdef __LP64__

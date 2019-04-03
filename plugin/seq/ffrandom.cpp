@@ -27,7 +27,11 @@
 //ff-c++-cpp-dep:
 // *INDENT-ON* //
 
+// TODO: remove this block as soon as autoconf is removed from FreeFem++
+#ifndef CMAKE
 #include "config.h"
+#endif
+
 #include  <iostream>
 #include  <cfloat>
 using namespace std;

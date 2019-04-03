@@ -1,4 +1,4 @@
-//ff-mpirun -np 8 elasticity-3d-thirdlevelgeneo.edp -glut ffglut -ffddm_schwarz_method ras -ffddm_geneo_nu 20 -global 10 -ffddm_partitioner 0 -nsuper 4 -ffddm_geneo_super_nu 8 -ffddm_inexactCS_tol 1.e-2
+//ff-mpirun -np 8 elasticity-3d-thirdlevelgeneo.edp -wg -ffddm_schwarz_method ras -ffddm_geneo_nu 20 -global 10 -ffddm_partitioner 0 -nsuper 4 -ffddm_geneo_super_nu 8 -ffddm_inexactCS_tol 1.e-2
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
 
