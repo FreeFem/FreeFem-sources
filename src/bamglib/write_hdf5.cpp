@@ -1,4 +1,7 @@
+// TODO: remove this block as soon as autoconf is removed from FreeFem++
+#ifndef CMAKE
 #include "config.h"
+#endif
 extern long verbosity;
 #ifdef HAVE_HDF5
 #include "write_hdf5.hpp"

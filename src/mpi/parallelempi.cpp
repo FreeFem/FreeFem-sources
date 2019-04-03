@@ -1,4 +1,3 @@
-#include <config.h>
 #include <cstdint>
 #include <fstream>
 #include <iostream>
