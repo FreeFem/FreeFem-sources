@@ -305,9 +305,11 @@ Mesh3*yams_pSurfMesh_to_mesh3 (yams_pSurfMesh sm, int infondang, int infocc, int
 		int ff_nt = sm->ntet;
 		Mesh3 *TH3_T = new Mesh3(ff_nv, ff_nt, ff_nbe, ff_v, ff_t, ff_b);
 		TH3_T->BuildGTree();
+        TH3_T->getTypeMesh3()=1;
 		return TH3_T;
 	} else {
 		Mesh3 *TH3_T = new Mesh3(ff_nv, ff_nbe, ff_v, ff_b);
+        TH3_T->getTypeMesh3()=1;
 		return TH3_T;
 	}
 }
@@ -803,7 +805,7 @@ AnyType yams_Op::operator () (Stack stack)  const {
 	}
 
 	Mesh3 *Th3_T = yams_pSurfMesh_to_mesh3(yamsmesh, infondang, infocc, intopt[22]);
-
+    Th3_T->getTypeMesh3()=1;
 	// recuperer la solution ????
 	if (verbosity > 10) {
 		cout << &yamsmesh->point << " " << &yamsmesh->tria << " " << &yamsmesh->geom << " " << &yamsmesh->tgte << endl;
