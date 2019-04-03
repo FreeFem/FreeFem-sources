@@ -4,7 +4,7 @@
 # lanuch ./build_PETSc.sh sudo
 
 WITH_SUDO=""
-if [ "$1" = "sudo "]
+if [ "$1" = "sudo" ]
 then
 	WITH_SUDO=sudo
 fi
