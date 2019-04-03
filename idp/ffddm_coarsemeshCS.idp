@@ -115,7 +115,7 @@ if (!pr#prfe#prmesh#binexactCS) {
 
   if (bseq || mpirank < pr#prfe#prmesh#pCS) {
   	set(pr#ECM,solver=GMRES);
-    set(pr#ECM,solver=sparsesolver,commworld=pr#prfe#prmesh#commCS,master=0); /* -1 */
+    set(pr#ECM,solver=sparsesolver,commworld=pr#prfe#prmesh#commCS,master=0,factorize=3); /* -1 */
   }
 }
 	

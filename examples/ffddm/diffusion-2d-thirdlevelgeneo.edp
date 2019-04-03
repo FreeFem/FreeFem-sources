@@ -10,7 +10,7 @@ include "ffddm.idp"
 
 macro def(i)i// EOM     // vector field definition
 macro init(i)i// EOM        // vector field initialization
-macro grad(u) [dx(u),dy(u),dz(u)] // EOM
+macro grad(u) [dx(u),dy(u)] // EOM
 func Pk = P1;             // finite element space
 
 int global = getARGV("-global", 8);
