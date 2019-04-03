@@ -27,13 +27,17 @@
  */
 //#pragma dont_inline on
 //#pragma inline_depth(1)
+
 //  for bessel function
 // c++11   => __STRICT_ANSI__ => error FH..
 #ifdef __STRICT_ANSI__
 #undef __STRICT_ANSI__
 #endif
-//
+
+// TODO: remove this block as soon as autoconf is removed from FreeFem++
+#ifndef CMAKE
 #include <config.h>
+#endif
 
 #include <cmath>
 #include <complex>
@@ -1654,17 +1658,11 @@ void Init_map_type()
     Global.Add("strtol","(",new OneOperator2<long,string*,long>(ffstrtol));// add march 2017
     Global.Add("strtod","(",new OneOperator1<double,string*>(ffstrtod));// add march 2017
 
-#ifdef HAVE_ATANH
      Global.Add("atanh","(",new OneOperator1<double>(atanh));
-#endif
      Global.Add("asin","(",new OneOperator1<double>(asin));
      Global.Add("acos","(",new OneOperator1<double>(acos));
-#ifdef HAVE_ASINH
      Global.Add("asinh","(",new OneOperator1<double>(asinh));
-#endif
-#ifdef HAVE_ACOSH
      Global.Add("acosh","(",new OneOperator1<double>(acosh));
-#endif
 #ifdef HAVE_ERFC
      Global.Add("erf","(",new OneOperator1<double>(erf));
      Global.Add("erfc","(",new OneOperator1<double>(erfc));

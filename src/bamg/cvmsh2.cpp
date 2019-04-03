@@ -28,7 +28,12 @@
 //
 // ORIG-DATE:     Dec 97
 // ORIG-DATE:     Dec 97
+
+// TODO: remove this block as soon as autoconf is removed from FreeFem++
+#ifndef CMAKE
 #include <config.h>
+#endif
+
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>

@@ -213,8 +213,12 @@
      along with Freefem++; if not, write to the Free Software
      Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
      */
-
+    
+// TODO: remove this block as soon as autoconf is removed from FreeFem++
+#ifndef CMAKE
 #include <config.h>
+#endif
+
 #include <iostream>
 #include  <complex>
 #include <string>

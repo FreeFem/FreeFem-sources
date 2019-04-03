@@ -9,7 +9,6 @@
 //
 
 /*
-     
   This file is part of Freefem++
      
   Freefem++ is free software; you can redistribute it and/or modify
@@ -46,7 +45,6 @@ namespace Fem2D
 #include "rgraph.hpp"
 #include "fem.hpp"
 #include "PlotStream.hpp"
-
 
 namespace Fem2D
 {
@@ -1233,9 +1231,10 @@ namespace Fem2D
   int Mesh3::SaveSurface(const string & filename) const
   {
     int ver = GmfFloat, outm;
-    if ( !(outm = GmfOpenMesh(filename.c_str(),GmfWrite,ver,3)) ) {
-      cerr <<"  -- Mesh3::Save  UNABLE TO OPEN  :"<< filename << endl;
-      return(1);
+    if ( !(outm = GmfOpenMesh(filename.c_str(),GmfWrite,ver,3)) )
+    {
+        cerr <<"  -- Mesh3::Save  UNABLE TO OPEN  :"<< filename << endl;
+        return(1);
     }
     // the mesh contains a volume mesh. Must extract the surface and the triangle on the surface ie the boundary mesh
     // the surface is the boundary elements, that means the triangle
@@ -1520,8 +1519,8 @@ namespace Fem2D
     ffassert(mes>=0); // add F. Hecht sep 2009.
   }
 
-  void Mesh3::flipSurfaceMesh3(int surface_orientation)
-  {
+void Mesh3::flipSurfaceMesh3(int surface_orientation)
+{
     /* inverse the orientation of the surface if necessary*/
     /* and control that all surfaces are oriented in the same way*/
     int nbflip=0;
@@ -1558,7 +1557,7 @@ namespace Fem2D
     if(i1>i3) Exchange(i1,i3), p = -p;
     if(i2>i3) Exchange(i2,i3), p = -p;
     return p;
-  }
+}
 
   // new version ...
   int  WalkInTetn(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt, R3 & offset)
