@@ -3,8 +3,14 @@
 # if sudo is needed
 # lanuch ./clean.sh sudo
 
+WITH_SUDO=""
+if [ "$1" = "sudo" ]
+then
+	WITH_SUDO=sudo
+fi
+
 make clean
-$SUDO rm -Rf /builds/freefem
+${WITH_SUDO} rm -Rf /builds/freefem
 
 if [ $? -eq 0 ]
 then

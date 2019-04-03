@@ -1,4 +1,4 @@
-//ff-mpirun  -np  4 diffusion-3d-minimal-ddm.edp -glut ffglut -raspart -ffddm_schwarz_method ras -ffddm_schwarz_coarse_correction BNN -ffddm_geneo_nu 10 -global 20
+//ff-mpirun  -np  4 diffusion-3d-minimal-ddm.edp -wg -raspart -ffddm_schwarz_method ras -ffddm_schwarz_coarse_correction BNN -ffddm_geneo_nu 10 -global 20
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
 
@@ -27,11 +27,11 @@ macro Varf(varfName, meshName, PhName)
 // Domain decomposition
 ffddmbuildDmesh( Lap , ThGlobal , mpiCommWorld )
 ffddmbuildDfespace( Lap , Lap , real , def , init , P1 )
-ffddmsetupOperator(Lap ,Lap , Varf)// mais plante avec    ffddmsetupOperator( Lap,Lap,Varf)
+ffddmsetupOperator(Lap ,Lap , Varf)
 
 // Domain decomposition solve
 real[int] rhs(LapVhi.ndof);//rhs(1) works as well 
-ffddmbuildrhs(Lap , Varf , rhs )// OK mais plante avec ffddmbuildrhs( Lap , Varf , rhs )  
+ffddmbuildrhs(Lap , Varf , rhs )
 LapVhi def(u) ;
 
 // Two-level Schwarz solve

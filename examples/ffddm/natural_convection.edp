@@ -1,4 +1,4 @@
-//ff-mpirun -np 8 natural_convection.edp -raspart -ffddm_schwarz_method oras -glut ffglut
+//ff-mpirun -np 8 natural_convection.edp -raspart -ffddm_schwarz_method oras -wg
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
 
@@ -27,7 +27,7 @@ real IRe=1./Rey, IRa=Ra/(Rey*Rey*Pr), IPr=1./(Rey*Pr) ;
 
 real Thot=0.5, Tcold=-0.5;
 
-real eps = 1e-7; // penalisation dans Navier-Stokes
+real eps = 1e-7; // penalization in Navier-Stokes
 
 int newtonMax = 10; 
 
