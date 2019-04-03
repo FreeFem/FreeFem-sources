@@ -89,7 +89,6 @@ fespace Vh(Th, Pk);      // local finite element space
     int Thetapts = int(Npts/6.0); // pts on the x-axis sides
     int Phipts   = int(Npts/3.0); // pts on the y-axis sides
 
-    meshN ThBorder;
     Th = square(Thetapts,Phipts,[x*pi,2.0*pi*y],label=Labels);
     // .....
     buildPeriodic(Th,       // The local mesh
