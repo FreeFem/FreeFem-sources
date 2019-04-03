@@ -30,13 +30,13 @@ TESTS=diffusion-2d-PETSc.edp diffusion-2d-PETSc-complex.edp diffusion-3d-PETSc.e
 	stokes-2d-PETSc.edp stokes-3d-PETSc.edp \
 	heat-2d-PETSc.edp diffusion-periodic-2d-PETSc.edp diffusion-periodic-2d.edp helmholtz-2d-PETSc.edp heat-2d-io.edp \
 	laplace-2d-SLEPc.edp laplace-complex-2d-SLEPc.edp stokes-2d-PETSc-fieldsplit.edp stokes-3d-io.edp \
-	laplace-2d-spherical-harmonics-SLEPc.edp	schrodinger-1d-harmonic-oscillator-SLEPc.edp	schrodinger-2d-harmonic-oscillator-SLEPc.edp \
+	laplace-2d-spherical-harmonics-SLEPc.edp schrodinger-1d-harmonic-oscillator-SLEPc.edp schrodinger-2d-harmonic-oscillator-SLEPc.edp \
 	laplace-2d-torus-SLEPc.edp schrodinger-1d-square-well-SLEPc.edp transpose-solve-PETSc.edp stokes-3d-PETSc-fieldsplit.edp \
-	PETSc-block.edp diffusion-2d.edp diffusion-3d.edp	diffusion-3d-simple.edp schrodinger-2d-axial-well-SLEPc.edp \
-	diffusion-2d-substructuring.edp	diffusion-2d-substructuring-PETSc.edp \
-	elasticity-2d.edp	\
-	stokes-3d.edp	stokes-2d.edp	\
-	heat-2d.edp	heat-3d.edp \
+	PETSc-block.edp diffusion-2d.edp diffusion-3d.edp diffusion-3d-simple.edp schrodinger-2d-axial-well-SLEPc.edp \
+	diffusion-2d-substructuring.edp diffusion-2d-substructuring-PETSc.edp \
+	elasticity-2d.edp Newton-adaptmesh-2d-PETSc.edp Newton-vi-adaptmesh-2d-PETSc.edp \
+	stokes-3d.edp stokes-2d.edp \
+	heat-2d.edp heat-3d.edp Newton-adaptmesh-2d-PETSc.edp \
 	helmholtz-2d.edp maxwell-3d.edp \
 	iterative.edp withPartitioning.edp \
 	elasticity-2d-substructuring.edp elasticity-block.edp \
