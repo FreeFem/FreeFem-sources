@@ -1,4 +1,4 @@
-//ff-mpirun  -np 4 Richards-2d.edp -glut ffglut -raspart -ns -ffddm_disable_plots
+//ff-mpirun  -np 4 Richards-2d.edp -wg -raspart -ns -ffddm_disable_plots
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
 
@@ -166,9 +166,9 @@ for(int ii=0;ii<100;ii++)
   Th=adaptmesh(Th,h,ratio=1.1);
   broadcast(processor(0),Th);
   
-  // le maillage a changé, on crée une nouvelle décomposition, on obtient des nouveaux maillages locaux
+  // the mesh has changed ; we create a new decomposition and obtain new local meshes
   ffddmbuildAug(R,Th,real,def,init,Pk,mpiCommWorld)
-  // interpole la solution au pas de temps précédent sur le nouveau maillage local 
+  // interpolate the solution at the previous time step on the new local mesh 
   hi = h;
   
 //  plot(Th,h,cmm="h ",value=1,wait=1);

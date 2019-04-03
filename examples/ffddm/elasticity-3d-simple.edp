@@ -1,4 +1,4 @@
-//ff-mpirun -np 8 elasticity-3d-simple.edp -glut ffglut -ffddm_schwarz_method ras -ffddm_schwarz_coarse_correction BNN -ffddm_geneo_nu 20 -global 10
+//ff-mpirun -np 8 elasticity-3d-simple.edp -wg -ffddm_schwarz_method ras -ffddm_schwarz_coarse_correction BNN -ffddm_geneo_nu 20 -global 10
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
 

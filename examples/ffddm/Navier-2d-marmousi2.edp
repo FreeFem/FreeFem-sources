@@ -2,7 +2,7 @@
 // PARAM -raspart -ffddm_schwarz_method oras -frequency 1 -ffddm_overlap 1 -ffddm_inexactCS_tol 0.1
 
 //ff-c++ -auto marmousi2.cpp
-//ff-mpirun -np 8 Navier-2d-marmousi2.edp -glut ffglut -ns -raspart -ffddm_schwarz_method oras -frequency 1 -ffddm_overlap 1 -ffddm_inexactCS_tol 0.1
+//ff-mpirun -np 8 Navier-2d-marmousi2.edp -wg -ns -raspart -ffddm_schwarz_method oras -frequency 1 -ffddm_overlap 1 -ffddm_inexactCS_tol 0.1
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
 
@@ -80,13 +80,13 @@ macro Varf(varfName, meshName, PhName)
               + int1d(meshName,labsext)(1i *(sxx*u*uu + sxy*(v*uu+u*vv) +syy*v*vv));
 // EOM
 
-// for the preconditioner (if (!bAbsorp) epsilonEprec = epsilonprob;)
+// for the preconditioner
 macro VarfEprec(varfName, meshName, PhName)
     varf varfName([u,v],[uu,vv]) = int2d(meshName)(NavierEprec(u,v,uu,vv)) 
               + int1d(meshName,labsext)(1i *(sxx*u*uu + sxy*(v*uu+u*vv) +syy*v*vv));
 // EOM
 
-// for the preconditioner (if (!bAbsorp) epsilonEprec = epsilonprob;) (oras)
+// for the preconditioner
 macro VarfOpt(varfName, meshName, PhName)
     varf varfName([u,v],[uu,vv]) = int2d(meshName)(NavierEprec(u,v,uu,vv)) 
               + int1d(meshName,labsext,10)(1i *(sxx*u*uu + sxy*(v*uu+u*vv) +syy*v*vv));

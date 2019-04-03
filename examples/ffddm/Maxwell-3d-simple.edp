@@ -1,4 +1,4 @@
-//ff-mpirun -np 8 Maxwell-3d-simple.edp -glut ffglut -raspart -ffddm_schwarz_method oras -ffddm_medit
+//ff-mpirun -np 8 Maxwell-3d-simple.edp -wg -raspart -ffddm_schwarz_method oras -ffddm_medit
 
 // for the make check:
 // NBPROC 6
@@ -37,7 +37,7 @@ int mysplit = 3;
 meshN Thc = cube(ng/mysplit, ng/mysplit, ng/mysplit, [x,y,z], label = labs);
 
 real epsilonprob = 0;//0 k k^2;                  // epsilon of the problem
-real be = getARGV("-betaEprec",1.); // beta from Euan paper, used in epsilonEprec  
+real be = getARGV("-betaEprec",1.); // beta for epsilonEprec  
 real epsilonEprec = 0;//k^be; 
 
 //macro Mdefplot(u)sqrt(real(u)^2+real(u#y)^2+real(u#z)^2)//
@@ -55,7 +55,7 @@ macro Varf(varfName, meshName, PhName)
                 + intbN(meshName,Robin)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
                 + on(Dirichlet,Ex=0,Ey=0,Ez=0);    // EOM
 
-// for the preconditioner (if (!bAbsorp) epsilonEprec = epsilonprob;)
+// for the preconditioner
 macro VarfEprec(varfName, meshName, PhName)
     varf varfName([Ex,Ey,Ez],[vx,vy,vz]) =
   intN(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
