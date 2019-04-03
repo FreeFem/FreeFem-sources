@@ -1,0 +1,14 @@
+include "test.idp"
+
+cout << "sqrt" << endl;
+real t;
+
+cout << IND << "real" << endl;
+
+real r = 16.0;
+
+t = clock();
+real resr1 = sqrt(r);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resr1 == 4.0);

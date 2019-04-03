@@ -1,0 +1,21 @@
+include "test.idp"
+
+cout << "square" << endl;
+real t;
+
+cout << IND << "real" << endl;
+
+real r = 4.0;
+real rneg = -4.0;
+
+t = clock();
+real resr1 = square(r);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resr1 == 16.0);
+
+t = clock();
+real resrneg = square(rneg);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resrneg == 16.0);
