@@ -273,7 +273,13 @@ public:
  inline MeshS * getMeshS() const{
    return meshS;
  }
-    ~Mesh3() {SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl);}
+    ~Mesh3() {
+        
+        if (meshS) {
+            if (meshS->vertices == vertices) vertices = 0; // Hack FH april to remove double free (very ..Bad )
+            meshS->destroy();//  Add clean mesh if necessary ...FH and AF. april 2019
+        }
+        SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl);}
 private:
   int load(const string & filename); 
   Mesh3(const Mesh3 &); // pas de construction par copie

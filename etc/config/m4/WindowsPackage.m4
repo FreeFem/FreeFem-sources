@@ -45,15 +45,15 @@ IFMPI Name: "{app}\examples\hpddm"; Permissions: everyone-full
 [Files]
 ; README
 Source: "README.md"; DestDir: "{app}"
-Source: "README_WINDOWS.md"; DestDir: "{app}"
-Source: "INNOVATION"; DestDir: "{app}"
-Source: "AUTHORS"; DestDir: "{app}"
-Source: "BUGS"; DestDir: "{app}"
-Source: "COPYRIGHT"; DestDir: "{app}"
-Source: "COPYING"; DestDir: "{app}"
+Source: "readme\README_WINDOWS.md"; DestDir: "{app}"
+Source: "readme\INNOVATION"; DestDir: "{app}"
+Source: "readme\AUTHORS"; DestDir: "{app}"
+Source: "readme\BUGS"; DestDir: "{app}"
+Source: "readme\COPYRIGHT"; DestDir: "{app}"
+Source: "readme\COPYING"; DestDir: "{app}"
 ;Source: "README"; DestDir: "{app}"
 ;Source: "crimson-freefem++.zip"; DestDir: "{app}"
-Source: "0ldUserReadMe.txt"; DestDir: "{app}"
+;Source: "0ldUserReadMe.txt"; DestDir: "{app}"
 
 ; Programs
 Source: "src\bin-win32\FreeFem++.exe"; DestDir: "{app}"
@@ -135,24 +135,24 @@ Source: "examples\3d\lac-leman-v4.msh"; DestDir: "{app}\examples\3d"
 IFMPI Source: "examples\mpi\ff*.txt"; DestDir: "{app}\examples\mpi"
 IFMPI Source: "examples\mpi\*.edp"; DestDir: "{app}\examples\mpi"
 IFMPI Source: "examples\hpddm\*.edp"; DestDir: "{app}\examples\hpddm"
-Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\load"
-Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\tutorial"
-Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\examples"
-Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\misc"
-Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\eigen"
+;Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\load"
+;Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\tutorial"
+;Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\examples"
+;Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\misc"
+;Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\eigen"
 
 
 
 ; Documentation files may need to be copied from another machine if
 ; Cygwin refuses to build them.
 
-Source: "freefem++doc.pdf"; DestDir: "{app}"
+Source: "FreeFEM-documentation.pdf"; DestDir: "{app}"
 
 ; Icons for Windows can be created from a 32x32 image with icotool
 ; (Linux Debian unstable), or IrfanView (Windows, not very good
 ; results) or paint (Windows, save in .bmp then rename to .ico).
 
-Source: "logo.ico"; DestDir: "{app}"
+Source: "etc\logo\logo.ico"; DestDir: "{app}"
 
 [Icons]
 

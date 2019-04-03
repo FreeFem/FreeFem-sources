@@ -107,7 +107,6 @@ fespace Vh(Th, Pk);      // local finite element space
     int Xpts= int(0.5*Npts); // pts on the x-axis sides
     int Ypts= 1;             // pts on the y-axis sides
 
-    meshN ThBorder;
     Th = square(Xpts,Ypts,[Lx*(x-0.5),Ly*(y-0.5)],label=Labels);
     // .....
     build(Th,       // The local mesh

@@ -5830,7 +5830,16 @@ R3 * set_eqp(R3 *a,R3 *b) { *a=*b; return a;}
 
 
 
-
+inline AnyType  DestroyPtr_pmesh3(Stack,const AnyType &x) {
+    const pmesh3 *  a=PGetAny<pmesh3>(x);
+/*    if((*a)->meshS) {
+        //  Question inutile
+        (*a)->meshS->destroy();// ???
+    }*/
+   // SHOWVERB(cout << "DestroyPtr " << typeid(A).name() << *a  << endl);
+    (*a)->destroy();
+    return  Nothing;
+};
 void  init_lgfem() 
 {
  // ThePlotStream = new ofstream("ttttt.plot");
@@ -5847,7 +5856,7 @@ void  init_lgfem()
 
  map_type[typeid(R3*).name()] = new ForEachType<R3*>(Initialize<R3>);   
   Dcl_TypeandPtr<pmesh>(0,0, ::InitializePtr<pmesh>,::DestroyPtr<pmesh>,AddIncrement<pmesh>,NotReturnOfthisType); 
-  Dcl_TypeandPtr<pmesh3>(0,0,::InitializePtr<pmesh3>,::DestroyPtr<pmesh3>,AddIncrement<pmesh3>,NotReturnOfthisType);
+  Dcl_TypeandPtr<pmesh3>(0,0,::InitializePtr<pmesh3>,::DestroyPtr_pmesh3,AddIncrement<pmesh3>,NotReturnOfthisType);
   Dcl_TypeandPtr<pmeshS>(0,0,::InitializePtr<pmeshS>,::DestroyPtr<pmeshS>,AddIncrement<pmeshS>,NotReturnOfthisType);    ///TODOCHECK
     
   Dcl_Type<lgVertex>(); 

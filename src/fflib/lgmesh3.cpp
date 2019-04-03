@@ -542,10 +542,11 @@ double pmesh_hmin(pmesh3 * p)
     return sqrt(hmin2);}
 
 
-pmeshS pmesh_gamma(pmesh3 * p)
+pmeshS pmesh_gamma(Stack stack, pmesh3 * const & p)
 { throwassert(p && *p) ;
   const Mesh3 & Th = **p;
   const MeshS *ThS = Th.meshS;
+  // Add2StackOfPtr2FreeRC(stack,ThS);
   return (ThS);
 }
 
@@ -1630,18 +1631,20 @@ AnyType pfSr2R(Stack s,const AnyType &a)
   R2 PHat;
   bool outside=false;
   bool qnu=true;
-  if ( 0 && mp.ThS && mp.ThS->elements == Th.elements && mp.T)
+  if (mp.ThS && mp.ThS->elements == Th.elements && mp.T)
    {
      qnu=false;
      K=mp.TS;
-     //PHat=mp.PHat;
+     PHat.x = mp.PHat.x;
+     PHat.y = mp.PHat.y;
    }
-  else if ( 0 && mp.other.ThS
+  else if (mp.other.ThS
             && (mp.other.ThS->elements ==  Th.elements)
             && (mp.other.P.x == mp.P.x) && (mp.other.P.y == mp.P.y) && (mp.other.P.z == mp.P.z)   )
     {
       K=mp.other.TS;
-      //PHat=mp.other.PHat;
+      PHat.x = mp.other.PHat.x;
+      PHat.y = mp.other.PHat.y;
       outside = mp.other.outside;
     }
   else {
@@ -2021,7 +2024,7 @@ void init_lgmesh3() {
  Add<pmesh3*>("nbe",".",new OneOperator1<long,pmesh3*>(pmesh_nbe));
  Add<pmesh3*>("hmax",".",new OneOperator1<double,pmesh3*>(pmesh_hmax));
  Add<pmesh3*>("hmin",".",new OneOperator1<double,pmesh3*>(pmesh_hmin));
- Add<pmesh3*>("Gamma",".",new OneOperator1<pmeshS,pmesh3*>(pmesh_gamma));
+ Add<pmesh3*>("Gamma",".",new OneOperator1s_<pmeshS,pmesh3*>(pmesh_gamma));
     
  
  //3D surface
