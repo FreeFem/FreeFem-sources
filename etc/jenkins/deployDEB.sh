@@ -13,7 +13,7 @@ git reset --hard
 git clean -fdx
 
 autoreconf -i \
-    && ./configure --enable-download --enable-optim \
+    && ./configure --enable-download --enable-optim --enable-generic \
     && ./3rdparty/getall -a \
     && make -j4 \
     && sudo checkinstall -D --install=no \
