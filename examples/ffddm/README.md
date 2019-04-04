@@ -8,7 +8,7 @@ Thanks to `ffddm`, FreeFem++ users have access to high-level functionalities for
 
 The `ffddm` framework is entirely written in the FreeFem++ language and the '.idp' scripts can be found [here](https://github.com/FreeFem/FreeFem-sources/blob/develop/idp) ('ffddm*.idp' files). It makes it also a very good tool for learning and prototyping domain decomposition methods without compromising efficiency.
 
- `ffddm` can also act as a wrapper for the [HPDDM](https://github.com/hpddm/hpddm) library. HPDDM is an efficient implementation of various domain decomposition methods and a variety of Krylov subspace algorithms, with advanced block and recycling methods for solving sequences of linear systems with multiple right-hand sides: GMRES and Block GMRES, CG, Block CG, and Breakdown-Free Block CG, GCRO-DR and Block GCRO-DR. For more details on how to use HPDDM within `ffddm`, see [the ffddm documentation](https://doc.freefem.org/documentation/ffddm/documentation/#using-hpddm-within-ffddm).
+ `ffddm` can also act as a wrapper for the [HPDDM](https://github.com/hpddm/hpddm) library. HPDDM is an efficient implementation of various domain decomposition methods and a variety of Krylov subspace algorithms, with advanced block and recycling methods for solving sequences of linear systems with multiple right-hand sides: GMRES and Block GMRES, CG, Block CG, and Breakdown-Free Block CG, GCRO-DR and Block GCRO-DR. For more details on how to use HPDDM within `ffddm`, see [the ffddm documentation](https://doc.freefem.org/documentation/ffddm/documentation.html#ffddmdocumentationhpddmffddm).
 
 # Getting Started
 
@@ -51,7 +51,7 @@ $ ff-mpirun -np 2 test.edp -glut ffglut
 
 ## Documentation
 
-You can find the `ffddm` documentation [here](https://doc.freefem.org/documentation/ffddm/ffddm/).
+You can find the `ffddm` documentation [here](https://doc.freefem.org/documentation/ffddm/index.html).
 
 ## Examples
 

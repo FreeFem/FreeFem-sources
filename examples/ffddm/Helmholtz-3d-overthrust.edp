@@ -1,5 +1,5 @@
 //ff-c++ overthrust.cpp
-//ff-mpirun -np 8 Helmholtz-3d-overthrust.edp -glut ffglut -raspart -ffddm_schwarz_method oras -ffddm_medit
+//ff-mpirun -np 8 Helmholtz-3d-overthrust.edp -wg -raspart -ffddm_schwarz_method oras -ffddm_medit
 
 // for the make check:
 // NBPROC 4
@@ -61,7 +61,7 @@ macro Varf(varfName, meshName, PhName)
 				+ intbN(meshName,Robin)(1i*k*u*v)
 				+ on(Dirichlet,u=0); // EOM
 
-// for the preconditioner (if (!bAbsorp) epsilonEprec = epsilonprob;)
+// for the preconditioner
 macro VarfEprec(varfName, meshName, PhName)
     varf varfName(u,v) =
   intN(meshName)(-(k^2-1i*epsilonEprec)*u*v+Grad(u)'*Grad(v))

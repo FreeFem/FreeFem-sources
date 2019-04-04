@@ -25,7 +25,11 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include <config.h> // needed for HAVE_DLFCN_H
+
+// TODO: remove this block as soon as autoconf is removed from FreeFem++
+#ifndef CMAKE
+#include <config.h>   // needed for HAVE_DLFCN_H
+#endif
 
 #include  <iostream>
 #include  <map>

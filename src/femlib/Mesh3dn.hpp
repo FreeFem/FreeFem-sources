@@ -232,7 +232,11 @@ public:
   double hmin() const;
   int Save(const string & filename) const;
     
-  ~MeshS() {SHOWVERB(cout << " %%%% delete MeshS"<< this << endl) ; }
+  ~MeshS() {
+    delete [] liste_v_num_surf ;
+    delete [] v_num_surf ;
+
+    SHOWVERB(cout << " %%%% delete MeshS"<< this << endl) ; }
   private:
   MeshS(const MeshS &); // pas de construction par copie
   void operator=(const MeshS &);// pas affectation par copy
@@ -251,7 +255,7 @@ public:
   double hmin() const; // Add J. Morice 11/10
   //surface mesh possible
   MeshS *meshS; 
-  int typeMesh3=1;   // by default volume mesh only
+  int typeMesh3;
   void GSave(FILE * f,int offset=0) const ;
   void GRead(FILE * f,int offset);
   int Save(const string & filename) const ;  
@@ -276,7 +280,7 @@ public:
     ~Mesh3() {
         
         if (meshS) {
-            if (meshS->vertices == vertices) vertices = 0; // Hack FH april to remove double free (very ..Bad )
+          //  if (meshS->vertices == vertices) vertices = 0; // Hack FH april to remove double free (very ..Bad )
             meshS->destroy();//  Add clean mesh if necessary ...FH and AF. april 2019
         }
         SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl);}

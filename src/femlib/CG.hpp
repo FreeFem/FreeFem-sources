@@ -6,7 +6,7 @@ struct CGMatVirt {
 public:
     typedef TypeIndex I;
     typedef TypeScalar R;
-   
+
     I n,m;
     mutable int it;
     mutable double cpu;
@@ -27,7 +27,7 @@ public:
     }
     virtual void  SetInitWithBC(R*rhs,R *x) const {}// do nothing by default ..
     CGMatVirt(int nn,int mm=-1) : n(nn),m(mm<0 ?nn:mm),cpu(0.),it(0) {}
-    virtual int * pwcl() const {return  0;} // array know if  node with BC (TGV) 
+    virtual int * pwcl() const {return  0;} // array know if  node with BC (TGV)
 };
 
 template<class TypeIndex=int,class TypeScalar=double>
@@ -67,6 +67,5 @@ struct CGMatVirtId : public CGMatVirt<Z,R> {
     CGMatVirtId(Z nn): CGMatVirt<Z,R> (nn,nn) {}
     R * matmul(R *x,R *Ax) const { myscopy(this->n,x,Ax);  return Ax;}
     R * addmatmul(R *x,R *Ax) const { mysaxpy(this->n,R(1.),x,Ax); return Ax;}
-    
-};
 
+};

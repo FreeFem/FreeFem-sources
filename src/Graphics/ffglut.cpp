@@ -2519,20 +2519,23 @@ case 20+index: {type dummy; fin >= dummy;} break;
             p=new OnePlotCurve(fin,4,this);// add zz and color ..
         else if(what==4)
             p=new OnePlotBorder(fin);
+        // volume 3D mesh
         else if (what==51 || what == 5)
         {
             fin >> imsh;
             p=new OnePlotMesh3(Ths3[imsh-1]);if((debug > 9)) cout << " plot : mesh3 (volume) " << imsh << endl;
         }
+        //surface 3D mesh
         else if(what==50)
         {
             fin >> imsh;if((debug > 9)) cout << " plot : mesh3 (surface) " << imsh << endl;
             p=new OnePlotMeshS(ThsS[imsh-1]);
         }
+        //volume and surface 3D meshes but only plot the volume
         else if (what==52)
         {
-            fin >> imsh;if((debug > 9)) cout << " plot : mesh3 (surface) " << imsh << endl;
-            p=new OnePlotMeshS(ThsS[imsh-1]);
+            fin >> imsh;if((debug > 9)) cout << " plot : mesh3 (contains a surface mesh too) " << imsh << endl;
+            p=new OnePlotMesh3(Ths3[imsh-1]);
         }
         else if (what==6  || what==7|| what==16  || what==17)
         {

@@ -28,7 +28,10 @@
 //#pragma dont_inline on
 //#pragma inline_depth(1)
 
+// TODO: remove this block as soon as autoconf is removed from FreeFem++
+#ifndef CMAKE
 #include <config.h>
+#endif
 
 #include <complex>
 #include "AFunction.hpp"

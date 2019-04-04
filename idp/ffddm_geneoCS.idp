@@ -112,7 +112,7 @@ if (!bpara) {
   matrix<pr#prfe#K> Zms = Zm;
   matrix<pr#prfe#K> tmp = pr#Aglobal*Zms;
   pr#E = Zms'*tmp;
-  set(pr#E,solver=sparsesolver,commworld=pr#prfe#prmesh#commself);
+  set(pr#E,solver=sparsesolver,commworld=pr#prfe#prmesh#commself,factorize=3);
 }
 else {
   pr#ncoarsespace = 0; /* coarse space dimension */
@@ -342,7 +342,7 @@ else {
   
   if (!pr#prfe#prmesh#binexactCS)
   if (mpiRank(pr#prfe#prmesh#mpicomm) < pr#prfe#prmesh#pCS)
-    set(pr#E,solver=sparsesolver,commworld=pr#prfe#prmesh#commCS,master=0);
+    set(pr#E,solver=sparsesolver,commworld=pr#prfe#prmesh#commCS,master=0,factorize=3);
 
     /*
     ET = E';
@@ -554,14 +554,14 @@ else {
     
       pr#superaR[mpiRank(pr#prfe#prmesh#commsuper)] = pr#superaRd[mpiRank(pr#prfe#prmesh#commsuper)];
     
-      set(pr#superaR[mpiRank(pr#prfe#prmesh#commsuper)],solver=sparsesolver,commworld=pr#prfe#prmesh#supercommself);
+      set(pr#superaR[mpiRank(pr#prfe#prmesh#commsuper)],solver=sparsesolver,commworld=pr#prfe#prmesh#supercommself,factorize=3);
     }
     else {
       pr#E = E0;
       pr#E = pr#superDih[mpiRank(pr#prfe#prmesh#commsuper)]*pr#E;
       pr#E = pr#RsuperCS'*pr#E;
       pr#E = pr#E*pr#RsuperCS;
-      set(pr#E,solver=sparsesolver,commworld=pr#prfe#prmesh#commsuper,master=-1);      
+      set(pr#E,solver=sparsesolver,commworld=pr#prfe#prmesh#commsuper,master=-1,factorize=3);
     }
   }
 
