@@ -5826,6 +5826,7 @@ AnyType cubeMesh_Op::operator () (Stack stack)  const {
 
 	Add2StackOfPtr2FreeRC(stack, Th3);
 	*mp = mps;
+    Th3->getTypeMesh3()=1;
 	return Th3;
 }
 
@@ -7361,6 +7362,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     // delete gtree;
     
    Mesh3 *Tht = new Mesh3(nv, nt, nbe, v, t, b);
+   Tht->getTypeMesh3()=typeMesh3;
    Tht->BuildGTree();    // Add JM. Oct 2010
    delete gtree;
     
@@ -7632,7 +7634,6 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
       delete [] edge1Dsub;
    
     }
-
     return Tht;
 }
 
@@ -9391,6 +9392,7 @@ AnyType Cube_Op::operator () (Stack stack)  const {
 	}
 
 	Th3_t->BuildGTree();
+    Th3_t->getTypeMesh3()=1;
 	Add2StackOfPtr2FreeRC(stack, Th3_t);
 
 	return Th3_t;
