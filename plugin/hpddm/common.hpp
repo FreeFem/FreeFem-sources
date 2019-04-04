@@ -247,11 +247,13 @@ void addInv() {
         Dcl_Type<Inv<pwr<Op, 'H'>, V*, K, 'T'>>();
         TheOperators->Add("^", new OneBinaryOperator_st<BinaryOp<pwr<Op, 'H'>, OpTrans<Op>, typename std::conditional<'N' == 'N', long, std::string*>::type>>);
         TheOperators->Add("*", new OneBinaryOperator_st<assign<Inv<pwr<Op, 'H'>, V*, K, 'T'>, pwr<Op, 'H'>, V*>>);
-        TheOperators->Add("=", new OneOperator2<V*, V*, Inv<pwr<Op, 'H'>, V*, K, 'T'>>(Inv<pwr<Op, 'H'>, V*, K, 'T'>::init));
+        TheOperators->Add("=", new OneOperator2<V*, V*, Inv<pwr<Op, 'H'>, V*, K, 'T'>>(Inv<pwr<Op, 'H'>, V*, K, 'T'>::inv));
+        TheOperators->Add("<-", new OneOperator2<V*, V*, Inv<pwr<Op, 'H'>, V*, K, 'T'>>(Inv<pwr<Op, 'H'>, V*, K, 'T'>::init));
     }
     TheOperators->Add("^", new OneBinaryOperator_st<BinaryOp<pwr<Op, trans>, Op*, typename std::conditional<trans == 'N', long, std::string*>::type>>);
     TheOperators->Add("*", new OneBinaryOperator_st<assign<Inv<pwr<Op, trans>, V*, K, trans>, pwr<Op, trans>, V*>>);
-    TheOperators->Add("=", new OneOperator2<V*, V*, Inv<pwr<Op, trans>, V*, K, trans>>(Inv<pwr<Op, trans>, V*, K, trans>::init));
+    TheOperators->Add("=", new OneOperator2<V*, V*, Inv<pwr<Op, trans>, V*, K, trans>>(Inv<pwr<Op, trans>, V*, K, trans>::inv));
+    TheOperators->Add("<-", new OneOperator2<V*, V*, Inv<pwr<Op, trans>, V*, K, trans>>(Inv<pwr<Op, trans>, V*, K, trans>::init));
 }
 template<class Op, template<class, class, class, char> class Prod, class V, class K = double, char N = 'N'>
 void addProd() {
