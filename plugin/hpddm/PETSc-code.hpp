@@ -2323,9 +2323,16 @@ class InvPETSc {
                     (*t)._A->HPDDM::template Subdomain<PetscScalar>::exchange(*out);
             }
         };
-        static U init(U Ax, InvPETSc<T, U, K, trans> A) {
+        static U inv(U Ax, InvPETSc<T, U, K, trans> A) {
             A.solve(Ax);
             return Ax;
+        }
+        static U init(U Ax, InvPETSc<T, U, K, trans> A) {
+            PetscInt n, m;
+            MatGetSize(A.t.A->_petsc, &n, &m);
+            ffassert(n == m);
+            Ax->init(A.u->n);
+            return inv(Ax, A);
         }
 };
 

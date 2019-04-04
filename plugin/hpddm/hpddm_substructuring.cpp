@@ -600,8 +600,12 @@ class InvSubstructuring {
                 opt.remove("verbosity");
             HPDDM::IterativeMethod::solve(*t, (K*)*u, (K*)*out, 1, MPI_COMM_WORLD);
         }
-        static U init(U Ax, InvSubstructuring<T, U, K, trans> A) {
+        static U inv(U Ax, InvSubstructuring<T, U, K, trans> A) {
             A.solve(Ax);
+            return Ax;
+        }
+        static U init(U Ax, InvSubstructuring<T, U, K, trans> A) {
+            Ax->init(A.u->n);
             return Ax;
         }
 };

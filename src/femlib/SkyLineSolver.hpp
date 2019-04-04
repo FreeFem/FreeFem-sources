@@ -100,7 +100,8 @@ public:
             s+= pTi;
         }
         pT[n]=s;
-        cout << " SumpT="<< s << endl;
+        if(verbosity > 1)
+            cout << " SumpT="<< s << endl;
     }
     R* solve(R*x,int trans=1) const;
     template <class RR> static RR* newcpy(RR *p,size_t n)

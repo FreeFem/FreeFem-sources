@@ -349,6 +349,7 @@ AnyType Build2D3D_Op::operator () (Stack stack)  const {
 	Mesh3 *Th3 = RemplissageSurf3D_tetgen_new(switch_tetgen, *Th3_tmp, label_tet,
 	                                          nbhole, tabhole, nbregion, tabregion,
 	                                          nbfacecl, tabfacecl);
+    Th3->getTypeMesh3()=1;
 
 	/*
 	 * Mesh3 *Th3=Transfo_Mesh2_tetgen_new( precis_mesh, switch_tetgen, Th, txx, tyy, tzz, border_only,
@@ -1695,6 +1696,7 @@ AnyType Remplissage_Op::operator () (Stack stack)  const {
 	ffassert(pTh);
 	Mesh3 &Th = *pTh;
 	Mesh3 *m = pTh;	// question a quoi sert *m ??
+    int typeMesh3 = Th.getTypeMesh3();
 	int nbv = Th.nv;// nombre de sommet
 	int nbt = Th.nt;// nombre de triangles
 	int nbe = Th.nbe;	// nombre d'aretes fontiere
@@ -1879,6 +1881,7 @@ AnyType Remplissage_Op::operator () (Stack stack)  const {
 	// Th3->Buildbnormalv();
 	// Th3->BuildjElementConteningVertex();
 	Th3->BuildGTree();
+    Th3->getTypeMesh3()=typeMesh3;
 	// Th3->decrement();
 	Add2StackOfPtr2FreeRC(stack, Th3);
 

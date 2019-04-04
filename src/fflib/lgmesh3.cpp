@@ -712,7 +712,6 @@ AnyType ReadMesh3::operator()(Stack stack) const
   if (Thh->getTypeMesh3()!=0) Thh->BuildGTree();
     if (Thh->getTypeMesh3()!=1) Thh->meshS->BuildGTree();
   Add2StackOfPtr2FreeRC(stack,Thh);
- /// if (Thh->getTypeMesh3()!=1) Add2StackOfPtr2FreeRC(stack,Thh->getMeshS());          ////////Axel
   return SetAny<pmesh3>(Thh);;
   
 }

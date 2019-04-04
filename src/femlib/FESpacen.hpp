@@ -141,7 +141,7 @@ public:
     const int ndfonEdge;
     const int ndfonFace;
     const int ndfonVolume;
-     const int NbDoF;
+    const int NbDoF;
     const int NbNode;
     int  N,nb_sub_fem;  
     const int nbsubdivision; // nb of subdivision for plot    
