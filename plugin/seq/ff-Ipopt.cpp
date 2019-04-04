@@ -29,7 +29,7 @@
 
 // TODO: remove this block as soon as autoconf is removed from FreeFem++
 #ifndef CMAKE
-#include "../config.h"
+#include "../../config.h"
 #endif
 
 #include "coin/IpTNLP.hpp"
