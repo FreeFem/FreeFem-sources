@@ -7,6 +7,8 @@ cout << IND << "real" << endl;
 
 real rpos = 0.5;
 real rneg = -0.5;
+real nanb = sqrt(-1);
+real toolong = 2.8e63;
 
 t = clock();
 real respos = rint(rpos);
@@ -19,3 +21,39 @@ real resneg = rint(rneg);
 t = clock() - t;
 cout << IND << IND << t << endl;
 test(resneg == -0.0);
+
+t = clock();
+real restoolong = rint(toolong);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(restoolong == toolong);
+
+cout << IND << "NaN" << endl;
+
+t = clock();
+real resnan = rint(nanb);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(isNaN(resnan));
+
+cout << IND << "zero" << endl;
+
+t = clock();
+real respzero = rint(+0);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(respzero == +0);
+
+t = clock();
+real resmzero = rint(-0);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resmzero == -0);
+
+cout << IND << "Inf" << endl;
+
+t = clock();
+real resinf = rint(log(0.0));
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinf == log(0.0));

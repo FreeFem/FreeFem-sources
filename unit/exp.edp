@@ -1,0 +1,34 @@
+include "test.idp"
+
+cout << "exp" << endl;
+real t;
+
+cout << IND << "real" << endl;
+
+real a = 0.0;
+real b = 2.0;
+
+t = clock();
+real resmodr1 = exp(a);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resmodr1 == 1.0);
+
+// t = clock();
+// real resmodr2 = exp(-log(0.));
+// t = clock() - t;
+// cout << IND << IND << t << endl;
+// cout << resmodr2 << endl;
+// test(resmodr2 == O.);
+
+cout << IND << "complex" << endl;
+
+complex hippie = 1i * pi;
+//real b = 2.0;
+
+t = clock();
+complex resc1 = exp(hippie);
+t = clock() - t;
+cout << IND << IND << t << endl;
+cout << resc1 << endl;
+test(resmodr1 == -1.0);

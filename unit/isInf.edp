@@ -1,47 +1,45 @@
 include "test.idp"
-
-cout << "min" << endl;
+cout << "isInf" << endl;
 real t;
-int i1 = 1;
-int i2 = 2;
-int i3 = 3;
-int i4 = -1;
-int i5 = -2;
-real r1 = 1.5;
-real r2 = 2.5;
-real r3 = -3.5;
-real r4 = -4.5;
+int i = 42;
+real r = 4.2;
+complex c = 4 + 2i;
+real nan = sqrt(-1);
 
 cout << IND << "int" << endl;
 
 t = clock();
-int mini = min(i1, i2);
+bool resi = isInf(i);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(mini == 1);
+test(resi == false);
+
+cout << IND << "Inf" << endl;
 
 t = clock();
-int mini2 = min(i1, i2, i3);
+bool resinf = isInf(log(0.00));
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(mini2 == 1);
+test(resinf == true);
 
 t = clock();
-int minineg = min(i4, i5);
+bool resinfneg = isInf(-log(0.00));
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(minineg == -2);
+test(resinfneg == true);
 
 cout << IND << "real" << endl;
 
 t = clock();
-real minr = min(r1, r2, r3);
+bool resr = isInf(r);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(minr == -3.5);
+test(resr == false);
+
+cout << IND << "NaN" << endl;
 
 t = clock();
-real minrneg = min(r3, r4);
+bool resnan = isInf(nan);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(minrneg == -4.5);
+test(resnan == false);

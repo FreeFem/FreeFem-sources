@@ -1,0 +1,23 @@
+include "test.idp"
+
+cout << "lround" << endl;
+real t;
+
+real rpos = 0.5;
+real rneg = -0.5;
+real nanb = sqrt(-1);
+real toolong = 2e63;
+
+cout << IND << "real" << endl;
+
+t = clock();
+real respos = lround(rpos);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(respos == 1.0);
+
+t = clock();
+real resneg = lround(rneg);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resneg == -1.0);

@@ -2,9 +2,6 @@ include "test.idp"
 
 cout << "max" << endl;
 real t;
-
-cout << IND << "int" << endl;
-
 int i1 = 1;
 int i2 = 2;
 int i3 = 3;
@@ -14,6 +11,8 @@ real r1 = 1.5;
 real r2 = 2.5;
 real r3 = -3.5;
 real r4 = -4.5;
+
+cout << IND << "int" << endl;
 
 t = clock();
 int maxi = max(i1, i2);
