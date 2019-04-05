@@ -5,30 +5,35 @@ real t;
 
 cout << IND << "real" << endl;
 
-real a = 0.0;
+real zero = 0.0;
 real b = 2.0;
+real minf = log(0.0);
+real pinf = -log(0.0);
 
 t = clock();
-real resmodr1 = exp(a);
+real resmodr1 = exp(zero);
 t = clock() - t;
 cout << IND << IND << t << endl;
 test(resmodr1 == 1.0);
 
-// t = clock();
-// real resmodr2 = exp(-log(0.));
-// t = clock() - t;
-// cout << IND << IND << t << endl;
-// cout << resmodr2 << endl;
-// test(resmodr2 == O.);
+t = clock();
+real respinf = exp(pinf);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(respinf == pinf);
+
+t = clock();
+real resminf = exp(minf);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resminf == 0.);
 
 cout << IND << "complex" << endl;
 
 complex hippie = 1i * pi;
-//real b = 2.0;
 
 t = clock();
 complex resc1 = exp(hippie);
 t = clock() - t;
 cout << IND << IND << t << endl;
-cout << resc1 << endl;
-test(resmodr1 == -1.0);
+test(resc1 == cos(pi) + 1i * sin(pi));

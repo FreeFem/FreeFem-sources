@@ -34,13 +34,19 @@ t = clock() - t;
 cout << IND << IND << t << endl;
 test(abs(resr4 - sqrt(3)/2) < HWERROR);
 
-// cout << IND << "complex" << endl;
-//
-// complex c1 = 1. + 1i;
-// t = clock();
-// complex cr1 = cos(c1);
-// t = clock() - t;
-// cout << IND << IND << t << endl;
-// cout << cr1 << endl;
-// cout << (exp(c1 * 1i) + exp(-(c1 * 1i))) /2 << endl;
-// test(cr1 == (exp(c1 * 1i) + exp(-(c1 * 1i))) /2);
+cout << IND << "complex" << endl;
+
+complex c1 = 1. + 1i;
+complex c2 = 4. + 2i;
+
+t = clock();
+complex cr1 = cos(c1);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test((cr1 - (exp(c1 * 1i) + exp(-(c1 * 1i))) /2) < HWERROR);
+
+t = clock();
+complex cr2 = cos(c2);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test((cr2 - (exp(c2 * 1i) + exp(-(c2 * 1i))) / 2) < HWERROR);

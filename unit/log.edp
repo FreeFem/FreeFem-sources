@@ -1,0 +1,21 @@
+include "test.idp"
+
+cout << "log" << endl;
+real t;
+
+cout << IND << "real" << endl;
+
+real r = 4.2;
+real minf = log(0.0);
+
+t = clock();
+real resr = log(1.);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resr == 0.);
+
+t = clock();
+real rminf  = log(0.);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(rminf == minf);

@@ -1,36 +1,36 @@
 include "test.idp"
 
-cout << "tan" << endl;
+cout << "atan" << endl;
 real t;
 
 cout << IND << "real" << endl;
 
 real r1 = 0.;
 real r2 = pi;
-real r3 = pi/4;
-real r4 = pi/8;
+real r3 = 1; //
+real minf = log(0.0);
+real pinf = -log(0.0);
 
 t = clock();
-real resr1 = tan(r1);
+real resr1 = atan(r1);
 t = clock() - t;
 cout << IND << IND << t << endl;
 test(resr1 == 0.);
 
 t = clock();
-real resr2 = tan(r2);
+real resr3 = atan(r3);
 t = clock() - t;
 cout << IND << IND << t << endl;
-cout << resr2 << endl;
-test(resr2 - tan(pi) < HWERROR);
+test(resr3 == pi/4);
 
 t = clock();
-real resr3 = tan(r3);
+real resminf = atan(minf);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(resr3 - tan(pi/4) < HWERROR);
+test(resminf == -(pi/2));
 
 t = clock();
-real resr4 = tan(r4);
+real respinf = atan(pinf);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(resr4 - tan(pi/8) < HWERROR);
+test(respinf == (pi/2));

@@ -17,13 +17,13 @@ test(resi == false);
 cout << IND << "Inf" << endl;
 
 t = clock();
-bool resinf = isInf(log(0.00));
+bool resinf = isInf(-log(0.00));
 t = clock() - t;
 cout << IND << IND << t << endl;
 test(resinf == true);
 
 t = clock();
-bool resinfneg = isInf(-log(0.00));
+bool resinfneg = isInf(log(0.00));
 t = clock() - t;
 cout << IND << IND << t << endl;
 test(resinfneg == true);

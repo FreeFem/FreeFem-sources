@@ -11,13 +11,13 @@ real nanb = sqrt(-1);
 real toolong = 2e63;
 
 t = clock();
-real respos = lrint(rpos);
+int respos = lrint(rpos);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(respos == 0.0);
+test(respos == 0);
 
 t = clock();
-real resneg = lrint(rneg);
+int resneg = lrint(rneg);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(resneg == -0.0);
+test(resneg == -0);
