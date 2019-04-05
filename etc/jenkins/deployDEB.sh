@@ -7,7 +7,7 @@ REPOSITORY="FreeFem-sources"
 LATEST_RELEASE=`curl 'https://api.github.com/repos/'$ORGANIZATION'/'$REPOSITORY'/releases/latest'`
 CURRENT_VERSION=`echo ${LATEST_RELEASE}| jq -r '.tag_name'`
 UPLOAD_URL=`echo ${LATEST_RELEASE}| jq -r '.upload_url'`
-FILE_NAME='freefem_1-'$VERSION'_amd64.deb'
+FILE_NAME='freefem_'$VERSION'-1_amd64.deb'
 
 git reset --hard
 git clean -fdx
