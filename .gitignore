@@ -92,6 +92,7 @@ debian/freefem++-mpich
 debian/freefem++-nw
 debian/freefem++-x11
 debian/tmp
+AppDir/
 3rdparty/Makefile
 3rdparty/WHERE-LD
 3rdparty/arpack/ARPACK/
