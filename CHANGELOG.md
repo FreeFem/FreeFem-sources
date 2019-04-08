@@ -23,19 +23,26 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Version 4 ]
+## [Unreleased] 4.1
+
+### Added
+- CMake ,thanks to [https://github.com/cdoucet](https://github.com/cdoucet)
+- Surface finite element, thanks to [AFourmont](https://github.com/AFourmont)
+- AppImage generation
+
+### Changed
+- PETSc/SLEPc version 3.11
+
+## [4.0]
 - correct bug in RT1Ortho and RT2Ortho  2d in the computation of derivative (2018-01-30, Thank to Bryan.Bosworth@colorado.edu)  
 - uniformize 2d/3d in element, methode   EdgeOrientation(e)  now return +1/-1
-## [Version 4 beta] 2018-12-01
 - change all the sparse matrix structure
 - remove all map matrix jan 2019
 
 ### Added
 - surface finite element (in progress)
-
 - nElementonB (version 2d and 3d of nTonEge)
 - area  ( same the lenEdge) in 3d
-
 - add function labels to get the array of label of a  mesh
 - add function regions to get the array of label of a  mesh
 - correct big bug in 	toRarray,toZarray, toCarray  transform [ ... ] array to int[int], real[int], complex[int]  
@@ -73,5 +80,6 @@ All notable changes to this project will be documented in this file.
 - The main distribution is now on Github
 
 [Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/3.62...master
+[4.0]: https://github.com/FreeFem/FreeFem-sources/compare/3.62...v4.0
 [3.62]: https://github.com/FreeFem/FreeFem-sources/compare/3.61...3.62
 [3.61]: https://github.com/FreeFem/FreeFem-sources/compare/v3.60...3.61
