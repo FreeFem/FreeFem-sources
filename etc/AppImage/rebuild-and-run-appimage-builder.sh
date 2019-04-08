@@ -16,7 +16,7 @@ set -e
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 
 # Sources top directory
-SRC_DIR=$(dirname $SCRIPTPATH)
+SRC_DIR=$(dirname $(dirname $SCRIPTPATH))
 
 CONTAINER_NAME="freefem-appimage-builder"
 IMAGE_NAME="freefem-appimage-builder"
@@ -27,7 +27,7 @@ if docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME" ; then
   docker rm "$CONTAINER_NAME"
 fi
 
-docker build -t "$IMAGE_NAME" "$SCRIPTPATH/appimage-builder/"
+docker build -t "$IMAGE_NAME" "$SCRIPTPATH/appimage-builder/" --network=host
 
 # Run a container with interactive Bash as the main process (PID 1)
 # with the FreeFem sources directory mounted:

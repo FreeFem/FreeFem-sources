@@ -13,7 +13,7 @@ set -e
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 
 # Sources top directory
-SRC_DIR=$(dirname $SCRIPTPATH)
+SRC_DIR=$(dirname $(dirname $SCRIPTPATH))
 
 cd $SRC_DIR
 
