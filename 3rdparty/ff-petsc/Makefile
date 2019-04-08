@@ -129,7 +129,7 @@ Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
 	../../config.status --file="Makefile.inc:Makefile-PETSc.inc"
 
 $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
-	cd $(SRCDIR) &&  $(PYTHON2) ./configure \
+	cd $(SRCDIR) &&  $(PYTHON2) ./configure MAKEFLAGS='' \
 		--prefix=$(DIR_INSTALL_REAL) \
 		--with-debugging=no \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
@@ -152,7 +152,7 @@ Make-petsc-download.mk:$(SRCDIR)/tag-install-real $(DIR_INSTALL_REAL)/lib/petsc/
 ifdef 	MUMPS_LIB
 #  version COMPLEX  .....
 $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
-	cd $(SRCDIR) &&  $(PYTHON2) ./configure \
+	cd $(SRCDIR) &&  $(PYTHON2) ./configure MAKEFLAGS='' \
 		--prefix=$(DIR_INSTALL_COMPLEX) \
 		--with-debugging=no \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
@@ -274,7 +274,7 @@ $(SRCDIR_SLEPC)/tag-conf-real:$(SRCDIR_SLEPC)/tag-tar
 	export PETSC_DIR=$(PETSC_DIR) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
 	export PETSC_ARCH=ff-real; \
-	cd $(SRCDIR_SLEPC) &&   $(PYTHON2) ./configure --prefix=$(DIR_INSTALL_REAL) $(SPELC_ADDCONF)
+	cd $(SRCDIR_SLEPC) &&   $(PYTHON2) ./configure   --prefix=$(DIR_INSTALL_REAL) $(SPELC_ADDCONF)
 	touch $@
 
 $(SRCDIR_SLEPC)/tag-make-real:$(SRCDIR_SLEPC)/tag-conf-real
