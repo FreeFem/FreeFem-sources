@@ -105,7 +105,7 @@ mkdir -p AppDir/usr/share/icons/hicolor/32x32/apps
 cp etc/logo/logo.png AppDir/usr/share/icons/hicolor/32x32/apps/freefem.png
 
 mkdir -p AppDir/usr/bin
-cp contrib/freefem-apprun.sh AppDir/usr/bin/freefem-apprun.sh
+cp etc/AppImage/freefem-apprun.sh AppDir/usr/bin/freefem-apprun.sh
 
 # Use it if you want resulting file to be FreeFem-3f71f1f-x86_64.AppImage for ex.
 # export VERSION=$(git rev-parse --short HEAD)

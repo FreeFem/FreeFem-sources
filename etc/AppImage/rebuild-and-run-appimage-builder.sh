@@ -46,7 +46,7 @@ cat << EOF
 
   To start build use the following command:
 
-  docker exec $CONTAINER_NAME $SOURCES_MOUNT_POINT/contrib/build-appimage.sh
+  docker exec $CONTAINER_NAME $SOURCES_MOUNT_POINT/etc/AppImage/build-appimage.sh
 
   If you want to attach interactive Bash shell inside the container use
 
