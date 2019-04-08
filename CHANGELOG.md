@@ -26,9 +26,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased] 4.1
 
 ### Added
-- CMake ,thanks to [https://github.com/cdoucet](https://github.com/cdoucet)
+- CMake, thanks to [https://github.com/cdoucet](https://github.com/cdoucet)
 - Surface finite element, thanks to [AFourmont](https://github.com/AFourmont)
-- AppImage generation
+- AppImage generation, thanks to [Alexander Sashnov](https://github.com/asashnov)
 
 ### Changed
 - PETSc/SLEPc version 3.11
