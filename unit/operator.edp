@@ -8,6 +8,7 @@ cout << IND << "int" << endl;
 int i1 = 2;
 int i2 = 3;
 real ir = 1.;
+real ir2 = 2.;
 complex ic = 5.0 + 1i * 6;
 complex ic2 = 1. + 1i;
 string is = "6 + 1i * 7";
@@ -314,7 +315,6 @@ t = clock() - t;
 cout << IND << IND << t << endl;
 test(resmodi1 == 0);
 
-real ir2 = 2.;
 t = clock();
 real resmodi2 = i2 % ir2;
 t = clock() - t;
@@ -377,7 +377,7 @@ t = clock();
 complex respowc1 = (ic) ^ i1;
 t = clock() - t;
 cout << IND << IND << t << endl;
-cout << respowc1 << endl;
+//cout << respowc1 << endl;
 //test(respowc1 == 11 + 60i); //to fix
 
 t = clock();
@@ -385,3 +385,60 @@ complex respowc2 = ic ^ ir;
 t = clock() - t;
 cout << IND << IND << t << endl;
 test(respowc2 == 5.+6i);
+
+
+cout << "ternary" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+int resterni1 = i1 < i2 ? i1 : i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resterni1 == i1);
+
+t = clock();
+int resterni2 = i1 < ir ? i1 : ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resterni2 == ir);
+
+t = clock();
+complex resterni3 = i1 < ic ? i1 : ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resterni3 == i1);
+
+cout << IND << "real" << endl;
+
+t = clock();
+real resternr1 = ir > ir2 ? ir : ir2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resternr1 == ir2);
+
+t = clock();
+int resternr2 = ir < i1 ? ir : i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resternr2 == ir);
+
+cout << IND << "complex" << endl;
+
+t = clock();
+complex resternc1 = ic > ic2 ? ic : ic2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resternc1 == ic);
+
+t = clock();
+complex resternc2 = ic > i1 ? ic : i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resternc2 == ic);
+
+t = clock();
+complex resternc3 = ic > ir ? ic : ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resternc3 == ic);

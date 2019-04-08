@@ -31,9 +31,16 @@ test(resminf == 0.);
 cout << IND << "complex" << endl;
 
 complex hippie = 1i * pi;
+complex c = 1i * pi/2;
 
 t = clock();
 complex resc1 = exp(hippie);
 t = clock() - t;
 cout << IND << IND << t << endl;
 test(resc1 == cos(pi) + 1i * sin(pi));
+
+t = clock();
+complex resc2 = exp(c);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resc2 == cos(pi/2) + 1i * sin(pi/2));
