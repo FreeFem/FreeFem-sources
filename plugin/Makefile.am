@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 SUBDIRS=ffddm	mpi hpddm	seq 
+=======
+SUBDIRS=seq mpi hpddm ffddm
+>>>>>>> 5289db82... Change plugins build order
 EXTRA_DIST=   \
 ./mpi/complex_pastix_FreeFem.cpp  \
 ./mpi/htool.cpp  \
