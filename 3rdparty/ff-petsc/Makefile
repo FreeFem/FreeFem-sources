@@ -83,7 +83,9 @@ recompile-complex:
 
 dir-install: Makefile.inc
 	-$(SUDO) mkdir -p $(DESTDIR)$(DIR_INSTALL_REAL)
+	-$(SUDO) chown $USER $(DESTDIR)$(DIR_INSTALL_REAL)
 	-$(SUDO) mkdir -p $(DESTDIR)$(DIR_INSTALL_COMPLEX)
+	-$(SUDO) chown $USER $(DESTDIR)$(DIR_INSTALL_REAL)
 	@if test -w 	"$(DESTDIR)$(DIR_INSTALL_REAL)" -a -w 	"$(DESTDIR)$(DIR_INSTALL_COMPLEX)" ; then echo "no need of sudo"; echo > do-sudo; \
 	else \
 	 echo  no write access in $(DESTDIR)$(DIR_INSTALL_REAL) and $(DESTDIR)$(DIR_INSTALL_COMPLEX); \
@@ -326,10 +328,10 @@ echo:
 	@echo " # need sudo if '$(W_SUDO)' == 'sudo'  .." $(W_SUDO1)
 
 install-destdir:
-	cd $(SRCDIR) && $(SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install  DESTDIR=$(DESTDIR)
-	cd $(SRCDIR) && $(SUDO) $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install DESTDIR=$(DESTDIR)
-	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) DESTDIR=$(DESTDIR)
-	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL) DESTDIR=$(DESTDIR)
+	cd $(SRCDIR) && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install  DESTDIR=$(DESTDIR)
+	cd $(SRCDIR) && $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install DESTDIR=$(DESTDIR)
+	cd $(SRCDIR_SLEPC) && make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) DESTDIR=$(DESTDIR)
+	cd $(SRCDIR_SLEPC) && make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL) DESTDIR=$(DESTDIR)
 
 .NOTPARALLEL:
 # Local Variables:
