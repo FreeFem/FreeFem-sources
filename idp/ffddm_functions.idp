@@ -668,6 +668,8 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     preffe#prmesh#toc(pr#tgmresi,"",pr#tgmres)
     return uni;
   }
+  else
+    return x0; /* dummy, not in comm */
 }
 /*# finGMRESsolve #*/
 
