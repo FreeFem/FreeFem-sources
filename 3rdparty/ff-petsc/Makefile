@@ -83,9 +83,9 @@ recompile-complex:
 
 dir-install: Makefile.inc
 	-$(SUDO) mkdir -p $(DESTDIR)$(DIR_INSTALL_REAL)
-	-$(SUDO) chown $USER $(DESTDIR)$(DIR_INSTALL_REAL)
+	-$(SUDO) chown ${USER} $(DESTDIR)$(DIR_INSTALL_REAL)
 	-$(SUDO) mkdir -p $(DESTDIR)$(DIR_INSTALL_COMPLEX)
-	-$(SUDO) chown $USER $(DESTDIR)$(DIR_INSTALL_REAL)
+	-$(SUDO) chown ${USER} $(DESTDIR)$(DIR_INSTALL_REAL)
 	@if test -w 	"$(DESTDIR)$(DIR_INSTALL_REAL)" -a -w 	"$(DESTDIR)$(DIR_INSTALL_COMPLEX)" ; then echo "no need of sudo"; echo > do-sudo; \
 	else \
 	 echo  no write access in $(DESTDIR)$(DIR_INSTALL_REAL) and $(DESTDIR)$(DIR_INSTALL_COMPLEX); \
