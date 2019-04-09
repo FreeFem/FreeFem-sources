@@ -7,11 +7,16 @@ cout << IND << "int" << endl;
 
 int i1 = 2;
 int i2 = 3;
+int ineg = -42;
 real ir = 1.;
 real ir2 = 2.;
 complex ic = 5.0 + 1i * 6;
 complex ic2 = 1. + 1i;
 string is = "6 + 1i * 7";
+string is2 = "Stackoverflo";
+matrix A = [[1, 2, 3],
+[4, 5, 5],
+[7, 8, 9]];
 
 t = clock();
 int resi1 = i1 + i2;
@@ -353,9 +358,6 @@ cout << IND << IND << t << endl;
 test(respowi2 == 3);
 
 // do matrix op
-matrix A = [[1, 2, 3],
-            [4, 5, 5],
-            [7, 8, 9]];
 
 cout << IND << "real" << endl;
 
@@ -442,3 +444,720 @@ complex resternc3 = ic > ir ? ic : ir;
 t = clock() - t;
 cout << IND << IND << t << endl;
 test(resternc3 == ic);
+
+
+cout << "operator >" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+bool ressupi = i1 > i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupi == false);
+
+t = clock();
+bool ressupineg = -i1 > -i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupineg == true);
+
+t = clock();
+bool ressupir = i1 > ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupir == true);
+
+t = clock();
+bool ressupic = i1 > ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupic == false);
+
+cout << IND << "real" << endl;
+
+t = clock();
+bool ressupr = ir > ir2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupr == false);
+
+t = clock();
+bool ressuprneg = -ir > -ir2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressuprneg == true);
+
+t = clock();
+bool ressupri = ir > i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupri == false);
+
+t = clock();
+bool ressuprc = ir > ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressuprc == false);
+
+cout << IND << "complex" << endl;
+
+t = clock();
+bool ressupc = ic > ic2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupc == true);
+
+t = clock();
+bool ressupci = ic > i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupci == true);
+
+t = clock();
+bool ressupcr = ic > ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupcr == true);
+
+
+cout << "operator <" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+bool resinfi = i1 < i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfi == true);
+
+t = clock();
+bool resinfineg = -i1 < -i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfineg == false);
+
+t = clock();
+bool resinfir = i1 < ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfir == false);
+
+t = clock();
+bool resinfic = i1 < ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfic == true);
+
+cout << IND << "real" << endl;
+
+t = clock();
+bool resinfr = ir < ir2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfr == true);
+
+t = clock();
+bool resinfrneg = -ir < -ir2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfrneg == false);
+
+t = clock();
+bool resinfri = ir < i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfri == true);
+
+t = clock();
+bool resinfrc = ir < ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfrc == true);
+
+cout << IND << "complex" << endl;
+
+t = clock();
+bool resinfc = ic < ic2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfc == false);
+
+t = clock();
+bool resinfci = ic < i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfci == false);
+
+t = clock();
+bool resinfcr = ic < ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfcr == false);
+
+
+cout << "operator >=" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+bool ressupeqi = i1 >= i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupeqi == false);
+
+t = clock();
+bool ressupeqi2 = i1 >= i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupeqi2 == true);
+
+t = clock();
+bool ressupeqineg = -i1 >= -i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupeqineg == true);
+
+t = clock();
+bool ressupeqineg2 = -i2 >= -i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupeqineg2 == true);
+
+t = clock();
+bool ressupeqir = i1 >= ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupeqir == true);
+
+t = clock();
+bool ressupeqic = i1 >= ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupeqic == false);
+
+cout << IND << "real" << endl;
+
+t = clock();
+bool ressupeqr = ir >= ir2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupeqr == false);
+
+t = clock();
+bool ressupeqr2 = ir >= ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupeqr2 == true);
+
+t = clock();
+bool ressupeqrneg = -ir >= -ir2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupeqrneg == true);
+
+t = clock();
+bool ressupeqrneg2 = -ir >= -ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupeqrneg2 == true);
+
+t = clock();
+bool ressupeqri = ir >= i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupeqri == false);
+
+t = clock();
+bool ressupeqrc = ir >= ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupeqrc == false);
+
+cout << IND << "complex" << endl;
+
+t = clock();
+bool ressupeqc = ic >= ic2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupeqc == true);
+
+t = clock();
+bool ressupeqci = ic >= i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupeqci == true);
+
+t = clock();
+bool ressupeqcr = ic >= ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ressupeqcr == true);
+
+
+cout << "operator <=" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+bool resinfeqi = i1 <= i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfeqi == true);
+
+t = clock();
+bool resinfeqi2 = i1 <= i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfeqi2 == true);
+
+t = clock();
+bool resinfeqineg = -i1 <= -i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfeqineg == false);
+
+t = clock();
+bool resinfeqineg2 = -i2 <= -i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfeqineg2 == true);
+
+t = clock();
+bool resinfeqir = i1 <= ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfeqir == false);
+
+t = clock();
+bool resinfeqic = i1 <= ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfeqic == true);
+
+cout << IND << "real" << endl;
+
+t = clock();
+bool resinfeqr = ir <= ir2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfeqr == true);
+
+t = clock();
+bool resinfeqr2 = ir <= ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfeqr2 == true);
+
+t = clock();
+bool resinfeqrneg = -ir <= -ir2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfeqrneg == false);
+
+t = clock();
+bool resinfeqrneg2 = -ir <= -ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfeqrneg2 == true);
+
+t = clock();
+bool resinfeqri = ir <= i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfeqri == true);
+
+t = clock();
+bool resinfeqrc = ir <= ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfeqrc == true);
+
+cout << IND << "complex" << endl;
+
+t = clock();
+bool resinfeqc = ic <= ic2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfeqc == false);
+
+t = clock();
+bool resinfeqci = ic <= i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfeqci == false);
+
+t = clock();
+bool resinfeqcr = ic <= ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resinfeqcr == false);
+
+
+cout << "operator =" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+int reseqi = i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqi == i1);
+
+cout << IND << "real" << endl;
+
+t = clock();
+real reseqr = ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqr == ir);
+
+cout << IND << "complex" << endl;
+
+t = clock();
+complex reseqc = ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqc == ic);
+
+cout << IND << "string" << endl;
+
+t = clock();
+string reseqs = is;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqs == is);
+
+
+cout << "operator ==" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+bool reseqeqi = i1 == i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqi == false);
+
+t = clock();
+bool reseqeqi2 = i1 == i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqi2 == true);
+
+t = clock();
+bool reseqeqir = i1 == ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqir == false);
+
+t = clock();
+bool reseqeqic = i1 == ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqir == false);
+
+t = clock();
+bool reseqeqis = i1 == is;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqis == false);
+
+cout << IND << "real" << endl;
+
+t = clock();
+bool reseqeqr = ir == ir2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqr == false);
+
+t = clock();
+bool reseqeqr2 = ir == ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqr2 == true);
+
+t = clock();
+bool reseqeqri = ir == i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqri == false);
+
+t = clock();
+bool reseqeqrc = ir == ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqrc == false);
+
+t = clock();
+bool reseqeqrs = ir == is;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqrs == false);
+
+cout << IND << "complex" << endl;
+
+t = clock();
+bool reseqeqc = ic == ic2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqc == false);
+
+t = clock();
+bool reseqeqc2 = ic == ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqc2 == true);
+
+t = clock();
+bool reseqeqci = ic == i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqci == false);
+
+t = clock();
+bool reseqeqcr = ic == ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqcr == false);
+
+t = clock();
+bool reseqeqcs = ic == is;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqcs == false);
+
+cout << IND << "string" << endl;
+
+t = clock();
+bool reseqeqs = is == is2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqs == false);
+
+t = clock();
+bool reseqeqs2 = is2 == is2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqs2 == true);
+
+t = clock();
+bool reseqeqsi = is == i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqci == false);
+
+t = clock();
+bool reseqeqcsr = is == ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqcsr == false);
+
+t = clock();
+bool reseqeqsc = is == ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqsc == false);
+
+cout << "operator ++" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+int resplusplusi = ++i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resplusplusi == 3);
+i1 = 2;
+
+while (i2 < 3) {
+  t = clock();
+  i2 == i2++;
+  t = clock() - t;
+}
+cout << IND << IND << t << endl;
+test(i2 == 3);
+i1 = 2;
+
+t = clock();
+int resplusplusineg = ++ineg;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resplusplusineg == -41);
+ineg = -42;
+
+while (ineg < -41) {
+  t = clock();
+  ineg == ineg++;
+  t = clock() - t;
+}
+cout << IND << IND << t << endl;
+test(ineg == -41);
+ineg = -42;
+
+cout << "operator --" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+int resminusminusi = --i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resminusminusi == 1);
+i1 = 2;
+
+while (i2 < 3) {
+  t = clock();
+  i2 == i2--;
+  t = clock() - t;
+}
+cout << IND << IND << t << endl;
+test(i2 == 3);
+i1 = 2;
+
+t = clock();
+int resminusminusineg = --ineg;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resminusminusineg == -43);
+ineg = -42;
+
+while (ineg > -43) {
+  t = clock();
+  ineg == ineg--;
+  t = clock() - t;
+}
+cout << IND << IND << t << endl;
+test(ineg == -43);
+ineg = -42;
+
+
+cout << "operator !=" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+bool resdiffi = i1 != i2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffi == true);
+
+t = clock();
+bool resdiffi2 = i1 != i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffi2 == false);
+
+t = clock();
+bool resdiffir = i1 != ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffir == true);
+
+t = clock();
+bool resdiffic = i1 != ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffic == true);
+
+t = clock();
+bool resdiffis = i1 != is;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffis == true);
+
+cout << IND << "real" << endl;
+
+t = clock();
+bool resdiffr = ir != ir2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffr == true);
+
+t = clock();
+bool resdiffr2 = ir != ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffr2 == false);
+
+t = clock();
+bool resdiffri = ir != i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffri == true);
+
+t = clock();
+bool resdiffrc = ir != ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffrc == true);
+
+t = clock();
+bool resdiffrs = ir != is;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffrs == true);
+
+cout << IND << "complex" << endl;
+
+t = clock();
+bool resdiffc = ic != ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffc == false);
+
+t = clock();
+bool resdiffc2 = ic != ic2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffc2 == true);
+
+t = clock();
+bool resdiffci = ic != i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffci == true);
+
+t = clock();
+bool resdiffcr = ic != ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffcr == true);
+
+t = clock();
+bool resdiffcs = ic != is;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffcs == true);
+
+cout << IND << "string" << endl;
+
+t = clock();
+bool resdiffs = is != is;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffs == false);
+
+t = clock();
+bool resdiffs2 = is != is2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffs2 == true);
+
+t = clock();
+bool resdiffsr = is != ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffsr == true);
+
+t = clock();
+bool resdiffsc = is != ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffsc == true);
+
+t = clock();
+bool resdiffsi = is != i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resdiffsi == true);

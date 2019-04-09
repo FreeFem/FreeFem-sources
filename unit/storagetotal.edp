@@ -1,0 +1,12 @@
+include "test.idp"
+
+cout << "storagetotal" << endl;
+real t;
+
+cout << IND << "int" << endl;
+
+t = clock();
+int total = storagetotal();
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(total);

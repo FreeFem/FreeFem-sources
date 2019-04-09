@@ -18,30 +18,42 @@ t = clock();
 int mini = min(i1, i2);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(mini == 1);
+test(mini == i1);
 
 t = clock();
 int mini2 = min(i1, i2, i3);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(mini2 == 1);
+test(mini2 == i1);
+
+t = clock();
+int mini3 = min(i1, i2, i3, i4);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(mini3 == i4);
 
 t = clock();
 int minineg = min(i4, i5);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(minineg == -2);
+test(minineg == i5);
 
 cout << IND << "real" << endl;
 
 t = clock();
-real minr = min(r1, r2, r3);
+real minr1 = min(r1, r2, r3);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(minr == -3.5);
+test(minr1 == r3);
+
+t = clock();
+real minr2 = min(r1, r2, r3, r4);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(minr2 == r4);
 
 t = clock();
 real minrneg = min(r3, r4);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(minrneg == -4.5);
+test(minrneg == r4);
