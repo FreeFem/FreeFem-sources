@@ -1,1 +1,1 @@
-SUBDIRS=ffddm	mpi hpddm	seq
+SUBDIRS=seq ffddm	mpi hpddm
