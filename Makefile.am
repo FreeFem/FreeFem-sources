@@ -21,15 +21,145 @@
 # E-MAIL  :
 
 SUBDIRS=3rdparty src \
-	plugin/seq plugin/mpi \
+	plugin plugin/seq plugin/mpi \
 	plugin/hpddm plugin/ffddm \
-	examples/examples examples/misc \
+	examples examples/examples examples/misc \
 	examples/tutorial examples/other \
 	examples/plugin examples/mpi \
 	examples/eigen examples/bug \
 	examples/3d examples/hpddm examples/ffddm
 
-EXTRA_DIST=README.md CHANGELOG.md
+EXTRA_DIST=README.md CHANGELOG.md \
+bin/keys.awk \
+bin/mpic++.in \
+bin/Install-MacOS.command \
+bin/FreeFem++-CoCoa.in \
+bin/save-in-files \
+bin/cleanregen.sh \
+bin/copysharedlibs.sh \
+bin/script/clean_all_installed_ffpp.sh \
+bin/script/remove-opemmpi-1.6.5-and-gfortran.sh \
+bin/script/PostInstall.sh \
+bin/script/PostInstall.m4 \
+bin/regtests.sh \
+bin/uninstall-ff++ \
+bin/build/cleancrlf \
+bin/build/orgindex \
+bin/build/download \
+bin/build/ff-md5 \
+bin/build/links2files \
+bin/modpath.iss \
+bin/Install-MacOS.command.in \
+bin/Searchdylib \
+bin/test-driver-ff \
+etc/tools/srcHeader.txt \
+etc/tools/.uncrustify \
+etc/debian/freefem++-doc.doc-base \
+etc/debian/freefem++.manpages \
+etc/debian/apt-ftparchive.conf \
+etc/debian/freefem++.docs \
+etc/debian/compat \
+etc/debian/freefem++.examples \
+etc/debian/changelog \
+etc/debian/freefem++-nw.install \
+etc/debian/freefem++-nw.prerm \
+etc/debian/freefem++-mpich.links \
+etc/debian/freefem++-doc.docs \
+etc/debian/freefem++-mpich.dirs \
+etc/debian/FreeFem++.1 \
+etc/debian/freefem++-mpich.install \
+etc/debian/freefem++-mpich.postinst \
+etc/debian/freefem++-nw.postinst \
+etc/debian/shlibs.local \
+etc/debian/rules \
+etc/debian/freefem++-mpich.prerm \
+etc/debian/copyright \
+etc/debian/freefem++-nw.dirs \
+etc/debian/CopyToServer.sh \
+etc/debian/control \
+etc/debian/freefem++-nw.links \
+etc/config/FreeFem++.scrpt-txt.in \
+etc/config/FreeFem++.app.in.tgz \
+etc/config/m4/acoptim.m4 \
+etc/config/m4/acmpi.m4 \
+etc/config/m4/ax_lib_hdf5.m4 \
+etc/config/m4/ax_lib_gsl.m4 \
+etc/config/m4/regtests.m4 \
+etc/config/m4/acmacros.m4 \
+etc/config/m4/ax_openmp.m4 \
+etc/config/m4/tags.rOZFHw \
+etc/config/m4/WindowsPackage.m4 \
+etc/FreeFem++.app/Contents \
+etc/FreeFem++.app/Contents/Resources \
+etc/FreeFem++.app/Contents/Resources/English.lproj \
+etc/FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib \
+etc/FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/classes.nib \
+etc/FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/NSAppleMenuImage.tiff \
+etc/FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/info.nib \
+etc/FreeFem++.app/Contents/Resources/English.lproj/MainMenu.nib/objects.nib \
+etc/FreeFem++.app/Contents/Resources/FreeFem++.icns \
+etc/FreeFem++.app/Contents/Resources/script \
+etc/FreeFem++.app/Contents/Resources/Credits.rtf \
+etc/FreeFem++.app/Contents/Info.plist \
+etc/FreeFem++.app/Contents/PkgInfo \
+etc/logo/logo.ico \
+etc/logo/logo.bmp \
+etc/doxygen/mainpage.dox \
+etc/doxygen/Doxyfile \
+etc/jenkins \
+etc/jenkins/install.sh \
+etc/jenkins/deployDEB.sh \
+etc/jenkins/build.sh \
+etc/jenkins/check.sh \
+etc/jenkins/configure.sh \
+etc/jenkins/clean.sh \
+etc/jenkins/build_PETSc.sh \
+etc/ff/ff.xcodeproj \
+etc/ff/ff.xcodeproj/project.pbxproj  \
+readme/INNOVATION \
+readme/README_MAC.md \
+readme/ChangeLog \
+readme/AUTHORS \
+readme/README_ARPACK.md \
+readme/BUGS \
+readme/INSTALL-MacOSX \
+readme/TODO \
+readme/README_XCODE.md \
+readme/COPYING \
+readme/NEWS \
+readme/README_COMPILATION.md \
+readme/HISTORY \
+readme/HISTORY_BEFORE_2005 \
+readme/COPYRIGHT \
+readme/0ldUserReadMe.txt \
+readme/README_GIT.md \
+readme/README_WINDOWS.md  \
+idp/ffddm_geneoCS.idp \
+idp/func-max.idp \
+idp/DDM-Schwarz-macro.idp \
+idp/ExtractDofsonBorder.idp \
+idp/Heat3d.idp \
+idp/MPIGMRESmacro.idp \
+idp/gsl.idp \
+idp/ffddm_partitioning.idp \
+idp/cube.idp \
+idp/mortar-msh.idp \
+idp/Makefile.am \
+idp/movemeshsmooth.idp \
+idp/DDM-funcs-v2.idp \
+idp/cobrameshcavity.idp \
+idp/MPIplot.idp \
+idp/MeshSurface.idp \
+idp/ffddm.idp \
+idp/ffddm_coarsemeshCS.idp \
+idp/ffddm_geneoCS_3rdlvl.idp \
+idp/getARGV.idp \
+idp/ffddm_functions.idp \
+idp/macro_ddm_substructuring.idp \
+idp/ffddm_parameters.idp \
+idp/macro_ddm.idp 
+
+
 
 FF_MAC_PREFIX=FreeFem++v$(VERSION)$(ADD_PACKAGE_NAME)
 
