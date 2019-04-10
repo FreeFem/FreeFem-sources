@@ -5,4 +5,4 @@ func int test(bool condition)
 }
 
 string IND = "\t";
-real HWERROR = 1e-15;
+real HWERROR = 1e-12;
