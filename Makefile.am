@@ -39,7 +39,6 @@ bin/cleanregen.sh \
 bin/copysharedlibs.sh \
 bin/script/clean_all_installed_ffpp.sh \
 bin/script/remove-opemmpi-1.6.5-and-gfortran.sh \
-bin/script/PostInstall.sh \
 bin/script/PostInstall.m4 \
 bin/regtests.sh \
 bin/uninstall-ff++ \
@@ -290,7 +289,7 @@ install-exec-local::
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)/usr/local/bin
 	test `uname` != Darwin || ( $(MAKE) FreeFem++.app.tgz  ; test -d $(DESTDIR)/Applications ||  mkdir $(DESTDIR)/Applications ; tar zxf FreeFem++.app.tgz  -C $(DESTDIR)/Applications )
 
-script/PostInstall.sh:./Makefile bin/script/PostInstall.m4
+bin/script/PostInstall.sh:./Makefile bin/script/PostInstall.m4
 	m4 bin/script/PostInstall.m4 "-DFF__FVER=$(PACKAGE_VERSION)" "-DFF_BINDIR=$(bindir)" "-DFF__DATADIR=$(pkgdatadir)" > bin/script/PostInstall.sh
 	chmod a+x bin/script/PostInstall.sh
 
