@@ -80,13 +80,23 @@ void Triangles::Read(MeshIstream & f_in,int Version,Real8 cutoffradian)
            assert(dim ==2);
          }
       else if  (!strcmp(fieldname,"Geometry"))
-	{ 
+	{
+            string dir="",str =  f_in.CurrentFile;
+            std::size_t found = str.find_last_of("/\\");
+            if(found !=  string::npos)
+              dir = str.substr(0,found+1);
 	  char * fgeom ;
 	  f_in >> fgeom;
 	  //	  if (cutoffradian>=0) => bug if change edit the file geometry 
 	  //  Gh.MaximalAngleOfCorner = cutoffradian;
-	  if (strlen(fgeom))
-	      Gh.ReadGeometry(fgeom);
+            if (strlen(fgeom)) {
+                string fg = fgeom;
+                found = fg.find_last_of("/\\");
+                if(found !=  string::npos) // seaprateur
+                    fg = dir+ fg.substr(found+1);
+                if(verbosity>4) cout << " -- read geometry in "<< fg << " not in  "  << fgeom << " "  << endl;
+	      Gh.ReadGeometry(fg.c_str());
+            }
 	  else 
 	    { 
 	      // include geometry 
