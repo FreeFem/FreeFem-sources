@@ -3,6 +3,23 @@ include "test.idp"
 cout << "square" << endl;
 real t;
 
+cout << IND << "int" << endl;
+
+int i = 4;
+real ineg = -4;
+
+t = clock();
+real resi1 = square(i);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resi1 == 16);
+
+t = clock();
+real resineg = square(ineg);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resineg == 16);
+
 cout << IND << "real" << endl;
 
 real r = 4.0;

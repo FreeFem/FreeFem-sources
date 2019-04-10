@@ -1,0 +1,15 @@
+include "test.idp"
+
+cout << "y0" << endl;
+real t;
+
+cout << IND << "real" << endl;
+
+//TODO
+// real r1 = ;
+//
+// t = clock();
+// real resr1 = y0(r1);
+// t = clock() - t;
+// cout << IND << IND << t << endl;
+test(y0(1));

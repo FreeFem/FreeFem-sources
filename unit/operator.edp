@@ -1161,3 +1161,122 @@ bool resdiffsi = is != i1;
 t = clock() - t;
 cout << IND << IND << t << endl;
 test(resdiffsi == true);
+
+
+cout << "operator +=" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+i1 += i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(i1 == 4);
+i1 = 2;
+
+cout << IND << "real" << endl;
+
+t = clock();
+ir += ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(i1 == 2.);
+ir = 1.;
+
+cout << IND << "complex" << endl;
+
+t = clock();
+ic += ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ic == 10. + 12i);
+ic = 5.0 + 6i;
+
+
+cout << "operator -=" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+i1 -= i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(i1 == 0);
+i1 = 2;
+
+cout << IND << "real" << endl;
+
+t = clock();
+ir -= ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ir == 0.);
+ir = 1.;
+
+cout << IND << "complex" << endl;
+
+t = clock();
+ic -= ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ic == 0.);
+ic = 5.0 + 6i;
+
+
+cout << "operator *=" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+i1 *= i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(i1 == 4);
+i1 = 2;
+
+cout << IND << "real" << endl;
+
+t = clock();
+ir *= ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ir == 1.);
+ir = 1.;
+
+cout << IND << "complex" << endl;
+
+t = clock();
+ic *= ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ic == -11. + 60i);
+ic = 5.0 + 6i;
+
+cout << "operator /=" << endl;
+
+cout << IND << "int" << endl;
+
+t = clock();
+i1 /= i1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(i1 == 1);
+i1 = 2;
+
+cout << IND << "real" << endl;
+
+t = clock();
+ir *= ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ir == 1.);
+ir = 1.;
+
+cout << IND << "complex" << endl;
+
+t = clock();
+ic /= ic;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(ic == 1);
+ic = 5.0 + 6i;
