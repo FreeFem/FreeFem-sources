@@ -24,4 +24,4 @@ size_t M_memSize();
 }
 #endif
 
-#enif //MEMORY_H_
+#endif //MEMORY_H_
