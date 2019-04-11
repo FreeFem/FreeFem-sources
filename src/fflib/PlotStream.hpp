@@ -12,6 +12,9 @@
 #endif
 #include "endian.hpp"
 
+#ifndef PLOT_STREAM_HPP_
+#define PLOT_STREAM_HPP_
+
 //FFCS visualization stream redirection
 #include "ffapi.hpp"
 
@@ -268,3 +271,4 @@ public:
     
 };
 
+#endif //PLOT_STREAM_HPP
