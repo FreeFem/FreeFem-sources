@@ -1486,6 +1486,10 @@ void Mesh::BuilTriangles(bool empty,bool removeouside)
 	delete [] h;
 	delete [] sd;
 }
+    
+inline  double rho(const Triangle &K) {
+        return 2*K.area/(K.lenEdge(0)+K.lenEdge(1)+K.lenEdge(2));
+    }
 Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 { //  routine complique 
   //  count the number of elements
@@ -1584,7 +1588,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		nvmax += NbOfSubInternalVertices(split[i]) -3;
 	
 	//  compute the minimal Hsize of the new mesh  
-	R hm = Th[0].h_min();
+       R hm = rho(Th[0]); //Th[0].h_min();
 	//  cout << " hm " << hm << endl;
 	// change h() in h_min() bug correct  july 2005 FH  ----
 	for (int it=0;it<Th.nt;it++)
@@ -1592,7 +1596,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	    assert(split[it]>=0 && split[it]<=64);
 	    //      cout << " it = " <<it << " h " <<  Th[it].h() << " " << split[it] << " hm = " << hm <<  endl;
 	    if (split[it]) 
-		hm=Min(hm,Th[it].h_min()/(R) split[it]);
+		hm=Min(hm,rho(Th[it])/(R) split[it]);
 	}
 	R seuil=hm/splitmax/4.0;
 	//assert(seuil>1e-15);
