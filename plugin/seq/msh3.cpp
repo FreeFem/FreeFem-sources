@@ -7257,8 +7257,12 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
                                 assert(trisub[iface + jjj] < nvsub);
                                 assert(ivb[jjj] < np);
                             }
-                            
-                            (bb++)->set(v, ivb, newbelabel);
+                            long lab=newbelabel;
+                            if (notalabel == newbelabel )// hack for P-H Tournier in Test FH ...
+                            {
+                                lab = -1-it;// lat is the
+                            }
+                            (bb++)->set(v, ivb, lab);
                             ie++;
                         }
                     }

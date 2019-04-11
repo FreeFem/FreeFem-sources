@@ -9,7 +9,7 @@
 // Reference value for FFCS regression tests
 real ref;
 
- for(int iter=0;iter < 13;iter++)
+ for(int iter=0;iter < 11;iter++)
  {
 
  fespace Vh(Th,P1);     // P1 FE space
