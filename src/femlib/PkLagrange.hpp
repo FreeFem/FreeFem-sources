@@ -31,6 +31,9 @@
  ref:ANR-07-CIS7-002-01 
  */
 
+#ifndef PK_LAGRANGE_HPP_
+#define PK_LAGRANGE_HPP_
+
 #include "FESpacen.hpp"
 
 namespace Fem2D {
@@ -129,3 +132,5 @@ private:
 
 
  }
+
+#endif //PK_LAGRANGE_HPP_

@@ -1,3 +1,6 @@
+#ifndef MEMORY_H_
+#define MEMORY_H_
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -20,3 +23,5 @@ size_t M_memSize();
 #ifdef __cplusplus
 }
 #endif
+
+#enif //MEMORY_H_

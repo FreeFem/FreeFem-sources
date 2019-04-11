@@ -30,6 +30,10 @@
  
  */
 
+
+#ifndef RNM_OP_HPP_
+#define RNM_OP_HPP_
+
 template<class R>  
 KNM_<R> & KNM_<R>::operator oper (const outProduct_KN_<R> & u)  
 {
@@ -181,3 +185,5 @@ template<class R>
       *l oper ( (*aa != zero) ?  *bb : *cc);
     return *this;
   }
+
+#endif //RNM_OP_HPP_

@@ -1,4 +1,7 @@
 
+#ifndef CGNL_HPP_
+#define CGNL_HPP_
+
 template<class R,class DJ>
 R argmin(R  rho,const DJ & dJ, KN_<R> &x,KN_<R> &h,KN_<R> &g,KN_<R> &w)
 {
@@ -112,3 +115,5 @@ int NLCG(const DJ & dJ,const P & C,KN_<R> &x,const int nbitermax, double &eps,lo
   cout << " Non convergence of the NL cojugate gradient " <<endl;
   return 0; 
 }
+
+#endif //CGNL_HPP_

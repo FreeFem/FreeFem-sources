@@ -30,6 +30,9 @@
  
  */
 
+#ifndef RNM_OPC_HPP_
+#define RNM_OPC_HPP_
+
 template<class R>
 inline KN_<R>&  KN_<R>::operator oper (const_R a)  {
     R * l(v);    
@@ -108,3 +111,5 @@ inline  KNMK_<R> & KNMK_<R>::operator oper (const KNMK_<const_R> & u)
 }
 
 #undef oper
+
+#endif //RNM_OPC_HPP_

@@ -39,6 +39,9 @@
 #include "rgraph.hpp"
 #endif
 
+#ifndef MESH2_H_
+#define MESH2_H_
+
 extern long verbosity;
 extern int SHOW;
 #include "meshtype.h"
@@ -1504,8 +1507,5 @@ inline void Line(R2 x) {rlineto(x.x,x.y);}
 
 }
 
-
-
-
-
+#endif //MESH2_H_
 

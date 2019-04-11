@@ -33,6 +33,10 @@
 #include <cstring>
 #include <cstdlib>
 #include <cctype>
+
+#ifndef MESHIO_H_
+#define MESHIO_H_
+
 using namespace std;
 //  PB compilo HP aCC 
 #if defined(__hpux) || defined(__SUNPRO_CC) 
@@ -243,3 +247,5 @@ inline void IFortranUnFormattedFile::read4(char *c,int ll)
 }
 
 }
+
+#endif //MESHIO_H_
