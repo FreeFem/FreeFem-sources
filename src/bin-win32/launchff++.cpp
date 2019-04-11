@@ -152,7 +152,7 @@ int main(int argc,const char **argv)
      delete [] dir;
    }
     ffargv[nffa++]="-log";
- // ffargv[nffa++]="-wait";
+    ffargv[nffa++]="-wait";
  
  //  cmd += " -wait -log";
    if(debug) {

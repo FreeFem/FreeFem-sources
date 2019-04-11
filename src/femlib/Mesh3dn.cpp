@@ -1719,7 +1719,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
 	    }
 
 	  }
-                 cout << "savesurf " <<endl;
+             //    cout << "savesurf " <<endl; ???  QUi a mis cet ligne de CODE ???? FH... april 2019 ... 
       }
     Phat=R3(l+1);
     if(ddd) cout  << "\t\t\t -> "<< dt << " : "  << Phat << " K(Phat) ="<< Th[it](Phat)

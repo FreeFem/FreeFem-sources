@@ -42,8 +42,8 @@ all-local:
 # -------------------------------
 
 DIRPKG=../pkg
-VERSION=3.10.3
-VERSION_SLEPC=3.10.1
+VERSION=3.11.0
+VERSION_SLEPC=3.11.0
 # http://slepc.upv.es/download/download.php?filename=slepc-3.7.4.tar.gz
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 PACKAGE_SLEPC=../pkg/slepc-$(VERSION_SLEPC).tar.gz
@@ -83,7 +83,9 @@ recompile-complex:
 
 dir-install: Makefile.inc
 	-$(SUDO) mkdir -p $(DESTDIR)$(DIR_INSTALL_REAL)
+	-$(SUDO) chown ${USER} $(DESTDIR)$(DIR_INSTALL_REAL)
 	-$(SUDO) mkdir -p $(DESTDIR)$(DIR_INSTALL_COMPLEX)
+	-$(SUDO) chown ${USER} $(DESTDIR)$(DIR_INSTALL_COMPLEX)
 	@if test -w 	"$(DESTDIR)$(DIR_INSTALL_REAL)" -a -w 	"$(DESTDIR)$(DIR_INSTALL_COMPLEX)" ; then echo "no need of sudo"; echo > do-sudo; \
 	else \
 	 echo  no write access in $(DESTDIR)$(DIR_INSTALL_REAL) and $(DESTDIR)$(DIR_INSTALL_COMPLEX); \
@@ -120,8 +122,8 @@ $(SRCDIR)/tag-make-real:$(SRCDIR)/tag-conf-real
 
 
 $(SRCDIR)/tag-install-real :$(SRCDIR)/tag-make-real
-	cd $(SRCDIR) && $(SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install
-	cd $(SRCDIR) && $(SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real check
+	cd $(SRCDIR) && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install
+	cd $(SRCDIR) && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real check
 	test -e $(DIR_INSTALL_REAL)/include/petsc.h
 	touch $@
 
@@ -129,7 +131,7 @@ Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
 	../../config.status --file="Makefile.inc:Makefile-PETSc.inc"
 
 $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
-	cd $(SRCDIR) &&  $(PYTHON2) ./configure \
+	cd $(SRCDIR) &&  $(PYTHON2) ./configure MAKEFLAGS='' \
 		--prefix=$(DIR_INSTALL_REAL) \
 		--with-debugging=no \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
@@ -152,7 +154,7 @@ Make-petsc-download.mk:$(SRCDIR)/tag-install-real $(DIR_INSTALL_REAL)/lib/petsc/
 ifdef 	MUMPS_LIB
 #  version COMPLEX  .....
 $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
-	cd $(SRCDIR) &&  $(PYTHON2) ./configure \
+	cd $(SRCDIR) &&  $(PYTHON2) ./configure MAKEFLAGS='' \
 		--prefix=$(DIR_INSTALL_COMPLEX) \
 		--with-debugging=no \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
@@ -179,7 +181,7 @@ $(SRCDIR)/tag-make-complex:$(SRCDIR)/tag-conf-complex Make-petsc-download.mk
 	touch $@
 
 $(SRCDIR)/tag-install-complex :$(SRCDIR)/tag-make-complex
-	cd $(SRCDIR) && $(SUDO) $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install
+	cd $(SRCDIR) && $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install
 	test -e $(DIR_INSTALL_COMPLEX)/include/petsc.h
 	touch $@
 WHERE-complex:../lib/WHERE.PETSc-complex ../lib/WHERE.SLEPc-complex
@@ -242,7 +244,8 @@ $(SRCDIR_SLEPC)/tag-install-complex :$(SRCDIR_SLEPC)/tag-make-complex
 	export PETSC_DIR=$(PETSC_DIR) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
 	export PETSC_ARCH=ff-complex ; \
-	cd $(SRCDIR_SLEPC) &&   $(SUDO_WITH_ENV) make install
+	cd $(SRCDIR_SLEPC) && make install
+	-test -x "`type -p otool`"  &&	make changec	
 	test -e $(DIR_INSTALL_COMPLEX)/include/slepc.h
 	cd $(SRCDIR_SLEPC) &&   make 'PETSC_DIR=$(PETSC_DIR)' 'SLEPC_DIR=$(SLEPC_DIR)' PETSC_ARCH=ff-complex check
 	touch $@
@@ -274,7 +277,7 @@ $(SRCDIR_SLEPC)/tag-conf-real:$(SRCDIR_SLEPC)/tag-tar
 	export PETSC_DIR=$(PETSC_DIR) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
 	export PETSC_ARCH=ff-real; \
-	cd $(SRCDIR_SLEPC) &&   $(PYTHON2) ./configure --prefix=$(DIR_INSTALL_REAL) $(SPELC_ADDCONF)
+	cd $(SRCDIR_SLEPC) &&   $(PYTHON2) ./configure   --prefix=$(DIR_INSTALL_REAL) $(SPELC_ADDCONF)
 	touch $@
 
 $(SRCDIR_SLEPC)/tag-make-real:$(SRCDIR_SLEPC)/tag-conf-real
@@ -289,11 +292,31 @@ $(SRCDIR_SLEPC)/tag-install-real :$(SRCDIR_SLEPC)/tag-make-real
 	export PETSC_DIR=$(DIR_INSTALL_REAL) ; \
 	export SLEPC_DIR=$(SLEPC_DIR) ; \
 	export PETSC_ARCH=ff-real; \
-	cd $(SRCDIR_SLEPC) &&   $(SUDO_WITH_ENV) make install
+	cd $(SRCDIR_SLEPC) && make install
+	-test -x "`type -p otool`"  && make changer
 	test -e $(DIR_INSTALL_REAL)/include/slepc.h
 	cd $(SRCDIR_SLEPC) &&   make 'PETSC_DIR=$(PETSC_DIR)' 'SLEPC_DIR=$(SLEPC_DIR)' PETSC_ARCH=ff-real check
 
 	touch $@
+
+changec:
+	diri=$(DIR_INSTALL_COMPLEX)/lib ; \
+	libpp=$$diri/libslepc.$(VERSION_SLEPC).dylib ; \
+    opblibpp=`otool -L $$libpp  | awk '/3rdparty/ {print $$1}'` ; \
+	npblibpp=$$diri/`basename $$opblibpp` ; \
+	echo -- $$opblibpp ; \
+	echo -- $$npblibpp ; \
+	test -n "$$opblibpp" &&  install_name_tool -change $$opblibpp $$npblibpp $$libpp ; \
+	otool -L $$libpp  | awk '/libpetsc/ {print "**",$$1}'
+changer:
+	diri=$(DIR_INSTALL_REAL)/lib ; \
+	libpp=$$diri/libslepc.$(VERSION_SLEPC).dylib ; \
+    opblibpp=`otool -L $$libpp  | awk '/3rdparty/ {print $$1}'` ; \
+	npblibpp=$$diri/`basename $$opblibpp` ; \
+	echo -- $$opblibpp ; \
+	echo -- $$npblibpp ; \
+	test -n "$$opblibpp" &&  install_name_tool -change $$opblibpp $$npblibpp $$libpp ; \
+	otool -L $$libpp  | awk '/libpetsc/ {print "**",$$1}'
 
 ../lib/WHERE.SLEPc:$(SRCDIR_SLEPC)/tag-install-real
 	-mkdir ../lib
@@ -324,12 +347,14 @@ echo:
 	@echo " do-sudo auto ???:" $(SHELL  cat do-sudo)
 	@echo " BLAS_LAPACK_LIBS: $(BLAS_LAPACK_LIBS)"
 	@echo " # need sudo if '$(W_SUDO)' == 'sudo'  .." $(W_SUDO1)
+	-@otool -L $(DIR_INSTALL_COMPLEX)/lib/libslepc.$(VERSION_SLEPC).dylib  | awk '/3rdparty/ {print $$1}'
+	-@otool -L $(DIR_INSTALL_REAL)/lib/libslepc.$(VERSION_SLEPC).dylib  | awk '/3rdparty/ {print $$1}'
 
 install-destdir:
-	cd $(SRCDIR) && $(SUDO) $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install  DESTDIR=$(DESTDIR)
-	cd $(SRCDIR) && $(SUDO) $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install DESTDIR=$(DESTDIR)
-	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) DESTDIR=$(DESTDIR)
-	cd $(SRCDIR_SLEPC) &&   $(SUDO) make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL) DESTDIR=$(DESTDIR)
+	cd $(SRCDIR) && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-real install  DESTDIR=$(DESTDIR)
+	cd $(SRCDIR) && $(MAKE)  PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=ff-complex install DESTDIR=$(DESTDIR)
+	cd $(SRCDIR_SLEPC) && make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_COMPLEX) DESTDIR=$(DESTDIR)
+	cd $(SRCDIR_SLEPC) && make install SLEPC_DIR=$(SLEPC_DIR) PETSC_DIR=$(DIR_INSTALL_REAL) DESTDIR=$(DESTDIR)
 
 .NOTPARALLEL:
 # Local Variables:
