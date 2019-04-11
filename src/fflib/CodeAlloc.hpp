@@ -26,6 +26,9 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifndef CODE_ALLOC_HPP
+#define CODE_ALLOC_HPP
+
 class CodeAlloc { public:
 
   static size_t nb,nbt,lg, nbdl,nbpx, chunk ;   
@@ -77,3 +80,5 @@ template<class T> class CodeAllocT: public CodeAlloc{
   static T * New(int n) { return (new CodeAllocT(n))->p;}
   ~CodeAllocT(){ delete [] p;}
 };
+
+#endif

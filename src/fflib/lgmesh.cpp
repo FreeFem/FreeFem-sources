@@ -2035,6 +2035,8 @@ double Chi(Stack stack,pmesh3 const &pTh)
     return 1.;
 }
 
+extern void init_glumesh2D();
+
 void init_lgmesh() {
   if(verbosity&&(mpirank==0) )  cout <<"lg_mesh ";
   bamg::MeshIstreamErrorHandler = MeshErrorIO;
@@ -2083,6 +2085,5 @@ void init_lgmesh() {
 
   TheOperators->Add("<-",
 		    new OneOperator2_<pmesh*,pmesh*,pmesh >(&set_copy_incr));
-  extern void init_glumesh2D();
   init_glumesh2D();
 }

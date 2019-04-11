@@ -121,6 +121,15 @@ extern basicForEachType *  typevarreal,  * typevarcomplex;  //  type of real and
 
 extern int TheCurrentLine; // unset: by default
 extern long mpisize,mpirank;
+
+// rand generator ---
+extern long genrand_int31(void);
+extern double genrand_real1(void);
+extern double genrand_real2(void);
+extern double genrand_real3(void);
+extern double  genrand_res53(void) ;
+
+
 // FH  for g++ 3.4  the prototypage  have change
 double  VersionNumber();
 double Imag(const  complex<double> & z){ return imag(z);}
@@ -1766,11 +1775,6 @@ void Init_map_type()
  // rand generator ---
   unsigned long init[4]={0x123, 0x234, 0x345, 0x456}, length=4;
   init_by_array(init, length);
-  extern long genrand_int31(void);
-  extern double genrand_real1(void);
-  extern double genrand_real2(void);
-  extern double genrand_real3(void);
-  extern double  genrand_res53(void) ;
 
   Global.Add("randint32","(",new OneOperator_0<long>(genrandint32));
   Global.Add("randint31","(",new OneOperator_0<long>(genrand_int31));
@@ -1780,45 +1784,45 @@ void Init_map_type()
   Global.Add("randres53","(",new OneOperator_0<double>(genrand_res53));
   Global.Add("randinit","(",new OneOperator1<long>(genrandint));
 
-   //  NaN and Inf
+  //  NaN and Inf
   Global.Add("ShowAlloc","(",new OneOperator1<long,string*>(ShowAlloc1));// debuging
   Global.Add("ShowAlloc","(",new OneOperator2<long,string*,long*>(ShowAlloc1));// debuging
   Global.Add("NaN","(",new OneOperator0<double>(NaN));
 
   Global.Add("NaN","(",new OneOperator1<double,string*   >(NaN));
-    Global.Add("isNaN","(",new OneOperator1<long,double>(isNaN));
-    Global.Add("copysign","(",new OneOperator2<double>(copysign));// Add jan 2018 FH
-    Global.Add("sign","(",new OneOperator1<double>(sign));// Add jan 2018 FH
-    Global.Add("sign","(",new OneOperator1<long>(sign));// Add jan 2018 FH
-    Global.Add("signbit","(",new OneOperator1<bool,long>(ffsignbit));// Add jan 2018 FH
-    Global.Add("signbit","(",new OneOperator1<bool,double>(ffsignbit));// Add jan 2018 FH
+  Global.Add("isNaN","(",new OneOperator1<long,double>(isNaN));
+  Global.Add("copysign","(",new OneOperator2<double>(copysign));// Add jan 2018 FH
+  Global.Add("sign","(",new OneOperator1<double>(sign));// Add jan 2018 FH
+  Global.Add("sign","(",new OneOperator1<long>(sign));// Add jan 2018 FH
+  Global.Add("signbit","(",new OneOperator1<bool,long>(ffsignbit));// Add jan 2018 FH
+  Global.Add("signbit","(",new OneOperator1<bool,double>(ffsignbit));// Add jan 2018 FH
 
-    Global.Add("isInf","(",new OneOperator1<long,double>(isInf));
-    Global.Add("isNormal","(",new OneOperator1<long,double>(isNormal));
-    Global.Add("chtmpdir","(",new OneOperator0<long>(ffapi::chtmpdir));
-    Global.Add("projection","(",new OneOperator3_<double,double   >(projection));
-    Global.Add("dist","(",new OneOperator2_<double,double>(dist));
-    Global.Add("dist","(",new OneOperator3_<double,double>(dist));
-    Global.Add("swap","(",new OneOperator2<bool,double*>(pswap));
-    Global.Add("swap","(",new OneOperator2<bool,long*>(pswap));
-    Global.Add("swap","(",new OneOperator2<bool,bool*>(pswap));
-    Global.Add("swap","(",new OneOperator2<bool,Complex*>(pswap));
-    Global.Add("swap","(",new OneOperator2<bool,string**>(pswap));
-
-
-     atype<MyMapSS*>()->Add("[","",new OneOperator2_<string**,MyMapSS*,string*>(get_elements));
-
-     atype<MyMapSS*>()->SetTypeLoop(atype<string**>(),atype<string**>());
+  Global.Add("isInf","(",new OneOperator1<long,double>(isInf));
+  Global.Add("isNormal","(",new OneOperator1<long,double>(isNormal));
+  Global.Add("chtmpdir","(",new OneOperator0<long>(ffapi::chtmpdir));
+  Global.Add("projection","(",new OneOperator3_<double,double   >(projection));
+  Global.Add("dist","(",new OneOperator2_<double,double>(dist));
+  Global.Add("dist","(",new OneOperator3_<double,double>(dist));
+  Global.Add("swap","(",new OneOperator2<bool,double*>(pswap));
+  Global.Add("swap","(",new OneOperator2<bool,long*>(pswap));
+  Global.Add("swap","(",new OneOperator2<bool,bool*>(pswap));
+  Global.Add("swap","(",new OneOperator2<bool,Complex*>(pswap));
+  Global.Add("swap","(",new OneOperator2<bool,string**>(pswap));
 
 
-     tables_of_identifier.push_back(&Global);
+  atype<MyMapSS*>()->Add("[","",new OneOperator2_<string**,MyMapSS*,string*>(get_elements));
 
-    TheOperators->Add("<<",new OneBinaryOperator<PrintP<MyMapSS*> >);
+  atype<MyMapSS*>()->SetTypeLoop(atype<string**>(),atype<string**>());
 
-    TheOperators->Add("{}",new ForAllLoop<E_ForAllLoopMapSS >);
-   // add setw feb 2015 FH
-    Global.Add("setw","(",new OneOperator1<OP_setw,long>(defOP_setw));
-    TheOperators->Add("<<", new OneBinaryOperator<Print<OP_setw> >);
+
+  tables_of_identifier.push_back(&Global);
+
+  TheOperators->Add("<<",new OneBinaryOperator<PrintP<MyMapSS*> >);
+
+  TheOperators->Add("{}",new ForAllLoop<E_ForAllLoopMapSS >);
+  // add setw feb 2015 FH
+  Global.Add("setw","(",new OneOperator1<OP_setw,long>(defOP_setw));
+  TheOperators->Add("<<", new OneBinaryOperator<Print<OP_setw> >);
 
 }
 //int ShowAlloc(const char *s,size_t & lg);
