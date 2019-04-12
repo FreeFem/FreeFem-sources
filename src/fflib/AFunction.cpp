@@ -1716,9 +1716,9 @@ void Init_map_type()
 
     Global.Add("atan2","(",new OneOperator2<double>(atan2));
     Global.Add("fmod","(",new OneOperator2<double>(fmod));// add sep 2017
-    Global.Add("fdim ","(",new OneOperator2<double>(fdim));// add sep 2017
-    Global.Add("fmax ","(",new OneOperator2<double>(fmax));// add sep 2017
-    Global.Add("fmin ","(",new OneOperator2<double>(fmin));// add sep 2017
+    Global.Add("fdim","(",new OneOperator2<double>(fdim));// add sep 2017
+    Global.Add("fmax","(",new OneOperator2<double>(fmax));// add sep 2017
+    Global.Add("fmin","(",new OneOperator2<double>(fmin));// add sep 2017
 
     Global.Add("hypot","(",new OneOperator2<double>(hypot));// add Jan 2014
 
