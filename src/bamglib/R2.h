@@ -137,4 +137,4 @@ inline P2<R,RR> Max2(P2<R,RR> x,P2<R,RR> y)
 */
 }
 
-#endif R2_H_
+#endif //R2_H_
