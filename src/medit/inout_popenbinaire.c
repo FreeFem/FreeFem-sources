@@ -729,7 +729,7 @@ int loadScaVecTen_bin (pMesh mesh, int numsol, int dim, int ver, int nel, int ty
 	double dbuf[GmfMaxTyp];
 	float fbuf[GmfMaxTyp];
 	double m[6], lambda[3], eigv[3][3], vp[2][2];
-	int inm, k, i, iord, off;
+	int k, i, iord, off;
 	char *ptr, data[128];
 	double ScaSol[1], VecSol[3], TenSol[9];
 	float fScaSol[1], fVecSol[3], fTenSol[9];
@@ -840,6 +840,7 @@ int loadScaVecTen_bin (pMesh mesh, int numsol, int dim, int ver, int nel, int ty
 				}
 
 				iord = eigen2(m, lambda, vp);
+				if (!iord) printf("eigen2 error\n");
 				mesh->sol[k].bb = min(lambda[0], lambda[1]);
 				if (mesh->sol[k].bb < mesh->bbmin) mesh->bbmin = mesh->sol[k].bb;
 
@@ -997,6 +998,7 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 
 				/*  type,size,typetab  */
 				read_TypeSizeTyptab_bin(&type, &size, typtab);
+				printf("sol: %s; type %i; size%i;\n", natureread, type, size);
 
 				/* Reading solutions*/
 				loadScaVecTen_bin(mesh, 1, dim, ver, nel, type, size, typtab, key);
@@ -1022,6 +1024,7 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 
 				/*  type,size,typetab  */
 				read_TypeSizeTyptab_bin(&type, &size, typtab);
+				printf("sol: %s; type %i; size%i;\n", natureread, type, size);
 
 				/* Reading solutions */
 				loadScaVecTen_bin(mesh, 1, dim, ver, nel, type, size, typtab, key);
@@ -1048,6 +1051,7 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 
 				/*  type,size,typetab  */
 				read_TypeSizeTyptab_bin(&type, &size, typtab);
+				printf("sol: %s; type %i; size%i;\n", natureread, type, size);
 
 				/* Reading solutions*/
 				loadScaVecTen_bin(mesh, 1, dim, ver, nel, type, size, typtab, key);
