@@ -35,12 +35,14 @@ void dumpTile (char *data, int width, int height, GLubyte *buffer) {
 	FILE *out2;
 
 	out2 = fopen(data, "w");
-	fprintf(out2, "P6\n");
-	fprintf(out2, "# Created using medit %s %s, (c) INRIA\n", ME_VER, ME_REL);
-	fprintf(out2, "%d %d\n", width, height);
-	fprintf(out2, "255\n");
-	fwrite(buffer, sizeof(GLubyte), width * height * 3, out2);
-	fclose(out2);
+	if (out2) {
+		fprintf(out2, "P6\n");
+		fprintf(out2, "# Created using medit %s %s, (c) INRIA\n", ME_VER, ME_REL);
+		fprintf(out2, "%d %d\n", width, height);
+		fprintf(out2, "255\n");
+		fwrite(buffer, sizeof(GLubyte), width * height * 3, out2);
+		fclose(out2);
+	}
 }
 
 /* dump big image */
