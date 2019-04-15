@@ -250,7 +250,7 @@ int createParticle (pScene sc, pMesh mesh) {
 	if (sc->par.nbpart >= MAX_PRT)
 		sc->par.nbpart = MAX_PRT;
 
-	++base;
+	// ++base;
 	l = 1;
 	nbp = 0;
 
@@ -372,7 +372,7 @@ int advectParticle (pScene sc, pMesh mesh) {
 
 	for (i = 1; i <= mesh->np; i++) {
 		pPoint ppt;
-		
+
 		ppt = &mesh->point[i];
 		ppt->mark = base;
 	}
@@ -392,7 +392,7 @@ int advectParticle (pScene sc, pMesh mesh) {
 		pp->cur = 1;
 	}
 
-	++base;
+	// ++base;
 	l = 1;
 
 	for (k = 1; k <= st->nbstl; k++) {
