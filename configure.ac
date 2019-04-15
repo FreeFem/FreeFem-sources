@@ -994,7 +994,13 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		        AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetsc)
-		        AC_FF_PETSC_WHERELIB(scotch,SCOTCH_LIB,SCOTCH_INCLUDE,$ffconfpetsc)
+                ff_SCOTCH_INCLUDE=$ff_PTSCOTCH_INCLUDE
+                ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*pt@<:@^ @:>@*//g'`
+                if test -n "$ff_SCOTCH_LIB"; then
+                    ff_scotch_ok=yes;
+                    AC_FF_ADDWHERELIB(scotch,$ff_SCOTCH_LIB,$ff_SCOTCH_INCLUDE)
+                    AC_SUBST([TOOL_COMPILE_scotch],"")
+                fi
 		        AC_FF_PETSC_WHERELIB(fftw3_mpi,FFTW_LIB,FFTW_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetsc)
                 AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetsc)
@@ -1041,7 +1047,13 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
             AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetscc)
-            AC_FF_PETSC_WHERELIB(scotch,SCOTCH_LIB,SCOTCH_INCLUDE,$ffconfpetscc)
+            ff_SCOTCH_INCLUDE=$ff_PTSCOTCH_INCLUDE
+            ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*pt@<:@^ @:>@*//g'`
+            if test -n "$ff_SCOTCH_LIB"; then
+                ff_scotch_ok=yes;
+                AC_FF_ADDWHERELIB(scotch,$ff_SCOTCH_LIB,$ff_SCOTCH_INCLUDE)
+                AC_SUBST([TOOL_COMPILE_scotch],"")
+            fi
             AC_FF_PETSC_WHERELIB(fftw3_mpi,FFTW_LIB,FFTW_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetscc)
