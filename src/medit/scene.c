@@ -671,7 +671,7 @@ void redrawScene () {
 	sc = cv.scene[currentScene()];
 	view = sc->view;
 	p = sc->persp;
-	c = sc->camera;
+	// c = sc->camera;
 
 	if (stereoMode == MONO || !hasStereo) {
 		glDrawBuffer(GL_BACK_LEFT);
