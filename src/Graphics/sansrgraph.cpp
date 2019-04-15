@@ -284,12 +284,13 @@ void couleur(int c)
 #endif
 }
 
+extern void DefColor(float & r, float & g, float & b,
+              int k,int nb, bool hsv,bool ggrey,int nbcolors,float *colors);
+
 static XColor DefColorSansG( int k,int nb, bool hsv,bool ggrey,int nbcolors,float *colors)
 {
  XColor C;
  float r,g,b;
-extern void DefColor(float & r, float & g, float & b,
-              int k,int nb, bool hsv,bool ggrey,int nbcolors,float *colors);
  DefColor(r,g,b,   k,nb,hsv,ggrey,nbcolors,colors);
  C.red= (short unsigned int) (65535*r);
  C.green=(short unsigned int)(65535*g);

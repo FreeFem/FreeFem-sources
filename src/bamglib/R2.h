@@ -26,6 +26,9 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifndef R2_H_
+#define R2_H_
+
 namespace bamg {
 template <class R,class RR> class P2xP2;
 
@@ -133,3 +136,5 @@ inline P2<R,RR> Max2(P2<R,RR> x,P2<R,RR> y)
    {return  P2<R,RR>(Max(x.x,y.x),Max(x.y,y.y) ;} 
 */
 }
+
+#endif //R2_H_

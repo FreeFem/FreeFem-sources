@@ -2080,9 +2080,13 @@ AnyType NonlinearSolve<Type>::E_NonlinearSolve::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
     if(ptA->_petsc) {
         KN<PetscScalar>* in = GetAny<KN<PetscScalar>*>((*x)(stack));
-        ffassert(in->n == 0 || in->n == ptA->_last - ptA->_first);
+        PetscInt first = ptA->_first;
+        PetscInt last = ptA->_last;
+        if(!ptA->_num)
+            MatGetOwnershipRange(ptA->_petsc, &first, &last);
+        ffassert(in->n == 0 || in->n == last - first);
         if(in->n == 0)
-            in->resize(ptA->_last - ptA->_first);
+            in->resize(last - first);
         User<NonlinearSolve<Type>> user = nullptr;
         PetscNew(&user);
         user->op = new NonlinearSolve<Type>::VecF_O(in->n, stack, codeJ);
@@ -2129,7 +2133,7 @@ AnyType NonlinearSolve<Type>::E_NonlinearSolve::operator()(Stack stack) const {
             VecCreateMPIWithArray(PETSC_COMM_WORLD, 1, in->n, n, static_cast<PetscScalar*>(*in), &x);
             if(c == 1) {
                 KN<PetscScalar>* fb = GetAny<KN<PetscScalar>*>((*b)(stack));
-                ffassert(fb->n == ptA->_last - ptA->_first);
+                ffassert(fb->n == last - first);
                 VecCreateMPIWithArray(PETSC_COMM_WORLD, 1, fb->n, n, static_cast<PetscScalar*>(*fb), &f);
             }
         }

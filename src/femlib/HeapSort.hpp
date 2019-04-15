@@ -1,3 +1,6 @@
+#ifndef HEAP_SORT_HPP_
+#define HEAP_SORT_HPP_
+
 template<class T>
 void  HeapSort(T *c,long n)
 { // starting 0...
@@ -53,3 +56,4 @@ void  HeapSort(K *k,T *t,long n)
     }
 }
 
+#endif //HEAP_SORT_HPP_

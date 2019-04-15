@@ -31,6 +31,9 @@
 #include <config.h>
 #endif
 
+#ifndef ENVIRONMENT_HPP_
+#define ENVIRONMENT_HPP_
+
 #include <string>
 #include <list>
 #include <map>
@@ -44,3 +47,6 @@ bool EnvironmentInsert(std::string key,std::string item,std::string before);
 
 void GetEnvironment();
 void EnvironmentLoad();
+
+#endif // ENVIRONMENT_HPP_
+

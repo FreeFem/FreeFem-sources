@@ -2432,7 +2432,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
                  Ths3[l]->increment(); //
              }
         }
-        getMesh3Type==fin.GetMeshes3();
+        getMesh3Type=fin.GetMeshes3();
      }
      //  There are 3D surface solution
      if(getMesh3Type==1 /*|| getMesh3Type==2*/)
@@ -2469,7 +2469,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
                  ThsS[l]->increment(); //
              }
         }
-        getMesh3Type==fin.GetMeshes3();
+        getMesh3Type=fin.GetMeshes3();
      }
      else if (getMesh3Type==3)
     

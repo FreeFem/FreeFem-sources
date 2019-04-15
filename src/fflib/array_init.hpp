@@ -25,6 +25,10 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
+#ifndef ARRAY_INIT_HPP
+#define ARRAY_INIT_HPP
+
 void initArrayDCLComplex();
 void initArrayOperatorComplex();
 //
@@ -35,3 +39,5 @@ void initArrayDCLlong();
 void initArrayOperatorlong();
 //
 void     initStringOperator();
+
+#endif // _ARRAY_INIT_HPP

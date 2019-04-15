@@ -21,6 +21,9 @@
 /* E-MAIL  : pascal.frey@sorbonne-universite.fr
  */
 
+#ifndef SPROTO_H_
+#define SPROTO_H_
+
 /* animat.c */
 int loadNextMesh(pMesh, int, int);
 int animat ();
@@ -319,3 +322,5 @@ void unlinkView (pScene sc1);
 /* zaldy.c */
 int zaldy1 (pMesh mesh);
 int zaldy2 (pMesh mesh);
+
+#endif //SPROTO_H_

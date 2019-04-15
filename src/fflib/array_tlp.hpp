@@ -33,6 +33,9 @@
 #include <config.h>
 #endif
 
+#ifndef ARRAY_TLP_HPP
+#define ARRAY_TLP_HPP
+
 #include <set>
 #include <complex>
 //#include <type_traits>
@@ -1835,3 +1838,5 @@ void ArrayOperatorF()
      TheOperators->Add("*=",new OneBinaryOperator<set_eq_array_mul<KN_<K> ,F_KN_<K,K,K,KK> > > ); // add FH juin 2005
 
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef GETPROG_UNIX_HPP_
+#define GETPROG_UNIX_HPP_
+
 #include "mode_open.hpp"
 #if _WIN32
 #include  "ff-win32.cpp"
@@ -326,3 +329,5 @@ int getprog(char* fn,int argc, char **argv)
     //  cout << " verbosity= "<< verbosity << endl;
     return 1;
 }
+
+#endif //GETPROG_UNIX_HPP_

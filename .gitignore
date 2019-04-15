@@ -38,6 +38,9 @@
 *.rej
 *.so
 *~
+*.dirstamp
+freefem++.pref
+WHERE_LIBRARY*
 CheckAll-out
 examples/*/*.b
 examples/*/*.dat
