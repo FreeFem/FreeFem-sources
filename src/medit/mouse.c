@@ -101,10 +101,10 @@ static void drawRubberBand (int xa, int ya, int xb, int yb) {
 
 static void rubberMotion (int x, int y) {
 	pScene sc;
-	pPersp p;
+	// pPersp p;
 
 	sc = cv.scene[currentScene()];
-	p = sc->persp;
+	// p = sc->persp;
 
 	glEnable(GL_COLOR_LOGIC_OP);
 	glLogicOp(GL_XOR);
@@ -307,7 +307,7 @@ void motion (int x, int y) {
 			tr->angle = 2.0f;
 		} else {
 			float dx, dy, dz;
-			
+
 			dx = pos[0] - tr->pos[0];
 			dy = pos[1] - tr->pos[1];
 			dz = pos[2] - tr->pos[2];
