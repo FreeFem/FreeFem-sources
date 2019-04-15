@@ -1017,8 +1017,8 @@ GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altco
 						p3 = &mesh->point[pt1->v[voy[0]]];
 						ps1 = &mesh->sol[adj[0]];
 
-						cx = (p1->c[0] + p2->c[0] + p3->c[0]) / 3.0;
-						cy = (p1->c[1] + p2->c[1] + p3->c[1]) / 3.0;
+						// cx = (p1->c[0] + p2->c[0] + p3->c[0]) / 3.0;
+						// cy = (p1->c[1] + p2->c[1] + p3->c[1]) / 3.0;
 						cz = ps1->bb;
 
 						memcpy(t1.a, t.b, 3 * sizeof(float));
@@ -1052,8 +1052,8 @@ GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altco
 						p3 = &mesh->point[pt1->v[voy[1]]];
 						ps1 = &mesh->sol[adj[1]];
 
-						cx = (p0->c[0] + p2->c[0] + p3->c[0]) / 3.0;
-						cy = (p0->c[1] + p2->c[1] + p3->c[1]) / 3.0;
+						// cx = (p0->c[0] + p2->c[0] + p3->c[0]) / 3.0;
+						// cy = (p0->c[1] + p2->c[1] + p3->c[1]) / 3.0;
 						cz = ps1->bb;
 
 						memcpy(t1.a, t.a, 3 * sizeof(float));
@@ -1087,8 +1087,8 @@ GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altco
 						p3 = &mesh->point[pt1->v[voy[2]]];
 						ps1 = &mesh->sol[adj[2]];
 
-						cx = (p0->c[0] + p1->c[0] + p3->c[0]) / 3.0;
-						cy = (p0->c[1] + p1->c[1] + p3->c[1]) / 3.0;
+						// cx = (p0->c[0] + p1->c[0] + p3->c[0]) / 3.0;
+						// cy = (p0->c[1] + p1->c[1] + p3->c[1]) / 3.0;
 						cz = ps1->bb;
 
 						memcpy(t1.a, t.a, 3 * sizeof(float));
