@@ -310,7 +310,7 @@ void drawBase (pScene sc, pMesh mesh) {
 
 	if (!sc->grid) {
 		int k;
-		
+
 		sc->grid = glGenLists(1);
 		glNewList(sc->grid, GL_COMPILE);
 		if (glGetError()) return;
@@ -356,7 +356,8 @@ void drawBase (pScene sc, pMesh mesh) {
 void drawHUD (pScene sc) {
 	pCamera c;
 	pMesh mesh;
-	GLfloat xm, ym, x, y, dx, dy, alt;
+	GLfloat x, y, dx, dy, alt;
+	// xm, ym,
 	double azim, elev;
 	int i, j;
 
@@ -375,8 +376,8 @@ void drawHUD (pScene sc) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glColor3f(0.0, 0.5, 0.0);
 	glLineWidth(1.0f);
-	xm = sc->par.xs / 2.0f;
-	ym = sc->par.ys / 2.0f;
+	// xm = sc->par.xs / 2.0f;
+	// ym = sc->par.ys / 2.0f;
 	glRecti(200, 160, 440, 320);
 
 	/* altitude */
