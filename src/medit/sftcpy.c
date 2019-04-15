@@ -314,13 +314,15 @@ int sftcpy (pScene sc, pMesh mesh) {
 
 	/* size for feedback buffer */
 	size = 0;
-	nvalues = -1;
+	// nvalues = -1;
 
 	do {
 		size += 1024 * 1024;
 		fbbuffer = (GLfloat *)calloc(1 + size, sizeof(GLfloat));
-		if (!fbbuffer)
+		if (!fbbuffer) {
+			fclose(file);
 			return (0);
+		}
 
 		if (ddebug) printf("feedback pointer = %p\n", fbbuffer);
 
@@ -345,8 +347,10 @@ int sftcpy (pScene sc, pMesh mesh) {
 			free(fbbuffer);
 	} while (nvalues < 0);
 
-	if (nvalues < 1)
+	if (nvalues < 1) {
+		fclose(file);
 		return (0);
+	}
 	else if (ddebug) printf("nvalues = %d  size = %d\n", nvalues, size);
 
 	/* write EPS file */
@@ -359,7 +363,7 @@ int sftcpy (pScene sc, pMesh mesh) {
 	if (ddebug) fprintf(stdout, "%s written\n", data);
 
 	glutSetCursor(GLUT_CURSOR_INHERIT);
-
+	fclose(file);
 	return (1);
 }
 
