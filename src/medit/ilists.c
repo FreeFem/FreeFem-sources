@@ -266,9 +266,9 @@ GLuint listTetraIso (pScene sc, pMesh mesh) {
 
 	if (ddebug) {
 		outv = fopen("vertex.mesh", "w");
-		fprintf(outv, "MeshVersionFormatted 1\n Dimension\n 3\n\nVertices\n \n");
+		if (outv) fprintf(outv, "MeshVersionFormatted 1\n Dimension\n 3\n\nVertices\n \n");
 		outf = fopen("faces.mesh2", "w");
-		fprintf(outv, "Triangles\n \n");
+		if (outf) fprintf(outv, "Triangles\n \n");
 	}
 
 	nv = nf = 0;
@@ -310,7 +310,7 @@ GLuint listTetraIso (pScene sc, pMesh mesh) {
 				nbpos = nbneg = nbnul = 0;
 
 				for (l = 0; l < 4; l++) {
-					p0 = &mesh->point[pt->v[l]];
+					// p0 = &mesh->point[pt->v[l]];
 					ps0 = &mesh->sol[pt->v[l]];
 					/*if ( ps0->bb < sc->iso.val[0] )  ps0->bb = sc->iso.val[0];*/
 
@@ -370,13 +370,16 @@ GLuint listTetraIso (pScene sc, pMesh mesh) {
 					glVertex3f(cx[3], cy[3], cz[3]);
 
 					if (ddebug) {
-						fprintf(outv, "%f %f %f 0\n", cx[0], cy[0], cz[0]);
-						fprintf(outv, "%f %f %f 0\n", cx[1], cy[1], cz[1]);
-						fprintf(outv, "%f %f %f 0\n", cx[2], cy[2], cz[2]);
-						fprintf(outv, "%f %f %f 0\n", cx[3], cy[3], cz[3]);
-
-						fprintf(outf, "%d %d %d 0\n", nv + 1, nv + 2, nv + 3);
-						fprintf(outf, "%d %d %d 0\n", nv + 1, nv + 3, nv + 4);
+						if (outv) {
+							fprintf(outv, "%f %f %f 0\n", cx[0], cy[0], cz[0]);
+							fprintf(outv, "%f %f %f 0\n", cx[1], cy[1], cz[1]);
+							fprintf(outv, "%f %f %f 0\n", cx[2], cy[2], cz[2]);
+							fprintf(outv, "%f %f %f 0\n", cx[3], cy[3], cz[3]);
+						}
+						if (outf) {
+							fprintf(outf, "%d %d %d 0\n", nv + 1, nv + 2, nv + 3);
+							fprintf(outf, "%d %d %d 0\n", nv + 1, nv + 3, nv + 4);
+						}
 					}
 
 					nv += 4;
@@ -422,10 +425,12 @@ GLuint listTetraIso (pScene sc, pMesh mesh) {
 					glVertex3f(cx[2], cy[2], cz[2]);
 
 					if (ddebug) {
-						fprintf(outv, "%f %f %f 0\n", cx[0], cy[0], cz[0]);
-						fprintf(outv, "%f %f %f 0\n", cx[1], cy[1], cz[1]);
-						fprintf(outv, "%f %f %f 0\n", cx[2], cy[2], cz[2]);
-						fprintf(outf, "%d %d %d 0\n", nv + 1, nv + 2, nv + 3);
+						if (outv) {
+							fprintf(outv, "%f %f %f 0\n", cx[0], cy[0], cz[0]);
+							fprintf(outv, "%f %f %f 0\n", cx[1], cy[1], cz[1]);
+							fprintf(outv, "%f %f %f 0\n", cx[2], cy[2], cz[2]);
+						}
+						if (outf) fprintf(outf, "%d %d %d 0\n", nv + 1, nv + 2, nv + 3);
 					}
 
 					nv += 3;
@@ -483,7 +488,7 @@ int tetraIsoPOVray (pScene sc, pMesh mesh) {
 
 	for (i = MAXISO - 1; i >= 0; i--) {
 		float iso;
-		
+
 		iso = sc->iso.val[i];
 
 		if (i == MAXISO - 1) iso -= 0.001 * fabs(iso) / delta;
