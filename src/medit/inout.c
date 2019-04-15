@@ -18,8 +18,7 @@
 /* LICENSE : LGPLv3 */
 /* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
 /* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr */
 
 #include "medit.h"
 #include "libmeshb7.h"
@@ -45,7 +44,7 @@ int loadMesh (pMesh mesh) {
 		strcat(data, ".meshb");
 		if (!(inm = GmfOpenMesh(data, GmfRead, &mesh->ver, &mesh->dim))) {
 			ptr = strstr(data, ".mesh");
-			*ptr = '\0';
+			if (ptr) *ptr = '\0';
 			strcat(data, ".mesh");
 			if (!(inm = GmfOpenMesh(data, GmfRead, &mesh->ver, &mesh->dim))) {
 				fprintf(stderr, "  ** %s  NOT FOUND.\n", data);
@@ -650,7 +649,7 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 	strcat(data, ".solb");
 	if (!(inm = GmfOpenMesh(data, GmfRead, &ver, &dim))) {
 		ptr = strstr(data, ".sol");
-		*ptr = '\0';
+		if (ptr) *ptr = '\0';
 		strcat(data, ".sol");
 		if (!(inm = GmfOpenMesh(data, GmfRead, &ver, &dim)))
 			return (0);
