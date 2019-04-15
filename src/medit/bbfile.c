@@ -72,14 +72,14 @@ int bbfile (pMesh mesh) {
 
 	sprintf(data, "%s.bb", tmp);
 	in = fopen(data, "r");
-	bigbb = 0;
+	//bigbb = 0;
 	if (!in) {
 		sprintf(data, "%s.pbb", tmp);
 		in = fopen(data, "r");
 	}
 
 	if (!in) {
-		bigbb = 1;
+		//bigbb = 1;
 		sprintf(data, "%s.BB", tmp);
 		in = fopen(data, "r");
 		if (!in) {	/* hack FH pour le mac */
@@ -267,7 +267,10 @@ int bbfile (pMesh mesh) {
 			ps->bb = 0.0f;
 
 			for (l = 0; l < 6; l++) {
-				if (fscanf(in, "%127s", data) != 1) continue;
+				if (fscanf(in, "%127s", data) != 1) {
+					continue;
+					m[l] = 0;
+				}
 
 				if (ptr = strpbrk(data, "dD")) *ptr = 'E';
 
