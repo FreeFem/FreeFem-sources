@@ -510,7 +510,7 @@ int saveMesh (pScene sc, pMesh mesh, char *fileout, ubyte clipon) {
 		ppt = &mesh->point[k];
 		if (ppt->tag & M_UNUSED) continue;
 
-		ref = ppt->ref;
+		// ref = ppt->ref;
 		if (mesh->dim == 2) {
 			fp1 = ppt->c[0] + mesh->xtra;
 			fp2 = ppt->c[1] + mesh->ytra;
@@ -639,7 +639,7 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 	double dbuf[GmfMaxTyp];
 	float fbuf[GmfMaxTyp];
 	double m[6], lambda[3], eigv[3][3], vp[2][2];
-	int inm, k, i, key, nel, size, type, iord, off, typtab[GmfMaxTyp], ver, dim;
+	int inm, k, i, key=0, nel, size, type, iord, off, typtab[GmfMaxTyp], ver, dim;
 	char *ptr, data[128];
 
 	strcpy(data, filename);
@@ -835,6 +835,7 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 				}
 
 				iord = eigen2(m, lambda, vp);
+				if (!iord) printf("eigen2 error\n", );
 				mesh->sol[k].bb = min(lambda[0], lambda[1]);
 				if (mesh->sol[k].bb < mesh->bbmin) mesh->bbmin = mesh->sol[k].bb;
 
