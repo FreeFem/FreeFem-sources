@@ -512,7 +512,7 @@ int tetraIsoPOVray (pScene sc, pMesh mesh) {
 				nbpos = nbneg = nbnul = 0;
 
 				for (l = 0; l < 4; l++) {
-					p0 = &mesh->point[pt->v[l]];
+					// p0 = &mesh->point[pt->v[l]];
 					ps0 = &mesh->sol[pt->v[l]];
 
 					if (ps0->bb > iso) pos[nbpos++] = l;
