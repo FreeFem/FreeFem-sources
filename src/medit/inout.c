@@ -835,7 +835,7 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 				}
 
 				iord = eigen2(m, lambda, vp);
-				if (!iord) printf("eigen2 error\n", );
+				if (!iord) printf("eigen2 error\n");
 				mesh->sol[k].bb = min(lambda[0], lambda[1]);
 				if (mesh->sol[k].bb < mesh->bbmin) mesh->bbmin = mesh->sol[k].bb;
 
