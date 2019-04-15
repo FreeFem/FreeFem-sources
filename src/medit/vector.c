@@ -273,7 +273,7 @@ GLuint listClipHexaVector (pMesh mesh) {
 	pPoint ppt;
 	pSolution ps0;
 	pScene sc;
-	pClip clip;
+	// pClip clip;
 	double rgb[3], u[3], epsra, iso, kc, dd, scal;
 	// scalemin, scalemax;
 	float cp[3];
@@ -287,7 +287,7 @@ GLuint listClipHexaVector (pMesh mesh) {
 	if (ddebug) printf("create vector list for clip\n");
 
 	sc = cv.scene[currentScene()];
-	clip = sc->clip;
+	// clip = sc->clip;
 	if (egal(sc->iso.val[0], sc->iso.val[MAXISO - 1])) return (0);
 
 	/* create display list */
