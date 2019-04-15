@@ -131,7 +131,7 @@ int imgTiling (pScene sc, char *data, char key) {
 	nbcol = (int)((float)imgWidth / tileWidthNB) + 1;
 	nbrow = (int)((float)imgHeight / tileHeightNB) + 1;
 	tiling = 1;
-	th = tileHeightNB;
+	//th = tileHeightNB;
 	finhaut = sc->par.ys;
 
 	for (row = nbrow - 1; row >= 0; row--) {
