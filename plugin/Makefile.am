@@ -1,11 +1,10 @@
-SUBDIRS=seq mpi hpddm ffddm
+SUBDIRS=seq mpi ffddm
 EXTRA_DIST=   \
 ./mpi/complex_pastix_FreeFem.cpp  \
 ./mpi/htool.cpp  \
 ./mpi/mpi-cmaes.cpp \
 ./mpi/interfacepastix.cpp \
 ./mpi/hypre_FreeFem.cpp \
-./mpi/ffsuperludistoption-1.hpp \
 ./mpi/generaldefs.h \
 ./mpi/real_SuperLU_DIST_FreeFem.cpp \
 ./mpi/MPICG.cpp \
@@ -157,15 +156,14 @@ EXTRA_DIST=   \
 ./seq/exactpartition.cpp \
 ./seq/fflapack.cpp \
 ./Makefile.am \
-./hpddm \
-./hpddm/SLEPc-code.hpp \
-./hpddm/PETSc.cpp \
-./hpddm/PETSc-code.hpp \
-./hpddm/Makefile.am \
-./hpddm/PETSc-complex.cpp \
-./hpddm/PETSc.hpp \
-./hpddm/hpddm.cpp \
-./hpddm/hpddm_substructuring.cpp \
-./hpddm/SLEPc-complex.cpp \
-./hpddm/common.hpp \
-./hpddm/SLEPc.cpp
+./mpi/SLEPc-code.hpp \
+./mpi/PETSc.cpp \
+./mpi/PETSc-code.hpp \
+./mpi/Makefile.am \
+./mpi/PETSc-complex.cpp \
+./mpi/PETSc.hpp \
+./mpi/hpddm.cpp \
+./mpi/hpddm_substructuring.cpp \
+./mpi/SLEPc-complex.cpp \
+./mpi/common.hpp \
+./mpi/SLEPc.cpp
