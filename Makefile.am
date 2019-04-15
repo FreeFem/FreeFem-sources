@@ -156,7 +156,7 @@ idp/getARGV.idp \
 idp/ffddm_functions.idp \
 idp/macro_ddm_substructuring.idp \
 idp/ffddm_parameters.idp \
-idp/macro_ddm.idp 
+idp/macro_ddm.idp
 
 
 
@@ -288,14 +288,10 @@ install-exec-local:: bin/script/PostInstall.sh
 	test `uname` != Darwin ||  echo $(bindir) >$(DESTDIR)/etc/paths.d/FreeFem++
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)/usr/local/bin
 	test `uname` != Darwin || ( $(MAKE) FreeFem++.app.tgz  ; test -d $(DESTDIR)/Applications ||  mkdir $(DESTDIR)/Applications ; tar zxf FreeFem++.app.tgz  -C $(DESTDIR)/Applications )
-<<<<<<< HEAD
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/idp
 	cd idp; for i in *.idp; do \
 	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/idp; fi; done
-	
-=======
 
->>>>>>> master
 bin/script/PostInstall.sh:./Makefile bin/script/PostInstall.m4
 	m4 bin/script/PostInstall.m4 "-DFF__FVER=$(PACKAGE_VERSION)" "-DFF_BINDIR=$(bindir)" "-DFF__DATADIR=$(pkgdatadir)" > bin/script/PostInstall.sh
 	chmod a+x bin/script/PostInstall.sh
