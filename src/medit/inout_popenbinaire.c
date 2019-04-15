@@ -130,7 +130,7 @@ int loadMesh_popen_bin (pMesh mesh) {
 	pHexa ph;
 	double d, dp1, dp2, dp3, dn[3];
 	float *n, fp1, fp2, fp3;
-	int i, ia, ib, inm, ref, is, k, disc, nn, nt, nq;
+	int i, ia, ib, inm, ref, is=0, k, disc=0, nn=0, nt=0, nq=0;
 	char *ptr, data[256];
 	/* Rajout popen*/
 	char *tictac;
@@ -233,7 +233,7 @@ int loadMesh_popen_bin (pMesh mesh) {
 				ppt->tag = M_UNUSED;
 			}
 
-			ppt = &mesh->point[k];
+			// ppt = &mesh->point[k]; //Risk of overflow
 
 			break;
 		case GmfTriangles:
@@ -248,8 +248,6 @@ int loadMesh_popen_bin (pMesh mesh) {
 
 			mesh->tria = (pTriangle)M_calloc(mesh->nt + 1, sizeof(Triangle), "zaldy1.tria");
 			assert(mesh->tria);
-
-			disc = 0;
 
 			for (k = 1; k <= mesh->nt; k++) {
 				pt = &mesh->tria[k];
