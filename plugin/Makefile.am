@@ -9,7 +9,6 @@ EXTRA_DIST=   \
 ./mpi/generaldefs.h \
 ./mpi/real_SuperLU_DIST_FreeFem.cpp \
 ./mpi/MPICG.cpp \
-./mpi/dmatrix.hpp \
 ./mpi/Makefile.am \
 ./mpi/removeDOF.cpp \
 ./mpi/complex_SuperLU_DIST_FreeFem.cpp \
@@ -22,7 +21,6 @@ EXTRA_DIST=   \
 ./mpi/MUMPS_FreeFem.cpp \
 ./mpi/real_pastix_FreeFem.cpp \
 ./mpi/MUMPS.cpp \
-./mpi/utility.cpp \
 ./ffddm \
 ./ffddm/marmousi.cpp \
 ./ffddm/overthrust.cpp \
@@ -90,7 +88,6 @@ EXTRA_DIST=   \
 ./seq/ff-NLopt.cpp \
 ./seq/clapack.h \
 ./seq/Element_P3dc.cpp \
-./seq/dmatrix.hpp \
 ./seq/dfft.cpp \
 ./seq/Element_P3.cpp \
 ./seq/libff-mmap-semaphore.h \
@@ -159,10 +156,6 @@ EXTRA_DIST=   \
 ./seq/myfunction2.cpp \
 ./seq/exactpartition.cpp \
 ./seq/fflapack.cpp \
-./tools-edp \
-./tools-edp/CC.idp \
-./tools-edp/RT2-ff.edp \
-./tools-edp/build-Pk.edp \
 ./Makefile.am \
 ./hpddm \
 ./hpddm/SLEPc-code.hpp \

@@ -41,7 +41,6 @@ using namespace std;
 #include "ff++.hpp"
 
 
-#include "dmatrix.hpp"
 #include <dmumps_c.h>
 #include <zmumps_c.h>
 
