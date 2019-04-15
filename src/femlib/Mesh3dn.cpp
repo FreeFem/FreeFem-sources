@@ -404,7 +404,7 @@ namespace Fem2D
      
   Mesh3::Mesh3(const  Serialize &serialized)
     :GenericMesh<Tet,Triangle3,Vertex3> (serialized),
-    meshS(0)
+    meshS(0),typeMesh3(1)
   {
     BuildBound();
     if(verbosity>1)
