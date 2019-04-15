@@ -228,16 +228,13 @@ void drawEllipsoid (pScene sc, pMesh mesh, int typel, int k) {
 }
 
 void glCircle (float radius) {
-	float ang, ux, uy;
-
-	ux = 0.0f;
-	uy = radius;
+	float ang;
 
 	glBegin(GL_LINE_STRIP);
 
 	for (ang = 0.0f; ang <= 2 * M_PI + 0.2; ang += 0.2) {
-		ux = radius * (float)sin((double)ang);
-		uy = radius * (float)cos((double)ang);
+		float ux = radius * (float)sin((double)ang);
+		float uy = radius * (float)cos((double)ang);
 		glVertex2f(ux, uy);
 	}
 
