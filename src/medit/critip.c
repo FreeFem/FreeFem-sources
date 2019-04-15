@@ -66,7 +66,7 @@ GLuint listCritPoint (pScene sc, pMesh mesh) {
 	Saddle sad[MAXPS];
 	GLuint dlist;
 	double aire, ux, uy, vx, vy, dd, cb0[3], cb1[3], cb2[3], vv[3][2], bc[3];
-	double rgb[3], a0, a1, delta, rr1, rr2, aa, dmin;
+	double rgb[3], a0, a1, delta, rr1, rr2, aa; //dmin
 	float p[3];
 	int *adj, iadr, i, i1, i2, k, m, ncp, ps, ifilt;
 	ubyte typ, tag;
@@ -90,8 +90,8 @@ GLuint listCritPoint (pScene sc, pMesh mesh) {
 
 	glPointSize(4.0);
 
-	dmin = sc->dmax * EPS;
-	dmin *= dmin;
+	// dmin = sc->dmax * EPS;
+	// dmin *= dmin;
 	ifilt = 0;
 	hsv[0] = sc->iso.col[0];
 	hsvrgb(hsv, rgb);
