@@ -324,6 +324,7 @@ int parsop (pScene sc, pMesh mesh) {
 
 			for (k = 0; k < MAXISO; k++) {
 				ret = fscanf(in, "%f", &sc->iso.val[k]);
+				if (ret == EOF) printf("fscanf error\n");
 			}
 
 			if (sc->iso.val[MAXISO - 1] < sc->iso.val[0]) sc->iso.palette = 0;
@@ -337,6 +338,7 @@ int parsop (pScene sc, pMesh mesh) {
 			if (sc->par.coeff > 1.0f) sc->par.coeff = 1.0f;
 		} else if (!strcmp(key, "time")) {
 			ret = fscanf(in, "%f %f %f", &sc->par.maxtime, &sc->par.pertime, &sc->par.dt);
+			if (ret == EOF) printf("fscanf error\n");
 			if (!EatSpace(in)) {
 				fscanf(in, "%c", &ub);
 				sc->par.nbpart = max(atoi(&ub), 1);
