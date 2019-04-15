@@ -93,35 +93,36 @@ void dumpCube (pScene sc, pMesh mesh, pCube cube) {
 	tr = cube->cubetr->matrix;
 
 	out = fopen("tr.data", "w");
+	if (out) {
+		for (i = 0; i < 4; i++) {
+			fprintf(out, "%f %f %f %f\n", tr[i], tr[4 + i], tr[8 + i], tr[12 + i]);
+		}
 
-	for (i = 0; i < 4; i++) {
-		fprintf(out, "%f %f %f %f\n", tr[i], tr[4 + i], tr[8 + i], tr[12 + i]);
+		u[0] = cube->cmi[0] - mesh->xtra;
+		u[1] = cube->cmi[1] - mesh->ytra;
+		u[2] = cube->cmi[2] - mesh->ztra;
+		u[3] = 1.0;
+		/*printf("avant %f %f %f %f\n",u[0],u[1],u[2],u[3]);*/
+		transformPoint2(v, u, tr);
+		fprintf(out, "\n%f %f %f   %f\n",
+		        v[0] + mesh->xtra, v[1] + mesh->ytra, v[2] + mesh->ztra, v[3]);
+
+		u[0] = cube->cma[0] - mesh->xtra;
+		u[1] = cube->cma[1] - mesh->ytra;
+		u[2] = cube->cma[2] - mesh->ztra;
+		/*printf("avant %f %f %f %f\n",u[0],u[1],u[2],u[3]);*/
+		transformPoint2(v, u, tr);
+		fprintf(out, "%f %f %f   %f\n",
+		        v[0] + mesh->xtra, v[1] + mesh->ytra, v[2] + mesh->ztra, v[3]);
+
+		fprintf(out, "\n%f %f %f\n",
+		        cube->cubetr->tra[12], cube->cubetr->tra[13], cube->cubetr->tra[14]);
+
+		fprintf(out, "%f   %f %f %f\n",
+		        cube->cubetr->angle, cube->cubetr->axis[0], cube->cubetr->axis[1],
+		        cube->cubetr->axis[2]);
+		fclose(out);
 	}
-
-	u[0] = cube->cmi[0] - mesh->xtra;
-	u[1] = cube->cmi[1] - mesh->ytra;
-	u[2] = cube->cmi[2] - mesh->ztra;
-	u[3] = 1.0;
-	/*printf("avant %f %f %f %f\n",u[0],u[1],u[2],u[3]);*/
-	transformPoint2(v, u, tr);
-	fprintf(out, "\n%f %f %f   %f\n",
-	        v[0] + mesh->xtra, v[1] + mesh->ytra, v[2] + mesh->ztra, v[3]);
-
-	u[0] = cube->cma[0] - mesh->xtra;
-	u[1] = cube->cma[1] - mesh->ytra;
-	u[2] = cube->cma[2] - mesh->ztra;
-	/*printf("avant %f %f %f %f\n",u[0],u[1],u[2],u[3]);*/
-	transformPoint2(v, u, tr);
-	fprintf(out, "%f %f %f   %f\n",
-	        v[0] + mesh->xtra, v[1] + mesh->ytra, v[2] + mesh->ztra, v[3]);
-
-	fprintf(out, "\n%f %f %f\n",
-	        cube->cubetr->tra[12], cube->cubetr->tra[13], cube->cubetr->tra[14]);
-
-	fprintf(out, "%f   %f %f %f\n",
-	        cube->cubetr->angle, cube->cubetr->axis[0], cube->cubetr->axis[1],
-	        cube->cubetr->axis[2]);
-	fclose(out);
 }
 
 void resetCube (pScene sc, pCube cube, pMesh mesh) {
