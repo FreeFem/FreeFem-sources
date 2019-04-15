@@ -350,7 +350,7 @@ int loadMesh_popen (pMesh mesh) {
 	pHexa ph;
 	double d, dp1, dp2, dp3, dn[3];
 	float *n, fp1, fp2, fp3;
-	int i, ia, ib, inm, ref, is, k, disc, nn, nt, nq;
+	int i, ia, ib, inm, ref, is=0, k, disc=0, nn=0, nt=0, nq=0;
 	char *ptr, data[256];
 	/* Rajout popen*/
 	char *natureread;
@@ -496,7 +496,7 @@ int loadMesh_popen (pMesh mesh) {
 			/* read the first triangle */
 
 			k = 1;
-			disc = 0;
+			// disc = 0;
 			pt = &mesh->tria[k];
 			getline_popen_firstelem(3, pt->v, &ref);
 
@@ -953,7 +953,7 @@ int loadMesh_popen (pMesh mesh) {
 			mesh->extra->nv = (int *)M_calloc(mesh->np + 1, sizeof(int), "inmesh");
 			assert(mesh->extra->nv);
 
-			k = 1;
+			// k = 1;
 			getline_popen_firstelemnoref(natureread, 2, vatn);
 			nn = vatn[0];
 			is = vatn[1];
@@ -984,7 +984,7 @@ int loadMesh_popen (pMesh mesh) {
 			mesh->extra->nt = (int *)M_calloc(3 * mesh->nt + 1, sizeof(int), "inmesh");
 			assert(mesh->extra->nt);
 
-			k = 1;
+			// k = 1;
 			getline_popen_elemnoref(natureread, 3, tvatn);
 			// GmfGetLin(inm,GmfNormalAtTriangleVertices,&nt,&is,&nn);
 			tvatn[0] = nt;
@@ -1022,7 +1022,7 @@ int loadMesh_popen (pMesh mesh) {
 			mesh->extra->nq = (int *)M_calloc(4 * mesh->nq + 1, sizeof(int), "inmesh");
 			assert(mesh->extra->nq);
 
-			k = 1;
+			// k = 1;
 			getline_popen_firstelemnoref(natureread, 3, tvatn);
 			tvatn[0] = nq;
 			tvatn[1] = is;
@@ -1061,7 +1061,7 @@ int loadMesh_popen (pMesh mesh) {
 			mesh->extra->t = (float *)M_calloc(3 * mesh->ntg + 1, sizeof(float), "inmesh");
 			assert(mesh->extra->t);
 
-			k = 1;
+			// k = 1;
 
 			for (k = 1; k <= mesh->ntg; k++) {
 				n = &mesh->extra->t[3 * (k - 1) + 1];
@@ -1093,7 +1093,7 @@ int loadMesh_popen (pMesh mesh) {
 			mesh->extra->tv = (int *)M_calloc(mesh->np + 1, sizeof(int), "inmesh");
 			assert(mesh->extra->tv);
 
-			k = 1;
+			// k = 1;
 			getline_popen_firstelemnoref(natureread, 2, vatn);
 			nn = vatn[0];
 			is = vatn[1];
@@ -1126,7 +1126,7 @@ int loadMesh_popen (pMesh mesh) {
 			mesh->extra->te = (int *)M_calloc(2 * mesh->na + 1, sizeof(int), "inmesh");
 			assert(mesh->extra->te);
 
-			k = 1;
+			// k = 1;
 			getline_popen_firstelemnoref(natureread, 3, tvatn);
 			nt = tvatn[0];
 			is = tvatn[1];
@@ -1349,7 +1349,7 @@ int loadSol_popen (pMesh mesh, char *filename, int numsol) {
 
 	while (!feof(stdin)) {
 		char *tictac;
-		
+
 		// fprintf(stdout,"data= %s\n",data);
 		fgets(data, 256, stdin);
 		tictac = strtok(data, " \n");
