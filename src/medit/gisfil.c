@@ -97,6 +97,7 @@ int loadGIS (pMesh mesh) {
 	if (ret != 9) {
 		fprintf(stderr, "  ## Error loading terrain.\n");
 		free(mesh);
+		fclose(fp);
 		return (0);
 	}
 
@@ -140,7 +141,7 @@ int loadGIS (pMesh mesh) {
 		}
 	} else {
 		int ni;
-		
+
 		te = (float *)malloc(sx * sizeof(float));
 		if (!te) exit(1);
 
@@ -158,6 +159,7 @@ int loadGIS (pMesh mesh) {
 				free(mesh->point);
 				free(mesh);
 				free(te);
+				fclose(fp);
 				return (0);
 			}
 
