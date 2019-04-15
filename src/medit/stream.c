@@ -978,6 +978,7 @@ int parseStream (pScene sc, pMesh mesh) {
 			if (mesh->dim == 3)
 				for (k = 1; k <= 3 * st->nbstl; k += 3) {
 					ret = fscanf(in, "%f %f %f\n", &x, &y, &z);
+					if (ret == EOF) printf("scanf error\n");
 					printf("x %f %f %f\n", x, y, z);
 					st->listp[k] = x - mesh->xtra;
 					st->listp[k + 1] = y - mesh->ytra;
@@ -988,6 +989,7 @@ int parseStream (pScene sc, pMesh mesh) {
 			else
 				for (k = 1; k <= 2 * st->nbstl; k += 2) {
 					ret = fscanf(in, "%f %f\n", &x, &y);
+					if (ret == EOF) printf("scanf error\n");
 					st->listp[k] = x - mesh->xtra;
 					st->listp[k + 1] = y - mesh->ytra;
 				}
@@ -1673,7 +1675,7 @@ int listTriaStream (pScene sc, pMesh mesh, float *pp) {
 		glLineWidth(1.0);
 		glEndList();
 		fprintf(stdout, ": %d (%d, %.2f) / %d lines", nbar, nbp, (float)nbp / nbar, k / 3);
-		fprintf(stdout, " %6.2Lf sec.\n", difftime(clock(), ct));
+		fprintf(stdout, " %6.2f sec.\n", difftime(clock(), ct));
 		if (sc->par.maxtime < FLT_MAX) {
 			fprintf(out, "%8.2f  %f %f\n",
 			        sc->par.cumtim, p[0] + mesh->xtra, p[1] + mesh->ytra);
@@ -1893,6 +1895,7 @@ pStream createStream (pScene sc, pMesh mesh) {
 
 	sc->slist = (GLuint *)calloc(MAX_LST, sizeof(GLuint));
 	if (!sc->slist) {
+		free(st->listp);
 		free(st);
 		return (0);
 	}
@@ -1941,7 +1944,7 @@ int streamIsoPoint (pScene sc, pMesh mesh) {
 	st->nbstl = 0;
 	if (mesh->dim == 3) {
 		int k;
-		
+
 		if (!mesh->ntet) return (0);
 
 		nbp = 0;
