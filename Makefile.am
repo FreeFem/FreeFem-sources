@@ -39,7 +39,6 @@ bin/cleanregen.sh \
 bin/copysharedlibs.sh \
 bin/script/clean_all_installed_ffpp.sh \
 bin/script/remove-opemmpi-1.6.5-and-gfortran.sh \
-bin/script/PostInstall.sh \
 bin/script/PostInstall.m4 \
 bin/regtests.sh \
 bin/uninstall-ff++ \
@@ -157,7 +156,7 @@ idp/getARGV.idp \
 idp/ffddm_functions.idp \
 idp/macro_ddm_substructuring.idp \
 idp/ffddm_parameters.idp \
-idp/macro_ddm.idp 
+idp/macro_ddm.idp
 
 
 
@@ -292,7 +291,7 @@ install-exec-local:: bin/script/PostInstall.sh
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/idp
 	cd idp; for i in *.idp; do \
 	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/idp; fi; done
-	
+
 bin/script/PostInstall.sh:./Makefile bin/script/PostInstall.m4
 	m4 bin/script/PostInstall.m4 "-DFF__FVER=$(PACKAGE_VERSION)" "-DFF_BINDIR=$(bindir)" "-DFF__DATADIR=$(pkgdatadir)" > bin/script/PostInstall.sh
 	chmod a+x bin/script/PostInstall.sh
