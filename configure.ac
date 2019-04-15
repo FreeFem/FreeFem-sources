@@ -471,7 +471,6 @@ curdir=`pwd`
 # Configure options
 # -----------------
 
-echo $ac_configure_args > configure.param
 echo "$PATH" > config.path
 eval for i in $ac_configure_args\; do echo \$i\; done | sed -e "s/$/'/" -e "s/^/'/"   > config.param
 
@@ -995,7 +994,7 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		        AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetsc)
                 ff_SCOTCH_INCLUDE=$ff_PTSCOTCH_INCLUDE
-                ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*pt@<:@^ @:>@*//g'`
+                ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*ptscotch@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*ptes@<:@^ @:>@*//g'`
                 if test -n "$ff_SCOTCH_LIB"; then
                     ff_scotch_ok=yes;
                     AC_FF_ADDWHERELIB(scotch,$ff_SCOTCH_LIB,$ff_SCOTCH_INCLUDE)
@@ -1048,7 +1047,7 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
             AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetscc)
             ff_SCOTCH_INCLUDE=$ff_PTSCOTCH_INCLUDE
-            ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*pt@<:@^ @:>@*//g'`
+            ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*ptscotch@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*ptes@<:@^ @:>@*//g'`
             if test -n "$ff_SCOTCH_LIB"; then
                 ff_scotch_ok=yes;
                 AC_FF_ADDWHERELIB(scotch,$ff_SCOTCH_LIB,$ff_SCOTCH_INCLUDE)
