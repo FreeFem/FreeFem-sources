@@ -165,13 +165,13 @@ $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 		--with-ssl=0 ---with-x=0 --with-fortran-bindings=0 \
 	  $(WITH_MPI_DIR) $(PETSC_ADDCONF)  \
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
-		--with-scalapack-dir=real \
-		--with-metis-dir=real \
-		--with-ptscotch-dir=real \
+		--with-scalapack-dir=$(DIR_INSTALL_REAL) \
+		--with-metis-dir=$(DIR_INSTALL_REAL) \
+		--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
 		--with-suitesparse-include='$(SUITESPARSE_INCLUDE)'  --with-suitesparse-lib='$(SUITESPARSE_LIB)' \
-		--with-mumps-dir=real \
-		--with-parmetis-dir=real \
-		--with-fftw-dir=real \
+		--with-mumps-dir=$(DIR_INSTALL_REAL) \
+		--with-parmetis-dir=$(DIR_INSTALL_REAL) \
+		--with-fftw-dir=$(DIR_INSTALL_REAL) \
 		PETSC_ARCH=ff-complex
 	test -f $(SRCDIR)/ff-complex/lib/petsc/conf/petscvariables
 	touch $@
