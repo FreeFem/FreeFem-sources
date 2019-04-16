@@ -2049,7 +2049,6 @@ m4_map([AC_FF_WHERELIB],[
 	[[fftw3],[-lfftw3],[${inc_usr_include}fftw3.h],[]],
 	[[superlu_dist],[-lsuperlu-dist],[${inc_usr_include}superlu-dist/superlu_defs.h],[]],
 	[[superlu],[-lsuperlu],[${inc_usr_include}superlu/superlu_enum_consts.h],[]],
-	[[superlu4],[-lsuperlu4],[${inc_usr_include}superlu4/superlu_enum_consts.h],[]],
         [[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
         [[scalapack],[-lscalapack$ff_with_mpi],[]],
         [[scotch],[-lscotch -lscotcherr],[scotch.h]],
@@ -2085,7 +2084,7 @@ TOOL_DISABLE_NO(parms,parms_FreeFem.$DYLIB_SUFFIX)
 
 TOOL_DISABLE_NO(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
 TOOL_DISABLE(scotch,scotch.$DYLIB_SUFFIX)
-TOOL_DISABLE(superlu4,SuperLu.$DYLIB_SUFFIX,superlu)
+TOOL_DISABLE(superlu,SuperLu.$DYLIB_SUFFIX)
 TOOL_DISABLE_NO(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
 TOOL_DISABLE(umfpack,UMFPACK64.$DYLIB_SUFFIX)
 TOOL_DISABLE(yams,freeyams.$DYLIB_SUFFIX)
