@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <math.h>
 #include "medit.h"
@@ -32,7 +35,7 @@ static float ident[16] = {
 
 void setPersp (pScene sc, pPersp p, int pmode) {
 	float tgalpha, deltax, deltay, alphax, alphay, alpha, beta;
-	float /*rapx, */rapy, Deltax, Deltay, yy;
+	float rapy, Deltax, Deltay, yy;
 
 	/* defalut */
 	Deltax = sc->par.xs;
@@ -57,7 +60,6 @@ void setPersp (pScene sc, pPersp p, int pmode) {
 
 	/* new fovy */
 	tgalpha = tan(p->fovy * DTOR);
-	/*rapx = fabs(p->rubfx - p->rubix) / (float)sc->par.xs;*/
 	rapy = fabs(p->rubfy - p->rubiy) / (float)sc->par.ys;
 
 	if (pmode == 1)

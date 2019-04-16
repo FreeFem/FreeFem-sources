@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -250,7 +253,6 @@ int createParticle (pScene sc, pMesh mesh) {
 	if (sc->par.nbpart >= MAX_PRT)
 		sc->par.nbpart = MAX_PRT;
 
-	// ++base;
 	l = 1;
 	nbp = 0;
 
@@ -392,7 +394,6 @@ int advectParticle (pScene sc, pMesh mesh) {
 		pp->cur = 1;
 	}
 
-	// ++base;
 	l = 1;
 
 	for (k = 1; k <= st->nbstl; k++) {
@@ -435,3 +436,7 @@ int advectParticle (pScene sc, pMesh mesh) {
 
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

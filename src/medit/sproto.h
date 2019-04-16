@@ -14,15 +14,18 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
 
-#ifndef SPROTO_H_
-#define SPROTO_H_
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifndef _SPROTO_H_
+#define _SPROTO_H_
 
 /* animat.c */
 int loadNextMesh(pMesh, int, int);
@@ -203,6 +206,7 @@ void iniopt(pScene, pMesh);
 int parsop(pScene, pMesh);
 
 /* particle.c */
+int advectParticle (pScene, pMesh);
 int createParticle(pScene, pMesh);
 
 /* path.c */
@@ -323,4 +327,8 @@ void unlinkView (pScene sc1);
 int zaldy1 (pMesh mesh);
 int zaldy2 (pMesh mesh);
 
-#endif //SPROTO_H_
+#endif /* _SPROTO_H_ */
+
+#ifdef __cplusplus
+}
+#endif

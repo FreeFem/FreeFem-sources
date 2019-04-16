@@ -14,12 +14,11 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
 
 #ifdef __cplusplus
 extern "C" {
@@ -171,20 +170,11 @@ void writeEPSRow (FILE *out, char key, ubyte *buffer, int size, ubyte bckbyt) {
 
 		for (k = 0; k < 3 * size; k += 3) {
 			ubyte bbyte;
-			
+
 			bbyte = (ubyte)(0.30 * buffer[k] + 0.59 * buffer[k + 1]
 			                + 0.11 * buffer[k + 2] + 0.5);
 			if (bbyte == bckbyt) byte |= (1 << (7 - c));
 
-			/*
-			 * if ( bbyte > 253 )  byte |= (1 << (7-c));
-			 *
-			 * if ( bbyte && bbyte != 255 )  {
-			 * printf("buffer %d %d %d\n",buffer[k],buffer[k+1],buffer[k+2]);
-			 * printf("bbyte  %d  byte %d\n",bbyte,byte);
-			 * exit(1);
-			 * }
-			 */
 			if (++c == 8) {
 				fprintf(out, "%.2x", byte);
 				if (++l == 36) {

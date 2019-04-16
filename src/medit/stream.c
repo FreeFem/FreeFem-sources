@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -49,7 +52,6 @@ int locateTetra (pMesh mesh, int nsdep, int base, float *p, double *cb) {
 	it = 0;
 	nsfin = nsdep;
 
-	/*  printf("locateTetra: searching for %f %f %f\n",p[0],p[1],p[2]);*/
 	do {
 		pTetra pt;
 		pPoint p0;
@@ -196,14 +198,11 @@ int inSubTetra (pPoint pt[4], float *p, double *cb) {
 }
 
 int locateHexa (pMesh mesh, int nsdep, int base, float *p, double *cb, pPoint pt[4]) {
-	/*double bx, by, bz, cx, cy, cz, dx, dy, dz, vx, vy, vz, apx, apy, apz;
-	double epsra, vol1, vol2, vol3, vol4, dd;*/
 	int *adj, it, nsfin;
 
 	it = 0;
 	nsfin = nsdep;
 
-	/*printf("locateHexa: searching for %f %f %f\n",p[0],p[1],p[2]);*/
 	do {
 		pHexa ph;
 		int iadr, in;
@@ -211,16 +210,13 @@ int locateHexa (pMesh mesh, int nsdep, int base, float *p, double *cb, pPoint pt
 		if (!nsfin) return (0);
 
 		ph = &mesh->hexa[nsfin];
-/*printf("\nnsfin %d  base %d  mark %d\n",nsfin,base,ph->mark);*/
 		if (!ph->v[0] || ph->mark == base) return (0);
 
 		ph->mark = base;
 		iadr = 6 * (nsfin - 1) + 1;
 		adj = &mesh->adja[iadr];
-/*printf("adj %d %d %d %d %d %d\n",adj[0],adj[1],adj[2],adj[3],adj[4],adj[5]);*/
 
 		/* tetra1: 0,2,3,7 : 3 external faces */
-/*printf("tet1: %d %d %d %d\n",ph->v[0],ph->v[2],ph->v[3],ph->v[7]);*/
 		pt[0] = &mesh->point[ph->v[0]];
 		pt[1] = &mesh->point[ph->v[2]];
 		pt[2] = &mesh->point[ph->v[3]];
@@ -338,7 +334,6 @@ int locateTria (pMesh mesh, int nsdep, int base, float *p, double *cb) {
 	it = 0;
 	nsfin = nsdep;
 
-	/*printf("locateTria: searching for %f %f\n",p[0],p[1]);*/
 	do {
 		pTriangle pt;
 		double ax, ay, bx, by, cx, cy;
@@ -849,7 +844,7 @@ void addPoint (pScene sc, Stream *st, float *p, ubyte color) {
 
 int nxtPoint3D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	pTetra pt;
-	double /*norm, */h6, cb[4], v1[3], v2[3], v3[3];
+	double h6, cb[4], v1[3], v2[3], v3[3];
 	float xp1[3], xp2[3], xp3[3];
 	int k;
 
@@ -861,7 +856,7 @@ int nxtPoint3D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	k = locateTetra(mesh, nsdep, ++mesh->mark, xp1, cb);
 	if (!k) return (0);
 
-	/*norm = */field3DInterp(mesh, k, cb, v1);
+	field3DInterp(mesh, k, cb, v1);
 	pt = &mesh->tetra[k];
 	pt->cpt--;
 
@@ -872,7 +867,7 @@ int nxtPoint3D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	k = locateTetra(mesh, k, ++mesh->mark, xp2, cb);
 	if (!k) return (0);
 
-	/*norm = */field3DInterp(mesh, k, cb, v2);
+	field3DInterp(mesh, k, cb, v2);
 	pt = &mesh->tetra[k];
 	pt->cpt--;
 
@@ -883,7 +878,7 @@ int nxtPoint3D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	k = locateTetra(mesh, k, ++mesh->mark, xp3, cb);
 	if (!k) return (0);
 
-	/*norm = */field3DInterp(mesh, k, cb, v3);
+	field3DInterp(mesh, k, cb, v3);
 	pt = &mesh->tetra[k];
 	pt->cpt--;
 
@@ -897,7 +892,7 @@ int nxtPoint3D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 
 int nxtPoint2D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	pTriangle pt;
-	double /*norm, */h6, cb[3], v1[3], v2[3], v3[3];
+	double h6, cb[3], v1[3], v2[3], v3[3];
 	float xp1[3], xp2[3], xp3[3];
 	int k;
 
@@ -908,7 +903,7 @@ int nxtPoint2D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	k = locateTria(mesh, nsdep, ++mesh->mark, xp1, cb);
 	if (!k) return (0);
 
-	/*norm = */field2DInterp(mesh, k, cb, v1);
+	field2DInterp(mesh, k, cb, v1);
 	pt = &mesh->tria[k];
 	pt->cpt--;
 
@@ -918,7 +913,7 @@ int nxtPoint2D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	k = locateTria(mesh, k, ++mesh->mark, xp2, cb);
 	if (!k) return (0);
 
-	/*norm = */field2DInterp(mesh, k, cb, v2);
+	field2DInterp(mesh, k, cb, v2);
 	pt = &mesh->tria[k];
 	pt->cpt--;
 
@@ -928,7 +923,7 @@ int nxtPoint2D (pMesh mesh, int nsdep, float *p, float step, double *v) {
 	k = locateTria(mesh, k, ++mesh->mark, xp3, cb);
 	if (!k) return (0);
 
-	/*norm = */field2DInterp(mesh, k, cb, v3);
+	field2DInterp(mesh, k, cb, v3);
 	pt = &mesh->tria[k];
 	pt->cpt--;
 
@@ -1404,7 +1399,7 @@ int listHexaStream (pScene sc, pMesh mesh, float *pp, int squiet) {
 		if (st->norm < EPS * step) break;
 
 		step = min(step, st->norm);
-		if (step == 0.0f) break;/*step = 1.0e-06*sc->dmax;*/
+		if (step == 0.0f) break;
 
 		nbp += filterPoint(sc, st, p, 0);
 	} while (nbp < maxpts);
@@ -1473,7 +1468,7 @@ int listHexaStream (pScene sc, pMesh mesh, float *pp, int squiet) {
 		if (st->norm < EPS * step) break;
 
 		step = min(step, st->norm);
-		if (step == 0.0f) break;/*step = 1.e-06 * sc->dmax;*/
+		if (step == 0.0f) break;
 
 		nbp += filterPoint(sc, st, p, 0);
 	} while (nbp < maxpts);
@@ -1745,7 +1740,6 @@ int listTriaStream (pScene sc, pMesh mesh, float *pp) {
 		return (0);
 	}
 
-	/*if ( ddebug ) */
 	if (nbar)
 		fprintf(stdout, ": %d (%d, %.2f) / %d lines", nbar, nbp, (float)nbp / nbar, k / 3);
 
@@ -1876,7 +1870,6 @@ pStream createStream (pScene sc, pMesh mesh) {
 	st = (pStream)calloc(1, sizeof(struct sstream));
 	if (!st) return (0);
 
-	/*st->typtrack = Euler;*/
 	st->typtrack = RK4;
 	st->stnp = 0;
 	st->nbstl = 0;
@@ -1980,7 +1973,6 @@ int streamRefTria (pScene sc, pMesh mesh) {
 	pt = &mesh->tria[refitem];
 
 	nmat = matRef(sc, pt->ref);
-	/*nmat = !pt->ref ? DEFAULT_MAT : 1+(pt->ref-1)%(sc->par.nbmat-1);*/
 	pm = &sc->material[nmat];
 	k = pm->depmat[LTria];
 	if (!k || pm->flag) return (0);
@@ -2045,7 +2037,6 @@ int streamRefQuad (pScene sc, pMesh mesh) {
 	pq = &mesh->quad[refitem];
 
 	nmat = matRef(sc, pq->ref);
-	/*nmat = !pt->ref ? DEFAULT_MAT : 1+(pt->ref-1)%(sc->par.nbmat-1);*/
 	pm = &sc->material[nmat];
 	k = pm->depmat[LQuad];
 	if (!k || pm->flag) return (0);
@@ -2095,3 +2086,7 @@ int streamRefQuad (pScene sc, pMesh mesh) {
 
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

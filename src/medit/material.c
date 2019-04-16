@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdarg.h>
 #include "medit.h"
@@ -203,7 +206,7 @@ int matRef (pScene sc, int ref) {
 
 	for (m = 1; m < sc->par.nbmat; m++) {
 		pMaterial pm;
-		
+
 		pm = &sc->material[m];
 		if (pm->ref == ref) return (m);
 	}
@@ -534,7 +537,6 @@ void matKeyboard (unsigned char key, int x, int y) {
 
 		matwin = 0;
 		glutHideWindow();
-		/*glutPostRedisplay();*/
 		glutSetWindow(main_scene->idwin);
 		doLists(main_scene, cv.mesh[main_scene->idmesh]);
 		glutPostRedisplay();
@@ -580,6 +582,10 @@ void matEdit (pScene sc) {
 	glutSetWindow(matwin);
 	cellInit(refmat);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #ifdef __cplusplus
 }

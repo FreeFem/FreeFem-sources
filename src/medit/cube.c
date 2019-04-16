@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -102,7 +105,6 @@ void dumpCube (pScene sc, pMesh mesh, pCube cube) {
 		u[1] = cube->cmi[1] - mesh->ytra;
 		u[2] = cube->cmi[2] - mesh->ztra;
 		u[3] = 1.0;
-		/*printf("avant %f %f %f %f\n",u[0],u[1],u[2],u[3]);*/
 		transformPoint2(v, u, tr);
 		fprintf(out, "\n%f %f %f   %f\n",
 		        v[0] + mesh->xtra, v[1] + mesh->ytra, v[2] + mesh->ztra, v[3]);
@@ -110,7 +112,6 @@ void dumpCube (pScene sc, pMesh mesh, pCube cube) {
 		u[0] = cube->cma[0] - mesh->xtra;
 		u[1] = cube->cma[1] - mesh->ytra;
 		u[2] = cube->cma[2] - mesh->ztra;
-		/*printf("avant %f %f %f %f\n",u[0],u[1],u[2],u[3]);*/
 		transformPoint2(v, u, tr);
 		fprintf(out, "%f %f %f   %f\n",
 		        v[0] + mesh->xtra, v[1] + mesh->ytra, v[2] + mesh->ztra, v[3]);
@@ -149,3 +150,7 @@ pCube createCube (pScene sc, pMesh mesh) {
 	resetCube(sc, cube, mesh);
 	return (cube);
 }
+
+#ifdef __cplusplus
+}
+#endif

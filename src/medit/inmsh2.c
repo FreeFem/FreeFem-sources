@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -52,16 +55,12 @@ int inmsh2 (pMesh mesh) {
 	if (!quiet) fprintf(stdout, "  Reading %s.{points,.faces}\n", mesh->name);
 
 	/* get number of elements */
-	/*fgets(data,255,inp);
-	 * sscanf(data,"%d",&mesh->np);*/
 	fscanf(inp, "%d", &mesh->np);
 	EatLine(inp);
 
-	/*fgets(data,255,inf);
-	 * sscanf(data,"%d",&mesh->ne);*/
 	fscanf(inf, "%d", &mesh->ne);
 	EatLine(inf);
-	if (!mesh->np) {/*|| (mesh->dim == 3 && !mesh->ne) ) {*/
+	if (!mesh->np) {
 		fprintf(stdout, "  ## No vertex.\n");
 		fclose(inp);
 		fclose(inf);
@@ -87,12 +86,11 @@ int inmsh2 (pMesh mesh) {
 			mesh->nq++;
 		}
 
-		/*fgets(data,80,inf);*/
 		EatLine(inf);
 	}
 
 	/* check if vertices and elements found */
-	if (!mesh->np) {/*|| mesh->ne == 0 ) {*/
+	if (!mesh->np) {
 		fclose(inp);
 		fclose(inf);
 		return (0);
@@ -130,11 +128,6 @@ int inmsh2 (pMesh mesh) {
 		if (ptr = strpbrk(sz, "dD"))
 			*ptr = 'E';
 
-		/*
-		 * sscanf(sx,"%f",&ppt->c[0]);
-		 * sscanf(sy,"%f",&ppt->c[1]);
-		 * sscanf(sz,"%f",&ppt->c[2]);
-		 */
 		ppt->c[0] = atof(sx);
 		ppt->c[1] = atof(sy);
 		ppt->c[2] = atof(sz);
@@ -157,8 +150,6 @@ int inmsh2 (pMesh mesh) {
 
 	/* read mesh faces */
 	rewind(inf);
-	/*fgets(data,255,inf);
-	 * sscanf(data,"%d",&mesh->ne);*/
 	fscanf(inf, "%d", &mesh->ne);
 	EatLine(inf);
 	mesh->nt = 0;
@@ -229,3 +220,7 @@ int inmsh2 (pMesh mesh) {
 
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

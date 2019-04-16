@@ -14,16 +14,20 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
 
 #include "medit.h"
 #include "extern.h"
 #include "sproto.h"
+#include "eigenv.h"
 
 int EatLine (FILE *in) {
 	int k, c;
@@ -72,14 +76,12 @@ int bbfile (pMesh mesh) {
 
 	sprintf(data, "%s.bb", tmp);
 	in = fopen(data, "r");
-	//bigbb = 0;
 	if (!in) {
 		sprintf(data, "%s.pbb", tmp);
 		in = fopen(data, "r");
 	}
 
 	if (!in) {
-		//bigbb = 1;
 		sprintf(data, "%s.BB", tmp);
 		in = fopen(data, "r");
 		if (!in) {	/* hack FH pour le mac */
@@ -91,7 +93,6 @@ int bbfile (pMesh mesh) {
 	if (!in)
 		return (0);
 
-	/* if ( !quiet )  fprintf(stdout,"  Reading %s\n",data); */
 	i1 = i2 = i3 = -1;
 	/* read file format */
 	err = 0;
@@ -123,9 +124,7 @@ int bbfile (pMesh mesh) {
 		int nfield;
 
 		/* get only 1st field */
-		/* fscanf(in,"%d",&nfield);*/
 		nfield = i1;
-		/*fscanf(in,"%d",&mesh->nfield);*/
 		mesh->nfield = i2;
 		if (nfield > 1) {
 			nf += i3;
@@ -144,10 +143,6 @@ int bbfile (pMesh mesh) {
 		fscanf(in, "%d", &mesh->typage);
 		printf(" np= %d, type= %d\n", np, mesh->typage);
 	} else {
-		/* fscanf(in,"%d",&mesh->nfield);
-		 * fscanf(in,"%d",&np);*/
-		/* read file type */
-		/* fscanf(in,"%d",&mesh->typage);*/
 		mesh->nfield = i1;
 		np = i2;
 		mesh->typage = i3;
@@ -207,6 +202,7 @@ int bbfile (pMesh mesh) {
 			}
 		}
 	}
+
 	/* vector field */
 	else if (mesh->nfield == mesh->dim) {
 		if (ddebug) fprintf(stdout, "   vector field \n");
@@ -311,3 +307,7 @@ int bbfile (pMesh mesh) {
 	fclose(in);
 	return (np);
 }
+
+#ifdef __cplusplus
+}
+#endif

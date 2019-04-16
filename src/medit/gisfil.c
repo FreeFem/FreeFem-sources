@@ -14,18 +14,21 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
 #include "sproto.h"
 
-#define FLOAT_MAX 1.e20
+#define FLOAT_MAX (float)1.e20
 
 int loadGIS (pMesh mesh) {
 	pQuad pq;
@@ -235,3 +238,7 @@ int loadGIS (pMesh mesh) {
 	fclose(fp);
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

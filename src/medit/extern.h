@@ -20,12 +20,20 @@
 /* AUTHORS : Pascal Frey                                                    */
 /* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
 
-#ifndef __MEDIT
-#define __MEDIT
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifndef _EXTERN_H_
+#define _EXTERN_H_
 
 extern Canvas cv;
 extern ubyte ddebug, quiet, imprim, option, morphing, animate, saveimg, imgtype;
 extern int animdep, animfin;
 extern char *imgtyp [];
 
+#endif /* _EXTERN_H_ */
+
+#ifdef __cplusplus
+}
 #endif

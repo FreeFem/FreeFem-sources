@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -591,7 +594,6 @@ void keyTrajet (unsigned char key, int x, int y) {
 		break;
 	case 'S':	/* show all points */
 		sc->type ^= S_PATH;
-		/*if ( sc->path.tlist )  glDeleteLists(sc->path.tlist,1);*/
 		if (sc->type & S_PATH && !sc->path.tlist)
 			sc->path.tlist = pathList(sc);
 
@@ -693,7 +695,6 @@ void keyView (unsigned char key, int x, int y) {
 
 	sc = cv.scene[currentScene()];
 	mesh = cv.mesh[sc->idmesh];
-	/*glutSetMenu(vmenu);*/
 
 	switch (key) {
 	case 'R':
@@ -1003,8 +1004,6 @@ void keyFeature (unsigned char key, int x, int y) {
 	if (dolist == TRUE) {
 		doLists(sc, mesh);
 		if (sc->mode & S_MAP) doMapLists(sc, mesh, 1);
-
-		/*if ( sc->isotyp )        doIsoLists(sc,mesh,1);*/
 	}
 
 	if (post == TRUE) glutPostRedisplay();
@@ -1148,7 +1147,7 @@ void keyMetric (unsigned char key, int x, int y) {
 	case 'K':	/* elevation coeff */
 		fprintf(stdout, "elevation coeff (%.2f): ", altcoef);
 		fflush(stdout);
-		while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
+		while(fgetc(stdin)!=EOF);	/*fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems*/
 		fscanf(stdin, "%f", &altcoef);
 		if (altcoef == 0.0) sc->mode |= ~S_ALTITUDE;
 
@@ -1307,7 +1306,6 @@ int createMenus (pScene sc, pMesh mesh) {
 	glutAddMenuEntry("[Alt-p] Paste", 'P');
 	glutAddMenuEntry("[Alt+l] Link", 'L');
 	glutAddMenuEntry("[Alt+u] Unlink", 'U');
-	/*glutAddMenuEntry("[Alt+d] Duplicate",'D');*/
 
 	/* animation menu */
 	amenu = glutCreateMenu(menuAnim);
@@ -1324,7 +1322,7 @@ int createMenus (pScene sc, pMesh mesh) {
 		glutAddMenuEntry("Toggle AutoReverse", 'R');
 	}
 
-	/* trajectoire menu */
+	/* trajectory menu */
 	if (mesh->dim == 3 || mesh->nbb) {
 		glutCreateMenu(menuTrajet);
 		glutAddMenuEntry("New Ctrl point", 'C');
@@ -1355,3 +1353,7 @@ int createMenus (pScene sc, pMesh mesh) {
 
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

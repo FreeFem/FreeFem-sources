@@ -14,11 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "libmeshb7.h"
@@ -510,7 +514,6 @@ int saveMesh (pScene sc, pMesh mesh, char *fileout, ubyte clipon) {
 		ppt = &mesh->point[k];
 		if (ppt->tag & M_UNUSED) continue;
 
-		// ref = ppt->ref;
 		if (mesh->dim == 2) {
 			fp1 = ppt->c[0] + mesh->xtra;
 			fp2 = ppt->c[1] + mesh->ytra;
@@ -673,7 +676,6 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 	} else {
 		mesh->typage = 1;
 		if (mesh->dim == 2 && mesh->nt) {
-			// if( mesh->nt){
 			nel = GmfStatKwd(inm, GmfSolAtTriangles, &type, &size, typtab);
 			if (nel && nel != mesh->nt) {
 				fprintf(stderr, "  %%%% Wrong number %d.\n", nel);
@@ -870,3 +872,7 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 	GmfCloseMesh(inm);
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

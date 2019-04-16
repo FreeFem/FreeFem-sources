@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -103,8 +106,6 @@ GLuint pathList (pScene sc) {
 	int k;
 	static GLfloat green[3] = {0.2, 1.0, 0.2};
 
-	/*static GLfloat orang[3] = {1.0, 0.7, 0.1};*/
-
 	if (ddebug) fprintf(stdout, "pathList");
 
 	path = sc->path;
@@ -139,13 +140,6 @@ GLuint pathList (pScene sc) {
 
 	glEnd();
 	glLineWidth(1.0);
-
-	/* curvilinear path */
-	/*
-	 * glBegin(GL_LINE_STRIP);
-	 * glColor3fv(orang);
-	 * glEnd();
-	 */
 
 	glEndList();
 	return (dlist);
@@ -216,7 +210,7 @@ int pathSave (char *file, pScene sc) {
 
 	for (k = 1; k <= sc->path.np; k++) {
 		float *p;
-		
+
 		p = &sc->path.pt[mesh->dim * k];
 
 		for (i = 0; i < mesh->dim; i++) {
@@ -229,3 +223,7 @@ int pathSave (char *file, pScene sc) {
 	fclose(out);
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

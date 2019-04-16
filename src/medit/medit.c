@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ...  visualization tool */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...  visualization tool                                        */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "compil.date"
@@ -37,7 +40,6 @@ int menu, amenu, fmenu, femenu, vmenu, mmenu, smenu;
 int clmenu, cmenu, vwmenu, txmenu, trmenu;
 int animdep, animfin;
 
-/**********************/
 /*  Rajout pour popen */
 ubyte dpopen, dpopensol, dpopenbin;
 static void excfun (int sigid) {
@@ -126,7 +128,6 @@ int medit0 () {
 	clock_t ct;
 
 	/* default */
-	// fprintf(stdout," \n medit0() \n");
 	fprintf(stdout, " Loading data file(s)\n");
 	ct = clock();
 
@@ -152,7 +153,6 @@ int medit0 () {
 				if (!cv.mesh[cv.nbm]) return (0);
 			}
 
-			/*(cv.mesh[cv.nbm])->name = calloc(strlen(name)+1,sizeof(char));*/
 			strcpy(cv.mesh[cv.nbm]->name, name);
 			name = strtok(NULL, " \n\0");
 			if (++cv.nbm == MAX_MESH) break;
@@ -232,7 +232,6 @@ int medit0_popen () {
 	clock_t ct;
 
 	/* default */
-	/*fprintf(stdout," \n medit0() \n");*/
 	fprintf(stdout, " Loading data file(s)\n");
 	ct = clock();
 
@@ -253,7 +252,6 @@ int medit0_popen () {
 	do {
 		pMesh mesh;
 
-		// printf("mesh number %i\n",k+1);
 		if (!cv.mesh[k]) {
 			cv.mesh[k] = M_calloc(1, sizeof(Mesh), "medit0.mesh");
 			if (!cv.mesh[k]) return (0);
@@ -261,12 +259,6 @@ int medit0_popen () {
 
 		mesh = cv.mesh[k];
 		mesh->typ = 0;
-
-		// fgets(data,128,stdin);
-		// name = data;
-		// printf("data=%s\n",data);
-		// name = "toto.dat";
-		// strcpy(cv.mesh[k]->name,name);
 
 		if (dpopenbin)
 			loadMesh_popen_bin(mesh);
@@ -280,11 +272,6 @@ int medit0_popen () {
 		meshBox(mesh, 1);
 		if (!quiet) meshInfo(mesh);
 
-		/*  /\* read metric *\/     // a changer lecture .sol et .bb */
-		/*    if ( !loadSol_popen(mesh,mesh->name,1) ) */
-		/*       bbfile_popen(mesh); */
-		/*     if ( !quiet && mesh->nbb ) */
-		/*       fprintf(stdout,"    Solutions  %8d\n",mesh->nbb); */
 		if (dpopensol) {
 			if (dpopenbin)
 				loadSol_popen_bin(mesh, mesh->name, 1);
@@ -399,7 +386,6 @@ int main (int argc, char *argv []) {
 
 	/* init grafix */
 	parsar(argc, argv);
-	// printf("fin de parsar");
 
 	if (option == ISOSURF) {
 		fprintf(stdout, "ISOSURF");
@@ -411,7 +397,6 @@ int main (int argc, char *argv []) {
 	}
 
 	glutInit(&argc, argv);
-	// printf("fin de glutInit");
 #ifdef ppc
 	chdir(pwd);
 #endif
@@ -502,3 +487,7 @@ int main (int argc, char *argv []) {
 
 	return (0);
 }
+
+#ifdef __cplusplus
+}
+#endif

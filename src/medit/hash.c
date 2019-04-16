@@ -14,25 +14,28 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
 #include "sproto.h"
 #include <time.h>
 
-#define NC 32
+#define NC (int)32
 #define NC2 (NC * NC)
 #define NC3 (NC2 * NC)
 
-#define KA 31
-#define KB 57
-#define KC 79
+#define KA (int)31
+#define KB (int)57
+#define KC (int)79
 
 static int ch[6][4] = {{0, 1, 2, 3}, {4, 5, 6, 7}, {0, 1, 5, 4},
 					   {1, 2, 6, 5}, {2, 3, 7, 6}, {0, 3, 7, 4}};
@@ -170,7 +173,6 @@ int hashTetra (pMesh mesh) {
 	return (1);
 }
 
-/* very sioux! (09/2002) */
 int hashHexa (pMesh mesh) {
 	pHexa ph, ph1;
 	int k, kk, iadr, pp, l, ll, v;
@@ -192,16 +194,6 @@ int hashHexa (pMesh mesh) {
 	}
 
 	/* memory alloc */
-/* bug fixe: 17/04/2007
- * hcode = (int*)M_calloc(max(11,mesh->nhex+1),sizeof(int),"hash.hexa");
- * link  = (int*)M_calloc(6*max(11,mesh->nhex+1),sizeof(int),"hash.hexa");
- * hsize = max(10,mesh->nhex);
- * if ( !hcode || !link ) {
- *  myerror.coderr = 1000;
- *  return(0);
- * }
- * hvoy = (char*)hcode;
- */
 	hcode = (int *)M_calloc(max(10, 6 * mesh->nhex / 4 + 1), sizeof(int), "hash.hexa");
 	assert(hcode);
 	link = (int *)M_calloc(max(10, 6 * mesh->nhex + 1), sizeof(int), "hash.hexa");
@@ -319,7 +311,6 @@ int hashHexa (pMesh mesh) {
 	return (1);
 }
 
-/* very sioux! (09/2002) */
 int hashTria (pMesh mesh) {
 	pTriangle pt, pt1;
 	int k, kk, l, ll, mins, maxs, mins1, maxs1, hsize;
@@ -433,3 +424,7 @@ int hashTria (pMesh mesh) {
 
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

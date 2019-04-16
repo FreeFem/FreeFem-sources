@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -31,8 +34,8 @@ GLuint geomList (pScene sc, pMesh mesh) {
 	pPoint ppt, pp0, pp1;
 	float n[3];
 	int k, it = 0, nm;
-	static float rouge[4] = {1.0, 0.0, 0.0, 1.0};
-	static float jaune[4] = {1.0, 1.0, 0.0, 1.0};
+	static float red[4] = {1.0, 0.0, 0.0, 1.0};
+	static float yellow[4] = {1.0, 1.0, 0.0, 1.0};
 
 	/* default */
 	if (mesh->na + mesh->nc + mesh->np == 0) return (0);
@@ -48,8 +51,7 @@ GLuint geomList (pScene sc, pMesh mesh) {
 	if (ddebug) printf("construct point list\n");
 
 	if (mesh->ne) {
-		/*glPointSize(3);*/
-		glPointSize(sc->par.pointsize);	/* pour Herve LeDret */
+		glPointSize(sc->par.pointsize);
 		glBegin(GL_POINTS);
 
 		for (k = 1; k <= mesh->np; k++) {
@@ -57,7 +59,7 @@ GLuint geomList (pScene sc, pMesh mesh) {
 			if (ppt->tag & M_UNUSED && !ppt->ref) continue;
 
 			if (ppt->tag == M_CORNER)
-				glColor3fv(rouge);
+				glColor3fv(red);
 			else if (ppt->tag == M_REQUIRED){
 				static float green[4] = {0.0, 1.0, 0.0, 1.0};
 				glColor3fv(green);
@@ -119,9 +121,9 @@ GLuint geomList (pScene sc, pMesh mesh) {
 
 		if (pr->tag & M_RIDGE) {
 			if (pr->tag & M_TAG)
-				glColor3fv(jaune);	/* ridge + ref en jaune */
+				glColor3fv(yellow);	/* ridge + ref in yellow */
 			else
-				glColor3fv(rouge);	/* ridges en rouge */
+				glColor3fv(red);	/* ridges in red */
 		} else if (!pr->ref) {
 			glColor3fv(sc->par.edge);
 		} else {
@@ -150,3 +152,7 @@ GLuint geomList (pScene sc, pMesh mesh) {
 		return (list);
 	}
 }
+
+#ifdef __cplusplus
+}
+#endif

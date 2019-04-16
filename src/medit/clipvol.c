@@ -14,18 +14,21 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
 #include "sproto.h"
 
-#define NBCOL 9
+#define NBCOL (int)9
 
 /* build list for capping */
 GLuint capTetra (pMesh mesh) {
@@ -228,7 +231,7 @@ GLuint capTetraMap (pMesh mesh) {
 
 	for (m = 0; m < sc->par.nbmat; m++) {
 		int k;
-		
+
 		pm = &sc->material[m];
 		k = pm->depmat[LTets];
 		if (!k || pm->flag) continue;
@@ -577,3 +580,7 @@ GLuint capTetraIso (pMesh mesh) {
 	glEndList();
 	return (dlist);
 }
+
+#ifdef __cplusplus
+}
+#endif

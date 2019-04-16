@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "libmeshb7.h"
@@ -98,12 +101,11 @@ void getline_bin_double_noref (int ddim, double *v) {
 	}
 }
 
-/**********************************/
 /*   function for loadsol_popen   */
 
+int tmptype;
 void read_TypeSizeTyptab_bin (int *type, int *size, int *typtab) {
 	int i;
-	int tmptype;
 	int tmpsize;
 
 	fread((unsigned char *)&(tmptype), WrdSiz, 1, stdin);
@@ -113,7 +115,6 @@ void read_TypeSizeTyptab_bin (int *type, int *size, int *typtab) {
 
 	for (i = 0; i < tmptype; i++) {
 		fread((unsigned char *)&(typtab[i]), WrdSiz, 1, stdin);
-		// printf("typtab[%i]=%i\n",i,typtab[i]);
 		tmpsize += typtab[i];
 	}
 
@@ -132,20 +133,17 @@ int loadMesh_popen_bin (pMesh mesh) {
 	float *n, fp1, fp2, fp3;
 	int i, ia, ib, inm, ref, is=0, k, disc=0, nn=0, nt=0, nq=0;
 	char *ptr, data[256];
-	/* Rajout popen*/
 	char *tictac;
 	char *natureread;
 	int loopdebug;
 	int vatn[2];
 	int tvatn[3];
 
-	/* variable rajouter pour popen */
 	int retcode = 0;
 	int cod;
 	int KwdCod;
 	int NulPos;
 	int NextKwdPos;
-	/* rajout */
 	float ftab[3];
 
 #ifdef WIN32
@@ -221,7 +219,6 @@ int loadMesh_popen_bin (pMesh mesh) {
 			assert(mesh->point);
 
 			for (k = 1; k <= mesh->np; k++) {
-				// if(0) printf("lecture point du maillage k=%i np=%i ver=%i \n",k,mesh->np,mesh->ver);
 				ppt = &mesh->point[k];
 
 				if (mesh->ver == GmfFloat)
@@ -232,8 +229,6 @@ int loadMesh_popen_bin (pMesh mesh) {
 				ppt->ref = ref & 0x7fff;
 				ppt->tag = M_UNUSED;
 			}
-
-			// ppt = &mesh->point[k]; //Risk of overflow
 
 			break;
 		case GmfTriangles:
@@ -372,7 +367,6 @@ int loadMesh_popen_bin (pMesh mesh) {
 
 			for (k = 1; k <= mesh->nc; k++) {
 				fread((unsigned char *)&is, WrdSiz, 1, stdin);
-				// fgets(data,256,stdin);  tictac = strtok(data," \n");  is = atoi(tictac);
 				if (is < 1 || is > mesh->np) {
 					disc++;
 				} else {
@@ -388,7 +382,6 @@ int loadMesh_popen_bin (pMesh mesh) {
 			fread((unsigned char *)&(mesh->nr), WrdSiz, 1, stdin);
 
 			for (k = 1; k <= mesh->nr; k++) {
-				// fgets(data,256,stdin);  tictac = strtok(data," \n");  is = atoi(tictac);
 				fread((unsigned char *)&is, WrdSiz, 1, stdin);
 				if (is < 1 || is > mesh->np) {
 					disc++;
@@ -436,7 +429,6 @@ int loadMesh_popen_bin (pMesh mesh) {
 			fread((unsigned char *)&(mesh->nri), WrdSiz, 1, stdin);
 
 			for (k = 1; k <= mesh->nri; k++) {
-				// getline_1int( natureread, &is);
 				fread((unsigned char *)&is, WrdSiz, 1, stdin);
 				if (is < 1 || is > mesh->na) {
 					disc++;
@@ -452,7 +444,6 @@ int loadMesh_popen_bin (pMesh mesh) {
 			fread((unsigned char *)&(mesh->nre), WrdSiz, 1, stdin);
 
 			for (k = 2; k <= mesh->nre; k++) {
-				// getline_1int( natureread, &is);
 				fread((unsigned char *)&is, WrdSiz, 1, stdin);
 				if (is < 1 || is > mesh->na) {
 					disc++;
@@ -510,7 +501,6 @@ int loadMesh_popen_bin (pMesh mesh) {
 			assert(mesh->extra->nv);
 
 			for (k = 1; k <= mesh->extra->iv; k++) {
-				// GmfGetLin(inm,GmfNormalAtVertices,&nn,&is);
 				getline_bin_int_noref(2, vatn);
 				nn = vatn[0];
 				is = vatn[1];
@@ -533,7 +523,6 @@ int loadMesh_popen_bin (pMesh mesh) {
 			assert(mesh->extra->nt);
 
 			for (k = 1; k <= mesh->extra->it; k++) {
-				// GmfGetLin(inm,GmfNormalAtTriangleVertices,&nt,&is,&nn);
 				getline_bin_int_noref(3, tvatn);
 				tvatn[0] = nt;
 				tvatn[1] = is;
@@ -558,7 +547,6 @@ int loadMesh_popen_bin (pMesh mesh) {
 			assert(mesh->extra->nq);
 
 			for (k = 1; k <= mesh->extra->iq; k++) {
-				// GmfGetLin(inm,GmfNormalAtQuadrilateralVertices,&nq,&is,&nn);
 				getline_bin_int_noref(3, tvatn);
 				tvatn[0] = nq;
 				tvatn[1] = is;
@@ -666,39 +654,6 @@ int loadMesh_popen_bin (pMesh mesh) {
 
 		if (KwdCod == GmfEnd)
 			break;
-
-		/*
-		 * if( KwdCod == GmfVertices ){
-		 * }
-		 * else if(KwdCod == GmfTriangles){
-		 * }
-		 * else if(KwdCod == GmfQuadrilaterals){
-		 * }
-		 * else if(KwdCod == GmfTetrahedra){
-		 * }
-		 * else if(KwdCod == GmfHexahedra){
-		 * }
-		 * else if(KwdCod == GmfCorners){
-		 * }
-		 * else if(KwdCod == GmfRequiredVertices){
-		 * }
-		 * else if(KwdCod == GmfEdges){
-		 * }
-		 * else if(KwdCod == GmfRidges){
-		 * }
-		 * else if(KwdCod == GmfRequiredEdges){
-		 * }
-		 * else if(KwdCod == GmfNormals){
-		 * }
-		 * else if(KwdCod == GmfTangents){
-		 * }
-		 * else if(KwdCod == GmfEnd){
-		 * }
-		 * else{
-		 * printf("This data KwdCod it is not taken in this version\n");
-		 * exit(1);
-		 * }
-		 */
 	}
 
 	/* check if vertices and elements found */
@@ -769,9 +724,6 @@ int loadScaVecTen_bin (pMesh mesh, int numsol, int dim, int ver, int nel, int ty
 	}
 
 	if (ddebug) printf("typtab[%i]=%i, off%i", i, typtab[i], off);
-
-	// printf("min= %f, max= %f\n",mesh->bbmin,mesh->bbmax);
-
 	if (ddebug) printf("numsol=%i,typtab[i]=%i\n", numsol, typtab[i]);
 
 	fflush(stdout);
@@ -802,10 +754,8 @@ int loadScaVecTen_bin (pMesh mesh, int numsol, int dim, int ver, int nel, int ty
 			mesh->sol[k].bb = 0.0;
 			getline_bin_double_noref(sol->dim, VecSol);
 
-			for (i = 0; i < sol->dim; i++) {
+			for (i = 0; i < sol->dim; i++)
 				fbuf[off + i] = VecSol[i];
-				// printf("solution vectorielle %i composante %i %f\n",k,i,VecSol[i]);
-			}
 
 			for (i = 0; i < sol->dim; i++) {
 				mesh->sol[k].m[i] = fbuf[off + i];
@@ -818,7 +768,6 @@ int loadScaVecTen_bin (pMesh mesh, int numsol, int dim, int ver, int nel, int ty
 			if (mesh->sol[k].bb > mesh->bbmax) mesh->bbmax = mesh->sol[k].bb;
 		}
 
-		// printf("max= %f, min= %f",mesh->bbmin,mesh->bbmax);
 		break;
 
 	case GmfSymMat:
@@ -883,13 +832,11 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 	double dbuf[GmfMaxTyp];
 	float fbuf[GmfMaxTyp];
 	double m[6], lambda[3], eigv[3][3], vp[2][2];
-	int inm, k, i, key, nel, size, type, iord, off, typtab[GmfMaxTyp], ver, dim;
+	int inm=0, k, i, key, nel, size, type, iord, off, typtab[GmfMaxTyp], ver, dim;
 	char *ptr, data[128];
 
-	// rajout pour popen
 	int NumberofSolAT;
 	char *natureread;
-	// rajout binaire
 	int KwdCod;
 	int cod;
 	int NulPos;
@@ -922,7 +869,6 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 		fprintf(stderr, "  %%%% Wrong dimension %d.\n", dim);
 		retcode = 0;
 		goto Lret;
-		// return(0);
 	}
 
 	while (!feof(stdin)) {
@@ -938,7 +884,6 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 				fprintf(stderr, "  %%%% Wrong number: %d Solutions discarded\n", nel - mesh->np);
 				retcode = 0;
 				goto Lret;
-				// return(0);
 			}
 
 			mesh->typage = 2;
@@ -964,7 +909,6 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 					fprintf(stderr, "  %%%% Wrong number %d.\n", nel);
 					retcode = 0;
 					goto Lret;
-					// return(0);
 				}
 
 				mesh->typage = 1;
@@ -990,7 +934,6 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 					fprintf(stderr, "  %%%% Wrong number %d.\n", nel);
 					retcode = 0;
 					goto Lret;
-					// return(0);
 				}
 
 				mesh->typage = 1;
@@ -1016,7 +959,6 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 					fprintf(stderr, "  %%%% Wrong number %d.\n", nel);
 					retcode = 0;
 					goto Lret;
-					// return(0);
 				}
 
 				mesh->typage = 1;
@@ -1043,7 +985,6 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 					GmfCloseMesh(inm);
 					retcode = 0;
 					goto Lret;
-					// return(0);
 				}
 
 				mesh->typage = 1;
@@ -1075,3 +1016,7 @@ Lret:
 #endif
 	return (retcode);
 }
+
+#ifdef __cplusplus
+}
+#endif

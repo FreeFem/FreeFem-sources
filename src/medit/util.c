@@ -14,12 +14,11 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,10 +51,6 @@ void setFont (char *name, int size) {
 		if (size == 24)
 			font_style = GLUT_BITMAP_TIMES_ROMAN_24;
 	}
-	/*
-	 * else if (strcmp(name, "8x13") == 0)
-	 * font_style = GLUT_BITMAP_8_BY_13;
-	 */
 	else if (strcmp(name, "9x15") == 0) {
 		font_style = GLUT_BITMAP_9_BY_15;
 	}
@@ -84,7 +79,6 @@ void output2 (GLfloat x, GLfloat y, char *format, ...) {
 	va_list args;
 	char *s, buffer[255];
 
-	/*strcpy(myerror.procname,"output2");*/
 	va_start(args, format);
 	vsprintf(buffer, format, args);
 	va_end(args);
@@ -92,8 +86,6 @@ void output2 (GLfloat x, GLfloat y, char *format, ...) {
 	glRasterPos2f(x, y);
 
 	for (s = buffer; *s; s++) {
-		/*glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10,*s);*/
-		/*glutBitmapCharacter(font_style,*s);*/
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, *s);
 	}
 }
@@ -102,7 +94,6 @@ void output3 (GLfloat x, GLfloat y, GLfloat z, char *format, ...) {
 	va_list args;
 	char buffer[255], *s;
 
-	/*strcpy(myerror.procname,"output3");*/
 	va_start(args, format);
 	vsprintf(buffer, format, args);
 	va_end(args);
@@ -119,7 +110,7 @@ void hsvrgb (double *hsv, double *rgb) {
 	int i;
 
 	hsv[0] = ((int)hsv[0] % 360) / 60.;
-	i = (int)floor((double)hsv[0]);	/* largest int <= h     */
+	i = (int)floor((double)hsv[0]);	/* largest int <= h */
 	f = hsv[0] - i;	/* fractional part of h */
 	p = hsv[2] * (1.0 - hsv[1]);
 	q = hsv[2] * (1.0 - (hsv[1] * f));

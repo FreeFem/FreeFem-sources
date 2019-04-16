@@ -14,12 +14,11 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
 
 #ifdef __cplusplus
 extern "C" {
@@ -247,7 +246,6 @@ int coreps (FILE *file, GLsizei size, GLfloat *buffer) {
 
 			/* draw filled polygon */
 			if (sorting == TRUE) {
-				/* fprintf(file,"1. stg\n"); */
 				fprintf(file, "dc ");
 
 				for (i = 0; i < nbv; i++) {
@@ -272,7 +270,6 @@ int coreps (FILE *file, GLsizei size, GLfloat *buffer) {
 			break;
 
 		case GL_POINT_TOKEN:
-			v = (Feedback3Dcolor *)ptr;
 			ptr += 7;
 			break;
 		default:
@@ -314,7 +311,6 @@ int sftcpy (pScene sc, pMesh mesh) {
 
 	/* size for feedback buffer */
 	size = 0;
-	// nvalues = -1;
 
 	do {
 		size += 1024 * 1024;
@@ -329,15 +325,6 @@ int sftcpy (pScene sc, pMesh mesh) {
 		/* draw scene in back buffer */
 		glFeedbackBuffer(size, GL_3D_COLOR, fbbuffer);
 		(void)glRenderMode(GL_FEEDBACK);
-/*
- *  glMatrixMode(GL_MODELVIEW);
- *  glLoadIdentity();
- *  gluLookAt(0.,0.,-sc->persp->depth, 0.,0.,0., 0.0,1.0,0.0);
- *
- *  setupView(sc);
- *  glMultMatrixf(sc->view->matrix);
- *  glTranslatef(sc->cx,sc->cy,sc->cz);
- */
 		drawModel(sc);
 		if (sc->type & S_DECO) redrawStatusBar(sc);
 
