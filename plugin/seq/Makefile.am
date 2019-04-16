@@ -51,7 +51,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernardiRaugel.$(DYLIB_SUFFIX) \
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.
 
-LIST_COMPILE_PKG=@TOOL_DYLIB_tetgen@ @TOOL_DYLIB_superlu4@ dfft.$(DYLIB_SUFFIX) 		\
+LIST_COMPILE_PKG=@TOOL_DYLIB_tetgen@ @TOOL_DYLIB_superlu@ dfft.$(DYLIB_SUFFIX) 		\
 	@TOOL_DYLIB_umfpack@ NewSolver.$(DYLIB_SUFFIX) @TOOL_DYLIB_lapack@ 		\
 	ffnewuoa.$(DYLIB_SUFFIX) @TOOL_DYLIB_gmm@ @TOOL_DYLIB_yams@ @TOOL_DYLIB_mmg3d@ @TOOL_DYLIB_mshmet@	\
 	@TOOL_DYLIB_gsl@ @TOOL_DYLIB_mumps_seq@ @TOOL_DYLIB_ipopt@ @TOOL_DYLIB_nlopt@ ff-cmaes.$(DYLIB_SUFFIX)	\
@@ -208,7 +208,7 @@ ipopt.out	mmg.out xxxx ThFF.txt		TriQA.txt		cavidadTT.txt		mass.txt		xy.txt \
 ThFF_Metric.txt		TriQA_Metric.txt	datanc.txt		u100m8.txt \
 TTh.sol		Th.o.sol	Th3.sol		dep.o.sol	dep.sol		gradient.sol	hessien.sol pippo.data pippo.dx testsavemedit.solb med.gp bidule.vtk	disque.vtk g-iso
 	-rm $(LIST_COMPILE_PKG)
-	-cd ../mpi; rm $(LIST_COMPILE_PKG)
+	-cd ../mpi; rm $(LIST_COMPILE) $(LIST_COMPILE_PKG)
 
 # FFCS: add tags for files that are not specified to automake by a SOURCE directive (this tags file is automatically
 # taken into account by automake when it sees it).

@@ -22,7 +22,7 @@
 
 SUBDIRS=3rdparty src \
 	plugin plugin/seq plugin/mpi \
-	plugin/hpddm plugin/ffddm \
+	plugin/ffddm \
 	examples examples/examples examples/misc \
 	examples/tutorial examples/other \
 	examples/plugin examples/mpi \
@@ -39,7 +39,6 @@ bin/cleanregen.sh \
 bin/copysharedlibs.sh \
 bin/script/clean_all_installed_ffpp.sh \
 bin/script/remove-opemmpi-1.6.5-and-gfortran.sh \
-bin/script/PostInstall.sh \
 bin/script/PostInstall.m4 \
 bin/regtests.sh \
 bin/uninstall-ff++ \
@@ -157,7 +156,8 @@ idp/getARGV.idp \
 idp/ffddm_functions.idp \
 idp/macro_ddm_substructuring.idp \
 idp/ffddm_parameters.idp \
-idp/macro_ddm.idp 
+idp/macro_ddm.idp \
+idp/CC.idp
 
 
 
@@ -292,7 +292,7 @@ install-exec-local:: bin/script/PostInstall.sh
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/idp
 	cd idp; for i in *.idp; do \
 	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/idp; fi; done
-	
+
 bin/script/PostInstall.sh:./Makefile bin/script/PostInstall.m4
 	m4 bin/script/PostInstall.m4 "-DFF__FVER=$(PACKAGE_VERSION)" "-DFF_BINDIR=$(bindir)" "-DFF__DATADIR=$(pkgdatadir)" > bin/script/PostInstall.sh
 	chmod a+x bin/script/PostInstall.sh
@@ -417,7 +417,6 @@ LIST_GENERATE_FILE= configure config.h.in \
     plugin/Makefile.in \
 	plugin/seq/Makefile.in \
 	plugin/mpi/Makefile.in \
-	plugin/hpddm/Makefile.in \
 	plugin/ffddm/Makefile.in \
 	examples/Makefile.in \
     examples/plugin/Makefile.in \
@@ -456,7 +455,6 @@ LIST_GENERATE_FILE_AM= \
     plugin/Makefile.am \
 	plugin/seq/Makefile.am \
 	plugin/mpi/Makefile.am \
-	plugin/hpddm/Makefile.am \
 	plugin/ffddm/Makefile.am \
 	examples/Makefile.am \
     examples/plugin/Makefile.am \

@@ -21,7 +21,7 @@
 # E-MAIL  : ...
 
 LIST_COMPILE=@TOOL_DYLIB_mumps@ @TOOL_DYLIB_hips@ @TOOL_DYLIB_superludist@ @TOOL_DYLIB_pastix@ MPICG.$(DYLIB_SUFFIX)	\
-@TOOL_DYLIB_parms@ mpi-cmaes.$(DYLIB_SUFFIX) parmetis.$(DYLIB_SUFFIX) @TOOL_DYLIB_htool@
+@TOOL_DYLIB_parms@ mpi-cmaes.$(DYLIB_SUFFIX) parmetis.$(DYLIB_SUFFIX) @TOOL_DYLIB_htool@ @TOOL_DYLIB_hpddm@
 
 if FFCS_MPIOK
 
@@ -41,7 +41,7 @@ endif
 #to force the recompile if change ... FH
 $(LIST_COMPILE): ../seq/ff-c++ ../seq/WHERE_LIBRARY-download
 
-.cpp.$(DYLIB_SUFFIX): ../seq/ff-c++ ../seq/WHERE_LIBRARY-download
+.cpp.$(DYLIB_SUFFIX): ../seq/ff-c++ ../seq/WHERE_LIBRARY-download ../seq/WHERE_LIBRARY-config
 #	FFCS needs an error exit code to make sure that all libraries are correctly compiled
 #
 #	FFCS on Windows inserts all MPI options (include, lib, ...) in the $MPICXX compiler script, instead of "$CXX $MPI_xxx",

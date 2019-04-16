@@ -471,7 +471,6 @@ curdir=`pwd`
 # Configure options
 # -----------------
 
-echo $ac_configure_args > configure.param
 echo "$PATH" > config.path
 eval for i in $ac_configure_args\; do echo \$i\; done | sed -e "s/$/'/" -e "s/^/'/"   > config.param
 
@@ -994,10 +993,17 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		        AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetsc)
-		        AC_FF_PETSC_WHERELIB(scotch,SCOTCH_LIB,SCOTCH_INCLUDE,$ffconfpetsc)
+                ff_SCOTCH_INCLUDE=$ff_PTSCOTCH_INCLUDE
+                ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*ptscotch@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*ptes@<:@^ @:>@*//g'`
+                if test -n "$ff_SCOTCH_LIB"; then
+                    ff_scotch_ok=yes;
+                    AC_FF_ADDWHERELIB(scotch,$ff_SCOTCH_LIB,$ff_SCOTCH_INCLUDE)
+                    AC_SUBST([TOOL_COMPILE_scotch],"")
+                fi
 		        AC_FF_PETSC_WHERELIB(fftw3_mpi,FFTW_LIB,FFTW_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetsc)
                 AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetsc)
+                AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetsc)
   			    AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetsc)
 			    AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetsc)
@@ -1041,10 +1047,17 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
             AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetscc)
-            AC_FF_PETSC_WHERELIB(scotch,SCOTCH_LIB,SCOTCH_INCLUDE,$ffconfpetscc)
+            ff_SCOTCH_INCLUDE=$ff_PTSCOTCH_INCLUDE
+            ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*ptscotch@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*ptes@<:@^ @:>@*//g'`
+            if test -n "$ff_SCOTCH_LIB"; then
+                ff_scotch_ok=yes;
+                AC_FF_ADDWHERELIB(scotch,$ff_SCOTCH_LIB,$ff_SCOTCH_INCLUDE)
+                AC_SUBST([TOOL_COMPILE_scotch],"")
+            fi
             AC_FF_PETSC_WHERELIB(fftw3_mpi,FFTW_LIB,FFTW_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetsc)
             AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetscc)
@@ -2036,7 +2049,6 @@ m4_map([AC_FF_WHERELIB],[
 	[[fftw3],[-lfftw3],[${inc_usr_include}fftw3.h],[]],
 	[[superlu_dist],[-lsuperlu-dist],[${inc_usr_include}superlu-dist/superlu_defs.h],[]],
 	[[superlu],[-lsuperlu],[${inc_usr_include}superlu/superlu_enum_consts.h],[]],
-	[[superlu4],[-lsuperlu4],[${inc_usr_include}superlu4/superlu_enum_consts.h],[]],
         [[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
         [[scalapack],[-lscalapack$ff_with_mpi],[]],
         [[scotch],[-lscotch -lscotcherr],[scotch.h]],
@@ -2072,7 +2084,7 @@ TOOL_DISABLE_NO(parms,parms_FreeFem.$DYLIB_SUFFIX)
 
 TOOL_DISABLE_NO(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
 TOOL_DISABLE(scotch,scotch.$DYLIB_SUFFIX)
-TOOL_DISABLE(superlu4,SuperLu.$DYLIB_SUFFIX,superlu)
+TOOL_DISABLE(superlu,SuperLu.$DYLIB_SUFFIX)
 TOOL_DISABLE_NO(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
 TOOL_DISABLE(umfpack,UMFPACK64.$DYLIB_SUFFIX)
 TOOL_DISABLE(yams,freeyams.$DYLIB_SUFFIX)
@@ -2243,7 +2255,6 @@ AC_OUTPUT(
     plugin/Makefile
 	plugin/seq/Makefile
 	plugin/mpi/Makefile
-	plugin/hpddm/Makefile
 	plugin/ffddm/Makefile
 	examples/Makefile
     examples/plugin/Makefile
