@@ -21,7 +21,7 @@
 // E-MAIL  : ...
 
 // *INDENT-OFF* //
-//ff-c++-LIBRARY-dep: superlu4 blas
+//ff-c++-LIBRARY-dep: superlu blas
 //ff-c++-cpp-dep:
 // *INDENT-ON* //
 

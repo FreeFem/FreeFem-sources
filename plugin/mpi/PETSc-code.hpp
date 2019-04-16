@@ -247,21 +247,6 @@ AnyType changeOperator<Type>::changeOperator_Op::operator()(Stack stack) const {
                 MatMPIAIJSetPreallocationCSR(ptA->_petsc, NULL, NULL, NULL);
             MatAssemblyBegin(ptA->_petsc, MAT_FINAL_ASSEMBLY);
             MatAssemblyEnd(ptA->_petsc, MAT_FINAL_ASSEMBLY);
-            if(ptA->_ksp) {
-                KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
-                if(std::is_same<Type, Dmat>::value && !ptA->_S.empty()) {
-                    KSPSetFromOptions(ptA->_ksp);
-                    KSPSetUp(ptA->_ksp);
-                    PC pc;
-                    KSPGetPC(ptA->_ksp, &pc);
-                    PCType type;
-                    PCGetType(pc, &type);
-                    PetscBool isFieldSplit;
-                    PetscStrcmp(type, PCFIELDSPLIT, &isFieldSplit);
-                    if(isFieldSplit)
-                        PETSc::setCompositePC(pc, ptA->_S);
-                }
-            }
             Type* ptNest = nargs[1] ? GetAny<Type*>((*nargs[1])(stack)) : 0;
             if(ptNest) {
                 PetscBool assembled;
@@ -285,6 +270,28 @@ AnyType changeOperator<Type>::changeOperator_Op::operator()(Stack stack) const {
                         MatAssemblyBegin(ptNest->_petsc, MAT_FINAL_ASSEMBLY);
                         MatAssemblyEnd(ptNest->_petsc, MAT_FINAL_ASSEMBLY);
                     }
+                }
+            }
+            if(ptA->_ksp) {
+                KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
+                if(std::is_same<Type, Dmat>::value && !ptA->_S.empty()) {
+                    KSPSetFromOptions(ptA->_ksp);
+                    PetscBool assembled;
+                    MatAssembled(ptA->_petsc, &assembled);
+                    if(assembled) {
+                        if(ptNest)
+                            MatAssembled(ptNest->_petsc, &assembled);
+                        if(assembled)
+                            KSPSetUp(ptA->_ksp);
+                    }
+                    PC pc;
+                    KSPGetPC(ptA->_ksp, &pc);
+                    PCType type;
+                    PCGetType(pc, &type);
+                    PetscBool isFieldSplit;
+                    PetscStrcmp(type, PCFIELDSPLIT, &isFieldSplit);
+                    if(isFieldSplit)
+                        PETSc::setCompositePC(pc, ptA->_S);
                 }
             }
         }
@@ -1239,13 +1246,18 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
             PetscInt nsplits;
             KSP* subksp;
             PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
-            for(int i = 0; i < nsplits; ++i) {
-                Mat A;
-                KSPGetOperators(subksp[i], &A, NULL);
-                if(A == ptSub->_petsc) {
+            Mat** mat;
+            PetscInt M, N;
+            MatNestGetSubMats(ptA->_petsc, &M, &N, &mat);
+            ffassert(M == N);
+            for(int i = 0; i < M; ++i) {
+                if(mat[i][i] == ptSub->_petsc) {
+                    Mat A;
+                    KSPGetOperators(subksp[i], &A, NULL);
                     KSPDestroy(&ptSub->_ksp);
                     ptSub->_ksp = subksp[i];
                     PetscObjectReference((PetscObject)subksp[i]);
+                    KSPSetOperators(subksp[i], ptSub->_petsc, ptSub->_petsc);
                     ptA = ptSub;
                     break;
                 }
@@ -1325,9 +1337,13 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
         if(nargs[4])
             KSPSetOptionsPrefix(ptA->_ksp, GetAny<std::string*>((*nargs[4])(stack))->c_str());
         KSPSetFromOptions(ptA->_ksp);
-        if(assembled)
-            KSPSetUp(ptA->_ksp);
         if(std::is_same<Type, Dmat>::value && nargs[2] && nargs[5] && nargs[6]) {
+            if(assembled) {
+                if(ptSub)
+                    MatAssembled(GetAny<Type*>((*A)(stack))->_petsc, &assembled);
+                if(assembled)
+                    KSPSetUp(ptA->_ksp);
+            }
             PC pc;
             KSPGetPC(ptA->_ksp, &pc);
             PETSc::setCompositePC(pc, ptA->_S);
