@@ -28,6 +28,7 @@ extern "C" {
 #include "libmeshb7.h"
 #include "extern.h"
 #include "string.h"
+#include "eigenv.h"
 #ifdef WIN32
 #include <fcntl.h>
 #endif
@@ -129,11 +130,9 @@ int loadMesh_popen_bin (pMesh mesh) {
 	pQuad pq;
 	pTetra ptet;
 	pHexa ph;
-	double d, dp1, dp2, dp3, dn[3];
-	float *n, fp1, fp2, fp3;
-	int i, ia, ib, inm, ref, is=0, k, disc=0, nn=0, nt=0, nq=0;
-	char *ptr, data[256];
-	char *tictac;
+	double d, dn[3];
+	float *n;
+	int i, ia, ib, ref, is=0, k, disc=0, nn=0, nt=0, nq=0;
 	char *natureread;
 	int loopdebug;
 	int vatn[2];
@@ -143,8 +142,6 @@ int loadMesh_popen_bin (pMesh mesh) {
 	int cod;
 	int KwdCod;
 	int NulPos;
-	int NextKwdPos;
-	float ftab[3];
 
 #ifdef WIN32
 	_setmode(fileno(stdin), O_BINARY);
@@ -681,13 +678,10 @@ Lret:
 
 int loadScaVecTen_bin (pMesh mesh, int numsol, int dim, int ver, int nel, int type, int size, int *typtab, int key) {
 	pSolution sol;
-	double dbuf[GmfMaxTyp];
 	float fbuf[GmfMaxTyp];
 	double m[6], lambda[3], eigv[3][3], vp[2][2];
 	int k, i, iord, off;
-	char *ptr, data[128];
 	double ScaSol[1], VecSol[3], TenSol[9];
-	float fScaSol[1], fVecSol[3], fTenSol[9];
 	int retcode = 0;
 
 	if (ddebug) printf("numsol=%i, type=%i, size=%i\n", numsol, type, size);
@@ -828,21 +822,13 @@ int loadScaVecTen_bin (pMesh mesh, int numsol, int dim, int ver, int nel, int ty
 
 /*load solution (metric) */
 int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
-	pSolution sol;
-	double dbuf[GmfMaxTyp];
-	float fbuf[GmfMaxTyp];
-	double m[6], lambda[3], eigv[3][3], vp[2][2];
-	int inm=0, k, i, key, nel, size, type, iord, off, typtab[GmfMaxTyp], ver, dim;
-	char *ptr, data[128];
-
-	int NumberofSolAT;
+	int inm=0, key, nel, size, type, typtab[GmfMaxTyp], ver, dim;
 	char *natureread;
 	int KwdCod;
 	int cod;
 	int NulPos;
 	int retcode = 0;
 
-	NumberofSolAT = 0;
 #ifdef WIN32
 	_setmode(fileno(stdin), O_BINARY);
 #endif
@@ -903,7 +889,7 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 				natureread = "SolAtTriangles";
 				fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
 				fread((unsigned char *)&nel, WrdSiz, 1, stdin);
-				if (debug) printf(stdout, "SolAtTriangles : nel %d, mesh->nt %d \n", nel, mesh->nt);
+				if (debug) printf("SolAtTriangles : nel %d, mesh->nt %d \n", nel, mesh->nt);
 
 				if (nel && nel != mesh->nt) {
 					fprintf(stderr, "  %%%% Wrong number %d.\n", nel);

@@ -879,7 +879,7 @@ GLuint listHexaMap (pScene sc, pMesh mesh, ubyte clip) {
 }
 
 GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altcoef) {
-	pTriangle pt, pt1;
+	pTriangle pt;
 	pMaterial pm;
 	pQuad pq;
 	pPoint p0, p1, p2, p3;
@@ -888,7 +888,6 @@ GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altco
 	double ax, ay, az, bx, by, bz, dd, kc, rgb[4];
 	float cx, cy, cz, n[3];
 	int *adj, k, m, ia, iadr;
-	ubyte *voy;
 	triangle t, t1, t2;
 	static double hsv[3] = {0.0, 1.0, 0.80};
 	static float nn[3] = {1.0, 0.0, 0.0};
@@ -1013,10 +1012,8 @@ GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altco
 					/* add quads to sides (thanks to F. Lagoutiere) */
 					iadr = 3 * (k - 1) + 1;
 					adj = &mesh->adja[iadr];
-					voy = &mesh->voy[iadr];
 
 					if (adj[0] && adj[0] < k) {
-						pt1 = &mesh->tria[adj[0]];
 						ps1 = &mesh->sol[adj[0]];
 
 						cz = ps1->bb;
@@ -1048,7 +1045,6 @@ GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altco
 					}
 
 					if (adj[1] && adj[1] < k) {
-						pt1 = &mesh->tria[adj[1]];
 						ps1 = &mesh->sol[adj[1]];
 
 						cz = ps1->bb;
@@ -1080,7 +1076,6 @@ GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altco
 					}
 
 					if (adj[2] && adj[2] < k) {
-						pt1 = &mesh->tria[adj[2]];
 						ps1 = &mesh->sol[adj[2]];
 
 						cz = ps1->bb;

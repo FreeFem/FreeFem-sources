@@ -940,7 +940,7 @@ int parseStream (pScene sc, pMesh mesh) {
 	pStream st;
 	float x, y, z;
 	int i, k, nbp, ret;
-	char *ptr, data[128], key[256], tmp[128];
+	char *ptr, data[128], key[256], tmp[128], *res;
 
 	/* input file */
 	strcpy(tmp, mesh->name);
@@ -950,7 +950,8 @@ int parseStream (pScene sc, pMesh mesh) {
 	sprintf(data, "%s.iso", tmp);
 	in = fopen(data, "r");
 	if (!in) {
-		sscanf(data, "DEFAULT.iso");
+		ret = sscanf(data, "DEFAULT.iso");
+		if (ret == EOF) printf("sscanf error\n");
 		in = fopen(data, "r");
 		if (!in) return (0);
 	}
@@ -961,14 +962,16 @@ int parseStream (pScene sc, pMesh mesh) {
 	st = sc->stream;
 
 	while (!feof(in)) {
-		fscanf(in, "%255s", key);
+		ret = fscanf(in, "%255s", key);
+		if (ret == EOF) printf("fscanf error\n");
 
 		for (i = 0; i < strlen(key); i++) {
 			key[i] = tolower(key[i]);
 		}
 
 		if (!strcmp(key, "nblines")) {
-			fscanf(in, "%d", &nbp);
+			ret = fscanf(in, "%d", &nbp);
+			if (ret == EOF) printf("fscanf error\n");
 			st->nbstl = nbp;
 			if (mesh->dim == 3)
 				for (k = 1; k <= 3 * st->nbstl; k += 3) {
@@ -1009,7 +1012,9 @@ int parseStream (pScene sc, pMesh mesh) {
 				st->zmax = y - mesh->ztra;
 			}
 		} else if (key[0] == '#') {
-			fgets(key, 255, in);
+			res = fgets(key, 255, in);
+			if (res == NULL) printf("fgets error\n");
+			free(res);
 		}
 	}
 
@@ -1032,7 +1037,7 @@ int listTetraStream (pScene sc, pMesh mesh, float *pp, int squiet) {
 	pStream st;
 	double dd, cb[4], cbdep[4], v[4], vdep[4], sizedep, normdep;
 	float step, p[3], ldt;
-	int i, k, exh, depart, nsdep, nsfin, nsold, nbp, maxpts;
+	int i, k, depart, nsdep, nsfin, nsold, nbp, maxpts;
 	clock_t ct;
 	FILE *out;
 
@@ -1069,7 +1074,6 @@ int listTetraStream (pScene sc, pMesh mesh, float *pp, int squiet) {
 
 	/* compute streamline */
 	nbp = 0;
-	exh = 0;
 	nsdep = mesh->ntet / 2;
 	step = 0.0;
 	nbar = 0;
@@ -1285,7 +1289,7 @@ int listHexaStream (pScene sc, pMesh mesh, float *pp, int squiet) {
 	pStream st;
 	double cbdep[4], cb[4], v[6], vdep[6], sizedep, normdep;
 	float step, p[3];
-	int i, k, exh, depart, nsdep, nsfin, nsold, nbp, maxpts;
+	int i, k, depart, nsdep, nsfin, nsold, nbp, maxpts;
 	mytime tt;
 
 	/* default */
@@ -1319,7 +1323,6 @@ int listHexaStream (pScene sc, pMesh mesh, float *pp, int squiet) {
 
 	/* compute streamline */
 	nbp = 0;
-	exh = 0;
 	nsdep = mesh->nhex / 2;
 	step = 0.0f;
 	nbar = 0;
@@ -1513,7 +1516,7 @@ int listTriaStream (pScene sc, pMesh mesh, float *pp) {
 	pStream st;
 	double dd, cb[3], cbdep[3], v[3], vdep[3], sizedep, normdep;
 	float step, p[3], ldt;
-	int i, k, exh, depart, nsdep, nsfin, nsold, nbp, maxpts;
+	int i, k, depart, nsdep, nsfin, nsold, nbp, maxpts;
 	clock_t ct;
 	FILE *out;
 
@@ -1547,7 +1550,6 @@ int listTriaStream (pScene sc, pMesh mesh, float *pp) {
 
 	/* compute streamlines */
 	nbp = 0;
-	exh = 0;
 	nsdep = mesh->nt / 2;
 	step = 0.0;
 	nbar = 0;
