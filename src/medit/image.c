@@ -31,7 +31,7 @@ extern "C" {
 PPMimage*loadPPM (const char *imgname, int *type) {
 	pPPMimage result;
 	FILE *fp;
-	int i, k, typimg, ret, r, g, b, s, maxval, bitsize;
+	int i, k, typimg, ret, r, g, b, s, maxval, bitsize, res;
 	char *ptr, c, buff[1024];
 
 	/* search for image */
@@ -145,7 +145,8 @@ PPMimage*loadPPM (const char *imgname, int *type) {
 	case P3:/* ascii file (color) */
 
 		for (i = 0; i < bitsize; i++) {
-			fscanf(fp, "%d", &r);
+			res = fscanf(fp, "%d", &r);
+			if (res == EOF) printf("fscanf error\n");
 			result->data[i] = (ubyte)r;
 		}
 

@@ -27,6 +27,7 @@ extern "C" {
 #include "medit.h"
 #include "libmeshb7.h"
 #include "extern.h"
+#include "eigenv.h"
 
 int loadMesh (pMesh mesh) {
 	pPoint ppt;

@@ -72,7 +72,7 @@ GLuint listCritPoint (pScene sc, pMesh mesh) {
 	double rgb[3], a0, a1, delta, rr1, rr2, aa;
 	float p[3];
 	int *adj, iadr, i, i1, i2, k, m, ncp, ps, ifilt;
-	ubyte typ, tag;
+	ubyte tag;
 	static double hsv[3] = {0.0f, 1.0f, 0.80f};
 
 	if (!mesh->nbb || mesh->nfield != mesh->dim) return (0);
@@ -84,7 +84,6 @@ GLuint listCritPoint (pScene sc, pMesh mesh) {
 	if (ddebug) printf("find critical points\n");
 
 	/* build list */
-	typ = 0;
 	ncp = 0;
 	ps = 0;
 	dlist = glGenLists(1);

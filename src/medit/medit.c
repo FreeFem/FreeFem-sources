@@ -126,6 +126,7 @@ int medit0 () {
 	char data[128];
 	int k, l;
 	clock_t ct;
+	char *res="";
 
 	/* default */
 	fprintf(stdout, " Loading data file(s)\n");
@@ -138,7 +139,8 @@ int medit0 () {
 		fprintf(stdout, "  File name(s) missing. Please enter : ");
 		fflush(stdout);
 		while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
-		fgets(data, 120, stdin);
+		res = fgets(data, 120, stdin);
+		if (res == NULL) printf("fgets error\n");
 		if (!strlen(data)) {
 			fprintf(stdout, "  ## No data\n");
 			return (0);
@@ -165,7 +167,8 @@ int medit0 () {
 		fprintf(stdout, "  Number of mesh missing:. Please enter : ");
 		fflush(stdout);
 		while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
-		fgets(data, 120, stdin);
+		res = fgets(data, 120, stdin);
+		if (res == NULL) printf("fgets error\n");
 		cv.nbm = atoi(data);
 	}
 
@@ -223,13 +226,14 @@ int medit0 () {
 	ct = difftime(clock(), ct);
 	fprintf(stdout, "  Input seconds:     %.2f\n",
 	        (double)ct / (double)CLOCKS_PER_SEC);
-
+	free(res);
 	return (cv.nbm);
 }
 
 int medit0_popen () {
 	int k;
 	clock_t ct;
+	char *res;
 
 	/* default */
 	fprintf(stdout, " Loading data file(s)\n");
@@ -242,7 +246,8 @@ int medit0_popen () {
 		fprintf(stdout, "  Number of mesh missing:. Please enter : ");
 		fflush(stdout);
 		while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
-		fgets(data, 128, stdin);
+		res = fgets(data, 128, stdin);
+		if (res == NULL) printf("fgets error\n");
 		cv.nbm = atoi(data);
 	}
 
@@ -342,7 +347,6 @@ int medit1 () {
 
 int main (int argc, char *argv []) {
 	int type;
-	char pwd[1024];
 
 #ifdef ppc
 	if (!getwd(pwd)) exit(2);

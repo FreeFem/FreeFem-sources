@@ -32,6 +32,10 @@ int loadNextMesh(pMesh, int, int);
 int animat ();
 int playAnim(pScene, pMesh, int, int);
 void glutIdle (void);
+int animParticle (pScene sc, pMesh mesh);
+
+/* bbfile.c */
+int EatLine (FILE *in);
 
 /* camera.c */
 double Azimuth(pCamera);
@@ -39,6 +43,9 @@ double Elevation(pCamera);
 void updateSun(pScene, pCamera);
 void updateCamera(pScene, pCamera, double, double);
 pCamera initCamera(pScene, int);
+
+/* cenrad.c */
+int cenrad (pMesh, int, double *, double *);
 
 /* clip.c */
 void updateClip(pClip, pMesh);
@@ -51,6 +58,7 @@ void resetClip(pScene, pClip, pMesh);
 pClip createClip(pScene, pMesh);
 void updateCube(pCube, pMesh);
 pCube createCube(pScene, pMesh);
+void tiltClip (pScene sc, pClip clip);
 
 /* clipvol.c */
 GLuint capTetra(pMesh);
@@ -59,6 +67,10 @@ GLuint capTetraIso(pMesh);
 
 /* critip.c */
 GLuint listCritPoint(pScene, pMesh);
+
+/* cube.c */
+void dumpCube (pScene, pMesh, pCube);
+void resetCube (pScene, pCube, pMesh);
 
 /* dlists.c */
 GLuint listTria(pScene, pMesh);
@@ -69,6 +81,12 @@ GLuint listHexa(pScene, pMesh, ubyte);
 /* eigenv.c */
 int eigenv (int sym, double mat[6], double lambda[3], double v[3][3]);
 
+/* ellipse.c */
+GLuint drawAllEllipse (pScene sc, pMesh mesh);
+void drawEllipse (pScene sc, pMesh mesh, int typel, int k);
+void circumSphere (pScene sc, pMesh mesh, int typel, int k);
+void drawEllipsoid (pScene sc, pMesh mesh, int typel, int k);
+
 /* geometry.c */
 GLuint geomList(pScene, pMesh);
 
@@ -78,6 +96,10 @@ int loadGIS(pMesh);
 /* hash.c */
 int hashTria(pMesh);
 int hashTetra(pMesh);
+int hashHexa (pMesh);
+
+/* ilists.c */
+int tetraIsoPOVray (pScene, pMesh);
 
 /* image.c */
 PPMimage*loadPPM (const char *imgname, int *type);
@@ -93,6 +115,13 @@ int loadMesh(pMesh);
 int saveMesh(pScene, pMesh, char *, ubyte);
 int loadSol (pMesh mesh, char *filename, int numsol);
 int loadMesh_popen(pMesh);	// pour popen
+
+/* inout_morice.c */
+int loadSol_popen (pMesh, char *, int);
+
+/* inout_popenbinaire.c */
+int loadMesh_popen_bin (pMesh);
+int loadSol_popen_bin (pMesh, char *, int);
 
 /* ilists.c */
 GLuint listTriaIso(pScene, pMesh);
@@ -160,6 +189,7 @@ void menuImage (int);
 void keyMetric (unsigned char key, int x, int y);
 int createMenus(pScene, pMesh);
 GLuint pickingScene (pScene sc, int x, int y, int ident);
+void keyCube (unsigned char key, int x, int y);
 
 /* mesh.c */
 void meshInfo(pMesh);
@@ -197,6 +227,9 @@ GLuint drawNormals (pMesh mesh, pScene sc);
 /* outmsh.c */
 int outmsh(pScene, pMesh, char *name, ubyte clipon);
 
+/* param.c */
+void parEdit (pScene sc);
+
 /* parsar.c */
 int parsar (int argc, char *argv []);
 
@@ -208,6 +241,7 @@ int parsop(pScene, pMesh);
 /* particle.c */
 int advectParticle (pScene, pMesh);
 int createParticle(pScene, pMesh);
+int displayParticle (pScene sc, pMesh mesh);
 
 /* path.c */
 int pathAdd(pScene, int, int);
@@ -252,6 +286,9 @@ void streamIdle ();
 /* scissor.c */
 void scissorScene ();
 
+/* sftcpy.c */
+int sftcpy (pScene, pMesh);
+
 /* status.c */
 void reshapeStatusBar (pScene sc, int width, int height);
 void redrawStatusBar (pScene sc);
@@ -281,6 +318,8 @@ double field3DInterp (pMesh mesh, int iel, double *cb, double *v);
 double sizeTria (pMesh mesh, int k);
 double sizeQuad (pMesh mesh, int k);
 double sizeTetra (pMesh mesh, int k);
+int streamIsoPoint (pScene sc, pMesh mesh);
+int inTetra (pMesh mesh, int nsdep, float *p, double *cb);
 
 /* tensor.c */
 GLuint listPointVector(pMesh, ubyte);
@@ -308,6 +347,8 @@ void multMatrix (GLfloat *p, GLfloat *a, GLfloat *b);
 void rotateMatrix (GLfloat angle, GLfloat x, GLfloat y, GLfloat z, GLfloat rm[16]);
 int invertMatrix (float src[16], float inverse[16]);
 int filnum (char *data, int numdep, char *ext);
+void transformPoint2 (double u[4], float v[4], float m[16]);
+
 
 /* vector.c */
 void drawVector2D (float p[2], double u[2], double scal);
@@ -316,6 +357,7 @@ GLuint listTria2dVector (pMesh mesh);
 GLuint listTria3dVector (pMesh mesh);
 GLuint listClipTetraVector (pMesh mesh);
 GLuint listClipHexaVector (pMesh mesh);
+GLuint listQuad2dVector (pMesh mesh);
 
 /* view.c */
 void copyView (pTransform view, pCamera cam, pPersp persp);

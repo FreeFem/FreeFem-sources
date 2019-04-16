@@ -1021,6 +1021,7 @@ void keyMetric (unsigned char key, int x, int y) {
 	pScene sc;
 	pMesh mesh;
 	ubyte post = TRUE;
+	int ret;
 
 	/* default */
 	sc = cv.scene[currentScene()];
@@ -1148,7 +1149,8 @@ void keyMetric (unsigned char key, int x, int y) {
 		fprintf(stdout, "elevation coeff (%.2f): ", altcoef);
 		fflush(stdout);
 		while(fgetc(stdin)!=EOF);	/*fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems*/
-		fscanf(stdin, "%f", &altcoef);
+		ret = fscanf(stdin, "%f", &altcoef);
+		if (ret == EOF) printf("fscanf error\n");
 		if (altcoef == 0.0) sc->mode |= ~S_ALTITUDE;
 
 		sc->type |= S_RESET;

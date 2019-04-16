@@ -28,12 +28,16 @@ extern "C" {
 #include "libmeshb7.h"
 #include "extern.h"
 #include "string.h"
+#include "eigenv.h"
+
 static int debug = 0;
 void getline_number (char *nature, int *nb) {
 	char data[256];
 	char *tictac;
+	char *res;
 
-	fgets(data, 256, stdin);
+	res = fgets(data, 256, stdin);
+	if (res == NULL) printf("fgets error\n");
 	tictac = strtok(data, " \n");
 	if (tictac == NULL) {
 		printf("problem in reading the number of %s\n", nature);
@@ -42,13 +46,16 @@ void getline_number (char *nature, int *nb) {
 		*nb = atoi(tictac);
 		if (debug) fprintf(stdout, "Number of %s %i \n", nature, *nb);
 	}
+	free(res);
 }
 
 void getline_1int (char *nature, int *nbint) {
 	char data[256];
 	char *tictac;
+	char *res;
 
-	fgets(data, 256, stdin);
+	res = fgets(data, 256, stdin);
+	if (res == NULL) printf("fgets error\n");
 	tictac = strtok(data, " \n");
 	if (tictac == NULL) {
 		printf("problem in reading the %s", nature);
@@ -56,16 +63,20 @@ void getline_1int (char *nature, int *nbint) {
 	}
 
 	*nbint = atoi(tictac);
+	free(res);
 }
 
 void getline_1intfirst (char *nature, int *nbint) {
 	char data[256];
 	char *tictac;
+	char *res;
 
-	fgets(data, 256, stdin);
+	res = fgets(data, 256, stdin);
+	if (res == NULL) printf("fgets error\n");
 	tictac = strtok(data, " \n");
 	if (tictac == NULL) {
-		fgets(data, 256, stdin);
+		res = fgets(data, 256, stdin);
+		if (res == NULL) printf("fgets error\n");
 		tictac = strtok(data, " \n");
 	}
 
@@ -75,42 +86,51 @@ void getline_1intfirst (char *nature, int *nbint) {
 	}
 
 	*nbint = atoi(tictac);
+	free(res);
 }
 
 void getline_popen_vertex (int ddim, double *c, int *ref) {
 	char data[256];
 	char *tictac;
 	int i;
+	char *res;
 
-	fgets(data, 256, stdin);
+	res = fgets(data, 256, stdin);
+	if (res == NULL) printf("fgets error\n");
 	c[0] = strtod(data, &tictac);
 
 	for (i = 1; i < ddim; i++)
 		c[i] = strtod(tictac, &tictac);
 
 	*ref = atoi(tictac);
+	free(res);
 }
 
 void getline_popen_firstvertex (int ddim, double *c, int *ref) {
 	char data[256];
 	char *tictac;
 	int i;
+	char *res;
 
-	fgets(data, 256, stdin);
+	res = fgets(data, 256, stdin);
+	if (res == NULL) printf("fgets error\n");
 	c[0] = strtod(data, &tictac);
 
 	for (i = 1; i < ddim; i++)
 		c[i] = strtod(tictac, &tictac);
 
 	*ref = atoi(tictac);
+	free(res);
 }
 
 void getline_popen_elem (int ddim, int *v, int *ref) {
 	char data[256];
 	char *tictac;
 	int i;
+	char *res;
 
-	fgets(data, 256, stdin);
+	res = fgets(data, 256, stdin);
+	if (res == NULL) printf("fgets error\n");
 	tictac = strtok(data, " \n");
 	if (tictac == NULL) printf("problem: in reading element");
 
@@ -120,18 +140,22 @@ void getline_popen_elem (int ddim, int *v, int *ref) {
 	}
 
 	*ref = atoi(tictac);
+	free(res);
 }
 
 void getline_popen_firstelem (int ddim, int *v, int *ref) {
 	char data[256];
 	char *tictac;
 	int i;
+	char *res;
 
-	fgets(data, 256, stdin);
+	res = fgets(data, 256, stdin);
+	if (res == NULL) printf("fgets error\n");
 	tictac = strtok(data, " \n");
 
 	if (tictac == NULL) {
-		fgets(data, 256, stdin);
+		res = fgets(data, 256, stdin);
+		if (res == NULL) printf("fgets error\n");
 		tictac = strtok(data, " \n");
 	}
 
@@ -143,13 +167,16 @@ void getline_popen_firstelem (int ddim, int *v, int *ref) {
 	}
 
 	*ref = atoi(tictac);
+	free(res);
 }
 
 void getline_popen_edge (int *v0, int *v1, int *ref) {
 	char data[256];
 	char *tictac;
+	char *res;
 
-	fgets(data, 256, stdin);
+	res = fgets(data, 256, stdin);
+	if (res == NULL) printf("fgets error\n");
 	tictac = strtok(data, " \n");
 	if (tictac == NULL) printf("problem: in reading edges");
 
@@ -160,18 +187,22 @@ void getline_popen_edge (int *v0, int *v1, int *ref) {
 	tictac = strtok(NULL, " \n");
 
 	*ref = atoi(tictac);
+	free(res);
 }
 
 void getline_popen_firstedge (int *v0, int *v1, int *ref) {
 	char data[256];
 	char *tictac;
+	char *res;
 
-	fgets(data, 256, stdin);
+	res = fgets(data, 256, stdin);
+	if (res == NULL) printf("fgets error\n");
 	if (debug) fprintf(stdout, "data edge %s\n", data);
 
 	tictac = strtok(data, " \n");
 	if (tictac == NULL) {
-		fgets(data, 256, stdin);
+		res = fgets(data, 256, stdin);
+		if (res == NULL) printf("fgets error\n");
 		tictac = strtok(data, " \n");
 	}
 
@@ -184,14 +215,16 @@ void getline_popen_firstedge (int *v0, int *v1, int *ref) {
 	tictac = strtok(NULL, " \n");
 
 	*ref = atoi(tictac);
+	free(res);
 }
 
 void getline_popen_elemnoref (char *nature, int ddim, int *v) {
 	char data[256];
-	char *tictac;
+	char *tictac, *res;
 	int i;
 
-	fgets(data, 256, stdin);
+	res = fgets(data, 256, stdin);
+	if (res == NULL) printf("fgets error\n");
 	tictac = strtok(data, " \n");
 	if (tictac == NULL) printf("problem: in reading %s\n", nature);
 
@@ -201,18 +234,21 @@ void getline_popen_elemnoref (char *nature, int ddim, int *v) {
 	}
 
 	if (tictac != NULL) printf("problem: in reading %s\n", nature);
+	free(res);
 }
 
 void getline_popen_firstelemnoref (char *nature, int ddim, int *v) {
 	char data[256];
-	char *tictac;
+	char *tictac, *res;
 	int i;
 
-	fgets(data, 256, stdin);
+	res = fgets(data, 256, stdin);
+	if (res == NULL) printf("fgets error\n");
 	tictac = strtok(data, " \n");
 
 	if (tictac == NULL) {
-		fgets(data, 256, stdin);
+		res = fgets(data, 256, stdin);
+		if (res == NULL) printf("fgets error\n");
 		tictac = strtok(data, " \n");
 	}
 
@@ -222,34 +258,40 @@ void getline_popen_firstelemnoref (char *nature, int ddim, int *v) {
 		v[i] = atoi(tictac);
 		tictac = strtok(NULL, " \n");
 	}
+	free(res);
 }
 
 void getline_popen_firstdouble (char *nature, int ddim, double *v) {
 	char data[256];
-	char *tictac;
+	char *tictac, *res;
 	int i;
 	char *tictac2;
 
-	fgets(data, 256, stdin);
+	res = fgets(data, 256, stdin);
+	if (res == NULL) printf("fgets error\n");
 
 	tictac2 = strtok(data, " \n");
 
-	if (tictac2 == NULL)
-		fgets(data, 256, stdin);
+	if (tictac2 == NULL) {
+		res = fgets(data, 256, stdin);
+		if (res == NULL) printf("fgets error\n");
+	}
 
 	v[0] = strtod(data, &tictac);
 
 	for (i = 1; i < ddim; i++) {
 		v[i] = strtod(tictac, &tictac);
 	}
+	free(res);
 }
 
 void getline_popen_double (char *nature, int ddim, double *v) {
 	char data[256];
-	char *tictac;
+	char *tictac, *res;
 	int i;
 
-	fgets(data, 256, stdin);
+	res = fgets(data, 256, stdin);
+	if (res == NULL) printf("fgets error\n");
 	v[0] = strtod(data, &tictac);
 
 	for (i = 1; i < ddim; i++) {
@@ -260,12 +302,13 @@ void getline_popen_double (char *nature, int ddim, double *v) {
 /*   function for loadsol_popen   */
 void read_TypeSizeTyptab (char *nature, int *type, int *size, int *typtab) {
 	char data[256];
-	char *tictac;
+	char *tictac, *res;
 	int i;
 	int tmptype;
 	int tmpsize;
 
-	fgets(data, 256, stdin);
+	res = fgets(data, 256, stdin);
+	if (res == NULL) printf("fgets error\n");
 	tictac = strtok(data, " \n");
 	if (tictac == NULL) printf("problem: in reading %s", nature);
 
@@ -285,6 +328,7 @@ void read_TypeSizeTyptab (char *nature, int *type, int *size, int *typtab) {
 
 	*size = tmpsize;
 	*type = tmptype;
+	free(res);
 }
 
 int loadMesh_popen (pMesh mesh) {
@@ -294,11 +338,11 @@ int loadMesh_popen (pMesh mesh) {
 	pQuad pq;
 	pTetra ptet;
 	pHexa ph;
-	double d, dp1, dp2, dp3, dn[3];
-	float *n, fp1, fp2, fp3;
+	double d, dn[3];
+	float *n;
 	int i, ia, ib, ref, is=0, k, disc=0, nn=0, nt=0, nq=0;
-	char *ptr, data[256];
-	char *natureread;
+	char data[256];
+	char *natureread, *res;
 	int loopdebug;
 	int vatn[2];
 	int tvatn[3];
@@ -323,7 +367,8 @@ int loadMesh_popen (pMesh mesh) {
 	while (!feof(stdin)) {
 		char *tictac;
 
-		fgets(data, 256, stdin);
+		res = fgets(data, 256, stdin);
+		if (res == NULL) printf("fgets error\n");
 		tictac = strtok(data, " \n");
 
 		loopdebug = loopdebug + 1;
@@ -551,9 +596,11 @@ int loadMesh_popen (pMesh mesh) {
 			natureread = "Corners";
 			getline_number(natureread, &(mesh->nc));
 
-			fgets(data, 256, stdin);
+			res = fgets(data, 256, stdin);
+			if (res == NULL) printf("fgets error\n");
 			if (tictac == NULL) {
-				fgets(data, 256, stdin);
+				res = fgets(data, 256, stdin);
+				if (res == NULL) printf("fgets error\n");
 				tictac = strtok(data, " \n");
 			}
 
@@ -571,7 +618,8 @@ int loadMesh_popen (pMesh mesh) {
 			}
 
 			for (k = 2; k <= mesh->nc; k++) {
-				fgets(data, 256, stdin);
+				res = fgets(data, 256, stdin);
+				if (res == NULL) printf("fgets error\n");
 				tictac = strtok(data, " \n");
 				is = atoi(tictac);
 				if (is < 1 || is > mesh->np) {
@@ -588,9 +636,11 @@ int loadMesh_popen (pMesh mesh) {
 			natureread = "RequiredVertices";
 			getline_number(natureread, &(mesh->nr));
 
-			fgets(data, 256, stdin);
+			res = fgets(data, 256, stdin);
+			if (res == NULL) printf("fgets error\n");
 			if (tictac == NULL) {
-				fgets(data, 256, stdin);
+				res = fgets(data, 256, stdin);
+				if (res == NULL) printf("fgets error\n");
 				tictac = strtok(data, " \n");
 			}
 
@@ -608,7 +658,8 @@ int loadMesh_popen (pMesh mesh) {
 			}
 
 			for (k = 2; k <= mesh->nr; k++) {
-				fgets(data, 256, stdin);
+				res = fgets(data, 256, stdin);
+				if (res == NULL) printf("fgets error\n");
 				tictac = strtok(data, " \n");
 				is = atoi(tictac);
 				if (is < 1 || is > mesh->np) {
@@ -972,11 +1023,9 @@ int loadMesh_popen (pMesh mesh) {
 
 int loadScaVecTen (pMesh mesh, int numsol, int dim, int ver, int nel, int type, int size, int *typtab, int key, char *natureread) {
 	pSolution sol;
-	double dbuf[GmfMaxTyp];
 	float fbuf[GmfMaxTyp];
 	double m[6], lambda[3], eigv[3][3], vp[2][2];
 	int k, i, iord, off;
-	char *ptr, data[128];
 	double ScaSol[1], VecSol[3], TenSol[9];
 
 	if (numsol > type) numsol = 1;
@@ -1104,12 +1153,8 @@ int loadScaVecTen (pMesh mesh, int numsol, int dim, int ver, int nel, int type, 
 
 /*load solution (metric) */
 int loadSol_popen (pMesh mesh, char *filename, int numsol) {
-	pSolution sol;
-	double dbuf[GmfMaxTyp];
-	float fbuf[GmfMaxTyp];
-	double m[6], lambda[3], eigv[3][3], vp[2][2];
-	int inm=0, k, i, key, nel, size, type, iord, off, typtab[GmfMaxTyp], ver, dim;
-	char *ptr, data[256];
+	int inm=0, key, nel, size, type, typtab[GmfMaxTyp], ver=0, dim=0;
+	char data[256], *res="";
 
 	// rajout pour popen
 	int NumberofSolAT;
@@ -1120,12 +1165,11 @@ int loadSol_popen (pMesh mesh, char *filename, int numsol) {
 	while (!feof(stdin)) {
 		char *tictac;
 
-		// fprintf(stdout,"data= %s\n",data);
-		fgets(data, 256, stdin);
+		res = fgets(data, 256, stdin);
+		if (res == NULL) printf("fgets error\n");
 		tictac = strtok(data, " \n");
 		if (tictac == NULL) continue;
 
-		// fprintf(stdout,"data= %s, tictac= %s\n",data,tictac);
 		if (!strncmp(tictac, "MeshVersionFormatted", 20)) {
 			/* read mesh format */
 			natureread = "MeshVersionFormatted";
@@ -1288,6 +1332,7 @@ int loadSol_popen (pMesh mesh, char *filename, int numsol) {
 	}
 
 	printf("NumberofSolAT %i\n", NumberofSolAT);
+	free(res);
 	return (1);
 }
 

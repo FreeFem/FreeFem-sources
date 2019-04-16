@@ -372,7 +372,7 @@ void keyScene (unsigned char key, int x, int y) {
 	pCamera cam;
 	double dd;
 	float a, b, c, d;
-	int k, keyact, numit, idw = currentScene();
+	int ret, k, keyact, numit, idw = currentScene();
 	ubyte post = FALSE, dolist = FALSE;
 
 	if (idw < 0) exit(0);
@@ -871,7 +871,8 @@ void keyScene (unsigned char key, int x, int y) {
 			fprintf(stdout, "ENTITY NUMBER: ");
 			fflush(stdout);
 			while(fgetc(stdin)!=EOF);	/* fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems */
-			fscanf(stdin, "%d", &numit);
+			ret = fscanf(stdin, "%d", &numit);
+			if (ret == EOF) printf("fscanf error\n");
 			if (sc->picklist) glDeleteLists(sc->picklist, 1);
 
 			if (numit > 0)
@@ -897,7 +898,8 @@ void keyScene (unsigned char key, int x, int y) {
 			fprintf(stdout, "Plane coeffs : ");
 			fflush(stdout);
 			while(fgetc(stdin)!=EOF);	/* fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems */
-			fscanf(stdin, "%f %f %f %f", &a, &b, &c, &d);
+			ret = fscanf(stdin, "%f %f %f %f", &a, &b, &c, &d);
+			if (ret == EOF) printf("fscanf error\n");
 			resetClip(sc, clip, mesh);
 			clip->eqn[0] = a;
 			clip->eqn[1] = b;
@@ -933,7 +935,8 @@ void keyScene (unsigned char key, int x, int y) {
 			fprintf(stdout, "reference (%d): ", refpick);
 			fflush(stdout);
 			while(fgetc(stdin)!=EOF);	/* fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems */
-			fscanf(stdin, "%d", &refpick);
+			ret = fscanf(stdin, "%d", &refpick);
+			if (ret == EOF) printf("fscanf error\n");
 			break;
 
 		case '&':
