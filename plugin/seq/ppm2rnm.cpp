@@ -50,7 +50,7 @@ typedef string *pstring;
 extern "C" {
 #endif
 
-PPMimage*loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
+PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 	pPPMimage result;
 	FILE *fp;
 	int i, k, typimg, ret, r, g, b, s, maxval, bitsize;
@@ -64,20 +64,16 @@ PPMimage*loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 	if (!ptr) {
 		ptr = strstr(imgname, ".pgm");
 		if (!ptr) {strcat(data, ".ppm");}
-
-		fp = fopen(data, "rb");
-	} else {
-		fp = fopen(data, "rb");
 	}
 
+	fp = fopen(data, "rb");
 	if (!fp) {
 		fprintf(stderr, "  ## UNABLE TO OPEN FILE %s.\n", data);
 		return 0;
 	}
 
-	if (!quiet) {
+	if (!quiet)
 		fprintf(stdout, "  opening %s\n", data);
-	}
 
 	if (!fgets(buff, sizeof(buff), fp)) {
 		fprintf(stderr, "  ## INVALID HEADER.\n");
@@ -91,19 +87,20 @@ PPMimage*loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 	}
 
 	switch (buff[1]) {
-	case '2': typimg = P2;
-		break;
-	case '3': typimg = P3;
-		break;
-	case '4': typimg = P4;
-		break;
-	case '5': typimg = P5;
-		break;
-	case '6': typimg = P6;
-		break;
-	default:
-		fprintf(stderr, "  ## INVALID IMAGE FORMAT (MUST BE 'PX').\n");
-		return 0;
+		case '2': typimg = P2;
+			break;
+		case '3': typimg = P3;
+			break;
+		case '4': typimg = P4;
+			break;
+		case '5': typimg = P5;
+			break;
+		case '6': typimg = P6;
+			break;
+		default:
+			fprintf(stderr, "  ## INVALID IMAGE FORMAT (MUST BE 'PX').\n");
+			fclose(fp);
+			return 0;
 	}
 
 	/* allocate memory to store imagee */
@@ -130,12 +127,14 @@ PPMimage*loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 	if (ret != 2) {
 		fprintf(stderr, "  ## ERROR LOADING IMAGE.\n");
 		free(result);
+		fclose(fp);
 		return 0;
 	}
 
 	if (fscanf(fp, "%d", &maxval) != 1) {
 		fprintf(stderr, "  ## INVALID IMAGE SIZE.\n");
 		free(result);
+		fclose(fp);
 		return 0;
 	}
 
@@ -164,6 +163,13 @@ PPMimage*loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 
 		for (i = 0; i < bitsize; i++) {
 			int rr = fscanf(fp, "%d", &r);
+			if (rr == EOF) {
+				fprintf(stderr, "  ## ERROR LOADING IMAGE.\n");
+				free(result->data);
+				free(result);
+				fclose(fp);
+				return 0;
+			}
 			result->data[i] = (ubyte)r;
 		}
 
@@ -176,6 +182,7 @@ PPMimage*loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 			fprintf(stderr, "  ## ERROR LOADING IMAGE.\n");
 			free(result->data);
 			free(result);
+			fclose(fp);
 			return 0;
 		}
 

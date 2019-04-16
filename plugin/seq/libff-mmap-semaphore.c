@@ -39,20 +39,24 @@ void (*libf_HandleError)(const char *, int err) = 0;
 static char*newstringcpy (const char *nm) {
 	char *p = (char *)malloc(strlen(nm) + 1);
 
-	strcpy(p, nm);
+	if (p)
+		strcpy(p, nm);
+
 	return p;
 }
 
 static char*newstringcpyadds (const char *nm) {
 	char *p = (char *)malloc(strlen(nm) + 2);
 
-	if (nm[0] != '/') {	/* add / */
-		strcpy(p, "/");
-		strcat(p, nm);
-	} else {
-		strcpy(p, nm);
+	if (p) {
+		if (nm[0] != '/') {	/* add / */
+			strcpy(p, "/");
+			strcat(p, nm);
+		} else {
+			strcpy(p, nm);
+		}
 	}
-
+	
 	return p;
 }
 

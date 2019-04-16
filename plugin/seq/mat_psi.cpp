@@ -39,7 +39,7 @@ class MatrixUpWind0:  public E_F0 {
 			expTh = to<pmesh>(args[1]);
 			expc = CastTo<double>(args[2]);
 			const E_Array *a = dynamic_cast<const E_Array *>((Expression)args[3]);
-			if (a->size() != 2) {CompileError("syntax:  MatrixUpWind0(Th,rhi,[u1,u2])");}
+			if (!a || a->size() != 2) {CompileError("syntax:  MatrixUpWind0(Th,rhi,[u1,u2])");}
 
 			int err = 0;
 			expu1 = CastTo<double>((*a)[0]);
@@ -166,8 +166,8 @@ AnyType MatrixUpWind0::operator () (Stack stack) const {
 	const Mesh &Th(*pTh);
 	{
 		//map<pair<int, int>, R> Aij;
-		MatriceMorse<R> * pAij= new MatriceMorse<R>(Th.nv), &Aij = *pAij ; 
-		
+		MatriceMorse<R> * pAij= new MatriceMorse<R>(Th.nv), &Aij = *pAij ;
+
 		KN<double> cc(Th.nv);
 		double infini = DBL_MAX;
 		cc = infini;
@@ -233,8 +233,8 @@ AnyType MatrixUpWind3::operator () (Stack stack) const {
 	const Mesh3 &Th(*pTh);
 	{
 		//map<pair<int, int>, R> Aij;
-		MatriceMorse<R> * pAij= new MatriceMorse<R>(Th.nv), &Aij = *pAij ; 
-		
+		MatriceMorse<R> * pAij= new MatriceMorse<R>(Th.nv), &Aij = *pAij ;
+
 		KN<double> cc(Th.nv);
 		double infini = DBL_MAX;
 		cc = infini;
