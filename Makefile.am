@@ -22,7 +22,7 @@
 
 SUBDIRS=3rdparty src \
 	plugin plugin/seq plugin/mpi \
-	plugin/hpddm plugin/ffddm \
+	plugin/ffddm \
 	examples examples/examples examples/misc \
 	examples/tutorial examples/other \
 	examples/plugin examples/mpi \
@@ -156,7 +156,8 @@ idp/getARGV.idp \
 idp/ffddm_functions.idp \
 idp/macro_ddm_substructuring.idp \
 idp/ffddm_parameters.idp \
-idp/macro_ddm.idp
+idp/macro_ddm.idp \
+idp/CC.idp
 
 
 
@@ -419,7 +420,6 @@ LIST_GENERATE_FILE= configure config.h.in \
     plugin/Makefile.in \
 	plugin/seq/Makefile.in \
 	plugin/mpi/Makefile.in \
-	plugin/hpddm/Makefile.in \
 	plugin/ffddm/Makefile.in \
 	examples/Makefile.in \
     examples/plugin/Makefile.in \
@@ -458,7 +458,6 @@ LIST_GENERATE_FILE_AM= \
     plugin/Makefile.am \
 	plugin/seq/Makefile.am \
 	plugin/mpi/Makefile.am \
-	plugin/hpddm/Makefile.am \
 	plugin/ffddm/Makefile.am \
 	examples/Makefile.am \
     examples/plugin/Makefile.am \

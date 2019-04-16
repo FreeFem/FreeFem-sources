@@ -44,24 +44,24 @@ FreeFEM includes a fast interpolation algorithm and a language for the manipulat
 
 The user documentation is available [here](https://github.com/FreeFem/FreeFem-doc).
 
-If you use FreeFEM for academic research, please use the following :
+If you use FreeFEM for academic research, please use the following:
 
-**APA :**
+**APA:**
 ```
 Hecht, F. (2012). New development in FreeFem++. Journal of numerical mathematics, 20(3-4), 251-266.
 ```
 
-**ISO 690 :**
+**ISO 690:**
 ```
 HECHT, Frédéric. New development in FreeFem++. Journal of numerical mathematics, 2012, vol. 20, no 3-4, p. 251-266.
 ```
 
-**MLA :**
+**MLA:**
 ```
 Hecht, Frédéric. "New development in FreeFem++." Journal of numerical mathematics 20.3-4 (2012): 251-266.
 ```
 
-**BibTeX :**
+**BibTeX:**
 ```
 @article{MR3043640,
   AUTHOR = {Hecht, F.},
@@ -81,14 +81,14 @@ Hecht, Frédéric. "New development in FreeFem++." Journal of numerical mathemat
 
 All development efforts take place in the _develop_ branch (or in feature branches: feature-cmake, geneo4PETSc, ... for specific projects)
 
-**Do not commit on master branch !**
+**Do not commit on master branch!**
 
 Have a look on the [Wiki](https://github.com/FreeFem/FreeFem-sources/wiki)!
 
 ## CI/CD Tools
 
 All: all dependency packages are installed (computer with root access).<br/>
-No : dependency packages are not installed (computer without root access).
+No: dependency packages are not installed (computer without root access).
 
 <sup>1</sup>: Ubuntu 18.04 x86
 
