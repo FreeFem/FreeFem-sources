@@ -198,7 +198,7 @@ int parsop (pScene sc, pMesh mesh) {
 	double dd;
 	float r, g, b, ca, cb, cc, na, nb, nc;
 	int k, i, m, n, xs, ys, ret, ref, nbmat;
-	char *ptr, ub, data[128], key[256], buf[256], pscol[32];
+	char *ptr, ub, data[128], key[256], buf[256], pscol[32], *res="";
 
 	/* check if user-specified parameters */
 	iniopt(sc, mesh);
@@ -229,7 +229,8 @@ int parsop (pScene sc, pMesh mesh) {
 	m = n = 0;
 
 	while (!feof(in)) {
-		fscanf(in, "%255s", key);
+		ret = fscanf(in, "%255s", key);
+		if (ret == EOF) printf("fscanf error\n");
 		if (feof(in)) break;
 
 		for (i = 0; i < strlen(key); i++) {
@@ -237,15 +238,18 @@ int parsop (pScene sc, pMesh mesh) {
 		}
 
 		if (key[0] == '#') {
-			fgets(key, 255, in);
+			res = fgets(key, 255, in);
+			if (res == NULL) printf("fgets error\n");
 		} else if (!strcmp(key, "backgroundcolor")) {
-			fscanf(in, "%f %f %f", &r, &g, &b);
+			ret = fscanf(in, "%f %f %f", &r, &g, &b);
+			if (ret == EOF) printf("fscanf error\n");
 			sc->par.back[0] = r;
 			sc->par.back[1] = g;
 			sc->par.back[2] = b;
 			sc->par.back[3] = 1.0f;
 		} else if (!strcmp(key, "boundingbox")) {
-			fscanf(in, "%f %f %f %f %f %f", &ca, &cb, &cc, &na, &nb, &nc);
+			ret = fscanf(in, "%f %f %f %f %f %f", &ca, &cb, &cc, &na, &nb, &nc);
+			if (ret == EOF) printf("fscanf error\n");
 			mesh->xmin = ca;
 			mesh->ymin = cb;
 			mesh->zmin = cc;
@@ -253,7 +257,8 @@ int parsop (pScene sc, pMesh mesh) {
 			mesh->ymax = nb;
 			mesh->zmax = nc;
 		} else if (!strcmp(key, "clipplane")) {
-			fscanf(in, "%f %f %f %f %f %f", &ca, &cb, &cc, &na, &nb, &nc);
+			ret = fscanf(in, "%f %f %f %f %f %f", &ca, &cb, &cc, &na, &nb, &nc);
+			if (ret == EOF) printf("fscanf error\n");
 			sc->par.clip[0] = ca - mesh->xtra;
 			sc->par.clip[1] = cb - mesh->ytra;
 			sc->par.clip[2] = cc - mesh->ztra;
@@ -264,27 +269,32 @@ int parsop (pScene sc, pMesh mesh) {
 				sc->par.clip[5] = nc / dd;
 			}
 		} else if (!strcmp(key, "linecolor")) {
-			fscanf(in, "%f %f %f", &r, &g, &b);
+			ret = fscanf(in, "%f %f %f", &r, &g, &b);
+			if (ret == EOF) printf("fscanf error\n");
 			sc->par.line[0] = r;
 			sc->par.line[1] = g;
 			sc->par.line[2] = b;
 			sc->par.linc = 1;
 		} else if (!strcmp(key, "linewidth")) {
-			fscanf(in, "%f", &r);
+			ret = fscanf(in, "%f", &r);
+			if (ret == EOF) printf("fscanf error\n");
 			sc->par.linewidth = max(1.0, min(10.0, r));
 			sc->par.linc = 1;
 		} else if (!strcmp(key, "pointsize")) {
-			fscanf(in, "%f", &r);
+			ret = fscanf(in, "%f", &r);
+			if (ret == EOF) printf("fascanf error\n");
 			sc->par.pointsize = max(1.0, min(10.0, r));
 			sc->par.linc = 1;
 		} else if (!strcmp(key, "edgecolor")) {
-			fscanf(in, "%f %f %f", &r, &g, &b);
+			ret = fscanf(in, "%f %f %f", &r, &g, &b);
+			if (ret == EOF) printf("fscanf error\n");
 			sc->par.edge[0] = r;
 			sc->par.edge[1] = g;
 			sc->par.edge[2] = b;
 			sc->par.linc = 1;
 		} else if (!strcmp(key, "sunposition")) {
-			fscanf(in, "%f %f %f", &r, &g, &b);
+			ret = fscanf(in, "%f %f %f", &r, &g, &b);
+			if (ret == EOF) printf("fscanf error\n");
 			sc->dmax = mesh->xmax - mesh->xmin;
 			sc->dmax = max(sc->dmax, mesh->ymax - mesh->ymin);
 			sc->dmax = max(sc->dmax, mesh->zmax - mesh->zmin);
@@ -294,11 +304,13 @@ int parsop (pScene sc, pMesh mesh) {
 			sc->par.sunpos[2] = 2.0 * sc->dmax * b;
 			sc->par.sunp = 1;
 		} else if (!strcmp(key, "windowsize")) {
-			fscanf(in, "%d %d", &xs, &ys);
+			ret = fscanf(in, "%d %d", &xs, &ys);
+			if (ret == EOF) printf("fscanf error\n");
 			sc->par.xs = (short)xs;
 			sc->par.ys = (short)ys;
 		} else if (!strcmp(key, "rendermode")) {
-			fscanf(in, "%255s", buf);
+			ret = fscanf(in, "%255s", buf);
+			if (ret == EOF) printf("fscanf error\n");
 
 			for (i = 0; i < strlen(buf); i++) {
 				buf[i] = tolower(buf[i]);
@@ -332,8 +344,9 @@ int parsop (pScene sc, pMesh mesh) {
 
 			if (sc->iso.val[MAXISO - 1] < sc->iso.val[0]) sc->iso.palette = 0;
 		} else if (!strcmp(key, "postscript")) {
-			fscanf(in, "%f %f %255s %31s", &sc->par.cm, &sc->par.dpi,
+			ret = fscanf(in, "%f %f %255s %31s", &sc->par.cm, &sc->par.dpi,
 			       buf, pscol);
+		  if (ret == EOF) printf("fscanf error\n");
 			strncpy(sc->par.pscolor, pscol, 10);
 			sc->par.coeff = atof(buf);
 			if (sc->par.coeff < 0.0f) sc->par.coeff = 0.0f;
@@ -343,11 +356,13 @@ int parsop (pScene sc, pMesh mesh) {
 			ret = fscanf(in, "%f %f %f", &sc->par.maxtime, &sc->par.pertime, &sc->par.dt);
 			if (ret == EOF) printf("fscanf error\n");
 			if (!EatSpace(in)) {
-				fscanf(in, "%c", &ub);
+				ret = fscanf(in, "%c", &ub);
+				if (ret == EOF) printf("fscanf error\n");
 				sc->par.nbpart = max(atoi(&ub), 1);
 			}
 		} else if (!strcmp(key, "nbmaterial")) {
-			fscanf(in, "%d", &nbmat);
+			ret = fscanf(in, "%d", &nbmat);
+			if (ret == EOF) printf("fscanf error\n");
 			sc->par.nbmat = max(2, nbmat);
 			matInit(sc);
 		} else if (!strcmp(key, "material")) {
@@ -356,21 +371,28 @@ int parsop (pScene sc, pMesh mesh) {
 				matInit(sc);
 			}
 
-			fgets(buf, 255, in);
+			res = fgets(buf, 255, in);
+			if (res == NULL) printf("fgets error\n");
 			if (n > sc->par.nbmat) continue;
 
 			ret = sscanf(buf, "%255s %d", buf, &ref);
+			if (ret == EOF) printf("fscanf error\n");
 			ptr = strstr(buf, "DEFAULT");
 			pm = ptr ? &sc->material[DEFAULT_MAT] : &sc->material[++n];
 			strcpy(pm->name, buf);
 			if (ret < 2) ref = 0;
 
 			pm->ref = ref ? ref : n;
-			fscanf(in, "%f %f %f %f", &pm->amb[0], &pm->amb[1], &pm->amb[2], &pm->amb[3]);
-			fscanf(in, "%f %f %f %f", &pm->dif[0], &pm->dif[1], &pm->dif[2], &pm->dif[3]);
-			fscanf(in, "%f %f %f %f", &pm->spe[0], &pm->spe[1], &pm->spe[2], &pm->spe[3]);
-			fscanf(in, "%f %f %f %f", &pm->emi[0], &pm->emi[1], &pm->emi[2], &pm->emi[3]);
-			fscanf(in, "%f", &pm->shininess);
+			ret =fscanf(in, "%f %f %f %f", &pm->amb[0], &pm->amb[1], &pm->amb[2], &pm->amb[3]);
+			if (ret == EOF) printf("fscanf error\n");
+			ret = fscanf(in, "%f %f %f %f", &pm->dif[0], &pm->dif[1], &pm->dif[2], &pm->dif[3]);
+			if (ret == EOF) printf("fscanf error\n");
+			ret = fscanf(in, "%f %f %f %f", &pm->spe[0], &pm->spe[1], &pm->spe[2], &pm->spe[3]);
+			if (ret == EOF) printf("fscanf error\n");
+			ret = fscanf(in, "%f %f %f %f", &pm->emi[0], &pm->emi[1], &pm->emi[2], &pm->emi[3]);
+			if (ret == EOF) printf("fscanf error\n");
+			ret = fscanf(in, "%f", &pm->shininess);
+			if (ret == EOF) printf("fscanf error\n");
 
 			if (pm->amb[3] == 0.0) pm->amb[3] = 1.0;
 
@@ -386,7 +408,8 @@ int parsop (pScene sc, pMesh mesh) {
 		}
 		/* stereo mode */
 		else if (!strcmp(key, "eyesep")) {
-			fscanf(in, "%f", &sc->par.eyesep);
+			ret = fscanf(in, "%f", &sc->par.eyesep);
+			if (ret == EOF) printf("fscanf error\n");
 		}
 	}
 
@@ -405,6 +428,7 @@ int parsop (pScene sc, pMesh mesh) {
 
 	if (ddebug) fprintf(stdout, "    Materials %8d\n", sc->par.nbmat);
 
+	free(res);
 	return (1);
 }
 

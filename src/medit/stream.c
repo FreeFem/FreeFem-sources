@@ -1039,7 +1039,7 @@ int listTetraStream (pScene sc, pMesh mesh, float *pp, int squiet) {
 	float step, p[3], ldt;
 	int i, k, depart, nsdep, nsfin, nsold, nbp, maxpts;
 	clock_t ct;
-	FILE *out;
+	FILE *out=0;
 
 	/* default */
 	if (!mesh->ntet) return (0);
@@ -1518,7 +1518,7 @@ int listTriaStream (pScene sc, pMesh mesh, float *pp) {
 	float step, p[3], ldt;
 	int i, k, depart, nsdep, nsfin, nsold, nbp, maxpts;
 	clock_t ct;
-	FILE *out;
+	FILE *out=0;
 
 	/* default */
 	if (!mesh->nt) return (0);

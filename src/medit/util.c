@@ -56,7 +56,7 @@ void setFont (char *name, int size) {
 	}
 
 	//TODO do something with that ?
-	printf("%s", font_style);
+	printf("%p", font_style);
 }
 
 /* display string format at pos(x,y) */

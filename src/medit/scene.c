@@ -855,7 +855,7 @@ void initGrafix (pScene sc, pMesh mesh) {
 /* new scene */
 int createScene (pScene sc, int idmesh) {
 	pMesh mesh;
-	char data[128];
+	char data[512];
 
 	/* default */
 	mesh = cv.mesh[idmesh];

@@ -145,7 +145,7 @@ int loadNextMesh (pMesh mesh, int k, int parse) {
 
 int playAnim (pScene sc, pMesh mesh, int deb, int fin) {
 	int k;
-	char *ptr, data[256], base[256];
+	char *ptr, data[512], base[256];
 
 	/* get basename */
 	sprintf(data, ".%d", deb);
@@ -171,7 +171,7 @@ int playAnim (pScene sc, pMesh mesh, int deb, int fin) {
 		if (sc->isotyp) doIsoLists(sc, mesh, 1);
 
 		if (!saveimg) {
-			snprintf(data, 256, "Medit - [%s] #%d", mesh->name, sc->idwin);
+			snprintf(data, 512, "Medit - [%s] #%d", mesh->name, sc->idwin);
 			glutSetWindowTitle(data);
 		}
 
@@ -188,7 +188,7 @@ int playAnim (pScene sc, pMesh mesh, int deb, int fin) {
 	if (saveimg) {
 		glDrawBuffer(GL_FRONT | GL_BACK);
 		if (saveimg) {
-			snprintf(data, 256, "Medit - [%s] #%d", mesh->name, sc->idwin);
+			snprintf(data, 512, "Medit - [%s] #%d", mesh->name, sc->idwin);
 			glutSetWindowTitle(data);
 		}
 

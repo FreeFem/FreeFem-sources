@@ -39,55 +39,73 @@ static int debug = 0;
 void getline_bin_float_vertex (int ddim, double *c, int *ref) {
 	int i;
 	float ff;
+	size_t ret;
 
 	for (i = 0; i < ddim; i++) {
-		fread((unsigned char *)&(ff), WrdSiz, 1, stdin);
+		ret = fread((unsigned char *)&(ff), WrdSiz, 1, stdin);
+		if (ret == 0) printf("fread error\n");
 		c[i] = ff;
 	}
 
-	fread((unsigned char *)&(*ref), WrdSiz, 1, stdin);
+	ret = fread((unsigned char *)&(*ref), WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
 }
 
 void getline_bin_double_vertex (int ddim, double *c, int *ref) {
 	int i;
+	size_t ret;
 
 	for (i = 0; i < ddim; i++) {
-		fread((unsigned char *)&(c[i]), WrdSiz, 2, stdin);
+		ret = fread((unsigned char *)&(c[i]), WrdSiz, 2, stdin);
+		if (ret == 0) printf("fread error\n");
 	}
 
-	fread((unsigned char *)&(*ref), WrdSiz, 1, stdin);
+	ret = fread((unsigned char *)&(*ref), WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
 }
 
 void getline_bin_elem (int ddim, int *v, int *ref) {
 	int i;
+	size_t ret;
 
 	for (i = 0; i < ddim; i++) {
-		fread((unsigned char *)&(v[i]), WrdSiz, 1, stdin);
+		ret = fread((unsigned char *)&(v[i]), WrdSiz, 1, stdin);
+		if (ret == 0) printf("fread error\n");
 	}
 
-	fread((unsigned char *)&(*ref), WrdSiz, 1, stdin);
+	ret = fread((unsigned char *)&(*ref), WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
 }
 
 void getline_bin_edge (int *v0, int *v1, int *ref) {
-	fread((unsigned char *)&(*v0), WrdSiz, 1, stdin);
-	fread((unsigned char *)&(*v1), WrdSiz, 1, stdin);
-	fread((unsigned char *)&(*ref), WrdSiz, 1, stdin);
+	size_t ret;
+
+	ret = fread((unsigned char *)&(*v0), WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
+	ret = fread((unsigned char *)&(*v1), WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
+	ret = fread((unsigned char *)&(*ref), WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
 }
 
 void getline_bin_int_noref (int ddim, int *v) {
 	int i;
+	size_t ret;
 
 	for (i = 0; i < ddim; i++) {
-		fread((unsigned char *)&(v[i]), WrdSiz, 1, stdin);
+		ret = fread((unsigned char *)&(v[i]), WrdSiz, 1, stdin);
+		if (ret == 0) printf("fread error\n");
 	}
 }
 
 void getline_bin_float_noref (int ddim, double *v) {
 	int i;
 	float ff;
+	size_t ret;
 
 	for (i = 0; i < ddim; i++) {
-		fread((unsigned char *)&(ff), WrdSiz, 1, stdin);
+		ret = fread((unsigned char *)&(ff), WrdSiz, 1, stdin);
+		if (ret == 0) printf("fread error\n");
 		if (debug) printf("value of ff %f\n", ff);
 
 		v[i] = ff;
@@ -96,9 +114,11 @@ void getline_bin_float_noref (int ddim, double *v) {
 
 void getline_bin_double_noref (int ddim, double *v) {
 	int i;
+	size_t ret;
 
 	for (i = 0; i < ddim; i++) {
-		fread((unsigned char *)&(v[i]), WrdSiz, 2, stdin);
+		ret = fread((unsigned char *)&(v[i]), WrdSiz, 2, stdin);
+		if (ret == 0) printf("fread error\n");
 	}
 }
 
@@ -108,14 +128,17 @@ int tmptype;
 void read_TypeSizeTyptab_bin (int *type, int *size, int *typtab) {
 	int i;
 	int tmpsize;
+	size_t ret;
 
-	fread((unsigned char *)&(tmptype), WrdSiz, 1, stdin);
+	ret = fread((unsigned char *)&(tmptype), WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
 	assert(tmptype <= GmfMaxTyp);
 
 	tmpsize = 0;
 
 	for (i = 0; i < tmptype; i++) {
-		fread((unsigned char *)&(typtab[i]), WrdSiz, 1, stdin);
+		ret = fread((unsigned char *)&(typtab[i]), WrdSiz, 1, stdin);
+		if (ret == 0) printf("fread error\n");
 		tmpsize += typtab[i];
 	}
 
@@ -137,6 +160,7 @@ int loadMesh_popen_bin (pMesh mesh) {
 	int loopdebug;
 	int vatn[2];
 	int tvatn[3];
+	size_t ret;
 
 	int retcode = 0;
 	int cod;
@@ -165,21 +189,26 @@ int loadMesh_popen_bin (pMesh mesh) {
 	loopdebug = -1;
 
 	// read code
-	fread((unsigned char *)&cod, WrdSiz, 1, stdin);
+	ret = fread((unsigned char *)&cod, WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
 	if (cod != 1) {
 		printf("error in reading the binary file .meshb with popen\n");
 		exit(1);
 	}
 
-	fread((unsigned char *)&(mesh->ver), WrdSiz, 1, stdin);
-	fread((unsigned char *)&KwdCod, WrdSiz, 1, stdin);
+	ret = fread((unsigned char *)&(mesh->ver), WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
+	ret = fread((unsigned char *)&KwdCod, WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
 	if (KwdCod != GmfDimension) {
 		printf("error in reading the binary file .meshb with popen\n");
 		exit(1);
 	}
 
-	fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-	fread((unsigned char *)&(mesh->dim), WrdSiz, 1, stdin);
+	ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
+	ret = fread((unsigned char *)&(mesh->dim), WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
 	/*control of the dimension*/
 	if ((mesh->dim != 2) && (mesh->dim != 3))
 		printf("the dimension is not correct");
@@ -189,7 +218,8 @@ int loadMesh_popen_bin (pMesh mesh) {
 	while (!feof(stdin)) {
 		loopdebug = loopdebug + 1;
 
-		fread((unsigned char *)&KwdCod, WrdSiz, 1, stdin);
+		ret = fread((unsigned char *)&KwdCod, WrdSiz, 1, stdin);
+		if (ret == 0) printf("fread error\n");
 
 		/* determination of KwdCod */
 		if (debug) printf("reading KwdCod %i %i\n", KwdCod, loopdebug);
@@ -199,8 +229,10 @@ int loadMesh_popen_bin (pMesh mesh) {
 			natureread = "Vertices";
 			if (debug) printf("reading %s", natureread);
 
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->np), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->np), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 			if (debug) printf(": number of vertices %i\n", mesh->np);
 
 			if (!mesh->np) {
@@ -232,8 +264,10 @@ int loadMesh_popen_bin (pMesh mesh) {
 			natureread = "Triangles";
 			if (debug) printf("reading %s", natureread);
 
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->nt), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->nt), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 			if (debug) printf(": number of triangles %i\n", mesh->nt);
 
 			if (ddebug) printf("allocate %d tria\n", mesh->nt);
@@ -264,8 +298,10 @@ int loadMesh_popen_bin (pMesh mesh) {
 			natureread = "Quadrilateral";
 			if (debug) printf("reading %s", natureread);
 
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->nq), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->nq), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 			if (debug) printf(": number of hexahedrons %i\n", mesh->nq);
 
 			if (ddebug) printf("allocate %d quad\n", mesh->nq);
@@ -297,8 +333,10 @@ int loadMesh_popen_bin (pMesh mesh) {
 			natureread = "Tetrahedra";
 			if (debug) printf("reading %s", natureread);
 
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->ntet), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->ntet), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 			if (debug) printf(": number of tetrahedrons %i\n", mesh->ntet);
 
 			if (mesh->ntet) {
@@ -330,8 +368,10 @@ int loadMesh_popen_bin (pMesh mesh) {
 			natureread = "Hexahedra";
 			if (debug) printf("reading %s", natureread);
 
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->nhex), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->nhex), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 			if (debug) printf(": number of hexahedrons %i\n", mesh->nhex);
 
 			if (ddebug) printf("allocate %d hexa\n", mesh->nhex);
@@ -359,11 +399,14 @@ int loadMesh_popen_bin (pMesh mesh) {
 
 			break;
 		case GmfCorners:
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->nc), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->nc), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 
 			for (k = 1; k <= mesh->nc; k++) {
-				fread((unsigned char *)&is, WrdSiz, 1, stdin);
+				ret = fread((unsigned char *)&is, WrdSiz, 1, stdin);
+				if (ret == 0) printf("fread error\n");
 				if (is < 1 || is > mesh->np) {
 					disc++;
 				} else {
@@ -375,11 +418,14 @@ int loadMesh_popen_bin (pMesh mesh) {
 
 			break;
 		case GmfRequiredVertices:
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->nr), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->nr), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 
 			for (k = 1; k <= mesh->nr; k++) {
-				fread((unsigned char *)&is, WrdSiz, 1, stdin);
+				ret = fread((unsigned char *)&is, WrdSiz, 1, stdin);
+				if (ret == 0) printf("fread error\n");
 				if (is < 1 || is > mesh->np) {
 					disc++;
 				} else {
@@ -394,8 +440,10 @@ int loadMesh_popen_bin (pMesh mesh) {
 			natureread = "Edges";
 			if (debug) printf("reading %s", natureread);
 
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->na), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->na), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 			if (debug) printf(": number of edges %i\n", mesh->na);
 
 			if (ddebug) printf("allocate %d edges\n", mesh->na);
@@ -422,11 +470,14 @@ int loadMesh_popen_bin (pMesh mesh) {
 
 			break;
 		case GmfRidges:
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->nri), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->nri), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 
 			for (k = 1; k <= mesh->nri; k++) {
-				fread((unsigned char *)&is, WrdSiz, 1, stdin);
+				ret = fread((unsigned char *)&is, WrdSiz, 1, stdin);
+				if (ret == 0) printf("fread error\n");
 				if (is < 1 || is > mesh->na) {
 					disc++;
 				} else {
@@ -437,11 +488,14 @@ int loadMesh_popen_bin (pMesh mesh) {
 
 			break;
 		case GmfRequiredEdges:
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->nre), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->nre), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 
 			for (k = 2; k <= mesh->nre; k++) {
-				fread((unsigned char *)&is, WrdSiz, 1, stdin);
+				ret = fread((unsigned char *)&is, WrdSiz, 1, stdin);
+				if (ret == 0) printf("fread error\n");
 				if (is < 1 || is > mesh->na) {
 					disc++;
 				} else {
@@ -452,8 +506,10 @@ int loadMesh_popen_bin (pMesh mesh) {
 
 			break;
 		case GmfNormals:
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->nvn), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->nvn), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 
 			/*  allocation  */
 			if (!mesh->ntg) {
@@ -492,8 +548,10 @@ int loadMesh_popen_bin (pMesh mesh) {
 				exit(1);
 			}
 
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->extra->iv), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->extra->iv), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 			mesh->extra->nv = (int *)M_calloc(mesh->np + 1, sizeof(int), "inmesh");
 			assert(mesh->extra->nv);
 
@@ -514,8 +572,10 @@ int loadMesh_popen_bin (pMesh mesh) {
 				exit(1);
 			}
 
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->extra->it), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->extra->it), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 			mesh->extra->nt = (int *)M_calloc(3 * mesh->nt + 1, sizeof(int), "inmesh");
 			assert(mesh->extra->nt);
 
@@ -538,8 +598,10 @@ int loadMesh_popen_bin (pMesh mesh) {
 				exit(1);
 			}
 
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->extra->iq), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->extra->iq), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 			mesh->extra->nq = (int *)M_calloc(4 * mesh->nq + 1, sizeof(int), "inmesh");
 			assert(mesh->extra->nq);
 
@@ -556,8 +618,10 @@ int loadMesh_popen_bin (pMesh mesh) {
 
 			break;
 		case GmfTangents:
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->ntg), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->ntg), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 
 			if (!mesh->nvn) {
 				mesh->extra = (pExtra)M_calloc(1, sizeof(Extra), "zaldy1.extra");
@@ -595,8 +659,10 @@ int loadMesh_popen_bin (pMesh mesh) {
 				exit(1);
 			}
 
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->extra->tv), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->extra->tv), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 
 			mesh->extra->tv = (int *)M_calloc(mesh->np + 1, sizeof(int), "inmesh");
 			assert(mesh->extra->tv);
@@ -619,8 +685,10 @@ int loadMesh_popen_bin (pMesh mesh) {
 				exit(1);
 			}
 
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&(mesh->extra->je), WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&(mesh->extra->je), WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 
 			mesh->extra->te = (int *)M_calloc(2 * mesh->na + 1, sizeof(int), "inmesh");
 			assert(mesh->extra->te);
@@ -640,7 +708,8 @@ int loadMesh_popen_bin (pMesh mesh) {
 			break;
 		case GmfEnd:
 
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 			printf("End of mesh\n");
 			break;
 		default:
@@ -828,26 +897,32 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 	int cod;
 	int NulPos;
 	int retcode = 0;
+	size_t ret;
 
 #ifdef WIN32
 	_setmode(fileno(stdin), O_BINARY);
 #endif
 	// read code
-	fread((unsigned char *)&cod, WrdSiz, 1, stdin);
+	ret = fread((unsigned char *)&cod, WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
 	if (cod != 1) {
 		printf("error in reading the binary file .meshb with popen\n");
 		exit(1);
 	}
 
-	fread((unsigned char *)&ver, WrdSiz, 1, stdin);
-	fread((unsigned char *)&KwdCod, WrdSiz, 1, stdin);
+	ret = fread((unsigned char *)&ver, WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
+	ret = fread((unsigned char *)&KwdCod, WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
 	if (KwdCod != GmfDimension) {
 		printf("error in reading the binary file .meshb with popen\n");
 		exit(1);
 	}
 
-	fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-	fread((unsigned char *)&dim, WrdSiz, 1, stdin);
+	ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
+	ret = fread((unsigned char *)&dim, WrdSiz, 1, stdin);
+	if (ret == 0) printf("fread error\n");
 	natureread = "Dimension";
 	printf(".sol: %s %i (mesh)%i (lecture)%i \n", natureread, dim, mesh->dim, ver);
 	/*control of the dimension*/
@@ -858,11 +933,14 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 	}
 
 	while (!feof(stdin)) {
-		fread((unsigned char *)&KwdCod, WrdSiz, 1, stdin);
+		ret = fread((unsigned char *)&KwdCod, WrdSiz, 1, stdin);
+		if (ret == 0) printf("fread error\n");
 
 		if (KwdCod == GmfSolAtVertices) {
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-			fread((unsigned char *)&nel, WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
+			ret = fread((unsigned char *)&nel, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 			natureread = "SolAtVertices";
 			if (debug) fprintf(stdout, "SolAtVertices : nel %i, mesh->np %i \n", nel, mesh->np);
 
@@ -887,8 +965,10 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 		if (mesh->dim == 2 && mesh->nt) {
 			if (KwdCod == GmfSolAtTriangles) {
 				natureread = "SolAtTriangles";
-				fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-				fread((unsigned char *)&nel, WrdSiz, 1, stdin);
+				ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+				if (ret == 0) printf("fread error\n");
+				ret = fread((unsigned char *)&nel, WrdSiz, 1, stdin);
+				if (ret == 0) printf("fread error\n");
 				if (debug) printf("SolAtTriangles : nel %d, mesh->nt %d \n", nel, mesh->nt);
 
 				if (nel && nel != mesh->nt) {
@@ -912,8 +992,10 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 		if (mesh->dim == 2 && mesh->nq) {
 			if (KwdCod == GmfSolAtQuadrilaterals) {
 				natureread = "SolAtQuadrilaterals";
-				fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-				fread((unsigned char *)&nel, WrdSiz, 1, stdin);
+				ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+				if (ret == 0) printf("fread error\n");
+				ret = fread((unsigned char *)&nel, WrdSiz, 1, stdin);
+				if (ret == 0) printf("fread error\n");
 				if (debug) fprintf(stdout, "SolAtQuadrilaterals : nel %i, mesh->nq %i \n", nel, mesh->nq);
 
 				if (nel && nel != mesh->nq) {
@@ -937,8 +1019,10 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 		if (mesh->dim == 3 && mesh->ntet) {
 			if (KwdCod == GmfSolAtTetrahedra) {
 				natureread = "SolAtTetrahedra";
-				fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-				fread((unsigned char *)&nel, WrdSiz, 1, stdin);
+				ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+				if (ret == 0) printf("fread error\n");
+				ret = fread((unsigned char *)&nel, WrdSiz, 1, stdin);
+				if (ret == 0) printf("fread error\n");
 				if (debug) fprintf(stdout, "SolAtTetrahedra : nel %i, mesh->ntet %i \n", nel, mesh->ntet);
 
 				if (nel && nel != mesh->ntet) {
@@ -962,8 +1046,10 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 		if (mesh->dim == 3 && mesh->nhex) {
 			if (KwdCod == GmfSolAtHexahedra) {
 				natureread = "SolAtHexahedra";
-				fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
-				fread((unsigned char *)&nel, WrdSiz, 1, stdin);
+				ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+				if (ret == 0) printf("fread error\n");
+				ret = fread((unsigned char *)&nel, WrdSiz, 1, stdin);
+				if (ret == 0) printf("fread error\n");
 				if (debug) fprintf(stdout, "SolAtHexahedra : nel %d, mesh->nhex %d \n", nel, mesh->nhex);
 
 				if (nel && nel != mesh->nhex) {
@@ -986,7 +1072,8 @@ int loadSol_popen_bin (pMesh mesh, char *filename, int numsol) {
 		}
 
 		if (KwdCod == GmfEnd) {
-			fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			ret = fread((unsigned char *)&NulPos, WrdSiz, 1, stdin);
+			if (ret == 0) printf("fread error\n");
 			if (debug) printf("End of solution\n");
 
 			if (ddebug) printf("Reading of mesh file is finished");

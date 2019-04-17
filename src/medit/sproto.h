@@ -237,6 +237,7 @@ int parsar (int argc, char *argv []);
 int saveMeditFile(char *, pScene);
 void iniopt(pScene, pMesh);
 int parsop(pScene, pMesh);
+int EatSpace (FILE *);
 
 /* particle.c */
 int advectParticle (pScene, pMesh);
