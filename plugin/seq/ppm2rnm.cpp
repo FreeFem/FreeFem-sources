@@ -54,6 +54,7 @@ extern "C" {
  * \param imgname PPM image file name
  * \param type PPM image type
  * \param quiet Verbosity
+ * \return Success: loaded PPM image, Error: 0
  */
 PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 	pPPMimage result;
@@ -78,7 +79,7 @@ PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 	}
 
 	if (!quiet)
-		fprintf(stdout, "%s opening %s\n", DISP_INFO, data);
+		fprintf(stdout, "%s Opening %s\n", DISP_INFO, data);
 
 	if (!fgets(buff, sizeof(buff), fp)) {
 		fprintf(stderr, "%s INVALID HEADER.\n", DISP_ERROR);
@@ -155,7 +156,7 @@ PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 	}
 
 	if (!quiet) {
-		fprintf(stdout, "%s Image size: %dx%d  %d bytes\n",
+		fprintf(stdout, "%s Image size: %dx%d - %d bytes\n",
 		        DISP_INFO, result->sizeX, result->sizeY, bitsize);
 	}
 
@@ -179,7 +180,6 @@ PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 			}
 			result->data[i] = (ubyte)r;
 		}
-
 		break;
 
 	case P5:/* binary file (grey) */
@@ -192,7 +192,6 @@ PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 			fclose(fp);
 			return 0;
 		}
-
 		break;
 	}
 
@@ -208,7 +207,7 @@ PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 	/* convert to grey levels */
 	else if (*type == GREY && (typimg == P3 || typimg == P6)) {
 		int i, k;
-		fprintf(stdout, "%s converting to grey levels\n", DISP_INFO);
+		fprintf(stdout, "%s Converting to grey levels\n", DISP_INFO);
 
 		for (i = 0, k = 0; i < bitsize; i += 3, k++) {
 			int r = (int)result->data[i];
@@ -228,6 +227,7 @@ PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
  * \param imgname PPM image file name
  * \param img PPM image
  * \param typimg PPM image type
+ * \return Success: 1, Error: 0
  */
 int savePPM (const char *imgname, pPPMimage img, int typimg) {
 	FILE *out;
@@ -285,22 +285,23 @@ int savePPM (const char *imgname, pPPMimage img, int typimg) {
 }
 
 /*! \brief Compute difference between two images
- * \param bits
- * \param img
- * \param itype
+ * \param bits First PPM image
+ * \param img Second PPM image
+ * \param itype PPM image type
+ * \return Success: Difference PPM image, Error: 0
  */
 pPPMimage diffImg (pPPMimage bits, pPPMimage img, ubyte itype) {
 	pPPMimage dif;
-	double psnr, dd;
+	double psnr;
 	int i, bitsize, dmax;
 
-	fprintf(stdout, "  Difference image\n");
+	fprintf(stdout, "%s Image difference\n", DISP_INFO);
 	bitsize = (int)bits->sizeX * bits->sizeY;
 	if (itype == COLOR) {bitsize *= 3;}
 
 	dif = (PPMimage *)malloc(sizeof(PPMimage));
 	if (!dif) {
-		fprintf(stderr, "  Sorry, not enough memory. Bye.\n");
+		fprintf(stderr, "%s Sorry, not enough memory. Bye.\n", DISP_ERROR);
 		return 0;
 	}
 
@@ -308,7 +309,7 @@ pPPMimage diffImg (pPPMimage bits, pPPMimage img, ubyte itype) {
 	dif->sizeY = bits->sizeY;
 	dif->data = (ubyte *)malloc(bitsize * sizeof(ubyte));
 	if (!dif->data) {
-		fprintf(stderr, "  Sorry, not enough memory. Bye.\n");
+		fprintf(stderr, "%s Sorry, not enough memory. Bye.\n", DISP_ERROR);
 		free(dif);
 		return 0;
 	}
@@ -317,18 +318,18 @@ pPPMimage diffImg (pPPMimage bits, pPPMimage img, ubyte itype) {
 	psnr = 0.0f;
 
 	for (i = 0; i < bitsize; i++) {
-		dd = abs((int)(bits->data[i] - img->data[i]));
+		double dd = abs((int)(bits->data[i] - img->data[i]));
 		dmax = max(dmax, dd);
 		psnr += (double)dd * dd;
 		dif->data[i] = (ubyte)(255 - dd);
 	}
 
-	if (psnr == 0.0f) {fprintf(stderr, "    PSNR problem!");} else {
+	if (psnr == 0.0f) {fprintf(stderr, "%s PSNR problem!", DISP_ERROR);} else {
 		psnr = 65025.0f / psnr;
 		psnr = 10.0 * log10(bitsize * psnr);
 	}
 
-	fprintf(stdout, "    PSNR = %.2f    dmax = %d\n", psnr, dmax);
+	fprintf(stdout, "%s PSNR = %.2f - dmax = %d\n", DISP_INFO, psnr, dmax);
 
 	return dif;
 }
@@ -337,67 +338,63 @@ pPPMimage diffImg (pPPMimage bits, pPPMimage img, ubyte itype) {
 }
 #endif
 
+/*!
+ * \brief Read PPM image
+ * \param a Double array
+ * \param b PPM image file name
+ * \return Success: loaded PPM image, Error: a
+ */
 pRnm read_image (pRnm const &a, const pstring &b) {
-	ubyte type, quiet = 1;
-	PPMimage *image = loadPPM(b->c_str(), &type, quiet);
+	ubyte type, quiet, *dd;
+	int k, n, m;
+	double *mm;
+	PPMimage *image;
+
+	quiet = 1;
+	image = loadPPM(b->c_str(), &type, quiet);
 
 	if (!image) {
-		std::cerr << " error loadPPM image " << *b << endl;
-		CompileError("error loadPPM image ");
+		std::cerr << DISP_ERROR << " Error loadPPM image " << *b << endl;
+		CompileError((string)DISP_ERROR + " Error loadPPM image ");
 		return a;
 	}
 
-	if (verbosity) {
-		cout << " size of image : " << image->sizeX << " x " << image->sizeY << " type =" << (int)type << endl;
-	}
+	if (verbosity)
+		cout << DISP_INFO << " Size of image : " << image->sizeX << " x " << image->sizeY << " - Type = " << (int)type << endl;
 
-	int n = image->sizeX;
-	int m = image->sizeY;
+	n = image->sizeX;
+	m = image->sizeY;
 	a->init(n, m);
-	ubyte *dd = image->data;
+	dd = image->data;
 
-	// cout << (double) dd[0] / 256. << " "
-	// << (double) dd[250] / 256. << " "
-	// << (double) dd[500] / 256. << "\n "
-	// ;
-	int k = 0;
-	double *mm = *a;
-
-	for (int i = 0; i < n; ++i) {
-		for (int j = 0; j < m; ++j) {
+	k = 0;
+	mm = *a;
+	for (int i = 0; i < n; ++i)
+		for (int j = 0; j < m; ++j)
 			*mm++ = (double)dd[k++] / 256.;
-		}
-	}
 
-	KN_<double> aa = *a;
-	// cout << aa[0] << " "<< aa[250] << "" << aa[500] << endl;
 	assert(k == n * m);
 	free(image->data);
 	free(image);
 	return a;
 }
 
+/*!
+ * \brief Equal operator between array and double array
+ * \param a array
+ * \param b double array
+ * \return a
+ */
 pRn seta (pRn const &a, const pRnm &b) {
 	*a = *b;
-	KN_<double> aa = *a;
-	// cout << aa[0] << " "<< aa[250] << "" << aa[500] << endl;
 	return a;
 }
 
-/*  class Init { public:
- * Init();
- * };
- *
- * $1 */
-template<class K>
-AnyType MyCast (Stack, const AnyType &b) {
-	KNM<K> *bb = GetAny<KNM<K> *>(b);
-	ffassert(bb->IsVector1());
-	return b;
-}
-
-static void Load_Init () {
-	cout << " lood: init ppm2rmn  " << endl;
+/*!
+ * \brief Dynamic load
+ */
+static void Load_PPM2RNM () {
+	cout << " load: ppm2rmn" << endl;
 
 	TheOperators->Add("<-",
 	                  new OneOperator2_<KNM<double> *, KNM<double> *, string *>(&read_image)
@@ -405,12 +402,6 @@ static void Load_Init () {
 	TheOperators->Add("=",
 	                  new OneOperator2_<KN<double> *, KN<double> *, KNM<double> *>(seta)
 	                  );
-	// autocast KNM<douyble>  *->    KN<double> (no)
-	/*
-	 * map_type[typeid(KN<double>* ).name()]->AddCast(
-	 *                                            new E_F1_funcT<KN<double>*,KNM<double>*>(MyCast<double>
-	 *                                                                            ));
-	 */
 }
 
-LOADFUNC(Load_Init)
+LOADFUNC(Load_PPM2RNM)
