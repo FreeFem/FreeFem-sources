@@ -15,11 +15,13 @@ macro ExtractDofsonBorder(labs,Wh,doflabs,orient)
 mesh Th=Wh.Th;
 fespace VhExtractDofsonBorder(Th,P1);
 VhExtractDofsonBorder abslabs,onlon,atest;
+if(orient)
 solve Pbabciss(abslabs,atest) 
 = int2d(Th,qft=qf1pTlump)(abslabs*atest*1e-8/area)
   +  int1d(Th,labs,qfe=qf1pElump)([dx(abslabs),dy(abslabs)]'*[-N.y,+N.x]*atest)
   -  int1d(Th,labs,qfe=qf1pElump)(orient*atest);
-  real abslabsmax = 2*abslabs[].max;
+  else abslabs= 1.; /* no sorting*/ 
+  real abslabsmax = abs(2*abslabs[].max);
   varf vlabsneg(u,v) = on(labs,u=abslabs-abslabsmax);
   if(1)  plot(abslabs,wait=1);
   real[int] absc=vlabsneg(0,Wh);

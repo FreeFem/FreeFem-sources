@@ -43,15 +43,20 @@ void Addto(HashMatrix<I,R> *P0,const HashMatrix<I,K> *PA,R (*f)(K) ,bool trans=f
 template<class TypeIndex,class TypeScalaire>
 class HashMatrix : public VirtualMatrix<TypeIndex,TypeScalaire> 
 {
+    static void  HeapSort(TypeIndex *ii,TypeIndex *jj, TypeScalaire *aij,long n);
+
+    
+public:
+    
+    template<class R> static void conj(R *x,TypeIndex nnz){}
+    template<> static void conj(complex<double> *x,TypeIndex nnz){ for(int k=0; k<nnz; ++k) x[k]=std::conj(x[k]) ; }
+    template<> static void conj(complex<float> *x,TypeIndex nnz){for(int k=0; k<nnz; ++k) x[k]=std::conj(x[k]) ; }
     
     static double conj(double x){return x;}
     static float conj(float  x){return x;}
     static complex<double> conj(const complex<double> &x){return std::conj(x);}
     static complex<float> conj(const complex<float> &x){return std::conj(x);}
-    static void  HeapSort(TypeIndex *ii,TypeIndex *jj, TypeScalaire *aij,long n);
 
-    
-public:
     typedef TypeIndex I;
     typedef TypeScalaire R;
     typedef uint64_t uniquecodeInt;
@@ -357,7 +362,8 @@ void AddMul(HashMatrix<I,RAB> &AB,HashMatrix<I,RA> &A, HashMatrix<I,RB> &B,bool 
      int Bn= B.n, Bm =B.m;
     if(ta) swap(An,Am);
     if(tb) swap(Bn,Bm);
-
+    bool tcb = (std::is_same<RB,complex<double> >::value|| std::is_same<RB,complex<float> >::value ) && tb;
+    bool tca = (std::is_same<RA,complex<double> >::value|| std::is_same<RA,complex<float> >::value ) && ta;
     AB.checksize(An,Bm);
     ffassert(Am == Bn);
     //  need A col sort  , b row sort
@@ -367,23 +373,22 @@ void AddMul(HashMatrix<I,RAB> &AB,HashMatrix<I,RA> &A, HashMatrix<I,RB> &B,bool 
       B.CSR(); // sort by row... and build p.
     int * Bj = tb ? B.i : B.j;
     int * Bi = tb ? B.j : B.i;
- //   cout << " B = " <<  B << " \n; \n\n;";
     for(size_t l=0; l< A.nnz;++l)
     {
         I i=A.i[l],j=A.j[l];
-        if(ta) swap(i,j);
-        //typename HashMatrix<I,R>::Pair rj(B.Row(j));
-        //      for(size_t ll=rj.first; ll< rj.second ;++ll)
+        RA aij=A.aij[l];
+        if(ta)  swap(i,j);
+        if(tca) aij=HashMatrix<I,RA>::conj(aij);
         
         for(size_t ll=B.p[j]; ll<  B.p[j+1] ;++ll)
         {
-             //assert(j == B.i[ll]);
             I k = Bj[ll];
             if(verbosity>1000000000) cout << " *** " << i<< " " << " " << k << " : " << j << " : "
                   << ll << " " << B.i[ll] <<" " << B.j[ll]<< " ::  " << A.aij[l]*B.aij[ll] <<endl;
-
             assert(j == Bi[ll]);
-            AB(i,k) += c* A.aij[l]*B.aij[ll];
+            RB bjk = tcb ? HashMatrix<I,RB>::conj(B.aij[ll]) : B.aij[ll];
+            
+            AB(i,k) += c* aij*bjk;
         }
     }
 }
@@ -426,7 +431,7 @@ std::ostream & operator<<(std::ostream & f,  const HashMatrix<I,R> &A)
 }
 
 template<class R>
-tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,VirtualMatrix<int,R>*,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
+tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,VirtualMatrix<int,R>*,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj)
 {
 
     typedef typename list<tuple<R,VirtualMatrix<int,R> *,bool> >::const_iterator lconst_iterator;
@@ -438,7 +443,7 @@ tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,Virt
     
     int n=0,m=0;
     bool sym=true;
-    for(i=begin;i!=end&&sym;i++++)
+    for(i=begin;i!=end&&sym;i++)
     {
         if(get<1>(*i))// M == 0 => zero matrix
         {
@@ -447,20 +452,22 @@ tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,Virt
                 sym = false;
         }
     }
-    
-    for(i=begin;i!=end;i++++)
+    int iter=0;
+    for(i=begin;i!=end;i++)
     {
         if(get<1>(*i)) // M == 0 => zero matrix
         {
             VirtualMatrix<int,R> & M=*get<1>(*i);
             bool transpose = get<2>(*i) !=  trans;
+            bool conjuge = get<2>(*i) !=  cnj;
+            
             ffassert( &M);
             R coef= get<0>(*i);
             if(verbosity>99)
-                cout << "                BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  get<2>(*i) << endl;
+                cout << "                "<< iter++<< " BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  get<2>(*i) << endl;
            { if(transpose) {m=max(m,M.n); n=max(n,M.m);} else{n=max(M.n,n); m=max(M.m,m);}}
            
-            M.addMatTo(coef,mij,transpose,ii00,jj00,transpose&&cnj,0.0,sym);
+            M.addMatTo(coef,mij,transpose,ii00,jj00,conjuge,0.0,sym);
         }
     }
     int nbcoef=mij.size();
@@ -520,7 +527,7 @@ HashMatrix<int,R>* BuildCombMat(const list<tuple<R,VirtualMatrix<int,R>*,bool> >
     int n = std::get<0>(nmsym), m =std::get<1>(nmsym);
     bool half= std::get<2>(nmsym);
     HashMatrix<int,R> *  mij= new HashMatrix<int,R>(n,m,0,half);
-    nmsym=BuildCombMat(*mij,lM,trans,ii00,jj00);
+    nmsym=BuildCombMat(*mij,lM,trans,ii00,jj00,trans);// remember trans => conj 
     
     return mij; // V4 mij;
     
