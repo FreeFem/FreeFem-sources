@@ -49,9 +49,8 @@ class HashMatrix : public VirtualMatrix<TypeIndex,TypeScalaire>
 public:
     
     template<class R> static void conj(R *x,TypeIndex nnz){}
-    template<> static void conj(complex<double> *x,TypeIndex nnz){ for(int k=0; k<nnz; ++k) x[k]=std::conj(x[k]) ; }
-    template<> static void conj(complex<float> *x,TypeIndex nnz){for(int k=0; k<nnz; ++k) x[k]=std::conj(x[k]) ; }
-    
+    static void conj(complex<double> *x,TypeIndex nnz){ for(int k=0; k<nnz; ++k) x[k]=std::conj(x[k]) ; }
+    static void conj(complex<float> *x,TypeIndex nnz){for(int k=0; k<nnz; ++k) x[k]=std::conj(x[k]) ; }
     static double conj(double x){return x;}
     static float conj(float  x){return x;}
     static complex<double> conj(const complex<double> &x){return std::conj(x);}
