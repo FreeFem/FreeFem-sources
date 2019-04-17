@@ -165,13 +165,13 @@ $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 		--with-ssl=0 ---with-x=0 --with-fortran-bindings=0 \
 	  $(WITH_MPI_DIR) $(PETSC_ADDCONF)  \
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
-		--with-scalapack-include='$(SCALAPACK_INCLUDE)'  --with-scalapack-lib='$(SCALAPACK_LIB)' \
-		--with-metis-include='$(METIS_INCLUDE)'  --with-metis-lib='$(METIS_LIB)' \
-		--with-ptscotch-include='$(PTSCOTCH_INCLUDE)'  --with-ptscotch-lib='$(PTSCOTCH_LIB)' \
+		--with-scalapack-dir=$(DIR_INSTALL_REAL) \
+		--with-metis-dir=$(DIR_INSTALL_REAL) \
+		--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
 		--with-suitesparse-include='$(SUITESPARSE_INCLUDE)'  --with-suitesparse-lib='$(SUITESPARSE_LIB)' \
-		--with-mumps-include='$(MUMPS_INCLUDE)'  --with-mumps-lib='$(MUMPS_LIB)' \
-		--with-parmetis-include='$(PARMETIS_INCLUDE)'  --with-parmetis-lib='$(PARMETIS_LIB)' \
-		--with-fftw-include='$(FFTW_INCLUDE)'  --with-fftw-lib='$(FFTW_LIB)' \
+		--with-mumps-dir=$(DIR_INSTALL_REAL) \
+		--with-parmetis-dir=$(DIR_INSTALL_REAL) \
+		--with-fftw-dir=$(DIR_INSTALL_REAL) \
 		PETSC_ARCH=ff-complex
 	test -f $(SRCDIR)/ff-complex/lib/petsc/conf/petscvariables
 	touch $@
