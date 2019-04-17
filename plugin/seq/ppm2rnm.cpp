@@ -25,12 +25,8 @@
 //ff-c++-cpp-dep:
 // *INDENT-ON* //
 
-// tools to read ppm file
-/*  use in freefem++ edp
- * see :
- * real[int,int] ff1("tt.pmm"); // read  image and set to an array.
- * real[int]  ff(ff1.nx*ff1.ny);
- * ff=ff1;
+/* Usage in FreeFEM .edp file
+ * see: examples/plugin/ppm2rnm.edp
  */
 #include  <iostream>
 #include  <cfloat>
@@ -46,19 +42,28 @@ typedef KN<double> *pRn;
 typedef string *pstring;
 #include "ppmimg.h"
 
+#define DISP_INFO "PPM2RMN:"
+#define DISP_ERROR "PPM2RNM - ERROR:"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/*!
+ * \brief Load a PPM image
+ * \param imgname PPM image file name
+ * \param type PPM image type
+ * \param quiet Verbosity
+ */
 PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 	pPPMimage result;
 	FILE *fp;
-	int i, k, typimg, ret, r, g, b, s, maxval, bitsize;
+	int typimg, ret, s, maxval, bitsize;
 	const char *ptr;
-	char c, buff[1024], data[256];
+	char buff[1024], data[256];
 
 	/* search for image */
-	fprintf(stdout, " Loading image: %s\n", imgname);
+	fprintf(stdout, "%s Loading image: %s\n", DISP_INFO, imgname);
 	ptr = strstr(imgname, ".ppm");
 	strcpy(data, imgname);
 	if (!ptr) {
@@ -68,21 +73,21 @@ PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 
 	fp = fopen(data, "rb");
 	if (!fp) {
-		fprintf(stderr, "  ## UNABLE TO OPEN FILE %s.\n", data);
+		fprintf(stderr, "%s UNABLE TO OPEN FILE %s.\n", DISP_ERROR, data);
 		return 0;
 	}
 
 	if (!quiet)
-		fprintf(stdout, "  opening %s\n", data);
+		fprintf(stdout, "%s opening %s\n", DISP_INFO, data);
 
 	if (!fgets(buff, sizeof(buff), fp)) {
-		fprintf(stderr, "  ## INVALID HEADER.\n");
+		fprintf(stderr, "%s INVALID HEADER.\n", DISP_ERROR);
 		return 0;
 	}
 
 	/* check header file */
 	if (buff[0] != 'P') {
-		fprintf(stderr, "  ## INVALID IMAGE FORMAT (MUST BE 'PX').\n");
+		fprintf(stderr, "%s INVALID IMAGE FORMAT (MUST BE 'PX').\n", DISP_ERROR);
 		return 0;
 	}
 
@@ -98,12 +103,12 @@ PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 		case '6': typimg = P6;
 			break;
 		default:
-			fprintf(stderr, "  ## INVALID IMAGE FORMAT (MUST BE 'PX').\n");
+			fprintf(stderr, "%s INVALID IMAGE FORMAT (MUST BE 'PX').\n", DISP_ERROR);
 			fclose(fp);
 			return 0;
 	}
 
-	/* allocate memory to store imagee */
+	/* allocate memory to store image */
 	result = (PPMimage *)malloc(sizeof(PPMimage));
 	assert(result);
 
@@ -113,6 +118,7 @@ PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 
 		/* check and strip comments */
 		if (buff[0] == '#') {
+			char c;
 			do {
 				c = getc(fp);
 			} while (c != '\n');
@@ -125,14 +131,14 @@ PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 	ret += fscanf(fp, "%d", &s);
 	result->sizeY = (short)s;
 	if (ret != 2) {
-		fprintf(stderr, "  ## ERROR LOADING IMAGE.\n");
+		fprintf(stderr, "%s ERROR LOADING IMAGE.\n", DISP_ERROR);
 		free(result);
 		fclose(fp);
 		return 0;
 	}
 
 	if (fscanf(fp, "%d", &maxval) != 1) {
-		fprintf(stderr, "  ## INVALID IMAGE SIZE.\n");
+		fprintf(stderr, "%s INVALID IMAGE SIZE.\n", DISP_ERROR);
 		free(result);
 		fclose(fp);
 		return 0;
@@ -149,8 +155,8 @@ PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 	}
 
 	if (!quiet) {
-		fprintf(stdout, "   image size: %dx%d  %d bytes\n",
-		        result->sizeX, result->sizeY, bitsize);
+		fprintf(stdout, "%s Image size: %dx%d  %d bytes\n",
+		        DISP_INFO, result->sizeX, result->sizeY, bitsize);
 	}
 
 	result->data = (ubyte *)malloc(1 + bitsize * sizeof(ubyte));
@@ -160,11 +166,12 @@ PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 	switch (typimg) {
 	case P2:/* ascii file (grey)  */
 	case P3:/* ascii file (color) */
-
+		int i;
 		for (i = 0; i < bitsize; i++) {
+			int r;
 			int rr = fscanf(fp, "%d", &r);
 			if (rr == EOF) {
-				fprintf(stderr, "  ## ERROR LOADING IMAGE.\n");
+				fprintf(stderr, "%s ERROR LOADING IMAGE.\n", DISP_ERROR);
 				free(result->data);
 				free(result);
 				fclose(fp);
@@ -179,7 +186,7 @@ PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 	case P6:/* binary file (color) */
 		ret = fread(result->data, sizeof(ubyte), bitsize, fp);
 		if (ret != bitsize) {
-			fprintf(stderr, "  ## ERROR LOADING IMAGE.\n");
+			fprintf(stderr, "%s ERROR LOADING IMAGE.\n", DISP_ERROR);
 			free(result->data);
 			free(result);
 			fclose(fp);
@@ -200,12 +207,13 @@ PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 	}
 	/* convert to grey levels */
 	else if (*type == GREY && (typimg == P3 || typimg == P6)) {
-		fprintf(stdout, "  converting to grey levels\n");
+		int i, k;
+		fprintf(stdout, "%s converting to grey levels\n", DISP_INFO);
 
 		for (i = 0, k = 0; i < bitsize; i += 3, k++) {
-			r = (int)result->data[i];
-			g = (int)result->data[i + 1];
-			b = (int)result->data[i + 2];
+			int r = (int)result->data[i];
+			int g = (int)result->data[i + 1];
+			int b = (int)result->data[i + 2];
 			result->data[k] = (ubyte)(0.3 * r + 0.59 * g + 0.11 * b);
 		}
 
@@ -215,14 +223,20 @@ PPMimage *loadPPM (const char *imgname, ubyte *type, ubyte quiet) {
 	return result;
 }
 
+/*!
+ * \brief Save a PPM image
+ * \param imgname PPM image file name
+ * \param img PPM image
+ * \param typimg PPM image type
+ */
 int savePPM (const char *imgname, pPPMimage img, int typimg) {
 	FILE *out;
-	int i, c, bitsize;
+	int bitsize;
 
 	/* open file */
 	out = fopen(imgname, "w");
 	if (!out) {
-		fprintf(stderr, "  ## UNABLE TO OPEN FILE %s.\n", imgname);
+		fprintf(stderr, "%s UNABLE TO OPEN FILE %s.\n", DISP_ERROR, imgname);
 		return 0;
 	}
 
@@ -230,37 +244,39 @@ int savePPM (const char *imgname, pPPMimage img, int typimg) {
 	bitsize = img->sizeX * img->sizeY;
 
 	switch (typimg) {
-	case P2:
-		fprintf(out, "P2\n");
-		fprintf(out, "# CREATOR: QIZIP Version 1, Rev. 2/2003, (c) INRIA\n");
-		fprintf(out, "%d %d\n", img->sizeX, img->sizeY);
-		fprintf(out, "255\n");
-		c = 0;
+		case P2:
+			int i, c;
 
-		for (i = 0; i < img->sizeX * img->sizeY; i++) {
-			fprintf(out, "%3d ", (int)img->data[i]);
-			if (++c == 17) {
-				c = 0;
-				fprintf(out, "\n");
+			fprintf(out, "P2\n");
+			fprintf(out, "# CREATOR: QIZIP Version 1, Rev. 2/2003, (c) INRIA\n");
+			fprintf(out, "%d %d\n", img->sizeX, img->sizeY);
+			fprintf(out, "255\n");
+			c = 0;
+
+			for (i = 0; i < img->sizeX * img->sizeY; i++) {
+				fprintf(out, "%3d ", (int)img->data[i]);
+				if (++c == 17) {
+					c = 0;
+					fprintf(out, "\n");
+				}
 			}
-		}
 
-		fprintf(out, "\n");
-		break;
-	case P5:
-		fprintf(out, "P5\n");
-		fprintf(out, "# CREATOR: QIZIP Version 1, Rev. 2/2003, (c) INRIA\n");
-		fprintf(out, "%d %d\n", img->sizeX, img->sizeY);
-		fprintf(out, "255\n");
-		fwrite(img->data, sizeof(ubyte), bitsize, out);
-		break;
-	case P6:
-		fprintf(out, "P6\n");
-		fprintf(out, "# CREATOR: QIZIP Version 1, Rev. 2/2003, (c) INRIA\n");
-		fprintf(out, "%d %d\n", img->sizeX, img->sizeY);
-		fprintf(out, "255\n");
-		fwrite(img->data, sizeof(ubyte), 3 * bitsize, out);
-		break;
+			fprintf(out, "\n");
+			break;
+		case P5:
+			fprintf(out, "P5\n");
+			fprintf(out, "# CREATOR: QIZIP Version 1, Rev. 2/2003, (c) INRIA\n");
+			fprintf(out, "%d %d\n", img->sizeX, img->sizeY);
+			fprintf(out, "255\n");
+			fwrite(img->data, sizeof(ubyte), bitsize, out);
+			break;
+		case P6:
+			fprintf(out, "P6\n");
+			fprintf(out, "# CREATOR: QIZIP Version 1, Rev. 2/2003, (c) INRIA\n");
+			fprintf(out, "%d %d\n", img->sizeX, img->sizeY);
+			fprintf(out, "255\n");
+			fwrite(img->data, sizeof(ubyte), 3 * bitsize, out);
+			break;
 	}
 
 	fclose(out);
@@ -268,7 +284,11 @@ int savePPM (const char *imgname, pPPMimage img, int typimg) {
 	return 1;
 }
 
-/* compute difference image */
+/*! \brief Compute difference between two images
+ * \param bits
+ * \param img
+ * \param itype
+ */
 pPPMimage diffImg (pPPMimage bits, pPPMimage img, ubyte itype) {
 	pPPMimage dif;
 	double psnr, dd;
