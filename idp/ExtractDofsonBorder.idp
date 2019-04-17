@@ -23,7 +23,7 @@ solve Pbabciss(abslabs,atest)
   else abslabs= 1.; /* no sorting*/ 
   real abslabsmax = abs(2*abslabs[].max);
   varf vlabsneg(u,v) = on(labs,u=abslabs-abslabsmax);
-  if(1)  plot(abslabs,wait=1);
+  if(0)  plot(abslabs,wait=1);
   real[int] absc=vlabsneg(0,Wh);
   doflabs.resize(Wh.ndof);
   doflabs=0:Wh.ndof-1;

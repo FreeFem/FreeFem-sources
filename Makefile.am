@@ -21,13 +21,8 @@
 # E-MAIL  :
 
 SUBDIRS=3rdparty src \
-	plugin plugin/seq plugin/mpi \
-	plugin/ffddm \
-	examples examples/examples examples/misc \
-	examples/tutorial examples/other \
-	examples/plugin examples/mpi \
-	examples/eigen examples/bug \
-	examples/3d examples/hpddm examples/ffddm
+	plugin  \
+	examples 
 
 EXTRA_DIST=README.md CHANGELOG.md \
 bin/keys.awk \

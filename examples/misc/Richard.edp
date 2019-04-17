@@ -113,7 +113,7 @@ for(int i=0;i<100;i++)
 //  hhh = h <0;
   }
   if(i%10==1) {
-  Th=adaptmesh(Th,h,ratio=1.1);
+  Th=adaptmesh(Th,h,ratio=1.1,nbvx=100000);
 //  plot(Th,h,cmm="h ",value=1,wait=1);
   }
  // plot(hhh,wait=1,cmm="h < 0");
