@@ -96,7 +96,7 @@ case "$MPIRUN" in
         fi
 	;;
 esac
-	echo " ####   --$MSMPI_INC--$MSMPI_BIN--$ff_win32"
+#	echo " ####   --$MSMPI_INC--$MSMPI_BIN--$ff_win32"
  if test -n "$MSMPI_INC" -a -n "$MSMPI_BIN" -a  "$ff_win32" = yes   ; then
    echo " ####  check  MSMPI"
 		   # MSMPI_LIB64 MSMPI_LIB32   $ff_ptrbit is  32 or 64
@@ -276,12 +276,12 @@ fi
 	      AC_SUBST(MPIFC)
 	  fi
 
-	echo " ********************ffmpi= '$ff_mpi' *************   "
+#	echo " ********************ffmpi= '$ff_mpi' *************   "
 	ff_MPI_INCLUDE="$with_mpiinc"
 	if test -z "$ff_mpitype" ; then
-            ff_mpishow=`$MPICXX -show` 2>/dev/null
-            ff_mpicshow=`$MPICC -show` 2>/dev/null
-            ff_mpifcshow=`$MPIFC -show` 2>/dev/null
+           test -n "$MPICXX" && ff_mpishow=`$MPICXX -show` 2>/dev/null
+           test -n "$MPICC" && ff_mpicshow=`$MPICC -show` 2>/dev/null
+           test -n "$MPIFC" && ff_mpifcshow=`$MPIFC -show` 2>/dev/null
 	    if test "$with_mpilibs" = no -o -z "$with_mpilibs" ; then
 		[ff_MPI_INCLUDE=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^[-/][^WLlOgp]|^-Wp,'|tr '\n' ' '`]
 		ff_MPI_LIB_DIRS=""
