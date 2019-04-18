@@ -1234,8 +1234,9 @@ if test "$ff_where_lib_conf_blaslapack" = 1  ; then
 	   if  echo  "$ff_where_lib_blaslapack"| grep -q  " -lmkl"  ; then
 	     	AC_MSG_NOTICE([ MKL  from  petsc ***** ])
 	        AC_FF_ADDWHERELIB(mkl,$ff_blas_libs,$ff_blas_inc)
-            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
-            AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
+			ff_mkl=yes
+dnl            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
+dnl            AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
 	   fi
 
 fi
@@ -1340,8 +1341,9 @@ then
 	    fi
 	    AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
 	    AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
-            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
-            AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
+		ff_mkl_ok=yes
+dnl            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
+dnl            AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
 
 	else
 	    ff_mkl_libpath=no
@@ -2230,7 +2232,14 @@ fi
 TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_PETSC_DYLIB"])
 TOOL_DISABLE(htool,["htool.$DYLIB_SUFFIX"])
 
-
+##
+if test "$ff_mkl_ok" == yes ; then 
+            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
+fi
+if test "$ff_blas_ok" == yes ; then 
+            AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
+fi
+##
 # All makefiles
 AC_OUTPUT(
     Makefile

@@ -7367,6 +7367,11 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     // delete gtree;
     
    Mesh3 *Tht = new Mesh3(nv, nt, nbe, v, t, b);
+    
+    if(typeMesh3==2) {  typeMesh3=1; //  Hack for a bug in trunc surface mesh FH aprif 2019  TO BE REMOVE in near future
+    if(verbosity ) cerr << " \n\n********************\n\n ** WARNING remove SURFACE MESH in trunc 3d  due to bug"
+            <<  "\n\n********************\n\n";
+    }
    Tht->getTypeMesh3()=typeMesh3;
    Tht->BuildGTree();    // Add JM. Oct 2010
    delete gtree;
