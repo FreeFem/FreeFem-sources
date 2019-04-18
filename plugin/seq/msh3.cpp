@@ -4560,7 +4560,7 @@ void BuildBoundMinDist_th3 (const double &precis_mesh, const double *tab_XX, con
 
 	// determination de hmin
 
-	hmin = 1e10;
+	hmin =longmini_box;
 
 	for (int ii = 0; ii < Th3.nt; ii++) {
 		const Tet &K(Th3.elements[ii]);
@@ -4609,16 +4609,17 @@ void BuildBoundMinDist_th3 (const double &precis_mesh, const double *tab_XX, con
 			}
 		}
 	}
+        if(hmin/longmini_box < 1e7)
+           hmin = hmin*0.1;//  in case of bad shape element
+	if (verbosity > 5) {cout << "    longmini_box" << longmini_box
+                                 << "    hmin =" << hmin << " longmini_box/hmin "
+                                 <<hmin/longmini_box<< endl;}
 
-	if (verbosity > 5) {cout << "    longmini_box" << longmini_box << endl;}
-
-	if (verbosity > 5) {cout << "    hmin =" << hmin << endl;}
-
-	assert(hmin < longmini_box);
-	if (verbosity > 5) {cout << "    Norme2(bmin-bmax)=" << Norme2(bmin - bmax) << endl;}
+	
+	if (verbosity > 9) {cout << "    Norme2(bmin-bmax)=" << Norme2(bmin - bmax) << endl;}
 
 	// assertion pour la taille de l octree
-	assert(hmin > Norme2(bmin - bmax) / 1e9);
+	ffassert(hmin > Norme2(bmin - bmax) / 1e9);
 }
 
 
