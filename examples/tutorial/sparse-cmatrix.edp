@@ -22,7 +22,7 @@ for(int step=0; step <2; ++step)
     matrix RBB= interpolate(Wh,Vh);  // build interpolation matrix
     matrix<complex> B=RB;
     B = B*(1+2i);
-
+    B(0,4)=1i;
     matrix<complex> BB=RBB;
 
     varf vA(u,v) = int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v))+ int1d(Th)(u*v); 
@@ -37,9 +37,19 @@ for(int step=0; step <2; ++step)
     cout << "B="<<B << endl;
     matrix<complex> BML=B*ML; // a faire 
     matrix<complex> tB=B';        //'; transpose and conjugate 
-					 cout << "tB=" << tB << endl;
+	cout << " trace tB=" << tB.trace << " trace B  " << B.trace << endl;
     matrix<complex> MLtB=ML'*B'; // 
-
+    assert( imag(tB.trace) * imag(B.trace) < 0) ;
+	{
+		
+		 matrix<complex> BtB = B'*B, tBtB= BtB';
+		 matrix<complex> ZZ =  BtB - tBtB;
+		 cout << " BtB hermitain  "<< ZZ.linfty <<  endl; 
+		 ZZ =  BtB - BtB';
+		 cout << " BtB hermitain  "<< ZZ.linfty <<  endl; 
+		 assert( ZZ.linfty < 1e-10);
+	}
+	
     cout << "BML="<<BML << endl;
     cout << "MLtB=" << MLtB << endl;
 
@@ -56,6 +66,7 @@ for(int step=0; step <2; ++step)
     Vh uHr = imag(uH);
     plot(uHr,wait=1);
     matrix<complex> BtA = BB'*A;//';
+	cout << BtA << endl; 
     matrix<complex> BtAB = BtA*BB;
     if(HaveUMFPACK)  
       set(BtAB,solver=sparsesolver);  
