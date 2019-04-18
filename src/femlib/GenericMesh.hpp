@@ -272,7 +272,10 @@ private: // pas de copie pour ne pas prendre l'adresse
     }// module 2 aire*l
 
     
-   
+    // Clever the orientation in case of only 1 vertex april 2019 (Hard to find !!!!! FH and PHT)
+    template<int NN,typename V> struct  SwapOrient { static void SwapO(V  **w){swap(w[0],w[1]);}} ;
+    template<typename V> struct  SwapOrient<1,V> { static void SwapO(V **){}} ;
+
 
 template<typename Data>  
 class GenericElement: public Label {
@@ -298,9 +301,6 @@ public:
     
   static const int (* const nvadj)[nva] ;//  
   static const int nitemdim[4]; //  nv,ne,nf,nt
-  // Clever the orientation in case of only 1 vertex april 2019 (Hard to find !!!!! FH and PHT)
-    template<int NN> struct  SwapOrient { static void SwapO(Vertex  **w){swap(w[0],w[1]);}} ;
-    template<> struct  SwapOrient<1> { static void SwapO(Vertex **){}} ;
 
   // variable prive
 private:
@@ -330,7 +330,7 @@ public:
     return *this;
   }
 
-    void changeOrientation() { SwapOrient<nv>::SwapO(vertices);}
+    void changeOrientation() { SwapOrient<nv,Vertex>::SwapO(vertices);}
     
   istream & Read1(istream & f,Vertex * v0,int n)
   {

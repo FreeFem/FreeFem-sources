@@ -35,7 +35,7 @@ AM_INIT_AUTOMAKE(1.11 dist-zip foreign subdir-objects)
 
 if test "$enable_ffcs" != yes
 then
-    if test `echo $am__api_version|awk '{if($1>1.13)print "ok";}'` != ok
+    if test `echo $am__api_version|awk '{if($1>1.13)print "ok";else print "no"}'` != ok
     then
 	AC_MSG_ERROR([Automake version needs to be 1.13 or later to enable "make check"])
     fi
