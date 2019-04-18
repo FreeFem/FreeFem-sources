@@ -272,8 +272,8 @@ private: // pas de copie pour ne pas prendre l'adresse
     }// module 2 aire*l
 
     
-    
-    
+   
+
 template<typename Data>  
 class GenericElement: public Label {
 public:
@@ -297,8 +297,12 @@ public:
   static const int (* const onWhatBorder)[nitem] ;//
     
   static const int (* const nvadj)[nva] ;//  
-  static const int nitemdim[4]; //  nv,ne,nf,nt 
-  // variable prive 
+  static const int nitemdim[4]; //  nv,ne,nf,nt
+  // Clever the orientation in case of only 1 vertex april 2019 (Hard to find !!!!! FH and PHT)
+    template<int NN> struct  SwapOrient { static void SwapO(Vertex  **w){swap(w[0],w[1]);}} ;
+    template<> struct  SwapOrient<1> { static void SwapO(Vertex **){}} ;
+
+  // variable prive
 private:
   Vertex *vertices[nv]; // an array of 3 pointer to vertex
   R mes; 
@@ -326,7 +330,8 @@ public:
     return *this;
   }
 
-  void changeOrientation() {swap(vertices[0],vertices[1]);}
+    void changeOrientation() { SwapOrient<nv>::SwapO(vertices);}
+    
   istream & Read1(istream & f,Vertex * v0,int n)
   {
     int iv[nv],ir,err=0;
@@ -775,7 +780,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         int nk=0,nba=0;
         int err=0;
         if(verbosity>5)
-            cout << "   -- BuildAdj:nva=// nea=" << nva << " " << nea << " "<< nbe << endl;
+            cout << "   -- BuildAdj:nva= " << nva << " " << nea << " "<< nbe << endl;
         for (int k=0;k<nt;++k)
             for (int i=0;i<nea;++i)
             {
@@ -913,7 +918,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
             else
                 cout << endl;	
         }	
-        }
+}
 /*
 template<typename T,typename B,typename V>
 void GenericMesh<T,B,V>::BuildSurface(const int &nb, KN<int> SurfaceDef)
@@ -929,65 +934,73 @@ void GenericMesh<T,B,V>::BuildSurface(const int &nb, KN<int> SurfaceDef)
 template<typename T,typename B,typename V>
 void GenericMesh<T,B,V>::BuildBoundaryElementAdj()
 {
-  // Return in TheBorderElementAjacencesLink
-  //  if exist a link :: sign(nk_link)*(nk_link+1)
-  //  else            :: sign(nk)*(nk)
-
-  // assert(TheBoundaryElementAdjacencesLink==0); plus tard
-  int *TheBoundaryElementAdjacencesLink = new int[B::nea*nbe];
-  HashTable<SortArray<int,B::nva>,int> h(B::nea*nbe,nv);
-  int nk=0;
-  int err=0;
-  int sens;
-  
-  cout << "nea/nva" << B::nea << " "  << B::nva << endl;
-  for (int k=0;k<nbe;++k)
-    for (int i=0;i<B::nea;++i)
-      {
-        SortArray<int,B::nva> a(items(k,i,&sens));
-
-	typename HashTable<SortArray<int,B::nva>,int>::iterator p= h.find(a);
-	if(!p) 
-	  { 
-	    h.add(a,nk);
-	    TheBoundaryElementAdjacencesLink[nk] = sens*(nk+1)   ;  // sens;
-	  } 
-	else 
-	  {	    
-	    ASSERTION(p->v>=0);
-	    if( sens*TheBoundaryElementAdjacencesLink[p->v] > 0 ){
-	      
-	      B & K(borderelements[CheckBE(k)]);
-	      int firstVertex  =  operator()(K[B::nvadj[i][0]])+1;
-	      int secondVertex =  operator()(K[B::nvadj[i][1]])+1;
-	      cout << " The edges defined by vertex is " << firstVertex << "-" << secondVertex << ", is oriented in the same direction in element " << k+1 << 
-		" and in element "<<  1+(p->v/B::nea) << endl;
-	      err++;
-	      assert(err==0);
-	    }
-	    if( abs(TheBoundaryElementAdjacencesLink[p->v]) != 1+p->v ){
-	      
-	      B & K(borderelements[CheckBE(k)]);
-	      int firstVertex  =  operator()(K[B::nvadj[i][0]])+1;
-	      int secondVertex =  operator()(K[B::nvadj[i][1]])+1;
-	      cout << " The edges defined by vertex is " << firstVertex << "-" << secondVertex << "belong to the three border elements ::" 
-		   << 1+(p->v)/B::nea <<", "<< k+1 <<" and "<< 1+(abs(TheBoundaryElementAdjacencesLink[p->v])-1)/B::nea << endl;
-	      cout << " The Surface contains these edges is not a manifold" << endl;
-	      err++;
-	    }
-
-	    TheBoundaryElementAdjacencesLink[nk]= TheBoundaryElementAdjacencesLink[p->v];
-	    TheBoundaryElementAdjacencesLink[p->v]= sens*(nk+1);  
-	   
-	  }
-	if( err > 10 ) 
-	  exit(1); 
-	nk++;
-      }
+    // Return in TheBorderElementAjacencesLink
+    //  if exist a link :: sign(nk_link)*(nk_link+1)
+    //  else            :: sign(nk)*(nk)
     
-  assert(err==0);
-  delete [ ] TheBoundaryElementAdjacencesLink; 
-  if(verbosity) cout << "number of adjacents edges " << nk << endl; 
+    // assert(TheBoundaryElementAdjacencesLink==0); plus tard
+    int *TheBoundaryElementAdjacencesLink = new int[B::nea*nbe];
+    HashTable<SortArray<int,B::nva>,int> h(B::nea*nbe,nv);
+    int nk=0;
+    int err=0,errm=0;
+    int sens;
+    
+    cout << "nea/nva" << B::nea << " "  << B::nva << endl;
+    for (int k=0;k<nbe;++k)
+        for (int i=0;i<B::nea;++i)
+        {
+            SortArray<int,B::nva> a(items(k,i,&sens));
+            
+            typename HashTable<SortArray<int,B::nva>,int>::iterator p= h.find(a);
+            if(!p)
+            {
+                h.add(a,nk);
+                TheBoundaryElementAdjacencesLink[nk] = sens*(nk+1)   ;  // sens;
+            }
+            else
+            {
+                ASSERTION(p->v>=0);
+                if( sens*TheBoundaryElementAdjacencesLink[p->v] > 0 ){
+                    
+                    B & K(borderelements[CheckBE(k)]);
+                    // Bug before is here nea : nb of border element for adj : , nva  = nb of vertex of border element for adl
+                    
+                    cout << " The adj border element  defined by [ " ;
+                    for(int ia=0; ia<nva; ++ia)
+                        cout <<  operator()(K[B::nvadj[i][ia]])+1<< " ";
+                    cout << " ]  is oriented in the same direction in element " << k+1 <<
+                    " and in element "<<  1+(p->v/B::nea) << endl;
+                    err++;
+                    
+                }
+                if( abs(TheBoundaryElementAdjacencesLink[p->v]) != 1+p->v ){
+                    
+                    B & K(borderelements[CheckBE(k)]);
+                    if(errm<10)
+                    {
+                        cout << " The adj border element defined by vertex [ ";
+                        for(int ia=0; ia<nva; ++ia)
+                            cout <<  operator()(K[B::nvadj[i][ia]])+1<< " ";
+                        cout << " ] is belong to the three border elements ::"
+                        << 1+(p->v)/B::nea <<", "<< k+1 <<" and "<< 1+(abs(TheBoundaryElementAdjacencesLink[p->v])-1)/B::nea << endl;
+                    }
+                    errm++;
+                }
+                if( errm)  cout << " The border "<<B::RdHat::d <<  "d  " << " is none  manifold" << endl;
+                if( err)  cout << " The border "<<B::RdHat::d <<  "d  " << " is badly oriented !!!!  " << endl;
+                ffassert(err==0 && errm==0);
+                TheBoundaryElementAdjacencesLink[nk]= TheBoundaryElementAdjacencesLink[p->v];
+                TheBoundaryElementAdjacencesLink[p->v]= sens*(nk+1);
+                
+            }
+            if( err > 10 )
+                exit(1);
+            nk++;
+        }
+    
+    assert(err==0);
+    delete [ ] TheBoundaryElementAdjacencesLink;
+    if(verbosity) cout << "number of adjacents edges " << nk << endl;
 }
 
 

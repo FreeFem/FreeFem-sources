@@ -308,7 +308,16 @@ AnyType changeOperator<Type>::changeOperator_Op::operator()(Stack stack) const {
                 ptA->_petsc = nullptr;
                 ptA->dtor();
                 ptA->_petsc = backup;
-                MatHeaderReplace(ptA->_petsc, &ptB->_petsc);
+                PetscMPIInt flag;
+                MPI_Comm_compare(PetscObjectComm((PetscObject)ptA->_petsc), PetscObjectComm((PetscObject)ptB->_petsc), &flag);
+                if(flag != MPI_CONGRUENT && flag != MPI_IDENT) {
+                    MatDestroy(&ptA->_petsc);
+                    MatConvert(ptB->_petsc, MATSAME, MAT_INITIAL_MATRIX, &ptA->_petsc);
+                    MatDestroy(&ptB->_petsc);
+                }
+                else {
+                    MatHeaderReplace(ptA->_petsc, &ptB->_petsc);
+                }
                 if(ptB->_ksp)
                     KSPDestroy(&ptB->_ksp);
                 ptA->_A = ptB->_A;
@@ -1546,7 +1555,7 @@ void changeNumbering_func(unsigned int* const num, unsigned int first, unsigned 
         resize(ptIn, n);
         *ptIn = PetscScalar();
         out = static_cast<PetscScalar*>(*ptOut);
-        if(last - first)
+        if(num)
             HPDDM::Subdomain<PetscScalar>::template distributedVec<1>(num, first, last, static_cast<PetscScalar*>(*ptIn), out, ptIn->n / bs, bs);
         else
             std::copy_n(out, ptIn->n, static_cast<PetscScalar*>(*ptIn));
@@ -1560,7 +1569,7 @@ AnyType changeNumbering<Type>::changeNumbering_Op::operator()(Stack stack) const
         PetscScalar* pt = *ptOut;
         for(int j = 0; j < E.size(); ++j) {
             Type* ptA = GetAny<Type*>((*(E[j].first))(stack));
-            if(ptA && ptA->_last - ptA->_first) {
+            if(ptA && (ptA->_last - ptA->_first || (inverse && ptA->_num))) {
                 PetscInt bs;
                 MatType type;
                 MatGetType(ptA->_petsc, &type);

@@ -13,88 +13,99 @@ NN=0
 NO=0
 NC=0
 NF=0
-
+verb=0
 if [ "$1" = "-n" ] ; then dry=1; shift; fi
 ffcmm=FreeFem++
-mpicm=ffmpi-run
+mpicm=ff-mpirun
+logdir="."
+list="$@"
+njob=1
 for j in $list; do
 	case $j in
+		-v) verb=1;;
 		-n) dry=1;;
-		-ff=*) ffcmm=${$j%ff_*} ;;
-		-ffmpi=*) mpicm=${$j%ff_*} ;;
+		-ff=*) ffcmm=${j:4} ;;
+		-ffmpi=*) mpicm=${j:7}  ;;
+		-od=*)  logdir=${j:4} ;;
+	    -j=*) njob=${j:3};;
+		-h) echo usage "$0 [-n] [-ff=FreeFem++] [-ffmpi=ff-mpirun] [-h] edp file ";;
 	esac
 done 
-echo "ff: $ffcmm $mpicm $dry"
-if [ $# -eq 0 ]; then
-list=*.edp
-elif  [ $# -gt  0 ]; then
-list="$@"
-fi
+((verb > 0)) && echo ff=$ffcmm
+((verb > 0)) && echo ffmpi=$mpicm
+((verb > 0)) && echo logdir=$logdir
+((verb > 0)) && echo njob=$njob
+dorun()
+{
+	j="$1"
+	ffarg="-ns"
+	dir=`dirname "$j"`
+	i=`basename "$j"`
+	log="$logdir/$i.log"
+	skeep=0
+	skeep=`head "$j"|awk '$1=="//" && $2=="UNCHECK-FILE" { if( vv == ""){ print 1;}; vv=1}'`
+	if (( skeep == 1 )) ; then
+		MSG="${std} UnCheck(.edp) ${std}"
+	else
+    np=`head "$j"|awk '$1=="//" && $2=="NBPROC" { if( vv == ""){ print $3;}; vv=1}'`
+    npa=`head "$j"|awk '$1=="//" && $2=="PARAM" { if( vv == ""){ for(i=3;i<=NF;++i)print $i;}; vv=1}'`
+	wmpi=`egrep 'mpirank|mpisize' $j|wc -l`
+	(( ( np == 0  &&  wmpi > 0)  )) && np=4
+    (( np > 0 )) && cmmff="$mpicm -np $np" 
+		ffarg="-nw -ns"
+
+    ((NN++))
+    (( dry ==1 )) && echo "(cd $dir; $cmmff "$i" $ffarg $npa  )" '2>&1 1>' $log;
+    (( dry !=1 )) && (cd $dir; $cmmff "$i" $ffarg $npa  ) 2>&1 1>"$log";
+    RES=$?
+    ((SIG=$RES%128));
+
+    ## error Compile error : Error load   $log
+    ## error Compile error :
+    ## Exec error : exec assert
+    ## Exec error :
+    errl=`grep 'error Compile error : Error load' "$log"`
+    errC=`grep 'error Compile error :' "$log"`
+    errX=`grep 'Exec error :' "$log"`
+    errA=`grep 'Exec error : exec assert' "$log"`
+  #  echo "$RES,$SIG,$errC,$errA."
+    if [ -n "$errl" ] ; then
+	((NL++))
+	MSG="${mgn} FAIL(load)        ${std}"
+    elif [ -n "$errC" ] ; then
+	((NC++))
+	MSG="${lgn} FAIL(Compile)     ${std}"
+    elif [ -n "$errA" -a  $SIG -ne 0 ] ; then
+	((NA++))
+	MSG="${blu} FAIL(Assert)      ${std}"
+    elif [ -n "$errX" -a  $SIG -ne 0 ] ; then
+	((NX++))
+	MSG="${mgn} FAIL(Exec)        ${std}"
+    elif [ $SIG -eq 0 ] ; then
+	((NO++))
+	MSG="${grn} OK  (Exec)        ${std}"
+    else
+	MSG="${red} FAIL(signal)=$SIG ${std}"
+	((NF++))
+    fi
+    (( dry !=1 )) &&echo $MSG  $cmm $j  >>"$log"
+    (( dry !=1 )) &&echo  $MSG  $cmm $j "( see "$log" )";	
+	fi
+}
+nj=0;
 for j in $list
 do
 	cmmff="$ffcmm"
-    case $j in
-		
+    case $j in		
 	*all.edp|*regtests.edp) 
 	    echo  pass   $j;; 
 	*.edp)
-		ffarg="-ns"
-		dir=`dirname "$j"`
-		i=`basename "$j"`
-		log="$i.log"
-		skeep=0
-		skeep=`head "$j"|awk '$1=="//" && $2=="UNCHECK-FILE" { if( vv == ""){ print 1;}; vv=1}'`
-		if (( skeep == 1 )) ; then
-			MSG="${std} UnCheck(.edp) ${std}"
-		else
-        np=`head "$j"|awk '$1=="//" && $2=="NBPROC" { if( vv == ""){ print $3;}; vv=1}'`
-        npa=`head "$j"|awk '$1=="//" && $2=="PARAM" { if( vv == ""){ for(i=3;i<=NF;++i)print $i;}; vv=1}'`
-		wmpi=`egrep 'mpirank|mpisize' $j|wc -l`
-		(( ( np == 0  &&  wmpi > 0)  )) && np=4
-	    (( np > 0 )) && cmmff="$mpicm -np $np" 
-			ffarg="-nw -ns"
-
-	    ((NN++))
-	    (( dry ==1 )) && echo "(cd $dir; $cmmff "$i" $ffarg $npa  )" '2>&1 1>' $log;
-	    (( dry !=1 )) && (cd $dir; $cmmff "$i" $ffarg $npa  ) 2>&1 1>"$log";
-	    RES=$?
-	    ((SIG=$RES%128));
-
-	    ## error Compile error : Error load   $log
-	    ## error Compile error :
-        ## Exec error : exec assert
-	    ## Exec error :
-	    errl=`grep 'error Compile error : Error load' "$log"`
-	    errC=`grep 'error Compile error :' "$log"`
-	    errX=`grep 'Exec error :' "$log"`
-	    errA=`grep 'Exec error : exec assert' "$log"`
-	  #  echo "$RES,$SIG,$errC,$errA."
-	    if [ -n "$errl" ] ; then
-		((NL++))
-		MSG="${mgn} FAIL(load)        ${std}"
-	    elif [ -n "$errC" ] ; then
-		((NC++))
-		MSG="${lgn} FAIL(Compile)     ${std}"
-	    elif [ -n "$errA" -a  $SIG -ne 0 ] ; then
-		((NA++))
-		MSG="${blu} FAIL(Assert)      ${std}"
-	    elif [ -n "$errX" -a  $SIG -ne 0 ] ; then
-		((NX++))
-		MSG="${mgn} FAIL(Exec)        ${std}"
-	    elif [ $SIG -eq 0 ] ; then
-		((NO++))
-		MSG="${grn} OK  (Exec)        ${std}"
-	    else
-		MSG="${red} FAIL(signal)=$SIG ${std}"
-		((NF++))
-	    fi
-	    (( dry !=1 )) &&echo $MSG  $cmm $i  >>"$log"
-	    (( dry !=1 )) &&echo  $MSG  $cmm $i "( see "$log" )";		
-	fi
-#	    echo  $MSG  $cmm $i "(see "$log " )" >>/tmp/list-ff-$$
-	    ;;
-		
+		((nj++))
+	    dorun $j 
+		#if (( nj % njob == 0 )); then wait; fi
+	;;
     esac
+	
 done
-
+wait
  (( dry !=1 )) && echo "Nb Case $NN / ${grn}OK $NO / ${red} FAIL $NF / ${blu} Assert Error $NA/ ${lgn} Compile Error $NC  / ${mgn} load Error $NL / Exec Error $NX${std}"

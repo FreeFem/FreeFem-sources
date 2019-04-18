@@ -265,7 +265,7 @@ inline complex<double>   operator,(const conj_KN_<complex<double> > & vc,const K
     complex<double>  * l(u);
     complex<double>   *r(vc.a);
     int nr=u.n,ls = u.step,rs=vc.a.step;
-     cblas_zdotc_sub(nr,(const void *) l,ls,(const void *) r,rs, (void*) &s);
+     cblas_zdotc_sub(nr,(const void *) r,rs,(const void *) l,ls, (void*) &s);
   //  s= BLAS_zdotc (&nr,r,&rs,l,&ls) ;
     return s;
 }
