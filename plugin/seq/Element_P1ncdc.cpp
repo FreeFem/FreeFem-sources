@@ -80,7 +80,6 @@ namespace  Fem2D {
 			}
 		}
 
-		// cout << r << "\t";
 		return r;
 	}
 
@@ -95,7 +94,6 @@ namespace  Fem2D {
 		}
 
 		throwassert(val.M() == 1);
-		// throwassert(val.K()==3 );
 
 		val = 0;
 		if (whatd[op_id]) {
@@ -122,185 +120,6 @@ namespace  Fem2D {
 			}
 		}
 	}
-
-	//
-	// end ttdcnc1_
-	// ------------------
-
-	/*
-	 * static void SetPtPkDCnc(R3 *Pt )
-	 * {
-	 *    const int d=3	;
-	 *
-	 *    int n=0;
-	 *    R c=1./3.;
-	 *    R b[]={c,c,c,c};
-	 *    for(int i=0;i<= 4; ++i)
-	 *    {   b[i]=0;
-	 *        Pt[n++] = R3(b+1) ;
-	 *        b[i]=c;
-	 *    }
-	 *    if(verbosity>9)
-	 *        cout << " Pkdc = " << KN_<R3>(Pt,4)<<"\n";
-	 *
-	 * }
-	 *
-	 *
-	 * class TypeOfFE_LagrangeDC3d: public  GTypeOfFE<Mesh3>
-	 * {
-	 * //typedef typename  MMesh Mesh;
-	 * public:
-	 * typedef   Mesh3 Mesh;
-	 * typedef   Mesh::Element Element;
-	 * typedef   Element::Rd Rd;
-	 * typedef   Element::RdHat RdHat;
-	 * static const int d=Rd::d;
-	 *
-	 * const int k;
-	 *
-	 * struct A4 {
-	 *    int dfon[4];
-	 *
-	 *    A4(int k) {
-	 *        //  (k+3)(k+2)(k+1) / 6   // d== 3
-	 *
-	 *        int ndf = (d== 3) ? ((k+3)*(k+2)*(k+1) / 6) :
-	 *        ((d== 2) ? ((k+2)*(k+1) / 2) : k+1 );
-	 *
-	 *        dfon[0]=dfon[1]=dfon[2]=dfon[3]=0;
-	 *        dfon[d]=ndf;
-	 *
-	 *        if(verbosity>9)
-	 *            cout << "A4 "<<   k<< " "   <<dfon[0]<< dfon[1]<<dfon[2]<<dfon[3]<<endl;
-	 *    }
-	 *    operator const  int  * () const {return dfon;}
-	 * };
-	 *
-	 * RdHat *Pt;
-	 * TypeOfFE_LagrangeDC3d(int kk):
-	 * //              dfon ,N,nsub(graphique) ,  const mat interpolation , discontinuous
-	 * GTypeOfFE<Mesh>(A4(kk),1,Max(kk,1),true,true),k(kk)
-	 * {
-	 *  int n=this->NbDoF;
-	 *  if(verbosity>9)
-	 *      cout << "\n +++ Pdc"<<k<<" : ndof : "<< n <<endl;
-	 *  SetPtPkDCnc (this->PtInterpolation);
-	 *  if(verbosity>9)    cout << this->PtInterpolation<< endl;
-	 *  {
-	 *      for (int i=0;i<n;i++)
-	 *        {
-	 *          this->pInterpolation[i]=i;
-	 *          this->cInterpolation[i]=0;
-	 *          this->dofInterpolation[i]=i;
-	 *          this->coefInterpolation[i]=1.;
-	 *        }
-	 *    }
-	 *
-	 * }
-	 * ~TypeOfFE_LagrangeDC3d(){ } //cout << "TypeOfFE_LagrangeDC3d"<< this->NbDoF<<endl;}
-	 *
-	 * void FB(const What_d whatd,const Mesh & Th,const Element & K,const Rd &P, RNMK_ & val) const;
-	 * virtual R operator()(const FElement & K,const  RdHat & PHat,const KN_<R> & u,int componante,int op) const ;
-	 *
-	 * private:
-	 * TypeOfFE_LagrangeDC3d( const TypeOfFE_LagrangeDC3d &) ;
-	 * void operator=( const TypeOfFE_LagrangeDC3d &) ;
-	 * };
-	 *
-	 * void TypeOfFE_LagrangeDC3d::FB(const What_d whatd,const Mesh & Th,const Element & K,const Rd &P, RNMK_ & val) const
-	 * {
-	 *    //  1 - 3 l[i]  =>  1 sur la face i et 0 sur b des autre face
-	 *  //  const Triangle & K(FE.T);
-	 *  R ll[]={1.-P.sum(),P.x,P.y,P.z};
-	 *  R l[]={1-ll[0]*3,1-ll[1]*3,1-ll[2]*3,1-ll[3]*3};
-	 *  assert(val.N() >=Element::nv);
-	 *  assert(val.M()==1 );
-	 *
-	 *  val=0;
-	 *  RN_ f0(val('.',0,op_id));
-	 *
-	 *  if (whatd & Fop_D0)
-	 *    {
-	 *      f0[0] = l[0];
-	 *      f0[1] = l[1];
-	 *      f0[2] = l[2];
-	 *      f0[3] = l[3];
-	 *    }
-	 *  if (whatd & Fop_D1)
-	 *    {
-	 *      R3 Dl[4];
-	 *      K.Gradlambda(Dl);
-	 *
-	 *      //for(int i=0;i<4;++i)
-	 *      //      cout << Dl[i] << endl;
-	 *      if (whatd & Fop_dx)
-	 *        {
-	 *          RN_ f0x(val('.',0,op_dx));
-	 *          f0x[0] = Dl[0].x;
-	 *          f0x[1] = Dl[1].x;
-	 *          f0x[2] = Dl[2].x;
-	 *          f0x[3] = Dl[3].x;
-	 *          f0x *= -3;
-	 *        }
-	 *
-	 *      if (whatd & Fop_dy) {
-	 *          RN_ f0y(val('.',0,op_dy));
-	 *          f0y[0] = Dl[0].y;
-	 *          f0y[1] = Dl[1].y;
-	 *          f0y[2] = Dl[2].y;
-	 *          f0y[3] = Dl[3].y;
-	 *          f0y *= -3;
-	 *
-	 *      }
-	 *
-	 *      if (whatd & Fop_dz) {
-	 *          RN_ f0z(val('.',0,op_dz));
-	 *          f0z[0] = Dl[0].z;
-	 *          f0z[1] = Dl[1].z;
-	 *          f0z[2] = Dl[2].z;
-	 *          f0z[3] = Dl[3].z;
-	 *          f0z *= -3;
-	 *
-	 *      }
-	 *    }
-	 *  //  cout << val << endl;
-	 * }
-	 *
-	 * R TypeOfFE_LagrangeDC3d::operator()(const FElement & K,const  R3 & PHat,const KN_<R> & u,int componante,int op) const
-	 * {
-	 *    R r=0;
-	 *    if(k==1)
-	 *      {
-	 *
-	 *       R u0(u(K(0))), u1(u(K(1))), u2(u(K(2))),u3(u(K(3)));
-	 *
-	 *    if (op==0)
-	 *      {
-	 *        R ll[4];
-	 *        PHat.toBary(ll);
-	 *          R l[]={1-ll[0]*3,1-ll[1]*3,1-ll[2]*3,1-ll[3]*3};
-	 *        r = u0*l[0]+u1*l[1]+l[2]*u2+l[3]*u3;
-	 *      }
-	 *    else if(op==op_dx || op==op_dy || op==op_dz)
-	 *      {
-	 *          const Element & T=K.T;
-	 *          R3 D[4];
-	 *          T.Gradlambda(D);
-	 *          for(int i=0;i<4;++i)
-	 *              D[i] *= -3.;
-	 *          if (op==op_dx)
-	 *              r =  D[0].x*u0 + D[1].x*u1 + D[2].x*u2+ D[3].x*u3 ;
-	 *          else if (op==op_dy)
-	 *              r =  D[0].y*u0 + D[1].y*u1 + D[2].y*u2+ D[3].y*u3 ;
-	 *          else
-	 *              r =  D[0].z*u0 + D[1].z*u1 + D[2].z*u2+ D[3].z*u3 ;
-	 *      }
-	 *      }
-	 *    else
-	 *        ffassert(0); // to do ..
-	 *    return r;
-	 * }
-	 */
 
 // link with FreeFem++
 	static TypeOfFE_P1ttdcnc1_ P1dc1LagrangeP1dc1;

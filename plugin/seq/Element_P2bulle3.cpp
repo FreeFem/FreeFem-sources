@@ -87,7 +87,6 @@ namespace Fem2D {
 			 for (int j = 0; j < 3; ++j) {
 				 int j1 = (j + 1) % 3, j2 = (j + 2) % 3;
 				 Pt[k++] = Pt[E::nvface[i][j]] * a0 + Pt[E::nvface[i][j1]] * a1 + Pt[E::nvface[i][j2]] * a1;
-				// cout << k-1<< " "  << Pt << endl;
 			 }
 		 }
 
@@ -118,7 +117,6 @@ namespace Fem2D {
 		for (int ff = 0; ff < Element::nf; ff++, k += 3) {
 			// oriantation de la face  a endroit
 			int fp = K.facePermutation(ff);
-			// fp=0; // No perm
 			if (fp & 1) {Exchange(p[k], p[k + 1]);}
 
 			if (fp & 2) {Exchange(p[k + 1], p[k + 2]);}

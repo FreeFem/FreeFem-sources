@@ -30,32 +30,23 @@
  * ref:ANR-07-CIS7-002-01
  */
 
-/*
- * calcul demander par F. Hecht
- */
-
 #ifndef WITH_NO_INIT
 #include "ff++.hpp"
 #endif
 
-// TransfoMesh_v2.cpp
 using namespace std;
-// LayerMesh.cpp
-// buildlayer.cpp
-// rajout global
 
 #include <set>
 #include <vector>
-// #include "msh3.hpp"
 
 using namespace  Fem2D;
 
-// fonction determinant les points d'intersection
+// function determining intersection points
 class ISOLINE_P1_Op: public E_F0mps
 {
 	public:
 		Expression eTh, filename, ff;
-		static const int n_name_param = 1;	//
+		static const int n_name_param = 1;
 		static basicAC_F0::name_and_type name_param [];
 		Expression nargs[n_name_param];
 
@@ -70,12 +61,10 @@ class ISOLINE_P1_Op: public E_F0mps
 				ff = to<double>(args[2]);
 			} else {
 				ffassert(0);
-				// ErrorCompile("no function to isolines \n");
 			}
 
 			if (!nargs[0]) {ffassert(0);}
 
-			// ErrorCompile("no isolines selected \n");
 		}
 
 		AnyType operator () (Stack stack)  const;
@@ -84,6 +73,11 @@ class ISOLINE_P1_Op: public E_F0mps
 basicAC_F0::name_and_type ISOLINE_P1_Op::name_param [] = {
 	{"iso", &typeid(double)}
 };
+
+/*!
+ * \brief Operator()
+ * \param Stack
+ */
 AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
 	Mesh *pTh = GetAny<Mesh *>((*eTh)(stack));
@@ -91,16 +85,14 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 
 	ffassert(pTh);
 	Mesh &Th = *pTh;
-	Mesh *m = pTh;	// question a quoi sert *m ??
-	int nbv = Th.nv;// nombre de sommet
-	int nbt = Th.nt;// nombre de triangles
-	int nbe = Th.neb;	// nombre d'aretes fontiere
-	long valsortie;
+	int nbv = Th.nv;// number of summit
+	int nbt = Th.nt;// number of triangles
+	int nbe = Th.neb;	// number of ridges
 	// value of isoline
 	double isovalue;
 	isovalue = GetAny<double>((*nargs[0])(stack));
 
-	// evaluation de la fonction aux sommets
+	// evaluation of the func with summits
 	KN<int> takevertex(Th.nv);
 	KN<double> tff(Th.nv);
 
@@ -121,7 +113,7 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 		}
 	}
 
-	// calcul des isolines dans les triangles
+	// calcul dof isolines in triangles
 	KN<double> EdgeIter(3 * Th.nt);
 	KN<int> taketriangle(2 * Th.nt);
 
@@ -159,7 +151,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 			nkeq[ii] = 0;
 			mark[ii] = 0;
 			Th.VerticesNumberOfEdge(K, ii, j0, j1);
-			// cout << "it=" << it << " ii= " << ii << " j0= " << j0 << "j1= " << j1 << endl;
 
 			double fi = tff[j0];
 			double fj = tff[j1];
@@ -200,8 +191,8 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 			cerr << " A triangle is a isovalue " << endl;
 			exit(1);
 		} else if (ivertex == 2) {
-			// *  search positive triangle *//
-			// deux possibilit�s
+			//  search positive triangle
+			// two possibilities
 			for (int iii = 0; iii < 3; iii++) {
 				if (nkeq[iii] != 1) {
 					int j0, j1;
@@ -293,7 +284,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 		}
 	}
 
-	// #################################
 	int NbInterBord = 0;
 	KN<int> ElementLink(Th.nt + Th.neb);
 
@@ -313,33 +303,20 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 		int adjeT1 = Th.ElementAdj(it, eo1);
 		int adjeT2 = Th.ElementAdj(it, eo2);
 
-		/*
-		 * if( VertexIso[ numv ] == 2 ){
-		 * if( VertexIsoTri[ 2*numv ] == it  ){
-		 * newit = VertexIsoTri[ 2*numv+1 ];
-		 * }
-		 * else
-		 * newit = VertexIsoTri[ 2*numv ];
-		 * }
-		 */
-
 		// link with previous element
 		{
 			int jj00, jj10;
 			Th.VerticesNumberOfEdge(K, eT1, jj00, jj10);
 
 			int numv = jj00;
-			// cout << "eT1, jj00, jj10 " << eT1 << " " << jj00 << " " << jj10 << " VertexIso[ numv ] "<< VertexIso[ numv ] << endl;
 
 			if (VertexIso[numv] == 2) {
 				if (VertexIsoTri[2 * numv] == it) {
 					ElementLink[VertexIsoTri[2 * numv + 1]] = it;
-					// newit = VertexIsoTri[ 2*numv+1 ];
 				} else {
 					ElementLink[VertexIsoTri[2 * numv]] = it;
 				}
 
-				// newit = VertexIsoTri[ 2*numv ];
 			} else if (VertexIso[numv] == 1) {
 				if (adjeT1 >= 0 && it != adjeT1) {
 					// search the edge of it in the border
@@ -354,25 +331,19 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 						int ibeV = Th.NumberOfTheBoundaryEdge(jj000, jj100);// old
 
 						ElementLink[ibeV + Th.nt] = it;
-						// NbInterBord++;
 					}
 
-					// exit(1);
 				} else {
 					// border
-					// int ibeV = Th.BorderElementAdj( jj00, jj10); //old
 					int ibeV = Th.NumberOfTheBoundaryEdge(jj00, jj10);
 					ElementLink[ibeV + Th.nt] = it;
-					// NbInterBord++;
 				}
 			} else if (adjeT1 >= 0 && it != adjeT1) {
 				ElementLink[adjeT1] = it;
 			} else {
 				// border
 				int ibeV = Th.NumberOfTheBoundaryEdge(jj00, jj10);
-				// ElementLink[Th.NumberOfTheBoundaryEdge(jj00,jj10)+Th.nt] = it; // old
 				ElementLink[ibeV + Th.nt] = it;
-				// NbInterBord++;
 			}
 		}
 		// link with the next element
@@ -384,12 +355,10 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 			if (VertexIso[numv] == 2) {
 				if (VertexIsoTri[2 * numv] == it) {
 					ElementLink[it] = VertexIsoTri[2 * numv + 1];
-					// newit = VertexIsoTri[ 2*numv+1 ];
 				} else {
 					ElementLink[it] = VertexIsoTri[2 * numv];
 				}
 
-				// newit = VertexIsoTri[ 2*numv ];
 			} else if (VertexIso[numv] == 1) {
 				if (adjeT2 >= 0 && it != adjeT2) {
 					// search the edge of it in the border
@@ -407,11 +376,9 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 						NbInterBord++;
 					}
 
-					// exit(1);
 				} else {
 					// border
 					int ibeV = Th.NumberOfTheBoundaryEdge(jj00, jj10);	// old
-					// int ibeV =  Th.BorderElementAdj( jj00, jj10);
 					ElementLink[it] = ibeV + Th.nt;
 					NbInterBord++;
 				}
@@ -422,72 +389,43 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 					// border
 					int ibeV = Th.NumberOfTheBoundaryEdge(jj00, jj10);
 					ElementLink[it] = ibeV + Th.nt;
-					// ElementLink[it] = Th.BorderElementAdj( jj00, jj10)+Th.nt; // old
 					NbInterBord++;
 				}
-
-				// for(int iijj=0; iijj<10; iijj++){
-				// cout << "ElementLink["<< iijj <<"]=" << ElementLink[iijj] <<endl;
-				// }
 			}
 		}
-		/*
-		 * if(adjeT2 >= 0 && it!=adjeT2)
-		 * ElementLink[it] = adjeT2;
-		 * else{
-		 * // border
-		 * const  Mesh::Triangle & K(Th.t(it));
-		 * int jj00,jj10;
-		 * Th.VerticesNumberOfEdge( K, taketriangle[ii], jj00, jj10);
-		 * ElementLink[it] = Th.TheBoundaryEdge(jj00,jj10)+Th.nt;
-		 * //NbInterBord++;
-		 * }
-		 */
 	}
 
 	int NbBordVertex = 0;
 	if (verbosity > 10) {cout << " NbInterBord = " << NbInterBord << endl;}
 
 	if (NbInterBord > 0) {
-		// #################################
-		// boucle sur le bord
-		// determination des points sur le bord
+		// boucle in the edge
+		// determination of points in the edge
 
 		for (int ii = 0; ii < Th.neb; ii++) {
-			// determination du sens du bord
+			// determination of the direction of the edge
 			int edgebid;
-			int ffbid = Th.BoundaryElement(ii, edgebid);// ii : number of edge => sortie :: ffbid = numero triangles, edgebid = numero edges
+			int ffbid = Th.BoundaryElement(ii, edgebid);
 			int j0bid, j1bid;
 			Th.VerticesNumberOfEdge(Th.t(ffbid), edgebid, j0bid, j1bid);
-			// j0bid --> j1bid sens de parcours sur le triangle
+			// j0bid --> j1bid direction of the course in the triangle
 			double fi = tff[j0bid];
 			double fj = tff[j1bid];
 			double xf = isovalue;
 
 			// sens fi -> fj (same as local triangle)
 
-			// fi++ et fj++  ==> lien ibe ++ next border
-			// fi==0 et fjj++ ==> lien triangle contenant cette vertex ++ vers next border
-			// fj==0 et fi++  ==> lien ibe vers triangle contenant cette vertex
-			// fi==0 et fj==0 ==> lien triangle contenant cette vertex vers - next bord  ( fjj >= 0 )
-			// - triangle contenant cette vertex (fjj < 0)
-
 			if (VertexIso[j0bid] > 0) {
 				// cas fi == isovalue
 				if (VertexIso[j1bid] > 0) {
 					if (verbosity > 10) {cout << "the edge is a isovalue :: link is previously computed " << endl;}
 
-					// assert( VertexIso[ j0bid ] == 2);
-					// assert( VertexIso[ j1bid ] == 2);
 				} else if (fj >= isovalue) {
 					// cas fi iso  fj++
-					// assert( VertexIso[ j0bid ] == 2);
 					if (VertexIso[j0bid] == 2) {
 						if (VertexIsoTri[2 * j0bid] == ffbid) {
-							// ElementLink[ VertexIsoTri[2*j0bid+1] ] = Th.nt + Th.BorderElementAdj(j1bid,j0bid); // old orientation
 							ElementLink[Th.nt + Th.NumberOfTheBoundaryEdge(j0bid, j1bid)] = VertexIsoTri[2 * j0bid + 1];
 						} else {
-							// ElementLink[ VertexIsoTri[2*j0bid] ] = Th.nt + Th.BorderElementAdj(j1bid,j0bid);  // old orientation
 							ElementLink[Th.nt + Th.NumberOfTheBoundaryEdge(j0bid, j1bid)] = VertexIsoTri[2 * j0bid];
 						}
 
@@ -498,9 +436,7 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 						if (verbosity > 10) {cout << "j0bid, j1bid, ffbid " << j0bid << " " << j1bid << " " << ffbid << endl;}
 
 						// assert( VertexIsoTri[2*j0bid] == ffbid );
-						// if( VertexIsoTri[2*j0bid] == ffbid ){
 						ElementLink[Th.nt + Th.NumberOfTheBoundaryEdge(j0bid, j1bid)] = VertexIsoTri[2 * j0bid];
-						// }
 						NbBordVertex++;
 					}
 				}
@@ -508,36 +444,24 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 				// cas fi == isovalue++
 				if (VertexIso[j1bid] > 0) {
 					assert(VertexIso[j1bid] == 1);
-					// ElementLink[ ii+Th.nt ] = VertexIsoTri[2*j1bid]; // old version
 					ElementLink[VertexIsoTri[2 * j1bid]] = ii + Th.nt;
 					ElementLink[ii + Th.nt] = Th.BorderElementAdj(j0bid, j1bid) + Th.nt;
 				} else if (fj >= isovalue) {
-					// ElementLink[ii+Th.nt] = Th.nt + Th.BorderElementAdj(j1bid,j0bid); // old orientation
 					ElementLink[ii + Th.nt] = Th.nt + Th.BorderElementAdj(j0bid, j1bid);
 					NbBordVertex++;
 				}
-				// old version ::
 				else {
 					ElementLink[ii + Th.nt] = Th.nt + Th.BorderElementAdj(j0bid, j1bid);
 					NbBordVertex++;
 				}
 			}
 
-			/*
-			 * if( fi >=  isovalue && Abs( fi - isovalue) > 1.e-11*(Abs(isovalue)+Abs(fi)) ){
-			 * if( fj >= isovalue && Abs( fj - isovalue) > 1.e-11*(Abs(isovalue)+Abs(fj)) ){
-			 * ElementLink[ii+Th.nt] = Th.nt + Th.BorderElementAdj(ii,j0bid,j1bid);
-			 * }
-			 *
-			 * NbBordVertex++;
-			 * }
-			 */
 		}
 
-		// rappel: le lien a �t� effectuer entre les bords
-		// -1 : pas de suivant
-		// positive et nulle : le suivant border element
-		// -2 : pas d'�lement � prendre en compte.
+		// reminder: the link has been done between edges
+		// -1 : no next
+		// positive and null : the next border element
+		// -2 : no element to consider.
 	}
 
 	if (verbosity > 10) {
@@ -553,8 +477,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 			cout << "ElementLink[" << iijj << "]=" << ElementLink[iijj] << endl;
 		}
 	}
-
-	// #################################
 
 	int NbVertex = NbIsoNonVertex + NbBordVertex;
 
@@ -618,7 +540,7 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 			assert(it >= 0);
 
 			if (it < Th.nt) {
-				// sur un triangle
+				// in a triangle
 				if (verbosity > 10) {cout << "it = " << it << " <--->  it2=" << it2 << " Th.nt " << Th.nt << endl;}
 
 				assert(TriangleVu[it] == -1);
@@ -627,7 +549,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 				int ii = 2 * it;
 				int eT1 = taketriangle[ii];
 				assert(eT1 >= 0);
-				// int eT2 = taketriangle[ii+1];
 				const Mesh::Triangle &K(Th.t(it));
 				int jj00, jj10;
 				Th.VerticesNumberOfEdge(K, eT1, jj00, jj10);
@@ -655,7 +576,7 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 				int ibe = it - Th.nt;
 				if (verbosity > 10) {cout << "ibe = " << ibe << " <--->  it2=" << it2 << " Th.nt " << Th.nt << endl;}
 
-				// sur le bord
+				// in the edge
 				int edgebid;
 				// int newit;
 				int ffbid = Th.BoundaryElement(ibe, edgebid);	// ii : number of edge => sortie :: ffbid = numero triangles, edgebid = numero edges
@@ -664,7 +585,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 				if (verbosity > 10) {cout << "Edge Vertex Number " << j0bid + 1 << " " << j1bid + 1 << " number of triangle " << ffbid << endl;}
 
 				if (taketriangle[2 * ffbid + 1] == edgebid && VertexIso[j1bid] == 0) {
-					// if( taketriangle[2*ffbid+1] == edgebid && VertexIso[j0bid] == 0){ // old version
 					if (EdgeIter[3 * ffbid + edgebid] > -0.1) {
 						double xlam = EdgeIter[3 * ffbid + edgebid];
 
@@ -684,7 +604,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 						inv++;
 					}
 				} else {
-					// old  version j0bid � la place de j1bid
 					VertexIsoP[inv].x = Th.vertices[j1bid].x;
 					VertexIsoP[inv].y = Th.vertices[j1bid].y;
 					VertexIsoP[inv].lab = label;
@@ -696,119 +615,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 		label++;
 	}
 
-// int TriangleVu[Th.nt];
-// for(int iii=0; iii< Th.nt; iii++)
-// TriangleVu[iii]= -1;
-// int label = 0;
-// int inv  = 0;
-
-// Vertex *VertexIsoP = new Vertex[NbVertex];
-
-// for(int it1=0; it1< Th.nt; it1++){
-// if( taketriangle[2*it1] < 0  || TriangleVu[it1] == 1 ) continue;
-
-// int it =it1;
-// do {
-
-// const  Mesh::Triangle & K(Th.t(it));
-
-// TriangleVu[it] = 1;
-
-// int ii = 2*it;
-// int eT1 = taketriangle[ii];
-// int eT2 = taketriangle[ii+1];
-
-// int jj00,jj10;
-// Th.VerticesNumberOfEdge( K, eT1, jj00, jj10);
-
-// if( EdgeIter[3*it+eT1] > -0.1){
-// double xlam = EdgeIter[3*it+eT1] ;
-
-// VertexIsoP[inv].x   = (1-xlam)*Th.vertices[ jj00 ].x + xlam*Th.vertices[ jj10 ].x;
-// VertexIsoP[inv].y   = (1-xlam)*Th.vertices[ jj00 ].y + xlam*Th.vertices[ jj10 ].y;
-// VertexIsoP[inv].lab = label;
-
-// inv++;
-// }
-// else{
-// cerr << "bug in definition of vertex" << endl;
-// int eo1;
-// eo1=eT1;
-// int ito1=Th.ElementAdj(it,eo1);
-
-// double xlam = EdgeIter[3*ito1+eo1];
-// VertexIsoP[inv].x   = xlam*Th.vertices[ jj00 ].x + (1-xlam)*Th.vertices[ jj10 ].x;
-// VertexIsoP[inv].y   = xlam*Th.vertices[ jj00 ].y + (1-xlam)*Th.vertices[ jj10 ].y;
-// VertexIsoP[inv].lab = label;
-// inv++;
-// }
-
-//// on passe a eT2
-// int newit;
-// Th.VerticesNumberOfEdge( K, eT2, jj00, jj10);
-// int numv  =  jj00;
-
-// if( VertexIso[ numv ] == 2 ){
-// if( VertexIsoTri[ 2*numv ] == it  ){
-// newit = VertexIsoTri[ 2*numv+1 ];
-// }
-// else
-// newit = VertexIsoTri[ 2*numv ];
-// }
-// else if( VertexIso[ numv ] == 1 ){
-// newit = -1;
-// }
-// else{
-// int eo;
-// eo=eT2;
-// int ito=Th.ElementAdj(it,eo);
-
-// if( (ito != it && taketriangle[2*ito] >= 0 ) && it >= 0){
-// newit = ito;
-// if( taketriangle[2*ito] != eo){
-// exit(1);
-// }
-// }
-// else
-// newit = -1;
-// }
-// if( newit < 0 ){
-// Th.VerticesNumberOfEdge( K, eT2, jj00, jj10);
-
-// if( EdgeIter[3*it+eT2] > -0.1){
-// double xlam = EdgeIter[3*it+eT2] ;
-////cout << "vertex (it="<< it << ", eT1="<< eT1 << ") :: " << jj00 << " " << jj10 << endl;
-// VertexIsoP[inv].x   = (1-xlam)*Th.vertices[ jj00 ].x + xlam*Th.vertices[ jj10 ].x;
-// VertexIsoP[inv].y   = (1-xlam)*Th.vertices[ jj00 ].y + xlam*Th.vertices[ jj10 ].y;
-// VertexIsoP[inv].lab = label;
-
-// inv++;
-// }
-// else{
-////cerr << "bug in definition of vertex" << endl;
-//// determination du triangle adjacents contenant e1
-
-////int ito1 = Th.TheAdjacencesLink[3*it+eT1]/3;
-////int eo1  = Th.TheAdjacencesLink[3*it+eT1]%3;
-// int eo1;
-// eo1=eT2;
-// int ito1=Th.ElementAdj(it,eo1);
-
-// double xlam = EdgeIter[3*ito1+eo1];
-// VertexIsoP[inv].x   = xlam*Th.vertices[ jj00 ].x + (1-xlam)*Th.vertices[ jj10 ].x;
-// VertexIsoP[inv].y   = xlam*Th.vertices[ jj00 ].y + (1-xlam)*Th.vertices[ jj10 ].y;
-// VertexIsoP[inv].lab = label;
-
-// inv++;
-// }
-// }
-////if(newit>=0)TriangleVu[it] = newit;
-// it = newit;
-
-// } while( it >= 0 && it!=it1 && taketriangle[2*it] >= 0  && TriangleVu[it] == -1 && inv <= NbVertex);
-
-// label=label+1;
-// }
 	if (verbosity) {cout << " IsolineP1 :inv= " << inv << endl;}
 
 	if (verbosity) {cout << "            NbVertex= " << NbVertex << endl;}
@@ -822,7 +628,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 	int lab = VertexIsoP[0].lab;
 
 	for (int k = 0; k < NbVertex; k++) {
-		// fprintf(fpoints,"%f %f %d\n",VertexIsoP[k].x,VertexIsoP[k].y,VertexIsoP[k].lab);
 		if (VertexIsoP[k].lab != lab) {fprintf(fpoints, "\n\n");}
 
 		fprintf(fpoints, "%f %f \n", VertexIsoP[k].x, VertexIsoP[k].y);
@@ -832,8 +637,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 	fclose(fpoints);
 
 	delete [] VertexIsoP;
-
-	return valsortie;
 }
 
 class ISOLINE_P1: public OneOperator {
@@ -846,18 +649,15 @@ class ISOLINE_P1: public OneOperator {
 		}
 };
 
-/*  class Init { public:
- * Init();
- * };
- *
- * $1 */
-static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
+/*!
+ * \brief Load_Init()
+ */
+static void Load_Init () {	// constructor who adds the function "splitmesh3"  a freefem++
 	typedef Mesh *pmesh;
 	cerr << " Warning obsolete load file version now use isolineP1 -> isoline " << endl;
 	cerr << " see example for the syntaxe " << endl;
 	cerr << " F . Hecht " << endl;
 	CompileError("obsolet load filee (sorry) use: load \"isoline\" ");
-	// Global.Add("isolineP1","(",new ISOLINE_P1);
 }
 
 LOADFUNC(Load_Init)

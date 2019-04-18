@@ -38,13 +38,10 @@
 #include "ff++.hpp"
 #include "AddNewFE.h"
 
-// #include "problem.hpp"
 namespace  Fem2D {
-	// ------
 	class TypeOfFE_HCT: public TypeOfFE {
 		public:
 			static int Data [];
-			// double Pi_h_coef[];
 
 			TypeOfFE_HCT (): TypeOfFE(12,
 				                      3,// hack   u, u_x, u_y for interpolation
@@ -54,8 +51,6 @@ namespace  Fem2D {
 				                      9 + 6,// nb coef to build interpolation
 				                      6,// np point to build interpolation
 				                      0) {
-				// const double gauss1 = (1. - sqrt(1. / 3.)) / 2;
-				// const double gauss2 = 1. - gauss1;
 				const R2 Pt [] = {R2(0, 0), R2(1, 0), R2(0, 1), R2(0.5, 0.5), R2(0, 0.5), R2(0.5, 0)};
 				// for the 3 vertices 3 coef => 9 coef ..
 				int kk = 0;
@@ -70,12 +65,10 @@ namespace  Fem2D {
 					kk++;	// DY
 				}
 
-				// for
 				int p = 3;
 
 				for (int e = 0; e < 3; ++e) {	// point d'integration sur l'arete e
 					P_Pi_h[p] = Pt[p];
-					// cout <<"\n" <<  p << " --  " << P_Pi_h[p] << " ::  " << A << " " << B << endl;
 					pij_alpha[kk++] = IPJ(9 + e, p, 1);	// coef =  ne_x * sge
 					pij_alpha[kk++] = IPJ(9 + e, p, 2);	// coef =  ne_y * sge
 					p++;
@@ -87,31 +80,7 @@ namespace  Fem2D {
 
 			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const R2 &P, RNMK_ &val) const;
 			void Pi_h_alpha (const baseFElement &K, KN_<double> &v) const;
-			// R operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const;
 	};
-
-	/*
-	 * R TypeOfFE_HCT::operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const
-	 * {
-	 * R v[10000],vf[1000];
-	 * assert(N*3*NbDoF<=10000 && NbDoF <1000 );
-	 * KNMK_<R> fb(v,NbDoF,N,op+1); //  the value for basic fonction
-	 * KN_<R> fk(vf,NbDoF);
-	 * for (int i=0;i<NbDoF;i++) // get the local value
-	 * fk[i] = u[K(i)];
-	 * //  get value of basic function
-	 * bool whatd[last_operatortype];
-	 * for (int i=0;i<last_operatortype;i++)
-	 * whatd[i]=false;
-	 * whatd[op]=true;
-	 * FB(whatd,K.Vh.Th,K.T,PHat,fb);
-	 * cout << " N ===" <<N << " " <<NbDoF << " " <<op+1 << endl;
-	 * cout << " fk = "<< fk << endl;
-	 * cout << " bf = " <<componante << " " << op << "==="  << fb('.',componante,op)<< endl;
-	 * R r = (fb('.',componante,op),fk);
-	 * return r;
-	 * }
-	 */
 	// on what     nu df on node node of df
 	int TypeOfFE_HCT::Data [] = {
 		0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 4, 5,	// support on what
@@ -140,7 +109,6 @@ namespace  Fem2D {
 			v[k++] = N.y;
 		}
 
-		// cout << " v =" << v << endl;
 		ffassert(v.N() == k);
 	}
 
@@ -151,15 +119,9 @@ namespace  Fem2D {
 	}
 
 #define P3(a, b, c) a *b *c
-	// #define P3aaa(a) a*a*a
-	// #define P3abb(a,b) a*b*b
-	// #define P3aaax(a) 3*a*a*a##x
-	// #define P3aaaxy(a) 6*a*a##x*a##y
 #define P3abcx(x, a, b, c) a ## x *b *c + a * b ## x * c + a * b * c ## x
 #define P3abcxy(x, y, a, b, c) a ## x *b ## y *c + a ## y * b ## x * c + a ## y * b * c ## x + a ## x * b * c ## y + a * b ## x * c ## y + a * b ## y * c ## x
 #define P3abcxyz(x, y, z, a, b, c) a ## x *b ## y *c ## z + a ## y * b ## x * c ## z + a ## y * b ## z * c ## x + a ## x * b ## z * c ## y + a ## z * b ## x * c ## y + a ## z * b ## y * c ## x
-	// #define P3abbx(x,a,b) a##x*b*b+2*a*b*b##x
-	// #define P3abbxy(x,y,a,b) 2*a##x*b##y*b + 2*a##y*b*b##x + 2*a*b##y*b##x
 
 #define P3X(a, b, c) P3abcx(x, a, b, c)
 #define P3Y(a, b, c) P3abcx(y, a, b, c)
@@ -181,7 +143,6 @@ namespace  Fem2D {
 		typedef double R;
 		double area = K.area;
 		int Nop = val.K();
-		// cout << "Nop = " << Nop << " " << whatd[op_id] <<  whatd[op_dx] <<  whatd[op_dy] << whatd[op_dxx] <<   whatd[op_dxy] << whatd[op_dyy]<< endl;
 		R2 A(K[0]), B(K[1]), C(K[2]);
 		R l[3] = {1 - P.x - P.y, P.x, P.y};
 		R2 Dl[3] = {K.H(0), K.H(1), K.H(2)};
@@ -189,20 +150,7 @@ namespace  Fem2D {
 		R lg2[3] = {E[0].norme2(), E[1].norme2(), E[2].norme2()};
 		R lg[3] = {sqrt(lg2[0]), sqrt(lg2[1]), sqrt(lg2[2])};
 		R eta[3] = {(lg2[2] - lg2[1]) / lg2[0], (lg2[0] - lg2[2]) / lg2[1], (lg2[1] - lg2[0]) / lg2[2]};
-		// double l2E[3]={  (E[0],E[0]),  (E[1],E[1]),  (E[2],E[2]) };
-		// double lE[3]={  sqrt(l2E[0]), sqrt(l2E[1]), sqrt(l2E[2]) };
 		double sgE[3] = {K.EdgeOrientation(0), K.EdgeOrientation(1), K.EdgeOrientation(2)};
-		// $ w_{3+i} = ccc[i] * ( li-2*li*li) $
-		// donc  $  D(w_i) =  ccc[i]  (1-2*li) Dl[i] $
-		// we must have $$ int_{e_i} dn(w_{3+j) ) =  \delta_{ij} $
-		// $int_e_i dn(w_{3+i} )  = ccc[i] (Dl[i],Ne[i]) = 1 $
-		// $ ccc[i] = 1/  (Dl[i],Ne[i]) $
-		/*
-		 * R2 Ne[3]= {
-		 *  E[0].perp() *sgE[0],
-		 *  E[1].perp() *sgE[1],
-		 *  E[2].perp() *sgE[2]
-		 * };*/
 		val = 0;
 
 		throwassert(val.N() >= 6);
@@ -214,8 +162,6 @@ namespace  Fem2D {
 		if (l[2] < l[i0]) {i0 = 2;}
 
 		int i1 = (i0 + 1) % 3, i2 = (i0 + 2) % 3;
-		// cout << " NMK= "<<val.N() << " " << val.M() << " " << val.K() << endl;
-		// cout << " Ki :  <<"<< l[0] << " " << l[1] << " " << l[2] << " i0 = Ki == " <<  i0 << endl;
 		double etai = eta[i0], etai1 = eta[i1], etai2 = eta[i2];
 		double li = l[i0], li1 = l[i1], li2 = l[i2];
 		double lix = Dl[i0].x, li1x = Dl[i1].x, li2x = Dl[i2].x;
@@ -227,7 +173,6 @@ namespace  Fem2D {
 			           3 * i2 + 2, 3 * i2 + 1,
 			           9 + i0, 9 + i1, 9 + i2
 		};	// renumerotation DL .. ff-> paper
-			// int q12[12]; for(int i=0; i<12; ++i) q12[p12[i]]=i; // num  paper -> ff invers ...
 
 		/*
 		 * double ll[10]={ P3(li,li,li),   P3(li1,li1,li1),   P3(li2,li2,li2),
@@ -254,7 +199,6 @@ namespace  Fem2D {
 			{(4. / 3.), 0, 0, -2, -2, 0, 0, 0, 0, 4},
 			{(-2. / 3.), 0, 0, 2, 0, 0, 0, 0, 0, 0},
 			{(-2. / 3.), 0, 0, 0, 2, 0, 0, 0, 0, 0}};
-		//
 		const int nnzdd = 6 * 3;// nb coef..
 		double add [] = {1., 1., 0., 0., 1., 1., 1., 0., 0., 1., 1., 1., 0., 0., 1., 1., 1., 1.};
 		int idd [] = {0, 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 7, 7, 8, 8, 9, 10, 11};
@@ -266,7 +210,7 @@ namespace  Fem2D {
 			int is = (i + 2) % 3;
 			R2 Es = E[is];
 			R2 Ep = -E[ip];
-			double dd[4] = {Es.x, Es.y, Ep.x, Ep.y};//
+			double dd[4] = {Es.x, Es.y, Ep.x, Ep.y};
 
 			add[ii] = dd[0];
 			add[ii + 1] = dd[2];
@@ -276,12 +220,6 @@ namespace  Fem2D {
 			add[kc] = (sgE[i] * 2 * area / lg[i]);	// hauteur
 		}
 
-		// cout << endl;
-		// for (int k=0; k<nnzdd;++k)
-		// cout << idd[k] << " " << jdd[k] << " " << add[k] << endl;
-		// cout << endl;
-
-		// double i012[3] = {1, 0, 0}, i112[3] = {12, 12, 11};
 		double AAA[12][10];
 		set2zero(&AAA[0][0], 120);
 		double AA[12][10];
@@ -304,7 +242,6 @@ namespace  Fem2D {
 		}
 
 		if (whatd[op_id] || whatd[op_dx] || whatd[op_dy]) {
-			// cout << "id dx dy"<< endl;
 
 			double ll[10] = LL10(P3);
 			double llx[10] = LL10(P3X);
@@ -325,9 +262,6 @@ namespace  Fem2D {
 
 			if (whatd[op_dy]) {val('.', 0, op_dy) = fy;}
 
-			// cout << "ll=" <<  KN_<double>(ll,10) << endl;
-
-			// cout << "f=" <<  f << endl;
 		}
 
 		if (whatd[op_dx] || whatd[op_dxx] || whatd[op_dxy]) {
@@ -354,7 +288,6 @@ namespace  Fem2D {
 		}
 
 		if (whatd[op_dy] || whatd[op_dyy]) {
-			// cout << "dy dyy "<< endl;
 			double ll[10] = LL10(P3Y);
 			double llx[10] = LL10(P3XY);
 			double lly[10] = LL10(P3YY);
@@ -374,7 +307,6 @@ namespace  Fem2D {
 			if (whatd[op_dyy]) {val('.', 0, op_dyy) = fy;}
 		}
 
-		// double NAN=nan("");
 		if (Nop > op_dxx) {
 			val('.', 1, op_dxx) = NAN;
 			val('.', 2, op_dxx) = NAN;

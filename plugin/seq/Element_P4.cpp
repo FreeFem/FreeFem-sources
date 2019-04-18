@@ -138,7 +138,7 @@ namespace  Fem2D {
 		// et la numerotation naturelle  mais 2 noud pas arete
 		// donc p est la perumation
 		// echange de numerotation si les arete sont dans le mauvais sens
-		int p[15];
+		int p[15]={};
 
 		for (int i = 0; i < 15; ++i) {
 			p[i] = i;
@@ -156,14 +156,10 @@ namespace  Fem2D {
 			Exchange(p[9], p[11]);	// 7,8
 		}
 
-		// cout << KN_<int>(p,10) <<endl;
 		val = 0;
 		/*
 		 * //  les fonction de base du Pk Lagrange sont
-		 * //
-		 * //
 		 */
-// --
 
 		if (whatd[op_id]) {
 			RN_ f0(val('.', 0, op_id));
@@ -174,15 +170,10 @@ namespace  Fem2D {
 
 				for (int i = 0; i < k; ++i) {
 					f *= L[nn[df][i]] - aa[df][i];
-					// cout <<  L[nn[df][i]]-aa[df][i]<< " ";
 				}
 
 				f0[pdf] = f;
-				// cout << pdf<< " " << df << " f " <<f <<endl;
 			}
-
-			// cout <<" L " << L[0] << " " << L[1] << " " << L[2] << endl;
-			// cout << ndf << " nbf = "<< f0 <<endl;
 		}
 
 		if (whatd[op_dx] || whatd[op_dy] || whatd[op_dxx] || whatd[op_dyy] || whatd[op_dxy]) {

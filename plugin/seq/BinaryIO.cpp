@@ -38,6 +38,12 @@ using namespace std;
 #include "AFunction_ext.hpp"// Extension of "AFunction.hpp" to deal with more than 3 parameters function
 using namespace Fem2D;
 
+/*!
+* \brief Save vector
+* \param f KN<double> * const &
+* \param nome string * const &
+* \return 0.0
+*/
 double SaveVec (KN<double> *const &f, string *const &nome) {
 	std::ofstream outfile(nome->data(), ios_base::binary);
 	// To access value at node i of vector N, do as follow: *(N[0]+i)
@@ -61,6 +67,12 @@ double SaveVec (KN<double> *const &f, string *const &nome) {
 	return 0.0;	// dummy return value.
 }
 
+/*!
+* \brief Write
+* \param io Stream_b<ostream> const &
+* \param data T * const &
+* \return ostream *
+*/
 double LoadVec (KN<double> *const &ww, string *const &nome) {
 	std::ifstream infile(nome->data(), ios_base::binary);
 	long int dim;
@@ -96,11 +108,7 @@ double flag (long int *const &FLAG, string *const &nome) {
 }
 
 // add the function name to the freefem++ table
-/*  class Init { public:
- * Init();
- * };
- * $1 */
-static void Load_Init () {
+ static void Load_Init () {
 	Global.Add("LoadVec", "(", new OneOperator2_<double, KN<double> *, string *>(LoadVec));
 	Global.Add("LoadFlag", "(", new OneOperator2_<double, long int *, string *>(LoadFlag));
 	Global.Add("SaveVec", "(", new OneOperator2_<double, KN<double> *, string *>(SaveVec));

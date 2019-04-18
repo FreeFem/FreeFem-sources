@@ -114,8 +114,6 @@ template<> const sym2 ExampleMetric<8>(const R2 &P) {const double s = 0.1 + (P -
 
 template<> const sym2 ExampleMetric<9>(const R2 &P) {const double s = 0.1 + fabs(P.x); return sym2(100, 0, 1) / square(s);}
 
-// template<int whichMetric> sym2 coExampleMetric(const R2 & P){return ExampleMetric<whichMetric>(P).comatrix();}
-
 /************************ 3D *************************/
 
 template<>

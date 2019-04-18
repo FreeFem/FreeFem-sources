@@ -90,7 +90,6 @@ class MeshGenQA:  public E_F0mps
 };
 
 basicAC_F0::name_and_type MeshGenQA::name_param[MeshGenQA::n_name_param] = {
-	// { "flag",               &typeid(long)},
 	{"noIsoRef", &typeid(bool)},
 	{"finalRefine", &typeid(bool)},
 	{"exportIntermediateData", &typeid(bool)},
@@ -100,7 +99,6 @@ basicAC_F0::name_and_type MeshGenQA::name_param[MeshGenQA::n_name_param] = {
 	{"noRef", &typeid(bool)}
 };
 AnyType MeshGenQA::operator () (Stack stack) const {
-	// const long  flag = arg(0,stack,0L);
 	const bool noIsoRef = arg(0, stack, false);
 	const bool finalRefine = arg(1, stack, false);
 	const bool exportIntermediateData = arg(2, stack, false);
@@ -156,17 +154,6 @@ AnyType MeshGenQA::operator () (Stack stack) const {
 
 	if (exportMetricToMathematica) {triQA.export_to_Mathematica_Metric("TriQA_Metric.txt");}
 
-	/*
-	 * if(exportToMathematica) {
-	 *  vector<double> gains;
-	 *  gains.resize(triQA.ne_oriented());
-	 *  for(int i=0; i<triQA.ne_oriented(); ++i)
-	 *      gains[i]=triQA.getEdges()[i].flipGain();
-	 *  ofstream data_out; data_out.open("gains.txt");
-	 *  mir::print_array(data_out << mir::Mathematica, gains.begin(), gains.end());
-	 *  data_out.close();
-	 * }*/
-
 	// generation de la class Mesh a partir des 3 tableaux : v,t,b
 	{
 		Mesh *m = triQA.export_to_Mesh();	// new Mesh(nbv+nbt,nbt*3,neb,v,t,b);
@@ -178,12 +165,6 @@ AnyType MeshGenQA::operator () (Stack stack) const {
 		return m;
 	}
 };
-
-/*  class Init { public:
- *  Init();
- * };
- *
- * $1 */
 
 // Init init;
 static void Load_Init () {

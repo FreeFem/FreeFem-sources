@@ -333,10 +333,6 @@ void ffhandler (const char *reason,
 	if (gslabort) {ExecError("Gsl errorhandler");}
 }
 
-/*  class Init { public:
- * Init();
- * };
- * $1 */
 using  namespace Fem2D;
 static void Load_Init () {
 	Global.Add("gslpolysolvequadratic", "(", new OneOperator2<long, KN_<double>, KN_<double> >(gslpolysolvequadratic));
@@ -364,73 +360,6 @@ static void Load_Init () {
 
 	Dcl_Type<const gsl_rng_type *>();	// gsl_rng_type
 	Global.New("ngslrng", CConstant<long>(ngslrng));
-//
-// all gsl random generator .???? .
-/*
- * Global.New("gslrngborosh13",CConstant<const gsl_rng_type *>(gsl_rng_borosh13));
- * Global.New("gslrngcoveyou",CConstant<const gsl_rng_type *>(gsl_rng_coveyou));
- * Global.New("gslrngcmrg",CConstant<const gsl_rng_type *>(gsl_rng_cmrg));
- * Global.New("gslrngfishman18",CConstant<const gsl_rng_type *>(gsl_rng_fishman18));
- * Global.New("gslrngfishman20",CConstant<const gsl_rng_type *>(gsl_rng_fishman20));
- * Global.New("gslrngfishman2x",CConstant<const gsl_rng_type *>(gsl_rng_fishman2x));
- * Global.New("gslrnggfsr4",CConstant<const gsl_rng_type *>(gsl_rng_gfsr4));
- * Global.New("gslrngknuthran",CConstant<const gsl_rng_type *>(gsl_rng_knuthran));
- * Global.New("gslrngknuthran2",CConstant<const gsl_rng_type *>(gsl_rng_knuthran2));
- * Global.New("gslrngknuthran2002",CConstant<const gsl_rng_type *>(gsl_rng_knuthran2002));
- * Global.New("gslrnglecuyer21",CConstant<const gsl_rng_type *>(gsl_rng_lecuyer21));
- * Global.New("gslrngminstd",CConstant<const gsl_rng_type *>(gsl_rng_minstd));
- * Global.New("gslrngmrg",CConstant<const gsl_rng_type *>(gsl_rng_mrg));
- * Global.New("gslrngmt19937",CConstant<const gsl_rng_type *>(gsl_rng_mt19937));
- * Global.New("gslrngmt199371999",CConstant<const gsl_rng_type *>(gsl_rng_mt19937_1999));
- * Global.New("gslrngmt199371998",CConstant<const gsl_rng_type *>(gsl_rng_mt19937_1998));
- * Global.New("gslrngr250",CConstant<const gsl_rng_type *>(gsl_rng_r250));
- * Global.New("gslrngran0",CConstant<const gsl_rng_type *>(gsl_rng_ran0));
- * Global.New("gslrngran1",CConstant<const gsl_rng_type *>(gsl_rng_ran1));
- * Global.New("gslrngran2",CConstant<const gsl_rng_type *>(gsl_rng_ran2));
- * Global.New("gslrngran3",CConstant<const gsl_rng_type *>(gsl_rng_ran3));
- * Global.New("gslrngrand",CConstant<const gsl_rng_type *>(gsl_rng_rand));
- * Global.New("gslrngrand48",CConstant<const gsl_rng_type *>(gsl_rng_rand48));
- * Global.New("gslrngrandom128bsd",CConstant<const gsl_rng_type *>(gsl_rng_random128_bsd));
- * Global.New("gslrngrandom128glibc2",CConstant<const gsl_rng_type *>(gsl_rng_random128_glibc2));
- * Global.New("gslrngrandom128libc5",CConstant<const gsl_rng_type *>(gsl_rng_random128_libc5));
- * Global.New("gslrngrandom256bsd",CConstant<const gsl_rng_type *>(gsl_rng_random256_bsd));
- * Global.New("gslrngrandom256glibc2",CConstant<const gsl_rng_type *>(gsl_rng_random256_glibc2));
- * Global.New("gslrngrandom256libc5",CConstant<const gsl_rng_type *>(gsl_rng_random256_libc5));
- * Global.New("gslrngrandom32bsd",CConstant<const gsl_rng_type *>(gsl_rng_random32_bsd));
- * Global.New("gslrngrandom32glibc2",CConstant<const gsl_rng_type *>(gsl_rng_random32_glibc2));
- * Global.New("gslrngrandom32libc5",CConstant<const gsl_rng_type *>(gsl_rng_random32_libc5));
- * Global.New("gslrngrandom64bsd",CConstant<const gsl_rng_type *>(gsl_rng_random64_bsd));
- * Global.New("gslrngrandom64glibc2",CConstant<const gsl_rng_type *>(gsl_rng_random64_glibc2));
- * Global.New("gslrngrandom64libc5",CConstant<const gsl_rng_type *>(gsl_rng_random64_libc5));
- * Global.New("gslrngrandom8bsd",CConstant<const gsl_rng_type *>(gsl_rng_random8_bsd));
- * Global.New("gslrngrandom8glibc2",CConstant<const gsl_rng_type *>(gsl_rng_random8_glibc2));
- * Global.New("gslrngrandom8libc5",CConstant<const gsl_rng_type *>(gsl_rng_random8_libc5));
- * Global.New("gslrngrandombsd",CConstant<const gsl_rng_type *>(gsl_rng_random_bsd));
- * Global.New("gslrngrandomglibc2",CConstant<const gsl_rng_type *>(gsl_rng_random_glibc2));
- * Global.New("gslrngrandomlibc5",CConstant<const gsl_rng_type *>(gsl_rng_random_libc5));
- * Global.New("gslrngrandu",CConstant<const gsl_rng_type *>(gsl_rng_randu));
- * Global.New("gslrngranf",CConstant<const gsl_rng_type *>(gsl_rng_ranf));
- * Global.New("gslrngranlux",CConstant<const gsl_rng_type *>(gsl_rng_ranlux));
- * Global.New("gslrngranlux389",CConstant<const gsl_rng_type *>(gsl_rng_ranlux389));
- * Global.New("gslrngranlxd1",CConstant<const gsl_rng_type *>(gsl_rng_ranlxd1));
- * Global.New("gslrngranlxd2",CConstant<const gsl_rng_type *>(gsl_rng_ranlxd2));
- * Global.New("gslrngranlxs0",CConstant<const gsl_rng_type *>(gsl_rng_ranlxs0));
- * Global.New("gslrngranlxs1",CConstant<const gsl_rng_type *>(gsl_rng_ranlxs1));
- * Global.New("gslrngranlxs2",CConstant<const gsl_rng_type *>(gsl_rng_ranlxs2));
- * Global.New("gslrngranmar",CConstant<const gsl_rng_type *>(gsl_rng_ranmar));
- * Global.New("gslrngslatec",CConstant<const gsl_rng_type *>(gsl_rng_slatec));
- * Global.New("gslrngtaus",CConstant<const gsl_rng_type *>(gsl_rng_taus));
- * Global.New("gslrngtaus2",CConstant<const gsl_rng_type *>(gsl_rng_taus2));
- * Global.New("gslrngtaus113",CConstant<const gsl_rng_type *>(gsl_rng_taus113));
- * Global.New("gslrngtransputer",CConstant<const gsl_rng_type *>(gsl_rng_transputer));
- * Global.New("gslrngtt800",CConstant<const gsl_rng_type *>(gsl_rng_tt800));
- * Global.New("gslrnguni",CConstant<const gsl_rng_type *>(gsl_rng_uni));
- * Global.New("gslrnguni32",CConstant<const gsl_rng_type *>(gsl_rng_uni32));
- * Global.New("gslrngvax",CConstant<const gsl_rng_type *>(gsl_rng_vax));
- * Global.New("gslrngwaterman14",CConstant<const gsl_rng_type *>(gsl_rng_waterman14));
- * Global.New("gslrngzuf",CConstant<const gsl_rng_type *>(gsl_rng_zuf));
- * Global.New("gslrngdefault",CConstant<const gsl_rng_type *>(gsl_rng_default));
- */
 
 	zzzfff->Add("gslrng", atype<gsl_rng **>());
 	zzzfff->Add("gslspline", atype<GSLInterpolation *>());
@@ -451,8 +380,6 @@ static void Load_Init () {
 
 	TheOperators->Add("=", new OneOperator2<gsl_rng **, gsl_rng **, const gsl_rng_type *>(set_gsl_rng_type));
 	TheOperators->Add("=", new OneOperator2<gsl_rng **, gsl_rng **, gsl_rng **>(set_gsl_cpy));
-// map_type[typeid(gsl_rng *).name()]->AddCast(   new E_F1_funcT<gsl_rng *,gsl_rng **>(UnRef<gsl_rng*>) );
-// map_type[typeid(gsl_rng *).name()]->AddCast(   new E_F1_funcT<gsl_rng *,gsl_rng **>(UnRef<gsl_rng*>) );
 
 	Global.Add("gslrnguniform", "(", new OneOperator1<double, gsl_rng **>(gslrnguniform));
 	Global.Add("gslrnguniformpos", "(", new OneOperator1<double, gsl_rng **>(gslrnguniformpos));

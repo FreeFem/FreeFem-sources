@@ -184,10 +184,7 @@ long lapack_dgeev (KNM<double> *const &A, KN<Complex> *const &vp, KNM<Complex> *
 	dgeev_(&JOBVL, &JOBVR, &n, mat, &n, wr, wi, vl, &n, vr, &n, w, &lw, &info);
 	lw = w[0];
 	w.resize(lw);
-	// cout << mat << endl;
 	dgeev_(&JOBVL, &JOBVR, &n, mat, &n, wr, wi, vl, &n, vr, &n, w, &lw, &info);
-	// cout << wr << endl;
-	// cout << wi << endl;
 	if (info < 0) {
 		cout << "   dgeev: the " << info << "-th argument had an illegal value." << endl;
 		(*vp) = Complex();
@@ -262,9 +259,6 @@ long lapack_zgeev (KNM<Complex> *const &A, KN<Complex> *const &vp, KNM<Complex> 
 				cout << "   zgeev: vp " << i << " : " << (*vp)[i] << endl;
 			}
 
-			// for(int j=0;j<n;++j)
-			// (*vectp)(j,i)=vr[k++];
-			// *vectp=vr;
 			if (verbosity > 5) {
 				cout << "   zgeev :   " << (*vectp)(':', i) << endl;
 			}

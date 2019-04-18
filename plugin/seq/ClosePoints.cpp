@@ -27,7 +27,6 @@
 
 #include <ff++.hpp>
 #include <AFunction_ext.hpp>
-// #include "HashTable.hpp"
 using namespace Fem2D;
 
 static bool debug = false;
@@ -114,7 +113,7 @@ class R2close {
 		}
 
 		Point*Exist (double x, double y, int k) const {
-			for (int i = head[k % m]; i != NotaPoint; i = next[i]) {// cout << i << " ";
+			for (int i = head[k % m]; i != NotaPoint; i = next[i]) {
 				if (Equivalent(x, y, P[i])) {
 					return P + i;
 				}
@@ -136,15 +135,13 @@ class R2close {
 
 			if (debug) {cout << " Find " << x << " " << y << " " << EPSILON << " " << ncase(x, y) << ": ";}
 
-			// double x = p[0], y=p[offset];
 			double eps = EPSILON / 2;
 			Point *q = 0;
-			int kk[9], k = 0, nc;
+			int kk[9]={}, k = 0, nc;
 
 			for (int i = -1; i < 2; ++i) {
 				for (int j = -1; j < 2; ++j) {
 					nc = ncase(x + eps * i, y + eps * j);
-					// cout <<x+eps*i << " " << y+eps*j << " " << nc << " . ";
 					if (nc >= 0) {
 						for (int i = 0; i < k; ++i) {	// remove double cas e..
 							if (kk[i] == nc) {
@@ -189,7 +186,7 @@ class R2close {
 			// double x = p[0], y=p[offset];
 			double eps = EPSILON / 2;
 			Point *q = 0;
-			int kk[9], k = 0, nc;
+			int kk[9]={}, k = 0, nc;
 
 			for (int i = -1; i < 2; ++i) {
 				for (int j = -1; j < 2; ++j) {
@@ -282,16 +279,9 @@ double dist2 (int n, double *p, double *q) {
 long Hcode (int n, double eps, double *p, double *p0);
 
 KN<long>*CloseTo2 (Stack stack, double const &eps, KNM_<double> const &P, KNM_<double> const &Q) {
-	// long Pn0 = P.N();
 	long Pm0 = P.M();
-	// long Qn0 = Q.N();
 	long Qm0 = Q.M();
-	// double *p0 = &(P(0, 0));
 	int po10 = P.step * P.shapei.step;
-	// int po01 = P.step * P.shapej.step;
-	// double *q0 = &(Q(0, 0));
-	//int qo10 = Q.step * Q.shapei.step;
-	// int qo01 = Q.step * Q.shapej.step;
 	double x0 = P(0, ':').min();
 	double y0 = P(1, ':').min();
 	double x1 = P(0, ':').max();
@@ -312,7 +302,7 @@ KN<long>*CloseTo2 (Stack stack, double const &eps, KNM_<double> const &P, KNM_<d
 			cout << i << " :: " << P(0, i) << " " << P(1, i) << endl;
 		}
 
-		/*int j = */ S.AddSimple(&P(0, i));
+		S.AddSimple(&P(0, i));
 	}
 
 	KN<long> *pr = new KN<long>(Qm0);
@@ -341,12 +331,7 @@ KN<long>*CloseTo (Stack stack, double const &eps, KNM_<double> const &P, KNM<dou
 		cout << " -ClosePoints Size array;   n0 " << n0 << " m0 " << m0 << endl;
 	}
 
-	// if(t) std::swap(n0,m0);
 	ffassert(n0 == 2);
-	// bool tq=t; // bofbof ...
-	// KNM_<double>  Po =*p;
-	// KNM_<double>  Pt =p->t();
-	// KNM_<double> P(t ? Pt: Po);
 	KNM<double> &Qo = *q;
 	double *p0 = &(P(0, 0));
 	int offset10 = P.step * P.shapei.step;
@@ -409,7 +394,6 @@ KN<long>*CloseTo (Stack stack, double const &eps, KNM_<double> const &P, KNM<dou
 
 	if (verbosity > 2) {cout << "  - ClosePoint: nb of common points " << m0 - S.n;}
 
-	// double *p0=&(*p)(0,0);
 
 	return Add2StackOfPtr2FreeRC(stack, pr);
 }
@@ -503,7 +487,6 @@ KN<long>*CloseTo (Stack stack, double const &eps, pmesh const &pTh, KNM<double> 
 		if (pV) {
 			pV = quadtree->NearestVertex(P);
 			long k = Th(pV);
-			// cout << j << " " << k << " "  << P << " " << pV <<endl;
 			if (inv) {(*pr)[k] = j;} else {(*pr)[j] = k;}
 		}
 	}
@@ -565,16 +548,8 @@ long Voisinage (KNM_<double> const &P, KNM_<double> const &Q, double const &eps,
 	int mp = P.M();
 	int mq = Q.M();
 	double *p = &P(0, 0);
-	// double *q = &Q(0, 0);
 	int offset01 = P.step * P.shapej.step;
-	// ;
 	int offset10 = P.step * P.shapei.step;
-	// ;
-	//double *q0 = &(Q(0, 0));
-	// int qoffset01 = Q.step * Q.shapej.step;
-	// ;
-	// int qoffset10 = Q.step * Q.shapei.step;
-	// ;
 	ffassert(mp == 2);
 	ffassert(mq == 2);
 	KN<int> lp(np);
@@ -616,7 +591,7 @@ long Voisinage (KNM_<double> const &P, KNM_<double> const &Q, double const &eps,
 	for (int j = 0; j < nq; ++j) {
 		int nlp = SP.FindAll(Q(j, 0), Q(j, 1), lp);
 
-		for (int k = 0; k < nlp; ++k) {	//
+		for (int k = 0; k < nlp; ++k) {
 			int i = lp[k];
 			if (verbosity > 99) {cout << " Add to i=" << i << " -> j " << j << endl;}
 
@@ -640,12 +615,10 @@ long ff_flann_search (KNM_<double> const &P, KNM_<double> const &Q, double const
 	int mq = Q.M();
 	int np = P.N();
 	int nq = Q.N();
-	// int nn = nq;
 	double *p = &P(0, 0);
 	double *q = &Q(0, 0);
 	int offset01 = P.step * P.shapej.step;
 	int offset10 = P.step * P.shapei.step;
-	// double *q0 = &(Q(0, 0));
 	int qoffset01 = Q.step * Q.shapej.step;
 	int qoffset10 = Q.step * Q.shapei.step;
 
@@ -655,7 +628,6 @@ long ff_flann_search (KNM_<double> const &P, KNM_<double> const &Q, double const
 	cout << nq << " " << mq << endl;
 
 	ffassert(mp == mq && offset10 == 1 && qoffset10 == 1);
-	// ffassert( mq ==2);
 
 	IJ.resize(nq);
 	flann::Matrix<double> dataset(p, np, mp);
@@ -696,15 +668,10 @@ int  WalkInTriangle(const Mesh & Th,int it, double *lambda,R2 PF)
 {
     const Triangle & T(Th[it]);
     const R2 Q[3]={(const R2) T[0],(const R2) T[1],(const R2) T[2]};
-    int i0=Th.number(T[0]);
-    int i1=Th.number(T[1]);
-    int i2=Th.number(T[2]);
-    
-     R2 P  = lambda[0]*Q[0]  + lambda[1]*Q[1]  + lambda[2]*Q[2];
-    
-    //  cout << " " << u << " " << v ;
 
-    
+     R2 P  = lambda[0]*Q[0]  + lambda[1]*Q[1]  + lambda[2]*Q[2];
+
+
     //  couleur(15);MoveTo( P); LineTo( PF);
     R l[3];
     l[0] = Area2(PF  ,Q[1],Q[2]);
@@ -719,26 +686,25 @@ int  WalkInTriangle(const Mesh & Th,int it, double *lambda,R2 PF)
     int kk=-1;
     if (l[0]>-eps && l[1]>-eps && l[2]>-eps)
     {
-    
+
         lambda[0] = l[0];
         lambda[1] = l[1];
         lambda[2] = l[2];
     }
     else
     {
-        
+
         if (l[0]<eps && lambda[0] != l[0]) neg[k++]=0;
         if (l[1]<eps && lambda[1] != l[1]) neg[k++]=1;
         if (l[2]<eps && lambda[2] != l[2]) neg[k++]=2;
         R eps1 = T.area     * 1.e-5;
-        
+
         if (k==2) // 2
         {
             // let j be the vertex beetween the 2 edges
             int j = 3-neg[0]-neg[1];
-            //
             R S = Area2(P,PF,Q[j]);
-            
+
             if (S>eps1)
                 kk = (j+1)%3;
             else if (S<-eps1)
@@ -747,14 +713,14 @@ int  WalkInTriangle(const Mesh & Th,int it, double *lambda,R2 PF)
                 kk = (j+1)%3;
             else
                 kk = (j+2)%3;
-            
+
         }
         else if (k==1)
             kk = neg[0];
         if(kk>=0)
         {
             R d=lambda[kk]-l[kk];
-            
+
             throwassert(d);
             R coef =  lambda[kk]/d;
             R coef1 = 1-coef;
@@ -792,7 +758,6 @@ BoundaryEdge *  Cut(const Mesh & Th,R2 P,R2 & PF)
         int itt =  Th.ElementAdj(it,j);
         if(itt==it || itt <0) {
             PF=Th[it](R2(l+1)); // point de sortie
-           // cout << " P " << P <<endl;
             int i1=Th(it,(jj+1)%3) ,i2=Th(it,(jj+2)%3) ;
             return Th.TheBoundaryEdge(i1,i2);}
         it = itt;
@@ -816,7 +781,7 @@ long BorderIntersect(pmesh const & pTh, KN_<double> const &IX, KN_<double> const
         R2 P(IX[i],IY[i]);
         R2 Q(OX[i],OY[i]);
         BoundaryEdge * e=Cut(Th,P,Q);
-        
+
         if(e ) { L[i]=e->lab;OX[i]=Q.x, OY[i]=Q.y;}
         else L[i]= notaregion;
     }
@@ -830,28 +795,14 @@ static void init () {
 	Global.Add("Voisinage", "(", new OneOperator4_<long, KNM_<double>, KNM_<double>, double, KN<KN<long> > *>(Voisinage));
 	Global.Add("neighborhood", "(", new OneOperator4_<long, KNM_<double>, KNM_<double>, double, KN<KN<long> > *>(Voisinage));
 	Global.Add("ClosePoints2", "(", new OneOperator3s_<KN<long> *, double, KNM_<double>, KNM_<double> >(CloseTo2));
-	// s  Global.Add("ClosePoints2t","(",new OneOperator3s_<KN<long>*,double, KNM_<double> , KNM_<double>   >(CloseTo2t));
-
+	
 	// numbering ..
-	// Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, Transpose<KNM<double>  *>  >(CloseTo<false>));
-	// Global.Add("ClosePoints","(",new OneOperator2s_<KN<long>*,double, KNM<double>   *  >(CloseTo<false>,1));
 	Global.Add("ClosePoints", "(", new OneOperator2s_<KN<long> *, double, KNM_<double> >(CloseTo<false> ));
-	// Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,KNM<double> * >(CloseTo<false>));
-	// Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,Transpose<KNM<double>  *> >(CloseTo<false>));
-	// Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,KNM<double> * >(CloseTo<false>));
-	// Global.Add("ClosePoints","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,Transpose<KNM<double>  *> >(CloseTo<false>));
 	Global.Add("ClosePoints", "(", new OneOperator3s_<KN<long> *, double, pmesh, KNM<double> *>(CloseTo<false> ));
-	// inv  numbering ..
-	// Global.Add("ClosePoints1","(",new OneOperator2s_<KN<long>*,double, Transpose<KNM<double>  *>  >(CloseTo<true>));
-	// Global.Add("ClosePoints1","(",new OneOperator2s_<KN<long>*,double, KNM<double>   *  >(CloseTo<true>,1));
 	Global.Add("ClosePoints1", "(", new OneOperator2s_<KN<long> *, double, KNM_<double> >(CloseTo<true> ));
-	// Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,KNM<double> * >(CloseTo<true>));
-	// Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double, Transpose<KNM<double>  *> ,Transpose<KNM<double>  *> >(CloseTo<true>));
-	// Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,KNM<double> * >(CloseTo<true>));
-	// Global.Add("ClosePoints1","(",new OneOperator3s_<KN<long>*,double,KNM<double> * ,Transpose<KNM<double>  *> >(CloseTo<true>));
-    Global.Add("ClosePoints1", "(", new OneOperator3s_<KN<long> *, double, pmesh, KNM<double> *>(CloseTo<true> ));
-    Global.Add("BorderIntersect", "(", new OneOperator6_<long,pmesh, KN_<double>,KN_<double>,KN_<double>,KN_<double>,KN_<long> >(BorderIntersect))  ;
-    
+  Global.Add("ClosePoints1", "(", new OneOperator3s_<KN<long> *, double, pmesh, KNM<double> *>(CloseTo<true> ));
+  Global.Add("BorderIntersect", "(", new OneOperator6_<long,pmesh, KN_<double>,KN_<double>,KN_<double>,KN_<double>,KN_<long> >(BorderIntersect))  ;
+
 }
 
 LOADFUNC(init);

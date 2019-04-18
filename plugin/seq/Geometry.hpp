@@ -97,9 +97,6 @@ class Edge {// edges are oriented. t is on the left.
 
 		R2 vec () const {return *v - *u;}	// R2(v->x - u->x, v->y - u->y)
 
-// R2 midPoint(){return R2((v->x + u->x)/2, (v->y + u->y)/2);}
-// R2 bary() const {if(sister==NULL) return (*u+*v)/2; return (*u +*v +*next->v +*sister->next->v)/4;}
-
 		bool isRepresentative () const {return (sister == NULL) || (u->x < v->x) || (u->x == v->x && u->y < v->y);}
 
 		Edge*representative () {return isRepresentative() ? this : sister;}
@@ -164,8 +161,6 @@ inline double Edge::flipGain () const {	// edge is assumed to be flipable, hence
 	return
 	    min(min(min(-ms.cos(st, vs), ms.cos(st, su)), min(mt.cos(st, ut), -mt.cos(st, tv))), min(-mu.cos(su, ut), -mv.cos(tv, vs))) -
 	    min(min(min(-mu.cos(uv, su), mu.cos(uv, ut)), min(mv.cos(uv, tv), -mv.cos(uv, vs))), min(-ms.cos(vs, su), -mt.cos(ut, tv)));
-// max(max(mu.cos2(uv,su), mu.cos2(uv,ut)), max(mv.cos2(uv,tv), mv.cos2(uv,vs))) -
-// max(max(ms.cos2(st,vs), ms.cos2(st,su)), max(mt.cos2(st,ut), mt.cos2(st,tv)));
 }
 
 inline bool Edge::flip () {

@@ -171,10 +171,6 @@ double mytest (Stack stack, pferarray const &p) {
 }
 
 // add the function name to the freefem++ table
-/*  class Init { public:
- * Init();
- * };
- * $1 */
 static void Load_Init () {
 	// Add function with 3 arguments
 	Global.Add("funcs1", "(", new OneOperator1s_<double, double>(funcs1));
