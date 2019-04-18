@@ -375,7 +375,7 @@ macro buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, array
 {
     real timing = mpiWtime();
     fespace WhLocal(Th, P);
-    if(mpisize > 1 && !excluded) {
+    if(mpiSize(comm) > 1 && !excluded) {
         meshN ThGlobal = Th;
         fespace PhGlobal(ThGlobal, P0);
         fespace VhGlobal(ThGlobal, P1);
@@ -445,7 +445,7 @@ IFMACRO(!removeZeros)
 ENDIFMACRO
         partition(Th, ThBorder, ThGlobal, PhGlobal, VhGlobal, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, D, WhLocal, P, arrayIntersection, restrictionIntersection, comm, fakeInterface, PkPart, defPart, initPart, bs)
     }
-    else if(mpisize == 1) {
+    else if(mpiSize(comm) == 1) {
         if(s > 1)
             Th = trunc(Th, 1, split = s);
         D.resize(WhLocal.ndof);
