@@ -2264,7 +2264,6 @@ AC_OUTPUT(
     plugin/Makefile
 	plugin/seq/Makefile
 	plugin/mpi/Makefile
-	plugin/ffddm/Makefile
 	examples/Makefile
     examples/plugin/Makefile
     examples/tutorial/Makefile
