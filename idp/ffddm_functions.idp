@@ -8,8 +8,14 @@ func preffe#K[int] pr#A(preffe#K[int] &u)
     if (!bpara)
     res = pr#Aglobal*u;
     else if (!preffe#prmesh#excluded){
-      res = pr#aRd[mpiRank(preffe#prmesh#commddm)]*u;
-      pr#prfe#update(res,true);
+      if (preffe#prmesh#overlap > 0) {
+        res = pr#aRd[mpiRank(preffe#prmesh#commddm)]*u;
+        pr#prfe#update(res,true);
+      }
+      else {
+        res = pr#matN*u;
+        pr#prfe#update(res,false);
+      }
     }
     /*res = B*u;*/
     preffe#prmesh#toc(pr#tmvi,"",pr#tmv)
@@ -29,8 +35,13 @@ func preffe#K[int] pr#directsolve(preffe#K[int]& rhs)
       res = pr#Aglobal^-1*rhs;
     }
     else if (!preffe#prmesh#excluded) {
-      matrix<preffe#K> matloc = preffe#Dih[mpiRank(preffe#prmesh#commddm)]*pr#aRd[mpiRank(preffe#prmesh#commddm)];
-      matloc = preffe#Rih[mpiRank(preffe#prmesh#commddm)]'*matloc;
+      matrix<preffe#K> matloc;
+      if (preffe#prmesh#overlap > 0) {
+        matloc = preffe#Dih[mpiRank(preffe#prmesh#commddm)]*pr#aRd[mpiRank(preffe#prmesh#commddm)];
+        matloc = preffe#Rih[mpiRank(preffe#prmesh#commddm)]'*matloc;
+      }
+      else
+        matloc = preffe#Rih[mpiRank(preffe#prmesh#commddm)]'*pr#matN;
       matloc = matloc*preffe#Rih[mpiRank(preffe#prmesh#commddm)];
       set(matloc,solver = sparsesolver,commworld=preffe#prmesh#commddm,master=-1);
       preffe#K[int] scaledrhs = preffe#Dih[mpiRank(preffe#prmesh#commddm)]*rhs;
