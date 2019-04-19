@@ -1,4 +1,4 @@
-SUBDIRS=seq mpi ffddm
+SUBDIRS=seq mpi
 EXTRA_DIST=   \
 ./mpi/complex_pastix_FreeFem.cpp  \
 ./mpi/htool.cpp  \
