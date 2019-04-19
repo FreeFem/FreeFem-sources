@@ -51,10 +51,6 @@
 #define M_BDRY (1 << 1)
 #define M_MOVE (1 << 2)
 #define M_CAVITY (1 << 3)
-// #define M_CORNER   (1 << 4)
-// #define M_REQUIRED (1 << 5)
-// #define M_RIDGE_GEO(1 << 6)
-// #define M_RIDGE_REF(1 << 7)
 #define ALL_BDRY 63
 
 #ifdef INT_MAX
@@ -71,4 +67,3 @@ extern unsigned char MMG_iare[6][2];
 extern unsigned char MMG_ifar[6][2];
 extern unsigned char MMG_isar[6][2];
 extern unsigned char MMG_arpt[4][3];
-

@@ -66,6 +66,7 @@ class MatrixUpWind3:  public E_F0 {
 			expTh = to<pmesh3>(args[1]);
 			expc = CastTo<double>(args[2]);
 			const E_Array *a = dynamic_cast<const E_Array *>((Expression)args[3]);
+			if (a == NULL) printf("Dynamic cast failed\n");
 			if (a->size() != 3) {CompileError("syntax:  MatrixUpWind0(Th,rhi,[u1,u2])");}
 
 			int err = 0;
@@ -165,7 +166,6 @@ AnyType MatrixUpWind0::operator () (Stack stack) const {
 	ffassert(pTh);
 	const Mesh &Th(*pTh);
 	{
-		//map<pair<int, int>, R> Aij;
 		MatriceMorse<R> * pAij= new MatriceMorse<R>(Th.nv), &Aij = *pAij ;
 
 		KN<double> cc(Th.nv);
@@ -232,7 +232,6 @@ AnyType MatrixUpWind3::operator () (Stack stack) const {
 	ffassert(pTh);
 	const Mesh3 &Th(*pTh);
 	{
-		//map<pair<int, int>, R> Aij;
 		MatriceMorse<R> * pAij= new MatriceMorse<R>(Th.nv), &Aij = *pAij ;
 
 		KN<double> cc(Th.nv);
@@ -286,11 +285,6 @@ AnyType MatrixUpWind3::operator () (Stack stack) const {
 	return sparce_mat;
 }
 
-/*  class Init { public:
- * Init();
- * };
- * Init init;
- */
 static void Load_Init () {
 	cout << " lood: init Mat Chacon " << endl;
 	Global.Add("MatUpWind0", "(", new OneOperatorCode<MatrixUpWind0>());

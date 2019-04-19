@@ -56,7 +56,7 @@ static char*newstringcpyadds (const char *nm) {
 			strcpy(p, nm);
 		}
 	}
-	
+
 	return p;
 }
 
@@ -101,7 +101,7 @@ void ffsem_init0_ (long *p) {
 
 ff_Psem ffsem_malloc () {
 	ff_Psem p = (ff_Psem)malloc(sizeof(struct FF_P_sem));
-
+	if (p == NULL) printf("malloc failed\n");
 	p->sem = 0;
 	p->nm = 0;
 	p->creat = 0;
@@ -120,7 +120,7 @@ void ffsem_del_ (long *p) {
 void ffsem_init (ff_Psem p, const char *nm, int crea) {
 	p->creat = crea;
 	p->nm = newstringcpyadds(nm);
-	if (crea) {
+	if (crea && p->nm) {
 		unlink(p->nm);
 		p->sem = sem_open(p->nm, O_CREAT, 0660, 0);
 	} else {
@@ -190,7 +190,7 @@ void ffsem_trywait_ (long *p, long *ret) {
 
 ff_Pmmap ffmmap_malloc () {
 	ff_Pmmap p = (ff_Pmmap)malloc(sizeof(struct FF_P_mmap));
-
+	if (p == NULL) printf("malloc failed\n");
 	ffmmap_init0(p);
 	return p;
 }
@@ -242,7 +242,7 @@ void ffmmap_init0_ (long *p) {
 
 long ffmmap_msync (ff_Pmmap p, long off, long ln) {
 	if (ln == 0) {
-		ln = p->len - off;	//
+		ln = p->len - off;
 	}
 
 	return msync((char *)p->map + off, ln, MS_SYNC);
@@ -268,7 +268,7 @@ void ffmmap_init (ff_Pmmap p, const char *nm, long len) {
 
 	off_t size = lseek(p->fd, 0, SEEK_END);	// seek to end of file
 	p->isnew = (size == 0);
-	printf(" len %ld size %lld \n", len, size);
+	printf(" len %ld size %ld \n", len, size);
 	if (size < len) {
 		if (ftruncate(p->fd, len) == -1) {
 			perror("ftruncate");

@@ -79,15 +79,11 @@ basicAC_F0::name_and_type ISOLINE_P1_Op::name_param [] = {
  * \param Stack
  */
 AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
-	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
 	Mesh *pTh = GetAny<Mesh *>((*eTh)(stack));
 	string *ffname = GetAny<string *>((*filename)(stack));
 
 	ffassert(pTh);
 	Mesh &Th = *pTh;
-	int nbv = Th.nv;// number of summit
-	int nbt = Th.nt;// number of triangles
-	int nbe = Th.neb;	// number of ridges
 	// value of isoline
 	double isovalue;
 	isovalue = GetAny<double>((*nargs[0])(stack));
@@ -295,7 +291,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 		if (taketriangle[2 * it] < 0) {continue;}
 
 		const Mesh::Triangle &K(Th.t(it));
-		int ii = 2 * it;
 		int eT1 = taketriangle[2 * it];
 		int eT2 = taketriangle[2 * it + 1];
 		int eo1 = eT1;
@@ -411,7 +406,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 			// j0bid --> j1bid direction of the course in the triangle
 			double fi = tff[j0bid];
 			double fj = tff[j1bid];
-			double xf = isovalue;
 
 			// sens fi -> fj (same as local triangle)
 
