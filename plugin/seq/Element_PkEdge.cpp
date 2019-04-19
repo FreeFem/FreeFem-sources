@@ -42,11 +42,9 @@ namespace  Fem2D {
 		int npe;// nb point on edge
 		int ndf;// nb dof
 		KN<R> X;// point on edge
-		// KN<R> Pi_h_coef; // 1
 		KN<int> Data;	// data of TypeOfFE
 		InitTypeOfFE_PkEdge (int KK)
 			: k(KK), npe(k + 1), ndf(3 * npe), X(npe), Data(5 * ndf + 3) {
-			// Pi_h_coef=1.;
 			const QuadratureFormular1d QF(-1 + 2 * npe, npe, GaussLegendre(npe), true);
 
 			for (int i = 0; i < npe; ++i) {
@@ -85,7 +83,6 @@ namespace  Fem2D {
 			TypeOfFE_PkEdge (int KK)
 				:  InitTypeOfFE_PkEdge(KK),
 				TypeOfFE(ndf, 1, Data, -k, 1, ndf * 2, ndf, 0) {
-				// cout << " Pk = " << k << endl;
 				int kkk = 0;
 
 				for (int i = 0; i < NbDoF; i++) {
@@ -97,7 +94,6 @@ namespace  Fem2D {
 					pij_alpha[kkk++] = IPJ(i, i, 0);
 					pij_alpha[kkk++] = IPJ(i, ii, 0);
 					P_Pi_h[i] = A * (1. - X[j]) + B * (X[j]);	// X=0 => A  X=1 => B;
-					// cout << P_Pi_h[i]<< endl;;
 				}
 			}
 
@@ -118,8 +114,6 @@ namespace  Fem2D {
 						kkk += 2;
 					}
 				}
-
-				// cout << " v :" << v << endl;
 			}
 
 			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
@@ -147,7 +141,6 @@ namespace  Fem2D {
 			xe = 1 - xe, dxe = -1;
 		}
 
-		// cout << P << " ee = " << ee << " xe " << xe << " " << L[ee]<< " s=" <<s  << " orient: " << K.EdgeOrientation(ee) <<endl;
 		assert(s);
 		val = 0;
 		if (whatd[op_id]) {
@@ -166,7 +159,6 @@ namespace  Fem2D {
 				f0[dof] = f;
 			}
 
-			// cout << " f0 = " << f0 << " X= "<< X << endl;
 		}
 
 		if (whatd[op_dx] || whatd[op_dy] || whatd[op_dxx] || whatd[op_dyy] || whatd[op_dxy]) {
@@ -174,7 +166,6 @@ namespace  Fem2D {
 			R lE2 = (E, E);
 			dxe /= lE2;
 
-			// cout << " xe = "<< xe << " " << dxe << " " << lE2 << endl;
 			for (int l = 0; l < npe; l++) {
 				int dof = e3 + l;
 				R f = 1., df = 0., ddf = 0.;
@@ -189,7 +180,6 @@ namespace  Fem2D {
 					}
 				}
 
-				// cout << "   dof: " << dof << " " << f << " " << df << " " << 1./lE2/(X[1]- X[0]) << " " << E << endl;
 				if (whatd[op_id]) {val(dof, 0, op_id) = f;}
 
 				if (whatd[op_dx]) {val(dof, 0, op_dx) = df * E.x;}
@@ -211,11 +201,9 @@ namespace  Fem2D {
 		int npe;// nb point on edge
 		int ndf;// nb dof
 		KN<R> X;// point on edge
-		// KN<R> Pi_h_coef; // 1
 		KN<int> Data;	// data of TypeOfFE
 		InitTypeOfFE_PkEdgedc (int KK)
 			: k(KK), npe(k + 1), ndf(3 * npe), X(npe), Data(5 * ndf + 3) {
-			// Pi_h_coef=1.;
 			const QuadratureFormular1d QF(-1 + 2 * npe, npe, GaussLegendre(npe), true);
 
 			for (int i = 0; i < npe; ++i) {
@@ -223,7 +211,6 @@ namespace  Fem2D {
 			}
 
 			HeapSort((R *)X, npe);
-			// int j = 0;
 			int o[6];
 			o[0] = 0;
 
@@ -232,8 +219,6 @@ namespace  Fem2D {
 			}
 
 			for (int df = 0; df < ndf; ++df) {
-				// int e = df / npe;
-				// int n = df % npe;
 				Data[o[0] + df] = 6;// 3+e;
 				Data[o[1] + df] = df;
 				Data[o[2] + df] = 0;
@@ -254,7 +239,6 @@ namespace  Fem2D {
 			TypeOfFE_PkEdgedc (int KK)
 				:  InitTypeOfFE_PkEdgedc(KK),
 				TypeOfFE(ndf, 1, Data, -2, 1, ndf * 2, ndf, 0) {
-				// cout << " Pk = " << k << endl;
 				int kkk = 0;
 
 				for (int i = 0; i < NbDoF; i++) {
@@ -266,7 +250,6 @@ namespace  Fem2D {
 					pij_alpha[kkk++] = IPJ(i, i, 0);
 					pij_alpha[kkk++] = IPJ(i, ii, 0);
 					P_Pi_h[i] = A * (1. - X[j]) + B * (X[j]);	// X=0 => A  X=1 => B;
-					// cout << P_Pi_h[i]<< endl;;
 				}
 			}
 
@@ -287,8 +270,6 @@ namespace  Fem2D {
 						kkk += 2;
 					}
 				}
-
-				// cout << " v :" << v << endl;
 			}
 
 			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
@@ -315,7 +296,6 @@ namespace  Fem2D {
 			xe = 1 - xe;
 		}
 
-		// cout << P << " ee = " << ee << " xe " << xe << " " << L[ee]<< " s=" <<s  << " orient: " << K.EdgeOrientation(ee) <<endl;
 		assert(s);
 		val = 0;
 		if (whatd[op_id]) {
@@ -334,7 +314,6 @@ namespace  Fem2D {
 				f0[df] = f;
 			}
 
-			// cout << " f0 = " << f0 << " X= "<< X << endl;
 		}
 
 		if (whatd[op_dx] || whatd[op_dy] || whatd[op_dxx] || whatd[op_dyy] || whatd[op_dxy]) {

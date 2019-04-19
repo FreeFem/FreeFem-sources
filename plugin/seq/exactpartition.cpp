@@ -50,7 +50,6 @@ long exactpartition (int n, int m, double **v, long *J) {
 		}
 
 		ffassert(s && j0 < N);
-		// sum = 1
 		double ss = 0;
 
 		for (int j = 0; j < n; ++j) {

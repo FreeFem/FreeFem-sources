@@ -38,7 +38,6 @@
 #define _USE_MATH_DEFINES
 #include "ff++.hpp"
 #include "msh3.hpp"
-// #define ADAPTLIBRARY
 #include "memory.h"
 #include "freeyamslib.h"
 #include "eigenv.h"	// include dans libMesh
@@ -252,7 +251,6 @@ Mesh3*yams_pSurfMesh_to_mesh3 (yams_pSurfMesh sm, int infondang, int infocc, int
 		iv[1] = sm->point[pt1->v[1]].tmp - 1;
 		iv[2] = sm->point[pt1->v[2]].tmp - 1;
 		lab = pt1->ref;	// change fh 02/2013
-		// cout << " lab : " << sm->connex  << " " << pt1->cc << " " << pt1->ref<< " " << endl;
 		(*ff_bb++).set(ff_v, iv, lab);
 
 		for (i = 0; i < 3; i++) {
@@ -458,8 +456,6 @@ void yams_inival (int intopt[23], double fopt[14]) {
 	fopt[3] = -1.0;
 	fopt[4] = -1.0;
 	fopt[13] = 45.;	// default RIDG = 45.
-	// opts.ridge  =   cos(RIDG*M_PI/180.);
-	// opts.geom   =   cos(GEOM*M_PI/180.);
 	fopt[12] = COS45DEG;/* Walton limitation          */
 	fopt[9] = -2;	/* default = 1 unit           */
 	fopt[10] = QUALCOE;	/* quality degradation        */
@@ -703,12 +699,6 @@ AnyType yams_Op::operator () (Stack stack)  const {
 		}
 	}
 
-	/*
-	 * KN<int> intopt(arg(0,stack,defaultintopt));
-	 * assert( intopt.N() == 23 );
-	 * KN<double> fopt(arg(1,stack,defaultfopt));
-	 * assert( fopt.N() == 14 );
-	 */
 	KN<double> metric;
 
 	int mtype = type;
@@ -829,14 +819,7 @@ AnyType yams_Op::operator () (Stack stack)  const {
 	return SetAny<pmesh3>(Th3_T);
 }
 
-/*  class Init1 { public:
- * Init1();
- * };
- *
- * $1 */
-
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
-	// typedef Mesh3 *pmesh3;
 	if (verbosity) {cout << " load: freeyams  " << endl;}
 
 	Global.Add("freeyams", "(", new OneOperatorCode<yams_Op> );

@@ -75,19 +75,6 @@ class BijanMO
 			histpath(0),
 			histcpath(0) {
 			cout << nbrestart << " == " << wnbrestart << endl;
-
-			/*   1 1 1 10 rho =1 epsloc=1e4 (unused), epsglo=1, */
-			/*      open(1,file='DATA_BMO.txt',status='unknown') */
-			/*      read(1,*) nbrestart */
-			/*      read(1,*) nbext1 */
-			/*      read(1,*) nbbvp */
-			/*      read(1,*) nbgrad */
-			/*      read(1,*) ifd,epsfd */
-			/*      read(1,*) rho000,epsloc */
-			/*      read(1,*) epsij */
-			/*      read(1,*) ndim */
-			/*      close(1) */
-			/*<       call init(ndim,vinit,xmin,xmax)>*/
 		}
 
 		double main (Vect &vinit, Vect &xxmim, Vect &xxmax);
@@ -116,7 +103,7 @@ class BijanMO
 
 		virtual ~BijanMO () {}
 
-		// les 4 functions utilisateur
+		//  4 functions user
 		// virtual void init(Vect & xinit) = 0;
 		virtual double J (Vect &x) = 0;
 		virtual R*DJ (Vect &x, Vect &fpx) {return 0;}	// do not existe

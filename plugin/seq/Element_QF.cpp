@@ -61,7 +61,6 @@ namespace  Fem2D {
 				return p;
 			}
 
-			// static double *cfill(int n) {  double *d = new double[n]]; for(int i=0; i<n; ++i) d[i]1.; return d;}
 			typedef GQuadratureFormular<R2> QF;
 			int *Data;
 			int m;
@@ -108,7 +107,6 @@ namespace  Fem2D {
 						int k = ijP(P_Pi_h[l]);
 						if (k != l) {
 							err++;
-							// cout << " Erreur search TypeOfFE_QF2d loose point " << l << " / " << NbDoF << " m = " << m << endl;
 						}
 					}
 
@@ -140,12 +138,6 @@ namespace  Fem2D {
 					val(k, 0, op_id) = 1;
 				}
 			}
-
-			/*     R operator()(const FElement & K,const  RdHat & PHat,const KN_<R> & u,int componante,int op) const
-			 *   {
-			 *
-			 *   }
-			 */
 	};
 
 	class TypeOfFE_QF3d: public GTypeOfFE<Mesh3>
@@ -226,7 +218,6 @@ namespace  Fem2D {
 				int kk = ijP(this->PtInterpolation[l]);
 				if (kk != l) {
 					err++;
-					// cout << " Erreur search TypeOfFE_QF3d loose point " << l <<" NbDoF=" << NbDoF <<  " m = " << m << endl;
 				}
 			}
 

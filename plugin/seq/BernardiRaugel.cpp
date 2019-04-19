@@ -107,6 +107,11 @@ namespace Fem2D
 		9, 9
 	};
 
+	/*!
+	 * \brief Define alpha k
+	 * \param K const baseFElement &
+	 * \param v KN<double> &
+	 */
 	// Define alpha_k
 	void TypeOfFE_P2BRLagrange::Pi_h_alpha (const baseFElement &K, KN_<double> &v) const {
 		const Triangle &T(K.T);
@@ -128,11 +133,18 @@ namespace Fem2D
 		}
 	}
 
+	/*!
+	 * \brief Shape function
+	 * \param whatd const bool*
+	 * \param const Mesh &
+	 * \param K const Triangle &
+	 * \param PHat const RdHat &
+	 * \param val RNMK_
+	 */
 	// Shape function
 	void TypeOfFE_P2BRLagrange::FB (const bool *whatd, const Mesh &, const Triangle &K, const RdHat &PHat, RNMK_ &val) const {
 		R2 A(K[0]), B(K[1]), C(K[2]);
 		R l0 = 1 - PHat.x - PHat.y, l1 = PHat.x, l2 = PHat.y;
-		R l4_0 = (4 * l0 - 1), l4_1 = (4 * l1 - 1), l4_2 = (4 * l2 - 1);
 		// int_e_1 l0*l0 = |e_1|/3 and int_e_1 l0*l1 = |e_1|/6
 		// to get the flux = 1
 		R2 E[3] = {K.Edge(0), K.Edge(1), K.Edge(2)};
@@ -257,7 +269,7 @@ namespace Fem2D
 			double a[6] = {eN[1].x, eN[1].y, eN[2].x, eN[2].y, eN[0].x, eN[0].y};
 			double b[6] = {eN[2].x, eN[2].y, eN[0].x, eN[0].y, eN[1].x, eN[1].y};
 			int nop = 0;
-			int vop[last_operatortype];
+			int vop[last_operatortype]={};
 
 			for (int j = 0; j < last_operatortype; j++) {
 				if (whatd[j]) {

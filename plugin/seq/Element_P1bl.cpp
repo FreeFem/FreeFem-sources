@@ -44,11 +44,7 @@ namespace  Fem2D {
 				}
 			}
 
-			// void FB(const Mesh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
 			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
-			// void D2_FB(const Me∂Seriaƒƒƒƒƒsh & Th,const Triangle & K,const R2 &P, RNMK_ & val) const;
-			// void Pi_h(const baseFElement & K,RN_ & val, InterpolFunction f, R* v,int, void *) const;
-			// virtual R operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const ;
 	};
 
 	int TypeOfFE_P1Bubble2::Data [] = {0, 1, 2, 6, 0, 0, 0, 0, 0, 1, 2, 3, 0, 0, 0, 0, 0, 1, 2, 3, 0, 0, 4};
@@ -72,7 +68,6 @@ namespace  Fem2D {
 		}
 
 		throwassert(val.M() == 1);
-		// throwassert(val.K()==3 );
 
 		val = 0;
 		RN_ f0(val('.', 0, op_id));
@@ -115,7 +110,6 @@ namespace  Fem2D {
 		R l [] = {1. - PHat.sum(), PHat.x, PHat.y, PHat.z};
 		const R d1 = dHat + 1.;
 		const R d13 = d1 * d1 * d1;
-		const R d14 = d13 * d1;
 		int i0 = 0;
 
 		if (l[1] < l[i0]) {i0 = 1;}
@@ -178,23 +172,3 @@ namespace  Fem2D {
 	// a static variable to add the finite element to freefem++
 	static AddNewFE stP1Bulle2("P1bl", &P1Bulle2);
 }	// FEM2d namespace
-
-/*
- * double expert( double x) {
- *  cout << " expert " << x << endl;
- *  return 42.;
- * }
- *
- * double expert( double *x) {
- * x=42;
- *  cout << " expert " << *x << endl;
- *  return 42.;
- * }
- * void static init(){
- *  // warning with choose of priority
- *  Global.Add("expert","(",new OneOperator1<double,double>(expert,1));
- *  Global.Add("expert","(",new OneOperator1<double,double*>(expert,2));
- * }
- *
- * LOADFUNC(init);
- */

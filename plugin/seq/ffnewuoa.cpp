@@ -26,22 +26,6 @@
 // *INDENT-ON* //
 
 #include "ff++.hpp"
-/*
-#include  <iostream>
-#include  <cfloat>
-using namespace std;
-#include "error.hpp"
-#include "AFunction.hpp"
-#include "rgraph.hpp"
-#include "RNM.hpp"
-#include "MatriceCreuse_tpl.hpp"
-#include "Mesh3dn.hpp"
-#include "MeshPoint.hpp"
-#include "lgfem.hpp"
-#include "lgmesh3.hpp"
-#include "lgsolver.hpp"
-#include "problem.hpp"
-*/
 typedef int integer;
 typedef int logical;
 typedef void (*typecalfunc)(integer *, double *, double *f, void *);
@@ -116,7 +100,6 @@ class OptimNewoa: public OneOperator
 					}
 
 					JJ = to<R>(C_F0(opJ, "(", theparam));
-					// closetheparam=currentblock->close(currentblock);   // the cleanning block expression
 					closetheparam = C_F0((Expression)Block::snewclose(currentblock), atype<void>());
 				}
 
@@ -166,12 +149,6 @@ void calfun (integer *n, double *x, double *f, void *t) {
 	*f = tt->J(KN_<double>(x, *n));
 	if (verbosity > 20) {cout << " F= " << *f << endl;}
 }
-
-/*  class Init { public:
- * Init();
- * };
- *
- * $1 */
 
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
 	Global.Add("newuoa", "(", new OptimNewoa(1));	// j + dJ

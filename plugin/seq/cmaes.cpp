@@ -242,7 +242,7 @@ cmaes_init (cmaes_t *t,	/* "this" */
 		trace += t->sp.rgInitialStds[i] * t->sp.rgInitialStds[i];
 	}
 
-	t->sigma = sqrt(trace / N);	/* t->sp.mueff/(0.2*t->sp.mueff+sqrt(N)) * sqrt(trace/N); */
+	t->sigma = sqrt(trace / N);
 
 	t->chiN = sqrt((double)N) * (1. - 1. / (4. * N) + 1. / (21. * N * N));
 	t->flgEigensysIsUptodate = 1;
@@ -373,7 +373,7 @@ cmaes_init (cmaes_t *t,	/* "this" */
 
 void
 cmaes_resume_distribution (cmaes_t *t, char *filename) {
-	int i, j, res, n;
+	int i, j, res, n, ret;
 	double d;
 	FILE *fp = fopen(filename, "r");
 
@@ -391,7 +391,8 @@ cmaes_resume_distribution (cmaes_t *t, char *filename) {
 		if ((res = fscanf(fp, " resume %lg", &d)) == EOF) {
 			break;
 		} else if (res == 0) {
-			fscanf(fp, " %*s");
+			ret = fscanf(fp, " %*s");
+      if (ret == EOF) printf("fscanf error\n");
 		} else if (res > 0) {
 			i += 1;
 		}
@@ -407,7 +408,8 @@ cmaes_resume_distribution (cmaes_t *t, char *filename) {
 		if ((res = fscanf(fp, " resume %lg", &d)) == EOF) {
 			FATAL("cmaes_resume_distribution(): Unexpected error, bug", 0, 0, 0);
 		} else if (res == 0) {
-			fscanf(fp, " %*s");
+			ret = fscanf(fp, " %*s");
+      if (ret == EOF) printf("fscanf error\n");
 		} else if (res > 0) {
 			++i;
 		}
@@ -422,7 +424,8 @@ cmaes_resume_distribution (cmaes_t *t, char *filename) {
 		if ((res = fscanf(fp, " xmean %lg", &d)) == EOF) {
 			FATAL("cmaes_resume_distribution(): 'xmean' not found", 0, 0, 0);
 		} else if (res == 0) {
-			fscanf(fp, " %*s");
+			ret = fscanf(fp, " %*s");
+      if (ret == EOF) printf("fscanf error\n");
 		} else if (res > 0) {
 			break;
 		}
@@ -445,7 +448,8 @@ cmaes_resume_distribution (cmaes_t *t, char *filename) {
 		if ((res = fscanf(fp, " path for sigma %lg", &d)) == EOF) {
 			FATAL("cmaes_resume_distribution(): 'path for sigma' not found", 0, 0, 0);
 		} else if (res == 0) {
-			fscanf(fp, " %*s");
+			ret = fscanf(fp, " %*s");
+      if (ret == EOF) printf("fscanf error\n");
 		} else if (res > 0) {
 			break;
 		}
@@ -468,7 +472,8 @@ cmaes_resume_distribution (cmaes_t *t, char *filename) {
 		if ((res = fscanf(fp, " path for C %lg", &d)) == EOF) {
 			FATAL("cmaes_resume_distribution(): 'path for C' not found", 0, 0, 0);
 		} else if (res == 0) {
-			fscanf(fp, " %*s");
+			ret = fscanf(fp, " %*s");
+      if (ret == EOF) printf("fscanf error\n");
 		} else if (res > 0) {
 			break;
 		}
@@ -491,7 +496,8 @@ cmaes_resume_distribution (cmaes_t *t, char *filename) {
 		if ((res = fscanf(fp, " sigma %lg", &d)) == EOF) {
 			FATAL("cmaes_resume_distribution(): 'sigma' not found", 0, 0, 0);
 		} else if (res == 0) {
-			fscanf(fp, " %*s");
+			ret = fscanf(fp, " %*s");
+      if (ret == EOF) printf("fscanf error\n");
 		} else if (res > 0) {
 			break;
 		}
@@ -504,7 +510,8 @@ cmaes_resume_distribution (cmaes_t *t, char *filename) {
 		if ((res = fscanf(fp, " covariance matrix %lg", &d)) == EOF) {
 			FATAL("cmaes_resume_distribution(): 'covariance matrix' not found", 0, 0, 0);
 		} else if (res == 0) {
-			fscanf(fp, " %*s");
+			ret = fscanf(fp, " %*s");
+      if (ret == EOF) printf("fscanf error\n");
 		} else if (res > 0) {
 			break;
 		}
@@ -1067,14 +1074,13 @@ void cmaes_WriteToFilePtr (cmaes_t *t, const char *key, FILE *fp) {
  * must be zero terminated.
  */
 	int i, k, N = (t ? t->sp.N : 0);
-	char const *keyend, *keystart;
+  char const  *keyend;
 	const char *s = "few";
 
 	if (key == 0) {
 		key = s;
 	}
 
-	keystart = key;	/* for debugging purpose */
 	keyend = key + strlen(key);
 
 	while (key < keyend) {
@@ -1766,7 +1772,6 @@ cmaes_TestForTermination (cmaes_t *t) {
 			}
 
 			if (iKoo == N) {
-				/* t->sigma *= exp(0.2+t->sp.cs/t->sp.damps); */
 				cp += sprintf(cp,
 				              "NoEffectAxis: standard deviation 0.1*%7.2e in principal axis %d without effect\n",
 				              fac / 0.1, iAchse);
@@ -1779,8 +1784,6 @@ cmaes_TestForTermination (cmaes_t *t) {
 	for (iKoo = 0; iKoo < N; ++iKoo) {
 		if (t->rgxmean[iKoo] == t->rgxmean[iKoo] +
 		    0.2 * t->sigma * sqrt(t->C[iKoo][iKoo])) {
-			/* t->C[iKoo][iKoo] *= (1 + t->sp.ccov); */
-			/* flg = 1; */
 			cp += sprintf(cp,
 			              "NoEffectCoordinate: standard deviation 0.2*%7.2e in coordinate %d without effect\n",
 			              t->sigma * sqrt(t->C[iKoo][iKoo]), iKoo);
@@ -2649,7 +2652,7 @@ random_init (random_t *t, long unsigned inseed) {
 		inseed = (long unsigned)abs((long)(100L * time(0) + clock()));
 	}
 
-	return random_Start(t, inseed);
+	return random_Start(t, inseed);;
 }
 
 void
@@ -3297,7 +3300,6 @@ MinIdx (const double *rgd, int len) {
 
 static double
 myhypot (double a, double b) {
-/* sqrt(a^2 + b^2) numerically stable. */
 	double r = 0;
 
 	if (fabs(a) > fabs(b)) {

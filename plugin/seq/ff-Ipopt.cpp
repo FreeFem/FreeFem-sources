@@ -122,7 +122,6 @@ template<class K> class GeneralFunc: public ffcalfunc<K>
 			KN<double> *p = GetAny<KN<double> *>((*theparame)(this->stack));
 			*p = x;
 			K ret = GetAny<K>((*JJ)(this->stack));
-			// cout << "call to ffcalfunc.J with " << *p << " and ret=" << ret << endl;
 			WhereStackOfPtr2Free(this->stack)->clean();
 			return ret;
 		}
@@ -159,7 +158,6 @@ class P2ScalarFunc: public ffcalfunc<R>
 			if (b) {
 				Rn *B = GetAny<Rn *>((*b)(stack));
 				tmp += *B;
-				// if(vf) tmp -= (*B); else tmp += (*B);
 			}
 
 			R res = 0.;
@@ -204,7 +202,6 @@ class P1VectorFunc: public ffcalfunc<Rn>
 				if (tmp.N() != B->N()) {tmp.resize(B->N()); tmp = 0.;}
 
 				tmp += *B;
-				// if(vf) tmp -= (*B); else tmp += (*B);
 			}
 
 			return tmp;
@@ -401,7 +398,6 @@ class SparseMatStructure
 		int n, m;
 		Structure structure;
 		bool sym;
-		// Zn2 *array_structure;
 		KN<int> *raws, *cols;
 };
 
@@ -604,7 +600,6 @@ ffNLP &ffNLP::BuildMatrixStructures (Level hlvl, Level jlvl, int _mm) {
 }
 
 int ffNLP::FindIndex (const KN<int> &irow, const KN<int> &jcol, int i, int j, int kmin, int kmax) {
-	// cout << "Trying to find (" << i << ',' << j << ") in :" << irow << jcol << " - kmin=" << kmin << " and kmax=" << kmax << endl;
 	typedef std::pair<int, int> Z2;
 	Z2 ij(i, j), ijmin(irow[kmin], jcol[kmin]), ijmax(irow[kmax], jcol[kmax]);
 	if (abs(kmin - kmax) <= 1) {
@@ -620,11 +615,6 @@ bool ffNLP::get_nlp_info (Index &n, Index &m, Index &nnz_jac_g, Index &nnz_h_lag
 	bool ret = true;
 
 	n = xstart ? xstart->N() : (ret = 0);
-	// set(m,mm,constraints,xstart,ret);
-	// set(nnz_jac_g,nnz_jac,dconstraints,xstart,ret);
-	// set(nnz_h_lag,nnz_h,hessian,xstart,ret);
-	// if(JacStruct.empty() && constraints) BuildMatrixStructures(do_nothing,one_evaluation);
-	// if(HesStruct.empty()) BuildMatrixStructures(one_evaluation,do_nothing);
 	mm = m = constraints ? JacStruct.N() : 0;
 	nnz_jac = nnz_jac_g = constraints ? JacStruct.size() : 0;
 	nnz_h = nnz_h_lag = HesStruct.size();
@@ -633,9 +623,6 @@ bool ffNLP::get_nlp_info (Index &n, Index &m, Index &nnz_jac_g, Index &nnz_h_lag
 }
 
 bool ffNLP::get_bounds_info (Index n, Number *x_l, Number *x_u, Index m, Number *g_l, Number *g_u) {
-	// cout << "n=" << n << " m=" << m << " mm=" << mm << " g_l.N()=" << gl.N() << " g_u.N()=" << gu.N() << endl;
-	// assert(gl.N()==mm);
-	// assert(gu.N()==mm);
 	KnToPtr(xl, x_l);
 	KnToPtr(xu, x_u);
 	if (mm) {KnToPtr(gl, g_l);}
@@ -791,8 +778,6 @@ bool ffNLP::eval_h (Index n, const Number *x, bool new_x, Number obj_factor, Ind
 					for (int k = MM->p[i]; k < MM->p[i + 1]; ++k) {
 						int kipopt = FindIndex(HesStruct.Raws(), HesStruct.Cols(), i, MM->j[k], 0, nele_hess - 1);
 						if (kipopt >= 0) {values[kipopt] = _obj_factor * (MM->aij[k]);}
-
-						// else values[k] = (hessian->paramof &&hessian->paramlm ? 1. : obj_factor) * (MM->a[k]);
 					}
 				}
 			} else if (!MM->half) {
@@ -1002,14 +987,12 @@ class OptimIpopt: public OneOperator
 					// the expression to init the theparam of all
 					inittheparam = currentblock->NewVar<LocalVariable>("the parameter", atype<KN<R> *>(), X_n);
 					initobjfact = currentblock->NewVar<LocalVariable>("objective factor", atype<double *>());
-					// C_F0 initlm = currentblock->NewVar<LocalVariable>("lagrange multiplier",atype<KN<R> *>(),L_m);
 					theparam = currentblock->Find("the parameter");	// the expression for the parameter
 					objfact = currentblock->Find("objective factor");
 					args.SetNameParam(n_name_param, name_param, nargs);
 					fitness_datas = GenericFitnessFunctionDatas::New(AF, args, nargs, theparam, objfact, L_m);	// Creates links to the freefem objects
 					constraints_datas = GenericConstraintFunctionDatas::New(AG, args, nargs, theparam);	// defining the functions
 					spurious_cases = AG == no_assumption_g && (AF == P2_f || AF == mv_P2_f || AF == quadratic_f || AF == linear_f);
-					// closetheparam=currentblock->close(currentblock);   // the cleanning block expression
 					closetheparam = C_F0((Expression)Block::snewclose(currentblock), atype<void>());
 				}
 
@@ -1163,7 +1146,6 @@ class OptimIpopt: public OneOperator
 
 					SmartPtr<IpoptApplication> app = new IpoptApplication();
 
-					// app->Options()->SetNumericValue("tol", 1e-10);
 					if (nargs[9]) {app->Options()->SetNumericValue("tol", GetAny<double>((*nargs[9])(stack)));}
 
 					if (nargs[10]) {app->Options()->SetIntegerValue("max_iter", GetAny<long>((*nargs[10])(stack)));}
@@ -1171,7 +1153,6 @@ class OptimIpopt: public OneOperator
 					if (nargs[11]) {app->Options()->SetNumericValue("max_cpu_time", GetAny<double>((*nargs[11])(stack)));}
 
 					bool bfgs = nargs[12] ? GetAny<bool>((*nargs[12])(stack)) : false;
-					// app->Options()->SetStringValue("hessian_approximation","limited-memory");
 					if (AF == unavailable_hessian || bfgs) {
 						if (AF == unavailable_hessian && !bfgs) {cout << "IPOPT Note : No hessian given ==> LBFGS hessian approximation enabled" << endl;}
 
@@ -1239,7 +1220,6 @@ class OptimIpopt: public OneOperator
 
 					if (nargs[28]) {if (!GetAny<bool>((*nargs[28])(stack))) {app->Options()->SetStringValue("accept_every_trial_step", "yes");}}
 
-					// if(nargs[26]) app->Options()->SetNumericValue("obj_scaling_factor",GetAny<double>((*nargs[26])(stack)));
 					if (verbosity > 1) {app->Options()->SetStringValue("print_user_options", "yes");}
 
 					app->Options()->SetStringValue("output_file", "ipopt.out");
@@ -1517,41 +1497,25 @@ basicAC_F0::name_and_type OptimIpopt::E_Ipopt::name_param [] =
 	// {"osf",				&typeid(double) }												//26 -  objective function scalling factor
 };
 
-/*  class Init { public:
- *  Init();
- * };
- *
- * static Init init;
- */
 static void Load_Init () {
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<no_assumption_f, no_assumption_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<no_assumption_f, without_constraints>()));
-	// Global.Add("IPOPT","(",new OptimIpopt(Case<no_assumption_f,P1_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<no_assumption_f, mv_P1_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<no_assumption_f, linear_g>()));
-	/*Global.Add("IPOPT","(",new OptimIpopt(Case<P2_f,P1_g>()));
-	 * Global.Add("IPOPT","(",new OptimIpopt(Case<P2_f,without_constraints>()));
-	 * Global.Add("IPOPT","(",new OptimIpopt(Case<P2_f,no_assumption_g>()));
-	 * Global.Add("IPOPT","(",new OptimIpopt(Case<P2_f,mv_P1_g>()));
-	 * Global.Add("IPOPT","(",new OptimIpopt(Case<P2_f,linear_g>()));*/
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<unavailable_hessian, no_assumption_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<unavailable_hessian, without_constraints>()));
-	// Global.Add("IPOPT","(",new OptimIpopt(Case<unavailable_hessian,P1_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<unavailable_hessian, mv_P1_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<unavailable_hessian, linear_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<mv_P2_f, no_assumption_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<mv_P2_f, without_constraints>()));
-	// Global.Add("IPOPT","(",new OptimIpopt(Case<mv_P2_f,P1_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<mv_P2_f, mv_P1_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<mv_P2_f, linear_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<quadratic_f, no_assumption_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<quadratic_f, without_constraints>()));
-	// Global.Add("IPOPT","(",new OptimIpopt(Case<quadratic_f,P1_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<quadratic_f, mv_P1_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<quadratic_f, linear_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<linear_f, no_assumption_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<linear_f, without_constraints>()));
-	// Global.Add("IPOPT","(",new OptimIpopt(Case<linear_f,P1_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<linear_f, mv_P1_g>()));
 	Global.Add("IPOPT", "(", new OptimIpopt(Case<linear_f, linear_g>()));
 }
@@ -1825,8 +1789,4 @@ GenericConstraintFunctionDatas *GenericConstraintFunctionDatas::New (AssumptionG
 	}
 }
 
-/*
- * enum AssumptionF {undeff,no_assumption_f, P2_f, unavailable_hessian, mv_P2_f, quadratic_f, linear_f};
- * enum AssumptionG {undefg,without_constraints, no_assumption_g, P1_g, mv_P1_g, linear_g};
- */
 LOADFUNC(Load_Init)

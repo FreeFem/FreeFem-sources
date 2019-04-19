@@ -52,7 +52,6 @@ namespace  Fem2D {
 			static const R2 G;
 			static const R cshrink;
 			static const R cshrink1;
-			// (1 -1/3)*
 			static R2 Shrink (const R2 &P) {return (P - G) * cshrink + G;}
 
 			static R2 Shrink1 (const R2 &P) {return (P - G) * cshrink1 + G;}
@@ -78,26 +77,6 @@ namespace  Fem2D {
 			}
 
 			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &P1, RNMK_ &val) const;
-			/*   void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
-			 * {
-			 * for (int i=0;i<10;++i)
-			 *  v[i]=1;
-			 * int e0=K.EdgeOrientation(0);
-			 * int e1=K.EdgeOrientation(1);
-			 * int e2=K.EdgeOrientation(2);
-			 * int ooo[6]={e0,e0,e1,e1,e2,e2};
-			 * int iii[6];
-			 * int jjj[6];
-			 * for(int i=0;i<6;++i)
-			 *  {
-			 *    iii[i]= 3+2*i; // si  orient = 1
-			 *    jjj[i]= 4+2*i; // si orient = -1
-			 *  }
-			 * for(int i=0;i<6;++i)
-			 *  if(ooo[i]==1) v[jjj[i]]=0;
-			 *  else v[iii[i]]=0;
-			 *
-			 *  }*/
 	};
 
 	const R2 TypeOfFE_P3dcLagrange::G(1. / 3., 1. / 3.);
@@ -156,15 +135,11 @@ namespace  Fem2D {
 
 				for (int i = 0; i < k; ++i) {
 					f *= L[nn[df][i]] - aa[df][i];
-					// cout <<  L[nn[df][i]]-aa[df][i]<< " ";
 				}
 
 				f0[pdf] = f;
-				// cout << pdf<< " " << df << " f " <<f <<endl;
 			}
 
-			// cout <<" L " << L[0] << " " << L[1] << " " << L[2] << endl;
-			// cout << ndf << " nbf = "<< f0 <<endl;
 		}
 
 		if (whatd[op_dx] || whatd[op_dy] || whatd[op_dxx] || whatd[op_dyy] || whatd[op_dxy]) {

@@ -42,27 +42,19 @@ namespace  Fem2D {
 	class TypeOfFE_P2pnc: public TypeOfFE {
 		public:
 			static int Data [];
-			// static double Pi_h_coef[];
 
 			TypeOfFE_P2pnc (): TypeOfFE(7, 1, Data, 3, 1, 2 * 3 * QFE.n + QFK.n, 3 * QFE.n + QFK.n, 0) {
 				int p = 0, k = 0;
-				// cout << endl;
 				const R2 Ph [] = {R2(0, 0), R2(1, 0), R2(0, 1)};
 
 				for (int i = 0; i < 3; i++) {
 					R2 A = Ph[(i + 1) % 3], B = Ph[(i + 2) % 3];
 
-					// cout << i<< " AB= " <<A << " " << B << endl;
-					// int pp = (i+1)*QFE.n;//  symetric point
 					for (int j = 0; j < QFE.n; j++) {
-						// pp--;
 						R l0 = QFE[j].x, l1 = 1 - l0;
 						pij_alpha[k++] = IPJ(2 * i, p, 0);
-						// pij_alpha[k++]= IPJ(2*i,pp,0);
 						pij_alpha[k++] = IPJ(2 * i + 1, p, 0);
-						// pij_alpha[k++]= IPJ(2*i+1,pp,0);
 						P_Pi_h[p++] = A * l0 + B * l1;
-						// cout << i << " " <<l0 << " " << l1 << " ::" <<  P_Pi_h[p-1] <<endl;
 					}
 				}
 
@@ -71,14 +63,11 @@ namespace  Fem2D {
 					P_Pi_h[p++] = QFK[i];
 				}
 
-				// cout << " k= " << k << " == " << this->pij_alpha.N() << endl;
-				// cout << " p= " << p << " == " << this->P_Pi_h.N() << endl;
 				ffassert(k == this->pij_alpha.N());
 				ffassert(p == this->P_Pi_h.N());
 			}
 
 			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
-			// R operator()(const FElement & K,const  R2 & PHat,const KN_<R> & u,int componante,int op) const ;
 			void Pi_h_alpha (const baseFElement &K, KN_<double> &v) const;
 	};
 
@@ -107,32 +96,27 @@ namespace  Fem2D {
 				R l1 = QFE[p].x, l0 = 1 - QFE[p].x;
 				if (oe[i] < 0) {swap(l0, l1);}
 
-				// R e0 = oe[i]>0, e1 = 1.-e0;
 				if (ddd < 3) {cout << p << " " << oe[i] << " " << l0 << " " << l1 << endl;}
 
 				R p0 = l0, p1 = l1;
-				R cc1 = p0 * QFE[p].a;	//
-				R cc0 = p1 * QFE[p].a;	//
+				R cc1 = p0 * QFE[p].a;
+				R cc0 = p1 * QFE[p].a;
 				v[k++] = cc0;
 				v[k++] = cc1;
-				// v[k++]= e0*cc1;
-				// v[k++]= e1*cc1;
 			}
 		}
 
 		for (int p = 0; p < QFK.n; ++p) {
 			double w = QFK[p].a;
 			R l1 = QFK[p].x, l2 = QFK[p].y, l0 = 1 - l1 - l2;
-			R b = 1;// 2-3*(l0*l0+l1*l1+l2*l2);
+			R b = 1;
 			v[k++] = b * w;
 		}
 
-		// cout << " k= " << k << " == " << this->pij_alpha.N() << endl;
 		ffassert(k == this->pij_alpha.N());
 	}
 
 	void TypeOfFE_P2pnc::FB (const bool *whatd, const Mesh &TH, const Triangle &K, const RdHat &PHat, RNMK_ &val) const {
-		// const Triangle & K(FE.T);
 		R2 A(K[0]), B(K[1]), C(K[2]);
 		R l0 = 1 - PHat.x - PHat.y, l1 = PHat.x, l2 = PHat.y;
 		R oe[3] = {K.EdgeOrientation(0), K.EdgeOrientation(1), K.EdgeOrientation(2)};
@@ -151,7 +135,6 @@ namespace  Fem2D {
 		}
 
 		throwassert(val.M() == 1);
-		// throwassert(val.K()==3 );
 
 		val = 0;
 		RN_ f0(val('.', 0, op_id));

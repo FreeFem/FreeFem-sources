@@ -44,18 +44,40 @@ class Stream_b {
 		T *f;
 };
 
+/*!
+* \brief pto_stream_b
+* \param f T**
+* \return Stream_b<T>
+*/
 template<class T>
 Stream_b<T> pto_stream_b (T **f) {return Stream_b<T>(f);}
 
+/*!
+* \brief to_stream_b
+* \param f T*
+* \return Stream_b<T>
+*/
 template<class T>
 Stream_b<T> to_stream_b (T *f) {return Stream_b<T>(f);}
 
+/*!
+* \brief Read
+* \param io Stream_b<istream> const &
+* \param data T *const &
+* \return istream *
+*/
 template<class T>
 istream*Read (Stream_b<istream> const &io, T *const &data) {
 	io.f->read(reinterpret_cast<char *>(data), sizeof(*data));
 	return io.f;
 }
 
+/*!
+* \brief Read
+* \param io Stream_b<istream> const &
+* \param data KN<T> * const &
+* \return istream *
+*/
 template<class T>
 istream*Read (Stream_b<istream> const &io, KN<T> *const &data) {
 	long n;
@@ -69,6 +91,12 @@ istream*Read (Stream_b<istream> const &io, KN<T> *const &data) {
 	return io.f;
 }
 
+/*!
+* \brief Write
+* \param io Stream_b<ostream> const &
+* \param data KN<T> * const
+* \return ostream *
+*/
 template<class T>
 ostream*Write (Stream_b<ostream> const &io, KN<T> *const &data) {
 	T *p = *data;
@@ -80,18 +108,36 @@ ostream*Write (Stream_b<ostream> const &io, KN<T> *const &data) {
 	return io.f;
 }
 
+/*!
+* \brief Write
+* \param io Stream_b<ostream> const &
+* \param data T * const &
+* \return ostream *
+*/
 template<class T>
 ostream*Write (Stream_b<ostream> const &io, T *const &data) {
 	io.f->write(reinterpret_cast<const char *>(data), sizeof(*data));
 	return io.f;
 }
 
+/*!
+* \brief Write
+* \param io Stream_b<ostream> const &
+* \param data T * const &
+* \return ostream *
+*/
 template<class T>
 ostream*Write (Stream_b<ostream> const &io, T const &data) {
 	io.f->write(reinterpret_cast<const char *>(&data), sizeof(data));
 	return io.f;
 }
 
+/*!
+* \brief init k
+* \param io Stream_b<ostream> const &
+* \param data T * const &
+* \return ostream *
+*/
 template<class K>
 void initK () {
 	typedef Stream_b<ostream> OB;
@@ -114,12 +160,6 @@ static void inittt () {
 	initK<long>();
 	initK<double>();
 	initK<complex<double> >();
-
-/*
- *   Add<IB>("(","",new OneOperator2_<istream *,IB,double *>(Read));
- *  Add<OB>("(","",new OneOperator2_<ostream *,OB,double *>(Write));
- *  Add<OB>("(","",new OneOperator2_<ostream *,OB,double >(Write));
- */
 }
 
 LOADFUNC(inittt);
