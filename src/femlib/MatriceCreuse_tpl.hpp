@@ -12,16 +12,16 @@
 // test blas
 //  on MacOS9 under MWERKS
 //  cblas_ddot macos-9 is not
-#ifdef HAVE_CBLAS_H
+#ifdef HAVE_CBLAS_H_BUG
 extern "C" {
 #define FF_VERSION VERSION
 #undef VERSION
 #include <cblas.h>
 //#undef VERSION
-//#define VERSION VERSION    
+//#define VERSION VERSION
 }
 #define WITHBLAS 1
-#elif HAVE_VECLIB_CBLAS_H
+#elif HAVE_VECLIB_CBLAS_BUG
 #include <vecLib/cblas.h>
 #define WITHBLAS 1
 #endif

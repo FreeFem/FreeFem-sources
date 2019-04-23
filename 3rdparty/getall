@@ -207,10 +207,10 @@ download('htool','https://github.com/PierreMarchand20/htool/archive/4af73fa94bd9
 		'fb2fdfc77c5e7b53d0bb7cab0d10fe7e');
 
 	
-download('hpddm','https://github.com/hpddm/hpddm/archive/6b09af3a1aff64fe37fa5f9d0d4eea8de04884af.zip',
+download('hpddm','https://github.com/hpddm/hpddm/archive/52eee8466f6310512696f675118b0ca5899e5a4c.zip',
 	'https://github.com/hpddm',
 	'hpddm.zip',
-	'b9b27486b418c45f89d9b29630fc0ff4');
+	'5100d0e8b269fc65286de5d16ecee105');
 
 # run all downloads concurrently
 
@@ -286,41 +286,3 @@ sub downloadone{
 	my $md5check=md5_hex(`cat $pkg`);
 	if( ( $md5 ne "none") && ($md5check ne $md5)){$errors.="ERROR: INVALID MD5 for $pkg  $md5check\n"}
 }
-
-# Backup
-#download('METIS','http://www.netlib.org/linalg/metis-4.0.tar.gz','http://www.netlib.org/linalg/','metis-4.0.tar.gz',
-#	 '0aa546419ff7ef50bd86ce1ec7f727c7');
-#download('ParMETIS','http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/OLD/ParMetis-3.1.1.tar.gz',
-#	 'http://glaros.dtc.umn.edu/gkhome/views/metis','ParMetis-3.1.1.tar.gz','57318dbaddff2c3d1ef820cff0bf87b0');
-# http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-4.0.3.tar.gz
-#download('MUMPS','http://graal.ens-lyon.fr/MUMPS/MUMPS_4.10.0.tar.gz',
-#	 'http://graal.ens-lyon.fr/MUMPS/','MUMPS_4.10.0.tar.gz','959e9981b606cd574f713b8422ef0d9f');
-#download('MUMPS','http://graal.ens-lyon.fr/MUMPS/MUMPS_5.0.0.tar.gz',
-#	 'http://graal.ens-lyon.fr/MUMPS/','MUMPS_5.0.0.tar.gz','3c6aeab847e9d775ca160194a9db2b75');
-#download('MUMPS','http://graal.ens-lyon.fr/MUMPS/MUMPS_5.0.1.tar.gz',
-#	 'http://graal.ens-lyon.fr/MUMPS/','MUMPS_5.0.1.tar.gz','b477573fdcc87babe861f62316833db0');
-# ALH - 6/1/14 - web certificate for gforge.inria.fr is rejected
-# ALH - 6/1/14 - web certificate for gforge.inria.fr is rejected
-#https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.3.tar.gz
-#download('Scotch','https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.3.tar.gz',
-#	 'https://gforge.inria.fr/projects/scotch/','scotch_6.0.3.tar.gz','10b0cc0f184de2de99859eafaca83cfc',
-#	 'BAD_CERT');
-# download('SuiteSparse','http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-4.3.1.tar.gz',
-# 	 'http://www.cise.ufl.edu/research/sparse/SuiteSparse/','SuiteSparse-4.3.1.tar.gz',
-# 	 'f8f26a3b1c7f82444c0db0b375215287');
-
-# reput version 4.4.4 of umpfack pb of install under windows ... F. H.
-#	 'http://faculty.cse.tamu.edu/davis/SuiteSparse/','SuiteSparse-4.5.5.tar.gz',
-#	 '0a5b38af0016f009409a9606d2f1b555') ;
-#download('SuperLU','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz',
-#	 'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/','superlu_4.3.tar.gz','b72c6309f25e9660133007b82621ba7c');
-# PB SuperLU_DIST with version 5.2.1 -> return to verison 3.0
-#  DO F. HECHT but no time
-#download('SuperLU_DIST','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_dist_5.2.1.tar.gz',
-#	 'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/','superlu_dist_5.2.1.tar.gz','af857778ffeb04aea02aa4843e6e8e1d');
-# http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz
-#download('TetGen','http://wias-berlin.de/software/tetgen/files/tetgen1.4.3.tar.gz',
-#	 'http://wias-berlin.de/software/tetgen/','tetgen1.4.3.tar.gz','d6a4bcdde2ac804f7ec66c29dcb63c18');
-## got back to version 3.8 (for slepc and petc )
-#download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.9.0.tar.gz',
-#	 	 'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/','petsc-lite-3.9.0.tar.gz','6958049cafdbb7586c50e09b54e6fce9');

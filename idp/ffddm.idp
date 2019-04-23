@@ -47,6 +47,8 @@ func string removespaces(string& str) {
 macro ffddmsetupOperatorinit(pr,preffe)
 IFMACRO(!pr#setupoperatorinit)
 
+NewMacro pr#localmacroaug preffe#prmesh#buildAug EndMacro
+
 NewMacro pr#prfe preffe EndMacro
 
 NewMacro pr#fromVhi(ui,VhName,res)
@@ -69,7 +71,6 @@ if (preffe#prmesh#isincomm)
 			res = ui;
 		}
 		else if (str == svhi) {
-			cout << "***** ALERTE (c'est normal) *****" << endl;
 			res = ui;	
 		}
 		else if (str == svhaug) {
@@ -92,7 +93,8 @@ if (preffe#prmesh#isincomm)
 			ENDIFMACRO
 		}		
 		else {
-			cout << "***** ALERTE ALERTE ALERTE ALERTE ALERTE *****" << endl;
+			cout << "***** TODO *****" << endl;
+			assert(0);
 		}
 	}
 	else {
@@ -145,8 +147,6 @@ if (preffe#prmesh#isincomm)
 				inttmp = Mint'*inttmp2;
 			}
 			mpiAllReduce(inttmp,res,preffe#prmesh#mpicomm,mpiSUM);
-			if (mpiRank(preffe#prmesh#mpicomm) == 0)
-			  cout << "***** ALERTE (c'est normal) *****" << endl;
 		}
 	}
 }
@@ -189,6 +189,7 @@ int pr#bdirect = ffddmbdirect;
 
 matrix<preffe#K> pr#Aglobal;
 matrix<preffe#K>[int] pr#aRd(preffe#prmesh#npart);      /* local Dirichlet matrices for parallel matrix vector product */
+matrix<preffe#K> pr#matN;
 
 IFMACRO(pr#withhpddm)
 if (!bpara){
@@ -218,6 +219,17 @@ if (preffe#prmesh#inexactCSsplit == 1)
   set(pr#hpddmOP,sparams="-hpddm_reuse_preconditioner 1");
 ENDIFMACRO
 
+
+NewMacro pr#localmacrominoverlap() preffe#prmesh#mminoverlap EndMacro
+
+IFMACRO(pr#localmacrominoverlap,0)
+NewMacro pr#prfegeneo() preffe EndMacro
+ENDIFMACRO
+
+IFMACRO(pr#localmacrominoverlap,1)
+NewMacro pr#prfegeneo() preffe#Aug EndMacro
+ENDIFMACRO
+
 ffddmgenerateOperatorfunctions(pr,preffe)
 
 NewMacro pr#setupoperatorinit()1 EndMacro
@@ -227,16 +239,13 @@ ENDIFMACRO
 macro ffddmsetupPrecondinit(pr)
 IFMACRO(!pr#setupprecondinit)
 
-NewMacro pr#localmacroaug pr#prfe#prmesh#buildAug EndMacro
 IFMACRO(pr#localmacroaug,1)
 matrix<pr#prfe#K> pr#CSinterp;
 ENDIFMACRO
 
 matrix<pr#prfe#K> pr#AglobEprec;
 matrix<pr#prfe#K>[int] pr#aR(pr#prfe#prmesh#npart);       /* local (ras or Robin) matrices (for the preconditioner) */
-matrix<pr#prfe#K> pr#aRdEprec; 
-
-matrix<pr#prfe#K> pr#matN;
+matrix<pr#prfe#K> pr#aRdEprec;
 
 string pr#prec = ffddmprecond;
 
@@ -275,7 +284,7 @@ ffddmsetupOperatorinit(pr,preffe)
 if (preffe#prmesh#isincomm)
 {	
 	preffe#prmesh#tic(pr#tfactoi)
- 
+
   if (pr#bdirect || bseq) {
     Varf(vaglobal,preffe#prmesh#Thglob,preffe#Vhglob)
     pr#Aglobal = vaglobal(preffe#Vhglob,preffe#Vhglob,solver = (vsym ? CG : GMRES),tgv=vtgvelim);
@@ -307,21 +316,26 @@ if (preffe#prmesh#isincomm)
     rhsFull.resize(preffe#AugVhi.ndof);
     rhs.resize(preffe#Vhi.ndof);    
 
-    if (bpara)      
+    if (bpara)
     {
-      Varf(vPb, preffe#prmesh#AugThi, preffe#AugVhi)
-      
-      if (preffe#prmesh#inexactCSsplit > 1)
-        pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgvelim);
-      else
-      
-      pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgv);
+      if (preffe#prmesh#overlap > 0) {
 
-      renumbering(pr#aRd[i], preffe#Auginterp, rhsFull, rhs, eps=-1);
- 
-      IFMACRO(pr#withhpddm)
-      changeOperator(pr#hpddmOP,pr#aRd[mpiRank(preffe#prmesh#commddm)]);
-      ENDIFMACRO
+        Varf(vPb, preffe#prmesh#AugThi, preffe#AugVhi)
+
+        if (preffe#prmesh#inexactCSsplit > 1)
+          pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgvelim);
+        else
+          pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgv);
+        renumbering(pr#aRd[i], preffe#Auginterp, rhsFull, rhs, eps=-1);
+
+        IFMACRO(pr#withhpddm)
+        changeOperator(pr#hpddmOP,pr#aRd[mpiRank(preffe#prmesh#commddm)]);
+        ENDIFMACRO
+      }
+      else {
+        Varf(vN,preffe#prmesh#Thi,preffe#Vhi)
+        pr#matN = vN(preffe#Vhi,preffe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgv);
+      }
     }
     
   }
@@ -346,8 +360,10 @@ if (pr#prfe#prmesh#isincomm)
   if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#commddm)))) {
   	     
     if (pr#verbosity > 1 && !bpara) cout << "["+Stringification(pr)+"] Domain :" << i << "/" << pr#prfe#prmesh#npart << endl;
-    
+
 		IFMACRO(!VarfPrec)
+		if (bseq) cout << "Error in ffddmsetupPrecond: you need to provide the varf macro for the preconditioner in sequential mode" << endl;
+		assert(!bseq);
 		pr#aR[i] = pr#aRd[i];
 		ENDIFMACRO
 		IFMACRO(VarfPrec)
@@ -450,7 +466,7 @@ if (pr#prfe#prmesh#isincomm)
 		Varfrhs(vPbrhs, pr#prfe#prmesh#Thi, pr#prfe#Vhi)
 		rhs = vPbrhs(0,pr#prfe#Vhi,tgv=vtgvelim);
 		
-		pr#prfe#update(rhs,true);   
+		pr#prfe#update(rhs, pr#prfe#prmesh#overlap > 0);
 	}
 }
 // EOM

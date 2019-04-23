@@ -9,6 +9,8 @@ if (pr#isincomm)
   if (!pr#excluded) {
     int backup = searchMethod;
     searchMethod = 1;
+
+    pr#overlap = sizeoverlaps;
         
     int ssplit = max(pr#inexactCSsplit,1);
     
@@ -45,7 +47,7 @@ if (pr#isincomm)
       
       PhGlobalff supp = abs(part - ii) < 0.1;
       VhGlobalff suppSmooth;
-      AddLayers(overlapName, supp[], sizeoverlaps * 2, suppSmooth[]);
+      AddLayers(overlapName, supp[], (sizeoverlaps == 0) + sizeoverlaps * 2, suppSmooth[]);
       {   
         meshN neighbors = trunc(overlapName, suppSmooth > 0.001 && (suppSmooth < 0.999));
         fespace Oh(neighbors, P0);
@@ -62,29 +64,44 @@ if (pr#isincomm)
         overlapName = trunc(overlapName, suppSmooth > 0.001, split = ffddmsplit);
         supp = abs(part - ii) < 0.1;
         suppSmooth = 0;
-        AddLayers(overlapName, supp[], 2 * sizeoverlaps, suppSmooth[]);
+        AddLayers(overlapName, supp[], (sizeoverlaps == 0) + 2 * sizeoverlaps, suppSmooth[]);
       }
       
       pr#Thi = trunc(overlapName, suppSmooth > 0.001, split=ssplit);
       overlapName = trunc(overlapName, suppSmooth > 0.001);
       supp = supp;
       suppSmooth = suppSmooth;
-      pr#Thi = trunc(pr#Thi, suppSmooth> 0.501, label = ffddminterfacelabel);
+
+      meshN borderName;
+      if (sizeoverlaps > 0) {
+        pr#Thi = trunc(pr#Thi, suppSmooth> 0.501, label = ffddminterfacelabel);
+        borderName = trunc(overlapName, (suppSmooth > (sizeoverlaps - 0.999) / (2 * sizeoverlaps)) && (suppSmooth < 0.501), label = (abs(ffddminterfacelabel) + 1) * 100);
+      }
+      else {
+        fespace fP0(pr#Thi,P0);
+        fP0 part0 = part;
+        pr#Thi = trunc(pr#Thi, abs(part - ii) < 0.1, label = ffddminterfacelabel);
+        borderName = trunc(overlapName, suppSmooth < 0.999, label = (abs(ffddminterfacelabel) + 1) * 100);
+      }
       
-      meshN borderName = trunc(overlapName, (suppSmooth > (sizeoverlaps - 0.999) / (2 * sizeoverlaps)) && (suppSmooth < 0.501), label = (abs(ffddminterfacelabel) + 1) * 100);
-      
-      pr#VhiP1 khi = max(suppSmooth*2 - 1.0, 0.) ;
-      if(usedARGV("-steep") != -1)
-      khi = khi > 0.001 ? 1.0 : 0.0;
-      
-      else if (usedARGV("-raspart") != -1) {
-        VhGlobalff phir;
-        PhGlobalff suppP0 = abs(ii - part) < 0.1;
-        varf vSuppi(u,v) = intN(overlapName,qforder=1)(suppP0*v);
-        phir[] = vSuppi(0,VhGlobalff);
-        phir = phir > 0.;
-        khi = phir;
-      }            
+      pr#VhiP1 khi;
+      if (sizeoverlaps > 0) {
+        khi = max(suppSmooth*2 - 1.0, 0.) ;
+        if(usedARGV("-steep") != -1)
+        khi = khi > 0.001 ? 1.0 : 0.0;
+
+        else if (usedARGV("-raspart") != -1) {
+          VhGlobalff phir;
+          PhGlobalff suppP0 = abs(ii - part) < 0.1;
+          varf vSuppi(u,v) = intN(overlapName,qforder=1)(suppP0*v);
+          phir[] = vSuppi(0,VhGlobalff);
+          phir = phir > 0.;
+          khi = phir;
+        }
+      }
+      else {
+        khi[] = 1.;
+      }
       
       pr#VhiP1 sum = khi;
       VhGlobalff phi = 0, phibase = 0;
@@ -107,20 +124,29 @@ if (pr#isincomm)
         PhGlobalff suppP0;
         suppP0[] = suppPartition[];
         
-        AddLayers(overlapName, suppPartition[], sizeoverlaps, phi[]);
-        
-        phibase[] = phi[];
-        
-        if(usedARGV("-steep") != -1)
-        phi = phi > 0.001 ? 1.0 : 0.0;
-        
-        else if (usedARGV("-raspart") != -1) {
+        if (sizeoverlaps > 0) {
+          AddLayers(overlapName, suppPartition[], sizeoverlaps, phi[]);
+
+          phibase[] = phi[];
+
+          if(usedARGV("-steep") != -1)
+            phi = phi > 0.001 ? 1.0 : 0.0;
+          else if (usedARGV("-raspart") != -1) {
+            VhGlobalff phir;
+            varf vSuppi(u,v) = intN(overlapName,qforder=1)(suppP0*v);
+            phir[] = vSuppi(0,VhGlobalff);
+            phir = phir > 0.;
+            phi = phir;
+          }
+        }
+        else {
           VhGlobalff phir;
           varf vSuppi(u,v) = intN(overlapName,qforder=1)(suppP0*v);
           phir[] = vSuppi(0,VhGlobalff);
           phir = phir > 0.;
           phi = phir;
-        } 
+          phibase[] = phi[];
+        }
         
         /*real intersection=intN(overlapName)(phibase)/eps;*/
         /*if(arrayIntersectioni[i] <=1)*/
@@ -131,7 +157,13 @@ if (pr#isincomm)
         else{
           epsi = eps;	
         }   
-        real intersection = intN(overlapName)(phibase) / epsi;
+        real intersection;
+        if (pr#overlap > 0)
+          intersection = intN(overlapName)(phibase) / epsi;
+        else {
+          partitionIntersectioni[numberIntersectioni] = phi;
+          intersection = partitionIntersectioni[numberIntersectioni][].max;
+        }
         if( intersection>1e-6)
         {
           partitionIntersectioni[numberIntersectioni] = phi;
@@ -200,6 +232,17 @@ if (pr#isincomm)
       
       pr#aTh[ii]=pr#Thi;
       pr#aThborder[ii]=trunc(borderName,1,split=ssplit);
+
+      if (bpara && pr#overlap == 0) {
+        IFMACRO(pr#mminoverlap,1)
+        fespace pr#PhAugP0(pr#AugThi,P0);
+        pr#PhAugP0 phaug = part;
+        pr#partAug.resize(pr#PhAugP0.ndof);
+        pr#partAug = phaug[];
+        ENDIFMACRO
+        ;
+      }
+
       pr#DP1[ii] = khi;
     }
     searchMethod = backup;
@@ -256,6 +299,8 @@ meshN pr#Thi = minimalMesh;
 fespace pr#VhiP1(pr#Thi,P1);
 
 pr#VhiP1[int] pr#partitionIntersectionbasei(0);
+
+int pr#overlap = 0;
 
 int pr#numberIntersection = 0;
 
@@ -320,6 +365,8 @@ mpiComm pr#commself(mpiCommWorld,pr#grpself);
 meshN[int] pr#aTh(pr#npart);        /* sequence of ovr. meshes */ 
 meshN[int] pr#aThborder(pr#npart);
 
+real[int] pr#partAug(1);
+
 NewMacro pr#init()1 EndMacro
 ENDIFMACRO
 // EOM
@@ -368,7 +415,7 @@ macro ffddmpartf(pr,Th,res)
       assert(0);
       ENDIFMACRO
       IFMACRO (pr#simple)
-      pr#simple(Ph, upart, comm)
+      pr#simple(pr#Ph0, upart, comm)
       ENDIFMACRO
     }    	
     
@@ -512,6 +559,101 @@ if (prmsh#isincomm && !prmsh#excluded)
     prmsh#Thi = prmsh#aTh[ii];
     fespace Vhipart(prmsh#Thi,pr#fPkP0);
     Vhipart udefpart(utmp) = uinitpart(prmsh#DP1[ii]);
+
+    Vhipart udefpart(usum);
+    if (prmsh#overlap == 0){
+      utmp[] = 1;
+      usum[] = 1;
+    }
+    
+    if (bpara) {
+      int backup = searchMethod;
+      searchMethod = 1;
+      pr#rcv.resize(prmsh#numberIntersection);
+      pr#snd.resize(prmsh#numberIntersection);
+      pr#restrictionIntersection.resize(prmsh#numberIntersection);
+      for(int i=0;i<prmsh#numberIntersection;++i) {
+          matrix R;
+          int[int] n2o(1);
+          if (prmsh#overlap > 0) {
+            meshN meshIntersection = trunc(prmsh#Thi, (prmsh#partitionIntersectionbasei[i] > 1.0e-6), new2old = n2o);
+            fespace WhIntersection(meshIntersection, pr#fPk);
+            int[int] renum = restrict(WhIntersection, pr#Vhi,n2o);
+            int[int] Ic = (0:WhIntersection.ndof-1);
+            real[int] Kc(WhIntersection.ndof);
+            Kc = 1;
+            R = [Ic,renum,Kc];
+            R.resize(WhIntersection.ndof, pr#Vhi.ndof);
+          }
+          else {
+            IFMACRO(prmsh#mminoverlap,1)
+            matrix RP1 = interpolate(prmsh#VhiP1,prmsh#AugVhiP1);
+            prmsh#AugVhiP1 partaugP1;
+            partaugP1[] = RP1'*prmsh#partitionIntersectionbasei[i][];
+            meshN meshIntersection = trunc(prmsh#AugThi, (partaugP1 > 1.0e-6), new2old = n2o);
+            fespace pr#PhAugP0(prmsh#AugThi,P0);
+            pr#PhAugP0 paug;
+            paug[] = prmsh#partAug;
+            paug = abs(paug-prmsh#arrayIntersection[i]) < 0.1;
+            meshN meshNeighbor = trunc(prmsh#AugThi, paug > 0.001, label=-10);
+
+            fespace WhIntersection(meshIntersection, pr#fPkP0);
+
+            fespace WhNeighbor(meshNeighbor, pr#fPkP0);
+
+            matrix Rn = interpolate(WhNeighbor,pr#AugVhi,inside=true);
+
+            varf vneighbor(udef(u),udef(v)) = on(-10, udef(u) = uinit(1));
+            real[int] bbord = vneighbor(0,WhNeighbor,tgv=1);
+            real[int] bbordaug = Rn'*bbord;
+
+            int[int] renum = restrict(WhIntersection, pr#AugVhi, n2o);
+
+            WhIntersection udefpart(utmpi);
+
+            matrix RR = interpolate(pr#Vhi,pr#AugVhi);
+
+            varf vbord(udef(u),udef(v)) = on(ffddminterfacelabel, udef(u) = uinit(1));
+            real[int] bmybord = vbord(0,pr#Vhi,tgv=1);
+            real[int] bmybordaug = RR'*bmybord;
+
+            for [i,bi: utmpi[]] bi = (bbordaug[renum[i]] > 0.999 && bmybordaug[renum[i]] > 0.999 ? 1 : 0);
+
+            int[int] rest(WhIntersection.ndof);
+            int ninter = 0;
+            for (int j=0; j<WhIntersection.ndof; j++)
+            if (utmpi[][j] > 0.999)
+              rest[ninter++] = renum[j];
+            rest.resize(ninter);
+            if (ninter > 0){
+            int[int] Ic(1);
+            if (ninter > 1)
+              Ic = (0:ninter-1);
+            real[int] Kc(ninter);
+            Kc = 1;
+            matrix Raug = [Ic,rest,Kc];
+            Raug.resize(ninter, pr#AugVhi.ndof);
+            R = Raug*RR';
+            usum[] += R'*Kc;
+            }
+            else {
+              R.resize(0, pr#AugVhi.ndof);
+            }
+            ENDIFMACRO
+            ;
+          }
+
+        /*cout << mpirank << " " << prmsh#arrayIntersection[i] << " " << R.n << " " << R.m << endl;*/
+        pr#restrictionIntersection[i] = R;
+        pr#rcv[i].resize(pr#restrictionIntersection[i].n);
+        pr#snd[i].resize(pr#restrictionIntersection[i].n);
+      }
+      searchMethod = backup;
+    }
+
+    if (prmsh#overlap == 0)
+      utmp[] = utmp[] ./= usum[];
+
     pr#Dk[ii].resize(Vhipart.ndof);
     IFMACRO(pr#K,complex)
     pr#Dk[ii].re = utmp[];
@@ -522,26 +664,7 @@ if (prmsh#isincomm && !prmsh#excluded)
     matrix Dihreal = utmp[];
     Dihreal.thresholding(1e-10);
     pr#Dih[ii] = Dihreal;
-    
-    if (bpara) {
-      int backup = searchMethod;
-      searchMethod = 1;
-      pr#rcv.resize(prmsh#numberIntersection);
-      pr#snd.resize(prmsh#numberIntersection);
-      pr#restrictionIntersection.resize(prmsh#numberIntersection);
-      for(int i=0;i<prmsh#numberIntersection;++i) {
-        meshN meshIntersection = trunc(prmsh#Thi, (prmsh#partitionIntersectionbasei[i] > 1.0e-6));
-        fespace WhIntersection(meshIntersection, pr#fPk);
-        matrix R = interpolate(WhIntersection, pr#Vhi);
-        R.thresholding(1.e-10);
-        pr#restrictionIntersection[i] = R;
-        pr#restrictionIntersection[i].resize(WhIntersection.ndof, pr#Vhi.ndof);
-        pr#rcv[i].resize(pr#restrictionIntersection[i].n);
-        pr#snd[i].resize(pr#restrictionIntersection[i].n);
-      }
-      searchMethod = backup;
-    }
-    
+
     if(!bnoGlob) {
       matrix Rihreal=interpolate(pr#Vhi,pr#Vhglob);        
       int[int] I(1),J(1);
@@ -632,9 +755,11 @@ if (prmsh#isincomm && !prmsh#excluded)
 // EOM
 
 macro ffddmbuildDfespaceEdge(pr,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
-ffddmbuildDfespacef(pr,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
 IFMACRO(prmesh#buildAug,1)
 ffddmbuildDfespacef(pr#Aug,prmesh#Aug,scalar,def,init,Pk,defpart,initpart,Pkpart)
+ENDIFMACRO
+ffddmbuildDfespacef(pr,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
+IFMACRO(prmesh#buildAug,1)
 if (bseq)
   pr#Auginterp = interpolate(pr#AugVhi,pr#Vhglob);
 else if (bpara)
@@ -674,6 +799,16 @@ if  (pr#inexactCSsplit <= 1) {
 else 
   pr#Thglob = trunc(Th,1,split=pr#inexactCSsplit*ffddmsplit);
 
+IFMACRO(!pr#mminoverlap)
+NewMacro pr#mminoverlap()0 EndMacro
+ENDIFMACRO
+
+IFMACRO(!pr#buildAug)
+IFMACRO(pr#mminoverlap,1)
+NewMacro pr#buildAug()1 EndMacro
+ENDIFMACRO
+ENDIFMACRO
+
 IFMACRO(!pr#buildAug)
 NewMacro pr#buildAug()0 EndMacro
 ENDIFMACRO
@@ -685,16 +820,20 @@ int pr#AugbinexactgeneoCS = 0;
 int pr#AugpCS = ffddmpCS;
 int pr#Augexclude = ffddmexclude;
 ffddminitDmeshf(pr#Aug,Th,comm)
+IFMACRO (!pr#AugbuildAug)
+NewMacro pr#AugbuildAug()0 EndMacro
+ENDIFMACRO
 ENDIFMACRO
 
 {
   real[int] locpartition;
   ffddmpartf(pr,Th,locpartition)
-  ffddmbuildDmeshf(pr,Th,locpartition,ffddmoverlap)
   
   IFMACRO(pr#buildAug,1)
   ffddmbuildDmeshf(pr#Aug,Th,locpartition,(ffddmoverlap+1))
   ENDIFMACRO
+
+  ffddmbuildDmeshf(pr,Th,locpartition,ffddmoverlap)
 }
 // EOM
 
