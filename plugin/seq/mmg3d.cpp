@@ -34,7 +34,6 @@
 
 #include "ff++.hpp"
 #include "msh3.hpp"
-// #define ADAPTLIBRARY
 #include "memory.h"
 #include "libmmg3d.h"
 #include "mmg3d_defines.h"
@@ -153,7 +152,6 @@ MMG_pMesh mesh3_to_MMG_pMesh (const Mesh3 &Th3, const int &nvmax, const int &ntr
 	meshMMG->point = (MMG_pPoint)calloc(meshMMG->npmax + 1, sizeof(MMG_Point));
 	meshMMG->tetra = (MMG_pTetra)calloc(meshMMG->nemax + 1, sizeof(MMG_Tetra));
 	meshMMG->tria = (MMG_pTria)calloc(meshMMG->ntmax + 1, sizeof(MMG_Tria));
-	// meshMMG->disp = NULL;
 
 	if (boolMoving) {
 		MMG_pDispl ppd;
@@ -209,16 +207,6 @@ MMG_pMesh mesh3_to_MMG_pMesh (const Mesh3 &Th3, const int &nvmax, const int &ntr
 		ptriangle->v[2] = Th3.operator () (K[2]) + 1;
 		ptriangle->ref = K.lab;
 	}
-
-	/*  // pour le deplacement des corps rigides
-	 * MMG_pDispl pd;
-	 * for (k=1; k<mesh->np; k++) {
-	 * pd = &mesh->disp[k];
-	 * pd->mv[0] = depx;
-	 * pd->mv[1] = depy;
-	 * pd->mv[2] = depz;
-	 * }
-	 */
 	return meshMMG;
 }
 
@@ -228,7 +216,6 @@ MMG_pSol metric_mmg3d (const int &nv, const int &nvmax, const KN<double> *pmetri
 
 	sol = (MMG_pSol)calloc(1, sizeof(MMG_Sol));
 
-	// cout << metric.N() << " taille de la metrique "<< endl;
 	if (pmetric && pmetric->N() > 0) {
 		const KN<double> &metric = *pmetric;
 		sol->np = nv;
@@ -338,11 +325,6 @@ class mmg3d_Op: public E_F0mps
 };
 
 basicAC_F0::name_and_type mmg3d_Op::name_param [] = {
-	/*
-	 * {  "nvmax", &typeid(long)},     // 0
-	 * {  "ntrimax", &typeid(long)},   // 1
-	 * {  "ntetmax", &typeid(long)},   // 2
-	 */
 	{"options", &typeid(KN_<long>)},// 3 -> 0
 	{"metric", &typeid(KN<double> *)},	// 4 -> 1
 	{"displacement", &typeid(E_Array)},	// 5 -> 2
@@ -559,14 +541,7 @@ AnyType mmg3d_Op::operator () (Stack stack)  const {
 	return Th3_T;
 }
 
-/*  class Init1 { public:
- * Init1();
- * };
- *
- * $1 */
-
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
-	// if (verbosity)
 	if (verbosity) {cout << " load: mmg3d  " << endl;}
 
 	Global.Add("mmg3d", "(", new mmg3d_ff);

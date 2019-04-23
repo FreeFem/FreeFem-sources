@@ -35,10 +35,6 @@ using namespace std;
 using namespace Fem2D;
 
 #include <vector>
-// typedef std::vector<R>::iterator Rptr;
-// typedef std::vector<R>::const_iterator const_Rptr;
-// template <class A> inline A * to_ptr(std::vector<A>::iterator it){return &*it;}
-// template <class A> inline const A * to_ptr(std::vector<A>::const_iterator it){return &*it;}
 
 #include "TensorK.hpp"
 // the main class
@@ -58,22 +54,6 @@ class MetricPk:  public E_F0mps
 			args.SetNameParam(n_name_param, name_param, nargs);	// les arguments nommes
 			expTh = to<pmesh>(args[0]);	// a the expression to get the mesh
 			expu = to<double>(args[1]);	// a the expression to get the mesh
-			/*
-			 * exphmin= to<double>(args[2]);  // a the expression to get the mesh
-			 * exphmax= to<double>(args[3]);  // a the expression to get the mesh
-			 * experr= to<double>(args[4]);  // a the expression to get the mesh
-			 * //  a array expression [ a, b]
-			 * const E_Array * ma= dynamic_cast<const E_Array*>((Expression) args[5]);
-			 * const E_Array * mp= dynamic_cast<const E_Array*>((Expression) args[6]);
-			 * if (ma->size() != 3) CompileError("syntax: MetricKuate(Th,np,o,err,[m11,m12,m22],[xx,yy])");
-			 * if (mp->size() != 2) CompileError("syntax: MetricKuate(Th,np,o,err,[m11,m12,m22],[xx,yy])");
-			 * int err =0;
-			 * m11= CastTo<KN<double> * >((*ma)[0]); // fist exp of the array (must be a  double)
-			 * m12= CastTo<KN<double> * >((*ma)[1]); // second exp of the array (must be a  double)
-			 * m22= CastTo<KN<double> * >((*ma)[2]); // second exp of the array (must be a  double)
-			 * px= CastTo<double * >((*mp)[0]); // fist exp of the array (must be a  double)
-			 * py= CastTo<double * >((*mp)[1]); // second exp of the array (must be a  double)
-			 */
 		}
 
 		double arg (int i, Stack stack, double a) const {return nargs[i] ? GetAny<double>((*nargs[i])(stack)) : a;}
@@ -130,7 +110,6 @@ AnyType MetricPk::operator () (Stack stack) const {
 
 	cout << "Approximation of " << r_deg << "th derivatives using finite elements of degree " << k_deg << ", in the L^" << p_exp << " norm.\n";
 	cout << "Triangulation type : " << ttype << "; Graded=0, Quasi_Acute(refined)=1, Quasi_Acute_Unrefined=2, Quasi_Acute_Proved(refined)=3" << endl;
-	// cout << "Metric type : " << wmat << "M0_alone=0, M1_alone=1, M0_M1_weighted_sum=2" << endl;
 
 	const Mesh *pTh = GetAny<pmesh>((*expTh)(stack));
 	ffassert(pTh);
@@ -186,10 +165,6 @@ AnyType MetricPk::operator () (Stack stack) const {
 			}
 		}
 	}
-
-// cout << "next point on boundary\n"; for(int i=0; i<nv; ++i) cout << " " << nextv[i]; cout << "\n";
-
-// for(int i=0; i<Th.neb; ++i) nextv[Th.be(i)[0]]=Th.be(i)[1]; //ne convient pas : les num�ros sont oubli�s, seuls les points sont conserv�s.
 
 	/********* estimation des d�riv�es ***********/
 	for (int i = 0; i < Th.nt; ++i) {
@@ -403,7 +378,6 @@ AnyType MetricPk::operator () (Stack stack) const {
 
 	// Jacobi iterations
 	// the power -1/2 of the metrics, which is homogenous to a distance, is averaged.
-// cout << "!!!!!!!!!! HELLO !!!!!!!!!!!\n";
 // for(int i=0; i<nv; ++i) if(ih_metric[3*i]==0 && ih_metric[3*i+1]==0 && ih_metric[3*i+2]==0) {
 // cout << Th(i).x << "," << Th(i).y << endl;
 // for(int j=0; j<m_dim; ++j) cout << Deriv[m_dim*i+j] << ",";
@@ -455,7 +429,6 @@ AnyType MetricPk::operator () (Stack stack) const {
 		// M : Metric for the L^p norm, M_0 metric for the L^infty norm
 		const R alpha = -1. / ((m_deg - r_deg) * p_exp + d_dim);// M = (det M_0)^alpha M_0
 		const R beta = (m_deg - r_deg) * p_exp / (((m_deg - r_deg) * p_exp + d_dim) * 2.);	// integrate sqrt(det M) = integrate (det M_0)^beta; beta = (alpha*d_dim+1)/2.
-		// const R tau = 2./(m_deg-r_deg+1);
 
 		for (int i = 0; i < nv; ++i) {
 			aires[i] /= 3;
@@ -467,7 +440,6 @@ AnyType MetricPk::operator () (Stack stack) const {
 			totalArea += aires[i];
 		}
 
-		// cout << "totalArea : " << totalArea << "\n";
 		R totalMass = 0;
 
 		for (int i = 0; i < nv; ++i) {
@@ -518,10 +490,6 @@ AnyType MetricPk::operator () (Stack stack) const {
 	 */
 }
 
-/*  class Init { public:
- * Init();
- * };
- * Init init;*/
 static void Load_Init () {
 	cout << "\n  -- lood: init MetricPk\n";
 	Global.Add("MetricPk", "(", new OneOperatorCode<MetricPk>());

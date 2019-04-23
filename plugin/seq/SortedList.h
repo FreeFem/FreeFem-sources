@@ -27,7 +27,6 @@
 #include <fstream>
 #include <set>
 #include <vector>
-// #include <stack>
 #include "float.h"
 #include "BasicMath.h"
 using namespace std;
@@ -61,8 +60,6 @@ class Tab {
 			for (int i = 0; i < tab.cardMax; i++) {Element(i) = tab[i];}
 		}
 
-		//~ Tab(){for(int i=0; i<growIndex; i++) delete elements[i];}
-
 		TabElement &operator [] (int pos) {	// TabElement & Element(int pos)
 			assert_msg(pos >= 0, "Tab::Element Error : Negative index " << pos);
 			if (pos >= cardMax) {
@@ -76,7 +73,6 @@ class Tab {
 
 			int i, pow;
 
-			// for(i=1, pow=startCard; pos>=2*pow; i++, pow*=2){};
 			for (i = growIndex - 1, pow = cardMax / 2; pos < pow; i--, pow /= 2) {}
 
 			;
@@ -90,7 +86,6 @@ class Tab {
 
 			int i, pow;
 
-			// for(i=1, pow=startCard; pos>=2*pow; i++, pow*=2){}; //
 			for (i = growIndex - 1, pow = cardMax / 2; pos < pow; i--, pow /= 2) {}
 
 			;
@@ -133,8 +128,6 @@ class Tab {
 		const static int growMax = 30;
 
 		vector<TabElement> elements[growMax];
-// TabElement * elements[growMax];
-// TabElement NegElement;
 
 		bool grow () {
 			if (growIndex == growMax) {return false;}
@@ -785,4 +778,3 @@ inline int SortedList<RZ>::enumerate (Tab<RZ> &tab) {
  */
 
 #endif
-

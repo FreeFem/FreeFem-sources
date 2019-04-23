@@ -32,41 +32,6 @@ using namespace std;
 
 #include "cfloat"
 #include "ff++.hpp"
-/*
-#include "rgraph.hpp"
-#include "error.hpp"
-#include "AFunction.hpp"
-
-// #include "lex.hpp"
-#include "HashMatrix.hpp"
-#include "SparseLinearSolver.hpp"
-
-#include "Mesh3dn.hpp"
-#include "MeshPoint.hpp"
-#include "lgfem.hpp"
-#include "lgmesh3.hpp"
-#include "lgsolver.hpp"
-#include "problem.hpp"
-/*
- #include  <iostream>
- #include  <cfloat>
- #include  <cmath>
- * using namespace std;
- #include "error.hpp"
- #include "AFunction.hpp"
- #include "rgraph.hpp"
- #include "RNM.hpp"
- * // remove problem of include
- #undef  HAVE_LIBUMFPACK
- #undef HAVE_CADNA
- #include "MatriceCreuse_tpl.hpp"
- #include "MeshPoint.hpp"
- #include "lgfem.hpp"
- #include "lgmesh.hpp"
- #include "lgmesh3.hpp"
- #include "lgsolver.hpp"
- #include "problem.hpp"
- */
 class MatrixUpWind0:  public E_F0mps {
 	public:
 		typedef Matrice_Creuse<R> *Result;
@@ -129,8 +94,8 @@ AnyType MatrixUpWind0::operator () (Stack stack) const {
 	ffassert(pTh);
 	const Mesh &Th(*pTh);
 	{
-		MatriceMorse<R> * pAij= new MatriceMorse<R>(Th.nv), &Aij = *pAij ; 
-		
+		MatriceMorse<R> * pAij= new MatriceMorse<R>(Th.nv), &Aij = *pAij ;
+
 		KN<double> cc(Th.nv);
 		double infini = DBL_MAX;
 		cc = infini;
@@ -182,10 +147,6 @@ AnyType MatrixUpWind0::operator () (Stack stack) const {
 	return sparce_mat;
 }
 
-/*  class Init { public:
- * Init();
- * };
- * $1 */
 static void Load_Init () {
 	cout << " lood: init Mat Chacon " << endl;
 	Global.Add("MatUpWind1", "(", new OneOperatorCode<MatrixUpWind0>());

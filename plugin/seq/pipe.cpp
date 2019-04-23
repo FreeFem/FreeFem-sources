@@ -69,12 +69,8 @@ struct pstream {
 	}
 
 	~pstream () {
-		// if(f)  delete f;;
-		// if(os) delete os;
-		// if(is) delete is;
 		if (fb) {delete (fb);}
 
-		// f=0;
 		os = 0;
 		is = 0;
 		fb = 0;
@@ -83,7 +79,6 @@ struct pstream {
 	void flush () {
 		if (os) {os->flush();}
 
-		// if( is ) is->flush();
 	}
 };
 static pstream**pstream_init (pstream **const &p, string *const &a, string *const &b) {
@@ -91,11 +86,6 @@ static pstream**pstream_init (pstream **const &p, string *const &a, string *cons
 
 	if (mode.length() == 0) {mode = "wr";}
 
-	/* redi::pstreams::pmode omp = redi::pstreams::pstdin|redi::pstreams::pstdout;
-	 * if (mode == "r+" )      omp = redi::pstreams::pstdin|redi::pstreams::pstdout;
-	 * else if( mode == "w"  ) omp = redi::pstreams::pstdout;
-	 * else if(  mode == "r" ) omp = redi::pstreams::pstdin;
-	 */
 	std::ios_base::openmode om = ios_base::in | ios_base::out;
 	if (mode == "r+") {om = ios_base::in | ios_base::out;} else if (mode == "w") {om = ios_base::out;} else if (mode == "r") {om = ios_base::in;} else {ExecError("Invalide mode pstream r,r+,w ");}
 
@@ -220,8 +210,6 @@ long cflush (pstream **ppf) {
 	pstream &f = **ppf;
 
 	f.flush();
-	// if( f.os ) f.os->flush();
-	// if( f.f) fflush(f.f);
 	return 0;
 };
 

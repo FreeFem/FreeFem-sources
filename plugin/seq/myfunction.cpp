@@ -35,7 +35,6 @@ double myfunction (Stack stack) {
 	double x = mp.P.x;	// get the current x value
 	double y = mp.P.y;	// get the current y value
 
-	// cout << "x = " << x << " y=" << y << " " << sin(x)*cos(y) <<  endl;
 	return sin(x) * cos(y);
 }
 

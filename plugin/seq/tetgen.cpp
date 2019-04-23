@@ -258,8 +258,6 @@ AnyType Build2D3D_Op::operator () (Stack stack)  const {
 		}
 	}
 
-	// KN<double> txx(nbv), tyy(nbv), tzz(nbv);
-	// KN<int> takemesh(nbv);
 	double *txx = new double[nbv];
 	double *tyy = new double[nbv];
 	double *tzz = new double[nbv];
@@ -297,10 +295,6 @@ AnyType Build2D3D_Op::operator () (Stack stack)  const {
 	delete [] takemesh;
 	int border_only = 0;
 	int recollement_border = 1;
-	/*
-	 * Mesh3 *Th3=Transfo_Mesh2_tetgen( precis_mesh, switch_tetgen, Th, txx, tyy, tzz, border_only,
-	 * recollement_border, point_confondus_ok, label_tet, mapfme);
-	 */
 	Mesh3 *Th3_tmp = MoveMesh2_func(precis_mesh, Th, txx, tyy, tzz, border_only, recollement_border, point_confondus_ok);
 
 	/* delete array */
@@ -351,21 +345,9 @@ AnyType Build2D3D_Op::operator () (Stack stack)  const {
 	                                          nbfacecl, tabfacecl);
     Th3->getTypeMesh3()=1;
 
-	/*
-	 * Mesh3 *Th3=Transfo_Mesh2_tetgen_new( precis_mesh, switch_tetgen, Th, txx, tyy, tzz, border_only,
-	 * recollement_border, point_confondus_ok, label_tet, mapfme,
-	 * nbhole, tabhole, nbregion, tabregion, nbfacecl,tabfacecl);
-	 *
-	 */
-
 	delete Th3_tmp;
 
-	// Th3->BuildBound();
-	// Th3->BuildAdj();
-	// Th3->Buildbnormalv();
-	// Th3->BuildjElementConteningVertex();
 	Th3->BuildGTree();
-	// Th3->decrement();
 	Add2StackOfPtr2FreeRC(stack, Th3);
 
 	delete [] switch_tetgen;
@@ -429,14 +411,11 @@ void mesh3_tetgenio_out (const tetgenio &out, Mesh3 &Th3) {
 		iv[2] = out.tetrahedronlist[i + 2] - 1;
 		iv[3] = out.tetrahedronlist[i + 3] - 1;
 
-		// lab   = label_tet;
 		for (int jj = 0; jj < 4; jj++) {
 			assert(iv[jj] >= 0 && iv[jj] < Th3.nv);
 		}
 
-		// cout << "nnt= " <<  nnt << " " << lab  << " " << out.tetrahedronattributelist[nnt] << endl;
 		lab = out.tetrahedronattributelist[nnt];
-		// cout << "nnt= " <<  lab  << " " << out.tetrahedronattributelist[nnt] << endl;
 
 		Th3.elements[nnt].set(Th3.vertices, iv, lab);
 		i = i + 4;
@@ -456,13 +435,6 @@ void mesh3_tetgenio_out (const tetgenio &out, Mesh3 &Th3) {
 
 		Th3.be(ibe).set(Th3.vertices, iv, out.trifacemarkerlist[ibe]);
 	}
-
-	/*
-	 * if( out.numberoftetrahedronattributes != 1 ){
-	 * cout << "out.numberoftetrahedronattributes" << out.numberoftetrahedronattributes  << endl;
-	 * exit(1);
-	 * }
-	 */
 }
 
 void mesh3_tetgenio_out (const tetgenio &out, const int &label_tet, Mesh3 &Th3) {
@@ -509,7 +481,6 @@ void mesh3_tetgenio_out (const tetgenio &out, const int &label_tet, Mesh3 &Th3) 
 		iv[2] = out.tetrahedronlist[i + 2] - 1;
 		iv[3] = out.tetrahedronlist[i + 3] - 1;
 		lab = label_tet;
-		// lab = out.tetrahedronmarkerlist[nnt];
 		Th3.elements[nnt].set(Th3.vertices, iv, lab);
 		i = i + 4;
 	}
@@ -567,7 +538,6 @@ void mesh3_tetgenio_out (const tetgenio &out, const int &label_tet, const int &l
 		iv[2] = out.tetrahedronlist[i + 2] - 1;
 		iv[3] = out.tetrahedronlist[i + 3] - 1;
 		lab = label_tet;
-		// lab = out.tetrahedronmarkerlist[nnt];
 		Th3.elements[nnt].set(Th3.vertices, iv, lab);
 		i = i + 4;
 	}
@@ -607,8 +577,6 @@ Mesh3*mesh3_tetgenio_out (const tetgenio &out) {
 	if (verbosity) {
 		cout << "Th3 :: Vertex Element Border :: " << out.numberofpoints << " " << out.numberoftetrahedra << " " << out.numberoftrifaces << endl;
 	}
-
-	// Th3.set(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces);
 
 	// new parameter
 	if (out.numberoftetrahedronattributes != 1) {
@@ -658,15 +626,11 @@ Mesh3*mesh3_tetgenio_out (const tetgenio &out) {
 		iv[2] = out.tetrahedronlist[i + 2] - 1;
 		iv[3] = out.tetrahedronlist[i + 3] - 1;
 
-		// lab   = label_tet;
 		for (int jj = 0; jj < 4; jj++) {
 			assert(iv[jj] >= 0 && iv[jj] < out.numberofpoints);
 		}
 
-		// cout << "nnt= " <<  nnt << " " << lab  << " " << out.tetrahedronattributelist[nnt] << endl;
 		lab = out.tetrahedronattributelist[nnt];
-		// cout << "nnt= " <<  lab  << " " << out.tetrahedronattributelist[nnt] << endl;
-		// Th3.elements[nnt].set( Th3.vertices, iv, lab);
 		(*tt++).set(v, iv, lab);
 		i = i + 4;
 	}
@@ -683,19 +647,15 @@ Mesh3*mesh3_tetgenio_out (const tetgenio &out) {
 			assert(iv[jj] >= 0 && iv[jj] < out.numberofpoints);
 		}
 
-		// Th3.be(ibe).set( Th3.vertices, iv, out.trifacemarkerlist[ibe]);
 		(*bb++).set(v, iv, out.trifacemarkerlist[ibe]);
 	}
 
 	Mesh3 *T_TH3 = new Mesh3(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces, v, t, b);
 	cout << "FreeFem++: Check mesh given by tetgen" << endl;
-	// return T_TH3;
 
 	if (TestElementMesh3(*T_TH3) != 1) {
 		return T_TH3;
 	} else {
-		// Mesh3 *T2_TH3 = TestElementMesh3_patch( *T_TH3 );
-		// return T2_TH3;
 		exit(1);
 	}
 }
@@ -750,8 +710,6 @@ Mesh3*mesh3_tetgenio_out (const tetgenio &out, const int &label_tet) {
 		iv[2] = out.tetrahedronlist[i + 2] - 1;
 		iv[3] = out.tetrahedronlist[i + 3] - 1;
 		lab = label_tet;
-		// lab = out.tetrahedronmarkerlist[nnt];
-		// Th3.elements[nnt].set( Th3.vertices, iv, lab);
 		(*tt++).set(v, iv, lab);
 		i = i + 4;
 	}
@@ -761,19 +719,14 @@ Mesh3*mesh3_tetgenio_out (const tetgenio &out, const int &label_tet) {
 		iv[0] = out.trifacelist[3 * ibe] - 1;
 		iv[1] = out.trifacelist[3 * ibe + 1] - 1;
 		iv[2] = out.trifacelist[3 * ibe + 2] - 1;
-		// Th3.be(ibe).set( Th3.vertices, iv, out.trifacemarkerlist[ibe]);
 		(*bb++).set(v, iv, out.trifacemarkerlist[ibe]);
 	}
 
 	Mesh3 *T_TH3 = new Mesh3(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces, v, t, b);
-	// return T_TH3;
 	cout << "FreeFem++: Check mesh given by tetgen" << endl;
 	if (TestElementMesh3(*T_TH3) != 1) {
 		return T_TH3;
 	} else {
-		// cout << "patch pour tetgen " << endl;
-		// Mesh3 *T2_TH3 = TestElementMesh3_patch( *T_TH3 );
-		// return T2_TH3;
 		exit(1);
 	}
 }
@@ -828,8 +781,6 @@ Mesh3*mesh3_tetgenio_out (const tetgenio &out, const int &label_tet, const int &
 		iv[2] = out.tetrahedronlist[i + 2] - 1;
 		iv[3] = out.tetrahedronlist[i + 3] - 1;
 		lab = label_tet;
-		// lab = out.tetrahedronmarkerlist[nnt];
-		// Th3.elements[nnt].set( Th3.vertices, iv, lab);
 		(*tt++).set(v, iv, lab);
 		i = i + 4;
 	}
@@ -841,7 +792,6 @@ Mesh3*mesh3_tetgenio_out (const tetgenio &out, const int &label_tet, const int &
 		iv[0] = out.trifacelist[3 * ibe] - 1;
 		iv[1] = out.trifacelist[3 * ibe + 1] - 1;
 		iv[2] = out.trifacelist[3 * ibe + 2] - 1;
-		// Th3.be(ibe).set( Th3.vertices, iv, label_face);
 		(*bb++).set(v, iv, label_face);
 	}
 
@@ -851,19 +801,14 @@ Mesh3*mesh3_tetgenio_out (const tetgenio &out, const int &label_tet, const int &
 		return T_TH3;
 	} else {
 		exit(1);
-		// Mesh3 *T2_TH3 = TestElementMesh3_patch( *T_TH3 );
-		// return T2_TH3;
 	}
 }
 
 Mesh3*Convexhull_3Dpoints (char *switch_tetgen, const int &nv_t, const double *Xcoord, const double *Ycoord,
                            const double *Zcoord, const int &label_tet, const int &label_face) {
-	// Mesh3 *T_Th3= new Mesh3;
 
 	tetgenio in, out;
 
-	// tetgenio::facet *f;
-	// tetgenio::polygon *p;
 	if (verbosity > 3) {
 		cout << " tetgenio: vertex " << endl;
 	}
@@ -896,7 +841,6 @@ Mesh3*Convexhull_3Dpoints (char *switch_tetgen, const int &nv_t, const double *X
 
 	if (verbosity > 1) {cout << "tetgen: finish tetrahedralize( , &in, &out);" << endl;}
 
-	// mesh3_tetgenio_out( out, label_tet, label_face,*T_Th3);
 	Mesh3 *T_Th3 = mesh3_tetgenio_out(out, label_tet, label_face);
 	if (verbosity > 1) {cout << " Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " " << T_Th3->nt << " " << T_Th3->nbe << endl;}
 
@@ -906,7 +850,6 @@ Mesh3*Convexhull_3Dpoints (char *switch_tetgen, const int &nv_t, const double *X
 }
 
 Mesh3*RemplissageSurf3D_tetgen (char *switch_tetgen, const Mesh3 &Th3, const int &label_tet) {
-	// Mesh3 *T_Th3= new Mesh3;
 
 	assert(Th3.nt == 0);
 	int nv_t = Th3.nv;
@@ -984,7 +927,6 @@ Mesh3*RemplissageSurf3D_tetgen (char *switch_tetgen, const Mesh3 &Th3, const int
 		cout << "tetgen: after tetrahedralize( , &in, &out);" << endl;
 	}
 
-	// mesh3_tetgenio_out( out, label_tet, *T_Th3);
 	Mesh3 *T_Th3 = mesh3_tetgenio_out(out, label_tet);
 	if (verbosity > 1) {
 		cout << " Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " " << T_Th3->nt << " " << T_Th3->nbe << endl;
@@ -998,7 +940,6 @@ Mesh3*RemplissageSurf3D_tetgen_new (char *switch_tetgen, const Mesh3 &Th3, const
                                     const int &nbhole, const double *tabhole,
                                     const int &nbregion, const double *tabregion,
                                     const int &nbfacecl, const double *tabfacecl) {
-	// Mesh3 *T_Th3= new Mesh3;
 
 	assert(Th3.nt == 0);
 	int nv_t = Th3.nv;
@@ -1118,7 +1059,6 @@ Mesh3*RemplissageSurf3D_tetgen_new (char *switch_tetgen, const Mesh3 &Th3, const
                                     const int &nbfacecl, const double *tabfacecl,
                                     const int &nbinside, const double *InsidePoint,
                                     const int &sizeofmetric, const double *metric) {
-	// Mesh3 *T_Th3= new Mesh3;
 
 	assert(Th3.nt == 0);
 	int nv_t = Th3.nv;
@@ -1619,15 +1559,6 @@ class Remplissage_Op: public E_F0mps
 			}
 
 			bVol = false;
-			/*
-			 * if( BCastTo<Mesh3 *>(args[1]) ){
-			 * eVolTh = CastTo<Mesh3 *>(args[1]);
-			 * bVol=true;
-			 * }
-			 * else{
-			 * bVol=false;
-			 * }
-			 */
 		}
 
 		Remplissage_Op (const basicAC_F0 &args, Expression tth, Expression vth)
@@ -1646,11 +1577,6 @@ class Remplissage_Op: public E_F0mps
 			bVol = true;
 		}
 
-		/*
-		 * static ArrayOfaType  typeargs() { return  ArrayOfaType( atype<pmesh3>(),true ); }// all type
-		 * static  E_F0 * f(const basicAC_F0 & args) { return new Remplissage_Op(args);}
-		 * operator aType () const { return atype<pmesh3>();}
-		 */
 		AnyType operator () (Stack stack)  const;
 };
 
@@ -1821,15 +1747,6 @@ AnyType Remplissage_Op::operator () (Stack stack)  const {
 
 	if (verbosity > 1) {cout << "tetgen:" << "nbhole=" << nbhole << "nbregion=" << nbregion << endl;}
 
-	/*
-	 * int addcheckorientation=0;
-	 * if( addcheckorientation==1  ){
-	 * cout << "check :: orientation des surfaces" << endl;
-	 * Th.BuildBoundaryElementAdj();
-	 * cout << "fin check :: orientation des surfaces" << endl;
-	 * }
-	 */
-
 	int nbinside = InsidePoint.N() / 3;
 	Mesh3 *Th3 = 0;
 
@@ -1876,13 +1793,8 @@ AnyType Remplissage_Op::operator () (Stack stack)  const {
 		cout << "action sur le maillage" << endl;
 	}
 
-	// Th3->BuildBound();
-	// Th3->BuildAdj();
-	// Th3->Buildbnormalv();
-	// Th3->BuildjElementConteningVertex();
 	Th3->BuildGTree();
-    Th3->getTypeMesh3()=typeMesh3;
-	// Th3->decrement();
+  Th3->getTypeMesh3()=typeMesh3;
 	Add2StackOfPtr2FreeRC(stack, Th3);
 
 	*mp = mps;
@@ -1964,8 +1876,6 @@ AnyType ReconstructionRefine_Op::operator () (Stack stack)  const {
 	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
 	Mesh3 *pTh = GetAny<Mesh3 *>((*eTh)(stack));
 
-	// double msvol= GetAny<double>((*maxvol)(stack));
-
 	ffassert(pTh);
 	Mesh3 &Th = *pTh;
 	Mesh3 *m = pTh;	// question a quoi sert *m ??
@@ -1977,7 +1887,6 @@ AnyType ReconstructionRefine_Op::operator () (Stack stack)  const {
 	}
 
 	KN<long> zzempty;
-	// int intempty=0;
 	string stringempty = string("rqaAAYQC");
 	string *switch_tet(arg(0, stack, &stringempty));
 	KN<long> nrtet(arg(1, stack, arg(10, stack, zzempty)));
@@ -2138,14 +2047,7 @@ AnyType ReconstructionRefine_Op::operator () (Stack stack)  const {
 		}
 	}
 
-	// cout << "fin du changement de label " << endl;
-
-	// Th3->BuildBound();
-	// Th3->BuildAdj();
-	// Th3->Buildbnormalv();
-	// Th3->BuildjElementConteningVertex();
 	Th3->BuildGTree();
-	// Th3->decrement();
 	Add2StackOfPtr2FreeRC(stack, Th3);
 
 	delete [] switch_tetgen;
@@ -2156,108 +2058,6 @@ AnyType ReconstructionRefine_Op::operator () (Stack stack)  const {
 
 	return Th3;
 }
-
-// ConvexHull3D_tetg_Op
-/*
- * class ConvexHull3D_tetg_Op : public E_F0mps
- * {
- * public:
- * Expression numofpts;
- * Expression xx,yy,zz;
- * static const int n_name_param =5; //
- * static basicAC_F0::name_and_type name_param[] ;
- * Expression nargs[n_name_param];
- *
- * KN_<long>  arg(int i,Stack stack,KN_<long> a ) const
- * { return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
- * KN_<double>  arg(int i,Stack stack,KN_<double> a ) const
- * { return nargs[i] ? GetAny<KN_<double> >( (*nargs[i])(stack) ): a;}
- * double  arg(int i,Stack stack,double a ) const{ return nargs[i] ? GetAny< double >( (*nargs[i])(stack) ): a;}
- * long   arg(int i,Stack stack, long  a ) const{ return nargs[i] ? GetAny< long  >( (*nargs[i])(stack) ): a;}
- * string*  arg(int i,Stack stack, string* a ) const{ return nargs[i] ? GetAny< string* >( (*nargs[i])(stack) ): a;}
- *
- * public:
- * ConvexHull3D_tetg_Op(const basicAC_F0 &  args, Expression nop,
- * Expression ffxx, Expression ffyy, Expression ffzz )
- * : numofpts(nop), xx(ffxx), yy(ffyy), zz(ffzz)
- * {
- * if(verbosity) cout << "Convex Hull with TetGen" << endl;
- * args.SetNameParam(n_name_param,name_param,nargs);
- * if( nargs[2] && nargs[3] )
- * CompileError("uncompatible ... (Th, region= , reftet=  ");
- * if( nargs[3] && nargs[4] )
- * CompileError("uncompatible ... (Th, label= , refface=  ");
- *
- * }
- *
- * AnyType operator()(Stack stack)  const ;
- * };
- *
- *
- * basicAC_F0::name_and_type  ConvexHull3D_tetg_Op::name_param[]= {
- * {  "switch", &typeid(string*)},
- * {  "reftet", &typeid(long)},
- * {  "refface", &typeid(long)},
- * {  "region", &typeid(long)},
- * {  "label", &typeid(long)}
- * };
- *
- * class ConvexHull3D_tetg : public OneOperator { public:
- * ConvexHull3D_tetg() : OneOperator( atype<pmesh3>(), atype<long>(),
- * atype< KN_<double> >(), atype< KN_<double> >(), atype< KN_<double> >() ) {}
- *
- * E_F0 * code(const basicAC_F0 & args) const
- * {
- * return  new  ConvexHull3D_tetg_Op( args,t[0]->CastTo(args[0]),
- * t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]) );
- * }
- * };
- *
- * AnyType  ConvexHull3D_tetg_Op::operator()(Stack stack)  const
- * {
- * int nbv = (int) GetAny<long>((*numofpts)(stack));
- * KN<double> cxx(nbv),cyy(nbv),czz(nbv);
- *
- * cxx = GetAny< KN<double> > ((*xx)(stack));
- * cyy = GetAny< KN<double> > ((*yy)(stack));
- * czz = GetAny< KN<double> > ((*zz)(stack));
- *
- *
- * assert( cxx.N() == nbv );
- * assert( cyy.N() == nbv );
- * assert( czz.N() == nbv );
- *
- * KN<long> zzempty;
- * //int intempty=0;
- * string stringempty= string("qaAAQC");
- * string* switch_tet(arg(0,stack,&stringempty));
- * int label_tet(arg(1,stack,arg(3,stack,0L)));
- * int label_face(arg(2,stack,arg(4,stack,1L)));
- *
- * //====================================
- * //  How to change string* into char*
- * //====================================
- * size_t size_switch_tet = switch_tet->size()+1;
- * char* switch_tetgen =new char[size_switch_tet];
- * strncpy(switch_tetgen, switch_tet->c_str(), size_switch_tet);
- * //======================================
- *
- * Mesh3 *Th3 =  Convexhull_3Dpoints ( switch_tetgen, nbv, cxx, cyy, czz, label_tet, label_face );
- *
- * //  Th3->BuildBound();
- * //  Th3->BuildAdj();
- * //  Th3->Buildbnormalv();
- * //  Th3->BuildjElementConteningVertex();
- * Th3->BuildGTree();
- * //Th3->decrement();
- * Add2StackOfPtr2FreeRC(stack,Th3);
- *
- * delete [] switch_tetgen;
- * cout << "FreeFem++: End check mesh given by tetgen" << endl;
- * return Th3;
- * }
- */
-// ConvexHull3D_tetg_file_Op
 
 class ConvexHull3D_tetg_file_Op: public E_F0mps
 {
@@ -2382,13 +2182,6 @@ AnyType ConvexHull3D_tetg_file_Op::operator () (Stack stack)  const {
 		     << "  z " << czz.min() << " " << czz.max() << endl;
 	}
 
-	// if( lec !=nbv ) {
-	// cerr << "  -- tetgconvexhull : Erreur Reading File " << pointsfile <<endl;
-	// cerr << " number of points " << nbv << " " <<"number of lecture" << lec << endl;
-	// exit(1);
-	// }
-	// assert(lec==nbv);
-
 	KN<long> zzempty;
 	// int intempty=0;
 	string stringempty = string("fe");
@@ -2410,12 +2203,7 @@ AnyType ConvexHull3D_tetg_file_Op::operator () (Stack stack)  const {
 
 	Th3 = Convexhull_3Dpoints(switch_tetgen, nbv, cxx, cyy, czz, label_tet, label_face);
 
-	// Th3->BuildBound();
-	// Th3->BuildAdj();
-	// Th3->Buildbnormalv();
-	// Th3->BuildjElementConteningVertex();
 	Th3->BuildGTree();
-	// Th3->decrement();
 	Add2StackOfPtr2FreeRC(stack, Th3);
 
 	delete [] switch_tetgen;
@@ -2426,14 +2214,7 @@ AnyType ConvexHull3D_tetg_file_Op::operator () (Stack stack)  const {
 	return Th3;
 }
 
-/*  class Init1 { public:
- * Init1();
- * };
- *
- * $1 */
-
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
-	// if (verbosity)
 	if (verbosity && (mpirank == 0)) {cout << " load: tetgen  " << endl;}
 
 	Global.Add("tetgconvexhull", "(", new ConvexHull3D_tetg_file);

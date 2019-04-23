@@ -25,7 +25,6 @@
 //ff-c++-cpp-dep:
 // *INDENT-ON* //
 
-// #include <mpi.h>
 #include <mkl_pardiso.h>
 #include <mkl_spblas.h>
 #include <mkl_types.h>
@@ -61,7 +60,7 @@ private:
     /* Auxiliary variables. */
     double ddum;          /* Double dummy */
     MKL_INT idum;         /* Integer dummy. */
-    
+
     mutable HMat *ptA;
     MKL_INT n;
     MKL_INT *ia;
@@ -74,12 +73,12 @@ public:
      static const int orTypeSol = 1&2&8&16;// Do all
     static const MKL_INT pmtype_unset= -1000000000;
     typedef typename PARDISO_STRUC_TRAIT<R>::R MR;
-    
+
     SolverPardiso (HMat  &AH, const Data_Sparse_Solver & ds,Stack stack )
     : ptA(&AH),ia(0),ja(0),a(0),verb(ds.verb),cn(0),cs(0),pmtype(pmtype_unset)
     {
         if(verb>2)  cout << "   SolverPardiso "<< this << " mat: " << ptA << "sym "<< ds.sym << " half " <<ptA->half  <<  " spd " << ds.positive << endl;
-        
+
         if( ds.lparams.N()>1) pmtype=ds.lparams[0]; // bof bof ...
         fill(iparm,iparm+64,0);
         fill(pt,pt+64,(void*) 0);
@@ -109,7 +108,7 @@ public:
         if( ptA->half)
            mtype = -2;       /* Real symmetric matrix */
         else mtype = 11;     // CRS
-        nrhs=0; 
+        nrhs=0;
     }
 
 void UpdateState()
@@ -135,7 +134,7 @@ void fac_init()
             for(int k= ia[i]-1; k<ia[i+1]; ++ k)
                 cout << i+1 <<" " <<  ja[k] << " " << a[k] << endl;
 
-    
+
 }
 void fac_symbolic()
 {// phase 11
@@ -178,7 +177,7 @@ void dosolver(R *x,R*b,int N,int trans)
     nrhs=N;
     iparm[11] = trans; //
     /* Set right hand side to one. */
-   
+
     PARDISO (pt, &maxfct, &mnum, &mtype, &phase,
              &n, a, ia, ja, &idum, &nrhs, iparm, &msglvl, b, x, &error);
     if ( error != 0 )
@@ -187,7 +186,7 @@ void dosolver(R *x,R*b,int N,int trans)
         exit (3);
     }
     printf ("\nSolve completed ... ");
-   
+
 
 }
 
@@ -206,11 +205,8 @@ void dosolver(R *x,R*b,int N,int trans)
              &n, &ddum, ia, ja, &idum, &nrhs,
              iparm, &msglvl, &ddum, &ddum, &error);
 }
-    
+
 };
-
-
-
 
 static long ffompgetnumthreads () {return omp_get_num_threads();}
 
@@ -220,21 +216,17 @@ static long ffompsetnumthreads (long n) {omp_set_num_threads(n); return n;}
 
 static void Load_Init ()
 {
-    // }static void initPARDISO()
-    // {
     addsolver<SolverPardiso<double>>("PARDISO",50,3);
     addsolver<SolverPardiso<Complex>>("PARDISO",50,3);
 
-    
-    
     if (!Global.Find("ompsetnumthreads").NotNull()) {
         Global.Add("ompsetnumthreads", "(", new OneOperator1<long, long>(ffompsetnumthreads));
     }
-    
+
     if (!Global.Find("ompgetnumthreads").NotNull()) {
         Global.Add("ompgetnumthreads", "(", new OneOperator0<long>(ffompgetnumthreads));
     }
-    
+
     if (!Global.Find("ompgetmaxthreads").NotNull()) {
         Global.Add("ompgetmaxthreads", "(", new OneOperator0<long>(ffompgetmaxthreads));
     }

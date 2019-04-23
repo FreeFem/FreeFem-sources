@@ -20,6 +20,9 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
+#ifndef _PPMIMG_H_
+#define _PPMIMG_H_
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -51,3 +54,5 @@ pPPMimage Rnm2PPMimage (pRnm const &array);
 #ifdef __cplusplus
 }
 #endif
+
+#endif /*_PPMIMG_H_*/

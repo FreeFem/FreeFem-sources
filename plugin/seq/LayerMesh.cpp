@@ -108,15 +108,9 @@ int Ni_func_mesh (const int choix, const double x, const double y) {
 }
 
 void discretisation_max_mesh (const int choix, const Mesh &Th2, int &Nmax) {
-	// int Ni;
 
 	Nmax = 0;
 
-	/*for(int ii=0; ii < A2D.NbSommet2D;ii++){
-	 * Ni   = Ni_func( choix, A2D.CoorSommet2D[ii][0], A2D.CoorSommet2D[ii][1]);
-	 *    Nmax = max(Ni,Nmax);
-	 * }
-	 * Nmax=4;*/
 	for (int ii = 0; ii < Th2.nv; ii++) {
 		int Ni;
 		const Mesh::Vertex &P = Th2.vertices[ii];
@@ -168,12 +162,9 @@ void Tet_mesh3_mes_neg (Mesh3 &Th3) {
 void build_layer_map_tetrahedra (const Mesh &Th2, map<int, int> &maptet) {
 	int numero_label = 0;
 
-	// cout << "in: buil_layer_map_tetrahedra" << endl;
 	for (int ii = 0; ii < Th2.nt; ii++) {
-		// cout << "ii= " << ii  << "Th2.nt=" << Th2.nt <<endl;
 		const Mesh::Triangle &K(Th2.t(ii));
 		map<int, int>::const_iterator imap = maptet.find(K.lab);
-		// cout << "K.lab= " << K.lab << endl;
 		if (imap == maptet.end()) {
 			maptet[K.lab] = numero_label;
 			numero_label = numero_label + 1;
@@ -186,7 +177,6 @@ void build_layer_map_tetrahedra (const Mesh &Th2, map<int, int> &maptet) {
 void build_layer_map_triangle (const Mesh &Th2, map<int, int> &maptrimil, map<int, int> &maptrizmax, map<int, int> &maptrizmin) {
 	int numero_label = 0;
 
-	// cout << "in: buil_layer_map_triangle" << endl;
 	for (int ii = 0; ii < Th2.nt; ii++) {
 		const Mesh::Triangle &K(Th2.t(ii));
 		map<int, int>::const_iterator imap = maptrizmax.find(K.lab);
@@ -224,7 +214,6 @@ void build_layer_map_triangle (const Mesh &Th2, map<int, int> &maptrimil, map<in
 		cout << ip->first << "<->" << ip->second << endl;
 	}
 
-	// map< int, int> :: iterator ip;
 	cout << "maptrizmin." << endl;
 
 	for (ip = maptrizmin.begin(); ip != maptrizmin.end(); ip++) {
@@ -258,34 +247,6 @@ void build_layer_map_edge (const Mesh &Th2, map<int, int> &mapemil, map<int, int
 			numero_label = numero_label + 1;
 		}
 	}
-
-	/*
-	 * for(int ii=0; ii< Th2.neb; ii++){
-	 *      const Mesh::BorderElement & K(Th2.be(ii));
-	 *      map<int,int>::const_iterator imap=mapezmin.find(K.lab);
-	 *      if(imap == mapezmin.end()){
-	 *              mapezmin[ K.lab ] = numero_label;
-	 *              numero_label = numero_label+1;
-	 *      }
-	 * }
-	 *
-	 * for(int ii=0; ii< Th2.neb; ii++){
-	 *      const Mesh::BorderElement & K(Th2.be(ii));
-	 *      map<int,int>::const_iterator imap=mapemil.find(K.lab);
-	 *
-	 *      if(imap == mapemil.end()){
-	 *              mapemil[ K.lab ] = numero_label;
-	 *              numero_label = numero_label+1;
-	 *      }
-	 * }
-	 *
-	 * cout << "number of Edge label =" << numero_label << endl;
-	 * map< int, int> :: iterator ip;
-	 * cout << "mapezmin." << endl;
-	 * for( ip=mapezmin.begin() ; ip != mapezmin.end(); ip++){
-	 * cout << ip-> first << "<->" <<ip ->second << endl;
-	 * }
-	 */
 }
 
 Mesh3*build_layer (const Mesh &Th2, const int Nmax, const int *tab_Ni,
@@ -323,7 +284,6 @@ void NbSom3D_NbElem3D_NbBord2D_mesh_product_mesh_tab (const int Nmax, const int 
 		const Mesh::Triangle &K(Th2.t(ii));
 
 		for (int jj = 0; jj < 3; jj++) {
-			// i  = A2D.ElemPoint2D[ii][jj];
 			i = Th2.operator () (K[jj]);
 			MajElem = MajElem + tab_Ni[i];
 		}
@@ -336,7 +296,6 @@ void NbSom3D_NbElem3D_NbBord2D_mesh_product_mesh_tab (const int Nmax, const int 
 		const Mesh::BorderElement &K(Th2.be(ii));
 
 		for (int jj = 0; jj < 2; jj++) {
-			// i  = A2D.ElemBord1D[ii][jj];
 			i = Th2(K[jj]);
 			MajBord2D = MajBord2D + tab_Ni[i];
 			assert(tab_Ni[i] <= Nmax);
@@ -349,8 +308,6 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
                                                  const map<int, int> &maptet, const map<int, int> &maptrimil, const map<int, int> &maptrizmax, const map<int, int> &maptrizmin,
                                                  const map<int, int> &mapemil, const map<int, int> &mapezmax, const map<int, int> &mapezmin,
                                                  Mesh3 &Th3) {
-	// intent(in)  Nmax,Mesh &A2D
-	// intent(out) Mesh3 &A3D
 
 	int NumSommet;
 	int NumElement;
@@ -385,7 +342,6 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 		val_zmax = tab_zmax[ii];
 		Ni = tab_Ni[ii];
 
-		// val_dz = (val_zmax - val_zmin)/Ni;
 		if (Ni == 0) {
 			val_dz = 0.;
 		} else {
@@ -393,7 +349,6 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 		}
 
 		tab_NumSommet[ii] = NumSommet;	// Numero du premier sommet 3D associ� au sommet 2D ii.
-		// cout << "ii, tab_NumSommet[ii]= "<< ii <<" "<< tab_NumSommet[ii] << endl;
 
 		for (int j = 0; j <= Ni; j++) {	// changer
 			Th3.vertices[NumSommet].x = P.x;
@@ -464,7 +419,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 
 	ElemBord = 0;
 
-	// bord d�finies en zmax
+	// border defined in zmax
 
 	for (int ii = 0; ii < Th2.nt; ii++) {
 		int ijj[3];
@@ -528,13 +483,6 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 		assert(Ni_ind2 <= Nmax);
 
 		for (int jNmax = Nmax - 1; jNmax >= 0; jNmax--) {
-			/*
-			 * i_recoll_1pp = int((jNmax+1)*Ni_ind1/Nmax);
-			 * i_recoll_2pp = int((jNmax+1)*Ni_ind2/Nmax);
-			 *
-			 * i_recoll_1 = int(jNmax*Ni_ind1/Nmax);
-			 * i_recoll_2 = int(jNmax*Ni_ind2/Nmax);
-			 */
 
 			i_recoll_1 = int((jNmax + 1) * Ni_ind1 / Nmax);
 			i_recoll_2 = int((jNmax + 1) * Ni_ind2 / Nmax);
@@ -563,8 +511,6 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 			if (i_recoll_2pp != i_recoll_2) {
 				type_dec_border = type_dec_border + 2;
 			}
-
-			// cout << "type decoupage bord= " <<  type_dec_border <<endl;
 
 			switch (type_dec_border) {
 			case 0:
@@ -627,7 +573,6 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 					Th3.be(ElemBord + 1).set(Th3.vertices, ijj, lab);
 				}
 
-				// cout << "idl=" << idl << endl;
 				ElemBord = ElemBord + 2;
 				break;
 			default:
@@ -712,8 +657,6 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 				if (i_recoll_jMax != i_recoll_jMaxpp) {cas_decoupage = cas_decoupage + int_decoup[jj];}
 			}
 
-			// cout << "cas du decoupage= " << cas_decoupage << endl;
-
 			switch (cas_decoupage) {
 			case 0:
 				// les points sont tous confondus pas d ajout element : rien a faire
@@ -767,8 +710,6 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 				DiagMax1 = max(SommetPrisme[0], SommetPrisme[4]);
 				DiagMax2 = max(SommetPrisme[1], SommetPrisme[3]);
 
-				// cout << "DiagMax1=" << DiagMax1 << " "<< SommetPrisme[0]<<" " <<SommetPrisme[4] << endl;
-
 				if (DiagMax1 > DiagMax2) {
 					// ------------------
 					// premier tetraedre
@@ -811,8 +752,6 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 				DiagMax1 = max(SommetPrisme[0], SommetPrisme[5]);
 				DiagMax2 = max(SommetPrisme[2], SommetPrisme[3]);
 
-				// cout << "DiagMax1=" << DiagMax1 << " "<< SommetPrisme[0]<<" " <<SommetPrisme[5] << endl;
-
 				if (DiagMax1 > DiagMax2) {
 					// ------------------
 					// premier tetraedre
@@ -854,8 +793,6 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 				// determination de la diagonale dominante
 				DiagMax1 = max(SommetPrisme[1], SommetPrisme[5]);
 				DiagMax2 = max(SommetPrisme[2], SommetPrisme[4]);
-
-				// cout << "DiagMax1=" << DiagMax1 << " "<< SommetPrisme[1]<<" " <<SommetPrisme[5] << endl;
 
 				if (DiagMax1 > DiagMax2) {
 					// ------------------
@@ -932,9 +869,6 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 				} else {
 					idl[2] = 2;
 				}
-
-				// cout << "idl[0] << << idl[1] << << idl[2]" << endl;
-				// cout << idl[0] << " " << idl[1] << "  "<< idl[2] << endl;
 
 				nbe = 0;
 
@@ -1057,17 +991,8 @@ void dpent1_mesh (int idl[3], int nu[12], int &nbe, int &option) {
 		idf = idp[0];
 		idecou = pdd[idf];
 
-		/* i=idf;
-		 * j=i/4;
-		 * i=i-4*j;
-		 * idl[2]=j+1;
-		 * j=i/2;
-		 * idl[1]=j+1;
-		 * idl[0]=i-2*j+1;
-		 * //cout << "idecou= " << idecou << endl;*/
 		for (i = 0; i < 12; i++) {
 			nu[i] = mu[idecou - 1][i] - 1;
-			// cout << "i, nu[i] "<< i <<" " << nu[i] << endl;
 		}
 	}
 }

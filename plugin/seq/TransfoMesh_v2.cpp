@@ -29,8 +29,6 @@ using namespace std;
 #include <fstream>
 #include <iostream>
 #include <cstring>
-// #include "tetgen.h"
-// #include <cassert>
 #include <map>
 #include "libmesh5.h"
 #include "ufunction.hpp"
@@ -47,8 +45,6 @@ using namespace std;
 
 using namespace std;
 using namespace Fem2D;
-// #include "TransfoMesh_v2.hpp"
-// #include "tetgen.h"
 
 #include "TransfoMesh_v2.hpp"
 
@@ -126,13 +122,11 @@ Mesh3* Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double 
 		const Tet &K(Th3.elements[ii]);
 		int iv[4];
 		int lab;
-		// lab = K.lab;
 		lab = label_nt_t[i];
 
 		for (int jj = 0; jj < 4; jj++) {
 			iv[jj] = Numero_Som[Th3.operator () (K[jj])];
 			assert(iv[jj] >= 0 && iv[jj] < nv_t);
-			// cout <<"i_elem=" << i_elem << "i=" <<  ii <<" " << jj << " " <<  Th3.operator()(K[jj]) << " "  << iv[jj] << endl;
 		}
 
 		T_Th3->elements[i_elem].set(T_Th3->vertices, iv, lab);
@@ -153,7 +147,6 @@ Mesh3* Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double 
 		int iv[3];
 		int lab;
 
-		// lab = K.lab;
 		lab = label_nbe_t[i];
 
 		for (int jj = 0; jj < 3; jj++) {
@@ -200,11 +193,6 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 	bmax3[0] = bmax.x;
 	bmax3[1] = bmax.y;
 	bmax3[2] = bmax.z;
-	/*
-	 * cout << "  OrderVertexTransfo_hcode " << endl;
-	 * OrderVertexTransfo_hcode_nv( Th3.nv, tab_XX, tab_YY, tab_ZZ, bmin3, bmax3, hmin, Numero_Som, ind_nv_t, nv_t );
-	 * cout << "fin order vertex: nv_t=" << nv_t << endl;
-	 */
 	cout << "  OrderVertexTransfo_hcode gtree " << endl;
 	OrderVertexTransfo_hcode_nv_gtree(Th3.nv, bmin, bmax, hmin, tab_XX, tab_YY, tab_ZZ, Numero_Som, ind_nv_t, nv_t);
 	cout << "fin order vertex gtree: nv_t=" << nv_t << endl;
@@ -244,13 +232,11 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 	nt_t = i_elem;
 
 	if (recollement_element == 1) {
-		// int point_confondus_ok_e = 0;
 		cout << "debut recollement : nt_t= " << nt_t << endl;
 
 		int np, dim = 3;
 		int *ind_np = new int [nt_t];
 		int *label_t = new int [nt_t];
-		// int *ind_label_t = new int[nt_t];
 		double hmin_elem;
 		double **Cdg_t = new double *[nt_t];
 
@@ -274,7 +260,6 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 		}
 
 		hmin_elem = hmin / 4;
-		// PointCommun_hcode( dim, nt_t, 0, Cdg_t, bmin3, bmax3, hmin_elem, ind_np, np); //ancien
 		PointCommun_hcode_gtree(dim, nt_t, 0, Cdg_t, label_t, bmin, bmax, hmin_elem,
 		                        ind_np, label_nt_t, np);// nv
 
@@ -334,7 +319,6 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 	nbe_t = i_border;
 
 	if (recollement_border == 1) {
-		// int point_confondus_ok = 1;
 		cout << "debut recollement : nbe_t= " << nbe_t << endl;
 
 		int np, dim = 3;
@@ -394,8 +378,6 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 
 		nbe_t = np;
 
-		// delete [] ind_nbe_t_tmp;
-		// delete [] ind_np;
 		cout << "fin recollement : nbe_t= " << nbe_t << endl;
 
 		// Affectation de la nouvelle valeur du label
@@ -477,7 +459,6 @@ Mesh3*Transfo_Mesh3_surf (const double &precis_mesh, const Mesh3 &Th3, const dou
 		int iv[3];
 		int lab;
 
-		// lab = K.lab;
 		lab = label_nbe_t[i];
 
 		for (int jj = 0; jj < 3; jj++) {
@@ -506,8 +487,6 @@ void SamePointElement_surf (const double &precis_mesh, const double *tab_XX, con
 	double hmin, hmin_elem;
 	R3 bmin, bmax;
 
-	// int recollement_element=1,recollement_border=1;
-
 	cout << "  OrderVertexTransfo_hcode gtree " << endl;
 	BuildBoundMinDist_th3(precis_mesh, tab_XX, tab_YY, tab_ZZ, Th3, bmin, bmax, hmin);
 	cout << " =============================== " << endl;
@@ -521,11 +500,6 @@ void SamePointElement_surf (const double &precis_mesh, const double *tab_XX, con
 	bmax3[1] = bmax.y;
 	bmax3[2] = bmax.z;
 
-	/*
-	 * cout << "  OrderVertexTransfo_hcode " << endl;
-	 * OrderVertexTransfo_hcode_nv( Th3.nv, tab_XX, tab_YY, tab_ZZ, bmin3, bmax3, hmin, Numero_Som, ind_nv_t, nv_t );
-	 * cout << "fin order vertex: nv_t=" << nv_t << endl;
-	 */
 	cout << "  OrderVertexTransfo_hcode gtree " << endl;
 	OrderVertexTransfo_hcode_nv_gtree(Th3.nv, bmin, bmax, hmin, tab_XX, tab_YY, tab_ZZ, Numero_Som, ind_nv_t, nv_t);
 	cout << "fin order vertex gtree: nv_t=" << nv_t << endl;
@@ -625,8 +599,6 @@ void SamePointElement_surf (const double &precis_mesh, const double *tab_XX, con
 
 		nbe_t = np;
 
-		// delete [] ind_nbe_t_tmp;
-		// delete [] ind_np;
 		cout << "fin recollement : nbe_t= " << nbe_t << endl;
 
 		// Affectation de la nouvelle valeur du label
@@ -738,8 +710,6 @@ Mesh3*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *
 	int *ind_nbe_t;
 	int *label_nbe_t;
 
-	// int i_som;
-	// T_Th3 = new Mesh3;
 	Numero_Som = new int[Th2.nv];
 	ind_nv_t = new int[Th2.nv];
 	ind_nbe_t = new int[Th2.nt];
@@ -782,12 +752,6 @@ Mesh3*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *
 		iv[1] = Numero_Som[Th2.operator () (K[1])];
 		iv[2] = Numero_Som[Th2.operator () (K[2])];
 
-		/*
-		 * map< int, int>:: const_iterator imap;
-		 * imap = maptri.find(K.lab); // imap= maptri.find( label_nbe_t[ibe] );
-		 * assert( imap != maptri.end());
-		 * lab = imap->second; // K.lab; // before
-		 */
 		T_Th3->be(ibe).set(T_Th3->vertices, iv, K.lab);
 	}
 
@@ -997,7 +961,6 @@ void SamePointElement_Mesh2 (const double &precis_mesh, const double *tab_XX, co
                              int &recollement_border, int &point_confondus_ok, int *Numero_Som,
                              int *ind_nv_t, int *ind_nt_t, int *ind_nbe_t, int *label_nbe_t,
                              int &nv_t, int &nt_t, int &nbe_t) {
-	// int recollement_border=0;
 	R3 bmin, bmax;
 	double hmin;
 
@@ -1014,11 +977,6 @@ void SamePointElement_Mesh2 (const double &precis_mesh, const double *tab_XX, co
 	bmax3[0] = bmax.x;
 	bmax3[1] = bmax.y;
 	bmax3[2] = bmax.z;
-	/*
-	 * cout << "debut: OrderVertexTransfo_hcode " <<endl;
-	 * OrderVertexTransfo_hcode_nv( Th2.nv, tab_XX, tab_YY, tab_ZZ, bmin3, bmax3, hmin, Numero_Som, ind_nv_t, nv_t );
-	 * cout << "fin order vertex: nv_t=" << nv_t << endl;
-	 */
 	cout << "debut: OrderVertexTransfo_hcode_gtree " << endl;
 	OrderVertexTransfo_hcode_nv_gtree(Th2.nv, bmin, bmax, hmin, tab_XX, tab_YY, tab_ZZ, Numero_Som, ind_nv_t, nv_t);
 	cout << "fin: OrderVertexTransfo_hcode_gtree " << endl;
@@ -1191,8 +1149,6 @@ void BuildBoundMinDist_th2 (const double &precis_mesh, const double *tab_XX, con
 	bmax.y = bmin.y;
 	bmax.z = bmin.z;
 
-	// R3 bmax = new R3(bmin);
-
 	cout << " determination of bmin and bmax" << endl;
 
 	for (int ii = 1; ii < Th2.nv; ii++) {
@@ -1249,44 +1205,12 @@ void BuildBoundMinDist_th2 (const double &precis_mesh, const double *tab_XX, con
 
 	// assertion pour la taille de l octree
 	assert(hmin > Norme2(bmin - bmax) / 1e9);
-
-	/*  // ?????????
-	 * hmin = 1e10;
-	 * for( int ii=0; ii< Th2.nt; ii++){
-	 *  const Mesh :: Triangle & K(Th2.t(ii)); // const Triangle2 & K(Th2.elements[ii]);
-	 *  double longedge;
-	 *  int iv[3];
-	 *  for(int jj=0; jj<3; jj++){
-	 *    iv[jj] = Th2.operator()(K[jj]) ;
-	 *  }
-	 *
-	 *  for( int jj=0; jj<3; jj++){
-	 *    for( int kk=jj+1; kk<3; kk++){
-	 *      int & i1= iv[jj];
-	 *      int & i2= iv[kk];
-	 *      longedge = pow(tab_XX[i1]-tab_XX[i2],2)
-	 + pow(tab_YY[i1]-tab_YY[i2],2)
-	 + pow(tab_ZZ[i1]-tab_ZZ[i2],2);
-	 +      longedge = sqrt(longedge);
-	 +      //cout << "longedge=" << longedge << endl;
-	 +      if( longedge > longmini_box*1e-7 ) hmin = min( hmin, longedge);
-	 +    }
-	 +  }
-	 + }
-	 + cout << "longmin_box=" << longmini_box << endl;
-	 + cout << "hmin =" << hmin << endl;
-	 + cout << "Norme2(bmin-bmax)=" <<  Norme2(bmin-bmax) << endl;
-	 + assert( hmin < longmini_box);
-	 + // assertion pour la taille de l octree
-	 + assert(hmin>Norme2(bmin-bmax)/1e9);
-	 */
 }
 
 // version Mesh3
 
 void BuildBoundMinDist_th3 (const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh3 &Th3, R3 &bmin, R3 &bmax, double &hmin) {
 	// determination de la boite englobante
-	// R3 bmin,bmax;
 	double precispt;
 
 	bmin.x = tab_XX[0];
@@ -1296,8 +1220,6 @@ void BuildBoundMinDist_th3 (const double &precis_mesh, const double *tab_XX, con
 	bmax.x = bmin.x;
 	bmax.y = bmin.y;
 	bmax.z = bmin.z;
-
-	// R3 bmax = new R3(bmin);
 
 	cout << " determination of bmin and bmax" << endl;
 
@@ -1312,9 +1234,6 @@ void BuildBoundMinDist_th3 (const double &precis_mesh, const double *tab_XX, con
 	}
 
 	double longmini_box;
-
-	// longmini_box = min(bmax.x-bmin.x, bmax.y-bmin.y);
-	// longmini_box = min(longmini_box, bmax.z-bmin.z);
 
 	longmini_box = pow(bmax.x - bmin.x, 2) + pow(bmax.y - bmin.y, 2) + pow(bmax.z - bmin.z, 2);
 	longmini_box = sqrt(longmini_box);
@@ -1377,33 +1296,6 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 	int *posv = new int[tab_nv];
 	double epsilon = hmin / 10.;
 
-	/*
-	 * double epsilon=0.001;
-	 *
-	 * // determination de boite englobante
-	 * double bmin[3],bmax[3];
-	 *
-	 * bmin[0] = tab_XX[0];
-	 * bmin[1] = tab_YY[0];
-	 * bmin[2] = tab_ZZ[0];
-	 *
-	 * bmax[0] = bmin[0];
-	 * bmax[1] = bmin[1];
-	 * bmax[2] = bmin[2];
-	 *
-	 * cout << " determination bmin et bmax" << endl;
-	 *
-	 * for(int ii=1; ii<tab_nv; ii++){
-	 * bmin[0] = min(bmin[0],tab_XX[ii]);
-	 * bmin[1] = min(bmin[1],tab_YY[ii]);
-	 * bmin[2] = min(bmin[2],tab_ZZ[ii]);
-	 *
-	 * bmax[0] = max(bmax[0],tab_XX[ii]);
-	 * bmax[1] = max(bmax[1],tab_YY[ii]);
-	 * bmax[2] = max(bmax[2],tab_ZZ[ii]);
-	 * }
-	 */
-
 	k[0] = int((bmax[0] - bmin[0]) / epsilon);
 	k[1] = int((bmax[1] - bmin[1]) / epsilon);
 	k[2] = int((bmax[2] - bmin[2]) / epsilon);
@@ -1448,7 +1340,6 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 	for (int ii = 0; ii < tab_nv; ii++) {
 		size_t i;
 		// boucle dans l autre sens pour assurer l'ordre des elements pour la suite
-		// cout << "vertex ii " << ii << "  max : " << tab_nv;
 		j[0] = int((tab_XX[ii] - bmin[0]) / epsilon);
 		j[1] = int((tab_YY[ii] - bmin[1]) / epsilon);
 		j[2] = int((tab_ZZ[ii] - bmin[2]) / epsilon);
@@ -1457,7 +1348,6 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 		assert(j[1] <= k[1] && j[1] >= 0);
 		assert(j[2] <= k[2] && j[2] >= 0);
 		i = (j[2] * (k[1] + 1) + j[1] * (k[0] + 1) + j[0]);
-		// cout << i << endl;
 		i = i % NbCode;
 		assert(i < NbCode);
 		posv[ii] = tcode[i];
@@ -1475,7 +1365,6 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 	nv_t = 0;
 
 	for (int icode = 0; icode < NbCode; icode++) {
-		// int ii,jj;
 		double dist;
 
 		for (int ii = tcode[icode]; ii != -1; ii = posv[ii]) {
@@ -1491,8 +1380,6 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 				if (sqrt(dist) < epsilon) {
 					// point semblable
 					Numero_Som[jj] = Numero_Som[ii];
-					// cout << "point semblable" << endl;
-					// exit(-1);
 				}
 			}
 
@@ -1518,21 +1405,6 @@ void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_co
 	int *Numero_Som = new int[NbPoints];
 	double epsilon = hmin / 10.;
 
-	/*
-	 * double epsilon=0.0001;
-	 * double bmin[dim],bmax[dim];
-	 *
-	 * for(int jj=0; jj<dim; jj++){
-	 * bmin[jj] = Coord_Point[0][jj];
-	 * bmax[jj] = bmin[jj];
-	 * }
-	 * for(int ii=1; ii<NbPoints; ii++){
-	 * for(int jj=0; jj<dim; jj++){
-	 * bmin[jj] = min(bmin[jj],Coord_Point[ii][jj]);
-	 * bmax[jj] = max(bmax[jj],Coord_Point[ii][jj]);
-	 * }
-	 * }
-	 */
 	assert(dim > 1);
 
 	for (int jj = 0; jj < dim; jj++) {
@@ -1610,13 +1482,11 @@ void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_co
 		np = 0;
 
 		for (int icode = 0; icode < NbCode; icode++) {
-			// int ii,jj;
 			double dist;
 
 			for (int ii = tcode[icode]; ii != -1; ii = posv[ii]) {
 				if (Numero_Som[ii] != -1) {continue;}
 
-				// minimum_np=ii;
 				Numero_Som[ii] = np;
 
 				for (int jj = posv[ii]; jj != -1; jj = posv[jj]) {
@@ -1670,7 +1540,6 @@ void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_co
 						// point semblable
 						Numero_Som[jj] = Numero_Som[ii];
 						point_multiple = 1;
-						// minimum_np = min( jj, minimum_np);
 					}
 				}
 
@@ -1722,13 +1591,7 @@ void OrderVertexTransfo_hcode_nv_gtree (const int &tab_nv, const R3 &bmin, const
 
 	for (int ii = 0; ii < tab_nv; ii++) {
 		const R3 r3vi(tab_XX[ii], tab_YY[ii], tab_ZZ[ii]);
-		/*vi.x = tab_XX[ii];
-		*  vi.y = tab_YY[ii];
-		*  vi.z = tab_ZZ[ii];*/
 		const Vertex3 &vi(r3vi);
-		/*vi.x = tab_XX[ii];
-		*  vi.y = tab_YY[ii];
-		*  vi.z = tab_ZZ[ii];*/
 		Vertex3 *pvi = gtree->ToClose(vi, hseuil);
 		if (!pvi) {
 			v[nv_t].x = vi.x;
@@ -1758,7 +1621,6 @@ void OrderVertexTransfo_hcode_nv_gtree (const int &tab_nv, const R3 &bmin, const
 				double dist;// = 0.;
 				dist = pow(tab_XX[jj] - tab_XX[ii], 2) + pow(tab_YY[jj] - tab_YY[ii], 2) + pow(tab_ZZ[jj] - tab_ZZ[ii], 2);	// pow(Coord_Point[jj][kk]-Coord_Point[ii][kk],2);
 				if (sqrt(dist) < hseuil) {
-					// cout << "point_commun:"<< ii << "<--> " << jj << " coord ii " << tab_XX[ii] << " " << tab_YY[ii] << " " << tab_ZZ[ii] << " jj " << tab_XX[jj] << " " << tab_YY[jj] << " " << tab_ZZ[jj] << endl;
 					numberofpointsdiff = 1;
 				}
 			}
@@ -1868,31 +1730,6 @@ void PointCommun_hcode_gtree (const int &dim, const int &NbPoints, const int &po
 		exit(1);
 	}
 
-	/*
-	 * int z_verifnumberofpoints;
-	 * z_verifnumberofpoints = 0;
-	 * if(z_verifnumberofpoints ==1){
-	 * int numberofpoints=0;
-	 * int numberofpointsdiff;
-	 * for(int ii=0; ii<NbPoints; ii++){
-	 * numberofpointsdiff=0;
-	 * for(int jj=ii+1; jj<NbPoints; jj++){
-	 * double dist = 0.;
-	 * for( int kk=0; kk<3; kk++){
-	 * dist = dist +  pow(Coord_Point[jj][kk]-Coord_Point[ii][kk],2);
-	 * }
-	 * if( sqrt(dist) < hseuil/10){
-	 * numberofpointsdiff=1;
-	 * }
-	 * }
-	 * if( numberofpointsdiff==0) numberofpoints=numberofpoints+1;
-	 * if( point_confondus_ok==1 && numberofpointsdiff==1) numberofpoints=numberofpoints-1;
-	 * }
-	 * cout << "numberofpoints =" << numberofpoints<< endl;
-	 * cout << "np =" << np<< endl;
-	 * //assert( numberofpoints == np);
-	 * }
-	 */
 	 delete[] v;
  	delete gtree;
 }

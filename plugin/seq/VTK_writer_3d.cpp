@@ -34,10 +34,8 @@
 #include <iterator>
 using namespace std;
 #include "ff++.hpp"
-// using namespace Fem2D;
 #include <set>
 #include <vector>
-// #include "msh3.hpp"
 
 class VtkWriter
 {
@@ -50,7 +48,6 @@ class VtkWriter
 
 	private:
 		std::vector<const Mesh3 *> _vecmesh;
-		// std::vector<tsinfo> _vecofts;
 		std::string _nameoffile;
 
 		/*! This string contains the name of data file with \\ where there's a \ in the path*/
@@ -354,13 +351,6 @@ void*call_addmesh (VtkWriter *const &mt, const Mesh3 *const &pTh) {
 }
 
 // Add the function name to the freefem++ table
-/*  class Init
- * {
- * public:
- * Init();
- * };
- *
- * $1 */
 static void Load_Init () {
 	Dcl_Type<VtkWriter *>(InitP<VtkWriter>, Destroy<VtkWriter> );	// declare deux nouveau type pour freefem++  un pointeur et
 

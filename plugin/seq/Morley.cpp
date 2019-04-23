@@ -44,13 +44,11 @@
 #include "ff++.hpp"
 #include "AddNewFE.h"
 
-// #include "problem.hpp"
 namespace  Fem2D {
 	// ------ P2 Morley
 	class TypeOfFE_P2Morley: public TypeOfFE {
 		public:
 			static int Data [];
-			// double Pi_h_coef[];
 
 			TypeOfFE_P2Morley (): TypeOfFE(3 + 3 + 0,
 				                           3,	// hack   u, u_x, u_y for interpolation
@@ -60,8 +58,6 @@ namespace  Fem2D {
 				                           3 + 6,	// nb coef to build interpolation
 				                           6,	// np point to build interpolation
 				                           0) {
-				// const double gauss1 = (1. - sqrt(1. / 3.)) / 2;
-				// const double gauss2 = 1. - gauss1;
 				const R2 Pt [] = {R2(0, 0), R2(1, 0), R2(0, 1), R2(0.5, 0.5), R2(0, 0.5), R2(0.5, 0)};
 				// for the 3 vertices 6 coef
 				int kk = 0;
@@ -77,7 +73,6 @@ namespace  Fem2D {
 
 				for (int e = 0; e < 3; ++e) {	// point d'integration sur l'arete e
 					P_Pi_h[p] = Pt[p];
-					// cout <<"\n" <<  p << " --  " << P_Pi_h[p] << " ::  " << A << " " << B << endl;
 					pij_alpha[kk++] = IPJ(3 + e, p, 1);	// coef = 0.5* l_e *ne_x * sge
 					pij_alpha[kk++] = IPJ(3 + e, p, 2);	// coef = 0.5* l_e *ne_y * sge
 					p++;
@@ -126,14 +121,7 @@ namespace  Fem2D {
 		R l0 = 1 - P.x - P.y, l1 = P.x, l2 = P.y;
 		R2 Dl[3] = {K.H(0), K.H(1), K.H(2)};
 		R2 E[3] = {K.Edge(0), K.Edge(1), K.Edge(2)};
-		// double l2E[3]={  (E[0],E[0]),  (E[1],E[1]),  (E[2],E[2]) };
-		// double lE[3]={  sqrt(l2E[0]), sqrt(l2E[1]), sqrt(l2E[2]) };
 		double sgE[3] = {K.EdgeOrientation(0), K.EdgeOrientation(1), K.EdgeOrientation(2)};
-		// $ w_{3+i} = ccc[i] * ( li-2*li*li) $
-		// donc  $  D(w_i) =  ccc[i]  (1-2*li) Dl[i] $
-		// we must have $$ int_{e_i} dn(w_{3+j) ) =  \delta_{ij} $
-		// $int_e_i dn(w_{3+i} )  = ccc[i] (Dl[i],Ne[i]) = 1 $
-		// $ ccc[i] = 1/  (Dl[i],Ne[i]) $
 		R2 Ne[3] = {
 			E[0].perp() * sgE[0],
 			E[1].perp() * sgE[1],
@@ -147,7 +135,6 @@ namespace  Fem2D {
 		R dl4 = (1 - 2 * l1) * ccc[1];
 		R dl5 = (1 - 2 * l2) * ccc[2];
 
-		// cout << l0 << " " << l1 << " " << l2 << " " << l3 << " " << l4 << " " << l5 ;
 		KN<bool> wd(KN_<const bool>(whatd, last_operatortype));
 		KN<int> wd_op(last_operatortype), wd_j(last_operatortype);
 		wd_j = 0;
@@ -235,7 +222,7 @@ namespace  Fem2D {
 		}
 
 		{
-			int vop[last_operatortype], nop = 0;
+			int vop[last_operatortype]={}, nop = 0;
 
 			for (int j = 0; j < last_operatortype; j++) {
 				if (wd[j]) {
@@ -262,7 +249,6 @@ namespace  Fem2D {
 
 			;
 			// copie of the derivative for the hack.
-			// cout << " copie " << endl;
 			if (whatd[op_id]) {
 				if (wd_op[op_dx] != op_id) {
 					val('.', 1, op_id) = val('.', wd_j[op_dx], wd_op[op_dx]);

@@ -148,14 +148,6 @@ TensorK::TensorK (int m_deg_, int r_deg_, triangulation_type ttype_ = Graded, wh
 	}
 }
 
-/*
- * void Mc(const double * D, int m_deg, double Mc[3]);
- * void M0(const double * D, int m_deg, double M0[3], const double Mc[3]){NULL;};
- * void M0(const double * D, int m_deg, double M0[3]){double getMc[3]; Mc(D,m_deg,getMc); M0(D,m_deg,getMc);}
- * void M1(const double * D, int m_deg, double M1[3], const double Mc[3]){NULL;};
- * void M1(const double * D, int m_deg, double M1[3]){double getMc[3]; Mc(D,m_deg,getMc); M1(D,m_deg,getMc);}
- * void Ms(const double * D, int m_deg, double Ms[3]);
- */
 
 // void Derivatives(const double DOFt[3],  const R2 invHauteur[3], double &fx,      double &fy);
 // void Derivatives(const double DOFt[6],  const R2 invHauteur[3], double &fxx,     double &fxy,    double &fyy);
@@ -261,17 +253,11 @@ void TensorK::getM (const double *D, double *M) const {
 		getMs(Ds, M);
 	} else {
 		getMs(D, M);
-// const double scal = pow(M[0]+M[2], r_deg/double(m_deg-r_deg));
-// M[0]*=scal; M[1]*=scal; M[2]*=scal;
 	}
 }
 
 void TensorK::getSquare (const double *D, double *Ds) const {
 	assert(ttype == Quasi_Acute_Proved);
-	// if(!quasi_acute) {
-	// for(int i=0; i<=m_deg; ++i) Ds[i]=D[i];
-	// return;
-	// }
 
 	const int diff_deg = m_deg - r_deg;
 	assert(2 * diff_deg == t_deg);
@@ -338,17 +324,6 @@ void TensorK::equilibrate (const double M[3], double Me[3]) const {
 		Me[i] = scal * M[i];
 	}
 };	// Me = (det M)^(-1/((m-r)p+d)) M
-
-// void getM0(const double *D, double M0[3]){
-// double Mc[3]; double E[2]; double c,s;
-// getMc(D,Mc); EigenSysSym(Mc,E,c,s);
-// getM0(E,c,s,M0);
-// }
-// void getM1(const double *D, double M1[3]){
-// double Mc[3]; double E[2]; double c,s;
-// getMc(D,Mc); EigenSysSym(Mc,E,c,s);
-// getM1(D,c,s,M1);
-// }
 
 // ******************** Matrix Utilities ********************
 void TensorK::EigenSym (const double S[3], double E[2]) {
