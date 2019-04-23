@@ -44,7 +44,7 @@
 //  put here some def dur to c++11
 // problem with mixed with using namespace std;
 // to correct bug in g++ v 4.8.1 add std
-#if defined (_WIN32  ) || (__GNUC__ >=5)
+#if defined (_WIN32  ) || (__GNUC__ >=5) || __llvm__
 #define NM_STD std::
 #else
 #define NM_STD
