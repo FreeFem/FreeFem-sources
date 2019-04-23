@@ -802,7 +802,6 @@ const GQuadratureFormular<Rd>*BuilQFd (const long &nex, const KNM_<double> &qf) 
 			pq[i][j] = qf(i, j + 1);
 		}
 
-		// cout << i << " " << pq[i].a << " " << (const Rd&)  pq[i] << " " << qf(':',i) << endl;
 	}
 
 	return new GQuadratureFormular<Rd>(nex, np, pq, true);
@@ -815,7 +814,6 @@ template<typename T> T*CCopy (T *pr, T p) {
 
 template<class Rd>
 const GQuadratureFormular<Rd>**pBuilQFd (const GQuadratureFormular<Rd> **const &pr, const long &nex, const KNM_<double> &qf) {
-	// cout << "pBuilQFd " << pr << " " << *pr << endl;
 	ffassert(pr);
 	*pr = BuilQFd<Rd>(nex, qf);
 	return pr;
@@ -1757,7 +1755,6 @@ const GQuadratureFormular<R2>*tripleQF (Stack stack, const GQuadratureFormular<R
 
 template<class Rd>
 const GQuadratureFormular<Rd>**cloneQF (const GQuadratureFormular<Rd> **const &pr, GQuadratureFormular<Rd> const *const &qf) {
-	// cout << "pBuilQFd " << pr << " " << *pr << endl;
 	ffassert(pr);
 	int np = qf->n;
 	GQuadraturePoint<Rd> *pq = new GQuadraturePoint<Rd>[np];

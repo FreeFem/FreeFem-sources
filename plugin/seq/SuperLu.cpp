@@ -150,14 +150,12 @@ int s_ (char *str, const char *cmp []) {
 
 	while (cmp[i] != 0) {
 		if (strcmp(str, cmp[i]) == 0) {
-			// cout << *str << " return" << i << endl;
 			return i + 1;
 		}
 
 		i++;
 	}
 
-	// cout << *str << " return 0" << endl;
 	return 0;
 }
 
@@ -203,17 +201,12 @@ void read_options_freefem (string string_option, superlu_options_t *options) {
 
 
 	while (tictac != NULL) {
-		// char* comp[] = {"Fact", "Equil","ColPerm",
-		// "DiagPivotThresh","Trans","IterRefine",
-		// "SymmetricMode","PivotGrowth","ConditionNumber",
-		// "PrintStat",0 };
 		int id_option = s_(tictac, comp);
 		tictac = strtok(NULL, " =,\t\n");
 		int val_options;
 
 		switch (id_option) {
 		case 1:	// Fact
-			// char* comp1[] = {"DOFACT", "SamePattern", "SamePattern_SameRowPerm", "FACTORED",0};
 			val_options = s_(tictac, compfact_t);
 			if (val_options == 0) {
 				printf("value given for SuperLU for options %s is not correct\n", "Fact");
@@ -223,7 +216,6 @@ void read_options_freefem (string string_option, superlu_options_t *options) {
 			options->Fact = enumfact_t[val_options - 1];
 			break;
 		case 2:	// Equil
-			// char* comp2[] = {"NO", "YES", 0};
 			val_options = s_(tictac, compyes_no_t);
 			if (val_options == 0) {
 				printf("value given for SuperLU for options %s is not correct\n", "Equil");
@@ -233,7 +225,6 @@ void read_options_freefem (string string_option, superlu_options_t *options) {
 			options->Equil = enumyes_no_t[val_options - 1];
 			break;
 		case 3:	// ColPerm
-			// char* comp3[] = {"NATURAL", "MMD_ATA", "MMD_AT_PLUS_A", "COLAMD", "MY_PERMC", 0};
 			val_options = s_(tictac, compcolperm_t);
 			if (val_options == 0) {
 				printf("value given for SuperLU for options %s is not correct\n", "ColPerm");
@@ -246,7 +237,6 @@ void read_options_freefem (string string_option, superlu_options_t *options) {
 			options->DiagPivotThresh = strtod(tictac, &tictac);
 			break;
 		case 5:	// Trans
-			// char* comp5[] = {"NOTRANS", "TRANS", "CONJ", 0};
 			val_options = s_(tictac, comptrans_t);
 			if (val_options == 0) {
 				printf("value given for SuperLU for options %s is not correct\n", "Trans");
@@ -256,7 +246,6 @@ void read_options_freefem (string string_option, superlu_options_t *options) {
 			options->Trans = enumtrans_t[val_options - 1];
 			break;
 		case 6:	// IterRefine
-			// char* comp6[] = {"NOREFINE", "SINGLE", "DOUBLE", "EXTRA", 0};
 			val_options = s_(tictac, compIterRefine_t);
 			if (val_options == 0) {
 				printf("value given for SuperLU for options %s is not correct\n", "IterRefine");
@@ -266,7 +255,6 @@ void read_options_freefem (string string_option, superlu_options_t *options) {
 			options->IterRefine = enumIterRefine_t[val_options - 1];
 			break;
 		case 7:	// SymmetricMode
-			// char* comp7[] = {"NO","YES", 0};
 			val_options = s_(tictac, compyes_no_t);
 			if (val_options == 0) {
 				printf("value given for SuperLU for options %s is not correct\n", "SymmetricMode");
@@ -276,7 +264,6 @@ void read_options_freefem (string string_option, superlu_options_t *options) {
 			options->SymmetricMode = enumyes_no_t[val_options - 1];
 			break;
 		case 8:	// PivotGrowth
-			// char* comp8[] = {"NO","YES", 0};
 			val_options = s_(tictac, compyes_no_t);
 			if (val_options == 0) {
 				printf("value given for SuperLU for options %s is not correct\n", "PivotGrowth");
@@ -286,7 +273,6 @@ void read_options_freefem (string string_option, superlu_options_t *options) {
 			options->PivotGrowth = enumyes_no_t[val_options - 1];
 			break;
 		case 9:	// ConditionNumber
-			// char* comp9[] = {"NO","YES", 0};
 			val_options = s_(tictac, compyes_no_t);
 			if (val_options == 0) {
 				printf("value given for SuperLU for options %s is not correct\n", "ConditionNumber");
@@ -323,12 +309,12 @@ class  VirtualSolverSuperLU: public VirtualSolver<int,R>,public SuperLUDriver<R>
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
     static const int orTypeSol = 1&8&16;
-    
+
     typedef R K;
     typedef int Z;
     typedef HashMatrix<Z,K>  HMat;
     HMat *AH;
- 
+
     double tol_pivot_sym, tol_pivot;// Add 31 oct 2005
     mutable char equed[1];
     yes_no_t equil;
@@ -343,7 +329,7 @@ public:
     R *rhsb, *rhsx, *xact;
     KN<double> RR, CC;
     int m, n, nnz;
-    
+
     mutable superlu_options_t options;
     mutable mem_usage_t mem_usage;
     long verb ;
@@ -355,16 +341,16 @@ public:
     RR(0), CC(0),
     tol_pivot_sym(ds.tol_pivot_sym), tol_pivot(ds.tol_pivot),verb(ds.verb),cn(0),cs(0)
     {
-        
+
         A.Store = 0;
         L.Store = 0;
         U.Store = 0;
-        
+
        set_default_options(&options);
         if( AH->half)
         {
             cerr << " Sorry SUPERLU need a no symmetric matrix "<< endl;
-            cerr << " bug in choose Solver "<< endl; 
+            cerr << " bug in choose Solver "<< endl;
             ExecError("SuperLU solver");
         }
        options.SymmetricMode = AH->half ? YES : NO ;
@@ -381,12 +367,12 @@ public:
         double rpg, rcond;
 
         SuperMatrix B, X;
-  
+
         Dtype_t R_SLU = SuperLUDriver<R>::R_SLU_T();
         this->Create_Dense_Matrix(&B, m, N, b, m, SLU_DN, R_SLU, SLU_GE);
         this->Create_Dense_Matrix(&X, m, N, x, m, SLU_DN, R_SLU, SLU_GE);
-        
-  
+
+
         SuperLUDriver<R>::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC,
                                 &L, &U, work, lwork, &B, &X, &rpg, &rcond, ferr, berr, &Glu,
                                 &mem_usage, &stat, &info);
@@ -394,16 +380,14 @@ public:
             printf("Triangular solve: dgssvx() returns info %d\n", info);
         if (verbosity > 3) {
                 if (info == 0 || info == n + 1) {
-                    /* This is how you could access the solution matrix. */
-                    // R *sol = (R *)((DNformat *)X.Store)->nzval;
-                    
+
                     if (options.IterRefine) {
                         int i = 0;
                         printf("Iterative Refinement:\n");
                         printf("%8s%8s%16s%16s\n", "rhs", "Steps", "FERR", "BERR");
                         printf("%8d%8d%16e%16e\n", i + 1, stat.RefineSteps, ferr[0], berr[0]);
                     }
-                    
+
                     fflush(stdout);
                 } else if (info > 0 && lwork == -1) {
                     printf("** Estimated memory: %d bytes\n", info - n);
@@ -414,7 +398,7 @@ public:
          if( X.Store) Destroy_SuperMatrix_Store(&X);
 
     }
-    
+
     void UpdateState()
     {
         if(verb>2 || verbosity> 9) std::cout << " UpdateState "<< AH-> re_do_numerics << " " << AH-> re_do_symbolic <<std::endl;
@@ -433,7 +417,6 @@ public:
             if (perm_r.size() != n) {perm_r.resize(n);}
             if (perm_c.size() != n) {perm_c.resize(n);}
             options.Fact = DOFACT;
-           // options.SymmetricMode = AH->half ? YES : NO ;
 
             RR = 1.;
             CC=1.;
@@ -442,7 +425,7 @@ public:
     void fac_symbolic()
     {
         if(verb>2 || verbosity> 9) cout << "fac_symbolic SuperLU R: nnz U " << " nnz= "  << AH->nnz << endl;
-        
+
     }
     void fac_numeric()
     {
@@ -482,7 +465,7 @@ public:
         L.Store=0;
 
     }
-    
+
 };
 
 

@@ -20,6 +20,9 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
+#ifndef _PPMIMG_H_
+#define _PPMIMG_H_
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,3 +50,4 @@ pPPMimage diffImg (pPPMimage bits, pPPMimage img, ubyte ityp);
 }
 #endif
 
+#endif /*_PPMIMG_H_*/

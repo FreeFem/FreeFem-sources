@@ -40,7 +40,6 @@ const Mesh*Split_Edges (Stack stack, Fem2D::Mesh const *const &pTh, long *dK) {
 	using  Fem2D::R2;
 	using  Fem2D::BoundaryEdge;
 	using  Fem2D::Mesh;
-	// using  Fem2D::R;
 	int nbtn = Th.nt;
 	int nbvn = Th.nv;
 	int nebn = Th.neb;
@@ -51,7 +50,6 @@ const Mesh*Split_Edges (Stack stack, Fem2D::Mesh const *const &pTh, long *dK) {
 				nbtn++;
 				int ee(e), kk;
 				kk = Th.ElementAdj(k, ee);
-				// if(kk<0 || kk==k) nebn++; // bug ?????????????????? cas de arete de bord interne ....
 				if (kk <= k) {nbvn++;}
 			}
 		}
@@ -200,10 +198,6 @@ const Mesh*Split_Edges (Stack stack, Fem2D::Mesh const *const &pTh, long *dK) {
 // static void Load_Init() soit appele a moment du chargement dynamique
 // du fichier
 //
-/*  class Init { public:
- * Init();
- * };
- */
 class SplitEdges:  public E_F0mps
 {
 	public:

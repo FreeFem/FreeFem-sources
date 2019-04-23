@@ -63,10 +63,7 @@ using namespace std;
 #include "lgmesh3.hpp"
 #include "lgsolver.hpp"
 #include "problem.hpp"
-// #include "LayerMesh.hpp"
-// #include "TransfoMesh_v2.hpp"
 #include "msh3.hpp"
-// #include "GQuadTree.hpp"
 
 #include <set>
 #include <vector>
@@ -226,7 +223,6 @@ AnyType RemplissageNetgen_Op::operator () (Stack stack)  const {
 			trig[jj] = Th3.operator () (K[jj]) + 1;
 		}
 
-		// cout << "label= " << label << endl;
 		Ng_AddSurfaceElement(netgen_mesh, NG_TRIG, trig);	// , &label);
 	}
 
@@ -262,11 +258,7 @@ AnyType RemplissageNetgen_Op::operator () (Stack stack)  const {
 	pmax[1] = 3.;
 	pmax[2] = 1.5;
 
-	// Ng_RestrictMeshSizeGlobal ( netgen_mesh, 0.1 );
 	Ng_RestrictMeshSizeBox(netgen_mesh, pmin, pmax, 0.05);
-	// Ng_RestrictMeshSizeGlobal ( netgen_mesh, 0.01 );
-
-	// Ng_RestrictMeshSizePoint (netgen_mesh, point, 0.01);
 
 	cout << "start remeshing" << endl;
 	Ng_GenerateVolumeMesh(netgen_mesh, &netgen_mp);
@@ -335,12 +327,7 @@ AnyType RemplissageNetgen_Op::operator () (Stack stack)  const {
 
 	Mesh3 *Th3_t = new Mesh3(netgen_nv, netgen_nt, netgen_nbe, v, t, b);
 
-	// Th3_t->BuildBound();
-	// Th3_t->BuildAdj();
-	// Th3_t->Buildbnormalv();
-	// Th3_t->BuildjElementConteningVertex();
 	Th3_t->BuildGTree();
-	// Th3->decrement();
 	Add2StackOfPtr2FreeRC(stack, Th3_t);
 
 	*mp = mps;
@@ -431,7 +418,6 @@ AnyType Netgen_STL_Op::operator () (Stack stack)  const {
 
 		netgen_mp.meshsize_filename = netgen_meshsize_filename_char;
 
-		// netgen_mp.meshsize_filename = "hinge.msz";
 	}
 
 	Ng_Init();
@@ -453,12 +439,9 @@ AnyType Netgen_STL_Op::operator () (Stack stack)  const {
 	rv = Ng_STL_GenerateSurfaceMesh(netgen_geom, netgen_mesh, &netgen_mp);
 	cout << "Generate Surface Mesh: Ng_result=" << rv << endl;
 
-	// Ng_SaveMesh (mesh, "surface.vol");
-
 	rv = Ng_GenerateVolumeMesh(netgen_mesh, &netgen_mp);
 	cout << "Generate Volume Mesh: Ng_result=" << rv << endl;
 
-	// Ng_SaveMesh (mesh, "volume.vol");
 	// read information of netgen
 	int netgen_nv = Ng_GetNP(netgen_mesh);
 	int netgen_nt = Ng_GetNE(netgen_mesh);
@@ -511,12 +494,7 @@ AnyType Netgen_STL_Op::operator () (Stack stack)  const {
 	Ng_Exit();
 	Mesh3 *Th3_t = new Mesh3(netgen_nv, netgen_nt, netgen_nbe, v, t, b);
 
-	// Th3_t->BuildBound();
-	// Th3_t->BuildAdj();
-	// Th3_t->Buildbnormalv();
-	// Th3_t->BuildjElementConteningVertex();
 	Th3_t->BuildGTree();
-	// Th3->decrement();
 	Add2StackOfPtr2FreeRC(stack, Th3_t);
 
 	*mp = mps;
@@ -596,7 +574,6 @@ class Netgen_LoadMesh: public OneOperator {
 };
 
 Mesh3*NETGEN_Load (const string &filename, const int &flagsnewlabelsurf) {
-	// int flagsnewlabelsurf=1;
 	char str[100];
 	int i, n;
 	double scale = 1;	// globflags.GetNumFlag ("scale", 1);
@@ -879,7 +856,6 @@ Mesh3*NETGEN_Load (const string &filename, const int &flagsnewlabelsurf) {
 
 					if (label == -1) {
 						if (nbfacesnetg == 0) {
-							// debutpngdf->Initialisation_Face( surfnr, domin, domout, bcp );
 							debutpngdf = new Netgen_Face(surfnr, domin, domout, bcp);
 						} else {
 							// iteratorpngdf = debutpngdf;
@@ -992,8 +968,6 @@ Mesh3*NETGEN_Load (const string &filename, const int &flagsnewlabelsurf) {
 						}
 					}
 
-					// cout << " i = " << i << " anc "<<  surfnr << " " << bcp << " " << domin << " " << domout<< " <-> "  << label << endl;
-
 					infile2 >> nep;
 					if (nep != 3) {
 						cerr << "only triangle elements are considered in Freefem++" << endl;
@@ -1065,8 +1039,6 @@ Mesh3*NETGEN_Load (const string &filename, const int &flagsnewlabelsurf) {
 						nbfacesnetg++;
 					}
 
-					// cout << " i = " << i << " anc "<<  surfnr << " " << bcp << " " << domin << " " << domout<< " <-> "  << label << endl;
-
 					infile2 >> nep;
 					if (nep != 3) {
 						cerr << "only triangle elements are considered in Freefem++" << endl;
@@ -1095,7 +1067,6 @@ Mesh3*NETGEN_Load (const string &filename, const int &flagsnewlabelsurf) {
 
 		if (strcmp(str, "volumeelements") == 0) {
 			infile2 >> n;
-			// PrintMessage (3, n, " volume elements");
 			nt = n;
 			if (nt != 0) {
 				for (i = 0; i < n; i++) {
@@ -1124,248 +1095,54 @@ Mesh3*NETGEN_Load (const string &filename, const int &flagsnewlabelsurf) {
 
 		if (strcmp(str, "edgesegments") == 0) {
 			cout << "this parameter is not taken in consideration in freefem++" << endl;
-			/*
-			 * infile2 >> n;
-			 * for (i = 1; i <= n; i++)
-			 * {
-			 * Segment seg;
-			 * int hi;
-			 * infile2 >> seg.si >> hi >> seg.p1 >> seg.p2;
-			 * AddSegment (seg);
-			 * }
-			 */
 		}
 
 		if (strcmp(str, "edgesegmentsgi") == 0) {
 			cout << "this parameter is not taken in consideration in freefem++" << endl;
-			/*
-			 * infile2 >> n;
-			 * for (i = 1; i <= n; i++)
-			 * {
-			 * Segment seg;
-			 * int hi;
-			 * infile2 >> seg.si >> hi >> seg.p1 >> seg.p2
-			 * >> seg.geominfo[0].trignum
-			 * >> seg.geominfo[1].trignum;
-			 * AddSegment (seg);
-			 * }
-			 */
 		}
 
 		if (strcmp(str, "edgesegmentsgi2") == 0) {
 			cout << "this parameter is not taken in consideration in freefem++" << endl;
-			/*
-			 * int a;
-			 * infile2 >> a;
-			 * n=a;
-			 *
-			 * PrintMessage (3, n, " curve elements");
-			 *
-			 * for (i = 1; i <= n; i++)
-			 * {
-			 * Segment seg;
-			 * int hi;
-			 * infile2 >> seg.si >> hi >> seg.p1 >> seg.p2
-			 * >> seg.geominfo[0].trignum
-			 * >> seg.geominfo[1].trignum
-			 * >> seg.surfnr1 >> seg.surfnr2
-			 * >> seg.edgenr
-			 * >> seg.epgeominfo[0].dist
-			 * >> seg.epgeominfo[1].edgenr
-			 * >> seg.epgeominfo[1].dist;
-			 *
-			 * seg.epgeominfo[0].edgenr = seg.epgeominfo[1].edgenr;
-			 *
-			 * seg.domin = seg.surfnr1;
-			 * seg.domout = seg.surfnr2;
-			 *
-			 * seg.surfnr1--;
-			 * seg.surfnr2--;
-			 *
-			 * AddSegment (seg);
-			 * }
-			 */
 		}
 
 		if (strcmp(str, "points") == 0) {
 			cout << "this parameter was taken in consideration before" << endl;
-			/*
-			 * infile2 >> n;
-			 * PrintMessage (3, n, " points");
-			 * for (i = 1; i <= n; i++)
-			 * {
-			 *  Point3d p;
-			 *  infile2 >> p.X() >> p.Y() >> p.Z();
-			 *  p.X() *= scale;
-			 *  p.Y() *= scale;
-			 *  p.Z() *= scale;
-			 *  AddPoint (p);
-			 * }
-			 */
 		}
 
 		if (strcmp(str, "identifications") == 0) {
 			cout << "this parameter is not taken in consideration in freefem++" << endl;
-			/*
-			 * infile2 >> n;
-			 * for (i = 1; i <= n; i++)
-			 * {
-			 * PointIndex pi1, pi2;
-			 * int ind;
-			 * infile2 >> pi1 >> pi2 >> ind;
-			 * ident -> Add (pi1, pi2, ind);
-			 * }
-			 */
 		}
 
 		if (strcmp(str, "identificationtypes") == 0) {
 			cout << "this parameter is not taken in consideration in freefem++" << endl;
-			/*
-			 * infile2 >> n;
-			 * for (i = 1; i <= n; i++)
-			 * {
-			 * int type;
-			 * infile2 >> type;
-			 * ident -> SetType(i,Identifications::ID_TYPE(type));
-			 * }
-			 */
 		}
 
 		if (strcmp(str, "materials") == 0) {
 			cout << "this parameter is not taken in consideration in freefem++" << endl;
-			/*
-			 * infile2 >> n;
-			 * for (i = 1; i <= n; i++)
-			 * {
-			 * int nr;
-			 * string mat;
-			 * infile2 >> nr >> mat;
-			 * SetMaterial (nr, mat.c_str());
-			 * }
-			 */
 		}
 
 		if (strcmp(str, "bcnames") == 0) {
 			cout << "this parameter is not taken in consideration in freefem++" << endl;
-			/*
-			 * infile2 >> n;
-			 * ARRAY<int,0> bcnrs(n);
-			 *
-			 * SetNBCNames(n);
-			 * for ( i = 1; i <= n; i++ )
-			 * {
-			 *  string nextbcname;
-			 *  infile2 >> bcnrs[i-1] >> nextbcname;
-			 *  bcnames[bcnrs[i-1]-1] = new string(nextbcname);
-			 * }
-			 *
-			 *
-			 *
-			 *
-			 * if ( GetDimension() == 2 )
-			 * {
-			 *  for (i = 1; i <= GetNSeg(); i++)
-			 *    {
-			 *      Segment & seg = LineSegment (i);
-			 *      if ( seg.si <= n )
-			 *        seg.SetBCName (bcnames[seg.si-1]);
-			 *      else
-			 *        seg.SetBCName(0);
-			 *    }
-			 * }
-			 * else
-			 * {
-			 *  for (SurfaceElementIndex sei = 0; sei < GetNSE(); sei++)
-			 *    {
-			 *      if ((*this)[sei].GetIndex())
-			 *        {
-			 *          int bcp = GetFaceDescriptor((*this)[sei].GetIndex ()).BCProperty();
-			 *          if ( bcp <= n )
-			 *            GetFaceDescriptor((*this)[sei].GetIndex ()).SetBCName(bcnames[bcp-1]);
-			 *          else
-			 *            GetFaceDescriptor((*this)[sei].GetIndex ()).SetBCName(0);
-			 *
-			 *        }
-			 *    }
-			 *
-			 * }
-			 *
-			 */
 		}
 
 		if (strcmp(str, "singular_points") == 0) {
 			cout << "this parameter is not taken in consideration in freefem++" << endl;
-			/*
-			 * infile2 >> n;
-			 * for (i = 1; i <= n; i++)
-			 * {
-			 *  PointIndex pi;
-			 *  double s;
-			 *  infile2 >> pi;
-			 *  infile2 >> s;
-			 *  (*this)[pi].Singularity (s);
-			 * }
-			 */
 		}
 
 		if (strcmp(str, "singular_edge_left") == 0) {
 			cout << "this parameter is not taken in consideration in freefem++" << endl;
-			/*
-			 * infile2 >> n;
-			 * for (i = 1; i <= n; i++)
-			 * {
-			 * SegmentIndex si;
-			 * double s;
-			 * infile2 >> si;
-			 * infile2 >> s;
-			 * (*this)[si].singedge_left = s;
-			 * }
-			 */
 		}
 
 		if (strcmp(str, "singular_edge_right") == 0) {
 			cout << "this parameter is not taken in consideration in freefem++" << endl;
-			/*
-			 * infile2 >> n;
-			 * for (i = 1; i <= n; i++)
-			 * {
-			 *  SegmentIndex si;
-			 *  double s;
-			 *  infile2 >> si;
-			 *  infile2 >> s;
-			 *  (*this)[si].singedge_right = s;
-			 * }
-			 */
 		}
 
 		if (strcmp(str, "singular_face_inside") == 0) {
 			cout << "this parameter is not taken in consideration in freefem++" << endl;
-			/*
-			 * infile2 >> n;
-			 * for (i = 1; i <= n; i++)
-			 * {
-			 *  SurfaceElementIndex sei;
-			 *  double s;
-			 *  infile2 >> sei;
-			 *  infile2 >> s;
-			 *  GetFaceDescriptor((*this)[sei].GetIndex()).domin_singular = s;
-			 * }
-			 */
 		}
 
 		if (strcmp(str, "singular_face_outside") == 0) {
 			cout << "this parameter is not taken in consideration in freefem++" << endl;
-			/*
-			 * infile2 >> n;
-			 * for (i = 1; i <= n; i++)
-			 * {
-			 *  SurfaceElementIndex sei;
-			 *  double s;
-			 *  infile2 >> sei;
-			 *  infile2 >> s;
-			 *  GetFaceDescriptor((*this)[sei].GetIndex()).domout_singular = s;
-			 * }
-			 */
 		}
 
 		if (strcmp(str, "endmesh2") == 0) {
@@ -1400,28 +1177,13 @@ AnyType Netgen_LoadMesh_Op::operator () (Stack stack)  const {
 		Th3_t->BuildSurfaceAdj();
 	}
 
-	// else{
-	// Th3_t->BuildBound();
-	// Th3_t->BuildAdj();
-	// Th3_t->Buildbnormalv();
-	// Th3_t->BuildjElementConteningVertex();
-
-	// }
 	Th3_t->BuildGTree();
-	// Th3->decrement();
 	Add2StackOfPtr2FreeRC(stack, Th3_t);
 
 	return Th3_t;
 }
 
-/*  class Init1 { public:
- * Init1();
- * };
- *
- * $1 */
-
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
-	// if (verbosity)
 	if (verbosity) {cout << " load: netgen  " << endl;}
 
 	Global.Add("netg", "(", new RemplissageNetgen);

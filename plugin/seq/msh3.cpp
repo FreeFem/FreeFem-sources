@@ -646,7 +646,7 @@ double zmax_func_mesh (const int choix, const double x, const double y) {
 
 int Ni_func_mesh (const int choix, const double x, const double y) {
 	const int multi = 1;
-	int res;
+	int res=0;
 
 	switch (choix) {
 	case 0:
@@ -851,7 +851,6 @@ void NbSom3D_NbElem3D_NbBord2D_mesh_product_mesh_tab (const int Nmax, const int 
 		const Mesh::Triangle &K(Th2.t(ii));
 
 		for (int jj = 0; jj < 3; jj++) {
-			// i  = A2D.ElemPoint2D[ii][jj];
 			i = Th2.operator () (K[jj]);
 			MajElem = MajElem + tab_Ni[i];
 		}
@@ -889,7 +888,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 	KN<int> tab_NumSommet(Th2.nv + 1);
 
 	// variable tet
-	int SommetPrisme[6];
+	int SommetPrisme[6] = {};
 
 	// variable creer pour le bord
 	int i_ind1, Ni_ind1;
@@ -1118,13 +1117,11 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 				ElemBord = ElemBord + 1;
 				break;
 			case 3:
-				int idl;
 				// determination de la diagonale Max
 				DiagMax1 = max(tab_NumSommet[i_ind1] + i_recoll_1pp, tab_NumSommet[i_ind2] + i_recoll_2);
 				DiagMax2 = max(tab_NumSommet[i_ind2] + i_recoll_2pp, tab_NumSommet[i_ind1] + i_recoll_1);
 
 				if (DiagMax1 > DiagMax2) {
-					idl = 1;
 
 					ijj[0] = tab_NumSommet[i_ind1] + i_recoll_1pp;
 					ijj[1] = tab_NumSommet[i_ind2] + i_recoll_2pp;
@@ -1138,7 +1135,6 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 
 					Th3.be(ElemBord + 1).set(Th3.vertices, ijj, lab);
 				} else {
-					idl = 2;
 
 					ijj[0] = tab_NumSommet[i_ind1] + i_recoll_1pp;
 					ijj[1] = tab_NumSommet[i_ind2] + i_recoll_2pp;
@@ -1208,7 +1204,7 @@ void Som3D_mesh_product_Version_Sommet_mesh_tab (const int Nmax,
 		 */
 		const Mesh::Element &K(Th2.t(ii));
 		int somv[4];
-		int K_jj[3];
+		int K_jj[3]={};
 		int lab;
 
 		map<int, int>::const_iterator imap = maptet.find(K.lab);
@@ -1523,7 +1519,7 @@ void dpent1_mesh (int idl[3], int nu[12], int &nbe, int &option) {
 	// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	// programmation : f77 ->c++ subroutine de f. hecht upmc
 
-	int idp[8];
+	int idp[8]={};
 	int i1, i2, i3, i, nbdp, idf, idecou;
 	const int pdd[8] = {1, 0, 2, 3, 4, 5, 0, 6};
 	int mu[6][12];
@@ -1604,7 +1600,6 @@ Mesh3*GluMesh3 (listMesh3 const &lst) {
 	double hmin = 1e100;
 	R3 Pn(1e100, 1e100, 1e100), Px(-1e100, -1e100, -1e100);
 	const list<const Mesh3 *> lth(*lst.lth);
-	const Mesh3 *th0 = 0;
 	int kk = 0;
 
 	for (list<const Mesh3 *>::const_iterator i = lth.begin(); i != lth.end(); i++) {
@@ -1612,7 +1607,6 @@ Mesh3*GluMesh3 (listMesh3 const &lst) {
 
 		kk++;
 		const Mesh3 &Th3(**i);	// definis ???
-        th0 = &Th3;
 		if (verbosity > 1) {cout << " determination of hmin : GluMesh3D + " << Th3.nv << " " << Th3.nt << " " << Th3.nbe << endl;}
 		nbt += Th3.nt;
 		nbvx += Th3.nv;
@@ -1817,14 +1811,12 @@ MeshS*GluMeshS (listMeshS const &lst) {
 	double hmin=1e100;
 	R3 Pn(1e100,1e100,1e100),Px(-1e100,-1e100,-1e100);
 	const list<MeshS const *> lth(*lst.lth);
-	const  MeshS * th0=0;
 	int kk=0;
 	for(list<MeshS const *>::const_iterator i=lth.begin();i != lth.end();++i)
 	{
 		if(! *i ) continue; //
 		++kk;
 		const MeshS &Th(**i);
-		th0=&Th;
 		if(verbosity>1)  cout << " GluMeshS + "<< Th.nv << " " << Th.nt << endl;
 		nbt+= Th.nt;
 		nbvx += Th.nv;
@@ -1862,8 +1854,6 @@ MeshS*GluMeshS (listMeshS const &lst) {
 			const MeshS &Th(**i);
 			if(!*i) continue;
 			if(verbosity>1)  cout << " GluMeshS + "<< Th.nv << " " << Th.nt << endl;
-			int nbv0 = nbv;
-
 			for (int ii=0;ii<Th.nv;ii++)
 			{
 				const Vertex3 &vi(Th(ii));
@@ -2563,7 +2553,6 @@ AnyType SetMesh3D_Op::operator () (Stack stack)  const {
 	int nbv = Th.nv;// nombre de sommet
 	int nbt = Th.nt;// nombre de triangles
 	int nbe = Th.nbe;	// nombre d'aretes fontiere
-	// cout << "Number of Vertex="<< nbv << "Number of BorderElement=" << nbe << endl;
 	KN<long> zz;
 	KN<long> nrtet(arg(0, stack, zz));
 	KN<long> nrface(arg(1, stack, zz));
@@ -2573,7 +2562,6 @@ AnyType SetMesh3D_Op::operator () (Stack stack)  const {
 	long rmlabfaces(arg(6, stack, 0L));
 	bool rm_i_faces(arg(7, stack, false));
 
-	// cout << " Chnage " << freg << " " << flab << endl;
 	if (nrface.N() <= 0 && nrtet.N() <= 0 && (!freg) && (!flab) && !rmlabfaces && !rm_i_faces) {
 		return m;	// modf J.M. oct 2010
 	}
@@ -2634,7 +2622,6 @@ AnyType SetMesh3D_Op::operator () (Stack stack)  const {
 	for (int i = 0; i < nbt; i++) {
 		const Tet &K(Th.elements[i]);
 		int iv[4];
-		// int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
 		iv[0] = Th.operator () (K[0]);
 		iv[1] = Th.operator () (K[1]);
 		iv[2] = Th.operator () (K[2]);
@@ -2706,13 +2693,8 @@ AnyType SetMesh3D_Op::operator () (Stack stack)  const {
 	*mp = mps;
 	if (nbt != 0) {
 		Mesh3 *mpq = new Mesh3(nbv, nbt, nbe, v, t, b);
-        mpq->getTypeMesh3()=typeMesh3;
-		// mpq->BuildBound();
-		// mpq->BuildAdj();
-		// mpq->Buildbnormalv();
-		// mpq->BuildjElementConteningVertex();
+    mpq->getTypeMesh3()=typeMesh3;
 		mpq->BuildGTree();
-		// mpq->decrement();   // ?? decrement enlever ???
 		Add2StackOfPtr2FreeRC(stack, mpq);
 
 		return mpq;
@@ -2721,7 +2703,6 @@ AnyType SetMesh3D_Op::operator () (Stack stack)  const {
 	if (nbt == 0) {
 		Mesh3 *mpq = new Mesh3(nbv, nbe, v, b);
         mpq->getTypeMesh3()=typeMesh3;
-		// mpq->BuildBound();
 		Add2StackOfPtr2FreeRC(stack, mpq);
 
 		return mpq;
@@ -2830,10 +2811,6 @@ public:
     AnyType operator () (Stack stack)  const;
 };
 
-
-
-
-
 // modif to create a real surface mesh               //*********************
 basicAC_F0::name_and_type Movemesh2D_3D_surf_Op::name_param [] = {
 	{"transfo", &typeid(E_Array)},
@@ -2857,7 +2834,6 @@ AnyType Movemesh2D_3D_surf_Op::operator () (Stack stack)  const {
 	}
 
 	KN<long> zzempty;
-	// int intempty=0;
 	int mesureM(arg(1, stack, 0L));
 	KN<long> nrface(arg(2, stack, arg(5, stack, zzempty)));
 	double precis_mesh(arg(3, stack, -1.));
@@ -2924,10 +2900,8 @@ AnyType Movemesh2D_3D_surf_Op::operator () (Stack stack)  const {
 		                            border_only, recollement_border, point_confondus_ok);
         MeshS * ThS = Th3->meshS;
 
-
 		// Rajouter fonction flip a l interieure
         int nbflip = 0, nbflipS = 0;
-
 
         // loop on triangles mesh3
         for (int ii = 0; ii < Th3->nbe; ii++) {
@@ -3012,7 +2986,6 @@ AnyType Movemesh2D_3D_surf_Op::operator () (Stack stack)  const {
 			ThS->be(ii).set(ThS->vertices, iv, lab);
 		}
 
-
         ffassert(nbflip == 0 || nbflip == Th3->nbe);
         ffassert(nbflipS == 0 || nbflipS == ThS->nt);
         if (flagsurfaceall == 1) {Th3->BuildBoundaryElementAdj();}
@@ -3031,9 +3004,6 @@ AnyType Movemesh2D_3D_surf_Op::operator () (Stack stack)  const {
 
  return (Mesh3 *)0;
 }
-
-
-//
 
 // modif to create a real surface mesh on meshS
 basicAC_F0::name_and_type Movemesh2D_S_Op::name_param [] = {
@@ -3057,7 +3027,6 @@ AnyType Movemesh2D_S_Op::operator () (Stack stack)  const {
     }
 
     KN<long> zzempty;
-    // int intempty=0;
     int mesureM(arg(1, stack, 0L));
     KN<long> nrface(arg(2, stack, arg(5, stack, zzempty)));
     double precis_mesh(arg(3, stack, -1.));
@@ -3208,8 +3177,6 @@ Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *
                      int &border_only, int &recollement_element, int &recollement_border, int &point_confondus_ok, int orientation) {
 
 	// cas besoin memoire important
-
-	// Mesh3 *T_Th3=new Mesh3;
 	int nv_t, nt_t, nbe_t;
 	int *Numero_Som;
 	int *ind_nv_t;
@@ -3228,8 +3195,6 @@ Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *
 	label_nt_t = new int[Th3.nt];
 	label_nbe_t = new int[Th3.nbe];
 
-	// cout << "Vertex, Tetrahedra, Border : "<<Th3.nv << ", "<<Th3.nt<< ", " << Th3.nbe<< endl;
-
 	for (int ii = 0; ii < Th3.nv; ii++) {
 		Numero_Som[ii] = ii;
 	}
@@ -3242,7 +3207,6 @@ Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *
 	if (verbosity > 1) {cout << " fin: SamePointElement " << endl;}
 
 	// set size of Mesh T_Th3
-	// T_Th3->set(nv_t,nt_t,nbe_t);
 	Vertex3 *v = new Vertex3[nv_t];
 	Tet *t = new Tet[nt_t];
 	Tet *tt = t;
@@ -3272,7 +3236,6 @@ Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *
 
 	assert(i_som == nv_t);
 
-	// cout << " Transfo volume elements " << endl;
 	// determination of volume elements
 	i_elem = 0;
 
@@ -3299,7 +3262,6 @@ Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *
 
 	assert(i_elem == nt_t);
 
-	// cout << " Transfo border elements " << endl;
 	// determination of border elements
 	i_border = 0;
 
@@ -3406,7 +3368,6 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
 
     assert(i_som == nv_t);
 
-    // cout << " Transfo volume elements " << endl;
     // determination of triangle elements
     i_elem = 0;
 
@@ -3433,7 +3394,6 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
 
     assert(i_elem == nt_t);
 
-    // cout << " Transfo border elements " << endl;
     // determination of border elements
     i_border = 0;
 
@@ -3487,8 +3447,6 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 	int Elem_ok, Border_ok;
 	double hmin, hmin_elem, hmin_border;
 	R3 bmin, bmax;
-
-	// int recollement_element=1,recollement_border=1;
 
 	if (verbosity > 2) {cout << "    BuilBound " << endl;}
 
@@ -3544,7 +3502,6 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 	nt_t = i_elem;
 
 	if (recollement_element == 1) {
-		// int point_confondus_ok_e = 0;
 		if (verbosity > 1) {cout << "debut recollement : nt_t= " << nt_t << endl;}
 
 		int np, dim = 3;
@@ -3572,7 +3529,6 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 		}
 
 		hmin_elem = hmin / 4;
-		// PointCommun_hcode( dim, nt_t, 0, Cdg_t, bmin3, bmax3, hmin_elem, ind_np, np); //ancien
 		PointCommun_hcode_gtree(dim, nt_t, 0, Cdg_t, label_t, bmin, bmax, hmin_elem,
 		                        ind_np, label_nt_t, np);// nv
 
@@ -3667,7 +3623,6 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 
 		if (verbosity > 1) {cout << "appele de PointCommun_hcode := " << point_confondus_ok << endl;}
 
-		// PointCommun_hcode( dim, nbe_t, point_confondus_ok, Cdg_be, bmin3, bmax3, hmin_border, ind_np, np);
 		PointCommun_hcode_gtree(dim, nbe_t, point_confondus_ok, Cdg_be, label_be,
 		                        bmin, bmax, hmin_border, ind_np, label_nbe_t, np);
 		if (verbosity > 1) {cout << "fin appele de PointCommun_hcode" << endl;}
@@ -3708,7 +3663,6 @@ Mesh3*Transfo_Mesh3_surf (const double &precis_mesh, const Mesh3 &Th3, const dou
                           int &recollement_border, int &point_confondus_ok) {
 	// cas besoin memoire important
 
-	// Mesh3 *T_Th3=new Mesh3;
 	int nv_t, nbe_t;
 	int nt_t = 0;
 	int *Numero_Som;
@@ -3740,9 +3694,7 @@ Mesh3*Transfo_Mesh3_surf (const double &precis_mesh, const Mesh3 &Th3, const dou
 
 	// set size of Mesh T_Th3
 
-	// T_Th3->set(nv_t,nt_t,nbe_t);
 	Vertex3 *v = new Vertex3[nv_t];
-	// Tet     *t;
 	Triangle3 *b = new Triangle3[nbe_t];
 	Triangle3 *bb = b;
 
@@ -3756,12 +3708,6 @@ Mesh3*Transfo_Mesh3_surf (const double &precis_mesh, const Mesh3 &Th3, const dou
 		assert(Numero_Som[ii] == i_som);
 
 		const Vertex3 &K(Th3.vertices[ii]);
-		/*
-		 * T_Th3->vertices[i_som].x = tab_XX[ii];
-		 * T_Th3->vertices[i_som].y = tab_YY[ii];
-		 * T_Th3->vertices[i_som].z = tab_ZZ[ii];
-		 * T_Th3->vertices[i_som].lab = K.lab;
-		 */
 		v[i_som].x = tab_XX[ii];
 		v[i_som].y = tab_YY[ii];
 		v[i_som].z = tab_ZZ[ii];
@@ -3787,7 +3733,6 @@ Mesh3*Transfo_Mesh3_surf (const double &precis_mesh, const Mesh3 &Th3, const dou
 		int iv[3];
 		int lab;
 
-		// lab = K.lab;
 		lab = label_nbe_t[i];
 
 		for (int jj = 0; jj < 3; jj++) {
@@ -3795,7 +3740,6 @@ Mesh3*Transfo_Mesh3_surf (const double &precis_mesh, const Mesh3 &Th3, const dou
 			assert(iv[jj] >= 0 && iv[jj] <= nv_t);
 		}
 
-		// T_Th3->be(i_border).set(T_Th3->vertices, iv, lab);
 		(bb++)->set(v, iv, lab);
 		i_border = i_border + 1;
 	}
@@ -3807,7 +3751,6 @@ Mesh3*Transfo_Mesh3_surf (const double &precis_mesh, const Mesh3 &Th3, const dou
 	delete [] ind_nbe_t;
 	delete [] label_nbe_t;
 
-	// Mesh3* T_Th3 = new Mesh3(nv_t,nt_t,nbe_t,v,t,b);
 	Mesh3 *T_Th3 = new Mesh3(nv_t, nbe_t, v, b);
 
 	return T_Th3;
@@ -3819,8 +3762,6 @@ void SamePointElement_surf (const double &precis_mesh, const double *tab_XX, con
 	int Elem_ok, Border_ok;
 	double hmin, hmin_elem, hmin_border;
 	R3 bmin, bmax;
-
-	// int recollement_element=1,recollement_border=1;
 
 	if (verbosity > 1) {cout << "  OrderVertexTransfo_hcode gtree " << endl;}
 
@@ -3836,11 +3777,6 @@ void SamePointElement_surf (const double &precis_mesh, const double *tab_XX, con
 	bmax3[1] = bmax.y;
 	bmax3[2] = bmax.z;
 
-	/*
-	 * cout << "  OrderVertexTransfo_hcode " << endl;
-	 * OrderVertexTransfo_hcode_nv( Th3.nv, tab_XX, tab_YY, tab_ZZ, bmin3, bmax3, hmin, Numero_Som, ind_nv_t, nv_t );
-	 * cout << "fin order vertex: nv_t=" << nv_t << endl;
-	 */
 	if (verbosity > 1) {cout << "  OrderVertexTransfo_hcode gtree " << endl;}
 
 	OrderVertexTransfo_hcode_nv_gtree(Th3.nv, bmin, bmax, hmin, tab_XX, tab_YY, tab_ZZ, Numero_Som, ind_nv_t, nv_t);
@@ -3880,7 +3816,6 @@ void SamePointElement_surf (const double &precis_mesh, const double *tab_XX, con
 	nbe_t = i_border;
 
 	if (recollement_border == 1) {
-		// int point_confondus_ok = 1;
 		if (verbosity > 1) {cout << "debut recollement : nbe_t= " << nbe_t << endl;}
 
 		int np, dim = 3;
@@ -3913,7 +3848,6 @@ void SamePointElement_surf (const double &precis_mesh, const double *tab_XX, con
 
 		if (verbosity > 1) {cout << "appele de PointCommun_hcode := " << point_confondus_ok << endl;}
 
-		// PointCommun_hcode( dim, nbe_t, point_confondus_ok, Cdg_be, bmin3, bmax3, hmin_border, ind_np, np);
 		PointCommun_hcode_gtree(dim, nbe_t, point_confondus_ok, Cdg_be, label_be,
 		                        bmin, bmax, hmin_border, ind_np, label_nbe_t, np);
 		if (verbosity > 1) {cout << "fin appele de PointCommun_hcode" << endl;}
@@ -4066,8 +4000,7 @@ void SamePointElement_Mesh2(const double &precis_mesh, const double *tab_XX, con
                             int &recollement_border, int &point_confondus_ok,
                             int *Numero_Som, int *ind_nv_t, int *ind_nt_t, int *ind_nbe_t,
                             int *label_nt_t, int *label_nbe_t, int &nv_t, int &nt_t, int &nbe_t) {
-    int Elem_ok, Border_ok;
-	// int recollement_border=0;
+  int Elem_ok, Border_ok;
 	R3 bmin, bmax;
 	double hmin, hmin_elem, hmin_border;
 
@@ -4183,7 +4116,6 @@ void SamePointElement_Mesh2(const double &precis_mesh, const double *tab_XX, con
     nbe_t = i_border;
 
     if (recollement_border == 1) {
-      // int point_confondus_ok=1;
       if (verbosity > 1) cout << "debut recollement : nbe_t= " << nbe_t << endl;
 
       int np, dim = 3;
@@ -4253,8 +4185,6 @@ void BuildBoundMinDist_th2 (const double &precis_mesh, const double *tab_XX, con
 	bmax.y = bmin.y;
 	bmax.z = bmin.z;
 
-	// R3 bmax = new R3(bmin);
-
 	if (verbosity > 1) {cout << " determination of bmin and bmax" << endl;}
 
 	for (int ii = 1; ii < Th2.nv; ii++) {
@@ -4298,7 +4228,6 @@ void BuildBoundMinDist_th2 (const double &precis_mesh, const double *tab_XX, con
 				           + pow(tab_YY[i1] - tab_YY[i2], 2)
 				           + pow(tab_ZZ[i1] - tab_ZZ[i2], 2);
 				longedge = sqrt(longedge);
-				// cout << "longedge=" << longedge << endl;
 				if (longedge > precispt) {hmin = min(hmin, longedge);}
 			}
 		}
@@ -4314,44 +4243,12 @@ void BuildBoundMinDist_th2 (const double &precis_mesh, const double *tab_XX, con
 
 	// assertion pour la taille de l octree
 	assert(hmin > Norme2(bmin - bmax) / 1e9);
-
-	/*  // ?????????
-	 * hmin = 1e10;
-	 * for( int ii=0; ii< Th2.nt; ii++){
-	 *  const Mesh :: Triangle & K(Th2.t(ii)); // const Triangle2 & K(Th2.elements[ii]);
-	 *  double longedge;
-	 *  int iv[3];
-	 *  for(int jj=0; jj<3; jj++){
-	 *    iv[jj] = Th2.operator()(K[jj]) ;
-	 *  }
-	 *
-	 *  for( int jj=0; jj<3; jj++){
-	 *    for( int kk=jj+1; kk<3; kk++){
-	 *      int & i1= iv[jj];
-	 *      int & i2= iv[kk];
-	 *      longedge = pow(tab_XX[i1]-tab_XX[i2],2)
-	 + pow(tab_YY[i1]-tab_YY[i2],2)
-	 + pow(tab_ZZ[i1]-tab_ZZ[i2],2);
-	 +      longedge = sqrt(longedge);
-	 +      //cout << "longedge=" << longedge << endl;
-	 +      if( longedge > longmini_box*1e-7 ) hmin = min( hmin, longedge);
-	 +    }
-	 +  }
-	 + }
-	 + cout << "longmin_box=" << longmini_box << endl;
-	 + cout << "hmin =" << hmin << endl;
-	 + cout << "Norme2(bmin-bmax)=" <<  Norme2(bmin-bmax) << endl;
-	 + assert( hmin < longmini_box);
-	 + // assertion pour la taille de l octree
-	 + assert(hmin>Norme2(bmin-bmax)/1e9);
-	 */
 }
 
 // version Mesh3
 
 void BuildBoundMinDist_th3 (const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh3 &Th3, R3 &bmin, R3 &bmax, double &hmin) {
 	// determination de la boite englobante
-	// R3 bmin,bmax;
 	double precispt;
 
 	bmin.x = tab_XX[0];
@@ -4361,8 +4258,6 @@ void BuildBoundMinDist_th3 (const double &precis_mesh, const double *tab_XX, con
 	bmax.x = bmin.x;
 	bmax.y = bmin.y;
 	bmax.z = bmin.z;
-
-	// R3 bmax = new R3(bmin);
 
 	if (verbosity > 1) {cout << " determination of bmin and bmax" << endl;}
 
@@ -4377,9 +4272,6 @@ void BuildBoundMinDist_th3 (const double &precis_mesh, const double *tab_XX, con
 	}
 
 	double longmini_box;
-
-	// longmini_box = min(bmax.x-bmin.x, bmax.y-bmin.y);
-	// longmini_box = min(longmini_box, bmax.z-bmin.z);
 
 	longmini_box = pow(bmax.x - bmin.x, 2) + pow(bmax.y - bmin.y, 2) + pow(bmax.z - bmin.z, 2);
 	longmini_box = sqrt(longmini_box);
@@ -4469,8 +4361,6 @@ void SamePointElement_MeshS (const double &precis_mesh, const double *tab_XX, co
     double hmin, hmin_elem, hmin_border;
     R3 bmin, bmax;
 
-    // int recollement_element=1,recollement_border=1;
-
     if (verbosity > 2) {cout << "    BuilBound " << endl;}
 
     BuildBoundMinDist_thS(precis_mesh, tab_XX, tab_YY, tab_ZZ, ThS, bmin, bmax, hmin);
@@ -4552,7 +4442,6 @@ void SamePointElement_MeshS (const double &precis_mesh, const double *tab_XX, co
         }
 
         hmin_elem = hmin / 3;
-        // PointCommun_hcode( dim, nt_t, 0, Cdg_t, bmin3, bmax3, hmin_elem, ind_np, np); //ancien
         PointCommun_hcode_gtree(dim, nt_t, 0, Cdg_t, label_t, bmin, bmax, hmin_elem,
                                 ind_np, label_nt_t, np);// nv
 
@@ -4614,7 +4503,6 @@ void SamePointElement_MeshS (const double &precis_mesh, const double *tab_XX, co
     nbe_t = i_border;
 
     if (recollement_border == 1) {
-        // int point_confondus_ok = 1;
         if (verbosity > 1) {cout << "debut recollement : nbe_t= " << nbe_t << endl;}
 
         int np, dim = 3;
@@ -4647,7 +4535,6 @@ void SamePointElement_MeshS (const double &precis_mesh, const double *tab_XX, co
 
         if (verbosity > 1) {cout << "appele de PointCommun_hcode := " << point_confondus_ok << endl;}
 
-        // PointCommun_hcode( dim, nbe_t, point_confondus_ok, Cdg_be, bmin3, bmax3, hmin_border, ind_np, np);
         PointCommun_hcode_gtree(dim, nbe_t, point_confondus_ok, Cdg_be, label_be,
                                 bmin, bmax, hmin_border, ind_np, label_nbe_t, np);
         if (verbosity > 1) {cout << "fin appele de PointCommun_hcode" << endl;}
@@ -4683,7 +4570,6 @@ void SamePointElement_MeshS (const double &precis_mesh, const double *tab_XX, co
 }
 void BuildBoundMinDist_thS (const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const MeshS &ThS, R3 &bmin, R3 &bmax, double &hmin) {
     // determination de la boite englobante
-    // R3 bmin,bmax;
     double precispt;
 
     bmin.x = tab_XX[0];
@@ -4693,8 +4579,6 @@ void BuildBoundMinDist_thS (const double &precis_mesh, const double *tab_XX, con
     bmax.x = bmin.x;
     bmax.y = bmin.y;
     bmax.z = bmin.z;
-
-    // R3 bmax = new R3(bmin);
 
     if (verbosity > 1) {cout << " determination of bmin and bmax" << endl;}
 
@@ -4709,9 +4593,6 @@ void BuildBoundMinDist_thS (const double &precis_mesh, const double *tab_XX, con
     }
 
     double longmini_box;
-
-    // longmini_box = min(bmax.x-bmin.x, bmax.y-bmin.y);
-    // longmini_box = min(longmini_box, bmax.z-bmin.z);
 
     longmini_box = pow(bmax.x - bmin.x, 2) + pow(bmax.y - bmin.y, 2) + pow(bmax.z - bmin.z, 2);
     longmini_box = sqrt(longmini_box);
@@ -4791,10 +4672,6 @@ void BuildBoundMinDist_thS (const double &precis_mesh, const double *tab_XX, con
     assert(hmin > Norme2(bmin - bmax) / 1e9);
 }
 
-
-//= =====================
-//
-//= =====================
 void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
                                   const double *bmin, const double *bmax, const double hmin, int *Numero_Som, int *ind_nv_t, int &nv_t) {
 	size_t i;
@@ -4804,33 +4681,6 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 	int *tcode;	//= new int[NbCode];
 	int *posv = new int[tab_nv];
 	double epsilon = hmin / 10.;
-
-	/*
-	 * double epsilon=0.001;
-	 *
-	 * // determination de boite englobante
-	 * double bmin[3],bmax[3];
-	 *
-	 * bmin[0] = tab_XX[0];
-	 * bmin[1] = tab_YY[0];
-	 * bmin[2] = tab_ZZ[0];
-	 *
-	 * bmax[0] = bmin[0];
-	 * bmax[1] = bmin[1];
-	 * bmax[2] = bmin[2];
-	 *
-	 * cout << " determination bmin et bmax" << endl;
-	 *
-	 * for(int ii=1; ii<tab_nv; ii++){
-	 * bmin[0] = min(bmin[0],tab_XX[ii]);
-	 * bmin[1] = min(bmin[1],tab_YY[ii]);
-	 * bmin[2] = min(bmin[2],tab_ZZ[ii]);
-	 *
-	 * bmax[0] = max(bmax[0],tab_XX[ii]);
-	 * bmax[1] = max(bmax[1],tab_YY[ii]);
-	 * bmax[2] = max(bmax[2],tab_ZZ[ii]);
-	 * }
-	 */
 
 	k[0] = int((bmax[0] - bmin[0]) / epsilon);
 	k[1] = int((bmax[1] - bmin[1]) / epsilon);
@@ -4877,7 +4727,6 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 
 	for (int ii = 0; ii < tab_nv; ii++) {
 		// boucle dans l autre sens pour assurer l'ordre des elements pour la suite
-		// cout << "vertex ii " << ii << "  max : " << tab_nv;
 		j[0] = int((tab_XX[ii] - bmin[0]) / epsilon);
 		j[1] = int((tab_YY[ii] - bmin[1]) / epsilon);
 		j[2] = int((tab_ZZ[ii] - bmin[2]) / epsilon);
@@ -4886,7 +4735,6 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 		assert(j[1] <= k[1] && j[1] >= 0);
 		assert(j[2] <= k[2] && j[2] >= 0);
 		i = (j[2] * (k[1] + 1) + j[1] * (k[0] + 1) + j[0]);
-		// cout << i << endl;
 		i = i % NbCode;
 		assert(i < NbCode);
 		posv[ii] = tcode[i];
@@ -4904,7 +4752,6 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 	nv_t = 0;
 
 	for (int icode = 0; icode < NbCode; icode++) {
-		// int ii,jj;
 		double dist;
 
 		for (int ii = tcode[icode]; ii != -1; ii = posv[ii]) {
@@ -4920,8 +4767,6 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 				if (sqrt(dist) < epsilon) {
 					// point semblable
 					Numero_Som[jj] = Numero_Som[ii];
-					// cout << "point semblable" << endl;
-					// exit(-1);
 				}
 			}
 
@@ -4949,21 +4794,6 @@ void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_co
 	int *Numero_Som = new int[NbPoints];
 	double epsilon = hmin / 10.;
 
-	/*
-	 * double epsilon=0.0001;
-	 * double bmin[dim],bmax[dim];
-	 *
-	 * for(int jj=0; jj<dim; jj++){
-	 * bmin[jj] = Coord_Point[0][jj];
-	 * bmax[jj] = bmin[jj];
-	 * }
-	 * for(int ii=1; ii<NbPoints; ii++){
-	 * for(int jj=0; jj<dim; jj++){
-	 * bmin[jj] = min(bmin[jj],Coord_Point[ii][jj]);
-	 * bmax[jj] = max(bmax[jj],Coord_Point[ii][jj]);
-	 * }
-	 * }
-	 */
 	assert(dim > 1);
 
 	for (int jj = 0; jj < dim; jj++) {
@@ -5047,7 +4877,6 @@ void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_co
 			for (int ii = tcode[icode]; ii != -1; ii = posv[ii]) {
 				if (Numero_Som[ii] != -1) {continue;}
 
-				// minimum_np=ii;
 				Numero_Som[ii] = np;
 
 				for (int jj = posv[ii]; jj != -1; jj = posv[jj]) {
@@ -5062,7 +4891,6 @@ void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_co
 					if (sqrt(dist) < epsilon) {
 						// point semblable
 						Numero_Som[jj] = Numero_Som[ii];
-						// minimum_np = min( jj, minimum_np);
 					}
 				}
 
@@ -5078,13 +4906,11 @@ void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_co
 		np = 0;
 
 		for (int icode = 0; icode < NbCode; icode++) {
-			// int ii,jj;
 			double dist;
 
 			for (int ii = tcode[icode]; ii != -1; ii = posv[ii]) {
 				if (Numero_Som[ii] != -1) {continue;}
 
-				// minimum_np=ii;
 				Numero_Som[ii] = np;
 				point_multiple = 0;
 
@@ -5101,7 +4927,6 @@ void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_co
 						// point semblable
 						Numero_Som[jj] = Numero_Som[ii];
 						point_multiple = 1;
-						// minimum_np = min( jj, minimum_np);
 					}
 				}
 
@@ -5138,9 +4963,7 @@ void OrderVertexTransfo_hcode_nv_gtree (const int &tab_nv, const R3 &bmin, const
 	assert(hmin > Norme2(bmin - bmax) / 1e9);
 	double hseuil = hmin / 10.;
 
-	// hseuil = hseuil/10.;
 	Vertex3 *v = new Vertex3[tab_nv];
-	// Vertex3  v[tab_nv];
 	EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v, bmin, bmax, 0);
 
 	if (verbosity > 2) {
@@ -5154,13 +4977,7 @@ void OrderVertexTransfo_hcode_nv_gtree (const int &tab_nv, const R3 &bmin, const
 
 	for (int ii = 0; ii < tab_nv; ii++) {
 		const R3 r3vi(tab_XX[ii], tab_YY[ii], tab_ZZ[ii]);
-		/*vi.x = tab_XX[ii];
-		*  vi.y = tab_YY[ii];
-		*  vi.z = tab_ZZ[ii];*/
 		const Vertex3 &vi(r3vi);
-		/*vi.x = tab_XX[ii];
-		*  vi.y = tab_YY[ii];
-		*  vi.z = tab_ZZ[ii];*/
 		Vertex3 *pvi = gtree->ToClose(vi, hseuil);
 		if (!pvi) {
 			v[nv_t].x = vi.x;
@@ -5203,8 +5020,6 @@ void OrderVertexTransfo_hcode_nv_gtree (const int &tab_nv, const R3 &bmin, const
 
 		if (verbosity > 2) {cout << "  -- numberofpoints " << numberofpoints << endl;}
 
-// if(verbosity >2) cout << "  -- taille boite englobante =" << endl;
-		// assert(nv_t==numberofpoints);
 	}
 }
 
@@ -5213,7 +5028,6 @@ void PointCommun_hcode_gtree (const int &dim, const int &NbPoints, const int &po
                               const R3 &bmin, const R3 &bmax, const double &hmin, int *ind_np, int *ind_label, int &np) {
 	double hseuil = hmin / 10.;
 	Vertex3 *v = new Vertex3[NbPoints];
-	// Vertex3 v[NbPoints];
 	EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v, bmin, bmax, 0);
 
 	if (verbosity > 1) {cout << "verif hmin vertex3 GTree switch: " << point_confondus_ok << endl;}
@@ -5251,7 +5065,6 @@ void PointCommun_hcode_gtree (const int &dim, const int &NbPoints, const int &po
 
 		for (int ii = 0; ii < NbPoints; ii++) {
 			const R3 r3vi(Coord_Point[ii][0], Coord_Point[ii][1], Coord_Point[ii][2]);
-			// int label = label_point[ii];
 			const Vertex3 &vi(r3vi);
 			Vertex3 *pvi = gtree->ToClose(vi, hseuil);
 
@@ -5276,7 +5089,6 @@ void PointCommun_hcode_gtree (const int &dim, const int &NbPoints, const int &po
 
 		for (int ii = 0; ii < NbPoints; ii++) {
 			const R3 r3vi(Coord_Point[ii][0], Coord_Point[ii][1], Coord_Point[ii][2]);
-			// int label =  label_point[ii];
 			const Vertex3 &vi(r3vi);
 			Vertex3 *pvi = gtree->ToClose(vi, hseuil);
 			ind_multiple[pvi - v] = ind_multiple[pvi - v] + 1;
@@ -5305,31 +5117,6 @@ void PointCommun_hcode_gtree (const int &dim, const int &NbPoints, const int &po
 	delete gtree;
 	delete [] v;
 
-	/*
-	 * int z_verifnumberofpoints;
-	 * z_verifnumberofpoints = 0;
-	 * if(z_verifnumberofpoints ==1){
-	 * int numberofpoints=0;
-	 * int numberofpointsdiff;
-	 * for(int ii=0; ii<NbPoints; ii++){
-	 * numberofpointsdiff=0;
-	 * for(int jj=ii+1; jj<NbPoints; jj++){
-	 * double dist = 0.;
-	 * for( int kk=0; kk<3; kk++){
-	 * dist = dist +  pow(Coord_Point[jj][kk]-Coord_Point[ii][kk],2);
-	 * }
-	 * if( sqrt(dist) < hseuil/10){
-	 * numberofpointsdiff=1;
-	 * }
-	 * }
-	 * if( numberofpointsdiff==0) numberofpoints=numberofpoints+1;
-	 * if( point_confondus_ok==1 && numberofpointsdiff==1) numberofpoints=numberofpoints-1;
-	 * }
-	 * cout << "numberofpoints =" << numberofpoints<< endl;
-	 * cout << "np =" << np<< endl;
-	 * //assert( numberofpoints == np);
-	 * }
-	 */
 }
 
 /* fin TransfoMesh_v2.cpp*/
@@ -5350,8 +5137,6 @@ class BuildLayeMesh_Op: public E_F0mps
 
 		long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
 
-	// int    arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
-
 	public:
 		BuildLayeMesh_Op (const basicAC_F0 &args, Expression tth, Expression nmaxx)
 			: eTh(tth), enmax(nmaxx), ezmin(0), ezmax(0), xx(0), yy(0), zz(0) {
@@ -5364,14 +5149,11 @@ class BuildLayeMesh_Op: public E_F0mps
 			if (nargs[1]) {a2 = dynamic_cast<const E_Array *>(nargs[1]);}
 
 			int err = 0;
-			// cout << nargs[0] << " "<< a1 << endl;
-			// cout << nargs[1] << " "<< a2 << endl;
 			if (a1) {
 				if (a1->size() != 2) {
 					CompileError("LayerMesh (Th,n, zbound=[zmin,zmax],) ");
 				}
 
-				// cout << "lecture de ezmin , ezmax" << endl;
 				ezmin = to<double>((*a1)[0]);
 				ezmax = to<double>((*a1)[1]);
 			}
@@ -5429,7 +5211,6 @@ class BuildLayerMesh: public OneOperator {
 		E_F0*code (const basicAC_F0 &args) const {
 			if (verbosity > 1) {cout << " je suis dans code(const basicAC_F0 & args) const" << endl;}
 
-			// cout << "args: " << args << endl;
 			return new BuildLayeMesh_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
 		}
 };
@@ -5450,8 +5231,6 @@ class cubeMesh_Op: public E_F0mps
 
 		long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
 
-	// int    arg(int i,Stack stack,int a ) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
-
 	public:
 		cubeMesh_Op (const basicAC_F0 &args, Expression nnx, Expression nny, Expression nnz, Expression transfo = 0)
 			: nx(nnx), ny(nny), nz(nnz), xx(0), yy(0), zz(0) {
@@ -5460,8 +5239,6 @@ class cubeMesh_Op: public E_F0mps
 			args.SetNameParam(n_name_param, name_param, nargs);
 			const E_Array *a2 = dynamic_cast<const E_Array *>(transfo);
 			int err = 0;
-			// cout << nargs[0] << " "<< a1 << endl;
-			// cout << nargs[1] << " "<< a2 << endl;
 			if (a2) {
 				if (a2->size() != 3) {
 					CompileError("cube (n1,n2,n3, [X,Y,Z]) ");
@@ -5490,7 +5267,6 @@ class cubeMesh: public OneOperator {
 		cubeMesh (int): OneOperator(atype<pmesh3>(), atype<long>(), atype<long>(), atype<long>(), atype<E_Array>()), xyz(1) {}
 
 		E_F0*code (const basicAC_F0 &args) const {
-			// cout << "args: " << args << endl;
 			if (xyz) {
 				return new cubeMesh_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]));
 			} else {
@@ -5538,7 +5314,6 @@ AnyType cubeMesh_Op::operator () (Stack stack)  const {
 
 	long rup [] = {0, l3[6 - 1]}, rdown [] = {0, l3[5 - 1]}, r0 [] = {0, region};
 	long rmid [] = {1, l3[1 - 1], 2, l3[2 - 1], 3, l3[3 - 1], 4, l3[4 - 1]};
-	// KN_<long> zzempty;
 	KN_<long> nrtet(r0, 2);
 	KN_<long> nrfmid(rmid, 8);
 	KN_<long> nrfup(rup, 2);
@@ -5623,11 +5398,9 @@ AnyType cubeMesh_Op::operator () (Stack stack)  const {
 	delete pTh;
 
 	if (xx && yy && zz) {
-		// Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax);
 
 		KN<double> txx(Th3->nv), tyy(Th3->nv), tzz(Th3->nv);
 		KN<int> takemesh(Th3->nv);
-		// MeshPoint *mp3(MeshPointStack(stack));
 
 		takemesh = 0;
 
@@ -5675,7 +5448,6 @@ AnyType BuildLayeMesh_Op::operator () (Stack stack)  const {
 
 	ffassert(pTh && nlayer > 0);
 	Mesh &Th = *pTh;
-	Mesh *m = pTh;	// question a quoi sert *m ??
 	int nbv = Th.nv;// nombre de sommet
 	int nbt = Th.nt;// nombre de triangles
 	int neb = Th.neb;	// nombre d'aretes fontiere
@@ -5719,7 +5491,6 @@ AnyType BuildLayeMesh_Op::operator () (Stack stack)  const {
 	int point_confondus_ok(arg(7, stack, 0L));
 	double precis_mesh(arg(8, stack, -1L));
 
-	// if( nrtet.N() && nrfmid.N() && nrfup.N() && nrfdown.N() ) return m;
 	ffassert(nrtet.N() % 2 == 0);
 	ffassert(nrfmid.N() % 2 == 0);
 	ffassert(nrfup.N() % 2 == 0);
@@ -5799,22 +5570,6 @@ AnyType BuildLayeMesh_Op::operator () (Stack stack)  const {
 	// cas maillage surfacique simplement // A construire Jacques + donner le numero des edges que l'on veut pas creer à l'intérieure
 
 	if (!(xx) && !(yy) && !(zz)) {
-		/*
-		 * map< int, int > maptet;
-		 * map< int, int > maptrimil, maptrizmax, maptrizmin;
-		 * map< int, int > mapemil, mapezmax, mapezmin;
-		 *
-		 * build_layer_map_tetrahedra( Th, maptet );
-		 * build_layer_map_triangle( Th, maptrimil, maptrizmax, maptrizmin );
-		 * build_layer_map_edge( Th, mapemil, mapezmax, mapezmin );
-		 *
-		 * Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
-		 */
-
-		// Th3->BuildBound();
-		// Th3->BuildAdj();
-		// Th3->Buildbnormalv();
-		// Th3->BuildjElementConteningVertex();
 
 		Th3->BuildGTree();	// A decommenter
         Th3->getTypeMesh3()=1;
@@ -5822,11 +5577,9 @@ AnyType BuildLayeMesh_Op::operator () (Stack stack)  const {
 		*mp = mps;
 		return Th3;
 	} else {
-		// Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax);
 
 		KN<double> txx(Th3->nv), tyy(Th3->nv), tzz(Th3->nv);
 		KN<int> takemesh(Th3->nv);
-		// MeshPoint *mp3(MeshPointStack(stack));
 
 		takemesh = 0;
 		Mesh3 &rTh3 = *Th3;
@@ -5855,11 +5608,6 @@ AnyType BuildLayeMesh_Op::operator () (Stack stack)  const {
 		}
 
 		Mesh3 *T_Th3 = Transfo_Mesh3(precis_mesh, rTh3, txx, tyy, tzz, border_only, recollement_elem, recollement_border, point_confondus_ok, 1);
-
-		// T_Th3->BuildBound();
-		// T_Th3->BuildAdj();
-		// T_Th3->Buildbnormalv();
-		// T_Th3->BuildjElementConteningVertex();
 
 		T_Th3->BuildGTree();// A decommenter
         T_Th3->getTypeMesh3()=1;
@@ -5924,7 +5672,6 @@ class DeplacementTab_Op: public E_F0mps
 {
 	public:
 		Expression eTh;
-		// Expression xx,yy,zz;
 		static const int n_name_param = 6;	//
 		static basicAC_F0::name_and_type name_param [];
 		Expression nargs[n_name_param];
@@ -5961,7 +5708,6 @@ AnyType DeplacementTab_Op::operator () (Stack stack)  const {
 
 	ffassert(pTh);
 	Mesh3 &Th = *pTh;
-	Mesh3 *m = pTh;	// question a quoi sert *m ??
 	int nbv = Th.nv;// nombre de sommet
 	int nbt = Th.nt;// nombre de triangles
 	int nbe = Th.nbe;	// nombre d'aretes fontiere
@@ -6017,19 +5763,11 @@ AnyType DeplacementTab_Op::operator () (Stack stack)  const {
 	                             recollement_elem, recollement_border, point_confondus_ok, 1);
 
 	if (nbt != 0) {
-		// T_Th3->BuildBound();
-
-		// T_Th3->BuildAdj();
 
 		if (flagsurfaceall == 1) {T_Th3->BuildBoundaryElementAdj();}
 
-		// T_Th3->Buildbnormalv();
-
-		// T_Th3->BuildjElementConteningVertex();
-
 		T_Th3->BuildGTree();
 
-		// T_Th3->decrement();
 	} else {
 		if (flagsurfaceall == 1) {T_Th3->BuildBoundaryElementAdj();}
 	}
@@ -6066,7 +5804,6 @@ void GetManifolds (Expression mani, int &nbcmanifold, int * &mani_nbe, Expressio
 
 		nbcmanifold = n;// nombre de manifold définis
 
-		// manifold = new Expression[n];
 		mani_nbe = new int[n];
 		int size = 0;
 
@@ -6108,28 +5845,6 @@ void GetNumberBEManifold (Expression surf, int &mani_nbe) {
 		mani_nbe = a->size();
 	}
 }
-
-// void GetManifold( Expression surf, int & mani_nbe, Expression * &manifold)
-// {
-// if ( surf )
-// {
-// int i,j;
-// if( verbosity>1)
-// cout << "  -- Manifoldal Condition to do" << endl;
-// const E_Array * a= dynamic_cast<const  E_Array *>(surf);
-// ffassert(a);
-// int n = a->size()/2;
-// mani_nbe = n;
-// if( verbosity>1)
-// cout << "    the number of face label in a manifold " << n << endl;
-// if( n*2 != a->size() )
-// CompileError(" a manifold is defined by a pair of [label, orientation ]");
-// manifold = new Expression[n*2];
-// for ( i=0,j=0;i<n;i++,j+=2)
-// if (GetBEManifold((*a)[i],manifold[j],manifold[j+1])==0)
-// CompileError(" a sub array of a sub manifold must be [label, orientation ]");
-// }
-// }
 
 int GetBEManifold (Expression bb, Expression &label, Expression &orient) {
 	const E_Array *a = dynamic_cast<const E_Array *>(bb);
@@ -6208,19 +5923,6 @@ AnyType CheckManifoldMesh_Op::operator () (Stack stack)  const {
 	}
 
 	assert(count == size);
-
-// int count=0;
-// for(int ii=0; ii<nbvariete; ii++)
-// {
-// beginvariete[ii]=count;
-// for(int jj=0; jj<labelvariete[ii]; jj++)
-// {
-// TabLabelVariete    [count] = GetAny< long > ( (*surface[2*ii+1][2*jj])(stack) );
-// OrientLabelVariete [count] = GetAny< long > ( (*surface[2*ii+1][2*jj+1])(stack) );
-// count++;
-// }
-// }
-// beginvariete[nbvariete]=count;
 
 	long resultat = 1;
 	pTh->BuildBoundaryElementAdj(nbmanifold, BeginManifold, TabLabelManifold, OrientLabelManifold);	// nbvariete, beginvariete, TabLabelVariete, OrientLabelVariete);
@@ -6685,8 +6387,6 @@ void Renumb (Fem2D::MeshS * &pTh) {
     }
 
     delete [] adjncyVec;
-    // renumb::i4vec_print ( nbt + 1, xadg, "  ADJ_ROW:" );
-    // renumb::adj_print ( nbt, adjncy.size(), xadg,adjncy.data() , "  ADJ" );
     int bandwidth;
     if (verbosity > 2) {
         bandwidth = renumb::adj_bandwidth(nbv, adjncy.size(), xadg, &(adjncy[0]));
@@ -6759,8 +6459,6 @@ AnyType Op_trunc_meshS::Op::operator () (Stack stack)  const {
     KN<long> kempty;
     KN<long> nre = arg(5,stack,kempty);
     KN<long> nrt = arg(6,stack,kempty);
-    Expression flab = nargs[7] ;
-    Expression freg = nargs[8] ;
     KN<int> split(Th.nt);
     split = kkksplit;
     MeshPoint *mp = MeshPointStack(stack), mps = *mp;
@@ -6774,7 +6472,6 @@ AnyType Op_trunc_meshS::Op::operator () (Stack stack)  const {
         if (GetAny<bool>((*bbb)(stack))) {kk++;} else {split[k] = 0;}
     }
 
-    // *mp=mps;
     if (verbosity > 1) {
         cout << "  -- Trunc mesh: Nb of Surface Trianles = " << kk << " label=" << label << endl;
     }
@@ -7356,8 +7053,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
         int itet = Th.BoundaryElement(i, iftet);
 
         if (split[itet]) {
-          const TriangleS &K(ThS->elements[i]);
-          // K comes from to the original tetra
+  				// K comes from to the original tetra
           int iftet;
           int itet = Th.BoundaryElement(i, iftet);
 
@@ -7451,8 +7147,6 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
         delete [] newindex;
       }
 
-
-      // Tht->meshS->set(nbv_surf, nbe, nbeS);
       // complete the building of the new meshS
       int mes=0., mesb=0.;
 
@@ -7523,8 +7217,6 @@ void Renumb (Fem2D::Mesh3 * &pTh) {
     }
 
     delete [] adjncyVec;
-    // renumb::i4vec_print ( nbt + 1, xadg, "  ADJ_ROW:" );
-    // renumb::adj_print ( nbt, adjncy.size(), xadg,adjncy.data() , "  ADJ" );
     int bandwidth;
     if (verbosity > 2) {
         bandwidth = renumb::adj_bandwidth(nbv, adjncy.size(), xadg, &(adjncy[0]));
@@ -7590,7 +7282,6 @@ AnyType Op_trunc_mesh3::Op::operator () (Stack stack)  const {
     Mesh3 *pTh = GetAny<Mesh3 *>((*getmesh)(stack));
     ffassert(pTh);
     Mesh3 &Th = *pTh;
-    MeshS &ThS = *(pTh->getMeshS());
 
     long kkksplit = std::max(1L, arg(0, stack, 1L));
     long label = arg(1, stack, 2L);
@@ -7684,7 +7375,6 @@ class ExtractMesh2D_Op: public E_F0mps
 
 		double arg (int i, Stack stack, double a) const {return nargs[i] ? GetAny<double>((*nargs[i])(stack)) : a;}
 
-		// long    arg(int i,Stack stack,long a ) const{ return nargs[i] ? GetAny< long >( (*nargs[i])(stack) ): a;}
 		long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
 
 	public:
@@ -7725,10 +7415,6 @@ AnyType ExtractMesh2D_Op::operator () (Stack stack)  const {
 	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
 	Mesh *pTh = GetAny<Mesh *>((*eTh)(stack));
 	Mesh &Th = *pTh;
-	int nbv = Th.nv;// nombre de sommet
-	int nbt = Th.nt;// nombre de triangles
-	int nbe = Th.neb;	// nombre d'aretes fontiere
-
 	KN<long> zzempty(0);
 	// recuperation des labels pour les surfaces et les elements
 	KN<long> labelface(arg(0, 2, stack, zzempty));
@@ -7828,7 +7514,7 @@ AnyType ExtractMesh2D_Op::operator () (Stack stack)  const {
 			if (takeelem[ie] != 1) {continue;}
 
 			const Mesh::Triangle &K(Th.t(ie));
-			int ivv[3];
+			int ivv[3]={};
 
 			for (int jj = 0; jj < 3; jj++) {
 				ivv[jj] = takevertex[Th.operator () (K[jj])];
@@ -7910,7 +7596,7 @@ AnyType ExtractMesh2D_Op::operator () (Stack stack)  const {
 			if (takebe[ibe] != 1) {continue;}
 
 			const Mesh::BorderElement &K(Th.be(ibe));
-			int ivv[2];
+			int ivv[2]={};
 
 			for (int jj = 0; jj < 2; jj++) {
 				ivv[jj] = takevertex[Th.operator () (K[jj])];
@@ -8012,9 +7698,6 @@ AnyType ExtractMesh_Op::operator () (Stack stack)  const {
 	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
 	Mesh3 *pTh = GetAny<Mesh3 *>((*eTh)(stack));
 	Mesh3 &Th = *pTh;
-	int nbv = Th.nv;// nombre de sommet
-	int nbt = Th.nt;// nombre de triangles
-	int nbe = Th.nbe;	// nombre d'aretes fontiere
 
 	KN<long> zzempty(0);
 	KN<long> labelface(arg(0, 2, stack, zzempty));
@@ -8087,10 +7770,6 @@ AnyType ExtractMesh_Op::operator () (Stack stack)  const {
 							int iivv = Th.operator () (K[jj]);
 							cerr << "Error(Extract Mesh):: the vertex (" << Th.vertices[iivv].x << ", " << Th.vertices[iivv].y << ", " << Th.vertices[iivv].z << ") is not in the volume mesh" << endl;
 						}
-
-						// continue;
-						// takevertex[ Th.operator()(K[jj]) ] = nv;
-						// nv++;
 					}
 
 					break;
@@ -8146,7 +7825,7 @@ AnyType ExtractMesh_Op::operator () (Stack stack)  const {
 			(bb++)->set(v, ivv, K.lab);
 		}
 
-		Mesh3 *pThnew = new Mesh3(nv, nt, ns, v, t, b);	// peut etre a dÃ©finir ???
+		Mesh3 *pThnew = new Mesh3(nv, nt, ns, v, t, b);	// to define ???
 		// attention aux composantes connexes.
 		pThnew->BuildGTree();	// Lorenzo
 
@@ -8171,7 +7850,6 @@ AnyType ExtractMesh_Op::operator () (Stack stack)  const {
 			for (int ii = 0; ii < labelface.N(); ii++) {
 				if (K.lab == labelface[ii]) {
 					nbeLab++;
-					//cout << "takeface" << endl;
 					takebe[ibe] = 1;
 
 					for (int jj = 0; jj < 3; jj++) {
@@ -8240,8 +7918,6 @@ bool AddLayers (Mesh3 const *const &pTh, KN<double> *const &psupp, long const &n
 	ffassert(phi.N() == nv);// P1
 	s = supp;
 	phi = 0.;
-	// supp = 0.;
-	// cout << " s  " << s << endl;
 
 	for (int step = 0; step < nlayer; ++step) {
 		u = 0.;
@@ -8255,8 +7931,6 @@ bool AddLayers (Mesh3 const *const &pTh, KN<double> *const &psupp, long const &n
 		for (int v = 0; v < nv; ++v) {
 			u[v] = u[v] > 0.;
 		}
-
-		// cout << " u  " << u << endl;
 
 		phi += u;
 
@@ -8273,12 +7947,8 @@ bool AddLayers (Mesh3 const *const &pTh, KN<double> *const &psupp, long const &n
 		}
 
 		supp += s;
-		// cout << " s  " << s << endl;
 	}
-
-	// cout << " phi  " << phi << endl;
 	phi *= (1. / nlayer);
-	// supp =s;
 	return true;
 }
 
@@ -8296,8 +7966,6 @@ bool AddLayers (MeshS const *const &pTh, KN<double> *const &psupp, long const &n
 	ffassert(phi.N() == nv);// P1
 	s = supp;
 	phi = 0.;
-	// supp = 0.;
-	// cout << " s  " << s << endl;
 
 	for (int step = 0; step < nlayer; ++step) {
 		u = 0.;
@@ -8311,8 +7979,6 @@ bool AddLayers (MeshS const *const &pTh, KN<double> *const &psupp, long const &n
 		for (int v = 0; v < nv; ++v) {
 			u[v] = u[v] > 0.;
 		}
-
-		// cout << " u  " << u << endl;
 
 		phi += u;
 
@@ -8329,12 +7995,8 @@ bool AddLayers (MeshS const *const &pTh, KN<double> *const &psupp, long const &n
 		}
 
 		supp += s;
-		// cout << " s  " << s << endl;
 	}
-
-	// cout << " phi  " << phi << endl;
 	phi *= (1. / nlayer);
-	// supp =s;
 	return true;
 }
 
@@ -8356,13 +8018,11 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
 	double hmin = 1e100;
 	R3 Pn(1e100, 1e100, 1e100), Px(-1e100, -1e100, -1e100);
 	// returned mesh3
-    const Mesh3 *th0 = 0;
 
 
     // determine the max structure size of the new mesh
 	for (int i = 0; i < tab->n; i++) {
 		const Mesh3 &Th3(*tab->operator [] (i));
-		th0 = &Th3;
 		if (verbosity > 1) {cout << " determination of hmin : GluMesh3D + " << Th3.nv << " " << Th3.nt << " " << Th3.nbe << endl;}
 		nbt += Th3.nt;
 		nbvx += Th3.nv;
@@ -8401,8 +8061,6 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
 	ffassert(hmin > Norme2(Pn - Px) / 1e9);
 	double hseuil = hmin / 10.;
 
-	// int *NumSom= new int[nbvx];
-
 	// VERSION morice
 	if (verbosity > 1) {cout << " creation of : BuildGTree" << endl;}
 
@@ -8410,15 +8068,12 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
 
 	nbv = 0;
 
-	// int nbv0=0;
 	for (int i = 0; i < tab->n; i++) {
 		const Mesh3 &Th3(*tab->operator [] (i));
 
 		if (verbosity > 1) {cout << " loop over mesh for create new mesh " << endl;}
 
 		if (verbosity > 1) {cout << " GluMesh3D + " << Th3.nv << " " << Th3.nt << " " << Th3.nbe << endl;}
-
-		// nbv0 =+Th3.nv;
 
 		for (int ii = 0; ii < Th3.nv; ii++) {
 			const Vertex3 &vi(Th3.vertices[ii]);
@@ -8433,13 +8088,6 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
 				gtree->Add(v[nbv]);
 				nbv++;
 			}
-
-			/*
-			 * else{
-			 * NumSom[ii+nbv0] = pvi-v;
-			 * assert(pvi-v <nbv);
-			 * }
-			 */
 		}
 
 		for (int k = 0; k < Th3.nt; k++) {
@@ -8451,18 +8099,14 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
 			iv[3] = gtree->ToClose(K[3], hseuil) - v;
 			(tt++)->set(v, iv, K.lab);
 		}
-
-		// nbv0 =+Th3.nv;
 	}
 
 	if (verbosity > 1) {cout << " creation of : BuildGTree for border elements" << endl;}
 
 	Vertex3 *becog = new Vertex3[nbex];
-	// Vertex3  becog[nbex];
 	EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(becog, Pn, Px, 0);
 	double hseuil_border = hseuil / 3;
 
-	// nbv0=0;
 	for (int i = 0; i < tab->n; i++) {
 		const Mesh3 &Th3(*tab->operator [] (i));
 
@@ -8499,8 +8143,6 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
 				}
 			}
 		}
-
-		// nbv0 =+Th3.nv;
 	}
 
 	delete gtree;
@@ -8529,20 +8171,8 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
 		return mpq;
 	} else {
 		Mesh3 *mpq = new Mesh3(nbv, nbt, nbe, v, t, b);
-		/*
-		 * mpq->BuildBound();
-		 * if(verbosity > 1) cout << "fin de BuildBound" << endl;
-		 * mpq->BuildAdj();
-		 * if(verbosity > 1) cout << "fin de BuildAdj" << endl;
-		 * mpq->Buildbnormalv();
-		 * if(verbosity > 1) cout << "fin de Buildnormalv()" << endl;
-		 * mpq->BuildjElementConteningVertex();
-		 * if(verbosity > 1) cout << "fin de ConteningVertex()" << endl;
-		 */
 		mpq->BuildGTree();
 		if (verbosity > 2) {cout << "fin de BuildGTree()" << endl;}
-
-		// Add2StackOfPtr2FreeRC(stack,mpq);
 
 		return mpq;
 	}
@@ -8592,7 +8222,6 @@ long BuildBoundaryElementAdj (const Mesh3 &Th, bool check = 0, KN<long> *pborder
 	// if exist a link :: sign(nk_link)*(nk_link+1)
 	// else            :: sign(nk)*(nk)
 
-	// assert(TheBoundaryElementAdjacencesLink==0); plus tard
 	int nbe = Th.nbe;
 	int nv = Th.nv;
 	int *TheBoundaryElementAdjacencesLink = new int[B::nea * nbe];
@@ -8624,7 +8253,6 @@ long BuildBoundaryElementAdj (const Mesh3 &Th, bool check = 0, KN<long> *pborder
 						     << ", is oriented in the same direction in element " << k + 1
 						     << " and in element " << 1 + (p->v / B::nea) << endl;
 					}
-
 					err++;
 				}
 
@@ -8639,14 +8267,12 @@ long BuildBoundaryElementAdj (const Mesh3 &Th, bool check = 0, KN<long> *pborder
 						     << 1 + (abs(TheBoundaryElementAdjacencesLink[p->v]) - 1) / B::nea << endl;
 						cout << " The Surface contains these edges is not a manifold" << endl;
 					}
-
 					err3++;
 				}
 
 				TheBoundaryElementAdjacencesLink[nk] = TheBoundaryElementAdjacencesLink[p->v];
 				TheBoundaryElementAdjacencesLink[p->v] = sens * (nk + 1);
 			}
-
 			nk++;
 		}
 	}
@@ -8936,8 +8562,6 @@ class Cube_Op: public E_F0mps
 			if (transfo) {
 				const E_Array *a2 = dynamic_cast<const E_Array *>(transfo);
 				int err = 0;
-				// cout << nargs[0] << " "<< a1 << endl;
-				// cout << nargs[1] << " "<< a2 << endl;
 				if (a2) {
 					if (a2->size() != 3) {
 						CompileError("Cube (n1,n2,n3, [X,Y,Z]) ");
@@ -8998,7 +8622,7 @@ struct MovePoint {
 Mesh3*BuildCube (long nx, long ny, long nz, long region, long *label, long kind, MovePoint *tf = 0) {
 	const int(*const nvface)[3] = Tet::nvface;
 	int debug = verbosity != 0 + verbosity / 10;
-	int codesb[64], kcode[20];
+	int codesb[64]={}, kcode[20]={};
 	int kstable = 0;
 	if (debug) {cout << "  Enter: BuildCube: " << kind << endl;}
 
@@ -9050,8 +8674,6 @@ Mesh3*BuildCube (long nx, long ny, long nz, long region, long *label, long kind,
 					for (int k = 0; k < 6; ++k) {
 						if (l == (1 << k)) {// boundary face
 							// arete diagonal =>
-							// k =  2*i + j; // i => normal 0,1,2 , j = min , max (0,1)
-							// vecteur i+1 %2 , i+2 %3
 							int ni = k / 2, j0 = k % 2;
 							int oi = (1 << ni) * j0;
 							int j1 = 1 << (ni + 1) % 3;
@@ -9142,7 +8764,7 @@ Mesh3*BuildCube (long nx, long ny, long nz, long region, long *label, long kind,
 		for (int j = 0; j < ny; ++j) {
 			for (int i = 0; i < nx; ++i) {
 				int pair = ntetcube == 6 ? code6 : (ppinit + k + j + i) % 2;
-				int n[8];
+				int n[8]={};
 
 				for (int c = 0; c < 2; ++c) {
 					for (int b = 0; b < 2; ++b) {
@@ -9258,12 +8880,8 @@ static void Load_Init () {
 	TheOperators->Add("+", new OneBinaryOperator_st<Op3_addmesh<listMesh3, pmesh3, pmesh3> > );
 	TheOperators->Add("+", new OneBinaryOperator_st<Op3_addmesh<listMesh3, listMesh3, pmesh3> > );
 
-	// TheOperators->Add("=",new OneBinaryOperator< Op3_setmesh<false,pmesh3*,pmesh3*,listMesh3>  >     );
-	// TheOperators->Add("<-",new OneBinaryOperator< Op3_setmesh<true,pmesh3*,pmesh3*,listMesh3>  >     );
-
 	TheOperators->Add("=", new OneBinaryOperator_st<Op3_setmesh<false, pmesh3 *, pmesh3 *, listMesh3> > );
 	TheOperators->Add("<-", new OneBinaryOperator_st<Op3_setmesh<true, pmesh3 *, pmesh3 *, listMesh3> > );
-
 
 	// 3D SURF :
 	TheOperators->Add("+", new OneBinaryOperator_st<Op3_addmeshS<listMeshS, pmeshS, pmeshS> > );
@@ -9299,7 +8917,6 @@ static void Load_Init () {
 	Global.Add("AddLayers", "(", new OneOperator4_<bool, const MeshS *, KN<double> *, long, KN<double> *>(AddLayers));
 	typedef const Mesh3 *pmesh3;
     typedef const MeshS *pmeshS;
-	// Global.Add("trunc","(", new Op_trunc_mesh3);
 }
 
 // <<msh3_load_init>> static loading: calling Load_Init() from a function which is accessible from

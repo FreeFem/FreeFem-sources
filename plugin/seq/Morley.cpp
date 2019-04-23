@@ -73,7 +73,6 @@ namespace  Fem2D {
 
 				for (int e = 0; e < 3; ++e) {	// point d'integration sur l'arete e
 					P_Pi_h[p] = Pt[p];
-					// cout <<"\n" <<  p << " --  " << P_Pi_h[p] << " ::  " << A << " " << B << endl;
 					pij_alpha[kk++] = IPJ(3 + e, p, 1);	// coef = 0.5* l_e *ne_x * sge
 					pij_alpha[kk++] = IPJ(3 + e, p, 2);	// coef = 0.5* l_e *ne_y * sge
 					p++;
@@ -223,7 +222,7 @@ namespace  Fem2D {
 		}
 
 		{
-			int vop[last_operatortype], nop = 0;
+			int vop[last_operatortype]={}, nop = 0;
 
 			for (int j = 0; j < last_operatortype; j++) {
 				if (wd[j]) {

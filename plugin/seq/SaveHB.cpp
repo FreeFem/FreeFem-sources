@@ -105,20 +105,19 @@ long SaveHB(std::string *const &hb_filename,
 
     const int N = A->N;
     const int M = A->M;
-    if( N != M ) return 1; 
+    if( N != M ) return 1;
 
     std::cout << "SaveHB : # of unknowns = " << N << std::endl;
 
     const int nnzero = A->nnz;
-    
+
 
     std::cout << "SaveHB : # of non-zero entries in A = " << nnzero << std::endl;
-	// (I *& JA, I *& IA, R *& A)
 	int * col_ptr, *row_ind;
 	R * ccs_val;
 	A->setfortran(true);
     A->CSC(col_ptr,row_ind,ccs_val);
-   
+
     //--------------------------------------------------
     // File
     //--------------------------------------------------
@@ -213,16 +212,14 @@ long SaveHB(std::string *const &hb_filename,
     output_matrix_entries( fout, N, ccs_val, nnzero, b );
 
     fout.close();
-   // delete [] col_ptr;  delete [] row_ind; delete [] ccs_val;
 
     A->setfortran(false);
     return 0;
 }
-    
+
 static void Load_Init () {    // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
-    // if (verbosity)
     if (verbosity) {cout << " load: SaveHB  " << endl;}
-    
+
 	Global.Add("SaveHB", "(", new OneOperator4_<long,string *,Matrice_Creuse<double>*,KN_<double>,string * >(SaveHB));
 	Global.Add("SaveHB", "(", new OneOperator4_<long,string *,Matrice_Creuse< std::complex<double> >*,KN_< std::complex<double> >,string * >(SaveHB));
     }
