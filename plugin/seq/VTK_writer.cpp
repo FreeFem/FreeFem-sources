@@ -257,7 +257,6 @@ AnyType Vtkwritesol_Op::operator () (Stack stack)  const {
 	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
 	VtkWriter &dx = *(GetAny<VtkWriter *>((*edx)(stack)));
 	string &name = *(GetAny<string *>((*ename)(stack)));
-	// double t=GetAny<double>((*et)(stack));
 	const Mesh &Th = *(dx.getmeshts(name));
 	int nt = Th.nt;
 	int nv = Th.nv;

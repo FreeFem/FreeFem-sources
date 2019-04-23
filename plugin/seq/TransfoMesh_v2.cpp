@@ -1138,7 +1138,6 @@ void SamePointElement_Mesh2 (const double &precis_mesh, const double *tab_XX, co
 // version Mesh2
 void BuildBoundMinDist_th2 (const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh &Th2, R3 &bmin, R3 &bmax, double &hmin) {
 	// determination de la boite englobante
-	// R3 bmin,bmax;
 	double precispt;
 
 	bmin.x = tab_XX[0];
@@ -1517,13 +1516,11 @@ void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_co
 		np = 0;
 
 		for (int icode = 0; icode < NbCode; icode++) {
-			// int ii,jj;
 			double dist;
 
 			for (int ii = tcode[icode]; ii != -1; ii = posv[ii]) {
 				if (Numero_Som[ii] != -1) {continue;}
 
-				// minimum_np=ii;
 				Numero_Som[ii] = np;
 				point_multiple = 0;
 
@@ -1578,7 +1575,6 @@ void OrderVertexTransfo_hcode_nv_gtree (const int &tab_nv, const R3 &bmin, const
 	assert(hmin > Norme2(bmin - bmax) / 1e9);
 	double hseuil = hmin / 10.;
 
-	// hseuil = hseuil/10.;
 	Vertex3 *v = new Vertex3[tab_nv];
 	EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v, bmin, bmax, 0);
 

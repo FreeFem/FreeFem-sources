@@ -1,3 +1,6 @@
+#ifndef _CG_HPP_
+#define _CG_HPP_
+
 #include <algorithm>
 #include <ctime>
 extern long verbosity;
@@ -69,3 +72,5 @@ struct CGMatVirtId : public CGMatVirt<Z,R> {
     R * addmatmul(R *x,R *Ax) const { mysaxpy(this->n,R(1.),x,Ax); return Ax;}
 
 };
+
+#endif // _CG_HPP_
