@@ -24,6 +24,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased] 4.1
+### Fixed
+-- missing conj operation is some hermitian operation on complex sparse matrix like  A+c*B', A*B' thanks to P-H Tournier
+-- writing CheckAllEdp to be compatible with new tree
+-- fix eps in trunc in case of very anisotrope mesh, Thank G. Sadaka
 
 ### Added
 - CMake, thanks to [https://github.com/cdoucet](https://github.com/cdoucet)
@@ -35,7 +39,7 @@ All notable changes to this project will be documented in this file.
 
 ## [4.0]
 - correct bug in RT1Ortho and RT2Ortho  2d in the computation of derivative (2018-01-30, Thank to Bryan.Bosworth@colorado.edu)  
-- uniformize 2d/3d in element, methode   EdgeOrientation(e)  now return +1/-1
+- uniformize 2d/3d in element, method   EdgeOrientation(e)  now return +1/-1
 - change all the sparse matrix structure
 - remove all map matrix jan 2019
 

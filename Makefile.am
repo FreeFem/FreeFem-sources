@@ -21,13 +21,8 @@
 # E-MAIL  :
 
 SUBDIRS=3rdparty src \
-	plugin plugin/seq plugin/mpi \
-	plugin/ffddm \
-	examples examples/examples examples/misc \
-	examples/tutorial examples/other \
-	examples/plugin examples/mpi \
-	examples/eigen examples/bug \
-	examples/3d examples/hpddm examples/ffddm
+	plugin  \
+	examples 
 
 EXTRA_DIST=README.md CHANGELOG.md \
 bin/keys.awk \
@@ -420,7 +415,6 @@ LIST_GENERATE_FILE= configure config.h.in \
     plugin/Makefile.in \
 	plugin/seq/Makefile.in \
 	plugin/mpi/Makefile.in \
-	plugin/ffddm/Makefile.in \
 	examples/Makefile.in \
     examples/plugin/Makefile.in \
     examples/tutorial/Makefile.in \
@@ -458,7 +452,6 @@ LIST_GENERATE_FILE_AM= \
     plugin/Makefile.am \
 	plugin/seq/Makefile.am \
 	plugin/mpi/Makefile.am \
-	plugin/ffddm/Makefile.am \
 	examples/Makefile.am \
     examples/plugin/Makefile.am \
     examples/tutorial/Makefile.am \

@@ -1,4 +1,4 @@
-SUBDIRS=seq mpi ffddm
+SUBDIRS=seq mpi
 EXTRA_DIST=   \
 ./mpi/complex_pastix_FreeFem.cpp  \
 ./mpi/htool.cpp  \
@@ -20,12 +20,10 @@ EXTRA_DIST=   \
 ./mpi/MUMPS_FreeFem.cpp \
 ./mpi/real_pastix_FreeFem.cpp \
 ./mpi/MUMPS.cpp \
-./ffddm \
-./ffddm/marmousi.cpp \
-./ffddm/overthrust.cpp \
-./ffddm/Makefile.am \
-./ffddm/marmousi2.cpp \
 ./seq \
+./seq/marmousi.cpp \
+./seq/overthrust.cpp \
+./seq/marmousi2.cpp \
 ./seq/VTK_writer_3d.cpp \
 ./seq/FreeFemQA.cpp \
 ./seq/buildlayer.cpp \

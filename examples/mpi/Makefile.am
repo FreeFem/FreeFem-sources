@@ -27,7 +27,7 @@ all-local: freefem++.pref
 
 TESTS=  DDM-Schwarz-Lame-2d.edp DDM-Schwarz-Lame-3d.edp DDM-Schwarz-Lap-2dd.edp DDM-Schwarz-Lap-3d.edp	\
 	DDM-Schwarz-Stokes-2d.edp LaplaceRT-3d-matrix-mumps.edp MPICGLap.edp MPIGMRES2D.edp MPIGMRES3D.edp MUMPS.edp	\
-	NSI3d-carac-mumps.edp NSI3d-carac.edp Stokes-v1-matrix-mumps.edp 	\
+	NSI3d-carac-mumps.edp Stokes-v1-matrix-mumps.edp 	\
 	Stokes-v2-matrix-mumps.edp Stokes-v3-matrix-mumps.edp VG.edp 	\
 	cavityNewtow-MUMPS.edp  cmaes-mpi-VarIneq.edp	\
 	essai.edp mortar-DN-4-mpi.edp testsolver_MUMPS.edp  parmetis.edp parmetis-3d.edp \

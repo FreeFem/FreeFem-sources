@@ -35,7 +35,7 @@ AM_INIT_AUTOMAKE(1.11 dist-zip foreign subdir-objects)
 
 if test "$enable_ffcs" != yes
 then
-    if test `echo $am__api_version|awk '{if($1>1.13)print "ok";}'` != ok
+    if test `echo $am__api_version|awk '{if($1>1.13)print "ok";else print "no"}'` != ok
     then
 	AC_MSG_ERROR([Automake version needs to be 1.13 or later to enable "make check"])
     fi
@@ -979,7 +979,7 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 	    ffconfpetsc="$d$dd"
 		ffconfslepc="$d/slepc/conf/slepcvariables"
 		
-		echo " petsc ... $ffconfpetsc"
+		# echo " petsc ... $ffconfpetsc"
 	    if test -f "$ffconfpetsc" ; then
 		if test  "$ff_petsc_ok" = no ; then
 		    PETSC_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetsc"`
@@ -1234,8 +1234,9 @@ if test "$ff_where_lib_conf_blaslapack" = 1  ; then
 	   if  echo  "$ff_where_lib_blaslapack"| grep -q  " -lmkl"  ; then
 	     	AC_MSG_NOTICE([ MKL  from  petsc ***** ])
 	        AC_FF_ADDWHERELIB(mkl,$ff_blas_libs,$ff_blas_inc)
-            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
-            AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
+			ff_mkl=yes
+dnl            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
+dnl            AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
 	   fi
 
 fi
@@ -1340,8 +1341,9 @@ then
 	    fi
 	    AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
 	    AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
-            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
-            AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
+		ff_mkl_ok=yes
+dnl            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
+dnl            AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
 
 	else
 	    ff_mkl_libpath=no
@@ -1463,7 +1465,7 @@ AC_SUBST(BLASINC,$ff_blas_inc)
 
 #looking for cblas.h  FH
 
-if test "$ff_blas_ok" = yes -a "$ff_cblas_libs" = yes -a -z "$ff_download_blas" ;
+if test "$ff_blas_ok" = yes -a -z "$ff_download_blas" ;
 then
     AC_CHECK_HEADERS(cblas.h,
 	ff_cblas_h=yes,
@@ -1789,7 +1791,7 @@ AC_SUBST([UMFPACK_CPPFLAGS],[$UMFPACK_CPPFLAGS])
 # ALH - 17/9/13 - moved UMFPACK configuration settings in wherelib to _after_ configuring the download version because
 # [[file:3rdparty/umfpack/Makefile.am]] does not set the WHERE mechanism. Also removed -I/usr/include/$ff_umfpack_dir
 # from include options for FFCS because it breaks the MingW64 compilation process.
-echo " totot *****"
+
 if test "$ff_umfpack_ok" = yes
 then
     if test $enable_ffcs = no
@@ -2204,7 +2206,7 @@ TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX",,nodowload)
 TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX",,nodowload)
 TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX",,nodowload)
 
- echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
+# echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 test "$enable_download" != "yes" -a "$enable_hpddm" != yes && enable_hpddm=no
 test "$enable_download" != "yes" -a "$enable_htool" != yes && enable_htool=no
 
@@ -2230,7 +2232,14 @@ fi
 TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_PETSC_DYLIB"])
 TOOL_DISABLE(htool,["htool.$DYLIB_SUFFIX"])
 
-
+##
+if test "$ff_mkl_ok" == yes ; then 
+            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
+fi
+if test "$ff_blas_ok" == yes ; then 
+            AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
+fi
+##
 # All makefiles
 AC_OUTPUT(
     Makefile
@@ -2255,7 +2264,6 @@ AC_OUTPUT(
     plugin/Makefile
 	plugin/seq/Makefile
 	plugin/mpi/Makefile
-	plugin/ffddm/Makefile
 	examples/Makefile
     examples/plugin/Makefile
     examples/tutorial/Makefile

@@ -24,7 +24,7 @@
 #include "medit.h"
 #include "libmeshb7.h"
 #include "extern.h"
-
+#include "eigenv.h"
 int loadMesh (pMesh mesh) {
 	pPoint ppt;
 	pEdge pr;
@@ -34,7 +34,7 @@ int loadMesh (pMesh mesh) {
 	pHexa ph;
 	double d, dp1, dp2, dp3, dn[3];
 	float *n, fp1, fp2, fp3;
-	int i, ia, ib, inm, ref, is, k, disc, nn, nt, nq;
+	long i, ia, ib, inm, ref, is, k, disc, nn, nt, nq;
 	char *ptr, data[256];
 
 	printf("use loadMesh\n");
@@ -106,7 +106,7 @@ int loadMesh (pMesh mesh) {
 				GmfGetLin(inm, GmfVertices, &fp1, &fp2, &ref);
 				ppt->c[0] = fp1;
 				ppt->c[1] = fp2;
-				printf("vertices %f %f %i\n", fp1, fp2, ref);
+				printf("vertices %f %f %li\n", fp1, fp2, ref);
 			} else {
 				GmfGetLin(inm, GmfVertices, &fp1, &fp2, &fp3, &ref);
 				ppt->c[0] = fp1;
@@ -408,7 +408,7 @@ int loadMesh (pMesh mesh) {
 
 	GmfCloseMesh(inm);
 	if (disc > 0)
-		fprintf(stdout, "  ## %d entities discarded\n", disc);
+		fprintf(stdout, "  ## %ld entities discarded\n", disc);
 
 	return (1);
 }

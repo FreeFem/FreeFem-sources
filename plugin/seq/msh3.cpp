@@ -4560,7 +4560,7 @@ void BuildBoundMinDist_th3 (const double &precis_mesh, const double *tab_XX, con
 
 	// determination de hmin
 
-	hmin = 1e10;
+	hmin =longmini_box;
 
 	for (int ii = 0; ii < Th3.nt; ii++) {
 		const Tet &K(Th3.elements[ii]);
@@ -4609,16 +4609,17 @@ void BuildBoundMinDist_th3 (const double &precis_mesh, const double *tab_XX, con
 			}
 		}
 	}
+        if(hmin/longmini_box < 1e7)
+           hmin = hmin*0.1;//  in case of bad shape element
+	if (verbosity > 5) {cout << "    longmini_box" << longmini_box
+                                 << "    hmin =" << hmin << " longmini_box/hmin "
+                                 <<hmin/longmini_box<< endl;}
 
-	if (verbosity > 5) {cout << "    longmini_box" << longmini_box << endl;}
-
-	if (verbosity > 5) {cout << "    hmin =" << hmin << endl;}
-
-	assert(hmin < longmini_box);
-	if (verbosity > 5) {cout << "    Norme2(bmin-bmax)=" << Norme2(bmin - bmax) << endl;}
+	
+	if (verbosity > 9) {cout << "    Norme2(bmin-bmax)=" << Norme2(bmin - bmax) << endl;}
 
 	// assertion pour la taille de l octree
-	assert(hmin > Norme2(bmin - bmax) / 1e9);
+	ffassert(hmin > Norme2(bmin - bmax) / 1e9);
 }
 
 
@@ -7366,6 +7367,11 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     // delete gtree;
     
    Mesh3 *Tht = new Mesh3(nv, nt, nbe, v, t, b);
+    
+    if(typeMesh3==2) {  typeMesh3=1; //  Hack for a bug in trunc surface mesh FH aprif 2019  TO BE REMOVE in near future
+    if(verbosity ) cerr << " \n\n********************\n\n ** WARNING remove SURFACE MESH in trunc 3d  due to bug"
+            <<  "\n\n********************\n\n";
+    }
    Tht->getTypeMesh3()=typeMesh3;
    Tht->BuildGTree();    // Add JM. Oct 2010
    delete gtree;

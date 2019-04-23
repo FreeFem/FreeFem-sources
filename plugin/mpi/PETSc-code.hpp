@@ -308,7 +308,16 @@ AnyType changeOperator<Type>::changeOperator_Op::operator()(Stack stack) const {
                 ptA->_petsc = nullptr;
                 ptA->dtor();
                 ptA->_petsc = backup;
-                MatHeaderReplace(ptA->_petsc, &ptB->_petsc);
+                PetscMPIInt flag;
+                MPI_Comm_compare(PetscObjectComm((PetscObject)ptA->_petsc), PetscObjectComm((PetscObject)ptB->_petsc), &flag);
+                if(flag != MPI_CONGRUENT && flag != MPI_IDENT) {
+                    MatDestroy(&ptA->_petsc);
+                    MatConvert(ptB->_petsc, MATSAME, MAT_INITIAL_MATRIX, &ptA->_petsc);
+                    MatDestroy(&ptB->_petsc);
+                }
+                else {
+                    MatHeaderReplace(ptA->_petsc, &ptB->_petsc);
+                }
                 if(ptB->_ksp)
                     KSPDestroy(&ptB->_ksp);
                 ptA->_A = ptB->_A;

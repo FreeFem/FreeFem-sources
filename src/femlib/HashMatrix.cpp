@@ -503,6 +503,7 @@ void HashMatrix<I,R>::dotranspose()
 {
     swap(i,j);
     swap(this->n,this->m);
+    conj(aij,this->nnz);
     ReHash();
     state=unsorted;
 }
@@ -1207,7 +1208,7 @@ void HashMatrix<I,R>::addMap(R coef,std::map< pair<I,I>, R> &mij,bool trans,I ii
 template<class I,class R>
 bool HashMatrix<I,R>::addMatTo(R coef,HashMatrix<I,R> & mij,bool trans,I ii00,I jj00,bool cnj,double threshold,const bool keepSym)
 {
-    
+    //  add a mij + = coef * [(this)^trans^cnj , 
     double eps0=max(numeric_limits<double>::min(),threshold);
     
     if (half)

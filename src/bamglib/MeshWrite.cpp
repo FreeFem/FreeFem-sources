@@ -697,7 +697,7 @@ namespace bamg {
     Int4 * reft = new Int4[Th.nbt];
     Int4 nbInT =    Th.ConsRefTriangle(reft);
     {
-      f << "MeshVersionFormatted 0" <<endl;
+      f << "MeshVersionFormatted 1" <<endl;
       f << "\nDimension\n"  << 2 << endl;
       f << "\nIdentifier\n" ;
       WriteStr(f,Th.identity);
