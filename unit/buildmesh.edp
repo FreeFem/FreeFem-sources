@@ -1,0 +1,33 @@
+include "test.idp"
+
+cout << "buildmesh" << endl;
+real t;
+
+border C01(t=0, 1){x=0; y=-1+t;}
+border C02(t=0, 1){x=1.5-1.5*t; y=-1;}
+border C03(t=0, 1){x=1.5; y=-t;}
+border C04(t=0, 1){x=1.5*t; y=0;}
+
+int n = 10;
+t = clock();
+mesh Th = buildmesh(C01(-n) + C02(-n) + C03(-n) + C04(-n));
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(Th.nt && Th.nv && Th.nbe);
+
+int vx = 42;
+t = clock();
+Th = buildmesh(C01(-n) + C02(-n) + C03(-n) + C04(-n), nbvx=vx);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(Th.nv <= 42);
+
+bool fborder = true;
+t = clock();
+Th = buildmesh(C01(-n) + C02(-n) + C03(-n) + C04(-n), fixedborder=fborder);
+t = clock() - t;
+cout << IND << IND << t << endl;
+//cout << Th.nb << endl;
+plot(Th);
+//test(Th.fixedborder == true);
+//TODO: display fixedborder

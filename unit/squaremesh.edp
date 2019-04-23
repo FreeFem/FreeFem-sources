@@ -63,8 +63,6 @@ func int testMesh(mesh &Th, int nx, int ny, real X, real Y,
   cout << IND << IND << t << endl;
   test(Th(0.5, 0.5).region == 0);
   t = clock() - t;
-  //cout << Th.nbelabel << endl;
-  //test(Th(0.5, 0).label == 1);
   test(Th.nbe == 2 * nx + 2 * ny);
   t = clock() - t;
   cout << IND << IND << t << endl;
