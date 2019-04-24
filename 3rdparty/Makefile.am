@@ -160,14 +160,15 @@ lib/WHERE.htool: ./getall
 
 #  to reinstall mpi under window afer clean 
 reinstall-msmpi:
-	-if test -n "@MSMPI_INC@"   -a  "@MSMPI_LIB@"  ; then \
-		echo " copy msmpi  in 3rdparty" ; \
+	-if test -f "$$MSMPI_INC"/mpif.h   ; then \
+		echo " copy msmpi  in 3rdparty form $$MSMPI_INC and $$MSMPI_LIB64 or $$MSMPI_LIB32" ; \
 		mkdir -p include/msmpi ;\
 		mkdir -p lib/msmpi ;\
-		cp "@MSMPI_INC@"/*.h include/msmpi ;\
-		grep -v INT_PTR_KIND "@MSMPI_INC@"/mpif.h >include/msmpi/mpif.h ;\
-		test "@SIZEOF_PTR@" -eq 8 && cp "@MSMPI_INC@"/x64/*.h 3rdparty/include/msmpi &&  cp "@MSMPI_LIB@/*.lib" lib/msmpi ;\
-	fi; 
+		cp "$$MSMPI_INC"/*.h include/msmpi ;\
+		grep -v INT_PTR_KIND "$$MSMPI_INC"/mpif.h >include/msmpi/mpif.h ;\
+		test "@SIZEOF_PTR@" -eq 8 && cp "$$MSMPI_INC"/x64/*.h include/msmpi &&  cp "$$MSMPI_LIB64"/*.lib lib/msmpi ;\
+		test "@SIZEOF_PTR@" -eq 4 && cp "$$MSMPI_INC"/x86/*.h include/msmpi &&  cp "$$MSMPI_LIB32"/*.lib lib/msmpi ;\
+	fi
 # FFCS: need to stop at the first error to make sure that all libraries are correctly compiled
 compile-dir:
 	@echo "\n\n ****** $(COMPILEDIR) ****** \n\n";
