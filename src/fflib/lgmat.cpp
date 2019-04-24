@@ -3616,7 +3616,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
     
         
        MatriceMorse<R> *mR = pR->pHM();
-       if(mR->n && mR->m) {
+       if(mR && mR->n && mR->m) {
         mR->COO();
         unsigned int n = mR->nnz;
         if(transpose) {
