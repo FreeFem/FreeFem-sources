@@ -1,0 +1,20 @@
+include "test.idp"
+
+cout << "checkmovemesh" << endl;
+real t;
+real minT;
+//
+// func fespace dispx() {
+//   return 10;
+// }
+//
+// func fespace dispy() {
+//   return 10;
+// }
+mesh Th = square(10, 10);
+t = clock();
+// minT = checkmovemesh(Th);
+t = clock() - t;
+cout << IND << IND << t << endl;
+
+//to finish
