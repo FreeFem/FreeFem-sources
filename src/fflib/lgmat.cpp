@@ -3370,20 +3370,20 @@ public:
     Expression eR;
     Expression ex;
     Expression eout;
-    int nbarg;
+    bool transpose;
     static const int n_name_param = 4;
     static basicAC_F0::name_and_type name_param[];
     Expression nargs[n_name_param];
     removeDOF_Op(const basicAC_F0&  args, Expression param1, Expression param2, Expression param3, Expression param4)
-    : eA(param1), eR(param2), ex(param3), eout(param4),nbarg(4) {
+    : eA(param1), eR(param2), ex(param3), eout(param4), transpose(false) {
         args.SetNameParam(n_name_param, name_param, nargs);
     }
-    removeDOF_Op(const basicAC_F0&  args, Expression param2, Expression param3, Expression param4)
-    : eA(0), eR(param2), ex(param3), eout(param4) ,nbarg(3){
+    removeDOF_Op(const basicAC_F0&  args, Expression param2, Expression param3, Expression param4, bool t, int)
+    : eA(0), eR(param2), ex(param3), eout(param4), transpose(t) {
         args.SetNameParam(n_name_param, name_param, nargs);
     }
     removeDOF_Op(const basicAC_F0&  args, Expression param1, Expression param2)
-    : eA(param1), eR(param2), ex(0), eout(0) ,nbarg(2){
+    : eA(param1), eR(param2), ex(0), eout(0), transpose(false) {
         args.SetNameParam(n_name_param, name_param, nargs);
     }
     
@@ -3400,19 +3400,20 @@ basicAC_F0::name_and_type removeDOF_Op<T>::name_param[] = {
 
 template<class T>
 class removeDOF : public OneOperator {
-   const  unsigned short withA;
+   const unsigned short withA;
 public:
     removeDOF() : OneOperator(atype<long>(), atype<Matrice_Creuse<T>*>(), atype<Matrice_Creuse<double>*>(), atype<KN<T>*>(), atype<KN<T>*>()),withA(1) {}
-    removeDOF(int ) : OneOperator(atype<long>(),  atype<Matrice_Creuse<double>*>(), atype<KN<T>*>(), atype<KN<T>*>()),withA(0) {}
-    removeDOF(int, int ) : OneOperator(atype<long>(),  atype<Matrice_Creuse<T>*>(), atype<Matrice_Creuse<double>*>()),withA(2) {}
+    removeDOF(int) : OneOperator(atype<long>(), atype<Matrice_Creuse<double>*>(), atype<KN<T>*>(), atype<KN<T>*>()),withA(0) {}
+    removeDOF(int, int) : OneOperator(atype<long>(), atype<Matrice_Creuse<T>*>(), atype<Matrice_Creuse<double>*>()),withA(2) {}
+    removeDOF(int, int, int) : OneOperator(atype<long>(), atype<Matrice_Creuse_Transpose<double>>(), atype<KN<T>*>(), atype<KN<T>*>()),withA(3) {}
    
     E_F0* code(const basicAC_F0& args) const {
         if(withA == 1)
         return new removeDOF_Op<T>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]));
-        else if(withA == 0)
-        return new removeDOF_Op<T>(args,  t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
+        else if(withA == 0 || withA == 3)
+        return new removeDOF_Op<T>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), withA == 3, 1);
         else
-        return new removeDOF_Op<T>(args,  t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
+        return new removeDOF_Op<T>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
     }
 };
 template<class T> bool cmp(const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; }
@@ -3423,7 +3424,13 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
     typedef double R;
     // code wri-ng no ...
     Matrice_Creuse<T>* pA = eA ? GetAny<Matrice_Creuse<T>* >((*eA)(stack)):0;
-    Matrice_Creuse<R>* pR = GetAny<Matrice_Creuse<R>* >((*eR)(stack));
+    Matrice_Creuse<R>* pR;
+    if(transpose) {
+        Matrice_Creuse_Transpose<R> tpR = GetAny<Matrice_Creuse_Transpose<R>>((*eR)(stack));
+        pR = tpR;
+    }
+    else
+        pR = GetAny<Matrice_Creuse<R>*>((*eR)(stack));
     KN<T>* pX = ex ? GetAny<KN<T>* >((*ex)(stack)) : 0;
     KN<T>* pOut = eout ? GetAny<KN<T>* >((*eout)(stack)) : 0;
     Matrice_Creuse<R>* pC = nargs[2] ? GetAny<Matrice_Creuse<R>*>((*nargs[2])(stack)) : 0;
@@ -3609,17 +3616,25 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
     
         
        MatriceMorse<R> *mR = pR->pHM();
+       if(mR->n && mR->m) {
         mR->COO();
         unsigned int n = mR->nnz;
-        
-        if(pOut->n != n) pOut->resize(n);
-        
-        
-        
-        for(unsigned int i = 0; i < n; ++i) {
-            *(*pOut + i) = *(*pX + mR->j[i]);
+        if(transpose) {
+            if(pOut->n != mR->m) pOut->resize(mR->m);
+            *pOut = T();
+            for(unsigned int i = 0; i < n; ++i) {
+                *(*pOut + mR->j[i]) = *(*pX + mR->i[i]);
+            }
         }
-        
+        else {
+            if(pOut->n != n) pOut->resize(n);
+            for(unsigned int i = 0; i < n; ++i) {
+                *(*pOut + i) = *(*pX + mR->j[i]);
+            }
+        }
+       }
+       else
+           *pOut = T();
     }
     return 0L;
 }
@@ -3874,6 +3889,8 @@ void  init_lgmat()
     Global.Add("renumbering", "(", new removeDOF<Complex>(1));
     Global.Add("renumbering", "(", new removeDOF<double>(1, 1));
     Global.Add("renumbering", "(", new removeDOF<Complex>(1, 1));
+    Global.Add("renumbering", "(", new removeDOF<double>(1, 1, 1));
+    Global.Add("renumbering", "(", new removeDOF<Complex>(1, 1, 1));
 
   Global.Add("display", "(", new plotMatrix<double>);
   Global.Add("display", "(", new plotMatrix<Complex>);
