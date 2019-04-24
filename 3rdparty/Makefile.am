@@ -165,7 +165,8 @@ reinstall-msmpi:
 		mkdir -p include/msmpi ;\
 		mkdir -p lib/msmpi ;\
 		cp "$$MSMPI_INC"/*.h include/msmpi ;\
-		grep -v INT_PTR_KIND "$$MSMPI_INC"/mpif.h >include/msmpi/mpif.h ;\
+		sed  's/INT_PTR_KIND()/@SIZEOF_PTR@/' <"$$MSMPI_INC"/mpif.h >include/msmpi/mpif.h ;\
+		grep KIND include/msmpi/mpif.h; \
 		test "@SIZEOF_PTR@" -eq 8 && cp "$$MSMPI_INC"/x64/*.h include/msmpi &&  cp "$$MSMPI_LIB64"/*.lib lib/msmpi ;\
 		test "@SIZEOF_PTR@" -eq 4 && cp "$$MSMPI_INC"/x86/*.h include/msmpi &&  cp "$$MSMPI_LIB32"/*.lib lib/msmpi ;\
 	fi
