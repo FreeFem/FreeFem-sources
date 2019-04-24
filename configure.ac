@@ -2097,7 +2097,13 @@ then
     if test -n "$ff_pthread"  ; then
        AC_FF_ADDWHERELIB(pthread,"",)
     fi
+# ALH  MPI  "-fno-range-check" on Windows, but this options fails on MacOS 10.8.  Add no-range-check for Windows
+# for hexadecimal parameter constants like:
+# [[file:c:/cygwin/home/alh/ffcs/rel/mingw/mpif.h::PARAMETER MPI_SHORT_INT z 8c000003]]
+#
+    AC_SUBST(NO_RANGE_CHECK,-fno-range-check)	
 fi
+
 
 # ALH - 4/9/13 - request from Helmut Jarausch - allow to change Scotch include path
 if test "$with_scotch_include" = ""
