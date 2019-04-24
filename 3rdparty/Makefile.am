@@ -16,10 +16,6 @@ EXTRA_DIST= \
 ./gmm/Makefile \
 ./gmm/cxxflags \
 ./headers-sparsesolver.inc \
-./hips/Makefile \
-./hips/SRC_SPKIT_makefile \
-./hips/hips-1.2b-rc4.patch \
-./hips/makefile-hips.inc \
 ./hypre/Makefile \
 ./hypre/ff-flags.inc \
 ./metis/Makefile \
@@ -42,14 +38,6 @@ EXTRA_DIST= \
 ./parmetis/Makefile-parmetis.in \
 ./parmetis/makefile \
 ./parmetis/parmetis-4.0.3.patch \
-./parms/Makefile \
-./parms/makefile-parms.in \
-./pastix/Makefile \
-./pastix/config-pastix-complex.in \
-./pastix/config-pastix-real.in \
-./pastix/pastix_release_2200-blend.patch \
-./pastix/patch-pastix_long_complex.h \
-./pastix//all_macros.diff \
 ./scalapack/Makefile \
 ./scalapack/SLmake-scalapack.inc \
 ./scotch/Makefile \
@@ -86,10 +74,8 @@ getall
 
 # FFCS: See [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be deactivated
 
+
 MPI_SOFT= @TOOL_COMPILE_scalapack@ @TOOL_COMPILE_superludist@ @TOOL_COMPILE_mumps@ 
-#
-#	@TOOL_COMPILE_pastix@ @TOOL_COMPILE_hips@			\
-#	@TOOL_COMPILE_parms@
 
 LIST_SOFT= @DOWNLOAD_FFTW@ @TOOL_COMPILE_tetgen@ @TOOL_COMPILE_parmetis@ @TOOL_COMPILE_superlu@ @TOOL_COMPILE_fftw3_mpi@	\
 	@TOOL_COMPILE_scotch@ @TOOL_COMPILE_mshmet@			\

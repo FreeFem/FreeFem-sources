@@ -318,7 +318,6 @@ fi
 	    AC_PATH_PROGS(MPICC,mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc, "",$ff_mpi_path)
 	fi
 	AC_SUBST(MPICC,$MPICC)
-	AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
 
 	if test ! -f "$ff_MPI_INCLUDE_DIR/mpif.h"  ; then
 	    AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/mpif.h"  ])
