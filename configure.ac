@@ -214,19 +214,21 @@ esac
 
 
 
+AC_CHECK_PROG(ff_unzip,unzip,yes,no)
 AC_CHECK_PROG(ff_m4,m4,yes,no)
 AC_CHECK_PROG(ff_bison,bison,yes,no)
 AC_CHECK_PROG(ff_flex,flex,yes,no)
 dnl AC_CHECK_PROG(ff_cmake,cmake,yes,no)
 AC_CHECK_PROG(ff_patch,patch,yes,no)
-case "$ff_m4 $ff_bison $ff_patch $ff_flex"  in
+case "$ff_m4 $ff_bison $ff_patch $ff_flex $ff_unzip"  in
 *no*)
     AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try ])
+    test "$ff_unzip" = no && AC_MSG_NOTICE([ sudo apt-get install unzip])
     test "$ff_m4" = no && AC_MSG_NOTICE([ sudo apt-get install m4])
     test "$ff_bison" = no && AC_MSG_NOTICE([ sudo apt-get install bison])
     test "$ff_flex" = no && AC_MSG_NOTICE([ sudo apt-get install flex])
     test "$ff_patch" = no && AC_MSG_NOTICE([ sudo apt-get install patch])
-    AC_MSG_ERROR([ Sorry missing  m4,bison,flex,patch command !]);;
+    AC_MSG_ERROR([ Sorry missing  unzip,m4,bison,flex,patch command !]);;
 esac
 
 
@@ -1128,6 +1130,15 @@ if test "$enable_download"  = "yes" ; then
 DOWNLOADCOMPILE="compile-pkg install-other"
 else
 DOWNLOADCOMPILE=
+fi
+if test "$enable_download"  = "yes"  ; then
+ AC_CHECK_PROG(ff_git,git,yes,no)
+ case "$ff_git"  in
+ *no*)
+     AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try ])
+     test "$ff_git" = no && AC_MSG_NOTICE([ sudo apt-get install git])
+     AC_MSG_ERROR([ Sorry missing  git command !]);;
+ esac
 fi
 
 AC_SUBST(WGET,$ff_wget_command)
