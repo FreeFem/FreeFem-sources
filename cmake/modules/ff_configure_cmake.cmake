@@ -9,6 +9,8 @@ function(ff_configure_cmake)
     set(CMAKE_BUILD_FLAGS -j ${numprocs})
   endif()
 
-
+  if(NOT ENABLE_DOWNLOAD)
+    set(ENABLE_DOWNLOAD False)
+  endif(NOT ENABLE_DOWNLOAD)
 
 endfunction(ff_configure_cmake)
