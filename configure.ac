@@ -972,7 +972,7 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		if test  "$ff_petsc_ok" = no ; then
 		    PETSC_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetsc"`
 		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
-				PETSC_MPIRUN=`echo "$PETSC_MPIRUN" | awk '{gsub("--oversubsribe", ""); print}'`	#remove --oversubscribe
+				PETSC_MPIRUN=`echo "$PETSC_MPIRUN" | awk '{gsub("--oversubscribe", ""); print}'`	#remove --oversubscribe
 			AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]);
 
 		    test  "$PETSC_SCALAR" = "real" && test  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_MPIRUN"` `which "$MPIRUN"`
