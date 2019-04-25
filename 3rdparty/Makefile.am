@@ -16,10 +16,6 @@ EXTRA_DIST= \
 ./gmm/Makefile \
 ./gmm/cxxflags \
 ./headers-sparsesolver.inc \
-./hips/Makefile \
-./hips/SRC_SPKIT_makefile \
-./hips/hips-1.2b-rc4.patch \
-./hips/makefile-hips.inc \
 ./hypre/Makefile \
 ./hypre/ff-flags.inc \
 ./metis/Makefile \
@@ -42,14 +38,6 @@ EXTRA_DIST= \
 ./parmetis/Makefile-parmetis.in \
 ./parmetis/makefile \
 ./parmetis/parmetis-4.0.3.patch \
-./parms/Makefile \
-./parms/makefile-parms.in \
-./pastix/Makefile \
-./pastix/config-pastix-complex.in \
-./pastix/config-pastix-real.in \
-./pastix/pastix_release_2200-blend.patch \
-./pastix/patch-pastix_long_complex.h \
-./pastix//all_macros.diff \
 ./scalapack/Makefile \
 ./scalapack/SLmake-scalapack.inc \
 ./scotch/Makefile \
@@ -86,12 +74,10 @@ getall
 
 # FFCS: See [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be deactivated
 
-MPI_SOFT= @TOOL_COMPILE_scalapack@ @TOOL_COMPILE_superludist@ @TOOL_COMPILE_mumps@
-#
-#	@TOOL_COMPILE_pastix@ @TOOL_COMPILE_hips@			\
-#	@TOOL_COMPILE_parms@
 
-LIST_SOFT=@TOOL_COMPILE_tetgen@ @TOOL_COMPILE_parmetis@ @TOOL_COMPILE_superlu@ @TOOL_COMPILE_fftw3_mpi@	\
+MPI_SOFT= @TOOL_COMPILE_scalapack@ @TOOL_COMPILE_superludist@ @TOOL_COMPILE_mumps@ 
+
+LIST_SOFT= @DOWNLOAD_FFTW@ @TOOL_COMPILE_tetgen@ @TOOL_COMPILE_parmetis@ @TOOL_COMPILE_superlu@ @TOOL_COMPILE_fftw3_mpi@	\
 	@TOOL_COMPILE_scotch@ @TOOL_COMPILE_mshmet@			\
 	@TOOL_COMPILE_yams@ @TOOL_COMPILE_mmg3d@  @TOOL_COMPILE_gmm@	\
 	@TOOL_COMPILE_nlopt@ @TOOL_COMPILE_mumps_seq@			\
@@ -172,7 +158,18 @@ lib/WHERE.htool: ./getall
 	else true; 	fi
 # end HTOOLL
 
-
+#  to reinstall mpi under window afer clean 
+reinstall-msmpi:
+	-if test -f "$$MSMPI_INC"/mpif.h   ; then \
+		echo " copy msmpi  in 3rdparty form $$MSMPI_INC and $$MSMPI_LIB64 or $$MSMPI_LIB32" ; \
+		mkdir -p include/msmpi ;\
+		mkdir -p lib/msmpi ;\
+		cp "$$MSMPI_INC"/*.h include/msmpi ;\
+		sed  's/INT_PTR_KIND()/@SIZEOF_PTR@/' <"$$MSMPI_INC"/mpif.h >include/msmpi/mpif.h ;\
+		grep KIND include/msmpi/mpif.h; \
+		test "@SIZEOF_PTR@" -eq 8 && cp "$$MSMPI_INC"/x64/*.h include/msmpi &&  cp "$$MSMPI_LIB64"/*.lib lib/msmpi ;\
+		test "@SIZEOF_PTR@" -eq 4 && cp "$$MSMPI_INC"/x86/*.h include/msmpi &&  cp "$$MSMPI_LIB32"/*.lib lib/msmpi ;\
+	fi
 # FFCS: need to stop at the first error to make sure that all libraries are correctly compiled
 compile-dir:
 	@echo "\n\n ****** $(COMPILEDIR) ****** \n\n";

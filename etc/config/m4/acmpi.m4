@@ -111,6 +111,8 @@ esac
 		   test "$ff_ptrbit" -eq 32 && ff_msmpi_lib="$MSMPI_LIB32"
 		   cp "$ff_msmpi_lib/msmpifec.lib" "$ff_msmpi_lib/msmpi.lib" 3rdparty/lib/msmpi
 		   ff_msmpi_lib=`pwd`/3rdparty/lib/msmpi
+		   # to reinstall msmpi .. 
+		   
 #  MSMPI
     if  with_mpilibs=`where msmpi.dll`
     then
@@ -313,7 +315,6 @@ fi
 	    AC_PATH_PROGS(MPICC,mpicc$ff_mpi_suffix hcc mpcc mpcc_r mpxlc cmpicc, "",$ff_mpi_path)
 	fi
 	AC_SUBST(MPICC,$MPICC)
-	AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
 
 	if test ! -f "$ff_MPI_INCLUDE_DIR/mpif.h"  ; then
 	    AC_MSG_NOTICE([ MPI without fortran no file "$ff_MPI_INCLUDE_DIR/mpif.h"  ])
