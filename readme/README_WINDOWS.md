@@ -28,7 +28,7 @@ on the icon, you get an error (it is due to a bug in GetOpenFileName).
 From version 3.52 onwards, the Windows 64 version is built with MPI support and
 with the following options
 ```bash
-./configure '--enable-download' '--disable-pastix' '--disable-hips'
+./configure '--enable-download'
 ```
 
 Then, execute and follow the instructions.

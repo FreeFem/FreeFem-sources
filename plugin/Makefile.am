@@ -1,9 +1,7 @@
 SUBDIRS=seq mpi
 EXTRA_DIST=   \
-./mpi/complex_pastix_FreeFem.cpp  \
 ./mpi/htool.cpp  \
 ./mpi/mpi-cmaes.cpp \
-./mpi/interfacepastix.cpp \
 ./mpi/hypre_FreeFem.cpp \
 ./mpi/generaldefs.h \
 ./mpi/real_SuperLU_DIST_FreeFem.cpp \
@@ -11,14 +9,11 @@ EXTRA_DIST=   \
 ./mpi/Makefile.am \
 ./mpi/removeDOF.cpp \
 ./mpi/complex_SuperLU_DIST_FreeFem.cpp \
-./mpi/parms_FreeFem.cpp \
-./mpi/hips_FreeFem.cpp \
 ./mpi/ffsuperludistoption.hpp \
 ./mpi/parmetis.cpp \
 ./mpi/undef.awk \
 ./mpi/dSuperLU_DIST.cpp \
 ./mpi/MUMPS_FreeFem.cpp \
-./mpi/real_pastix_FreeFem.cpp \
 ./mpi/MUMPS.cpp \
 ./seq \
 ./seq/marmousi.cpp \

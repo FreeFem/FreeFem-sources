@@ -109,7 +109,7 @@ autoreconf -i
 Configuration:
 
 ```bash
-./configure --enable-download --enable-optim --disable-pastix
+./configure --enable-download --enable-optim
 ```
 
 Download:

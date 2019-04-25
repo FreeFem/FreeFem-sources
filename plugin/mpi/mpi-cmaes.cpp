@@ -45,10 +45,10 @@ using namespace std;
 
 
 template<class T> struct MPI_TYPE {};
-template<> struct MPI_TYPE<long>      {static const MPI_Datatype  TYPE(){return MPI_LONG;}};
-template<> struct MPI_TYPE<int>      {static const MPI_Datatype TYPE(){return MPI_INT;}};
-template<> struct MPI_TYPE<double>    {static const MPI_Datatype TYPE(){return MPI_DOUBLE;}};
-template<> struct MPI_TYPE<char>    {static const MPI_Datatype TYPE(){return MPI_BYTE;}};
+template<> struct MPI_TYPE<long>      {static MPI_Datatype  TYPE(){return MPI_LONG;}};
+template<> struct MPI_TYPE<int>      {static MPI_Datatype TYPE(){return MPI_INT;}};
+template<> struct MPI_TYPE<double>    {static MPI_Datatype TYPE(){return MPI_DOUBLE;}};
+template<> struct MPI_TYPE<char>    {static MPI_Datatype TYPE(){return MPI_BYTE;}};
 
 
 class CMAES //Abstract class, because the fitness function prototype may differ from users to users
