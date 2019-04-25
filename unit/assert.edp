@@ -1,0 +1,12 @@
+include "test.idp"
+
+cout << "assert" << endl;
+real t;
+bool res = false;
+int[int] tab = [1, 2, 3];
+
+t = clock();
+assert(true);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(1);

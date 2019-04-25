@@ -1,0 +1,70 @@
+include "test.idp"
+
+real t;
+cout << "adj" << endl;
+mesh Th = square(10, 10);
+int T, k = 0, e = 0;
+
+t = clock();
+T = Th[k].adj(e);
+t = clock() - t;
+cout << IND << t << endl;
+test(Th[T].adj(e) == k);
+
+e = 1;
+t = clock();
+T = Th[k].adj(e);
+t = clock() - t;
+cout << IND << t << endl;
+test(Th[T].adj(e) == k);
+
+e = 2;
+t = clock();
+T = Th[k].adj(e);
+t = clock() - t;
+cout << IND << t << endl;
+test(Th[T].adj(e) == k);
+
+k = 1;
+e = 0;
+t = clock();
+T = Th[k].adj(e);
+t = clock() - t;
+cout << IND << t << endl;
+test(Th[T].adj(e) == k);
+
+e = 1;
+t = clock();
+T = Th[k].adj(e);
+t = clock() - t;
+cout << IND << t << endl;
+test(Th[T].adj(e) == k);
+
+e = 2;
+t = clock();
+T = Th[k].adj(e);
+t = clock() - t;
+cout << IND << t << endl;
+test(Th[T].adj(e) == k);
+
+k = 2;
+e = 0;
+t = clock();
+T = Th[k].adj(e);
+t = clock() - t;
+cout << IND << t << endl;
+test(Th[T].adj(e) == k);
+
+e = 1;
+t = clock();
+T = Th[k].adj(e);
+t = clock() - t;
+cout << IND << t << endl;
+test(Th[T].adj(e) == k);
+
+e = 2;
+t = clock();
+T = Th[k].adj(e);
+t = clock() - t;
+cout << IND << t << endl;
+test(Th[T].adj(e) == k);

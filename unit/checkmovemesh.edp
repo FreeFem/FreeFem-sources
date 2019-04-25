@@ -3,18 +3,14 @@ include "test.idp"
 cout << "checkmovemesh" << endl;
 real t;
 real minT;
-//
-// func fespace dispx() {
-//   return 10;
-// }
-//
-// func fespace dispy() {
-//   return 10;
-// }
 mesh Th = square(10, 10);
+fespace UH(Th, P1);
+UH uu = sin(y*pi)/100;
+UH vv = cos(x*pi)/100;
+UH ux = 1, uy = 1;
+
 t = clock();
-// minT = checkmovemesh(Th);
+minT = checkmovemesh(Th, [x + uu, y + vv]);
 t = clock() - t;
 cout << IND << IND << t << endl;
-
-//to finish
+test(minT > 0);
