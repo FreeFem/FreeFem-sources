@@ -781,6 +781,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         int err=0;
         if(verbosity>5)
             cout << "   -- BuildAdj:nva= " << nva << " " << nea << " "<< nbe << endl;
+        int nadjnomanifold=0;
         for (int k=0;k<nt;++k)
             for (int i=0;i<nea;++i)
             {
@@ -796,7 +797,22 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                 }
                 else
                 {
-                    ASSERTION(p->v>=0);
+                    if(p->v<0 ){// no manifold TO DO
+                        
+                       
+                        // clean adj
+                        int nk1=-1-p->v;
+                        int nk2= TheAdjacencesLink[nk1];
+                        if(nk2>=0)
+                        { // firt time remove existing link ...
+                             nadjnomanifold++;
+                            TheAdjacencesLink[nk1]=-2;
+                            TheAdjacencesLink[nk2]=-2;// on no manifold border .
+                        }
+                        
+                      // no manifold TO DO if false
+                    }
+                   
                     TheAdjacencesLink[nk]=p->v;
                     TheAdjacencesLink[p->v]=nk;
                     p->v=-1-nk;
@@ -804,6 +820,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                 }
                 ++nk;
             }
+        if(verbosity&& nadjnomanifold) cerr << "  --- Warning manifold obj nb:" << nadjnomanifold << " of  dim =" << T::RdHat::d << endl;
         int kerr=0,kerrf=0,nbei=0;
         map<pair<int,int>,pair<int,int> > mapfs;
         int uncorrect =0, nbchangeorient=0;
@@ -912,7 +929,8 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         if(verbosity>1) 
         {
             cout << "  -- BuildAdj: nb Elememt " << nt << " nb vertices " << nv << endl;
-            cout << "             : nb adj  = "<< na << " on border " << nba << " nea = " << nea << " nva = " << nva ;
+            cout << "             : nb adj  = "<< na << " on border " << nba << " nea = " << nea << " nva = " << nva
+                 << " nb no manifold border " << nadjnomanifold << endl;
             if(nea==2)
                 cout << " Const d'Euler: " << nt - na + nv << endl;
             else
@@ -1274,7 +1292,8 @@ void GenericMesh<T,B,V>::BuildBoundaryElementAdj(const int &nbsurf, int* firstDe
 template<typename T,typename B,typename V>
 DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],int nbequibe,int *equibe) const
 {
-/*
+/*  Numbering in 1d, 2d ok if no manifold object
+ Warning:   wrong in 3d if no manifold object but improble.
    nbequibe nb of  borderelement with equi boundary condition
   for i =0, 2*nbequibe, i+= 2)
     

@@ -1564,72 +1564,73 @@ else
 fi
 
 # Arpack itself
+AC_ARG_ENABLE(download-arpack,AC_HELP_STRING([--enable-download_arpack],[force the use  download of arpack]))
+#echo "****** enable_download_arpack=$enable_download_arpack"
 
 ff_arpack_ok=no
 ff_save_libs="$LIBS"
 ff_arpack_libs=
-if test "$ff_blas_ok" = yes;
+if test "$ff_blas_ok" = yes 
 then
-
+    if test -a "$enable_download_arpack" != yes ; then
 	# User-specified location
 	AC_ARG_WITH(arpack,
-		[  --with-arpack=library	Use a specific version of Arpack],
-		ff_arpack_ok=yes
-		ff_arpack_libs="${withval}")
-
+	[  --with-arpack=library	Use a specific version of Arpack],
+	ff_arpack_ok=yes
+	ff_arpack_libs="${withval}")
+    
 	# Default locations
 	if test "$ff_arpack_ok" = no;
 	then
-		AC_CHECK_LIB(arpack,dsaupd_,
-			ff_arpack_libs="-larpack -llapack"
-			ff_arpack_ok=yes,,
-			-llapack)
+	    AC_CHECK_LIB(arpack,dsaupd_,
+		ff_arpack_libs="-larpack -llapack"
+		ff_arpack_ok=yes,,
+		-llapack)
 	fi
-
+	
    # Trying to "locate" Arpack
-   if test "$ff_arpack_ok" = no -a "$enable_download" != yes ;
-   then
-        AC_MSG_CHECKING(for libarpack with locate)
-        ff_lib_arpack=`locate libarpack|grep  'libarpack.*.a$'|head -1`
-	LIBS="$ff_lib_arpack $LIBS"
-        AC_LINK_IFELSE(
-                [AC_LANG_CALL(,dsaupd_)],
-                ff_arpack_ok=yes
-                ff_arpack_libs="$ff_lib_arpack")
-        AC_MSG_RESULT($ff_arpack_ok)
-    fi
-  if test "$ff_arpack_ok" = yes
-  then
-      AC_FF_ADDWHERELIB(arpack,$ff_arpack_libs,)
-      echo  arpack LD "'$ff_arpack_libs'"  >>$ff_where_lib_conf
-  fi
-
-	# If all else fails, download!
-	if test "$ff_arpack_ok" = no -a "$enable_download" = yes \
-	   -a "$enable_fortran" != no
+	if test "$ff_arpack_ok" = no -a "$enable_download" != yes ;
 	then
-                ff_arpack_download=yes
-		AC_MSG_NOTICE(using downloaded Arpack)
-
+            AC_MSG_CHECKING(for libarpack with locate)
+            ff_lib_arpack=`locate libarpack|grep  'libarpack.*.a$'|head -1`
+	    LIBS="$ff_lib_arpack $LIBS"
+            AC_LINK_IFELSE(
+		[AC_LANG_CALL(,dsaupd_)],
+		ff_arpack_ok=yes
+		ff_arpack_libs="$ff_lib_arpack")
+            AC_MSG_RESULT($ff_arpack_ok)
+	fi
+	if test "$ff_arpack_ok" = yes
+	then
+	    AC_FF_ADDWHERELIB(arpack,$ff_arpack_libs,)
+	    echo  arpack LD "'$ff_arpack_libs'"  >>$ff_where_lib_conf
+	fi
+    fi
+    # If all else fails, download!
+    if test "$ff_arpack_ok" = no -a "$enable_download" = yes -o "$enable_download_arpack" = yes  -a "$enable_fortran" != no
+    then
+	ff_arpack_download=yes
+	AC_MSG_NOTICE(using downloaded Arpack)
+	
 		# ALH - 6/11/13 - this install goal is the standard goal for all downloaded packages in
 		# [[file:3rdparty/common.mak::install]]
-
-		AC_SUBST(DOWNLOAD_ARPACK,install)
-
-		AC_SUBST(FF_LAPACKdir,$ff_lapackdir)
-		AC_SUBST(ARPACKLIB,${curdir}/3rdparty/lib/libarpack.a)
-		AC_SUBST(LAPACK_arpack_LIB,${curdir}/3rdparty/lib/liblapack.a)
-
+	
+	AC_SUBST(DOWNLOAD_ARPACK,install)
+       
+	AC_SUBST(FF_LAPACKdir,$ff_lapackdir)
+	AC_SUBST(ARPACKLIB,${curdir}/3rdparty/lib/libarpack.a)
+	AC_SUBST(LAPACK_arpack_LIB,${curdir}/3rdparty/lib/liblapack.a)
+	
 		# Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this
 		# could make the following tests fail.
-
+	
 		# ALH - 30/9/13 - do not use the "-L ${curdir}/3rdparty/lib" directive because it would allow other
 		# following -l directives (eg -lumfpack) to pick an old locally compiled library instead of the system
 		# ones.
-
-                ff_arpack_libs="${curdir}/3rdparty/lib/libarpack.a $ff_lapack_lib"
-		ff_arpack_ok=yes
-	fi
+	
+	ff_arpack_libs="${curdir}/3rdparty/lib/libarpack.a $ff_lapack_lib"
+	ff_arpack_ok=yes
+    fi
 fi
 if test  "$ff_arpack_ok" != yes
  then
