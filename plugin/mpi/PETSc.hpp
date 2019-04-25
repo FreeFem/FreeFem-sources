@@ -24,7 +24,7 @@ class DistributedCSR {
     public:
         HpddmType*                             _A;
         Mat                                _petsc;
-        std::vector<Mat>                       _S;
+        std::vector<Mat>                      _vS;
         VecScatter                       _scatter;
         KSP                                  _ksp;
         HPDDM::Subdomain<PetscScalar>** _exchange;
@@ -34,7 +34,7 @@ class DistributedCSR {
         unsigned int*                       _cnum;
         unsigned int                      _cfirst;
         unsigned int                       _clast;
-        DistributedCSR() : _A(), _petsc(), _ksp(), _exchange(), _num(), _first(), _last(), _cnum(), _cfirst(), _clast() { _S.clear(); }
+        DistributedCSR() : _A(), _petsc(), _ksp(), _exchange(), _num(), _first(), _last(), _cnum(), _cfirst(), _clast() { _vS.clear(); }
         ~DistributedCSR() {
             dtor();
         }
@@ -82,8 +82,8 @@ class DistributedCSR {
                 }
                 MatDestroy(&_petsc);
             }
-            for(int i = 0; i < _S.size(); ++i)
-                MatDestroy(&_S[i]);
+            for(int i = 0; i < _vS.size(); ++i)
+                MatDestroy(&_vS[i]);
             if(_ksp)
                 KSPDestroy(&_ksp);
             if(_exchange) {
@@ -180,7 +180,7 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
             }
             numSchur -= nbSchur;
             delete [] num;
-            ptA->_S.resize(mT->n);
+            ptA->_vS.resize(mT->n);
             for(int k = 0; k < mT->n; ++k) {
                 MatriceMorse<PetscScalar>* mS = static_cast<MatriceMorse<PetscScalar>*>(&(*(mT->operator[](k)).A));
                 std::vector<std::vector<std::pair<int, PetscScalar>>> tmp(mS->n);
@@ -225,11 +225,11 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
                 c = nullptr;
                 HPDDM::MatrixCSR<PetscScalar>* dN = new_HPDDM_MatrixCSR<PetscScalar>(mS,true,s,is,js);//->n, mS->m, mS->nbcoef, s, is, js, mS->symetrique, true);
                 bool free = ptA->_A->HPDDM::template Subdomain<PetscScalar>::distributedCSR(numSchur, start, end, ia, ja, c, dN);
-                MatCreate(PETSC_COMM_WORLD, &ptA->_S[k]);
-                MatSetSizes(ptA->_S[k], end - start, end - start, global, global);
-                MatSetType(ptA->_S[k], MATMPIAIJ);
-                MatMPIAIJSetPreallocationCSR(ptA->_S[k], reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
-                MatSetOption(ptA->_S[k], MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
+                MatCreate(PETSC_COMM_WORLD, &ptA->_vS[k]);
+                MatSetSizes(ptA->_vS[k], end - start, end - start, global, global);
+                MatSetType(ptA->_vS[k], MATMPIAIJ);
+                MatMPIAIJSetPreallocationCSR(ptA->_vS[k], reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
+                MatSetOption(ptA->_vS[k], MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
                 if(free) {
                     delete [] ia;
                     delete [] ja;
