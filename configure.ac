@@ -175,7 +175,6 @@ m4_define([TOOL_DISABLE_NO],
     TOOL_PARAMETERS($1,$2,$3)
 ])
 
-ff_HOSTARCH_pastix=
 echo "#  Build with freefem++ with ./configure " `date`  >$ff_where_lib_conf
 # To allow anonymous CVS version to contain a "./configure" and
 # Makefiles
@@ -214,19 +213,21 @@ esac
 
 
 
+AC_CHECK_PROG(ff_unzip,unzip,yes,no)
 AC_CHECK_PROG(ff_m4,m4,yes,no)
 AC_CHECK_PROG(ff_bison,bison,yes,no)
 AC_CHECK_PROG(ff_flex,flex,yes,no)
 dnl AC_CHECK_PROG(ff_cmake,cmake,yes,no)
 AC_CHECK_PROG(ff_patch,patch,yes,no)
-case "$ff_m4 $ff_bison $ff_patch $ff_flex"  in
+case "$ff_m4 $ff_bison $ff_patch $ff_flex $ff_unzip"  in
 *no*)
     AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try ])
+    test "$ff_unzip" = no && AC_MSG_NOTICE([ sudo apt-get install unzip])
     test "$ff_m4" = no && AC_MSG_NOTICE([ sudo apt-get install m4])
     test "$ff_bison" = no && AC_MSG_NOTICE([ sudo apt-get install bison])
     test "$ff_flex" = no && AC_MSG_NOTICE([ sudo apt-get install flex])
     test "$ff_patch" = no && AC_MSG_NOTICE([ sudo apt-get install patch])
-    AC_MSG_ERROR([ Sorry missing  m4,bison,flex,patch command !]);;
+    AC_MSG_ERROR([ Sorry missing  unzip,m4,bison,flex,patch command !]);;
 esac
 
 
@@ -485,7 +486,6 @@ AC_MSG_CHECKING(wether we are on a MacIntosh)
 ff_mac=no
 if test `uname` = Darwin;
 then
-	ff_HOSTARCH_pastix=i686_mac
 	ff_suffix_dylib="dylib"
 	ff_suffix_dylib_a="dylib"
 	ff_mac=yes
@@ -906,18 +906,6 @@ else
 	AC_SUBST(MPI_LIBC,"")
 	AC_SUBST(MPI_LIBFC,"")
 
-        # Extra MPI-dependant configuration options that are set by FF
-        # during MPI configuration. FFCS - 25/2/13 - Fred noticed that if
-        # PASTIX_HOSTARCH stays blank, pastix compilation breaks. At least
-        # i686_pc_linux and i686_mac are required by pastix on the
-        # corresponding platforms.
-
-	if test"$ff_HOSTARCH_pastix" = ""
-	then
-	    ff_HOSTARCH_pastix=i686_pc_linux
-	fi
-	AC_SUBST(PASTIX_HOSTARCH,$ff_HOSTARCH_pastix)
-
         # these values should not be empty otherwise
         # plugin/seq/ff-get-dep will think that they are not
         # defined
@@ -1128,6 +1116,15 @@ if test "$enable_download"  = "yes" ; then
 DOWNLOADCOMPILE="compile-pkg install-other"
 else
 DOWNLOADCOMPILE=
+fi
+if test "$enable_download"  = "yes"  ; then
+ AC_CHECK_PROG(ff_git,git,yes,no)
+ case "$ff_git"  in
+ *no*)
+     AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try ])
+     test "$ff_git" = no && AC_MSG_NOTICE([ sudo apt-get install git])
+     AC_MSG_ERROR([ Sorry missing  git command !]);;
+ esac
 fi
 
 AC_SUBST(WGET,$ff_wget_command)
@@ -2062,7 +2059,6 @@ m4_map([AC_FF_WHERELIB],[
 	[[mmg3d],[-lmmg3d],[libmmg3d.h],[]],
 	[[mshmet],[-lmshmet],[],[]],
 dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
-	[[parms],[-lparms -litsol -llapack -lblas -lm],[],[]],
 	[[tetgen],[-ltet],[tetgen.h],[]],
 	[[ipopt],[ -lipopt],[${inc_usr_include}coin/IpTNLP.hpp],[]],
 	[[nlopt],[ -lnlopt],[nlopt.hpp],[]]
@@ -2071,7 +2067,6 @@ dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 ## before try
 
 TOOL_DISABLE(tetgen,tetgen.$DYLIB_SUFFIX)
-TOOL_DISABLE_NO(hips,hips_FreeFem.$DYLIB_SUFFIX)
 TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(lapack,"lapack.$DYLIB_SUFFIX fflapack.$DYLIB_SUFFIX")
 TOOL_DISABLE(parmetis,metis.$DYLIB_SUFFIX)
@@ -2082,9 +2077,7 @@ TOOL_DISABLE(mumps,"MUMPS.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps_seq,"MUMPS_seq.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX",mumps-seq)
 TOOL_DISABLE(nlopt,ff-NLopt.$DYLIB_SUFFIX)
 dnl TOOL_DISABLE(parmetis)
-TOOL_DISABLE_NO(parms,parms_FreeFem.$DYLIB_SUFFIX)
 
-TOOL_DISABLE_NO(pastix,"interfacepastix.$DYLIB_SUFFIX complex_pastix_FreeFem.$DYLIB_SUFFIX real_pastix_FreeFem.$DYLIB_SUFFIX")
 TOOL_DISABLE(scotch,scotch.$DYLIB_SUFFIX)
 TOOL_DISABLE(superlu,SuperLu.$DYLIB_SUFFIX)
 TOOL_DISABLE_NO(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
@@ -2104,19 +2097,13 @@ then
     if test -n "$ff_pthread"  ; then
        AC_FF_ADDWHERELIB(pthread,"",)
     fi
-fi
-
-# ALH - pARMS needs "-fno-range-check" on Windows, but this options fails on MacOS 10.8.  Add no-range-check for Windows
+# ALH  MPI  "-fno-range-check" on Windows, but this options fails on MacOS 10.8.  Add no-range-check for Windows
 # for hexadecimal parameter constants like:
-#
 # [[file:c:/cygwin/home/alh/ffcs/rel/mingw/mpif.h::PARAMETER MPI_SHORT_INT z 8c000003]]
 #
-# Such constants are rejected without [[file:3rdparty/parms/makefile-parms.in::NO_RANGE_CHECK]]
-
-if test "$OS" = Windows_NT
-then
-    AC_SUBST(NO_RANGE_CHECK,-fno-range-check)
+    AC_SUBST(NO_RANGE_CHECK,-fno-range-check)	
 fi
+
 
 # ALH - 4/9/13 - request from Helmut Jarausch - allow to change Scotch include path
 if test "$with_scotch_include" = ""

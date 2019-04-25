@@ -61,9 +61,9 @@ int loadMesh (pMesh mesh) {
 
 	/* parse keywords */
 	mesh->np = GmfStatKwd(inm, GmfVertices);
-	printf("mesh->np=%i\n", mesh->np);
+	/* printf("mesh->np=%i\n", mesh->np);*/
 	mesh->nt = GmfStatKwd(inm, GmfTriangles);
-	printf("mesh->np=%i\n", mesh->nt);
+	/* printf("mesh->np=%i\n", mesh->nt);*/
 	mesh->nq = GmfStatKwd(inm, GmfQuadrilaterals);
 	mesh->ntet = GmfStatKwd(inm, GmfTetrahedra);
 	mesh->nhex = GmfStatKwd(inm, GmfHexahedra);
@@ -106,7 +106,7 @@ int loadMesh (pMesh mesh) {
 				GmfGetLin(inm, GmfVertices, &fp1, &fp2, &ref);
 				ppt->c[0] = fp1;
 				ppt->c[1] = fp2;
-				printf("vertices %f %f %li\n", fp1, fp2, ref);
+				/*printf("vertices %f %f %li\n", fp1, fp2, ref);*/
 			} else {
 				GmfGetLin(inm, GmfVertices, &fp1, &fp2, &fp3, &ref);
 				ppt->c[0] = fp1;
@@ -640,7 +640,8 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 	double dbuf[GmfMaxTyp];
 	float fbuf[GmfMaxTyp];
 	double m[6], lambda[3], eigv[3][3], vp[2][2];
-	int inm, k, i, key, nel, size, type, iord, off, typtab[GmfMaxTyp], ver, dim;
+    long inm;
+    int k, i, key, nel, size, type, iord, off, typtab[GmfMaxTyp], ver, dim;
 	char *ptr, data[128];
 
 	strcpy(data, filename);

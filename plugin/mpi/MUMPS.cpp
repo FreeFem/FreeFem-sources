@@ -58,12 +58,12 @@ template<> struct MUMPS_STRUC_TRAIT<Complex>  {typedef ZMUMPS_STRUC_C MUMPS; typ
 void mumps_c(DMUMPS_STRUC_C *id) { dmumps_c(id);}
 void mumps_c(ZMUMPS_STRUC_C *id) { zmumps_c(id);}
 
-template<class T> struct MPI_TYPE {static const MPI_Datatype  TYPE(){return MPI_BYTE;}};;
-template<> struct MPI_TYPE<long>      {static const MPI_Datatype  TYPE(){return MPI_LONG;}};
-template<> struct MPI_TYPE<int>      {static const MPI_Datatype TYPE(){return MPI_INT;}};
-template<> struct MPI_TYPE<double>    {static const MPI_Datatype TYPE(){return MPI_DOUBLE;}};
-template<> struct MPI_TYPE<char>    {static const MPI_Datatype TYPE(){return MPI_BYTE;}};
-template<> struct MPI_TYPE<Complex>    {static const MPI_Datatype TYPE(){return MPI_DOUBLE_COMPLEX;}};
+template<class T> struct MPI_TYPE {static MPI_Datatype  TYPE(){return MPI_BYTE;}};;
+template<> struct MPI_TYPE<long>      {static MPI_Datatype  TYPE(){return MPI_LONG;}};
+template<> struct MPI_TYPE<int>      {static MPI_Datatype TYPE(){return MPI_INT;}};
+template<> struct MPI_TYPE<double>    {static MPI_Datatype TYPE(){return MPI_DOUBLE;}};
+template<> struct MPI_TYPE<char>    {static MPI_Datatype TYPE(){return MPI_BYTE;}};
+template<> struct MPI_TYPE<Complex>    {static MPI_Datatype TYPE(){return MPI_DOUBLE_COMPLEX;}};
 
 
 static std::string analysis[] = {"AMD", "", "AMF", "SCOTCH", "PORD", "METIS", "QAMD", "automatic sequential", "automatic parallel", "PT-SCOTCH", "ParMetis"};

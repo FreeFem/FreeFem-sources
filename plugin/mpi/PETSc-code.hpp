@@ -172,7 +172,7 @@ class changeOperator : public OneOperator {
 template<class Type>
 basicAC_F0::name_and_type changeOperator<Type>::changeOperator_Op::name_param[] = {
     {"restriction", &typeid(Matrice_Creuse<double>*)},
-    {"nest", &typeid(Type*)}
+    {"parent", &typeid(Type*)}
 };
 template<class Type>
 AnyType changeOperator<Type>::changeOperator_Op::operator()(Stack stack) const {
@@ -247,14 +247,14 @@ AnyType changeOperator<Type>::changeOperator_Op::operator()(Stack stack) const {
                 MatMPIAIJSetPreallocationCSR(ptA->_petsc, NULL, NULL, NULL);
             MatAssemblyBegin(ptA->_petsc, MAT_FINAL_ASSEMBLY);
             MatAssemblyEnd(ptA->_petsc, MAT_FINAL_ASSEMBLY);
-            Type* ptNest = nargs[1] ? GetAny<Type*>((*nargs[1])(stack)) : 0;
-            if(ptNest) {
+            Type* ptParent = nargs[1] ? GetAny<Type*>((*nargs[1])(stack)) : 0;
+            if(ptParent) {
                 PetscBool assembled;
-                MatAssembled(ptNest->_petsc, &assembled);
+                MatAssembled(ptParent->_petsc, &assembled);
                 if(!assembled) {
                     PetscInt M, N;
                     Mat** mat;
-                    MatNestGetSubMats(ptNest->_petsc, &M, &N, &mat);
+                    MatNestGetSubMats(ptParent->_petsc, &M, &N, &mat);
                     PetscBool assemble = PETSC_TRUE;
                     for(PetscInt i = 0; i < M && assemble; ++i) {
                         for(PetscInt j = 0; j < N && assemble; ++j) {
@@ -267,8 +267,8 @@ AnyType changeOperator<Type>::changeOperator_Op::operator()(Stack stack) const {
                         }
                     }
                     if(assemble) {
-                        MatAssemblyBegin(ptNest->_petsc, MAT_FINAL_ASSEMBLY);
-                        MatAssemblyEnd(ptNest->_petsc, MAT_FINAL_ASSEMBLY);
+                        MatAssemblyBegin(ptParent->_petsc, MAT_FINAL_ASSEMBLY);
+                        MatAssemblyEnd(ptParent->_petsc, MAT_FINAL_ASSEMBLY);
                     }
                 }
             }
@@ -279,8 +279,8 @@ AnyType changeOperator<Type>::changeOperator_Op::operator()(Stack stack) const {
                     PetscBool assembled;
                     MatAssembled(ptA->_petsc, &assembled);
                     if(assembled) {
-                        if(ptNest)
-                            MatAssembled(ptNest->_petsc, &assembled);
+                        if(ptParent)
+                            MatAssembled(ptParent->_petsc, &assembled);
                         if(assembled)
                             KSPSetUp(ptA->_ksp);
                     }
@@ -1215,7 +1215,7 @@ basicAC_F0::name_and_type setOptions_Op<Type>::name_param[] = {
     {"prefix", &typeid(std::string*)},
     {"schurPreconditioner", &typeid(KN<Matrice_Creuse<PetscScalar>>*)},
     {"schurList", &typeid(KN<double>*)},
-    {"subksp", &typeid(Type*)},
+    {"parent", &typeid(Type*)},
     {"MatNullSpace", &typeid(KNM<PetscScalar>*)}
 };
 template<class Type, char> class LinearSolve;
@@ -1241,10 +1241,10 @@ class setOptions : public OneOperator {
 template<class Type>
 AnyType setOptions_Op<Type>::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
-    Type* ptSub = nargs[7] ? GetAny<Type*>((*nargs[7])(stack)) : 0;
-    if(ptSub && ptA->_ksp) {
+    Type* ptParent = nargs[7] ? GetAny<Type*>((*nargs[7])(stack)) : 0;
+    if(ptParent && ptParent->_ksp) {
         PC pc;
-        KSPGetPC(ptA->_ksp, &pc);
+        KSPGetPC(ptParent->_ksp, &pc);
         PCType type;
         PCGetType(pc, &type);
         PetscBool isFieldSplit;
@@ -1257,17 +1257,18 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
             PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
             Mat** mat;
             PetscInt M, N;
-            MatNestGetSubMats(ptA->_petsc, &M, &N, &mat);
+            MatNestGetSubMats(ptParent->_petsc, &M, &N, &mat);
             ffassert(M == N);
             for(int i = 0; i < M; ++i) {
-                if(mat[i][i] == ptSub->_petsc) {
+                if(mat[i][i] == ptA->_petsc) {
                     Mat A;
                     KSPGetOperators(subksp[i], &A, NULL);
-                    KSPDestroy(&ptSub->_ksp);
-                    ptSub->_ksp = subksp[i];
+                    if(ptA->_ksp) {
+                        KSPDestroy(&ptA->_ksp);
+                    }
+                    ptA->_ksp = subksp[i];
                     PetscObjectReference((PetscObject)subksp[i]);
-                    KSPSetOperators(subksp[i], ptSub->_petsc, ptSub->_petsc);
-                    ptA = ptSub;
+                    KSPSetOperators(subksp[i], ptA->_petsc, ptA->_petsc);
                     break;
                 }
             }
@@ -1348,8 +1349,8 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
         KSPSetFromOptions(ptA->_ksp);
         if(std::is_same<Type, Dmat>::value && nargs[2] && nargs[5] && nargs[6]) {
             if(assembled) {
-                if(ptSub)
-                    MatAssembled(GetAny<Type*>((*A)(stack))->_petsc, &assembled);
+                if(ptParent)
+                    MatAssembled(ptParent->_petsc, &assembled);
                 if(assembled)
                     KSPSetUp(ptA->_ksp);
             }

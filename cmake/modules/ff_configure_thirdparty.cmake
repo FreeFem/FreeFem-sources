@@ -8,6 +8,4 @@ macro(ff_configure_thirdparty)
   ff_configure_thirdparty_required() 
   ff_configure_thirdparty_optional() 
  
-
-
 endmacro(ff_configure_thirdparty)
