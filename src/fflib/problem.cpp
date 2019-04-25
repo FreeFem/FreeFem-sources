@@ -168,6 +168,25 @@ namespace Fem2D {
         if (err)
         ExecError("Incompatibility beetwen linear varf  and FE space");
     }
+  template<class R>
+  inline void  CheckErrorOptimisation(const R& ccc,const R& cc,const char * cmm)
+    {
+        if ( ccc != cc) {
+             if( (abs(ccc-cc) >1e-14*abs(cc)) || (cc !=cc) ||  (ccc !=ccc) ) {
+                cerr << cc << " != " << ccc <<  " diff "<< cc-ccc <<" => ";
+                cerr << cmm << endl;
+                ExecError("In Optimized version "); }}
+   }
+    inline void  CheckErrorOptimisation(const Complex ccc,const Complex& cc,const char * cmm)
+    {
+        if ( ccc != cc) {
+            if( (abs(ccc.real()-ccc.real())+ abs(cc.imag()-cc.imag())  >1e-13*abs((cc.real())+abs(cc.imag())) )||  (cc !=cc) ||  (ccc !=ccc) )
+            {
+                cerr << cc << " != " << ccc <<  " diff "<< cc-ccc <<" => ";
+                cerr << cmm << endl;
+                ExecError("In Optimized version "); }}
+    }
+
     //---------------------------------------------------------------------------------------
     template<class R>
     void  Element_OpVF(MatriceElementairePleine<R,FESpace3> & mat,
@@ -330,10 +349,11 @@ namespace Fem2D {
                         if ( copt && ( mat.optim==1) && Kv.number <1)
                         {
                             R cc  =  GetAny<R>(ll.second.eval(stack));
-                            if ( ccc != cc) {
+                            CheckErrorOptimisation(cc,ccc,"Sorry error in Optimization Element_OpVF2d  (b) add:   int2d(Th,optimize=0)(...)");
+                           /* if ( ccc != cc) {
                                 cerr << cc << " != " << ccc << " => ";
                                 cerr << "Sorry error in Optimization Element_OpVF2d  (b) add:  int2d(Th,optimize=0)(...)" << endl;
-                                ExecError("In Optimized version "); }
+                                ExecError("In Optimized version "); }*/
                         }
                         *pa += coef * ccc * w_i*w_j;
                     }
@@ -3163,10 +3183,11 @@ namespace Fem2D {
                 {
                     R cc  =  GetAny<R>(ll.second.eval(stack));
                     //cout << *(copt[il]) << " == " <<  cc << endl;
-                    if ( ccc != cc) {
+                    CheckErrorOptimisation(cc,ccc,"Sorry error in Optimization (e) add:  int2d(Th,optimize=0)(...)");
+                   /* if ( ccc != cc) {
                         cerr << cc << " != " << ccc << " => ";
                         cerr << "Sorry error in Optimization (e) add:  int2d(Th,optimize=0)(...)" << endl;
-                        ExecError("In Optimized version "); }
+                        ExecError("In Optimized version "); }*/
                 }
                 int fi=Kv.dfcbegin(icomp);
                 int li=Kv.dfcend(icomp);
@@ -3222,10 +3243,11 @@ namespace Fem2D {
                     {
                         R cc  =  GetAny<R>(ll.second.eval(stack));
                         //cout << *(copt[il]) << " == " <<  cc << endl;
-                        if ( ccc != cc) {
+                        CheckErrorOptimisation(cc,ccc,"Sorry error in Optimization (f) add:  int2d(Th,optimize=0)(...)");
+                       /* if ( ccc != cc) {
                             cerr << cc << " != " << ccc << " => ";
                             cerr << "Sorry error in Optimization (f) add:  int2d(Th,optimize=0)(...)" << endl;
-                            ExecError("In Optimized version "); }
+                            ExecError("In Optimized version "); }*/
                     }
                     int fi=Kv.dfcbegin(icomp);
                     int li=Kv.dfcend(icomp);
@@ -3280,10 +3302,11 @@ namespace Fem2D {
                 {
                     R cc  =  GetAny<R>(ll.second.eval(stack));
                     //cout << *(copt[il]) << " == " <<  cc << endl;
-                    if ( ccc != cc) {
+                    CheckErrorOptimisation(cc,ccc,"Sorry error in Optimization (g) add:  int2d(Th,optimize=0)(...)");
+                   /* if ( ccc != cc) {
                         cerr << cc << " != " << ccc << " => ";
                         cerr << "Sorry error in Optimization (g) add:  int2d(Th,optimize=0)(...)" << endl;
-                        ExecError("In Optimized version "); }
+                        ExecError("In Optimized version "); }*/
                 }
                 int fi=Kv.dfcbegin(icomp);
                 int li=Kv.dfcend(icomp);
@@ -3436,11 +3459,12 @@ namespace Fem2D {
                 {
                     R cc  =  GetAny<R>(ll.second.eval(stack));
                     //cout << *(copt[il]) << " == " <<  cc << endl;
-                    if ( ccc != cc) {
-                        cerr << cc << " != " << ccc << " => ";
-                        cerr << "Sorry error in Optimization Element_Op plein 3d (a) add:  int2d(Th,optimize=0)(...)" << endl;
-                        ExecError("In Optimized version "); }
-                }
+                    CheckErrorOptimisation(cc,ccc,"Sorry error in Optimization Element_Op plein 3d (a) add:  int2d(Th,optimize=0)(...)");
+                     /*   if ( ccc != cc) {
+                            cerr << cc << " != " << ccc << " => ";
+                            cerr << "Sorry error in Optimization Element_Op plein 3d (a) add:  int2d(Th,optimize=0)(...)" << endl;
+                            ExecError("In Optimized version "); }*/
+                    }
                 int fi=Kv.dfcbegin(icomp);
                 int li=Kv.dfcend(icomp);
                 int fj=Ku.dfcbegin(jcomp);
@@ -3519,10 +3543,11 @@ namespace Fem2D {
                                 if ( copt && ( mat.optim==1) && Kv.number <1)
                                 {
                                     R cc  =  GetAny<R>(ll.second.eval(stack));
-                                    if ( ccc != cc) {
+                                    CheckErrorOptimisation(cc,ccc,"Sorry error in Optimization  Element_Op plein 3d (b) add:  int2d(Th,optimize=0)(...)");
+                                   /* if ( ccc != cc) {
                                         cerr << cc << " != " << ccc << " => ";
                                         cerr << "Sorry error in Optimization  Element_Op plein 3d (b) add:  int2d(Th,optimize=0)(...)" << endl;
-                                        ExecError("In Optimized version "); }
+                                        ExecError("In Optimized version "); }*/
                                 }
                                 if(verbosity>999)
                                 cout << " -- int on leveset3d  aij = "<< pi.a* ccc * w_i*w_j <<" " << ccc << " " << w_i*w_j <<endl;
@@ -3573,10 +3598,12 @@ namespace Fem2D {
                         if ( copt && ( mat.optim==1) && Kv.number <1)
                         {
                             R cc  =  GetAny<R>(ll.second.eval(stack));
+                            CheckErrorOptimisation(cc,ccc,"Sorry error in Optimization Element_Op plein 3d (c) add:  int2d(Th,optimize=0)(...)");
+                            /*
                             if ( ccc != cc) {
                                 cerr << cc << " != " << ccc << " => ";
                                 cerr << "Sorry error in Optimization  Element_Op plein 3d (c) add:  int2d(Th,optimize=0)(...)" << endl;
-                                ExecError("In Optimized version "); }
+                                ExecError("In Optimized version "); }*/
                         }
                         *pa += coef * ccc * w_i*w_j;
                     }
@@ -3673,10 +3700,11 @@ namespace Fem2D {
                 {
                     R cc  =  GetAny<R>(ll.second.eval(stack));
                     //cout << *(copt[il]) << " == " <<  cc << endl;
-                    if ( ccc != cc) {
+                    CheckErrorOptimisation(cc,ccc,"Sorry error in Optimization (e) add:  int2d(Th,optimize=0)(...)");
+                    /*if ( ccc != cc) {
                         cerr << cc << " != " << ccc << " => ";
                         cerr << "Sorry error in Optimization (e) add:  int2d(Th,optimize=0)(...)" << endl;
-                        ExecError("In Optimized version "); }
+                        ExecError("In Optimized version "); }*/
                 }
                 int fi=Kv.dfcbegin(icomp);
                 int li=Kv.dfcend(icomp);
@@ -3731,10 +3759,12 @@ namespace Fem2D {
                 {
                     R cc  =  GetAny<R>(ll.second.eval(stack));
                     //cout << *(copt[il]) << " == " <<  cc << endl;
+                    CheckErrorOptimisation(cc,ccc,"Sorry error in Optimization (g) add:  int2d(Th,optimize=0)(...)");
+                    /*
                     if ( ccc != cc) {
                         cerr << cc << " != " << ccc << " => ";
                         cerr << "Sorry error in Optimization (g) add:  int2d(Th,optimize=0)(...)" << endl;
-                        ExecError("In Optimized version "); }
+                        ExecError("In Optimized version "); }*/
                 }
                 int fi=Kv.dfcbegin(icomp);
                 int li=Kv.dfcend(icomp);
@@ -3889,10 +3919,12 @@ namespace Fem2D {
                 {
                     R cc  =  GetAny<R>(ll.second.eval(stack));
                     // cout << *(copt[il]) << " == " <<  cc << endl;
+                    CheckErrorOptimisation(c,cc,"Sorry error in Optimization (l) add:  int2d(Th,optimize=0)(...)");
+                    /*
                     if ( c != cc) {
                         cerr << c << " != " << cc << " => ";
                         cerr << "Sorry error in Optimization (l) add:  int2d(Th,optimize=0)(...)" << endl;
-                        ExecError("In Optimized version "); }
+                        ExecError("In Optimized version "); }*/
                 }
                 c *= coef ;
                 long fi=Ku.dfcbegin(icomp);
@@ -3984,10 +4016,12 @@ namespace Fem2D {
                     {
                         R cc  =  GetAny<R>(ll.second.eval(stack));
                         // cout << *(copt[il]) << " == " <<  cc << endl;
+                        CheckErrorOptimisation(c,cc,"Sorry error in Optimization (n) add:  int2d(Th,optimize=0)(...)");
+                        /*
                         if ( c != cc) {
                             cerr << c << " != " << cc << " => ";
                             cerr << "Sorry error in Optimization (n) add:  int2d(Th,optimize=0)(...)" << endl;
-                            ExecError("In Optimized version "); }
+                            ExecError("In Optimized version "); }*/
                     }
                     c *= coef ;
                     long fi=Ku.dfcbegin(icomp);
@@ -4043,10 +4077,12 @@ namespace Fem2D {
                 {
                     R cc  =  GetAny<R>(ll.second.eval(stack));
                     // cout << *(copt[il]) << " == " <<  cc << endl;
+                    CheckErrorOptimisation(c,cc,"Sorry error in Optimization (o) add:  int2d(Th,optimize=0)(...)");
+                    /*
                     if ( c != cc) {
                         cerr << c << " != " << cc << " => ";
                         cerr << "Sorry error in Optimization (o) add:  int2d(Th,optimize=0)(...)" << endl;
-                        ExecError("In Optimized version "); }
+                        ExecError("In Optimized version "); }*/
                 }
                 c *= coef ;
                 long fi=Ku.dfcbegin(icomp);
@@ -4199,10 +4235,12 @@ namespace Fem2D {
                 {
                     R cc  =  GetAny<R>(ll.second.eval(stack));
                     // cout << *(copt[il]) << " == " <<  cc << endl;
+                    CheckErrorOptimisation(c,cc,"Sorry error in Optimization (i) add:  int2d(Th,optimize=0)(...)");
+                    /*
                     if ( c != cc) {
                         cerr << c << " != " << cc << " => ";
                         cerr << "Sorry error in Optimization (i) add:  int2d(Th,optimize=0)(...)" << endl;
-                        ExecError("In Optimized version "); }
+                        ExecError("In Optimized version "); }*/
                 }
                 c *= coef ;
                 long fi=Ku.dfcbegin(icomp);
@@ -4279,10 +4317,12 @@ namespace Fem2D {
                         {
                             R cc  =  GetAny<R>(ll.second.eval(stack));
                             // cout << *(copt[il]) << " == " <<  cc << endl;
+                            CheckErrorOptimisation(c,cc,"Sorry error in Optimization (j) add:  int2d(Th,optimize=0)(...)");
+                            /*
                             if ( c != cc) {
                                 cerr << c << " != " << cc << " => ";
                                 cerr << "Sorry error in Optimization (j) add:  int2d(Th,optimize=0)(...)" << endl;
-                                ExecError("In Optimized version "); }
+                                ExecError("In Optimized version "); }*/
                         }
                         c *= coef ;
                         long fi=Ku.dfcbegin(icomp);
@@ -4345,10 +4385,12 @@ namespace Fem2D {
                 {
                     R cc  =  GetAny<R>(ll.second.eval(stack));
                     // cout << *(copt[il]) << " == " <<  cc << endl;
+                    CheckErrorOptimisation(c,cc,"Sorry error in Optimization (k) add:  int2d(Th,optimize=0)(...)");
+                    /*
                     if ( c != cc) {
                         cerr << c << " != " << cc << " => ";
                         cerr << "Sorry error in Optimization (k) add:  int2d(Th,optimize=0)(...)" << endl;
-                        ExecError("In Optimized version "); }
+                        ExecError("In Optimized version "); }*/
                 }
                 c *= coef ;
                 long fi=Ku.dfcbegin(icomp);
@@ -4473,10 +4515,12 @@ namespace Fem2D {
                     {
                         R cc  =  GetAny<R>(ll.second.eval(stack));
                         // cout << *(copt[il]) << " == " <<  cc << endl;
+                        CheckErrorOptimisation(c,cc,"Sorry error in Optimization (l) add:  int2d(Th,optimize=0)(...)");
+                        /*
                         if ( c != cc) {
                             cerr << c << " != " << cc << " => ";
                             cerr << "Sorry error in Optimization (l) add:  int2d(Th,optimize=0)(...)" << endl;
-                            ExecError("In Optimized version "); }
+                            ExecError("In Optimized version "); }*/
                     }
                     c *= coef ;
                     long fi=Ku.dfcbegin(icomp);
@@ -4569,10 +4613,12 @@ namespace Fem2D {
                     {
                         R cc  =  GetAny<R>(ll.second.eval(stack));
                         // cout << *(copt[il]) << " == " <<  cc << endl;
+                        CheckErrorOptimisation(c,cc,"Sorry error in Optimization (o) add:  int2d(Th,optimize=0)(...)");
+                        /*
                         if ( c != cc) {
                             cerr << c << " != " << cc << " => ";
                             cerr << "Sorry error in Optimization (o) add:  int2d(Th,optimize=0)(...)" << endl;
-                            ExecError("In Optimized version "); }
+                            ExecError("In Optimized version "); }*/
                     }
                     c *= coef ;
                     long fi=Ku.dfcbegin(icomp);
@@ -4721,10 +4767,12 @@ namespace Fem2D {
                     if ( copt && ( optim==1) && Kv.number <1)
                     {
                         R cc  =  GetAny<R>(ll.second.eval(stack));
+                        CheckErrorOptimisation(c,cc, "Sorry error in Optimization add:  (p) int2d(Th,optimize=0)(...)" );
+                        /*
                         if ( c != cc) {
                             cerr << c << " != " << cc << " => ";
                             cerr << "Sorry error in Optimization add:  (p) int2d(Th,optimize=0)(...)" << endl;
-                            ExecError("In Optimized version "); }
+                            ExecError("In Optimized version "); }*/
                     }
                     //if (Kv.number<5) cout << il<< " " << i << "  c== " <<  c << endl;
                     R a = coef * c * w_i;
@@ -4793,10 +4841,12 @@ namespace Fem2D {
                     if ( copt && ( optim==1) && Kv.number <1)
                     {
                         R cc  =  GetAny<R>(ll.second.eval(stack));
+                        CheckErrorOptimisation(c,cc,"Sorry error in Optimization (q) add:  int2d(Th,optimize=0)(...)");
+                        /*
                         if ( c != cc) {
                             cerr << c << " != " << cc << " => ";
                             cerr << "Sorry error in Optimization (q) add:  int2d(Th,optimize=0)(...)" << endl;
-                            ExecError("In Optimized version "); }
+                            ExecError("In Optimized version "); }*/
                     }
                     //if (Kv.number<5) cout << il<< " " << i << "  c== " <<  c << endl;
                     R a = coef * c * w_i;
@@ -4866,10 +4916,12 @@ namespace Fem2D {
                     if ( copt && ( optim==1) && Kv.number <1)
                     {
                         R cc  =  GetAny<R>(ll.second.eval(stack));
+                        CheckErrorOptimisation(c,cc,"Sorry error in Optimization Element_OpVF2d  (b) add:  int2d(Th,optimize=0)(...)");
+                        /*
                         if ( c != cc) {
                             cerr << c << " != " << cc << " => ";
                             cerr << "Sorry error in Optimization add:  (p) int2d(Th,optimize=0)(...)" << endl;
-                            ExecError("In Optimized version "); }
+                            ExecError("In Optimized version "); }*/
                     }
                     //if (Kv.number<5) cout << il<< " " << i << "  c== " <<  c << endl;
                     R a = coef * c * w_i;
@@ -4944,10 +4996,12 @@ namespace Fem2D {
                         if ( copt && ThI(KI) <1)
                         {
                             R cc  =  GetAny<R>(ll.second.eval(stack));
+                            CheckErrorOptimisation(c,cc,"Sorry error in Optimization (s) add:  int2d(Th,optimize=0)(...)");
+                            /*
                             if ( c != cc) {
                                 cerr << c << " != " << cc << " => ";
                                 cerr << "Sorry error in Optimization (s) add:  int2d(Th,optimize=0)(...)" << endl;
-                                ExecError("In Optimized version "); }
+                                ExecError("In Optimized version "); }*/
                         }
                         
                         R a = coef * c * w_i;
