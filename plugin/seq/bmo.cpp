@@ -91,7 +91,7 @@ double BijanMO::main (Vect &xx, Vect &xxmin, Vect &xxmax) {
 	/* Local variables */
 	double costsave;
 	integer irestart;
-	double f, costsave0, f0;
+	double f, costsave0;
 	Vect v(ndim), v0(ndim), x1(ndim), hgc(ndim), fpx(ndim),
 	fpx0(ndim), temp(ndim), xmin(ndim), xmax(ndim), xsave(ndim), vinit(ndim), xsave0(ndim);
 	double rho;
@@ -119,7 +119,6 @@ double BijanMO::main (Vect &xx, Vect &xxmin, Vect &xxmax) {
 	}
 
 	f = finit;
-	f0 = finit;
 	xopt1 = xoptg = vinit;
 	if (finit < epsij) {
 		cstropt = cstr;
@@ -199,7 +198,6 @@ double BijanMO::main (Vect &xx, Vect &xxmin, Vect &xxmax) {
 				}
 
 				v0 = v;
-				f0 = f;
 			}
 
 			if (debug) {
@@ -258,8 +256,6 @@ L9101:
 }
 
 void BijanMO::tir (Vect &v, Vect &fpx) {
-	double fp = funcapp(v, fpx);
-
 	for (int i = 0; i < ndim; ++i) {
 		double vi = v[i], x0 = xmin[i], x1 = xmax[i], fpxi = -fpx[i];
 		fpxi = min(fpxi, (x1 - vi) * 0.95);

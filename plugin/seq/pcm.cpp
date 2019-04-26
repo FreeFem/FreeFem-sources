@@ -114,7 +114,7 @@ void swap_float_endian (float *number) {
 	}
 
 	float in = *number;
-	float out;
+	float out = 0.;
 	((char *)&out)[0] = ((char *)&in)[3];
 	((char *)&out)[1] = ((char *)&in)[2];
 	((char *)&out)[2] = ((char *)&in)[1];

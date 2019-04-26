@@ -118,13 +118,16 @@ Mesh*GMSH_Load (const string &filename) {
 	double version = 2.0;
 	bool binary = false, swap = false, postpro = false;
 	FILE *fp = fopen(filename.c_str(), "rb");
+	char *res;
+	int ret;
 	if (!fp) {
 		cerr << "Unable to open file " << filename.c_str() << endl;
 		exit(1);
 	}
 
 	while (!feof(fp)) {
-		fgets(str, sizeof(str), fp);
+		res = fgets(str, sizeof(str), fp);
+		if (res == NULL) printf("fgets error\n");
 		if (str[0] == '$') {
 			if (!strncmp(&str[1], "MeshFormat", 10)) {
 				if (!fgets(str, sizeof(str), fp)) {exit(1);}
@@ -206,14 +209,17 @@ Mesh*GMSH_Load (const string &filename) {
 					for (int i = 0; i < numElements; i++) {
 						int num, type, physical = 0, elementary = 0, partition = 0, numVertices;
 						if (version <= 1.0) {
-							fscanf(fp, "%d %d %d %d %d", &num, &type, &physical, &elementary, &numVertices);
+							ret = fscanf(fp, "%d %d %d %d %d", &num, &type, &physical, &elementary, &numVertices);
+							if (ret == EOF) printf("fscanf error\n");
 						} else {
 							int numTags;
-							fscanf(fp, "%d %d %d", &num, &type, &numTags);
+							ret = fscanf(fp, "%d %d %d", &num, &type, &numTags);
+							if (ret == EOF) printf("fscanf error\n");
 
 							for (int j = 0; j < numTags; j++) {
 								int tag;
-								fscanf(fp, "%d", &tag);
+								ret = fscanf(fp, "%d", &tag);
+								if (ret == EOF) printf("fscanf error\n");
 								if (j == 0) {physical = tag;} else if (j == 1) {elementary = tag;} else if (j == 2) {partition = tag;}
 
 								// ignore any other tags for now
@@ -238,7 +244,8 @@ Mesh*GMSH_Load (const string &filename) {
 						int indices[60];
 
 						for (int j = 0; j < numVertices; j++) {
-							fscanf(fp, "%d", &indices[j]);
+							ret = fscanf(fp, "%d", &indices[j]);
+							if (ret == EOF) printf("fscanf error\n");
 						}
 					}
 				} else {
@@ -305,7 +312,8 @@ Mesh*GMSH_Load (const string &filename) {
 	fp = fopen(filename.c_str(), "rb");
 
 	while (!feof(fp)) {
-		fgets(str, sizeof(str), fp);
+		res = fgets(str, sizeof(str), fp);
+		if (res == NULL) printf("fgets error\n");
 		if (str[0] == '$') {
 			if (!strncmp(&str[1], "ELM", 3) || !strncmp(&str[1], "Elements", 8)) {
 				if (!fgets(str, sizeof(str), fp)) {exit(1);}
@@ -320,14 +328,17 @@ Mesh*GMSH_Load (const string &filename) {
 					for (int i = 0; i < numElements; i++) {
 						int num, type, physical = 0, elementary = 0, partition = 0, numVertices;
 						if (version <= 1.0) {
-							fscanf(fp, "%d %d %d %d %d", &num, &type, &physical, &elementary, &numVertices);
+							ret = fscanf(fp, "%d %d %d %d %d", &num, &type, &physical, &elementary, &numVertices);
+							if (ret == EOF) printf("fscanf error\n");
 						} else {
 							int numTags;
-							fscanf(fp, "%d %d %d", &num, &type, &numTags);
+							ret = fscanf(fp, "%d %d %d", &num, &type, &numTags);
+							if (ret == EOF) printf("fscanf error\n");
 
 							for (int j = 0; j < numTags; j++) {
 								int tag;
-								fscanf(fp, "%d", &tag);
+								ret = fscanf(fp, "%d", &tag);
+								if (ret == EOF) printf("fscanf error\n");
 								if (j == 0) {physical = tag;} else if (j == 1) {elementary = tag;} else if (j == 2) {partition = tag;}
 
 								// ignore any other tags for now
@@ -343,7 +354,8 @@ Mesh*GMSH_Load (const string &filename) {
 						int indices[60];
 
 						for (int j = 0; j < numVertices; j++) {
-							fscanf(fp, "%d", &indices[j]);
+							ret = fscanf(fp, "%d", &indices[j]);
+							if (ret == EOF) printf("fscanf error\n");
 						}
 
 						if (type == 1) {
@@ -518,17 +530,20 @@ Mesh3*GMSH_Load3 (const string &filename) {
 	map<int, int> mapnumv;
 
 	// loading mesh and reading mesh in gmsh are in the file GModelIO_Mesh.cpp (directory Geo)
-	char str[256] = "ZZZ";
+	char str[256] = "ZZZ", *res;
 	double version = 2.0;
 	bool binary = false, swap = false, postpro = false;
 	FILE *fp = fopen(filename.c_str(), "rb");
+	int ret;
+
 	if (!fp) {
 		cerr << "Unable to open file " << filename.c_str() << endl;
 		exit(1);
 	}
 
 	while (!feof(fp)) {
-		fgets(str, sizeof(str), fp);
+		res = fgets(str, sizeof(str), fp);
+		if (res == NULL) printf("fgets error\n");
 		if (str[0] == '$') {
 			if (!strncmp(&str[1], "MeshFormat", 10)) {
 				if (!fgets(str, sizeof(str), fp)) {exit(1);}
@@ -607,14 +622,17 @@ Mesh3*GMSH_Load3 (const string &filename) {
 					for (int i = 0; i < numElements; i++) {
 						int num, type, physical = 0, elementary = 0, partition = 0, numVertices;
 						if (version <= 1.0) {
-							fscanf(fp, "%d %d %d %d %d", &num, &type, &physical, &elementary, &numVertices);
+							ret = fscanf(fp, "%d %d %d %d %d", &num, &type, &physical, &elementary, &numVertices);
+							if (ret == EOF) printf("fscanf error\n");
 						} else {
 							int numTags;
-							fscanf(fp, "%d %d %d", &num, &type, &numTags);
+							ret = fscanf(fp, "%d %d %d", &num, &type, &numTags);
+							if (ret == EOF) printf("fscanf error\n");
 
 							for (int j = 0; j < numTags; j++) {
 								int tag;
-								fscanf(fp, "%d", &tag);
+								ret = fscanf(fp, "%d", &tag);
+								if (ret == EOF) printf("fscanf error\n");
 								if (j == 0) {physical = tag;} else if (j == 1) {elementary = tag;} else if (j == 2) {partition = tag;}
 
 								// ignore any other tags for now
@@ -639,7 +657,8 @@ Mesh3*GMSH_Load3 (const string &filename) {
 						int indices[60];
 
 						for (int j = 0; j < numVertices; j++) {
-							fscanf(fp, "%d", &indices[j]);
+							ret = fscanf(fp, "%d", &indices[j]);
+							if (ret == EOF) printf("fscanf error\n");
 						}
 					}
 				} else {
@@ -708,7 +727,8 @@ Mesh3*GMSH_Load3 (const string &filename) {
 	fp = fopen(filename.c_str(), "rb");
 
 	while (!feof(fp)) {
-		fgets(str, sizeof(str), fp);
+		res = fgets(str, sizeof(str), fp);
+		if (res == NULL) printf("fgets error\n");
 		if (str[0] == '$') {
 			if (!strncmp(&str[1], "ELM", 3) || !strncmp(&str[1], "Elements", 8)) {
 				if (!fgets(str, sizeof(str), fp)) {exit(1);}
@@ -729,14 +749,17 @@ Mesh3*GMSH_Load3 (const string &filename) {
 					for (int i = 0; i < numElements; i++) {
 						int num, type, physical = 0, elementary = 0, partition = 0, numVertices;
 						if (version <= 1.0) {
-							fscanf(fp, "%d %d %d %d %d", &num, &type, &physical, &elementary, &numVertices);
+							ret = fscanf(fp, "%d %d %d %d %d", &num, &type, &physical, &elementary, &numVertices);
+							if (ret == EOF) printf("fscanf error\n");
 						} else {
 							int numTags;
-							fscanf(fp, "%d %d %d", &num, &type, &numTags);
+							ret = fscanf(fp, "%d %d %d", &num, &type, &numTags);
+							if (ret == EOF) printf("fscanf error\n");
 
 							for (int j = 0; j < numTags; j++) {
 								int tag;
-								fscanf(fp, "%d", &tag);
+								ret = fscanf(fp, "%d", &tag);
+								if (ret == EOF) printf("fscanf error\n");
 
 								if (j == 0) {physical = tag;} else if (j == 1) {elementary = tag;} else if (j == 2) {partition = tag;}
 
@@ -753,7 +776,8 @@ Mesh3*GMSH_Load3 (const string &filename) {
 						int indices[60];
 
 						for (int j = 0; j < numVertices; j++) {
-							fscanf(fp, "%d", &indices[j]);
+							ret = fscanf(fp, "%d", &indices[j]);
+							if (ret == EOF) printf("fscanf error\n");
 						}
 
 						if (type == 2) {

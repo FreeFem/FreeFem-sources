@@ -44,12 +44,7 @@
 #endif
 #include "AFunction_ext.hpp"// [[file:../src/fflib/AFunction_ext.hpp]]
 
-// TransfoMesh_v2.cpp
 using namespace std;
-// LayerMesh.cpp
-// buildlayer.cpp
-// trunc3d.cpp
-// rajout global
 #include <climits>
 #include <set>
 #include <vector>
@@ -265,7 +260,7 @@ int TestElementMesh3 (const Mesh3 &Th3) {
 		for (int e = 0; e < 6; e++) {
 			if (Th3[k].lenEdge(e) < Norme2(Psup - Pinf) / 1e9) {
 				const Tet &K(Th3.elements[k]);
-				int iv[4];
+				int iv[4]={};
 
 				for (int jj = 0; jj < 4; jj++) {
 					iv[jj] = Th3.operator () (K[jj]);
@@ -2127,7 +2122,7 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
 	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
 	Mesh3 *pTh = GetAny<Mesh3 *>((*eTh)(stack));
 	ffassert(pTh);
-    
+
 	Mesh3 &Th = *pTh;
     MeshS &ThS = *(pTh)->getMeshS();
 	//Mesh3 *m = pTh;	// question a quoi sert *m ??
@@ -2140,12 +2135,12 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
     KN<int> takemesh(Th.nv);
     MeshPoint *mp3(MeshPointStack(stack));
     takemesh = 0;
-   
+
     // for surface 3D mesh
     int nbvS = 0;
     int nbtS = 0;
     int nbeS = 0;
-   
+
     if(typeMesh3!=1) {
         //takemeshS(ThS.nv);
         nbvS = ThS.nv;// nombre de sommet
@@ -2156,10 +2151,10 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
     KN<int> takemeshS(nbvS);
     takemeshS = 0;
     KN<double> txxS(nbvS), tyyS(nbvS), tzzS(nbvS);
-    
+
 	if (typeMesh3!=0 && verbosity > 5) {cout << "before movemesh volume: Vertex " << nbv << " Tetrahedra " << nbt << " triangles " << nbe << endl;}
     if (typeMesh3!=1 && verbosity > 5) {cout << "before movemesh surface: Vertex " << nbvS << " Triangles " << nbtS << " Edges " << nbeS << endl;}
-  
+
 	// lecture des references
 
 	KN<long> zzempty;
@@ -2193,10 +2188,10 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
 	assert((xx) && (yy) && (zz));
 
 	KN<double> txx(Th.nv), tyy(Th.nv), tzz(Th.nv);
-   
+
 	Mesh3 &rTh3 = Th;
     MeshS &rThS = ThS;
-   
+
     // mesh3 contains volume mesh
     if (typeMesh3!=0) {
     // loop over tetrahedron
@@ -2251,48 +2246,48 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
             iv[0] = ThS.operator () (K[0]);
             iv[1] = ThS.operator () (K[1]);
             iv[2] = ThS.operator () (K[2]);
-            
+
             R coordx, coordy, coordz;
             for (int jj = 0; jj < 3; jj++) {
                 int i = iv[jj];
                 if (takemeshS[i] == 0) {
                     mpS->set(ThS.vertices[i].x, ThS.vertices[i].y, ThS.vertices[i].z);
                     if (xx) {txxS[i] = GetAny<double>((*xx)(stack));}
-                    
+
                     if (yy) {tyyS[i] = GetAny<double>((*yy)(stack));}
-                    
+
                     if (zz) {tzzS[i] = GetAny<double>((*zz)(stack));}
-                    
+
                     takemeshS[i] = takemeshS[i] + 1;
                 }
             }
         }
-        
+
     // loop on edge
         for (int it = 0; it < ThS.nbe; ++it) {
             const BoundaryEdgeS &K(ThS.be(it));
             int iv[2];
             iv[0] = ThS.operator () (K[0]);
             iv[1] = ThS.operator () (K[1]);
-            
+
             R coordx, coordy, coordz;
-            
+
             for (int jj = 0; jj < 2; jj++) {
                 int i = iv[jj];
                 if (takemeshS[i] == 0) {
                     mpS->set(ThS.vertices[i].x, ThS.vertices[i].y, ThS.vertices[i].z);
                     if (xx) {txxS[i] = GetAny<double>((*xx)(stack));}
-                    
+
                     if (yy) {tyyS[i] = GetAny<double>((*yy)(stack));}
-                    
+
                     if (zz) {tzzS[i] = GetAny<double>((*zz)(stack));}
-                    
+
                     takemeshS[i] = takemeshS[i] + 1;
                 }
             }
         }
     }
-   
+
 	// option (Transfo_Mesh3) ::
 
 	// border_only = 0, recollement_border=1, point_confondus_ok=0;   == > 1900 triangles
@@ -2321,9 +2316,9 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
 		recollement_border = 1;
 		point_confondus_ok = 1;
 	}
-    
+
     Mesh3 *T_Th3 = &rTh3;
-    
+
     if (typeMesh3!=0) {
         T_Th3 = Transfo_Mesh3(precis_mesh, rTh3, txx, tyy, tzz, border_only,
                                  recollement_elem, recollement_border, point_confondus_ok, orientationelement);
@@ -2350,7 +2345,7 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
             }
         }
     }
-    
+
     if (typeMesh3 !=1) {
         T_Th3->meshS = Transfo_MeshS(precis_mesh, rThS, txxS, tyyS, tzzS, border_only,
                                     recollement_elem, recollement_border, point_confondus_ok, orientationelement);
@@ -2367,9 +2362,9 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
                // T_ThS->elements[i].lab = ChangeLab3D(maptet, lab);
         //    }
        // }
-        
+
         // les arete frontieres qui n'ont pas change
-        
+
        /* if (nrf.N() > 0) {
             for (int i = 0; i < nbeS; i++) {
                 const BoundaryEdgeS &K(T_ThS->be(i));
@@ -2378,7 +2373,7 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
             }
         }*/
     }
-    
+
     if (typeMesh3 !=0) {
         if (flagsurfaceall == 1)
             T_Th3->BuildBoundaryElementAdj();
@@ -2390,7 +2385,7 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
             T_Th3->meshS->BuildBoundaryElementAdj();
         T_Th3->meshS->BuildGTree();
     }
-    
+
 	*mp = mps;
     T_Th3->getTypeMesh3()=typeMesh3;
 	return T_Th3;
@@ -2437,38 +2432,38 @@ public:
         i = nargs[i] ? i : ii;
         return nargs[i] ? GetAny<KN_<long> >((*nargs[i])(stack)) : a;
     }
-    
+
     double arg (int i, Stack stack, double a) const {return nargs[i] ? GetAny<double>((*nargs[i])(stack)) : a;}
-    
+
     long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
-    
+
 public:
     MovemeshS_Op (const basicAC_F0 &args, Expression tth, Expression xxx = 0, Expression yyy = 0, Expression zzz = 0)
     : eTh(tth), xx(xxx), yy(yyy), zz(zzz) {
         args.SetNameParam(n_name_param, name_param, nargs);
         const E_Array *a1 = 0;
         if (nargs[0]) {a1 = dynamic_cast<const E_Array *>(nargs[0]);}
-        
+
         int err = 0;
         if (nargs[1] && nargs[7]) {
             CompileError("uncompatible movemeshS (Th, region= , reftet=  ");
         }
-        
+
         if (nargs[2] && nargs[8]) {
             CompileError("uncompatible movemeshS (Th, label= , refface=  ");
         }
-        
+
         if (a1) {
             if (a1->size() != 3 || xx || yy || zz) {
                 CompileError("movemeshS (Th,transfo=[X,Y,Z],) ");
             }
-            
+
             xx = to<double>((*a1)[0]);
             yy = to<double>((*a1)[1]);
             zz = to<double>((*a1)[2]);
         }
     }
-    
+
     AnyType operator () (Stack stack)  const;
 };
 
@@ -2490,9 +2485,9 @@ AnyType MovemeshS_Op::operator () (Stack stack)  const {
     MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
     MeshS *pTh = GetAny<MeshS *>((*eTh)(stack));
     ffassert(pTh);
-    
+
     MeshS &Th = *pTh;
-   
+
     int nbv = Th.nv;// nombre de sommet
     int nbt = Th.nt;// nombre de triangles
     int nbe = Th.nbe;    // nombre d'aretes fontiere
@@ -2501,12 +2496,12 @@ AnyType MovemeshS_Op::operator () (Stack stack)  const {
     takemesh = 0;
 
     KN<double> txx(nbv), tyy(nbv), tzz(nbv);
-    
+
 
     if (verbosity > 5) cout << "before movemesh surface: Vertex " << nbv << " Triangles " << nbt << " Edges " << nbe << endl;
-    
+
     // lecture des references
-    
+
     KN<long> zzempty;
     KN<long> nrtet(arg(1, 7, stack, zzempty));
     KN<long> nrf(arg(2, 8, stack, zzempty));
@@ -2514,31 +2509,31 @@ AnyType MovemeshS_Op::operator () (Stack stack)  const {
     long mergefacemesh(arg(4, stack, 1L));
     long flagsurfaceall(arg(5, stack, 0L));
     long orientationelement(arg(6, stack, 1L));
-    
+
     // if( nrtet.N() && nrfmid.N() && nrfup.N() && nrfdown.N() ) return m;
     ffassert(nrtet.N() % 2 == 0);
     ffassert(nrf.N() % 2 == 0);
-    
+
     map<int, int> mapface;
-    
+
     for (int i = 0; i < nrf.N(); i += 2) {
         if (nrf[i] != nrf[i + 1]) {
             mapface[nrf[i]] = nrf[i + 1];
         }
     }
-    
+
     map<int, int> maptet;
     for (int i = 0; i < nrtet.N(); i += 2) {
         if (nrtet[i] != nrtet[i + 1]) {
             maptet[nrtet[i]] = nrtet[i + 1];
         }
     }
-    
+
     // realisation de la map par default
     assert((xx) && (yy) && (zz));
-   
-  
-    
+
+
+
 
         // loop on triangle
         for (int it = 0; it < Th.nt; ++it) {
@@ -2547,83 +2542,83 @@ AnyType MovemeshS_Op::operator () (Stack stack)  const {
             iv[0] = Th.operator () (K[0]);
             iv[1] = Th.operator () (K[1]);
             iv[2] = Th.operator () (K[2]);
-            
+
             R coordx, coordy, coordz;
             for (int jj = 0; jj < 3; jj++) {
                 int i = iv[jj];
                 if (takemesh[i] == 0) {
                     mpS->set(Th.vertices[i].x, Th.vertices[i].y, Th.vertices[i].z);
                     if (xx) {txx[i] = GetAny<double>((*xx)(stack));}
-                    
+
                     if (yy) {tyy[i] = GetAny<double>((*yy)(stack));}
-                    
+
                     if (zz) {tzz[i] = GetAny<double>((*zz)(stack));}
-                    
+
                     takemesh[i] = takemesh[i] + 1;
                 }
             }
         }
-        
+
         // loop on edge
         for (int it = 0; it < Th.nbe; ++it) {
             const BoundaryEdgeS &K(Th.be(it));
             int iv[2];
             iv[0] = Th.operator () (K[0]);
             iv[1] = Th.operator () (K[1]);
-            
+
             R coordx, coordy, coordz;
-            
+
             for (int jj = 0; jj < 2; jj++) {
                 int i = iv[jj];
                 if (takemesh[i] == 0) {
                     mpS->set(Th.vertices[i].x, Th.vertices[i].y, Th.vertices[i].z);
                     if (xx) {txx[i] = GetAny<double>((*xx)(stack));}
-                    
+
                     if (yy) {tyy[i] = GetAny<double>((*yy)(stack));}
-                    
+
                     if (zz) {tzz[i] = GetAny<double>((*zz)(stack));}
-                    
+
                     takemesh[i] = takemesh[i] + 1;
                 }
             }
         }
 
-    
+
     int border_only = 0;// ne sert a rien !!!!! A enlever
     int recollement_elem = 0;
     int recollement_border, point_confondus_ok;
-    
+
     if (mergefacemesh == 0) {
         recollement_border = 0;
         point_confondus_ok = 0;
     }
-    
+
     if (mergefacemesh == 1) {
         recollement_border = 1;
         point_confondus_ok = 0;
     }
-    
+
     if (mergefacemesh == 2) {
         recollement_border = 1;
         point_confondus_ok = 1;
     }
-    
+
     MeshS *T_Th = Transfo_MeshS(precis_mesh, Th, txx, tyy, tzz, border_only,
                                      recollement_elem, recollement_border, point_confondus_ok, orientationelement);
-    
+
         if ((T_Th->mes) <= 0 && (T_Th->nt > 0)) {
             cerr << " Erreur bad orientation in movemesh add parmetre orientation=,1 mesure=" << T_Th->mes << endl;
             ExecError(" movemesh(3d): mesh with neg vol");
         }
 
-    
- 
+
+
         if (flagsurfaceall == 1)
           T_Th->BuildBoundaryElementAdj();
         T_Th->BuildGTree();
         Add2StackOfPtr2FreeRC(stack, T_Th);
- 
-    
+
+
     *mp = mps;
     return T_Th;
 }
@@ -2633,10 +2628,10 @@ class MovemeshS: public OneOperator {
 public:
     int cas;
     MovemeshS (): OneOperator(atype<pmeshS>(), atype<pmeshS>()), cas(0) {}
-    
+
     E_F0*code (const basicAC_F0 &args) const {
       return new MovemeshS_Op(args, t[0]->CastTo(args[0]));
-       
+
     }
 };
 
@@ -2764,7 +2759,7 @@ AnyType SetMesh3D_Op::operator () (Stack stack)  const {
 
 	for (int i = 0; i < nbe; ++i) {
 		const Triangle3 &K = Th.be(i);
-		int l0, l1 = ChangeLab3D(mapface, l0 = K.lab);
+		int l0;
 		nben++;
 	}
 
@@ -2961,34 +2956,34 @@ public:
     KN_<long> arg (int i, Stack stack, KN_<long> a) const {
         return nargs[i] ? GetAny<KN_<long> >((*nargs[i])(stack)) : a;
     }
-    
+
     long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
     double arg (int i, Stack stack, double a) const {return nargs[i] ? GetAny<double>((*nargs[i])(stack)) : a;}
-    
+
 public:
     Movemesh2D_S_Op (const basicAC_F0 &args, Expression tth):
     eTh(tth), xx(0), yy(0), zz(0) {
         args.SetNameParam(n_name_param, name_param, nargs);
-        
+
         const E_Array *a1 = 0;
         if (nargs[0]) {a1 = dynamic_cast<const E_Array *>(nargs[0]);}
-        
+
         int err = 0;
         if (nargs[2] && nargs[5]) {
             CompileError("uncompatible movemesh2S (Th, label= , refface=  ");
         }
-        
+
         if (a1) {
             if (a1->size() != 3) {
                 CompileError("movemesh2S (Th,transfo=[X,Y,Z],) ");
             }
-            
+
             xx = to<double>((*a1)[0]);
             yy = to<double>((*a1)[1]);
             zz = to<double>((*a1)[2]);
         }
     }
-    
+
     AnyType operator () (Stack stack)  const;
 };
 
@@ -3085,8 +3080,8 @@ AnyType Movemesh2D_3D_surf_Op::operator () (Stack stack)  const {
 		Mesh3 *Th3 = MoveMesh2_func(precis_mesh, Th, txx, tyy, tzz,
 		                            border_only, recollement_border, point_confondus_ok);
         MeshS * ThS = Th3->meshS;
-        
-        
+
+
 		// Rajouter fonction flip a l interieure
         int nbflip = 0, nbflipS = 0;
 
@@ -3186,11 +3181,11 @@ AnyType Movemesh2D_3D_surf_Op::operator () (Stack stack)  const {
           ThS->liste_v_num_surf[i]=i;
           ThS->v_num_surf[i]=i;
         }
-        
+
         Th3->getTypeMesh3()=2;
         return Th3;
 	}
-    
+
  return (Mesh3 *)0;
 }
 
@@ -3217,40 +3212,40 @@ AnyType Movemesh2D_S_Op::operator () (Stack stack)  const {
     if (verbosity > 5) {
         cout << "before movemesh: Vertex Triangle Edge" << nbv << " " << nbt << " " << nbe << endl;
     }
-    
+
     KN<long> zzempty;
     // int intempty=0;
     int mesureM(arg(1, stack, 0L));
     KN<long> nrface(arg(2, stack, arg(5, stack, zzempty)));
     double precis_mesh(arg(3, stack, -1.));
     long flagsurfaceall(arg(4, stack, -1L));
-    
+
     if (nrface.N() < 0) {return m;}
-    
+
     ffassert(nrface.N() % 2 == 0);
-    
+
     map<int, int> mapface;
-    
+
     int z00 = false;
-    
+
     for (int i = 0; i < nrface.N(); i += 2) {
       z00 = z00 || (nrface[i] == 0 && nrface[i + 1] == 0);
-        
+
       if (nrface[i] != nrface[i + 1])
         mapface[nrface[i]] = nrface[i + 1];
     }
     int surface_orientation = 1;
     if (mesureM < 0)
       surface_orientation = -1;
-  
+
     KN<double> txx(nbv), tyy(nbv), tzz(nbv);
     MeshPoint *mp3(MeshPointStack(stack));
-    
+
     {
         KN<int> takemesh(nbv);
         takemesh = 0;
         const Mesh &rTh = Th;
-        
+
         for (int it = 0; it < nbt; ++it) {
           for (int iv = 0; iv < 3; ++iv) {
             int i = Th(it, iv);
@@ -3275,29 +3270,29 @@ AnyType Movemesh2D_S_Op::operator () (Stack stack)  const {
     MeshS * ThS = Th3->meshS;
     // Rajouter fonction flip a l interieure
     int nbflip = 0;
-  
+
     // loop on triangles meshS
     for (int ii = 0; ii < ThS->nt; ii++) {
       const TriangleS &K(ThS->elements[ii]);
       int iv[3];
       int lab;
       double mes_triangleS;
-        
+
       iv[0] = ThS->operator () (K[0]);
       iv[1] = ThS->operator () (K[1]);
       iv[2] = ThS->operator () (K[2]);
-        
+
       map<int, int>::const_iterator imap;
       imap = mapface.find(K.lab);
-            
+
       if (imap != mapface.end())
         lab = imap->second;
       else
         lab = K.lab;
-          
+
       ThS->elements[ii].set(ThS->vertices, iv, lab);
       mes_triangleS = ThS->elements[ii].mesure();
-            
+
       if (surface_orientation * mes_triangleS < 0) {
         int iv_temp = iv[1];   // swap( iv[1] = iv[2]
         iv[1] = iv[2];
@@ -3313,25 +3308,25 @@ AnyType Movemesh2D_S_Op::operator () (Stack stack)  const {
       int lab;
       iv[0] = ThS->operator () (K[0]);
       iv[1] = ThS->operator () (K[1]);
-            
+
       map<int, int>::const_iterator imap;
       imap = mapface.find(K.lab);
-            
+
       if (imap != mapface.end())
         lab = imap->second;
       else
         lab = K.lab;
-        
+
      ThS->be(ii).set(ThS->vertices, iv, lab);
    }
-    
+
    ffassert(nbflip == 0 || nbflip == ThS->nbe);
    if (flagsurfaceall == 1) {ThS->BuildBoundaryElementAdj();}
-     
+
    Add2StackOfPtr2FreeRC(stack, Th3);
-    
+
    return ThS;
- 
+
 }
 
 
@@ -3354,9 +3349,9 @@ class Movemesh2D_S: public OneOperator {
 public:
     typedef const Mesh *pmesh;
     typedef const MeshS *pmeshS;
-    
+
     Movemesh2D_S (): OneOperator(atype<pmeshS>(), atype<pmesh>()) {}
-    
+
     E_F0*code (const basicAC_F0 &args) const {
         return new Movemesh2D_S_Op(args, t[0]->CastTo(args[0]));    // CastTo(args[]); // plus tard
     }
@@ -3368,7 +3363,7 @@ public:
 /* ancien fichier de TransfoMesh */
 Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
                      int &border_only, int &recollement_element, int &recollement_border, int &point_confondus_ok, int orientation) {
-    
+
 	// cas besoin memoire important
 
 	// Mesh3 *T_Th3=new Mesh3;
@@ -3516,7 +3511,7 @@ Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *
 MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
                      int &border_only, int &recollement_element, int &recollement_border, int &point_confondus_ok, int orientation) {
     // cas besoin memoire important
- 
+
     int nv_t, nt_t, nbe_t;
     int *Numero_Som;
     int *ind_nv_t;
@@ -3525,29 +3520,29 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
     int *label_nt_t;
     int *label_nbe_t;
     int i_som, i_elem, i_border;
-    
+
     Numero_Som = new int[ThS.nv];
     ind_nv_t = new int[ThS.nv];
     ind_nt_t = new int[ThS.nt];
     ind_nbe_t = new int[ThS.nbe];
     label_nt_t = new int[ThS.nt];
     label_nbe_t = new int[ThS.nbe];
- 
+
     for (int ii = 0; ii < ThS.nv; ii++)
       Numero_Som[ii] = ii;
-    
+
     if (verbosity > 1) {cout << " debut: SamePointElement " << endl;}
     SamePointElement_MeshS(precis_mesh, tab_XX, tab_YY, tab_ZZ, ThS, recollement_element, recollement_border, point_confondus_ok,
                      Numero_Som, ind_nv_t, ind_nt_t, ind_nbe_t, label_nt_t, label_nbe_t, nv_t, nt_t, nbe_t);
-  
+
     if (verbosity > 1) cout << " fin: SamePointElement " << endl;
-    
+
     Vertex3 *v = new Vertex3[nv_t];
     TriangleS *t = new TriangleS[nt_t];
     TriangleS *tt = t;
     BoundaryEdgeS *b = new BoundaryEdgeS[nbe_t];
     BoundaryEdgeS *bb = b;
-    
+
     double mes = 0, mesb = 0;
     if (verbosity > 1)
       cout << "Transfo THS : Vertex, Triangle, Border : " << "nv_t=" << nv_t << " nt_t=" << nt_t << " nbe_t=" << nbe_t << endl;
@@ -3557,7 +3552,7 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
     for (int i = 0; i < nv_t; i++) {
       int &ii = ind_nv_t[i];
       assert(Numero_Som[ii] == i_som);
-        
+
       const Vertex3 &K(ThS.vertices[ii]);
       v[i_som].x = tab_XX[ii];
       v[i_som].y = tab_YY[ii];
@@ -3565,36 +3560,36 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
       v[i_som].lab = K.lab;
       i_som = i_som + 1;
     }
-    
+
     assert(i_som == nv_t);
-    
+
     // cout << " Transfo volume elements " << endl;
     // determination of triangle elements
     i_elem = 0;
-    
+
     for (int i = 0; i < nt_t; i++) {
       int &ii = ind_nt_t[i];
-        
+
       // creation of elements
       const TriangleS &K(ThS.elements[ii]);
       int iv[3];
       int lab;
       lab = label_nt_t[i];
-        
+
       for (int jj = 0; jj < 3; jj++) {
         iv[jj] = Numero_Som[ThS.operator () (K[jj])];
         assert(iv[jj] >= 0 && iv[jj] < nv_t);
       }
-        
+
       if (orientation < 0) {swap(iv[1], iv[2]);}
-        
+
       (tt)->set(v, iv, lab);
       mes += tt++->mesure();
        i_elem++;
     }
-    
+
     assert(i_elem == nt_t);
-    
+
     // cout << " Transfo border elements " << endl;
     // determination of border elements
     i_border = 0;
@@ -3606,12 +3601,12 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
       int iv[2];
       int lab;
       lab = label_nbe_t[i];
-        
+
       for (int jj = 0; jj < 2; jj++) {
         iv[jj] = Numero_Som[ThS.operator () (K[jj])];
         assert(iv[jj] >= 0 && iv[jj] < nv_t);
       }
-        
+
       if (orientation < 0) {swap(iv[0], iv[1]);}
       bb->set(v, iv, lab);
       mesb += bb++->mesure();
@@ -3625,7 +3620,7 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
       cerr << " surface border mesh = " << mesb << endl;
       ErrorExec(" movemesh 3d ", 1);
     }
-    
+
     delete [] Numero_Som;
     delete [] ind_nv_t;
     delete [] ind_nt_t;
@@ -4149,13 +4144,13 @@ Mesh3*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *
     // gestion of recollement ????
     SamePointElement_Mesh2(precis_mesh, tab_XX, tab_YY, tab_ZZ, Th2, recollement_border, point_confondus_ok,
                            Numero_Som, ind_nv_t, ind_nt_t, ind_nbe_t, label_nt_t, label_nbe_t, nv_t, nt_t, nbe_t);
-    
+
     if (verbosity > 1) cout << " fin: SamePointElement " << endl;
 	cout << "After movemesh::Vertex  triangle  border " << nv_t << " " << nt_t << " " << nbe_t << endl;
 
 	Vertex3 *v3 = new Vertex3[nv_t];
     Vertex3 *vS = new Vertex3[nv_t];
-    
+
     Triangle3 *t3 = new Triangle3[nt_t];
     Triangle3 *tt3 = t3;
 	TriangleS *tS = new TriangleS[nt_t];
@@ -4184,7 +4179,7 @@ Mesh3*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *
         iv[1] = Numero_Som[Th2.operator () (K[1])];
         (bb++)->set(vS, iv, K.lab);
     }
-  
+
       for (int it = 0; it < nt_t; it++) {
         int lab;
         int iv[3];
@@ -4212,14 +4207,14 @@ Mesh3*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *
     T_Th3->meshS = new MeshS(nv_t, nt_t, nbe_t, vS, tS, b);
     T_Th3->meshS->liste_v_num_surf=0;
     T_Th3->meshS->v_num_surf=0;
-   
+
     delete [] Numero_Som;
 	delete [] ind_nv_t;
     delete [] ind_nt_t;
 	delete [] ind_nbe_t;
 	delete [] label_nbe_t;
     delete [] label_nt_t;
- 
+
 	return T_Th3;
 }
 
@@ -4255,7 +4250,7 @@ void SamePointElement_Mesh2(const double &precis_mesh, const double *tab_XX, con
 
 	// determination de nt_t
 	int i_elem = 0;
-    
+
     for (int ii = 0; ii < Th2.nt; ii++) {
       const Mesh::Triangle &K(Th2.t(ii));
       int iv[3];
@@ -4280,26 +4275,26 @@ void SamePointElement_Mesh2(const double &precis_mesh, const double *tab_XX, con
       double **Cdg_t = new double *[nt_t];
       for (int i = 0; i < nt_t; i++)
         Cdg_t[i] = new double[dim];
-        
+
       for (int i_elem = 0; i_elem < nt_t; i_elem++) {
         int &ii = ind_nt_t[i_elem];
         const Mesh::Triangle &K(Th2.t(ii));
         int iv[3];
-            
+
         for (int jj = 0; jj < 3; jj++)
           iv[jj] = Th2.operator () (K[jj]);
-          
+
           Cdg_t[i_elem][0] = (tab_XX[iv[0]] + tab_XX[iv[1]] + tab_XX[iv[2]] ) / 3.;
           Cdg_t[i_elem][1] = (tab_YY[iv[0]] + tab_YY[iv[1]] + tab_YY[iv[2]] ) / 3.;
           Cdg_t[i_elem][2] = (tab_ZZ[iv[0]] + tab_ZZ[iv[1]] + tab_ZZ[iv[2]] ) / 3.;
           label_t[i_elem] = K.lab;
         }
-        
+
         hmin_elem = hmin / 3;
         PointCommun_hcode_gtree(dim, nt_t, 0, Cdg_t, label_t, bmin, bmax, hmin_elem,
                                 ind_np, label_nt_t, np);// nv
        assert(np <= nt_t);
-        
+
         int *ind_nt_t_tmp = new int [np];
         for (int i_elem = 0; i_elem < np; i_elem++) {
           assert(ind_np[i_elem] >= 0 && ind_np[i_elem] <= nt_t);
@@ -4307,92 +4302,92 @@ void SamePointElement_Mesh2(const double &precis_mesh, const double *tab_XX, con
         }
         for (int i_elem = 0; i_elem < np; i_elem++)
           ind_nt_t[i_elem] = ind_nt_t_tmp[i_elem];
-        
+
         delete [] ind_np;
         delete [] label_t;
-        
+
         for (int i = 0; i < nt_t; i++)
           delete [] Cdg_t[i];
-        
+
         delete [] Cdg_t;
         delete [] ind_nt_t_tmp;
-        
+
         nt_t = np;
         if (verbosity > 1) cout << "fin recollement : nt_t= " << nt_t << endl;
     }
-   
+
     // determination de nbe_t
     int i_border = 0;
     for (int ii = 0; ii < Th2.neb; ii++) {
       Border_ok = 1;
       const Mesh::BorderElement &K(Th2.be(ii));
       int iv[2];
-      
+
       for (int jj = 0; jj < 2; jj++)
         iv[jj] = Numero_Som[Th2.operator () (K[jj])];
-        
+
       for (int jj = 0; jj < 2; jj++)
         for (int kk = jj + 1; kk < 2; kk++)
           if (iv[jj] == iv[kk]) Border_ok = 0;
-     
+
       if (Border_ok == 1) {
         ind_nbe_t[i_border] = ii;
         label_nbe_t[i_border] = K.lab;
         i_border = i_border + 1;
       }
     }
-  
+
     nbe_t = i_border;
-    
+
     if (recollement_border == 1) {
       // int point_confondus_ok=1;
       if (verbosity > 1) cout << "debut recollement : nbe_t= " << nbe_t << endl;
-        
+
       int np, dim = 3;
       int *ind_np = new int [nbe_t];
       int *label_be = new int [nbe_t];
       double **Cdg_be = new double *[nbe_t];
-        
+
       for (int i = 0; i < nbe_t; i++)
         Cdg_be[i] = new double[dim];
-        
+
       for (int i_border = 0; i_border < nbe_t; i_border++) {
         int &ii = ind_nbe_t[i_border];
         const Mesh::BorderElement &K(Th2.be(ii));    // const Triangle2 & K(Th2.elements[ii]);  // avant Mesh2
         int iv[2];
-            
+
         for (int jj = 0; jj < 2; jj++) iv[jj] = Th2.operator () (K[jj]);
-     
+
         Cdg_be[i_border][0] = (tab_XX[iv[0]] + tab_XX[iv[1]] ) / 2.;
         Cdg_be[i_border][1] = (tab_YY[iv[0]] + tab_YY[iv[1]] ) / 2.;
         Cdg_be[i_border][2] = (tab_ZZ[iv[0]] + tab_ZZ[iv[1]] ) / 2.;
-            
+
         label_be[i_border] = K.lab;
       }
-        
+
       hmin_border = hmin / 3.;
       if (verbosity > 1) cout << "points commun " << endl;
-     
+
       PointCommun_hcode_gtree(dim, nbe_t, point_confondus_ok, Cdg_be, label_be, bmin, bmax, hmin_border,
                               ind_np, label_nbe_t, np);
         if (verbosity > 1) cout << "points commun finis " << endl;
-        
+
         assert(np <= nbe_t);
         int ind_nbe_t_tmp[np];
-        
+
         for (int i_border = 0; i_border < np; i_border++)
           ind_nbe_t_tmp[i_border] = ind_nbe_t[ind_np[i_border]];
-        
+
         for (int i_border = 0; i_border < np; i_border++)
           ind_nbe_t[i_border] = ind_nbe_t_tmp[i_border];
-       
+
         delete [] ind_np;
         delete [] label_be;
-        
+
         for (int i = 0; i < nbe_t; i++)
           delete [] Cdg_be[i];
         delete [] Cdg_be;
-        
+
         nbe_t = np;
         if (verbosity > 1) cout << "fin recollement : nbe_t= " << nbe_t << endl;
 	}
@@ -4630,44 +4625,44 @@ void SamePointElement_MeshS (const double &precis_mesh, const double *tab_XX, co
     int Elem_ok, Border_ok;
     double hmin, hmin_elem, hmin_border;
     R3 bmin, bmax;
-    
+
     // int recollement_element=1,recollement_border=1;
-    
+
     if (verbosity > 2) {cout << "    BuilBound " << endl;}
-    
+
     BuildBoundMinDist_thS(precis_mesh, tab_XX, tab_YY, tab_ZZ, ThS, bmin, bmax, hmin);
     if (verbosity > 2) {cout << "   =============================== " << endl;}
-    
+
     double bmin3[3], bmax3[3];
     bmin3[0] = bmin.x;
     bmin3[1] = bmin.y;
     bmin3[2] = bmin.z;
-    
+
     bmax3[0] = bmax.x;
     bmax3[1] = bmax.y;
     bmax3[2] = bmax.z;
-    
+
     if (verbosity > 2) {cout << "    OrderVertexTransfo_hcode gtree " << endl;}
     OrderVertexTransfo_hcode_nv_gtree(ThS.nv, bmin, bmax, hmin, tab_XX, tab_YY, tab_ZZ, Numero_Som, ind_nv_t, nv_t);
     if (verbosity > 2) {cout << "    fin order vertex gtree: nv_t=" << nv_t << endl;}
-    
+
     if (verbosity > 2) {cout << "   =============================== " << endl;}
-    
+
     /* determination de nt_t et de nbe_t*/
     int i_elem, i_border;
-    
+
     i_elem = 0;
-    
+
     for (int ii = 0; ii < ThS.nt; ii++) {
         const TriangleS &K(ThS.elements[ii]);
         int iv[3];
-        
+
         Elem_ok = 1;
-        
+
         for (int jj = 0; jj < 3; jj++) {
             iv[jj] = Numero_Som[ThS.operator () (K[jj])];
         }
-        
+
         for (int jj = 0; jj < 3; jj++) {
             for (int kk = jj + 1; kk < 3; kk++) {
                 if (iv[jj] == iv[kk]) {
@@ -4675,171 +4670,171 @@ void SamePointElement_MeshS (const double &precis_mesh, const double *tab_XX, co
                 }
             }
         }
-        
+
         if (Elem_ok == 1) {
             ind_nt_t[i_elem] = ii;
             label_nt_t[i_elem] = K.lab;
             i_elem = i_elem + 1;
         }
     }
-    
+
     nt_t = i_elem;
-    
+
     if (recollement_element == 1) {
         // int point_confondus_ok_e = 0;
         if (verbosity > 1) {cout << "debut recollement : nt_t= " << nt_t << endl;}
-        
+
         int np, dim = 3;
         int *ind_np = new int [nt_t];
         int *label_t = new int [nt_t];
         double **Cdg_t = new double *[nt_t];
-        
+
         for (int i = 0; i < nt_t; i++) {
             Cdg_t[i] = new double[dim];
         }
-        
+
         for (int i_elem = 0; i_elem < nt_t; i_elem++) {
             int &ii = ind_nt_t[i_elem];
             const TriangleS &K(ThS.elements[ii]);
             int iv[3];
-            
+
             for (int jj = 0; jj < 3; jj++) {
                 iv[jj] = ThS.operator () (K[jj]);
             }
-            
+
             Cdg_t[i_elem][0] = (tab_XX[iv[0]] + tab_XX[iv[1]] + tab_XX[iv[2]] ) / 3.;
             Cdg_t[i_elem][1] = (tab_YY[iv[0]] + tab_YY[iv[1]] + tab_YY[iv[2]] ) / 3.;
             Cdg_t[i_elem][2] = (tab_ZZ[iv[0]] + tab_ZZ[iv[1]] + tab_ZZ[iv[2]] ) / 3.;
             label_t[i_elem] = K.lab;
         }
-        
+
         hmin_elem = hmin / 3;
         // PointCommun_hcode( dim, nt_t, 0, Cdg_t, bmin3, bmax3, hmin_elem, ind_np, np); //ancien
         PointCommun_hcode_gtree(dim, nt_t, 0, Cdg_t, label_t, bmin, bmax, hmin_elem,
                                 ind_np, label_nt_t, np);// nv
-        
+
         assert(np <= nt_t);
-        
+
         int *ind_nt_t_tmp = new int [np];
-        
+
         for (int i_elem = 0; i_elem < np; i_elem++) {
             assert(ind_np[i_elem] >= 0 && ind_np[i_elem] <= nt_t);
             ind_nt_t_tmp[i_elem] = ind_nt_t[ind_np[i_elem]];
         }
-        
+
         for (int i_elem = 0; i_elem < np; i_elem++) {
             ind_nt_t[i_elem] = ind_nt_t_tmp[i_elem];
         }
-        
+
         delete [] ind_np;
         delete [] label_t;
-        
+
         for (int i = 0; i < nt_t; i++) {
             delete [] Cdg_t[i];
         }
-        
+
         delete [] Cdg_t;
-        
+
         delete [] ind_nt_t_tmp;
-        
+
         nt_t = np;
         if (verbosity > 1) {cout << "fin recollement : nt_t= " << nt_t << endl;}
     }
-    
+
     // determination of border elements
     i_border = 0;
-    
+
     for (int ii = 0; ii < ThS.nbe; ii++) {
         Border_ok = 1;
-        
+
         const BoundaryEdgeS &K(ThS.be(ii));
         int iv[2];
-        
+
         for (int jj = 0; jj < 2; jj++) {
             iv[jj] = Numero_Som[ThS.operator () (K[jj])];
             assert(iv[jj] >= 0 && iv[jj] < nv_t);
         }
-        
+
         for (int jj = 0; jj < 2; jj++) {
             for (int kk = jj + 1; kk < 2; kk++) {
                 if (iv[jj] == iv[kk]) {Border_ok = 0;}
             }
         }
-        
+
         if (Border_ok == 1) {
             ind_nbe_t[i_border] = ii;
             label_nbe_t[i_border] = K.lab;
             i_border = i_border + 1;
         }
     }
-    
+
     nbe_t = i_border;
-    
+
     if (recollement_border == 1) {
         // int point_confondus_ok = 1;
         if (verbosity > 1) {cout << "debut recollement : nbe_t= " << nbe_t << endl;}
-        
+
         int np, dim = 3;
         int *ind_np = new int [nbe_t];
         double **Cdg_be = new double *[nbe_t];
         int *label_be = new int [nbe_t];
-        
+
         for (int i = 0; i < nbe_t; i++) {
             Cdg_be[i] = new double[dim];
         }
-        
+
         for (int i_border = 0; i_border < nbe_t; i_border++) {
             int &ii = ind_nbe_t[i_border];
             const BoundaryEdgeS &K(ThS.be(ii));
             int iv[2];
-            
+
             for (int jj = 0; jj < 2; jj++) {
                 iv[jj] = ThS.operator () (K[jj]);
             }
-            
+
             Cdg_be[i_border][0] = (tab_XX[iv[0]] + tab_XX[iv[1]] ) / 2.;
             Cdg_be[i_border][1] = (tab_YY[iv[0]] + tab_YY[iv[1]] ) / 2.;
-            Cdg_be[i_border][2] = (tab_ZZ[iv[0]] + tab_ZZ[iv[1]] ) / 2.;   
-            
+            Cdg_be[i_border][2] = (tab_ZZ[iv[0]] + tab_ZZ[iv[1]] ) / 2.;
+
             label_be[i_border] = K.lab;
         }
-        
+
         hmin_border = hmin / 2.;
         if (verbosity > 1) {cout << "hmin_border=" << hmin_border << endl;}
-        
+
         if (verbosity > 1) {cout << "appele de PointCommun_hcode := " << point_confondus_ok << endl;}
-        
+
         // PointCommun_hcode( dim, nbe_t, point_confondus_ok, Cdg_be, bmin3, bmax3, hmin_border, ind_np, np);
         PointCommun_hcode_gtree(dim, nbe_t, point_confondus_ok, Cdg_be, label_be,
                                 bmin, bmax, hmin_border, ind_np, label_nbe_t, np);
         if (verbosity > 1) {cout << "fin appele de PointCommun_hcode" << endl;}
-        
+
         assert(np <= nbe_t);
-        
+
         int *ind_nbe_t_tmp = new int [np];
-        
+
         for (int i_border = 0; i_border < np; i_border++) {
             ind_nbe_t_tmp[i_border] = ind_nbe_t[ind_np[i_border]];
         }
-        
+
         for (int i_border = 0; i_border < np; i_border++) {
             ind_nbe_t[i_border] = ind_nbe_t_tmp[i_border];
         }
-        
+
         delete [] ind_np;
         delete [] label_be;
-        
+
         for (int i = 0; i < nbe_t; i++) {
             delete [] Cdg_be[i];
         }
-        
+
         delete [] Cdg_be;
-        
+
         delete [] ind_nbe_t_tmp;
-        
+
         nbe_t = np;
         if (verbosity > 1) {cout << "fin recollement : nbe_t= " << nbe_t << endl;}
-        
+
         // Affectation de la nouvelle valeur du label
     }
 }
@@ -4847,62 +4842,62 @@ void BuildBoundMinDist_thS (const double &precis_mesh, const double *tab_XX, con
     // determination de la boite englobante
     // R3 bmin,bmax;
     double precispt;
-    
+
     bmin.x = tab_XX[0];
     bmin.y = tab_YY[0];
     bmin.z = tab_ZZ[0];
-    
+
     bmax.x = bmin.x;
     bmax.y = bmin.y;
     bmax.z = bmin.z;
-    
+
     // R3 bmax = new R3(bmin);
-    
+
     if (verbosity > 1) {cout << " determination of bmin and bmax" << endl;}
-    
+
     for (int ii = 1; ii < ThS.nv; ii++) {
         bmin.x = min(bmin.x, tab_XX[ii]);
         bmin.y = min(bmin.y, tab_YY[ii]);
         bmin.z = min(bmin.z, tab_ZZ[ii]);
-        
+
         bmax.x = max(bmax.x, tab_XX[ii]);
         bmax.y = max(bmax.y, tab_YY[ii]);
         bmax.z = max(bmax.z, tab_ZZ[ii]);
     }
-    
+
     double longmini_box;
-    
+
     // longmini_box = min(bmax.x-bmin.x, bmax.y-bmin.y);
     // longmini_box = min(longmini_box, bmax.z-bmin.z);
-    
+
     longmini_box = pow(bmax.x - bmin.x, 2) + pow(bmax.y - bmin.y, 2) + pow(bmax.z - bmin.z, 2);
     longmini_box = sqrt(longmini_box);
-    
+
     if (verbosity > 1) {cout << " bmin := " << bmin.x << " " << bmin.y << " " << bmin.z << endl;}
-    
+
     if (verbosity > 1) {cout << " bmax := " << bmax.x << " " << bmax.y << " " << bmax.z << endl;}
-    
+
     if (verbosity > 1) {cout << " box volume :=" << longmini_box << endl;}
-    
+
     if (precis_mesh < 0) {
         precispt = longmini_box * 1e-7;
     } else {
         precispt = precis_mesh;
     }
-    
+
     // determination de hmin
-    
+
     hmin = 1e10;
-    
+
     for (int ii = 0; ii < ThS.nt; ii++) {
         const TriangleS &K(ThS.elements[ii]);
         double longedge;
         int iv[3];
-        
+
         for (int jj = 0; jj < 3; jj++) {
             iv[jj] = ThS.operator () (K[jj]);
         }
-        
+
         for (int jj = 0; jj < 3; jj++) {
             for (int kk = jj + 1; kk < 3; kk++) {
                 int &i1 = iv[jj];
@@ -4915,19 +4910,19 @@ void BuildBoundMinDist_thS (const double &precis_mesh, const double *tab_XX, con
             }
         }
     }
-    
+
     if (ThS.nt == 0) {
         for (int ii = 0; ii < ThS.nbe; ii++) {
             if (verbosity > 10) {cout << "border " << ii << " hmin =" << hmin << endl;}
-            
+
             const BoundaryEdgeS &K(ThS.be(ii));
             double longedge;
             int iv[2];
-            
+
             for (int jj = 0; jj < 2; jj++) {
                 iv[jj] = ThS.operator () (K[jj]);
             }
-            
+
             for (int jj = 0; jj < 2; jj++) {
                 for (int kk = jj + 1; kk < 2; kk++) {
                     int &i1 = iv[jj];
@@ -4941,14 +4936,14 @@ void BuildBoundMinDist_thS (const double &precis_mesh, const double *tab_XX, con
             }
         }
     }
-    
+
     if (verbosity > 5) {cout << "    longmini_box" << longmini_box << endl;}
-    
+
     if (verbosity > 5) {cout << "    hmin =" << hmin << endl;}
-    
+
     assert(hmin < longmini_box);
     if (verbosity > 5) {cout << "    Norme2(bmin-bmax)=" << Norme2(bmin - bmax) << endl;}
-    
+
     // assertion pour la taille de l octree
     assert(hmin > Norme2(bmin - bmax) / 1e9);
 }
@@ -6414,20 +6409,20 @@ struct Op_trunc_meshS: public OneOperator {
         Expression nargs[n_name_param];
         Expression getmesh, bbb;
         long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
-        
+
         bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
-        
+
         KN<long>*arg (int i, Stack stack) const {return nargs[i] ? GetAny<KN<long> *>((*nargs[i])(stack)) : 0;}
-        
+
         Op (const basicAC_F0 &args, Expression t, Expression b): getmesh(t), bbb(b)
         {args.SetNameParam(n_name_param, name_param, nargs);}
-        
+
         AnyType operator () (Stack s)  const;
     };
-    
+
     E_F0*code (const basicAC_F0 &args) const
     {return new Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));}
-    
+
     Op_trunc_meshS ():
     OneOperator(atype<pmeshS>(), atype<pmeshS>(), atype<bool>()) {};
 };
@@ -6444,7 +6439,7 @@ basicAC_F0::name_and_type Op_trunc_meshS::Op::name_param[Op_trunc_meshS::Op::n_n
     {"region", &typeid(KN_<long> )},
     {"flabel", &typeid(long)},
     {"fregion", &typeid(long)}
-    
+
 };
 
 
@@ -6455,29 +6450,29 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
     int nbei = 0;
     int nt = 0;
     int nv = 0;
-    
+
     int nvtrunc = 0;
     int nedge = 0;
     int nface = 0;
-    
+
     double hmin = 1e100;
-    
-    
+
+
     R3 bmin, bmax;
     // counter for edges, boundary or internal
     int nbeee = 0;
     int nbfi = 0;
-    
+
     const int kksplit2 = kksplit * kksplit;
 
     int ntsplit = 0;
     int tagb[3] = {1, 2, 4};
-    
+
     KN<int> tagTonB(Th.nt);
     tagTonB = 0;
-   
+
     cout << "initial mesh, nb vertices:  " << Th.nv << ", nb triangles: " << Th.nt << ", nb boundary edges:" << Th.nbe << endl;
-    
+
     for (int ibe = 0; ibe < Th.nbe; ibe++) {
         int iff;
         int it = Th.BoundaryElement(ibe, iff); // it num of element and iff num of local boundary
@@ -6487,14 +6482,14 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
             tagTonB[itt] |= tagb[ifff];
         }
     }
-    
-    
+
+
     for (int i = 0; i < Th.nt; i++) {
         if (split[i]) {
             ++ntsplit;  // number of original triangle must be split
             // number of triangles after trunc
             nt = nt + kksplit2;
-            
+
             // computation of number of border elements -- edge element boundary o internal
             for (int j = 0; j < 3; j++) {
                 int jt = j, it = Th.ElementAdj(i, jt);
@@ -6503,7 +6498,7 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
                 } else {
                     nbfi++;// internal edge count 2 times ...
                 }
-         
+
                 if (it == i || it < 0) {
                     nbe += kksplit;// on est sur la frontiere
                 } else if (!split[it]) {
@@ -6512,13 +6507,13 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
                     nbei++, nbe+= kksplit; // internal boundary ..
                 }
             }
-            
+
             for (int e = 0; e < 3; e++) {
                 hmin = min(hmin, Th[i].lenEdge(e));    // calcul de .lenEdge pour un Mesh3
             }
         }
     }
-    
+
     ffassert(nbfi % 2 == 0);
     // original mesh
     nface = nbeee + nbfi / 2;     // nbfi / 2; internal edge count 2 times
@@ -6526,16 +6521,16 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
     double hseuil = (hmin / kksplit) / 1000.;
     if (verbosity > 5)
     cout << "Before trunc, mesh has " << nbeee << "  boundary edges, " <<  nbfi / 2  <<" internal edges = "<<   ",  all edges  =  " << nface << ", hseuil=" << hseuil << endl;
- 
-    
+
+
     /* determination de bmin, bmax et hmin */
-    
+
     KN<int> takevertex(Th.nv, -1);
-    
+
     for (int i = 0; i < Th.nt; i++) {
         if (split[i]) {
             const TriangleS &K(Th.elements[i]);
-            
+
             for (int ii = 0; ii < 3; ii++) {
                 int iv = Th.operator () (K[ii]);
                 if (takevertex[iv] == -1) {
@@ -6553,15 +6548,15 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
     // take same numbering
     for (int i = 0, k = 0; i < Th.nv; i++) {
         if (takevertex[i] >= 0) {takevertex[i] = k++;}}
-    
+
     if (kksplit > 1) {    // compute the number of slip edge ...
         nedge = 0;
         HashTable<SortArray<int, 2>, int> edges(3 * Th.nt, Th.nt);
-        
+
         for (int i = 0; i < Th.nt; i++) {
             if (split[i]) {
                 const TriangleS &K(Th.elements[i]);
-                
+
                 for (int e = 0; e < 3; ++e) {
                     int e1 = Th(K[Th[i].nvedge[e][0]]);
                     int e2 = Th(K[Th[i].nvedge[e][1]]);
@@ -6573,7 +6568,7 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
             }
         }
     }
-    
+
     if (verbosity > 10) {
         cout << "    -- nvertex  " << nvtrunc << ", nedges before trunc = " << nedge
         << ", nfaces edges total in initial mesh= " << nface << " number splited ntri =" << ntsplit
@@ -6583,48 +6578,48 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
     }
 
 
-    
+
     /* determination des vertex, triangles et tetrahedre obtenue apres splitting dans le Simplex */
- 
+
    int nvmax=0;
    for (int i=0;i<Th.nt;i++)
         if(split[i]) {
             int k=Abs(split[i]);
             int r= (k+2)*(k+1)/2;
             split[i]<0 ? nvmax +=3*r-3 : nvmax +=r-3;
-   
+
         }
     nvmax+=nvtrunc;
 
     int nvsub = (kksplit + 1) * (kksplit + 2)/2;
     int ntrisub = kksplit2;
     int nedgesub = 3*(kksplit+1)*(kksplit+2)/2-3*(kksplit+1);
-    
+
     R2 *vertexsub;
     int *trisub;
     int *edgesub;
-    
+
     // split triangles element - fct splid on a the simplex
     SplitSimplex<R2>(kksplit, nvsub, vertexsub, ntrisub, trisub);
     // split the boundary of the triangle simplex
     SplitEdgeSimplex(kksplit, nedgesub, edgesub);
-    
+
     int itt = 0;
     int ie = 0;
-  
+
     Vertex3 *vertices = new Vertex3[nvmax];
     TriangleS *t = new TriangleS[nt];
     TriangleS *triangles = t;
     BoundaryEdgeS *b = new BoundaryEdgeS[nbe];
     BoundaryEdgeS *bbedges = b;
     R3 hh = (bmax - bmin) / 10.;
-    
+
     EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(vertices, bmin - hh, bmax + hh, 0);
 
     const R3 *pP[3];
-    
+
     int np = 0;    // nb of new points ..
-    
+
     // first build old point to keep the numbering order for DDM ...
     for (int i = 0, k = 0; i < Th.nv; i++) {
         if (takevertex[i] >= 0) {
@@ -6644,7 +6639,7 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
         for (int i = 0; i < Th.nt; i++) {
           if (split[i]) {
             const TriangleS &K(Th.elements[i]);
-            
+
             for (int ii = 0; ii < 3; ii++)
               pP[ii] = &K[ii];
             for (int iv = 0; iv < nvsub; iv++)
@@ -6689,11 +6684,11 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
               itt++;
               assert(itt <= nt);
             }
-              
+
               // here split internal edges
               for (int j = 0; j < 3; j++) {
                   int jt = j, it = Th.ElementAdj(i, jt);
-              
+
               int nedgesplit = kksplit;
               if (((tagTonB[i] & tagb[j]) == 0) && !(it == i || it < 0) && !split[it]) {
                       // new border not on boundary
@@ -6713,54 +6708,54 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
               }
           }
         }
-    
+
     if (verbosity > 10)
         cout << "    ++ np=" << np << "==  nv=" << nvmax << endl;
-   
-    
+
+
     ffassert(np <= nv);
   if (verbosity > 8)
         cout << "   -- Number of new  border face not on Border " << ie << endl;
-    
+
     delete [] vertexsub;
     delete [] trisub;
     delete [] edgesub;
-  
+
     // split border elements Edges
     int nv1Dsub = kksplit+1;
     int nedge1Dsub = kksplit;
     R1 *vertex1Dsub;
     int *edge1Dsub;
-    
+
     SplitSimplex<R1>(kksplit, nv1Dsub, vertex1Dsub, nedge1Dsub, edge1Dsub);
- 
+
     for (int ibe = 0; ibe < Th.nbe; ibe++) {
         int iff;
         int it = Th.BoundaryElement(ibe, iff);
         int ifff = iff, itt = Th.ElementAdj(it, ifff);
         if (itt < 0) {itt = it;}
-        
+
         if (split[it] == 0 && split[itt] == 0) {
             continue;    // boundary not on one element
         }
-        
+
         const BoundaryEdgeS &K(Th.be(ibe));
         int ivv[2];
-        
+
         ivv[0] = Th.operator () (K[0]);
         ivv[1] = Th.operator () (K[1]);
-    
+
         R3 *vertexedgesub = new R3[nv1Dsub];
         int *newindex = new int[nv1Dsub];
-        
+
         for (int iv = 0; iv < nv1Dsub; iv++) {
             double alpha = vertex1Dsub[iv].x;
-            
+
             vertexedgesub[iv].x = alpha * Th.vertices[ivv[0]].x + (1.-alpha) * Th.vertices[ivv[1]].x;
             vertexedgesub[iv].y = alpha * Th.vertices[ivv[0]].y + (1.-alpha) * Th.vertices[ivv[1]].y;
             vertexedgesub[iv].z = alpha * Th.vertices[ivv[0]].z + (1.-alpha) * Th.vertices[ivv[1]].z;
         }
-        
+
         for (int iv = 0; iv < nv1Dsub; iv++) {
             const Vertex3 &vi(vertexedgesub[iv]);
             Vertex3 *pvi = gtree->ToClose(vi, hseuil);
@@ -6769,12 +6764,12 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
         }
         for (int ii = 0; ii < nedge1Dsub; ii++) {
             int ivb[2];
-            
+
             for (int jjj = 0; jjj < 2; jjj++) {
                 ivb[jjj] = newindex[edge1Dsub[2 * ii + jjj]];
                 assert(edge1Dsub[2 * ii + jjj] < nvsub);
                 if (verbosity > 199) {cout << "        " << ivb[jjj] << " np:" << np << endl;}
-                
+
                 assert(ivb[jjj] < np);
             }
             bbedges[ie].set(vertices, ivb, K.lab);
@@ -6800,9 +6795,9 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
     delete gtree;
 
     return Tht;
-    
+
 }
-    
+
 
 void Renumb (Fem2D::MeshS * &pTh) {
     assert(pTh);
@@ -6819,10 +6814,10 @@ void Renumb (Fem2D::MeshS * &pTh) {
     xadg[0] = 0;
     std::vector<int> adjncy;
     std::set<int> *adjncyVec = new std::set<int>[nbv]();
-    
+
     for (int k = 0; k < nbt; ++k) {
         const TriangleS &K = Th[k];
-        
+
         for (int j = 0; j < nve - 1; ++j) {
             for (int i = j + 1; i < nve; ++i) {
                 adjncyVec[Th.operator () (K[i])].insert(Th.operator () (K[j]));
@@ -6830,22 +6825,22 @@ void Renumb (Fem2D::MeshS * &pTh) {
             }
         }
     }
-    
+
     int cpt = 0;
-    
+
     for (int k = 0; k < nbv; ++k) {
         cpt += adjncyVec[k].size();
         xadg[k + 1] = cpt;
     }
-    
+
     adjncy.reserve(xadg[nbv]);
-    
+
     for (int k = 0; k < nbv; ++k) {
         for (std::set<int>::iterator it = adjncyVec[k].begin(); it != adjncyVec[k].end(); ++it) {
             adjncy.push_back(*it);
         }
     }
-    
+
     delete [] adjncyVec;
     // renumb::i4vec_print ( nbt + 1, xadg, "  ADJ_ROW:" );
     // renumb::adj_print ( nbt, adjncy.size(), xadg,adjncy.data() , "  ADJ" );
@@ -6855,24 +6850,24 @@ void Renumb (Fem2D::MeshS * &pTh) {
         cout << "\n";
         cout << "  ADJ bandwidth = " << bandwidth << "\n";
     }
-    
+
     int *perm = renumb::genrcm(nbv, adjncy.size(), xadg, &(adjncy[0]));
     int *perm_inv = renumb::perm_inverse3(nbv, perm);
     if (verbosity > 2) {
         bandwidth = renumb::adj_perm_bandwidth(nbv, adjncy.size(), xadg, &(adjncy[0]),
                                                perm, perm_inv);
-        
+
         cout << "\n";
         cout << "  ADJ bandwidth after RCM permutation = " << bandwidth << "\n";
     }
-    
+
     delete [] xadg;
     int nbe = Th.nbe;
     Vertex3 *v = new Vertex3[nbv];
     MeshS::Element *t = new TriangleS[nbt];
     MeshS::BorderElement *b = new BoundaryEdgeS[nbe];
     Vertex3 *vv = v;
-    
+
     for (int i = 0; i < nbv; i++) {
         const Vertex3 &V = Th(perm[i]);
         vv->x = V.x;
@@ -6881,26 +6876,26 @@ void Renumb (Fem2D::MeshS * &pTh) {
         vv->lab = V.lab;
         vv++;
     }
-    
+
     TriangleS *tt = t;
-    
+
     for (int i = 0; i < nbt; i++) {
         int i0 = perm_inv[Th(i, 0)], i1 = perm_inv[Th(i, 1)], i2 = perm_inv[Th(i, 2)];
         int ivt[3] = {i0, i1, i2};
         (*tt++).set(v, ivt, Th[i].lab);
     }
-    
+
     MeshS::BorderElement *bb = b;
-    
+
     for (int i = 0; i < nbe; i++) {
         const BoundaryEdgeS &K(Th.be(i));
         int ivv[2];
-        
+
         ivv[0] = perm_inv[Th.operator () (K[0])];
         ivv[1] = perm_inv[Th.operator () (K[1])];
         (bb++)->set(v, ivv, K.lab);
     }
-    
+
     delete [] perm_inv;
     delete [] perm;
     delete pTh;
@@ -6914,7 +6909,7 @@ AnyType Op_trunc_meshS::Op::operator () (Stack stack)  const {
     MeshS &Th = *pTh;
     long kkksplit = std::max(1L, arg(0, stack, 1L));
     long label = arg(1, stack, 2L);
-    
+
     KN<long> *pn2o = arg(2, stack);
     KN<long> *po2n = arg(3, stack);
     bool renum = arg(4, stack, false);
@@ -6928,25 +6923,25 @@ AnyType Op_trunc_meshS::Op::operator () (Stack stack)  const {
     MeshPoint *mp = MeshPointStack(stack), mps = *mp;
     long kk = 0;
     long ks = kkksplit * kkksplit;
-    
+
     for (int k = 0; k < Th.nt; k++) {
         const TriangleS &K(Th.elements[k]);
         R2 B(1. / 3., 1. / 3.);
         mp->set(Th, K(B), B, K, 0);
         if (GetAny<bool>((*bbb)(stack))) {kk++;} else {split[k] = 0;}
     }
-    
+
     // *mp=mps;
     if (verbosity > 1) {
         cout << "  -- Trunc mesh: Nb of Surface Trianles = " << kk << " label=" << label << endl;
     }
-    
-    
+
+
     if (pn2o) {
         pn2o->resize(kk * ks);
         KN<long> &n2o(*pn2o);
         int l = 0;
-        
+
         for (int k = 0; k < Th.nt; ++k) {
             if (split[k]) {
                 for (int i = 0; i < ks; ++i) {
@@ -6955,26 +6950,26 @@ AnyType Op_trunc_meshS::Op::operator () (Stack stack)  const {
             }
         }
     }
-   
+
     if (po2n) {
         po2n->resize(Th.nt);
         KN<long> &o2n(*po2n);
         int l = 0;
-        
+
         for (int k = 0; k < Th.nt; ++k) {
             if (split[k]) {
                 o2n[k] = l;
                 l += ks;
             } else {o2n[k] = -1;}}
     }
-    
+
     *mp = mps;
     MeshS *Tht = truncmesh(Th, kkksplit, split, false, label);
 
     if (renum) {Renumb(Tht);}
-    
+
     Add2StackOfPtr2FreeRC(stack, Tht);    // 07/2008 FH
-    
+
     return Tht;
 };
 
@@ -6991,20 +6986,20 @@ struct Op_trunc_mesh3: public OneOperator {
         Expression nargs[n_name_param];
         Expression getmesh, bbb;
         long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
-        
+
         bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
-        
+
         KN<long>*arg (int i, Stack stack) const {return nargs[i] ? GetAny<KN<long> *>((*nargs[i])(stack)) : 0;}
-        
+
         Op (const basicAC_F0 &args, Expression t, Expression b): getmesh(t), bbb(b)
         {args.SetNameParam(n_name_param, name_param, nargs);}
-        
+
         AnyType operator () (Stack s)  const;
     };
-    
+
     E_F0*code (const basicAC_F0 &args) const
     {return new Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));}
-    
+
     Op_trunc_mesh3 ():
     OneOperator(atype<pmesh3>(), atype<pmesh3>(), atype<bool>()) {};
 };
@@ -7020,7 +7015,7 @@ basicAC_F0::name_and_type Op_trunc_mesh3::Op::name_param[Op_trunc_mesh3::Op::n_n
 
 Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, const int newbelabel) {
     static const int FaceTriangle[4] = {3, 0, 1, 2};//= {{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}}
-    
+
     // computation of number of border elements and vertex without split
     int nbe = 0, nbei = 0;
     int nt = 0;
@@ -7035,12 +7030,12 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     const int kksplit3 = kksplit2 * kksplit;
     int ntsplit = 0;
     int tagb[4] = {1, 2, 4, 8};
-    
+
     // type 3D mesh
     int typeMesh3 = Th.getTypeMesh3();
     KN<int> tagTonB(Th.nt);
     tagTonB = 0;
-    
+
     for (int ibe = 0; ibe < Th.nbe; ibe++) {
         int iff;
         int it = Th.BoundaryElement(ibe, iff);
@@ -7050,13 +7045,13 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
             tagTonB[itt] |= tagb[ifff];
         }
     }
-    
+
     for (int i = 0; i < Th.nt; i++) {
         if (split[i]) {
             ++ntsplit;
             // computation of number of tetrahedrons
             nt = nt + kksplit3;
-            
+
             // computation of number of border elements
             for (int j = 0; j < 4; j++) {
                 int jt = j, it = Th.ElementAdj(i, jt);
@@ -7065,7 +7060,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
                 } else {
                     nbfi++;    // internal face count 2 times ...
                 }
-                
+
                 if (it == i || it < 0) {
                     nbe += kksplit2;// on est sur la frontiere
                 } else if (!split[it]) {
@@ -7074,28 +7069,28 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
                     nbei++, nbe += kksplit2;// internal boundary ..
                 }
             }
-            
+
             for (int e = 0; e < 6; e++) {
                 hmin = min(hmin, Th[i].lenEdge(e));    // calcul de .lenEdge pour un Mesh3
             }
         }
     }
-    
+
     ffassert(nbfi % 2 == 0);
     nface = nbeee + nbfi / 2;
     double hseuil = (hmin / kksplit) / 1000.;
     if (verbosity > 5) {
         cout << "  number of  not intern boundary faces = " << nbeee << ",  all faces  =  " << nbe << ", hseuil=" << hseuil << endl;
     }
-    
+
     /* determination de bmin, bmax et hmin */
-    
+
     KN<int> takevertex(Th.nv, -1);
-    
+
     for (int i = 0; i < Th.nt; i++) {
         if (split[i]) {
             const Tet &K(Th.elements[i]);
-            
+
             for (int ii = 0; ii < 4; ii++) {
                 int iv = Th.operator () (K[ii]);
                 if (takevertex[iv] == -1) {
@@ -7106,19 +7101,19 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
             }
         }
     }
-    
+
     // take same numbering
     for (int i = 0, k = 0; i < Th.nv; i++) {
         if (takevertex[i] >= 0) {takevertex[i] = k++;}}
-    
+
     if (kksplit > 1) {    // compute the number of slip edge ...
         nedge = 0;
         HashTable<SortArray<int, 2>, int> edges(3 * nface, nface);
-        
+
         for (int i = 0; i < Th.nt; i++) {
             if (split[i]) {
                 const Tet &K(Th.elements[i]);
-                
+
                 for (int e = 0; e < 6; ++e) {
                     int e1 = Th(K[Th[i].nvedge[e][0]]);
                     int e2 = Th(K[Th[i].nvedge[e][1]]);
@@ -7130,7 +7125,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
             }
         }
     }
-    
+
     if (verbosity > 10) {
         cout << "    -- nvertex  " << nvtrunc << ", nedges = " << nedge
         << ", nfaces = " << nface << " ntet =" << ntsplit
@@ -7138,10 +7133,10 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
         << "    -- Euler/Poincare constante = " << nvtrunc - nedge + nface - ntsplit
         << endl;
     }
-    
-    
+
+
     /* determination des vertex, triangles et tetrahedre obtenue apres splitting dans le Simplex */
-    
+
     int nfacesub = kksplit2;
     int ntetsub = kksplit3;
     int nvsub = (kksplit + 1) * (kksplit + 2) * (kksplit + 3) / 6;
@@ -7149,29 +7144,29 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     R3 *vertexsub;    // [nvsub];
     int *tetsub;// [4*ntetsub];
     int *trisub;// [4*kksplit*kksplit];
-    
+
     SplitSimplex<R3>(kksplit, nvsub, vertexsub, ntetsub, tetsub);
     SplitSurfaceSimplex(kksplit, ntrisub, trisub);
-    
+
     if (verbosity > 3) {
         cout << "  -- trunc (3d) : Th.nv= " << Th.nv << "kksplit=" << kksplit << endl;
     }
-    
+
     int ntnosplit = nt / kksplit3;
     int nbenosplit = nbe / kksplit2 - nbei;    // warning true bounding => remove internal border
     int nfacenosplit = (4 * ntnosplit + nbenosplit) / 2;
     nv = ntnosplit * (nvsub - 4 * ((kksplit + 1) * (kksplit + 2) / 2 - 3 * (kksplit - 1) - 3) - 6 * (kksplit - 1) - 4);
     if (verbosity > 100) {cout << "       1) nv= " << nv << endl;}
-    
+
     nv = nv + nfacenosplit * ((kksplit + 1) * (kksplit + 2) / 2 - 3 * (kksplit - 1) - 3);
     if (verbosity > 100) {cout << "       2) nv= " << nv << endl;}
-    
+
     nv = nv + nedge * (kksplit - 1);
     if (verbosity > 100) {cout << "       3) nv= " << nv << endl;}
-    
+
     nv = nv + nvtrunc;
     if (verbosity > 100) {cout << "       4) nv= " << nv << endl;}
-    
+
     int itt = 0;
     int ie = 0;
     Vertex3 *v = new Vertex3[nv];
@@ -7183,7 +7178,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v, bmin - hh, bmax + hh, 0);
     const R3 *pP[4];
     int np = 0;    // nb of new points ..
-    
+
     // first build old point to keep the numbering order for DDM ...
     for (int i = 0, k = 0; i < Th.nv; i++) {
         if (takevertex[i] >= 0) {
@@ -7199,22 +7194,22 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     KN<int> newindex(nvsub);
     {
         KN<R3> vertextetsub(nvsub);
-        
+
         for (int i = 0; i < Th.nt; i++) {
             if (split[i]) {
                 const Tet &K(Th.elements[i]);
-                
+
                 for (int ii = 0; ii < 4; ii++) {
                     pP[ii] = &K[ii];
                 }
-                
+
                 for (int iv = 0; iv < nvsub; iv++) {
                     (R3 &)vertextetsub[iv] = vertexsub[iv].Bary(pP);
                 }
-                
+
                 for (int iv = 0; iv < nvsub; iv++) {
                     Vertex3 *pvi = gtree->ToClose(vertextetsub[iv], hseuil);
-                    
+
                     if (!pvi) {
                         (R3 &)v[np] = vertextetsub[iv];
                         v[np].lab = K.lab;
@@ -7224,34 +7219,34 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
                     } else {
                         newindex[iv] = pvi - v;
                     }
-                    
+
                     ffassert(np <= nv);
                 }
-                
+
                 for (int ii = 0; ii < ntetsub; ii++) {
                     int ivt[4];
-                    
+
                     for (int jj = 0; jj < 4; jj++) {
                         ivt[jj] = newindex[tetsub[4 * ii + jj]];
                         assert(tetsub[4 * ii + jj] < nvsub);
                         assert(ivt[jj] < np);
                     }
-                    
+
                     (tt++)->set(v, ivt, K.lab);
                     itt++;
                     assert(itt <= nt);
                 }
-                
+
                 for (int j = 0; j < 4; j++) {
                     int jt = j, it = Th.ElementAdj(i, jt);
-                    
+
                     if (((tagTonB[i] & tagb[j]) == 0) && !(it == i || it < 0) && !split[it]) {
                         // new border not on boundary
                         int ivb[3];
-                        
+
                         for (int ii = 0; ii < nfacesub; ii++) {
                             int iface = 3 * FaceTriangle[j] * nfacesub + 3 * ii;
-                            
+
                             for (int jjj = 0; jjj < 3; jjj++) {
                                 ivb[jjj] = newindex[trisub[iface + jjj]];
                                 assert(trisub[iface + jjj] < nvsub);
@@ -7266,7 +7261,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
                             ie++;
                         }
                     }
-                    
+
                     assert(ie <= nbe);
                 }
             }
@@ -7275,114 +7270,114 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     if (verbosity > 10) {
         cout << "    ++ np=" << np << "==  nv=" << nv << endl;
     }
-    
+
     ffassert(np == nv);
     if (verbosity > 8) {
         cout << "   -- Number of new  border face not on Border " << ie << endl;
     }
-    
+
     delete [] vertexsub;// [nvsub];
     delete [] tetsub;    // [4*ntetsub];
     delete [] trisub;    // [4*kksplit*kksplit];
-    
+
     // split border elements
     int nv2Dsub = (kksplit + 1) * (kksplit + 2) / 4;
     int ntri2Dsub = kksplit2;
     R2 *vertex2Dsub;// [nvsub];
     int *tri2Dsub;    // [4*kksplit*kksplit];
-    
+
     SplitSimplex<R2>(kksplit, nv2Dsub, vertex2Dsub, ntri2Dsub, tri2Dsub);
-    
+
     for (int ibe = 0; ibe < Th.nbe; ibe++) {
         int iff;
         int it = Th.BoundaryElement(ibe, iff);
         int ifff = iff, itt = Th.ElementAdj(it, ifff);
         if (itt < 0) {itt = it;}
-        
+
         if (split[it] == 0 && split[itt] == 0) {
             continue;    // boundary not on one element
         }
-        
+
         const Triangle3 &K(Th.be(ibe));
         int ivv[3];
-        
+
         ivv[0] = Th.operator () (K[0]);
         ivv[1] = Th.operator () (K[1]);
         ivv[2] = Th.operator () (K[2]);
-        
+
         R3 *vertextrisub = new R3[nv2Dsub];
         int *newindex = new int[nv2Dsub];
-        
+
         for (int iv = 0; iv < nv2Dsub; iv++) {
             double alpha = vertex2Dsub[iv].x;
             double beta = vertex2Dsub[iv].y;
-            
+
             vertextrisub[iv].x = (1 - alpha - beta) * Th.vertices[ivv[0]].x + alpha * Th.vertices[ivv[1]].x + beta * Th.vertices[ivv[2]].x;
             vertextrisub[iv].y = (1 - alpha - beta) * Th.vertices[ivv[0]].y + alpha * Th.vertices[ivv[1]].y + beta * Th.vertices[ivv[2]].y;
             vertextrisub[iv].z = (1 - alpha - beta) * Th.vertices[ivv[0]].z + alpha * Th.vertices[ivv[1]].z + beta * Th.vertices[ivv[2]].z;
         }
-        
+
         for (int iv = 0; iv < nv2Dsub; iv++) {
             const Vertex3 &vi(vertextrisub[iv]);
             Vertex3 *pvi = gtree->ToClose(vi, hseuil);
             assert(pvi);
             newindex[iv] = pvi - v;
         }
-        
+
         for (int ii = 0; ii < nfacesub; ii++) {
             int ivb[3];
-            
+
             for (int jjj = 0; jjj < 3; jjj++) {
                 ivb[jjj] = newindex[tri2Dsub[3 * ii + jjj]];
                 assert(tri2Dsub[3 * ii + jjj] < nvsub);
                 if (verbosity > 199) {cout << "        " << ivb[jjj] << " np:" << np << endl;}
-                
+
                 assert(ivb[jjj] < np);
             }
-            
+
             (bb++)->set(v, ivb, K.lab);
             ie++;
             assert(ie <= nbe);
         }
-        
+
         delete [] vertextrisub;
         delete [] newindex;
     }
-    
+
     delete [] vertex2Dsub;    // [4*ntetsub];
     delete [] tri2Dsub;    // [4*kksplit*kksplit];
-    
+
     if (verbosity > 99) {
         cout << "nbofv initial" << Th.nv << endl;
         cout << "nv=" << nv << " np=" << np << endl;
         cout << "itt=" << itt << " nt=" << nt << endl;
         cout << "ie=" << ie << " nbe=" << nbe << endl;
     }
-    
+
     ffassert(nv == np);
     ffassert(ie == nbe);
     ffassert(itt == nt);
-    
+
     // delete gtree;
-    
+
    Mesh3 *Tht = new Mesh3(nv, nt, nbe, v, t, b);
    Tht->getTypeMesh3()=typeMesh3;
    Tht->BuildGTree();    // Add JM. Oct 2010
    delete gtree;
-    
-    
+
+
     // if the surface mesh MeshS, trunc is obtain whit the slip on the triangle3, extract the points on the surface domain and split the edges border element of the real surface
-    
+
     if (typeMesh3==2) {
       double hminS = 1e100;
       R3 bminS, bmaxS;
       MeshS *ThS=Th.meshS;
       int tagbS[3] = {1, 2, 4};
-        
+
       // type 3D mesh
       KN<int> tagTonBS(ThS->nt);
       tagTonBS = 0;
-        
+
       for (int ibe = 0; ibe < ThS->nbe; ibe++) {
         int iff;
         int it = ThS->BoundaryElement(ibe, iff);
@@ -7391,9 +7386,9 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
         if (itt >= 0 && itt != it)
           tagTonBS[itt] |= tagbS[ifff];
       }
-        
+
       /* determination de bminS, bmaxS et hminS */
-        
+
       KN<int> takevertexS(ThS->nv, -1);
       for (int i = 0; i < ThS->nt; i++) {
         // origin of the triangleS ->tetra itet
@@ -7412,7 +7407,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
           }
         }
       }
-        
+
       // determine the boundary number
       int nbeS=0, nbeiS=0;
       for (int i = 0; i < ThS->nt; i++) {
@@ -7426,7 +7421,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
             int jt = j, it = ThS->ElementAdj(i, jt), iftet;
             // the original adj tetra to acces split
             int itetadj = Th.BoundaryElement(it, iftet);
-                   
+
             if (it == i || it < 0)
               nbeS += kksplit;// on est sur la frontiere
             else if (!split[itetadj])
@@ -7465,8 +7460,8 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
       R3 hhS = (bmaxS - bminS) / 10.;
       double hseuilS = (hminS / kksplit) / 1000.;
       EF23::GTree<Vertex3> *gtreeS = new EF23::GTree<Vertex3>(Tht->meshS->vertices, bminS - hhS, bmaxS + hhS, 0);
-        
-        
+
+
       // save the surface vertices
       for (int k=0; k<nbv_surf; k++) {
         int k0 = Tht->meshS->liste_v_num_surf[k];
@@ -7482,7 +7477,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
      for (int i = 0 ; i < Tht->meshS->nv; i++) {
        const R3 r3vi( Tht->meshS->vertices[i].x, Tht->meshS->vertices[i].y, Tht->meshS->vertices[i].z);
        const Vertex3 &vi(r3vi);
-   
+
        Vertex3 * pvi=gtreeS->ToClose(vi,hseuilS);
        if (!pvi) {
          (R3 &)v[np] = Tht->meshS->vertices[i];
@@ -7493,11 +7488,11 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
        else ffassert(0);
        ffassert(np<=nbv_surf);
       }
-  
+
       // read triangles and change with the surface numbering
       int iv[3], lab;
       Tht->meshS->mes=0;
-  
+
       for(int i=0;i<nbe;++i) {
         const Triangle3 & K(Tht->borderelements[i]);
         for (int j=0;j<3;++j) iv[j]=Tht->meshS->v_num_surf[Tht->operator()(K[j])];
@@ -7505,24 +7500,24 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
         Tht->meshS->elements[i].set(Tht->meshS->vertices,iv,lab);
         Tht->meshS->mes += Tht->elements[i].mesure();
       }
-   
+
       int nvsub = (kksplit + 1) * (kksplit + 2)/2;
       int nedgesub = 3*(kksplit+1)*(kksplit+2)/2-3*(kksplit+1);
       int *edgesub, ie=0;
 
       // split the boundary of the triangle simplex
       SplitEdgeSimplex(kksplit, nedgesub, edgesub);
-      
+
       for (int i = 0; i < ThS->nt; i++) {
         int iftet;
         int itet = Th.BoundaryElement(i, iftet);
-          
+
         if (split[itet]) {
           const TriangleS &K(ThS->elements[i]);
           // K comes from to the original tetra
           int iftet;
           int itet = Th.BoundaryElement(i, iftet);
-  
+
           // here split internal edges
           for (int j = 0; j < 3; j++) {
             int jt = j, it = ThS->ElementAdj(i, jt), iftet;
@@ -7548,47 +7543,47 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
         }
       }
       delete [] edgesub;
-        
-        
+
+
       // split border elements Edges
       int nv1Dsub = kksplit+1;
       int nedge1Dsub = kksplit;
       R1 *vertex1Dsub;
       int *edge1Dsub;
-        
+
       SplitSimplex<R1>(kksplit, nv1Dsub, vertex1Dsub, nedge1Dsub, edge1Dsub);
-  
-        
+
+
       for (int ibe = 0; ibe < ThS->nbe; ibe++) {
         int iff, it = ThS->BoundaryElement(ibe, iff);
         int iftet, iftetadj;
         // it triangleS come from to the tetra itet
         int itet = Th.BoundaryElement(it, iftet);
         int ifff = iff, itt = ThS->ElementAdj(it, ifff);
-        
+
         // the original adj tetra to acces split
         int itetadj = Th.BoundaryElement(itt, iftetadj);
         if (itt < 0) {itt = it;}
-          
+
         if (split[itet] == 0 && split[itetadj] == 0)
           continue;    // boundary not on one element
-          
+
         const BoundaryEdgeS &K(ThS->be(ibe));
         int ivv[2];
-            
+
         ivv[0] = ThS->operator () (K[0]);
         ivv[1] = ThS->operator () (K[1]);
- 
+
           R3 *vertexedgesub = new R3[nv1Dsub];
           int *newindex = new int[nv1Dsub];
-            
+
         for (int iv = 0; iv < nv1Dsub; iv++) {
           double alpha = vertex1Dsub[iv].x;
           vertexedgesub[iv].x = alpha * ThS->vertices[ivv[0]].x + (1.-alpha) * ThS->vertices[ivv[1]].x;
           vertexedgesub[iv].y = alpha * ThS->vertices[ivv[0]].y + (1.-alpha) * ThS->vertices[ivv[1]].y;
           vertexedgesub[iv].z = alpha * ThS->vertices[ivv[0]].z + (1.-alpha) * ThS->vertices[ivv[1]].z;
         }
-     
+
         for (int iv = 0; iv < nv1Dsub; iv++) {
           const Vertex3 &vi(vertexedgesub[iv]);
           Vertex3 *pvi = gtreeS->ToClose(vi, hseuilS);
@@ -7597,12 +7592,12 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
         }
         for (int ii = 0; ii < nedge1Dsub; ii++) {
           int ivb[2];
-                
+
           for (int jjj = 0; jjj < 2; jjj++) {
             ivb[jjj] = newindex[edge1Dsub[2 * ii + jjj]];
             assert(edge1Dsub[2 * ii + jjj] < nvsub);
             if (verbosity > 199) {cout << "        " << ivb[jjj] << " np:" << np << endl;}
-                    
+
             assert(ivb[jjj] < nbv_surf);
           }
           Tht->meshS->borderelements[ie].set(Tht->meshS->vertices, ivb, K.lab);
@@ -7612,17 +7607,17 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
         delete [] vertexedgesub;
         delete [] newindex;
       }
-        
-        
+
+
       // Tht->meshS->set(nbv_surf, nbe, nbeS);
       // complete the building of the new meshS
       int mes=0., mesb=0.;
-        
+
       for (int i=0;i<nbe;i++)
         mes += Tht->meshS->elements[i].mesure();
       for (int i=0;i<nbeS;i++)
         mesb += Tht->meshS->be(i).mesure();
-        
+
       Tht->meshS->BuildBound();
       if(nt > 0){
         Tht->meshS->BuildAdj();
@@ -7630,13 +7625,13 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
         Tht->meshS->BuildjElementConteningVertex();
       }
       if(verbosity>1) cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
-        
+
       assert(mes>=0.);
       Tht->meshS->BuildGTree();
       delete gtreeS;
       delete [] vertex1Dsub;
       delete [] edge1Dsub;
-   
+
     }
     return Tht;
 }
@@ -7657,10 +7652,10 @@ void Renumb (Fem2D::Mesh3 * &pTh) {
     xadg[0] = 0;
     std::vector<int> adjncy;
     std::set<int> *adjncyVec = new std::set<int>[nbv]();
-    
+
     for (int k = 0; k < nbt; ++k) {
         const Tet &K = Th[k];
-        
+
         for (int j = 0; j < nve - 1; ++j) {
             for (int i = j + 1; i < nve; ++i) {
                 adjncyVec[Th.operator () (K[i])].insert(Th.operator () (K[j]));
@@ -7668,22 +7663,22 @@ void Renumb (Fem2D::Mesh3 * &pTh) {
             }
         }
     }
-    
+
     int cpt = 0;
-    
+
     for (int k = 0; k < nbv; ++k) {
         cpt += adjncyVec[k].size();
         xadg[k + 1] = cpt;
     }
-    
+
     adjncy.reserve(xadg[nbv]);
-    
+
     for (int k = 0; k < nbv; ++k) {
         for (std::set<int>::iterator it = adjncyVec[k].begin(); it != adjncyVec[k].end(); ++it) {
             adjncy.push_back(*it);
         }
     }
-    
+
     delete [] adjncyVec;
     // renumb::i4vec_print ( nbt + 1, xadg, "  ADJ_ROW:" );
     // renumb::adj_print ( nbt, adjncy.size(), xadg,adjncy.data() , "  ADJ" );
@@ -7693,24 +7688,24 @@ void Renumb (Fem2D::Mesh3 * &pTh) {
         cout << "\n";
         cout << "  ADJ bandwidth = " << bandwidth << "\n";
     }
-    
+
     int *perm = renumb::genrcm(nbv, adjncy.size(), xadg, &(adjncy[0]));
     int *perm_inv = renumb::perm_inverse3(nbv, perm);
     if (verbosity > 2) {
         bandwidth = renumb::adj_perm_bandwidth(nbv, adjncy.size(), xadg, &(adjncy[0]),
                                                perm, perm_inv);
-        
+
         cout << "\n";
         cout << "  ADJ bandwidth after RCM permutation = " << bandwidth << "\n";
     }
-    
+
     delete [] xadg;
     int nbe = Th.nbe;
     Vertex3 *v = new Vertex3[nbv];
     Tet *t = new Tet[nbt];
     Triangle3 *b = new Triangle3[nbe];
     Vertex3 *vv = v;
-    
+
     for (int i = 0; i < nbv; i++) {
         const Vertex3 &V = Th(perm[i]);
         vv->x = V.x;
@@ -7719,27 +7714,27 @@ void Renumb (Fem2D::Mesh3 * &pTh) {
         vv->lab = V.lab;
         vv++;
     }
-    
+
     Tet *tt = t;
-    
+
     for (int i = 0; i < nbt; i++) {
         int i0 = perm_inv[Th(i, 0)], i1 = perm_inv[Th(i, 1)], i2 = perm_inv[Th(i, 2)], i3 = perm_inv[Th(i, 3)];
         int ivt[4] = {i0, i1, i2, i3};
         (*tt++).set(v, ivt, Th[i].lab);
     }
-    
+
     Triangle3 *bb = b;
-    
+
     for (int i = 0; i < nbe; i++) {
         const Triangle3 &K(Th.be(i));
         int ivv[3];
-        
+
         ivv[0] = perm_inv[Th.operator () (K[0])];
         ivv[1] = perm_inv[Th.operator () (K[1])];
         ivv[2] = perm_inv[Th.operator () (K[2])];
         (bb++)->set(v, ivv, K.lab);
     }
-    
+
     delete [] perm_inv;
     delete [] perm;
     delete pTh;
@@ -7756,38 +7751,38 @@ AnyType Op_trunc_mesh3::Op::operator () (Stack stack)  const {
 
     long kkksplit = std::max(1L, arg(0, stack, 1L));
     long label = arg(1, stack, 2L);
-    
+
     KN<long> *pn2o = arg(2, stack);
     KN<long> *po2n = arg(3, stack);
     bool renum = arg(4, stack, false);
-    
+
     KN<int> split(Th.nt);
     split = kkksplit;
     MeshPoint *mp = MeshPointStack(stack), mps = *mp;
     long kk = 0;
     long ks = kkksplit * kkksplit * kkksplit;
-    
+
     for (int k = 0; k < Th.nt; k++) {
         const Tet &K(Th.elements[k]);
         R3 B(1. / 4., 1. / 4., 1. / 4.);// 27/09/10 : J.Morice error in msh3.cpp
         mp->set(Th, K(B), B, K, 0);
         if (GetAny<bool>((*bbb)(stack))) {kk++;} else {split[k] = 0;}
     }
-    
+
     // *mp=mps;
     if (verbosity > 1) {
         cout << "  -- Trunc mesh: Nb of Tetrahedrons = " << kk << " label=" << label << endl;
     }
-    
+
     Mesh3 *Tht = truncmesh(Th, kkksplit, split, false, label);
     Tht->getTypeMesh3()= Th.getTypeMesh3();
-  
+
 
     if (pn2o) {
         pn2o->resize(kk * ks);
         KN<long> &n2o(*pn2o);
         int l = 0;
-        
+
         for (int k = 0; k < Th.nt; ++k) {
             if (split[k]) {
                 for (int i = 0; i < ks; ++i) {
@@ -7796,25 +7791,25 @@ AnyType Op_trunc_mesh3::Op::operator () (Stack stack)  const {
             }
         }
     }
-    
+
     if (po2n) {
         po2n->resize(Th.nt);
         KN<long> &o2n(*po2n);
         int l = 0;
-        
+
         for (int k = 0; k < Th.nt; ++k) {
             if (split[k]) {
                 o2n[k] = l;
                 l += ks;
             } else {o2n[k] = -1;}}
     }
-    
+
     if (renum) {Renumb(Tht);}
-    
+
     if (renum && Tht->getTypeMesh3()!=1) {Renumb(Tht->meshS);}
-    
+
     Add2StackOfPtr2FreeRC(stack, Tht);    // 07/2008 FH
-    
+
     *mp = mps;
     return Tht;
 };

@@ -53,7 +53,7 @@ int main (int argc, const char **argv) {
 	ff_Pmmap shd;
 	double cff, rff;
 	long status;
-	int i;
+	int i, ret;
 
 	if (argc > 1) {debug = atoi(argv[1]);}
 
@@ -73,7 +73,8 @@ int main (int argc, const char **argv) {
 
 	char ff[1024];
 	sprintf(ff, "FreeFem++ ffslave.edp -nw -ns -v %d&", debug);
-	system(ff);	// Lauch FF++ in batch no graphique
+	ret = system(ff);	// Lauch FF++ in batch no graphique
+	if (ret == -1) printf("system function error\n");
 	if (debug) {printf(" cc: before wait\n");}
 
 	if (debug) {printf(" cc: before wait 0 ff\n");}
@@ -103,4 +104,3 @@ int main (int argc, const char **argv) {
 	ffmmap_del(shd);
 	return 0;
 }
-

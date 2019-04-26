@@ -264,7 +264,7 @@ void ffmmap_init (ff_Pmmap p, const char *nm, long len) {
 
 	off_t size = lseek(p->fd, 0, SEEK_END);	// seek to end of file
 	p->isnew = (size == 0);
-	printf(" len %ld size %lld \n", len, size);
+	printf(" len %ld size %ld \n", len, size);
 	if (size < len) {
 		if (ftruncate(p->fd, len) == -1) {
 			perror("ftruncate");

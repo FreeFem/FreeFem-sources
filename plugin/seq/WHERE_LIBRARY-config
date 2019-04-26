@@ -1,0 +1,33 @@
+#  Build with freefem++ with ./configure  Fri Apr 26 15:27:43 CEST 2019
+f77 LD /usr/lib/gcc/x86_64-linux-gnu/7/libgfortran.so /usr/lib/gcc/x86_64-linux-gnu/7/libquadmath.so
+f77 INCLUDE -DAdd_  
+fc LD /usr/lib/gcc/x86_64-linux-gnu/7/libgfortran.so /usr/lib/gcc/x86_64-linux-gnu/7/libquadmath.so
+fc INCLUDE -DAdd_  
+pthread LD -lpthread
+cxx11 LD -std=c++11
+cxx11 INCLUDE -std=c++11 
+mpifc LD -pthread -L/usr//lib -L/usr/lib/x86_64-linux-gnu/openmpi/lib -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi 
+mpifc INCLUDE -I/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -I/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/opal/mca/event/libevent2022/libevent -I/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/opal/mca/event/libevent2022/libevent/include -I/usr/lib/x86_64-linux-gnu/openmpi/include  
+mpif77 LD -pthread -L/usr//lib -L/usr/lib/x86_64-linux-gnu/openmpi/lib -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi 
+mpif77 INCLUDE -I/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -I/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/opal/mca/event/libevent2022/libevent -I/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/opal/mca/event/libevent2022/libevent/include -I/usr/lib/x86_64-linux-gnu/openmpi/include  
+mpi LD -pthread -L/usr//lib -L/usr/lib/x86_64-linux-gnu/openmpi/lib -lmpi_cxx -lmpi 
+mpi INCLUDE -I/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -I/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/opal/mca/event/libevent2022/libevent -I/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/opal/mca/event/libevent2022/libevent/include -I/usr/lib/x86_64-linux-gnu/openmpi/include  
+fftw3 LD -lfftw3
+blas LD -lblas
+arpack LD -larpack -llapack
+arpack LD '-larpack -llapack'
+lapack LD -llapack
+amd LD -lumfpack  -lamd -lcholmod -lcolamd
+amd INCLUDE -I/usr/include/suitesparse 
+umfpack LD -lumfpack  -lamd -lcholmod -lcolamd
+umfpack INCLUDE -I/usr/include/suitesparse 
+gsl LD -L/usr/lib/x86_64-linux-gnu -lgsl -lgslcblas -lm
+gsl INCLUDE -I/usr/include 
+mumps LD -ldmumps -lzmumps  -lmumps_common  -lpord
+mumps_seq LD -ldmumps_seq -lzmumps_seq  -lmumps_common_seq  -lpord_seq -lmpiseq_seq
+libseq LD -lmpiseq_seq
+tetgen LD -ltet
+ipopt LD  -lipopt
+nlopt LD  -lnlopt
+hdf5 LD -L/usr/lib/x86_64-linux-gnu/hdf5/serial   -lm -ldl -lz -lsz -lpthread  -lhdf5 -lhdf5_hl
+hdf5 INCLUDE -I/usr/include/hdf5/serial -I/usr/include 

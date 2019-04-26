@@ -46,33 +46,6 @@
 #include <cmath>
 #include <complex>
 using namespace std;
-/*
-using namespace std;
-#include "error.hpp"
-#include "AFunction.hpp"
-using namespace std;
-#include "rgraph.hpp"
-#include "RNM.hpp"
-#include "fem.hpp"
-
-#include "FESpacen.hpp"
-#include "FESpace.hpp"
-
-#include "MatriceCreuse_tpl.hpp"
-#include "MeshPoint.hpp"
-#include "Operator.hpp"
-#include "lex.hpp"
-
-#include "lgfem.hpp"
-#include "lgmesh3.hpp"
-#include "lgsolver.hpp"
-#include "problem.hpp"
-// #include "LayerMesh.hpp"
-// #include "TransfoMesh_v2.hpp"
-#include "msh3.hpp"
-// #include "GQuadTree.hpp"
-// #include "lex.hpp"
- */
 #include "ff++.hpp"
 #include <set>
 #include <vector>
@@ -1159,7 +1132,8 @@ Mesh*VTK_Load (const string &filename, bool bigEndian) {
 // swap = bigEndian or not bigEndian
 	// variable freefem++
 	int nv, nt = 0, nbe = 0;
-	int nerr = 0;
+	int nerr = 0, ret;
+	char *res;
 	Mesh::Vertex *vff;
 
 	map<int, int> mapnumv;
@@ -1174,10 +1148,13 @@ Mesh*VTK_Load (const string &filename, bool bigEndian) {
 
 	char buffer[256], buffer2[256];
 
-	fgets(buffer, sizeof(buffer), fp);	// version line
-	fgets(buffer, sizeof(buffer), fp);	// title
+	res = fgets(buffer, sizeof(buffer), fp);
+	if (res == NULL) printf("fgets error\n");	// version line
+	res = fgets(buffer, sizeof(buffer), fp);	// title
+	if (res == NULL) printf("fgets error\n");
 
-	fscanf(fp, "%s", buffer);	// ASCII or BINARY
+	ret = fscanf(fp, "%s", buffer);	// ASCII or BINARY
+	if (ret == EOF) printf("fscanf error\n");
 	bool binary = false;
 	if (!strncmp(buffer, "BINARY", 6)) {binary = true;}
 
@@ -2735,7 +2712,8 @@ Mesh3*VTK_Load3 (const string &filename, bool bigEndian) {
 // swap = bigEndian or not bigEndian
 	// variable freefem++
 	int nv, nt = 0, nbe = 0;
-	int nerr = 0;
+	int nerr = 0, ret;
+	char * res;
 	// Reading Mesh in vtk formats
 	FILE *fp = fopen(filename.c_str(), "rb");
 
@@ -2746,10 +2724,12 @@ Mesh3*VTK_Load3 (const string &filename, bool bigEndian) {
 
 	char buffer[256], buffer2[256];
 
-	fgets(buffer, sizeof(buffer), fp);	// version line
-	fgets(buffer, sizeof(buffer), fp);	// title
-
-	fscanf(fp, "%s", buffer);	// ASCII or BINARY
+	res = fgets(buffer, sizeof(buffer), fp);	// version line
+	if (res == NULL) printf("fgets error\n");
+	res = fgets(buffer, sizeof(buffer), fp);	// title
+	if (res == NULL) printf("fgets error\n");
+	ret = fscanf(fp, "%s", buffer);	// ASCII or BINARY
+	if (ret == EOF) printf("fscanf error\n");
 	bool binary = false;
 	if (!strcmp(buffer, "BINARY")) {binary = true;}
 

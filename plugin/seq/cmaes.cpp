@@ -391,7 +391,8 @@ cmaes_resume_distribution (cmaes_t *t, char *filename) {
 		if ((res = fscanf(fp, " resume %lg", &d)) == EOF) {
 			break;
 		} else if (res == 0) {
-			fscanf(fp, " %*s");
+			res = fscanf(fp, " %*s");
+      if (res == EOF) printf("fscanf error\n");
 		} else if (res > 0) {
 			i += 1;
 		}
@@ -407,7 +408,8 @@ cmaes_resume_distribution (cmaes_t *t, char *filename) {
 		if ((res = fscanf(fp, " resume %lg", &d)) == EOF) {
 			FATAL("cmaes_resume_distribution(): Unexpected error, bug", 0, 0, 0);
 		} else if (res == 0) {
-			fscanf(fp, " %*s");
+			res = fscanf(fp, " %*s");
+      if (res == EOF) printf("fscanf error\n");
 		} else if (res > 0) {
 			++i;
 		}
@@ -422,7 +424,8 @@ cmaes_resume_distribution (cmaes_t *t, char *filename) {
 		if ((res = fscanf(fp, " xmean %lg", &d)) == EOF) {
 			FATAL("cmaes_resume_distribution(): 'xmean' not found", 0, 0, 0);
 		} else if (res == 0) {
-			fscanf(fp, " %*s");
+			res = fscanf(fp, " %*s");
+      if (res == EOF) printf("fscanf error\n");
 		} else if (res > 0) {
 			break;
 		}
@@ -445,7 +448,8 @@ cmaes_resume_distribution (cmaes_t *t, char *filename) {
 		if ((res = fscanf(fp, " path for sigma %lg", &d)) == EOF) {
 			FATAL("cmaes_resume_distribution(): 'path for sigma' not found", 0, 0, 0);
 		} else if (res == 0) {
-			fscanf(fp, " %*s");
+			res = fscanf(fp, " %*s");
+      if (res == EOF) printf("fscanf error\n");
 		} else if (res > 0) {
 			break;
 		}
@@ -468,7 +472,8 @@ cmaes_resume_distribution (cmaes_t *t, char *filename) {
 		if ((res = fscanf(fp, " path for C %lg", &d)) == EOF) {
 			FATAL("cmaes_resume_distribution(): 'path for C' not found", 0, 0, 0);
 		} else if (res == 0) {
-			fscanf(fp, " %*s");
+			res = fscanf(fp, " %*s");
+      if (res == EOF) printf("fscanf error\n");
 		} else if (res > 0) {
 			break;
 		}
@@ -491,7 +496,9 @@ cmaes_resume_distribution (cmaes_t *t, char *filename) {
 		if ((res = fscanf(fp, " sigma %lg", &d)) == EOF) {
 			FATAL("cmaes_resume_distribution(): 'sigma' not found", 0, 0, 0);
 		} else if (res == 0) {
-			fscanf(fp, " %*s");
+			res = fscanf(fp, " %*s");
+      if (res == EOF) printf("fscanf error\n");
+
 		} else if (res > 0) {
 			break;
 		}
@@ -504,7 +511,8 @@ cmaes_resume_distribution (cmaes_t *t, char *filename) {
 		if ((res = fscanf(fp, " covariance matrix %lg", &d)) == EOF) {
 			FATAL("cmaes_resume_distribution(): 'covariance matrix' not found", 0, 0, 0);
 		} else if (res == 0) {
-			fscanf(fp, " %*s");
+			res = fscanf(fp, " %*s");
+      if (res == EOF) printf("fscanf error\n");
 		} else if (res > 0) {
 			break;
 		}

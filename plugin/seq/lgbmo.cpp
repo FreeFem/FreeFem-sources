@@ -28,19 +28,6 @@
 #include  <iostream>
 #include  <cfloat>
 using namespace std;
-/*
-#include "error.hpp"
-#include "AFunction.hpp"
-#include "rgraph.hpp"
-#include "RNM.hpp"
-#include "MatriceCreuse_tpl.hpp"
-#include "Mesh3dn.hpp"
-#include "MeshPoint.hpp"
-#include "lgfem.hpp"
-#include "lgmesh3.hpp"
-#include "lgsolver.hpp"
-#include "problem.hpp"
- */
 #include "ff++.hpp"
 #include "bmo.hpp"
 
@@ -189,7 +176,6 @@ class OptimBMO: public OneOperator
 					 *
 					 */
 
-					R tol = arg(0, stack, 1E-6);// not used ....
 					int nbrestart = arg(1, stack, 5L);
 					int nbext1 = 5;	// bof bof
 					int nbbvp = arg(2, stack, 5L);
