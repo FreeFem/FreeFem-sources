@@ -172,7 +172,8 @@ namespace Fem2D {
   inline void  CheckErrorOptimisation(const R& ccc,const R& cc,const char * cmm)
     {
         if ( ccc != cc) {
-             if( (abs(ccc-cc) >1e-12*abs(cc)) || (cc !=cc) ||  (ccc !=ccc) ) {
+             if( (abs(ccc-cc) >1e-12*(abs(cc)+abs(ccc)) ) // test for round off err 
+                 || (cc !=cc) ||  (ccc !=ccc) ) {// test for NaN
                 cerr << cc << " != " << ccc <<  " diff "<< cc-ccc <<" => ";
                 cerr << cmm << endl;
                 ExecError("In Optimized version "); }}
@@ -180,7 +181,8 @@ namespace Fem2D {
     inline void  CheckErrorOptimisation(const Complex ccc,const Complex& cc,const char * cmm)
     {
         if ( ccc != cc) {
-            if( (abs(ccc.real()-ccc.real())+ abs(cc.imag()-cc.imag())  >0.5e-12*abs((cc.real())+abs(cc.imag())) )||  (cc !=cc) ||  (ccc !=ccc) )
+            if( (abs(ccc.real()-ccc.real())+ abs(cc.imag()-cc.imag())  >0.5e-12*( abs(cc.real())+abs(cc.imag())+abs(ccc.real())+abs(ccc.imag()) ) )
+                ||  (cc !=cc) ||  (ccc !=ccc) )
             {
                 cerr << cc << " != " << ccc <<  " diff "<< cc-ccc <<" => ";
                 cerr << cmm << endl;

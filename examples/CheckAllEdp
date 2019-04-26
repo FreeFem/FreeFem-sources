@@ -40,6 +40,7 @@ dorun()
 	j="$1"
 	ffarg="-ns"
 	dir=`dirname "$j"`
+	bdir=`basename "$j"`
 	i=`basename "$j"`
 	log="$logdir/$i.log"
 	skeep=0
@@ -64,6 +65,7 @@ dorun()
     ## error Compile error :
     ## Exec error : exec assert
     ## Exec error :
+	if (( dry !=1 )) ; then  
     errl=`grep 'error Compile error : Error load' "$log"`
     errC=`grep 'error Compile error :' "$log"`
     errX=`grep 'Exec error :' "$log"`
@@ -90,6 +92,7 @@ dorun()
     fi
     (( dry !=1 )) &&echo $MSG  $cmm $j  >>"$log"
     (( dry !=1 )) &&echo  $MSG  $cmm $j "( see "$log" )";	
+fi
 	fi
 }
 nj=0;
