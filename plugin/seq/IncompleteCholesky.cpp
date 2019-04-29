@@ -61,7 +61,6 @@ long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
     ffassert( A.half && L.half);
     ffassert( A.n == L.n);
     int n =A.n,i,j,k,kk;
-    double tgv1= sqrt(tgv);
     double tgve =tgv*0.99999999;
     if(tgve < 1) tgve=1e200;
     double nan=sqrt(-1.);
@@ -96,7 +95,7 @@ long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
                 double *pAij = A.pij(i,j) ;
                 double Lij = pAij ? *pAij: 0.,Aij=Lij;
                 for(int kkk= lj0; kkk<lj1; ++kkk)// loop  row j
-                {  //cout << " ?? " << kkk << " "<< lj0 << " " <<lj1 <<endl;
+                {
                     int k = L.j[kkk];
                     ffassert(k >=0 && k < j);
                     double Ljk = L.aij[kkk], *pLik=L.pij(i,k), Lik = pLik ? *pLik : 0.;

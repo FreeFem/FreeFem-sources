@@ -3046,8 +3046,6 @@ AnyType Movemesh2D_3D_surf_Op::operator () (Stack stack)  const {
 	{
 		KN<int> takemesh(nbv);
 		takemesh = 0;
-		const Mesh &rTh = Th;
-
 		for (int it = 0; it < nbt; ++it) {
 			for (int iv = 0; iv < 3; ++iv) {
 				int i = Th(it, iv);
@@ -3244,7 +3242,6 @@ AnyType Movemesh2D_S_Op::operator () (Stack stack)  const {
     {
         KN<int> takemesh(nbv);
         takemesh = 0;
-        const Mesh &rTh = Th;
 
         for (int it = 0; it < nbt; ++it) {
           for (int iv = 0; iv < 3; ++iv) {
