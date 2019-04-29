@@ -1,105 +1,14 @@
-macro ffddmgeneosetup(pr,Varf)
+macro ffddmbuildZTAZ(pr,Varf)
 
 if (pr#prfe#prmesh#isincomm)
 {
-pr#corr = ffddmcorrection;
-  
-int nev = ffddmnu;
-
-IFMACRO(pr#withhpddm)
-set(pr#hpddmOP,sparams="-hpddm_geneo_nu "+nev);
-
-pr#prfe#prmesh#tic(pr#tloc)
-
-IFMACRO(!pr#algebraic)
-{	
-  Varf(vN,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
-  pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,solver=CG,tgv=vtgv);
-}
-ENDIFMACRO
-attachCoarseOperator(pr#prfe#prmesh#commddm, pr#hpddmOP, A = pr#matN);
-
-pr#prfe#prmesh#toc(pr#tloc,"building E",pr#tbuildE)
-
-ENDIFMACRO
-
-IFMACRO(!pr#withhpddm)
-
-if (!bpara)
-  pr#Z.resize(nev*pr#prfe#prmesh#npart);
-else if (!pr#prfe#prmesh#excluded)
-  pr#Z.resize(nev);
-
-pr#si=0;
-pr#prfe#prmesh#tic(pr#tloc)
-
-int[int] sizel(pr#prfe#prmesh#npart);
-
-for(int i=0;i<pr#prfe#prmesh#npart;++i)
-if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#commddm)))) {
-	pr#prfe#prmesh#Thi=pr#prfe#prmesh#aTh[i];
-	
-  pr#prfe#K[int,int] eV(pr#prfe#Dk[i].n,nev);
-	pr#prfe#K[int] ev(nev);
-		
-	matrix<pr#prfe#K> weightedTmp;
-	weightedTmp=pr#aR[i]*pr#prfe#Dih[i];	
-	
-  matrix<pr#prfe#K> weighted;
-  
-  weighted=pr#prfe#Dih[i]*weightedTmp;
-  
-  /*
-  pr#prfe#K[int] dofsinoverlap(pr#prfe#Dk[i].n);
-  dofsinoverlap = 1;
-  pr#prfe#update(dofsinoverlap,false);
-  for [j,bj: dofsinoverlap] bj = abs(bj) > 1;
-  
-  matrix<pr#prfe#K> Movl = dofsinoverlap;
-  
-  weighted = weighted*Movl;
-  weighted = Movl*weighted;
-  */
-  
-  IFMACRO(!pr#algebraic)
-  {	
-    if (pr#prfe#prmesh#overlap > 0) {
-      Varf(vN,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
-      pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgv);
-    }
-  }
-  ENDIFMACRO
-  set(pr#matN,solver = sparsesolver,commworld=pr#prfe#prmesh#commself);
-  
-  int kk = EigenValue(pr#matN,weighted,value=ev,rawvector=eV,ncv=max(20,3*nev));
-  
-  int nok = 0;
-  
-  for(int j=0;j<nev;++j) {
-    if (ffddmtau == 0 || real(ev[j]) < ffddmtau) {
-      /*cout << i << " " << pr#si << " " << ev[j] << endl;*/
-      
-      pr#Z[pr#si].resize(pr#prfe#Dk[i].n);
-			pr#Z[pr#si] = pr#prfe#Dk[i].*eV(:,j);
-			pr#si+=1;
-			nok+=1;
-		}
-	}
-  
-  sizel[i] = nok;	/* number of ev for subdomain i */
-}
-if (bseq)
-  pr#prfe#prmesh#Thi = pr#prfe#prmesh#Thglob;
-
-pr#prfe#prmesh#toc(pr#tloc,"local eigenvalue problems",pr#teigenv)
-  
 pr#prfe#prmesh#tic(pr#tloc)
 
 if (!bpara) {
   pr#ncoarsespace=pr#si;
   if (mpiRank(pr#prfe#prmesh#mpicomm) == 0)
     cout << "["+Stringification(pr)+"] CS size = " << pr#ncoarsespace << endl;
-  pr#sizelg = sizel;	/* sizelg: vector stocking the number of ev for every subdomain */
+  pr#sizelg = sizel;	/* sizelg stores the number of ev for every subdomain */
 
   pr#prfe#K[int,int] Zm(pr#prfe#Ndofglobal,pr#ncoarsespace);
   int cpt = 0;
@@ -126,7 +35,7 @@ else {
      see PhD thesis of P.Jolivet pag 46 and following */
   	
   pr#sizelg = 0;
-  mpiAllReduce(sizel,pr#sizelg,pr#prfe#prmesh#mpicomm,mpiSUM); /* sizelg: vector stocking the number of ev for every subdomain */
+  mpiAllReduce(sizel,pr#sizelg,pr#prfe#prmesh#mpicomm,mpiSUM); /* sizelg stores the number of ev for every subdomain */
     
   pr#offseti = 0; /* offseti[i]: index of the first ev of the subdomain i in the global numbering of the columns of Z */
   for (int ii=0; ii < pr#prfe#prmesh#npart; ii++)
@@ -588,7 +497,305 @@ else {
     
 }
 pr#prfe#prmesh#toc(pr#tloc,"building E",pr#tbuildE)
+}
+
+// EOM
+
+macro ffddmgeneosetup(pr,Varf)
+
+pr#bCM = 0;
+
+if (pr#prfe#prmesh#isincomm)
+{
+pr#corr = ffddmcorrection;
+
+int nev = ffddmnu;
+
+IFMACRO(pr#withhpddm)
+set(pr#hpddmOP,sparams="-hpddm_geneo_nu "+nev);
+
+pr#prfe#prmesh#tic(pr#tloc)
+
+IFMACRO(!pr#algebraic)
+{
+  Varf(vN,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
+  pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,solver=CG,tgv=vtgv);
+}
+ENDIFMACRO
+attachCoarseOperator(pr#prfe#prmesh#commddm, pr#hpddmOP, A = pr#matN);
+
+pr#prfe#prmesh#toc(pr#tloc,"building E",pr#tbuildE)
+
+ENDIFMACRO
+
+IFMACRO(!pr#withhpddm)
+
+if (!bpara)
+  pr#Z.resize(nev*pr#prfe#prmesh#npart);
+else if (!pr#prfe#prmesh#excluded)
+  pr#Z.resize(nev);
+
+pr#si=0;
+pr#prfe#prmesh#tic(pr#tloc)
+
+int[int] sizel(pr#prfe#prmesh#npart);
+
+for(int i=0;i<pr#prfe#prmesh#npart;++i)
+if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#commddm)))) {
+	pr#prfe#prmesh#Thi=pr#prfe#prmesh#aTh[i];
+
+  pr#prfe#K[int,int] eV(pr#prfe#Dk[i].n,nev);
+	pr#prfe#K[int] ev(nev);
+
+	matrix<pr#prfe#K> weightedTmp;
+	weightedTmp=pr#aR[i]*pr#prfe#Dih[i];
+
+  matrix<pr#prfe#K> weighted;
+
+  weighted=pr#prfe#Dih[i]*weightedTmp;
+
+  /*
+  pr#prfe#K[int] dofsinoverlap(pr#prfe#Dk[i].n);
+  dofsinoverlap = 1;
+  pr#prfe#update(dofsinoverlap,false);
+  for [j,bj: dofsinoverlap] bj = abs(bj) > 1;
+
+  matrix<pr#prfe#K> Movl = dofsinoverlap;
+
+  weighted = weighted*Movl;
+  weighted = Movl*weighted;
+  */
+
+  IFMACRO(!pr#algebraic)
+  {
+    if (pr#prfe#prmesh#overlap > 0) {
+      Varf(vN,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
+      pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgv);
+    }
+  }
+  ENDIFMACRO
+  set(pr#matN,solver = sparsesolver,commworld=pr#prfe#prmesh#commself);
+
+  int kk = EigenValue(pr#matN,weighted,value=ev,rawvector=eV,ncv=max(20,3*nev));
+
+  int nok = 0;
+
+  for(int j=0;j<nev;++j) {
+    if (ffddmtau == 0 || real(ev[j]) < ffddmtau) {
+      /*cout << i << " " << pr#si << " " << ev[j] << endl;*/
+
+      pr#Z[pr#si].resize(pr#prfe#Dk[i].n);
+			pr#Z[pr#si] = pr#prfe#Dk[i].*eV(:,j);
+			pr#si+=1;
+			nok+=1;
+		}
+	}
+
+  sizel[i] = nok;	/* number of ev for subdomain i */
+}
+if (bseq)
+  pr#prfe#prmesh#Thi = pr#prfe#prmesh#Thglob;
+
+pr#prfe#prmesh#toc(pr#tloc,"local eigenvalue problems",pr#teigenv)
+
+ffddmbuildZTAZ(pr,Varf)
+
 ENDIFMACRO
 }
 // EOM
-/*# finCoarseSpace #*/
+
+macro ffddmdtnsetup(pr,Varf,lambdamax)
+
+pr#bCM = 0;
+
+if (pr#prfe#prmesh#isincomm)
+{
+pr#corr = ffddmcorrection; /* Correction scheme used */
+
+int nev = ffddmnu; /* Maximum number of eigenvectors per subdomain */
+
+IFMACRO(pr#withhpddm)
+set(pr#hpddmOP,sparams="-hpddm_geneo_nu "+nev);
+
+pr#prfe#prmesh#tic(pr#tloc)
+
+IFMACRO(!pr#algebraic)
+{
+  Varf(vN,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
+  pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,solver=CG,tgv=vtgv);
+}
+ENDIFMACRO
+
+varf vmass(def(u),def(v)) = intbN(pr#prfe#prmesh#Thi,ffddminterfacelabel)(pr#prfe#mdef(u)'*pr#prfe#mdef(v));
+matrix<pr#prfe#K> mmass = vmass(pr#prfe#Vhi,pr#prfe#Vhi);
+
+attachCoarseOperator(pr#prfe#prmesh#commddm, pr#hpddmOP, A = pr#matN, B = mmass, pattern = pr#aRd[mpiRank(pr#prfe#prmesh#commddm)]);
+
+pr#prfe#prmesh#toc(pr#tloc,"building E",pr#tbuildE)
+
+ENDIFMACRO
+
+IFMACRO(!pr#withhpddm)
+
+if (!bpara) /* If sequential */
+  pr#Z.resize(nev*pr#prfe#prmesh#npart);
+else if (!pr#prfe#prmesh#excluded)
+  pr#Z.resize(nev);
+
+pr#si=0;
+pr#prfe#prmesh#tic(pr#tloc) /* For timings */
+
+int[int] sizel(pr#prfe#prmesh#npart);
+
+for(int i=0;i<pr#prfe#prmesh#npart;++i) /* Loop over the subdomains */
+if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#commddm)))) { /* If subdomain assigned to this processor */
+	pr#prfe#prmesh#Thi=pr#prfe#prmesh#aTh[i]; /* Local mesh */
+
+  /* Start DtN part */
+
+  varf vv(pr#prfe#mdef(u), pr#prfe#mdef(v)) = on(ffddminterfacelabel, pr#prfe#mdef(u) = pr#prfe#minit(1)); /* Mark interface */
+  real[int] b10 = vv(0,pr#prfe#Vhi,tgv=1);
+  int ndof10 = 0, ndofint = 0; /* Set up interface and interior DOFs */
+  for (int j=0;j<b10.n;j++) {
+    if (b10[j] != 0) {
+      ndof10++;
+      b10[j] = ndof10; /* Enumerate interface DOFs */
+    }
+    else {
+      ndofint++;
+      b10[j] = -ndofint; /* Enumerate interior DOFs (using negative index) */
+    }
+  }
+
+   /* For restriction operators */
+  int[int] Ii(ndof10),Ji(ndof10);
+  pr#prfe#K[int] Ki(ndof10);
+  int[int] Iiint(ndofint),Jiint(ndofint);
+  pr#prfe#K[int] Kiint(ndofint);
+  for (int j=0;j<b10.n;j++) {
+    if (b10[j] > 0) {
+      Ji[b10[j]-1] = j;
+      Ii[b10[j]-1] = b10[j]-1;
+      Ki[b10[j]-1] = 1;
+    }
+    else {
+      Jiint[-b10[j]-1] = j;
+      Iiint[-b10[j]-1] = -b10[j]-1;
+      Kiint[-b10[j]-1] = 1;
+    }
+  }
+
+   /* Restriction operators */
+  matrix<pr#prfe#K> R10 = [Ii,Ji,Ki];
+  matrix<pr#prfe#K> Rint = [Iiint,Jiint,Kiint];
+
+  R10.resize(ndof10,pr#prfe#Vhi.ndof);
+  Rint.resize(ndofint,pr#prfe#Vhi.ndof);
+
+  IFMACRO(!pr#algebraic)
+  {
+    if (pr#prfe#prmesh#overlap > 0) {
+      Varf(vN,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
+      pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgv);
+    }
+  }
+  ENDIFMACRO
+
+   /* Local stiffness matrices */
+  matrix<pr#prfe#K> A10t = R10*pr#matN;
+  matrix<pr#prfe#K> A10 = A10t*R10';
+
+  matrix<pr#prfe#K> Aintt = Rint*pr#matN;
+  matrix<pr#prfe#K> Aint = Aintt*Rint';
+  set(Aint,solver=sparsesolver,commworld=pr#prfe#prmesh#commself);
+
+   /* Transfer operators as part of the Schur complement */
+  matrix<pr#prfe#K> Aint10t = Rint*pr#matN;
+  matrix<pr#prfe#K> Aint10 = Aint10t*R10';
+
+  matrix<pr#prfe#K> A10intt = R10*pr#matN;
+  matrix<pr#prfe#K> A10int = A10intt*Rint';
+
+  /* Interface mass matrix */
+  varf vmass(def(u),def(v)) = intbN(pr#prfe#prmesh#Thi,ffddminterfacelabel)(pr#prfe#mdef(u)'*pr#prfe#mdef(v));
+  matrix<pr#prfe#K> mmass = vmass(pr#prfe#Vhi,pr#prfe#Vhi);
+  matrix<pr#prfe#K> mmass10t = R10*mmass;
+  matrix<pr#prfe#K> mmass10 = mmass10t*R10';
+  set(mmass10,solver=sparsesolver,commworld=pr#prfe#prmesh#commself);
+
+  /* Set up for interface eigenvectors and eigenvalues */
+  pr#prfe#K[int,int] eVC(ndof10,nev);
+  pr#prfe#K[int] ev(nev);
+
+  pr#prfe#K[int] tmp(pr#prfe#Vhi.ndof); /* For extension of eigenfunction */
+
+  pr#prfe#K[int] vinta(ndofint), vintb(ndofint);
+  pr#prfe#K[int] v10a(ndof10), v10b(ndof10);
+
+  int cptA = 0, cptB = 0;
+
+  /* Left-hand side of the generalised eigenproblem */
+  func pr#prfe#K[int] FA(pr#prfe#K[int] & u) {
+	  vinta = Aint10*u;
+	  vintb = Aint^-1*vinta;
+	  v10a = A10int*vintb;
+	  v10b = A10*u;
+	  v10b -=  v10a;
+	  cptA++;
+	  return v10b;
+	}
+
+  /* Right-hand side of the generalised eigenproblem */
+	func pr#prfe#K[int] FB(pr#prfe#K[int] & u) {
+	  cptB++;
+	  v10a = mmass10*u;
+	  return v10a;
+	}
+
+  /* Solve for right-hand side of generalised eigenproblem */
+	func pr#prfe#K[int] FB1(pr#prfe#K[int] & u) {
+	  cptB++;
+	  v10a = mmass10^-1*u;
+	  return v10a;
+	}
+
+  int ncv = max(2*nev+1,100);
+
+  int kk = complexEigenValue(ndof10,A=FA,B=FB,B1=FB1,value=ev,rawvector=eVC,which="SR",mode=2,ncv=ncv,tol=0.001);
+
+  int nok = 0;
+
+  for(int j=0;j<nev;++j)
+  {
+    if(j<kk && (real(ev[j]) < lambdamax)) /* Criterion 4.3 of Lea's paper */
+    {
+    /* cout << "Eigenvalue " << i << "," << nok << " " << ev[j] << endl; */
+    /* Retain eigenfuntion on interface */
+    tmp = R10'*eVC(:,j);
+     /* Extend eigenfunctions into the domain */
+    complex[int] tmp2 = Aint10*eVC(:,j);
+    complex[int] tmp3 = Aint^-1*tmp2;
+    tmp3 *= -1;
+    tmp += Rint'*tmp3;
+    /* Now tmp is as in Definition 4.4 of Lea's paper.*/
+
+    pr#Z[pr#si].resize(pr#prfe#Dk[i].n);
+    pr#Z[pr#si]= tmp .* pr#prfe#Dk[i];
+
+    pr#si+=1;
+    nok+=1;
+    }
+  }
+
+  sizel[i] = nok;	/* number of ev for subdomain i */
+}
+if (bseq)
+  pr#prfe#prmesh#Thi = pr#prfe#prmesh#Thglob;
+
+pr#prfe#prmesh#toc(pr#tloc,"local eigenvalue problems",pr#teigenv)
+
+ffddmbuildZTAZ(pr,Varf)
+
+ENDIFMACRO
+}
+// EOM
