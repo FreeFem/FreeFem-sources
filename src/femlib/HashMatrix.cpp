@@ -1217,7 +1217,7 @@ bool HashMatrix<I,R>::addMatTo(R coef,HashMatrix<I,R> & mij,bool trans,I ii00,I 
         {
             I ii=i[kk], jj=j[kk];
             R cij =  coef* ( cnj ? RNM::conj(aij[kk]) : aij[kk]);
-           // if(RNM::norm2(cij)>eps0) // remove for IPOPT april 2019 FH
+            if(threshold || RNM::norm2(cij)>eps0) // remove for IPOPT april 2019 FH
             {
                 mij[ij_mat(trans,ii00,jj00,ii,jj)] += cij ;
                 if (ii!=jj&&!keepSym)
@@ -1231,7 +1231,7 @@ bool HashMatrix<I,R>::addMatTo(R coef,HashMatrix<I,R> & mij,bool trans,I ii00,I 
         {
             I ii=i[kk], jj=j[kk];
             R cij =  coef* ( cnj ? RNM::conj(aij[kk]) : aij[kk]);
-            // if(RNM::norm2(cij)>eps0) // / remove for IPOPT april 2019 FH
+            if(threshold || RNM::norm2(cij)>eps0) // / remove for IPOPT april 2019 FH
                 mij[ij_mat(trans,ii00,jj00,ii,jj)] += cij;
         }
     }
