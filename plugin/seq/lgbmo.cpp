@@ -160,7 +160,20 @@ class OptimBMO: public OneOperator
 				virtual AnyType operator () (Stack stack)  const {
 					WhereStackOfPtr2Free(stack) = new StackOfPtr2Free(stack);	// FH mars 2005
 
-					R tol = arg(0, stack, 1E-6);// not used ....
+					/*
+					 * basicAC_F0::name_and_type  OptimBMO::E_BMO::name_param[]= {
+					 * {  "eps", &typeid(double)  },
+					 * { "nbrestart",&typeid(long) },
+					 * { "nbbvp",&typeid(long)},
+					 * { "nbgrad",&typeid(long)},
+					 * { "epsfd",&typeid(double)},
+					 * { "epsloc",&typeid(double)},
+					 * { "epsij",&typeid(double)},
+					 * { "n100",&typeid(long)} // 7
+					 * };
+					 *
+					 */
+
 					int nbrestart = arg(1, stack, 5L);
 					int nbext1 = 5;	// bof bof
 					int nbbvp = arg(2, stack, 5L);

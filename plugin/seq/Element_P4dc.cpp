@@ -115,7 +115,7 @@ namespace  Fem2D {
 		// et la numerotation naturelle  mais 2 noud pas arete
 		// donc p est la perumation
 		// echange de numerotation si les arete sont dans le mauvais sens
-		int p[15];
+		int p[15]={};
 
 		for (int i = 0; i < 15; ++i) {
 			p[i] = i;

@@ -253,7 +253,7 @@ class Vtkwritesol_Op: public E_F0mps
 };	// end of class
 
 AnyType Vtkwritesol_Op::operator () (Stack stack)  const {
-	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+	MeshPoint *mp(MeshPointStack(stack));
 	VtkWriter &dx = *(GetAny<VtkWriter *>((*edx)(stack)));
 	string &name = *(GetAny<string *>((*ename)(stack)));
 	// double t=GetAny<double>((*et)(stack));

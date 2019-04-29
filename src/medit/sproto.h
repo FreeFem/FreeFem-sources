@@ -27,6 +27,9 @@ extern "C" {
 #ifndef _SPROTO_H_
 #define _SPROTO_H_
 
+#ifndef SPROTO_H_
+#define SPROTO_H_
+
 /* animat.c */
 int loadNextMesh(pMesh, int, int);
 int animat ();

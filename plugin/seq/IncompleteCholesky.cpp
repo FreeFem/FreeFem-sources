@@ -61,7 +61,6 @@ long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
     ffassert( A.half && L.half);
     ffassert( A.n == L.n);
     int n =A.n,i,j,k,kk;
-    double tgv1= sqrt(tgv);
     double tgve =tgv*0.99999999;
     if(tgve < 1) tgve=1e200;
     double nan=sqrt(-1.);
@@ -74,7 +73,6 @@ long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
     for(int i=0; i< n; ++i)
     {
         int ai1=A.p[i+1]-1;
-        int ai0=A.p[i];
         int li1=L.p[i+1]-1;
         int li0=L.p[i];
         double  Aii=A.aij[ai1];
@@ -126,7 +124,6 @@ long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
 
 inline R pscal(R*L,int *cl,int kl,int kl1,int i, MatriceMorse<R> &  Ut,int j )
 {
-    int ku = Ut.p[j],ku1=Ut.p[j]-1;
     int k= min(i,j); //  common  part
     R r =0;
     for(int l=kl;l<kl1;++l)
@@ -165,8 +162,6 @@ long iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
     double mUii=1e200;
     for(int i=0; i< n; ++i)
     {
-        int ai1=A.p[i+1]-1;
-        int ai0=A.p[i];
         int li1=L.p[i+1]-1;
         int li0=L.p[i];
         int ui1=Ut.p[i+1]-1;
@@ -320,7 +315,6 @@ long iLUB(int nb,int *b,MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R>
         ui1[il]=Ut.p[i+1]-1;
         ui0[il]=Ut.p[i];
         }
-        //double  Aii=A(i,i),Uii;
 
         int BCi ;//  bofboc
         for (int i= i0; i<i1; ++i,++k)
@@ -498,7 +492,6 @@ void LU_solve(MatriceMorse<R> &T,int cas,KN<double> & b,bool trans)
 }
 bool ff_ichol_solve(Matrice_Creuse<R> * pcL,KN<double> * b)
 {
-    // L L' u = b =>  L uu = b;  L' u = uu;
     MatriceCreuse<R> * pl=pcL->A;
     ffassert(pl );
     MatriceMorse<R> *pL = dynamic_cast<MatriceMorse<R>* > (pl);
@@ -510,7 +503,6 @@ bool ff_ichol_solve(Matrice_Creuse<R> * pcL,KN<double> * b)
 }
 bool ff_ilu_solve(Matrice_Creuse<R> * const & pcL,Matrice_Creuse<R> *const &  pcU,KN<double> * const & b)
 {
-    // L Ut u = b =>  L uu = b;  L' u = uu;
     MatriceCreuse<R> * pl=pcL->A;
     ffassert(pl );
     MatriceMorse<R> *pL = dynamic_cast<MatriceMorse<R>* > (pl);

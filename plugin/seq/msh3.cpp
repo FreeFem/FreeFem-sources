@@ -44,9 +44,7 @@
 #endif
 #include "AFunction_ext.hpp"// [[file:../src/fflib/AFunction_ext.hpp]]
 
-// TransfoMesh_v2.cpp
 using namespace std;
-// rajout global
 #include <climits>
 #include <set>
 #include <vector>
@@ -262,7 +260,7 @@ int TestElementMesh3 (const Mesh3 &Th3) {
 		for (int e = 0; e < 6; e++) {
 			if (Th3[k].lenEdge(e) < Norme2(Psup - Pinf) / 1e9) {
 				const Tet &K(Th3.elements[k]);
-				int iv[4];
+				int iv[4]={};
 
 				for (int jj = 0; jj < 4; jj++) {
 					iv[jj] = Th3.operator () (K[jj]);
@@ -2590,7 +2588,7 @@ AnyType SetMesh3D_Op::operator () (Stack stack)  const {
 
 	for (int i = 0; i < nbe; ++i) {
 		const Triangle3 &K = Th.be(i);
-		int l0, l1 = ChangeLab3D(mapface, l0 = K.lab);
+		int l0;
 		nben++;
 	}
 
@@ -2865,8 +2863,6 @@ AnyType Movemesh2D_3D_surf_Op::operator () (Stack stack)  const {
 	{
 		KN<int> takemesh(nbv);
 		takemesh = 0;
-		const Mesh &rTh = Th;
-
 		for (int it = 0; it < nbt; ++it) {
 			for (int iv = 0; iv < 3; ++iv) {
 				int i = Th(it, iv);
@@ -3056,7 +3052,6 @@ AnyType Movemesh2D_S_Op::operator () (Stack stack)  const {
     {
         KN<int> takemesh(nbv);
         takemesh = 0;
-        const Mesh &rTh = Th;
 
         for (int it = 0; it < nbt; ++it) {
           for (int iv = 0; iv < 3; ++iv) {
@@ -4345,7 +4340,7 @@ void BuildBoundMinDist_th3 (const double &precis_mesh, const double *tab_XX, con
                                  << "    hmin =" << hmin << " longmini_box/hmin "
                                  <<hmin/longmini_box<< endl;}
 
-	
+
 	if (verbosity > 9) {cout << "    Norme2(bmin-bmax)=" << Norme2(bmin - bmax) << endl;}
 
 	// assertion pour la taille de l octree
@@ -6902,7 +6897,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     // delete gtree;
 
    Mesh3 *Tht = new Mesh3(nv, nt, nbe, v, t, b);
-    
+
     if(typeMesh3==2) {  typeMesh3=1; //  Hack for a bug in trunc surface mesh FH aprif 2019  TO BE REMOVE in near future
     if(verbosity ) cerr << " \n\n********************\n\n ** WARNING remove SURFACE MESH in trunc 3d  due to bug"
             <<  "\n\n********************\n\n";

@@ -220,11 +220,6 @@ AnyType Mapkk::operator () (Stack s) const {
 
 	for (long j = 0, kk = 0; j < m; ++j) {
 		for (long k = 0, i = 0; i < n; ++i) {
-			int ii = i, jj = j;
-			if (ii > n2) {ii = i - n;}
-
-			if (jj > m2) {jj = j - n;}
-
 			R2 P(i * ki + ki0, j *kj + kj0);
 			mp->set(P.x, P.y);
 			v[kk++] = GetAny<R>((*exp)(s));

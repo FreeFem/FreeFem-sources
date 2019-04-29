@@ -86,7 +86,6 @@ namespace  Fem2D {
                                       9,// nb coef to build interpolation
                                       3,// np point to build interpolation
                                       0) {
-            const R c3 = 1. / 3.;
             const R2 Pt [] = {R2(0.5, 0.5), R2(0, 0.5), R2(0.5, 0)};
             // for the 3 vertices 6 coef
             int kk = 0;
