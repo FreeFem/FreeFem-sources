@@ -106,7 +106,7 @@ namespace  Fem2D {
 				 *   16,17
 				 */
 				int iii[6] = {3, 6, 8, 11, 13, 16};
-				int jjj[6];
+				int jjj[6]={};
 
 				for (int i = 0; i < 6; ++i) {
 					jjj[i] = iii[i] + 1;// si orient = -1

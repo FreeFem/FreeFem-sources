@@ -2449,8 +2449,8 @@ Mesh3*VTK_Load3 (const string &filename, bool bigEndian) {
 // swap = bigEndian or not bigEndian
 	// variable freefem++
 	int nv, nt = 0, nbe = 0;
-	int nerr = 0, res;
-	char *ret;
+	int nerr = 0, ret;
+	char * res;
 	// Reading Mesh in vtk formats
 	FILE *fp = fopen(filename.c_str(), "rb");
 
@@ -2461,13 +2461,12 @@ Mesh3*VTK_Load3 (const string &filename, bool bigEndian) {
 
 	char buffer[256], buffer2[256];
 
-	ret = fgets(buffer, sizeof(buffer), fp);	// version line
-	if (ret == NULL) cout << "fgets error" << endl;
-	ret = fgets(buffer, sizeof(buffer), fp);	// title
-	if (ret == NULL) cout << "fgets error" << endl;
-
-	res = fscanf(fp, "%s", buffer);	// ASCII or BINARY
-	if (res == EOF) cout << "fscanf error" << endl;
+	res = fgets(buffer, sizeof(buffer), fp);	// version line
+	if (res == NULL) printf("fgets error\n");
+	res = fgets(buffer, sizeof(buffer), fp);	// title
+	if (res == NULL) printf("fgets error\n");
+	ret = fscanf(fp, "%s", buffer);	// ASCII or BINARY
+	if (ret == EOF) printf("fscanf error\n");
 	bool binary = false;
 	if (!strcmp(buffer, "BINARY")) {binary = true;}
 

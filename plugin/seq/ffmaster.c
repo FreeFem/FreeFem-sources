@@ -74,7 +74,7 @@ int main (int argc, const char **argv) {
 	char ff[1024];
 	sprintf(ff, "FreeFem++ ffslave.edp -nw -ns -v %d&", debug);
 	ret = system(ff);	// Lauch FF++ in batch no graphique
-	if (ret == -1) printf("system failed\n");
+	if (ret == -1) printf("system function error\n");
 	if (debug) {printf(" cc: before wait\n");}
 
 	if (debug) {printf(" cc: before wait 0 ff\n");}

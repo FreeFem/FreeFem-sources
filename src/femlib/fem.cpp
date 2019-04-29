@@ -1395,6 +1395,11 @@ Mesh::Mesh(int nbv,R2 * P)
 
 }
 
+extern int
+	mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *tri,
+		long *arete, long nba, long *sd,
+		long nbsd, long *reft, long *nbt, Rmesh coef, Rmesh puis, long *err);
+
 void Mesh::BuilTriangles(bool empty,bool removeouside)
 {
     long nba = neb;
@@ -1437,11 +1442,6 @@ void Mesh::BuilTriangles(bool empty,bool removeouside)
 	    arete[k++] =number(bedges[i][0])+1;
 	    arete[k++] =number(bedges[i][1])+1;
 	}
-
-	extern int
-		mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *tri,
-			long *arete, long nba, long *sd,
-			long nbsd, long *reft, long *nbt, Rmesh coef, Rmesh puis, long *err);
 
 	long nbt=0;
 	mshptg8_ (cr, h, c, nu, &nbs, nbs, tri, arete, nba, (long *) sd, nbsd, reft, &nbt, .25, .75, &err);
@@ -1486,6 +1486,11 @@ void Mesh::BuilTriangles(bool empty,bool removeouside)
 	delete [] h;
 	delete [] sd;
 }
+
+extern int
+	mshptg8_ (Rmesh *cr, Rmesh *h, long *c, long *nu, long *nbs, long nbsmx, long *tri,
+		  long *arete, long nba, long *sd,
+		  long nbsd, long *reft, long *nbt, Rmesh coef, Rmesh puis, long *err);
 
 inline  double rho(const Triangle &K) {
         return 2*K.area/(K.lenEdge(0)+K.lenEdge(1)+K.lenEdge(2));

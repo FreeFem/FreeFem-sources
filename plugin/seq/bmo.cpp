@@ -256,7 +256,6 @@ L9101:
 * \param fpx Vect &
 */
 void BijanMO::tir (Vect &v, Vect &fpx) {
-
 	for (int i = 0; i < ndim; ++i) {
 		double vi = v[i], x0 = xmin[i], x1 = xmax[i], fpxi = -fpx[i];
 		fpxi = min(fpxi, (x1 - vi) * 0.95);

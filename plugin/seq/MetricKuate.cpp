@@ -310,7 +310,6 @@ void metrique (int nbpoints, R2 *Point, R &A, R &B, R &C, R epsilon) {
 							A = aik;
 							B = bik;
 							C = cik;
-							EPS = epsilon0;
 						}
 					}
 

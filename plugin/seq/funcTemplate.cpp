@@ -159,7 +159,6 @@ double mytest (Stack stack, pferarray const &p) {
 
 	// FEbaseArray
 	for (int i = 0; i < N; ++i) {
-		FEbase<K, v_fes> **ppui = (*pa)[i];	// DATA elememt FINI
 		KN<K> *pui = pa->get(i);
 		ret += (*pui)[0];
 		KN<K> ui = *pui;// copie du tableau

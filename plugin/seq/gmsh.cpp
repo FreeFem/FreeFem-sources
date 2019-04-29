@@ -525,6 +525,7 @@ Mesh3*GMSH_Load3 (const string &filename) {
 	double version = 2.0;
 	bool binary = false, swap = false, postpro = false;
 	FILE *fp = fopen(filename.c_str(), "rb");
+
 	if (!fp) {
 		cerr << "Unable to open file " << filename.c_str() << endl;
 		exit(1);
