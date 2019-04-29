@@ -1014,7 +1014,7 @@ int parseStream (pScene sc, pMesh mesh) {
 		} else if (key[0] == '#') {
 			res = fgets(key, 255, in);
 			if (res == NULL) printf("fgets error\n");
-			free(res);
+			;
 		}
 	}
 

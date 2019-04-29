@@ -428,7 +428,7 @@ int parsop (pScene sc, pMesh mesh) {
 
 	if (ddebug) fprintf(stdout, "    Materials %8d\n", sc->par.nbmat);
 
-	free(res);
+	;
 	return (1);
 }
 

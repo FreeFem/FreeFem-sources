@@ -46,7 +46,6 @@ void getline_number (char *nature, int *nb) {
 		*nb = atoi(tictac);
 		if (debug) fprintf(stdout, "Number of %s %i \n", nature, *nb);
 	}
-	free(res);
 }
 
 void getline_1int (char *nature, int *nbint) {
@@ -63,7 +62,6 @@ void getline_1int (char *nature, int *nbint) {
 	}
 
 	*nbint = atoi(tictac);
-	free(res);
 }
 
 void getline_1intfirst (char *nature, int *nbint) {
@@ -86,7 +84,6 @@ void getline_1intfirst (char *nature, int *nbint) {
 	}
 
 	*nbint = atoi(tictac);
-	free(res);
 }
 
 void getline_popen_vertex (int ddim, double *c, int *ref) {
@@ -103,7 +100,6 @@ void getline_popen_vertex (int ddim, double *c, int *ref) {
 		c[i] = strtod(tictac, &tictac);
 
 	*ref = atoi(tictac);
-	free(res);
 }
 
 void getline_popen_firstvertex (int ddim, double *c, int *ref) {
@@ -120,7 +116,6 @@ void getline_popen_firstvertex (int ddim, double *c, int *ref) {
 		c[i] = strtod(tictac, &tictac);
 
 	*ref = atoi(tictac);
-	free(res);
 }
 
 void getline_popen_elem (int ddim, int *v, int *ref) {
@@ -140,7 +135,6 @@ void getline_popen_elem (int ddim, int *v, int *ref) {
 	}
 
 	*ref = atoi(tictac);
-	free(res);
 }
 
 void getline_popen_firstelem (int ddim, int *v, int *ref) {
@@ -167,7 +161,6 @@ void getline_popen_firstelem (int ddim, int *v, int *ref) {
 	}
 
 	*ref = atoi(tictac);
-	free(res);
 }
 
 void getline_popen_edge (int *v0, int *v1, int *ref) {
@@ -187,7 +180,6 @@ void getline_popen_edge (int *v0, int *v1, int *ref) {
 	tictac = strtok(NULL, " \n");
 
 	*ref = atoi(tictac);
-	free(res);
 }
 
 void getline_popen_firstedge (int *v0, int *v1, int *ref) {
@@ -215,7 +207,6 @@ void getline_popen_firstedge (int *v0, int *v1, int *ref) {
 	tictac = strtok(NULL, " \n");
 
 	*ref = atoi(tictac);
-	free(res);
 }
 
 void getline_popen_elemnoref (char *nature, int ddim, int *v) {
@@ -234,7 +225,6 @@ void getline_popen_elemnoref (char *nature, int ddim, int *v) {
 	}
 
 	if (tictac != NULL) printf("problem: in reading %s\n", nature);
-	free(res);
 }
 
 void getline_popen_firstelemnoref (char *nature, int ddim, int *v) {
@@ -258,7 +248,6 @@ void getline_popen_firstelemnoref (char *nature, int ddim, int *v) {
 		v[i] = atoi(tictac);
 		tictac = strtok(NULL, " \n");
 	}
-	free(res);
 }
 
 void getline_popen_firstdouble (char *nature, int ddim, double *v) {
@@ -282,7 +271,6 @@ void getline_popen_firstdouble (char *nature, int ddim, double *v) {
 	for (i = 1; i < ddim; i++) {
 		v[i] = strtod(tictac, &tictac);
 	}
-	free(res);
 }
 
 void getline_popen_double (char *nature, int ddim, double *v) {
@@ -328,7 +316,6 @@ void read_TypeSizeTyptab (char *nature, int *type, int *size, int *typtab) {
 
 	*size = tmpsize;
 	*type = tmptype;
-	free(res);
 }
 
 int loadMesh_popen (pMesh mesh) {
@@ -1332,7 +1319,7 @@ int loadSol_popen (pMesh mesh, char *filename, int numsol) {
 	}
 
 	printf("NumberofSolAT %i\n", NumberofSolAT);
-	free(res);
+	;
 	return (1);
 }
 

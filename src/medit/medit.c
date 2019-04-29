@@ -226,7 +226,7 @@ int medit0 () {
 	ct = difftime(clock(), ct);
 	fprintf(stdout, "  Input seconds:     %.2f\n",
 	        (double)ct / (double)CLOCKS_PER_SEC);
-	free(res);
+	;
 	return (cv.nbm);
 }
 

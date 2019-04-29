@@ -7,14 +7,14 @@
 using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
-using namespace std;  
+using namespace std;
 #include "rgraph.hpp"
 #include "RNM.hpp"
 #include "fem.hpp"
 
 
-#include "FESpacen.hpp" 
-#include "FESpace.hpp" 
+#include "FESpacen.hpp"
+#include "FESpace.hpp"
 //#include "lex.hpp"
 #include "HashMatrix.hpp"
 
@@ -22,7 +22,7 @@ using namespace std;
 
 //#include "MatriceCreuse_tpl.hpp"
 #include "MeshPoint.hpp"
-#include "Operator.hpp" 
+#include "Operator.hpp"
 #include "lex.hpp"
 
 #include "lgfem.hpp"
@@ -37,7 +37,7 @@ using namespace std;
 
 using namespace  Fem2D;
 
-class listMesh { 
+class listMesh {
 public:
   list<Mesh const  *> *lth;
   void init()  { lth=new list<Mesh const  *>;}
@@ -74,29 +74,29 @@ Mesh * GluMesh(listMesh const & lst)
       for (int k=0;k<Th.nt;k++)
 	for (int e=0;e<3;e++)
 	  hmin=min(hmin,Th[k].lenEdge(e));
-      
+
       for (int i=0;i<Th.nv;i++)
-	{ 	  
+	{
 	  R2 P(Th(i));
 	  Pn=Minc(P,Pn);
-	  Px=Maxc(P,Px);     
+	  Px=Maxc(P,Px);
 	}
     }
     if(kk==0) return 0; //  no mesh ...
   if(verbosity>2)
-    cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn 
+    cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn
 	 << " "<< Px << endl;
-  
+
   Vertex * v= new Vertex[nbvx];
   Triangle *t= new Triangle[nbt];
   Triangle *tt=t;
   BoundaryEdge *b= new BoundaryEdge[nebx];
   BoundaryEdge *bb= b;
-  
+
   ffassert(hmin>Norme2(Pn-Px)/1e9);
-  double hseuil =hmin/10.; 
-  
-  
+  double hseuil =hmin/10.;
+
+
   FQuadTree *quadtree=new Fem2D::FQuadTree(th0,Pn,Px,0);
   {
     map<pair<int,int>,int> bbe;
@@ -106,20 +106,19 @@ Mesh * GluMesh(listMesh const & lst)
 	const Mesh &Th(**i);
 	if(!*i) continue;
 	if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
-	int nbv0 = nbv;
 	
 	for (int ii=0;ii<Th.nv;ii++)
 	{
 	  const Vertex &vi(Th(ii));
 	  Vertex * pvi=quadtree->ToClose(vi,hseuil);
-	  if(!pvi) { 
+	  if(!pvi) {
 	    v[nbv].x = vi.x;
 	    v[nbv].y = vi.y;
 	    v[nbv].lab = vi.lab;
 	    quadtree->Add(v[nbv++]);
 	  }
 	}
-      
+
 	for (int k=0;k<Th.nt;k++)
 	  {
 	    const Triangle  &K(Th[k]);
@@ -128,8 +127,8 @@ Mesh * GluMesh(listMesh const & lst)
 	    int i2=quadtree->ToClose(K[2],hseuil)-v; //NearestVertex(K[2])-v;
 	    (*tt++).set(v,i0,i1,i2,K.lab);
 	  }
-	
-      
+
+
 	for (int k=0;k<Th.neb;k++)
 	  {
 	    const BoundaryEdge & be(Th.bedges[k]);
@@ -139,26 +138,26 @@ Mesh * GluMesh(listMesh const & lst)
 	    if(ii1<ii0) Exchange(ii0,ii1);
 	    pair<int,int> i01(ii0,ii1);
 	    if( bbe.find(i01) == bbe.end())
-	    {	    
+	    {
 	      (*bb++).set(v,i0,i1,be.lab);
 	      bbe[i01]=	  neb++;
 	    }
-	    
+
 	  }
-	
-      } 
+
+      }
   }
 
   delete quadtree;
 
-   
+
   if(verbosity>1)
     {
       cout << "     Nb points : "<< nbv << " , nb edges : " << neb << endl;
       cout << "     Nb of glu point " << nbvx -nbv;
       cout << "     Nb of glu  Boundary edge " << nebx-neb;
     }
-  
+
   {
     Mesh * m = new Mesh(nbv,nbt,neb,v,t,b);
     R2 Pn,Px;
@@ -167,52 +166,52 @@ Mesh * GluMesh(listMesh const & lst)
     //    m->decrement();
     return m;
   }
-  
+
 }
 
-template<class RR,class AA=RR,class BB=AA> 
-struct Op2_addmesh: public binary_function<AA,BB,RR> { 
-  static RR f(Stack s,const AA & a,const BB & b)  
-  { return RR(s, a, b );} 
+template<class RR,class AA=RR,class BB=AA>
+struct Op2_addmesh: public binary_function<AA,BB,RR> {
+  static RR f(Stack s,const AA & a,const BB & b)
+  { return RR(s, a, b );}
 };
 
-template<bool INIT,class RR,class AA=RR,class BB=AA> 
-struct Op2_setmesh: public binary_function<AA,BB,RR> { 
+template<bool INIT,class RR,class AA=RR,class BB=AA>
+struct Op2_setmesh: public binary_function<AA,BB,RR> {
   static RR f(Stack stack, const AA & a,const BB & b)
-  {    
+  {
     ffassert(a );
     pmesh  p=GluMesh(b);
-    
+
       if(!INIT &&  *a) (**a).destroy() ;
-    //  Add2StackOfPtr2FreeRC(stack,p); //  the pointer is use to set variable so no remove. 
+    //  Add2StackOfPtr2FreeRC(stack,p); //  the pointer is use to set variable so no remove.
     return *a=p,a;
-  } 
+  }
 };
 
-class SetMesh_Op : public E_F0mps 
+class SetMesh_Op : public E_F0mps
 {
 public:
-  Expression a; 
-   
+  Expression a;
+
   static const int n_name_param =2+2+2+2+2; //  add nbiter FH 30/01/2007 11 -> 12
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
-    
+
   KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
   long  arg(int i,Stack stack, long  a ) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
   bool   arg(int i,Stack stack, bool   a ) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
 
-  
+
 public:
   SetMesh_Op(const basicAC_F0 &  args,Expression aa) : a(aa) {
     args.SetNameParam(n_name_param,name_param,nargs);
-      if( nargs[0] && nargs[2] ) 
+      if( nargs[0] && nargs[2] )
 	  CompileError("uncompatible change (Th, label= , refe=  ");
-      if( nargs[1] && nargs[3] ) 
+      if( nargs[1] && nargs[3] )
 	  CompileError("uncompatible change (Th, region= , reft=  ");
-      
-  } 
-  
+
+  }
+
   AnyType operator()(Stack stack)  const ;
 };
 
@@ -228,8 +227,8 @@ basicAC_F0::name_and_type SetMesh_Op::name_param[]= {
   {  "rmledges", &typeid(long)},
   {  "rmInternalEdges", &typeid(bool)}
 
-        
-    
+
+
 };
 
 int  ChangeLab(const map<int,int> & m,int lab)
@@ -240,20 +239,20 @@ int  ChangeLab(const map<int,int> & m,int lab)
   return lab;
 }
 
-AnyType SetMesh_Op::operator()(Stack stack)  const 
+AnyType SetMesh_Op::operator()(Stack stack)  const
 {
-    MeshPoint *mp=MeshPointStack(stack),smp=*mp; 
+    MeshPoint *mp=MeshPointStack(stack),smp=*mp;
   Mesh * pTh= GetAny<Mesh *>((*a)(stack));
   Mesh & Th=*pTh;
   Mesh *m= pTh;
-  int nbv=Th.nv; // nombre de sommet 
+  int nbv=Th.nv; // nombre de sommet
   int nbt=Th.nt; // nombre de triangles
   int neb=Th.neb; // nombre d'aretes fontiere
   KN<long> zz;
-  KN<long> nre (arg(0,stack,arg(2,stack,zz)));  
-  KN<long> nrt (arg(1,stack,arg(3,stack,zz)));  
-  KN<long> rv (arg(4,stack,zz));  
-  KN<long> rt (arg(5,stack,zz));  
+  KN<long> nre (arg(0,stack,arg(2,stack,zz)));
+  KN<long> nrt (arg(1,stack,arg(3,stack,zz)));
+  KN<long> rv (arg(4,stack,zz));
+  KN<long> rt (arg(5,stack,zz));
   Expression flab = nargs[6] ;
   Expression freg = nargs[7] ;
   bool  rm_edge = nargs[8];
@@ -265,7 +264,7 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
     if(verbosity>1)
 	cout << "  -- SetMesh_Op: nb vertices" << nbv<< " nb Trai "<< nbt << " nb b. edges  "
 	     << neb << "renum V " << rV << " , renum T "<< rT << " rm internal edges " << rm_i_edges<< endl;
-    
+
   if(nre.N() <=0 && nrt.N()<=0  && !rV && ! rT  && ! flab && ! freg && !rm_i_edges &&   !rm_edge ) return m;
   ffassert( nre.N() %2 ==0);
   ffassert( nrt.N() %2 ==0);
@@ -288,7 +287,7 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   Vertex * v= new Vertex[nbv];
   Triangle *t= new Triangle[nbt];
   BoundaryEdge *b= new BoundaryEdge[nebn];
-  // generation des nouveaux sommets 
+  // generation des nouveaux sommets
   Vertex *vv=v;
   // copie des anciens sommets (remarque il n'y a pas operateur de copy des sommets)
   for (int i=0;i<nbv;i++)
@@ -299,10 +298,10 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
      vv->x=V.x;
      vv->y=V.y;
      vv->lab = V.lab;
-	
+
    }
 
-  //  generation des triangles 
+  //  generation des triangles
   int nberr=0;
   R2 PtHat(1./3.,1./3.);
   for (int i=0;i<nbt;i++)
@@ -314,15 +313,15 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
 	  i1=rv(i1);
 	  i2=rv(i2);
       }
-      // les 3 triangles par triangles origines 
+      // les 3 triangles par triangles origines
       t[ii].set(v,i0,i1,i2,ChangeLab(mapt,Th[i].lab));
       if(freg)
 	{
 	  mp->set(Th,Th[i](PtHat),PtHat,Th[i],Th[i].lab);
-	  t[ii].lab =GetAny<long>( (* freg)(stack)) ;  
+	  t[ii].lab =GetAny<long>( (* freg)(stack)) ;
 	}
-	
-    }  
+
+    }
   int  nrmedge=0;
   // les arete frontieres qui n'ont pas change
   BoundaryEdge * bb=b;
@@ -334,12 +333,12 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
       const   Triangle &K(Th[k]);
       int i1=Th(Th.bedges[i][0]);
       int i2=Th(Th.bedges[i][1]);
- 
+
 	if(rV) {
 	    i1=rv(i1);
 	    i2=rv(i2);
 	}
-	
+
       int l0,l1=ChangeLab(mape,l0=m->bedges[i].lab) ;
       mp->set(Th,Th[k](PtHat),PtHat,Th[k],l1);
       if(flab)
@@ -363,9 +362,9 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   assert(nebn==bb-b);
   m =  new Mesh(nbv,nbt,nebn,v,t,b);
 
-  R2 Pn,Px;                                                                                                                               
+  R2 Pn,Px;
   m->BoundingBox(Pn,Px);
-  m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);   
+  m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
   //  m->decrement();
   Add2StackOfPtr2FreeRC(stack,m);
     *mp=smp;
@@ -373,62 +372,62 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
 }
 
 
-class SetMesh : public OneOperator { public:  
+class SetMesh : public OneOperator { public:
 typedef Mesh const *pmesh;
     SetMesh() : OneOperator(atype<pmesh>(),atype<pmesh>() ) {}
-  
-  E_F0 * code(const basicAC_F0 & args) const 
-  { 
-    return  new SetMesh_Op(args,t[0]->CastTo(args[0])); 
+
+  E_F0 * code(const basicAC_F0 & args) const
+  {
+    return  new SetMesh_Op(args,t[0]->CastTo(args[0]));
   }
 };
 
 
-//  truc pour que la fonction 
+//  truc pour que la fonction
 // Init::Init() soit appele a moment du chargement dynamique
-// du fichier 
+// du fichier
 //
 #ifndef  DYNAMICS_LIBS
 void init_glumesh2D()
 {
   Dcl_Type<listMesh>();
   typedef Mesh const  *pmesh;
-  
+
   //Dcl_Type<listMesh3>();
   //typedef Mesh3 *pmesh3;
   if(verbosity>2)
     cout << " glumesh2D " ;
-  //cout << " je suis dans Init " << endl; 
+  //cout << " je suis dans Init " << endl;
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,pmesh,pmesh>  >      );
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,listMesh,pmesh>  >      );
   TheOperators->Add("=",new OneBinaryOperator_st< Op2_setmesh<false,pmesh*,pmesh*,listMesh>  >     );
   TheOperators->Add("<-",new OneBinaryOperator_st< Op2_setmesh<true,pmesh*,pmesh*,listMesh>  >     );
-  
+
   Global.Add("change","(",new SetMesh);
 
 }
-#else  
+#else
 class Init { public:
   Init();
 };
 
-static Init init;  //  une variable globale qui serat construite  au chargement dynamique 
+static Init init;  //  une variable globale qui serat construite  au chargement dynamique
 
-Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++ 
+Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
   Dcl_Type<listMesh>();
   typedef Mesh *pmesh;
-  
+
   //Dcl_Type<listMesh3>();
   //typedef Mesh3 *pmesh3;
-  
+
   if (verbosity)
     cout << "  glumesh2D " ;
-  //cout << " je suis dans Init " << endl; 
+  //cout << " je suis dans Init " << endl;
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,pmesh,pmesh>  >      );
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,listMesh,pmesh>  >      );
   TheOperators->Add("=",new OneBinaryOperator_st< Op2_setmesh<false,pmesh*,pmesh*,listMesh>  >     );
   TheOperators->Add("<-",new OneBinaryOperator_st< Op2_setmesh<true,pmesh*,pmesh*,listMesh>  >     );
-  
+
   Global.Add("change","(",new SetMesh);
 
 }

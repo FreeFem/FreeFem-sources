@@ -39,9 +39,9 @@ GLuint capTetra (pMesh mesh) {
 	pPoint p0, p1;
 	pMaterial pm;
 	double dd1[6], d, ax, ay, az, bx, by, bz;
-	double cx[4], cy[4], cz[4], cc;
+	double cx[4]={}, cy[4]={}, cz[4]={}, cc;
 	float n[3];
-	int m, k1, k2, l, transp, pos[6], neg[6], nbpos, nbneg, nbnul;
+	int m, k1, k2, l, transp, pos[6]={}, neg[6]={}, nbpos, nbneg, nbnul;
 	static int tn[4] = {0, 0, 1, 1};
 	static int tp[4] = {0, 1, 1, 0};
 
