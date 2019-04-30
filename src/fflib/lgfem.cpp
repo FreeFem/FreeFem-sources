@@ -334,15 +334,16 @@ class E_P_Stack_lenEdge   :public  E_F0mps { public:
     
 }; 
 
-class E_P_Stack_hTriangle   :public  E_F0mps { public: 
+class E_P_Stack_hTriangle   :public  E_F0mps { public:
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
     MeshPoint * mp=MeshPointStack(s);
     assert(mp->T) ;
     double l=1e100;
     if( mp->d==2) l=mp->T->h();
-      else if ( mp->d==3) l=mp->T3->lenEdgesmax();
-    return SetAny<double>(l);} 
-    operator aType () const  { return atype<double>();}         
+    else if ( mp->d==3 && mp->dHat==3 ) l=mp->T3->lenEdgesmax();
+    else if ( mp->d==3 && mp->dHat==2 ) l=mp->TS->lenEdgesmax();
+    return SetAny<double>(l);}
+    operator aType () const  { return atype<double>();}
     
 };
 
@@ -359,14 +360,16 @@ class E_P_Stack_nTonEdge   :public  E_F0mps { public:
 
 class E_P_Stack_nElementonB   :public  E_F0mps { public:
     AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-        MeshPoint * mp=MeshPointStack(s);
-        long l=0;
-        if((mp->T) && (mp->e > -1) && (mp->d==2 ))
+      MeshPoint * mp=MeshPointStack(s);
+      long l=0;
+      if((mp->T) && (mp->e > -1) && (mp->d==2 ))
          l=mp->Th->nTonEdge(mp->t,mp->e);
-        else if (mp->d==3 && mp->T3 && ( mp->f>=0) )
-           l= mp->Th3->nElementonB(mp->t,mp->f);
-        // cout << " nTonEdge " << l << endl;
-        return SetAny<long>( l) ;}
+      else if (mp->d==3 && mp->dHat==3 && mp->T3 && ( mp->f>=0) )
+         l= mp->Th3->nElementonB(mp->t,mp->f);
+      else if (mp->d==3 && mp->dHat==2 && mp->TS && ( mp->e>=0) )
+          l= mp->ThS->nElementonB(mp->t,mp->e);
+      // cout << " nTonEdge " << l << endl;
+      return SetAny<long>( l) ;}
     operator aType () const  { return atype<long>();}
     
 };
@@ -374,11 +377,11 @@ class E_P_Stack_nElementonB   :public  E_F0mps { public:
 template<int NBT>
 class E_P_Stack_TypeEdge   :public  E_F0mps { public:
     AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-        MeshPoint * mp=MeshPointStack(s);
-        assert(mp->T && mp->e > -1 && mp->d==2 ) ;
-        long l=mp->Th->nTonEdge(mp->t,mp->e)==NBT;
-        // cout << " nTonEdge " << l << endl;
-        return SetAny<long>( l) ;}
+    MeshPoint * mp=MeshPointStack(s);
+    assert(mp->T && mp->e > -1 && mp->d==2 ) ;
+    long l=mp->Th->nTonEdge(mp->t,mp->e)==NBT;
+    // cout << " nTonEdge " << l << endl;
+    return SetAny<long>( l) ;}
     operator aType () const  { return atype<long>();}
     
 };
@@ -390,11 +393,13 @@ class E_P_Stack_areaTriangle   :public  E_F0mps { public:
       double l=-1; // unset ...
     if(mp->d==2)	
       l= mp->T->area;	
-    else if (mp->d==3 && mp->f >=0)
-      {	
+    else if (mp->d==3 && mp->dHat==3 && mp->f >=0) {
 	  R3 NN = mp->T3->N(mp->f);
 	  l= NN.norme()/2.;
       }
+     else if (mp->d==3 && mp->dHat==2 )
+       l= mp->TS->mesure();
+      
     else 
       {
 	  cout << "erreur : E_P_Stack_areaTriangle" << mp->d << " " << mp->f << endl;
@@ -410,15 +415,17 @@ class E_P_Stack_EdgeOrient  :public  E_F0mps { public:
     AnyType operator()(Stack s)  const { throwassert(* (long *) s);
         MeshPoint &mp= *MeshPointStack(s); // the struct to get x,y, normal , value
         double r=1;
-        if(mp.d==2)
-        {
-            if( mp.T && mp.e >=0  )
-                r=mp.T->EdgeOrientation(mp.e);
+        if(mp.d==2) {
+            if( mp.T && mp.e >=0 )
+            r=mp.T->EdgeOrientation(mp.e);
         }
-        else // 3D ...
-        {
-             if( mp.T3 && mp.f >=0  )
-                 r = mp.T3->faceOrient( mp.f);
+        else if(mp.d==3 && mp.dHat==3) {
+             if( mp.T3 && mp.f >=0 )
+             r = mp.T3->faceOrient(mp.f);
+        }
+        else if(mp.d==3 && mp.dHat==2) {
+            if( mp.TS && mp.e >=0 )
+            r = mp.T3->EdgeOrientation(mp.e);
         }
         return r ;
     }
@@ -433,15 +440,12 @@ class E_P_Stack_VolumeTet   :public  E_F0mps { public:
 	MeshPoint * mp=MeshPointStack(s);
 	assert(mp->T) ;
 	double l=-1; // unset ...
-	if (mp->d==3 && mp->T3 )
-	  {	
-	      l= mp->T3->mesure();
-	  }
-	else 
-	  {
+	if (mp->d==3 && mp->dHat==3 && mp->T3 )
+	  	l= mp->T3->mesure();
+    else {
 	    cout << "erreur : E_P_Stack_VolumeTet" << mp->d << " " << mp->f << endl;
 	    ffassert(0); // undef 
-	  }
+	}
 	return SetAny<double>(l);} 
     operator aType () const { return atype<double>();}         
     
@@ -6870,7 +6874,8 @@ Expression Op_CopyArrayT(const E_Array & a,const E_Array & b)
 	      rr=aa_ii.LeftValue();
 	  }
 	  if(v_fes::dHat==2) r=new E_set_fev<K>(&b,rr,2);
-	  else if(v_fes::dHat==3) r=new  E_set_fev3<K,v_fes3>(&b,rr);         ////////////ZZZZZZZ
+	  else if(v_fes::dHat==3) r=new  E_set_fev3<K,v_fes3>(&b,rr);
+
       }
     //  try complex vector value FE interpolation 
     return r;

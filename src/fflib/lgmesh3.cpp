@@ -743,9 +743,9 @@ AnyType ReadMeshS::operator()(Stack stack) const
     Mesh3 *Thh = new Mesh3(*fn,0);  // param 0-> initialize just the meshS
 
     if (Thh->getTypeMesh3()!=1) Thh->meshS->BuildGTree();
-    
+    else cout << "Error, there isn't a surface mesh" << endl;
     Add2StackOfPtr2FreeRC(stack,Thh);
-    Add2StackOfPtr2FreeRC(stack,Thh->getMeshS());
+   // Add2StackOfPtr2FreeRC(stack,Thh->getMeshS());
     return SetAny<pmeshS>(Thh->getMeshS());
     
 }
@@ -2259,7 +2259,6 @@ init_meshS_array();  //3D surface
  Add<pfSrarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fesS>());// new version FH sep 2009
  Add<pfScarray>("[","",new OneOperator2_FE_get_elmnt<Complex,v_fesS>());
  Add<pfesS*>("(","", new OneTernaryOperator<pVhS_ndf,pVhS_ndf::Op>  );
- 
 }
 
 //#include "InitFunct.hpp"

@@ -37,6 +37,8 @@ class MeshPointBase { public:
   bool outside;
   int VF; 
   int d;
+  int dHat;
+    
   void set(const R2 &P2,const R2 & P_Hat,const  baseFElement & K,int ll,const R2 &NN,int iedge)
    { 
      P.x=P2.x;
@@ -212,7 +214,8 @@ class MeshPointBase { public:
          t=(*Th)(T);
 	v=f=e=-1;
 	VF=0;
-        d=3;// Bug correct v4 
+    d=3;// Bug correct v4
+    dHat=3;
 	
     }
     
@@ -223,10 +226,11 @@ class MeshPointBase { public:
      P.z=doublenotset;
      T=0;
      Th=0;
-      label =notaregion;
-       region = notaregion;
+     label =notaregion;
+     region = notaregion;
      VF=0;  
-      d=0;
+     d=0;
+     dHat=0;
    }
    bool isUnset() const { return P.x == doublenotset;} // BofBof
    void set(R x=0.0,R y=0.0,R z=0.0) 
@@ -242,6 +246,7 @@ class MeshPointBase { public:
       t=f=e=v=-1; 
       VF=0;  
       d=0;
+      dHat=0;
    }
 
 
@@ -262,6 +267,7 @@ class MeshPointBase { public:
      N=NN;   
      VF=0;
      d=3;
+     dHat=3;
    }
   void set(const Mesh3 & aTh,const R3 &P2,const R3 & P_Hat,const  Tet & aK,int ll,const R3 &NN,int iface,int VFF=0)
    { 
@@ -279,6 +285,7 @@ class MeshPointBase { public:
      N=NN;   
      VF=VFF;
      d=3;
+     dHat=3;
    }
    
   void set(const R3 &P2,const R3 & P_Hat,const  baseFElement3 & K,int ll)
@@ -296,6 +303,7 @@ class MeshPointBase { public:
      N.z=0;   
      VF=0;  
      d=3;
+     dHat=3;
    }
    
      void set(const R3 &P2,const R3 & P_Hat,const  baseFElement3 & K)
@@ -337,6 +345,7 @@ class MeshPointBase { public:
    
      t=(*Th3)(T3);
      d=3;
+     dHat=3;
    }
 
   void set(const  Mesh3 &aTh, const R3 &P2,const R3 & P_Hat,const  Tet & aK,const int ll,bool coutside=false)
@@ -356,6 +365,7 @@ class MeshPointBase { public:
      outside=coutside;
      VF=0;  
      d=3;
+     dHat=3;
    }
    
   void setP(const Mesh3 * pTh,int tt,int ss)
@@ -371,7 +381,8 @@ class MeshPointBase { public:
      v=f=e=-1;
      v=ss;
      VF=0;
-     d=3;  
+     d=3;
+     dHat=3;
    }
     
 // --------3D surface
@@ -395,6 +406,7 @@ class MeshPointBase { public:
         N.z=NN.z;
         VF=0;
         d=3;
+        dHat=2;
     }
     void set(const MeshS & aTh,const R3 &P2,const R2 & P_Hat,const TriangleS & aK,int ll,const R3 &NN,int iedge,int VFF=0)
     {
@@ -415,6 +427,7 @@ class MeshPointBase { public:
         N.z=NN.z;
         VF=VFF;
         d=3;
+        dHat=2;
     }
     
     void set(const R3 &P2, const R2 & P_Hat,const baseFElementS & K,int ll)
@@ -434,6 +447,7 @@ class MeshPointBase { public:
         N.z=0;
         VF=0;
         d=3;
+        dHat=2;
     }
     
     void set(const R3 &P2, const R2 & P_Hat,const  baseFElementS & K)
@@ -477,6 +491,7 @@ class MeshPointBase { public:
         
         t=(*ThS)(TS);
         d=3;
+        dHat=2;
     }
     
     void set(const  MeshS &aTh, const R3 &P2,const R3 & P_Hat,const TriangleS & aK,const int ll,bool coutside=false)
@@ -495,6 +510,7 @@ class MeshPointBase { public:
         outside=coutside;
         VF=0;
         d=3;
+        dHat=2;
     }
     
     void setP(const MeshS * pTh,int tt,int ss)
@@ -512,6 +528,7 @@ class MeshPointBase { public:
         v=ss;
         VF=0;
         d=3;
+        dHat=2;
     }
     
     
@@ -578,15 +595,7 @@ class MeshPoint : public MeshPointBase { public:
       other.unset();
     }
 //fin 3d
-    
-    
-    
-    
-    
-    
-    
-    
-    
+ 
     
   void set(R x=0.0,R y=0.0,R z=0.0) {  
      MeshPointBase::set(x,y,z);

@@ -47,22 +47,16 @@ using namespace  Fem2D;
 using namespace  yams;
 
 // 3d mesh function
-
-void mesh3_to_yams_pSurfMesh (const Mesh3 &Th3, int memory, int choix,
+// mesh3 -> yams_pSurfMesh
+void mesh3_to_yams_pSurfMesh (const Mesh3 &Th, int memory, int choix,
                               yams_pSurfMesh meshyams) {
-	/*
-	 * Mesh3  :: maillage initiale
-	 * memory :: memoire pour yams
-	 * choix  :: option du remaillage
-	 * ref    ::
-	 */
 	int k;
 	int npinit, neinit;
 
 	meshyams->dim = 3;
-	meshyams->npfixe = Th3.nv;
-	meshyams->nefixe = Th3.nbe;
-	meshyams->ntet = Th3.nt;
+	meshyams->npfixe = Th.nv;
+	meshyams->nefixe = Th.nbe;
+	meshyams->ntet = Th.nt;
 	meshyams->nafixe = 0;	// Edges
 	meshyams->nvfixe = 0;	// Normals
 	meshyams->ntfixe = 0;	// Tangents
@@ -75,10 +69,10 @@ void mesh3_to_yams_pSurfMesh (const Mesh3 &Th3, int memory, int choix,
 
 	for (k = 1; k <= npinit; k++) {
 		ppt = &meshyams->point[k];
-		ppt->c[0] = Th3.vertices[k - 1].x;
-		ppt->c[1] = Th3.vertices[k - 1].y;
-		ppt->c[2] = Th3.vertices[k - 1].z;
-		ppt->ref = Th3.vertices[k - 1].lab & 0x7fff;
+		ppt->c[0] = Th.vertices[k - 1].x;
+		ppt->c[1] = Th.vertices[k - 1].y;
+		ppt->c[2] = Th.vertices[k - 1].z;
+		ppt->ref = Th.vertices[k - 1].lab & 0x7fff;
 
 		ppt->tag = M_UNUSED;
 		ppt->color = 0;
@@ -93,11 +87,11 @@ void mesh3_to_yams_pSurfMesh (const Mesh3 &Th3, int memory, int choix,
 	yams_pTriangle ptriangle;
 
 	for (k = 1; k <= neinit; k++) {
-		const Triangle3 &K(Th3.be(k - 1));
+		const Triangle3 &K(Th.be(k - 1));
 		ptriangle = &meshyams->tria[k];
-		ptriangle->v[0] = Th3.operator () (K[0]) + 1;
-		ptriangle->v[1] = Th3.operator () (K[1]) + 1;
-		ptriangle->v[2] = Th3.operator () (K[2]) + 1;
+		ptriangle->v[0] = Th.operator () (K[0]) + 1;
+		ptriangle->v[1] = Th.operator () (K[1]) + 1;
+		ptriangle->v[2] = Th.operator () (K[2]) + 1;
 		ptriangle->ref = K.lab & 0x7fff;
 	}
 
@@ -108,12 +102,12 @@ void mesh3_to_yams_pSurfMesh (const Mesh3 &Th3, int memory, int choix,
 		assert(meshyams->tetra);
 
 		for (k = 1; k <= meshyams->ntet; k++) {
-			const Tet &K(Th3.elements[k - 1]);
+			const Tet &K(Th.elements[k - 1]);
 			ptetra = &meshyams->tetra[k];
-			ptetra->v[0] = Th3.operator () (K[0]) + 1;
-			ptetra->v[1] = Th3.operator () (K[1]) + 1;
-			ptetra->v[2] = Th3.operator () (K[2]) + 1;
-			ptetra->v[3] = Th3.operator () (K[3]) + 1;
+			ptetra->v[0] = Th.operator () (K[0]) + 1;
+			ptetra->v[1] = Th.operator () (K[1]) + 1;
+			ptetra->v[2] = Th.operator () (K[2]) + 1;
+			ptetra->v[3] = Th.operator () (K[3]) + 1;
 			ptetra->ref = K.lab & 0x7fff;
 		}
 	}
@@ -122,7 +116,65 @@ void mesh3_to_yams_pSurfMesh (const Mesh3 &Th3, int memory, int choix,
 	meshyams->np = meshyams->npfixe;
 }
 
-Mesh3*yams_pSurfMesh_to_mesh3 (yams_pSurfMesh sm, int infondang, int infocc, int choix) {
+
+
+// meshS -> yams_pSurfMesh
+void meshS_to_yams_pSurfMesh (const MeshS &Th, int memory, int choix,
+                              yams_pSurfMesh meshyams) {
+
+    int k;
+    int npinit, neinit;
+    
+    meshyams->dim = 3;
+    meshyams->npfixe = Th.nv;
+    meshyams->nefixe = Th.nt; //Th.nbe;
+    meshyams->ntet = 0; //Th.nt;
+    meshyams->nafixe = 0;    // Edges
+    meshyams->nvfixe = 0;    // Normals
+    meshyams->ntfixe = 0;    // Tangents
+    npinit = meshyams->npfixe;
+    neinit = meshyams->nefixe;
+    // cette fonction change la taille des tableaux en fonctions des options : choix, memory, sm->type
+    zaldy1(meshyams->nefixe, meshyams->npfixe, meshyams->nvfixe, memory, meshyams, choix);
+    
+    yams_pPoint ppt;
+    
+    for (k = 1; k <= npinit; k++) {
+        ppt = &meshyams->point[k];
+        ppt->c[0] = Th.vertices[k - 1].x;
+        ppt->c[1] = Th.vertices[k - 1].y;
+        ppt->c[2] = Th.vertices[k - 1].z;
+        ppt->ref = Th.vertices[k - 1].lab & 0x7fff;
+        
+        ppt->tag = M_UNUSED;
+        ppt->color = 0;
+        ppt->size = -1.;
+        ppt->tge = 0;
+        ppt->geom = M_CURVE;
+    }
+    
+    meshyams->npfixe = npinit;
+    
+    /* read mesh triangles */
+    yams_pTriangle ptriangle;
+    
+    for (k = 1; k <= neinit; k++) {
+        const TriangleS &K(Th.elements[k - 1]);
+        ptriangle = &meshyams->tria[k];
+        ptriangle->v[0] = Th.operator () (K[0]) + 1;
+        ptriangle->v[1] = Th.operator () (K[1]) + 1;
+        ptriangle->v[2] = Th.operator () (K[2]) + 1;
+        ptriangle->ref = K.lab & 0x7fff;
+    }
+    
+    meshyams->ne = meshyams->nefixe;
+    meshyams->np = meshyams->npfixe;
+}
+
+
+
+
+MeshS*yams_pSurfMesh_to_meshS (yams_pSurfMesh sm, int infondang, int infocc, int choix) {
 	/*
 	 * Mesh3  :: maillage initiale
 	 * memory :: memoire pour yams
@@ -181,19 +233,6 @@ Mesh3*yams_pSurfMesh_to_mesh3 (yams_pSurfMesh sm, int infondang, int infocc, int
 	}
 
 	cout << "sm->ntet=" << sm->ntet << endl;
-	// a enlever on ne garde pas les tetrahedres
-	// demander P. Frey
-	if (choix == 6 && sm->ntet) {
-		for (k = 1; k <= sm->ntet; k++) {
-			ptt = &sm->tetra[k];
-			if (!ptt->v[0]) {continue;}
-
-			for (i = 0; i < 4; i++) {
-				ppt = &sm->point[ptt->v[i]];
-				ppt->tag &= ~M_UNUSED;
-			}
-		}
-	}
 
 	/* mark used vertices */
 	np = nav = 0;
@@ -239,8 +278,8 @@ Mesh3*yams_pSurfMesh_to_mesh3 (yams_pSurfMesh sm, int infondang, int infocc, int
 	}
 
 	ff_nbe = nt;
-	Triangle3 *ff_b = new Triangle3[ff_nbe];
-	Triangle3 *ff_bb = ff_b;
+	TriangleS *ff_b = new TriangleS[ff_nbe];
+	TriangleS *ff_bb = ff_b;
 
 	for (k = 1; k <= sm->ne; k++) {
 		int iv[3], lab;
@@ -252,7 +291,6 @@ Mesh3*yams_pSurfMesh_to_mesh3 (yams_pSurfMesh sm, int infondang, int infocc, int
 		iv[1] = sm->point[pt1->v[1]].tmp - 1;
 		iv[2] = sm->point[pt1->v[2]].tmp - 1;
 		lab = pt1->ref;	// change fh 02/2013
-		// cout << " lab : " << sm->connex  << " " << pt1->cc << " " << pt1->ref<< " " << endl;
 		(*ff_bb++).set(ff_v, iv, lab);
 
 		for (i = 0; i < 3; i++) {
@@ -277,43 +315,16 @@ Mesh3*yams_pSurfMesh_to_mesh3 (yams_pSurfMesh sm, int infondang, int infocc, int
 		}
 	}
 
-	Tet *ff_t;
-	if (choix == 6 && sm->ntet) {ff_t = new Tet[sm->ntet];}
-
-	Tet *ff_tt = ff_t;
-
-	if (choix == 6 && sm->ntet) {
-		int iv[4], lab;
-
-		for (k = 1; k <= sm->ntet; k++) {
-			ptt = &sm->tetra[k];
-			if (!ptt->v[0]) {continue;}
-
-			for (i = 0; i < 4; i++) {
-				iv[i] = sm->point[ptt->v[i]].tmp - 1;
-			}
-
-			lab = ptt->ref;
-			(*ff_tt++).set(ff_v, iv, lab);
-		}
-	}
-
 	// les autres avoir par la suite
 	if (verbosity > 1) {cout << " nv " << ff_nv << " nbe" << ff_nbe << endl;}
 
-	if (choix == 6 && sm->ntet) {
-		int ff_nt = sm->ntet;
-		Mesh3 *TH3_T = new Mesh3(ff_nv, ff_nt, ff_nbe, ff_v, ff_t, ff_b);
-		TH3_T->BuildGTree();
-        TH3_T->getTypeMesh3()=1;
-		return TH3_T;
-	} else {
-		Mesh3 *TH3_T = new Mesh3(ff_nv, ff_nbe, ff_v, ff_b);
-        TH3_T->getTypeMesh3()=1;
-		return TH3_T;
-	}
+		MeshS *THS_T = new MeshS(ff_nv, ff_nbe, ff_v, ff_b);
+
+		return THS_T;
+
 }
 
+// TODO CHECK
 void solyams_pSurfMesh (yams_pSurfMesh sm, const int &type, const KN<double> &tabsol, float hmin, float hmax) {
 	yams_pPoint ppt;
 	yams_pMetric pm;
@@ -498,10 +509,356 @@ void yams_inival (int intopt[23], double fopt[14]) {
 	intopt[21] = 1;
 }
 
-class yams_Op: public E_F0mps
+
+// version with meshS in arg
+
+class yams_Op_meshS: public E_F0mps
+{
+public:
+    typedef pmeshS Result;
+    Expression eTh;
+    int nbsol;
+    int nbsolsize;
+    int type;
+    int dim;
+    vector<Expression> sol;
+    
+    static const int n_name_param = 14;    //
+    static basicAC_F0::name_and_type name_param [];
+    Expression nargs[n_name_param];
+    
+    KN_<long> arg (int i, Stack stack, KN_<long> a) const
+    {return nargs[i] ? GetAny<KN_<long> >((*nargs[i])(stack)) : a;}
+    
+    KN_<double> arg (int i, Stack stack, KN_<double> a) const
+    {return nargs[i] ? GetAny<KN_<double> >((*nargs[i])(stack)) : a;}
+    
+    double arg (int i, Stack stack, double a) const {return nargs[i] ? GetAny<double>((*nargs[i])(stack)) : a;}
+    
+    long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
+    
+    int arg (int i, Stack stack, int a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
+    
+    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
+    
+public:
+    yams_Op_meshS (const basicAC_F0 &args): sol(args.size() - 1) {
+        cout << "yams" << endl;
+        args.SetNameParam(n_name_param, name_param, nargs);
+        eTh = to<pmeshS>(args[0]);
+        dim = 3;
+        nbsol = args.size() - 1;
+        if (nbsol > 1) {
+            CompileError(" yams accept only one solution ");
+        }
+        
+        int ksol = 0;
+        
+        if (nbsol == 1) {
+            int i = 1;
+            if (args[i].left() == atype<E_Array>()) {
+                const E_Array *a = dynamic_cast<const E_Array *>(args[i].LeftValue());
+                ffassert(a);
+                ksol += a->size();
+            } else {
+                ksol++;
+            }
+            
+            sol.resize(ksol);
+            
+            // type :: 1 sca, 2 vector, 3 symtensor
+            
+            ksol = 0;
+            nbsolsize = 0;
+            type = 0;
+            
+            if (args[i].left() == atype<E_Array>()) {
+                const E_Array *a = dynamic_cast<const E_Array *>(args[i].LeftValue());
+                ffassert(a);
+                int N = a->size();
+                nbsolsize = nbsolsize + N;
+                
+                switch (N) {
+                        /*
+                         * case 3 :
+                         *  type[i-1]=2;
+                         *  for (int j=0;j<N;j++)
+                         *  sol[ksol++]=to<double>((*a)[j]);
+                         *  break;
+                         */
+                    case 6:
+                        type = 3;
+                        
+                        for (int j = 0; j < N; j++) {
+                            sol[ksol++] = to<double>((*a)[j]);
+                        }
+                        
+                        break;
+                    default:
+                        CompileError(" 3D solution for yams is a scalar (1 comp) or a symetric tensor (6 comp)");
+                        break;
+                }
+            } else {
+                type = 1;
+                nbsolsize = nbsolsize + 1;
+                sol[ksol++] = to<double>(args[i]);
+            }
+            
+            if (nargs[2]) {
+                CompileError(" we give two metric for yams ");
+            }
+        }
+    }
+    
+    static ArrayOfaType typeargs () {return ArrayOfaType(atype<pmeshS>(), true);}    // all type
+    
+    static E_F0*f (const basicAC_F0 &args) {return new yams_Op_meshS(args);}
+    
+    AnyType operator () (Stack stack)  const;
+    operator aType () const {return atype<pmeshS>();}
+};
+
+
+basicAC_F0::name_and_type yams_Op_meshS::name_param [] = {
+    {"loptions", &typeid(KN_<long>)},    // 0
+    {"doptions", &typeid(KN_<double>)},
+    {"metric", &typeid(KN_<double>)},
+    {"aniso", &typeid(bool)},    // 3
+    {"mem", &typeid(long)},
+    {"hmin", &typeid(double)},
+    {"hmax", &typeid(double)},    // 6
+    {"gradation", &typeid(double)},
+    {"option", &typeid(long)},    // 8
+    {"ridgeangle", &typeid(double)},// 9
+    {"absolute", &typeid(bool)},// 10
+    {"verbosity", &typeid(long)},    // 11
+    
+    {"nr", &typeid(long)},    // 12 no ridge
+    {"ns", &typeid(long)}    // 13 no point smoothing
+};
+
+
+
+AnyType yams_Op_meshS::operator () (Stack stack)  const {
+    // initialisation
+    MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+    MeshS *pTh = GetAny<MeshS *>((*eTh)(stack));
+    
+    ffassert(pTh);
+    MeshS &ThS = *pTh;
+    int nv = ThS.nv;
+    int nt = ThS.nt;
+    int nbe = ThS.nbe;
+    
+    KN<int> defaultintopt(23);
+    KN<double> defaultfopt(14);
+    defaultintopt = 0;
+    defaultfopt = 0.;
+    yams_inival(defaultintopt, defaultfopt);
+    
+    KN<int> intopt(23);
+    
+    for (int ii = 0; ii < 23; ii++) {
+        intopt[ii] = defaultintopt[ii];
+    }
+    
+    KN<double> fopt(14);
+    
+    for (int ii = 0; ii < 14; ii++) {
+        fopt[ii] = defaultfopt[ii];
+    }
+    
+    assert(fopt.N() == 14);
+    
+    if (nargs[0]) {
+        KN<int> intopttmp = GetAny<KN_<long> >((*nargs[0])(stack));
+        if (intopttmp.N() != 13) {
+            cerr << "the size of vector loptions is 13 " << endl;
+            exit(1);
+        } else {
+            for (int ii = 0; ii < 13; ii++) {
+                intopt[wrapper_intopt[ii]] = intopttmp[ii];
+            }
+        }
+    }
+    
+    if (nargs[1]) {
+        KN<double> fopttmp = GetAny<KN_<double> >((*nargs[1])(stack));
+        if (fopttmp.N() != 11) {
+            cerr << "the size of vector loptions is 11 not " << fopttmp.N() << endl;
+            ExecError("FreeYams");
+        } else {
+            for (int ii = 0; ii < 11; ii++) {
+                fopt[wrapper_fopt[ii]] = fopttmp[ii];
+            }
+        }
+    }
+    
+    intopt[0] = arg(3, stack, intopt[0] != 1);
+    intopt[8] = arg(4, stack, intopt[8]);
+    fopt[7] = arg(5, stack, fopt[7]);
+    fopt[8] = arg(6, stack, fopt[7]);
+    fopt[6] = arg(7, stack, fopt[6]);
+    intopt[22] = arg(8, stack, intopt[22]);    // optim option
+    if (nargs[9]) {intopt[17] = 1;}
+    
+    fopt[13] = arg(9, stack, fopt[13]);    // ridge angle
+    intopt[21] = arg(10, stack, intopt[21]);// absolue
+    intopt[11] = arg(11, stack, (int)verbosity);// verbosity
+    intopt[17] = arg(12, stack, intopt[17]);// no ridge
+    intopt[18] = arg(13, stack, intopt[18]);// nb smooth
+    if (verbosity > 1) {
+        cout << " fopt = [";
+        
+        for (int i = 0; i < 11; ++i) {
+            cout << fopt[wrapper_fopt[i]] << (i < 10 ? "," : "];\n");
+        }
+        
+        cout << " intopt = [";
+        
+        for (int i = 0; i < 13; ++i) {
+            cout << intopt[wrapper_intopt[i]] << (i < 12 ? "," : "];\n");
+        }
+    }
+    
+    /*
+     * KN<int> intopt(arg(0,stack,defaultintopt));
+     * assert( intopt.N() == 23 );
+     * KN<double> fopt(arg(1,stack,defaultfopt));
+     * assert( fopt.N() == 14 );
+     */
+    KN<double> metric;
+    
+    int mtype = type;
+    if (nargs[2]) {
+        metric = GetAny<KN_<double> >((*nargs[2])(stack));
+        if (metric.N() == ThS.nv) {
+            mtype = 1;
+            intopt[1] = 0;
+        } else if (metric.N() == 6 * ThS.nv) {
+            intopt[1] = 1;
+            mtype = 3;
+        } else {
+            cerr << "sizeof vector metric is incorrect, size will be Th.nv or 6*Th.nv" << endl;
+        }
+    } else if (nbsol > 0) {
+        if (type == 1) {
+            intopt[1] = 0;
+            metric.resize(ThS.nv);
+            metric = 0.;
+        } else if (type == 3) {
+            intopt[1] = 1;
+            metric.resize(6 * ThS.nv);
+            metric = 0.;
+        }
+    } else {
+        if (intopt[1] == 0) {metric.resize(ThS.nv); metric = 0.;} else if (intopt[1] == 1) {metric.resize(6 * ThS.nv); metric = 0.;}
+    }
+    
+    // mesh for yams
+    yams_pSurfMesh yamsmesh;
+    yamsmesh = (yams_pSurfMesh)calloc(1, sizeof(yams_SurfMesh));
+    if (!yamsmesh) {
+        cerr << "allocation error for SurfMesh for yams" << endl;
+    }
+    
+    yamsmesh->infile = NULL;
+    yamsmesh->outfile = NULL;
+    yamsmesh->type = M_SMOOTH | M_QUERY | M_DETECT | M_BINARY | M_OUTPUT;
+    
+    meshS_to_yams_pSurfMesh(ThS, intopt[8], intopt[22], yamsmesh);
+    
+    // solution for freeyams2
+    if (nbsol) {
+        MeshPoint *mp3(MeshPointStack(stack));
+        
+        KN<bool> takemesh(nv);
+        takemesh = false;
+        
+        for (int it = 0; it < nt; it++) {
+            for (int iv = 0; iv < 3; iv++) {
+                int i = ThS(it, iv);
+                
+                if (takemesh[i] == false) {
+                    mp3->setP(&ThS, it, iv);
+                    
+                    for (int ii = 0; ii < nbsolsize; ii++) {
+                        metric[i * nbsolsize + ii] = GetAny<double>((*sol[ii])(stack));
+                    }
+                    
+                    takemesh[i] = true;
+                }
+            }
+        }
+    }
+    
+    if (verbosity > 10) {
+        cout << "nbsol  " << nargs[2] << endl;
+    }
+    
+    if (nargs[2] || (nbsol > 0)) {
+        float hmin, hmax;
+        solyams_pSurfMesh(yamsmesh, mtype, metric, hmin, hmax);
+        yamsmesh->nmfixe = yamsmesh->npfixe;
+        if (fopt[7] < 0.0) {
+            fopt[7] = max(fopt[7], hmin);
+        }
+        
+        if (fopt[8] < 0.0) {
+            fopt[8] = max(fopt[8], hmax);
+        }
+    } else {
+        yamsmesh->nmfixe = 0;
+    }
+    
+    int infondang = 0, infocc = 0;
+    int res = yams_main(yamsmesh, intopt, fopt, infondang, infocc);
+    if (verbosity > 10) {
+        cout << " yamsmesh->dim " << yamsmesh->dim << endl;
+    }
+    
+    if (res > 0) {
+        cout << " problem with yams :: error " << res << endl;
+        ExecError("Freeyams error");
+    }
+    
+    MeshS *ThS_T = yams_pSurfMesh_to_meshS(yamsmesh, infondang, infocc, intopt[22]);
+
+    // recuperer la solution ????
+    if (verbosity > 10) {
+        cout << &yamsmesh->point << " " << &yamsmesh->tria << " " << &yamsmesh->geom << " " << &yamsmesh->tgte << endl;
+        cout << &yamsmesh << endl;
+    }
+    
+    free(yamsmesh->point);
+    free(yamsmesh->tria);
+    free(yamsmesh->geom);
+    free(yamsmesh->tgte);
+    if (yamsmesh->metric) {free(yamsmesh->metric);}
+    
+    if (yamsmesh->edge) {free(yamsmesh->edge);}
+    
+    if (yamsmesh->tetra) {free(yamsmesh->tetra);}
+    
+    free(yamsmesh);
+    
+    *mp = mps;
+    Add2StackOfPtr2FreeRC(stack, ThS_T);
+    return SetAny<pmeshS>(ThS_T);
+}
+
+
+
+
+
+
+
+// version mesh3 in arg
+
+class yams_Op_mesh3: public E_F0mps
 {
 	public:
-		typedef pmesh3 Result;
+		typedef pmeshS Result;
 		Expression eTh;
 		int nbsol;
 		int nbsolsize;
@@ -528,7 +885,7 @@ class yams_Op: public E_F0mps
 		bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
 
 	public:
-		yams_Op (const basicAC_F0 &args): sol(args.size() - 1) {
+		yams_Op_mesh3 (const basicAC_F0 &args): sol(args.size() - 1) {
 			cout << "yams" << endl;
 			args.SetNameParam(n_name_param, name_param, nargs);
 			eTh = to<pmesh3>(args[0]);
@@ -598,13 +955,13 @@ class yams_Op: public E_F0mps
 
 		static ArrayOfaType typeargs () {return ArrayOfaType(atype<pmesh3>(), true);}	// all type
 
-		static E_F0*f (const basicAC_F0 &args) {return new yams_Op(args);}
+		static E_F0*f (const basicAC_F0 &args) {return new yams_Op_mesh3(args);}
 
 		AnyType operator () (Stack stack)  const;
-		operator aType () const {return atype<pmesh3>();}
+		operator aType () const {return atype<pmeshS>();}
 };
 
-basicAC_F0::name_and_type yams_Op::name_param [] = {
+basicAC_F0::name_and_type yams_Op_mesh3::name_param [] = {
 	{"loptions", &typeid(KN_<long>)},	// 0
 	{"doptions", &typeid(KN_<double>)},
 	{"metric", &typeid(KN_<double>)},
@@ -621,16 +978,18 @@ basicAC_F0::name_and_type yams_Op::name_param [] = {
 	{"nr", &typeid(long)},	// 12 no ridge
 	{"ns", &typeid(long)}	// 13 no point smoothing
 };
-AnyType yams_Op::operator () (Stack stack)  const {
+
+
+AnyType yams_Op_mesh3::operator () (Stack stack)  const {
 	// initialisation
 	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
 	Mesh3 *pTh = GetAny<Mesh3 *>((*eTh)(stack));
 
 	ffassert(pTh);
-	Mesh3 &Th3 = *pTh;
-	int nv = Th3.nv;
-	int nt = Th3.nt;
-	int nbe = Th3.nbe;
+	Mesh3 &Th = *pTh;
+	int nv = Th.nv;
+	int nt = Th.nt;
+	int nbe = Th.nbe;
 
 	KN<int> defaultintopt(23);
 	KN<double> defaultfopt(14);
@@ -714,10 +1073,10 @@ AnyType yams_Op::operator () (Stack stack)  const {
 	int mtype = type;
 	if (nargs[2]) {
 		metric = GetAny<KN_<double> >((*nargs[2])(stack));
-		if (metric.N() == Th3.nv) {
+		if (metric.N() == Th.nv) {
 			mtype = 1;
 			intopt[1] = 0;
-		} else if (metric.N() == 6 * Th3.nv) {
+		} else if (metric.N() == 6 * Th.nv) {
 			intopt[1] = 1;
 			mtype = 3;
 		} else {
@@ -726,15 +1085,15 @@ AnyType yams_Op::operator () (Stack stack)  const {
 	} else if (nbsol > 0) {
 		if (type == 1) {
 			intopt[1] = 0;
-			metric.resize(Th3.nv);
+			metric.resize(Th.nv);
 			metric = 0.;
 		} else if (type == 3) {
 			intopt[1] = 1;
-			metric.resize(6 * Th3.nv);
+			metric.resize(6 * Th.nv);
 			metric = 0.;
 		}
 	} else {
-		if (intopt[1] == 0) {metric.resize(Th3.nv); metric = 0.;} else if (intopt[1] == 1) {metric.resize(6 * Th3.nv); metric = 0.;}
+		if (intopt[1] == 0) {metric.resize(Th.nv); metric = 0.;} else if (intopt[1] == 1) {metric.resize(6 * Th.nv); metric = 0.;}
 	}
 
 	// mesh for yams
@@ -748,7 +1107,7 @@ AnyType yams_Op::operator () (Stack stack)  const {
 	yamsmesh->outfile = NULL;
 	yamsmesh->type = M_SMOOTH | M_QUERY | M_DETECT | M_BINARY | M_OUTPUT;
 
-	mesh3_to_yams_pSurfMesh(Th3, intopt[8], intopt[22], yamsmesh);
+	mesh3_to_yams_pSurfMesh(Th, intopt[8], intopt[22], yamsmesh);
 
 	// solution for freeyams2
 	if (nbsol) {
@@ -758,11 +1117,11 @@ AnyType yams_Op::operator () (Stack stack)  const {
 		takemesh = false;
 
 		for (int it = 0; it < nt; it++) {
-			for (int iv = 0; iv < 4; iv++) {
-				int i = Th3(it, iv);
+			for (int iv = 0; iv < 3; iv++) {
+				int i = Th(it, iv);
 
 				if (takemesh[i] == false) {
-					mp3->setP(&Th3, it, iv);
+					mp3->setP(&Th, it, iv);
 
 					for (int ii = 0; ii < nbsolsize; ii++) {
 						metric[i * nbsolsize + ii] = GetAny<double>((*sol[ii])(stack));
@@ -804,8 +1163,8 @@ AnyType yams_Op::operator () (Stack stack)  const {
 		ExecError("Freeyams error");
 	}
 
-	Mesh3 *Th3_T = yams_pSurfMesh_to_mesh3(yamsmesh, infondang, infocc, intopt[22]);
-    Th3_T->getTypeMesh3()=1;
+	MeshS *ThS_T = yams_pSurfMesh_to_meshS(yamsmesh, infondang, infocc, intopt[22]);
+    //Th3_T->getTypeMesh3()=1;
 	// recuperer la solution ????
 	if (verbosity > 10) {
 		cout << &yamsmesh->point << " " << &yamsmesh->tria << " " << &yamsmesh->geom << " " << &yamsmesh->tgte << endl;
@@ -825,8 +1184,8 @@ AnyType yams_Op::operator () (Stack stack)  const {
 	free(yamsmesh);
 
 	*mp = mps;
-	Add2StackOfPtr2FreeRC(stack, Th3_T);
-	return SetAny<pmesh3>(Th3_T);
+	Add2StackOfPtr2FreeRC(stack, ThS_T);
+	return SetAny<pmeshS>(ThS_T);
 }
 
 /*  class Init1 { public:
@@ -839,7 +1198,8 @@ static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3
 	// typedef Mesh3 *pmesh3;
 	if (verbosity) {cout << " load: freeyams  " << endl;}
 
-	Global.Add("freeyams", "(", new OneOperatorCode<yams_Op> );
+	Global.Add("freeyams", "(", new OneOperatorCode<yams_Op_mesh3> );   //
+    Global.Add("freeyams", "(", new OneOperatorCode<yams_Op_meshS> );
 }
 
 #define  WITH_NO_INIT

@@ -42,7 +42,7 @@ func f3min = Rmin*f3;
 
 cout << "=====================" << endl;
 cout << "=====================" << endl;
-mesh3 Th3sph=movemesh23(Th,transfo=[f1min,f2min,f3min],orientation=-1);
+meshS Th3sph=movemesh23(Th,transfo=[f1min,f2min,f3min],orientation=-1);
 cout << "=====================" << endl;
 cout << "=====================" << endl;
 savemesh(Th3sph,"sphereR1.mesh");
@@ -54,12 +54,12 @@ func f2max = Rmax*f2;
 func f3max = Rmax*f3;
 cout << "=====================" << endl;
 cout << "=====================" << endl;
-mesh3 Th3sph2=movemesh23(Th,transfo=[f1max,f2max,f3max],orientation=1);
+meshS Th3sph2=movemesh23(Th,transfo=[f1max,f2max,f3max],orientation=1);
 cout << "=====================" << endl;
 cout << "=====================" << endl;
 savemesh(Th3sph2,"sphereR2.mesh");
 cout << "addition" << endl;
-mesh3 Th3=Th3sph+Th3sph2;
+meshS Th3=Th3sph+Th3sph2;
 savemesh(Th3,"sphereAdd.mesh");
 medit("sphereSurfaceAdd",wait=1,Th3);
 plot(Th3); // FFCS: testing 3d plots

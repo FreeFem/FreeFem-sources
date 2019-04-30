@@ -222,10 +222,12 @@ public:
   MeshS(FILE *f,int offset=0);
   //MeshS(const string);         
   MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb);
+  MeshS(int nnv, int nnt, Vertex3 *vv, TriangleS *tt);
  // mapping for volume/surface vertices
  // int *v_num_surf=NULL; // mapping for surface/volume vertices
   const Element * Find( Rd P, R2 & Phat,bool & outside,const Element * tstart=0) const;
   int Save(const string & filename);
+  void flipSurfaceMeshS(int surface_orientation);
   //MeshS(FILE *f);
   void GSave(FILE * f,int offset=0) const ;
   void GRead(FILE * f,int offset);
@@ -251,7 +253,7 @@ public:
   Mesh3(FILE *f,int offset=0);     
   Mesh3(const  Serialize &);     
   Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb); 
-  Mesh3(int nnv, int nnbe, Vertex3 *vv, Triangle3 *bb);  // surface mesh 
+  Mesh3(int nnv, int nnbe, Vertex3 *vv, Triangle3 *bb);  // surface mesh
   double hmin() const; // Add J. Morice 11/10
   //surface mesh possible
   MeshS *meshS; 
@@ -261,7 +263,7 @@ public:
   int Save(const string & filename) const ;  
   int SaveSurface(const string & filename) const ;  
   int SaveSurface(const string & filename1, const string & filename2) const ;  
-  void flipSurfaceMesh3(int surface_orientation);
+  //void flipSurfaceMesh3(int surface_orientation);
   void read(istream &);
   void readmsh(ifstream & f,int offset);
   void TrueVertex();

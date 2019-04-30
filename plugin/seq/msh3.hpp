@@ -67,13 +67,13 @@ void SamePointElement_MeshS (const double &precis_mesh, const double *tab_XX, co
 
 // CAS 3D surfacique(old version)
 
-void SamePointElement_surf (const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh3 &Th3,
+/*void SamePointElement_surf (const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh3 &Th3,
                             int &recollement_border, int &point_confondus_ok, int *Numero_Som,
                             int *ind_nv_t, int *ind_nbe_t, int *label_nbe_t, int &nv_t, int &nbe_t);
 
 Mesh3*Transfo_Mesh3_surf (const double &precis_mesh, const Mesh3 &Th3, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
                           int &recollement_border, int &point_confondus_ok);
-
+*/
 void SamePointElement_Mesh2(const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh &Th2,
                             int &recollement_border, int &point_confondus_ok,
                             int *Numero_Som, int *ind_nv_t, int *ind_nt_t, int *ind_nbe_t,
@@ -81,8 +81,8 @@ void SamePointElement_Mesh2(const double &precis_mesh, const double *tab_XX, con
 
 void Transfo_Mesh2_map_face (const Mesh &Th2, map<int, int> &maptri);
 
-Mesh3*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
-                      int &border_only, int &recollement_border, int &point_confondus_ok,bool oldSurface=true);
+MeshS*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
+                      int &border_only, int &recollement_border, int &point_confondus_ok);
 
 /* avant LayerMesh.cpp */
 void recollement_maillage_mesh (const int Nmax, const int N, int *tab_recollement);

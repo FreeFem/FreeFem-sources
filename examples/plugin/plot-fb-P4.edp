@@ -28,7 +28,7 @@ if(!NoUseOfWait)
     vi[][i]=1;
     vi;
     plot(vi,wait=0,cmm=" v"+i);
-    mesh3 Th3= movemesh23(th,transfo=[x,y,vi*0.5]);
+    meshS Th3= movemesh23(th,transfo=[x,y,vi*0.5]);
     medit("mm",Th3); 
     vi=vi;	
     cout << i << " vi = "<< vi[]<<endl;

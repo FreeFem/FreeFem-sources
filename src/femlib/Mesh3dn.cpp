@@ -767,18 +767,14 @@ namespace Fem2D
      
     //define the type of meshes present in the data file .mesh
 
-    if (nTet==0 && nTri>0 && nSeg>0) {  // Mesh3 null, MeshS (real surface with boundaries)
+    if (nTet==0 && nTri>0) {  // Mesh3 null, MeshS (real surface with boundaries)
         if(verbosity) cout << "data file "<< pfile <<  " contains only a surface MeshS" <<endl;
         typeMesh3=0;}
-     if (nTet==0 && nTri>0 && nSeg==0) { // Mesh3(old surface), MeshS null
-        if(verbosity) cout << "data file "<< pfile <<  " contains only a old surface Mesh3" <<endl;
-          typeMesh3=1;}
+       
     if (nTet>0 && nTri>0 && nSeg==0) { // Mesh3 (volume), MeshS null
         if(verbosity) cout << "data file "<< pfile <<  " contains only a volume Mesh"<<endl;
         typeMesh3=1; }
-    if (nTet==0 && nTri>0 && nSeg>0) { // Mesh3(old surface), MeshS(real surface with boundaries)
-        if(verbosity) cout << "data file "<< pfile << " contains only an old surface mesh3 surface and meshS"<<endl;
-        typeMesh3=2; }
+
     if (nTet>0 && nTri>0 && nSeg>0) { // Mesh3(volume with boundaries), MeshS(real surface with boundaries)
         if(verbosity) cout << "data file "<< pfile << " contains a volume and surface Meshes"<<endl;
         typeMesh3=2; }
@@ -1475,11 +1471,12 @@ namespace Fem2D
         
     //  Add FH to be consitant we all constructor ...  July 09
     BuildBound();
-    if(nt > 0){
+      if(!nt) {
+          cerr << " the tetrahedrons list is empty, not possible for a mesh3 ";
+          ffassert(0);}
       BuildAdj();
       Buildbnormalv();
       BuildjElementConteningVertex();
-    }
     //  end add
     if(verbosity>1)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
@@ -1490,60 +1487,33 @@ namespace Fem2D
   }
       
   Mesh3::Mesh3(int nnv, int nnbe, Vertex3 *vv, Triangle3 *bb)
-    :meshS(0)
   {
       
-    nv = nnv;
-    nbe =nnbe;
-        
-    vertices = vv;
-    borderelements = bb;
-        
-    mes=0.;
-    mesb=0.;
-        
-    for (int i=0;i<nbe;i++)
-      mesb += this->be(i).mesure();
-
-    //  Add FH to be consitant we all constructor ...  July 09
-    BuildBound();
-    if(nt > 0){
-      BuildAdj();
-      Buildbnormalv();
-      BuildjElementConteningVertex();
-    }
-    //  end add
-          
-    if(verbosity>1)
-      cout << "  -- End of Construct  mesh3: mesure = " << mes << " border mesure " << mesb <<  endl;
-    ffassert(mes>=0); // add F. Hecht sep 2009.
-  }
-
-void Mesh3::flipSurfaceMesh3(int surface_orientation)
-{
-    /* inverse the orientation of the surface if necessary*/
-    /* and control that all surfaces are oriented in the same way*/
-    int nbflip=0;
-    for (int i=0;i<this->nbe;i++)
-      {
-        double mes_triangle3= this->be(i).mesure();
-        
-        if( surface_orientation*mes_triangle3 < 0){
-          const Triangle3 &K( this->be(i) );
-          int iv[3];
-          
-          iv[0] = this->operator()(K[0]);
-          iv[1] = this->operator()(K[1]);
-          iv[2] = this->operator()(K[2]);
-          
-          int iv_temp=iv[1];
-          iv[1]=iv[2];
-          iv[2]=iv_temp;
-          this->be(i).set( this->vertices, iv, K.lab ) ;
-          nbflip++;
-        }
+      typeMesh3=0;
+      int nvS = nnv;
+      int ntS = nnbe;
+      
+      Vertex3* vS = new Vertex3[nnv];;
+    
+      TriangleS* tS = new TriangleS[nnbe];
+      TriangleS *ttS = tS;
+      
+      for (int i = 0; i < nnv; i++) {
+        vS[i].x = vv[i].x;
+        vS[i].y = vv[i].y;
+        vS[i].z = vv[i].z;
+        vS[i].lab = vv[i].lab;
       }
-    assert(nbflip==0 || nbflip== this->nbe);
+      int iv[3];
+      for (int i = 0; i < nnbe; i++) {
+        const Triangle3& K(bb[i]);
+        for(int jj=0; jj<3; jj++)
+          iv[jj] = &K[jj] - vv;
+      (ttS++)->set(vS, iv, K.lab);
+      }
+
+      meshS = new MeshS(nvS, ntS, vS, tS);
+
   }
 
 
@@ -2190,23 +2160,54 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     mes=0.;
     mesb=0.;
      
+ //    for (int i=0;i<nbe;i++)
+ //       cout << "test " <<  this->be(i).x << "-" << this->be(i).y() << "-" <<this->be(i).z() << endl;
+     
     for (int i=0;i<nt;i++)
       mes += this->elements[i].mesure();
     for (int i=0;i<nbe;i++)
       mesb += this->be(i).mesure();
-      
+     
     BuildBound();
-    if(nt > 0){
-      BuildAdj();
-      Buildbnormalv();
-      BuildjElementConteningVertex();
-    }
+    BuildAdj();
+    Buildbnormalv();
+    BuildjElementConteningVertex();
+    
     if(verbosity>1)
       cout << "  -- End of read meshS: mesure = " << mes << " border mesure " << mesb << endl;
     
     assert(mes>=0.);
   }
     
+    MeshS::MeshS(int nnv, int nnt, Vertex3 *vv, TriangleS *tt)
+    :v_num_surf(0),liste_v_num_surf(0)
+    {
+        nv = nnv;
+        nt = nnt;
+        
+        vertices = vv;
+        elements = tt;
+       
+        mes=0.;
+        mesb=0.;
+        
+        for (int i=0;i<nt;i++)
+            mes += this->elements[i].mesure();
+    
+        
+        BuildBound();
+        if(nt > 0){
+            BuildAdj();
+            Buildbnormalv();
+            BuildjElementConteningVertex();
+        }
+        if(verbosity>1)
+            cout << "  -- End of read meshS: mesure = " << mes << " border mesure " << mesb << endl;
+        
+        assert(mes>=0.);
+    }
+    
+ 
     
   int MeshS::Save(const string & filename) const
   {
@@ -2245,7 +2246,30 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     return (0);
   }
  
-    
+  void MeshS::flipSurfaceMeshS(int surface_orientation)
+  {
+    /* inverse the orientation of the surface if necessary*/
+    /* and control that all surfaces are oriented in the same way*/
+    int nbflip=0;
+    for (int i=0;i<this->nt;i++) {
+      double mes_triangleS= this->elements[i].mesure();
+            
+      if( surface_orientation*mes_triangleS < 0){
+        const TriangleS &K(elements[i] );
+        int iv[3];
+        
+        for (int i=0 ; i<3 ; i++)
+          iv[i] = this->operator()(K[i]);
+
+        int iv_temp=iv[1];
+        iv[1]=iv[2];
+        iv[2]=iv_temp;
+        this->elements[i].set( this->vertices, iv, K.lab ) ;
+        nbflip++;
+      }
+    }
+    assert(nbflip==0 || nbflip== this->nbe);
+  }
 
    
     

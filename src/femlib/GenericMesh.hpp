@@ -787,39 +787,39 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
             {
                 int sens;
                 SortArray<int,nva> a(itemadj(k,i,&sens));//  warning the face of tet given interieon normal FH.
-                //cout << " ### "   << " item(k,i)= " << itemadj(k,i) << " a= " << a << " k " << k << " i " << i << endl;
-                typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);
+                if(verbosity>15) cout <<nk << " T "<< k << "### "   << " item(k,i)= " << itemadj(k,i) << " a= " << a << " k " << k << " i " << i << endl;
+                typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);//cout << "p->v " << p->v << endl;
                 if(!p)
                 {
                     h.add(a,nk);
                     TheAdjacencesLink[nk]=-1;
                     nba++;
                 }
-                else
-                {
-                    if(p->v<0 ){// no manifold TO DO
-                        
-                       
+                else {
+                   if(p->v<0 ) {// no manifold TO DO
                         // clean adj
                         int nk1=-1-p->v;
                         int nk2= TheAdjacencesLink[nk1];
-                        if(nk2>=0)
-                        { // firt time remove existing link ...
+                        if(nk2>=0) { // firt time remove existing link ...
                              nadjnomanifold++;
                             TheAdjacencesLink[nk1]=-2;
                             TheAdjacencesLink[nk2]=-2;// on no manifold border .
+                         //nba--;
+                        // no manifold TO DO if false
                         }
-                        
-                      // no manifold TO DO if false
-                    }
-                   
+                   }
+                    else {
+                   // cout << " test p->v "<< p->v << endl;
                     TheAdjacencesLink[nk]=p->v;
                     TheAdjacencesLink[p->v]=nk;
                     p->v=-1-nk;
-                    nba--;
+                    }
+                 nba--;
+    
                 }
                 ++nk;
             }
+
         if(verbosity&& nadjnomanifold) cerr << "  --- Warning manifold obj nb:" << nadjnomanifold << " of  dim =" << T::RdHat::d << endl;
         int kerr=0,kerrf=0,nbei=0;
         map<pair<int,int>,pair<int,int> > mapfs;
@@ -832,7 +832,8 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                 SortArray<int,nva> a(itembe(ke,&sens));
                 
                 typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);
-                //cout << k << " ### "   << " item(k,i)= " << itembe(k) << " a= " << a << endl;
+                if(verbosity>15) cout << "B " << ke << " ### "   << " item(k,i)= " << itembe(ke) << " a= " << a << endl;
+               
                 if(!p) { err++;
                     if(err==1) cerr << "Err  Border element not in mesh \n";
                     if (err<10)  cerr << " \t " << ke << " " << a << endl;
@@ -848,9 +849,14 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                         // choise le bon .. too get the correct normal
                         int k= nk/nea, e=nk%nea;
                         int kk= nkk/nea, ee=nkk%nea;
-                        itemadj(k,e,&s);
-                        itemadj(kk,ee,&ss);
-                        assert(s && ss && s== -ss);
+                        itemadj(k,e,&s); if(verbosity>15) cout << " item(k,e)= " << itemadj(k,e) <<  " k " << k << " e " << e << " s " << s << endl;
+                        itemadj(kk,ee,&ss); if(verbosity>15) cout << " item(kk,ee)= " << itemadj(kk,ee) << " kk " << kk << " ee " << ee << " ss " << ss << endl;
+                       assert(s && ss && s== -ss);
+                        /* if (s && ss && s== -ss) {
+                            cerr << " Bad orientation: The adj border element  defined by [ " << itemadj(k,e) << " ]  is oriented in the same direction in element "
+                        << k << " and in the element " << kk << " ****** bug in mesh construction? orientation parameter? "<< endl;
+                        ffassert(0);
+                        }*/
                         if( sens == s) {swap(nk,nkk);swap(k,kk);} //  autre cote
                         //  verif sens normal
                         int regk= elements[k].lab;

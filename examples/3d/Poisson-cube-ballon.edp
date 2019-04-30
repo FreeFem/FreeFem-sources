@@ -5,7 +5,7 @@ load "medit"
 
  
 // 
-mesh3 ThHex;
+meshS ThHex;
 real volumetet;  // use in tetg.
 {
 	//  first  build the 6 faces of the hex.
@@ -29,18 +29,18 @@ int[int] refx=[0,1];  // gauche
 int[int] refX=[0,2];   // droite 
 
 
-mesh3 Thx0 = movemesh23(Thx,transfo=[x0,x,y],orientation=-1,label=refx);
-mesh3 Thx1 = movemesh23(Thx,transfo=[x1,x,y],orientation=1,label=refX);
-mesh3 Thy0 = movemesh23(Thy,transfo=[x,y0,y],orientation=+1,label=refy);
-mesh3 Thy1 = movemesh23(Thy,transfo=[x,y1,y],orientation=-1,label=refY);
-mesh3 Thz0 = movemesh23(Thz,transfo=[x,y,z0],orientation=-1,label=refz);
-mesh3 Thz1 = movemesh23(Thz,transfo=[x,y,z1],orientation=+1,label=refZ);
+meshS Thx0 = movemesh23(Thx,transfo=[x0,x,y],orientation=-1,label=refx);
+meshS Thx1 = movemesh23(Thx,transfo=[x1,x,y],orientation=1,label=refX);
+meshS Thy0 = movemesh23(Thy,transfo=[x,y0,y],orientation=+1,label=refy);
+meshS Thy1 = movemesh23(Thy,transfo=[x,y1,y],orientation=-1,label=refY);
+meshS Thz0 = movemesh23(Thz,transfo=[x,y,z0],orientation=-1,label=refz);
+meshS Thz1 = movemesh23(Thz,transfo=[x,y,z1],orientation=+1,label=refZ);
 
 //medit("  --- ", Thx0,Thx1,Thy0,Thy1,Thz0,Thz1);
  ThHex = Thx0+Thx1+Thy0+Thy1+Thz0+Thz1;
  
 }
-mesh3 Thsph; // 
+meshS Thsph; // 
 
 {
 mesh  Th=square(10,20,[x*pi-pi/2,2*y*pi]);  //  $]\frac{-pi}{2},frac{-pi}{2}[\times]0,2\pi[ $
@@ -81,7 +81,7 @@ Thsph = movemesh23(Th,transfo=[f1*R,f2*R,f3*R],orientation=-1);
 
 
 ////////////////////////////////
-mesh3 ThS = ThHex+Thsph; // "gluing" surface meshs to tolat boundary meshes
+meshS ThS = ThHex+Thsph; // "gluing" surface meshs to tolat boundary meshes
 medit("Bounday mesh",ThS,wait=1);
 
 // build a mesh of a axis parallel box with TetGen

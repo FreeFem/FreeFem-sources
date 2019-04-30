@@ -46,7 +46,7 @@ func f3min = Rmin*f3;
 
 cout << "=====================" << endl;
 cout << "=====================" << endl;
-mesh3 Th3sph=movemesh23(Th,transfo=[f1min,f2min,f3min],orientation=1);
+meshS Th3sph=movemesh23(Th,transfo=[f1min,f2min,f3min],orientation=1);
 cout << "=====================" << endl;
 cout << "=====================" << endl;
 real Rmax  = 2.;
@@ -55,11 +55,11 @@ func f2max = Rmax*f2;
 func f3max = Rmax*f3;
 cout << "=====================" << endl;
 cout << "=====================" << endl;
-mesh3 Th3sph2=movemesh23(Th,transfo=[f1max,f2max,f3max],orientation=-1);
+meshS Th3sph2=movemesh23(Th,transfo=[f1max,f2max,f3max],orientation=-1);
 cout << "=====================" << endl;
 cout << "=====================" << endl;
 cout << "addition" << endl;
-mesh3 Th3=Th3sph+Th3sph2;
+meshS Th3=Th3sph+Th3sph2;
 savemesh(Th3sph,"ellipsoide.mesh");
 
 real[int] domain2 = [1.5*Ra,0.,0.,145,0.001,0.,0.,0.,18,0.001];
@@ -69,7 +69,10 @@ cout << "==============================" << endl;
 mesh3 Th3fin=tetg(Th3,switch="paAAYYCCV",nbofregions=2,regionlist=domain2);
 cout << "=============================" << endl;
 cout << "finish: tetgen call without hole" << endl;
-cout << "=============================" << endl;
+cout <<
+
+
+ "=============================" << endl;
 savemesh(Th3fin,"spherewithtworegion.mesh"); 
 medit("maillagetwo",Th3fin);
 

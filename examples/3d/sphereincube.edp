@@ -16,7 +16,7 @@ include "MeshSurface.idp"
      int  Ls=2 ;
     
     ////////////////////////////////
-    mesh3 ThHS = SurfaceHex(Nex,Bex,Lbex,1)+Sphere(Lin,hs,Ls,1); // "gluing" surface meshs to total boundary meshes
+    meshS ThHS = SurfaceHex(Nex,Bex,Lbex,1)+Sphere(Lin,hs,Ls,1); // "gluing" surface meshs to total boundary meshes
     real voltet=(hs^3)/6.;
     cout << " voltet = " << voltet << endl;
     real[int] domaine = [0,0,0,2,voltet,0,0,(Lex+Lin)/2,1,voltet]; 

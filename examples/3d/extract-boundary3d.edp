@@ -7,9 +7,8 @@ mesh3 Th=cube(n,n,n);
 int[int] ll=labels(Th);//  get all labels of the mesh .. 
 cout << " the labels "<< ll << endl;
 cout << Th.nbe << endl; 
-Th=extract(Th,label=ll);// extract boundary of 3d Mesh with given label
-assert(Th.nt==0); 
-cout <<"  mesh nbe, nv " <<  Th.nbe << " " << Th. nv << endl; 
+meshS ThS=extract(Th,label=ll);// extract boundary of 3d Mesh with given label
+cout <<"  mesh nv, nt, nbe" <<  ThS.nv << " - " << ThS. nt << " - " << ThS.nbe << endl; 
 cout <<"  computed by hand: " << ntb  << " " << nvb  << endl; 
-assert( Th.nbe == ntb) ;
-assert( Th.nv == nvb);
+assert( ThS.nt == ntb) ;
+assert( ThS.nv == nvb);
