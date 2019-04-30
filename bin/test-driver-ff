@@ -106,6 +106,8 @@ else
 	FLAGS_FFPP_B="${FLAGS_FFPP}"
 fi	
 ## echo "  test ${TEST_FFPP} ${FLAGS_FFPP_B}  "$@" ${FLAGS_FFPP_A}" 
+export MPIEXEC_TIMEOUT=300
+test -z "${COMMONPROGRAMFILES+x}" -a -z "${WINDIR+x}" && ulimit -t 60
 ${TEST_FFPP} ${FLAGS_FFPP_B}  "$@" ${FLAGS_FFPP_A}>$log_file 2>&1
 
 estatus=$?

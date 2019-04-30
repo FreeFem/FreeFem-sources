@@ -1,5 +1,5 @@
-//  run with MPI:  ff-mpirun -np 4 script.edp
-// NBPROC 4
+//  run with MPI:  ff-mpirun -np 2 script.edp
+// NBPROC 2
 
 /* to run : in a Shell.  cut and past:
 cd /Users/hecht/work/freefem++/examples/mpi 
@@ -20,7 +20,7 @@ border c(t=2,0){x=t ;y=1;label=outside;};
 border d(t=1,0){x = 1-t; y = t;label=inside;};
 border e(t=0, pi/2){ x= cos(t); y = sin(t);label=inside;};
 border e1(t=pi/2, 2*pi){ x= cos(t); y = sin(t);label=outside;};
-int n=4;
+int n=1;
 mesh th2,TH2;
 mesh3 th,TH;
 int[int] rup=[0,0], rdown=[0,0], rmid=[outside,outside,inside,inside];;
@@ -67,17 +67,12 @@ for ( i=0 ;i< 10; i++)
 {
   cout << mpirank << " looP " << i << endl;
   if (mpirank == 0)
-  {
    PB;
-   processor(1) << U[];
-   processor(1) >> u[];
-  }
   else
-  {
-   pb;
-   processor(0) << u[];
-   processor(0) >> U[];
-  }
+    pb;
+   broadcast(processor(0),U[]);
+   broadcast(processor(1),u[]);
+ 
   if (mpirank==0)     plot(U,u,wait=1,fill=1);
 
   if(mpirank==0)

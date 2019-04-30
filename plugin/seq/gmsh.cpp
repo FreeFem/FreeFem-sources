@@ -878,6 +878,7 @@ AnyType GMSH_LoadMesh3_Op::operator () (Stack stack)  const {
 
 	Mesh3 *Th3_t = GMSH_Load3(*pffname);
 
+    Th3_t->getTypeMesh3() = 1;
 	Th3_t->BuildGTree();
 	Add2StackOfPtr2FreeRC(stack, Th3_t);
 
