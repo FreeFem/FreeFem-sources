@@ -7273,8 +7273,10 @@ void Renumb (Fem2D::Mesh3 * &pTh) {
 
     delete [] perm_inv;
     delete [] perm;
+    int typeMesh3 = pTh->getTypeMesh3();
     delete pTh;
     pTh = new Mesh3(nbv, nbt, nbe, v, t, b);
+    pTh->getTypeMesh3() = typeMesh3;
     pTh->BuildGTree();
 }
 

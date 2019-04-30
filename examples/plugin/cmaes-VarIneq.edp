@@ -1,7 +1,7 @@
 load "ff-cmaes"
 
 
-int NN = 7;
+int NN = 5;
 mesh Th = square(NN,NN);
 func f1=1.;
 func f2=-1.;

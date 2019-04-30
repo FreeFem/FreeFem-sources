@@ -274,7 +274,7 @@ AnyType changeOperator<Type>::changeOperator_Op::operator()(Stack stack) const {
             }
             if(ptA->_ksp) {
                 KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
-                if(std::is_same<Type, Dmat>::value && !ptA->_S.empty()) {
+                if(std::is_same<Type, Dmat>::value && !ptA->_vS.empty()) {
                     KSPSetFromOptions(ptA->_ksp);
                     PetscBool assembled;
                     MatAssembled(ptA->_petsc, &assembled);
@@ -291,7 +291,7 @@ AnyType changeOperator<Type>::changeOperator_Op::operator()(Stack stack) const {
                     PetscBool isFieldSplit;
                     PetscStrcmp(type, PCFIELDSPLIT, &isFieldSplit);
                     if(isFieldSplit)
-                        PETSc::setCompositePC(pc, ptA->_S);
+                        PETSc::setCompositePC(pc, ptA->_vS);
                 }
             }
         }
@@ -303,7 +303,7 @@ AnyType changeOperator<Type>::changeOperator_Op::operator()(Stack stack) const {
             PetscBool isType;
             MatGetType(ptB->_petsc, &type);
             PetscStrcmp(type, MATNEST, &isType);
-            if(!isType && ptA->_S.empty() && ptB->_S.empty()) {
+            if(!isType && ptA->_vS.empty() && ptB->_vS.empty()) {
                 Mat backup = ptA->_petsc;
                 ptA->_petsc = nullptr;
                 ptA->dtor();
@@ -582,8 +582,8 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
     bool bsr = nargs[4] && GetAny<bool>((*nargs[4])(stack));
     bool prune = bsr ? (nargs[5] && GetAny<bool>((*nargs[5])(stack))) : false;
     if(prune) {
-        ptA->_S.resize(1);
-        MatCreate(PETSC_COMM_WORLD, &ptA->_S[0]);
+        ptA->_vS.resize(1);
+        MatCreate(PETSC_COMM_WORLD, &ptA->_vS[0]);
     }
     if(mpisize > 1) {
         ffassert(ptSize->n >= 3 + mK->n);
@@ -591,7 +591,7 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
         ptA->_last = ptSize->operator()(1);
         MatSetSizes(ptA->_petsc, mK->n * (bsr ? bs : 1), mK->n * (bsr ? bs : 1), ptSize->operator()(2) * (bsr ? bs : 1), ptSize->operator()(2) * (bsr ? bs : 1));
         if(prune)
-            MatSetSizes(ptA->_S[0], mK->n * bs, mK->n * bs, ptSize->operator()(2) * bs, ptSize->operator()(2) * bs);
+            MatSetSizes(ptA->_vS[0], mK->n * bs, mK->n * bs, ptSize->operator()(2) * bs, ptSize->operator()(2) * bs);
         ptA->_num = new unsigned int[ptSize->n - 3];
         for(int i = 3; i < ptSize->n; ++i)
             ptA->_num[i - 3] = ptSize->operator()(i);
@@ -602,7 +602,7 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
         ptA->_num = nullptr;
         MatSetSizes(ptA->_petsc, mK->n * (bsr ? bs : 1), mK->n * (bsr ? bs : 1), mK->n * (bsr ? bs : 1), mK->n * (bsr ? bs : 1));
         if(prune)
-            MatSetSizes(ptA->_S[0], mK->n * bs, mK->n * bs, mK->n * bs, mK->n * bs);
+            MatSetSizes(ptA->_vS[0], mK->n * bs, mK->n * bs, mK->n * bs, mK->n * bs);
     }
     bool clean = nargs[3] && GetAny<bool>((*nargs[3])(stack));
     if(clean)
@@ -614,7 +614,7 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
     else
         MatMPIAIJSetPreallocationCSR(ptA->_petsc, reinterpret_cast<PetscInt*>(mK->lg), reinterpret_cast<PetscInt*>(mK->cl), mK->a);
     if(prune) {
-        MatSetType(ptA->_S[0], MATMPIAIJ);
+        MatSetType(ptA->_vS[0], MATMPIAIJ);
         PetscInt* pI = new PetscInt[mK->n * bs + 1];
         PetscInt* pJ = new PetscInt[mK->nbcoef * bs];
         PetscScalar* pC = new PetscScalar[mK->nbcoef * bs];
@@ -635,7 +635,7 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
     else
         MatMPIAIJSetPreallocationCSR(ptA->_petsc, reinterpret_cast<PetscInt*>(mK->p), reinterpret_cast<PetscInt*>(mK->j), mK->aij);
     if(prune) {
-        MatSetType(ptA->_S[0], MATMPIAIJ);
+        MatSetType(ptA->_vS[0], MATMPIAIJ);
         PetscInt* pI = new PetscInt[mK->n * bs + 1];
         PetscInt* pJ = new PetscInt[mK->nnz * bs];
         PetscScalar* pC = new PetscScalar[mK->nnz * bs];
@@ -650,7 +650,7 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
         }
         pI[mK->n * bs] = mK->nnz * bs;
 #endif
-        MatMPIAIJSetPreallocationCSR(ptA->_S[0], pI, pJ, pC);
+        MatMPIAIJSetPreallocationCSR(ptA->_vS[0], pI, pJ, pC);
         delete [] pC;
         delete [] pJ;
         delete [] pI;
@@ -661,7 +661,7 @@ AnyType initCSRfromMatrix_Op<HpddmType>::operator()(Stack stack) const {
         ptK->destroy();
     if(prune) {
         KSPCreate(PETSC_COMM_WORLD, &ptA->_ksp);
-        KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_S[0]);
+        KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_vS[0]);
     }
     return ptA;
 }
@@ -1356,7 +1356,7 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
             }
             PC pc;
             KSPGetPC(ptA->_ksp, &pc);
-            PETSc::setCompositePC(pc, ptA->_S);
+            PETSc::setCompositePC(pc, ptA->_vS);
         }
     }
     return 0L;
