@@ -37,7 +37,7 @@ int loadMesh (pMesh mesh) {
 	pTetra ptet;
 	pHexa ph;
 	double d, dp1, dp2, dp3, dn[3];
-	float *n={}, fp1, fp2, fp3;
+	float *n, fp1, fp2, fp3;
 	long i, ia, ib, inm, ref, is, k, disc, nn, nt, nq;
 	char *ptr, data[256];
 
