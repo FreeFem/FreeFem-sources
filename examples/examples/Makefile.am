@@ -33,8 +33,8 @@ TESTS=BlackScholes2D.edp condensor.edp \
 	NSprojection.edp optimcontrol.edp \
 	potential.edp schwarz.edp \
 	sound.edp stokes.edp \
-	test1.edp testbed.edp \
-	thermal.edp thermic.edp
+	test1.edp thermal.edp \
+	thermic.edp
 
 # if .. no arpack ...
 XFAIL_TESTS=sound.edp
