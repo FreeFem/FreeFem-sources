@@ -2115,9 +2115,9 @@ AnyType VTK_WriteMesh_Op::operator () (Stack stack)  const {
 	string *dataname;
 	int nbofsol = l.size();
 	KN<int> order(nbofsol);
-
 	char *nameofuser[nbofsol];
 
+	memset(nameofuser[nbofsol], 0, sizeof(nameofuser));
 	for (int ii = 0; ii < nbofsol; ii++) {
 		order[ii] = 0;
 	}
@@ -3723,9 +3723,9 @@ AnyType VTK_WriteMesh3_Op::operator () (Stack stack)  const {
 	string *dataname;
 	int nbofsol = l.size();
 	KN<int> order(nbofsol);
+	char *nameofuser[nbofsol];
 
-	char *nameofuser[nbofsol]={};
-
+	for (int i=0; i< nbofsol;i++) nameofuser[i] = {};
 	for (int ii = 0; ii < nbofsol; ii++) {
 		order[ii] = 0;
 	}

@@ -119,7 +119,9 @@ long ffsetenv (string *const &k, string *const &v) {
 	char *kk = strcpy((char *)malloc(k->size() + 2), k->c_str());
 
 	SetEnvironmentVariable(vv, kk);
-	return SetEnvironmentVariable(vv, kk);
+	free(vv);
+	free(kk);
+	return 0;
 }
 
 long ffunsetenv (string *const &k) {
@@ -141,6 +143,8 @@ long ffsetenv (string *const &k, string *const &v) {
 	char *kk = strcpy((char *)malloc(k->size() + 2), k->c_str());
 	long r = setenv(vv, kk, 1);
 
+	free(vv);
+	free(kk);
 	return r;
 }
 

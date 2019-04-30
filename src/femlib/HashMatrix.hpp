@@ -26,7 +26,7 @@ using std::complex;
 using std::list;
 extern  long  verbosity  ;
 
-void init_HashMatrix (); 
+void init_HashMatrix ();
 template<class Z,class ZZ>
 inline uint64_t  roll64(Z y,ZZ r){uint64_t x=y; r %= 64; return (x<<r) | (x << (64-r)) ;}
 
@@ -41,13 +41,13 @@ void Addto(HashMatrix<I,R> *P0,const HashMatrix<I,K> *PA,R (*f)(K) ,bool trans=f
 
 
 template<class TypeIndex,class TypeScalaire>
-class HashMatrix : public VirtualMatrix<TypeIndex,TypeScalaire> 
+class HashMatrix : public VirtualMatrix<TypeIndex,TypeScalaire>
 {
     static void  HeapSort(TypeIndex *ii,TypeIndex *jj, TypeScalaire *aij,long n);
 
-    
+
 public:
-    
+
     template<class R> static void conj(R *x,TypeIndex nnz){}
     static void conj(complex<double> *x,TypeIndex nnz){ for(int k=0; k<nnz; ++k) x[k]=std::conj(x[k]) ; }
     static void conj(complex<float> *x,TypeIndex nnz){for(int k=0; k<nnz; ++k) x[k]=std::conj(x[k]) ; }
@@ -72,8 +72,7 @@ public:
     R * aij;
     size_t * head;
     size_t * next;
-    // bool trans ; // bad idea at this level  F.H
-    bool half; //
+    bool half;
     int state,type_state;
     size_t nbsort;
     I sizep;
@@ -84,12 +83,11 @@ public:
      // for  Dirichlet BC
     double tgv;
     I ntgv;
-     //bool ismorse;
-    
+
     I NbCoef() const {return  (I) nnz;}
     void setcoef(const KN_<R> & x){ffassert(x.N()==(I) nnz);KN_<R>(this->aij,nnz) = x;}
     void getcoef( KN_<R> & x) const {ffassert(x.N()==(I) nnz);x =KN_<R>(this->aij,nnz);}
-    
+
     void setdiag(const KN_<R> & d);
     void getdiag( KN_<R> & d) const;
     R pscal(R *x,R *y,I sx=1,I sy=1);
@@ -106,25 +104,25 @@ public:
     HashMatrix(I nn,const R *diag);
     void RenumberingInv(KN_<I> II,KN_<I> JJ);
     void Renumbering(I nn,I mm,KN_<I> II,KN_<I> JJ);
-    void RemoveDoubleij(int kk);// remove 
+    void RemoveDoubleij(int kk);// remove
     template<class R,class K> static R cast_funct(K x) { return (R) x;}
-    
+
     template<class J,class K> HashMatrix(const HashMatrix<J,K> &A , R (*ff)(K) );
     template<class J> HashMatrix(const HashMatrix<J,R> &A );
 
     template<class II,class RR> HashMatrix & operator=(const HashMatrix<II,RR>& A )
     {
         if( (const void*)  this == (const void*) & A) return *this;
-        
+
         set(A.n,A.m,A.half,A.nnz,A.i,A.j,A.aij,A.fortran,cast_funct<R,RR>);
         return *this;
     }
- 
+
     template<class II,class RR> HashMatrix & operator+=(const HashMatrix<II,RR>& A );
 
-    
-    int IsTrianglulare() const ; 
-    
+
+    int IsTrianglulare() const ;
+
     void CheckUnLock(const char * cmm)
     {
         if( lock)
@@ -136,16 +134,16 @@ public:
     }
     void setp(I sp);
     void resize(I nn, I mm=0)  {resize(nn,mm,nnz); }
-        
+
     void resize(I nn, I mm,size_t nnnz, double tol = -1., bool sym=false );
-    void SymmetrizePattern(); // To do for Suzuki , Paradiso 
+    void SymmetrizePattern(); // To do for Suzuki , Paradiso
     void clear();
     Hash hash(size_t ii,size_t jj) const{ return ( (ii-fortran)+ (jj-fortran)*this->n )%nhash; }
-    
+
     void setfortran(int yes);
-    
+
     size_t find(size_t ii,size_t jj) const { return find(ii,jj, hash(ii,jj)); }
-    
+
     size_t  find(I ii,I jj,Hash h) const
     {
         nbfind++;
@@ -156,10 +154,7 @@ public:
         }
         return empty;
     }
-    
-  //  iterator end()  { return iterator(this,nnz);}
-  //  iterator begin(){ return iterator(this,0);}
-    
+
     size_t insert(I ii, I jj,const R & aa)
     {
         state=unsorted;
@@ -170,11 +165,11 @@ public:
         aij[k] += aa;
         return k;
     }
-    
+
     template<typename T>                 static void HMresize(T *&t,size_t no,size_t nn);
     template<typename T,typename TT>     static void HMcopy( T *dst,const TT *from, size_t nn);
     template<typename T,typename TT>     static void HMcopy( T *dst,const TT *from, size_t nn, T (*ff)(TT) );
-    
+
     bool do2Triangular(bool lower) ; //  put half tp lower or upper
     void dotranspose();
     void Increaze(size_t nnznew=0,size_t newnnz=0);// newnnz<0 => newnnz is set to nnz (change value of nnz)
@@ -183,7 +178,7 @@ public:
     size_t simpleinsert(I ii, I jj,Hash &h);
     R   *pij(I ii,I jj)  const;
     R   *npij(I ii,I jj);   // with add if no term ii,jj
- 
+
     R & diag(I ii)  { return operator()(ii,ii);}
     R   diag(I ii) const  { return operator()(ii,ii);}
     R   operator()(I ii,I jj)  const
@@ -193,35 +188,34 @@ public:
         if(k==empty) return R();
         else return aij[k];
     }
-    
+
     R  & operator()(I ii,I jj)
     {
         return *npij(ii,jj);
     }
-    
+
     R    operator()(pair<I,I> ij)  const {return operator()(ij.first,ij.second);}
     R &  operator()(pair<I,I> ij)  {return operator()(ij.first,ij.second);}
     R    operator[](pair<I,I> ij)  const {return operator()(ij.first,ij.second);}
     R &  operator[](pair<I,I> ij)  {return operator()(ij.first,ij.second);}
     ~HashMatrix();
- 
-    
+
+
     void Sortij();
     void Sortji();
-    
+
     void set(I  nn,I  mm,bool hhalf,size_t nnnz, I  *ii, I *jj, R  *aa,int f77=0,int tcsr=0);
-    // tcsr = 0=> COO, 1=> CSR , -1 : CSC
     template<class II>          void set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, R  *aa,int f77);
     template<class II,class RR> void set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, RR *aa,int f77,R (*ff)(RR));
 
     void Add(const HashMatrix<I,R> *PA,R coef=R(1),bool trans=false, I ii00=0,I jj00=0);
-    
+
     HashMatrix &operator=(const HashMatrix &A) ;
     HashMatrix &operator+=(const HashMatrix &A) ;// {Add(&A); return *this;};
     HashMatrix &operator-=(const HashMatrix &A) ; //{Add(&A,R(-1.)); return *this;}
 
-    
-    
+
+
     void operator*=(R v);
     void operator=(const R & v);
     void HM();// un sorted ... Default  type ..
@@ -232,7 +226,7 @@ public:
     void CSC();
     void CSC(I *& JA, I *& IA, R *& A);
     static int addstateLU(int U) { return U>0 ? 4 : 5; };
-    
+
     size_t SortLU(int U);
     size_t CSC_U(I *& JA, I *& IA, R *& A);
     size_t CSR_L(I *& IA, I *& JA, R *& A);
@@ -250,34 +244,33 @@ public:
     double norm1() const;
     double norminfty() const;
     bool sym() const {return half;}
-    //    static const int TS_SYM=1,TS_DEF_POS=2,TS_PARA=4;
-    
+
     int typemat() const { return int(half)*VirtualMatrix<int,R>::TS_SYM ;}
     void SetBC(char *wbc,double ttgv);
- 
-    
+
+
     void addMap(R coef,std::map< pair<I,I>, R> &mij,bool trans=false,I ii00=0,I jj00=0,bool cnj=false,double threshold=0.);
     bool addMatTo(R coef,HashMatrix<I,R> & mij,bool trans=false,I ii00=0,I jj00=0,bool cnj=false,double threshold=0.,const bool keepSym=false) ;
-  
-    
+
+
     VirtualMatrix<I,R>  & operator +=(MatriceElementaire<R> & me) ;
      ostream& dump (ostream&f)  const { return f<<*this;}
     void SetBC(I ii,double ttgv) { diag(ii)=ttgv;};
-	
+
     double gettgv(I * pntgv=0,double ratio=1e6) const ;
     bool GetReDoNumerics() const { bool b=re_do_numerics; re_do_numerics=0;return b;}
     bool GetReDoSymbolic() const { bool b=re_do_symbolic; re_do_symbolic=0;return  b;}
 
-    
-    HashMatrix<I, R> *toMatriceMorse(bool transpose=false,bool copy=false) const {ffassert(0); return 0;}	
+
+    HashMatrix<I, R> *toMatriceMorse(bool transpose=false,bool copy=false) const {ffassert(0); return 0;}
     double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) {ffassert(0); };
-    
+
     void UnHalf();
     void Half() {resize(this->n,this->m,nnz,-1,true);}
     void RemoveHalf(int cas,double tol=-1) ;
 
-    void setsdp(bool sym,bool dp); // set of unset to sym / defpos or not 
-    
+    void setsdp(bool sym,bool dp); // set of unset to sym / defpos or not
+
     virtual bool ChecknbLine  (I n) const {return this->n==n;}
     virtual bool ChecknbColumn  (I m) const {return this->m==m;}
     static double CPUsecond() {
@@ -301,7 +294,7 @@ template<class I,class R> void CheckPtrHashMatrix(const HashMatrix<I,R> *p,const
         if(gm <0)
             cout << " n = " << p->n << " == " << p->N
                   << " , m= " << p->m << " "<< p->M
-            << " nzz "<< p->nnz << endl; 
+            << " nzz "<< p->nnz << endl;
         cerr << " Fatal Error " << where << "  invalide HashMatrix Ptr "<< gm << " "<< p << endl;
         ffassert(0);
     }
@@ -315,7 +308,7 @@ inline  size_t HashMatrix<I,R>::simpleinsert(I ii, I jj,Hash &h)
     state=unsorted;
     re_do_numerics=1;
     re_do_symbolic=1;
-    
+
     type_state=type_HM;
     if(nnz==nnzmax) {
         Increaze();
@@ -378,7 +371,7 @@ void AddMul(HashMatrix<I,RAB> &AB,HashMatrix<I,RA> &A, HashMatrix<I,RB> &B,bool 
         RA aij=A.aij[l];
         if(ta)  swap(i,j);
         if(tca) aij=HashMatrix<I,RA>::conj(aij);
-        
+
         for(size_t ll=B.p[j]; ll<  B.p[j+1] ;++ll)
         {
             I k = Bj[ll];
@@ -386,7 +379,7 @@ void AddMul(HashMatrix<I,RAB> &AB,HashMatrix<I,RA> &A, HashMatrix<I,RB> &B,bool 
                   << ll << " " << B.i[ll] <<" " << B.j[ll]<< " ::  " << A.aij[l]*B.aij[ll] <<endl;
             assert(j == Bi[ll]);
             RB bjk = tcb ? HashMatrix<I,RB>::conj(B.aij[ll]) : B.aij[ll];
-            
+
             AB(i,k) += c* aij*bjk;
         }
     }
@@ -404,10 +397,10 @@ std::ostream & operator<<(std::ostream & f,  const HashMatrix<I,R> &A)
     f << "# Sparse Matrix (Morse)  " << &A << endl;
     f << "# first line: n m (is symmetic) nnz \n";
     f << "# after for each nonzero coefficient:   i j a_ij where (i,j) \\in  {1,...,n}x{1,...,m} \n";
-    
+
     f << A.n << " " << A.m << " " << A.half << "  " << A.nnz <<endl;
     I k=A.p[0];
-    
+
     for (I i=0;i<A.n;i++)
     {
         I ke=A.p[i+1];
@@ -434,12 +427,12 @@ tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,Virt
 {
 
     typedef typename list<tuple<R,VirtualMatrix<int,R> *,bool> >::const_iterator lconst_iterator;
-    
+
     lconst_iterator begin=lM.begin();
     lconst_iterator end=lM.end();
     lconst_iterator i;
- 
-    
+
+
     int n=0,m=0;
     bool sym=true;
     for(i=begin;i!=end&&sym;i++)
@@ -459,18 +452,17 @@ tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,Virt
             VirtualMatrix<int,R> & M=*get<1>(*i);
             bool transpose = get<2>(*i) !=  trans;
             bool conjuge = get<2>(*i) !=  cnj;
-            
+
             ffassert( &M);
             R coef= get<0>(*i);
             if(verbosity>99)
                 cout << "                "<< iter++<< " BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " <<  get<2>(*i) << endl;
            { if(transpose) {m=max(m,M.n); n=max(n,M.m);} else{n=max(M.n,n); m=max(M.m,m);}}
-           
+
             M.addMatTo(coef,mij,transpose,ii00,jj00,conjuge,0.0,sym);
         }
     }
-    int nbcoef=mij.size();
- 
+
     //V4 return new   MatriceMorseOld<R>(n,m,mij,sym);
     return make_tuple(n,m,sym);
 }
@@ -478,14 +470,14 @@ tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,Virt
 template<class R>
 tuple<int,int,bool> nmCombMat(const list<tuple<R,VirtualMatrix<int,R>*,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
 {
-    
+
     typedef typename list<tuple<R,VirtualMatrix<int,R> *,bool> >::const_iterator lconst_iterator;
-    
+
     lconst_iterator begin=lM.begin();
     lconst_iterator end=lM.end();
     lconst_iterator i;
-    
-    
+
+
     int n=0,m=0;
     bool sym=true;
     for(i=begin;i!=end&&sym;i++++)
@@ -497,7 +489,7 @@ tuple<int,int,bool> nmCombMat(const list<tuple<R,VirtualMatrix<int,R>*,bool> >  
                 sym = false;
         }
     }
-    
+
     for(i=begin;i!=end;i++++)
     {
         if(std::get<1>(*i)) // M == 0 => zero matrix
@@ -509,27 +501,25 @@ tuple<int,int,bool> nmCombMat(const list<tuple<R,VirtualMatrix<int,R>*,bool> >  
             if(verbosity>99)
                 cout << "                BuildCombMat + " << coef << "*" << &M << " " << sym << "  t = " << transpose << " " << std::get<2>(*i) << endl;
             { if(transpose) {m=max(m,M.n); n=max(n,M.m);} else{n=max(M.n,n); m=max(M.m,m);}}
-            
+
         }
     }
-    
+
     return make_tuple(n,m,sym);
 }
 
 template<class R>
 HashMatrix<int,R>* BuildCombMat(const list<tuple<R,VirtualMatrix<int,R>*,bool> >  &lM,bool trans=false,int ii00=0,int jj00=0)
 {
-    
-    //ffassert(0);
-    
+
     auto nmsym=nmCombMat(lM,trans,ii00,jj00);
     int n = std::get<0>(nmsym), m =std::get<1>(nmsym);
     bool half= std::get<2>(nmsym);
     HashMatrix<int,R> *  mij= new HashMatrix<int,R>(n,m,0,half);
-    nmsym=BuildCombMat(*mij,lM,trans,ii00,jj00,trans);// remember trans => conj 
-    
+    nmsym=BuildCombMat(*mij,lM,trans,ii00,jj00,trans);// remember trans => conj
+
     return mij; // V4 mij;
-    
+
 }
 
 template<class I>
@@ -569,7 +559,7 @@ void HashMatrix<I,R>::set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, RR 
     half=hhalf;
     Increaze(nnnz);
     nnz=nnnz;
-    
+
     HMcopy(i,ii,nnnz);
     HMcopy(j,jj,nnnz);
     HMcopy(aij,aa,nnnz,ff);
@@ -585,11 +575,10 @@ void HashMatrix<I,R>::set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, R *
     half=hhalf;
     Increaze(nnnz);
     nnz=nnnz;
-    
+
     HMcopy(i,ii,nnnz);
     HMcopy(j,jj,nnnz);
     HMcopy(aij,aa,nnnz);
     ReHash();
 }
-// #include "HashMatrix-tmpl.hpp"
 #endif

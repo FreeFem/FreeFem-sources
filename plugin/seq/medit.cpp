@@ -1829,7 +1829,7 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator () (Stack stack)  const {
 	int typsol, nbsol;
 	nbsol = offset - 1;
 
-	int TypTab[l.size() - 1]={};
+	int TypTab[l.size() - 1];
 
 	for (size_t i = 0; i < l.size() - 1; i++) {
 		TypTab[i] = l[i + 1].what;

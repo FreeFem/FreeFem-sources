@@ -15,12 +15,10 @@ using namespace std;
 
 #include "FESpacen.hpp"
 #include "FESpace.hpp"
-//#include "lex.hpp"
 #include "HashMatrix.hpp"
 
 #include "SparseLinearSolver.hpp"
 
-//#include "MatriceCreuse_tpl.hpp"
 #include "MeshPoint.hpp"
 #include "Operator.hpp"
 #include "lex.hpp"
@@ -63,7 +61,7 @@ Mesh * GluMesh(listMesh const & lst)
     int kk=0;
   for(list<Mesh const *>::const_iterator i=lth.begin();i != lth.end();++i)
     {
-       if(! *i ) continue; //
+       if(! *i ) continue;
         ++kk;
        const Mesh &Th(**i);
       th0=&Th;
@@ -102,11 +100,11 @@ Mesh * GluMesh(listMesh const & lst)
     map<pair<int,int>,int> bbe;
     for(list<Mesh const  *>::const_iterator i=lth.begin();i != lth.end();++i)
       {
-          if(! *i ) continue; //
+          if(! *i ) continue;
 	const Mesh &Th(**i);
 	if(!*i) continue;
 	if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
-	
+
 	for (int ii=0;ii<Th.nv;ii++)
 	{
 	  const Vertex &vi(Th(ii));
@@ -163,7 +161,6 @@ Mesh * GluMesh(listMesh const & lst)
     R2 Pn,Px;
     m->BoundingBox(Pn,Px);
     m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
-    //    m->decrement();
     return m;
   }
 
@@ -183,7 +180,6 @@ struct Op2_setmesh: public binary_function<AA,BB,RR> {
     pmesh  p=GluMesh(b);
 
       if(!INIT &&  *a) (**a).destroy() ;
-    //  Add2StackOfPtr2FreeRC(stack,p); //  the pointer is use to set variable so no remove.
     return *a=p,a;
   }
 };
@@ -226,9 +222,6 @@ basicAC_F0::name_and_type SetMesh_Op::name_param[]= {
   {  "fregion", &typeid(long)},
   {  "rmledges", &typeid(long)},
   {  "rmInternalEdges", &typeid(bool)}
-
-
-
 };
 
 int  ChangeLab(const map<int,int> & m,int lab)
@@ -348,7 +341,7 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
           double sa=0.5,sb=1-sa;
           R2 PA(TriangleHat[VerticesOfTriangularEdge[ke][0]]),
           PB(TriangleHat[VerticesOfTriangularEdge[ke][1]]);
-          R2 Pt(PA*sa+PB*sb ); //
+          R2 Pt(PA*sa+PB*sb );
           //  void set(const Mesh & aTh,const R2 &P2,const R2 & P_Hat,const  Triangle & aK,int ll,const R2 &NN,int iedge,int VFF=0)
           MeshPointStack(stack)->set(Th,K(Pt),Pt,K,l1,R2(E.y,-E.x)/le,ke);
 	  l1 =GetAny<long>( (*flab)(stack)) ;
@@ -393,11 +386,8 @@ void init_glumesh2D()
   Dcl_Type<listMesh>();
   typedef Mesh const  *pmesh;
 
-  //Dcl_Type<listMesh3>();
-  //typedef Mesh3 *pmesh3;
   if(verbosity>2)
     cout << " glumesh2D " ;
-  //cout << " je suis dans Init " << endl;
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,pmesh,pmesh>  >      );
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,listMesh,pmesh>  >      );
   TheOperators->Add("=",new OneBinaryOperator_st< Op2_setmesh<false,pmesh*,pmesh*,listMesh>  >     );
@@ -417,12 +407,8 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   Dcl_Type<listMesh>();
   typedef Mesh *pmesh;
 
-  //Dcl_Type<listMesh3>();
-  //typedef Mesh3 *pmesh3;
-
   if (verbosity)
     cout << "  glumesh2D " ;
-  //cout << " je suis dans Init " << endl;
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,pmesh,pmesh>  >      );
   TheOperators->Add("+",new OneBinaryOperator_st< Op2_addmesh<listMesh,listMesh,pmesh>  >      );
   TheOperators->Add("=",new OneBinaryOperator_st< Op2_setmesh<false,pmesh*,pmesh*,listMesh>  >     );

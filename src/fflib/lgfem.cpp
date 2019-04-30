@@ -1,34 +1,33 @@
 /// \file
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :      
-// USAGE    :        
-// ORG      : 
+// SUMMARY  :
+// USAGE    :
+// ORG      :
 // AUTHOR   : Frederic Hecht
 // E-MAIL   : hecht@ann.jussieu.fr
 //
 
 /*
- 
+
  This file is part of Freefem++
- 
+
  Freefem++ is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation; either version 2.1 of the License, or
  (at your option) any later version.
- 
+
  Freefem++  is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #ifdef __MWERKS__
 #pragma optimization_level 0
-//#pragma inline_depth(0)
 #endif
 
 #include  <cmath>
@@ -47,12 +46,9 @@ using namespace std;
 
 #include "SparseLinearSolver.hpp"
 
-//#include "MatriceCreuse_tpl.hpp"
-
-
 #include "MeshPoint.hpp"
 #include <complex>
-#include "Operator.hpp" 
+#include "Operator.hpp"
 
 #include <set>
 #include <map>
@@ -95,24 +91,6 @@ template<class R>
  TypeVarForm<R> * TypeVarForm<R>::Global;
 }
 
-/*
-const int nTypeSolveMat=10;
-int kTypeSolveMat;
-TypeSolveMat *dTypeSolveMat[nTypeSolveMat];
-
- AnyType Long2TypeSolveMat(Stack, const AnyType &ll) {
-      long l=GetAny<long>(ll);
-    ffassert( l>=0 && l <kTypeSolveMat);
-    return dTypeSolveMat[l];
-}
- AnyType  TypeSolveMat2Long(Stack,const AnyType  &tt ) {
-     const TypeSolveMat *t = GetAny<TypeSolveMat *>(tt);
-    for(long l=0;  l <kTypeSolveMat; ++l)
-	if( t==dTypeSolveMat[l]) return l;
-    return long (kTypeSolveMat-1); // sparse solver case 
-}
-*/
-
 basicAC_F0::name_and_type  OpCall_FormBilinear_np::name_param[]= {
 {   "bmat",&typeid(Matrice_Creuse<R>* )},
      LIST_NAME_PARM_MAT
@@ -124,11 +102,10 @@ basicAC_F0::name_and_type  OpCall_FormLinear_np::name_param[]= {
 };
 
 
-
-const E_Array * Array(const C_F0 & a) { 
+const E_Array * Array(const C_F0 & a) {
   if (a.left() == atype<E_Array>() )
     return dynamic_cast<const E_Array *>(a.LeftValue());
-  else 
+  else
     return 0;
 }
 bool Box2(const C_F0 & bb, Expression * box)
@@ -140,16 +117,16 @@ bool Box2(const C_F0 & bb, Expression * box)
     box[1] = to<double>((*a)[1]);
     return true;
     }
-  else 
+  else
     return false;
-  
+
 }
 bool Box2x2(Expression  bb, Expression * box)
 {
   const E_Array * a= dynamic_cast<const E_Array *>(bb);
   if(a && a->size() == 2)
      return Box2((*a)[0],box)  &&  Box2((*a)[1],box+2) ;
-  else 
+  else
     return false;
 }
 void dump_table()
@@ -157,14 +134,14 @@ void dump_table()
    cout << " dump the table of the language " << endl;
    cout << " ------------------------------ " <<endl <<endl;
 	map<const string,basicForEachType *>::const_iterator i; ;
-	       
+
 	for (i= map_type.begin();i !=map_type.end();i++)
 	  {
 	   cout << " type : " << i->first << endl;
 	   if( i->second )
 	     i->second->ShowTable(cout);
 	   else cout << " Null \n";
-	   cout << "\n\n";     
+	   cout << "\n\n";
 	  }
 
 	for (i= map_type.begin();i !=map_type.end();i++)
@@ -173,10 +150,10 @@ void dump_table()
 	   if( i->second )
 	     i->second->ShowTable(cout);
 	   else cout << " Null \n";
-	   cout << "\n\n";    
-	   
+	   cout << "\n\n";
+
 	  }
-	  
+
 	 cout << "--------------------- " << endl;
 	 cout << *TheOperators << endl;
 	 cout << "--------------------- " << endl;
@@ -184,30 +161,24 @@ void dump_table()
 }
 
 
-
-
-
-
-bool In(long *viso,int n,long v) 
+bool In(long *viso,int n,long v)
 {
   int i=0,j=n,k;
-  if  (v <viso[0] || v >viso[j-1]) 
-    return false;  
-  while (i<j-1)    
+  if  (v <viso[0] || v >viso[j-1])
+    return false;
+  while (i<j-1)
    if ( viso[k=(i+j)/2]> v) j=k;
    else i=k;
   return (viso[i]=v);
 }
 
 
-
 class  LinkToInterpreter { public:
  Type_Expr   P,N,x,y,z,label,region,nu_triangle,nu_face,nu_edge,lenEdge,hTriangle,area,inside,volume;
-  LinkToInterpreter() ; 
+  LinkToInterpreter() ;
 };
 
 LinkToInterpreter * l2interpreter;
-
 
   using namespace Fem2D;
   using namespace EF23;
@@ -216,145 +187,145 @@ template<class Result,class A>
 class E_F_A_Ptr_o_R :public  E_F0 { public:
   typedef Result A::* ptr;
   Expression a0;
-  ptr p; 
-  E_F_A_Ptr_o_R(Expression aa0,ptr pp) 
+  ptr p;
+  E_F_A_Ptr_o_R(Expression aa0,ptr pp)
     : a0(aa0),p(pp) {}
   AnyType operator()(Stack s)  const {
     return SetAny<Result*>(&(GetAny<A*>((*a0)(s))->*p));}
-  bool MeshIndependent() const {return a0->MeshIndependent();} // 
-  
+  bool MeshIndependent() const {return a0->MeshIndependent();} //
+
 };
 //  ----
 //  remarque pas de template, cela ne marche pas encore ......
- class E_P_Stack_P   :public  E_F0mps { public: 
+ class E_P_Stack_P   :public  E_F0mps { public:
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<R3*>(&MeshPointStack(s)->P);} 
-    operator aType () const { return atype<R3*>();}         
-    
-}; 
- class E_P_Stack_Px   :public  E_F0mps { public: 
-  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<R*>(&MeshPointStack(s)->P.x);} 
-    operator aType () const { return atype<R*>();}         
-    
-}; 
- class E_P_Stack_Py   :public  E_F0mps { public: 
-  AnyType operator()(Stack s)  const {throwassert(* (long *) s);
-    return SetAny<R*>(&MeshPointStack(s)->P.y);} 
-    operator aType () const { return atype<R*>();}         
-    
-}; 
- class E_P_Stack_Pz   :public  E_F0mps { public: 
-  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<R*>(&MeshPointStack(s)->P.z);} 
-    operator aType () const { return atype<R*>();}         
-    
-}; 
-
- class E_P_Stack_N   :public  E_F0mps { public: 
-  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<R3*>(&MeshPointStack(s)->N);}
-        operator aType () const { return atype<R3*>();}         
+    return SetAny<R3*>(&MeshPointStack(s)->P);}
+    operator aType () const { return atype<R3*>();}
 
 };
- class E_P_Stack_Nx   :public  E_F0mps { public: 
+ class E_P_Stack_Px   :public  E_F0mps { public:
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<R*>(&MeshPointStack(s)->N.x);} 
-    operator aType () const { return atype<R*>();}         
-    
-}; 
- class E_P_Stack_Ny   :public  E_F0mps { public: 
-  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<R*>(&MeshPointStack(s)->N.y);} 
+    return SetAny<R*>(&MeshPointStack(s)->P.x);}
     operator aType () const { return atype<R*>();}
-}; 
- class E_P_Stack_Nz   :public  E_F0mps { public: 
+
+};
+ class E_P_Stack_Py   :public  E_F0mps { public:
+  AnyType operator()(Stack s)  const {throwassert(* (long *) s);
+    return SetAny<R*>(&MeshPointStack(s)->P.y);}
+    operator aType () const { return atype<R*>();}
+
+};
+ class E_P_Stack_Pz   :public  E_F0mps { public:
+  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+    return SetAny<R*>(&MeshPointStack(s)->P.z);}
+    operator aType () const { return atype<R*>();}
+
+};
+
+ class E_P_Stack_N   :public  E_F0mps { public:
+  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+    return SetAny<R3*>(&MeshPointStack(s)->N);}
+        operator aType () const { return atype<R3*>();}
+
+};
+ class E_P_Stack_Nx   :public  E_F0mps { public:
+  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+    return SetAny<R*>(&MeshPointStack(s)->N.x);}
+    operator aType () const { return atype<R*>();}
+
+};
+ class E_P_Stack_Ny   :public  E_F0mps { public:
+  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+    return SetAny<R*>(&MeshPointStack(s)->N.y);}
+    operator aType () const { return atype<R*>();}
+};
+ class E_P_Stack_Nz   :public  E_F0mps { public:
      AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<R*>(&MeshPointStack(s)->N.z);} 
-    operator aType () const { return atype<R*>();}         
-    
-}; 
+    return SetAny<R*>(&MeshPointStack(s)->N.z);}
+    operator aType () const { return atype<R*>();}
 
- class E_P_Stack_Region   :public  E_F0mps { public: 
-  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<long*>(&MeshPointStack(s)->region);} 
-    operator aType () const { return atype<long*>();}         
-    
-}; 
- class E_P_Stack_Label   :public  E_F0mps { public: 
-  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<long*>(&MeshPointStack(s)->label);} 
-    operator aType () const { return atype<long *>();}         
-    
-}; 
- class E_P_Stack_Mesh   :public  E_F0mps { public: 
-  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<pmesh >(const_cast<pmesh>(MeshPointStack(s)->Th));} 
-  operator aType () const { return atype<pmesh>();}         
+};
 
-}; 
- class E_P_Stack_Nu_Triangle   :public  E_F0mps { public: 
+ class E_P_Stack_Region   :public  E_F0mps { public:
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<long>(MeshPointStack(s)->t);} 
-    operator aType () const { return atype<long>();}         
-    
-}; 
- class E_P_Stack_Nu_Vertex   :public  E_F0mps { public: 
-  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<long>(MeshPointStack(s)->v);} 
-    operator aType () const { return atype<long>();}         
-    
-}; 
- class E_P_Stack_Nu_Face   :public  E_F0mps { public: 
-  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<long>(MeshPointStack(s)->f);} 
-    operator aType () const { return atype<long>();}         
-    
-}; 
- class E_P_Stack_Nu_Edge   :public  E_F0mps { public: 
-  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<long>(MeshPointStack(s)->e);} 
-    operator aType () const { return atype<long>();}         
-    
-}; 
- class E_P_Stack_inside   :public  E_F0mps { public: 
-  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<double>(MeshPointStack(s)->outside? 0.0 : 1.0 );} 
-    operator aType () const { return atype<double>();}         
-    
-}; 
+    return SetAny<long*>(&MeshPointStack(s)->region);}
+    operator aType () const { return atype<long*>();}
 
-class E_P_Stack_lenEdge   :public  E_F0mps { public: 
+};
+ class E_P_Stack_Label   :public  E_F0mps { public:
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    MeshPoint * mp=MeshPointStack(s);      
+    return SetAny<long*>(&MeshPointStack(s)->label);}
+    operator aType () const { return atype<long *>();}
+
+};
+ class E_P_Stack_Mesh   :public  E_F0mps { public:
+  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+    return SetAny<pmesh >(const_cast<pmesh>(MeshPointStack(s)->Th));}
+  operator aType () const { return atype<pmesh>();}
+
+};
+ class E_P_Stack_Nu_Triangle   :public  E_F0mps { public:
+  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+    return SetAny<long>(MeshPointStack(s)->t);}
+    operator aType () const { return atype<long>();}
+
+};
+ class E_P_Stack_Nu_Vertex   :public  E_F0mps { public:
+  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+    return SetAny<long>(MeshPointStack(s)->v);}
+    operator aType () const { return atype<long>();}
+
+};
+ class E_P_Stack_Nu_Face   :public  E_F0mps { public:
+  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+    return SetAny<long>(MeshPointStack(s)->f);}
+    operator aType () const { return atype<long>();}
+
+};
+ class E_P_Stack_Nu_Edge   :public  E_F0mps { public:
+  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+    return SetAny<long>(MeshPointStack(s)->e);}
+    operator aType () const { return atype<long>();}
+
+};
+ class E_P_Stack_inside   :public  E_F0mps { public:
+  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+    return SetAny<double>(MeshPointStack(s)->outside? 0.0 : 1.0 );}
+    operator aType () const { return atype<double>();}
+
+};
+
+class E_P_Stack_lenEdge   :public  E_F0mps { public:
+  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
+    MeshPoint * mp=MeshPointStack(s);
     ffassert(mp->T && mp ->e >=0 && mp->d==2);
     double l= mp->T->lenEdge(mp->e);
-    return SetAny<double>(l);} 
-    operator aType () const { return atype<double>();}         
-    
-}; 
+    return SetAny<double>(l);}
+    operator aType () const { return atype<double>();}
 
-class E_P_Stack_hTriangle   :public  E_F0mps { public: 
+};
+
+class E_P_Stack_hTriangle   :public  E_F0mps { public:
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
     MeshPoint * mp=MeshPointStack(s);
     assert(mp->T) ;
     double l=1e100;
     if( mp->d==2) l=mp->T->h();
       else if ( mp->d==3) l=mp->T3->lenEdgesmax();
-    return SetAny<double>(l);} 
-    operator aType () const  { return atype<double>();}         
-    
+    return SetAny<double>(l);}
+    operator aType () const  { return atype<double>();}
+
 };
 
-class E_P_Stack_nTonEdge   :public  E_F0mps { public: 
+class E_P_Stack_nTonEdge   :public  E_F0mps { public:
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
     MeshPoint * mp=MeshPointStack(s);
     assert(mp->T && mp->e > -1 && mp->d==2 ) ;
     long l=mp->Th->nTonEdge(mp->t,mp->e);
     // cout << " nTonEdge " << l << endl;
-    return SetAny<long>( l) ;} 
-    operator aType () const  { return atype<long>();}         
-    
+    return SetAny<long>( l) ;}
+    operator aType () const  { return atype<long>();}
+
 };
 
 class E_P_Stack_nElementonB   :public  E_F0mps { public:
@@ -368,7 +339,7 @@ class E_P_Stack_nElementonB   :public  E_F0mps { public:
         // cout << " nTonEdge " << l << endl;
         return SetAny<long>( l) ;}
     operator aType () const  { return atype<long>();}
-    
+
 };
 
 template<int NBT>
@@ -377,32 +348,31 @@ class E_P_Stack_TypeEdge   :public  E_F0mps { public:
         MeshPoint * mp=MeshPointStack(s);
         assert(mp->T && mp->e > -1 && mp->d==2 ) ;
         long l=mp->Th->nTonEdge(mp->t,mp->e)==NBT;
-        // cout << " nTonEdge " << l << endl;
         return SetAny<long>( l) ;}
     operator aType () const  { return atype<long>();}
-    
+
 };
 
-class E_P_Stack_areaTriangle   :public  E_F0mps { public: 
+class E_P_Stack_areaTriangle   :public  E_F0mps { public:
   AnyType operator()(Stack s)  const { throwassert(* (long *) s);
     MeshPoint * mp=MeshPointStack(s);
     assert(mp->T) ;
       double l=-1; // unset ...
-    if(mp->d==2)	
-      l= mp->T->area;	
+    if(mp->d==2)
+      l= mp->T->area;
     else if (mp->d==3 && mp->f >=0)
-      {	
+      {
 	  R3 NN = mp->T3->N(mp->f);
 	  l= NN.norme()/2.;
       }
-    else 
+    else
       {
 	  cout << "erreur : E_P_Stack_areaTriangle" << mp->d << " " << mp->f << endl;
-	  ffassert(0); // undef 
+	  ffassert(0); // undef
       }
-    return SetAny<double>(l);} 
-    operator aType () const { return atype<double>();}         
-    
+    return SetAny<double>(l);}
+    operator aType () const { return atype<double>();}
+
 };
 
 // Add jan 2018
@@ -423,57 +393,30 @@ class E_P_Stack_EdgeOrient  :public  E_F0mps { public:
         return r ;
     }
     operator aType () const  { return atype<double>();}
-    
+
 };
 
 
 // add FH
-class E_P_Stack_VolumeTet   :public  E_F0mps { public: 
+class E_P_Stack_VolumeTet   :public  E_F0mps { public:
     AnyType operator()(Stack s)  const { throwassert(* (long *) s);
 	MeshPoint * mp=MeshPointStack(s);
 	assert(mp->T) ;
 	double l=-1; // unset ...
 	if (mp->d==3 && mp->T3 )
-	  {	
+	  {
 	      l= mp->T3->mesure();
 	  }
-	else 
+	else
 	  {
 	    cout << "erreur : E_P_Stack_VolumeTet" << mp->d << " " << mp->f << endl;
-	    ffassert(0); // undef 
+	    ffassert(0); // undef
 	  }
-	return SetAny<double>(l);} 
-    operator aType () const { return atype<double>();}         
-    
-}; 
+	return SetAny<double>(l);}
+    operator aType () const { return atype<double>();}
 
-/*
-class New_MeshPoint : public E_F0mps {
-
-};*/
-
-
- 
-
- 
-//inline pfes MakePtr(pmesh * const &  a, TypeOfFE * const & tef){ return pfes(new pfes_tef(a,tef)) ;}
-//inline pfes MakePtr(pmesh * const &  a){ return pfes(new pfes_tef(a,&P1Lagrange)) ;}
-//inline pfes MakePtr(pfes * const &  a,long const & n){ return pfes(new pfes_fes(a,n)) ;}
-/*
-class E_pfes : public E_F0 {
-  const int N;
-  Expression *Th,*tef; 
-  E_pfes(Expression *TTh,*ttef) : Th(TTh),tef(ttef),N(ttef?ttef->nbitem():0) {}
-   virtual AnyType operator()(Stack)  const {
-   return AnyType<pfes*>
-  }
-  
-  virtual size_t nbitem() const {return 1;}  
 };
-  OneOperator_pfes():OneOperator(atype<void>(),atype<E_Array>(),atype<E_Array>()) {}
-    E_F0 * code(const basicAC_F0 & args) const ; 
-  
-};*/
+
 template<class R>
 class  E_StopGC: public StopGC<R> {
 public:
@@ -486,7 +429,7 @@ public:
     Kn_ xx,gg;
     C_F0 citer,cxx,cgg;
     C_F0 stop;
-    
+
     E_StopGC(Stack ss,long nn,const  Polymorphic * op): s(ss),n(nn),iter(-1),
     xx(0,0),gg(0,0),
     citer(CConstant<long*>(&iter)),
@@ -494,7 +437,7 @@ public:
     cgg(dCPValue(&gg)),
     stop(op,"(",citer,cxx,cgg)
     {
-        
+
     }
     ~E_StopGC()
     {//  a verifier ???? FH....
@@ -506,7 +449,6 @@ public:
     // template<class R> class StopGC { public: virtual  bool Stop(int iter, R *, R * ){return false;} };
     bool Stop(int iterr, R *x, R * g)
     {
-        // cout << " Stop " << iterr << endl;
         iter=iterr;
         xx.set(x,n);
         gg.set(g,n);
@@ -526,45 +468,39 @@ class LinearCG : public OneOperator
    Stack stack;
    mutable  Kn x;
    C_F0 c_x;
-  
+
    Expression  mat1,mat;
    typedef  typename RNM_VirtualMatrix<R>::plusAx plusAx;
-   MatF_O(int n,Stack stk,const OneOperator * op) 
+   MatF_O(int n,Stack stk,const OneOperator * op)
      : RNM_VirtualMatrix<R>(n),stack(stk),
        x(n),c_x(CPValue(x)),
        mat1(op->code(basicAC_F0_wa(c_x))),
        mat( CastTo<Kn_>(C_F0(mat1,(aType)*op))) {
-         //ffassert(atype<Kn_ >() ==(aType) *op);
-         // WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005   
-         
+
          }
-   ~MatF_O() { 
-     // cout << " del MatF_O mat " << endl;
-     if(mat1 != mat) 
+   ~MatF_O() {
+     if(mat1 != mat)
        delete mat;
       delete mat1;
-     // cout << " del MatF_Ocx ..." <<  endl;
       Expression zzz = c_x;
-     // cout << " zzz "<< zzz << endl;
      delete zzz;
-    // WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
-     
+
      }
-   void addMatMul(const  Kn_  & xx, Kn_ & Ax) const { 
+   void addMatMul(const  Kn_  & xx, Kn_ & Ax) const {
       ffassert(xx.N()==Ax.N());
       x =xx;
       Ax  += GetAny<Kn_>((*mat)(stack));
       WhereStackOfPtr2Free(stack)->clean();
-       } 
-    plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
-  virtual bool ChecknbLine(int n) const { return true;}  
-  virtual bool ChecknbColumn(int m) const { return true;} 
-    
-};  
+       }
+    plusAx operator*(const Kn &  x) const {return plusAx(this,x);}
+  virtual bool ChecknbLine(int n) const { return true;}
+  virtual bool ChecknbColumn(int m) const { return true;}
+
+};
 
   class E_LCG: public E_F0mps { public:
-      
-      
+
+
    const int cas;// <0 => Nolinear
    static const int n_name_param=6;
 
@@ -572,33 +508,32 @@ class LinearCG : public OneOperator
 
 
   Expression nargs[n_name_param];
-   
-  const OneOperator *A, *C; 
+
+  const OneOperator *A, *C;
   Expression X,B;
 
-      
+
   E_LCG(const basicAC_F0 & args,int cc) :cas(cc)
    {
       args.SetNameParam(n_name_param,name_param,nargs);
       {  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[0].LeftValue());
          ffassert(op);
          A = op->Find("(",ArrayOfaType(atype<Kn* >(),false)); }
-      if (nargs[2]) 
+      if (nargs[2])
       {  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[2]);
-         ffassert(op); 
+         ffassert(op);
          C = op->Find("(",ArrayOfaType(atype<Kn* >(),false)); }
        else  C =0;
       X = to<Kn*>(args[1]);
       if (args.size()>2)
         B = to<Kn*>(args[2]);
-      else 
+      else
         B=0;
    }
-     
+
      virtual AnyType operator()(Stack stack)  const {
        int ret=-1;
        E_StopGC<R> *stop=0;
-      // WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH mars 2005   
       try {
       Kn &x = *GetAny<Kn *>((*X)(stack));
       int n=x.N();
@@ -607,59 +542,56 @@ class LinearCG : public OneOperator
 	  double *veps=0;
       int nbitermax=  100;
       long verb = verbosity;
-      
+
       if (nargs[0]) eps= GetAny<double>((*nargs[0])(stack));
       if (nargs[1]) nbitermax = GetAny<long>((*nargs[1])(stack));
       if (nargs[3]) veps=GetAny<double*>((*nargs[3])(stack));
       if (nargs[4]) verb=Abs(GetAny<long>((*nargs[4])(stack)));
       if (nargs[5]) stop= new E_StopGC<R>(stack,n,dynamic_cast<const  Polymorphic *>(nargs[5]));
-//          cout << " E_LCG: Stop = " << stop << " " << verb << endl;
       long gcverb=51L-Min(Abs(verb),50L);
-      if(verb==0) gcverb = 1000000000;// no print 
+      if(verb==0) gcverb = 1000000000;// no print
       if(veps) eps= *veps;
       KN<R>  bzero(B?1:n); // const array zero
-      bzero=R(); 
-      KN<R> *bb=&bzero; 
+      bzero=R();
+      KN<R> *bb=&bzero;
       if (B) {
         Kn &b = *GetAny<Kn *>((*B)(stack));
         R p = (b,b);
-       if (p== R()) 
+       if (p== R())
          {
           // ExecError("Sorry LinearCG work only with nul right hand side, so put the right hand in the function");
           }
          bb = &b;
       }
       if (cas<0) {
-       if (C) 
+       if (C)
          { MatF_O CC(n,stack,C);
            ret = NLCG(AA,CC,x,nbitermax,eps, gcverb,stop );}
-        else 
+        else
            ret = NLCG(AA,MatriceIdentite<R>(n),x,nbitermax,eps, gcverb,stop);
         }
-      else 
-      if (C) 
+      else
+      if (C)
        { MatF_O CC(n,stack,C);
          ret = ConjuguedGradient2(AA,CC,x,*bb,nbitermax,eps, gcverb, stop );}
-      else 
+      else
          ret = ConjuguedGradient2(AA,MatriceIdentite<R>(n),x,*bb,nbitermax,eps, gcverb, stop );
       if(veps) *veps = -(eps);
       }
       catch(...)
       {
        if( stop) delete stop;
-       // WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
         throw;
       }
-     // WhereStackOfPtr2Free(stack)->clean(); // FH mars 2005 
      if( stop) delete stop;
-         
+
       return SetAny<long>(ret);
-       
-     }  
-    operator aType () const { return atype<long>();}         
-     
+
+     }
+    operator aType () const { return atype<long>();}
+
   };
-  
+
   E_F0 * code(const basicAC_F0 & args) const {
     return new E_LCG(args,cas);}
   LinearCG() :   OneOperator(atype<long>(),
@@ -668,7 +600,7 @@ class LinearCG : public OneOperator
   LinearCG(int cc) :   OneOperator(atype<long>(),
                              atype<Polymorphic*>(),
                              atype<KN<R> *>()),cas(cc){}
-   
+
 };
 
 
@@ -684,7 +616,7 @@ basicAC_F0::name_and_type  LinearCG<R>::E_LCG::name_param[]= {
 
 
 template<class R>
-class LinearGMRES : public OneOperator 
+class LinearGMRES : public OneOperator
 { public:
   typedef KN<R> Kn;
   typedef KN_<R> Kn_;
@@ -697,36 +629,35 @@ class LinearGMRES : public OneOperator
    Kn *b;
    Expression  mat1,mat;
    typedef  typename RNM_VirtualMatrix<R>::plusAx plusAx;
-   MatF_O(int n,Stack stk,const OneOperator * op,Kn *bb) 
+   MatF_O(int n,Stack stk,const OneOperator * op,Kn *bb)
      : RNM_VirtualMatrix<R>(n),
        stack(stk),
        x(n),c_x(CPValue(x)),b(bb),
-       mat1(op->code(basicAC_F0_wa(c_x))), 
+       mat1(op->code(basicAC_F0_wa(c_x))),
        mat( CastTo<Kn_>(C_F0(mat1,(aType)*op))  /*op->code(basicAC_F0_wa(c_x))*/) {
-      // ffassert(atype<Kn_ >() ==(aType) *op);
        }
      ~MatF_O() { if(mat1!=mat) delete mat; delete mat1; delete c_x.LeftValue();}
    void addMatMul(const  Kn_  & xx, Kn_ & Ax) const {
-   
+
      ffassert(xx.N()==Ax.N());
        x =xx;
       Ax    += GetAny<Kn_>((*mat)(stack));
       if(b && &Ax!=b) Ax += *b; // Ax -b => add b (not in cas of init. b c.a.d  &Ax == b
       WhereStackOfPtr2Free(stack)->clean(); //  add dec 2008
-   } 
-    plusAx operator*(const Kn &  x) const {return plusAx(this,x);} 
-  virtual bool ChecknbLine(int n) const { return true;}  
-  virtual bool ChecknbColumn(int m) const { return true;} 
-    
-};  
- 
+   }
+    plusAx operator*(const Kn &  x) const {return plusAx(this,x);}
+  virtual bool ChecknbLine(int n) const { return true;}
+  virtual bool ChecknbColumn(int m) const { return true;}
+
+};
+
 
   class E_LGMRES: public E_F0mps { public:
    const int cas;// <0 => Nolinear
    static basicAC_F0::name_and_type name_param[] ;
    static const int n_name_param =7;
    Expression nargs[n_name_param];
-  const OneOperator *A, *C; 
+  const OneOperator *A, *C;
   Expression X,B;
 
   E_LGMRES(const basicAC_F0 & args,int cc) :cas(cc)
@@ -735,18 +666,18 @@ class LinearGMRES : public OneOperator
       {  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[0].LeftValue());
          ffassert(op);
          A = op->Find("(",ArrayOfaType(atype<Kn* >(),false)); }
-      if (nargs[2]) 
+      if (nargs[2])
       {  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[2]);
-         ffassert(op); 
+         ffassert(op);
          C = op->Find("(",ArrayOfaType(atype<Kn* >(),false)); }
        else  C =0;
       X = to<Kn*>(args[1]);
       if (args.size()>2)
         B = to<Kn*>(args[2]);
-      else 
+      else
         B=0;
    }
-     
+
      virtual AnyType operator()(Stack stack)  const {
       Kn &x = *GetAny<Kn *>((*X)(stack));
       Kn b(x.n);
@@ -766,16 +697,16 @@ class LinearGMRES : public OneOperator
       if (nargs[6]) stop= new E_StopGC<R>(stack,n,dynamic_cast<const  Polymorphic *>(nargs[6]));
 
 	 long gcverb=51L-Min(Abs(verb),50L);
-	 
-     
+
+
       int ret;
       if(verbosity>4)
-        cout << "  ..GMRES: eps= " << eps << " max iter " << nbitermax 
+        cout << "  ..GMRES: eps= " << eps << " max iter " << nbitermax
              << " dim of Krylov space " << dKrylov << endl;
         KNM<R> H(dKrylov+1,dKrylov+1);
 	int k=dKrylov;//,nn=n;
        double epsr=eps;
- 
+
          KN<R>  bzero(B?1:n); // const array zero
          bzero=R();
          KN<R> *bb=&bzero;
@@ -797,18 +728,10 @@ class LinearGMRES : public OneOperator
              if(verbosity>1) cout << "  ** GMRES set b =  -A(0);  : max=" << bbgmres->max() << " " << bbgmres->min()<<endl;
          }
 
-
-      //cout << " ** GMRES  bb max=" << bb->max() << " " << bb->min()<<endl;
       if (cas<0) {
         ErrorExec("NL GMRES:  to do! sorry ",1);
-/*       if (C) 
-         { MatF_O CC(n,stack,C);
-           ret = NLGMRES(AA,CC,x,nbitermax,eps, 51L-Min(Abs(verbosity),50L) );}
-        else 
-           ret = NLGMRES(AA,MatriceIdentite<R>(n),x,nbitermax,eps, 51L-Min(Abs(verbosity),50L));
-         ConjuguedGradient  */
         }
-      else 
+      else
        {
        if (C)
         { MatF_O CC(n,stack,C,0);
@@ -819,12 +742,12 @@ class LinearGMRES : public OneOperator
       if(verbosity>99)    cout << " Sol GMRES :" << x << endl;
          if(stop) delete stop;
       return SetAny<long>(ret);
-       
-     }  
-    operator aType () const { return atype<long>();}         
-     
+
+     }
+    operator aType () const { return atype<long>();}
+
   };
-  
+
   E_F0 * code(const basicAC_F0 & args) const {
     return new E_LGMRES(args,cas);}
   LinearGMRES() :   OneOperator(atype<long>(),
@@ -833,7 +756,7 @@ class LinearGMRES : public OneOperator
   LinearGMRES(int cc) :   OneOperator(atype<long>(),
                              atype<Polymorphic*>(),
                              atype<KN<R> *>()),cas(cc){}
-   
+
 };
 
 
@@ -852,10 +775,10 @@ template<typename int2>
 typename map<int,int2>::iterator closeto(map<int,int2> & m, int k)
  {
   typename map<int,int2>::iterator i=  m.find(k);
-   if (i==m.end()) 
+   if (i==m.end())
     {
      i=  m.find(k+1);
-     if (i==m.end()) 
+     if (i==m.end())
       i=  m.find(k-1);
     }
    return i;
@@ -864,7 +787,7 @@ typename map<int,int2>::iterator closeto(map<int,int2> & m, int k)
 
 
 template<class T,int N>
-class Smallvect { public: 
+class Smallvect { public:
  T v[N];
  T & operator[](int i){return v[i];}
  const T & operator[](int i) const {return v[i];}
@@ -876,25 +799,24 @@ ostream & operator<<(ostream & f,const Smallvect<T,N> & v)
     return f;
 }
 
-template<class T> 
-int numeroteclink(KN_<T> & ndfv) 
+template<class T>
+int numeroteclink(KN_<T> & ndfv)
 {
          int nbdfv =0;
          for (int i=0;i<ndfv.N();i++)
            if (ndfv[i]>=i)
            {
              int j=i,ii,kkk=0;
-             
+
              do {
                ii=ndfv[j];
 		 ffassert(kkk++<10);
 	       assert(nbdfv <= j);
-             //  assert(ii>=nbdfv);
                ndfv[j]=nbdfv ;
                j=ii;
-               }             
+               }
              while (j!=nbdfv);
-             if (verbosity > 100) 
+             if (verbosity > 100)
              cout << "    ndf: " <<  j << " " <<  ii  << " <- " << nbdfv << " " <<  kkk <<  endl;
               nbdfv++;
            }
@@ -902,41 +824,39 @@ int numeroteclink(KN_<T> & ndfv)
 }
 
 bool  InCircularList(const int *p,int i,int k)
-//  find k in circular list:  i , p[i], p[p[i]], ... 
-{ 
-    int j=i,l=0;    
+//  find k in circular list:  i , p[i], p[p[i]], ...
+{
+    int j=i,l=0;
     do {
 	if (j==k) return true;
 	ffassert(l++<10);
         j=p[j];
-    } while (j!=i);    
+    } while (j!=i);
     return false;
 }
 
-bool BuildPeriodic( 
+bool BuildPeriodic(
   int nbcperiodic,
   Expression *periodic,
   const Mesh &Th,Stack stack,
-  int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe) { 
-  
+  int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe) {
+
 /*
   build numbering of vertex form 0 to nbdfv-1
   and build numbering  of  edge form 0 to nbdfe-1
-  we removing common vextex or common edge    
-  --  we suppose one df by vertex 
-      nbdfv number of df on vertex 
-      ndfv[i]  given the numero of the df of the vertex 
+  we removing common vextex or common edge
+  --  we suppose one df by vertex
+      nbdfv number of df on vertex
+      ndfv[i]  given the numero of the df of the vertex
   -- we suppose 1 df
-*/  
-   typedef Smallvect<int,2> int2;    
+*/
+   typedef Smallvect<int,2> int2;
     if (nbcperiodic ) {
-      
-   //    KN<int> ndfv(Th.nv);
-    //   KN<int> ndfe(Th.neb);
+
        ffassert(ndfv.N()==Th.nv);
        ffassert(ndfe.N()==Th.neb);
-        
-       MeshPoint *mp=MeshPointStack(stack),smp=*mp;   
+
+       MeshPoint *mp=MeshPointStack(stack),smp=*mp;
        int n= nbcperiodic;
        if (verbosity >2)
          cout << " Nb of pair of periodic conditions: = " << n <<  endl;
@@ -945,11 +865,11 @@ bool BuildPeriodic(
        KN<int*> plk1(n),plk2(n);
        KN<int> nlk1(n),nlk2(n);
        KN<int> lab1(n),lab2(n);
-#ifndef  HUGE_VAL      
+#ifndef  HUGE_VAL
        const double infty= numeric_limits<double>::infinity();
 #else
        const double infty= HUGE_VAL;
-#endif       
+#endif
        int nblink1, nblink2;
        int *plink1 , *plink2;
         for (int step=0;step<2;step++)
@@ -962,12 +882,12 @@ bool BuildPeriodic(
                int label2=GetAny<long>((*periodic[k+2])(stack));
                lab1[ip]=label1;
                lab2[ip]=label2;
-               
+
                int l1=nblink1;
                int l2=nblink2;
                plk1[ip]= plink1;
                plk2[ip]= plink2;
-               
+
                for (int ke=0;ke<Th.neb;ke++)
                 {
                  if (Th.bedges[ke].lab==label1)
@@ -982,9 +902,9 @@ bool BuildPeriodic(
                    }
                  }
                nlk1[ip]= nblink1-l1;
-               nlk2[ip]= nblink2-l2;              
+               nlk2[ip]= nblink2-l2;
             }
-            if(step) break; // no reallocl 
+            if(step) break; // no reallocl
             if (verbosity >3)
             cout << "  Periodic = " << nblink1 << " " << nblink2 << " step=" << step << endl;
             link1 = new int[nblink1];
@@ -994,7 +914,7 @@ bool BuildPeriodic(
              ExecError("Periodic:  the both number of edges is not the same ");
             }
          }
-        if ( nblink1 >0) 
+        if ( nblink1 >0)
         {
         for (int ip=0, k=0;ip<n;ip++,k+=4)
           {
@@ -1006,13 +926,13 @@ bool BuildPeriodic(
             double xmn=infty,xmx=-infty,hmn=infty;
             if (verbosity >1)
             cout << "  --Update: periodic  couple label1= " << label1 << ", n edges= " << n1 << "; "
-                                          << ", label2= " << label2<<  ", n edges= " << n2 <<endl; 
+                                          << ", label2= " << label2<<  ", n edges= " << n2 <<endl;
             if (n1 != n2) ExecError("periodic BC:  the number of edges is not the same");
             for (int i1=0;i1<n1;i1++)
              {
               const BoundaryEdge & e =Th.bedges[pke1[i1]];
-              if (e.lab==label1) 
-                {           
+              if (e.lab==label1)
+                {
                  mp->set(e[0].x,e[0].y);
                  double x0=GetAny<double>((*periodic[k+kk1])(stack));
                  mp->set(e[1].x,e[1].y);
@@ -1021,9 +941,9 @@ bool BuildPeriodic(
 			cout << "lab1:  e[" << pke1[i1] << "]  v0:   " <<  e[0].x << " " << e[0].y << "  s = " << x0
 			<< "\t v1 " <<  e[1].x << " " << e[1].y << "  s = " << x1 << endl;
 		    xmn=Min(x1,x0,xmn);
-                 xmx=Max(x1,x0,xmx); 
+                 xmx=Max(x1,x0,xmx);
                  hmn=Min(hmn,Abs(x1-x0));
-               }                                
+               }
              }
             ffassert(hmn>1.0e-20);
             double coef = 8/hmn;
@@ -1031,7 +951,7 @@ bool BuildPeriodic(
             if (verbosity > 2)
             cout << "  --Update: periodic " << xmn << " " << xmx << " " << " h=" << hmn << endl;
             ffassert(coef>1e-10 && (xmx-xmn)*coef < 1.e7 );
-             
+
            //  map construction ----
            for (int i1=0;i1<n1;i1++)
              {
@@ -1058,10 +978,10 @@ bool BuildPeriodic(
                      cout << xx << " " << i0 << " " << ie << " :  " << im->second[0] << " " << im->second[1] << endl;
                     assert( (im->second[1] < 0) && (im->second[0] >=0) );
                     im->second[1]=ie;}
-                   
-               }                                
+
+               }
              }
-            
+
             for (int i2=0;i2<n2;i2++)
              {
               int ie2=pke2[i2];
@@ -1077,15 +997,15 @@ bool BuildPeriodic(
 		 if(verbosity>5 )
 		      cout << "lab2:  e[" << pke2[i2] << "]  v0:   " <<  e[0].x << " " << e[0].y << "  s = " << xx0
 		      << "\t v1 " <<  e[1].x << " " << e[1].y << "  s = " << xx1 << endl;
-		    
+
                  int i0= int((xx0-x0)*coef);
                  int i1= int((xx1-x0)*coef);
                  map<int,int2>::iterator im0=closeto(m,i0);
                  map<int,int2>::iterator im1=closeto(m,i1);
                  if(im0 == m.end() || im1 == m.end() )
-                 	{ 
-			
-			  cout << "Abscisse: s0 = "<< xx0 << " <==> s1 " << xx1  <<endl; 
+                 	{
+
+			  cout << "Abscisse: s0 = "<< xx0 << " <==> s1 " << xx1  <<endl;
 			  ExecError("periodic: Sorry one vertex of edge is losted "); }
                   int ie1=-1;
                  if      (((ie1=im0->second[0])==im1->second[1]) && (ie1>=0)) ;
@@ -1095,7 +1015,7 @@ bool BuildPeriodic(
                  else if (((ie1=im0->second[0])==im1->second[0]) && (ie1>=0)) ;
                  else
                   {
-                   cout << ie2 << " ~ " << im0->second[0] << " " << im0->second[1] << ", " 
+                   cout << ie2 << " ~ " << im0->second[0] << " " << im0->second[1] << ", "
                                         << im1->second[0] << " " << im1->second[1] << endl;
                    ExecError("periodic: Sorry one egde is losted "); }
 		 if(verbosity>50)
@@ -1107,22 +1027,22 @@ bool BuildPeriodic(
                  mp->set(ep[1].x,ep[1].y);
                  double yy1=GetAny<double>((*periodic[k+kk1])(stack));
 		if(verbosity>50)
-			cout << " e0: s  "<< xx0 << " " << xx1 << "e1 s "<< yy0 << " " << yy1  ; 
-                 
+			cout << " e0: s  "<< xx0 << " " << xx1 << "e1 s "<< yy0 << " " << yy1  ;
+
                  pke1[i2]=ie1*2+ ( ( (yy1-yy0) < 0)  == ( (xx1-xx0) < 0) ) ;
-		    
+
                  if (verbosity >50)
-                 cout << " \t  edge " << ie1 << " <=> " << ie2 << " " 
+                 cout << " \t  edge " << ie1 << " <=> " << ie2 << " "
                       << ( ( (yy1-yy0) < 0)  == ( (xx1-xx0) < 0) ) << "; "
-                      << xx0 << " " <<xx1<<" <=> "  << yy0 << " " <<yy1<< 
+                      << xx0 << " " <<xx1<<" <=> "  << yy0 << " " <<yy1<<
                       "  ::  " <<  Th(ep[0]) << " " << Th(ep[1]) << endl ;
 
                 }
               }
-              
-             
+
+
           }
-          
+
         *mp = smp;
         for (int i=0;i<Th.neb;i++)
             ndfe[i]=i;// circular link
@@ -1134,32 +1054,32 @@ bool BuildPeriodic(
            int sens = link1[i]%2;
            int ie2=link2[i];
            assert(ie1!=ie2);
-	   if(!InCircularList(ndfe,ie1,ie2))   // merge of two list 
+	   if(!InCircularList(ndfe,ie1,ie2))   // merge of two list
 	      Exchange(ndfe[ie1],ndfe[ie2]);
 	   for (int ke2=0;ke2<2;ke2++)
              {
                 int ke1=ke2;
-                if(!sens) ke1=1-ke1; 
+                if(!sens) ke1=1-ke1;
                 int iv1=Th(Th.bedges[ie1][ke1]);
                 int iv2=Th(Th.bedges[ie2][ke2]);
-                if (!InCircularList(ndfv,iv1,iv2)) {  // merge of two list 
+                if (!InCircularList(ndfv,iv1,iv2)) {  // merge of two list
 		   Exchange(ndfv[iv2],ndfv[iv1]);
                    if (verbosity >50)
-		   { 
+		   {
 		     cout << "  vertex " << iv1 <<  "<==> " << iv2 << " list : " << iv1;
 		     int i=iv1,k=0;
 		     while ( (i=ndfv[i]) != iv1 && k++<10)
-			 cout << ", "<< i ; 
+			 cout << ", "<< i ;
 		       cout << endl;
-		   }}                  
+		   }}
              }
-            
-         } 
+
+         }
          // generation de numero de dlt
-         
-          nbdfv = numeroteclink(ndfv) ; 
-          nbdfe = numeroteclink(ndfe) ; 
-          if (verbosity>2) 
+
+          nbdfv = numeroteclink(ndfv) ;
+          nbdfe = numeroteclink(ndfe) ;
+          if (verbosity>2)
             cout << "  -- nb df on vertices " << nbdfv << endl;
         delete [] link1;
         delete [] link2;
@@ -1170,26 +1090,26 @@ bool BuildPeriodic(
 	      delete [] link2;
         }
    }
-   return false;   
+   return false;
 }
 
 
-bool  v_fes::buildperiodic(Stack stack,int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe) { 
+bool  v_fes::buildperiodic(Stack stack,int & nbdfv, KN<int> & ndfv,int & nbdfe, KN<int> & ndfe) {
   return BuildPeriodic(nbcperiodic,periodic,**ppTh,stack,nbdfv,ndfv,nbdfe,ndfe);
 
 }
 #ifdef ZZZZZZZZ
-FESpace * pfes_tef::update() { 
-   typedef Smallvect<int,2> int2; 
-    
+FESpace * pfes_tef::update() {
+   typedef Smallvect<int,2> int2;
+
     if (nbcperiodic ) {
        const Mesh &Th(**ppTh);
        KN<int> ndfv(Th.nv);
        KN<int> ndfe(Th.neb);
        int nbdfv,nbdfe;
-        return  new FESpace(**ppTh,*tef,nbdfv,ndfv,nbdfe,ndfe); 
+        return  new FESpace(**ppTh,*tef,nbdfv,ndfv,nbdfe,ndfe);
       }
-     else 
+     else
           return  new FESpace(**ppTh,*tef);
 }
 #endif
@@ -1200,19 +1120,19 @@ struct OpMake_pfes_np {
 };
 
 basicAC_F0::name_and_type  OpMake_pfes_np::name_param[]= {
-  "periodic", &typeid(E_Array) 
+  "periodic", &typeid(E_Array)
 };
 
 // by default, in DSL a FE is 2D, in the building of fespace, if mesh3-S used them associate the corresponding FE
 // mapping between TypeOfFE2 and TypeOfFES
 map<TypeOfFE *,TypeOfFE3 *> TEF2dto3d;
-AnyType TypeOfFE3to2(Stack,const AnyType &b) { 
+AnyType TypeOfFE3to2(Stack,const AnyType &b) {
     TypeOfFE3 *t3=0;
     TypeOfFE  *t2=GetAny<TypeOfFE *>(b);
     map<TypeOfFE *,TypeOfFE3 *>::const_iterator i=TEF2dto3d.find(t2);
     if(i != TEF2dto3d.end())
 	t3=i->second;
-    
+
     if(t3==0)
       {
 	  cerr << " sorry no cast to this 3d finite element " <<endl;
@@ -1229,7 +1149,7 @@ AnyType TypeOfFESto2(Stack,const AnyType &b) {
     map<TypeOfFE *,TypeOfFES *>::const_iterator i=TEF2dtoS.find(t2);
     if(i != TEF2dtoS.end())
         tS=i->second;
-   
+
     if(tS==0)
     {
         cerr << " sorry no cast to this surface finite element " <<endl;
@@ -1238,17 +1158,6 @@ AnyType TypeOfFESto2(Stack,const AnyType &b) {
     return tS;
 }
 
-
-
-/*
- for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
- {
- ffassert(i->tfe); // check 
- AddNewFE(i->name,i->tfe);
- // Global.New(i->name, Type_Expr(atype<TypeOfFE*>(),new  EConstantTypeOfFE(i->tfe)));
- }
- 
- */
 TypeOfFE * FindFE2(const char * s)
 {
     for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
@@ -1262,11 +1171,11 @@ TypeOfFE * FindFE2(const char * s)
 
 typedef TypeOfFE TypeOfFE2;
 template<class pfes,class Mesh,class TypeOfFE,class pfes_tefk>
-struct OpMake_pfes: public OneOperator , public OpMake_pfes_np { 
-  
-  struct Op: public E_F0mps { 
+struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
+
+  struct Op: public E_F0mps {
   public:
-    
+
     Expression eppTh;
     Expression eppfes;
     const E_Array & atef;
@@ -1274,11 +1183,11 @@ struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
     int nbcperiodic;
     Expression *periodic;
     KN<int>  tedim;
-    Op(Expression ppfes,Expression ppTh, const E_Array & aatef,int nbp,Expression * pr,KN<int> &ttedim) 
-      : eppTh(ppTh),eppfes(ppfes),atef(aatef),nbcperiodic(nbp),periodic(pr),tedim(ttedim) {       
+    Op(Expression ppfes,Expression ppTh, const E_Array & aatef,int nbp,Expression * pr,KN<int> &ttedim)
+      : eppTh(ppTh),eppfes(ppfes),atef(aatef),nbcperiodic(nbp),periodic(pr),tedim(ttedim) {
     }
     ~Op() { if(periodic) delete []periodic;}
-    AnyType operator()(Stack s)  const {  
+    AnyType operator()(Stack s)  const {
       const int d = Mesh::Rd::d;
       const Mesh ** ppTh = GetAny<const Mesh  **>( (*eppTh)(s) );
       AnyType r = (*eppfes)(s) ;
@@ -1289,36 +1198,33 @@ struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
 	else if(tedim[i]==2 && d ==3)
 	  tef[i]= GetAny<TypeOfFE *>(TypeOfFE3to2(s,atef[i].eval(s)));
 	else ffassert(0);
-	  
+
       pfes * ppfes = GetAny<pfes *>(r);
       bool same = true;
       for (int i=1;i<atef.size();i++)
       same &= atef[i].LeftValue() == atef[1].LeftValue();
       *ppfes = new pfes_tefk(ppTh,tef,atef.size(),s,nbcperiodic,periodic);
-      //(**ppfes).decrement();  //07/2008 FH
-      //Add2StackOfPtr2FreeRC(s,*ppfes);  //  bug????  a verifier 06/07/2008
-      //  delete [] tef;
       return r;}
   } ;
-  
+
   E_F0 * code(const basicAC_F0 & args)  const
-  { 
+  {
     int nbcperiodic=0;
     Expression *periodic=0;
     Expression nargs[n_name_param];
-    
+
     args.SetNameParam(n_name_param,name_param,nargs);
       GetPeriodic(Mesh::Rd::d,nargs[0],nbcperiodic,periodic);
     aType t_tfe= atype<TypeOfFE*>();
-    aType t_tfe2= atype<TypeOfFE2*>();  
+    aType t_tfe2= atype<TypeOfFE2*>();
     int d=  TypeOfFE::Rd::d;
-    string sdim= d ?  " 2d : " : " 3d : " ; 
+    string sdim= d ?  " 2d : " : " 3d : " ;
     const E_Array * a2(dynamic_cast<const E_Array *>(args[2].LeftValue()));
     ffassert(a2);
     int N = a2->size(); ;
     if (!N) CompileError(sdim+" We wait an array of Type of Element ");
       KN<int> tedim(N);
-    for (int i=0;i< N; i++) 
+    for (int i=0;i< N; i++)
       if ((*a2)[i].left() == t_tfe)
 	  tedim[i]=d;
       else if ((*a2)[i].left() ==t_tfe2)
@@ -1327,8 +1233,8 @@ struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
 	    CompileError(sdim+" We wait an array of  Type of Element ");
     //    ffassert(0);
     return  new Op(args[0],args[1],*a2,nbcperiodic,periodic,tedim);
-  } 
-  OpMake_pfes() : 
+  }
+  OpMake_pfes() :
     OneOperator(atype<pfes*>(),atype<pfes*>(),atype<const Mesh **>(),atype<E_Array>()) {}
 };
 
@@ -1362,26 +1268,26 @@ class OP_MakePtr2 { public:
       int nbcperiodic ;
       Expression *periodic;
       Op(const basicAC_F0 & args);
-      
+
       AnyType operator()(Stack s) const  {
 	A p= GetAny<A>( (*a)(s) );
 	B th= GetAny<B>( (*b)(s) );
-	C tef= GetAny<C>( (*c)(s) );   
-	//  cout << "  ----------- " << endl;  
+	C tef= GetAny<C>( (*c)(s) );
+	//  cout << "  ----------- " << endl;
 	*p=new pfes_tef(th,tef,s,nbcperiodic,periodic) ;
 	//(**p).decrement();
 	return  SetAny<R>(p);
-      } 
-    }; // end Op class 
-  
+      }
+    }; // end Op class
+
   typedef Op::R Result;
   static  E_F0 * f(const basicAC_F0 & args) { return  new Op(args);}
   static ArrayOfaType  typeargs() {
-    return ArrayOfaType(       
+    return ArrayOfaType(
 			atype<Op::A>(),
 			atype<Op::B>(),
 			atype<Op::C>(),false ) ;}
-};  
+};
 
 
 class OP_MakePtr3 { public:
@@ -1398,26 +1304,26 @@ class OP_MakePtr3 { public:
       int nbcperiodic ;
       Expression *periodic;
       Op(const basicAC_F0 & args);
-      
+
       AnyType operator()(Stack s) const  {
 	A p= GetAny<A>( (*a)(s) );
 	B th= GetAny<B>( (*b)(s) );
-	C tef= GetAny<C>( (*c)(s) );   
-	//  cout << "  ----------- " << endl;  
+	C tef= GetAny<C>( (*c)(s) );
+	//  cout << "  ----------- " << endl;
 	*p=new pfes3_tef(th,tef,s,nbcperiodic,periodic) ;
 	//(**p).decrement();
 	return  SetAny<R>(p);
-      } 
-    }; // end Op class 
-  
+      }
+    }; // end Op class
+
   typedef Op::R Result;
   static  E_F0 * f(const basicAC_F0 & args) { return  new Op(args);}
   static ArrayOfaType  typeargs() {
-    return ArrayOfaType(       
+    return ArrayOfaType(
 			atype<Op::A>(),
 			atype<Op::B>(),
 			atype<Op::C>(),false ) ;}
-};  
+};
 
 class OP_MakePtrS { public:
     class Op : public E_F0mps  { public:
@@ -1433,18 +1339,16 @@ class OP_MakePtrS { public:
         int nbcperiodic ;
         Expression *periodic;
         Op(const basicAC_F0 & args);
-        
+
         AnyType operator()(Stack s) const  {
             A p= GetAny<A>( (*a)(s) );
             B th= GetAny<B>( (*b)(s) );
             C tef= GetAny<C>( (*c)(s) );
-            //  cout << "  ----------- " << endl;
             *p=new pfesS_tef(th,tef,s,nbcperiodic,periodic) ;
-            //(**p).decrement();
             return  SetAny<R>(p);
         }
     }; // end Op class
-    
+
     typedef Op::R Result;
     static  E_F0 * f(const basicAC_F0 & args) { return  new Op(args);}
     static ArrayOfaType  typeargs() {
@@ -1457,18 +1361,18 @@ class OP_MakePtrS { public:
 void GetPeriodic(const int d,Expression perio,    int & nbcperiodic ,    Expression * &periodic)
 {
     ffassert(d==2 || d ==3);
-      if ( perio) 
+      if ( perio)
        {
-         if( verbosity>1) 
+         if( verbosity>1)
          cout << "  -- Periodical Condition to do" << endl;
          const E_Array * a= dynamic_cast<const  E_Array *>(perio);
          ffassert(a);
          int n = a->size();
         nbcperiodic= n/2;
-        if( verbosity>1) 
+        if( verbosity>1)
         cout << "    the number of periodicBC " << n << endl;
-        if ( 2*nbcperiodic != n ) CompileError(" Sorry the number of periodicBC must by even"); 
-        periodic = new Expression[n*d]; 
+        if ( 2*nbcperiodic != n ) CompileError(" Sorry the number of periodicBC must by even");
+        periodic = new Expression[n*d];
         for (int i=0,j=0;i<n;i++,j+=d)
 	  if(d==2)
 	    { if (GetPeriodic((*a)[i],periodic[j],periodic[j+1])==0)
@@ -1478,13 +1382,13 @@ void GetPeriodic(const int d,Expression perio,    int & nbcperiodic ,    Express
 	    { if (GetPeriodic((*a)[i],periodic[j],periodic[j+1],periodic[j+2])==0)
 		CompileError(" a sub array of periodic BC must be [label, realfunction , realfunction]");
 	    }
-	  else ffassert(0); 
+	  else ffassert(0);
         }
 
 
 }
 
-    
+
 OP_MakePtr2::Op::Op(const basicAC_F0 & args)
   : a(to<A>(args[0])),b(to<B>(args[1])),c(to<C>(args[2]))
      {
@@ -1521,7 +1425,7 @@ int GetPeriodic(Expression  bb, Expression & b,Expression & f)
 	  f= to<double>((*a)[1]);
 	  return 1;
 	}
-      else 
+      else
 	return 0;
     }
 int GetPeriodic(Expression  bb, Expression & b,Expression & f1,Expression & f2)
@@ -1534,39 +1438,39 @@ int GetPeriodic(Expression  bb, Expression & b,Expression & f1,Expression & f2)
 	  f2= to<double>((*a)[2]);
 	  return 1;
       }
-    else 
+    else
 	return 0;
 }
 
 basicAC_F0::name_and_type  OP_MakePtr2::Op::name_param[]= {
-  "periodic", &typeid(E_Array) 
+  "periodic", &typeid(E_Array)
 };
 
 basicAC_F0::name_and_type  OP_MakePtr3::Op::name_param[]= {
-  "periodic", &typeid(E_Array) 
+  "periodic", &typeid(E_Array)
 };
 
 basicAC_F0::name_and_type  OP_MakePtrS::Op::name_param[]= {
     "periodic", &typeid(E_Array)
 };
 
-inline pfes* MakePtr2(pfes * const &p,pmesh * const &  a){ 
+inline pfes* MakePtr2(pfes * const &p,pmesh * const &  a){
       *p=new pfes_tef(a,&P1Lagrange);
       //(**p).decrement();
        return p ;}
-       
+
 inline pfes* MakePtr2(pfes * const &p,pfes * const &  a,long const & n){
        *p= new pfes_fes(a,n);
       //(**p).decrement();
        return p ;}
-       
+
  long FindTxy(Stack s,pmesh * const &  ppTh,const double & x,const double & y)
 {
    R2 P(x,y),PHat;
    bool outside;
-     MeshPoint & mp = *MeshPointStack(s);  
+     MeshPoint & mp = *MeshPointStack(s);
    const Mesh * pTh= *ppTh;
-   if(pTh == 0) return 0;  
+   if(pTh == 0) return 0;
    const Triangle * K=pTh->Find(mp.P.p2(),PHat,outside);
    if (!outside)
      mp.set(*pTh,P,PHat,*K,K->lab);
@@ -1574,20 +1478,16 @@ inline pfes* MakePtr2(pfes * const &p,pfes * const &  a,long const & n){
    return 1;
 }
 
- 
 
-
- 
-
-template<class K>    
+template<class K>
 KN<K> * pfer2vect( pair<FEbase<K,v_fes> *,int> p)
- {  
+ {
     KN<K> * x=p.first->x();
-    if ( !x) {  // defined 
+    if ( !x) {  // defined
       FESpace * Vh= p.first->newVh(); // cout << "test 1" << endl;
       throwassert( Vh);
       *p.first = x = new KN<K>(Vh->NbOfDF);
-      *x=K(); 
+      *x=K();
     }
     return x;}
 
@@ -1611,14 +1511,14 @@ bool pfer_refresh(pair<FEbase<K,v_fes> *,int> p)
         * p.first  = new KN<K>(p.first->Vh->NbOfDF,K());
     return Vho != (const FESpace * ) p.first->Vh;// FE change !!!
 }
-template<class K>        
+template<class K>
 long pfer_nbdf(pair<FEbase<K,v_fes> *,int> p)
- {  
+ {
    if (!p.first->Vh) p.first->Vh= p.first->newVh();
    throwassert( !!p.first->Vh);
    return p.first->Vh->NbOfDF;
  }
- 
+
 double pmesh_area(pmesh * p)
  { throwassert(p && *p) ;  return (**p).area ;}
 double pmesh_bordermeasure(pmesh * p)
@@ -1673,9 +1573,9 @@ long mp_nuTriangle(MeshPoint * p)
    else ffassert(0);
    delete p;
    return nu ;}
-   
+
 long mp_region(MeshPoint * p)
- { //throwassert(p && p->Th);
+ {
    long  nu(p->region);
    delete p;
    return nu ;}
@@ -1687,9 +1587,9 @@ class pVh_ndf : public ternary_function<pfes *,long,long,long>
 
   class Op : public E_F0mps { public:
       Expression a,b,c;
-       Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {}       
-       AnyType operator()(Stack s)  const 
-        { 
+       Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {}
+       AnyType operator()(Stack s)  const
+        {
            pfes * p(GetAny<pfes *>((*a)(s)));
            long  k(GetAny<long>((*b)(s)));
            long  i(GetAny<long>((*c)(s)));
@@ -1701,29 +1601,15 @@ class pVh_ndf : public ternary_function<pfes *,long,long,long>
            long ret(K(i));
            return  ret;
          }
-   
+
   };
 };
-/* Essaie : FH march 2015 ...
-class pVh_renumber : public binary_function<pfes *,KN<long> *,KN<long> *>
-{ public:
-    
-    static KN<long> *  f(Stack s,pfes  *p  ,KN<long> *  k)
-        {
-            ffassert(0); // debile ...
-            return  k ;
-        }
-        
-   
-};
- */
-//plus
 
 class Op_CopyArray : public OneOperator { public:
     Op_CopyArray():OneOperator(atype<void>(),atype<E_Array>(),atype<E_Array>()) {}
-    E_F0 * code(const basicAC_F0 & args) const ; 
-};  
-                       
+    E_F0 * code(const basicAC_F0 & args) const ;
+};
+
 template<class R,int dd>
 AnyType pfer2R(Stack s,const AnyType &a)
 {
@@ -1732,11 +1618,10 @@ AnyType pfer2R(Stack s,const AnyType &a)
   int componante=ppfe.second;
   if ( !fe.x()) {
    if ( !fe.x()){
-    // CompileError(" Sorry unset fem array ");
      return   SetAny<R>(0.0);
     }
   }
-   
+
   const FESpace & Vh(*fe.Vh);
   const Mesh & Th(Vh.Th);
   assert(Th.ntet==0 && Th.volume==0 && Th.triangles != 0);
@@ -1745,7 +1630,7 @@ AnyType pfer2R(Stack s,const AnyType &a)
   R2 PHat;
   bool outside=false;
   bool qnu=true;
-  if ( mp.Th == &Th && mp.T) 
+  if ( mp.Th == &Th && mp.T)
    {
     qnu=false;
     K=mp.T;
@@ -1756,73 +1641,40 @@ AnyType pfer2R(Stack s,const AnyType &a)
     K=mp.other.T;
     PHat=mp.other.PHat.p2();
     outside = mp.other.outside;
-   } 
+   }
   else {
     if (mp.isUnset()) ExecError("Try to get unset x,y, ...");
     K=Th.Find(mp.P.p2(),PHat,outside);
     mp.other.set(Th,mp.P.p2(),PHat,*K,0,outside);
     }
-  // cout << "  ---  " << qnu << "  " << mp.P << " " << mp.outside <<  " " << outside << endl;
   const FElement KK(Vh[Th(K)]);
-  if (outside && !KK.tfe->NbDfOnVertex && !KK.tfe->NbDfOnEdge) 
-    return   SetAny<R>(0.0); 
-/*  if (!outside) 
-    {
-      if ( Norme2_2( (*K)(PHat) - mp.P ) > 1e-12 )
-        cout << "bug ??  " << Norme2_2( (*K)(PHat) - mp.P ) << " " << mp.P << " " << (*K)(PHat) << endl;
-    } */
-/*  int nbdf=KK.NbDoF();
-  
-  int N= KK.N;
-  KN_<R> U(*fe.x());
-  KNMK<R> fb(nbdf,N,3); //  the value for basic fonction
-  KN<R> fk(nbdf);
-  for (int i=0;i<nbdf;i++) // get the local value
-    fk[i] = U[KK(i)];
-    //  get value of basic function
-  KK.BF(PHat,fb);  
-  
-  R r = (fb('.',componante,dd),fk);  
-*/
-  
+  if (outside && !KK.tfe->NbDfOnVertex && !KK.tfe->NbDfOnEdge)
+    return   SetAny<R>(0.0);
+
  const R rr = KK(PHat,*fe.x(),componante,dd);
-//  cout << " " << rr << endl;
-//  R2 B(mp.P);
-/*   if ( r < 0.08001 &&  Norme2_2(mp.P) > 0.05  && Norme2_2(mp.P) < 0.4*0.4  ) 
-     {
-     int vv=verbosity;
-      cout << " f()  triangle  " << Th(K) << " " << mp.P << " " << PHat << " =  " << r << " " <<outside ;
-      if (outside) {  verbosity = 200;
-         K=Th.Find(mp.P,PHat,outside);
-          cout << Th(K) << " " << outside << endl;}
-       cout << endl; verbosity=vv;
-     } */
-//  if ( qnu )   
- //  cout << " f()  triangle       " << Th(K) << " " << mp.P << " " << PHat << " =  " << r <<  endl;
   return SetAny<R>(rr);
 }
 
- 
+
 template<class R>
 AnyType set_fe (Stack s,Expression ppfe, Expression e)
-  { 
+  {
    long kkff = Mesh::kfind,  kkth = Mesh::kthrough;
       StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
 
-   
-    MeshPoint *mps=MeshPointStack(s),mp=*mps;  
+
+    MeshPoint *mps=MeshPointStack(s),mp=*mps;
     pair<FEbase<R,v_fes> *,int>  pp=GetAny<pair<FEbase<R,v_fes> *,int> >((*ppfe)(s));
     FEbase<R,v_fes> & fe(*pp.first);
     const  FESpace * pVh(fe.newVh());
-      
+
     if(!pVh ) ExecError("Unset FEspace (Null mesh ? ) on  uh= ");
     const  FESpace & Vh= *pVh;
     KN<R> gg(Vh.MaximalNbOfDF());
     const  Mesh & Th(Vh.Th);
- //   R F[100]; // buffer 
     TabFuncArg tabexp(s,Vh.N);
     tabexp[0]=e;
-    
+
     if(Vh.N!=1)
     {  cerr << " Try to set a  vectorial  FE function  (nb  componant=" <<  Vh.N << ") with one scalar " << endl;
        ExecError(" Error interploation (set)  FE function (vectorial) with a scalar");
@@ -1832,17 +1684,17 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
     KN<R> Viso(100);
     // R2 Ptt[3];
     for (int i=0;i<Viso.N();i++)
-      Viso[i]=0.01*i; 
-      
-    FElement::aIPJ ipj(Vh[0].Pi_h_ipj()); 
-    FElement::aR2  PtHat(Vh[0].Pi_h_R2()); 
+      Viso[i]=0.01*i;
+
+    FElement::aIPJ ipj(Vh[0].Pi_h_ipj());
+    FElement::aR2  PtHat(Vh[0].Pi_h_R2());
     KN<double>   Aipj(ipj.N());
     KN<R>   Vp(PtHat.N());
     const E_F0 & ff(* (const  E_F0 *) e ) ;
 
    if (Vh.isFEMesh() )
     {
-      
+
       ffassert(Vh.NbOfDF == Th.nv && Vh.N == 1 );
       for (int iv=0;iv<Th.nv;iv++)
        {
@@ -1858,36 +1710,36 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
          yy[iv] = GetAny<R>( ff(s) );
           sptr->clean(); // modif FH mars 2006  clean Ptr
        }
-      
+
     }
-   else     
-    
+   else
+
      for (int t=0;t<Th.nt;t++)
       {
          FElement K(Vh[t]);
          int nbdf=K.NbDoF();
-         gg=R();   
-#ifdef OLDPih    
-// old method          
+         gg=R();
+#ifdef OLDPih
+// old method
          K.Pi_h(gg,F_Pi_h,F,&tabexp);
-#else               
+#else
          K.Pi_h(Aipj);
          for (int p=0;p<PtHat.N();p++)
-          { 
+          {
             mps->set(K.T(PtHat[p]),PtHat[p],K);
             Vp[p]=GetAny<R>( ff(s) );
            }
          for (int i=0;i<Aipj.N();i++)
-          { 
+          {
            const FElement::IPJ &ipj_i(ipj[i]);
            assert(ipj_i.j==0); // car  Vh.N=0
-           gg[ipj_i.i] += Aipj[i]*Vp[ipj_i.p];            
+           gg[ipj_i.i] += Aipj[i]*Vp[ipj_i.p];
           }
-#endif          
-         for (int df=0;df<nbdf;df++)         
+#endif
+         for (int df=0;df<nbdf;df++)
             (*y)[K(df)] =  gg[df] ;
            sptr->clean(); // modif FH mars 2006  clean Ptr
-                       
+
       }
     *mps=mp;
     fe=y;
@@ -1895,55 +1747,55 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
      kkth = Mesh::kthrough -kkth;
 
     if(verbosity>1)
-      ShowBound(*y,cout)  
+      ShowBound(*y,cout)
            << " " << kkth << "/" << kkff << " =  " << double(kkth)/Max<double>(1.,kkff) << endl;
-    return SetAny<FEbase<R,v_fes>*>(&fe); 
+    return SetAny<FEbase<R,v_fes>*>(&fe);
   }
 AnyType set_feoX_1 (Stack s,Expression ppfeX_1, Expression e)
-  { // inutile 
+  { // inutile
     // meme chose que  v(X1,X2);
       StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
     typedef const interpolate_f_X_1<R>::CODE * code;
-    MeshPoint mp= *MeshPointStack(s); 
+    MeshPoint mp= *MeshPointStack(s);
     code ipp = dynamic_cast<code>(ppfeX_1);
-    
+
     pair<FEbase<R,v_fes> *,int>  pp=GetAny<pair<FEbase<R,v_fes> *,int> >((*ipp->f)(s));
     FEbase<R,v_fes> & fe(*pp.first);
     const  FESpace & Vh(*fe.newVh());
-    KN<R> gg(Vh.MaximalNbOfDF()); 
+    KN<R> gg(Vh.MaximalNbOfDF());
     const  Mesh & Th(Vh.Th);
-    R F[100]; // buffer 
+    R F[100]; // buffer
     TabFuncArg tabexp(s,Vh.N+2);
     tabexp[0]=e;
     tabexp[1]=ipp->x;
     tabexp[2]=ipp->y;
-    
-    throwassert(Vh.N==1); 
-    KN<R> * y=new  KN<R>(Vh.NbOfDF); 
+
+    throwassert(Vh.N==1);
+    KN<R> * y=new  KN<R>(Vh.NbOfDF);
      for (int t=0;t<Th.nt;t++)
       {
          FElement K(Vh[t]);
          int nbdf=K.NbDoF();
-        
+
          gg=R();
-         
+
          K.Pi_h(gg,FoX_1_Pi_h,F,&tabexp);
          for (int df=0;df<nbdf;df++)
           (*y)[K(df)] =  gg[df] ;
-          sptr->clean(); // modif FH mars 2006  clean Ptr          
+          sptr->clean(); // modif FH mars 2006  clean Ptr
       }
     *MeshPointStack(s)=mp;
     fe=y;
     if(verbosity>1)
-    cout << "  -- interpole f= g*X^-1, function's bound:  " << y->min() << " " << y->max() << endl; 
-    return SetAny<FEbase<R,v_fes>*>(&fe); 
+    cout << "  -- interpole f= g*X^-1, function's bound:  " << y->min() << " " << y->max() << endl;
+    return SetAny<FEbase<R,v_fes>*>(&fe);
   }
 
 template<class K>
-E_set_fev<K>::E_set_fev(const E_Array * a,Expression pp,int ddim) 
+E_set_fev<K>::E_set_fev(const E_Array * a,Expression pp,int ddim)
   :dim(ddim), aa(*a),ppfe(pp),optimize(true),
-   where_in_stack_opt(),optiexp0(),optiexpK() 
-{ 
+   where_in_stack_opt(),optiexp0(),optiexpK()
+{
   aa.map(to<K>) ;
   bool kdump=false;
   if(optimize)
@@ -1952,7 +1804,7 @@ E_set_fev<K>::E_set_fev(const E_Array * a,Expression pp,int ddim)
       deque<pair<Expression,int> > ll;
       MapOfE_F0 m;
       where_in_stack_opt.resize(n);
-      size_t top = currentblock->OffSet(0), topbb=top; // FH. bofbof ??? 
+      size_t top = currentblock->OffSet(0), topbb=top; // FH. bofbof ???
       for (int i=0; i<n; i++)
 	{
 	  Expression ee= aa[i].LeftValue();
@@ -1962,39 +1814,39 @@ E_set_fev<K>::E_set_fev(const E_Array * a,Expression pp,int ddim)
 	  if (kdump)
 	    cout  << "\n\t\t"<< i  << ": " << where_in_stack_opt[i] << endl;
 	}
-      
+
       currentblock->OffSet(top-topbb);
-      //  
+      //
       int k=ll.size(),k0=0,k1=0;
       for (int i=0;i<k;i++)
 	if (ll[i].first->MeshIndependent()) k0++;
       deque<pair<Expression,int> > l0(k0),l1(k-k0);
       k0=0,k1=0;
       for (int i=0;i<k;i++)
-	if (ll[i].first->MeshIndependent()) 
+	if (ll[i].first->MeshIndependent())
 	  {
 	    if (kdump)
 	      cout << " mi " << ll[i].second << " " << *(ll[i].first) << endl;
 	    l0[k0++]=ll[i];
 	  }
-	else 
+	else
 	  {
 	    if (kdump)
 	      cout << " md " << ll[i].second << " " << *(ll[i].first) << endl;
 	    l1[k1++]=ll[i];
 	  }
-      if (k0)      
+      if (k0)
 	optiexp0 = new E_F0_Optimize(l0,m,0);  // constant part
-      if (k1) 
+      if (k1)
 	optiexpK = new E_F0_Optimize(l1,m,0);  // none constant part
-      
+
     }
-  
-  
+
+
 }
 
 
-template<class K>   
+template<class K>
 AnyType E_set_fev<K>::operator()(Stack s)  const
 {
   if(dim== 2)  return  Op2d(s);
@@ -2004,11 +1856,11 @@ AnyType E_set_fev<K>::operator()(Stack s)  const
 }
 
 
-template<class K>   
+template<class K>
 AnyType E_set_fev<K>::Op3d(Stack s)  const
 {
-  //  voir E_set_fev3  ( pb de consitance a revoir FH) 
-  ffassert(0); // a faire   
+  //  voir E_set_fev3  ( pb de consitance a revoir FH)
+  ffassert(0); // a faire
 }
 
 template<class K>
@@ -2018,17 +1870,17 @@ AnyType E_set_fev<K>::OpS(Stack s)  const
     ffassert(0); // a faire
 }
 
-template<class K>   
+template<class K>
 AnyType E_set_fev<K>::Op2d(Stack s)  const
-{  
-  StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);     
-  MeshPoint *mps=MeshPointStack(s), mp=*mps;   
+{
+  StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
+  MeshPoint *mps=MeshPointStack(s), mp=*mps;
   FEbase<K,v_fes> ** pp=GetAny< FEbase<K,v_fes> **>((*ppfe)(s));
   FEbase<K,v_fes> & fe(**pp);
   const  FESpace & Vh(*fe.newVh());
-  KN<K> gg(Vh.MaximalNbOfDF()); 
-  
-  
+  KN<K> gg(Vh.MaximalNbOfDF());
+
+
   const  Mesh & Th(Vh.Th);
   const int dim=Vh.N;
   K ** copt=0;
@@ -2042,38 +1894,32 @@ AnyType E_set_fev<K>::Op2d(Stack s)  const
         copt[i]= static_cast<K *>(static_cast<void *>((char*)s+offset));
         *(copt[i])=0;
        }
-    if (optiexp0) (*optiexp0)(s); // init 
+    if (optiexp0) (*optiexp0)(s); // init
   }
-  
-#ifdef OLDPih    
+
+#ifdef OLDPih
   ffassert(dim<100);
 #endif
-  //   R F[100]; // buffer 
-  
+
   TabFuncArg tabexp(s,Vh.N);
-  //   const E_Array * aa = dynamic_cast<const E_Array *>(e);
   ffassert( aa.size() == Vh.N);
   for (int i=0;i<dim;i++)
-    tabexp[i]=aa[i]; 
-  
+    tabexp[i]=aa[i];
+
   KN<K> * y=new  KN<K>(Vh.NbOfDF);
   KN<K> & yy(*y);
-  
-  FElement::aIPJ ipj(Vh[0].Pi_h_ipj()); 
-  FElement::aR2  PtHat(Vh[0].Pi_h_R2()); 
-  
+
+  FElement::aIPJ ipj(Vh[0].Pi_h_ipj());
+  FElement::aR2  PtHat(Vh[0].Pi_h_R2());
+
   KN<double>   Aipj(ipj.N());
-  
-  
-  //   KNM<K>  Vp(dim,PtHat.N());// bug 
-  // g++ error: too many initializers for `const __class_type_info_pseudo
-  
+
   KN<K>  Vp1(dim*PtHat.N());
-  
-  
+
+
   if (Vh.isFEMesh() )
     {
-      
+
       ffassert(Vh.NbOfDF == Th.nv && dim == 1 );
       for (int iv=0;iv<Th.nv;iv++)
 	{
@@ -2088,172 +1934,149 @@ AnyType E_set_fev<K>::Op2d(Stack s)  const
 	  assert(il>=0);
 	  mps->set(Th,v,TriangleHat[il],Kt,v.lab);
 	  if (copt) {
-	    if (optiexpK) (*optiexpK)(s); 
+	    if (optiexpK) (*optiexpK)(s);
             yy[iv] =  *(copt[0]);
           }
-          else 
+          else
 	    yy[iv] = GetAny<K>( ff(s) );
 	  sptr->clean(); // modif FH mars 2006  clean Ptr
 	}
-      
+
     }
   else
     for (int t=0;t<Th.nt;t++)
       {
 	FElement Kt(Vh[t]);
 	int nbdf=Kt.NbDoF();
-        
+
 	gg=K();
-        
-#ifdef OLDPih    
-	// old method          
+
+#ifdef OLDPih
+	// old method
 	Kt.Pi_h(gg,F_Pi_h,F,&tabexp);
-#else               
+#else
 	Kt.Pi_h(Aipj);
-	
+
 	for (int p=0;p<PtHat.N();p++)
-          { 
+          {
             mps->set(Kt.T(PtHat[p]),PtHat[p],Kt);
 
-      //      KN_<K> Vpp(Vp('.',p));
             KN_<K> Vpp(Vp1,SubArray(dim,p*dim)); // a Change FHHHHHHHH
-            if (copt) { // optimize  version 
+            if (copt) { // optimize  version
              if (optiexpK) (*optiexpK)(s);
              for (int j=0;j<dim;j++)
                Vpp[j] = *(copt[j]);
             }
-            else  // old version 
+            else  // old version
             for (int j=0;j<dim;j++)
-             if (tabexp[j]) 
+             if (tabexp[j])
                Vpp[j]=GetAny<K>( (*tabexp[j])(s) );
               else Vpp[j]=0;
-              
-           }
-           
-         for (int i=0;i<Aipj.N();i++)
-          { 
-           const FElement::IPJ &ipj_i(ipj[i]);
-         //  gg[ipj_i.i] += Aipj[i]*Vp(ipj_i.j,ipj_i.p);           
-             gg[ipj_i.i] += Aipj[i]*Vp1(ipj_i.j+ipj_i.p*dim); // index a la main  
-            sptr->clean(); // modif FH mars 2006  clean Ptr          
-          } 
-#endif          
 
-         for (int df=0;df<nbdf;df++)         
+           }
+
+         for (int i=0;i<Aipj.N();i++)
+          {
+           const FElement::IPJ &ipj_i(ipj[i]);
+             gg[ipj_i.i] += Aipj[i]*Vp1(ipj_i.j+ipj_i.p*dim); // index a la main
+            sptr->clean(); // modif FH mars 2006  clean Ptr
+          }
+#endif
+
+         for (int df=0;df<nbdf;df++)
            yy[Kt(df)] =  gg[df] ;
       }
-   //  MeshPointStack(s)->unset();
     fe=y;
     if (copt) delete [] copt;
     *MeshPointStack(s) = mp;
     if(verbosity>1)
         ShowBound(*y,cout) << endl ;
-   //HHHH*/       
     return Nothing;
   }
 
 
 template<class K>
-inline FEbase<K,v_fes> * MakePtrFE(pfes * const &  a){ 
+inline FEbase<K,v_fes> * MakePtrFE(pfes * const &  a){
   FEbase<K,v_fes> * p=new FEbase<K,v_fes>(a);
-  //cout << "MakePtrFE " << p<< endl; 
-  return p ;}
-  
-template<class K>
-inline FEbase<K,v_fes> ** MakePtrFE2(FEbase<K,v_fes> * * const &  p,pfes * const &  a){ 
-  *p=new FEbase<K,v_fes>(a);
-  //cout << "MakePtrFE2 " << *p<< endl; 
   return p ;}
 
-template<class K>  
-inline FEbaseArray<K,v_fes> ** MakePtrFE3(FEbaseArray<K,v_fes> * * const &  p,pfes * const &  a,const long & N){ 
-  *p=new FEbaseArray<K,v_fes>(a,N);
-  //cout << "MakePtrFE2 " << *p<< endl; 
-  return p ;}
-  
-/*
-inline pmesharray*  MakePtr(pmesharray*  const &  p,long   const &  a){ 
-  p->first=new pmesh [a];
-  p->second=a;
-  for (int i=0;i<a;i++) 
-     p->first[i]=0; // nuset 
-  return p ;}
-*/  
 template<class K>
-class  OneOperatorMakePtrFE : public OneOperator 
+inline FEbase<K,v_fes> ** MakePtrFE2(FEbase<K,v_fes> * * const &  p,pfes * const &  a){
+  *p=new FEbase<K,v_fes>(a);
+  return p ;}
+
+template<class K>
+inline FEbaseArray<K,v_fes> ** MakePtrFE3(FEbaseArray<K,v_fes> * * const &  p,pfes * const &  a,const long & N){
+  *p=new FEbaseArray<K,v_fes>(a,N);
+  return p ;}
+
+template<class K>
+class  OneOperatorMakePtrFE : public OneOperator
 {
 public:
-  // il faut Optimize 
-  // typedef double K;
   typedef  FEbase<K,v_fes> ** R;
   typedef pfes* B;
-  class CODE : public E_F0mps  
+  class CODE : public E_F0mps
   {
   public:
     Expression fer,fes;
     E_set_fev<K> * e_set_fev;
     const E_Array * v;
-    CODE(const basicAC_F0 & args) 
-      : 
+    CODE(const basicAC_F0 & args)
+      :
       fer(to<R>(args[0])),
       fes(to<B>(args[1])),
-      e_set_fev(0) 
+      e_set_fev(0)
     {
       if (BCastTo<K>(args[2]) )
-	v = new E_Array(basicAC_F0_wa(to<K>(args[2]))); 
-      else 
+	v = new E_Array(basicAC_F0_wa(to<K>(args[2])));
+      else
 	v = dynamic_cast<const E_Array *>( args[2].LeftValue() );
       if (!v) {
 	cout << "Error: type of arg :" << *args[2].left()  << " in " << typeid(K).name() << " case " << endl;
 	ErrorCompile(" We wait  a double/complex expression or a array expression",1);
       }
-      //v->map(to<K>);
         e_set_fev=  new   E_set_fev<K>(v,fer,v_fes::dHat);
-      
+
     }
-    
+
     AnyType operator()(Stack stack)  const {
       R  p = GetAny<R>( (*fer)(stack));
-      B  a = GetAny<B>( (*fes)(stack)); 
+      B  a = GetAny<B>( (*fes)(stack));
       *p=new FEbase<K,v_fes>(a);
-      (*e_set_fev)(stack); 
-      //  cout << "MakePtrFE: build p " << p << " " << *p << endl;         
+      (*e_set_fev)(stack);
       return SetAny<R>(p);
     }
-    operator aType () const { return atype<R>();}         
-    
-    
+    operator aType () const { return atype<R>();}
+
+
   };
-  
-  E_F0 * code(const basicAC_F0 & args) const 
+
+  E_F0 * code(const basicAC_F0 & args) const
   { return  new CODE(args);}
-  OneOperatorMakePtrFE(aType tt):  // tt= aType<double>() or aType<E_Array>()  
+  OneOperatorMakePtrFE(aType tt):  // tt= aType<double>() or aType<E_Array>()
     OneOperator(map_type[typeid(R).name()],map_type[typeid(R).name()],map_type[typeid(B).name()],tt)
   {}
 };
 
 
-// ---  
+// ---
 
 template<class Result,class A>
 class  OneOperator_Ptr_o_R: public OneOperator {
-  //  aType r; //  return type 
+  //  aType r; //  return type
     typedef Result A::* ptr;
-    ptr p;   
-    public: 
-    E_F0 * code(const basicAC_F0 & args) const 
-     { return  new E_F_A_Ptr_o_R<Result,A>(t[0]->CastTo(args[0]),p);} 
+    ptr p;
+    public:
+    E_F0 * code(const basicAC_F0 & args) const
+     { return  new E_F_A_Ptr_o_R<Result,A>(t[0]->CastTo(args[0]),p);}
     OneOperator_Ptr_o_R(ptr pp):
-       OneOperator(atype<Result*>(),atype<A*>()),p(pp) {}     
+       OneOperator(atype<Result*>(),atype<A*>()),p(pp) {}
 };
 
 template<class K>  K  *PAddition(const K * a,const K *  b)  {return  new K(*a+*b);}
 
 
-
-
-
-// 
 class fCLD { public:
   typedef pair<int,Label> Key;
   typedef  map<Key,Expression>::iterator iterator;
@@ -2262,23 +2085,23 @@ class fCLD { public:
   void operator=(const fCLD & a){ *l=*a.l;}
   void destroy() { delete l;l=0;}
   ~fCLD(){ delete l;l=0;}
-  void Add(finconnue *v,int lab,C_F0 f) { 
+  void Add(finconnue *v,int lab,C_F0 f) {
     const MGauche *pn= v->simple();
      Check(pn,"Def CL Dirichet ");
-    
+
     Label r(lab);
     Key k(make_pair(pn->first,r));
     iterator i=l->find(k);
     Check( i != l->end() ,"Def CL Dirichet already exists");
-    l->insert(make_pair(k,CastTo<double>(f)));        
+    l->insert(make_pair(k,CastTo<double>(f)));
   }
 };
 
-//  pour stocker des expression de compilation 
+//  pour stocker des expression de compilation
 
 
 class Convect : public E_F0mps  { public:
-    typedef double  Result; // return type 
+    typedef double  Result; // return type
     Expression u,v,w,ff,dt;
     long state;
     static Expression ou,ov,ow,odt; // previous def
@@ -2286,24 +2109,24 @@ class Convect : public E_F0mps  { public:
     int d;
     Convect(const basicAC_F0 & args)  : u(0),v(0),w(0),ff(0),dt(0)
     {
-      args.SetNameParam(); 
+      args.SetNameParam();
       const E_Array * a = dynamic_cast<const E_Array *>(args[0].LeftValue());
             ffassert(a);
 	d= a->size();
-       if (d == 3) 
+       if (d == 3)
 	   w= CastTo<double>((*a)[2]);
-       else if (d != 2) 
+       else if (d != 2)
           { CompileError("convect vector have only 2 or 3 componant");}
        u= CastTo<double>((*a)[0]);
        v= CastTo<double>((*a)[1]);
-       
+
        dt=CastTo<double>(args[1]);
        ff=CastTo<double>(args[2]);
        // save previous  state
         if( !(( ou && u->compare(ou)==0)  && (v->compare(ov)==0) && ( (w==0) || (w->compare(ov)==0))
               && (dt->compare(odt)==0) )) {
              count++;
-            
+
         }
         state= count;// use of optim of convect
         if(verbosity>3)
@@ -2313,17 +2136,17 @@ class Convect : public E_F0mps  { public:
         ow=w;
         odt=dt;
      }
-    
-    static ArrayOfaType  typeargs() 
+
+    static ArrayOfaType  typeargs()
       { return  ArrayOfaType(atype<E_Array>(),atype<double>(),atype<double>());}
-      
-    static  E_F0 * f(const basicAC_F0 & args) { return new Convect(args);} 
-    AnyType operator()(Stack s) const ; 
-    AnyType eval2(Stack s) const ; 
-    AnyType eval3(Stack s) const ; 
+
+    static  E_F0 * f(const basicAC_F0 & args) { return new Convect(args);}
+    AnyType operator()(Stack s) const ;
+    AnyType eval2(Stack s) const ;
+    AnyType eval3(Stack s) const ;
     AnyType eval3old(Stack s) const ;  // old version a supprime en  2017
     operator aType () const { return atype<Result>();}
-    
+
 };
 Expression Convect::ou=0;
 Expression Convect::ov=0;
@@ -2342,14 +2165,14 @@ public:
     typedef pf3rbasearray asol3;
     typedef pfSrbase solS;
     typedef pfSrbasearray asolS;
-    
+
     typedef pfecbase solc;
     typedef pfecbasearray asolc;
     typedef pf3cbase solc3;
     typedef pf3cbasearray asolc3;
     typedef pfScbase solcS;
     typedef pfScbasearray asolcS;
-    
+
     typedef long  Result;
     struct ListWhat {
 	int what,i;
@@ -2363,17 +2186,17 @@ public:
 	pmesh th() { assert(v[0] && what==0); return static_cast<pmesh>(cv[0]);}
 	pmesh3 th3() { assert(v[0] && what==5); return static_cast<pmesh3>(cv[0]);}
  	pmeshS thS() { assert(v[0] && what==5); return static_cast<pmeshS>(cv[0]);}
-        
+
 	void Set(int nn=0,void **vv=0,int *c=0) {
 	    cmp[0]=cmp[1]=cmp[2]=cmp[3]=-1;
 	    v[0]=v[1]=v[2]=v[3]=0;
         n=nn;
 	    for(int i=0;i<nn;++i)
-	      {   
+	      {
 		  if(c) cmp[i]=c[i];
 		  if(vv) v[i]=vv[i];
-	      }		   
-	}	
+	      }
+	}
         void Set(int nn,const void **vv,int *c=0) {
             cmp[0]=cmp[1]=cmp[2]=cmp[3]=-1;
             v[0]=v[1]=v[2]=v[3]=0;
@@ -2383,21 +2206,21 @@ public:
             {
                 if(c) cmp[i]=c[i];
                 if(vv) cv[i]=vv[i];
-            }		   
-        }	
-	
+            }
+        }
+
 	ListWhat(int w=-1,int ii=-1 )
 	: what(w),i(ii) {Set();}
 	ListWhat(int what,int ii,int n,void ** f0,int *c)
 	: what(what),i(ii){ Set(n,f0,c);}
         ListWhat(int what,int ii,int n,const void ** f0,int *c)
         : what(what),i(ii){ Set(n,f0,c);}
-        
+
 	ListWhat(int what,int ii,void * f0)
 	: what(what),i(ii){ Set(1,&f0,0);}
         ListWhat(int what,int ii,const void * f0)
         : what(what),i(ii){ Set(1,&f0,0);}
-        
+
         ListWhat(int what,int ii,int nn,long *f0)
         : what(what),i(ii),n(nn){
             cmp[0]=cmp[1]=cmp[2]=cmp[3]=-1;
@@ -2405,18 +2228,18 @@ public:
             for(int i=0; i<n; ++i)
                 l[i]=f0[i];
         }
-        
+
 	template<typename S>
 	void eval(S *f,int *c)
 	{ for(int i=0;i<3;++i) {
         f[i]= static_cast<S>(v[i]);
 	    c[i]= cmp[i];  }
 	}
-	
+
 	template<typename M>
 	M eval()
 	{ assert(v[0]);
-	    return static_cast<M>(v[0]);	    
+	    return static_cast<M>(v[0]);
 	}
 	void eval(sol & f0,int & cmp0, sol &f1,int &cmp1)
 	{
@@ -2436,10 +2259,10 @@ public:
     };
 
   /// <<Expression2>>
-    struct Expression2 
+    struct Expression2
      {//  FH. change nov 2016  add one  expression  for  colored curve ...
-	long what; // 0 mesh, 1 iso, 2 vector, 3 curve , 4 border , 5  mesh3, 6 iso 3d, 
-	// 7: vector 3d  ( +10 -> complex visu ???? ) 
+	long what; // 0 mesh, 1 iso, 2 vector, 3 curve , 4 border , 5  mesh3, 6 iso 3d,
+	// 7: vector 3d  ( +10 -> complex visu ???? )
 	// 101 array of iso 2d  , 106 array of iso 3d  , 100  array of meshes
         // 103  array of curves ...
 	bool composant;
@@ -2462,17 +2285,17 @@ public:
              ll.push_back(ListWhat(what,ii,4,f));
              return 4;
          }
- 
+
 	template<class S>
-	int EvalandPush(Stack s,int ii,vector<ListWhat> & ll ) const  
-	{ 
+	int EvalandPush(Stack s,int ii,vector<ListWhat> & ll ) const
+	{
 	    int n=-1;
-	    S f[3]={0,0,0};		
+	    S f[3]={0,0,0};
 	    int cmp[3]={-1,-1,-1};
-        
+
 	    for(int i=0;i<3;++i)
 		if (e[i]) {
-		    if (!composant) 
+		    if (!composant)
 		      { pair<S,int> p= GetAny< pair<S,int> >((*e[i])(s));
 			  n=i;cmp[i]=p.second;
 			  f[i]= p.first;}
@@ -2482,17 +2305,17 @@ public:
 		}
 	    ll.push_back(ListWhat(what,ii,n+1,f,cmp));
 	    return n;}
-	
+
          int AEvalandPush(Stack s,int ii,vector<ListWhat> & ll,vector<AnyType> & lat) const
          {
-        
+
           pttab pt[4]={0,0,0,0};
           pt[0] =evalptt(0,s);
           pt[1]=evalptt(1,s);
           if (e[2]) pt[2]=evalptt(2,s);
          if (e[3]) pt[3]=evalptt(3,s);
          int kt = min(pt[0]->N() , pt[1]->N());
-             
+
          for( int j=0; j<kt; ++j)
          {
           int what = 13;
@@ -2508,18 +2331,18 @@ public:
                   KN_<double> t=(*ptk)[j];
                   f[k]=lat.size();
                   if(verbosity>99) cout << " ("<<k << ") " << t.N() << " "<< f[k] ;
-                  
+
                   lat.push_back(SetAny<KN_<double> >(t));
               }
           }
          if(verbosity>99) cout << endl;
-             
+
           ll.push_back(ListWhat(what,ii,4,f));
          }
          return 4;
          }
-         
-    
+
+
 	template<class A,class S> // ok of mesh too because composant=true;
  	int AEvalandPush(Stack s,int ii,vector<ListWhat> & ll ) const
 	{  typedef pair<A,int> PA;
@@ -2529,15 +2352,15 @@ public:
 		S fj[3];
 		void *fv[3];
 	    };
-	    f[0]=f[1]=f[2]=0;		
+	    f[0]=f[1]=f[2]=0;
 	    int cmp[3]={-1,-1,-1};
-	    
+
 	    for(int i=0;i<3;++i)
-		if (e[i]) 
+		if (e[i])
 		  {
-		    if (!composant) 
+		    if (!composant)
 		     { PA p= GetAny< PA >((*e[i])(s)); cmp[i]=p.second;f[i]=p.first; nn=i;}
-	            else 
+	            else
 		     { f[i]= GetAny< A >((*e[i])(s)); cmp[i]=0; nn=i;}
 		  }
 	    	else break;
@@ -2547,9 +2370,9 @@ public:
 	      cout << "add  N = " << n << " " << nn  << " "<< what << endl;
 	    for(int j=0;j<n;++j)
 	      {
-		
+
 		int m=-1;
-		fj[0]=fj[1]=fj[2]=0;// clean 
+		fj[0]=fj[1]=fj[2]=0;// clean
 		for (int i=0;i<nn;++i)
 		  {
 		    fj[i]=  *f[i]->operator[](j);
@@ -2561,33 +2384,33 @@ public:
 		    if(verbosity>100)
 		    cout << ".";
 		}
-		
-	      }	
+
+	      }
 	    if(verbosity>100)
 	    cout << endl;
 	    return nn;
 	}
-     template<class S> 
-       int MEvalandPush(Stack s,int ii,vector<ListWhat> & ll ) const  
-       {  typedef KN<S> * A; 
-	  
-	   A ath;		
-	   
+     template<class S>
+       int MEvalandPush(Stack s,int ii,vector<ListWhat> & ll ) const
+       {  typedef KN<S> * A;
+
+	   A ath;
+
 	   ath= GetAny< A >((*e[0])(s));
 	   int n=0;
 	   if(ath) n = ath->N();
 	    S th;
-	   
+
 	   for(int j=0;j<n;++j)
 	     {
 	       th= ath->operator[](j);
-	       if(th) 		    
+	       if(th)
 		ll.push_back(ListWhat(what%100,ii,static_cast<const void *>(th)));
-       
+
 	     }
 	   return n;
        }
-       
+
 	sol eval(int i,Stack s,int & cmp) const  {  cmp=-1;
 	    if (e[i]) {
 		if (!composant) {pfer p= GetAny< pfer >((*e[i])(s)); cmp=p.second;return p.first;}
@@ -2613,34 +2436,34 @@ public:
 		else {return GetAny< pf3cbase >((*e[i])(s));}
 	    }
 	    else return 0;}
-	
-	
+
+
 	asol evala(int i, Stack s,int & cmp) const  {  cmp=-1;
-	    if (e[i]) 
+	    if (e[i])
 	      {pferarray p= GetAny< pferarray >((*e[i])(s)); cmp=p.second;return p.first;}
 	    else return 0;}
 	asol3 evala3(int i, Stack s,int & cmp) const  {  cmp=-1;
-	    if (e[i]) 
+	    if (e[i])
 	      {pf3rarray p= GetAny< pf3rarray >((*e[i])(s)); cmp=p.second;return p.first;}
 	    else return 0;}
    asolS evalaS(int i, Stack s,int & cmp) const  {  cmp=-1;
          if (e[i])
           {pfSrarray p= GetAny< pfSrarray >((*e[i])(s)); cmp=p.second;return p.first;}
         else return 0;}
-	
+
 	asolc evalca(int i, Stack s,int & cmp) const  {  cmp=-1;
-	    if (e[i]) 
+	    if (e[i])
 	      {pfecarray p= GetAny< pfecarray >((*e[i])(s)); cmp=p.second;return p.first;}
 	    else return 0;}
 	asolc3 evalca3(int i, Stack s,int & cmp) const  {  cmp=-1;
-	    if (e[i]) 
+	    if (e[i])
 	      {pf3carray p= GetAny< pf3carray >((*e[i])(s)); cmp=p.second;return p.first;}
 	    else return 0;}
     asolcS evalcaS(int i, Stack s,int & cmp) const  {  cmp=-1;
          if (e[i])
           {pfScarray p= GetAny< pfScarray >((*e[i])(s)); cmp=p.second;return p.first;}
         else return 0;}
-         
+
 	const Mesh & evalm(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh >((*e[i])(s)) ;}
 	KN<pmesh> * evalma(int i,Stack s) const  { throwassert(e[i]);return   GetAny< KN<pmesh> * >((*e[i])(s)) ;}
 	const Mesh3 & evalm3(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh3 >((*e[i])(s)) ;}
@@ -2663,20 +2486,19 @@ public:
   vector<Expression2> l;
     typedef KN<KN<double> > * ptaboftab;
     Expression nargs[n_name_param];
-  
+
     Plot(const basicAC_F0 & args) : l(args.size())
     {
         args.SetNameParam(n_name_param,name_param,nargs);
         if ( nargs[8] )
             Box2x2( nargs[8] , bb);
-        
+
         // scan all the parameters of the plot() call
         for (size_t i=0;i<l.size();i++)
-            
+
             // argument is an [[file:AFunction.hpp::E_Array]] (= array of E_F0)
             if (args[i].left()==atype<E_Array>())
             {
-                //cout << "args[i].left()==atype<E_Array>()" << endl;
                 l[i].composant=false;
                 const E_Array * a = dynamic_cast<const E_Array *>(args[i].LeftValue());
                 ffassert(a);
@@ -2719,109 +2541,95 @@ public:
                     l[i].what=7; // new 3d vector
                     for (int j=0;j<a->size();j++)
                         l[i][j]= CastTo<pf3r>((*a)[j]);
-                    
+
                 }
                 else if (asizea == 3 && bpf3c ) // 3d vector ...
                 {
                     l[i].what=17; // new 3d vector
                     for (int j=0;j<a->size();j++)
                         l[i][j]= CastTo<pf3c>((*a)[j]);
-                    
+
                 }
                 else if (asizea == 3 && bpfSr ) // 3D vector for surface...
                 {
                     l[i].what=9; // new 3d vector
                     for (int j=0;j<a->size();j++)
                         l[i][j]= CastTo<pfSr>((*a)[j]);
-                    
+
                 }
                 else if (asizea == 3 && bpfSc ) // 3D vector for surface...
                 {
                     l[i].what=19; // new 3d vector
                     for (int j=0;j<a->size();j++)
                         l[i][j]= CastTo<pfSc>((*a)[j]);
-                    
+
                 }
                 else { CompileError("plot of array with wrong  number of components (!= 2 or 3) ");}
             }
             else if (BCastTo<pferbase>(args[i])) { // [[file:problem.hpp::pferbase]] [[file:lgmesh3.hpp::BCastTo]]
                 l[i].what=1; //  iso value 2d
-                // cout << "BCastTo<pferbase>(args[i])" << endl;
                 l[i].composant=true;
                 l[i][0]=CastTo<pferbase>(args[i]); }
             else if (BCastTo<pfer>(args[i])) { // [[file:problem.hpp::pfer]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
                 l[i].composant=false;
                 l[i].what=1; //  iso value 2d
                 l[i][0]=CastTo<pfer>(args[i]);}
             else if (BCastTo<pfecbase>(args[i])) { // [[file:problem.hpp::pfecbase]]
                 l[i].what=11; //  iso value 2d
-                // cout << "BCastTo<pferbase>(args[i])" << endl;
                 l[i].composant=true;
                 l[i][0]=CastTo<pfecbase>(args[i]); }
             else if (BCastTo<pfec>(args[i])) { // [[file:problem.hpp::pfec]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
                 l[i].composant=false;
                 l[i].what=11; //  iso value 2d
                 l[i][0]=CastTo<pfec>(args[i]);}
-        
-        
+
+
             else if (BCastTo<pf3r>(args[i])) { // [[file:lgmesh3.hpp::pf3r]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
                 l[i].composant=false;
                 l[i].what=6; //  real iso value 3D volume
                 l[i][0]=CastTo<pf3r>(args[i]);}
             else if (BCastTo<pf3c>(args[i])) { // [[file:lgmesh3.hpp::pf3c]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
                 l[i].composant=false;
                 l[i].what=16; //  complex iso value 3D volume
                 l[i][0]=CastTo<pf3c>(args[i]);}
-        
+
             else if (BCastTo<pfSr>(args[i])) { // [[file:lgmesh3.hpp::pfSr]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
                 l[i].composant=false;
                 l[i].what=8; //  real iso value 3D surface
                 l[i][0]=CastTo<pfSr>(args[i]);}
             else if (BCastTo<pfSc>(args[i])) { // [[file:lgmesh3.hpp::pfSc]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
                 l[i].composant=false;
                 l[i].what=18;   // complex iso value 3D surface
                 l[i][0]=CastTo<pfSc>(args[i]);}
-        
+
             else if (BCastTo<pferarray>(args[i])) {
-                // cout << "BCastTo<pfer>(args[i])" << endl;
                 l[i].composant=false;
                 l[i].what=101; //  iso value array iso value 2d
                 l[i][0]=CastTo<pferarray>(args[i]);}
             else if (BCastTo<pfecarray>(args[i])) {
-                // cout << "BCastTo<pfer>(args[i])" << endl;
                 l[i].composant=false;
                 l[i].what=111; //  iso value array iso value 2d
                 l[i][0]=CastTo<pfecarray>(args[i]);}
-        
+
             else if (BCastTo<pf3rarray>(args[i])) { // [[file:lgmesh3.hpp::pf3rarray]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
                 l[i].composant=false;
                 l[i].what=106; // iso value array iso value 3d
                 l[i][0]=CastTo<pf3rarray>(args[i]);}
             else if (BCastTo<pf3carray>(args[i])) { // [[file:lgmesh3.hpp::pf3carray]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
                 l[i].composant=false;
                 l[i].what=116; // iso value array iso value 3d
                 l[i][0]=CastTo<pf3carray>(args[i]);}
-        
+
             else if (BCastTo<pfSrarray>(args[i])) { // [[file:lgmesh3.hpp::pfSrarray]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
                 l[i].composant=false;
                 l[i].what=108; ffassert(0); //arry iso value array iso value 3d
                 l[i][0]=CastTo<pfSrarray>(args[i]);}
             else if (BCastTo<pfScarray>(args[i])) { // [[file:lgmesh3.hpp::pfScarray]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
                 l[i].composant=false;
                 l[i].what=118;  //arry iso value array iso value 3d
                 l[i][0]=CastTo<pfScarray>(args[i]);}
-        
-        
+
+
             else if (BCastTo<pmesh>(args[i])){
                 l[i].composant=true;
                 l[i].what=0; // mesh ...
@@ -2835,165 +2643,21 @@ public:
                 l[i].what=50;// 3d surface mesh ...
                 l[i][0]=CastTo<pmeshS>(args[i]);}
             else if (BCastTo<const E_BorderN *>(args[i])){
-                // cout << "BCastTo<const E_BorderN*>(args[i])" << endl;
                 l[i].what=4; // border 2d
                 l[i].composant=true;
                 l[i][0]=CastTo<const E_BorderN *>(args[i]);}
             else if (BCastTo<KN<pmesh> *>(args[i])){
                 l[i].composant=true;
-                // cout << "BCastTo<const E_BorderN*>(args[i])" << endl;
                 l[i].what=100; //  mesh 2d array
                 l[i][0]=CastTo<KN<pmesh> *>(args[i]);}
-        
+
             else {
                 CompileError("Sorry no way to plot this kind of data");
             }
-        
+
     }
-    
-    
-    /*Plot(const basicAC_F0 & args) : l(args.size())
-    {
-        
-        args.SetNameParam(n_name_param,name_param,nargs);
-        if ( nargs[8] )
-            Box2x2( nargs[8] , bb);
-        
-        // scan all the parameters of the plot() call
-        
-        for (size_t i=0;i<l.size();i++)
-            
-            // argument is an [[file:AFunction.hpp::E_Array]] (= array of E_F0)
-            if (args[i].left()==atype<E_Array>())
-            {
-                //cout << "args[i].left()==atype<E_Array>()" << endl;
-                l[i].composant=false;
-                const E_Array * a = dynamic_cast<const E_Array *>(args[i].LeftValue());
-                ffassert(a);
-                int asizea=a->size();
-                if(asizea==0) CompileError("plot of vector with 0 of components(!= 2 or 3) ");
-                bool bpfer=  BCastTo<pfer>((*a)[0]);
-                bool bpf3r=  BCastTo<pf3r>((*a)[0]);
-                bool bpfec=  BCastTo<pfec>((*a)[0]);
-                bool bpf3c=  BCastTo<pf3c>((*a)[0]);
-                bool bptab=  BCastTo<tab> ((*a)[0]);
-                bool bpttab=  BCastTo<pttab>((*a)[0]);
-                if ( bpfer && asizea <3)
-                {
-                    l[i].what=asizea;
-                    for (int j=0;j<a->size();j++)
-                        l[i][j]= CastTo<pfer>((*a)[j]);
-                }
-                else if ( bpfec && asizea <3)
-                {
-                    l[i].what=10+asizea;
-                    for (int j=0;j<a->size();j++)
-                        l[i][j]= CastTo<pfec>((*a)[j]);
-                }
-                else if (bptab && asizea>=2 && asizea<=4)// change nov 2016 FH  for color corve
-                {
-                    l[i].what=3;
-                    for (int j=0;j<a->size();j++)
-                        l[i][j]= CastTo<tab>((*a)[j]);
-                }
-                else if (bpttab && asizea>=2 && asizea<=4)// change nov 2016 FH  for  arry of curve
-                {
-                    l[i].what=103;
-                    for (int j=0;j<a->size();j++)
-                        l[i][j]= CastTo<pttab>((*a)[j]);
-                }
-                else if (asizea == 3 && bpf3r ) // 3d vector ...
-                {
-                    l[i].what=7; // new 3d vector
-                    for (int j=0;j<a->size();j++)
-                        l[i][j]= CastTo<pf3r>((*a)[j]);
-                    
-                }
-                else if (asizea == 3 && bpf3c ) // 3d vector ...
-                {
-                    l[i].what=17; // new 3d vector
-                    for (int j=0;j<a->size();j++)
-                        l[i][j]= CastTo<pf3c>((*a)[j]);
-                    
-                }
-                
-                else { CompileError("plot of array with wrong  number of components (!= 2 or 3) ");}
-            }
-            else if (BCastTo<pferbase>(args[i])) { // [[file:problem.hpp::pferbase]] [[file:lgmesh3.hpp::BCastTo]]
-                l[i].what=1; //  iso value 2d
-                // cout << "BCastTo<pferbase>(args[i])" << endl;
-                l[i].composant=true;
-                l[i][0]=CastTo<pferbase>(args[i]); }
-            else if (BCastTo<pfer>(args[i])) { // [[file:problem.hpp::pfer]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
-                l[i].composant=false;
-                l[i].what=1; //  iso value 2d
-                l[i][0]=CastTo<pfer>(args[i]);}
-            else if (BCastTo<pfecbase>(args[i])) { // [[file:problem.hpp::pfecbase]]
-                l[i].what=11; //  iso value 2d
-                // cout << "BCastTo<pferbase>(args[i])" << endl;
-                l[i].composant=true;
-                l[i][0]=CastTo<pfecbase>(args[i]); }
-            else if (BCastTo<pfec>(args[i])) { // [[file:problem.hpp::pfec]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
-                l[i].composant=false;
-                l[i].what=11; //  iso value 2d
-                l[i][0]=CastTo<pfec>(args[i]);}
-            else if (BCastTo<pf3r>(args[i])) { // [[file:lgmesh3.hpp::pf3r]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
-                l[i].composant=false;
-                l[i].what=6; //  iso value 3d
-                l[i][0]=CastTo<pf3r>(args[i]);}
-            else if (BCastTo<pf3c>(args[i])) { // [[file:lgmesh3.hpp::pf3c]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
-                l[i].composant=false;
-                l[i].what=16; //  iso value 3d
-                l[i][0]=CastTo<pf3c>(args[i]);}
-            else if (BCastTo<pferarray>(args[i])) {
-                // cout << "BCastTo<pfer>(args[i])" << endl;
-                l[i].composant=false;
-                l[i].what=101; //  iso value array iso value 2d
-                l[i][0]=CastTo<pferarray>(args[i]);}
-            else if (BCastTo<pfecarray>(args[i])) {
-                // cout << "BCastTo<pfer>(args[i])" << endl;
-                l[i].composant=false;
-                l[i].what=111; //  iso value array iso value 2d
-                l[i][0]=CastTo<pfecarray>(args[i]);}
-            else if (BCastTo<pf3rarray>(args[i])) { // [[file:lgmesh3.hpp::pf3rarray]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
-                l[i].composant=false;
-                l[i].what=106; //arry iso value array iso value 3d
-                l[i][0]=CastTo<pf3rarray>(args[i]);}
-            else if (BCastTo<pf3carray>(args[i])) { // [[file:lgmesh3.hpp::pf3carray]]
-                // cout << "BCastTo<pfer>(args[i])" << endl;
-                l[i].composant=false;
-                l[i].what=116; //arry iso value array iso value 3d
-                l[i][0]=CastTo<pf3carray>(args[i]);}
-            else if (BCastTo<pmesh>(args[i])){
-                l[i].composant=true;
-                l[i].what=0; // mesh ...
-                l[i][0]=CastTo<pmesh>(args[i]);}
-            else if (BCastTo<pmesh3>(args[i])){
-                l[i].composant=true;
-                l[i].what=5;// 3d mesh ...
-                l[i][0]=CastTo<pmesh3>(args[i]);}
-            else if (BCastTo<const E_BorderN *>(args[i])){
-                // cout << "BCastTo<const E_BorderN*>(args[i])" << endl;
-                l[i].what=4; // border 2d
-                l[i].composant=true;
-                l[i][0]=CastTo<const E_BorderN *>(args[i]);}
-            else if (BCastTo<KN<pmesh> *>(args[i])){
-                l[i].composant=true;
-                // cout << "BCastTo<const E_BorderN*>(args[i])" << endl;
-                l[i].what=100; //  mesh 2d array
-                l[i][0]=CastTo<KN<pmesh> *>(args[i]);}
-            else {
-                CompileError("Sorry no way to plot this kind of data");
-            }
-    }*/
-    
-    
-    
+
+
   static ArrayOfaType  typeargs() { return  ArrayOfaType(true);}// all type
 
   /// <<Plot_f>> Creates a Plot object with the list of arguments obtained from the script during the grammatical
@@ -3004,7 +2668,7 @@ public:
   /// Evaluates the contents of the Plot object during script evaluation. Implemented at [[Plot_operator_brackets]]
 
   AnyType operator()(Stack s) const ;
-}; 
+};
 
 /// <<Plot_name_param>>
 
@@ -3015,22 +2679,22 @@ basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
   {   "wait", &typeid(bool) },
   {   "fill", &typeid(bool) },
   {   "value", &typeid(bool) },
-  {   "clean", &typeid(bool) },     
-  {   "aspectratio", &typeid(bool)},  
+  {   "clean", &typeid(bool) },
+  {   "aspectratio", &typeid(bool)},
   {   "bb",&typeid(E_Array) },
-  {   "nbiso", &typeid(long)}, 
-  {   "nbarrow", &typeid(long)}, 
-  {   "viso", &typeid(KN_<double>)},       
+  {   "nbiso", &typeid(long)},
+  {   "nbarrow", &typeid(long)},
+  {   "viso", &typeid(KN_<double>)},
   {   "varrow", &typeid(KN_<double>)},
   {   "bw",&typeid(bool)},
   {   "grey", &typeid(bool)},
   {   "hsv", &typeid(KN_<double>)},
   {   "boundary", &typeid(bool)}, // 16
-  {   "dim", &typeid(long)}, // 2 or 3 
+  {   "dim", &typeid(long)}, // 2 or 3
   {   "add", &typeid(bool)}, // add to previous plot
-  {   "prev", &typeid(bool)}, // keep previou  view point  
-  {   "ech", &typeid(double)}, // keep previou  view point 
-     
+  {   "prev", &typeid(bool)}, // keep previou  view point
+  {   "ech", &typeid(double)}, // keep previou  view point
+
   // FFCS: more options for VTK graphics (numbers are required for processing)
 
   {"ZScale",&typeid(double)}, // #1
@@ -3063,28 +2727,28 @@ template<class K>
 class pb2mat : public E_F0 { public:
   typedef Matrice_Creuse<K> *  Result;
   const Problem * pb;
-  pb2mat(const basicAC_F0 & args) : pb(dynamic_cast<const Problem *>(args[0].left()))  
+  pb2mat(const basicAC_F0 & args) : pb(dynamic_cast<const Problem *>(args[0].left()))
   {ffassert(pb);}
   static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<const Problem *>());}
-  
-  static  E_F0 * f(const basicAC_F0 & args) { return new Plot(args);} 
-  
-  AnyType operator()(Stack s) const 
+
+  static  E_F0 * f(const basicAC_F0 & args) { return new Plot(args);}
+
+  AnyType operator()(Stack s) const
   {
-    Problem::Data<FESpace> *data= pb->dataptr(this->stack); 
+    Problem::Data<FESpace> *data= pb->dataptr(this->stack);
     if ( SameType<K,double>::OK )
       {
-	ffassert( !!data->AR);  
+	ffassert( !!data->AR);
 	return  SetAny<Matrice_Creuse<K> * >(&data->AR) ;
       }
-    else 
+    else
       {
-	ffassert( !!data->AC);  
+	ffassert( !!data->AC);
 	return SetAny<Matrice_Creuse<K> * >(&data->AC) ;
       }
   }
-  
-  
+
+
 };
 
 
@@ -3097,7 +2761,7 @@ LinkToInterpreter::LinkToInterpreter()
    y=make_Type_Expr(atype<R*>(),new E_P_Stack_Py);
    z=make_Type_Expr(atype<R*>(),new E_P_Stack_Pz);
    N=make_Type_Expr(atype<R3*>(),new E_P_Stack_N);
-   
+
    region=make_Type_Expr(new E_P_Stack_Region,atype<long*>());
    label=make_Type_Expr(new E_P_Stack_Label,atype<long*>());
    nu_triangle= make_Type_Expr(atype<long>(),new E_P_Stack_Nu_Triangle);
@@ -3114,25 +2778,25 @@ LinkToInterpreter::LinkToInterpreter()
   Global.New("label",label);
   Global.New("region",region);
   Global.New("notaregion",CConstant<long>(lnotaregion));
-  Global.New("nuTriangle",nu_triangle);   
+  Global.New("nuTriangle",nu_triangle);
   Global.New("nuTet",nu_triangle);
   Global.New("nuEdge",nu_edge);
   Global.New("nuFace",nu_face);
-  Global.New("P",P);   
-  Global.New("N",N);   
-  
-  Global.New("lenEdge",lenEdge);   
-  Global.New("area",area);   
-  Global.New("volume",volume);   
+  Global.New("P",P);
+  Global.New("N",N);
+
+  Global.New("lenEdge",lenEdge);
+  Global.New("area",area);
+  Global.New("volume",volume);
   Global.New("hTriangle",hTriangle);
-  Global.New("inside",inside);   
+  Global.New("inside",inside);
   Global.New("nTonEdge",make_Type_Expr(atype<long>(),new E_P_Stack_nTonEdge));
   Global.New("nElementonB",make_Type_Expr(atype<long>(),new E_P_Stack_nElementonB));
   Global.New("edgeOrientation",make_Type_Expr(atype<R>(),new E_P_Stack_EdgeOrient)); // Add FH jan 2018
   Global.New("BoundaryEdge",make_Type_Expr(atype<long>(),new E_P_Stack_TypeEdge<1>));// Add FH jan 2018
   Global.New("InternalEdge",make_Type_Expr(atype<long>(),new E_P_Stack_TypeEdge<2>));// Add FH jan 2018
 
-    
+
 }
 
 
@@ -3141,10 +2805,10 @@ LinkToInterpreter::LinkToInterpreter()
 template<class K>
 struct set_eqmatrice_creuse_fbl: public binary_function<Matrice_Creuse<K>*,const Matrice_Creuse<K>  *,const  C_args * > {
   static Matrice_Creuse<K>* f(Matrice_Creuse<K>* const  & a,const  C_args * const & b)  {
-  // 1  verif the FESpace 
-  
-  // 2 set = or += 
-    
+  // 1  verif the FESpace
+
+  // 2 set = or +=
+
     ffassert(0);
     return a;}
 };
@@ -3155,17 +2819,17 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
     ffassert(0);
     return a;}
 };
-  
- template<class R> 
-  AnyType IntFunction<R>::operator()(Stack stack) const  { 
+
+ template<class R>
+  AnyType IntFunction<R>::operator()(Stack stack) const  {
   MeshPoint mp=* MeshPointStack(stack);
   StackOfPtr2Free  * wsptr2free=WhereStackOfPtr2Free(stack);
   size_t  swsptr2free =wsptr2free->size();
  R r=0;
- 
+
  SHOWVERB(cout << " int " << endl);
  const vector<Expression>  & what(di->what);
- const int dim =di->d; 
+ const int dim =di->d;
  const bool surface=di->isMeshS;
  const GQuadratureFormular<R1>& FIE = di->FIE(stack);
  const GQuadratureFormular<R2> & FIT = di->FIT(stack);
@@ -3199,31 +2863,16 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
           else cout << "  --  int 3d surface  (nQP: "<< FIT.n << " ) in "  ;
       }
   }
- /*
-   if ( verbosity>3)
-   if (kind==CDomainOfIntegration::int1d) cout << "  -- boundary int border " ;
-   else if (kind==CDomainOfIntegration::intalledges) cout << "  -- boundary int all edges " ;
-   else if (kind==CDomainOfIntegration::intallVFedges) cout << "  -- boundary int all VF  edges " ;
-   else cout << "  -- boundary int  " ;*/
-      
- Expandsetoflab(stack,*di, setoflab,all); 
-/*
- for (size_t i=0;i<what.size();i++)
-   {
-     long  lab  = GetAny<long>( (*what[i])(stack));
-     setoflab.insert(lab);
-     if ( verbosity>3) cout << lab << " ";
-     all=false;
-   }
- */
+
+ Expandsetoflab(stack,*di, setoflab,all);
 
  if(dim==2)
    {
      if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) &&  (CDomainOfIntegration::int2d!=kind) ) InternalError("So no levelset integration type  case (10 2d)");
      const Mesh  & Th = * GetAny<pmesh>( (*di->Th)(stack) );
      ffassert(&Th);
-     
-     if (verbosity >3) 
+
+     if (verbosity >3)
      {
        if (all) cout << " all " << endl ;
        else cout << endl;
@@ -3252,11 +2901,11 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                        f[i]=phi[j];
                        umx = std::max(umx,phi[j]);
                        umn = std::min(umn,phi[j]);
-                       
+
                    }
                    if( umn <=0 && umx >= 0)
                    {
-                      
+
                        int np= IsoLineK(f,Q,1e-10);
                        if(np==2)
                        {
@@ -3275,32 +2924,32 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                                r += lAB*pi.a*GetAny<R>( (*fonc)(stack));
                            }
                        }
-                       
+
                    }
                    wsptr2free->clean(swsptr2free);// ADD FH 11/2017
                }
                if(verbosity > 5) cout << " Lenght level set = " << llevelset << endl;
-               
+
            }
 
         else
 	 for( int e=0;e<Th.neb;e++)
 	   {
-	     if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())   
-	       {     
-		 
+	     if (all || setoflab.find(Th.bedges[e].lab) != setoflab.end())
+	       {
+
 		 int ie,i =Th.BoundaryElement(e,ie);
-		 const Triangle & K(Th[i]);   
+		 const Triangle & K(Th[i]);
 		 R2 E=K.Edge(ie);
-		 double le = sqrt((E,E)); 
+		 double le = sqrt((E,E));
 		 R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
 		   PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
-		 
+
 		 for (int npi=0;npi<FI.n;npi++) // loop on the integration point
 		   {
 		     QuadratureFormular1dPoint pi( FI[npi]);
 		     double sa=pi.x,sb=1.-sa;
-		     R2 Pt(PA*sa+PB*sb ); //  
+		     R2 Pt(PA*sa+PB*sb ); //
 		     MeshPointStack(stack)->set(Th,K(Pt),Pt,K,Th.bedges[e].lab,R2(E.y,-E.x)/le,ie);
 		     r += le*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
@@ -3337,18 +2986,18 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                      f[i]=phi[j];
                      umx = std::max(umx,phi[j]);
                      umn = std::min(umn,phi[j]);
-                     
+
                  }
                  double area =K.area;
                  if( umn >=0 ) continue; //  all positif => nothing
                  if( umx >0 )
                     { // coupe ..
                         int i0 = 0, i1 = 1, i2 =2;
-                        
+
                         if( f[i0] > f[i1] ) swap(i0,i1) ;
                         if( f[i0] > f[i2] ) swap(i0,i2) ;
                         if( f[i1] > f[i2] ) swap(i1,i2) ;
-                        
+
                         double c = (f[i2]-f[i1])/(f[i2]-f[i0]); // coef Up Traing
                         if( f[i1] < 0 ) {double y=f[i2]/(f[i2]-f[i1]); c *=y*y; }
                         else {double y=f[i0]/(f[i0]-f[i1]) ; c = 1.- (1.-c)*y*y; };
@@ -3363,22 +3012,22 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                         MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);
                         r += area*pi.a*GetAny<R>( (*fonc)(stack));
                     }
-                    
+
                 }
                  wsptr2free->clean(swsptr2free);// ADD FH 11/2017
              }
-             
+
          }
       else
        for (int i=0;i< Th.nt; i++)
 	 {
 	   const Triangle & K(Th[i]);
-	   if (all || setoflab.find(Th[i].lab) != setoflab.end()) 
+	   if (all || setoflab.find(Th[i].lab) != setoflab.end())
 	     for (int npi=0; npi<FI.n;npi++)
 	       {
 		 QuadraturePoint pi(FI[npi]);
-		 MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);                       
-		 r += K.area*pi.a*GetAny<R>( (*fonc)(stack)); 
+		 MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);
+		 r += K.area*pi.a*GetAny<R>( (*fonc)(stack));
 	       }
              wsptr2free->clean(swsptr2free);// ADD FH 11/2017
 	 }
@@ -3386,11 +3035,11 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
      else   if (kind==CDomainOfIntegration::intalledges)
        {
 	 const QuadratureFormular1d & FI = FIE;
-	 for (int i=0;i< Th.nt; i++) 
+	 for (int i=0;i< Th.nt; i++)
 	   if (all || setoflab.find(Th[i].lab) != setoflab.end())
            {
 	     for( int ie=0;ie<3;ie++)
-	       {                                
+	       {
 		 const Triangle & K(Th[i]);
                    int e0=VerticesOfTriangularEdge[ie][0];
                    int e1=VerticesOfTriangularEdge[ie][1];
@@ -3398,15 +3047,15 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                    BoundaryEdge * be = Th.TheBoundaryEdge(i1,i2);
                    int lab = be ? be->lab :  notaregion;
 		 R2 E=K.Edge(ie);
-		 double le = sqrt((E,E)); 
+		 double le = sqrt((E,E));
 		 R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
 		   PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
-                 
+
 		 for (int npi=0;npi<FI.n;npi++) // loop on the integration point
 		   {
 		     QuadratureFormular1dPoint pi( FI[npi]);
 		     double sa=pi.x,sb=1-sa;
-		     R2 Pt(PA*sa+PB*sb ); //  
+		     R2 Pt(PA*sa+PB*sb ); //
 		     MeshPointStack(stack)->set(Th,K(Pt),Pt,K,lab,R2(E.y,-E.x)/le,ie);// correction FH 6/2/2014
 		     r += le*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
@@ -3420,26 +3069,26 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 	 cerr << " a faire CDomainOfIntegration::intallVFedges " << endl; //%%%%%%%%%
 	 ffassert(0);
 	 const QuadratureFormular1d & FI = FIE;
-	 for (int i=0;i< Th.nt; i++) 
-	   if (all || setoflab.find(Th[i].lab) != setoflab.end()) 
+	 for (int i=0;i< Th.nt; i++)
+	   if (all || setoflab.find(Th[i].lab) != setoflab.end())
 	     {
 	       const Triangle & K(Th[i]);
 	       const R2 GH(untier,untier);
 	       const R2 G=K(GH);
 	       for( int ie=0;ie<3;ie++)
-		 { 
+		 {
 		   int ie0=VerticesOfTriangularEdge[ie][0] ;
 		   int ie1=VerticesOfTriangularEdge[ie][1] ;
 		   const R2 MH=(TriangleHat[ie0]+TriangleHat[ie1])*0.5;
-		   const R2 M(K(MH)); 
+		   const R2 M(K(MH));
 		   R2 E(G,M);
-		   double le = sqrt((E,E)); 
-                   
+		   double le = sqrt((E,E));
+
 		   for (int npi=0;npi<FI.n;npi++) // loop on the integration point
 		     {
 		       QuadratureFormular1dPoint pi( FI[npi]);
 		       double sa=pi.x,sb=1-sa;
-		       R2 Pt(GH*sa+MH*sb ); //  
+		       R2 Pt(GH*sa+MH*sb ); //
 		       MeshPointStack(stack)->set(Th,K(Pt),Pt,K,Th[ie].lab,R2(E.y,-E.x)/le,ie,1);
 		       r += le*pi.a*GetAny<R>( (*fonc)(stack));
 		     }
@@ -3450,19 +3099,19 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
      else
        {
 	 InternalError("CDomainOfIntegration kind unkown");
-       }            
+       }
    }
-      
+
  // volume 3d
  else if(dim==3 && !surface)
    {
      if(di->islevelset() &&  (CDomainOfIntegration::int2d!=kind) && (CDomainOfIntegration::int3d!=kind) )
          InternalError("So no levelset integration type on no int2d / int3d case (10 3d)");
-      
+
      const Mesh3  & Th = * GetAny<pmesh3>( (*di->Th)(stack) );
      ffassert(&Th);
-     
-     if (verbosity >3) 
+
+     if (verbosity >3)
        {
 	 if (all) cout << " all " << endl ;
 	 else cout << endl;
@@ -3473,12 +3122,11 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                const GQuadratureFormular<R2> & FI = FIT;
                double llevelset = 0;
                const double uset = std::numeric_limits<double>::max();
-              // cout << " uset ="<<uset << endl;
                R3 Q[4];
                KN<double> phi(Th.nv);
                phi=uset;
                double f[4];
-               
+
                for(int t=0; t< Th.nt;++t)
                {
                    double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
@@ -3493,11 +3141,11 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                        f[i]=phi[j];
                        umx = std::max(umx,f[i]);
                        umn = std::min(umn,f[i]);
-                       
+
                    }
                    if( umn <=0 && umx >= 0)
                    {
-                       
+
                        int np= IsoLineK(f,Q,1e-10);
 
                        double l[3];
@@ -3505,7 +3153,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                        {
                         if(verbosity>999)  cout << t << " int levelset : " << umn << " .. " << umx << " np " << np <<" "
                          << f[0] << " " << f[1] << " "<< f[2] << " "<< f[3] << " "<<endl;
-                          
+
                            const Mesh3::Element & K(Th[t]);
                            double epsmes3=K.mesure()*K.mesure()*1e-18;
                            R3 PP[4];
@@ -3520,7 +3168,6 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                                if(mes2*mes <epsmes3) continue; //  too small
                                NN /= mes;
                                mes *= 0.5; //   warning correct FH 050109
-                             //  cout <<i << " / "  << NN << " / " << mes <<" / "<< i0<< i1<< i2 <<" " << llevelset <<endl;
                                llevelset += mes;
                                for (int npi=0;npi<FI.n;npi++) // loop on the integration point
                                {
@@ -3532,35 +3179,34 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                                }
                            }
                        }
-                       
+
                    }
                    wsptr2free->clean(swsptr2free);// ADD FH 11/2017
                }
                if(verbosity > 5) cout << " Area level set = " << llevelset << endl;
-              // if(verbosity > 50) cout << "phi " << phi << endl;
-               
+
            }
-       
+
          else
-        
+
        {
 	 const GQuadratureFormular<R2> & FI = FIT;
          int lab;
 	 for( int e=0;e<Th.nbe;e++)
 	   {
-	     if (all || setoflab.find(lab=Th.be(e).lab) != setoflab.end())   
-	       {     
-		 
+	     if (all || setoflab.find(lab=Th.be(e).lab) != setoflab.end())
+	       {
+
 		 int ie,i =Th.BoundaryElement(e,ie);
-		 const Mesh3::Element & K(Th[i]);   
+		 const Mesh3::Element & K(Th[i]);
 		 R3 NN=K.N(ie);
-		 double mes = sqrt((NN,NN)); 
-		 NN /= mes; 
+		 double mes = sqrt((NN,NN));
+		 NN /= mes;
 		 mes *= 0.5; //   warning correct FH 050109
 		 for (int npi=0;npi<FI.n;npi++) // loop on the integration point
 		   {
 		     GQuadraturePoint<R2> pi( FI[npi]);
-		     R3 Pt(K.PBord(ie,pi)); //  
+		     R3 Pt(K.PBord(ie,pi)); //
 		     MeshPointStack(stack)->set(Th,K(Pt),Pt,K,lab,NN,ie);
 		     r += mes*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
@@ -3570,22 +3216,21 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
        }
      else if (kind==CDomainOfIntegration::int3d)
      {
-       
+
          if(di->islevelset())
-         {   // int3d levelset < 0
+         {
              GQuadratureFormular<R3> FI(FIV.n*3);
              double llevelset = 0;
              const double uset = std::numeric_limits<double>::max();
-             // cout << " uset ="<<uset << endl;
              R3 Q[3][4];
              double vol6[3];
              KN<double> phi(Th.nv);
              phi=uset;
              double f[4];
-             
+
              for (int t=0;t< Th.nt; t++)
              {
-                 
+
 		 const Mesh3::Element & K(Th[t]);
 		 if (all || setoflab.find(K.lab) != setoflab.end())
                  {
@@ -3612,20 +3257,20 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                  wsptr2free->clean(swsptr2free);// ADD FH 11/2017
              }
 
-            
+
          }
         else
          {
        const GQuadratureFormular<R3> & FI =FIV;
-             for (int i=0;i< Th.nt; i++) 
+             for (int i=0;i< Th.nt; i++)
 	       {
 		 const Mesh3::Element & K(Th[i]);
-		 if (all || setoflab.find(K.lab) != setoflab.end()) 
+		 if (all || setoflab.find(K.lab) != setoflab.end())
 		   for (int npi=0; npi<FI.n;npi++)
                      {
                        GQuadraturePoint<R3> pi(FI[npi]);
-                       MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);                       
-                       r += K.mesure()*pi.a*GetAny<R>( (*fonc)(stack)); 
+                       MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);
+                       r += K.mesure()*pi.a*GetAny<R>( (*fonc)(stack));
                      }
                    wsptr2free->clean(swsptr2free);// ADD FH 11/2017
                }
@@ -3635,20 +3280,20 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
        {
          const GQuadratureFormular<R2> & FI = FIT;
          int lab;
-	 for (int i=0;i< Th.nt; i++) 
-	   if (all || setoflab.find(Th[i].lab) != setoflab.end()) 
+	 for (int i=0;i< Th.nt; i++)
+	   if (all || setoflab.find(Th[i].lab) != setoflab.end())
 	     for( int ie=0;ie<4;ie++) // Coorection mai 2018 FH ???????????????? never tested
 	       {
-                   
-		 const Mesh3::Element  & K(Th[i]);   
+
+		 const Mesh3::Element  & K(Th[i]);
 		 R3 NN=K.N(ie);
-		 double mes = NN.norme(); 
+		 double mes = NN.norme();
 		   NN /= mes;
-		   mes*=0.5;//  correction 05/01/09 FH 
+		   mes*=0.5;//  correction 05/01/09 FH
 		 for (int npi=0;npi<FI.n;npi++) // loop on the integration point
 		   {
 		     GQuadraturePoint<R2> pi( FI[npi]);
-		     R3 Pt(K.PBord(ie,pi)); //  
+		     R3 Pt(K.PBord(ie,pi)); //
 		     MeshPointStack(stack)->set(Th,K(Pt),Pt,K,lab,NN,ie);
 		     r += mes*pi.a*GetAny<R>( (*fonc)(stack));
 		   }
@@ -3657,13 +3302,13 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
        }
 
    }
-      
+
  else if(dim==3 && surface)
  {
      if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) &&  (CDomainOfIntegration::int2d!=kind) ) InternalError("So no levelset integration type  case (10 3d)");
      const MeshS  & Th = * GetAny<pmeshS>( (*di->Th)(stack) );
      ffassert(&Th);
-     
+
      if (verbosity >3)
      {
          if (all) cout << " all " << endl ;
@@ -3693,11 +3338,11 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                      f[i]=phi[j];
                      umx = std::max(umx,phi[j]);
                      umn = std::min(umn,phi[j]);
-                     
+
                  }
                  if( umn <=0 && umx >= 0)
                  {
-                     
+
                      int np= IsoLineK(f,Q,1e-10);
                      if(np==2)
                      {
@@ -3705,15 +3350,14 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                          double epsmes3=K.mesure()*K.mesure()*1e-18;
                          R3 PA(K(Q[0])),PB(K(Q[1])), PC(K(Q[2]));
                          R3 NN= R3(PB,PA)^R3(PC,PA); //R3 NAB(PA,PB);
-                         
+
                          double mes2 = (NN,NN);
                          double mes = sqrt(mes2);
-                        
+
                          if(mes2*mes <epsmes3) continue; //  too small
                          NN /= mes;
-                             //  cout <<i << " / "  << NN << " / " << mes <<" / "<< i0<< i1<< i2 <<" " << llevelset <<endl;
                          llevelset += mes;
-                      
+
                          for (int npi=0;npi<FI.n;npi++) // loop on the integration point
                          {
                              QuadratureFormular1dPoint pi( FI[npi]);
@@ -3721,30 +3365,30 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                              R2 Pt(Q[0]*sa+Q[1]*sb ); //
                              MeshPointStack(stack)->set(Th,K(Pt),Pt,K,-1,NN,-1);
                              r += mes*pi.a*GetAny<R>( (*fonc)(stack));
-                             
+
                          }
                      }
-                     
+
                  }
                  wsptr2free->clean(swsptr2free);// ADD FH 11/2017
              }
              if(verbosity > 5) cout << " Lenght level set = " << llevelset << endl;
-             
+
          }
-         
+
          else
              for( int e=0;e<Th.nbe;e++)
              {
                  if (all || setoflab.find(Th.be(e).lab) != setoflab.end())
                  {
-                     
+
                      int ie,i =Th.BoundaryElement(e,ie);
                      const TriangleS & K(Th[i]);
                      R3 E=K.Edge(ie);
                      double le = sqrt((E,E));
                      R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
                      PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
-                     
+
                      for (int npi=0;npi<FI.n;npi++) // loop on the integration point
                      {
                          QuadratureFormular1dPoint pi( FI[npi]);
@@ -3760,7 +3404,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
      else if (kind==CDomainOfIntegration::int2d)
      {
          const QuadratureFormular & FI =FIT;
-         
+
          if(di->islevelset())
          { // add FH mars 2014 compute int2d  on phi < 0 ..
              double llevelset = 0;
@@ -3773,7 +3417,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                  if (all || setoflab.find(Th[t].lab) != setoflab.end())
                  {
                      const TriangleS & K(Th[t]);
-                     
+
                      double umx=-HUGE_VAL,umn=HUGE_VAL;
                      for(int i=0;i<3;++i)
                      {
@@ -3786,18 +3430,18 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                          f[i]=phi[j];
                          umx = std::max(umx,phi[j]);
                          umn = std::min(umn,phi[j]);
-                         
+
                      }
                      double area =K.mesure();
                      if( umn >=0 ) continue; //  all positif => nothing
                      if( umx >0 )
                      { // coupe ..
                          int i0 = 0, i1 = 1, i2 =2;
-                         
+
                          if( f[i0] > f[i1] ) swap(i0,i1) ;
                          if( f[i0] > f[i2] ) swap(i0,i2) ;
                          if( f[i1] > f[i2] ) swap(i1,i2) ;
-                         
+
                          double c = (f[i2]-f[i1])/(f[i2]-f[i0]); // coef Up Traing
                          if( f[i1] < 0 ) {double y=f[i2]/(f[i2]-f[i1]); c *=y*y; }
                          else {double y=f[i0]/(f[i0]-f[i1]) ; c = 1.- (1.-c)*y*y; };
@@ -3812,11 +3456,11 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                          MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);
                          r += area*pi.a*GetAny<R>( (*fonc)(stack));
                      }
-                     
+
                  }
                  wsptr2free->clean(swsptr2free);// ADD FH 11/2017
              }
-             
+
          }
          else
              for (int i=0;i< Th.nt; i++)
@@ -3840,11 +3484,11 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
              if (all || setoflab.find(Th[i].lab) != setoflab.end())
                  for( int ie=0;ie<3;ie++)
                  {
-    
+
                      const MeshS::Element  & K(Th[i]);
                      R3 NN=K.N(ie);
                      double mes = NN.norme();
-                     NN /= mes; 
+                     NN /= mes;
                      for (int npi=0;npi<FI.n;npi++) // loop on the integration point
                     {
                          QuadratureFormular1dPoint pi( FI[npi]);
@@ -3864,20 +3508,12 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
          InternalError("CDomainOfIntegration kind unkown");
      }
  }
-      
-   
-      
-      
-      
+
  else {  InternalError("CDomainOfIntegration dim unkown");}
- 
+
  *MeshPointStack(stack)=mp;
      return SetAny<R>(r);
   }
-
-
-
-
 
 
 void Show(const char * s,int k=1)
@@ -3888,7 +3524,6 @@ void Show(const char * s,int k=1)
        getcadre(xmin,xmax,ymin,ymax);
        rmoveto(xmin+(xmax-xmin)/100,ymax-(k)*(ymax-ymin)/30);
        plotstring(s);
-       //  couleur(1);	
   }
 }
 template<class K,class v_fes>
@@ -3900,46 +3535,44 @@ int Send2d(PlotStream & theplot,Plot::ListWhat & lli,map<const typename v_fes::F
     int err=1;
     long what=lli.what;
     int lg,nsb;
-    lli.eval(fe,cmp);		    
-    if (fe[0]->x() && what %10 ==1) 
-	{		 
+    lli.eval(fe,cmp);
+    if (fe[0]->x() && what %10 ==1)
+	{
 	      err=0;
 	      theplot << what ;
 	      theplot <<mapth[ &(fe[0]->Vh->Th)];// numero du maillage
 
 	      KN<K> V1=fe[0]->Vh->newSaveDraw(*fe[0]->x(),cmp[0],lg,nsb);
-	   
-	      // construction of the sub division ... 
+
+	      // construction of the sub division ...
 	      int nsubT=NbOfSubTriangle(nsb);
 	      int nsubV=NbOfSubInternalVertices(nsb);
 	      KN<R2> Psub(nsubV);
 	      KN<int> Ksub(nsubT*3);
 	      for(int i=0;i<nsubV;++i)
 	      Psub[i]=SubInternalVertex(nsb,i);
-	      //cout << " Psub " << Psub <<endl;
 	      for(int sk=0,p=0;sk<nsubT;++sk)
 	      for(int i=0;i<3;++i,++p)
 	      Ksub[p]=numSubTriangle(nsb,sk,i);
-	      
+
 	      if(verbosity>9)
 	      cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N()
 	      << " Max "  << V1.max() << " min " << V1.min() << endl;
 	      theplot << Psub ;
 	      theplot << Ksub ;
 	      theplot << V1;
-	      // theplot << (long) nsb<< V1;
-	      
+
 	      }
-    else if (fe[0]->x() && fe[1]->x() &&what %10 ==2)   
+    else if (fe[0]->x() && fe[1]->x() &&what %10 ==2)
       {
-	
+
 	{
 	  err=0;
 	  theplot << what ;
-	  
-	  
+
+
 	  KN<K> V1=fe[0]->Vh->newSaveDraw(*fe[0]->x(),*fe[1]->x(),cmp[0],cmp[1],lg,nsb);
-	  // construction of the sub division ... 
+	  // construction of the sub division ...
 	  int nsubT=NbOfSubTriangle(nsb);
 	  int nsubV=NbOfSubInternalVertices(nsb);
 	  KN<R2> Psub(nsubV);
@@ -3949,18 +3582,16 @@ int Send2d(PlotStream & theplot,Plot::ListWhat & lli,map<const typename v_fes::F
 	  for(int sk=0,p=0;sk<nsubT;++sk)
 	      for(int i=0;i<3;++i,++p)
 		  Ksub[p]=numSubTriangle(nsb,sk,i);
-	  
+
 	  theplot <<mapth[ &(fe[0]->Vh->Th)];// numero du maillage
 	  theplot << Psub ;
 	  theplot << Ksub ;
 	  theplot <<  V1;
-	  
-	  // theplot << (long) nsb<< V1;
 	}
-	
+
       }
     return err;
-	      
+
 }
 
 template<class K,class v_fes>
@@ -3977,15 +3608,12 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
         int lg,nsb;
         lli.eval(fe3,cmp);
         // FFCS is able to display 3d complex data
-        //if(what==6)
         {
             if (fe3[0]->x())
             {
                 err=0;
                 theplot << what ;
                 theplot <<mapth3[ &(fe3[0]->Vh->Th)];// numero du maillage
-                // KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int composante,int & lg,
-                //   KN<Rd> &Psub,KN<int> &Ksub,int op_U) const
                 KN<R3> Psub;
                 KN<int> Ksub;
                 KN<K> V1=fe3[0]->Vh->newSaveDraw(*fe3[0]->x(),cmp[0],lg,Psub,Ksub,0);
@@ -4003,15 +3631,12 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
         int lg,nsb;
         lli.eval(fe3,cmp);
         // FFCS is able to display 3d complex data
-        //if(what==7) // ve
         {
             if (fe3[0]->x()&& fe3[1]->x() && fe3[2]->x())
             {
                 err=0;
                 theplot << what ;
                 theplot <<mapth3[ &(fe3[0]->Vh->Th)];// numero du maillage
-                // KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int composante,int & lg,
-                //   KN<Rd> &Psub,KN<int> &Ksub,int op_U) const
                 KN<R3> Psub1,Psub2,Psub3; // bf Bof ...
                 KN<int> Ksub1,Ksub2,Ksub3;
                 KN<K> V1=fe3[0]->Vh->newSaveDraw(*fe3[0]->x(),cmp[0],lg,Psub1,Ksub1,0);
@@ -4029,7 +3654,7 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
                 V123(2,'.')=V3;
                 // FFCS: should be able to deal with complex as well
                 theplot << (KN_<K>&) V123;
-                
+
             }
         }
     }
@@ -4048,18 +3673,13 @@ int SendS(PlotStream & theplot,Plot::ListWhat &lli,map<const MeshS *,long> &mapt
     long what=lli.what;
     int lg,nsb;
     lli.eval(feS,cmp);
-    
-    
+
+
     if (what%10==8)
     {
         err=0;
         theplot << what ;
         theplot <<mapthS[ &(feS[0]->Vh->Th)];// numero du maillage
-        //KN<K> V1=feS[0]->Vh->newSaveDraw(*feS[0]->x(),cmp[0],lg,nsb);
-        
-        //nsb = feS[0]->nbsubdivision;
-        //int nsbv = NbOfSubInternalVertices(nsb);
-        //lg = nsbv*Th.nt;
         KN<R2> Psub;
         KN<int> Ksub;
         KN<K> V1=feS[0]->Vh->newSaveDraw(*feS[0]->x(),cmp[0],lg,Psub,Ksub,0);
@@ -4070,45 +3690,13 @@ int SendS(PlotStream & theplot,Plot::ListWhat &lli,map<const MeshS *,long> &mapt
         theplot << Psub ;
         theplot << Ksub ;
         theplot << V1;
-        
+
     }
-    
-    
-    
+
+
+
      else  if (what%10==9)
      { ffassert(0);
-     /*int lg,nsb;
-     lli.eval(feS,cmp);
-     // FFCS is able to display 3d complex data
-     //if(what==9) // ve
-     {
-     if (feS[0]->x()&& feS[1]->x() && feS[2]->x())
-     {
-     err=0;
-     theplot << what ;
-     theplot <<mapthS[ &(feS[0]->Vh->Th)];// numero du maillage
-     // KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int composante,int & lg,
-     //   KN<Rd> &Psub,KN<int> &Ksub,int op_U) const
-     KN<R3> Psub1,Psub2,Psub3; // bf Bof ...
-     KN<int> Ksub1,Ksub2,Ksub3;
-     KN<K> V1=feS[0]->Vh->newSaveDraw(*feS[0]->x(),cmp[0],lg,Psub1,Ksub1,0);
-     KN<K> V2=feS[1]->Vh->newSaveDraw(*feS[1]->x(),cmp[1],lg,Psub2,Ksub2,0);
-     KN<K> V3=feS[2]->Vh->newSaveDraw(*feS[2]->x(),cmp[2],lg,Psub3,Ksub3,0);
-     if(verbosity>9)
-     cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N()
-     << " "  << V1.max() << " " << V1.min() << endl;
-     theplot << Psub1 ;
-     theplot << Ksub1 ;
-     ffassert( V1.N() == V2.N()  &&V1.N() == V3.N());
-     KNM<K> V123(3,V1.N()); // warning fortran numbering ...
-     V123(0,'.')=V1;
-     V123(1,'.')=V2;
-     V123(2,'.')=V3;
-     // FFCS: should be able to deal with complex as well
-     theplot << (KN_<K>&) V123;
-     
-     }
-     }*/
      }
     return err;
 }
@@ -4126,7 +3714,7 @@ inline  void NewSetColorTable(int nb,float *colors=0,int nbcolors=0,bool hsv=tru
 
 /// <<Plot_operator_brackets>> from class [[Plot]]
 AnyType Plot::operator()(Stack s) const{
-    
+
     // remap  case 107 and 108 , 109  for array of FE.
     vector<ListWhat> ll;
     vector<AnyType> lat;
@@ -4134,10 +3722,7 @@ AnyType Plot::operator()(Stack s) const{
     // generation de la list de plot ...
     for (size_t i=0;i<l.size();i++)
     {
-        //KN<pmesh > * ath;
-        //pmesh th;
-        //int cmp0=0,cmp1=1,cmp2=2;
-        
+
         switch (l[i].what) {
             case 0 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 1 : l[i].EvalandPush<void *>(s,i,ll); break;
@@ -4164,15 +3749,15 @@ AnyType Plot::operator()(Stack s) const{
             case  111 : l[i].AEvalandPush<asolc, solc>(s,i,ll); break;
             case  116 : l[i].AEvalandPush<asolc3, solc3>(s,i,ll); break;
             case  118 : l[i].AEvalandPush<asolcS, solcS>(s,i,ll); break;
-                
+
             default:
                 ffassert(l[i].what<100) ; // missing piece of code FH (jan 2010) ...
                 ll.push_back(ListWhat(l[i].what,i));
                 break;
         }
-        
+
     }
-    
+
     if(ThePlotStream)
     {
         /*
@@ -4218,7 +3803,7 @@ AnyType Plot::operator()(Stack s) const{
         {  KN<double> bbox(4);
             for (int i=0;i<4;i++)
                 bbox[i]= GetAny<double>((*bb[i])(s));
-            
+
             (theplot<< 8L) <= bbox ;
         }
         if (nargs[9])  (theplot<< 9L)   <=  GetAny<long>((*nargs[9])(s));
@@ -4226,12 +3811,12 @@ AnyType Plot::operator()(Stack s) const{
         if (nargs[11]) {
             KN_<double> v =GetAny<KN_<double> >((*nargs[11])(s)) ;
             (theplot<< 11L)  <= v   ;}
-        
+
         if (nargs[12])
             (theplot<< 12L) <=  GetAny<KN_<double> >((*nargs[12])(s)) ;
-        
-        
-        
+
+
+
         if (nargs[13]) (theplot<< 13L)  <= GetAny<bool>((*nargs[13])(s));
         if (nargs[14]) (theplot<< 14L) <= GetAny<bool>((*nargs[14])(s));
         if (nargs[15])
@@ -4242,20 +3827,20 @@ AnyType Plot::operator()(Stack s) const{
         if (nargs[18]) (theplot<< 18L)  <= GetAny<bool>((*nargs[18])(s));
         if (nargs[19]) (theplot<< 19L)  <= GetAny<bool>((*nargs[19])(s));
         if (nargs[20]) (theplot<< 20L)  <= (echelle=GetAny<double>((*nargs[20])(s)));
-        
+
         // FFCS: extra plot options for VTK (indexed from 1 to keep these lines unchanged even if the number of standard
         // FF parameters above changes) received in [[file:../ffcs/src/visudata.cpp::receiving_plot_parameters]]. When
         // adding a parameter here, do _NOT_ forget to change the size of the array at
         // [[number_of_distinct_named_parameters_for_plot]] and to name the new parameters at [[Plot_name_param]]. Also
         // update the list of displayed values at [[file:../ffcs/src/plot.cpp::Plotparam_listvalues]] and read the
         // parameter value from the pipe at [[file:../ffcs/src/visudata.cpp::receiving_plot_parameters]].
-        
+
 #define VTK_START 20
 #define SEND_VTK_PARAM(index,type)                    \
 if(nargs[VTK_START+index])                    \
 (theplot<<(long)(VTK_START+index))                \
 <=GetAny<type>((*nargs[VTK_START+index])(s));
-        
+
         SEND_VTK_PARAM(1,double); // ZScale
         SEND_VTK_PARAM(2,bool); // WhiteBackground
         SEND_VTK_PARAM(3,bool); // OpaqueBorders
@@ -4278,7 +3863,7 @@ if(nargs[VTK_START+index])                    \
         SEND_VTK_PARAM(20,long); // WindowIndex
         SEND_VTK_PARAM(21,long); // NbColorTicks
         SEND_VTK_PARAM(22,long); // NbColors
-        
+
         theplot.SendEndArgPlot();
         map<const Mesh *,long> mapth;
         map<const Mesh3 *,long> mapth3;
@@ -4317,7 +3902,7 @@ if(nargs[VTK_START+index])                    \
             if (fe3[0]->x()) th3=&fe3[0]->Vh->Th;
             if (fe3[1]) ffassert(th3 == &fe3[1]->Vh->Th);
             if (fe3[2]) ffassert(th3 == &fe3[2]->Vh->Th);
-                
+
           }
           // Prepare for the sending 3D surface iso values for ffglut
           else if (what==8 || what==9 || what==18 || what==19) {
@@ -4337,7 +3922,7 @@ if(nargs[VTK_START+index])                    \
         // send of meshes 2d
         theplot.SendMeshes();
         theplot << kth ;
-        
+
         for (map<const Mesh *,long>::const_iterator i=mapth.begin();i != mapth.end(); ++i)
             theplot << i->second << *  i->first ;
 
@@ -4349,7 +3934,7 @@ if(nargs[VTK_START+index])                    \
             for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i)
                 theplot << i->second << *  i->first ;
            }
-    
+
         // only send of surface meshes 3D
        if(kthS && kth3==0)
         {
@@ -4358,7 +3943,7 @@ if(nargs[VTK_START+index])                    \
             for (map<const MeshS *,long>::const_iterator i=mapthS.begin();i != mapthS.end(); ++i)
                 theplot << i->second << *  i->first ;
        }
-        
+
         // send of volume and surface meshes 3D
         // in this case, plot the surface
         if(kthS && kth3) {
@@ -4367,11 +3952,11 @@ if(nargs[VTK_START+index])                    \
           for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i)
             theplot << i->second << *  i->first ;
         }
-      
+
         // end of what ploting for meshes
         theplot.SendPlots();
-        
-        
+
+
         theplot <<(long) ll.size();
         for (size_t ii=0;ii<ll.size();ii++)
         {
@@ -4381,8 +3966,7 @@ if(nargs[VTK_START+index])                    \
             const Mesh *pTh=0;
             const Mesh3 *pTh3=0;
             const MeshS *pThS=0;
-            
-            // long what = l[i].what;
+
             // send 2d meshes for ffglut
             if(what ==0)
             {
@@ -4398,81 +3982,16 @@ if(nargs[VTK_START+index])                    \
                 err = Send2d<R,v_fes>( theplot,ll[ii] ,mapth);
             else if (what==11 || what==12 )
                 err = Send2d<Complex,v_fes>( theplot,ll[ii] ,mapth);
-            
-            
-            /*
-             {
-             int lg,nsb;
-             ll[ii].eval(fe,cmp);
-             if(what==1)
-             {
-             if (fe[0]->x())
-             {
-             err=0;
-             theplot << what ;
-             theplot <<mapth[ &(fe[0]->Vh->Th)];// numero du maillage
-             KN<double> V1=fe[0]->Vh->newSaveDraw(*fe[0]->x(),cmp[0],lg,nsb);
-             
-             // construction of the sub division ...
-             int nsubT=NbOfSubTriangle(nsb);
-             int nsubV=NbOfSubInternalVertices(nsb);
-             KN<R2> Psub(nsubV);
-             KN<int> Ksub(nsubT*3);
-             for(int i=0;i<nsubV;++i)
-             Psub[i]=SubInternalVertex(nsb,i);
-             //cout << " Psub " << Psub <<endl;
-             for(int sk=0,p=0;sk<nsubT;++sk)
-             for(int i=0;i<3;++i,++p)
-             Ksub[p]=numSubTriangle(nsb,sk,i);
-             
-             if(verbosity>9)
-             cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N()
-             << " "  << V1.max() << " " << V1.min() << endl;
-             theplot << Psub ;
-             theplot << Ksub ;
-             theplot << V1;
-             // theplot << (long) nsb<< V1;
-             
-             }
-             }
-             else
-             {
-             if ( fe[0]->x() && fe[1]->x())
-             {
-             err=0;
-             theplot << what ;
-             
-             
-             KN<double> V1=fe[0]->Vh->newSaveDraw(*fe[0]->x(),*fe[1]->x(),cmp[0],cmp[1],lg,nsb);
-             // construction of the sub division ...
-             int nsubT=NbOfSubTriangle(nsb);
-             int nsubV=NbOfSubInternalVertices(nsb);
-             KN<R2> Psub(nsubV);
-             KN<int> Ksub(nsubT*3);
-             for(int i=0;i<nsubV;++i)
-             Psub[i]=SubInternalVertex(nsb,i);
-             for(int sk=0,p=0;sk<nsubT;++sk)
-             for(int i=0;i<3;++i,++p)
-             Ksub[p]=numSubTriangle(nsb,sk,i);
-             
-             theplot <<mapth[ &(fe[0]->Vh->Th)];// numero du maillage
-             theplot << Psub ;
-             theplot << Ksub ;
-             theplot <<  V1;
-             
-             // theplot << (long) nsb<< V1;
-             }
-             }
-             }*/
+
             else if (what==3 || what==13 )
             {
-                
+
                 what=13;
                 theplot << what  ; //
                 KN<double> z0;
                 if(verbosity>99)
                     cout << " sendplot curve "<< what << " " << ii ;
-                
+
                 for(int k=0; k<4; ++k)
                 {
                     int ilat=ll[ii].l[k];
@@ -4488,7 +4007,7 @@ if(nargs[VTK_START+index])                    \
                     cout <<endl;
                 err=0;
             }
-            
+
             else if (l[i].what==4 )
             {
                 err=0;
@@ -4498,7 +4017,7 @@ if(nargs[VTK_START+index])                    \
             }
             // send 3d meshes for ffglut
             else if(what ==51)
-            { 
+            {
                 pTh3=&l[i].evalm3(0,s);
                 if(pTh3) {
                     err=0;
@@ -4514,7 +4033,7 @@ if(nargs[VTK_START+index])                    \
                         theplot <<mapthS[ &(l[i].evalmS(0,s))];// numero du maillage 3D surface
                  }
             }
-            
+
             else if(what ==52)
             {
                 pThS=&(l[i].evalmS(0,s));
@@ -4524,7 +4043,7 @@ if(nargs[VTK_START+index])                    \
                     theplot <<mapthS[ &(l[i].evalmS(0,s))];// numero du maillage 3D surface
                 }
             }
-            
+
             // send 3D volume iso values for ffglut
             else  if (what==6 ||what==7 )
                 err = Send3d<R,v_fes3>( theplot,ll[ii] ,mapth3);
@@ -4535,66 +4054,7 @@ if(nargs[VTK_START+index])                    \
                 err = SendS<R,v_fesS>( theplot,ll[ii] ,mapthS);
             else if (what==18 || what==19 )
                 err = SendS<Complex,v_fesS>( theplot,ll[ii] ,mapthS);
-            
-            /*
-             {
-             int lg,nsb;
-             ll[ii].eval(fe3,cmp);
-             if(what==6)
-             {
-             if (fe3[0]->x())
-             {
-             err=0;
-             theplot << what ;
-             theplot <<mapth3[ &(fe3[0]->Vh->Th)];// numero du maillage
-             // KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int composante,int & lg,
-             //   KN<Rd> &Psub,KN<int> &Ksub,int op_U) const
-             KN<R3> Psub;
-             KN<int> Ksub;
-             KN<double> V1=fe3[0]->Vh->newSaveDraw(*fe3[0]->x(),cmp[0],lg,Psub,Ksub,0);
-             if(verbosity>9)
-             cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N()
-             << " "  << V1.max() << " " << V1.min() << endl;
-             theplot << Psub ;
-             theplot << Ksub ;
-             theplot << V1;
-             }
-             }
-             }
-             else  if (what==7)
-             {
-             int lg,nsb;
-             ll[ii].eval(fe3,cmp);
-             if(what==7) // ve
-             {
-             if (fe3[0]->x()&& fe3[1]->x() && fe3[2]->x())
-             {
-             err=0;
-             theplot << what ;
-             theplot <<mapth3[ &(fe3[0]->Vh->Th)];// numero du maillage
-             // KN<R>  GFESpace<MMesh>::newSaveDraw(const KN_<R> & U,int composante,int & lg,
-             //   KN<Rd> &Psub,KN<int> &Ksub,int op_U) const
-             KN<R3> Psub1,Psub2,Psub3; // bf Bof ...
-             KN<int> Ksub1,Ksub2,Ksub3;
-             KN<double> V1=fe3[0]->Vh->newSaveDraw(*fe3[0]->x(),cmp[0],lg,Psub1,Ksub1,0);
-             KN<double> V2=fe3[1]->Vh->newSaveDraw(*fe3[1]->x(),cmp[1],lg,Psub2,Ksub2,0);
-             KN<double> V3=fe3[2]->Vh->newSaveDraw(*fe3[2]->x(),cmp[2],lg,Psub3,Ksub3,0);
-             if(verbosity>9)
-             cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N()
-             << " "  << V1.max() << " " << V1.min() << endl;
-             theplot << Psub1 ;
-             theplot << Ksub1 ;
-             ffassert( V1.N() == V2.N()  &&V1.N() == V3.N());
-             KNM<double> V123(3,V1.N()); // warning fortran numbering ...
-             V123(0,'.')=V1;
-             V123(1,'.')=V2;
-             V123(2,'.')=V3;
-             theplot << (KN_<double>&) V123;
-             
-             }
-             }
-             }*/
-            
+
             else
                 ffassert(0);// erreur type theplot inconnue
             if(err==1)
@@ -4604,12 +4064,12 @@ if(nargs[VTK_START+index])                    \
                 << " in plot command " << endl;
                 theplot << -1L << (long) i ;
             }
-            
-            
+
+
         }
         theplot.SendEndPlot();
     }
-    
+
     // begin to the post scrit procedure
     if (!withrgraphique) {initgraphique();withrgraphique=true;}
     viderbuff();
@@ -4630,7 +4090,7 @@ if(nargs[VTK_START+index])                    \
     double ArrowSize=-1;
     // PPPPP
     KN<R> Viso,Varrow;
-    
+
     bool bw=false;
     string * psfile=0;
     string * cm=0;
@@ -4658,7 +4118,7 @@ if(nargs[VTK_START+index])                    \
         Viso.init(Niso);
         Viso=v;
         pViso=true;}
-    
+
     if (nargs[12]) {
         KN_<double> v =GetAny<KN_<double> >((*nargs[12])(s)) ;
         Niso=v.N();
@@ -4666,7 +4126,7 @@ if(nargs[VTK_START+index])                    \
         Varrow=v;
         pVarrow=true;
     }
-    
+
     if (nargs[13]) bw= GetAny<bool>((*nargs[13])(s));
     if (nargs[14]) grey= GetAny<bool>((*nargs[14])(s));
     if (nargs[15]) {
@@ -4688,31 +4148,27 @@ if(nargs[VTK_START+index])                    \
     if (nargs[VTK_START+8]) ArrowSize = GetAny<double>((*nargs[VTK_START+8])(s));
     //  for the gestion of the PTR.
     WhereStackOfPtr2Free(s)=new StackOfPtr2Free(s);// FH aout 2007
-    
+
     setgrey(grey);
     if (Viso.unset()) Viso.init(Niso);
     if (Varrow.unset()) Varrow.init(Narrow);
-    
-    // KN<R> Viso(Niso);
-    // KN<R> Varrow(Narrow);
-    // if (pViso) Viso=*pViso;
-    // if (pVarrow) Varrow=*pVarrow;
+
     const Mesh * cTh=0;
     bool vecvalue=false,isovalue=false;
     bool ops=psfile;
     bool drawmeshes=false;
     if ( clean ) {
-        
+
         // ALH - 28/3/15 - Open PS file before blanking the current picture because Javascript needs to know any "ps="
         // parameter to send the graphical commands to the right canvas.
-        
+
         if (psfile) {
             // [[file:../Graphics/sansrgraph.cpp::openPS]]
             openPS(psfile->c_str());
         }
-        
+
         reffecran();
-        
+
         if (bw) NoirEtBlanc(1);
         R2 Pmin,Pmax;
         R2 uminmax(1e100,-1e100);
@@ -4725,14 +4181,12 @@ if(nargs[VTK_START+index])                    \
             R2  P1,P2;
             if (what==1 || what==2)
             {
-                
+
                 if( !uaspectratio)   aspectratio= true;
                 ll[ii].eval(fe,cmp0,fe1,cmp1);
-                
+
                 if (!fe->x()) continue;
-                
-                //int nb=fe->x()->N();
-                
+
                 fe->Vh->cmesh->BoundingBox(P1,P2);
                 cTh=fe->Vh->cmesh;
                 if (fe1==0)
@@ -4749,7 +4203,7 @@ if(nargs[VTK_START+index])                    \
                         else
                             cerr << " On ne sait tracer que de vecteur sur un meme type element finite. " << endl;
                     }
-                    
+
                 }
             }
             else if (l[i].what==0)
@@ -4764,7 +4218,7 @@ if(nargs[VTK_START+index])                    \
                 if( !uaspectratio) aspectratio= true;
                 const  E_BorderN * Bh= l[i].evalb(0,s);
                 Bh->BoundingBox(s,P1.x,P2.x,P1.y,P2.y);
-                
+
             }
             else if (l[i].what==3)
             {
@@ -4777,7 +4231,7 @@ if(nargs[VTK_START+index])                    \
                     cout << "Plot: bound  Pmin=" <<  P1 << ",  Pmax=" << P2 << endl;
             }
             else continue;
-            
+
             if (first)
             {first=false; Pmin=P1;Pmax=P2;}
             else {
@@ -4786,14 +4240,14 @@ if(nargs[VTK_START+index])                    \
                 Pmax.x = Max(Pmax.x,P2.x);
                 Pmax.y = Max(Pmax.y,P2.y);
             }
-            
+
         }
-        
+
         {
             R umx=uminmax.y,umn=uminmax.x;
             if (verbosity>5)
                 cout << " u bound " <<  uminmax << "  V : " << Vminmax <<endl;
-            
+
             if (verbosity>1)
                 cout << "Plot bound [x,y] " <<  Pmin << " max [x,y] " << Pmax << endl;
             int N=Viso.N();
@@ -4820,7 +4274,7 @@ if(nargs[VTK_START+index])                    \
             if (!pVarrow)
                 for (int i = 0;i < Na;i++)
                 {Varrow[i]=x;x +=d; }
-            
+
             SetColorTable(Max(N,Na)+4) ;
         }
     }  // clean
@@ -4837,7 +4291,7 @@ if(nargs[VTK_START+index])                    \
             cadreortho((xx0+xx1)*0.5,(yy0+yy1)*0.5, max(xx1-xx0,yy1-yy0)*0.5);
         else
             cadre(xx0,xx1,yy0,yy1);
-        
+
     }
     getcadre(xx0,xx1,yy0,yy1);
     const R ccoeff=coeff;
@@ -4852,7 +4306,7 @@ if(nargs[VTK_START+index])                    \
         {
             int i=ll[ii].i;
             long what = ll[i].what;
-            
+
             if (l[i].what==0)
                 if (fill)
                     ll[ii].th()->Draw(0,thfill);
@@ -4860,10 +4314,8 @@ if(nargs[VTK_START+index])                    \
                     ll[ii].th()->Draw(0,thfill);
                 else  if (what==1 || what==2)
                 {
-                    
+
                     ll[ii].eval(fe,cmp0,fe1,cmp1);
-                    // fe=  l[i].eval(0,s,cmp0);
-                    // fe1= l[i].eval(1,s,cmp1);;
                     if (!fe->x()) continue;
 #ifdef VVVVVVV
                     cout << "   Min = " << fe->x->min() << " max = " << fe->x->max() ;
@@ -4880,22 +4332,22 @@ if(nargs[VTK_START+index])                    \
                         if (drawmeshes) fe->Vh->Th.Draw(0,fill);
                     }
                     else
-                        
-                        
+
+
                         if (fill)
                             isovalue=true,fe->Vh->Drawfill(*fe->x(),Viso,cmp0,1.,colors,nbcolors,hsv,drawborder);
                         else
                             isovalue=true,fe->Vh->Draw(*fe->x(),Viso,cmp0,colors,nbcolors,hsv,drawborder);
-                    
+
                     if (drawmeshes) fe->Vh->Th.Draw(0,fill);
-                    
+
                 }
                 else if (l[i].what==4)
                 {
                     const  E_BorderN * Bh= l[i].evalb(0,s);
                     Bh->Plot(s);
                 }
-            
+
                 else if(l[i].what==3)
                 {
                     penthickness(6);
@@ -4907,10 +4359,7 @@ if(nargs[VTK_START+index])                    \
                     if (l[i].e[3]) { v.set(l[i].evalt(3,s));}
                     long k= Min(x.N(),y.N());
                     bool colored= (v.N()==k);
-                    // if(colored)
                     NewSetColorTable(Viso.N()+4,colors,nbcolors,hsv);
-                    // cout << " a faire " << endl;
-                    // cout << " plot :\n" << * l[i].evalt(0,s) << endl << * l[i].evalt(1,s) << endl;
                     rmoveto(x[0],y[0]);
                     couleur(2+i);
                     for (int i= 1;i<k;i++)
@@ -4920,31 +4369,6 @@ if(nargs[VTK_START+index])                    \
                     if(verbosity) cout << "  Plot::  Sorry no ps version for this type of plot "
                          << l[i].what <<endl;
                 }
-            /*
-             else if(l[i].what==23)
-             {
-             pttab ptx=l[i].evalptt(0,s),ptz=0,ptv=0;
-             pttab pty=l[i].evalptt(1,s);
-             if (l[i].e[2]) ptz=l[i].evalptt(2,s);
-             if (l[i].e[3]) ptv=l[i].evalptt(3,s);
-             int kt = min(ptx->N() , pty->N());
-             for( int j=0; j<kt; ++j)
-             {
-             tab x = (*ptx)[j];
-             tab y = (*pty)[j];
-             long k= Min(x.N(),y.N());
-             //bool colored= (v.N()==k);
-             // if(colored)
-             //   NewSetColorTable(Viso.N()+4,colors,nbcolors,hsv);
-             // cout << " a faire " << endl;
-             // cout << " plot :\n" << * l[i].evalt(0,s) << endl << * l[i].evalt(1,s) << endl;
-             rmoveto(x[0],y[0]);
-             couleur(2+i);
-             for (int i= 1;i<k;i++)
-             rlineto(x[i],y[i]);
-             }
-             }
-             */
             thfill=false;
         }
         if (value) {
@@ -4952,8 +4376,7 @@ if(nargs[VTK_START+index])                    \
             if (isovalue) {PlotValue(Viso,k,"IsoValue");k+= Viso.N()+3;}
             if (vecvalue) {PlotValue(Varrow,k,"Vec Value");k+= Varrow.N()+3;}
         }
-        // value=false;
-        
+
         if (cm) {
             couleur(1);
             DrawCommentaire(cm->c_str(),0.1,0.97);
@@ -4969,7 +4392,7 @@ if(nargs[VTK_START+index])                    \
             getcadre(x0,x1,y0,y1);
             char c=Getxyc(x,y);
             dx=(x1-x0)/2.;dy=(y1-y0)/2.;
-            
+
             switch (c)
             {
                 case '+' :  plotting=true;
@@ -5007,7 +4430,7 @@ if(nargs[VTK_START+index])                    \
                 case 'g' : setgrey(grey=!getgrey()); plotting=true;
                     reffecran();
                     break;
-                    
+
                 case 'm' :
                     reffecran();
                     drawmeshes= !drawmeshes;
@@ -5041,27 +4464,24 @@ if(nargs[VTK_START+index])                    \
                             couleur(2);
                             PF=(*t)(Phat);
                             DrawMark(PF,0.003);
-                            
+
                         }
                         couleur(5);
                         DrawMark(P,0.0015);
-                        
+
                         couleur(1);
                         if (v)
                             DrawMark(*v,0.005);
-                        
+
                         goto next;}
                 case '?':
                     int i=2;
                     reffecran();
-                    //Show("Enter a keyboard character in graphic window to do :",i++);
                     Show("Enter a keyboard character in the FreeFem Graphics window in order to:",i++);
-                    
+
                     i+=2;
-                    //Show("+)  zomm around the cursor 3/2 times ",i++);
                     Show("+)  zoom in around the cursor 3/2 times ",i++);
                     Show("-)  zoom out around the cursor 3/2 times  ",i++);
-                    //Show("-)  unzomm around the cursor 3/2 times  ",i++)    ;
                     Show("=)  reset zooming  ",i++);
                     Show("r)  refresh plot ",i++);
                     Show("ac) increase   the size arrow ",i++);
@@ -5088,12 +4508,10 @@ if(nargs[VTK_START+index])                    \
                     {
                         fe   = l[i].eval(0,s,cmp0);
                         fe1  = l[i].eval(1,s,cmp1);
-                        
+
                         if (!fe->x()) continue;
-                        
-                        // int nb=fe->x()->N();
-                        
-                        
+
+
                         if (fe1==0)
                             uminmax = minmax(uminmax,fe->Vh->MinMax(*fe->x(),cmp0,false));
                         else
@@ -5107,8 +4525,8 @@ if(nargs[VTK_START+index])                    \
                         }
                     }
                     else continue;
-                    
-                    
+
+
                 }
                 if (verbosity>5)   cout << " u bound " <<  uminmax << endl;
                 R umx=uminmax.y,umn=uminmax.x;
@@ -5124,9 +4542,9 @@ if(nargs[VTK_START+index])                    \
                 if (!pVarrow)
                     for (int i = 0;i < Na;i++)
                     {Varrow[i]=x;x +=d; }
-                
-                
-                
+
+
+
             }
         }
         *mps=mp;
@@ -5134,16 +4552,13 @@ if(nargs[VTK_START+index])                    \
     NoirEtBlanc(0)  ;
     setgrey(greyo);
     if (colors) delete[] colors;
-    // modif mars 2006  auto stack ptr
-    // if (cm)        delete cm;
-    // if (psfile)        delete psfile;
     viderbuff();
-    
+
     return 0L;
 }
 
-AnyType Convect::operator()(Stack s) const 
-{  
+AnyType Convect::operator()(Stack s) const
+{
     if(d==2)  return eval2(s);
     else  return eval3(s);
 }
@@ -5152,13 +4567,13 @@ AnyType Convect::eval2(Stack s) const
 {
   MeshPoint* mp(MeshPointStack(s)),mpc(*mp);
   MeshPointStack(s,&mpc);// P  ptr on  variable mpc ...
-   
+
   static MeshPoint mpp,mps;
   static int stateold=0;
   static int count =0;
   static R ddtp=0;
   R ddt = GetAny<double>((*dt)(s));
-  if (ddt) 
+  if (ddt)
     {
       if( (stateold == state) && (ddt==ddtp) && (*mp==mpp  ) )// optim same convect at same point nov/2015
       {
@@ -5169,7 +4584,7 @@ AnyType Convect::eval2(Stack s) const
       }
       else
 	{
-            
+
           if( verbosity > 3 && count++ < 10*10) cout <<" -- no optim convect " <<stateold << " " << state
                     << " P= " << mp->P  << " PP= " << mpp.P <<  endl;
           stateold=state;// correction FH..
@@ -5182,20 +4597,20 @@ AnyType Convect::eval2(Stack s) const
 	  l[0]=1-l[1]-l[2];
 
 	  int k=0;
-	  int j; 
+	  int j;
 	  int it=Th(mpc.T);
-	  while ( (j=WalkInTriangle(Th,it,l,GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),ddt))>=0) 
-	    { 
+	  while ( (j=WalkInTriangle(Th,it,l,GetAny<double>((*u)(s)),GetAny<double>((*v)(s)),ddt))>=0)
+	    {
 	      ffassert( l[j] == 0);
-	      //int jj  = j;            
+	      //int jj  = j;
 	      R a= l[(j+1)%3], b= l[(j+2)%3];
 	      int itt =  Th.ElementAdj(it,j);
-	      if(itt==it || itt <0)  break; // le bord 
+	      if(itt==it || itt <0)  break; // le bord
 	      it = itt;
 	      l[j]=0;
 	      l[(j+1)%3] = b;
 	      l[(j+2)%3] = a;
-	      mpc.change(R2(l[1],l[2]),Th[it],0);             
+	      mpc.change(R2(l[1],l[2]),Th[it],0);
 	      if(k++>1000)
 		{
 		  cerr << "Fatal  error  in Convect (R2) operator: loop  => velocity too high ???? or NaN F. Hecht  " << endl;
@@ -5212,7 +4627,7 @@ AnyType Convect::eval2(Stack s) const
   AnyType r= (*ff)(s);
   if( verbosity > 3 && count++ < 10*10) cout << "  %%%r= "<< GetAny<double>(r) << "  P= " << mp->P  << ", "<< mp->T << endl;
    MeshPointStack(s,mp);// restor old pointeur ..
- 
+
   return r;
 }
 
@@ -5220,7 +4635,7 @@ inline int FindandAdd(set<int> *st,vector<int> & lst,int k)
 {
     if(lst.size() < 10)
     {
-      
+
     }
     return 0;
 }
@@ -5240,9 +4655,7 @@ AnyType Convect::eval3old(Stack s) const
     static R ddtp=0;
 
     randwalk(-1); // init randwalk
-   //  set<int> *st=0;
-   // vector<int> lst;
-    
+
     R ddt = GetAny<double>((*dt)(s));
     if (ddt)
     {
@@ -5255,13 +4668,13 @@ AnyType Convect::eval3old(Stack s) const
         }
         else
         {
-            
+
            if( verbosity > 3 && count++ < 10*10) cout <<" -- no optim3 convect " <<stateold << " " << state
                 << " P= " << mp->P  << " PP= " << mpp.P <<  endl;
            const Mesh3 & Th3(*mp->Th3);
             ffassert(mp->Th3 && mp->T3);
             R3 PHat=mpc.PHat;
-            
+
             int k=0;
             int j;
             int it=Th3(mpc.T3);
@@ -5272,7 +4685,7 @@ AnyType Convect::eval3old(Stack s) const
                     mpc.change(PHat,Th3[it],0);
                     if(ddd) cout << "   **P= "<< (*mpc.T3)(PHat) << " ,  Ph " << PHat << " : j = " << j  <<  " it:  " << it << "ddt=" << ddt ;
                     if(ddt==0) break; // finish ...
-                    
+
                 }
                 else
                 {
@@ -5292,19 +4705,19 @@ AnyType Convect::eval3old(Stack s) const
                         cout << Pho  << "o Hat " << PHat << endl;
                         cout << Po << " o != " << mpc.P << " diff= "<< (Po-mpc.P).norme2() <<endl;
                         assert(0);
-                        
+
                     }
-#endif			  
+#endif
                     ffassert(k++<2000);
                 }
-            
+
             mpc.change(PHat,Th3[it],0);
-            mpp=*mp; 
-            mps=mpc;         
+            mpp=*mp;
+            mps=mpc;
         }
     }
     AnyType r= (*ff)(s);
-    MeshPointStack(s,mp);    
+    MeshPointStack(s,mp);
     return r;
 }
 
@@ -5315,8 +4728,6 @@ AnyType Convect::eval3(Stack s) const
     static MeshPoint mpp,mps;
     static R ddts;
     randwalk(-1); // init randwalk
-    //  set<int> *st=0;
-    // vector<int> lst;
     R3 offset;
     R ddt = GetAny<double>((*dt)(s));
     if (ddt)
@@ -5327,11 +4738,11 @@ AnyType Convect::eval3(Stack s) const
             mpc=mps;
         else
         {
-            
+
             const Mesh3 & Th3(*mp->Th3);
             ffassert(mp->Th3 && mp->T3);
             R3 PHat=mpc.PHat;
-            
+
             int k=0;
             int j;
             int it=Th3(mpc.T3);
@@ -5342,7 +4753,7 @@ AnyType Convect::eval3(Stack s) const
                     mpc.change(PHat,Th3[it],0);
                     if(ddd) cout << "   **P= "<< (*mpc.T3)(PHat) << " ,  Ph " << PHat << " : j = " << j  <<  " it:  " << it << "ddt=" << ddt ;
                     if(ddt==0) break; // finish ...
-                    
+
                 }
                 else
                 {
@@ -5362,12 +4773,12 @@ AnyType Convect::eval3(Stack s) const
                         cout << Pho  << "o Hat " << PHat << endl;
                         cout << Po << " o != " << mpc.P << " diff= "<< (Po-mpc.P).norme2() <<endl;
                         assert(0);
-                        
+
                     }
 #endif
                     ffassert(k++<2000);
                 }
-            
+
             mpc.change(PHat,Th3[it],0);
             mpp=*mp;
             mps=mpc;
@@ -5388,9 +4799,9 @@ class Op3_pfe2K : public ternary_function<pair<FEbase<K,v_fes> *,int>,R,R,K> { p
 
   class Op : public E_F0mps { public:
     Expression a,b,c;
-    Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {/*cout << "Op3_pfe2K" << endl;*/}       
-    AnyType operator()(Stack s)  const 
-    { 
+    Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {/*cout << "Op3_pfe2K" << endl;*/}
+    AnyType operator()(Stack s)  const
+    {
       R xx(GetAny<R>((*b)(s)));
       R yy(GetAny<R>((*c)(s)));
       MeshPoint & mp = *MeshPointStack(s),mps=mp;
@@ -5407,9 +4818,9 @@ class Op3_pfe2K : public ternary_function<pair<FEbase<K,v_fes> *,int>,R,R,K> { p
 class Op3_Mesh2mp : public ternary_function<pmesh*,R,R,MeshPoint *> { public:
   class Op : public E_F0mps { public:
       Expression a,b,c;
-       Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {}       
-       AnyType operator()(Stack s)  const 
-        { 
+       Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {}
+       AnyType operator()(Stack s)  const
+        {
            R xx(GetAny<R>((*b)(s)));
            R yy(GetAny<R>((*c)(s)));
            pmesh *ppTh(GetAny<pmesh*>((*a)(s)));
@@ -5422,54 +4833,54 @@ class Op3_Mesh2mp : public ternary_function<pmesh*,R,R,MeshPoint *> { public:
            const Triangle * K=pTh->Find(mp->P.p2(),PHat,outside);
            mp->set(*pTh,(R2) mp->P.p2(),PHat,*K,0,outside);
            return mp;}
-   
+
   };
 };
 
 template<class RR,class AA=RR>
 class JumpOp : public E_F0mps  { public:
   typedef RR  R;
-  typedef AA A; 
+  typedef AA A;
   typedef RR result_type;
-  typedef AA argument_type; 
+  typedef AA argument_type;
 
        Expression a;
        public:
-       AnyType operator()(Stack stack)  const 
-        { // a faire 
-           A rd,rg;       
-           MeshPoint *mp=MeshPointStack(stack),smp=*mp;              
+       AnyType operator()(Stack stack)  const
+        { // a faire
+           A rd,rg;
+           MeshPoint *mp=MeshPointStack(stack),smp=*mp;
            rg = GetAny<A>((*a)(stack));
-           rd = 0. ;// to be compatible with varf def... FH april 2014 ... v 3.31. 
+           rd = 0. ;// to be compatible with varf def... FH april 2014 ... v 3.31.
            if ( mp->SetAdj() )
-             rd = GetAny<A>((*a)(stack));  
-           *mp=smp;         
-           return  SetAny<R>(rd-rg);//  external - internal 
+             rd = GetAny<A>((*a)(stack));
+           *mp=smp;
+           return  SetAny<R>(rd-rg);//  external - internal
         }
-       JumpOp(Expression aa) : a(aa) {} 
+       JumpOp(Expression aa) : a(aa) {}
     };
 
 template<class RR,class AA=RR>
 class MeanOp : public E_F0mps  { public:
   typedef RR  R;
-  typedef AA A; 
+  typedef AA A;
   typedef RR result_type;
-  typedef AA argument_type; 
+  typedef AA argument_type;
 
        Expression a;
        public:
-       AnyType operator()(Stack stack)  const 
-        { // a faire 
-           A rd,rg;       
-           MeshPoint *mp=MeshPointStack(stack),smp=*mp;              
+       AnyType operator()(Stack stack)  const
+        { // a faire
+           A rd,rg;
+           MeshPoint *mp=MeshPointStack(stack),smp=*mp;
            rg = GetAny<A>((*a)(stack));
            rd = rg;
            if ( mp->SetAdj() )
-             rd = GetAny<A>((*a)(stack));  
-           *mp=smp;         
+             rd = GetAny<A>((*a)(stack));
+           *mp=smp;
            return  SetAny<R>((rg+rd)*0.5);
         }
-       MeanOp(Expression aa) : a(aa) {} 
+       MeanOp(Expression aa) : a(aa) {}
     };
 
 template<class RR,class AA=RR>
@@ -5478,7 +4889,7 @@ class OthersideOp: public E_F0mps  { public:
     typedef AA A;
     typedef RR result_type;
     typedef AA argument_type;
-    
+
     Expression a;
 public:
     AnyType operator()(Stack stack)  const
@@ -5529,7 +4940,7 @@ long get_size(pf3cbasearray *const & a)
 long resize(pferbasearray *const & a, long const & n)
 {
     (**a).resize(n);
-    return n; 
+    return n;
 }
 
 long resize(pfecbasearray *const & a, long const & n)
@@ -5548,7 +4959,7 @@ pfer get_element(pferarray const & a, long const & n)
   return pfer( *(*a.first)[n],a.second);
 }
 
-//  complex case 
+//  complex case
 pfecbase* get_element(pfecbasearray *const & a, long const & n)
 {
   return (**a)[n];
@@ -5557,7 +4968,7 @@ pfec get_element(pfecarray const & a, long const & n)
 {
   return pfec( *(*a.first)[n],a.second);
 }
-//  end complex case 
+//  end complex case
 
 lgElement get_element(pmesh const & a, long const & n)
 {
@@ -5636,28 +5047,21 @@ long EdgeElement(lgBoundaryEdge const & a)
     return a.EdgeElement();
 }
 
-/*
-pmesh* get_element(pmesharray *const & a, long const & n)
-{
-  assert(n>=0 && n <=a->second);
-  return a->first +n;
-}
-*/
 template<class A> inline AnyType DestroyKN(Stack,const AnyType &x){
   KN<A> * a=GetAny<KN<A>*>(x);
   for (int i=0;i<a->N(); i++)
     (*a)[i]->destroy();
-  a->destroy(); 
+  a->destroy();
   return  Nothing;
 }
-template<class RR,class A,class B>  
-RR * get_elementp_(const A & a,const B & b){ 
-  if( b<0 || a->N() <= b) 
+template<class RR,class A,class B>
+RR * get_elementp_(const A & a,const B & b){
+  if( b<0 || a->N() <= b)
    { cerr << " Out of bound  0 <=" << b << " < "  << a->N() << " array type = " << typeid(A).name() << endl;
      ExecError("Out of bound in operator []");}
     return  &((*a)[b]);}
-    
-template<class R>  R * set_initinit( R* const & a,const long & n){ 
+
+template<class R>  R * set_initinit( R* const & a,const long & n){
  SHOWVERB( cout << " set_init " << typeid(R).name() << " " << n << endl);
   a->init(n);
   for (int i=0;i<n;i++)
@@ -5668,22 +5072,22 @@ template<class A> inline AnyType DestroyKNmat(Stack,const AnyType &x){
   KN<A> * a=GetAny<KN<A>*>(x);
   for (int i=0;i<a->N(); i++)
     (*a)[i].destroy();
-  a->destroy(); 
+  a->destroy();
   return  Nothing;
 }
 
-template<class R>  R * set_initmat( R* const & a,const long & n){ 
+template<class R>  R * set_initmat( R* const & a,const long & n){
  SHOWVERB( cout << " set_init " << typeid(R).name() << " " << n << endl);
   a->init(n);
   for (int i=0;i<n;i++)
     (*a)[i].init();
    return a;}
-    
+
 void init_mesh_array()
  {
   Dcl_Type<KN<pmesh> *>(0,::DestroyKN<pmesh> );
   atype<KN<pmesh>* >()->Add("[","",new OneOperator2_<pmesh*,KN<pmesh>*,long >(get_elementp_<pmesh,KN<pmesh>*,long>));
-    TheOperators->Add("<-", 
+    TheOperators->Add("<-",
        new OneOperator2_<KN<pmesh> *,KN<pmesh> *,long>(&set_initinit));
   map_type_of_map[make_pair(atype<long>(),atype<pmesh>())]=atype<KN<pmesh>*>(); // vector
 
@@ -5691,23 +5095,23 @@ void init_mesh_array()
   Dcl_Type< Resize<KN<pmesh> > > ();
   Add<KN<pmesh>*>("resize",".",new OneOperator1< Resize<KN<pmesh> >,KN<pmesh>*>(to_Resize));
   Add<Resize<KN<pmesh> > >("(","",new OneOperator2_<KN<pmesh> *,Resize<KN<pmesh> > , long   >(resizeandclean1));
-   
+
 
  }
-template<class RR,class A,class B>  
-RR  get_elementp(const A & a,const B & b){ 
-  if( b<0 || a->N() <= b) 
+template<class RR,class A,class B>
+RR  get_elementp(const A & a,const B & b){
+  if( b<0 || a->N() <= b)
    { cerr << " Out of bound  0 <=" << b << " < "  << a->N() << " array type = " << typeid(A).name() << endl;
      ExecError("Out of bound in operator []");}
     return  ((*a)[b]);}
 
 template<class T> T *resizeandclean2(const Resize<T> & t,const long &n)
  {  // resizeandclean1
-  int nn= t.v->N(); // old size 
-  
+  int nn= t.v->N(); // old size
+
   for (int i=n;i<nn;i++)  {(*t.v)[i].destroy();;} // clean
   t.v->resize(n);
-  for (int i=nn;i<n;i++)  {(*t.v)[i].init();}  
+  for (int i=nn;i<n;i++)  {(*t.v)[i].init();}
   return  t.v;
  }
 
@@ -5718,8 +5122,6 @@ AnyType ClearReturn(Stack stack, const AnyType & a)
     //  pour l'instant on copie pour fqire mqrche
     // a repense  FH  mqi 20014....
     PMat * m = GetAny<PMat * >(a);
-    //   KN<K> *cm=new KN<K>(true, *m); bug quant KN est une variable global
-    // KN<K> *cm=new KN<K>( *m); // on duplique le tableau comme en C++  (dur dur ?????? FH)
     m->increment();
     Add2StackOfPtr2FreeRC(stack,m);
     return m;
@@ -5736,8 +5138,8 @@ void DclTypeMatrix()
     Dcl_Type<newpMatrice_Creuse<R> >();      // to def new Matrice_Creuse
     Dcl_Type<Matrice_Creuse_Transpose<R> >();      // matrice^t   (A')
 
-  Dcl_Type<Matrice_Creuse_Transpose<R> >();      // matrice^t   (A')                             
-  Dcl_Type<Matrice_Creuse_inv<R> >();      // matrice^-1   A^{-1}                          
+  Dcl_Type<Matrice_Creuse_Transpose<R> >();      // matrice^t   (A')
+  Dcl_Type<Matrice_Creuse_inv<R> >();      // matrice^-1   A^{-1}
   Dcl_Type<Matrice_Creuse_inv_trans<R> >();      // matrice^-1   A'^{-1}
   Dcl_Type<typename RNM_VirtualMatrix<R>::plusAx >();       // A*x (A'*x)
   Dcl_Type<typename RNM_VirtualMatrix<R>::plusAtx >();       // A^t*x (A'*x)
@@ -5745,35 +5147,35 @@ void DclTypeMatrix()
     Dcl_Type<typename RNM_VirtualMatrix<R>::solveAtxeqb >();       // A^t^-1*x
   Dcl_Type<Matrix_Prod<R,R> >();
   Dcl_Type<list<tuple<R,MatriceCreuse<R> *,bool> >*>();
-  
+
    // resize mars 2006 v2.4-1
- 
+
   // array of matrix   matrix[int] A(n);
   typedef  Matrice_Creuse<R> Mat;
   typedef  Mat * PMat;
   typedef  KN<Mat> AMat;
-  Dcl_Type<AMat *>(0,::DestroyKNmat<Mat> );  
-  
+  Dcl_Type<AMat *>(0,::DestroyKNmat<Mat> );
+
   // init array
-    TheOperators->Add("<-", 
+    TheOperators->Add("<-",
        new OneOperator2_<AMat *,AMat *,long>(&set_initmat)
                       );
-  //  A[i] 
+  //  A[i]
   atype<AMat* >()->Add("[","",new OneOperator2_<PMat,AMat*,long >(get_elementp_<Mat,AMat*,long>));
-  
+
   // resize
   Dcl_Type< Resize<AMat> > ();
   Add<AMat*>("resize",".",new OneOperator1< Resize<AMat >,AMat*>(to_Resize));
   Add<Resize<AMat> >("(","",new OneOperator2_<AMat *,Resize<AMat> , long   >(resizeandclean2));
-   
-  // to declare matrix[int]     
-  map_type_of_map[make_pair(atype<long>(),atype<PMat>())]=atype<AMat*>(); 
-  
+
+  // to declare matrix[int]
+  map_type_of_map[make_pair(atype<long>(),atype<PMat>())]=atype<AMat*>();
+
 }
 
 
-template<class A,class B> 
-AnyType First(Stack,const AnyType &b) { 
+template<class A,class B>
+AnyType First(Stack,const AnyType &b) {
 return   SetAny<A>(GetAny<B>(b).first);}
 
 template<class K>
@@ -5786,22 +5188,6 @@ AnyType AddIncrement(Stack stack, const AnyType & a)
     cout << "AddIncrement:: increment + Add2StackOfPtr2FreeRC " << endl;
     return a;
 }
-/* 
-class EConstantTypeOfFE3 :public E_F0
-    { public:
-	//  using namespace   Fem2D;
-	typedef Fem2D::TypeOfFE3 * T;
-	T  v;
-    public:
-	AnyType operator()(Stack ) const { ;return SetAny<T>(v);}
-	EConstantTypeOfFE3( T o):v(o) {}
-	size_t nbitem() const { assert(v);
-	cout << " nb item = " << v->N << endl;
-	return v->N ;} 
-	operator aType () const { return atype<T>();} 
-    };
-
-*/
 
 // FE 3D volume
 Type_Expr CConstantTFE3(const EConstantTypeOfFE3::T & v)
@@ -5829,128 +5215,121 @@ double get_R3(R3 *p,long i){return (*p)[i];}
 R3 * set_eqp(R3 *a,R3 *b) { *a=*b; return a;}
 
 
-void  init_lgfem() 
+void  init_lgfem()
 {
- // ThePlotStream = new ofstream("ttttt.plot");
   if(verbosity&& (mpirank==0)) cout <<"lg_fem ";
 #ifdef HAVE_CADNA
   cout << "cadna ";
-  cadna_init(-1); // pas de fichier 
-#endif  
-//Dcl_Type<const C_args*>(); // to store compilation expression
- 
+  cadna_init(-1); // pas de fichier
+#endif
+
  Dcl_Type<MeshPoint*>();
  Dcl_Type<R3*>(::Initialize<R3>);
  Dcl_Type<R2*>(::Initialize<R2>);
 
- map_type[typeid(R3*).name()] = new ForEachType<R3*>(Initialize<R3>);   
-  Dcl_TypeandPtr<pmesh>(0,0, ::InitializePtr<pmesh>,::DestroyPtr<pmesh>,AddIncrement<pmesh>,NotReturnOfthisType); 
+ map_type[typeid(R3*).name()] = new ForEachType<R3*>(Initialize<R3>);
+  Dcl_TypeandPtr<pmesh>(0,0, ::InitializePtr<pmesh>,::DestroyPtr<pmesh>,AddIncrement<pmesh>,NotReturnOfthisType);
   Dcl_TypeandPtr<pmesh3>(0,0,::InitializePtr<pmesh3>,::DestroyPtr<pmesh3>,AddIncrement<pmesh3>,NotReturnOfthisType);
   Dcl_TypeandPtr<pmeshS>(0,0,::InitializePtr<pmeshS>,::DestroyPtr<pmeshS>,AddIncrement<pmeshS>,NotReturnOfthisType);    ///TODOCHECK
-    
-  Dcl_Type<lgVertex>(); 
-  Dcl_Type<lgElement>( ); 
-  Dcl_Type<lgElement::Adj>( ); 
 
-  Dcl_Type<lgBoundaryEdge::BE >( ); 
-  Dcl_Type<lgBoundaryEdge>( ); 
+  Dcl_Type<lgVertex>();
+  Dcl_Type<lgElement>( );
+  Dcl_Type<lgElement::Adj>( );
 
-  atype<long>()->AddCast( 
+  Dcl_Type<lgBoundaryEdge::BE >( );
+  Dcl_Type<lgBoundaryEdge>( );
+
+  atype<long>()->AddCast(
     new E_F1_funcT<long,lgVertex>(Cast<long,lgVertex>),
     new E_F1_funcT<long,lgElement>(Cast<long,lgElement>),
     new E_F1_funcT<long,lgBoundaryEdge>(Cast<long,lgBoundaryEdge>)
   );
 
- Dcl_Type<TypeOfFE*>(); 
+ Dcl_Type<TypeOfFE*>();
  Dcl_Type<TypeOfFE3*>(); // 3D volume
  Dcl_Type<TypeOfFES*>(); // 3D surface
-  //  cout << " test DCL TypeOfFES* "<<typeid(TypeOfFES*).name() <<endl;
  map_type[typeid(TypeOfFE3*).name()]->AddCast(
 				 new E_F1_funcT<TypeOfFE3*,TypeOfFE*>(TypeOfFE3to2)	);
  map_type[typeid(TypeOfFES*).name()]->AddCast(
                  new E_F1_funcT<TypeOfFES*,TypeOfFE*>(TypeOfFESto2)    );
-    
-// Dcl_Type<TypeSolveMat*>();
+
  DclTypeMatrix<R>();
  DclTypeMatrix<Complex>();
- 
-//  Dcl_Type<MatriceCreuseDivKN_<double> >();      //  A^(-1)  x
-                                    
-                                    
- Dcl_TypeandPtr<pferbase>(); // il faut le 2 pour pourvoir initialiser 
- Dcl_TypeandPtr<pferbasearray>(); // il faut le 2 pour pourvoir initialiser 
- Dcl_Type< pfer >(); 
- Dcl_Type< pferarray >(); 
- Dcl_Type< pferarray >(); 
+
+ Dcl_TypeandPtr<pferbase>(); // il faut le 2 pour pourvoir initialiser
+ Dcl_TypeandPtr<pferbasearray>(); // il faut le 2 pour pourvoir initialiser
+ Dcl_Type< pfer >();
+ Dcl_Type< pferarray >();
+ Dcl_Type< pferarray >();
 
 
 
-    
+
 //  pour des Func FE complex   // FH  v 1.43
-    Dcl_TypeandPtr<pfecbase>(); // il faut le 2 pour pourvoir initialiser 
-    Dcl_TypeandPtr<pfecbasearray>(); // il faut le 2 pour pourvoir initialiser 
-    Dcl_Type< pfec >(); 
-    Dcl_Type< pfecarray >(); 
+    Dcl_TypeandPtr<pfecbase>(); // il faut le 2 pour pourvoir initialiser
+    Dcl_TypeandPtr<pfecbasearray>(); // il faut le 2 pour pourvoir initialiser
+    Dcl_Type< pfec >();
+    Dcl_Type< pfecarray >();
     //  FH v 1.43
     // add  mai 2009 FH for 3d eigen value.
     Dcl_Type<FEbaseArrayKn<double> *>();
     Dcl_Type<FEbaseArrayKn<Complex> *>();
- 
- 							      							   				 
-    
-    // Dcl_Type< pmesharray *>(); // il faut le 2 pour pourvoir initialiser 
-    
-    map_type[typeid(pfes).name()] = new ForEachType<pfes>(); 
+
+
+
+    // Dcl_Type< pmesharray *>(); // il faut le 2 pour pourvoir initialiser
+
+    map_type[typeid(pfes).name()] = new ForEachType<pfes>();
     map_type[typeid(pfes*).name()] = new ForEachTypePtrfspace<pfes,2>();
 
 // Dcl type for 3D volume FE
- Dcl_TypeandPtr<pf3rbase>(); // il faut le 2 pour pourvoir initialiser 
- Dcl_TypeandPtr<pf3rbasearray>(); // il faut le 2 pour pourvoir initialiser 
- Dcl_Type< pf3r >(); 
- Dcl_Type< pf3rarray >(); 
+ Dcl_TypeandPtr<pf3rbase>(); // il faut le 2 pour pourvoir initialiser
+ Dcl_TypeandPtr<pf3rbasearray>(); // il faut le 2 pour pourvoir initialiser
+ Dcl_Type< pf3r >();
+ Dcl_Type< pf3rarray >();
 
 //  pour des Func FE complex   // FH  v 1.43
- Dcl_TypeandPtr<pf3cbase>(); // il faut le 2 pour pourvoir initialiser 
- Dcl_TypeandPtr<pf3cbasearray>(); // il faut le 2 pour pourvoir initialiser 
- Dcl_Type< pf3c >(); 
- Dcl_Type< pf3carray >(); 
+ Dcl_TypeandPtr<pf3cbase>(); // il faut le 2 pour pourvoir initialiser
+ Dcl_TypeandPtr<pf3cbasearray>(); // il faut le 2 pour pourvoir initialiser
+ Dcl_Type< pf3c >();
+ Dcl_Type< pf3carray >();
 
  // Dcl type for 3D volume FE v 4.00
  Dcl_TypeandPtr<pfSrbase>(); // il faut le 2 pour pourvoir initialiser
  Dcl_TypeandPtr<pfSrbasearray>(); // il faut le 2 pour pourvoir initialiser
  Dcl_Type< pfSr >();
  Dcl_Type< pfSrarray >();
-    
+
  //  pour des Func FE complex   // FH  v 4.00
  Dcl_TypeandPtr<pfScbase>(); // il faut le 2 pour pourvoir initialiser
  Dcl_TypeandPtr<pfScbasearray>(); // il faut le 2 pour pourvoir initialiser
  Dcl_Type< pfSc >();
  Dcl_Type< pfScarray >();
- 
-    
-    
+
+
+
     //  cast of eigen value  mai 2009 ...
   map_type[typeid(FEbaseArrayKn<double> *).name()]->AddCast(
 							      new E_F1_funcT<FEbaseArrayKn<double> *,pferbasearray>(Cast<FEbaseArrayKn<double> *,pferbasearray> ),
 							      new E_F1_funcT<FEbaseArrayKn<double> *,pferarray>(First<FEbaseArrayKn<double> *,pferarray> ),
 							      new E_F1_funcT<FEbaseArrayKn<double> *,pf3rbasearray>(Cast<FEbaseArrayKn<double> *,pf3rbasearray> ),
 							      new E_F1_funcT<FEbaseArrayKn<double> *,pf3rarray>(First<FEbaseArrayKn<double> *,pf3rarray> )
-							      
-							      );				 
+
+							      );
   map_type[typeid(FEbaseArrayKn<Complex> *).name()]->AddCast(
 							       new E_F1_funcT<FEbaseArrayKn<Complex> *,pfecbasearray>(Cast<FEbaseArrayKn<Complex> *,pfecbasearray> ),
 							       new E_F1_funcT<FEbaseArrayKn<Complex> *,pfecarray>(First<FEbaseArrayKn<Complex> *,pfecarray> ),
 							       new E_F1_funcT<FEbaseArrayKn<Complex> *,pf3cbasearray>(Cast<FEbaseArrayKn<Complex> *,pf3cbasearray> ),
 							       new E_F1_funcT<FEbaseArrayKn<Complex> *,pf3carray>(First<FEbaseArrayKn<Complex> *,pf3carray> )
-							       );				 
-    
+							       );
+
  map_type[typeid(pfes3).name()] = new ForEachType<pfes3>();  // 3D volume
  map_type[typeid(pfes3*).name()] = new ForEachTypePtrfspace<pfes3,3>(); // // 3D volume
 
  map_type[typeid(pfesS).name()] = new ForEachType<pfesS>();  // 3D surface
  map_type[typeid(pfesS*).name()] = new ForEachTypePtrfspace<pfesS,4>(); // 3D surface
-    
- //   
+
+ //
  Dcl_Type<const QuadratureFormular *>();
  Dcl_Type<const QuadratureFormular1d *>();
  Dcl_Type<const GQuadratureFormular<R3> *>();
@@ -5960,25 +5339,25 @@ void  init_lgfem()
  Global.New("qf2pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_2));
  Global.New("qf2pT4P1",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_2_4P1));
  Global.New("qf5pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_5));
- 
+
  Global.New("qf7pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_7));
  Global.New("qf9pT",CConstant<const QuadratureFormular *>(&QuadratureFormular_T_9));
- 
+
  Global.New("qf1pE",CConstant<const QuadratureFormular1d *>(&QF_GaussLegendre1));
  Global.New("qf2pE",CConstant<const QuadratureFormular1d *>(&QF_GaussLegendre2));
  Global.New("qf3pE",CConstant<const QuadratureFormular1d *>(&QF_GaussLegendre3));
  Global.New("qf4pE",CConstant<const QuadratureFormular1d *>(&QF_GaussLegendre4));
  Global.New("qf5pE",CConstant<const QuadratureFormular1d *>(&QF_GaussLegendre5));
  Global.New("qf1pElump",CConstant<const QuadratureFormular1d *>(&QF_LumpP1_1D));
- 
+
   Global.New("qfV1",CConstant<const GQuadratureFormular<R3>  *>(&QuadratureFormular_Tet_1));
   Global.New("qfV2",CConstant<const GQuadratureFormular<R3>  *>(&QuadratureFormular_Tet_2));
   Global.New("qfV5",CConstant<const GQuadratureFormular<R3>  *>(&QuadratureFormular_Tet_5));
   Global.New("qfV1lump",CConstant<const GQuadratureFormular<R3>  *>(&QuadratureFormular_Tet_1lump));
-     
-    
- //  juste du code genere 
- 
+
+
+ //  juste du code genere
+
  Global.New("wait",CConstant<bool*>(&TheWait));
  Global.New("NoUseOfWait",CConstant<bool*>(&NoWait));
  Global.New("NoGraphicWindow",CConstant<bool*>(&NoGraphicWindow));
@@ -5988,7 +5367,7 @@ void  init_lgfem()
  Dcl_Type<ftest *>();
  Dcl_Type<foperator *>();
  Dcl_Type<foperator *>();
- Dcl_Type<const BC_set *>();  // a set of boundary condition 
+ Dcl_Type<const BC_set *>();  // a set of boundary condition
  Dcl_Type<const Call_FormLinear<v_fes> *>();    //   to set Vector
  Dcl_Type<const Call_FormBilinear<v_fes> *>();  // to set Matrix
  Dcl_Type<const Call_FormLinear<v_fes3> *>();    //   to set Vector 3D volume
@@ -5996,14 +5375,14 @@ void  init_lgfem()
  Dcl_Type<const Call_FormLinear<v_fesS> *>();    //   to set Vector 3D surface
  Dcl_Type<const Call_FormBilinear<v_fesS> *>();  // to set Matrix 3D surface
  Dcl_Type<interpolate_f_X_1<double>::type>();  // to make  interpolation x=f o X^1 ;
- 
+
  map_type[typeid(const FormBilinear*).name()] = new TypeFormBilinear;
  map_type[typeid(const FormLinear*).name()] = new TypeFormLinear;
  aType t_C_args = map_type[typeid(const C_args*).name()] = new TypeFormOperator;
  map_type[typeid(const Problem*).name()] = new TypeSolve<false,Problem>;
  map_type[typeid(const Solve*).name()] = new TypeSolve<true,Solve>;
- Dcl_Type<const IntFunction<double>*>(); 
- Dcl_Type<const IntFunction<complex<double> >*>(); 
+ Dcl_Type<const IntFunction<double>*>();
+ Dcl_Type<const IntFunction<complex<double> >*>();
  basicForEachType * t_solve=atype<const  Solve *>();
  basicForEachType * t_problem=atype<const  Problem *>();
  basicForEachType * t_fbilin=atype<const  FormBilinear *>();
@@ -6014,31 +5393,29 @@ void  init_lgfem()
  basicForEachType * t_form=atype<const C_args*>();
 
   Dcl_Type<const CDomainOfIntegration *>();
-  
- 
 
- atype<pmesh >()->AddCast( new E_F1_funcT<pmesh,pmesh*>(UnRef<pmesh >)); 
- //  in mesh3  atype<pmesh3>()->AddCast( new E_F1_funcT<pmesh3,pmesh3*>(UnRef<pmesh3 >)); 
+
+
+ atype<pmesh >()->AddCast( new E_F1_funcT<pmesh,pmesh*>(UnRef<pmesh >));
  atype<pfes >()->AddCast(  new E_F1_funcT<pfes,pfes*>(UnRef<pfes>));
- 
+
  atype<pferbase>()->AddCast(  new E_F1_funcT<pferbase,pferbase>(UnRef<pferbase>));
  atype<pfecbase>()->AddCast(  new E_F1_funcT<pfecbase,pfecbase>(UnRef<pfecbase>));
- 
+
  Add<pfer>("[]",".",new OneOperator1<KN<double> *,pfer>(pfer2vect<R>));
  Add<pfec>("[]",".",new OneOperator1<KN<Complex> *,pfec>(pfer2vect<Complex>));
-    
-    
+
+
  Add<pfer>("(","",new OneTernaryOperator<Op3_pfe2K<R>,Op3_pfe2K<R>::Op> );
  Add<pfec>("(","",new OneTernaryOperator<Op3_pfe2K<Complex>,Op3_pfe2K<Complex>::Op> );
  Add<double>("(","",new OneTernaryOperator<Op3_K2R<R>,Op3_K2R<R>::Op> );
-// Add<long>("(","",new OneTernaryOperator<Op3_K2R<long>,Op3_K2R<long>::Op> ); // FH stupide 
  Add<Complex>("(","",new OneTernaryOperator<Op3_K2R<Complex>,Op3_K2R<Complex>::Op> );
  Add<pmesh *>("(","",new OneTernaryOperator<Op3_Mesh2mp,Op3_Mesh2mp::Op> );
- 
- 
+
+
  Add<MeshPoint *>("nuTriangle",".",new OneOperator1<long,MeshPoint *>(mp_nuTriangle));
  Add<MeshPoint *>("region",".",new OneOperator1<long,MeshPoint *>(mp_region));
- 
+
     Add<pfer>("refresh",".",new OneOperator1<bool,pfer>(pfer_refresh<R,v_fes>));
     Add<pfec>("refresh",".",new OneOperator1<bool,pfec>(pfer_refresh<Complex,v_fes>));
 
@@ -6046,19 +5423,19 @@ void  init_lgfem()
  Add<pfec>("n",".",new OneOperator1<long,pfec>(pfer_nbdf<Complex>));
  Add<pfer>("Th",".",new OneOperator1<pmesh ,pfer>(pfer_Th<R>));
  Add<pfec>("Th",".",new OneOperator1<pmesh,pfec>(pfer_Th<Complex>));
-    
+
  Add<pmesh*>("area",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("mesure",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("measure",".",new OneOperator1<double,pmesh*>(pmesh_area));
  Add<pmesh*>("bordermeasure",".",new OneOperator1<double,pmesh*>(pmesh_bordermeasure));// add june 2017 F.H
  Add<pmesh*>("nt",".",new OneOperator1<long,pmesh*>(pmesh_nt));
  Add<pmesh*>("nbe",".",new OneOperator1<long,pmesh*>(pmesh_nbe));
-    
+
  Add<pmesh*>("nv",".",new OneOperator1<long,pmesh*>(pmesh_nv));
-    
+
   Add<pmesh*>("hmax",".",new OneOperator1<double,pmesh*>(pmesh_hmax));
   Add<pmesh*>("hmin",".",new OneOperator1<double,pmesh*>(pmesh_hmin));
-    
+
  Add<pfes*>("ndof",".",new OneOperator1<long,pfes*>(pVh_ndof));
  Add<pfes*>("Th",".",new OneOperator1<pmesh,pfes*>(pVh_Th));
  Add<pfes*>("nt",".",new OneOperator1<long,pfes*>(pVh_nt));
@@ -6067,23 +5444,17 @@ void  init_lgfem()
 /* FH: ne peux pas marcher, il faut passer aussi le nouveau Vh
  Add<pfes*>("(","", new OneBinaryOperator_st<pVh_renumber>  );
  */
-    
-    
- //new OneOperator3<long,pfes*,long,long>(pVh_ndf));
- 
+
+
  atype<Matrice_Creuse<R> * >()->AddCast(new OneOperatorCode<pb2mat<R> >);
  atype<Matrice_Creuse<Complex> * >()->AddCast(new OneOperatorCode<pb2mat<Complex> >);
 
-//   Add all Finite Element "P0","P1","P2","RT0", ... 
+//   Add all Finite Element "P0","P1","P2","RT0", ...
   for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
     {
-     ffassert(i->tfe); // check 
+     ffassert(i->tfe); // check
      AddNewFE(i->name,i->tfe);
-    // Global.New(i->name, Type_Expr(atype<TypeOfFE*>(),new  EConstantTypeOfFE(i->tfe)));
      }
-// Global.New("P1",CConstant<TypeOfFE*>(&P1Lagrange))
-// Global.New("P2",CConstant<TypeOfFE*>(&P2Lagrange));
-// kTypeSolveMat=0;
     static  string LU="LU";
     static  string CG="CG";
     static  string GMRES="GMRES";
@@ -6101,45 +5472,10 @@ void  init_lgfem()
     Global.New(sparsesolver.c_str(),CConstant<string*>(&sparsesolver));
     Global.New(sparsesolverSym.c_str(),CConstant<string*>(&sparsesolverSym));
 
-    //dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::LU)));
-// Global.New("CG",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::GC)));
- //Global.New("Crout",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::CROUT)));
- //Global.New("Cholesky",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::CHOLESKY)));
- //Global.New("GMRES",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::GMRES)));
-// Global.New("UMFPACK",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolver)));
-// Global.New("sparsesolver",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolver)));
-
-// Global.New("sparsesolverSym",CConstant<TypeSolveMat*>(dTypeSolveMat[kTypeSolveMat++]=new TypeSolveMat(TypeSolveMat::SparseSolverSym)));
-
-// ffassert(kTypeSolveMat<nTypeSolveMat);
-// map_type[typeid(TypeSolveMat*).name()]->AddCast(new E_F1_funcT<TypeSolveMat*,long>(Long2TypeSolveMat) );
-// map_type[typeid(long).name()]->AddCast(  new E_F1_funcT<long,TypeSolveMat*>(TypeSolveMat2Long) );
-    
-//  init pmesh  
-/*
-
- Add<pmesh*>("<-","(",
-             new OneOperator1_<pmesh,string*>(ReadMesh),
-             new OneOperator3_<long,pmesh*,double,double,
-                      E_F_stackF0F0F0_<long,pmesh*,double,double> >(& FindTxy )
-
- );
-
- Add<pmesh3*>("<-","(",
-             new OneOperator1_<pmesh3,string*>(ReadMesh3)
- );
-*/
-/*TheOperators->Add("<-",);
-
- );*/
- 
-//old --   
-//  init FESpace 
+//old --
+//  init FESpace
  TheOperators->Add("<-",
 		   new OneOperator2_<pfes*,pfes*,pmesh* >(& MakePtr2 ),
-		   // new OneOperator2_<pfes*,pfes*,pmesh3* >(& MakePtr3 ),
-		   //    new OneOperator3_<pfes*,pfes*,pmesh*,long >(& MakePtr2 ),
-		   //    new OneOperator3_<pfes*,pfes*,pmesh*,TypeOfFE* >(& MakePtr2 ),
 		   new OneOperatorCode<OP_MakePtr2>,
 		   new OneOperatorCode<OP_MakePtr3>,
            new OneOperatorCode<OP_MakePtrS>,
@@ -6148,7 +5484,7 @@ void  init_lgfem()
            new OpMake_pfes<pfesS,MeshS,TypeOfFES,pfesS_tefk>      // add for 3D surface  FEspace
         );
     TheOperators->Add("=",new OneOperator2<R3*,R3*,R3* >(&set_eqp));
- 
+
  Add<MeshPoint*>("P",".", new OneOperator_Ptr_o_R<R3,MeshPoint>(  & MeshPoint::P));
  Add<MeshPoint*>("N",".", new OneOperator_Ptr_o_R<R3,MeshPoint>(  & MeshPoint::N));
  Add<R3*>("x",".", new OneOperator_Ptr_o_R<R,R3>(  & R3::x));
@@ -6156,9 +5492,9 @@ void  init_lgfem()
  Add<R3*>("z",".", new OneOperator_Ptr_o_R<R,R3>(  & R3::z));
  Add<R2*>("x",".", new OneOperator_Ptr_o_R<R,R2>(  & R2::x));
  Add<R2*>("y",".", new OneOperator_Ptr_o_R<R,R2>(  & R2::y));
- 
+
  Add<R3*>("[","",new OneOperator2<double,R3*,long>(get_R3));
-    
+
  Add<pmesh>("[","",new OneOperator2_<lgElement,pmesh,long>(get_element));
  Add<pmesh*>("be",".",new OneOperator1_<lgBoundaryEdge::BE,pmesh*>(Build));
  Add<lgElement>("adj",".",new OneOperator1_<lgElement::Adj,lgElement>(Build));
@@ -6168,8 +5504,8 @@ void  init_lgfem()
  TheOperators->Add("!=", new OneBinaryOperator<Op2_ne<lgElement,lgElement> >);
  TheOperators->Add("<", new OneBinaryOperator<Op2_lt<lgElement,lgElement> >);
  TheOperators->Add("<=", new OneBinaryOperator<Op2_le<lgElement,lgElement> >);
-		      
-    
+
+
  Add<pmesh*>("[","",new OneOperator2_<lgElement,pmesh*,long>(get_element));
  Add<pmesh>("(","",new OneOperator2_<lgVertex,pmesh,long>(get_vertex));
  Add<pmesh*>("(","",new OneOperator2_<lgVertex,pmesh*,long>(get_vertex));
@@ -6189,8 +5525,8 @@ void  init_lgfem()
  Add<lgBoundaryEdge>("label",".",new OneOperator1_<long,lgBoundaryEdge>(getlab));
  Add<lgBoundaryEdge>("Element",".",new OneOperator1_<lgElement,lgBoundaryEdge>(getElement));
  Add<lgBoundaryEdge>("whoinElement",".",new OneOperator1_<long,lgBoundaryEdge>(EdgeElement));
- 
- 
+
+
  // New FF language types. zzzfff is defined at [[file:lex.hpp::zzzfff]] as a pointer to an object of class mylex
  // [[file:lex.hpp::class mylex]]. zzzfff->Add() is at [[file:lex.cpp::void mylex Add Key k aType t]]. The lexer will
  // then be called from the parser via [[file:../lglib/lg.ypp::yylex]]
@@ -6204,15 +5540,14 @@ void  init_lgfem()
  // pmesh3 is a pointer to Mesh3 defined at [[file:lgfem.hpp::typedef Mesh3 pmesh3]]
  zzzfff->Add("mesh3",atype<pmesh3*>());
  // pmeshS is a pointer to MeshS defined at [[file:lgfem.hpp::typedef MeshS pmeshS]]
- zzzfff->Add("meshS",atype<pmeshS*>());  /////
+ zzzfff->Add("meshS",atype<pmeshS*>());
 
  zzzfff->Add("element",atype<lgElement>());
  zzzfff->Add("vertex",atype<lgVertex>());
-// zzzfff->Add("fespace",atype<pfes*>());
  zzzfff->Add("matrix",atype<Matrice_Creuse<R> *>());
  zzzfff->Add("Cmatrix",atype<Matrice_Creuse<Complex> *>()); // a voir
 
- 
+
 
  Global.Add("LinearCG","(",new LinearCG<R>()); // old form  with rhs (must be zer
  Global.Add("LinearGMRES","(",new LinearGMRES<R>()); // old form
@@ -6222,16 +5557,10 @@ void  init_lgfem()
  Global.Add("AffineCG","(",new LinearCG<R>(1)); //  without right handsize
  Global.Add("NLCG","(",new LinearCG<R>(-1)); //  without right handsize
 
- //   Global.Add("LinearCG","(",new LinearCG<Complex>()); // old form  with rhs (must be zer
- //   Global.Add("LinearGMRES","(",new LinearGMRES<Complex>()); // old form  with rhs (must be zer
- //   Global.Add("LinearGMRES","(",new LinearGMRES<Complex>(1)); // old form  without rhs 
-//    Global.Add("LinearCG","(",new LinearCG<Complex>(1)); //  without right handsize
-//    Global.Add("NLCG","(",new LinearCG<Complex>(-1)); //  without right handsize
-   
  zzzfff->AddF("varf",t_form);    //  var. form ~  <<varf>>
  zzzfff->AddF("solve",t_solve);
  zzzfff->AddF("problem",t_problem);
- 
+
 
  Global.Add("jump","(",new OneOperatorCode<Code_VF<Ftest,Code_Jump> >);
  Global.Add("jump","(",new OneOperatorCode<Code_VF<Finconnue,Code_Jump> >);
@@ -6245,25 +5574,25 @@ void  init_lgfem()
  Global.Add("conj","(",new OneOperatorCode<CODE_conj<Finconnue> >);
  Global.Add("conj","(",new OneOperatorCode<CODE_conj<Ftest> >);
  Global.Add("conj","(",new OneOperatorCode<CODE_conj<Foperator> >);
- TheOperators->Add("\'", new OneOperatorCode<CODE_conj<Finconnue> >); 
- TheOperators->Add("\'", new OneOperatorCode<CODE_conj<Ftest> >);   
- TheOperators->Add("\'", new OneOperatorCode<CODE_conj<Foperator> >);   
-    
+ TheOperators->Add("\'", new OneOperatorCode<CODE_conj<Finconnue> >);
+ TheOperators->Add("\'", new OneOperatorCode<CODE_conj<Ftest> >);
+ TheOperators->Add("\'", new OneOperatorCode<CODE_conj<Foperator> >);
+
  Global.Add("dx","(",new OneOperatorCode<CODE_Diff<Ftest,op_dx> >);
  Global.Add("dy","(",new OneOperatorCode<CODE_Diff<Ftest,op_dy> >);
  Global.Add("dx","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dx> >);
  Global.Add("dy","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dy> >);
- 
+
  Global.Add("dxx","(",new OneOperatorCode<CODE_Diff<Ftest,op_dxx> >);
  Global.Add("dxy","(",new OneOperatorCode<CODE_Diff<Ftest,op_dxy> >);
  Global.Add("dyx","(",new OneOperatorCode<CODE_Diff<Ftest,op_dyx> >);
  Global.Add("dyy","(",new OneOperatorCode<CODE_Diff<Ftest,op_dyy> >);
- 
+
  Global.Add("dxx","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dxx> >);
  Global.Add("dyy","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dyy> >);
  Global.Add("dxy","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dxy> >);
  Global.Add("dyx","(",new OneOperatorCode<CODE_Diff<Finconnue,op_dyx> >);
- 
+
  Global.Add("on","(",new OneOperatorCode<BC_set > );
 
  /// <<plot_keyword>> uses [[Plot]] and [[file:AFunction.hpp::OneOperatorCode]] and [[file:AFunction.hpp::Global]]
@@ -6276,95 +5605,93 @@ void  init_lgfem()
     new OneOperatorCode<CODE_L_Add<Ftest> > ,
     new OneOperatorCode<CODE_L_Add<Finconnue> > ,
     new OneOperatorCode<C_args>(t_C_args,t_C_args,t_C_args) // ,
-  //  new OperatorIdentity<FormBilinear>(), // add FH 13042005
-  //  new OperatorIdentity<FormLinear>()       // add FH 13042005  + int2d ( ..)
   );
  TheOperators->Add("-",
     new OneOperatorCode<CODE_L_Minus<Foperator> > ,
     new OneOperatorCode<CODE_L_Minus<Ftest> > ,
     new OneOperatorCode<CODE_L_Minus<Finconnue> >,
-    new OneOperatorCode<CODE_L_Sub<Foperator> > ,    
+    new OneOperatorCode<CODE_L_Sub<Foperator> > ,
     new OneOperatorCode<CODE_L_Sub<Ftest> > ,
     new OneOperatorCode<CODE_L_Sub<Finconnue> >,
-    new OneOperatorCode<C_args_minus>(t_C_args,t_C_args,t_fbilin) ,       
+    new OneOperatorCode<C_args_minus>(t_C_args,t_C_args,t_fbilin) ,
     new OneOperatorCode<C_args_minus>(t_C_args,t_C_args,t_flin) ,
     new OneOperatorCode<Minus_Form<FormBilinear > >,
-    new OneOperatorCode<Minus_Form<FormLinear > > 
-           
+    new OneOperatorCode<Minus_Form<FormLinear > >
+
   );
-  
-  
-  atype<const C_args*>()->AddCast( 
-      new OneOperatorCode<C_args>(t_C_args,t_fbilin) ,       
-      new OneOperatorCode<C_args>(t_C_args,t_flin)  ,     
-      new OneOperatorCode<C_args>(t_C_args,t_BC)       
+
+
+  atype<const C_args*>()->AddCast(
+      new OneOperatorCode<C_args>(t_C_args,t_fbilin) ,
+      new OneOperatorCode<C_args>(t_C_args,t_flin)  ,
+      new OneOperatorCode<C_args>(t_C_args,t_BC)
     );
-    
-  atype<const C_args*>()->AddCast( 
+
+  atype<const C_args*>()->AddCast(
       new OneOperatorCode<C_args>(t_C_args,atype<DotSlash_KN_<R> >()) ,
       new OneOperatorCode<C_args>(t_C_args,atype<KN<R>*>())  ,
-      new OneOperatorCode<C_args>(t_C_args,atype<DotStar_KN_<R> >())  ,           
+      new OneOperatorCode<C_args>(t_C_args,atype<DotStar_KN_<R> >())  ,
       new OneOperatorCode<C_args>(t_C_args,atype<Matrice_Creuse<R>*>()) ,
       new OneOperatorCode<C_args>(t_C_args,atype<RNM_VirtualMatrix<R>::plusAx >()),
       new OneOperatorCode<C_args>(t_C_args,atype<RNM_VirtualMatrix<R>::plusAtx >())
-       
-    );         
 
-  atype<const C_args*>()->AddCast( 
+    );
+
+  atype<const C_args*>()->AddCast(
       new OneOperatorCode<C_args>(t_C_args,atype<DotSlash_KN_<Complex> >()) ,
       new OneOperatorCode<C_args>(t_C_args,atype<KN<Complex>*>())  ,
-      new OneOperatorCode<C_args>(t_C_args,atype<DotStar_KN_<Complex> >())  ,           
+      new OneOperatorCode<C_args>(t_C_args,atype<DotStar_KN_<Complex> >())  ,
       new OneOperatorCode<C_args>(t_C_args,atype<Matrice_Creuse<Complex>*>()) ,
       new OneOperatorCode<C_args>(t_C_args,atype<RNM_VirtualMatrix<Complex>::plusAx >()),
       new OneOperatorCode<C_args>(t_C_args,atype<RNM_VirtualMatrix<Complex>::plusAtx >())
-       
-    );         
-    
- TheOperators->Add("*",  
+
+    );
+
+ TheOperators->Add("*",
     new OneOperatorCode<CODE_L_Mul<Foperator,Ftest,Finconnue> > ,
     new OneOperatorCode<CODE_L_Mul<Foperator,Finconnue,Ftest> > );
-    
-// Warning just double or complex in following operator 
-// ----------------------------------------------------    
-//   in case of  ambiguity we take the double version  
+
+// Warning just double or complex in following operator
+// ----------------------------------------------------
+//   in case of  ambiguity we take the double version
 //   case    long -> double
 //           long -> complex
- TheOperators->Add("*",      
+ TheOperators->Add("*",
     new OneOperatorCode<CODE_L_MulLR<Finconnue,double>, 20> ,
     new OneOperatorCode<CODE_L_MulLR<Foperator,double>, 20 > ,
     new OneOperatorCode<CODE_L_MulLR<Ftest,double>, 20 > ,
     new OneOperatorCode<CODE_L_MulRL<double,Finconnue>, 20 > ,
     new OneOperatorCode<CODE_L_MulRL<double,Foperator>, 20 > ,
-    new OneOperatorCode<CODE_L_MulRL<double,Ftest>, 20 > 
+    new OneOperatorCode<CODE_L_MulRL<double,Ftest>, 20 >
   );
- TheOperators->Add("*",       
+ TheOperators->Add("*",
     new OneOperatorCode<CODE_L_MulLR<Finconnue,Complex>, 10 > ,
     new OneOperatorCode<CODE_L_MulLR<Foperator,Complex>, 10 > ,
     new OneOperatorCode<CODE_L_MulLR<Ftest,Complex>, 10 > ,
     new OneOperatorCode<CODE_L_MulRL<Complex,Finconnue>, 10 > ,
     new OneOperatorCode<CODE_L_MulRL<Complex,Foperator>, 10 > ,
-    new OneOperatorCode<CODE_L_MulRL<Complex,Ftest>, 10 > 
+    new OneOperatorCode<CODE_L_MulRL<Complex,Ftest>, 10 >
   );
-  
- TheOperators->Add("/",  
+
+ TheOperators->Add("/",
     new OneOperatorCode<CODE_L_DivLR<Finconnue,double>, 20 > ,
     new OneOperatorCode<CODE_L_DivLR<Foperator,double>, 20 > ,
     new OneOperatorCode<CODE_L_DivLR<Ftest,double>, 20 > );
 
- TheOperators->Add("/",  
+ TheOperators->Add("/",
     new OneOperatorCode<CODE_L_DivLR<Finconnue,Complex>, 10 > ,
     new OneOperatorCode<CODE_L_DivLR<Foperator,Complex>, 10 > ,
     new OneOperatorCode<CODE_L_DivLR<Ftest,Complex>, 10 > );
-    
-// Warning just double or complex in previous operator 
-// ----------------------------------------------------    
-  
+
+// Warning just double or complex in previous operator
+// ----------------------------------------------------
+
 // TheOperators->Add("=",new OneOperatorCode<BC_set1<double> >);
 
-  
+
  TheOperators->Add("=",
 		   new OneOperator2<pmesh*,pmesh*,pmesh >(&set_eqdestroy_incr),
-		   
+
 		   new OneBinaryOperator<set_eq_array<KN_<double> ,RNM_VirtualMatrix<R>::plusAx > > ,
 		   new OneBinaryOperator<set_eq_array<KN_<double> ,RNM_VirtualMatrix<R>::plusAtx > >  , //ZZ set_eq_array
 		   new OneBinaryOperator<set_eq_array<KN_<double> ,RNM_VirtualMatrix<R>::solveAxeqb > >  ,
@@ -6372,8 +5699,8 @@ void  init_lgfem()
 
 		   new OpArraytoLinearForm<double,v_fes>(atype< KN_<double> >(),false,false)  ,
 		   new OpMatrixtoBilinearForm<double,v_fes >);
- 
- 
+
+
  TheOperators->Add("=",
 		 //-  new OpArraytoLinearForm<double,v_fes3>(atype< KN<double>* >(),true,false)  ,// 3D volume
 		   new OpArraytoLinearForm<double,v_fes3>(atype< KN_<double> >(),false,false)  ,//3D volume
@@ -6384,7 +5711,7 @@ void  init_lgfem()
 
  TheOperators->Add("<-",
 		   new OpArraytoLinearForm<double,v_fes>(atype< KN<double>* >(),true,true) ,
-		   new OpArraytoLinearForm<Complex,v_fes>(atype< KN<Complex>* >(),true,true) , 
+		   new OpArraytoLinearForm<Complex,v_fes>(atype< KN<Complex>* >(),true,true) ,
 		   new OpArraytoLinearForm<double,v_fes3>(atype< KN<double>* >(),true,true) , //3D volume
 		   new OpArraytoLinearForm<Complex,v_fes3>(atype< KN<Complex>* >(),true,true), //3D volume
            new OpArraytoLinearForm<double,v_fesS>(atype< KN<double>* >(),true,true) , //3D surface
@@ -6399,17 +5726,15 @@ void  init_lgfem()
                    new OneBinaryOperator<set_eq_array<KN_<Complex> ,RNM_VirtualMatrix<Complex>::solveAtxeqb > >  ,
 
 		   new OpArraytoLinearForm<Complex,v_fes>(atype< KN<Complex>* >(),true,false)  ,
-		   //- new OpArraytoLinearForm<Complex,v_fes>(atype< KN_<Complex> >(),false,false)   ,
 		   new OpMatrixtoBilinearForm<Complex,v_fes >);
- 
+
  TheOperators->Add("=",
-		  //-  new OpArraytoLinearForm<Complex,v_fes3>(atype< KN<Complex>* >(),true,false)  , // 3d
 		   new OpArraytoLinearForm<Complex,v_fes3>(atype< KN_<Complex> >(),false,false)   , //3D volume
 		   new OpMatrixtoBilinearForm<Complex,v_fes3 > , //3D volume
            new OpArraytoLinearForm<Complex,v_fesS>(atype< KN_<Complex> >(),false,false)   , //3D surface
            new OpMatrixtoBilinearForm<Complex,v_fesS >); //3D surface
 
- // add august 2007 
+ // add august 2007
  TheOperators->Add("<-",
 		   new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::plusAx > > ,
 		   new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::plusAtx > >  ,
@@ -6430,7 +5755,7 @@ void  init_lgfem()
                       , new init_FE_eqarray<FFset3<R,v_fes,RNM_VirtualMatrix<R>::plusAtx> >(10)
                       , new init_FE_eqarray<FFset3<R,v_fes,KN_<R> > >(10)
                       , new init_FE_eqarray<FF_L_args<R,v_fes,Call_FormLinear<v_fes> > >(10)
-                      
+
                       );
     TheOperators->Add("<-"
                       , new init_FE_eqarray<FFset3<Complex,v_fes,RNM_VirtualMatrix<Complex>::plusAx> >(10)
@@ -6446,12 +5771,7 @@ void  init_lgfem()
                       , new init_FE_eqarray<FFset3<R,v_fes3,RNM_VirtualMatrix<R>::plusAtx> >(10)  // 3D volume
                       , new init_FE_eqarray<FFset3<R,v_fes3,KN_<R> > >(10)  // 3D volume
                       , new init_FE_eqarray<FF_L_args<R,v_fes3,Call_FormLinear<v_fes3> > >(10)  // 3D volume
-                     // , new init_FE_eqarray<FFset3<R,v_fesS,VirtualMatrice<R>::plusAx> >(10)  // 3D surface
-                     // , new init_FE_eqarray<FFset3<R,v_fesS,VirtualMatrice<R>::solveAxeqb> >(10)  // 3D surface
-                     // , new init_FE_eqarray<FFset3<R,v_fesS,VirtualMatrice<R>::plusAtx> >(10)  // 3D surface
-                     // , new init_FE_eqarray<FFset3<R,v_fesS,KN_<R> > >(10)  // 3D surface
-                     // , new init_FE_eqarray<FF_L_args<R,v_fesS,Call_FormLinear<v_fesS> > >(10)  // 3D surface
-                      
+
                       );
     TheOperators->Add("<-"
                       , new init_FE_eqarray<FFset3<Complex,v_fes3,RNM_VirtualMatrix<Complex>::plusAx> >(10)  // 3D volume
@@ -6459,57 +5779,44 @@ void  init_lgfem()
                       , new init_FE_eqarray<FFset3<Complex,v_fes3,RNM_VirtualMatrix<Complex>::plusAtx> >(10)  // 3D volume
                       , new init_FE_eqarray<FFset3<Complex,v_fes3,KN_<Complex> > >(10)  // 3D volume
                       , new init_FE_eqarray<FF_L_args<Complex,v_fes3,Call_FormLinear<v_fes3> > >(10)  // 3D volume
-                     // , new init_FE_eqarray<FFset3<Complex,v_fesS,VirtualMatrice<Complex>::plusAx> >(10)  // 3D surface
-                     // , new init_FE_eqarray<FFset3<Complex,v_fesS,VirtualMatrice<Complex>::solveAxeqb> >(10)  // 3D surface
-                     // , new init_FE_eqarray<FFset3<Complex,v_fesS,VirtualMatrice<Complex>::plusAtx> >(10)  // 3D surface
-                     // , new init_FE_eqarray<FFset3<Complex,v_fesS,KN_<Complex> > >(10)  // 3D surface
-                     // , new init_FE_eqarray<FF_L_args<Complex,v_fesS,Call_FormLinear<v_fesS> > >(10)  // 3D surface
                       );
 
     // Fin
 
-    
+
     // Fin
  TheOperators->Add("+=",
-		 //-   new OneBinaryOperator<set_eqarray_add<KN<double> ,RNM_VirtualMatrix<R>::plusAx > > ,
-		  //-  new OneBinaryOperator<set_eqarray_add<KN<double> ,RNM_VirtualMatrix<R>::plusAtx > > ,
-		   
+
 		   new OneBinaryOperator<set_eq_array_add<KN_<double> ,RNM_VirtualMatrix<double>::plusAx > > ,
 		   new OneBinaryOperator<set_eq_array_add<KN_<double> ,RNM_VirtualMatrix<double>::plusAtx > >,
-		   
-		 //-   new OpArraytoLinearForm<double,v_fes>(atype< KN<double>* >(),true,false,false)  ,
-		   new OpArraytoLinearForm<double,v_fes>(atype< KN_<double> >(),false,false,false)  , 
-		 //-   new OpArraytoLinearForm<double,v_fes3>(atype< KN<double>* >(),true,false,false)  , // 3d
+
+		   new OpArraytoLinearForm<double,v_fes>(atype< KN_<double> >(),false,false,false)  ,
 		   new OpArraytoLinearForm<double,v_fes3>(atype< KN_<double> >(),false,false,false) ,  // 3D volume
 		   new OpArraytoLinearForm<double,v_fesS>(atype< KN_<double> >(),false,false,false)    // 3D surface
        );
 
  TheOperators->Add("+=",
-		  //-  new OneBinaryOperator<set_eqarray_add<KN<Complex> ,RNM_VirtualMatrix<Complex>::plusAx > > ,
-		  //-  new OneBinaryOperator<set_eqarray_add<KN<Complex> ,RNM_VirtualMatrix<Complex>::plusAtx > > ,
-		   
+
 		   new OneBinaryOperator<set_eq_array_add<KN_<Complex> ,RNM_VirtualMatrix<Complex>::plusAx > > ,
 		   new OneBinaryOperator<set_eq_array_add<KN_<Complex> ,RNM_VirtualMatrix<Complex>::plusAtx > >,
-		   
-		  //-  new OpArraytoLinearForm<Complex,v_fes>(atype< KN<Complex>* >(),true,false,false)  ,
-		   new OpArraytoLinearForm<Complex,v_fes>(atype< KN_<Complex> >(),false,false,false)  , 
 
-		  //-  new OpArraytoLinearForm<Complex,v_fes3>(atype< KN<Complex>* >(),true,false,false)  ,
+		   new OpArraytoLinearForm<Complex,v_fes>(atype< KN_<Complex> >(),false,false,false)  ,
+
 		   new OpArraytoLinearForm<Complex,v_fes3>(atype< KN_<Complex> >(),false,false,false) , // 3D volume
            new OpArraytoLinearForm<Complex,v_fesS>(atype< KN_<Complex> >(),false,false,false)  // 3D surface
        );
 
 
-       
+
  TheOperators->Add("<-",new OpMatrixtoBilinearForm<double,v_fes >(1) );
  TheOperators->Add("<-",new OpMatrixtoBilinearForm<Complex,v_fes >(1) );
 
  TheOperators->Add("<-",new OpMatrixtoBilinearForm<double,v_fes3 >(1) ); // 3D volume
  TheOperators->Add("<-",new OpMatrixtoBilinearForm<Complex,v_fes3 >(1) );// 3D volume
- 
+
  TheOperators->Add("<-",new OpMatrixtoBilinearForm<double,v_fesS >(1) ); // 3D surface
  TheOperators->Add("<-",new OpMatrixtoBilinearForm<Complex,v_fesS >(1) ); // 3D surface
-    
+
  Add<const  FormLinear   *>("(","",new OpCall_FormLinear<FormLinear,v_fes> );
  Add<const  FormBilinear *>("(","",new OpCall_FormBilinear<FormBilinear,v_fes> );
  Add<const  FormBilinear *>("(","",new OpCall_FormLinear2<FormBilinear,v_fes> );
@@ -6521,31 +5828,30 @@ void  init_lgfem()
  Add<const  FormBilinear *>("(","",new OpCall_FormLinear2<FormBilinear,v_fes3> );  // 3D volume
  Add<const C_args*>("(","",new OpCall_FormLinear2<C_args,v_fes3>);  // 3D volume
  Add<const C_args*>("(","",new OpCall_FormBilinear<C_args,v_fes3> );  // 3D volume
-    
+
  Add<const  FormLinear   *>("(","",new OpCall_FormLinear<FormLinear,v_fesS> );  // 3D surface
  Add<const  FormBilinear *>("(","",new OpCall_FormBilinear<FormBilinear,v_fesS> );  // 3D surface
  Add<const  FormBilinear *>("(","",new OpCall_FormLinear2<FormBilinear,v_fesS> );  // 3D surface
  Add<const C_args*>("(","",new OpCall_FormLinear2<C_args,v_fesS>);  // 3D surface
  Add<const C_args*>("(","",new OpCall_FormBilinear<C_args,v_fesS> );  // 3D surface
 
-//  correction du bug morale 
+//  correction du bug morale
 //  Attention il y a moralement un bug
 //  les initialisation   x = y   ( passe par l'operateur binaire <-  dans TheOperators
 //   les initialisation   x(y)   ( passe par l'operateur unaire <-  de typedebase de x (inutile 2007).
 //  x(y1,..,yn) est un operator n+1   (x,y1,..,yn)
 // on passe toujours par x(y) maintenant.
 //   -------
-       
-       
+
+
  TheOperators->Add("<-",
        new OneOperator2_<pferbase*,pferbase*,pfes* >(MakePtrFE2),
-       new OneOperator3_<pferbasearray*,pferbasearray*,pfes*,long >(MakePtrFE3),  
+       new OneOperator3_<pferbasearray*,pferbasearray*,pfes*,long >(MakePtrFE3),
 
        new OneOperator2_<pfecbase*,pfecbase*,pfes* >(MakePtrFE2),
        new OneOperator3_<pfecbasearray*,pfecbasearray*,pfes*,long >(MakePtrFE3)
-     //  new OneOperator2_<pmesharray*,pmesharray*,long >(MakePtr)
-       
-       
+
+
        );
  TheOperators->Add("<-",
        new OneOperatorMakePtrFE<double>(atype<double>()),  //  scalar case
@@ -6553,42 +5859,41 @@ void  init_lgfem()
        new OneOperatorMakePtrFE<Complex>(atype<Complex>()),  //  scalar complex  case
        new OneOperatorMakePtrFE<Complex>(atype<E_Array>())  //  vect complex case
        );
-//  interpolation   operator 
+//  interpolation   operator
  TheOperators->Add("=",
        new OneOperator2_<pfer,pfer,double,E_F_StackF0F0opt2<double> >(set_fe<double>) ,
-       new OneOperator2_<pfec,pfec,Complex,E_F_StackF0F0opt2<Complex> >(set_fe<Complex>) 
-       
-       ) ;     
-     //  new OneOperator2_<pferbase,pferbase,E_Array,E_F_StackF0F0 >(set_fev));
-       
+       new OneOperator2_<pfec,pfec,Complex,E_F_StackF0F0opt2<Complex> >(set_fe<Complex>)
+
+       ) ;
+
 //  Attention il y a moralement un bug
 //  les initialisation   x = y   ( passe par l'operateur binaire <-  dans TheOperators
 //   les initialisation   x(y)   ( passe par l'operateur unaire <-  de typedebase de x
-//   -------  corrige 
+//   -------  corrige
 
-     
+
  TheOperators->Add("=",
        new OneOperator2<pfes*,pfes*,pfes>(&set_eqdestroy_incr),
        new Op_CopyArray()
        );
-       
+
  TheOperators->Add("<-",
        new OneOperator2_<pfes*,pfes*,pfes>(&set_copy_incr));
- 
+
  TheOperators->Add("<<",
        new OneBinaryOperator<PrintPnd<R3*>  >,
        new OneBinaryOperator<PrintPnd<Matrice_Creuse<R>*> >,
        new OneBinaryOperator<PrintPnd<Matrice_Creuse<Complex>*> >
 
-       );   
+       );
 
  TheOperators->Add(">>",
 		   new OneBinaryOperator<Op_Read<Matrice_Creuse<R> > >,
 		   new OneBinaryOperator<Op_Read<Matrice_Creuse<Complex> > >
-		   
-		   );   
- 
- 
+
+		   );
+
+
  Global.Add("int2d","(",new OneOperatorCode<CDomainOfIntegration>);
  Global.Add("int1d","(",new OneOperatorCode<CDomainOfIntegrationBorder>);
  Global.Add("intalledges","(",new OneOperatorCode<CDomainOfIntegrationAllEdges>);
@@ -6603,24 +5908,24 @@ void  init_lgfem()
  Global.Add("average","(",new OneUnaryOperator<MeanOp<Complex>,MeanOp<Complex> >);
  Global.Add("otherside","(",new OneUnaryOperator<OthersideOp<Complex>,OthersideOp<Complex> >);
 
-  
+
  Add<const CDomainOfIntegration*>("(","",new OneOperatorCode<FormBilinear> );
  Add<const CDomainOfIntegration *>("(","",new OneOperatorCode<FormLinear> );
- 
+
  Add<const CDomainOfIntegration *>("(","",new OneOperatorCode<IntFunction<double>,1 >);
  Add<const CDomainOfIntegration *>("(","",new OneOperatorCode<IntFunction<complex<double> >,0 >);
- 
+
 
 
  map_type[typeid(double).name()]->AddCast(
    new E_F1_funcT<double,pfer>(pfer2R<R,0>)
    );
-   
+
  map_type[typeid(Complex).name()]->AddCast(
    new E_F1_funcT<Complex,pfec>(pfer2R<Complex,0>)
    );
- 
-// bof  
+
+// bof
  Global.Add("dx","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dx>));
  Global.Add("dy","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dy>));
  Global.Add("dxx","(",new E_F1_funcT<double,pfer>(pfer2R<R,op_dxx>));
@@ -6635,9 +5940,9 @@ void  init_lgfem()
  Global.Add("dxy","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dxy>));
  Global.Add("dyx","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dyx>));
 
- 
- // Add<pferbasearray*>("[","",new OneOperator2_FEcomp<double,v_fes>(get_element)); 
-  Add<pfecbasearray*>("[","",new OneOperator2_<pfecbase*,pfecbasearray*,long>(get_element));  // use FH sep. 2009 
+
+ // Add<pferbasearray*>("[","",new OneOperator2_FEcomp<double,v_fes>(get_element));
+  Add<pfecbasearray*>("[","",new OneOperator2_<pfecbase*,pfecbasearray*,long>(get_element));  // use FH sep. 2009
   Add<pferbasearray*>("[","",new OneOperator2_<pferbase*,pferbasearray*,long>(get_element));  //  use ???? FH sep. 2009
     // bof bof ..
     // resize of array of Finite element ..  a little hard 2013 FH
@@ -6664,7 +5969,6 @@ void  init_lgfem()
     Add<pf3cbasearray*>("resize",".",new OneOperator1<Resize1<pf3cbasearray* >,pf3cbasearray*>(to_Resize1));  //   FH oct. 2016
     Add<pf3carray>("resize",".",new OneOperator1<Resize1<pf3carray >,pf3carray>(to_Resize1));  //  FH Oct 2016
 
-    //new OneOperator2_<pf3rbasearray*,Resize1<pf3rbasearray* > , long  >(fepresize<pf3rbasearray*>);
     Add<Resize1<pf3rbasearray* > >("(","",new  OneOperator2_<pf3rbasearray*,Resize1<pf3rbasearray* > , long  >(fepresize));
     Add<Resize1<pf3rarray > >("(","",new OneOperator2_<pf3rarray,Resize1<pf3rarray > , long  >(feresize));
     Add<Resize1<pf3cbasearray* > >("(","",new  OneOperator2_<pf3cbasearray*,Resize1<pf3cbasearray* > , long  >(fepresize));//  FH Oct 2016
@@ -6685,7 +5989,7 @@ void  init_lgfem()
     Add<Resize1<pfScarray > >("(","",new OneOperator2_<pfScarray,Resize1<pfScarray > , long  >(feresize));
 
 // end of resize ...
-   
+
   Add<pfecbasearray*>("n",".",new OneOperator1_<long,pfecbasearray*>(get_size));  //  FH fev 2013
   Add<pferbasearray*>("n",".",new OneOperator1_<long,pferbasearray*>(get_size));  //   FH fev. 2013
   Add<pferarray>("n",".",new OneOperator1_<long,pferarray>(get_size));  //  FH fev 2013
@@ -6695,41 +5999,35 @@ void  init_lgfem()
   Add<pf3rarray>("n",".",new OneOperator1_<long,pf3rarray>(get_size));  //  FH fev 2013
   Add<pf3cbasearray*>("n",".",new OneOperator1_<long,pf3cbasearray*>(get_size));  //   FH  Oct 2016
   Add<pf3carray>("n",".",new OneOperator1_<long,pf3carray>(get_size));  //  FH Oct 2016
-    
-    
+
+
   Add<pferarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fes>());// new version FH sep 2009
   Add<pfecarray>("[","",new OneOperator2_FE_get_elmnt<Complex,v_fes>());
-   
+
   Add<pf3rarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fes>());// new version FH sep 2009
   Add<pf3carray>("[","",new OneOperator2_FE_get_elmnt<Complex,v_fes>());// FH Oct 2016
 
-//    Add<pferarray>("[","",new OneOperator2_<pfer,pferarray,long>(get_element));
-//    Add<pfecarray>("[","",new OneOperator2_<pfec,pfecarray,long>(get_element));
-  
- // Add<pmesharray>("[","",new OneOperator2_<pmesh*,pmesharray*,long>(get_element));
-
-  TheOperators->Add("\'",       
+  TheOperators->Add("\'",
        new OneOperator1<Matrice_Creuse_Transpose<R>,Matrice_Creuse<R> *>(&Build<Matrice_Creuse_Transpose<R>,Matrice_Creuse<R> *>),
        new OneOperator1<Matrice_Creuse_Transpose<Complex>,Matrice_Creuse<Complex> *>(&Build<Matrice_Creuse_Transpose<Complex>,Matrice_Creuse<Complex> *>)
   );
-  
- Add<pfer>("(","",new interpolate_f_X_1<R> ); 
-  TheOperators->Add("=", new OneOperator2_<void,interpolate_f_X_1<R>::type,double,E_F_StackF0F0 >(set_feoX_1) ) ; 
-// init_lgmesh() ;
+
+ Add<pfer>("(","",new interpolate_f_X_1<R> );
+  TheOperators->Add("=", new OneOperator2_<void,interpolate_f_X_1<R>::type,double,E_F_StackF0F0 >(set_feoX_1) ) ;
   init_lgmat();
   init_mesh_array();
 
  l2interpreter = new LinkToInterpreter;
- using namespace FreeFempp; 
- FreeFempp::TypeVarForm<double>::Global = new TypeVarForm<double>();       
- FreeFempp::TypeVarForm<Complex>::Global = new TypeVarForm<Complex>();       
-    
- 
- Global.New("P13d",CConstantTFE3(&DataFE<Mesh3>::P1));   
- Global.New("P23d",CConstantTFE3(&DataFE<Mesh3>::P2));   
+ using namespace FreeFempp;
+ FreeFempp::TypeVarForm<double>::Global = new TypeVarForm<double>();
+ FreeFempp::TypeVarForm<Complex>::Global = new TypeVarForm<Complex>();
+
+
+ Global.New("P13d",CConstantTFE3(&DataFE<Mesh3>::P1));
+ Global.New("P23d",CConstantTFE3(&DataFE<Mesh3>::P2));
  Global.New("P03d",CConstantTFE3(&DataFE<Mesh3>::P0));
  Global.New("RT03d",CConstantTFE3(&RT03d));
- Global.New("Edge03d",CConstantTFE3(&Edge03d));   
+ Global.New("Edge03d",CConstantTFE3(&Edge03d));
  Global.New("P1b3d",CConstantTFE3(&P1bLagrange3d));
 
  Global.New("RT0S",CConstantTFES(&DataFE<MeshS>::RT0));    ///TODOCHECK
@@ -6741,48 +6039,17 @@ void  init_lgfem()
  TEF2dtoS[FindFE2("P1")]=&DataFE<MeshS>::P1;
  TEF2dtoS[FindFE2("P2")]=&DataFE<MeshS>::P2;
  TEF2dtoS[FindFE2("RT0")]=&DataFE<MeshS>::RT0;
-    
-    
-    
-    /*
-     for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
-     {
-     ffassert(i->tfe); // check 
-     AddNewFE(i->name,i->tfe);
-     // Global.New(i->name, Type_Expr(atype<TypeOfFE*>(),new  EConstantTypeOfFE(i->tfe)));
-     }
-     
-     */
+
   TEF2dto3d[FindFE2("P1")]=&DataFE<Mesh3>::P1;
   TEF2dto3d[FindFE2("P2")]=&DataFE<Mesh3>::P2;
   TEF2dto3d[FindFE2("P0")]=&DataFE<Mesh3>::P0;
   TEF2dto3d[FindFE2("P1b")]=&P1bLagrange3d;
   TEF2dto3d[FindFE2("RT0")]=&RT03d;
- /*
-// add may 2011 F. HEcHt   
-  //    in progress ?????  to set varaible to store FinitELEMEnt type.  
-    zzzfff->Add("FiniteElement",atype<TypeOfFE*>());
-    zzzfff->Add("FiniteElement3",atype<TypeOfFE3*>());
-
-    TheOperators->Add("=",new OneOperator2<TypeOfFE*,TypeOfFE*,TypeOfFE*>(&setFE<1>) );    
-    TheOperators->Add("<-",new OneOperator2_<pfes*,pfes*,pfes>(&setFE<0>));
-  
-  */
 }
 
-/*   in progress ?????  to set varaible to store FinitELEMEnt type.  
-template<int init>
-TypeOfFE* setFE(TypeOfFE* a,TypeOfFE* b) 
-{
-    if(init) 
-    return a;    
-}
-*/
 void clean_lgfem()
 {
-//  for (int i=0;i<kTypeSolveMat;++i)
-//    delete dTypeSolveMat[i];
-   
+
   delete l2interpreter;
   delete  FreeFempp::TypeVarForm<double>::Global;
   delete  FreeFempp::TypeVarForm<Complex>::Global;
@@ -6796,17 +6063,17 @@ Expression IsFEcomp(const C_F0 &c,int i, Expression & rrr,Expression &iii)
     if(atype<typename E_FEcomp<K,v_fes>::Result>() == c.left())
       {
 	  const E_FEcomp<K,v_fes> * e= dynamic_cast<const E_FEcomp<K,v_fes>*>(c.LeftValue() );
-	  if( !e) 	
-	    { 
+	  if( !e)
+	    {
 		const E_FEcomp_get_elmnt_array<K,v_fes> * ee= dynamic_cast<const E_FEcomp_get_elmnt_array<K,v_fes>*>(c.LeftValue() );
-		
-		if( !ee) 	
-		  { 
+
+		if( !ee)
+		  {
 		      cerr <<" Fatal error Copy array .." << *c.left()<< " composante : " << i << endl;
 		      ffassert(ee);
 		  }
-		else 
-		  { 
+		else
+		  {
 		      if (ee->comp ==i) {
 			  if (i && ee->a00->a0 != rrr) cerr << " error composante arry vect. incompatible " << ee->comp << " "<< ee->a00->a0 << " != " << rrr << endl;
 			  else {
@@ -6814,55 +6081,39 @@ Expression IsFEcomp(const C_F0 &c,int i, Expression & rrr,Expression &iii)
 			    rrr= ee->a00->a0;
 			    iii= ee->a1;
 			  }
-			 
+
 		      }
-		      else cerr << " erreur composante " << ee->comp << " != " << i << endl; 
-		    
-			
+		      else cerr << " erreur composante " << ee->comp << " != " << i << endl;
+
+
 		  }
-	    } 
-	  else 
+	    }
+	  else
 	    {
-	    	
+
 		if (e->comp ==i) {
 		      if (i && e->a0 != rrr) cerr << " error composante incompatible " << e->comp  << endl;
 		      else  rrr=r=e->a0;
 		}
-	      else cerr << " erreur composante " << e->comp << " != " << endl;		
+	      else cerr << " erreur composante " << e->comp << " != " << endl;
 	  }
       }
     return r;
 }
-
-/*
-Expression IsCFEcomp(const C_F0 &c,int i)
-{
-  typedef Complex K;
-  if(atype<E_FEcomp<K,v_fes>::Result>() == c.left())
-   {
-     const E_FEcomp<K,v_fes> * e= dynamic_cast<const E_FEcomp<K,v_fes>*>(c.LeftValue() );
-     ffassert(e);
-     if (e->comp !=i) return 0;
-     else return e->a0;
-   }
-  else return 0;
-}
-*/
 
 template<class K,class v_fes>
 Expression Op_CopyArrayT(const E_Array & a,const E_Array & b)
 {
     typedef FEbaseArray<K,v_fes>  FEba;
 
-    //int na=a.size();
     int nb=b.size();
     Expression r=0,rr=0,rrr,iii;
-    //  try real voctor value FE interpolation 
+    //  try real voctor value FE interpolation
     rr=IsFEcomp<K,v_fes>(a[0],0,rrr,iii) ;
-    if (rr !=0) 
+    if (rr !=0)
       {
           for (int i=1;i<nb;i++)
-	      if (!IsFEcomp<K,v_fes>(a[i],i,rrr,iii))  
+	      if (!IsFEcomp<K,v_fes>(a[i],i,rrr,iii))
 		  CompileError("Copy of Array with incompatible K  vector value FE function () !");;
 	  if(iii) {// ffassert(0); //  moralement il : rrr[iii]
 	      C_F0 aa(rrr,atype<FEba**>()),ii(iii,atype<long>());
@@ -6872,57 +6123,57 @@ Expression Op_CopyArrayT(const E_Array & a,const E_Array & b)
 	  if(v_fes::dHat==2) r=new E_set_fev<K>(&b,rr,2);
 	  else if(v_fes::dHat==3) r=new  E_set_fev3<K,v_fes3>(&b,rr);         ////////////ZZZZZZZ
       }
-    //  try complex vector value FE interpolation 
+    //  try complex vector value FE interpolation
     return r;
 }
- 
+
  E_F0 * Op_CopyArray::code(const basicAC_F0 & args) const  {
        E_F0 * ret=0;
       const E_Array & a= *dynamic_cast<const E_Array*>(args[0].LeftValue());
       const E_Array & b= *dynamic_cast<const E_Array*>(args[1].LeftValue());
       int na=a.size();
       int nb=b.size();
-      if (na != nb ) 
+      if (na != nb )
         CompileError("Copy of Array with incompatible size!");
       if(0)
-	{ // old code !!!!!!! before removing FH sept. 2009 
+	{ // old code !!!!!!! before removing FH sept. 2009
        Expression rr=0,rrr,iii;
-       //  try real voctor value FE interpolation 
+       //  try real voctor value FE interpolation
        rr=IsFEcomp<double,v_fes>(a[0],0,rrr,iii) ;
-       if (rr !=0) 
+       if (rr !=0)
         {
           for (int i=1;i<nb;i++)
-	    if (!IsFEcomp<double,v_fes>(a[i],i,rrr,iii))  
-                CompileError("Copy of Array with incompatible real vector value FE function () !");;           
+	    if (!IsFEcomp<double,v_fes>(a[i],i,rrr,iii))
+                CompileError("Copy of Array with incompatible real vector value FE function () !");;
 	  return  new E_set_fev<double>(&b,rr,2);
          }
-       //  try complex vector value FE interpolation 
+       //  try complex vector value FE interpolation
 
        rr=IsFEcomp<Complex,v_fes>(a[0],0,rrr,iii) ;
-       if (rr !=0) 
+       if (rr !=0)
         {
           for (int i=1;i<nb;i++)
-	    if (!IsFEcomp<Complex,v_fes>(a[i],i,rrr,iii))  
-	      CompileError("Copy of Array with incompatible complex vector value FE function () !");;           
+	    if (!IsFEcomp<Complex,v_fes>(a[i],i,rrr,iii))
+	      CompileError("Copy of Array with incompatible complex vector value FE function () !");;
 	  return  new E_set_fev<Complex>(&b,rr,2);
 	}
-       
+
        rr=IsFEcomp<double,v_fes3>(a[0],0,rrr,iii) ;
-       if (rr !=0) 
+       if (rr !=0)
         {
           for (int i=1;i<nb;i++)
-	    if (!IsFEcomp<double,v_fes3>(a[i],i,rrr,iii))  
-                CompileError("Copy of Array with incompatible real vector value FE function () !");;           
+	    if (!IsFEcomp<double,v_fes3>(a[i],i,rrr,iii))
+                CompileError("Copy of Array with incompatible real vector value FE function () !");;
 	  return  new E_set_fev3<double,v_fes3>(&b,rr);
          }
-       //  try complex vector value FE interpolation 
+       //  try complex vector value FE interpolation
 
        rr=IsFEcomp<Complex,v_fes3>(a[0],0,rrr,iii) ;
-       if (rr !=0) 
+       if (rr !=0)
         {
           for (int i=1;i<nb;i++)
-	    if (!IsFEcomp<Complex,v_fes3>(a[i],i,rrr,iii))  
-                CompileError("Copy of Array with incompatible complex vector value FE function () !");;           
+	    if (!IsFEcomp<Complex,v_fes3>(a[i],i,rrr,iii))
+                CompileError("Copy of Array with incompatible complex vector value FE function () !");;
 	  return  new E_set_fev3<Complex,v_fes3>(&b,rr);
          }
 	}
@@ -6941,33 +6192,31 @@ template<class v_fes,int DIM>
 C_F0 NewFEvariableT(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx,int dim)
 {
   ffassert(dim==DIM);
-  //   if (cplx)
-//   cout << "NewFEvariable  cplx=" << cplx << endl;
   typedef FEbase<double,v_fes> FE;
   typedef E_FEcomp<R,v_fes> FEi;
   typedef typename FEi::Result FEiR;
-  
+
   typedef FEbase<Complex,v_fes> CFE;
   typedef E_FEcomp<Complex,v_fes> CFEi;
   typedef typename  CFEi::Result CFEiR;
- 
+
   Expression fes =fespacetype;
- 
-  aType dcltype=atype<FE **>();  
+
+  aType dcltype=atype<FE **>();
   aType cf0type=atype<C_F0>();
   aType rtype=atype<FEiR>();
-   
+
   if(cplx)
     {
       dcltype=atype<CFE **>();
       rtype=atype<CFEiR>();
-      
+
     }
   ffassert(pids);
   ListOfId &ids(*pids);
-  
+
   string str("[");
-  
+
   const int n=ids.size();
   ffassert(n>0);
   if ( fes->nbitem() != (size_t) n) {
@@ -6975,32 +6224,32 @@ C_F0 NewFEvariableT(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0
     CompileError("Invalide array size  for  vectorial fespace function");
   }
   for (int i=0;i<n;i++)
-    { 
+    {
       str += ids[i].id;
       if(i<n-1) str +=",";
     }
   str += "]";
-     bool binit= !init.Empty(); 
+     bool binit= !init.Empty();
      char * name = strcpy(CodeAllocT<char>::New(str.size()+1),str.c_str());
-     C_F0 ret; 
+     C_F0 ret;
      // modif  100109 (add Block::  before NewVar for g++ 3.3.3 on Suse 9)
-    ret= binit ? currentblock->Block::NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype,init)) 
+    ret= binit ? currentblock->Block::NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype,init))
       : currentblock->Block::NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype));
      C_F0 base = currentblock->Find(name);
      if (cplx)
-       for (int i=0;i<n;i++) 
-         currentblock->NewID(cf0type,ids[i].id, C_F0(new CFEi(base,i,n), rtype) ); 
+       for (int i=0;i<n;i++)
+         currentblock->NewID(cf0type,ids[i].id, C_F0(new CFEi(base,i,n), rtype) );
      else
-       for (int i=0;i<n;i++) 
-         currentblock->NewID(cf0type,ids[i].id, C_F0(new FEi(base,i,n), rtype) ); 
-     delete pids; // add FH 25032005 
-     
-      return ret ; 
+       for (int i=0;i<n;i++)
+         currentblock->NewID(cf0type,ids[i].id, C_F0(new FEi(base,i,n), rtype) );
+     delete pids; // add FH 25032005
+
+      return ret ;
 }
 
 
 C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx,int dim)
-{   //cout << "test 75" << endl;
+{
   if(dim==2)
     return NewFEvariableT<v_fes,2>(pids,currentblock,fespacetype,init,cplx,dim);
   else if  (dim==3)
@@ -7014,21 +6263,19 @@ C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 
 C_F0 NewFEvariable(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 init,bool cplx,int dim)
 {
   ListOfId * lid =new ListOfId;
-  lid->push_back(UnId(id));  
+  lid->push_back(UnId(id));
   return NewFEvariable(lid,currentblock,fespacetype,init,cplx,dim);
 }
 
 
-size_t dimFESpaceImage(const basicAC_F0 &args) 
+size_t dimFESpaceImage(const basicAC_F0 &args)
 {
-  //aType t_m2= atype<pmesh*>();
-  // aType t_m3= atype<pmesh3*>();
   aType t_tfe= atype<TypeOfFE*>();
   aType t_tfe3= atype<TypeOfFE3*>();
   aType t_tfeS= atype<TypeOfFES*>();
   aType t_a= atype<E_Array>();
-  size_t dim23=0; 
-  
+  size_t dim23=0;
+
   for (int i=0;i<args.size();i++)
     if (args[i].left() == t_tfe || args[i].left() == t_tfe3 || args[i].left() == t_tfeS)
       dim23 += args[i].LeftValue()->nbitem();
@@ -7039,24 +6286,23 @@ size_t dimFESpaceImage(const basicAC_F0 &args)
 	for (int i=0;i<ea.size();i++)
 	  if (ea[i].left() == t_tfe || ea[i].left() == t_tfe3|| ea[i].left() == t_tfeS)
             dim23 += ea[i].nbitem();
-	  else ffassert(0); // bug 
+	  else ffassert(0); // bug
       }
   dim23 = dim23 ? dim23 : 1;
-  // cout << "dimFESpaceImage:  FESpace in R^"<< dim << endl;
   return dim23;
 }
 
 aType  typeFESpace(const basicAC_F0 &args)
 {
-  
+
   aType t_m2= atype<pmesh*>();
   aType t_m3= atype<pmesh3*>();
   aType t_mS= atype<pmeshS*>();
-  
+
   aType t_tfe= atype<TypeOfFE*>();
   aType t_tfe3= atype<TypeOfFE3*>();
   aType t_tfeS= atype<TypeOfFES*>();
-    
+
   aType atfe[]={t_tfe,t_tfe3,t_tfeS};
   aType atfs[]={atype<pfes *>(),atype<pfes3 *>(),atype<pfesS *>()};
   aType t_a= atype<E_Array>();
@@ -7100,7 +6346,7 @@ aType  typeFESpace(const basicAC_F0 &args)
 
 
 
-template<class v_fes,int DIM>   
+template<class v_fes,int DIM>
 C_F0 NewFEarrayT(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 sizeofarray,bool cplx,int dim)
 {
   ffassert(dim==DIM || dim!=4);  // TODO
@@ -7112,7 +6358,7 @@ C_F0 NewFEarrayT(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 si
    typedef FEbaseArray<Complex,v_fes>  CFE;
    typedef  E_FEcomp<Complex,v_fes,CFE > CFEi;
    typedef typename CFEi::Result CFEiR;
-   
+
    Expression fes =fespacetype;
     aType dcltype=atype<FE **>();
     aType cf0type=atype<C_F0>();
@@ -7123,11 +6369,11 @@ C_F0 NewFEarrayT(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 si
       {
         dcltype=atype<CFE **>();
         rtype=atype<CFEiR>();
-        
+
       }
-    
+
     string str("[");
-    
+
     const int n=ids.size();
      ffassert(n>0);
    if ( fes->nbitem() != (size_t) n) {
@@ -7135,32 +6381,32 @@ C_F0 NewFEarrayT(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 si
       CompileError("Invalid array size  for  vectorial fespace function");
    }
    for (int i=0;i<n;i++)
-    { 
+    {
      str += ids[i].id;
      if(i<n-1) str +=",";
     }
      str += "]";
      char * name = strcpy(CodeAllocT<char>::New(str.size()+1),str.c_str());
-     C_F0 ret=  currentblock->Block::NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype,sizeofarray)); 
+     C_F0 ret=  currentblock->Block::NewVar<LocalVariable>(name,dcltype,basicAC_F0_wa(fespacetype,sizeofarray));
      C_F0 base = currentblock->Find(name);
      if(cplx)
-      for (int i=0;i<n;i++) 
-         currentblock->NewID(cf0type,ids[i].id, C_F0(new CFEi(base,i,n), rtype) ); 
+      for (int i=0;i<n;i++)
+         currentblock->NewID(cf0type,ids[i].id, C_F0(new CFEi(base,i,n), rtype) );
      else
-      for (int i=0;i<n;i++) 
+      for (int i=0;i<n;i++)
          currentblock->NewID(cf0type,ids[i].id, C_F0(new FEi(base,i,n), rtype) );
-         
-     delete pids ; // add FH 25032005 
-      return ret ; 
+
+     delete pids ; // add FH 25032005
+      return ret ;
 
 }
 
-   
+
 C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 sizeofarray,bool cplx,int dim)
 {
   if(dim==2)
     return NewFEarrayT<v_fes,2>(pids,currentblock,fespacetype,sizeofarray,cplx,dim);
-  else if  (dim==3) 
+  else if  (dim==3)
     return NewFEarrayT<v_fes3,3>(pids,currentblock,fespacetype,sizeofarray,cplx,dim);
   else if  (dim==4)
       return NewFEarrayT<v_fesS,4>(pids,currentblock,fespacetype,sizeofarray,cplx,dim);
@@ -7169,7 +6415,7 @@ C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
     return C_F0();
 }
 C_F0 NewFEarray(const char * id,Block *currentblock,C_F0 & fespacetype,CC_F0 sizeofarray,bool cplx,int dim)
-{ 
+{
   ListOfId *lid= new ListOfId;
   lid->push_back(UnId(id));
   return NewFEarray(lid,currentblock,fespacetype,sizeofarray,cplx,dim);
@@ -7184,20 +6430,20 @@ void  Expandsetoflab(Stack stack,const BC_set & bc,set<long> & setoflab)
             long  lab  = GetAny<long>( (*bc.on[i])(stack));
             setoflab.insert(lab);
             if ( verbosity>99) cout << lab << " ";
-            
+
 	    }
-        else 
+        else
 	    {
             KN<long>  labs( GetAny<KN_<long> >( (*bc.on[i])(stack)));
-            for (long j=0; j<labs.N(); ++j) {	      
+            for (long j=0; j<labs.N(); ++j) {
                 setoflab.insert(labs[j]);
                 if ( verbosity>99) cout << labs[j] << " ";
-            }	  
-            
+            }
+
 	    }
-    if(verbosity>99) 
+    if(verbosity>99)
         cout << endl;
-    
+
 }
 
 void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & setoflab,bool &all)
@@ -7210,16 +6456,16 @@ void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & seto
             if ( verbosity>3) cout << lab << " ";
             all=false;
 	    }
-        else 
+        else
 	    {
             KN<long>  labs( GetAny<KN_<long> >( (*di.what[i])(stack)));
-            for (long j=0; j<labs.N(); ++j) {	      
+            for (long j=0; j<labs.N(); ++j) {
                 setoflab.insert(labs[j]);
                 if ( verbosity>3) cout << labs[j] << " ";
-            }	  
-            all=false;	  
+            }
+            all=false;
 	    }
-    
+
 }
 }
 
