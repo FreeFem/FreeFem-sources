@@ -14,8 +14,7 @@ IF(MPI_FOUND)
 #                            ${CMAKE_SOURCE_DIR}/examples++-mpi/MUMPS.cpp
 #                            ${CMAKE_SOURCE_DIR}/examples++-mpi/MUMPS_FreeFem.cpp
 #                            ${CMAKE_SOURCE_DIR}/examples++-mpi/parmetis.cpp
-#                            ${CMAKE_SOURCE_DIR}/examples++-mpi/real_SuperLU_DIST_FreeFem.cpp
-#                            ${CMAKE_SOURCE_DIR}/examples++-mpi/removeDOF.cpp)
+#                            ${CMAKE_SOURCE_DIR}/examples++-mpi/real_SuperLU_DIST_FreeFem.cpp)
 #
 #  FOREACH(CPPFILE ${CPPFILES})
 #    GET_FILENAME_COMPONENT(FILENAME ${CPPFILE} NAME_WE)

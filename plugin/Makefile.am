@@ -7,7 +7,6 @@ EXTRA_DIST=   \
 ./mpi/real_SuperLU_DIST_FreeFem.cpp \
 ./mpi/MPICG.cpp \
 ./mpi/Makefile.am \
-./mpi/removeDOF.cpp \
 ./mpi/complex_SuperLU_DIST_FreeFem.cpp \
 ./mpi/ffsuperludistoption.hpp \
 ./mpi/parmetis.cpp \
