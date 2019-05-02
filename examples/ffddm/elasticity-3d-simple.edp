@@ -4,7 +4,7 @@
 
 // for the make check:
 // NBPROC 4
-// PARAM -raspart -ffddm_schwarz_method ras -ffddm_schwarz_coarse_correction BNN -ffddm_geneo_nu 20 -global 10
+// PARAM -raspart -ffddm_schwarz_method ras -ffddm_schwarz_coarse_correction BNN -ffddm_geneo_nu 20 -global 5
 
 macro dimension 3// EOM            // 2D or 3D
 
