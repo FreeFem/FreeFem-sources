@@ -1,8 +1,8 @@
 //ff-mpirun -np 8 Maxwell-3d-simple.edp -wg -raspart -ffddm_schwarz_method oras -ffddm_medit
 
 // for the make check:
-// NBPROC 6
-// PARAM -raspart -ffddm_schwarz_method oras -global 15
+// NBPROC 4
+// PARAM -raspart -ffddm_schwarz_method oras -global 10
 
 load "Element_Mixte3d"
 

@@ -3,8 +3,8 @@
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
 
 // for the make check:
-// NBPROC 8
-// PARAM -raspart -ffddm_schwarz_method oras
+// NBPROC 4
+// PARAM -raspart -ffddm_schwarz_method oras -Ra 1e6 -global 20
 
 macro dimension 2// EOM            // 2D or 3D
 
@@ -20,7 +20,7 @@ macro div(u)(dx(u) + dy(u#B))// EOM
 macro UgradU(uw,u)[[uw,uw#B]'*grad(u),[uw,uw#B]'*grad(u#B)]//
 func Pk = [P2, P2, P1, P1];             // finite element space 
 
-real Ra=1.e7;
+real Ra=getARGV("-Ra", 1.e7);
 real Pr=0.71;
 real Rey=sqrt(Ra/Pr);
 real IRe=1./Rey, IRa=Ra/(Rey*Rey*Pr), IPr=1./(Rey*Pr) ;

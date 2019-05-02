@@ -4,7 +4,7 @@
 
 // for the make check:
 // NBPROC 4
-// PARAM -raspart -ffddm_schwarz_method oras -frequency 2e+9
+// PARAM -raspart -ffddm_schwarz_method oras -frequency 0.8e+9
 
 load "metis"
 load "medit"
