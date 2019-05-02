@@ -336,7 +336,6 @@ class E_P_Stack_nElementonB   :public  E_F0mps { public:
          l=mp->Th->nTonEdge(mp->t,mp->e);
         else if (mp->d==3 && mp->T3 && ( mp->f>=0) )
            l= mp->Th3->nElementonB(mp->t,mp->f);
-        // cout << " nTonEdge " << l << endl;
         return SetAny<long>( l) ;}
     operator aType () const  { return atype<long>();}
 
@@ -350,7 +349,6 @@ class E_P_Stack_TypeEdge   :public  E_F0mps { public:
         long l=mp->Th->nTonEdge(mp->t,mp->e)==NBT;
         return SetAny<long>( l) ;}
     operator aType () const  { return atype<long>();}
-
 };
 
 class E_P_Stack_areaTriangle   :public  E_F0mps { public:
@@ -393,7 +391,6 @@ class E_P_Stack_EdgeOrient  :public  E_F0mps { public:
         return r ;
     }
     operator aType () const  { return atype<double>();}
-
 };
 
 
@@ -446,7 +443,6 @@ public:
         delete (E_F0 *) citer; // ???
         delete (E_F0 *) stop; // ???
     }
-    // template<class R> class StopGC { public: virtual  bool Stop(int iter, R *, R * ){return false;} };
     bool Stop(int iterr, R *x, R * g)
     {
         iter=iterr;
@@ -785,7 +781,6 @@ typename map<int,int2>::iterator closeto(map<int,int2> & m, int k)
  }
 
 
-
 template<class T,int N>
 class Smallvect { public:
  T v[N];
@@ -1039,8 +1034,6 @@ bool BuildPeriodic(
 
                 }
               }
-
-
           }
 
         *mp = smp;
@@ -1240,17 +1233,14 @@ struct OpMake_pfes: public OneOperator , public OpMake_pfes_np {
 
 inline pfes* MakePtr2(pfes * const &p,pmesh * const &  a, TypeOfFE * const & tef)
 { *p=new pfes_tef(a,tef) ;
-  //(**p).decrement();
   return p;}
 
 inline pfes3* MakePtr3(pfes3 * const &p,pmesh3 * const &  a, TypeOfFE3 * const & tef)
 { *p=new pfes3_tef(a,tef) ;
-  //(**p).decrement();
   return p;}
 
 inline pfesS* MakePtrS(pfesS * const &p,pmeshS * const &  a, TypeOfFES * const & tef)       ///TODO
 { *p=new pfesS_tef(a,tef) ;
-    //(**p).decrement();
     return p;}
 
 
@@ -1273,9 +1263,7 @@ class OP_MakePtr2 { public:
 	A p= GetAny<A>( (*a)(s) );
 	B th= GetAny<B>( (*b)(s) );
 	C tef= GetAny<C>( (*c)(s) );
-	//  cout << "  ----------- " << endl;
 	*p=new pfes_tef(th,tef,s,nbcperiodic,periodic) ;
-	//(**p).decrement();
 	return  SetAny<R>(p);
       }
     }; // end Op class
@@ -1292,7 +1280,6 @@ class OP_MakePtr2 { public:
 
 class OP_MakePtr3 { public:
     class Op : public E_F0mps  { public:
-	//  static int GetPeriodic(Expression  bb, Expression & b,Expression & f);
 	static const int n_name_param =1;
       static basicAC_F0::name_and_type name_param[] ;
       Expression nargs[n_name_param];
@@ -1309,9 +1296,7 @@ class OP_MakePtr3 { public:
 	A p= GetAny<A>( (*a)(s) );
 	B th= GetAny<B>( (*b)(s) );
 	C tef= GetAny<C>( (*c)(s) );
-	//  cout << "  ----------- " << endl;
 	*p=new pfes3_tef(th,tef,s,nbcperiodic,periodic) ;
-	//(**p).decrement();
 	return  SetAny<R>(p);
       }
     }; // end Op class
@@ -1384,8 +1369,6 @@ void GetPeriodic(const int d,Expression perio,    int & nbcperiodic ,    Express
 	    }
 	  else ffassert(0);
         }
-
-
 }
 
 
@@ -1456,12 +1439,10 @@ basicAC_F0::name_and_type  OP_MakePtrS::Op::name_param[]= {
 
 inline pfes* MakePtr2(pfes * const &p,pmesh * const &  a){
       *p=new pfes_tef(a,&P1Lagrange);
-      //(**p).decrement();
        return p ;}
 
 inline pfes* MakePtr2(pfes * const &p,pfes * const &  a,long const & n){
        *p= new pfes_fes(a,n);
-      //(**p).decrement();
        return p ;}
 
  long FindTxy(Stack s,pmesh * const &  ppTh,const double & x,const double & y)
@@ -1490,7 +1471,6 @@ KN<K> * pfer2vect( pair<FEbase<K,v_fes> *,int> p)
       *x=K();
     }
     return x;}
-
 
 template<class K>
 pmesh pfer_Th(pair<FEbase<K,v_fes> *,int> p)
@@ -1584,7 +1564,6 @@ long mp_region(MeshPoint * p)
 class pVh_ndf : public ternary_function<pfes *,long,long,long>
 { public:
 
-
   class Op : public E_F0mps { public:
       Expression a,b,c;
        Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {}
@@ -1601,7 +1580,6 @@ class pVh_ndf : public ternary_function<pfes *,long,long,long>
            long ret(K(i));
            return  ret;
          }
-
   };
 };
 
@@ -1662,7 +1640,6 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
    long kkff = Mesh::kfind,  kkth = Mesh::kthrough;
       StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
 
-
     MeshPoint *mps=MeshPointStack(s),mp=*mps;
     pair<FEbase<R,v_fes> *,int>  pp=GetAny<pair<FEbase<R,v_fes> *,int> >((*ppfe)(s));
     FEbase<R,v_fes> & fe(*pp.first);
@@ -1682,7 +1659,6 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
     KN<R> * y=new  KN<R>(Vh.NbOfDF);
     KN<R> & yy(*y);
     KN<R> Viso(100);
-    // R2 Ptt[3];
     for (int i=0;i<Viso.N();i++)
       Viso[i]=0.01*i;
 
@@ -1694,7 +1670,6 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
 
    if (Vh.isFEMesh() )
     {
-
       ffassert(Vh.NbOfDF == Th.nv && Vh.N == 1 );
       for (int iv=0;iv<Th.nv;iv++)
        {
@@ -1710,7 +1685,6 @@ AnyType set_fe (Stack s,Expression ppfe, Expression e)
          yy[iv] = GetAny<R>( ff(s) );
           sptr->clean(); // modif FH mars 2006  clean Ptr
        }
-
     }
    else
 
@@ -1816,7 +1790,6 @@ E_set_fev<K>::E_set_fev(const E_Array * a,Expression pp,int ddim)
 	}
 
       currentblock->OffSet(top-topbb);
-      //
       int k=ll.size(),k0=0,k1=0;
       for (int i=0;i<k;i++)
 	if (ll[i].first->MeshIndependent()) k0++;
@@ -1841,8 +1814,6 @@ E_set_fev<K>::E_set_fev(const E_Array * a,Expression pp,int ddim)
 	optiexpK = new E_F0_Optimize(l1,m,0);  // none constant part
 
     }
-
-
 }
 
 
@@ -2059,12 +2030,8 @@ public:
   {}
 };
 
-
-// ---
-
 template<class Result,class A>
 class  OneOperator_Ptr_o_R: public OneOperator {
-  //  aType r; //  return type
     typedef Result A::* ptr;
     ptr p;
     public:
@@ -2751,8 +2718,6 @@ class pb2mat : public E_F0 { public:
 
 };
 
-
-//template<class RR,class A>  void PrintP(RR* a, A  b){  *a <<*b;}
 LinkToInterpreter::LinkToInterpreter()
 {
    //P,N,x,y,z,label,region,nu_triangle;
@@ -2798,8 +2763,6 @@ LinkToInterpreter::LinkToInterpreter()
 
 
 }
-
-
 
 
 template<class K>
@@ -3333,7 +3296,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                      if( phi[j]==uset)
                      {
                          MeshPointStack(stack)->setP(&Th,t,i);
-                         phi[j]= di->levelset(stack);//zzzz
+                         phi[j]= di->levelset(stack);
                      }
                      f[i]=phi[j];
                      umx = std::max(umx,phi[j]);
@@ -3425,7 +3388,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
                          if( phi[j]==uset)
                          {
                              MeshPointStack(stack)->setP(&Th,t,i);
-                             phi[j]= di->levelset(stack);//zzzz
+                             phi[j]= di->levelset(stack);
                          }
                          f[i]=phi[j];
                          umx = std::max(umx,phi[j]);
@@ -3692,9 +3655,6 @@ int SendS(PlotStream & theplot,Plot::ListWhat &lli,map<const MeshS *,long> &mapt
         theplot << V1;
 
     }
-
-
-
      else  if (what%10==9)
      { ffassert(0);
      }
@@ -4791,8 +4751,6 @@ AnyType Convect::eval3(Stack s) const
 }
 
 
-
-
 template<class K>
 class Op3_pfe2K : public ternary_function<pair<FEbase<K,v_fes> *,int>,R,R,K> { public:
 
@@ -5262,9 +5220,6 @@ void  init_lgfem()
  Dcl_Type< pferarray >();
  Dcl_Type< pferarray >();
 
-
-
-
 //  pour des Func FE complex   // FH  v 1.43
     Dcl_TypeandPtr<pfecbase>(); // il faut le 2 pour pourvoir initialiser
     Dcl_TypeandPtr<pfecbasearray>(); // il faut le 2 pour pourvoir initialiser
@@ -5702,7 +5657,6 @@ void  init_lgfem()
 
 
  TheOperators->Add("=",
-		 //-  new OpArraytoLinearForm<double,v_fes3>(atype< KN<double>* >(),true,false)  ,// 3D volume
 		   new OpArraytoLinearForm<double,v_fes3>(atype< KN_<double> >(),false,false)  ,//3D volume
 		   new OpMatrixtoBilinearForm<double,v_fes3 > , // 3D volume
            new OpArraytoLinearForm<double,v_fesS>(atype< KN_<double> >(),false,false)  , // 3D surface
@@ -5782,8 +5736,6 @@ void  init_lgfem()
                       );
 
     // Fin
-
-
     // Fin
  TheOperators->Add("+=",
 
@@ -5940,8 +5892,6 @@ void  init_lgfem()
  Global.Add("dxy","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dxy>));
  Global.Add("dyx","(",new E_F1_funcT<Complex,pfec>(pfer2R<Complex,op_dyx>));
 
-
- // Add<pferbasearray*>("[","",new OneOperator2_FEcomp<double,v_fes>(get_element));
   Add<pfecbasearray*>("[","",new OneOperator2_<pfecbase*,pfecbasearray*,long>(get_element));  // use FH sep. 2009
   Add<pferbasearray*>("[","",new OneOperator2_<pferbase*,pferbasearray*,long>(get_element));  //  use ???? FH sep. 2009
     // bof bof ..
@@ -6059,7 +6009,6 @@ Expression IsFEcomp(const C_F0 &c,int i, Expression & rrr,Expression &iii)
 {
     Expression r=0;
     if(!i) rrr=0,iii=0;
-    //  typedef double K;
     if(atype<typename E_FEcomp<K,v_fes>::Result>() == c.left())
       {
 	  const E_FEcomp<K,v_fes> * e= dynamic_cast<const E_FEcomp<K,v_fes>*>(c.LeftValue() );
@@ -6115,13 +6064,13 @@ Expression Op_CopyArrayT(const E_Array & a,const E_Array & b)
           for (int i=1;i<nb;i++)
 	      if (!IsFEcomp<K,v_fes>(a[i],i,rrr,iii))
 		  CompileError("Copy of Array with incompatible K  vector value FE function () !");;
-	  if(iii) {// ffassert(0); //  moralement il : rrr[iii]
+	  if(iii) {
 	      C_F0 aa(rrr,atype<FEba**>()),ii(iii,atype<long>());
 	      C_F0 aa_ii(aa,"[",ii);
 	      rr=aa_ii.LeftValue();
 	  }
 	  if(v_fes::dHat==2) r=new E_set_fev<K>(&b,rr,2);
-	  else if(v_fes::dHat==3) r=new  E_set_fev3<K,v_fes3>(&b,rr);         ////////////ZZZZZZZ
+	  else if(v_fes::dHat==3) r=new  E_set_fev3<K,v_fes3>(&b,rr);
       }
     //  try complex vector value FE interpolation
     return r;
@@ -6344,13 +6293,10 @@ aType  typeFESpace(const basicAC_F0 &args)
 }
 
 
-
-
 template<class v_fes,int DIM>
 C_F0 NewFEarrayT(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 sizeofarray,bool cplx,int dim)
 {
   ffassert(dim==DIM || dim!=4);  // TODO
-  // ffassert(!cplx);
   typedef FEbaseArray<double,v_fes>  FE;
   typedef  E_FEcomp<R,v_fes,FE > FEi;
    typedef typename FEi::Result FEiR;

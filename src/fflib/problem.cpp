@@ -864,11 +864,9 @@ namespace Fem2D {
                 for (int t=0;t< Th.nt; t++)
                 {
 
-                    const Mesh3::Element & K(Th[t]);
                     if ( all || setoflab.find(Th[t].lab) != setoflab.end())
 
                     {
-                        double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
                         for(int i=0;i<4;++i)
                         {
                             int j= Th(t,i);
@@ -911,8 +909,6 @@ namespace Fem2D {
         mp = mps;// restore data x,yz
     }
 
-
-
     // template struct to obtain the original type mesh - particular case for meshS FEM
   /*  template<class FE>    struct Trait_MESHO {
         // By default Mesh == MeshO
@@ -926,12 +922,6 @@ namespace Fem2D {
         typedef typename FESpaceS::Mesh Mesh;
         static Mesh * topmesh(MeshO *p) {return p->getMeshS();}
     };*/
-
-
-
-
-
-
 
 
     // creating an instance of AssembleBilinearForm with MatriceCreuse
@@ -964,7 +954,6 @@ namespace Fem2D {
         bool all=true;
 
         const MeshS & ThI = Th;// * GetAny<pmesh>( (* di.Th)(stack));
-        bool sameMesh = &ThI == &Vh.Th &&  &ThI == &Uh.Th;
 
         const QuadratureFormular1d & FIEo = di.FIE(stack);
         const QuadratureFormular & FITo = di.FIT(stack);
@@ -1030,7 +1019,6 @@ namespace Fem2D {
             }
         }
         Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
-        void *paramate=stack;
         pair_stack_double parammatElement_OpVF(stack,& binside);
 
         if (verbosity >3)
@@ -1050,7 +1038,6 @@ namespace Fem2D {
             matep= new MatriceElementairePleine<R,FESpaceS>(Uh,Vh,VF,FIT,FIE,useopt);
 
             matep->faceelement = Element_OpVF;
-            paramate= &parammatElement_OpVF;
         }
         else if (sym) {
             mates= new MatriceElementaireSymetrique<R,FESpaceS>(Uh,FIT,FIE,useopt);
@@ -1182,7 +1169,6 @@ namespace Fem2D {
     }
 
     // end 3d
-
 
 
     ////////////////////////////////////////////////
@@ -1654,7 +1640,6 @@ namespace Fem2D {
         *MeshPointStack(stack) = mp;
     }
 
-
     //3D volume
     template<class R>
     void  AddMatElem(MatriceMap<R> & A,const Mesh3 & Th,const BilinearOperator & Op,bool sym,int it,  int ie,int label,
@@ -1681,7 +1666,6 @@ namespace Fem2D {
         long i,j;
         bool classoptm = copt && Op.optiexpK;
         assert(Op.MaxOp() <last_operatortype);
-        //
         int lastop=0;
         lastop = 0;
         What_d Dop = Op.DiffOp(lastop);
@@ -2100,7 +2084,6 @@ namespace Fem2D {
         bool sptrclean=true;
 
         const CDomainOfIntegration & di= *b->di;
-        const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
         SHOWVERB(cout << " FormBilinear () " << endl);
         const int useopt=di.UseOpt(stack);
         const bool intmortar=di.intmortar(stack);
@@ -2395,17 +2378,12 @@ namespace Fem2D {
         QuadratureFormular FIT(FITo,3);
         GQuadratureFormular<R3>  FIV(FIVo,3);
 
-
-
-        //    const QuadratureFormular & FIT = di.FIT(stack);
-        //    const Fem2D::GQuadratureFormular<R3> & FIV = di.FIV(stack);
         bool VF=b->VF();  // finite Volume or discontinous Galerkin
         if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
         if (verbosity>3)
         {
             if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") ,"  ;
             else  if (CDomainOfIntegration::intallfaces==kind) cout << "  -- boundary int all edges ( nQP: "<< FIT.n << "),"  ;
-            //else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIT.n << ")," ;
             else cout << "  --  int 3d   (nQP: "<< FIV.n << " ) in "  ;
         }
         if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (2)");
@@ -2488,8 +2466,6 @@ namespace Fem2D {
                 AddMatElem(A,Th,*b->b,sym,i,ie,Th[i].lab,Uh,Vh,FIV,FIT,p,stack,intmortar);
 
                 if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
-
-
             }
 
         }
@@ -2507,12 +2483,8 @@ namespace Fem2D {
 
                 for (int t=0;t< Th.nt; t++)
                 {
-
-                    const Mesh3::Element & K(Th[t]);
                     if (all || setoflab.find(Th[t].lab) != setoflab.end())
-
                     {
-                        double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
                         for(int i=0;i<4;++i)
                         {
                             int j= Th(t,i);
@@ -2529,9 +2501,7 @@ namespace Fem2D {
                         {
                             AddMatElem(A,Th,*b->b,sym,t,-1,Th[t].lab,Uh,Vh,FIV,FIT,p,stack);
                             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
-
                         }
-
                     }
                 }
                 FIV = FIVo;
@@ -2579,12 +2549,8 @@ namespace Fem2D {
             cout << "        Th/ v nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
             cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
         }
-        Expression  const * const mapt=*di.mapt?di.mapt:0 ;
-        Expression  const * const mapu=*di.mapu?di.mapu:0 ;
         bool withmap =di.withmap();
-        //   ExecError(" no map  in the case (4) ??");}
         assert(pThdi == & Th);
-        //const vector<Expression>  & what(di.what);
         CDomainOfIntegration::typeofkind  kind = di.kind;
         set<int> setoflab;
         bool all=true;
@@ -2704,8 +2670,6 @@ namespace Fem2D {
                 }
                 FIT =FITo;
             }
-
-
             else
             {
                 for( int e=0;e<Th.nbe;e++)
@@ -2720,10 +2684,8 @@ namespace Fem2D {
             }}
         else if (di.kind == CDomainOfIntegration::intallVFedges)
         {
-
             cerr << " a faire intallVFedges " << endl;
             ffassert(0);
-
         }
         else if (di.kind == CDomainOfIntegration::int2d )
         {cout << "bonjour*****11111111"<<endl;
@@ -2764,7 +2726,6 @@ namespace Fem2D {
                 FIT =FITo;
             }
             else
-
             {
                     for (int i=0;i< Th.nt; i++)
                     {
@@ -2828,7 +2789,7 @@ namespace Fem2D {
         RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction
         for (i=0;i< nx;i++)
         *pa++ = 0.;
-        if (ie<0 )//&& B==0)
+        if (ie<0 )
         for (npi=0;npi<FI.n;npi++) // loop on the integration point
         {
             QuadraturePoint pi(FI[npi]);
@@ -2902,10 +2863,8 @@ namespace Fem2D {
                 {  // attention la fonction test donne la ligne
                     //  et la fonction test est en second
                     BilinearOperator::K ll(*l);
-                    //          pair<int,int> jj(ll.first.first),ii(ll.first.second);
                     long jcomp= ll.first.first.first,jop=ll.first.first.second;
                     long icomp= ll.first.second.first,iop=ll.first.second.second;
-
 
                     R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
                     if ( copt && ( mat.optim==1) && Kv.number <1)
@@ -2993,8 +2952,6 @@ namespace Fem2D {
         }
         *MeshPointStack(stack) = mp;
     }
-
-
 
     // creating an instance of Element_Op with MatriceElementairePleine
     // case 3D volume
@@ -3121,7 +3078,6 @@ namespace Fem2D {
                     if (!same) Kv.BF(Dop,Pt,fv);
                     MeshPointStack(stack)->set(T(Pt),Pt,Ku,label,NN,ie);
                     if (classoptm) (*Op.optiexpK)(stack); // call optim version
-
                     pa=a;
                     for (int i=0;  i<n;   i++ )
                     {
@@ -3155,11 +3111,8 @@ namespace Fem2D {
                     }
                     if(verbosity>999) cout << " ++\n";
                 }
-
                 if(verbosity>999) cout << " @@ "<< asum << endl;;
-
             }
-
         }// end int level set ...
         else // int on edge ie
         for (npi=0;npi<FIb.n;npi++) // loop on the integration point
@@ -3175,7 +3128,6 @@ namespace Fem2D {
             if (!same) Kv.BF(Dop,Pt,fv);
             MeshPointStack(stack)->set(T(Pt),Pt,Ku,label,NN,ie);
             if (classoptm) (*Op.optiexpK)(stack); // call optim version
-
 
             for ( i=0;  i<n;   i++ )
             {
@@ -3207,7 +3159,6 @@ namespace Fem2D {
             }
         }
 
-
         if (Ku.Vh.Th(T) <1 && verbosity>100) {
             pa=mat.a;
             cout <<endl  << " Tet " << Ku.Vh.Th(T) << " =  " << T  << " " << nx << endl;
@@ -3218,8 +3169,6 @@ namespace Fem2D {
                 cout << setw(5)  << (*pa++) << " ";
                 cout << endl;
             } }
-
-
     }
 
     // creating an instance of Element_Op with MatriceElementairePleine
@@ -3285,7 +3234,6 @@ namespace Fem2D {
             {  // attention la fonction test donne la ligne
                 //  et la fonction test est en second
                 BilinearOperator::K ll(*l);
-                //          pair<int,int> jj(ll.first.first),ii(ll.first.second);
                 long jcomp= ll.first.first.first,jop=ll.first.first.second;
                 long icomp= ll.first.second.first,iop=ll.first.second.second;
 
@@ -3405,7 +3353,6 @@ namespace Fem2D {
 
         const Opera &Op(*mat.bilinearform);
         bool classoptm = copt && Op.optiexpK;
-        // assert(  (copt !=0) ||  (Op.where_in_stack_opt.size() !=0) );
         if (Ku.number<1  && verbosity/100 && verbosity % 10 == 2 )
         cout << "Element_Op S: copt = " << copt << " " << classoptm << " opt "<< mat.optim << endl;
         assert(Op.MaxOp() <last_operatortype);
@@ -3572,15 +3519,10 @@ namespace Fem2D {
 
                     mat(i,j)  +=  c * w_i*w_j;
                 }
-
             }
         }
-
         *MeshPointStack(stack) = mp;
-
     }
-
-
 
     // creating an instance of Element_Op MatriceElementaireSymetrique
     // case 3D volume
@@ -3730,21 +3672,15 @@ namespace Fem2D {
                         long  lj=Ku.dfcend(jcomp);
 
                         for (long i=fi;  i<li;   i++ )
-                        for (long j=fj;  j<min(lj,i+1);  j++,pa++ ) //
+                        for (long j=fj;  j<min(lj,i+1);  j++,pa++ )
                         {
                             R w_i =  fu(i,icomp,iop);
                             R w_j =  fu(j,jcomp,jop);
 
                             mat(i,j)  +=  c * w_i*w_j;
                         }
-
                     }
-
-
-
                 }
-
-
             }
 
         }// end int level set ...
@@ -3752,7 +3688,6 @@ namespace Fem2D {
         // int on edge ie
         for (npi=0;npi<FIb.n;npi++) // loop on the integration point
         {
-
             pa =a;
             GQuadraturePoint<R2> pi( FIb[npi]);
             R3 NN= T.N(ie);
@@ -3794,14 +3729,9 @@ namespace Fem2D {
                     R w_j =  fu(j,jcomp,jop);
 
                     mat(i,j)  +=  c * w_i*w_j;
-
                 }
-
             }
-
-
         }
-
 
         pa=a;
         if (Ku.Vh.Th(T) <0 & verbosity>100) {
@@ -3896,11 +3826,8 @@ namespace Fem2D {
                             R w_j =  fu(j,jcomp,jop);
 
                             mat(i,j)  +=  c * w_i*w_j;
-
                         }
-
                 }
-
             }
         else if(B)
 
@@ -3947,14 +3874,13 @@ namespace Fem2D {
                     long lj=Ku.dfcend(jcomp);
 
                     for ( i=fi;  i<li;   i++ )
-                        for ( j=fj;  j<min(lj,i+1);  j++,pa++ ) //
+                        for ( j=fj;  j<min(lj,i+1);  j++,pa++ )
                         {
                             R w_i =  fu(i,icomp,iop);
                             R w_j =  fu(j,jcomp,jop);
 
                             mat(i,j)  +=  c * w_i*w_j;
                         }
-
                 }
             }
         *MeshPointStack(stack) = mp;
@@ -3982,12 +3908,10 @@ namespace Fem2D {
         if (Kv.number<1  && verbosity/100 && verbosity % 10 == 2)
         cout << "Element_rhs S0: copt = " << copt << " " << classoptm << " opt " << optim << endl;
 
-
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
         int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
         assert(Op.MaxOp() <last_operatortype);
-
 
         RNMK_ fu(p,n,N,lastop); //  the value for basic fonction
 
@@ -4008,7 +3932,6 @@ namespace Fem2D {
                     LOperaD::K ll(*l);
                     pair<int,int> ii(ll.first);
                     double w_i =  wi(ii.first,ii.second);
-                    //copt=0;
                     R c = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack)); //GetAny<double>(ll.second.eval(stack));
                     if ( copt && ( optim==1) && Kv.number <1)
                     {
@@ -4022,12 +3945,8 @@ namespace Fem2D {
                     B[Kv(i)] += a;
                 }
             }
-
-
         }
         *MeshPointStack(stack) = mp;
-
-
     }
 
     // creating an instance of Element_rhs
@@ -4087,13 +4006,9 @@ namespace Fem2D {
                     B[Kv(i)] += a;
                 }
             }
-
-
         }
         *MeshPointStack(stack) = mp;
-
     }
-
 
     // creating an instance of Element_rhs
     // case 3D surface
@@ -4135,7 +4050,6 @@ namespace Fem2D {
                     LOperaD::K ll(*l);
                     pair<int,int> ii(ll.first);
                     double w_i =  wi(ii.first,ii.second);
-                    //copt=0;
                     R c = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack)); //GetAny<double>(ll.second.eval(stack));
                     if ( copt && ( optim==1) && Kv.number <1)
                     {
@@ -4154,8 +4068,6 @@ namespace Fem2D {
         }
         *MeshPointStack(stack) = mp;
     }
-
-
     // #pragma optimization_level 0
 
     // creating an instance of Element_rhs
@@ -4226,10 +4138,7 @@ namespace Fem2D {
             Kp = & K;
         }
         *MeshPointStack(stack) = mp;
-
-
     }
-
 
     // creating an instance of Element_rhs
     // case 3D volume
@@ -4307,8 +4216,6 @@ namespace Fem2D {
             Kp = & K;
         }
         *MeshPointStack(stack) = mp;
-
-
     }
 
     // creating an instance of Element_rhs
@@ -4457,15 +4364,11 @@ namespace Fem2D {
                             ExecError("In Optimized version "); }
                     }
                     //= GetAny<double>(ll.second.eval(stack));
-
                     B[Kv(i)] += coef * c * w_i;
                 }
             }
-
-
         }
         *MeshPointStack(stack) = mp;
-
     }
 
     // creating an instance of Element_rhs
@@ -4536,18 +4439,12 @@ namespace Fem2D {
                             cerr << "Sorry error in Optimization (v) add:  int2d(Th,optimize=0)(...)" << endl;
                             ExecError("In Optimized version "); }
                     }
-
-
                     //= GetAny<double>(ll.second.eval(stack));
-
                     B[Kv(i)] += coef * c * w_i;
                 }
             }
-
-
         }
         *MeshPointStack(stack) = mp;
-
     }
 
 
@@ -4695,8 +4592,6 @@ namespace Fem2D {
                     B[Kv(i)] += coef * c * w_i;
                 }
             }
-
-
         }
         *MeshPointStack(stack) = mp;
     }
@@ -4760,19 +4655,13 @@ namespace Fem2D {
                             cerr << "Sorry error in Optimization (w)  add:  int2d(Th,optimize=0)(...)" << endl;
                             ExecError("In Optimized version "); }
                     }
-
-
                     //= GetAny<double>(ll.second.eval(stack));
                     B[Kv(i)] += coef * c * w_i;
                 }
             }
-
-
         }
         *MeshPointStack(stack) = mp;
-
     }
-
 
     // case 3D surface
     template<class R>
@@ -4781,10 +4670,6 @@ namespace Fem2D {
     {
         ffassert(0);
     }
-
-
-
-
 
     // creating an instance of Element_rhsVF
     // case 2d
@@ -4842,8 +4727,8 @@ namespace Fem2D {
             double sa=pi.x,sb=1-sa;
             R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
             PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
-            R2 Pt(PA*sa+PB*sb ); //
-            R2 PP_t(PP_A*sa+PP_B*sb ); //
+            R2 Pt(PA*sa+PB*sb );
+            R2 PP_t(PP_A*sa+PP_B*sb );
             if (binside) {
                 Pt   = (1-binside)*Pt + binside*PC;
                 PP_t  = (1-binside)*PP_t + binside*PP_C; }
@@ -4869,8 +4754,6 @@ namespace Fem2D {
 
                 for (LOperaD::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
                 {
-
-
                     LOperaD::K ll(*l);
                     pair<int,int> ii(ll.first);
                     int iis = ii.second;
@@ -4896,18 +4779,14 @@ namespace Fem2D {
                             cerr << "Sorry error in Optimization (x) add:  int2d(Th,optimize=0)(...)" << endl;
                             ExecError("In Optimized version "); }
                     }
-
                     //= GetAny<double>(ll.second.eval(stack));
                     if(dofik>=0) B[dofik] += coef * c * w_i;
                     if(dofikk>=0) B[dofikk] += coef * c * ww_i;
 
                 }
             }
-
-
         }
         *MeshPointStack(stack) = mp;
-
     }
 
     // creating an instance of Element_rhs
@@ -4928,10 +4807,8 @@ namespace Fem2D {
         }
         // integration 1d on 2 diff mesh
 
-
         MeshPoint mp=*MeshPointStack(stack) ;
         R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
-
 
         bool classoptm = copt && Op.optiexpK;
         if (ThI(KI)<1 && verbosity/100 && verbosity % 10 == 2)
@@ -4947,15 +4824,12 @@ namespace Fem2D {
 
         for (npi=0;npi<FI.n;npi++) // loop on the integration point
         {
-
             GQuadraturePoint<R2> pi(FI[npi]);
             R3 NN= T.N(ie);
             double mes=NN.norme();
             NN/=mes;
             double coef = 0.5*mes*pi.a; //
             R3 Pt(T.PBord(ie,pi)),PI(T(Pt));
-
-
 
             MeshPointStack(stack)->set(ThI,PI,Pt,KI,label,NN,ie);
             if (classoptm) (*Op.optiexpK)(stack); // call optim version
@@ -4988,7 +4862,6 @@ namespace Fem2D {
                                 cerr << "Sorry error in Optimization (y) add:  int1d(Th,optimize=0)(...)" << endl;
                                 ExecError("In Optimized version "); }
                         }
-
                         //= GetAny<double>(ll.second.eval(stack));
                         B[Kv(i)] += coef * c * w_i;
                     }
@@ -4997,7 +4870,6 @@ namespace Fem2D {
             }
         }
         *MeshPointStack(stack) = mp;
-
     }
 
     // creating an instance of Element_rhs
@@ -5025,7 +4897,6 @@ namespace Fem2D {
         Stack stack=pvoid2Stack(vstack);
         MeshPoint mp=*MeshPointStack(stack) ;
         R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
-
 
         bool classoptm = copt && Op.optiexpK;
         if (ThI.number(KI)<1 && verbosity/100 && verbosity % 10 == 2)
@@ -5056,11 +4927,9 @@ namespace Fem2D {
         for (npi=0;npi<FI.n;npi++) // loop on the integration point
         {
             QuadratureFormular1dPoint pi( FI[npi]);
-
-
             double coef = le*pi.a;
             double sa=pi.x,sb=1-sa;
-            R2 Pt(PA*sa+PB*sb ); //
+            R2 Pt(PA*sa+PB*sb );
             R2 PI(KI(Pt));
             MeshPointStack(stack)->set(ThI,PI,Pt,KI,label,R2(E.y,-E.x)/le,ie);
             if (classoptm) (*Op.optiexpK)(stack); // call optim version
@@ -5093,18 +4962,13 @@ namespace Fem2D {
                                 cerr << "Sorry error in Optimization (z) add:  int1d(Th,optimize=0)(...)" << endl;
                                 ExecError("In Optimized version "); }
                         }
-
-
                         //= GetAny<double>(ll.second.eval(stack));
-
                         B[Kv(i)] += coef * c * w_i;
                     }
                 }
-
             }
         }
         *MeshPointStack(stack) = mp;
-
     }
     // creating an instance of Element_rhs
     // case 2d
@@ -5118,7 +4982,6 @@ namespace Fem2D {
         Stack stack=pvoid2Stack(vstack);
         MeshPoint mp=*MeshPointStack(stack) ;
         R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
-
 
         bool classoptm = copt && Op.optiexpK;
         if (ThI.number(KI)<1 && verbosity/100 && verbosity % 10 == 2)
@@ -5150,12 +5013,10 @@ namespace Fem2D {
         {
             QuadratureFormular1dPoint pi( FI[npi]);
 
-
             double coef = le*pi.a;
             double sa=pi.x,sb=1-sa;
             R2 Pt(PA*sa+PB*sb ); //
             R2 PIo(KI(Pt)),PI(PIo);
-            //   Kv.BF(Dop,Pt,fu);
             MeshPointStack(stack)->set(ThI,PI,Pt,KI,label,R2(E.y,-E.x)/le,ie);
             if(mapt)
             { // move poit
@@ -5193,10 +5054,7 @@ namespace Fem2D {
                                 cerr << "Sorry error in Optimization (z) add:  int1d(Th,optimize=0)(...)" << endl;
                                 ExecError("In Optimized version "); }
                         }
-
-
                         //= GetAny<double>(ll.second.eval(stack));
-
                         B[Kv(i)] += coef * c * w_i;
                     }
                 }
@@ -5204,7 +5062,6 @@ namespace Fem2D {
             }
         }
         *MeshPointStack(stack) = mp;
-
     }
 
 
@@ -5218,7 +5075,6 @@ namespace Fem2D {
     {
      ffassert(0);
     }
-
 
     // generic template for AssembleVarForm
     template<class R,typename MC,class FESpace >
@@ -5395,7 +5251,6 @@ namespace Fem2D {
                         else
                         CompileError("In Boundary condition the vector FESpace , we must have:"
                                      " all componant, in the right order");
-
                     }
 #ifdef OLDPih
                     K.Pi_h(gg,F_Pi_h,buf,&tabexp);
@@ -5743,7 +5598,7 @@ namespace Fem2D {
         if (verbosity>2) cout << "  -- AssembleLinearForm 2, discontinous Galerkin  =" << VF << " binside = "<< binside
         << " levelset integration " <<di.islevelset()<< " withmap: "<<  di.withmap() << "\n";
         Expression  const * const mapt=di.mapt[0] ? di.mapt:0;
-        sameMesh = sameMesh && !mapt; //
+        sameMesh = sameMesh && !mapt;
 
         if (verbosity>3)
         {
@@ -5798,11 +5653,8 @@ namespace Fem2D {
         if(di.islevelset() && (kind !=CDomainOfIntegration::int1d)&& (kind !=CDomainOfIntegration::int2d))
         InternalError(" Sorry No levelSet integral for is case ..(5)");
 
-
         if (kind==CDomainOfIntegration::int1d)
         {
-
-
             if(VF) InternalError(" no jump or average in int1d of RHS");
             if(di.islevelset())
             {
@@ -5828,7 +5680,6 @@ namespace Fem2D {
                     }
                     if( umn <=0 && umx >= 0)
                     {
-
                         int np= IsoLineK(f,Q,1e-10);
                         if(np==2)
                         {
@@ -5869,7 +5720,6 @@ namespace Fem2D {
             {
                 pair_stack_double bstack(stack,& binside);
 
-                //InternalError(" Today no jump or average in intalledges of RHS ");
                 for (int i=0;i< ThI.nt; i++)
                 if (all || setoflab.find(ThI[i].lab) != setoflab.end())
                 {
@@ -5990,11 +5840,8 @@ namespace Fem2D {
                 if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
             }
         }
-
         if (n_where_in_stack_opt) delete [] where_in_stack;
-
     }
-
 
     // creating an instance of AssembleLinearForm
     // case 3D volume
@@ -6191,7 +6038,6 @@ namespace Fem2D {
                     if (all || setoflab.find(ThI[t].lab) != setoflab.end())
 
                     {
-                        double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
                         for(int i=0;i<4;++i)
                         {
                             int j= ThI(t,i);
@@ -6277,8 +6123,6 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
         const bool intmortar=di.intmortar(stack);
 
         SHOWVERB(cout << " FormLinear " << endl);
-        // const vector<Expression>  & what(di.what);
-
         CDomainOfIntegration::typeofkind  kind = di.kind;
         const QuadratureFormular1d & FIE = di.FIE(stack);
         const QuadratureFormular & FIT = di.FIT(stack);
@@ -6291,7 +6135,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
         if (verbosity>2) cout << "  -- AssembleLinearForm S, discontinous Galerkin  =" << VF << " binside = "<< binside
             << " levelset integration " <<di.islevelset()<< " withmap: "<<  di.withmap() << "\n";
         Expression  const * const mapt=di.mapt[0] ? di.mapt:0;
-        sameMesh = sameMesh && !mapt; //
+        sameMesh = sameMesh && !mapt;
 
         if (verbosity>3)
         {

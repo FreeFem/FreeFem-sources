@@ -1297,8 +1297,6 @@ void ArrayOperator()
 
      Dcl_Type< Resize<KN<K> > > ();
      Dcl_Type< Resize<KNM<K> > > ();
-     aType knrp = atype<KN<K> *>();
-     aType knr_ = atype<KN_<K> >();
    //-  typedef KN<Z> ZN;
 
     // add  dec 2009.  ne marche pas ( incompatible  avec MatrixBlock) a comprendre ????? FH.
@@ -1309,7 +1307,6 @@ void ArrayOperator()
      //   map_type[typeid(KN_<K>).name()]->AddCast(new OneOperator_2KN_<K>);
     // fin add
     // ----
-     aType knlp=  aaaa_knlp ;
 
      atype<KN<K>* >()->Add("[","",new OneOperator2_<K*,KN<K>*,Z >(get_elementp_<K,KN<K>*,Z>));
      atype<KN<K>* >()->Add("(","",new OneOperator2_<K*,KN<K>*,Z >(get_elementp_<K,KN<K>*,Z>));

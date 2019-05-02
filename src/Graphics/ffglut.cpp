@@ -131,10 +131,9 @@ int   ReadOnePlot(FILE *fp)
         }
         kread++;
         if(debug>2) cout << " Read entete " << version << endl;
-        int c1 =getc(fp);//
+        int c1 =getc(fp);
         if(c1==13)
-            int c2 =getc(fp);//
-
+            int c2 =getc(fp);
 
     }
     long cas;
@@ -169,8 +168,6 @@ void TimerNextPlot(int value)
     // the routine to  until the end of nextplot.
     // we use gluttimerfunc functionnaly
     //  remark, if we miss we retry.
-    // -----
-    //  if(debug) cout << " TimeNextPlot  " << endl;
     if(nbTimerNextPlot>1 && debug >2 ) cout << "       ######  Warning more than 1 nbTimerNextPlot" << nbTimerNextPlot << endl;
     value=min(1000,(value*3)/2);// try at leat every 1 second (not to heavy computation)
     if(TryNewPlot())
@@ -191,7 +188,7 @@ int SendForNextPlot()
 {
 
     if(nbSendForNextPlot>0 && debug >2 ) cout << "       ######  Warning more than 1 SendForNextPlot" << nbSendForNextPlot+1 << endl;
-    if(nbSendForNextPlot) return 0; //
+    if(nbSendForNextPlot) return 0;
     nbSendForNextPlot++;
 
     //  to send a event to plot the date sheet.
@@ -641,11 +638,9 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 void OnePlotError::Draw(OneWindow *win)
 {
     initlist();
-    ThePlot & plot=*win->theplot;
     win->SetScreenView() ;
     glColor3d(0.,0.,0.);
     cout << " Error plot item empty " << item <<  endl;
-    int i = 4;
     char s[100];
     sprintf(s,"Warning the item %ld fot the plot is empty",item);
     win->Show(s,4+item*2);
@@ -783,10 +778,8 @@ void OnePlotFES::Draw(OneWindow *win)
     R coef = plot.coeff;
     double xmin,xmax,ymin,ymax;
     win->getcadre(xmin,xmax,ymin,ymax);
-    double d= Max(ymax-ymin,xmax-xmin);
     R kk = 4*win->hpixel;
     if(plot.ArrowSize>0) kk=win->hpixel*max(win->width*plot.ArrowSize/100.,1.);
-    R cc = win->hpixel*40;
 
     int klist=0;
     bool  change=false;
@@ -1035,7 +1028,6 @@ void OnePlotFE<Mesh>::Draw(OneWindow *win)
     R coef = plot.coeff;
     double xmin,xmax,ymin,ymax;
     win->getcadre(xmin,xmax,ymin,ymax);
-    double d= Max(ymax-ymin,xmax-xmin);
     R kk = 4*win->hpixel;
     if(plot.ArrowSize>0) kk=win->hpixel*max(win->width*plot.ArrowSize/100.,1.);
     R cc = win->hpixel*40;
@@ -1287,7 +1279,6 @@ void OnePlotBorder::Draw(OneWindow *win)
         vector<pair<long,R2> > & v=data[i];
         ShowGlerror("end OnePlotBorder::Draw  1");
 
-
         for(int j=1;j<v.size();++j)
         {
             plot.color(2+v[j].first);
@@ -1332,8 +1323,6 @@ void OnePlotBorder::Draw(OneWindow *win)
 
 void OnePlotHMatrix::Draw(OneWindow *win)
 {
-  ThePlot & plt=*win->theplot;
-
   if (si <= 0 || sj <= 0)
     return;
 
@@ -1457,8 +1446,6 @@ changearrow(true),changeiso(true), keepPV(false),init(false)
 
 void OneWindow::set(ThePlot *p)
 {
-    bool first = !theplot;
-    bool change = theplot != p;
     theplot=p;
     if(p)
     {
@@ -1699,7 +1686,7 @@ void  OneWindow::SetView()
 
 }
 void  OneWindow::resize(int w,int h)
-{  double ww=width,hh=height;
+{
     width=w;
     height=h;
     if (theplot && theplot->aspectratio)
@@ -1797,7 +1784,6 @@ void OneWindow::Display()
     {
         ShowGlerror("Begin Display");
 
-        //  SetView();
         if(theplot)
             theplot->Draw(this);
         ShowGlerror("After Display");
@@ -1808,8 +1794,6 @@ void OneWindow::cadreortho(R2 A, R2 B)
     R2 D(A,B);
     oBmin=A;
     oBmax=B;
-
-    double cxy =  D.y*width/ (D.x*height);
 
     if ( D.y*width < D.x*height)
         // width -> infty => D.x la ref
@@ -1846,7 +1830,6 @@ void OneWindow::setLighting()
         GLfloat ambient[] = {cca,cca,cca,1.0f};//differents parametres
         GLfloat diffuse[] = {ccd,ccd,ccd,1.0f};
         GLfloat specular_reflexion[] = {ccs,ccs,ccs,1.0f};
-        GLubyte shiny_obj = 128;
         glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,1);
         glEnable(GL_LIGHTING);//positionnement de la lumiere avec
         glLightfv(GL_LIGHT0,GL_AMBIENT,ambient);//les differents parametres
@@ -1901,7 +1884,6 @@ OnePlotBorder::OnePlotBorder(PlotStream & f)
 
 void OnePlot::GLDraw(OneWindow *win)
 {
-    ThePlot & plot= *win->theplot;
     Draw(win);
 
     win->changeiso=0;
@@ -2745,9 +2727,6 @@ void ThePlot::DrawIsoT(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso, R 
                     color(l+4);
                     glVertex3f(Pt[i].x, Pt[i].y, Pt[i].z);
                     glVertex3f(Pt[j].x, Pt[j].y, Pt[j].z);
-
-                        //MoveTo(Pt[i]);
-                        //LineTo(Pt[j]);
                 }
                 else
                 {
@@ -3031,8 +3010,6 @@ static void Mouse( int button,int state,int x,int y )
                 if(win && state == GLUT_DOWN) { win->xold=x,win->yold=y;return;}
             }
             break;
-
-
 
     }
 }
@@ -3321,7 +3298,6 @@ static  bool TryNewPlot( void )
         WaitNextRead();
         int iwnp= nextPlot-> winnum;
         if(debug>1) cout << " change current plot to: " << nextPlot << " et  Lock Plot . winnum  " << iwnp << endl;;
-        //cout << " winnum: " << iwnp << endl;
         if(Num2Windows[iwnp]==0)
         {
             ostringstream titre;
@@ -3491,9 +3467,6 @@ int main(int argc,  char** argv)
     glutInitWindowPosition(iii0,jjj0);
 
     int iw0=glutCreateWindow(titre.c_str());
-    //glutPushWindow();
-    // if (fullscreen)
-    //    glutFullScreen();
     Num2Windows[0]=iw0;
     glDisable(GL_DEPTH_TEST);
     glutReshapeFunc( Reshape ); // pour changement de fenetre

@@ -26,38 +26,6 @@
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/*
-#include  <iostream>
-#include  <cfloat>
-using namespace std;
-#include "error.hpp"
-#include "AFunction.hpp"
-#include "rgraph.hpp"
-
-#include "RNM.hpp"
-#include "fem.hpp"
-
-
-#include "FESpacen.hpp"
-#include "FESpace.hpp"
-
-
-//#include "fem3.hpp"
-#include "MeshPoint.hpp"
-#include <complex>
-#include "Operator.hpp"
-
-#include <set>
-#include <vector>
-#include <fstream>
-
-#include "lex.hpp"
-
-#include "Mesh2.h"
-
-#include "BamgFreeFem.hpp"
-#include "lgfem.hpp"
-*/
 
 #include "ff++.hpp"
 #include "AFunction_ext.hpp"
@@ -71,9 +39,6 @@ using Fem2D::MeshPoint;
 extern bool NoWait;
 
 typedef Mesh const * pmesh;
-
-
-
 
 class classBuildMesh :  public E_F0mps { public:
 
@@ -152,7 +117,6 @@ class classBuildMeshArray :  public E_F0mps { public:
 	using  Fem2D::Mesh;
 	using  Fem2D::MeshPointStack;
 
-	//   Mesh(int nbv,int nbt,int nbeb,Vertex *v,Triangle *t,BoundaryEdge  *b);
 	cout << nv << " " << nt << " " << nbe << endl;
 	cout << xyl.N() << " "<< xyl.M() << endl;
 	cout << nut.N() << " "<< nut.M() << endl;
@@ -485,10 +449,6 @@ basicAC_F0::name_and_type Op_trunc_mesh::Op::name_param[Op_trunc_mesh::Op::n_nam
      {  "fregion", &typeid(long)},
  };
 
-
-//extern Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax,) ;
-
-
 AnyType classBuildMesh::operator()(Stack stack)  const {
     const E_BorderN * borders = GetAny<const E_BorderN *>((*getborders)(stack));
    long  nbvx         = arg(0,stack,0L);
@@ -535,12 +495,6 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
     KN<long> nrt = arg(6,stack,kempty);
     Expression flab = nargs[7] ;
     Expression freg = nargs[8] ;
-    /* ZZZZZ
-     {  "labels", &typeid(KN_<long> )},
-     {  "region", &typeid(KN_<long> )},
-     {  "flabel", &typeid(long)},
-     {  "fregion", &typeid(long)},
-     */
     split=kkksplit;
     long ks=kkksplit*kkksplit;
     MeshPoint *mp= MeshPointStack(stack),mps=*mp;
@@ -639,14 +593,12 @@ AnyType SplitMesh::operator()(Stack stack) const
   using  Fem2D::R2;
   using  Fem2D::BoundaryEdge;
   using  Fem2D::Mesh;
- // using  Fem2D::R;
   using  Fem2D::MeshPointStack;
    MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
   const  Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
    ffassert(Thh);
    int label=1;
   const  Mesh & Th(*Thh);
-   //   long nbv=Thh->nv;
    long nbt=Thh->nt;
    KN<int> split(nbt);
    R2 B(1./3.,1./3.);
@@ -668,7 +620,6 @@ AnyType SplitMesh::operator()(Stack stack) const
    pth->quadtree=new Fem2D::FQuadTree(pth,Pn,Px,pth->nv);
 
    *mp=mps;
-   // pth->decrement();
     Add2StackOfPtr2FreeRC(stack,pth);//  07/2008 FH
 
     return SetAny<pmesh>(pth);
@@ -713,7 +664,6 @@ AnyType SaveMesh::operator()(Stack stack) const
      cout << "  - end writing faces  " << endl;
     for (int iv=0;iv<nbv;iv++)
       {
- //       cout << iv << endl;
         const Fem2D::Vertex  & v(Th(iv));
         ffassert( iv == Th(num[iv]/3,num[iv]%3));
         mp->setP(Thh,num[iv]/3,num[iv]%3);
@@ -743,7 +693,6 @@ AnyType MoveMesh::operator()(Stack stack) const
   using  Fem2D::R2;
   using  Fem2D::BoundaryEdge;
   using  Fem2D::Mesh;
- // using  Fem2D::R;
   using  Fem2D::MeshPointStack;
    MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
    const Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
@@ -774,7 +723,6 @@ AnyType MoveMesh::operator()(Stack stack) const
 	 ffassert(0); // a faire ????
        }
    *mp=mps;
-    //pth->decrement();
     Add2StackOfPtr2FreeRC(stack,pth);// 07/2008 FH
     return SetAny<pmesh>(pth);
 
@@ -840,8 +788,6 @@ AnyType Adaptation::operator()(Stack stack) const
     BuildPeriodic(nbcperiodic,periodic,*Thh,stack,nbdfv,ndfv,nbdfe,ndfe);
      oTh = msh2bamg(*Thh,cutoffradian,nbdfv,ndfv,nbdfe,ndfe,reqedges,reqedges.N());
 
-  //  cerr << " Sorry periodic mesh adaptation is not well implemented "<< endl;
-  //  ExecError("adaptmesh( ... )");
   }
   else
    oTh = msh2bamg(*Thh,cutoffradian,reqedges,reqedges.N());
@@ -887,7 +833,6 @@ AnyType Adaptation::operator()(Stack stack) const
       << endl << endl ;
     }
 
- //
  Th.ReMakeTriangleContainingTheVertex();
   MeshPoint* mp(Fem2D::MeshPointStack(stack));
 
@@ -906,7 +851,6 @@ AnyType Adaptation::operator()(Stack stack) const
     for (Int4  jt = 0; jt < 3; jt++)
       {
         bamg::Vertex & v= Th(it)[jt];
-	//   const Fem2D::Vertex & vf = (*Thh)[it][jt];
         if ( v.color)
           {
             v.color =0; // uncolor
@@ -924,18 +868,14 @@ AnyType Adaptation::operator()(Stack stack) const
   //    a faire F Hecht .
 
   Metric Mhmax(hmax);
-    double  ch2=2/(hmax*hmax);
-    double  cH2=2/(hmin*hmin);
 
   for ( iv=0;iv<Th.nbv;iv++)
     Th[iv].m = Mhmax;
     int miss=0;
    if (mtx)
     for ( iv=0;iv<Th.nbv;iv++)
-      //if ( (m11[iv]+m22[iv]) > ch2) // modif FH (Thank to J-F Remacle 07/2010), correct 03/2011 FH.
        Th[iv].m.IntersectWith(MetricAnIso(m11[iv],m12[iv],m22[iv]));// add inters ..
       else miss++;
-  //if(miss && verbosity>1) cout << "   -- Warning: Missing metric on vertices (too large) " <<  miss << " " << ch2 << endl;
   if ( givenmetric)
     if (ksol == 1)
       {
@@ -1017,7 +957,6 @@ AnyType Adaptation::operator()(Stack stack) const
 
   delete nTh;
   delete oTh;
-  //g->decrement();
   Add2StackOfPtr2FreeRC(stack,g);// 07/2008  FH
 
   return SetAny<pmesh>(g);
@@ -1032,9 +971,6 @@ AnyType Adaptation::operator()(Stack stack) const
  }
 }
 
-
-
-
 const Fem2D::Mesh  * EmptyTheMesh(const Fem2D::Mesh *  const & pTh,long *ssd=0)
 {
   using namespace Fem2D;
@@ -1044,7 +980,6 @@ const Fem2D::Mesh  * EmptyTheMesh(const Fem2D::Mesh *  const & pTh,long *ssd=0)
   using  Fem2D::BoundaryEdge;
   using  Fem2D::Mesh;
   const Mesh & Th=*pTh;
- // using  Fem2D::R;
   using  Fem2D::MeshPointStack;
   int nbv=Th.nv;
   int nbt=0;
@@ -1237,7 +1172,6 @@ const Mesh * MoveTheMesh(const Fem2D::Mesh &Th,const KN_<double> & U,const KN_<d
   R2 Pn,Px;
   m->BoundingBox(Pn,Px);
   m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
- //m->decrement();  //  delete done external
   return m;
 
 }
@@ -1368,7 +1302,6 @@ Mesh * Carre_(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN
     BoundaryEdge * bb=b;
   for (int i=0;i<nx;i++)
     {  // bottom
-      //      int j=0;
       int i1=i,i2=i1+1;
       *bb++ = BoundaryEdge(v,i1,i2,l1);
       v[i1].lab=v[i2].lab=l1;
@@ -1404,9 +1337,6 @@ Mesh * Carre_(int nx,int ny,Expression fx,Expression fy,Stack stack,int flags,KN
     R2 Pn,Px;
     m->BoundingBox(Pn,Px);
     m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
-
- //   Add2StackOfPtr2FreeRC(stack,m);// 07/2008 FH  remove for cube and put in Carre
-
     return m;
   }
 }
@@ -1511,221 +1441,6 @@ basicAC_F0::name_and_type  MeshCarre2f::name_param[]= {
 	{  "region", &typeid(long)}
     };
 
-
-/*
-
-Grid * Etruncmesh::eval()
-{
-  Analvar save(*an);
-  throwassert(idgrid && idgrid->typesol ==Iden::maillage );
-  Grid* go = idgrid->fg;
-  throwassert(go);
-  int * flag= new int[go->nt];
-  int * bb  = new int[go->nt];
-  Real xl[]={ 1./3.,1./3.,1./3.};
-  for (int i=0;i<go->nt;i++)
-    {
-      int oldlocal = an->local;
-      const bTriangle & T = go->t[i];
-      const bVertex & v0 = *T.v[0];
-      const bVertex & v1 = *T.v[1];
-      const bVertex & v2 = *T.v[2];
-      Real x = v0.x*xl[0] + v1.x*xl[1] + v2.x*xl[2];
-      Real y = v0.y*xl[0] + v1.y*xl[1] + v2.y*xl[2];
-      an->setAn(0,x, y, T.where, xl,-1,-1,i);
-      Real ee = e->eval();
-      flag[i] = (int) Max((Real)-32000.0,Min(e->eval(),(Real)32000.0));
-      if (b)
-        bb[i]  = (int) Max((Real)-32000.0,Min(b->eval(),(Real)32000.0));
-      else
-        bb[i] = 1;
-      //   cout << ee  << " " << flag[i] <<  " " << bb[i] << endl;
-
-      an->local  = oldlocal;
-    }
-  Grid* g = new Grid();
-  // for (int i=0;i<go->nt;i++)
-  //  cout << flag[i] << (i%10 == 9 ? '\n' : ' ');
-  cout << endl;
-  Triangles * Th = new Triangles(*go->Th,flag,bb);
-  delete [] flag;
-  delete [] bb;
-  if( ! Th) erreur("trunc triangulation");
-  double hmax = Th->MaximalHmax();
-  //  cout << " hmax = " << hmax << " ------- " << endl;
-  Metric M(hmax);
-  for (int iv=0;iv < Th->nbv;iv++)
-    (*Th)[iv].m = M;
-
-#ifdef DRAWING1
-  reffecran();
-  Th->InitDraw();
-  Th->inquire();
-#endif
-
-  g->th2t(Th);
-  g->renum();
-  g->prepgrid(0);
-
-  if(!toScilab)
-  g->draw(*an);
-  // an->activeMesh=g; // set the activegrid
-  *an=save;
-  return g;
-}
-
-Grid * Emovemesh::eval()
-{
-   Analvar save(*an);
-  int i;
-  Grid* go = idmoved->fg;
-  Grid* gn = new Grid(go);
-  throwassert(go);
-
-  Grid& t =*gn;
-  an->gridxyng = go;
-  Real xl[3] = {0.,0.,0.};
-  for ( i = 0; i < go->nv; i++)
-    {
-      int oldlocal = an->local;
-      an->setAn(0, go->v[i].x, go->v[i].y, go->v[i].where,xl, i);
-      t.v[i].x = ex->eval();
-      t.v[i].y = ey->eval();
-      an->local  = oldlocal;
-    }
-  an->gridxyng =0;
-  t.prepgrid(1);
-  //  for(i=0;i<t.nt;i++)
-  //  for(int iloc=0;iloc<3;iloc++)
-  //    t.t[i].e[iloc] = go->t[i].e[iloc];
-  if(!toScilab)
-  t.draw(*an);
-  Geometry * tGh = new Geometry(go->Th->Gh);
-  Triangles* tTh = new Triangles(*go->Th,tGh);// copy the Triangles
-  cout << "\t\t MoveMesh Grid * " << gn << " Gh = " <<  tGh << " Th = " << tTh  << endl;
-  //tTh->Write("movemesh.Th");
-
-  Triangles & Th = *tTh;
-  Geometry & Gh = *tGh;
-  Geometry & GhO = go->Th->Gh;
-  int * renu = go->NumThinGrid;
-
-  cout << "\t\t renu = " << renu << " " << (renu ? renu[0] : 0) << endl;
-  // move of the geometry
-  for ( i = 0; i <GhO.nbv;i++)
-    {
-      int oldlocal = an->local;
-      an->setAn(0,GhO.vertices[i].r.x, GhO.vertices[i].r.y, GhO.vertices[i].ref(),xl);
-      Gh.vertices[i].r.x  = ex->eval();
-      Gh.vertices[i].r.y  = ey->eval();
-      an->local  = oldlocal;
-    }
-  // change the tangente
-
-  for (i=0;i<Gh.nbe;i++)
-    {
-      R2 AB = Gh.edges[i].v[1]->r - Gh.edges[i].v[0]->r;
-      Real8 lAB = Norme2(AB); // length of current edge AB
-
-      for (int jj=0;jj<2;jj++)
-        if( ! Gh.edges[i].v[jj]->Corner() &&
-            (    (jj==0 && Gh.edges[i].TgA())
-                 || (jj==1 && Gh.edges[i].TgB()) ) )
-          {
-
-            // recompute the tangent
-            R2 tg =  Gh.edges[i].v[1-jj]->r
-              - Gh.edges[i].Adj[jj]->v[1-Gh.edges[i].SensAdj[jj]]->r;
-            Real8 ltg =  Norme2(tg);
-            tg =  tg *(lAB/ltg);
-            if ( (tg,AB) < 0)
-              tg = -tg;
-            Gh.edges[i].tg[jj] = tg;
-          }
-    } // for (i=0;i<nbe;i++)
-if(!toScilab)
-{
-#ifdef DRAWING
-  Gh.InitDraw();
-#endif
-#ifdef DRAWING2
-  reffecran();
-  Gh.InitDraw();
-  Gh.Draw();
-#endif
-}
-  //  move of the bamg mesh
-  Th.pmin =  R2(t.v[0].x,t.v[0].y);
-  Th.pmax =  Th.pmin;
-
-  for ( i = 0; i < Th.nbv; i++)
-    {   // Be carefull we do a renumbering
-      int j = renu ? renu[i] : i;
-      Th.vertices[i].r =   R2(t.v[j].x,t.v[j].y);
-      Th.pmin.x = Min( Th.pmin.x, Th.vertices[i].r.x);
-      Th.pmin.y = Min( Th.pmin.y, Th.vertices[i].r.y);
-      Th.pmax.x = Max( Th.pmax.x, Th.vertices[i].r.x);
-      Th.pmax.y = Max( Th.pmax.y, Th.vertices[i].r.y);
-    }
-  {R2 P10 = (Th.pmax-Th.pmin)*0.1;
-  Th.pmin = Th.pmin - P10;Th.pmax = Th.pmax + P10;}
-
-  Gh.pmin =  Gh.vertices[0].r;
-  Gh.pmax =  Gh.pmin;
-
-  for ( i = 0; i < Gh.nbv; i++)
-    {
-      Gh.pmin.x = Min( Gh.pmin.x, Gh.vertices[i].r.x);
-      Gh.pmin.y = Min( Gh.pmin.y, Gh.vertices[i].r.y);
-      Gh.pmax.x = Max( Gh.pmax.x, Gh.vertices[i].r.x);
-      Gh.pmax.y = Max( Gh.pmax.y, Gh.vertices[i].r.y);
-    }
-  {R2 P10 = (Gh.pmax-Gh.pmin)*0.1;
-  Gh.pmin = Gh.pmin - P10;Gh.pmax = Gh.pmax + P10;}
-
-  delete [] renu;
-  renu=0;
-
-  Gh.coefIcoor = (MaxICoor)/(Max( Gh.pmax.x- Gh.pmin.x, Gh.pmax.y- Gh.pmin.y));
-  Th.coefIcoor = (MaxICoor)/(Max( Th.pmax.x- Th.pmin.x, Th.pmax.y- Th.pmin.y));
-
-  //  for ( i = 0; i < Gh.nbv; i++)
-  //    Gh.vertices[i].i = Gh.toI2(Gh.vertices[i].r);
-
-  for ( i = 0; i < Th.nbv; i++)
-    Th.vertices[i].i = Th.toI2(Th.vertices[i].r);
-  // remove all the adj  and save the flag
-  for ( i= 0; i < Th.nbt; i++)
-    {
-      Triangle & t = Th(i);
-      for ( int j = 0 ; j<3; j++)
-        t.SetAdj2(j,0,t.GetAllflag(j));
-    }
-
-
-  //  Th.quadtree=new QuadTree(&Th);
-  Th.nbt = Th.nbt - Th.NbOutT; // remove all the  the ouside triangles
-  Th.SetIntCoor("In movemesh");
-  Th.FillHoleInMesh();
-  // delete Th.quadtree; // delete old
-  if (!Th.quadtree)
-    Th.quadtree=new QuadTree(&Th);
-  Th.ReMakeTriangleContainingTheVertex();
-
-
-#ifdef DRAWING2
-  Th.inquire();
-#endif
-  gn->Th = &Th;
-  gn->Gh = &Gh;
-  Gh.NbRef++;
-  gn->nbholes = go->nbholes;
-  *an=save;
-  return gn;
-}
-
-*/
-
    void  MeshErrorIO(ios& )
 {
    ExecError("Mesh IO Error ");
@@ -1735,7 +1450,6 @@ inline pmesh *  initMesh(pmesh * const & p, string * const & s) {
   Mesh * m;
   *p= m =new Mesh(*s);
   m->MakeQuadTree();
- //  delete s;  modif mars 2006 auto del ptr
   return p;
  }
 
@@ -1754,7 +1468,6 @@ class CheckMoveMesh :  public E_F0mps { public:
   using  Fem2D::R2;
   using  Fem2D::BoundaryEdge;
   using  Fem2D::Mesh;
- // using  Fem2D::R;
   using  Fem2D::MeshPointStack;
       args.SetNameParam();
       getmesh=to<pmesh>(args[0]);
@@ -1782,7 +1495,6 @@ AnyType CheckMoveMesh::operator()(Stack stack) const
   using  Fem2D::R2;
   using  Fem2D::BoundaryEdge;
   using  Fem2D::Mesh;
- // using  Fem2D::R;
   using  Fem2D::MeshPointStack;
    MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
    const Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
@@ -1843,13 +1555,9 @@ bool AddLayers(Mesh const * const & pTh, KN<double> * const & psupp, long const 
     ffassert(phi.N()==nv); // P1
     s = supp;
     phi=0.;
-    // supp = 0.;
-    // cout << " s  " << s << endl;
 
     for(int step=0; step < nlayer; ++ step)
     {
-
-
         u = 0.;
         for(int k=0; k<nt; ++k)
             for(int i=0; i<nve; ++i)
@@ -1857,7 +1565,6 @@ bool AddLayers(Mesh const * const & pTh, KN<double> * const & psupp, long const 
 
         for(int v=0; v < nv; ++v)
             u[v] = u[v] >0.;
-        // cout << " u  " << u << endl;
 
         phi += u;
 
@@ -1869,11 +1576,8 @@ bool AddLayers(Mesh const * const & pTh, KN<double> * const & psupp, long const 
         for(int k=0; k < nt; ++k)
             s[k] = s[k] > 0.;
         supp += s;
-        // cout << " s  " << s << endl;
     }
-    // cout << " phi  " << phi << endl;
     phi *= (1./nlayer);
-    // supp =s;
     return true;
 }
 
@@ -1889,7 +1593,6 @@ double arealevelset(Mesh const * const & pTh,KN<double>  * const & pphi,const do
         if( !where || (*where)[k] )
         {
             const Triangle & K(Th[k]);
-            const Vertex & A(K[0]), &B(K[1]),&C(K[2]);
             int iK[3]={Th(k,0),Th(k,1),Th(k,2)};
             R  fk[3]={phi[iK[0]]-phi0,phi[iK[1]]-phi0,phi[iK[2]]-phi0 };
             int i0 = 0, i1 = 1, i2 =2;
@@ -1909,7 +1612,6 @@ double arealevelset(Mesh const * const & pTh,KN<double>  * const & pphi,const do
             }
         }
     }
-    // cout << phi0 << endl;
     return arean; //  negative area ...
 }
 double arealevelset(Mesh const * const & pTh,KN<double>  * const & pphi,const double & phi0)
@@ -1937,7 +1639,6 @@ double volumelevelset(Mesh3 const * const & pTh,KN<double> * const &pphi,const d
             else if(fk[ij[0]]>=0.) volumep += K.mesure();
             else
             {
-                //cout << "ij = {" << ij[0] << ',' << ij[1] << ',' << ij[2] << ',' << ij[3] << '}' << endl;
                 const R3 A[4] = {K[ij[0]],K[ij[1]],K[ij[2]],K[ij[3]]};
                 const R f[4] = {fk[ij[0]],fk[ij[1]],fk[ij[2]],fk[ij[3]]};
                 if(f[0]<0. && f[1]>=0.) //the only negative dof is f0
@@ -2070,7 +1771,6 @@ void init_lgmesh() {
     //  Add FH mars 2015 to compute mesure under levelset ...
     Global.Add("arealevelset","(",new OneOperator3_<double,const Mesh *, KN<double>*,double>(arealevelset));
     Global.Add("arealevelset","(",new OneOperator4_<double,const Mesh *, KN<double>*,double,KN<double>*>(arealevelset));
-    //Global.Add("convectlevelset","(", new OneOperatorCode<ConvectLevelSet0 >( ));
     Global.Add("volumelevelset","(",new OneOperator3_<double,const Mesh3 *,KN<double>*,double>(volumelevelset));
     Global.Add("volumelevelset","(",new OneOperator4_<double,const Mesh3*,KN<double>*,double,KN<double>*>(volumelevelset));
     // add FH to get bounding box ...

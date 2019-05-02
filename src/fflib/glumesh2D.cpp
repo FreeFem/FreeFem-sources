@@ -342,7 +342,6 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
           R2 PA(TriangleHat[VerticesOfTriangularEdge[ke][0]]),
           PB(TriangleHat[VerticesOfTriangularEdge[ke][1]]);
           R2 Pt(PA*sa+PB*sb );
-          //  void set(const Mesh & aTh,const R2 &P2,const R2 & P_Hat,const  Triangle & aK,int ll,const R2 &NN,int iedge,int VFF=0)
           MeshPointStack(stack)->set(Th,K(Pt),Pt,K,l1,R2(E.y,-E.x)/le,ke);
 	  l1 =GetAny<long>( (*flab)(stack)) ;
       }
@@ -358,12 +357,10 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   R2 Pn,Px;
   m->BoundingBox(Pn,Px);
   m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
-  //  m->decrement();
   Add2StackOfPtr2FreeRC(stack,m);
     *mp=smp;
   return m;
 }
-
 
 class SetMesh : public OneOperator { public:
 typedef Mesh const *pmesh;
@@ -374,7 +371,6 @@ typedef Mesh const *pmesh;
     return  new SetMesh_Op(args,t[0]->CastTo(args[0]));
   }
 };
-
 
 //  truc pour que la fonction
 // Init::Init() soit appele a moment du chargement dynamique

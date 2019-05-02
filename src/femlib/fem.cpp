@@ -35,8 +35,6 @@ extern long searchMethod; //pichon
 #include "error.hpp"
 #include <iostream>
 #include <fstream>
-//#include <strstream.h>
-//using namespace std;  //introduces namespace std
 #include "RNM.hpp"
 #include "rgraph.hpp"
 #include "Serialize.hpp"
@@ -128,11 +126,10 @@ public:
 			VerticesNumberOfEdge(T,j,j0,j1);
 			k = j0+j1;
 			TheAdjacencesLink[n]=Head[k];
-			Head[k]=n; //
+			Head[k]=n;
 		    }
 
 		}
-		//
 		if (neb==0) { // build boundary
 		    for(int step=0;step<2;step++)
 		    {
@@ -290,13 +287,10 @@ public:
 			for (int j=0;j<3;j++)
 			    if (TonBoundary[k] & AddMortar[j])
 			    {
-				//   triangles[k].Draw(j,0.8);
 				int s0,s1;
 				VerticesNumberOfEdge(triangles[k],j,s0,s1);
 				linkg[s0] = (linkg[s0] == -1) ? s1 : -2 ;
 				linkd[s1] = (linkd[s1] == -1) ? s0 : -2 ;
-				//              throwassert(linkg[s0] != -1 && linkg[s1] != -1 );
-				//   cout << "On Mortar " << s0 << " " << s1 << " link " <<  linkg[s0]  << " " << linkd[s1] <<endl  ;
 			    }
 				//  we remove the  boundary link
 				for (int k=0;k<nt;k++)
@@ -305,14 +299,11 @@ public:
 					{
 					    int s0,s1;
 					    VerticesNumberOfEdge(triangles[k],j,s0,s1);
-					    // cout << s0 << " " << s1 << " ld " << linkd[s0]  << " " << linkd[s1] << " lg " << linkg[s0]  << " " << linkg[s1] << " apres " ;
 					    linkg[s0] = linkg[s0] != -1 ?  -2 : -1;
 					    linkg[s1] = linkg[s1] != -1 ?  -2 : -1;
 
 					    linkd[s1] = linkd[s1] != -1 ?  -2 : -1;
 					    linkd[s0] = linkd[s0] != -1 ?  -2 : -1;
-					    // cout  << " ld " << linkd[s0]  << " " << linkd[s1] << " lg" << linkg[s0]  << " " << linkg[s1] << endl;
-
 					}
 
 					    //    remark if   linkd[i]  == -2  extremities of mortars (more than 2 mortars)
@@ -328,7 +319,6 @@ public:
 			    NextT3[k3j]=-2;
 
 			    int is= number(T[j]);
-			    // if (linkg[is]<-1 || linkd[is]<-1) // extremite of bmortars
 			    int j0 =EdgesVertexTriangle[j][0];  //  the 2 edges contening j
 			    int j1 =EdgesVertexTriangle[j][1];
 			    if  (TonBoundary[k] & (AddMortar[j0]|AddMortar[j1]))  // (linkg[is]!=-1)
@@ -340,14 +330,6 @@ public:
 		    }
 		    //    loop on extremite of bmortars
 		    // calcule du nombre de joint
-		    /*      rattente(1);
-		    for (int is=0;is<nv;is++)
-			if ( (linkg[is]<-1 || linkd[is]<-1) )
-		    {MoveTo( vertices[is]);
-			    ostringstream ss;
-			    ss << is ;
-			    plotstring(ss.str().c_str());
-		    }  */
 		    datamortars=0;
 		    int kdmg = 0,kdmd=0;
 		    int kdmgaa = 0,kdmdaa=0;
@@ -374,7 +356,6 @@ public:
 			    ffassert(kdmg && kdmd);
 			}
 			int onbm=NbMortars;
-			// cout << "begin " << NbMortars << " g " << kdmg << " d " <<kdmd << endl;
 			int kdmgo=kdmgaa;
 			int kdmdo=kdmdaa;
 			int kdm=kdmdaa+kdmgaa;
@@ -401,7 +382,6 @@ public:
 				    int k=p/3;
 				    int i=p%3;
 				    const Triangle & T(triangles[k]);
-				    //throwassert( vertices + sm == &T[i]);
 				    // for the 2 egdes contening the vertex j of the triangle k
 
 				    for (int jj=0;jj<2;jj++)   // 2 edge j contening i
@@ -425,9 +405,7 @@ public:
 				}
 				ffassert(p!=-2);
 
-				// throwassert(km % 2 == 0);
 				HeapSort(bmortars,km);
-				// cout <<" Nb of mortars around vertex "<< is << " = " << km<< endl;
 				//  searh the same mortar (left and right)
 				//  with same angle
 				int im=km-1; // the last
@@ -451,13 +429,10 @@ public:
 					    mortars[NbMortars].right = datad;
 					    mortars[NbMortars].Th = this;
 					}
-					// cout << "   Begin mortar " << is << " " << im << " " << jm << " theta =" << thetai << endl;
 					R2 AM(A,bmortars[im].to);
 					AM = AM/Norme2(AM);
 					int ig(im),id(jm);
 					if ( bmortars[im].sens <0) ig=jm,id=im;
-					//SubMortar & mg(bmortars[ig]);
-					//SubMortar & md(bmortars[id]);
 					//  loop sur droite gauche
 					//  meme sommet
 					//   0 = gauche 1=droite
@@ -465,7 +440,6 @@ public:
 					int *link[2];
 					int nm[2]={0,0};
 					R  ll[2]={0.0,0.0};
-					//
 					sgd[0]=sgd[1]=is;
 					link[0] = linkg;
 					link[1] = linkd;
@@ -478,7 +452,6 @@ public:
 
 					    int sm = sgd[gd];
 					    int  dg = 1-gd;
-					    // cout << " sm = " << sm << " h=" << headT3[sm] << " gb=" << gd << " autre " << sgd[dg ] << " " << kkkk << endl;
 
 					    R lAV,avam;
 					    Vertex *pV=0;
@@ -490,7 +463,6 @@ public:
 						    k=p/3;
 						    i=p%3;
 						    const Triangle & T(triangles[k]);
-						    // couleur(1);T.Draw(0.3);
 						    throwassert( vertices + sm == &T[i]);
 						    // for the 2 egdes contening the vertex j of the triangle k
 						    j = EdgesVertexTriangle[i][dg];
@@ -499,14 +471,9 @@ public:
 						    if ( TonBoundary[k] & AddMortar[j])
 						    {  // check the sens and the direction
 
-							//  cout << number(T[VerticesOfTriangularEdge[j][gd]])  << " pv="
-							//      << number(V)  << " sm=" << sm << " " << headT3[number(V)] << endl;
-
 							R2 AV(A,V);
 							lAV = Norme2(AV);
 							avam = (AV,AM);
-							// cout << " ---  " << avam << " > " << ll[gd] <<  " " << Abs((AM.perp(),AV) )
-							//     << " " << ( avam > ll[gd] && Abs((AM.perp(),AV)) < lAV * 1e-6 ) << endl;
 							// go ahead in direction AM
 							if ( (avam > ll[gd])  && Abs((AM.perp(),AV)) < lAV * 1e-6 )
 							{pV = &V;break;} //  ok good
@@ -515,7 +482,6 @@ public:
 						if ( ! (p>=0 && pV))
 						    throwassert(p>=0 && pV); //  PB reach the end without founding
 						if ( ! ( Abs((AM.perp(),A-*pV)) < 1e-5) )
-						    // cout << Abs((AM.perp(),A-*pV)) <<*pV << endl,
 						    throwassert( Abs((AM.perp(),A-*pV)) < 1e-5);
 
 						throwassert(sm != number(pV));
@@ -532,9 +498,7 @@ public:
 						    throwassert( s == number(triangles[kkgd/3][VerticesOfTriangularEdge[kkgd%3][dg]]));
 						    sgd[gd]=s;// save the last
 							if ( ! ( Abs((AM.perp(),A-vertices[s])) < 1e-5) )
-							    // cout << Abs((AM.perp(),A-vertices[s])) << vertices[s] << endl,
 							    throwassert( Abs((AM.perp(),A-vertices[s])) < 1e-5);
-							//cout << " s=" << s << " h=" << headT3[s] << " " << link[gd][s] << " " <<  link[dg][s] << endl; ;
 							throwassert(kkgd>=0 && kkgd < 3*nt);
 							if (datamortars)
 							{
@@ -542,11 +506,9 @@ public:
 							    throwassert(datad - datamortars == nm[1] + kdmd + kdmgo );
 
 							    if (gd == 0)  *datag++ = kkgd; // store
-							    else          *datad++ = kkgd; //
+							    else          *datad++ = kkgd;
 
 							}
-
-							//                            cout  << " ++++ "<<  ll[gd] << " > " << ll[dg]  << " " << headT3[sgd[dg]] << " " <<sgd[dg] << endl;
 
 							int kk=kkgd,kkk=0,kkkk=0;
 							if ( link[gd][s] >=0) {
@@ -565,22 +527,18 @@ public:
 						if (ll[gd]>ll[dg] &&  headT3[sgd[dg]]>=0) //changement de cote
 						    gd = dg;
 						throwassert(kkkk++<100);
-						//cout <<" kkkk=" << kkkk << " " << sgd[0] << " " << sgd[1] << endl;
 					} while (sgd[0] != sgd[1]);
 
 					kdmgaa = Max(kdmgaa,kdmg  + nm[0]);
 					kdmdaa = Max(kdmdaa,kdmd  + nm[1]);
 
 					if (is < sgd[0]  &&  headT3[sgd[0]] >=0) {
-					    //cout << "    Mortars from (on saute) " << is << " to " << sgd[0] << " " << nm[0] << " " << nm[1]<< " " <<  kdmg <<  " " << kdmd << endl;
 					    if( mortars ) { //  restore
 						datag -= nm[0];
 						datad -= nm[1];   }
 
 					}
 					else {
-					    // cout << "    Mortars from " << is << " to " << sgd[0] << " " << nm[0] << " " << nm[1]<< " " <<  kdmg <<  " " << kdmd << endl;
-
 					    if(mortars ) {
 						ffassert(NbMortars< onbm);
 						mortars[NbMortars].nleft  = nm[0];
@@ -607,8 +565,6 @@ public:
 				    cout << "    Nb Mortars " << NbMortars << /*" " << kdmg << " "<<  kdmd <<*/ endl;
 			if (mortars)
 			{
-			    // cout << "end " << NbMortars << " g " << kdmg << " d " <<kdmd << endl;
-			    // cout << kdmgo << " " << kdmg << " " << kdmdo << " " << kdmd << endl;
 			    ffassert(kdmgo == kdmgaa && kdmdo == kdmdaa);}
 		    }  while (NbMortars && !mortars) ;
 
@@ -647,7 +603,6 @@ public:
 		for (int it=0;it<nt;it++)
 		    for (int j=0;j<3;j++)
 			TriangleConteningVertex[(*this)(it,j)]=it;
-        //for (int i=0 ; i<3*nt ; i++)     cout << i/3 << " " << i%3 << " val " <<TheAdjacencesLink[i]/3 << " " <<TheAdjacencesLink[i]%3 <<endl;; //cout << "val " <<TheAdjacencesLink[i]<<endl;;
 		Buildbnormalv();
 		if (verbosity>4)
 		{
@@ -672,7 +627,6 @@ public:
 		    Pmax.x = Max(Pmax.x,P.x);
 		    Pmax.y = Max(Pmax.y,P.y);
 		}
-		//  cout << " Bounding Box = " << Pmin <<" " <<  Pmax << endl;
 	    }
     void Mesh::read(const char * filename)
     {
@@ -734,7 +688,6 @@ public:
 	if(verbosity)
 	    cout << "   End of read: area on mesh = " << area <<endl;
 	ConsAdjacence();
-	//   BoundingBox(cMin,cMax);//  Set of cMin,Cmax
     }
 
 	    Mesh::Mesh(int nbv,int nbt,int nbeb,Vertex *v,Triangle *t,BoundaryEdge  *b)
@@ -772,16 +725,8 @@ public:
 		    bool removeouside=nbt>=0;
 		    nt=0;
 		    BuilTriangles(true,removeouside);
-		    /*    if( ! removeouside)
-		    {
-			neb=0; // remove the edge
-			delete [] bedges;
-			bedges=0;
-
-		    } */
 		    ConsAdjacence();
 		}
-		// cout << " build: Mesh : " << this << endl;
 	    }
 
 	    inline int BinaryRand(){
@@ -806,7 +751,6 @@ int  WalkInTriangle(const Mesh & Th,int it, double *lambda,
     R v   = lambda[0]*V[i0] + lambda[1]*V[i1] + lambda[2]*V[i2];
     R2 P  = lambda[0]*Q[0]  + lambda[1]*Q[1]  + lambda[2]*Q[2];
 
-    //  cout << " " << u << " " << v ;
     R2 PF = P + R2(u,v)*dt;
 
     //  couleur(15);MoveTo( P); LineTo( PF);
@@ -840,7 +784,6 @@ int  WalkInTriangle(const Mesh & Th,int it, double *lambda,
 	{
 	    // let j be the vertex beetween the 2 edges
 	    int j = 3-neg[0]-neg[1];
-	    //
 	    R S = Area2(P,PF,Q[j]);
 
 	    if (S>eps1)
@@ -929,13 +872,9 @@ R2 SubTriangle(const int N,const int n,const int l)
     else
       if(l==1) j++;
       else if(l==2) i++;
-    // if(l==1) i++;
-    // if(l==2) j++;
-    // if ( k <= 0 )cout << " - " << endl;
     return k >0
 	? R2( (double) i/ (double)N,(double) j/(double)N)
 	: R2( (double) (N-j)/ (double)N,(double) (N-i)/(double)N);
-
 }
 
 int numSubTriangle(const int N,const int n,const int l)
@@ -961,8 +900,6 @@ int numSubTriangle(const int N,const int n,const int l)
 	else
 	  if(l==1) j++;
 	  else if(l==2) i++;
-
-	// if ( k <= 0 )cout << " - " << endl;
 	return k >0
 	? numSubTVertex(N,i, j)
 	: numSubTVertex(N,N-j,N-i);
@@ -978,7 +915,6 @@ int Walk(const Mesh & Th,int& it, R *l,
     int j;
     while ( (j=WalkInTriangle(Th,it,l,U,V,dt))>=0)
     {
-	//int jj  = j;
 	throwassert( l[j] == 0);
 	R a= l[(j+1)%3], b= l[(j+2)%3];
 	int itt =  Th.ElementAdj(it,j);
@@ -1006,15 +942,9 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 	    v=quadtree->NearestVertex(P);
 	    assert(v);
 	}
-	/*
-	 if (verbosity>100)
-	 cout << endl << (*this)(v) << *v << " " << Norme2(P-*v) << endl;
-	 */
 	it00=it=Contening(v);
     }
 RESTART:
-    //     int itdeb=it;
-    //     int count=0;
     //     L1:
     outside=true;
     //int its=it;
@@ -1030,17 +960,9 @@ RESTART:
 	    kthrough++;
 	    if (k++>=10000)
 	    {
-		/* cout << P << endl;
-		reffecran();
-		Draw(0);
-		triangles[its].Fill(2);
-		DrawMark(P,0.01);
-		rattente(1);  */
 		ffassert(k++<10000);
 	    }
 	    int kk,n=0,nl[3];
-
-
 
 	    R2 & A(K[0]), & B(K[1]), & C(K[2]);
 	    R l[3]={0,0,0};
@@ -1121,7 +1043,6 @@ RESTART:
 		R dd = (Pjj,Pjj);
 		if (dd >= dP ) {
 		    Phat=PPhat;
-		    // if(kout>1) cout << "        @ " << tt-triangles  << " " << Phat << " " << outside << endl;
 		    rett=tt;
 		    if(searchMethod && outside) goto PICHON;
 		    return tt;
@@ -1136,12 +1057,6 @@ RESTART:
 		    tt = triangles + it ;
 		}
 	    }
-	    /*
-	     if(kout>1)
-	     cout << "Find --- "<< P << " :  k=" << k << "  la lb " << la << " " << lb
-	     << " ii =" << ii << " iii= " << iii << " " << it << " dP= "
-	     << dP << " ret = " << ret <<endl;
-	     */
 	    if (ret || ii == iib)
 	    {
 		l[j]=0;
@@ -1149,7 +1064,6 @@ RESTART:
 		l[j0]= Max(0.,Min(+lb/(la+lb),1.));
 		l[j1]= 1-l[j0];
 		Phat=R2(l[1],l[2]);
-		//if(kout>1) cout << "        # " << it << " " << Phat << " " << outside << endl;
 		rett=triangles +it;
 		if(searchMethod && outside) goto PICHON;
 		return rett;
@@ -1158,13 +1072,11 @@ RESTART:
 	    // next edge on true boundaryS
 	    for (int p=BoundaryAdjacencesHead[ii];p>=0;p=BoundaryAdjacencesLink[p])
 	    { int e=p/2, ie=p%2;// je=2-ie;
-				// cout << number(bedges[e][0]) << " " << number(bedges[e][1]) << endl;
 		if (!bedges[e].in( vertices+iii)) //  edge not equal  to i0 i1
 		{
 		    ok=true;
 		    iib = ii;
 		    it= BoundaryElement(e,ie);  //  next triangle
-						 // cout << "  ------ " << it << " " << Phatt <<  endl;
 		    break;
 		}
 	    }
@@ -1182,10 +1094,6 @@ PICHON:	// Add dec 2010 ...
             v=quadtree->NearestVertex(P);
             assert(v);
         }
-        /*
-         if (verbosity>100)
-         cout << endl << (*this)(v) << *v << " " << Norme2(P-*v) << endl;
-         */
         it=Contening(v);
         if( it != it00) goto RESTART;
     }
@@ -1193,7 +1101,6 @@ PICHON:	// Add dec 2010 ...
     npichon2d++;
 	// Brute force .... bof bof ...
     double ddp=1e100;
-    int pk=-1;
 
     for(int k=0;k<nt;++k)
       {
@@ -1219,8 +1126,6 @@ PICHON:	// Add dec 2010 ...
 	double lgp2=(GP,GP);
 	if(ddp > lgp2) {
 	    ddp=lgp2;
-	    pk=k;
-
 	}
       }
 
@@ -1233,13 +1138,9 @@ int  WalkInTriangle(const Mesh & Th,int it, double *lambda,
 {
     const Triangle & T(Th[it]);
     const R2 Q[3]={(const R2) T[0],(const R2) T[1],(const R2) T[2]};
-    // int i0=Th.number(T[0]);
-    // int i1=Th.number(T[1]);
-    // int i2=Th.number(T[2]);
 
     R2 P  = lambda[0]*Q[0]  + lambda[1]*Q[1]  + lambda[2]*Q[2];
 
-    //  cout << " " << u << " " << v ;
     R2 PF = P + R2(u,v)*dt;
 
     //  couleur(15);MoveTo( P); LineTo( PF);
@@ -1273,7 +1174,6 @@ int  WalkInTriangle(const Mesh & Th,int it, double *lambda,
 	{
 	    // let j be the vertex beetween the 2 edges
 	    int j = 3-neg[0]-neg[1];
-	    //
 	    R S = Area2(P,PF,Q[j]);
 
 	    if (S>eps1)
@@ -1313,14 +1213,12 @@ int  WalkInTriangle(const Mesh & Th,int it, double *lambda,
 }
 Mesh::~Mesh()
 {
-    //(cout << "   -- delete mesh " << this << endl);
     delete  quadtree;
     delete [] triangles;
     delete [] vertices;
     delete [] bedges;
     delete [] mortars;
     delete [] datamortars;
-    // delete [] adj;
     delete [] TheAdjacencesLink;
     delete [] BoundaryEdgeHeadLink;
     delete [] BoundaryAdjacencesHead;
@@ -1339,7 +1237,6 @@ Mesh::~Mesh()
     return 0;
 }
 
-
  int NbOfSubInternalVertices(int kk)
 {
     assert(kk);
@@ -1349,8 +1246,6 @@ Mesh::~Mesh()
 
     return kk<0 ? 3*r : r;
 }
-
-
 
 Mesh::Mesh(int nbv,R2 * P)
 {
@@ -1398,7 +1293,6 @@ Mesh::Mesh(int nbv,R2 * P)
 void Mesh::BuilTriangles(bool empty,bool removeouside)
 {
     long nba = neb;
-    //
     long nbsd = 0; // bofbof
     if(!removeouside) nbsd=1;
     // faux just pour un test
@@ -1543,7 +1437,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
     // avec le quadtree qui sont sur les aretes ou les sommets
     //  calcul du magorant du nombre de sommets
     int nvmax= 0;// Th.nv;
-    { //int v;
+    {
 	KN<bool> setofv(Th.nv,false);
 	for (int i=0;i<Th.nt;i++)
 	    if ( split[i] )
@@ -1563,16 +1457,13 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 			if (!pbe && (ie0 < ie1))
 			{
 			    nebi += max(split[i],split[it]); // arete interne a force ...  (FH jan 2007)
-			   // cout << nebi << " zzzz  t" << i << " a=" << j << " taj=" << it << " sa =" <<    ie0 << " " << ie1 << " + = " << max(split[i],split[it]) << endl;
 			}
 		    }
 		}
 		for (int j=0;j<3;j++)
-		    //   if ( setofv.insert(Th(i,j) ).second )
 		    if ( !setofv[Th(i,j)])
 		    {
 			setofv[Th(i,j)]=true;
-			//  cout << Th(i,j)  << " " ;
 			nvmax++;
 		    }
 	    }
@@ -1588,18 +1479,15 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		nvmax += NbOfSubInternalVertices(split[i]) -3;
 
 	//  compute the minimal Hsize of the new mesh
-       R hm = rho(Th[0]); //Th[0].h_min();
-	//  cout << " hm " << hm << endl;
+       R hm = rho(Th[0]);
 	// change h() in h_min() bug correct  july 2005 FH  ----
 	for (int it=0;it<Th.nt;it++)
 	{
 	    assert(split[it]>=0 && split[it]<=64);
-	    //      cout << " it = " <<it << " h " <<  Th[it].h() << " " << split[it] << " hm = " << hm <<  endl;
 	    if (split[it])
 		hm=Min(hm,rho(Th[it])/(R) split[it]);
 	}
 	R seuil=hm/splitmax/4.0;
-	//assert(seuil>1e-15);
 	vertices = new Vertex[nvmax];
 	assert( vertices );
 
@@ -1637,55 +1525,25 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
                 cout << "  --- number of  neb : " << nebmax << endl;
             }
         }
-    /*
-	for (int i=0;i<Th.nt;i++)
-	    if (split[i])
-		for (int j=0;j<3;j++)
-		{
-
-		    Vertex * pV=quadtree->ToClose(Th[i][j],seuil);
-		    if (pV ==0) {
-			// cout << Th(i,j) << " " ;
-			vertices[nv] = Th[i][j];
-			vertices[nv].normal=0;
-			quadtree->Add(vertices[nv]);
-			nv++;}
-		}
-		    // nv = Th.nv;
-		    if(verbosity>3)
-		    {
-			cout << "  -- number of old vertices use: " << nv << endl;
-			cout << "  -- number of  neb : " << nebmax << endl;
-		    }
-     */
 	bedges = new BoundaryEdge[nebmax];
 	BoundaryEdge * bedgesi= new BoundaryEdge[nebimax];  // jan 2007 FH
 	int * sdd= new int[Th.nt];
 	for (int i=0;i<Th.nt;++i)
 		sdd[i]= 0;
-	/*
-	    for (int i=0;i<Th.neb;i++)
-	{
-		cout << i << " " << " " << Th(Th.bedges[i][0]) << " " << Th(Th.bedges[i][1]) << endl;
-	} */
 	assert(bedges && bedgesi);
 	//  generation of the boundary edges
 	neb =0;
 	nebi=0;   //   generaztion des arete interne pour les force ...
 	nbsdd=0;
-	//   for (int ieb=0,jj;ieb<Th.neb;ieb++)
 	for (int it=0;it<Th.nt;it++)
 	    if (  split[it] )
 	    {
-		// sdd[it]=-1;
 		for (int jt=0;jt<3;jt++)
 		{
 		    int jtt=jt,itt=Th.ElementAdj(it,jtt);
-		    //  cout << it <<  " " << jt << " " << jt << " " << itt << !split[itt] << endl;
 		    int ie0,ie1;
 		    Label  re(label);
 		    Th.VerticesNumberOfEdge(Th[it],jt,ie0,ie1);
-		    //  cout << "++ ";
 		    BoundaryEdge * pbe = Th.TheBoundaryEdge(ie0,ie1);
 		    bool bbe= ( itt == it || itt <0 || !split[itt] || (pbe && &(*pbe)[0] == &Th(ie0))) ;
 
@@ -1703,9 +1561,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 			if (pbe ) {
 			    re = *pbe;
 			    if( & (*pbe)[0] == &Th(ie1) ) sens = -sens; // pour les aretes non decoupe avril 2007
-			   // cout << " ### " << ie0 << " " << ie1 << " " <<  sens << endl;
 			}
-			// cout << " lab = " <<  re.lab << endl;
 			Vertex *pva= quadtree->NearestVertex(Th(ie0));
 			Vertex *pvb= quadtree->NearestVertex(Th(ie1));
 			Vertex *pv0=pva;
@@ -1733,15 +1589,12 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 
 			    pv0=pv1;
 			}
-			//if (bbe)
-			 //   cout << nneb+1 << " yyyy  t" << it << " a=" << jt << " taj=" << itt << " sa =" <<    ie0 << " " << ie1 << " + = " << n << endl;
 
 			assert(nneb<nnebmax);
 			bbedges[nneb].vertices[0]=pv0;
 			bbedges[nneb].vertices[1]=pvb;
 			(Label &) bbedges[nneb]= re ;
 			sdd[it]= (1+ (nneb++ + offset))*sens; // numero de la derniere arete attention au sens si pas decoupe avril 2007
-			//cout << " ### " << pv0 - vertices << " " << pvb - vertices << " " <<  sens << " it = " << it << " " <<  sdd[it] << " itt " << itt  << " -- " << sdd[406] << endl;
 
 			if(  ( itt !=it || itt <0)  ) // interne
 			   sdd[itt]= -sdd[it];
@@ -1750,8 +1603,6 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		nbsdd++;
 	    }
 
-		//   cout << "          (debug)  nb vertices on egdes " << nv << endl;
-		    //  cout << " " <<  nebmax << " " << neb << endl;
 	ffassert(neb==nebmax);
 	ffassert(nebi==nebimax);
 	ffassert(nbsdd==nbsddmax);
@@ -1759,7 +1610,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	//   create the new vertices and the new triangle
 	int   kt=0;
  	for (int K=0;K<Th.nt;K++)
-	{ // cout << K << endl;
+	{
 	    Triangle &T(Th[K]);
 	    R2 A(T[0]);
 	    R2 B(T[1]);
@@ -1770,7 +1621,6 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	    int vt[3];
 	    for (int n=0;n<N2;n++,kt++) //  loop on all sub triangle
 	    {
-		//(Label&) triangles[kt] = (Label&) T;
 		for(int j=0;j<3;j++) //  Loop on the 3 vertices
 		{
 		    R2 PTj=SubTriangle(N,n,j);
@@ -1784,7 +1634,6 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    if(!noregenereration && pV==0) addv = lmin > 1e-5;
 		    if ( addv )
 		    { // new vertex
-		      // cout << "    -- " << nv << "  New Vertices " << Pj << " n=" << n << " j=" << j << " " << PTj << endl;
                         if( !(nv < nvmax ))
 			ffassert(nv<nvmax);
 			vertices[nv]=Pj;
@@ -1796,14 +1645,10 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    if(noregenereration)
 		    {
 		      assert(pV);
-		    //cout << j <<  "  " << *pV << " " << Pj << " " << number(pV) << " " << Norme2(Pj-*pV) << " " << nv << endl;
 		      vt[j]=number(pV);
 		    }
 		}
 
-		    //  triangles[kt].SetVertex(j,pV);
-		 // for(int j=0;j<3;j++)
-		  // cout << kt << " " << n << endl;
 		if(noregenereration)
 		{
 		    R2 A=vertices[vt[0]];
@@ -1827,12 +1672,9 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	    cout << "  - Nb of boundary edges " << neb << endl;
 
 	}
-	//
 	if (!noregenereration )   // REGENRATION DU MAILLAGE
-	{ //
-	   // nebi=0;
+	{
 	    long nba = neb+nebi;
-	    //
 	    long nbsd = nbsdd; // bofbof
 			   //ok,  with correction of mshptg
 	    long  *sd;
@@ -1912,7 +1754,6 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    cout << " Sd : " << endl;
 		    for(int i=0;i<nbsd; ++i)
 			cout << " " << i+1 << " -- " << sd[2*i] << "  lab " << sd[2*i+1] << endl;
-		    //nbsd=0;
 		}
 		mshptg8_ (cr, h, c, nu, &nbs, nbs, tri, arete, nba, (long *) sd, nbsd, reft, &nbt, .25, .75, &err);
 		if( !(err==0 && nbt !=0))
@@ -1920,7 +1761,6 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    cerr << " Error mesh generation in mshptg : err = " << err << " nb triangles = " << nbt << endl;
 		    ffassert(err==0 && nbt !=0);
 		}
-		//
 
 		delete [] triangles;
 		// Correction FH bug  trunc  mesh with hole 25032005 +july 2005
@@ -1928,13 +1768,11 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		R dmin=1e100;
 		for(int i=0,k=0;i<nbt;i++,k+=3)
 		{
-		    //int ir = reft[i];
 		    reft[i]=-1;
 		    R2 A=vertices[nu[k]-1],B=vertices[nu[k+1]-1],C=vertices[nu[k+2]-1];
 		    R2 G=(A+B+C)/3.,PHat;
 		    double d=Area2(A,B,C);
 		    dmin=min(d,dmin);
-		    //cout << A << "\n" << B << "\n" << C << "\n" << A << "\n\n";
 		    if(d<=1e-5 && 0)
 		    {
 			cout<< " T = "<<  i << " det= " << d << "  ::  " << A << " " << B << " " << C  << endl;
@@ -1952,7 +1790,6 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    }
 		}
 		nt=kt;
-		// cout << " " << dmin << endl;
 		if(verbosity>3)
 		    cout << "  - Nb Triangles = " << nt <<  " remove triangle in hole :" <<  nbt - nt
 			<<endl;
@@ -2066,9 +1903,7 @@ Serialize  Mesh::serialize() const
     l += nv*( sizeof(int) + sizeof(double)*2);
     l += neb*(sizeof(int)*3);
 
-    // cout << l << magicmesh << endl;
     Serialize  serialized(l,magicmesh);
-    // cout << l << magicmesh << endl;
     size_t pp=0;
     serialized.put(pp, l);
     serialized.put( pp,nt);
@@ -2082,7 +1917,6 @@ Serialize  Mesh::serialize() const
 	serialized.put(pp, vertices[i].y);
 	serialized.put(pp, vertices[i].lab);
     }
-    //cout << " ---  " << endl;
     for (int i=0;i<nt;i++)
     {
 	const Triangle & K(triangles[i]);
@@ -2094,7 +1928,6 @@ Serialize  Mesh::serialize() const
 	serialized.put(pp, i2);
 	serialized.put(pp, K.lab);
     }
-    // cout << " ---  " << endl;
     for (int i=0;i<neb;i++)
     {
 	const BoundaryEdge & K(bedges[i]);
@@ -2104,8 +1937,6 @@ Serialize  Mesh::serialize() const
 	serialized.put(pp, i1);
 	serialized.put(pp, K.lab);
     }
-    //  cout << " ---  " << endl;
-    // cout << pp << " == " << serialized.size() << endl;
     assert(pp==serialized.size());
     return serialized;
 }
@@ -2140,8 +1971,6 @@ void Mesh::Buildbnormalv()
 		v1.SetNormal(n,N);
 	    }
 	}
-	    // cout << nb << " == " << n-bnormalv << endl;
 	    assert(n - bnormalv <= nb );
 }
 }
-//  static const R2 Triangle::Hat[3]= {R2(0,0),R2(1,0),R2(0,1)} ;

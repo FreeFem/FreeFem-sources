@@ -907,8 +907,7 @@ GLuint pickingScene (pScene sc, int x, int y, int ident) {
 	refitem = 0;
 	refmat = -1;
 	mesh = cv.mesh[sc->idmesh];
-	clip = sc->clip;
-
+		
 	if (!getColorRange(&c, mesh)) return (dlist);
 
 	glGetIntegerv(GL_VIEWPORT, viewport);
