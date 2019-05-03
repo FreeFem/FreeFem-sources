@@ -4318,7 +4318,6 @@ if(nargs[VTK_START+index])                    \
                     if (l[i].e[2]) { z.set(l[i].evalt(2,s));}
                     if (l[i].e[3]) { v.set(l[i].evalt(3,s));}
                     long k= Min(x.N(),y.N());
-                    bool colored= (v.N()==k);
                     NewSetColorTable(Viso.N()+4,colors,nbcolors,hsv);
                     rmoveto(x[0],y[0]);
                     couleur(2+i);

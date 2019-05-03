@@ -1534,7 +1534,7 @@ bool SameMesh(const Mesh * const & pTh1,const Mesh * const & pTh2)
     if( pTh1 == pTh2) return 1;
     if( pTh1->nv != pTh2->nv) return 0;
     if( pTh1->nt != pTh2->nt) return 0;
-    const Mesh & Th1=*pTh1, & Th2 = *pTh2;
+  //  const Mesh & Th1=*pTh1, & Th2 = *pTh2;
     ffassert(0); // a faire..
 
     return 1;

@@ -3187,9 +3187,7 @@ MatriceMorse<R> * removeHalf(MatriceMorse<R> & A,long half,double tol)
     // half < 0 => L
     // half > 0 => U
     // half = 0 => L and the result will be sym
-    int sym = half ==0;
     int nnz =0;
-    int n = A.n;
 
     if( A.half )
         return &A;//  copy

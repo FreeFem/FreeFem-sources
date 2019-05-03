@@ -5512,7 +5512,6 @@ namespace Fem2D {
                     PtonB = 0;
 
                    R3 E=K.T.Edge(ie);
-                   double le = sqrt((E,E));
 
                     Rd NN=K.T.NormalS(ie);
                     NN /= NN.norme();
@@ -5782,7 +5781,6 @@ namespace Fem2D {
             {
                 QuadratureFormular FITM(FIT);
                 double uset = HUGE_VAL;
-                R2 Q[4];
                 KN<double> phi(Th.nv);phi=uset;
                 double f[3];
                 for(int t=0; t< Th.nt;++t)
@@ -5817,7 +5815,6 @@ namespace Fem2D {
                             if( f[i1] < 0 ) {double y=f[i2]/(f[i2]-f[i1]); c *=y*y; }
                             else {double y=f[i0]/(f[i0]-f[i1]) ; c = 1.- (1.-c)*y*y; };
                             assert( c > 0 && c < 1);
-                            double arean = (1-c)*Th[t].area;
                             FITM=FIT;
                             FITM*=1-c;
                             ffassert(mapt==0);
@@ -6033,8 +6030,6 @@ namespace Fem2D {
 
                 for (int t=0;t< Th.nt; t++)
                 {
-
-                    const Mesh3::Element & K(ThI[t]);
                     if (all || setoflab.find(ThI[t].lab) != setoflab.end())
 
                     {
@@ -6286,7 +6281,6 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
             {
                 QuadratureFormular FITM(FIT);
                 double uset = HUGE_VAL;
-                R2 Q[4];
                 KN<double> phi(Th.nv);phi=uset;
                 double f[3];
                 for(int t=0; t< Th.nt;++t)
@@ -6321,7 +6315,6 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
                             if( f[i1] < 0 ) {double y=f[i2]/(f[i2]-f[i1]); c *=y*y; }
                             else {double y=f[i0]/(f[i0]-f[i1]) ; c = 1.- (1.-c)*y*y; };
                             assert( c > 0 && c < 1);
-                            double arean = (1-c)*Th[t].mesure();
                             FITM=FIT;
                             FITM*=1-c;
                             ffassert(mapt==0);
