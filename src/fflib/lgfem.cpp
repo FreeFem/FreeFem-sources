@@ -695,7 +695,7 @@ class LinearGMRES : public OneOperator
 	 long gcverb=51L-Min(Abs(verb),50L);
 
 
-      int ret;
+      int ret=-1;
       if(verbosity>4)
         cout << "  ..GMRES: eps= " << eps << " max iter " << nbitermax
              << " dim of Krylov space " << dKrylov << endl;
@@ -3634,7 +3634,7 @@ int SendS(PlotStream & theplot,Plot::ListWhat &lli,map<const MeshS *,long> &mapt
     int cmp[3]={-1,-1,-1};
     int err=1;
     long what=lli.what;
-    int lg,nsb;
+    int lg,nsb=0;
     lli.eval(feS,cmp);
 
 

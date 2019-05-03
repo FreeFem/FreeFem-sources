@@ -240,7 +240,7 @@ void drawisoTet(const R3 K[4],R f[4],R v)
 
     R3 P[4];
     int nP=0;
-    int np[4],nm[4];
+    int np[4]={},nm[4]={};
     int km=0,kp=0;
     for (int i=0;i<4;++i)
     {
@@ -248,7 +248,7 @@ void drawisoTet(const R3 K[4],R f[4],R v)
         if(f[i]>=v) np[kp++]=i;
     }
 
-    int h=-1,b[3];
+    int h=-1,b[3]={};
     if(kp==1 && km==3)
     {
         h = np[0];

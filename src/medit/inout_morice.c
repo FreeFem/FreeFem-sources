@@ -1010,7 +1010,7 @@ int loadMesh_popen (pMesh mesh) {
 
 int loadScaVecTen (pMesh mesh, int numsol, int dim, int ver, int nel, int type, int size, int *typtab, int key, char *natureread) {
 	pSolution sol;
-	float fbuf[GmfMaxTyp];
+	float fbuf[GmfMaxTyp]={};
 	double m[6], lambda[3], eigv[3][3], vp[2][2];
 	int k, i, iord, off;
 	double ScaSol[1], VecSol[3], TenSol[9];

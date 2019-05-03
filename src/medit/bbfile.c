@@ -62,7 +62,7 @@ int EatSpace (FILE *in) {
 
 int bbfile (pMesh mesh) {
 	FILE *in;
-	pSolution ps;
+	pSolution ps=NULL;
 	double a, b, c, lambda[3], eigv[3][3], m[6], vp[2][2];
 	float dummy;
 	int j, k, l, dim, np, nf, i1, i2, i3, err, iord, ret;

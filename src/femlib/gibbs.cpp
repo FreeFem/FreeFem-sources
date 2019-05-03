@@ -1000,7 +1000,7 @@ int Mesh::renum()
  	err = -1 : memory alloc pb; err = -3: fatal erreur  gibbs 2 : pb racine
 */
 {
-    long   pfold, pfnew;
+    long   pfold=0, pfnew=0;
     long* ptvois=NULL;
     long* vois=NULL;
     long* nn =NULL;

@@ -763,7 +763,7 @@ namespace Fem2D
       return 3;
     }
     int iv[4],lab;
-    float cr[3];
+    float cr[3]={};
 
     // caution for the vertice 3 cases :
     // pure volume mesh -> in the .mesh, the vertice are true
@@ -1758,7 +1758,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
 		  << " PF= K(l) = " << Th[it](R3(l+1)) << " kf = " << kf << " " << cf << "/ " << PF
 		  <<endl ;
 
-    int neg[nve],k=0;
+    int neg[nve]={},k=0;
     int kk=-1;
 
     if(kf>=0)   // sortie positive ..
@@ -1778,7 +1778,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
         if (k>1) //  2 .. 3 face de sortie possible
           {
 	    // regarde  sorti interne ..
-	    int pos[4];
+	    int pos[4]={};
 	    int kp =0;
 	    if (l[0]<0 ) pos[kp++]=0;
 	    if (l[1]<0 ) pos[kp++]=1;

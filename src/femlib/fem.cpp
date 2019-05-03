@@ -763,7 +763,7 @@ int  WalkInTriangle(const Mesh & Th,int it, double *lambda,
     l[1] /= Det;
     l[2] /= Det;
     const R eps = 1e-5;
-    int neg[3],k=0;
+    int neg[3]={},k=0;
     int kk=-1;
     if (l[0]>-eps && l[1]>-eps && l[2]>-eps)
     {
@@ -962,7 +962,7 @@ RESTART:
 	    {
 		ffassert(k++<10000);
 	    }
-	    int kk,n=0,nl[3];
+	    int kk,n=0,nl[3]={};
 
 	    R2 & A(K[0]), & B(K[1]), & C(K[2]);
 	    R l[3]={0,0,0};
@@ -1025,7 +1025,7 @@ RESTART:
 
 	    int j0=(j+1)%3,i0= &K[j0]-vertices;
 	    int j1=(j+2)%3,i1= &K[j1]-vertices;
-	    int ii,jj,iii;
+	    int ii=0,jj=0,iii;
 	    bool ret=false;
 
 	    R2 AB=R2(K[j0],K[j1]),  AP(K[j0],P), BP(K[j1],P);
@@ -1153,7 +1153,7 @@ int  WalkInTriangle(const Mesh & Th,int it, double *lambda,
     l[1] /= Det;
     l[2] /= Det;
     const R eps = 1e-5;
-    int neg[3],k=0;
+    int neg[3]={},k=0;
     int kk=-1;
     if (l[0]>-eps && l[1]>-eps && l[2]>-eps)
     {

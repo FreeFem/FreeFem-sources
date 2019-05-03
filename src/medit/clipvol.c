@@ -205,9 +205,9 @@ GLuint capTetraMap (pMesh mesh) {
 	pMaterial pm;
 	pSolution ps0, ps1;
 	double dd1[6], d, ax, ay, az, bx, by, bz;
-	double cx[4], cy[4], cz[4], cc;
-	float n[3], sol[4];
-	int m, k1, k2, l, pos[6], neg[6], nbpos, nbneg, nbnul;
+	double cx[4]={}, cy[4]={}, cz[4]={}, cc;
+	float n[3], sol[4]={};
+	int m, k1, k2, l, pos[6]={}, neg[6]={}, nbpos, nbneg, nbnul;
 	static int tn[4] = {0, 0, 1, 1};
 	static int tp[4] = {0, 1, 1, 0};
 	triangle t1, t2;
@@ -415,9 +415,9 @@ GLuint capTetraIso (pMesh mesh) {
 	pMaterial pm;
 	pSolution ps0, ps1;
 	double dd1[6];
-	double rgb[3], cx[4], cy[4], cz[4], ccx, ccy, ccz, cc;
+	double rgb[3], cx[4]={}, cy[4]={}, cz[4]={}, ccx, ccy, ccz, cc;
 	float iso, kc, sol[4];
-	int i, m, k, k1, k2, l, l1, nc, pos[6], neg[6], nbpos, nbneg, nbnul, ncol;
+	int i, m, k, k1, k2, l, l1, nc, pos[6]={}, neg[6]={}, nbpos, nbneg, nbnul, ncol;
 	static int tn[4] = {0, 0, 1, 1};
 	static int tp[4] = {0, 1, 1, 0};
 	static double hsv[3] = {0.0f, 1.0f, 0.20f};

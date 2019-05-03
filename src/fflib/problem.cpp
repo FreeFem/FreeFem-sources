@@ -7009,7 +7009,7 @@ dim(dimProblem(l))
     cout << "Problem : ----------------------------- " << top << " dim = " << dim<<" " << nargs <<  endl;
     top = offset + max(sizeof(Data<FESpace>),sizeof(Data<FESpace>));
 
-    bool iscomplex;
+    bool iscomplex=false;
     if(dim==2)
     iscomplex=GetBilinearParam<pfer,pfec>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
     else if (dim==3)

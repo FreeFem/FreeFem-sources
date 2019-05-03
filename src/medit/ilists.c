@@ -242,8 +242,8 @@ GLuint listTetraIso (pScene sc, pMesh mesh) {
 	pMaterial pm;
 	pSolution ps0, ps1;
 	double delta, rgb[4], d, ax, ay, az, bx, by, bz;
-	float n[3], cx[4], cy[4], cz[4], cc;
-	int m, k, k1, k2, i, l, pos[4], neg[4], nbpos, nbneg, nbnul, nv, nf;
+	float n[3], cx[4]={}, cy[4]={}, cz[4]={}, cc;
+	int m, k, k1, k2, i, l, pos[4]={}, neg[4]={}, nbpos, nbneg, nbnul, nv, nf;
 	static double hsv[3] = {0.0f, 1.0f, 0.80f};
 	static int tn[4] = {0, 0, 1, 1};
 	static int tp[4] = {0, 1, 1, 0};
@@ -465,7 +465,7 @@ int tetraIsoPOVray (pScene sc, pMesh mesh) {
 	pSolution ps0, ps1;
 	double delta;
 	float cx[4], cy[4], cz[4], cc;
-	int m, k, k1, k2, i, l, pos[4], neg[4], nbpos, nbneg, nbnul;
+	int m, k, k1, k2, i, l, pos[4]={}, neg[4]={}, nbpos, nbneg, nbnul;
 	char data[128];
 	static int tn[4] = {0, 0, 1, 1};
 	static int tp[4] = {0, 1, 1, 0};

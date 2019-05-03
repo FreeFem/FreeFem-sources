@@ -3625,6 +3625,7 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 		assert(np <= nbe_t);
 
 		int *ind_nbe_t_tmp = new int [np];
+		ind_nbe_t_tmp = NULL;
 
 		for (int i_border = 0; i_border < np; i_border++) {
 			ind_nbe_t_tmp[i_border] = ind_nbe_t[ind_np[i_border]];
@@ -4782,7 +4783,7 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_confondus_ok, double **Coord_Point,
                         const double *bmin, const double *bmax, const double hmin, int *ind_np, int &np) {
 	size_t i;
-	size_t j[dim];
+	size_t j[dim]={};
 	size_t k[dim];
 	size_t NbCode = 100000;
 	int *tcode;	//= new int[NbCode];

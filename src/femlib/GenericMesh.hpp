@@ -332,7 +332,7 @@ public:
 
   istream & Read1(istream & f,Vertex * v0,int n)
   {
-    int iv[nv],ir,err=0;
+    int iv[nv]={},ir,err=0;
     for (int i=0;i<nv;++i)
       {
 	f >> iv[i];
@@ -741,7 +741,7 @@ template<typename T,typename B,typename V>
 void GenericMesh<T,B,V>::BuildjElementConteningVertex()
 {
   const int nkv= T::nv;
-    int lerr[10];
+    int lerr[10]={};
   if(!ElementConteningVertex) ElementConteningVertex = new int[nv];
 
     for(int i=0;i<nv;++i)
@@ -1041,13 +1041,11 @@ void GenericMesh<T,B,V>::BuildBoundaryElementAdj(const int &nbsurf, int* firstDe
 
     //######################################
 
-    // assert(TheBoundaryElementAdjacencesLink==0); plus tard
     int *TheBoundaryElementAdjacencesLink = new int[B::nea*nbe_surf];
     HashTable<SortArray<int,B::nva>,int> h(B::nea*nbe_surf,nv);
     int nk=0;
     int err=0;
     int sens;
-    //  ffassert(0); // a verifier ???? F HECHT mars2019 firstVertex and secondVertex
       if(verbosity>4) cout << "BuildBoundaryElementAdj: nea/nva " << B::nea << " "  << B::nva << endl;
     for (int k=0;k<nbe_surf;++k)
       for (int i=0;i<B::nea;++i)
@@ -1193,7 +1191,7 @@ DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],i
 	  for(int ieq=0,keq=0;keq<nbequibe;++keq)
 	    {
 		int p1[nbev],p2[nbev];
-		int v1[nbev],v2[nbev];
+		int v1[nbev]={},v2[nbev]={};
 		int be1=equibe[ieq]/8,pe1=equibe[ieq++]%8;
 		int be2=equibe[ieq]/8,pe2=equibe[ieq++]%8;
 		int itemb1,k1=BoundaryElement(be1,itemb1);
@@ -1500,7 +1498,6 @@ Serialize GenericMesh<T,B,V>::serialize() const
 	set(nnv,nnt,nnbe);
 	for (int i=0;i<nv;i++)
 	  {
-	      //double r[d];
 	      for(int j=0;j<d;++j)
 		  serialized.get(pp,vertices[i][j]);
 	      serialized.get(pp,vertices[i].lab);

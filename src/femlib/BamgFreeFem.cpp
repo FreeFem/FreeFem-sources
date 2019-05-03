@@ -905,7 +905,7 @@ const Fem2D::Mesh *  ReadTriangulate( string  * const & s) {
   using namespace Fem2D;
   KN<R2> xy;
   char c;
-  int nv;
+  int nv=0;
   for(int step=0;step<2;step++)
     {
       nv=0;

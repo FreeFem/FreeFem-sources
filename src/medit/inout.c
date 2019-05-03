@@ -641,7 +641,7 @@ int saveMesh (pScene sc, pMesh mesh, char *fileout, ubyte clipon) {
 int loadSol (pMesh mesh, char *filename, int numsol) {
 	pSolution sol;
 	double dbuf[GmfMaxTyp];
-	float fbuf[GmfMaxTyp];
+	float fbuf[GmfMaxTyp]={};
 	double m[6], lambda[3], eigv[3][3], vp[2][2];
     long inm;
     int k, i, key=0, nel, size, type, iord, off, typtab[GmfMaxTyp], ver, dim;

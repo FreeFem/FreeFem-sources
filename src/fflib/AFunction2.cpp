@@ -88,13 +88,6 @@ OneOperator::pair_find OneOperator::Find(const ArrayOfaType & at)const
  {
       const OneOperator *w=0,*oo;
       int nn=0,p=-10000;
- /*     for (oo=this;oo;oo=oo->next)
-        if (oo->pref>=p && oo->WithOutCast(at))
-          {
-           if(p<oo->pref) {nn=0;p=oo->pref;}
-           nn++;
-           w=oo;}
-      if (nn) return make_pair(w,nn);*/
       for (int ncast=0;ncast<=n;ncast++) // loop on the number of cast
        {
          p=-10000;
@@ -132,13 +125,9 @@ OneOperator* OneOperator::FindSameR(const ArrayOfaType & at)
       int n=0;
       for (oo=this;oo;oo=oo->next)
         {
-        //if (oo->WithOutCast(at))
         if  (at==*oo)  n++,r=oo;
         else if (oo->WithOutCast(at)) n++,r=oo;
-      //  if (n) cout << " \t " << oo << " " << *oo  << " <-----> " << at << " n =" << n << endl;
         }
-     // if (n>1) cout << "FindSameR " << n << endl;
-     // if (n)       cout << *r << " <-----> " << at << " n =" << n << endl;
       return n==1 ? r : 0;
 }
 
@@ -221,7 +210,6 @@ C_F0::C_F0(const Polymorphic * poly,const char *op,const basicAC_F0 & p)
 	    {
 		cerr << " error operator " << op << " " << at << endl;
 		poly->Show(op,at,cerr);
-		// const  OneOperator *  ff=
 		poly->Find(op,at);
 	    }
 	      CompileError();
@@ -236,9 +224,6 @@ C_F0::C_F0(const Polymorphic * poly,const char *op,const basicAC_F0 & p)
 	    CompileError();
 	}
     }
-
-
-
 
 //  operator without parameter
 C_F0::C_F0(const Polymorphic * pop,const char *op)
@@ -345,14 +330,6 @@ void Polymorphic::Addp(const char * op,Value pp,...) const
   va_start(ap,pp);
   for(pp=va_arg(ap,OneOperator * );pp;pp=va_arg(ap,OneOperator * ))
     *f += *pp;
-/*  if ( ! strlen(op) )
-   { // no polymorphisme
-     if(m.size() !=1 ||  !f->Simple()) {
-       cerr << " no polymorphisme and polymorphisme are mixed " << endl;
-    //   for_each(m.begin,m.end(),ShowOn_cerr);
-       CompileError();
-     }
-   } */
 }
 
 void Polymorphic::Add(const char * op,Value *pp) const
@@ -366,13 +343,7 @@ void Polymorphic::Add(const char * op,Value *pp) const
     pp++;
     for(;*pp;pp++)
      *f += **pp;
-   /*if ( ! strlen(op) )
-     { // no polymorphisme
-      if(m.size() !=1 ||  !f->Simple()) {
-       cerr << " no polymorphisme and polymorphisme are mixed " << endl;
-      //   for_each(m.begin,m.end(),ShowOn_cerr);
-       CompileError();
-     }  } */ }
+ }
 
 }
 
@@ -413,22 +384,13 @@ C_F0 Find(const char * name)
 vectorOfInst* TableOfIdentifier::newdestroy()
 {
  int k=0;
-// cout << "\n\t List of destroy variables " << m.size() << " : " ;
  for (pKV * i=listofvar;i;i=i->second.next)
    {
      if  (i->second.del && i->second.first->ExistDestroy() )
-    // cout  << i->first << ", " ;
      assert(i->second.first);
      if (i->second.del && i->second.first->ExistDestroy() ) k++;
    }
   ffassert(nIdWithDelete==k);
-// cout << endl;
-/*  old code
- ListOfInst *l=new ListOfInst(k);
- for (pKV * i=listofvar;i;i=i->second.next)
-     if (i->second.del && i->second.first->ExistDestroy())
-       l->Add(i->second.first->Destroy(i->second) );
-*/
 // new code
   vectorOfInst * l= new vectorOfInst(k);
   int j=0;
@@ -443,7 +405,6 @@ C_F0  TableOfIdentifier::destroy() {return C_F0(newdestroy());}
    {
      for (iterator i=m.begin();i!=m.end();++i)
        {
-
    //     delete i->first;
         }
      m.clear();
@@ -489,18 +450,6 @@ Block::Block(Block * f):fatherblock(f),top(f?f->top:BeginOffset*sizeof(void*)),t
     }
 Block::~Block(){}
 
-/*
-vectorOfInst * Block::newclose(Block *& c) {
-    tables_of_identifier.erase(itabl);
-    c=fatherblock;
-    if (fatherblock) {fatherblock->topmax=topmax;
-        fatherblock->top=top;}
-
-    vectorOfInst * r;
-    r = table.newdestroy();
-    delete this;
-    return r;}
-*/
    vectorOfInst * Block::snewclose(Block *& c) {
     Block * a=c;
     tables_of_identifier.erase(a->itabl);
@@ -610,7 +559,6 @@ bool ArrayOfaType::WithOutCast( const ArrayOfaType & a) const
    for (int i=0;i<n;i++)
        if (! a.t[i]->SametypeRight(t[i]))
         return false;
- // cerr << " TRUE " << endl;
    return true;
  }
 
@@ -644,20 +592,11 @@ void basicForEachType::AddCast(CastFunc f1,CastFunc f2,CastFunc f3,CastFunc f4,
 	      }
 	    if (casting)  *casting += *ff[i];
 	    else casting = ff[i];
-	    /*
-	     if( ! mapofcast.insert(make_pair<const aType,CastFunc>(ff[i]->a,ff[i])).second)
-	     {
-	     cerr << " The casting to "<< *this << " from " << ff[i]->a << " exists " << endl;
-	     cerr << " List of cast " << endl;
-	     for_each(mapofcast.begin(),mapofcast.end(),CerrCast);
-	     CompileError();
-	     } */
 	}
   }
 
  ostream & operator<<(ostream & f,const OneOperator & a)
 {
-//   for(const OneOperator * tt=&a;tt;tt=tt->next)
      f << "\t  " << * (a.r) << " :  "  <<(const ArrayOfaType &) a;
    return f;
 }
@@ -742,7 +681,6 @@ Expression NewExpression(Function2 f,Expression a,Expression b)
 
 E_Routine::E_Routine(const Routine * routine,const basicAC_F0 & args)
   :    code(routine->ins),
-       //clean(routine->clean),
        rt(routine->tret),
        nbparam(args.size()),
        param(new Expression[nbparam]),
@@ -759,33 +697,15 @@ E_Routine::E_Routine(const Routine * routine,const basicAC_F0 & args)
 E_Routine::~E_Routine() {
     if(verbosity>10000) cout << "~E_Routine()"<< endl;
     delete [] param;}
-/*
-struct CleanE_Routine {
-  const E_Routine * er;
-    Stack s;
-    AnyType * l;
-    CleanE_Routine(const  E_Routine * r,Stack ss,AnyType *ll): er(r),s(ss),l(ll) {}
-    ~CleanE_Routine() {
-   // cout << " Clean E_routine " << er <<endl;
-  //  (*er->clean)(s);
-    delete [] l;
-    }
-};
-*/
 AnyType E_Routine::operator()(Stack s)  const  {
-  //cout << " E_Routine:: push "  <<debugstack <<" " << TheCurrentLine << " " <<debugstack->size() << endl;
    debugstack->push_back(pair<const E_Routine*,int>(this,TheCurrentLine));
    const int lgsave=BeginOffset*sizeof(void*);
    char  save[lgsave];
    AnyType ret=Nothing;
    memcpy(save,s,lgsave); // save
     AnyType *listparam;
- //  Add2StackOfPtr2Free(s,new CleanE_Routine(this,s,listparam=new AnyType[nbparam]));
     Add2StackOfPtr2FreeA(s,listparam=new AnyType[nbparam]);
 
-    //   AnyType *listparam =Add2StackOfPtr2FreeA(s,new AnyType[nbparam]);
-   //
- //  WhereStackOfPtr2Free(s)->Add2StackOfPtr2Free(s,listparam);
 //  to day the memory gestion of the local variable are static,
    for (int i=0;i<nbparam;i++)
      listparam[i]= (*param[i])(s); // set of the parameter
@@ -796,20 +716,16 @@ AnyType E_Routine::operator()(Stack s)  const  {
       ret=(*code)(s);
      }
    catch( E_exception & e) {
-          // cout << " catch " << e.what() << " clean & throw " << endl;
             if (e.type() == E_exception::e_return)
               ret = e.r;
            else
               ErrorExec("E_exception: break or contine not in loop ",1);
   }
   catch(...) { // clean and rethrow the exception
-      //::delete [] listparam;
-     //  (*clean)(s);
       WhereStackOfPtr2Free(s)->clean(); // FH mars 2005
       memcpy(s,save,lgsave);  // restore
       TheCurrentLine=debugstack->back().second;
       debugstack->pop_back();
-     // cout << " E_Routine:: ... pop "  <<debugstack <<" " << TheCurrentLine << " " <<debugstack->size() << endl;
 
       throw ;
      }
@@ -819,7 +735,6 @@ AnyType E_Routine::operator()(Stack s)  const  {
     memcpy(s,save,lgsave);  // restore
     TheCurrentLine=debugstack->back().second;
     debugstack->pop_back();
-   // cout << " E_Routine::  pop "  <<debugstack <<" " << TheCurrentLine << " " <<debugstack->size() << endl;
 
    // il faudrait que les variable locale soit detruire apres le return
    // cf routine clean, pour le cas ou l'on retourne un tableau local.
@@ -853,7 +768,6 @@ void ListOfInst::Add(const C_F0 & ins) {
         throwassert(list);
         linenumber[n]= TheCurrentLine;
         lsldel[n]=currentblock->nIdWithDelete();
-    //     NbNewVarWithDel=0;
         list[n++] = ins;
     }
 }
@@ -896,46 +810,6 @@ AnyType ListOfInst::operator()(Stack s) const {
 	throw;
     }
     return r;}
-/*
-AnyType E_block::operator()(Stack s)  const {
-    StackOfPtr2Free * sptr = WhereStackOfPtr2Free(s);
-    if (clean)
-    {
-	try {
-	    for (int i=0;i<n;i++) {
-		TheCurrentLine=linenumber[i];
-		(*code[i])(s);
-		sptr->clean();
-
-            }}
-	catch( E_exception & e) {
-	    (*clean)(s);
-	    if (e.type() != E_exception::e_return)
-		sptr->clean();
-	    throw; // rethow
-	}
-	catch(...) { // catch all for cleanning
-	    (*clean)(s);
-	    sptr->clean();
-	    // if(verbosity>50)
-	    //  cout << " catch " << e.what() << " clean & throw " << endl;
-	    // throw(e);
-            throw; // rethow
-	}
-
-	(*clean)(s);
-	sptr->clean();
-
-    }
-    else  // not catch  exception if no clean (optimization}
-	for (int i=0;i<n;i++)
-	{
-	    (*code[i])(s);
-	    sptr->clean(); // mars 2006 FH clean Ptr
-	}
-	    return Nothing;
-   }
-*/
 
 void ShowDebugStack()
  {
@@ -968,7 +842,6 @@ void ShowDebugStack()
 class E_F0para :public E_F0 { public:
   const int i;
   AnyType operator()(Stack s)  const  {
-  //  return  (* Stack_Ptr<Expression>(s,ParamPtrOffset)[i])(s);
     return Stack_Ptr<AnyType>(s,ParamPtrOffset)[i];
   }
    E_F0para(int ii) : i(ii){}
@@ -981,13 +854,10 @@ Routine::Routine(aType tf,aType tr,const char * iden,  ListOfId *l,Block * & cb)
      {
        delete l;  // add  FH 24032005 (trap )
        cb = currentblock;
-	// cout <<"Routine: tf = " << *tf << "  " <<  *tr << endl;
        for (size_t i=0;i<param.size();i++)
        {
-	//   cout << "Routine " << i << " ref=  " << param[i].ref << " " << *param[i].r << " " << *param[i].r->right() << endl;
            currentblock->NewID(param[i].r,param[i].id,C_F0(new E_F0para(i),// modif FH 2007
 							   param[i].r),
-							  // (param[i].ref ? param[i].r :  param[i].r->right() ),
 							   !param[i].ref);
        }
      }
@@ -995,7 +865,6 @@ Routine::Routine(aType tf,aType tr,const char * iden,  ListOfId *l,Block * & cb)
        {
            instrs.setclose(Block::snewclose(currentblock));
            ins=instrs;
-        // clean = (C_F0) currentblock->close(currentblock);
          return    currentblock;}
 
 
@@ -1130,16 +999,12 @@ void lgerror (const char* s)
     args+=loop->t;
     args+=cloop;
     C_F0 instt(inst,atype<NothingType>());
- //   C_F0 eend(end,atype<NothingType>());
     args+=instt;
- //   if( (Expression) end !=0)
-  //    args+=end;
     return C_F0(TheOperators,"{}",args);
 }
 
 void InitLoop()
 {
-   // TheLoopOpt=new Polymorphic();
      Dcl_Type<PolymorphicLoop*>(0);
 
 }

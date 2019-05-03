@@ -162,7 +162,7 @@ int Mesh2::load(const string & filename)
     return 3;
   }
   int iv[4],lab;
-  float cr[3];
+  float cr[3]={0,0,0};
   // read vertices
   GmfGotoKwd(inm,GmfVertices);
   int mxlab=0;
