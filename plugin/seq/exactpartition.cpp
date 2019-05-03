@@ -88,7 +88,8 @@ long exactpartition (FEbaseArrayKn<double> *const &p, KN<long> *const &pj) {
 		int mi = vi ? vi->N() : 0;
 		if (m == 0) {m = mi;} else if (m != mi) {kerr++;}
 
-		v[i] = *vi;
+		//v[i] = *vi;
+		v[i] = vi ? *vi : NULL;
 	}
 
 	ffassert(kerr == 0);
