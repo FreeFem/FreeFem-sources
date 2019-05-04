@@ -166,10 +166,6 @@ download('SuiteSparse','http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSpars
 	'http://faculty.cse.tamu.edu/davis/SuiteSparse/',
 	'SuiteSparse-4.4.4.tar.gz',
 	'e0af74476935c9ff6d971df8bb6b82fc') ;
-download('SuperLU_DIST','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_dist_3.0.tar.gz',
-	'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/',
-	'superlu_dist_3.0.tar.gz',
-	'1d77f10a265f5751d4e4b59317d778f8');
 download('SuperLU','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_5.2.1.tar.gz',
 	'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/',
 	'superlu_5.2.1.tar.gz',

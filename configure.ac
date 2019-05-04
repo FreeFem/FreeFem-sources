@@ -2047,7 +2047,6 @@ m4_map([AC_FF_WHERELIB],[
 	[[mumps_scotch],[-lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch],[dmumps_c.h]],
 	[[hypre],[-lHYPRE]],
 	[[fftw3],[-lfftw3],[${inc_usr_include}fftw3.h],[]],
-	[[superlu_dist],[-lsuperlu-dist],[${inc_usr_include}superlu-dist/superlu_defs.h],[]],
 	[[superlu],[-lsuperlu],[${inc_usr_include}superlu/superlu_enum_consts.h],[]],
         [[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
         [[scalapack],[-lscalapack$ff_with_mpi],[]],
@@ -2081,7 +2080,6 @@ dnl TOOL_DISABLE(parmetis)
 
 TOOL_DISABLE(scotch,scotch.$DYLIB_SUFFIX)
 TOOL_DISABLE(superlu,SuperLu.$DYLIB_SUFFIX)
-TOOL_DISABLE_NO(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
 TOOL_DISABLE(umfpack,UMFPACK64.$DYLIB_SUFFIX)
 TOOL_DISABLE(yams,freeyams.$DYLIB_SUFFIX)
 TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX,,nodowload)

@@ -4,14 +4,10 @@ EXTRA_DIST=   \
 ./mpi/mpi-cmaes.cpp \
 ./mpi/hypre_FreeFem.cpp \
 ./mpi/generaldefs.h \
-./mpi/real_SuperLU_DIST_FreeFem.cpp \
 ./mpi/MPICG.cpp \
 ./mpi/Makefile.am \
-./mpi/complex_SuperLU_DIST_FreeFem.cpp \
-./mpi/ffsuperludistoption.hpp \
 ./mpi/parmetis.cpp \
 ./mpi/undef.awk \
-./mpi/dSuperLU_DIST.cpp \
 ./mpi/MUMPS_FreeFem.cpp \
 ./mpi/MUMPS.cpp \
 ./seq \
@@ -84,7 +80,6 @@ EXTRA_DIST=   \
 ./seq/libff-mmap-semaphore.h \
 ./seq/BasicMath.h \
 ./seq/lapack.cpp \
-./seq/isolineP1.cpp \
 ./seq/MetricKuate.cpp \
 ./seq/Makefile.am \
 ./seq/gmsh.cpp \
