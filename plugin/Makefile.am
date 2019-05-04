@@ -7,7 +7,6 @@ EXTRA_DIST=   \
 ./mpi/MPICG.cpp \
 ./mpi/Makefile.am \
 ./mpi/parmetis.cpp \
-./mpi/undef.awk \
 ./mpi/MUMPS_FreeFem.cpp \
 ./mpi/MUMPS.cpp \
 ./seq \
@@ -115,7 +114,6 @@ EXTRA_DIST=   \
 ./seq/tetgen.cpp \
 ./seq/Element_P4dc.hpp \
 ./seq/symmetrizeCSR.cpp \
-./seq/undef.awk \
 ./seq/cmaes_interface.h \
 ./seq/ppmimg.h \
 ./seq/ffrandom.cpp \
