@@ -1820,7 +1820,7 @@ Mesh3*GluMesh3 (listMesh3 const &lst) {
         cout << "Impossible building with not tetrahedrons for a mesh3, use meshS "<<endl;
         ffassert(0);
     } else {
-        Mesh3 *mpq = new Mesh3(nbv, nbt, nbe, v, t, b); mpq->typeMesh3=1;
+        Mesh3 *mpq = new Mesh3(nbv, nbt, nbe, v, t, b); //mpq->typeMesh3=1;
         mpq->BuildGTree();
         if (verbosity > 2) {cout << "fin de BuildGTree()" << endl;}
         return mpq;
@@ -2142,14 +2142,13 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
     ffassert(pTh);
     
     Mesh3 &Th = *pTh;
-    MeshS &ThS = *(pTh)->getMeshS();
+    MeshS &ThS = *(pTh)->meshS;
     //Mesh3 *m = pTh;    // question a quoi sert *m ??
     // for volume 3D mesh
     int nbv = Th.nv;// nombre de sommet
     int nbt = Th.nt;// nombre de triangles
     int nbe = Th.nbe;    // nombre d'aretes fontiere
-    int typeMesh3 = Th.getTypeMesh3();
-    if (verbosity > 5) cout << " type Mesh3 " << typeMesh3 <<   "////" << endl;
+    //int typeMesh3 = Th.getTypeMesh3();
     KN<int> takemesh(Th.nv);
     MeshPoint *mp3(MeshPointStack(stack));
     takemesh = 0;
@@ -2159,7 +2158,7 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
     int nbtS = 0;
     int nbeS = 0;
     
-    if(typeMesh3!=1) {
+    if(Th.meshS) {
         //takemeshS(ThS.nv);
         nbvS = ThS.nv;// nombre de sommet
         nbtS = ThS.nt;// nombre de triangles
@@ -2170,8 +2169,8 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
     takemeshS = 0;
     KN<double> txxS(nbvS), tyyS(nbvS), tzzS(nbvS);
     
-    if (typeMesh3!=0 && verbosity > 5) {cout << "before movemesh volume: Vertex " << nbv << " Tetrahedra " << nbt << " triangles " << nbe << endl;}
-    if (typeMesh3!=1 && verbosity > 5) {cout << "before movemesh surface: Vertex " << nbvS << " Triangles " << nbtS << " Edges " << nbeS << endl;}
+    if (verbosity > 5) {cout << "before movemesh volume: Vertex " << nbv << " Tetrahedra " << nbt << " triangles " << nbe << endl;}
+    if (Th.meshS && verbosity > 5) {cout << "before movemesh surface: Vertex " << nbvS << " Triangles " << nbtS << " Edges " << nbeS << endl;}
     
     // lecture des references
     
@@ -2211,7 +2210,7 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
     MeshS &rThS = ThS;
     
     // mesh3 contains volume mesh
-    if (typeMesh3!=0) {
+    //if (typeMesh3!=0) {
         // loop over tetrahedron
         for (int it = 0; it < Th.nt; ++it) {
             for (int iv = 0; iv < 4; ++iv) {
@@ -2254,9 +2253,9 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
                 }
             }
         }
-    }
+    //}
     // mesh3 contains surface mesh
-    if(typeMesh3 !=1)   {
+    if(Th.meshS)   {
         // loop on triangle
         for (int it = 0; it < ThS.nt; ++it) {
             const TriangleS &K = (ThS[it]);
@@ -2337,7 +2336,7 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
     
     Mesh3 *T_Th3 = &rTh3;
     
-    if (typeMesh3!=0) {
+    //if (typeMesh3!=0) {
         T_Th3 = Transfo_Mesh3(precis_mesh, rTh3, txx, tyy, tzz, border_only,
                               recollement_elem, recollement_border, point_confondus_ok, orientationelement);
         //T_ThS = T_Th3->getMeshS();
@@ -2362,9 +2361,9 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
                 T_Th3->be(i).lab = l1;
             }
         }
-    }
+   // }
     
-    if (typeMesh3 !=1) {
+    if (rTh3.meshS) {
         T_Th3->meshS = Transfo_MeshS(precis_mesh, rThS, txxS, tyyS, tzzS, border_only,
                                      recollement_elem, recollement_border, point_confondus_ok, orientationelement);
         
@@ -2395,20 +2394,20 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
          }*/
     }
     
-    if (typeMesh3 !=0) {
+  //  if (typeMesh3 !=0) {
         if (flagsurfaceall == 1)
             T_Th3->BuildBoundaryElementAdj();
         T_Th3->BuildGTree();
         Add2StackOfPtr2FreeRC(stack, T_Th3);
-    }
-    if (typeMesh3 !=1) {
+    //}
+    if (T_Th3->meshS) {
         if (flagsurfaceall == 1)
             T_Th3->meshS->BuildBoundaryElementAdj();
         T_Th3->meshS->BuildGTree();
     }
     
     *mp = mps;
-    T_Th3->getTypeMesh3()=typeMesh3;
+ //   T_Th3->getTypeMesh3()=typeMesh3;
     return T_Th3;
 }
 
@@ -2734,7 +2733,7 @@ AnyType SetMesh3D_Op::operator () (Stack stack)  const {
     if (!pTh) {return pTh;}
     
     //Mesh3 *m = pTh;
-    int typeMesh3 = Th.getTypeMesh3();
+ //   int typeMesh3 = Th.getTypeMesh3();
     int nbv = Th.nv;// nombre de sommet
     int nbt = Th.nt;// nombre de triangles
     int nbe = Th.nbe;    // nombre d'aretes fontiere
@@ -2879,9 +2878,9 @@ AnyType SetMesh3D_Op::operator () (Stack stack)  const {
     nbe -= nrmf;
     assert(nben == bb - b);
     *mp = mps;
-    if (nbt != 0) {
+   // if (nbt != 0) {
         Mesh3 *mpq = new Mesh3(nbv, nbt, nbe, v, t, b);
-        mpq->getTypeMesh3()=typeMesh3;
+       // mpq->getTypeMesh3()=typeMesh3;
         // mpq->BuildBound();
         // mpq->BuildAdj();
         // mpq->Buildbnormalv();
@@ -2891,19 +2890,21 @@ AnyType SetMesh3D_Op::operator () (Stack stack)  const {
         Add2StackOfPtr2FreeRC(stack, mpq);
         
         return mpq;
-    }
+  //  }
     
-    if (nbt == 0) {
-        Mesh3 *mpq = new Mesh3(nbv, nbe, v, b);
+    /*if (nbt == 0) {
+        
+        
+       Mesh3 *mpq = new Mesh3(nbv, nbe, v, b);
         mpq->getTypeMesh3()=typeMesh3;
         // mpq->BuildBound();
         Add2StackOfPtr2FreeRC(stack, mpq);
         
         return mpq;
-    }
+    }*/
     
-    Mesh3 *mpq = NULL;
-    return mpq;
+   // Mesh3 *mpq = NULL;
+//return mpq;
 }
 
 class SetMesh3D: public OneOperator {
@@ -3516,7 +3517,7 @@ Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *
     delete [] label_nbe_t;
     
     Mesh3 *T_Th3 = new Mesh3(nv_t, nt_t, nbe_t, v, t, b);
-    T_Th3->typeMesh3 = Th3.typeMesh3;
+  //  T_Th3->typeMesh3 = Th3.typeMesh3;
     return T_Th3;
     
 }
@@ -3909,9 +3910,9 @@ MeshS*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *
     SamePointElement_Mesh2(precis_mesh, tab_XX, tab_YY, tab_ZZ, Th2, recollement_border, point_confondus_ok,
                            Numero_Som, ind_nv_t, ind_nt_t, ind_nbe_t, label_nt_t, label_nbe_t, nv_t, nt_t, nbe_t);
     
-    if (verbosity > 1) {
+    if (verbosity > 1)
         cout << " fin: SamePointElement " << endl;
-        cout << "After movemesh::Vertex  triangle  border " << nv_t << " " << nt_t << " " << nbe_t << endl; }
+    cout << "After movemesh::Vertex  triangle  border " << nv_t << " " << nt_t << " " << nbe_t << endl;
     
     ///Vertex3 *v3 = new Vertex3[nv_t];
     Vertex3 *vS = new Vertex3[nv_t];
@@ -5565,7 +5566,7 @@ AnyType cubeMesh_Op::operator () (Stack stack)  const {
     
     Add2StackOfPtr2FreeRC(stack, Th3);
     *mp = mps;
-    Th3->getTypeMesh3()=1;
+   // Th3->getTypeMesh3()=1;
     return Th3;
 }
 
@@ -5718,7 +5719,7 @@ AnyType BuildLayeMesh_Op::operator () (Stack stack)  const {
         // Th3->BuildjElementConteningVertex();
         
         Th3->BuildGTree();    // A decommenter
-        Th3->getTypeMesh3()=1;
+     //   Th3->getTypeMesh3()=1;
         Add2StackOfPtr2FreeRC(stack, Th3);
         *mp = mps;
         return Th3;
@@ -5763,7 +5764,7 @@ AnyType BuildLayeMesh_Op::operator () (Stack stack)  const {
         // T_Th3->BuildjElementConteningVertex();
         
         T_Th3->BuildGTree();// A decommenter
-        T_Th3->getTypeMesh3()=1;
+     //   T_Th3->getTypeMesh3()=1;
         delete Th3;
         Add2StackOfPtr2FreeRC(stack, T_Th3);
         *mp = mps;
@@ -6082,6 +6083,8 @@ basicAC_F0::name_and_type CheckManifoldMesh_Op::name_param [] = {
     // option a rajouter
     // facemerge 0,1 + label
 };
+
+
 AnyType CheckManifoldMesh_Op::operator () (Stack stack)  const {
     MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
     MeshS *pTh = GetAny<MeshS *>((*eTh)(stack));
@@ -6776,7 +6779,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     int tagb[4] = {1, 2, 4, 8};
     
     // type 3D mesh
-    int typeMesh3 = Th.getTypeMesh3();
+  //  int typeMesh3 = Th.getTypeMesh3();
     KN<int> tagTonB(Th.nt);
     tagTonB = 0;
     
@@ -7107,17 +7110,18 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     
     Mesh3 *Tht = new Mesh3(nv, nt, nbe, v, t, b);
     
-    if(typeMesh3==2) {  typeMesh3=1; //  Hack for a bug in trunc surface mesh FH aprif 2019  TO BE REMOVE in near future
+   /* if(Th.meshS) {  typeMesh3=1; //  Hack for a bug in trunc surface mesh FH aprif 2019  TO BE REMOVE in near future
         if(verbosity ) cerr << " \n\n********************\n\n ** WARNING remove SURFACE MESH in trunc 3d  due to bug"
             <<  "\n\n********************\n\n";
-    }
-    Tht->getTypeMesh3()=typeMesh3;
+    }*/
+  //  Tht->getTypeMesh3()=typeMesh3;
     Tht->BuildGTree();    // Add JM. Oct 2010
     delete gtree;
     
     
     // if the surface mesh MeshS, trunc is obtain whit the slip on the triangle3, extract the points on the surface domain and split the edges border element of the real surface
-    
+    int typeMesh3 =0;
+    //if(Th.meshS)
     if (typeMesh3==2) {
         double hminS = 1e100;
         R3 bminS, bmaxS;
@@ -7245,7 +7249,8 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
         
         for(int i=0;i<nbe;++i) {
             const Triangle3 & K(Tht->borderelements[i]);
-            for (int j=0;j<3;++j) iv[j]=Tht->meshS->v_num_surf[Tht->operator()(K[j])];
+            for (int j=0;j<3;++j)
+                iv[j]=Tht->meshS->v_num_surf[Tht->operator()(K[j])];
             lab=K.lab;
             Tht->meshS->elements[i].set(Tht->meshS->vertices,iv,lab);
             Tht->meshS->mes += Tht->elements[i].mesure();
@@ -7489,6 +7494,9 @@ void Renumb (Fem2D::Mesh3 * &pTh) {
     delete [] perm;
     delete pTh;
     pTh = new Mesh3(nbv, nbt, nbe, v, t, b);
+    
+   // if (pTh->meshS) //TODO
+    
     pTh->BuildGTree();
 }
 
@@ -7497,7 +7505,7 @@ AnyType Op_trunc_mesh3::Op::operator () (Stack stack)  const {
     Mesh3 *pTh = GetAny<Mesh3 *>((*getmesh)(stack));
     ffassert(pTh);
     Mesh3 &Th = *pTh;
-    MeshS &ThS = *(pTh->getMeshS());
+    MeshS &ThS = *(pTh->meshS);
     
     long kkksplit = std::max(1L, arg(0, stack, 1L));
     long label = arg(1, stack, 2L);
@@ -7525,7 +7533,7 @@ AnyType Op_trunc_mesh3::Op::operator () (Stack stack)  const {
     }
     
     Mesh3 *Tht = truncmesh(Th, kkksplit, split, false, label);
-    Tht->getTypeMesh3()= Th.getTypeMesh3();
+   // Tht->getTypeMesh3()= Th.getTypeMesh3();
     
     
     if (pn2o) {
@@ -7556,7 +7564,7 @@ AnyType Op_trunc_mesh3::Op::operator () (Stack stack)  const {
     
     if (renum) {Renumb(Tht);}
     
-    if (renum && Tht->getTypeMesh3()!=1) {Renumb(Tht->meshS);}
+    if (renum && Tht->meshS) {Renumb(Tht->meshS);}
     
     Add2StackOfPtr2FreeRC(stack, Tht);    // 07/2008 FH
     
@@ -8040,25 +8048,10 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
     if (nbt == 0) {
         cout << " The result of GlueMesh is a meshS " << endl;
         ffassert(0);
-        
-        //Mesh3 *mpq = new Mesh3(nbv, nbe, v, b);
-        //if (flagsurfaceall == 1) {mpq->BuildBoundaryElementAdj();}
-        
-        //return mpq;
-    } else {
+    }
+    else {
         Mesh3 *mpq = new Mesh3(nbv, nbt, nbe, v, t, b);
-        /*
-         * mpq->BuildBound();
-         * if(verbosity > 1) cout << "fin de BuildBound" << endl;
-         * mpq->BuildAdj();
-         * if(verbosity > 1) cout << "fin de BuildAdj" << endl;
-         * mpq->Buildbnormalv();
-         * if(verbosity > 1) cout << "fin de Buildnormalv()" << endl;
-         * mpq->BuildjElementConteningVertex();
-         * if(verbosity > 1) cout << "fin de ConteningVertex()" << endl;
-         */
         mpq->BuildGTree();
-        if (verbosity > 2) {cout << "fin de BuildGTree()" << endl;}
         
         // Add2StackOfPtr2FreeRC(stack,mpq);
         
@@ -8102,76 +8095,87 @@ AnyType Op_GluMesh3tab::Op::operator () (Stack stack)  const {
 }
 
 
-
-template< class Mesh>
-long BuildBoundaryElementAdj (const Mesh &Th, bool check = 0, KN<long> *pborder = 0) {
-    typedef typename Mesh::Element T;
-    typedef typename Mesh::Vertex V;
-    typedef typename Mesh::BorderElement B;
+// return nbc the number of conex componants
+//template< class Mesh_t>
+long BuildBoundaryElementAdj (const MeshS &Th, bool check = 0, KN<long> *pborder = 0) {
+    typedef typename MeshS::Element T;
+    typedef typename MeshS::Vertex V;
+    //typedef typename Mesh_t::BorderElement B;
     
     // Return in TheBorderElementAjacencesLink
     // if exist a link :: sign(nk_link)*(nk_link+1)
     // else            :: sign(nk)*(nk)
     
     // assert(TheBoundaryElementAdjacencesLink==0); plus tard
-    int nbe = Th.nbe;
+    int nt = Th.nt;
     int nv = Th.nv;
-    int *TheBoundaryElementAdjacencesLink = new int[B::nea * nbe];
-    HashTable<SortArray<int, B::nva>, int> h(B::nea *nbe, nv);
+    int *TheElementAdjacencesLink = new int[T::nea * nt];
+    HashTable<SortArray<int, T::nva>, int> h(T::nea *nt, nv);
     int nk = 0;
     int err = 0, err3 = 0;
     int sens;
     int debug = verbosity > 999;
     if (verbosity > 9) {
-        cout << "nea/nva" << B::nea << " " << B::nva << endl;
+        cout << "nea/nva" << T::nea << " " << T::nva << endl;
     }
     
-    for (int k = 0; k < nbe; ++k) {
-        for (int i = 0; i < B::nea; ++i) {
-            SortArray<int, B::nva> a(Th.items(k, i, &sens));
+    for (int k = 0; k < nt; ++k) {
+        for (int i = 0; i < T::nea; ++i) {
+            SortArray<int, T::nva> a(Th.itemadj(k, i, &sens));
             
-            typename HashTable<SortArray<int, B::nva>, int>::iterator p = h.find(a);
+            typename HashTable<SortArray<int, T::nva>, int>::iterator p = h.find(a);
             if (!p) {
                 h.add(a, nk);
-                TheBoundaryElementAdjacencesLink[nk] = sens * (nk + 1);    // sens;
+                TheElementAdjacencesLink[nk] = sens * (nk + 1);    // sens;
             } else {
                 ASSERTION(p->v >= 0);
-                if (sens * TheBoundaryElementAdjacencesLink[p->v] > 0) {
-                    const B &K(Th.be(k));
-                    int firstVertex = Th(K[B::nvadj[i][0]]) + 1;
-                    int secondVertex = Th(K[B::nvadj[i][1]]) + 1;
+                if (sens * TheElementAdjacencesLink[p->v] > 0) {
+                    const T &K(Th.elements[k]);
+                    int firstVertex = Th(K[T::nvadj[i][0]]) + 1;
+                    int secondVertex = Th(K[T::nvadj[i][1]]) + 1;
                     if (err < 100 && check) {
                         cout << " The edges defined by vertex is " << firstVertex << "-" << secondVertex
                         << ", is oriented in the same direction in element " << k + 1
-                        << " and in element " << 1 + (p->v / B::nea) << endl;
+                        << " and in element " << 1 + (p->v / T::nea) << endl;
                     }
                     
                     err++;
                 }
                 
-                if (abs(TheBoundaryElementAdjacencesLink[p->v]) != 1 + p->v) {
-                    const B &K(Th.be(k));
-                    int firstVertex = Th(K[B::nvadj[i][0]]) + 1;
-                    int secondVertex = Th(K[B::nvadj[i][1]]) + 1;
+                if (abs(TheElementAdjacencesLink[p->v]) != 1 + p->v) {
+                    const T &K(Th.elements[k]);
+                    int firstVertex = Th(K[T::nvadj[i][0]]) + 1;
+                    int secondVertex = Th(K[T::nvadj[i][1]]) + 1;
                     if (err3 < 100 && check) {
                         cout << " The edges defined by vertex is " << firstVertex << "-" << secondVertex
                         << "belong to the three border elements ::"
-                        << 1 + (p->v) / B::nea << ", " << k + 1 << " and "
-                        << 1 + (abs(TheBoundaryElementAdjacencesLink[p->v]) - 1) / B::nea << endl;
+                        << 1 + (p->v) / T::nea << ", " << k + 1 << " and "
+                        << 1 + (abs(TheElementAdjacencesLink[p->v]) - 1) / T::nea << endl;
                         cout << " The Surface contains these edges is not a manifold" << endl;
                     }
                     
                     err3++;
                 }
                 
-                TheBoundaryElementAdjacencesLink[nk] = TheBoundaryElementAdjacencesLink[p->v];
-                TheBoundaryElementAdjacencesLink[p->v] = sens * (nk + 1);
+                TheElementAdjacencesLink[nk] = TheElementAdjacencesLink[p->v];
+                TheElementAdjacencesLink[p->v] = sens * (nk + 1);
             }
             
             nk++;
         }
     }
+  
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+ 
     if (err && err3 && check) {ExecError(" The surface mesh in no manifold ");}
     
     long nb = 0, mk = 0;
@@ -8184,13 +8188,13 @@ long BuildBoundaryElementAdj (const Mesh &Th, bool check = 0, KN<long> *pborder 
         int errv = 0;
         nk = 0;
         
-        for (int k = 0; k < nbe; ++k) {
-            for (int i = 0; i < B::nea; ++i) {
-                if (abs(TheBoundaryElementAdjacencesLink[nk]) == nk + 1) {
+        for (int k = 0; k < nt; ++k) {
+            for (int i = 0; i < T::nea; ++i) {
+                if (abs(TheElementAdjacencesLink[nk]) == nk + 1) {
                     nb++;
-                    const B &K(Th.be(k));
-                    int v0 = Th(K[B::nvadj[i][0]]);
-                    int v1 = Th(K[B::nvadj[i][1]]);
+                    const T &K(Th.elements[k]);
+                    int v0 = Th(K[T::nvadj[i][0]]);
+                    int v1 = Th(K[T::nvadj[i][1]]);
                     if (nx[v0] >= 0) {errv++;} else {nx[v0] = v1;}
                     
                     if (debug) {cout << v0 << " " << v1 << endl;}
@@ -8252,66 +8256,34 @@ long BuildBoundaryElementAdj (const Mesh &Th, bool check = 0, KN<long> *pborder 
         }
     }
     
-    delete [] TheBoundaryElementAdjacencesLink;
+    delete [] TheElementAdjacencesLink;
     if (verbosity) {cout << "number of adjacents edges " << nk << " nb border edge :" << nb << " " << nc << endl;}
     
     return nc;
 }
 
-long ShowBorder (const Mesh3 *pth) {
-    return BuildBoundaryElementAdj(*pth);
-}
 
-long GetBorder (const Mesh3 *pth, KN<long> *pb) {
-    return BuildBoundaryElementAdj(*pth, 0, pb);
-}
 
+
+
+
+
+
+
+
+// template but just use for surface mesh
+//template<class Mesh_t>
 long GetBorder (const MeshS *pth, KN<long> *pb) {
     return BuildBoundaryElementAdj(*pth, 0, pb);
 }
 
+//template<class Mesh_t>
 long ShowBorder (const MeshS *pth) {
     return BuildBoundaryElementAdj(*pth);
 }
 
-// <<WITH_NO_INIT>> because i include this file in tetgen.cpp (very bad) [[file:tetgen.cpp::WITH_NO_INIT]]
-
-// ORIG-DATE:   September 2017
-// -*- Mode : c++ -*%
-//
-// SUMMARY  : interface avec le logiciel gmsh
-// USAGE    : LGPL
-// ORG      : LJLL Universite Pierre et Marie Curie, Paris,  FRANCE
-// AUTHOR   : Frederic Hecht
-// E-MAIL   : Frederic Hecht@ann.jussieu.fr
-//
-
-/*
- * This file is part of Freefem++
- *
- * Freefem++ is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation; either version 2.1 of the License, or
- * (at your option) any later version.
- *
- * Freefem++  is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Freefem++; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * Thank to the ARN ()  FF2A3 grant
- * ref:ANR-07-CIS7-002-01
- */
 
 // FH   July 2017 a cartienne cube
-//
-#include "ff++.hpp"
-
-using namespace Fem2D;
 // genere with split-Hexa-simplexe.cpp (Thank to D. Bernardi)
 const int nbsimplexes = 58;
 const int simplexes[nbsimplexes][4] = {
@@ -8810,9 +8782,10 @@ AnyType Cube_Op::operator () (Stack stack)  const {
     MovePoint pf(stack, xx, yy, zz);
     Mesh3 *Th3_t = BuildCube(nx, ny, nz, region, label, kind, &pf);
     Th3_t->BuildGTree();
-    Th3_t->getTypeMesh3()=1;
+   // Th3_t->getTypeMesh3()=1;
     Add2StackOfPtr2FreeRC(stack, Th3_t);
-    
+    cout << "call "<< endl;
+    Th3_t->BuildMeshS();
     return Th3_t;
 }
 
@@ -8889,60 +8862,59 @@ static void Load_Init () {
         cout << " load: msh3  " << endl;
     }
     
+    
+    // operators for Mesh3
     TheOperators->Add("+", new OneBinaryOperator_st<Op3_addmesh<listMesh3, pmesh3, pmesh3> > );
     TheOperators->Add("+", new OneBinaryOperator_st<Op3_addmesh<listMesh3, listMesh3, pmesh3> > );
-    
-    // TheOperators->Add("=",new OneBinaryOperator< Op3_setmesh<false,pmesh3*,pmesh3*,listMesh3>  >     );
-    // TheOperators->Add("<-",new OneBinaryOperator< Op3_setmesh<true,pmesh3*,pmesh3*,listMesh3>  >     );
-    
     TheOperators->Add("=", new OneBinaryOperator_st<Op3_setmesh<false, pmesh3 *, pmesh3 *, listMesh3> > );
     TheOperators->Add("<-", new OneBinaryOperator_st<Op3_setmesh<true, pmesh3 *, pmesh3 *, listMesh3> > );
+
+    Global.Add("change", "(", new SetMesh3D);
+    //Global.Add("movemesh2D3Dsurf", "(", new Movemesh2D_3D_surf_cout);   // remove ?
+    Global.Add("movemesh3", "(", new Movemesh3D);  // apply transfo to mesh3 and meshS if surface can be built
+    Global.Add("movemesh", "(", new Movemesh3D(1));
+    // Global.Add("movemesh3D", "(", new Movemesh3D_cout);
+
+    Global.Add("deplacement", "(", new DeplacementTab);
+    Global.Add("checkbemesh", "(", new CheckManifoldMesh);
+    Global.Add("buildlayers", "(", new BuildLayerMesh);
+
+    Global.Add("trunc", "(", new Op_trunc_mesh3);
+    Global.Add("gluemesh", "(", new Op_GluMesh3tab);
+    Global.Add("extract", "(", new ExtractMesh2D);   // obselete function -> use trunc function
+    Global.Add("extract", "(", new ExtractMesh);     // take a Mesh3 in arg and return a part of MeshS
+    Global.Add("movemesh23", "(", new Movemesh2D_S);
     
+   // Global.Add("showborder", "(", new OneOperator1<long, const Mesh3 *>(ShowBorder<Mesh3>));
+   // Global.Add("getborder", "(", new OneOperator2<long, const Mesh3 *, KN<long> *>(GetBorder<Mesh3>));
+ 
+    Global.Add("AddLayers", "(", new OneOperator4_<bool, const Mesh3 *, KN<double> *, long, KN<double> *>(AddLayers));
     
-    // 3D SURF :
+    Global.Add("bcube", "(", new cubeMesh);
+    Global.Add("bcube", "(", new cubeMesh(1));
+    Global.Add("cube", "(", new Cube);
+    Global.Add("cube", "(", new Cube(1));
+   
+    // operators for MeshS
+    
     TheOperators->Add("+", new OneBinaryOperator_st<Op3_addmeshS<listMeshS, pmeshS, pmeshS> > );
     TheOperators->Add("+", new OneBinaryOperator_st<Op3_addmeshS<listMeshS, listMeshS, pmeshS> > );
     TheOperators->Add("=", new OneBinaryOperator_st<Op3_setmeshS<false, pmeshS *, pmeshS *, listMeshS> > );
     TheOperators->Add("<-", new OneBinaryOperator_st<Op3_setmeshS<true, pmeshS *, pmeshS *, listMeshS> > );
     
-    Global.Add("change", "(", new SetMesh3D);
     Global.Add("change", "(", new SetMeshS);
-    Global.Add("movemesh23", "(", new Movemesh2D_S);
-    //Global.Add("movemesh2D3Dsurf", "(", new Movemesh2D_3D_surf_cout);   // remove ?
-    Global.Add("movemesh3", "(", new Movemesh3D);  // apply transfo to mesh3 and meshS if surface can be built
     Global.Add("movemeshS", "(", new MovemeshS);
     Global.Add("movemesh", "(", new MovemeshS(1));
-    Global.Add("movemesh", "(", new Movemesh3D(1));
-    //    Global.Add("movemesh3D", "(", new Movemesh3D_cout);
-    Global.Add("deplacement", "(", new DeplacementTab);
-    Global.Add("checkbemesh", "(", new CheckManifoldMesh);
-    Global.Add("buildlayers", "(", new BuildLayerMesh);
-    Global.Add("bcube", "(", new cubeMesh);
-    Global.Add("bcube", "(", new cubeMesh(1));
-    Global.Add("cube", "(", new Cube);
-    Global.Add("cube", "(", new Cube(1));
-    
-    Global.Add("square3", "(", new Square);
-    Global.Add("square3", "(", new Square(1));
-    
-    Global.Add("trunc", "(", new Op_trunc_mesh3);
     Global.Add("trunc", "(", new Op_trunc_meshS);
-    Global.Add("gluemesh", "(", new Op_GluMesh3tab);
     
-    Global.Add("extract", "(", new ExtractMesh2D);   // obselete function -> use trunc function
-    Global.Add("extract", "(", new ExtractMesh);     // take a Mesh3 in arg and return a part of MeshS
-    
-    Global.Add("showborder", "(", new OneOperator1<long, const Mesh3 *>(ShowBorder));
-    Global.Add("getborder", "(", new OneOperator2<long, const Mesh3 *, KN<long> *>(GetBorder));
     Global.Add("showborder", "(", new OneOperator1<long, const MeshS *>(ShowBorder));
     Global.Add("getborder", "(", new OneOperator2<long, const MeshS *, KN<long> *>(GetBorder));
     
-    
-    Global.Add("AddLayers", "(", new OneOperator4_<bool, const Mesh3 *, KN<double> *, long, KN<double> *>(AddLayers));
     Global.Add("AddLayers", "(", new OneOperator4_<bool, const MeshS *, KN<double> *, long, KN<double> *>(AddLayers));
-    typedef const Mesh3 *pmesh3;
-    typedef const MeshS *pmeshS;
-    // Global.Add("trunc","(", new Op_trunc_mesh3);
+
+    Global.Add("square3", "(", new Square);
+    Global.Add("square3", "(", new Square(1));
+
 }
 
 // <<msh3_load_init>> static loading: calling Load_Init() from a function which is accessible from

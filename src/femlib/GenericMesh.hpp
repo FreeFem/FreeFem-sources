@@ -783,14 +783,12 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
             cout << "   -- BuildAdj:nva= " << nva << " " << nea << " "<< nbe << endl;
         int nadjnomanifold=0;
         for (int k=0;k<nt;++k)
-            for (int i=0;i<nea;++i)
-            {
+            for (int i=0;i<nea;++i) {
                 int sens;
                 SortArray<int,nva> a(itemadj(k,i,&sens));//  warning the face of tet given interieon normal FH.
                 if(verbosity>15) cout <<nk << " T "<< k << "### "   << " item(k,i)= " << itemadj(k,i) << " a= " << a << " k " << k << " i " << i << endl;
-                typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);//cout << "p->v " << p->v << endl;
-                if(!p)
-                {
+                typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);
+                if(!p) {
                     h.add(a,nk);
                     TheAdjacencesLink[nk]=-1;
                     nba++;

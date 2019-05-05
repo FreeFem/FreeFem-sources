@@ -550,6 +550,14 @@ pmeshS pmesh_gamma(Stack stack, pmesh3 * const & p)
   return (ThS);
 }
 
+/*void pmesh_buildSurf(Stack stack, pmesh3 * const & p)
+{ throwassert(p && *p) ;
+    const Mesh3 & Th = **p;
+    MeshS *ThS = Th.meshS;
+    Th.BuildMeshS(&ThS);
+    // Add2StackOfPtr2FreeRC(stack,ThS);
+    //return (ThS);
+}*/
 
 
 // Tools for 3D surface mesh
@@ -709,8 +717,8 @@ AnyType ReadMesh3::operator()(Stack stack) const
       cout << "ReadMesh3 " << *fn << endl;
   Mesh3 *Thh = new Mesh3(*fn);
 
-  if (Thh->getTypeMesh3()!=0) Thh->BuildGTree();
-    if (Thh->getTypeMesh3()!=1) Thh->meshS->BuildGTree();
+  Thh->BuildGTree();
+    if (Thh->meshS) Thh->meshS->BuildGTree();
   Add2StackOfPtr2FreeRC(stack,Thh);
   return SetAny<pmesh3>(Thh);;
   
@@ -740,13 +748,14 @@ AnyType ReadMeshS::operator()(Stack stack) const
     string * fn =  GetAny<string*>((*filename)(stack));
     if(verbosity > 2)
         cout << "ReadMeshS " << *fn << endl;
-    Mesh3 *Thh = new Mesh3(*fn,0);  // param 0-> initialize just the meshS
-
-    if (Thh->getTypeMesh3()!=1) Thh->meshS->BuildGTree();
-    else cout << "Error, there isn't a surface mesh" << endl;
-    Add2StackOfPtr2FreeRC(stack,Thh);
+    MeshS *Th = new MeshS(*fn,0);  // param 0-> initialize just the meshS
+    Th->BuildGTree();
+    //if (Thh->getTypeMesh3()!=1) Thh->meshS->BuildGTree()
+    
+    //else cout << "Error, there isn't a surface mesh" << endl;
+    Add2StackOfPtr2FreeRC(stack,Th);
    // Add2StackOfPtr2FreeRC(stack,Thh->getMeshS());
-    return SetAny<pmeshS>(Thh->getMeshS());
+    return SetAny<pmeshS>(Th);
     
 }
 
@@ -969,6 +978,17 @@ inline pmesh3 *  initMesh(pmesh3 * const & p, string * const & s) {
 
 //3D surface   ///TODOCHECK
 inline pmeshS *  initMesh(pmeshS * const & p, string * const & s) {
+    MeshS * m;
+    if(verbosity > 2)
+        cout << " initMesh " << *s << endl;
+    *p= m =new MeshS(*s);
+    m->BuildGTree();
+    //  delete s;  modif mars 2006 auto del ptr
+    return p;
+}
+
+
+/*inline pmeshS *  initMesh(pmeshS * const & p, string * const & s) {
 Mesh3 * m;
     MeshS * mS;
     if(verbosity > 2)
@@ -979,7 +999,7 @@ Mesh3 * m;
     m->getMeshS()->BuildGTree();
     //  delete s;  modif mars 2006 auto del ptr
     return p;
-}
+}*/
 
 
 /*
@@ -2023,8 +2043,9 @@ void init_lgmesh3() {
  Add<pmesh3*>("nbe",".",new OneOperator1<long,pmesh3*>(pmesh_nbe));
  Add<pmesh3*>("hmax",".",new OneOperator1<double,pmesh3*>(pmesh_hmax));
  Add<pmesh3*>("hmin",".",new OneOperator1<double,pmesh3*>(pmesh_hmin));
+
  Add<pmesh3*>("Gamma",".",new OneOperator1s_<pmeshS,pmesh3*>(pmesh_gamma));
-    
+ //Add<pmesh3*>("BuidMeshS",".",new OneOperator1s_<void,pmesh3*>(pmesh_buildSurf));
  
  //3D surface
  Dcl_Type<GlgVertex<MeshS> >();

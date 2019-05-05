@@ -51,11 +51,11 @@ medit("Th3c",Th3c);
 }
 // extraction of the border of the bottle
 int[int] databoder(1);
-int ncb= getborder(Th3c,databoder);     cout << "test b*/////" << ncb << endl;
-int ktop= Th3c(databoder[databoder[1]]).z < Th3c(databoder[databoder[0]]).z;   cout << "test b*///// 2" <<endl;
+int ncb= getborder(Th3c,databoder); 
+int ktop= Th3c(databoder[databoder[1]]).z < Th3c(databoder[databoder[0]]).z; 
 int  kbot=1-ktop;
-real Zbot = Th3c(databoder[databoder[kbot]]).z;  cout << "test b*/////3" <<endl;
-real Ztop = Th3c(databoder[databoder[ktop]]).z; cout << "test b*/////4" <<endl;
+real Zbot = Th3c(databoder[databoder[kbot]]).z; 
+real Ztop = Th3c(databoder[databoder[ktop]]).z; 
 cout << " Z  top  " << Zbot  << endl; 
 cout << " Z  bot  " << Ztop << endl; 
 assert( ncb ==2);

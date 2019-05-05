@@ -6594,7 +6594,7 @@ namespace Fem2D {
                    R3 E=K.T.Edge(ie);
                    double le = sqrt((E,E));
                     
-                    Rd NN=K.T.NormalS(ie);
+                    Rd NN=K.T.NormalS();
                     NN /= NN.norme();
                     
                     for (int i=0;i<ipmat.ncoef;i++)

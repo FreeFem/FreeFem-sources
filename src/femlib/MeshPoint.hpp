@@ -60,6 +60,7 @@ class MeshPointBase { public:
      N.z=0; 
      VF=0;
      d=2;
+     dHat=2;
    }
   void set(const Mesh & aTh,const R2 &P2,const R2 & P_Hat,const  Triangle & aK,int ll,const R2 &NN,int iedge,int VFF=0)
    { 
@@ -82,6 +83,7 @@ class MeshPointBase { public:
      N.z=0;   
      VF=VFF;
      d=2;
+     dHat=2;
    }
    
   void set(const R2 &P2,const R2 & P_Hat,const  baseFElement & K,int ll)
@@ -103,6 +105,7 @@ class MeshPointBase { public:
      N.z=0;   
      VF=0;  
      d=2;
+     dHat=2;
    }
    
      void set(const R2 &P2,const R2 & P_Hat,const  baseFElement & K)
@@ -147,6 +150,7 @@ class MeshPointBase { public:
    
      t=(*Th)(T);
      d=2;
+     dHat=2;
    }
 
   void set(const  Mesh &aTh, const R2 &P2,const R2 & P_Hat,const  Triangle & aK,const int ll,bool coutside=false)
@@ -169,6 +173,7 @@ class MeshPointBase { public:
      outside=coutside;
      VF=0;  
      d=2;
+     dHat=2;
    }
    
   void setP(const Mesh * pTh,int tt,int ss)
@@ -186,7 +191,8 @@ class MeshPointBase { public:
      v=f=e=-1;
      v=ss;
      VF=0;
-     d=2;  
+     d=2;
+     dHat=2;
    }
    
   void change(const R2 & PH,const Triangle & tt,int ll)
@@ -201,7 +207,7 @@ class MeshPointBase { public:
      v=f=e=-1;
      VF=0;
      d=2;  
-     
+     dHat=2;
    }
     void change(const R3 & PH,const Tet & tt,int ll)
     { 

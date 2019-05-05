@@ -7,6 +7,7 @@ macro(ff_define_ffglut_executable)
 
     add_executable(ffglut ${CMAKE_SOURCE_DIR}/src/Graphics/ffglut.cpp
                           ${CMAKE_SOURCE_DIR}/src/femlib/fem.cpp
+			  ${CMAKE_SOURCE_DIR}/src/femlib/MeshSn.cpp
                           ${CMAKE_SOURCE_DIR}/src/femlib/Mesh3dn.cpp
                           ${CMAKE_SOURCE_DIR}/src/femlib/Mesh2dn.cpp
                           ${CMAKE_SOURCE_DIR}/src/femlib/Mesh1dn.cpp

@@ -41,6 +41,7 @@
 #include "Mesh2dn.hpp"
 //  for plotStream (a change)
 #include "Mesh3dn.hpp"
+#include "MeshSn.hpp"
 #include "rgraph.hpp"
 #include "fem.hpp"
 #include "PlotStream.hpp"

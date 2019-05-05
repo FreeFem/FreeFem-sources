@@ -4300,11 +4300,12 @@ if(nargs[VTK_START+index])                    \
             th= ll[ii].th();
           // Prepare for the sending mesh 3d with differenciation 3D surface / volumuic / volum+surfac
           if( what ==5 ) {
-            const int th3type = (l[i].evalm3(0,s)).getTypeMesh3() ;
+            //const int th3type = (l[i].evalm3(0,s)).getTypeMesh3() ;
             // need to modifie the what for type mesh3 for identification in the ffglut reading
-            if (th3type==0) { ll[i].what=50; thS= &(l[i].evalmS(0,s));}  // 3d pure surface
-            else if (th3type==1) { ll[i].what=51; th3= & (l[i].evalm3(0,s)); }   // 3d pure volume
-            else if (th3type==2) { ll[i].what=52; th3= & (l[i].evalm3(0,s)); thS= &(l[i].evalmS(0,s)); } // 3d mixed volume and surface
+            //if (l[i].evalm3(0,s)).meshS) { ll[i].what=50; thS= &(l[i].evalmS(0,s));}  // 3d pure surface
+            if (l[i].evalm3(0,s).meshS) { ll[i].what=52; th3= & (l[i].evalm3(0,s)); thS= &(l[i].evalmS(0,s)); } // 3d mixed volume and surface
+            else { ll[i].what=51; th3= & (l[i].evalm3(0,s)); }   // 3d pure volume
+         
           }
           if( what ==50 )
             thS= (&(l[i].evalmS(0,s)));// 3d pure surface

@@ -194,7 +194,7 @@ MeshS*yams_pSurfMesh_to_meshS (yams_pSurfMesh sm, int infondang, int infocc, int
 
 	// freefempp variable
 	int ff_nv, ff_nt, ff_nbe;
-
+    ff_nbe=0;
 	/* mark connected component */
 	ne = 0;
 
@@ -277,9 +277,9 @@ MeshS*yams_pSurfMesh_to_meshS (yams_pSurfMesh sm, int infondang, int infocc, int
 		nt++;
 	}
 
-	ff_nbe = nt;
-	TriangleS *ff_b = new TriangleS[ff_nbe];
-	TriangleS *ff_bb = ff_b;
+	ff_nt = nt;
+	TriangleS *ff_t = new TriangleS[ff_nt];
+	TriangleS *ff_tt = ff_t;
 
 	for (k = 1; k <= sm->ne; k++) {
 		int iv[3], lab;
@@ -291,7 +291,7 @@ MeshS*yams_pSurfMesh_to_meshS (yams_pSurfMesh sm, int infondang, int infocc, int
 		iv[1] = sm->point[pt1->v[1]].tmp - 1;
 		iv[2] = sm->point[pt1->v[2]].tmp - 1;
 		lab = pt1->ref;	// change fh 02/2013
-		(*ff_bb++).set(ff_v, iv, lab);
+		(*ff_tt++).set(ff_v, iv, lab);
 
 		for (i = 0; i < 3; i++) {
 			ppt = &sm->point[pt1->v[i]];
@@ -314,11 +314,14 @@ MeshS*yams_pSurfMesh_to_meshS (yams_pSurfMesh sm, int infondang, int infocc, int
 			if (pt1->tag[i] & M_REQUIRED) {nrequis++;}
 		}
 	}
-
+    
+    BoundaryEdgeS *ff_b = new BoundaryEdgeS[ff_nbe];
+    BoundaryEdgeS *ff_bb = ff_b;
+  
 	// les autres avoir par la suite
-	if (verbosity > 1) {cout << " nv " << ff_nv << " nbe" << ff_nbe << endl;}
+	if (verbosity > 1) {cout << " nv " << ff_nv << " nt" << ff_nt << " nbe" << ff_nbe << endl;}
 
-		MeshS *THS_T = new MeshS(ff_nv, ff_nbe, ff_v, ff_b);
+    MeshS *THS_T = new MeshS(ff_nv, ff_nt, ff_nbe, ff_v, ff_t, ff_b);
 
 		return THS_T;
 
