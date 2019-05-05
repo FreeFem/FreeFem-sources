@@ -20,7 +20,7 @@
 # AUTHORS : ...
 # E-MAIL  : ...
 
-LIST_COMPILE=@TOOL_DYLIB_mumps@ @TOOL_DYLIB_superludist@ MPICG.$(DYLIB_SUFFIX)	\
+LIST_COMPILE=@TOOL_DYLIB_mumps@ MPICG.$(DYLIB_SUFFIX)	\
 mpi-cmaes.$(DYLIB_SUFFIX) parmetis.$(DYLIB_SUFFIX) @TOOL_DYLIB_htool@ @TOOL_DYLIB_hpddm@
 
 if FFCS_MPIOK

@@ -182,9 +182,7 @@ re_do_numerics(0),re_do_symbolic(0)
         {
             f >> ii >> jj >> aaij;
             ffassert(f.good() );
-            i--;j--;
-            //cout << i << " " << j << " " << aij << endl;
-            operator()(ii,jj) = aaij;
+            operator()(ii-1,jj-1) = aaij;
         }
     }
     else if(cas== 3)
@@ -206,7 +204,7 @@ re_do_numerics(0),re_do_symbolic(0)
         
     }
     else {
-        cerr << " Unkown matrice Tyoe" << endl << endl;
+        cerr << " Unkown matrix type" << endl << endl;
         ffassert(0);
     }
     
