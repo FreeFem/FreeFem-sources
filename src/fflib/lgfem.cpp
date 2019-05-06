@@ -1030,7 +1030,7 @@ bool BuildPeriodic(
             double x0 = xmn;
             if (verbosity > 2)
             cout << "  --Update: periodic " << xmn << " " << xmx << " " << " h=" << hmn << endl;
-            ffassert(coef>1e-10 && (xmx-xmn)*coef < 1.e7 );
+            ffassert(!n1 || (coef>1e-10 && (xmx-xmn)*coef < 1.e7 ));
              
            //  map construction ----
            for (int i1=0;i1<n1;i1++)
