@@ -517,11 +517,11 @@ long getlab(GlgElement<Mesh3> const & a){  return a.lab();}
 long getlab(GlgBoundaryElement<Mesh3> const & a){  return a.lab();}
 R getmes(GlgElement<Mesh3> const & a){  return a.mes();}
 
-double pmesh_mes(pmesh3 * p) { ffassert(p && *p) ;  return (**p).mes ;}
-double pmesh_mesb(pmesh3 * p) { ffassert(p && *p) ;  return (**p).mesb;}
-long pmesh_nt(pmesh3 * p) { ffassert(p && *p) ;  return (**p).nt ;}
-long pmesh_nv(pmesh3 * p) { ffassert(p && *p) ;  return (**p).nv ;}
-long pmesh_nbe(pmesh3 * p) { ffassert(p && *p) ;  return (**p).nbe ;}
+double pmesh_mes(pmesh3 * p) { ffassert(p) ;  return *p ? (**p).mes : 0.0;}
+double pmesh_mesb(pmesh3 * p) { ffassert(p) ;  return *p ? (**p).mesb : 0.0;}
+long pmesh_nt(pmesh3 * p) { ffassert(p) ;  return *p ? (**p).nt : 0;}
+long pmesh_nv(pmesh3 * p) { ffassert(p) ;  return *p ? (**p).nv : 0;}
+long pmesh_nbe(pmesh3 * p) { ffassert(p) ;  return *p ? (**p).nbe : 0;}
 
 double pmesh_hmax(pmesh3 * p)
 { ffassert(p && *p) ;
