@@ -1034,7 +1034,7 @@ bool BuildPeriodic(
             double x0 = xmn;
             if (verbosity > 2)
             cout << "  --Update: periodic " << xmn << " " << xmx << " " << " h=" << hmn << endl;
-            ffassert(coef>1e-10 && (xmx-xmn)*coef < 1.e7 );
+            ffassert(!n1 || (coef>1e-10 && (xmx-xmn)*coef < 1.e7 ));
              
            //  map construction ----
            for (int i1=0;i1<n1;i1++)
@@ -1624,16 +1624,16 @@ long pfer_nbdf(pair<FEbase<K,v_fes> *,int> p)
  }
  
 double pmesh_area(pmesh * p)
- { throwassert(p && *p) ;  return (**p).area ;}
+ { throwassert(p) ;  return *p ? (**p).area : 0.0;}
 double pmesh_bordermeasure(pmesh * p)
-{ throwassert(p && *p) ;  return (**p).lenbord ;}
+{ throwassert(p) ;  return *p ? (**p).lenbord : 0.0;}
 
 long pmesh_nt(pmesh * p)
- { throwassert(p && *p) ;  return (**p).nt ;}
+ { throwassert(p) ;  return *p ? (**p).nt : 0;}
 long pmesh_nbe(pmesh * p)
-{ throwassert(p && *p) ;  return (**p).neb ;}
+{ throwassert(p) ;  return *p ? (**p).neb : 0;}
 long pmesh_nv(pmesh * p)
- { throwassert(p && *p) ;  return (**p).nv ;}
+ { throwassert(p) ;  return *p ? (**p).nv : 0;}
 
 double pmesh_hmax(pmesh * p)
 { throwassert(p && *p) ;

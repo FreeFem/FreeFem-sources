@@ -1,0 +1,148 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"                        // PETSc plugin
+macro dimension()2// EOM            // 2D or 3D
+include "macro_ddm.idp"             // additional DDM functions
+
+macro def(i)i// EOM                 // scalar field definition
+macro init(i)i// EOM                // scalar field initialization
+macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
+int[int] labPeriodic = [2, 4, 1, 3];
+macro Pk() P2, periodic=[[labPeriodic[0],x+y], [labPeriodic[1],x+y], [labPeriodic[2],x-y], [labPeriodic[3],x-y]]// EOM
+macro PkNoPeriodic() P2// EOM
+
+int s = getARGV("-split", 1);                                   // refinement factor
+
+real r = 0.25;
+border a(t=0,1)    { x = -t+1; y = t;             label = 1; };
+border b(t=0,1)    { x = -t; y = 1-t;             label = 2; };
+border c(t=0,1)    { x = t-1; y = -t;             label = 3; };
+border d(t=0,1)    { x = t; y = -1+t;             label = 4; };
+border e(t=0,2*pi) { x = r*cos(t); y = -r*sin(t); label = 0; };
+
+meshN Th = buildmesh(a(getARGV("-global", 40)) + b(getARGV("-global", 40)) + c(getARGV("-global", 40)) + d(getARGV("-global", 40)) + e(getARGV("-global", 40)));
+fespace Wh(Th, Pk);                         // local finite element space
+int[int] arrayIntersection;                 // ranks of neighboring subdomains
+int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
+real[int] D;                                // partition of unity
+if(mpisize > 1) {
+    fespace Ph(Th, P0);
+    Ph part;
+    mesh ThExtended = Th;
+    {
+        metisdual(part[], Th, mpisize);
+        fespace PhExtended(ThExtended, P0);
+        PhExtended partExtended;
+        partExtended = part;
+        for(int i = 0; i < mpisize; ++i) {
+            mesh ThLocal = trunc(Th, abs(part - i) < 1e-6, label = 0);
+            int j = 0;
+            varf vOn(u, v) = on(labPeriodic[j], u = 1);
+            fespace Vh(ThLocal, P1);
+            Vh u;
+            int[int] touch(4);
+            touch = 0;
+            for(j = 0; j < labPeriodic.n; ++j) {
+                u[] = vOn(0, Vh);
+                mesh ThLocalMoved;
+                if(u[].linfty > 1e-12) {
+                    if(j == 0) {
+                        ThLocalMoved = movemesh(ThLocal, [x + 1, y - 1]);
+                        touch[0] = 1;
+                    }
+                    else if(j == 1) {
+                        ThLocalMoved = movemesh(ThLocal, [x - 1, y + 1]);
+                        touch[1] = 1;
+                    }
+                    else if(j == 2) {
+                        ThLocalMoved = movemesh(ThLocal, [x - 1, y - 1]);
+                        touch[2] = 1;
+                    }
+                    else if(j == 3) {
+                        ThLocalMoved = movemesh(ThLocal, [x + 1, y + 1]);
+                        touch[3] = 1;
+                    }
+                }
+                if(j == 3) {
+                    if(touch[0] == 1 && touch[2] == 1) {
+                        mesh ThLocalMovedSecond = movemesh(ThLocal, [x, y - 2]);
+                        ThLocalMoved = ThLocalMoved + ThLocalMovedSecond;
+                    }
+                    if(touch[0] == 1 && touch[3] == 1) {
+                        mesh ThLocalMovedSecond = movemesh(ThLocal, [x + 2, y]);
+                        ThLocalMoved = ThLocalMoved + ThLocalMovedSecond;
+                    }
+                    if(touch[1] == 1 && touch[2] == 1) {
+                        mesh ThLocalMovedSecond = movemesh(ThLocal, [x - 2, y]);
+                        ThLocalMoved = ThLocalMoved + ThLocalMovedSecond;
+                    }
+                    if(touch[1] == 1 && touch[3] == 1) {
+                        mesh ThLocalMovedSecond = movemesh(ThLocal, [x, y + 2]);
+                        ThLocalMoved = ThLocalMoved + ThLocalMovedSecond;
+                    }
+                }
+                if(ThLocalMoved.nt > 0) {
+                    ThExtended = ThExtended + ThLocalMoved;
+                    partExtended = partExtended;
+                    fespace PhMoved(ThLocalMoved, P0);
+                    PhMoved p = i;
+                    PhExtended interp;
+                    interp = p;
+                    partExtended[] += interp[];
+                }
+            }
+        }
+        Th = ThExtended;
+        part = partExtended;
+    }
+    broadcast(processor(0), Th);
+    broadcast(processor(0), part[]);
+    plot(part, fill = 1, wait = 1);
+    real[int] DExtended;
+    buildWithPartitioning(ThExtended, part[], 1, DExtended, arrayIntersection, restrictionIntersection, PkNoPeriodic, mpiCommWorld);
+    Th = trunc(ThExtended, y <= 1-x && y >= -1-x && y <= 1+x && y >= -1+x);
+    fespace WhExtended(ThExtended, PkNoPeriodic);
+    matrix R = interpolate(Wh, WhExtended);
+    D.resize(Wh.ndof);
+    int[int] I, J;
+    real[int] C;
+    [J, I, C] = R;
+    for(int i = 0; i < C.n; ++i) {
+        if(abs(C[i]) > 1e-12)
+            D[J[i]] = DExtended[I[i]];
+    }
+    for(int i = 0; i < arrayIntersection.n; ++i) {
+        int nnz = 0;
+        for(int j = 0; j < restrictionIntersection[i].n; ++j) {
+            int k = 0;
+            for( k ; k < C.n; ++k) {
+                if(restrictionIntersection[i][j] == I[k] && abs(C[k]) > 1e-12) {
+                    restrictionIntersection[i][nnz] = J[k];
+                    ++nnz;
+                    break;
+                }
+            }
+        }
+        restrictionIntersection[i].resize(nnz);
+    }
+}
+else {
+    if(s > 1)
+        Th = trunc(Th, 1, split = s);
+    D.resize(Wh.ndof);
+    D = 1.0;
+}
+
+func f = (y+x+1) * (y+x-1) * (y-x+1) * (y-x-1);
+varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) - intN(Th)((0.39 - f) * v) + on(0, u = 0.0);
+matrix<real> Loc = vPb(Wh, Wh);
+real[int] rhs = vPb(0, Wh);
+
+Mat A(Loc, arrayIntersection, restrictionIntersection, D);
+set(A, sparams = "-ksp_view -pc_type lu");
+Wh<real> def(u);    // local solution
+
+u[] = A^-1 * rhs;
+
+plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
