@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "y0" << endl;
+cout << "y1" << endl;
 real t;
 
 cout << IND << "real" << endl;
@@ -9,7 +9,7 @@ real r1 = 0;
 real minf = log(0.);
 
 t = clock();
-real resr1 = y0(r1);
+real resr1 = y1(r1);
 t = clock() - t;
 cout << IND << IND << t << endl;
 test(resr1 == minf);

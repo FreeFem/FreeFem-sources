@@ -1,0 +1,31 @@
+include "test.idp"
+
+cout << "int1d" << endl;
+real t;
+mesh Th = square(10, 10);
+real res;
+
+t = clock();
+res = int1d(Th, 1)(1.);
+t = clock() - t;
+test(res);
+
+t = clock();
+res = int1d(Th)(1.);
+t = clock() - t;
+test(res);
+
+t = clock();
+res = int1d(Th, qfe=qf1pE)(1.);
+t = clock() - t;
+test(res);
+
+t = clock();
+res = int1d(Th, qforder=2)(1.);
+t = clock() - t;
+test(res);
+
+t = clock();
+res = int1d(Th, qforder=2)(1.);
+t = clock() - t;
+test(res);

@@ -23,11 +23,9 @@ cout << IND << IND << t << endl;
 test(Th.nv <= 42);
 
 bool fborder = true;
-//int nbt = Th.nbe;
+int nbt = Th.nbe;
 t = clock();
 Th = buildmesh(C01(-n) + C02(-n) + C03(-n) + C04(-n), fixedborder=fborder);
 t = clock() - t;
 cout << IND << IND << t << endl;
-//plot(Th);
-//test(nbt == Th.nbe);
-//TODO: display fixedborder
+test(nbt == Th.nbe);

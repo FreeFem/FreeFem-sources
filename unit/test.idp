@@ -1,6 +1,10 @@
 func int test(bool condition)
 {
-	assert(condition);
+	try {
+		assert(condition);
+	} catch(...) {
+	  cout << "test failed" << endl;
+	}
 	return 0;
 }
 
