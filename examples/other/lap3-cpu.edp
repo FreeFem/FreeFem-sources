@@ -1,6 +1,9 @@
 //  a example to test the level of optimisation
 // --------------------------------------------
-int nn=300;
+// PARAM -n 100
+include "getARGV.idp"
+
+int nn=getARGV("-n",300);
  mesh Th=square(nn,nn);
 verbosity=5;
  fespace Vh(Th,P1);     // P1 FE space

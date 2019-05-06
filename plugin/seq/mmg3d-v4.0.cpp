@@ -79,6 +79,7 @@ void end_mesh (void *dataff) {
 
 	Th.mes = 0.;
 	Th.mesb = 0.;
+	Th.getTypeMesh3() = 1;
 
 	for (int i = 0; i < Th.nbe; i++) {
 		Th.mesb += Th.be(i).mesure();

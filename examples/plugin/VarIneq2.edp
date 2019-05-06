@@ -6,7 +6,7 @@ load "ff-NLopt"
 //performing some mesh adaptation to get a more precise output.
 int kas = 3; //    choose of the algo ...
 
-int NN = 10;
+int NN = 6;
 mesh Th = square(NN,NN);
 func f1=1.;
 func f2=-1.;
@@ -165,7 +165,7 @@ Vh best1,best2;
 best1[] = start(0:Vh.ndof-1);
 best2[] = start(Vh.ndof:2*Vh.ndof-1);
 
-Th = adaptmesh(Th,best1,best2);
+Th = adaptmesh(Th,best1,best2,err=0.05);
 
 oldu1=best1;
 oldu2=best2;

@@ -6,7 +6,7 @@ savemesh(Th,"Th.msh");
 func f=x+y+0.1234567890e-5;
 fespace Vh(Th,P2);
 Vh u=f;
-{ofstream f("u.txt");
+{ofstream f("u2.txt");
   f.precision; 
  cout << " f.precision() = " << f.precision() << endl;
  f.precision(12);
@@ -18,10 +18,10 @@ real regtest;//FFCS regression test value
 {
 mesh Th=readmesh("Th.msh"); // il y a un changement de numerotation des traingle ou??
 // mesh Th("Th.msh"); // oK ..
-savemesh(Th,"Th1.msh");
+//savemesh(Th,"Th1.msh");
 fespace VVh(Th,P2);
 VVh u=f,v,e;
-ifstream f("u.txt");
+ifstream f("u2.txt");
 f >> v[] ;
 e[] = u[] -v[];
 cout << e[].max << " " << e[].min << endl;

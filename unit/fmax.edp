@@ -22,11 +22,11 @@ t = clock() - t;
 cout << IND << IND << t << endl;
 test(maxi == 2);
 
-t = clock();
-int maxi2 = fmax(i1, i2, i3);
-t = clock() - t;
-cout << IND << IND << t << endl;
-test(maxi2 == 3);
+//t = clock();
+//int maxi2 = fmax(i1, i2, i3);
+//t = clock() - t;
+//cout << IND << IND << t << endl;
+//test(maxi2 == 3);
 
 t = clock();
 int maxineg = fmax(i4, i5);
@@ -36,11 +36,11 @@ test(maxineg == -1);
 
 cout << IND << "real" << endl;
 
-t = clock();
-real maxr = fmax(r1, r2, r3);
-t = clock() - t;
-cout << IND << IND << t << endl;
-test(maxr == 2.5);
+//t = clock();
+//real maxr = fmax(r1, r2, r3);
+//t = clock() - t;
+//cout << IND << IND << t << endl;
+//test(maxr == 2.5);
 
 t = clock();
 real maxrneg = fmax(r3, r4);

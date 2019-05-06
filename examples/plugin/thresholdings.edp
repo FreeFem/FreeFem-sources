@@ -11,4 +11,5 @@ matrix M=Lapl(Xh,Xh);
 
 cout << M << endl;
 M.thresholding(0.7);// remove all term less then 0.7 
+assert(M.nnz< 20);//  to be sure than some terme a remove M.nnz == 17 .
 cout << M << endl;

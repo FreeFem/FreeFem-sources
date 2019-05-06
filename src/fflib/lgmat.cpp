@@ -652,7 +652,7 @@ void BuildCombMat(MatriceMorse<R> & mij,const KNM_<R> & A, int ii00=0,int jj00=0
           {
            R cij=coef*A(i,j);
            if (cnj)  cij = RNM::conj(cij); 
-           if(Fem2D::norm(cij) >eps0)
+          // if(Fem2D::norm(cij) >eps0) no compression for IPOPT  april 2019 FH.. 
              mij[ij_mat(false,ii00,jj00,i,j)] += cij;
          
    }

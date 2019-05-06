@@ -4,7 +4,7 @@
 load "mpi-cmaes"
 
 
-int NN = 10;
+int NN = 6;
 mesh Th = square(NN,NN);
 func f1=1.;
 func f2=-1.;
@@ -98,7 +98,7 @@ func real J(real[int] &X)
 	Au2 -= b2;
 	real val = u1[]'*Au1 + u2[]'*Au2;
 	val +=  pena * IneqC(X);
-	plot(u1,u2,nbiso=30,fill=1,dim=3,cmm="adapt level " + al + " - iteration " + iter + " - J = " + val,value=1);
+	if(iter%100==0) plot(u1,u2,nbiso=30,fill=1,dim=3,cmm="adapt level " + al + " - iteration " + iter + " - J = " + val,value=1);
 	return val ;
 }
 
