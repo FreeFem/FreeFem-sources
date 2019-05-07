@@ -36,7 +36,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernardiRaugel.$(DYLIB_SUFFIX) \
 	pcm2rnm.$(DYLIB_SUFFIX) $(DYLIB_OTHER_COMPILE)  \
 	iovtk.$(DYLIB_SUFFIX) 	 gmsh.$(DYLIB_SUFFIX) MetricKuate.$(DYLIB_SUFFIX) \
 	Element_P1dc1.$(DYLIB_SUFFIX) BinaryIO.$(DYLIB_SUFFIX) \
-        isolineP1.$(DYLIB_SUFFIX) isoline.$(DYLIB_SUFFIX)  thresholdings.$(DYLIB_SUFFIX) \
+        isoline.$(DYLIB_SUFFIX)  thresholdings.$(DYLIB_SUFFIX) \
         VTK_writer_3d.$(DYLIB_SUFFIX)  VTK_writer.$(DYLIB_SUFFIX) \
 	splitedges.$(DYLIB_SUFFIX) Element_Mixte.$(DYLIB_SUFFIX) Element_Mixte3d.$(DYLIB_SUFFIX) \
 	myfunction2.$(DYLIB_SUFFIX) \
@@ -55,7 +55,7 @@ LIST_COMPILE_PKG=@TOOL_DYLIB_tetgen@ @TOOL_DYLIB_superlu@ dfft.$(DYLIB_SUFFIX) 	
 	@TOOL_DYLIB_umfpack@ NewSolver.$(DYLIB_SUFFIX) @TOOL_DYLIB_lapack@ 		\
 	ffnewuoa.$(DYLIB_SUFFIX) @TOOL_DYLIB_gmm@ @TOOL_DYLIB_yams@ @TOOL_DYLIB_mmg3d@ @TOOL_DYLIB_mshmet@	\
 	@TOOL_DYLIB_gsl@ @TOOL_DYLIB_mumps_seq@ @TOOL_DYLIB_ipopt@ @TOOL_DYLIB_nlopt@ ff-cmaes.$(DYLIB_SUFFIX)	\
-	@TOOL_DYLIB_scotch@ @TOOL_DYLIB_parmetis@ @TOOL_DYLIB_pardiso@ @TOOL_DYLIB_MMAP@
+	@TOOL_DYLIB_scotch@ @TOOL_DYLIB_metis@ @TOOL_DYLIB_pardiso@ @TOOL_DYLIB_MMAP@
 
 EXTRA_PROGRAMS= ffmaster
 bin_PROGRAMS= @BIN_ffmaster@
@@ -163,7 +163,7 @@ ff-get-dep:ff-get-dep.in ../../config.status
 	-if [ -d ../../3rdparty/bin ] ;then cp $@ ../../3rdparty/bin; fi
 WHERE_LIBRARY-download:ff-pkg-download FORCE  WHERE_LIBRARY-config WHERE_LIBRARY
 	@./ff-pkg-download >$@-new
-	@diff $@-new $@  || (cp $@-new $@ ;touch WHERE_LIBRARY)
+	@diff $@-new $@  || (mv $@-new $@ ;touch WHERE_LIBRARY)
 WHERE_LIBRARY:
 	touch $@
 FORCE: ;

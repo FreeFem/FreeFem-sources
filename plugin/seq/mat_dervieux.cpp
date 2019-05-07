@@ -32,6 +32,7 @@ using namespace std;
 
 #include "cfloat"
 #include "ff++.hpp"
+
 class MatrixUpWind0:  public E_F0mps {
 	public:
 		typedef Matrice_Creuse<R> *Result;

@@ -6,16 +6,12 @@ IF(MPI_FOUND)
 
 #  FILE(GLOB CPPFILES *.cpp)
 #
-#  LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-mpi/complex_SuperLU_DIST_FreeFem.cpp
-#                            ${CMAKE_SOURCE_DIR}/examples++-mpi/dSuperLU_DIST.cpp
-#                            ${CMAKE_SOURCE_DIR}/examples++-mpi/example-mumps.cpp
+#  LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-mpi/example-mumps.cpp
 #                            ${CMAKE_SOURCE_DIR}/examples++-mpi/hypre_FreeFem.cpp
 #                            ${CMAKE_SOURCE_DIR}/examples++-mpi/mpi-cmaes.cpp
 #                            ${CMAKE_SOURCE_DIR}/examples++-mpi/MUMPS.cpp
 #                            ${CMAKE_SOURCE_DIR}/examples++-mpi/MUMPS_FreeFem.cpp
-#                            ${CMAKE_SOURCE_DIR}/examples++-mpi/parmetis.cpp
-#                            ${CMAKE_SOURCE_DIR}/examples++-mpi/real_SuperLU_DIST_FreeFem.cpp
-#                            ${CMAKE_SOURCE_DIR}/examples++-mpi/removeDOF.cpp)
+#                            ${CMAKE_SOURCE_DIR}/examples++-mpi/parmetis.cpp)
 #
 #  FOREACH(CPPFILE ${CPPFILES})
 #    GET_FILENAME_COMPONENT(FILENAME ${CPPFILE} NAME_WE)
@@ -44,7 +40,6 @@ FILE(GLOB EDP_FILES *.edp)
 
 # tests which are known to fail are removed from test list  
 LIST(REMOVE_ITEM EDP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/chaleur3D-mumps.edp
-                           ${CMAKE_CURRENT_SOURCE_DIR}/chaleur3D-superludist.edp
                            ${CMAKE_CURRENT_SOURCE_DIR}/essai-com.edp
                            ${CMAKE_CURRENT_SOURCE_DIR}/schwarz-2d.edp
                            ${CMAKE_CURRENT_SOURCE_DIR}/schwarz-b.edp
@@ -95,19 +90,8 @@ ENDIF(NOT FF_PLUGIN_MUMPS)
 
 
 IF (NOT FF_PLUGIN_MEDIT)
-  LIST(REMOVE_ITEM EDP_FILES ${CMAKE_SOURCE_DIR}/examples/mpi/LaplaceRT-3d-matrix-mumps.edp
-                             ${CMAKE_SOURCE_DIR}/examples/mpi/LaplaceRT-3d-matrix-superludist.edp)
+  LIST(REMOVE_ITEM EDP_FILES ${CMAKE_SOURCE_DIR}/examples/mpi/LaplaceRT-3d-matrix-mumps.edp)
 ENDIF(NOT FF_PLUGIN_MEDIT)
-
-
-IF (NOT FF_PLUGIN_REAL_SUPERLU_DIST_FREEFEM)
-  LIST(REMOVE_ITEM EDP_FILES ${CMAKE_SOURCE_DIR}/examples/mpi/testsolver_SuperLU_DIST.edp)
-ENDIF(NOT FF_PLUGIN_REAL_SUPERLU_DIST_FREEFEM)
-
-
-IF (NOT FF_PLUGIN_DSUPERLU_DIST)
-  LIST(REMOVE_ITEM EDP_FILES ${CMAKE_SOURCE_DIR}/examples/mpi/testsolver_dsuperlu_dist.edp)
-ENDIF(NOT FF_PLUGIN_DSUPERLU_DIST)
 
 
 IF (NOT FF_PLUGIN_HTOOL)
@@ -123,14 +107,9 @@ ENDIF(NOT FF_PLUGIN_MPI_CMAES)
 IF (NOT FF_PLUGIN_MSH3)
   LIST(REMOVE_ITEM EDP_FILES ${CMAKE_SOURCE_DIR}/examples/mpi/Laplace3d-hypre.edp
                              ${CMAKE_SOURCE_DIR}/examples/mpi/NSI3d-carac-mumps.edp
-                             ${CMAKE_SOURCE_DIR}/examples/mpi/NSI3d-carac-superludist.edp
                              ${CMAKE_SOURCE_DIR}/examples/mpi/Stokes-v1-matrix-mumps.edp
-                             ${CMAKE_SOURCE_DIR}/examples/mpi/Stokes-v1-matrix-superludist.edp
                              ${CMAKE_SOURCE_DIR}/examples/mpi/Stokes-v2-matrix-mumps.edp
-                             ${CMAKE_SOURCE_DIR}/examples/mpi/Stokes-v2-matrix-superludist.edp
                              ${CMAKE_SOURCE_DIR}/examples/mpi/Stokes-v3-matrix-mumps.edp
-                             ${CMAKE_SOURCE_DIR}/examples/mpi/Stokes-v3-matrix-superludist.edp
-                             ${CMAKE_SOURCE_DIR}/examples/mpi/beam-3d-matrix-superludist.edp
                              ${CMAKE_SOURCE_DIR}/examples/mpi/chaleur3D-hypre.edp
                              ${CMAKE_SOURCE_DIR}/examples/mpi/schwarz-3.edp)
 ENDIF(NOT FF_PLUGIN_MSH3)

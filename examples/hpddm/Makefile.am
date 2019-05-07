@@ -28,7 +28,7 @@ all-local: freefem++.pref
 TESTS=diffusion-2d-PETSc.edp diffusion-2d-PETSc-complex.edp diffusion-3d-PETSc.edp \
 	elasticity-2d-PETSc.edp elasticity-3d-PETSc.edp \
 	stokes-2d-PETSc.edp stokes-3d-PETSc.edp \
-	heat-2d-PETSc.edp diffusion-periodic-2d-PETSc.edp diffusion-periodic-2d.edp helmholtz-2d-PETSc.edp heat-2d-io.edp \
+	heat-2d-PETSc.edp diffusion-periodic-2d-PETSc.edp diffusion-periodic-2d.edp diffusion-periodic-balanced-2d-PETSc.edp helmholtz-2d-PETSc.edp heat-2d-io.edp \
 	laplace-2d-SLEPc.edp laplace-complex-2d-SLEPc.edp stokes-2d-PETSc-fieldsplit.edp stokes-3d-io.edp \
 	laplace-2d-spherical-harmonics-SLEPc.edp schrodinger-1d-harmonic-oscillator-SLEPc.edp schrodinger-2d-harmonic-oscillator-SLEPc.edp \
 	laplace-2d-torus-SLEPc.edp schrodinger-1d-square-well-SLEPc.edp transpose-solve-PETSc.edp stokes-3d-PETSc-fieldsplit.edp \

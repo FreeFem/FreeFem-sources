@@ -4,7 +4,7 @@
 
 // for the make check:
 // NBPROC 4
-// PARAM -raspart -ffddm_schwarz_method oras
+// PARAM -raspart -ffddm_schwarz_method oras -waven 6
 
 macro dimension 3// EOM            // 2D or 3D
 
