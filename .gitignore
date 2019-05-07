@@ -161,7 +161,7 @@ AppDir/
 3rdparty/lib/pkgconfig/ipopt.pc
 3rdparty/metis/FAIRE
 3rdparty/metis/config.log
-3rdparty/metis/metis-.*/
+3rdparty/metis/metis-*
 3rdparty/mmg3d/ff-flags
 3rdparty/mmg3d/mmg3d4/
 3rdparty/mmg3d/tag-tar-158547
@@ -467,15 +467,12 @@ config.path
 3rdparty/ff-petsc/Make-petsc-download.mk
 3rdparty/ff-petsc/Makefile.inc
 3rdparty/ff-petsc/do-sudo
-3rdparty/ff-petsc/petsc-master/
-3rdparty/ff-petsc/slepc-3.8.2/
 3rdparty/fftw/fftw-3.3.2/
 3rdparty/gmm/gmm-4.2/
 3rdparty/ipopt/Ipopt-3.12.4/
 3rdparty/scalapack/scalapack-2.0.2/
 3rdparty/scotch/scotch_6.0.4/
 3rdparty/superlu/SuperLU_5.2.1/
-3rdparty/superludist/SuperLU_DIST_3.0/
 3rdparty/tag-install-other
 3rdparty/tetgen/tetgen1.5.1-beta1/
 ##  file create by autoreconf -i
