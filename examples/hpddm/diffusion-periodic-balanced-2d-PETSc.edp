@@ -31,7 +31,7 @@ if(mpisize > 1) {
     Ph part;
     mesh ThExtended = Th;
     {
-        metisdual(part[], Th, mpisize);
+        partitionerSeq(part[], Th, mpisize);
         fespace PhExtended(ThExtended, P0);
         PhExtended partExtended;
         partExtended = part;
@@ -100,7 +100,7 @@ if(mpisize > 1) {
     broadcast(processor(0), part[]);
     plot(part, fill = 1, wait = 1);
     real[int] DExtended;
-    buildWithPartitioning(ThExtended, part[], 1, DExtended, arrayIntersection, restrictionIntersection, PkNoPeriodic, mpiCommWorld);
+    buildWithPartitioning(ThExtended, part[], s, DExtended, arrayIntersection, restrictionIntersection, PkNoPeriodic, mpiCommWorld);
     Th = trunc(ThExtended, y <= 1-x && y >= -1-x && y <= 1+x && y >= -1+x);
     fespace WhExtended(ThExtended, PkNoPeriodic);
     matrix R = interpolate(Wh, WhExtended);
