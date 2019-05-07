@@ -31,7 +31,7 @@ if(mpisize > 1) {
     Ph part;
     mesh ThExtended = Th;
     {
-        partitionerSeq(part, Th, mpisize);
+        partitionerSeq(part[], Th, mpisize);
         fespace PhExtended(ThExtended, P0);
         PhExtended partExtended;
         partExtended = part;
