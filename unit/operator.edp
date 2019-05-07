@@ -261,6 +261,45 @@ matrix C = resmm4 - B;
 [I, J, D] = C;
 test(abs(D.max) == 0);
 
+t = clock();
+matrix resmm5 = A * ir;
+t = clock() - t;
+cout << IND << IND << t << endl;
+C = resmm5 - A;
+[I, J, D] = C;
+test(abs(D.max) == 0);
+
+
+cout << "operator .*" << endl;
+
+cout << IND << "int[int]" << endl;
+
+real[int] ri1 = [1, 2, 3];
+real[int] ri2 = [4, 5, 6];
+real[int] resmuli = [4, 10, 18];
+
+t = clock();
+real[int] multbti = ri1 .* ri2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+for (int i = 0; i < 2; i++) {
+  test(multbti[i] == resmuli[i]);
+}
+
+cout << IND << "real[int]" << endl;
+
+real[int] rr1 = [1., 2., 3.];
+real[int] rr2 = [4., 5., 6.];
+real[int] resmul = [4., 10., 18.];
+
+t = clock();
+real[int] multbt = rr1 .* rr2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+for (int i = 0; i < 2; i++) {
+  test(multbt[i] == resmul[i]);
+}
+
 cout << "operator /" << endl;
 
 cout << IND << "int" << endl;
@@ -324,6 +363,32 @@ cout << IND << IND << t << endl;
 test(resdc3 == 5. + 1i * 6);
 
 
+cout << "operator ./" << endl;
+
+cout << IND << "int[int]" << endl;
+
+real[int] resdivi = [0.25, 0.4, 0.5];
+
+t = clock();
+real[int] divtbti = ri1 ./ ri2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+for (int i = 0; i < 2; i++) {
+  test(divtbti[i] == resdivi[i]);
+}
+
+cout << IND << "real[int]" << endl;
+
+real[int] resdivr = [0.25, 0.4, 0.5];
+
+t = clock();
+real[int] divtbt = rr1 ./ rr2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+for (int i = 0; i < 2; i++) {
+  test(divtbt[i] == resdivr[i]);
+}
+
 cout << "operator %" << endl;
 
 cout << IND << "int" << endl;
@@ -371,8 +436,6 @@ t = clock() - t;
 cout << IND << IND << t << endl;
 test(respowi2 == 3);
 
-// do matrix op
-
 cout << IND << "real" << endl;
 
 t = clock();
@@ -402,6 +465,21 @@ t = clock() - t;
 cout << IND << IND << t << endl;
 test(respowc2 == 5.+6i);
 
+
+cout << "operator '" << endl;
+
+cout << IND << "matrix" << endl;
+
+A = [[1, 2, 3],
+[4, 5, 6],
+[7, 8, 9]];
+t = clock();
+matrix a = A';
+t = clock() - t;
+cout << IND << IND << t << endl;
+C = A - a';
+[I, J, D] = C;
+test(D.max == 0);
 
 cout << "ternary" << endl;
 

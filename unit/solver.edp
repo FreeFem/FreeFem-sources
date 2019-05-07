@@ -1,0 +1,111 @@
+include "test.idp"
+
+cout << "solver" << endl;
+real t;
+
+// Parameters
+func Pk = P2;
+
+func f = -2.*x*(y-1.)*(y-2.*x+x*y+2.)*exp(x-y);
+func uD = 0;
+func ue = exp(x-y)*x*(1.-x)*y*(1.-y);
+real eps = 1e-4;
+
+int nn = 10;	//Mesh quality
+
+// Macro
+macro grad(A) [dx(A), dy(A)] //
+
+// Mesh
+border b1(t=0, 1){x=t; y=0; label=1;}
+border b2(t=0, 1){x=1; y=t; label=2;}
+border b3(t=0, 1){x=1-t; y=1; label=3;}
+border b4(t=0, 1){x=0; y=1-t; label=4;}
+mesh Th = buildmesh(b1(nn) + b2(nn) + b3(nn) + b4(nn));
+int[int] Wall = [1, 2, 3, 4];
+
+// Fespace
+fespace Uh(Th, Pk);
+Uh u, uh;
+Uh uerror;
+
+cout << IND << "varf" << endl;
+ //using varf
+ t = clock();
+ varf vPoisson (u, uh)
+  	= int2d(Th)(
+  		  grad(u)' * grad(uh)
+  	)
+  	+ int2d(Th)(
+  		  f * uh
+  	)
+  	+ on(Wall, u=uD)
+  	;
+t = clock() - t;
+cout << IND << IND << t << endl;
+cout << IND << "solver CG" << endl;
+{
+  matrix<real> Poisson = vPoisson(Uh, Uh, solver=CG);
+  real[int] PoissonBoundary = vPoisson(0, Uh);
+  t = clock();
+  u[] = Poisson^-1 * PoissonBoundary;
+  t = clock() - t;
+  cout << IND << IND << t << endl;
+  uerror = u - ue;
+  test(uerror[].max < eps);
+}
+cout << IND << "solver Cholesky" << endl;
+{
+  matrix<real> Poisson = vPoisson(Uh, Uh, solver=Cholesky);
+  real[int] PoissonBoundary = vPoisson(0, Uh);
+  t = clock();
+  u[] = Poisson^-1 * PoissonBoundary;
+  t = clock() - t;
+  cout << IND << IND << t << endl;
+  uerror = u - ue;
+  test(uerror[].max < eps);
+}
+cout << "solver Crout" << endl;
+{
+  matrix<real> Poisson = vPoisson(Uh, Uh, solver=Crout);
+  real[int] PoissonBoundary = vPoisson(0, Uh);
+  t = clock();
+  u[] = Poisson^-1 * PoissonBoundary;
+  t = clock() - t;
+  cout << IND << IND << t << endl;
+  uerror = u - ue;
+  test(uerror[].max < eps);
+}
+cout << IND << "solver GMRES" << endl;
+{
+  matrix<real> Poisson = vPoisson(Uh, Uh, solver=GMRES);
+  real[int] PoissonBoundary = vPoisson(0, Uh);
+  t = clock();
+  u[] = Poisson^-1 * PoissonBoundary;
+  t = clock() - t;
+  cout << IND << IND << t << endl;
+  uerror = u - ue;
+  test(uerror[].max < eps);
+}
+cout << IND << "solver LU" << endl;
+{
+  matrix<real> Poisson = vPoisson(Uh, Uh, solver=LU);
+  real[int] PoissonBoundary = vPoisson(0, Uh);
+  t = clock();
+  u[] = Poisson^-1 * PoissonBoundary;
+  t = clock() - t;
+  cout << IND << IND << t << endl;
+  uerror = u - ue;
+  test(uerror[].max < eps);
+}
+cout << IND << "solver sparsesolver" << endl;
+{
+  matrix<real> Poisson = vPoisson(Uh, Uh, solver=sparsesolver);
+  real[int] PoissonBoundary = vPoisson(0, Uh);
+  t = clock();
+  u[] = Poisson^-1 * PoissonBoundary;
+  t = clock() - t;
+  cout << IND << IND << t << endl;
+  uerror = u - ue;
+  test(uerror[].max < eps);
+}
