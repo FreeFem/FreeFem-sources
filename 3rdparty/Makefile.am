@@ -43,7 +43,6 @@ EXTRA_DIST= \
 ./scotch/Makefile \
 ./scotch/Makefile-scotch.inc \
 ./scotch/Makefile.patch \
-./scotch/scotch_6.0.3.patch \
 ./scotch/scotch_6.0.4.patch \
 ./superlu/Makefile \
 ./superlu/make.inc \

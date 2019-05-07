@@ -163,7 +163,7 @@ ff-get-dep:ff-get-dep.in ../../config.status
 	-if [ -d ../../3rdparty/bin ] ;then cp $@ ../../3rdparty/bin; fi
 WHERE_LIBRARY-download:ff-pkg-download FORCE  WHERE_LIBRARY-config WHERE_LIBRARY
 	@./ff-pkg-download >$@-new
-	@diff $@-new $@  || (cp $@-new $@ ;touch WHERE_LIBRARY)
+	@diff $@-new $@  || (mv $@-new $@ ;touch WHERE_LIBRARY)
 WHERE_LIBRARY:
 	touch $@
 FORCE: ;
