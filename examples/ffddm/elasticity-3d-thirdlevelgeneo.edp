@@ -3,8 +3,8 @@
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
 
 // for the make check:
-// NBPROC 8
-// PARAM -ffddm_schwarz_method ras -ffddm_geneo_nu 20 -global 10 -ffddm_partitioner 0 -nsuper 4 -ffddm_geneo_super_nu 8 -ffddm_inexactCS_tol 1.e-2
+// NBPROC 4
+// PARAM -ffddm_schwarz_method ras -ffddm_geneo_nu 20 -global 5 -ffddm_partitioner 0 -nsuper 2 -ffddm_geneo_super_nu 8 -ffddm_inexactCS_tol 1.e-2
 
 macro dimension 3// EOM            // 2D or 3D
 

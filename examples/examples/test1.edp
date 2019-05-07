@@ -1,28 +1,59 @@
-//Tutorial file test1.pde
-// YOUR FIRST PROGRAM
+/****************************************************************************/
+/* This file is part of FreeFem++.                                          */
+/*                                                                          */
+/* FreeFem++ is free software: you can redistribute it and/or modify        */
+/* it under the terms of the GNU Lesser General Public License as           */
+/* published by the Free Software Foundation, either version 3 of           */
+/* the License, or (at your option) any later version.                      */
+/*                                                                          */
+/* FreeFem++ is distributed in the hope that it will be useful,             */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of           */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            */
+/* GNU Lesser General Public License for more details.                      */
+/*                                                                          */
+/* You should have received a copy of the GNU Lesser General Public License */
+/* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
+/****************************************************************************/
+// Your first program
 
-border C(t=0,2*pi){x=cos(t); y=sin(t);}                    // the boundary
-mesh Th = buildmesh (C(50));                // of the domain and its mesh
-fespace Vh(Th,P1);      // Finite Element of degree 2 defined here for Vh
- Vh u,v;            // defines u and v as piecewise-P2 continuous functions
- func f= x*y;                       // definition of an algebraic function
- real cpu = clock();
- solve Poisson(u,v,solver=LU) =               // defines and solves the PDE
-    int2d(Th)( dx(u)*dx(v) + dy(u)*dy(v))               //  bilinear part
-    - int2d(Th)( f*v)                                   // right hand side
-    + on(C,u=0)  ;                          // Dirichlet boundary condition
+// Define a boundary
+border C(t=0, 2*pi){x=cos(t); y=sin(t);}
 
-  plot(u,wait=1);
- cout << " CPU time = " << clock()-cpu << endl;
+// Build the mesh from boundary
+mesh Th = buildmesh(C(50));
 
-// ENDS HERE
+// Create a finite element space of order 2
+fespace Vh(Th, P2);
+// Defines u and v, piecewise-P2 continuous functions
+Vh u, v;
 
-// FOR THE PRO: The same done with total control over the algebra
-varf a(u,v) = int2d(Th)( dx(u)*dx(v) + dy(u)*dy(v))+ on(C,u=0) ;
-matrix A=a(Vh,Vh);  // stiffness matrix, see (\ref{eqn:Stiffness0})
-varf b(u,v) = int2d(Th)( u*v ) ;
-matrix B=b(Vh,Vh);
-Vh F=f;
+// Define an algebraic function
+func f = x*y;
+
+real cpu = clock();
+
+// Define and solve a PDE
+solve Poisson(u, v, solver=LU)
+  = int2d(Th)(dx(u)*dx(v) + dy(u)*dy(v)) // bilinear part
+  - int2d(Th)(f*v) // right hand side
+  + on(C, u=0); // Dirichlet boundary condition
+
+// Plot the solution
+plot(u, wait=1, cmm="Solution");
+
+// Display the CPU time
+cout << " CPU time = " << clock()-cpu << endl;
+
+// FOR THE PRO: The same problem solved with total control over the algebra
+varf a(u, v) // the weak form
+  = int2d(Th)(dx(u)*dx(v) + dy(u)*dy(v))
+  + on(C, u=0);
+matrix A = a(Vh, Vh); // stiffness matrix
+
+varf b(u,v) = int2d(Th)(u*v);
+matrix B = b(Vh, Vh);
+
+Vh F = f;
 v[] = B*F[];
-u[]=A^-1*v[];
-plot(u,wait=1);
+u[] = A^-1*v[];
+plot(u, wait=1, cmm="PRO Solution");

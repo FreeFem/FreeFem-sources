@@ -10,40 +10,29 @@ macro init(i)i// EOM                        // scalar field initialization
 macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
 func Pk = P1;                               // finite element space
 
-int overlap = getARGV("-overlap", 1);                           // geometric overlap between subdomains
 int s = getARGV("-split", 1);                                   // refinement factor
 
 int[int] LL = [2,2, 1,2, 2,2];
-meshN ThBorder, Th = cube(1, 1, 1, [x, y, z]);
+meshN Th = cube(1, 1, 1, [x, y, z]);
 fespace Wh(Th, Pk);                         // local finite element space
 int[int] arrayIntersection;                 // ranks of neighboring subdomains
 int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
 real[int] D;                                // partition of unity
 {
     Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10), [x, y, z], label = LL);      // global mesh
-    buildOverlap(Th, ThBorder, 10, s, overlap, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld, false)
+    build(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
 }
 
-real[int] rhs;                              // local right-hand side
-matrix<real> Mat;                           // local operator
-{                                           // local weak form
-    meshN ThAugmented = Th + ThBorder;
-    varf vPb(u, v) = intN(ThAugmented)(grad(u)' * grad(v)) + intN(ThAugmented)(v) + on(1, u = 1.0);
-    fespace WhAugmented(ThAugmented, Pk);
-    Mat = vPb(WhAugmented, WhAugmented, tgv = -1);
-    real[int] rhsFull = vPb(0, WhAugmented, tgv = -1);
-    matrix R = interpolate(Wh, WhAugmented);
-    renumbering(Mat, R, rhsFull, rhs);
-}
-ThBorder = cube(1, 1, 1, [x, y, z]);
+varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(v) + on(1, u = 1.0);
+matrix<real> Mat = vPb(Wh, Wh, tgv = -1);
+real[int] rhs = vPb(0, Wh, tgv = -1);
 
-schwarz A(Mat, arrayIntersection, restrictionIntersection, D, scaled = false);
+schwarz A(Mat, arrayIntersection, restrictionIntersection, D);
 set(A, sparams = "-hpddm_schwarz_coarse_correction deflated -hpddm_geneo_nu 10");
 
 int solver = getOption("schwarz_method");
 if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) { // two-level Schwarz methods
-    varf vPbNoPen(u, v) = intN(Th)(grad(u)' * grad(v)) + on(1, u = 0.0);
-    matrix<real> noPen = vPbNoPen(Wh, Wh, sym = 1);
+    matrix<real> noPen = vPb(Wh, Wh, sym = 1);
     attachCoarseOperator(mpiCommWorld, A, A = noPen);
 }
 

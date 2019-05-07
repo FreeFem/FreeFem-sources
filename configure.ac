@@ -2047,7 +2047,6 @@ m4_map([AC_FF_WHERELIB],[
 	[[mumps_scotch],[-lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch],[dmumps_c.h]],
 	[[hypre],[-lHYPRE]],
 	[[fftw3],[-lfftw3],[${inc_usr_include}fftw3.h],[]],
-	[[superlu_dist],[-lsuperlu-dist],[${inc_usr_include}superlu-dist/superlu_defs.h],[]],
 	[[superlu],[-lsuperlu],[${inc_usr_include}superlu/superlu_enum_consts.h],[]],
         [[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
         [[scalapack],[-lscalapack$ff_with_mpi],[]],
@@ -2070,10 +2069,12 @@ dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 TOOL_DISABLE(tetgen,tetgen.$DYLIB_SUFFIX)
 TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(lapack,"lapack.$DYLIB_SUFFIX fflapack.$DYLIB_SUFFIX")
-TOOL_DISABLE(parmetis,metis.$DYLIB_SUFFIX)
+TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
+TOOL_DISABLE(parmetis,parmetis.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
 TOOL_DISABLE(mshmet,"mshmet.$DYLIB_SUFFIX aniso.$DYLIB_SUFFIX")
 TOOL_DISABLE(gmm,ilut.$DYLIB_SUFFIX,,enable_gmm=no)
+TOOL_DISABLE(scalapack,"MUMPS.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps,"MUMPS.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps_seq,"MUMPS_seq.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX",mumps-seq)
 TOOL_DISABLE(nlopt,ff-NLopt.$DYLIB_SUFFIX)
@@ -2081,7 +2082,6 @@ dnl TOOL_DISABLE(parmetis)
 
 TOOL_DISABLE(scotch,scotch.$DYLIB_SUFFIX)
 TOOL_DISABLE(superlu,SuperLu.$DYLIB_SUFFIX)
-TOOL_DISABLE_NO(superludist,"complex_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX real_SuperLU_DIST_FreeFem.$DYLIB_SUFFIX dSuperLU_DIST.$DYLIB_SUFFIX")
 TOOL_DISABLE(umfpack,UMFPACK64.$DYLIB_SUFFIX)
 TOOL_DISABLE(yams,freeyams.$DYLIB_SUFFIX)
 TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX,,nodowload)
