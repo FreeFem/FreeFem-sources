@@ -57,6 +57,12 @@ if test -z "$MPIRUN" ; then
     fi
 fi
 AC_MSG_RESULT($MPIRUN)
+if test "ff_mpi" != "no" ; then 
+ AC_MSG_CHECKING(for MPIRUN option: )
+ ff_okkk=`$MPIRUN  -np 2 --oversubscribe echo ff__okkk| grep ff__okkk |wc -l`
+ if test "$ff_okkk" -eq 2 ; then ff_mpi_option="--oversubscribe" ; fi 
+ AC_MSG_RESULT($ff_mpi_option)
+fi
 
 AC_MSG_CHECKING(for mpipath )
 
@@ -339,6 +345,7 @@ dnl              [echo mpi INCLUDE "'$ff_MPI_INCLUDE'" >>$ff_where_lib_conf ]
 	AC_SUBST(MPI_LIB,$ff_MPI_LIB)
 	AC_SUBST(MPI_LIBC,$ff_MPI_LIBC)
 	AC_SUBST(MPI_LIBFC,$ff_MPI_LIBFC)
+	AC_SUBST(MPI_RUN_OPTION,$ff_mpi_option)
         AC_SUBST(SKIP_TESTS_MPI,"no")
 	fi
 	CXX="$ff_save_cxx"
