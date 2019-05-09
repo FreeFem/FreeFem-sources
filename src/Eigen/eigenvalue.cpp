@@ -247,6 +247,7 @@ const OneOperator *  ToCode(Expression e)
         const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(e);
         ffassert(op);
         code= op->Find("(",ArrayOfaType(atype<KN<K> * >(),false));
+        ffassert(code);
     }
     return  code;
 }
@@ -279,11 +280,13 @@ class EigenValue : public OneOperator
                 const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[1].LeftValue());
                 ffassert(op);
                 codeOP1 = op->Find("(",ArrayOfaType(atype<Kn* >(),false));
+                 ffassert(codeOP1);
                 if( cas== 2)
                 {
                     const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[2].LeftValue());
                     ffassert(op);
                     codeB = op->Find("(",ArrayOfaType(atype<Kn* >(),false));
+                    ffassert(codeB);
                 }
             }
             else if( cas== 3)
@@ -365,11 +368,13 @@ class EigenValueC : public OneOperator
                 const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[1].LeftValue());
                 ffassert(op);
                 codeOP1 = op->Find("(",ArrayOfaType(atype<Kn* >(),false));
+                ffassert(codeOP1);
                 if( cas== 2)
                 {
                     const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[2].LeftValue());
                     ffassert(op);
                     codeB = op->Find("(",ArrayOfaType(atype<Kn* >(),false));
+                    ffassert(codeB);
                 }
             }
             else if( cas==3)

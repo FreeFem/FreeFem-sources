@@ -608,6 +608,7 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
 	  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[kk]);
 	  if(op)
 	   ds.precon = op->Find("(",ArrayOfaType(atype<KN<R>* >(),false)); // strange bug in g++ is R become a double
+            ffassert(ds.precon);
 	}
       
 	if (nargs[++kk]) ds.NbSpace= GetAny<long>((*nargs[kk])(stack));
