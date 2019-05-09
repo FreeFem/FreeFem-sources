@@ -581,6 +581,7 @@ template<class R>
            const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[3]);
            assert(op);
            precon = op->Find("(",ArrayOfaType(atype<KN<R>* >(),false)); // strange bug in g++ is R become a double
+          ffassert(precon);
           }
          
        } 

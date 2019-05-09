@@ -176,21 +176,28 @@ void OneOperator::Show(const ArrayOfaType & at,ostream &f) const
 const  OneOperator * Polymorphic::Find(const char *op, const  ArrayOfaType &at) const
   {
     const_iterator i=m.find(op);
+      int nf=0;
     if (i!=m.end())
       {
        OneOperator::pair_find r=i->second->Find(at);
        if (r.second==1) return r.first;
+          nf=max(nf,r.second);
        }
+      if(nf) { cerr << "\n Warning ambiguity Polymorphic Find "<<  nf << endl;
+          Show(op,at,cerr); }
     return 0;
   }
 const  OneOperator * Polymorphic::FindWithOutCast(const char *op, const  ArrayOfaType &at) const
   {
+      int nf=0;
     const_iterator i=m.find(op);
     if (i!=m.end())
       {
        OneOperator::pair_find r=i->second->FindWithOutCast(at);
        if (r.second==1) return r.first;
+           nf=max(nf,r.second);
        }
+      if(nf) { cerr << "\n Warning ambiguity Polymorphic FindWithOutCast "<<op<< " "<<  nf << endl;  Show(op,at,cerr);}
     return 0;
   }
 

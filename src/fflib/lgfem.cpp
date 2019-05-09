@@ -582,11 +582,15 @@ class LinearCG : public OneOperator
       args.SetNameParam(n_name_param,name_param,nargs);
       {  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[0].LeftValue());
          ffassert(op);
-         A = op->Find("(",ArrayOfaType(atype<Kn* >(),false)); }
+         A = op->Find("(",ArrayOfaType(atype<Kn* >(),false));
+         ffassert(A);
+      }
       if (nargs[2]) 
       {  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[2]);
          ffassert(op); 
-         C = op->Find("(",ArrayOfaType(atype<Kn* >(),false)); }
+         C = op->Find("(",ArrayOfaType(atype<Kn* >(),false));
+         ffassert(C);
+      }
        else  C =0;
       X = to<Kn*>(args[1]);
       if (args.size()>2)
@@ -734,11 +738,15 @@ class LinearGMRES : public OneOperator
       args.SetNameParam(n_name_param,name_param,nargs);
       {  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(args[0].LeftValue());
          ffassert(op);
-         A = op->Find("(",ArrayOfaType(atype<Kn* >(),false)); }
+         A = op->Find("(",ArrayOfaType(atype<Kn* >(),false));
+          ffassert(A);
+      }
       if (nargs[2]) 
       {  const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[2]);
          ffassert(op); 
-         C = op->Find("(",ArrayOfaType(atype<Kn* >(),false)); }
+         C = op->Find("(",ArrayOfaType(atype<Kn* >(),false));
+          ffassert(C);
+      }
        else  C =0;
       X = to<Kn*>(args[1]);
       if (args.size()>2)
