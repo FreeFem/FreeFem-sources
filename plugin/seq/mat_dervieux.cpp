@@ -32,41 +32,7 @@ using namespace std;
 
 #include "cfloat"
 #include "ff++.hpp"
-/*
-#include "rgraph.hpp"
-#include "error.hpp"
-#include "AFunction.hpp"
 
-// #include "lex.hpp"
-#include "HashMatrix.hpp"
-#include "SparseLinearSolver.hpp"
-
-#include "Mesh3dn.hpp"
-#include "MeshPoint.hpp"
-#include "lgfem.hpp"
-#include "lgmesh3.hpp"
-#include "lgsolver.hpp"
-#include "problem.hpp"
-/*
- #include  <iostream>
- #include  <cfloat>
- #include  <cmath>
- * using namespace std;
- #include "error.hpp"
- #include "AFunction.hpp"
- #include "rgraph.hpp"
- #include "RNM.hpp"
- * // remove problem of include
- #undef  HAVE_LIBUMFPACK
- #undef HAVE_CADNA
- #include "MatriceCreuse_tpl.hpp"
- #include "MeshPoint.hpp"
- #include "lgfem.hpp"
- #include "lgmesh.hpp"
- #include "lgmesh3.hpp"
- #include "lgsolver.hpp"
- #include "problem.hpp"
- */
 class MatrixUpWind0:  public E_F0mps {
 	public:
 		typedef Matrice_Creuse<R> *Result;

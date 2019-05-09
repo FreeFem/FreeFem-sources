@@ -20,8 +20,6 @@ EXTRA_DIST= \
 ./hypre/ff-flags.inc \
 ./metis/Makefile \
 ./metis/Makefile-metis.in \
-./metis/patch-metis \
-./metis/metis-4.0_main_return.patch \
 ./mmg3d/Makefile \
 ./mmg3d/patch-mmg3dv4.diff \
 ./mshmet/Makefile \
@@ -42,8 +40,6 @@ EXTRA_DIST= \
 ./scalapack/SLmake-scalapack.inc \
 ./scotch/Makefile \
 ./scotch/Makefile-scotch.inc \
-./scotch/Makefile.patch \
-./scotch/scotch_6.0.3.patch \
 ./scotch/scotch_6.0.4.patch \
 ./superlu/Makefile \
 ./superlu/make.inc \
@@ -67,9 +63,9 @@ getall
 # FFCS: See [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be deactivated
 
 
-MPI_SOFT= @TOOL_COMPILE_scalapack@ @TOOL_COMPILE_mumps@ 
+MPI_SOFT= @TOOL_COMPILE_scalapack@ @TOOL_COMPILE_parmetis@ @TOOL_COMPILE_mumps@ 
 
-LIST_SOFT= @DOWNLOAD_FFTW@ @TOOL_COMPILE_tetgen@ @TOOL_COMPILE_parmetis@ @TOOL_COMPILE_superlu@ @TOOL_COMPILE_fftw3_mpi@	\
+LIST_SOFT= @DOWNLOAD_FFTW@ @TOOL_COMPILE_tetgen@ @TOOL_COMPILE_metis@ @TOOL_COMPILE_superlu@ @TOOL_COMPILE_fftw3_mpi@	\
 	@TOOL_COMPILE_scotch@ @TOOL_COMPILE_mshmet@			\
 	@TOOL_COMPILE_yams@ @TOOL_COMPILE_mmg3d@  @TOOL_COMPILE_gmm@	\
 	@TOOL_COMPILE_nlopt@ @TOOL_COMPILE_mumps_seq@			\
