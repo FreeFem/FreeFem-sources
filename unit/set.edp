@@ -1,0 +1,20 @@
+include "test.idp"
+
+cout << "set" << endl;
+real t;
+
+matrix A = [[1, 2]];
+int[int] I, J;
+real[int] D;
+
+
+cout << A << endl;
+t = clock();
+set(A, solver=sparsesolver);
+t = clock() - t;
+matrix C = A - A;
+[I, J, D] = C;
+cout << A << endl;
+C = vLaplacian(Uh, Uh, solver=LU, factorize=1);
+test(C == true);
+//to finish
