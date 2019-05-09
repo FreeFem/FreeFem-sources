@@ -350,7 +350,6 @@ AnyType Build2D3D_Op::operator () (Stack stack)  const {
 	Mesh3 *Th3 = RemplissageSurf3D_tetgen_new(switch_tetgen, *ThS_tmp, label_tet,
 	                                          nbhole, tabhole, nbregion, tabregion,
 	                                          nbfacecl, tabfacecl);
-    Th3->getTypeMesh3()=1;
 
 	/*
 	 * Mesh3 *Th3=Transfo_Mesh2_tetgen_new( precis_mesh, switch_tetgen, Th, txx, tyy, tzz, border_only,
@@ -1109,7 +1108,6 @@ Mesh3*RemplissageSurf3D_tetgen_new (char *switch_tetgen, const MeshS &ThS, const
 		cout << " Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " " << T_Th3->nt << " " << T_Th3->nbe << endl;
 		cout << "FreeFem++: End check mesh given by tetgen" << endl;
 	}
-    T_Th3->getTypeMesh3()=1; // volume 3D mesh
 	return T_Th3;
 }
 

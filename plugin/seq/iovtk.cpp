@@ -1452,7 +1452,6 @@ Mesh*VTK_Load (const string &filename, bool bigEndian) {
     // variable freefem++
     int nv, nt = 0, nbe = 0;
     int nerr = 0;
-    Mesh::Vertex *vff;
     
     map<int, int> mapnumv;
     
@@ -1512,7 +1511,7 @@ Mesh*VTK_Load (const string &filename, bool bigEndian) {
         cout << "   vtkio: Reading %d points" << nv << endl;
     }
     
-    vff = new Mesh::Vertex[nv];
+    Mesh::Vertex *vff = new Mesh::Vertex[nv];
     
     for (int i = 0; i < nv; i++) {
         double xyz[3];
@@ -5170,7 +5169,7 @@ public:
         }
     }
     
-    static ArrayOfaType typeargs () {return ArrayOfaType(atype<string *>(), atype<pmesh>(), true);}    // all type
+    static ArrayOfaType typeargs () {return ArrayOfaType(atype<string *>(), atype<pmeshS>(), true);}    // all type
     
     static E_F0*f (const basicAC_F0 &args) {return new VTK_WriteMesh_Op(args);}
     

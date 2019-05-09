@@ -154,15 +154,13 @@ public:
   void GSave(FILE * f,int offset=0) const ;
   void GRead(FILE * f,int offset);
   int Save(const string & filename) const ;
-  void BuildMeshS();
-  void BuidEdgesFromMesh3();
   int SaveSurface(const string & filename) const ;  
   int SaveSurface(const string & filename1, const string & filename2) const ;  
   //void flipSurfaceMesh3(int surface_orientation);
   void read(istream &);
   void readmsh(ifstream & f,int offset);
   void TrueVertex();
-
+  void BuildMeshS(double angle=8.*atan(1.)/9.);  // default angle = 40 deg
     ~Mesh3() {
         
         if (meshS)
@@ -175,7 +173,7 @@ private:
   void operator=(const Mesh3 &);// pas affectation par copy
 };
 
-
+  
   
 // for the caracteristic method.
   int  WalkInTet(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt);

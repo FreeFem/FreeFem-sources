@@ -1428,7 +1428,7 @@ bool SaveGMSH (pmeshS pTh, string *filewoext) {
         // 1 is an edge
         f1 << (i + 1) << " 1 ";
         // two tags: the label
-        f1 << "1 " << msh.be(i).lab << " " << msh.be(i).lab << " ";
+        f1 << "1 " << msh.be(i).lab << " " ;//<< msh.be(i).lab << " ";
         // list of nodes
         f1 << msh(msh.be(i)[0]) + 1 << " " << msh(msh.be(i)[1]) + 1 << endl;
     }

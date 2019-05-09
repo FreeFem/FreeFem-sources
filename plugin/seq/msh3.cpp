@@ -56,6 +56,7 @@ using namespace std;
 #include "msh3.hpp"    // [[file:msh3.hpp]]
 #include "splitsimplex.hpp"    // [[file:../src/femlib/splitsimplex.hpp]]
 #include "renumb.hpp"
+#include <cmath>
 
 using namespace  Fem2D;
 
@@ -2505,7 +2506,9 @@ AnyType MovemeshS_Op::operator () (Stack stack)  const {
     MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
     MeshS *pTh = GetAny<MeshS *>((*eTh)(stack));
     ffassert(pTh);
-    
+    typedef typename MeshS::Element T;
+    typedef typename MeshS::BorderElement B;
+    typedef typename MeshS::Vertex V;
     MeshS &Th = *pTh;
     
     int nbv = Th.nv;// nombre de sommet
@@ -2555,13 +2558,12 @@ AnyType MovemeshS_Op::operator () (Stack stack)  const {
     
     
     
-    // loop on triangle
+    // loop on elements
     for (int it = 0; it < Th.nt; ++it) {
-        const TriangleS &K = (Th[it]);
-        int iv[3];
-        iv[0] = Th.operator () (K[0]);
-        iv[1] = Th.operator () (K[1]);
-        iv[2] = Th.operator () (K[2]);
+        const T &K = (Th[it]);
+        int iv[T::nea];
+        for (int i=0;i<T::nea;i++)
+        iv[i] = Th.operator () (K[i]);
         
         R coordx, coordy, coordz;
         for (int jj = 0; jj < 3; jj++) {
@@ -2579,12 +2581,12 @@ AnyType MovemeshS_Op::operator () (Stack stack)  const {
         }
     }
     
-    // loop on edge
+    // loop on border elements
     for (int it = 0; it < Th.nbe; ++it) {
-        const BoundaryEdgeS &K(Th.be(it));
-        int iv[2];
-        iv[0] = Th.operator () (K[0]);
-        iv[1] = Th.operator () (K[1]);
+        const B &K(Th.be(it));
+        int iv[B::nea];
+        for (int i=0;i<B::nea;i++)
+            iv[i] = Th.operator () (K[i]);
         
         R coordx, coordy, coordz;
         
@@ -2919,12 +2921,6 @@ public:
 
 
 
-
-
-
-
-
-
 class SetMeshS_Op: public E_F0mps
 {
 public:
@@ -3237,9 +3233,7 @@ MeshS*func_movemesh23(const Mesh &Th, KN<double> txx, KN<double> tyy, KN<double>
         mes_triangleS = ThS->elements[ii].mesure();
         
         if (surface_orientation * mes_triangleS < 0) {
-            int iv_temp = iv[1];   // swap( iv[1] = iv[2]
-            iv[1] = iv[2];
-            iv[2] = iv_temp;
+            swap(iv[1], iv[2]);
             ThS->elements[ii].set(ThS->vertices, iv, lab);
             nbflip++;
         }
@@ -3468,7 +3462,8 @@ Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *
             assert(iv[jj] >= 0 && iv[jj] < nv_t);
         }
         
-        if (orientation < 0) {swap(iv[1], iv[2]);}
+        if (orientation < 0)
+            swap(iv[1], iv[2]);
         
         (tt)->set(v, iv, lab);
         mes += tt++->mesure();
@@ -6535,8 +6530,7 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
         cout << "  - Nb of boundary edges " << nbe << endl;
     }
     
-    MeshS *Tht;
-    Tht=new MeshS(nv, itt, nbe, vertices, triangles, bbedges);
+    MeshS *Tht=new MeshS(nv, itt, nbe, vertices, triangles, bbedges);
     Tht->BuildGTree();    // Add JM. Oct 2010
     
     delete gtree;
@@ -7641,7 +7635,7 @@ public:
         args.SetNameParam(n_name_param, name_param, nargs);
         
         if (nargs[1] || nargs[3])
-            CompileError("obselete function, to extrat a region of the mesh3, use trunc function");
+            CompileError("obselete function, to extract a region of the mesh3, use trunc function...this function returns a part of boundary 3D mesh  ->  a meshS type");
         
         if (nargs[0] && nargs[2])
             CompileError("uncompatible extractmesh (Th, label= , refface=  ");
@@ -7749,11 +7743,6 @@ AnyType ExtractMesh_Op::operator () (Stack stack)  const {
     return pThnew;
     
 }
-
-
-
-
-
 
 
 
@@ -7888,7 +7877,8 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
     R3 Pn(1e100, 1e100, 1e100), Px(-1e100, -1e100, -1e100);
     // returned mesh3
     const Mesh3 *th0 = 0;
-    
+    // flag for meshS
+    int haveMeshS=0;
     
     // determine the max structure size of the new mesh
     for (int i = 0; i < tab->n; i++) {
@@ -7898,7 +7888,8 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
         nbt += Th3.nt;
         nbvx += Th3.nv;
         nbex += Th3.nbe;
-        
+        if (Th3.meshS)
+            haveMeshS++;
         for (int k = 0; k < Th3.nt; k++) {
             for (int e = 0; e < 6; e++) {
                 hmin = min(hmin, Th3[k].lenEdge(e));// calcul de .lenEdge pour un Mesh3
@@ -7975,11 +7966,12 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
         
         for (int k = 0; k < Th3.nt; k++) {
             const Tet &K(Th3.elements[k]);
-            int iv[4];
-            iv[0] = gtree->ToClose(K[0], hseuil) - v;
-            iv[1] = gtree->ToClose(K[1], hseuil) - v;
-            iv[2] = gtree->ToClose(K[2], hseuil) - v;
-            iv[3] = gtree->ToClose(K[3], hseuil) - v;
+            int iv[Tet::nea];
+            for (int iea=0;iea<Tet::nea;iea++)
+                iv[iea] = gtree->ToClose(K[iea], hseuil) - v;
+         //   iv[1] = gtree->ToClose(K[1], hseuil) - v;
+          //  iv[2] = gtree->ToClose(K[2], hseuil) - v;
+           // iv[3] = gtree->ToClose(K[3], hseuil) - v;
             (tt++)->set(v, iv, K.lab);
         }
         
@@ -8001,8 +7993,8 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
             const Triangle3 &K(Th3.be(k));
             if ((K.lab != lab_delete)) {// &&(K.lab != 3))
                 int iv[3];
-                for(int i=0;i<3;i++)
-                    iv[i] = Th3.operator () (K[i]);
+                for(int ii=0;ii<3;ii++)
+                    iv[ii] = Th3.operator () (K[ii]);
                 
                 const R3 r3vi(K(PtHat));
                 const Vertex3 &vi(r3vi);
@@ -8045,18 +8037,20 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
         cout << "     Nb of glu3D  Boundary faces " << nbex - nbe << endl;
     }
     
-    if (nbt == 0) {
+    /*if (nbt == 0) {
         cout << " The result of GlueMesh is a meshS " << endl;
         ffassert(0);
-    }
-    else {
+    }*/
+   // else {
         Mesh3 *mpq = new Mesh3(nbv, nbt, nbe, v, t, b);
         mpq->BuildGTree();
-        
+    
+    if (haveMeshS)
+        mpq->BuildMeshS();
         // Add2StackOfPtr2FreeRC(stack,mpq);
         
         return mpq;
-    }
+   // }
 }
 
 struct Op_GluMesh3tab: public OneOperator {
@@ -8164,17 +8158,7 @@ long BuildBoundaryElementAdj (const MeshS &Th, bool check = 0, KN<long> *pborder
             nk++;
         }
     }
-  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
  
     if (err && err3 && check) {ExecError(" The surface mesh in no manifold ");}
     
@@ -8784,8 +8768,7 @@ AnyType Cube_Op::operator () (Stack stack)  const {
     Th3_t->BuildGTree();
    // Th3_t->getTypeMesh3()=1;
     Add2StackOfPtr2FreeRC(stack, Th3_t);
-    cout << "call "<< endl;
-    Th3_t->BuildMeshS();
+
     return Th3_t;
 }
 
@@ -8847,6 +8830,146 @@ AnyType Square_Op::operator () (Stack stack)  const {
 }
 
 
+
+
+
+
+
+class BuildMeshS_Op: public E_F0mps
+{
+public:
+    Expression eTh;
+    static const int n_name_param = 1+1;
+    static basicAC_F0::name_and_type name_param [];
+    Expression nargs[n_name_param];
+    KN_<long> arg (int i, int ii, Stack stack, KN_<long> a) const {
+        ffassert(!(nargs[i] && nargs[ii]));
+        i = nargs[i] ? i : ii;
+        return nargs[i] ? GetAny<KN_<long> >((*nargs[i])(stack)) : a;
+    }
+    
+    double arg (int i, Stack stack, double a) const {return nargs[i] ? GetAny<double>((*nargs[i])(stack)) : a;}
+    long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}   ////*****
+
+    
+public:
+    BuildMeshS_Op (const basicAC_F0 &args, Expression tth)
+    : eTh(tth) {
+        args.SetNameParam(n_name_param, name_param, nargs);
+       
+    }
+    AnyType operator () (Stack stack)  const;
+};
+
+
+basicAC_F0::name_and_type BuildMeshS_Op::name_param [] = {
+
+    {"angle", &typeid(double)},
+};
+
+
+
+AnyType BuildMeshS_Op::operator () (Stack stack)  const {
+    
+    MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+    Mesh3 *pTh = GetAny<Mesh3 *>((*eTh)(stack));
+    Mesh3 &Th = *pTh;
+    ffassert(pTh);
+    
+    if (verbosity>5) cout << "Enter in BuilMesh_Op.... " << endl;
+    
+    // angle minimal between 2 triangles to determine if the edge is a boundary
+    // default value is based on isocaedrom Dietary angle alpha = pi - arcsin(2/3) --> minimal angle criteria = arcsin(2/3) = 42 deg
+    const double angle(arg(0, stack, 8.*atan(1.)/9.));  // default angle = 40 deg));
+    if(atan(1)*4<=angle)
+        ExecError( " the criteria angle must be inferior to pi alpha");
+  
+    double tolerance = cos(angle);
+    
+    if (verbosity>5) cout << "Angle criteria to determine an edge:" << angle << endl;
+    
+    if (Th.meshS) {
+        cout << "Caution, Mesh3::meshS previously created " << endl;;
+        Add2StackOfPtr2FreeRC(stack, pTh);
+        return pTh;
+    }
+    
+    else {
+        int nv = Th.nv;
+        int nt = Th.nt;
+        int nbe = Th.nbe;
+        
+        Vertex3 *v = new Vertex3[nv];
+        Tet *t = new Tet[nt];
+        Tet *tt = t;
+        Triangle3 *b = new Triangle3[nbe];
+        Triangle3 *bb = b;
+        double mes = 0, mesb = 0;
+        
+        if (verbosity>5) cout << "copy the original mesh3... nv= " << nv <<" nt= " << nt << " nbe= " << nbe << endl;
+        int i_som=0, i_elem=0, i_border=0;
+        
+        for (int i = 0; i < nv; i++) {
+            const Vertex3 &K(Th.vertices[i]);
+            v[i].x = K.x;
+            v[i].y = K.y;
+            v[i].z = K.z;
+            v[i].lab = K.lab;
+        }
+        
+        
+        for (int i = 0; i < nt; i++) {
+            const Tet &K(Th.elements[i]);
+            int iv[4];
+            int lab=K.lab;
+            
+            for (int jj = 0; jj < 4; jj++) {
+                iv[jj] = Th.operator () (K[jj]);
+                assert(iv[jj] >= 0 && iv[jj] < nv);
+            }
+            (tt)->set(v, iv, lab);
+            mes += tt++->mesure();
+       }
+        
+        
+        for (int i = 0; i < nbe; i++) {
+            const Triangle3 &K(Th.be(i));
+            int iv[3];
+            int lab=K.lab;
+            for (int jj = 0; jj < 3; jj++) {
+                iv[jj] = Th.operator () (K[jj]);
+                assert(iv[jj] >= 0 && iv[jj] < nv);
+            }
+            (bb)->set(v, iv, lab);
+            mesb += bb++->mesure();
+       }
+        
+        Mesh3 *Th_t = new Mesh3(nv,nt,nbe,v,t,b);
+        Th_t->BuildGTree();
+        // build the meshS and the edges list
+        Th_t->BuildMeshS(angle);
+        *mp = mps;
+        Add2StackOfPtr2FreeRC(stack, Th_t);
+        return Th_t;
+    }
+    
+}
+
+
+
+class BuildMeshSFromMesh3: public OneOperator {
+public:
+    BuildMeshSFromMesh3 (): OneOperator(atype<pmesh3>(), atype<pmesh3>()) {}
+    
+    E_F0*code (const basicAC_F0 &args) const {
+        return new BuildMeshS_Op(args,t[0]->CastTo(args[0]));
+        
+    }
+};
+
+
+
+
 #ifndef WITH_NO_INIT
 
 // <<dynamic_loading>>
@@ -8884,6 +9007,8 @@ static void Load_Init () {
     Global.Add("extract", "(", new ExtractMesh2D);   // obselete function -> use trunc function
     Global.Add("extract", "(", new ExtractMesh);     // take a Mesh3 in arg and return a part of MeshS
     Global.Add("movemesh23", "(", new Movemesh2D_S);
+    // for a mesh3 Th3, if Th3->meshS=NULL, build the meshS associated
+    Global.Add("buildSurface", "(", new BuildMeshSFromMesh3);
     
    // Global.Add("showborder", "(", new OneOperator1<long, const Mesh3 *>(ShowBorder<Mesh3>));
    // Global.Add("getborder", "(", new OneOperator2<long, const Mesh3 *, KN<long> *>(GetBorder<Mesh3>));

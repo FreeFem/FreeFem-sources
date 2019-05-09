@@ -79,7 +79,6 @@ void end_mesh (void *dataff) {
 
 	Th.mes = 0.;
 	Th.mesb = 0.;
-	Th.getTypeMesh3() = 1;
 
 	for (int i = 0; i < Th.nbe; i++) {
 		Th.mesb += Th.be(i).mesure();
@@ -92,11 +91,11 @@ void end_mesh (void *dataff) {
 		cout << "end_mesh:  Th.mes = " << Th.mes << " Th.mesb = " << Th.mesb << endl;
 	}
 
-	if (Th.nt > 0) {
-		Th.BuildAdj();
-		Th.Buildbnormalv();
-		Th.BuildjElementConteningVertex();
-	}
+	//if (Th.nt > 0) {
+    Th.BuildAdj();
+    Th.Buildbnormalv();
+    Th.BuildjElementConteningVertex();
+	//}
 
 	// end add
 

@@ -46,7 +46,7 @@ namespace Fem2D
 #include "rgraph.hpp"
 #include "fem.hpp"
 #include "PlotStream.hpp"
-
+#include "AFunction.hpp"
 
 namespace Fem2D
 {
@@ -201,12 +201,10 @@ namespace Fem2D
         }
         
         BuildBound();
-        // if(nt > 0){
         BuildAdj();
         Buildbnormalv();
         BuildjElementConteningVertex();
-        // }
-        //}
+
         if(meshS) {
             meshS->BuildBound();
             if(meshS->nt > 0){
@@ -337,7 +335,8 @@ namespace Fem2D
                 ffassert( newvertex== iii );
                 
                 Element *tt;
-                if(this->nt !=0) tt=new Element[this->nt];
+                if(!this->nt) ExecError( " the tetrahedrons list is empty, not possible for a mesh3 must be a meshS type " );
+                tt=new Element[this->nt];
                 BorderElement *bb = new BorderElement[this->nbe];
                 
                 Element *ttt=tt;
@@ -1126,7 +1125,7 @@ namespace Fem2D
         
     }
     
-    
+  /*
     void Mesh3::BuildMeshS()
     {
         if (meshS) {
@@ -1174,7 +1173,6 @@ namespace Fem2D
             meshS->vertices[iv].z=P.z;
             meshS->vertices[iv].lab=P.lab;
         }
-        cout <<" pt ok " <<endl;
         // set the elements meshS, come from the border elements mesh3
         
         ffassert(nbe);
@@ -1184,10 +1182,9 @@ namespace Fem2D
         for (int it=0; it<nbe; it++) {
             int iv[3];
             const BorderElement & K(this->borderelements[it]);
-            for (int j=0;j<3;++j) {
+            for (int j=0;j<3;++j)
                 iv[j]=v_num_surf[this->operator()(K[j])];
-                //  ffassert(0<iv[j] && iv[j] < nbv_surf);
-            }
+              
             int lab=K.lab;
             meshS->elements[it].set(meshS->vertices,iv,lab);
             meshS->mes += meshS->elements[it].mesure();
@@ -1195,31 +1192,57 @@ namespace Fem2D
         
         ffassert( meshS->nt >=0 && meshS->elements);
         
-        
-        
         meshS->nbe=0;
         meshS->borderelements= new BoundaryEdgeS[nbe];
-        
-        
         meshS->BuildBound();
         meshS->BuildAdj();
         meshS->Buildbnormalv();
         meshS->BuildjElementConteningVertex();
-        int nbe=0,nbi=0;
+        
+        //BoundaryEdgeS *bb = b;
+        
+        int nbeS=0,nbiS=0;
         // Build edges from the triangle list
         for (int i = 0; i < meshS->nt; i++)
             for (int j = 0; j < 3; j++) {
                 
                 int jt = j, it = meshS->ElementAdj(i, jt);
                 if ((it == i || it < 0)) {
-                    nbe++;// boundary edge ...
+                    nbeS++;// boundary edge ...
+                    
                 } else {
-                    nbi++;// internal edge count 2 times ...
+                    nbiS++;
                 }
-                if (verbosity>5) cout << " Building edges from mesh3 nbe: "<< nbe << " nbi: " << nbi << endl;
+                if (verbosity>5) cout << " Building edges from mesh3 nbe: "<< nbeS << " nbi: " << nbiS << endl;
             }
+        
+          meshS->borderelements= new BoundaryEdgeS[nbeS];
+        
+        // this loop can be optimized
+        // to do a pair num element / num face for boundary
+        for (int i = 0; i < meshS->nt; i++)
+            for (int j = 0; j < 3; j++) {
+                
+                int jt = j, it = meshS->ElementAdj(i, jt);
+                if ((it == i || it < 0)) {
+                    const TriangleS &K(meshS->elements[i]);
+                    const TriangleS &K_adj(meshS->elements[it]);
+                    int iv[2];
+                    for(int ip=0;ip<2;ip++)
+                        iv[ip] = meshS->operator () (K [nvedgeTria[j][ip]] );
+                    int lab=min(K.lab, K_adj.lab);;
+                    meshS->borderelements[it].set(meshS->vertices,iv,lab);
+                    meshS->mesb += meshS->borderelements[it].mesure();
+                }
+            }
+        
+        
+        
+        
+        
+        
     }
-    
+    */
     
     
     int Mesh3::SaveSurface(const string & filename) const
@@ -1449,9 +1472,9 @@ namespace Fem2D
         
         //  Add FH to be consitant we all constructor ...  July 09
         BuildBound();
-        if(!nt) {
-            cerr << " the tetrahedrons list is empty, not possible for a mesh3 ";
-            ffassert(0);}
+        if(!nt)
+            ExecError( " the tetrahedrons list is empty, not possible for a mesh3 must be a meshS type " );
+
         BuildAdj();
         Buildbnormalv();
         BuildjElementConteningVertex();
@@ -1959,6 +1982,90 @@ namespace Fem2D
         return kk;
     }
     
+    
+    
+    
+    
+    
+    void Mesh3::BuildMeshS(double angle)
+    {
+     
+        if (meshS) {
+            cout << "error, Mesh3::meshS previously created " << endl;
+            ffassert(0);
+        }
+        if (verbosity>5) cout << "Build meshS from mesh3.... " << endl;
+        
+      
+       int mes = 0, mesb = 0;
+ 
+        int *v_num_surf, *map_v_num_surf;
+        // Extraction of Vertex  belongs to the surface
+        v_num_surf=new int[nv];
+        map_v_num_surf=new int[nv];
+        for (int k=0; k<nv; k++){
+            v_num_surf[k]=-1;
+            map_v_num_surf[k]=0;
+        }
+        // Search Vertex on the surface
+        int nbv_surf=0;
+        for (int k=0; k<nbe; k++) {
+            const Triangle3 & K(borderelements[k]);
+            for(int jj=0; jj<3; jj++){
+                int i0=this->operator()(K[jj]);
+                if( v_num_surf[i0] == -1 ){
+                    v_num_surf[i0] = nbv_surf;
+                    map_v_num_surf[nbv_surf]= i0;
+                    nbv_surf++;
+                }
+            }
+        }
+        
+        // set the surface vertex in meshS
+        ffassert(nbv_surf);
+        
+        Vertex3 *vS = new Vertex3[nbv_surf];
+        TriangleS *tS = new TriangleS[nbe];
+        TriangleS *ttS = tS;
+      
+        
+        for (int iv=0; iv<nbv_surf; iv++) {
+            int k0 = map_v_num_surf[iv];
+            const Vertex3 & P = vertices[k0];
+            vS[iv].x=P.x;
+            vS[iv].y=P.y;
+            vS[iv].z=P.z;
+            vS[iv].lab=P.lab;
+        }
+        
+        ffassert(nbe);
+        
+        
+        for (int it=0; it<nbe; it++) {
+            int iv[3];
+            const Triangle3 & K(borderelements[it]);
+            for (int j=0;j<3;++j)
+                iv[j]=v_num_surf[this->operator()(K[j])];
+            
+            int lab=K.lab;
+            (ttS)->set(vS,iv,lab);
+            mes += ttS++->mesure();
+        }
+        
+        // first building without list edges
+        meshS = new MeshS(nbv_surf,nbe,0,vS,tS,0);
+        meshS->v_num_surf=new int(*v_num_surf);
+        meshS->liste_v_num_surf=new int(*map_v_num_surf);
+        delete [] v_num_surf;
+        delete [] map_v_num_surf;
+        // build the edge list
+        meshS->BuildEdges(angle);
+
+        meshS->BuildGTree();
+        
+        
+    }
+
     
 } //   End  namespace Fem2D
 

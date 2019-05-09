@@ -546,18 +546,12 @@ pmeshS pmesh_gamma(Stack stack, pmesh3 * const & p)
 { throwassert(p && *p) ;
   const Mesh3 & Th = **p;
   const MeshS *ThS = Th.meshS;
-  // Add2StackOfPtr2FreeRC(stack,ThS);
+    if(ThS==NULL) cout << "The meshS member is empty! " << endl;
   return (ThS);
 }
+long pmesh_nadjnomanifold(pmesh3 * p) { ffassert(p) ;  return *p ? ((**p).meshS)->nadjnomanifold : 0;}
 
-/*void pmesh_buildSurf(Stack stack, pmesh3 * const & p)
-{ throwassert(p && *p) ;
-    const Mesh3 & Th = **p;
-    MeshS *ThS = Th.meshS;
-    Th.BuildMeshS(&ThS);
-    // Add2StackOfPtr2FreeRC(stack,ThS);
-    //return (ThS);
-}*/
+long pmesh_nadjnomanifold(pmeshS * p) { ffassert(p) ;  return *p ? (**p).nadjnomanifold : 0;}
 
 
 // Tools for 3D surface mesh
@@ -587,11 +581,11 @@ long getlab(GlgElement<MeshS> const & a){  return a.lab();}
 long getlab(GlgBoundaryElement<MeshS> const & a){  return a.lab();}
 R getmes(GlgElement<MeshS> const & a){  return a.mes();}
 
-double pmesh_mes(pmeshS * p) { ffassert(p && *p) ;  return (**p).mes ;}
-double pmesh_mesb(pmeshS * p) { ffassert(p && *p) ;  return (**p).mesb;}
-long pmesh_nt(pmeshS * p) { ffassert(p && *p) ;  return (**p).nt ;}
-long pmesh_nv(pmeshS * p) { ffassert(p && *p) ;  return (**p).nv ;}
-long pmesh_nbe(pmeshS * p) { ffassert(p && *p) ;  return (**p).nbe ;}
+double pmesh_mes(pmeshS * p) { ffassert(p) ;  return *p ? (**p).mes : 0.0;}
+double pmesh_mesb(pmeshS * p) { ffassert(p) ;  return *p ? (**p).mesb : 0.0;}
+long pmesh_nt(pmeshS * p) { ffassert(p) ;  return *p ? (**p).nt : 0;}
+long pmesh_nv(pmeshS * p) { ffassert(p) ;  return *p ? (**p).nv : 0;}
+long pmesh_nbe(pmeshS * p) { ffassert(p) ;  return *p ? (**p).nbe : 0;}
 
 double pmesh_hmax(pmeshS * p)
 { ffassert(p && *p) ;
@@ -2045,8 +2039,8 @@ void init_lgmesh3() {
  Add<pmesh3*>("hmin",".",new OneOperator1<double,pmesh3*>(pmesh_hmin));
 
  Add<pmesh3*>("Gamma",".",new OneOperator1s_<pmeshS,pmesh3*>(pmesh_gamma));
- //Add<pmesh3*>("BuidMeshS",".",new OneOperator1s_<void,pmesh3*>(pmesh_buildSurf));
- 
+ Add<pmesh3*>("nbnomanifold",".",new OneOperator1<long,pmesh3*>(pmesh_nadjnomanifold));
+    
  //3D surface
  Dcl_Type<GlgVertex<MeshS> >();
  Dcl_Type<GlgElement<MeshS> >( );
@@ -2099,7 +2093,7 @@ void init_lgmesh3() {
  Add<pmeshS*>("nbe",".",new OneOperator1<long,pmeshS*>(pmesh_nbe));
  Add<pmeshS*>("hmax",".",new OneOperator1<double,pmeshS*>(pmesh_hmax));
  Add<pmeshS*>("hmin",".",new OneOperator1<double,pmeshS*>(pmesh_hmin));
-  
+ Add<pmeshS*>("nbnomanifold",".",new OneOperator1<long,pmeshS*>(pmesh_nadjnomanifold));
   
  // 3D volume
  TheOperators->Add("<-",

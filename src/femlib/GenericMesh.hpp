@@ -481,7 +481,7 @@ public:
   typedef  EF23::GTree<V> GTree;
   typedef typename Element::RdHat RdHat;// for parametrization                                        
 
-  int nt,nv,nbe;
+  int nt,nv,nbe,nadjnomanifold;
   R mes,mesb;
   //private:
   V *vertices;
@@ -781,7 +781,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         int err=0;
         if(verbosity>5)
             cout << "   -- BuildAdj:nva= " << nva << " " << nea << " "<< nbe << endl;
-        int nadjnomanifold=0;
+        nadjnomanifold=0;
         for (int k=0;k<nt;++k)
             for (int i=0;i<nea;++i) {
                 int sens;
