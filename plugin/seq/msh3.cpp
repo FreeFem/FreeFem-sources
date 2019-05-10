@@ -3624,8 +3624,7 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 
 		assert(np <= nbe_t);
 
-		int *ind_nbe_t_tmp = new int [np];
-		ind_nbe_t_tmp = NULL;
+		int *ind_nbe_t_tmp = new int[np]();
 
 		for (int i_border = 0; i_border < np; i_border++) {
 			ind_nbe_t_tmp[i_border] = ind_nbe_t[ind_np[i_border]];
