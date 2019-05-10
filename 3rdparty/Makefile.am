@@ -20,6 +20,7 @@ EXTRA_DIST= \
 ./hypre/ff-flags.inc \
 ./metis/Makefile \
 ./metis/Makefile-metis.in \
+./metis/metis-5.1.patch \
 ./mmg3d/Makefile \
 ./mmg3d/patch-mmg3dv4.diff \
 ./mshmet/Makefile \

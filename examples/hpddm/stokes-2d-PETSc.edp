@@ -38,7 +38,7 @@ matrix<real> K = vPb(Wh, Wh);
 real[int] rhs = vPb(0, Wh);
 
 Mat A(K, arrayIntersection, restrictionIntersection, D, bs = 1);
-set(A, sparams = "-pc_type lu -pc_factor_mat_solver_package mumps");
+set(A, sparams = "-pc_type lu -pc_factor_mat_solver_type mumps");
 Wh<real> def(b);
 b[] = A^-1 * rhs;
 plotMPI(Th, b[], "Global solution PETSc", Pk, def, real, 3, 1);

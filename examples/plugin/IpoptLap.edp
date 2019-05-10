@@ -3,8 +3,16 @@ load "ff-Ipopt";
 int NN=10;
 
 mesh Th = square(NN,NN);
-
 fespace Vh(Th,P1);
+{  // verif no thresholding in operation 1*A; 
+	macro grad(u) [dx(u),dy(u)]//
+	varf a(u,v) = int2d(Th)(grad(u)'*grad(v));
+	matrix A = a(Vh,Vh);
+	matrix A1 = 1.*A;
+	assert(A.nnz == A1.nnz ); 
+}  // end verification 
+
+
 func f=1;
 func g=0;
 

@@ -7024,6 +7024,7 @@ dim(dimProblem(l))
         const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[3+3]);
         assert(op);
         precon = op->Find("(",ArrayOfaType(atype<KN<R>* >(),false));
+        ffassert(precon);
     }
 
     VF=isVF(op->largs);
