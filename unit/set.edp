@@ -3,18 +3,28 @@ include "test.idp"
 cout << "set" << endl;
 real t;
 
-matrix A = [[1, 2]];
-int[int] I, J;
-real[int] D;
+verbosity=3;
 
+matrix A = [[1, 0], [0, 1]];
+real[int] b = [1, 0];
+real[int] sol(2);
 
-cout << A << endl;
-t = clock();
+set(A, solver=CG);
+sol = A^-1 * b;
+cout << sol << endl;
+
+set(A, solver=LU);
+sol = A^-1 * b;
+cout << sol << endl;
+
+set(A, solver=Crout);
+sol = A^-1 * b;
+cout << sol << endl;
+
+set(A, solver=Cholesky);
+sol = A^-1 * b;
+cout << sol << endl;
+
 set(A, solver=sparsesolver);
-t = clock() - t;
-matrix C = A - A;
-[I, J, D] = C;
-cout << A << endl;
-C = vLaplacian(Uh, Uh, solver=LU, factorize=1);
-test(C == true);
-//to finish
+sol = A^-1 * b;
+cout << sol << endl;

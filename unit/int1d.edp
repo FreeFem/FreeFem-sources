@@ -8,24 +8,89 @@ real res;
 t = clock();
 res = int1d(Th, 1)(1.);
 t = clock() - t;
-test(res);
+cout << IND << t << endl;
+test(res == 1);
 
 t = clock();
-res = int1d(Th)(1.);
+res = int1d(Th, 1)(x);
 t = clock() - t;
-test(res);
+cout << IND << t << endl;
+test(res == (1./2.));
 
 t = clock();
-res = int1d(Th, qfe=qf1pE)(1.);
+res = int1d(Th, 1, 2)(x + y);
 t = clock() - t;
-test(res);
+cout << IND << t << endl;
+test(abs(2 - res) < HWERROR);
 
 t = clock();
-res = int1d(Th, qforder=2)(1.);
+res = int1d(Th, 1, qfe=qf1pE)(1.);
 t = clock() - t;
-test(res);
+cout << IND << t << endl;
+test(res == 1);
 
 t = clock();
-res = int1d(Th, qforder=2)(1.);
+res = int1d(Th, 1, qforder=2)(1.);
 t = clock() - t;
-test(res);
+cout << IND << t << endl;
+test(res == 1);
+
+t = clock();
+res = int1d(Th, 1, qfe=qf2pE)(1.);
+t = clock() - t;
+cout << IND << t << endl;
+test(abs(1 - res) < HWERROR);
+
+t = clock();
+res = int1d(Th, 1, qforder=3)(1.);
+t = clock() - t;
+cout << IND << t << endl;
+test(abs(1 - res) < HWERROR);
+
+t = clock();
+res = int1d(Th, 1, qfe=qf3pE)(1.);
+t = clock() - t;
+cout << IND << t << endl;
+test(abs(1 - res) < HWERROR);
+
+t = clock();
+res = int1d(Th, 1, qforder=6)(1.);
+t = clock() - t;
+cout << IND << t << endl;
+test(abs(1 - res) < HWERROR);
+
+t = clock();
+res = int1d(Th, 1, qforder=8)(1.);
+t = clock() - t;
+cout << IND << t << endl;
+test(abs(1 - res) < HWERROR);
+
+t = clock();
+res = int1d(Th, 1, qfe=qf4pE)(1.);
+t = clock() - t;
+cout << IND << t << endl;
+test(abs(1 - res) < HWERROR);
+
+t = clock();
+res = int1d(Th, 1, qfe=qf5pE)(1.);
+t = clock() - t;
+cout << IND << t << endl;
+test(abs(1 - res) < HWERROR);
+
+t = clock();
+res = int1d(Th, 1, qforder=10)(1.);
+t = clock() - t;
+cout << IND << t << endl;
+test(abs(1 - res) < HWERROR);
+
+t = clock();
+res = int1d(Th, 1, qforder=2)(1.);
+t = clock() - t;
+cout << IND << t << endl;
+test(abs(1 - res) < HWERROR);
+
+t = clock();
+res = int1d(Th, 1, qfe=qf1pElump)(1.);
+t = clock() - t;
+cout << IND << t << endl;
+test(abs(1 - res) < HWERROR);
