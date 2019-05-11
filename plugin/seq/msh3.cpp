@@ -1817,15 +1817,12 @@ Mesh3*GluMesh3 (listMesh3 const &lst) {
         cout << "     Nb of glu3D  Boundary faces " << nbex - nbe << endl;
     }
     
-    if (nbt == 0) {
-        cout << "Impossible building with not tetrahedrons for a mesh3, use meshS "<<endl;
-        ffassert(0);
-    } else {
-        Mesh3 *mpq = new Mesh3(nbv, nbt, nbe, v, t, b); //mpq->typeMesh3=1;
+  
+        Mesh3 *mpq = new Mesh3(nbv, nbt, nbe, v, t, b);
         mpq->BuildGTree();
         if (verbosity > 2) {cout << "fin de BuildGTree()" << endl;}
         return mpq;
-    }
+
 }
 
 template<class RR, class AA = RR, class BB = AA>
@@ -2072,6 +2069,23 @@ struct Op3_setmeshS: public binary_function<AA, BB, RR> {
     }
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Movemesh3D
 
 class Movemesh3D_Op: public E_F0mps
@@ -2145,15 +2159,12 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
     Mesh3 &Th = *pTh;
     MeshS &ThS = *(pTh)->meshS;
     //Mesh3 *m = pTh;    // question a quoi sert *m ??
-    // for volume 3D mesh
     int nbv = Th.nv;// nombre de sommet
     int nbt = Th.nt;// nombre de triangles
     int nbe = Th.nbe;    // nombre d'aretes fontiere
-    //int typeMesh3 = Th.getTypeMesh3();
     KN<int> takemesh(Th.nv);
     MeshPoint *mp3(MeshPointStack(stack));
     takemesh = 0;
-    
     // for surface 3D mesh
     int nbvS = 0;
     int nbtS = 0;
@@ -2396,14 +2407,14 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
     }
     
   //  if (typeMesh3 !=0) {
-        if (flagsurfaceall == 1)
-            T_Th3->BuildBoundaryElementAdj();
+       // if (flagsurfaceall == 1)
+        //    T_Th3->BuildBoundaryElementAdj();
         T_Th3->BuildGTree();
         Add2StackOfPtr2FreeRC(stack, T_Th3);
     //}
     if (T_Th3->meshS) {
-        if (flagsurfaceall == 1)
-            T_Th3->meshS->BuildBoundaryElementAdj();
+      //  if (flagsurfaceall == 1)
+        //    T_Th3->meshS->BuildBoundaryElementAdj();
         T_Th3->meshS->BuildGTree();
     }
     
@@ -2635,8 +2646,8 @@ AnyType MovemeshS_Op::operator () (Stack stack)  const {
     
     
     
-    if (flagsurfaceall == 1)
-        T_Th->BuildBoundaryElementAdj();
+  //  if (flagsurfaceall == 1)
+   //     T_Th->BuildBoundaryElementAdj();
     
     T_Th->BuildGTree();
     Add2StackOfPtr2FreeRC(stack, T_Th);
@@ -3258,7 +3269,7 @@ MeshS*func_movemesh23(const Mesh &Th, KN<double> txx, KN<double> tyy, KN<double>
     }
     
     ffassert(nbflip == 0 || nbflip == ThS->nt);
-    if (flagsurfaceall == 1) {ThS->BuildBoundaryElementAdj();}
+    //if (flagsurfaceall == 1) {ThS->BuildBoundaryElementAdj();}
     
     return ThS;
     
@@ -5912,8 +5923,10 @@ AnyType DeplacementTab_Op::operator () (Stack stack)  const {
     
     Mesh3 *T_Th3 = Transfo_Mesh3(precis_mesh, Th, txx, tyy, tzz, border_only,
                                  recollement_elem, recollement_border, point_confondus_ok, 1);
+    T_Th3->BuildGTree();
     
-    if (nbt != 0) {
+    
+    /*if (nbt != 0) {
         // T_Th3->BuildBound();
         
         // T_Th3->BuildAdj();
@@ -5929,7 +5942,7 @@ AnyType DeplacementTab_Op::operator () (Stack stack)  const {
         // T_Th3->decrement();
     } else {
         if (flagsurfaceall == 1) {T_Th3->BuildBoundaryElementAdj();}
-    }
+    }*/
     
     Add2StackOfPtr2FreeRC(stack, T_Th3);
     
@@ -8089,6 +8102,7 @@ AnyType Op_GluMesh3tab::Op::operator () (Stack stack)  const {
 }
 
 
+
 // return nbc the number of conex componants
 //template< class Mesh_t>
 long BuildBoundaryElementAdj (const MeshS &Th, bool check = 0, KN<long> *pborder = 0) {
@@ -8839,7 +8853,7 @@ class BuildMeshS_Op: public E_F0mps
 {
 public:
     Expression eTh;
-    static const int n_name_param = 1+1;
+    static const int n_name_param = 1;
     static basicAC_F0::name_and_type name_param [];
     Expression nargs[n_name_param];
     KN_<long> arg (int i, int ii, Stack stack, KN_<long> a) const {

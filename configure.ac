@@ -2264,6 +2264,7 @@ AC_OUTPUT(
     examples/bug/Makefile
     examples/other/Makefile
     examples/3d/Makefile
+    examples/3dSurf/Makefile 
 )
 
 AC_MSG_NOTICE([  freefem++ used  download : $enable_download ])
