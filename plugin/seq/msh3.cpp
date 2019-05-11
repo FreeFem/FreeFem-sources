@@ -2517,6 +2517,8 @@ AnyType MovemeshS_Op::operator () (Stack stack)  const {
     MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
     MeshS *pTh = GetAny<MeshS *>((*eTh)(stack));
     ffassert(pTh);
+    
+    
     typedef typename MeshS::Element T;
     typedef typename MeshS::BorderElement B;
     typedef typename MeshS::Vertex V;
@@ -3533,6 +3535,10 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
                      int &border_only, int &recollement_element, int &recollement_border, int &point_confondus_ok, int orientation) {
     // cas besoin memoire important
     
+    typedef typename MeshS::Element T;
+    typedef typename MeshS::BorderElement B;
+    typedef typename MeshS::Vertex V;
+    
     int nv_t, nt_t, nbe_t;
     int *Numero_Som;
     
@@ -3560,11 +3566,11 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
     
     if (verbosity > 1) cout << " fin: SamePointElement " << endl;
     
-    Vertex3 *v = new Vertex3[nv_t];
-    TriangleS *t = new TriangleS[nt_t];
-    TriangleS *tt = t;
-    BoundaryEdgeS *b = new BoundaryEdgeS[nbe_t];
-    BoundaryEdgeS *bb = b;
+    V *v = new V[nv_t];
+    T *t = new T[nt_t];
+    T *tt = t;
+    B *b = new B[nbe_t];
+    B *bb = b;
     
     double mes = 0, mesb = 0;
     if (verbosity > 1)
@@ -3575,7 +3581,7 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
     for (int i = 0; i < nv_t; i++) {
         int &ii = ind_nv_t[i];
         assert(Numero_Som[ii] == i_som);
-        const Vertex3 &K(ThS.vertices[ii]);
+        const V &K(ThS.vertices[ii]);
         v[i_som].x = tab_XX[ii];
         v[i_som].y = tab_YY[ii];
         v[i_som].z = tab_ZZ[ii];
@@ -3590,12 +3596,12 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
     for (int i = 0; i < nt_t; i++) {
         int &ii = ind_nt_t[i];
         // creation of elements
-        const TriangleS &K(ThS.elements[ii]);
-        int iv[3];
+        const T &K(ThS.elements[ii]);
+        int iv[T::nea];
         int lab;
         lab = label_nt_t[i];
         
-        for (int jj = 0; jj < 3; jj++) {
+        for (int jj = 0; jj < T::nea; jj++) {
             iv[jj] = Numero_Som[ThS.operator () (K[jj])];
             assert(iv[jj] >= 0 && iv[jj] < nv_t);
         }
@@ -3614,8 +3620,8 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
     for (int i = 0; i < nbe_t; i++) {
         int &ii = ind_nbe_t[i];
         // creation of elements
-        const BoundaryEdgeS &K(ThS.be(ii));
-        int iv[2];
+        const B &K(ThS.be(ii));
+        int iv[B::nea];
         int lab;
         lab = label_nbe_t[i];
         
@@ -3644,6 +3650,7 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
     delete [] label_nbe_t;
     if (verbosity>10) cout << " --- build MeshS after Transfo " << endl;
     MeshS *T_ThS = new MeshS(nv_t, nt_t, nbe_t, v, t, b);
+    
     T_ThS->liste_v_num_surf=0;
     T_ThS->v_num_surf=0;
     return T_ThS;
@@ -7725,19 +7732,26 @@ AnyType ExtractMesh_Op::operator () (Stack stack)  const {
     }
     
     ns = nbeLab;
+    int  nbv_surf=0;
     Vertex3 *v = new Vertex3[nv];
     TriangleS *b = new TriangleS[ns];
     TriangleS *bb = b;
+    int *v_num_surf=new int[nv], *map_v_num_surf=new int[nv];
     
     for (int ii = 0; ii < Th.nv; ii++) {
         if (takevertex[ii] == -1) {continue;}
         
         int iv = takevertex[ii];
+       
+        v_num_surf[iv] = nbv_surf;
+        map_v_num_surf[nbv_surf]= iv;
+        
         assert(iv >= 0 && iv < nv);
         v[iv].x = Th.vertices[ii].x;
         v[iv].y = Th.vertices[ii].y;
         v[iv].z = Th.vertices[ii].z;
         v[iv].lab = Th.vertices[ii].lab;
+        nbv_surf++;
     }
     
     for (int ibe = 0; ibe < Th.nbe; ibe++) {
@@ -7750,6 +7764,11 @@ AnyType ExtractMesh_Op::operator () (Stack stack)  const {
     }
     
     MeshS *pThnew = new MeshS(nv, ns, 0, v, b, 0);
+    pThnew->v_num_surf=new int(*v_num_surf);
+    pThnew->liste_v_num_surf=new int(*map_v_num_surf);
+   pThnew->BuildEdges();
+    delete [] v_num_surf;
+    delete [] map_v_num_surf;
     pThnew->BuildGTree();
     
     Add2StackOfPtr2FreeRC(stack, pThnew);
@@ -9012,8 +9031,8 @@ static void Load_Init () {
     Global.Add("movemesh", "(", new Movemesh3D(1));
     // Global.Add("movemesh3D", "(", new Movemesh3D_cout);
 
-    Global.Add("deplacement", "(", new DeplacementTab);
-    Global.Add("checkbemesh", "(", new CheckManifoldMesh);
+    Global.Add("deplacement", "(", new DeplacementTab);  // movemesh ?
+    Global.Add("checkbemesh", "(", new CheckManifoldMesh);   // ??
     Global.Add("buildlayers", "(", new BuildLayerMesh);
 
     Global.Add("trunc", "(", new Op_trunc_mesh3);

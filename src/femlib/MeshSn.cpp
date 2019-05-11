@@ -836,12 +836,14 @@ namespace Fem2D
                     typename HashTable<SortArray<int,2>,int>::iterator p= edgesI.find(key);
                     if (!p) {    // 1st time the edge is seen
                         // unit normal
-                        R3 Normal = K.NormalS()/K.NormalS().norme2() ;
-                        R3 Normal_adj = K_adj.NormalS()/K_adj.NormalS().norme2();
+                        R3 Normal = K.NormalS();
+                        Normal /= Normal.norme() ;
+                        R3 Normal_adj = K_adj.NormalS();
+                        Normal_adj /= Normal_adj.norme();
                         R pdt = (Normal,Normal_adj); // scalar product
                         pdt = acos(pdt); // radian angle (Normal,Normal_adj)
                         if(verbosity>15)
-                            cout << "Element num: " << i << " N " << Normal << " Element adjacent num: " << it << " N_adj " << Normal_adj << " angle between N N_adj = " << p <<endl;
+                            cout << "Element num: " << i << " N " << Normal << " Element adjacent num: " << it << " N_adj " << Normal_adj << " angle between N N_adj = " << pdt <<endl;
                         
                         if(pdt >= angle) {
                             if(verbosity>15)
@@ -883,6 +885,12 @@ namespace Fem2D
         // update the number of edges
         nbe = nbeS;
         if (verbosity>5) cout << " Building edges from mesh3 nbe: "<< nbeS << " nbi: " << nbiS << endl;
+        
+        TheAdjacencesLink=0;
+        BuildBound();
+        BuildAdj();
+        Buildbnormalv();
+        BuildjElementConteningVertex();
     }
     
     
