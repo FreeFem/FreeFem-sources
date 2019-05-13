@@ -178,7 +178,6 @@ int runEncodeB64 (int n, unsigned char *inBytes, unsigned char *outBytes) {
 		if (nn == 0) {return l;}
 
 		unsigned char *newInBytes = &inBytes[nbcachedInBytes];
-		// unsigned char *newOutBytes = &outBytes[l];
 		int m = nn - nn % 3;
 		if (nn == m) {
 			l += encodeB64(nn, newInBytes, outBytes);
@@ -570,9 +569,6 @@ void VTU_WRITE_MESH (FILE *fp, const Mesh &Th, bool binary, int datasize, bool s
 
 	fprintf(fp, "\n</DataArray>\n");
 	fprintf(fp, "</Cells>\n");
-	// fprintf(fp,"</Piece>\n");
-	// fprintf(fp,"</UnstructuredGrid>\n");
-	// fprintf(fp,"</VTKFile>\n");
 
 		//---------------------------------- LABELS WITH VTU -------------------------------------------//
 	fprintf(fp, "<CellData Scalars=\"Label\">\n");
@@ -869,9 +865,6 @@ void VTU_WRITE_MESH (FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool 
 
 	fprintf(fp, "\n</DataArray>\n");
 	fprintf(fp, "</Cells>\n");
-	// fprintf(fp,"</Piece>\n");
-	// fprintf(fp,"</UnstructuredGrid>\n");
-	// fprintf(fp,"</VTKFile>\n");
 
 		//---------------------------------- LABELS WITH VTU -------------------------------------------//
 	fprintf(fp, "<CellData Scalars=\"Label\">\n");
@@ -919,203 +912,7 @@ void VTU_WRITE_MESH (FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool 
 	//---------------------------------- LABELS WITH VTU -------------------------------------------//
 }
 
-/*
- * void VTU_WRITE_MESH( FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool surface, bool bigEndian){
- * int nc,nv;
- * if(surface) nc=Th.nt+Th.nbe;
- * else nc=Th.nt;
- * // Mesh
- * // Vertex coordinates
- * BEGINTYPE_VTU( fp, "Points");
- *
- * if(datasize == sizeof(float)){
- *  VTU_DATA_ARRAY( fp, "Float32", "Points", 3 ,binary);
- * }
- * else if(datasize == sizeof(double)) {
- *  VTU_DATA_ARRAY( fp, "Float64", "Points", 3 ,binary);
- * }
- *
- * // write coordinate of vertices :: the same as extension .vtk
- * if(datasize == sizeof(float)){
- *  for(unsigned int i = 0; i < Th.nv; i++){
- *    const Vertex3 & P = Th.vertices[i];
- *    float f[3];
- *    f[0]=P.x;
- *    f[1]=P.y;
- *    f[2]=P.z;
- *    if(binary){
- *      if(!bigEndian) SwapBytes((char*)&f, sizeof(float), 3);
- *      fwrite(&f, sizeof(float), 3, fp);
- *    }
- *    else{
- *      fprintf(fp,"%f %f %f\n",f[0],f[1],f[2]);
- *    }
- *  }
- * }
- * else if(datasize == sizeof(double)){
- *  for(unsigned int i = 0; i < Th.nv; i++){
- *    const Vertex3 & P = Th.vertices[i];
- *    double f[3];
- *    f[0]=P.x;
- *    f[1]=P.y;
- *    f[2]=P.z;
- *    if(binary){
- *      if(!bigEndian) SwapBytes((char*)&f, sizeof(double), 3);
- *      fwrite(&f, sizeof(double), 3, fp);
- *    }
- *    else{
- *      fprintf(fp,"%lf %lf %lf\n",f[0],f[1],f[2]);
- *    }
- *  }
- * }
- * if(binary) fprintf(fp,"\n");
- * ENDTYPE_VTU( fp, "DataArray");
- * ENDTYPE_VTU( fp, "Points");
- *
- * // Elemenents
- * BEGINTYPE_VTU( fp, "Cells");
- * VTU_DATA_ARRAY( fp, "Int32", "connectivity" , binary); // rgmin=0 ; rgmax=nc-1;
- * // begin :: connectivit� des elements
- * if(binary){
- *  int IntType=4;
- *  if(verbosity > 1) printf("writting tetrahedre elements \n");
- *  for(int it=0; it< Th.nt; it++){
- *    const Tet & K( Th.elements[it] );
- *    int iv[IntType];
- *
- *    for(int ii=0; ii<IntType; ii++){
- *      iv[ii] = Th.operator()(K[ii]);
- *    }
- *
- *    if(!bigEndian) SwapBytes((char*)&iv, sizeof(unsigned int), IntType);
- *    fwrite(&iv, sizeof(unsigned int), IntType, fp);
- *  }
- *  if(surface){
- *    if(verbosity > 1) printf("writting border elements \n");
- *    IntType=3;
- *    for(int ibe=0; ibe<Th.nbe; ibe++){
- *      const Triangle3 &K( Th.be(ibe) );
- *
- *      int iv[IntType];
- *      for(int ii=0; ii<IntType; ii++){
- *        iv[ii] = Th.operator()(K[ii]);
- *      }
- *
- *      if(!bigEndian) SwapBytes((char*)&iv, sizeof(unsigned int), IntType);
- *      fwrite(&iv, sizeof(unsigned int), IntType, fp);
- *    }
- *  }
- * }
- * else{
- *  int IntType=4;
- *  if(verbosity > 1) printf("writting tetrahedrons elements \n");
- *  for(int it=0; it< Th.nt; it++){
- *    const Tet &K( Th.elements[it] );
- *
- *    int iv[IntType];
- *    for(int ii=0; ii<IntType; ii++){
- *      iv[ii] = Th.operator()(K[ii]);
- *    }
- *    fprintf(fp,"%d %d %d %d\n", iv[0],iv[1],iv[2],iv[3]);
- *  }
- *  if(surface){
- *    if(verbosity > 1) printf("writting border elements \n");
- *    IntType=3;
- *    for(int ibe=0; ibe<Th.nbe; ibe++){
- *      const Triangle3 &K( Th.be(ibe) );
- *
- *      int iv[IntType];
- *      for(int ii=0; ii<IntType; ii++){
- *        iv[ii] = Th.operator()(K[ii]);
- *      }
- *
- *      fprintf(fp,"%d %d %d\n",iv[0],iv[1],iv[2]);
- *    }
- *  }
- * }
- * if(binary) fprintf(fp, "\n");
- * // end :: connectivit� des elements
- * ENDTYPE_VTU( fp, "DataArray");
- *
- * VTU_DATA_ARRAY( fp, "Int32", "offsets" , binary); // rgmin=; rgmax=;
- * if(binary){
- *  int offsets=0;
- *  int offcell=4;
- *  for(int it=0; it< Th.nt; it++){
- *    offsets+=offcell;
- *    if(!bigEndian) SwapBytes((char*)&offsets, sizeof(unsigned int), 1);
- *    fwrite(&offsets, sizeof(unsigned int), 1, fp);
- *  }
- *  if(surface){
- *    offcell=3;
- *    for(int ibe=0; ibe<Th.nbe; ibe++){
- *      offsets+=offcell;
- *      if(!bigEndian) SwapBytes((char*)&offsets, sizeof(unsigned int), 1);
- *      fwrite(&offsets, sizeof(unsigned int), 1, fp);
- *    }
- *  }
- * }
- * else{
- *  int offsets=0;
- *  int offcell=4;
- *  for(int it=0; it< Th.nt; it++){
- *    offsets+=offcell;
- *    fprintf(fp,"%d ",offsets);
- *  }
- *  if(surface){
- *    offcell=3;
- *    for(int ibe=0; ibe<Th.nbe; ibe++){
- *      offsets+=offcell;
- *      fprintf(fp,"%d ",offsets);
- *    }
- *  }
- * }
- * fprintf(fp,"\n");
- * ENDTYPE_VTU( fp, "DataArray");
- *
- * VTU_DATA_ARRAY( fp, "UInt8", "types", binary); // rgmin=3; rgmax=5;
- * // type cas 2D
- * if(binary){
- *  unsigned int type;
- *  type = VTK_TET;
- *  for(int it=0; it< Th.nt; it++){
- *
- *    if(!bigEndian) SwapBytes((char*)&type, sizeof(unsigned int), 1);
- *    fwrite(&type, sizeof(unsigned int), 1, fp);
- *  }
- *  if(surface){
- *    type=VTK_TRI;
- *    for(int ibe=0; ibe<Th.nbe; ibe++){
- *
- *      if(!bigEndian) SwapBytes((char*)&type, sizeof(unsigned int), 1);
- *      fwrite(&type, sizeof(unsigned int), 1, fp);
- *    }
- *  }
- * }
- * else{
- *  unsigned int type;
- *  type= VTK_TET;
- *  for(int it=0; it< Th.nt; it++){
- *    fprintf(fp,"%d ",type);
- *  }
- *  if(surface){
- *    type=VTK_TRI;
- *    for(int ibe=0; ibe<Th.nbe; ibe++){
- *      fprintf(fp,"%d ",type);
- *    }
- *  }
- * }
- * fprintf(fp,"\n");
- * // end type cas 3D
- * ENDTYPE_VTU( fp, "DataArray");
- *
- * ENDTYPE_VTU( fp, "Cells");
- *
- * ENDTYPE_VTU( fp, "Piece");
- * ENDTYPE_VTU( fp, "UnstructuredGrid");
- * ENDTYPE_VTU( fp, "VTKFile");
- * }
- */
+
 
 // two dimensional case
 
@@ -1161,6 +958,7 @@ Mesh*VTK_Load (const string &filename, bool bigEndian) {
 	int nv, nt = 0, nbe = 0;
 	int nerr = 0;
 	Mesh::Vertex *vff;
+        char *res;
 
 	map<int, int> mapnumv;
 
@@ -1174,8 +972,9 @@ Mesh*VTK_Load (const string &filename, bool bigEndian) {
 
 	char buffer[256], buffer2[256];
 
-	fgets(buffer, sizeof(buffer), fp);	// version line
-	fgets(buffer, sizeof(buffer), fp);	// title
+	res=fgets(buffer, sizeof(buffer), fp);	// version line
+	res=fgets(buffer, sizeof(buffer), fp);	// title
+    
 
 	fscanf(fp, "%s", buffer);	// ASCII or BINARY
 	bool binary = false;
@@ -2249,60 +2048,7 @@ void VTK_WRITE_MESH (const string &filename, FILE *fp, const Mesh &Th, bool bina
 	fprintf(fp, "CELL_DATA %d\n", numElements);
 	int cell_fd = 1;
 	int cell_lab = 1;
-	/*
-	 * fprintf(fp, "COLOR_SCALARS Label 4\n");
-	 * if(binary){
-	 * int label;
-	 * for(int it=0; it< Th.nt; it++){
-	 *  const Mesh::Triangle &K( Th.t(it) );
-	 *  label =K.lab;
-	 *  if(!bigEndian) SwapBytes((char*)&label, sizeof(int), 1);
-	 *  fwrite(&label, sizeof(int), 1, fp);
-	 * }
-	 * if(surface){
-	 *  for(int ibe=0; ibe<Th.neb; ibe++){
-	 *    const Mesh::BorderElement &K( Th.be(ibe) );
-	 *    label =K.lab;
-	 *    if(!bigEndian) SwapBytes((char*)&label, sizeof(int), 1);
-	 *    fwrite(&label, sizeof(int), 1, fp);
-	 *  }
-	 * }
-	 * }
-	 * else{
-	 * int label;
-	 * for(int it=0; it< Th.nt; it++){
-	 *  const Mesh::Triangle &K( Th.t(it) );
-	 *  list<int>::const_iterator ilist;
-	 *
-	 *  for( ilist=list_label_Elem.begin(); ilist!=list_label_Elem.end(); ilist++){
-	 *      if( *ilist == K.lab ){
-	 *
-	 *        fprintf(fp,"%f %f %f 1.0\n",ColorTable[abs(*ilist)%NbColorTable][0],
-	 *                ColorTable[abs(*ilist)%NbColorTable][1],
-	 *                ColorTable[abs(*ilist)%NbColorTable][2]);
-	 *        break;
-	 *      }
-	 *  }
-	 *
-	 *
-	 * }
-	 * if(surface){
-	 *  for(int ibe=0; ibe<Th.neb; ibe++){
-	 *    const Mesh::BorderElement &K( Th.be(ibe) );
-	 *    list<int>::const_iterator ilist;
-	 *    for( ilist=list_label_Elem.begin(); ilist!=list_label_Elem.end(); ilist++){
-	 *      if( *ilist == K.lab ){
-	 *        fprintf(fp,"%f %f %f 1.0\n",ColorTable[abs(*ilist)%NbColorTable][0],
-	 *                ColorTable[abs(*ilist)%NbColorTable][1],
-	 *                ColorTable[abs(*ilist)%NbColorTable][2]);
-	 *        break;
-	 *      }
-	 *    }
-	 *  }
-	 * }
-	 * }
-	 * fprintf(fp,"\n");
-	 */
+
 	fprintf(fp, "Scalars  Label int %d\n", cell_fd);
 	fprintf(fp, "LOOKUP_TABLE FreeFempp_table\n");
 	// Determination des labels
@@ -4333,11 +4079,6 @@ void saveTecplot (const string &file, const Mesh &Th) {
 	pf.close();
 }
 
-/*  class Init1 { public:
- * Init1();
- * };
- *
- * $1 */
 
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
 	typedef Mesh *pmesh;
