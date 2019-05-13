@@ -4782,7 +4782,7 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_confondus_ok, double **Coord_Point,
                         const double *bmin, const double *bmax, const double hmin, int *ind_np, int &np) {
 	size_t i;
-	size_t j[dim]={};
+	size_t j[dim];
 	size_t k[dim];
 	size_t NbCode = 100000;
 	int *tcode;	//= new int[NbCode];
@@ -4790,6 +4790,7 @@ void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_co
 	int *Numero_Som = new int[NbPoints];
 	double epsilon = hmin / 10.;
 
+	memset(j, 0, sizeof(size_t) * dim);
 	assert(dim > 1);
 
 	for (int jj = 0; jj < dim; jj++) {
