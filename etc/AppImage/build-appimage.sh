@@ -72,9 +72,11 @@ autoreconf -i
     CFLAGS='-fpermissive' \
     CXXFLAGS='-fpermissive' \
     --prefix=$SRC_DIR/AppDir/usr \
-    --enable-download
+    --enable-download \
+	--enable-optim
 ./3rdparty/getall -a
 make
+make check
 make install
 
 # TODO: ffglut tool is missing now
@@ -92,7 +94,7 @@ rm -rf $SRC_DIR/AppDir/usr/share/doc/
 mkdir -p AppDir/usr/share/applications/
 cat << EOF > AppDir/usr/share/applications/FreeFem.desktop
 [Desktop Entry]
-Name=FreeFem
+Name=FreeFEM
 Type=Application
 Exec=freefem-apprun.sh
 Icon=freefem
