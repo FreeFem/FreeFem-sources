@@ -56,26 +56,25 @@ meshS TriangleS = movemeshS(Triangle3,transfo=[x,sinico*y+cosico*z,-cosico*y+sin
 plot (cmm="TriangleS",TriangleS,wait=1);
 //medit("face pyramide pentagonale",TriangleS);
 
-meshS TriangleI = movemeshS(TriangleS,transfo=[x,-cosdiedre*y+sindiedre*z,-sindiedre*y-cosdiedre*z],orientation=-orientation,label=ref);//triangle inf rotation de l'angle diedre par rapport au triangle sup
-meshS Triangles = TriangleI+TriangleS;
+meshS TriangleI = movemeshS(TriangleS,transfo=[x,-cosdiedre*y+sindiedre*z,-sindiedre*y-cosdiedre*z],orientation=-1,label=ref);//triangle inf rotation de l'angle diedre par rapport au triangle sup
+
+meshS Triangles = TriangleI+TriangleS;cout << "test bug " << endl;
 plot (cmm="TriangleI",TriangleI,wait=1);
 plot (cmm="Triangles",Triangles,wait=1);
 //medit("face pyramide pentagonale + face antiprisme d'ordre 5",Triangles);
 
-meshS T1 = movemeshS(Triangles,transfo=[x-0.5,y-sinpi3*cosico,z],label=ref);//translation pour que la figure soit sur le bord du pentagone
+meshS T1 = movemeshS(Triangles,transfo=[x-0.5,y-sinpi3*cosico,z],label=ref,orientation=1);//translation pour que la figure soit sur le bord du pentagone
 
-meshS T2 = movemeshS(T1,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref);
+meshS T2 = movemeshS(T1,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref,orientation=1);
 meshS T3 = movemeshS(T2,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref);
 meshS T4 = movemeshS(T3,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref);
 meshS T5 = movemeshS(T4,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref);
 
 meshS Tdemi= T1+T2+T3+T4+T5;//moitié de l'icosaedre
 
-
 meshS Tdemi0 = movemeshS(Tdemi,transfo=[x,y,z+0.5*h],label=ref);//moitié supérieure
 meshS Tdemi1 = movemeshS(Tdemi0,transfo=[x,y,-z],label=ref);//moitié inférieure
-meshS Tdemi1rot = movemeshS(Tdemi1,transfo=[cospi5*x-sinpi5*y,sinpi5*x+cospi5*y,z],label=ref);//rotation de la moitié inférieure pour les emboiter
-
+meshS Tdemi1rot = movemeshS(Tdemi1,transfo=[cospi5*x-sinpi5*y,sinpi5*x+cospi5*y,z],label=ref,orientation=-1);//rotation de la moitié inférieure pour les emboiter
 meshS Ticosaedre = Tdemi0+Tdemi1rot;
 plot(cmm="Icosaedre",Ticosaedre,wait=1);
 

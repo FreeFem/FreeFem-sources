@@ -3116,7 +3116,7 @@ Mesh3*VTK_Load3 (const string &filename, bool bigEndian) {
                 if (!bigEndian) {SwapBytes((char *)xyz, sizeof(double), 3);}
             }
         } else {
-            cout << datasize << " " << sizeof(float) << endl;
+           if(verbosity >10) cout << datasize << " " << sizeof(float) << endl;
             if (datasize == sizeof(float)) {
                 if (fscanf(fp, "%lf %lf %lf", &xyz[0], &xyz[1], &xyz[2]) != 3) {
                     cout << "error in reading vtk files (float)" << endl;
@@ -5109,7 +5109,7 @@ public:
         
         if (BCastTo<string *>(args[0])) {filename = CastTo<string *>(args[0]);}
         
-        if (BCastTo<pmesh>(args[1])) {eTh = CastTo<pmeshS>(args[1]);}
+        if (BCastTo<pmeshS>(args[1])) {eTh = CastTo<pmeshS>(args[1]);}
         
         nbofsol = l.size();
         
@@ -5171,7 +5171,7 @@ public:
     
     static ArrayOfaType typeargs () {return ArrayOfaType(atype<string *>(), atype<pmeshS>(), true);}    // all type
     
-    static E_F0*f (const basicAC_F0 &args) {return new VTK_WriteMesh_Op(args);}
+    static E_F0*f (const basicAC_F0 &args) {return new VTK_WriteMeshS_Op(args);}
     
     AnyType operator () (Stack stack)  const;
 };
@@ -5956,7 +5956,7 @@ MeshS*VTK_LoadS (const string &filename, bool bigEndian) {
             if (!bigEndian) SwapBytes((char *)xyz, sizeof(double), 3);
             
         } else {
-            cout << datasize << " " << sizeof(float) << endl;
+            if(verbosity >10) cout << datasize << " " << sizeof(float) << endl;
             if (datasize == sizeof(float)) {
                 if (fscanf(fp, "%lf %lf %lf", &xyz[0], &xyz[1], &xyz[2]) != 3) {
                     cout << "error in reading vtk files (float)" << endl;

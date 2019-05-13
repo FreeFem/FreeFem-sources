@@ -799,7 +799,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                         int nk1=-1-p->v;
                         int nk2= TheAdjacencesLink[nk1];
                         if(nk2>=0) { // firt time remove existing link ...
-                             nadjnomanifold++;
+                            nadjnomanifold++;
                             TheAdjacencesLink[nk1]=-2;
                             TheAdjacencesLink[nk2]=-2;// on no manifold border .
                          //nba--;
@@ -849,12 +849,12 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                         int kk= nkk/nea, ee=nkk%nea;
                         itemadj(k,e,&s); if(verbosity>15) cout << " item(k,e)= " << itemadj(k,e) <<  " k " << k << " e " << e << " s " << s << endl;
                         itemadj(kk,ee,&ss); if(verbosity>15) cout << " item(kk,ee)= " << itemadj(kk,ee) << " kk " << kk << " ee " << ee << " ss " << ss << endl;
-                       assert(s && ss && s== -ss);
-                        /* if (s && ss && s== -ss) {
+                       //assert(s && ss && s== -ss);
+                         if (!(s && ss && s== -ss)) {
                             cerr << " Bad orientation: The adj border element  defined by [ " << itemadj(k,e) << " ]  is oriented in the same direction in element "
                         << k << " and in the element " << kk << " ****** bug in mesh construction? orientation parameter? "<< endl;
                         ffassert(0);
-                        }*/
+                        }
                         if( sens == s) {swap(nk,nkk);swap(k,kk);} //  autre cote
                         //  verif sens normal
                         int regk= elements[k].lab;

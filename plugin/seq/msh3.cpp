@@ -2073,19 +2073,6 @@ struct Op3_setmeshS: public binary_function<AA, BB, RR> {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Movemesh3D
 
 class Movemesh3D_Op: public E_F0mps
@@ -2123,6 +2110,8 @@ public:
             CompileError("uncompatible movemesh3 (Th, label= , refface=  ");
         }
         
+        if (nargs[5])
+            CompileError("obselete argument movemesh3, for surface use meshS type and movemeshS function ");
         if (a1) {
             if (a1->size() != 3 || xx || yy || zz) {
                 CompileError("movemesh3 (Th,transfo=[X,Y,Z],) ");
@@ -2169,13 +2158,7 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
     int nbvS = 0;
     int nbtS = 0;
     int nbeS = 0;
-    
-    if(Th.meshS) {
-        //takemeshS(ThS.nv);
-        nbvS = ThS.nv;// nombre de sommet
-        nbtS = ThS.nt;// nombre de triangles
-        nbeS = ThS.nbe;    // nombre d'aretes fontiere
-    }
+  
     MeshPoint *mpS(MeshPointStack(stack));
     KN<int> takemeshS(nbvS);
     takemeshS = 0;
@@ -2222,7 +2205,7 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
     MeshS &rThS = ThS;
     
     // mesh3 contains volume mesh
-    //if (typeMesh3!=0) {
+ 
         // loop over tetrahedron
         for (int it = 0; it < Th.nt; ++it) {
             for (int iv = 0; iv < 4; ++iv) {
@@ -2265,67 +2248,7 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
                 }
             }
         }
-    //}
-    // mesh3 contains surface mesh
-    if(Th.meshS)   {
-        // loop on triangle
-        for (int it = 0; it < ThS.nt; ++it) {
-            const TriangleS &K = (ThS[it]);
-            int iv[3];
-            iv[0] = ThS.operator () (K[0]);
-            iv[1] = ThS.operator () (K[1]);
-            iv[2] = ThS.operator () (K[2]);
-            
-            R coordx, coordy, coordz;
-            for (int jj = 0; jj < 3; jj++) {
-                int i = iv[jj];
-                if (takemeshS[i] == 0) {
-                    mpS->set(ThS.vertices[i].x, ThS.vertices[i].y, ThS.vertices[i].z);
-                    if (xx) {txxS[i] = GetAny<double>((*xx)(stack));}
-                    
-                    if (yy) {tyyS[i] = GetAny<double>((*yy)(stack));}
-                    
-                    if (zz) {tzzS[i] = GetAny<double>((*zz)(stack));}
-                    
-                    takemeshS[i] = takemeshS[i] + 1;
-                }
-            }
-        }
-        
-        // loop on edge
-        for (int it = 0; it < ThS.nbe; ++it) {
-            const BoundaryEdgeS &K(ThS.be(it));
-            int iv[2];
-            iv[0] = ThS.operator () (K[0]);
-            iv[1] = ThS.operator () (K[1]);
-            
-            R coordx, coordy, coordz;
-            
-            for (int jj = 0; jj < 2; jj++) {
-                int i = iv[jj];
-                if (takemeshS[i] == 0) {
-                    mpS->set(ThS.vertices[i].x, ThS.vertices[i].y, ThS.vertices[i].z);
-                    if (xx) {txxS[i] = GetAny<double>((*xx)(stack));}
-                    
-                    if (yy) {tyyS[i] = GetAny<double>((*yy)(stack));}
-                    
-                    if (zz) {tzzS[i] = GetAny<double>((*zz)(stack));}
-                    
-                    takemeshS[i] = takemeshS[i] + 1;
-                }
-            }
-        }
-    }
-    
-    // option (Transfo_Mesh3) ::
-    
-    // border_only = 0, recollement_border=1, point_confondus_ok=0;   == > 1900 triangles
-    // border_only = 0, recollement_border=0, point_confondus_ok=0;   == > 1980 triangles
-    // border_only = 0, recollement_border=1, point_confondus_ok=1;   == > 1820 triangles
-    
-    // border_only = 1, recollement_border=1, point_confondus_ok=0;   == > 1900 triangles
-    // border_only = 1, recollement_border=0, point_confondus_ok=0;   == > 1980 triangles
-    // border_only = 1, recollement_border=1, point_confondus_ok=1;   == > 1820 triangles
+   
     
     int border_only = 0;// ne sert a rien !!!!! A enlever
     int recollement_elem = 0;
@@ -2373,20 +2296,11 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
                 T_Th3->be(i).lab = l1;
             }
         }
-   // }
     
-    if (rTh3.meshS) {
-        T_Th3->meshS = Transfo_MeshS(precis_mesh, rThS, txxS, tyyS, tzzS, border_only,
-                                     recollement_elem, recollement_border, point_confondus_ok, orientationelement);
-        
-        if ((T_Th3->meshS->mes) <= 0 && (T_Th3->meshS->nt > 0)) {
-            cerr << " Erreur bad orientation in movemesh add parmetre orientation=,1 mesure=" << T_Th3->meshS->mes << endl;
-            ExecError(" movemesh(3d): mesh with neg vol");
-        }
-        
-        
-        
-        //for the moment, we don't move the references
+    if (rTh3.meshS)
+        T_Th3->BuildMeshS();
+
+    //for the moment, we don't move the references
         // if (nrtet.N() > 0) {
         //     for (int i = 0; i < nbtS; i++) {
         //        const TriangleS &K(T_ThS->elements[i]);
@@ -2403,23 +2317,14 @@ AnyType Movemesh3D_Op::operator () (Stack stack)  const {
          int l0, l1 = ChangeLab3D(mapface, l0 = K.lab);
          T_ThS->be(i).lab = l1;
          }
-         }*/
-    }
-    
-  //  if (typeMesh3 !=0) {
-       // if (flagsurfaceall == 1)
-        //    T_Th3->BuildBoundaryElementAdj();
+         }
+    }*/
+
         T_Th3->BuildGTree();
         Add2StackOfPtr2FreeRC(stack, T_Th3);
-    //}
-    if (T_Th3->meshS) {
-      //  if (flagsurfaceall == 1)
-        //    T_Th3->meshS->BuildBoundaryElementAdj();
-        T_Th3->meshS->BuildGTree();
-    }
+
     
     *mp = mps;
- //   T_Th3->getTypeMesh3()=typeMesh3;
     return T_Th3;
 }
 
@@ -2507,8 +2412,8 @@ basicAC_F0::name_and_type MovemeshS_Op::name_param [] = {
     {"facemerge", &typeid(long)},
     {"boolsurface", &typeid(long)},    // 5
     {"orientation", &typeid(long)},
-    {"region", &typeid(KN_<long>)},    // 7
-    {"label", &typeid(KN_<long>)}    // 8
+    {"region", &typeid(KN_<long>)},    // 6
+    {"label", &typeid(KN_<long>)}    // 7
     // option a rajouter
     // facemerge 0,1 + label
 };
@@ -2543,7 +2448,7 @@ AnyType MovemeshS_Op::operator () (Stack stack)  const {
     KN<long> nrf(arg(2, 8, stack, zzempty));
     double precis_mesh(arg(3, stack, 1e-7));
     long mergefacemesh(arg(4, stack, 1L));
-    long flagsurfaceall(arg(5, stack, 0L));
+    //long flagsurfaceall(arg(5, stack, 0L));
     long orientationelement(arg(6, stack, 1L));
     
     // if( nrtet.N() && nrfmid.N() && nrfup.N() && nrfdown.N() ) return m;
@@ -3308,6 +3213,9 @@ public:
             CompileError("uncompatible movemesh2S (Th, label= , refface=  ");
         }
         
+        if (nargs[4])
+            CompileError("obselete argument movemesh23, movemesh23 function returns a meshS type ");
+            
         if (a1) {
             if (a1->size() != 3) {
                 CompileError("movemesh2S (Th,transfo=[X,Y,Z],) ");
@@ -3345,7 +3253,7 @@ AnyType Movemesh2D_S_Op::operator () (Stack stack)  const {
     int mesureM(arg(1, stack, 0L));
     KN<long> nrface(arg(2, stack, arg(5, stack, zzempty)));
     double precis_mesh(arg(3, stack, -1.));
-    long flagsurfaceall(arg(4, stack, -1L));
+    long flagsurfaceall=-1L;//(arg(4, stack, -1L));
     if (nrface.N() < 0) {return m;}
     // movemesh
     int nbv = Th.nv;
@@ -3525,7 +3433,6 @@ Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *
     delete [] label_nbe_t;
     
     Mesh3 *T_Th3 = new Mesh3(nv_t, nt_t, nbe_t, v, t, b);
-  //  T_Th3->typeMesh3 = Th3.typeMesh3;
     return T_Th3;
     
 }
@@ -3651,8 +3558,8 @@ MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *
     if (verbosity>10) cout << " --- build MeshS after Transfo " << endl;
     MeshS *T_ThS = new MeshS(nv_t, nt_t, nbe_t, v, t, b);
     
-    T_ThS->liste_v_num_surf=0;
-    T_ThS->v_num_surf=0;
+    T_ThS->mapSurf2Vol=0;
+    T_ThS->mapVol2Surf=0;
     return T_ThS;
     
 }
@@ -3986,8 +3893,8 @@ MeshS*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *
     
     
     MeshS *T_ThS = new MeshS(nv_t, nt_t, nbe_t, vS, tS, b);
-    T_ThS->liste_v_num_surf=0;
-    T_ThS->v_num_surf=0;
+    T_ThS->mapSurf2Vol=0;
+    T_ThS->mapVol2Surf=0;
     
     delete [] Numero_Som;
     delete [] ind_nv_t;
@@ -5777,7 +5684,6 @@ AnyType BuildLayeMesh_Op::operator () (Stack stack)  const {
         // T_Th3->BuildjElementConteningVertex();
         
         T_Th3->BuildGTree();// A decommenter
-     //   T_Th3->getTypeMesh3()=1;
         delete Th3;
         Add2StackOfPtr2FreeRC(stack, T_Th3);
         *mp = mps;
@@ -5911,7 +5817,7 @@ AnyType DeplacementTab_Op::operator () (Stack stack)  const {
     int recollement_elem = 0;
     int recollement_border, point_confondus_ok;
     int mergefacemesh(arg(4, stack, 0L));
-    long flagsurfaceall(arg(5, stack, 1L));
+    //long flagsurfaceall(arg(5, stack, 1L));
     
     if (mergefacemesh == 0) {
         recollement_border = 0;
@@ -6458,7 +6364,7 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
                     for (int ii = 0; ii < nedgesplit; ii++) {
                         for (int jjj = 0; jjj < 2; jjj++) {
                             int iedge = 2 * j * nedgesplit + 2 * ii;
-                            ivb[jjj] = newindex[edgesub[iedge+jjj]];
+                            ivb[jjj] = newindex[edgesub[iedge+jjj]];            ///// ???
                             assert(edgesub[2*ii+ jjj] < nvsub);
                             assert(ivb[jjj] < np);
                         }
@@ -7097,6 +7003,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
             }
             
             (bb++)->set(v, ivb, K.lab);
+           // cout << " ie " << ie << "mesure" << bb[ie]->mesure() << endl;
             ie++;
             assert(ie <= nbe);
         }
@@ -7123,18 +7030,22 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     // delete gtree;
     
     Mesh3 *Tht = new Mesh3(nv, nt, nbe, v, t, b);
-    
-   /* if(Th.meshS) {  typeMesh3=1; //  Hack for a bug in trunc surface mesh FH aprif 2019  TO BE REMOVE in near future
-        if(verbosity ) cerr << " \n\n********************\n\n ** WARNING remove SURFACE MESH in trunc 3d  due to bug"
-            <<  "\n\n********************\n\n";
-    }*/
-  //  Tht->getTypeMesh3()=typeMesh3;
     Tht->BuildGTree();    // Add JM. Oct 2010
     delete gtree;
     
     
     // if the surface mesh MeshS, trunc is obtain whit the slip on the triangle3, extract the points on the surface domain and split the edges border element of the real surface
-    int typeMesh3 =0;
+    
+    /* if(Th.meshS) {  typeMesh3=1; //  Hack for a bug in trunc surface mesh FH aprif 2019  TO BE REMOVE in near future
+     if(verbosity ) cerr << " \n\n********************\n\n ** WARNING remove SURFACE MESH in trunc 3d  due to bug"
+     <<  "\n\n********************\n\n";
+     }*/
+    
+if(Th.meshS)
+        Tht->BuildMeshS();
+    
+    
+   /* int typeMesh3 =0;
     //if(Th.meshS)
     if (typeMesh3==2) {
         double hminS = 1e100;
@@ -7157,7 +7068,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
         
         /* determination de bminS, bmaxS et hminS */
         
-        KN<int> takevertexS(ThS->nv, -1);
+      /*  KN<int> takevertexS(ThS->nv, -1);
         for (int i = 0; i < ThS->nt; i++) {
             // origin of the triangleS ->tetra itet
             int iftet;
@@ -7401,7 +7312,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
         delete [] vertex1Dsub;
         delete [] edge1Dsub;
         
-    }
+    }*/
     return Tht;
 }
 
@@ -7736,15 +7647,15 @@ AnyType ExtractMesh_Op::operator () (Stack stack)  const {
     Vertex3 *v = new Vertex3[nv];
     TriangleS *b = new TriangleS[ns];
     TriangleS *bb = b;
-    int *v_num_surf=new int[nv], *map_v_num_surf=new int[nv];
+    int *mapVol2Surf=new int[nv], *mapSurf2Vol=new int[nv];
     
     for (int ii = 0; ii < Th.nv; ii++) {
         if (takevertex[ii] == -1) {continue;}
         
         int iv = takevertex[ii];
        
-        v_num_surf[iv] = nbv_surf;
-        map_v_num_surf[nbv_surf]= iv;
+        mapVol2Surf[iv] = nbv_surf;
+        mapSurf2Vol[nbv_surf]= iv;
         
         assert(iv >= 0 && iv < nv);
         v[iv].x = Th.vertices[ii].x;
@@ -7764,11 +7675,16 @@ AnyType ExtractMesh_Op::operator () (Stack stack)  const {
     }
     
     MeshS *pThnew = new MeshS(nv, ns, 0, v, b, 0);
-    pThnew->v_num_surf=new int(*v_num_surf);
-    pThnew->liste_v_num_surf=new int(*map_v_num_surf);
-   pThnew->BuildEdges();
-    delete [] v_num_surf;
-    delete [] map_v_num_surf;
+    pThnew->mapVol2Surf = new int[nv];
+    pThnew->mapSurf2Vol= new int[nv];
+    for(int i=0 ; i<nv ; i++) {
+        pThnew->mapVol2Surf[i]= mapVol2Surf[i];
+        pThnew->mapSurf2Vol[i]= mapSurf2Vol[i];
+    }
+
+    pThnew->BuildEdges();
+    delete [] mapVol2Surf;
+    delete [] mapSurf2Vol;
     pThnew->BuildGTree();
     
     Add2StackOfPtr2FreeRC(stack, pThnew);
@@ -8497,7 +8413,7 @@ class Square_Op: public E_F0mps
 {
 public:
     Expression filename;
-    static const int n_name_param = 3;    //
+    static const int n_name_param = 4;    //
     static basicAC_F0::name_and_type name_param [];
     Expression nargs[n_name_param], enx, eny, xx, yy, zz;
     
@@ -8524,7 +8440,8 @@ public:
 basicAC_F0::name_and_type Square_Op::name_param [] = {
     {"region", &typeid(long)},
     {"label", &typeid(KN_<long>)},
-    {"flags", &typeid(long)}
+    {"flags", &typeid(long)},
+    {"orientation", &typeid(long)}
 };
 
 class Square: public OneOperator {
@@ -8824,6 +8741,9 @@ AnyType Square_Op::operator () (Stack stack)  const {
         for (int i = 0; i < 4; ++i)
             label[i] = l[i];
     }
+    
+    long mesureM=0;
+    if (nargs[3]) mesureM=GetAny< long >((*nargs[3])(stack));
     Mesh *pTh = Carre_(nx,ny,0,0,stack,region,label,0L);
     Mesh &Th = *pTh;
     int nbv = Th.nv;// nombre de sommet
@@ -8849,7 +8769,7 @@ AnyType Square_Op::operator () (Stack stack)  const {
             }
         }
     KN<long> zzempty;
-    MeshS *ThS_t = func_movemesh23(Th, txx, tyy, tzz, 0L, zzempty, -1., -1L, stack);
+    MeshS *ThS_t = func_movemesh23(Th, txx, tyy, tzz, mesureM, zzempty, -1., -1L, stack);
     
     delete pTh;
     if (verbosity > 2)

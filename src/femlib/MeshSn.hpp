@@ -137,23 +137,22 @@ typedef GenericVertex<R3> Vertex3;
     
     class MeshS : public GenericMesh<TriangleS,BoundaryEdgeS,Vertex3> {
     public:
-        int *liste_v_num_surf;
-        int *v_num_surf;
-        MeshS():v_num_surf(0),liste_v_num_surf(0) {};
-        MeshS(const string);     // TODO
-        MeshS(const string, const long);  // TODO
+         // mapping for volume/surface vertices
+        int *mapSurf2Vol; //*liste_v_num_surf;
+        int *mapVol2Surf; //*v_num_surf;
+        MeshS():mapVol2Surf(0),mapSurf2Vol(0) {};
+        MeshS(const string);
+        MeshS(const string, const long);
         void read(istream &f);
         void readmsh(ifstream & f,int offset);
         MeshS(FILE *f,int offset=0);
         //MeshS(const string);
         MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb);
-        // mapping for volume/surface vertices
-        // int *v_num_surf=NULL; // mapping for surface/volume vertices
+       
         int load(const string & filename);
         const Element * Find( Rd P, R2 & Phat,bool & outside,const Element * tstart=0) const;
         int Save(const string & filename);
         void flipSurfaceMeshS(int surface_orientation);
-        //MeshS(FILE *f);
         void GSave(FILE * f,int offset=0) const ;
         void GRead(FILE * f,int offset);
         double hmin() const;
@@ -161,8 +160,8 @@ typedef GenericVertex<R3> Vertex3;
         void BuildEdges(const double angle=8.*atan(1.)/9.);  // default angle = 40 deg);
         
         ~MeshS() {
-            delete [] liste_v_num_surf ;
-            delete [] v_num_surf ;
+            delete [] mapSurf2Vol ;
+            delete [] mapVol2Surf ;
             
             SHOWVERB(cout << " %%%% delete MeshS"<< this << endl) ; }
     private:

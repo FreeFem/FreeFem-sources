@@ -765,13 +765,11 @@ namespace Fem2D
         
         //define the type of meshes present in the data file .mesh
         
-        if (nTet==0) {
-            cerr << " Impossible to create a Mesh3 with no Tetrahedrons, the mesh type is MeshS" << endl;
-            ffassert(0);
-        }
+        if (nTet==0)
+            ExecError(" Impossible to create a Mesh3 with no Tetrahedrons, if you want create a surface mesh, the mesh type is MeshS");
         
         if (nTet>0 && nTri>0 && nSeg==0)
-            if(verbosity) cout << "data file "<< pfile <<  " read only a Mesh3, possible to create the MeshS associated using the command <Mesh3>.BuildMeshS." << endl;
+            if(verbosity) cout << "data file "<< pfile <<  " read only a Mesh3, possible to create the MeshS associated using the command <Mesh3>.buildSurface(<Mesh3>)." << endl;
         if (nTet>0 && nTri>0 && nSeg>0)
             if(verbosity) cout << "data file "<< pfile <<  " read a Mesh3 and MeshS" << endl;
         
@@ -854,11 +852,11 @@ namespace Fem2D
         if (nEdges>0) {
             meshS = new MeshS();
             // Number of Vertex in the surface
-            meshS->v_num_surf=new int[nv];
-            meshS->liste_v_num_surf=new int[nv]; // mapping to surface/volume vertices
+            meshS->mapVol2Surf=new int[nv];
+            meshS->mapSurf2Vol=new int[nv]; // mapping to surface/volume vertices
             for (int k=0; k<nv; k++) {
-                meshS->v_num_surf[k]=-1;
-                meshS->liste_v_num_surf[k]=0;
+                meshS->mapVol2Surf[k]=-1;
+                meshS->mapSurf2Vol[k]=0;
             }
             // search Vertex on the surface
             int nbv_surf=0;
@@ -866,10 +864,10 @@ namespace Fem2D
                 const BorderElement & K(this->borderelements[k]);
                 for(int jj=0; jj<3; jj++) {
                     int i0=this->operator()(K[jj]);
-                    if( meshS->v_num_surf[i0] == -1 ) {
+                    if( meshS->mapVol2Surf[i0] == -1 ) {
                         // the mapping v_num_surf -> new numbering /  liste_v_num_surf[nbv_surf] -> the global num
-                        meshS->v_num_surf[i0] = nbv_surf;
-                        meshS->liste_v_num_surf[nbv_surf]= i0;
+                        meshS->mapVol2Surf[i0] = nbv_surf;
+                        meshS->mapSurf2Vol[nbv_surf]= i0;
                         nbv_surf++;
                     }
                 }
@@ -877,7 +875,7 @@ namespace Fem2D
             this->meshS->set(nbv_surf,nTri,nSeg);
             // save the surface vertices
             for (int k=0; k<nbv_surf; k++) {
-                int k0 = meshS->liste_v_num_surf[k];
+                int k0 = meshS->mapSurf2Vol[k];
                 const  Vertex & P = this->vertices[k0];
                 meshS->vertices[k].lab=P.lab;
                 meshS->vertices[k].x=P.x;
@@ -890,7 +888,7 @@ namespace Fem2D
             GmfGotoKwd(inm,GmfTriangles);
             for(int i=0;i<nTri;++i) {
                 GmfGetLin(inm,GmfTriangles,&iv[0],&iv[1],&iv[2],&lab);
-                for (int j=0;j<3;++j) iv[j]=meshS->v_num_surf[iv[j]-1];
+                for (int j=0;j<3;++j) iv[j]=meshS->mapVol2Surf[iv[j]-1];
                 // assert( iv[0]>0 && iv[0]<=nbv_surf && iv[1]>0 && iv[1]<=nbv_surf && iv[2]>0 &&iv[2]<=nbv_surf );
                 for(int j=0;j<3;++j)
                     if(!meshS->vertices[iv[j]].lab) {
@@ -906,7 +904,7 @@ namespace Fem2D
             GmfGotoKwd(inm,GmfEdges);
             for(int i=0;i<nSeg;++i) {
                 GmfGetLin(inm,GmfEdges,&iv[0],&iv[1],&lab);
-                for (int j=0;j<2;++j) iv[j]=meshS->v_num_surf[iv[j]-1];
+                for (int j=0;j<2;++j) iv[j]=meshS->mapVol2Surf[iv[j]-1];
                 // assert( iv[0]>0 && iv[0]<=nbv_surf && iv[1]>0 && iv[1]<=nbv_surf);
                 meshS->borderelements[i].set(meshS->vertices,iv,lab);
                 meshS->mesb += meshS->borderelements[i].mesure();
@@ -1113,8 +1111,8 @@ namespace Fem2D
                 GmfSetKwd(outm,GmfEdges,nbeS);
                 for (int k=0; k<nbeS; k++) {
                     const MeshS::BorderElement & K(meshS->borderelements[k]);
-                    int i0= meshS->liste_v_num_surf[meshS->operator()(K[0])]+1;
-                    int i1= meshS->liste_v_num_surf[meshS->operator()(K[1])]+1;
+                    int i0= meshS->mapSurf2Vol[meshS->operator()(K[0])]+1;
+                    int i1= meshS->mapSurf2Vol[meshS->operator()(K[1])]+1;
                     int lab=K.lab;
                     GmfSetLin(outm,GmfEdges,i0,i1,lab);
                 }
@@ -1125,126 +1123,7 @@ namespace Fem2D
         
     }
     
-  /*
-    void Mesh3::BuildMeshS()
-    {
-        if (meshS) {
-            cout << "error, Mesh3::meshS previously created " << endl;
-            ffassert(0);
-        }
-        if (verbosity>5) cout << "Build meshS from mesh3.... " << endl;
-        meshS = new MeshS();
-        //extraction vertice surface must be make when pur volume
-        // it's made in the mesh3::load function
-        int *v_num_surf, *map_v_num_surf;
-        // Extraction of Vertex  belongs to the surface
-        v_num_surf=new int[nv];
-        map_v_num_surf=new int[nv];
-        for (int k=0; k<nv; k++){
-            v_num_surf[k]=-1;
-            map_v_num_surf[k]=0;
-        }
-        // Search Vertex on the surface
-        int nbv_surf=0; cout << "test " << nv << " " <<  nt << " " << nbe <<  endl;
-        for (int k=0; k<nbe; k++) {
-            const BorderElement & K(this->borderelements[k]);
-            for(int jj=0; jj<3; jj++){
-                int i0=this->operator()(K[jj]);
-                if( v_num_surf[i0] == -1 ){
-                    v_num_surf[i0] = nbv_surf;
-                    map_v_num_surf[nbv_surf]= i0;
-                    nbv_surf++; cout << "ok" << endl;
-                }
-            }
-        }
-        cout <<"nbv_surf"<<nbv_surf<<endl;
-        // set the surface vertex in meshS
-        ffassert(nbv_surf);
-        
-        meshS->nv=nbv_surf;
-        meshS->vertices=new Vertex[nbv_surf];
-        
-        //   GmfSetKwd(outm,GmfVertices,nbv_surf);
-        for (int iv=0; iv<nbv_surf; iv++) {
-            int k0 = map_v_num_surf[iv];
-            const  Vertex & P = this->vertices[k0];
-            meshS->vertices[iv].x=P.x;
-            meshS->vertices[iv].y=P.y;
-            meshS->vertices[iv].z=P.z;
-            meshS->vertices[iv].lab=P.lab;
-        }
-        // set the elements meshS, come from the border elements mesh3
-        
-        ffassert(nbe);
-        meshS->nt=nbe;
-        meshS->elements= new TriangleS[nbe];
-        
-        for (int it=0; it<nbe; it++) {
-            int iv[3];
-            const BorderElement & K(this->borderelements[it]);
-            for (int j=0;j<3;++j)
-                iv[j]=v_num_surf[this->operator()(K[j])];
-              
-            int lab=K.lab;
-            meshS->elements[it].set(meshS->vertices,iv,lab);
-            meshS->mes += meshS->elements[it].mesure();
-        }
-        
-        ffassert( meshS->nt >=0 && meshS->elements);
-        
-        meshS->nbe=0;
-        meshS->borderelements= new BoundaryEdgeS[nbe];
-        meshS->BuildBound();
-        meshS->BuildAdj();
-        meshS->Buildbnormalv();
-        meshS->BuildjElementConteningVertex();
-        
-        //BoundaryEdgeS *bb = b;
-        
-        int nbeS=0,nbiS=0;
-        // Build edges from the triangle list
-        for (int i = 0; i < meshS->nt; i++)
-            for (int j = 0; j < 3; j++) {
-                
-                int jt = j, it = meshS->ElementAdj(i, jt);
-                if ((it == i || it < 0)) {
-                    nbeS++;// boundary edge ...
-                    
-                } else {
-                    nbiS++;
-                }
-                if (verbosity>5) cout << " Building edges from mesh3 nbe: "<< nbeS << " nbi: " << nbiS << endl;
-            }
-        
-          meshS->borderelements= new BoundaryEdgeS[nbeS];
-        
-        // this loop can be optimized
-        // to do a pair num element / num face for boundary
-        for (int i = 0; i < meshS->nt; i++)
-            for (int j = 0; j < 3; j++) {
-                
-                int jt = j, it = meshS->ElementAdj(i, jt);
-                if ((it == i || it < 0)) {
-                    const TriangleS &K(meshS->elements[i]);
-                    const TriangleS &K_adj(meshS->elements[it]);
-                    int iv[2];
-                    for(int ip=0;ip<2;ip++)
-                        iv[ip] = meshS->operator () (K [nvedgeTria[j][ip]] );
-                    int lab=min(K.lab, K_adj.lab);;
-                    meshS->borderelements[it].set(meshS->vertices,iv,lab);
-                    meshS->mesb += meshS->borderelements[it].mesure();
-                }
-            }
-        
-        
-        
-        
-        
-        
-    }
-    */
-    
-    
+
     int Mesh3::SaveSurface(const string & filename) const
     {
         int ver = GmfFloat, outm;
@@ -1256,13 +1135,13 @@ namespace Fem2D
         // the mesh3 only contains volume mesh.
         // Must extract the surface and the triangle on the surface ie the boundary mesh
         if (! meshS) {
-            int *v_num_surf, *map_v_num_surf;
+            int *mapVol2Surf, *mapSurf2Vol;
             // Extraction of Vertex  belongs to the surface
-            v_num_surf=new int[nv];
-            map_v_num_surf=new int[nv];
+            mapVol2Surf=new int[nv];
+            mapSurf2Vol=new int[nv];
             for (int k=0; k<nv; k++){
-                v_num_surf[k]=-1;
-                map_v_num_surf[k]=0;
+                mapVol2Surf[k]=-1;
+                mapSurf2Vol[k]=0;
             }
             // create mapping Volume/Suface vertex
             int nbv_surf=0;
@@ -1270,9 +1149,9 @@ namespace Fem2D
                 const BorderElement & K(this->borderelements[k]);
                 for(int jj=0; jj<3; jj++){
                     int i0=this->operator()(K[jj]);
-                    if( v_num_surf[i0] == -1 ){
-                        v_num_surf[i0] = nbv_surf;
-                        map_v_num_surf[nbv_surf]= i0;
+                    if( mapVol2Surf[i0] == -1 ){
+                        mapVol2Surf[i0] = nbv_surf;
+                        mapSurf2Vol[nbv_surf]= i0;
                         nbv_surf++;
                     }
                 }
@@ -1281,7 +1160,7 @@ namespace Fem2D
             float fx,fy,fz;
             GmfSetKwd(outm,GmfVertices,nbv_surf);
             for (int k=0; k<nbv_surf; k++) {
-                int k0 = map_v_num_surf[k];
+                int k0 = mapSurf2Vol[k];
                 const  Vertex & P = this->vertices[k0];
                 GmfSetLin(outm,GmfVertices,fx=P.x,fy=P.y,fz=P.z,P.lab);
             }
@@ -1289,14 +1168,15 @@ namespace Fem2D
             GmfSetKwd(outm,GmfTriangles,nbe);
             for (int k=0; k<nbe; k++) {
                 const BorderElement & K(this->borderelements[k]);
-                int i0=v_num_surf[this->operator()(K[0])]+1;
-                int i1=v_num_surf[this->operator()(K[1])]+1;
-                int i2=v_num_surf[this->operator()(K[2])]+1;
+                int i0=mapVol2Surf[this->operator()(K[0])]+1;
+                int i1=mapVol2Surf[this->operator()(K[1])]+1;
+                int i2=mapVol2Surf[this->operator()(K[2])]+1;
                 int lab=K.lab;
                 assert(0<i0 && i0-1 < nbv_surf && 0<i1 && i1-1 < nbv_surf &&  0<i2 && i2-1 < nbv_surf );
                 GmfSetLin(outm,GmfTriangles,i0,i1,i2,lab);
             }
-            delete [ ] v_num_surf;
+            delete [] mapVol2Surf;
+            delete [] mapSurf2Vol;
         }
         // the mesh3 contains an explicit surface mesh, ie meshS
         else  {
@@ -1994,7 +1874,7 @@ namespace Fem2D
             cout << "error, Mesh3::meshS previously created " << endl;
             ffassert(0);
         }
-        if (verbosity>5) cout << "Build meshS from mesh3.... " << endl;
+        if (verbosity) cout << "Build meshS from mesh3.... " << endl;
         
       
        int mes = 0, mesb = 0;
@@ -2054,13 +1934,17 @@ namespace Fem2D
         
         // first building without list edges
         meshS = new MeshS(nbv_surf,nbe,0,vS,tS,0);
-        meshS->v_num_surf=new int(*v_num_surf);
-        meshS->liste_v_num_surf=new int(*map_v_num_surf);
+        meshS->mapVol2Surf = new int[nv];
+        meshS->mapSurf2Vol= new int[nv];
+        for(int i=0 ; i<nv ; i++) {
+            meshS->mapVol2Surf[i]= v_num_surf[i];
+            meshS->mapSurf2Vol[i]= map_v_num_surf[i];
+        }
+        
         delete [] v_num_surf;
         delete [] map_v_num_surf;
         // build the edge list
         meshS->BuildEdges(angle);
-
         meshS->BuildGTree();
         
         

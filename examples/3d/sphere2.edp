@@ -8,7 +8,7 @@ real cc=100;
 //TC=adaptmesh(TC,[cc*x/r,0,cc*y/r],IsMetric=1);
 plot(TC,wait=1);
 meshS Thup=movemesh23(TC,transfo=[x,y,sqrt(abs(1-square(x)-square(y)))]);
-meshS Thdown=movemesh23(TC,transfo=[x,y,-sqrt(abs(1-square(x)-square(y)))]);
+meshS Thdown=movemesh23(TC,transfo=[x,y,-sqrt(abs(1-square(x)-square(y)))], orientation=-1);
 verbosity=10;
 meshS Th= Thup+Thdown;
 

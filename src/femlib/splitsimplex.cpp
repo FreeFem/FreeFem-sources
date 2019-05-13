@@ -162,8 +162,9 @@ void SplitSimplex(int N,R2 *P,int *K,int op=0,R2 *ABC=0)
       else
 	{
 	  K[l++]= op+NumSimplex2(N-i,N-j);
-	  K[l++]= op+NumSimplex2(N-i,N-j-1);
+	  //K[l++]= op+NumSimplex2(N-i,N-j-1);
 	  K[l++]= op+NumSimplex2(N-i-1,N-j);
+      K[l++]= op+NumSimplex2(N-i,N-j-1);
 	}
 }
 
@@ -365,7 +366,7 @@ void SplitSurfaceSimplex(int N,int &ntri2,int *&tri)
 	  int i=N-(N-j-1)-(N-k);
 	  tri[l++]= op+NumSimplex3(   i, N-j-1, N-k);
 	  tri[l++]= op+NumSimplex3( i-1, N-j,   N-k); 
-	  tri[l++]= op+NumSimplex3(   i, N-j, N-k-1); 
+	  tri[l++]= op+NumSimplex3(   i, N-j, N-k-1);
 	}
       if(verbosity>200)
 	cout << "l="<< l/3 <<  " "<< tri[l-3] <<" "<< tri[l-2] <<" "<<  tri[l-1] <<" "<<  endl;

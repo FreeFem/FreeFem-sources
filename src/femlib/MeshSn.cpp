@@ -46,7 +46,7 @@ namespace Fem2D
 #include "rgraph.hpp"
 #include "fem.hpp"
 #include "PlotStream.hpp"
-
+#include "AFunction.hpp"
 
 namespace Fem2D
 {
@@ -198,20 +198,20 @@ namespace Fem2D
         mes=0.;
         mesb=0.;
         
-        if(nt != 0)
-        {
+        if(nt == 0)
+            ExecError ( " A meshS type must have elements " );
             
-            for (int k=0; k<nt; k++) {
-                int i[3],lab;
-                Element & K(this->elements[k]);
-                f >> i[0] >> i[1] >> i[2] >> lab;
-                Add(i,3,offset);
-                K.set(this->vertices,i,lab);
-                mes += K.mesure();
-                err += K.mesure() <0;
+        for (int k=0; k<nt; k++) {
+            int i[3],lab;
+            Element & K(this->elements[k]);
+            f >> i[0] >> i[1] >> i[2] >> lab;
+            Add(i,3,offset);
+            K.set(this->vertices,i,lab);
+            mes += K.mesure();
+            err += K.mesure() <0;
                 
-            }
         }
+        
         
         
         for (int k=0; k<nbe; k++) {
@@ -234,7 +234,7 @@ namespace Fem2D
     
     
     MeshS::MeshS(const string filename)
-    :liste_v_num_surf(0),v_num_surf(0)    {
+    :mapSurf2Vol(0),mapVol2Surf(0)    {
         int ok=load(filename);
         if(verbosity) {
             cout << "read meshS ok " << ok ;
@@ -257,7 +257,6 @@ namespace Fem2D
         }
         
         BuildBound();
-        
         BuildAdj();
         Buildbnormalv();
         BuildjElementConteningVertex();
@@ -316,9 +315,9 @@ namespace Fem2D
         nTri= GmfStatKwd(inm,GmfTriangles); // triangles in case of volume mesh -> boundary element / in case of surface mesh -> element
         nSeg=GmfStatKwd(inm,GmfEdges); // segment elements only present in surface mesh
         
-        
-        
         this->set(nv,nTri,nSeg);
+        if(nTri == 0)
+            ExecError ( " A meshS type must have elements " );
         
         if(verbosity>1)
             cout << "  -- MeshS(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
@@ -401,7 +400,7 @@ namespace Fem2D
     
     
     MeshS::MeshS(const string filename, const long change)
-    :liste_v_num_surf(0),v_num_surf(0) {
+    :mapSurf2Vol(0),mapVol2Surf(0) {
         
         
         int ok=load(filename);
@@ -502,8 +501,7 @@ namespace Fem2D
                 }
                 ffassert( newvertex== iii );
                 
-                Element *tt;
-                if(this->nt !=0) tt=new Element[this->nt];
+                Element *tt=new Element[this->nt];
                 BorderElement *bb = new BorderElement[this->nbe];
                 
                 Element *ttt=tt;
@@ -550,7 +548,18 @@ namespace Fem2D
         }
         
         BuildBound();
-        if(nt > 0){
+        BuildAdj();
+        Buildbnormalv();
+        BuildjElementConteningVertex();
+        
+        // if not edges then build the edges - need access to the old adjacensce to build eges and rebuild the new adj
+        if (nbe==0) {
+            BuildEdges();
+            delete [] TheAdjacencesLink;
+            delete [] BoundaryElementHeadLink;
+            TheAdjacencesLink=0;
+            BoundaryElementHeadLink=0;
+            BuildBound();
             BuildAdj();
             Buildbnormalv();
             BuildjElementConteningVertex();
@@ -564,29 +573,34 @@ namespace Fem2D
         ffassert(mes>=0); // add F. Hecht sep 2009.
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
+ 
     
     MeshS::MeshS(FILE *f,int offset)
-    :liste_v_num_surf(0),v_num_surf(0)
+    :mapSurf2Vol(0),mapVol2Surf(0)
     {
         GRead(f,offset);// remove 1
         assert( (nt >= 0 || nbe>=0)  && nv>0) ;
         BuildBound();
         if(verbosity>2)
             cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
+      
+        BuildAdj();
+        Buildbnormalv();
+        BuildjElementConteningVertex();
         
-        if(nt > 0){
+        // if not edges then build the edges - need access to the old adjacensce to build eges and rebuild the new adj
+        if (nbe==0) {
+            BuildEdges();
+            delete [] TheAdjacencesLink;
+            delete [] BoundaryElementHeadLink;
+            TheAdjacencesLink=0;
+            BoundaryElementHeadLink=0;
+            BuildBound();
             BuildAdj();
             Buildbnormalv();
             BuildjElementConteningVertex();
         }
+        
         if(verbosity>2)
             cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
         
@@ -648,18 +662,18 @@ namespace Fem2D
         mes=0.;
         mesb=0.;
         
-        if(nt != 0)
-        {
+        if(nt == 0)
+            ExecError ( " A meshS type must have elements " );
+ 
             
-            for (int k=0; k<nt; k++) {
-                int i[3],lab;
-                Element & K(this->elements[k]);
-                f >> i[0] >> i[1] >> i[2]  >> lab;
-                Add(i,3,offset);
-                K.set(this->vertices,i,lab);
-                mes += K.mesure();
-                
-            }
+        for (int k=0; k<nt; k++) {
+            int i[3],lab;
+            Element & K(this->elements[k]);
+            f >> i[0] >> i[1] >> i[2]  >> lab;
+            Add(i,3,offset);
+            K.set(this->vertices,i,lab);
+            mes += K.mesure();
+    
         }
         for (int k=0; k<nbe; k++) {
             int i[2],lab;
@@ -703,7 +717,7 @@ namespace Fem2D
     
     
     MeshS::MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb)
-    :v_num_surf(0),liste_v_num_surf(0)
+    :mapVol2Surf(0),mapSurf2Vol(0)
     {
         nv = nnv;
         nt = nnt;
@@ -723,6 +737,19 @@ namespace Fem2D
         BuildAdj();
         Buildbnormalv();
         BuildjElementConteningVertex();
+        // if not edges then build the edges - need access to the old adjacensce to build eges and rebuild the new adj
+        if (nbe==0) {
+            BuildEdges();
+            delete [] TheAdjacencesLink;
+            delete [] BoundaryElementHeadLink;
+            TheAdjacencesLink=0;
+            BoundaryElementHeadLink=0;
+            BuildBound();
+            BuildAdj();
+            Buildbnormalv();
+            BuildjElementConteningVertex();
+        }
+        
         
         if(verbosity>1)
             cout << "  -- End of read meshS: mesure = " << mes << " border mesure " << mesb << endl;
@@ -791,13 +818,14 @@ namespace Fem2D
                 nbflip++;
             }
         }
-        assert(nbflip==0 || nbflip== this->nbe);
+        assert(nbflip==0 || nbflip== this->nt);
     }
     
     
     // determine the boundary edge list for meshS
     void MeshS::BuildEdges(const double angle) {
         
+        delete [] borderelements; // to remove the previous pointers
         borderelements = new BoundaryEdgeS[3 * nt]; // 3 * nt upper evaluated
         
         HashTable<SortArray<int, 2>, int> edgesI(3 * nt, nt);
@@ -817,7 +845,6 @@ namespace Fem2D
                     int iv[2];
                     for(int ip=0;ip<2;ip++)
                         iv[ip] = this->operator () (K [TriangleS::nvedge[j][ip]]);
-                    
                     if(verbosity>15)
                         cout << " the edge " << iv[0] << " " << iv[1] << " is a boundary " << endl;
                     int lab = min(K.lab, K_adj.lab);
@@ -849,6 +876,8 @@ namespace Fem2D
                             if(verbosity>15)
                                 cout << " the edge " <<nbeS <<": [" << iv[0] << " " << iv[1] << "] is a boundary with the angular criteria" << endl;
                             int lab = min(K.lab, K_adj.lab);
+                            //cout << "oldnum" <<liste_v_num_surf[iv[0]] <<" /" << liste_v_num_surf[iv[1]] << endl;
+
                             be(nbeS).set(vertices,iv,lab);
                             mesb += be(nbeS).mesure();
                             edgesI.add(key, nbeS++);
@@ -886,8 +915,11 @@ namespace Fem2D
         nbe = nbeS;
         if (verbosity>5) cout << " Building edges from mesh3 nbe: "<< nbeS << " nbi: " << nbiS << endl;
         
-        TheAdjacencesLink=0;
         BuildBound();
+        delete []TheAdjacencesLink;
+        delete [] BoundaryElementHeadLink;
+        TheAdjacencesLink=0;
+        BoundaryElementHeadLink=0;
         BuildAdj();
         Buildbnormalv();
         BuildjElementConteningVertex();
