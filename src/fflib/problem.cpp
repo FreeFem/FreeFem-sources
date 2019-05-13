@@ -2087,6 +2087,7 @@ namespace Fem2D {
         SHOWVERB(cout << " FormBilinear () " << endl);
         const int useopt=di.UseOpt(stack);
         const bool intmortar=di.intmortar(stack);
+        const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
         if ( verbosity >1)
         {
             cout << " Integral   on Th nv :  " << Th.nv << " nt : " << Th.nt << endl;
@@ -2098,7 +2099,7 @@ namespace Fem2D {
         Expression  const * const mapu=*di.mapu?di.mapu:0 ;
         bool withmap =di.withmap();
         //   ExecError(" no map  in the case (4) ??");}
-        assert(pThdi == & Th);
+        ffassert(pThdi == & Th);
         CDomainOfIntegration::typeofkind  kind = di.kind;
         set<int> setoflab;
         bool all=true;

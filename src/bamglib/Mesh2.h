@@ -1285,8 +1285,9 @@ inline Real4 qualite(const Vertex &va,const Vertex &vb,const Vertex &vc)
 
 inline  Triangle::Triangle(Triangles *Th,Int4 i,Int4 j,Int4 k) {
   Vertex *v=Th->vertices;
+
   assert(i >=0 && j >=0 && k >=0);
-  assert(i < nbv && j < nbv && k < nbv);
+  assert(i < Th->nbv && j < Th->nbv && k < Th->nbv);
   ns[0]=v+i;
   ns[1]=v+j;
   ns[2]=v+k;
