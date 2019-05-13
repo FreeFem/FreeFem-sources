@@ -14,18 +14,21 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
 #include "sproto.h"
 
-#define FLOAT_MAX 1.e20
+#define FLOAT_MAX (float)1.e20
 
 int loadGIS (pMesh mesh) {
 	pQuad pq;
@@ -97,6 +100,7 @@ int loadGIS (pMesh mesh) {
 	if (ret != 9) {
 		fprintf(stderr, "  ## Error loading terrain.\n");
 		free(mesh);
+		fclose(fp);
 		return (0);
 	}
 
@@ -132,7 +136,8 @@ int loadGIS (pMesh mesh) {
 			for (i = 1; i <= sx; i++) {
 				k = (j - 1) * sx + i;
 				ppt = &mesh->point[k];
-				fscanf(fp, "%lf", &ppt->c[2]);
+				ret = fscanf(fp, "%lf", &ppt->c[2]);
+				if (ret == EOF) printf("fgets error\n");
 				ppt->c[0] = (float)(ggx * (xxm + i - 1));
 				ppt->c[1] = (float)(ggy * (yym + j - 1));
 				ppt->c[2] = (float)(hhz * ppt->c[2]);
@@ -140,7 +145,7 @@ int loadGIS (pMesh mesh) {
 		}
 	} else {
 		int ni;
-		
+
 		te = (float *)malloc(sx * sizeof(float));
 		if (!te) exit(1);
 
@@ -158,6 +163,7 @@ int loadGIS (pMesh mesh) {
 				free(mesh->point);
 				free(mesh);
 				free(te);
+				fclose(fp);
 				return (0);
 			}
 
@@ -200,7 +206,8 @@ int loadGIS (pMesh mesh) {
 				for (i = 1; i < sx; i++) {
 					k = (j - 1) * (sx - 1) + i;
 					pq = &mesh->quad[k];
-					fscanf(fp, "%d", &ref);
+					ret = fscanf(fp, "%d", &ref);
+					if (ret == EOF) printf("fgets error\n");
 					pq->ref = ref;
 				}
 			}
@@ -233,3 +240,7 @@ int loadGIS (pMesh mesh) {
 	fclose(fp);
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

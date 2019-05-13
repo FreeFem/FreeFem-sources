@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -876,7 +879,7 @@ GLuint listHexaMap (pScene sc, pMesh mesh, ubyte clip) {
 }
 
 GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altcoef) {
-	pTriangle pt, pt1;
+	pTriangle pt;
 	pMaterial pm;
 	pQuad pq;
 	pPoint p0, p1, p2, p3;
@@ -885,7 +888,6 @@ GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altco
 	double ax, ay, az, bx, by, bz, dd, kc, rgb[4];
 	float cx, cy, cz, n[3];
 	int *adj, k, m, ia, iadr;
-	ubyte *voy;
 	triangle t, t1, t2;
 	static double hsv[3] = {0.0, 1.0, 0.80};
 	static float nn[3] = {1.0, 0.0, 0.0};
@@ -1010,15 +1012,10 @@ GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altco
 					/* add quads to sides (thanks to F. Lagoutiere) */
 					iadr = 3 * (k - 1) + 1;
 					adj = &mesh->adja[iadr];
-					voy = &mesh->voy[iadr];
 
 					if (adj[0] && adj[0] < k) {
-						pt1 = &mesh->tria[adj[0]];
-						p3 = &mesh->point[pt1->v[voy[0]]];
 						ps1 = &mesh->sol[adj[0]];
 
-						cx = (p1->c[0] + p2->c[0] + p3->c[0]) / 3.0;
-						cy = (p1->c[1] + p2->c[1] + p3->c[1]) / 3.0;
 						cz = ps1->bb;
 
 						memcpy(t1.a, t.b, 3 * sizeof(float));
@@ -1048,12 +1045,8 @@ GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altco
 					}
 
 					if (adj[1] && adj[1] < k) {
-						pt1 = &mesh->tria[adj[1]];
-						p3 = &mesh->point[pt1->v[voy[1]]];
 						ps1 = &mesh->sol[adj[1]];
 
-						cx = (p0->c[0] + p2->c[0] + p3->c[0]) / 3.0;
-						cy = (p0->c[1] + p2->c[1] + p3->c[1]) / 3.0;
 						cz = ps1->bb;
 
 						memcpy(t1.a, t.a, 3 * sizeof(float));
@@ -1083,12 +1076,8 @@ GLuint alt2dList (pScene sc, pMesh mesh, int geomtype, float shrink, float altco
 					}
 
 					if (adj[2] && adj[2] < k) {
-						pt1 = &mesh->tria[adj[2]];
-						p3 = &mesh->point[pt1->v[voy[2]]];
 						ps1 = &mesh->sol[adj[2]];
 
-						cx = (p0->c[0] + p1->c[0] + p3->c[0]) / 3.0;
-						cy = (p0->c[1] + p1->c[1] + p3->c[1]) / 3.0;
 						cz = ps1->bb;
 
 						memcpy(t1.a, t.a, 3 * sizeof(float));
@@ -1256,12 +1245,12 @@ GLuint drawPalette (pScene sc) {
 	if (sc->iso.palette < 3) {
 		float xpos;
 
-		if (sc->iso.palette <= 2) {
+		if (sc->iso.palette < 2) {
 			top = sc->par.ys - 20;
 			bottom = top - 10;
 			left = sc->par.xs / 10;
 			right = sc->par.xs - left;
-		} else if (sc->iso.palette == 2) {
+		} else {
 			top = 40;
 			bottom = top - 10;
 			left = sc->par.xs / 10;
@@ -1420,3 +1409,7 @@ GLuint drawPalette (pScene sc) {
 
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,26 +1,26 @@
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :      
-// USAGE    :        
-// ORG      : 
+// SUMMARY  :
+// USAGE    :
+// ORG      :
 // AUTHOR   : Frederic Hecht
 // E-MAIL   : hecht@ann.jussieu.fr
 //
- 
+
 /*
- 
+
  This file is part of Freefem++
- 
+
  Freefem++ is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation; either version 2.1 of the License, or
  (at your option) any later version.
- 
+
  Freefem++  is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -35,7 +35,7 @@
 
 // set in getprog-unix.hpp in Graphic dir..
 const char *  prognamearg=0;
-extern  void (*initparallele)(int &, char **&); // to know if mpiversion ... 
+extern  void (*initparallele)(int &, char **&); // to know if mpiversion ...
 
 #ifdef PURE_WIN32
 #include <windows.h>
@@ -61,7 +61,7 @@ const char BACKSLACH='\\';
 int dirExists(const string & path)
 {
     struct stat info;
-    
+
     if(stat( path.c_str(), &info ) != 0)
         return 0;
     else if(info.st_mode & S_IFDIR)
@@ -80,7 +80,7 @@ string TransDir(string dir,string adddir="")
 {
   for (size_t i=0; i<dir.size(); ++i)
     if(dir[i]==dirnsep) dir[i]=dirsep;
-  if(dir.size()>1 && dir[dir.size()-1] != dirsep) 
+  if(dir.size()>1 && dir[dir.size()-1] != dirsep)
     dir += dirsep;
    if(adddir.length() && dir[0]=='!')
    {
@@ -89,48 +89,40 @@ string TransDir(string dir,string adddir="")
   return  dir;
 }
 
-
-
-template<typename T> 
+template<typename T>
 void  show(const char * s,const T & l,const char * separateur="\n")
 {
   cout << s << * separateur;
   for (typename T::const_iterator i=l.begin(); i != l.end(); i++)
     cout  << * i << * separateur;
-  //cout << endl; 
 }
-
-
-
-
 
 bool  EnvironmentFind(string key,string item)
  {
    EnvironmentData::iterator ekey=ffenvironment.find(key);
-   if( ekey != ffenvironment.end()) 
+   if( ekey != ffenvironment.end())
     {
      OneEnvironmentData * pl= &ekey->second;
      OneEnvironmentData::iterator i=find(pl->begin(),pl->end(),item);
        return i != pl->end();
      }
-    
+
    return false;
  }
-
 
 bool  EnvironmentClean(string key)
 {
    EnvironmentData::iterator ekey=ffenvironment.find(key);
-   if( ekey != ffenvironment.end()) 
+   if( ekey != ffenvironment.end())
     {
       OneEnvironmentData * pl= &ekey->second;
       pl->clear();
       return true;
      }
-    
+
    return false;
  }
- 
+
 bool EnvironmentInsert(string key,string item,string before)
 {
    bool ret=true;
@@ -141,21 +133,21 @@ bool EnvironmentInsert(string key,string item,string before)
         << suf << "'  " << item <<endl;
    if( ! suf.empty() && dirExists(item+suf) )
     {
-	 if(verbosity>=100)  cout << " EnvironmentInsert: Add suf " << suf << " to " << item << " in GetEnvironment "<< key << endl; 
+	 if(verbosity>=100)  cout << " EnvironmentInsert: Add suf " << suf << " to " << item << " in GetEnvironment "<< key << endl;
 	 item  += suf;
     }
-   
+
    OneEnvironmentData::iterator i=find(l.begin(),l.end(),item);
-   
+
    if(i!=l.end()) {ret=false; l.erase(i);} // if existe remove
    i=find(l.begin(),l.end(),before);
    if(verbosity>=100) cout << " insert " << key << " " << item << " " << before << endl;
    if(i == l.end() && before!="$")
-       l.insert(l.begin(),item); // insert in front 
+       l.insert(l.begin(),item); // insert in front
    else
        l.insert(i,item); // insert before i
-    
-  return ret;  
+
+  return ret;
 }
 
 int GetEnvironment(const string & key, string items)
@@ -167,20 +159,20 @@ int GetEnvironment(const string & key, string items)
     items+=";;";
   for (size_t  i=0;i<items.size();i++)
    if(  items[i]==';')
-    { 
+    {
 
       string item =items.substr(d,i-d);
       if(path) item=TransDir(item);
       if(verbosity>=100) cout << " + " << item << endl;
-      if(!EnvironmentFind(key,item)) 
+      if(!EnvironmentFind(key,item))
 	{
 	  EnvironmentInsert(key,item,"$");
-	  k++; 
+	  k++;
 	}
-      d=i+1;          
+      d=i+1;
     }
-    
- return k;   
+
+ return k;
 }
 int  readinitfile(const string & file)
 {
@@ -200,10 +192,6 @@ int  readinitfile(const string & file)
 	{
 		c= f.get();
 		c1=f.peek();
-		//cout << c ;
-		//      if(bv)
-		//cerr << bv ;
-		//else cerr << '.';
 		if(c == EOF)
 		  break;
 		if(c =='\n' || c=='\r' )
@@ -212,80 +200,79 @@ int  readinitfile(const string & file)
 		    line="";
 		    cmm = false;
 		  }
-		else 
+		else
 		  line+= c;
 		if(c=='#') cmm=true;
 		if(!cmm)
                 {
 		  if(invalue) // get value  key [=|+= value ]
-		    { 
+		    {
 		      if (bv) //  store the value
-			{	  
+			{
 			  if (! (c == bv || ( bv==' ' && isspace(c)) ) )
 			    {
 			      value+= c; // add to value
 			    }
 			  else  // end of value
 			    {
-			      bv =0; invalue=0; // fin de la value 
-			      if(verbosity >= 50) 
+			      bv =0; invalue=0; // fin de la value
+			      if(verbosity >= 50)
 				cout <<file <<":" << key << " = " << value <<endl;
 			      if(key=="verbosity")
 				verbosity=atoi(value.c_str());
-			      else 
+			      else
 				{
-				  if( !add) 
-				    {EnvironmentClean(key);   
+				  if( !add)
+				    {EnvironmentClean(key);
 				    GetEnvironment(key,value);}
-				  else 
+				  else
 				    {
 				      bool path=key.find("path")!= string::npos;
 				      if(path)
 					EnvironmentInsert(key,TransDir(value,dirfile),"$");
-				      else 
-					EnvironmentInsert(key,value,"$");		      
+				      else
+					EnvironmentInsert(key,value,"$");
 				    }
-				  
-				}
 
+				}
 			      key="";
 			      value="";
 			    }
 			}
 		      else // find begin of value
-			{ 
+			{
 			  if(c=='\'' || c == '"' ) {bv = c;value="";}
 			  else if (! isspace(c)) {value=c;bv=' ';}
-			  
+
 			}
 		    }
-		  else if( inkey) 
+		  else if( inkey)
 		    {
 		      if ( isalnum(c) ) key += c;
-		      else if ( c == '=') 
-			{ 
+		      else if ( c == '=')
+			{
 			  inkey=false;
 			  invalue=true;
 			  add=false;
 			}
-		      else if ( c == '+' && c1=='=') 
+		      else if ( c == '+' && c1=='=')
 			{
 			  inkey=false;
 			  invalue=true;
 			  add=true;
 			  c1=f.get();
 			}
-		      else if (! isspace(c) ) 
-			break;      
+		      else if (! isspace(c) )
+			break;
 		    }
-		  else if(isalpha(c) ) 
+		  else if(isalpha(c) )
 		    { inkey=1; key= c;}
                 }
 	}
 	if( inkey || invalue || bv )
 	  {
 	    cout << " error read init file : " << file << " " <<  linenumber << endl;
-	    cout << " line : " << line << endl;	    
+	    cout << " line : " << line << endl;
 	    return -11;
 	  }
 	return 1;
@@ -298,7 +285,7 @@ void GetEnvironment()
 
  // FFCS: we must make sure that FFCS does not reuse the same freefem++.pref as FF because some shared libraries must be
  // recompiled.
-#ifdef PURE_WIN32 
+#ifdef PURE_WIN32
 string     ffprefsuffix ="pref";
 #else
 string     ffprefsuffix ="pref";
@@ -316,8 +303,8 @@ string     ffprefsuffix ="pref";
   home    = getenv("HOME");
 #endif
 
-#ifdef PURE_WIN32 
- 
+#ifdef PURE_WIN32
+
   const int LEN = 4096;
   char envv[LEN];
   char envl[LEN];
@@ -325,27 +312,27 @@ string     ffprefsuffix ="pref";
   char envh[LEN];
   char execpath[MAX_PATH+1];
 
-  if (GetEnvironmentVariable("FF_VERBOSITY", envv, LEN) > 0) 
+  if (GetEnvironmentVariable("FF_VERBOSITY", envv, LEN) > 0)
    ff_verbosity=envv;
-   
-  if (GetEnvironmentVariable("FF_LOADPATH", envl, LEN) > 0) 
+
+  if (GetEnvironmentVariable("FF_LOADPATH", envl, LEN) > 0)
    ff_loadpath=envl;
-   
-  if (GetEnvironmentVariable("FF_INCLUDEPATH", envi, LEN) > 0) 
+
+  if (GetEnvironmentVariable("FF_INCLUDEPATH", envi, LEN) > 0)
    ff_incpath=envi;
-  
-  if (GetEnvironmentVariable("HOMEPATH", envh, LEN) > 0) 
+
+  if (GetEnvironmentVariable("HOMEPATH", envh, LEN) > 0)
     home=envh;
-#endif 
+#endif
   if ( ff_verbosity ) {
-    
+
     verbosity = atoi(ff_verbosity);
       if(verbosity > 4)
     cout << " -- GetEnvironmentVariable: verbosity= " <<verbosity   << endl;
-      
+
   }
 
-#ifdef PURE_WIN32 
+#ifdef PURE_WIN32
      int bytes = GetModuleFileName(NULL, execpath, MAX_PATH);
      execpath[bytes]='\0';
      if(bytes)
@@ -374,36 +361,31 @@ string     ffprefsuffix ="pref";
     }
 #endif
 
-  if(home) 
+  if(home)
 	EnvironmentInsert("init-files",TransDir(home)+"."+ffpref,"$");
 
   EnvironmentInsert("init-files",ffpref,"$");
-	
-  { 
+
+  {
     OneEnvironmentData  & l = ffenvironment["init-files"];
-    OneEnvironmentData::iterator i=l.begin();	
+    OneEnvironmentData::iterator i=l.begin();
     while( i != l.end())
       {
-	if(verbosity>2) cout << " try initfile : " <<*i << endl; 
-	readinitfile(*i++);	   
+	if(verbosity>2) cout << " try initfile : " <<*i << endl;
+	readinitfile(*i++);
       }
   }
-  
-  
-  
- // if ( ff_verbosity ) {
- //   verbosity = atoi(ff_verbosity);
- // }
+
   if(ff_loadpath)
     GetEnvironment("loadpath",ff_loadpath);
   if(ff_incpath)
     GetEnvironment("includepath",ff_incpath);
 
-   EnvironmentInsert("includepath","","");//    always add "" the first include path  
-  if( verbosity >2) 
+   EnvironmentInsert("includepath","","");//    always add "" the first include path
+  if( verbosity >2)
     {
       EnvironmentData::iterator loadpath=ffenvironment.find("loadpath");
-      EnvironmentData::iterator inc=ffenvironment.find("includepath");    
+      EnvironmentData::iterator inc=ffenvironment.find("includepath");
       if(  loadpath != ffenvironment.end()) {
 	show("\nload path : ",loadpath->second, "\n \t ");
 	cout <<"(.)"<<endl;
@@ -412,23 +394,20 @@ string     ffprefsuffix ="pref";
 	show("\ninclude path : ",inc->second, "\n \t ");
 	cout <<"(.)"<<endl;}
     }
-//  if ( ff_verbosity ) {
-//    verbosity = atoi(ff_verbosity);
     if(verbosity>10) cout << " --  GetEnvironment: verbosity is set to " << verbosity  << endl;
-//  }
-  
+
  }
 void EnvironmentLoad()
 {
     EnvironmentData::iterator toload=ffenvironment.find("load");
-    if(  toload != ffenvironment.end()) 
-	
+    if(  toload != ffenvironment.end())
+
 	for (OneEnvironmentData::iterator i=toload->second.begin(); i != toload->second.end(); ++i)
 	{
 	    if(verbosity) cout << "PreEnv load :"<< *i << endl;
 	    load(*i);
 	}
-	    
+
 }
 
 //  from ffapi to env. F. Hecht ..
@@ -456,7 +435,7 @@ long chtmpdir()
     if(verbosity>2)
         std::cout << " Change to " << endl;
     return chdir(tmp);
-    
+
 }
 bool ff_justcompile=false;
 bool ff_ch2edpdtmpir=0;
@@ -473,7 +452,7 @@ long verbosity=50;
 int main()
 {
   GetEnvironment();
-  return 0; 
+  return 0;
 }
 }
 #endif

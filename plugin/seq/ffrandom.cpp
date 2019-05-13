@@ -54,7 +54,7 @@ unsigned long good_seed () {
 	std::ifstream file("/dev/random", std::ios::binary);
 
 	if (file.is_open()) {
-		unsigned long memblock[10];
+		unsigned long memblock[10]={};
 		size_t size = sizeof(int);
 		file.read((char *)(void *)memblock, size);
 		file.close();

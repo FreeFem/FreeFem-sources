@@ -106,9 +106,6 @@ R3*courbe (Stack stack, const KNM_<double> &b, const long &li0, const long &li1,
 	if (pi) {*pi = i0;}
 
 	R3 *pQ = Add2StackOfPtr2Free(stack, new R3(Q));
-	// MeshPoint &mp= *MeshPointStack(stack); // the struct to get x,y, normal , value
-	// mp.P.x=Q.x; // get the current x value
-	// mp.P.y=Q.y; // get the current y value
 	return pQ;
 }
 
@@ -187,7 +184,6 @@ KN<double>*courbure (Stack stack, pmesh const &pTh, KN<long> *const &lab, bool a
 				le[k] += lE;
 				if (axi) {nr[k] += E.y / lE;}
 
-				// cout << k << " " << lE << " "<< le[k] << endl;
 			}
 		}
 	}
@@ -196,13 +192,9 @@ KN<double>*courbure (Stack stack, pmesh const &pTh, KN<long> *const &lab, bool a
 
 	for (int i = 0; i < Th.nv; ++i) {
 		if (cn[i] == 3) {
-			// cout << i << " courbure " << c[i] << " " << le[i] << " " << c[i]/le[i]/2. <<endl;
 			if (c[i] > pi) {c[i] -= twopi;} else if (c[i] < -pi) {c[i] += twopi;}
 
 			if (axi) {
-				// Bof Bof  moyen des normal:
-				// c[i] angle entre n1 et n2 :
-				// ( n1 + n2 )/ || n1+n2|| et on a :|| n1+n2|| = 1+cos(abs(c[i]))
 				double Nr = nr[i] / (1. + cos(abs(c[i])));	// ok
 				double r = Th(i).x;
 				if (verbosity > 9999) {
@@ -212,8 +204,6 @@ KN<double>*courbure (Stack stack, pmesh const &pTh, KN<long> *const &lab, bool a
 				c[i] = r * c[i] / (le[i] / 2.) + Nr;
 			} else {c[i] /= (le[i] / 2.);}
 		} else if ((cn[i] > 0) && (abs(Th(i).x) < epsTh && axi)) {
-			// extermite r=0
-			// cout << "axi 0" << nr[i] <<  endl;
 			double ci = c[i];
 			if (cn[i] == 2) {ci = pi + ci;}
 
@@ -223,13 +213,12 @@ KN<double>*courbure (Stack stack, pmesh const &pTh, KN<long> *const &lab, bool a
 				cout << Th(i).y << " R1 " << ci / le[i] << " ci " << ci << " le " << le[i] << " cn " << cn[i] << " " << c[i] << " " << nr[i] << " " << asin(nr[i]) << endl;
 			}
 
-			c[i] = ci * 2 * rm;	// 2*nr[i];
+			c[i] = ci * 2 * rm;
 		} else {
 			c[i] = 0;
 		}
 	}
 
-	// cout << c << endl;
 	return Add2StackOfPtr2FreeRC(stack, pc);
 }
 
@@ -410,7 +399,6 @@ double vp1 (const double &a11, const double &a12, const double &a22) {
 	double vp[2][2];
 	double l[2];
 	double m[3] = {a11, a12, a22};
-	int nv = eigen2(m, l, vp);
 
 	return l[0];
 }
@@ -419,7 +407,6 @@ double Tresca (const double &a11, const double &a12, const double &a22) {
 	double vp[2][2];
 	double l[2];
 	double m[3] = {a11, a12, a22};
-	int nv = eigen2(m, l, vp);
 
 	return max(fabs(l[0] - l[1]), max(fabs(l[0]), fabs(l[1])));
 }
@@ -428,29 +415,23 @@ double Tresca (const double &arr, const double &arz, const double &azz, const do
 	double vp[2][2];
 	double l[3];
 	double m[3] = {arr, arz, azz};
-	int nv = eigen2(m, l, vp);
 
 	l[2] = att;
 
 	return max(fabs(l[0] - l[1]), max(fabs(l[0] - l[2]), fabs(l[1] - l[2])));
 }
 
-
 double Tresca (const double &a11, const double &a22, const double &a33, const double &a12,const double &a23, const double &a13) {
 	double vp[3][3];
 	double l[3];
-	/*  numberinbg of m : a11 , a12 ,  a13,  a22,   a23   a33 	(symetrique )*/
 	double m[6] = { a11,a12,a13, a22,a23,a33};
-	int nv = eigenv(1,m, l, vp);
-	//cout << nv << " " <<l[0] << " " << l[1] << " " << l[2] << endl; 
-    return max(fabs(l[0] - l[1]), max(fabs(l[0] - l[2]), fabs(l[1] - l[2])));
+
+  return max(fabs(l[0] - l[1]), max(fabs(l[0] - l[2]), fabs(l[1] - l[2])));
 }
 double VonMises (const double &a11, const double &a22, const double &a33, const double &a12,const double &a23, const double &a13) {
 	double vp[3][3];
 	double l[3];
-	/*  numberinbg of m : a11 , a12 ,  a13,  a22,   a23   a33 	*/
 	double m[6] = { a11,a12,a13, a22,a23,a33};
-	int nv = eigenv(1,m, l, vp);
 	double s1 = l[1] - l[0];
 	double s2 = l[0] - l[2];
 	double s3 = l[1] - l[2];
@@ -460,7 +441,6 @@ double VonMises (const double &a11, const double &a12, const double &a22) {
 	double vp[2][2];
 	double l[3];
 	double m[3] = {a11, a12, a22};
-	int nv = eigen2(m, l, vp);
 	double s1 = l[1] - l[0];
 	double s2 = l[0] - l[2];
 	double s3 = l[1] - l[2];
@@ -470,8 +450,7 @@ double VonMises (const double &a11, const double &a12, const double &a22) {
 double VonMises (const double &arr, const double &arz, const double &azz, const double &att) {
 	double vp[2][2];
 	double l[3];
-    double m[3] = {arr, arz, azz};
-	int nv = eigen2(m, l, vp);
+  double m[3] = {arr, arz, azz};
 
 	l[2] = att;
 	double s1 = l[1] - l[0];
@@ -491,7 +470,6 @@ static void finit () {
 	Global.Add("curves", "(", new OneOperator2s_<R3 *, KNM_<double>, double>(courbe));
 	Global.Add("setcurveabcisse", "(", new OneOperator1s_<double, KNM_<double> >(reparametrage));
 	Global.Add("equiparameter", "(", new OneOperator2s_<KNM<double> *, KNM_<double>, long>(equiparametre));
-	// Global.Add("vp1","(",new OneOperator3_<double, double,double,double >(vp1));
 	Global.Add("Tresca", "(", new OneOperator3_<double, double>(Tresca));
 	Global.Add("VonMises", "(", new OneOperator3_<double, double>(VonMises));
 	Global.Add("Tresca", "(", new OneOperator4_<double, double>(Tresca));

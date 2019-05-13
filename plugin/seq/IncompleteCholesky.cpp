@@ -61,7 +61,6 @@ long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
     ffassert( A.half && L.half);
     ffassert( A.n == L.n);
     int n =A.n,i,j,k,kk;
-    double tgv1= sqrt(tgv);
     double tgve =tgv*0.99999999;
     if(tgve < 1) tgve=1e200;
     double nan=sqrt(-1.);
@@ -74,7 +73,6 @@ long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
     for(int i=0; i< n; ++i)
     {
         int ai1=A.p[i+1]-1;
-        int ai0=A.p[i];
         int li1=L.p[i+1]-1;
         int li0=L.p[i];
         double  Aii=A.aij[ai1];
@@ -93,24 +91,20 @@ long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
                 ffassert(j<i);
                 int lj1=L.p[j+1]-1;
                 int lj0=L.p[j];
-                
+
                 double *pAij = A.pij(i,j) ;
                 double Lij = pAij ? *pAij: 0.,Aij=Lij;
                 for(int kkk= lj0; kkk<lj1; ++kkk)// loop  row j
-                {  //cout << " ?? " << kkk << " "<< lj0 << " " <<lj1 <<endl;
+                {
                     int k = L.j[kkk];
-                    //cout << " @@@" << i << " " << j << " ( " << lj0 << " " << lj1 << ")  " << k << " // " << kkk <<  " " << endl;
                     ffassert(k >=0 && k < j);
                     double Ljk = L.aij[kkk], *pLik=L.pij(i,k), Lik = pLik ? *pLik : 0.;
-                    //cout << " *** " << k << " " <<Lik *Ljk <<endl;
                     Lij -= Lik *Ljk;
                 }
                 Lij /=  L(j,j);
                 L.aij[kk] =Lij;
-                //cout <<kk << " " << j << " " << Lij << " "<< Aij << " , ";
-                
+
             }
-            // cout << " **" << endl;
             for(int k= li0; k<li1; ++k)
                 Aii -= L.aij[k]*L.aij[k];
             if( Aii <=1e-30) {
@@ -121,7 +115,7 @@ long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
             }
             double Lii = sqrt(Aii);
              L.aij[li1] =Lii;
-            
+
         }
     }
     if(verbosity>2) cout << "  -- ichol:  N BC = " << BC << " nberr "<< err <<endl;
@@ -130,20 +124,16 @@ long ichol(MatriceMorse<R> & A,MatriceMorse<R> &  L,double tgv)
 
 inline R pscal(R*L,int *cl,int kl,int kl1,int i, MatriceMorse<R> &  Ut,int j )
 {
-    int ku = Ut.p[j],ku1=Ut.p[j]-1;
     int k= min(i,j); //  common  part
     R r =0;
-    //cout << " pscal: "<<  i << " " << j << "  min: " << k << endl;
     for(int l=kl;l<kl1;++l)
     {
-        
+
         int jl = cl[l];
-        //cout << "     ##" <<i << " " << jl << " " << (jl > k) << endl;
         if( jl >= k) break;
         R Lijl = L[l];
         R * pUtjjl = Ut.pij(j,jl);
         if(pUtjjl) { r += Lijl* *pUtjjl;
-            //cout <<   "   **  "<< Lijl << " " << *pUtjjl << " " << jl <<  " " << r << endl;
         }
     }
     ffassert ( r==r );
@@ -151,16 +141,6 @@ inline R pscal(R*L,int *cl,int kl,int kl1,int i, MatriceMorse<R> &  Ut,int j )
 }
 long iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double tgv)
 {
-    /*  Algo LU :
- L = L + I, U = U+D
- for(int i=0;i<n; ++i)
- {
- for(int j=0;j<i;++j) L(i,j) = (A(i,j) - (L(i,':'),U(':',j)))/ D(j,j);
- for(int j=0;j<i;++j) U(j,i) = (A(j,i) - (L(j,':'),U(':',i))) ;
- D(i,i) = A(i,i) - (L(i,':'),U(':',i));
- }
-
- */
       A.CSR();
       L.CSR();
       Ut.dotranspose();
@@ -182,8 +162,6 @@ long iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
     double mUii=1e200;
     for(int i=0; i< n; ++i)
     {
-        int ai1=A.p[i+1]-1;
-        int ai0=A.p[i];
         int li1=L.p[i+1]-1;
         int li0=L.p[i];
         int ui1=Ut.p[i+1]-1;
@@ -192,7 +170,7 @@ long iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
         err += L.j[li1] != i;
         ffassert( L.j[li1]==i && Ut.j[ui1]==i);
         double  Aii=A(i,i),Uii;
-        
+
         int BCi ;
          wbc[i]  = BCi= (Aii > tgve);
         if (BCi)
@@ -209,7 +187,7 @@ long iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
             {
                 int j   = L.j[l];
                 R *pAij = A.pij(i,j), Aij = pAij ? *pAij : 0.;
-                
+
                 R Ujj=Ut(j,j);
                 ffassert(j<i);
                 L.aij[l] = (Aij - pscal(L.aij,L.j,li0,li1,i, Ut,j)) / Ujj;
@@ -226,7 +204,7 @@ long iLU(MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double t
             L(i,i) =1.;
 
             mUii = min(mUii,abs(Uii));
-            
+
             if (abs(Uii)< 1e-30)
             {
                 if(verbosity && err<10)
@@ -250,7 +228,7 @@ double * inv(int n,double *a,double *a1)
     fill(a1,a1+n*n,0.);
     for (int i = 0; i < n2; i+= n1)
         a1[i]=1;
-    
+
     KN<integer> p(n);
     dgesv_(&n0, &n0, a1, &n0, p, a, &n0, &info);
     return a1;
@@ -258,12 +236,11 @@ double * inv(int n,double *a,double *a1)
 
 double * MatVect(int n,double *a,double *x, double *y)
 {
-    //  y = A *x, Row major
     fill(y,y+n,0.);
     for (int k=0,j=0;j<n;++j)
         for(int i=0; i<n;++i,++k)
             y[i] += a[k]*x[j];
-	return y; 
+	return y;
 }
 #ifdef CODE_IN_PROGRESS
 //  F. Hecht try to make block ILU preconditinneur
@@ -271,7 +248,7 @@ double * MatVect(int n,double *a,double *x, double *y)
 //  Store Diag bloc of inv Diag block ????
 long iLUB(int nb,int *b,MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R> &  Ut,double tgv)
 {
-    
+
     /*  Algo LU block :
      L = L + I, U = U+D
      for(int i=0;i<n; ++i)
@@ -280,7 +257,7 @@ long iLUB(int nb,int *b,MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R>
      for(int j=0;j<i;++j) U(j,i) = (A(j,i) - (L(j,':'),U(':',i))) ;
      D(i,i) = A(i,i) - (L(i,':'),U(':',i));
      }
-     
+
      */
     //  calcul indic de bloc
 
@@ -295,7 +272,7 @@ long iLUB(int nb,int *b,MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R>
     int sym = A.half    ;
     int n =A.n,i,j,k,kk;
     ffassert( b[nb]== n);
-    
+
     double tgve =tgv*0.999;
     if(tgve < 1) tgve=1e200;
     double NaN=sqrt(-1.);
@@ -327,7 +304,7 @@ long iLUB(int nb,int *b,MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R>
     for(int ib=0; ib< nb; ++ib)
     {
         int i0=b[i0], i1=b[ib+1], nbi = i1-n0,;
-       
+
         for (int i= i0; i<i1; ++i)
         {
         int il=i-i0;
@@ -338,8 +315,7 @@ long iLUB(int nb,int *b,MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R>
         ui1[il]=Ut.p[i+1]-1;
         ui0[il]=Ut.p[i];
         }
-        //double  Aii=A(i,i),Uii;
-        
+
         int BCi ;//  bofboc
         for (int i= i0; i<i1; ++i,++k)
         {
@@ -374,7 +350,7 @@ long iLUB(int nb,int *b,MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R>
                         for(int jl=0;jl<fb;++jl)
                         { int j= ib[jb]+ jl;
                           R * p= L.pij(i,j);
-                          if(p) *p = y[jl]; 
+                          if(p) *p = y[jl];
                         }
                     }
                 }
@@ -393,7 +369,7 @@ long iLUB(int nb,int *b,MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R>
             }
         }
         }
-        
+
        //  bloc diagonale
          for (int k=0,j= i0; j<i1; ++j)
             for (int i= i0; i<i1; ++i,++k)
@@ -403,7 +379,7 @@ long iLUB(int nb,int *b,MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R>
                 double  Aij=A(i,j);
                 Aii[k]=Aij;
                 DD[kk]= Aij -pscal(Ut.aij,Ut.j,ui0[il],ui1[il],i, L,j);
-                
+
             }
         //  inverse DD
         inv(nbi,DD+pD1[ib],DD1+pD1[ib]);
@@ -413,11 +389,8 @@ long iLUB(int nb,int *b,MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R>
                  R *pU = sym ? A.pij(i,j) : A.pij(j,i)
             }
 
-        // Uii= Aii - pscal(Ut.aij,Ut.j,ui0,ui1,i, L,i);
-        //  L(i,i) =1.;
-            
             mUii = min(mUii,abs(Uii));
-            
+
             if (abs(Uii)< 1e-30)
             {
                 if(verbosity && err<10)
@@ -427,7 +400,7 @@ long iLUB(int nb,int *b,MatriceMorse<R> & A,MatriceMorse<R> &  L,MatriceMorse<R>
             }
             Ut(i,i) = Uii;
         }
-    
+
     if(verbosity>2 || err ) cout << "   - ILU: Nb BC = " << BC << "nb err =" << err << " main Uii " << mUii << endl;
     Ut.dotranspose();
     Ut.CSC();
@@ -446,7 +419,7 @@ long ff_ilu (Matrice_Creuse<R> * const & pcA,Matrice_Creuse<R> * const & pcL,Mat
     MatriceMorse<R> *pL = dynamic_cast<MatriceMorse<R>* > (pl);
     MatriceMorse<R> *pU = dynamic_cast<MatriceMorse<R>* > (pu);
     ffassert(pL && pA && pU);
-    
+
     return iLU(*pA,*pL,*pU,tgv);
 }
 
@@ -458,7 +431,7 @@ long ff_ichol (Matrice_Creuse<R> * const & pcA,Matrice_Creuse<R> * const & pcL,d
     MatriceMorse<R> *pA= dynamic_cast<MatriceMorse<R>* > (pa);
     MatriceMorse<R> *pL = dynamic_cast<MatriceMorse<R>* > (pl);
     ffassert(pL && pA);
-    
+
     return ichol(*pA,*pL,tgv);
 }
 long ff_ilu (Matrice_Creuse<R> *  const & pcA,Matrice_Creuse<R> *  const & pcL,Matrice_Creuse<R> * const & pcU)
@@ -486,13 +459,13 @@ void LU_solve(MatriceMorse<R> &T,int cas,KN<double> & b,bool trans)
             k0 = T.p[i];
             k1 = T.p[i+1]-1;
             b[i] /= T.aij[k1];
-            
+
             for (k=k0;k<k1;k++)
             {
                 int j = ij[k];
                 b[j] -= b[i]*T.aij[k];
             }
-            
+
             assert(ij[k] == i);
         }
     }
@@ -511,27 +484,25 @@ void LU_solve(MatriceMorse<R> &T,int cas,KN<double> & b,bool trans)
             b[i] = bi/ T.aij[k];
             assert(ij[k] == i);
         }
-        
+
     }
-    
-    
-    
+
+
+
 }
 bool ff_ichol_solve(Matrice_Creuse<R> * pcL,KN<double> * b)
 {
-    // L L' u = b =>  L uu = b;  L' u = uu;
     MatriceCreuse<R> * pl=pcL->A;
     ffassert(pl );
     MatriceMorse<R> *pL = dynamic_cast<MatriceMorse<R>* > (pl);
     ffassert(pL );
     LU_solve(*pL,-1,*b,0);
     LU_solve(*pL,-1,*b,1);
-    
+
     return true;
 }
 bool ff_ilu_solve(Matrice_Creuse<R> * const & pcL,Matrice_Creuse<R> *const &  pcU,KN<double> * const & b)
 {
-    // L Ut u = b =>  L uu = b;  L' u = uu;
     MatriceCreuse<R> * pl=pcL->A;
     ffassert(pl );
     MatriceMorse<R> *pL = dynamic_cast<MatriceMorse<R>* > (pl);
@@ -542,7 +513,7 @@ bool ff_ilu_solve(Matrice_Creuse<R> * const & pcL,Matrice_Creuse<R> *const &  pc
     ffassert(pl );
     LU_solve(*pL,-1,*b,0);
     LU_solve(*pU, 1,*b,0);
-    
+
     return true;
 }
 

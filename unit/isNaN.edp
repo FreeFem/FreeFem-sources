@@ -1,0 +1,32 @@
+include "test.idp"
+
+cout << "isNaN" << endl;
+real t;
+int i = 42;
+real nan = sqrt(-1);
+real r = 4.2;
+complex c = 4 + 2i;
+
+cout << IND << "int" << endl;
+
+t = clock();
+bool resi = isNaN(i);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resi == false);
+
+cout << IND << "Nan" << endl;
+
+t = clock();
+bool resnan = isNaN(nan);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resnan == true);
+
+cout << IND << "real" << endl;
+
+t = clock();
+bool resr = isNaN(r);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resr == false);

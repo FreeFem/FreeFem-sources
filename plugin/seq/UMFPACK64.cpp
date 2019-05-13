@@ -29,15 +29,7 @@
 
 #include  <iostream>
 using namespace std;
-//#include "rgraph.hpp"
 #include "ff++.hpp"
-
-/*
-#include "error.hpp"
-#include "AFunction.hpp"
-
-#include "MatriceCreuse_tpl.hpp"
-*/
 
 template<class K=double>
 class VirtualSolverUMFPACK64: public  VirtualSolver<int,K>
@@ -50,7 +42,7 @@ public:
     HMat *pA;
     HMat64 *pA64;
     VirtualSolverUMFPACK<SuiteSparse_long,K> v64;
-    
+
      VirtualSolverUMFPACK64(HMat  &AA, const Data_Sparse_Solver & ds,Stack stack )
     : pA(&AA),
       pA64(new HashMatrix<SuiteSparse_long,K>(AA)),
@@ -58,7 +50,7 @@ public:
     void dosolver(K *x,K*b,int N,int trans){
         return v64.dosolver(x,b,N,trans);
     }
-    
+
      void fac_init(){v64.fac_init();}  // n, nzz fixe
      void fac_symbolic(){v64.fac_symbolic();}
      void fac_numeric(){v64.fac_numeric();}

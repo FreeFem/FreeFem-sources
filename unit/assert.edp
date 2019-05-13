@@ -1,0 +1,24 @@
+include "test.idp"
+
+cout << "assert" << endl;
+
+real t;
+bool isTrue = true;
+
+t = clock();
+assert(true);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(isTrue == true);
+
+bool isCaught = false;
+try {
+  t = clock();
+  assert(true == false);
+  t = clock() - t;
+  cout << IND << IND << t << endl;
+} catch(...) {
+  isCaught = true;
+  cout << "assert failed" << endl;
+}
+test(isCaught == true);

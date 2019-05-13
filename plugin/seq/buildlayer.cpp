@@ -25,6 +25,8 @@
 //ff-c++-cpp-dep:
 // *INDENT-ON* //
 
+//NOT-USED
+
 #include <iostream>
 #include <cfloat>
 #include <cmath>
@@ -51,7 +53,6 @@ using namespace std;
 #include "problem.hpp"
 #include "LayerMesh.hpp"
 #include "TransfoMesh_v2.hpp"
-// #include "GQuadTree.hpp"
 
 #include <set>
 #include <vector>
@@ -85,14 +86,11 @@ class BuildLayeMesh_Op: public E_F0mps
 			if (nargs[1]) {a2 = dynamic_cast<const E_Array *>(nargs[1]);}
 
 			int err = 0;
-			// cout << nargs[0] << " "<< a1 << endl;
-			// cout << nargs[1] << " "<< a2 << endl;
 			if (a1) {
 				if (a1->size() != 2) {
 					CompileError("LayerMesh (Th,n, zbound=[zmin,zmax],) ");
 				}
 
-				// cout << "lecture de ezmin , ezmax" << endl;
 				ezmin = to<double>((*a1)[0]);
 				ezmax = to<double>((*a1)[1]);
 			}
@@ -182,7 +180,6 @@ AnyType BuildLayeMesh_Op::operator () (Stack stack)  const {
 
 	cout << nrtet.N() << nrfmid.N() << nrfup.N() << nrfdown.N() << endl;
 
-	// if( nrtet.N() && nrfmid.N() && nrfup.N() && nrfdown.N() ) return m;
 	ffassert(nrtet.N() % 2 == 0);
 	ffassert(nrfmid.N() % 2 == 0);
 	ffassert(nrfup.N() % 2 == 0);
@@ -239,28 +236,15 @@ AnyType BuildLayeMesh_Op::operator () (Stack stack)  const {
 	Mesh3 *Th3 = build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
 
 	if (!(xx) && !(yy) && !(zz)) {
-		/*
-		 * map< int, int > maptet;
-		 * map< int, int > maptrimil, maptrizmax, maptrizmin;
-		 * map< int, int > mapemil, mapezmax, mapezmin;
-		 *
-		 * build_layer_map_tetrahedra( Th, maptet );
-		 * build_layer_map_triangle( Th, maptrimil, maptrizmax, maptrizmin );
-		 * build_layer_map_edge( Th, mapemil, mapezmax, mapezmin );
-		 *
-		 * Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin, mapemil, mapezmax, mapezmin);
-		 */
 		Th3->BuildBound();
 		Th3->BuildAdj();
 		Th3->Buildbnormalv();
 		Th3->BuildjElementConteningVertex();
 		Th3->BuildGTree();
-		// Th3->decrement();
 		Add2StackOfPtr2FreeRC(stack, m);
 		*mp = mps;
 		return Th3;
 	} else {
-		// Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax);
 
 		KN<double> txx(Th3->nv), tyy(Th3->nv), tzz(Th3->nv);
 		KN<int> takemesh(Th3->nv);
@@ -301,12 +285,6 @@ AnyType BuildLayeMesh_Op::operator () (Stack stack)  const {
 	}
 }
 
-/*  class Init1 { public:
- * Init1();
- * };
- *
- * $1 */
-
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
 	typedef const Mesh *pmesh;
 	typedef const Mesh3 *pmesh3;
@@ -314,8 +292,6 @@ static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3
 	if (verbosity) {
 		cout << " load: buildlayers  " << endl;
 	}
-
-	// cout << " je suis dans Init " << endl;
 
 	Global.Add("buildlayers", "(", new BuildLayerMesh);
 }

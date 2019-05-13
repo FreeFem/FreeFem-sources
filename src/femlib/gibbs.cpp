@@ -1,26 +1,26 @@
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :      
-// USAGE    :        
-// ORG      : 
+// SUMMARY  :
+// USAGE    :
+// ORG      :
 // AUTHOR   : Frederic Hecht
 // E-MAIL   : hecht@ann.jussieu.fr
 //
 
 /*
- 
+
  This file is part of Freefem++
- 
+
  Freefem++ is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation; either version 2.1 of the License, or
  (at your option) any later version.
- 
+
  Freefem++  is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -53,16 +53,16 @@ extern long verbosity;
 int gibbs1_(integer* n,integer*  record,integer*  ptvois);
 int gibbs2_(integer* n,integer*  record,integer*  criter);
 int gibbsa_(integer* n,integer*  ptvois,integer*  vois,integer*  r,integer*  m,
-             integer*  nv,integer*  nx,integer*  ny,integer*  nn,integer*  w1,integer*  w2, 
+             integer*  nv,integer*  nx,integer*  ny,integer*  nn,integer*  w1,integer*  w2,
 	integer* pfold,integer*  pfnew,integer*  impre,integer*  nfout);
 int gibbsb_(integer* x,integer*  y,integer*  n,integer*  ptvois,
 						integer*  vois,integer*  nx,integer*  ny,integer*  nv,integer*  nn,integer*  m,
 						integer*  wh,integer*  wl,integer* r, integer* impre, integer* nfout);
 int gibbsc_(integer* nz,integer*  nv,integer*  niveau,integer*  n,integer* );
-int gibbsd_(integer* racine,integer*  n,integer*  ptvois,integer*  
+int gibbsd_(integer* racine,integer*  n,integer*  ptvois,integer*
 							vois,integer*  nv,integer*  r,integer*  niveau);
 int gibbst_(integer* n,integer*  p,integer*  nv,integer*  nn,integer*  ptvois,integer*  vois,
-						integer*  m,integer*  r,integer*  new_,integer*  option, 
+						integer*  m,integer*  r,integer*  new_,integer*  option,
 						integer* pfnew,integer*  impre,integer*  nfout);
 
 /* Subroutine */ int gibbs1_(integer* n,integer*  record,integer*  ptvois)
@@ -78,7 +78,7 @@ int gibbst_(integer* n,integer*  p,integer*  nv,integer*  nn,integer*  ptvois,in
 /*     routine appele par gibbs0 */
 /* -----------------------------------------------------------------------
  */
-/*     but: trie record (ensemble de n sommet) telle que l'ordre des somm 
+/*     but: trie record (ensemble de n sommet) telle que l'ordre des somm
 */
 /*     soit croissant (ordre du sommet i est ptvois(i+1)-ptvois(i)) */
 /* -----------------------------------------------------------------------
@@ -123,7 +123,7 @@ L4:
 	goto L8;
     }
 L5:
-    if (ptvois[record[j] + 1] - ptvois[record[j]] < ptvois[record[j + 1] + 1] 
+    if (ptvois[record[j] + 1] - ptvois[record[j]] < ptvois[record[j + 1] + 1]
 	    - ptvois[record[j + 1]]) {
 	++j;
     }
@@ -205,9 +205,9 @@ L999:
     return 0;
 } /* gibbs2_ */
 
-/* Subroutine */ 
+/* Subroutine */
 int gibbsa_(integer* n,integer*  ptvois,integer*  vois,integer*  r,integer*  m,
-             integer*  nv,integer*  nx,integer*  ny,integer*  nn,integer*  w1,integer*  w2, 
+             integer*  nv,integer*  nx,integer*  ny,integer*  nn,integer*  w1,integer*  w2,
 	integer* pfold,integer*  pfnew,integer*  impre,integer*  nfout)
 {
     /* System generated locals */
@@ -226,7 +226,7 @@ int gibbsa_(integer* n,integer*  ptvois,integer*  vois,integer*  r,integer*  m,
 
 /* -----------------------------------------------------------------------
  */
-/*  but: calculer une renumerotation des sommets d'un graphe defini par: 
+/*  but: calculer une renumerotation des sommets d'un graphe defini par:
 */
 /*     par la methode de gibbs */
 /* -----------------------------------------------------------------------
@@ -414,7 +414,7 @@ s */
 	bnew = mmax(i__2,i__3);
         if(*pfold>m1e9) { pfo1+=*pfold/m1e9; *pfold = *pfold%m1e9;}
         if(*pfnew>m1e9) { pfn1+=*pfnew/m1e9; *pfnew = *pfnew%m1e9;}
-        
+
 /* L110: */
     }
     if(pfo1 || pfn1)
@@ -434,7 +434,7 @@ s */
 /*      if(impre.ne.0) then */
 /*        write(nfout,*)'profile  old  = ',pfold,', profile  new = ',pfnew
  */
-/*        write(nfout,*)'1/2 bande old = ',bold ,', 1/2 band new = ',bnew 
+/*        write(nfout,*)'1/2 bande old = ',bold ,', 1/2 band new = ',bnew
 */
 /*      endif */
 return 0;
@@ -457,7 +457,7 @@ integer*  wh,integer*  wl,integer* r, integer* , integer* )
 
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
-/* ...................................................................... 
+/* ......................................................................
 */
 /*     attention on met la descente optimiser dans r <0 ou nulle */
 /* .......................................................................
@@ -492,7 +492,7 @@ integer*  wh,integer*  wl,integer* r, integer* , integer* )
 /* L20: */
     }
     if (flag_) {
-/*       calcul des composantes connexe du graphe sans les sommets de 
+/*       calcul des composantes connexe du graphe sans les sommets de
 nn */
 /*       ------------------------------------------------------------
 --- */
@@ -543,7 +543,7 @@ L50:
 /*        if(impre.le.-10) write(nfout,5555)'nv(0:n+n) = ',(nv(i),i=0,
 n+n) */
 	gibbs1_(&nbc, &m[1], nv);
-/*        if(impre.le.-10)write(nfout,5555)'trie m =',(m(i),i=1,nbc) 
+/*        if(impre.le.-10)write(nfout,5555)'trie m =',(m(i),i=1,nbc)
 */
 	i__1 = p;
 	for (i = 0; i <= i__1; ++i) {
@@ -627,7 +627,7 @@ n+n) */
 	}
     }
 /*     on met les nouveaux niveaux de la descendance optimiser dans nn */
-/*     ----------------------------------------------------------------- 
+/*     -----------------------------------------------------------------
 */
     i__1 = *n;
     for (i = 1; i <= i__1; ++i) {
@@ -671,9 +671,9 @@ return 0;} /* gibbsb_ */
 	*mxz = mmax(i__2,i__3);
 	i__2 = nv[i + 1];
 	for (j = nv[i] + 1; j <= i__2; ++j) {
-	    if(nv[j] > *n) 
+	    if(nv[j] > *n)
 	     printf(" bug in gibbsc_ ##### %ld %ld %ld %ld \n",j,nv[j],i,*niveau );
-	    if(nv[j] <= *n) 
+	    if(nv[j] <= *n)
 	    nz[nv[j]] = i;
 /* L20: */
 	}
@@ -767,7 +767,7 @@ L20:
 return 0;} /* gibbsd_ */
 
 
-/* Subroutine */ int gibbst_(integer* n,integer*  p,integer*  nv,integer*  nn,integer*  ptvois,integer*  vois,integer*  m,integer*  r,integer*  new_,integer*  option, 
+/* Subroutine */ int gibbst_(integer* n,integer*  p,integer*  nv,integer*  nn,integer*  ptvois,integer*  vois,integer*  m,integer*  r,integer*  new_,integer*  option,
 	integer* pfnew,integer*  impre,integer*  )
 {
     /* System generated locals */
@@ -941,7 +941,7 @@ integer* vois,integer* lvois,integer* w,integer* v)
      --w;
      --vois;
      --ptvoi;
-     
+
      /* Function Body */
      for (i = 1; i <= nbss; ++i) {
        w[i] = -1;
@@ -953,10 +953,10 @@ integer* vois,integer* lvois,integer* w,integer* v)
 	 ++ptvoi[ss + 1];
 	 w[ss] = 0;}
      }
-     
-     for (i = 1; i <= nbss; ++i) 
+
+     for (i = 1; i <= nbss; ++i)
        ptvoi[i + 1] += ptvoi[i];
-     
+
      for (i = 0; i < nbt; ++i) {
        for (j = 0; j < 3; ++j) {
 	 ss = number(triangles[i][j])+1;
@@ -979,7 +979,7 @@ integer* vois,integer* lvois,integer* w,integer* v)
 	     w[ss] = i;
 	     if (iii > *lvois)  return 2 ;
 	     /* print*,'pas assez de place memoire' */
-	     
+
 	     vois[iii] = ss;
 	     ++iii;}
 	 }
@@ -991,16 +991,16 @@ integer* vois,integer* lvois,integer* w,integer* v)
      return 0;} /* gibbsv_ */
 
 int Mesh::renum()
-/* -------- 
+/* --------
 	renumber vertices by gibbs method; updates triangle and edge array
-	in:   mesh  
+	in:   mesh
 	out:   mesh
- 	auxiliary arrays: ptvois,vois,r,m,nv,nx,ny,nn,w1,w2,f 
+ 	auxiliary arrays: ptvois,vois,r,m,nv,nx,ny,nn,w1,w2,f
  	all of size nv+1 except vois (10(nv+1)) and nv (2(nv+1))
  	err = -1 : memory alloc pb; err = -3: fatal erreur  gibbs 2 : pb racine
 */
 {
-    long   pfold, pfnew;
+    long   pfold=0, pfnew=0;
     long* ptvois=NULL;
     long* vois=NULL;
     long* nn =NULL;
@@ -1016,7 +1016,7 @@ int Mesh::renum()
     int err=0;
   	ptvois = new long[nv+1]; 		//(long*)calloc((long)(nv + 1) , sizeof(long));
 	nn = 	 new long[3*nt]; 			//(long*)calloc(3 * nt ,sizeof(long));
-	vois = 	 new long[nbvoisin+10];	//(long*)calloc((long)(nbvoisin + 10) , sizeof(long)); 
+	vois = 	 new long[nbvoisin+10];	//(long*)calloc((long)(nbvoisin + 10) , sizeof(long));
 	r = 	 new long[nv+1];				//(long*)calloc((long)(nv + 1) , sizeof(long));
 	if((!ptvois)||(!nn)||(!vois)||(!r)) return -1;
 	err = gibbsv(ptvois,vois,&nbvoisin,r,nn) ;
@@ -1050,28 +1050,28 @@ int Mesh::renum()
      {
        int i,j;
        for ( i=0;i<nv;i++)
-	 r[i] -= 1; 
+	 r[i] -= 1;
        Vertex  * f= new Vertex[nv];
        for (i = 0; i < nv; ++i)
 	 f[i] = vertices[i];
        for (i = 0; i < nv; ++i)
 	 vertices[r[i]]  = f[i];
-       delete [] f;       
-       
+       delete [] f;
+
        for (j = 0; j < nt; ++j)  // updates triangle array
 	  triangles[j].Renum(vertices,r);
-       
+
        for (j = 0; j < neb; ++j)	// updates edge array
 	    bedges[j].Renum(vertices,r);
-	  
+
 	  if (BoundaryAdjacencesHead )
 	   {
-          for (int i=0;i<nv;i++) 
+          for (int i=0;i<nv;i++)
             BoundaryAdjacencesHead[i]=-1;
           int j2=0;
           for (int j=0;j<neb;j++)
            for (int k=0;k<2;k++,j2++)
-             {  
+             {
               int v = number(bedges[j][k]);
               ffassert(v >=0 && v < nv);
               BoundaryAdjacencesLink[j2]=BoundaryAdjacencesHead[v];
@@ -1081,22 +1081,22 @@ int Mesh::renum()
       for (int it=0;it<nt;it++)
        for (int j=0;j<3;j++)
          TriangleConteningVertex[(*this)(it,j)]=it;
-        
+
        if (quadtree) {
          delete quadtree;quadtree=0;
          MakeQuadTree(); }
 
-      
+
      }
   delete [] r;
   return err;
-} 
+}
 int FESpace::renum()
-/* -------- 
+/* --------
 	renumber vertices by gibbs method; updates triangle and edge array
-	in:   mesh  
+	in:   mesh
 	out:   mesh
- 	auxiliary arrays: ptvois,vois,r,m,nv,nx,ny,nn,w1,w2,f 
+ 	auxiliary arrays: ptvois,vois,r,m,nv,nx,ny,nn,w1,w2,f
  	all of size nv+1 except vois (10(nv+1)) and nv (2(nv+1))
  	err = -1 : memory alloc pb; err = -3: fatal erreur  gibbs 2 : pb racine
 */
@@ -1104,7 +1104,6 @@ int FESpace::renum()
   if (cdef==0) return -2;
   if (cdef->NodesOfElement==0) return -2;
     int nv = NbOfNodes;
-    int nt = NbOfElements;// ;Th.nt;
     long  pfold =0, pfnew=0;
     long* ptvois=NULL;
     long* vois=NULL;
@@ -1118,14 +1117,14 @@ int FESpace::renum()
     long* w2=NULL;
     long nbvperelem = 20; // pour le P1
   //  cout << "gibbs: nbvperelem =" << nbvperelem << endl;
-    long nbvoisin =  (nbvperelem)*nv; 
+    long nbvoisin =  (nbvperelem)*nv;
     long printint=0, iodev=6;
     int err=0;
     int nnx= SizeToStoreAllNodeofElement();
-  	ptvois = new long[nv+1]; 		
-	nn = 	 new long[nnx]; 		
-	vois = 	 new long[nbvoisin+100];	
-	r = 	 new long[nv+1];			
+  	ptvois = new long[nv+1];
+	nn = 	 new long[nnx];
+	vois = 	 new long[nbvoisin+100];
+	r = 	 new long[nv+1];
 	if((!ptvois)||(!nn)||(!vois)||(!r)) return -1;
 	err = gibbsv(ptvois,vois,&nbvoisin,r,nn) ;
 	delete [] nn;
@@ -1155,24 +1154,24 @@ int FESpace::renum()
        delete [] w1;
        delete [] w2;
      }
-    else 
+    else
       cerr << " Not enought memory (bug)" <<  nbvoisin << " " << nbvoisin/NbOfElements <<  endl;
   delete [] vois;
   delete [] ptvois;
-  if (err==0 && verbosity>1) 
+  if (err==0 && verbosity>1)
   cout << " FESpace:Gibbs: old skyline = " << pfold << "  new skyline = " << pfnew << endl;
   if (err == 0 && (pfnew <= pfold))
      {
        int i;
       // cout << *this << endl;
        for ( i=0;i<nv;i++)
-	     r[i] -= 1; 
-	    cdef->renum(r,nnx);  
+	     r[i] -= 1;
+	    cdef->renum(r,nnx);
         }
-     
+
   delete [] r;
   return err;
-} 
+}
 /* function */ int FESpace::gibbsv (integer* ptvoi,
 integer* vois,integer* lvois,integer* w,integer* v)
 {
@@ -1180,7 +1179,7 @@ integer* vois,integer* lvois,integer* w,integer* v)
     integer  i__2;
 
     /* Local variables */
-     
+
      integer i, j, k, T, ss, iii, ptv, ptv1;
      integer nbss = NbOfNodes , nbt = NbOfElements;
      integer jj,kk;
@@ -1201,7 +1200,7 @@ integer* vois,integer* lvois,integer* w,integer* v)
      --w;
      --vois;
      --ptvoi;
-     
+
      /* Function Body */
      for (i = 1; i <= nbss; ++i) {
        w[i] = -1;
@@ -1213,14 +1212,14 @@ integer* vois,integer* lvois,integer* w,integer* v)
 	 ++ptvoi[ss + 1];
 	 w[ss] = 0;}
      }
-     
-     for (i = 1; i <= nbss; ++i) 
+
+     for (i = 1; i <= nbss; ++i)
        ptvoi[i + 1] += ptvoi[i];
-     
+
      for (i = 0; i < nbt; ++i) {
        for (j = 0,jj= NbOfNodesInElement(i); j <jj  ; ++j) {
 	     ss = (*this)(i,j) +1;//number(triangles[i][j])+1;
-	     if ( ! ( ss>0 && ss <= nbss)) 
+	     if ( ! ( ss>0 && ss <= nbss))
 	       {
 	          cout << "bug " << ss << " " <<  i << " " << j << endl;
 	          exit(1);
@@ -1244,7 +1243,7 @@ integer* vois,integer* lvois,integer* w,integer* v)
 	     w[ss] = i;
 	     if (iii > *lvois)  return 2 ;
 	     /* print*,'pas assez de place memoire' */
-	     
+
 	     vois[iii] = ss;
 	     ++iii;}
 	 }
@@ -1253,7 +1252,7 @@ integer* vois,integer* lvois,integer* w,integer* v)
      ptvoi[nbss + 1] = iii;
      *lvois = iii - 1;
      return 0; /* OK */
-     return 0;} /* gibbsv_ */						
+     return 0;} /* gibbsv_ */
 /*  message d'erreur:         *err = 2;    print*,'pas assez de place memoire'   */
-			
+
 /*  message d'erreur:         *err = 2;    print*,'pas assez de place memoire'   */

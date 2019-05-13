@@ -1,12 +1,39 @@
 load "ppm2rnm"
-bool wait=false;
-string namef1="fig.pgm";
-real[int,int] ff1(namef1); // read  image and set to an array. 
-int nx = ff1.n, ny=ff1.m; 
-mesh Th=square(nx-1,ny-1,[(nx-1)*(x)/nx,(ny-1)*(1-y)/ny]);
-// warning  the numbering is of the vertices (x,y) is 
-// given by $  i = x/nx + nx* y/ny $
-fespace Vh(Th,P1);
-Vh f1;
-f1[]=ff1;
-plot(f1,wait=1);
+
+// Parameters
+bool wait = false;
+string figName = "fig.pgm";
+
+// Read PPM (method 1)
+real[int, int] img1(figName); //Read image and set to an array
+int nx = img1.n, ny = img1.m;
+mesh Th1 = square(nx-1, ny-1, [(nx-1)*(x)/nx, (ny-1)*(1-y)/ny]);
+//Warning:
+// the numbering of the vertices (x,y) is
+// given by i = x/nx + nx* y/ny
+fespace Vh1(Th1, P1);
+Vh1 fimg1;
+fimg1[] = img1;
+plot(fimg1, cmm="method 1", wait=wait);
+
+// Read PPM (method 2)
+real[int, int] img2(figName); //Read image and set to an array
+int nx2 = img2.n, ny2 = img2.m;
+mesh Th2 = square(nx2-1, ny2-1, [(nx2-1)*(x)/nx2, (ny2-1)*(1-y)/ny2]);
+fespace Vh2(Th2, P1);
+Vh2 fimg2;
+fimg2[] = img2;
+plot(fimg2, cmm="method 2", wait=wait);
+
+// Save PPM
+bool res = savePPM("figout.ppm", img2);
+assert(res);
+
+// Difference PPM
+real[int, int] imgDiff = diffPPM(img1, img2);
+int nxDiff = imgDiff.n, nyDiff = imgDiff.m;
+mesh ThDiff = square(nxDiff-1, nyDiff-1, [(nxDiff-1)*(x)/nxDiff, (nyDiff-1)*(1-y)/nyDiff]);
+fespace VhDiff(ThDiff, P1);
+VhDiff fimgDiff;
+fimgDiff[] = imgDiff;
+plot(fimgDiff, cmm="difference", wait=wait);

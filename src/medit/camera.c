@@ -14,12 +14,11 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
 
 #ifdef __cplusplus
 extern "C" {
@@ -144,7 +143,7 @@ pCamera initCamera (pScene sc, int up) {
 
 	if (ddebug) {
 		double look[3];
-		
+
 		look[0] = c->eye[0] + sc->dmax * c->speed[0];
 		look[1] = c->eye[1] + sc->dmax * c->speed[1];
 		look[2] = c->eye[2] + sc->dmax * c->speed[2];

@@ -1,0 +1,31 @@
+include "test.idp"
+
+real t;
+cout << "exit" << endl;
+
+bool isCaught = false;
+int exv1 = 0;
+int exv2 = 1;
+int valueReturned = -1;
+
+try {
+  t = clock();
+  exit(exv1);
+  t = clock() - t;
+  cout << IND << t << endl;
+} catch(...) {
+  isCaught = true;
+  valueReturned = exv1;
+}
+test((isCaught == true) && (valueReturned == exv1));
+
+try {
+  t = clock();
+  exit(exv2);
+  t = clock() - t;
+  cout << IND << t << endl;
+} catch(...) {
+  isCaught = true;
+  valueReturned = exv2;
+}
+test((isCaught == true) && (valueReturned == exv2));

@@ -28,8 +28,15 @@
 #include <ff++.hpp>
 #include <AFunction_ext.hpp>
 using namespace Fem2D;
+
+/*!
+ * \brief BECtrap
+ * \param stack Stack
+ * \param pd KN<double> *const &
+ * \return Success: 0
+ */
 double BECtrap (Stack stack, KN<double> *const &pd) {
-	MeshPoint &mp = *MeshPointStack(stack);	// the struct to get x,y, normal , value
+	MeshPoint &mp = *MeshPointStack(stack);	// the struct to get x, y, normal, value
 	double *d = *pd;
 	double x = mp.P.x;	// get the current x value
 	double y = mp.P.y;	// get the current y value
@@ -37,8 +44,7 @@ double BECtrap (Stack stack, KN<double> *const &pd) {
 	double x2 = x * x, y2 = y * y, z2 = z * z, r2 = x2 + y2, r4 = r2 * r2;
 	long n = pd->N();
 
-	// cout << "x = " << x << " y=" << y << " " << sin(x)*cos(y) <<  endl;
-	double ret;
+	double ret = 0.;
 
 	if (n == 4) {
 		ret = x2 * d[0] + y2 * d[1] + z2 * d[2] + r4 * d[3];
@@ -46,12 +52,20 @@ double BECtrap (Stack stack, KN<double> *const &pd) {
 		double s = sin(d[5] * z);
 		ret = x2 * d[0] + y2 * d[1] + z2 * d[2] + r4 * d[3] + d[4] * s * s;
 	} else {
-		ffassert(0);//
+		ffassert(0);
 	}
 
 	return ret;
 }
 
+/*!
+ * \brief GPvortex
+ * \param stack Stack
+ * \param x0 const double &
+ * \param y0 const double &
+ * \param kappa const double &
+ * \return Complex
+ */
 Complex GPvortex (Stack stack, const double &x0, const double &y0, const double &kappa) {
 	MeshPoint &mp = *MeshPointStack(stack);	// the struct to get x, y, normal, value
 	// double *d = *pd;
@@ -65,6 +79,14 @@ Complex GPvortex (Stack stack, const double &x0, const double &y0, const double 
 	return (r > 1e-20) ? tr * p : p;
 }
 
+/*!
+ * \brief dxGPvortex
+ * \param stack Stack
+ * \param x0 const double &
+ * \param y0 const double &
+ * \param kappa const double &
+ * \return Complex
+ */
 Complex dxGPvortex (Stack stack, const double &x0, const double &y0, const double &kappa) {
 	MeshPoint &mp = *MeshPointStack(stack);	// the struct to get x, y, normal, value
 	// double *d = *pd;
@@ -80,9 +102,16 @@ Complex dxGPvortex (Stack stack, const double &x0, const double &y0, const doubl
 	return (r > 1e-20) ? (dtr * p + tr * dp) : dp;
 }
 
+/*!
+ * \brief dyGPvortex
+ * \param stack Stack
+ * \param x0 const double &
+ * \param y0 const double &
+ * \param kappa const double &
+ * \return Complex
+ */
 Complex dyGPvortex (Stack stack, const double &x0, const double &y0, const double &kappa) {
 	MeshPoint &mp = *MeshPointStack(stack);	// the struct to get x, y, normal, value
-	// double *d = *pd;
 	double x = mp.P.x;	// get the current x value
 	double dy = 1.;
 	double y = mp.P.y;	// get the current y value
@@ -95,9 +124,14 @@ Complex dyGPvortex (Stack stack, const double &x0, const double &y0, const doubl
 	return (r > 1e-20) ? (dtr * p + tr * dp) : dp;
 }
 
+/*!
+ * \brief GPvortices
+ * \param stack Stack
+ * \param ps const KNM<double> &
+ * \return Complex
+ */
 Complex GPvortices (Stack stack, const KNM_<double> &ps) {
 	MeshPoint &mp = *MeshPointStack(stack);	// the struct to get x, y, normal, value
-	// double *d = *pd;
 	double x = mp.P.x;	// get the current x value
 	double y = mp.P.y;	// get the current y value
 	Complex vs = 1.;

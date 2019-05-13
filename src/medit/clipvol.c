@@ -14,18 +14,21 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
 #include "sproto.h"
 
-#define NBCOL 9
+#define NBCOL (int)9
 
 /* build list for capping */
 GLuint capTetra (pMesh mesh) {
@@ -36,9 +39,9 @@ GLuint capTetra (pMesh mesh) {
 	pPoint p0, p1;
 	pMaterial pm;
 	double dd1[6], d, ax, ay, az, bx, by, bz;
-	double cx[4], cy[4], cz[4], cc;
+	double cx[4]={}, cy[4]={}, cz[4]={}, cc;
 	float n[3];
-	int m, k1, k2, l, transp, pos[6], neg[6], nbpos, nbneg, nbnul;
+	int m, k1, k2, l, transp, pos[6]={}, neg[6]={}, nbpos, nbneg, nbnul;
 	static int tn[4] = {0, 0, 1, 1};
 	static int tp[4] = {0, 1, 1, 0};
 
@@ -202,9 +205,9 @@ GLuint capTetraMap (pMesh mesh) {
 	pMaterial pm;
 	pSolution ps0, ps1;
 	double dd1[6], d, ax, ay, az, bx, by, bz;
-	double cx[4], cy[4], cz[4], cc;
-	float n[3], sol[4];
-	int m, k1, k2, l, pos[6], neg[6], nbpos, nbneg, nbnul;
+	double cx[4]={}, cy[4]={}, cz[4]={}, cc;
+	float n[3], sol[4]={};
+	int m, k1, k2, l, pos[6]={}, neg[6]={}, nbpos, nbneg, nbnul;
 	static int tn[4] = {0, 0, 1, 1};
 	static int tp[4] = {0, 1, 1, 0};
 	triangle t1, t2;
@@ -228,7 +231,7 @@ GLuint capTetraMap (pMesh mesh) {
 
 	for (m = 0; m < sc->par.nbmat; m++) {
 		int k;
-		
+
 		pm = &sc->material[m];
 		k = pm->depmat[LTets];
 		if (!k || pm->flag) continue;
@@ -412,9 +415,9 @@ GLuint capTetraIso (pMesh mesh) {
 	pMaterial pm;
 	pSolution ps0, ps1;
 	double dd1[6];
-	double rgb[3], cx[4], cy[4], cz[4], ccx, ccy, ccz, cc;
+	double rgb[3], cx[4]={}, cy[4]={}, cz[4]={}, ccx, ccy, ccz, cc;
 	float iso, kc, sol[4];
-	int i, m, k, k1, k2, l, l1, nc, pos[6], neg[6], nbpos, nbneg, nbnul, ncol;
+	int i, m, k, k1, k2, l, l1, nc, pos[6]={}, neg[6]={}, nbpos, nbneg, nbnul, ncol;
 	static int tn[4] = {0, 0, 1, 1};
 	static int tp[4] = {0, 1, 1, 0};
 	static double hsv[3] = {0.0f, 1.0f, 0.20f};
@@ -577,3 +580,7 @@ GLuint capTetraIso (pMesh mesh) {
 	glEndList();
 	return (dlist);
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,0 +1,13 @@
+include "test.idp"
+
+cout << "ceil" << endl;
+real t;
+
+cout << IND << "real" << endl;
+
+real r = 0.5;
+t = clock();
+int retceil = ceil(r);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(retceil == 1.0);

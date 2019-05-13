@@ -87,11 +87,17 @@ static istream&Eat2LN (istream &f) {
 	return f;
 }
 
+/*!
+* \brief main
+* \param xx Vect &
+* \param xxmin Vect &
+* \param xxmax Vect &
+*/
 double BijanMO::main (Vect &xx, Vect &xxmin, Vect &xxmax) {
 	/* Local variables */
 	double costsave;
 	integer irestart;
-	double f, costsave0, f0;
+	double f;
 	Vect v(ndim), v0(ndim), x1(ndim), hgc(ndim), fpx(ndim),
 	fpx0(ndim), temp(ndim), xmin(ndim), xmax(ndim), xsave(ndim), vinit(ndim), xsave0(ndim);
 	double rho;
@@ -119,7 +125,6 @@ double BijanMO::main (Vect &xx, Vect &xxmin, Vect &xxmax) {
 	}
 
 	f = finit;
-	f0 = finit;
 	xopt1 = xoptg = vinit;
 	if (finit < epsij) {
 		cstropt = cstr;
@@ -148,20 +153,10 @@ double BijanMO::main (Vect &xx, Vect &xxmin, Vect &xxmax) {
 		cout << finit << " " << 1. << " " << xoptg[0] << " " << xoptg[1] << " /J/  " << endl;
 	}
 
-	/* cccccccccccccccccccccccccccccccccccccccccccccccccccccc */
-
-	/* x        open(2,file='hist.J',status='unknown') */
-	/* x        open(3,file='hist.JC',status='unknown') */
-
-	/* x        write(3,999) fseul,(cstr(ii),ii=1,ncstr) */
-	/* x        write(2,*) finit,1.,xoptg(1),xoptg(2) */
-	/* x        close(2) */
-
 	itersom = 0;
 	costsaveming = finit;
 	irestart2 = 1;
 
-	// cout << " ------ " <<  nbrestart << " " << nbext1 << "  " << nbbvp << endl;
 	for (irestart = 1; irestart <= nbrestart; ++irestart) {
 		xsave = vinit;
 		irestart2 *= 2;
@@ -199,7 +194,6 @@ double BijanMO::main (Vect &xx, Vect &xxmin, Vect &xxmax) {
 				}
 
 				v0 = v;
-				f0 = f;
 			}
 
 			if (debug) {
@@ -219,7 +213,6 @@ double BijanMO::main (Vect &xx, Vect &xxmin, Vect &xxmax) {
 				rand(v);
 			}
 
-			costsave0 = costsave;
 			xsave0 = xsave;
 		}
 	}
@@ -257,9 +250,12 @@ L9101:
 	return fseulopt;
 }
 
+/*!
+* \brief tir
+* \param v Vect &
+* \param fpx Vect &
+*/
 void BijanMO::tir (Vect &v, Vect &fpx) {
-	double fp = funcapp(v, fpx);
-
 	for (int i = 0; i < ndim; ++i) {
 		double vi = v[i], x0 = xmin[i], x1 = xmax[i], fpxi = -fpx[i];
 		fpxi = min(fpxi, (x1 - vi) * 0.95);
@@ -270,6 +266,10 @@ void BijanMO::tir (Vect &v, Vect &fpx) {
 	}
 }
 
+/*!
+* \brief rand
+* \param v Vect &
+*/
 void BijanMO::rand (Vect &v) {
 	if (diagrand) {
 		double xrdran = xrandme(nbeval + nbevalp);
@@ -287,6 +287,17 @@ void BijanMO::rand (Vect &v) {
 	}
 }
 
+/*!
+* \brief gradopt
+* \param x1 Vect &
+* \param fpx Vect &
+* \param temp Vect &
+* \param rho double
+* \param f double
+* \param gnorm double
+* \param fpx0 Vect &
+* \param hgc Vect &
+*/
 int BijanMO::gradopt (Vect &x1, Vect &fpx,
                       Vect &temp, double &rho, double &f,
                       double &gnorm,
@@ -294,7 +305,7 @@ int BijanMO::gradopt (Vect &x1, Vect &fpx,
 	/* Local variables */
 	integer ii;
 	integer igc, igr;
-	double xmod, xmod0, gamgc;
+	double xmod, gamgc;
 	double xmodd, xnorm, gnorm0 = 0.;
 
 	/* Function Body */
@@ -341,10 +352,6 @@ int BijanMO::gradopt (Vect &x1, Vect &fpx,
 			xmodd = xmodd + abs(x1(ii));
 		}
 
-		if (igr == 1) {
-			xmod0 = xmod;
-		}
-
 		f = func(x1);
 
 		gnorm = fpx.l2();
@@ -380,11 +387,6 @@ int BijanMO::gradopt (Vect &x1, Vect &fpx,
 			cout << "\t\t\t " << f << " " << gnorm * gnorm0 << " " << x1[0] << " " << x1[1] << " /J/ " << endl;
 		}
 
-		/* x        open(2,file='hist.J',access='append') */
-		/* x        write(2,*) f,gnorm*gnorm0,x1(1),x1(2) */
-		/* x        close(2) */
-		/* x        write(3,999) fseul,(cstr(ii),ii=1,ncstr) */
-
 		if (f < costsaveming) {
 			costsaveming = f;
 			gnormsave = gnorm;
@@ -405,9 +407,6 @@ int BijanMO::gradopt (Vect &x1, Vect &fpx,
 		if (gnorm < 1e-6 || gnorm * gnorm0 < 1e-6) {
 			break;
 		}
-
-		/*      if(gnorm.lt.1.e-2.or.gnorm*gnorm0.lt.1.e-6.or.xmod/xmodd.lt.epsloc */
-		/*     1  .or.xmod/xmod0.lt.epsloc) goto 888 */
 	}
 
 	if (debug > 3) {//
@@ -417,6 +416,16 @@ int BijanMO::gradopt (Vect &x1, Vect &fpx,
 	return 0;
 }
 
+/*!
+* \brief ropt_dicho
+* \param x Vect
+* \param temp Vect
+* \param ro double &
+* \param rho double
+* \param g Vect
+* \param ccout double
+* \return double
+*/
 double BijanMO::ropt_dicho (Vect x, Vect temp, double &ro, Vect g, double ccout) {
 	integer j, l;
 	double s, fm, sd, sn, pr;
@@ -519,6 +528,13 @@ L500:
 	return ccout;
 }	/* ropt_dicho__ */
 
+/*!
+* \brief fun
+* \param x Vect &
+* \param temp Vect &
+* \param ro double
+* \return double
+*/
 double BijanMO::fun (Vect &x, Vect &temp, Vect &g, double ro) {
 	for (int ii = 0; ii < ndim; ++ii) {
 		temp[ii] = x[ii] - ro * g[ii];
@@ -532,6 +548,12 @@ double BijanMO::fun (Vect &x, Vect &temp, Vect &g, double ro) {
 	return func(temp);
 }
 
+/*!
+* \brief funcp
+* \param x Vect &
+* \param fpx Vect &
+* \param double f
+*/
 void BijanMO::funcp (Vect &x, Vect &fpx, double f) {
 	/* Local variables */
 	double fp, x00;
@@ -558,6 +580,13 @@ void BijanMO::funcp (Vect &x, Vect &fpx, double f) {
 	}
 }
 
+
+/*!
+* \brief funcapp
+* \param x Vect &
+* \param fpx Vect &
+* \return double
+*/
 double BijanMO::funcapp (Vect &x, Vect &fpx) {
 	/* Local variables */
 	integer kk;
@@ -565,7 +594,7 @@ double BijanMO::funcapp (Vect &x, Vect &fpx) {
 	integer nbevalsave;
 	double diffucarte0;
 	integer kkk;
-	double xcoef, fapp;
+	double xcoef, fapp=0.;
 
 	/* Function Body */
 	nbevalsave = min(nbeval, nbsol);

@@ -170,6 +170,9 @@ clean-local::
 # Reduced compilation
 # -------------------
 
+unittests::
+	-cd unit && make
+
 quick:
 	cd src/libMesh && $(MAKE) $(AM_MAKEFLAGS)
 	cd src/lglib && $(MAKE) $(AM_MAKEFLAGS)

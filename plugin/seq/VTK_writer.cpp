@@ -47,7 +47,6 @@ class VtkWriter
 
 	private:
 		std::vector<const Fem2D::Mesh *> _vecmesh;
-		// std::vector<tsinfo> _vecofts;
 		std::string _nameoffile;
 
 		/*! This string contains the name of data file with \\ where there's a \ in the path*/
@@ -258,7 +257,6 @@ AnyType Vtkwritesol_Op::operator () (Stack stack)  const {
 	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
 	VtkWriter &dx = *(GetAny<VtkWriter *>((*edx)(stack)));
 	string &name = *(GetAny<string *>((*ename)(stack)));
-	// double t=GetAny<double>((*et)(stack));
 	const Mesh &Th = *(dx.getmeshts(name));
 	int nt = Th.nt;
 	int nv = Th.nv;
@@ -330,13 +328,6 @@ void*call_addmesh (VtkWriter *const &mt, const Fem2D::Mesh *const &pTh) {
 }
 
 // Add the function name to the freefem++ table
-/*  class Init
- * {
- * public:
- * Init();
- * };
- *
- * $1 */
 static void Load_Init () {
 	Dcl_Type<VtkWriter *>(InitP<VtkWriter>, Destroy<VtkWriter> );
 // declare deux nouveau type pour freefem++  un pointeur et

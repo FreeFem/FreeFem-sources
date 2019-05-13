@@ -44,7 +44,7 @@ template<class Z,class K>
     if( sn == "CROUT") {sym = true;}
     if( sn == "CG") {sym = true;pos=true;}
     if( sn == "SPARSESOLVERSYM") {sym=true;}
-    return sym + pos*2; 
+    return sym + pos*2;
 }
 
 template<class Z,class K>
@@ -68,7 +68,7 @@ template<class Z,class K>
             int p=j->second->p;
             if( (ts  & typesolve) == typesolve ) // compiatile
             {
-                
+
                 if( pp < p)
                 {
                     i=j; // the last   ???
@@ -76,15 +76,15 @@ template<class Z,class K>
                     if(verbosity>9)
                         cout << " find solver " << i->first << " "<< p << " / " << typesolve << " in "<< ts <<  endl;
                 }
-                
+
             }
             else
                 if(verbosity>9)
                     cout << " not find solver " << i->first << " "<< p << " / " << typesolve << " in "<< ts <<  endl;
-            
-            
+
+
         }
-    
+
     if( i != ffsolver.end())
         return i->second->create(A,ds,stack);
     else
@@ -99,7 +99,7 @@ template<class Z,class K>
         ExecError(" No Solver ????");
         return 0;
     }
-    
+
 }
 
 
@@ -107,7 +107,6 @@ template<class R>
 void SetSolver(Stack stack,bool VF,VirtualMatrix<int,R> & A,const  Data_Sparse_Solver & ds)
 {
     using namespace Fem2D;
-    const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
     typename  VirtualMatrix<int,R>::VSolver * solver=0;
     HashMatrix<int,R> * AH(dynamic_cast<HashMatrix<int,R> *>(&A));
     ffassert(AH);
@@ -117,31 +116,30 @@ void SetSolver(Stack stack,bool VF,VirtualMatrix<int,R> & A,const  Data_Sparse_S
         A.SetSolver(solver,true);
         if(ds.factorize)
         {
-            solver->factorize(ds.factorize);// full factorization  mars 2019 FH/PHT 
+            solver->factorize(ds.factorize);// full factorization  mars 2019 FH/PHT
         }
     }
     else
         CompileError("SetSolver: type resolution unknown");
-    
+
 }
 
 
 template<class R>
 void DefSolver(Stack stack, VirtualMatrix<int,R>  & A,const Data_Sparse_Solver & ds)
 {
-    const OneOperator* pprecon= static_cast<const OneOperator*>(ds.precon);
     typename  VirtualMatrix<int,R>::VSolver * solver=0;
     HashMatrix<int,R>* AH(dynamic_cast<HashMatrix<int,R> *>(&A));
     ffassert(AH);
-    
+
     solver = NewVSolver<int,R>(*AH,ds,stack);
-    
+
     if(solver)
         A.SetSolver(solver,true);
     else
         CompileError("SetSolver: type resolution unknown");
-    
-    
+
+
 }
 
 typedef double R;

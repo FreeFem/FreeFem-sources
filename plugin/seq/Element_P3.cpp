@@ -89,8 +89,8 @@ namespace  Fem2D {
 				int e1 = K.EdgeOrientation(1);
 				int e2 = K.EdgeOrientation(2);
 				int ooo[6] = {e0, e0, e1, e1, e2, e2};
-				int iii[6];
-				int jjj[6];
+				int iii[6]={};
+				int jjj[6]={};
 
 				for (int i = 0; i < 6; ++i) {
 					iii[i] = 3 + 2 * i;	// si  orient = 1
@@ -125,7 +125,7 @@ namespace  Fem2D {
 		// et la numerotation naturelle  mais 2 noud pas arete
 		// donc p est la perumation
 		// echange de numerotation si les arete sont dans le mauvais sens
-		int p[10];
+		int p[10]={};
 
 		for (int i = 0; i < 10; ++i) {
 			p[i] = i;
@@ -143,14 +143,7 @@ namespace  Fem2D {
 			Exchange(p[7], p[8]);	// 7,8
 		}
 
-		// cout << KN_<int>(p,10) <<endl;
 		val = 0;
-		/*
-		 * //  les fonction de base du Pk Lagrange sont
-		 * //
-		 * //
-		 */
-// --
 
 		if (whatd[op_id]) {
 			RN_ f0(val('.', 0, op_id));
@@ -161,15 +154,10 @@ namespace  Fem2D {
 
 				for (int i = 0; i < k; ++i) {
 					f *= L[nn[df][i]] - aa[df][i];
-					// cout <<  L[nn[df][i]]-aa[df][i]<< " ";
 				}
 
 				f0[pdf] = f;
-				// cout << pdf<< " " << df << " f " <<f <<endl;
 			}
-
-			// cout <<" L " << L[0] << " " << L[1] << " " << L[2] << endl;
-			// cout << ndf << " nbf = "<< f0 <<endl;
 		}
 
 		if (whatd[op_dx] || whatd[op_dy] || whatd[op_dxx] || whatd[op_dyy] || whatd[op_dxy]) {
@@ -314,7 +302,6 @@ namespace  Fem2D {
 	TypeOfFE_P3_3d::TypeOfFE_P3_3d ():  GTypeOfFE<Mesh>(TypeOfFE_P3_3d::dfon, 1, 3, false, false) {
 		typedef Element E;
 		int n = this->NbDoF;
-		// const int d = E::Rd::d;
 		bool dd = verbosity > 5;
 		if (dd) {
 			cout << "\n +++ P3  : ndof : " << n << " " << this->PtInterpolation.N() << endl;
@@ -323,7 +310,7 @@ namespace  Fem2D {
 		R3 *Pt = this->PtInterpolation;
 		// construction of interpolation ppoint
 
-		{// int k = 0;
+		{
 		 double cc = 1. / 3.;
 
 		 for (int i = 0; i < ndof; ++i) {
@@ -352,7 +339,6 @@ namespace  Fem2D {
 			M.p[i] = i;
 		}
 
-		// int k = 10;
 		if (verbosity > 9) {cout << " P3  set:";}
 
 		int dof = 4;

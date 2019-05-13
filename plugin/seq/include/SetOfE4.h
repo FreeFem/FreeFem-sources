@@ -1,0 +1,1 @@
+../../../src/bamglib/SetOfE4.h

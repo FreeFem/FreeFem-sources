@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "sproto.h"
@@ -115,3 +118,7 @@ void unlinkView (pScene sc1) {
 	sc1->master = -1;
 	sc2->slave = -1;
 }
+
+#ifdef __cplusplus
+}
+#endif

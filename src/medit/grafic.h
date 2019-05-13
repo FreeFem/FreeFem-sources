@@ -14,15 +14,18 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
 
-#ifndef _GRAFIC_H
-#define _GRAFIC_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifndef _GRAFIC_H_
+#define _GRAFIC_H_
 
 #define MAX_LIST 4
 #define MAXISO 5
@@ -75,9 +78,9 @@ enum {VECTOR, CONE};
 #define S_NUMF (1 << 7)
 
 /* type */
-#define S_FLAT (1 << 0)	/* render with facet normals  */
-#define S_SCISSOR (1 << 1)	/* scissoring mode            */
-#define S_FOLLOW (1 << 2)	/* picking mode               */
+#define S_FLAT (1 << 0)	/* render with facet normals */
+#define S_SCISSOR (1 << 1)	/* scissoring mode */
+#define S_FOLLOW (1 << 2)	/* picking mode */
 #define S_NORMAL (1 << 3)
 #define S_OPPOS (1 << 4)
 #define S_DECO (1 << 5)
@@ -127,9 +130,9 @@ typedef struct _cell {
 } cell;
 typedef struct transform {
 	float pos[3];	/* current mouse position */
-	float angle, axis[3];	/* rotation angle + axis  */
-	float panx, pany, opanx, opany;	/* screen translation     */
-	float matrix[16], oldmat[16];	/* transformation matrix  */
+	float angle, axis[3];	/* rotation angle + axis */
+	float panx, pany, opanx, opany;	/* screen translation */
+	float matrix[16], oldmat[16];	/* transformation matrix */
 	float rot[16], tra[16];
 	int mstate, mbutton, manim;
 } Transform;
@@ -164,7 +167,7 @@ typedef struct sparam {
 	ubyte sunp, linc, advtim, nbpart;
 } Param;
 
-/* trajectoire */
+/* trajectory */
 typedef struct straj {
 	int np;
 	float *pt;
@@ -207,28 +210,32 @@ typedef struct scene {
 	Param par;
 	Trajet path;
 	Iso iso;
-	float dmin, dmax;	/* scene size    */
-	float shrink;	/* shrink value  */
+	float dmin, dmax;	/* scene size */
+	float shrink;	/* shrink value */
 	float cx, cy, cz;	/* center of scene */
-	GLuint dlist[MAX_LIST];	/* display lists  */
-	GLuint mlist[MAX_LIST];	/* metric lists   */
-	GLuint ilist[MAX_LIST];	/* iso-surfaces   */
+	GLuint dlist[MAX_LIST];	/* display lists */
+	GLuint mlist[MAX_LIST];	/* metric lists */
+	GLuint ilist[MAX_LIST];	/* iso-surfaces */
 	GLuint clist[MAX_LIST];
-	GLuint cmlist[MAX_LIST];/* clipped elts   */
-	GLuint vlist[MAX_LIST];	/* vector list    */
-	GLuint *slist, cplist;	/* streamlines    */
-	GLuint glist, nlist;/* geometry lists */
+	GLuint cmlist[MAX_LIST]; /* clipped elts */
+	GLuint vlist[MAX_LIST];	/* vector list */
+	GLuint *slist, cplist;	/* streamlines */
+	GLuint glist, nlist; /* geometry lists */
 	GLuint grid;
 	GLuint picklist;
 	int *matsort;
-	short idwin, idmesh;/* window, mesh id */
+	short idwin, idmesh; /* window, mesh id */
 	short master, slave;
 	ubyte item;	/* display items */
-	ubyte mode;	/* render mode   */
+	ubyte mode;	/* render mode */
 	ubyte type;
 	ubyte isotyp;
 	ubyte picked;
 } Scene;
 typedef Scene *pScene;
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif

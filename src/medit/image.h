@@ -14,16 +14,18 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifndef _IMAGE_H_
+#define _IMAGE_H_
 
 enum imgtyp {DEFAULT=0, P2, P3, P5, P6, PS,
 	         GREY, RGB, RED, GREEN, BLUE, COLOR};
@@ -45,6 +47,8 @@ typedef struct {
 	unsigned char pixel_size;
 	unsigned char image_desc;
 } TGAheader;
+
+#endif /* _IMAGE_H_ */
 
 #ifdef __cplusplus
 }

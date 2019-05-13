@@ -44,18 +44,34 @@
  */
 static const int wrapperMetric[6] = {0, 1, 3, 2, 4, 5};
 
+/*!
+ * \brief Met 3D wrap
+ * \param m double[6]
+ * \param mw double[6]
+ */
 void met3dwrap (double m[6], double mw[6]) {
 	for (int i = 0; i < 6; ++i) {
 		mw[i] = m[wrapperMetric[i]];
 	}
 }
 
+/*!
+ * \brief Unmet 3D wrap
+ * \param m double[6]
+ * \param mw double[6]
+ */
 void unmet3dwrap (double mw[6], double m[6]) {
 	for (int i = 0; i < 6; ++i) {
 		m[wrapperMetric[i]] = mw[i];
 	}
 }
 
+/*!
+ * \brief BoundAniso2d
+ * \param m double[3]
+ * \param cmin double
+ * \return Success: 0, Error: 1
+ */
 int BoundAniso2d (double m[3], double cmin) {
 	double vp[2][2];
 	double l[2];
@@ -74,6 +90,12 @@ int BoundAniso2d (double m[3], double cmin) {
 	return nv ? 0 : 1;
 }
 
+/*!
+ * \brief BoundAniso3d
+ * \param mff double[6]
+ * \param cmin double
+ * \return Success: 0, Error: 1
+ */
 int BoundAniso3d (double mff[6], double cmin) {
 	double m[6];
 	double vp[3][3];
@@ -100,11 +122,17 @@ int BoundAniso3d (double mff[6], double cmin) {
 	return nv ? 0 : 1;
 }
 
+/*!
+ * \brief Boundaniso
+ * \param k long const &
+ * \param pm KN<double> * const &
+ * \param animax double const &
+ * \return ns long
+ */
 long Boundaniso (long const &k, KN<double> *const &pm, double const &animax) {
 	KN<double> &m(*pm);
 	long ns = m.N() / k;
 	ffassert(ns * k == m.N());
-	// double lmin = sqrt(animax);
 	ffassert(k == 3 || k == 6);
 	int err = 0;
 	if (k == 3) {	// <[m11,m12,m22]

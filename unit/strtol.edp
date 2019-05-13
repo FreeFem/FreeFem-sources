@@ -1,0 +1,33 @@
+include "test.idp"
+
+cout << "strtol" << endl;
+real t;
+
+string text = "42";
+string text2 = "-42";
+string text3 = "101010";
+string hexa = "0x2A";
+
+t = clock();
+int resnb = strtol(text);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resnb == 42);
+
+t = clock();
+int resnb2 = strtol(text2);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resnb2 == -42);
+
+t = clock();
+int resnb3 = strtol(text3, 2);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resnb3 == 42);
+
+t = clock();
+int resnb4 = strtol(hexa, 16);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resnb4 == 42);

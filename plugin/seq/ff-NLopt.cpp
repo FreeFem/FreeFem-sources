@@ -144,7 +144,6 @@ template<class K> class ffcalfunc	// to call the freefem function .. J, constrai
 			KN<double> *p = GetAny<KN<double> *>((*theparame)(stack));
 			*p = x;
 			K ret = GetAny<K>((*JJ)(stack));
-			// cout << "call to ffcalfunc.J with " << *p << " and ret=" << ret << endl;
 			WhereStackOfPtr2Free(stack)->clean();
 			return ret;
 		}
@@ -157,9 +156,6 @@ typedef ffcalfunc<Rnm> *MatrixFunc;
 class GenericOptimizer
 {
 	public:
-		/*GenericOptimizer(nlopt::algorithm ALGO) : opt(ALGO,0),x(0),econsttol(0),iconsttol(0),econstrained(false),iconstrained(false),fit(0),d_fit(0),equaconst(0),
-		 *                                                                                                                                                                      d_equaconst(0),ineqconst(0),d_ineqconst(0),subopt(0)
-		 * {}*/
 		GenericOptimizer (nlopt::algorithm ALGO, int dim = 0): opt(ALGO, dim), x(0), econsttol(0), iconsttol(0), econstrained(false), iconstrained(false), fit(0), d_fit(0), equaconst(0),
 			d_equaconst(0), ineqconst(0), d_ineqconst(0), subopt(0)
 		{}
@@ -251,7 +247,6 @@ class GenericOptimizer
 			if (iconstrained) {opt.remove_inequality_constraints();}
 
 			Rn itestv = ineqconst->J(*x);
-			// cout << "itestv = " << itestv << "(x=" << *x << ")" <<  endl;
 			if (iconsttol.n == 0) {iconsttol.resize(itestv.n); iconsttol = 1.e-12;} else {assert(iconsttol.n == itestv.n);}
 
 			opt.add_inequality_mconstraint(NLoptICDF, static_cast<void *>(this), KnToStdVect(iconsttol));
@@ -266,14 +261,12 @@ class GenericOptimizer
 
 			for (int i = 0; i < n; ++i) {X[i] = xx[i];}
 
-			// cout << "grad: " << grad << "d_fit.top():" << d_fit.top() << endl;
 			if (grad.size() && pthis->d_fit) {
 				Rn dJ = pthis->d_fit->J(X);
 
 				for (int i = 0; i < n; ++i) {grad[i] = dJ[i];}
 			}
 
-			// cout << "call to NLoptFunc with x=" << X << endl;
 			return pthis->fit->J(X);
 		}
 
@@ -636,9 +629,6 @@ template<nlopt::algorithm ALGO, bool SA = Info<ALGO>::SA> class OptimNLopt: publ
 					catch (const std::invalid_argument&) {cout << "invalid argument" << endl;}
 					catch (const std::bad_alloc&) {cout << "bad alloc" << endl;}
 
-					// x = KN_<double>(optim.xbestever(),optim.dimension());
-					// cout << "Number of fitness evalution(s) : " << optim.eval() << endl;
-
 					closetheparam.eval(stack);	// clean memory
 					WhereStackOfPtr2Free(stack)->clean();	// FH mars 2005
 					return cost;// SetAny<long>(0);  Modif FH  july 2005
@@ -730,7 +720,6 @@ template<nlopt::algorithm ALGO> class OptimNLopt<ALGO, true>: public OneOperator
 
 					if (gradeconst) {EGradEConst = to<Rnm_>(C_F0(gradeconst, "(", theparam));}
 
-					// closetheparam=currentblock->close(currentblock);   // the cleanning block expression
 					closetheparam = C_F0((Expression)Block::snewclose(currentblock), atype<void>());
 				}
 
@@ -842,9 +831,6 @@ template<nlopt::algorithm ALGO> class OptimNLopt<ALGO, true>: public OneOperator
 						catch (const std::invalid_argument&) {cout << "invalid argument" << endl;}
 						catch (const std::bad_alloc&) {cout << "bad alloc" << endl;}
 					}
-
-					// x = KN_<double>(optim.xbestever(),optim.dimension());
-					// cout << "Number of fitness evalution(s) : " << optim.eval() << endl;
 
 					closetheparam.eval(stack);	// clean memory
 					WhereStackOfPtr2Free(stack)->clean();	// FH mars 2005

@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "sproto.h"
@@ -35,12 +38,14 @@ void dumpTile (char *data, int width, int height, GLubyte *buffer) {
 	FILE *out2;
 
 	out2 = fopen(data, "w");
-	fprintf(out2, "P6\n");
-	fprintf(out2, "# Created using medit %s %s, (c) INRIA\n", ME_VER, ME_REL);
-	fprintf(out2, "%d %d\n", width, height);
-	fprintf(out2, "255\n");
-	fwrite(buffer, sizeof(GLubyte), width * height * 3, out2);
-	fclose(out2);
+	if (out2) {
+		fprintf(out2, "P6\n");
+		fprintf(out2, "# Created using medit %s %s, (c) INRIA\n", ME_VER, ME_REL);
+		fprintf(out2, "%d %d\n", width, height);
+		fprintf(out2, "255\n");
+		fwrite(buffer, sizeof(GLubyte), width * height * 3, out2);
+		fclose(out2);
+	}
 }
 
 /* dump big image */
@@ -129,7 +134,6 @@ int imgTiling (pScene sc, char *data, char key) {
 	nbcol = (int)((float)imgWidth / tileWidthNB) + 1;
 	nbrow = (int)((float)imgHeight / tileHeightNB) + 1;
 	tiling = 1;
-	th = tileHeightNB;
 	finhaut = sc->par.ys;
 
 	for (row = nbrow - 1; row >= 0; row--) {
@@ -201,7 +205,6 @@ int imgTiling (pScene sc, char *data, char key) {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
-			/*gluLookAt(0.,0.,-sc->persp->depth, 0.,0.,0., 0.0,1.0,0.0);*/
 
 			glMultMatrixf(sc->view->matrix);
 			glTranslatef(sc->cx, sc->cy, sc->cz);
@@ -216,7 +219,6 @@ int imgTiling (pScene sc, char *data, char key) {
 			bitsImgOffset = col * tileWidthNB * bitsPixel;
 			bitsTileRow = tileWidthNB * bitsPixel;
 			bitsCurTileRow = tw * bitsPixel;
-			/*bitsTileOffset = border * bitsPixel;*/
 			bitsTileOffset = 0;
 
 			for (i = 0; i < th; i++) {
@@ -266,3 +268,7 @@ int imgTiling (pScene sc, char *data, char key) {
 
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -369,7 +372,7 @@ void keyScene (unsigned char key, int x, int y) {
 	pCamera cam;
 	double dd;
 	float a, b, c, d;
-	int k, keyact, numit, idw = currentScene();
+	int ret, k, keyact, numit, idw = currentScene();
 	ubyte post = FALSE, dolist = FALSE;
 
 	if (idw < 0) exit(0);
@@ -525,7 +528,6 @@ void keyScene (unsigned char key, int x, int y) {
 			post = TRUE;
 			break;
 		case 't':	/* toggle texture */
-			/*keyColor('t',0,0);*/
 			break;
 		case 'u':
 			if (keyact & GLUT_ACTIVE_ALT)
@@ -682,7 +684,6 @@ void keyScene (unsigned char key, int x, int y) {
 			keyItem('P', 0, 0);
 			break;
 		case 'Q':
-			/*keyMetric('q',0,0);*/
 			break;
 		case 'R':
 			if (ipilmat < 1) return;
@@ -695,7 +696,6 @@ void keyScene (unsigned char key, int x, int y) {
 			post = TRUE;
 			break;
 		case 'S':	/* softcopy */
-			/*keyFile('S',0,0);*/
 			keyAnim('S', 0, 0);
 			break;
 		case 'V':	/* change center of scene */
@@ -811,14 +811,6 @@ void keyScene (unsigned char key, int x, int y) {
 			farclip(1);
 			post = TRUE;
 
-			/*
-			 * if ( p->rubber == 2 )
-			 * setPersp(sc,p,0);
-			 * else
-			 * p->fovy = min(1.1*p->fovy,179.0);
-			 * farclip(1);
-			 * post = TRUE;
-			 */
 			/* get linked view */
 			sc1 = sc;
 
@@ -860,14 +852,6 @@ void keyScene (unsigned char key, int x, int y) {
 			farclip(1);
 			post = TRUE;
 
-/*
- *    if ( p->rubber == 2 )
- *  setPersp(sc,p,1);
- *    else
- *    p->fovy = max(0.9*p->fovy,1e-05);
- *    farclip(1);
- *    post = TRUE;
- */
 			/* update linked view */
 			sc1 = sc;
 
@@ -886,8 +870,9 @@ void keyScene (unsigned char key, int x, int y) {
 		case '#':	/* select entity */
 			fprintf(stdout, "ENTITY NUMBER: ");
 			fflush(stdout);
-			while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
-			fscanf(stdin, "%d", &numit);
+			while(fgetc(stdin)!=EOF);	/* fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems */
+			ret = fscanf(stdin, "%d", &numit);
+			if (ret == EOF) printf("fscanf error\n");
 			if (sc->picklist) glDeleteLists(sc->picklist, 1);
 
 			if (numit > 0)
@@ -912,8 +897,9 @@ void keyScene (unsigned char key, int x, int y) {
 			        clip->eqn[0], clip->eqn[1], clip->eqn[2], dd);
 			fprintf(stdout, "Plane coeffs : ");
 			fflush(stdout);
-			while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
-			fscanf(stdin, "%f %f %f %f", &a, &b, &c, &d);
+			while(fgetc(stdin)!=EOF);	/* fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems */
+			ret = fscanf(stdin, "%f %f %f %f", &a, &b, &c, &d);
+			if (ret == EOF) printf("fscanf error\n");
 			resetClip(sc, clip, mesh);
 			clip->eqn[0] = a;
 			clip->eqn[1] = b;
@@ -948,8 +934,9 @@ void keyScene (unsigned char key, int x, int y) {
 		case '%':
 			fprintf(stdout, "reference (%d): ", refpick);
 			fflush(stdout);
-			while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
-			fscanf(stdin, "%d", &refpick);
+			while(fgetc(stdin)!=EOF);	/* fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems */
+			ret = fscanf(stdin, "%d", &refpick);
+			if (ret == EOF) printf("fscanf error\n");
 			break;
 
 		case '&':
@@ -967,3 +954,7 @@ void keyScene (unsigned char key, int x, int y) {
 
 	if (post) glutPostRedisplay();
 }
+
+#ifdef __cplusplus
+}
+#endif

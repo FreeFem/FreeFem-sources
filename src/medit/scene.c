@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -592,7 +595,7 @@ void redrawMorphing (pScene sc) {
 /* animate */
 void glutIdle (void) {
 	static float timePassed = 0.0;
-	static float timeRedraw = 0.02;	/*1.0 / 50.0*/
+	static float timeRedraw = 0.02;
 	float clk, timeElaps;
 
 	clk = clock();
@@ -666,12 +669,10 @@ void redrawScene () {
 	pScene sc;
 	pTransform view;
 	pPersp p;
-	pCamera c;
 
 	sc = cv.scene[currentScene()];
 	view = sc->view;
 	p = sc->persp;
-	c = sc->camera;
 
 	if (stereoMode == MONO || !hasStereo) {
 		glDrawBuffer(GL_BACK_LEFT);
@@ -854,7 +855,7 @@ void initGrafix (pScene sc, pMesh mesh) {
 /* new scene */
 int createScene (pScene sc, int idmesh) {
 	pMesh mesh;
-	char data[128];
+	char data[512];
 
 	/* default */
 	mesh = cv.mesh[idmesh];
@@ -981,3 +982,7 @@ int createScene (pScene sc, int idmesh) {
 	initGrafix(sc, mesh);
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

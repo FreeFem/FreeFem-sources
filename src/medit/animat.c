@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -34,30 +37,19 @@ static int getmesh (pMesh mesh, int range) {
 	if (ddebug) fprintf(stdout, "getmesh: create mesh %d\n", range);
 
 	if (mesh->tria) M_free(mesh->tria);
-
 	if (mesh->quad) M_free(mesh->quad);
-
 	if (mesh->edge) M_free(mesh->edge);
-
 	if (mesh->tetra) M_free(mesh->tetra);
-
 	if (mesh->hexa) M_free(mesh->hexa);
-
 	if (mesh->adja) M_free(mesh->adja);
-
 	if (mesh->voy) M_free(mesh->voy);
-
 	if (mesh->point) M_free(mesh->point);
 
 	if (mesh->extra) {
 		if (mesh->extra->iv) M_free(mesh->extra->nv);
-
 		if (mesh->extra->it) M_free(mesh->extra->nt);
-
 		if (mesh->extra->iq) M_free(mesh->extra->nq);
-
 		if (mesh->extra->n) M_free(mesh->extra->n);
-
 		M_free(mesh->extra);
 		mesh->extra = (void *)0;
 	}
@@ -65,9 +57,8 @@ static int getmesh (pMesh mesh, int range) {
 	if (mesh->sol && mesh->nbb) {
 		if ((mesh->dim == 2 && mesh->nfield == 3) || (mesh->dim == 3 && mesh->nfield == 6)) {
 			int k;
-			for (k = 1; k <= mesh->nbb; k++) {
+			for (k = 1; k <= mesh->nbb; k++)
 				free(mesh->sol[k].m);
-			}
 		}
 
 		M_free(mesh->sol);
@@ -85,14 +76,8 @@ static int getmesh (pMesh mesh, int range) {
 	mesh->np = mesh->nt = mesh->nq = mesh->ne = 0;
 	mesh->ntet = mesh->nhex = mesh->nbb = 0;
 
-	if (animdep == range) {
-		/*char *ptr, data[256];
-		sprintf(data, ".%d", range);
-		ptr = (char *)strstr(mesh->name, data);
-		if (ptr) *ptr = '\0';*/
-
+	if (animdep == range)
 		strcpy(base, mesh->name);
-	}
 
 	/* adjust file name */
 	sprintf(mesh->name, "%s.%d", base, range);
@@ -160,7 +145,7 @@ int loadNextMesh (pMesh mesh, int k, int parse) {
 
 int playAnim (pScene sc, pMesh mesh, int deb, int fin) {
 	int k;
-	char *ptr, data[256], base[256];
+	char *ptr, data[512], base[256];
 
 	/* get basename */
 	sprintf(data, ".%d", deb);
@@ -186,7 +171,7 @@ int playAnim (pScene sc, pMesh mesh, int deb, int fin) {
 		if (sc->isotyp) doIsoLists(sc, mesh, 1);
 
 		if (!saveimg) {
-			sprintf(data, "Medit - [%s] #%d", mesh->name, sc->idwin);
+			snprintf(data, 512, "Medit - [%s] #%d", mesh->name, sc->idwin);
 			glutSetWindowTitle(data);
 		}
 
@@ -203,7 +188,7 @@ int playAnim (pScene sc, pMesh mesh, int deb, int fin) {
 	if (saveimg) {
 		glDrawBuffer(GL_FRONT | GL_BACK);
 		if (saveimg) {
-			sprintf(data, "Medit - [%s] #%d", mesh->name, sc->idwin);
+			snprintf(data, 512, "Medit - [%s] #%d", mesh->name, sc->idwin);
 			glutSetWindowTitle(data);
 		}
 
@@ -253,13 +238,14 @@ int animat () {
 
 	/* enter basename */
 	if (!cv.nbm) {
-		char data[128], *name;
-		
+		char data[128], *name, *res;
+		int ret;
+
 		fprintf(stdout, "  File name(s) missing. Please enter : ");
 		fflush(stdout);
 		while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
-		fgets(data, 120, stdin);
-		if (!strlen(data)) {
+		res = fgets(data, 120, stdin);
+		if (!strlen(data) || res == NULL) {
 			fprintf(stdout, "  ## Error\n");
 			return (0);
 		}
@@ -267,7 +253,11 @@ int animat () {
 		fprintf(stdout, "  Enter range [start,end] :");
 		fflush(stdout);
 		while(fgetc(stdin)!=EOF);	//fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems
-		fscanf(stdin, "%d %d", &animdep, &animfin);
+		ret = fscanf(stdin, "%d %d", &animdep, &animfin);
+		if (ret == EOF) {
+			fprintf(stdout, "  ## Error\n");
+			return (0);
+		}
 
 		/* parse file name(s) */
 		name = strtok(data, " \n");
@@ -302,3 +292,7 @@ int animat () {
 	quiet = 1;
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

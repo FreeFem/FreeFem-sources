@@ -1,0 +1,151 @@
+include "test.idp"
+
+cout << "abs" << endl;
+real t;
+
+cout << IND << "int" << endl;
+
+int lplus = 5;
+int lmoins = -5;
+int lzero = 0;
+
+t = clock();
+real alplus = abs(lplus);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(alplus == lplus);
+
+t = clock();
+real almoins = abs(lmoins);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(almoins == -lmoins);
+
+t = clock();
+real alzero = abs(lzero);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(alzero == lzero);
+
+cout << IND << "real" << endl;
+
+real rplus = 5.;
+real rmoins = -5.;
+real rzero = 0.;
+
+t = clock();
+real arplus = abs(rplus);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(arplus == rplus);
+
+t = clock();
+real armoins = abs(rmoins);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(armoins == -rmoins);
+
+t = clock();
+real arzero = abs(rzero);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(arzero == rzero);
+
+cout << IND << "complex" << endl;
+
+complex cplusplus = 5. + 1i * 3.;
+complex cplusmoins = 5. - 1i *3;
+complex cmoinsplus = -5. + 1i * 3;
+complex cmoinsmoins = -5. - 1i * 3;
+complex czero = 0.;
+real cabs = sqrt(5^2+3^2);
+
+t = clock();
+real acplusplus = abs(cplusplus);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(acplusplus == cabs);
+
+t = clock();
+real acplusmoins = abs(cplusmoins);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(acplusmoins == cabs);
+
+t = clock();
+real acmoinsplus = abs(cmoinsplus);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(acmoinsplus == cabs);
+
+t = clock();
+real acmoinsmoins = abs(cmoinsmoins);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(acmoinsmoins == cabs);
+
+t = clock();
+real azero = abs(czero);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(azero == 0.);
+
+cout << IND << "real array" << endl;
+
+int n = 4;
+real[int] A = [1.,-1.,5.,-58.];
+real[int] B(n);
+
+t = clock();
+B = abs(A);
+t = clock() - t;
+cout << IND << IND << t << endl;
+for (int i = 0; i < n; i++) {
+  test(B[i] == abs(A[i]));
+}
+
+int tab = 2;
+real[int, int] AA = [[-1.,5.,8.,-9.],[5., 6.,-8.,-9.]];
+real[int, int] BB(tab, n);
+
+t = clock();
+BB = abs(AA);
+t = clock() - t;
+cout << IND << IND << t << endl;
+for (int i = 0; i < tab; i++) {
+  for (int j = 0; j < n; j++) {
+    test(BB(i,j) == abs(AA(i,j)));
+  }
+}
+
+// cout << IND << "int array" << endl;
+//
+// int[int] Aint = [1,-1,5,-58];
+// int[int] Bint(n);
+//
+// t = clock();
+// for (int i = 0; i < n; i++) {
+//   Bint[i] = abs(Aint[i]);
+// }
+// t = clock() - t;
+// cout << IND << IND << t << endl;
+// for (int i = 0; i < n; i++) {
+//   test(Bint[i] == abs(Aint[i]));
+// }
+//
+// int[int, int] AAint = [[-1,5,8,-9],[5, 6,-8,-9]];
+// int[int, int] BBint(tab, n);
+//
+// t = clock();
+// for (int i = 0; i < tab; i++) {
+//   for (int j = 0; j < n; j++) {
+//     BBint(i,j) = abs(AAint(i,j));
+//   }
+// }
+// t = clock() - t;
+// cout << IND << IND << t << endl;
+// for (int i = 0; i < tab; i++) {
+//   for (int j = 0; j < n; j++) {
+//     test(BBint(i,j) == abs(AAint(i,j)));
+//   }
+// }

@@ -65,7 +65,6 @@ class CMAES	// Abstract class, because the fitness function prototype may differ
 		void UpdateEigensystem (int flgforce) {return cmaes_UpdateEigensystem(&evo, flgforce);}
 
 		virtual void PopEval () = 0;
-		// {for(int i=0;i<popsize();++i) fitvals[i] = ff(pop[i]);} //the thing to parralelize
 
 		double axisratio () const {return cmaes_Get(&evo, "axisratio");}// between lengths of longest and shortest principal axis of the distribution ellipsoid
 
@@ -246,15 +245,12 @@ class OptimCMA_ES: public OneOperator
 					KN<double> iSD(n, 1.);
 					iSD *= initialStdDev;
 					KN<double> initialStdDevs(nargs[2] ? GetAny<KN_<double> >((*nargs[2])(stack)) : (KN_<double>)iSD);
-					// cout << "dans le dylib :" << initialStdDevs << endl;
 					double stopTolFun = arg(3, stack, 1.E-12);
 					double stopTolFunHist = arg(4, stack, 0.);
 					double stopTolX = arg(5, stack, 0.);
 					double stopTolUpXFactor = arg(6, stack, 1.E3);
 					long popsize = arg(7, stack, 4 + (long)floor(3 * log(n)));
-					// long mu = arg(8,stack,popsize/2);
 					string pipf = nargs[10] ? *GetAny<string *>((*nargs[10])(stack)) : string("");
-					long iprint = verbosity;
 					ffcalfunc ffJ(stack, JJ, theparam);
 					CMA_ES *optim = 0;
 					if (pipf.size() > 0) {
@@ -307,14 +303,8 @@ basicAC_F0::name_and_type OptimCMA_ES::E_CMA_ES::name_param [] =
 	{"stopMaxFunEval", &typeid(long)},
 	{"stopMaxIter", &typeid(long)},
 	{"paramFile", &typeid(string *)}
-	// {"mu",							&typeid(long) }
 };
 
-/*  class Init { public:
- * Init();
- * };
- *
- * $1 */
 static void Load_Init () {
 	Global.Add("cmaes", "(", new OptimCMA_ES(1));
 }

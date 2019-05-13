@@ -10,21 +10,21 @@
 
 /*
   This file is part of Freefem++
-     
+
   Freefem++ is free software; you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License as published by
   the Free Software Foundation; either version 2.1 of the License, or
   (at your option) any later version.
-     
+
   Freefem++  is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU Lesser General Public License for more details.
-     
+
   You should have received a copy of the GNU Lesser General Public License
   along with Freefem++; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-     
+
   Thank to the ARN ()  FF2A3 grant
   ref:ANR-07-CIS7-002-01
 */
@@ -48,10 +48,10 @@ namespace Fem2D
 
 namespace Fem2D
 {
-      
-      
-      
-      
+
+
+
+
   /*
     const short int v_tet_face[4][3]=  {{3,2,1},{0,2,3},{ 3,1,0},{ 0,1,2}};
     const short int a_tet_face[4][3]=  {{ 0,1,0},{ 0,2,0},{ 0,3,1},{ 1,2,1}};
@@ -60,7 +60,7 @@ namespace Fem2D
     const short int fadj_tet_edge[6][2]= {{4,3},{2,4},{3,2},{4,1},{1,3},{2,1}};
     const short int op_tet_edge[6]={ 6, 5, 4, 3, 2, 1};
   */
-      
+
   //  Attention  nvfaceTet  donnne les faces  les 4 faces de tet telle que la
   // tel que  le tet forme des trois sommet  + l'autre sommet soit positif.
   //  donc  le  produit vectoriel des 2 aretes  (0,1) (0,2)  donne une  normale interieur.
@@ -100,7 +100,7 @@ namespace Fem2D
   template<>
   const int (* const GenericElement<DataTet>::nvadj)[3] = nvfaceTet ;
   template<> const int  GenericElement<DataTet>::nitemdim[4] = {4,6,4,1 }  ;
-      
+
   int onWhatIsFace[4][15] ;
   typedef const int   (*const PtrConst15int) [15]; //  a pointeur on  const arry of 15 int. (to help xcode)
   // static const int (* const SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2]))[15];
@@ -114,7 +114,7 @@ namespace Fem2D
   template<> const int (* const GenericElement<DataSeg3>::nvedge)[2] = nvedgeSeg; //nvedgeTria ;
   template<> const int (* const GenericElement<DataSeg3>::nvadj)[1] = nvadjSeg ;
 
-      
+
   // template for Mesh3 ( volume mesh )
   template<> int   GenericMesh<Tet,Triangle3,Vertex3>::kfind=0;
   template<> int   GenericMesh<Tet,Triangle3,Vertex3>::kthrough=0;
@@ -122,7 +122,7 @@ namespace Fem2D
   //template for MeshS ( surface mesh )
   template<> int   GenericMesh<TriangleS,BoundaryEdgeS,Vertex3>::kfind=0;
   template<> int   GenericMesh<TriangleS,BoundaryEdgeS,Vertex3>::kthrough=0;
-      
+
 
   //  const int (* const SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2]))[15]
   PtrConst15int  SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2])
@@ -150,24 +150,18 @@ namespace Fem2D
             cout << onWhatIsFace[j][i] << " ";
           cout << endl;
         }
-        
+
     return onWhatIsFace;
   }
 
-
-      
   void Add(int *p,int n,int o)
   {
     for(int i=0;i<n;++i)
       p[i] += o;
   }
 
-
-
-
-
   // constructor of the class Mesh3
-      
+
   Mesh3::Mesh3(const string  filename)
     :meshS(0)
   {
@@ -182,8 +176,7 @@ namespace Fem2D
       if (typeMesh3!=1)
         cout << "surface Mesh, num Triangles:= " << this->meshS->nt << ", num Vertice:= " << this->meshS->nv << " num boundary Edges:= " << this->meshS->nbe << endl;
     }
-        
-        
+
     if (ok) {
       ifstream f(filename.c_str());
       if(!f) {
@@ -198,8 +191,8 @@ namespace Fem2D
       //   else
       read(f); // TODO with surface,
     }
-     
-            
+
+
     if(typeMesh3!=0 ) {
       BuildBound();
       if(nt > 0){
@@ -228,17 +221,17 @@ namespace Fem2D
     }
     if(typeMesh3!=0 ) ffassert(mes>=0); // add F. Hecht sep 2009.
     if(typeMesh3!=1 ) ffassert(meshS->mes>=0); // add F. Hecht sep 2009.
-   
+
   }
-      
-        
+
+
   // Read a mesh with correct the mesh :
   // 1) delete multiple points defined
   // 2) delete points which is not in element or in border element
   Mesh3::Mesh3(const string  filename, const long change)
     :meshS(0)
   {
-       
+
     int ok=load(filename);     // 1 fixed for the moment, just initialize a mesh3, meshS isn't used
     if(verbosity) {
       cout << "read mesh ok " << ok  << endl;
@@ -277,9 +270,9 @@ namespace Fem2D
         for (int ii=0;ii<this->nv;ii++){
           const R3 r3vi( this->vertices[ii].x, this->vertices[ii].y, this->vertices[ii].z );
           const Vertex3 &vi(r3vi);
-          
+
           Vertex3 * pvi=gtree->ToClose(vi,hseuil);
-          
+
           if(!pvi){
             vv[nv_t].x = vi.x;
             vv[nv_t].y = vi.y;
@@ -293,9 +286,8 @@ namespace Fem2D
             Numero_Som[ii] = pvi-vv;
           }
         }
-        
+
         delete gtree;
-        //delete [] vv;
       }
 
       // general case
@@ -320,7 +312,7 @@ namespace Fem2D
       }
 
       if( newvertex != this->nv){
-        
+
         // determination of vertex
         Vertex *vvv = new Vertex[ newvertex ];
         KN<int> newNumero_Som(nv_t);
@@ -336,7 +328,7 @@ namespace Fem2D
           }
         }
         ffassert( newvertex== iii );
-        
+
         Element *tt;
         if(this->nt !=0) tt=new Element[this->nt];
         BorderElement *bb = new BorderElement[this->nbe];
@@ -367,15 +359,13 @@ namespace Fem2D
         delete [] vertices;
         delete [] elements;
         delete [] borderelements;
-        
+
         nv = newvertex;
 
 	    vertices = vvv;
         elements = tt;
         borderelements = bb;
 
-	//&this = new Mesh3(newvertex,this->nt,this-nbe,vvv,tt,bb);
-        
         delete [] newNumero_Som;
       }
       else{
@@ -383,14 +373,14 @@ namespace Fem2D
       }
       delete [] Numero_Som;
     }
-        
+
     BuildBound();
     if(nt > 0){
       BuildAdj();
       Buildbnormalv();
       BuildjElementConteningVertex();
     }
-          
+
     if(verbosity>2)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
     if(verbosity)
@@ -399,9 +389,6 @@ namespace Fem2D
     ffassert(mes>=0); // add F. Hecht sep 2009.
   }
 
-
-
-     
   Mesh3::Mesh3(const  Serialize &serialized)
     :GenericMesh<Tet,Triangle3,Vertex3> (serialized),
     meshS(0),typeMesh3(1)
@@ -409,13 +396,13 @@ namespace Fem2D
     BuildBound();
     if(verbosity>1)
       cout << "  -- End of serialized: mesure = " << mes << " border mesure " << mesb << endl;
-        
+
     if(nt > 0){
       BuildAdj();
       Buildbnormalv();
       BuildjElementConteningVertex();
     }
-        
+
     if(verbosity>1)
       cout << "  -- Mesh3  (serialized), d "<< 3  << ", n Tet " << nt << ", n Vtx "
 	   << nv << " n Bord " << nbe << endl;
@@ -425,13 +412,13 @@ namespace Fem2D
   Mesh3::Mesh3(FILE *f,int offset)
     :meshS(0)
   {
-        
+
     GRead(f,offset);// remove 1
     assert( (nt >= 0 || nbe>=0)  && nv>0) ;
     BuildBound();
     if(verbosity>2)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
-        
+
     if(nt > 0){
       BuildAdj();
       Buildbnormalv();
@@ -439,14 +426,13 @@ namespace Fem2D
     }
     if(verbosity>2)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
-        
+
     if(verbosity>1)
       cout << "  -- Mesh3  (File *), d "<< 3  << ", n Tet " << nt << ", n Vtx "
            << nv << " n Bord " << nbe << endl;
     ffassert(mes>=0); // add F. Hecht sep 2009.
   }
 
-      
   // Add by J. Morice 11/10
   // compute the hmin in a 3d mesh
   // Remark: on peut le mettre dans generic mesh
@@ -454,7 +440,7 @@ namespace Fem2D
   double Mesh3::hmin() const{
     R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // Extremite de la boite englobante
     double hmin=1e10;
-        
+
     for (int ii=0;ii< this->nv;ii++){
       R3 P( vertices[ii].x, vertices[ii].y, vertices[ii].z);
       Pinf=Minc(P,Pinf);
@@ -479,7 +465,7 @@ namespace Fem2D
         hmin=min(hmin,this->elements[k].lenEdge(e));   // calcul de .lenEdge pour un Mesh3
       }
     }
-        
+
     for (int k=0;k<this->nbe;k++){
       for (int e=0;e<3;e++){
         if( this->be(k).lenEdge(e) < Norme2(Psup-Pinf)/1e9 )
@@ -496,8 +482,6 @@ namespace Fem2D
     ffassert(hmin>Norme2(Psup-Pinf)/1e9);
     return hmin;
   }
-
-
 
   // Fin Add by J. Morice nov 2010
   // Add J. Morice 12/2010
@@ -537,7 +521,6 @@ namespace Fem2D
 	}
       }
       delete gtree;
-      //delete [] vv;
     }
     // general case
     KN<int> takevertex(nv_t,0);
@@ -573,7 +556,7 @@ namespace Fem2D
 	}
       }
       ffassert( newvertex== iii );
-                
+
       Element *tt;
       if(this->nt !=0) tt=new Element[this->nt];
       BorderElement *bb = new BorderElement[this->nbe];
@@ -605,24 +588,22 @@ namespace Fem2D
       vertices = vvv;
       elements = tt;
       borderelements = bb;
-                
-      //&this = new Mesh3(newvertex,this->nt,this-nbe,vvv,tt,bb);
-                
+
       delete [] newNumero_Som;
     }
     else{
       cout << " no need to change the mesh " << endl;
     }
     delete [] Numero_Som;
-        
-        
+
+
     BuildBound();
     if(nt > 0){
       BuildAdj();
       Buildbnormalv();
       BuildjElementConteningVertex();
     }
-        
+
     if(verbosity>2)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
     if(verbosity)
@@ -630,19 +611,17 @@ namespace Fem2D
 	   << nv << " n Bord " << nbe << endl;
     ffassert(mes>=0); // add F. Hecht sep 2009.
   }
-        
+
   // Fin Add J. Morice 12/2010
-        
+
   void  Mesh3::read(istream &f)
   { // read the mesh
     int i;
-    //	f >> nv >> nt >> neb ;
     string str;
     int err=0;
     while(!f.eof())
       {
         f >> str;
-        //cout << str << endl;
         if( str== "Vertices")
           {
             f >> nv;
@@ -697,20 +676,10 @@ namespace Fem2D
           {// on mange la ligne
             int c;
             while ( (c=f.get()) != '\n' &&  c != EOF)
-              //cout << c << endl;
               ;
           }
       }
     assert( (nt >= 0 || nbe>=0)  && nv>0) ;
-    /*   done at up level ...
-         BuildBound();
-         
-         if(nt > 0){
-         BuildAdj();
-         Buildbnormalv();
-         BuildjElementConteningVertex();
-         }
-    */
     if(err!=0)
       {
 	cerr << " Mesh3::read: sorry bad mesh. Number of negative Tet " << err << endl;
@@ -720,10 +689,6 @@ namespace Fem2D
   }
 
 
-
-
-
-      
   int Mesh3::load(const string & filename)
   {
     int bin;
@@ -764,7 +729,7 @@ namespace Fem2D
     nTet= GmfStatKwd(inm,GmfTetrahedra); // tetrahedron elements only present in volume mesh
     nTri= GmfStatKwd(inm,GmfTriangles); // triangles in case of volume mesh -> boundary element / in case of surface mesh -> element
     nSeg=GmfStatKwd(inm,GmfEdges); // segment elements only present in surface mesh
-     
+
     //define the type of meshes present in the data file .mesh
 
     if (nTet==0 && nTri>0 && nSeg>0) {  // Mesh3 null, MeshS (real surface with boundaries)
@@ -789,7 +754,7 @@ namespace Fem2D
     if(verbosity>1 && (typeMesh3!=0) )
       cout << "  -- Mesh3(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
            << ", num Tetrahedron elts:= " << nTet << ", num vertice:= " << nv << " num Triangle boundaries:= " << nTri << endl;
-          
+
     if(dim  != 3) {
       cerr << "Err dim == " << dim << " !=3 " <<endl;
       return 2; }
@@ -798,14 +763,14 @@ namespace Fem2D
       return 3;
     }
     int iv[4],lab;
-    float cr[3];
+    float cr[3]={};
 
     // caution for the vertice 3 cases :
     // pure volume mesh -> in the .mesh, the vertice are true
     // pure surface mesh -> in the .mesh, the vertice are true
     // volume and surface meshes -> in the .mesh, vertice are true for the volume and the surface vertice
     // must be searched - *liste_v_num_surf is the mapping bewteen surface and volume vertice in mesh
-        
+
       int mxlab=0, mnlab=0;
     // 1st case, the .mesh contains tetrahedrons -> volume mesh -> mesh3 is iniatiazed
     if (typeMesh3!=0) { // ! Mesh3 null
@@ -824,7 +789,7 @@ namespace Fem2D
            mxlab= max(mxlab,lab);
 	       mnlab= min(mnlab,lab);
 	  }
-       
+
       // read tetrahedrons (element mesh3)
        GmfGotoKwd(inm,GmfTetrahedra);
        mes=0;
@@ -866,7 +831,7 @@ namespace Fem2D
 	     }
 	  }
    } // end typeMesh3!=0
-      
+
    // 2nd case, the .mesh don't contains tetrahedrons, that means it's only a surface mesh
    // the vertices given are the surface mesh vertices
    int mxlabSurf=0, mnlabSurf=0;
@@ -928,11 +893,11 @@ namespace Fem2D
         meshS->mesb += this->meshS->borderelements[i].mesure();
       }
     } // end typeMesh==0
-      
+
     // 3rd case, the .mesh contains tetrahedrons, triangles and edges
     // we are able to build a volume and surface mesh
     // for this, surface vertices must be extract of the original vertice list and a mapping must be created between surface and volume vertices
-  
+
       if (typeMesh3==2) {  // ! MeshS null and Mesh3 null
       meshS = new MeshS();
       // Number of Vertex in the surface
@@ -973,7 +938,6 @@ namespace Fem2D
       for(int i=0;i<nTri;++i) {
 	    GmfGetLin(inm,GmfTriangles,&iv[0],&iv[1],&iv[2],&lab);
 	    for (int j=0;j<3;++j) iv[j]=meshS->v_num_surf[iv[j]-1];
-       // assert( iv[0]>0 && iv[0]<=nbv_surf && iv[1]>0 && iv[1]<=nbv_surf && iv[2]>0 &&iv[2]<=nbv_surf );
 	    for(int j=0;j<3;++j)
 	      if(!meshS->vertices[iv[j]].lab) {
 		    meshS->vertices[iv[j]].lab=1;
@@ -989,7 +953,6 @@ namespace Fem2D
       for(int i=0;i<nSeg;++i) {
 	    GmfGetLin(inm,GmfEdges,&iv[0],&iv[1],&lab);
 	    for (int j=0;j<2;++j) iv[j]=meshS->v_num_surf[iv[j]-1];
-       // assert( iv[0]>0 && iv[0]<=nbv_surf && iv[1]>0 && iv[1]<=nbv_surf);
         meshS->borderelements[i].set(meshS->vertices,iv,lab);
 	    meshS->mesb += meshS->borderelements[i].mesure();
 	  }
@@ -998,39 +961,38 @@ namespace Fem2D
     if(verbosity>1 && (meshS) )
       cout << "  -- MeshS(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
 	   << ", Triangle elts:= " << meshS->nt << ", num vertice:= " << meshS->nv << ", num edges boundaries:= " << meshS->nbe << endl;
-    
+
     GmfCloseMesh(inm);
     delete[] data;
     return 0; // OK
   }
-       
-      
+
   const     string Gsbegin="Mesh3::GSave v0",Gsend="end";
   void Mesh3::GSave(FILE * ff,int offset) const
   {
     PlotStream f(ff);
-        
+
     f <<  Gsbegin ;
     f << nv << nt << nbe;
     for (int k=0; k<nv; k++) {
       const  Vertex & P = this->vertices[k];
       f << P.x <<P.y << P.z << P.lab ;
     }
-        
+
     if(nt != 0){
-          
+
       for (int k=0; k<nt; k++) {
         const Element & K(this->elements[k]);
         int i0=this->operator()(K[0])+offset;
         int i1=this->operator()(K[1])+offset;
         int i2=this->operator()(K[2])+offset;
         int i3=this->operator()(K[3])+offset;
-        
+
         int lab=K.lab;
         f << i0 << i1 << i2 << i3 << lab;
       }
     }
-        
+
     for (int k=0; k<nbe; k++) {
       const BorderElement & K(this->borderelements[k]);
       int i0=this->operator()(K[0])+offset;
@@ -1043,7 +1005,7 @@ namespace Fem2D
   }
 
 
-      
+
   void Mesh3::GRead(FILE * ff,int offset)
   {
     PlotStream f(ff);
@@ -1062,10 +1024,10 @@ namespace Fem2D
     }
     mes=0.;
     mesb=0.;
-        
+
     if(nt != 0)
       {
-        
+
         for (int k=0; k<nt; k++) {
           int i[4],lab;
           Element & K(this->elements[k]);
@@ -1073,7 +1035,7 @@ namespace Fem2D
           Add(i,4,offset);
           K.set(this->vertices,i,lab);
           mes += K.mesure();
-          
+
         }
       }
     for (int k=0; k<nbe; k++) {
@@ -1083,7 +1045,7 @@ namespace Fem2D
       Add(i,3,offset);
       K.set(this->vertices,i,lab);
       mesb += K.mesure();
-          
+
     }
     f >> s;
     ffassert( s== Gsend);
@@ -1103,10 +1065,10 @@ namespace Fem2D
     }
     mes=0.;
     mesb=0.;
-        
+
     if(nt != 0)
       {
-              
+
 	for (int k=0; k<nt; k++) {
 	  int i[4],lab;
 	  Element & K(this->elements[k]);
@@ -1115,11 +1077,11 @@ namespace Fem2D
 	  K.set(this->vertices,i,lab);
 	  mes += K.mesure();
 	  err += K.mesure() <0;
-              
+
 	}
       }
-        
-        
+
+
     for (int k=0; k<nbe; k++) {
       int i[4],lab;
       BorderElement & K(this->borderelements[k]);
@@ -1127,7 +1089,7 @@ namespace Fem2D
       Add(i,3,offset);
       K.set(this->vertices,i,lab);
       mesb += K.mesure();
-            
+
     }
     if(err!=0)
       {
@@ -1137,9 +1099,9 @@ namespace Fem2D
       }
 
   }
-        
-      
-      
+
+
+
   int Mesh3::Save(const string & filename) const
   {
       int ver = GmfFloat, outm;
@@ -1157,7 +1119,7 @@ namespace Fem2D
         GmfSetLin(outm,GmfVertices,fx=P.x,fy=P.y,fz=P.z,P.lab);
       }
       // write tetrahedrons (mesh3)
-        if(nt != 0) { 
+        if(nt != 0) {
         GmfSetKwd(outm,GmfTetrahedra,nt);
         for (int k=0; k<nt; k++) {
           const Element & K(this->elements[k]);
@@ -1181,7 +1143,7 @@ namespace Fem2D
       }
     } // end typeMesh3 !=0
     // write edges, in cas of volume + surface mesh (meshS)
-      if (typeMesh3==2) { 
+      if (typeMesh3==2) {
         int nbeS = meshS->nbe;
         if(nbeS != 0) {
       GmfSetKwd(outm,GmfEdges,nbeS);
@@ -1224,9 +1186,9 @@ namespace Fem2D
     } // end typeMesh==0
    GmfCloseMesh(outm);
    return (0);
-        
+
   }
-  
+
 
   int Mesh3::SaveSurface(const string & filename) const
   {
@@ -1284,10 +1246,10 @@ namespace Fem2D
       }
       delete [ ] v_num_surf;
     }
-      
+
     // the mesh contains a surface mesh. Mesh could be a pur surface mesh or volume+surface mesh
     // the surface is meshS
-     
+
     if (typeMesh3!=1) {
     int nvS = meshS->nv;
     int ntS = meshS->nt;
@@ -1326,15 +1288,10 @@ namespace Fem2D
   }
 
 
-        
-        
-        
   int Mesh3::SaveSurface(const string & filename1,const string & filename2) const
   {
-        
       // the mesh contains a volume mesh. Must extract the surface and the triangle on the surface ie the boundary mesh
       // the surface is the boundary elements, that means the triangle
-      
       if (typeMesh3==1) {
           //extraction vertice surface must be make when pur volume
           // it's made in the mesh3::load function
@@ -1367,7 +1324,7 @@ namespace Fem2D
               int k0 = map_v_num_surf[k];
               const  Vertex & P = this->vertices[k0];
               fprintf(fpoints,"%f %f %f %i\n",P.x,P.y,P.z,P.lab);
-              
+
           }
           fclose(fpoints);
           // print in file in filename2 the triangle (could be the boundary of volume mesh or the element of surface mesh)
@@ -1376,10 +1333,6 @@ namespace Fem2D
 
           for (int k=0; k<nbe; k++) {
               const BorderElement & K(this->borderelements[k]);
-              /*int i0=v_num_surf[this->operator()(K[0])]+1;
-              int i1=v_num_surf[this->operator()(K[1])]+1;
-              int i2=v_num_surf[this->operator()(K[2])]+1;
-              int lab=K.lab;*/
               int i0=this->operator()(K[0]);
               int i1=this->operator()(K[1]);
               int i2=this->operator()(K[2]);
@@ -1387,7 +1340,6 @@ namespace Fem2D
               int label0= this->vertices[i0].lab;
               int label1= this->vertices[i1].lab;
               int label2= this->vertices[i2].lab;
-              //GmfSetLin(outm,GmfTriangles,i0,i1,i2,lab);
               int nature=3;
               int i0v=v_num_surf[i0]+1;
               int i1v=v_num_surf[i1]+1;
@@ -1398,10 +1350,10 @@ namespace Fem2D
           fclose(ffaces);
           delete [ ] v_num_surf;
       }
-      
+
       // the mesh contains a surface mesh. Mesh could be a pur surface mesh or volume+surface mesh
       // the surface is meshS
-      
+
       if (typeMesh3!=0) {
           int nvS = meshS->nv;
           int ntS = meshS->nt;
@@ -1448,60 +1400,24 @@ namespace Fem2D
       }
       return (0);
   }
-    
-    
-    
-    
-        
+
   Mesh3::Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb)
     :meshS(0)
   {
-      
+
     nv = nnv;
     nt = nnt;
     nbe =nnbe;
     vertices = vv;
     elements = tt;
     borderelements = bb;
-        
+
     mes=0.;
     mesb=0.;
-        
+
     for (int i=0;i<nt;i++)
       mes += this->elements[i].mesure();
-        
-    for (int i=0;i<nbe;i++)
-      mesb += this->be(i).mesure();
-        
-    //  Add FH to be consitant we all constructor ...  July 09
-    BuildBound();
-    if(nt > 0){
-      BuildAdj();
-      Buildbnormalv();
-      BuildjElementConteningVertex();
-    }
-    //  end add
-    if(verbosity>1)
-      cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
-          
-    //    if(verbosity>1)
-    //      cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
-    assert(mes>=0.);
-  }
-      
-  Mesh3::Mesh3(int nnv, int nnbe, Vertex3 *vv, Triangle3 *bb)
-    :meshS(0)
-  {
-      
-    nv = nnv;
-    nbe =nnbe;
-        
-    vertices = vv;
-    borderelements = bb;
-        
-    mes=0.;
-    mesb=0.;
-        
+
     for (int i=0;i<nbe;i++)
       mesb += this->be(i).mesure();
 
@@ -1513,7 +1429,37 @@ namespace Fem2D
       BuildjElementConteningVertex();
     }
     //  end add
-          
+    if(verbosity>1)
+      cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
+
+    assert(mes>=0.);
+  }
+
+  Mesh3::Mesh3(int nnv, int nnbe, Vertex3 *vv, Triangle3 *bb)
+    :meshS(0)
+  {
+
+    nv = nnv;
+    nbe =nnbe;
+
+    vertices = vv;
+    borderelements = bb;
+
+    mes=0.;
+    mesb=0.;
+
+    for (int i=0;i<nbe;i++)
+      mesb += this->be(i).mesure();
+
+    //  Add FH to be consitant we all constructor ...  July 09
+    BuildBound();
+    if(nt > 0){
+      BuildAdj();
+      Buildbnormalv();
+      BuildjElementConteningVertex();
+    }
+    //  end add
+
     if(verbosity>1)
       cout << "  -- End of Construct  mesh3: mesure = " << mes << " border mesure " << mesb <<  endl;
     ffassert(mes>=0); // add F. Hecht sep 2009.
@@ -1527,15 +1473,15 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     for (int i=0;i<this->nbe;i++)
       {
         double mes_triangle3= this->be(i).mesure();
-        
+
         if( surface_orientation*mes_triangle3 < 0){
           const Triangle3 &K( this->be(i) );
           int iv[3];
-          
+
           iv[0] = this->operator()(K[0]);
           iv[1] = this->operator()(K[1]);
           iv[2] = this->operator()(K[2]);
-          
+
           int iv_temp=iv[1];
           iv[1]=iv[2];
           iv[2]=iv_temp;
@@ -1582,13 +1528,12 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     const Mesh3::Element & T(Th[it]);
     const int nve = 4;
     const Rd  Q[nve]={(const R3) T[0],(const R3) T[1],(const R3) T[2],(const R3) T[3]};
-           
+
     Rd P  =T(Phat);
-           
-    //  cout << " " << u << " " << v ;
+
     Rd PF = P + U*dt;
     Rd PFK= PF;
-        
+
     //  couleur(15);MoveTo( P); LineTo( PF);
     R l[nve];
     double Det=T.mesure()*6;
@@ -1600,7 +1545,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     l[1] /= Det;
     l[2] /= Det;
     l[3] /= Det;
-        
+
     if (l[0]>-eps && l[1]>-eps && l[2]>-eps && l[3]>-eps)
       { // a fini  .... ouf ...
 	dt =0;
@@ -1608,11 +1553,11 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
 	nomove=false;
 	return -1;
       }
-        
+
     // l(Q) = lambda + dl  *coef  avec Q= P+ U*dt*coef
     // coef > 0 et segement [PQ] dans K .. et Q \in \partial K
     // recherche de la face de sortie ..
-           
+
     dl[0]= l[0]-lambda[0];
     dl[1]= l[1]-lambda[1];
     dl[2]= l[2]-lambda[2];
@@ -1622,7 +1567,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     cl[1]= -lambda[1]/dl[1];
     cl[2]= -lambda[2]/dl[2];
     cl[3]= -lambda[3]/dl[3];
-           
+
     //  min  positif
     int kf=-1;
     double cf=1;// 1 min  positif  < 1.
@@ -1630,7 +1575,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     if(cl[1]>0. && cl[1] < cf) cf=cl[kf=1];
     if(cl[2]>0. && cl[2] < cf) cf=cl[kf=2];
     if(cl[3]>0. && cl[3] < cf) cf=cl[kf=3];
-        
+
     if(kf>=0)
       {
 	double cf1 = 1-cf;
@@ -1640,22 +1585,22 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
 	l[2]-= dl[2]*cf1;
 	l[3]-= dl[3]*cf1;
 	PFK = P +  U*(dt*cf); // final  point in tet.
-                
+
       }
     // on sort en temp  cf*dt
-           
-           
-           
+
+
+
     if(ddd)  cout << "\t\t\t WT " << it << ", " << Phat << ",  PFK=" << PFK
 		  << " :  "  << l[0] << " " <<l[1] <<" " <<l[2] << " " <<l[3]
 		  << " == " << det(Q[0],Q[1],Q[2],PF)/Det
 		  << " : l (in) "  << lambda[0] << " " <<lambda[1] <<" " <<lambda[2] << " " <<lambda[3]
 		  << " PF= K(l) = " << Th[it](R3(l+1)) << " kf = " << kf << " " << cf << "/ " << PF
 		  <<endl ;
-           
-    int neg[nve],k=0,nng[4],kn=0;// Bug missing init of kn Thank of Axel mars 2019.. 
+
+    int neg[nve],k=0,nng[4],kn=0;// Bug missing init of kn Thank of Axel mars 2019..
     int kk=-1;
-           
+
     if(kf>=0)   // sortie positive ..
       {
 	// on regarde de les reelement negatif
@@ -1667,10 +1612,9 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
 	if (l[1]<=-eps ) neg[k++]=1,ko+=1+j, j+=4;else nng[kn++]=1;
 	if (l[2]<=-eps ) neg[k++]=2,ko+=2+j, j+=4;else nng[kn++]=2;
 	if (l[3]<=-eps ) neg[k++]=3,ko+=3+j, j+=4;else nng[kn++]=3;
-                
-	//R eps1 = T.mesure()   * 1.e-5;
+
 	if(ddd)  cout << "\t\t\t k= " << k << endl;
-                
+
 	if(k>0)
 	  {
 	    {
@@ -1687,7 +1631,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
 	    if(l[p[0]] <l[p[1]]) swap(p[0],p[1]);// 0 ok
 	    if(l[p[2]] <l[p[3]]) swap(p[2],p[3]);// 3 ok
 	    if(l[p[1]] <l[p[2]]) swap(p[1],p[2]);// 1,2 ok
-                    
+
 	    ffassert((l[p[0]]  >= l[p[1]]) && (l[p[1]]  >= l[p[2]]) && (l[p[2]]  >= l[p[3]]) );
 	    if(ddd) cout << "\t\t\t   \t\t -> kk=" << kk << " , l= "<< l[0]  << " "
 			 <<l[1] << " " <<l[2] << " " << l[3] << " PF =" << PF <<  " " << &PF <<endl;
@@ -1719,14 +1663,13 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
 	    }
 
 	  }
-             //    cout << "savesurf " <<endl; ???  QUi a mis cet ligne de CODE ???? FH... april 2019 ... 
       }
     Phat=R3(l+1);
     if(ddd) cout  << "\t\t\t -> "<< dt << " : "  << Phat << " K(Phat) ="<< Th[it](Phat)
 		  <<  ", " << kk << endl;
     return kk;
   }
-        
+
   int  WalkInTet(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt)
   {
     const R eps = 1e-8;
@@ -1745,13 +1688,12 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     const Mesh3::Element & T(Th[it]);
     const int nve = 4;
     const Rd  Q[nve]={(const R3) T[0],(const R3) T[1],(const R3) T[2],(const R3) T[3]};
-        
+
     Rd P  =T(Phat);
-        
-    //  cout << " " << u << " " << v ;
+
     Rd PF = P + U*dt;
     Rd PFK= PF;
-        
+
     //  couleur(15);MoveTo( P); LineTo( PF);
     R l[nve];
     double Det=T.mesure()*6;
@@ -1763,7 +1705,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     l[1] /= Det;
     l[2] /= Det;
     l[3] /= Det;
-          
+
     if (l[0]>-eps && l[1]>-eps && l[2]>-eps && l[3]>-eps)
       { // a fini  .... ouf ...
 	dt =0;
@@ -1771,11 +1713,11 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
 	nomove=false;
 	return -1;
       }
-          
+
     // l(Q) = lambda + dl  *coef  avec Q= P+ U*dt*coef
     // coef > 0 et segement [PQ] dans K .. et Q \in \partial K
     // recherche de la face de sortie ..
-          
+
     dl[0]= l[0]-lambda[0];
     dl[1]= l[1]-lambda[1];
     dl[2]= l[2]-lambda[2];
@@ -1785,7 +1727,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     cl[1]= -lambda[1]/dl[1];
     cl[2]= -lambda[2]/dl[2];
     cl[3]= -lambda[3]/dl[3];
-     
+
     //  min  positif
     int kf=-1;
     double cf=1;// 1 min  positif  < 1.
@@ -1793,7 +1735,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     if(cl[1]>0. && cl[1] < cf) cf=cl[kf=1];
     if(cl[2]>0. && cl[2] < cf) cf=cl[kf=2];
     if(cl[3]>0. && cl[3] < cf) cf=cl[kf=3];
-          
+
     if(kf>=0)
       {
 	double cf1 = 1-cf;
@@ -1806,38 +1748,37 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
 
       }
     // on sort en temp  cf*dt
-          
-        
-          
+
+
+
     if(ddd)  cout << "\t\t\t WT " << it << ", " << Phat << ",  PFK=" << PFK
 		  << " :  "  << l[0] << " " <<l[1] <<" " <<l[2] << " " <<l[3]
 		  << " == " << det(Q[0],Q[1],Q[2],PF)/Det
 		  << " : l (in) "  << lambda[0] << " " <<lambda[1] <<" " <<lambda[2] << " " <<lambda[3]
 		  << " PF= K(l) = " << Th[it](R3(l+1)) << " kf = " << kf << " " << cf << "/ " << PF
 		  <<endl ;
-          
-    int neg[nve],k=0;
+
+    int neg[nve]={},k=0;
     int kk=-1;
-      
+
     if(kf>=0)   // sortie positive ..
       {
         // on regarde de les reelement negatif
 	// on ne veut pas des points sur les faces.
 	// car sinon il va y avoir un probleme ans on va projete sur la face
         //  et remettre le point dans le tetraedre.
-              
+
         if (l[0]<=-eps ) neg[k++]=0;
         if (l[1]<=-eps ) neg[k++]=1;
         if (l[2]<=-eps ) neg[k++]=2;
         if (l[3]<=-eps ) neg[k++]=3;
-        
-        //R eps1 = T.mesure()   * 1.e-5;
+
 	if(ddd)  cout << "\t\t\t k= " << k << endl;
-        
+
         if (k>1) //  2 .. 3 face de sortie possible
           {
 	    // regarde  sorti interne ..
-	    int pos[4];
+	    int pos[4]={};
 	    int kp =0;
 	    if (l[0]<0 ) pos[kp++]=0;
 	    if (l[1]<0 ) pos[kp++]=1;
@@ -1845,11 +1786,11 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
 	    if (l[3]<0 ) pos[kp++]=3;
 	    if(kp>0) kk=pos[randwalk(kp)];//
 	    else     kk=neg[randwalk(k)];
-              
+
           }
         else if (k==1) //  une face possible de sortie (cas simple)
           kk = neg[0];
-        
+
         if(kk>=0)
           {
 	    if ( l[kk] ) // on bouge et on arete avant la fin ...
@@ -1861,12 +1802,9 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
 	    if(ddd) cout << "\t\t\t   \t\t -> kk=" << kk << " , l= "<< lambda[0]  << " "
 			 <<lambda[1] << " " <<lambda[2] << " " << lambda[3] << " PF =" << PF <<  " " << &PF <<endl;
             lambda[kk] =0;
-	    //}
-              
-           
-          
+
           }
-         
+
       }
     if(nomove )
       // on ne bouge pas on utilse Find ...
@@ -1892,7 +1830,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
 		     << " dt = " << dt << " c = " << dc << " outside: "<< outside <<" , PF " << PF << endl;
 	return 4+Th(K);
       }
-          
+
     //  on remet le point dans le tet.
     int jj=0;
     R lmx=lambda[0];
@@ -1908,7 +1846,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     assert(kk<0 || lambda[kk]==0);
     return kk;
   }
-        
+
   inline int   cleanlambda(double *lambda)
   {
     const R eps=1e-15;
@@ -1924,15 +1862,14 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     if(lambda[3]<eps) lambda[jj] += lambda[3],lambda[3]=0,kk+=8;
     return kk;
   }
-        
+
   int  WalkInTetv2(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt)
   {
-            
+
     const R eps = 1e-8;
-            
+
     // corrected by F.H 23 juin 2015
     bool ddd=verbosity>2000;
-    bool nomove=true;
     R lambda[4],dl[4],cl[4];
     Phat.toBary(lambda);
     if(ddd) cout << "\n\t\t\tWT: "  << Phat << " :  "  << lambda[0] << " " <<lambda[1] <<" " <<lambda[2] << " " <<lambda[3] << " u = "<< U << " dt " << dt <<endl;
@@ -1944,13 +1881,12 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     const Mesh3::Element & T(Th[it]);
     const int nve = 4;
     const Rd  Q[nve]={(const R3) T[0],(const R3) T[1],(const R3) T[2],(const R3) T[3]};
-            
+
     Rd P  =T(Phat);
-            
-    //  cout << " " << u << " " << v ;
+
     Rd PF = P + U*dt;
     Rd PFK= PF;
-            
+
     //  couleur(15);MoveTo( P); LineTo( PF);
     R l[nve];
     double Det=T.mesure()*6;
@@ -1962,19 +1898,18 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     l[1] /= Det;
     l[2] /= Det;
     l[3] /= Det;
-            
+
     if (l[0]>-eps && l[1]>-eps && l[2]>-eps && l[3]>-eps)
       { // a fini  .... ouf ...
 	dt =0;
 	Phat=R3(l+1);
-	nomove=false;
 	return -1;
       }
-            
+
     // l(Q) = lambda + dl  *coef  avec Q= P+ U*dt*coef
     // coef > 0 et segement [PQ] dans K .. et Q \in \partial K
     // recherche de la face de sortie ..
-            
+
     dl[0]= l[0]-lambda[0];
     dl[1]= l[1]-lambda[1];
     dl[2]= l[2]-lambda[2];
@@ -1984,7 +1919,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     cl[1]= -lambda[1]/dl[1];
     cl[2]= -lambda[2]/dl[2];
     cl[3]= -lambda[3]/dl[3];
-            
+
     //  min  positif
     int kf=-1;
     double cf=1;// 1 min  positif  < 1.
@@ -1992,7 +1927,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     if(cl[1]>0. && cl[1] < cf) cf=cl[kf=1];
     if(cl[2]>0. && cl[2] < cf) cf=cl[kf=2];
     if(cl[3]>0. && cl[3] < cf) cf=cl[kf=3];
-            
+
     if(kf>=0)
       {
 	double cf1 = 1-cf;
@@ -2002,7 +1937,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
 	l[2]-= dl[2]*cf1;
 	l[3]-= dl[3]*cf1;
 	// PFK = P +  U*(dt*cf); // final  point in tet.
-                
+
       }
     // on sort en temp  cf*dt
     dt*=cf;
@@ -2017,27 +1952,27 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
   void MeshS::GSave(FILE * ff,int offset) const
   {
     PlotStream f(ff);
-            
+
     f <<  GsbeginS ;
     f << nv << nt << nbe;
     for (int k=0; k<nv; k++) {
       const  Vertex & P = this->vertices[k];
       f << P.x <<P.y << P.z << P.lab ;
     }
-            
+
     if(nt != 0){
-                
+
       for (int k=0; k<nt; k++) {
 	const Element & K(this->elements[k]);
 	int i0=this->operator()(K[0])+offset;
 	int i1=this->operator()(K[1])+offset;
 	int i2=this->operator()(K[2])+offset;
-                    
+
 	int lab=K.lab;
 	f << i0 << i1 << i2  << lab;
       }
     }
-            
+
     for (int k=0; k<nbe; k++) {
       const BorderElement & K(this->borderelements[k]);
       int i0=this->operator()(K[0])+offset;
@@ -2047,9 +1982,8 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     }
     f << GsendS;
   }
-        
-       
-        
+
+
   MeshS::MeshS(FILE *f,int offset)
     :liste_v_num_surf(0),v_num_surf(0)
   {
@@ -2058,7 +1992,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     BuildBound();
     if(verbosity>2)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
-            
+
     if(nt > 0){
       BuildAdj();
       Buildbnormalv();
@@ -2066,25 +2000,25 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     }
     if(verbosity>2)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
-            
+
     if(verbosity>1)
       cout << "  -- MeshS  (File *), d "<< 3  << ", n Tri " << nt << ", n Vtx "
 	   << nv << " n Bord " << nbe << endl;
     ffassert(mes>=0); // add F. Hecht sep 2009.
   }
-        
-    
+
+
   double MeshS::hmin() const
   {
     R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // Extremite de la boite englobante
     double hmin=1e10;
-        
+
     for (int ii=0;ii< this->nv;ii++) {
       R3 P( vertices[ii].x, vertices[ii].y, vertices[ii].z);
       Pinf=Minc(P,Pinf);
       Psup=Maxc(P,Psup);
     }
-     
+
     for (int k=0;k<this->nt;k++) {
       for (int e=0;e<3;e++){
         if( this->elements[k].lenEdge(e) < Norme2(Psup-Pinf)/1e9 ){
@@ -2104,7 +2038,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
       return hmin;
   }
 
-    
+
   // brute force method
   void MeshS::GRead(FILE * ff,int offset)
   {
@@ -2124,10 +2058,10 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     }
     mes=0.;
     mesb=0.;
-            
+
     if(nt != 0)
       {
-                
+
 	for (int k=0; k<nt; k++) {
 	  int i[3],lab;
 	  Element & K(this->elements[k]);
@@ -2135,7 +2069,7 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
 	  Add(i,3,offset);
 	  K.set(this->vertices,i,lab);
 	  mes += K.mesure();
-                    
+
 	}
       }
     for (int k=0; k<nbe; k++) {
@@ -2145,16 +2079,16 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
         Add(i,2,offset);
       K.set(this->vertices,i,lab);
       mesb += K.mesure();
-                
+
     }
     f >> s;
     ffassert( s== GsendS);
   }
-     
+
   const MeshS::Element * MeshS::Find( Rd P, R2 & Phat,bool & outside,const Element * tstart) const //;
 
   {
-         
+
   for (int i=0;i<nt;i++)
   {
   kthrough++;
@@ -2175,9 +2109,8 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
   }
   return 0; // outside
   }
-        
-  
-        
+
+
   MeshS::MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb)
     :v_num_surf(0),liste_v_num_surf(0)
  {
@@ -2189,12 +2122,12 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     borderelements = bb;
     mes=0.;
     mesb=0.;
-     
+
     for (int i=0;i<nt;i++)
       mes += this->elements[i].mesure();
     for (int i=0;i<nbe;i++)
       mesb += this->be(i).mesure();
-      
+
     BuildBound();
     if(nt > 0){
       BuildAdj();
@@ -2203,11 +2136,11 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     }
     if(verbosity>1)
       cout << "  -- End of read meshS: mesure = " << mes << " border mesure " << mesb << endl;
-    
+
     assert(mes>=0.);
   }
-    
-    
+
+
   int MeshS::Save(const string & filename) const
   {
     int ver = GmfFloat, outm;
@@ -2244,11 +2177,4 @@ void Mesh3::flipSurfaceMesh3(int surface_orientation)
     GmfCloseMesh(outm);
     return (0);
   }
- 
-    
-
-   
-    
 } //   End  namespace Fem2D
-
-

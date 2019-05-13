@@ -1,0 +1,95 @@
+include "test.idp"
+real t;
+
+
+cout << "square" << endl;
+
+func int testMesh(mesh &Th, int nx, int ny, real X, real Y,
+                  int[int] &Label, int Region) {
+
+  test(abs((X * Y) - Th.measure) < HWERROR);
+  t = clock() - t;
+  cout << IND << IND << t << endl;
+  test(abs(((2 * X) + (2 * Y)) - Th.bordermeasure) < HWERROR);
+  t = clock() - t;
+  cout << IND << IND << t << endl;
+
+  real[int] bb(4);
+  t = clock() - t;
+  boundingbox(Th, bb);
+  t = clock() - t;
+  cout << IND << IND << t << endl;
+  test(bb[0] == 0);
+  test(bb[1] == X);
+  test(bb[2] == 0);
+  test(bb[3] == Y);
+
+  //triangle
+  int nt = Th.nt;
+  test(nt == nx * ny * 2);
+  t = clock() - t;
+  for (int i = 0; i < nt ; i++) {
+    test(Th[i].label == Region);
+    test(Th[i].region == Region);
+    test(abs(Th[i].area - (X/nx) * (Y/ny) * (1./2.)) < HWERROR);
+    int e = 1;
+    int a = Th[i].adj(e);
+  }
+  t = clock() - t;
+  cout << IND << IND << t << endl;
+
+  //vertices
+  int nv = Th.nv;
+  test(nv == (nx + 1) * (ny + 1));
+  for (int i = 0; i < nv; i++) {
+    int label = Th(i).label;
+    test((label == Region) || (label == Label[0]) || (label == Label[1])
+    || (label == Label[2]) || (label == Label[3]));
+  }
+
+  //boundary
+  int nbe = Th.nbe;
+  test(nbe == 2 * (nx) + 2 * (ny));
+  for (int i = 0; i < nbe; i++) {
+    int label = Th.be(i).label;
+    test((label == Label[0]) || (label == Label[1])
+    || (label == Label[2]) || (label == Label[3]));
+    int v1 = Th.be(i)[0];
+    int v2 =  Th.be(i)[1];
+    int tri = Th.be(i).Element;
+    int e = Th.be(i).whoinElement;
+  }
+
+  cout << IND << IND << t << endl;
+  test(Th(0.5, 0.5).region == 0);
+  t = clock() - t;
+  test(Th.nbe == 2 * nx + 2 * ny);
+  t = clock() - t;
+  cout << IND << IND << t << endl;
+}
+
+int nx = 10;
+int ny = 21;
+real X = 2.;
+real Y = 1.3;
+int[int] Flags = [0, 1, 2, 3, 4];
+int[int] Label = [2, 3, 4, 5];
+int Region = 7;
+
+t = clock();
+mesh Th1 = square(nx, ny);
+t = clock() - t;
+
+int[int] label0 = [1, 2, 3, 4];
+testMesh(Th1, nx, ny, 1, 1, label0, 0);
+
+mesh Th2 = square(nx, ny, [X*x, Y*y]);
+testMesh(Th2, nx, ny, X, Y, label0, 0);
+
+for (int i = 0; i < Flags.n; i++) {
+  mesh Th3 = square(nx, ny,[X*x, Y*y], flags=Flags[i]);
+  testMesh(Th3, nx, ny, X, Y, label0, 0);
+}
+
+mesh Th4 = square(nx, ny, [X*x, Y*y],flags=Flags[1], label=Label);
+testMesh(Th4, nx, ny, X, Y, Label, 0);

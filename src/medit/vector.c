@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -129,8 +132,7 @@ GLuint listClipTetraVector (pMesh mesh) {
 	pPoint ppt;
 	pSolution ps0;
 	pScene sc;
-	pClip clip;
-	double rgb[3], u[3], epsra, iso, kc, dd, scal, scalemin, scalemax;
+	double rgb[3], u[3], epsra, iso, kc, dd, scal;
 	float cp[3];
 	GLuint dlist = 0;
 	int ia, l, m;
@@ -142,7 +144,6 @@ GLuint listClipTetraVector (pMesh mesh) {
 	if (ddebug) printf("create vector list for clip\n");
 
 	sc = cv.scene[currentScene()];
-	clip = sc->clip;
 	if (egal(sc->iso.val[0], sc->iso.val[MAXISO - 1])) return (0);
 
 	/* create display list */
@@ -151,8 +152,6 @@ GLuint listClipTetraVector (pMesh mesh) {
 	if (glGetError()) return (0);
 
 	/* build list */
-	scalemin = sc->dmax * SCALV;
-	scalemax = 10.0 * scalemin;
 	mesh->mark++;
 	glLineWidth(2.0);
 
@@ -271,8 +270,7 @@ GLuint listClipHexaVector (pMesh mesh) {
 	pPoint ppt;
 	pSolution ps0;
 	pScene sc;
-	pClip clip;
-	double rgb[3], u[3], epsra, iso, kc, dd, scal, scalemin, scalemax;
+	double rgb[3], u[3], epsra, iso, kc, dd, scal;
 	float cp[3];
 	GLuint dlist = 0;
 	int ia, l, m;
@@ -284,7 +282,6 @@ GLuint listClipHexaVector (pMesh mesh) {
 	if (ddebug) printf("create vector list for clip\n");
 
 	sc = cv.scene[currentScene()];
-	clip = sc->clip;
 	if (egal(sc->iso.val[0], sc->iso.val[MAXISO - 1])) return (0);
 
 	/* create display list */
@@ -293,8 +290,6 @@ GLuint listClipHexaVector (pMesh mesh) {
 	if (glGetError()) return (0);
 
 	/* build list */
-	scalemin = sc->dmax * SCALV;
-	scalemax = 10.0 * scalemin;
 	mesh->mark++;
 	glLineWidth(2.0);
 
@@ -413,7 +408,7 @@ GLuint listTria2dVector (pMesh mesh) {
 	pPoint ppt;
 	pSolution ps0;
 	pScene sc;
-	double rgb[3], u[2], epsra, iso, kc, dd, scalemin, scalemax, scal;
+	double rgb[3], u[2], epsra, iso, kc, dd, scal;
 	float cp[2];
 	GLuint dlist = 0;
 	int ia, k, m;
@@ -432,8 +427,6 @@ GLuint listTria2dVector (pMesh mesh) {
 	glNewList(dlist, GL_COMPILE);
 	if (glGetError()) return (0);
 
-	scalemin = sc->dmax * SCALV;
-	scalemax = 15 * scalemin;
 	mesh->mark++;
 	glLineWidth(3.0);
 
@@ -567,7 +560,7 @@ GLuint listQuad2dVector (pMesh mesh) {
 	pPoint ppt;
 	pSolution ps0;
 	pScene sc;
-	double rgb[3], u[2], epsra, iso, kc, dd, scalemin, scalemax, scal;
+	double rgb[3], u[2], epsra, iso, kc, dd, scal;
 	float cp[2];
 	GLuint dlist = 0;
 	int ia, k, m;
@@ -586,8 +579,6 @@ GLuint listQuad2dVector (pMesh mesh) {
 	glNewList(dlist, GL_COMPILE);
 	if (glGetError()) return (0);
 
-	scalemin = sc->dmax * SCALV;
-	scalemax = 15 * scalemin;
 	mesh->mark++;
 	glLineWidth(3.0);
 
@@ -721,7 +712,7 @@ GLuint listTria3dVector (pMesh mesh) {
 	pPoint ppt;
 	pSolution ps0;
 	pScene sc;
-	double rgb[3], u[3], epsra, iso, kc, dd, scalemin, scalemax, scal;
+	double rgb[3], u[3], epsra, iso, kc, dd, scal;
 	float cp[3];
 	GLuint dlist = 0;
 	int ia, k, m;
@@ -731,7 +722,6 @@ GLuint listTria3dVector (pMesh mesh) {
 	if (!mesh->nbb) return (0);
 
 	sc = cv.scene[currentScene()];
-	/*if ( egal(sc->iso.val[0],sc->iso.val[MAXISO-1]) )  return(0);*/
 	if (ddebug) printf("create vector list\n");
 
 	/* create display list */
@@ -739,8 +729,6 @@ GLuint listTria3dVector (pMesh mesh) {
 	glNewList(dlist, GL_COMPILE);
 	if (glGetError()) return (0);
 
-	scalemin = sc->dmax * SCALV;
-	scalemax = 15 * scalemin;
 	mesh->mark++;
 	glLineWidth(2.0);
 
@@ -814,7 +802,7 @@ GLuint listTria3dVector (pMesh mesh) {
 
 			while (k != 0) {
 				int l;
-				
+
 				pt = &mesh->tria[k];
 				if (!pt->v[0]) {
 					k = pt->nxt;
@@ -874,3 +862,7 @@ GLuint listTria3dVector (pMesh mesh) {
 	glEndList();
 	return (dlist);
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -207,7 +207,6 @@ AnyType datasolHDF5Mesh2_Op::operator () (Stack stack)  const {
 	const Mesh &Th = *pTh;
 	int nt = Th.nt;
 	int nv = Th.nv;
-	// int nbtype=l.size();
 	int nbsol;
 	int solnbfloat;
 	int resultorder = arg(0, stack, 1L);
@@ -653,12 +652,6 @@ AnyType datasolHDF5Mesh3_Op<v_fes>::operator () (Stack stack)  const {
 	delete Hdf5SolFile3D;
 	return longdefault;
 }
-
-/*  class Init { public:
- *  Init();
- * };
- *
- * $1 */
 
 static void Load_Init () {
 	cout << " " << endl;

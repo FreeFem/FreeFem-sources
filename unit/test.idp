@@ -1,0 +1,12 @@
+func int test(bool condition)
+{
+	try {
+		assert(condition);
+	} catch(...) {
+	  cout << "test failed" << endl;
+	}
+	return 0;
+}
+
+string IND = "\t";
+real HWERROR = 1e-12;

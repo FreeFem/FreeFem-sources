@@ -1,0 +1,11 @@
+include "test.idp"
+
+cout << "dumptable" << endl;
+real t;
+ofstream file("dumptable");
+
+t = clock();
+dumptable(file);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(!system("ls dumptable"));

@@ -127,11 +127,6 @@ Mesh3 const*SplitMesh4 (Stack stack, Fem2D::Mesh3 const *const &pTh) {
 // static void Load_Init() soit appele a moment du chargement dynamique
 // du fichier
 //
-/*  class Init { public:
- * Init();
- * };
- *
- * $1 */
 
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh4"  a freefem++
 	if (verbosity > 1) {

@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -32,10 +35,10 @@ typedef struct saddle {
 	int k;
 } Saddle;
 
-#define EPSD 1.e-14
-#define EPS3 1.e-03
-#define MAXPS 100
-#define HSIZ 0.001
+#define EPSD (float)1.e-14
+#define EPS3 (float)1.e-03
+#define MAXPS (int)100
+#define HSIZ (float)0.001
 
 static int idir[5] = {0, 1, 2, 0, 1};
 
@@ -66,10 +69,10 @@ GLuint listCritPoint (pScene sc, pMesh mesh) {
 	Saddle sad[MAXPS];
 	GLuint dlist;
 	double aire, ux, uy, vx, vy, dd, cb0[3], cb1[3], cb2[3], vv[3][2], bc[3];
-	double rgb[3], a0, a1, delta, rr1, rr2, aa, dmin;
+	double rgb[3], a0, a1, delta, rr1, rr2, aa;
 	float p[3];
 	int *adj, iadr, i, i1, i2, k, m, ncp, ps, ifilt;
-	ubyte typ, tag;
+	ubyte tag;
 	static double hsv[3] = {0.0f, 1.0f, 0.80f};
 
 	if (!mesh->nbb || mesh->nfield != mesh->dim) return (0);
@@ -81,7 +84,6 @@ GLuint listCritPoint (pScene sc, pMesh mesh) {
 	if (ddebug) printf("find critical points\n");
 
 	/* build list */
-	typ = 0;
 	ncp = 0;
 	ps = 0;
 	dlist = glGenLists(1);
@@ -90,8 +92,6 @@ GLuint listCritPoint (pScene sc, pMesh mesh) {
 
 	glPointSize(4.0);
 
-	dmin = sc->dmax * EPS;
-	dmin *= dmin;
 	ifilt = 0;
 	hsv[0] = sc->iso.col[0];
 	hsvrgb(hsv, rgb);
@@ -346,3 +346,7 @@ GLuint listCritPoint (pScene sc, pMesh mesh) {
 
 	return (dlist);
 }
+
+#ifdef __cplusplus
+}
+#endif

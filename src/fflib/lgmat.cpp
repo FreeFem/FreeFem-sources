@@ -1,26 +1,26 @@
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :      
-// USAGE    :        
-// ORG      : 
+// SUMMARY  :
+// USAGE    :
+// ORG      :
 // AUTHOR   : Frederic Hecht
 // E-MAIL   : hecht@ann.jussieu.fr
 //
 
 /*
- 
+
  This file is part of Freefem++
- 
+
  Freefem++ is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation; either version 2.1 of the License, or
  (at your option) any later version.
- 
+
  Freefem++  is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -29,37 +29,8 @@
  // to do  F. HECHT
 #ifdef __MWERKS__
 #pragma optimization_level 0
-//#pragma inline_depth(0) 
 #endif
-/*
-#include "error.hpp"
-#include "RNM.hpp"
-#include <set>
-#include <vector>
-#include <cstdio>
-#include <cstring>
-#include <complex>
-
-#include  <cmath>
-#include  <iostream>
-using namespace std;
-#include "FESpacen.hpp"
-
-#include "AFunction.hpp"
-#include "rgraph.hpp"
-#include "MatriceCreuse_tpl.hpp"
-
-//#include "fem3.hpp"
-#include "MeshPoint.hpp"
-#include "Operator.hpp" 
-
-#include "lex.hpp"
-#include "lgfem.hpp"
-#include "lgmesh3.hpp"
-#include "lgsolver.hpp"
-#include "problem.hpp"
-*/
-#include "ff++.hpp" 
+#include "ff++.hpp"
 #include "array_resize.hpp"
 
 #include "AFunction_ext.hpp"
@@ -77,26 +48,26 @@ extern FILE *ThePlotStream;
 
 
 // Debut FH Houston -------- avril 2004 ---------
-//  class for operator on sparse matrix 
+//  class for operator on sparse matrix
 //   ------------------------------------
 //  pour le addition de matrice ----matrice creuse in french)
 //  MatriceCreuse    real class for matrix sparse
-//  Matrice_Creuse   class for matrix sparse +  poiteur on FE space def 
+//  Matrice_Creuse   class for matrix sparse +  poiteur on FE space def
 //         to recompute matrice in case of mesh change
 //  list<tuple<R,MatriceCreuse<R> *,bool> > * is liste of
 //  \sum_i a_i*A_i  where a_i is a scalare and A_i is a sparse matrix
 //
- 
 
 
-template<class R> 
+
+template<class R>
 list<tuple<R,MatriceCreuse<R> *, bool > > * to(Matrice_Creuse<R> * M)
 {
   list<tuple<R,MatriceCreuse<R> *,bool> >  * l=new list<tuple<R,MatriceCreuse<R> *,bool> >;
    l ->push_back(make_tuple<R,MatriceCreuse<R> *,bool>(1,M->A,false));
   return  l;
 }
-template<class R> 
+template<class R>
 list<tuple<R,MatriceCreuse<R> *, bool > > * to(Matrice_Creuse_Transpose<R>  M)
 {
   list<tuple<R,MatriceCreuse<R> *,bool> >  * l=new list<tuple<R,MatriceCreuse<R> *,bool> >;
@@ -118,16 +89,16 @@ AnyType tM2L3 (Stack , const AnyType & pp)
 }
 
 
-template<class R> 
+template<class R>
 struct Op2_ListCM: public binary_function<R,Matrice_Creuse<R> *,list<tuple<R,MatriceCreuse<R> *,bool> > *>
- { 
+ {
    typedef tuple<R,MatriceCreuse<R> *,bool>  P;
    typedef list<P> L;
    typedef L * RR;
    typedef R  AA;
    typedef Matrice_Creuse<R> * BB;
-   
- static  RR f(const   AA & a,const   BB & b)  
+
+ static  RR f(const   AA & a,const   BB & b)
   {
     RR r=  new list<P> ;
     P p(a,b->pMC(),false);
@@ -135,16 +106,16 @@ struct Op2_ListCM: public binary_function<R,Matrice_Creuse<R> *,list<tuple<R,Mat
     return r;}
 };
 
-template<class R> 
+template<class R>
 struct Op2_ListMC: public binary_function<Matrice_Creuse<R> *,R,list<tuple<R,MatriceCreuse<R> *,bool> > *>
- { 
+ {
    typedef tuple<R,MatriceCreuse<R> *,bool>  P;
    typedef list<P> L;
    typedef L * RR;
    typedef R  AA;
    typedef Matrice_Creuse<R> * BB;
-   
- static  RR f(const   BB & b,const   AA & a)  
+
+ static  RR f(const   BB & b,const   AA & a)
   {
     RR r=  new list<P> ;
     P p(a,b->pMC(),false);
@@ -153,16 +124,16 @@ struct Op2_ListMC: public binary_function<Matrice_Creuse<R> *,R,list<tuple<R,Mat
 };
 //  ADD FH 16/02/2007
 
-template<class R> 
+template<class R>
 struct Op2_ListCMt: public binary_function<R,Matrice_Creuse_Transpose<R> ,list<tuple<R,MatriceCreuse<R> *,bool> > *>
-{ 
+{
     typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
     typedef R  AA;
     typedef Matrice_Creuse_Transpose<R>  BB;
-    
-    static  RR f(const   AA & a,const   BB & b)  
+
+    static  RR f(const   AA & a,const   BB & b)
     {
 	RR r=  new list<P> ;
         P p(a,b.A->pMC(),true);
@@ -170,16 +141,16 @@ struct Op2_ListCMt: public binary_function<R,Matrice_Creuse_Transpose<R> ,list<t
 	return r;}
 };
 
-template<class R> 
+template<class R>
 struct Op2_ListMtC: public binary_function<Matrice_Creuse_Transpose<R> ,R,list<tuple<R,MatriceCreuse<R> *,bool> > *>
-{ 
+{
     typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
     typedef R  AA;
     typedef Matrice_Creuse_Transpose<R> BB;
-    
-    static  RR f(const   BB & b,const   AA & a)  
+
+    static  RR f(const   BB & b,const   AA & a)
     {
 	RR r=  new list<P> ;
         P p(a,b.A->pMC(),true);
@@ -190,25 +161,25 @@ struct Op2_ListMtC: public binary_function<Matrice_Creuse_Transpose<R> ,R,list<t
 
 
 
-template<class R> 
+template<class R>
 struct Op1_LCMd: public unary_function<list<tuple<R,MatriceCreuse<R> *,bool> > *,
 list<tuple<R,MatriceCreuse<R> *,bool> > *  >
 {  //  - ...
     typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
-    
-    static   RR f(const RR & l)  
-    { 
+
+    static   RR f(const RR & l)
+    {
 	typedef typename list<tuple<R,MatriceCreuse<R> *,bool> >::iterator lci;
 	for (lci i= l->begin();i !=l->end();++i)
              get<0>(*i) *= R(-1);
 	return l;
-    }    
-    
+    }
+
 };
 
-template<class R> 
+template<class R>
 struct Op2_ListCMCMadd: public binary_function<list<tuple<R,MatriceCreuse<R> *,bool> > *,
                                                list<tuple<R,MatriceCreuse<R> *,bool> > *,
                                                list<tuple<R,MatriceCreuse<R> *,bool> > *  >
@@ -217,14 +188,14 @@ struct Op2_ListCMCMadd: public binary_function<list<tuple<R,MatriceCreuse<R> *,b
    typedef list<P> L;
    typedef L * RR;
 
-  static   RR f(const RR & a,const RR & b)  
-  { 
+  static   RR f(const RR & a,const RR & b)
+  {
     a->insert(a->end(),b->begin(),b->end());
-      
+
     delete b;
     return a;
-  }    
-    
+  }
+
 };
 template<class R>
 struct Op2_ListCMCMsub: public binary_function<list<tuple<R,MatriceCreuse<R> *,bool> > *,
@@ -234,16 +205,16 @@ list<tuple<R,MatriceCreuse<R> *,bool> > *  >
     typedef tuple<R,MatriceCreuse<R> *,bool>  P;
     typedef list<P> L;
     typedef L * RR;
-    
+
     static   RR f(const RR & a,const RR & b)
     {
-        Op1_LCMd<R>::f(b); 
+        Op1_LCMd<R>::f(b);
         a->insert(a->end(),b->begin(),b->end());
-        
+
         delete b;
         return a;
     }
-    
+
 };
 
 template<class R,int cc=1>
@@ -256,14 +227,14 @@ struct Op2_ListMCMadd: public binary_function<Matrice_Creuse<R> *,
    typedef L * RR;
    typedef Matrice_Creuse<R> * MM;
 
-  static   RR f(const MM & a,const RR & b)  
-  { 
-    
+  static   RR f(const MM & a,const RR & b)
+  {
+
     b->push_front(make_tuple<R,MatriceCreuse<R> *>(R(cc),a->A,false));
     return b;
   }
-    
-    
+
+
 };
 
 template<class R,int cc=1>
@@ -276,14 +247,14 @@ struct Op2_ListCMMadd: public binary_function< list<tuple<R,MatriceCreuse<R> *,b
    typedef L * RR;
    typedef Matrice_Creuse<R> * MM;
 
-  static   RR f(const RR & a,const MM & b)  
-  { 
-    
+  static   RR f(const RR & a,const MM & b)
+  {
+
     a->push_back(make_tuple<R,MatriceCreuse<R> *,bool>(R(cc),b->A,false));
     return a;
   }
-    
-    
+
+
 };
 
 template<class R,int cc=1>
@@ -296,14 +267,14 @@ struct Op2_ListMMadd: public binary_function< Matrice_Creuse<R> *,
    typedef L * RR;
    typedef Matrice_Creuse<R> * MM;
 
-  static   RR f(const MM & a,const MM & b)  
-  { 
+  static   RR f(const MM & a,const MM & b)
+  {
     L * l=to(a);
     l->push_back(make_tuple<R,MatriceCreuse<R> *>(R(cc),b->A,false));
     return l;
   }
-    
-    
+
+
 };
 // Fin Add FH Houston --------
 
@@ -316,86 +287,27 @@ class RestrictArray : public OneOperator { public:
 
     typedef  typename Base<pfes>::B::FESpace FESpace;
     typedef typename FESpace::FElement FElement;
-  //  typedef  FESpace FESpace;
-    
+
     class Op : public E_F0info { public:  // passe de l'info ..
         typedef pfes * A;
         Expression a,b,c,d;
-        // if c = 0 => a,b FESpace
-        // if c != a FESpace et b,c KN_<double>
         static const int n_name_param =0;
-     //   static basicAC_F0::name_and_type name_param[] ;
         Expression nargs[n_name_param];
         bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
         long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
         KN_<long>  arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
-        
+
     public:
         Op(const basicAC_F0 &  args,Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc),d(0) {
           args.SetNameParam(n_name_param,0,nargs);
-          
+
         }
-        /*
-        AnyType operator()(Stack stack)  const
-          {
-              if( verbosity>9) cout << " -- RestrictArray  "<< endl;
-              pfes * pCUh = GetAny< pfes * >((* a)(stack));
-              pfes * pFVh = GetAny<  pfes * >((* b)(stack));
-              // verif same  FE.
-              KN_<long> ncf=  GetAny<  KN_<long>  >((* c)(stack));
-              FESpace * pVCh = **pCUh;
-              FESpace * pVFh = **pFVh;
-              FESpace  VCh = *pVCh;
-              FESpace  VFh = *pVFh;
-              long neC = VCh.NbOfElements   ;
-              long neF = VFh.NbOfElements   ;
-              long ndfC = VCh.NbOfDF   ;
-              long ndfF = VFh.NbOfDF   ;
-              
-              KN_<long> nc2f= ncf;
-              
-              KN<long> *pnum=new KN<long>(ndfC);
-              KN<long> inj=*pnum;
-              inj = -1; // un set ..
-              if( verbosity>9) cout<< " ne =" << neC << " " << neF << endl;
-              
-              for(int kc=0; kc <VCh.NbOfElements; kc++)
-              {
-                  
-                  int kf = nc2f(kc);
-                  FElement KC(pVCh,kc);
-                  FElement KF(pVFh,kf);
-                  
-                  int ndofKC = KC.NbDoF() ;
-                  int ndofKF =  KF.NbDoF() ;
-                  if( verbosity>99) cout << kc << " " << kf << " : " <<ndofKC << " " << ndofKF << endl;
-                  ffassert(ndofKC== ndofKF );
-                  ffassert( kf >= 0 && kf < neF);
-                  ffassert( kc >= 0 && kc< neC);
- 
-                  for(int df=0; df<ndofKC; df++)
-                  {
-                      int dfC =KC(df), dfF=KF(df);
-                      if( verbosity>99) cout << dfC <<" ->  "<< dfF << endl;
-                      assert(dfC >= 0 && dfC < ndfC);
-                      inj[dfC] = dfF;
-                  }
-                 
-              }
-              
-              if( verbosity>9) cout << " restrict:  Inject= " << inj << endl;
-               ffassert(inj.min() != -1);
-            //Add2StackOfPtr2FreeRC(stack,pnum);
-              
-            return pnum;
-          }
-	*/
     };
     RestrictArray() : OneOperator(  atype<const typename RestrictArray<pfes>::Op *>(),//atype<KN<long>* >(),
                                         atype<pfes *>(),
                                         atype<pfes *>(),
                                         atype<KN_<long> >()) {}
-    
+
     E_F0 * code(const basicAC_F0 & args) const
     {
         if(args.size()!=3)CompileError("Bug in RestrictArray code nb of args !=  3 ????? bizarre" );
@@ -411,7 +323,7 @@ template< typename T > struct Base< T* >{ typedef T B;};
 template<class pfes, int INIT>
 AnyType SetRestrict(Stack stack,Expression einj,Expression erest)
 {
-    
+
     typedef  typename Base<pfes>::B::FESpace FESpace;
     typedef typename FESpace::FElement FElement;
 
@@ -431,30 +343,29 @@ AnyType SetRestrict(Stack stack,Expression einj,Expression erest)
     long neF = VFh.NbOfElements   ;
     long ndfC = VCh.NbOfDF   ;
     long ndfF = VFh.NbOfDF   ;
-    
+
     KN_<long> nc2f= ncf;
     if(INIT==0)
         pinj->init(ndfC);
     else pinj->resize(ndfC);
-  //  KN<long> *pnum= INIT ==0 ? new KN<long>(ndfC): pnum;
     KN<long> & inj=*pinj;
     inj = -1; // un set ..
     if( verbosity>9) cout<< " ne =" << neC << " " << neF << endl;
-    
+
     for(int kc=0; kc <VCh.NbOfElements; kc++)
     {
-        
+
         int kf = nc2f(kc);
         FElement KC(pVCh,kc);
         FElement KF(pVFh,kf);
-        
+
         int ndofKC = KC.NbDoF() ;
         int ndofKF =  KF.NbDoF() ;
         if( verbosity>99) cout << kc << " " << kf << " : " <<ndofKC << " " << ndofKF << endl;
         ffassert(ndofKC== ndofKF );
         ffassert( kf >= 0 && kf < neF);
         ffassert( kc >= 0 && kc< neC);
-        
+
         for(int df=0; df<ndofKC; df++)
         {
             int dfC =KC(df), dfF=KF(df);
@@ -462,11 +373,11 @@ AnyType SetRestrict(Stack stack,Expression einj,Expression erest)
             assert(dfC >= 0 && dfC < ndfC);
             inj[dfC] = dfF;
         }
-        
+
     }
     if( verbosity>9) cout << " restrict:  Inject= " << inj << endl;
     ffassert(inj.min() != -1);
-   
+
   return pinj;
 }
 
@@ -477,8 +388,6 @@ class MatrixInterpolation : public OneOperator { public:
     class Op : public E_F0info { public:
        typedef pfes * A;
        Expression a,b,c,d;
-       // if c = 0 => a,b FESpace
-       // if c != a FESpace et b,c KN_<double>
        static const int n_name_param =5;
        static basicAC_F0::name_and_type name_param[] ;
         Expression nargs[n_name_param];
@@ -490,27 +399,27 @@ class MatrixInterpolation : public OneOperator { public:
        Op(const basicAC_F0 &  args,Expression aa,Expression bb) : a(aa),b(bb),c(0),d(0) {
          args.SetNameParam(n_name_param,name_param,nargs);  }
        Op(const basicAC_F0 &  args,Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc),d(0) {
-         args.SetNameParam(n_name_param,name_param,nargs); } 
+         args.SetNameParam(n_name_param,name_param,nargs); }
 	Op(const basicAC_F0 &  args,Expression aa,Expression bb,Expression cc,Expression dd) : a(aa),b(bb),c(cc),d(dd) {
-	    args.SetNameParam(n_name_param,name_param,nargs); } 
-	
-	
+	    args.SetNameParam(n_name_param,name_param,nargs); }
+
+
     };
     // interpolation(Vh,Vh)
    MatrixInterpolation() : OneOperator(atype<const typename MatrixInterpolation<pfes>::Op *>(),
                                        atype<pfes *>(),
                                        atype<pfes *>()) {}
-   // interpolation(Vh,xx,yy) // 2d 
+   // interpolation(Vh,xx,yy) // 2d
    MatrixInterpolation(int bidon) : OneOperator(atype<const typename MatrixInterpolation<pfes>::Op *>(),
                                                 atype<pfes *>(),atype<KN_<double> >(),atype<KN_<double> >()) {}
- 
-    // interpolation(Vh,xx,yy,zz) // 3d 
+
+    // interpolation(Vh,xx,yy,zz) // 3d
     MatrixInterpolation(int bidon,int bidon2) : OneOperator(atype<const typename MatrixInterpolation<pfes>::Op *>(),
 						 atype<pfes *>(),atype<KN_<double> >(),atype<KN_<double> >(),atype<KN_<double> >()) {}
-    
-  
-    E_F0 * code(const basicAC_F0 & args) const 
-     { 
+
+
+    E_F0 * code(const basicAC_F0 & args) const
+     {
        if(args.size()==2)
        return  new Op(args,t[0]->CastTo(args[0]),
                            t[1]->CastTo(args[1]));
@@ -530,7 +439,7 @@ class MatrixInterpolation : public OneOperator { public:
 };
 template<>
 basicAC_F0::name_and_type  MatrixInterpolation<pfes>::Op::name_param[]= {
-   {  "t", &typeid(bool)}, 
+   {  "t", &typeid(bool)},
    {  "op", &typeid(long)},
    {  "inside",&typeid(bool)},
    {  "composante",&typeid(long)},
@@ -540,12 +449,12 @@ basicAC_F0::name_and_type  MatrixInterpolation<pfes>::Op::name_param[]= {
 
 template<>
 basicAC_F0::name_and_type  MatrixInterpolation<pfes3>::Op::name_param[]= {
-    {  "t", &typeid(bool)}, 
+    {  "t", &typeid(bool)},
     {  "op", &typeid(long)},
     {  "inside",&typeid(bool)},
     {  "composante",&typeid(long)},
     {  "U2Vc",&typeid(KN_<long>)}
-    
+
 };
 
 template<>
@@ -562,8 +471,8 @@ basicAC_F0::name_and_type  MatrixInterpolation<pfesS>::Op::name_param[]= {
 
 template<class R>
    class SetMatrix_Op : public E_F0mps { public:
-       Expression a; 
-       
+       Expression a;
+
        static  aType btype;
        static const int n_name_param =NB_NAME_PARM_MAT; //  add nbiter FH 30/01/2007 11 -> 12  //add var MUMPS+autre
        static basicAC_F0::name_and_type name_param[] ;
@@ -575,7 +484,7 @@ template<class R>
        public:
        SetMatrix_Op(const basicAC_F0 &  args,Expression aa) : a(aa) {
          args.SetNameParam(n_name_param,name_param,nargs);
-         precon = 0; //  a changer 
+         precon = 0; //  a changer
          if ( nargs[3])
           {
            const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[3]);
@@ -583,39 +492,37 @@ template<class R>
            precon = op->Find("(",ArrayOfaType(atype<KN<R>* >(),false)); // strange bug in g++ is R become a double
           ffassert(precon);
           }
-         
-       } 
+
+       }
        AnyType operator()(Stack stack)  const ;
     };
 
 
 template<class R>
-class SetMatrix : public OneOperator { public:  
+class SetMatrix : public OneOperator { public:
 
- 
-  // SetMatrix() : OneOperator(atype<const typename SetMatrix<R>::Op *>(),atype<Matrice_Creuse<R> *>() ) {}
    SetMatrix() : OneOperator(SetMatrix_Op<R>::btype,atype<Matrice_Creuse<R> *>() ) {}
-  
-    E_F0 * code(const basicAC_F0 & args) const 
-     { 
-       return  new SetMatrix_Op<R>(args,t[0]->CastTo(args[0])); 
+
+    E_F0 * code(const basicAC_F0 & args) const
+     {
+       return  new SetMatrix_Op<R>(args,t[0]->CastTo(args[0]));
      }
 };
 
 template<class R>
        aType  SetMatrix_Op<R>::btype=0;
 
-template <class R> 
+template <class R>
 basicAC_F0::name_and_type  SetMatrix_Op<R>::name_param[]= {
  LIST_NAME_PARM_MAT
 
 };
 
 template<class R>
-AnyType SetMatrix_Op<R>::operator()(Stack stack)  const 
+AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
 {
    Matrice_Creuse<R> *  A= GetAny<Matrice_Creuse<R> *>((*a)(stack));
-   
+
     ffassert(A);
     if( !A->A) A->A.master(new MatriceMorse<R>(0,0));//  set to empty matrix .. mars 2014 FH ..
     Data_Sparse_Solver ds;
@@ -628,7 +535,7 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
     pvm->setsdp(ds.sym,ds.positive); // put the matrix in rigth format
     SetSolver<R>(stack,VF,*A->pMC(),ds);
 
-  return Nothing; 
+  return Nothing;
 }
 
 
@@ -640,8 +547,6 @@ AnyType SetMatrixInterpolation3(Stack,Expression ,Expression);
 template<int init>
 AnyType SetMatrixInterpolationS(Stack,Expression ,Expression);
 
-//------
-
 template<class R>
 void BuildCombMat(MatriceMorse<R> & mij,const KNM_<R> & A, int ii00=0,int jj00=0,R coef=R(1.),bool cnj=false)
 {
@@ -652,21 +557,20 @@ void BuildCombMat(MatriceMorse<R> & mij,const KNM_<R> & A, int ii00=0,int jj00=0
    for ( j=0;j<m;j++)
           {
            R cij=coef*A(i,j);
-           if (cnj)  cij = RNM::conj(cij); 
-          // if(Fem2D::norm(cij) >eps0) no compression for IPOPT  april 2019 FH.. 
+           if (cnj)  cij = RNM::conj(cij);
              mij[ij_mat(false,ii00,jj00,i,j)] += cij;
-         
+
    }
 
 }
 
 MatriceMorse<R> * buildInterpolationMatrix(const FESpace & Uh,const FESpace & Vh,void *data)
-{  //  Uh = Vh 
+{  //  Uh = Vh
     MatriceMorse<R> * m=0;
   int op=op_id; //  value of the function
   bool transpose=false;
   bool inside=false;
-   int * iU2V=0;  
+   int * iU2V=0;
   if (data)
    {
      int * idata=static_cast<int*>(data);
@@ -676,7 +580,7 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace & Uh,const FESpace & Vh
        iU2V= idata + 4;
      ffassert(op>=0 && op < 4);
    }
-  if(verbosity>2) 
+  if(verbosity>2)
     {
       cout << "  -- buildInterpolationMatrix   transpose =" << transpose << endl
            << "              value, dx , dy          op = " << op << endl
@@ -687,50 +591,34 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace & Uh,const FESpace & Vh
     int mm=Vh.NbOfDF;
  if(transpose) Exchange(n,mm);
   m = new MatriceMorse<R>(n,mm);
-  int n1=n+1;
-  const  Mesh & ThU =Uh.Th; // line 
+  const  Mesh & ThU =Uh.Th; // line
   const  Mesh & ThV =Vh.Th; // colunm
   bool samemesh =  &Uh.Th == &Vh.Th;  // same Mesh
   int thecolor =0;
-  //  int nbn_u = Uh.NbOfNodes;
-  //int nbn_v = Vh.NbOfNodes;
-  
+
   int nnz =0;
-  
+
   KN<int> color(ThV.nt);
   KN<int> mark(n);
   mark=0;
-  
- // int *lg = new int [n1];
- // int * cl = 0;
-//  double *a=0;
-  
+
   color=thecolor++;
   FElement Uh0 = Uh[0];
   FElement Vh0 = Vh[0];
-  
-  FElement::aIPJ ipjU(Uh0.Pi_h_ipj()); 
-  FElement::aR2  PtHatU(Uh0.Pi_h_R2()); 
-  
-  //  FElement::aIPJ ipjV(Vh0.Pi_h_ipj()); 
-  // FElement::aR2  PtHatV(Vh0.Pi_h_R2()); 
-  
+
+  FElement::aIPJ ipjU(Uh0.Pi_h_ipj());
+  FElement::aR2  PtHatU(Uh0.Pi_h_R2());
+
   int nbdfVK= Vh0.NbDoF();
-  //  int nbdfUK= Uh0.NbDoF();
   int NVh= Vh0.N;
-  //int NUh= Uh0.N;
-  
-  //ffassert(NVh==NUh); 
-  
-  
-  int nbp= PtHatU.N(); // 
-  //  int nbc= ipjU.N(); // 
+
+  int nbp= PtHatU.N();
   KN<R2> PV(nbp);   //  the PtHat in ThV mesh
   KN<int> itV(nbp); // the Triangle number
-  KN<bool> intV(nbp); // ouside or not 
+  KN<bool> intV(nbp); // ouside or not
   KN<R>   AipjU(ipjU.N());
-  
-  KNM<R> aaa(nbp,nbdfVK); 
+
+  KNM<R> aaa(nbp,nbdfVK);
 
 
    const R eps = 1.0e-10;
@@ -738,35 +626,30 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace & Uh,const FESpace & Vh
    KN<R> kv(sfb1*nbp);
    R * v = kv;
     KN<int> ik(nbp); // the Triangle number
-//   KNMK_<R> fb(v+ik[i],VhV0.NbDoF,VhV0.N,1); //  the value for basic fonction
 
    bool whatd[last_operatortype];
-   for (int i=0;i<last_operatortype;i++) 
+   for (int i=0;i<last_operatortype;i++)
      whatd[i]=false;
    whatd[op]=true; // the value of function
    KN<bool> fait(Uh.NbOfDF);
    fait=false;
-  //map< pair<int,int> , double > sij;
     R2 Gh(1./3,1./3);
- // for (int step=0;step<2;step++)
    {
-      
+
 	  for (int it=0;it<ThU.nt;it++)
 	    {
 	      thecolor++; //  change the current color
 	      const Triangle & TU(ThU[it]);
 	      FElement KU(Uh[it]);
 	      KU.Pi_h(AipjU);
-	      int nbkU = 0;
 	      if (samemesh)
 	        {
-	          nbkU = 1; 
 	          PV = PtHatU;
 	          itV = it;
 		  intV= false;// add July 2009 (unset varaible FH)
 	        }
-	      else 
-	       {  
+	      else
+	       {
 	          const Triangle *ts=0,*ts0=0;
                    // Search  barycenter
                    bool outside;
@@ -777,99 +660,63 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace & Uh,const FESpace & Vh
 	            {
 	              ts=ThV.Find(TU(PtHatU[i]),PV[i],outside,ts0);
                         if(!outside && ts0==0) ts0=ts;
-		      if(outside && verbosity>9 ) 
+		      if(outside && verbosity>9 )
 		        cout << it << " " << i << " :: " << TU(PtHatU[i]) << "  -- "<< outside << PV[i] << " " << ThV(ts) << " ->  " <<  (*ts)(PV[i]) <<endl;
 	              itV[i]= ThV(ts);
-	              intV[i]=outside && inside; //  ouside and inside flag 
+	              intV[i]=outside && inside; //  ouside and inside flag
 	            }
 	       }
-	       
-	      
-	      for (int p=0;p<nbp;p++)
-	         { 
 
-	              KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype); // valeur de fonction de base de Vh 
-	              // ou:   fb(idf,j,0) valeur de la j composante de la fonction idf 
-	              Vh0.tfe->FB(whatd,ThV,ThV[itV[p]],PV[p],fb);  
+
+	      for (int p=0;p<nbp;p++)
+	         {
+
+	              KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype); // valeur de fonction de base de Vh
+	              // ou:   fb(idf,j,0) valeur de la j composante de la fonction idf
+	              Vh0.tfe->FB(whatd,ThV,ThV[itV[p]],PV[p],fb);
 	          }
 
-	      for (int i=0;i<ipjU.N();i++) 
-	          { // pour tous le terme 
+	      for (int i=0;i<ipjU.N();i++)
+	          { // pour tous le terme
 	           const FElement::IPJ &ipj_i(ipjU[i]);
-	          // assert(ipj_i.j==0); // car  Vh.N=0
-	           int dfu = KU(ipj_i.i); // le numero de df global 
+	           int dfu = KU(ipj_i.i); // le numero de df global
 	           if(fait[dfu]) continue;
 	           int jU = ipj_i.j; // la composante dans U
 	           int p=ipj_i.p;  //  le points
-	           if (intV[p]) continue; //  ouside and inside flag => next 
+	           if (intV[p]) continue; //  ouside and inside flag => next
 	           R aipj = AipjU[i];
 	           FElement KV(Vh[itV[p]]);
 		      int jV=jU;
 		      if(iU2V) jV=iU2V[jU];
-		    
+
 		    if(jV>=0 && jV<NVh)
 			{
-			    KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype); 
-			    KN_<R> fbj(fb('.',jV,op)); 
-			    
-			    for (int idfv=0;idfv<nbdfVK;idfv++) 
-				if (Abs(fbj[idfv])>eps) 
+			    KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype);
+			    KN_<R> fbj(fb('.',jV,op));
+
+			    for (int idfv=0;idfv<nbdfVK;idfv++)
+				if (Abs(fbj[idfv])>eps)
 				  {
 				      int dfv=KV(idfv);
 				      int ii=dfu, jj=dfv;
 				      if(transpose) Exchange(ii,jj);
 				      // le term dfu,dfv existe dans la matrice
 				      R c= fbj[idfv]*aipj;
-				      //  cout << " Mat inter " << i << " , "<< j << " = " << c << " " <<step << " " << it << " " <<  endl; 
 				      if(Abs(c)>eps)
                                           (*m)(ii,jj) += c;
-					//  sij[make_pair(ii,jj)] += c;// correct du to periodic BC. June 2011
 				  }
 			}
-	                      
+
 	          }
-	          
-	      for (int df=0;df<KU.NbDoF();df++) 
-	          {  
-	           int dfu = KU(df); // le numero de df global 
+
+	      for (int df=0;df<KU.NbDoF();df++)
+	          {
+	           int dfu = KU(df); // le numero de df global
 	           fait[dfu]=true;
 	           }
-	       
-	       
 	    }
-/*	    if (step==0)
-	     {
-	         nnz = sij.size();
-	         cl = new int[nnz];
-	         a = new double[nnz];
-	         int k=0;
-	         for(int i=0;i<n1;i++)
-	           lg[i]=0;
-	          
-	         for (map<pair<int,int>, double >::iterator kk=sij.begin();kk!=sij.end();++kk)
-	          { 
-	            int i= kk->first.first;
-	            int j= kk->first.second;
-	           // cout << " Mat inter " << i << " , "<< j  << endl;
-	            cl[k]=j;
-	            a[k]= kk->second;	            
-	            lg[i+1]=++k;
-	          }
-	         assert(k==nnz);
-	         //  on bouche les ligne vide   lg[i]=0; 
-	         //  lg est un tableau croissant  =>
-	         for(int i=1;i<n1;i++)
-	              lg[i]=max(lg[i-1],lg[i]) ;
-	         m->lg=lg;
-             m->cl=cl;
-             m->a=a;
-             m->nnz=nnz;
-             fait=false;
-	     }
- */
     }
    // sij.clear();
-  //assert(0); // a faire to do
     return m;
 }
 
@@ -881,11 +728,11 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace3 & Uh,const FESpace3 & 
     typedef Mesh::Element  Element;
     typedef FESpace3::Rd  Rd;
     typedef Element::RdHat  RdHat;
-    
+
     int op=op_id; //  value of the function
     bool transpose=false;
     bool inside=false;
-    int * iU2V=0;  
+    int * iU2V=0;
     if (data)
       {
 	int * idata=static_cast<int*>(data);
@@ -895,7 +742,7 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace3 & Uh,const FESpace3 & 
 	iU2V= idata + 4;
 	ffassert(op>=0 && op < 4);
       }
-    if(verbosity>2) 
+    if(verbosity>2)
       {
 	cout << "  -- buildInterpolationMatrix   transpose =" << transpose << endl
 	<< "              value, dx , dy          op = " << op << endl
@@ -909,42 +756,38 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace3 & Uh,const FESpace3 & 
     RdHat Gh= RdHat::diag(1./(RdHat::d+1));
     Rd G;
     int n1=n+1;
-    const  Mesh & ThU =Uh.Th; // line 
+    const  Mesh & ThU =Uh.Th; // line
     const  Mesh & ThV =Vh.Th; // colunm
     bool samemesh =  &Uh.Th == &Vh.Th;  // same Mesh
     int thecolor =0;
-    //  int nbn_u = Uh.NbOfNodes;
-    //int nbn_v = Vh.NbOfNodes;
-    
+
     int nnz =0;
-    
+
     KN<int> color(ThV.nt);
     KN<int> mark(n);
     mark=0;
-    
-    int *lg = new int [n1];
+
     int * cl = 0;
     double *a=0;
-    
+
     color=thecolor++;
     FElement Uh0 = Uh[0];
     FElement Vh0 = Vh[0];
-    
-    
+
+
     int nbdfVK= Vh0.NbDoF();
     int NVh= Vh0.N;
-    
-    InterpolationMatrix<RdHat> ipmat(Uh);    
-  
-    int nbp=ipmat.np; // 
+
+    InterpolationMatrix<RdHat> ipmat(Uh);
+
+    int nbp=ipmat.np; //
      KN<RdHat> PV(nbp);   //  the PtHat in ThV mesh
     KN<int> itV(nbp); // the Triangle number
-    KN<bool> intV(nbp); // ouside or not 
-   // KN<R>   AipjU(ipjU.N());
-    
-    KNM<R> aaa(nbp,nbdfVK); 
-    
-    
+    KN<bool> intV(nbp); // ouside or not
+
+    KNM<R> aaa(nbp,nbdfVK);
+
+
     const R eps = 1.0e-10;
     const int sfb1=Vh0.N*last_operatortype*Vh0.NbDoF();
     KN<R> kv(sfb1*nbp);
@@ -954,113 +797,95 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace3 & Uh,const FESpace3 & 
     What_d whatd= 1<< op;
     KN<bool> fait(Uh.NbOfDF);
     fait=false;
-   // map< pair<int,int> , double > sij;
-  //  for (int step=0;step<2;step++)
       {
-	
+
 	for (int it=0;it<ThU.nt;it++)
 	  {
 	    thecolor++; //  change the current color
 	    const Element & TU(ThU[it]);
 	    FElement KU(Uh[it]);
 	    ipmat.set(KU);
-	    //KU.Pi_h(AipjU);
-	    int nbkU = 0;
 	    if (samemesh)
 	      {
-		nbkU = 1; 
 		PV = ipmat.P;
 		itV = it;
 		intV= false;// add July 2009 (unset varaible FH)
 	      }
-	    else 
-	      {  
+	    else
+	      {
 	          const Element *ts=0,*ts0=0;
                   bool outside;
                   ts0=ThV.Find(TU(Gh),G,outside,ts0);
                   if(outside) ts0=0; // bad starting tet
 	          for (int i=0;i<nbp;i++)
 	            {
-	           
+
 	              ts=ThV.Find(TU(ipmat.P[i]),PV[i],outside,ts0);
                       if( ts0 ==0 && !outside) ts0=ts;
-		      if(outside && verbosity>9 ) 
+		      if(outside && verbosity>9 )
 			  cout << it << " " << i << " :: " << TU(ipmat.P[i]) << "  -- "<< outside << PV[i] << " " << ThV(ts) << " ->  " <<  (*ts)(PV[i]) <<endl;
 	              itV[i]= ThV(ts);
-	              intV[i]=outside && inside; //  ouside and inside flag 
+	              intV[i]=outside && inside; //  ouside and inside flag
 	            }
 	      }
-	    
-	    
+
+
 	    for (int p=0;p<nbp;p++)
-	      { 
-		  
-		  KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype); // valeur de fonction de base de Vh 
-		  // ou:   fb(idf,j,0) valeur de la j composante de la fonction idf 
-		  Vh0.tfe->FB(whatd,ThV,ThV[itV[p]],PV[p],fb);  
+	      {
+
+		  KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype); // valeur de fonction de base de Vh
+		  // ou:   fb(idf,j,0) valeur de la j composante de la fonction idf
+		  Vh0.tfe->FB(whatd,ThV,ThV[itV[p]],PV[p],fb);
 	      }
-	    
-	    for (int i=0;i<ipmat.ncoef;i++) 
-	      { // pour tous le terme 
-		  
-	          // assert(ipj_i.j==0); // car  Vh.N=0
-		  int dfu = KU(ipmat.dofe[i]); // le numero de df global 
+
+	    for (int i=0;i<ipmat.ncoef;i++)
+	      { // pour tous le terme
+
+		  int dfu = KU(ipmat.dofe[i]); // le numero de df global
 		  if(fait[dfu]) continue;
 		  int jU = ipmat.comp[i]; // la composante dans U
 		  int p=ipmat.p[i];  //  le point
-		  if (intV[p]) continue; //  ouside and inside flag => next 
+		  if (intV[p]) continue; //  ouside and inside flag => next
 		  R aipj = ipmat.coef[i];
 		  FElement KV(Vh[itV[p]]);
 		  int jV=jU;
 		  if(iU2V) jV=iU2V[jU];
-		  
+
 		  if(jV>=0 && jV<NVh)
 		    {
-		      KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype); 
-		      KN_<R> fbj(fb('.',jV,op)); 
-		      
-		      for (int idfv=0;idfv<nbdfVK;idfv++) 
-			  if (Abs(fbj[idfv])>eps) 
+		      KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype);
+		      KN_<R> fbj(fb('.',jV,op));
+
+		      for (int idfv=0;idfv<nbdfVK;idfv++)
+			  if (Abs(fbj[idfv])>eps)
 			    {
 			      int dfv=KV(idfv);
 			      int ii=dfu, jj=dfv;
 			      if(transpose) Exchange(ii,jj);
 			      // le term dfu,dfv existe dans la matrice
 			      R c= fbj[idfv]*aipj;
-			      //  cout << " Mat inter " << i << " , "<< j << " = " << c << " " <<step << " " << it << " " <<  endl; 
 			      if(Abs(c)>eps)
                                   (*m)(ii,jj) += c;
-				  //
-				 // sij[make_pair(ii,jj)] += c;// correct du to periodic BC. June 2011
-			      /*   
-			       if(step==0)
-			       sij.insert(make_pair(i,j));
-			       else	                  
-			       (*m)(i,j)=c;
-			       */
 			    }
 		    }
-		  
+
 	      }
-	    
-	    for (int df=0;df<KU.NbDoF();df++) 
-	      {  
-		  int dfu = KU(df); // le numero de df global 
+
+	    for (int df=0;df<KU.NbDoF();df++)
+	      {
+		  int dfu = KU(df); // le numero de df global
 		  fait[dfu]=true;
 	      }
-	    
-	    
+
+
 	  }
 
       }
-   // sij.clear();
-    //assert(0); // a faire to do
     return m;
 }
 
 MatriceMorse<R> * buildInterpolationMatrix(const FESpaceS & Uh,const FESpaceS & Vh,void *data)
 {
-  //  Uh = Vh
   MatriceMorse<R> * m=0;
   typedef FESpaceS::Mesh Mesh;
   typedef FESpaceS::FElement  FElement;
@@ -1099,8 +924,6 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpaceS & Uh,const FESpaceS & 
   const  Mesh & ThV =Vh.Th; // colunm
   bool samemesh =  &Uh.Th == &Vh.Th;  // same Mesh
   int thecolor =0;
-  //  int nbn_u = Uh.NbOfNodes;
-  //int nbn_v = Vh.NbOfNodes;
 
   int nnz =0;
 
@@ -1108,7 +931,6 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpaceS & Uh,const FESpaceS & 
   KN<int> mark(n);
   mark=0;
 
-  int *lg = new int [n1];
   int * cl = 0;
   double *a=0;
 
@@ -1126,7 +948,6 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpaceS & Uh,const FESpaceS & 
   KN<RdHat> PV(nbp);   //  the PtHat in ThV mesh
   KN<int> itV(nbp); // the Triangle number
   KN<bool> intV(nbp); // ouside or not
-  // KN<R>   AipjU(ipjU.N());
 
   KNM<R> aaa(nbp,nbdfVK);
 
@@ -1140,8 +961,6 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpaceS & Uh,const FESpaceS & 
   What_d whatd= 1<< op;
   KN<bool> fait(Uh.NbOfDF);
   fait=false;
-  // map< pair<int,int> , double > sij;
-  //  for (int step=0;step<2;step++)
   {
 
     for (int it=0;it<ThU.nt;it++)
@@ -1150,11 +969,8 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpaceS & Uh,const FESpaceS & 
       const Element & TU(ThU[it]);
       FElement KU(Uh[it]);
       ipmat.set(KU);
-      //KU.Pi_h(AipjU);
-      int nbkU = 0;
       if (samemesh)
       {
-        nbkU = 1;
         PV = ipmat.P;
         itV = it;
         intV= false;// add July 2009 (unset varaible FH)
@@ -1185,7 +1001,6 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpaceS & Uh,const FESpaceS & 
 
       for (int i=0;i<ipmat.ncoef;i++)
       { // pour tous le terme
-        // assert(ipj_i.j==0); // car  Vh.N=0
         int dfu = KU(ipmat.dofe[i]); // le numero de df global
         if(fait[dfu]) continue;
         int jU = ipmat.comp[i]; // la composante dans U
@@ -1209,17 +1024,8 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpaceS & Uh,const FESpaceS & 
             if(transpose) Exchange(ii,jj);
             // le term dfu,dfv existe dans la matrice
             R c= fbj[idfv]*aipj;
-            //  cout << " Mat inter " << i << " , "<< j << " = " << c << " " <<step << " " << it << " " <<  endl;
             if(Abs(c)>eps)
               (*m)(ii,jj) += c;
-            //
-            // sij[make_pair(ii,jj)] += c;// correct du to periodic BC. June 2011
-            /*
-            if(step==0)
-            sij.insert(make_pair(i,j));
-            else
-            (*m)(i,j)=c;
-            */
           }
         }
 
@@ -1235,14 +1041,11 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpaceS & Uh,const FESpaceS & 
     }
 
   }
-  // sij.clear();
-  //assert(0); // a faire to do
   return m;
 }
 
 MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double> & xx,const KN_<double> & yy ,int *data)
-{  //  Uh = Vh 
-
+{
   int op=op_id; //  value of the function
   int icomp=0;
   bool transpose=false;
@@ -1254,9 +1057,9 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double
      inside=data[2];
      icomp = data[3];
      ffassert(op>=0 && op < 4);
-     
+
    }
-  if(verbosity>2) 
+  if(verbosity>2)
     {
       cout << "  -- buildInterpolationMatrix   transpose =" << transpose << endl
            << "              value, dx , dy          op = " << op << endl
@@ -1268,18 +1071,18 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double
   int mm=xx.N();
   int nbxx= mm;
   if(transpose) Exchange(n,mm);
-  const  Mesh & ThU =Uh.Th; // line 
-  
-   
+  const  Mesh & ThU =Uh.Th; // line
+
+
   FElement Uh0 = Uh[0];
-  
-   
-   
+
+
+
  int nbdfUK= Uh0.NbDoF();
  int NUh= Uh0.N;
- 
- ffassert(icomp < NUh && icomp >=0); 
-    
+
+ ffassert(icomp < NUh && icomp >=0);
+
 
    const int sfb1=Uh0.N*last_operatortype*Uh0.NbDoF();
    KN<R> kv(sfb1);
@@ -1287,25 +1090,24 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double
    const R eps = 1.0e-10;
 
    bool whatd[last_operatortype];
-   for (int i=0;i<last_operatortype;i++) 
+   for (int i=0;i<last_operatortype;i++)
      whatd[i]=false;
    whatd[op]=true; // the value of function
    KN<bool> fait(Uh.NbOfDF);
    fait=false;
-   //map< pair<int,int> , double > sij;
    R2 Phat;
    bool outside;
     MatriceMorse<R> * m = new MatriceMorse<R>(n,mm);
    for(int ii=0;ii<nbxx;ii++)
    {
-     const Triangle *ts=ThU.Find(R2(xx[ii],yy[ii]),Phat,outside); 
+     const Triangle *ts=ThU.Find(R2(xx[ii],yy[ii]),Phat,outside);
      if(outside && !inside) continue;
-     int it = ThU(ts); 
+     int it = ThU(ts);
      FElement KU(Uh[it]);
      KNMK_<R> fb(v,nbdfUK,NUh,last_operatortype);
-     Uh0.tfe->FB(whatd,ThU,ThU[it],Phat,fb);  
+     Uh0.tfe->FB(whatd,ThU,ThU[it],Phat,fb);
      KN_<R> Fwi(fb('.',icomp,op));
-     for (int idfu=0;idfu<nbdfUK;idfu++) 
+     for (int idfu=0;idfu<nbdfUK;idfu++)
        {
         int  j = ii;
         int  i = KU(idfu);
@@ -1313,24 +1115,22 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double
         R c = Fwi(idfu);
 	if(Abs(c)>eps)
             (*m)(i,j) += c;
-	 // sij[make_pair(i,j)] += c;// correct du to periodic BC. June 2011
       }
       }
-  
-  
+
+
   //  sij.clear();
    return m;
-  //assert(0); // a faire to do
 }
 
 MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace3 & Uh,const KN_<double> & xx,const KN_<double> & yy ,const KN_<double> & zz,int *data)
-{  //  Uh = Vh 
+{
     typedef FESpace3::Mesh Mesh;
     typedef FESpace3::FElement  FElement;
     typedef Mesh::Element  Element;
     typedef FESpace3::Rd  Rd;
-    
-    
+
+
     int op=op_id; //  value of the function
     int icomp=0;
     bool transpose=false;
@@ -1344,7 +1144,7 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace3 & Uh,const KN_<doubl
 	ffassert(op>=0 && op < 4);
         if(op==3) op=op_dz;//  correct missing
       }
-    if(verbosity>2) 
+    if(verbosity>2)
       {
 	cout << "  -- buildInterpolationMatrix   transpose =" << transpose << endl
 	<< "              value, dx , dy          op = " << op << endl
@@ -1356,24 +1156,24 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace3 & Uh,const KN_<doubl
     int mm=xx.N();
     int nbxx= mm;
     if(transpose) Exchange(n,mm);
-    const  Mesh & ThU =Uh.Th; // line 
-    
-    
+    const  Mesh & ThU =Uh.Th; // line
+
+
     FElement Uh0 = Uh[0];
-    
-    
-    
+
+
+
     int nbdfUK= Uh0.NbDoF();
     int NUh= Uh0.N;
-    
-    ffassert(icomp < NUh && icomp >=0); 
-    
-    
+
+    ffassert(icomp < NUh && icomp >=0);
+
+
     const int sfb1=Uh0.N*last_operatortype*Uh0.NbDoF();
     KN<R> kv(sfb1);
     R * v = kv;
     const R eps = 1.0e-10;
-    
+
     What_d whatd= 1 <<op;
     KN<bool> fait(Uh.NbOfDF);
     fait=false;
@@ -1381,17 +1181,17 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace3 & Uh,const KN_<doubl
      MatriceMorse<R> * m = new MatriceMorse<R>(n,mm);
     Rd Phat;
     bool outside;
-    
+
     for(int ii=0;ii<nbxx;ii++)
       {
-	const Element *ts=ThU.Find(Rd(xx[ii],yy[ii],zz[ii]),Phat,outside); 
+	const Element *ts=ThU.Find(Rd(xx[ii],yy[ii],zz[ii]),Phat,outside);
 	if(outside && !inside) continue;
-	int it = ThU(ts); 
+	int it = ThU(ts);
 	FElement KU(Uh[it]);
 	KNMK_<R> fb(v,nbdfUK,NUh,last_operatortype);
-	Uh0.tfe->FB(whatd,ThU,ThU[it],Phat,fb);  
+	Uh0.tfe->FB(whatd,ThU,ThU[it],Phat,fb);
 	KN_<R> Fwi(fb('.',icomp,op));
-	for (int idfu=0;idfu<nbdfUK;idfu++) 
+	for (int idfu=0;idfu<nbdfUK;idfu++)
 	  {
 	    int  j = ii;
 	    int  i = KU(idfu);
@@ -1399,27 +1199,23 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace3 & Uh,const KN_<doubl
 	    R c = Fwi(idfu);
 	    if(Abs(c)>eps)
                 (*m)(i,j) += c;
-		//sij[make_pair(i,j)] += c;// correct du to periodic BC. June 2011
 	  }
       }
-    
-   // MatriceMorse<R> * m = new MatriceMorse<R>(n,mm,sij,false);
-   // sij.clear();
+
     return m;
-    //assert(0); // a faire to do
 }
 
 MatriceMorse<R> *  buildInterpolationMatrix1(const FESpaceS & Uh,const KN_<double> & xx,const KN_<double> & yy ,const KN_<double> & zz,int *data)
 {
   // TODO
     ffassert(0);
-    return 0; 
+    return 0;
 }
 
 AnyType SetMatrixInterpolation1(Stack stack,Expression emat,Expression einter,int init)
 {
   using namespace Fem2D;
-  
+
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
   const MatrixInterpolation<pfes>::Op * mi(dynamic_cast<const MatrixInterpolation<pfes>::Op *>(einter));
   ffassert(einter);
@@ -1434,58 +1230,53 @@ AnyType SetMatrixInterpolation1(Stack stack,Expression emat,Expression einter,in
   KN<long> U2Vc;
   U2Vc= mi->arg(4,stack,U2Vc); ;
   if( mi->c==0)
-  { // old cas 
+  { // old cas
   pfes * pVh = GetAny<  pfes * >((* mi->b)(stack));
   FESpace * Vh = **pVh;
   int NVh =Vh->N;
 
-      for(int i=0;i<NUh;++i)    
-        data[4+i]=i;// 
-      for(int i=0;i<min(NUh,(int) U2Vc.size());++i)    
+      for(int i=0;i<NUh;++i)
+        data[4+i]=i;//
+      for(int i=0;i<min(NUh,(int) U2Vc.size());++i)
 	  data[4+i]= U2Vc[i];//
   if(verbosity>3)
 	for(int i=0;i<NUh;++i)
 	  {
 	    cout << "The Uh componante " << i << " -> " << data[4+i] << "  Componante of Vh  " <<endl;
 	  }
-	  for(int i=0;i<NUh;++i)    
+	  for(int i=0;i<NUh;++i)
 	if(data[4+i]>=NVh)
 	  {
 	      cout << "The Uh componante " << i << " -> " << data[4+i] << " >= " << NVh << " number of Vh Componante " <<endl;
 	      ExecError("Interpolation incompability beetween componante ");
 	  }
-      
+
   ffassert(Vh);
   ffassert(Uh);
-  
-  //  sparse_mat->pUh=pUh;
-  //sparse_mat->pVh=pVh;
+
   if(!init) sparse_mat->init();
       sparse_mat->typemat=0; //TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   sparse_mat->A.master(buildInterpolationMatrix(*Uh,*Vh,data));
   }
-  else 
+  else
   {  // new cas mars 2006
   KN_<double>  xx = GetAny<  KN_<double>  >((* mi->b)(stack));
   KN_<double>  yy = GetAny<  KN_<double>  >((* mi->c)(stack));
-  ffassert( xx.N() == yy.N()); 
+  ffassert( xx.N() == yy.N());
   ffassert(Uh);
-  
-  //  sparse_mat->pUh=0;
-  //  sparse_mat->pVh=0;
+
   if(!init) sparse_mat->init();
       sparse_mat->typemat=0;//TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
   sparse_mat->A.master(buildInterpolationMatrix1(*Uh,xx,yy,data));
   }
   delete [] data;
    return sparse_mat; // Warning .. no correct gestion of temp ptr ..
- // return Add2StackOfPtr2Free(stack,sparse_mat);
 }
 
 AnyType SetMatrixInterpolation31(Stack stack,Expression emat,Expression einter,int init)
 {
     using namespace Fem2D;
-    
+
     Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
     const MatrixInterpolation<pfes3>::Op * mi(dynamic_cast<const MatrixInterpolation<pfes3>::Op *>(einter));
     ffassert(einter);
@@ -1500,44 +1291,42 @@ AnyType SetMatrixInterpolation31(Stack stack,Expression emat,Expression einter,i
     KN<long> U2Vc;
     U2Vc= mi->arg(4,stack,U2Vc); ;
     if( mi->c==0)
-      { // old cas 
+      { // old cas
 	  pfes3 * pVh = GetAny<  pfes3 * >((* mi->b)(stack));
 	  FESpace3 * Vh = **pVh;
 	  int NVh =Vh->N;
-	  
-	  for(int i=0;i<NUh;++i)    
-	      data[4+i]=i;// 
-	  for(int i=0;i<min(NUh,(int) U2Vc.size());++i)    
+
+	  for(int i=0;i<NUh;++i)
+	      data[4+i]=i;//
+	  for(int i=0;i<min(NUh,(int) U2Vc.size());++i)
 	      data[4+i]= U2Vc[i];//
 	  if(verbosity>3)
 	      for(int i=0;i<NUh;++i)
 		{
 		  cout << "The Uh componante " << i << " -> " << data[4+i] << "  Componante of Vh  " <<endl;
 		}
-	  for(int i=0;i<NUh;++i)    
+	  for(int i=0;i<NUh;++i)
 	      if(data[4+i]>=NVh)
 		{
 		  cout << "The Uh componante " << i << " -> " << data[4+i] << " >= " << NVh << " number of Vh Componante " <<endl;
 		  ExecError("Interpolation incompability beetween componante ");
 		}
-	  
+
 	  ffassert(Vh);
 	  ffassert(Uh);
 	  if(!init) sparse_mat->init();
 	  sparse_mat->typemat=0;//(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
 	  sparse_mat->A.master(buildInterpolationMatrix(*Uh,*Vh,data));	  //  sparse_mat->A.master(new MatriceMorse<R>(*Uh,*Vh,buildInterpolationMatrix,data));
       }
-    else 
+    else
       {  // new cas mars 2006
 	  KN_<double>  xx = GetAny<  KN_<double>  >((* mi->b)(stack));
 	  KN_<double>  yy = GetAny<  KN_<double>  >((* mi->c)(stack));
 	  KN_<double>  zz = GetAny<  KN_<double>  >((* mi->d)(stack));
-	  ffassert( xx.N() == yy.N()); 
-	  ffassert( xx.N() == zz.N()); 
+	  ffassert( xx.N() == yy.N());
+	  ffassert( xx.N() == zz.N());
 	  ffassert(Uh);
 	  if(!init) sparse_mat->init();
-	  //  sparse_mat->pUh=0;
-	  //  sparse_mat->pVh=0;
 	  sparse_mat->typemat=0;//(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
 	  sparse_mat->A.master(buildInterpolationMatrix1(*Uh,xx,yy,zz,data));
       }
@@ -1599,8 +1388,6 @@ AnyType SetMatrixInterpolationS1(Stack stack,Expression emat,Expression einter,i
     ffassert( xx.N() == zz.N());
     ffassert(Uh);
     if(!init) sparse_mat->init();
-    //  sparse_mat->pUh=0;
-    //  sparse_mat->pVh=0;
     sparse_mat->typemat=0;//(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
     sparse_mat->A.master(buildInterpolationMatrix1(*Uh,xx,yy,zz,data));
   }
@@ -1626,7 +1413,7 @@ AnyType ProdMat(Stack stack,Expression emat,Expression prodmat)
 
   Matrice_Creuse<RAB> * sparse_mat =GetAny<Matrice_Creuse<RA>* >((*emat)(stack));
   const Matrix_Prod<RA,RB>  AB = GetAny<Matrix_Prod<RA,RB> >((*prodmat)(stack));
-    
+
   MatriceMorse<RA> *mA= AB.A->pHM();
   MatriceMorse<RB> *mB= AB.B->pHM();
     bool ta = AB.ta, tb = AB.tb;
@@ -1646,53 +1433,30 @@ AnyType ProdMat(Stack stack,Expression emat,Expression prodmat)
   }
    MatriceMorse<RAB> *mAB=new MatriceMorse<RAB>(An,Bm);
    AddMul(*mAB,*mA,*mB,ta,tb);
-  
+
   if(!init) sparse_mat->init();
-    sparse_mat->typemat=0;//(mA->n == mB->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+    sparse_mat->typemat=0;
   sparse_mat->A.master(mAB);
   return sparse_mat;
-    
+
 }
-    
+
 
 template<class R,int init>
 AnyType CombMat(Stack stack,Expression emat,Expression combMat)
 {
   using namespace Fem2D;
-  
+
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
   list<tuple<R,VirtualMatrix<int,R> *,bool> > *  lcB = GetAny<list<tuple<R,VirtualMatrix<int,R> *,bool> >*>((*combMat)(stack));
-  //  sparse_mat->pUh=0;
-  // sparse_mat->pVh=0;
   HashMatrix<int,R> * AA=BuildCombMat<R>(*lcB,false,0,0);
-    
+
    if(!init) sparse_mat->init();
   sparse_mat->A.master(AA);
-    sparse_mat->typemat=0; //(AA->n == AA->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+    sparse_mat->typemat=0;
   delete lcB;
   return sparse_mat;
 }
-
-/*
-template<class R>
-AnyType MatriceCreuse2map(Stack , const AnyType & mat)
-{
-
-  using namespace Fem2D;
-
-  Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >(mat);
-  ffassert(sparse_mat);
-  int n=sparse_mat->N(),m=sparse_mat->M();
-  map<pair<int,int>,R> *M=new map<pair<int,int>,R>;
-  if (n >0 && m>0 && sparse_mat->A) 
-    {
-      sparse_mat->A->addMatTo(R(1.),*M);
-      // hack 
-      (*M)[make_pair(n-1,m-1)]+=R();
-    }
-  return M;
-}
-*/
 
 template<class R,int init>
 AnyType DiagMat(Stack stack,Expression emat,Expression edia)
@@ -1700,8 +1464,6 @@ AnyType DiagMat(Stack stack,Expression emat,Expression edia)
   using namespace Fem2D;
   KN<R> * diag=GetAny<KN<R>* >((*edia)(stack));
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
-  //  sparse_mat->pUh=0;
-  // sparse_mat->pVh=0;
   if(!init) sparse_mat->init();
   sparse_mat->typemat=VirtualMatrix<int,R>::TS_SYM;//TypeSolveMat(TypeSolveMat::GC); //  none square matrice (morse)
   sparse_mat->A.master(new MatriceMorse<R>((int) diag->N(),(const R*) *diag));
@@ -1720,7 +1482,7 @@ template<class Rin,class Rout>
  }
  };
 
-template<class R> 
+template<class R>
  struct  ChangeMatriceMorse<R,R> {
  static MatriceMorse<R>* f(MatriceMorse<R>* mr)
  {
@@ -1732,7 +1494,7 @@ AnyType CopyMat_tt(Stack stack,Expression emat,Expression eA,bool transp)
 {
     using namespace Fem2D;
     Matrice_Creuse<R> * Mat;
-    
+
     if(transp)
     {
         Matrice_Creuse_Transpose<R>  tMat=GetAny<Matrice_Creuse_Transpose<R> >((*eA)(stack));
@@ -1740,19 +1502,18 @@ AnyType CopyMat_tt(Stack stack,Expression emat,Expression eA,bool transp)
     }
     else   Mat =GetAny<Matrice_Creuse<R>*>((*eA)(stack));
     MatriceMorse<R> * mr=Mat->pHM();
-    
+
     MatriceMorse<RR> * mrr = new MatriceMorse<RR>(mr->n,mr->n);
     *mrr = *mr;
     if(transp) mrr->dotranspose();
-    
-    
+
+
     Matrice_Creuse<RR> * sparse_mat =GetAny<Matrice_Creuse<RR>* >((*emat)(stack));
     if(!init) sparse_mat->init() ;
     sparse_mat->typemat=Mat->typemat; //  none square matrice (morse)
     sparse_mat->A.master(mrr);
     VirtualMatrix<int,RR> *pvm = sparse_mat->pMC();
     pvm->SetSolver(); // copy solver ???
-    //delete mr;
     return sparse_mat;
 }
 
@@ -1773,45 +1534,17 @@ AnyType MatFull2Sparse(Stack stack,Expression emat,Expression eA)
 {
   KNM<R> * A=GetAny<KNM<R>* >((*eA)(stack));
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
-  //  sparse_mat->pUh=0;
-  // sparse_mat->pVh=0;
   if(!init) sparse_mat->init() ;
   sparse_mat->typemat=0;//(TypeSolveMat::GMRES); //  none square matrice (morse)
   sparse_mat->A.master(new MatriceMorse<R>((KNM_<R> &)*A,0.0));
-  
- return sparse_mat;
-}
-/*
-template<class R,int init>
-AnyType MatMap2Sparse(Stack stack,Expression emat,Expression eA)
-{
-   map< pair<int,int>, R> * A=GetAny< map< pair<int,int>, R> * >((*eA)(stack));
-   int n=0,m=0;
-   // hack:  the last element must exist in the map  to set matrix size 
 
-   typename map< pair<int,int>, R>::const_iterator last= --A->end(); // le last element
-   
-   if( last != A->end() )
-   
-        { 
-                n = last->first.first+1; 
-                m=last->first.second+1;
-        } 
-    
-  Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
-     if(!init) sparse_mat->init() ;
-  //  sparse_mat->pUh=0;
-  // sparse_mat->pVh=0;
-  sparse_mat->typemat=0;//(TypeSolveMat::GMRES); //  none square matrice (morse)
-  sparse_mat->A.master(new MatriceMorse<R>(n,m,*A,false));
-  delete A; 
  return sparse_mat;
 }
-*/
-template<class RR,class AA=RR,class BB=AA> 
-struct Op2_pair: public binary_function<AA,BB,RR> { 
-  static RR f(const AA & a,const BB & b)  
-  { return RR( a, b);} 
+
+template<class RR,class AA=RR,class BB=AA>
+struct Op2_pair: public binary_function<AA,BB,RR> {
+  static RR f(const AA & a,const BB & b)
+  { return RR( a, b);}
 };
 
 
@@ -1853,11 +1586,11 @@ template<class R>
 pair<long,long> get_NM(const list<tuple<R,MatriceCreuse<R> *,bool> > & lM)
 {
       typedef typename list<tuple<R,MatriceCreuse<R> *,bool> >::const_iterator lconst_iterator;
-    
+
     lconst_iterator begin=lM.begin();
     lconst_iterator end=lM.end();
     lconst_iterator i;
-    
+
     long n=0,m=0;
     for(i=begin;i!=end;i++++)
      {
@@ -1871,7 +1604,7 @@ pair<long,long> get_NM(const list<tuple<R,MatriceCreuse<R> *,bool> > & lM)
        if (n != 0) ffassert(nn == n);
        if (m != 0) ffassert(mm == m);
       }
-   return make_pair(n,m);    
+   return make_pair(n,m);
 }
 
 template<class R>
@@ -1881,11 +1614,11 @@ template<class R>
 long set_diag(Matrice_Creuse<R> * p, KN<R> * x)
  { ffassert(p && x ) ;  return p->A ?p->A->setdiag(*x): 0  ;}
 
- 
-template<class R>  
-R * get_elementp2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & c){ 
+
+template<class R>
+R * get_elementp2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & c){
     MatriceMorse<R> * a= ac ? ac->pHM() : 0 ;
-  if(  !a || a->n <= b || c<0 || a->m <= c  ) 
+  if(  !a || a->n <= b || c<0 || a->m <= c  )
    { cerr << " Out of bound  0 <=" << b << " < "  << a->n << ",  0 <= " << c << " < "  << a->m
            << " Matrix type = " << typeid(ac).name() << endl;
      cerr << ac << " " << a << endl;
@@ -1909,22 +1642,22 @@ R  get_element2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & c)
     if(p) r=*p;
     return  r;}
 
-template<class RR,class AA=RR,class BB=AA> 
-struct Op2_mulAv: public binary_function<AA,BB,RR> { 
-  static RR f(const AA & a,const BB & b)  
-  { return (*a->A * *b );} 
+template<class RR,class AA=RR,class BB=AA>
+struct Op2_mulAv: public binary_function<AA,BB,RR> {
+  static RR f(const AA & a,const BB & b)
+  { return (*a->A * *b );}
 };
 
-template<class RR,class AA=RR,class BB=AA> 
-struct Op2_mulvirtAv: public binary_function<AA,BB,RR> { 
-  static RR f(const AA & a,const BB & b)  
-  { return RR( (*a).A, b );} 
+template<class RR,class AA=RR,class BB=AA>
+struct Op2_mulvirtAv: public binary_function<AA,BB,RR> {
+  static RR f(const AA & a,const BB & b)
+  { return RR( (*a).A, b );}
 };
 
 class Matrice_Creuse_C2R  { public:
-    typedef Complex K;  
+    typedef Complex K;
     Matrice_Creuse<K> * A;
-    int cas; //  0 re , 1 im 
+    int cas; //  0 re , 1 im
     Matrice_Creuse_C2R(Matrice_Creuse<K> * AA,int cass) : A(AA),cas(cass) {assert(A);}
     operator MatriceCreuse<K> & () const {return *A->A;}
     operator Matrice_Creuse<K> * () const {return A;}
@@ -1935,17 +1668,16 @@ R realC(Complex c) {return c.real();}
 R imagC(Complex c) {return c.imag();}
 
 
-template<int cas> 
+template<int cas>
 newpMatrice_Creuse<double>  Build_Matrice_Creuse_C2R(Stack stack,Matrice_Creuse<Complex> * const & Mat)
 {
-    
+
     typedef Complex C;
     typedef double R;
     using namespace Fem2D;
     MatriceMorse<C> * mr= Mat->pHM();
     ffassert(mr);
-    MatriceMorse<R> * mrr = 0;// ZZZZZ
-    // cout << " CopyMatC2R:  " << init << " " <<  sparse_mat <<endl;
+    MatriceMorse<R> * mrr = 0;
     if(cas==0)
         mrr = new MatriceMorse<R>(*mr,realC);
     else if(cas==1)
@@ -1955,25 +1687,25 @@ newpMatrice_Creuse<double>  Build_Matrice_Creuse_C2R(Stack stack,Matrice_Creuse<
         ffassert(0);
     }
      return newpMatrice_Creuse<double>(stack,mrr);
-    
+
 }
- 
+
 template<class K>
-class OneBinaryOperatorA_inv : public OneOperator { public:  
+class OneBinaryOperatorA_inv : public OneOperator { public:
   OneBinaryOperatorA_inv() : OneOperator(atype<Matrice_Creuse_inv<K> >(),atype<Matrice_Creuse<K> *>(),atype<long>()) {}
-    E_F0 * code(const basicAC_F0 & args) const 
+    E_F0 * code(const basicAC_F0 & args) const
      { Expression p=args[1];
-       if ( ! p->EvaluableWithOutStack() ) 
-        { 
+       if ( ! p->EvaluableWithOutStack() )
+        {
           bool bb=p->EvaluableWithOutStack();
           cout << bb << " " <<  * p <<  endl;
           CompileError(" A^p, The p must be a constant == -1, sorry");}
        long pv = GetAny<long>((*p)(NullStack));
-        if (pv !=-1)   
+        if (pv !=-1)
          { char buf[100];
            sprintf(buf," A^%ld, The pow must be  == -1, sorry",pv);
-           CompileError(buf);}     
-       return  new E_F_F0<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>(Build<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>,t[0]->CastTo(args[0])); 
+           CompileError(buf);}
+       return  new E_F_F0<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>(Build<Matrice_Creuse_inv<K>,Matrice_Creuse<K> *>,t[0]->CastTo(args[0]));
     }
 };
 template<class K>
@@ -1999,31 +1731,31 @@ class OneBinaryOperatorAt_inv : public OneOperator { public:
 
 
 template<class K>
-class Psor :  public E_F0 { public:  
- 
+class Psor :  public E_F0 { public:
+
    typedef double  Result;
    Expression mat;
-   Expression xx,gmn,gmx,oomega;  
-   Psor(const basicAC_F0 & args) 
-    {   
+   Expression xx,gmn,gmx,oomega;
+   Psor(const basicAC_F0 & args)
+    {
       args.SetNameParam();
-      mat=to<Matrice_Creuse<K> *>(args[0]); 
-      gmn=to<KN<K>*>(args[1]); 
-      gmx=to<KN<K>*>(args[2]); 
-      xx=to<KN<K>*>(args[3]); 
-      oomega=to<double>(args[4]); 
-      
-   }   
-    static ArrayOfaType  typeargs() { 
+      mat=to<Matrice_Creuse<K> *>(args[0]);
+      gmn=to<KN<K>*>(args[1]);
+      gmx=to<KN<K>*>(args[2]);
+      xx=to<KN<K>*>(args[3]);
+      oomega=to<double>(args[4]);
+
+   }
+    static ArrayOfaType  typeargs() {
       return  ArrayOfaType( atype<double>(),
                             atype<Matrice_Creuse<K> *>(),
                             atype<KN<K>*>(),
                             atype<KN<K>*>(),
                             atype<KN<K>*>(),
                             atype<double>(),false);}
-                            
-    static  E_F0 * f(const basicAC_F0 & args){ return new Psor(args);} 
-    
+
+    static  E_F0 * f(const basicAC_F0 & args){ return new Psor(args);}
+
     AnyType operator()(Stack s) const {
       Matrice_Creuse<K>* A= GetAny<Matrice_Creuse<K>* >( (*mat)(s) );
       KN<K>* gmin = GetAny<KN<K>* >( (*gmn)(s) );
@@ -2032,11 +1764,11 @@ class Psor :  public E_F0 { public:
       double omega = GetAny<double>((*oomega)(s));
       return A->A->psor(*gmin,*gmax,*x,omega);
     }
-  
+
 };
 template <class R>
  struct TheDiagMat {
-  Matrice_Creuse<R> * A; 
+  Matrice_Creuse<R> * A;
   TheDiagMat(Matrice_Creuse<R> * AA) :A(AA) {ffassert(A);}
   void   get_mat_daig( KN_<R> & x) { ffassert(A && A->A && x.N() == A->A->n  && A->A->n == A->A->m );
      A->A->getdiag(x);}
@@ -2047,10 +1779,10 @@ template <class R>
   void   set_mat_daig(const  KN_<R> & x) { ffassert(A && A->A && x.N() == A->A->n  && A->A->n == A->A->m );
      A->A->setdiag(x);}
  };
- 
+
  template <class R>
  struct TheCoefMat {
-  Matrice_Creuse<R> * A; 
+  Matrice_Creuse<R> * A;
   TheCoefMat(Matrice_Creuse<R> * AA) :A(AA) {ffassert(A);}
   void   get_mat_coef( KN_<R> & x) { ffassert(A && A->A && x.N() == A->A->NbCoef()  );
      A->A->getcoef(x);}
@@ -2063,7 +1795,7 @@ template<class R>
 R get_trace_mat(Matrice_Creuse<R> * p)
 {
     return p ? p->A->trace():0.;
-    
+
 }
 
 template<class R>
@@ -2073,7 +1805,7 @@ TheDiagMat<R> thediag(Matrice_Creuse<R> * p)
 template<class R>
 TheCoefMat<R> thecoef(Matrice_Creuse<R> * p)
  {  return  TheCoefMat<R>(p);}
- 
+
 template<class R>
 TheDiagMat<R> set_mat_daig(TheDiagMat<R> dm,KN<R> * x)
 {
@@ -2107,10 +1839,10 @@ KN<R> * get_mat_coef(KN<R> * x,TheCoefMat<R> dm)
   return x;
 }
 
-template<class R> 
-bool IsRawMat(const basicAC_F0 & args) 
-{   
-    
+template<class R>
+bool IsRawMat(const basicAC_F0 & args)
+{
+
     const E_Array * pee= dynamic_cast<const E_Array*>((Expression) args[1]);
     if (!pee) return 0;
     const E_Array &ee=*pee;
@@ -2118,18 +1850,18 @@ bool IsRawMat(const basicAC_F0 & args)
     if (N==1)
     {
 	C_F0 c0(ee[0]);
-	return 
+	return
 	    atype<KN_<R> >()->CastingFrom(ee[0].left());
-	    
+
     }
     else if (N==3)
     {
 	C_F0 c0(ee[0]),c1(ee[1]),c2(ee[2]);
-	return 
+	return
 	    atype<KN_<long> >()->CastingFrom(ee[0].left())
 	    && 	    atype<KN_<long> >()->CastingFrom(ee[1].left())
 	    &&      atype<KN_<R> >()->CastingFrom(ee[2].left());
-	    
+
     }
     return 0;
 }
@@ -2139,31 +1871,31 @@ template<typename R>
 class RawMatrix :  public E_F0 { public:
     int init;
     typedef Matrice_Creuse<R> * Result;
-    Expression emat; 
+    Expression emat;
     Expression coef,col,lig;
     RawMatrix(const basicAC_F0 & args,int initt) ;
     static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<Matrice_Creuse<R>*>(),atype<E_Array>());}
-    AnyType operator()(Stack s) const ;    
+    AnyType operator()(Stack s) const ;
 };
 
  template<typename R>
- class BlockMatrix :  public E_F0 { public: 
+ class BlockMatrix :  public E_F0 { public:
    typedef Matrice_Creuse<R> * Result;
    int N,M;
    int init;
-   Expression emat; 
+   Expression emat;
    Expression ** e_Mij;
    int ** t_Mij;
    BlockMatrix(const basicAC_F0 & args,int iinit=0) ;
    ~BlockMatrix() ;
-      
+
     static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<Matrice_Creuse<R>*>(),atype<E_Array>());}
     static  E_F0 * f(const basicAC_F0 & args){
 	if(IsRawMat<R>(args)) return new RawMatrix<R>(args,0);
 	else return new BlockMatrix(args,0);
-    }  
+    }
     AnyType operator()(Stack s) const ;
-    
+
 };
 template<typename R>
 class BlockMatrix1 :  public BlockMatrix<R> { public:
@@ -2171,55 +1903,47 @@ class BlockMatrix1 :  public BlockMatrix<R> { public:
     static  E_F0 * f(const basicAC_F0 & args){
         if(IsRawMat<R>(args)) return new RawMatrix<R>(args,1);
         else return new BlockMatrix<R>(args,1);
-    }  
+    }
 
 };
 
-template<typename R>  
-//map< pair<int,int>, R> *
+template<typename R>
 newpMatrice_Creuse<R> Matrixfull2mapIJ_inv (Stack s,KNM<R>   * const & pa,const Inv_KN_long & iii,const Inv_KN_long & jjj)
 {
-   // ZZZZ
-    
+
    const  KN_<long> &ii(iii), &jj(jjj);
    const KNM<R> & a(*pa);
    int N=a.N(),M=a.M();
    long n = ii(SubArray(N)).max()+1;
    long m= jj(SubArray(M)).max()+1;
-   
+
 
     HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int) n,(int) m);
     HashMatrix<int,R> & A =*pA;
-   
+
    for (long i=0;i<N;++i)
     for (long j=0;j<M;++j)
      { R aij=a(i,j);
-       //cout << i << " " << j << " :: " << ii[i] << " " << jj[j] << " = " << aij << endl;
-       if(ii[i]>=0 && jj[j]>=0 && Fem2D::norm(aij)>1e-40) 
+       if(ii[i]>=0 && jj[j]>=0 && Fem2D::norm(aij)>1e-40)
          A(ii[i],jj[j]) += aij;
      }
 
   return newpMatrice_Creuse<R>(s,pA);
 }
 
-template<typename R>  
-//map< pair<int,int>, R> *
+template<typename R>
 newpMatrice_Creuse<R>  Matrixfull2mapIJ (Stack s, KNM<R>   * const & pa,const KN_<long> & ii,const  KN_<long> & jj)
 {
    const KNM<R> & a(*pa);
    int N=a.N(),M=a.M();
    long n = ii.N();
    long m= jj.N();
-  // cout << "  ### n m " << n << " " << m << endl; 
-//   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
-//   map< pair<int,int>, R> & A(*pA);
     HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m);
     HashMatrix<int,R> & A =*pA;
-    //A[make_pair(n-1,m-1)] += R(); // Hack to be sure that the last term existe
-  
+
    for (long il=0;il<N;++il)
     for (long jl=0;jl<M;++jl)
-     { 
+     {
        long i = ii[il];
        long j = jj[jl];
        if( i>=0 && j >=0) {
@@ -2228,14 +1952,13 @@ newpMatrice_Creuse<R>  Matrixfull2mapIJ (Stack s, KNM<R>   * const & pa,const KN
               cerr << " Out of Bound  in A(I,J) : " << i << " " << j << " not in " << "[0,"<<N<<"[x[0," << M << "[ \n";
               ExecError("Out of Bound Error");
              }
-       
+
           R aij=a(i,j);
-       //cout << i << " " << j << " :: " << ii[i] << " " << jj[j] << " = " << aij << endl;
-	  if (Fem2D::norm(aij)>1e-40) 
+	  if (Fem2D::norm(aij)>1e-40)
            A(il,jl) += aij;
        }
      }
-      
+
     return newpMatrice_Creuse<R> (s,pA);//;pA;
 }
 
@@ -2249,23 +1972,20 @@ AnyType Matrixfull2map (Stack s , const AnyType & pp)
     HashMatrix<int,R> *pA= new  HashMatrix<int,R>(n,m);
     HashMatrix<int,R> & A =*pA;
 
-  // map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
-  // map< pair<int,int>, R> & A(*pA);
    A(n-1,m-1) = R(); // Hack to be sure that the last term existe
-  
+
    for (int i=0;i<N;++i)
     for (int j=0;j<M;++j)
      { R aij=a(i,j);
-       if (Fem2D::norm(aij)>1e-40) 
+       if (Fem2D::norm(aij)>1e-40)
       A(i,j) += aij;
      }
-      
+
   return SetAny<newpMatrice_Creuse<R> >(newpMatrice_Creuse<R> (s,pA));//
 }
 
 
 template<class R>
-//map< pair<int,int>, R> *
 newpMatrice_Creuse<R>  Matrixoutp2mapIJ_inv (Stack s,outProduct_KN_<R>   * const & pop,const Inv_KN_long & iii,const Inv_KN_long & jjj)
 {
    const KN_<long> &ii(iii), &jj(jjj);
@@ -2273,65 +1993,38 @@ newpMatrice_Creuse<R>  Matrixoutp2mapIJ_inv (Stack s,outProduct_KN_<R>   * const
    long  N=op.a.N(),M=op.b.N();
    long  n = ii(SubArray(N)).max()+1;
    long m= jj(SubArray(M)).max()+1;
-/*
-   long minn = ii(SubArray(N)).min()+1;
-   long minm= jj(SubArray(M)).min()+1;
-     if ( !(0 <= minn && 0 <=  minm) ) 
-        {
-            cerr << " Out of Bound  in A(I^-1,J^1) :  "<< minn << " " << minm <<" =>  negative value!! " << endl;
-            ExecError("Out of Bound Error");
-        }
- */
-    //  map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
-   //map< pair<int,int>, R> & A(*pA);
-   //A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe
     HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m);
     HashMatrix<int,R> & A =*pA;
 
    for (int i=0;i<N;++i)
     for (int j=0;j<M;++j)
-     { 
+     {
        R aij=op.a[i]*RNM::conj(op.b[j]);
-       if(ii[i]>=0 && jj[j]>=0 && Fem2D::norm(aij)>1e-40) 
-//       if (norm(aij)>1e-40 &) 
+       if(ii[i]>=0 && jj[j]>=0 && Fem2D::norm(aij)>1e-40)
           A(ii[i],jj[j]) += aij;
-     }   
+     }
   delete pop;
-    
-//  return pA;
- return newpMatrice_Creuse<R> (s,pA);//
+
+ return newpMatrice_Creuse<R> (s,pA);
 }
 
 
 template<class R>
-//map< pair<int,int>, R> *
 newpMatrice_Creuse<R>
 Matrixmapp2mapIJ1 (Stack s,Matrice_Creuse<R> *const &  mcB,const Inv_KN_long & iii,const Inv_KN_long  & jjj)
 {
-    const KN_<long> &ii(iii), &jj(jjj);  
+    const KN_<long> &ii(iii), &jj(jjj);
     typedef typename map< pair<int,int>, R>::const_iterator It;
-    
-  //  map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
-  //  map< pair<int,int>, R> & A(*pA);
+
       int n=0,m=0;
      HashMatrix<int,R> *B = dynamic_cast<HashMatrix<int,R> *>(mcB->pMC());
      ffassert(B);
-  
-    // hack:  the last element must exist in the map  to set matrix size 
-/*    
-    It lastb= --B->end(); // le last element
-    
-    if( lastb != B->end() )	
-    { 
-	nb = last->first.first+1; 
-	mb=last->first.second+1;
-    } */
+
     int N=ii.N(),M=jj.N();
     int nn = ii.max(), mm= jj.max();
     HashMatrix<int,R> *pA= new  HashMatrix<int,R>(nn,mm);
     HashMatrix<int,R> & A =*pA;
-   // A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe 
-    
+
     for (int k=0;k<B->nnz;++k)
     {
         int il =  B->i[k];
@@ -2346,28 +2039,25 @@ Matrixmapp2mapIJ1 (Stack s,Matrice_Creuse<R> *const &  mcB,const Inv_KN_long & i
 	n=max(i,n);
 	m=max(j,m);
 	R aij = B->aij[k];
-	if(i >=0 && j>=0) 
+	if(i >=0 && j>=0)
 	  A(i,j) += aij;
     }
     // A[make_pair(n,m)] += R(); // Hack to be sure that the last term existe
     // delete B;
     //  FH question resize or not pA  to (n,m);
  return  newpMatrice_Creuse<R> (s,pA);//
-  //  return pA;
 }
 
 template<class R>
 // map< pair<int,int>, R> *
 newpMatrice_Creuse<R> Matrixmapp2mapIJ (Stack s,Matrice_Creuse<R> *const &  mcB,const KN_<long> & ii,const KN_<long>  & jj)
 {
-    
+
 
  typedef typename map< pair<int,int>, R>::const_iterator It;
 typedef typename multimap< int,int>::iterator  MI;
     HashMatrix<int,R> *B = dynamic_cast<HashMatrix<int,R> *>(mcB->pMC());
     ffassert(B);
- //   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
-  //  map< pair<int,int>, R> & A(*pA);
     multimap< int,int > I,J;
     int N=ii.N(),M=jj.N();
     for (int i=0;i<N;++i)
@@ -2391,26 +2081,25 @@ typedef typename multimap< int,int>::iterator  MI;
 	{
 	    int i=pi->second;
 	    for(MI pj=PPj.first ; pj !=  PPj.second; ++pj)
-	    { 
+	    {
 		int j=pj->second;
 		n=max(i,n);
-	        m=max(j,m);	
-	       if(i >=0 && j>=0) 
+	        m=max(j,m);
+	       if(i >=0 && j>=0)
 	         A(i,j) += aij;
 	    }
-	}   
+	}
     }
     // resier A to n,m ?????
    // A[make_pair(n,m)] += R(); // Hack to be sure that the last term existe
    // delete B;
-    
+
    // return pA;
     return  newpMatrice_Creuse<R> (s,pA);//
 }
 
 template<class R>
 newpMatrice_Creuse<R>
-//map< pair<int,int>, R> *
 Matrixoutp2mapIJ (Stack s,outProduct_KN_<R>   * const & pop,const KN_<long> & ii,const KN_<long>  & jj)
 {
    const outProduct_KN_<R> & op(*pop);
@@ -2419,13 +2108,9 @@ Matrixoutp2mapIJ (Stack s,outProduct_KN_<R>   * const & pop,const KN_<long> & ii
     HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m);
     HashMatrix<int,R> & A =*pA;
 
- //  map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
- //  map< pair<int,int>, R> & A(*pA);
-//   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe
-   
    for (long il=0;il<n;++il)
     for (long jl=0;jl<m;++jl)
-     { 
+     {
        long i = ii[il];
        long j = jj[jl];
        if(i>=0 && j >=0)
@@ -2436,13 +2121,12 @@ Matrixoutp2mapIJ (Stack s,outProduct_KN_<R>   * const & pop,const KN_<long> & ii
                     ExecError("Out of Bound Error");
                 }
                R aij=op.a[i]*RNM::conj(op.b[j]);
-               if (Fem2D::norm(aij)>1e-40) 
+               if (Fem2D::norm(aij)>1e-40)
                   A(il,jl) += aij;
                }
-     }   
+     }
   delete pop;
-  return  newpMatrice_Creuse<R> (s,pA);//
-  //return pA;
+  return  newpMatrice_Creuse<R> (s,pA);
 }
 
 
@@ -2453,27 +2137,24 @@ AnyType Matrixoutp2map (Stack s, const AnyType & pp)
    long N=op.a.N(),M=op.b.N();
    long n = N;
    long m= M;
-//   map< pair<int,int>, R> *pA= new map< pair<int,int>, R>;
-//   map< pair<int,int>, R> & A(*pA);
 //   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe
     HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m);
     HashMatrix<int,R> & A =*pA;
 
    for (long i=0;i<N;++i)
     for (long j=0;j<M;++j)
-     { 
+     {
       R aij=op.a[i]*RNM::conj(op.b[j]);
-      if (Fem2D::norm(aij)>1e-40) 
+      if (Fem2D::norm(aij)>1e-40)
         A(i,j) += aij;
-     } 
-  delete &op;        
- // return pA;
+     }
+  delete &op;
  return  SetAny<newpMatrice_Creuse<R>>(newpMatrice_Creuse<R> (s,pA));//
 }
 
 
-template<typename R>  BlockMatrix<R>::~BlockMatrix() 
-{  
+template<typename R>  BlockMatrix<R>::~BlockMatrix()
+{
     if (e_Mij)
     {   if(verbosity>9999) cout << " del Block matrix "<< this << " " << e_Mij <<" N = " << N << " M = " << M << endl;
 	for (int i=0;i<N;i++)
@@ -2486,16 +2167,16 @@ template<typename R>  BlockMatrix<R>::~BlockMatrix()
 	M=0;
 	e_Mij=0;
 	t_Mij=0; }
-}   
+}
 
 template<typename R>  RawMatrix<R>::RawMatrix(const basicAC_F0 & args,int iinit)
 : init(iinit)
 {
     args.SetNameParam();
     emat = args[0];
-    
+
     const E_Array & ee= *dynamic_cast<const E_Array*>((Expression) args[1]);
-    
+
     int N=ee.size();
     if (N==1)
     {
@@ -2504,21 +2185,21 @@ template<typename R>  RawMatrix<R>::RawMatrix(const basicAC_F0 & args,int iinit)
 	lig=0;
 	col=0;
     }
-    
+
     else if (N==3)
     {
 	C_F0 c0(ee[0]),c1(ee[1]),c2(ee[2]);
 	coef=to<KN_<R> >(ee[2]);
 	lig=to<KN_<long> >(ee[0]);
 	col=to<KN_<long> >(ee[1]);
-	
+
     }
-    
-    
+
+
 }
 template<typename R>  BlockMatrix<R>::BlockMatrix(const basicAC_F0 & args,int iinit)
 : init(iinit)
-{   
+{
     N=0;
     M=0;
     args.SetNameParam();
@@ -2531,8 +2212,8 @@ template<typename R>  BlockMatrix<R>::BlockMatrix(const basicAC_F0 & args,int ii
         const E_Array* emi= dynamic_cast<const E_Array*>((Expression)  eMij[i]);
         if (!emi) err++;
         else
-        { 
-	    if ( i==0) 
+        {
+	    if ( i==0)
 		M = emi->size();
 	    else
 		if(M != emi->size()) err++;
@@ -2547,10 +2228,10 @@ template<typename R>  BlockMatrix<R>::BlockMatrix(const basicAC_F0 & args,int ii
     for (int i=0;i<N;i++)
     {
 	const E_Array li= *dynamic_cast<const E_Array*>((Expression)  eMij[i]);
-	
+
 	e_Mij[i] =  new Expression [M];
-	t_Mij[i] = new int [M]; 
-	for (int j=0; j<M;j++)  
+	t_Mij[i] = new int [M];
+	for (int j=0; j<M;j++)
 	{
 	    C_F0 c_Mij(li[j]);
 	    Expression eij=c_Mij.LeftValue();
@@ -2558,97 +2239,87 @@ template<typename R>  BlockMatrix<R>::BlockMatrix(const basicAC_F0 & args,int ii
 	    if ( rij == atype<long>() &&  eij->EvaluableWithOutStack() )
 	    {
 		long contm = GetAny<long>((*eij)(NullStack));
-		/*  prev  version
-		if(contm !=0) 
-		CompileError(" Block matrix , Just 0 matrix");
-		e_Mij[i][j]=0;
-		t_Mij[i][j]=0;*/
 		if(contm==0)
 		{
 		    e_Mij[i][j]=0;
 		    t_Mij[i][j]=0;
 		}
 		else if ( atype<R >()->CastingFrom(rij) )
-		{  		  // frev 2007 
+		{  		  // frev 2007
 		    e_Mij[i][j]=to<R>(c_Mij);
-		    t_Mij[i][j]=7; //  just un scalaire 
+		    t_Mij[i][j]=7; //  just un scalaire
 		}
 		else CompileError(" Block matrix , Just 0 matrix");
 	    }
-	    else if ( rij ==  atype<Matrice_Creuse<R> *>()) 
+	    else if ( rij ==  atype<Matrice_Creuse<R> *>())
 	    {
 		e_Mij[i][j]=eij;
 		t_Mij[i][j]=1;
-	    } 
-	    else if ( rij ==  atype<Matrice_Creuse_Transpose<R> >()) 
+	    }
+	    else if ( rij ==  atype<Matrice_Creuse_Transpose<R> >())
 	    {
 		e_Mij[i][j]=eij;
 		t_Mij[i][j]=2;
-	    } 
+	    }
 	    else if ( atype<KNM<R> *  >()->CastingFrom(rij) )
 	      {  //  before KN_ because KNM can be cast in KN_
-		  
+
 		  e_Mij[i][j]=to<KNM<R> * >(c_Mij);
 		  t_Mij[i][j]=5;
-	      }	    
+	      }
 	    else if ( atype<KN_<R> >()->CastingFrom(rij) )
-	    {  
+	    {
 		e_Mij[i][j]=to<KN_<R> >(c_Mij);
 		t_Mij[i][j]=3;
-		
-	    } 
+
+	    }
 	    else if ( atype<Transpose<KN_<R> > >()->CastingFrom(rij) )
-	    {  
-		
+	    {
+
 		e_Mij[i][j]=to<Transpose<KN_<R> > >(c_Mij);
 		t_Mij[i][j]=4;
-	    } 
+	    }
 	    else if ( atype<Transpose< KNM<R> * > >()->CastingFrom(rij) )
-	    {  
-		
+	    {
+
 		e_Mij[i][j]=to<Transpose<KNM<R> *> >(c_Mij);
 		t_Mij[i][j]=6;
 	    }
 	    else if ( atype<R >()->CastingFrom(rij) )
-	    {  		  // frev 2007 
+	    {  		  // frev 2007
 		e_Mij[i][j]=to<R>(c_Mij);
-		t_Mij[i][j]=7; //  just un scalaire 
+		t_Mij[i][j]=7; //  just un scalaire
 	    }
-	    
-	    else {  
-		
+
+	    else {
+
 		CompileError(" Block matrix ,  bad type in block matrix");
 	    }
-	    /*            else if   ( atype<map< pair<int,int>, R> * >()->CastingFrom(rij) ) 
-	    {
-		e_Mij[i][j]= to<map< pair<int,int>, R> *>(C_F0(eij,rij)).LeftValue();
-		t_Mij[i][j]=10;
-	    }*/
 	}
-	
+
     }
 }
 
 template<typename RR>
-class  SetRawMatformMat : public OneOperator { 
+class  SetRawMatformMat : public OneOperator {
 public:
-    typedef Matrice_Creuse<RR> *  A; // Warning  B type of  2 parameter 
+    typedef Matrice_Creuse<RR> *  A; // Warning  B type of  2 parameter
     typedef Matrice_Creuse<RR> *  R;
     typedef E_Array B; //   A type of 1 parameter
-    
+
     class CODE : public  E_F0 { public:
 	Expression Mat;
 	Expression lig;
 	Expression col;
 	Expression coef;
-	bool mi;    
-	    CODE(Expression a,const E_Array & tt)  
+	bool mi;
+	    CODE(Expression a,const E_Array & tt)
 		: Mat(a),
 		 mi(tt.MeshIndependent())
 	    {
 
 		    assert(&tt);
-		    if(tt.size()!=3) 
+		    if(tt.size()!=3)
 			CompileError("Set raw matrix:  [ lg,col, a] = A (size !=3) ");
 		    if (    aatypeknlongp->CastingFrom(tt[0].left() ) //// for  compilation error with g++ 3.2.2 (4 times)
 			&&  aatypeknlongp->CastingFrom(tt[1].left() )
@@ -2657,17 +2328,17 @@ public:
 			      lig = aatypeknlongp->CastTo(tt[0]);
 			      col = aatypeknlongp->CastTo(tt[1]);
 			      coef = atype<KN<RR>* >()->CastTo(tt[2]);
-			    }      
-			    else 
+			    }
+			    else
 				CompileError(" we are waiting for [ lg,col,a] = A");
     }
-	    
-	    AnyType operator()(Stack stack)  const 
+
+	    AnyType operator()(Stack stack)  const
 	    {
-                
+
                 //V4
 		A  a=GetAny<A>((*Mat)(stack));
-                
+
 		KN<long> *lg,*cl;
 		KN<RR> *cc;
 		lg = GetAny<KN<long>*>((*lig)(stack));
@@ -2676,7 +2347,7 @@ public:
 		int n=a->N(),m=a->M();
                 HashMatrix<int,RR> *mh = a->pHM();
                 mh->COO();
-                
+
                 int kk = mh->nnz,k1=0;
                 if( mh->pij(n-1,m-1)==0 ) k1=1;
 		lg->resize(kk+k1);
@@ -2684,14 +2355,13 @@ public:
 		cl->resize(kk+k1);
 		int k=0;
 
-		//if (!a->sym)
                 for ( k=0 ; k < kk;++k)
-		  {  
+		  {
                       (*lg)[k]= mh->i[k];
 		      (*cl)[k]= mh->j[k];
                       (*cc)[k]= mh->aij[k];
 		  }
-                
+
                 if(k1)
                 {
                  (*lg)[kk]= n;
@@ -2700,62 +2370,27 @@ public:
                 }
 
 		return SetAny<R>(a);
-	    } 
-	    bool MeshIndependent() const     {return  mi;} // 
+	    }
+	    bool MeshIndependent() const     {return  mi;} //
 	    ~CODE() {}
-	    operator aType () const { return atype<R>();}    
+	    operator aType () const { return atype<R>();}
     }; // end sub class CODE
-    
-    
-public: // warning hack  A and B 
-	E_F0 * code(const basicAC_F0 & args) const 
-    { return  new CODE(t[1]->CastTo(args[1]),*dynamic_cast<const E_Array*>( t[0]->CastTo(args[0]).RightValue()));} 
-    SetRawMatformMat():   OneOperator(atype<R>(),atype<B>(),atype<A>())  {} // warning with A and B 
-    
+
+
+public: // warning hack  A and B
+	E_F0 * code(const basicAC_F0 & args) const
+    { return  new CODE(t[1]->CastTo(args[1]),*dynamic_cast<const E_Array*>( t[0]->CastTo(args[0]).RightValue()));}
+    SetRawMatformMat():   OneOperator(atype<R>(),atype<B>(),atype<A>())  {} // warning with A and B
+
 };
 
-
-
-
-/*
-newpMatrice_Creuse<R> CopyMatC2R(Stack stack,Expression emat,Expression CR2eA)
-{
-    typedef Complex C; 
-    typedef double R; 
-    using namespace Fem2D;
-    Matrice_Creuse_C2R   CRMat =GetAny<Matrice_Creuse_C2R>((*CR2eA)(stack));
-    Matrice_Creuse<C> *Mat=CRMat; 
-    int cas = CRMat.cas; 
-    Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
-    MatriceMorse<C> * mr= Mat->pHM();
-    ffassert(mr); 
-    MatriceMorse<R> * mrr = 0;// ZZZZZ
-   // cout << " CopyMatC2R:  " << init << " " <<  sparse_mat <<endl;
-    if(cas==0) 
-        mrr = new MatriceMorse<R>(*mr,realC);
-    else if(cas==1) 
-        mrr = new MatriceMorse<R>(*mr,imagC);
-    else {
-         cout << " cas = " << cas <<endl;
-        ffassert(0); 
-    }
-    delete mr;
-    if(!init) sparse_mat->init() ; // ???? 
-    sparse_mat->A.master(mrr);
-    //ffassert(0);// a faire 
-   // return sparse_mat;
-  // ZZZZ
-    return newpMatrice_Creuse<R>(stack,mrr);
-}
-*/
 template<typename R>  AnyType RawMatrix<R>::operator()(Stack stack) const
 {
-    MatriceMorse<R> * amorse =0; 
+    MatriceMorse<R> * amorse =0;
     KN_<R> cc(GetAny< KN_<R>  >((*coef)(stack)));
     int k= cc.N();
     int n= k;
     int m=n;
-   // map< pair<int,int>, R> Aij;
     bool sym=false;
     if( lig && col)
     {
@@ -2776,26 +2411,26 @@ template<typename R>  AnyType RawMatrix<R>::operator()(Stack stack) const
 
     if(verbosity)
 	cout << "  -- Raw Matrix    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nnz << endl;
-    
+
     Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
     if( !init) sparse_mat->init();
 
     sparse_mat->A.master(amorse);
     sparse_mat->typemat=0; //(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
-    
+
     if(verbosity>3) { cout << "  End Raw Matrix : " << endl;}
-    
-    return sparse_mat;   
+
+    return sparse_mat;
 }
 template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 {
   typedef list<tuple<R,MatriceCreuse<R> *,bool> > * L;
    KNM<L> Bij(N,M);
-   KNM<KNM_<R> * > Fij(N,M); 
-   KNM<bool> cnjij(N,M); 
+   KNM<KNM_<R> * > Fij(N,M);
+   KNM<bool> cnjij(N,M);
    KNM<R> Rij(N,M); //  to sto
-  
-   cnjij = false; 
+
+   cnjij = false;
    KN<long> Oi(N+1), Oj(M+1);
    if(verbosity>9) { cout << " Build Block Matrix : " << N << " x " << M << endl;}
    Bij = (L) 0;
@@ -2807,9 +2442,9 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
       Fij(i,j)=0;
       Expression eij = e_Mij[i][j];
       int tij=t_Mij[i][j];
-      if (eij) 
+      if (eij)
       {
-        cnjij(i,j) = tij%2 == 0; 
+        cnjij(i,j) = tij%2 == 0;
         AnyType e=(*eij)(s);
         if (tij==1) Bij(i,j) = to( GetAny< Matrice_Creuse<R>* >( e)) ;
         else if  (tij==2) Bij(i,j) = to( GetAny<Matrice_Creuse_Transpose<R> >(e));
@@ -2818,8 +2453,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
         else if (tij==5)  { KNM<R> * m= GetAny< KNM<R>*  >( e);  Fij(i,j) = new KNM_<R>(*m);}
         else if (tij==6)  { KNM<R> * m= GetAny< Transpose< KNM<R>* >  >( e).t;  Fij(i,j) = new KNM_<R>(m->t()); }
 	else if (tij==7)   { Rij(i,j)=GetAny< R  >( e);  Fij(i,j) = new KNM_<R>(&(Rij(i,j)),1,1);}
-        
-   //     else if  (tij==3) {}
+
         else {
          cout << " Bug " << tij << endl;
          ExecError(" Type sub matrix block unknown ");
@@ -2829,34 +2463,34 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
      //  compute size of matrix
      int err=0;
     for (int i=0;i<N;++i)
-     for (int j=0;j<M;++j) 
+     for (int j=0;j<M;++j)
        {
         pair<long,long> nm(0,0);
-        
-       if (Bij(i,j)) 
+
+       if (Bij(i,j))
          nm = get_NM( *Bij(i,j));
-       else if(Fij(i,j)) 
+       else if(Fij(i,j))
          nm = make_pair<long,long>(Fij(i,j)->N(), Fij(i,j)->M());
-          
+
         if (( nm.first || nm.second)  && verbosity>3)
           cout << " Block [ " << i << "," << j << " ]      =     " << nm.first << " x " << nm.second << " cnj = " << cnjij(i,j) << endl;
         if (nm.first)
           {
           if ( Oi(i+1) ==0 )  Oi(i+1)=nm.first;
           else  if(Oi(i+1) != nm.first)
-            { 
+            {
                  err++;
-                 cerr <<"Error Block Matrix,  size sub matrix" << i << ","<< j << " n (old) "  << Oi(i+1) 
+                 cerr <<"Error Block Matrix,  size sub matrix" << i << ","<< j << " n (old) "  << Oi(i+1)
                        << " n (new) " << nm.first << endl;
 
             }
           }
-          if(nm.second) 
-          {  
+          if(nm.second)
+          {
           if   ( Oj(j+1) ==0) Oj(j+1)=nm.second;
-          else   if(Oj(j+1) != nm.second) 
-            { 
-              cerr <<"Error Block Matrix,  size sub matrix" << i << ","<< j << " m (old) "  << Oj(j+1) 
+          else   if(Oj(j+1) != nm.second)
+            {
+              cerr <<"Error Block Matrix,  size sub matrix" << i << ","<< j << " m (old) "  << Oj(j+1)
                    << " m (new) " << nm.second << endl;
               err++;}
           }
@@ -2864,7 +2498,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
 
     if (err)    ExecError("Error Block Matrix,  size sub matrix");
     //  gestion of zero block ????
-    
+
     for (int j=0;j<M;++j)
     {  if(verbosity>99) cout << j << " colum size" << Oj(j+1) << endl;
         if   ( Oj(j+1) ==0) {
@@ -2879,17 +2513,10 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
                if( Oi(i+1) !=1)  err++;}
     }
     if (err)    ExecError("Error Block Matrix with  0 line or  0 colomn..");
-   
-
-   
-    
-
-//  cout << "Oi = " <<  Oi << endl;
-//  cout << "Oj = " <<  Oj << endl;
 
     for (int i=0;i<N;++i)
       Oi(i+1) += Oi(i);
-    for (int j=0;j<M;++j) // correct 10/01/2007 FH 
+    for (int j=0;j<M;++j) // correct 10/01/2007 FH
       Oj(j+1) += Oj(j);// correct 07/03/2010 FH
   long n=Oi(N),m=Oj(M);
   if(verbosity>99)
@@ -2897,13 +2524,12 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
      cout << "     Oi = " <<  Oi << endl;
      cout << "     Oj = " <<  Oj << endl;
   }
-  MatriceMorse<R> * amorse =0; 
+  MatriceMorse<R> * amorse =0;
 {
-   //map< pair<int,int>, R> Aij;
     HashMatrix<int,R>  *Aij = new  HashMatrix<int,R>( n, m,0);
     for (int i=0;i<N;++i)
-     for (int j=0;j<M;++j) 
-       if (Bij(i,j)) 
+     for (int j=0;j<M;++j)
+       if (Bij(i,j))
          {
            if(verbosity>99)
              cout << "  Add  Block S " << i << "," << j << " =  at " << Oi(i) << " x " << Oj(j) << " conj = " << cnjij(i,j) << endl;
@@ -2914,10 +2540,8 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
              int jj00=Oj(j);
              bool cnj=cnjij(i,j);
             BuildCombMat(mmij,lM,ttrans,ii00,jj00,cnj);
-            
-           //  tuple<int,int,bool> BuildCombMat(HashMatrix<int,R> & mij,const list<tuple<R,HashMatrix<int,R>*,bool> >  &lM,bool trans,int ii00,int jj00,bool cnj=false)
 
-            
+
          }
        else if (Fij(i,j))
         {
@@ -2925,29 +2549,27 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
              cout << "  Add  Block F " << i << "," << j << " =  at " << Oi(i) << " x " << Oj(j) << endl;
            BuildCombMat(*Aij,*Fij(i,j),Oi(i),Oj(j),R(1.),cnjij(i,j));// BuildCombMat
         }
-        
-           
+
+
     amorse=  Aij;
   }
   if(verbosity>9)
      cout << "  -- Block Matrix NxM = " << N << "x" << M << "    nxm  =" <<n<< "x" << m << " nb  none zero coef. " << amorse->nnz << endl;
- 
+
   Matrice_Creuse<R> * sparse_mat =GetAny<Matrice_Creuse<R>* >((*emat)(s));
   if(!init) sparse_mat->init();
-  //sparse_mat->pUh=0;
-  // sparse_mat->pVh=0; 
   sparse_mat->A.master(amorse);
     sparse_mat->typemat=0;//(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) : TypeSolveMat(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
-                
-     
-  // cleanning    
+
+
+  // cleanning
   for (int i=0;i<N;++i)
    for (int j=0;j<M;++j)
     if(Bij(i,j)) delete Bij(i,j);
-    else if(Fij(i,j))  delete Fij(i,j);  
+    else if(Fij(i,j))  delete Fij(i,j);
    if(verbosity>9) { cout << "  End Build Blok Matrix : " << endl;}
-   
- return sparse_mat;  
+
+ return sparse_mat;
 
 }
 
@@ -2969,33 +2591,16 @@ AnyType mM2L3 (Stack , const AnyType & pp)
     minusMat<R> mpp(to(GetAny<Matrice_Creuse<R> *>(pp)));
     return SetAny<minusMat<R> >(mpp);
 }
-/* template<class R>
-AnyType mmM2L3 (Stack , const AnyType & pp)
-{
-    minusMat<R> &  p(GetAny<minusMat<R> >(pp));
-    minusMat<R> mpp(p.l);
-    delete  p.l;
-    return mpp.l;
-}
 
-template<class R>
-AnyType mmM2L3c (Stack , const AnyType & pp)
-{
-    list<tuple<R,MatriceCreuse<R> *,bool> >  *  p(GetAny<minusMat<R> >(pp))
-    minusMat<R> mpp(p.l);
-    delete  p.l;
-    return mpp.l;
-}
-*/
 template<class R>
 class E_ForAllLoopMatrix
 {  public:
 
     typedef R *VV;
     typedef long KK;
-    
+
     typedef Matrice_Creuse<R> *  Tab;
-    
+
     typedef  ForAllLoopOpBase DataL;
     const DataL *data;
     E_ForAllLoopMatrix(const DataL *t): data(t){}
@@ -3004,14 +2609,13 @@ class E_ForAllLoopMatrix
         KK * i   =   GetAny<KK*>(data->i(s));
         KK * j   =   GetAny<KK*>(data->j(s));
         VV  v   =   GetAny<VV >(data->v(s));
-        //      cout << i << " " << j << " " << v << " " << data->epl <<     endl;
         if(verbosity>1000) {
         cout << " i " << (char*) (void *) i -  (char*)(void*) s ;
         cout << " j " << (char*) (void *) j  -  (char*)(void*) s ;
         cout << " vi " <<  (char*) (void *) v -  (char*)(void*) s ;
         cout << endl;
         }
-        
+
         ffassert(i && v);
         MatriceCreuse<R> *m=t->A;
         MatriceMorse<R> *mm = dynamic_cast<MatriceMorse<R>*>(m);
@@ -3025,10 +2629,9 @@ class E_ForAllLoopMatrix
                 data->code(s);
                 mm->aij[kk] = *v;
             }
-      //  data->end(s);
         return Nothing  ;
     }
-    
+
 };
 
 //  Mat real -> mat complex .... ??? FH.   april  2016 ....
@@ -3055,7 +2658,7 @@ struct  VirtualMatCR :public RNM_VirtualMatrix<Complex>{ public:
         KN_<double> iy(py+1,cy.N(),cy.step*2);
         VM.addMatTransMul(rx,ry);
         VM.addMatTransMul(ix,iy);
-    
+
     }
         bool WithSolver() const {return VM.WithSolver();} // by default no solver
     virtual void Solve( KN_<R> & cx ,const KN_<R> & cy) const
@@ -3069,7 +2672,7 @@ struct  VirtualMatCR :public RNM_VirtualMatrix<Complex>{ public:
         VM.Solve(rx,ry);
         VM.Solve(ix,iy);
     }
-    
+
     bool ChecknbLine  (int n) const { return VM.ChecknbLine(n); }
     bool ChecknbColumn  (int m) const  { return VM.ChecknbColumn(m); }
 };
@@ -3078,14 +2681,14 @@ template<class R,class A,class B>    // extend (4th arg.)
 class  Op2_mulvirtAvCR : public OneOperator {     //
     aType r; //  return type
 
-  
+
 public:
     class CODE :public  E_F0 { public:                               // extend
         Expression a0,a1;          // extend
         CODE( Expression aa0,Expression aa1) : a0(aa0), a1(aa1) {}  // extend (2th arg.)
         AnyType operator()(Stack s)  const
         {
-            
+
             RNM_VirtualMatrix<Complex> *pv = new  VirtualMatCR ((*GetAny<A>((*a0)(s))).A);
             Add2StackOfPtr2Free(s,pv);
             return SetAny<R>(R(pv,GetAny<B>((*a1)(s))));
@@ -3097,16 +2700,16 @@ public:
     E_F0 * code(const basicAC_F0 & args) const
     {     if ( args.named_parameter && !args.named_parameter->empty()  )
         CompileError( " They are used Named parameter ");
-        
+
         return  new CODE( t[0]->CastTo(args[0]),
                           t[1]->CastTo(args[1]));}     // extend
     Op2_mulvirtAvCR(int preff=0):                        // 3->4
     OneOperator(map_type[typeid(R).name()],
                 map_type[typeid(A).name()],
                 map_type[typeid(B).name()]) {pref=preff;}
-    
+
 };
-// Norme Hashmatrix 
+// Norme Hashmatrix
 template<class K>
 double get_norme_linfty(Matrice_Creuse<K> * p){
     if(p==0) return 0.;
@@ -3135,99 +2738,79 @@ Matrice_Creuse<R> * SetMatrice_Creuse(Matrice_Creuse<R> * p,newpMatrice_Creuse<R
 template <class R>
 void AddSparseMat()
 {
-// aType tkrp = atype<KN<R> *>(); 
  SetMatrix_Op<R>::btype = Dcl_Type<const  SetMatrix_Op<R> * >();
  Dcl_Type<TheDiagMat<R> >();
  Dcl_Type<TheCoefMat<R> >(); // Add FH oct 2005
- Dcl_Type< map< pair<int,int>, R> * >(); // Add FH mars 2005 
+ Dcl_Type< map< pair<int,int>, R> * >(); // Add FH mars 2005
  Dcl_Type<  minusMat<R>  >(); // Add FJH mars 2007
- 
+
  basicForEachType * t_MC=atype<  Matrice_Creuse<R>* >();
-    
+
  t_MC->SetTypeLoop(atype<  R* >(),atype<  long* >(),atype<  long* >());
-    
-// basicForEachType * t_MCt=atype<  Matrice_Creuse_Transpose<R> >();
-// basicForEachType * t_lM=atype< list<tuple<R,MatriceCreuse<R> *,bool> > * >();
-// basicForEachType * t_nM=atype<  minusMat<R> >();
- 
+
  basicForEachType * t_MM=atype<map< pair<int,int>, R> * >();
- 
-TheOperators->Add("*", 
+
+TheOperators->Add("*",
         new OneBinaryOperator<Op2_mulvirtAv<typename RNM_VirtualMatrix<R>::plusAx,Matrice_Creuse<R>*,KN_<R> > >,
         new OneBinaryOperator<Op2_mulvirtAv<typename RNM_VirtualMatrix<R>::plusAtx,Matrice_Creuse_Transpose<R>,KN_<R> > >,
         new OneBinaryOperator<Op2_mulvirtAv<typename RNM_VirtualMatrix<R>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<R> > > ,
         new OneBinaryOperator<Op2_mulvirtAv<typename RNM_VirtualMatrix<R>::solveAtxeqb,Matrice_Creuse_inv_trans<R>,KN_<R> > >
         );
 
-/*if(0)
-TheOperators->Add("*", 
-        new OneBinaryOperator<Op2_mulvirtAv<typename RNM_VirtualMatrix<R>::plusAx,Matrice_Creuse<R>*,KN_<R> > >( 0  ,tkrp),
-        new OneBinaryOperator<Op2_mulvirtAv<typename RNM_VirtualMatrix<R>::plusAtx,Matrice_Creuse_Transpose<R>,KN_<R> > >( 0 ,tkrp),
-        new OneBinaryOperator<Op2_mulvirtAv<typename RNM_VirtualMatrix<R>::solveAxeqb,Matrice_Creuse_inv<R>,KN_<R> > >( 0 ,tkrp)
-        );
-*/        
 TheOperators->Add("^", new OneBinaryOperatorA_inv<R>());
 TheOperators->Add("^", new OneBinaryOperatorAt_inv<R>());
 
-// matrix new code   FH (Houston 2004)        
+// matrix new code   FH (Houston 2004)
  TheOperators->Add("=",
         new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,newpMatrice_Creuse<R> > (SetMatrice_Creuse<R,0> ),
-//       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const Matrix_Prod<R,R>,E_F_StackF0F0>(ProdMat<R,R,R,1>),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KN<R> *,E_F_StackF0F0>(DiagMat<R,1>),
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R,1>), 
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R,1>),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R,1>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparse<R,1>) ,
-   //    new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,map< pair<int,int>, R> * ,E_F_StackF0F0>(MatMap2Sparse<R,1>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<tuple<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R,1>) ,
        new OneOperatorCode<BlockMatrix1<R> >()
-       
+
        );
-       
+
  TheOperators->Add("<-",
        new OneOperatorCode<BlockMatrix<R> >(),
        new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,newpMatrice_Creuse<R> > (SetMatrice_Creuse<R,1> ),
-//       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation::Op*,E_F_StackF0F0>(SetMatrixInterpolation),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const Matrix_Prod<R,R>,E_F_StackF0F0>(ProdMat<R,R,R,0>),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KN<R> *,E_F_StackF0F0>(DiagMat<R,0>)  ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R,0>), 
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R,0>),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R,0>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparse<R,0>) ,
-     //V4  new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,map< pair<int,int>, R> * ,E_F_StackF0F0>(MatMap2Sparse<R,0>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<tuple<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R,0>)
-      
-       
+
+
        );
-TheOperators->Add("*", 
+TheOperators->Add("*",
         new OneBinaryOperator<Op2_pair<Matrix_Prod<R,R>,Matrice_Creuse<R>*,Matrice_Creuse<R>*> >,
-        new OneBinaryOperator<Op2_pair<Matrix_Prod<R,R>,Matrice_Creuse_Transpose<R>,Matrice_Creuse<R>* > >, 
+        new OneBinaryOperator<Op2_pair<Matrix_Prod<R,R>,Matrice_Creuse_Transpose<R>,Matrice_Creuse<R>* > >,
         new OneBinaryOperator<Op2_pair<Matrix_Prod<R,R>,Matrice_Creuse_Transpose<R>,Matrice_Creuse_Transpose<R> > >,
         new OneBinaryOperator<Op2_pair<Matrix_Prod<R,R>,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R> > > ,
-        new OneBinaryOperator<Op2_ListCM<R> >  , 
+        new OneBinaryOperator<Op2_ListCM<R> >  ,
         new OneBinaryOperator<Op2_ListMC<R> >  ,
-	new OneBinaryOperator<Op2_ListCMt<R> >  , 
-        new OneBinaryOperator<Op2_ListMtC<R> >  
-		  
+	new OneBinaryOperator<Op2_ListCMt<R> >  ,
+        new OneBinaryOperator<Op2_ListMtC<R> >
+
         );
-TheOperators->Add("+", 
+TheOperators->Add("+",
         new OneBinaryOperator<Op2_ListCMCMadd<R> >,
         new OneBinaryOperator<Op2_ListCMMadd<R> >,
         new OneBinaryOperator<Op2_ListMCMadd<R> >,
-//	new OneBinaryOperator<Op2_ListCMCMadd<R> >(t_MCt,t_lM),
-//	new OneBinaryOperator<Op2_ListCMCMadd<R> >(t_MC,t_lM),
         new OneBinaryOperator<Op2_ListMMadd<R> >
-       
+
        );
     TheOperators->Add("-",
                       new OneBinaryOperator<Op2_ListCMCMsub<R> >,
                       new OneBinaryOperator<Op2_ListCMMadd<R,-1> >,
                       new OneBinaryOperator<Op2_ListMCMadd<R,-1> >,
-                      //    new OneBinaryOperator<Op2_ListCMCMadd<R> >(t_MCt,t_lM),
-                      //    new OneBinaryOperator<Op2_ListCMCMadd<R> >(t_MC,t_lM),
                       new OneBinaryOperator<Op2_ListMMadd<R,-1> >
-                      
+
                       );
- TheOperators->Add("-",  
+ TheOperators->Add("-",
 	 new OneUnaryOperator<Op1_LCMd<R> >
      );
     Add<Matrice_Creuse<R> *>("COO",".",new OneOperator1<bool,Matrice_Creuse<R> *>(set_mat_COO<R>) );
@@ -3239,41 +2822,33 @@ TheOperators->Add("+",
  Add<Matrice_Creuse<R> *>("nnz",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_nbcoef<R>) );
  Add<Matrice_Creuse<R> *>("size",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_nbcoef<R>) );
  Add<Matrice_Creuse<R> *>("trace",".",new OneOperator1<R,Matrice_Creuse<R>* >(get_trace_mat<R>) );
- 
+
  Add<Matrice_Creuse<R> *>("diag",".",new OneOperator1<TheDiagMat<R> ,Matrice_Creuse<R> *>(thediag<R>) );
  Add<Matrice_Creuse<R> *>("coef",".",new OneOperator1<TheCoefMat<R> ,Matrice_Creuse<R> *>(thecoef<R>) );
 
-// Add<Matrice_Creuse<R> *>("setdiag",".",new OneOperator2<long,Matrice_Creuse<R> *,KN<R> *>(set_diag<R>) );
  TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheDiagMat<R> >(get_mat_daig<R>) );
-    
+
  TheOperators->Add("<-", new OneOperator2<KN<R>*,KN<R>*,TheDiagMat<R> >(init_get_mat_daig<R>) );
     TheOperators->Add("=", new OneOperator2<TheDiagMat<R>,TheDiagMat<R>,KN<R>*>(set_mat_daig<R>) );
- 
-// TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheDiagMat<R> >(get_mat_daig<R>) );
-// TheOperators->Add("=", new OneOperator2<TheDiagMat<R>,TheDiagMat<R>,KN<R>*>(set_mat_daig<R>) );
+
 // ADD oct 2005
  TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheCoefMat<R> >(get_mat_coef<R>) );
  TheOperators->Add("=", new OneOperator2<TheCoefMat<R>,TheCoefMat<R>,KN<R>*>(set_mat_coef<R>) );
- 
-// TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheCoefMat<R> >(get_mat_coef<R>) );
-// TheOperators->Add("=", new OneOperator2<TheCoefMat<R>,TheCoefMat<R>,KN<R>*>(set_mat_coef<R>) );
- 
+
  Global.Add("set","(",new SetMatrix<R>);
  Add<Matrice_Creuse<R> *>("linfty",".",new OneOperator1<double,Matrice_Creuse<R> *>(get_norme_linfty));
  Add<Matrice_Creuse<R> *>("l2",".",new OneOperator1<double,Matrice_Creuse<R> *>(get_norme_l2));
  Add<Matrice_Creuse<R> *>("l1",".",new OneOperator1<double,Matrice_Creuse<R> *>(get_norme_l1));
- //Global.Add("psor","(",new  OneOperatorCode<Psor<R> > );
- //   a(i,i)
  atype<Matrice_Creuse<R> * >()->Add("(","",new OneOperator3_<R*,Matrice_Creuse<R> *,long,long >(1,get_elementp2mc<R>));
-    
+
  atype<Matrice_Creuse<R> * >()->Add("[","",new OneOperator3_<R,Matrice_Creuse<R> *,long,long >(10,get_element2mc<R>));
- 
+
 //    typedef map< pair<int,int>, R> MAPMAT;
  typedef Matrice_Creuse<R> * MAPMATC;
  typedef   newpMatrice_Creuse<R> MAPMATN;
  atype<KNM<R>*>()->Add("(","",new OneOperator3s_<MAPMATN ,KNM<R>*,Inv_KN_long,Inv_KN_long >(Matrixfull2mapIJ_inv<R>));
  atype<KNM<R>*>()->Add("(","",new OneOperator3s_<MAPMATN ,KNM<R>*,KN_<long>,KN_<long> >(Matrixfull2mapIJ<R>));
- 
+
  atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3s_<MAPMATN ,outProduct_KN_<R>*,Inv_KN_long,Inv_KN_long >(Matrixoutp2mapIJ_inv<R>));
  atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3s_<MAPMATN ,outProduct_KN_<R>*,KN_<long>,KN_<long> >(Matrixoutp2mapIJ<R>));
 
@@ -3288,82 +2863,47 @@ TheOperators->Add("+",
  t_MC->Add("(","",new OneOperator3s_<MAPMATN ,MAPMATC ,Inv_KN_long,Inv_KN_long >(Matrixmapp2mapIJ1<R>,t_MC));
  t_MC->Add("(","",new OneOperator3s_<MAPMATN ,MAPMATC ,KN_<long>,KN_<long> >(Matrixmapp2mapIJ<R>,t_MC));
 
- //atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<MAPMAT *,MAPMAT *,Inv_KN_long,Inv_KN_long >(Matrixmapp2mapIJ1<R>),t_lM);
- //atype<outProduct_KN_<R>*>()->Add("(","",new OneOperator3_<MAPMAT *,MAPMAT *,KN_<long>,KN_<long> >(Matrixmapp2mapIJ<R>),t_lM);
-
- 
-//map< pair<int,int>, R> * ttt=   (0);
-
-   //   ; 
  map_type[typeid(MAPMATN ).name()]->AddCast(
      new E_F1_funcT<MAPMATN ,KNM<R>* >(Matrixfull2map<R>),
      new E_F1_funcT<MAPMATN ,outProduct_KN_<R>* >(Matrixoutp2map<R>)
-     //, new E_F1_funcT<MAPMAT *,Matrice_Creuse<R>* >(MatriceCreuse2map<R>)
 
-       ); 
+       );
 
  map_type[typeid(list<tuple<R,MatriceCreuse<R> *,bool> > *).name()]->AddCast(
      new E_F1_funcT<list<tuple<R,MatriceCreuse<R> *,bool> > *,Matrice_Creuse<R>* >(M2L3<R>),
      new E_F1_funcT<list<tuple<R,MatriceCreuse<R> *,bool> > *,Matrice_Creuse_Transpose<R> >(tM2L3<R>),
      new E_F1_funcT<list<tuple<R,MatriceCreuse<R> *,bool> > *,minusMat<R> >(mM2L3<R> )
      );
- /*
- map_type[typeid(minusMat<R>).name()]->AddCast( 
-	new E_F1_funcT<minusMat<R>,list<tuple<R,MatriceCreuse<R> *,bool> > * >(mmM2L3<R> )
-	//new E_F1_funcT<minusMat<R>,Matrice_Creuse<R>*  > * >(mmM2L3c<R> ),
-	//new E_F1_funcT<minusMat<R>,Matrice_Creuse_Transpose<R> > * >(mmM2L3ct<R> )
-						
-      );
-*/
 
 
     TheOperators->Add("{}",new ForAllLoop<E_ForAllLoopMatrix<R> >);
 
-      
-//  --- end  
+
+//  --- end
 }
 
-
-//extern Map_type_of_map map_type_of_map ; //  to store te type 
-//extern Map_type_of_map map_pair_of_type ; //  to store te type 
-extern int lineno(); 
+extern int lineno();
 class  PrintErrorCompile : public OneOperator {
-    public: 
+    public:
     const char * cmm;
-    E_F0 * code(const basicAC_F0 & ) const 
+    E_F0 * code(const basicAC_F0 & ) const
      { ErrorCompile(cmm,lineno());
-      return 0;} 
+      return 0;}
     PrintErrorCompile(const char * cc): OneOperator(map_type[typeid(R).name()]),cmm(cc){}
 
 };
 
-class PrintErrorCompileIM :  public E_F0info { public:  
+class PrintErrorCompileIM :  public E_F0info { public:
  typedef double  Result;
- static E_F0 *   f(const basicAC_F0 & args)  
-    {   
+ static E_F0 *   f(const basicAC_F0 & args)
+    {
      lgerror("\n\n *** change interplotematrix in interpole.\n  *** Bad name in previous version,\n *** sorry FH.\n\n");
-     return 0;  }   
+     return 0;  }
     static ArrayOfaType  typeargs() {return  ArrayOfaType(true);}
-    operator aType () const { return atype<double>();} 
+    operator aType () const { return atype<double>();}
 
 };
 
-// the default probleme solver
-//TypeSolveMat::TSolveMat  TypeSolveMatdefaultvalue=TypeSolveMat::defaultvalue;
-/*
-bool SetDefault()
-{
-    if(verbosity>1)
-	cout << " SetDefault sparse to default" << endl;
-    DefSparseSolverNew<double,0>::solver =DefSparseSolverNew<double,0>::solverdef;
-    DefSparseSolverNew<double,1>::solver =DefSparseSolverNew<double,1>::solverdef;
-    DefSparseSolverNew<Complex,0>::solver =DefSparseSolverNew<Complex,0>::solverdef;
-    DefSparseSolverNew<Complex,1>::solver =DefSparseSolverNew<Complex,1>::solverdef;
-    TypeSolveMat::defaultvalue =TypeSolveMat::SparseSolver;
-    return  true;
-}
-
-*/
 template<class T>
 class removeDOF_Op : public E_F0mps {
 public:
@@ -3387,7 +2927,7 @@ public:
     : eA(param1), eR(param2), ex(0), eout(0), transpose(false) {
         args.SetNameParam(n_name_param, name_param, nargs);
     }
-    
+
     AnyType operator()(Stack stack) const;
 };
 
@@ -3407,7 +2947,7 @@ public:
     removeDOF(int) : OneOperator(atype<long>(), atype<Matrice_Creuse<double>*>(), atype<KN<T>*>(), atype<KN<T>*>()),withA(0) {}
     removeDOF(int, int) : OneOperator(atype<long>(), atype<Matrice_Creuse<T>*>(), atype<Matrice_Creuse<double>*>()),withA(2) {}
     removeDOF(int, int, int) : OneOperator(atype<long>(), atype<Matrice_Creuse_Transpose<double>>(), atype<KN<T>*>(), atype<KN<T>*>()),withA(3) {}
-   
+
     E_F0* code(const basicAC_F0& args) const {
         if(withA == 1)
         return new removeDOF_Op<T>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]));
@@ -3443,13 +2983,10 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
     bool rhs = (pX && pOut) && (pOut->n > 0 || pX->n > 0);
     if(pA)
     {
-        //cout << "removeDOF_Op pA " << pA << " " << pA->pHM() <<endl;
-        //cout << "   pR " << pA << " " << pR->pHM() <<endl;
         if(!pC)
             pC = pR;
         MatriceMorse<T> *mA = pA->pHM();
         MatriceMorse<R> *mR = pR->pHM();
-        //cout << " removeDOF_Op "  << " " << mR << " " << mC << " "  << mA <<  endl;
         if(!mC)
             mC = mR;
         pA->Uh = pR->Uh;
@@ -3462,7 +2999,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
         unsigned int n = condensation ? condensation->n : mR->nnz;
         unsigned int m = condensation ? condensation->n : mC->nnz;
         KN<int> lg(n+1,0);
- 
+
         if(rhs && pOut->n != n) pOut->resize(n);
         mC->COO();
         mR->COO();
@@ -3476,7 +3013,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
             if(!mA->half) {
                 std::vector<std::pair<int, T> > tmp;
                 tmp.reserve(mA->nnz);
-                
+
                 lg[0] = 0;
                 for(long i = 0; i < n; ++i) {
                     for(long j = mA->p[mR->j[i]]; j < mA->p[mR->j[i] + 1]; ++j) {
@@ -3510,14 +3047,14 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                         A(i,j) =aij;
                     }
                 }
-              
-                
+
+
             }// !mA->Half
             else {
                 std::vector<std::vector<std::pair<unsigned int, T> > > tmp(n);
                 for(unsigned int i = 0; i < n; ++i)
                     tmp[i].reserve(mA->p[mR->p[i] + 1] - mA->p[mR->j[i]]);
-                
+
                 unsigned int nnz = 0;
                 for(unsigned int i = 0; i < n; ++i) {
                     for(unsigned int j = mA->p[mR->j[i]]; j < mA->p[mR->j[i] + 1]; ++j) {
@@ -3536,15 +3073,15 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                 mA->clear();
                 mA->resize(n,m,nnz);
                 MatriceMorse<T> &A = *mA;
-                
+
                 for(unsigned int i = 0; i < n; ++i) {
                     std::sort(tmp[i].begin(), tmp[i].end(),cmp<T>);
                     // c++11, [](const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; });
                     for(typename std::vector<std::pair<unsigned int, T> >::const_iterator it = tmp[i].begin(); it != tmp[i].end(); ++it)
                           A(i,it->first) =it->second;
-                    
+
                 }
-                
+
             }
         }
 
@@ -3563,16 +3100,14 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                 }
 
             }
-        
-            
-            //        if(!mA->half) {
+
             std::vector<std::pair<int, T> > tmpInterior;
             std::vector<std::pair<int, T> > tmpBoundary;
             std::vector<std::pair<int, T> > tmpInteraction;
             tmpInterior.reserve(mA->nnz);
             tmpBoundary.reserve(mA->nnz);
             tmpInteraction.reserve(mA->nnz);
-            
+
             lg[0] = 0;
             for(long i = 0; i < mA->n; ++i) {
                 int row = tmpVec[i];
@@ -3584,7 +3119,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                         else
                             tmpInteraction.push_back(make_pair(col - 1, mA->aij[j]));
                     }
-                    
+
                 }
                 else {
                     for(unsigned int j = mA->p[i]; j < mA->p[i + 1]; ++j) {
@@ -3592,13 +3127,12 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                         if(col > 0)
                             tmpBoundary.push_back(make_pair(col - 1, mA->aij[j]));
                     }
-                    // std::sort(tmp.begin() + lg[i], tmp.end());
                     if(rhs)
                         *(*pOut + i) = *(*pX + *(*condensation + i));
                     lg[i + 1] = tmpBoundary.size();
                 }
             }
-  
+
             mA->clear();
             mA->resize(n,n);
             MatriceMorse<T> &mR = *new MatriceMorse<T>(n,m,tmpBoundary.size());
@@ -3608,14 +3142,13 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
             ffassert(0);
             pR->typemat = 0; //TypeSolveMat(TypeSolveMat::GMRES);
             // bug ici ::: FH..            pR->A.master(&mR);
-            //V4  m->dummy = false;
         }
 
     }
     else if(rhs)
     {
-    
-        
+
+
        MatriceMorse<R> *mR = pR->pHM();
        if(mR && mR->n && mR->m) {
         mR->COO();
@@ -3651,23 +3184,20 @@ bool Have_UMFPACK() { return Have_UMFPACK_;}
 
 MatriceMorse<R> * removeHalf(MatriceMorse<R> & A,long half,double tol)
 {
-    
+
     // half < 0 => L
     // half > 0 => U
     // half = 0 => L and the result will be sym
-    int sym = half ==0;
     int nnz =0;
-    int n = A.n;
-    
+
     if( A.half )
         return &A;//  copy
     // do alloc
-    // MatriceMorse<R> *r=&A;
     MatriceMorse<R> *r=new MatriceMorse<R>(A);
     r->RemoveHalf(half,tol);
     if(verbosity )
         cout << "  removeHalf: new nnz = "<< r->nnz << " "<< r->half << endl;
-    
+
     return r;
 }
 
@@ -3684,7 +3214,7 @@ bool removeHalf(Stack stack,Matrice_Creuse<R> *const & pR,Matrice_Creuse<R> *con
     MatriceCreuse<R> * pa=pA->A;
     MatriceMorse<R> *pma= dynamic_cast<MatriceMorse<R>* > (pa);
     MatriceCreuse<R> * pr= removeHalf(*pma,half,tol);
-    
+
     pR->A.master(pr);
     return true;
 }
@@ -3692,7 +3222,6 @@ newpMatrice_Creuse<R> removeHalf(Stack stack,Matrice_Creuse<R> *const & pA,long 
 {
     return removeHalf(stack,pA,half,-1.);
 }
-//OneOperator0<bool> *TheSetDefaultSolver=0; // to change the SetDefaultSolver
 
 template<class K>
 class plotMatrix : public OneOperator {
@@ -3714,11 +3243,11 @@ public:
 		}
 
             AnyType operator()(Stack stack) const{
-                
+
                 if (mpirank == 0 && ThePlotStream) {
                     Matrice_Creuse<K>* A =GetAny<Matrice_Creuse<K>* >((*a)(stack));
                     bool wait = arg(0,stack,false);
-                    
+
                     PlotStream theplot(ThePlotStream);
                     theplot.SendNewPlot();
                     theplot << 3L;
@@ -3729,9 +3258,9 @@ public:
                     theplot.SendPlots();
                     theplot << 1L;
                     theplot << 31L;
-                    
+
                     HashMatrix<int,K>* ph=A->pHM();
-                    
+
                     if (!ph) {
                         theplot << 0;
                         theplot << 0;
@@ -3743,7 +3272,7 @@ public:
                         theplot << (int)ph->m;
                         theplot << (long)ph->nnz;
                         theplot << 0L;
-                        
+
                         for (int i=0;i<ph->nnz;i++) {
                             theplot << ph->i[i];
                             theplot << ph->j[i];
@@ -3751,17 +3280,17 @@ public:
                             theplot << 1;
                         }
                     }
-                    
+
                     theplot.SendEndPlot();
-                    
+
                 }
-                
+
                 return 0L;
             }
         };
-    
+
     plotMatrix() : OneOperator(atype<long>(),atype<Matrice_Creuse<K>*>()) {}
-    
+
     E_F0 * code(const basicAC_F0 & args) const
     {
         return  new Op(args,t[0]->CastTo(args[0]));
@@ -3773,44 +3302,34 @@ basicAC_F0::name_and_type  plotMatrix<K>::Op::name_param[]= {
 	{  "wait", &typeid(bool)}
 };
 
-void  init_lgmat() 
+void  init_lgmat()
 
 {
-   // SetDefaultSolver();
 
-//    DefSparseSolverNew<double,0>::solverdef =DefSparseSolverNew<double,0>::solver;
-//    DefSparseSolverNew<double,1>::solverdef =DefSparseSolverNew<double,1>::solver;
-//    DefSparseSolverNew<Complex,0>::solverdef =DefSparseSolverNew<Complex,0>::solver;
-//    DefSparseSolverNew<Complex,1>::solverdef =DefSparseSolverNew<Complex,1>::solver;
-
-
-  
-  Dcl_Type<const  MatrixInterpolation<pfes>::Op *>(); 
-  Dcl_Type<const  MatrixInterpolation<pfes3>::Op *>(); 
+  Dcl_Type<const  MatrixInterpolation<pfes>::Op *>();
+  Dcl_Type<const  MatrixInterpolation<pfes3>::Op *>();
   Dcl_Type<const  MatrixInterpolation<pfesS>::Op *>();
 
   map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<double*>())]=atype<Matrice_Creuse<double> *>();
   map_type_of_map[make_pair(atype<Matrice_Creuse<double>* >(),atype<Complex*>())]=atype<Matrice_Creuse<Complex> *>();
   AddSparseMat<double>();
   AddSparseMat<Complex>();
-  
+
   Add<const MatrixInterpolation<pfes>::Op *>("<-","(", new MatrixInterpolation<pfes>);
   Add<const MatrixInterpolation<pfes>::Op *>("<-","(", new MatrixInterpolation<pfes>(1));
   Add<const MatrixInterpolation<pfes>::Op *>("<-","(", new MatrixInterpolation<pfes3>);
   Add<const MatrixInterpolation<pfes>::Op *>("<-","(", new MatrixInterpolation<pfes3>(1,1));
   Add<const MatrixInterpolation<pfes>::Op *>("<-","(", new MatrixInterpolation<pfesS>);
   Add<const MatrixInterpolation<pfes>::Op *>("<-","(", new MatrixInterpolation<pfesS>(1,1));
-    
+
     Dcl_Type<const  RestrictArray<pfes>::Op *>();
     Dcl_Type<const  RestrictArray<pfes3>::Op *>();
     Dcl_Type<const  RestrictArray<pfesS>::Op *>();
-  //  Add<const RestrictArray<pfes>::Op *>("<-","(", new RestrictArray<pfes>);
-  //  Add<const RestrictArray<pfes3>::Op *>("<-","(", new RestrictArray<pfes3>);
-  
+
   Global.Add("restrict","(",new RestrictArray<pfes>);// FH Jan 2014
   Global.Add("restrict","(",new RestrictArray<pfes3>);// FH Jan 2014
   Global.Add("restrict","(",new RestrictArray<pfesS>);// PHT Apr 2019
-    
+
   TheOperators->Add("=",
                       new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfes>::Op*,E_F_StackF0F0>(SetRestrict<pfes,1>),
                       new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfes3>::Op*,E_F_StackF0F0>(SetRestrict<pfes3,1>),
@@ -3821,7 +3340,7 @@ void  init_lgmat()
                       new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfes3>::Op*,E_F_StackF0F0>(SetRestrict<pfes3,0>),
                       new OneOperator2_<KN<long>*,KN<long>*,const RestrictArray<pfesS>::Op*,E_F_StackF0F0>(SetRestrict<pfesS,0>)
                       );
-  
+
 
   Global.Add("interpolate","(",new MatrixInterpolation<pfes>);
   Global.Add("interpolate","(",new MatrixInterpolation<pfes>(1));
@@ -3832,33 +3351,26 @@ void  init_lgmat()
   Global.Add("interplotematrix","(",new  OneOperatorCode<PrintErrorCompileIM>);
   zzzfff->Add("mapmatrix",atype<map< pair<int,int>, double> *>());
   zzzfff->Add("Cmapmatrix",atype<map< pair<int,int>, Complex> *>()); // a voir
-  
-//  Global.Add("defaulttoGMRES","(",new OneOperator0<bool>(SetGMRES));
-//  Global.Add("defaulttoCG","(",new OneOperator0<bool>(SetCG));
-//  Global.New("havesparsesolver",CVariable<bool>(SparseDefault));
-//  Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefault));
-  
+
   Dcl_Type< Resize<Matrice_Creuse<double> > > ();
-  
+
   Add<Matrice_Creuse<double> *>("resize",".",new OneOperator1< Resize<Matrice_Creuse<double>  >,Matrice_Creuse<double> *>(to_Resize));
-  Add<Resize<Matrice_Creuse<double> > >("(","",new OneOperator3_<Matrice_Creuse<double>  *,Resize<Matrice_Creuse<double>  > , long, long  >(resize2)); 
+  Add<Resize<Matrice_Creuse<double> > >("(","",new OneOperator3_<Matrice_Creuse<double>  *,Resize<Matrice_Creuse<double>  > , long, long  >(resize2));
   // add missing in
  Dcl_Type< Resize<Matrice_Creuse<Complex> > > ();
  Add<Matrice_Creuse<Complex> *>("resize",".",new OneOperator1< Resize<Matrice_Creuse<Complex>  >,Matrice_Creuse<Complex> *>(to_Resize));
- Add<Resize<Matrice_Creuse<Complex> > >("(","",new OneOperator3_<Matrice_Creuse<Complex>  *,Resize<Matrice_Creuse<Complex>  > , long, long  >(resize2));   
- 
- 
- //Global.Add("defaultsolver","(",new OneOperator0<bool>(SetDefaultSolver));
- 
- // pour compatibiliter 
- 
+ Add<Resize<Matrice_Creuse<Complex> > >("(","",new OneOperator3_<Matrice_Creuse<Complex>  *,Resize<Matrice_Creuse<Complex>  > , long, long  >(resize2));
+
+
+ // pour compatibiliter
+
  TheOperators->Add("=",
 		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfes>::Op*,E_F_StackF0F0>(SetMatrixInterpolation<1>),
 		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfes3>::Op*,E_F_StackF0F0>(SetMatrixInterpolation3<1>),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesS>::Op*,E_F_StackF0F0>(SetMatrixInterpolationS<1>)
 		   );
 
-    
+
  TheOperators->Add("<-",
 		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfes>::Op*,E_F_StackF0F0>(SetMatrixInterpolation<0>),
 		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfes3>::Op*,E_F_StackF0F0>(SetMatrixInterpolation3<0>),
@@ -3867,23 +3379,16 @@ void  init_lgmat()
  // construction of complex matrix form a double matrix
  TheOperators->Add("=", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,E_F_StackF0F0>(CopyMat<R,Complex,1>)
 		   );
- 
+
  TheOperators->Add("<-", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,E_F_StackF0F0>(CopyMat<R,Complex,0>)
 		   );
- // Global.Add("imag","(",new OneOperator1_<double,Complex>(Imag));
- //   Add<double>("<--","(",new OneOperator1_<double,Complex>(Real));
-    Dcl_Type<Matrice_Creuse_C2R>(); 
+    Dcl_Type<Matrice_Creuse_C2R>();
     Add<Matrice_Creuse<Complex>*>("re",".",new OneOperator1s_<newpMatrice_Creuse<double> ,Matrice_Creuse<Complex>* >(Build_Matrice_Creuse_C2R<0> ));
     Add<Matrice_Creuse<Complex>*>("im",".",new OneOperator1s_<newpMatrice_Creuse<double>  ,Matrice_Creuse<Complex>* >(Build_Matrice_Creuse_C2R<1> ));
     // construction of complex matrix form a double matrix
- //   TheOperators->Add("=", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,Matrice_Creuse_C2R,E_F_StackF0F0>(CopyMatC2R<1>));
-
- //   TheOperators->Add("<-", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,Matrice_Creuse_C2R,E_F_StackF0F0>(CopyMatC2R<0>));
-
-// extern  void init_UMFPack_solver();
  init_UMFPack_solver();
  init_HashMatrix ();
-    
+
  Global.Add("renumbering", "(", new removeDOF<double>);
  Global.Add("renumbering", "(", new removeDOF<Complex>);
     Global.Add("renumbering", "(", new removeDOF<double>(1));
@@ -3904,8 +3409,8 @@ void  init_lgmat()
                      new Op2_mulvirtAvCR< RNM_VirtualMatrix<Complex>::solveAtxeqb,Matrice_Creuse_inv<R>,KN_<Complex> >
                      );
      init_SparseLinearSolver();
-    
-    
+
+
     Global.New("DefaultSolver",CPValue<string*>(def_solver));
     Global.New("DefaultSolverSym",CPValue<string*>(def_solver_sym));
     Global.New("DefaultSolverSDP",CPValue<string*>(def_solver_sym_dp));

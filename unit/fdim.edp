@@ -1,0 +1,6 @@
+include "test.idp"
+
+cout << "fdim" << endl;
+real t;
+
+cout << IND << "real" << endl;

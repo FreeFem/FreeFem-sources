@@ -28,19 +28,6 @@
 #include  <iostream>
 #include  <cfloat>
 using namespace std;
-/*
-#include "error.hpp"
-#include "AFunction.hpp"
-#include "rgraph.hpp"
-#include "RNM.hpp"
-#include "MatriceCreuse_tpl.hpp"
-#include "Mesh3dn.hpp"
-#include "MeshPoint.hpp"
-#include "lgfem.hpp"
-#include "lgmesh3.hpp"
-#include "lgsolver.hpp"
-#include "problem.hpp"
- */
 #include "ff++.hpp"
 #include "bmo.hpp"
 
@@ -57,7 +44,6 @@ class OptimBMO: public OneOperator
 		typedef R REAL;
 		typedef KN<REAL> VECT;
 		typedef KNM<REAL> MAT;
-		//typedef VirtualMatrice<REAL> VMAT;
 
 		const int cas;
 
@@ -168,7 +154,6 @@ class OptimBMO: public OneOperator
 						dJJ = to<Kn_>(C_F0(opdJ, "(", theparam));	// Modif FH 17102005 (a verifier) to<Kn*> ->to<Kn>
 					}
 
-					// closetheparam=currentblock->close(currentblock);   // the cleanning block expression
 					closetheparam = C_F0((Expression)Block::snewclose(currentblock), atype<void>());
 				}
 
@@ -189,7 +174,6 @@ class OptimBMO: public OneOperator
 					 *
 					 */
 
-					R tol = arg(0, stack, 1E-6);// not used ....
 					int nbrestart = arg(1, stack, 5L);
 					int nbext1 = 5;	// bof bof
 					int nbbvp = arg(2, stack, 5L);
@@ -202,8 +186,6 @@ class OptimBMO: public OneOperator
 					int diagrand = arg(9, stack, 0L);
 					R cmin = arg(9, stack, -1000.);
 					R cmax = arg(10, stack, 1000.);
-					// KN_<double>  vmin = arg< KN_<double> >(11,stack, ccmin );
-					// KN_<double>  vmax = arg< KN_<double> >(12,stack, ccmax );
 					string *datahist = arg(13, stack, (string *)0);
 					string *datachist = arg(14, stack, (string *)0);
 					int typealgo = arg(15, stack, 1L);
@@ -270,22 +252,6 @@ class OptimBMO: public OneOperator
 			                                    atype<KN<R> *>()), cas(c) {}
 };
 
-// template<class R>
-/*
- * BijanMO(
- * ndim,
- * nbrestart=1,
- * nbext1=1,
- * nbbvp=5,
- * nbgrad=5,
- * epsfd=1e-5,
- * rho000=100,
- * epsloc=1e-4,
- * epsij=1e-6,
- * n100=100)
- *
- */
-
 basicAC_F0::name_and_type OptimBMO::E_BMO::name_param [] = {
 	{"eps", &typeid(double)},
 	{"nbrestart", &typeid(long)},
@@ -305,11 +271,6 @@ basicAC_F0::name_and_type OptimBMO::E_BMO::name_param [] = {
 	{"algo", &typeid(long)}	// 15
 };
 
-/*  class Init { public:
- * Init();
- * };
- *
- * $1 */
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
 	Global.Add("bmo", "(", new OptimBMO(1));// j + dJ
 	Global.Add("bmo", "(", new OptimBMO(1, 1));	// j + dJ

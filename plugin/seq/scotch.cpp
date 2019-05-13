@@ -104,7 +104,6 @@ AnyType SCOTCH_Op<T, V, K>::operator () (Stack stack)  const {
 			if (itt != it && itt >= 0) {
 				++accum;
 				edgevec.push_back(baseval + itt);
-				// edgevec.emplace_back(baseval + itt);
 			}
 		}
 

@@ -1,0 +1,64 @@
+include "test.idp"
+
+cout << "polar" << endl;
+real t;
+
+cout << IND << "real" << endl;
+
+real a = 3.;
+real b1 = 0;
+real b2 = pi / 4;
+real b3 = pi / 2;
+real b4 = (3 * pi) / 4;
+real b5 = 2 * pi;
+real b6 = (-3 * pi) / 4;
+real b7 = -(pi / 2);
+real b8 = -pi / 4;
+
+t = clock();
+complex c1 = polar(a, b1);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(c1 == 3.);
+
+t = clock();
+complex c2 = polar(a, b2);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(abs(c2 - ((3 / sqrt(2)) + (3 / sqrt(2)) * 1i)) < HWERROR);
+
+t = clock();
+complex c3 = polar(a, b3);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(abs(c3 - 3. * 1i) < HWERROR);
+
+t = clock();
+complex c4 = polar(a, b4);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test((c4 - (-(3 / sqrt(2)) + (3 / sqrt(2)) * 1i)) < HWERROR);
+
+t = clock();
+complex c5 = polar(a, b5);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(abs(c5 -3) < HWERROR);
+
+t = clock();
+complex c6 = polar(a, b6);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test((c6 - (-(3 / sqrt(2)) - (3 / sqrt(2)) * 1i)) < HWERROR);
+
+t = clock();
+complex c7 = polar(a, b7);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(abs(c7 - (-3i)) < HWERROR);
+
+t = clock();
+complex c8 = polar(a, b8);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(abs(c8 - ((3 / sqrt(2)) - (3 / sqrt(2)) * 1i)) < HWERROR);

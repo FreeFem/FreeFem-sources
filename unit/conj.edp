@@ -1,0 +1,21 @@
+include "test.idp"
+
+cout << "conj" << endl;
+real t;
+
+cout << IND << "complex" << endl;
+
+complex c1 = 4 + 2i;
+complex c2 = 4 - 2i;
+
+t = clock();
+complex resconj = conj(c1);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resconj == c2);
+
+t = clock();
+complex resconj2 = conj(c2);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resconj2 == c1);

@@ -1,0 +1,52 @@
+include "test.idp"
+
+cout << "erfc" << endl;
+real t;
+
+cout << IND << "real" << endl;
+
+real r1 = 0.;
+real r2 = 10.;
+real r3 = -10;
+
+t = clock();
+real err1 = erfc(r1);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(err1 == 1 - erf(r1));
+
+t = clock();
+real err2 = erfc(r2);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(err2 - (1 - erf(r2)) < 10e-6);
+
+t = clock();
+real err3 = erfc(r3);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(err3 == 1 - erf(r3));
+
+cout << IND << "int" << endl;
+
+int i1 = 0;
+int i2 = 10;
+int i3 = -10;
+
+t = clock();
+int erri1 = erfc(i1);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(err1 == 1 - erf(i1));
+
+t = clock();
+int erri2 = erfc(i2);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(err2 - (1 - erf(i2)) < 10e-6);
+
+t = clock();
+int erri3 = erfc(i3);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(err3 == 1 - erf(i3));

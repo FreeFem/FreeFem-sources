@@ -100,11 +100,6 @@ long read_pcm (string *const &filename, KNM<double> *const &u, KNM<double> *cons
 	return (long) pcm.width * pcm.height;
 }
 
-/*  class Init { public:
- * Init();
- * };
- *
- * $1 */
 static void Load_Init () {
 	cout << " load: init pcm2rmn  " << endl;
 

@@ -377,7 +377,6 @@ AnyType mmg3d_Op::operator () (Stack stack)  const {
 			dff.movename = "move";
 		}
 
-		// if(verbosity > 2)
 		if (verbosity > 2) {cout << "displacement vector is loading" << endl;}
 	}
 
@@ -388,7 +387,6 @@ AnyType mmg3d_Op::operator () (Stack stack)  const {
 	argv[0] = ff;
 	argv[1] = &args[0];
 	strcpy(args, sarg.c_str());
-	// cout << sarg << " == " << &args[0] << endl;
 	char cc = '\0';
 
 	for (int i = 0; i < args.N(); cc = args[i++]) {
@@ -396,9 +394,6 @@ AnyType mmg3d_Op::operator () (Stack stack)  const {
 
 		ffassert(argc < 1000);
 	}
-
-	// for(int i=0;i< argc; ++i)
-// cout << " *** arg " << i << " " << argv[i] << endl;
 
 	int res = mainmmg3d(argc, argv, &dff);
 	Mesh3 *pTh3 = (Mesh3 *)dff.mesh;
@@ -421,12 +416,6 @@ AnyType mmg3d_Op::operator () (Stack stack)  const {
 	Add2StackOfPtr2FreeRC(stack, pTh3);
 	return pTh3;
 }
-
-/*  class Init1 { public:
- * Init1();
- * };
- *
- * $1 */
 
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
 	// if (verbosity)

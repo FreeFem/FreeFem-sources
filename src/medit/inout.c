@@ -14,17 +14,21 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "libmeshb7.h"
 #include "extern.h"
 #include "eigenv.h"
+
 int loadMesh (pMesh mesh) {
 	pPoint ppt;
 	pEdge pr;
@@ -45,7 +49,7 @@ int loadMesh (pMesh mesh) {
 		strcat(data, ".meshb");
 		if (!(inm = GmfOpenMesh(data, GmfRead, &mesh->ver, &mesh->dim))) {
 			ptr = strstr(data, ".mesh");
-			*ptr = '\0';
+			if (ptr) *ptr = '\0';
 			strcat(data, ".mesh");
 			if (!(inm = GmfOpenMesh(data, GmfRead, &mesh->ver, &mesh->dim))) {
 				fprintf(stderr, "  ** %s  NOT FOUND.\n", data);
@@ -511,7 +515,6 @@ int saveMesh (pScene sc, pMesh mesh, char *fileout, ubyte clipon) {
 		ppt = &mesh->point[k];
 		if (ppt->tag & M_UNUSED) continue;
 
-		ref = ppt->ref;
 		if (mesh->dim == 2) {
 			fp1 = ppt->c[0] + mesh->xtra;
 			fp2 = ppt->c[1] + mesh->ytra;
@@ -638,10 +641,10 @@ int saveMesh (pScene sc, pMesh mesh, char *fileout, ubyte clipon) {
 int loadSol (pMesh mesh, char *filename, int numsol) {
 	pSolution sol;
 	double dbuf[GmfMaxTyp];
-	float fbuf[GmfMaxTyp];
+	float fbuf[GmfMaxTyp]={};
 	double m[6], lambda[3], eigv[3][3], vp[2][2];
     long inm;
-    int k, i, key, nel, size, type, iord, off, typtab[GmfMaxTyp], ver, dim;
+    int k, i, key=0, nel, size, type, iord, off, typtab[GmfMaxTyp], ver, dim;
 	char *ptr, data[128];
 
 	strcpy(data, filename);
@@ -651,7 +654,7 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 	strcat(data, ".solb");
 	if (!(inm = GmfOpenMesh(data, GmfRead, &ver, &dim))) {
 		ptr = strstr(data, ".sol");
-		*ptr = '\0';
+		if (ptr) *ptr = '\0';
 		strcat(data, ".sol");
 		if (!(inm = GmfOpenMesh(data, GmfRead, &ver, &dim)))
 			return (0);
@@ -675,7 +678,6 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 	} else {
 		mesh->typage = 1;
 		if (mesh->dim == 2 && mesh->nt) {
-			// if( mesh->nt){
 			nel = GmfStatKwd(inm, GmfSolAtTriangles, &type, &size, typtab);
 			if (nel && nel != mesh->nt) {
 				fprintf(stderr, "  %%%% Wrong number %d.\n", nel);
@@ -837,6 +839,7 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 				}
 
 				iord = eigen2(m, lambda, vp);
+				if (!iord) printf("eigen2 error\n");
 				mesh->sol[k].bb = min(lambda[0], lambda[1]);
 				if (mesh->sol[k].bb < mesh->bbmin) mesh->bbmin = mesh->sol[k].bb;
 
@@ -871,3 +874,7 @@ int loadSol (pMesh mesh, char *filename, int numsol) {
 	GmfCloseMesh(inm);
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

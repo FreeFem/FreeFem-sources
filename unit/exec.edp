@@ -1,0 +1,28 @@
+include "test.idp"
+
+cout << "exec" << endl;
+real t;
+
+cout << IND << "string" << endl;
+
+string commandls = "ls";
+string commandfail = "toto";
+string commandempty = "";
+
+t = clock();
+int retvalue1 = exec(commandls);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(retvalue1 == 0);
+
+t = clock();
+int retvalue2 = exec(commandfail);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(retvalue2 == -1);
+
+t = clock();
+int retvalue3 = exec(commandempty);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(retvalue3 == 0);

@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -257,7 +260,6 @@ static void drawTets (pScene sc, pMesh mesh, int k) {
 	output3(p2->c[0], p2->c[1], p2->c[2], "%d", pt->v[2]);
 	output3(p3->c[0], p3->c[1], p3->c[2], "%d", pt->v[3]);
 
-	/*if ( mesh->nfield == 6 )  drawEllipse(sc,mesh,LTets,k);*/
 	if (!mesh->nbb)
 		circumSphere(sc, mesh, LTets, k);
 }
@@ -267,7 +269,6 @@ static void drawHexa (pScene sc, pMesh mesh, int k) {
 	pHexa ph;
 	pPoint p0;
 	float n[3];
-	/*float shrink; */
 	int l;
 
 	/* default */
@@ -280,7 +281,6 @@ static void drawHexa (pScene sc, pMesh mesh, int k) {
 
 	refmat = matRef(sc, ph->ref);
 	pm = &sc->material[refmat];
-	/*shrink = 0.95 * sc->shrink;*/
 
 	glBegin(GL_QUADS);
 	glColor3f(1.0 - pm->dif[0], 1.0 - pm->dif[1], 1.0 - pm->dif[2]);
@@ -350,7 +350,6 @@ static void drawPoint (pScene sc, pMesh mesh, int k) {
 
 	pt = &mesh->point[k];
 
-	/*glDisable(GL_DEPTH_TEST);*/
 	glDisable(GL_LIGHTING);
 	glPointSize(6.0);
 	glColor3f(1.0, 0., 0.);
@@ -359,7 +358,6 @@ static void drawPoint (pScene sc, pMesh mesh, int k) {
 	glEnd();
 	output3(pt->c[0], pt->c[1], pt->c[2], "%d", refitem);
 	glEnable(GL_LIGHTING);
-	/*glEnable(GL_DEPTH_TEST);*/
 }
 
 static void infoData (pScene sc, pMesh mesh, int k, int typel) {
@@ -544,7 +542,7 @@ static int getColorRange (Color *c, pMesh mesh) {
 
 	c->aMask = mask;
 	c->aBits = 8 - aBits;
-	
+
 	return (1);
 }
 
@@ -900,7 +898,7 @@ GLuint pickingScene (pScene sc, int x, int y, int ident) {
 	pMesh mesh;
 	pClip clip;
 	GLint viewport[4];
-	GLubyte pixel[4];
+	GLubyte pixel[4]={};
 	GLuint dlist;
 	Color c;
 	unsigned int item;
@@ -909,7 +907,6 @@ GLuint pickingScene (pScene sc, int x, int y, int ident) {
 	refitem = 0;
 	refmat = -1;
 	mesh = cv.mesh[sc->idmesh];
-	clip = sc->clip;
 
 	if (!getColorRange(&c, mesh)) return (dlist);
 
@@ -982,7 +979,6 @@ GLuint pickingScene (pScene sc, int x, int y, int ident) {
 				int k;
 
 				for (k = 1; k <= mesh->np; k++) {
-					/*drawPoint(sc,mesh,k);*/
 					infoEntity(sc, mesh, k, LPoint);
 				}
 			} else {
@@ -1039,7 +1035,6 @@ GLuint pickItem (pMesh mesh, pScene sc, int numit) {
 				int nm;
 
 				nm = matRef(sc, ppt->ref);
-				/*nm = 1+(ppt->ref-1) % (sc->par.nbmat-1);*/
 				pm = &sc->material[nm];
 			}
 
@@ -1060,3 +1055,7 @@ GLuint pickItem (pMesh mesh, pScene sc, int numit) {
 	glEndList();
 	return (dlist);
 }
+
+#ifdef __cplusplus
+}
+#endif
