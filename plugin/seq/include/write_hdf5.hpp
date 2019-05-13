@@ -1,1 +1,0 @@
-../../../src/bamglib/write_hdf5.hpp

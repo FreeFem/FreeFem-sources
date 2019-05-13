@@ -1,2 +1,0 @@
-libMesh LD -L/home/floriane/Airthium/unit/FreeFem-sources/3rdparty/lib -lMesh
-libMesh INCLUDE -I/home/floriane/Airthium/unit/FreeFem-sources/3rdparty/include/libMesh
