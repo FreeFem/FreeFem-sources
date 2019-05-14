@@ -814,7 +814,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                 ++nk;
             }
         if(verbosity&& nadjnomanifold) cerr << "  --- Warning manifold obj nb:" << nadjnomanifold << " of  dim =" << T::RdHat::d << endl;
-        int kerr=0,kerrf=0,nbei=0;
+        int kerr=0,kerrf=0,nbei=0,fwarn=0;
         map<pair<int,int>,pair<int,int> > mapfs;
         int uncorrect =0, nbchangeorient=0;
         for(int step=0; step<2; ++step)
@@ -878,9 +878,22 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                             }
 
                         }
-
+                        
+                    }
+                    else
+                    {//  verif if the face is in correct sens ...
+                      int sk,k= nk/nea, e=nk%nea; //   same oreintatio ???
+                      itemadj(k,e,&sk);
+                       if( sk != sens &&  (step == 0) )
+                       {
+                           fwarn++;
+                           if( verbosity>4 && fwarn < 10) cout << "  --  warning true  boundary element "<<ke << " is no in correct orientation " <<endl;
+                           borderelements[ke].changeOrientation();
+                           nbchangeorient++;
+                       }
                     }
 
+            
 
 
                 BoundaryElementHeadLink[ke] = nk;
@@ -909,6 +922,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         if(uncorrect==0) break;
     }
     if( nbchangeorient && verbosity>2) cout << " Warning change orientation of " << nbchangeorient << " faces \n";
+    if( fwarn && verbosity>2) cout << " Warning error in boundary oriention  " << fwarn  << " faces \n";
     if( kerr || kerrf ) {
         cout << " Erreur in boundary orientation  bug in mesh or bug in ff++ "  << kerr  << " / " <<nbei  << "\n\n";
         cout << "  or Erreur in face    "  << kerrf  << " / " <<nbei  << "\n\n";
