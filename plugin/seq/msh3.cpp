@@ -18,7 +18,7 @@
 // LICENSE : LGPLv3
 // ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
 // AUTHORS : Jacques Morice
-// E-MAIL  : jacques.morice@ann.jussieu.fr
+// E-MAIL  : jac/Users/hecht/ff/ff-git/plugin/seq/msh3.cpp:    if (verbosity > 1) {cout << "NbVertexRecollement " << nt_t << " / " << "NbVertex(anc)" << Th3.nt << endl;}ques.morice@ann.jussieu.fr
 
 // *INDENT-OFF* //
 //ff-c++-LIBRARY-dep:
@@ -4668,6 +4668,8 @@ void BuildBoundMinDist_thS (const double &precis_mesh, const double *tab_XX, con
     assert(hmin > Norme2(bmin - bmax) / 1e9);
 }
 
+// code a detruire version  en  4.3  ne pas utiliser ....
+#if 0
 void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
                                   const double *bmin, const double *bmax, const double hmin, int *Numero_Som, int *ind_nv_t, int &nv_t) {
 	size_t i;
@@ -4684,7 +4686,8 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 
 	int numberofpoints = 0;
 	int numberofpointsdiff;
-
+// OH LALA A CHANGE REPIDEMENT ET NE DETRUITE LE COMMENTAIRE QUI VA SUIVRE  F. HECHT CODE EN N¨2 MERCI A. Gailliegue
+    // qui a trouve..
 	for (int ii = 0; ii < tab_nv; ii++) {
 		numberofpointsdiff = 0;
 
@@ -4778,7 +4781,7 @@ void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const
 	delete [] posv;
 	delete [] tcode;
 }
-
+#endif
 void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_confondus_ok, double **Coord_Point,
                         const double *bmin, const double *bmax, const double hmin, int *ind_np, int &np) {
 	size_t i;
@@ -4952,9 +4955,7 @@ void OrderVertexTransfo_hcode_nv_gtree (const int &tab_nv, const R3 &bmin, const
 	size_t k[3];
 
 	// parametre interne pour debugger le code
-	int verifnumberofpoints;
-
-	verifnumberofpoints = 1;
+	int verifnumberofpoints=0;
 
 	// hmin a determiner plus haut
 	assert(hmin > Norme2(bmin - bmax) / 1e9);
@@ -4997,7 +4998,8 @@ void OrderVertexTransfo_hcode_nv_gtree (const int &tab_nv, const R3 &bmin, const
 
 	if (verbosity > 3) {cout << "    nv_t = " << nv_t << " / " << "nv_t(anc)" << tab_nv << endl;}
 
-	if (verifnumberofpoints == 1) {
+	if (verifnumberofpoints == 1) {// Thank to A. Gailliegue Remove code
+            cout << "\n\n WARNING  CODE IN N2 never use .... LINE 5002 of  msh3.cpp \n\n" <<endl;
 		int numberofpoints = 0;
 		int numberofpointsdiff;
 
