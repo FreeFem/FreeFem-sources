@@ -731,7 +731,7 @@ namespace Fem2D
     nSeg=GmfStatKwd(inm,GmfEdges); // segment elements only present in surface mesh
 
     //define the type of meshes present in the data file .mesh
-
+      typeMesh3=1; // par defaut mesh3 !!!! 
     if (nTet==0 && nTri>0 && nSeg>0) {  // Mesh3 null, MeshS (real surface with boundaries)
         if(verbosity) cout << "data file "<< pfile <<  " contains only a surface MeshS" <<endl;
         typeMesh3=0;}
