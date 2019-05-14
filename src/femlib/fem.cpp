@@ -921,7 +921,8 @@ R2 SubTriangle(const int N,const int n,const int l)
     int i = n % N;
     int j = n / N;
     int k = N - i - j;
-    if(k<=0)
+    if(k>0)//   inverse to have good orientation  ami 2019 FH.  Thanks to A. Fourmont
+        // same correct in splitsimplex 2d ... 
       {
 	if(l==1) i++;
 	else if(l==2) j++;
@@ -953,7 +954,7 @@ int numSubTriangle(const int N,const int n,const int l)
 	int i = n % N;
 	int j = n / N;
 	int k = N - i - j;
-	if(k<=0)
+	if(k>0)//   inverse to have good orientation  ami 2019 FH.  Thanks to A. Fourmont
 	  {
 	    if(l==1) i++;
 	    else if(l==2) j++;
@@ -1514,6 +1515,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
     neb =0;
     bnormalv=0;
     R2 Pmin,Pmax;
+    int nwarm =0;
     Th.BoundingBox(Pmin,Pmax);
     nt=0;
     int nebi=0; // nb arete interne
@@ -1769,6 +1771,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	    if (!N) continue;
 	    long N2=N*N;
 	    int vt[3];
+           
 	    for (int n=0;n<N2;n++,kt++) //  loop on all sub triangle
 	    {
 		//(Label&) triangles[kt] = (Label&) T;
@@ -1811,7 +1814,8 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    R2 B=vertices[vt[1]];
 		    R2 C=vertices[vt[2]];
 		    R a = (( B-A)^(C-A))*0.5;
-
+                    if( a<0) nwarm++;
+                    if( nwarm<10 && verbosity>9) cout << " warning: bad oriantiation in trunc " << kt << " " << a << endl  ;
 		    if (a>0)
 			triangles[kt].set(vertices,vt[0],vt[1],vt[2],T.lab);
 		    else
@@ -1826,6 +1830,8 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	    cout << "  - Nb of vertices       " << nv << endl;
 	    cout << "  - Nb of triangle       " << nt << endl;
 	    cout << "  - Nb of boundary edges " << neb << endl;
+            if(nwarm)
+                cout << "  - Warning: Nb of Triangles with bad oriantation  " << nwarm  << endl;
 
 	}
 	//
