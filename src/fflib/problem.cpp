@@ -2312,7 +2312,7 @@ namespace Fem2D {
         const int useopt=di.UseOpt(stack);
         //double binside=di.binside(stack);
         const bool intmortar=di.intmortar(stack);
-        const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
+        //const Mesh * pThdi = GetAny<pmesh>( (* di.Th)(stack));
         if ( verbosity >1)
         {
             cout << " Integral   on Th nv :  " << Th.nv << " nt : " << Th.nt << endl;
