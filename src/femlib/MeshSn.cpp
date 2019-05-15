@@ -46,7 +46,6 @@ namespace Fem2D
 #include "rgraph.hpp"
 #include "fem.hpp"
 #include "PlotStream.hpp"
-#include "AFunction.hpp"
 
 namespace Fem2D
 {
@@ -198,9 +197,12 @@ namespace Fem2D
         mes=0.;
         mesb=0.;
         
-        if(nt == 0)
-            ExecError ( " A meshS type must have elements " );
+        if(nt == 0) {
+                cerr << "  A meshS type must have elements  " << endl;
+            ffassert(0);exit(1);
             
+        }
+        
         for (int k=0; k<nt; k++) {
             int i[3],lab;
             Element & K(this->elements[k]);
@@ -314,10 +316,11 @@ namespace Fem2D
         nv = GmfStatKwd(inm,GmfVertices);  // vertice
         nTri= GmfStatKwd(inm,GmfTriangles); // triangles in case of volume mesh -> boundary element / in case of surface mesh -> element
         nSeg=GmfStatKwd(inm,GmfEdges); // segment elements only present in surface mesh
-        
         this->set(nv,nTri,nSeg);
-        if(nTri == 0)
-            ExecError ( " A meshS type must have elements " );
+       
+        if(nTri == 0) {
+            cerr << "  A meshS type must have elements  " << endl;
+            ffassert(0);exit(1);}
         
         if(verbosity>1)
             cout << "  -- MeshS(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
@@ -662,8 +665,9 @@ namespace Fem2D
         mes=0.;
         mesb=0.;
         
-        if(nt == 0)
-            ExecError ( " A meshS type must have elements " );
+        if(nt == 0) {
+            cerr << "  A meshS type must have elements  " << endl;
+            ffassert(0);exit(1);}
  
             
         for (int k=0; k<nt; k++) {

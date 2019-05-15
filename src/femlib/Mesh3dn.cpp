@@ -46,7 +46,6 @@ namespace Fem2D
 #include "rgraph.hpp"
 #include "fem.hpp"
 #include "PlotStream.hpp"
-#include "AFunction.hpp"
 
 namespace Fem2D
 {
@@ -335,7 +334,11 @@ namespace Fem2D
                 ffassert( newvertex== iii );
                 
                 Element *tt;
-                if(!this->nt) ExecError( " the tetrahedrons list is empty, not possible for a mesh3 must be a meshS type " );
+                
+                if(this->nt== 0) {
+                    cerr << " the tetrahedrons list is empty, not possible for a mesh3 must be a meshS type " << endl;
+                    ffassert(0);exit(1);}
+              
                 tt=new Element[this->nt];
                 BorderElement *bb = new BorderElement[this->nbe];
                 
@@ -763,10 +766,11 @@ namespace Fem2D
         nSeg=GmfStatKwd(inm,GmfEdges); // segment elements only present in surface mesh
         
         //define the type of meshes present in the data file .mesh
-        
-        if (nTet==0)
-            ExecError(" Impossible to create a Mesh3 with no Tetrahedrons, if you want create a surface mesh, the mesh type is MeshS");
-        
+    
+        if(nTet==0) {
+            cerr << " Impossible to create a Mesh3 with no Tetrahedrons, if you want create a surface mesh, the mesh type is MeshS " << endl;
+            ffassert(0);exit(1);}
+     
         if (nTet>0 && nTri>0 && nSeg==0)
             if(verbosity) cout << "data file "<< pfile <<  " read only a Mesh3, possible to create the MeshS associated using the command <Mesh3>.buildSurface(<Mesh3>)." << endl;
         if (nTet>0 && nTri>0 && nSeg>0)
@@ -1351,9 +1355,12 @@ namespace Fem2D
         
         //  Add FH to be consitant we all constructor ...  July 09
         BuildBound();
-        if(!nt)
-            ExecError( " the tetrahedrons list is empty, not possible for a mesh3 must be a meshS type " );
         
+        if(nt==0) {
+            cerr << " Impossible to create a Mesh3 with no Tetrahedrons, if you want create a surface mesh, the mesh type is MeshS " << endl;
+            ffassert(0);exit(1);
+        }
+     
         BuildAdj();
         Buildbnormalv();
         BuildjElementConteningVertex();
