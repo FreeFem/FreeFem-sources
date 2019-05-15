@@ -2360,6 +2360,7 @@ AnyType MovemeshS_Op::operator () (Stack stack)  const {
     long flagsurfaceall(arg(5, stack, 0L));
     long orientationelement(arg(6, stack, 1L));
 
+    // if( nrtet.N() && nrfmid.N() && nrfup.N() && nrfdown.N() ) return m;
     ffassert(nrtet.N() % 2 == 0);
     ffassert(nrf.N() % 2 == 0);
 
@@ -3052,6 +3053,7 @@ AnyType Movemesh2D_S_Op::operator () (Stack stack)  const {
     {
         KN<int> takemesh(nbv);
         takemesh = 0;
+        const Mesh &rTh = Th;
 
         for (int it = 0; it < nbt; ++it) {
           for (int iv = 0; iv < 3; ++iv) {

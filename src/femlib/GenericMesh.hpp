@@ -1120,6 +1120,167 @@ void GenericMesh<T,B,V>::BuildBoundaryElementAdj(const int &nbsurf, int* firstDe
   }
 }
 
+
+
+
+// template<typename T,typename B,typename V>
+// void GenericMesh<T,B,V>::BuildBoundaryElementAdj_V2(const int &nbsurf,int *firstDefSurface, int *labelDefSurface, int *senslabelDefSurface)
+// {
+// //   assert(firstDefSurface.N() == nbsurf+1);
+// //   assert(labelDefSurface.N() == firstDefSurface[nbsurf]);
+// //   assert(senslabelDefSurface.N() == firstDefSurface[nbsurf]);
+
+//   // determination des labels des surfaces
+//   map<int, int> maplabel;
+//   int numero_label=0;
+//   for(int ii=0; ii< firstDefSurface[nbsurf]; ii++){
+//     map<int,int>::const_iterator imap=maplabel.find( abs(labelDefSurface[ii]) );
+//     //cout << "K.lab= " << K.lab << endl;
+//     if(imap == maplabel.end()){
+//       maplabel[ abs(labelDefSurface[ii]) ] = numero_label;
+//       numero_label = numero_label+1;
+//     }
+//   }
+
+//   int *nbe_label=new int[numero_label];
+//   for(int ii=0; ii< numero_label; ii++) nbe_label[ii] = 0;
+//   for(int k=0; k<nbe; k++){
+//     B & K(borderelements[CheckBE(k)]);
+//     map<int,int>::const_iterator imap=maplabel.find( K.lab );
+
+// //  if(imap == maplabel.end()){
+// //       printf("The label %d given for Definition of different surface is not in the border element mesh\n",K.lab);
+// //       exit(1);
+// //     }
+// //     else{
+//     nbe_label[(*imap).second]++;
+//     //    }
+//   }
+
+//   int all_nbe_label=0;
+//   for(int k=0; k<numero_label; k++){
+//     all_nbe_label=all_nbe_label+nbe_label[k];
+//   }
+//   /*
+//     if(all_nbe_label != nbe){
+//     cerr << "some element in the border element are not references in the Surface description" << endl;
+//     exit(1);
+//     }
+//     assert(all_nbe_label == nbe);  // autrement cela veut dire que certain element du bord n'ont pas �t� mis dans le descriptif
+//   */
+//   int *organisation_be_label;
+//   organisation_be_label = new int[all_nbe_label];
+
+//   int *count_nbe_label =new int[numero_label];
+//   int *debut_nbe_label =new int[numero_label+1];
+
+//   for(int ii=0; ii< numero_label; ii++)
+//     count_nbe_label[ii] =0;
+
+//   debut_nbe_label[0]=0;
+//   for(int ii=1; ii< numero_label; ii++)
+//     debut_nbe_label[ii] = debut_nbe_label[ii-1]+nbe_label[ii-1];
+//   debut_nbe_label[numero_label] = all_nbe_label;
+
+//   for(int k=0; k<nbe; k++){
+//     B & K(borderelements[CheckBE(k)]);
+//     map<int,int>::const_iterator imap=maplabel.find( K.lab );
+//     assert(imap != maplabel.end());
+//     organisation_be_label[ debut_nbe_label[(*imap).second] + count_nbe_label[(*imap).second] ] = k ;
+//     count_nbe_label[(*imap).second ]++;
+//   }
+
+//   for(int ii=0; ii< numero_label; ii++)
+//     assert( count_nbe_label[ii] == nbe_label[ii] );
+
+//   delete [] count_nbe_label;
+
+//   for(int isurf=0; isurf < nbsurf; isurf++){
+
+//     int nbe_surf=0; // number in the surface
+//     for( int iii=firstDefSurface[isurf]; iii< firstDefSurface[isurf+1];iii++ ){
+//       map<int,int>::const_iterator imap=maplabel.find( abs(labelDefSurface[iii]) );
+//       nbe_surf=nbe_surf+nbe_label[ (*imap).second ];
+//     }
+
+//     // assert(TheBoundaryElementAdjacencesLink==0); plus tard
+//     int *TheBoundaryElementAdjacencesLink = new int[B::nea*nbe_surf];
+//     HashTable<SortArray<int,B::nva>,int> h(B::nea*nbe_surf,nv);
+//     int nk=0;
+//     int err=0;
+//     int sens;
+
+//     int count_sbe;
+//     int *surf_be = new int[nbe_surf];
+
+//     count_sbe=0;
+//     for( int iii=firstDefSurface[isurf]; iii< firstDefSurface[isurf+1];iii++ ){
+//       map<int,int>::const_iterator imap=maplabel.find( abs(labelDefSurface[iii]) );
+
+//       for( int jjj= debut_nbe_label[(*imap).second]; jjj < debut_nbe_label[(*imap).second+1]; jjj++ ){
+// 	int k=organisation_be_label[jjj];
+// 	surf_be[count_sbe] = k;
+// 	count_sbe++;
+
+// 	for (int i=0;i<B::nea;++i)
+// 	  {
+// 	    SortArray<int,B::nva> a(items( k,i,&sens));
+// 	    sens=sens*senslabelDefSurface[iii];
+// 	    typename HashTable<SortArray<int,B::nva>,int>::iterator p= h.find(a);
+// 	    if(!p)
+// 	      {
+// 		h.add(a,nk);
+// 		TheBoundaryElementAdjacencesLink[nk] = sens*(nk+1);
+//  	      }
+// 	    else
+// 	      {
+
+// 		ASSERTION(p->v>=0);
+// 		if( sens*TheBoundaryElementAdjacencesLink[p->v] > 0){
+
+// 		  B & K(borderelements[CheckBE(k)]);
+// 		  int firstVertex  =  operator()(K[B::nvadj[i][0]])+1;
+// 		  int secondVertex =  operator()(K[B::nvadj[i][1]])+1;
+// 		  cout << " The edges, defined by vertex is " << firstVertex << "-" << secondVertex << ", is oriented in the same direction in element " << k+1 <<
+// 		    " and in element "<<  1+surf_be[(p->v/B::nea)] << endl;
+// 		  err++;
+// 		}
+
+// 		if( abs(TheBoundaryElementAdjacencesLink[p->v]) != 1+p->v ){
+
+// 		  B & K(borderelements[CheckBE(k)]);
+// 		  int firstVertex  =  operator()(K[B::nvadj[i][0]])+1;
+// 		  int secondVertex =  operator()(K[B::nvadj[i][1]])+1;
+// 		  cout << " The edges defined by vertex is " << firstVertex << "-" << secondVertex << "belong to the three border elements ::"
+// 		       << 1+surf_be[(p->v)/B::nea] <<", "<< surf_be[k]+1 <<" and  "<< 1+surf_be[(abs(TheBoundaryElementAdjacencesLink[p->v])-1)/B::nea] << endl;
+// 		  cout << " The "<< isurf+1 << " Surface contains these edges is not a manifold" << endl;
+// 		  err++;
+// 		  assert(err==0);
+// 		}
+
+// 		TheBoundaryElementAdjacencesLink[nk]=TheBoundaryElementAdjacencesLink[p->v];
+// 		TheBoundaryElementAdjacencesLink[p->v]=sens*(nk+1);
+// 	      }
+
+// 	    if( err > 10 )
+// 	      exit(1);
+// 	    nk++;
+// 	  }
+//       }
+//     }
+
+//     assert(err==0);
+//     delete [ ] TheBoundaryElementAdjacencesLink;
+//     delete [ ] surf_be;
+//     if(verbosity) cout << "number of adjacents edges " << nk << endl;
+//   }
+
+//   delete [] organisation_be_label;
+//   delete [] debut_nbe_label;
+//   delete [] nbe_label;
+// }
+
+
 template<typename T,typename B,typename V>
 DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],int nbequibe,int *equibe) const
 {
