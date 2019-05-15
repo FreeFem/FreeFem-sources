@@ -25,7 +25,7 @@ real R = 5, L = 15;
 // physical parameters
 real nu = 1./50, nufinal = 1/200., cnu = 0.5;
 // stop test for Newton
-real eps = 1e-6;
+real eps = 1e-4;
 
 // Mesh
 border cc(t=0, 2*pi) {x=cos(t)/2; y=sin(t)/2; label=1;}
