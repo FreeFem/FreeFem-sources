@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -100,7 +103,6 @@ void drawAxis (pScene sc, int dim) {
 		glVertex2f(0.0, 1.0);
 		glEnd();
 
-		/*glColor3f(0.0f,1.0f,0.0f);*/
 		glColor3f(1. - sc->par.back[0], 1.0 - sc->par.back[1], 1.0 - sc->par.back[2]);
 		glRasterPos3f(1.02, 0.0, 0.0);
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, 'x');
@@ -138,7 +140,6 @@ void drawAxis (pScene sc, int dim) {
 		glVertex3f(0.0, 0.0, 1.0);
 		glEnd();
 
-		/*glColor3f(0.0f,1.0f,0.0f);*/
 		glColor3f(1. - sc->par.back[0], 1.0 - sc->par.back[1], 1.0 - sc->par.back[2]);
 		glRasterPos3f(1.02, 0.0, 0.0);
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, 'x');
@@ -198,7 +199,7 @@ void drawBox (pScene sc, pMesh mesh, int mode) {
 void drawCube (pScene sc, pMesh mesh) {
 	pTransform cubetr;
 	pCube cube;
-	float x1, y1, z1/*, x2, y2*/, z2, xd, yd/*, zd*/;
+	float x1, y1, z1, z2, xd, yd;
 
 	cube = sc->cube;
 	cubetr = cube->cubetr;
@@ -217,12 +218,9 @@ void drawCube (pScene sc, pMesh mesh) {
 	x1 = cube->cmi[0] - mesh->xtra;
 	y1 = cube->cmi[1] - mesh->ytra;
 	z1 = cube->cmi[2] - mesh->ztra;
-	/*x2 = cube->cma[0] - mesh->xtra;*/
-	/*y2 = cube->cma[1] - mesh->ytra;*/
 	z2 = cube->cma[2] - mesh->ztra;
 	xd = cube->cma[0] - cube->cmi[0];
 	yd = cube->cma[1] - cube->cmi[1];
-	/*zd = cube->cma[2] - cube->cmi[2];*/
 
 	glBegin(GL_QUADS);
 	glVertex3f(x1, y1, z1);
@@ -310,7 +308,7 @@ void drawBase (pScene sc, pMesh mesh) {
 
 	if (!sc->grid) {
 		int k;
-		
+
 		sc->grid = glGenLists(1);
 		glNewList(sc->grid, GL_COMPILE);
 		if (glGetError()) return;
@@ -356,7 +354,7 @@ void drawBase (pScene sc, pMesh mesh) {
 void drawHUD (pScene sc) {
 	pCamera c;
 	pMesh mesh;
-	GLfloat xm, ym, x, y, dx, dy, alt;
+	GLfloat x, y, dx, dy, alt;
 	double azim, elev;
 	int i, j;
 
@@ -375,8 +373,6 @@ void drawHUD (pScene sc) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glColor3f(0.0, 0.5, 0.0);
 	glLineWidth(1.0f);
-	xm = sc->par.xs / 2.0f;
-	ym = sc->par.ys / 2.0f;
 	glRecti(200, 160, 440, 320);
 
 	/* altitude */
@@ -522,7 +518,6 @@ void drawHUD (pScene sc) {
 	glVertex2f(330, 246);
 	glVertex2f(330, 250);
 	glEnd();
-	/*glRecti(318,238,322,242);*/
 	glColor3f(0.0, 1.0, 0.0);
 	glLineWidth(3.0f);
 	glBegin(GL_LINES);
@@ -538,3 +533,7 @@ void drawHUD (pScene sc) {
 	glMatrixMode(GL_MODELVIEW);
 	glEnable(GL_DEPTH_TEST);
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -2291,6 +2291,15 @@ class InvPETSc {
                     VecGetArray(x, &ptr);
                     HPDDM::Subdomain<K>::template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*u), ptr, u->n / bs, bs);
                     VecRestoreArray(x, &ptr);
+                    if((*t)._ksp) {
+                        PetscBool nonZero;
+                        KSPGetInitialGuessNonzero((*t)._ksp, &nonZero);
+                        if(nonZero) {
+                            VecGetArray(y, &ptr);
+                            HPDDM::Subdomain<K>::template distributedVec<0>((*t)._num, (*t)._first, (*t)._last, static_cast<PetscScalar*>(*out), ptr, out->n / bs, bs);
+                            VecRestoreArray(y, &ptr);
+                        }
+                    }
                     if(t.A->_A)
                         std::fill_n(static_cast<PetscScalar*>(*out), out->n, 0.0);
                 }

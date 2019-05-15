@@ -38,15 +38,15 @@ void BuildBoundMinDist_th3 (const double &precis_mesh, const double *tab_XX, con
 void BuildBoundMinDist_thS (const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const MeshS &ThS, R3 &bmin, R3 &bmax, double &hmin);
 
 // void PointCommun_hcode( const int &dim, const int &NbPoints, const int &point_confondus_ok,double **Coord_Point, int * ind_np, int & np);
-void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_confondus_ok, double **Coord_Point,
-                        const double *bmin, const double *bmax, const double hmin, int *ind_np, int &np);
+//void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_confondus_ok, double **Coord_Point,
+//                        const double *bmin, const double *bmax, const double hmin, int *ind_np, int &np);
 void PointCommun_hcode_gtree (const int &dim, const int &NbPoints, const int &point_confondus_ok,
                               double **Coord_Point, const int *label_point,
                               const R3 &bmin, const R3 &bmax, const double &hmin, int *ind_np, int *ind_label, int &np);
 // void OrderVertexTransfo_base(const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh3 & Th3, int *Numero_Som, int * ind_nv_t, int & nv_t );
 
-void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
-                                  const double *bmin, const double *bmax, const double hmin, int *Numero_Som, int *ind_nv_t, int &nv_t);
+//void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
+//                                  const double *bmin, const double *bmax, const double hmin, int *Numero_Som, int *ind_nv_t, int &nv_t);
 
 void OrderVertexTransfo_hcode_nv_gtree (const int &tab_nv, const R3 &bmin, const R3 &bmax, const double &hmin,
                                         const double *tab_XX, const double *tab_YY, const double *tab_ZZ, int *Numero_Som, int *ind_nv_t, int &nv_t);

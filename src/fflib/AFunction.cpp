@@ -150,11 +150,9 @@ template<class T> inline T Square (const T &a){return a*a;}
 
 struct SubArray2: public binary_function<long,long,SubArray> {
   static SubArray f(const long & a,const long & b)  {
-   // cout << "SubArray: " << a << " " << b << endl;
     return SubArray(b-a+1,a);} };
 struct SubArray3: public ternary_function<long,long,long,SubArray> {
   static SubArray f(Stack s,const long & a,const long & b,const long & c)  {
-  // cout << "SubArray: " << a << " " << b << " " <<  c << endl;
    return SubArray((b-a+1)/c,a,c);} };
 
 #ifdef OLDCPP
@@ -183,28 +181,6 @@ inline void MyAssert(int i,char * ex,char * file,long line)
      CompileError();}
  }
 
-
-/*
-template<class R>
-class  OneOperator0 : public OneOperator {
- class E_F0_F :public  E_F0 { public:
-  typedef  R (*func)( ) ;
-  func f;
-  E_F0_F(func ff)  : f(ff) {}
-  AnyType operator()(Stack )  const  {return SetAny<R>( f()) ;}
-     operator aType () const { return atype<R>();}
-
-};
-
-  //  aType r; //  return type
-    typedef  R (*func)() ;
-    func  f;
-    public:
-    E_F0 * code(const basicAC_F0 & ) const
-     { return  new E_F0_F(f);}
-    OneOperator0(func  ff): OneOperator(map_type[typeid(R).name()]),f(ff){}
-};
-*/
 template<class R>
 class  OneOperatorConst : public OneOperator {
     E_F0 * e;
@@ -239,8 +215,6 @@ class  OneOperator_border_label : public OneOperator {public:
     OneOperator_border_label(): OneOperator(atype<long>(),atype<const E_Border *>()) {}
 };
 
-
-
 template<class RR> RR LIncremantation(RR* a){ return ++(*a);}
 template<class RR> RR RIncremantation(RR* a){ return (*a)++;}
 template<class RR> RR LDecremantation(RR* a){ return --(*a);}
@@ -249,12 +223,8 @@ template<class RR> RR RDecremantation(RR* a){ return (*a)--;}
 template<class RR,class B>
  RR * New_form_string(string * s) {B * r=  new B(s);freestring(s);return r;}// correct Mars 2011 remove * if delete
 
-
-
-
 inline   string ** get_elements( MyMap<String,String> *  const  &  a,string*  const   & b)
  { String* Sret=  &((*a)[*b]); // correction FH feb 2004
-   // delete b; la chaine est detruire automatiquement en fin d'instruction  FH jan 2010
     return Sret->getap();}
 
 template<class RR> RR Abs(RR a) { return a<0?-a:a;}
@@ -268,7 +238,6 @@ R *MakePtrWithDel( A  const & a)
 template<class R,class RR>
 struct Op1_new_pstring: public unary_function<string*,R> {
   static R f(string * const & a)  {R r =  new RR(a->c_str());
-    // delete a;  (stack ptr) FH mars 2006
     return r;} };
 
 template<class R,class RR>
@@ -277,14 +246,12 @@ struct Op2_set_pstring: public binary_function<R,string*,R> {
    if ( !*p || !**p) {
        cerr << " Error openning file " << *a << endl;
        ExecError("Error openning file");}
-  //  delete a; modif mars 2006 FH
    return p;} };
 
 template<class R,class RR>
 struct Op2_set_pstringiomode: public ternary_function<R,string*,ios::openmode,R> {
   static R  f(Stack s,R const & p,string * const & a,const ios::openmode & mode)
    {*p =  new RR(a->c_str(),mode);
-     // delete a;   modif mars 2006 FH
     return p;} };
 
 AnyType FWhile(Stack s ,Expression test,Expression ins)
@@ -410,8 +377,6 @@ inline  void ShowOn_cerr(const pair<const char * ,const OneOperator *> & i)
    i.second->Show(cerr);
 }
 
-
-
 void ShowKeyWord(ostream & f )
  {
    zzzfff->dump(f);
@@ -451,9 +416,6 @@ long exec(string *s)
       int r=execute(s->c_str());
     //  delete s;    modif mars 2006 FH
       return r;}
-
-
-
 
  class ostream_precis { public:
  ostream_precis(ostream * ff) :f(ff) {}
@@ -577,19 +539,16 @@ struct  MIMul {
         if (mia && a->EvaluableWithOutStack() )
           {
             A va = GetAny<A>((*a)(NullStack));
-           // cout << " va = " << va << endl;
             if ( va == A() )
              {
-             //  cout << " va = " << va << endl;
                return true;
              }
           }
         if (mib && b->EvaluableWithOutStack() )
           {
             B vb = GetAny<B>((*b)(NullStack));
-            // cout << " vb = " << vb << endl;
             if ( vb == B() )
-            { //cout << " vb = " << vb << endl;
+            {
              return true; }
            }
          return false;
@@ -619,16 +578,6 @@ public:
 	  return new TransE_Array(dynamic_cast<const E_Array*>((Expression) args[0])); }
 };
 
-/*
-class opTTrans : public OneOperator{
-public:
-    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
-    opTTrans():   OneOperator(atype<E_Array>(),atype<TransE_Array>()  ) {}
-    E_F0 * code(const basicAC_F0 & args) const {
-	return dynamic_cast<const TransE_Array*>((Expression) args[0])->v; }
-};
-*/
-
 class opDot : public OneOperator{
 public:
     AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
@@ -650,8 +599,6 @@ public:
     opColumn(aType A, aType B): OneOperator(atype<C_F0>(),A,B) {if( A== basicForEachType::type_C_F0)pref=-100;}
     opColumn(aType A): OneOperator(atype<C_F0>(),ArrayOfaType(A,true)) {pref=-100;}
 
-  //  opColumn(): OneOperator(atype<C_F0>(),atype<TransE_Array >(),atype<E_Array>()  ) {}
-
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
     C_F0  code2(const basicAC_F0 &args) const;
 };
@@ -667,21 +614,6 @@ public:
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
     C_F0  code2(const basicAC_F0 &args) const;
 };
-
-
-/*
-class opArray : public OneOperator{
-public:
-    const char * op;
-    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
-    bool MeshIndependent() const { return false;}
-
-    opSum(const char *opp,aType A, aType B): OneOperator(atype<C_F0>(),A,B),op(opp) {}
-
-    E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
-    C_F0  code2(const basicAC_F0 &args) const;
-};
-*/
 
 class opFormal : public OneOperator{
 public:
@@ -955,38 +887,16 @@ class ForEachType<void *>:  public basicForEachType{public:// correction july 20
 };
 
 inline double walltime(){
-    /*
-#ifdef HAVE_GETTIMEOFDAY
-
-
-    struct              timeval currentWallTime;
-    double             msecTime;
-
-    gettimeofday(&currentWallTime, NULL);
-
-    //time with milliseconds
-    msecTime = ( currentWallTime.tv_sec*1000. + currentWallTime.tv_usec/1000. )/1000.0;
-
-    // return time with milliseconds
-    return msecTime;
-
-
-#else
-*/
     // add for Pichon mars 2010
     time_t currentWallTime;
     time(&currentWallTime);
     return (double)currentWallTime;
-//#endif
 }
 
 inline long fftime()
 {
-//#ifdef HAVE_GETTIMEOFDAY
     time_t tloc;
     return time(&tloc);
-//#endif
-//    return -1;
 }
 long ffstrtol(string* p)
 {
@@ -994,7 +904,6 @@ long ffstrtol(string* p)
     const char *pp=p->c_str();
     long r = strtol(pp,&pe,10);
     const char *ppe = pe, *pppe= pp+p->size();
-   // cout << " .ffstrtol. " << pppe - pe << endl;
     assert(ppe <= pppe);
     for(const char *ppe = pe; ppe < pppe; ++ppe)
         ffassert(isspace(*ppe));
@@ -1007,7 +916,6 @@ long ffstrtol(string* p,long d)
     const char *pp=p->c_str();
     long r = strtol(pp,&pe,d);
     const char *ppe = pe, *pppe= pp+p->size();
-  //  cout << " .ffstrtol. " << pppe - pe << endl;
     ffassert(ppe <= pppe);
     for(const char *ppe = pe; ppe < pppe; ++ppe)
         ffassert(isspace(*ppe));
@@ -1020,7 +928,6 @@ double ffstrtod(string* p)
     const char *pp=p->c_str();
     double r = strtod(pp,&pe);
     const char *ppe = pe, *pppe= pp+p->size();
-    //  cout << " .ffstrtol. " << pppe - pe << endl;
     ffassert(ppe <= pppe);
     for(const char *ppe = pe; ppe < pppe; ++ppe)
         ffassert(isspace(*ppe));
@@ -1037,7 +944,6 @@ int ShowAlloc(const char *s,size_t & lg);
 long ShowAlloc1(string *  s,long * np) { size_t lg; long  n= ShowAlloc(s->c_str(),lg); *np=lg; return n;}
 long ShowAlloc1(string *  s) { size_t lg; long  n= ShowAlloc(s->c_str(),lg); return n;}
 
-//template<class K,class V,class KK,class VV>
 class E_ForAllLoopMapSS
 {  public:
     typedef String K;
@@ -1058,7 +964,6 @@ class E_ForAllLoopMapSS
         KK * i   =   GetAny<KK* >(data->i(s));
         VV * v   =   GetAny<VV* >(data->v(s));
         if(verbosity>1000) {
-            //      cout << i << " " << j << " " << v << " " << data->epl <<     endl;
             cout << " i " << (char*) (void *) i -  (char*)(void*) s ;
             cout << " vi " <<  (char*) (void *) v -  (char*)(void*) s ;
             cout << endl;}
@@ -1105,12 +1010,7 @@ class E_ForAllLoopMapSS
                     cout << " map =" << iii->first << " -> " << iii->second << endl;
                 cout << " end of map " << endl;
             }
-            // ii=iinext;//
-
         }
-      //  if(verbosity>99999) cout << "befor end \n";
-      //  data->end(s);
-      //  if(verbosity>99999) cout <<"afert end \n";
         return Nothing  ;
     }
 
@@ -1138,7 +1038,6 @@ void Init_map_type()
 {
    TheOperators=new Polymorphic(),
    TheRightOperators=new Polymorphic();
-  //  cout << sizeof(string) << endl;
     map_type[typeid(AnyType).name()] = new ForTypeAnyType();
     map_type[typeid(void).name()] = new ForTypeVoid();
        InitLoop();
@@ -1162,13 +1061,11 @@ void Init_map_type()
     Dcl_Type<OP_setw>();
     Dcl_Type<Polymorphic*>();
 
-//    Dcl_Type<C_F0>();
     basicForEachType::type_C_F0 = map_type[typeid(C_F0).name()] =  new TypeLineFunction;
     Dcl_Type<E_Array>();
     Dcl_Type<TransE_Array >();// add
     Dcl_Type<const E_Border *>();
     Dcl_Type<const E_BorderN *>();
-    // string[string] type
     typedef MyMap<String,String> MyMapSS;
     map_type[typeid(MyMapSS*).name()] = new ForEachType<MyMapSS*>(Initialize<MyMapSS >,Delete<MyMapSS >) ;
     map_type_of_map[make_pair(atype<string*>(),atype<string*>())]=atype<MyMapSS*>();
@@ -1369,11 +1266,8 @@ void Init_map_type()
 
      TheOperators->Add("^",
 		       new OneBinaryOperator<Op2_pow<long,long,long> >,
-    //   new OneBinaryOperator<Op2_pow<double,long,double> >,
 		       new OneBinaryOperator<Op2_pow<double,double,double> >,
 		       new OneBinaryOperator<Op2_pow<double,double,long> >,
-    //   new OneBinaryOperator<Op2_pow<Complex,Complex,double> >,
-    //  new OneBinaryOperator<Op2_pow<Complex,double,Complex> >,
 		       new OneBinaryOperator<Op2_pow<Complex,Complex,Complex> >
      );
 
@@ -1438,12 +1332,6 @@ void Init_map_type()
        new Operator_Aritm_If<string* >  // (OK???)  to do FH string * mars 2006
        );
 
-/*
-     ArrayOperator<double>();
-     ArrayOperator<Complex>();
-     ArrayOperator<long>();
-*/
-//      initArrayOperators()   ;
      initArrayOperatorlong();
      initArrayOperatordouble();
      initArrayOperatorComplex();
@@ -1479,14 +1367,12 @@ void Init_map_type()
      );
 
      TheOperators->Add("+",
-    //   new OneBinaryOperator<Op2_addp<const E_BorderN *,const E_BorderN *,const E_BorderN * > >,
        new AddBorderOperator
        );
 
       // add frev 2007
       TheOperators->Add("\'", new opTrans);
 
-     // TheOperators->Add("\'", new opTTrans);
       TheOperators->Add("*",new opDot(atype<TransE_Array >(),atype<E_Array>() )   );  // a faire mais dur
       TheOperators->Add("*",new opDot(atype<E_Array >(),atype<E_Array>() )   );  // a faire mais dur
       TheOperators->Add("*",new opColumn(atype<E_Array >() )   );  //  [ ]* C_F0 (all)
@@ -1554,10 +1440,6 @@ void Init_map_type()
        new OneOperator2_<long*,long*,long>(&set_copyp),
        new OneOperator2_<bool*,bool*,bool>(&set_copyp), //  mars 2006
        new OneOperator2_<Complex*,Complex*,Complex>(&set_copy),
-  //     new OneOperator2_<istream**,istream**,istream*>(&set_copy_new<istream>),
-   //    new OneOperator2_<ostream**,ostream**,ostream*>(&set_copy_new<ostream>),
-//       new OneUnaryOperator<Op1_new_pstring<istream*,ifstream> >,
-//       new OneUnaryOperator<Op1_new_pstring<ostream*,ofstream> >,
        new OneBinaryOperator<Op2_set_pstring<istream**,ifstream> >,  //  FH string * mars 2006
        new OneBinaryOperator<Op2_set_pstring<ostream**,ofstream> >,  //  FH string * mars 2006
        new OneTernaryOperator3<Op2_set_pstringiomode<ostream**,ofstream> >  ,    //  FH string * mars 2006
@@ -1567,11 +1449,8 @@ void Init_map_type()
      atype<istream* >()->AddCast( new E_F1_funcT<istream*,istream**>(UnRef<istream* >));
      atype<ostream* >()->AddCast( new E_F1_funcT<ostream*,ostream**>(UnRef<ostream* >));
 
-//     Add<istream**>("<-","(", new OneUnaryOperator<Op1_new_pstring<istream*,ifstream> >);
      Add<ostream**>("<-","(", new OneUnaryOperator<Op1_new_pstring<ostream*,ofstream> >);  //  FH string * mars 2006
 
-    // Polymorphic * precis =new Polymorphic();
-    //  Add<ostream*>("precision",".",precis);
      Add<ostream**>("precision",".",new OneOperator1<ostream_precis,ostream**>(ostream_precision));
      Add<ostream*>("precision",".",new OneOperator1<ostream_precis,ostream*>(ostream_precision));
 
@@ -1587,8 +1466,6 @@ void Init_map_type()
     Add<istream**>("tellg",".",new OneOperator1<istream_seekg,istream**>(ff_iseekg));
     Add<istream*>("tellg",".",new OneOperator1<istream_seekg,istream*>(ff_iseekg));
 
- //   Add<istream_seekp>("(","",new OneOperator1<long,istream_seekp>(fftellp),
-//			new OneOperator2<long,istream_seekp,long>(ffseekp));
     Add<ostream_seekp>("(","",new OneOperator1<long,ostream_seekp>(fftellp),
 		       new OneOperator2<long,ostream_seekp,long>(ffseekp));
     Add<istream_seekg>("(","",new OneOperator1<long,istream_seekg>(fftellg),
@@ -1636,7 +1513,6 @@ void Init_map_type()
 
 
      Global.Add("cos","(",new OneOperator1<double>(cos));
-//     Global.Add("square","(",new OneOperator1_<double>(Square));
     Global.Add("square","(",new OneOperator1<long,long,E_F_F0<long,const long &> >(Square));// add FH Mai 2011
     Global.Add("square","(",new OneOperator1<double,double,E_F_F0<double,const double &> >(Square));
     Global.Add("square","(",new OneOperator1<Complex,Complex,E_F_F0<Complex,const Complex &> >(Square));// add FH Mai 2011
@@ -1732,10 +1608,8 @@ void Init_map_type()
      Global.Add("cosh","(",new OneOperator1_<Complex>(cosh));
      Global.Add("tanh","(",new OneOperator1_<Complex>(tanh));// Add June 2016 FH..
      Global.Add("log","(",new OneOperator1_<Complex>(log));
-     //     Global.Add("log10","(",new OneOperator1_<Complex>(log10));
      Global.Add("tan","(",new OneOperator1_<Complex>(tan));
      Global.Add("exp","(",new OneOperator1_<Complex>(exp));
-     //Complex (* powcc  )( const  Complex &, const Complex &) =pow;
 
     Global.Add("pow","(",new OneBinaryOperator<Op2_pow<Complex,Complex,Complex> >);
                 //new OneOperator2_<Complex,Complex>(pow ));
@@ -1749,10 +1623,6 @@ void Init_map_type()
      Global.Add("imag","(",new OneOperator1_<double,Complex>(Imag));
      //  Big probleme  real is a type
      Add<double>("<--","(",new OneOperator1_<double,Complex>(Real));
-    // Global.Add("real","(",new OneOperator1_<double,Complex>(Real));
-    // Add<double>(typevarreal->right()->name(),".",new OneOperator1_<double,Complex>(Real));
-    // Global.Add(typevarreal->right()->name(),".",new OneOperator1_<double,Complex>(Real));
-    // Add<double*>(typevarreal->left()->name(),".",new OneOperator1_<double,Complex*>(preal));
 
      Global.Add("abs","(",new OneOperator1_<double,Complex>(abs));
 
@@ -1825,7 +1695,6 @@ void Init_map_type()
   TheOperators->Add("<<", new OneBinaryOperator<Print<OP_setw> >);
 
 }
-//int ShowAlloc(const char *s,size_t & lg);
 
 
 
@@ -1864,8 +1733,6 @@ C_F0  opVI::code2(const basicAC_F0 &args) const
     Expression p=args[1];
     if ( ! p->EvaluableWithOutStack() )
     {
-        bool bb=p->EvaluableWithOutStack();
-        //cout << bb << " " <<  * p <<  endl;
         CompileError(" [...][p], The p must be a constant , sorry");
     }
     int pv = GetAny<long>((*p)(NullStack));
@@ -1876,9 +1743,6 @@ C_F0  opVI::code2(const basicAC_F0 &args) const
     else ea = dynamic_cast<const E_Array*>((Expression) args[0]);
     assert( ea || tea );
     const E_Array & a=  ta ? *tea->v : *ea;
-    // cout << " pv =" << pv << " size = "<< a.size() << endl;
-
-    //ffassert(pv >=0 && pv <a.size());
     if(tea){
         AC_F0  v  ;
         for (int i=0;i<a.size();++i)
@@ -1993,7 +1857,6 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
 		s = C_F0(TheOperators,"+",s,abi);}
 	    C(i,j)=s;
 	};
-   // cout << "\n ***na1 nb1 == = "<< na1 << " " << nb1 << endl;
     if( na1==1 && mb1 ==1)
 	return C(0,0);
     else if ( mb1 ==1 ) // || (na1==1)) // correct du car ' on conj encore r . mars 2010
@@ -2021,29 +1884,6 @@ C_F0  opDot::code2(const basicAC_F0 &args) const
 	}
 	return C_F0(TheOperators,"[]",v);
     }
-/*
-    if ( !mab && ! maa)
-    {
-
-	if( na != nb)
-	    CompileError(" no same size  [ ...]'*[ ...  ] sorry ");
-
-	if( ta && ! tb)
-	{
-	    s= C_F0(TheOperators,"*",a[0],b[0]);
-	    for (int i=1;i<na;++i)
-	    {
-		abi = C_F0(TheOperators,"*",a[i],b[i]);
-		s = C_F0(TheOperators,"+",s,abi);
-	    }
-	    return s;//Type_Expr(s); //new C_F0(s);   ATTENTION le type est variable ici   FH
-	}
-
-	if(!ma && mb)
-	{
-	}
-
-    }*/
 
     cout << "   formal prod array or matrix : [ .. ] * [ .. ]   " << na << "x" << nb << endl;
     cout << "   formal prod array or matrix : [ .. ] * [ .. ]   " <<  endl;
@@ -2065,8 +1905,6 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
     else ea = dynamic_cast<const E_Array*>((Expression) args[0]);
     if( tb)  teb = dynamic_cast<const TransE_Array*>((Expression) args[1]);
     else eb = dynamic_cast<const E_Array*>((Expression) args[1]);
-
-    // ffassert( ea || tea );
 
     if( (eb || teb) && ( ea || tea ) )
     {
@@ -2133,7 +1971,6 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
                 if(!tb)  B(i,0) = b[i];
                 else     B(0,i) = TryConj(b[i]);
 
-        //KNM<CC_F0> C(na1,mb1);
         CC_F0 s,aibi;
 
         for (int i=0;i<na1;++i)
@@ -2145,7 +1982,6 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
                 else
                     s = C_F0(TheOperators,"+",s,aibi);
             };
-        //   if( na1==1 && mb1 ==1)
         return s;
     }
     else if ( ea || tea )
@@ -2174,14 +2010,6 @@ C_F0  opColumn::code2(const basicAC_F0 &args) const
 
     }
     else ffassert(0);
-    /*
-     cout << "   formal : array or matrix : [ .. ] : [ .. ]   " << na << "x" << nb << endl;
-     cout << "   formal : array or matrix : [ .. ] : [ .. ]   " <<  endl;
-     cout << " first  array :  matrix " << maa << " trans " << ta << " " << na << "x" << ma <<endl;
-     cout << " second array :  matrix " << mab << " trans " << tb << " " << nb << "x" << mb <<endl;
-     CompileError("  not implemented sorry ..... (FH) to do ???? ");
-
-     */
     return C_F0();
 }
 

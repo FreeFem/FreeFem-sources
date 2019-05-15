@@ -133,6 +133,7 @@ inline void  invNumSimplex3(int n,int &i,int &j,int &k)
 // d = 2
 void SplitSimplex(int N,R2 *P,int *K,int op=0,R2 *ABC=0)
 {
+    // warning PB of oriention if (i+j<N)  , the transo is positif => no swap on 1, 2 ve
   assert(N>0);
   int nv = (N+1)*(N+2)/2;
   double h=1./N;
@@ -162,9 +163,8 @@ void SplitSimplex(int N,R2 *P,int *K,int op=0,R2 *ABC=0)
       else
 	{
 	  K[l++]= op+NumSimplex2(N-i,N-j);
-	  //K[l++]= op+NumSimplex2(N-i,N-j-1);
-	  K[l++]= op+NumSimplex2(N-i-1,N-j);
-      K[l++]= op+NumSimplex2(N-i,N-j-1);
+      K[l++]= op+NumSimplex2(N-i-1,N-j);//  swap vertices  1 and 2 May 2019 FH (Thanks to AF)
+	  K[l++]= op+NumSimplex2(N-i,N-j-1);
 	}
 }
 
@@ -296,10 +296,10 @@ void SplitSurfaceSimplex(int N,int &ntri2,int *&tri)
 	  tri[l++]= op+NumSimplex3(0,i,j+1); 
 	}
       else
-	{
+	{ // correction orinatation ... 
 	  tri[l++]= op+NumSimplex3(0,N-i,N-j);
-	  tri[l++]= op+NumSimplex3(0,N-i,N-j-1);
-	  tri[l++]= op+NumSimplex3(0,N-i-1,N-j); 
+	  tri[l++]= op+NumSimplex3(0,N-i-1,N-j);
+          tri[l++]= op+NumSimplex3(0,N-i,N-j-1);
 	}
       //cout << "i,j " << i << "," << j << endl;
       if(verbosity>200)
@@ -317,10 +317,10 @@ void SplitSurfaceSimplex(int N,int &ntri2,int *&tri)
 	  tri[l++]= op+NumSimplex3(i+1,0,j);
 	}
       else
-	{
+	{ // CHANGE ORIENTATION FH MAY
 	  tri[l++]= op+NumSimplex3(N-i,0,N-j);
-	  tri[l++]= op+NumSimplex3(N-i-1,0,N-j); // inverser les deux lignes
 	  tri[l++]= op+NumSimplex3(N-i,0,N-j-1);
+          tri[l++]= op+NumSimplex3(N-i-1,0,N-j); // inverser les deux lignes
 	}
       //cout << "i,j " << i << "," << j << endl;
       if(verbosity>200)
@@ -339,10 +339,10 @@ void SplitSurfaceSimplex(int N,int &ntri2,int *&tri)
 	  //tri[l++]= op+NumSimplex3(i+1,j,0);
 	}
       else
-	{
+	{ // CHANGE ORIENTATION FH MAY
 	  tri[l++]= op+NumSimplex3(N-i,N-j,0);
-	  tri[l++]= op+NumSimplex3(N-i,N-j-1,0);
-	  tri[l++]= op+NumSimplex3(N-i-1,N-j,0); 
+	  tri[l++]= op+NumSimplex3(N-i-1,N-j,0);
+            tri[l++]= op+NumSimplex3(N-i,N-j-1,0);
 	  //tri[l++]= op+NumSimplex3(N-i,N-j-1,0);
 	}
       //cout << "i,j " << i << "," << j << endl;

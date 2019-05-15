@@ -1,11 +1,18 @@
 #include "ff++.hpp"
 
-long CircumCenter(Fem2D::Mesh const *const &pTh, KN<double> *const & pcx, KN<double> *const &pcy) 
+/*!
+* \brief CircumCenter
+* \param pTh Fem2D::Mesh const *const &
+* \param pcx KN<double> * const &
+* \param pcy KN<double> * const
+* \return 0L
+*/
+long CircumCenter(Fem2D::Mesh const *const &pTh, KN<double> *const & pcx, KN<double> *const &pcy)
 {
 	KN<double> & cx = *pcx;
 	KN<double> &cy= *pcy;
 	const Mesh &Th= *pTh;
-	
+
 	ffassert( Th.nt == cx.N());
 	ffassert( Th.nt == cy.N());
 	for (int k=0; k<Th.nt; ++k)
@@ -18,25 +25,18 @@ long CircumCenter(Fem2D::Mesh const *const &pTh, KN<double> *const & pcx, KN<dou
         double ab= -det(a,aa,b);
         double abb= det(a,aa,bb);
 		double s = ab+abb;
-		R2 P = bb*ab/s + b*abb/s; 
+		R2 P = bb*ab/s + b*abb/s;
 		cx[k]=P.x;
-		cy[k]=P.y; 
-		//  verif 
-		/*
-		double la = R2(A,P).norme2();
-		double lb= R2(B,P).norme2();
-		double lc = R2(C,P).norme2();
-		cout << ab << " " << abb << " :: " << la << " " << lb << " " << lc << endl; 
-	    ffassert( abs(la-lc) < 1e-6 && abs(la-lb) < 1e-6);	
-		*/		
+		cy[k]=P.y;
+		//  verif
 	}
-	return 0L; 
+	return 0L;
 }
 
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
 	if (verbosity) {
 		cout << " lood: CircumCenter  " << endl;}
-		
+
 		Global.Add("CircumCenter", "(", new OneOperator3_<long,pmesh,KN<double>*,KN<double>*> (CircumCenter));
 	}
 LOADFUNC(Load_Init)

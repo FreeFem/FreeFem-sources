@@ -1,0 +1,30 @@
+include "test.idp"
+
+cout << "set" << endl;
+real t;
+
+verbosity=3;
+
+matrix A = [[1, 0], [0, 1]];
+real[int] b = [1, 0];
+real[int] sol(2);
+
+set(A, solver=CG);
+sol = A^-1 * b;
+cout << sol << endl;
+
+set(A, solver=LU);
+sol = A^-1 * b;
+cout << sol << endl;
+
+set(A, solver=Crout);
+sol = A^-1 * b;
+cout << sol << endl;
+
+set(A, solver=Cholesky);
+sol = A^-1 * b;
+cout << sol << endl;
+
+set(A, solver=sparsesolver);
+sol = A^-1 * b;
+cout << sol << endl;

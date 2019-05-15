@@ -85,26 +85,6 @@ namespace  Fem2D {
 			}
 
 			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
-			/*  void Pi_h_alpha(const baseFElement & K,KN_<double> & v) const
-			 * {
-			 *  for (int i=0;i<15+6;++i)
-			 *    v[i]=1;
-			 *  int e0=K.EdgeOrientation(0);
-			 *  int e1=K.EdgeOrientation(1);
-			 *  int e2=K.EdgeOrientation(2);
-			 *  int ooo[6]={e0,e0,e1,e1,e2,e2};
-			 * int iii[6]={3,6,8,11,13,16};
-			 *  int jjj[6];
-			 *  for(int i=0;i<6;++i)
-			 *    {
-			 *      jjj[i]= iii[i]+1; // si orient = -1
-			 *    }
-			 *  for(int i=0;i<6;++i)
-			 *    if(ooo[i]==1) v[jjj[i]]=0;
-			 *    else v[iii[i]]=0;
-			 *
-			 * }
-			 */
 	};
 
 	const R2 TypeOfFE_P4dcLagrange::G(1. / 3., 1. / 3.);
@@ -135,7 +115,7 @@ namespace  Fem2D {
 		// et la numerotation naturelle  mais 2 noud pas arete
 		// donc p est la perumation
 		// echange de numerotation si les arete sont dans le mauvais sens
-		int p[15];
+		int p[15]={};
 
 		for (int i = 0; i < 15; ++i) {
 			p[i] = i;
@@ -162,15 +142,10 @@ namespace  Fem2D {
 
 				for (int i = 0; i < k; ++i) {
 					f *= L[nn[df][i]] - aa[df][i];
-					// cout <<  L[nn[df][i]]-aa[df][i]<< " ";
 				}
 
 				f0[pdf] = f;
-				// cout << pdf<< " " << df << " f " <<f <<endl;
 			}
-
-			// cout <<" L " << L[0] << " " << L[1] << " " << L[2] << endl;
-			// cout << ndf << " nbf = "<< f0 <<endl;
 		}
 
 		if (whatd[op_dx] || whatd[op_dy] || whatd[op_dxx] || whatd[op_dyy] || whatd[op_dxy]) {

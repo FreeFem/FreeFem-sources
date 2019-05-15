@@ -27,8 +27,8 @@
 
 #include "ff++.hpp"
 #include "AddNewFE.h"
-// Fini element on Quadrature Formula ...
-// to opimize computation ...
+// Finite element on Quadrature Formula ...
+// to optimize computation ...
 /// ---------------------------------------------------------------
 namespace  Fem2D {
 	// -------------------
@@ -64,7 +64,6 @@ namespace  Fem2D {
 				return d;
 			}
 
-			// static double *cfill(int n) {  double *d = new double[n]]; for(int i=0; i<n; ++i) d[i]1.; return d;}
 			typedef GQuadratureFormular<R2> QF;
 			int *Data;
 			int m;
@@ -111,7 +110,6 @@ namespace  Fem2D {
 						int k = ijP(P_Pi_h[l]);
 						if (k != l) {
 							err++;
-							// cout << " Erreur search TypeOfFE_QF2d loose point " << l << " / " << NbDoF << " m = " << m << endl;
 						}
 					}
 
@@ -144,11 +142,6 @@ namespace  Fem2D {
 				}
 			}
 
-			/*     R operator()(const FElement & K,const  RdHat & PHat,const KN_<R> & u,int componante,int op) const
-			 *   {
-			 *
-			 *   }
-			 */
 	};
 
 	class TypeOfFE_QF3d: public GTypeOfFE<Mesh3>

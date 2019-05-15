@@ -1,0 +1,22 @@
+include "test.idp"
+
+cout << "NaN" << endl;
+real t;
+
+cout << IND << "string" << endl;
+
+string str = "Airthium";
+
+t = clock();
+real res = NaN("");
+t = clock() - t;
+cout << IND << IND << t << endl;
+//test(isNaN(res) == true);
+test(res != res);
+
+t = clock();
+real res2 = NaN(str);
+t = clock() - t;
+cout << IND << IND << t << endl;
+//test(isNaN(res2) == true);
+test(res2 != res2);

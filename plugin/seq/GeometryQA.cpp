@@ -156,7 +156,6 @@ namespace mir {
 		}
 
 		// If the metric is not constant, it is sampled until resolution allows to make a sensible choice (based on lip constant). Smallest eigenvalue used only.
-		// assert(lip>0);
 		for (int pow = 1; h * (minSize - metric.lip / (2 * pow)) < 0.5; pow *= 2) {	// !!! condition should be checked
 			for (int i = 0; i <= pow; i++) {
 				if (i % 2 == 0) {continue;}
@@ -228,7 +227,6 @@ namespace mir {
 			}
 		}
 
-		// cout << "hello" << endl;
 		return false;	// not supposed to happen
 	}
 
@@ -237,7 +235,6 @@ namespace mir {
 		Vertex *t = next->intersect(start, end, VertexAllocator, metric);
 
 		if (oldSister == NULL) {
-			// Vertex *s=next->intersect(start, end, VertexAllocator, metric);
 			if (t == NULL) {return false;}
 
 			Edge *const tw = next;
@@ -359,7 +356,7 @@ namespace mir {
 		}
 
 		return f;
-	}	// <<"{{},{}}";
+	}
 
 	Triangulation::Triangulation (int N, const Metric2 &Metric): metric(Metric) {
 		for (int i = 0; i <= N; i++) {
@@ -487,8 +484,6 @@ namespace mir {
 			Edge *e = &edges[i];
 			if (!e->isRepresentative()) {continue;}
 
-			// cout << " nv = " << nv() << " " << ne_oriented() << endl;
-
 			const int indexu = vertices.index(e->getu()), indexv = vertices.index(e->getv());
 			bool extru = indexu < nv_iso && ((e == minEdge[indexu]) || (e == maxEdge[indexu]));
 			bool extrv = indexv < nv_iso && ((e == minEdge[indexv]) || (e == maxEdge[indexv]));
@@ -543,12 +538,6 @@ namespace mir {
 		}
 
 		toExcludePtr.clear();
-		/*
-		 * for(int i=0; i<toExcludePtr.size(); ++i){
-		 *  const Edge *const e=toExcludePtr[i];
-		 *  toExclude[edges.index(e)]=true;
-		 *  if(!e->onBoundary()) toExclude[edges.index(e->getSister())]=true;
-		 * }*/
 
 		if (movie_name.size() > 0) {cout << "Beginning main flip. Movie frame : " << movie_frame_number;}
 
@@ -642,17 +631,6 @@ namespace mir {
 			}
 		}
 
-		/*
-		 * for (int i=0;i<nbt;i++)
-		 * {
-		 *  int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
-		 *  int ii = nbv + i; // numero du
-		 *  // les 3 triangles par triangles origines
-		 *  (*tt++).set(v,ii,i1,i2,Th[i].lab);
-		 *  (*tt++).set(v,i0,ii,i2,Th[i].lab);
-		 *  (*tt++).set(v,i0,i1,ii,Th[i].lab);
-		 * }
-		 */
 		// les arete frontieres qui n'ont pas change
 		FFBE *bb = b;
 
@@ -662,22 +640,12 @@ namespace mir {
 			if (!e.onBoundary() || !e.isRepresentative()) {continue;}
 
 			// data_out << 1+vertices.index(e.getu())
-			// << " " << 1+vertices.index(e.getv()) << " " << e.onBoundary() << endl;
 			int i1 = vertices.index(e.getu());
 			int i2 = vertices.index(e.getv());
 			int lab = e.onBoundary();
 			(*bb++).set(v, i1, i2, lab);
 		}
 
-		/*
-		 * for (int i=0;i<neb;i++)
-		 * {
-		 *  int i1=Th(Th.bedges[i][0]);
-		 *  int i2=Th(Th.bedges[i][1]);
-		 *  int lab=Th.bedges[i].lab;
-		 *  (*bb++).set(v,i1,i2,lab);
-		 * }
-		 */
 		Mesh *m = new Mesh(nbv, nbt, neb, v, t, b);
 
 		return m;

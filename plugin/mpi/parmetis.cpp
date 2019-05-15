@@ -4,19 +4,19 @@
 // AUTHOR   : P. Jolivet
 // E-MAIL   : P. Jolivet <pierre.jolivet@enseeiht.fr>
 
-/* 
+/*
  This file is part of Freefem++
- 
+
  Freefem++ is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation; either version 2.1 of the License, or
  (at your option) any later version.
- 
+
  Freefem++  is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -98,7 +98,6 @@ AnyType ParMETIS_Op<Type, Mesh>::operator()(Stack stack) const {
         int loc = vtxdist[rank + 1] - vtxdist[rank];
         idx_t* xadg = new idx_t[loc + 1];
         const Mesh& Th(*GetAny<const Mesh*>((*pTh)(stack)));
-        idx_t nv = Th.nv;
         idx_t nve = Mesh::Rd::d + 1;
         std::vector<idx_t> adjncy;
         adjncy.reserve(loc * nve);

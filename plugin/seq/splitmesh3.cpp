@@ -46,7 +46,6 @@ Mesh const*SplitMesh3 (Stack stack, Fem2D::Mesh const *const &pTh) {
 	using  Fem2D::R2;
 	using  Fem2D::BoundaryEdge;
 	using  Fem2D::Mesh;
-	// using  Fem2D::R;
 	int nbv = Th.nv;// nombre de sommet
 	int nbt = Th.nt;// nombre de triangles
 	int neb = Th.neb;	// nombre d'aretes fontiere
@@ -115,11 +114,6 @@ Mesh const*SplitMesh3 (Stack stack, Fem2D::Mesh const *const &pTh) {
 // static void Load_Init() soit appele a moment du chargement dynamique
 // du fichier
 //
-/*  class Init { public:
- * Init();
- * };
- *
- * $1 */
 
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
 	if (verbosity) {

@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... parse arguments from command line*/
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ... parse arguments from command line                          */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -28,7 +31,6 @@
 short schw, schh;
 extern ubyte option, infogl, fullscreen, dosurf, stereoMode;
 
-/********************/
 /*  rajout popen    */
 extern ubyte dpopen;
 extern ubyte dpopenbin;
@@ -74,7 +76,6 @@ int parsar (int argc, char *argv []) {
 		}
 		// Rajout de l option popen
 		else if (!strcmp(argv[i], "-popen")) {
-			// printf("valeur de i=%i \n",i);
 			dpopen = TRUE;
 
 			if (!strcmp(argv[i + 1], "-filebin")) {
@@ -97,15 +98,12 @@ int parsar (int argc, char *argv []) {
 				printf("medit with popen : mesh(es) \n");
 
 			if (i + 1 != argc) {
-				// printf("valeur de i=%i \n",i);
 				cv.nbm = atoi(argv[i + 1]);
-				// printf("number of mesh= %i\n",cv.nbm);
 				i++;
 				if (cv.nbm == 0) return (0);
 			}
 
 			for (k = 0; k < cv.nbm; k++) {
-				// printf("valeur de i=%i \n",i);
 				cv.mesh[k] = (pMesh)M_calloc(1, sizeof(Mesh), "parsar.mesh");
 				if (!cv.mesh[k]) return (0);
 
@@ -115,7 +113,6 @@ int parsar (int argc, char *argv []) {
 				i++;
 			}
 
-			// assert(i==argc);
 		}
 		// Fin Rajout de popen
 		else if (!strcmp(argv[i], "-i")) {
@@ -167,7 +164,6 @@ int parsar (int argc, char *argv []) {
 			}
 
 			mesh = cv.mesh[cv.nbm];
-			/*mesh->name = argv[i];*/
 			strcpy(mesh->name, argv[i]);
 			if (ddebug) printf("parsar: mesh[%d] %s\n", cv.nbm, mesh->name);
 
@@ -179,3 +175,7 @@ int parsar (int argc, char *argv []) {
 
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

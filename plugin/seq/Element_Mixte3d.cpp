@@ -168,7 +168,7 @@ namespace Fem2D {
                         int  eo = K.EdgeOrientation(ee)>0;//  change FH; jan 2019
 			R3 E = K.Edge(ee);	// the edge local number is given by the integer division betweeand
 			if (!eo) {E = -E;}
-                    
+
 			if (e % 2 == 1) {p = p - QFe.n;}// if I consider an 'even' dof, the quad pts are the ones of the previous dof (they correspond to the same edge)
 
 			for (int q = 0; q < QFe.n; ++q, ++p) {
@@ -215,9 +215,6 @@ namespace Fem2D {
 				}
 			}
 		}
-
-		// ffassert(i==M.ncoef);
-		// ffassert( M.np == p);
 	}
 
 	// In Mesh3dn.hpp:
@@ -2029,7 +2026,7 @@ namespace Fem2D {
 
 			void FB (const What_d whatd, const Mesh &Th, const Element &K, const RdHat &PHat, RNMK_ &val) const;
 
-			~TypeOfFE_P0Edge3ds0 () {}	// cout << "TypeOfFE_Lagrange"<< this->NbDoF<<endl;}
+			~TypeOfFE_P0Edge3ds0 () {}
 
 		private:
 			TypeOfFE_P0Edge3ds0 (const TypeOfFE_P0Edge3ds0 &);
@@ -2084,7 +2081,7 @@ namespace Fem2D {
 
 			void FB (const What_d whatd, const Mesh &Th, const Element &K, const RdHat &PHat, RNMK_ &val) const;
 
-			~TypeOfFE_P1Edge3ds0 () {}	// cout << "TypeOfFE_Lagrange"<< this->NbDoF<<endl;}
+			~TypeOfFE_P1Edge3ds0 () {}
 
 		private:
 			TypeOfFE_P1Edge3ds0 (const TypeOfFE_P1Edge3ds0 &);
@@ -2164,7 +2161,7 @@ namespace Fem2D {
 
 			void FB (const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat, RNMK_ &val) const;
 
-			~TypeOfFE_P2Edge3ds0 () {}	// cout << "TypeOfFE_Lagrange"<< this->NbDoF<<endl;}
+			~TypeOfFE_P2Edge3ds0 () {}
 
 		private:
 			TypeOfFE_P2Edge3ds0 (const TypeOfFE_P2Edge3ds0 &);
@@ -2176,8 +2173,6 @@ namespace Fem2D {
 
 		{
 			// We build the interpolation pts on the edges of the reference tetrahedron:
-			// int p;
-			// p = 0;
 			int i = 0;
 
 			for (int e = 0; e < Element::ne; ++e, ++i) {
@@ -2316,7 +2311,6 @@ namespace Fem2D {
 			}
 		}
 
-		// int doff = Element::nf * 3;
 		{
 			p = Element::nf * QFface.n;
 
@@ -2333,7 +2327,6 @@ namespace Fem2D {
 		}
 		// verif bonne taille
 		ffassert(p == this->PtInterpolation.N());
-		// ffassert(i== this->coefInterpolation());//
 	}	// end TypeOfFE_RT1_3d()
 
 	// For the coefficients of interpolation alphak in (13.1)
@@ -2390,7 +2383,6 @@ namespace Fem2D {
 		// **************************************************
 		// DOFs on the tetraedra --- 3 DOFs in the volume //
 		// **************************************************
-		// NK = i=1,2,3 = -N*6*|K|
 		// Base Piola compatible  B_i =N_i* |F_i|/6  for 3 face 1,2,3
 		double CK = -K.mesure();// dof U= [u1,u2,u3] > |K| int_K ( B_i.U )
 
@@ -2404,7 +2396,6 @@ namespace Fem2D {
 			}
 		}
 
-		// ffassert(i==M.ncoef);
 	}	// end set function
 
 	// here the basis functions and theirs derivates
@@ -2424,14 +2415,12 @@ namespace Fem2D {
 		// fo contain just the sign about permutation ----- 1perm=-1 / 2perm=1 / 3perm=-1
 		double fo[4] = {(double)K.faceOrient(0), (double)K.faceOrient(1),
 			            (double)K.faceOrient(2), (double)K.faceOrient(3)};
-		// int ee = 0;
 		int p[15] = {2, 1, 0, 3, 4, 5, 8, 7, 6, 9, 10, 11, 12, 13, 14};	// Permutation for orientation to dof
 		R3 Pm[16];	// all the momome function ..
 
 		for (int ff = 0, k = 0; ff < Element::nf; ff++, k += 3) {
 			// orientation de la face a envert
 			int fp = K.facePermutation(ff);
-			// fp=0; // No perm
 			if (fp & 1) {Exchange(p[k], p[k + 1]);}
 
 			if (fp & 2) {Exchange(p[k + 1], p[k + 2]);}
@@ -2515,8 +2504,6 @@ namespace Fem2D {
 			R3 DxPm[16];
 			R3 DyPm[16];
 			R3 DzPm[16];
-
-			// if(Ortho) {Dphix=R2(0,1);Dphiy=R2(-1,0);}// x,y -> (-y,x)
 
 			for (int l = 0; l < 16; ++l) {
 				// diff phi[i]*lambda[j]/cc;

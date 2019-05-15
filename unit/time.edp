@@ -1,0 +1,16 @@
+include "test.idp"
+
+cout << "time" << endl;
+real t;
+real time1;
+real time2;
+
+cout << IND << "real" << endl;
+
+t = clock();
+time1 = time();
+t = clock() - t;
+cout << IND << IND << t << endl;
+system("sleep 1");
+time2 = time();
+test(time2 > time1);

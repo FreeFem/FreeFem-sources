@@ -24,7 +24,7 @@ SUBDIRS=3rdparty src \
 	plugin  \
 	examples 
 
-EXTRA_DIST=README.md CHANGELOG.md \
+EXTRA_DIST=README.md CHANGELOG.md AUTHORS\
 bin/keys.awk \
 bin/mpic++.in \
 bin/Install-MacOS.command \
@@ -110,24 +110,9 @@ etc/jenkins/clean.sh \
 etc/jenkins/build_PETSc.sh \
 etc/ff/ff.xcodeproj \
 etc/ff/ff.xcodeproj/project.pbxproj  \
-readme/INNOVATION \
-readme/README_MAC.md \
-readme/ChangeLog \
-readme/AUTHORS \
-readme/README_ARPACK.md \
-readme/BUGS \
-readme/INSTALL-MacOSX \
-readme/TODO \
-readme/README_XCODE.md \
-readme/COPYING \
-readme/NEWS \
-readme/README_COMPILATION.md \
-readme/HISTORY \
-readme/HISTORY_BEFORE_2005 \
-readme/COPYRIGHT \
-readme/0ldUserReadMe.txt \
-readme/README_GIT.md \
-readme/README_WINDOWS.md  \
+readme/BUGS			readme/HISTORY_BEFORE_2005	readme/README_ARPACK.md		readme/README_MAC.md		readme/TODO \
+readme/COPYRIGHT		readme/INNOVATION		readme/README_COMPILATION.md	readme/README_WINDOWS.md \
+readme/HISTORY			readme/README			readme/README_GIT.md		readme/README_XCODE.md \
 idp/ffddm_geneoCS.idp \
 idp/func-max.idp \
 idp/DDM-Schwarz-macro.idp \
@@ -184,6 +169,9 @@ clean-local::
 
 # Reduced compilation
 # -------------------
+
+unittests::
+	-cd unit && make
 
 quick:
 	cd src/libMesh && $(MAKE) $(AM_MAKEFLAGS)
@@ -272,7 +260,7 @@ clean-local::
 
 # Native MacOS packaging
 # ----------------------
-install-exec-local:: bin/script/PostInstall.sh
+install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf
 	test `uname` != Darwin || $(MAKE) FreeFem++-CoCoa  bin/script/PostInstall.sh
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(pkgdatadir)/$(VERSION)
 	test `uname` != Darwin || $(mkinstalldirs) -m 755 $(DESTDIR)/etc/paths.d/
@@ -280,6 +268,7 @@ install-exec-local:: bin/script/PostInstall.sh
 	tar cvf - $(FF_EXAMPLES_FILES)| (cd $(DESTDIR)$(pkgdatadir)/$(VERSION); tar xvf -)
 	$(INSTALL_SCRIPT) examples/CheckAll examples/CheckAllEdp $(DESTDIR)$(pkgdatadir)/$(VERSION)
 	$(mkinstalldirs) -m 755 $(DESTDIR)${bindir}
+	$(INSTALL_DATA) FreeFEM-documentation.pdf  "$(DESTDIR)$(pkgdatadir)" 
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)${bindir}
 	test `uname` != Darwin ||  echo $(bindir) >$(DESTDIR)/etc/paths.d/FreeFem++
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)/usr/local/bin
@@ -294,6 +283,7 @@ bin/script/PostInstall.sh:./Makefile bin/script/PostInstall.m4
 
 
 FreeFEM-documentation.pdf:Makefile
+	-rm FreeFEM-documentation.pdf
 	$(WGET) https://doc.freefem.org/pdf/FreeFEM-documentation.pdf
 
 ListFiles-natives: .FORCE

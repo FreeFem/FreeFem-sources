@@ -250,9 +250,6 @@ class Dxwritesol_Op: public E_F0mps
 	public:
 		Dxwritesol_Op (const basicAC_F0 &args):  what(0), nbfloat(0) {
 			evct = 0;
-			// int nbofsol;
-			// int ddim = 2;
-			// int stsize = 3;
 			// There's no named parameter
 			args.SetNameParam();
 			if (args.size() != 4) {
@@ -279,27 +276,6 @@ class Dxwritesol_Op: public E_F0mps
 				evct = to<double>(args[3]);
 			} else if (args[3].left() == atype<E_Array>()) {
 				CompileError("Until now only scalar solution");
-
-				/*const E_Array * a0  = dynamic_cast<const E_Array *>( args[i].LeftValue() );
-				 * //cout << "taille" << a0->size() << endl;
-				 * //if (a0->size() != ddim || a0->size() != stsize)
-				 * //  CompileError("savesol in 2D: vector solution is 2 composant, symmetric solution is 3 composant");
-				 * if( a0->size() == ddim){
-				 *      // vector solution
-				 *      what=2;
-				 *      nbfloat=a0->size();
-				 *      for(int j=0; j<l[i].nbfloat; j++){
-				 *              //evct[j] = to<double>( (*a0)[j]);
-				 *      }
-				 * }
-				 * else if( a0->size() == stsize){
-				 *      // symmetric tensor solution
-				 *      what=3;
-				 *      nbfloat=a0->size();
-				 *      for(int j=0; j<l[i].nbfloat; j++){
-				 *              //evct[j] = to<double>( (*a0)[j]);
-				 *      }
-				 * }*/
 			} else {
 				CompileError("savesol in 2D: Sorry no way to save this kind of data");
 			}
@@ -313,7 +289,7 @@ class Dxwritesol_Op: public E_F0mps
 };
 
 AnyType Dxwritesol_Op::operator () (Stack stack)  const {
-	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+	MeshPoint *mp(MeshPointStack(stack));
 	DxWriter &dx = *(GetAny<DxWriter *>((*edx)(stack)));
 	string &name = *(GetAny<string *>((*ename)(stack)));
 	double t = GetAny<double>((*et)(stack));
@@ -369,10 +345,6 @@ void*call_addtimeseries (DxWriter *const &mt, string *const &name, const Fem2D::
 }
 
 // Add the function name to the freefem++ table
-/*  class Init { public:
- * Init();
- * };
- * $1 */
 static void Load_Init () {
 	Dcl_Type<DxWriter *>(InitP<DxWriter>, Destroy<DxWriter> );	// declare deux nouveau type pour freefem++  un pointeur et
 

@@ -57,10 +57,7 @@ namespace  Fem2D {
 				for (int i = 0; i < NbDoF; i++) {
 					pij_alpha[i] = IPJ(i, i, 0);
 					P_Pi_h[i] = Pt[i];
-					// cout << Pt[i] << " " ;
 				}
-
-				// cout <<" cshrink: " << cshrink << " cshrink1 : "<< cshrink1 <<endl;
 			}
 
 			void FB (const bool *whatd, const Mesh &Th, const Triangle &K, const RdHat &PHat, RNMK_ &val) const;
@@ -121,7 +118,6 @@ namespace  Fem2D {
 			}
 		}
 
-		// cout << r << "\t";
 		return r;
 	}
 
@@ -137,7 +133,6 @@ namespace  Fem2D {
 		}
 
 		throwassert(val.M() == 1);
-		// throwassert(val.K()==3 );
 
 		val = 0;
 		RN_ f0(val('.', 0, op_id));
@@ -175,13 +170,10 @@ namespace  Fem2D {
 		R l0 = 1 - P.x - P.y, l1 = P.x, l2 = P.y;
 		R l4_0 = (4 * l0 - 1), l4_1 = (4 * l1 - 1), l4_2 = (4 * l2 - 1);
 
-		// throwassert(FE.N == 1);
 		throwassert(val.N() >= 6);
 		throwassert(val.M() == 1);
-		// throwassert(val.K()==3 );
 
 		val = 0;
-		// --
 		if (whatd[op_id]) {
 			RN_ f0(val('.', 0, op_id));
 			f0[0] = l0 * (2 * l0 - 1);
@@ -251,7 +243,6 @@ namespace  Fem2D {
 
 	//
 	// end ttdc1_
-	// ------------------
 
 	static void SetPtPkDC (R3 *Pt, int kk, int nn, R cc = 1) {	// P0 P1 et P2 , P1b
 		const int d = 3;
@@ -289,7 +280,6 @@ namespace  Fem2D {
 			const R cshrink;
 			const R cshrink1;
 			static const Rd G;
-			// (1 -1/3)*
 
 			Rd Shrink (const Rd &P) const {return (P - G) * cshrink + G;}
 
@@ -300,7 +290,6 @@ namespace  Fem2D {
 				int dfon[4];
 
 				A4 (int k) {
-					// (k+3)(k+2)(k+1) / 6   // d== 3
 
 					int ndf = (d == 3) ? ((k + 3) * (k + 2) * (k + 1) / 6) :
 					          ((d == 2) ? ((k + 2) * (k + 1) / 2) : k + 1);
@@ -336,16 +325,9 @@ namespace  Fem2D {
 						this->coefInterpolation[i] = 1.;
 					}
 				}
-
-				/*
-				 * inv de a M1  + b Id  =   a1 M1  + b1 Id  ( M1 : mat /  m_ij =1 )
-				 * M*M = (d+1) M =>
-				 * b1 =  1/b
-				 * a1 = -b / ((d+1)a+1)
-				 */
 			}
 
-			~TypeOfFE_LagrangeDC3d () {}// cout << "TypeOfFE_LagrangeDC3d"<< this->NbDoF<<endl;}
+			~TypeOfFE_LagrangeDC3d () {}
 
 			void FB (const What_d whatd, const Mesh &Th, const Element &K, const RdHat &PHat, RNMK_ &val) const;
 			virtual R operator () (const FElement &K, const RdHat &PHat, const KN_<R> &u, int componante, int op) const;
@@ -356,7 +338,6 @@ namespace  Fem2D {
 	};
 
 	void TypeOfFE_LagrangeDC3d::FB (const What_d whatd, const Mesh &Th, const Element &K, const RdHat &PHat, RNMK_ &val) const {
-		// const Triangle & K(FE.T);
 		R3 P = this->Shrink1(PHat);
 		R l [] = {1. - P.sum(), P.x, P.y, P.z};
 
@@ -381,8 +362,6 @@ namespace  Fem2D {
 				Dl[i] *= cshrink1;
 			}
 
-			// for(int i=0;i<4;++i)
-			// cout << Dl[i] << endl;
 			if (whatd & Fop_dx) {
 				RN_ f0x(val('.', 0, op_dx));
 				f0x[0] = Dl[0].x;
@@ -407,8 +386,6 @@ namespace  Fem2D {
 				f0z[3] = Dl[3].z;
 			}
 		}
-
-		// cout << val << endl;
 	}
 
 	R TypeOfFE_LagrangeDC3d::operator () (const FElement &K, const R3 &PHat1, const KN_<R> &u, int componante, int op) const {

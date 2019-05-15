@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -57,7 +60,6 @@ void drawEllipsoid (pScene sc, pMesh mesh, int typel, int k) {
 		int iord;
 
 		p0 = &mesh->point[k];
-		/*pm = &sc->material[refmat];*/
 		pm = &sc->material[p0->ref];
 		ps = &mesh->sol[k];
 
@@ -228,16 +230,13 @@ void drawEllipsoid (pScene sc, pMesh mesh, int typel, int k) {
 }
 
 void glCircle (float radius) {
-	float ang, ux, uy;
-
-	ux = 0.0f;
-	uy = radius;
+	float ang;
 
 	glBegin(GL_LINE_STRIP);
 
 	for (ang = 0.0f; ang <= 2 * M_PI + 0.2; ang += 0.2) {
-		ux = radius * (float)sin((double)ang);
-		uy = radius * (float)cos((double)ang);
+		float ux = radius * (float)sin((double)ang);
+		float uy = radius * (float)cos((double)ang);
 		glVertex2f(ux, uy);
 	}
 
@@ -415,3 +414,7 @@ void circumSphere (pScene sc, pMesh mesh, int typel, int k) {
 	glPopMatrix();
 	glEnable(GL_LIGHTING);
 }
+
+#ifdef __cplusplus
+}
+#endif

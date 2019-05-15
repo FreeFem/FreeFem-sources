@@ -50,7 +50,6 @@ long exactpartition (int n, int m, double **v, long *J) {
 		}
 
 		ffassert(s && j0 < N);
-		// sum = 1
 		double ss = 0;
 
 		for (int j = 0; j < n; ++j) {
@@ -89,7 +88,8 @@ long exactpartition (FEbaseArrayKn<double> *const &p, KN<long> *const &pj) {
 		int mi = vi ? vi->N() : 0;
 		if (m == 0) {m = mi;} else if (m != mi) {kerr++;}
 
-		v[i] = *vi;
+		//v[i] = *vi;
+		v[i] = vi ? *vi : NULL;
 	}
 
 	ffassert(kerr == 0);

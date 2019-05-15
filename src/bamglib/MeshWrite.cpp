@@ -1,25 +1,25 @@
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :      
-// USAGE    :        
-// ORG      : 
+// SUMMARY  :
+// USAGE    :
+// ORG      :
 // AUTHOR   : Frederic Hecht
 // E-MAIL   : hecht@ann.jussieu.fr
 //
 
 /*
  This file is part of Freefem++
- 
+
  Freefem++ is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation; either version 2.1 of the License, or
  (at your option) any later version.
- 
+
  Freefem++  is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public License
  along with Freefem++; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -58,7 +58,7 @@ using namespace H5;
 //-----------------------------ajout format hdf5-----------------------------//
 
 namespace bamg {
-  
+
   void Triangles::Write(const char * filename,const TypeFileMesh typein ) const
   {
     TypeFileMesh type = typein;
@@ -84,11 +84,11 @@ namespace bamg {
 	else if (!strcmp(filename + lll - (ls=4),".MSH"))    type = mshMesh;
 	else if (!strcmp(filename + lll - (ls=4),".FTQ"))    type = ftqMesh;
 	else ls=0;
-      } 
+      }
     if (verbosity>1)
       {
 	cout << "  -- Writing the file " << filename << " of type " ;
-	switch (type) 
+	switch (type)
 	  {
 	  case BDMesh     :  cout << " BD Mesh "  ; break;
 	  case NOPOMesh   :  cout << " NOPO "     ; break;
@@ -100,25 +100,25 @@ namespace bamg {
 //-----------------------------ajout format hdf5-----------------------------//
 	  case hdf5Mesh   :  cout << " h5  "      ; break;
 //-----------------------------ajout format hdf5-----------------------------//
-	  default: 
-	    cerr << endl 
+	  default:
+	    cerr << endl
 		 <<  " Unkown type mesh file " << (int) type << " for Writing " << filename <<endl;
 	    MeshError(1);
-	  }     
+	  }
 	Int4 NbOfTria =  nbt-2*NbOfQuad-NbOutT ;
 	if (NbOfTria)      cout << " NbOfTria = " << NbOfTria;
 	if (NbOfQuad)      cout << " NbOfQuad = " << NbOfQuad;
 	if (nbe)   	cout << " NbOfRefEdge = " << nbe ;
 	cout    << endl;
-	
+
       }
     ofstream f(filename /*,ios::trunc*/);
     f.precision(12);
-    
+
     if (f)
-      switch (type) 
+      switch (type)
 	{
-	case BDMesh     : 
+	case BDMesh     :
 	  {
 	    if ( ! Gh.OnDisk)
 	      {
@@ -144,7 +144,7 @@ namespace bamg {
 //-----------------------------ajout format hdf5-----------------------------//
 	case hdf5Mesh   :  Write_hdf5(filename)  ; break;
 //-----------------------------ajout format hdf5-----------------------------//
-	default: 
+	default:
 	  cerr << " Unkown type mesh file " << (int) type << " for Writing " << filename <<endl;
 	  MeshError(1);
 	}
@@ -155,22 +155,22 @@ namespace bamg {
       }
     if(verbosity>5)
       cout << "end write" << endl;
-    
+
   }
   void Triangles::Write_nop5(OFortranUnFormattedFile * f,
-			     Int4 &lnop5,Int4 &nef,Int4 &lgpdn,Int4 ndsr) const 
+			     Int4 &lnop5,Int4 &nef,Int4 &lgpdn,Int4 ndsr) const
   {
     ndsr =0;
     Int4 * reft = new Int4[nbt];
     //Int4 nbInT = ;
     ConsRefTriangle(reft);
     Int4 no5l[20];
-    
+
     Int4 i5 = 0;
     Int4 i,j,k=0,l5;
     //  Int4 ining=0;
     Int4 imax,imin;
-    
+
     lgpdn = 0;
     nef=0;
     // construction of a liste linked  of edge
@@ -178,9 +178,9 @@ namespace bamg {
     Edge  ** link = new Edge * [nbe];
     for (i=0;i<nbv;i++)
       head[i]=0; // empty liste
-    
+
     for (i=0;i<nbe;i++)
-      { 
+      {
 	j = Min(Number(edges[i][0]),Number(edges[i][1]));
 	link[i]=head[j];
 	head[j]=edges +i;
@@ -194,7 +194,7 @@ namespace bamg {
 	Int4 np=0;
 	l5 = 2;
 	Triangle & t = triangles[i];
-	Triangle * ta; // 
+	Triangle * ta; //
 	Vertex *v0,*v1,*v2,*v3;
 	if (reft[i]<0) continue;
 	ta = t.Quadrangle(v0,v1,v2,v3);
@@ -211,7 +211,7 @@ namespace bamg {
 	    imin = Min3(no5l[l5-1],no5l[l5-2],no5l[l5-3]);
 	    lgpdn = Max(lgpdn,imax-imin);
 	    kining=l5++;
-	    // ref of 3 edges 
+	    // ref of 3 edges
 	    for (j=0;j<3;j++)
 	      {
 		no5l[l5] = 0;
@@ -223,7 +223,7 @@ namespace bamg {
 		Int4 ja = j1+j2-2;
 		Edge * e=head[ji];
 		while (e)
-		  if(Number((*e)[0])+Number((*e)[1]) == ja) 
+		  if(Number((*e)[0])+Number((*e)[1]) == ja)
 		    {
 		      no5l[l5] = e->ref;
 		      break;
@@ -234,38 +234,38 @@ namespace bamg {
 	      }
 	    if ( no5l[l5-1] || no5l[l5-2] || no5l[l5-3]  )
 	      ining=2;
-	    else 
+	    else
 	      l5 -= 3;
-	    
+
 	    no5l[l5++] = triangles[i][0].ref();
 	    no5l[l5++] = triangles[i][1].ref();
 	    no5l[l5++] = triangles[i][2].ref();
 	    if (ining ||  no5l[l5-1] || no5l[l5-2] || no5l[l5-3]  )
 	      ining= ining ? ining : 3;
 	    else
-	      l5 -= 3,ining=0; 
+	      l5 -= 3,ining=0;
 	  }
 	else if ( &t<ta)
-	  { 
+	  {
 	    k++;
 	    no5l[l5++] = Max(subdomains[reft[i]].ref,(Int4) 1);
 	    np =4;
 	    no5l[l5++] = np;
 	    no5l[0]    = np;
-	    
+
 	    no5l[l5++] = Number(v0) +1;
 	    no5l[l5++] = Number(v1) +1;
 	    no5l[l5++] = Number(v2) +1;
 	    no5l[l5++] = Number(v3) +1;
-	    
+
 	    imax = Max(Max(no5l[l5-1],no5l[l5-2]),Max(no5l[l5-3],no5l[l5-4]));
 	    imin = Min(Min(no5l[l5-1],no5l[l5-2]),Min(no5l[l5-3],no5l[l5-4]));
 	    lgpdn = Max(lgpdn,imax-imin);
-	    
-	    
+
+
 	    kining=l5++;
-	    // ref of the 4 edges 
-	    // ref of 3 edges 
+	    // ref of the 4 edges
+	    // ref of 3 edges
 	    for (j=0;j<4;j++)
 	      {
 		no5l[l5] = 0;
@@ -277,7 +277,7 @@ namespace bamg {
 		Int4 ja = j1+j2-2;
 		Edge *e=head[ji];
 		while (e)
-		  if(Number((*e)[0])+Number((*e)[1]) == ja) 
+		  if(Number((*e)[0])+Number((*e)[1]) == ja)
 		    {
 		      no5l[l5] = e->ref;
 		      break;
@@ -288,9 +288,9 @@ namespace bamg {
 	      }
 	    if ( no5l[l5-1] || no5l[l5-2] || no5l[l5-3] || no5l[l5-4] )
 	      ining=2;
-	    else 
+	    else
 	      l5 -= 4;
-	    
+
 	    no5l[l5++] = v0->ref();
 	    no5l[l5++] = v1->ref();
 	    no5l[l5++] = v2->ref();
@@ -299,10 +299,10 @@ namespace bamg {
 	      ining= ining ? ining : 3;
 	    else
 	      l5 -= 4;
-	    
+
 	  }
 	else l5=0;
-	
+
 	if (l5)
 	  {
 	    if (ining)
@@ -313,39 +313,39 @@ namespace bamg {
 	      }
 	    else l5--;
 	    no5l[1]=nmae;
-	    // for all ref  
+	    // for all ref
 	    for (j=kining+1;j<l5;j++)
 	      {
 		no5l[j] = Abs(no5l[j]);
 		ndsr = Max(ndsr,no5l[j]);
 	      }
-	    
+
 	    if (f && i < 10 && verbosity > 10)
-	      { 
+	      {
 		cout << " e[ " << i << " @" << i5 << "]=";
 		for (j=0;j<l5;j++)
-		  cout << " " << no5l[j]; 
+		  cout << " " << no5l[j];
 		cout << endl;
 	      }
-	    
+
 	    if (f)
 	      for (j=0;j<l5;j++)
-		*f << no5l[j]; 
+		*f << no5l[j];
 	    i5 += l5;
 	  }
       }
     if(verbosity>10)
       cout << "   fin write nopo 5 i5=" << i5 << " " << i5*4 << endl;
-    lnop5=i5; 
+    lnop5=i5;
     lgpdn++; // add 1
     delete [] reft;
     delete [] head;
     delete [] link;
-    
+
   }
 
   void Triangles::Write_nopo(ostream &ff) const
-    
+
   {
     Int4  nef=0;
     Int4 lpgdn=0;
@@ -353,26 +353,26 @@ namespace bamg {
     Int4 i;
     Int4 ndsd=1;
     Int4 lnop5=0;
- 
+
     OFortranUnFormattedFile f(ff);
- 
+
     for (i=0;i<NbSubDomains ;i++)
       ndsd=Max(ndsd,subdomains[i].ref);
- 
-    // to compute the lnop5,nef,lpgdn,ndsr parameter 
+
+    // to compute the lnop5,nef,lpgdn,ndsr parameter
     Write_nop5(0,lnop5,nef,lpgdn,ndsr);
-    
+
     f.Record();
-    
+
     f <<  Int4(13)<<Int4(6)<<Int4(32)<<Int4(0)<<Int4(27)<<Int4(0) ;
     f << Int4(nbv+nbv) ;
     f << lnop5;
     f << Int4(1 )<<Int4(1)<<Int4(1 )<<Int4(1)<<Int4(2)<<Int4(1);
-    
-    f.Record(33*sizeof(Int4)); 
-    
+
+    f.Record(33*sizeof(Int4));
+
     f << Int4(32) ;
-    
+
     //char *c=identity;
     time_t timer =time(0);
     char buf[10];
@@ -381,13 +381,13 @@ namespace bamg {
     f.write4(buf,2);
     f.write4("created with BAMG",6);
     f.write4("NOPO",1);
-    
-    
+
+
     f << Int4(0) << Int4(1) << Int4(0) ;
     f.Record();
     Int4 nbquad= NbOfQuad;
     Int4 nbtria= nbt-NbOutT - 2*NbOfQuad;
-    
+
     cout << " lnop5      = " << lnop5 << endl;
     cout << " nbquad     = " << nbquad << endl;
     cout << " nbtrai     = " << nbtria << endl;
@@ -395,7 +395,7 @@ namespace bamg {
     cout << " nef        = " << nef  << endl;
     cout << " np         = " << nbv  << endl;
     cout << " ndsr       = " << ndsr << endl;
-    f << Int4(27)  
+    f << Int4(27)
       << Int4(2)  << ndsr     << ndsd    << Int4(1) << nbtria+nbquad
       << Int4(0)  << Int4(0)  << nbtria  << nbquad  << Int4(0)
       << Int4(0)  << Int4(0)  << Int4(0) << nef     << Int4(nbv)
@@ -412,7 +412,7 @@ namespace bamg {
     // cout << "fin write nopo" << endl;
   }
 
-  void Triangles::Write_am_fmt(ostream &f) const 
+  void Triangles::Write_am_fmt(ostream &f) const
   {
     Int4 i,j;
     assert(this && nbt);
@@ -430,9 +430,9 @@ namespace bamg {
 	}
     for (i=0;i<nbv;i++)
       f << vertices[i].r.x << " " << vertices[i].r.y << endl;
-    for (j=i=0;i<nbt;i++) 
+    for (j=i=0;i<nbt;i++)
       if (reft[i]>=0)
-	f << subdomains[reft[i]].ref  << (j++%10 == 9 ?  '\n' : ' ');
+	     f << subdomains[reft[i]].ref  << (j++%10 == 9 ?  '\n' : ' ');
     f << endl;
     for (i=0;i<nbv;i++)
       f << vertices[i].ref()  << (i%10 == 9 ?  '\n' : ' ');
@@ -442,9 +442,9 @@ namespace bamg {
 
   }
 
-  void Triangles::Write_am(ostream &ff) const 
+  void Triangles::Write_am(ostream &ff) const
   {
-    OFortranUnFormattedFile f(ff);  
+    OFortranUnFormattedFile f(ff);
     Int4 i,j;
     assert(this && nbt);
     Int4 * reft = new Int4[nbt];
@@ -465,7 +465,7 @@ namespace bamg {
 	float y= vertices[i].r.y;
 	f << x << y ;
       }
-    for (j=i=0;i<nbt;i++) 
+    for (j=i=0;i<nbt;i++)
       if (reft[i]>=0)
 	f << subdomains[reft[i]].ref;
     for (i=0;i<nbv;i++)
@@ -473,7 +473,7 @@ namespace bamg {
     delete [] reft;
   }
 
-  void Triangles::Write_ftq(ostream &f) const 
+  void Triangles::Write_ftq(ostream &f) const
   {
 
     Int4 i;
@@ -488,39 +488,39 @@ namespace bamg {
     f << nbv << " " << nele << " " << ntri <<  " " << nqua << endl;
     Int4 k=0;
     for( i=0;i<nbt;i++)
-      { 
+      {
 	Triangle & t = triangles[i];
-	Triangle * ta; // 
+	Triangle * ta; //
 	Vertex *v0,*v1,*v2,*v3;
 	if (reft[i]<0) continue;
 	ta = t.Quadrangle(v0,v1,v2,v3);
 	if (!ta)
 	  { // a triangles
-	    f << "3 " 
-	      << Number(triangles[i][0]) +1 << " " 
-	      << Number(triangles[i][1]) +1 << " " 
-	      << Number(triangles[i][2]) +1 << " " 
+	    f << "3 "
+	      << Number(triangles[i][0]) +1 << " "
+	      << Number(triangles[i][1]) +1 << " "
+	      << Number(triangles[i][2]) +1 << " "
 	      << subdomains[reft[i]].ref << endl;
 	    k++;
 	  }
 	if ( &t<ta)
-	  { 
+	  {
 	    k++;
-	    f << "4 " << Number(v0)+1 << " " << Number(v1)+1  << " "  
-	      << Number(v2)+1 << " "  << Number(v3)+1 << " "  
+	    f << "4 " << Number(v0)+1 << " " << Number(v1)+1  << " "
+	      << Number(v2)+1 << " "  << Number(v3)+1 << " "
 	      << subdomains[reft[i]].ref << endl;
 	  }
       }
     assert(k == nele);
-  
+
     for (i=0;i<nbv;i++)
-      f << vertices[i].r.x << " " << vertices[i].r.y 
+      f << vertices[i].r.x << " " << vertices[i].r.y
 	<< " " <<  vertices[i].ref() << endl;
     delete [] reft;
-  
-  
+
+
   }
-  void Triangles::Write_msh(ostream &f) const 
+  void Triangles::Write_msh(ostream &f) const
   {
     Int4 i;
     assert(this && nbt);
@@ -530,28 +530,28 @@ namespace bamg {
     f << nbv << " " << nbInT << " " << nbe <<  endl;
 
     for (i=0;i<nbv;i++)
-      f << vertices[i].r.x << " " << vertices[i].r.y << " " 
+      f << vertices[i].r.x << " " << vertices[i].r.y << " "
 	<< vertices[i].ref() <<   endl;
 
     for (i=0;i<nbt;i++)
       if(reft[i]>=0)
-	f << Number(triangles[i][0]) +1 << " " 
-	  << Number(triangles[i][1]) +1 << " " 
-	  << Number(triangles[i][2]) +1 << " " 
+	f << Number(triangles[i][0]) +1 << " "
+	  << Number(triangles[i][1]) +1 << " "
+	  << Number(triangles[i][2]) +1 << " "
 	  << subdomains[reft[i]].ref << endl;
-  
+
 
     for (i=0;i<nbe;i++)
-      f << Number(edges[i][0]) +1 << " "  << Number(edges[i][1]) +1 
+      f << Number(edges[i][0]) +1 << " "  << Number(edges[i][1]) +1
 	<< " " << edges[i].ref << endl;
-      
+
     delete [] reft;
 
   }
 
 
   //-----------------------------ajout format hdf5-----------------------------//
-  void Triangles::Write_hdf5(const char * f) const 
+  void Triangles::Write_hdf5(const char * f) const
   {
 #ifdef HAVE_HDF5
     Int4 i;
@@ -568,7 +568,7 @@ namespace bamg {
       }
 
     for (i=0;i<nbt;i++)
-      { 
+      {
 	if(reft[i]>=0)
 	  {
 	    Connectivity[i][0]=Number(triangles[i][0]);
@@ -580,12 +580,12 @@ namespace bamg {
     // write hdf5 file
     WriteHdf5 * Hdf5MeshFile2D = new WriteHdf5(f,nbInT,nbv);
     Hdf5MeshFile2D->WriteHdf5MeshFile2D(coord, Connectivity);
-    delete Hdf5MeshFile2D; 
+    delete Hdf5MeshFile2D;
 
     // write xdmf file
     WriteXdmf * XdmfMeshFile2D = new WriteXdmf(f,nbInT,nbv);
     XdmfMeshFile2D->WriteXdmfMeshFile2D();
-    delete XdmfMeshFile2D; 
+    delete XdmfMeshFile2D;
 
     delete [] reft;
 #else
@@ -599,7 +599,7 @@ namespace bamg {
 
 
 
-  void Triangles::Write_amdba(ostream &f) const 
+  void Triangles::Write_amdba(ostream &f) const
   {
     assert(this && nbt);
 
@@ -609,17 +609,17 @@ namespace bamg {
     f << nbv << " " << nbInT << endl;
     cout.precision(12);
     for (i=0;i<nbv;i++)
-      f << i+1 << " " 
-	<< vertices[i].r.x 
-	<< " " << vertices[i].r.y 
+      f << i+1 << " "
+	<< vertices[i].r.x
+	<< " " << vertices[i].r.y
 	<< " " << vertices[i].ref() << endl;
     j=1;
     for (i=0;i<nbt;i++)
       if(reft[i]>=0)
-	f << j++ << " " 
-	  << Number(triangles[i][0]) +1 << " " 
-	  << Number(triangles[i][1]) +1 << " " 
-	  << Number(triangles[i][2]) +1 << " " 
+	f << j++ << " "
+	  << Number(triangles[i][0]) +1 << " "
+	  << Number(triangles[i][1]) +1 << " "
+	  << Number(triangles[i][2]) +1 << " "
 	  << subdomains[reft[i]].ref  << endl ;
     f << endl;
     delete [] reft;
@@ -640,44 +640,44 @@ namespace bamg {
       }
   }
   void Triangles::WriteElements(ostream& f,Int4 * reft ,Int4 nbInT) const
-  { 
+  {
     const Triangles & Th= *this;
-    // do triangle and quad 
-    if(verbosity>9) 
+    // do triangle and quad
+    if(verbosity>9)
       cout  << " In Triangles::WriteElements " << endl
 	    << "   Nb of In triangles " << nbInT-Th.NbOfQuad*2 << endl
 	    << "   Nb of Quadrilaterals " <<  Th.NbOfQuad << endl
 	    << "   Nb of in+out+quad  triangles " << Th.nbt << " " << nbInT << endl;
-	 
+
     Int4 k=nbInT-Th.NbOfQuad*2;
     Int4 num =0;
     if (k>0) {
       f << "\nTriangles\n"<< k << endl;
       for(Int4 i=0;i<Th.nbt;i++)
-	{ 
+	{
 	  Triangle & t = Th.triangles[i];
 	  if (reft[i]>=0 && !( t.Hidden(0) || t.Hidden(1) || t.Hidden(2) ))
 	    { k--;
-	      f << Th.Number(t[0])+1 << " " << Th.Number(t[1])+1 
+	      f << Th.Number(t[0])+1 << " " << Th.Number(t[1])+1
 		<< " "  << Th.Number(t[2])+1  << " " << Th.subdomains[reft[i]].ref << endl;
 	      reft[i] = ++num;
 	    }
 	}
-    } 
+    }
     if (Th.NbOfQuad>0) {
       f << "\nQuadrilaterals\n"<<Th.NbOfQuad << endl;
       k = Th.NbOfQuad;
       for(Int4 i=0;i<Th.nbt;i++)
-	{ 
+	{
 	  Triangle & t = Th.triangles[i];
-	  Triangle * ta; // 
+	  Triangle * ta; //
 	  Vertex *v0,*v1,*v2,*v3;
 	  if (reft[i]<0) continue;
 	  if ((ta=t.Quadrangle(v0,v1,v2,v3)) !=0 && &t<ta)
-	    { 
+	    {
 	      k--;
-	      f << Th.Number(v0)+1 << " " << Th.Number(v1)+1  << " "  
-		<< Th.Number(v2)+1 << " "  << Th.Number(v3)+1 << " "  
+	      f << Th.Number(v0)+1 << " " << Th.Number(v1)+1  << " "
+		<< Th.Number(v2)+1 << " "  << Th.Number(v3)+1 << " "
 		<< Th.subdomains[reft[i]].ref << endl;
 	      reft[i] = ++num;
 	      reft[Number(ta)] = num;
@@ -685,10 +685,10 @@ namespace bamg {
 	}
       assert(k==0);
     }
-    // warning reft is now the element number 
+    // warning reft is now the element number
   }
 
-  ostream& operator <<(ostream& f, const   Triangles & Th) 
+  ostream& operator <<(ostream& f, const   Triangles & Th)
   {
     //  Th.FindSubDomain();
     // warning just on say the class is on the disk
@@ -709,12 +709,12 @@ namespace bamg {
 	  f << "\"\"" << endl << endl;
 	  f << "# BEGIN of the include geometry file because geometry is not on the disk"
 	    << Th.Gh << endl;
-	  f << "End" << endl 
+	  f << "End" << endl
 	    << "# END of the include geometrie file because geometry is not on the disk"
 	    << endl ;
 	}
     }
-    { 
+    {
       f.precision(12);
       f << "\nVertices\n" << Th.nbv <<endl;
       for (Int4 i=0;i<Th.nbv;i++)
@@ -723,11 +723,11 @@ namespace bamg {
 	  f << v.r.x << " " << v.r.y << " " << v.ref() << endl;
 	}
     }
-    Int4 ie; 
+    Int4 ie;
     {
       f << "\nEdges\n"<< Th.nbe << endl;
       for(ie=0;ie<Th.nbe;ie++)
-	{ 
+	{
 	  Edge & e = Th.edges[ie];
 	  f << Th.Number(e[0])+1 << " " << Th.Number(e[1])+1;
 	  f << " " << e.ref <<endl;
@@ -736,7 +736,7 @@ namespace bamg {
 	{
 	  f << "\nCrackedEdges\n"<< Th.NbCrackedEdges << endl;
 	  for( ie=0;ie<Th.NbCrackedEdges;ie++)
-	    { 
+	    {
 	      Edge & e1 = *Th.CrackedEdges[ie].a.edge;
 	      Edge & e2 = *Th.CrackedEdges[ie].b.edge;
 	      f << Th.Number(e1)+1 << " " << Th.Number(e2)+1 <<endl;;
@@ -748,18 +748,18 @@ namespace bamg {
     {
       f << "\nSubDomainFromMesh\n" << Th.NbSubDomains<< endl ;
       for (Int4 i=0;i<Th.NbSubDomains;i++)
-	f << 3 << " " << reft[Th.Number(Th.subdomains[i].head)] << " " << 1 << " " 
+	f << 3 << " " << reft[Th.Number(Th.subdomains[i].head)] << " " << 1 << " "
 	  <<  Th.subdomains[i].ref << endl;
-     
+
     }
     if (Th.Gh.NbSubDomains)
       {
         f << "\nSubDomainFromGeom\n" << Th.Gh.NbSubDomains << endl ;
 	for (Int4 i=0;i<Th.NbSubDomains;i++)
-	  {  
-	    f << 2 << " " << Th.Number(Th.subdomains[i].edge)+1 << " " 
+	  {
+	    f << 2 << " " << Th.Number(Th.subdomains[i].edge)+1 << " "
 	      <<  Th.subdomains[i].sens  << " " <<  Th.Gh.subdomains[i].ref << endl;
-	  } 
+	  }
       }
     {
       f << "\nVertexOnGeometricVertex\n"<<  Th.NbVerticesOnGeomVertex << endl;
@@ -767,17 +767,17 @@ namespace bamg {
 	{
 	  VertexOnGeom & v =Th.VerticesOnGeomVertex[i0];
 	  assert(v.OnGeomVertex()) ;
-	  f << " " << Th.Number(( Vertex *)v)+1  
-	    << " " << Th.Gh.Number(( GeometricalVertex * )v)+1 
+	  f << " " << Th.Number(( Vertex *)v)+1
+	    << " " << Th.Gh.Number(( GeometricalVertex * )v)+1
 	    << endl;
 	}
     }
-    { 
+    {
       f << "\nVertexOnGeometricEdge\n"<<  Th.NbVerticesOnGeomEdge << endl;
       for (Int4 i0=0;i0<Th.NbVerticesOnGeomEdge;i0++)
 	{
 	  const VertexOnGeom & v =Th.VerticesOnGeomEdge[i0];
-	  assert(v.OnGeomEdge()) ;   
+	  assert(v.OnGeomEdge()) ;
 	  f << " " << Th.Number((Vertex * )v)+1  ;
 	  f << " " << Th.Gh.Number((const  GeometricalEdge * )v)+1  ;
 	  f << " " << (Real8 ) v << endl;
@@ -788,22 +788,22 @@ namespace bamg {
 
       for (i0=0;i0<Th.nbe;i0++)
 	if ( Th.edges[i0].on ) k++;
-     
+
       f << "\nEdgeOnGeometricEdge\n"<< k << endl;
       for (i0=0;i0<Th.nbe;i0++)
-	if ( Th.edges[i0].on ) 
+	if ( Th.edges[i0].on )
 	  f << (i0+1) << " "  << (1+Th.Gh.Number(Th.edges[i0].on)) <<  endl;
       if (Th.NbCrackedEdges)
 	{
-	  f << "\nCrackedEdges\n"<< Th.NbCrackedEdges << endl;	  
-	  for(i0=0;i0< Th.NbCrackedEdges; i0++) 
+	  f << "\nCrackedEdges\n"<< Th.NbCrackedEdges << endl;
+	  for(i0=0;i0< Th.NbCrackedEdges; i0++)
 	    {
 	      f << Th.Number(Th.CrackedEdges[i0].a.edge) << " " ;
 	      f  << Th.Number(Th.CrackedEdges[i0].b.edge) << endl;
 	    }
 	}
-    }  
-    if (&Th.BTh != &Th && Th.BTh.OnDisk && Th.BTh.name) 
+    }
+    if (&Th.BTh != &Th && Th.BTh.OnDisk && Th.BTh.name)
       {
 	int *mark=new int[Th.nbv];
 	Int4 i;
@@ -832,13 +832,13 @@ namespace bamg {
 	  //	 assert(mark[iv] == -1]);
 	  mark[iv] = 1;
 	  f << iv+1 << " " << Th.BTh.Number(voe.be)+1 << " " << voe.abcisse <<  endl;}
-       
-	f << "\nVertexOnSupportTriangle" << endl;   
+
+	f << "\nVertexOnSupportTriangle" << endl;
 	Int4 k = Th.nbv -  Th.NbVertexOnBThEdge - Th.NbVertexOnBThVertex;
 	f << k << endl;
 	//       Int4 kkk=0;
 	CurrentTh=&Th.BTh;
-	for (i=0;i<Th.nbv;i++) 
+	for (i=0;i<Th.nbv;i++)
 	  if (mark[i] == -1) {
 	    k--;
 	    Icoor2 dete[3];
@@ -849,7 +849,7 @@ namespace bamg {
 		Real8 aa= (Real8) dete[1]/ tb->det, bb= (Real8) dete[2] / tb->det;
 		f << i+1 << " " << Th.BTh.Number(tb)+1 << " " << aa << " " << bb << endl ;
 	      }
-	    else 
+	    else
 	      {
 		double aa,bb,det[3];
 		TriangleAdjacent ta=CloseBoundaryEdgeV2(I,tb,aa,bb);
@@ -863,14 +863,14 @@ namespace bamg {
 	  }
 	assert(!k);
 	delete [] mark;
-	 
+
 
       }
     f << "\nEnd" << endl;
     //  Th.ConsLinkTriangle();
     delete [] reft;
     return f;
-   
+
   }
 
 
@@ -890,7 +890,7 @@ namespace bamg {
       }
   }
 
-  ostream& operator <<(ostream& f, const   Geometry & Gh) 
+  ostream& operator <<(ostream& f, const   Geometry & Gh)
   {
     Int4  NbCorner=0;
     {
@@ -901,8 +901,8 @@ namespace bamg {
       //     f <<endl;
     }
     int nbreqv=0;
-    { 
-     
+    {
+
       f.precision(12);
       f << "\nVertices\n" << Gh.nbv <<endl;
       for (Int4 i=0;i<Gh.nbv;i++)
@@ -913,31 +913,31 @@ namespace bamg {
 	  if (v.Corner()) NbCorner++;
 	}
     }
-   
+
     int nbcracked=0;
 
     {
       int nbreq=0;
       f << "\nEdges\n"<< Gh.nbe << endl;
       for(Int4 ie=0;ie<Gh.nbe;ie++)
-	{ 
-	 
+	{
+
 	  GeometricalEdge & e = Gh.edges[ie];
 	  if (e.Required()) nbreq++;
-	  if (e.Cracked()) { 
+	  if (e.Cracked()) {
 	    Int4 ie1 = Gh.Number(e.link);
 	    if (ie <= ie1)  ++nbcracked;}
 	  f << Gh.Number(e[0])+1 << " " << Gh.Number(e[1])+1;
 	  f << " " << e.ref <<endl;
 	}
-     
+
       if (nbcracked)
 	{
 	  f << "\nCrackedEdges\n"<< nbcracked<< endl;
 	  for(Int4 ie=0;ie<Gh.nbe;ie++)
 	    {
 	      GeometricalEdge & e = Gh.edges[ie];
-	      if (e.Cracked()) { 
+	      if (e.Cracked()) {
 		Int4  ie1 = Gh.Number(e.link);
 		if (ie <= ie1)  f << ie+1 << " " << ie1+1<< endl;
 	      }
@@ -949,28 +949,28 @@ namespace bamg {
 	  for(Int4 ie=0;ie<Gh.nbe;ie++)
 	    {
 	      GeometricalEdge & e = Gh.edges[ie];
-	      if (e.Required()) 
+	      if (e.Required())
 		f << ie+1 << endl;
 	    }
 	}
-     
-     
-     
+
+
+
     }
 
-    f << "\nAngleOfCornerBound\n" 
+    f << "\nAngleOfCornerBound\n"
       << Gh.MaximalAngleOfCorner*180/Pi << endl;
-    if (NbCorner) 
+    if (NbCorner)
       {
 	f << "\nCorners\n" << NbCorner << endl;
 	for (Int4 i=0,j=0;i<Gh.nbv;i++)
 	  {
 	    GeometricalVertex & v =  Gh.vertices[i];
-	    if (v.Corner()) 
+	    if (v.Corner())
 	      j++,f << Gh.Number(v)+1 << (j % 5 ? ' ' : '\n');
 	  }
-        
-      
+
+
       }
 
     if(nbreqv)
@@ -979,48 +979,48 @@ namespace bamg {
 	for (Int4 j=0,i=0;i<Gh.nbv;i++)
 	  {
 	    GeometricalVertex & v =  Gh.vertices[i];
-	    
-	    if (v.Required()) 
+
+	    if (v.Required())
 	      j++,f << i+1 << (j % 5 ? ' ' : '\n');
 	  }
 	f << endl;
       }
-    
-    { 
+
+    {
       Int4 i;
       f << "\nSubDomainFromGeom\n" ;
       f << Gh.NbSubDomains<< endl;
-      for (i=0;i<Gh.NbSubDomains;i++) 
-	f << "2 " << Gh.Number(Gh.subdomains[i].edge)+1 << " " << Gh.subdomains[i].sens 
-	  << " " << Gh.subdomains[i].ref << endl;        
+      for (i=0;i<Gh.NbSubDomains;i++)
+	f << "2 " << Gh.Number(Gh.subdomains[i].edge)+1 << " " << Gh.subdomains[i].sens
+	  << " " << Gh.subdomains[i].ref << endl;
     }
     {
       Int4 n=0,i;
 
       for(i=0;i< Gh.nbe;i++)
 	{
-	  if(Gh.edges[i].TgA() && Gh.edges[i][0].Corner() ) 
+	  if(Gh.edges[i].TgA() && Gh.edges[i][0].Corner() )
 	    n++;
-	  if(Gh.edges[i].TgB() && Gh.edges[i][1].Corner() ) 
+	  if(Gh.edges[i].TgB() && Gh.edges[i][1].Corner() )
 	    n++;
 	}
       if (n) {
 	f << "TangentAtEdges " << n << endl;
 	for(i=0;i< Gh.nbe;i++)
 	  {
-	    if (Gh.edges[i].TgA() && Gh.edges[i][0].Corner() ) 
-	      f << i+1 << " 1 " << Gh.edges[i].tg[0].x 
+	    if (Gh.edges[i].TgA() && Gh.edges[i][0].Corner() )
+	      f << i+1 << " 1 " << Gh.edges[i].tg[0].x
 		<< " " << Gh.edges[i].tg[0].y << endl;
-	    if (Gh.edges[i].TgB() && Gh.edges[i][1].Corner() ) 
-	      f << i+1 << " 2 " << Gh.edges[i].tg[1].x 
+	    if (Gh.edges[i].TgB() && Gh.edges[i][1].Corner() )
+	      f << i+1 << " 2 " << Gh.edges[i].tg[1].x
 		<< " " << Gh.edges[i].tg[1].y << endl;
 	  }
-	 
+
       }}
     //  f << " Not Yet Implemented" << endl;
-     
+
     return f;
   }
 
 
-} // end of namespace bamg 
+} // end of namespace bamg

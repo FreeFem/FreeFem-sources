@@ -1,0 +1,29 @@
+include "test.idp"
+
+cout << "diffpos" << endl;
+real t;
+
+cout << IND << "real" << endl;
+
+real a = 1.;
+real b = 2.;
+real c = -1.;
+real d = -2.;
+
+t = clock();
+real res1 = diffpos(a, b);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(res1 == b - a);
+
+t = clock();
+real res2 = diffpos(b, a);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(res2 == 0);
+
+t = clock();
+real res3 = diffpos(c, d);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(res3 == 0.);

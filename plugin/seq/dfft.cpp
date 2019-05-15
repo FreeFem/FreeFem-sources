@@ -79,7 +79,6 @@ KN<Complex>*dfft_eq (KN<Complex> *const &x, const DFFT_1d2dor3d<Complex> &d) {
 	ffassert(x->N() == d.n * d.m * d.k);
 	Complex *px = *x;
 	fftw_plan p;
-	// cout << " dfft " << px << " = " << d.x << " n = " << d.n << " " << d.m << " sign = " << d.sign << endl;
 	if (d.k == 1) {
 		if (d.n > 1) {
 			p = fftw_plan_dft_2d(d.n, d.m, reinterpret_cast<fftw_complex *>(d.x), reinterpret_cast<fftw_complex *>(px), d.sign, FFTW_ESTIMATE);
@@ -94,11 +93,8 @@ KN<Complex>*dfft_eq (KN<Complex> *const &x, const DFFT_1d2dor3d<Complex> &d) {
 		}
 	}
 
-	// cout << " ---" ;
 	fftw_execute(p);
-	// cout << " ---" ;
 	fftw_destroy_plan(p);
-	// cout << " ---" ;
 	return x;
 }
 
@@ -132,7 +128,6 @@ fftw_plan*plan__eq (fftw_plan *a, fftw_plan b) {
 }
 
 fftw_plan*plan_set (fftw_plan *a, fftw_plan b) {
-	// if(*a) fftw_destroy_plan(*a);
 	*a = b;
 	return a;
 }
@@ -224,12 +219,7 @@ AnyType Mapkk::operator () (Stack s) const {
 	long n2 = (n + 1) / 2, m2 = (m + 1) / 2;
 
 	for (long j = 0, kk = 0; j < m; ++j) {
-		for (long k = 0, i = 0; i < n; ++i) {	//
-			int ii = i, jj = j;
-			if (ii > n2) {ii = i - n;}
-
-			if (jj > m2) {jj = j - n;}
-
+		for (long k = 0, i = 0; i < n; ++i) {
 			R2 P(i * ki + ki0, j *kj + kj0);
 			mp->set(P.x, P.y);
 			v[kk++] = GetAny<R>((*exp)(s));
@@ -248,7 +238,6 @@ static void Load_Init () {
 	Dcl_Type<DFFT_C>();
 	Dcl_Type<DFFT_R>();
 
-	// cout << typeid(fftw_plan).name()  << endl;
 	Dcl_Type<fftw_plan *>(::InitializePtr<fftw_plan *>, ::DeletePtr<fftw_plan *> );
 	Dcl_Type<fftw_plan>();
 	zzzfff->Add("fftwplan", atype<fftw_plan *>());
@@ -270,14 +259,6 @@ static void Load_Init () {
 	Global.Add("dfft", "(", new OneOperator2_<DFFT_C, KNM<Complex> *, long>(dfft));
 	Global.Add("map", "(", new OneOperatorCode<Mapkk>());
 	TheOperators->Add("=", new OneOperator2_<KN<Complex> *, KN<Complex> *, DFFT_C>(dfft_eq));
-	/*
-	 * Global.Add("dfft","(", new OneOperator2_<DFFT_R,KN<double>*,long >(dfft ));
-	 * Global.Add("dfft","(", new OneOperator3_<DFFT_R,KN<double>*,long,long >(dfft ));
-	 * Global.Add("dfft","(", new OneOperator4_<DFFT_R,KN<double>*,long,long, long >(dfft ));
-	 * Global.Add("dfft","(", new OneOperator2_<DFFT_R,KNM<double>*,long >(dfft ));
-	 * TheOperators->Add("=", new OneOperator2_<KN<double>*,KN<double>*,DFFT_R>(dfft_eq));
-	 */
-	// TheOperators->Add("=", new OneOperator2_<KNM<Complex>*,KNM<Complex>*,DFFT_1d2dor3d>(dfft_eq));
 }
 
 LOADFUNC(Load_Init)

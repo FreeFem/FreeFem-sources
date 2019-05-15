@@ -634,7 +634,6 @@ namespace Fem2D
     void  Mesh3::read(istream &f)
     { // read the mesh
         int i;
-        //	f >> nv >> nt >> neb ;
         string str;
         int err=0;
         while(!f.eof())
@@ -1123,7 +1122,7 @@ namespace Fem2D
         
     }
     
-
+    
     int Mesh3::SaveSurface(const string & filename) const
     {
         int ver = GmfFloat, outm;
@@ -1354,7 +1353,7 @@ namespace Fem2D
         BuildBound();
         if(!nt)
             ExecError( " the tetrahedrons list is empty, not possible for a mesh3 must be a meshS type " );
-
+        
         BuildAdj();
         Buildbnormalv();
         BuildjElementConteningVertex();
@@ -1863,22 +1862,18 @@ namespace Fem2D
     }
     
     
-    
-    
-    
-    
     void Mesh3::BuildMeshS(double angle)
     {
-     
+        
         if (meshS) {
             cout << "error, Mesh3::meshS previously created " << endl;
             ffassert(0);
         }
         if (verbosity) cout << "Build meshS from mesh3.... " << endl;
         
-      
-       int mes = 0, mesb = 0;
- 
+        
+        int mes = 0, mesb = 0;
+        
         int *v_num_surf, *map_v_num_surf;
         // Extraction of Vertex  belongs to the surface
         v_num_surf=new int[nv];
@@ -1907,7 +1902,7 @@ namespace Fem2D
         Vertex3 *vS = new Vertex3[nbv_surf];
         TriangleS *tS = new TriangleS[nbe];
         TriangleS *ttS = tS;
-      
+        
         
         for (int iv=0; iv<nbv_surf; iv++) {
             int k0 = map_v_num_surf[iv];
@@ -1949,7 +1944,7 @@ namespace Fem2D
         
         
     }
-
+    
     
 } //   End  namespace Fem2D
 

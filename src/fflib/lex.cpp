@@ -38,9 +38,6 @@
 #include "lg.tab.hpp"
 #include "lex.hpp"
 
-//#include <regex>
-
-
 extern YYSTYPE *plglval;
 
 //  New version of macro expantion more classical
@@ -49,12 +46,6 @@ extern YYSTYPE *plglval;
 
 static const bool debugmacro = false;
 
-/*inline char * newcopy(const char * s)
-{
-  char *r(new char  [strlen(s)+1]);
-  strcpy(r, s);return r;
-}
-*/
 void  mylex::Add(Key k,int i)
 {
     Check(!i,k,"mot clef");
@@ -261,7 +252,7 @@ int mylex::basescan()
     buf[0]=0;
     buf[1]=0;
     buf[2]=0;
-    buf[3]=0; //
+    buf[3]=0;
 debut:
     TheCurrentLine=linenumber;
     // modif FH
@@ -279,7 +270,6 @@ debut:
     int ret = c;
     if (c == EOF)
     {
-        //if (echo) cout << "ENDOFFILE "<< endl;
         if (close() )  goto debut;
         buf[0]=0;
         return ENDOFFILE;
@@ -367,7 +357,6 @@ debut:
                     cc='\n';
                     if(ccc!=cc && (ccc==10 || ccc==13)) source().get();// NL CR eat ...
                     linenumber++;
-                //if (echo) cout << setw(5) <<linenumber << " : " ;
                 default :
                     buf[i]=cc  ;
                     break;
@@ -520,11 +509,11 @@ int mylex::scan(int lvl)
         }
     }
 
-    if ( ret =='{')   //cout << " listMacroDef->push_back"<< endl;
+    if ( ret =='{')
     {
         listMacroDef->push_back( MapMacroDef() );
     }
-    else if (ret == '}')  //cout << " listMacroDef->pop_back"<< endl;
+    else if (ret == '}')
     {
         listMacroDef->pop_back( );
     }
@@ -585,7 +574,6 @@ char * mylex::match(int i)
 {
     if ( i != basescanprint() )
     {
-        // basescan -> scan1 change 2/2/2007  (non pas des substitution de parametres FH)
         cerr << " we waiting for a '" << char(i) <<"'" << endl;
         ErrorScan(" err macro ");
     };
@@ -623,9 +611,8 @@ bool mylex::SetMacro(int &ret)
     int oldmacro=1;
     if (strncmp(buf,"macro",6)==0 || (oldmacro=strncmp(buf,newmacro,9))==0 )
     {
-        if(echo)  print(cout);//xxxxxx
+        if(echo)  print(cout);
         char *macroname=newcopy(match(ID));
-        //if(echo)  print(cout);
         int nbparam =0;
         MacroData macroparm;
 
@@ -647,7 +634,6 @@ bool mylex::SetMacro(int &ret)
                         ErrorScan(" Too much (more than 100) parameters");
                     }
 
-                    //cout << " \t\t " << ID << " " << rr << " " << buf << endl;
                     if (rr != ID)
                     {
                         cerr <<" Erreur waiting of an ID: " << buf << " " << rr <<  endl;
@@ -664,8 +650,8 @@ bool mylex::SetMacro(int &ret)
         }
         int kmacro=0;
 
-        macroparm.l = linenumber;// s
-        macroparm.f = file(); //
+        macroparm.l = linenumber;
+        macroparm.f = file();
         do
         {
             int lk=0,nl=0;
@@ -684,7 +670,6 @@ bool mylex::SetMacro(int &ret)
             }
             else if(isalpha(i) && isalpha(ii) )  //  Modif F.H
             {
-                //def +=char(i);
                 item = char(i);
                 i = source().get();
                 while(isalpha(i))
@@ -725,9 +710,6 @@ bool mylex::SetMacro(int &ret)
         }
         while(1);
         macroparm.d.push_back(def);
-        // if(echo) cout << "macro " << macroname  ;
-        // for (size_t i=0;i<macroparm.d.size()-1;i++)
-        // if(echo) cout << ( (i == 0) ? '(' : ',') << macroparm.d[i];
         if (nbparam)
             if(echo) cout << " )  " ;
         for (size_t i=0; i<def.size(); i++)
@@ -738,7 +720,6 @@ bool mylex::SetMacro(int &ret)
                 if(echo) cout << '\n' << setw(5) <<linenumber << " : " ;
             }
             else if(echo) cout << def[i]   ;
-        // cout << macroparm.back() ;
         MapMacroDef & MacroDef =listMacroDef->back();
         MapMacroDef::const_iterator i=MacroDef.find(macroname);
         if ( i == MacroDef.end() )
@@ -899,7 +880,6 @@ bool mylex::IFMacro(int &ret)
 
         if(exist == (isnot==0))
         {
-            //string * ifmc= newstring(" ifmacro ");
             input(def,new string(file()),lgifm);
         }
         ret =  scan1();
@@ -945,7 +925,6 @@ bool mylex::CallMacro(int &ret)
             if (rr==ENDOFFILE) ErrorScan(" Stringification in macro ");
             if(echo) cout << token();
             p += token();
-            //if(echo) cout <<buf;
         }
         if(echo) cout << p << ")";
         plglval->str = newcopy(p.c_str());
@@ -978,7 +957,6 @@ bool mylex::CallMacro(int &ret)
 
             if (j != i->end())
             {
-                // int inmacroold=withmacropara;
                 const MacroData  & macroparm= j->second;
                 int nbparam= macroparm.d.size()-1;
                 if(debugmacro) cout <<"call macro : " << buf << endl;
@@ -1033,7 +1011,6 @@ bool mylex::CallMacro(int &ret)
                         if(debugmacro)
                             cout << "macro arg "<< k << " :" << macroparm.d[k] << " -> " <<  p << endl;
                         lp.insert(pair<string,string>(macroparm.d[k],p));
-                        //lp[macroparm[k]] = p;
                     }
                 }
                 if(debugmacro)
@@ -1070,7 +1047,7 @@ bool mylex::CallMacro(int &ret)
                     {
                     	if (strncmp(buf,ifm,8)==0 || strncmp(buf,ifs,15)==0)
 	                    	inifmacro = 1;
-                    	
+
                     	if (!isconc) {
                         	MapMacroParam::const_iterator j=lp.find(buf);
                         	if ( j !=  lp.end()) {
@@ -1082,32 +1059,24 @@ bool mylex::CallMacro(int &ret)
                             	currentexpand=token();
                         	}
                     	}
-                        //strcpy(buf2,buf);
                         if (isconc) {
 							MapMacroParam::const_iterator j=lp.find(buf);
                         	if ( j !=  lp.end())
                             	rightexpand=j->second;
                         	else
                             	rightexpand=token();
-                            	
+
                         	currentexpand = leftexpand+rightexpand;
-							//currentexpand.erase(currentexpand.begin(), std::find_if(currentexpand.begin(), currentexpand.end(), std::bind1st(std::not_equal_to<char>(), ' ')));
-                        	//cout << "isconc"<<currentexpand<<"close"<<endl;
-                        	//strcpy(buf,currentexpand.c_str());
                         	if (!inifmacro)
                         	for (list<MapMacroDef>::const_iterator i=listMacroDef->begin(); i != listMacroDef->end(); i++) {
-                        	
-                        		            					
+
+
 								while (currentexpand[0] == ' ')
 									currentexpand.erase(0, 1);
-								
+
             					MapMacroDef::const_iterator j= i->find(currentexpand.c_str());
 								if (j != i->end()) {
 									const MacroData  & macroparm= j->second;
-									//strcpy(buf,macroparm.d[0].c_str());
-									//cout << "bbbbbb" << buf << endl;
-									//expandtxt+=macroparm.d[0];
-									//cout << "trouve" << j->first << endl;
 									if (macroparm.d.size() == 1) {
 										currentexpand = macroparm.d[0];
 									if (currentexpand[currentexpand.size()-1] == ' ')
@@ -1115,7 +1084,7 @@ bool mylex::CallMacro(int &ret)
 									}
 								}
                         	}
-                        	isconc = 0;	
+                        	isconc = 0;
                         }
                     }
                     else if (ret!='#') {  //  macro concatenation operator
@@ -1124,33 +1093,16 @@ bool mylex::CallMacro(int &ret)
                     	if (!isconc) {
                         	expandtxt+=currentexpand+ReadCommentAndSpace;
                         	currentexpand=token();
-                        //strcpy(buf2,buf);
                     	}
 
                     }
                     else {
-                    	//cout << "haha" << currentexpand << "hehe" << endl;
                     	leftexpand = currentexpand;
-                    	//leftexpand.erase(leftexpand.begin(), std::find_if(leftexpand.begin(), leftexpand.end(), std::bind1st(std::not_equal_to<char>(), ' ')));
-                        	//cout << "isconc"<<currentexpand<<"close"<<endl;
-                    	//while (leftexpand[leftexpand.size()-1] == '\0')
-						//	leftexpand.resize(leftexpand.size()-1);
-						//while (leftexpand[leftexpand.size()-1] == '\n')
-						//	leftexpand.resize(leftexpand.size()-1);
- 						//while (leftexpand[leftexpand.size()-1] == ' ')
-						//	leftexpand.resize(leftexpand.size()-1);
                     	isconc = 1;
-                    	//ret = scan1();
-                    	//strcat(buf,buf2);
-                    	//cout << "haha " << buf  << endl;
-                    	;//CallMacro(ret);
-                    	//expandtxt+=buf;
                     }
                 }
                 echo=echosave;
                 if(debugmacro) cout <<" (macro) eadin : " << expandtxt << endl;
-                //if (expandtxt[expandtxt.size()-1] == ' ')	expandtxt[expandtxt.size()-1] = '\0';
-                //cout << "haha " << expandtxt <<"hehe" << endl;
                 input(expandtxt,macronn,macroparm.l);
                 ret =  scan1(); // Correction FH 6/06/2004 of string parameter
                 return true;
@@ -1166,36 +1118,36 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
 
     l=0;
     nf=f=0;
-    
+
     // Try to open the given file name without any extra path from [[file:lex.hpp::ffincludedir]]
     if (lex->ffincludedir.empty())
       nf=f= new ifstream(ff,ios_base::binary); //  modif of win32
-    
-    // If it worked, set [[file:lex.hpp::filename]] to ff, otherwise try to open it 
+
+    // If it worked, set [[file:lex.hpp::filename]] to ff, otherwise try to open it
     // in the same directory as the file which includes it
     if (!f || !*f)
     {
       // if the file is included by another one, it is searched in the same directory
-      if (lex->level >= 0) // file is included by another one 
+      if (lex->level >= 0) // file is included by another one
       {
         if (f)
         {
           delete f;
           nf=f=0;
         }
-    
+
         // directory separator can be / (Unix) or \ (Windows)
-        string separator = "/\\";  
+        string separator = "/\\";
 
         // parent_filename is the full path to the file which includes filename
         string parent_filename(*lex->pilesource[lex->level].filename);
-    
+
         // get dirname of parent_filename
         size_t found = parent_filename.find_last_of(separator);
         dirname = parent_filename.substr(0,found+1);
 
         // try to open dirname/ff
-        string dif_ff(dirname+ff); 
+        string dif_ff(dirname+ff);
         nf=f= new ifstream(dif_ff.c_str(),ios_base::binary);
       }
     }
@@ -1285,7 +1237,6 @@ void mylex::input(const char *  filename)
 
     pilesource[level+1].open(this,filename);
     pilesource[level+1].l =0;
-    // cout << "\n ++include " << filename << ";" << level+1 << endl;
     linenumber = 1;
     level++;
 }
@@ -1312,9 +1263,7 @@ bool mylex::close()
     if(debugmacro )
         cout << "\n close " << level ;
     ffassert(level >=0 && level < 100);
-    // cout << "\n-- close " << level << endl;
     pilesource[level].close(); // [[mylex::xxxx::close]]
-    // cout << "\n ++   " << level << endl;
     if (--level<0)
         return false;
     linenumber = pilesource[level].l;

@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -176,7 +179,6 @@ void meshBox (pMesh mesh, int bb) {
 
 	for (k = 1; k <= mesh->np; k++) {
 		ppt = &mesh->point[k];
-		/*if ( ppt->tag == M_UNUSED && mesh->ne )  continue;*/
 		ppt->c[0] -= mesh->xtra;
 		ppt->c[1] -= mesh->ytra;
 		ppt->c[2] -= mesh->ztra;
@@ -351,7 +353,6 @@ void meshRef (pScene sc, pMesh mesh) {
 		if (!pt->v[0]) continue;
 
 		nmat = matRef(sc, pt->ref);
-		/*nmat = !pt->ref ? DEFAULT_MAT : 1+(pt->ref-1)%(sc->par.nbmat-1);*/
 		pt->nxt = old[nmat];
 		old[nmat] = k;
 		pm = &sc->material[nmat];
@@ -380,7 +381,6 @@ void meshRef (pScene sc, pMesh mesh) {
 		if (!pq->v[0]) continue;
 
 		nmat = matRef(sc, pq->ref);
-		/*nmat = !pq->ref ? DEFAULT_MAT : 1+(pq->ref-1)%(sc->par.nbmat-1);*/
 		pq->nxt = old[nmat];
 		old[nmat] = k;
 		pm = &sc->material[nmat];
@@ -409,7 +409,6 @@ void meshRef (pScene sc, pMesh mesh) {
 		if (!pte->v[0]) continue;
 
 		nmat = matRef(sc, pte->ref);
-		/*nmat = !pte->ref ? DEFAULT_MAT : 1+(pte->ref-1)%(sc->par.nbmat-1);*/
 		pte->nxt = old[nmat];
 		old[nmat] = k;
 		pm = &sc->material[nmat];
@@ -436,7 +435,6 @@ void meshRef (pScene sc, pMesh mesh) {
 
 		ph = &mesh->hexa[k];
 		nmat = matRef(sc, ph->ref);
-		/*nmat = !ph->ref ? DEFAULT_MAT : 1+(ph->ref-1)%(sc->par.nbmat-1);*/
 		ph->nxt = old[nmat];
 		old[nmat] = k;
 		pm = &sc->material[nmat];
@@ -461,18 +459,6 @@ void meshRef (pScene sc, pMesh mesh) {
 	free(old);
 
 	/* remove unused materials */
-/*
- * for (m=1; m<sc->par.nbmat; m++) {
- *  pm = &sc->material[m];
- *  if ( !pm->depmat[LTria] && !pm->depmat[LQuad] &&
- *       !pm->depmat[LTets] && !pm->depmat[LHexa] ) {
- *    pm1 = &sc->material[sc->par.nbmat-1];
- *    memcpy(pm,pm1,sizeof(struct material));
- *    sc->par.nbmat--;
- *    m--;
- *  }
- * }
- */
 	if (ddebug)
 		for (m = 0; m < sc->par.nbmat; m++) {
 			pm = &sc->material[m];
@@ -528,7 +514,7 @@ int meshUpdate (pScene sc, pMesh mesh) {
 				free(mesh->sol[k].m);
 			}
 		}
-		
+
 		M_free(mesh->sol);
 		mesh->sol = 0;
 	}
@@ -557,7 +543,6 @@ int meshUpdate (pScene sc, pMesh mesh) {
 		meshSurf(mesh);
 
 	meshBox(mesh, 1);
-	/*parsop(sc,mesh);*/
 	if (!quiet) meshInfo(mesh);
 
 	/* read metric */
@@ -573,3 +558,7 @@ int meshUpdate (pScene sc, pMesh mesh) {
 
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

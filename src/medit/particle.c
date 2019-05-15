@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -85,14 +88,13 @@ void computeTetraParticle (pScene sc, pMesh mesh, int k) {
 	pParticle pp;
 	double cb[4], v[4];
 	float pos[3], ldt;
-	int cur, nsold, nbp;
+	int cur, nsold;
 
 	st = sc->stream;
 	pp = &tp[k];
 	if (pp->ct > sc->par.pertime) return;
 
 	ldt = 0.0;
-	nbp = 0;
 	nsold = pp->nsdep;
 
 	pos[0] = pp->pos[pp->cur][0];
@@ -170,7 +172,6 @@ void computeTetraParticle (pScene sc, pMesh mesh, int k) {
 			return;
 		}
 
-		nbp++;
 	} while (ldt <= sc->par.dt);
 
 	cur = (pp->cur % MAX_PRT) + 1;
@@ -211,7 +212,7 @@ int createParticle (pScene sc, pMesh mesh) {
 	pTriangle pt;
 	pPoint ppt;
 	double v[4], cx, cy, cz;
-	int i, j, k, l, nmat, nbp, base;
+	int i, j, k, l, nmat, base;
 
 	if (ddebug) printf("create particles\n");
 
@@ -250,9 +251,7 @@ int createParticle (pScene sc, pMesh mesh) {
 	if (sc->par.nbpart >= MAX_PRT)
 		sc->par.nbpart = MAX_PRT;
 
-	++base;
 	l = 1;
-	nbp = 0;
 
 	while (k != 0 && st->nbstl < MAX_LST - 1) {
 		pt = &mesh->tria[k];
@@ -372,7 +371,7 @@ int advectParticle (pScene sc, pMesh mesh) {
 
 	for (i = 1; i <= mesh->np; i++) {
 		pPoint ppt;
-		
+
 		ppt = &mesh->point[i];
 		ppt->mark = base;
 	}
@@ -392,7 +391,6 @@ int advectParticle (pScene sc, pMesh mesh) {
 		pp->cur = 1;
 	}
 
-	++base;
 	l = 1;
 
 	for (k = 1; k <= st->nbstl; k++) {
@@ -435,3 +433,7 @@ int advectParticle (pScene sc, pMesh mesh) {
 
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif

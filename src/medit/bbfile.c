@@ -14,16 +14,20 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
 
 #include "medit.h"
 #include "extern.h"
 #include "sproto.h"
+#include "eigenv.h"
 
 int EatLine (FILE *in) {
 	int k, c;
@@ -58,10 +62,10 @@ int EatSpace (FILE *in) {
 
 int bbfile (pMesh mesh) {
 	FILE *in;
-	pSolution ps;
+	pSolution ps=NULL;
 	double a, b, c, lambda[3], eigv[3][3], m[6], vp[2][2];
 	float dummy;
-	int j, k, l, dim, np, nf, i1, i2, i3, err, iord;
+	int j, k, l, dim, np, nf, i1, i2, i3, err, iord, ret;
 	char *ptr, data[128], tmp[128];
 	ubyte bigbb;
 
@@ -72,14 +76,12 @@ int bbfile (pMesh mesh) {
 
 	sprintf(data, "%s.bb", tmp);
 	in = fopen(data, "r");
-	bigbb = 0;
 	if (!in) {
 		sprintf(data, "%s.pbb", tmp);
 		in = fopen(data, "r");
 	}
 
 	if (!in) {
-		bigbb = 1;
 		sprintf(data, "%s.BB", tmp);
 		in = fopen(data, "r");
 		if (!in) {	/* hack FH pour le mac */
@@ -91,26 +93,29 @@ int bbfile (pMesh mesh) {
 	if (!in)
 		return (0);
 
-	/* if ( !quiet )  fprintf(stdout,"  Reading %s\n",data); */
 	i1 = i2 = i3 = -1;
 	/* read file format */
 	err = 0;
-	fscanf(in, "%d", &dim);
+	ret = fscanf(in, "%d", &dim);
+  if (ret == EOF) printf("fscanf error\n");
 	if (EatSpace(in)) err++;
 
-	fscanf(in, "%d", &i1);
+	ret = fscanf(in, "%d", &i1);
+  if (ret == EOF) printf("fscanf error\n");
 	if (EatSpace(in)) err++;
 
-	fscanf(in, "%d", &i2);
+	ret = fscanf(in, "%d", &i2);
+  if (ret == EOF) printf("fscanf error\n");
 	if (EatSpace(in)) err++;
 
-	fscanf(in, "%d", &i3);
+	ret = fscanf(in, "%d", &i3);
+  if (ret == EOF) printf("fscanf error\n");
 	bigbb = (EatSpace(in) == 0);/* not nl after the 4 integer => BB */
 
-	if (!quiet)
+	if (!quiet) {
 		if (bigbb) fprintf(stdout, "  Reading BB file %s\n", data);
 		else fprintf(stdout, "  Reading bb file %s\n", data);
-
+  }
 	if (dim < 2 || dim > 3 || err) {
 		fprintf(stderr, "  %%%% Wrong file (dim=%d) (err=%d). Ignored\n", dim, err);
 		return (0);
@@ -123,31 +128,28 @@ int bbfile (pMesh mesh) {
 		int nfield;
 
 		/* get only 1st field */
-		/* fscanf(in,"%d",&nfield);*/
 		nfield = i1;
-		/*fscanf(in,"%d",&mesh->nfield);*/
 		mesh->nfield = i2;
 		if (nfield > 1) {
 			nf += i3;
 
 			for (k = 1; k < nfield - 1; k++) {
-				fscanf(in, "%d", &np);
+				ret = fscanf(in, "%d", &np);
+        if (ret == EOF) printf("fscanf error\n");
 				nf += np;
 			}
 
-			fscanf(in, "%d", &np);
+			ret = fscanf(in, "%d", &np);
+      if (ret == EOF) printf("fscanf error\n");
 		} else {
 			np = i3;
 		}
 
 		/* read file type */
-		fscanf(in, "%d", &mesh->typage);
+		ret = fscanf(in, "%d", &mesh->typage);
+    if (ret == EOF) printf("fscanf error\n");
 		printf(" np= %d, type= %d\n", np, mesh->typage);
 	} else {
-		/* fscanf(in,"%d",&mesh->nfield);
-		 * fscanf(in,"%d",&np);*/
-		/* read file type */
-		/* fscanf(in,"%d",&mesh->typage);*/
 		mesh->nfield = i1;
 		np = i2;
 		mesh->typage = i3;
@@ -195,18 +197,21 @@ int bbfile (pMesh mesh) {
 			ps->bb = 0.0;
 			if (fscanf(in, "%127s", data) != 1) continue;
 
-			if (ptr = strpbrk(data, "dD")) *ptr = 'E';
+			if ((ptr = strpbrk(data, "dD"))) *ptr = 'E';
 
-			sscanf(data, "%f", &ps->bb);
+			ret = sscanf(data, "%f", &ps->bb);
+      if (ret == EOF) printf("sscanf error\n");
 			if (ps->bb < mesh->bbmin) mesh->bbmin = ps->bb;
 
 			if (ps->bb > mesh->bbmax) mesh->bbmax = ps->bb;
 
 			for (j = 1; j <= nf; j++) {
-				fscanf(in, "%f", &dummy);
+				ret = fscanf(in, "%f", &dummy);
+        if (ret == EOF) printf("sscanf error\n");
 			}
 		}
 	}
+
 	/* vector field */
 	else if (mesh->nfield == mesh->dim) {
 		if (ddebug) fprintf(stdout, "   vector field \n");
@@ -218,9 +223,10 @@ int bbfile (pMesh mesh) {
 			for (l = 0; l < mesh->dim; l++) {
 				if (fscanf(in, "%127s", data) != 1) continue;
 
-				if (ptr = strpbrk(data, "dD")) *ptr = 'E';
+				if ((ptr = strpbrk(data, "dD"))) *ptr = 'E';
 
-				sscanf(data, "%f", &ps->m[l]);
+				ret = sscanf(data, "%f", &ps->m[l]);
+        if (ret == EOF) printf("sscanf error\n");
 				ps->bb += ps->m[l] * ps->m[l];
 			}
 
@@ -231,7 +237,8 @@ int bbfile (pMesh mesh) {
 				mesh->bbmax = ps->bb;
 
 			for (j = 1; j < nf; j++) {
-				fscanf(in, "%f", &dummy);
+				ret = fscanf(in, "%f", &dummy);
+        if (ret == EOF) printf("fscanf error\n");
 			}
 		}
 
@@ -242,7 +249,8 @@ int bbfile (pMesh mesh) {
 
 		for (k = 1; k <= mesh->np; k++) {
 			ps = &mesh->sol[k];
-			fscanf(in, "%lf %lf %lf", &a, &b, &c);
+			ret = fscanf(in, "%lf %lf %lf", &a, &b, &c);
+      if (ret == EOF) printf("fscanf error\n");
 			ps->m[0] = a;
 			ps->m[1] = b;
 			ps->m[2] = c;
@@ -256,7 +264,8 @@ int bbfile (pMesh mesh) {
 			if (ps->bb > mesh->bbmax) mesh->bbmax = ps->bb;
 
 			for (j = 1; j < nf; j++) {
-				fscanf(in, "%f", &dummy);
+				ret = fscanf(in, "%f", &dummy);
+        if (ret == EOF) printf("fscanf error\n");
 			}
 		}
 	} else if (dim == 3 && mesh->nfield == 6) {
@@ -267,11 +276,15 @@ int bbfile (pMesh mesh) {
 			ps->bb = 0.0f;
 
 			for (l = 0; l < 6; l++) {
-				if (fscanf(in, "%127s", data) != 1) continue;
+				if (fscanf(in, "%127s", data) != 1) {
+					continue;
+					m[l] = 0;
+				}
 
-				if (ptr = strpbrk(data, "dD")) *ptr = 'E';
+				if ((ptr = strpbrk(data, "dD"))) *ptr = 'E';
 
-				sscanf(data, "%f", &dummy);
+				ret = sscanf(data, "%f", &dummy);
+        if (ret == EOF) printf("sscanf error\n");
 				m[l] = dummy;
 			}
 
@@ -297,7 +310,8 @@ int bbfile (pMesh mesh) {
 			}
 
 			for (j = 1; j < nf; j++) {
-				fscanf(in, "%f", &dummy);
+				ret = fscanf(in, "%f", &dummy);
+        if (ret == EOF) printf("fscanf error\n");
 			}
 		}
 	} else {
@@ -308,3 +322,7 @@ int bbfile (pMesh mesh) {
 	fclose(in);
 	return (np);
 }
+
+#ifdef __cplusplus
+}
+#endif

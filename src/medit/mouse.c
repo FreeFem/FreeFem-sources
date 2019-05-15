@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "extern.h"
@@ -101,10 +104,8 @@ static void drawRubberBand (int xa, int ya, int xb, int yb) {
 
 static void rubberMotion (int x, int y) {
 	pScene sc;
-	pPersp p;
 
 	sc = cv.scene[currentScene()];
-	p = sc->persp;
 
 	glEnable(GL_COLOR_LOGIC_OP);
 	glLogicOp(GL_XOR);
@@ -250,7 +251,6 @@ void mouse (int button, int state, int x, int y) {
 			if (tr->manim == GL_TRUE) glutIdleFunc(glutIdle);
 			else tr->angle = 0.0;
 
-			/*if ( abs(startx-x) + abs(starty-y) > 0 )*/
 			glutPostRedisplay();
 		} else if (tr->manim == GL_TRUE && olds == idw) {
 			glutIdleFunc(NULL);
@@ -307,7 +307,7 @@ void motion (int x, int y) {
 			tr->angle = 2.0f;
 		} else {
 			float dx, dy, dz;
-			
+
 			dx = pos[0] - tr->pos[0];
 			dy = pos[1] - tr->pos[1];
 			dz = pos[2] - tr->pos[2];
@@ -457,3 +457,7 @@ void animateCamera () {
 	reshapeScene(sc->par.xs, sc->par.ys);
 	glutPostRedisplay();
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -36,8 +36,6 @@
 
 #include "ff++.hpp"
 #include "msh3.hpp"
-// #define ADAPTLIBRARY
-// #include "libmesh5.h"
 #include "mshmetlib.h"
 
 #ifdef __cplusplus
@@ -105,7 +103,6 @@ MSHMET_pMesh mesh_to_MSHMET_pMesh (const Mesh &Th) {
 		ppt->c[0] = Th.vertices[k - 1].x;
 		ppt->c[1] = Th.vertices[k - 1].y;
 		ppt->c[2] = 0.;
-		// ppt->mark  = Th.vertices[k-1].lab;
 	}
 
 	MSHMET_pTria ptriangle;
@@ -119,7 +116,6 @@ MSHMET_pMesh mesh_to_MSHMET_pMesh (const Mesh &Th) {
 		ptriangle->v[0] = Th.operator () (K[0]) + 1;
 		ptriangle->v[1] = Th.operator () (K[1]) + 1;
 		ptriangle->v[2] = Th.operator () (K[2]) + 1;
-		// ptriangle->mark = K.lab;
 
 		for (i = 0; i < 3; i++) {
 			ppt = &meshMSHMET->point[ptriangle->v[i]];
@@ -141,21 +137,6 @@ MSHMET_pMesh mesh_to_MSHMET_pMesh (const Mesh &Th) {
 		ux = p2->c[0] - p1->c[0];
 		uy = p2->c[1] - p1->c[1];
 		h3 = sqrt(ux * ux + uy * uy);
-		/*
-		 * pe        = 0.5 * (h1 + h2 + h3);
-		 * double aire = pe * (pe-h1) * (pe-h2) * (pe-h3);
-		 * //aire = sqrt(ptriangle->aire);
-		 * //rins      = 2.0 * aire / pe;
-		 *
-		 * //p0->aire += ptriangle->aire;
-		 * //p0->rins += rins;
-		 *
-		 * //p1->aire += ptriangle->aire;
-		 * //p1->rins += rins;
-		 *
-		 * //p2->aire += ptriangle->aire;
-		 * //p2->rins += rins;
-		 */
 	}
 
 	return meshMSHMET;
@@ -185,7 +166,6 @@ MSHMET_pMesh mesh3_to_MSHMET_pMesh (const Mesh3 &Th3) {
 		ppt->c[0] = Th3.vertices[k - 1].x;
 		ppt->c[1] = Th3.vertices[k - 1].y;
 		ppt->c[2] = Th3.vertices[k - 1].z;
-		// ppt->mark  = 0; //Th3.vertices[k-1].lab;
 	}
 
 	int i;
@@ -198,7 +178,6 @@ MSHMET_pMesh mesh3_to_MSHMET_pMesh (const Mesh3 &Th3) {
 		ptetra->v[1] = Th3.operator () (K[1]) + 1;
 		ptetra->v[2] = Th3.operator () (K[2]) + 1;
 		ptetra->v[3] = Th3.operator () (K[3]) + 1;
-		// ptetra->mark = 0;//K.lab;
 
 		for (i = 0; i < 4; i++) {
 			ppt = &meshMSHMET->point[ptetra->v[i]];
@@ -278,7 +257,6 @@ void metric_mshmet_to_ff_metric (MSHMET_pSol sol, MSHMET_Info *info, KN<double> 
 		// isotrope
 		for (k = 1; k <= sol->np; k++) {
 			metric[k - 1] = sol->met[k];
-			// cout << "k " << k << " " << sol->met[k] << endl;
 		}
 	} else {
 		for (k = 1; k <= sol->np; k++) {
@@ -784,21 +762,11 @@ AnyType mshmet2d_Op::operator () (Stack stack)  const {
 	return SetAny<KN<double> >(metric);
 }
 
-/*  class Init1 { public:
- * Init1();
- * };
- *
- * $1 */
-
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
-	// if (verbosity)
 	if (verbosity) {cout << " load: mshmet  " << endl;}
 
 	Global.Add("mshmet", "(", new OneOperatorCode<mshmet2d_Op> );
 	Global.Add("mshmet", "(", new OneOperatorCode<mshmet3d_Op> );
-	// Global.Add("mshmet","(",new OneOperatorCode<mshmet2d_Op> );
 }
 
-// #define  WITH_NO_INIT
-// #include "msh3.hpp"
 LOADFUNC(Load_Init)

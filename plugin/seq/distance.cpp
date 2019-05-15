@@ -38,7 +38,6 @@ using namespace std;
 #include <algorithm>
 #include <queue>
 #include <limits>
-// #include "msh3.hpp"
 static int debug = 0, debug1 = 0;
 using namespace  Fem2D;
 
@@ -75,7 +74,6 @@ double distmin (const Rd &A, const Rd &B, const Rd &Q, double aq, double bq) {
 	double lp = (AQ, AB) / ab2;
 	Rd PQ = AQ - lp * AB;	// ( PQ , AB) = 0
 
-	// Rd P = A + lp*AB;// or Q - PQ
 	if (lp < 0) {d = aq;} else if (lp > 1.) {d = bq;} else {d = Norme2(PQ);}
 
 	if (verbosity > 9999) {
@@ -148,8 +146,6 @@ double distmin (const R3 &A, double a, const R3 &B, double b, const R3 &C, doubl
 	R3 AB(A, B), AC(A, C), AQ(A, Q);
 	double ab2 = (AB, AB), acab = (AC, AB), ac2 = (AC, AC);
 	double aqab = (AQ, AB), aqac = (AQ, AC);
-	// b ab2  + c acab = aqab
-	// b acab + c ac2 = aqac
 	double pdet = ab2 * ac2 - acab * acab;
 	double pb = (aqab * ac2 - aqac * acab) / pdet;
 	double pc = (ab2 * aqac - aqab * acab) / pdet;
@@ -258,8 +254,6 @@ double distmin (const R3 &A, const R3 &B, const R3 &C, const R3 &Q) {
 	R3 AB(A, B), AC(A, C), AQ(A, Q);
 	double ab2 = (AB, AB), acab = (AC, AB), ac2 = (AC, AC);
 	double aqab = (AQ, AB), aqac = (AQ, AC);
-	// b ab2  + c acab = aqab
-	// b acab + c ac2 = aqac
 	double det = ab2 * ac2 - acab * acab;
 	double b = (aqab * ac2 - aqac * acab) / det;
 	double c = (ab2 * aqac - aqab * acab) / det;
@@ -494,7 +488,6 @@ int DistanceIso0 (const Mesh3 &Th, int k, double *f, double *fv) {
 	double FK[nbve] = {fv[iK[0]], fv[iK[1]], fv[iK[2]], fv[iK[3]]};
 	int cas = DistanceIso0(K, fk, FK);
 	if (cas > 0) {	// OK iso cut triangle
-		//
 		fv[iK[0]] = min(fv[iK[0]], FK[0]);
 		fv[iK[1]] = min(fv[iK[1]], FK[1]);
 		fv[iK[2]] = min(fv[iK[2]], FK[2]);
@@ -511,10 +504,8 @@ AnyType Distance (Stack stack, const Mesh *pTh, Expression eff, KN<double> *pxx,
 	debug = 0;
 	if (verbosity > 99) {debug = 1;}
 
-// #define mmm min
 	double unset = -std::numeric_limits<double>::max();
 	double distinf = std::numeric_limits<double>::max();
-	double distneginf = std::numeric_limits<double>::min();
 	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
 	double isovalue = 0.;
 	ffassert(pTh);
@@ -522,7 +513,6 @@ AnyType Distance (Stack stack, const Mesh *pTh, Expression eff, KN<double> *pxx,
 	long nbv = Th.nv;	// nombre de sommet
 	long nbt = Th.nt;	// nombre de triangles
 	// long  nbe=Th.neb; // nombre d'aretes fontiere
-	// ffassert(0);
 	typedef KN<double> Rn;
 	typedef KN<long> Zn;
 	typedef pair<double, long> KEY;	// Distance max , vertex i/triangle k= 3*k+i
@@ -549,9 +539,6 @@ AnyType Distance (Stack stack, const Mesh *pTh, Expression eff, KN<double> *pxx,
 		}
 	}
 
-	// find Elem cut by f = 0
-	// generation of inital data
-	// Pk[3],Gk[3];
 	long err = 0, nt0 = 0;
 
 	for (long k = 0; k < Th.nt; ++k) {
@@ -641,7 +628,7 @@ class Distance3d_Op: public E_F0mps
 	public:
 
 		Expression eTh, eff, exx;
-		static const int n_name_param = 1;	//
+		static const int n_name_param = 1;
 		static basicAC_F0::name_and_type name_param [];
 		Expression nargs[n_name_param];
 

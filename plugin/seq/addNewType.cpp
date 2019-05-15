@@ -42,6 +42,12 @@ class myType_uv {
 		myType_uv (myType *mmt, double uu, double vv): mt(mmt), u(uu), v(vv) {}
 };
 
+/*!
+ * \brief constructor init_MyType
+ * \param a myType *const &
+ * \param s string *const &
+ * \return NULL
+ */
 // le vrai constructeur est la
 myType*init_MyType (myType *const &a, string *const &s) {
 	a->nom = new string(*s);
@@ -49,13 +55,30 @@ myType*init_MyType (myType *const &a, string *const &s) {
 	return NULL;// return value never used for now (13.1)
 }
 
+/*!
+ * \brief Set a type
+ * \param mt myType *const &
+ * \param u const double &
+ * \param v const double &
+ * \return myType_uv(mt, u, v);
+ */
 myType_uv set_myType_uv (myType *const &mt, const double &u, const double &v)
 {return myType_uv(mt, u, v);}
 
+/*!
+ * \brief Set a type
+ * \param muv const myType_uv &
+ * \return muv.mt->x(muv.u, muv.v);
+ */
 double get_myType_uv_x (const myType_uv &muv) {
 	return muv.mt->x(muv.u, muv.v);
 }
 
+/*!
+ * \brief Get a type
+ * \param muv const myType_uv &
+ * \return r static R3 &
+ */
 R3*get_myType_uv_N (const myType_uv &muv) {
 	static R3 r;
 
@@ -68,6 +91,7 @@ R3*get_myType_uv_N (const myType_uv &muv) {
  * Init();
  * };
  * $1 */
+
 static void Load_Init () {
 	Dcl_Type<myType *>(InitP<myType>, Destroy<myType> );// declare deux nouveau type pour freefem++  un pointeur et
 	Dcl_Type<myType_uv>();
@@ -96,4 +120,3 @@ static void Load_Init () {
 }
 
 LOADFUNC(Load_Init)
-

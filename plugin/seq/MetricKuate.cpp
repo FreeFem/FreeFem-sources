@@ -33,21 +33,6 @@
 #include  <cfloat>
 #include  <cmath>
 using namespace std;
-/*
- #include "error.hpp"
- #include "AFunction.hpp"
- #include "rgraph.hpp"
- #include "RNM.hpp"
- * // remove problem of include
- #undef  HAVE_LIBUMFPACK
- #undef HAVE_CADNA
- #include "MatriceCreuse_tpl.hpp"
- #include "MeshPoint.hpp"
- #include "lgfem.hpp"
- #include "lgmesh3.hpp"
- #include "problem.hpp"
- * //#include "ellipsemax.hpp"
- */
 #include "ff++.hpp"
 
 using namespace std;
@@ -133,7 +118,6 @@ void metrique (int nbpoints, R2 *Point, R &A, R &B, R &C, R epsilon) {
 
 	// ----------------------------------------------------------------
 
-	// int test = -1;
 	R X0;
 	R Y0;
 	R bmin = 0., bmax = inf, b1, b2, aik = 0., bik = 0., cik = 0.;
@@ -143,8 +127,6 @@ void metrique (int nbpoints, R2 *Point, R &A, R &B, R &C, R epsilon) {
 	Y0 = Point[0].y;
 	r0 = Point[0].norme();
 	assert(r0 == Rmin);
-
-	// cout<<" Rmin = "<<Rmin<<" Rmax =  "<<Rmax<<endl;
 
 	R EPS = 0.;	// pour recuperer la valeur de epsilon0 optimale
 	R epsilonmax = r0 * (1. - r0 / Rmax) / 20.;
@@ -178,7 +160,6 @@ void metrique (int nbpoints, R2 *Point, R &A, R &B, R &C, R epsilon) {
 	if (abs(Rmin - Rmax) > 1e-5) {
 		int condition = -1;
 
-		// cout<<" Rmax - Rmin  "<<Rmax-Rmin<<endl;
 		for (int ee = 0; ee < neps - 1; ee++) {	// boucle sur epsilon0---------------
 			epsilon0 = Tabepsilon[ee];
 			if (r0 <= epsilon0) {epsilon0 = r0 * epsilon0;}
@@ -321,7 +302,6 @@ void metrique (int nbpoints, R2 *Point, R &A, R &B, R &C, R epsilon) {
 						if (((a0 * bmax + a1) * bmax) < ((a0 * bmin + a1) * bmin)) {bik = bmax;} else {bik = bmin;}
 
 						aik = (Ri * Ri * Y0 * X0 - R0 * R0 * Yi * Xi + bik * Yi * Y0 * detXY) / (detXY * Xi * X0);
-						// (Ri*Ri*Y0/Xi - R0*R0*Yi/X0)/detXY+bik*Yi*Y0/(Xi*X0);
 						cik = (-Ri * Ri * X0 * X0 + R0 * R0 * Xi * Xi - bik * (Yi * X0 + Y0 * Xi) * detXY) / (detXY * Xi * X0);
 
 						assert((4. * aik * bik - cik * cik) >= 0.);	// aire positive
@@ -330,7 +310,6 @@ void metrique (int nbpoints, R2 *Point, R &A, R &B, R &C, R epsilon) {
 							A = aik;
 							B = bik;
 							C = cik;
-							EPS = epsilon0;
 						}
 					}
 
@@ -349,7 +328,6 @@ void metrique (int nbpoints, R2 *Point, R &A, R &B, R &C, R epsilon) {
 int LireTaille (const char *NomDuFichier, int &nbnoeuds) {	// Lire le maillage  sur le fichier de nom NomDuFichier
 															// Ouverture du fichier  a partir de son nom
 	ifstream f(NomDuFichier);
-	// char  buffer[BUFSIZ];
 	string buffer;
 
 	nbnoeuds = 0;
@@ -361,7 +339,6 @@ int LireTaille (const char *NomDuFichier, int &nbnoeuds) {	// Lire le maillage  
 	while (getline(f, buffer, '\n')) {
 		if ((buffer[0] != '#') && (buffer != "")) {
 			nbnoeuds += 1;
-			// cout<<buffer<<endl;
 		}
 	}
 
@@ -418,7 +395,6 @@ class MetricKuate:  public E_F0mps
 
 			if (mp->size() != 2) {CompileError("syntax: MetricKuate(Th,np,o,err,[m11,m12,m22],[xx,yy])");}
 
-			// int err = 0;
 			m11 = CastTo<KN<double> *>((*ma)[0]);	// fist exp of the array (must be a  double)
 			m12 = CastTo<KN<double> *>((*ma)[1]);	// second exp of the array (must be a  double)
 			m22 = CastTo<KN<double> *>((*ma)[2]);	// second exp of the array (must be a  double)
@@ -464,8 +440,6 @@ AnyType MetricKuate::operator () (Stack stack) const {
 	KN<R2> Pt(np);
 	const Mesh &Th(*pTh);
 	cout << " MetricKuate " << np << " hmin = " << hmin << " hmax = " << hmax << " nv = " << Th.nv << endl;
-	R hmx2 = 1. / (hmax * hmax);
-	R hmn2 = 1. / (hmin * hmin);
 
 	ffassert(pm11->N() == Th.nv);
 	ffassert(pm12->N() == Th.nv);
@@ -486,10 +460,7 @@ AnyType MetricKuate::operator () (Stack stack) const {
 				double eee = fabs(GetAny<double>((*experr)(stack)));
 				ee = max(ee, 1e-30);
 				eee = max(eee, 1e-30);
-				// e^p  = eee/ee
 				double p = Min(Max(log(eee) - log(ee), 0.1), 10);
-				// c^p ee = 1
-				// c = (1/ee)^1/p
 				double c = pow(1. / ee, 1. / p);
 				c = min(max(c, hmin), hmax);
 				Pt[i].x = *pxx * c / M_E;
@@ -513,10 +484,6 @@ AnyType MetricKuate::operator () (Stack stack) const {
 	return true;
 }
 
-/*  class Init { public:
- * Init();
- * };
- * $1 */
 static void Load_Init () {
 	cout << "\n  -- lood: init MetricKuate\n";
 	Global.Add("MetricKuate", "(", new OneOperatorCode<MetricKuate>());

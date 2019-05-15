@@ -302,8 +302,6 @@ int Th_Grid (const KNM_<double> *g, int k, int ii) {
 	int N = g->N() - 1;
 	int kq = k / 2;	// number of the quad
 	int k0 = k % 2;	// up or down
-	// (0,0),(1,0),(1,1) Qd <=> (ii !=0,  ii==2)
-	// (0,0),(1,1),(0,1) Q2  <=> (ii%2, ii != 0
 	int I = kq % N + (k0 ? (ii % 2) : (ii != 0));
 	int J = kq / N + (k0 ? (ii != 0) : (ii == 2));
 
@@ -317,7 +315,6 @@ R2 V_Grid (const KNM_<double> *g, int k) {
 }
 
 int EA_Grid (const KNM_<double> *g, int k, int &e) {
-	int N = g->N() - 1;
 	int kq = k / 2;	// number of the quad
 	int k0 = k % 2;	// up or down
 	bool intern = k0 ? (e == 0) : (e == 2);
@@ -351,7 +348,6 @@ AnyType FINDLOCALMIN_P1_Op::operator () (Stack stack)  const {
 	typedef std::priority_queue<KEY, std::vector<KEY>, std::greater<KEY> > myPQ;
 	typedef std::priority_queue<KEY> myPQL;
 
-	// MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
 	const Mesh *pTh = GetAny<const Mesh *>((*eTh)(stack));
 	ffassert(pTh);
 	const Mesh &Th = *pTh;
@@ -359,7 +355,6 @@ AnyType FINDLOCALMIN_P1_Op::operator () (Stack stack)  const {
 	int ddd0 = verbosity > 2;
 	int nbv = Th.nv;// nombre de sommet
 	int nbt = Th.nt;// nombre de triangles
-	// int nbe=Th.neb; // nombre d'aretes fontiere
 	int convex = arg(1, stack, 0L);
 	double eps = arg(0, stack, 0.);
 	if (verbosity > 2) {cout << "    -- findlocalmin: convex = " << convex << " eps= " << eps << endl;}
@@ -415,7 +410,6 @@ AnyType FINDLOCALMIN_P1_Op::operator () (Stack stack)  const {
 	long col = 0;
 	int nmin = 0;
 	KN<long> sm(nbv);
-	R2 Gl[3];
 	long rkm = 0;	// Numero de region
 
 	while (!lvm.empty()) {
@@ -438,9 +432,6 @@ AnyType FINDLOCALMIN_P1_Op::operator () (Stack stack)  const {
 				pqv.pop();
 				double Uv = tp.first;
 				int iv = tp.second;
-				// if(cv[iv]==col) continue;
-
-				// cv[iv]=col;
 				if (ddd1) {cout << "\t\t" << iv << " " << Uv << endl;}
 
 				assert(Uv >= Uvp);	// verif piority queue
@@ -500,7 +491,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 		pyy = GetAny<KN<double> *>((*eyy)(stack));
 	}
 
-	// cout << pxx << " " << pyy << " " << pxy << endl;
 	ffassert((pxx || pyy) == !pxy);
 	const Mesh *pTh = GetAny<const Mesh *>((*eTh)(stack));
 	ffassert(pTh);
@@ -510,7 +500,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 	// int nbe=Th.neb; // nombre d'aretes fontiere
 	long nbc;
 	// value of isoline
-	// int ka=0;
 	double isovalue = arg(0, stack, 0.);
 	long close = arg(1, stack, 1L);
 	double smoothing = arg(2, stack, 0.);
@@ -622,7 +611,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 					}
 
 					int np = LineBorder(Pk, fk, close, Qk, i1, i2, eps);
-					// cout << np << endl;
 					if (np >= 10) {	// full edge
 						int ke = 0;
 					} else if (np == 2) {
@@ -769,14 +757,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 				i0 = i1;
 			}
 
-			/*      do in brak          if(i1==ie) // close the path ..
-			 * {
-			 * QQ.push_back(i1);
-			 * if(verbosity>99)
-			 * cout << " " << i1;
-			 * }
-			 */
-
 			if (verbosity > 99) {
 				cout << ") " << endl;
 			} else if (verbosity > 9) {cout << endl;}
@@ -891,7 +871,6 @@ AnyType ISOLINE_P1_Op::operator () (Stack stack)  const {
 			i0 = iQ[i++];
 			i1 = iQ[i++];
 
-			// cout<< i0 << " " << i1 << endl;
 			for (int l = i0; l < i1; ++l) {
 				int j = QQ[l];
 				fqq << P[j].P.x << " " << P[j].P.y << " " << k << " " << j << endl;
@@ -1009,9 +988,6 @@ R3*Curve (Stack stack, const KNM_<double> &b, const long &li0, const long &li1, 
 	if (pi) {*pi = i0;}
 
 	R3 *pQ = Add2StackOfPtr2Free(stack, new R3(Q));
-	// MeshPoint &mp= *MeshPointStack(stack); // the struct to get x,y, normal , value
-	// mp.P.x=Q.x; // get the current x value
-	// mp.P.y=Q.y; // get the current y value
 	return pQ;
 }
 

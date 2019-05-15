@@ -14,16 +14,18 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifndef _CHRONO_H_
+#define _CHRONO_H_
 
 #include <time.h>
 
@@ -46,6 +48,8 @@ typedef struct mytime {
 void chrono (int cmode, mytime *ptt);
 double gttime (mytime t);
 void tminit (mytime *t, int maxtim);
+
+#endif /* _CHRONO_H_ */
 
 #ifdef __cplusplus
 }

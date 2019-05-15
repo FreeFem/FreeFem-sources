@@ -14,12 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
 /****************************************************************************/
-/* SUMMARY : ... */
-/* LICENSE : LGPLv3 */
-/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE */
-/* AUTHORS : Pascal Frey */
-/* E-MAIL  : pascal.frey@sorbonne-universite.fr
- */
+/* SUMMARY : ...                                                            */
+/* LICENSE : LGPLv3                                                         */
+/* ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE           */
+/* AUTHORS : Pascal Frey                                                    */
+/* E-MAIL  : pascal.frey@sorbonne-universite.fr                             */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "medit.h"
 #include "sproto.h"
@@ -28,7 +31,7 @@
 PPMimage*loadPPM (const char *imgname, int *type) {
 	pPPMimage result;
 	FILE *fp;
-	int i, k, typimg, ret, r, g, b, s, maxval, bitsize;
+	int i, k, typimg, ret, r, g, b, s, maxval, bitsize, res;
 	char *ptr, c, buff[1024];
 
 	/* search for image */
@@ -142,7 +145,8 @@ PPMimage*loadPPM (const char *imgname, int *type) {
 	case P3:/* ascii file (color) */
 
 		for (i = 0; i < bitsize; i++) {
-			fscanf(fp, "%d", &r);
+			res = fscanf(fp, "%d", &r);
+			if (res == EOF) printf("fscanf error\n");
 			result->data[i] = (ubyte)r;
 		}
 
@@ -392,3 +396,7 @@ int imgHard (pScene sc, char *data, char key) {
 	M_free(pixels);
 	return (1);
 }
+
+#ifdef __cplusplus
+}
+#endif
