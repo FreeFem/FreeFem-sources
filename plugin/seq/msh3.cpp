@@ -8544,7 +8544,7 @@ AnyType Cube_Op::operator () (Stack stack)  const {
 
 AnyType Square_Op::operator () (Stack stack)  const {
     long nx, ny, region = 0, /*label [] = {1, 2, 3, 4},*/ kind = 4;
-    KN<long> label;
+    KN<long> label(4);
     for (int i=0;i<4;i++) label[i]=i+1;//{1, 2, 3, 4};
     nx = GetAny<long>((*enx)(stack));
     ny = GetAny<long>((*eny)(stack));
