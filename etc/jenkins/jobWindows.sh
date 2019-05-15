@@ -9,8 +9,11 @@ cd /c/builds/workspace/FreeFem-sources-windows7 \
   && autoreconf -i \
   && ./configure --prefix=/builds/workspace/freefem \
   && ./3rdparty/getall -a \
-  && chmod +x ./etc/jenkins/blob/build_PETSC.sh && bash ./etc/jenkins/blob/build_PETSC.sh \
-  && chmod +x ./etc/jenkins/blob/build.sh && bash ./etc/jenkins/blob/build.sh
+  && cd 3rdparty/ff-petsc \
+	&& make petsc-slepc \
+	&& cd - \
+	&& ./reconfigure \
+  && make
 
   if [ $? -eq 0 ]
   then
@@ -21,7 +24,7 @@ cd /c/builds/workspace/FreeFem-sources-windows7 \
   fi
 
   # check
-  chmod +x ./etc/jenkins/blob/check.sh && bash ./etc/jenkins/blob/check.sh
+  make check
 
   if [ $? -eq 0 ]
   then
@@ -31,7 +34,7 @@ cd /c/builds/workspace/FreeFem-sources-windows7 \
   fi
 
   # install
-  chmod +x ./etc/jenkins/blob/install.sh && bash ./etc/jenkins/blob/install.sh
+  make install
 
   if [ $? -eq 0 ]
   then
