@@ -3,10 +3,7 @@ source shell mingw64
 
 echo "Job 6"
 
-cd /c/builds/workspace/FreeFem-sources-windows7 \
-  && git clone https://github.com/FreeFem/FreeFem-sources.git -b develop \
-  && cd FreeFem-sources \
-  && autoreconf -i \
+autoreconf -i \
   && ./configure --prefix=/builds/workspace/freefem \
   && ./3rdparty/getall -a \
   && cd 3rdparty/ff-petsc \
