@@ -4,38 +4,39 @@ source shell mingw64
 echo "Job 6"
 
 autoreconf -i \
-  && ./configure --prefix=/builds/workspace/freefem \
+  && ./configure --enable-download --enable-debug --prefix=/builds/workspace/freefem \
   && ./3rdparty/getall -a \
-  && cd 3rdparty/ff-petsc \
-	&& make petsc-slepc \
-	&& cd - \
-	&& ./reconfigure \
   && make
 
-  if [ $? -eq 0 ]
-  then
-    echo "Build process complete"
-  else
-    echo "Build process failed"
-    exit 1
-  fi
+# && cd 3rdparty/ff-petsc \
+# && make petsc-slepc \
+# && cd - \
+# && ./reconfigure \
 
-  # check
-  make check
+if [ $? -eq 0 ]
+then
+  echo "Build process complete"
+else
+  echo "Build process failed"
+  exit 1
+fi
 
-  if [ $? -eq 0 ]
-  then
-    echo "Check process complete"
-  else
-    echo "Check process failed"
-  fi
+# check
+make check
 
-  # install
-  make install
+if [ $? -eq 0 ]
+then
+  echo "Check process complete"
+else
+  echo "Check process failed"
+fi
 
-  if [ $? -eq 0 ]
-  then
-    echo "Install process complete"
-  else
-    echo "Install process failed"
-  fi
+# install
+make install
+
+if [ $? -eq 0 ]
+then
+  echo "Install process complete"
+else
+  echo "Install process failed"
+fi
