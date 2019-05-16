@@ -45,7 +45,7 @@ Makefile.in: ../../config.status Makefile-metis.in
 $(SRCDIR)/tag-compile: $(SRCDIR)/tags
 	#cd $(SRCDIR)/libmetis ;
 	make -C $(SRCDIR)/libmetis $(OBJS) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I.'
-	make -C $(SRCDIR)/GKlib $(OBJS_GK) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -Dmetis_EXPORTS' -D_GNU_SOURCE
+	make -C $(SRCDIR)/GKlib $(OBJS_GK) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -Dmetis_EXPORTS -D_GNU_SOURCE'
 	mkdir $(SRCDIR)/lib
 	cd $(SRCDIR); $(AR)  libmetis.a  libmetis/*.o GKlib/*.o
 	touch $(SRCDIR)/tag-compile
