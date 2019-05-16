@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 cd 3rdparty/ff-petsc \
 	&& make petsc-slepc \
