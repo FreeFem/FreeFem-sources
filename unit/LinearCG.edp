@@ -23,7 +23,7 @@ func real[int] DJ(real[int] &u)
     return u;
   };
 
-func real J(real[int] & u2)
+func real J(real[int] &u2)
   {
     real s=0;
     for (int i=0;i<u2.n;i++)
