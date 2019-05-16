@@ -1,6 +1,6 @@
 # Ubuntu 16.04 - VM0
 
-sudo apt install gcc g++ gfortran m4 patch git flex bison
+sudo apt install gcc g++ gfortran m4 patch git liblapack-dev flex bison
 
 # Ubuntu 16.04 - VM1
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libopenmpi-dev libhdf5-dev libgsl-dev flex bison
@@ -9,7 +9,7 @@ sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuit
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libopenmpi-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
 
 # Ubuntu 18.04 - VM0
-sudo apt install gcc g++ gfortran m4 patch git flex bison
+sudo apt install gcc g++ gfortran m4 patch git liblapack-dev flex bison
 
 # Ubuntu 18.04 - VM1
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libopenmpi-dev libhdf5-dev libgsl-dev flex bison
