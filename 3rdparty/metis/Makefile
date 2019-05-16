@@ -27,15 +27,15 @@ $(SRCDIR)/FAIT:
 	touch $(SRCDIR)/FAIT
 
 install:$(SRCDIR)/tag-compile
-#	cd $(SRCDIR)/Programs ;$(MAKE) 
+#	cd $(SRCDIR)/Programs ;$(MAKE)
 #	cd $(SRCDIR) ;  $(MAKE)  -C  install
 	-mkdir -p ../include/metis
 	-mkdir -p ../lib/metis
 	cp $(SRCDIR)/libmetis.a ../lib/metis
 	cp $(SRCDIR)/include/*.h ../include/metis
-	
 
-FAIRE: $(SRCDIR)/FAIT 
+
+FAIRE: $(SRCDIR)/FAIT
 	$(MAKE) WHERE
 	touch FAIRE
 
@@ -45,14 +45,14 @@ Makefile.in: ../../config.status Makefile-metis.in
 $(SRCDIR)/tag-compile: $(SRCDIR)/tags
 	#cd $(SRCDIR)/libmetis ;
 	make -C $(SRCDIR)/libmetis $(OBJS) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I.'
-	make -C $(SRCDIR)/GKlib $(OBJS_GK) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -Dmetis_EXPORTS'
+	make -C $(SRCDIR)/GKlib $(OBJS_GK) 'CC=$(CC)' CFLAGS='$(CFLAGS) -I../GKlib -I../include  -I. -Dmetis_EXPORTS' -D_GNU_SOURCE
 	mkdir $(SRCDIR)/lib
 	cd $(SRCDIR); $(AR)  libmetis.a  libmetis/*.o GKlib/*.o
 	touch $(SRCDIR)/tag-compile
 
 
 
-WHERE: 
+WHERE:
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
 	echo metis LD -L@DIR@/lib/metis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
 	echo metis INCLUDE -I@DIR@/include/metis >> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
@@ -66,7 +66,7 @@ checkgraph.o	debug.o	gklib.o	kwayfm.o	meshpart.o	ometis.o	refine.o	stat.o
 
 OBJS_GK=b64.o		error.o	fs.o		graph.o	itemsets.o	omp.o		random.o	sort.o	tokenizer.o \
 blas.o	evaluate.o	getopt.o	htable.o	mcore.o	pdb.o		rw.o		string.o	util.o \
-csr.o		fkvkselect.o	gkregex.o	io.o		memory.o	pqueue.o	seq.o		timers.o 
+csr.o		fkvkselect.o	gkregex.o	io.o		memory.o	pqueue.o	seq.o		timers.o
 
 
 
@@ -101,11 +101,11 @@ clean-local:
 	-rm -rf ../lib/metis ../lib/WHERE.metis
 	-rm -rf ../include/metis
 	-rm -rf $(SRCDIR)
-	-rm FAIRE FAIT 
+	-rm FAIRE FAIT
 
 # FFCS - 23/5/12 - $(SRCDIR)/$(INSTALL) is meaningless if $(SRCDIR) does not exist
 clean: clean-local
 	-rm ../lib/metis/libmetis.a
 	-rm ../lib/include/metis.h
 	-rm -rf $(SRCDIR)
-	-rm FAIRE FAIT 
+	-rm FAIRE FAIT
