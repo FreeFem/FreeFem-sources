@@ -744,11 +744,7 @@ AnyType ReadMeshS::operator()(Stack stack) const
         cout << "ReadMeshS " << *fn << endl;
     MeshS *Th = new MeshS(*fn,0);  // param 0-> initialize just the meshS
     Th->BuildGTree();
-    //if (Thh->getTypeMesh3()!=1) Thh->meshS->BuildGTree()
-    
-    //else cout << "Error, there isn't a surface mesh" << endl;
     Add2StackOfPtr2FreeRC(stack,Th);
-   // Add2StackOfPtr2FreeRC(stack,Thh->getMeshS());
     return SetAny<pmeshS>(Th);
     
 }

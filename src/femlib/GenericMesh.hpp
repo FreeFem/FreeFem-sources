@@ -525,9 +525,10 @@ public:
     nv=mv;
     nbe=mbe;
     vertices=new V[nv];
-    elements= new T[nt];
-    borderelements = new B[nbe];
+    if(nt) elements= new T[nt];
+    if(nbe) borderelements = new B[nbe];
     assert( nt >=0 && elements);
+    assert( nbe >=0 && borderelements);
     assert( nv >0 && vertices);
 
   }
@@ -710,8 +711,8 @@ public:
     delete [] ElementConteningVertex;
     delete [] TheAdjacencesLink;
     delete [] BoundaryElementHeadLink;
-    delete [] borderelements;
     if(nt>0) delete [] elements;
+    if(nbe>0) delete [] borderelements;
     delete [] vertices;
     delete [] bnormalv;
     if(gtree) delete gtree;

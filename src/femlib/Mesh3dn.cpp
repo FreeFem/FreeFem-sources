@@ -175,35 +175,32 @@ namespace Fem2D
         int ok=load(filename);
         if(verbosity) {
             cout << "read mesh ok " << ok ;
-            // if (typeMesh3==0) cout << " ---- pure surface Mesh"<< endl;
-            //else if (typeMesh3==1) cout << " ---- pure volume Mesh"<< endl;
-            //else if (typeMesh3==2) cout << " ---- volume and surface Meshes"<< endl;
-            
-            cout << "volume Mesh, num Tetra:= " << nt << ", num Vertice:= " << nv << " num boundary Triangles:= " << nbe << endl;
+            cout << "Mesh3, num Tetra:= " << nt << ", num Vertice:= " << nv << " num boundary Triangles:= " << nbe << endl;
             if (meshS)
-                cout << "surface Mesh, num Triangles:= " << this->meshS->nt << ", num Vertice:= " << this->meshS->nv << " num boundary Edges:= " << this->meshS->nbe << endl;
+                cout << "Mesh3::meshS, num Triangles:= " << this->meshS->nt << ", num Vertice:= " << this->meshS->nv << " num boundary Edges:= " << this->meshS->nbe << endl;
         }
         
-        if (ok) {
+        if(ok)
+        {
             ifstream f(filename.c_str());
             if(!f) {
                 cerr << "  --  Mesh3::Mesh3 Erreur openning " << filename<<endl;ffassert(0);exit(1);}
             if(verbosity>2)
                 cout << "  -- Mesh3:  Read On file \"" <<filename<<"\""<<  endl;
-            if(filename.rfind(".msh")==filename.length()-4) {
-                //readmsh(f,-1); // TODO with surface, detection based on number of vertice to build one elt
-                cout << "caution, surface mesh isn't available with the format .msh" << endl;
-                ffassert(0);
-            }
-            //   else
-            read(f); // TODO with surface,
+            if(filename.rfind(".msh")==filename.length()-4)
+                readmsh(f,-1);
+            else
+                read(f);
         }
         
         BuildBound();
-        BuildAdj();
-        Buildbnormalv();
-        BuildjElementConteningVertex();
-
+        // in case the mesh just has a vertices list
+        if (nt && nbe) {
+            BuildAdj();
+            Buildbnormalv();
+            BuildjElementConteningVertex();
+        }
+        
         if(meshS) {
             meshS->BuildBound();
             if(meshS->nt > 0){
@@ -333,37 +330,33 @@ namespace Fem2D
                 }
                 ffassert( newvertex== iii );
                 
-                Element *tt;
-                
-                if(this->nt== 0) {
-                    cerr << " the tetrahedrons list is empty, not possible for a mesh3 must be a meshS type " << endl;
-                    ffassert(0);exit(1);}
-              
-                tt=new Element[this->nt];
-                BorderElement *bb = new BorderElement[this->nbe];
+                Element *tt=NULL;
+                BorderElement *bb=NULL;
+                if (nt) tt=new Element[this->nt];
+                if (nbe) bb = new BorderElement[this->nbe];
                 
                 Element *ttt=tt;
                 BorderElement *bbb=bb;
-                
-                for (int k=0; k<this->nbe; k++) {
-                    const BorderElement & K(this->borderelements[k]);
-                    int iv[3];
-                    for(int jj=0; jj<3; jj++){
-                        iv[jj] = Numero_Som[this->operator()(K[jj])];
-                        iv[jj] = newNumero_Som[iv[jj]];
+                if(nbe)
+                    for (int k=0; k<this->nbe; k++) {
+                        const BorderElement & K(this->borderelements[k]);
+                        int iv[3];
+                        for(int jj=0; jj<3; jj++){
+                            iv[jj] = Numero_Som[this->operator()(K[jj])];
+                            iv[jj] = newNumero_Som[iv[jj]];
+                        }
+                        (bbb++)->set(vvv,iv,K.lab);
                     }
-                    (bbb++)->set(vvv,iv,K.lab);
-                }
-                
-                for(int k=0; k< this->nt; k++){
-                    const Element & K(this->elements[k]);
-                    int iv[4];
-                    for(int jj=0; jj<4; jj++){
-                        iv[jj] = Numero_Som[this->operator()(K[jj])];
-                        iv[jj] = newNumero_Som[iv[jj]];
+                if(nt)
+                    for(int k=0; k< this->nt; k++){
+                        const Element & K(this->elements[k]);
+                        int iv[4];
+                        for(int jj=0; jj<4; jj++){
+                            iv[jj] = Numero_Som[this->operator()(K[jj])];
+                            iv[jj] = newNumero_Som[iv[jj]];
+                        }
+                        (ttt++)->set(vvv,iv,K.lab);
                     }
-                    (ttt++)->set(vvv,iv,K.lab);
-                }
                 cout << " delete vertices + autre " << endl;
                 delete [] vertices;
                 delete [] elements;
@@ -386,7 +379,7 @@ namespace Fem2D
         }
         
         BuildBound();
-        if(nt > 0){
+        if(nt && nbe){
             BuildAdj();
             Buildbnormalv();
             BuildjElementConteningVertex();
@@ -575,29 +568,32 @@ namespace Fem2D
             }
             ffassert( newvertex== iii );
             
-            Element *tt;
-            if(this->nt !=0) tt=new Element[this->nt];
-            BorderElement *bb = new BorderElement[this->nbe];
+            Element *tt=NULL;
+            BorderElement *bb=NULL;
+            if(nt) tt=new Element[this->nt];
+            if(nbe) bb = new BorderElement[this->nbe];
             Element *ttt=tt;
             BorderElement *bbb=bb;
-            for (int k=0; k<this->nbe; k++) {
-                const BorderElement & K(this->borderelements[k]);
-                int iv[3];
-                for(int jj=0; jj<3; jj++){
-                    iv[jj] = Numero_Som[this->operator()(K[jj])];
-                    iv[jj] = newNumero_Som[iv[jj]];
+            if(nbe)
+                for (int k=0; k<this->nbe; k++) {
+                    const BorderElement & K(this->borderelements[k]);
+                    int iv[3];
+                    for(int jj=0; jj<3; jj++){
+                        iv[jj] = Numero_Som[this->operator()(K[jj])];
+                        iv[jj] = newNumero_Som[iv[jj]];
+                    }
+                    (bbb++)->set(vvv,iv,K.lab);
                 }
-                (bbb++)->set(vvv,iv,K.lab);
-            }
-            for(int k=0; k< this->nt; k++){
-                const Element & K(this->elements[k]);
-                int iv[4];
-                for(int jj=0; jj<4; jj++){
-                    iv[jj] = Numero_Som[this->operator()(K[jj])];
-                    iv[jj] = newNumero_Som[iv[jj]];
+            if(nt)
+                for(int k=0; k< this->nt; k++){
+                    const Element & K(this->elements[k]);
+                    int iv[4];
+                    for(int jj=0; jj<4; jj++){
+                        iv[jj] = Numero_Som[this->operator()(K[jj])];
+                        iv[jj] = newNumero_Som[iv[jj]];
+                    }
+                    (ttt++)->set(vvv,iv,K.lab);
                 }
-                (ttt++)->set(vvv,iv,K.lab);
-            }
             cout << " delete vertices + autre " << endl;
             delete [] vertices;
             delete [] elements;
@@ -618,7 +614,7 @@ namespace Fem2D
         
         
         BuildBound();
-        if(nt > 0){
+        if(nt){
             BuildAdj();
             Buildbnormalv();
             BuildjElementConteningVertex();
@@ -766,18 +762,26 @@ namespace Fem2D
         nSeg=GmfStatKwd(inm,GmfEdges); // segment elements only present in surface mesh
         
         //define the type of meshes present in the data file .mesh
-    
-        if(nTet==0) {
-            cerr << " Impossible to create a Mesh3 with no Tetrahedrons, if you want create a surface mesh, the mesh type is MeshS " << endl;
-            ffassert(0);exit(1);}
-     
+        if(nv==0) {
+            cerr << " ERROR: The mesh file doesn't contain vertices,   nv:" <<nv<< " nTet: " <<nTet<<" nTri: "<<nTri<<endl;
+            ffassert(0);
+        }
+        /*if(!nTet && nTri) {
+            cerr << " Impossible to create a Mesh3 with no Tetrahedrons, if you want create a surface mesh, the mesh type is MeshS ,   nv:" <<nv<< " nTet: " <<nTet<<" nTri: "<<nTri << endl;
+            ffassert(0);
+            exit(1);
+        }*/
         if (nTet>0 && nTri>0 && nSeg==0)
-            if(verbosity) cout << "data file "<< pfile <<  " read only a Mesh3, possible to create the MeshS associated using the command <Mesh3>.buildSurface(<Mesh3>)." << endl;
+            if(verbosity>1)
+                cout << "data file "<< pfile <<  " contains only a Mesh3, possible to create the MeshS associated using the command <Mesh3>.buildSurface(<Mesh3>)." << endl;
         if (nTet>0 && nTri>0 && nSeg>0)
-            if(verbosity) cout << "data file "<< pfile <<  " read a Mesh3 and MeshS" << endl;
-        
+            if(verbosity>1) cout << "data file "<< pfile <<  " contains a Mesh3 and MeshS" << endl;
+        if(verbosity && !nTri && !nTet)
+            cerr << " WARNING!!! The mesh file just contains a set of vertices" << endl;
+
         this->set(nv,nTet,nTri);
         nEdges=nSeg;
+        
         if(verbosity>1)
             cout << "  -- Mesh3(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
             << ", num Tetrahedron elts:= " << nTet << ", num vertice:= " << nv << " num Triangle boundaries:= " << nTri << endl;
@@ -785,7 +789,7 @@ namespace Fem2D
         if(dim  != 3) {
             cerr << "Err dim == " << dim << " !=3 " <<endl;
             return 2; }
-        if( nv<=0 && ((nTet <0 || nTri <=0) || (nTri <=0 || nSeg<=0)) ) {
+        if( nv<=0) {//} && ((nTet <0 || nTri <=0) || (nTri <=0 || nSeg<=0)) ) {
             cerr << " missing data "<< endl;
             return 3;
         }
@@ -804,54 +808,56 @@ namespace Fem2D
             }
             else
                 GmfGetLin(inm,GmfVertices,&vertices[i].x,&vertices[i].y,&vertices[i].z,&lab);
-            vertices[i].lab=lab;
-            mxlab= max(mxlab,lab);
-            mnlab= min(mnlab,lab);
-        }
+                vertices[i].lab=lab;
+                mxlab= max(mxlab,lab);
+                mnlab= min(mnlab,lab);
+            }
         // read tetrahedrons (element mesh3)
-        GmfGotoKwd(inm,GmfTetrahedra);
-        mes=0;
-        for(int i=0;i<nTet;++i) {
-            GmfGetLin(inm,GmfTetrahedra,&iv[0],&iv[1],&iv[2],&iv[3],&lab);
-            assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv && iv[2]>0 && iv[2]<=nv && iv[3]>0 && iv[3]<=nv);
-            for (int j=0;j<4;j++) iv[j]--;
-            this->elements[i].set(vertices,iv,lab);
-            mes += this->elements[i].mesure();
-        }
-        // read triangles (boundary element mesh3)
-        if(mnlab==0 && mxlab==0 ) {
-            int kmv=0;
-            mesb=0;
-            GmfGotoKwd(inm,GmfTriangles);
-            for(int i=0;i<nbe;++i) {
-                GmfGetLin(inm,GmfTriangles,&iv[0],&iv[1],&iv[2],&lab);
-                assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv && iv[2]>0 && iv[2]<=nv);
-                for(int j=0;j<3;++j)
-                    if(!vertices[iv[j]-1].lab) {
-                        vertices[iv[j]-1].lab=1;
-                        kmv++;
-                    }
-                for (int j=0;j<3;++j) iv[j]--;
-                this->be(i).set(this->vertices,iv,lab);
-                mesb += this->be(i).mesure();
+       
+        if(nt) {
+            GmfGotoKwd(inm,GmfTetrahedra);
+            for(int i=0;i<nTet;++i) {
+                GmfGetLin(inm,GmfTetrahedra,&iv[0],&iv[1],&iv[2],&iv[3],&lab);
+                assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv && iv[2]>0 && iv[2]<=nv && iv[3]>0 && iv[3]<=nv);
+                for (int j=0;j<4;j++) iv[j]--;
+                this->elements[i].set(vertices,iv,lab);
+                mes += this->elements[i].mesure();
             }
-            if(kmv&& verbosity>1) cout << "    Aucun label Hack (FH)  ??? => 1 sur les triangle frontiere "<<endl;
+            
         }
-        else {
-            mesb=0;
+            // read triangles (boundary element mesh3)
+        if(nbe) {
             GmfGotoKwd(inm,GmfTriangles);
-            for(int i=0;i<nbe;++i) {
-                GmfGetLin(inm,GmfTriangles,&iv[0],&iv[1],&iv[2],&lab);
-                assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv && iv[2]>0 && iv[2]<=nv);
-                for (int j=0;j<3;++j) iv[j]--;
-                this->be(i).set(this->vertices,iv,lab);
-                mesb += this->be(i).mesure();
+            mesb=0;
+            if(mnlab==0 && mxlab==0) {
+                int kmv=0;
+                
+                for(int i=0;i<nbe;++i) {
+                    GmfGetLin(inm,GmfTriangles,&iv[0],&iv[1],&iv[2],&lab);
+                    assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv && iv[2]>0 && iv[2]<=nv);
+                    for(int j=0;j<3;++j)
+                        if(!vertices[iv[j]-1].lab) {
+                            vertices[iv[j]-1].lab=1;
+                            kmv++;
+                        }
+                    for (int j=0;j<3;++j) iv[j]--;
+                    this->be(i).set(this->vertices,iv,lab);
+                    mesb += this->be(i).mesure();
+                }
+                if(kmv&& verbosity>1) cout << "    Aucun label Hack (FH)  ??? => 1 sur les triangle frontiere "<<endl;
+            }
+            else {
+                for(int i=0;i<nbe;++i) {
+                    GmfGetLin(inm,GmfTriangles,&iv[0],&iv[1],&iv[2],&lab);
+                    assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv && iv[2]>0 && iv[2]<=nv);
+                    for (int j=0;j<3;++j) iv[j]--;
+                    this->be(i).set(this->vertices,iv,lab);
+                    mesb += this->be(i).mesure();
+                }
             }
         }
-        
         // the .mesh contains edges, Building the meshS
         // for this, surface vertices must be extract of the original vertice list and a mapping must be created between surface and volume vertices
-        
         if (nEdges>0) {
             meshS = new MeshS();
             // Number of Vertex in the surface
@@ -912,8 +918,7 @@ namespace Fem2D
                 meshS->borderelements[i].set(meshS->vertices,iv,lab);
                 meshS->mesb += meshS->borderelements[i].mesure();
             }
-        } // end typeMesh3==2
-        
+        }
         if(verbosity>1 && (meshS) )
             cout << "  -- MeshS(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
             << ", Triangle elts:= " << meshS->nt << ", num vertice:= " << meshS->nv << ", num edges boundaries:= " << meshS->nbe << endl;
@@ -935,11 +940,6 @@ namespace Fem2D
         for (int k=0; k<nv; k++) {
             const  Vertex & P = this->vertices[k];
             f << P.x <<P.y << P.z << P.lab ;
-        }
-        
-        if(nt==0) {
-            cerr << " Impossible to save a Mesh3 with no Tetrahedrons, the mesh type is MeshS" << endl;
-            ffassert(0);
         }
         
         for (int k=0; k<nt; k++) {
@@ -974,38 +974,46 @@ namespace Fem2D
         ffassert( s== Gsbegin);
         f >> nv >> nt >> nbe;
         if(verbosity>2)
-            cout << " GRead : nv " << nv << " " << nt << " " << nbe << endl;
-        if(nt==0) {
-            cerr << " Impossible to create a Mesh3 with no Tetrahedrons, the mesh type is MeshS" << endl;
-            ffassert(0);
+           cout << " GRead : nv " << nv << " " << nt << " " << nbe << endl;
+       // check the input mesh file format
+       if(nv==0) {
+           cerr << " ERROR: The mesh file doesn't contain vertices" << endl;
+           ffassert(0);
+       }
+       if(verbosity && nt==0 && nbe==0)
+           cerr << " WARNING!!! The mesh file just contains a set of vertices" << endl;
+           
+        if(nt==0 && nbe) {
+            cerr << " ERROR!!! The old SURFACE mesh3 is obselete, please use meshS type" << endl;
+         ffassert(0);
         }
         
         this->vertices = new Vertex[nv];
-        this->elements = new Element [nt];
-        this->borderelements = new BorderElement[nbe];
+        if (nt) this->elements = new Element [nt];
+        if (nbe) this->borderelements = new BorderElement[nbe];
         for (int k=0; k<nv; k++) {
             Vertex & P = this->vertices[k];
             f >> P.x >>P.y >> P.z >> P.lab ;
         }
         mes=0.;
         mesb=0.;
-        
-        for (int k=0; k<nt; k++) {
-            int i[4],lab;
-            Element & K(this->elements[k]);
-            f >> i[0] >> i[1] >> i[2] >> i[3] >> lab;
-            Addr(i,4,offset);
-            K.set(this->vertices,i,lab);
-            mes += K.mesure();
-        }
-        for (int k=0; k<nbe; k++) {
-            int i[3],lab;
-            BorderElement & K(this->borderelements[k]);
-            f >> i[0] >> i[1] >> i[2]  >> lab;
-            Addr(i,3,offset);
-            K.set(this->vertices,i,lab);
-            mesb += K.mesure();
-            
+        if (nt)
+            for (int k=0; k<nt; k++) {
+                int i[4],lab;
+                Element & K(this->elements[k]);
+                f >> i[0] >> i[1] >> i[2] >> i[3] >> lab;
+                Addr(i,4,offset);
+                K.set(this->vertices,i,lab);
+                mes += K.mesure();
+            }
+        if (nbe)
+            for (int k=0; k<nbe; k++) {
+                int i[3],lab;
+                BorderElement & K(this->borderelements[k]);
+                f >> i[0] >> i[1] >> i[2]  >> lab;
+                Addr(i,3,offset);
+                K.set(this->vertices,i,lab);
+                mesb += K.mesure();
         }
         f >> s;
         ffassert(s== Gsend);
@@ -1020,14 +1028,22 @@ namespace Fem2D
         if(verbosity>2)
             cout << " GRead : nv " << nv << " " << nt << " " << nbe << endl;
         
-        if(nt==0) {
-            cerr << " Impossible to create a Mesh3 with no Tetrahedrons, the mesh type is MeshS" << endl;
+        // check the input mesh file format
+        if(nv==0) {
+            cerr << " ERROR: The mesh file doesn't contain vertices" << endl;
+            ffassert(0);
+        }
+        if(verbosity && nt==0 && nbe==0)
+            cerr << " WARNING!!! The mesh file just contains a set of vertices" << endl;
+        
+        if(nt==0 && nbe) {
+            cerr << " ERROR!!! The old SURFACE mesh3 is obselete, please use meshS type" << endl;
             ffassert(0);
         }
         
         this->vertices = new Vertex[nv];
-        this->elements = new Element [nt];
-        this->borderelements = new BorderElement[nbe];
+        if (nt) this->elements = new Element [nt];
+        if (nbe) this->borderelements = new BorderElement[nbe];
         for (int k=0; k<nv; k++) {
             Vertex & P = this->vertices[k];
             f >> P.x >>P.y >> P.z >> P.lab ;
@@ -1035,9 +1051,7 @@ namespace Fem2D
         mes=0.;
         mesb=0.;
         
-        if(nt != 0)
-        {
-            
+        if (nt)
             for (int k=0; k<nt; k++) {
                 int i[4],lab;
                 Element & K(this->elements[k]);
@@ -1046,18 +1060,17 @@ namespace Fem2D
                 K.set(this->vertices,i,lab);
                 mes += K.mesure();
                 err += K.mesure() <0;
-                
             }
-        }
-        for (int k=0; k<nbe; k++) {
-            int i[3],lab;
-            BorderElement & K(this->borderelements[k]);
-            f >> i[0] >> i[1] >> i[2]  >> lab;
-            Addr(i,3,offset);
-            K.set(this->vertices,i,lab);
-            mesb += K.mesure();
-            
-        }
+        if (nbe)
+            for (int k=0; k<nbe; k++) {
+                int i[3],lab;
+                BorderElement & K(this->borderelements[k]);
+                f >> i[0] >> i[1] >> i[2]  >> lab;
+                Addr(i,3,offset);
+                K.set(this->vertices,i,lab);
+                mesb += K.mesure();
+            }
+        
         if(err!=0)
         {
             cerr << " Mesh3::readmsh : sorry bad mesh. Number of negative Tet " << err << endl;
@@ -1344,6 +1357,19 @@ namespace Fem2D
         elements = tt;
         borderelements = bb;
         
+        // check the input mesh file format
+        if(nv==0) {
+            cerr << " ERROR: The mesh file doesn't contain vertices" << endl;
+            ffassert(0);
+        }
+        if(verbosity && nt==0 && nbe==0)
+            cerr << " WARNING!!! The mesh file just contains a set of vertices" << endl;
+        
+        if(nt==0 && nbe) {
+            cerr << " ERROR!!! The old SURFACE mesh3 is obselete, please use meshS type" << endl;
+            ffassert(0);
+        }
+      
         mes=0.;
         mesb=0.;
         
@@ -1355,51 +1381,17 @@ namespace Fem2D
         
         //  Add FH to be consitant we all constructor ...  July 09
         BuildBound();
-        
-        if(nt==0) {
-            cerr << " Impossible to create a Mesh3 with no Tetrahedrons, if you want create a surface mesh, the mesh type is MeshS " << endl;
-            ffassert(0);exit(1);
+        if(nt && nbe) {
+            BuildAdj();
+            Buildbnormalv();
+            BuildjElementConteningVertex();
         }
-     
-        BuildAdj();
-        Buildbnormalv();
-        BuildjElementConteningVertex();
         //  end add
         if(verbosity>1)
             cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
         
         assert(mes>=0.);
     }
-    
-    /* Mesh3::Mesh3(int nnv, int nnbe, Vertex3 *vv, Triangle3 *bb)
-     {
-     
-     typeMesh3=0;
-     int nvS = nnv;
-     int ntS = nnbe;
-     
-     Vertex3* vS = new Vertex3[nnv];;
-     
-     TriangleS* tS = new TriangleS[nnbe];
-     TriangleS *ttS = tS;
-     
-     for (int i = 0; i < nnv; i++) {
-     vS[i].x = vv[i].x;
-     vS[i].y = vv[i].y;
-     vS[i].z = vv[i].z;
-     vS[i].lab = vv[i].lab;
-     }
-     int iv[3];
-     for (int i = 0; i < nnbe; i++) {
-     const Triangle3& K(bb[i]);
-     for(int jj=0; jj<3; jj++)
-     iv[jj] = &K[jj] - vv;
-     (ttS++)->set(vS, iv, K.lab);
-     }
-     
-     meshS = new MeshS(nvS, ntS, vS, tS);
-     
-     }*/
     
     
     int  signe_permutation(int i0,int i1,int i2,int i3)
@@ -1417,7 +1409,6 @@ namespace Fem2D
     // new version ...
     int  WalkInTetn(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt, R3 & offset)
     {
-        int ncas=0 ;
         const R eps = 1e-12;
         const R epsb = 1e-10;
         const R epsedge = 1e-9;
