@@ -1578,9 +1578,9 @@ AC_ARG_ENABLE(download-arpack,AC_HELP_STRING([--enable-download_arpack],[force t
 ff_arpack_ok=no
 ff_save_libs="$LIBS"
 ff_arpack_libs=
-if test "$ff_blas_ok" = yes 
+if test "$ff_blas_ok" = yes ;
 then
-    if test -a "$enable_download_arpack" != yes ; then
+    if test "$enable_download_arpack" != yes ; then
 	# User-specified location
 	AC_ARG_WITH(arpack,
 	[  --with-arpack=library	Use a specific version of Arpack],
