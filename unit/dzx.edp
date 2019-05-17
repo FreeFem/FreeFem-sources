@@ -1,0 +1,36 @@
+load "msh3"
+load "Element_P3"
+include "test.idp"
+
+cout << "dzx" << endl;
+real t;
+
+mesh3 Th = cube(10, 10, 10);
+fespace Uh(Th, P2);
+Uh u, du;
+Uh dxerr;
+
+u = x;
+t = clock();
+du = dzx(u);
+t = clock() - t;
+cout << IND << t << endl;
+test(du[].min < HWERROR);
+test(du[].max < HWERROR);
+
+t = clock();
+du = dzx(u);
+t = clock() - t;
+cout << IND << t << endl;
+test(du[].min < HWERROR);
+test(du[].max < HWERROR);
+
+Uh uu = x*y + x + y + 1;
+
+t = clock();
+du = dz(uu);
+t = clock() - t;
+cout << IND << t << endl;
+Uh dxerror = du;
+test(dxerror[].min < HWERROR);
+test(dxerror[].max < HWERROR);
