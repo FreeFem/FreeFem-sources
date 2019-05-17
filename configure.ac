@@ -1611,7 +1611,6 @@ then
 	if test "$ff_arpack_ok" = yes
 	then
 	    AC_FF_ADDWHERELIB(arpack,$ff_arpack_libs,)
-	    echo  arpack LD "'$ff_arpack_libs'"  >>$ff_where_lib_conf
 	fi
     fi
     # If all else fails, download!
