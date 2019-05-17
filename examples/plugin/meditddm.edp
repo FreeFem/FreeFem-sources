@@ -1,6 +1,7 @@
 // meditddm.edp
 load "medit"
-
+load "msh3"
+load "shell"
 /********************************************
  Initial Problem:
 Resolution of the following EDP:
@@ -11,7 +12,7 @@ We find the solution $u$ in solving two EDP defined on domain $\Omega$ and $\Ome
 This solution is vizualize with ffmedit 
 *********************************************/
 verbosity=3;
-
+{
 border Gamma(t=0,2*pi){x=cos(t); y=sin(t); label=1;};
 border Gamma1(t=0,2*pi){x=2*cos(t); y=2*sin(t); label=2;};
 border Gamma2(t=0,2*pi){x=0.5*cos(t); y=0.5*sin(t); label=3;};
@@ -48,3 +49,26 @@ Lap2dOmega1;
 
 // vizualisation of solution of the initial problem
 medit("solution",Th,us,Th1,u1,order=1,meditff="ffmedit",save="testsavemedit.solb");	
+// 
+}
+{
+	mesh3 Th=cube(10,10,10);
+	fespace Vh(Th,P1);
+
+	Vh u= x+2*y+3*z;
+	savemesh(Th,"meditcube.meshb");
+	savesol("meditcube.solb",Th,u,order=1);
+}
+{
+mesh3 Th=readmesh3("meditcube.meshb");
+fespace Vh(Th,P1);
+Vh u;
+verbosity=99;
+u[]=readsol("meditcube.solb");
+cout << u[].max << " " << u[].min << endl;
+assert(abs(u[].max-6) <1e-6);
+plot(u);
+unlink("meditcube.meshb");
+unlink("meditcube.solb");
+
+}
