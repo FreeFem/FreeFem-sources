@@ -1,51 +1,55 @@
 load "msh3"
-load "Element_P3"
 include "test.idp"
 
-cout << "dy" << endl;
+cout << "dzy" << endl;
 real t;
 
-mesh Th = square(10, 10);
+mesh3 Th = cube(10, 10, 10);
 fespace Uh(Th, P2);
 Uh u, du;
 Uh dxerr;
 
 u = x;
 t = clock();
-du = dy(u);
+du = dzy(u);
 t = clock() - t;
 cout << IND << t << endl;
-test(du(0,0) == 0);
-
-t = clock();
-du = dy(u);
-t = clock() - t;
-cout << IND << t << endl;
-test(du[].min < HWERROR);
 test(du[].max < HWERROR);
+test(du[].min < HWERROR);
 
-fespace Uh1(Th, P2);
-Uh1 uu = x*y + x + y + 1;
-
+u = y;
 t = clock();
-Uh1 dxu = dy(uu);
+du = dzy(u);
 t = clock() - t;
 cout << IND << t << endl;
-Uh1 dxerror = dxu - (x+1);
+test(du[].max < HWERROR);
+test(du[].min < HWERROR);
+
+u = z;
+t = clock();
+du = dzy(u);
+t = clock() - t;
+cout << IND << t << endl;
+test(du[].max < HWERROR);
+test(du[].min < HWERROR);
+
+Uh uu = x*y + x + y + 1;
+
+t = clock();
+Uh dxu = dzy(uu);
+t = clock() - t;
+cout << IND << t << endl;
+Uh dxerror = dxu - 0;
 test((abs(0 - dxerror[].min)) < HWERROR);
 test((abs(0 - dxerror[].max)) < HWERROR);
 
-mesh3 Th3D = cube(4, 4, 4);
-
-fespace Uh3(Th3D, P2);
-Uh3 u3, du3, duerr;
-
-u3 = x*y*z + x*y + x*z + y*z + x + y + z + 1;
+Uh u3 = x*y*z + x*y + x*z + y*z + x + y + z + 1;
 
 t = clock();
-Uh3 dxu3 = dy(u3);
+Uh dxu3 = dzy(u3);
 t = clock() - t;
 cout << IND << t << endl;
-Uh3 duerror = dxu3 - (x*z+x+z+1);
+Uh duerror = dxu3 - (x + 1);
+cout << duerror[].max << "\t" << duerror[].min << endl;
 test(duerror[].max < HWERROR);
 test(duerror[].min < HWERROR);

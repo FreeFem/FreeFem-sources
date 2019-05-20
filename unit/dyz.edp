@@ -1,0 +1,55 @@
+load "msh3"
+include "test.idp"
+
+cout << "dyz" << endl;
+real t;
+
+mesh3 Th = cube(10, 10, 10);
+fespace Uh(Th, P2);
+Uh u, du;
+Uh dxerr;
+
+u = x;
+t = clock();
+du = dyz(u);
+t = clock() - t;
+cout << IND << t << endl;
+test(du[].max < HWERROR);
+test(du[].min < HWERROR);
+
+u = y;
+t = clock();
+du = dyz(u);
+t = clock() - t;
+cout << IND << t << endl;
+test(abs(du[].max) < HWERROR);
+test(abs(du[].min) < HWERROR);
+
+u = z;
+t = clock();
+du = dyz(u);
+t = clock() - t;
+cout << IND << t << endl;
+test(du[].max < HWERROR);
+test(du[].min < HWERROR);
+
+Uh uu = x*y + x + y + 1;
+
+t = clock();
+Uh dxu = dyz(uu);
+t = clock() - t;
+cout << IND << t << endl;
+Uh dxerror = dxu - 0;
+test((abs(0 - dxerror[].min)) < HWERROR);
+test((abs(0 - dxerror[].max)) < HWERROR);
+
+Uh u3 = x*y*z + x*y + x*z + y*z + x + y + z + 1;
+
+t = clock();
+Uh dxu3 = dyz(u3);
+t = clock() - t;
+cout << IND << t << endl;
+Uh duerror = dxu3 - (x + 1);
+cout << duerror[].max << "\t" << duerror[].min << endl;
+test(duerror[].max < HWERROR);
+test(duerror[].min < HWERROR);

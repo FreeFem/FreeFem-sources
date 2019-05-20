@@ -2,7 +2,7 @@ load "msh3"
 load "Element_P3"
 include "test.idp"
 
-cout << "dzx" << endl;
+cout << "dxz" << endl;
 real t;
 
 mesh3 Th = cube(10, 10, 10);
@@ -12,7 +12,7 @@ Uh dxerr;
 
 u = x;
 t = clock();
-du = dzx(u);
+du = dxz(u);
 t = clock() - t;
 cout << IND << t << endl;
 test(du[].min < HWERROR);
@@ -20,7 +20,15 @@ test(du[].max < HWERROR);
 
 u = y;
 t = clock();
-du = dzx(u);
+du = dxz(u);
+t = clock() - t;
+cout << IND << t << endl;
+test(du[].min < HWERROR);
+test(du[].max < HWERROR);
+
+u = z;
+t = clock();
+du = dxz(u);
 t = clock() - t;
 cout << IND << t << endl;
 test(du[].min < HWERROR);
@@ -29,21 +37,20 @@ test(du[].max < HWERROR);
 Uh uu = x*y + x + y + 1;
 
 t = clock();
-du = dzx(uu);
+Uh dxxu = dxz(uu);
 t = clock() - t;
 cout << IND << t << endl;
-Uh dxerror = du;
-test(dxerror[].min < HWERROR);
-test(dxerror[].max < HWERROR);
+Uh dxxerror = dxxu - 0;
+test(dxxerror[].min < HWERROR);
+test(dxxerror[].max < HWERROR);
 
-fespace Uh2(Th, P2);
-Uh2 u3 = x*y*z + x*y + x*z + y*z + x + y + z + 1;
+Uh u3 = x*y*z + x*y + x*z + y*z + x + y + z + 1;
 
 t = clock();
-Uh2 dzxu = dzx(u3);
+Uh dxzu3 = dxz(u3);
 t = clock() - t;
 cout << IND << t << endl;
-Uh2 duerror = dzxu - (y + 1);
-cout << duerror[].min << "\t" << duerror[].max << endl;
-test(duerror[].max < HWERROR);
-test(duerror[].min < HWERROR);
+dxerr = dxzu3 - (y + 1);
+cout << dxerr[].max << "\t" << dxerr[].min << endl;
+test(dxerr[].max < HWERROR);
+test(dxerr[].min < HWERROR);
