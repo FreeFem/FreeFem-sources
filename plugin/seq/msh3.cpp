@@ -6905,6 +6905,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     delete gtree;
     
     if(Th.meshS) {
+        if(verbosity>3)
         cout << "building of the meshS after trunc on meshS"<<endl;
         Tht->BuildMeshS();
     }
@@ -7479,11 +7480,12 @@ AnyType ExtractMesh_Op::operator () (Stack stack)  const {
     // a trier les tableaux d'entier
     
     int nv = 0, nt = 0, ns = 0;
-    
+    if(verbosity>9)
+    {
     cout << " labelface.N()  " << labelface.N() << endl;
     for (int ii = 0; ii < labelface.N(); ii++)
         cout << ii << " " << labelface[ii] << endl;
-    
+    }
     KN<int> takevertex(Th.nv, -1);
     KN<int> takebe(Th.nbe, -1);
     
@@ -7683,7 +7685,7 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
     for (int i = 0; i < tab->n; i++) {
         const Mesh3 &Th3(*tab->operator [] (i));
         th0 = &Th3;
-        if (verbosity > 1) {cout << " determination of hmin : GluMesh3D + " << Th3.nv << " " << Th3.nt << " " << Th3.nbe << endl;}
+        if (verbosity > 4) {cout << " determination of hmin : GluMesh3D + " << Th3.nv << " " << Th3.nt << " " << Th3.nbe << endl;}
         nbt += Th3.nt;
         nbvx += Th3.nv;
         nbex += Th3.nbe;
@@ -7708,7 +7710,7 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
         }
     }
     
-    if (verbosity > 1) {cout << "      - hmin =" << hmin << " ,  Bounding Box: " << Pn << " " << Px << endl;}
+    if (verbosity > 2) {cout << "      - hmin =" << hmin << " ,  Bounding Box: " << Pn << " " << Px << endl;}
     
     // probleme memoire
     Vertex3 *v = new Vertex3[nbvx];
@@ -7725,7 +7727,7 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
     // int *NumSom= new int[nbvx];
     
     // VERSION morice
-    if (verbosity > 1) {cout << " creation of : BuildGTree" << endl;}
+    if (verbosity > 4) {cout << " creation of : BuildGTree" << endl;}
     
     EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v, Pn, Px, 0);
     
@@ -7733,9 +7735,9 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
     for (int i = 0; i < tab->n; i++) {
         const Mesh3 &Th3(*tab->operator [] (i));
         
-        if (verbosity > 1) {cout << " loop over mesh for create new mesh " << endl;}
+        if (verbosity > 4) {cout << " loop over mesh for create new mesh " << endl;}
         
-        if (verbosity > 1) {cout << " GluMesh3D + " << Th3.nv << " " << Th3.nt << " " << Th3.nbe << endl;}
+        if (verbosity > 1) {cout << " -- GluMesh3D + " << Th3.nv << " " << Th3.nt << " " << Th3.nbe << endl;}
         
         
         for (int ii = 0; ii < Th3.nv; ii++) {
@@ -7762,7 +7764,7 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
         }
     }
     
-    if (verbosity > 1) {cout << " creation of : BuildGTree for border elements" << endl;}
+    if (verbosity > 4) {cout << " creation of : BuildGTree for border elements" << endl;}
     
     Vertex3 *becog = new Vertex3[nbex];
     
@@ -7803,19 +7805,17 @@ Mesh3*GluMesh3tab (KN<pmesh3> *const &tab, long const &lab_delete) {
     delete gtree_be;
     delete [] becog;
     
-    if (verbosity > 2) {cout << " nbv=" << nbv << endl;}
-    
-    if (verbosity > 2) {cout << " nbvx=" << nbvx << endl;}
-    
-    if (verbosity > 2) {cout << " nbt=" << nbt << endl;}
-    
-    if (verbosity > 2) {cout << " nbe=" << nbe << endl;}
-    
-    if (verbosity > 2) {cout << " nbex=" << nbex << endl;}
+    if (verbosity > 4) {
+        cout << "     nbv=" << nbv << endl;
+        cout << "     nbvx=" << nbvx << endl;
+        cout << "     nbt=" << nbt << endl;
+        cout << "     nbe=" << nbe << endl;
+        cout << "     nbex=" << nbex << endl;}
     
     if (verbosity > 1) {
         cout << "     Nb of glu3D  point " << nbvx - nbv;
         cout << "     Nb of glu3D  Boundary faces " << nbex - nbe << endl;
+        
     }
     
     Mesh3 *mpq = new Mesh3(nbv, nbt, nbe, v, t, b);
