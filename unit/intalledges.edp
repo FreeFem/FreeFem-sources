@@ -1,0 +1,30 @@
+include "test.idp"
+
+cout << "intalledges" << endl;
+real t;
+mesh Th = square(1, 1);
+real edge;
+
+t = clock();
+edge = intalledges(Th)(1);
+t = clock() - t;
+test(edge == 4 + 2 * sqrt(2));
+cout << IND << t << endl;
+
+mesh Th2 = square(2, 2);
+
+t = clock();
+edge = intalledges(Th2)(1);
+t = clock() - t;
+cout << edge << endl;
+test(abs(edge - (8 + 4 * sqrt(2))) < HWERROR);
+cout << IND << t << endl;
+
+Th2 = square(10, 10);
+
+t = clock();
+edge = intalledges(Th2)(1);
+t = clock() - t;
+cout << edge << endl;
+test(abs(edge - (40 + 20 * sqrt(2))) < HWERROR);
+cout << IND << t << endl;
