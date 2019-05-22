@@ -1,0 +1,76 @@
+include "test.idp"
+
+cout << "on" << endl;
+real t;
+
+border C(t=0, 2*pi){x=cos(t); y=sin(t);}
+mesh Th = buildmesh(C(5));
+fespace Vh(Th, P1);
+Vh u, v;
+
+func f= x*y;
+real cpu=clock();
+
+t = clock();
+solve Poisson(u, v, solver=LU)
+    = int2d(Th)(
+          dx(u)*dx(v)
+        + dy(u)*dy(v)
+    )
+    - int2d(Th)(
+          f*v
+    )
+    + on(C, u=0);
+t = clock() - t;
+cout << IND << t << endl;
+real bound = int1d(Th, C)(u);
+test(abs(0 - bound) < HWERROR);
+t = clock();
+solve Poisson2(u, v, solver=LU)
+    = int2d(Th)(
+          dx(u)*dx(v)
+        + dy(u)*dy(v)
+    )
+    - int2d(Th)(
+          f*v
+    )
+    + on(C, u=1);
+    ;
+bound = int1d(Th, C)(u)/int1d(Th, C)(1);
+test(abs(bound - 1) < HWERROR);
+t = clock() - t;
+cout << IND << t << endl;
+cout << "CPU time = " << (clock()-cpu) << endl;
+
+// Mesh
+border aaa(t=0, 1){x=t; y=0; label=1;}
+border bbb(t=0, 0.5){x=1; y=t; label=2;}
+border ccc(t=0, 0.5){x=1-t; y=0.5; label=3;}
+border ddd(t=0.5, 1){x=0.5; y=t; label=4;}
+border eee(t=0.5, 1){x=1-t; y=1; label=5;}
+border fff(t=0, 1){x=0; y=1-t; label=6;}
+mesh Th2 = buildmesh(aaa(6) + bbb(4) + ccc(4) +ddd(4) + eee(4) + fff(6));
+mesh Th3 = movemesh(Th2,[x+1.1, y]);
+
+func f2 = 1;
+func g = 0;
+fespace Wh(Th2, P1);
+Wh uu, vv, zero;
+uu = 0;
+zero = 0;
+int i = 0;
+t = clock();
+problem Probem1(uu, vv, solver=CG, init=i, eps=-1.0e-6)
+	= int2d(Th2)(
+		  dx(uu)*dx(vv)
+		+ dy(uu)*dy(vv)
+	)
+	+ int2d(Th)(
+		  vv*f2
+	)
+	+ on(1, 2, 3, 4, 5, 6, uu=g)
+	;
+real boundpb = int1d(Th2)(u)/int1d(Th2)(1);
+t = clock() - t;
+cout << IND << t << endl;
+test(abs(1 - boundpb) < HWERROR);
