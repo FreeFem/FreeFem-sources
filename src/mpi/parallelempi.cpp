@@ -434,6 +434,8 @@ struct MPIrank {
 	    aa->BuildGTree();
             a=aa;
 	  }
+    delete a->meshS;
+    const_cast<Fem2D::Mesh3*>(a)->meshS = nullptr;
 	delete buf;
 	return *this;
   }
