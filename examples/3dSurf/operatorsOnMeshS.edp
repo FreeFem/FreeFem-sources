@@ -1,0 +1,28 @@
+load "msh3" 
+load "medit"
+
+// Parameters
+int nn = 10; // Mesh quality
+//example of operator for meshS 
+
+// read the imput mesh, vertice/tetra/triangle/edge 
+mesh3 Th3 = cube(nn,nn,nn);
+Th3 = buildSurface(Th3); // build the surface mesh 
+meshS ThS = Th3.Gamma;
+//split the extrating surface
+//plot(Th3);
+meshS ThSsplit = trunc(ThS, 1, split=3);
+mesh3 Th3split = trunc(Th3, 1, split=2);
+savemesh(Th3split, "Th3split.mesh");
+
+meshS Th3splitG = Th3split.Gamma;
+
+medit("buildFromMesh3Splited",Th3splitG);
+medit("buildFromMesh3Initial",ThSsplit);
+
+mesh3 Th3mv = movemesh(Th3,[x+1,y/2,z+y]);
+meshS Th3mvG = Th3mv.Gamma;
+meshS ThSmv = movemesh(ThS,[x+1,y/2,z+y]);
+
+medit("Th3mvG",Th3mvG);
+medit("ThSmv",ThSmv);

@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,4.2,frederic.hecht@sorbonne-universite.fr,freefem++)
+AC_INIT(FreeFem++,4.2-1,frederic.hecht@sorbonne-universite.fr,FeeFEM++)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -35,9 +35,8 @@ AM_INIT_AUTOMAKE(1.11 dist-zip foreign subdir-objects)
 
 if test "$enable_ffcs" != yes
 then
-    if test `echo $am__api_version|awk '{if($1>1.13)print "ok";else print "no"}'` != ok
-    then
-	AC_MSG_ERROR([Automake version needs to be 1.13 or later to enable "make check"])
+    if test "$am__api_version" \< 1.13 ;   then
+	AC_MSG_ERROR([Automake version $am__api_version needs to be 1.13 or later to enable "make check"])
     fi
 fi
 
@@ -56,7 +55,7 @@ m4_define([AC_FF_ADDWHERELIB],
             ff_where_lib_conf_$1=1
 	    ff_where_lib_$1="$2"
 	    ff_where_inc_$1="$3"
-	    AC_MSG_NOTICE([    ++ add $1 : $2 $3 in  $ff_where_lib_conf "])
+	    AC_MSG_NOTICE([    ++ add $1 : $2 ;  $3 in  $ff_where_lib_conf "])
 	else
 	    AC_MSG_NOTICE([    -- do not add $1 : $2 $3 in  $ff_where_lib_conf "])
         fi
@@ -960,6 +959,7 @@ AC_ARG_WITH(petsc,[  --with-petsc=/usr/local/petsc/conf/petscvariables   --witho
 # /usr/local/petsc/conf/petscvariables
 #/usr/local/ff++/petsc/lib/petsc/conf/petscvariables
 ff_petsc_ok=no
+ff_slepc_ok=no
 ## echo --$with_petsc--
 if test "$with_petsc" != no -a  $ff_mpi = yes; then
     for d in "$with_petsc" "${prefix}/ff-petsc/real/lib" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
@@ -974,7 +974,7 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
 				PETSC_MPIRUN=`echo "$PETSC_MPIRUN" | awk '{gsub(" --oversubscribe", ""); print}'`	#remove --oversubscribe
 			AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]);
-
+           
 		    test  "$PETSC_SCALAR" = "real" && test  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_MPIRUN"` `which "$MPIRUN"`
 		    if test "$?"  -eq 0 ; then
 		        AC_FF_PETSC_WHERELIB_BASIC(petsc,$ffconfpetsc)
@@ -995,7 +995,10 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		        AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetsc)
   			    AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetsc)
 			    AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetsc)
-                
+                if test -f $d/libslepc.$ff_suffix_dylib ; then
+				   ff_slepc_ok=yes
+			       AC_FF_ADDWHERELIB(slepc,$d/libslepc.$ff_suffix_dylib,$ff_where_inc_petsc)				
+				fi 
 		    else
 			 AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN or $PETSC_SCALAR != real ." ]);
 		    fi
@@ -1011,14 +1014,15 @@ fi
 
 
 if test "$ff_petsc_ok" != no ;   then
-    AC_MSG_NOTICE([ with petsc  $ff_petsc_ok])
+    AC_MSG_NOTICE([ with petsc  $ff_petsc_ok,  with slepc $ff_slepc_ok ])
 else
-    AC_MSG_NOTICE([ without petsc ***** ])
+    AC_MSG_NOTICE([ without petsc, slepc  ***** ])
 fi
 
 ## PETSc complex
 AC_ARG_WITH(petsc_complex,[  --with-petsc_complex=/usr/local/petsc/conf/petscvariables   --without-petsc_complex  ])
 ff_petsccomplex_ok=no
+ff_slepccomplex_ok=no
 if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
     for d in "$with_petsc_complex" "${prefix}/ff-petsc/complex/lib" /usr/local/ff++/petsc-complex/lib ;do
 	for dd in ""  "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
@@ -1049,6 +1053,10 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
             AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetscc)
+            if test -f $d/libslepc.$ff_suffix_dylib ; then
+				   ff_slepccomplex_ok=yes
+			       AC_FF_ADDWHERELIB(slepccomplex,$d/libslepc.$ff_suffix_dylib,$ff_where_inc_petsccomplex)				
+			fi 
 
 			else
 			 AC_MSG_NOTICE([" Warning PETSC complex MPI and FF++ MPI not the same: $PETSC_COMPLEX_MPIRUN != $MPIRUN or $PETSC_COMPLEX_SCALAR != complex ." ]);
@@ -1060,7 +1068,7 @@ fi
 
 
 if test "$ff_petsccomplex_ok" != no ;   then
-    AC_MSG_NOTICE([ with petsc complex  $ff_petsccomplex_ok])
+    AC_MSG_NOTICE([ with petsc complex  $ff_petsccomplex_ok, with slepc complex $ff_slepccomplex_ok ])
 else
     AC_MSG_NOTICE([ without petsc complex ***** ])
 fi
@@ -1570,9 +1578,9 @@ AC_ARG_ENABLE(download-arpack,AC_HELP_STRING([--enable-download_arpack],[force t
 ff_arpack_ok=no
 ff_save_libs="$LIBS"
 ff_arpack_libs=
-if test "$ff_blas_ok" = yes 
+if test "$ff_blas_ok" = yes ;
 then
-    if test -a "$enable_download_arpack" != yes ; then
+    if test "$enable_download_arpack" != yes ; then
 	# User-specified location
 	AC_ARG_WITH(arpack,
 	[  --with-arpack=library	Use a specific version of Arpack],
@@ -1603,7 +1611,6 @@ then
 	if test "$ff_arpack_ok" = yes
 	then
 	    AC_FF_ADDWHERELIB(arpack,$ff_arpack_libs,)
-	    echo  arpack LD "'$ff_arpack_libs'"  >>$ff_where_lib_conf
 	fi
     fi
     # If all else fails, download!
@@ -2264,6 +2271,7 @@ AC_OUTPUT(
     examples/bug/Makefile
     examples/other/Makefile
     examples/3d/Makefile
+    examples/3dSurf/Makefile 
 )
 
 AC_MSG_NOTICE([  freefem++ used  download : $enable_download ])
@@ -2273,6 +2281,7 @@ AC_MSG_NOTICE([	--  UMFPACK (sparse solver) $ff_umfpack_ok ])
 AC_MSG_NOTICE([	--  BLAS $ff_blas_ok ])
 AC_MSG_NOTICE([	--  with MPI             $ff_mpi])
 AC_MSG_NOTICE([		--  with PETSC $ff_petsc_ok  / PETSC complex   $ff_petsccomplex_ok ]);
+AC_MSG_NOTICE([		--  with SLEPC $ff_slepc_ok  / SLEPC complex   $ff_slepccomplex_ok ]);
 AC_MSG_NOTICE([		--  with hpddm  $enable_hpddm (need MPI & c++11 :  $ff_cxx11 ) ]);
 AC_MSG_NOTICE([		--  with htool  $enable_htool (need MPI & c++11 :  $ff_cxx11 ) ]);
 AC_MSG_NOTICE([	--  without libs  : $ff_unlib_plugin]);

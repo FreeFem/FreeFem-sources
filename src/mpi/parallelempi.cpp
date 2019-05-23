@@ -1,3 +1,25 @@
+/****************************************************************************/
+/* This file is part of FreeFem++.                                          */
+/*                                                                          */
+/* FreeFem++ is free software: you can redistribute it and/or modify        */
+/* it under the terms of the GNU Lesser General Public License as           */
+/* published by the Free Software Foundation, either version 3 of           */
+/* the License, or (at your option) any later version.                      */
+/*                                                                          */
+/* FreeFem++ is distributed in the hope that it will be useful,             */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of           */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            */
+/* GNU Lesser General Public License for more details.                      */
+/*                                                                          */
+/* You should have received a copy of the GNU Lesser General Public License */
+/* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
+/****************************************************************************/
+// SUMMARY : ...
+// LICENSE : LGPLv3
+// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+// AUTHORS : ...
+// E-MAIL  : ...
+
 #include <cstdint>
 #include <fstream>
 #include <iostream>
@@ -10,21 +32,20 @@
 using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
-// FH: I have move AFunction_ext.hpp  to fflib dir.
+// FH: I have move AFunction_ext.hpp to fflib dir.
 #include "AFunction_ext.hpp"
 // Add J. Morice for AFunction_ext.hpp
 #include "ufunction.hpp"
 using namespace std;
 #include "rgraph.hpp"
 #include "RNM.hpp"
-// after RNM   otherwise
-// trouble with index in RNM (I do no understander FH)
+// after RNM otherwise
+// trouble with index in RNM (I do no understande FH)
 #include <set>
 #include <vector>
 #include <map>
 
 #include "fem.hpp"
-
 
 #include "FESpacen.hpp"
 #include "FESpace.hpp"
@@ -46,97 +67,90 @@ using namespace std;
 #include "../fflib/ffapi.hpp"
 void ff_atend( void (*atendff)());
 
-
 #undef MPICH_SKIP_MPICXX
-#define  MPICH_SKIP_MPICXX
+#define MPICH_SKIP_MPICXX
 #undef MPICH_IGNORE_CXX_SEEK
 #define MPICH_IGNORE_CXX_SEEK
 #include <mpi.h>
 
-// Remark on mipich  MPI_Comm, MPI_Resquest, MPI_Group, MPI_Op are int
-//  => encapsulation
+// Remark: on mipich MPI_Comm, MPI_Resquest, MPI_Group, MPI_Op are int
+// => encapsulation
 
-//static long verbosity=1000;
-template<class MPI_type,int DIFF>
+//static long verbosity = 1000;
+template<class MPI_type, int DIFF>
 struct fMPI {
   MPI_type v;
-  operator  MPI_type &() {return v;}
-  operator  MPI_type *() {return &v;}
-  operator  MPI_type () const  {return v;}
+  operator MPI_type &() { return v; }
+  operator MPI_type *() { return &v; }
+  operator MPI_type () const { return v; }
 
-  // MPI_type * operator  &() {return &v;}
-  void operator=(const MPI_type vv) { v=vv;}
-  fMPI(const MPI_type vv=0) : v(vv){}
-  bool operator!=(MPI_type vv) const {return vv !=v;}
-  bool operator==(MPI_type vv) const {return vv ==v;}
-
+  // MPI_type * operator &() { return &v; }
+  void operator = (const MPI_type vv) { v=vv; }
+  fMPI(const MPI_type vv=0) : v(vv) {}
+  bool operator != (MPI_type vv) const { return vv != v; }
+  bool operator == (MPI_type vv) const { return vv == v; }
 };
 
-// the encapsulation for the for MPI type  (int on mpich )
-
-typedef fMPI<MPI_Comm,1> fMPI_Comm;
-typedef fMPI<MPI_Group,2> fMPI_Group;
-typedef fMPI<MPI_Request,3> fMPI_Request;
-typedef fMPI<MPI_Op,4> fMPI_Op;
-
-
-
+// the encapsulation for the for MPI type (int on mpich )
+typedef fMPI<MPI_Comm, 1> fMPI_Comm;
+typedef fMPI<MPI_Group, 2> fMPI_Group;
+typedef fMPI<MPI_Request, 3> fMPI_Request;
+typedef fMPI<MPI_Op, 4> fMPI_Op;
 // end of encapsulation ..
 
-// to send a sparse matrix we send header, line array ,colmun array, value array.
-//  end afer the fist resquest we need to do allocation.
-// so in this cas the communacatio is done in
+// to send a sparse matrix we send header, line array, colmun array, value array.
+// end afer the fist resquest we need to do allocation.
+// so in this cas the communication is done in
 // 2 step
 //    1 the header,
 //       alloc time
-//    2 the  message
-//  a couple request, pointer.
-//    Not use of IPROBE because probelem of wait.
+//    2 the message
+// a couple request, pointer.
+// Not use of IPROBE because probelem of wait.
 class MPIrank;
-class DoOnWaitMPI_Request ;
+class DoOnWaitMPI_Request;
 
-map<MPI_Request*,DoOnWaitMPI_Request *> ToDoOnWaitMPI_Request;
+map<MPI_Request*, DoOnWaitMPI_Request *> ToDoOnWaitMPI_Request;
 
 void GetPendingWait() ;
 
-
-template<class T> struct MPI_TYPE {static MPI_Datatype  TYPE(){return MPI_BYTE;}};;
-template<> struct MPI_TYPE<long>      {static MPI_Datatype  TYPE(){return MPI_LONG;}};
-template<> struct MPI_TYPE<int>      {static MPI_Datatype TYPE(){return MPI_INT;}};
-template<> struct MPI_TYPE<double>    {static MPI_Datatype TYPE(){return MPI_DOUBLE;}};
-template<> struct MPI_TYPE<char>    {static MPI_Datatype TYPE(){return MPI_BYTE;}};
+template<class T> struct MPI_TYPE { static MPI_Datatype TYPE(){ return MPI_BYTE; } };
+template<> struct MPI_TYPE<long> { static MPI_Datatype TYPE(){ return MPI_LONG; } };
+template<> struct MPI_TYPE<int> { static MPI_Datatype TYPE(){ return MPI_INT; } };
+template<> struct MPI_TYPE<double> { static MPI_Datatype TYPE(){ return MPI_DOUBLE; } };
+template<> struct MPI_TYPE<char> { static MPI_Datatype TYPE(){ return MPI_BYTE; } };
 
 #ifdef HAVE_MPI_DOUBLE_COMPLEX
-template<> struct MPI_TYPE<Complex>   {static MPI_Datatype TYPE(){return MPI_DOUBLE_COMPLEX;}};
+template<> struct MPI_TYPE<Complex> { static MPI_Datatype TYPE(){ return MPI_DOUBLE_COMPLEX; } };
 #endif
 template<class T> struct MPI_WHAT {};
-template<> struct MPI_WHAT<long>      {static const int WHAT=101;};
-template<> struct MPI_WHAT<double>    {static const int WHAT=102;};
-template<> struct MPI_WHAT<Complex>   {static const int WHAT=103;};
-template<> struct MPI_WHAT<KN<long> *>   {static const int WHAT=104;};
-template<> struct MPI_WHAT<KN<double>* >   {static const int WHAT=105;};
-template<> struct MPI_WHAT<KN<Complex>* >   {static const int WHAT=106;};
-template<> struct MPI_WHAT<KNM<long> *>   {static const int WHAT=107;};
-template<> struct MPI_WHAT<KNM<double>* >   {static const int WHAT=108;};
-template<> struct MPI_WHAT<KNM<Complex>* >   {static const int WHAT=109;};
+template<> struct MPI_WHAT<long> { static const int WHAT=101; };
+template<> struct MPI_WHAT<double> { static const int WHAT=102; };
+template<> struct MPI_WHAT<Complex> { static const int WHAT=103; };
+template<> struct MPI_WHAT<KN<long>* > { static const int WHAT=104; };
+template<> struct MPI_WHAT<KN<double>* > { static const int WHAT=105; };
+template<> struct MPI_WHAT<KN<Complex>* > { static const int WHAT=106; };
+template<> struct MPI_WHAT<KNM<long>* > { static const int WHAT=107; };
+template<> struct MPI_WHAT<KNM<double>* > { static const int WHAT=108; };
+template<> struct MPI_WHAT<KNM<Complex>* > { static const int WHAT=109; };
 
 template<class T> struct MPI_TAG {};
-template<> struct MPI_TAG<long>   {static const int TAG=5;};
-template<> struct MPI_TAG<double>    {static const int TAG=4;};
-template<> struct MPI_TAG<Complex >   {static const int TAG=6;};
-template<> struct MPI_TAG<KN<long>* >   {static const int TAG=11;};
-template<> struct MPI_TAG<KN<double>* >   {static const int TAG=12;};
-template<> struct MPI_TAG<KN<Complex>* >   {static const int TAG=13;};
-template<> struct MPI_TAG<KNM<long>* >   {static const int TAG=14;};
-template<> struct MPI_TAG<KNM<double>* >   {static const int TAG=15;};
-template<> struct MPI_TAG<KNM<Complex>* >   {static const int TAG=16;};
-template<> struct MPI_TAG<Mesh *>   {static const int TAG=1000;};
-template<> struct MPI_TAG<Mesh3 *>   {static const int TAG=1010;};
-template<> struct MPI_TAG<const Mesh *>   {static const int TAG=1000;};
-template<> struct MPI_TAG<const Mesh3 *>   {static const int TAG=1010;};
+template<> struct MPI_TAG<long> { static const int TAG=5; };
+template<> struct MPI_TAG<double> { static const int TAG=4; };
+template<> struct MPI_TAG<Complex > { static const int TAG=6; };
+template<> struct MPI_TAG<KN<long>* > { static const int TAG=11; };
+template<> struct MPI_TAG<KN<double>* > { static const int TAG=12; };
+template<> struct MPI_TAG<KN<Complex>* > { static const int TAG=13; };
+template<> struct MPI_TAG<KNM<long>* > { static const int TAG=14; };
+template<> struct MPI_TAG<KNM<double>* > { static const int TAG=15; };
+template<> struct MPI_TAG<KNM<Complex>* > { static const int TAG=16; };
+template<> struct MPI_TAG<Mesh* > { static const int TAG=1000; };
+template<> struct MPI_TAG<Mesh3* > { static const int TAG=1010; };
+template<> struct MPI_TAG<const Mesh* > { static const int TAG=1000; };
+template<> struct MPI_TAG<const Mesh3* > { static const int TAG=1010; };
 
-template<> struct MPI_TAG<Matrice_Creuse<double> *>   {static const int TAG=1020;};
-template<> struct MPI_TAG<Matrice_Creuse<Complex> *>   {static const int TAG=1030;};
+template<> struct MPI_TAG<Matrice_Creuse<double> *> { static const int TAG=1020; };
+template<> struct MPI_TAG<Matrice_Creuse<Complex> *> { static const int TAG=1030; };
 
 void f_initparallele(int &, char **&);
 void f_init_lgparallele();
@@ -144,650 +158,583 @@ void f_init_lgparallele();
 extern long mpirank ;
 extern long mpisize ;
 
-//  for syncro communication
-MPI_Request *  Syncro_block = reinterpret_cast<MPI_Request * > (1);
+// for syncro communication
+MPI_Request *Syncro_block = reinterpret_cast<MPI_Request* > (1);
 
 const size_t sizempibuf = 1024*320;
 
 template<class R>
-long  WSend( R * v,int l,int who,int tag,MPI_Comm comm,MPI_Request *rq)
-{
-  long ret=0;
-  MPI_Request rq0,*request=&rq0;
+long WSend (R *v, int l, int who, int tag, MPI_Comm comm, MPI_Request *rq) {
+  long ret = 0;
+  MPI_Request rq0, *request = &rq0;
   if(verbosity>100)
-    cout << mpirank<< " send to " << who << " tag " << tag << " " << rq << " " <<  comm << " syncro "<<  (rq == Syncro_block) <<endl;
-  if(rq == Syncro_block || rq == 0)
-    ret=MPI_Send((void *) v,l, MPI_TYPE<R>::TYPE() , who, tag,comm);
-  else
-    {
-      ret=MPI_Isend((void *) v,l, MPI_TYPE<R>::TYPE() , who, tag,comm,request);
-      *rq=*request;
-    }
-    return ret;
+    cout << mpirank << " send to " << who << " tag " << tag << " " << rq << " " << comm << " syncro " << (rq == Syncro_block) << endl;
+  if (rq == Syncro_block || rq == 0)
+    ret = MPI_Send((void *)v, l, MPI_TYPE<R>::TYPE(), who, tag, comm);
+  else {
+    ret = MPI_Isend((void *)v, l, MPI_TYPE<R>::TYPE(), who, tag, comm, request);
+    *rq = *request;
+  }
+  return ret;
 }
 
 template<class T>
-void CheckContigueKNM(const KNM_<T> &t)
-{
-    if( t.step != 1 && !t.IsVector1() ) {
-        cout<< " step= "<< t.step << " size " << t.N() << " " << & t[0] << " " << & t[1] << endl;
-        ExecError("Sorry the array is not contigue (step != 1) ");
-    }
+void CheckContigueKNM (const KNM_<T> &t) {
+  if (t.step != 1 && !t.IsVector1()) {
+    cout << " step = "<< t.step << " size " << t.N() << " " << &t[0] << " " << &t[1] << endl;
+    ExecError("Sorry the array is not contiguous (step != 1) ");
+  }
 }
 
 template<class T>
-void CheckContigueKN(const KN_<T> &t)
-{
-    if( t.step != 1 && t.N()>1) {
-	cout<< " step= "<< t.step << " size " << t.N() << " " << & t[0] << " " << & t[1] << endl;
-	ExecError("Sorry the array is not contigue (step != 1) ");
-    }
+void CheckContigueKN (const KN_<T> &t) {
+  if (t.step != 1 && t.N() > 1) {
+    cout<< " step = " << t.step << " size " << t.N() << " " << &t[0] << " " << &t[1] << endl;
+    ExecError("Sorry the array is not contiguous (step != 1) ");
+  }
 }
-
 
 template<>
-long  WSend<Complex> ( Complex * v,int n,int who,int tag,MPI_Comm comm,MPI_Request *rq)
-{
-  long ret=0;
-  MPI_Request rq0,*request=&rq0;
-  if(verbosity>100)
-    cout << mpirank<< " send to " << who << " tag " << tag << " " << rq << " " <<  comm << " syncro "<<  (rq == Syncro_block) << endl;
-  if(rq == Syncro_block || rq ==0)
-    {
+long WSend<Complex> (Complex *v, int n, int who, int tag, MPI_Comm comm, MPI_Request *rq) {
+  long ret = 0;
+  MPI_Request rq0, *request = &rq0;
+  if (verbosity > 100)
+    cout << mpirank << " send to " << who << " tag " << tag << " " << rq << " " << comm << " syncro "<< (rq == Syncro_block) << endl;
+  if (rq == Syncro_block || rq == 0) {
 #ifdef HAVE_MPI_DOUBLE_COMPLEX
-      ret=MPI_Send(reinterpret_cast<void*> (v) , n, MPI_DOUBLE_COMPLEX, who, tag,comm);
+    ret = MPI_Send(reinterpret_cast<void*>(v), n, MPI_DOUBLE_COMPLEX, who, tag, comm);
 #else
-      n *=2;
-      ret=  MPI_Send(reinterpret_cast<void*> (v), n, MPI_DOUBLE, who, tag,comm);
+    n *= 2;
+    ret = MPI_Send(reinterpret_cast<void*>(v), n, MPI_DOUBLE, who, tag, comm);
 #endif
-    }
-  else
-    {
+  } else {
 #ifdef HAVE_MPI_DOUBLE_COMPLEX
-      ret=MPI_Isend(reinterpret_cast<void*> (v) , n, MPI_DOUBLE_COMPLEX, who, tag,comm,request);
+    ret = MPI_Isend(reinterpret_cast<void*>(v), n, MPI_DOUBLE_COMPLEX, who, tag, comm, request);
 #else
-      n *=2;
-      ret=MPI_Isend(reinterpret_cast<void*> (v), n, MPI_DOUBLE, who, tag,comm,request);
-      n /= 2;
+    n *= 2;
+    ret = MPI_Isend(reinterpret_cast<void*>(v), n, MPI_DOUBLE, who, tag, comm, request);
+    n /= 2;
 #endif
-      if(rq) *rq=*request;
-      else MPI_Request_free(request);
-      }
+    if(rq) *rq = *request;
+    else MPI_Request_free(request);
+  }
   return ret;
 }
 
 template<class R>
-long  WRecv(R * v,int n,int who,int tag,MPI_Comm comm,MPI_Request *rq)
-{
+long WRecv (R *v, int n, int who, int tag, MPI_Comm comm, MPI_Request *rq) {
   MPI_Status status;
-  if(rq && (rq != Syncro_block))
-    return MPI_Irecv(reinterpret_cast<void*> (v),n, MPI_TYPE<R>::TYPE() , who, tag,comm,rq);
+  if (rq && (rq != Syncro_block))
+    return MPI_Irecv(reinterpret_cast<void*>(v), n, MPI_TYPE<R>::TYPE(), who, tag, comm, rq);
   else
-    return MPI_Recv(reinterpret_cast<void*> (v),n, MPI_TYPE<R>::TYPE() , who, tag,comm,&status);
+    return MPI_Recv(reinterpret_cast<void*>(v), n, MPI_TYPE<R>::TYPE(), who, tag, comm, &status);
 }
 
 template<>
-long  WRecv<Complex> (Complex * v,int n,int who,int tag,MPI_Comm comm,MPI_Request *rq)
-{
+long WRecv<Complex> (Complex *v, int n, int who, int tag, MPI_Comm comm, MPI_Request *rq) {
   MPI_Status status;
 #ifdef HAVE_MPI_DOUBLE_COMPLEX
-  if(rq && (rq != Syncro_block))
-    return MPI_Irecv(reinterpret_cast<void*> (v), n, MPI_DOUBLE_COMPLEX, who, tag,comm,rq);
+  if (rq && (rq != Syncro_block))
+    return MPI_Irecv(reinterpret_cast<void*>(v), n, MPI_DOUBLE_COMPLEX, who, tag, comm, rq);
   else
-    return MPI_Recv(reinterpret_cast<void*> (v), n, MPI_DOUBLE_COMPLEX, who, tag,comm,&status);
+  return MPI_Recv(reinterpret_cast<void*>(v), n, MPI_DOUBLE_COMPLEX, who, tag, comm, &status);
 #else
-  n *=2;
-  if(rq && (rq != Syncro_block))
-    return  MPI_Irecv(reinterpret_cast<void*> (v), n, MPI_DOUBLE, who, tag,comm,rq);
+  n *= 2;
+  if (rq && (rq != Syncro_block))
+    return MPI_Irecv(reinterpret_cast<void*>(v), n, MPI_DOUBLE, who, tag, comm, rq);
   else
-       return MPI_Recv(reinterpret_cast<void*> (v), n, MPI_DOUBLE, who, tag,comm,&status);
+    return MPI_Recv(reinterpret_cast<void*>(v), n, MPI_DOUBLE, who, tag, comm, &status);
 #endif
 }
 
 template<class R>
-void  WBcast(R * v,int  n,int who,MPI_Comm comm)
-{
-  assert(v && n>0);
-  MPI_Bcast(reinterpret_cast<void*> (v), n, MPI_TYPE<R>::TYPE(), who,comm);
+void WBcast (R *v, int n, int who, MPI_Comm comm) {
+  assert(v && n > 0);
+  MPI_Bcast(reinterpret_cast<void*>(v), n, MPI_TYPE<R>::TYPE(), who, comm);
 }
 
 template<>
-void  WBcast<Complex>(Complex * v,int  n,int who,MPI_Comm comm)
-{
-  assert(v && n>0);
+void WBcast<Complex> (Complex *v, int n, int who, MPI_Comm comm) {
+  assert(v && n > 0);
 #ifdef HAVE_MPI_DOUBLE_COMPLEX
-    MPI_Bcast(reinterpret_cast<void*> (v), n, MPI_DOUBLE_COMPLEX /*MPI_TYPE<R>::TYPE()*/, who,comm);
+  MPI_Bcast(reinterpret_cast<void*>(v), n, MPI_DOUBLE_COMPLEX /*MPI_TYPE<R>::TYPE()*/, who, comm);
 #else
-  n *=2;
-  MPI_Bcast(reinterpret_cast<void*> (v), n, MPI_DOUBLE, who,comm);
+  n *= 2;
+  MPI_Bcast(reinterpret_cast<void*>(v), n, MPI_DOUBLE, who, comm);
 #endif
 }
 
-
-
 struct MPIrank {
-
   int who;
   MPI_Comm comm;
   MPI_Request *rq;
   // mutable bool block;
 
-  MPIrank(int i=0,MPI_Comm com=MPI_COMM_WORLD, MPI_Request *rqq=0)
-    : who(i) , comm(com),rq(rqq)
-  {
-	int n;
-	MPI_Comm_size(comm, &n);
+  MPIrank(int i=0, MPI_Comm com=MPI_COMM_WORLD, MPI_Request *rqq=0)
+    : who(i), comm(com), rq(rqq) {
+    int n;
+    MPI_Comm_size(comm, &n);
   }
 
+  long Send(double a) const { return WSend(&a, 1, who, MPI_TAG< double >::TAG, comm, rq); }
+  long Send(long a) const { return WSend(&a, 1, who, MPI_TAG< long >::TAG, comm, rq); }
+  long Send(Complex a) const { return WSend(&a, 1, who, MPI_TAG< Complex >::TAG, comm, rq); }
 
-  long Send(double a)const  {return WSend(&a, 1, who, MPI_TAG< double >::TAG,comm,rq); }
-  long Send(long a)const  {return WSend(&a, 1, who, MPI_TAG< long >::TAG,comm,rq); }
-  long Send(Complex a)const  {return WSend(&a, 1, who, MPI_TAG< Complex >::TAG,comm,rq); }
+  long Recv(double & a) const { return WRecv(&a, 1, who, MPI_TAG< double >::TAG ,comm, rq); }
+  long Recv(long & a) const { return WRecv(&a, 1, who, MPI_TAG< long >::TAG ,comm, rq); }
+  long Recv(Complex & a) const { return WRecv(&a, 1, who, MPI_TAG< Complex >::TAG ,comm, rq); }
 
-  long Recv(double & a) const { return  WRecv(&a, 1,  who, MPI_TAG< double >::TAG ,comm,rq);}
-  long Recv(long & a) const { return  WRecv(&a, 1,  who, MPI_TAG< long >::TAG ,comm,rq);}
-  long Recv(Complex & a) const { return  WRecv(&a, 1,  who, MPI_TAG< Complex >::TAG ,comm,rq);}
-
-  const MPIrank & Bcast(double & a) const {WBcast(&a, 1, who,comm); return *this; }
-  const MPIrank & Bcast(long & a) const {WBcast(&a, 1, who,comm); return *this; }
-  const MPIrank & Bcast(Complex & a) const {WBcast(&a, 1, who,comm); return *this; }
-
-
+  const MPIrank & Bcast(double & a) const { WBcast(&a, 1, who, comm); return *this; }
+  const MPIrank & Bcast(long & a) const { WBcast(&a, 1, who, comm); return *this; }
+  const MPIrank & Bcast(Complex & a) const { WBcast(&a, 1, who, comm); return *this; }
 
   template<class R>
-  long Recv(KN<R> & a) const {
+  long Recv (KN<R> & a) const {
     assert(&a);
-      CheckContigueKN(a);
+    CheckContigueKN(a);
 
-    if(verbosity>99)
-      cout << " ---- " << who  << "  >> " << & a << " " << a.N() << " " << a.step << " " << MPI_TAG<KN<R>* >::TAG
-	       <<" from " << mpirank << "  "<<  (R *) a << endl;
-    int n= a.N();
-    long ll=WRecv((R *) a, n, who, MPI_TAG<KN<R>* >::TAG ,comm,rq);
-    if(verbosity>99)
-      cout << " ++++ " << who  << "  >> " << & a << " " << a.N() << " " << MPI_TAG<KN<R>* >::TAG
-	   <<" from  " << mpirank << "  "<<  (R *) a << endl;
-    ffassert(a.N()==n);
+    if (verbosity > 99)
+      cout << " ---- " << who << " >> " << &a << " " << a.N() << " " << a.step << " " << MPI_TAG<KN<R>* >::TAG
+           << " from " << mpirank << " " << (R *)a << endl;
+    int n = a.N();
+    long ll = WRecv((R *)a, n, who, MPI_TAG<KN<R>* >::TAG, comm, rq);
+    if (verbosity > 99)
+      cout << " ++++ " << who << " >> " << &a << " " << a.N() << " " << MPI_TAG<KN<R>* >::TAG
+           << " from " << mpirank << " " << (R *)a << endl;
+    ffassert(a.N() == n);
     return ll;
   }
 
   template<class R>
-  long Send(const KN<R> *aa)const  {
-    const KN<R> & a=*aa;
+  long Send (const KN<R> *aa) const {
+    const KN<R> & a = *aa;
     ffassert(&a);
-    int n= a.N();
+    int n = a.N();
     CheckContigueKN(*aa);
-    if(verbosity>99)
-	  cout << " .... " << who  << "  >> " << & a << " " << a.N() << " " << a.step<< " " << MPI_TAG<KN<R>* >::TAG
-	       <<" from  " << mpirank << "  "<<  (R *) a << endl;
-    return WSend((R *) a,n,who,MPI_TAG<KN<R>* >::TAG,comm,rq);
+    if (verbosity > 99)
+      cout << " .... " << who << " >> " << &a << " " << a.N() << " " << a.step << " " << MPI_TAG<KN<R>* >::TAG
+           << " from " << mpirank << " " << (R *)a << endl;
+    return WSend((R *)a, n, who, MPI_TAG<KN<R>* >::TAG, comm, rq);
   }
 
   template<class R>
-  const MPIrank & Bcast(const KN<R> &a) const  {
+  const MPIrank & Bcast (const KN<R> &a) const {
     assert(&a);
-    int n= a.N();
+    int n = a.N();
     CheckContigueKN(a);
 
-    WBcast((R *) a, n, who,comm);
-    ffassert(a.N()==n);
+    WBcast((R *)a, n, who, comm);
+    ffassert(a.N() == n);
     return *this;
   }
- // KNM *********************************** Add FH. Nov 2016
-    template<class R>
-    long Recv(KNM<R> & a) const {
-        assert(&a);
-        CheckContigueKNM(a);
 
-        if(verbosity>99)
-            cout << " ---- " << who  << "  >> " << & a << " " << a.N() << "x" <<  a.M() << " " << MPI_TAG<KNM<R>* >::TAG
-            <<" from " << mpirank << "  "<<  (R *) a << endl;
-        int n= a.N()*a.M();
-        long ll=WRecv((R *) a, n, who, MPI_TAG<KNM<R>* >::TAG ,comm,rq);
-        if(verbosity>99)
-            cout << " ++++ " << who  << "  >> " << & a << " " << a.N() << "x" <<  a.M()<<" " << MPI_TAG<KNM<R>* >::TAG
-            <<" from  " << mpirank << "  "<<  (R *) a << endl;
-        ffassert(a.N()*a.M()==n);
-        return ll;
-    }
+  // KNM *********************************** Add FH. Nov 2016
+  template<class R>
+  long Recv (KNM<R> & a) const {
+    assert(&a);
+    CheckContigueKNM(a);
 
-    template<class R>
-    long Send(const KNM<R> *aa)const  {
-        const KNM<R> & a=*aa;
-        ffassert(&a);
-        int n= a.N()*a.M();
-        CheckContigueKNM(*aa);
-        if(verbosity>99)
-            cout << " .... " << who  << "  >> " << & a << " " << a.N() <<"x" << a.M() << " " << a.step<< " " << MPI_TAG<KNM<R>* >::TAG
-            <<" from  " << mpirank << "  "<<  (R *) a << endl;
-        return WSend((R *) a,n,who,MPI_TAG<KNM<R>* >::TAG,comm,rq);
-    }
-
-    template<class R>
-    const MPIrank & Bcast(const KNM<R> &a) const  {
-        assert(&a);
-        int n= a.N()*a.M();
-        CheckContigueKNM(a);
-
-        WBcast((R *) a, n, who,comm);
-        ffassert(a.N()*a.M()==n);
-        return *this;
-    }
-
- // KNM ***********************************
-
-  const MPIrank & Bcast(Fem2D::Mesh const *&  a) const {
-    if(verbosity>100)
-      cout << " MPI Bcast  (mesh *) " << a << endl;
-    Serialize  *buf=0;
-    long nbsize=0;
-    if(  who == mpirank)
-      {
-	buf =new Serialize((*a).serialize());
-	nbsize =  buf->size();
-      }
-    WBcast( &nbsize, 1,  who,comm);
-    if (who != mpirank)
-      buf= new Serialize(nbsize,Fem2D::Mesh::magicmesh);
-    assert(nbsize);
-    if(verbosity>200)
-      cout << " size to bcast : " << nbsize << " mpirank : " << mpirank << endl;
-
-    WBcast( (char *)(*buf),nbsize,  who,comm);
-
-    if(who != mpirank)
-      {
-	if (a) (*a).decrement();
-        Fem2D::Mesh *pTh= new Fem2D::Mesh(*buf);
-	Fem2D::R2 Pn,Px;
-	pTh->BoundingBox(Pn,Px);
-	pTh->quadtree=new Fem2D::FQuadTree(pTh,Pn,Px,pTh->nv);
-        a=pTh;
-      }
-    delete buf;
-    return *this;
-   }
-
-  const MPIrank & Bcast(Fem2D::Mesh3 const *&  a) const {
-    if(verbosity>100)
-      cout << " MPI Bcast  (const mesh3 *) " << a << endl;
-    Serialize  *buf=0;
-    long  nbsize=0;
-    if(  who == mpirank)
-      {
-	buf =new Serialize((*a).serialize());
-	nbsize =  buf->size();
-      }
-    WBcast( &nbsize, 1,  who,comm);
-    if (who != mpirank)
-      buf= new Serialize(nbsize,Fem2D::GenericMesh_magicmesh);
-    assert(nbsize);
-    if(verbosity>200)
-      cout << " size to bcast : " << nbsize << " mpirank : " << mpirank << endl;
-
-    WBcast( (char *)(*buf),nbsize,  who,comm);
-
-	if(who != mpirank)
-	  {
-	    if (a) (*a).decrement();
-	    Fem2D::Mesh3 * aa= new Fem2D::Mesh3(*buf);
-	    aa->BuildGTree();
-            a=aa;
-	  }
-	delete buf;
-	return *this;
+    if (verbosity > 99)
+      cout << " ---- " << who << " >> " << &a << " " << a.N() << "x" << a.M() << " " << MPI_TAG<KNM<R>* >::TAG
+           << " from " << mpirank << " " << (R *)a << endl;
+    int n = a.N()*a.M();
+    long ll = WRecv((R *)a, n, who, MPI_TAG<KNM<R>* >::TAG, comm, rq);
+    if (verbosity > 99)
+      cout << " ++++ " << who << " >> " << &a << " " << a.N() << "x" << a.M() << " " << MPI_TAG<KNM<R>* >::TAG
+           << " from " << mpirank << " " << (R *)a << endl;
+    ffassert(a.N()*a.M() == n);
+    return ll;
   }
 
   template<class R>
-  const MPIrank & Bcast(Matrice_Creuse<R> &  a) const
-    {
-      if(verbosity>100)
-	cout << mpirank <<  ":  MPI Bcast " << who << "  (Matrice_Creuse &) " << &a << " " << a.A << endl;
-      MatriceMorse<R> *mA=0;
-      int ldata[4]={0,0,0,0};
-      if(  who == mpirank)
-	{
-	  if(a.A)
-	    {
-	      mA= a.pHM();
-	      ldata[0]=mA->n;
-	      ldata[1]=mA->m;
-	      ldata[2]=mA->nnz;
-	      ldata[3]=mA->half;
-	    }
-	}
-      int n4=4;
-      WBcast( ldata,n4, who,comm);
-      if(  who != mpirank && ldata[0] )
-	mA= new MatriceMorse<R>(ldata[0],ldata[1],ldata[2],ldata[3]);
-      else
-          CheckPtrHashMatrix(mA,"Bcast 2");
-      if(ldata[0])
-	  {
-	    WBcast(  mA->i,ldata[2], who,comm);
-	    WBcast(  mA->j,ldata[2], who,comm);
-	    WBcast( mA->aij,ldata[2] , who,comm);
+  long Send (const KNM<R> *aa) const {
+    const KNM<R> & a = *aa;
+    ffassert(&a);
+    int n = a.N()*a.M();
+    CheckContigueKNM(*aa);
+    if (verbosity > 99)
+      cout << " .... " << who << " >> " << &a << " " << a.N() << "x" << a.M() << " " << a.step << " " << MPI_TAG<KNM<R>* >::TAG
+           << " from " << mpirank << " " << (R *)a << endl;
+    return WSend((R *)a, n, who, MPI_TAG<KNM<R>* >::TAG, comm, rq);
+  }
 
+  template<class R>
+  const MPIrank & Bcast (const KNM<R> &a) const {
+    assert(&a);
+    int n = a.N()*a.M();
+    CheckContigueKNM(a);
 
-            mA->Increaze(ldata[2],ldata[2]);
-	  }
-      CheckPtrHashMatrix(mA,"Bcast 2");
-      if(  who != mpirank)
-	a.A.master(mA);
-     // else
-//	delete mA;
-      return *this;
+    WBcast((R *)a, n, who, comm);
+    ffassert(a.N()*a.M() == n);
+    return *this;
+  }
+
+  // KNM ***********************************
+  const MPIrank & Bcast (Fem2D::Mesh const *&a) const {
+    if(verbosity>100)
+      cout << " MPI Bcast (mesh *) " << a << endl;
+    Serialize *buf = 0;
+    long nbsize = 0;
+    if (who == mpirank) {
+      buf = new Serialize((*a).serialize());
+      nbsize = buf->size();
     }
+    WBcast(&nbsize, 1, who, comm);
+    if (who != mpirank)
+      buf = new Serialize(nbsize, Fem2D::Mesh::magicmesh);
+    assert(nbsize);
+    if (verbosity > 200)
+      cout << " size to bcast : " << nbsize << " mpirank : " << mpirank << endl;
 
-  // version asyncrone or syncrone  Now 2010 ...
-  template<class R>   long Send(Matrice_Creuse<R> * const &  a) const ;
-  template<class R>   long Recv(Matrice_Creuse<R>  &  a) const ;
-  long Send(Fem2D::Mesh const *  a) const ;
-  long Send (Fem2D::Mesh3 const *  a) const ;
-  long Recv(Fem2D::Mesh const *& a)  const;
-  long Recv(Fem2D::Mesh3 const *& a) const;
+    WBcast((char *)(*buf), nbsize, who, comm);
 
-  operator int () const { return who;}
+    if (who != mpirank) {
+      if (a) (*a).decrement();
+      Fem2D::Mesh *pTh = new Fem2D::Mesh(*buf);
+      Fem2D::R2 Pn, Px;
+      pTh->BoundingBox(Pn, Px);
+      pTh->quadtree = new Fem2D::FQuadTree(pTh, Pn, Px, pTh->nv);
+      a = pTh;
+    }
+    delete buf;
+    return *this;
+  }
+
+  const MPIrank & Bcast (Fem2D::Mesh3 const *&a) const {
+    if(verbosity>100)
+      cout << " MPI Bcast (const mesh3 *) " << a << endl;
+    Serialize *buf = 0;
+    long nbsize = 0;
+    if (who == mpirank) {
+      buf = new Serialize((*a).serialize());
+      nbsize = buf->size();
+    }
+    WBcast(&nbsize, 1, who, comm);
+    if (who != mpirank)
+      buf = new Serialize(nbsize, Fem2D::GenericMesh_magicmesh);
+    assert(nbsize);
+    if (verbosity > 200)
+      cout << " size to bcast : " << nbsize << " mpirank : " << mpirank << endl;
+
+    WBcast((char *)(*buf), nbsize, who, comm);
+
+    if (who != mpirank) {
+      if (a) (*a).decrement();
+      Fem2D::Mesh3 * aa = new Fem2D::Mesh3(*buf);
+      aa->BuildGTree();
+      a = aa;
+    }
+    delete a->meshS;
+    const_cast<Fem2D::Mesh3*>(a)->meshS = nullptr;
+    delete buf;
+    return *this;
+  }
+
+  template<class R>
+  const MPIrank & Bcast(Matrice_Creuse<R> &a) const {
+    if(verbosity>100)
+      cout << mpirank << ": MPI Bcast " << who << " (Matrice_Creuse &) " << &a << " " << a.A << endl;
+    MatriceMorse<R> *mA = 0;
+    int ldata[4] = {0, 0, 0, 0};
+    if (who == mpirank) {
+      if(a.A) {
+        mA = a.pHM();
+        ldata[0] = mA->n;
+        ldata[1] = mA->m;
+        ldata[2] = mA->nnz;
+        ldata[3] = mA->half;
+      }
+    }
+    int n4 = 4;
+    WBcast(ldata, n4, who, comm);
+    if (who != mpirank && ldata[0])
+      mA = new MatriceMorse<R>(ldata[0], ldata[1], ldata[2], ldata[3]);
+    else
+      CheckPtrHashMatrix(mA, "Bcast 2");
+    if(ldata[0]) {
+      WBcast(mA->i, ldata[2], who, comm);
+      WBcast(mA->j, ldata[2], who, comm);
+      WBcast(mA->aij, ldata[2], who, comm);
+
+      mA->Increaze(ldata[2], ldata[2]);
+    }
+    CheckPtrHashMatrix(mA, "Bcast 2");
+    if (who != mpirank)
+      a.A.master(mA);
+    // else
+    //	delete mA;
+    return *this;
+  }
+
+  // old async or sync Nov 2010 ...
+  template<class R> long Send (Matrice_Creuse<R> * const &a) const;
+  template<class R> long Recv (Matrice_Creuse<R> &a) const;
+  long Send (Fem2D::Mesh const *a) const;
+  long Send (Fem2D::Mesh3 const *a) const;
+  long Recv (Fem2D::Mesh const *&a) const;
+  long Recv (Fem2D::Mesh3 const *&a) const;
+
+  operator int () const { return who; }
 };
 
-
-
-
-// for MPI_WAIT_resquets (complex MPI asyncrone MPI recv request ) ..
-class DoOnWaitMPI_Request :public   MPIrank
-{
-
+// for MPI_WAIT_resquets (complex MPI async MPI recv request ) ...
+class DoOnWaitMPI_Request : public MPIrank {
 public:
-    bool sync;
-    DoOnWaitMPI_Request( MPIrank  mpr) : MPIrank(mpr),sync((rq==0 || rq == Syncro_block)) {}
-    virtual  bool Do(MPI_Request *rrq) =0; // false -> end
-    bool  DoSR() { // do the  Send/Recv Op.
-	bool ret=false;
-	if(verbosity>100)
-	  cout << mpirank << "   --- Do Send/Recv :  "  << " " << rq << " " << sync <<  endl;
-	if(sync) //  wait ...
-	  { bool c=1;
-	    if(verbosity>100)
-	      cout << mpirank << "   --- Do way :  " << c << " " << rq << endl;
-	    while (c)
-	      {
-		c=Do(rq);
-		if(verbosity>100)
-		  cout << mpirank << "   --- Do return :  " << c << " " << rq << endl;
-	      }
+  bool sync;
+  DoOnWaitMPI_Request( MPIrank mpr) : MPIrank(mpr), sync((rq == 0 || rq == Syncro_block)) {}
+  virtual bool Do(MPI_Request *rrq) = 0; // false -> end
+  bool DoSR() { // do the Send/Recv Op.
+    bool ret = false;
+    if (verbosity > 100)
+      cout << mpirank << "   --- Do Send/Recv : " << " " << rq << " " << sync << endl;
+    if(sync) { // wait ...
+      bool c = 1;
+      if (verbosity > 100)
+        cout << mpirank << "   --- Do way : " << c << " " << rq << endl;
+      while (c) {
+        c = Do(rq);
+        if (verbosity > 100)
+          cout << mpirank << "   --- Do return : " << c << " " << rq << endl;
+      }
 
-	    ret=true;// clean
-	  }
-	else
-	  ToDoOnWaitMPI_Request[rq]=this; // add request for WAIT ..
-	return ret;
-    }
-    virtual ~DoOnWaitMPI_Request(){}
-private:
-    DoOnWaitMPI_Request(const DoOnWaitMPI_Request & );
-     DoOnWaitMPI_Request & operator=( DoOnWaitMPI_Request & );
+      ret = true;// clean
+    } else
+      ToDoOnWaitMPI_Request[rq] = this; // add request for WAIT ..
+    return ret;
+  }
+  virtual ~DoOnWaitMPI_Request(){}
+  private:
+  DoOnWaitMPI_Request (const DoOnWaitMPI_Request &);
+  DoOnWaitMPI_Request & operator= ( DoOnWaitMPI_Request &);
 };
 
-
-
-void DoOnWaitMPIRequest(MPI_Request *rq)
-{
-  if( rq  )
-    {
-	map<MPI_Request*,DoOnWaitMPI_Request *>:: iterator drd = ToDoOnWaitMPI_Request.find(rq) ;
-	if(drd != ToDoOnWaitMPI_Request.end())
-	  {
-	    if(verbosity>100)
-	      cout << " Do on DoOnWaitMPIRequest " << rq  << " "  << endl;
-	    if( !drd->second->Do(rq) )
-	      {
-		delete drd->second;
-		ToDoOnWaitMPI_Request.erase(drd); // finish ...
-	      }
-
-	  }
-
+void DoOnWaitMPIRequest (MPI_Request *rq) {
+  if (rq) {
+    map<MPI_Request*, DoOnWaitMPI_Request *>:: iterator drd = ToDoOnWaitMPI_Request.find(rq);
+    if (drd != ToDoOnWaitMPI_Request.end()) {
+      if (verbosity > 100)
+        cout << " Do on DoOnWaitMPIRequest " << rq << " " << endl;
+      if (!drd->second->Do(rq)) {
+        delete drd->second;
+        ToDoOnWaitMPI_Request.erase(drd); // finish ...
+      }
     }
-
+  }
 }
 
-void DeSerialize(Serialize * sTh,Fem2D::Mesh const ** ppTh)
-{
-      if ( *ppTh ) (**ppTh).decrement();
-      Fem2D::Mesh * pTh= new Fem2D::Mesh(*sTh);
-      *ppTh=pTh;
+void DeSerialize (Serialize * sTh, Fem2D::Mesh const ** ppTh) {
+  if (*ppTh) (**ppTh).decrement();
+  Fem2D::Mesh *pTh = new Fem2D::Mesh(*sTh);
+  *ppTh = pTh;
 
-      Fem2D::R2 Pn,Px;
-      pTh->BoundingBox(Pn,Px);
-      pTh->quadtree=new Fem2D::FQuadTree(pTh,Pn,Px,pTh->nv);
+  Fem2D::R2 Pn,Px;
+  pTh->BoundingBox(Pn, Px);
+  pTh->quadtree = new Fem2D::FQuadTree(pTh, Pn, Px, pTh->nv);
 }
 
-void DeSerialize(Serialize * sTh,const Fem2D::Mesh3 ** ppTh)
-{
-      if ( *ppTh )  (**ppTh).decrement();
-      Fem2D::Mesh3 * pTh= new Fem2D::Mesh3(*sTh);
-      pTh->BuildGTree();
-      *ppTh=pTh;
+void DeSerialize (Serialize *sTh, const Fem2D::Mesh3 **ppTh) {
+  if (*ppTh) (**ppTh).decrement();
+  Fem2D::Mesh3 *pTh = new Fem2D::Mesh3(*sTh);
+  pTh->BuildGTree();
+  *ppTh = pTh;
 }
-
 
 template<class R>
-class RevcWMatd : public DoOnWaitMPI_Request
-{
+class RevcWMatd : public DoOnWaitMPI_Request {
 public:
   typedef Matrice_Creuse<R> Mat;
-  Matrice_Creuse<R> * pmat;
+  Matrice_Creuse<R> *pmat;
   MatriceMorse<R> *mA;
   int state;
   int ldata[4];
-  RevcWMatd(const MPIrank *mpirank,Mat * pm)
-    : DoOnWaitMPI_Request(*mpirank),
-      pmat(pm),mA(0),state(0)
-  {
+  RevcWMatd(const MPIrank *mpirank, Mat * pm)
+    : DoOnWaitMPI_Request(*mpirank), pmat(pm), mA(0), state(0) {
     int tag = MPI_TAG<Matrice_Creuse<R>* >::TAG;
-    int ll=WRecv( ldata,4, who, tag,comm,rq);
+    int ll = WRecv(ldata, 4, who, tag, comm, rq);
     ffassert(ll == MPI_SUCCESS);
-
   }
 
-  bool  Do(MPI_Request *rrq)
-  {
+  bool  Do(MPI_Request *rrq) {
     state++;
-    int tag=MPI_TAG<Mat *>::TAG;
-    if(verbosity>100)
-      cout << mpirank << "  ---R: ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << " " << state << endl;
+    int tag = MPI_TAG<Mat *>::TAG;
+    if (verbosity > 100)
+      cout << mpirank << "  ---R: ldata " << ldata[0] << " " << ldata[1] << " " << ldata[2] << " " <<ldata[3] << " " << state << endl;
 
-    int ll=0;
+    int ll = 0;
 
-    switch (state)
-      {
+    switch (state) {
       case 1:
-	mA =  new MatriceMorse<R>(ldata[0],ldata[1],ldata[2],ldata[3]);
-	ll=WRecv(  mA->i,ldata[2],   who, tag+1,comm,rq);
-	break;
+        mA = new MatriceMorse<R>(ldata[0], ldata[1], ldata[2], ldata[3]);
+        ll = WRecv(mA->i, ldata[2], who, tag+1, comm, rq);
+        break;
       case 2:
-	ll=WRecv(  mA->j,ldata[2],  who, tag+2,comm,rq);
-	break;
+        ll = WRecv(mA->j, ldata[2], who, tag+2, comm, rq);
+        break;
       case 3:
-
-	ll=WRecv(  mA->aij,ldata[2],  who, tag+3,comm,rq);
-	break;
+        ll = WRecv(mA->aij, ldata[2], who, tag+3, comm, rq);
+        break;
       default:
-        mA->Increaze(ldata[2],ldata[2]);
-        CheckPtrHashMatrix(mA," WRecv ");
-	pmat->A.master(mA);
-	mA=0;
-	return false;
-	break;
-      }
+        mA->Increaze(ldata[2], ldata[2]);
+        CheckPtrHashMatrix(mA, " WRecv ");
+        pmat->A.master(mA);
+        mA = 0;
+        return false;
+        break;
+    }
 
     ffassert(ll == MPI_SUCCESS);
 
     return true; // OK
   }
+
   ~RevcWMatd() {
     if(mA) delete mA;
   }
-
 };
 
 template<class R>
-class SendWMatd : public DoOnWaitMPI_Request
-{
+class SendWMatd : public DoOnWaitMPI_Request {
 public:
   typedef Matrice_Creuse<R> Mat;
-  Matrice_Creuse<R> * pmat;
+  Matrice_Creuse<R> *pmat;
   MatriceMorse<R> *mA;
   int state;
   int ldata[4];
-  SendWMatd(const MPIrank *mpirank,Mat * pm)
-    : DoOnWaitMPI_Request(*mpirank),
-      pmat(pm),mA(0),state(0)
-  {
-    mA=pmat->pHM();
-    CheckPtrHashMatrix(mA," SendWMatd ");
-    ldata[0]=mA->n;
-    ldata[1]=mA->m;
-    ldata[2]=mA->nnz;
-    ldata[3]=mA->half;
+  SendWMatd(const MPIrank *mpirank, Mat *pm)
+    : DoOnWaitMPI_Request(*mpirank), pmat(pm), mA(0), state(0) {
+    mA = pmat->pHM();
+    CheckPtrHashMatrix(mA, " SendWMatd ");
+    ldata[0] = mA->n;
+    ldata[1] = mA->m;
+    ldata[2] = mA->nnz;
+    ldata[3] = mA->half;
     int tag = MPI_TAG<Matrice_Creuse<R>* >::TAG;
-    int ll=WSend( ldata,4, who, tag,comm,rq);
-    ffassert(ll == MPI_SUCCESS) ;
+    int ll = WSend(ldata, 4, who, tag, comm, rq);
+    ffassert(ll == MPI_SUCCESS);
   }
-  bool  Do(MPI_Request *rrq)
-  {
+  bool Do(MPI_Request *rrq) {
     state++;
-    int tag=MPI_TAG<Mat *>::TAG;
-    if(verbosity>100)
-      cout << mpirank << "  ---S  ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << " "<< state << endl;
+    int tag = MPI_TAG<Mat *>::TAG;
+    if (verbosity > 100)
+      cout << mpirank << "  ---S ldata " << ldata[0] << " " << ldata[1] << " " << ldata[2] << " " <<ldata[3] << " "<< state << endl;
 
-    CheckPtrHashMatrix(mA," SendWMatd 2");
-    int ll=0;
-    switch (state)
-      {
+    CheckPtrHashMatrix(mA, " SendWMatd 2");
+    int ll = 0;
+    switch (state) {
       case 1:
-	ll=WSend(  mA->i,ldata[2],  who, tag+1,comm,rq);
-	break;
+        ll = WSend(mA->i, ldata[2], who, tag+1, comm, rq);
+        break;
       case 2:
-	ll=WSend( mA->j,ldata[2],  who, tag+2,comm,rq);
-	break;
+        ll = WSend(mA->j, ldata[2], who, tag+2, comm, rq);
+        break;
       case 3:
-	ll=WSend(  mA->aij,ldata[2],   who, tag+3,comm,rq);
-	break;
+        ll = WSend(mA->aij, ldata[2], who, tag+3, comm, rq);
+        break;
       default:
-	return false;
-	break;
-      }
+        return false;
+        break;
+    }
 
+    ffassert(ll == MPI_SUCCESS);
 
     return true; // OK
   }
+
   ~SendWMatd() {
   }
-
 };
 
-
 template<class Mesh>
-class RevcWMeshd : public DoOnWaitMPI_Request,Serialize
-{
+class RevcWMeshd : public DoOnWaitMPI_Request, Serialize {
 public:
-  Mesh const ** ppTh;
+  Mesh const **ppTh;
   int state;
 
-  RevcWMeshd(const MPIrank *mpirank,Mesh const ** ppThh)
-    : DoOnWaitMPI_Request(*mpirank),Serialize(sizempibuf,Fem2D::Mesh::magicmesh),
-      ppTh(ppThh),state(0)
-  {
-    // remark the first data in p is the size in long long
+  RevcWMeshd (const MPIrank *mpirank, Mesh const **ppThh)
+    : DoOnWaitMPI_Request(*mpirank), Serialize(sizempibuf, Fem2D::Mesh::magicmesh),
+    ppTh(ppThh), state(0) {
+    // remark: the first data in p is the size in long long
 
-    int tag=MPI_TAG<Mesh *>::TAG;
-    if(verbosity>99)
-      cout << " -- RevcWMeshd   " << rq << " " << comm << " " << p << endl;
-    int ll=WRecv(p, sizempibuf,  who, tag,comm,rq); // wait first part Warning async => not wait.
-   }
+    int tag = MPI_TAG<Mesh *>::TAG;
+    if (verbosity > 99)
+      cout << " -- RevcWMeshd " << rq << " " << comm << " " << p << endl;
+    int ll = WRecv(p, sizempibuf, who, tag, comm, rq); // wait first part Warning async => not wait.
+  }
 
-  bool  Do(MPI_Request *rrq)
-  {
-     long long lsz;
-    int tag=MPI_TAG<Mesh *>::TAG;
+  bool Do (MPI_Request *rrq) {
+    long long lsz;
+    int tag = MPI_TAG<Mesh *>::TAG;
     ffassert(rq == rrq);
-      size_t kk=0;
-      get(kk,lsz);
-      if(verbosity>199) cout << mpirank << "     --  lsk = "  <<lsz << " p= " << p << " p[]= "
-          << (int) p[0] << (int) p[1] << (int) p[2] << (int) p[3]<<endl;
+    size_t kk = 0;
+    get(kk, lsz);
+    if (verbosity > 199)
+      cout << mpirank << "     -- lsk = " << lsz << " p= " << p << " p[]= "
+           << (int)p[0] << (int)p[1] << (int)p[2] << (int)p[3] << endl;
 
     long l1 = lsz - sizempibuf;
-    if(verbosity>100)
-      cout << mpirank << " Do RevcWMeshd " <<  lsz  <<" " << state << "  cont  : " <<  (l1 >0)  << " " << rq << " " << comm << endl;
+    if (verbosity > 100)
+      cout << mpirank << " Do RevcWMeshd " << lsz << " " << state << " cont : " << (l1 > 0) << " " << rq << " " << comm << endl;
 
-    if(0==state++ &&  l1>0 ) // recv first part ..
-      {
-	if(verbosity>100)
-	  cout << mpirank << " + Do RevcWMeshd " <<  lsz  <<" " << state << "  cont  : " <<  ( l1 > sizempibuf) <<  " " << rq << " " << l1  <<  endl;
-	resize(lsz);
-	int ll=WRecv(p+sizempibuf,l1,  who, tag+state,comm,rq);
-	return true;// continue ..
-      }
-    else resize(lsz);
+    if (0 == state++ && l1 > 0 ) { // recv first part ..
+      if (verbosity > 100)
+        cout << mpirank << " + Do RevcWMeshd " << lsz << " " << state << " cont : " << (l1 > sizempibuf) << " " << rq << " " << l1 << endl;
+      resize(lsz);
+      int ll = WRecv(p+sizempibuf, l1, who, tag+state, comm, rq);
+      return true; // continue ..
+    } else resize(lsz);
     // we have the all buffer => DeSerialize
-    DeSerialize(this,ppTh);
-    if(verbosity>100)
-      cout << "    " << mpirank << " recived from " << who << " serialized " << what <<   ", l="
-	   << lsz << ", tag=" << tag << " rq = " << rq << " "  << *ppTh << endl;
+    DeSerialize(this, ppTh);
+    if (verbosity > 100)
+      cout << "    " << mpirank << " recived from " << who << " serialized " << what << ", l="
+           << lsz << ", tag=" << tag << " rq = " << rq << " " << *ppTh << endl;
 
     return false; // OK
   }
-  ~RevcWMeshd() {}
 
+  ~RevcWMeshd() {}
 };
 
 template<class Mesh>
-class SendWMeshd : public DoOnWaitMPI_Request,Serialize
-{
+class SendWMeshd : public DoOnWaitMPI_Request, Serialize {
 public:
-  const Mesh ** ppTh;
+  const Mesh **ppTh;
   int state;
 
-  SendWMeshd(const MPIrank *mpirank,const Mesh ** ppThh)
-    : DoOnWaitMPI_Request(*mpirank),Serialize((**ppThh).serialize()),
-      ppTh(ppThh),state(0)
-  {
-      {
+  SendWMeshd(const MPIrank *mpirank, const Mesh ** ppThh)
+    : DoOnWaitMPI_Request(*mpirank), Serialize((**ppThh).serialize()),
+    ppTh(ppThh), state(0) {
+    {
       long long lsz;
-      size_t kk=0;
-      get(kk,lsz);
-      ffassert(lsz==lg); //  verif
-      }
-    int tag=MPI_TAG<Mesh *>::TAG;
+      size_t kk = 0;
+      get(kk, lsz);
+      ffassert(lsz == lg); // verif
+    }
+    int tag = MPI_TAG<Mesh *>::TAG;
 
-    if(verbosity>100)
-          cout << " -- SendWMeshd   " << rq << " " << comm << " " << p << " "<< lg << " "<< " p[]= "
-          << (int) p[0] << (int) p[1] << (int) p[2] << (int) p[3] <<endl;
+    if (verbosity > 100)
+      cout << " -- SendWMeshd " << rq << " " << comm << " " << p << " " << lg << " "<< " p[]= "
+           << (int)p[0] << (int)p[1] << (int)p[2] << (int)p[3] << endl;
 
-
-    if (lg<=sizempibuf)
-      WSend(p,lg, who, tag,comm,rq);
+    if (lg <= sizempibuf)
+      WSend(p, lg, who, tag, comm, rq);
     else
-      WSend(p,sizempibuf,who, tag,comm,rq);
+      WSend(p, sizempibuf, who, tag, comm, rq);
   }
 
-  bool  Do(MPI_Request *rrq)
-  {
-    int tag=MPI_TAG<Mesh *>::TAG;
+  bool Do(MPI_Request *rrq) {
+    int tag = MPI_TAG<Mesh *>::TAG;
     long l1 = lg -sizempibuf;
-    if(verbosity>100)
-      cout << mpirank << " Do SendWMeshd " <<  lg  <<" " << state << "  cont  : " <<  (l1 >0)  << " " << rq << " " << comm << endl;
+    if (verbosity > 100)
+      cout << mpirank << " Do SendWMeshd " << lg << " " << state << " cont : " << (l1 > 0) << " " << rq << " " << comm << endl;
 
-    if(0==state++ &&  l1>0 ) // send the second part
-      {
-	return true;// Fini
-      }
+    if (0 == state++ && l1 > 0) { // send the second part
+      int ll = WSend(p+sizempibuf, l1, who, tag+state, comm, rq);
+      return true;// Fini
+    }
     return false; // OK
   }
 
   ~SendWMeshd() {count()=0;}
-
 };
 
 
@@ -798,6 +745,7 @@ template<class R>
       {
 	  cout << " MPI << (Matrice_Creuse *) " << a << endl;
 	ffassert(rq==0 || rq == Syncro_block) ; //
+	int tag = MPI_TAG<Matrice_Creuse<R>* >::TAG;
 	MatriceMorse<R> *mA=a->A->toMatriceMorse();
 	int ldata[4];
 	ldata[0]=mA->n;
@@ -1484,6 +1432,7 @@ template<class R>
 struct Op_AllReduce1  : public   quad_function<R *,R *,fMPI_Comm,fMPI_Op,long> {
     static long  f(Stack, R *  const  & s, R *  const  &r,  fMPI_Comm const & comm,fMPI_Op const &op)
     {
+	int chunk = 1;
 	return MPI_Allreduce( (void *) (R*) s,(void *) (R*) r, 1 , MPI_TYPE<R>::TYPE(),op,comm);
     }
 };
@@ -1796,6 +1745,8 @@ long  Op_All2All3v<Complex>(KN_<Complex>  const  & s, KN_<Complex>  const  &r,fM
   int mpisizew;
   MPI_Comm_size(comm, &mpisizew); /* local */
   ffassert( sendcnts.N() == sdispls.N() && sendcnts.N() == recvcnts.N() && sendcnts.N() == rdispls.N() && sendcnts.N() == mpisizew );
+
+  //ffassert(s.N()==sendcnts[mpirankv] && r.N()==recvbuf[mpirankv]);
 
   KN<int> INTsendcnts(sendcnts.N());
   KN<int> INTsdispls(sdispls.N());
@@ -2227,7 +2178,7 @@ fMPI_Group* def_group( fMPI_Group* const & a,fMPI_Comm * const &comm)
 
 fMPI_Comm* def_comm( fMPI_Comm* const & a,fMPI_Group* const & g)
 {
-    MPI_Comm_create(MPI_COMM_WORLD,*g,*a);
+    int ok=MPI_Comm_create(MPI_COMM_WORLD,*g,*a);
     return a;
 }
 
@@ -2266,7 +2217,8 @@ struct Def_def_Intercommcreate  : public  quad_function<fMPI_Comm*,MPIrank,MPIra
 {
 static fMPI_Comm * f(Stack,fMPI_Comm* const & a, MPIrank const & p1, MPIrank const & p2, long const & tag )
 {
-    MPI_Intercomm_create(p1.comm, p1.who, p2.comm,p2.who,tag, *a);
+    int err;
+    err=MPI_Intercomm_create(p1.comm, p1.who, p2.comm,p2.who,tag, *a);
     return a;
 }
 };

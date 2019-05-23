@@ -300,7 +300,6 @@ CheckMacLib.sh: src/nw/FreeFem++
 CheckMPIMacLib.sh: src/mpi/FreeFem++-mpi
 	echo "for i in `otool -L src/mpi/FreeFem++-mpi|egrep -v '/System/Library/|/usr/lib/'|awk '/.dylib/ {printf($$1.OFS)  }'` ; do test ! -f $$i && exit 1; done; exit 0"  >$@
 	chmod a+x $@
-.FORCE:
 
 $(FF_MAC_PREFIX)_Macos:documentation ListFiles-natives
 	-mkdir $@
@@ -413,8 +412,8 @@ LIST_GENERATE_FILE= configure config.h.in \
     examples/examples/Makefile.in \
     examples/bug/Makefile.in \
     examples/other/Makefile.in \
-    examples/3d/Makefile.in
-
+    examples/3d/Makefile.in \
+    examples/3dSurf/Makefile.in
 
 LIST_GENERATE_FILE_AM= \
   Makefile.am \
@@ -450,7 +449,8 @@ LIST_GENERATE_FILE_AM= \
     examples/examples/Makefile.am \
     examples/bug/Makefile.am \
     examples/other/Makefile.am \
-    examples/3d/Makefile.am
+    examples/3d/Makefile.am \
+    examples/3dSurf/Makefile.am
 
 
 #$(LIST_GENERATE_FILE):$(LIST_GENERATE_FILE_AM)
@@ -501,3 +501,4 @@ Makefile: @MAINTAINER_MODE_FALSE@ configure  $(LIST_GENERATE_FILE_AM)
 	ok=0; \
 	fi ;  \
 	test $$ok -eq 1
+.FORCE:

@@ -479,7 +479,7 @@ public:
   typedef  EF23::GTree<V> GTree;
   typedef typename Element::RdHat RdHat;// for parametrization
 
-  int nt,nv,nbe;
+  int nt,nv,nbe,nadjnomanifold;
   R mes,mesb;
   //private:
   V *vertices;
@@ -525,9 +525,10 @@ public:
     nv=mv;
     nbe=mbe;
     vertices=new V[nv];
-    elements= new T[nt];
-    borderelements = new B[nbe];
+    if(nt) elements= new T[nt];
+    if(nbe) borderelements = new B[nbe];
     assert( nt >=0 && elements);
+    assert( nbe >=0 && borderelements);
     assert( nv >0 && vertices);
 
   }
@@ -710,8 +711,8 @@ public:
     delete [] ElementConteningVertex;
     delete [] TheAdjacencesLink;
     delete [] BoundaryElementHeadLink;
-    delete [] borderelements;
     if(nt>0) delete [] elements;
+    if(nbe>0) delete [] borderelements;
     delete [] vertices;
     delete [] bnormalv;
     if(gtree) delete gtree;
@@ -775,46 +776,45 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         int err=0;
         if(verbosity>5)
             cout << "   -- BuildAdj:nva= " << nva << " " << nea << " "<< nbe << endl;
-        int nadjnomanifold=0;
+        nadjnomanifold=0;
         for (int k=0;k<nt;++k)
-            for (int i=0;i<nea;++i)
-            {
+            for (int i=0;i<nea;++i) {
                 int sens;
                 SortArray<int,nva> a(itemadj(k,i,&sens));//  warning the face of tet given interieon normal FH.
+                if(verbosity>99) cout <<nk << " T "<< k << "### "   << " item(k,i)= " << itemadj(k,i) << " a= " << a << " k " << k << " i " << i << endl;
                 typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);
-                if(!p)
-                {
+                if(!p) {
                     h.add(a,nk);
                     TheAdjacencesLink[nk]=-1;
                     nba++;
                 }
-                else
-                {
-                    if(p->v<0 ){// no manifold TO DO
-
-
+                else {
+                    if(p->v<0 ) {// no manifold TO DO
                         // clean adj
                         int nk1=-1-p->v;
                         int nk2= TheAdjacencesLink[nk1];
-                        if(nk2>=0)
-                        { // firt time remove existing link ...
-                             nadjnomanifold++;
+                        if(nk2>=0) { // firt time remove existing link ...
+                            nadjnomanifold++;
                             TheAdjacencesLink[nk1]=-2;
                             TheAdjacencesLink[nk2]=-2;// on no manifold border .
+                            //nba--;
+                            // no manifold TO DO if false
                         }
-
-                      // no manifold TO DO if false
                     }
-
-                    TheAdjacencesLink[nk]=p->v;
-                    TheAdjacencesLink[p->v]=nk;
-                    p->v=-1-nk;
+                    else {
+                        // cout << " test p->v "<< p->v << endl;
+                        TheAdjacencesLink[nk]=p->v;
+                        TheAdjacencesLink[p->v]=nk;
+                        p->v=-1-nk;
+                    }
                     nba--;
+                    
                 }
                 ++nk;
             }
+      
         if(verbosity&& nadjnomanifold) cerr << "  --- Warning manifold obj nb:" << nadjnomanifold << " of  dim =" << T::RdHat::d << endl;
-        int kerr=0,kerrf=0,nbei=0;
+        int kerr=0,kerrf=0,nbei=0,fwarn=0;
         map<pair<int,int>,pair<int,int> > mapfs;
         int uncorrect =0, nbchangeorient=0;
         for(int step=0; step<2; ++step)
@@ -825,6 +825,9 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                 SortArray<int,nva> a(itembe(ke,&sens));
 
                 typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);
+
+                if(verbosity>99) cout << "B " << ke << " ### "   << " item(k,i)= " << itembe(ke) << " a= " << a << endl;
+
                 if(!p) { err++;
                     if(err==1) cerr << "Err  Border element not in mesh \n";
                     if (err<10)  cerr << " \t " << ke << " " << a << endl;
@@ -839,9 +842,14 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                         // choise le bon .. too get the correct normal
                         int k= nk/nea, e=nk%nea;
                         int kk= nkk/nea, ee=nkk%nea;
-                        itemadj(k,e,&s);
-                        itemadj(kk,ee,&ss);
-                        assert(s && ss && s== -ss);
+                        itemadj(k,e,&s); if(verbosity>15) cout << " item(k,e)= " << itemadj(k,e) <<  " k " << k << " e " << e << " s " << s << endl;
+                        itemadj(kk,ee,&ss); if(verbosity>15) cout << " item(kk,ee)= " << itemadj(kk,ee) << " kk " << kk << " ee " << ee << " ss " << ss << endl;
+                       //assert(s && ss && s== -ss);
+                         if (!(s && ss && s== -ss)) {
+                            cerr << " Bad orientation: The adj border element  defined by [ " << itemadj(k,e) << " ]  is oriented in the same direction in element "
+                        << k << " and in the element " << kk << " ****** bug in mesh construction? orientation parameter? "<< endl;
+                        ffassert(0);
+                        }
                         if( sens == s) {swap(nk,nkk);swap(k,kk);} //  autre cote
                         //  verif sens normal
                         int regk= elements[k].lab;
@@ -878,9 +886,22 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                             }
 
                         }
-
+                        
+                    }
+                    else
+                    {//  verif if the face is in correct sens ...
+                      int sk,k= nk/nea, e=nk%nea; //   same oreintatio ???
+                      itemadj(k,e,&sk);
+                       if( sk != sens &&  (step == 0) )
+                       {
+                           fwarn++;
+                           if( verbosity>4 && fwarn < 10) cout << "  --  warning true  boundary element "<<ke << " is no in correct orientation " <<endl;
+                           borderelements[ke].changeOrientation();
+                           nbchangeorient++;
+                       }
                     }
 
+            
 
 
                 BoundaryElementHeadLink[ke] = nk;
@@ -909,6 +930,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         if(uncorrect==0) break;
     }
     if( nbchangeorient && verbosity>2) cout << " Warning change orientation of " << nbchangeorient << " faces \n";
+    if( fwarn && verbosity>2) cout << " Warning error in boundary oriention  " << fwarn  << " faces \n";
     if( kerr || kerrf ) {
         cout << " Erreur in boundary orientation  bug in mesh or bug in ff++ "  << kerr  << " / " <<nbei  << "\n\n";
         cout << "  or Erreur in face    "  << kerrf  << " / " <<nbei  << "\n\n";
@@ -1105,6 +1127,167 @@ void GenericMesh<T,B,V>::BuildBoundaryElementAdj(const int &nbsurf, int* firstDe
     if(verbosity) cout << "number of adjacents edges " << nk << endl;
   }
 }
+
+
+
+
+// template<typename T,typename B,typename V>
+// void GenericMesh<T,B,V>::BuildBoundaryElementAdj_V2(const int &nbsurf,int *firstDefSurface, int *labelDefSurface, int *senslabelDefSurface)
+// {
+// //   assert(firstDefSurface.N() == nbsurf+1);
+// //   assert(labelDefSurface.N() == firstDefSurface[nbsurf]);
+// //   assert(senslabelDefSurface.N() == firstDefSurface[nbsurf]);
+
+//   // determination des labels des surfaces
+//   map<int, int> maplabel;
+//   int numero_label=0;
+//   for(int ii=0; ii< firstDefSurface[nbsurf]; ii++){
+//     map<int,int>::const_iterator imap=maplabel.find( abs(labelDefSurface[ii]) );
+//     //cout << "K.lab= " << K.lab << endl;
+//     if(imap == maplabel.end()){
+//       maplabel[ abs(labelDefSurface[ii]) ] = numero_label;
+//       numero_label = numero_label+1;
+//     }
+//   }
+
+//   int *nbe_label=new int[numero_label];
+//   for(int ii=0; ii< numero_label; ii++) nbe_label[ii] = 0;
+//   for(int k=0; k<nbe; k++){
+//     B & K(borderelements[CheckBE(k)]);
+//     map<int,int>::const_iterator imap=maplabel.find( K.lab );
+
+// //  if(imap == maplabel.end()){
+// //       printf("The label %d given for Definition of different surface is not in the border element mesh\n",K.lab);
+// //       exit(1);
+// //     }
+// //     else{
+//     nbe_label[(*imap).second]++;
+//     //    }
+//   }
+
+//   int all_nbe_label=0;
+//   for(int k=0; k<numero_label; k++){
+//     all_nbe_label=all_nbe_label+nbe_label[k];
+//   }
+//   /*
+//     if(all_nbe_label != nbe){
+//     cerr << "some element in the border element are not references in the Surface description" << endl;
+//     exit(1);
+//     }
+//     assert(all_nbe_label == nbe);  // autrement cela veut dire que certain element du bord n'ont pas �t� mis dans le descriptif
+//   */
+//   int *organisation_be_label;
+//   organisation_be_label = new int[all_nbe_label];
+
+//   int *count_nbe_label =new int[numero_label];
+//   int *debut_nbe_label =new int[numero_label+1];
+
+//   for(int ii=0; ii< numero_label; ii++)
+//     count_nbe_label[ii] =0;
+
+//   debut_nbe_label[0]=0;
+//   for(int ii=1; ii< numero_label; ii++)
+//     debut_nbe_label[ii] = debut_nbe_label[ii-1]+nbe_label[ii-1];
+//   debut_nbe_label[numero_label] = all_nbe_label;
+
+//   for(int k=0; k<nbe; k++){
+//     B & K(borderelements[CheckBE(k)]);
+//     map<int,int>::const_iterator imap=maplabel.find( K.lab );
+//     assert(imap != maplabel.end());
+//     organisation_be_label[ debut_nbe_label[(*imap).second] + count_nbe_label[(*imap).second] ] = k ;
+//     count_nbe_label[(*imap).second ]++;
+//   }
+
+//   for(int ii=0; ii< numero_label; ii++)
+//     assert( count_nbe_label[ii] == nbe_label[ii] );
+
+//   delete [] count_nbe_label;
+
+//   for(int isurf=0; isurf < nbsurf; isurf++){
+
+//     int nbe_surf=0; // number in the surface
+//     for( int iii=firstDefSurface[isurf]; iii< firstDefSurface[isurf+1];iii++ ){
+//       map<int,int>::const_iterator imap=maplabel.find( abs(labelDefSurface[iii]) );
+//       nbe_surf=nbe_surf+nbe_label[ (*imap).second ];
+//     }
+
+//     // assert(TheBoundaryElementAdjacencesLink==0); plus tard
+//     int *TheBoundaryElementAdjacencesLink = new int[B::nea*nbe_surf];
+//     HashTable<SortArray<int,B::nva>,int> h(B::nea*nbe_surf,nv);
+//     int nk=0;
+//     int err=0;
+//     int sens;
+
+//     int count_sbe;
+//     int *surf_be = new int[nbe_surf];
+
+//     count_sbe=0;
+//     for( int iii=firstDefSurface[isurf]; iii< firstDefSurface[isurf+1];iii++ ){
+//       map<int,int>::const_iterator imap=maplabel.find( abs(labelDefSurface[iii]) );
+
+//       for( int jjj= debut_nbe_label[(*imap).second]; jjj < debut_nbe_label[(*imap).second+1]; jjj++ ){
+// 	int k=organisation_be_label[jjj];
+// 	surf_be[count_sbe] = k;
+// 	count_sbe++;
+
+// 	for (int i=0;i<B::nea;++i)
+// 	  {
+// 	    SortArray<int,B::nva> a(items( k,i,&sens));
+// 	    sens=sens*senslabelDefSurface[iii];
+// 	    typename HashTable<SortArray<int,B::nva>,int>::iterator p= h.find(a);
+// 	    if(!p)
+// 	      {
+// 		h.add(a,nk);
+// 		TheBoundaryElementAdjacencesLink[nk] = sens*(nk+1);
+//  	      }
+// 	    else
+// 	      {
+
+// 		ASSERTION(p->v>=0);
+// 		if( sens*TheBoundaryElementAdjacencesLink[p->v] > 0){
+
+// 		  B & K(borderelements[CheckBE(k)]);
+// 		  int firstVertex  =  operator()(K[B::nvadj[i][0]])+1;
+// 		  int secondVertex =  operator()(K[B::nvadj[i][1]])+1;
+// 		  cout << " The edges, defined by vertex is " << firstVertex << "-" << secondVertex << ", is oriented in the same direction in element " << k+1 <<
+// 		    " and in element "<<  1+surf_be[(p->v/B::nea)] << endl;
+// 		  err++;
+// 		}
+
+// 		if( abs(TheBoundaryElementAdjacencesLink[p->v]) != 1+p->v ){
+
+// 		  B & K(borderelements[CheckBE(k)]);
+// 		  int firstVertex  =  operator()(K[B::nvadj[i][0]])+1;
+// 		  int secondVertex =  operator()(K[B::nvadj[i][1]])+1;
+// 		  cout << " The edges defined by vertex is " << firstVertex << "-" << secondVertex << "belong to the three border elements ::"
+// 		       << 1+surf_be[(p->v)/B::nea] <<", "<< surf_be[k]+1 <<" and  "<< 1+surf_be[(abs(TheBoundaryElementAdjacencesLink[p->v])-1)/B::nea] << endl;
+// 		  cout << " The "<< isurf+1 << " Surface contains these edges is not a manifold" << endl;
+// 		  err++;
+// 		  assert(err==0);
+// 		}
+
+// 		TheBoundaryElementAdjacencesLink[nk]=TheBoundaryElementAdjacencesLink[p->v];
+// 		TheBoundaryElementAdjacencesLink[p->v]=sens*(nk+1);
+// 	      }
+
+// 	    if( err > 10 )
+// 	      exit(1);
+// 	    nk++;
+// 	  }
+//       }
+//     }
+
+//     assert(err==0);
+//     delete [ ] TheBoundaryElementAdjacencesLink;
+//     delete [ ] surf_be;
+//     if(verbosity) cout << "number of adjacents edges " << nk << endl;
+//   }
+
+//   delete [] organisation_be_label;
+//   delete [] debut_nbe_label;
+//   delete [] nbe_label;
+// }
+
 
 template<typename T,typename B,typename V>
 DataFENodeDF GenericMesh<T,B,V>::BuildDFNumbering(int ndfon[NbTypeItemElement],int nbequibe,int *equibe) const

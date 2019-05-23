@@ -49,7 +49,7 @@ func int Plot3D(real[int] &rho,string cmm,bool ffplot)
 	//Vh rhoplot=rhoo;
 	try
 	{
-		mesh3 Sphere = movemesh23(Th,transfo=[rhoo(x,y)*cos(x)*sin(y),rhoo(x,y)*sin(x)*sin(y),rhoo(x,y)*cos(y)]);
+		meshS Sphere = movemesh23(Th,transfo=[rhoo(x,y)*cos(x)*sin(y),rhoo(x,y)*sin(x)*sin(y),rhoo(x,y)*cos(y)]);
 		if(ffplot) plot(Sphere);
 		else medit(cmm ,Sphere,wait=0);
 	}

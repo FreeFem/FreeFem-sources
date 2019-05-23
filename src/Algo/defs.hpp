@@ -1,32 +1,27 @@
-// -*- Mode : c++ -*-
-//
-// SUMMARY  :      
-// USAGE    :        
-// ORG      : 
-// AUTHOR   : Frederic Hecht
-// E-MAIL   : hecht@ann.jussieu.fr
-//
+/****************************************************************************/
+/* This file is part of FreeFem++.                                          */
+/*                                                                          */
+/* FreeFem++ is free software: you can redistribute it and/or modify        */
+/* it under the terms of the GNU Lesser General Public License as           */
+/* published by the Free Software Foundation, either version 3 of           */
+/* the License, or (at your option) any later version.                      */
+/*                                                                          */
+/* FreeFem++ is distributed in the hope that it will be useful,             */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of           */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            */
+/* GNU Lesser General Public License for more details.                      */
+/*                                                                          */
+/* You should have received a copy of the GNU Lesser General Public License */
+/* along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        */
+/****************************************************************************/
+// SUMMARY : ...
+// LICENSE : LGPLv3
+// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+// AUTHORS : Frederic Hecht
+// E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
-/*
- 
- This file is part of Freefem++
- 
- Freefem++ is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
- 
- Freefem++  is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU Lesser General Public License for more details.
- 
- You should have received a copy of the GNU Lesser General Public License
- along with Freefem++; if not, write to the Free Software
- Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
-#ifndef DEFS_H
-#define DEFS_H
+#ifndef _DEFS_H_
+#define _DEFS_H_
 
 #ifndef GLIB
 #define GLIB
@@ -36,22 +31,18 @@
 #include <cstdlib>
 #include <cstdio>
 #include <stddef.h>
-//#include <cassert>
 #include <cmath>
 #include <cstring>
 #include <list>
 using namespace std;
 
-//#include "mvvtp.h"
-//#include "mvblas.h"
-
 #endif
 
-// DEFINE simple constants
+// Define simple constants
 #ifndef Pi
 #define Pi (3.141592653589793)
 #endif
-#ifndef TINY // sert dans BrentLS et Matrix
+#ifndef TINY // used in BrentLS and Matrix
 #define TINY 		1.0e-20
 #endif
 #ifndef True
@@ -67,7 +58,7 @@ using namespace std;
 #define No (0)
 #endif
 
-//Define some simple template functions
+// Define some simple template functions
 #ifndef Sgn
 #define Sgn(x) ((x) < 0 ? -1.0 : 1.0)
 #endif
@@ -82,37 +73,40 @@ using namespace std;
 #endif
 
 #ifndef inValidSize
-#define inValidSize() cerr<<"Warning: incompatible sizes!"<<endl;
+#define inValidSize() cerr << "Warning: incompatible sizes!" << endl;
 #endif
 
-// Opérations sur les listes
-//
+// Lists operations
+
+/*!
+ * \brief Display list
+ * \param l List
+ */
 template<class Type>
-void affiche(list<Type> l)
-{
+void display (list<Type> l) {
   typename list<Type>::iterator il;
-  for (il=l.begin();il!=l.end();il++) cout <<(*il)<<" ";
-  cout<<endl;
+  for (il = l.begin(); il != l.end(); il++) cout << (*il) << " ";
+  cout << endl;
 }
 
+/*!
+ * \brief Normalize list
+ * \param l List
+ */
 template<class Type>
-list<Type> normalize(list<Type> l) {
+list<Type> normalize (list<Type> l) {
   list<Type> v(l);
   Type scale = l.front();
   typename list<Type>::iterator il;
-	
+
   if (scale == 0) {
-	cerr << "First element is zero, cannot be normed! \n";
-	return v;
-  }
-  
-  else {
-	for (il=v.begin();il!=v.end();il++)
-	  *il /= scale;
-	return v;
+    cerr << "First element is zero, cannot be normed! \n";
+    return v;
+  } else {
+    for (il = v.begin(); il != v.end(); il++)
+      *il /= scale;
+    return v;
   }
 }
 
-#endif
-
-
+#endif //_DEFS_H_

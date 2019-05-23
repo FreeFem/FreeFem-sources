@@ -73,10 +73,10 @@ autoreconf -i
     CXXFLAGS='-fpermissive' \
     --prefix=$SRC_DIR/AppDir/usr \
     --enable-download \
-	--enable-optim
+    --enable-optim \
+    --enable-generic
 ./3rdparty/getall -a
 make
-make check
 make install
 
 # TODO: ffglut tool is missing now

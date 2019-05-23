@@ -1,3 +1,3 @@
 #!/bin/sh
 
-make -j4
+make -j2

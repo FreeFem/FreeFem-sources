@@ -54,6 +54,7 @@ using namespace  Fem2D;
  */
 // subroutine use for tetegen call
 typedef const Mesh3 *pmesh3;
+typedef const MeshS *pmeshS;
 
 void mesh3_tetgenio_out (const tetgenio &out, Mesh3 &Th3);
 
@@ -66,7 +67,7 @@ Mesh3*mesh3_tetgenio_out (const tetgenio &out, const int &label_tet);
 Mesh3*mesh3_tetgenio_out (const tetgenio &out, const int &label_tet, const int &label_face);
 Mesh3*Convexhull_3Dpoints (char *switch_tetgen, const int &nv_t, const double *Xcoord, const double *Ycoord, const double *Zcoord, const int &label_tet);
 Mesh3*RemplissageSurf3D_tetgen (char *switch_tetgen, const Mesh3 &Th3, const int &label_tet);
-Mesh3*RemplissageSurf3D_tetgen_new (char *switch_tetgen, const Mesh3 &Th3, const int &label_tet,
+Mesh3*RemplissageSurf3D_tetgen_new (char *switch_tetgen, const MeshS &ThS, const int &label_tet,
                                     const int &nbhole, const double *tabhole,
                                     const int &nbregion, const double *tabregion,
                                     const int &nbfacecl, const double *tabfacecl);
@@ -295,7 +296,11 @@ AnyType Build2D3D_Op::operator () (Stack stack)  const {
 	delete [] takemesh;
 	int border_only = 0;
 	int recollement_border = 1;
-	Mesh3 *Th3_tmp = MoveMesh2_func(precis_mesh, Th, txx, tyy, tzz, border_only, recollement_border, point_confondus_ok);
+	/*
+	 * Mesh3 *Th3=Transfo_Mesh2_tetgen( precis_mesh, switch_tetgen, Th, txx, tyy, tzz, border_only,
+	 * recollement_border, point_confondus_ok, label_tet, mapfme);
+	 */
+	MeshS *ThS_tmp = MoveMesh2_func(precis_mesh, Th, txx, tyy, tzz, border_only, recollement_border, point_confondus_ok);
 
 	/* delete array */
 	delete [] txx;
@@ -303,7 +308,7 @@ AnyType Build2D3D_Op::operator () (Stack stack)  const {
 	delete [] tzz;
 
 	/* check orientation of the mesh and flip if necessary*/
-	Th3_tmp->flipSurfaceMesh3(surface_orientation);
+	ThS_tmp->flipSurfaceMeshS(surface_orientation);
 
 	int addcheckorientation = 0;
 	if (addcheckorientation == 1) {
@@ -311,21 +316,21 @@ AnyType Build2D3D_Op::operator () (Stack stack)  const {
 			cout << "check :: orientation des surfaces" << endl;
 		}
 
-		Th3_tmp->BuildBoundaryElementAdj();
+		ThS_tmp->BuildBoundaryElementAdj();
 		if (verbosity > 0) {
 			cout << "fin check :: orientation des surfaces" << endl;
 		}
 	}
 
-	/* set label of surface Th3_tmp */
-	for (int ii = 0; ii < Th3_tmp->nbe; ii++) {
-		const Triangle3 &K(Th3_tmp->be(ii));
+	/* set label of surface ThS_tmp */
+	for (int ii = 0; ii < ThS_tmp->nt; ii++) {
+		const TriangleS &K(ThS_tmp->elements[ii]);
 		int iv[3];
 		int lab;
 
-		iv[0] = Th3_tmp->operator () (K[0]);
-		iv[1] = Th3_tmp->operator () (K[1]);
-		iv[2] = Th3_tmp->operator () (K[2]);
+		iv[0] = ThS_tmp->operator () (K[0]);
+		iv[1] = ThS_tmp->operator () (K[1]);
+		iv[2] = ThS_tmp->operator () (K[2]);
 
 		map<int, int>::const_iterator imap;
 		imap = mapfme.find(K.lab);
@@ -336,16 +341,22 @@ AnyType Build2D3D_Op::operator () (Stack stack)  const {
 			lab = K.lab;
 		}
 
-		Th3_tmp->be(ii).set(Th3_tmp->vertices, iv, lab);
+		ThS_tmp->elements[ii].set(ThS_tmp->vertices, iv, lab);
 	}
 
 	/* mesh domains with tetgen */
-	Mesh3 *Th3 = RemplissageSurf3D_tetgen_new(switch_tetgen, *Th3_tmp, label_tet,
+	Mesh3 *Th3 = RemplissageSurf3D_tetgen_new(switch_tetgen, *ThS_tmp, label_tet,
 	                                          nbhole, tabhole, nbregion, tabregion,
 	                                          nbfacecl, tabfacecl);
-    Th3->getTypeMesh3()=1;
 
-	delete Th3_tmp;
+	/*
+	 * Mesh3 *Th3=Transfo_Mesh2_tetgen_new( precis_mesh, switch_tetgen, Th, txx, tyy, tzz, border_only,
+	 * recollement_border, point_confondus_ok, label_tet, mapfme,
+	 * nbhole, tabhole, nbregion, tabregion, nbfacecl,tabfacecl);
+	 *
+	 */
+
+	delete ThS_tmp;
 
 	Th3->BuildGTree();
 	Add2StackOfPtr2FreeRC(stack, Th3);
@@ -936,15 +947,15 @@ Mesh3*RemplissageSurf3D_tetgen (char *switch_tetgen, const Mesh3 &Th3, const int
 	return T_Th3;
 }
 
-Mesh3*RemplissageSurf3D_tetgen_new (char *switch_tetgen, const Mesh3 &Th3, const int &label_tet,
+Mesh3*RemplissageSurf3D_tetgen_new (char *switch_tetgen, const MeshS &ThS, const int &label_tet,
                                     const int &nbhole, const double *tabhole,
                                     const int &nbregion, const double *tabregion,
                                     const int &nbfacecl, const double *tabfacecl) {
 
-	assert(Th3.nt == 0);
-	int nv_t = Th3.nv;
-	int nt_t = Th3.nt;
-	int nbe_t = Th3.nbe;
+	//assert(Th3.nt == 0);
+	int nv_t = ThS.nv;
+	int nt_t = ThS.nt;
+	int nbe_t = ThS.nbe;
 
 	if (verbosity) {cout << "3D RemplissageSurf3D:: Vertex  triangle2  border " << nv_t << " " << nt_t << " " << nbe_t << endl;}
 
@@ -966,10 +977,10 @@ Mesh3*RemplissageSurf3D_tetgen_new (char *switch_tetgen, const Mesh3 &Th3, const
 	jtet = 0;
 
 	for (int nnv = 0; nnv < nv_t; nnv++) {
-		in.pointlist[itet] = Th3.vertices[nnv].x;
-		in.pointlist[itet + 1] = Th3.vertices[nnv].y;
-		in.pointlist[itet + 2] = Th3.vertices[nnv].z;
-		in.pointmarkerlist[nnv] = Th3.vertices[nnv].lab;
+		in.pointlist[itet] = ThS.vertices[nnv].x;
+		in.pointlist[itet + 1] = ThS.vertices[nnv].y;
+		in.pointlist[itet + 2] = ThS.vertices[nnv].z;
+		in.pointmarkerlist[nnv] = ThS.vertices[nnv].lab;
 		itet = itet + 3;
 	}
 
@@ -978,14 +989,14 @@ Mesh3*RemplissageSurf3D_tetgen_new (char *switch_tetgen, const Mesh3 &Th3, const
 	if (verbosity) {cout << " tetgenio: facet " << endl;}
 
 	// Version avec des facettes
-	in.numberoffacets = nbe_t;
+	in.numberoffacets = nt_t;
 	in.facetlist = new tetgenio::facet[in.numberoffacets];
 	in.facetmarkerlist = new int[in.numberoffacets];
 
-	for (int ibe = 0; ibe < nbe_t; ibe++) {
+	for (int it = 0; it < nt_t; it++) {
 		tetgenio::facet *f;
 		tetgenio::polygon *p;
-		f = &in.facetlist[ibe];
+		f = &in.facetlist[it];
 		f->numberofpolygons = 1;
 		f->polygonlist = new tetgenio::polygon[f->numberofpolygons];
 		f->numberofholes = 0;
@@ -996,16 +1007,16 @@ Mesh3*RemplissageSurf3D_tetgen_new (char *switch_tetgen, const Mesh3 &Th3, const
 		p->vertexlist = new int[3];
 
 		// creation of elements
-		const Triangle3 &K(Th3.be(ibe));// const Triangle2 & K(Th2.elements[ii]); // Version Mesh2
-		p->vertexlist[0] = Th3.operator () (K[0]) + 1;
-		p->vertexlist[1] = Th3.operator () (K[1]) + 1;
-		p->vertexlist[2] = Th3.operator () (K[2]) + 1;
+		const TriangleS &K(ThS.elements[it]);// const Triangle2 & K(Th2.elements[ii]); // Version Mesh2
+		p->vertexlist[0] = ThS.operator () (K[0]) + 1;
+		p->vertexlist[1] = ThS.operator () (K[1]) + 1;
+		p->vertexlist[2] = ThS.operator () (K[2]) + 1;
 
 		for (int kkk = 0; kkk < 3; kkk++) {
 			assert(p->vertexlist[kkk] <= in.numberofpoints && p->vertexlist[kkk] > 0);
 		}
 
-		in.facetmarkerlist[ibe] = K.lab;
+		in.facetmarkerlist[it] = K.lab;
 	}
 
 	// mise a jour des nouvelles variables
@@ -1049,7 +1060,6 @@ Mesh3*RemplissageSurf3D_tetgen_new (char *switch_tetgen, const Mesh3 &Th3, const
 		cout << " Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " " << T_Th3->nt << " " << T_Th3->nbe << endl;
 		cout << "FreeFem++: End check mesh given by tetgen" << endl;
 	}
-
 	return T_Th3;
 }
 
@@ -1526,8 +1536,8 @@ class Remplissage_Op: public E_F0mps
 		Expression eTh;	// Surface mesh
 		// ====================
 		// This parameter allow to add inside points of this initial volume mesh
-		Expression eVolTh;
-		bool bVol;
+		//Expression eVolTh;
+		//bool bVol;
 		// ====================
 		static const int n_name_param = 9 + 2 + 1 + 1;	//
 		static basicAC_F0::name_and_type name_param [];
@@ -1558,10 +1568,19 @@ class Remplissage_Op: public E_F0mps
 				CompileError("uncompatible movemesh3 (Th, label= , refface=  ");
 			}
 
-			bVol = false;
+			//bVol = false;
+			/*
+			 * if( BCastTo<Mesh3 *>(args[1]) ){
+			 * eVolTh = CastTo<Mesh3 *>(args[1]);
+			 * bVol=true;
+			 * }
+			 * else{
+			 * bVol=false;
+			 * }
+			 */
 		}
 
-		Remplissage_Op (const basicAC_F0 &args, Expression tth, Expression vth)
+		/*Remplissage_Op (const basicAC_F0 &args, Expression tth, Expression vth)
 			: eTh(tth), eVolTh(vth) {
 			if (verbosity > 1) {cout << "Remplissage du bord" << endl;}
 
@@ -1575,7 +1594,7 @@ class Remplissage_Op: public E_F0mps
 			}
 
 			bVol = true;
-		}
+		}*/
 
 		AnyType operator () (Stack stack)  const;
 };
@@ -1599,34 +1618,32 @@ basicAC_F0::name_and_type Remplissage_Op::name_param [] = {
 
 class Remplissage: public OneOperator {
 	public:
-		Remplissage (): OneOperator(atype<pmesh3>(), atype<pmesh3>()) {}
+		Remplissage (): OneOperator(atype<pmesh3>(), atype<pmeshS>()) {}
 
 		E_F0*code (const basicAC_F0 &args) const {
 			return new Remplissage_Op(args, t[0]->CastTo(args[0]));
 		}
 };
 
-class RemplissageAddPoint: public OneOperator {
+/*class RemplissageAddPoint: public OneOperator {
 	public:
 		RemplissageAddPoint (): OneOperator(atype<pmesh3>(), atype<pmesh3>(), atype<pmesh3>()) {}
 
 		E_F0*code (const basicAC_F0 &args) const {
 			return new Remplissage_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
 		}
-};
+};*/
 
 AnyType Remplissage_Op::operator () (Stack stack)  const {
 	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
-	Mesh3 *pTh = GetAny<Mesh3 *>((*eTh)(stack));
+	MeshS *pTh = GetAny<MeshS *>((*eTh)(stack));
 
 	ffassert(pTh);
-	Mesh3 &Th = *pTh;
-	Mesh3 *m = pTh;	// question a quoi sert *m ??
-    int typeMesh3 = Th.getTypeMesh3();
+	MeshS &Th = *pTh;
 	int nbv = Th.nv;// nombre de sommet
 	int nbt = Th.nt;// nombre de triangles
 	int nbe = Th.nbe;	// nombre d'aretes fontiere
-	cout << "Tetgen : Vertex Triangle Border " << nbv << "  " << nbt << " nbe " << nbe << endl;
+	cout << "Tetgen: initial surface mesh - Vertex:  " << nbv << " Triangles:" << nbt << " Edges: " << nbe << endl;
 
 	KN<long> zzempty;
 	// int intempty=0;
@@ -1669,7 +1686,7 @@ AnyType Remplissage_Op::operator () (Stack stack)  const {
 
 	// case with a inside meshes
 
-	if (bVol) {
+	/*if (bVol) {
 		// Inside point is given by a mesh
 		Mesh3 *pvolTh = GetAny<Mesh3 *>((*eVolTh)(stack));
 		Mesh3 &volTh = *pvolTh;
@@ -1707,9 +1724,9 @@ AnyType Remplissage_Op::operator () (Stack stack)  const {
 		}
 
 		assert(loopnv / 3 == nvInside);
-	}
+	}*/
 
-	if (!bVol && !nargs[11]) {assert(InsidePoint.N() == 0);}
+	if (/*!bVol && */!nargs[11]) {assert(InsidePoint.N() == 0);}
 
 	// fin add inisde point
 	//= ========================
@@ -1748,15 +1765,18 @@ AnyType Remplissage_Op::operator () (Stack stack)  const {
 	if (verbosity > 1) {cout << "tetgen:" << "nbhole=" << nbhole << "nbregion=" << nbregion << endl;}
 
 	int nbinside = InsidePoint.N() / 3;
-	Mesh3 *Th3 = 0;
+	//Mesh3 *Th3 = 0;
 
-	if (nargs[11] || nargs[12] || bVol) {
+	/*if (nargs[11] || nargs[12] || bVol) {
 		Th3 = RemplissageSurf3D_tetgen_new(switch_tetgen, Th, label_tet, nbhole, tabhole, nbregion, tabregion, nbfacecl, tabfacecl, nbinside, InsidePoint, sizeofmetric, metric);
 		// delete multiple vertex
 		Th3->TrueVertex();
-	} else {
-		Th3 = RemplissageSurf3D_tetgen_new(switch_tetgen, Th, label_tet, nbhole, tabhole, nbregion, tabregion, nbfacecl, tabfacecl);
-	}
+	} else {*/
+	Mesh3 *Th3 = RemplissageSurf3D_tetgen_new(switch_tetgen, Th, label_tet, nbhole, tabhole, nbregion, tabregion, nbfacecl, tabfacecl);
+    
+    if (nargs[11] || nargs[12]) // delete multiple vertex
+        Th3->TrueVertex();
+	//}
 
 	if (verbosity > 0) {
 		cout << "finish tetgen " << endl;
@@ -1794,7 +1814,6 @@ AnyType Remplissage_Op::operator () (Stack stack)  const {
 	}
 
 	Th3->BuildGTree();
-  Th3->getTypeMesh3()=typeMesh3;
 	Add2StackOfPtr2FreeRC(stack, Th3);
 
 	*mp = mps;
@@ -2220,8 +2239,8 @@ static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3
 	Global.Add("tetgconvexhull", "(", new ConvexHull3D_tetg_file);
 	Global.Add("tetgconvexhull", "(", new ConvexHull3D_tetg_file(1));
 	Global.Add("tetgtransfo", "(", new Build2D3D);
-	Global.Add("tetg", "(", new Remplissage);
-	Global.Add("tetg", "(", new RemplissageAddPoint);
+	Global.Add("tetg", "(", new Remplissage); // input a meshS to build a mesh3
+	//Global.Add("tetg", "(", new RemplissageAddPoint); // not use
 	Global.Add("tetgreconstruction", "(", new ReconstructionRefine);
 }
 

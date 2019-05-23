@@ -793,7 +793,7 @@ template<class A,class B>
 template<class A> 
   AnyType UnRefCopyPtr(Stack s,const AnyType &a) { 
     A ** ppa=PGetAny<A*>(a);
-    A * pc = new A(**ppa);
+    A * pc = *ppa ? new A(**ppa) : nullptr;
     return   SetPtrAny(Add2StackOfPtr2Free(s,pc)) ;}
        
     

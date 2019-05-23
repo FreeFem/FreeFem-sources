@@ -39,59 +39,18 @@
 
 // definition R
 #include <cstdlib>
-namespace Fem2D {
 
-#include "R3.hpp"
-}
- 
  using namespace ::std;
-#include "GenericMesh.hpp" 
+#include "GenericMesh.hpp"
+#include "MeshSn.hpp"
 
 namespace Fem2D {
   
 typedef GenericVertex<R3> Vertex3;
 
+//  define in MeshSn.hpp
+// struct DataSeg3 and struct DataTriangle3
 
-struct DataSeg3  {
-  static const int NbOfVertices =2;
-  static const int NbOfEdges =1;
-  static const int NbOfFaces =0;
-  static const int NT =0;
-  static const int NbOfAdjElem =NbOfVertices;
-  static const int NbOfVertexOnHyperFace =NbOfVertices-1;
-  typedef Vertex3 V;
-  typedef  V::Rd Rd;
-  static R mesure(  V *  pv[NbOfVertices]) {
-    return R3(*pv[0],*pv[1]).norme();
-  }
-  typedef R1 RdHat;
-  typedef R0 RdHatBord;
-  static RdHat PBord(const int * nvb,const RdHatBord &P)  { return RdHat(*nvb) ;}
-        
-  //static const int (* const nvface)[3];// = nvfaceSeg ;
-  //static const int (* const nvedge)[2];//  = nvedgeSeg;
-        
-  };
-
-  
-struct DataTriangle3  {
-  static const int NbOfVertices =3;
-  static const int NbOfEdges =3;
-  static const int NbOfFaces =1;
-  static const int NT =0;
-  static const int NbOfAdjElem =NbOfVertices;
-  static const int NbOfVertexOnHyperFace =NbOfVertices-1;
-  typedef Vertex3 V;
-  typedef  V::Rd Rd ;
-  typedef R2 RdHat;
-  typedef R1 RdHatBord;
-  static RdHat PBord(const int * nvb,const RdHatBord &P)  { 
-  return RdHat::KHat[nvb[0]]*(1-P.x)+R2::KHat[nvb[1]]*(P.x) ;}  
-
-  static R mesure(  V *  pv[NbOfVertices]) {    
-    return (R3(*pv[0],*pv[1])^R3(*pv[0],*pv[2])).norme()*0.5;
-  }
-};
 
 struct DataTet  {
   static const int NbOfVertices =4;
@@ -121,15 +80,6 @@ struct DataTet  {
 };
 
 
-    class BoundaryEdgeS: public GenericElement<DataSeg3>  
-  {
-  public:
-      BoundaryEdgeS() {}; // constructor empty for array
-      bool in(const Vertex3 * pv) const {return pv == &operator[](0) || pv == &operator[](1);}
-      
-  };
-
-
 class Triangle3: public GenericElement<DataTriangle3>  {
 public: 
   Triangle3() {}; // constructor empty for array
@@ -151,31 +101,6 @@ public:
 
 };
 
-  
-  class TriangleS: public Triangle3  {
-public: 
-  TriangleS() {}; // constructor empty for array
-
-  void Gradlambda(Rd * GradL) const
-  {
-    R3 Normal = Edge(2)^Edge(1); 
-    R N = Normal.norme2();
-    for(int i=0 ; i<3 ; i++)
-      GradL[i]= (Normal^Edge(i)) / N;
-   }
-      
-   R3 NormalS(int i) const {
-     ASSERTION(i>=0 && i <3);
-     return R3( Edge(2)^Edge(1) );
-   }
-      
-   R EdgeOrientationS(int i) const {
-     R Orient[2]={-1.,1.};
-     return Orient[EdgeOrientation(i)];
-   }
-
-};
- 
 
 class Tet: public GenericElement<DataTet>  {
 public: 
@@ -213,76 +138,34 @@ public:
 
 template<typename Mesh> void GSave2(FILE * ff,const Mesh & Th) ;
 
-  
-class MeshS : public GenericMesh<TriangleS,BoundaryEdgeS,Vertex3> { 
-public:
-  int *liste_v_num_surf;
-  int *v_num_surf;
-  MeshS():v_num_surf(0),liste_v_num_surf(0) {};
-  MeshS(FILE *f,int offset=0);
-  //MeshS(const string);         
-  MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb);
- // mapping for volume/surface vertices
- // int *v_num_surf=NULL; // mapping for surface/volume vertices
-  const Element * Find( Rd P, R2 & Phat,bool & outside,const Element * tstart=0) const;
-  int Save(const string & filename);
-  //MeshS(FILE *f);
-  void GSave(FILE * f,int offset=0) const ;
-  void GRead(FILE * f,int offset);
-  double hmin() const;
-  int Save(const string & filename) const;
-    
-  ~MeshS() {
-    delete [] liste_v_num_surf ;
-    delete [] v_num_surf ;
-
-    SHOWVERB(cout << " %%%% delete MeshS"<< this << endl) ; }
-  private:
-  MeshS(const MeshS &); // pas de construction par copie
-  void operator=(const MeshS &);// pas affectation par copy
-};
-
-
+ 
 class Mesh3 : public GenericMesh<Tet,Triangle3,Vertex3> { 
 public:
-  Mesh3():meshS(0){}
+  Mesh3():meshS(0){} 
   Mesh3(const string);
   Mesh3(const string, const long); // Add J. Morice 11/10
   Mesh3(FILE *f,int offset=0);     
   Mesh3(const  Serialize &);     
   Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb); 
-  Mesh3(int nnv, int nnbe, Vertex3 *vv, Triangle3 *bb);  // surface mesh 
   double hmin() const; // Add J. Morice 11/10
   //surface mesh possible
-  MeshS *meshS; 
-  int typeMesh3;
+  MeshS *meshS;
+  int nEdges;
   void GSave(FILE * f,int offset=0) const ;
   void GRead(FILE * f,int offset);
-  int Save(const string & filename) const ;  
+  int Save(const string & filename) const ;
   int SaveSurface(const string & filename) const ;  
   int SaveSurface(const string & filename1, const string & filename2) const ;  
-  void flipSurfaceMesh3(int surface_orientation);
+  //void flipSurfaceMesh3(int surface_orientation);
   void read(istream &);
   void readmsh(ifstream & f,int offset);
   void TrueVertex();
-  inline int & getTypeMesh3() {
-    return typeMesh3;
-   }
- inline const int & getTypeMesh3() const{
-   return typeMesh3;
- }
- inline MeshS * getMeshS() {
-   return meshS;
- }
- inline MeshS * getMeshS() const{
-   return meshS;
- }
+  void BuildMeshS(double angle=8.*atan(1.)/9.);  // default angle = 40 deg
     ~Mesh3() {
         
-        if (meshS) {
-          //  if (meshS->vertices == vertices) vertices = 0; // Hack FH april to remove double free (very ..Bad )
+        if (meshS)
             meshS->destroy();//  Add clean mesh if necessary ...FH and AF. april 2019
-        }
+        
         SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl);}
 private:
   int load(const string & filename); 
@@ -290,11 +173,7 @@ private:
   void operator=(const Mesh3 &);// pas affectation par copy
 };
 
-
-
-    
-
-
+  
   
 // for the caracteristic method.
   int  WalkInTet(const Mesh3 & Th,int it, R3 & Phat,const R3 & U, R & dt);

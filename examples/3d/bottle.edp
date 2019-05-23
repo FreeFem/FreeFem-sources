@@ -12,9 +12,9 @@ real Rext = 1.;// External radius
 real Rneck= 0.2; // Radius of the neck of the bootle
 int labtop =3, labbottom =2, labcyl = 1;
 
-mesh3 Ths;
+meshS Ths;
 {
-mesh3 Th3c,Th3bottom, Th3top;
+meshS Th3c,Th3bottom, Th3top;
 {
 // form of the neck ... 	
 real[int,int] srneck= 
@@ -46,16 +46,16 @@ for(int i=0;i<4;++i)
  Th2c=adaptmesh(Th2c,em11,em21,em22,IsMetric=1,periodic=perio,nbvx=100000);
 }
 Th2c=change(Th2c,fregion=labcyl); 
- Th3c = movemesh23(Th2c,transfo=[E1 , E2 , E3]);// maillage exterieur 
-medit("Th3c",Th3c);
+Th3c = movemesh23(Th2c,transfo=[E1 , E2 , E3]);// maillage exterieur 
+medit("Th3c",Th3c); 
 }
 // extraction of the border of the bottle
 int[int] databoder(1);
-int ncb= getborder(Th3c,databoder);
-int ktop= Th3c(databoder[databoder[1]]).z < Th3c(databoder[databoder[0]]).z;
+int ncb= getborder(Th3c,databoder); 
+int ktop= Th3c(databoder[databoder[1]]).z < Th3c(databoder[databoder[0]]).z; 
 int  kbot=1-ktop;
-real Zbot = Th3c(databoder[databoder[kbot]]).z;
-real Ztop = Th3c(databoder[databoder[ktop]]).z;
+real Zbot = Th3c(databoder[databoder[kbot]]).z; 
+real Ztop = Th3c(databoder[databoder[ktop]]).z; 
 cout << " Z  top  " << Zbot  << endl; 
 cout << " Z  bot  " << Ztop << endl; 
 assert( ncb ==2);

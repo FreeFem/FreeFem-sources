@@ -54,7 +54,7 @@ for(int ii=0; ii<2; ii++) //  BUG trap  in interation 3
   cout << " met size "<< met.n << " " << m11[].n << endl;
   
   verbosity=1;
-    mesh3 Thb=freeyams(Th3,metric=m11[],hmin=0.0001,hmax=0.3,gradation=2.,verbosity=-10);
+    meshS Thb=freeyams(Th3,metric=m11[],hmin=0.0001,hmax=0.3,gradation=2.,verbosity=-10);
     h3=det3s(m11,m21,m31,m22,m32,m33);
     real[int] rltetg = [0.1,0.1,.1,1,lerr*5];
   Th3=tetg(Thb,switch="aAQpYY",regionlist=rltetg);

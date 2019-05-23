@@ -70,6 +70,8 @@ macro bb3(boundingMesh, overshoot, ThGlobal)
             ThGlobal = trunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3) && z >= bb(4) && z <= bb(5)));// EOM
 
 macro plotMPI(Th, u, legend, Pk, def, K, d, w)
+if(!NoGraphicWindow)
+{
     if(mpirank == 0) {
         meshN ThCurrent = Th;
         meshN[int] meshTab(mpisize);
@@ -96,9 +98,12 @@ macro plotMPI(Th, u, legend, Pk, def, K, d, w)
         Isend(processor(0, rq[1]), u);
         mpiWait(rq[0]);
         mpiWait(rq[1]);
-    }// EOM
+    }
+	}// EOM
 
 macro plotMPIeach(Th, u, legend, Pk, def, K, d, w)
+if(!NoGraphicWindow)
+{
     if(mpirank == 0) {
         meshN ThCurrent = Th;
         meshN[int] meshTab(mpisize);
@@ -126,7 +131,8 @@ macro plotMPIeach(Th, u, legend, Pk, def, K, d, w)
         Isend(processor(0, rq[1]), u);
         mpiWait(rq[0]);
         mpiWait(rq[1]);
-    }// EOM
+    }
+}// EOM
 
 macro export(name, mesh, sol, fforder, comm)
 load "iovtk"

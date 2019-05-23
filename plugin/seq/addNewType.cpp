@@ -21,20 +21,28 @@
 // E-MAIL  : ...
 
 #include "ff++.hpp"
-using namespace Fem2D;	// see src/femlib/RNM.hpp
+using namespace Fem2D; // see src/femlib/RNM.hpp
 
+/*!
+ * \class myType
+ * \brief Example class
+ */
 class myType {
 	public:
 		string *nom;
-		myType (char *nn) {cout << " nn = " << nn << endl;}
+		myType (char *nn) { cout << " nn = " << nn << endl; } // initialization
 
-		double x (double u, double v) const {return u + v;}
+		double x (double u, double v) const { return u + v; }
 
-		void init () {cout << " init myTpe \n"; nom = 0;}	// initialization of the pointer
+		void init () { cout << " init myTpe " << endl; nom = 0; } // pointer initialization
 
-		void destroy () {cout << " destroy de la variable associe \n"; delete nom; nom = 0;}
+		void destroy () { cout << " associated variable destruction " << endl; delete nom; nom = 0; } // pointer delete
 };
 
+/*!
+ * \class myType_uv
+ * \brief Example class
+ */
 class myType_uv {
 	public:
 		myType *mt;
@@ -42,17 +50,17 @@ class myType_uv {
 		myType_uv (myType *mmt, double uu, double vv): mt(mmt), u(uu), v(vv) {}
 };
 
+// The real constructor is here
 /*!
- * \brief constructor init_MyType
+ * \brief Constructor init_MyType
  * \param a myType *const &
  * \param s string *const &
  * \return NULL
  */
-// le vrai constructeur est la
-myType*init_MyType (myType *const &a, string *const &s) {
+myType *init_MyType (myType *const &a, string *const &s) {
 	a->nom = new string(*s);
 	cout << " build MyType " << *a->nom << endl;
-	return NULL;// return value never used for now (13.1)
+	return NULL;// returned value never used for now (13.1)
 }
 
 /*!
@@ -62,8 +70,9 @@ myType*init_MyType (myType *const &a, string *const &s) {
  * \param v const double &
  * \return myType_uv(mt, u, v);
  */
-myType_uv set_myType_uv (myType *const &mt, const double &u, const double &v)
-{return myType_uv(mt, u, v);}
+myType_uv set_myType_uv (myType *const &mt, const double &u, const double &v) {
+	return myType_uv(mt, u, v);
+}
 
 /*!
  * \brief Set a type
@@ -86,33 +95,28 @@ R3*get_myType_uv_N (const myType_uv &muv) {
 	return &r;
 }
 
-// Add the function name to the freefem++ table
-/*  class Init { public:
- * Init();
- * };
- * $1 */
-
+// Add the function name to the FreeFEM table
+/*!
+ * \brief Dynamic load function
+ */
 static void Load_Init () {
-	Dcl_Type<myType *>(InitP<myType>, Destroy<myType> );// declare deux nouveau type pour freefem++  un pointeur et
+	Dcl_Type<myType *>(InitP<myType>, Destroy<myType>);// declare two new types for FreeFEM
 	Dcl_Type<myType_uv>();
 	// Dcl_Type<R3>();
-	// cast d'un ** en *
-	// atype<myType**>()->AddCast( new E_F1_funcT<myType*,myType **>(UnRef<myType*>));
+	// cast of ** to *
+	// atype<myType**>()->AddCast(new E_F1_funcT<myType*, myType **>(UnRef<myType*>));
 
-	zzzfff->Add("myType", atype<myType *>());	// ajoute le type myType a freefem++
-	// constructeur  d'un type myType  dans freefem
-	TheOperators->Add("<-",
-	                  new OneOperator2_<myType *, myType *, string *>(&init_MyType));
-	// dans ff++
-	// myType ff("qsdlqdjlqsjdlkq");
-	// ajoute la fonction  myType* (u,v) cree le type myType_uv
-	// ff(0.1,0.6).x
-	// deux etapes
-	// 1)  ff(u,v) -> myType_uv
-	// ajoute la methode x sur myType_uv   ff(u,v).x
-	// ajoute des fonction sur myType_uv
-	// 1)
+	zzzfff->Add("myType", atype<myType *>());	// add type myType to FreeFEM
+	// constructeur d'un type myType  dans freefem
+	TheOperators->Add("<-", new OneOperator2_<myType *, myType *, string *>(&init_MyType));
+	// in FreeFEM
+	// myType ff("thisisastring");
+	// add the function myType* (u,v) & create the type myType_uv
 
+	// ff(0.1, 0.6).x
+	// two steps:
+	// add the method x on myType_uv
+	// add function on myType_uv
 	atype<myType *>()->Add("(", "", new OneOperator3_<myType_uv, myType *, double, double>(set_myType_uv));
 
 	Add<myType_uv>("x", ".", new OneOperator1_<double, myType_uv>(get_myType_uv_x));
