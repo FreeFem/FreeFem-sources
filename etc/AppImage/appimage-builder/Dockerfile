@@ -26,7 +26,7 @@ RUN apt update && apt full-upgrade -y && apt install -y --no-install-recommends 
     ghostscript \
     git \
     gnuplot-qt \
-	gsl \
+    libgsl0-dev \
     libarpack2-dev \
     libfftw3-dev \
     libgmm++-dev \
