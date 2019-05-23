@@ -13,7 +13,7 @@ real ir2 = 2.;
 complex ic = 5.0 + 1i * 6;
 complex ic2 = 1. + 1i;
 string is = "6 + 1i * 7";
-string is2 = "Stackoverflo";
+string is2("Stackoverflo");
 matrix A = [[1, 2, 3],
 [4, 5, 6],
 [7, 8, 9]];
