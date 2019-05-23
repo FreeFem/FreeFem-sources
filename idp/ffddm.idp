@@ -108,9 +108,9 @@ if (preffe#prmesh#isincomm)
 			assert(0);
 			ENDIFMACRO
 			IFMACRO(pr#localmacroaug,1)
-			res = preffe#Auginterp'*ui;
-			/* A PARTIR DE LA IL FAUT REPRENDRE CETTE MACRO */
-			preffe#Augupdate(res,true);
+			preffe#K[int] tmp = ui .* preffe#Dk[mpiRank(preffe#prmesh#commddm)];
+			res = preffe#Auginterp'*tmp;
+			preffe#Augupdate(res,false);
 			ENDIFMACRO
 		}
 		else if (str == svhcoarse) {

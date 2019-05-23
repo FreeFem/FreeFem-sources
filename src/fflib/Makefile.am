@@ -59,6 +59,7 @@ libff_a_SOURCES2=  UMFPack_Solver.cpp \
 	../femlib/Mesh1dn.cpp \
 	../femlib/Mesh2dn.cpp \
 	../femlib/Mesh3dn.cpp \
+	../femlib/MeshSn.cpp \
 	../femlib/GQuadTree.cpp \
 	../femlib/libmesh5.c \
 	glumesh2D.cpp \

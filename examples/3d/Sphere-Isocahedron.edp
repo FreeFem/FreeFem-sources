@@ -6,7 +6,7 @@ load "tetgen"
 load "freeyams"
 
 
-func mesh3 Ellipsoide20 (real RX,real RY, real RZ,real hsize,int L,int orientation)
+func meshS Ellipsoide20 (real RX,real RY, real RZ,real hsize,int L,int orientation)
 {
 //===================================================================================
 //Angles utiles
@@ -45,36 +45,37 @@ border a(t=0,1){x=t; y=0; label =1;};
 border b(t=1,0.5){x=t; y=sqrt(3)*(1-t); label =2;};
 border c(t=0.5,0){x=t; y=sqrt(3)*(t); label =3;};
 mesh Triangle= buildmesh(a(n)+b(n)+c(n)); //traingle equilateral
-
+plot (cmm="Triangle",Triangle,wait=1);
 
 func f = 1;
 int[int]  ref=[0,1]; 
 
-mesh3 Triangle3 = movemesh23(Triangle,transfo=[x,0,y],label=ref);//trianglesup
-mesh3 TriangleS = movemesh3(Triangle3,transfo=[x,sinico*y+cosico*z,-cosico*y+sinico*z],label=ref);//rotation de -(pi - diedre) par rapport à l'axe des x pour former une face de la pyramide pentagonale
-
+meshS Triangle3 = movemesh23(Triangle,transfo=[x,0,y],label=ref);//trianglesup
+plot (cmm="Triangle3",Triangle3,wait=1);
+meshS TriangleS = movemeshS(Triangle3,transfo=[x,sinico*y+cosico*z,-cosico*y+sinico*z],label=ref);//rotation de -(pi - diedre) par rapport à l'axe des x pour former une face de la pyramide pentagonale
+plot (cmm="TriangleS",TriangleS,wait=1);
 //medit("face pyramide pentagonale",TriangleS);
 
-mesh3 TriangleI = movemesh3(TriangleS,transfo=[x,-cosdiedre*y+sindiedre*z,-sindiedre*y-cosdiedre*z],orientation=-orientation,label=ref);//triangle inf rotation de l'angle diedre par rapport au triangle sup
-mesh3 Triangles = TriangleI+TriangleS;
+meshS TriangleI = movemeshS(TriangleS,transfo=[x,-cosdiedre*y+sindiedre*z,-sindiedre*y-cosdiedre*z],orientation=-1,label=ref);//triangle inf rotation de l'angle diedre par rapport au triangle sup
 
+meshS Triangles = TriangleI+TriangleS;cout << "test bug " << endl;
+plot (cmm="TriangleI",TriangleI,wait=1);
+plot (cmm="Triangles",Triangles,wait=1);
 //medit("face pyramide pentagonale + face antiprisme d'ordre 5",Triangles);
 
-mesh3 T1 = movemesh3(Triangles,transfo=[x-0.5,y-sinpi3*cosico,z],label=ref);//translation pour que la figure soit sur le bord du pentagone
+meshS T1 = movemeshS(Triangles,transfo=[x-0.5,y-sinpi3*cosico,z],label=ref,orientation=1);//translation pour que la figure soit sur le bord du pentagone
 
-mesh3 T2 = movemesh3(T1,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref);
-mesh3 T3 = movemesh3(T2,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref);
-mesh3 T4 = movemesh3(T3,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref);
-mesh3 T5 = movemesh3(T4,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref);
+meshS T2 = movemeshS(T1,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref,orientation=1);
+meshS T3 = movemeshS(T2,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref);
+meshS T4 = movemeshS(T3,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref);
+meshS T5 = movemeshS(T4,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref);
 
-mesh3 Tdemi= T1+T2+T3+T4+T5;//moitié de l'icosaedre
+meshS Tdemi= T1+T2+T3+T4+T5;//moitié de l'icosaedre
 
-
-mesh3 Tdemi0 = movemesh3(Tdemi,transfo=[x,y,z+0.5*h],label=ref);//moitié supérieure
-mesh3 Tdemi1 = movemesh3(Tdemi0,transfo=[x,y,-z],label=ref);//moitié inférieure
-mesh3 Tdemi1rot = movemesh3(Tdemi1,transfo=[cospi5*x-sinpi5*y,sinpi5*x+cospi5*y,z],label=ref);//rotation de la moitié inférieure pour les emboiter
-
-mesh3 Ticosaedre = Tdemi0+Tdemi1rot;
+meshS Tdemi0 = movemeshS(Tdemi,transfo=[x,y,z+0.5*h],label=ref);//moitié supérieure
+meshS Tdemi1 = movemeshS(Tdemi0,transfo=[x,y,-z],label=ref);//moitié inférieure
+meshS Tdemi1rot = movemeshS(Tdemi1,transfo=[cospi5*x-sinpi5*y,sinpi5*x+cospi5*y,z],label=ref,orientation=-1);//rotation de la moitié inférieure pour les emboiter
+meshS Ticosaedre = Tdemi0+Tdemi1rot;
 plot(cmm="Icosaedre",Ticosaedre,wait=1);
 
 //=================================================================================
@@ -82,12 +83,12 @@ plot(cmm="Icosaedre",Ticosaedre,wait=1);
 //=================================================================================
 real aa =RX, bb=RY, cc =RZ;
 func metric = sqrt(aa*x*x+bb*y*y+cc*z*z);
-mesh3 Th = movemesh3(Ticosaedre,transfo=[x/metric,y/metric,z/metric]);
-mesh3 Thb=freeyams(Th,hmin=hsize,hmax=hsize,gradation=1.1);
+meshS Th = movemeshS(Ticosaedre,transfo=[x/metric,y/metric,z/metric]);  plot (cmm="Th",Th,wait=1);
+meshS Thb=freeyams(Th,hmin=hsize,hmax=hsize,gradation=1.1);  plot (cmm="Thb",Thb,wait=1);
 return Thb;
 }
 real hsize=0.1;
-mesh3 Thb=Ellipsoide20(1,1,1,hsize,1,1);
+meshS Thb=Ellipsoide20(1,1,1,hsize,1,1);
 // Thb=freeyams(Thb,hmin=hsize,hmax=hsize,gradation=1.1);
 plot(cmm="Thb",Thb,wait=1);
 

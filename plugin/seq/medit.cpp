@@ -78,7 +78,7 @@ class readsol_Op: public E_F0mps
 			}
 		}
 
-		static ArrayOfaType typeargs () {return ArrayOfaType(atype<string *>(), true);}	// all type
+		static ArrayOfaType typeargs () {return ArrayOfaType(atype<string *>());}	// all type
 
 		static E_F0*f (const basicAC_F0 &args) {return new readsol_Op(args);}
 

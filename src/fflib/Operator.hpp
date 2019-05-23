@@ -116,7 +116,7 @@ struct Op2_or: public binary_function<bool,bool,bool> {
 template<class R,class A,class B> 
 struct Op2_padd: public binary_function<A,B,R*> { 
   static R * f(Stack s,const A & a,const B & b)  { 
-   R* r= Add2StackOfPtr2Free(s,new R (*a  + *b));
+   R* r= Add2StackOfPtr2Free(s, a || b ? new R ((a ? *a : nullptr) + (b ? *b : nullptr)) : nullptr);
   // delete a,delete b;
   return r;} }; 
 
@@ -505,7 +505,7 @@ struct set_eq_arraypd_div: public binary_function<A,B,A> {
 
 template<class A>
 struct PrintP: public binary_function<ostream*,A,ostream*> {
-    static ostream* f(ostream* const  & a,const A & b)  {  *a << *b; 
+    static ostream* f(ostream* const  & a,const A & b)  {  if(b) *a << *b; 
 	// a->flush();// ADD FH MAi 2010 to empty the buffer  baf idea  add flush of ostream 
   //delete b; mars 2006 FH 
    return a;}

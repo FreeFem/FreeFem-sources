@@ -10,7 +10,8 @@ EXTRA_PROGRAMS=ffglut
 # FFCS:visualization stream redirection
 ffglut_SOURCES=../Graphics/ffglut.cpp ../Graphics/gggg.cpp ../Graphics/ffthreads.cpp \
 ../Graphics/ffthreads.hpp \
-../femlib/fem.cpp ../femlib/Mesh3dn.cpp ../femlib/Mesh2dn.cpp  ../femlib/Mesh1dn.cpp ../femlib/GQuadTree.cpp  ../femlib/FQuadTree.cpp \
+../femlib/fem.cpp ../femlib/MeshSn.cpp ../femlib/Mesh3dn.cpp ../femlib/Mesh2dn.cpp  \
+../femlib/Mesh1dn.cpp ../femlib/GQuadTree.cpp  ../femlib/FQuadTree.cpp \
 ../femlib/Drawing.cpp ../femlib/mshptg.cpp ../fflib/ffapi.cpp
 
 ffglut_DEPENDENCIES= ../libMesh/libMesh.a

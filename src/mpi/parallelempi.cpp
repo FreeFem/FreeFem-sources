@@ -434,6 +434,8 @@ struct MPIrank {
 	    aa->BuildGTree();
             a=aa;
 	  }
+    delete a->meshS;
+    const_cast<Fem2D::Mesh3*>(a)->meshS = nullptr;
 	delete buf;
 	return *this;
   }
@@ -781,6 +783,7 @@ public:
 
     if(0==state++ &&  l1>0 ) // send the second part
       {
+	int ll=WSend(p+sizempibuf,l1,  who, tag+state,comm,rq);
 	return true;// Fini
       }
     return false; // OK
@@ -798,6 +801,7 @@ template<class R>
       {
 	  cout << " MPI << (Matrice_Creuse *) " << a << endl;
 	ffassert(rq==0 || rq == Syncro_block) ; //
+	int tag = MPI_TAG<Matrice_Creuse<R>* >::TAG;
 	MatriceMorse<R> *mA=a->A->toMatriceMorse();
 	int ldata[4];
 	ldata[0]=mA->n;
@@ -1484,6 +1488,7 @@ template<class R>
 struct Op_AllReduce1  : public   quad_function<R *,R *,fMPI_Comm,fMPI_Op,long> {
     static long  f(Stack, R *  const  & s, R *  const  &r,  fMPI_Comm const & comm,fMPI_Op const &op)
     {
+	int chunk = 1;
 	return MPI_Allreduce( (void *) (R*) s,(void *) (R*) r, 1 , MPI_TYPE<R>::TYPE(),op,comm);
     }
 };
@@ -1796,6 +1801,8 @@ long  Op_All2All3v<Complex>(KN_<Complex>  const  & s, KN_<Complex>  const  &r,fM
   int mpisizew;
   MPI_Comm_size(comm, &mpisizew); /* local */
   ffassert( sendcnts.N() == sdispls.N() && sendcnts.N() == recvcnts.N() && sendcnts.N() == rdispls.N() && sendcnts.N() == mpisizew );
+
+  //ffassert(s.N()==sendcnts[mpirankv] && r.N()==recvbuf[mpirankv]);
 
   KN<int> INTsendcnts(sendcnts.N());
   KN<int> INTsdispls(sdispls.N());
@@ -2227,7 +2234,7 @@ fMPI_Group* def_group( fMPI_Group* const & a,fMPI_Comm * const &comm)
 
 fMPI_Comm* def_comm( fMPI_Comm* const & a,fMPI_Group* const & g)
 {
-    MPI_Comm_create(MPI_COMM_WORLD,*g,*a);
+    int ok=MPI_Comm_create(MPI_COMM_WORLD,*g,*a);
     return a;
 }
 
@@ -2266,7 +2273,8 @@ struct Def_def_Intercommcreate  : public  quad_function<fMPI_Comm*,MPIrank,MPIra
 {
 static fMPI_Comm * f(Stack,fMPI_Comm* const & a, MPIrank const & p1, MPIrank const & p2, long const & tag )
 {
-    MPI_Intercomm_create(p1.comm, p1.who, p2.comm,p2.who,tag, *a);
+    int err;
+    err=MPI_Intercomm_create(p1.comm, p1.who, p2.comm,p2.who,tag, *a);
     return a;
 }
 };

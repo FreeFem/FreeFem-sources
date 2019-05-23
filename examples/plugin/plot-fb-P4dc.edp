@@ -32,7 +32,7 @@ if(!NoUseOfWait)
     if(0)
       { 
       load "medit" load "msh3"
-      mesh3 Th3= movemesh23(th,transfo=[x,y,vi*0.5]);
+      meshS Th3= movemesh23(th,transfo=[x,y,vi*0.5]);
       medit("mm",Th3); 
 
       //savemesh(th,"mm",[x,y,vi*0.5]);   //save *.points and *.faces file for medit

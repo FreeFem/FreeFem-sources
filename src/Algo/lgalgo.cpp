@@ -285,7 +285,13 @@ void init_algo()
 {
   Global.Add("BFGS","(",new OptimAlgo(1,1));  //  j + dJ
   Global.Add("Newton","(",new OptimAlgo(2,2,2));  //  j + dJ
-  Global.Add("Newtow","(",new OneOperatorCode<PrintErrorCompileNewtow>);  //  error 
+  Global.Add("Newtow","(",new OneOperatorCode<PrintErrorCompileNewtow>);  //  error
+    
+    // pour debug de msh3
+  //  extern    void init_msh3();
+  //  init_msh3();
+    // fin debug mesh3
+
 }
 
 //#include "InitFunct.hpp"

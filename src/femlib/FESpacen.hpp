@@ -51,6 +51,7 @@
 using namespace std;
 #include "error.hpp"
 #include "ufunction.hpp"
+#include "MeshSn.hpp"
 #include "Mesh3dn.hpp"
 #include "Mesh2dn.hpp"
 #include "Mesh1dn.hpp"

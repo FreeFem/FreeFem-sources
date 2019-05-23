@@ -11,13 +11,14 @@ real hs = 0.8;
 int[int]  N=[4/hs,8/hs,11.5/hs];
 real [int,int]  B=[[-2,2],[-2,6],[-10,1.5]];
 int [int,int]  L=[[311,311],[311,311],[311,311]];
-mesh3 ThH = SurfaceHex(N,B,L,1);
-mesh3 ThSg =Sphere(1,hs,300,-1); // "gluing" surface meshs to tolat boundary meshes
-mesh3 ThSd =Sphere(1,hs,310,-1); 
+meshS ThH = SurfaceHex(N,B,L,1);
+meshS ThSg = Sphere(1,hs,300,-1); // "gluing" surface meshs to tolat boundary meshes
+meshS ThSd = Sphere(1,hs,310,-1); 
 
+plot (ThH,ThSg,ThSd);
 ThSd=movemesh(ThSd,[x,4+y,z]);
 
-mesh3 ThHS=ThH+ThSg+ThSd;
+meshS ThHS=ThH+ThSg+ThSd;
 medit("ThHS", ThHS);
 
 real voltet=(hs^3)/6.;

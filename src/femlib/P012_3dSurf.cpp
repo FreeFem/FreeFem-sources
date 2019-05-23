@@ -312,9 +312,9 @@
           for (int e=0;e<3;e++)
           {
               
-              R3 N= (K.EdgeOrientationS(e)*Nk)^(K.Edge(e)); //^(K.NormalS(e)); //   K.N(e);//  exterior and  ||N|| = 2* area f
+              R3 N= (K.EdgeOrientation(e)*Nk)^(K.Edge(e)); //^(K.NormalS(e)); //   K.N(e);//  exterior and  ||N|| = 2* area f
               N /=N.norme();
-              N *= K.EdgeOrientationS(e);//  exterior and  ||N|| = 2* area f
+              N *= K.EdgeOrientation(e);//  exterior and  ||N|| = 2* area f
              
               for (int c=0;c<3;c++,i++)
                 M.coef[i]=N[c];
@@ -334,7 +334,7 @@
           R3 P=K(PHat);
           R3 A[3]={(K[0]), (K[1]), (K[2])};
           R cc =1./(2.*K.mesure());
-          R ci[3]={cc*K.EdgeOrientationS(0),cc*K.EdgeOrientationS(1),cc*K.EdgeOrientationS(2)};     /// orientation????????
+          R ci[3]={cc*K.EdgeOrientation(0),cc*K.EdgeOrientation(1),cc*K.EdgeOrientation(2)};     /// orientation????????
           
           if (whatd & Fop_D0)
           {

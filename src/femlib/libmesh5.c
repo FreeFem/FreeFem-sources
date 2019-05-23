@@ -69,7 +69,7 @@ typedef struct
 
 int NmbMsh=0;
 GmfMshSct *MshTab[ MaxMsh + 1 ];
-char *KwdFmt[ GmfMaxKwd + 1 ][3] =
+char *KwdFmt[ GmfMaxKwd + 1 ][3] = 
 {    {"Reserved", "", ""},
     {"MeshVersionFormatted", "", "i"},
     {"Reserved", "", ""},
@@ -181,7 +181,7 @@ int GmfOpenMesh(const char *FilNam, int mod, ...)
     /* MESH STRUCTURE INIT */
     /*---------------------*/
 
-    if( NmbMsh == MaxMsh) NmbMsh=0;  // Add J. Morice allow to read/write more than 100 mesh/sol
+    if( NmbMsh == MaxMsh) NmbMsh=0;  // Add J. Morice allow to read/write more than 100 mesh/sol 
     if( !(msh = calloc(1, sizeof(GmfMshSct))) || (NmbMsh >= MaxMsh) )
         return(0);
 
@@ -222,7 +222,6 @@ int GmfOpenMesh(const char *FilNam, int mod, ...)
         PtrVer = va_arg(par, int *);
         PtrDim = va_arg(par, int *);
         va_end(par);
-        size_t ret = 0;
 
         /* Create the name string and open the file */
 
@@ -232,8 +231,8 @@ int GmfOpenMesh(const char *FilNam, int mod, ...)
 
         if(msh->typ & Bin)
         {
-            ret = fread((unsigned char *)&msh->cod, WrdSiz, 1, msh->hdl);
-            if (ret == 0) printf("fread errpr\n");
+            fread((unsigned char *)&msh->cod, WrdSiz, 1, msh->hdl);
+
             if( (msh->cod != 1) && (msh->cod != 16777216) )
                 return(0);
 
@@ -256,8 +255,7 @@ int GmfOpenMesh(const char *FilNam, int mod, ...)
             if(res == EOF)
                 return(0);
 
-            res = fscanf(msh->hdl, "%d", &msh->ver);
-            if (res == EOF) printf("fscanf error\n");
+            fscanf(msh->hdl, "%d", &msh->ver);
 
             do
             {
@@ -267,8 +265,7 @@ int GmfOpenMesh(const char *FilNam, int mod, ...)
             if(res == EOF)
                 return(0);
 
-            res = fscanf(msh->hdl, "%d", &msh->dim);
-            if (res == EOF) printf("fscanf error\n");
+            fscanf(msh->hdl, "%d", &msh->dim);
         }
 
         if( (msh->dim != 2) && (msh->dim != 3) )
@@ -561,7 +558,7 @@ int GmfGetLin(int MshIdx, int KwdCod, ...)
 {
     double *DblPtr, *DblSolTab;
     float *FltPtr, *FltSolTab;
-    int i, j, *IntPtr, ret=0;
+    int i, j, *IntPtr;
     va_list par;
     GmfMshSct *msh = MshTab[ MshIdx ];
     KwdSct *kwd = &msh->KwdTab[ KwdCod ];
@@ -581,14 +578,12 @@ int GmfGetLin(int MshIdx, int KwdCod, ...)
                     if(kwd->fmt[i] == 'r')
                     {
                         FltPtr = va_arg(par, float *);
-                        ret = fscanf(msh->hdl, "%f", FltPtr);
-                        if (ret == EOF) printf("fscanf error\n");
+                        fscanf(msh->hdl, "%f", FltPtr);
                     }
                     else
                     {
                         IntPtr = va_arg(par, int *);
-                        ret = fscanf(msh->hdl, "%d", IntPtr);
-                        if (ret == EOF) printf("fscanf error\n");
+                        fscanf(msh->hdl, "%d", IntPtr);
                     }
                 }
             }
@@ -618,14 +613,12 @@ int GmfGetLin(int MshIdx, int KwdCod, ...)
                     if(kwd->fmt[i] == 'r')
                     {
                         DblPtr = va_arg(par, double *);
-                        ret = fscanf(msh->hdl, "%lf", DblPtr);
-                        printf("scanf error\n");
+                        fscanf(msh->hdl, "%lf", DblPtr);
                     }
                     else
                     {
                         IntPtr = va_arg(par, int *);
-                        ret = fscanf(msh->hdl, "%d", IntPtr);
-                        if (ret == EOF) printf("fscanf error\n");
+                        fscanf(msh->hdl, "%d", IntPtr);
                     }
                 }
             }
@@ -653,12 +646,10 @@ int GmfGetLin(int MshIdx, int KwdCod, ...)
         {
             FltSolTab = va_arg(par, float *);
 
-            if(msh->typ & Asc) {
-                for(j=0;j<kwd->SolSiz;j++) {
-                  ret = fscanf(msh->hdl, "%f", &FltSolTab[j]);
-                  if (ret == EOF) printf("fscanf error\n");
-                }
-            } else
+            if(msh->typ & Asc)
+                for(j=0;j<kwd->SolSiz;j++)
+                    fscanf(msh->hdl, "%f", &FltSolTab[j]);
+            else
                 for(j=0;j<kwd->SolSiz;j++)
                     ScaWrd(msh, (unsigned char *)&FltSolTab[j]);
         }
@@ -666,12 +657,10 @@ int GmfGetLin(int MshIdx, int KwdCod, ...)
         {
             DblSolTab = va_arg(par, double *);
 
-            if(msh->typ & Asc) {
-                for(j=0;j<kwd->SolSiz;j++) {
-                    ret = fscanf(msh->hdl, "%lf", &DblSolTab[j]);
-                    if (ret == EOF) printf("fscanf error\n");
-                  }
-            } else
+            if(msh->typ & Asc)
+                for(j=0;j<kwd->SolSiz;j++)
+                    fscanf(msh->hdl, "%lf", &DblSolTab[j]);
+            else
                 for(j=0;j<kwd->SolSiz;j++)
                     ScaDblWrd(msh, (unsigned char *)&DblSolTab[j]);
         }
@@ -820,7 +809,7 @@ int GmfCpyLin(int InpIdx, int OutIdx, int KwdCod)
 {
     double d;
     float f;
-    int i, a, ret=0;
+    int i, a;
     GmfMshSct *InpMsh = MshTab[ InpIdx ], *OutMsh = MshTab[ OutIdx ];
     KwdSct *kwd = &InpMsh->KwdTab[ KwdCod ];
 
@@ -830,20 +819,18 @@ int GmfCpyLin(int InpIdx, int OutIdx, int KwdCod)
         {
             if(InpMsh->ver == 1)
             {
-                if(InpMsh->typ & Asc) {
-                    ret = fscanf(InpMsh->hdl, "%f", &f);
-                    if (ret == EOF) printf("fscanf error\n");
-                } else
+                if(InpMsh->typ & Asc)
+                    fscanf(InpMsh->hdl, "%f", &f);
+                else
                     ScaWrd(InpMsh, (unsigned char *)&f);
 
                 d = f;
             }
             else
             {
-                if(InpMsh->typ & Asc) {
-                    ret = fscanf(InpMsh->hdl, "%lf", &d);
-                    if (ret == EOF) printf("fscanf error\n");
-                } else
+                if(InpMsh->typ & Asc)
+                    fscanf(InpMsh->hdl, "%lf", &d);
+                else
                     ScaDblWrd(InpMsh, (unsigned char *)&d);
 
                 f = (float)d;
@@ -862,10 +849,9 @@ int GmfCpyLin(int InpIdx, int OutIdx, int KwdCod)
         }
         else
         {
-            if(InpMsh->typ & Asc) {
-                ret = fscanf(InpMsh->hdl, "%d", &a);
-                if (ret == EOF) printf("fscanf error\n");
-            } else
+            if(InpMsh->typ & Asc)
+                fscanf(InpMsh->hdl, "%d", &a);
+            else
                 ScaWrd(InpMsh, (unsigned char *)&a);
 
             if(OutMsh->typ & Asc)
@@ -877,7 +863,7 @@ int GmfCpyLin(int InpIdx, int OutIdx, int KwdCod)
 
     if(OutMsh->typ & Asc)
         fprintf(OutMsh->hdl, "\n");
-    return 0;
+    return 0; 
 }
 
 
@@ -900,7 +886,7 @@ static int ScaKwdTab(GmfMshSct *msh)
 
             if(isalpha(str[0]))
             {
-                /* Search which kwd code this string is associated with,
+                /* Search which kwd code this string is associated with, 
                     then get its header and save the curent position in file (just before the data) */
 
                 for(KwdCod=1; KwdCod<= GmfMaxKwd; KwdCod++)
@@ -957,15 +943,14 @@ static int ScaKwdTab(GmfMshSct *msh)
 
 static void ScaKwdHdr(GmfMshSct *msh, int KwdCod)
 {
-    int i, ret=0;
+    int i;
     KwdSct *kwd = &msh->KwdTab[ KwdCod ];
 
     if(!strcmp("i", KwdFmt[ KwdCod ][1]))
     {
-        if(msh->typ & Asc) {
-            ret = fscanf(msh->hdl, "%d", &kwd->NmbLin);
-            if (ret == EOF) printf("fscanf error\n");
-        } else
+        if(msh->typ & Asc)
+            fscanf(msh->hdl, "%d", &kwd->NmbLin);
+        else
             ScaWrd(msh, (unsigned char *)&kwd->NmbLin);
     }
     else
@@ -975,12 +960,10 @@ static void ScaKwdHdr(GmfMshSct *msh, int KwdCod)
     {
         if(msh->typ & Asc)
         {
-            ret = fscanf(msh->hdl, "%d", &kwd->NmbTyp);
-            if (ret == EOF) printf("fscanf error\n");
-            for(i=0;i<kwd->NmbTyp;i++) {
-                ret = fscanf(msh->hdl, "%d", &kwd->TypTab[i]);
-                if (ret == EOF) printf("fscanf error\n");
-              }
+            fscanf(msh->hdl, "%d", &kwd->NmbTyp);
+
+            for(i=0;i<kwd->NmbTyp;i++)
+                fscanf(msh->hdl, "%d", &kwd->TypTab[i]);
         }
         else
         {
@@ -1062,10 +1045,8 @@ static void ExpFmt(GmfMshSct *msh, int KwdCod)
 static void ScaWrd(GmfMshSct *msh, unsigned char *wrd)
 {
     unsigned char swp;
-    size_t ret;
 
-    ret = fread(wrd, WrdSiz, 1, msh->hdl);
-    if (ret == 0) printf("fread error\n");
+    fread(wrd, WrdSiz, 1, msh->hdl);
 
     if(msh->cod == 1)
         return;
@@ -1088,10 +1069,8 @@ static void ScaDblWrd(GmfMshSct *msh, unsigned char *wrd)
 {
     int i;
     unsigned char swp;
-    size_t ret;
 
-    ret = fread(wrd, WrdSiz, 2, msh->hdl);
-    if (ret == 0) printf("fread error\n");
+    fread(wrd, WrdSiz, 2, msh->hdl);
 
     if(msh->cod == 1)
         return;

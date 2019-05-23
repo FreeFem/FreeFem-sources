@@ -311,7 +311,8 @@ class E_P_Stack_hTriangle   :public  E_F0mps { public:
     assert(mp->T) ;
     double l=1e100;
     if( mp->d==2) l=mp->T->h();
-      else if ( mp->d==3) l=mp->T3->lenEdgesmax();
+    else if ( mp->d==3 && mp->dHat==3 ) l=mp->T3->lenEdgesmax();
+    else if ( mp->d==3 && mp->dHat==2 ) l=mp->TS->lenEdgesmax();
     return SetAny<double>(l);}
     operator aType () const  { return atype<double>();}
 
@@ -330,13 +331,16 @@ class E_P_Stack_nTonEdge   :public  E_F0mps { public:
 
 class E_P_Stack_nElementonB   :public  E_F0mps { public:
     AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-        MeshPoint * mp=MeshPointStack(s);
-        long l=0;
-        if((mp->T) && (mp->e > -1) && (mp->d==2 ))
+      MeshPoint * mp=MeshPointStack(s);
+      long l=0;
+      if((mp->T) && (mp->e > -1) && (mp->d==2 ))
          l=mp->Th->nTonEdge(mp->t,mp->e);
-        else if (mp->d==3 && mp->T3 && ( mp->f>=0) )
-           l= mp->Th3->nElementonB(mp->t,mp->f);
-        return SetAny<long>( l) ;}
+      else if (mp->d==3 && mp->dHat==3 && mp->T3 && ( mp->f>=0) )
+         l= mp->Th3->nElementonB(mp->t,mp->f);
+      else if (mp->d==3 && mp->dHat==2 && mp->TS && ( mp->e>=0) )
+          l= mp->ThS->nElementonB(mp->t,mp->e);
+      // cout << " nTonEdge " << l << endl;
+      return SetAny<long>( l) ;}
     operator aType () const  { return atype<long>();}
 
 };
@@ -344,10 +348,11 @@ class E_P_Stack_nElementonB   :public  E_F0mps { public:
 template<int NBT>
 class E_P_Stack_TypeEdge   :public  E_F0mps { public:
     AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-        MeshPoint * mp=MeshPointStack(s);
-        assert(mp->T && mp->e > -1 && mp->d==2 ) ;
-        long l=mp->Th->nTonEdge(mp->t,mp->e)==NBT;
-        return SetAny<long>( l) ;}
+    MeshPoint * mp=MeshPointStack(s);
+    assert(mp->T && mp->e > -1 && mp->d==2 ) ;
+    long l=mp->Th->nTonEdge(mp->t,mp->e)==NBT;
+    // cout << " nTonEdge " << l << endl;
+    return SetAny<long>( l) ;}
     operator aType () const  { return atype<long>();}
 };
 
@@ -356,15 +361,15 @@ class E_P_Stack_areaTriangle   :public  E_F0mps { public:
     MeshPoint * mp=MeshPointStack(s);
     assert(mp->T) ;
       double l=-1; // unset ...
-    if(mp->d==2)
-      l= mp->T->area;
-    else if (mp->d==3 && mp->f >=0)
-      {
+    if(mp->d==2)	
+      l= mp->T->area;	
+    else if (mp->d==3 && mp->dHat==3 && mp->f >=0) {
 	  R3 NN = mp->T3->N(mp->f);
 	  l= NN.norme()/2.;
       }
-    else
-      {
+     else if (mp->d==3 && mp->dHat==2 )
+       l= mp->TS->mesure();
+    else {
 	  cout << "erreur : E_P_Stack_areaTriangle" << mp->d << " " << mp->f << endl;
 	  ffassert(0); // undef
       }
@@ -378,15 +383,17 @@ class E_P_Stack_EdgeOrient  :public  E_F0mps { public:
     AnyType operator()(Stack s)  const { throwassert(* (long *) s);
         MeshPoint &mp= *MeshPointStack(s); // the struct to get x,y, normal , value
         double r=1;
-        if(mp.d==2)
-        {
-            if( mp.T && mp.e >=0  )
-                r=mp.T->EdgeOrientation(mp.e);
+        if(mp.d==2) {
+            if( mp.T && mp.e >=0 )
+            r=mp.T->EdgeOrientation(mp.e);
         }
-        else // 3D ...
-        {
-             if( mp.T3 && mp.f >=0  )
-                 r = mp.T3->faceOrient( mp.f);
+        else if(mp.d==3 && mp.dHat==3) {
+             if( mp.T3 && mp.f >=0 )
+             r = mp.T3->faceOrient(mp.f);
+        }
+        else if(mp.d==3 && mp.dHat==2) {
+            if( mp.TS && mp.e >=0 )
+            r = mp.T3->EdgeOrientation(mp.e);
         }
         return r ;
     }
@@ -400,16 +407,13 @@ class E_P_Stack_VolumeTet   :public  E_F0mps { public:
 	MeshPoint * mp=MeshPointStack(s);
 	assert(mp->T) ;
 	double l=-1; // unset ...
-	if (mp->d==3 && mp->T3 )
-	  {
-	      l= mp->T3->mesure();
-	  }
-	else
-	  {
+	if (mp->d==3 && mp->dHat==3 && mp->T3 )
+	  	l= mp->T3->mesure();
+    else {
 	    cout << "erreur : E_P_Stack_VolumeTet" << mp->d << " " << mp->f << endl;
-	    ffassert(0); // undef
-	  }
-	return SetAny<double>(l);}
+	    ffassert(0); // undef 
+	}
+	return SetAny<double>(l);} 
     operator aType () const { return atype<double>();}
 
 };
@@ -472,7 +476,6 @@ class LinearCG : public OneOperator
        x(n),c_x(CPValue(x)),
        mat1(op->code(basicAC_F0_wa(c_x))),
        mat( CastTo<Kn_>(C_F0(mat1,(aType)*op))) {
-
          }
    ~MatF_O() {
      if(mat1 != mat)
@@ -491,12 +494,12 @@ class LinearCG : public OneOperator
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);}
   virtual bool ChecknbLine(int n) const { return true;}
   virtual bool ChecknbColumn(int m) const { return true;}
-
+    
 };
 
   class E_LCG: public E_F0mps { public:
-
-
+      
+      
    const int cas;// <0 => Nolinear
    static const int n_name_param=6;
 
@@ -504,11 +507,11 @@ class LinearCG : public OneOperator
 
 
   Expression nargs[n_name_param];
-
+   
   const OneOperator *A, *C;
   Expression X,B;
 
-
+      
   E_LCG(const basicAC_F0 & args,int cc) :cas(cc)
    {
       args.SetNameParam(n_name_param,name_param,nargs);
@@ -530,7 +533,7 @@ class LinearCG : public OneOperator
       else
         B=0;
    }
-
+     
      virtual AnyType operator()(Stack stack)  const {
        int ret=-1;
        E_StopGC<R> *stop=0;
@@ -3849,11 +3852,12 @@ if(nargs[VTK_START+index])                    \
             th= ll[ii].th();
           // Prepare for the sending mesh 3d with differenciation 3D surface / volumuic / volum+surfac
           if( what ==5 ) {
-            const int th3type = (l[i].evalm3(0,s)).getTypeMesh3() ;
+            //const int th3type = (l[i].evalm3(0,s)).getTypeMesh3() ;
             // need to modifie the what for type mesh3 for identification in the ffglut reading
-            if (th3type==0) { ll[i].what=50; thS= &(l[i].evalmS(0,s));}  // 3d pure surface
-            else if (th3type==1) { ll[i].what=51; th3= & (l[i].evalm3(0,s)); }   // 3d pure volume
-            else if (th3type==2) { ll[i].what=52; th3= & (l[i].evalm3(0,s)); thS= &(l[i].evalmS(0,s)); } // 3d mixed volume and surface
+            //if (l[i].evalm3(0,s)).meshS) { ll[i].what=50; thS= &(l[i].evalmS(0,s));}  // 3d pure surface
+            if (l[i].evalm3(0,s).meshS) { ll[i].what=52; th3= & (l[i].evalm3(0,s)); thS= &(l[i].evalmS(0,s)); } // 3d mixed volume and surface
+            else { ll[i].what=51; th3= & (l[i].evalm3(0,s)); }   // 3d pure volume
+         
           }
           if( what ==50 )
             thS= (&(l[i].evalmS(0,s)));// 3d pure surface
