@@ -19,7 +19,7 @@ void initPETScStructure(HpddmType* ptA, PetscInt bs, PetscBool symmetric, KN<typ
     double timing = MPI_Wtime();
     PetscInt global;
     if(ptD) {
-        ptA->_A->restrict(*ptD);
+        ptA->_A->restriction(*ptD);
         ptA->_A->initialize(*ptD);
         unsigned int g;
         ptA->_A->distributedNumbering(ptA->_num, ptA->_first, ptA->_last, g);

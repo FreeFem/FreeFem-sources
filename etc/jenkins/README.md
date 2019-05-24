@@ -75,7 +75,8 @@ pacman -S autoconf automake-wrapper bash bash-completion \
   mingw-w64-x86_64-gcc-fortran mingw-w64-x86_64-gsl mingw-w64-x86_64-hdf5 \
   mingw-w64-x86_64-openblas mintty msys2-keyring msys2-launcher-git \
   msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
-  perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which mingw-w64-x86_64-libmicroutils
+  perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
+  mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-arpack cmake
 ```
 
 [MSMPI 9](https://www.microsoft.com/en-us/download/details.aspx?id=56727)
