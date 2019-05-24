@@ -514,6 +514,7 @@ freefem++-*.tar.gz
 freefem++-*.zip
 FreeFem++.pmdoc/
 FreeFem++.scrpt-txt
+ff
 ##  file create by autoreconf -i
 INSTALL
 compile
