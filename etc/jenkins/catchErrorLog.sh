@@ -7,7 +7,7 @@ job=$JOB_NAME
 ## Tests directories
 logDirectory="${workspace}/log/${job}"
 baseDirectory="examples"
-declare -a directories
+#declare -a directories
 directories=("3d" "3dSurf" "bamg" "bug" "eigen" "examples" "ffddm" "hpddm" "misc" "mpi" "other" "plugin" "tutorial")
 
 echo "Log will be put in ${logDirectory}"
