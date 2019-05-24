@@ -36,3 +36,20 @@ real resrneg = square(rneg);
 t = clock() - t;
 cout << IND << IND << t << endl;
 test(resrneg == 16.0);
+
+cout << IND << "complex" << endl;
+
+complex c = 4 + 2i;
+complex cneg = -4 + 2i;
+
+t = clock();
+complex rescint = square(c);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(rescint == 12.0 + 16i);
+
+t = clock();
+complex rescneg = square(cneg);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(rescneg == 12.0 - 16i);

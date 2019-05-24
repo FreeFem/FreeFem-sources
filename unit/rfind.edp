@@ -1,0 +1,21 @@
+include "test.idp"
+
+cout << "rfind" << endl;
+real t;
+string sentence = "a 42 a 42";
+string sentence2 = "acdc";
+string toFind = "42";
+string toFind2 = "c";
+int posFound;
+
+t = clock();
+posFound = sentence.rfind(toFind);
+t = clock() - t;
+cout << IND << t << endl;
+test(posFound == 7);
+
+t = clock();
+posFound = sentence2.rfind(toFind2);
+t = clock() - t;
+cout << IND << t << endl;
+test(posFound == 3);

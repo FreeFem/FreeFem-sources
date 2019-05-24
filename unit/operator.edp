@@ -1,3 +1,4 @@
+load "msh3"
 include "test.idp"
 
 cout << "operator +" << endl;
@@ -20,6 +21,8 @@ matrix A = [[1, 2, 3],
 matrix B = [[2, 4, 6],
             [8, 10, 12],
             [14, 16, 18]];
+int[int] arrayint = [1, 2, 3];
+real[int] arrayreal = [1.1, 2.2, 3.3];
 
 t = clock();
 int resi1 = i1 + i2;
@@ -920,6 +923,44 @@ t = clock() - t;
 cout << IND << IND << t << endl;
 test(reseqs == is);
 
+cout << IND << "int[int]" << endl;
+
+t = clock();
+arrayint = [2, 3, 4];
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(arrayint[0] == 2 && arrayint[1] == 3 && arrayint[2] == 4);
+arrayint = [1, 2, 3];
+
+cout << IND << "real[int]" << endl;
+
+t = clock();
+arrayreal = [1., 2., 3.];
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(arrayreal[0] == 1. && arrayreal[1] == 2. && arrayreal[2] == 3.);
+arrayreal = [1.1, 2.2, 3.3];
+
+cout << IND << "mesh" << endl;
+
+mesh Th = square(10, 10);
+mesh Th2 = square(4, 4);
+t = clock();
+Th = Th2;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(Th.nt == Th2.nt && Th.nbe == Th2.nbe);
+
+cout << IND << "mesh3" << endl;
+
+mesh3 Th3 = cube(10, 10, 10);
+mesh3 Th4 = cube(4, 4, 4);
+t = clock();
+Th3 = Th4;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(Th3.nt == Th4.nt && Th3.nbe == Th4.nbe);
+
 
 cout << "operator ==" << endl;
 
@@ -1050,6 +1091,23 @@ bool reseqeqsc = is == ic;
 t = clock() - t;
 cout << IND << IND << t << endl;
 test(reseqeqsc == false);
+
+cout << IND << "mesh" << endl;
+
+t = clock();
+bool reseqeqmesh = Th.nt == Th.nt;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqmesh == true);
+
+cout << IND << "mesh3" << endl;
+
+t = clock();
+bool reseqeqmsh3 = Th4.nt == Th4.nt;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(reseqeqmsh3 == true);
+
 
 cout << "operator ++" << endl;
 
@@ -1284,6 +1342,26 @@ cout << IND << IND << t << endl;
 test(ic == 10. + 12i);
 ic = 5.0 + 6i;
 
+cout << IND << "int[int]" << endl;
+
+t = clock();
+arrayint += 1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(arrayint[0] == 2 && arrayint[1] == 3 && arrayint[2] == 4);
+arrayint = [1, 2, 3];
+
+cout << IND << "real[int]" << endl;
+
+t = clock();
+arrayreal += 1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(arrayreal[0] - 3.1 < HWERROR);
+test(arrayreal[1] - 3.2 < HWERROR);
+test(arrayreal[2] - 4.3 < HWERROR);
+arrayreal = [1.1, 2.2, 3.3];
+
 
 cout << "operator -=" << endl;
 
@@ -1313,6 +1391,26 @@ t = clock() - t;
 cout << IND << IND << t << endl;
 test(ic == 0.);
 ic = 5.0 + 6i;
+
+cout << IND << "int[int]" << endl;
+
+t = clock();
+arrayint -= 1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(arrayint[0] == 0 && arrayint[1] == 1 && arrayint[2] == 2);
+arrayint = [1, 2, 3];
+
+cout << IND << "real[int]" << endl;
+
+t = clock();
+arrayreal -= 1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(arrayreal[0] - 0.1 < HWERROR);
+test(arrayreal[1] - 1.2 < HWERROR);
+test(arrayreal[2] - 2.3 < HWERROR);
+arrayreal = [1.1, 2.2, 3.3];
 
 
 cout << "operator *=" << endl;
@@ -1344,6 +1442,25 @@ cout << IND << IND << t << endl;
 test(ic == -11. + 60i);
 ic = 5.0 + 6i;
 
+cout << IND << "int[int]" << endl;
+
+t = clock();
+arrayint *= 1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(arrayint[0] == 1 && arrayint[1] == 2 && arrayint[2] == 3);
+arrayint = [1, 2, 3];
+
+cout << IND << "real[int]" << endl;
+
+t = clock();
+arrayreal *= 1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(arrayreal[0] == 1.1 && arrayreal[1] == 2.2 && arrayreal[2] == 3.3);
+arrayreal = [1.1, 2.2, 3.3];
+
+
 cout << "operator /=" << endl;
 
 cout << IND << "int" << endl;
@@ -1372,3 +1489,122 @@ t = clock() - t;
 cout << IND << IND << t << endl;
 test(ic == 1);
 ic = 5.0 + 6i;
+
+cout << IND << "int[int]" << endl;
+
+t = clock();
+arrayint /= 1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(arrayint[0] == 1 && arrayint[1] == 2 && arrayint[2] == 3);
+
+cout << IND << "real[int]" << endl;
+
+t = clock();
+arrayreal /= 1;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(arrayreal[0] == 1.1 && arrayreal[1] == 2.2 && arrayreal[2] == 3.3);
+
+
+cout << "operator &&" << endl;
+
+cout << IND << "boolean" << endl;
+
+bool b1 = false;
+bool b2 = false;
+bool b3 = false;
+t = clock();
+if (b1 == false && b2 == false)
+  b3 = true;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(b3 == true);
+
+cout << IND << "int" << endl;
+
+b3 = false;
+t = clock();
+if (i1 && i2)
+  b3 = true;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(b3 == true);
+
+cout << IND << "real" << endl;
+
+b3 = false;
+t = clock();
+if (ir && ir2)
+  b3 = true;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(b3 == true);
+
+
+cout << "operator |" << endl;
+
+cout << IND << "boolean" << endl;
+
+b1 = false;
+b2 = true;
+b3 = false;
+t = clock();
+if (b1 == false | b2 == true)
+  b3 = true;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(b3 == true);
+
+cout << IND << "int" << endl;
+
+b3 = false;
+t = clock();
+if (i1 | i2)
+  b3 = true;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(b3 == true);
+
+cout << IND << "real" << endl;
+
+b3 = false;
+t = clock();
+if (ir | ir2)
+  b3 = true;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(b3 == true);
+
+
+cout << "operator !" << endl;
+
+cout << IND << "boolean" << endl;
+
+bool isNot = false;
+t = clock();
+if (!(isNot) == true)
+  isNot = true;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(isNot == true);
+
+cout << IND << "int" << endl;
+
+isNot = false;
+t = clock();
+if (!i1)
+  isNot = true;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(isNot == false);
+
+cout << IND << "real" << endl;
+
+isNot = false;
+t = clock();
+if (!ir)
+  isNot = true;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(isNot == false);

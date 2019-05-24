@@ -1,0 +1,20 @@
+include "test.idp"
+
+cout << "length" << endl;
+real t;
+string str = "Hello, wordl!";
+string str2 = "";
+string str3;
+int size;
+
+t = clock();
+size = str.length;
+t = clock() - t;
+cout << IND << t << endl;
+test(size == 13);
+
+t = clock();
+size = str2.length;
+t = clock() - t;
+cout << IND << t << endl;
+test(size == 0);
