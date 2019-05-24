@@ -691,7 +691,7 @@ public:
 };
 
 
-
+template<class K> long get_MyMap_n(MyMap<String,K> *p) {return p ? (p->m ? p->m->size():0):0 ;} 
 template<class K> long get_n(KN<K> * p){ return p->N();}//
 template<class K> long get_n(KNM<K> * p){ return p->N();}//
 template<class K> long get_m(KNM<K> * p){ return p->M();}//
@@ -1755,7 +1755,8 @@ void ArrayOperator()
      atype<MyMap<String,K>*>()->Add("[","",new OneOperator2_<K*,MyMap<String,K>*,string*>(get_element<K>));
      TheOperators->Add("&",new OneOperator2_<bool,MyMap<String,K>*,string*>(exist_element<K>));
     TheOperators->Add("<<",new OneBinaryOperator<PrintP<MyMap<String,K>*> >);
-
+    Add<MyMap<String,K>* >("n",".",new OneOperator1<Z,MyMap<String,K> *>(get_MyMap_n));
+    
     // Add Mai 2009
     Dcl_Type<SetArray<K> >();
     TheOperators->Add("::",

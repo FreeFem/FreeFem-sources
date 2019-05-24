@@ -37,7 +37,7 @@ TESTS=BlackScholes2D.edp condensor.edp \
 	thermic.edp
 
 # if .. no arpack ...
-XFAIL_TESTS=sound.edp
+XFAIL_TESTS=sound.edp NSprojection.edp
 
 EXTRA_DIST=*.edp all.edp regtests.edp regtests.m4 ref.edp
 
