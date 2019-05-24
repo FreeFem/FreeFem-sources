@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 ## Jenkins variables
 workspace=$WORKSPACE
 job=$JOB_NAME
