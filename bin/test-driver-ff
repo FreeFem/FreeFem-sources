@@ -116,7 +116,8 @@ fi
 ## Add an error suffix in order to extract errored tests only
 if [ $estatus -ne 0 ]
 then
-  mv $log_file "${log_file}.err"
+	##   warning the log fil must exist ..... F. HECHT
+  cp  $log_file "${log_file}.err"
 fi
 
 if test $enable_hard_errors = no && test $estatus -eq 99; then
