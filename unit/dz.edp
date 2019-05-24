@@ -36,15 +36,18 @@ test(dxerror[].max < HWERROR);
 
 mesh3 Th3D = cube(4, 4, 4);
 
-fespace Uh3(Th3D, P2);
+fespace Uh3(Th3D, P3);  //P3 because following u3 in an order 3 polynome
 Uh3 u3, du3, duerr;
 
 u3 = x*y*z + x*y + x*z + y*z + x + y + z + 1;
 
 t = clock();
-Uh3 dxu3 = dz(u3);
+du3 = dz(u3);
 t = clock() - t;
 cout << IND << t << endl;
-Uh3 duerror = dxu3 - (x*y+x+y+1);
-test(duerror[].max < HWERROR);
-test(duerror[].min < HWERROR);
+duerr = du3 - (x*y+x+y+1);
+plot(duerr);
+test(duerr[].max < HWERROR);
+test(duerr[].min < HWERROR);
+
+// Test multiple finite elements
