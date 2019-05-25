@@ -62,7 +62,7 @@ macro  BuildMat()
 BuildMat
 
 real err = 1, outflux = 1;
-for(int n = 0; n < 300; n++) {
+for(int n = 0; n < 200; n++) {
   Vh uold = u, vold = v, pold = p;
 
   solve pb4u(u, w, init=n, solver=CG, eps=epsu)
@@ -100,7 +100,7 @@ for(int n = 0; n < 300; n++) {
   v[] += dtM1y*q[];
 
   if(n%50 == 49) {
-    Th = adaptmesh(Th, [u, v], q, err=0.04, nbvx=100000);
+    Th = adaptmesh(Th, [u, v], q, err=0.06, nbvx=100000);
     plot(Th, wait=true);
     BuildMat // rebuild mat.
   }

@@ -52,7 +52,7 @@ for (iter=0;iter<nbiter;iter++)
      NS;
      if ( !(i % 10)) 
      plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[u1,u2],ps="plotNS_"+iter+"_"+i+".eps",value=1);  
-     cout << "CPU " << clock()-s0 << "s " << endl;     
+     cout << "CPU " << clock()-s0 << "s " << " Th.nv " << Th.nv << endl;     
    } 
  
   if (iter>= nbiter) break;
@@ -60,12 +60,15 @@ for (iter=0;iter<nbiter;iter++)
   u1x=0;u1y=0;
   Pu1;Pu2;
   plot([u1x,u2x],wait=1);
-  Th=adaptmesh(Th,[u1x,u2x],abserror=0,cutoff=cut,err=tol, inquire=0);
+  Th=adaptmesh(Th,[u1x,u2x],abserror=0,cutoff=cut,err=tol, inquire=0,nbvx=100000);
   u1=u1;
   u2=u2;
   plot(Th);
   dt = dt*coefdt;
+  if( Th.nv < 1000)
+  {
   tol = tol *coeftol;
   cut = cut *coefcut;
+  }
 }
 cout << "CPU " << clock()-s0 << "s " << endl;     
