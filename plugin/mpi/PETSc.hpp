@@ -146,14 +146,24 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
                 std::copy_n(local - fields->n, fields->n, local);
         }
         unsigned long* counts = new unsigned long[nb]();
-        for(unsigned int i = 0; i < last - first; ++i)
+        unsigned int remove = 0;
+        for(unsigned int i = 0; i < last - first; ++i) {
             if(local[i])
                 ++counts[local[i] - 1];
+            else
+                ++remove;
+        }
+        unsigned int firstFS = 0;
+        if(ptA->_ksp != ksp) {
+            MPI_Exscan(&remove, &firstFS, 1, MPI_UNSIGNED, MPI_SUM, PETSC_COMM_WORLD);
+            if(mpirank == 0)
+                firstFS = 0;
+        }
         PetscInt* idx = new PetscInt[*std::max_element(counts, counts + nb)];
         for(unsigned short j = 0; j < nb; ++j) {
             IS is;
             unsigned short* pt = local;
-            unsigned int remove = 0;
+            remove = firstFS;
             for(unsigned int i = 0; i < counts[j]; ++pt) {
                 if(*pt == j + 1)
                     idx[i++] = first + std::distance(local, pt) - remove;
