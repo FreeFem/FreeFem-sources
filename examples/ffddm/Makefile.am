@@ -33,7 +33,7 @@ TESTS=diffusion-2d-thirdlevelgeneo.edp diffusion-3d-minimal-ddm.edp\
 	Helmholtz-3d-simple.edp Maxwell_Cobracavity.edp \
 	Maxwell-3d-simple.edp natural_convection_3D_obstacle.edp \
 	natural_convection.edp \
-	Richards-2d.edp
+	Richards-2d.edp heat-torus-3d-surf.edp
 
 XFAIL_TESTS=diffusion-2d-thirdlevelgeneo.edp diffusion-3d-minimal-ddm.edp\
 	diffusion-3d-minimal-direct.edp diffusion-3d-simple.edp \
@@ -43,7 +43,7 @@ XFAIL_TESTS=diffusion-2d-thirdlevelgeneo.edp diffusion-3d-minimal-ddm.edp\
 	Helmholtz-3d-simple.edp Maxwell_Cobracavity.edp \
 	Maxwell-3d-simple.edp natural_convection_3D_obstacle.edp \
 	natural_convection.edp \
-	Richards-2d.edp
+	Richards-2d.edp heat-torus-3d-surf.edp
 
 EXTRA_DIST=*.edp
 
