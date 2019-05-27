@@ -77,10 +77,11 @@ if (pr#issuper) {
 
 ffddmnpart = nsup;
 
+IFMACRO(!pr#supersimple)
 NewMacro pr#supersimple(Phglob, upart, pr#commsuper)
 upart[] = partsuper[];
 EndMacro
-
+ENDIFMACRO
 
 int backexclude = ffddmexclude;
 ffddmexclude = 0;
@@ -113,9 +114,11 @@ if (pr#issuper){
 
 broadcast(processor(0,mpiCommWorld),part[]);
 
+IFMACRO(!pr#simple)
 NewMacro pr#simple(Phglob, upart, comm)
 upart[] = part[];
 EndMacro
+ENDIFMACRO
 
 int backpCS = ffddmpCS;
 ffddmpCS = nsup;
@@ -203,7 +206,7 @@ else {
 // EOM
 
 macro ffddmsetupsuperinit(pr,preffe)
-matrix pr#RsuperCS;
+matrix<preffe#K> pr#RsuperCS;
 int[int] pr#superlocalnuminv(0);
 NewMacro pr#superalgebraic()1 EndMacro
 ffddmsetupinit(pr#super,preffe#super)
@@ -238,7 +241,7 @@ if (pr#prfe#prmesh#issuper) {
   
   int[int] I(nloc);
   pr#superlocalnuminv.resize(pr#ncoarsespace);
-  real[int] K(nloc);
+  pr#prfe#K[int] K(nloc);
   I = (0:nloc-1);
   K = 1;
   for (int j=0; j<nloc; j++)
@@ -282,7 +285,7 @@ if (pr#prfe#prmesh#issuper) {
     }
     int nn =restIntersection.n;
     int[int] I(nn),J(nn);
-    real[int] K(nn);
+    pr#prfe#K[int] K(nn);
     I = (0:nn-1);
     K=1;
     J = restIntersection;
@@ -326,8 +329,8 @@ macro ffddmgeneosetupsuper(pr)
   pr#prfe#prmesh#supertic(pr#supertloc)
   pr#prfe#prmesh#tic(pr#tloc)
   
-  matrix[int] restNeumann(pr#prfe#prmesh#arrayIntersection.n);
-  matrix[int] restNeumannSend(pr#prfe#prmesh#arrayIntersection.n);
+  matrix<pr#prfe#K>[int] restNeumann(pr#prfe#prmesh#arrayIntersection.n);
+  matrix<pr#prfe#K>[int] restNeumannSend(pr#prfe#prmesh#arrayIntersection.n);
   
   mpiRequest[int] rqn(pr#prfe#prmesh#arrayIntersection.n*2);
   for (int i=0; i<pr#prfe#prmesh#arrayIntersection.n; i++) {
@@ -337,7 +340,15 @@ macro ffddmgeneosetupsuper(pr)
     */
     restNeumannSend[i] = pr#matN;
     
+    NewMacro localmacroK pr#prfe#K EndMacro
+    IFMACRO(localmacroK,real)
     renumbering(restNeumannSend[i],pr#prfe#restrictionIntersection[i],eps=-1);
+    ENDIFMACRO
+
+    IFMACRO(localmacroK,complex)
+    matrix restreal = pr#prfe#restrictionIntersection[i].re;
+    renumbering(restNeumannSend[i],restreal,eps=-1);
+    ENDIFMACRO
  
  Isend(processor(pr#prfe#prmesh#arrayIntersection[i],pr#prfe#prmesh#commddm,rqn[i]),restNeumannSend[i]);
   }
@@ -352,7 +363,7 @@ macro ffddmgeneosetupsuper(pr)
   for (int i=0; i<inisuperwithoverlap.n; i++)
     inisuperwithoverlap[i].resize(1000);
   
-  mpiRequest[int] rq(2*(pr#prfe#prmesh#listofsupers.n-pr#issuper)+2*pr#issuper*(pr#prfe#prmesh#insuperwithoverlap.n-!pr#prfe#prmesh#excluded));
+  mpiRequest[int] rq(2*(pr#prfe#prmesh#listofsupers.n-pr#prfe#prmesh#issuper)+2*pr#prfe#prmesh#issuper*(pr#prfe#prmesh#insuperwithoverlap.n-!pr#prfe#prmesh#excluded));
   int cpt = 0;
   if (pr#prfe#prmesh#issuper) {  
     for (int i=!pr#prfe#prmesh#excluded;i<pr#prfe#prmesh#insuperwithoverlap.n;i++) {
@@ -401,11 +412,11 @@ macro ffddmgeneosetupsuper(pr)
   
   int[int] tabnumberIntersection(pr#prfe#prmesh#insuperwithoverlap.n); /* i: number of neighbours of processor i */
   int[int][int] tabarrayIntersection(pr#prfe#prmesh#insuperwithoverlap.n);
-  if (pr#issuper)
+  if (pr#prfe#prmesh#issuper)
   for (int i=!pr#prfe#prmesh#excluded; i<pr#prfe#prmesh#insuperwithoverlap.n; i++)
     tabarrayIntersection[i].resize(1000);
   
-  mpiRequest[int] rqt(2*(pr#prfe#prmesh#listofsupers.n-pr#issuper)+2*pr#issuper*(pr#prfe#prmesh#insuperwithoverlap.n-!pr#prfe#prmesh#excluded));
+  mpiRequest[int] rqt(2*(pr#prfe#prmesh#listofsupers.n-pr#prfe#prmesh#issuper)+2*pr#prfe#prmesh#issuper*(pr#prfe#prmesh#insuperwithoverlap.n-!pr#prfe#prmesh#excluded));
   
   cpt = 0;
   for (int is=0; is < pr#prfe#prmesh#listofsupers.n; is++) {
@@ -425,7 +436,7 @@ macro ffddmgeneosetupsuper(pr)
   for (int i=0;i < cpt;i++)
     int k = mpiWaitAny(rqt); 
   
-  if (pr#issuper)
+  if (pr#prfe#prmesh#issuper)
   for (int i=!pr#prfe#prmesh#excluded; i<pr#prfe#prmesh#insuperwithoverlap.n; i++)
     tabarrayIntersection[i].resize(tabnumberIntersection[i]);
   
@@ -502,7 +513,7 @@ macro ffddmgeneosetupsuper(pr)
     int k = mpiWaitAny(rqszi);
   }
     
-  mpiRequest[int] rqsii(pr#prfe#prmesh#listofsupers.n-pr#issuper);
+  mpiRequest[int] rqsii(pr#prfe#prmesh#listofsupers.n-pr#prfe#prmesh#issuper);
   cpt = 0;
   for (int is=0; is < pr#prfe#prmesh#listofsupers.n; is++) {
     int isuper = pr#prfe#prmesh#listofsupers[is];
@@ -626,7 +637,7 @@ macro ffddmgeneosetupsuper(pr)
   
   pr#prfe#prmesh#supertoc(pr#supertloc,"assembling super Neumann matrices",pr#supertbuildE)
   
-  ffddmgeneosetup(pr#super,0)
+  ffddmgeneosetup(pr#super,null)
   
   pr#prfe#prmesh#toc(pr#tloc,"",pr#tbuildE)
 }
