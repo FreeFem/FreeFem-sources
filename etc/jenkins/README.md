@@ -88,9 +88,11 @@ wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.1.tar.gz
 tar xf openmpi-4.0.1
 cd openmpi-4.0.1/
 #MacOS 10.10.5
-./configure CC=gcc-4.9 CXX=g++-4.9 FC=gfortran-4.9 F77=gfortran-4.9 --prefix=/usr/local
-#MacOS 10.13
+./configure CC=clang CXX=clang++ --prefix=/usr/local  VM2 
+./configure CC=gcc CXX=g++ --prefix=/usr/local (gcc g++ version5.1)  VM2-2
+#MacOS 10.13 (ongoing)
 ./configure CC=gcc-9 CXX=g++-9 FC=gfortran-9 F77=gfortran-9 --prefix=/usr/local
+./configure CC=clang CXX=clang++ FC=gfortran-9 F77=gfortran-9 --prefix=/usr/local 
 make -j4 all
 make check
 sudo make install
