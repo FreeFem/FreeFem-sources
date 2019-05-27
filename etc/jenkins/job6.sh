@@ -8,7 +8,7 @@
 echo "Job 6"
 casejob=6
 # change default  compilator
-change_compilator=/etc/jenkins/change_compilator-`uname -s`-`uname -r`-$casejob.sh
+change_compilator=etc/jenkins/change_compilator-`uname -s`-`uname -r`-$casejob.sh
 echo try to source file  "$change_compilator"
 test -f "$change_compilator" && echo  source file "$change_compilator"
 test -f "$change_compilator" && cat  "$change_compilator"
