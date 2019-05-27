@@ -6,6 +6,8 @@ string sentence = "a 42 a 42";
 string sentence2 = "acdc";
 string toFind = "42";
 string toFind2 = "c";
+int atPos = 1;
+real atPosr = 1.;
 int posFound;
 
 t = clock();
@@ -19,3 +21,15 @@ posFound = sentence2.rfind(toFind2);
 t = clock() - t;
 cout << IND << t << endl;
 test(posFound == 3);
+
+t = clock();
+posFound = sentence2.rfind(toFind2, atPos);
+t = clock() - t;
+cout << IND << t << endl;
+test(posFound == 1);
+
+t = clock();
+posFound = sentence2.rfind(toFind2, atPosr);
+t = clock() - t;
+cout << IND << t << endl;
+test(posFound == 1.);

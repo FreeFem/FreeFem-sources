@@ -5,45 +5,53 @@ include "test.idp"
 cout << "dzx" << endl;
 real t;
 
-mesh3 Th = cube(10, 10, 10);
-fespace Uh(Th, P2);
-Uh u, du;
-Uh dxerr;
+{
+	mesh3 Th = cube(4, 4, 4);
 
-u = x;
-t = clock();
-du = dzx(u);
-t = clock() - t;
-cout << IND << t << endl;
-test(du[].min < HWERROR);
-test(du[].max < HWERROR);
+	cout << IND << "P0" << endl;
+	fespace Uh0(Th, P0);
+	Uh0 u0, du0, du0ex;
+	Uh0 uerr0;
 
-u = y;
-t = clock();
-du = dzx(u);
-t = clock() - t;
-cout << IND << t << endl;
-test(du[].min < HWERROR);
-test(du[].max < HWERROR);
+	u0 = 1.;
+	du0ex = 0.;
+	t = clock();
+	du0 = dzx(u0);
+	t = clock() - t;
+	cout << IND << t << endl;
+	uerr0 = abs(du0 - du0ex);
+	test(uerr0[].linfty < HWERROR);
 
-Uh uu = x*y + x + y + 1;
+	cout << IND << "P1" << endl;
+	fespace Uh1(Th, P1);
+	Uh1 u1, du1, du1ex;
+	Uh1 uerr1;
 
-t = clock();
-du = dzx(uu);
-t = clock() - t;
-cout << IND << t << endl;
-Uh dxerror = du;
-test(dxerror[].min < HWERROR);
-test(dxerror[].max < HWERROR);
+	u1 = x + y + z + 1.;
+	du1ex = 0.;
+	t = clock();
+	du1 = dzx(u1);
+	t = clock() - t;
+	cout << IND << t << endl;
+	uerr1 = abs(du1 - du1ex);
+	test(uerr1[].linfty < HWERROR);
 
-fespace Uh2(Th, P2);
-Uh2 u3 = x*y*z + x*y + x*z + y*z + x + y + z + 1;
+	cout << IND << "P2" << endl;
+	fespace Uh2(Th, P2);
+	Uh2 u2, du2, du2ex;
+	Uh2 uerr2;
 
-t = clock();
-Uh2 dzxu = dzx(u3);
-t = clock() - t;
-cout << IND << t << endl;
-Uh2 duerror = dzxu - (y + 1);
-cout << duerror[].min << "\t" << duerror[].max << endl;
-test(duerror[].max < HWERROR);
-test(duerror[].min < HWERROR);
+	u2 = x*x + y*x + x*z + y*z + y*y + z*z + x + y + z + 1.;
+	du2ex = 1;
+	t = clock();
+	du2 = dzx(u2);
+	t = clock() - t;
+	cout << IND << t << endl;
+	uerr2 = abs(du2 - du2ex);
+	test(uerr2[].linfty < HWERROR);
+
+	cout << IND << "P3" << endl;
+	fespace Uh3(Th, P3);
+	Uh3 u3, du3, du3ex;
+	Uh3 uerr3;
+}
