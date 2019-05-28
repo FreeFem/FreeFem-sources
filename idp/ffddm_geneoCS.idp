@@ -58,7 +58,7 @@ else {
     }	
   }
   
-  pr#prfe#K[int,int] AiZmi(0,pr#si); /* A_i Z_i */
+  pr#prfe#K[int,int] AiZmi(1,1); /* A_i Z_i */
   
   IFMACRO(pr#localmacrominoverlap,1)
   ffddmsetupOperator(localprAug, pr#prfe#Aug, Varf)
