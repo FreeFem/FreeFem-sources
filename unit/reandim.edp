@@ -6,6 +6,8 @@ real t;
 matrix<complex> A = [[1+1i, 2+1i, 3+2i],
                     [1 + 5i, 2 + -2i, 3 + 6i]];
 complex[int] intarray = [1 + 2i, 2 + 2i, 3 - 2i];
+complex[int, int] intintarray = [[1+1i, 2+1i, 3+2i],
+                    [1 + 5i, 2 + -2i, 3 + 6i]];
 
 cout << ".re" << endl;
 
@@ -25,6 +27,15 @@ t = clock() - t;
 cout << IND << t << endl;
 [I, J, D] = RES;
 test(D[0] == 1 && D[1] == 2 && D[2] == 3);
+
+// complex[int, int] toto = intintarray.re;
+// t = clock();
+// matrix C = intintarray.re;
+// t = clock() - t;
+// cout << IND << t << endl;
+// [I, J, D] = C;
+// test(D[0] == 1 && D[1] == 2 && D[2] == 3 &&
+// D[3] == 1 && D[4] == 2 && D[5] == 3);
 
 cout << ".im" << endl;
 
