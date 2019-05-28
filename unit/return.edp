@@ -3,29 +3,49 @@ include "test.idp"
 cout << "return" << endl;
 real t;
 
-bool isCaught = false;
-int ret1 = 0;
-int ret2 = 1;
-int valueReturned = -1;
 
-try {
-  t = clock();
-  return(ret1);
-  t = clock() - t;
-  cout << IND << t << endl;
-} catch(...) {
-  isCaught = true;
-  valueReturned = ret1;
-}
-test((isCaught == true) && (valueReturned == exv1));
+func int main() {
+  bool isCaught = false;
+  int ret1 = 0;
+  int ret2 = 1;
+  int valueReturned = -1;
+  string retstr;
+  string str = "toto";
+  bool isTrue = true;
 
-try {
-  t = clock();
-  return(ret2);
-  t = clock() - t;
+  try {
+    t = clock();
+    return ret1;
+    t = clock() - t;
+  } catch(...) {
+    isCaught = true;
+    valueReturned = ret1;
+  }
   cout << IND << t << endl;
-} catch(...) {
-  isCaught = true;
-  valueReturned = ret2;
+  test((isCaught == true) && (valueReturned == ret1));
+
+  isCaught = false;
+  try {
+    t = clock();
+    return ret2;
+    t = clock() - t;
+  } catch(...) {
+    isCaught = true;
+    valueReturned = ret2;
+  }
+  cout << IND << t << endl;
+  test((isCaught == true) && (valueReturned == ret2));
+
+  isCaught = false;
+  try {
+    t = clock();
+    return isTrue;
+    t = clock() - t;
+  } catch(...) {
+    isCaught = true;
+    valueReturned = ret2;
+  }
+  cout << IND << t << endl;
+  test((isCaught == true) && (valueReturned == true));
+  return true;
 }
-test((isCaught == true) && (valueReturned == ret2));
