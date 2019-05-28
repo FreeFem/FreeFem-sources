@@ -20,6 +20,14 @@ macro intbN()int2d// EOM            // two-dimensional integral
 macro minimalMesh()cube(1,1,1)// EOM
 ENDIFMACRO
 
+IFMACRO(dimension,3S)
+load "msh3"
+macro meshN()meshS// EOM            // three-dimensional surface problem
+macro intN()int2d// EOM
+macro intbN()int1d// EOM
+macro minimalMesh()square3(1,1,[x,y,z])// EOM
+ENDIFMACRO
+
 IFMACRO(WITHHPDDM)
 load "hpddm"
 ENDIFMACRO

@@ -28,24 +28,24 @@ sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuit
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libopenmpi-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
 ```
 
-# MacOS 10.10 - VM0
+# MacOS 10.10.5 - VM0 (Xcode 7.2.1, gcc g++ gfortran 4.9)
 ```
-brew install gcc m4 git flex bison
-```
-
-# MacOS 10.10 - VM1
-```
-brew install gcc m4 git flex bison lapack suitesparse hdf5
+brew install gcc@4.9 m4 git flex bison
 ```
 
-[OpenMPI compilation](#openmpi)
-
-# MacOS 10.10 - VM2
+# MacOS 10.10.5 - VM1 (Xcode 7.2.1, gcc g++ gfortran 4.9)
 ```
-brew install gcc m4 git flex bison lapack suitesparse hdf5 cmake wget autoconf automake
+brew install gcc@4.9 m4 git flex bison suitesparse-4.5.4 hdf5
 ```
 
-[OpenMPI compilation](#openmpi)
+[OpenMPI compilation](#openmpi) 2.1.6
+
+# MacOS 10.10.5 - VM2 (Xcode 7.2.1, gcc g++ gfortran 4.9)
+```
+brew install gcc@4.9 m4 git flex bison suitesparse-4.5.4 hdf5 cmake wget autoconf automake
+```
+
+[OpenMPI compilation](#openmpi) 2.1.6
 
 # MacOS 10.13 - VM0
 ```
@@ -61,7 +61,7 @@ brew install gcc m4 git flex bison lapack suitesparse hdf5
 
 # MacOS 10.13 - VM2
 ```
-brew install gcc m4 git flex bison lapack suitesparse hdf5 cmake wget autoconf automake
+brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake
 ```
 
 [OpenMPI compilation](#openmpi)
@@ -87,7 +87,12 @@ pacman -S autoconf automake-wrapper bash bash-completion \
 wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.1.tar.gz
 tar xf openmpi-4.0.1
 cd openmpi-4.0.1/
-./configure CC=gcc CXX=g++ --prefix=/usr/local
+#MacOS 10.10.5
+./configure CC=clang CXX=clang++ --prefix=/usr/local  VM2 
+./configure CC=gcc CXX=g++ --prefix=/usr/local (gcc g++ version5.1)  VM2-2
+#MacOS 10.13 (ongoing)
+./configure CC=gcc-9 CXX=g++-9 FC=gfortran-9 F77=gfortran-9 --prefix=/usr/local
+./configure CC=clang CXX=clang++ FC=gfortran-9 F77=gfortran-9 --prefix=/usr/local 
 make -j4 all
 make check
 sudo make install

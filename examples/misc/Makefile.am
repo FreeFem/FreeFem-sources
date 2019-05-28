@@ -39,6 +39,8 @@ TESTS=aaa-adp.edp aadaptation.edp \
 	Stokes-P1nc-P0+P1.edp testadp.edp \
 	teste.edp testFE.edp \
 	wafer-heating-laser-axi.edp
+# if .. no arpack or too long 
+XFAIL_TESTS=NSP1P1.edp
 
 EXTRA_DIST=*.edp all.edp regtests.edp regtests.m4 ref.edp
 

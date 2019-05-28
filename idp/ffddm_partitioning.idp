@@ -871,6 +871,14 @@ else
 
 ffddminitDmeshf(pr#Coarse,Thc,comm)
 
+IFMACRO(!pr#mminoverlap)
+NewMacro pr#mminoverlap()0 EndMacro
+ENDIFMACRO
+
+IFMACRO(!pr#Coarsemminoverlap)
+NewMacro pr#Coarsemminoverlap()0 EndMacro
+ENDIFMACRO
+
 IFMACRO(!pr#buildAug)
 NewMacro pr#buildAug()0 EndMacro
 ENDIFMACRO

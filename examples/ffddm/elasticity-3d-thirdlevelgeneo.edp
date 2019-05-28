@@ -79,8 +79,6 @@ EbinexactgeneoCS = 1;
 
 ffddmgeneosetup(E,Varf)
 
-ffddmsetupsuper(E)
-
 ffddmset(Esuper,verbosity,1)
 
 u[] = EfGMRES(x0, rhs, 1.e-6, 200, "right");

@@ -66,8 +66,6 @@ LapbinexactgeneoCS = 1;
 
 ffddmgeneosetup(Lap,Varf)
 
-ffddmsetupsuper(Lap)
-
 ffddmset(Lapsuper,verbosity,1)
 
 u[] = LapfGMRES(x0, rhs, 1.e-6, 200, "right");

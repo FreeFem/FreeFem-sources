@@ -1,0 +1,53 @@
+//ff-mpirun  -np  4 heat-torus-3d-surf.edp -wg -ffddm_schwarz_method ras -ffddm_geneo_nu 10 -global 5
+
+// If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
+
+// for the make check:
+// NBPROC 4
+// PARAM -ffddm_schwarz_method ras -ffddm_geneo_nu 10 -global 5
+
+macro dimension 3S// EOM            // 2D or 3D
+
+include "ffddm.idp"
+
+macro def(i)i// EOM                         // scalar field definition
+macro init(i)i// EOM                        // scalar field initialization
+macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
+func Pk = P1;                               // finite element space
+
+real R = 3, r=1; 
+int nx = r*2*pi*getARGV("-global", 5);
+int ny = R*2*pi*getARGV("-global", 5);
+
+meshS ThGlobal = square3(nx,ny,[(R+r*cos(2*pi*x))*cos(2*pi*y),(R+r*cos(2*pi*x))*sin(2*pi*y),r*sin(2*pi*x)]);
+
+func f = 100*exp(-20*((x-0)^2+(y-(R+r))^2+z^2));
+
+macro Varf(varfName, meshName, PhName)
+    varf varfName(u,v) = intN(meshName)(u*v + dt * grad(u)' * grad(v)) +intN(meshName)(un*v + f*v);
+// EOM
+
+int nt = 50;
+real dt = 0.5;
+
+ffddmbuildDmesh(Lap, ThGlobal, mpiCommWorld)
+ffddmbuildDfespace(Lap, Lap, real, def, init, P1)
+
+LapVhi u, un;
+
+ffddmsetupOperator(Lap, Lap, Varf)
+ffddmsetupPrecond(Lap, Varf)
+ffddmgeneosetup(Lap, Varf)
+
+real[int] rhs(LapVhi.ndof);
+
+un = 0;
+
+for (int i = 0; i < nt; i++) {
+  ffddmbuildrhs(Lap, Varf, rhs)
+  u[] = LapfGMRES(un[], rhs, 1.e-6, 200, "right");
+  ffddmplot(Lap,u, "u");
+  un[] = u[];
+}
+
+Lapwritesummary

@@ -173,7 +173,7 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
                     KSPSetOperators(ksp, ptA->_petsc, ptA->_petsc);
                     setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
                     EPSSetUp(eps);
-                    if(!ptA->_vS.empty()) {
+                    if(ptA->_vS && !ptA->_vS->empty()) {
                         PC pc;
                         KSPGetPC(ksp, &pc);
                         PCSetUp(pc);

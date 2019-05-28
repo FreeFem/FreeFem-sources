@@ -6209,7 +6209,7 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
                 int ivt[3];
                 for (int jj = 0; jj < 3; jj++) {
                     ivt[jj] = newindex[trisub[3 * ii + jj]];
-                    assert(newindex[3 * ii + jj] < nvsub);
+                    assert(trisub[3 * ii + jj] < nvsub);
                     assert(ivt[jj] < np);
                 }
                 R3 A=vertices[ivt[0]];

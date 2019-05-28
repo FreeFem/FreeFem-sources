@@ -172,20 +172,23 @@ namespace Fem2D {
   inline void  CheckErrorOptimisation(const R& ccc,const R& cc,const char * cmm)
     {
         if ( ccc != cc) {
-             if( (abs(ccc-cc) >1e-11*(abs(cc)+abs(ccc)) ) // test for round off err 
+             if( (abs(ccc-cc) >1e-8*(abs(cc)+abs(ccc)) ) // test for round off err
                  || (cc !=cc) ||  (ccc !=ccc) ) {// test for NaN
                 cerr << cc << " != " << ccc <<  " diff "<< cc-ccc <<" => ";
                 cerr << cmm << endl;
+                 cerr << " remark if you add  (..  ,   optimize=2) then  you remove this check (be carefull); "<< endl;
                 ExecError("In Optimized version "); }}
    }
     inline void  CheckErrorOptimisation(const Complex ccc,const Complex& cc,const char * cmm)
     {
         if ( ccc != cc) {
-            if( (abs(ccc.real()-ccc.real())+ abs(cc.imag()-cc.imag())  >0.5e-11*( abs(cc.real())+abs(cc.imag())+abs(ccc.real())+abs(ccc.imag()) ) )
+            if( (abs(ccc.real()-ccc.real())+ abs(cc.imag()-cc.imag())  >0.5e-8*( abs(cc.real())+abs(cc.imag())+abs(ccc.real())+abs(ccc.imag()) ) )
                 ||  (cc !=cc) ||  (ccc !=ccc) )
             {
                 cerr << cc << " != " << ccc <<  " diff "<< cc-ccc <<" => ";
                 cerr << cmm << endl;
+                cerr << " remark if you add  (..  ,   optimize=2) then  you remove this check (be carefull); " <<endl;
+
                 ExecError("In Optimized version "); }}
     }
 

@@ -249,13 +249,10 @@ namespace Fem2D
                 cerr << "  --  MeshS::MeshS Erreur openning " << filename<<endl;ffassert(0);exit(1);}
             if(verbosity>2)
                 cout << "  -- MeshS:  Read On file \"" <<filename<<"\""<<  endl;
-            if(filename.rfind(".msh")==filename.length()-4) {
-                //readmsh(f,-1); // TODO with surface, detection based on number of vertice to build one elt
-                cout << "caution, surface mesh isn't available with the format .msh" << endl;
-                ffassert(0);
-            }
-            //   else
-            read(f); // TODO with surface,
+            if(filename.rfind(".msh")==filename.length()-4)
+                readmsh(f,-1);
+            else
+                read(f);
         }
         
         BuildBound();
