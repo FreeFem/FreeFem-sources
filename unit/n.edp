@@ -1,0 +1,40 @@
+include "test.idp"
+
+cout << ".n()" << endl;
+real t;
+
+int[int] intarray = [1, 2, 3];
+real[int] realarray = [1.1, 2.2, 3.3];
+int[int, int] intintarray = [[1, 2], [3, 4]];
+real[int, int] rintintarray = [[3.1, 2.2], [4.4, 3.3], [1.1, 2.2]];
+int size;
+
+t = clock();
+size = intarray.n;
+t = clock() - t;
+cout << IND << t << endl;
+test(size == 3);
+
+t = clock();
+size = realarray.n;
+t = clock() - t;
+cout << IND << t << endl;
+test(size == 3);
+
+t = clock();
+size = realarray.n;
+t = clock() - t;
+cout << IND << t << endl;
+test(size == 3);
+
+t = clock();
+size = intintarray.n;
+t = clock() - t;
+cout << IND << t << endl;
+test(size == 2);
+
+t = clock();
+size = rintintarray.n;
+t = clock() - t;
+cout << IND << t << endl;
+test(size == 3);
