@@ -61,7 +61,7 @@ brew install gcc m4 git flex bison lapack suitesparse hdf5
 
 # MacOS 10.13 - VM2
 ```
-brew install gcc m4 git flex bison lapack suitesparse hdf5 cmake wget autoconf automake
+brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake
 ```
 
 [OpenMPI compilation](#openmpi)

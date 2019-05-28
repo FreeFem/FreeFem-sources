@@ -7,12 +7,12 @@
 
 echo "Job 6"
 casejob=6
-# change default  compilator
-change_compilator=etc/jenkins/change_compilator-`uname -s`-`uname -r`-$casejob.sh
-echo try to source file  "$change_compilator"
-test -f "$change_compilator" && echo  source file "$change_compilator"
-test -f "$change_compilator" && cat  "$change_compilator"
-test -f "$change_compilator" && source "$change_compilator"
+# change default  compiler
+change_compiler=etc/jenkins/change_compiler-`uname -s`-`uname -r`-$casejob.sh
+echo try to source file  "$change_compiler"
+test -f "$change_compiler" && echo  source file "$change_compiler"
+test -f "$change_compiler" && cat  "$change_compiler"
+test -f "$change_compiler" && source "$change_compiler"
 # configuration & build
 autoreconf -i \
   && ./configure  --enable-download --enable-debug --prefix=/builds/workspace/freefem \
