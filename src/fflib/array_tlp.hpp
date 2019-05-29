@@ -1835,6 +1835,8 @@ void ArrayOperatorF()
      TheOperators->Add("/=",new OneBinaryOperator<set_eq_array_div<KN_<K> ,F_KN_<K,K,K,KK> > > ); // add FH juin 2005
      TheOperators->Add("*=",new OneBinaryOperator<set_eq_array_mul<KN_<K> ,F_KN_<K,K,K,KK> > > ); // add FH juin 2005
 
+    TheOperators->Add("<-", new OneOperator2_<KN<K> *,KN<K> *,F_KN_<K,K,K,KK> >(set_init_N));
+
 }
 
 #endif
