@@ -899,6 +899,14 @@ t = clock() - t;
 cout << IND << IND << t << endl;
 test(reseqi == i1);
 
+cout << IND << "bool" << endl;
+
+t = clock();
+bool b = true;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(b == true);
+
 cout << IND << "real" << endl;
 
 t = clock();
@@ -1108,6 +1116,13 @@ t = clock() - t;
 cout << IND << IND << t << endl;
 test(reseqeqmsh3 == true);
 
+cout << IND << "bool" << endl;
+
+t = clock();
+bool resb = b == true;
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(resb == true);
 
 cout << "operator ++" << endl;
 

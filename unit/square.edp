@@ -54,22 +54,27 @@ t = clock() - t;
 cout << IND << IND << t << endl;
 test(rescneg == 12.0 - 16i);
 
-// cout << IND << "complex[int]" << endl;
-//
-// complex[int] carray = [4 + 2i, 1 + 1i];
-// complex[int] cnegarray = [-4 + 2i, 1 + 1i];
-// int index = 1;
-//
-// t = clock();
-// cout << square(carray) << endl;
-// t = clock() - t;
-// cout << IND << IND << t << endl;
-// test(carrayint[0] == 12.0 + 16i);
-// test(carrayint[1] == -1 + 1i);
-//
-// t = clock();
-// complex[int] carrayneg = square(cnegarray);
-// t = clock() - t;
-// cout << IND << IND << t << endl;
-// test(carrayneg[0] == 12.0 - 16i);
-// test(carrayneg[1] == 1. + 1i);
+cout << IND << "real[int]" << endl;
+
+real[int] u(5), v(5);
+
+for[i, vi:v]
+	vi = i;
+
+t = clock();
+u = square(v);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(u[0] == 0 && u[1] == 1 && u[2] == 4 && u[3] == 9 && u[4] == 16);
+
+cout << IND << "complex[int]" << endl;
+
+complex[int] w(2), s(2);
+
+w = [1 + 1i, 2 + 3i];
+
+t = clock();
+s = square(w);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(s[0] == 2i && s[1] == -5 + 12i);

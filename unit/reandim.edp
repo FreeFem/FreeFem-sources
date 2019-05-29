@@ -28,14 +28,12 @@ cout << IND << t << endl;
 [I, J, D] = RES;
 test(D[0] == 1 && D[1] == 2 && D[2] == 3);
 
-// complex[int, int] toto = intintarray.re;
-// t = clock();
-// matrix C = intintarray.re;
-// t = clock() - t;
-// cout << IND << t << endl;
-// [I, J, D] = C;
-// test(D[0] == 1 && D[1] == 2 && D[2] == 3 &&
-// D[3] == 1 && D[4] == 2 && D[5] == 3);
+t = clock();
+real[int, int] res = intintarray.re;
+t = clock() - t;
+cout << IND << t << endl;
+test(res(0,0) == 1 && res(0,1) == 2 && res(0,2) == 3 &&
+res(1,0) == 1 && res(1,1) == 2 && res(1,2) == 3);
 
 cout << ".im" << endl;
 
@@ -53,3 +51,10 @@ t = clock() - t;
 cout << IND << t << endl;
 [I, J, D] = RES;
 test(D[0] == 2 && D[1] == 2 && D[2] == -2);
+
+t = clock();
+res = intintarray.im;
+t = clock() - t;
+cout << IND << t << endl;
+test(res(0,0) == 1 && res(0,1) == 1 && res(0,2) == 2 &&
+res(1,0) == 5 && res(1,1) == -2 && res(1,2) == 6);
