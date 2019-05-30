@@ -2118,8 +2118,11 @@ AnyType NonlinearSolve<Type>::E_NonlinearSolve::operator()(Stack stack) const {
         std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
         insertOptions(options);
         SNESSetFromOptions(snes);
-        if(ptA->_ksp)
+        KSP ksp;
+        if(ptA->_ksp) {
+            SNESGetKSP(snes, &ksp);
             SNESSetKSP(snes, ptA->_ksp);
+        }
         {
             PetscInt n;
             VecGetSize(r, &n);
@@ -2138,6 +2141,11 @@ AnyType NonlinearSolve<Type>::E_NonlinearSolve::operator()(Stack stack) const {
         if(xl) {
             VecDestroy(&xl);
             VecDestroy(&xu);
+        }
+        if(ptA->_ksp) {
+            KSPCreate(PETSC_COMM_WORLD, &ksp);
+            SNESSetKSP(snes, ksp);
+            KSPDestroy(&ksp);
         }
         SNESDestroy(&snes);
 
