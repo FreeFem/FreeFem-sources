@@ -307,7 +307,7 @@ AnyType changeOperator<Type>::changeOperator_Op::operator()(Stack stack) const {
             PetscBool isType;
             MatGetType(ptB->_petsc, &type);
             PetscStrcmp(type, MATNEST, &isType);
-            if(!isType && (!ptA->_vS || ptA->_vS->empty()) && (!ptB->_vS || ptB->_vS->empty())) {
+            if(!isType) {
                 Mat backup = ptA->_petsc;
                 ptA->_petsc = nullptr;
                 ptA->dtor();
