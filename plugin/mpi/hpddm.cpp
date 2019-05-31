@@ -1,9 +1,10 @@
 //ff-c++-LIBRARY-dep: cxx11 hpddm [mumps parmetis ptscotch scotch scalapack|umfpack] [mkl|blas] mpi pthread mpifc fc
 //ff-c++-cpp-dep:
 
-#define HPDDM_SCHWARZ 1
-#define HPDDM_FETI    0
-#define HPDDM_BDD     0
+#define HPDDM_SCHWARZ                   1
+#define HPDDM_FETI                      0
+#define HPDDM_BDD                       0
+#define HPDDM_INEXACT_COARSE_OPERATOR   0
 
 #include "common.hpp"
 
@@ -147,15 +148,15 @@ AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
         }
         if(ptA->exclusion(comm)) {
             if(pair)
-                pair->p = ptA->template buildTwo<1>(comm);
+                pair->p = ptA->template buildTwo<1>(comm, &dA);
             else
-                ret = ptA->template buildTwo<1>(comm);
+                ret = ptA->template buildTwo<1>(comm, &dA);
         }
         else {
             if(pair)
-                pair->p = ptA->template buildTwo<0>(comm);
+                pair->p = ptA->template buildTwo<0>(comm, &dA);
             else
-                ret = ptA->template buildTwo<0>(comm);
+                ret = ptA->template buildTwo<0>(comm, &dA);
         }
         if(timing) { // toc
             (*timing)[timing->n - 1] = MPI_Wtime() - (*timing)[timing->n - 1];

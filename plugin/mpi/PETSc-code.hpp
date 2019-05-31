@@ -2121,6 +2121,7 @@ AnyType NonlinearSolve<Type>::E_NonlinearSolve::operator()(Stack stack) const {
         KSP ksp;
         if(ptA->_ksp) {
             SNESGetKSP(snes, &ksp);
+            PetscObjectReference((PetscObject)ksp);
             SNESSetKSP(snes, ptA->_ksp);
         }
         {
@@ -2143,7 +2144,6 @@ AnyType NonlinearSolve<Type>::E_NonlinearSolve::operator()(Stack stack) const {
             VecDestroy(&xu);
         }
         if(ptA->_ksp) {
-            KSPCreate(PETSC_COMM_WORLD, &ksp);
             SNESSetKSP(snes, ksp);
             KSPDestroy(&ksp);
         }
