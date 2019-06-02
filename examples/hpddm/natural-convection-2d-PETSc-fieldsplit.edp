@@ -33,14 +33,13 @@ real nuCurrent = nu;
 
 
 real[int] D;
-int[int] arrayIntersection(0);
-int[int][int] restrictionIntersection(0);
+int[int][int] intersection(0);
 mesh ThBackup;
 {
     if(adaptation)
         ThBackup = Th;
     int s = getARGV("-split", 1);
-    build(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
+    build(Th, s, D, intersection, Pk, mpiCommWorld)
 }
 
 Wh [u1, u2, p, T] = [0, 0, 0, 1-x];
@@ -56,7 +55,7 @@ varf vPb([uw1, uw2, pw, Tw], [v1, v2, q, TT])
  + on(1, 2, 3, 4, uw1 = 0, uw2 = 0) + on(2, 4, Tw = 0);
 varf vS(p, q) = int2d(Th, qforder = 3)(-1/(gammaAL + nuCurrent) * p * q);
 
-Mat dA(Wh.ndof, arrayIntersection, restrictionIntersection, D);
+Mat dA(Wh.ndof, intersection, D);
 func real[int] funcRes(real[int]& inPETSc) {
     changeNumbering(dA, u1[], inPETSc, inverse = true, exchange = true);
     real[int] out(Wh.ndof);
@@ -103,12 +102,11 @@ while(nuCurrent > nuFinal) {
         broadcast(processor(0), ThBackup);
         def(uG) = def(uG);
         Th = ThBackup;
-        arrayIntersection.resize(0);
-        restrictionIntersection.resize(0);
+        intersection.resize(0);
         D.resize(0);
         int s = getARGV("-split", 1);
-        build(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
-        Mat dAdapt(Wh.ndof, arrayIntersection, restrictionIntersection, D);
+        build(Th, s, D, intersection, Pk, mpiCommWorld)
+        Mat dAdapt(Wh.ndof, intersection, D);
         changeOperator(dA, dAdapt);
         [u1, u2, p, T] = def(uG);
     }

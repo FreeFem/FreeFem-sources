@@ -18,13 +18,12 @@ if(verbosity > 0 && mpirank == 0) {
 }
 
 meshN Th = square(1, 1);
-fespace Wh(Th, Pk);                         // local finite element space
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
-real[int] D;                                // partition of unity
+fespace Wh(Th, Pk);              // local finite element space
+int[int][int] intersection(0);   // local-to-neighbors renumbering
+real[int] D;                     // partition of unity
 {
     Th = square(getARGV("-global", 40), getARGV("-global", 40));    // global mesh
-    build(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
+    build(Th, s, D, intersection, Pk, mpiCommWorld)
 }
 
 func real wedge(real a, real b) {
@@ -48,7 +47,7 @@ matrix<complex> Loc;                        // local operator
     rhs = vPb(0, Wh, tgv = -1);
 }
 
-Mat<complex> A(Loc, arrayIntersection, restrictionIntersection, D);
+Mat<complex> A(Loc, intersection, D);
 set(A, sparams = "-ksp_view -pc_type lu");
 Wh<complex> def(u);    // local solution
 

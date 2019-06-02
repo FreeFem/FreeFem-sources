@@ -827,31 +827,29 @@ class initCSR : public OneOperator {
             public:
                 Expression A;
                 Expression K;
-                Expression O;
                 Expression R;
                 Expression D;
                 const int c;
                 static const int n_name_param = 6;
                 static basicAC_F0::name_and_type name_param[];
                 Expression nargs[n_name_param];
-                E_initCSR(const basicAC_F0& args, int d) : A(0), K(0), O(0), R(0), D(0), c(d) {
+                E_initCSR(const basicAC_F0& args, int d) : A(0), K(0), R(0), D(0), c(d) {
                     args.SetNameParam(n_name_param, name_param, nargs);
                     A = to<DistributedCSR<HpddmType>*>(args[0]);
                     if(c == 1)
                         K = to<long>(args[1]);
                     else
                         K = to<Matrice_Creuse<PetscScalar>*>(args[1]);
-                    O = to<KN<long>*>(args[2]);
-                    R = to<KN<KN<long>>*>(args[3]);
-                    D = to<KN<typename std::conditional<std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value, double, long>::type>*>(args[4]);
+                    R = to<KN<KN<long>>*>(args[2]);
+                    D = to<KN<typename std::conditional<std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value, double, long>::type>*>(args[3]);
                 }
 
                 AnyType operator()(Stack stack) const;
                 operator aType() const { return atype<DistributedCSR<HpddmType>*>(); }
         };
         E_F0* code(const basicAC_F0 & args) const { return new E_initCSR(args, c); }
-        initCSR() : OneOperator(atype<DistributedCSR<HpddmType>*>(), atype<DistributedCSR<HpddmType>*>(), atype<Matrice_Creuse<PetscScalar>*>(), atype<KN<long>*>(), atype<KN<KN<long>>*>(), atype<KN<typename std::conditional<std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value, double, long>::type>*>()), c(0) { }
-        initCSR(int) : OneOperator(atype<DistributedCSR<HpddmType>*>(), atype<DistributedCSR<HpddmType>*>(), atype<long>(), atype<KN<long>*>(), atype<KN<KN<long>>*>(), atype<KN<typename std::conditional<std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value, double, long>::type>*>()), c(1) { }
+        initCSR() : OneOperator(atype<DistributedCSR<HpddmType>*>(), atype<DistributedCSR<HpddmType>*>(), atype<Matrice_Creuse<PetscScalar>*>(), atype<KN<KN<long>>*>(), atype<KN<typename std::conditional<std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value, double, long>::type>*>()), c(0) { }
+        initCSR(int) : OneOperator(atype<DistributedCSR<HpddmType>*>(), atype<DistributedCSR<HpddmType>*>(), atype<long>(), atype<KN<KN<long>>*>(), atype<KN<typename std::conditional<std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value, double, long>::type>*>()), c(1) { }
 };
 template<class HpddmType>
 basicAC_F0::name_and_type initCSR<HpddmType>::E_initCSR::name_param[] = {
@@ -866,7 +864,6 @@ template<class HpddmType>
 AnyType initCSR<HpddmType>::E_initCSR::operator()(Stack stack) const {
     DistributedCSR<HpddmType>* ptA = GetAny<DistributedCSR<HpddmType>*>((*A)(stack));
     KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
-    KN<long>* ptO = GetAny<KN<long>*>((*O)(stack));
     KN<typename std::conditional<std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value, double, long>::type>* ptD = GetAny<KN<typename std::conditional<std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value, double, long>::type>*>((*D)(stack));
     PetscInt bs = nargs[1] ? GetAny<long>((*nargs[1])(stack)) : 1;
     int dof = 0;
@@ -880,7 +877,7 @@ AnyType initCSR<HpddmType>::E_initCSR::operator()(Stack stack) const {
     ptA->_A = new HpddmType;
     if(comm)
         PETSC_COMM_WORLD = *comm;
-    if(ptO && (mA || dof)) {
+    if(ptR && (mA || dof)) {
         HPDDM::MatrixCSR<PetscScalar>* dA;
         if(mA)
             dA = new_HPDDM_MatrixCSR<PetscScalar>(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
@@ -888,11 +885,12 @@ AnyType initCSR<HpddmType>::E_initCSR::operator()(Stack stack) const {
             dA = new HPDDM::MatrixCSR<PetscScalar>(dof, dof, 0, nullptr, nullptr, nullptr, false);
         Matrice_Creuse<double>* pList = nargs[5] ? GetAny<Matrice_Creuse<double>*>((*nargs[5])(stack)) : 0;
         HPDDM::MatrixCSR<void>* dL = nullptr;
+        KN_<KN<long>> sub(ptR->n > 0 && ptR->operator[](0).n > 0 ? (*ptR)(FromTo(1, ptR->n - 1)) : KN<KN<long>>());
         if(std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value && pList && (mA || dof)) {
             int n = 0;
             ptA->_exchange = new HPDDM::template Subdomain<PetscScalar>*[2]();
             ptA->_exchange[0] = new HPDDM::template Subdomain<PetscScalar>();
-            ptA->_exchange[0]->initialize(dA, STL<long>(*ptO), *ptR, comm);
+            ptA->_exchange[0]->initialize(dA, STL<long>(ptR->n > 0 ? ptR->operator[](0) : KN<long>()), sub, comm);
             ptA->_exchange[0]->setBuffer();
             if(pList->A) {
                 MatriceMorse<double>* mList = static_cast<MatriceMorse<double>*>(&*(pList->A));
@@ -914,7 +912,7 @@ AnyType initCSR<HpddmType>::E_initCSR::operator()(Stack stack) const {
                 ptD->destroy();
             }
         }
-        ptA->_A->HPDDM::template Subdomain<PetscScalar>::initialize(dA, STL<long>(*ptO), *ptR, comm, dL);
+        ptA->_A->HPDDM::template Subdomain<PetscScalar>::initialize(dA, STL<long>(ptR->n > 0 ? ptR->operator[](0) : KN<long>()), sub, comm, dL);
         delete dL;
         ptA->_num = new unsigned int[ptA->_A->getMatrix()->_n];
         initPETScStructure(ptA, bs, nargs[4] ? (GetAny<bool>((*nargs[4])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE, ptD, rhs);
@@ -926,7 +924,6 @@ AnyType initCSR<HpddmType>::E_initCSR::operator()(Stack stack) const {
 #endif
         }
         if(nargs[3] && GetAny<bool>((*nargs[3])(stack))) {
-            ptO->resize(0);
             ptR->resize(0);
             if(c == 0)
                 GetAny<Matrice_Creuse<PetscScalar>*>((*K)(stack))->destroy();

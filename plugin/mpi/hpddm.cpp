@@ -14,13 +14,12 @@ class initDDM_Op : public E_F0mps {
     public:
         Expression A;
         Expression Mat;
-        Expression o;
         Expression R;
         Expression D;
         static const int n_name_param = 3;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
-        initDDM_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3, Expression param4, Expression param5) : A(param1), Mat(param2), o(param3), R(param4), D(param5) {
+        initDDM_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3, Expression param4) : A(param1), Mat(param2), R(param3), D(param4) {
             args.SetNameParam(n_name_param, name_param, nargs);
         }
 
@@ -35,10 +34,10 @@ basicAC_F0::name_and_type initDDM_Op<Type, K>::name_param[] = {
 template<class Type, class K>
 class initDDM : public OneOperator {
     public:
-        initDDM() : OneOperator(atype<Type*>(), atype<Type*>(), atype<Matrice_Creuse<K>*>(), atype<KN<long>*>(), atype<KN<KN<long>>*>(), atype<KN<HPDDM::underlying_type<K>>*>()) { }
+        initDDM() : OneOperator(atype<Type*>(), atype<Type*>(), atype<Matrice_Creuse<K>*>(), atype<KN<KN<long>>*>(), atype<KN<HPDDM::underlying_type<K>>*>()) { }
 
         E_F0* code(const basicAC_F0& args) const {
-            return new initDDM_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]), t[4]->CastTo(args[4]));
+            return new initDDM_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]));
         }
 };
 template<class Type, class K>
@@ -46,12 +45,12 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
     Matrice_Creuse<K>* pA = GetAny<Matrice_Creuse<K>*>((*Mat)(stack));
     MatriceMorse<K>* mA = pA->A ? static_cast<MatriceMorse<K>*>(&(*pA->A)) : nullptr;
-    KN<long>* ptO = GetAny<KN<long>*>((*o)(stack));
     KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
     KN<HPDDM::underlying_type<K>>* ptD = GetAny<KN<HPDDM::underlying_type<K>>*>((*D)(stack));
-    if(ptO)
-        ptA->HPDDM::template Subdomain<K>::initialize(new_HPDDM_MatrixCSR<K>(mA)
-                                            , STL<long>(*ptO), *ptR, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
+    if(ptR) {
+        KN_<KN<long>> sub(ptR->n > 0 && ptR->operator[](0).n > 0 ? (*ptR)(FromTo(1, ptR->n - 1)) : KN<KN<long>>());
+        ptA->HPDDM::template Subdomain<K>::initialize(new_HPDDM_MatrixCSR<K>(mA), STL<long>(ptR->n > 0 ? ptR->operator[](0) : KN<long>()), sub, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
+    }
     if(ptD)
         ptA->initialize(*ptD);
     else

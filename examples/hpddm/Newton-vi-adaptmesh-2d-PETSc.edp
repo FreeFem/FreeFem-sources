@@ -15,15 +15,14 @@ func Pkdc = P1dc;                   // finite element space
 mesh Th;
 fespace Vh(Th, Pk);
 fespace Ph(Th, Pkdc);
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
-real[int] D;                                // partition of unity
+int[int][int] intersection(0);   // local-to-neighbors renumbering
+real[int] D;                     // partition of unity
 mesh ThBackup;
 {
     Th = square(getARGV("-global", 40), getARGV("-global", 40));
     ThBackup = Th;
     int s = getARGV("-split", 1);
-    build(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
+    build(Th, s, D, intersection, Pk, mpiCommWorld)
 }
 
 Vh b = 100;
@@ -44,7 +43,7 @@ varf vC(uh, vh) = int2d(Th)(b*vh)
 varf vhJ(uh, vh) = int2d(Th)(dfalpha*(dx(uh)*dx(vh) + dy(uh)*dy(vh)) + ddfalpha*(dx(u)*dx(vh) + dy(u)*dy(vh)) * (dx(u)*dx(uh) + dy(u)*dy(uh)))
     + on(1, 2, uh = 0);
 
-Mat dJ(Vh.ndof, arrayIntersection, restrictionIntersection, D);
+Mat dJ(Vh.ndof, intersection, D);
 matrix H;
 
 func real[int] funcRes(real[int]& inPETSc) {
@@ -95,12 +94,11 @@ for(int i = 0; i < step; ++i) {
         plot(uG, cmm = "Global solution", wait = 1, fill = 1, dim = 3);
         {
             Th = ThBackup;
-            arrayIntersection.resize(0);
-            restrictionIntersection.resize(0);
+            intersection.resize(0);
             D.resize(0);
             int s = getARGV("-split", 1);
-            build(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
-            Mat dAdapt(Vh.ndof, arrayIntersection, restrictionIntersection, D);
+            build(Th, s, D, intersection, Pk, mpiCommWorld)
+            Mat dAdapt(Vh.ndof, intersection, D);
             changeOperator(dJ, dAdapt);
         }
         u = uG;

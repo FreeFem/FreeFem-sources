@@ -28,15 +28,14 @@ if(verbosity > 0 && mpirank == 0) {
 }
 
 meshN Th = square(1, 1);
-fespace Wh(Th, Pk);                         // local finite element space
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
-real[int] D;                                // partition of unity
+fespace Wh(Th, Pk);              // local finite element space
+int[int][int] intersection(0);   // local-to-neighbors renumbering
+real[int] D;                     // partition of unity
 {
     int[int] l = [2, 1, 2, 2];
     meshN ThBorder;
     Th = square(2 * getARGV("-global", 10), getARGV("-global", 10), [2 * x, y], label = l);    // global mesh
-    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Pk, comm, excluded, 2)
+    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, D, intersection, Pk, comm, excluded, 2)
 }
 
 real f = -90000.0;
@@ -51,7 +50,7 @@ varf vPb(def(u), def(v)) = intN(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsil
 Mat = vPb(Wh, Wh, sym = 1);
 real[int] rhs = vPb(0, Wh);
 
-schwarz A(Mat, arrayIntersection, restrictionIntersection, D);
+schwarz A(Mat, intersection, D);
 
 matrix<real> Opt;                           // local operator with optimized boundary conditions
 pair ret;

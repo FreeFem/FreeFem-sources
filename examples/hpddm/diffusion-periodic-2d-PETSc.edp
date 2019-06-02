@@ -26,12 +26,11 @@ border d(t=0,1)    { x = t; y = -1+t;             label = 4; };
 border e(t=0,2*pi) { x = r*cos(t); y = -r*sin(t); label = 0; };
 
 meshN Th = buildmesh(a(getARGV("-global", 40)) + b(getARGV("-global", 40)) + c(getARGV("-global", 40)) + d(getARGV("-global", 40)) + e(getARGV("-global", 40)));
-fespace Wh(Th, Pk);                         // local finite element space
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
-real[int] D;                                // partition of unity
+fespace Wh(Th, Pk);              // local finite element space
+int[int][int] intersection(0);   // local-to-neighbors renumbering
+real[int] D;                     // partition of unity
 {
-    buildPeriodic(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld, labPeriodic)
+    buildPeriodic(Th, s, D, intersection, Pk, mpiCommWorld, labPeriodic)
 }
 
 func f = (y+x+1) * (y+x-1) * (y-x+1) * (y-x-1);
@@ -39,7 +38,7 @@ varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) - intN(Th)((0.39 - f) * v) + on(0,
 matrix<real> Loc = vPb(Wh, Wh);
 real[int] rhs = vPb(0, Wh);
 
-Mat A(Loc, arrayIntersection, restrictionIntersection, D);
+Mat A(Loc, intersection, D);
 set(A, sparams = "-ksp_view");
 Wh<real> def(u);    // local solution
 

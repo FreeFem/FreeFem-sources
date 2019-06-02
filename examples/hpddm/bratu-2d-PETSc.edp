@@ -23,19 +23,18 @@ mesh M = buildmesh(aa(N)+bb(N)+cc(N)+dd(N));
 load "Element_P3"
 func Pk = P3;
 fespace Vh(M, Pk);
-int[int] arrayIntersection;
-int[int][int] restrictionIntersection(0);
+int[int][int] intersection(0);
 real[int] D;
 {
     int s = getARGV("-split", 1);
-    build(M, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
+    build(M, s, D, intersection, Pk, mpiCommWorld)
 }
 Vh u;
 func BC = cos(pi*x)*cos(pi*y);
 varf vInit(w, v) = on(aa, bb, cc, dd, w = BC);
 varf vJ(w, v) = int2d(M)(dx(w)*dx(v) + dy(w)*dy(v) - c*exp(u)*w*v) + on(aa, bb, cc, dd, w = 0);
 varf vRes(w, v) = int2d(M)(dx(u)*dx(v) + dy(u)*dy(v) - c*exp(u)*v) + on(aa, bb, cc, dd, w = u);
-Mat A(Vh.ndof, arrayIntersection, restrictionIntersection, D);
+Mat A(Vh.ndof, intersection, D);
 set(A, sparams = "-pc_type asm -sub_pc_type lu -ksp_converged_reason");
 matrix J;
 func real[int] funcRes(real[int]& inPETSc) {

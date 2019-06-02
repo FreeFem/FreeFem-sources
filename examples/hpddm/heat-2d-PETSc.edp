@@ -21,14 +21,13 @@ if(verbosity > 0 && mpirank == 0) {
 }
 
 meshN Th = square(1, 1);
-fespace Wh(Th, Pk);                         // local finite element space
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
-real[int] D;                                // partition of unity
+fespace Wh(Th, Pk);              // local finite element space
+int[int][int] intersection(0);   // local-to-neighbors renumbering
+real[int] D;                     // partition of unity
 {
     int[int] l = [1, 1, 1, 1];
     Th = square(getARGV("-global", 40), getARGV("-global", 40), label = l);    // global mesh
-    build(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
+    build(Th, s, D, intersection, Pk, mpiCommWorld)
 }
 
 real[int] rhs(Wh.ndof);                     // local right-hand side
@@ -44,7 +43,7 @@ matrix<real> M;                             // local mass matrix
     M = vPbM(Wh, Wh);
 }
 
-Mat A(Loc, arrayIntersection, restrictionIntersection, D);
+Mat A(Loc, intersection, D);
 set(A, sparams = "-ksp_view");
 
 Wh<real> def(u) = init(0.0);    // local solution

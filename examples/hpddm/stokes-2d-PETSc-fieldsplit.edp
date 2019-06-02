@@ -21,16 +21,15 @@ if(verbosity > 0 && mpirank == 0) {
 }
 
 meshN Th = square(1, 1);
-fespace Wh(Th, Pk);                         // local finite element space
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
-real[int] D;                                // partition of unity
+fespace Wh(Th, Pk);              // local finite element space
+int[int][int] intersection(0);   // local-to-neighbors renumbering
+real[int] D;                     // partition of unity
 {
     meshN ThGlobal = square(getARGV("-global", 40), getARGV("-global", 40), [x, y]);    // global mesh
     ThGlobal = trunc(ThGlobal, (x < 0.5) || (y < 0.5), label = 5);
     Th = movemesh(ThGlobal, [-x, y]);
     Th = ThGlobal + Th;
-    build(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
+    build(Th, s, D, intersection, Pk, mpiCommWorld)
 }
 
 varf vPb([u, uB, p], [v, vB, q]) = intN(Th)(grad(u)' * grad(v) + grad(uB)' * grad(vB) - div(u) * q - div(v) * p + 1e-10 * p * q) + on(1, 3, 5, u = 0, uB = 0) + on(2, u = y*(0.5-y), uB = 0);
@@ -41,7 +40,7 @@ string[int] names(2);
 names[0] = "velocity";
 names[1] = "pressure";
 
-Mat MatB(K, arrayIntersection, restrictionIntersection, D);
+Mat MatB(K, intersection, D);
 set(MatB, prefix = "block_", sparams = "-block_pc_type fieldsplit -block_ksp_type fgmres -block_pc_fieldsplit_type multiplicative -block_pc_fieldsplit_detect_saddle_point -fieldsplit_velocity_ksp_type preonly"
 + " -fieldsplit_velocity_pc_type lu -fieldsplit_pressure_pc_type jacobi " 
 + " -fieldsplit_pressure_ksp_type gmres -block_ksp_monitor -block_ksp_view -block_ksp_rtol 1e-6", fields = b[], names = names);

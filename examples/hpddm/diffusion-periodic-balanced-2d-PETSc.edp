@@ -22,10 +22,9 @@ border d(t=0,1)    { x = t; y = -1+t;             label = 4; };
 border e(t=0,2*pi) { x = r*cos(t); y = -r*sin(t); label = 0; };
 
 meshN Th = buildmesh(a(getARGV("-global", 40)) + b(getARGV("-global", 40)) + c(getARGV("-global", 40)) + d(getARGV("-global", 40)) + e(getARGV("-global", 40)));
-fespace Wh(Th, Pk);                         // local finite element space
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
-real[int] D;                                // partition of unity
+fespace Wh(Th, Pk);              // local finite element space
+int[int][int] intersection(0);   // local-to-neighbors renumbering
+real[int] D;                     // partition of unity
 if(mpisize > 1) {
     fespace Ph(Th, P0);
     Ph part;
@@ -100,7 +99,7 @@ if(mpisize > 1) {
     broadcast(processor(0), part[]);
     plot(part, fill = 1, wait = 1);
     real[int] DExtended;
-    buildWithPartitioning(ThExtended, part[], s, DExtended, arrayIntersection, restrictionIntersection, PkNoPeriodic, mpiCommWorld);
+    buildWithPartitioning(ThExtended, part[], s, DExtended, intersection, PkNoPeriodic, mpiCommWorld);
     Th = trunc(ThExtended, y <= 1-x && y >= -1-x && y <= 1+x && y >= -1+x);
     fespace WhExtended(ThExtended, PkNoPeriodic);
     matrix R = interpolate(Wh, WhExtended);
@@ -112,20 +111,21 @@ if(mpisize > 1) {
         if(abs(C[i]) > 1e-12)
             D[J[i]] = DExtended[I[i]];
     }
-    for(int i = 0; i < arrayIntersection.n; ++i) {
-        int nnz = 0;
-        for(int j = 0; j < restrictionIntersection[i].n; ++j) {
-            int k = 0;
-            for( k ; k < C.n; ++k) {
-                if(restrictionIntersection[i][j] == I[k] && abs(C[k]) > 1e-12) {
-                    restrictionIntersection[i][nnz] = J[k];
-                    ++nnz;
-                    break;
+    if(intersection.n > 0)
+        for(int i = 0; i < intersection[0].n; ++i) {
+            int nnz = 0;
+            for(int j = 0; j < intersection[1 + i].n; ++j) {
+                int k = 0;
+                for( k ; k < C.n; ++k) {
+                    if(intersection[1 + i][j] == I[k] && abs(C[k]) > 1e-12) {
+                        intersection[1 + i][nnz] = J[k];
+                        ++nnz;
+                        break;
+                    }
                 }
             }
+            intersection[1 + i].resize(nnz);
         }
-        restrictionIntersection[i].resize(nnz);
-    }
 }
 else {
     if(s > 1)
@@ -139,7 +139,7 @@ varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) - intN(Th)((0.39 - f) * v) + on(0,
 matrix<real> Loc = vPb(Wh, Wh);
 real[int] rhs = vPb(0, Wh);
 
-Mat A(Loc, arrayIntersection, restrictionIntersection, D);
+Mat A(Loc, intersection, D);
 set(A, sparams = "-ksp_view -pc_type lu");
 Wh<real> def(u);    // local solution
 

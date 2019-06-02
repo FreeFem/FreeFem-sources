@@ -28,16 +28,15 @@ if(verbosity > 0 && mpirank == 0) {
 }
 
 meshN ThBorder, Th = square(1, 1);
-fespace Wh(Th, Pk);                         // local finite element space
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
-real[int] D;                                // partition of unity
+fespace Wh(Th, Pk);              // local finite element space
+int[int][int] intersection(0);   // local-to-neighbors renumbering
+real[int] D;                     // partition of unity
 {
     meshN ThGlobal = square(getARGV("-global", 30), getARGV("-global", 30), [x, y]);    // global mesh
     ThGlobal = trunc(ThGlobal, (x < 0.5) || (y < 0.5), label = 5);
     Th = movemesh(ThGlobal, [-x, y]);
     Th = ThGlobal + Th;
-    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Pk, comm, excluded)
+    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, D, intersection, Pk, comm, excluded)
 }
 
 real[int] rhs;                              // local right-hand side
@@ -53,7 +52,7 @@ matrix<real> Mat;                           // local operator
 }
 ThBorder = square(1, 1);
 
-schwarz A(Mat, arrayIntersection, restrictionIntersection, D, scaled = false);
+schwarz A(Mat, intersection, D, scaled = false);
 set(A, sparams = "-hpddm_mkl_pardiso_iparm_13 1 -hpddm_schwarz_method oras -hpddm_schwarz_coarse_correction deflated -hpddm_geneo_nu 15");
 
 matrix<real> Opt;                           // local operator with optimized boundary conditions

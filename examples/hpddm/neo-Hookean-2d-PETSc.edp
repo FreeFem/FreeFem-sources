@@ -307,15 +307,14 @@ int2d(Th, qforder=1)
 
    + on(2, varu1 = 0, varu2 = 0);
 
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
-real[int] D;                                // partition of unity
+int[int][int] intersection(0);   // local-to-neighbors renumbering
+real[int] D;                     // partition of unity
 {
     int s = getARGV("-split", 1);
-    build(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
+    build(Th, s, D, intersection, Pk, mpiCommWorld)
 }
 
-Mat A(Vh.ndof, arrayIntersection, restrictionIntersection, D, bs = 2);
+Mat A(Vh.ndof, intersection, D, bs = 2);
 Vh<real> def(Rb)[3];
 [Rb[0], RbB[0]] = [1, 0];
 [Rb[1], RbB[1]] = [0, 1];
