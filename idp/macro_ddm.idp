@@ -378,7 +378,7 @@ ENDIFMACRO
         }
 // EOM
 
-macro buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, PkPart, defPart, initPart, labPeriodic, userPartitioning, bs)
+macro buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, PkPart, defPart, initPart, labPeriodic, userPartitioning, bs)
 {
     real timing = mpiWtime();
     fespace WhLocal(Th, P);
@@ -463,136 +463,136 @@ ENDIFMACRO
 }// EOM
 
 IFMACRO(vectorialfe)
-macro buildOverlapEdge(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, PkPart, defPart, initPart, bs) {
+macro buildOverlapEdge(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, PkPart, defPart, initPart, bs) {
     int[int] emptyArray(0);
     real[int] emptyRealArray(0);
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, PkPart, defPart, initPart, emptyArray, emptyRealArray, bs)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, PkPart, defPart, initPart, emptyArray, emptyRealArray, bs)
 }// EOM
-macro buildOverlapEdgeWithPartitioning(Th, ThBorder, part, fakeInterface, s, overlap, D, intersection, P, comm, excluded, PkPart, defPart, initPart, bs) {
+macro buildOverlapEdgeWithPartitioning(Th, ThBorder, part, fakeInterface, s, overlap, intersection, D, P, comm, excluded, PkPart, defPart, initPart, bs) {
     int[int] emptyArray(0);
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, PkPart, defPart, initPart, emptyArray, part, bs)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, PkPart, defPart, initPart, emptyArray, part, bs)
 }// EOM
-macro buildOverlapWithPartitioning(Th, ThBorder, part, fakeInterface, s, overlap, D, intersection, P, comm, excluded, bs) {
+macro buildOverlapWithPartitioning(Th, ThBorder, part, fakeInterface, s, overlap, intersection, D, P, comm, excluded, bs) {
     int[int] emptyArray(0);
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, P, def, init, emptyArray, part, bs)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, P, def, init, emptyArray, part, bs)
 }// EOM
-macro buildOverlap(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, bs) {
+macro buildOverlap(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, bs) {
     int[int] emptyArray(0);
     real[int] emptyRealArray(0);
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, P, def, init, emptyArray, emptyRealArray, bs)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, P, def, init, emptyArray, emptyRealArray, bs)
 }// EOM
-macro buildOverlapPeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, labPeriodic, bs) {
+macro buildOverlapPeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, labPeriodic, bs) {
     real[int] emptyArray(0);
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, P, def, init, labPeriodic, emptyArray, bs)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, P, def, init, labPeriodic, emptyArray, bs)
 }// EOM
-macro buildEdgeWithPartitioning(Th, part, s, D, intersection, P, comm, PkPart, defPart, initPart, bs) {
+macro buildEdgeWithPartitioning(Th, part, s, intersection, D, P, comm, PkPart, defPart, initPart, bs) {
     int[int] emptyArray(0);
     meshN ThBorder;
     int fakeInterface = -111111;
     int overlap = 1;
     bool excluded = false;
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, D, intersection, P, comm, excluded, PkPart, defPart, initPart, emptyArray, part, bs)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, intersection, D, P, comm, excluded, PkPart, defPart, initPart, emptyArray, part, bs)
 }// EOM
-macro buildWithPartitioning(Th, part, s, D, intersection, P, comm, bs) {
+macro buildWithPartitioning(Th, part, s, intersection, D, P, comm, bs) {
     int[int] emptyArray(0);
     meshN ThBorder;
     int fakeInterface = -111111;
     int overlap = 1;
     bool excluded = false;
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, P, def, init, emptyArray, part, bs)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, P, def, init, emptyArray, part, bs)
 }// EOM
-macro build(Th, s, D, intersection, P, comm, bs) {
-    int[int] emptyArray(0);
-    real[int] emptyRealArray(0);
-    meshN ThBorder;
-    int fakeInterface = -111111;
-    int overlap = 1;
-    bool excluded = false;
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, P, def, init, emptyArray, emptyRealArray, bs)
-}// EOM
-macro buildPeriodic(Th, s, D, intersection, P, comm, labPeriodic, bs) {
+macro build(Th, s, intersection, D, P, comm, bs) {
     int[int] emptyArray(0);
     real[int] emptyRealArray(0);
     meshN ThBorder;
     int fakeInterface = -111111;
     int overlap = 1;
     bool excluded = false;
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, P, def, init, labPeriodic, emptyRealArray, bs)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, P, def, init, emptyArray, emptyRealArray, bs)
 }// EOM
-macro buildMinimalist(Th, D, intersection, P, comm, bs) {
+macro buildPeriodic(Th, s, intersection, D, P, comm, labPeriodic, bs) {
     int[int] emptyArray(0);
     real[int] emptyRealArray(0);
     meshN ThBorder;
     int fakeInterface = -111111;
     int overlap = 1;
     bool excluded = false;
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, 1, overlap, D, intersection, P, mpiCommWorld, excluded, P, def, init, emptyArray, emptyRealArray, bs)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, P, def, init, labPeriodic, emptyRealArray, bs)
+}// EOM
+macro buildMinimalist(Th, intersection, D, P, bs) {
+    int[int] emptyArray(0);
+    real[int] emptyRealArray(0);
+    meshN ThBorder;
+    int fakeInterface = -111111;
+    int overlap = 1;
+    bool excluded = false;
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, 1, overlap, intersection, D, P, mpiCommWorld, excluded, P, def, init, emptyArray, emptyRealArray, bs)
 }// EOM
 ENDIFMACRO
 IFMACRO(!vectorialfe)
-macro buildOverlapEdge(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, PkPart, defPart, initPart) {
+macro buildOverlapEdge(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, PkPart, defPart, initPart) {
     int[int] emptyArray(0);
     real[int] emptyRealArray(0);
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, PkPart, defPart, initPart, emptyArray, emptyRealArray, 1)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, PkPart, defPart, initPart, emptyArray, emptyRealArray, 1)
 }// EOM
-macro buildOverlapEdgeWithPartitioning(Th, ThBorder, part, fakeInterface, s, overlap, D, intersection, P, comm, excluded, PkPart, defPart, initPart) {
+macro buildOverlapEdgeWithPartitioning(Th, ThBorder, part, fakeInterface, s, overlap, intersection, D, P, comm, excluded, PkPart, defPart, initPart) {
     int[int] emptyArray(0);
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, PkPart, defPart, initPart, emptyArray, part, 1)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, PkPart, defPart, initPart, emptyArray, part, 1)
 }// EOM
-macro buildOverlapWithPartitioning(Th, ThBorder, part, fakeInterface, s, overlap, D, intersection, P, comm, excluded) {
+macro buildOverlapWithPartitioning(Th, ThBorder, part, fakeInterface, s, overlap, intersection, D, P, comm, excluded) {
     int[int] emptyArray(0);
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, P, def, init, emptyArray, part, 1)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, P, def, init, emptyArray, part, 1)
 }// EOM
-macro buildOverlap(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded) {
+macro buildOverlap(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded) {
     int[int] emptyArray(0);
     real[int] emptyRealArray(0);
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, P, def, init, emptyArray, emptyRealArray, 1)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, P, def, init, emptyArray, emptyRealArray, 1)
 }// EOM
-macro buildOverlapPeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, labPeriodic) {
+macro buildOverlapPeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, labPeriodic) {
     real[int] emptyArray(0);
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, P, def, init, labPeriodic, emptyArray, 1)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, P, def, init, labPeriodic, emptyArray, 1)
 }// EOM
-macro buildEdgeWithPartitioning(Th, part, s, D, intersection, P, comm, PkPart, defPart, initPart) {
+macro buildEdgeWithPartitioning(Th, part, s, intersection, D, P, comm, PkPart, defPart, initPart) {
     int[int] emptyArray(0);
     meshN ThBorder;
     int fakeInterface = -111111;
     int overlap = 1;
     bool excluded = false;
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, PkPart, defPart, initPart, emptyArray, part, 1)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, PkPart, defPart, initPart, emptyArray, part, 1)
 }// EOM
-macro buildWithPartitioning(Th, part, s, D, intersection, P, comm) {
+macro buildWithPartitioning(Th, part, s, intersection, D, P, comm) {
     int[int] emptyArray(0);
     meshN ThBorder;
     int fakeInterface = -111111;
     int overlap = 1;
     bool excluded = false;
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, P, def, init, emptyArray, part, 1)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, P, def, init, emptyArray, part, 1)
 }// EOM
-macro build(Th, s, D, intersection, P, comm) {
-    int[int] emptyArray(0);
-    real[int] emptyRealArray(0);
-    meshN ThBorder;
-    int fakeInterface = -111111;
-    int overlap = 1;
-    bool excluded = false;
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, P, def, init, emptyArray, emptyRealArray, 1)
-}// EOM
-macro buildPeriodic(Th, s, D, intersection, P, comm, labPeriodic) {
+macro build(Th, s, intersection, D, P, comm) {
     int[int] emptyArray(0);
     real[int] emptyRealArray(0);
     meshN ThBorder;
     int fakeInterface = -111111;
     int overlap = 1;
     bool excluded = false;
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, P, comm, excluded, P, def, init, labPeriodic, emptyRealArray, 1)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, P, def, init, emptyArray, emptyRealArray, 1)
 }// EOM
-macro buildMinimalist(Th, D, intersection, P) {
+macro buildPeriodic(Th, s, intersection, D, P, comm, labPeriodic) {
     int[int] emptyArray(0);
     real[int] emptyRealArray(0);
     meshN ThBorder;
     int fakeInterface = -111111;
     int overlap = 1;
     bool excluded = false;
-    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, 1, overlap, D, intersection, P, mpiCommWorld, excluded, P, def, init, emptyArray, emptyRealArray, 1)
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, P, def, init, labPeriodic, emptyRealArray, 1)
+}// EOM
+macro buildMinimalist(Th, intersection, D, P) {
+    int[int] emptyArray(0);
+    real[int] emptyRealArray(0);
+    meshN ThBorder;
+    int fakeInterface = -111111;
+    int overlap = 1;
+    bool excluded = false;
+    buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, 1, overlap, intersection, D, P, mpiCommWorld, excluded, P, def, init, emptyArray, emptyRealArray, 1)
 }// EOM
 ENDIFMACRO

@@ -22,7 +22,7 @@ mesh ThBackup;
     Th = square(getARGV("-global", 40), getARGV("-global", 40));
     ThBackup = Th;
     int s = getARGV("-split", 1);
-    build(Th, s, D, intersection, Pk, mpiCommWorld)
+    build(Th, s, intersection, D, Pk, mpiCommWorld)
 }
 
 Vh b = 100;
@@ -97,7 +97,7 @@ for(int i = 0; i < step; ++i) {
             intersection.resize(0);
             D.resize(0);
             int s = getARGV("-split", 1);
-            build(Th, s, D, intersection, Pk, mpiCommWorld)
+            build(Th, s, intersection, D, Pk, mpiCommWorld)
             Mat dAdapt(Vh.ndof, intersection, D);
             changeOperator(dJ, dAdapt);
         }

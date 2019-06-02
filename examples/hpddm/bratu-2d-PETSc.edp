@@ -27,7 +27,7 @@ int[int][int] intersection(0);
 real[int] D;
 {
     int s = getARGV("-split", 1);
-    build(M, s, D, intersection, Pk, mpiCommWorld)
+    build(M, s, intersection, D, Pk, mpiCommWorld)
 }
 Vh u;
 func BC = cos(pi*x)*cos(pi*y);

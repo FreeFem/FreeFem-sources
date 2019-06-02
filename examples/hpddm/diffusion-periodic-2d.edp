@@ -37,7 +37,7 @@ fespace Wh(Th, Pk);              // local finite element space
 int[int][int] intersection(0);   // local-to-neighbors renumbering
 real[int] D;                     // partition of unity
 {
-    buildOverlapPeriodic(Th, ThBorder, fakeInterface, s, overlap, D, intersection, Pk, comm, excluded, labPeriodic)
+    buildOverlapPeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, Pk, comm, excluded, labPeriodic)
 }
 
 func f = (y+x+1) * (y+x-1) * (y-x+1) * (y-x-1);

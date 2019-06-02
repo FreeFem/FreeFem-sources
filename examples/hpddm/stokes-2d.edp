@@ -36,7 +36,7 @@ real[int] D;                     // partition of unity
     ThGlobal = trunc(ThGlobal, (x < 0.5) || (y < 0.5), label = 5);
     Th = movemesh(ThGlobal, [-x, y]);
     Th = ThGlobal + Th;
-    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, D, intersection, Pk, comm, excluded)
+    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, intersection, D, Pk, comm, excluded)
 }
 
 real[int] rhs;                              // local right-hand side

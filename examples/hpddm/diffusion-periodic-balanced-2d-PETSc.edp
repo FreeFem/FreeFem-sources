@@ -99,7 +99,7 @@ if(mpisize > 1) {
     broadcast(processor(0), part[]);
     plot(part, fill = 1, wait = 1);
     real[int] DExtended;
-    buildWithPartitioning(ThExtended, part[], s, DExtended, intersection, PkNoPeriodic, mpiCommWorld);
+    buildWithPartitioning(ThExtended, part[], s, intersection, DExtended, PkNoPeriodic, mpiCommWorld);
     Th = trunc(ThExtended, y <= 1-x && y >= -1-x && y <= 1+x && y >= -1+x);
     fespace WhExtended(ThExtended, PkNoPeriodic);
     matrix R = interpolate(Wh, WhExtended);

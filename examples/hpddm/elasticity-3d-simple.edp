@@ -21,7 +21,7 @@ int[int][int] intersection(0);   // local-to-neighbors renumbering
 real[int] D;                     // partition of unity
 {
     Th = cube(6 * getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5), [6 * x, y, z], label = LL);
-    build(Th, s, D, intersection, Pk, mpiCommWorld)
+    build(Th, s, intersection, D, Pk, mpiCommWorld)
 }
 
 real f = -9000.0;

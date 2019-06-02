@@ -24,7 +24,7 @@ int[int][int] intersection(0);   // local-to-neighbors renumbering
 real[int] D;                     // partition of unity
 {
     Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10), [x, y, z], label = LL);    // global mesh
-    build(Th, s, D, intersection, Pk, mpiCommWorld)
+    build(Th, s, intersection, D, Pk, mpiCommWorld)
 }
 
 varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(v) + on(1, u = 0.0);

@@ -27,7 +27,7 @@ real[int] D;                     // partition of unity
 {
     int[int] l = [1, 1, 1, 1];
     Th = square(getARGV("-global", 40), getARGV("-global", 40), label = l);    // global mesh
-    build(Th, s, D, intersection, Pk, mpiCommWorld)
+    build(Th, s, intersection, D, Pk, mpiCommWorld)
 }
 
 real[int] rhs(Wh.ndof);                     // local right-hand side

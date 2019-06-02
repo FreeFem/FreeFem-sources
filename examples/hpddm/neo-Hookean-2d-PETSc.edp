@@ -311,7 +311,7 @@ int[int][int] intersection(0);   // local-to-neighbors renumbering
 real[int] D;                     // partition of unity
 {
     int s = getARGV("-split", 1);
-    build(Th, s, D, intersection, Pk, mpiCommWorld)
+    build(Th, s, intersection, D, Pk, mpiCommWorld)
 }
 
 Mat A(Vh.ndof, intersection, D, bs = 2);

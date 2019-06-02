@@ -112,8 +112,8 @@ fespace Vh(Th, Pk);      // local finite element space
     // .....
     build(Th,       // The local mesh
             s,        // Refinement factor
-            D,        // partition of unity
             intersection, // local-to-neighbors renumbering
+            D,        // partition of unity
             Pk,           // FE-space
             mpiCommWorld // Communicator
          );

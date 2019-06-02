@@ -34,7 +34,7 @@ real[int] D;                     // partition of unity
 {
     int[int] l = [1, 1, 1, 1];
     Th = square(getARGV("-global", 40), getARGV("-global", 40), label = l);    // global mesh
-    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, D, intersection, Pk, comm, excluded)
+    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, intersection, D, Pk, comm, excluded)
 }
 
 real[int] rhs;                              // local right-hand side

@@ -39,7 +39,7 @@ mesh ThBackup;
     if(adaptation)
         ThBackup = Th;
     int s = getARGV("-split", 1);
-    build(Th, s, D, intersection, Pk, mpiCommWorld)
+    build(Th, s, intersection, D, Pk, mpiCommWorld)
 }
 
 Wh [u1, u2, p, T] = [0, 0, 0, 1-x];
@@ -105,7 +105,7 @@ while(nuCurrent > nuFinal) {
         intersection.resize(0);
         D.resize(0);
         int s = getARGV("-split", 1);
-        build(Th, s, D, intersection, Pk, mpiCommWorld)
+        build(Th, s, intersection, D, Pk, mpiCommWorld)
         Mat dAdapt(Wh.ndof, intersection, D);
         changeOperator(dA, dAdapt);
         [u1, u2, p, T] = def(uG);

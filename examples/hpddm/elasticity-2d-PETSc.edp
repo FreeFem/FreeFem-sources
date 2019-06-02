@@ -26,7 +26,7 @@ real[int] D;                     // partition of unity
 {
     int[int] l = [2, 1, 2, 2];
     Th = square(2 * getARGV("-global", 10), getARGV("-global", 10), [2 * x, y], label = l);    // global mesh
-    build(Th, s, D, intersection, Pk, mpiCommWorld)
+    build(Th, s, intersection, D, Pk, mpiCommWorld)
 }
 
 real f = -90000.0;

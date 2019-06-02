@@ -31,7 +31,7 @@ int[int][int] intersection(0);   // local-to-neighbors renumbering
 real[int] D;                     // partition of unity
 {
     Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10), [x, y, z], label = LL);      // global mesh
-    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, D, intersection, Pk, comm, excluded)
+    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, intersection, D, Pk, comm, excluded)
 }
 
 real[int] rhs;                              // local right-hand side
