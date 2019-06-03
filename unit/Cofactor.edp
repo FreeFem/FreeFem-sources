@@ -1,0 +1,23 @@
+include "test.idp"
+
+cout << "Cofactor" << endl;
+real t;
+
+t = clock();
+matrix A =  Cofactor([[1, 2],
+                      [3, 4]]);
+t = clock() - t;
+cout << IND << t << endl;
+cout << A << endl;
+
+real deter = det([[1, 4, 7],
+                [3, 0, 5],
+                [-1, 9, 11]]);
+t = clock();
+matrix B =  Cofactor([[1, 4, 7],
+                [3, 0, 5],
+                [-1, 9, 11]]);
+t = clock() - t;
+cout << IND << t << endl;
+cout << B << endl;
+ //test(A == 13);

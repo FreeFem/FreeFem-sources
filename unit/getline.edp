@@ -4,7 +4,6 @@ cout << "getline" << endl;
 real t;
 ifstream file("myfile.txt");
 string read;
-string delim = " ";
 
 t = clock();
 getline(file, read);
