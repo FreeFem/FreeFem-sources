@@ -40,7 +40,7 @@
 *~
 *.dirstamp
 *freefem++.pref
-WHERE_LIBRARY*
+WHERE*
 CheckAll-out
 examples/*/*.b
 examples/*/*.dat
@@ -52,6 +52,7 @@ examples/*/*.gbb
 examples/*/*.gmsh
 examples/*/*.hb
 examples/*/*.matrix
+examples/*/all.edp
 examples/*/*.mesh
 examples/*/*.msh
 #  build with gmsh tool ..
@@ -92,7 +93,6 @@ debian/freefem++-nw
 debian/freefem++-x11
 debian/tmp
 AppDir/
-3rdparty/WHERE-LD
 3rdparty/arpack/ARPACK/
 3rdparty/arpack/arpack96.tar.gz
 3rdparty/arpack/arpack++
@@ -128,16 +128,6 @@ AppDir/
 3rdparty/ipopt/Ipopt-3.10.2/
 3rdparty/ipopt/Makefile.inc
 3rdparty/lib/
-3rdparty/lib/WHERE.Ipopt
-3rdparty/lib/WHERE.freeyams
-3rdparty/lib/WHERE.gmm
-3rdparty/lib/WHERE.libMesh
-3rdparty/lib/WHERE.mmg3d
-3rdparty/lib/WHERE.mshmet
-3rdparty/lib/WHERE.mumps
-3rdparty/lib/WHERE.mumpsseq
-3rdparty/lib/WHERE.scalapack
-3rdparty/lib/WHERE.superlu_dist
 3rdparty/lib/libipopt.la
 3rdparty/lib/pkgconfig/ipopt.pc
 3rdparty/metis/FAIRE
@@ -189,7 +179,6 @@ AppDir/
 3rdparty/superludist/FAIRE
 3rdparty/superludist/FAIT
 3rdparty/superludist/SuperLU_DIST_
-3rdparty/superludist/make.inc	3rdparty/ff-petsc/WHERE-all
 3rdparty/tag-compile-pkg
 3rdparty/tetgen/FAIRE
 3rdparty/tetgen/cxxflags
@@ -203,7 +192,6 @@ AppDir/
 3rdparty/yams/FAIRE
 3rdparty/yams/ff-flags
 3rdparty/yams/freeyams.*/
-3rdparty/ff-petsc/WHERE-all
 3rdparty/ff-petsc/petsc-3*
 3rdparty/ff-petsc/slepc-3*
 FreeFEM-documentation.pdf
@@ -221,7 +209,6 @@ bin/script/PostInstall.sh
 *.pvd
 examples/3d/A.txt
 examples/3d/B.txt
-examples/3d/all.edp
 examples/3d/dd.bb
 examples/3d/dd.meshb
 examples/3d/sphere.points
@@ -235,20 +222,13 @@ examples/bamg/test/*.bb
 examples/bamg/test/*.mesh
 examples/bamg/test/*.mtr
 examples/chapt3/J.txt
-examples/chapt3/all.edp
 examples/chapt3/graph.txt
 examples/eigen/.*.eps
-examples/eigen/all.edp
 examples/eigen/machinefile
 examples/plugin/ThFF.txt
 examples/plugin/ThFF_Metric.txt
 examples/plugin/TriQA.txt
 examples/plugin/TriQA_Metric.txt
-examples/plugin/WHERE_LIBRARY
-examples/plugin/WHERE_LIBRARY-config
-examples/plugin/WHERE_LIBRARY-download
-examples/plugin/WHERE_LIBRARY-download-new
-examples/plugin/all.edp
 examples/plugin/ff-c++
 examples/plugin/ff-get-dep
 examples/plugin/ff-pkg-download
@@ -268,7 +248,6 @@ examples/other/speedtest.out
 examples/tutorial/.*.eps
 examples/tutorial/.*.ps
 examples/tutorial/A.matrix
-examples/tutorial/all.edp
 examples/tutorial/f.txt
 examples/tutorial/lestables
 examples/tutorial/machinefile
@@ -280,7 +259,6 @@ examples/tutorial/u.txt
 examples/misc/.*.BB
 examples/misc/.*.eps
 examples/misc/.*.points
-examples/misc/all.edp
 examples/misc/err.dat
 examples/misc/machinefile
 examples/misc/toto.txt
@@ -355,7 +333,6 @@ examples/tutorial/toto.am_fmt
 examples/tutorial/toto.dbg
 examples/tutorial/u2.txt
 examples/examples/J.txt
-examples/examples/all.edp
 examples/examples/graph.txt
 examples/ffddm/sol.vtk
 examples/plugin/pipe.png
