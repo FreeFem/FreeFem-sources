@@ -41,11 +41,10 @@ Th = change(Th, refface = chlab);
 fespace Wh(Th, Pk);
 
 meshN ThBorder;
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
+int[int][int] intersection(0);   // local-to-neighbors renumbering
 real[int] D;
 {
-    buildOverlapEdge(Th, ThBorder, 10, s, overlap, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld, 0, PkPart, defPart, initPart)
+    buildOverlapEdge(Th, ThBorder, 10, s, overlap, intersection, D, Pk, mpiCommWorld, 0, PkPart, defPart, initPart)
 }
 
 matrix<complex> Mat;
@@ -76,7 +75,7 @@ complex[int] rhs(Wh.ndof);
         rhs = vPbRhs(0, WhAugmented);
 }
 
-schwarz<complex> A(Mat, arrayIntersection, restrictionIntersection, D, scaled = false, communicator = mpiCommWorld);
+schwarz<complex> A(Mat, intersection, D, scaled = false, communicator = mpiCommWorld);
 set(A, sparams = "-hpddm_schwarz_method oras");
 
 complex[int] nEx(Wh.ndof);

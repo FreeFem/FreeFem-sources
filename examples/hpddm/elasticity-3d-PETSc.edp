@@ -21,13 +21,12 @@ if(verbosity > 0 && mpirank == 0) {
 
 int[int] LL = [2,3, 2,1, 2,2];
 meshN Th;
-fespace Wh(Th, Pk);                         // local finite element space
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
-real[int] D;                                // partition of unity
+fespace Wh(Th, Pk);              // local finite element space
+int[int][int] intersection(0);   // local-to-neighbors renumbering
+real[int] D;                     // partition of unity
 {
     Th = cube(10 * getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5), [10 * x, y, z], label = LL);      // global mesh
-    build(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
+    build(Th, s, intersection, D, Pk, mpiCommWorld)
 }
 
 real f = -9000.0;
@@ -41,7 +40,7 @@ varf vPb(def(u), def(v)) = intN(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsil
 matrix<real> Loc = vPb(Wh, Wh);
 real[int] rhs = vPb(0, Wh);
 
-Mat A(Loc, arrayIntersection, restrictionIntersection, D, bs = 3);
+Mat A(Loc, intersection, D, bs = 3);
 set(A, sparams = "-ksp_view -ksp_max_it 1000");
 Wh<real> def(u);    // local solution
 

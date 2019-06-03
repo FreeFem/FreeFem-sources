@@ -69,10 +69,9 @@ if(verbosity > 0 && mpirank == 0) {
 /***************************************/
 /*   ###############################   */
 /***************************************/
-meshN Th = square(1, 1);                    // Local mesh
-int[int] arrayIntersection;                 // Rank of neighborings subdomains
-int[int][int] restrictionIntersection(0);   // Local-to-neighbors renumbering
-real[int] D;                                // Partition of unity
+meshN Th = square(1, 1);         // Local mesh
+int[int][int] intersection(0);   // Local-to-neighbors renumbering
+real[int] D;                     // Partition of unity
 
 /***************************************/
 /*         Geometry parameters         */
@@ -97,9 +96,8 @@ fespace Vh(Th, Pk);      // local finite element space
     // .....
     build(Th,       // The local mesh
             s,        // Refinement factor
+            intersection, // local-to-neighbors renumbering
             D,        // partition of unity
-            arrayIntersection,       // ranks of neighboring subdomains
-            restrictionIntersection, // local-to-neighbors renumbering
             Pk,           // FE-space
             mpiCommWorld // Communicator
          );
@@ -129,7 +127,7 @@ matrix<real> B = vB(Vh,Vh);
 /***************************************/
 /*      Build distributed matrices     */
 /***************************************/
-Mat DistA(A, arrayIntersection, restrictionIntersection, D);
+Mat DistA(A, intersection, D);
 Mat DistB(DistA, B);
 /***************************************/
 /*          Problem resolution         */

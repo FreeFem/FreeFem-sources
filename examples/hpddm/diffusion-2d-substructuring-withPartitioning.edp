@@ -25,10 +25,9 @@ if(verbosity > 0 && mpirank == 0) {
 }
 
 meshN Th = square(1, 1);
-fespace Wh(Th, Pk);                         // local finite element space
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
-int[int] interfaceNb;                       //
+fespace Wh(Th, Pk);              // local finite element space
+int[int][int] intersection(0);   // local-to-neighbors renumbering
+int[int] interfaceNb;            //
 int[int] labDirichlet = [1, 3];
 {
     int[int] l = [2, 1, 3, 2];
@@ -36,7 +35,7 @@ int[int] labDirichlet = [1, 3];
     fespace Ph(Th, P0);
     Ph part;
     part = (x > 0.5 && y > 0.5 ? 3 : (x > 0.5 ? 2 : (y < 0.5 ? 1 : 0)));
-    buildSubstructuringWithPartitioning(Th, interfaceNb, part[], 10, labDirichlet, labNeumann, s, arrayIntersection, restrictionIntersection, Pk, BC, comm, excluded)
+    buildSubstructuringWithPartitioning(Th, interfaceNb, part[], 10, labDirichlet, labNeumann, s, intersection, Pk, BC, comm, excluded)
 }
 
 func f = 10;
@@ -44,7 +43,7 @@ varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(f * v) + on(labDirichle
 matrix<real> Mat = vPb(Wh, Wh, sym = 1); // local operator
 real[int] rhs = vPb(0, Wh);                  // local right-hand side
 
-bdd A(Mat, arrayIntersection, restrictionIntersection, communicator = comm);
+bdd A(Mat, intersection, communicator = comm);
 // this can be replaced by feti
 bool adaptive = isSetOption("geneo_nu") || isSetOption("geneo_threshold");
 

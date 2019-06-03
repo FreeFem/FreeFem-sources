@@ -27,10 +27,9 @@ if(verbosity > 0 && mpirank == 0) {
 }
 
 meshN ThBorder, Th = buildlayers(square(1, 1), 1);
-fespace Wh(Th, Pk);                         // local finite element space
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
-real[int] D;                                // partition of unity
+fespace Wh(Th, Pk);              // local finite element space
+int[int][int] intersection(0);   // local-to-neighbors renumbering
+real[int] D;                     // partition of unity
 {
     mesh ThGlobal2d = square(getARGV("-global", 12), getARGV("-global", 12), [x, y]);    // global mesh
     ThGlobal2d = trunc(ThGlobal2d, (x <= 0.5) || (y <= 0.5), label = 5);
@@ -38,7 +37,7 @@ real[int] D;                                // partition of unity
     mesh Th2d = movemesh(ThGlobal2d, [-x, y]);
     ThGlobal2d = ThGlobal2d + Th2d;
     Th = buildlayers(ThGlobal2d, getARGV("-global", 12) / 2, zbound = [0, 0.4]);
-    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Pk, comm, excluded)
+    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, intersection, D, Pk, comm, excluded)
 }
 
 real[int] rhs;                              // local right-hand side
@@ -54,7 +53,7 @@ matrix<real> Mat;                           // local operator
 }
 ThBorder = buildlayers(square(1, 1), 1);
 
-schwarz A(Mat, arrayIntersection, restrictionIntersection, D, scaled = false);
+schwarz A(Mat, intersection, D, scaled = false);
 set(A, sparams = "-hpddm_mkl_pardiso_iparm_13 1 --hpddm_schwarz_method oras -hpddm_schwarz_coarse_correction deflated -hpddm_geneo_nu 5");
 
 matrix<real> Opt;                           // local operator with optimized boundary conditions

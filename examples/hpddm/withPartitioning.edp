@@ -12,13 +12,12 @@ func Pk = P1;                               // finite element space
 func Zk = [P1, P2];                         // finite element space
 
 meshN Th = cube(1, 1, 1);
-fespace Wh(Th, Pk);                          // local finite element space
-fespace Qh(Th, Zk);                          // local finite element space
-int[int] arrayIntersection;                  // ranks of neighboring subdomains
-int[int][int] restrictionIntersectionP(0);   // local-to-neighbors renumbering
-int[int][int] restrictionIntersectionZ(0);   // local-to-neighbors renumbering
-real[int] DP;                                // partition of unity
-real[int] DZ;                                // partition of unity
+fespace Wh(Th, Pk);               // local finite element space
+fespace Qh(Th, Zk);               // local finite element space
+int[int][int] intersectionP(0);   // local-to-neighbors renumbering
+int[int][int] intersectionZ(0);   // local-to-neighbors renumbering
+real[int] DP;                     // partition of unity
+real[int] DZ;                     // partition of unity
 {
     int[int] l = [1, 1, 1, 1];
     meshN ThBorder;
@@ -27,8 +26,8 @@ real[int] DZ;                                // partition of unity
     real[int] part(Ph.ndof);
     if(mpirank == 0)
         partitionerSeq(part, Th, mpisize);
-    buildOverlapWithPartitioning(Th, ThBorder, part, 11111, 1, 1, DP, arrayIntersection, restrictionIntersectionZ, Pk, mpiCommWorld, false);
+    buildOverlapWithPartitioning(Th, ThBorder, part, 11111, 1, 1, intersectionZ, DP, Pk, mpiCommWorld, false);
     Th = cube(getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5)); // need to reload the global mesh because it is destroyed in ''build*''
-    buildOverlapEdgeWithPartitioning(Th, ThBorder, part, 22222, 1, 1, DZ, arrayIntersection, restrictionIntersectionP, Zk, mpiCommWorld, false, Zk, def2, init2);
+    buildOverlapEdgeWithPartitioning(Th, ThBorder, part, 22222, 1, 1, intersectionP, DZ, Zk, mpiCommWorld, false, Zk, def2, init2);
     ThBorder = cube(1, 1, 1);
 }

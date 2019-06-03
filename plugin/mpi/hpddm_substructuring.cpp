@@ -11,13 +11,12 @@ namespace Substructuring {
 class Skeleton_Op : public E_F0mps {
     public:
         Expression interface;
-        Expression index;
         Expression restriction;
         Expression outInterface;
         static const int n_name_param = 3;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
-        Skeleton_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3, Expression param4) : interface(param1), index(param2), restriction(param3), outInterface(param4) {
+        Skeleton_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : interface(param1), restriction(param2), outInterface(param3) {
             args.SetNameParam(n_name_param, name_param, nargs);
         }
         AnyType operator()(Stack stack) const;
@@ -29,26 +28,25 @@ basicAC_F0::name_and_type Skeleton_Op::name_param[] = {
 };
 class Skeleton : public OneOperator {
     public:
-        Skeleton() : OneOperator(atype<long>(), atype<KN<double>*>(), atype<KN<long>*>(), atype<KN<Matrice_Creuse<double> >*>(), atype<KN<KN<long> >*>()) {}
+        Skeleton() : OneOperator(atype<long>(), atype<KN<double>*>(), atype<KN<Matrice_Creuse<double> >*>(), atype<KN<KN<long> >*>()) {}
 
         E_F0* code(const basicAC_F0& args) const
         {
-            return new Skeleton_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]));
+            return new Skeleton_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
         }
 };
 AnyType Skeleton_Op::operator()(Stack stack) const {
     KN<double>* in = GetAny<KN<double>*>((*interface)(stack));
     KN<KN<long> >* out = GetAny<KN<KN<long> >*>((*outInterface)(stack));
-    KN<long>* arrayNeighbor = GetAny<KN<long>*>((*index)(stack));
     KN<Matrice_Creuse<double> >* interpolation = GetAny<KN<Matrice_Creuse<double> >*>((*restriction)(stack));
     MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0;
-    unsigned short n = arrayNeighbor->n;
+    unsigned short n = out->operator[](0).n;
     MPI_Request* rq = new MPI_Request[2 * n];
     std::vector<unsigned char*> send(n);
     std::vector<unsigned char*> recv(n);
     unsigned short neighborAfter = 0;
-    if(out->n != n)
-        out->resize(n);
+    if(out->n != 1 + n)
+        out->resize(1 + n);
     for(unsigned short i = 0; i < n; ++i) {
         MatriceMorse<double>* pt = static_cast<MatriceMorse<double>*>(&(*interpolation->operator[](i).A));
 #ifdef VERSION_MATRICE_CREUSE
@@ -56,7 +54,7 @@ AnyType Skeleton_Op::operator()(Stack stack) const {
 #endif
         send[i] = new unsigned char[pt->n];
         recv[i] = new unsigned char[pt->n];
-        unsigned int dest = arrayNeighbor->operator[](i);
+        unsigned int dest = out->operator[](0).operator[](i);
         if(dest < mpirank) {
             unsigned int col = 0;
             for(unsigned int j = 0; j < pt->n; ++j) {
@@ -83,14 +81,14 @@ AnyType Skeleton_Op::operator()(Stack stack) const {
     for(unsigned short i = 0; i < neighborAfter; ++i) {
         MatriceMorse<double>* pt = static_cast<MatriceMorse<double>*>(&(*interpolation->operator[](i).A));
         // cout << mpirank << " receives from " << arrayNeighbor->operator[](i) << ", " << pt->n << "." << endl;
-        MPI_Irecv(recv[i], pt->n, MPI_UNSIGNED_CHAR, arrayNeighbor->operator[](i), 0, *comm, rq + n + i);
+        MPI_Irecv(recv[i], pt->n, MPI_UNSIGNED_CHAR, out->operator[](0).operator[](i), 0, *comm, rq + n + i);
     }
     for(unsigned short i = neighborAfter; i < n; ++i) {
         int index;
         MPI_Waitany(n - neighborAfter, rq + neighborAfter, &index, MPI_STATUS_IGNORE);
         unsigned short dest = neighborAfter + index;
         MatriceMorse<double>* pt = static_cast<MatriceMorse<double>*>(&(*interpolation->operator[](dest).A));
-        KN<long>& resOut = out->operator[](dest);
+        KN<long>& resOut = out->operator[](1 + dest);
        
 
 #ifdef VERSION_MATRICE_CREUSE
@@ -126,13 +124,13 @@ AnyType Skeleton_Op::operator()(Stack stack) const {
                 send[dest][j] = '0';
         }
         // cout << mpirank << " sends to " << arrayNeighbor->operator[](dest) << ", " << pt->n << "." << endl;
-        MPI_Isend(send[dest], pt->n, MPI_UNSIGNED_CHAR, arrayNeighbor->operator[](dest), 0, *comm, rq + n + dest);
+        MPI_Isend(send[dest], pt->n, MPI_UNSIGNED_CHAR, out->operator[](0).operator[](dest), 0, *comm, rq + n + dest);
         resOut.resize(nnz);
     }
     for(unsigned short i = 0; i < neighborAfter; ++i) {
         int index;
         MPI_Waitany(neighborAfter, rq + n, &index, MPI_STATUS_IGNORE);
-        KN<long>& resOut = out->operator[](index);
+        KN<long>& resOut = out->operator[](1 + index);
         MatriceMorse<double>* pt = static_cast<MatriceMorse<double>*>(&(*interpolation->operator[](index).A));
 #ifndef VERSION_MATRICE_CREUSE
         resOut.resize(pt->nbcoef);
@@ -181,7 +179,7 @@ AnyType Skeleton_Op::operator()(Stack stack) const {
         for(  signed int i = 0; i < vec.size(); ++i)
             interfaceNb->operator[](i) = vec[i];
         for(unsigned short i = 0; i < n; ++i) {
-            KN<long>& res = out->operator[](i);
+            KN<long>& res = out->operator[](1 + i);
             for(  signed int j = 0; j < res.n; ++j) {
                 std::vector<unsigned int>::const_iterator idx = std::lower_bound(vec.cbegin(), vec.cend(), (unsigned int)res[j]);
                 if(idx == vec.cend() || res[j] < *idx) {
@@ -196,15 +194,15 @@ AnyType Skeleton_Op::operator()(Stack stack) const {
         if(!redundancy) {
             std::vector<std::pair<unsigned short, unsigned int> >* array = new std::vector<std::pair<unsigned short, unsigned int> >[interfaceNb->n];
             for(unsigned short i = 0; i < n; ++i) {
-                KN<long>& res = out->operator[](i);
+                KN<long>& res = out->operator[](1 + i);
                 for(  signed int j = 0; j < res.n; ++j)
                     array[res[j]].push_back(std::make_pair(i, res[j]));
             }
             for(unsigned int i = 0; i < interfaceNb->n; ++i) {
                 if(array[i].size() > 1) {
-                    if(mpirank > arrayNeighbor->operator[](array[i].back().first))
+                    if(mpirank > out->operator[](0).operator[](array[i].back().first))
                         array[i].erase(array[i].begin());
-                    else if(mpirank < arrayNeighbor->operator[](array[i].front().first))
+                    else if(mpirank < out->operator[](0).operator[](array[i].front().first))
                         array[i].pop_back();
                 }
                 else if (array[i].size() < 1)
@@ -212,7 +210,7 @@ AnyType Skeleton_Op::operator()(Stack stack) const {
             }
             std::vector<long>* copy = new std::vector<long>[n];
             for(unsigned short i = 0; i < n; ++i)
-                copy[i].reserve(out->operator[](i).n);
+                copy[i].reserve(out->operator[](1 + i).n);
             for(unsigned int i = 0; i < interfaceNb->n; ++i) {
                 for(std::vector<std::pair<unsigned short, unsigned int> >::const_iterator it = array[i].cbegin(); it != array[i].cend(); ++it) {
                     copy[it->first].push_back(it->second);
@@ -220,9 +218,9 @@ AnyType Skeleton_Op::operator()(Stack stack) const {
             }
             for(unsigned short i = 0; i < n; ++i) {
                 unsigned int sizeVec = copy[i].size();
-                if(sizeVec != out->operator[](i).n) {
-                    out->operator[](i).resize(sizeVec);
-                    long* pt = (static_cast<KN_<long> >(out->operator[](i)));
+                if(sizeVec != out->operator[](1 + i).n) {
+                    out->operator[](1 + i).resize(sizeVec);
+                    long* pt = (static_cast<KN_<long> >(out->operator[](1 + i)));
                     std::reverse_copy(copy[i].begin(), copy[i].end(), pt);
                 }
             }
@@ -239,12 +237,11 @@ class initDDM_Op : public E_F0mps {
     public:
         Expression A;
         Expression Mat;
-        Expression o;
         Expression R;
         static const int n_name_param = 2;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
-        initDDM_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3, Expression param4) : A(param1), Mat(param2), o(param3), R(param4) {
+        initDDM_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : A(param1), Mat(param2), R(param3) {
             args.SetNameParam(n_name_param, name_param, nargs);
         }
 
@@ -258,10 +255,10 @@ basicAC_F0::name_and_type initDDM_Op<Type, K>::name_param[] = {
 template<class Type, class K>
 class initDDM : public OneOperator {
     public:
-        initDDM() : OneOperator(atype<Type*>(), atype<Type*>(), atype<Matrice_Creuse<K>*>(), atype<KN<long>*>(), atype<KN<KN<long>>*>()) { }
+        initDDM() : OneOperator(atype<Type*>(), atype<Type*>(), atype<Matrice_Creuse<K>*>(), atype<KN<KN<long>>*>()) { }
 
         E_F0* code(const basicAC_F0& args) const {
-            return new initDDM_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]));
+            return new initDDM_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
         }
 };
 template<class Type, class K>
@@ -269,10 +266,11 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
     Matrice_Creuse<K>* pA = GetAny<Matrice_Creuse<K>*>((*Mat)(stack));
     MatriceMorse<K>* mA = pA->A ? static_cast<MatriceMorse<K>*>(&(*pA->A)) : nullptr;
-    KN<long>* ptO = GetAny<KN<long>*>((*o)(stack));
     KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
-    if(ptO)
-        ptA->HPDDM::template Subdomain<K>::initialize(new_HPDDM_MatrixCSR<K>(mA), STL<long>(*ptO), *ptR, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
+    if(ptR) {
+        KN_<KN<long>> sub(ptR->n > 0 && ptR->operator[](0).n > 0 ? (*ptR)(FromTo(1, ptR->n - 1)) : KN<KN<long>>());
+        ptA->HPDDM::template Subdomain<K>::initialize(new_HPDDM_MatrixCSR<K>(mA), STL<long>(ptR->n > 0 ? ptR->operator[](0) : KN<long>()), sub, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
+    }
     FEbaseArrayKn<K>* deflation = nargs[1] ? GetAny<FEbaseArrayKn<K>*>((*nargs[1])(stack)) : 0;
     if(deflation && deflation->N > 0 && !ptA->getVectors()) {
         K** ev = new K*[deflation->N];

@@ -1,0 +1,120 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+// sequential script from https://www.um.es/freefem/ff++/pmwiki.php?n=Main.Newton3D
+// Navier--Stokes block solved using a modified augmented Lagrangian preconditioner,
+// cf. [Moulin et al. 2019] (https://github.com/prj-/moulin2019al)
+
+load "PETSc"                        // PETSc plugin
+macro dimension()2// EOM            // 2D or 3D
+macro trueRestrict()true// EOM
+macro removeZeros()true// EOM
+include "macro_ddm.idp"             // additional DDM functions
+
+mesh Th = square(getARGV("-global", 40), getARGV("-global", 40));
+bool adaptation = usedARGV("-adaptation") != -1;
+real gammaAL = 0.3;
+
+macro grad(u)[dx(u), dy(u)]//
+macro Grad(u)[grad(u#1), grad(u#2)]//
+macro div(u)(dx(u#1) + dy(u#2))//
+macro ugrad(u, v)([u#1, u#2]' * grad(v))//
+macro UgradV(u, v, T)[ugrad(u, v#1), ugrad(u, v#2), ugrad(u, T)]//
+macro Pk()[P2, P2, P1, P1]//
+macro def(i)[i, i#B, i#C, i#D]// EOM      // vector field definition
+macro init(i)[i, i, i, i]// EOM           // vector field initialization
+
+fespace Wh(Th, [P2, P2, P1, P1]);
+real nu        = 1/100.0;
+real nuFinal   = 1/1500.0;
+real Pr        = 56.2;
+real k         = 1/Pr;
+real nuCurrent = nu;
+
+
+real[int] D;
+int[int][int] intersection(0);
+mesh ThBackup;
+{
+    if(adaptation)
+        ThBackup = Th;
+    int s = getARGV("-split", 1);
+    build(Th, s, intersection, D, Pk, mpiCommWorld)
+}
+
+Wh [u1, u2, p, T] = [0, 0, 0, 1-x];
+
+real c;
+varf vPb([uw1, uw2, pw, Tw], [v1, v2, q, TT])
+ = int2d(Th)(gammaAL * div(uw) * div(v) + UgradV(u, uw, Tw)' * [v1, v2, TT] + UgradV(uw, u, T)'  * [v1, v2, TT]
+         + (Grad(uw) : Grad(v)) * nuCurrent
+         + c * Tw * v2 + grad(Tw)' * grad(TT) * k - div(uw) * q - div(v) * pw)
+ + int2d(Th)(gammaAL * div(u) * div(v) + UgradV(u, u, T)' * [v1, v2, TT]
+         + (Grad(u) : Grad(v)) * nuCurrent
+         + c * T * v2 + grad(T)' * grad(TT) * k - div(u) * q - div(v) * p)
+ + on(1, 2, 3, 4, uw1 = 0, uw2 = 0) + on(2, 4, Tw = 0);
+varf vS(p, q) = int2d(Th, qforder = 3)(-1/(gammaAL + nuCurrent) * p * q);
+
+Mat dA(Wh.ndof, intersection, D);
+func real[int] funcRes(real[int]& inPETSc) {
+    changeNumbering(dA, u1[], inPETSc, inverse = true, exchange = true);
+    real[int] out(Wh.ndof);
+    out = vPb(0, Wh, tgv = -2);
+    real[int] outPETSc;
+    changeNumbering(dA, out, outPETSc);
+    return outPETSc;
+}
+func int funcJ(real[int]& inPETSc) {
+    changeNumbering(dA, u1[], inPETSc, inverse = true, exchange = true);
+    matrix Loc = vPb(Wh, Wh, tgv = -2);
+    changeOperator(dA, Loc);
+    return 0;
+}
+while(nuCurrent > nuFinal) {
+    if(adaptation || nu == nuCurrent) {
+        Wh [list1, list2, listP, listT] = [1.0, 1.0, 1.0, 2.0];
+        set(dA, sparams = "-ksp_monitor -ksp_max_it 100 -ksp_type fgmres -ksp_rtol 1.0e-2 -pc_type fieldsplit -fieldsplit_1_ksp_type gmres -fieldsplit_1_pc_type hypre", fields = list1[]);
+        [list1, list2, listP, listT] = [1.0, 1.0, 2.0, 0.0];
+        fespace Qh(Th, P1);
+        Qh listS;
+        listS[]= 1:Qh.ndof;
+        Wh [uw1,uw2,pw,Tw] = [0.0, 0.0, listS, 0.0];
+        matrix[int] S(1);
+        S[0] = vS(Qh, Qh);
+        string[int] names(2);
+        names[0] = "v";
+        names[1] = "p";
+        string paramsNS = "-prefix_push fieldsplit_0_ -prefix_push fieldsplit_v_ -pc_type lu -prefix_pop -prefix_push fieldsplit_p_ -ksp_type cg -ksp_max_it 5 -pc_type jacobi -prefix_pop -ksp_type fgmres " + " -ksp_rtol 1.0e-2 -ksp_gmres_restart 200 -prefix_pop";
+        set(dA, fieldsplit = 0, sparams = "-fieldsplit_0_ksp_type fgmres -fieldsplit_0_ksp_max_it 100 -fieldsplit_0_ksp_rtol 1.0e-1 -fieldsplit_0_pc_type fieldsplit " + paramsNS, fields = list1[], schurPreconditioner = S, schurList = uw1[], names = names);
+    }
+    c = -1/(nuCurrent * Pr);
+    real[int] xPETSc;
+    changeNumbering(dA, u1[], xPETSc);
+    SNESSolve(dA, funcJ, funcRes, xPETSc, sparams = "-snes_monitor -snes_type newtonls -snes_rtol 1.0e-4");
+    changeNumbering(dA, u1[], xPETSc, inverse = true, exchange = !adaptation);
+    if(adaptation) {
+        fespace VhG(ThBackup, Pk);
+        VhG def(uG), def(uReduce);
+        def(uReduce) = [u1, u2, p, T];
+        mpiAllReduce(uReduce[], uG[], mpiCommWorld, mpiSUM);
+        if(mpirank == 0)
+            ThBackup = adaptmesh(ThBackup, [uGD,uGD], [uG,uGB], ratio = 2.5);
+        broadcast(processor(0), ThBackup);
+        def(uG) = def(uG);
+        Th = ThBackup;
+        intersection.resize(0);
+        D.resize(0);
+        int s = getARGV("-split", 1);
+        build(Th, s, intersection, D, Pk, mpiCommWorld)
+        Mat dAdapt(Wh.ndof, intersection, D);
+        changeOperator(dA, dAdapt);
+        [u1, u2, p, T] = def(uG);
+    }
+    {
+        fespace Vh(Th, P1);
+        Vh onlyT = T;
+        macro def1(i)i//
+        plotMPI(Th, onlyT[], "Global temperature for viscosity = " + nuCurrent, P1, def1, real, 2, 1)
+    }
+    nuCurrent = max(nuFinal, nuCurrent/2.0);
+}

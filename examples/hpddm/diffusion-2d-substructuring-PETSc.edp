@@ -18,14 +18,13 @@ if(verbosity > 0 && mpirank == 0) {
 }
 
 meshN Th = square(1, 1);
-fespace Wh(Th, Pk);                         // local finite element space
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
-int[int] interfaceNb;                       //
+fespace Wh(Th, Pk);              // local finite element space
+int[int][int] intersection(0);   // local-to-neighbors renumbering
+int[int] interfaceNb;            //
 {
     int[int] l = [2, 1, 2, 2];
     Th = square(getARGV("-global", 40), getARGV("-global", 40), label = l);    // global mesh
-    buildSubstructuring(Th, interfaceNb, 10, 1, labNeumann, s, arrayIntersection, restrictionIntersection, Pk, BC, mpiCommWorld, false)
+    buildSubstructuring(Th, interfaceNb, 10, 1, labNeumann, s, intersection, Pk, BC, mpiCommWorld, false)
 }
 
 func f = 10;
@@ -33,7 +32,7 @@ varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(f * v) + on(1, u = 0.0)
 matrix<real> Loc = vPb(Wh, Wh, sym = 1, tgv = -2); // local operator
 real[int] rhs = vPb(0, Wh, tgv = -2);              // local right-hand side
 
-MatIS A(Loc, arrayIntersection, restrictionIntersection, interfaceNb, communicator = mpiCommWorld);
+MatIS A(Loc, intersection, interfaceNb, communicator = mpiCommWorld);
 Wh<real> def(u) = 0.0;    // local solution
 
 int[int] numbering;
