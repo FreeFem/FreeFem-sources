@@ -25,13 +25,12 @@ if(verbosity > 0 && mpirank == 0) {
 }
 
 meshN ThBorder, Th = square(1, 1);
-fespace Wh(Th, Pk);                         // local finite element space
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
-real[int] D;                                // partition of unity
+fespace Wh(Th, Pk);              // local finite element space
+int[int][int] intersection(0);   // local-to-neighbors renumbering
+real[int] D;                     // partition of unity
 {
     Th = square(getARGV("-global", 40), getARGV("-global", 40));    // global mesh
-    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, D, arrayIntersection, restrictionIntersection, Pk, comm, excluded)
+    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, intersection, D, Pk, comm, excluded)
 }
 
 func real wedge(real a, real b) {
@@ -61,7 +60,7 @@ matrix<complex> Mat;                        // local operator
 }
 ThBorder = square(1, 1);
 
-schwarz<complex> A(Mat, arrayIntersection, restrictionIntersection, D, scaled = false);
+schwarz<complex> A(Mat, intersection, D, scaled = false);
 
 matrix<complex> Opt;                        // local operator with optimized boundary conditions
 pair<complex> ret;

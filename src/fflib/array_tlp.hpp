@@ -872,8 +872,8 @@ void ArrayDCL()
 
   //  Dcl_Type<KNM<K> *>(0,::Destroy<KNM<K> > ,::ClearReturnpKK<K,KNM<K> >);
     Dcl_TypeandPtr_<KNM_<K> ,KNM<K>*  > (0,0,0,::Destroy<KNM<K> >, ::ClearReturnKK_<K,KNM<K>,KNM_<K> >,::ClearReturnpKK<K,KNM<K> >);
-    Dcl_Type<  KN<KNM<K> >* >(0,::DestroyKN<KNM<K> >,::ClearReturnpKK<KNM<K>,KN<KNM<K> > >);
-    Dcl_Type<  KN<KN<K> >* >(0,::DestroyKN<KN<K> >,::ClearReturnpKK<KN<K>,KN<KN<K> > >);
+    Dcl_Type<  KN<KNM<K> >* >(InitP<KN<KNM<K>>>,::DestroyKN<KNM<K> >,::ClearReturnpKK<KNM<K>,KN<KNM<K> > >);
+    Dcl_Type<  KN<KN<K> >* >(InitP<KN<KN<K>>>,::DestroyKN<KN<K> >,::ClearReturnpKK<KN<K>,KN<KN<K> > >);
 
     Dcl_Type< outProduct_KN_<K>* >();
     Dcl_Type< Transpose<KN_<K> > > ();

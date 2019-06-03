@@ -12,14 +12,16 @@ macro partitionSubstructuring(meshName, interfaceNb, globalName, PhGlobal, part,
         PhGlobal supp = abs(part - mpiRank(comm)) < 0.1;
         VhGlobal suppSmooth;
         AddLayers(globalName, supp[], 2, suppSmooth[]);
+        ndofSkeleton.resize(1);
+        ndofSkeleton[0].resize(0);
         {
             meshN neighbors = trunc(globalName, suppSmooth > 0.001);
             fespace Oh(neighbors, P0);
             Oh partOverlap = part;
-            Unique(partOverlap[], arrayIntersection, remove = mpiRank(comm));
+            Unique(partOverlap[], ndofSkeleton[0], remove = mpiRank(comm));
         }
 
-        VhGlobal[int] partitionIntersection(arrayIntersection.n);
+        VhGlobal[int] partitionIntersection(ndofSkeleton[0].n);
         if(s > 1) {
             globalName = trunc(globalName, suppSmooth > 0.001, split = s, label = fakeInterface);
             supp = abs(part - mpiRank(comm)) < 0.1;
@@ -29,41 +31,40 @@ macro partitionSubstructuring(meshName, interfaceNb, globalName, PhGlobal, part,
         }
         globalName = trunc(globalName, suppSmooth > 0.501, label = fakeInterface);
         real eps = intN(globalName)(1.0);
-        real[int] epsTab(arrayIntersection.n);
-        mpiRequest[int] rq(2 * arrayIntersection.n);
-        for(int j = 0; j < arrayIntersection.n; ++j)
-            Irecv(processor(arrayIntersection[j], comm, rq[j]), epsTab[j]);
-        for(int j = 0; j < arrayIntersection.n; ++j)
-            Isend(processor(arrayIntersection[j], comm, rq[arrayIntersection.n + j]), eps);
+        real[int] epsTab(ndofSkeleton[0].n);
+        mpiRequest[int] rq(2 * ndofSkeleton[0].n);
+        for(int j = 0; j < ndofSkeleton[0].n; ++j)
+            Irecv(processor(ndofSkeleton[0][j], comm, rq[j]), epsTab[j]);
+        for(int j = 0; j < ndofSkeleton[0].n; ++j)
+            Isend(processor(ndofSkeleton[0][j], comm, rq[ndofSkeleton[0].n + j]), eps);
         VhGlobal phi = 0;
         part = part;
         int numberIntersection = 0;
-        for(int k = 0; k < 2 * arrayIntersection.n; ++k)
+        for(int k = 0; k < 2 * ndofSkeleton[0].n; ++k)
             mpiWaitAny(rq);
-        for(int i = 0; i < arrayIntersection.n; ++i) {
-            PhGlobal suppPartition = abs(arrayIntersection[i] - part) < 0.1;
+        for(int i = 0; i < ndofSkeleton[0].n; ++i) {
+            PhGlobal suppPartition = abs(ndofSkeleton[0][i] - part) < 0.1;
             AddLayers(globalName, suppPartition[], 1, phi[]);
-            real intersection = intN(globalName)(phi) / min(eps, epsTab[i]);
-            if(intersection > 1.0e-6) {
+            if(intN(globalName)(phi) / min(eps, epsTab[i]) > 1.0e-6) {
                 partitionIntersection[numberIntersection] = phi;
-                arrayIntersection[numberIntersection++] = arrayIntersection[i];
+                ndofSkeleton[0][numberIntersection++] = ndofSkeleton[0][i];
             }
         }
-        if(numberIntersection != arrayIntersection.n)
-            arrayIntersection.resize(numberIntersection);
+        if(numberIntersection != ndofSkeleton[0].n)
+            ndofSkeleton[0].resize(numberIntersection);
         Wh def(interface);
         varf vPbInterface(def(u), def(v)) = on(fakeInterface, BC(u, 1.0)) + on(labDirichlet, BC(u, 0.0));
         interface[] = vPbInterface(0, Wh, tgv = 1);
-        matrix[int] R(arrayIntersection.n);
+        matrix[int] R(ndofSkeleton[0].n);
 
-        for(int i = 0; i < arrayIntersection.n; ++i) {
-            meshN meshIntersection = trunc(globalName, (part == mpiRank(comm) || part == arrayIntersection[i]) && partitionIntersection[i] > 1e-6, label = fakeInterface);
+        for(int i = 0; i < ndofSkeleton[0].n; ++i) {
+            meshN meshIntersection = trunc(globalName, (part == mpiRank(comm) || part == ndofSkeleton[0][i]) && partitionIntersection[i] > 1e-6, label = fakeInterface);
             fespace WhIntersection(meshIntersection, Pk);
             R[i] = interpolate(WhIntersection, Wh, inside = 1);
         }
-        buildSkeleton(interface[], arrayIntersection, R, ndofSkeleton, interface = interfaceNb, redundancy = getARGV("-redundancy", 1), communicator = comm);// EOM
+        buildSkeleton(interface[], R, ndofSkeleton, interface = interfaceNb, redundancy = getARGV("-redundancy", 1), communicator = comm);// EOM
 
-macro buildSubstructuringWithPartitioning(Th, interfaceNb, userPartitioning, fakeInterface, labDirichlet, labNeumann, s, arrayIntersection, restrictionIntersection, P, BC, comm, excluded)
+macro buildSubstructuringWithPartitioning(Th, interfaceNb, userPartitioning, fakeInterface, labDirichlet, labNeumann, s, intersection, P, BC, comm, excluded)
 {
     real timing = mpiWtime();
     fespace WhLocal(Th, Pk);
@@ -87,7 +88,7 @@ macro buildSubstructuringWithPartitioning(Th, interfaceNb, userPartitioning, fak
             partGlobal[] = userPartitioning;
             broadcast(processor(0, comm), partGlobal[]);
         }
-        partitionSubstructuring(Th, interfaceNb, ThGlobal, PhGlobal, partGlobal, s, restrictionIntersection, BC, comm, fakeInterface, labDirichlet)
+        partitionSubstructuring(Th, interfaceNb, ThGlobal, PhGlobal, partGlobal, s, intersection, BC, comm, fakeInterface, labDirichlet)
     }
     else if(mpiSize(comm) == 1) {
         if(s > 1)
@@ -107,8 +108,8 @@ macro buildSubstructuringWithPartitioning(Th, interfaceNb, userPartitioning, fak
     if(verbosity > 0 && mpirank == 0) cout.scientific << " --- partition of unity built (in " << mpiWtime() - timing << ")" << endl;
 }// EOM
 
-macro buildSubstructuring(Th, interfaceNb, fakeInterface, labDirichlet, labNeumann, s, arrayIntersection, restrictionIntersection, P, BC, comm, excluded)
+macro buildSubstructuring(Th, interfaceNb, fakeInterface, labDirichlet, labNeumann, s, intersection, P, BC, comm, excluded)
 {
     real[int] emptyArray(0);
-    buildSubstructuringWithPartitioning(Th, interfaceNb, emptyArray, fakeInterface, labDirichlet, labNeumann, s, arrayIntersection, restrictionIntersection, P, BC, comm, excluded)
+    buildSubstructuringWithPartitioning(Th, interfaceNb, emptyArray, fakeInterface, labDirichlet, labNeumann, s, intersection, P, BC, comm, excluded)
 }// EOM

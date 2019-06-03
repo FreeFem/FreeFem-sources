@@ -206,22 +206,23 @@ if (!bpara){
 	assert(bpara);
 }
 
-int[int][int] pr#restrictionIntersectionhpddm(preffe#prmesh#numberIntersection);
+int[int][int] pr#intersectionhpddm(1 + preffe#prmesh#numberIntersection);
 {
-preffe#K[int] CC;
+  pr#intersectionhpddm[0] = preffe#prmesh#arrayIntersection;
+  preffe#K[int] CC;
   int[int] II;
   for (int j=0; j<preffe#prmesh#numberIntersection;j++) {
-    [II, pr#restrictionIntersectionhpddm[j], CC] = preffe#restrictionIntersection[j];
+    [II, pr#intersectionhpddm[1 + j], CC] = preffe#restrictionIntersection[j];
     if (CC[CC.n-1] == 0)
-      pr#restrictionIntersectionhpddm[j].resize(CC.n-1);
+      pr#intersectionhpddm[1 + j].resize(CC.n-1);
   }
 }
 IFMACRO(preffe#K,real)
-schwarz<preffe#K> pr#hpddmOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], preffe#prmesh#arrayIntersection, pr#restrictionIntersectionhpddm, preffe#Dk[mpiRank(preffe#prmesh#commddm)], scaled = false, communicator = preffe#prmesh#commddm);
+schwarz<preffe#K> pr#hpddmOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, preffe#Dk[mpiRank(preffe#prmesh#commddm)], scaled = false, communicator = preffe#prmesh#commddm);
 ENDIFMACRO
 IFMACRO(preffe#K,complex)
 real[int] pr#hpddmDk = preffe#Dk[mpiRank(preffe#prmesh#commddm)].re;
-schwarz<preffe#K> pr#hpddmOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], preffe#prmesh#arrayIntersection, pr#restrictionIntersectionhpddm, pr#hpddmDk, scaled = false, communicator = preffe#prmesh#commddm);
+schwarz<preffe#K> pr#hpddmOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, pr#hpddmDk, scaled = false, communicator = preffe#prmesh#commddm);
 ENDIFMACRO
 if (preffe#prmesh#inexactCSsplit == 1)
   set(pr#hpddmOP,sparams="-hpddm_reuse_preconditioner 1");
@@ -431,26 +432,6 @@ macro ffddmsetup(pr,preffe,Varf,VarfPrec)
 ffddmsetupOperator(pr,preffe,Varf)
 ffddmsetupPrecond(pr,VarfPrec)
 // EOM
-
-/*
-IFMACRO (pr#K,complex)
-zschwarz pr#Addmc(pr#matc, pr#arrayIntersectionc, pr#restrictionIntersectionc, scaling = pr#Dc, communicator = mpiCommWorld);
-ENDIFMACRO
-IFMACRO (pr#K,real)
-dschwarz pr#Addmc(pr#matc, pr#arrayIntersectionc, pr#restrictionIntersectionc, scaling = pr#Dc, communicator = mpiCommWorld);
-ENDIFMACRO
-
-IFMACRO (pr#minexactCS,1)
-
-ffddmsetup(pr#Coarse,VarfEprec,VarfOpt)
-ffddmcoarsemeshsetup(pr#Coarse,Thcc,VarfEprec)
-ffddmset(pr#Coarse,corr,"ADEF1")
-pr#ncoarsespace = pr#CoarseNdofglobal;
-
-ENDIFMACRO
-
-set(pr#Addmc,sparams="-hpddm_verbosity "+getARGV("-inexactCS_verbosity", 0)+" -hpddm_schwarz_method "+getARGV("-inexactCS_schwarz_method", "oras")+" -hpddm_tol "+getARGV("-inexactCS_tol", 1.e-1)+" -hpddm_gmres_restart "+getARGV("-inexactCS_restart", 200)+" -hpddm_max_it "+getARGV("-inexactCS_max_it", 200));
-*/
 
 macro ffddmbuildrhs(pr,Varfrhs,rhs)
 if (pr#prfe#prmesh#isincomm)

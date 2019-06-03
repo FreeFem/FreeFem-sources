@@ -20,10 +20,9 @@ if(verbosity > 0 && mpirank == 0) {
 }
 
 meshN Th = buildlayers(square(1, 1), 1);
-fespace Wh(Th, Pk);                         // local finite element space
-int[int] arrayIntersection;                 // ranks of neighboring subdomains
-int[int][int] restrictionIntersection(0);   // local-to-neighbors renumbering
-real[int] D;                                // partition of unity
+fespace Wh(Th, Pk);              // local finite element space
+int[int][int] intersection(0);   // local-to-neighbors renumbering
+real[int] D;                     // partition of unity
 {
     mesh ThGlobal2d = square(getARGV("-global", 12), getARGV("-global", 12), [x, y]);    // global mesh
     ThGlobal2d = trunc(ThGlobal2d, (x <= 0.5) || (y <= 0.5), label = 5);
@@ -31,7 +30,7 @@ real[int] D;                                // partition of unity
     mesh Th2d = movemesh(ThGlobal2d, [-x, y]);
     ThGlobal2d = ThGlobal2d + Th2d;
     Th = buildlayers(ThGlobal2d, getARGV("-global", 12) / 2, zbound = [0, 0.4]);
-    build(Th, s, D, arrayIntersection, restrictionIntersection, Pk, mpiCommWorld)
+    build(Th, s, intersection, D, Pk, mpiCommWorld)
 }
 
 varf vPb([u, uB, uC, p], [v, vB, vC, q]) = intN(Th)(grad(u)' * grad(v) + grad(uB)' * grad(vB) + grad(uC)' * grad(vC) - div(u) * q - div(v) * p + 1e-10 * p * q) + on(0, 1, 3, 5, u = 0, uB = 0, uC = 0) + on(2, u = 1000*y*(0.5-y)*z*(0.4-z), uB = 0, uC = 0);
@@ -42,7 +41,7 @@ string[int] names(2);
 names[0] = "velocity";
 names[1] = "pressure";
 
-Mat A(Loc, arrayIntersection, restrictionIntersection, D);
+Mat A(Loc, intersection, D);
 set(A, sparams = "-ksp_type fgmres -pc_type fieldsplit -pc_fieldsplit_type schur -pc_fieldsplit_schur_fact_type lower -pc_fieldsplit_detect_saddle_point -fieldsplit_velocity_sub_pc_type lu " + " -fieldsplit_pressure_sub_pc_type lu -fieldsplit_velocity_sub_pc_factor_mat_solver_type mumps " + " -fieldsplit_pressure_sub_pc_factor_mat_solver_type mumps -ksp_monitor -ksp_view " + " -fieldsplit_velocity_ksp_type gmres -fieldsplit_velocity_ksp_max_it 5 -fieldsplit_pressure_ksp_type gmres -fieldsplit_pressure_ksp_max_it 5 -ksp_rtol 1e-6", fields = b[], names = names);
 b[] = 0.0;
 b[] = A^-1 * rhs;

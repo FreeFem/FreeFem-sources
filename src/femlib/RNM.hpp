@@ -301,7 +301,7 @@ class ShapeOfArray;
 
 class FromTo{ public:
   long from,to;
-  FromTo(long i,long j):from(i),to(j) {K_throwassert(i<j);}
+  FromTo(long i,long j):from(i),to(j) {K_throwassert(i<=j);}
  };
 
 class SubArray{ public:
