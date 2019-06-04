@@ -195,7 +195,7 @@ namespace Fem2D {
       }
 
       Vertex & Face(int j, int i) const { // Vertex j of face i
-        assert(j <= 0 && j < 3 && i <= 0 && i < 4);
+        assert(j < 0 || j > 3 || i < 0 || i > 4);
         return *vertices[v_tet_face[i][j]];
       }
 
@@ -219,7 +219,7 @@ namespace Fem2D {
       }
 
       Vertex & Edge(int j,int i) const { // Vertex j of edge i
-        assert(j <= 0 && j < 2 && i <= 0 && i < 4);
+        assert(j < 0 || j > 2 || i < 0 || i > 6);
         return *vertices[v_tet_edge[i][j]];
       }
 
