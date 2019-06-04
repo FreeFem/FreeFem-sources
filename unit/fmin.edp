@@ -1,41 +1,41 @@
 include "test.idp"
 
-cout << "fmax" << endl;
+cout << "fmin" << endl;
 real t;
 int i1 = 1;
 int i2 = 2;
 int i4 = -1;
 int i5 = -2;
-real r3 = -3.5;
-real r4 = -4.5;
+real r1 = -3.5;
+real r2 = -4.5;
 real nan = sqrt(-1);
 
 cout << IND << "int" << endl;
 
 t = clock();
-int maxi = fmax(i1, i2);
+real rmin = fmin(i1, i2);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(maxi == 2);
+test(rmin == i1);
 
 t = clock();
-int maxineg = fmax(i4, i5);
+rmin = fmin(i4, i5);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(maxineg == -1);
+test(rmin == i5);
 
 cout << IND << "real" << endl;
 
 t = clock();
-real maxrneg = fmax(r3, r4);
+rmin = fmin(r1, r2);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(maxrneg == -3.5);
+test(rmin == r2);
 
 cout << IND << "nan" << endl;
 
 t = clock();
-int maxnan = fmax(i1, nan);
+rmin = fmin(i1, nan);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(maxnan == i1);
+test(rmin == i1);
