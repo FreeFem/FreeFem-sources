@@ -176,9 +176,6 @@ AppDir/
 3rdparty/superlu/FAIT
 3rdparty/superlu/SuperLU_
 3rdparty/superlu/ff-FLAGS
-3rdparty/superludist/FAIRE
-3rdparty/superludist/FAIT
-3rdparty/superludist/SuperLU_DIST_
 3rdparty/tag-compile-pkg
 3rdparty/tetgen/FAIRE
 3rdparty/tetgen/cxxflags
