@@ -716,7 +716,7 @@ C_F0  formalMatCofactor(const basicAC_F0 &args)
               j1 = (j+1)%3;
               j2 = (j+2)%3;
 
-            C(i,j) = A(i1,j1)*A(i2,i2)-A(i1,j2)*A(i2,j1);
+            C(i,j) = A(i1,j1)*A(i2,j2)-A(i1,j2)*A(i2,j1);
           }
     }
     v=C(0,0);
