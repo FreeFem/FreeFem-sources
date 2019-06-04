@@ -158,7 +158,7 @@ namespace Fem2D {
     f >> (Rd&) v >> (Label&) v;
     return f;
   }
-
+/*
   class Tetraedre: public Label {
     public:
       typedef TVertex<R3> Vertex;
@@ -265,7 +265,7 @@ namespace Fem2D {
       void operator = (const Tetraedre &);
 
   };
-
+*/
   template<class Rd>
   class TTriangle: public Label {
     public:
@@ -476,7 +476,7 @@ namespace Fem2D {
       Triangle *triangles;
       BoundaryEdge *bedges;
       Edge *edges; // edge element
-      Tetraedre *tet; //
+     // Tetraedre *tet; //
 
       int nbElmts() const { return nt; }
       int nbBrdElmts() const { return neb; }
