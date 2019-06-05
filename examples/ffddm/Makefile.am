@@ -25,6 +25,10 @@ TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP
 
 all-local: freefem++.pref
 
+if METIS
+CONDITIONAL_METIS = Maxwell_Cobracavity.edp
+endif
+
 TESTS = diffusion-2d-thirdlevelgeneo.edp \
 	diffusion-3d-minimal-ddm.edp\
 	diffusion-3d-minimal-direct.edp \
@@ -34,12 +38,12 @@ TESTS = diffusion-2d-thirdlevelgeneo.edp \
 	Helmholtz-2d-HPDDM-BGMRES.edp \
 	Helmholtz-2d-simple.edp \
 	Helmholtz-3d-simple.edp \
-	Maxwell_Cobracavity.edp \
 	Maxwell-3d-simple.edp \
 	natural_convection_3D_obstacle.edp \
 	natural_convection.edp \
 	Richards-2d.edp \
-	heat-torus-3d-surf.edp
+	heat-torus-3d-surf.edp \
+	$(CONDITIONAL_METIS)
 
 XFAIL_TESTS = $(TESTS)
 

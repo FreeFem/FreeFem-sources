@@ -25,9 +25,12 @@ TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 
 all-local: all.edp regtests.edp freefem++.pref
 
+if METIS
+CONDITIONAL_METIS = schwarz-nm-3d.edp
+endif
+
 if TETGEN
 CONDITIONAL_TETGEN = cylinder.edp \
-	Laplace-Adapt-3d.edp \
 	Period-Poisson-cube-ballon.edp \
 	Poisson3d.edp \
 	Poisson-cube-ballon.edp \
@@ -36,23 +39,27 @@ CONDITIONAL_TETGEN = cylinder.edp \
 	tetgencube.edp \
 	tetgenholeregion.edp
 
+if FREEYAMS
+CONDITIONAL_TETGEN_FREEYAMS = Sphere-Isocahedron.edp
+
+if MMG3D
+if MSHMET
+CONDITIONAL_TETGEN_FREEYAMS_MMG3D_MSHMET = Laplace-Adapt-aniso-3d.edp
+endif MSHMET
+endif MMG3D
+endif FREEYAMS
+
 if GSL
 CONDITIONAL_TETGEN_GSL = bottle.edp
 endif GSL
 
 if MMG3D
 CONDITIONAL_TETGEN_MMG3D = fallingspheres.edp
-
-if FREEYAMS
-CONDITIONAL_TETGEN_MMG3D_FREEYAMS = Laplace-Adapt-aniso-3d.edp
-endif FREEYAMS
-
 endif MMG3D
 
-if FREEYAMS
-CONDITIONAL_TETGEN_FREEYAMS = Sphere-Isocahedron.edp
-endif FREEYAMS
-
+if MSHMET
+CONDITIONAL_TETGEN_MSHMET = Laplace-Adapt-3d.edp
+endif
 endif TETGEN
 
 TESTS = 3d-Leman.edp \
@@ -81,15 +88,23 @@ TESTS = 3d-Leman.edp \
 	sphere6.edp \
 	Stokes.edp \
 	TruncLac.edp \
+	$(CONDITIONAL_METIS) \
 	$(CONDITIONAL_TETGEN) \
+	$(CONDITIONAL_TETGEN_FREEYAMS) \
+	$(CONDITIONAL_TETGEN_FREEYAMS_MMG3D_MSHMET) \
 	$(CONDITIONAL_TETGEN_GSL)  \
 	$(CONDITIONAL_TETGEN_MMG3D) \
-	$(CONDITIONAL_TETGEN_MMG3D_FREEYAMS) \
-	$(CONDITIONAL_TETGEN_FREEYAMS)
+	$(CONDITIONAL_TETGEN_MSHMET)
 
-XFAIL_TESTS = Laplace-Adapt-3d.edp Laplace-Adapt-aniso-3d.edp schwarz-nm-3d.edp
+XFAIL_TESTS =
 
-EXTRA_DIST = *.edp all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh lac-leman-v4.msh
+EXTRA_DIST = *.edp \
+	all.edp \
+	regtests.edp \
+	regtests.m4 \
+	ref.edp \
+	dodecaedre01.mesh \
+	lac-leman-v4.msh
 
 all.edp: Makefile
 	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;int MEM1234=storageused();"; \

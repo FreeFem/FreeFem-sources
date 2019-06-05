@@ -2236,13 +2236,35 @@ if test "$ff_blas_ok" == yes ; then
 fi
 
 ## Condtional for check
-AM_CONDITIONAL([GSL], [test "$ff_with_gsl" = "yes"])
-AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = "yes"])
-AM_CONDITIONAL([FFTW3], [test "$enable_download" = yes && test -n "$TOOL_COMPILE_fftw3"])
-AM_CONDITIONAL([TETGEN], [test "$enable_download" = yes && test -n "$TOOL_COMPILE_tetgen"])
-AM_CONDITIONAL([FREEYAMS], [test "$enable_download" = yes && test -n "$TOOL_COMPILE_yams"])
-AM_CONDITIONAL([MMG3D], [test "$enable_download" = yes && test -n "$TOOL_COMPILE_mmg3d"])
-AM_CONDITIONAL([PARMETIS], [test "$enable_download" = yes && test -n "$TOOL_COMPILE_parmetis"])
+AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = yes])
+AM_CONDITIONAL([BLACS], [test "$ff_blacs_ok" = yes])
+AM_CONDITIONAL([FFTW3], [test "$ff_fftw_ok" = yes])
+AM_CONDITIONAL([FREEYAMS], [test "$ff_freeyams_ok" = yes])
+AM_CONDITIONAL([GSL], [test "$ff_with_gsl" = yes])
+AM_CONDITIONAL([HTOOL], [test "$enable_htool" = yes])
+AM_CONDITIONAL([HPDDM], [test "$enable_hpddm" = yes])
+AM_CONDITIONAL([HYPRE], [test "$ff_hypre_ok" = yes])
+AM_CONDITIONAL([IPOPT], [test "$ff_ipopt_ok" = yes])
+AM_CONDITIONAL([LIBSEQ], [test "$ff_libseq_ok" = yes])
+AM_CONDITIONAL([METIS], [test "$ff_metis_ok" = yes])
+AM_CONDITIONAL([MMG3D], [test "$ff_mmg3d_ok" = yes])
+AM_CONDITIONAL([MPI], [test "$ff_mpi" = yes])
+AM_CONDITIONAL([MSHMET], [test "$ff_mshmet_ok" = yes])
+AM_CONDITIONAL([MUMPS], [test "$ff_mumps_ok" = yes])
+AM_CONDITIONAL([MUMPS_ptscotch], [test "$ff_mumps_ptscotch_ok" = yes])
+AM_CONDITIONAL([MUMPS_scotch], [test "$ff_mumps_scotch_ok" = yes])
+AM_CONDITIONAL([MUMPS_seq], [test "$ff_mumps_seq_ok" = yes])
+AM_CONDITIONAL([NLOPT], [test "$ff_nlopt_ok" = yes])
+AM_CONDITIONAL([PARMETIS], [test "$ff_parmetis_ok" = yes])
+AM_CONDITIONAL([PETSC], [test "$ff_petsc_ok" = yes])
+AM_CONDITIONAL([PETSCCOMPLEX], [test "$ff_petsccomplex_ok" = yes])
+AM_CONDITIONAL([PTSCOTCH], [test "$ff_ptscotch_ok" = yes])
+AM_CONDITIONAL([SCALAPACK], [test "$ff_scalapack_ok" = yes])
+AM_CONDITIONAL([SCOTCH], [test "$ff_scotch_ok" = yes])
+AM_CONDITIONAL([SLEPC], [test "$ff_slepc_ok" = yes])
+AM_CONDITIONAL([SLEPCCOMPLEX], [test "$ff_slepccomplex_ok" = yes])
+AM_CONDITIONAL([SUPERLU], [test "$ff_superlu_ok" = yes])
+AM_CONDITIONAL([TETGEN], [test "$ff_tetgen_ok" = yes])
 
 ##
 # All makefiles
@@ -2361,9 +2383,3 @@ then
 	AC_MSG_NOTICE([     *********************************************** ])
     fi
 fi
-
-# Local Variables:
-# mode:shell-script
-# ispell-local-dictionary:"british"
-# coding:utf-8
-# End:

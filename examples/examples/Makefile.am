@@ -20,26 +20,39 @@
 # AUTHORS : ...
 # E-MAIL  : ...
 
-LOG_DRIVER=$(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 
 all-local: all.edp regtests.edp freefem++.pref
 
-TESTS=BlackScholes2D.edp condensor.edp \
-	convects.edp Heat.edp \
-	heatex.edp lame.edp \
-	membrane.edp membranerror.edp \
-	muwave.edp NSNewton.edp \
-	NSprojection.edp optimcontrol.edp \
-	potential.edp schwarz.edp \
-	sound.edp stokes.edp \
-	test1.edp thermal.edp \
-	thermic.edp
+if ARPACK
+CONDITIONAL_ARPACK = sound.edp
+endif
+
+TESTS = BlackScholes2D.edp \
+	condensor.edp \
+	convects.edp \
+	Heat.edp \
+	heatex.edp \
+	lame.edp \
+	membrane.edp \
+	membranerror.edp \
+	muwave.edp \
+	NSNewton.edp \
+	NSprojection.edp \
+	optimcontrol.edp \
+	potential.edp \
+	schwarz.edp \
+	stokes.edp \
+	test1.edp \
+	thermal.edp \
+	thermic.edp \
+	$(CONDITIONAL_ARPACK)
 
 # if .. no arpack or too long
-XFAIL_TESTS=sound.edp NSprojection.edp
+XFAIL_TESTS = NSprojection.edp
 
-EXTRA_DIST=*.edp all.edp regtests.edp regtests.m4 ref.edp
+EXTRA_DIST = *.edp all.edp regtests.edp regtests.m4 ref.edp
 
 all.edp:
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
