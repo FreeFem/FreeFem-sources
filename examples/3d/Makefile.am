@@ -87,7 +87,7 @@ TESTS = 3d-Leman.edp \
 	$(CONDITIONAL_TETGEN_MMG3D_FREEYAMS) \
 	$(CONDITIONAL_TETGEN_FREEYAMS)
 
-XFAIL_TESTS = Laplace-Adapt-3d.edp Laplace-Adapt-aniso-3d.edp
+XFAIL_TESTS = Laplace-Adapt-3d.edp Laplace-Adapt-aniso-3d.edp schwarz-nm-3d.edp
 
 EXTRA_DIST = *.edp all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh lac-leman-v4.msh
 

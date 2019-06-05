@@ -20,19 +20,125 @@
 # AUTHORS : ...
 # E-MAIL  : ...
 
-LOG_DRIVER=$(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 
 all-local: freefem++.pref all.edp regtests.edp
 
-TESTS=APk-AdaptEpsDeltaPk.edp APk-ExplicitPkTest.edp APk-FreeFemQA.edp APk-MetricPk.edp IPOTest.edp IpOptMinSurf.edp IpoptLap.edp IpoptMinSurfVol.edp IpoptVI.edp IpoptVI2.edp LapDG3.edp LapDG4.edp LapLNewSolver.edp LapMUMPS_seq.edp LapNewSolver.edp LapUmfpack64.edp LaplaceP3.edp LaplaceP4.edp LaplaceRT1.edp Leman-mesh.edp MetricKuate.edp NS_P2BR_P0.edp PARDISO.edp SuperLU.edp VarIneq2.edp  bilapMorley.edp bmo.edp buildlayermesh.edp checkglumeshcube.edp cmaes-VarIneq.edp cmaes-oven.edp convect_dervieux.edp convectchacon-3d.edp convectchacon.edp convexehull3d.edp dfft.edp ffnewuoa.edp ffrandom.edp funcTemplate.edp glumesh3D.edp gsl.edp  ilut.edp isoline.edp lame-TD-NSS.edp lap-solvers.edp lapack.edp layer.edp load.edp meditddm.edp metis.edp mshmet.edp myType.edp myfunction2.edp pipe.edp plot-fb-P3.edp plot-fb-P3dc.edp plot-fb-P4.edp plot-fb-P4dc.edp plotfb.edp ppm2rnm.edp provadxw.edp ref.edp schwarz-nm.edp scotch.edp shell.edp splitedges.edp splitmesh3.edp splitmesh6.edp test-ElementMixte.edp testFE-P3.edp testFE-P3dc.edp testFE-P4.edp testFE-P4dc.edp testFE-PkEdge.edp testFE_P2BR.edp testFEMorley.edp  tetgenholeregion_rugby.edp thresholdings.edp ttestio.edp bfstream.edp bilapP3-hct-like.edp ClosePoints.edp cube.edp bilapHCT.edp	testFEHCT.edp Stokes-surface-tension-axi.edp Element_QF.edp distance.edp	distance2.edp	distance3.edp testdist.edp testp1dcnc.edp testFE-P2Bulle3.edp LaplaceRT2.edp LaplaceP2pnc.edp testFE-P2pnc.edp LaplaceP3-3d.edp LaplaceRT13d.edp SaveHB_sample.edp SaveHB_sample_z.edp IncompleteCholesky.edp RT2-ff.edp
+if TETGEN
+CONDITIONAL_TETGEN = buildlayermesh.edp \
+	checkglumeshcube.edp \
+	convexehull3d.edp \
+	tetgenholeregion_rugby.edp
+
+endif
+
+TESTS = APk-AdaptEpsDeltaPk.edp \
+	APk-ExplicitPkTest.edp \
+	APk-FreeFemQA.edp \
+	APk-MetricPk.edp \
+	bfstream.edp \
+	bilapHCT.edp \
+	bilapMorley.edp \
+	bilapP3-hct-like.edp \
+	bmo.edp \
+	ClosePoints.edp \
+	cmaes-oven.edp \
+	cmaes-VarIneq.edp \
+	convect_dervieux.edp \
+	convectchacon-3d.edp \
+	convectchacon.edp \
+	cube.edp \
+	dfft.edp \
+	distance.edp \
+	distance2.edp \
+	distance3.edp \
+	Element_QF.edp \
+	ffnewuoa.edp \
+	ffrandom.edp \
+	funcTemplate.edp \
+	glumesh3D.edp \
+	gsl.edp \
+	ilut.edp \
+	IncompleteCholesky.edp \
+	IpoptLap.edp \
+	IpOptMinSurf.edp \
+	IpoptMinSurfVol.edp \
+	IpoptVI.edp \
+	IpoptVI2.edp \
+	IPOTest.edp \
+	isoline.edp \
+	lame-TD-NSS.edp \
+	lap-solvers.edp \
+	lapack.edp \
+	LapDG3.edp \
+	LapDG4.edp \
+	LaplaceP2pnc.edp \
+	LaplaceP3-3d.edp \
+	LaplaceP3.edp \
+	LaplaceP4.edp \
+	LaplaceRT1.edp \
+	LaplaceRT13d.edp \
+	LaplaceRT2.edp \
+	LapLNewSolver.edp \
+	LapMUMPS_seq.edp \
+	LapNewSolver.edp \
+	LapUmfpack64.edp \
+	layer.edp \
+	Leman-mesh.edp \
+	load.edp \
+	meditddm.edp \
+	metis.edp \
+	MetricKuate.edp \
+	mshmet.edp \
+	myfunction2.edp \
+	myType.edp \
+	NS_P2BR_P0.edp \
+	PARDISO.edp \
+	pipe.edp \
+	plot-fb-P3.edp \
+	plot-fb-P3dc.edp \
+	plot-fb-P4.edp \
+	plot-fb-P4dc.edp \
+	plotfb.edp \
+	ppm2rnm.edp \
+	provadxw.edp \
+	ref.edp \
+	RT2-ff.edp \
+	SaveHB_sample_z.edp \
+	SaveHB_sample.edp \
+	schwarz-nm.edp \
+	scotch.edp \
+	shell.edp \
+	splitedges.edp \
+	splitmesh3.edp \
+	splitmesh6.edp \
+	Stokes-surface-tension-axi.edp \
+	SuperLU.edp \
+	test-ElementMixte.edp \
+	testdist.edp \
+	testFE_P2BR.edp \
+	testFE-P2Bulle3.edp \
+	testFE-P2pnc.edp \
+	testFE-P3.edp \
+	testFE-P3dc.edp \
+	testFE-P4.edp \
+	testFE-P4dc.edp \
+	testFE-PkEdge.edp \
+	testFEHCT.edp \
+	testFEMorley.edp \
+	testp1dcnc.edp \
+	thresholdings.edp \
+	ttestio.edp \
+	VarIneq2.edp \
+	$(CONDITIONAL_TETGEN)
 # all test can fail must but clean ????  FH...
 
-XFAIL_TESTS=$(TESTS)
+XFAIL_TESTS = $(TESTS)
 
-EXTRA_DIST=*.edp all.edp regtests.edp regtests.m4 cube.msh  ch.pts fig.pgm lg.pgm
+EXTRA_DIST = *.edp all.edp regtests.edp regtests.m4 cube.msh  ch.pts fig.pgm lg.pgm
 
-freefem++.pref:Makefile
+freefem++.pref: Makefile
 	echo loadpath = "../../plugin/seq/" > freefem++.pref
 	echo includepath = "../../idp/" >> freefem++.pref
 
