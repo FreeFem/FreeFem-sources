@@ -25,13 +25,75 @@ TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 
 all-local: freefem++.pref all.edp regtests.edp
 
+if FFTW3
+CONDITIONAL_FFTW3 = dfft.edp
+endif FFTW3
+
+if FORTRAN
+CONDITIONAL_FORTRAN = ffnewuoa.edp
+endif FORTRAN
+
+if HDF5
+CONDITIONAL_HDF5 = iohd5-beam-2d.edp \
+	iohd5-beam-3d.edp
+endif HDF5
+
+if IPOPT
+CONDITIONAL_IPOPT = IpoptLap.edp \
+	IpOptMinSurf.edp \
+	IpoptMinSurfVol.edp \
+	IpoptVI.edp \
+	IpoptVI2.edp \
+	IPOTest.edp
+endif IPOPT
+
+if METIS
+CONDITIONAL_METIS = metis.edp \
+	schwarz-nm.edp
+
+if SCOTCH
+CONDITIONAL_METIS_SCOTCH = scotch.edp
+endif
+endif METIS
+
+if MKL
+CONDITIONAL_MKL = PARDISO.edp
+endif
+
+if MSHMET
+CONDITIONAL_MSHMET = aniso.edp
+endif MSHMET
+
+if MUMPS_seq
+CONDITIONAL_MUMPS_seq = LapMUMPS_seq.edp
+endif MUMPS_seq
+
+if MUMPS
+if SUPERLU
+CONDITIONAL_MUMPS_SUPERLU = lap-solvers.edp
+endif SUPERLU
+endif MUMPS
+
+if NLOPT
+CONDITIONAL_NLOPT = VarIneq2.edp
+endif NLOPT
+
+if SUPERLU
+CONDITIONAL_SUPERLU = SuperLU.edp
+endif SUPERLU
+
 if TETGEN
 CONDITIONAL_TETGEN = buildlayermesh.edp \
 	checkglumeshcube.edp \
 	convexehull3d.edp \
 	tetgenholeregion_rugby.edp
+endif TETGEN
 
-endif
+if UMFPACK
+CONDITIONAL_UMFPACK = LapLNewSolver.edp \
+	LapNewSolver.edp \
+	LapUmfpack64.edp
+endif UMFPACK
 
 TESTS = APk-AdaptEpsDeltaPk.edp \
 	APk-ExplicitPkTest.edp \
@@ -49,27 +111,18 @@ TESTS = APk-AdaptEpsDeltaPk.edp \
 	convectchacon-3d.edp \
 	convectchacon.edp \
 	cube.edp \
-	dfft.edp \
 	distance.edp \
 	distance2.edp \
 	distance3.edp \
 	Element_QF.edp \
-	ffnewuoa.edp \
 	ffrandom.edp \
 	funcTemplate.edp \
 	glumesh3D.edp \
 	gsl.edp \
 	ilut.edp \
 	IncompleteCholesky.edp \
-	IpoptLap.edp \
-	IpOptMinSurf.edp \
-	IpoptMinSurfVol.edp \
-	IpoptVI.edp \
-	IpoptVI2.edp \
-	IPOTest.edp \
 	isoline.edp \
 	lame-TD-NSS.edp \
-	lap-solvers.edp \
 	lapack.edp \
 	LapDG3.edp \
 	LapDG4.edp \
@@ -80,15 +133,10 @@ TESTS = APk-AdaptEpsDeltaPk.edp \
 	LaplaceRT1.edp \
 	LaplaceRT13d.edp \
 	LaplaceRT2.edp \
-	LapLNewSolver.edp \
-	LapMUMPS_seq.edp \
-	LapNewSolver.edp \
-	LapUmfpack64.edp \
 	layer.edp \
 	Leman-mesh.edp \
 	load.edp \
 	meditddm.edp \
-	metis.edp \
 	MetricKuate.edp \
 	mshmet.edp \
 	myfunction2.edp \
@@ -107,14 +155,11 @@ TESTS = APk-AdaptEpsDeltaPk.edp \
 	RT2-ff.edp \
 	SaveHB_sample_z.edp \
 	SaveHB_sample.edp \
-	schwarz-nm.edp \
-	scotch.edp \
 	shell.edp \
 	splitedges.edp \
 	splitmesh3.edp \
 	splitmesh6.edp \
 	Stokes-surface-tension-axi.edp \
-	SuperLU.edp \
 	test-ElementMixte.edp \
 	testdist.edp \
 	testFE_P2BR.edp \
@@ -130,8 +175,19 @@ TESTS = APk-AdaptEpsDeltaPk.edp \
 	testp1dcnc.edp \
 	thresholdings.edp \
 	ttestio.edp \
-	VarIneq2.edp \
-	$(CONDITIONAL_TETGEN)
+	$(CONDITIONAL_FFTW3) \
+	$(CONDITIONAL_FORTRAN) \
+	$(CONDITIONAL_IPOPT) \
+	$(CONDITIONAL_METIS) \
+	$(CONDITIONAL_METIS_SCOTCH) \
+	$(CONDITIONAL_MKL) \
+	$(CONDITIONAL_MSHMET) \
+	$(CONDITIONAL_MUMPS_seq) \
+	$(CONDITIONAL_MUMPS_SUPERLU) \
+	$(CONDITIONAL_NLOPT) \
+	$(CONDITIONAL_SUPERLU) \
+	$(CONDITIONAL_TETGEN) \
+	$(CONDITIONAL_UMFPACK)
 # all test can fail must but clean ????  FH...
 
 XFAIL_TESTS = $(TESTS)
