@@ -76,29 +76,12 @@ $(SRCDIR)/tags: $(PACKAGE)
 	patch -p0  <metis-5.1.patch
 	touch $(SRCDIR)/tags
 
-$(SRCDIR)/tags-4.0: $(PACKAGE)
-	tar xvzf $(PACKAGE)
-	patch -p0  <patch-metis
-	patch -p0  <metis-4.0_main_return.patch
-	mv  $(SRCDIR)/Programs/Makefile $(SRCDIR)/Programs/Makefile-orig
-	sed -e 's;BINDIR = ..;BINDIR = ../$(INSTALL)/bin;' \
-            -e 's;../libmetis.a;../$(INSTALL)/lib/metis/libmetis.a;' \
-            -e 's;-L[.][.];-L../$(INSTALL)/lib/metis;' \
-          <$(SRCDIR)/Programs/Makefile-orig \
-          >$(SRCDIR)/Programs/Makefile
-	mv $(SRCDIR)/Lib/Makefile $(SRCDIR)/Lib/Makefile-orig
-	sed   -e 's;../libmetis.a;../$(INSTALL)/lib/metis/libmetis.a;' \
-          <$(SRCDIR)/Lib/Makefile-orig \
-          >$(SRCDIR)/Lib/Makefile
-	touch $(SRCDIR)/tags
-
 $(PACKAGE):
 	../getall -o METIS -a
 
 clean-local:
 	-cd $(SRCDIR) && $(MAKE) realclean  -C $(SRCDIR)
-	-rm -rf metis-4.0 config.log
-	-rm -rf ../lib/metis ../lib/WHERE.metis
+	-rm -rf config.log ../lib/metis ../lib/WHERE.metis
 	-rm -rf ../include/metis
 	-rm -rf $(SRCDIR)
 	-rm FAIRE FAIT

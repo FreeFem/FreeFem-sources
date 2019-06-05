@@ -189,8 +189,7 @@ AppDir/
 3rdparty/yams/FAIRE
 3rdparty/yams/ff-flags
 3rdparty/yams/freeyams.*/
-3rdparty/ff-petsc/petsc-3*
-3rdparty/ff-petsc/slepc-3*
+3rdparty/ff-petsc/petsc-*/
 FreeFEM-documentation.pdf
 bin/script/PostInstall.sh
 *ex.*.eps
