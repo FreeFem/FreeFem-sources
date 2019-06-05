@@ -953,6 +953,8 @@ AM_CONDITIONAL([FFCS_MPIOK],[test $ff_mpi = yes])
 # Looking for useful configuration utilities
 # ------------------------------------------
 
+AC_ARG_ENABLE(summary,AC_HELP_STRING([--enable-summary],[Display activated libraries list at the end of the configure process]))
+
 AC_ARG_ENABLE(download,AC_HELP_STRING([--enable-download],[Download missing libraries (BLAS,ARPACK,UMFPACK,...)]))
 ## PETSc
 AC_ARG_WITH(petsc,[  --with-petsc=/usr/local/petsc/conf/petscvariables   --without-petsc  ])
@@ -2241,6 +2243,7 @@ AM_CONDITIONAL([BLACS], [test "$ff_blacs_ok" = yes])
 AM_CONDITIONAL([FFTW3], [test "$ff_fftw_ok" = yes])
 AM_CONDITIONAL([FORTRAN], [test "$enable_fortran" = yes])
 AM_CONDITIONAL([FREEYAMS], [test "$ff_freeyams_ok" = yes])
+AM_CONDITIONAL([GMM], [test "$enable_gmm" = yes])
 AM_CONDITIONAL([GSL], [test "$ff_with_gsl" = yes])
 AM_CONDITIONAL([HDF5], [test "$with_hdf5" = yes])
 AM_CONDITIONAL([HTOOL], [test "$enable_htool" = yes])
@@ -2249,7 +2252,7 @@ AM_CONDITIONAL([HYPRE], [test "$ff_hypre_ok" = yes])
 AM_CONDITIONAL([IPOPT], [test "$ff_ipopt_ok" = yes])
 AM_CONDITIONAL([LIBSEQ], [test "$ff_libseq_ok" = yes])
 AM_CONDITIONAL([METIS], [test "$ff_metis_ok" = yes])
-AM_CONDITIONAL([MKL], [test "$enable_mkl" = yes])
+AM_CONDITIONAL([MKL], [test "$ff_mkl" = yes])
 AM_CONDITIONAL([MMG3D], [test "$ff_mmg3d_ok" = yes])
 AM_CONDITIONAL([MPI], [test "$ff_mpi" = yes])
 AM_CONDITIONAL([MSHMET], [test "$ff_mshmet_ok" = yes])
@@ -2311,18 +2314,18 @@ AC_OUTPUT(
     examples/3dSurf/Makefile
 )
 
-AC_MSG_NOTICE([  freefem++ used  download : $enable_download ])
-AC_MSG_NOTICE([	--  Dynamic load facility: $ff_dynload ])
-AC_MSG_NOTICE([	--  ARPACK (eigen value): $ff_arpack_ok ])
-AC_MSG_NOTICE([	--  UMFPACK (sparse solver) $ff_umfpack_ok ])
-AC_MSG_NOTICE([	--  BLAS $ff_blas_ok ])
-AC_MSG_NOTICE([	--  with MPI             $ff_mpi])
-AC_MSG_NOTICE([		--  with PETSC $ff_petsc_ok  / PETSC complex   $ff_petsccomplex_ok ]);
-AC_MSG_NOTICE([		--  with SLEPC $ff_slepc_ok  / SLEPC complex   $ff_slepccomplex_ok ]);
-AC_MSG_NOTICE([		--  with hpddm  $enable_hpddm (need MPI & c++11 :  $ff_cxx11 ) ]);
-AC_MSG_NOTICE([		--  with htool  $enable_htool (need MPI & c++11 :  $ff_cxx11 ) ]);
-AC_MSG_NOTICE([	--  without libs  : $ff_unlib_plugin]);
-AC_MSG_NOTICE([	--  without plugin: $ff_uncompile_plugin]);
+AC_MSG_NOTICE([  freefem++ used download: $enable_download ])
+AC_MSG_NOTICE([  --  Dynamic load facility: $ff_dynload ])
+AC_MSG_NOTICE([  --  ARPACK (eigen value): $ff_arpack_ok ])
+AC_MSG_NOTICE([  --  UMFPACK (sparse solver): $ff_umfpack_ok ])
+AC_MSG_NOTICE([  --  BLAS: $ff_blas_ok ])
+AC_MSG_NOTICE([  --  with MPI:     $ff_mpi])
+AC_MSG_NOTICE([    --  with PETSC: $ff_petsc_ok / PETSC complex: $ff_petsccomplex_ok ]);
+AC_MSG_NOTICE([    --  with SLEPC: $ff_slepc_ok / SLEPC complex: $ff_slepccomplex_ok ]);
+AC_MSG_NOTICE([    --  with hpddm: $enable_hpddm (need MPI & c++11: $ff_cxx11) ]);
+AC_MSG_NOTICE([    --  with htool: $enable_htool (need MPI & c++11: $ff_cxx11) ]);
+AC_MSG_NOTICE([  --  without libs: $ff_unlib_plugin ]);
+AC_MSG_NOTICE([  --  without plugin: $ff_uncompile_plugin ]);
 
 
 AC_MSG_NOTICE([    progs: $ff_progs ])
@@ -2387,4 +2390,58 @@ then
 	AC_MSG_NOTICE([ to install missing package  under debian or ubuntu, try: sudo apt-get install freeglut3-dev ])
 	AC_MSG_NOTICE([     *********************************************** ])
     fi
+fi
+
+if test "$enable_summary" = yes; then
+  if test "$enable_fortran" != yes; then
+    enable_fortran=no
+  fi
+  if test "$enable_gmm" != yes; then
+    enable_gmm=no
+  fi
+  if test "$ff_mkl" != yes; then
+    ff_mkl=no
+  fi
+  if test -n "$ff_pthread"; then
+    ff_pthread_ok=yes
+  else
+    ff_pthread_ok=no
+  fi
+
+  AC_MSG_NOTICE([ Activated libraries ])
+  AC_MSG_NOTICE([ - ARPACK: $ff_arpack_ok])
+  AC_MSG_NOTICE([ - BLACS: $ff_blacs_ok])
+  AC_MSG_NOTICE([ - FFTW3: $ff_fftw_ok])
+  AC_MSG_NOTICE([ - FORTRAN: $enable_fortran])
+  AC_MSG_NOTICE([ - FREEYAMS: $ff_freeyams_ok])
+  AC_MSG_NOTICE([ - GMM: $enable_gmm])
+  AC_MSG_NOTICE([ - GSL: $ff_with_gsl])
+  AC_MSG_NOTICE([ - HDF5: $with_hdf5])
+  AC_MSG_NOTICE([ - HTOOL: $enable_htool])
+  AC_MSG_NOTICE([ - HPDDM: $enable_hpddm])
+  AC_MSG_NOTICE([ - HYPRE: $ff_hypre_ok])
+  AC_MSG_NOTICE([ - IPOPT: $ff_ipopt_ok])
+  AC_MSG_NOTICE([ - LIBSEQ: $ff_libseq_ok])
+  AC_MSG_NOTICE([ - METIS: $ff_metis_ok])
+  AC_MSG_NOTICE([ - MKL: $ff_mkl])
+  AC_MSG_NOTICE([ - MMG3D: $ff_mmg3d_ok])
+  AC_MSG_NOTICE([ - MPI: $ff_mpi])
+  AC_MSG_NOTICE([ - MSHMET: $ff_mshmet_ok])
+  AC_MSG_NOTICE([ - MUMPS: $ff_mumps_ok])
+  AC_MSG_NOTICE([ - MUMPS_ptscotch: $ff_mumps_ptscotch_ok])
+  AC_MSG_NOTICE([ - MUMPS_scotch: $ff_mumps_scotch_ok])
+  AC_MSG_NOTICE([ - MUMPS_seq: $ff_mumps_seq_ok])
+  AC_MSG_NOTICE([ - NLOPT: $ff_nlopt_ok])
+  AC_MSG_NOTICE([ - PARMETIS: $ff_parmetis_ok])
+  AC_MSG_NOTICE([ - PETSC: $ff_petsc_ok])
+  AC_MSG_NOTICE([ - PETSCCOMPLEX: $ff_petsccomplex_ok])
+  AC_MSG_NOTICE([ - PTHREAD: $ff_pthread_ok])
+  AC_MSG_NOTICE([ - PTSCOTCH: $ff_ptscotch_ok])
+  AC_MSG_NOTICE([ - SCALAPACK: $ff_scalapack_ok])
+  AC_MSG_NOTICE([ - SCOTCH: $ff_scotch_ok])
+  AC_MSG_NOTICE([ - SLEPC: $ff_slepc_ok])
+  AC_MSG_NOTICE([ - SLEPCCOMPLEX: $ff_slepccomplex_ok])
+  AC_MSG_NOTICE([ - SUPERLU: $ff_superlu_ok])
+  AC_MSG_NOTICE([ - TETGEN: $ff_tetgen_ok])
+  AC_MSG_NOTICE([ - UMFPACK: $ff_umfpack_ok])
 fi

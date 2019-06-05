@@ -198,6 +198,7 @@ bin/script/PostInstall.sh
 *ex.*.so
 *ex.*.trs
 *.log
+*.log.err
 *.vtu
 *.h5
 *.BB

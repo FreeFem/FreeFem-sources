@@ -33,6 +33,14 @@ if FORTRAN
 CONDITIONAL_FORTRAN = ffnewuoa.edp
 endif FORTRAN
 
+if GMM
+CONDITIONAL_GMM = ilut.edp
+endif GMM
+
+if GSL
+CONDITIONAL_GSL = gsl.edp
+endif GSL
+
 if HDF5
 CONDITIONAL_HDF5 = iohd5-beam-2d.edp \
 	iohd5-beam-3d.edp
@@ -86,7 +94,8 @@ if TETGEN
 CONDITIONAL_TETGEN = buildlayermesh.edp \
 	checkglumeshcube.edp \
 	convexehull3d.edp \
-	tetgenholeregion_rugby.edp
+	tetgenholeregion_rugby.edp \
+	ttestio.edp
 endif TETGEN
 
 if UMFPACK
@@ -118,8 +127,6 @@ TESTS = APk-AdaptEpsDeltaPk.edp \
 	ffrandom.edp \
 	funcTemplate.edp \
 	glumesh3D.edp \
-	gsl.edp \
-	ilut.edp \
 	IncompleteCholesky.edp \
 	isoline.edp \
 	lame-TD-NSS.edp \
@@ -142,7 +149,6 @@ TESTS = APk-AdaptEpsDeltaPk.edp \
 	myfunction2.edp \
 	myType.edp \
 	NS_P2BR_P0.edp \
-	PARDISO.edp \
 	pipe.edp \
 	plot-fb-P3.edp \
 	plot-fb-P3dc.edp \
@@ -174,9 +180,10 @@ TESTS = APk-AdaptEpsDeltaPk.edp \
 	testFEMorley.edp \
 	testp1dcnc.edp \
 	thresholdings.edp \
-	ttestio.edp \
 	$(CONDITIONAL_FFTW3) \
 	$(CONDITIONAL_FORTRAN) \
+	$(CONDITIONAL_GMM) \
+	$(CONDITIONAL_GSL) \
 	$(CONDITIONAL_IPOPT) \
 	$(CONDITIONAL_METIS) \
 	$(CONDITIONAL_METIS_SCOTCH) \

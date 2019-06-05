@@ -83,7 +83,6 @@ TESTS = 3d-Leman.edp \
 	periodic-3d.edp \
 	Poisson.edp \
 	pyramide.edp \
-	schwarz-nm-3d.edp \
 	sphere2.edp \
 	sphere6.edp \
 	Stokes.edp \
