@@ -2041,7 +2041,6 @@ AC_SUBST(STD_LIBS,$ff_std_libs)
 AX_PATH_GSL(1.15, ff_with_gsl=yes, ff_with_gsl=no)
 if test "$ff_with_gsl" = "yes"; then
   AC_FF_ADDWHERELIB(gsl,$GSL_LIBS,$GSL_CFLAGS)
-  AM_CONDITIONAL(GSL, true)
 fi
 
 ##
@@ -2237,6 +2236,8 @@ if test "$ff_blas_ok" == yes ; then
 fi
 
 ## Condtional for check
+AM_CONDITIONAL([GSL], [test "$ff_with_gsl" = "yes"])
+AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = "yes"])
 AM_CONDITIONAL([FFTW3], [test "$enable_download" = yes && test -n "$TOOL_COMPILE_fftw3"])
 AM_CONDITIONAL([TETGEN], [test "$enable_download" = yes && test -n "$TOOL_COMPILE_tetgen"])
 AM_CONDITIONAL([FREEYAMS], [test "$enable_download" = yes && test -n "$TOOL_COMPILE_yams"])

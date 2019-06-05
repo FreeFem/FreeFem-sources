@@ -20,21 +20,34 @@
 # AUTHORS : ...
 # E-MAIL  : ...
 
-LOG_DRIVER=$(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw SKIP=$(SKIP_TESTS_EIGEN)
+LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw SKIP=$(SKIP_TESTS_EIGEN)
 
 all-local: all.edp freefem++.pref
 
-TESTS=BeamEigenValue.edp BeamEigenValueperio.edp \
-	condition-number.edp free-cyl-axi.edp \
-	Lap3dEigenValue.edp LapComplexEigenValue.edp \
-	LapEigenValue.edp LapEigenValueFunc.edp \
-	LapEigenValueFuncV2.edp LapnosymComplexEigenValue.edp \
-	LapnosymEigenValue.edp neuman.edp \
-	Stokes-eigen.edp VP-Steklov-Poincare.edp \
+if ARPACK
+CONDITIONAL_ARPACK = BeamEigenValue.edp \
+	BeamEigenValueperio.edp \
+	condition-number.edp \
+	free-cyl-axi.edp \
+	Lap3dEigenValue.edp \
+	LapComplexEigenValue.edp \
+	LapEigenValue.edp \
+	LapEigenValueFunc.edp \
+	LapEigenValueFuncV2.edp \
+	LapnosymComplexEigenValue.edp \
+	LapnosymEigenValue.edp \
+	neuman.edp \
+	Stokes-eigen.edp \
+	VP-Steklov-Poincare.edp \
 	WGM-sphere.edp
+endif
 
-EXTRA_DIST=*.edp all.edp
+TESTS = $(CONDITIONAL_ARPACK)
+
+XFAIL_TESTS = LapnosymEigenValue.edp
+
+EXTRA_DIST = *.edp all.edp
 
 all.edp:
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \

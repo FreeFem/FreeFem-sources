@@ -20,22 +20,27 @@
 # AUTHORS : ...
 # E-MAIL  : ...
 
-LOG_DRIVER=$(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 
 all-local: all.edp freefem++.pref
 
-TESTS=  buildMeshSfromMesh3.edp \
+if TETGEN
+CONDITIONAL_TETGEN = HeatTorus.edp
+endif
+
+TESTS = buildMeshSfromMesh3.edp \
 	glu3DSurf.edp \
 	Laplace3dSP2.edp \
-	HeatTorus.edp \
 	LaplacianSurf.edp \
 	operatorsOnMeshS.edp \
-	extractSurfFromMesh3.edp 
+	extractSurfFromMesh3.edp \
+	$(CONDITIONAL_TETGEN)
 
-XFAIL_TESTS=$(TESTS)
+XFAIL_TESTS = buildMeshSfromMesh3.edp \
+	Laplace3dSP2.edp
 
-EXTRA_DIST=*.edp all.edp
+EXTRA_DIST = *.edp all.edp
 
 all.edp: Makefile
 	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;int MEM1234=storageused();"; \
@@ -50,6 +55,5 @@ all.edp: Makefile
 freefem++.pref:Makefile
 	echo includepath = \"../../idp/\" > freefem++.pref
 	echo loadpath = \"../../plugin/seq/\" >> freefem++.pref
-
 
 FORCE:
