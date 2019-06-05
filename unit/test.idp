@@ -4,6 +4,7 @@ func int test(bool condition)
 		assert(condition);
 	} catch(...) {
 	  cout << "test failed" << endl;
+		exit(1);
 	}
 	return 0;
 }

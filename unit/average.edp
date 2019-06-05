@@ -1,0 +1,11 @@
+include "test.idp"
+
+cout << "average" << endl;
+real t;
+macro dn(u) (N.x*dx(u)+N.y*dy(u) ) //  def the normal derivative
+
+
+t = clock();
+// average();
+t = clock() - t;
+cout << IND << t << endl;
