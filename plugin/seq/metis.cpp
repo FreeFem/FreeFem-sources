@@ -21,7 +21,7 @@
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
 // *INDENT-OFF* //
-//ff-c++-LIBRARY-dep: metis
+//ff-c++-LIBRARY-dep: [mpi parmetis|metis]
 //ff-c++-cpp-dep:
 // *INDENT-ON* //
 

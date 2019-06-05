@@ -643,7 +643,7 @@ public:
     { // read the mesh
 	dim=2;
 	ne=0;
-	ntet=0;
+	ntet=0; 
 	volume=0;
 	TriangleConteningVertex =0;
 	BoundaryAdjacencesHead=0;
@@ -651,7 +651,7 @@ public:
 	BoundaryEdgeHeadLink=0;
 	quadtree =0;
 	NbMortars=0;
-	tet=0;
+	//tet=0;
 	edges=0;
 	mortars=0;
 	TheAdjacencesLink =0;
@@ -700,7 +700,7 @@ public:
 		NbMortars=0;
 		mortars=0;
 		dim=2;
-		tet=0;
+//		tet=0;
 		volume=0;
 		edges=0;
 		ntet=0;
@@ -1226,7 +1226,7 @@ Mesh::~Mesh()
     delete [] BoundaryAdjacencesLink;
     delete []  TriangleConteningVertex;
     delete [] bnormalv;
-    delete [] tet;
+//    delete [] tet;
     delete [] edges;
 }
 //  for the  mortar elements
@@ -1258,7 +1258,7 @@ Mesh::Mesh(int nbv,R2 * P)
     TriangleConteningVertex=0;
     TriangleConteningVertex=0;
     dim=2;
-    tet=0;
+//    tet=0;
     edges=0;
     ntet=0;
     ne=0;
@@ -1399,7 +1399,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
     ntet=0;
     ne=0;
     dim=2;
-    tet=0;
+//    tet=0;
     edges=0;
     mortars=0;
     TheAdjacencesLink =0;
@@ -1837,7 +1837,7 @@ Mesh::Mesh(const  Serialize &serialized)
     volume=0;
     NbMortars=0;
     dim=0;
-    tet=0;
+//    tet=0;
     edges=0;
     ntet=0;
     ne=0;

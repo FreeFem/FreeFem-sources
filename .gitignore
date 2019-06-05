@@ -176,9 +176,6 @@ AppDir/
 3rdparty/superlu/FAIT
 3rdparty/superlu/SuperLU_
 3rdparty/superlu/ff-FLAGS
-3rdparty/superludist/FAIRE
-3rdparty/superludist/FAIT
-3rdparty/superludist/SuperLU_DIST_
 3rdparty/tag-compile-pkg
 3rdparty/tetgen/FAIRE
 3rdparty/tetgen/cxxflags
@@ -192,8 +189,7 @@ AppDir/
 3rdparty/yams/FAIRE
 3rdparty/yams/ff-flags
 3rdparty/yams/freeyams.*/
-3rdparty/ff-petsc/petsc-3*
-3rdparty/ff-petsc/slepc-3*
+3rdparty/ff-petsc/petsc-*/
 FreeFEM-documentation.pdf
 bin/script/PostInstall.sh
 *ex.*.eps
@@ -202,6 +198,7 @@ bin/script/PostInstall.sh
 *ex.*.so
 *ex.*.trs
 *.log
+*.log.err
 *.vtu
 *.h5
 *.BB

@@ -417,6 +417,7 @@ struct set_eq_array: public binary_function<A,B,A> {
   {  A aa=a;aa = b;
      return a;}
 };
+
 /*
 template<class A,class B>
 struct set_eq_array_call: public binary_function<A,B,A> {
@@ -570,6 +571,10 @@ template<class R,class A>  R * set_init2( R* const & a,const A & b,const A & c){
 template<class R,class A>  R * set_init( R* const & a,const A & b){ 
  SHOWVERB( cout << " set_init " << typeid(R).name() << " " << &b << endl);
   a->init(b); return a;}
+template<class R,class A>  R * set_init_N( R* const & a,const A & b){
+    SHOWVERB( cout << " set_init_N" << typeid(R).name() << " " << &b << endl);
+    a->init(b.N()); *a=b; return a;}
+
 template<class R,class A>  R * set_initp( R* const & a,const A & b){ 
     SHOWVERB( cout << " set_init " << typeid(R).name() << " " << &b << endl);
     a->init(*b); return a;}

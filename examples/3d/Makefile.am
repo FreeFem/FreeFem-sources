@@ -1,18 +1,18 @@
 ############################################################################
-# This file is part of FreeFem++.                                          #
+# This file is part of FreeFEM.                                            #
 #                                                                          #
-# FreeFem++ is free software: you can redistribute it and/or modify        #
+# FreeFEM is free software: you can redistribute it and/or modify          #
 # it under the terms of the GNU Lesser General Public License as           #
 # published by the Free Software Foundation, either version 3 of           #
 # the License, or (at your option) any later version.                      #
 #                                                                          #
-# FreeFem++ is distributed in the hope that it will be useful,             #
+# FreeFEM is distributed in the hope that it will be useful,               #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of           #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
 # GNU Lesser General Public License for more details.                      #
 #                                                                          #
 # You should have received a copy of the GNU Lesser General Public License #
-# along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        #
+# along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          #
 ############################################################################
 # SUMMARY : Makefile for FreeFem++
 # LICENSE : LGPLv3
@@ -20,42 +20,90 @@
 # AUTHORS : ...
 # E-MAIL  : ...
 
-LOG_DRIVER=$(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 
 all-local: all.edp regtests.edp freefem++.pref
 
-TESTS=3d-Leman.edp ArrayFE-3d.edp \
-	beam-3d.edp bottle.edp \
-	cone.edp convect-3d.edp \
-	cube-period.edp cylinder-3d.edp \
-	EqPoisson.edp extract-boundary3d.edp \
-	fallingspheres.edp first.edp \
-	intlevelset3d.edp Lac.edp \
-	Laplace-Adapt-3d.edp Laplace-Adapt-aniso-3d.edp \
-	Laplace3d.edp LaplaceRT-3d.edp \
-	meditddm.edp NSI3d-carac.edp \
-	NSI3d.edp p.edp \
-	Period-Poisson-cube-ballon.edp periodic-3d.edp \
-	Poisson-cube-ballon.edp Poisson.edp \
-	Poisson3d.edp pyramide.edp \
-	refinesphere.edp schwarz-nm-3d.edp \
-	Sphere-Isocahedron.edp sphere2.edp \
-	sphere6.edp sphereincube.edp \
-	Stokes.edp tetgencube.edp \
-	tetgenholeregion.edp \
-	TruncLac.edp
+if METIS
+CONDITIONAL_METIS = schwarz-nm-3d.edp
+endif
 
-XFAIL_TESTS=bottle.edp \
-	cylinder.edp extract-boundary3d.edp \
-	fallingspheres.edp Laplace-Adapt-3d.edp \
-	Laplace-Adapt-aniso-3d.edp Period-Poisson-cube-ballon.edp \
-	Poisson3d.edp Poisson-cube-ballon.edp \
-	refinesphere.edp schwarz-nm-3d.edp \
-	Sphere-Isocahedron.edp sphereincube.edp \
-	tetgencube.edp tetgenholeregion.edp
+if TETGEN
+CONDITIONAL_TETGEN = cylinder.edp \
+	Period-Poisson-cube-ballon.edp \
+	Poisson3d.edp \
+	Poisson-cube-ballon.edp \
+	refinesphere.edp \
+	sphereincube.edp \
+	tetgencube.edp \
+	tetgenholeregion.edp
 
-EXTRA_DIST=*.edp all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh lac-leman-v4.msh
+if FREEYAMS
+CONDITIONAL_TETGEN_FREEYAMS = Sphere-Isocahedron.edp
+
+if MMG3D
+if MSHMET
+CONDITIONAL_TETGEN_FREEYAMS_MMG3D_MSHMET = Laplace-Adapt-aniso-3d.edp
+endif MSHMET
+endif MMG3D
+endif FREEYAMS
+
+if GSL
+CONDITIONAL_TETGEN_GSL = bottle.edp
+endif GSL
+
+if MMG3D
+CONDITIONAL_TETGEN_MMG3D = fallingspheres.edp
+endif MMG3D
+
+if MSHMET
+CONDITIONAL_TETGEN_MSHMET = Laplace-Adapt-3d.edp
+endif
+endif TETGEN
+
+TESTS = 3d-Leman.edp \
+	ArrayFE-3d.edp \
+	beam-3d.edp \
+	cone.edp \
+	convect-3d.edp \
+	cube-period.edp \
+	cylinder-3d.edp \
+	EqPoisson.edp \
+	extract-boundary3d.edp \
+	first.edp \
+	intlevelset3d.edp \
+	Lac.edp \
+	Laplace3d.edp \
+	LaplaceRT-3d.edp \
+	meditddm.edp \
+	NSI3d-carac.edp \
+	NSI3d.edp \
+	p.edp \
+	periodic-3d.edp \
+	Poisson.edp \
+	pyramide.edp \
+	sphere2.edp \
+	sphere6.edp \
+	Stokes.edp \
+	TruncLac.edp \
+	$(CONDITIONAL_METIS) \
+	$(CONDITIONAL_TETGEN) \
+	$(CONDITIONAL_TETGEN_FREEYAMS) \
+	$(CONDITIONAL_TETGEN_FREEYAMS_MMG3D_MSHMET) \
+	$(CONDITIONAL_TETGEN_GSL)  \
+	$(CONDITIONAL_TETGEN_MMG3D) \
+	$(CONDITIONAL_TETGEN_MSHMET)
+
+XFAIL_TESTS =
+
+EXTRA_DIST = *.edp \
+	all.edp \
+	regtests.edp \
+	regtests.m4 \
+	ref.edp \
+	dodecaedre01.mesh \
+	lac-leman-v4.msh
 
 all.edp: Makefile
 	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;int MEM1234=storageused();"; \
