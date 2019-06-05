@@ -20,42 +20,76 @@
 # AUTHORS : ...
 # E-MAIL  : ...
 
-LOG_DRIVER=$(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 
 all-local: all.edp regtests.edp freefem++.pref
 
-TESTS=3d-Leman.edp ArrayFE-3d.edp \
-	beam-3d.edp bottle.edp \
-	cone.edp convect-3d.edp \
-	cube-period.edp cylinder-3d.edp \
-	EqPoisson.edp extract-boundary3d.edp \
-	fallingspheres.edp first.edp \
-	intlevelset3d.edp Lac.edp \
-	Laplace-Adapt-3d.edp Laplace-Adapt-aniso-3d.edp \
-	Laplace3d.edp LaplaceRT-3d.edp \
-	meditddm.edp NSI3d-carac.edp \
-	NSI3d.edp p.edp \
-	Period-Poisson-cube-ballon.edp periodic-3d.edp \
-	Poisson-cube-ballon.edp Poisson.edp \
-	Poisson3d.edp pyramide.edp \
-	refinesphere.edp schwarz-nm-3d.edp \
-	Sphere-Isocahedron.edp sphere2.edp \
-	sphere6.edp sphereincube.edp \
-	Stokes.edp tetgencube.edp \
-	tetgenholeregion.edp \
-	TruncLac.edp
+if TETGEN
+CONDITIONAL_TETGEN = cylinder.edp \
+	Laplace-Adapt-3d.edp \
+	Period-Poisson-cube-ballon.edp \
+	Poisson3d.edp \
+	Poisson-cube-ballon.edp \
+	refinesphere.edp \
+	sphereincube.edp \
+	tetgencube.edp \
+	tetgenholeregion.edp
 
-XFAIL_TESTS=bottle.edp \
-	cylinder.edp extract-boundary3d.edp \
-	fallingspheres.edp Laplace-Adapt-3d.edp \
-	Laplace-Adapt-aniso-3d.edp Period-Poisson-cube-ballon.edp \
-	Poisson3d.edp Poisson-cube-ballon.edp \
-	refinesphere.edp schwarz-nm-3d.edp \
-	Sphere-Isocahedron.edp sphereincube.edp \
-	tetgencube.edp tetgenholeregion.edp
+if GSL
+CONDITIONAL_TETGEN_GSL = bottle.edp
+endif GSL
 
-EXTRA_DIST=*.edp all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh lac-leman-v4.msh
+if MMG3D
+CONDITIONAL_TETGEN_MMG3D = fallingspheres.edp
+
+if FREEYAMS
+CONDITIONAL_TETGEN_MMG3D_FREEYAMS = Laplace-Adapt-aniso-3d.edp
+endif FREEYAMS
+
+endif MMG3D
+
+if FREEYAMS
+CONDITIONAL_TETGEN_FREEYAMS = Sphere-Isocahedron.edp
+endif FREEYAMS
+
+endif TETGEN
+
+TESTS = 3d-Leman.edp \
+	ArrayFE-3d.edp \
+	beam-3d.edp \
+	cone.edp \
+	convect-3d.edp \
+	cube-period.edp \
+	cylinder-3d.edp \
+	EqPoisson.edp \
+	extract-boundary3d.edp \
+	first.edp \
+	intlevelset3d.edp \
+	Lac.edp \
+	Laplace3d.edp \
+	LaplaceRT-3d.edp \
+	meditddm.edp \
+	NSI3d-carac.edp \
+	NSI3d.edp \
+	p.edp \
+	periodic-3d.edp \
+	Poisson.edp \
+	pyramide.edp \
+	schwarz-nm-3d.edp \
+	sphere2.edp \
+	sphere6.edp \
+	Stokes.edp \
+	TruncLac.edp \
+	$(CONDITIONAL_TETGEN) \
+	$(CONDITIONAL_TETGEN_GSL)  \
+	$(CONDITIONAL_TETGEN_MMG3D) \
+	$(CONDITIONAL_TETGEN_MMG3D_FREEYAMS) \
+	$(CONDITIONAL_TETGEN_FREEYAMS)
+
+XFAIL_TESTS =
+
+EXTRA_DIST = *.edp all.edp regtests.edp regtests.m4 ref.edp dodecaedre01.mesh lac-leman-v4.msh
 
 all.edp: Makefile
 	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;int MEM1234=storageused();"; \
