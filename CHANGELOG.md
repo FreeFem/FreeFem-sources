@@ -31,6 +31,8 @@ All notable changes to this project will be documented in this file.
 - `int[int][int] array;` is now supported (a size was previously needed, i.e., `array(0);`)
 - check selectivity during `make check`, depending on available 3rd party librairies
 - new CI/CD tools for `develop` branch
+- new gestion of mesh3 - meshS coupling
+- square3, buildSurface, ... operators for meshS
 
 ### Changed
 - SLEPc is now directly downloaded by PETSc with `--download-slepc`
@@ -41,6 +43,7 @@ All notable changes to this project will be documented in this file.
 ### Removed
 - old interfaces that were not maintained anymore (pARMS, PaStiX, hips) and that are available through PETSc
 - spurious outputs when destroying some meshes
+- old surface msh3 type, replaced by meshS
 
 ### Fixed
 - missing typeMesh3 initializations
@@ -48,6 +51,7 @@ All notable changes to this project will be documented in this file.
 - nested fieldsplits in the PETSc interface
 - memory leaks in `SNESSolve` (nonlinear PETSc solvers)
 - bug fix of `Cofactor` function
+- various bug fixes on surface mesh
 
 ## [4.1]
 ### Fixed
