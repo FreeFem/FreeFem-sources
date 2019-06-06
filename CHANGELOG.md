@@ -24,9 +24,13 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [4.2.1]
 ### Added
 - nested fieldsplit example `examples/hpddm/natural-convection-2d-PETSc-fieldsplit.edp`
 - `int[int][int] array;` is now supported (a size was previously needed, i.e., `array(0);`)
+- check selectivity during `make check`, depending on available 3rd party librairies
+- new CI/CD tools for `develop` branch
 
 ### Changed
 - SLEPc is now directly downloaded by PETSc with `--download-slepc`
@@ -43,6 +47,7 @@ All notable changes to this project will be documented in this file.
 - multiple segmentation faults when using unitialized values (thanks to G. Sadaka)
 - nested fieldsplits in the PETSc interface
 - memory leaks in `SNESSolve` (nonlinear PETSc solvers)
+- bug fix of `Cofactor` function
 
 ## [4.1]
 ### Fixed
@@ -105,6 +110,7 @@ All notable changes to this project will be documented in this file.
 - The main distribution is now on Github
 
 [Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.1...develop
+[4.2.1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.0...v4.2.1
 [4.1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.0...v4.1
 [4.0]: https://github.com/FreeFem/FreeFem-sources/compare/3.62...v4.0
 [3.62]: https://github.com/FreeFem/FreeFem-sources/compare/3.61...3.62
