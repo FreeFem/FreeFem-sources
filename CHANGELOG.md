@@ -34,16 +34,14 @@ All notable changes to this project will be documented in this file.
 - `build` macros for HPDDM and PETSc have been simplified to follow the above API change, two parameters have been permuted as well to match the HPDDM and PETSc constructors
 - PETSc version 3.11.2 and HPDDM with multilevel GenEO
 
-### Fixed
-- missing typeMesh3 initializations
-- multiple segmentation faults when using unitialized values
-- nested fieldsplits in the PETSc interface
-
 ### Removed
 - old interfaces that were not maintained anymore (pARMS, PaStiX, hips) and that are available through PETSc
 - spurious outputs when destroying some meshes
 
 ### Fixed
+- missing typeMesh3 initializations
+- multiple segmentation faults when using unitialized values (thanks to G. Sadaka)
+- nested fieldsplits in the PETSc interface
 - memory leaks in `SNESSolve` (nonlinear PETSc solvers)
 
 ## [4.1]
