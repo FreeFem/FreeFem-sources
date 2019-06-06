@@ -23,11 +23,34 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] 4.1
+## [Unreleased]
+### Added
+- nested fieldsplit example `examples/hpddm/natural-convection-2d-PETSc-fieldsplit.edp`
+- `int[int][int] array;` is now supported (a size was previously needed, i.e., `array(0);`)
+
+### Changed
+- SLEPc is now directly downloaded by PETSc with `--download-slepc`
+- HPDDM and PETSc API have been simplified, instead of an `int[int]` and an `int[int][int]`, only a single `int[int][int]` is now needed
+- `build` macros for HPDDM and PETSc have been simplified to follow the above API change, two parameters have been permuted as well to match the HPDDM and PETSc constructors
+- PETSc version 3.11.2 and HPDDM with multilevel GenEO
+
 ### Fixed
--- missing conj operation is some hermitian operation on complex sparse matrix like  A+c*B', A*B' thanks to P-H Tournier
--- writing CheckAllEdp to be compatible with new tree
--- fix eps in trunc in case of very anisotrope mesh, Thank G. Sadaka
+- missing typeMesh3 initializations
+- multiple segmentation faults when using unitialized values
+- nested fieldsplits in the PETSc interface
+
+### Removed
+- old interfaces that were not maintained anymore (pARMS, PaStiX, hips) and that are available through PETSc
+- spurious outputs when destroying some meshes
+
+### Fixed
+- memory leaks in `SNESSolve` (nonlinear PETSc solvers)
+
+## [4.1]
+### Fixed
+- missing conj operation is some hermitian operation on complex sparse matrix like  A+c*B', A*B' thanks to P-H Tournier
+- writing CheckAllEdp to be compatible with new tree
+- fix eps in trunc in case of very anisotrope mesh, Thank G. Sadaka
 
 ### Added
 - CMake, thanks to [https://github.com/cdoucet](https://github.com/cdoucet)
@@ -38,7 +61,7 @@ All notable changes to this project will be documented in this file.
 - PETSc/SLEPc version 3.11
 
 ## [4.0]
-- correct bug in RT1Ortho and RT2Ortho  2d in the computation of derivative (2018-01-30, Thank to Bryan.Bosworth@colorado.edu)  
+- correct bug in RT1Ortho and RT2Ortho  2d in the computation of derivative (2018-01-30, Thank to Bryan.Bosworth@colorado.edu)
 - uniformize 2d/3d in element, method   EdgeOrientation(e)  now return +1/-1
 - change all the sparse matrix structure
 - remove all map matrix jan 2019
@@ -83,7 +106,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.0...develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.1...develop
+[4.1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.0...v4.1
 [4.0]: https://github.com/FreeFem/FreeFem-sources/compare/3.62...v4.0
 [3.62]: https://github.com/FreeFem/FreeFem-sources/compare/3.61...3.62
 [3.61]: https://github.com/FreeFem/FreeFem-sources/compare/v3.60...3.61
