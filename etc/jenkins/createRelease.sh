@@ -10,7 +10,7 @@ VERSION=`grep AC_INIT configure.ac | cut -d"," -f2 | tr - .`
 RELEASE_TAG_NAME="v$VERSION"
 RELEASE_TARGET_COMMITISH="master"
 RELEASE_NAME="FreeFEM v$VERSION"
-RELEASE_BODY=""
+RELEASE_BODY="**Warning**: this is an automatic release, if you have some trouble with packages post a message in the [forum](community.freefem.org)"
 RELEASE_DRAFT="false"
 RELEASE_PRERELEASE="false"
 
