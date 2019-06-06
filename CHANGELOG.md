@@ -46,7 +46,6 @@ All notable changes to this project will be documented in this file.
 - old surface msh3 type, replaced by meshS
 
 ### Fixed
-- missing typeMesh3 initializations
 - multiple segmentation faults when using unitialized values (thanks to G. Sadaka)
 - nested fieldsplits in the PETSc interface
 - memory leaks in `SNESSolve` (nonlinear PETSc solvers)
