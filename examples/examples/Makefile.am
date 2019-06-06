@@ -1,18 +1,18 @@
 ############################################################################
-# This file is part of FreeFem++.                                          #
+# This file is part of FreeFEM.                                            #
 #                                                                          #
-# FreeFem++ is free software: you can redistribute it and/or modify        #
+# FreeFEM is free software: you can redistribute it and/or modify          #
 # it under the terms of the GNU Lesser General Public License as           #
 # published by the Free Software Foundation, either version 3 of           #
 # the License, or (at your option) any later version.                      #
 #                                                                          #
-# FreeFem++ is distributed in the hope that it will be useful,             #
+# FreeFEM is distributed in the hope that it will be useful,               #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of           #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
 # GNU Lesser General Public License for more details.                      #
 #                                                                          #
 # You should have received a copy of the GNU Lesser General Public License #
-# along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        #
+# along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          #
 ############################################################################
 # SUMMARY : Makefile for FreeFem++
 # LICENSE : LGPLv3
@@ -20,26 +20,39 @@
 # AUTHORS : ...
 # E-MAIL  : ...
 
-LOG_DRIVER=$(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 
 all-local: all.edp regtests.edp freefem++.pref
 
-TESTS=BlackScholes2D.edp condensor.edp \
-	convects.edp Heat.edp \
-	heatex.edp lame.edp \
-	membrane.edp membranerror.edp \
-	muwave.edp NSNewton.edp \
-	NSprojection.edp optimcontrol.edp \
-	potential.edp schwarz.edp \
-	sound.edp stokes.edp \
-	test1.edp thermal.edp \
-	thermic.edp
+if ARPACK
+CONDITIONAL_ARPACK = sound.edp
+endif
+
+TESTS = BlackScholes2D.edp \
+	condensor.edp \
+	convects.edp \
+	Heat.edp \
+	heatex.edp \
+	lame.edp \
+	membrane.edp \
+	membranerror.edp \
+	muwave.edp \
+	NSNewton.edp \
+	NSprojection.edp \
+	optimcontrol.edp \
+	potential.edp \
+	schwarz.edp \
+	stokes.edp \
+	test1.edp \
+	thermal.edp \
+	thermic.edp \
+	$(CONDITIONAL_ARPACK)
 
 # if .. no arpack or too long
-XFAIL_TESTS=sound.edp NSprojection.edp
+XFAIL_TESTS = NSprojection.edp
 
-EXTRA_DIST=*.edp all.edp regtests.edp regtests.m4 ref.edp
+EXTRA_DIST = *.edp all.edp regtests.edp regtests.m4 ref.edp
 
 all.edp:
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \

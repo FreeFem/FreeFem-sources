@@ -1172,7 +1172,8 @@ class KN :public KN_<R> { public:
   template<class I,class T> KN& operator /=   (const KN_ITAB<T ,I> & ui)
      {  KN_<R>::operator /=(ui);  return *this;}
 
-
+    template<class  A,class B,class C,class D> KN&  operator =  (const F_KN_<A,B,C,D>  & ui)
+      {  if(this->unset()) this->set(new R[ui.N()],ui.N()); KN_<R>::operator =(ui);  return *this;}
   //  two opertor to cast to an array of constant
 //    operator KN_<const_R> & ()
 //          { return *  (KN_<const_R>*) this;}

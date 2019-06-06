@@ -953,6 +953,8 @@ AM_CONDITIONAL([FFCS_MPIOK],[test $ff_mpi = yes])
 # Looking for useful configuration utilities
 # ------------------------------------------
 
+AC_ARG_ENABLE(summary,AC_HELP_STRING([--enable-summary],[Display activated libraries list at the end of the configure process]))
+
 AC_ARG_ENABLE(download,AC_HELP_STRING([--enable-download],[Download missing libraries (BLAS,ARPACK,UMFPACK,...)]))
 ## PETSc
 AC_ARG_WITH(petsc,[  --with-petsc=/usr/local/petsc/conf/petscvariables   --without-petsc  ])
@@ -966,7 +968,7 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
 	    ffconfpetsc="$d$dd"
 		ffconfslepc="$d/slepc/conf/slepcvariables"
-		
+
 		# echo " petsc ... $ffconfpetsc"
 	    if test -f "$ffconfpetsc" ; then
 		if test  "$ff_petsc_ok" = no ; then
@@ -974,7 +976,7 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
 				PETSC_MPIRUN=`echo "$PETSC_MPIRUN" | awk '{gsub(" --oversubscribe", ""); print}'`	#remove --oversubscribe
 			AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]);
-           
+
 		    test  "$PETSC_SCALAR" = "real" && test  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_MPIRUN"` `which "$MPIRUN"`
 		    if test "$?"  -eq 0 ; then
 		        AC_FF_PETSC_WHERELIB_BASIC(petsc,$ffconfpetsc)
@@ -997,8 +999,8 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 			    AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetsc)
                 if test -f $d/libslepc.$ff_suffix_dylib ; then
 				   ff_slepc_ok=yes
-			       AC_FF_ADDWHERELIB(slepc,$d/libslepc.$ff_suffix_dylib,$ff_where_inc_petsc)				
-				fi 
+			       AC_FF_ADDWHERELIB(slepc,$d/libslepc.$ff_suffix_dylib,$ff_where_inc_petsc)
+				fi
 		    else
 			 AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN or $PETSC_SCALAR != real ." ]);
 		    fi
@@ -1055,8 +1057,8 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
             AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetscc)
             if test -f $d/libslepc.$ff_suffix_dylib ; then
 				   ff_slepccomplex_ok=yes
-			       AC_FF_ADDWHERELIB(slepccomplex,$d/libslepc.$ff_suffix_dylib,$ff_where_inc_petsccomplex)				
-			fi 
+			       AC_FF_ADDWHERELIB(slepccomplex,$d/libslepc.$ff_suffix_dylib,$ff_where_inc_petsccomplex)
+			fi
 
 			else
 			 AC_MSG_NOTICE([" Warning PETSC complex MPI and FF++ MPI not the same: $PETSC_COMPLEX_MPIRUN != $MPIRUN or $PETSC_COMPLEX_SCALAR != complex ." ]);
@@ -1586,7 +1588,7 @@ then
 	[  --with-arpack=library	Use a specific version of Arpack],
 	ff_arpack_ok=yes
 	ff_arpack_libs="${withval}")
-    
+
 	# Default locations
 	if test "$ff_arpack_ok" = no;
 	then
@@ -1595,7 +1597,7 @@ then
 		ff_arpack_ok=yes,,
 		-llapack)
 	fi
-	
+
    # Trying to "locate" Arpack
 	if test "$ff_arpack_ok" = no -a "$enable_download" != yes ;
 	then
@@ -1618,23 +1620,23 @@ then
     then
 	ff_arpack_download=yes
 	AC_MSG_NOTICE(using downloaded Arpack)
-	
+
 		# ALH - 6/11/13 - this install goal is the standard goal for all downloaded packages in
 		# [[file:3rdparty/common.mak::install]]
-	
+
 	AC_SUBST(DOWNLOAD_ARPACK,install)
-       
+
 	AC_SUBST(FF_LAPACKdir,$ff_lapackdir)
 	AC_SUBST(ARPACKLIB,${curdir}/3rdparty/lib/libarpack.a)
 	AC_SUBST(LAPACK_arpack_LIB,${curdir}/3rdparty/lib/liblapack.a)
-	
+
 		# Do not update $LIBS, but create an extra LIB variable, because this lib does not exist yet, and this
 		# could make the following tests fail.
-	
+
 		# ALH - 30/9/13 - do not use the "-L ${curdir}/3rdparty/lib" directive because it would allow other
 		# following -l directives (eg -lumfpack) to pick an old locally compiled library instead of the system
 		# ones.
-	
+
 	ff_arpack_libs="${curdir}/3rdparty/lib/libarpack.a $ff_lapack_lib"
 	ff_arpack_ok=yes
     fi
@@ -1893,7 +1895,7 @@ AC_SUBST(RANLIN,$ff_RANLIB)
 # -------------------------------------
 
 # Not if we don't want shared libraries (non FH  modif FH juin 2005)
-if test "$ff_PURE_WIN32" -ne 1 ; then 
+if test "$ff_PURE_WIN32" -ne 1 ; then
 ff_dynload=no
 if test "$enable_static" != yes
 then
@@ -1933,7 +1935,7 @@ if test "$ff_dynload" = yes
 then
 	AC_DEFINE(HAVE_DLFCN_H,1,Dynamic loading - not mandatory)
 fi
-fi  # endif ff_PURE_WIN32 != 1 
+fi  # endif ff_PURE_WIN32 != 1
 #  the -rdynamic don't exist on macos and sunOS
 if test "$ff_dynload" = yes
 then
@@ -2109,7 +2111,7 @@ then
 # for hexadecimal parameter constants like:
 # [[file:c:/cygwin/home/alh/ffcs/rel/mingw/mpif.h::PARAMETER MPI_SHORT_INT z 8c000003]]
 #
-    AC_SUBST(NO_RANGE_CHECK,-fno-range-check)	
+    AC_SUBST(NO_RANGE_CHECK,-fno-range-check)
 fi
 
 
@@ -2228,12 +2230,50 @@ TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_
 TOOL_DISABLE(htool,["htool.$DYLIB_SUFFIX"])
 
 ##
-if test "$ff_mkl_ok" == yes ; then 
+if test "$ff_mkl_ok" == yes ; then
             AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
 fi
-if test "$ff_blas_ok" == yes ; then 
+if test "$ff_blas_ok" == yes ; then
             AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
 fi
+
+## Condtional for check
+AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = yes])
+AM_CONDITIONAL([BLACS], [test "$ff_blacs_ok" = yes])
+AM_CONDITIONAL([FFTW3], [test "$ff_fftw_ok" = yes])
+AM_CONDITIONAL([FORTRAN], [test "$enable_fortran" = yes])
+AM_CONDITIONAL([FREEYAMS], [test "$ff_freeyams_ok" = yes])
+AM_CONDITIONAL([GMM], [test "$enable_gmm" = yes])
+AM_CONDITIONAL([GSL], [test "$ff_with_gsl" = yes])
+AM_CONDITIONAL([HDF5], [test "$with_hdf5" = yes])
+AM_CONDITIONAL([HTOOL], [test "$enable_htool" = yes])
+AM_CONDITIONAL([HPDDM], [test "$enable_hpddm" = yes])
+AM_CONDITIONAL([HYPRE], [test "$ff_hypre_ok" = yes])
+AM_CONDITIONAL([IPOPT], [test "$ff_ipopt_ok" = yes])
+AM_CONDITIONAL([LIBSEQ], [test "$ff_libseq_ok" = yes])
+AM_CONDITIONAL([METIS], [test "$ff_metis_ok" = yes])
+AM_CONDITIONAL([MKL], [test "$ff_mkl" = yes])
+AM_CONDITIONAL([MMG3D], [test "$ff_mmg3d_ok" = yes])
+AM_CONDITIONAL([MPI], [test "$ff_mpi" = yes])
+AM_CONDITIONAL([MSHMET], [test "$ff_mshmet_ok" = yes])
+AM_CONDITIONAL([MUMPS], [test "$ff_mumps_ok" = yes])
+AM_CONDITIONAL([MUMPS_ptscotch], [test "$ff_mumps_ptscotch_ok" = yes])
+AM_CONDITIONAL([MUMPS_scotch], [test "$ff_mumps_scotch_ok" = yes])
+AM_CONDITIONAL([MUMPS_seq], [test "$ff_mumps_seq_ok" = yes])
+AM_CONDITIONAL([NLOPT], [test "$ff_nlopt_ok" = yes])
+AM_CONDITIONAL([PARMETIS], [test "$ff_parmetis_ok" = yes])
+AM_CONDITIONAL([PETSC], [test "$ff_petsc_ok" = yes])
+AM_CONDITIONAL([PETSCCOMPLEX], [test "$ff_petsccomplex_ok" = yes])
+AM_CONDITIONAL([PTHREAD], [test -n "$ff_pthread"])
+AM_CONDITIONAL([PTSCOTCH], [test "$ff_ptscotch_ok" = yes])
+AM_CONDITIONAL([SCALAPACK], [test "$ff_scalapack_ok" = yes])
+AM_CONDITIONAL([SCOTCH], [test "$ff_scotch_ok" = yes])
+AM_CONDITIONAL([SLEPC], [test "$ff_slepc_ok" = yes])
+AM_CONDITIONAL([SLEPCCOMPLEX], [test "$ff_slepccomplex_ok" = yes])
+AM_CONDITIONAL([SUPERLU], [test "$ff_superlu_ok" = yes])
+AM_CONDITIONAL([TETGEN], [test "$ff_tetgen_ok" = yes])
+AM_CONDITIONAL([UMFPACK], [test "$ff_umfpack_ok" = yes])
+
 ##
 # All makefiles
 AC_OUTPUT(
@@ -2271,21 +2311,21 @@ AC_OUTPUT(
     examples/bug/Makefile
     examples/other/Makefile
     examples/3d/Makefile
-    examples/3dSurf/Makefile 
+    examples/3dSurf/Makefile
 )
 
-AC_MSG_NOTICE([  freefem++ used  download : $enable_download ])
-AC_MSG_NOTICE([	--  Dynamic load facility: $ff_dynload ])
-AC_MSG_NOTICE([	--  ARPACK (eigen value): $ff_arpack_ok ])
-AC_MSG_NOTICE([	--  UMFPACK (sparse solver) $ff_umfpack_ok ])
-AC_MSG_NOTICE([	--  BLAS $ff_blas_ok ])
-AC_MSG_NOTICE([	--  with MPI             $ff_mpi])
-AC_MSG_NOTICE([		--  with PETSC $ff_petsc_ok  / PETSC complex   $ff_petsccomplex_ok ]);
-AC_MSG_NOTICE([		--  with SLEPC $ff_slepc_ok  / SLEPC complex   $ff_slepccomplex_ok ]);
-AC_MSG_NOTICE([		--  with hpddm  $enable_hpddm (need MPI & c++11 :  $ff_cxx11 ) ]);
-AC_MSG_NOTICE([		--  with htool  $enable_htool (need MPI & c++11 :  $ff_cxx11 ) ]);
-AC_MSG_NOTICE([	--  without libs  : $ff_unlib_plugin]);
-AC_MSG_NOTICE([	--  without plugin: $ff_uncompile_plugin]);
+AC_MSG_NOTICE([  freefem++ used download: $enable_download ])
+AC_MSG_NOTICE([  --  Dynamic load facility: $ff_dynload ])
+AC_MSG_NOTICE([  --  ARPACK (eigen value): $ff_arpack_ok ])
+AC_MSG_NOTICE([  --  UMFPACK (sparse solver): $ff_umfpack_ok ])
+AC_MSG_NOTICE([  --  BLAS: $ff_blas_ok ])
+AC_MSG_NOTICE([  --  with MPI:     $ff_mpi])
+AC_MSG_NOTICE([    --  with PETSC: $ff_petsc_ok / PETSC complex: $ff_petsccomplex_ok ]);
+AC_MSG_NOTICE([    --  with SLEPC: $ff_slepc_ok / SLEPC complex: $ff_slepccomplex_ok ]);
+AC_MSG_NOTICE([    --  with hpddm: $enable_hpddm (need MPI & c++11: $ff_cxx11) ]);
+AC_MSG_NOTICE([    --  with htool: $enable_htool (need MPI & c++11: $ff_cxx11) ]);
+AC_MSG_NOTICE([  --  without libs: $ff_unlib_plugin ]);
+AC_MSG_NOTICE([  --  without plugin: $ff_uncompile_plugin ]);
 
 
 AC_MSG_NOTICE([    progs: $ff_progs ])
@@ -2296,45 +2336,45 @@ if test "$ff_arpack_download" = yes -a  -n "$TOOL_COMPILE_arpack"  ; then
     AC_MSG_NOTICE([      use of download ARPACK see  3rdparty/arpack/ARPACK/README  no License ])
 fi
 
-if test "$enable_download" = yes  ;then
-    if test  -n "$TOOL_COMPILE_fftw3"   ; then
+if test "$enable_download" = yes; then
+  if test -n "$TOOL_COMPILE_fftw3"; then
     AC_MSG_NOTICE([      use of download fftw   see  3rdparty/fftw/fftw-3.2/COPYRIGHT ])
-    fi
-    if test  -n "$TOOL_COMPILE_tetgen"   ; then
+  fi
+  if test -n "$TOOL_COMPILE_tetgen"; then
     AC_MSG_NOTICE([      use of download tetgen  see 3rdparty/tetgen/tetgen1.5.1-beta/LICENSE ])
-    fi
-    if test  -n "$TOOL_COMPILE_yams"   ; then
+  fi
+  if test -n "$TOOL_COMPILE_yams"; then
     AC_MSG_NOTICE([      use of download freeyams  see 3rdparty/yams/freeyams.2011.02.22 (suface mesh adaptation)  ])
-    fi
-    if test  -n "$TOOL_COMPILE_mmg3d"   ; then
+  fi
+  if test -n "$TOOL_COMPILE_mmg3d"; then
     AC_MSG_NOTICE([      use of download mmg3d (v4)   see 3rdparty/mmg3d/mmg3d4/LICENCE.txt  ])
-    fi
-    if test  -n "$TOOL_COMPILE_parmetis"   ; then
+  fi
+  if test -n "$TOOL_COMPILE_parmetis"; then
     AC_MSG_NOTICE([      use of download parmetis])
-     fi
-    # ALH - some tools may be activated but not downloaded if a local version is specified (see
-    # [[TOOL_PARAMETERS]])
+  fi
 
-    if test "$enable_superlu_download" = yes
-    then
-	AC_MSG_NOTICE([      use of download superlu])
-    fi
+  # ALH - some tools may be activated but not downloaded if a local version is specified (see
+  # [[TOOL_PARAMETERS]])
 
-    if test -n "$MPICC" ; then
-   	AC_MSG_NOTICE([      try to download: $ff_download_lib])
-    fi
+  if test "$enable_superlu_download" = yes; then
+    AC_MSG_NOTICE([      use of download superlu])
+  fi
 
-    if test "$ff_download_blas" = "generic"  ; then
-        AC_MSG_NOTICE([      use of download generic blas and cblas freefem may be slow  ])
-        AC_MSG_NOTICE([      you can try to use the  Kazushige Goto s BLAS at http://www.cs.utexas.edu/users/flame/goto/  ])
-        AC_MSG_NOTICE([          or at  http://www.tacc.utexas.edu/~kgoto/ for the best BLAS .])
-        AC_MSG_NOTICE([      or try to 3rdparty/compile the altas blas .])
-    fi
+  if test -n "$MPICC"; then
+    AC_MSG_NOTICE([      try to download: $ff_download_lib])
+  fi
 
-    # ALH - 30/10/13 - (request from FH) all downloads are now part of a separate script ([[file:3rdparty/getall]])
-    # which needs to be run before make for the user to specify whether he is ok with each of the package licences.
+  if test "$ff_download_blas" = "generic"; then
+    AC_MSG_NOTICE([      use of download generic blas and cblas freefem may be slow  ])
+    AC_MSG_NOTICE([      you can try to use the  Kazushige Goto s BLAS at http://www.cs.utexas.edu/users/flame/goto/  ])
+    AC_MSG_NOTICE([          or at  http://www.tacc.utexas.edu/~kgoto/ for the best BLAS .])
+    AC_MSG_NOTICE([      or try to 3rdparty/compile the altas blas .])
+  fi
 
-    AC_MSG_NOTICE([      Please run "3rdparty/getall" to download all necessary packages before running make])
+  # ALH - 30/10/13 - (request from FH) all downloads are now part of a separate script ([[file:3rdparty/getall]])
+  # which needs to be run before make for the user to specify whether he is ok with each of the package licences.
+
+  AC_MSG_NOTICE([      Please run "3rdparty/getall" to download all necessary packages before running make])
 fi
 
 # FFCS does not use glut, so remove this message because it could make the user think that something is broken
@@ -2352,8 +2392,56 @@ then
     fi
 fi
 
-# Local Variables:
-# mode:shell-script
-# ispell-local-dictionary:"british"
-# coding:utf-8
-# End:
+if test "$enable_summary" = yes; then
+  if test "$enable_fortran" != yes; then
+    enable_fortran=no
+  fi
+  if test "$enable_gmm" != yes; then
+    enable_gmm=no
+  fi
+  if test "$ff_mkl" != yes; then
+    ff_mkl=no
+  fi
+  if test -n "$ff_pthread"; then
+    ff_pthread_ok=yes
+  else
+    ff_pthread_ok=no
+  fi
+
+  AC_MSG_NOTICE([ Activated libraries ])
+  AC_MSG_NOTICE([ - ARPACK: $ff_arpack_ok])
+  AC_MSG_NOTICE([ - BLACS: $ff_blacs_ok])
+  AC_MSG_NOTICE([ - FFTW3: $ff_fftw_ok])
+  AC_MSG_NOTICE([ - FORTRAN: $enable_fortran])
+  AC_MSG_NOTICE([ - FREEYAMS: $ff_freeyams_ok])
+  AC_MSG_NOTICE([ - GMM: $enable_gmm])
+  AC_MSG_NOTICE([ - GSL: $ff_with_gsl])
+  AC_MSG_NOTICE([ - HDF5: $with_hdf5])
+  AC_MSG_NOTICE([ - HTOOL: $enable_htool])
+  AC_MSG_NOTICE([ - HPDDM: $enable_hpddm])
+  AC_MSG_NOTICE([ - HYPRE: $ff_hypre_ok])
+  AC_MSG_NOTICE([ - IPOPT: $ff_ipopt_ok])
+  AC_MSG_NOTICE([ - LIBSEQ: $ff_libseq_ok])
+  AC_MSG_NOTICE([ - METIS: $ff_metis_ok])
+  AC_MSG_NOTICE([ - MKL: $ff_mkl])
+  AC_MSG_NOTICE([ - MMG3D: $ff_mmg3d_ok])
+  AC_MSG_NOTICE([ - MPI: $ff_mpi])
+  AC_MSG_NOTICE([ - MSHMET: $ff_mshmet_ok])
+  AC_MSG_NOTICE([ - MUMPS: $ff_mumps_ok])
+  AC_MSG_NOTICE([ - MUMPS_ptscotch: $ff_mumps_ptscotch_ok])
+  AC_MSG_NOTICE([ - MUMPS_scotch: $ff_mumps_scotch_ok])
+  AC_MSG_NOTICE([ - MUMPS_seq: $ff_mumps_seq_ok])
+  AC_MSG_NOTICE([ - NLOPT: $ff_nlopt_ok])
+  AC_MSG_NOTICE([ - PARMETIS: $ff_parmetis_ok])
+  AC_MSG_NOTICE([ - PETSC: $ff_petsc_ok])
+  AC_MSG_NOTICE([ - PETSCCOMPLEX: $ff_petsccomplex_ok])
+  AC_MSG_NOTICE([ - PTHREAD: $ff_pthread_ok])
+  AC_MSG_NOTICE([ - PTSCOTCH: $ff_ptscotch_ok])
+  AC_MSG_NOTICE([ - SCALAPACK: $ff_scalapack_ok])
+  AC_MSG_NOTICE([ - SCOTCH: $ff_scotch_ok])
+  AC_MSG_NOTICE([ - SLEPC: $ff_slepc_ok])
+  AC_MSG_NOTICE([ - SLEPCCOMPLEX: $ff_slepccomplex_ok])
+  AC_MSG_NOTICE([ - SUPERLU: $ff_superlu_ok])
+  AC_MSG_NOTICE([ - TETGEN: $ff_tetgen_ok])
+  AC_MSG_NOTICE([ - UMFPACK: $ff_umfpack_ok])
+fi

@@ -1,18 +1,18 @@
 ############################################################################
-# This file is part of FreeFem++.                                          #
+# This file is part of FreeFEM.                                            #
 #                                                                          #
-# FreeFem++ is free software: you can redistribute it and/or modify        #
+# FreeFEM is free software: you can redistribute it and/or modify          #
 # it under the terms of the GNU Lesser General Public License as           #
 # published by the Free Software Foundation, either version 3 of           #
 # the License, or (at your option) any later version.                      #
 #                                                                          #
-# FreeFem++ is distributed in the hope that it will be useful,             #
+# FreeFEM is distributed in the hope that it will be useful,               #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of           #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
 # GNU Lesser General Public License for more details.                      #
 #                                                                          #
 # You should have received a copy of the GNU Lesser General Public License #
-# along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        #
+# along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          #
 ############################################################################
 # SUMMARY : Makefile for FreeFem++
 # LICENSE : LGPLv3
@@ -39,7 +39,7 @@ TESTS=aaa-adp.edp aadaptation.edp \
 	Stokes-P1nc-P0+P1.edp testadp.edp \
 	teste.edp testFE.edp \
 	wafer-heating-laser-axi.edp
-# if .. no arpack or too long 
+# if .. no arpack or too long
 XFAIL_TESTS=NSP1P1.edp
 
 EXTRA_DIST=*.edp all.edp regtests.edp regtests.m4 ref.edp
