@@ -23,11 +23,11 @@ sudo checkinstall -D --install=no \
     --pkgversion "${VERSION}" --pkglicense "LGPL-2+" \
     --pkgsource "https://github.com/FreeFem/FreeFem-sources" \
     --pkgaltsource "https://freefem.org/" \
-    --maintener "FreeFEM" --backup=no --default
+    --maintainer "FreeFEM" --backup=no --default
 
 ## Deploy in GitHub release
 RELEASE=`curl 'https://api.github.com/repos/'$ORGANIZATION'/'$REPOSITORY'/releases/tags/'$RELEASE_TAG_NAME`
-UPLOAD_URL=`echo ${LATEST_RELEASE}| jq -r '.upload_url'`
+UPLOAD_URL=`echo "$RELEASE" | jq -r '.upload_url'`
 
 if [ -x $UPLOAD_URL ]
 then
