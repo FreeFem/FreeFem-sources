@@ -1472,17 +1472,17 @@ AC_SUBST(BLASINC,$ff_blas_inc)
 
 #looking for cblas.h  FH
 
-if test "$ff_blas_ok" = yes -a -z "$ff_download_blas" ;
-then
-    AC_CHECK_HEADERS(cblas.h,
-	ff_cblas_h=yes,
-	ff_cblas_h=no)
-    AC_CHECK_HEADERS(Accelerate/cblas.h,
-	ff_cblas_h=yes
-	ff_cblas_h=no)
-    AC_CHECK_HEADERS(atlas/cblas.h,
-	ff_cblas_h=yes
-	ff_cblas_h=no)
+if test "$ff_blas_ok" = yes -a -z "$ff_download_blas"; then
+  AC_CHECK_HEADERS(cblas.h,
+    ff_cblas_h=yes,
+    ff_cblas_h=no)
+  AC_CHECK_HEADERS(Accelerate/cblas.h,
+    ff_cblas_h=yes,
+    ff_cblas_h=no)
+  AC_CHECK_HEADERS(atlas/cblas.h,
+    ff_cblas_h=yes,
+    ff_cblas_h=no)
+  AC_CHECK_LIB([cblas], [cblas_zdotu_sub], [LIBS+=-lcblas])
 fi
 
 # ALH - 18/9/13 - [[file:3rdparty/blas/Makefile.am]] does not update the WHERE mechanism so it always needs to be set up
