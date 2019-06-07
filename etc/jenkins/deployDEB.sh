@@ -10,7 +10,7 @@ ORGANIZATION="FreeFem"
 REPOSITORY="FreeFem-sources"
 VERSION=`grep AC_INIT configure.ac | cut -d"," -f2 | tr - .`
 RELEASE_TAG_NAME="v$VERSION"
-DEB_NAME="freefem_${VERSION}-1.deb"
+DEB_NAME="freefem_${VERSION}-1_amd64.deb"
 
 ## DEB build
 autoreconf -i
@@ -27,7 +27,7 @@ sudo checkinstall -D --install=no \
 
 ## Deploy in GitHub release
 RELEASE=`curl 'https://api.github.com/repos/'$ORGANIZATION'/'$REPOSITORY'/releases/tags/'$RELEASE_TAG_NAME`
-UPLOAD_URL=`echo "$RELEASE" | jq -r '.upload_url'`
+UPLOAD_URL=`printf "%s" "$RELEASE" | jq -r '.upload_url'`
 
 if [ -x $UPLOAD_URL ]
 then
@@ -36,3 +36,4 @@ then
 else
   RESPONSE=`curl --data-binary "@$DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$DEB_NAME"`
 fi
+

@@ -11,7 +11,7 @@ ORGANIZATION="FreeFem"
 REPOSITORY="FreeFem-sources"
 VERSION=`grep AC_INIT configure.ac | cut -d"," -f2 | tr - .`
 RELEASE_TAG_NAME="v$VERSION"
-EXE_NAME="FreeFem++-${VERSION}-win64.exe"
+EXE_NAME="Output/FreeFem++-${VERSION}-win64.exe"
 
 ## EXE build
 autoreconf -i
@@ -24,7 +24,7 @@ make win32
 
 ## Deploy in GitHub release
 RELEASE=`curl 'https://api.github.com/repos/'$ORGANIZATION'/'$REPOSITORY'/releases/tags/'$RELEASE_TAG_NAME`
-UPLOAD_URL=`echo "$RELEASE" | jq -r '.upload_url'`
+UPLOAD_URL=`printf "%s" "$RELEASE" | jq -r '.upload_url'`
 
 if [ -x $UPLOAD_URL ]
 then
