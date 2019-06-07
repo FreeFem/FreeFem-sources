@@ -11,7 +11,7 @@ ORGANIZATION="FreeFem"
 REPOSITORY="FreeFem-sources"
 VERSION=`grep AC_INIT configure.ac | cut -d"," -f2 | tr - .`
 RELEASE_TAG_NAME="v$VERSION"
-DEB_NAME="FreeFem++-${VERSION}-win64.exe"
+EXE_NAME="FreeFem++-${VERSION}-win64.exe"
 
 ## EXE build
 autoreconf -i
@@ -31,5 +31,5 @@ then
 	echo "Release does not exists"
 	exit 1
 else
-  RESPONSE=`curl --data-binary "@$FILE_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$FILE_NAME"`
+  RESPONSE=`curl --data-binary "@$EXE_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$EXE_NAME"`
 fi

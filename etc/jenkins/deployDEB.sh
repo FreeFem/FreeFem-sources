@@ -10,7 +10,7 @@ ORGANIZATION="FreeFem"
 REPOSITORY="FreeFem-sources"
 VERSION=`grep AC_INIT configure.ac | cut -d"," -f2 | tr - .`
 RELEASE_TAG_NAME="v$VERSION"
-DEB_NAME="freefem_${VERSION}-1.AppImage"
+DEB_NAME="freefem_${VERSION}-1.deb"
 
 ## DEB build
 autoreconf -i
@@ -34,5 +34,5 @@ then
 	echo "Release does not exists"
 	exit 1
 else
-  RESPONSE=`curl --data-binary "@$FILE_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$FILE_NAME"`
+  RESPONSE=`curl --data-binary "@$DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$DEB_NAME"`
 fi
