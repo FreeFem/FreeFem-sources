@@ -21,9 +21,9 @@ if(verbosity > 0 && mpirank == 0) {
 
 int[int] LL = [2,3, 2,1, 2,2];
 meshN Th;
-fespace Wh(Th, Pk);              // local finite element space
-int[int][int] intersection(0);   // local-to-neighbors renumbering
-real[int] D;                     // partition of unity
+fespace Wh(Th, Pk);           // local finite element space
+int[int][int] intersection;   // local-to-neighbors renumbering
+real[int] D;                  // partition of unity
 {
     Th = cube(10 * getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5), [10 * x, y, z], label = LL);      // global mesh
     build(Th, s, intersection, D, Pk, mpiCommWorld)

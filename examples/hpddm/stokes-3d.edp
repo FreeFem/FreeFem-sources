@@ -27,9 +27,9 @@ if(verbosity > 0 && mpirank == 0) {
 }
 
 meshN ThBorder, Th = buildlayers(square(1, 1), 1);
-fespace Wh(Th, Pk);              // local finite element space
-int[int][int] intersection(0);   // local-to-neighbors renumbering
-real[int] D;                     // partition of unity
+fespace Wh(Th, Pk);           // local finite element space
+int[int][int] intersection;   // local-to-neighbors renumbering
+real[int] D;                  // partition of unity
 {
     mesh ThGlobal2d = square(getARGV("-global", 12), getARGV("-global", 12), [x, y]);    // global mesh
     ThGlobal2d = trunc(ThGlobal2d, (x <= 0.5) || (y <= 0.5), label = 5);
