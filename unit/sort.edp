@@ -21,7 +21,7 @@ cout << IND << "int[int]" << endl;
 int[int] AA =  [3, 10, 4];
 int[int] BB =  [-1, -3 , -2];
 int[int] AA2 =  [3, 4, 10];
-int[int] BB2 =  [-3, -2 , -1];
+int[int] BB2 =  [-3, -2, -1];
 
 t = clock();
 sort(AA, BB);
