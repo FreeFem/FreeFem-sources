@@ -19,7 +19,7 @@ func bool SubdomainsPartitionUnity(mesh & Th, int nnpart, real[int] & partdof,
   fespace Ph(Th,P0);
 
   mesh Thi=Th;
-  fespace Vhi(Thi,P1);  // FreeFem++ trick, formal definition
+  fespace Vhi(Thi,P1);  // FreeFEM trick, formal definition
   Vhi[int] pun(nnpart); // local fem functions Vh sun=0, unssd=0;
   Vh sun = 0, unssd = 0;
   Ph part;

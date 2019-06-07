@@ -4,7 +4,7 @@
 # $Id: configure.ac,v 1.338 2010/05/10 21:35:07 hecht Exp $
 
 # Version numbering: x.xx-pp where "pp" is the package version (when
-# the same FreeFem++ version is packaged several times). For
+# the same FreeFEM version is packaged several times). For
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 

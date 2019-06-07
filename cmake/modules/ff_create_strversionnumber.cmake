@@ -3,7 +3,7 @@ function(ff_create_strversionnumber)
 execute_process(COMMAND "date" OUTPUT_VARIABLE VersionFreeFemDate)
 string(STRIP ${VersionFreeFemDate} VersionFreeFemDate)
 file(WRITE ${CMAKE_SOURCE_DIR}/src/fflib/strversionnumber.cpp
-"// TODO: remove this block as soon as autoconf is removed from FreeFem++\n
+"// TODO: remove this block as soon as autoconf is removed from FreeFEM\n
 #ifndef CMAKE\n
 #include \"config-wrapper.h\"\n
 #endif\n

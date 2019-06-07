@@ -1,8 +1,8 @@
 Dissection is a C++ implementation of parallel sparse direct solver on shared
 memory architecture with a kernel detection algorithm for singular matrices.
 
-The source is available under GPL v3 from the FreeFem++ repository,
-< http://www.freefem.org/ff++/ff++/download/dissection/ >
+The source is available under GPL v3 from the FreeFEM repository,
+< http://www3.freefem.org/ff++/ff++/download/dissection/ >
 
 The copyright holders of Dissection give you permission to combine Dissection
 program with free software programs or libraries that are released under the
