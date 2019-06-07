@@ -18,7 +18,7 @@ echo "Release name: $RELEASE_NAME"
 
 ## Check if release exists
 RESPONSE=`curl 'https://api.github.com/repos/'$ORGANIZATION'/'$REPOSITORY'/releases/tags/'$RELEASE_TAG_NAME`
-RESPONSE_URL=`echo "$RESPONSE" | jq -r '.url'`
+RESPONSE_URL=`printf "%s" "$RESPONSE" | jq -r '.url'`
 
 ## Create release
 if [ -z "$RESPONSE_URL" ]
