@@ -54,7 +54,7 @@ brew install gcc m4 git flex bison
 
 # MacOS 10.13 - VM1
 ```
-brew install gcc m4 git flex bison lapack suitesparse hdf5
+brew install gcc m4 git flex bison suitesparse hdf5
 ```
 
 [OpenMPI compilation](#openmpi)
@@ -84,15 +84,15 @@ pacman -S autoconf automake-wrapper bash bash-completion \
 # OpenMPI
 
 ```
-wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.1.tar.gz
+curl -L https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.1.tar.gz --output openmpi-4.0.1.tar.gz
 tar xf openmpi-4.0.1
 cd openmpi-4.0.1/
 #MacOS 10.10.5
 ./configure CC=clang CXX=clang++ --prefix=/usr/local  VM2 
 ./configure CC=gcc CXX=g++ --prefix=/usr/local (gcc g++ version5.1)  VM2-2
-#MacOS 10.13 (ongoing)
-./configure CC=gcc-9 CXX=g++-9 FC=gfortran-9 F77=gfortran-9 --prefix=/usr/local
-./configure CC=clang CXX=clang++ FC=gfortran-9 F77=gfortran-9 --prefix=/usr/local 
+#MacOS 10.13.5
+./configure CC=clang CXX=clang++ FC=gfortran-9 F77=gfortran-9 --prefix=/usr/local  VM2
+./configure CC=gcc-9 CXX=g++-9 FC=gfortran-9 F77=gfortran-9 --prefix=/usr/local VM2-2
 make -j4 all
 make check
 sudo make install
