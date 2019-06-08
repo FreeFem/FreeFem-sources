@@ -999,7 +999,8 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 			    AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetsc)
                 if test -f $d/libslepc.$ff_suffix_dylib ; then
 				   ff_slepc_ok=yes
-			       AC_FF_ADDWHERELIB(slepc,$d/libslepc.$ff_suffix_dylib,$ff_where_inc_petsc)
+                   ff_SLEPC_LIB="-Wl,-rpath,$d -L$d -lslepc"
+			       AC_FF_ADDWHERELIB(slepc,$ff_SLEPC_LIB,$ff_where_inc_petsc)
 				fi
 		    else
 			 AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN or $PETSC_SCALAR != real ." ]);
@@ -1057,7 +1058,8 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
             AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetscc)
             if test -f $d/libslepc.$ff_suffix_dylib ; then
 				   ff_slepccomplex_ok=yes
-			       AC_FF_ADDWHERELIB(slepccomplex,$d/libslepc.$ff_suffix_dylib,$ff_where_inc_petsccomplex)
+                   ff_SLEPCCOMPLEX_LIB="-Wl,-rpath,$d -L$d -lslepc"
+			       AC_FF_ADDWHERELIB(slepccomplex,$ff_SLEPCCOMPLEX_LIB,$ff_where_inc_petsccomplex)
 			fi
 
 			else
