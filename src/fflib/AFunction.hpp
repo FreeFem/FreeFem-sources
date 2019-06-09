@@ -1601,8 +1601,11 @@ class AC_F0: public basicAC_F0 { //  a Array of [[C_F0]]
 }; 
 
 class  basicAC_F0_wa : public basicAC_F0 { public:
+ template<bool...> struct pack { };
  template<class... T>
- basicAC_F0_wa(T&&... a) : basicAC_F0_wa({std::forward<T>(a)...}) { }
+ using AllC_F0 = typename std::enable_if<std::is_same<pack<true, std::is_convertible<T, C_F0>::value...>, pack<std::is_convertible<T, C_F0>::value..., true>>::value>::type;
+ template<class... T, typename = AllC_F0<T...>>
+ basicAC_F0_wa(T... a) : basicAC_F0_wa({std::forward<T>(a)...}) { }
  basicAC_F0_wa(const std::initializer_list<C_F0>& e) {
    named_parameter=0;
    nb = e.size();
