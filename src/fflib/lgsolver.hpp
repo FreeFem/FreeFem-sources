@@ -207,11 +207,11 @@ class SolveGCPrecon :   public MatriceCreuseOld<R>::VirtualSolver , public RNM_V
       throwassert(precon);
       R aii;
       A.getdiag(D1);
-    double tgv=Fem2D::norm(D1.linfty() )  ;
-    if( Fem2D::norm(tgv) < 1e10) tgv=1e100;
+    double tgv=std::norm(D1.linfty() )  ;
+    if( std::norm(tgv) < 1e10) tgv=1e100;
     double tgv1 = 1./tgv; // Corrige fH 11 mai 2015 ...
      for (int i=0;i<n;i++)
-       D1[i] = Fem2D::norm(D1[i]) < tgv  ? R(1.) : tgv1;
+       D1[i] = std::norm(D1[i]) < tgv  ? R(1.) : tgv1;
       
 }
    void Solver(const MatriceCreuseOld<R> &a,KN_<R> &x,const KN_<R> &b) const  {
@@ -404,7 +404,7 @@ class SolveGMRESDiag<Complex> :   public MatriceMorseOld<Complex>::VirtualSolver
     Complex aii=0;
     A.getdiag(D1);
     for (int i=0;i<n;i++)
-      D1[i] = (Fem2D::norm(aii=D1[i]) < 1e-20 ? Complex(1.) : Complex(1.)/aii);}
+      D1[i] = (std::norm(aii=D1[i]) < 1e-20 ? Complex(1.) : Complex(1.)/aii);}
 
    void Solver(const MatriceMorseOld<Complex> &a,KN_<Complex> &x,const KN_<Complex> &b) const  {
       epsr = (eps < 0) ? (epsr >0 ? -epsr : -eps ) : eps ;
@@ -487,7 +487,7 @@ class SolveGMRESPrecon<Complex> :   public   MatriceCreuseOld<Complex>::VirtualS
       Complex aii;
       A.getdiag(D1);
       for (int i=0;i<n;i++)
-	D1[i] = Fem2D::norm(aii=D1[i])<1e-20 ? Complex(1.0) : Complex(1.)/aii;
+	D1[i] = std::norm(aii=D1[i])<1e-20 ? Complex(1.0) : Complex(1.)/aii;
       
 }
    void Solver(const MatriceCreuseOld<Complex> &a,KN_<Complex> &x,const KN_<Complex> &b) const  {

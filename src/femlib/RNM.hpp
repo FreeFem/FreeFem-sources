@@ -157,12 +157,6 @@ template<class T> T Square(const T & r){return r*r;}
 inline double  conj(const double & x){return x;}
 inline float  conj(const float &x){return x;}
 inline long  conj(const long &x){return x;}
-inline double  real(const double &x){return x;}
-inline float  real(const float &x){return x;}
-    template<class T> T  real(const complex<T>& v){ return std::real(v);}
-inline double  norm2(const double x){return x*x;}
-inline float  norm2(const float x){return x*x;}
-template<class T> T  norm2(const complex<T>& v){ return std::norm(v);}
 
 template<class T> inline complex<T>  conj(const complex<T>& v){ return std::conj<T>(v);}
 template<class T> inline T Min (const T &a,const T &b){return a < b ? a : b;}

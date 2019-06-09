@@ -111,9 +111,6 @@ public:
             c[i]=p[i];
         return c;
     }
-    inline static double  norm2(const double x){return x*x;}
-    inline static float  norm2(const float x){return x*x;}
-    template<class T> static T  norm2(const complex<T>& v){ return std::norm(v);}
 
 private:
     void docopy()
@@ -229,7 +226,7 @@ void SkyLineMatrix<Z,R>::cholesky(double eps) const {
     typefac = FactorizationCholesky;
     if(verbosity>3 || verb >1 )
         cout << "  -- SkyLineMatrix Factorize/Cholesky   " << endl;
-    if ( norm2(D[0]) <= 1.0e-60)
+    if ( std::norm(D[0]) <= 1.0e-60)
         MATERROR(2,"cholesky SkyLine pivot ");
         
         D[0] = sqrt(D[0]);
@@ -252,8 +249,8 @@ void SkyLineMatrix<Z,R>::cholesky(double eps) const {
             *ij =  -s/D[j] ;
             xii -= *ij * *ij ;
         }
-        // cout << RNM::norm2(xii) << " " << Max(eps2*RNM::norm2(D[i]),1.0e-60) << " " << sqrt(xii) <<endl;
-        if ( norm2(xii) <= max(eps2*norm2(D[i]),1.0e-60))
+        // cout << std::norm(xii) << " " << Max(eps2*std::norm(D[i]),1.0e-60) << " " << sqrt(xii) <<endl;
+        if ( std::norm(xii) <= max(eps2*std::norm(D[i]),1.0e-60))
             MATERROR(3,"cholesky SkyLine pivot ");
             D[i] = sqrt(xii);
     }
@@ -286,7 +283,7 @@ void SkyLineMatrix<Z,R>::crout(double eps) const  {
             
             xii -= *ij * *ij * *dkk;
         }
-        if (norm2(xii) <= max(eps2*norm2(D[i]),1.0e-60))
+        if (std::norm(xii) <= max(eps2*std::norm(D[i]),1.0e-60))
         {
             cout << " Crout: zero pivot (" << i << " )= " << abs(xii)<< " <= " << eps*abs(D[i])
             << " eps = " << eps <<endl;
@@ -356,7 +353,7 @@ void SkyLineMatrix<Z,R>::LU(double eps) const  {
         // cout << " k0 " << k0 << " i = " << i << " " <<  s << endl;
         uii = D[i] -s;
         
-        if (norm2(uii) <= max(eps2*norm2(D[i]),1.0e-30))
+        if (std::norm(uii) <= max(eps2*std::norm(D[i]),1.0e-30))
             MATERROR(3,"LU SkyLine pivot ");
         
         D[i] = uii;

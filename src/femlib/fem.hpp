@@ -45,9 +45,6 @@ const double Pi = 3.14159265358979323846264338328;
 
 // definition R
 namespace Fem2D {
-  inline double norm(double x){ return x*x; }
-  inline float norm(float x){ return x*x; }
-  template<class T> T norm(const complex<T> &x){ return std::norm(x); }
 
   // ALH - These include files are located inside the namespace definition on purpose?
 

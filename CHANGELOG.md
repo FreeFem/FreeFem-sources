@@ -24,6 +24,12 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- interface to `TSSolve`, DAE/ODE solvers from PETSc
+- simpler constructor for sequential PETSc matrices (no need for the restriction array and the partition of unity)
+
+### Changed
+- replaced custom implementations (`RNM::real`, `RNM::norm2`, and `Fem2D::norm`) by C++11 functions
 
 ## [4.2.1]
 ### Added
@@ -112,7 +118,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.1...develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.2.1...develop
 [4.2.1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.0...v4.2.1
 [4.1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.0...v4.1
 [4.0]: https://github.com/FreeFem/FreeFem-sources/compare/3.62...v4.0
