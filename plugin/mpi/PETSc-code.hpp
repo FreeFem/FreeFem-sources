@@ -1325,15 +1325,9 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
                 delete [] dots;
                 MatNullSpace sp;
                 MatNullSpaceCreate(PETSC_COMM_WORLD, PETSC_FALSE, std::max(dim, dimPETSc), ns, &sp);
-                if(!assembled) {
-                    MatSetType(ptA->_petsc, MATMPIAIJ);
-                    MatSetUp(ptA->_petsc);
-                }
                 MatSetNearNullSpace(ptA->_petsc, sp);
                 MatNullSpaceDestroy(&sp);
-                if(ns)
-                    VecDestroyVecs(dim, &ns);
-                delete [] ns;
+                VecDestroyVecs(std::max(dim, dimPETSc), &ns);
             }
         }
         if(nargs[4])
