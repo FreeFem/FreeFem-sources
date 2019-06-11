@@ -1,5 +1,5 @@
 #!/bin/sh
-# Testing procedure for MPI version of FreeFem++
+# Testing procedure for MPI version of FreeFEM
 # $Id$
 
 NPROCS=2 REGEDP=essai.edp ../regtests.sh
@@ -27,4 +27,3 @@ if test $? != 0
     then
     exit 1
 fi
-

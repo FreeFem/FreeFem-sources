@@ -1358,15 +1358,14 @@ namespace Fem2D
         borderelements = bb;
         
         // check the input mesh file format
-        if(nv==0) {
-            cerr << " ERROR: The mesh file doesn't contain vertices" << endl;
-            ffassert(0);
+        if(verbosity && nv==0) {
+            cerr << " WARNING! The mesh file doesn't contain any vertex" << endl;
         }
         if(verbosity && nt==0 && nbe==0)
-            cerr << " WARNING!!! The mesh file just contains a set of vertices" << endl;
+            cerr << " WARNING! The mesh file just contains a set of vertices" << endl;
         
         if(nt==0 && nbe) {
-            cerr << " ERROR!!! The old SURFACE mesh3 is obselete, please use meshS type" << endl;
+            cerr << " ERROR! The old SURFACE mesh3 is obsolete, please use meshS type" << endl;
             ffassert(0);
         }
       

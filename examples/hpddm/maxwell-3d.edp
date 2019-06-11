@@ -41,7 +41,7 @@ Th = change(Th, refface = chlab);
 fespace Wh(Th, Pk);
 
 meshN ThBorder;
-int[int][int] intersection(0);   // local-to-neighbors renumbering
+int[int][int] intersection;   // local-to-neighbors renumbering
 real[int] D;
 {
     buildOverlapEdge(Th, ThBorder, 10, s, overlap, intersection, D, Pk, mpiCommWorld, 0, PkPart, defPart, initPart)

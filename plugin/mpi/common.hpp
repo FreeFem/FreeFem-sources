@@ -365,7 +365,7 @@ template<class Type, class K>
 AnyType exchangeIn_Op<Type, K>::operator()(Stack stack) const {
     Type* pA = GetAny<Type*>((*A)(stack));
     KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
-    bool scaled = nargs[0] && GetAny<bool>((*nargs[0])(stack));
+    const bool scaled = mpisize > 1 && nargs[0] && GetAny<bool>((*nargs[0])(stack));
     exchange(pA, pin, scaled);
     return 0L;
 }
@@ -403,7 +403,7 @@ AnyType exchangeInOut_Op<Type, K>::operator()(Stack stack) const {
     Type* pA = GetAny<Type*>((*A)(stack));
     KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
     KN<K>* pout = GetAny<KN<K>*>((*out)(stack));
-    bool scaled = nargs[0] && GetAny<bool>((*nargs[0])(stack));
+    const bool scaled = mpisize > 1 && nargs[0] && GetAny<bool>((*nargs[0])(stack));
     Matrice_Creuse<double>* pR = nargs[1] ? GetAny<Matrice_Creuse<double>*>((*nargs[1])(stack)) : nullptr;
     MatriceMorse<double>* mR = pR ? static_cast<MatriceMorse<double>*>(&(*pR->A)) : nullptr;
     if(pR) {

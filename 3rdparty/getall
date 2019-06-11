@@ -1,20 +1,20 @@
 #!/usr/bin/perl
 
 ############################################################################
-# This file is part of FreeFem++.                                          #
+# This file is part of FreeFEM.                                            #
 #                                                                          #
-# FreeFem++ is free software: you can redistribute it and/or modify        #
+# FreeFEM is free software: you can redistribute it and/or modify          #
 # it under the terms of the GNU Lesser General Public License as           #
 # published by the Free Software Foundation, either version 3 of           #
 # the License, or (at your option) any later version.                      #
 #                                                                          #
-# FreeFem++ is distributed in the hope that it will be useful,             #
+# FreeFEM is distributed in the hope that it will be useful,               #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of           #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
 # GNU Lesser General Public License for more details.                      #
 #                                                                          #
 # You should have received a copy of the GNU Lesser General Public License #
-# along with FreeFem++. If not, see <http://www.gnu.org/licenses/>.        #
+# along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          #
 ############################################################################
 # SUMMARY : Download third-party packages independently of FF configuration
 # LICENSE : LGPLv3
@@ -35,7 +35,7 @@ getopts('afho:',\%opts);
 
 if($opts{h}){
 	print <<EOF;
-getall [options]: Download third-party packages independently of the FreeFem++ configuration procedure
+getall [options]: Download third-party packages independently of the FreeFEM configuration procedure
 
 Available options:
 
@@ -186,10 +186,10 @@ download('htool','https://github.com/PierreMarchand20/htool/archive/4af73fa94bd9
 		'fb2fdfc77c5e7b53d0bb7cab0d10fe7e');
 
 	
-download('hpddm','https://github.com/hpddm/hpddm/archive/18cbf94c730f2bd77d2d2dfa2771e585bf2a1373.zip',
+download('hpddm','https://github.com/hpddm/hpddm/archive/52aae2ab82933e7b3402a178aaba047e83f69365.zip',
 	'https://github.com/hpddm',
 	'hpddm.zip',
-	'b1e23361b61a0daff1c758051908c758');
+	'83e746936642fea1be529b42cb357eff');
 
 # run all downloads concurrently
 

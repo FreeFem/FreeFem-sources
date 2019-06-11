@@ -2,7 +2,7 @@ macro(ff_define_ffglut_executable)
 
   if(GLUT_FOUND)
 
-    # steps are the same as for FreeFem++ executable
+    # steps are the same as for FreeFEM executable
     # (see ff_define_freefem_executable for an explanation)
 
     add_executable(ffglut ${CMAKE_SOURCE_DIR}/src/Graphics/ffglut.cpp

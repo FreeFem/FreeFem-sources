@@ -1924,7 +1924,7 @@ newpMatrice_Creuse<R> Matrixfull2mapIJ_inv (Stack s,KNM<R>   * const & pa,const 
    for (long i=0;i<N;++i)
     for (long j=0;j<M;++j)
      { R aij=a(i,j);
-       if(ii[i]>=0 && jj[j]>=0 && Fem2D::norm(aij)>1e-40)
+       if(ii[i]>=0 && jj[j]>=0 && std::norm(aij)>1e-40)
          A(ii[i],jj[j]) += aij;
      }
 
@@ -1954,7 +1954,7 @@ newpMatrice_Creuse<R>  Matrixfull2mapIJ (Stack s, KNM<R>   * const & pa,const KN
              }
 
           R aij=a(i,j);
-	  if (Fem2D::norm(aij)>1e-40)
+	  if (std::norm(aij)>1e-40)
            A(il,jl) += aij;
        }
      }
@@ -1977,7 +1977,7 @@ AnyType Matrixfull2map (Stack s , const AnyType & pp)
    for (int i=0;i<N;++i)
     for (int j=0;j<M;++j)
      { R aij=a(i,j);
-       if (Fem2D::norm(aij)>1e-40)
+       if (std::norm(aij)>1e-40)
       A(i,j) += aij;
      }
 
@@ -2000,7 +2000,7 @@ newpMatrice_Creuse<R>  Matrixoutp2mapIJ_inv (Stack s,outProduct_KN_<R>   * const
     for (int j=0;j<M;++j)
      {
        R aij=op.a[i]*RNM::conj(op.b[j]);
-       if(ii[i]>=0 && jj[j]>=0 && Fem2D::norm(aij)>1e-40)
+       if(ii[i]>=0 && jj[j]>=0 && std::norm(aij)>1e-40)
           A(ii[i],jj[j]) += aij;
      }
   delete pop;
@@ -2121,7 +2121,7 @@ Matrixoutp2mapIJ (Stack s,outProduct_KN_<R>   * const & pop,const KN_<long> & ii
                     ExecError("Out of Bound Error");
                 }
                R aij=op.a[i]*RNM::conj(op.b[j]);
-               if (Fem2D::norm(aij)>1e-40)
+               if (std::norm(aij)>1e-40)
                   A(il,jl) += aij;
                }
      }
@@ -2145,7 +2145,7 @@ AnyType Matrixoutp2map (Stack s, const AnyType & pp)
     for (long j=0;j<M;++j)
      {
       R aij=op.a[i]*RNM::conj(op.b[j]);
-      if (Fem2D::norm(aij)>1e-40)
+      if (std::norm(aij)>1e-40)
         A(i,j) += aij;
      }
   delete &op;

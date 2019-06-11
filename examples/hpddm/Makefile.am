@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License #
 # along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          #
 ############################################################################
-# SUMMARY : Makefile for FreeFem++
+# SUMMARY : Makefile for FreeFEM
 # LICENSE : LGPLv3
 # ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
 # AUTHORS : ...
@@ -75,7 +75,9 @@ CONDITIONAL_PETSC = bratu-2d-PETSc.edp \
 	stokes-3d-PETSc.edp \
 	stokes-3d-PETSc-fieldsplit.edp \
 	transpose-solve-PETSc.edp \
-	vi-2d-PETSc.edp
+	vi-2d-PETSc.edp \
+	orego.edp \
+	heat-2d-TS-PETSc.edp
 
 if SLEPC
 CONDITIONAL_PETSC_SLEPC = laplace-2d-SLEPc.edp \

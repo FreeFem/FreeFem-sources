@@ -4,12 +4,12 @@
 # $Id: configure.ac,v 1.338 2010/05/10 21:35:07 hecht Exp $
 
 # Version numbering: x.xx-pp where "pp" is the package version (when
-# the same FreeFem++ version is packaged several times). For
+# the same FreeFEM version is packaged several times). For
 # coherency, this should have the same value as the top-most package
 # number in debian/changelog.
 
 
-AC_INIT(FreeFem++,4.2-1,frederic.hecht@sorbonne-universite.fr,FeeFEM++)
+AC_INIT(FreeFEM,4.2-1,frederic.hecht@sorbonne-universite.fr,FreeFEM)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -999,7 +999,8 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 			    AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetsc)
                 if test -f $d/libslepc.$ff_suffix_dylib ; then
 				   ff_slepc_ok=yes
-			       AC_FF_ADDWHERELIB(slepc,$d/libslepc.$ff_suffix_dylib,$ff_where_inc_petsc)
+                   ff_SLEPC_LIB="-Wl,-rpath,$d -L$d -lslepc"
+			       AC_FF_ADDWHERELIB(slepc,$ff_SLEPC_LIB,$ff_where_inc_petsc)
 				fi
 		    else
 			 AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN or $PETSC_SCALAR != real ." ]);
@@ -1057,7 +1058,8 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
             AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetscc)
             if test -f $d/libslepc.$ff_suffix_dylib ; then
 				   ff_slepccomplex_ok=yes
-			       AC_FF_ADDWHERELIB(slepccomplex,$d/libslepc.$ff_suffix_dylib,$ff_where_inc_petsccomplex)
+                   ff_SLEPCCOMPLEX_LIB="-Wl,-rpath,$d -L$d -lslepc"
+			       AC_FF_ADDWHERELIB(slepccomplex,$ff_SLEPCCOMPLEX_LIB,$ff_where_inc_petsccomplex)
 			fi
 
 			else
@@ -1472,17 +1474,17 @@ AC_SUBST(BLASINC,$ff_blas_inc)
 
 #looking for cblas.h  FH
 
-if test "$ff_blas_ok" = yes -a -z "$ff_download_blas" ;
-then
-    AC_CHECK_HEADERS(cblas.h,
-	ff_cblas_h=yes,
-	ff_cblas_h=no)
-    AC_CHECK_HEADERS(Accelerate/cblas.h,
-	ff_cblas_h=yes
-	ff_cblas_h=no)
-    AC_CHECK_HEADERS(atlas/cblas.h,
-	ff_cblas_h=yes
-	ff_cblas_h=no)
+if test "$ff_blas_ok" = yes -a -z "$ff_download_blas"; then
+  AC_CHECK_HEADERS(cblas.h,
+    ff_cblas_h=yes,
+    ff_cblas_h=no)
+  AC_CHECK_HEADERS(Accelerate/cblas.h,
+    ff_cblas_h=yes,
+    ff_cblas_h=no)
+  AC_CHECK_HEADERS(atlas/cblas.h,
+    ff_cblas_h=yes,
+    ff_cblas_h=no)
+  AC_CHECK_LIB([cblas], [cblas_zdotu_sub], [LIBS+=-lcblas])
 fi
 
 # ALH - 18/9/13 - [[file:3rdparty/blas/Makefile.am]] does not update the WHERE mechanism so it always needs to be set up

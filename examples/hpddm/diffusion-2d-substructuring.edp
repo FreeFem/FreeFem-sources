@@ -24,9 +24,9 @@ if(verbosity > 0 && mpirank == 0) {
 }
 
 meshN Th = square(1, 1);
-fespace Wh(Th, Pk);              // local finite element space
-int[int][int] intersection(0);   // local-to-neighbors renumbering
-int[int] interfaceNb;            //
+fespace Wh(Th, Pk);           // local finite element space
+int[int][int] intersection;   // local-to-neighbors renumbering
+int[int] interfaceNb;         //
 int[int] labDirichlet = [1, 3];
 {
     int[int] l = [2, 1, 3, 2];

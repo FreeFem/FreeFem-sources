@@ -1,24 +1,24 @@
-# ======================================================================
-# Laboratoire Jacques-Louis Lions
-# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
-# ======================================================================
-# This file is part of Freefem++
-# 
-# Freefem++ is free software; you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as
-# published by the Free Software Foundation; either version 2.1 of
-# the License, or (at your option) any later version.
-# 
-# Freefem++ is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-# 
-# You should have received a copy of the GNU Lesser General Public
-# License along with Freefem++; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-# ======================================================================
-# headeralh default=0 freefem make multipleauthors start=04/06/04 upmc brief="Makefile for downloaded ARPACK"
+############################################################################
+# This file is part of FreeFEM.                                            #
+#                                                                          #
+# FreeFEM is free software: you can redistribute it and/or modify          #
+# it under the terms of the GNU Lesser General Public License as           #
+# published by the Free Software Foundation, either version 3 of           #
+# the License, or (at your option) any later version.                      #
+#                                                                          #
+# FreeFEM is distributed in the hope that it will be useful,               #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of           #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
+# GNU Lesser General Public License for more details.                      #
+#                                                                          #
+# You should have received a copy of the GNU Lesser General Public License #
+# along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          #
+############################################################################
+# SUMMARY : Makefile for downloaded ARPACK
+# LICENSE : LGPLv3
+# ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+# AUTHORS : ...
+# E-MAIL  : ...
 
 all-local:$(DOWNLOAD_ARPACK)
 EXTRA_DIST=ARmake.m4 arpack-patch-lapack.tar.gz veclib_zdotc.f veclib_cdotc.f 

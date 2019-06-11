@@ -26,9 +26,9 @@ if(verbosity > 0 && mpirank == 0) {
 
 int[int] LL = [1,2, 1,2, 1,1];
 meshN ThBorder, Th = cube(1, 1, 1, [x, y, z]);
-fespace Wh(Th, Pk);              // local finite element space
-int[int][int] intersection(0);   // local-to-neighbors renumbering
-real[int] D;                     // partition of unity
+fespace Wh(Th, Pk);           // local finite element space
+int[int][int] intersection;   // local-to-neighbors renumbering
+real[int] D;                  // partition of unity
 {
     Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10), [x, y, z], label = LL);      // global mesh
     buildOverlap(Th, ThBorder, fakeInterface, s, overlap, intersection, D, Pk, comm, excluded)

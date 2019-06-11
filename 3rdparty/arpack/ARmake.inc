@@ -1,4 +1,4 @@
-# ARPACK ARmake.inc modified for FreeFem++
+# ARPACK ARmake.inc modified for FreeFEM
 # $Id$
 
 ###########################################################################

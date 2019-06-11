@@ -1,0 +1,32 @@
+//  run with MPI:  ff-mpirun -np 1 script.edp
+// NBPROC 1
+
+assert(mpisize == 1);
+load "PETSc"
+
+real[int, int] B(3, 3);
+B = 1e-6;
+matrix sp = B;
+Mat T(sp);
+func real[int] funcRes(real t, real[int]& in, real[int]& inT) {
+    real[int] out(3);
+    out[0] = inT[0] - 77.27*(in[1] + in[0]*(1 - 8.375e-6*in[0] - in[1]));
+    out[1] = inT[1] - 1/77.27*(in[2] - (1 + in[0])*in[1]);
+    out[2] = inT[2] - 0.161*(in[0] - in[2]);
+    return out;
+}
+func int funcJ(real t, real[int]& in, real[int]& inT, real a) {
+    B = [[a - 77.27*((1 - 8.375e-6*in[0] - in[1]) - 8.375e-6*in[0]), -77.27*(1 - in[0]), 0],
+         [1/77.27*in[1], a + 1/77.27*(1 + in[0]), -1/77.27],
+         [-0.161, 0, a + 0.161]];
+    sp = B;
+    T = sp;
+    return 0;
+}
+real[int] x(3);
+x = [1, 2, 3];
+func int funcM(int s, real t, real[int]& u) {
+    cout << "step " << s << ", time " << t << ", sol " << u << endl;
+}
+TSSolve(T, funcJ, funcRes, x, sparams = "-ts_type rosw -ts_max_steps 2000 -ts_max_time 360 -ts_exact_final_time interpolate -ts_max_snes_failures -1 -ts_view -pc_type lu -ts_rtol 1e-3", monitor = funcM);
+cout << x << endl;
