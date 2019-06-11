@@ -1,5 +1,5 @@
 <!----------------------------------------------------------------------------------->
-<!--- This file is part of FreeFem++.                                             --->
+<!--- This file is part of FreeFEM.                                               --->
 <!--- Laboratoire Jacques-Louis Lions                                             --->
 <!--- Sorbonne Université, UMR 7598, Paris, F-75005 France                        --->
 <!---                                                                             --->

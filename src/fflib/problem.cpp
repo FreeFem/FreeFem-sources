@@ -483,7 +483,7 @@ namespace Fem2D {
                 // R zero=R();
                 int il=0;
                 for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
-                ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( Fem2D::norm(*(where_in_stack[il])) < 1e-100 ) );
+                ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( std::norm(*(where_in_stack[il])) < 1e-100 ) );
             }
             BilinearOperator b_nozer(*b->b,ok);
             if (verbosity % 10 > 3 )
@@ -789,7 +789,7 @@ namespace Fem2D {
                 // R zero=R();
                 int il=0;
                 for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
-                ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( Fem2D::norm(*(where_in_stack[il])) < 1e-100 ) );
+                ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( std::norm(*(where_in_stack[il])) < 1e-100 ) );
             }
             BilinearOperator b_nozer(*b->b,ok);
             if (verbosity % 10 > 3 )
@@ -1106,7 +1106,7 @@ namespace Fem2D {
                 // R zero=R();
                 int il=0;
                 for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
-                ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( Fem2D::norm(*(where_in_stack[il])) < 1e-100 ) );
+                ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( std::norm(*(where_in_stack[il])) < 1e-100 ) );
             }
             BilinearOperator b_nozer(*b->b,ok);
             if (verbosity % 10 > 3 )
@@ -2388,7 +2388,7 @@ namespace Fem2D {
                 // R zero=R();
                 int il=0;
                 for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
-                ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( Fem2D::norm(*(where_in_stack[il])) < 1e-100 ) );
+                ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( std::norm(*(where_in_stack[il])) < 1e-100 ) );
             }
             BilinearOperator b_nozer(*b->b,ok);
             if (verbosity % 10 > 3 )
@@ -2681,7 +2681,7 @@ namespace Fem2D {
                 // R zero=R();
                 int il=0;
                 for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
-                ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( Fem2D::norm(*(where_in_stack[il])) < 1e-100 ) );
+                ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( std::norm(*(where_in_stack[il])) < 1e-100 ) );
             }
             BilinearOperator b_nozer(*b->b,ok);
             if (verbosity % 10 > 3 )
@@ -2903,7 +2903,7 @@ namespace Fem2D {
                 // R zero=R();
                 int il=0;
                 for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
-                    ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( Fem2D::norm(*(where_in_stack[il])) < 1e-100 ) );
+                    ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( std::norm(*(where_in_stack[il])) < 1e-100 ) );
             }
             BilinearOperator b_nozer(*b->b,ok);
             if (verbosity % 10 > 3 )

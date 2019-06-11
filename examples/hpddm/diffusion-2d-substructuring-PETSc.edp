@@ -18,9 +18,9 @@ if(verbosity > 0 && mpirank == 0) {
 }
 
 meshN Th = square(1, 1);
-fespace Wh(Th, Pk);              // local finite element space
-int[int][int] intersection(0);   // local-to-neighbors renumbering
-int[int] interfaceNb;            //
+fespace Wh(Th, Pk);           // local finite element space
+int[int][int] intersection;   // local-to-neighbors renumbering
+int[int] interfaceNb;         //
 {
     int[int] l = [2, 1, 2, 2];
     Th = square(getARGV("-global", 40), getARGV("-global", 40), label = l);    // global mesh

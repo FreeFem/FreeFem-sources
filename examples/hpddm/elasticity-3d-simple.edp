@@ -16,9 +16,9 @@ int s = getARGV("-split", 1);                                   // refinement fa
 
 int[int] LL = [2,3, 2,1, 2,2];
 meshN Th = cube(1, 1, 1, [x, y, z]);
-fespace Wh(Th, Pk);              // local finite element space
-int[int][int] intersection(0);   // local-to-neighbors renumbering
-real[int] D;                     // partition of unity
+fespace Wh(Th, Pk);           // local finite element space
+int[int][int] intersection;   // local-to-neighbors renumbering
+real[int] D;                  // partition of unity
 {
     Th = cube(6 * getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5), [6 * x, y, z], label = LL);
     build(Th, s, intersection, D, Pk, mpiCommWorld)

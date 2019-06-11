@@ -1,28 +1,26 @@
 #!/usr/bin/perl
-# Build an index of all Emacs org-mode hyperlinks
-# ======================================================================
-# Written by Antoine Le Hyaric
-# http://www.ljll.math.upmc.fr/lehyaric
-# Laboratoire Jacques-Louis Lions
-# Université Pierre et Marie Curie-Paris6, UMR 7598, Paris, F-75005 France
-# ======================================================================
-# This file is part of Freefem++
-#
-# Freefem++ is free software; you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as
-# published by the Free Software Foundation; either version 2.1 of
-# the License, or (at your option) any later version.
-#
-# Freefem++ is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public
-# License along with Freefem++; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-# ======================================================================
-# headeralh brief="Build an index of all Emacs org-mode hyperlinks" default=0 freefem perl start=22/10/2013 upmc written
+
+############################################################################
+# This file is part of FreeFEM.                                            #
+#                                                                          #
+# FreeFEM is free software: you can redistribute it and/or modify          #
+# it under the terms of the GNU Lesser General Public License as           #
+# published by the Free Software Foundation, either version 3 of           #
+# the License, or (at your option) any later version.                      #
+#                                                                          #
+# FreeFEM is distributed in the hope that it will be useful,               #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of           #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
+# GNU Lesser General Public License for more details.                      #
+#                                                                          #
+# You should have received a copy of the GNU Lesser General Public License #
+# along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          #
+############################################################################
+# SUMMARY : ...
+# LICENSE : LGPLv3
+# ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+# AUTHORS : Build an index of all Emacs org-mode hyperlinks
+# E-MAIL  : Antoine Le Hyaric
 
 use strict;
 use warnings;
@@ -122,7 +120,7 @@ sub scanfiles{
 print "\n";
 open OUT,">index.org" or die;
 print OUT "# -*- mode:org;coding:utf-8 -*-\n";
-print OUT "# Hyperlinks into the FreeFem++ source, built with [[file:build/orgindex]]\n";
+print OUT "# Hyperlinks into the FreeFEM source, built with [[file:build/orgindex]]\n";
 print OUT "# (do not modify this file manually: update the source files and run [[file:build/orgindex]] again)\n";
 print OUT "\n";
 

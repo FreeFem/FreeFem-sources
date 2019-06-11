@@ -1,8 +1,8 @@
 #!/bin/bash
-# Speed benchmark for FreeFem++
+# Speed benchmark for FreeFEM
 # $Id$
 
-# The FreeFem++ executable
+# The FreeFEM executable
 ffexe=${PROGLOC}/nw/FreeFem++-nw${EXEEXT}
 if test ! -x $ffexe
 then

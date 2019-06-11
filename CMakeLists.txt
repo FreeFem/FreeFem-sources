@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(FreeFem++ C CXX Fortran)
+project(FreeFEM C CXX Fortran)
 
 set(FREEFEM_VERSION 4.0)
 

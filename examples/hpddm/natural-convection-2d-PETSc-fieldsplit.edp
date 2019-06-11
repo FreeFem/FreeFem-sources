@@ -33,7 +33,7 @@ real nuCurrent = nu;
 
 
 real[int] D;
-int[int][int] intersection(0);
+int[int][int] intersection;
 mesh ThBackup;
 {
     if(adaptation)
@@ -67,7 +67,7 @@ func real[int] funcRes(real[int]& inPETSc) {
 func int funcJ(real[int]& inPETSc) {
     changeNumbering(dA, u1[], inPETSc, inverse = true, exchange = true);
     matrix Loc = vPb(Wh, Wh, tgv = -2);
-    changeOperator(dA, Loc);
+    dA = Loc;
     return 0;
 }
 while(nuCurrent > nuFinal) {
@@ -107,7 +107,7 @@ while(nuCurrent > nuFinal) {
         int s = getARGV("-split", 1);
         build(Th, s, intersection, D, Pk, mpiCommWorld)
         Mat dAdapt(Wh.ndof, intersection, D);
-        changeOperator(dA, dAdapt);
+        dA = dAdapt;
         [u1, u2, p, T] = def(uG);
     }
     {

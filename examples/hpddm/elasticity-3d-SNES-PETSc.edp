@@ -18,9 +18,9 @@ int s = getARGV("-split", 1);                                   // refinement fa
 
 int[int] LL = [2,3, 2,1, 2,2];
 meshN Th = cube(1, 1, 1, [x, y, z]);
-fespace Wh(Th, Pk);              // local finite element space
-int[int][int] intersection(0);   // local-to-neighbors renumbering
-real[int] D;                     // partition of unity
+fespace Wh(Th, Pk);           // local finite element space
+int[int][int] intersection;   // local-to-neighbors renumbering
+real[int] D;                  // partition of unity
 {
     Th = cube(10 * getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5), [10 * x, y, z], label = LL);      // global mesh
     build(Th, s, intersection, D, Pk, mpiCommWorld)
@@ -58,7 +58,7 @@ func real[int] funcRes(real[int]& inPETSc) {
 }
 func int funcJ(real[int]& inPETSc) {
     matrix Loc = vPb(Wh, Wh, tgv = -2);
-    changeOperator(A, Loc);
+    A = Loc;
     return 0;
 }
 real[int] xPETSc;

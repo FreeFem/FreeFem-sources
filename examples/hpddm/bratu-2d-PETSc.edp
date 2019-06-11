@@ -23,7 +23,7 @@ mesh M = buildmesh(aa(N)+bb(N)+cc(N)+dd(N));
 load "Element_P3"
 func Pk = P3;
 fespace Vh(M, Pk);
-int[int][int] intersection(0);
+int[int][int] intersection;
 real[int] D;
 {
     int s = getARGV("-split", 1);
@@ -48,7 +48,7 @@ func real[int] funcRes(real[int]& inPETSc) {
 func int funcJ(real[int]& inPETSc) {
     changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
     J = vJ(Vh, Vh, tgv = -2);
-    changeOperator(A, J);
+    A = J;
     return 0;
 }
 real[int] bPETSc;

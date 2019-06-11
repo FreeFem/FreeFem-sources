@@ -122,12 +122,12 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
    throwassert(n==x.N());
    Rn g(n), h(n), Ah(n), & Cg(Ah);  // on utilise Ah pour stocke Cg
    g = A*x;
-   double xx= RNM::real((x,conj(x)));
+   double xx= std::real((x,conj(x)));
    double epsold=eps;
    g -= b;// g = Ax-b
    Cg = C*g; // gradient preconditionne
    h =-Cg;
-   double g2 = RNM::real((Cg,conj(g)));
+   double g2 = std::real((Cg,conj(g)));
    if (g2 < 1e-30)
     { if(verbosity>1 || (kprint<100000))
        cout << "GC  g^2 =" << g2 << " < 1.e-30  Nothing to do " << endl;
@@ -137,14 +137,14 @@ int ConjuguedGradient(const M & A,const P & C,const KN_<R> &b,KN_<R> &x,const in
    for (int iter=0;iter<=nbitermax;iter++)
      {
        Ah = A*h;
-       double hAh =RNM::real((h,conj(Ah)));
+       double hAh =std::real((h,conj(Ah)));
       // if (Abs(hAh)<1e-30) ExecError("CG2: Matrix non defined, sorry ");
-       R ro =  - RNM::real((g,conj(h)))/ hAh; // ro optimal (produit scalaire usuel)
+       R ro =  - std::real((g,conj(h)))/ hAh; // ro optimal (produit scalaire usuel)
        x += ro *h;
        g += ro *Ah; // plus besoin de Ah, on utilise avec Cg optimisation
        Cg = C*g;
        double g2p=g2;
-       g2 = RNM::real((Cg,conj(g)));
+       g2 = std::real((Cg,conj(g)));
        bool stop = Stop && Stop->Stop(iter,x,g);
 
        if ( !(iter%kprint) && iter && (verbosity>3) )
@@ -213,7 +213,7 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
        Ah -= b;        //   Ax + rop*Ah = rop*Ah + g  =
        Ah -= g;         //   Ah*rop
        R hAh =(h,Ah);
-         if (RNM::norm2(hAh)<1e-60) ExecError("CG2: Matrix is not defined (/0), sorry ");
+         if (std::norm(hAh)<1e-60) ExecError("CG2: Matrix is not defined (/0), sorry ");
        ro =  - (g,h)*rop/hAh ; // ro optimal (produit scalaire usuel)
        if ( ro != ro) ExecError("CG2: Bug : ro is NaN ???  ");
        x += (ro-rop) *h;

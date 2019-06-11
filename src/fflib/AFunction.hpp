@@ -1601,20 +1601,19 @@ class AC_F0: public basicAC_F0 { //  a Array of [[C_F0]]
 }; 
 
 class  basicAC_F0_wa : public basicAC_F0 { public:
- basicAC_F0_wa(const C_F0 & e) {
+ template<bool...> struct pack { };
+ template<class... T>
+ using AllC_F0 = typename std::enable_if<std::is_same<pack<true, std::is_convertible<T, C_F0>::value...>, pack<std::is_convertible<T, C_F0>::value..., true>>::value>::type;
+ template<class... T, typename = AllC_F0<T...>>
+ basicAC_F0_wa(T... a) : basicAC_F0_wa({std::forward<T>(a)...}) { }
+ basicAC_F0_wa(const std::initializer_list<C_F0>& e) {
    named_parameter=0;
-   nb=1;
-   a= new C_F0[nb];
-   a[0]=e;
+   nb = e.size();
+   a = new C_F0[nb];
+   int i = 0;
+   for(auto n : e)
+       a[i++] = n;
  }
- basicAC_F0_wa(const C_F0 & e,const C_F0 & ee) {
-   named_parameter=0;
-   nb=2;
-   a= new C_F0[nb];
-   a[0]=e;
-   a[1]=ee;
- }
- 
 
  basicAC_F0_wa(C_F0 e,const basicAC_F0 & b) { 
    named_parameter=0;

@@ -15,8 +15,8 @@ func Pkdc = P2dc;                   // finite element space
 mesh Th;
 fespace Vh(Th, Pk);
 fespace Ph(Th, Pkdc);
-int[int][int] intersection(0);   // local-to-neighbors renumbering
-real[int] D;                     // partition of unity
+int[int][int] intersection;   // local-to-neighbors renumbering
+real[int] D;                  // partition of unity
 {
     Th = square(getARGV("-global", 40), getARGV("-global", 40));
     int s = getARGV("-split", 1);
@@ -57,7 +57,7 @@ func real[int] funcRes(real[int]& inPETSc) {
 func int funcJ(real[int]& inPETSc) {
     changeNumbering(dJ, u[], inPETSc, inverse = true, exchange = true);
     H = vhJ(Vh, Vh, tgv = -1);
-    changeOperator(dJ, H);
+    dJ = H;
     return 0;
 }
 

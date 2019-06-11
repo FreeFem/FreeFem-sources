@@ -1,7 +1,7 @@
 macro(ff_define_freefem_executable)
 
-  # FreeFem++ executable
-  # 1. define executable FreeFem++ (add_executable)
+  # FreeFEM executable
+  # 1. define executable FreeFEM (add_executable)
   # 2. define paths to header files (include_directories -> defines X in 'gcc -I X')
   # 3. define associated libraries which are defined in other CMake scripts (target_link_libraries -> defines X in 'gcc -l X') 
   # 4. define what to do when running 'make install' (install)  
