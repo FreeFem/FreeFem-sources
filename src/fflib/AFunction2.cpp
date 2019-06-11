@@ -327,16 +327,16 @@ C_F0::C_F0(const Polymorphic * pop,const char *op,const  C_F0 & a,const  C_F0 & 
       : ArrayOfaType(l),r(rr),next(0),pref(0)
       {throwassert(rr );}
 
-void Polymorphic::Addp(const char * op,Value pp,...) const
-{
-  pair<iterator,bool>  p=m.insert(pair<const Key,Value>(op,pp));
-  Value f= p.first->second;
+void Polymorphic::Addp (const char *op, Value pp, ...) const {
+  pair<iterator,bool> p = m.insert(pair<const Key, Value>(op, pp));
+  Value f = p.first->second;
   if (!p.second)  // not insert => old
     *f += *pp;
   va_list ap;
-  va_start(ap,pp);
-  for(pp=va_arg(ap,OneOperator * );pp;pp=va_arg(ap,OneOperator * ))
+  va_start(ap, pp);
+  for (pp = va_arg(ap, OneOperator*); pp; pp = va_arg(ap, OneOperator*))
     *f += *pp;
+  va_end(ap);
 }
 
 void Polymorphic::Add(const char * op,Value *pp) const
