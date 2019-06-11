@@ -1,5 +1,5 @@
 #ifdef __APPLE__
-#define GL_SILENCE_DEPRECATION 
+#define GL_SILENCE_DEPRECATION
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
@@ -2883,45 +2883,46 @@ void ThePlot::DrawIsoTfill(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso
 }
 
 
-bool WindowDump(int width,int height)
-{
-    int i,j;
-    FILE *fptr;
-    static int counter = 0;
-    char fname[32];
-    unsigned char *image;
+bool WindowDump (int width, int height) {
+  int i, j;
+  FILE *fptr;
+  static int counter = 0;
+  char fname[32];
+  unsigned char *image;
 
-    /* Allocate our buffer for the image */
-    if ((image = new unsigned char[3*width*height]) == NULL) {
-        fprintf(stderr,"WindowDump - Failed to allocate memory for image\n");
-        return(false);
+  /* Allocate our buffer for the image */
+  if ((image = new unsigned char[3*width*height]) == NULL) {
+    fprintf(stderr, "WindowDump - Failed to allocate memory for image\n");
+    return false;
+  }
+
+  /* Open the file */
+  sprintf(fname, "ffglut_%04d.ppm", counter);
+  if ((fptr = fopen(fname, MODE_WRITE_BINARY)) == NULL) {
+    fprintf(stderr, "WindowDump - Failed to open file for window dump\n");
+    delete[] image;
+    return false;
+  }
+  if((debug > 10)) cout << " WindowDump in " << fname << endl;
+
+  /* Copy the image into our buffer */
+  glReadBuffer(GL_FRONT);
+  glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
+
+  /* Write the PPM file */
+  fprintf(fptr, "P6\n%d %d\n255\n", width, height);
+  for (j = height-1; j >= 0; j--) {
+    for (i = 0; i < width; i++) {
+      fputc(image[3*j*width+3*i+0], fptr);
+      fputc(image[3*j*width+3*i+1], fptr);
+      fputc(image[3*j*width+3*i+2], fptr);
     }
+  }
+  fclose(fptr);
 
-    /* Open the file */
-    sprintf(fname,"ffglut_%04d.ppm",counter);
-    if ((fptr = fopen(fname, MODE_WRITE_BINARY)) == NULL) {
-        fprintf(stderr,"WindowDump - Failed to open file for window dump\n");
-        return(false);
-    }
-    if((debug > 10)) cout << " WindowDump in " << fname << endl;
-    /* Copy the image into our buffer */
-    glReadBuffer(GL_FRONT);
-    glReadPixels(0,0,width,height,GL_RGB,GL_UNSIGNED_BYTE,image);
-
-    /* Write the PPM file */
-    fprintf(fptr,"P6\n%d %d\n255\n",width,height);
-    for (j=height-1;j>=0;j--) {
-        for (i=0;i<width;i++) {
-            fputc(image[3*j*width+3*i+0],fptr);
-            fputc(image[3*j*width+3*i+1],fptr);
-            fputc(image[3*j*width+3*i+2],fptr);
-        }
-    }
-    fclose(fptr);
-
-    delete [] image;
-    counter++;
-    return(true);
+  delete[] image;
+  counter++;
+  return true;
 }
 
 
