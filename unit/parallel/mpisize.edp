@@ -1,0 +1,11 @@
+//NBPROC 4
+
+include "test.idp"
+real t;
+
+t = clock();
+if (mpirank  == 0)
+  cout << mpisize << endl;
+t = clock() - t;
+cout << IND << t << endl;
+test(mpisize == 4);

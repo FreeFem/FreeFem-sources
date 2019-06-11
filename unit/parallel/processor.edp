@@ -1,0 +1,59 @@
+include "test.idp"
+
+cout << "processor" << endl;
+
+real t;
+real r = 0;
+int[int] proc1 = [1, 2], proc2 = [0, 3];
+int color = 1;
+int key = 1;
+
+cout << "MPI rank = " << mpirank << endl;
+
+mpiComm comm(mpiCommWorld, 0, 0);
+mpiGroup grp(proc1);
+mpiGroup grp1(comm, proc1);
+mpiComm ncomm1(mpiCommWorld, grp);
+mpiComm ncomm2(comm, color, key);
+mpiRequest rq;
+mpiRequest[int] arq(10);
+mpiComm Comm(mpiCommWorld, 0, 0);
+int MPICommSize = mpiSize(Comm);
+int MPIRank = mpiRank(Comm);
+
+if (MPIRank == 0) cout << "MPI Comm size = " << MPICommSize << endl;
+cout << "MPI rank in Comm = " << mpiRank(Comm) << endl;
+
+mpiRequest Req;
+mpiRequest[int] ReqArray(10);
+real a = 42, b;
+
+// for (int i = 0; i < MPICommSize; i++) {
+//
+//   // processor(i);
+//   // //return processor any source with no Resquest in MPI_COMM_WORLD
+//   // processor(mpiAnySource);
+//   // //return processor i with no Resquest in Comm
+//   // processor(i, Comm);
+//   // //return processor i with no Resquest in Comm
+//   // processor(Comm, i);
+//   // //return processor i with Resquest rq in Comm
+//   // /* processor(i, Req, Comm);
+//   // //return processor i with Resquest rq in MPI_COMM_WORLD
+//   // processor(i, Req); */
+//   // //return processor i in MPI_COMM_WORLD in block mode for synchronously communication
+//   // processorblock(i);
+//   // //return processor any source in MPI_COMM_WORLD in block mode for synchronously communication
+//   // processorblock(mpiAnySource);
+//   //return processor i in in Comm in block mode
+//   processorblock(i, Comm);
+// }
+
+processor(1) << a;
+processor(2) >> b;
+test(b == 42);
+
+mpiBarrier(Comm);
+mpiWaitAny(ReqArray);
+real ti = mpiWtime();
+real tick = mpiWtick();
