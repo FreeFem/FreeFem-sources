@@ -1,4 +1,4 @@
-// This test shows some powerful features of FreeFem++ on a
+// This test shows some powerful features of FreeFEM on a
 // simple example: -\Delta(u) = 1 in the unit cercle with u=0 on the
 // border of the unit cercle. This problem has an analytical solution
 // u = (1-x^2-y^2)/4

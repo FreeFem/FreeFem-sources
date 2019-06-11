@@ -1,4 +1,4 @@
-// test to valid the adding of the surfacic finite elements in FreeFem++
+// test to validate the addition of surfacic finite elements in FreeFEM
 
 load "msh3"
 load "medit"
@@ -22,8 +22,8 @@ macro Grad2(uVar) [dx(uVar),dy(uVar)]  // EOM
 varf a(uVar,vVar) = int2d(Th)(Grad2(uVar)'*Grad2(vVar))
  - int2d ( Th ) ( f * vVar )
   + on(1,uVar=g);
- 
-matrix AVar =a(Vh,Vh);  
+
+matrix AVar =a(Vh,Vh);
 real[int] bVar = a(0,Vh);
 real[int] solVar = AVar^-1*bVar;
 
@@ -58,10 +58,10 @@ macro Grad3(uSVar) [dx(uSVar),dy(uSVar),dz(uSVar)]  // EOM
 varf aS(uSVar,vSVar) = int2d(ThS)(Grad3(uSVar)'*Grad3(vSVar))
  - int2d ( ThS ) ( f * vSVar )
   + on(1,uSVar=g);
-matrix ASVar =aS(VhS,VhS);  
+matrix ASVar =aS(VhS,VhS);
 real[int] bSVar = aS(0,VhS);
 real[int] solSVar = ASVar^-1*bSVar;
-  
+
 // with problem
 problem Lap3dS(uSPb,vSPb , solver = CG )  = int2d(ThS)(Grad3(uSPb)'*Grad3(vSPb))
  - int2d ( ThS ) ( f * vSPb )
@@ -71,16 +71,14 @@ Lap3dS;
 savemesh (Th, "Th2D.mesh");
 savemesh (ThS, "ThS.mesh");
 
-// check solution for variational forms  
-real[int] errVar = solVar - solSVar;  
+// check solution for variational forms
+real[int] errVar = solVar - solSVar;
 cout << "---> norm error l2 for variationnal form " << errVar.l2 << endl;
 
 // check solution with problem
-real[int] errPb = uPb[] - uSPb[];  
+real[int] errPb = uPb[] - uSPb[];
 cout << "---> norm error l2 with problem " << errPb.l2;
 
 plot(uSPb,cmm=" USPd  ",wait=1);
 
 //plot(ThS,cmm=" ThS",wait=1);
-
-
