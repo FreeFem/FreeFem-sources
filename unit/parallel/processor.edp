@@ -11,22 +11,13 @@ int key = 1;
 cout << "MPI rank = " << mpirank << endl;
 
 mpiComm comm(mpiCommWorld, 0, 0);
-mpiGroup grp(proc1);
-mpiGroup grp1(comm, proc1);
-mpiComm ncomm1(mpiCommWorld, grp);
-mpiComm ncomm2(comm, color, key);
 mpiRequest rq;
 mpiRequest[int] arq(10);
-mpiComm Comm(mpiCommWorld, 0, 0);
-int MPICommSize = mpiSize(Comm);
-int MPIRank = mpiRank(Comm);
+int MPICommSize = mpiSize(comm);
+int MPIRank = mpiRank(comm);
 
 if (MPIRank == 0) cout << "MPI Comm size = " << MPICommSize << endl;
-cout << "MPI rank in Comm = " << mpiRank(Comm) << endl;
-
-mpiRequest Req;
-mpiRequest[int] ReqArray(10);
-real a = 42, b;
+cout << "MPI rank in Comm = " << mpiRank(comm) << endl;
 
 // for (int i = 0; i < MPICommSize; i++) {
 //
@@ -53,7 +44,7 @@ processor(1) << a;
 processor(2) >> b;
 test(b == 42);
 
-mpiBarrier(Comm);
-mpiWaitAny(ReqArray);
-real ti = mpiWtime();
-real tick = mpiWtick();
+// mpiBarrier(Comm);
+// mpiWaitAny(ReqArray);
+// real ti = mpiWtime();
+// real tick = mpiWtick();
