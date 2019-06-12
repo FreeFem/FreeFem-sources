@@ -1,30 +1,25 @@
-// -*- Mode : c++ -*-
-//
-// SUMMARY  :
-// USAGE    :
-// ORG      :
-// AUTHOR   : Frederic Hecht
-// E-MAIL   : hecht@ann.jussieu.fr
-//
+/****************************************************************************/
+/* This file is part of FreeFEM.                                            */
+/*                                                                          */
+/* FreeFEM is free software: you can redistribute it and/or modify          */
+/* it under the terms of the GNU Lesser General Public License as           */
+/* published by the Free Software Foundation, either version 3 of           */
+/* the License, or (at your option) any later version.                      */
+/*                                                                          */
+/* FreeFEM is distributed in the hope that it will be useful,               */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of           */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            */
+/* GNU Lesser General Public License for more details.                      */
+/*                                                                          */
+/* You should have received a copy of the GNU Lesser General Public License */
+/* along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          */
+/****************************************************************************/
+// SUMMARY : ...
+// LICENSE : LGPLv3
+// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+// AUTHORS : Frederic Hecht
+// E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
-/*
-
- This file is part of Freefem++
-
- Freefem++ is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- Freefem++  is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public License
- along with Freefem++; if not, write to the Free Software
- Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
 #include "environment.hpp"
 #include "iostream"
 #include <iostream>
@@ -33,14 +28,13 @@
 #include <cstring>
 #include <algorithm>
 
-// set in getprog-unix.hpp in Graphic dir..
-const char *  prognamearg=0;
-extern  void (*initparallele)(int &, char **&); // to know if mpiversion ...
+// set in getprog-unix.hpp in Graphic dir
+const char *prognamearg = 0;
+extern void (*initparallele)(int &, char **&); // to know if mpiversion ...
 
 #ifdef PURE_WIN32
 #include <windows.h>
 #endif
-
 
 #ifdef HAVE_GETENV
 #include <cstdlib>
@@ -48,134 +42,119 @@ extern  void (*initparallele)(int &, char **&); // to know if mpiversion ...
 using namespace std;
 bool load(string s);
 
-const char SLACH='/';
-const char BACKSLACH='\\';
+const char SLACH = '/';
+const char BACKSLACH = '\\';
 #ifdef PURE_WIN32
- const  char dirsep=BACKSLACH, dirnsep=SLACH;
+const char dirsep = BACKSLACH, dirnsep = SLACH;
 #else
- const  char dirnsep=BACKSLACH, dirsep=SLACH;
+const char dirnsep = BACKSLACH, dirsep = SLACH;
 #endif
 
 #include <sys/stat.h>
 
-int dirExists(const string & path)
-{
-    struct stat info;
+int dirExists (const string & path) {
+  struct stat info;
 
-    if(stat( path.c_str(), &info ) != 0)
-        return 0;
-    else if(info.st_mode & S_IFDIR)
-        return 1;
-    else
-        return 0;
+  if (stat(path.c_str(), &info ) != 0)
+    return 0;
+  else if (info.st_mode & S_IFDIR)
+    return 1;
+  else
+    return 0;
 }
 
-string DirName(const char * f)
-{
-  const char *c= strrchr(f,dirsep);
-  if(!c) return string("");
-  else return string(f,strlen(f)-strlen(c));
+string DirName (const char *f) {
+  const char *c = strrchr(f, dirsep);
+  if (!c) return string("");
+  else return string(f, strlen(f)-strlen(c));
 }
-string TransDir(string dir,string adddir="")
-{
-  for (size_t i=0; i<dir.size(); ++i)
-    if(dir[i]==dirnsep) dir[i]=dirsep;
-  if(dir.size()>1 && dir[dir.size()-1] != dirsep)
+
+string TransDir (string dir, string adddir="") {
+  for (size_t i = 0; i < dir.size(); ++i)
+    if (dir[i] == dirnsep) dir[i] = dirsep;
+  if (dir.size() > 1 && dir[dir.size()-1] != dirsep)
     dir += dirsep;
-   if(adddir.length() && dir[0]=='!')
-   {
-       dir = adddir +dirsep +dir.substr(1);
-   }
-  return  dir;
+  if (adddir.length() && dir[0] == '!')
+    dir = adddir + dirsep + dir.substr(1);
+  return dir;
 }
 
 template<typename T>
-void  show(const char * s,const T & l,const char * separateur="\n")
-{
+void show (const char *s, const T &l, const char *separateur="\n") {
   cout << s << * separateur;
-  for (typename T::const_iterator i=l.begin(); i != l.end(); i++)
-    cout  << * i << * separateur;
+  for (typename T::const_iterator i = l.begin(); i != l.end(); i++)
+    cout << * i << * separateur;
 }
 
-bool  EnvironmentFind(string key,string item)
- {
-   EnvironmentData::iterator ekey=ffenvironment.find(key);
-   if( ekey != ffenvironment.end())
-    {
-     OneEnvironmentData * pl= &ekey->second;
-     OneEnvironmentData::iterator i=find(pl->begin(),pl->end(),item);
-       return i != pl->end();
-     }
+bool EnvironmentFind (string key, string item) {
+  EnvironmentData::iterator ekey = ffenvironment.find(key);
+  if (ekey != ffenvironment.end()) {
+    OneEnvironmentData *pl = &ekey->second;
+    OneEnvironmentData::iterator i = find(pl->begin(), pl->end(), item);
+    return i != pl->end();
+  }
 
-   return false;
- }
+  return false;
+}
 
-bool  EnvironmentClean(string key)
-{
-   EnvironmentData::iterator ekey=ffenvironment.find(key);
-   if( ekey != ffenvironment.end())
-    {
-      OneEnvironmentData * pl= &ekey->second;
-      pl->clear();
-      return true;
-     }
+bool EnvironmentClean (string key) {
+  EnvironmentData::iterator ekey = ffenvironment.find(key);
+  if (ekey != ffenvironment.end()) {
+    OneEnvironmentData *pl = &ekey->second;
+    pl->clear();
+    return true;
+  }
 
-   return false;
- }
+  return false;
+}
 
-bool EnvironmentInsert(string key,string item,string before)
-{
-   bool ret=true;
-   OneEnvironmentData  & l = ffenvironment[key];
-   char  sufmpi[] = {'m','p','i',dirsep,'\0'};
-   string suf= ((key== "loadpath") && initparallele ) ? sufmpi  : "";
-    if( verbosity > 1000) cout << " **EnvironmentInsert " <<initparallele<< " suf '"
-        << suf << "'  " << item <<endl;
-   if( ! suf.empty() && dirExists(item+suf) )
-    {
-	 if(verbosity>=100)  cout << " EnvironmentInsert: Add suf " << suf << " to " << item << " in GetEnvironment "<< key << endl;
-	 item  += suf;
-    }
+bool EnvironmentInsert (string key, string item, string before) {
+  bool ret = true;
+  OneEnvironmentData &l = ffenvironment[key];
+  char sufmpi[] = {'m', 'p', 'i', dirsep, '\0'};
+  string suf = ((key == "loadpath") && initparallele ) ? sufmpi : "";
+  if (verbosity > 1000) cout << " **EnvironmentInsert " << initparallele << " suf '"
+    << suf << "' " << item << endl;
+  if (!suf.empty() && dirExists(item+suf)) {
+    if (verbosity >= 100) cout << " EnvironmentInsert: Add suf " << suf << " to " << item << " in GetEnvironment " << key << endl;
+    item += suf;
+  }
 
-   OneEnvironmentData::iterator i=find(l.begin(),l.end(),item);
+  OneEnvironmentData::iterator i = find(l.begin(), l.end(), item);
 
-   if(i!=l.end()) {ret=false; l.erase(i);} // if existe remove
-   i=find(l.begin(),l.end(),before);
-   if(verbosity>=100) cout << " insert " << key << " " << item << " " << before << endl;
-   if(i == l.end() && before!="$")
-       l.insert(l.begin(),item); // insert in front
-   else
-       l.insert(i,item); // insert before i
+  if (i != l.end()) { ret = false; l.erase(i); } // if exist => remove
+  i = find(l.begin(), l.end(), before);
+  if (verbosity >= 100) cout << " insert " << key << " " << item << " " << before << endl;
+  if (i == l.end() && before != "$")
+    l.insert(l.begin(), item); // insert in front
+  else
+    l.insert(i, item); // insert before i
 
   return ret;
 }
 
-int GetEnvironment(const string & key, string items)
-{
-  if(verbosity>=100)  cout << key << " -> " << items <<  endl;
-  bool path=key.find("path")!= string::npos;
-  int d=0, k=0;
-  if(path)
-    items+=";;";
-  for (size_t  i=0;i<items.size();i++)
-   if(  items[i]==';')
-    {
-
-      string item =items.substr(d,i-d);
-      if(path) item=TransDir(item);
-      if(verbosity>=100) cout << " + " << item << endl;
-      if(!EnvironmentFind(key,item))
-	{
-	  EnvironmentInsert(key,item,"$");
-	  k++;
-	}
-      d=i+1;
+int GetEnvironment (const string &key, string items) {
+  if (verbosity >= 100) cout << key << " -> " << items << endl;
+  bool path = key.find("path") != string::npos;
+  int d = 0, k = 0;
+  if (path)
+    items += ";;";
+  for (size_t i = 0; i < items.size(); i++)
+    if (items[i] == ';') {
+      string item = items.substr(d, i-d);
+      if (path) item = TransDir(item);
+      if (verbosity >= 100) cout << " + " << item << endl;
+      if (!EnvironmentFind(key, item)) {
+        EnvironmentInsert(key, item, "$");
+        k++;
+      }
+      d = i + 1;
     }
 
- return k;
+  return k;
 }
-int  readinitfile(const string & file)
-{
+
+int readinitfile (const string &file) {
 	string line="";
 	string key;
 	string value;
@@ -279,8 +258,7 @@ int  readinitfile(const string & file)
 }
 
 
-void GetEnvironment()
- {
+void GetEnvironment () {
  char  * ff_verbosity=0,* ff_loadpath=0,* ff_incpath=0,* home=0;
 
  // FFCS: we must make sure that FFCS does not reuse the same freefem++.pref as FF because some shared libraries must be
@@ -397,8 +375,8 @@ string     ffprefsuffix ="pref";
     if(verbosity>10) cout << " --  GetEnvironment: verbosity is set to " << verbosity  << endl;
 
  }
-void EnvironmentLoad()
-{
+
+void EnvironmentLoad() {
     EnvironmentData::iterator toload=ffenvironment.find("load");
     if(  toload != ffenvironment.end())
 
@@ -410,7 +388,7 @@ void EnvironmentLoad()
 
 }
 
-//  from ffapi to env. F. Hecht ..
+// from ffapi to env. F. Hecht ..
 #include "ffapi.hpp"
 #include <dirent.h>
 #include <strings.h>
@@ -447,12 +425,10 @@ void ifchtmpdir()
 }
 
 #ifdef TESTMAIN
-long verbosity=50;
- EnvironmentData  environment;
-int main()
-{
+long verbosity = 50;
+EnvironmentData environment;
+int main () {
   GetEnvironment();
   return 0;
-}
 }
 #endif
