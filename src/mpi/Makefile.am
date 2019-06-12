@@ -37,7 +37,7 @@ EXTRA_SCRIPTS = ff-mpirun
 EXTRA_DIST = ff-mpirun.in
 
 # FFCS: visualization stream redirection
-FreeFem___mpi_SOURCES = ../fflib/ffapi.cpp \
+FreeFem___mpi_SOURCES = /ffapi.cpp \
 	../Graphics/sansrgraph.cpp \
 	../lglib/mymain.cpp \
 	../lglib/lg.tab.cpp \
@@ -51,8 +51,9 @@ ff-mpirun: ff-mpirun.in Makefile
 	../../config.status  --file=ff-mpirun:ff-mpirun.in
 	chmod a+x ff-mpirun
 
-# Force rebuild with current flags: PARALLELE
-.PHONY: ../fflib/ffapi.cpp
-## copy this file because we use different FLAGS (-DPARALLELE)
-# ffapi.cpp: ../fflib/ffapi.cpp
-# 	cp $^ .
+# # Force rebuild with current flags: PARALLELE
+# .PHONY: ../fflib/ffapi.cpp ## That does not work for Windows executable
+## TODO: same compilation process for *Nix and Windows ?
+# copy this file because we use different FLAGS (-DPARALLELE)
+ffapi.cpp: ../fflib/ffapi.cpp
+	cp $^ .
