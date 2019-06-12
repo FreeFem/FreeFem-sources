@@ -43,7 +43,7 @@ using namespace std;
 #define Pi (3.141592653589793)
 #endif
 #ifndef TINY // used in BrentLS and Matrix
-#define TINY 		1.0e-20
+#define TINY 1.0e-20
 #endif
 #ifndef True
 #define True (1)
