@@ -43,7 +43,7 @@ using namespace std;
 #define Pi (3.141592653589793)
 #endif
 #ifndef TINY // used in BrentLS and Matrix
-#define TINY 		1.0e-20
+#define TINY 1.0e-20
 #endif
 #ifndef True
 #define True (1)
@@ -85,7 +85,7 @@ using namespace std;
 template<class Type>
 void display (list<Type> l) {
   typename list<Type>::iterator il;
-  for (il = l.begin(); il != l.end(); il++) cout << (*il) << " ";
+  for (il = l.begin(); il != l.end(); ++il) cout << (*il) << " ";
   cout << endl;
 }
 
@@ -103,7 +103,7 @@ list<Type> normalize (list<Type> l) {
     cerr << "First element is zero, cannot be normed! \n";
     return v;
   } else {
-    for (il = v.begin(); il != v.end(); il++)
+    for (il = v.begin(); il != v.end(); ++il)
       *il /= scale;
     return v;
   }
