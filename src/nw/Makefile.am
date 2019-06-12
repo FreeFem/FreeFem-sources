@@ -26,8 +26,7 @@ bin_PROGRAMS = FreeFem++ FreeFem++-nw @FFGLUTPROG@
 EXTRA_PROGRAMS = ffglut
 
 # FFCS:visualization stream redirection
-ffglut_SOURCES = ../Graphics/ffglut.cpp \
-  ../femlib/Drawing.cpp \
+ffglut_SOURCES = ../femlib/Drawing.cpp \
   ../femlib/fem.cpp \
   ../fflib/ffapi.cpp \
   ../femlib/FQuadTree.cpp \
@@ -37,6 +36,7 @@ ffglut_SOURCES = ../Graphics/ffglut.cpp \
   ../femlib/Mesh3dn.cpp \
   ../femlib/MeshSn.cpp \
   ../femlib/mshptg.cpp \
+  ../Graphics/ffglut.cpp \
   ../Graphics/ffthreads.cpp \
   ../Graphics/ffthreads.hpp \
   ../Graphics/gggg.cpp
