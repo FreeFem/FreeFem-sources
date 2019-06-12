@@ -52,7 +52,7 @@ ff-mpirun: ff-mpirun.in Makefile
 	chmod a+x ff-mpirun
 
 # Force rebuild with current flags: PARALLELE
-.PHONY: FreeFem___mpi
+.PHONY: ../fflib/ffapi.cpp
 ## copy this file because we use different FLAGS (-DPARALLELE)
 # ffapi.cpp: ../fflib/ffapi.cpp
 # 	cp $^ .
