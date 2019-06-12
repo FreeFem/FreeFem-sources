@@ -88,7 +88,7 @@ class ConjugateGradient : public Optima<LS> {
   typedef typename LS::Param Param;
   typedef typename LS::Vect Vect;
   typedef typename LS::VMat VMat;
-  typedef LS  LineSearch;
+  typedef LS LineSearch;
 
 public:
   // a constructor
