@@ -1203,6 +1203,7 @@ template<class Type>
 struct _n_User<TimeStepper<Type>> {
     typename NonlinearSolve<Type>::IVecF_O* op;
     typename NonlinearSolve<Type>::IMatF_O* r;
+    typename NonlinearSolve<Type>::IMatF_O* rhs;
     typename NonlinearSolve<Type>::IMonF_O* mon;
 };
 template<class Type>
@@ -2058,6 +2059,9 @@ class NonlinearSolve : public OneOperator {
                 IMatF_O(int n, Stack stk, const OneOperator* op) :
                     stack(stk), t(0), c_t(CPValue(t)), x(n), c_x(CPValue(x)), x_t(n), c_x_t(CPValue(x_t)),
                     mat(op ? CastTo<Kn_>(C_F0(op->code(basicAC_F0_wa({ c_t, c_x, c_x_t })), (aType)*op)) : 0) { }
+                IMatF_O(int n, Stack stk, const OneOperator* op, int) :
+                    stack(stk), t(0), c_t(CPValue(t)), x(n), c_x(CPValue(x)),
+                    mat(op ? CastTo<Kn_>(C_F0(op->code(basicAC_F0_wa({ c_t, c_x })), (aType)*op)) : 0) { }
                 ~IMatF_O() {
                     delete mat;
                     Expression zzz = c_t;
@@ -2071,6 +2075,12 @@ class NonlinearSolve : public OneOperator {
                     t = tt;
                     x = xx;
                     x_t = xx_t;
+                    res = GetAny<Kn_>((*mat)(stack));
+                    WhereStackOfPtr2Free(stack)->clean();
+                }
+                void apply(const double& tt, const Kn_& xx, Kn_& res) const {
+                    t = tt;
+                    x = xx;
                     res = GetAny<Kn_>((*mat)(stack));
                     WhereStackOfPtr2Free(stack)->clean();
                 }
@@ -2114,12 +2124,12 @@ class NonlinearSolve : public OneOperator {
                 Expression r;
                 Expression b;
                 Expression x;
-                const OneOperator *codeJ, *codeR;
+                const OneOperator *codeJ, *codeR, *codeRHS;
                 const int c;
                 static const int n_name_param = 4;
                 static basicAC_F0::name_and_type name_param[];
                 Expression nargs[n_name_param];
-                E_NonlinearSolve(const basicAC_F0& args, int d) : A(0), J(0), r(0), x(0), codeJ(0), codeR(0), c(d) {
+                E_NonlinearSolve(const basicAC_F0& args, int d) : A(0), J(0), r(0), x(0), codeJ(0), codeR(0), codeRHS(0), c(d) {
                     args.SetNameParam(n_name_param, name_param, nargs);
                     A = to<Type*>(args[0]);
                     const Polymorphic* op = dynamic_cast<const Polymorphic*>(args[1].LeftValue());
@@ -2131,15 +2141,21 @@ class NonlinearSolve : public OneOperator {
                         codeR = op->Find("(", ArrayOfaType(atype<KN<PetscScalar>*>(), false));
                     }
                     else {
-                        codeJ = op->Find("(", ArrayOfaType(atype<double>(), atype<KN<double>*>(), atype<KN<double>*>(), atype<double>(), false));
+                        codeJ = op->Find("(", ArrayOfaType(atype<double>(), atype<KN<PetscScalar>*>(), atype<KN<PetscScalar>*>(), atype<double>(), false));
                         op = dynamic_cast<const Polymorphic*>(args[2].LeftValue());
                         ffassert(op);
-                        codeR = op->Find("(", ArrayOfaType(atype<double>(), atype<KN<double>*>(), atype<KN<double>*>(), false));
+                        codeR = op->Find("(", ArrayOfaType(atype<double>(), atype<KN<PetscScalar>*>(), atype<KN<PetscScalar>*>(), false));
                     }
                     if(c == 0 || c == 2)
                         x = to<KN<PetscScalar>*>(args[3]);
                     else {
-                        b = to<KN<PetscScalar>*>(args[3]);
+                        if(c == 1)
+                            b = to<KN<PetscScalar>*>(args[3]);
+                        else {
+                            op = dynamic_cast<const Polymorphic*>(args[3].LeftValue());
+                            ffassert(op);
+                            codeRHS = op->Find("(", ArrayOfaType(atype<double>(), atype<KN<PetscScalar>*>(), false));
+                        }
                         x = to<KN<PetscScalar>*>(args[4]);
                     }
                 }
@@ -2151,6 +2167,7 @@ class NonlinearSolve : public OneOperator {
         NonlinearSolve() : OneOperator(atype<long>(), atype<Type*>(), atype<Polymorphic*>(), atype<Polymorphic*>(), atype<KN<PetscScalar>*>()), c(0) { }
         NonlinearSolve(int) : OneOperator(atype<long>(), atype<Type*>(), atype<Polymorphic*>(), atype<Polymorphic*>(), atype<KN<PetscScalar>*>(), atype<KN<PetscScalar>*>()), c(1) { }
         NonlinearSolve(int, int) : OneOperator(atype<long>(), atype<Type*>(), atype<Polymorphic*>(), atype<Polymorphic*>(), atype<KN<PetscScalar>*>()), c(2) { }
+        NonlinearSolve(int, int, int) : OneOperator(atype<long>(), atype<Type*>(), atype<Polymorphic*>(), atype<Polymorphic*>(), atype<Polymorphic*>(), atype<KN<PetscScalar>*>()), c(3) { }
 };
 template<class Type>
 basicAC_F0::name_and_type NonlinearSolve<Type>::E_NonlinearSolve::name_param[] = {
@@ -2236,6 +2253,25 @@ PetscErrorCode FormIFunction(TS ts, PetscReal t, Vec u, Vec u_t, Vec F, void* ct
     PetscFunctionReturn(0);
 }
 template<class Type>
+PetscErrorCode FormRHSFunction(TS ts, PetscReal t, Vec u, Vec F, void* ctx) {
+    User<Type>*             user;
+    const PetscScalar* in, *in_t;
+    PetscScalar*             out;
+    PetscErrorCode          ierr;
+
+    PetscFunctionBegin;
+    user = reinterpret_cast<User<Type>*>(ctx);
+    typename NonlinearSolve<Type>::IMatF_O* mat = reinterpret_cast<typename NonlinearSolve<Type>::IMatF_O*>((*user)->rhs);
+    VecGetArrayRead(u, &in);
+    VecGetArray(F, &out);
+    KN_<PetscScalar> xx(const_cast<PetscScalar*>(in), mat->x.n);
+    KN_<PetscScalar> yy(out, mat->x.n);
+    mat->apply(t, xx, yy);
+    VecRestoreArray(F, &out);
+    VecRestoreArrayRead(u, &in);
+    PetscFunctionReturn(0);
+}
+template<class Type>
 PetscErrorCode Monitor(TS ts, PetscInt step, PetscReal time, Vec u, void* ctx) {
     User<Type>*             user;
     const PetscScalar* in, *in_t;
@@ -2274,7 +2310,7 @@ AnyType NonlinearSolve<Type>::E_NonlinearSolve::operator()(Stack stack) const {
             VecCreateMPIWithArray(PETSC_COMM_WORLD, 1, in->n, n, static_cast<PetscScalar*>(*in), &x);
         }
         KSP ksp;
-        if(c != 2) {
+        if(c < 2) {
             User<NonlinearSolve<Type>> user = nullptr;
             PetscNew(&user);
             user->op = new NonlinearSolve<Type>::VecF_O(in->n, stack, codeJ);
@@ -2342,11 +2378,14 @@ AnyType NonlinearSolve<Type>::E_NonlinearSolve::operator()(Stack stack) const {
             PetscNew(&user);
             user->op = new NonlinearSolve<Type>::IVecF_O(in->n, stack, codeJ);
             user->r = new NonlinearSolve<Type>::IMatF_O(in->n, stack, codeR);
+            user->rhs = (c == 3 ? new NonlinearSolve<Type>::IMatF_O(in->n, stack, codeRHS, 1) : nullptr);
             user->mon = nullptr;
             TS ts;
             TSCreate(PETSC_COMM_WORLD, &ts);
             TSSetIFunction(ts, r, FormIFunction<TimeStepper<Type>>, &user);
             TSSetIJacobian(ts, ptA->_petsc, ptA->_petsc, FormIJacobian<TimeStepper<Type>>, &user);
+            if(user->rhs)
+                TSSetRHSFunction(ts, NULL, FormRHSFunction<TimeStepper<Type>>, &user);
             TSSetFromOptions(ts);
             SNES snes;
             if(ptA->_ksp) {
@@ -2739,6 +2778,7 @@ static void Init_PETSc() {
     Global.Add("SNESSolve", "(", new PETSc::NonlinearSolve<Dmat>());
     Global.Add("SNESSolve", "(", new PETSc::NonlinearSolve<Dmat>(1));
     Global.Add("TSSolve", "(", new PETSc::NonlinearSolve<Dmat>(1, 1));
+    Global.Add("TSSolve", "(", new PETSc::NonlinearSolve<Dmat>(1, 1, 1));
     Global.Add("augmentation", "(", new PETSc::augmentation<Dmat>);
     Global.Add("globalNumbering", "(", new OneOperator2_<long, Dmat*, KN<long>*>(PETSc::globalNumbering<Dmat>));
     Global.Add("globalNumbering", "(", new OneOperator2_<long, Dbddc*, KN<long>*>(PETSc::globalNumbering<Dbddc>));
