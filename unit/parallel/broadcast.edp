@@ -1,0 +1,31 @@
+//NBPROC 4
+include "test.idp"
+
+cout << "broadcast" << endl;
+
+real t;
+
+cout << "MPI rank = " << mpirank << endl;
+
+if (mpisize > 4) {
+  int[int] procs=[1, 4];
+  mpiGroup grp(procs);
+  mpiComm comm(grp);
+}
+
+int l = mpirank + 100;
+cout << " l == " << l << " broadcast l from 0   mpirank = " << mpirank << endl;
+broadcast(processor(0),l);
+cout << " l == " << l << "  mpirank = "<< mpirank << endl;
+test(l == 100);
+
+matrix<complex> A;
+matrix<complex>[int]  B(10);
+if (mpirank == 0)
+   A=[[1+1i,1i],[0,2-1i],[0,2-1i]];
+broadcast(processor(0),A);
+if (mpirank != 0) {
+  test(A(0, 0) == 1+1i && A(0, 1) == 1i
+  && A(1, 0) == 0 && A(1, 1) == 2-1i
+  && A(2, 0) == 0 && A(2, 1) == 2-1i);
+}

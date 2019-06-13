@@ -1,7 +1,7 @@
 //NBPROC 4
 include "test.idp"
 
-cout << "processor" << endl;
+cout << "Isend and I recv" << endl;
 
 real t;
 
@@ -17,7 +17,7 @@ if (mpisize > 4) {
   mpiComm  n2comm(mpiCommWorld,mpirank%3,2);// MPI_Comm_split
   if (!n1comm)  // not in n1comm
     {
-      MPI_Intercomm_create constructor
+      //MPI_Intercomm_create constructor
       mpiComm  nicomm(processor(n1comm,1),processor(n2comm,2),1000);
       mpiComm  n12comm(nicomm,true);  // MPI_Intercomm_merge cosntructor
     }
@@ -29,4 +29,20 @@ else if (mpirank==1) {
   int k;
   processor(0) >> k; // block recv
   test(k == 123456);
+}
+{
+  // UnBlock communication
+  mpiRequest rq;
+  if (mpirank == 0)
+{
+  Isend(processor(1,rq),16.);
+  mpiWait(rq);// Send
+}
+  else if (mpirank == 1)
+  {
+    real  k;
+    Irecv(processor(0,rq),k);
+    mpiWait(rq);// Recv
+    test(k == 16);
+  }
 }

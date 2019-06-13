@@ -1,0 +1,24 @@
+//NBPROC 4
+
+include "test.idp"
+
+cout << "mpiAlltoall" << endl;
+
+real t;
+
+int status; //to get the MPI status of send / recv
+real a = 42, b;
+
+mpiComm comm(mpiCommWorld, 0, 0);
+mpiRequest req;
+
+//send a,b asynchronously to the process 1
+processor(1) << a << b;
+//receive a,b synchronously from the process 10
+processor(10) >> a >> b;
+
+t = mpiWtime();
+mpiAlltoall(a, b, comm);
+t = mpiWtime() - t;
+cout << IND << t << endl;
+test(b == 42);
