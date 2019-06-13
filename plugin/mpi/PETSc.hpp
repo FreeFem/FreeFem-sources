@@ -206,7 +206,7 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
             ptA->_vS = new std::vector<Mat>();
             ptA->_vS->resize(mT->n);
             for(int k = 0; k < mT->n; ++k) {
-                MatriceMorse<PetscScalar>* mS = static_cast<MatriceMorse<PetscScalar>*>(&(*(mT->operator[](k)).A));
+                MatriceMorse<PetscScalar>* mS = (mT->operator[](k)).A ? static_cast<MatriceMorse<PetscScalar>*>(&(*(mT->operator[](k)).A)) : nullptr;
                 int n = mS ? mS->n : 0;
                 std::vector<std::vector<std::pair<int, PetscScalar>>> tmp(n);
                 if(mS)
