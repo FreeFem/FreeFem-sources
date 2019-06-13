@@ -2145,6 +2145,8 @@ class NonlinearSolve : public OneOperator {
                         op = dynamic_cast<const Polymorphic*>(args[2].LeftValue());
                         ffassert(op);
                         codeR = op->Find("(", ArrayOfaType(atype<double>(), atype<KN<PetscScalar>*>(), atype<KN<PetscScalar>*>(), false));
+                        if(!codeR)
+                            codeRHS = op->Find("(", ArrayOfaType(atype<double>(), atype<KN<PetscScalar>*>(), false));
                     }
                     if(c == 0 || c == 2)
                         x = to<KN<PetscScalar>*>(args[3]);
@@ -2377,13 +2379,14 @@ AnyType NonlinearSolve<Type>::E_NonlinearSolve::operator()(Stack stack) const {
             User<TimeStepper<Type>> user = nullptr;
             PetscNew(&user);
             user->op = new NonlinearSolve<Type>::IVecF_O(in->n, stack, codeJ);
-            user->r = new NonlinearSolve<Type>::IMatF_O(in->n, stack, codeR);
-            user->rhs = (c == 3 ? new NonlinearSolve<Type>::IMatF_O(in->n, stack, codeRHS, 1) : nullptr);
+            user->r = (codeR ? new NonlinearSolve<Type>::IMatF_O(in->n, stack, codeR) : nullptr);
+            user->rhs = (c == 3 || !codeR ? new NonlinearSolve<Type>::IMatF_O(in->n, stack, codeRHS, 1) : nullptr);
             user->mon = nullptr;
             TS ts;
             TSCreate(PETSC_COMM_WORLD, &ts);
-            TSSetIFunction(ts, r, FormIFunction<TimeStepper<Type>>, &user);
             TSSetIJacobian(ts, ptA->_petsc, ptA->_petsc, FormIJacobian<TimeStepper<Type>>, &user);
+            if(user->r)
+                TSSetIFunction(ts, r, FormIFunction<TimeStepper<Type>>, &user);
             if(user->rhs)
                 TSSetRHSFunction(ts, NULL, FormRHSFunction<TimeStepper<Type>>, &user);
             TSSetFromOptions(ts);
