@@ -5,6 +5,7 @@ html {
 	height: 100%;
 	font-size: 16px;
 	font-family: 'Roboto', sans-serif;
+  overflow: hidden;
 }
 
 body {
@@ -12,6 +13,7 @@ body {
 	padding: 0;
 	width: 100%;
 	height: 100%;
+  overflow-x: hidden;
 }
 
 a {
@@ -46,6 +48,8 @@ header p {
 
 table {
 	padding: 1rem;
+  width: 100%;
+  overflow: auto;
 }
 
 table td.title {
@@ -62,6 +66,10 @@ table td.title {
 
 .headerValue a:hover {
 	color: rgb(0, 0, 255, 1);
+}
+
+.headerValueLeg {
+  line-height: 1.75rem;
 }
 
 .coverLegendCovLo, .headerCovTableEntryLo, .coverPerLo, .coverNumLo, .coverFnLo {
