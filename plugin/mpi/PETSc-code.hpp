@@ -897,7 +897,7 @@ AnyType initCSR<HpddmType>::E_initCSR::operator()(Stack stack) const {
     ptA->_A = new HpddmType;
     if(comm)
         PETSC_COMM_WORLD = *comm;
-    if((ptR || c == 2 || c == 3) && (mA || dof)) {
+    if((ptR || c == 2 || c == 3) && (mA || (c != 0 && c != 2))) {
         HPDDM::MatrixCSR<PetscScalar>* dA;
         if(mA)
             dA = new_HPDDM_MatrixCSR<PetscScalar>(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
@@ -906,7 +906,7 @@ AnyType initCSR<HpddmType>::E_initCSR::operator()(Stack stack) const {
         Matrice_Creuse<double>* pList = nargs[5] ? GetAny<Matrice_Creuse<double>*>((*nargs[5])(stack)) : 0;
         HPDDM::MatrixCSR<void>* dL = nullptr;
         KN_<KN<long>> sub((c == 0 || c == 1) && ptR->n > 0 && ptR->operator[](0).n > 0 ? (*ptR)(FromTo(1, ptR->n - 1)) : KN<KN<long>>());
-        if(std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value && pList && (mA || dof)) {
+        if(std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value && pList && (mA || (c != 0 && c != 2))) {
             int n = 0;
             ptA->_exchange = new HPDDM::template Subdomain<PetscScalar>*[2]();
             ptA->_exchange[0] = new HPDDM::template Subdomain<PetscScalar>();

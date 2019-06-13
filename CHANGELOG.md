@@ -28,6 +28,9 @@ All notable changes to this project will be documented in this file.
 - interface to `TSSolve`, DAE/ODE solvers from PETSc
 - simpler constructor for sequential PETSc matrices (no need for the restriction array and the partition of unity)
 
+### Removed
+- legacy linear solver interfaces using the old matrix type
+
 ### Changed
 - replaced custom implementations (`RNM::real`, `RNM::norm2`, and `Fem2D::norm`) by C++11 functions
 
