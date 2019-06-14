@@ -2404,6 +2404,7 @@ AnyType NonlinearSolve<Type>::E_NonlinearSolve::operator()(Stack stack) const {
                 user->mon = new NonlinearSolve<Type>::IMonF_O(in->n, stack, codeM);
             }
             TSMonitorSet(ts, Monitor<TimeStepper<Type>>, &user, NULL);
+            TSSetSolution(ts, x);
             TSSolve(ts, x);
             if(ptA->_ksp) {
                 SNESSetKSP(snes, ksp);

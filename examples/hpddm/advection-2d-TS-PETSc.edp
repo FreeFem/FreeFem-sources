@@ -1,0 +1,78 @@
+load "PETSc"
+macro def(u)u//
+macro init(u)u//
+macro dimension()2//
+include "macro_ddm.idp"
+
+border C(t = 0, 2*pi){ x=cos(t); y=sin(t); }
+mesh Th = buildmesh(C(getARGV("-global", 100)));
+
+func Pk = P1dc;
+fespace Vh(Th, Pk);
+real[int] D;
+int[int][int] intersection;
+build(Th, 1, intersection, D, Pk, mpiCommWorld);
+Vh v1 = y, v2 = -x;
+
+macro diff(n)(abs(n) - (n))//
+
+varf vK(c, w) = int2d(Th)((v1 * dx(c) + v2 * dy(c)) * w) + intalledges(Th)((1 - nTonEdge) * w * diff(v1 * N.x + v2 * N.y) * 0.5 * jump(c));
+varf vM(c, w) = int2d(Th)(c * w);
+matrix M = vM(Vh, Vh);
+matrix K = vK(Vh, Vh);
+
+Mat dK(K, intersection, D);
+Mat dM(dK, M);
+set(M, sparams = "-pc_type jacobi");
+Mat dT(Vh.ndof, intersection, D);
+
+func real[int] funcExplicit(real t, real[int]& in) {
+    real[int] temp(in.n), out(in.n);
+    MatMult(dK, in, temp);
+    temp *= -1;
+    KSPSolve(dM, temp, out);
+    return out;
+}
+func real[int] funcRes(real t, real[int]& in, real[int]& inT) {
+    real[int] temp(in.n), out(in.n);
+    MatMult(dM, inT, out);
+    MatMult(dK, in, temp);
+    out += temp;
+    return out;
+}
+real shift = 0;
+func int funcJ(real t, real[int]& in, real[int]& inT, real a) {
+    if(abs(a - shift) > 1.0e-10) {
+        matrix B = a * M + K;
+        dT = B;
+        shift = a;
+    }
+    return 0;
+}
+Vh w;
+string type;
+func int funcM(int s, real t, real[int]& u) {
+    changeNumbering(dT, w[], u, inverse = true, exchange = true);
+    plotMPI(Th, w[], "Global solution at step " + s + " (time " + t + ") with " + type + " method", Pk, def, real, 3, 0)
+}
+for(int j = 0; j < 3; ++j) {
+    Vh c = exp(-10 * ((x - 0.3)^2 + (y - 0.3)^2));
+    real[int] cPETSc;
+    changeNumbering(dT, c[], cPETSc);
+    real T = 3 * pi;
+    string deflt = "-ts_view -ts_max_snes_failures -1 -ts_exact_final_time interpolate -ts_adapt_type basic -ts_max_time " + string(T);
+    if(j == 0) {
+        type = "explicit";
+        TSSolve(dT, funcJ, funcExplicit, cPETSc, sparams = "-ts_type rk -ts_rk_type 5f " + deflt, monitor = funcM);
+    }
+    else if(j == 1) {
+        type = "implicit";
+        TSSolve(dT, funcJ, funcRes, cPETSc, sparams = "-ts_type rosw " + deflt, monitor = funcM);
+    }
+    else {
+        type = "semi-implicit";
+        TSSolve(dT, funcJ, funcRes, cPETSc, sparams = "-ts_type arkimex -ts_arkimex_type 5 " + deflt, monitor = funcM);
+    }
+    changeNumbering(dT, c[], cPETSc, inverse = true, exchange = true);
+    plotMPI(Th, c[], "Global solution with " + type + " method", Pk, def, real, 3, 1)
+}

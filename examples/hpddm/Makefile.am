@@ -78,7 +78,8 @@ CONDITIONAL_PETSC = bratu-2d-PETSc.edp \
 	vi-2d-PETSc.edp \
 	orego.edp \
 	heat-2d-TS-PETSc.edp \
-	heat-2d-TS-RHS-PETSc.edp
+	heat-2d-TS-RHS-PETSc.edp \
+	advection-2d-TS-PETSc.edp
 
 if SLEPC
 CONDITIONAL_PETSC_SLEPC = laplace-2d-SLEPc.edp \
