@@ -48,11 +48,11 @@ endif HDF5
 
 if IPOPT
 CONDITIONAL_IPOPT = IpoptLap.edp \
-	IpOptMinSurf.edp \
+	IpoptMinSurf.edp \
 	IpoptMinSurfVol.edp \
 	IpoptVI.edp \
 	IpoptVI2.edp \
-	IPOTest.edp
+	IpoptTest.edp
 endif IPOPT
 
 if METIS
