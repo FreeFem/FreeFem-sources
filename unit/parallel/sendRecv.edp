@@ -8,6 +8,9 @@ real t;
 int rank;
 mpiComm comm(mpiCommWorld, 0, 0);
 int MPIRank = mpiRank(comm);
+matrix A = [[1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9]];
 
 int toSend;
 if (MPIRank == 0) {
@@ -155,4 +158,28 @@ if (MPIRank == 0) {
   cout << IND << IND << t << endl;
   mesh3 Th3 = cube(5, 5, 5);
   test(toSendMesh3.nv == Th3.nv);
+}
+
+matrix toSendMatrix;
+if (MPIRank == 0) {
+  cout << IND << "mesh3" << endl;
+  toSendMatrix = A;
+  t = mpiWtime();
+  Send(processor(1, comm), toSendMatrix);
+  t = mpiWtime() - t;
+  cout << IND << IND << t << endl;
+} else if (MPIRank == 1) {
+  t = mpiWtime();
+  Recv(processor(0, comm), toSendMatrix);
+  t = mpiWtime() - t;
+  cout << IND << IND << t << endl;
+  test(toSendMatrix(0, 0) == A(0, 0));
+  test(toSendMatrix(0, 1) == A(0, 1));
+  test(toSendMatrix(0, 2) == A(0, 2));
+  test(toSendMatrix(1, 0) == A(1, 0));
+  test(toSendMatrix(1, 1) == A(1, 1));
+  test(toSendMatrix(1, 2) == A(1, 2));
+  test(toSendMatrix(2, 0) == A(2, 0));
+  test(toSendMatrix(2, 1) == A(2, 1));
+  test(toSendMatrix(2, 2) == A(2, 2));
 }

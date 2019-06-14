@@ -7,42 +7,53 @@ real t;
 
 cout << "MPI rank = " << mpirank << endl;
 
-if (mpisize > 4) {
-  int[int] procs=[1, 4];
-  mpiGroup grp(procs);
-  mpiComm comm(grp);
-
-  mpiComm  n0comm(mpiCommWorld,mpirank%3,0);// MPI_Comm_split
-  mpiComm  n1comm(mpiCommWorld,mpirank%3,1);// MPI_Comm_split
-  mpiComm  n2comm(mpiCommWorld,mpirank%3,2);// MPI_Comm_split
-  if (!n1comm)  // not in n1comm
-    {
-      //MPI_Intercomm_create constructor
-      mpiComm  nicomm(processor(n1comm,1),processor(n2comm,2),1000);
-      mpiComm  n12comm(nicomm,true);  // MPI_Intercomm_merge cosntructor
-    }
-}
+// if (mpisize > 4) {
+//   int[int] procs=[1, 4];
+//   mpiGroup grp(procs);
+//   mpiComm comm(grp);
+// }
 
 if( mpirank==0)
-  processor(1) << 123456; //  unblock send
+  processor(1) << 123456;
 else if (mpirank==1) {
   int k;
-  processor(0) >> k; // block recv
+  processor(0) >> k;
   test(k == 123456);
 }
 {
-  // UnBlock communication
   mpiRequest rq;
   if (mpirank == 0)
 {
   Isend(processor(1,rq),16.);
-  mpiWait(rq);// Send
+  mpiWait(rq);
 }
   else if (mpirank == 1)
   {
     real  k;
     Irecv(processor(0,rq),k);
-    mpiWait(rq);// Recv
+    mpiWait(rq);
     test(k == 16);
+  }
+}
+
+{
+  matrix A;
+  mpiRequest rq;
+  if (mpirank == 0)
+{
+  A = [[1, 2],
+      [3, 4]];
+  Isend(processor(1, rq), A);
+  mpiWait(rq);
+}
+  else if (mpirank == 1)
+  {
+    matrix  k;
+    Irecv(processor(0,rq), k);
+    mpiWait(rq);
+    test(k(0, 0) == 1);
+    test(k(0, 1) == 2);
+    test(k(1, 0) == 3);
+    test(k(1, 1) == 4);
   }
 }

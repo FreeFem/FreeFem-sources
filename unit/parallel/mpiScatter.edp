@@ -1,9 +1,9 @@
 //NBPROC 4
 include "test.idp"
 
-cout << "mpiAlltoall" << endl;
+cout << "mpiScatter" << endl;
 
-real t;
+int[int] a, b;
 
 int[int] procs=[1, 4];
 mpiGroup grp(procs);
@@ -18,19 +18,12 @@ if (!n1comm)  // not in n1comm
     mpiComm  n12comm(nicomm,true);  // MPI_Intercomm_merge cosntructor
   }
 
-int[int] a = [1, 4 , 2], b;
-real c = 42, d;
-
-//send a,b asynchronously to the process 1
-// processor(1) << a << b;
-// //receive a,b synchronously from the process 10
-// processor(10) >> a >> b;
-mpiComm cc;
-// mpiCommWorld cc;
-
-cout << mpirank << endl;
-if (mpisize == 4) {
-  mpiAlltoall(a, b, n0comm);
-  // cout << "mpirank : " << mpirank << endl;
+if (mpirank == 0) {
+  // a = [42, 43, 44];
+  a = [1, 2, 42];
+  b(3);
+  mpiScatter(a, b, processor(1, n0comm));
+  cout << "a inside" << a << endl;
 }
-test(b[0] == 42);
+// else if (mpirank == 1)
+//   test(b(0) == 42);

@@ -1,0 +1,8 @@
+include "test.idp"
+
+cout << "mprirank" << endl;
+
+if (mpirank == 0)
+  test(mpirank == 0);
+else if (mpirank == 1)
+  test(mpirank == 1);
