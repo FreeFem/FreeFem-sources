@@ -313,8 +313,8 @@ else {
   for (int is=0;is < pr#prfe#prmesh#listofsupers.n; is++) {
     int isuper = pr#prfe#prmesh#listofsupers[is];
     if (pr#prfe#prmesh#issuper && pr#prfe#prmesh#mysuperrank == isuper) {
-      inisuperwithoverlap[is] = pr#prfe#prmesh#insuperwithoverlap;
       inisuperwithoverlap[is].resize(pr#prfe#prmesh#insuperwithoverlap.n);
+      inisuperwithoverlap[is] = pr#prfe#prmesh#insuperwithoverlap;
     }
     else
       inisuperwithoverlap[is].resize(inisuperwithoverlapsize[is]);
@@ -388,7 +388,7 @@ else {
       nbij += tabnumberIntersection[i];
   }
   
-  mpiRequest[int] rqs(pr#prfe#prmesh#listofsupers.n-pr#prfe#prmesh#issuper+nbrqmpiexcl+pr#prfe#prmesh#issuper*(inisuperwithoverlap[is].n+nbij));
+  mpiRequest[int] rqs(pr#prfe#prmesh#listofsupers.n-pr#prfe#prmesh#issuper+nbrqmpiexcl+pr#prfe#prmesh#issuper*(inisuperwithoverlap[is].n-!pr#prfe#prmesh#excluded+nbij));
   cpt = 0;
   for (int is=0; is < pr#prfe#prmesh#listofsupers.n; is++) {
     int isuper = pr#prfe#prmesh#listofsupers[is];
@@ -424,12 +424,12 @@ else {
     for (int i = !pr#prfe#prmesh#excluded; i < inisuperwithoverlap[is].n; i++)
     for (int j=0; j < tabnumberIntersection[i]; j++) {
       tabEij[cpt].resize(pr#sizelg[inisuperwithoverlap[is][i]],pr#sizelg[tabarrayIntersection[i][j]]);
-      Irecv(processor(inisuperwithoverlap[is][i]+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rqs[pr#prfe#prmesh#listofsupers.n-pr#prfe#prmesh#issuper+nbrqmpiexcl+inisuperwithoverlap[is].n+cpt]),tabEij[cpt]);
+      Irecv(processor(inisuperwithoverlap[is][i]+pr#prfe#prmesh#pCS*pr#prfe#prmesh#exclude,pr#prfe#prmesh#mpicomm,rqs[pr#prfe#prmesh#listofsupers.n-pr#prfe#prmesh#issuper+nbrqmpiexcl+inisuperwithoverlap[is].n-!pr#prfe#prmesh#excluded+cpt]),tabEij[cpt]);
       cpt++;
     }
   }
 
-  for (int i=0; i<pr#prfe#prmesh#listofsupers.n-pr#prfe#prmesh#issuper+nbrqmpiexcl+pr#prfe#prmesh#issuper*(inisuperwithoverlap[is].n+nbij); i++)
+  for (int i=0; i<pr#prfe#prmesh#listofsupers.n-pr#prfe#prmesh#issuper+nbrqmpiexcl+pr#prfe#prmesh#issuper*(inisuperwithoverlap[is].n-!pr#prfe#prmesh#excluded+nbij); i++)
     int k = mpiWaitAny(rqs);
   
   if (pr#prfe#prmesh#issuper) {

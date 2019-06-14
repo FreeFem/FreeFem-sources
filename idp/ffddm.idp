@@ -208,6 +208,7 @@ if (!bpara){
 
 int[int][int] pr#intersectionhpddm(1 + preffe#prmesh#numberIntersection);
 {
+  pr#intersectionhpddm[0].resize(preffe#prmesh#arrayIntersection.n);
   pr#intersectionhpddm[0] = preffe#prmesh#arrayIntersection;
   preffe#K[int] CC;
   int[int] II;
