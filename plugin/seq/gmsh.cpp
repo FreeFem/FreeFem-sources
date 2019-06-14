@@ -125,7 +125,7 @@ Mesh*GMSH_Load (const string &filename) {
 
 	while (!feof(fp)) {
 		res = fgets(str, sizeof(str), fp);
-		if (res == nullptr) cout << "fgets error" << endl;
+		if (verbosity > 10 && res == nullptr) cout << "fgets error or EOF" << endl;
 		if (str[0] == '$') {
 			if (!strncmp(&str[1], "MeshFormat", 10)) {
 				if (!fgets(str, sizeof(str), fp)) {exit(1);}
@@ -307,7 +307,7 @@ Mesh*GMSH_Load (const string &filename) {
 	if (fp == nullptr) cerr << "fopen error"<< endl;
 	while (!feof(fp)) {
 		res = fgets(str, sizeof(str), fp);
-		if (res == nullptr) cerr << "fgets error" << endl;
+		if (verbosity > 10 && res == nullptr) cout << "fgets error or EOF" << endl;
 		if (str[0] == '$') {
 			if (!strncmp(&str[1], "ELM", 3) || !strncmp(&str[1], "Elements", 8)) {
 				if (!fgets(str, sizeof(str), fp)) {exit(1);}
@@ -534,7 +534,7 @@ Mesh3*GMSH_Load3 (const string &filename) {
 
 	while (!feof(fp)) {
 		res = fgets(str, sizeof(str), fp);
-		if (res == nullptr) cerr << "fgets error" << endl;
+		if (verbosity > 10 && res == nullptr) cout << "fgets error or EOF" << endl;
 		if (str[0] == '$') {
 			if (!strncmp(&str[1], "MeshFormat", 10)) {
 				if (!fgets(str, sizeof(str), fp)) {exit(1);}
@@ -717,7 +717,7 @@ Mesh3*GMSH_Load3 (const string &filename) {
 
 	while (!feof(fp)) {
 		res = fgets(str, sizeof(str), fp);
-		if (res == nullptr) cerr << "fgets error" << endl;
+		if (verbosity > 10 && res == nullptr) cout << "fgets error or EOF" << endl;
 		if (str[0] == '$') {
 			if (!strncmp(&str[1], "ELM", 3) || !strncmp(&str[1], "Elements", 8)) {
 				if (!fgets(str, sizeof(str), fp)) {exit(1);}
