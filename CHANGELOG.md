@@ -26,6 +26,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - interface to `TSSolve`, DAE/ODE solvers from PETSc
+- interface to `TaoSolve`, Toolkit for Advance Optimization from PETSc
 - simpler constructor for sequential PETSc matrices (no need for the restriction array and the partition of unity)
 
 ### Changed

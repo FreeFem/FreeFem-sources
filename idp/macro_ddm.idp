@@ -5,7 +5,7 @@ macro partitioner()metis// EOM
 ENDIFMACRO
 IFMACRO(partitioner,metis)
 load "metis"
-macro partitionerSeq(part, Th, size)metisdual(part, Th, size)// EOM
+macro partitionerSeq(part, Th, size){ if(size <= 1) part = 0; else metisdual(part, Th, size); }// EOM
 macro partitionerPar(part, Th, comm, size)broadcast(processor(0, comm), part)// EOM
 ENDIFMACRO
 IFMACRO(partitioner,scotch)
@@ -70,8 +70,7 @@ macro bb3(boundingMesh, overshoot, ThGlobal)
             ThGlobal = trunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3) && z >= bb(4) && z <= bb(5)));// EOM
 
 macro plotMPI(Th, u, legend, Pk, def, K, d, w)
-if(!NoGraphicWindow)
-{
+if(!NoGraphicWindow) {
     if(mpirank == 0) {
         meshN ThCurrent = Th;
         meshN[int] meshTab(mpisize);
@@ -99,11 +98,10 @@ if(!NoGraphicWindow)
         mpiWait(rq[0]);
         mpiWait(rq[1]);
     }
-	}// EOM
+}// EOM
 
 macro plotMPIeach(Th, u, legend, Pk, def, K, d, w)
-if(!NoGraphicWindow)
-{
+if(!NoGraphicWindow) {
     if(mpirank == 0) {
         meshN ThCurrent = Th;
         meshN[int] meshTab(mpisize);
