@@ -1,4 +1,5 @@
 PARAM=-ne -nw -v 1000000
+
 FF=../src/nw/FreeFem++
 SRC=$(wildcard *.edp)
 
@@ -12,7 +13,8 @@ all: freefem++.pref base parallel
 
 base:
 	(for test in $(SRC); do \
-		$(FF) $$test $(PARAM); \
+		echo $$test; \
+		$(FF) $$test $(PARAM) > $$test.log; \
 	done)
 
 freefem++.pref:
@@ -20,5 +22,6 @@ freefem++.pref:
 
 parallel:
 	(for test in $(SRCmpi); do \
-		$(FFmpi) $$test $(PARAM); \
+		echo $$test; \
+		$(FFmpi) $$test $(PARAM) > $$test.log; \
 	done)
