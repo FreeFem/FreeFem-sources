@@ -23,9 +23,9 @@ if (mpisize > 4) {
     }
 }
 
-if (mpirank==0)
+if (mpirank == 0)
   processor(1) << 123456; //  unblock send
-else if (mpirank==1) {
+else if (mpirank == 1) {
   int k;
   processor(0) >> k; // block recv
   test(k == 123456);

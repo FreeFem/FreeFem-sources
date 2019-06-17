@@ -1,0 +1,10 @@
+include "test.idp"
+
+cout << "mpiUndefined" << endl;
+
+real t;
+
+t = mpiWtime();
+test(mpiUndefined == -32766);
+t = mpiWtime() - t;
+cout << IND << t << endl;

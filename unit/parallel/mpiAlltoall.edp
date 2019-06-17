@@ -1,36 +1,62 @@
 //NBPROC 4
 include "test.idp"
 
-cout << "mpiAlltoall" << endl;
+if (mpirank == 0)
+  cout << "mpiAlltoall" << endl;
 
 real t;
-
-int[int] procs=[1, 4];
-mpiGroup grp(procs);
-mpiComm comm(grp);
-
-mpiComm  n0comm(mpiCommWorld,mpirank%3,0);// MPI_Comm_split
-mpiComm  n1comm(mpiCommWorld,mpirank%3,1);// MPI_Comm_split
-mpiComm  n2comm(mpiCommWorld,mpirank%3,2);// MPI_Comm_split
-if (!n1comm)  // not in n1comm
-  {
-    mpiComm  nicomm(processor(n1comm,1),processor(n2comm,2),1000);
-    mpiComm  n12comm(nicomm,true);  // MPI_Intercomm_merge cosntructor
-  }
-
-int[int] a = [1, 4 , 2], b;
-real c = 42, d;
-
-//send a,b asynchronously to the process 1
-// processor(1) << a << b;
-// //receive a,b synchronously from the process 10
-// processor(10) >> a >> b;
 mpiComm cc;
-// mpiCommWorld cc;
 
-cout << mpirank << endl;
-if (mpisize == 4) {
-  mpiAlltoall(a, b, n0comm);
-  // cout << "mpirank : " << mpirank << endl;
-}
-test(b[0] == 42);
+if (mpirank == 0)
+  cout << IND << "int[int]" << endl;
+
+int[int] a(mpisize), b(mpisize);
+a[mpirank] = mpirank;
+
+t = mpiWtime();
+mpiAlltoall(a, b);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+test(b[mpirank] == mpirank);
+
+t = mpiWtime();
+mpiAlltoall(a, b, cc);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+test(b[mpirank] == mpirank);
+
+if (mpirank == 0)
+  cout << IND << "real[int]" << endl;
+
+real[int] c(mpisize), e(mpisize);
+c[mpirank] = mpirank;
+
+t = mpiWtime();
+mpiAlltoall(c, e);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+test(e[mpirank] == mpirank);
+
+t = mpiWtime();
+mpiAlltoall(c, e, cc);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+test(e[mpirank] == mpirank);
+
+if (mpirank == 0)
+  cout << IND << "complex[int]" << endl;
+
+complex[int] f(mpisize), g(mpisize);
+f[mpirank] = mpirank;
+
+t = mpiWtime();
+mpiAlltoall(f, g);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+test(g[mpirank] == mpirank);
+
+t = mpiWtime();
+mpiAlltoall(f, g, cc);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+test(g[mpirank] == mpirank);
