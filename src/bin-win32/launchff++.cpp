@@ -111,7 +111,7 @@ int main (int argc, const char **argv) {
     ofn.lpstrFilter = "freefem++ Files (*.edp)\0*.edp\0All Files (*.*)\0*.*\0\0";
     ofn.lpstrFile   = filename;
     ofn.nMaxFile    = MAX_PATH;
-    ofn.lpstrTitle  = "Select a File, yo!";
+    ofn.lpstrTitle  = "Please, select a file";
     ofn.Flags       = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
 
     if (GetOpenFileNameA(&ofn)) {
