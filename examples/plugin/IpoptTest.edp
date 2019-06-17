@@ -13,7 +13,6 @@
  */
  
  load "ff-Ipopt"
- include "ExtractDofsonBorder.idp" 
  real[int] xlb=[1.,1.,1.,1.],xub=[5.,5.,5.,5.],glb=[25.,40.],gub=[1.e19,40.];
  
  func real J(real[int] &X)

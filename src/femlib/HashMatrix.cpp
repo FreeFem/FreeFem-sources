@@ -171,7 +171,7 @@ re_do_numerics(0),re_do_symbolic(0)
         
         if(verbosity>3)
             cout << "     -- Read Mat: " <<  this->n << " x " <<  this->m << " sym : " << rsymetrique << " nnz=" << rnbcoef <<endl;
-        ffassert(f.good() && rn>0 && rm>0 && rnbcoef>0 );
+        ffassert(f.good() && rn>=0 && rm>=0 && rnbcoef>=0 );
         resize(rn,rm,rnbcoef);
         half =rsymetrique;
         I ii,jj;

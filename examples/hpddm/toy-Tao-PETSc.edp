@@ -1,0 +1,123 @@
+//  run with MPI:  ff-mpirun -np 1 script.edp
+// NBPROC 1
+
+assert(mpisize == 1);
+load "PETSc"
+int n = 2;
+real[int] D(n);
+D = 1;
+int[int][int] restriction(1);
+restriction[0].resize(0);
+matrix sp = D;
+Mat H(sp, restriction, D);
+func real J(real[int]& in) {
+    return (in[0]-2.0)^2 + (in[1]-2.0)^2 - 2.0*(in[0]+in[1]);
+}
+func real[int] DJ(real[int]& in) {
+    real[int] out(in.n);
+    out[0] = 2.0*(in[0]-2.0) - 2.0;
+    out[1] = 2.0*(in[1]-2.0) - 2.0;
+    return out;
+}
+real[int] xl = [-1, -1];
+real[int] xu = [ 2,  2];
+int me = 1;
+D.resize(1);
+D = 1;
+sp = D;
+Mat E(sp, restriction, D);
+real[int, int] full(1, 2);
+full = 1;
+sp = full;
+Mat JE(E, H, sp);
+func real[int] funcE(real[int]& in) {
+    real[int] out(me);
+    out[0] = in[0]^2 + in[1] - 2.0;
+    return out;
+}
+func int funcJE(real[int]& in) {
+    real[int, int] full(me, in.n);
+    full(0, 0) = 2 * in[0];
+    full(0, 1) = 1;
+    matrix sp = full;
+    JE = sp;
+    return 0;
+}
+{
+    func int funcH(real[int]& in) {
+        real[int] diag(n);
+        diag = 2;
+        matrix sp = diag;
+        H = sp;
+        return 0;
+    }
+    for(int i = 0; i < 2; ++i) {
+        real[int] x = [0, 0];
+        if(i == 0)
+            TaoSolve(H, J, DJ, x, xl = xl, xu = xu, sparams = "-tao_monitor -tao_type bqnls -pc_type lu -pc_factor_mat_solver_type mumps");
+        else
+            TaoSolve(H, J, DJ, x, xl = xl, xu = xu, sparams = "-tao_monitor -tao_type bnls -pc_type lu -pc_factor_mat_solver_type mumps", HessianRoutine = funcH);
+        cout << "J([" << x[0] << ", " << x[1] << "]) = " << J(x) << endl;
+    }
+}
+{
+    func int funcH(real[int]& in, real[int]& DE) {
+        real[int] diag(n);
+        diag[0] = 2 * (1+DE[0]);
+        diag[1] = 2;
+        matrix sp = diag;
+        H = sp;
+        return 0;
+    }
+    real[int] x = [0, 0];
+    TaoSolve(H, J, DJ, x, xl = xl, xu = xu, sparams = "-tao_monitor -tao_type ipm -pc_type lu -pc_factor_mat_solver_type mumps", HessianRoutine = funcH, EqualityConstraints = funcE, JacobianEquality = funcJE, JE = JE);
+    cout << "J([" << x[0] << ", " << x[1] << "]) = " << J(x) << ", E(x) = " << funcE(x)[0] << " (= 0)" << endl;
+}
+{
+    int mi = 2;
+    D.resize(mi);
+    D = 1;
+    full.resize(mi, mi);
+    full = 1;
+    sp = full;
+    Mat I(sp, restriction, D);
+    Mat JI(I, H, sp);
+    func int funcHnoE(real[int]& in, real[int]& DI) {
+        real[int] diag(n);
+        diag[0] = 2 * (1+DI[0]-DI[1]);
+        diag[1] = 2;
+        matrix sp = diag;
+        H = sp;
+        return 0;
+    }
+    func int funcH(real[int]& in, real[int]& DE, real[int]& DI) {
+        real[int] diag(n);
+        diag[0] = 2 * (1+DE[0]+DI[0]-DI[1]);
+        diag[1] = 2;
+        matrix sp = diag;
+        H = sp;
+        return 0;
+    }
+    func real[int] funcI(real[int]& in) {
+        real[int] out(mi);
+        out[0] = in[0]^2 - in[1];
+        out[1] = -in[0]^2 + in[1] + 1.0;
+        return out;
+    }
+    func int funcJI(real[int]& in) {
+        real[int, int] full(mi, in.n);
+        full(0, 0) = 2 * in[0];
+        full(0, 1) = -1;
+        full(1, 0) = -2 * in[0];
+        full(1, 1) = 1;
+        matrix sp = full;
+        JI = sp;
+        return 0;
+    }
+    real[int] x = [0, 0];
+    TaoSolve(H, J, DJ, x, xl = xl, xu = xu, sparams = "-tao_monitor -tao_type ipm -pc_type lu -pc_factor_mat_solver_type mumps", HessianRoutine = funcHnoE, InequalityConstraints = funcI, JacobianInequality = funcJI, JI = JI);
+    cout << "J([" << x[0] << ", " << x[1] << "]) = " << J(x) << ", I(x) = [" << funcI(x)[0] << ", " << funcI(x)[0] << "] (>= [0, 0])" << endl;
+    x = [0, 0];
+    TaoSolve(H, J, DJ, x, xl = xl, xu = xu, sparams = "-tao_monitor -tao_type ipm -pc_type lu -pc_factor_mat_solver_type mumps", HessianRoutine = funcH, EqualityConstraints = funcE, JacobianEquality = funcJE, JE = JE, InequalityConstraints = funcI, JacobianInequality = funcJI, JI = JI);
+    cout << "J([" << x[0] << ", " << x[1] << "]) = " << J(x) << ", E(x) = " << funcE(x)[0] << " (= 0), I(x) = [" << funcI(x)[0] << ", " << funcI(x)[0] << "] (>= [0, 0])" << endl;
+}
