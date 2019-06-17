@@ -109,8 +109,8 @@ fi
 export MPIEXEC_TIMEOUT=300
 test -z "${COMMONPROGRAMFILES+x}" -a -z "${WINDIR+x}" && ulimit -t 60
 ${TEST_FFPP} ${FLAGS_FFPP_B}  "$@" ${FLAGS_FFPP_A}>$log_file 2>&1
-
 estatus=$?
+FAIL_CPU_LIMIT=`tail -100 $log_file|egrep -i  'Cputime limit exceeded|MPIEXEC_TIMEOUT'|wc -l`
 fi
 
 ## Add an error suffix in order to extract errored tests only
@@ -122,7 +122,9 @@ fi
 if test $enable_hard_errors = no && test $estatus -eq 99; then
   estatus=1
 fi
-
+if test "${FAIL_CPU_LIMIT:-0}" -ge 1  ; then
+	$expect_failure=yes;
+fi 
 case $estatus:$expect_failure in
   0:yes) col=$grn res=PASS recheck=yes gcopy=yes;;
   0:*)   col=$grn res=PASS  recheck=no  gcopy=no;;

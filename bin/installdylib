@@ -1,0 +1,21 @@
+
+cd `dirname $0`
+cd ..
+grep ' = ' Makefile| grep ff_prefix_dir| sed 's/ = /=/' >prefix-list.sh
+source prefix-list.sh
+pwd=`pwd`
+pwd3lib="$pwd/3rdparty/lib"
+echo $pwd
+echo $pwd3lib
+for lib in $ff_prefix_dir_lib/*.dylib; do
+  ooo=/tmp/otoool-`basename $lib`
+ # echo $lib
+  otool -L $lib| awk '/compatibility version/ {print $1}'>$ooo
+  grep $pwd3lib $ooo 
+  for i in `grep $pwd3lib $ooo` ; do
+    j=`echo $i|sed "s;$pwd3lib$;$ff_prefix_dir_lib;"`
+	install_name_tool -change $i $j $lib
+	echo install_name_tool -change $i $j $lib
+  done
+done
+

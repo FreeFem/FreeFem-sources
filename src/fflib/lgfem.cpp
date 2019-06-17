@@ -4398,7 +4398,7 @@ if(nargs[VTK_START+index])                    \
                 case 'f' : fill = !fill ; plotting=true;
                     reffecran();
                     break;
-                case 'g' : setgrey(grey=!getgrey()); plotting=true;
+                case 'g' : setgrey(grey= !getgrey()); plotting=true;
                     reffecran();
                     break;
 
