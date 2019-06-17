@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFEM,4.2-1,frederic.hecht@sorbonne-universite.fr,FreeFEM)
+AC_INIT(FreeFEM,4.3,frederic.hecht@sorbonne-universite.fr,FreeFEM)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -643,7 +643,7 @@ fi
 
 # Version numbering, converted to a floating point value
 ff_numver="`echo $VERSION|sed 's/-\(.*\)/+\1.0*0.000001/'`"
-AC_DEFINE_UNQUOTED(VersionFreeFempp,$ff_numver,FreeFem++ version as a float)
+AC_DEFINE_UNQUOTED(VersionFreeFem,$ff_numver,FreeFEM version as a float)
 
 # Since src/fflib/strversionnumber.cpp is recreated at each build, this
 # date is only useful for config-version.h
@@ -694,7 +694,7 @@ cat << EOF > config-version.h
 #define VersionFreeFemDate "$FF_DATE"
 
 /* FreeFem++ version as a float */
-#define VersionFreeFempp ($ff_numver)
+#define VersionFreeFem ($ff_numver)
 EOF
 
 # Checking wether to produce a debug version
@@ -1245,7 +1245,6 @@ if test "$ff_where_lib_conf_blaslapack" = 1  ; then
 	        AC_FF_ADDWHERELIB(mkl,$ff_blas_libs,$ff_blas_inc)
 			ff_mkl=yes
 dnl            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
-dnl            AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
 	   fi
 
 fi
@@ -1352,7 +1351,6 @@ then
 	    AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
 		ff_mkl_ok=yes
 dnl            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
-dnl            AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
 
 	else
 	    ff_mkl_libpath=no
@@ -2234,9 +2232,6 @@ TOOL_DISABLE(htool,["htool.$DYLIB_SUFFIX"])
 ##
 if test "$ff_mkl_ok" == yes ; then
             AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
-fi
-if test "$ff_blas_ok" == yes ; then
-            AC_DEFINE(HAVE_BLAS,1, the MKL intel lib is present for BLAS and LAPACK  )
 fi
 
 ## Condtional for check

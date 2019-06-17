@@ -34,6 +34,7 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 - legacy linear solver interfaces using the old matrix type
+- dot products using CBLAS because of errors at link time
 
 ## [4.2.1]
 ### Added
