@@ -28,7 +28,7 @@ WriteXdmf::WriteXdmf(const char *ffname, Int4 nbelem, Int4 nbvertex) : WXffname(
 
 WriteXdmf::~WriteXdmf()
 {
-  delete [] xdmf_filename;  
+  delete [] xdmf_filename;
   delete [] Elemtype;
 }
 
@@ -38,21 +38,21 @@ void WriteXdmf::WriteXdmfMeshFile2D()
   Elemtype= new char[strlen("Triangle")+1];
   strcpy(Elemtype,"Triangle");
   dimension=2;
-  nbvperelem=3; 
- 
+  nbvperelem=3;
+
   //creation et ecriture du fichier de description
   //du maillage 2D au format xdfm pour paraview
   xdmf_file.open (xdmf_filename);
   xdmf_file << "<?xml version=\"1.0\" ?>\n";
   xdmf_file << "<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>\n";
-  xdmf_file << "<Xdmf Version=\"2.0\">\n"; 
-  xdmf_file << "  <Domain>\n"; 
+  xdmf_file << "<Xdmf Version=\"2.0\">\n";
+  xdmf_file << "  <Domain>\n";
   // pour l'instant nom du maillage par defaut : full mesh
   xdmf_file << "    <Grid Name=\"" << "full mesh" << "\" GridType=\"Uniform\">\n";
-  xdmf_file << "      <Topology TopologyType=\"" << Elemtype 
+  xdmf_file << "      <Topology TopologyType=\"" << Elemtype
 	    << "\"  NumberOfElements=\"" << nbofelem << "\">\n";
   // nb nodes per element, ici classe triangle donc =3
-  xdmf_file << "	<DataItem Format=\"HDF\" NumberType=\"Int\" Dimensions=\"" 
+  xdmf_file << "	<DataItem Format=\"HDF\" NumberType=\"Int\" Dimensions=\""
 	    << nbofelem << " " << nbvperelem << "\">\n";
   xdmf_file << "           " << WXffname  << ":/Connectivity/ELEM2NODE\n";
   xdmf_file << "        </DataItem>\n";
@@ -71,47 +71,47 @@ void WriteXdmf::WriteXdmfMeshFile2D()
   cout<<"save xdmf file mesh : "<< xdmf_filename << endl;
 }
 
-void WriteXdmf::WriteXdmfMeshFile3D()
-{ 
-  //initialisation du type d'element : tetraedre
-  Elemtype= new char[strlen("Tetrahedron")+1];
-  strcpy(Elemtype,"Tetrahedron");
-  dimension=3;
-  nbvperelem=4; 
+// void WriteXdmf::WriteXdmfMeshFile3D()
+// {
+//   //initialisation du type d'element : tetraedre
+//   Elemtype= new char[strlen("Tetrahedron")+1];
+//   strcpy(Elemtype,"Tetrahedron");
+//   dimension=3;
+//   nbvperelem=4;
+//
+//   //creation et ecriture du fichier de description
+//   //du maillage 3D au format xdfm pour paraview
+//   xdmf_file.open (xdmf_filename);
+//   xdmf_file << "<?xml version=\"1.0\" ?>\n";
+//   xdmf_file << "<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>\n";
+//   xdmf_file << "<Xdmf Version=\"2.0\">\n";
+//   xdmf_file << "  <Domain>\n";
+//   //pour l'instant nom du maillage par defaut : full mesh
+//   xdmf_file << "    <Grid Name=\"" << "full mesh" << "\" GridType=\"Uniform\">\n";
+//   xdmf_file << "      <Topology TopologyType=\"" << Elemtype
+// 	    << "\"  NumberOfElements=\"" << nbofelem << "\">\n";
+//   // nb nodes per element, ici classe Tetrahedra donc = 4
+//   xdmf_file << "	<DataItem Format=\"HDF\" NumberType=\"Int\" Dimensions=\""
+// 	    << nbofelem << " " << nbvperelem << "\">\n";
+//   xdmf_file << "           " << WXffname  << ":/Connectivity/ELEM2NODE\n";
+//   xdmf_file << "        </DataItem>\n";
+//   xdmf_file << "      </Topology>\n";
+//   xdmf_file << "      <Geometry GeometryType=\"XYZ\">\n";
+//   xdmf_file << "	<DataItem NumberType=\"Float\" Precision=\"8\" Dimensions=\""
+// 	    << nbofvertex << " "<< dimension << "\" Format=\"HDF\">\n";
+//   xdmf_file << "           " << WXffname << ":/Coordinates/XYZ\n";
+//   xdmf_file << "        </DataItem>\n";
+//   xdmf_file << "      </Geometry>\n";
+//   xdmf_file << "    </Grid>\n";
+//   xdmf_file << "  </Domain>\n";
+//   xdmf_file << "</Xdmf>\n";
+//   xdmf_file.close();
+//
+//   cout <<"save xdmf file mesh : "<< xdmf_filename << endl;
+// }
 
-  //creation et ecriture du fichier de description
-  //du maillage 3D au format xdfm pour paraview
-  xdmf_file.open (xdmf_filename);
-  xdmf_file << "<?xml version=\"1.0\" ?>\n";
-  xdmf_file << "<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>\n";
-  xdmf_file << "<Xdmf Version=\"2.0\">\n"; 
-  xdmf_file << "  <Domain>\n"; 
-  //pour l'instant nom du maillage par defaut : full mesh
-  xdmf_file << "    <Grid Name=\"" << "full mesh" << "\" GridType=\"Uniform\">\n";
-  xdmf_file << "      <Topology TopologyType=\"" << Elemtype 
-	    << "\"  NumberOfElements=\"" << nbofelem << "\">\n";
-  // nb nodes per element, ici classe Tetrahedra donc = 4
-  xdmf_file << "	<DataItem Format=\"HDF\" NumberType=\"Int\" Dimensions=\"" 
-	    << nbofelem << " " << nbvperelem << "\">\n";
-  xdmf_file << "           " << WXffname  << ":/Connectivity/ELEM2NODE\n";
-  xdmf_file << "        </DataItem>\n";
-  xdmf_file << "      </Topology>\n";
-  xdmf_file << "      <Geometry GeometryType=\"XYZ\">\n";
-  xdmf_file << "	<DataItem NumberType=\"Float\" Precision=\"8\" Dimensions=\""
-	    << nbofvertex << " "<< dimension << "\" Format=\"HDF\">\n";
-  xdmf_file << "           " << WXffname << ":/Coordinates/XYZ\n";
-  xdmf_file << "        </DataItem>\n";
-  xdmf_file << "      </Geometry>\n";
-  xdmf_file << "    </Grid>\n";
-  xdmf_file << "  </Domain>\n";
-  xdmf_file << "</Xdmf>\n";
-  xdmf_file.close();
-
-  cout <<"save xdmf file mesh : "<< xdmf_filename << endl;
-}
-
-void WriteXdmf::WriteXdmfSolFile2DInit() 
-{ 
+void WriteXdmf::WriteXdmfSolFile2DInit()
+{
   //initialisation du type d'element : triangle
   Elemtype= new char[strlen("Triangle")+1];
   strcpy(Elemtype,"Triangle");
@@ -127,14 +127,14 @@ void WriteXdmf::WriteXdmfSolFile2DInit()
   xdmf_file.open (xdmf_filename);
   xdmf_file << "<?xml version=\"1.0\" ?>\n";
   xdmf_file << "<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>\n";
-  xdmf_file << "<Xdmf Version=\"2.0\">\n"; 
-  xdmf_file << "  <Domain>\n"; 
+  xdmf_file << "<Xdmf Version=\"2.0\">\n";
+  xdmf_file << "  <Domain>\n";
   //pour l'instant nom du maillage par defaut : full mesh
   xdmf_file << "    <Grid Name=\"" << "full mesh" << "\" GridType=\"Uniform\">\n";
-  xdmf_file << "      <Topology TopologyType=\"" << Elemtype 
+  xdmf_file << "      <Topology TopologyType=\"" << Elemtype
 	    << "\"  NumberOfElements=\"" << nbofelem << "\">\n";
   // nb nodes per element, ici classe triangle donc =3
-  xdmf_file << "	<DataItem Format=\"HDF\" NumberType=\"Int\" Dimensions=\"" 
+  xdmf_file << "	<DataItem Format=\"HDF\" NumberType=\"Int\" Dimensions=\""
 	    << nbofelem << " " << nbvperelem << "\">\n";
   xdmf_file << "           " << str_h5_mesh_filename.c_str()  << ":/Connectivity/ELEM2NODE\n";
   xdmf_file << "        </DataItem>\n";
@@ -151,19 +151,19 @@ void WriteXdmf::WriteXdmfSolFile2DAddField(string * fieldname, int data_type, in
 {
   vector<string> type_char(3);
   vector<string> res_char(2);
- 
 
-  type_char[0]= "Scalar"; 
-  type_char[1]= "Vector"; 
-  type_char[2]= "Vector"; 
-  res_char[0]= "Cell";  
+
+  type_char[0]= "Scalar";
+  type_char[1]= "Vector";
+  type_char[2]= "Vector";
+  res_char[0]= "Cell";
   res_char[1]= "Node";
 
   //ecriture des descriptions du ou des champs solution 2D
-  xdmf_file << "      <Attribute Name=\"" <<  fieldname->c_str() 
+  xdmf_file << "      <Attribute Name=\"" <<  fieldname->c_str()
 	    << "\" AttributeType=\"" << type_char[data_type]
 	    << "\" Center=\"" << res_char[result_order]<<"\">\n";
-  if(result_order==0) 
+  if(result_order==0)
     {
       xdmf_file << "        <DataItem Dimensions=\" " << nbofelem  << " " << trans_dim
 		<< " \" NumberType=\"" <<"Float" << "\" Format=\"HDF\">\n";
@@ -189,7 +189,7 @@ void WriteXdmf::WriteXdmfSolFile2DFinalize()
 }
 
 void WriteXdmf::WriteXdmfSolFile3DInit()
-{ 
+{
   //initialisation du type d'element : tetraedre
   Elemtype= new char[strlen("Tetrahedron")+1];
   strcpy(Elemtype,"Tetrahedron");
@@ -205,14 +205,14 @@ void WriteXdmf::WriteXdmfSolFile3DInit()
   xdmf_file.open (xdmf_filename);
   xdmf_file << "<?xml version=\"1.0\" ?>\n";
   xdmf_file << "<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>\n";
-  xdmf_file << "<Xdmf Version=\"2.0\">\n"; 
-  xdmf_file << "  <Domain>\n"; 
+  xdmf_file << "<Xdmf Version=\"2.0\">\n";
+  xdmf_file << "  <Domain>\n";
   //pour l'instant nom du maillage par defaut : full mesh
   xdmf_file << "    <Grid Name=\"" << "full mesh" << "\" GridType=\"Uniform\">\n";
-  xdmf_file << "      <Topology TopologyType=\"" << Elemtype 
+  xdmf_file << "      <Topology TopologyType=\"" << Elemtype
 	    << "\"  NumberOfElements=\"" << nbofelem << "\">\n";
   //nb nodes per element, ici classe tetrahedre donc =4
-  xdmf_file << "	<DataItem Format=\"HDF\" NumberType=\"Int\" Dimensions=\"" 
+  xdmf_file << "	<DataItem Format=\"HDF\" NumberType=\"Int\" Dimensions=\""
 	    << nbofelem << " " << nbvperelem << "\">\n";
   xdmf_file << "           " << str_h5_mesh_filename.c_str()  << ":/Connectivity/ELEM2NODE\n";
   xdmf_file << "        </DataItem>\n";
@@ -229,17 +229,17 @@ void WriteXdmf::WriteXdmfSolFile3DAddField(string * fieldname, int data_type, in
 {
   vector<string> type_char(3);
   vector<string> res_char(2);
-  type_char[0]= "Scalar"; 
-  type_char[1]= "Vector"; 
-  type_char[2]= "Tensor6"; 
-  res_char[0]= "Cell";  
+  type_char[0]= "Scalar";
+  type_char[1]= "Vector";
+  type_char[2]= "Tensor6";
+  res_char[0]= "Cell";
   res_char[1]= "Node";
 
   //ecriture des descriptions du ou des champs solution 3D
-  xdmf_file << "      <Attribute Name=\"" <<  fieldname->c_str() 
+  xdmf_file << "      <Attribute Name=\"" <<  fieldname->c_str()
 	    << "\" AttributeType=\"" << type_char[data_type]
 	    << "\" Center=\"" << res_char[result_order]<<"\">\n";
-  if(result_order==0) 
+  if(result_order==0)
     {
       xdmf_file << "        <DataItem Dimensions=\" " << nbofelem  << " " << trans_dim
 		<< " \" NumberType=\"" <<"Float" << "\" Format=\"HDF\">\n";
@@ -255,7 +255,7 @@ void WriteXdmf::WriteXdmfSolFile3DAddField(string * fieldname, int data_type, in
 }
 
 void WriteXdmf::WriteXdmfSolFile3DFinalize()
-{ 
+{
   //fin d'ecriture et fermeture du fichier des descriptions solution 3D
   xdmf_file << "    </Grid>\n";
   xdmf_file << "  </Domain>\n";
