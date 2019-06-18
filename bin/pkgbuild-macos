@@ -1,0 +1,18 @@
+#  first 
+#  create dir for install
+version
+dst=/tmp/ff-dst""
+pkg=
+id=fr.upmc.math.ljll.FreeFem-v4.pkg.app
+if [ -f ""$dst"" ] ; then 
+echo fatal error the dst dir exist , please remeo of change 
+exit 1
+fi
+mkdir $dst
+make install "DESTDIR=$dst"
+# copy lib ... 
+# buildpkg ...
+ pkgbuild --identifier $id  --root "$dst"  $pkg 
+# productbuild 
+ 
+ 
