@@ -24,3 +24,7 @@ parallel:
 		echo $$test; \
 		$(FFmpi) $$test $(PARAM) > $$test.log; \
 	done)
+
+clean:
+	rm base/*.log
+	rm parallel/*.log
