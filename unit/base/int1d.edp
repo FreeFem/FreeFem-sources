@@ -18,6 +18,12 @@ cout << IND << t << endl;
 test(res == (1./2.));
 
 t = clock();
+res = int1d(Th, 1, levelset=y)(x);
+t = clock() - t;
+cout << IND << t << endl;
+test(res == (1./2.));
+
+t = clock();
 res = int1d(Th, 1, 2)(x + y);
 t = clock() - t;
 cout << IND << t << endl;
