@@ -14,7 +14,8 @@ cout << "2D" << endl;
 	fespace UUh(Th, [P1, P1]);
 	UUh [ux, uy] = [x+y, x*y];
 
-	savehdf5sol("iohdf5.sol.h5", Th, u, "u", [ux, uy], "[ux, uy]");
+	savemesh(Th, "Th2D.h5");
+	savehdf5sol("iohdf52D.sol.h5", Th, u, "u", [ux, uy], "[ux, uy]");
 }
 
 cout << "3D" << endl;
@@ -27,5 +28,6 @@ cout << "3D" << endl;
 	fespace UUh(Th, [P1, P1, P1]);
 	UUh [ux, uy, uz] = [x+y+z, x*y*z, x+x*y+x*y*z];
 
-	savehdf5sol("iohdf5.sol.h5", Th, u, "u", [ux, uy, uz], "[ux, uy, uz]");
+	// savemesh(Th, "Th3D.h5");
+	savehdf5sol("iohdf53D.sol.h5", Th, u, "u", [ux, uy, uz], "[ux, uy, uz]");
 }
