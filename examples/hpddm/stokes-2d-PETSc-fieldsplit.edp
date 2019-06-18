@@ -46,9 +46,13 @@ set(MatB, prefix = "block_", sparams = "-block_pc_type fieldsplit -block_ksp_typ
 + " -fieldsplit_pressure_ksp_type gmres -block_ksp_monitor -block_ksp_view -block_ksp_rtol 1e-6", fields = b[], names = names);
 b[] = 0.0;
 b[] = MatB^-1 * rhs;
-plotMPI(Th, b[], "Global solution PETSc with fieldsplit preconditioner", Pk, def, real, 3, 1);
+macro def2(u)[u, u#B]// EOM
+macro def1(u)u// EOM
+plotMPI(Th, def2(b), [P2, P2], def2, real, cmm = "Global velocity with fieldsplit preconditioner")
+plotMPI(Th, bC, P1, def1, real, cmm = "Global pressure with fieldsplit preconditioner")
 Mat MatM(MatB, K, clean = true);
 set(MatM, prefix = "monolithic_", sparams = "-monolithic_pc_type lu -monolithic_ksp_view -monolithic_ksp_rtol 1e-6");
 b[] = 0.0;
 b[] = MatM^-1 * rhs;
-plotMPI(Th, b[], "Global solution PETSc with monolithic preconditioner", Pk, def, real, 3, 1);
+plotMPI(Th, def2(b), [P2, P2], def2, real, cmm = "Global velocity with monolithic preconditioner")
+plotMPI(Th, bC, P1, def1, real, cmm = "Global pressure with monolithic preconditioner")

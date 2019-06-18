@@ -81,6 +81,6 @@ else
 
 if(!excluded)
     originalNumbering(A, u[], interfaceNb);
-plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
 
 statistics(A);

@@ -48,7 +48,7 @@ using namespace std;
 inline void Check_Kn(const char * str,const char * file,int line)
 {
  cerr << "CHECK_KN: " << str << " in file: " << file << ", line " << line <<endl;
-#ifdef VersionFreeFempp
+#ifdef VersionFreeFem
     ffassert(0);
 #else
     assert(0);
@@ -257,7 +257,7 @@ struct  RNM_VirtualMatrix { public:
   virtual void SolveT( KN_<R> &  ,const KN_<R> & ) const
     { InternalError("RNM_VirtualMatrix::solve trans/herm not implemented.\n In  FeeeFem++ add instruction like  set(A, solver= sparsesolver);\n// where A is the current matrix  "); }
 
-#ifdef VersionFreeFempp
+#ifdef VersionFreeFem
   virtual bool ChecknbLine  (Z n) const= 0;
   virtual bool ChecknbColumn  (Z m) const =0;
 #else

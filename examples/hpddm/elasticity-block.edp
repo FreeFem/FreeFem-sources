@@ -71,5 +71,6 @@ u[] = uBlock(0 * u[].n:1 * u[].n - 1);
 d[] = uBlock(1 * u[].n:2 * u[].n - 1);
 meshN ThMoved1 = movemesh3(Th, transfo = [x + alpha * u, y + alpha * uB, z + alpha * uC]);
 meshN ThMoved2 = movemesh3(Th, transfo = [x + alpha * d, y + alpha * dB, z + alpha * dC]);
-plotMPI(ThMoved1, u[], "Global moved solution", Pk, def, real, 3, 1)
-plotMPI(ThMoved2, u[], "Global moved solution", Pk, def, real, 3, 1)
+macro def1(u)u// EOM
+plotMPI(ThMoved1, u, P1, def1, real, cmm = "Global moved solution")
+plotMPI(ThMoved2, u, P1, def1, real, cmm = "Global moved solution")

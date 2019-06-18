@@ -4,8 +4,6 @@ macro(ff_define_strversionnumber_library)
 
   ff_create_strversionnumber()
   add_library(strversionnumber STATIC strversionnumber.cpp)
-  target_compile_definitions(strversionnumber PRIVATE VersionFreeFempp=${FREEFEM_VERSION})
+  target_compile_definitions(strversionnumber PRIVATE VersionFreeFem=${FREEFEM_VERSION})
 
 endmacro()
-
-

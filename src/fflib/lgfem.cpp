@@ -2490,6 +2490,8 @@ public:
                 bool bpfSc=  BCastTo<pfSc>((*a)[0]); // for 3D surface with complex
                 bool bptab=  BCastTo<tab> ((*a)[0]);
                 bool bpttab=  BCastTo<pttab>((*a)[0]);
+                bool bpferarray=  BCastTo<pferarray>((*a)[0]);
+                bool bpfecarray=  BCastTo<pfecarray>((*a)[0]);
                 if ( bpfer && asizea <3)
                 {
                     l[i].what=asizea;
@@ -2541,6 +2543,18 @@ public:
                     for (int j=0;j<a->size();j++)
                         l[i][j]= CastTo<pfSc>((*a)[j]);
 
+                }
+                else if (bpferarray && asizea == 2)
+                {
+                    l[i].what=102;
+                    for (int j=0;j<a->size();j++)
+                        l[i][j]= CastTo<pferarray>((*a)[j]);
+                }
+                else if (bpfecarray && asizea == 2)
+                {
+                    l[i].what=112;
+                    for (int j=0;j<a->size();j++)
+                        l[i][j]= CastTo<pfecarray>((*a)[j]);
                 }
                 else { CompileError("plot of array with wrong  number of components (!= 2 or 3) ");}
             }
@@ -3713,11 +3727,13 @@ AnyType Plot::operator()(Stack s) const{
             case 50 : l[i].EvalandPush<void *>(s,i,ll); break;
             case  100 : l[i].MEvalandPush< pmesh>(s,i,ll); break;
             case  101 : l[i].AEvalandPush<asol, sol>(s,i,ll); break;
+            case  102 : l[i].AEvalandPush<asol, sol>(s,i,ll); break;
             case  103 : l[i].AEvalandPush(s,i,ll,lat); break;
             case  105 : l[i].MEvalandPush< pmesh3>(s,i,ll); break;
             case  106 : l[i].AEvalandPush<asol3, sol3>(s,i,ll); break;
             case  108 : l[i].AEvalandPush<asolS, solS>(s,i,ll); break;
             case  111 : l[i].AEvalandPush<asolc, solc>(s,i,ll); break;
+            case  112 : l[i].AEvalandPush<asolc, solc>(s,i,ll); break;
             case  116 : l[i].AEvalandPush<asolc3, solc3>(s,i,ll); break;
             case  118 : l[i].AEvalandPush<asolcS, solcS>(s,i,ll); break;
 

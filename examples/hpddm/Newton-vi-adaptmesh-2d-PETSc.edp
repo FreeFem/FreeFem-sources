@@ -75,7 +75,7 @@ for(int i = 0; i < step; ++i) {
     changeNumbering(dJ, u[], bPETSc);
     {
         Vh xu = fu;
-        plotMPI(Th, xu[], "Upper bound", Pk, def, real, 3, 1)
+        plotMPI(Th, xu, Pk, def, real, cmm = "Upper bound")
         changeNumbering(dJ, xu[], xuPETSc);
     }
     SNESSolve(dJ, funcJ, funcRes, bPETSc, xPETSc, xu = xuPETSc, sparams = "-snes_monitor -snes_max_it " + (i != step - 1 ? 4 : 40) + " -ksp_converged_reason -snes_view -snes_vi_monitor -snes_type vinewtonrsls -snes_rtol 1.0e-6 -pc_type lu");
@@ -102,8 +102,8 @@ for(int i = 0; i < step; ++i) {
             dJ = dAdapt;
         }
         u = uG;
-        plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
+        plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
     }
 }
 changeNumbering(dJ, u[], xPETSc, inverse = true, exchange = true);
-plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

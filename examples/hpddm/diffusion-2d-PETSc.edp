@@ -43,12 +43,13 @@ for(int i = 0; i < D.n; ++i)
     if(abs(D[i] - 1.0) > 1e-6)
         err[i] = 0.0;
 
-plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
-plotMPI(Th, err, "Global residual", Pk, def, real, 3, 1)
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
+u[] = err;
+plotMPI(Th, u, Pk, def, real, cmm = "Global residual")
 
 Wh<real> def(Rb)[1];
 Rb[0] = 1;
 set(A, sparams = "-pc_type gamg -ksp_type gmres -ksp_max_it 200", nearnullspace = Rb);
 u[] = 0.0;
 u[] = A^-1 * rhs;
-plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

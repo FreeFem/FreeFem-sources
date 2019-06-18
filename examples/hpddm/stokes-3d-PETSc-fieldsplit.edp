@@ -45,4 +45,5 @@ Mat A(Loc, intersection, D);
 set(A, sparams = "-ksp_type fgmres -pc_type fieldsplit -pc_fieldsplit_type schur -pc_fieldsplit_schur_fact_type lower -pc_fieldsplit_detect_saddle_point -fieldsplit_velocity_sub_pc_type lu " + " -fieldsplit_pressure_sub_pc_type lu -fieldsplit_velocity_sub_pc_factor_mat_solver_type mumps " + " -fieldsplit_pressure_sub_pc_factor_mat_solver_type mumps -ksp_monitor -ksp_view " + " -fieldsplit_velocity_ksp_type gmres -fieldsplit_velocity_ksp_max_it 5 -fieldsplit_pressure_ksp_type gmres -fieldsplit_pressure_ksp_max_it 5 -ksp_rtol 1e-6", fields = b[], names = names);
 b[] = 0.0;
 b[] = A^-1 * rhs;
-plotMPI(Th, b[], "Global solution PETSc", Pk, def, real, 3, 1);
+macro def1(u)u// EOM
+plotMPI(Th, b, P2, def1, real, cmm = "Global solution")
