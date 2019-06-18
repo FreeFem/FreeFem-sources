@@ -1,7 +1,7 @@
 PARAM=-ne -nw -v 1000000
 
 FF=../src/nw/FreeFem++
-SRC=$(wildcard *.edp)
+SRC=$(wildcard sequential/*.edp)
 
 FFmpi=../src/mpi/ff-mpirun -np 4
 SRCmpi=$(wildcard parallel/*.edp)
