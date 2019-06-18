@@ -4,9 +4,7 @@ cout << "mpiCommWorld" << endl;
 
 real t;
 
-// matrix res = mpiCommWorld;
 t = mpiWtime();
 cout << mpiCommWorld << endl;
 t = mpiWtime() - t;
 cout << IND << t << endl;
-// test(mpiCommWorld == 1.);

@@ -33,8 +33,8 @@ complex rankc = 1. + 1i/(1.+ 1i + mpirank);
 complex globalRankc;
 
 t = mpiWtime();
-mpiAllReduce(rankc, globalRankc, mpiCommWorld, mpiMAX);
+mpiAllReduce(rankc, globalRankc, mpiCommWorld, mpiSUM);
 t = mpiWtime() - t;
 cout << IND << t << endl;
 if (mpirank == 0) cout << globalRankc << endl;
-test(globalRankc == 1. + 1i);
+test((globalRank - (4.85882 + 1.43529i)) < ALGERROR);

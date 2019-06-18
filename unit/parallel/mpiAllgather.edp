@@ -1,0 +1,34 @@
+include "test.idp"
+
+cout << "mpiAllGather" << endl;
+real t;
+
+cout << IND << "int[int]" << endl;
+
+int rank = mpirank;
+int[int] nbRcv(mpisize);
+t = mpiWtime();
+mpiAllgather(rank, nbRcv, mpiCommWorld);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+test(nbRcv[mpirank] == mpirank);
+
+cout << IND << "real[int]" << endl;
+
+real rankr = mpirank;
+real[int] ArrayRcv(mpisize);
+t = mpiWtime();
+mpiAllgather(rankr, ArrayRcv, mpiCommWorld);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+test(ArrayRcv[mpirank] == mpirank);
+
+cout << IND << "complex[int]" << endl;
+
+complex rankc = mpirank;
+complex[int] ArrayRcvc(mpisize);
+t = mpiWtime();
+mpiAllgather(rankc, ArrayRcvc, mpiCommWorld);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+test(ArrayRcvc[mpirank] == mpirank);

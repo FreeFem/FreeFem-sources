@@ -17,7 +17,6 @@ if (mpisize > 4) {
   mpiComm  n2comm(mpiCommWorld,mpirank%3,2);// MPI_Comm_split
   if (!n1comm)  // not in n1comm
     {
-      MPI_Intercomm_create constructor
       mpiComm  nicomm(processor(n1comm,1),processor(n2comm,2),1000);
       mpiComm  n12comm(nicomm,true);  // MPI_Intercomm_merge cosntructor
     }

@@ -1,0 +1,16 @@
+include "test.idp"
+
+cout << "mpiAlltoall" << endl;
+
+real t;
+
+cout << IND << "int[int]" << endl;
+
+int[int] a(mpisize), b(mpisize), c(mpisize), e(mpisize), f(mpisize);
+a[mpirank] = mpirank;
+
+// t = mpiWtime();
+// mpiAlltoallv(a, b, c, f, e);
+// t = mpiWtime() - t;
+// cout << IND << IND << t << endl;
+// test(b[mpirank] == mpirank);
