@@ -6,9 +6,14 @@ SRC=$(wildcard base/*.edp)
 FFmpi=../src/mpi/ff-mpirun -np 4
 SRCmpi=$(wildcard parallel/*.edp)
 
-.PHONY: all base parallel
+SRCplugins=$(wildcard plugins/*.edp)
 
-all: freefem++.pref base parallel
+.PHONY: all base parallel plugins
+
+all: freefem++.pref base parallel plugins
+
+freefem++.pref:
+	echo loadpath += "../plugin/seq" > freefem++.pref
 
 base:
 	(for test in $(SRC); do \
@@ -16,15 +21,19 @@ base:
 		$(FF) $$test $(PARAM) > $$test.log; \
 	done)
 
-freefem++.pref:
-	echo loadpath += "../plugin/seq" > freefem++.pref
-
 parallel:
 	(for test in $(SRCmpi); do \
 		echo $$test; \
 		$(FFmpi) $$test $(PARAM) > $$test.log; \
 	done)
 
+plugins:
+	(for test in $(SRCplugins); do \
+		echo $$test; \
+		$(FF) $$test $(PARAM) > $$test.log; \
+	done)
+
 clean:
 	rm base/*.log
 	rm parallel/*.log
+	rm plugins/*.log
