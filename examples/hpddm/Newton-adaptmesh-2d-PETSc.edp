@@ -91,11 +91,11 @@ plot(uG, cmm = "Global solution", wait = 1, fill = 1, dim = 3);
     dJ = dAdapt;
 }
 u = uG;
-plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
 xPETSc.resize(0);
 changeNumbering(dJ, u[], xPETSc);
 u[] = vC(0, Vh);
 changeNumbering(dJ, u[], bPETSc);
 SNESSolve(dJ, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_max_it 40 -ksp_monitor_true_residual -snes_converged_reason -ksp_converged_reason -pc_type lu -snes_view");
 changeNumbering(dJ, u[], xPETSc, inverse = true, exchange = true);
-plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

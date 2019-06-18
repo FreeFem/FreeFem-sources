@@ -52,7 +52,8 @@ if(mpirank == 0) {
         pSol.resize(pSol.n - 1);
     Wh sol;
     changeNumbering(A, sol[], pSol, inverse = true, exchange = true);
-    plotMPI(Th, sol[], "Global solution #1", Pk, def, real, 3, 1)
+    macro params()cmm = "Global solution #1", wait = 1, dim = 3// EOM
+    plotMPI(Th, sol, Pk, def, real, params)
 }
 {
     real[int] split(pF.n);
@@ -65,5 +66,6 @@ if(mpirank == 0) {
         pSol.resize(pSol.n - 1);
     Wh sol;
     changeNumbering(A, sol[], pSol, inverse = true, exchange = true);
-    plotMPI(Th, sol[], "Global solution #2", Pk, def, real, 3, 1)
+    macro params()cmm = "Global solution #2", wait = 1, dim = 3// EOM
+    plotMPI(Th, sol, Pk, def, real, params)
 }

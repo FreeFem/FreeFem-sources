@@ -69,15 +69,17 @@ macro bb3(boundingMesh, overshoot, ThGlobal)
 
             ThGlobal = trunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3) && z >= bb(4) && z <= bb(5)));// EOM
 
-macro plotMPI(Th, u, legend, Pk, def, K, d, w)
+macro plotMPI(Th, u, Pk, def, K, params)
 if(!NoGraphicWindow) {
+    meshN ThCurrent = Th;
+    fespace Xh(ThCurrent, Pk);
+    Xh<K> def(uSend);
+    def(uSend) = u;
     if(mpirank == 0) {
-        meshN ThCurrent = Th;
         meshN[int] meshTab(mpisize);
-        fespace Xh(ThCurrent, Pk);
         Xh<K>[int] def(uTab)(mpisize);
-        uTab[0][] = u;
-        meshTab[0] = Th;
+        uTab[0][] = uSend[];
+        meshTab[0] = ThCurrent;
         mpiRequest[int] rq(mpisize - 1);
         for(int i = 1; i < mpisize; ++i)
             Irecv(processor(i, mpiCommWorld, rq[i - 1]), meshTab[i]);
@@ -89,44 +91,12 @@ if(!NoGraphicWindow) {
         }
         for(int i = 1; i < mpisize; ++i)
             mpiWaitAny(rq);
-        plot(uTab, wait = w, nbiso = 40, fill = 1, value = 1, dim = d, cmm = legend);
+        plot(def(uTab), params);
     }
     else {
         mpiRequest[int] rq(2);
-        Isend(processor(0, rq[0]), Th);
-        Isend(processor(0, rq[1]), u);
-        mpiWait(rq[0]);
-        mpiWait(rq[1]);
-    }
-}// EOM
-
-macro plotMPIeach(Th, u, legend, Pk, def, K, d, w)
-if(!NoGraphicWindow) {
-    if(mpirank == 0) {
-        meshN ThCurrent = Th;
-        meshN[int] meshTab(mpisize);
-        fespace Xh(ThCurrent, Pk);
-        Xh<K>[int] def(uTab)(mpisize);
-        uTab[0][] = u;
-        meshTab[0] = Th;
-        mpiRequest[int] rq(mpisize - 1);
-        for(int i = 1; i < mpisize; ++i)
-            Irecv(processor(i, mpiCommWorld, rq[i - 1]), meshTab[i]);
-        for(int i = 1; i < mpisize; ++i)
-            mpiWaitAny(rq);
-        for(int i = 1; i < mpisize; ++i) {
-            ThCurrent = meshTab[i];
-            Irecv(processor(i, mpiCommWorld, rq[i - 1]), uTab[i][]);
-        }
-        for(int i = 1; i < mpisize; ++i)
-            mpiWaitAny(rq);
-        for(int i = 0; i < mpisize; ++i)
-            plot(uTab[i], wait = w, nbiso = 40, fill = 1, value = 1, dim = d, cmm = legend);
-    }
-    else {
-        mpiRequest[int] rq(2);
-        Isend(processor(0, rq[0]), Th);
-        Isend(processor(0, rq[1]), u);
+        Isend(processor(0, rq[0]), ThCurrent);
+        Isend(processor(0, rq[1]), uSend[]);
         mpiWait(rq[0]);
         mpiWait(rq[1]);
     }

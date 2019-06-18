@@ -40,4 +40,7 @@ Mat A(K, intersection, D, bs = 1);
 set(A, sparams = "-pc_type lu -pc_factor_mat_solver_type mumps");
 Wh<real> def(b);
 b[] = A^-1 * rhs;
-plotMPI(Th, b[], "Global solution PETSc", Pk, def, real, 3, 1);
+macro def2(u)[u, u#B]// EOM
+macro def1(u)u// EOM
+plotMPI(Th, def2(b), [P2, P2], def2, real, cmm = "Global velocity")
+plotMPI(Th, bC, P1, def1, real, cmm = "Global pressure")

@@ -76,7 +76,7 @@ real[int] lbPETSc, ubPETSc;
     TaoSolve(H, J, DJ, uPETSc, xl = lbPETSc, xu = ubPETSc, sparams = "-tao_monitor -tao_view -tao_type bqnls -tao_max_it 100 -tao_gatol 1e-4");
     changeNumbering(H, u[], uPETSc, inverse = true, exchange = true);
     real Ju = J(uPETSc);
-    plotMPI(Th, u[], "Global solution, J(u) = " + Ju, Pk, def, real, 3, 1)
+    plotMPI(Th, u, Pk, def, real, cmm = "Global solution, J(u) = " + Ju)
 }
 {
     Vh u = onG != 0 ? g : 0;
@@ -85,5 +85,5 @@ real[int] lbPETSc, ubPETSc;
     TaoSolve(H, J, DJ, uPETSc, xl = lbPETSc, xu = ubPETSc, sparams = "-tao_monitor -tao_view -tao_type bnls -tao_max_it 100 -tao_gatol 1e-4", HessianRoutine = HJ);
     changeNumbering(H, u[], uPETSc, inverse = true, exchange = true);
     real Ju = J(uPETSc);
-    plotMPI(Th, u[], "Global solution, J(u) = " + Ju, Pk, def, real, 3, 1)
+    plotMPI(Th, u, Pk, def, real, cmm = "Global solution, J(u) = " + Ju)
 }

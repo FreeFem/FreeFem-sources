@@ -182,12 +182,10 @@ for(int i=0;i<k;i++){
     if(!mpirank) cout << " Eigenvalue #"+i+" = "+EigenVAL[i]<<endl;
     Temp = EigenVEC[i];
     plotMPI(Th,     // The local mesh
-            Temp[], // The local solution
-            "Psi("+i+")  EV = "+EigenVAL[i], // Comment
+            Temp,   // The local solution
             Pk,     // Local FE-space
             def,    // Macro for field definition
             real,   // Type
-            3,      // 2d/3d view
-            1       // Wait
+            cmm = "Psi("+i+")  EV = "+EigenVAL[i]
            )
 }

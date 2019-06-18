@@ -114,7 +114,7 @@ while(nuCurrent > nuFinal) {
         fespace Vh(Th, P1);
         Vh onlyT = T;
         macro def1(i)i//
-        plotMPI(Th, onlyT[], "Global temperature for viscosity = " + nuCurrent, P1, def1, real, 2, 1)
+        plotMPI(Th, onlyT, P1, def1, real, cmm = "Global temperature for viscosity = " + nuCurrent)
     }
     nuCurrent = max(nuFinal, nuCurrent/2.0);
 }

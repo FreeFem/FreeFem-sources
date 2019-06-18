@@ -66,8 +66,9 @@ u[] = 0;
 changeNumbering(A, u[], xPETSc);
 SNESSolve(A, funcJ, funcRes, xPETSc, sparams = "-snes_monitor -snes_linesearch_monitor -snes_type newtonls");
 changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
-plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
+macro def1(u)u// EOM
+plotMPI(Th, u, P1, def1, real, cmm = "Global solution")
 real alpha = 1.0;
 mesh3 ThMoved = movemesh3(Th, transfo = [x + alpha * u, y + alpha * uB, z + alpha * uC]);
 u[] = mpirank;
-plotMPI(ThMoved, u[], "Global moved solution", Pk, def, real, 3, 1)
+plotMPI(ThMoved, u, P1, def1, real, cmm = "Global moved solution")
