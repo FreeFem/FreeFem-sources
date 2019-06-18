@@ -1,13 +1,12 @@
 PARAM=-ne -nw -v 1000000
 
 FF=../src/nw/FreeFem++
-SRC=$(wildcard sequential/*.edp)
+SRC=$(wildcard base/*.edp)
 
 FFmpi=../src/mpi/ff-mpirun -np 4
 SRCmpi=$(wildcard parallel/*.edp)
 
 .PHONY: all base parallel
-
 
 all: freefem++.pref base parallel
 
