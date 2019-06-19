@@ -12,7 +12,7 @@ if (!mpirank)
 		ai = i+1;
 
 t = mpiWtime();
-mpiScatterv(a, b, processor(0), c, e);
+//mpiScatterv(a, b, processor(0), c, e);
 t = mpiWtime() - t;
 cout << IND << IND << t << endl;
 
