@@ -242,7 +242,6 @@ long lapack_zgeev (KNM<Complex> *const &A, KN<Complex> *const &vp, KNM<Complex> 
 	char N = 'N', V = 'V';
 	lw = -1;// to get opt size value
 	zgeev_(&N, &V, &n, mat, &n, w, vl, &n, vr, &n, wk, &lw, rwk, &info);
-	// cout << lw << " " << wk[0] << " " << info <<   endl;
 	lw = wk[0].real();
 	wk.resize(lw);
 	zgeev_(&N, &V, &n, mat, &n, w, vl, &n, vr, &n, wk, &lw, rwk, &info);
@@ -255,10 +254,12 @@ long lapack_zgeev (KNM<Complex> *const &A, KN<Complex> *const &vp, KNM<Complex> 
 
 		for (int i = 0; i < n; ++i) {
 			(*vp)[i] = w[i];
+                    for (int j = 0; j < n; ++j) 
+                        (*vectp)(j, i) = vr(j, i);
+
 			if (verbosity > 2) {
 				cout << "   zgeev: vp " << i << " : " << (*vp)[i] << endl;
 			}
-
 			if (verbosity > 5) {
 				cout << "   zgeev :   " << (*vectp)(':', i) << endl;
 			}
@@ -714,6 +715,60 @@ long lapack_dgesdd (KNM<double> *const &A, KNM<double> *const &U, KN<double> *co
 	return info;
 }
 
+long lapack_dgelsy (KNM<double> *const &A, KN<double> *const &B) {
+/*
+ * ubroutine dgelsy    (    integer     M,
+ * integer     N,
+ * integer     NRHS,
+ * double precision, dimension( lda, * )     A,
+ * integer     LDA,
+ * double precision, dimension( ldb, * )     B,
+ * integer     LDB,
+ * integer, dimension( * )     JPVT,
+ * double precision     RCOND,
+ * integer     RANK,
+ * double precision, dimension( * )     WORK,
+ * integer     LWORK,
+ * integer     INFO
+ * )
+ */
+	intblas N = A->M(), M = A->N(), NB = 1, LDA = &(*A)(1, 0) - &(*A)(0, 0);
+	intblas INFO, LW = 3 * N + NB * (N + 1), RANK;
+
+	KN<double> W(LW);
+	double RCOND = 0.01;
+	KN<intblas> JPVT(N, intblas());
+	dgelsy_(&M, &N, &NB, &(*A)(0, 0), &LDA, &(*B)[0], &M, &JPVT[0], &RCOND, &RANK, &W(0), &LW, &INFO);
+	return RANK;
+}
+
+long lapack_dgelsy (KNM<double> *const &A, KNM<double> *const &B) {
+	/*
+	 * ubroutine dgelsy    (    integer     M,
+	 * integer     N,
+	 * integer     NRHS,
+	 * double precision, dimension( lda, * )     A,
+	 * integer     LDA,
+	 * double precision, dimension( ldb, * )     B,
+	 * integer     LDB,
+	 * integer, dimension( * )     JPVT,
+	 * double precision     RCOND,
+	 * integer     RANK,
+	 * double precision, dimension( * )     WORK,
+	 * integer     LWORK,
+	 * integer     INFO
+	 * )
+	 */
+	intblas N = A->M(), M = A->N(), NB = B->N(), LDA = &(*A)(1, 0) - &(*A)(0, 0);
+	intblas INFO, LW = 3 * N + NB * (N + 1), RANK;
+
+	KN<double> W(LW);
+	double RCOND = 0.01;
+	KN<intblas> JPVT(N, intblas());
+	dgelsy_(&M, &N, &NB, &(*A)(0, 0), &LDA, &(*B)[0], &M, &JPVT[0], &RCOND, &RANK, &W(0), &LW, &INFO);
+	return RANK;
+}
+
 // GL,28/09/2011 (computation of the eigenvalues and eigenvectors of a real symmetric matrix)
 long lapack_dsyev (KNM<double> *const &A, KN<double> *const &vp, KNM<double> *const &vectp) {
 	/*
@@ -972,66 +1027,165 @@ inline int gemm (char *transa, char *transb, integer *m, integer *
                  *ldc) {
 	return zgemm_(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
 }
+template<class R, bool init=false>
+KNM<R>*mult_ab (KNM<R> *a, const KNM_<R> &A, const KNM_<R> &B,R alpha =R(1.),R beta = R(0.))
+{  //  a=  alpha*op( A )*op( B ) + beta*C,
+   
+    char tA, tB;
+    
+    if (init) {a->init();}
+    
+    intblas N = A.N();
+    intblas M = B.M();
+    intblas K = A.M();
+    KNM<R> &C = *a;
+    C.resize(N, M);
+    ffassert(K == B.N());
+    R *A00 = &A(0, 0), *A10 = &A(1, 0), *A01 = &A(0, 1);
+    R *B00 = &B(0, 0), *B10 = &B(1, 0), *B01 = &B(0, 1);
+    R *C00 = &C(0, 0), *C10 = &C(1, 0), *C01 = &C(0, 1);
+    intblas lsa = A10 - A00, lsb = B10 - B00, lsc = C10 - C00;
+    intblas lda = A01 - A00, ldb = B01 - B00, ldc = C01 - C00;
+    if (verbosity > 10) {
+        cout << " N:" << N << " " << M << " " << K << endl;
+        cout << lsa << " " << lsb << " " << lsc << " init " << init << endl;
+        cout << lda << " " << ldb << " " << ldc << endl;
+    }
+    
+    tA = (lda == 1 && N != 1) ? 'T' : 'N';    // N,K
+    tB = (ldb == 1 && K != 1) ? 'T' : 'N';    // K,M
+    
+    if (lda == 1) {lda = lsa;}
+    
+    if (ldb == 1) {ldb = lsb;}
+    
+    if (beta == 0.) {
+        C = R();
+    }
+    
+#ifdef XXXXXXXXXXXXXX
+    
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < M; ++j) {
+            for (int k = 0; k < K; ++k) {
+                C(i, j) += A(i, k) * B(k, j);
+            }
+        }
+    }
+    
+#else
+    gemm(&tB, &tA, &N, &M, &K, &alpha, A00, &lda, B00, &ldb, &beta, C00, &ldc);
+#endif
+    return a;
+    /*
+     * The Fortran interface for these procedures are:
+     * SUBROUTINE xGEMM ( TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC )
+     * where TRANSA and TRANSB determines if the matrices A and B are to be transposed.
+     * M is the number of rows in matrix A and C. N is the number of columns in matrix B and C.
+     * K is the number of columns in matrix A and rows in matrix B.
+     * LDA, LDB and LDC specifies the size of the first dimension of the matrices, as laid out in memory;
+     * meaning the memory distance between the start of each row/column, depending on the memory structure (Dongarra et al. 1990).
+     */
+}
 
 template<class R, bool init, int ibeta>
 KNM<R>*mult (KNM<R> *a, const KNM_<R> &A, const KNM_<R> &B) {	// C=A*B
-	R alpha = 1., beta = R(ibeta);
-	char tA, tB;
-
-	if (init) {a->init();}
-
-	intblas N = A.N();
-	intblas M = B.M();
-	intblas K = A.M();
-	KNM<R> &C = *a;
-	C.resize(N, M);
-	ffassert(K == B.N());
-	R *A00 = &A(0, 0), *A10 = &A(1, 0), *A01 = &A(0, 1);
-	R *B00 = &B(0, 0), *B10 = &B(1, 0), *B01 = &B(0, 1);
-	R *C00 = &C(0, 0), *C10 = &C(1, 0), *C01 = &C(0, 1);
-	intblas lsa = A10 - A00, lsb = B10 - B00, lsc = C10 - C00;
-	intblas lda = A01 - A00, ldb = B01 - B00, ldc = C01 - C00;
-	if (verbosity > 10) {
-		cout << " N:" << N << " " << M << " " << K << endl;
-		cout << lsa << " " << lsb << " " << lsc << " init " << init << endl;
-		cout << lda << " " << ldb << " " << ldc << endl;
-	}
-
-	tA = (lda == 1 && N != 1) ? 'T' : 'N';	// N,K
-	tB = (ldb == 1 && K != 1) ? 'T' : 'N';	// K,M
-
-	if (lda == 1) {lda = lsa;}
-
-	if (ldb == 1) {ldb = lsb;}
-
-	if (beta == 0.) {
-		C = R();
-	}
-
-#ifdef XXXXXXXXXXXXXX
-
-	for (int i = 0; i < N; ++i) {
-		for (int j = 0; j < M; ++j) {
-			for (int k = 0; k < K; ++k) {
-				C(i, j) += A(i, k) * B(k, j);
-			}
-		}
-	}
-
-#else
-	gemm(&tB, &tA, &N, &M, &K, &alpha, A00, &lda, B00, &ldb, &beta, C00, &ldc);
-#endif
-	return a;
-	/*
-	 * The Fortran interface for these procedures are:
-	 * SUBROUTINE xGEMM ( TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC )
-	 * where TRANSA and TRANSB determines if the matrices A and B are to be transposed.
-	 * M is the number of rows in matrix A and C. N is the number of columns in matrix B and C.
-	 * K is the number of columns in matrix A and rows in matrix B.
-	 * LDA, LDB and LDC specifies the size of the first dimension of the matrices, as laid out in memory;
-	 * meaning the memory distance between the start of each row/column, depending on the memory structure (Dongarra et al. 1990).
-	 */
+    R alpha = 1., beta = R(ibeta);
+    return mult_ab<R,init>(a,A,B,alpha,beta);
 }
+template<class R>
+long  ff_ShurComplement(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const &  I,KNM<R> * const & pV)
+{
+    // I given numbering of Shur complement I[i] is the index in A of the i in S
+    R zero(0.);
+    KNM<R>   & S= *pS;
+    KNM<R>   & A= *pA;
+    int ni = I.N();
+    int n=pA->N(),m=pA->M();
+    ffassert( n == m);
+    S.resize(ni,ni);
+    S=0.;
+    ffassert( n>ni);
+    KN<long> mark(n,-1L);
+    for(int i=0; i< ni; ++i)
+        mark[I[i]]=i;
+    int nj=0;
+    for(int i=0; i<n;++i)
+        if (mark[i] <0 ) mark[i] = -2 - nj++;
+    KN<int> J(nj);
+    for(int i=0; i<n;++i)
+        if (mark[i] <0 ) J[-mark[i]+2]= i;
+    KNM<R> AII(ni,ni),AIJ(ni,nj), AJI(nj,ni), AJJ(nj,nj);
+    AII=zero;
+    AIJ=zero;
+    AJI=zero;
+    AJJ=zero;
+    for(int i=0;i<A.N();++i)
+        for(int j=0;j<A.M();++j)
+        {
+            R aij = A(i,j);
+            int mi= mark[i];
+            int mj = mark[j];
+            int ki = mi <0 ? -mi-2 : -1;
+            int kj = mj <0 ? -mj-2 : -1;
+            if( mi>=0 )
+            {
+                if(  mj >=0 )//II
+                    AII(mi,mj) += aij;
+                else
+                    AIJ(mi,kj) += aij;
+            }
+            else
+                if(  mj >=0 )//JI
+                    AJI(ki,mj) += aij;
+                else// JJ
+                    AJJ(ki,kj) += aij;
+        }
+    if(verbosity>99)
+    {
+        cout << " AII "<< AII << endl;
+        cout << " AIJ "<< AIJ << endl;
+        cout << " AJI "<< AJI << endl;
+        cout << " AJJ "<< AJJ << endl;
+    }
+    KNM<R> AJJ1=AJJ,BJI(nj,ni);
+    BJI=zero;
+    lapack_inv(&AJJ1);
+    
+    // AII = AII - AIJ*AJJ1*AJI
+    mult_ab<R>(&BJI,AJJ1,AJI);
+    if(pV)
+    {
+        for(int i=0; i< n; ++i)
+        {
+            int mi= mark[i];
+            int ki = mi <0 ? -mi-2 : -1;
+            if( mi <0)
+                for(int k=0; k<ni;++k)
+                    (*pV)(i,k) = BJI(ki,k);
+            else
+                for(int k=0; k<ni;++k)
+                (*pV)(i,k) = R(k==mi);
+        }
+        
+    }
+    mult_ab<R>(&AII,AIJ,BJI,-1,1);
+    if(verbosity>99)
+    {
+        cout << " AJJ1 "<< AJJ1 << endl;
+        cout << " BJI "<< BJI << endl;
+        cout << " AII "<< AII << endl;
+    }
+    S = AII; 
+    return ni;
+}
+template<class R>
+long  ff_ShurComplement(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const &  I)
+{
+    KNM<R> * pV=0;
+    return ff_ShurComplement<R>(pS,pA,I,pV);
+}
+
 
 template<class R, bool init, int ibeta>
 KNM<R>*mult (KNM<R> *a, Mult<KNM<R> *> bc) {
@@ -1167,6 +1321,12 @@ static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3
 		Global.Add("zhegv", "(", new OneOperator4_<long, KNM<Complex> *, KNM<Complex> *, KN<double> *, KNM<Complex> *>(lapack_zhegv));
 		Global.Add("dsyev", "(", new OneOperator3_<long, KNM<double> *, KN<double> *, KNM<double> *>(lapack_dsyev));
 		Global.Add("zheev", "(", new OneOperator3_<long, KNM<Complex> *, KN<double> *, KNM<Complex> *>(lapack_zheev));
+		Global.Add("dgelsy", "(", new OneOperator2_<long, KNM<double> *, KN<double> *>(lapack_dgelsy));
+		Global.Add("dgelsy", "(", new OneOperator2_<long, KNM<double> *, KNM<double> *>(lapack_dgelsy));
+           // Add FH.  for P. Ventura... Jun 2019 ..
+            Global.Add("ShurComplement", "(", new OneOperator3_<long, KNM<R> *, KNM<R> *, KN_<long> >(ff_ShurComplement<R>));
+            Global.Add("ShurComplement", "(", new OneOperator3_<long, KNM<Complex> *, KNM<Complex> *, KN_<long> >(ff_ShurComplement<Complex>));
+
 	} else if (verbosity) {
 		cout << "( load: lapack <=> fflapack , skeep ) ";
 	}
