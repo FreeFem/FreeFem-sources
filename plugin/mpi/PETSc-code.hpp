@@ -1165,7 +1165,7 @@ template<class Type>
 class setOptions_Op : public E_F0mps {
     public:
         Expression A;
-        static const int n_name_param = 10;
+        static const int n_name_param = 11;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         setOptions_Op(const basicAC_F0& args, Expression param1) : A(param1) {
@@ -1185,7 +1185,8 @@ basicAC_F0::name_and_type setOptions_Op<Type>::name_param[] = {
     {"schurList", &typeid(KN<double>*)},
     {"parent", &typeid(Type*)},
     {"MatNullSpace", &typeid(KNM<PetscScalar>*)},
-    {"fieldsplit", &typeid(long)}
+    {"fieldsplit", &typeid(long)},
+    {"schurComplement", &typeid(KNM<PetscScalar>*)}
 };
 template<class Type, char> class LinearSolver;
 template<class Type> class NonlinearSolver;
@@ -1345,16 +1346,48 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
         if(nargs[4])
             KSPSetOptionsPrefix(ptA->_ksp, GetAny<std::string*>((*nargs[4])(stack))->c_str());
         KSPSetFromOptions(ksp);
-        if(std::is_same<Type, Dmat>::value && nargs[2] && nargs[5] && nargs[6]) {
-            if(assembled) {
-                if(ptParent)
-                    MatAssembled(ptParent->_petsc, &assembled);
-                if(assembled)
-                    KSPSetUp(ksp);
+        if(std::is_same<Type, Dmat>::value && nargs[6]) {
+            if(nargs[2] && nargs[5]) {
+                if(assembled) {
+                    if(ptParent)
+                        MatAssembled(ptParent->_petsc, &assembled);
+                    if(assembled)
+                        KSPSetUp(ksp);
+                }
+                PC pc;
+                KSPGetPC(ksp, &pc);
+                PETSc::setCompositePC(pc, ptA->_vS);
             }
-            PC pc;
-            KSPGetPC(ksp, &pc);
-            PETSc::setCompositePC(pc, ptA->_vS);
+            else if(mpisize == 1 && nargs[10]) {
+                IS is;
+                std::vector<PetscInt> idx;
+                KN<double>* pL = GetAny<KN<double>*>((*nargs[6])(stack));
+                idx.reserve(pL->n);
+                KNM<PetscScalar>* pS = GetAny<KNM<PetscScalar>*>((*nargs[10])(stack));
+                for(int i = 0; i < pL->n; ++i) {
+                    if(std::abs((*pL)[i]) > 1.0e-12)
+                        idx.emplace_back(i);
+                }
+                ISCreateGeneral(PETSC_COMM_WORLD, idx.size(), idx.data(), PETSC_COPY_VALUES, &is);
+                PC pc;
+                KSPGetPC(ptA->_ksp, &pc);
+                PCFactorSetUpMatSolverType(pc);
+                Mat F, S;
+                PCFactorGetMatrix(pc, &F);
+                MatFactorSetSchurIS(F, is);
+                KSPSetUp(ptA->_ksp);
+                MatFactorSchurStatus status;
+                MatFactorGetSchurComplement(F, &S, &status);
+                PetscInt m, n;
+                MatGetSize(S, &m, &n);
+                pS->resize(m, n);
+                PetscScalar* data;
+                MatDenseGetArray(S, &data);
+                std::copy_n(data, m * n, (PetscScalar*)*pS);
+                MatDenseRestoreArray(S, &data);
+                MatFactorRestoreSchurComplement(F, &S, status);
+                ISDestroy(&is);
+            }
         }
     }
     return 0L;
