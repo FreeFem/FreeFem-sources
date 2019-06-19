@@ -34,6 +34,6 @@ plugins:
 	done)
 
 clean:
-	rm base/*.log
-	rm parallel/*.log
-	rm plugins/*.log
+	rm -f base/*.log
+	rm -f parallel/*.log
+	rm -f plugins/*.log
