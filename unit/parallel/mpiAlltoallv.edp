@@ -1,46 +1,15 @@
+//NBPROC 4
 include "test.idp"
 
 cout << "mpiAlltoallv" << endl;
 
 real t;
+mpiComm cc;
 
 cout << IND << "int[int]" << endl;
 
-// int[int] a(mpisize), b(mpisize), c(mpisize), e(mpisize), f(mpisize), g(mpisize);
-// a[mpirank] = mpirank + 1;
-
-// t = mpiWtime();
-// mpiAlltoallv(a, b, c, e, f, g);
-// t = mpiWtime() - t;
-// cout << IND << IND << t << endl;
-// for (int i=0; i < mpisize; i++) {
-//         c[i] = i;
-//         f[i] = mpirank;
-//         g[i] = i * mpirank;
-//         e[i] = (i * (i+1))/2;
-//     }
-// // // cout << a[mpirank] << " " << b[mpirank] << endl;
-// // cout << a[mpirank] << " " << b[mpirank] << endl;
-// // cout << a[mpirank] << " " << c[mpirank] << endl;
-// // cout << a[mpirank] << " " << e[mpirank] << endl;
-// // cout << a[mpirank] << " " << f[mpirank] << endl;
-// // cout << a[mpirank] << " " << g[mpirank] << endl;
-// // cout << a[0] << " " << g[0] << endl;
-// // cout << a[1] << " " << g[1] << endl;
-// // cout << a[2] << " " << g[2] << endl;
-// // cout << a[3] << " " << g[3] << endl;
-// mpiBarrier(mpiCommWorld);
-// if (mpirank == 2) {
-//   // cout << a << endl;
-//   cout << b << endl;
-  // cout << c << endl;
-  // cout << f << endl;
-  // cout << g << endl;
-// }
-
-//en dessous!
 int[int] a(mpisize), b(mpisize);
-a[mpirank] = mpirank+1;
+a[mpirank] = mpirank;
 
 int[int] sc(mpisize), sd(mpisize), rc(mpisize), rd(mpisize);
 
@@ -51,15 +20,95 @@ for (int i = 0; i < mpisize; i++) {
 	rd[i] = 0;
 }
 
-//t = mpiWtime();
+t = mpiWtime();
 mpiAlltoallv(a, b, sc, sd, rc, rd);
-//t = mpiWtime() - t;
-//cout << IND << IND << t << endl;
-//test(b[mpirank] == mpirank);
-if (mpirank == 2) cout << b << endl;
-//lui il sort [0, 0, 0, 4]
-// alors que normalement il a [0, 0, 3, 0]
-if (mpirank == 0) cout << b << endl;
-// test(b[mpirank] == mpirank);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+if (mpirank == 0) test(b[0] == 0);
+if (mpirank == 0) test(b[1] == 1);
+if (mpirank == 1) test(b[2] == 2);
+if (mpirank == 2) test(b[3] == 3);
+
+t = mpiWtime();
+mpiAlltoallv(a, b, cc, sc, sd, rc, rd);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+if (mpirank == 0) test(b[0] == 0);
+if (mpirank == 0) test(b[1] == 1);
+if (mpirank == 1) test(b[2] == 2);
+if (mpirank == 2) test(b[3] == 3);
+
+mpiBarrier(mpiCommWorld);
+
+
+cout << IND << "complex[int]" << endl;
+
+complex[int] ac(mpisize), bc(mpisize);
+ac[mpirank] = mpirank;
+
+int[int] scc(mpisize), sdc(mpisize), rcc(mpisize), rdc(mpisize);
+
+for (int i = 0; i < mpisize; i++) {
+	scc[i] = mpisize;
+	sdc[i] = 0;
+	rcc[i] = mpisize;
+	rdc[i] = 0;
+}
+
+t = mpiWtime();
+mpiAlltoallv(ac, bc, scc, sdc, rcc, rdc);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+
+if (mpirank == 0) test(bc[0] == 0.);
+if (mpirank == 0) test(bc[1] == 1.);
+if (mpirank == 1) test(bc[2] == 2.);
+if (mpirank == 2) test(bc[3] == 3.);
+
+t = mpiWtime();
+mpiAlltoallv(ac, bc, cc, scc, sdc, rcc, rdc);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+
+if (mpirank == 0) test(bc[0] == 0.);
+if (mpirank == 0) test(bc[1] == 1.);
+if (mpirank == 1) test(bc[2] == 2.);
+if (mpirank == 2) test(bc[3] == 3.);
+
+mpiBarrier(mpiCommWorld);
+
+cout << IND << "real[int]" << endl;
+
+real[int] ar(mpisize), br(mpisize);
+ar[mpirank] = mpirank;
+
+int[int] scr(mpisize), sdr(mpisize), rcr(mpisize), rdr(mpisize);
+
+for (int i = 0; i < mpisize; i++) {
+	scr[i] = mpisize;
+	sdr[i] = 0;
+	rcr[i] = mpisize;
+	rdr[i] = 0;
+}
+
+t = mpiWtime();
+mpiAlltoallv(ar, br, scr, sdr, rcr, rdr);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+
+if (mpirank == 0) test(br[0] == 0.);
+if (mpirank == 0) test(br[1] == 1.);
+if (mpirank == 1) test(br[2] == 2.);
+if (mpirank == 2) test(br[3] == 3.);
+
+t = mpiWtime();
+mpiAlltoallv(ar, br, cc, scr, sdr, rcr, rdr);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+
+if (mpirank == 0) test(br[0] == 0.);
+if (mpirank == 0) test(br[1] == 1.);
+if (mpirank == 1) test(br[2] == 2.);
+if (mpirank == 2) test(br[3] == 3.);
 
 mpiBarrier(mpiCommWorld);
