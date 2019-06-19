@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "sinh" << endl;
+cout << functionDEFINITION << "sinh" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real zero = 0.;
 real r = 4.2;
@@ -13,22 +13,22 @@ real pinf = -log(0.);
 t = clock();
 real reszero = sinh(zero);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reszero == 0.);
 
 t = clock();
 real resminf = sinh(minf);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resminf == minf);
 
 t = clock();
 real respinf = sinh(pinf);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(respinf == pinf);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 complex cpos = 1 + 1i;
 complex cneg = 1 - 1i;
@@ -36,11 +36,11 @@ complex cneg = 1 - 1i;
 t = clock();
 complex rescpos = sinh(cpos);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(rescpos == (exp(cpos) - exp(-cpos))/2);
 
 t = clock();
 complex rescneg = sinh(cneg);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(rescneg == (exp(cneg) - exp(-cneg))/2);

@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "removeHalf" << endl;
+cout << functionDEFINITION << "removeHalf" << endl;
 
 real t;
 matrix A = [[1, 2, 3],
@@ -20,7 +20,7 @@ real tol = 2;
 t = clock();
 B = removeHalf(A, !half);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(B(0,0) == 1 && B(0,1) == 0 && B(0,2) == 0
     && B(1, 0) == 4 && B(1,1) == 0 && B(1,2) == 0
     && B(2,0) == 7 && B(2,1) == 9 && B(2,2) == 3);
@@ -28,7 +28,7 @@ test(B(0,0) == 1 && B(0,1) == 0 && B(0,2) == 0
 t = clock();
 B = removeHalf(A, half);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(B(0,0) == 1 && B(0,1) == 2 && B(0,2) == 3
     && B(1, 0) == 0 && B(1,1) == 0 && B(1,2) == 6
     && B(2,0) == 0 && B(2,1) == 0 && B(2,2) == 3);
@@ -36,7 +36,7 @@ test(B(0,0) == 1 && B(0,1) == 2 && B(0,2) == 3
 t = clock();
 B = removeHalf(A, half, tol);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(B(0,0) == 0 && B(0,1) == 0 && B(0,2) == 3
     && B(1, 0) == 0 && B(1,1) == 0 && B(1,2) == 6
     && B(2,0) == 0 && B(2,1) == 0 && B(2,2) == 3);
@@ -44,7 +44,7 @@ test(B(0,0) == 0 && B(0,1) == 0 && B(0,2) == 3
 t = clock();
 bool isRemoved = removeHalf(B, A, 0, 0);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(B(0,0) == 1 && B(0,1) == 0 && B(0,2) == 0
     && B(1, 0) == 4 && B(1,1) == 0 && B(1,2) == 0
     && B(2,0) == 7 && B(2,1) == 9 && B(2,2) == 3);

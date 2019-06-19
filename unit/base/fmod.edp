@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "fmod" << endl;
+cout << functionDEFINITION << "fmod" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real a = 5.0;
 real b = 2.0;
@@ -13,11 +13,11 @@ real d = -2.0;
 t = clock();
 real resmodr1 = fmod(a,b);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmodr1 == 1.0);
 
 t = clock();
 real resmodr2 = fmod(c,d);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmodr2 == -1.0);

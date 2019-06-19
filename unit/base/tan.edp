@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "tan" << endl;
+cout << functionDEFINITION << "tan" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real r1 = 0.;
 real r2 = pi;
@@ -13,24 +13,24 @@ real r4 = pi/8;
 t = clock();
 real resr1 = tan(r1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr1 == 0.);
 
 t = clock();
 real resr2 = tan(r2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 cout << resr2 << endl;
 test(resr2 - tan(pi) < HWERROR);
 
 t = clock();
 real resr3 = tan(r3);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr3 - tan(pi/4) < HWERROR);
 
 t = clock();
 real resr4 = tan(r4);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr4 - tan(pi/8) < HWERROR);

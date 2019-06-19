@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "dist" << endl;
+cout << functionDEFINITION << "dist" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real a = 1.;
 real b = 2.;
@@ -13,23 +13,23 @@ real d = -2.;
 t = clock();
 real res1 = dist(a, b);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(res1 == sqrt(a^2 + b^2));
 
 t = clock();
 real res2 = dist(c, d);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(res2 == sqrt(c^2 + d^2));
 
 t = clock();
 real res3 = dist(a, b, c);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(res3 == sqrt(a^2 + b^2 + c^2));
 
 t = clock();
 real res4 = dist(c, d, d);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(res4 == sqrt(c^2 + d^2 + d^2));

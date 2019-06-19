@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "on" << endl;
+cout << functionDEFINITION << "on" << endl;
 real t;
 
 border C(t=0, 2*pi){x=cos(t); y=sin(t);}
@@ -9,7 +9,6 @@ fespace Vh(Th, P1);
 Vh u, v;
 
 func f= x*y;
-real cpu=clock();
 
 t = clock();
 solve Poisson(u, v, solver=LU)
@@ -22,7 +21,7 @@ solve Poisson(u, v, solver=LU)
     )
     + on(C, u=0);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 real bound = int1d(Th, C)(u);
 test(abs(0 - bound) < HWERROR);
 t = clock();
@@ -39,8 +38,7 @@ solve Poisson2(u, v, solver=LU)
 bound = int1d(Th, C)(u)/int1d(Th, C)(1);
 test(abs(bound - 1) < HWERROR);
 t = clock() - t;
-cout << IND << t << endl;
-cout << "CPU time = " << (clock()-cpu) << endl;
+cout << timeELAPSED << t << endl;
 
 // Mesh
 border aaa(t=0, 1){x=t; y=0; label=1;}
@@ -72,5 +70,5 @@ problem Probem1(uu, vv, solver=CG, init=i, eps=-1.0e-6)
 	;
 real boundpb = int1d(Th2)(u)/int1d(Th2)(1);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - boundpb) < HWERROR);

@@ -1,14 +1,14 @@
 include "test.idp"
 
-cout << "sqrt" << endl;
+cout << functionDEFINITION << "sqrt" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real r = 16.0;
 
 t = clock();
 real resr1 = sqrt(r);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr1 == 4.0);

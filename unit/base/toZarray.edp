@@ -1,11 +1,11 @@
 include "test.idp"
 
-cout << "toZarray" << endl;
+cout << functionDEFINITION << "toZarray" << endl;
 real t;
 int[int] c(3);
 
 t = clock();
 c = toZarray([0.1,1.9,2.5]);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(c[0] == 0 && c[1] == 1 && c[2] == 2);

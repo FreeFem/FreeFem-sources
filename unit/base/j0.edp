@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "j0" << endl;
+cout << functionDEFINITION << "j0" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real r1 = 0;
 real r2 = 4.2;
@@ -12,17 +12,17 @@ real r3 = -4.2;
 t = clock();
 real resr1 = j0(r1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr1 == 1);
 
 // t = clock();
 // real resr2 = j0(r2);
 // t = clock() - t;
-// cout << IND << IND << t << endl;
+// cout << timeELAPSED << t << endl;
 // test((resr2 - ((sin(r2)) / r2)) < HWERROR);
 //
 // t = clock();
 // real resr3 = j0(r3);
 // t = clock() - t;
-// cout << IND << IND << t << endl;
+// cout << timeELAPSED << t << endl;
 // test((resr3 - ((sin(r3))/r3)) < HWERROR);

@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "tgamma" << endl;
+cout << functionDEFINITION << "tgamma" << endl;
 real t;
 real pinf = -log(0.);
 real minf = log(0.);
@@ -9,17 +9,17 @@ real nan = -sqrt(-1);
 t = clock();
 real tg = tgamma(0);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(tg == pinf);
 
 t = clock();
 real tg2 = tgamma(2);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(tg2 == 1);
 
 t = clock();
 real tg3 = tgamma(6);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(tg3 == 120);

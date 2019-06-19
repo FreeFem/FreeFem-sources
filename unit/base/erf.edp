@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "erf" << endl;
+cout << functionDEFINITION << "erf" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real r1 = 0.;
 real r2 = 10.;
@@ -12,22 +12,22 @@ real r3 = -10;
 t = clock();
 real err1 = erf(r1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(err1 == 0);
 
 t = clock();
 real err2 = erf(r2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(err2 == 1);
 
 t = clock();
 real err3 = erf(r3);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(err3 == -1);
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 int i1 = 0;
 int i2 = 10;
@@ -36,17 +36,17 @@ int i3 = -10;
 t = clock();
 int erri1 = erf(i1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(err1 == 0);
 
 t = clock();
 int erri2 = erf(i2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(err2 == 1);
 
 t = clock();
 int erri3 = erf(i3);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(err3 == -1);

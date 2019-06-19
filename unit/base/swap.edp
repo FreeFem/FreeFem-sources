@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "swap" << endl;
+cout << functionDEFINITION << "swap" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real a = 4.2;
 real b = 2.4;
@@ -13,11 +13,11 @@ real d = -2.4;
 t = clock();
 swap(a, b);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(a == 2.4 && b == 4.2);
 
 t = clock();
 swap(c, d);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(c == -2.4 && d == -4.2);

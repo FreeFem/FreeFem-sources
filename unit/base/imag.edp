@@ -1,20 +1,20 @@
 include "test.idp"
 
-cout << "imag" << endl;
+cout << functionDEFINITION << "imag" << endl;
 real t;
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 complex c = 4. + 2i;
 t = clock();
 real resr = imag(c);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr == 2.);
 
 complex c2 = 4.;
 t = clock();
 real resr2 = imag(c2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr2 == 0);

@@ -1,21 +1,21 @@
 include "test.idp"
 
-cout << "round" << endl;
+cout << functionDEFINITION << "round" << endl;
 real t;
 
 real rpos = 0.5;
 real rneg = -0.5;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 real respos = round(rpos);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(respos == 1.0);
 
 t = clock();
 real resneg = round(rneg);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resneg == -1.0);

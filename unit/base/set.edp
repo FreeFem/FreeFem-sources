@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "set" << endl;
+cout << functionDEFINITION << "set" << endl;
 real t;
 
 verbosity=3;

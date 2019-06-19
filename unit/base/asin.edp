@@ -1,47 +1,47 @@
 include "test.idp"
 
-cout << "asin" << endl;
+cout << functionDEFINITION << "asin" << endl;
 real t;
 real eps = 1e-6;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 real moins1 = -1.0;
 real theta = asin(moins1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(theta == -pi/2.);
 
 t = clock();
 real zero = 0.;
 real theta2 = asin(zero);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(theta2 == 0);
 
 t = clock();
 real un = 1.;
 real theta3 = asin(un);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(theta3 == pi/2);
 
 t = clock();
 real moins1moinseps = -1. - eps;
 real theta4 = asin(moins1moinseps);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(isNaN(theta4));
 
 t = clock();
 real p1pluseps = 1.0 + eps;
 real theta5 = asin(p1pluseps);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(isNaN(theta5));
 
-cout << IND << "real array" << endl;
+cout << typeDEFINITION << "real[int]" << endl;
 
 int n = 4;
 real[int] A = [-1.,0.,0.3,1.];
@@ -50,7 +50,7 @@ real[int] B(n);
 t = clock();
 B = asin(A);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 for (int i = 0; i < n; i++) {
   test(B[i] == asin(A[i]));
 }
@@ -62,7 +62,7 @@ real[int, int] BB(tab, n);
 t = clock();
 BB = asin(AA);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 for (int i = 0; i < tab; i++) {
   for (int j = 0; j < n; j++) {
     test(BB(i,j) == asin(AA(i,j)));

@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "exp" << endl;
+cout << functionDEFINITION << "exp" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real zero = 0.0;
 real b = 2.0;
@@ -13,22 +13,22 @@ real pinf = -log(0.0);
 t = clock();
 real resmodr1 = exp(zero);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmodr1 == 1.0);
 
 t = clock();
 real respinf = exp(pinf);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(respinf == pinf);
 
 t = clock();
 real resminf = exp(minf);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resminf == 0.);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 complex hippie = 1i * pi;
 complex c = 1i * pi/2;
@@ -36,11 +36,11 @@ complex c = 1i * pi/2;
 t = clock();
 complex resc1 = exp(hippie);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resc1 == cos(pi) + 1i * sin(pi));
 
 t = clock();
 complex resc2 = exp(c);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resc2 == cos(pi/2) + 1i * sin(pi/2));

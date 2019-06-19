@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "find" << endl;
+cout << functionDEFINITION << "find" << endl;
 real t;
 string sentence = "a 42 a 42";
 string toFind = "42";
@@ -10,18 +10,18 @@ int atPos = 0;
 t = clock();
 posFound = sentence.find(toFind, atPos);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(posFound == 2);
 
 atPos = 3;
 t = clock();
 posFound = sentence.find(toFind, atPos);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(posFound == 7);
 
 t = clock();
 posFound = sentence.find(toFind);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(posFound == 2);

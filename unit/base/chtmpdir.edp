@@ -1,10 +1,10 @@
 include "test.idp"
 
-cout << "chtmpdir" << endl;
+cout << functionDEFINITION << "chtmpdir" << endl;
 real t;
 int res = 42;
 
 t = clock();
 res = chtmpdir();
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;

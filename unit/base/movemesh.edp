@@ -1,7 +1,7 @@
 load "msh3"
 include "test.idp"
 
-cout << "movemesh" << endl;
+cout << functionDEFINITION << "movemesh" << endl;
 real t;
 mesh Th = square(10, 10);
 mesh3 Th3 = cube(10, 10, 10);
@@ -17,7 +17,7 @@ int savey = y;
 t = clock();
 mesh MovedTh = movemesh(Th, [x + uu, y + vv]);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(x != savex && y != savey);
 
 savex = x;
@@ -26,7 +26,7 @@ int savez = z;
 t = clock();
 mesh3 MovedTh3 = movemesh(Th3, [x + uu, y + vv, z + ww]);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(x != savex && y != savey && z != savez);
 
 savex = x;
@@ -37,6 +37,6 @@ t = clock();
 MovedTh3 = movemesh(Th3, [x + uu, y + vv, z + ww], label=refx, region=refx,
                     facemerge=1, ptmerge=4.2, orientation=1);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(x != savex && y != savey && z != savez);
 plot(MovedTh3);

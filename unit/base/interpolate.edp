@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "interpolate" << endl;
+cout << functionDEFINITION << "interpolate" << endl;
 real t;
 mesh Th = square(4, 4);
 mesh Th4 = square(2, 2, [x*0.5, y*0.5]);
@@ -14,7 +14,7 @@ int[int] u2vc = [1, 3, -1]; //-1 -> put zero on the component
 t = clock();
 matrix A = interpolate(V3h, V4h, inside=0, U2Vc=u2vc);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 V4h [a1, a2, a3, a4] = [1, 2, 3, 4];
 V3h [b1, b2, b3] = [10, 20, 30];
 b1[] = A*a1[];

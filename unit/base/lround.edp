@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "lround" << endl;
+cout << functionDEFINITION << "lround" << endl;
 real t;
 
 real rpos = 0.5;
@@ -8,16 +8,16 @@ real rneg = -0.5;
 real nanb = sqrt(-1);
 real toolong = 2e63;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 int respos = lround(rpos);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(respos == 1);
 
 t = clock();
 int resneg = lround(rneg);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resneg == -1);

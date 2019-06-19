@@ -1,7 +1,7 @@
 load "msh3"
 include "test.idp"
 
-cout << "volumelevelset" << endl;
+cout << functionDEFINITION << "volumelevelset" << endl;
 
 real t;
 real r = 0.5;
@@ -15,6 +15,6 @@ Uh u = 1. - (x^2+y^2+z^2);
 t = clock();
 real res = volumelevelset(Th, u[], r);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 cout << res << endl;
 // cout << 4.*pi * (0.5^3) / 3 << endl;

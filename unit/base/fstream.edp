@@ -1,16 +1,16 @@
 include "test.idp"
 
-cout << "ofstream" << endl;
+cout << functionDEFINITION << "ofstream" << endl;
 real t;
 string txt = "Writing this to a file \n";
 
 t = clock();
 ofstream ofs("myfile.txt");
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 ofs << txt;
 t = clock();
 ifstream ifs("myfile.txt");
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ifs.good());

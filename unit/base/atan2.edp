@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "atan2" << endl;
+cout << functionDEFINITION << "atan2" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real yr1 = 4.2;
 real xr1 = 1.5;
@@ -16,29 +16,29 @@ real pinf = -log(0.0);
 t = clock();
 real resr1 = atan2(yr1, xr1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr1 == atan(yr1/xr1));
 
 t = clock();
 real resr2 = atan2(yr1, xr2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr2 == atan(yr1/xr2) + pi);
 
 t = clock();
 real resr3 = atan2(yr2, xr2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr3 == atan(yr2/xr2) - pi);
 
 t = clock();
 real resr4 = atan2(yr1, zero);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr4 == pi / 2);
 
 t = clock();
 real resr5 = atan2(yr2, zero);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr5 == -(pi / 2));

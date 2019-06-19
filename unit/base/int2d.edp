@@ -1,7 +1,7 @@
 load "msh3"
 include "test.idp"
 
-cout << "int2d" << endl;
+cout << functionDEFINITION << "int2d" << endl;
 real t;
 real res;
 mesh Th = square(10, 10);
@@ -9,85 +9,85 @@ mesh Th = square(10, 10);
 t = clock();
 res = int2d(Th)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th)(x);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(0.5 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, levelset=-0.5+x)(x);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(0.125 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th)(x + y);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qft=qf1pT)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qforder=2)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qft=qf2pT)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qforder=3)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qforder=6)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qforder=8)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qft=qf5pT)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qforder=10)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qforder=2)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qft=qf1pTlump)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 func int fRegion () {
@@ -99,79 +99,79 @@ Th = change(Th, fregion=fRegion());
 t = clock();
 res = int2d(Th)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th)(x);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(0.5 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th)(x + y);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qft=qf1pT)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qforder=2)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qft=qf2pT)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qforder=3)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qforder=6)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qforder=8)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qft=qf5pT)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qforder=10)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qforder=2)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th, qft=qf1pTlump)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 mesh3 Th3 = cube(10, 10, 10);
@@ -179,97 +179,97 @@ mesh3 Th3 = cube(10, 10, 10);
 t = clock();
 res = int2d(Th3, 1)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1)(x);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(0.5 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1)(x + y);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(0.5 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qft=qf1pT)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qforder=2)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qft=qf2pT)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qforder=3)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qforder=6)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qforder=8)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qft=qf5pT)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qforder=10)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qforder=2)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qft=qf1pTlump)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qft=qf2pT4P1)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qft=qf7pT)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qft=qf9pT)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 Th3 = change(Th3, fregion=fRegion());
@@ -277,77 +277,77 @@ Th3 = change(Th3, fregion=fRegion());
 t = clock();
 res = int2d(Th3, 1)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1)(x);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(0.5 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1)(x + y);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(0.5 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qft=qf1pT)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qforder=2)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qft=qf2pT)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qforder=3)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qforder=6)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qforder=8)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qft=qf5pT)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qforder=10)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qforder=2)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int2d(Th3, 1, qft=qf1pTlump)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);

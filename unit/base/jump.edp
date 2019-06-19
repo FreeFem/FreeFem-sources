@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "jump" << endl;
+cout << functionDEFINITION << "jump" << endl;
 real t;
 
 mesh Th = square(10, 10);
@@ -14,11 +14,11 @@ Uh cc, cch;
 t = clock();
 solve Prob1(cc, cch) = int2d(Th)(cc*cch) + intalledges(Th)(cc*cch) + int2d(Th)(1.*cch);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(cc(0.5, 0.5)) < h(0.5,0.5)^2);
 
 t = clock();
 solve Prob2(cc, cch) = int2d(Th)(cc*cch) + intalledges(Th)(jump(cc)*cch) - int2d(Th)(1.*cch);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test((1 - cc(0.5,0.5)) < h(0.5,0.5)^2);

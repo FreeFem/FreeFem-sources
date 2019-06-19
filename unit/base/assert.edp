@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "assert" << endl;
+cout << functionDEFINITION << "assert" << endl;
 
 real t;
 bool isTrue = true;
@@ -8,7 +8,7 @@ bool isTrue = true;
 t = clock();
 assert(true);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(isTrue == true);
 
 bool isCaught = false;
@@ -16,7 +16,7 @@ try {
   t = clock();
   assert(true == false);
   t = clock() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
 } catch(...) {
   isCaught = true;
   cout << "assert failed" << endl;
