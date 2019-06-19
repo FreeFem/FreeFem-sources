@@ -81,7 +81,8 @@ CONDITIONAL_PETSC = bratu-2d-PETSc.edp \
 	heat-2d-TS-RHS-PETSc.edp \
 	advection-2d-TS-PETSc.edp \
 	toy-Tao-PETSc.edp \
-	minimal-surface-2d-Tao-PETSc.edp
+	minimal-surface-2d-Tao-PETSc.edp \
+	Schur-complement-PETSc.edp
 
 if SLEPC
 CONDITIONAL_PETSC_SLEPC = laplace-2d-SLEPc.edp \
