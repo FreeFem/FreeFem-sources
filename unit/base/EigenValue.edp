@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "EigenValue" << endl;
+cout << functionDEFINITION << "EigenValue" << endl;
 real t;
 
 real kc2 = 1.;
@@ -64,6 +64,6 @@ t = clock();
 int k=EigenValue(OP, B, sym=true, sigma=sigma, value=ev, vector=eV,
    tol=1e-10, nev=nev);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 real rounded = round(ev[0]);
 test(rounded == 20);

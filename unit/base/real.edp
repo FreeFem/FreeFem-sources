@@ -1,18 +1,18 @@
 include "test.idp"
 
-cout << "real" << endl;
+cout << functionDEFINITION << "real" << endl;
 real t;
 
 complex c = 4 + 2i;
 t = clock();
 real resc = real(c);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resc == 4.);
 
 complex c2 = 42.;
 t = clock();
 real resc2 = real(c2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resc2 == 42.);

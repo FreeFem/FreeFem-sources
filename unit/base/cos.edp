@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "cos" << endl;
+cout << functionDEFINITION << "cos" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real r1 = 0.;
 real r2 = pi;
@@ -13,28 +13,28 @@ real r4 = pi/6;
 t = clock();
 real resr1 = cos(r1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr1 == 1.);
 
 t = clock();
 real resr2 = cos(r2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr2 == -1.);
 
 t = clock();
 real resr3 = cos(r3);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr3 == sqrt(2)/2);
 
 t = clock();
 real resr4 = cos(r4);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(resr4 - sqrt(3)/2) < HWERROR);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 complex c1 = 1. + 1i;
 complex c2 = 4. + 2i;
@@ -42,11 +42,11 @@ complex c2 = 4. + 2i;
 t = clock();
 complex cr1 = cos(c1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test((cr1 - (exp(c1 * 1i) + exp(-(c1 * 1i))) /2) < HWERROR);
 
 t = clock();
 complex cr2 = cos(c2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test((cr2 - (exp(c2 * 1i) + exp(-(c2 * 1i))) / 2) < HWERROR);

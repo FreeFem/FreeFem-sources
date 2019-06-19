@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "signbit" << endl;
+cout << functionDEFINITION << "signbit" << endl;
 real t;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 int ipos = 42;
 int ineg = -42;
@@ -11,16 +11,16 @@ int ineg = -42;
 t = clock();
 bool resipos = signbit(ipos);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resipos == false);
 
 t = clock();
 bool resineg = signbit(ineg);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resineg == true);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real rpos = 42.0;
 real rneg = -42.0;
@@ -28,11 +28,11 @@ real rneg = -42.0;
 t = clock();
 bool resrpos = signbit(rpos);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resrpos == false);
 
 t = clock();
 bool resrneg = signbit(rneg);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resrneg == true);

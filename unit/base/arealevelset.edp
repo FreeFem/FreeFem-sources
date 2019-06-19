@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "arealevelset" << endl;
+cout << functionDEFINITION << "arealevelset" << endl;
 
 real t;
 real r = 0.5;
@@ -15,5 +15,5 @@ Uh phi = 1. - (x^2+y^2);
 t = clock();
 real res = arealevelset(Th, phi[], r);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(res - (pi/2)) < (1./i));

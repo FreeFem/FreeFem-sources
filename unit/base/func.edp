@@ -1,12 +1,12 @@
 include "test.idp"
 
-cout << "func" << endl;
+cout << functionDEFINITION << "func" << endl;
 real t;
 
  t = clock();
 func f = [0, 1, 2, 3];
  t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(f[1]);
 
 int i;

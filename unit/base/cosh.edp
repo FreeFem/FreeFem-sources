@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "cosh" << endl;
+cout << functionDEFINITION << "cosh" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real r1 = 0.;
 real r2 = pi;
@@ -13,23 +13,23 @@ real r4 = pi/6;
 t = clock();
 real resr1 = cosh(r1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr1 == 1.);
 
 t = clock();
 real resr2 = cosh(r2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr2 == (exp(r2) + exp(-r2))/2);
 
 t = clock();
 real resr3 = cosh(r3);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr3 == (exp(r3) + exp(-r3))/2);
 
 t = clock();
 real resr4 = cosh(r4);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr4 == (exp(r4) + exp(-r4))/2);

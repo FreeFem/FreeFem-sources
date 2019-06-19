@@ -1,7 +1,7 @@
 load "msh3"
 include "test.idp"
 
-cout << "intallfaces" << endl;
+cout << functionDEFINITION << "intallfaces" << endl;
 real t;
 mesh3 Th = cube(1, 1, 1);
 real edge;
@@ -12,5 +12,5 @@ t = clock() - t;
 plot(Th);
 cout << edge << endl;
 // test(edge == 4 + 2 * sqrt(2));
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 //TODO

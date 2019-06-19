@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "triangulate" << endl;
+cout << functionDEFINITION << "triangulate" << endl;
 
 real t;
 string filetr = "triangle.msh";
@@ -10,7 +10,7 @@ real[int] y =  [4, 8, 9, 10];
 t = clock();
 mesh Thxy = triangulate(filetr);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 // test(Thxy);
 
 // Fespace

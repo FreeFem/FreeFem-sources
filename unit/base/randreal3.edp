@@ -1,13 +1,13 @@
 include "test.idp"
 
-cout << "randreal3" << endl;
+cout << functionDEFINITION << "randreal3" << endl;
 real t;
 
 randinit(time());
 t = clock();
 real r3 = randreal3();
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 for (int i = 0; i < 100; i++) {
   r3 = randreal3();
   test(r3 > 0 && r3 < 1);

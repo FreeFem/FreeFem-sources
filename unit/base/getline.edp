@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "getline" << endl;
+cout << functionDEFINITION << "getline" << endl;
 real t;
 ifstream file("myfile.txt");
 string read;
@@ -8,6 +8,6 @@ string read;
 t = clock();
 getline(file, read);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 cout << read << endl;
 test(read == "Writing this to a file ");

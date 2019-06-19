@@ -1,7 +1,7 @@
 load "msh3"
 include "test.idp"
 
-cout << "labels" << endl;
+cout << functionDEFINITION << "labels" << endl;
 
 real t;
 mesh Th = square(10, 10);
@@ -16,10 +16,10 @@ func int getsize(int[int] array) {
 t = clock();
 int[int] res = labels(Th);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 cout << res << endl;
 
 t = clock();
 res = labels(Th3);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;

@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "length" << endl;
+cout << functionDEFINITION << "length" << endl;
 real t;
 string str = "Hello, wordl!";
 string str2 = "";
@@ -10,11 +10,11 @@ int size;
 t = clock();
 size = str.length;
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(size == 13);
 
 t = clock();
 size = str2.length;
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(size == 0);

@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "fdim" << endl;
+cout << functionDEFINITION << "fdim" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;

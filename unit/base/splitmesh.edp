@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "splitmesh" << endl;
+cout << functionDEFINITION << "splitmesh" << endl;
 real t;
 
 border a(t=0, 2*pi){x=cos(t); y=sin(t); label=1;}
@@ -10,6 +10,6 @@ int nbnt = Th.nt;
 t = clock();
 Th = splitmesh(Th, 1 + 5*(square(x-0.5) + y*y));
 t = clock() - t ;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 int nbnt2 = Th.nt;
 test(nbnt2 > nbnt);

@@ -1,62 +1,62 @@
 include "test.idp"
 
-cout << "arg" << endl;
+cout << functionDEFINITION << "arg" << endl;
 real t;
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 complex comp1 = 5. + 1i * 5;
 t = clock();
 real arg1 = arg(comp1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arg1 == pi / 4);
 
 complex comp2 = 1i * 5.;
 t = clock();
 real arg2 = arg(comp2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arg2 == pi / 2);
 
 complex comp3 = -5 + 1i * 5.;
 t = clock();
 real arg3 = arg(comp3);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arg3 == 3 * pi / 4);
 
 complex comp4 = -5.;
 t = clock();
 real arg4 = arg(comp4);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arg4 == pi);
 
 complex comp5 = -5.0 - 1i * 5.;
 t = clock();
 real arg5 = arg(comp5);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arg5 == -3 * pi / 4);
 
 complex comp6 = 1i * -5.;
 t = clock();
 real arg6 = arg(comp6);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arg6 == -pi / 2);
 
 complex comp7 = 5.0 - 1i * 5.;
 t = clock();
 real arg7 = arg(comp7);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arg7 == -pi / 4);
 
 complex comp8 = 5.;
 t = clock();
 real arg8 = arg(comp8);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arg8 == 0.);

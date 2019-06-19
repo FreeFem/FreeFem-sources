@@ -1,7 +1,7 @@
 include "test.idp"
 
 real t;
-cout << "exit" << endl;
+cout << functionDEFINITION << "exit" << endl;
 
 bool isCaught = false;
 int exv1 = 0;
@@ -12,7 +12,7 @@ try {
   t = clock();
   exit(exv1);
   t = clock() - t;
-  cout << IND << t << endl;
+  cout << timeELAPSED << t << endl;
 } catch(...) {
   isCaught = true;
   valueReturned = exv1;
@@ -23,7 +23,7 @@ try {
   t = clock();
   exit(exv2);
   t = clock() - t;
-  cout << IND << t << endl;
+  cout << timeELAPSED << t << endl;
 } catch(...) {
   isCaught = true;
   valueReturned = exv2;

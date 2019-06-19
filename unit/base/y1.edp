@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "y1" << endl;
+cout << functionDEFINITION << "y1" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real r1 = 0;
 real minf = log(0.);
@@ -11,5 +11,5 @@ real minf = log(0.);
 t = clock();
 real resr1 = y1(r1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr1 == minf);

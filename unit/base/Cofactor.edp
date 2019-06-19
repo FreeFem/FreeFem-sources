@@ -1,13 +1,13 @@
 include "test.idp"
 
-cout << "Cofactor" << endl;
+cout << functionDEFINITION << "Cofactor" << endl;
 real t;
 
 t = clock();
 matrix A =  Cofactor([[1, 2],
                       [3, 4]]);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(A(0,0) == 4 && A(0,1) == -3 && A(1, 0) == -2 && A(1,1) == 1);
 
 t = clock();
@@ -15,7 +15,7 @@ matrix B =  Cofactor([[1, 4, 7],
                       [3, 0, 5],
                       [-1, 9, 11]]);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 cout << B << endl;
 test(B(0,0) == -45 && B(0,1) == -38 && B(0,2) == 27 &&
     B(1,0) == 19 && B(1,1) == 18 && B(1,2) == -13 &&

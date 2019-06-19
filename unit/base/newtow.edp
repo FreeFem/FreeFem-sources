@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "newtow" << endl;
+cout << functionDEFINITION << "newtow" << endl;
 real t;
 
 string str = "Error 404";
@@ -8,4 +8,4 @@ string str = "Error 404";
 t = clock();
 Newtow();
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;

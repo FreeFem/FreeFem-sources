@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "invdiffnp" << endl;
+cout << functionDEFINITION << "invdiffnp" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real a = 4.;
 real b = 2.;
@@ -13,17 +13,17 @@ real d = -2.;
 t = clock();
 real r1 = invdiffnp(a, b);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(r1 == 0);
 
 t = clock();
 real r2 = invdiffnp(c, a);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(r2 == 1/(a-c));
 
 t = clock();
 real r3 = invdiffnp(c, d);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(r3 == 0.);
