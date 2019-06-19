@@ -180,6 +180,7 @@ TESTS = APk-AdaptEpsDeltaPk.edp \
 	testFEMorley.edp \
 	testp1dcnc.edp \
 	thresholdings.edp \
+	Schur-Complement.edp \
 	$(CONDITIONAL_FFTW3) \
 	$(CONDITIONAL_FORTRAN) \
 	$(CONDITIONAL_GMM) \
