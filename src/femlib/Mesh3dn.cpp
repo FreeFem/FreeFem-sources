@@ -723,7 +723,7 @@ namespace Fem2D
     int Mesh3::load(const string & filename)
     {
         int bin;
-        int ver,inm,dim;
+        int ver,inm,dim,err=0;
         int lf=filename.size()+20;
         KN<char>  fileb(lf),filef(lf);
         char *data = new char[filename.size()+1];
@@ -822,6 +822,12 @@ namespace Fem2D
                 for (int j=0;j<4;j++) iv[j]--;
                 this->elements[i].set(vertices,iv,lab);
                 mes += this->elements[i].mesure();
+                if( this->elements[i].mesure() <=0. )
+                {
+                    if( err++ < 10 && verbosity )
+                        cout << " the tet " << i << " is badly orienated tet "<<this->elements[i].mesure() << endl;
+                    
+                }
             }
             
         }
@@ -853,6 +859,11 @@ namespace Fem2D
                     for (int j=0;j<3;++j) iv[j]--;
                     this->be(i).set(this->vertices,iv,lab);
                     mesb += this->be(i).mesure();
+                    if( this->be(i).mesure() <=0. )
+                    {
+                      if(  err++ < 10 && verbosity )
+                        cout << " the triangle " << i << " is  badly orienated "<<this->be(i).mesure()  << endl;
+                    }
                 }
             }
         }
@@ -925,6 +936,13 @@ namespace Fem2D
         
         GmfCloseMesh(inm);
         delete[] data;
+        if(err)
+        {
+            cerr << "Fatal Error  in mesh : "<< filename <<" number badly oriented element  " << err << endl
+                 << "    nt " << nt << " / nbe " << nbe << " / mes " << mes << " mesb " << mesb << endl;
+            ffassert(0);
+        }
+
         return 0; // OK
     }
     

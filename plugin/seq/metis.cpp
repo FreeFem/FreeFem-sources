@@ -111,7 +111,7 @@ KN<long>*partmetisd (Stack s, KN<long> *const &part, Mesh *const &pTh, long cons
 	idx_t numflag = 0;
 	idx_t nparts = lparts;
 	idx_t edgecut;
-		#ifdef  METIS_VER_MAJOR
+#ifdef  METIS_VER_MAJOR
 	printf("  %d-way Edge-Cut: %7d, Balance: %5.2f\n", nparts, nve, libmetis__ComputeElementBalance(nt, nparts, epart));
 #else
 	printf("  %d-way Edge-Cut: %7d, Balance: %5.2f\n", nparts, nve, ComputeElementBalance(nt, nparts, epart));

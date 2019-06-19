@@ -60,5 +60,6 @@ for(int i = 0; i < D.n; ++i)
     if(abs(D[i] - 1.0) > 1e-6)
         err[i] = 0.0;
 
-plotMPI(Th, u[], "Global solution", Pk, def, complex, 3, 1)
-plotMPI(Th, err, "Global error", Pk, def, complex, 3, 1)
+plotMPI(Th, u, Pk, def, complex, cmm = "Global solution")
+u[] = err;
+plotMPI(Th, u, Pk, def, complex, cmm = "Global residual")

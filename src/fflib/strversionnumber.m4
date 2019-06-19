@@ -10,7 +10,7 @@ using namespace std;
 using namespace std;
 
 double VersionNumber(){
-  return VersionFreeFempp;
+  return VersionFreeFem;
 }
 
 string StrVersionNumber(){

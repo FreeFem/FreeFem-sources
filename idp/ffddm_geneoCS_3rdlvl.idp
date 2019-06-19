@@ -188,7 +188,8 @@ if (pr#issuper) {
   
   pr#insuperwithoverlap.resize(pr#neighborsofsuper.n+pr#insuperinterior.n);
   pr#insuperwithoverlap(0:pr#insuperinterior.n-1) = pr#insuperinterior;
-  pr#insuperwithoverlap(pr#insuperinterior.n:pr#insuperwithoverlap.n-1) = pr#neighborsofsuper;
+  if (pr#insuperwithoverlap.n >pr#insuperinterior.n)
+    pr#insuperwithoverlap(pr#insuperinterior.n:pr#insuperwithoverlap.n-1) = pr#neighborsofsuper;
   
   tmp.resize(pr#neighborsofsuper.n);
   pr#superarrayIntersection.resize(tmp.n);
@@ -384,8 +385,8 @@ macro ffddmgeneosetupsuper(pr)
   for (int is=0;is < pr#prfe#prmesh#listofsupers.n; is++) {
     int isuper = pr#prfe#prmesh#listofsupers[is];
     if (pr#prfe#prmesh#issuper && pr#prfe#prmesh#mysuperrank == isuper) {
-      inisuperwithoverlap[is] = pr#prfe#prmesh#insuperwithoverlap;
       inisuperwithoverlap[is].resize(pr#prfe#prmesh#insuperwithoverlap.n);
+      inisuperwithoverlap[is] = pr#prfe#prmesh#insuperwithoverlap;
     }
     else
       inisuperwithoverlap[is].resize(inisuperwithoverlapsize[is]);

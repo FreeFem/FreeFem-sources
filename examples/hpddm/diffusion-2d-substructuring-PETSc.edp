@@ -40,10 +40,10 @@ globalNumbering(A, numbering);
 for(int i = 0; i < u[].n; ++i)
     u[][i] = numbering[i];
 originalNumbering(A, u[], interfaceNb);
-plotMPI(Th, u[], "Global numbering", Pk, def, real, 3, 1)
+plotMPI(Th, u, Pk, def, real, cmm = "Global numbering")
 
 set(A, sparams = "-pc_type bddc -ksp_monitor");
 u[] = A^-1 * rhs;
 
 originalNumbering(A, u[], interfaceNb);
-plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

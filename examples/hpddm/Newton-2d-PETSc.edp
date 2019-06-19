@@ -68,4 +68,4 @@ xPETSc.resize(bPETSc.n);
 xPETSc = 0;
 SNESSolve(dJ, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -ksp_monitor_true_residual -snes_converged_reason -ksp_converged_reason -pc_type lu -snes_view");
 changeNumbering(dJ, u[], xPETSc, inverse = true, exchange = true);
-plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

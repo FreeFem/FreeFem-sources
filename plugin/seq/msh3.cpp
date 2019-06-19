@@ -6744,7 +6744,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
                 }
                 
                 for (int iv = 0; iv < nvsub; iv++) {
-                    Vertex3 *pvi = gtree->ToClose(vertextetsub[iv], hseuil);
+                    Vertex3 *pvi = gtree->ToClose(vertextetsub[iv], hseuil, true);
                     
                     if (!pvi) {
                         (R3 &)v[np] = vertextetsub[iv];
@@ -6855,7 +6855,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
         
         for (int iv = 0; iv < nv2Dsub; iv++) {
             const Vertex3 &vi(vertextrisub[iv]);
-            Vertex3 *pvi = gtree->ToClose(vi, hseuil);
+            Vertex3 *pvi = gtree->ToClose(vi, hseuil, true);
             assert(pvi);
             newindex[iv] = pvi - v;
         }

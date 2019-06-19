@@ -47,7 +47,8 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernardiRaugel.$(DYLIB_SUFFIX) \
 	Element_HCT.$(DYLIB_SUFFIX) Curvature.$(DYLIB_SUFFIX) Element_P1bl.$(DYLIB_SUFFIX) \
 	Element_QF.$(DYLIB_SUFFIX) distance.$(DYLIB_SUFFIX) Element_P1ncdc.$(DYLIB_SUFFIX) \
 	Element_P2bulle3.$(DYLIB_SUFFIX)  \
-	Element_P2pnc.$(DYLIB_SUFFIX) SaveHB.$(DYLIB_SUFFIX) IncompleteCholesky.$(DYLIB_SUFFIX)
+	Element_P2pnc.$(DYLIB_SUFFIX) SaveHB.$(DYLIB_SUFFIX) IncompleteCholesky.$(DYLIB_SUFFIX) \
+	Shur-Complement.$(DYLIB_SUFFIX) 
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.
 

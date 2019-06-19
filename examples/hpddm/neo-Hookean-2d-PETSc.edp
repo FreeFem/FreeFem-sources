@@ -340,8 +340,9 @@ real[int] xPETSc;
 changeNumbering(A, u1n[], xPETSc);
 SNESSolve(A, funcJ, funcRes, xPETSc, sparams = "-snes_monitor -snes_linesearch_monitor -snes_type newtonls -snes_converged_reason -snes_view -snes_rtol 1e-4");
 changeNumbering(A, u1n[], xPETSc, inverse = true, exchange = true);
-plotMPI(Th, u1n[], "Global solution", Pk, def, real, 2, 1)
+plotMPI(Th, [u1n, u2n], Pk, def, real, cmm = "Global solution")
 real alpha = 1.0;
 meshN ThMoved = movemesh(Th, [x + alpha * u1n, y + alpha * u2n]);
 u1n[] = mpirank;
-plotMPI(ThMoved, u1n[], "Global moved solution", Pk, def, real, 2, 1)
+macro def1(u)u// EOM
+plotMPI(Th, u1n, P1, def1, real, cmm = "Global moved solution")

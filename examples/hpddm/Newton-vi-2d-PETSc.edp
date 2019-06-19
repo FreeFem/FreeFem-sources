@@ -63,7 +63,7 @@ func int funcJ(real[int]& inPETSc) {
 
 Vh xu;
 xu = sqrt((x - 0.5)^2 + (y - 0.5)^2) < 0.4 ? 0.2 : 1.0;
-plotMPI(Th, xu[], "Upper bound", Pk, def, real, 3, 1)
+plotMPI(Th, xu, Pk, def, real, cmm = "Upper bound")
 real[int] xPETSc, bPETSc, xuPETSc;
 u[] = vC(0, Vh, tgv = -1);
 changeNumbering(dJ, u[], bPETSc);
@@ -72,4 +72,4 @@ xPETSc.resize(bPETSc.n);
 xPETSc = 0.1;
 SNESSolve(dJ, funcJ, funcRes, bPETSc, xPETSc, xu = xuPETSc, sparams = "-snes_monitor -ksp_converged_reason -snes_view -snes_vi_monitor -snes_type vinewtonrsls -snes_rtol 1.0e-6 -pc_type lu");
 changeNumbering(dJ, u[], xPETSc, inverse = true, exchange = true);
-plotMPI(Th, u[], "Global solution", Pk, def, real, 3, 1)
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

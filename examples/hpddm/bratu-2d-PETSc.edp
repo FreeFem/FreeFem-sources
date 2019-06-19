@@ -57,4 +57,4 @@ changeNumbering(A, u[], bPETSc);
 real[int] xPETSc = bPETSc;
 SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_linesearch_monitor -snes_type newtontr -snes_converged_reason -snes_view");
 changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
-plotMPI(M, u[], "Global solution", Pk, def, real, 3, 1)
+plotMPI(M, u, Pk, def, real, cmm = "Global solution")
