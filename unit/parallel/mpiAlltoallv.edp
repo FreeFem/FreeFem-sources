@@ -1,16 +1,65 @@
 include "test.idp"
 
-cout << "mpiAlltoall" << endl;
+cout << "mpiAlltoallv" << endl;
 
 real t;
 
 cout << IND << "int[int]" << endl;
 
-int[int] a(mpisize), b(mpisize), c(mpisize), e(mpisize), f(mpisize);
-a[mpirank] = mpirank;
+// int[int] a(mpisize), b(mpisize), c(mpisize), e(mpisize), f(mpisize), g(mpisize);
+// a[mpirank] = mpirank + 1;
 
 // t = mpiWtime();
-// mpiAlltoallv(a, b, c, f, e);
+// mpiAlltoallv(a, b, c, e, f, g);
 // t = mpiWtime() - t;
 // cout << IND << IND << t << endl;
+// for (int i=0; i < mpisize; i++) {
+//         c[i] = i;
+//         f[i] = mpirank;
+//         g[i] = i * mpirank;
+//         e[i] = (i * (i+1))/2;
+//     }
+// // // cout << a[mpirank] << " " << b[mpirank] << endl;
+// // cout << a[mpirank] << " " << b[mpirank] << endl;
+// // cout << a[mpirank] << " " << c[mpirank] << endl;
+// // cout << a[mpirank] << " " << e[mpirank] << endl;
+// // cout << a[mpirank] << " " << f[mpirank] << endl;
+// // cout << a[mpirank] << " " << g[mpirank] << endl;
+// // cout << a[0] << " " << g[0] << endl;
+// // cout << a[1] << " " << g[1] << endl;
+// // cout << a[2] << " " << g[2] << endl;
+// // cout << a[3] << " " << g[3] << endl;
+// mpiBarrier(mpiCommWorld);
+// if (mpirank == 2) {
+//   // cout << a << endl;
+//   cout << b << endl;
+  // cout << c << endl;
+  // cout << f << endl;
+  // cout << g << endl;
+// }
+
+//en dessous!
+int[int] a(mpisize), b(mpisize);
+a[mpirank] = mpirank+1;
+
+int[int] sc(mpisize), sd(mpisize), rc(mpisize), rd(mpisize);
+
+for (int i = 0; i < mpisize; i++) {
+	sc[i] = mpisize;
+	sd[i] = 0;
+	rc[i] = mpisize;
+	rd[i] = 0;
+}
+
+//t = mpiWtime();
+mpiAlltoallv(a, b, sc, sd, rc, rd);
+//t = mpiWtime() - t;
+//cout << IND << IND << t << endl;
+//test(b[mpirank] == mpirank);
+if (mpirank == 2) cout << b << endl;
+//lui il sort [0, 0, 0, 4]
+// alors que normalement il a [0, 0, 3, 0]
+if (mpirank == 0) cout << b << endl;
 // test(b[mpirank] == mpirank);
+
+mpiBarrier(mpiCommWorld);
