@@ -1,0 +1,102 @@
+load "msh3"
+load "Element_P3"
+include "test.idp"
+
+cout << "dyx" << endl;
+real t;
+
+{
+  mesh Th = square(10, 10);
+
+  cout << IND << "P0" << endl;
+  fespace Uh0(Th, P0);
+  Uh0 u0, du0, du0ex;
+  Uh0 uerr0;
+
+  u0 = 1.;
+  du0ex = 0.;
+  t = clock();
+  du0 = dyx(u0);
+  t = clock() - t;
+  cout << IND << t << endl;
+  uerr0 = abs(du0 - du0ex);
+  test(uerr0[].linfty < HWERROR);
+
+  cout << IND << "P1" << endl;
+  fespace Uh1(Th, P1);
+  Uh1 u1, du1, du1ex;
+  Uh1 uerr1;
+
+  u1 = 1.;
+  du1ex = 0.;
+  t = clock();
+  du1 = dyx(u1);
+  t = clock() - t;
+  cout << IND << t << endl;
+  uerr1 = abs(du1 - du0ex);
+  test(uerr0[].linfty < HWERROR);
+
+  cout << IND << "P2" << endl;
+  fespace Uh2(Th, P2);
+  Uh2 u2, du2, du2ex;
+  Uh2 uerr2;
+
+  u2 = x*x + y*x + y*y + x + y + 1.;
+  du2ex = 1.;
+  t = clock();
+  du2 = dyx(u2);
+  t = clock() - t;
+  cout << IND << t << endl;
+  uerr2 = abs(du2 - du2ex);
+  test(uerr2[].linfty < HWERROR);
+
+  cout << IND << "P3" << endl;
+  fespace Uh3(Th, P3);
+  Uh3 u3, du3, du3ex;
+  Uh3 uerr3;
+}
+{
+  mesh3 Th = cube(4, 4, 4);
+
+  cout << IND << "P0" << endl;
+  fespace Uh0(Th, P0);
+  Uh0 u0, du0, du0ex;
+  Uh0 uerr0;
+
+  u0 = 1.;
+  du0ex = 0.;
+  t = clock();
+  du0 = dyx(u0);
+  t = clock() - t;
+  cout << IND << t << endl;
+  uerr0 = abs(du0 - du0ex);
+  test(uerr0[].linfty < HWERROR);
+
+  cout << IND << "P1" << endl;
+  fespace Uh1(Th, P1);
+  Uh1 u1, du1, du1ex;
+  Uh1 uerr1;
+
+  u1 = x + y + z + 1.;
+  du1ex = 0.;
+  t = clock();
+  du1 = dyx(u1);
+  t = clock() - t;
+  cout << IND << t << endl;
+  uerr1 = abs(du1 - du1ex);
+  test(uerr1[].linfty < HWERROR);
+
+  cout << IND << "P2" << endl;
+  fespace Uh2(Th, P2);
+  Uh2 u2, du2, du2ex;
+  Uh2 uerr2;
+
+  u2 =  x*x + y*x + x*z + y*z + y*y + z*z + x + y + z + 1.;
+  du2ex = 1.;
+  t = clock();
+  du2 = dyx(u2);
+  t = clock() - t;
+  cout << IND << t << endl;
+  uerr2 = abs(du2 - du2ex);
+  test(uerr2[].linfty < HWERROR);
+}

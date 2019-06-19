@@ -1,0 +1,84 @@
+include "test.idp"
+
+cout << "cout" << endl;
+real t;
+
+int i = 42;
+int[int] iarray = [1, 2, 3];
+int[string] isarray = ["a", 1, "b", 2, "c", 3];
+real r = 4.2;
+real[int] rarray = [1., 2., 3.];
+real[string] rsarray = ["a", 1., "b", 2., "c", 3.];
+bool b = true;
+string s = "FreeFem";
+complex c = 4. + 2 * i;
+matrix A = [[1 , 2],
+            [3, 4]];
+matrix<complex> B = [[1. + 2*1i, 2.* 1i],
+                      [4. * 1i, 2. * 1i]];
+
+cout << IND << "int" << endl;
+t = clock();
+cout << i << endl;
+t = clock() - t;
+cout << IND << IND << t << endl;
+
+cout << IND << "int[int]" << endl;
+t = clock();
+cout << iarray << endl;
+t = clock() - t;
+cout << IND << IND << t << endl;
+
+cout << IND << "int[string]" << endl;
+t = clock();
+cout << isarray << endl;
+t = clock() - t;
+cout << IND << IND << t << endl;
+
+cout << IND << "real" << endl;
+t = clock();
+cout << r << endl;
+t = clock() - t;
+cout << IND << IND << t << endl;
+
+cout << IND << "real[int]" << endl;
+t = clock();
+cout << rarray << endl;
+t = clock() - t;
+cout << IND << IND << t << endl;
+
+cout << IND << "real[string]" << endl;
+t = clock();
+cout << rsarray << endl;
+t = clock() - t;
+cout << IND << IND << t << endl;
+
+cout << IND << "boolean" << endl;
+t = clock();
+cout << b << endl;
+t = clock() - t;
+cout << IND << IND << t << endl;
+
+cout << IND << "string" << endl;
+t = clock();
+cout << s << endl;
+t = clock() - t;
+cout << IND << IND << t << endl;
+
+cout << IND << "complex" << endl;
+t = clock();
+cout << c << endl;
+t = clock() - t;
+cout << IND << IND << t << endl;
+
+cout << IND << "matrix" << endl;
+t = clock();
+cout << A << endl;
+t = clock() - t;
+cout << IND << IND << t << endl;
+
+cout << IND << "complex matrix" << endl;
+t = clock();
+cout << B << endl;
+t = clock() - t;
+cout << IND << IND << t << endl;

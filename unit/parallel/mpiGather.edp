@@ -1,0 +1,16 @@
+include "test.idp"
+
+cout << "mpiGather" << endl;
+
+real t;
+
+cout << IND << "int[int]" << endl;
+
+int[int] Send(mpisize);
+Send[mpirank] = mpirank;
+int[int] Rcv(mpisize);
+t = mpiWtime();
+mpiGather(Send, Rcv, processor(0));
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+// test(Rcv[mpirank] == mpirank);

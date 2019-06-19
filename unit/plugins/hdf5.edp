@@ -1,0 +1,33 @@
+load "msh3"
+load "iohdf5"
+include "test.idp"
+
+cout << "hdf5" << endl;
+
+cout << "2D" << endl;
+{
+	mesh Th = square(10, 10);
+
+	fespace Uh(Th, P1);
+	Uh u = x*y;
+
+	fespace UUh(Th, [P1, P1]);
+	UUh [ux, uy] = [x+y, x*y];
+
+	savemesh(Th, "Th2D.h5");
+	savehdf5sol("iohdf52D.sol.h5", Th, u, "u", [ux, uy], "[ux, uy]");
+}
+
+cout << "3D" << endl;
+{
+	mesh3 Th = cube(10, 10, 10);
+
+	fespace Uh(Th, P1);
+	Uh u = x*y*z;
+
+	fespace UUh(Th, [P1, P1, P1]);
+	UUh [ux, uy, uz] = [x+y+z, x*y*z, x+x*y+x*y*z];
+
+	// savemesh(Th, "Th3D.h5");
+	savehdf5sol("iohdf53D.sol.h5", Th, u, "u", [ux, uy, uz], "[ux, uy, uz]");
+}

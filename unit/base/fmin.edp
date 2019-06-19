@@ -1,38 +1,41 @@
 include "test.idp"
 
-cout << "square" << endl;
+cout << "fmin" << endl;
 real t;
+int i1 = 1;
+int i2 = 2;
+int i4 = -1;
+int i5 = -2;
+real r1 = -3.5;
+real r2 = -4.5;
+real nan = sqrt(-1);
 
 cout << IND << "int" << endl;
 
-int i = 4;
-real ineg = -4;
-
 t = clock();
-real resi1 = square(i);
+real rmin = fmin(i1, i2);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(resi1 == 16);
+test(rmin == i1);
 
 t = clock();
-real resineg = square(ineg);
+rmin = fmin(i4, i5);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(resineg == 16);
+test(rmin == i5);
 
 cout << IND << "real" << endl;
 
-real r = 4.0;
-real rneg = -4.0;
-
 t = clock();
-real resr1 = square(r);
+rmin = fmin(r1, r2);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(resr1 == 16.0);
+test(rmin == r2);
+
+cout << IND << "nan" << endl;
 
 t = clock();
-real resrneg = square(rneg);
+rmin = fmin(i1, nan);
 t = clock() - t;
 cout << IND << IND << t << endl;
-test(resrneg == 16.0);
+test(rmin == i1);

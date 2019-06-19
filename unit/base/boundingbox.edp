@@ -1,0 +1,21 @@
+load "msh3"
+include "test.idp"
+
+cout << "boundingbox" << endl;
+
+real t;
+mesh Th = square(10,10);
+mesh3 Th3 = cube(10, 10, 10);
+real[int] bb(4);
+
+t = clock();
+real res = boundingbox(Th, bb);
+t = clock() - t;
+cout << IND << t << endl;
+test(bb[0] < bb[1] && bb[2] < bb[3]);
+
+t = clock();
+res = boundingbox(Th3, bb);
+t = clock() - t;
+cout << IND << t << endl;
+test(bb[0] < bb[1] && bb[2] < bb[3]);

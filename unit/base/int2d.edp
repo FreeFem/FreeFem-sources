@@ -19,6 +19,12 @@ cout << IND << t << endl;
 test(abs(0.5 - res) < HWERROR);
 
 t = clock();
+res = int2d(Th, levelset=-0.5+x)(x);
+t = clock() - t;
+cout << IND << t << endl;
+test(abs(0.125 - res) < HWERROR);
+
+t = clock();
 res = int2d(Th)(x + y);
 t = clock() - t;
 cout << IND << t << endl;

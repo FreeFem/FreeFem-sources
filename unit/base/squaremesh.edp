@@ -1,7 +1,6 @@
 include "test.idp"
 real t;
 
-
 cout << "square" << endl;
 
 func int testMesh(mesh &Th, int nx, int ny, real X, real Y,

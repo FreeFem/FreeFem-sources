@@ -1,0 +1,38 @@
+include "test.idp"
+
+cout << "processorblock" << endl;
+real t;
+
+mpiComm Comm(mpiCommWorld, 0, 0);
+
+int MPICommSize = mpiSize(Comm);
+int MPIRank = mpiRank(Comm);
+
+if (MPIRank == 0) cout << "MPI Comm size = " << MPICommSize << endl;
+cout << "MPI rank in Comm = " << mpiRank(Comm) << endl;
+
+mpiRequest Req;
+mpiRequest[int] ReqArray(10);
+
+for (int i = 0; i < MPICommSize; i++){
+    t = mpiWtime();
+    processorblock(i);
+    t = mpiWtime() - t;
+    cout << IND << t << endl;
+    t = mpiWtime();
+    processorblock(mpiAnySource);
+    t = mpiWtime() - t;
+    cout << IND << t << endl;
+    t = mpiWtime();
+    processorblock(i, Comm);
+    t = mpiWtime() - t;
+    cout << IND << t << endl;
+    int res;
+    processorblock(i) << 42;
+    processorblock(i) >> res;
+    test(res == 42);
+}
+
+mpiBarrier(Comm); //do a MPI_Barrier on communicator Comm
+mpiWaitAny(ReqArray); //wait add of Request array,
+mpiWait(Req); //wait on a Request

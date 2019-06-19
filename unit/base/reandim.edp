@@ -1,0 +1,60 @@
+include "test.idp"
+
+cout << ".re and .im" << endl;
+real t;
+
+matrix<complex> A = [[1+1i, 2+1i, 3+2i],
+                    [1 + 5i, 2 + -2i, 3 + 6i]];
+complex[int] intarray = [1 + 2i, 2 + 2i, 3 - 2i];
+complex[int, int] intintarray = [[1+1i, 2+1i, 3+2i],
+                    [1 + 5i, 2 + -2i, 3 + 6i]];
+
+cout << ".re" << endl;
+
+t = clock();
+matrix R = A.re;
+t = clock() - t;
+cout << IND << t << endl;
+int[int] I, J;
+real[int] D;
+[I, J, D] = R;
+test(D[0] == 1 && D[1] == 2 && D[2] == 3 &&
+D[3] == 1 && D[4] == 2 && D[5] == 3);
+
+t = clock();
+matrix RES = intarray.re;
+t = clock() - t;
+cout << IND << t << endl;
+[I, J, D] = RES;
+test(D[0] == 1 && D[1] == 2 && D[2] == 3);
+
+t = clock();
+real[int, int] res = intintarray.re;
+t = clock() - t;
+cout << IND << t << endl;
+test(res(0,0) == 1 && res(0,1) == 2 && res(0,2) == 3 &&
+res(1,0) == 1 && res(1,1) == 2 && res(1,2) == 3);
+
+cout << ".im" << endl;
+
+t = clock();
+matrix S = A.im;
+t = clock() - t;
+cout << IND << t << endl;
+[I, J, D] = S;
+test(D[0] == 1 && D[1] == 1 && D[2] == 2 &&
+    D[3] == 5 && D[4] == -2 && D[5] == 6);
+
+t = clock();
+RES = intarray.im;
+t = clock() - t;
+cout << IND << t << endl;
+[I, J, D] = RES;
+test(D[0] == 2 && D[1] == 2 && D[2] == -2);
+
+t = clock();
+res = intintarray.im;
+t = clock() - t;
+cout << IND << t << endl;
+test(res(0,0) == 1 && res(0,1) == 1 && res(0,2) == 2 &&
+res(1,0) == 5 && res(1,1) == -2 && res(1,2) == 6);

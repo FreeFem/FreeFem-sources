@@ -1,0 +1,35 @@
+include "test.idp"
+
+cout << "interpolate" << endl;
+real t;
+mesh Th = square(4, 4);
+mesh Th4 = square(2, 2, [x*0.5, y*0.5]);
+bool Inside = true;
+bool T = true;
+int op = 1;
+fespace V4h(Th4, [P1, P1, P1, P1]);
+fespace V3h(Th, [P1, P1, P1]);
+int[int] u2vc = [1, 3, -1]; //-1 -> put zero on the component
+
+t = clock();
+matrix A = interpolate(V3h, V4h, inside=0, U2Vc=u2vc);
+t = clock() - t;
+cout << IND << t << endl;
+V4h [a1, a2, a3, a4] = [1, 2, 3, 4];
+V3h [b1, b2, b3] = [10, 20, 30];
+b1[] = A*a1[];
+test(b1 == 2 && b2 == 4 && b3 == 0);
+
+fespace Vh(Th, P1);
+Vh v, vv;
+fespace Vh4(Th4, P1);
+Vh4 v4=x*y;
+fespace Wh(Th, P0);
+fespace Wh4(Th4, P0);
+
+t = clock();
+matrix IV = interpolate(Vh, Vh4);
+t = clock() - t;
+v=v4;
+vv[]= IV*v4[];
+test(v == vv);

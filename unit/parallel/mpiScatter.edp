@@ -1,0 +1,16 @@
+//NBPROC 4
+assert(mpisize == 4);
+include "test.idp"
+
+cout << "mpiScatter" << endl;
+
+int[int] a(mpisize), b(mpisize);
+if (!mpirank)
+	for [i, ai:a]
+		ai = i+1;
+
+mpiScatter(a, b(mpirank), processor(0));
+
+for (int i = 0; i < mpisize; i++)
+	if (mpirank == i)
+		test(b[i] == i + 1);

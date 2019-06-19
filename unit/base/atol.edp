@@ -1,0 +1,32 @@
+include "test.idp"
+
+cout << "atol" << endl;
+real t;
+string s1 = "4209876";
+string s2 = "toto";
+string s3 = "4200toto";
+string s4 = "toto42";
+
+t = clock();
+real long =  atol(s1);
+t = clock() - t;
+cout << IND << t << endl;
+test(long == 4209876);
+
+t = clock();
+long =  atol(s2);
+t = clock() - t;
+cout << IND << t << endl;
+test(long == 0);
+
+t = clock();
+long =  atol(s3);
+t = clock() - t;
+cout << IND << t << endl;
+test(long == 4200);
+
+t = clock();
+long =  atol(s4);
+t = clock() - t;
+cout << IND << t << endl;
+test(long == 0);

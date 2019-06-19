@@ -1,0 +1,13 @@
+include "test.idp"
+
+cout << "getline" << endl;
+real t;
+ifstream file("myfile.txt");
+string read;
+
+t = clock();
+getline(file, read);
+t = clock() - t;
+cout << IND << t << endl;
+cout << read << endl;
+test(read == "Writing this to a file ");

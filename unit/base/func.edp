@@ -1,0 +1,15 @@
+include "test.idp"
+
+cout << "func" << endl;
+real t;
+
+ t = clock();
+func f = [0, 1, 2, 3];
+ t = clock() - t;
+cout << IND << t << endl;
+test(f[1]);
+
+int i;
+for (i = 0; i < 4; i++);
+int savei = i;
+cout << f[savei] << endl;

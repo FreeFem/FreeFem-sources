@@ -1,0 +1,40 @@
+include "test.idp"
+
+cout << "mpiAllReduce" << endl;
+
+real t;
+if (!mpirank) cout << IND << "mpiMAX" << endl;
+
+if (!mpirank) cout << IND << IND << "int" << endl;
+int rank = mpirank;
+int globalRank;
+t = mpiWtime();
+mpiAllReduce(rank, globalRank, mpiCommWorld, mpiMAX);
+t = mpiWtime() - t;
+cout << IND << t << endl;
+if (mpirank == 0) cout << globalRank << endl;
+test(globalRank == 3);
+
+if (!mpirank) cout << IND << IND << "real" << endl;
+
+real rankr = 1./(1. + mpirank);
+real globalRankr;
+
+t = mpiWtime();
+mpiAllReduce(rankr, globalRankr, mpiCommWorld, mpiMAX);
+t = mpiWtime() - t;
+cout << IND << t << endl;
+if (mpirank == 0) cout << globalRankr << endl;
+test(globalRankr == 1.);
+
+if (!mpirank) cout << IND << IND << "complex" << endl;
+
+complex rankc = 1. + 1i/(1.+ 1i + mpirank);
+complex globalRankc;
+
+t = mpiWtime();
+mpiAllReduce(rankc, globalRankc, mpiCommWorld, mpiSUM);
+t = mpiWtime() - t;
+cout << IND << t << endl;
+if (mpirank == 0) cout << globalRankc << endl;
+test((globalRank - (4.85882 + 1.43529i)) < ALGERROR);
