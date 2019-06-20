@@ -19,18 +19,33 @@ base:
 	(for test in $(SRC); do \
 		echo $$test; \
 		$(FF) $$test $(PARAM) > $$test.log; \
+		if [ "$$?" -eq "0" ]; then \
+			echo -e "Success"; \
+		else \
+			echo -e "\tFail"; \
+		fi \
 	done)
 
 parallel:
 	(for test in $(SRCmpi); do \
 		echo $$test; \
 		$(FFmpi) $$test $(PARAM) > $$test.log; \
+		if [ "$$?" -eq "0" ]; then \
+			echo -e "Success"; \
+		else \
+			echo -e "\tFail"; \
+		fi \
 	done)
 
 plugins:
 	(for test in $(SRCplugins); do \
 		echo $$test; \
 		$(FF) $$test $(PARAM) > $$test.log; \
+		if [ "$$?" -eq "0" ]; then \
+			echo -e "Success"; \
+		else \
+			echo -e "\tFail"; \
+		fi \
 	done)
 
 clean:
