@@ -1,0 +1,165 @@
+html {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	font-size: 16px;
+	font-family: 'Roboto', sans-serif;
+  overflow: hidden;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+header {
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	background-color: #282c34;
+	font-size: calc(10px + 2vmin);
+	color: white;
+}
+
+header p {
+	margin: auto;
+}
+
+#content {
+	flex: 1 1 auto;
+}
+
+footer {
+	display: flex;
+	background-color: #282c34;
+	height: 1rem;
+}
+
+/*
+a {
+	color: black;
+	text-decoration: none;
+	z-index: 10;
+}
+
+a:visited {
+	color: black;
+	text-decoration: none;
+}
+
+header {
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	background-color: #282c34;
+}
+
+header a, header a:visited {
+	padding: 1rem;
+	color: white;
+	text-decoration: underline;
+}
+
+header p {
+	margin: auto;
+	font-size: 2rem;
+	color: white;
+}
+
+table {
+	padding: 1rem;
+  width: 100%;
+  overflow: auto;
+}
+
+table td.title {
+	display: none;
+}
+
+.headerItem {
+	font-weight: 300;
+}
+
+.headerValue {
+	color: #4682B4;
+}
+
+.headerValue a:hover {
+	color: rgb(0, 0, 255, 1);
+}
+
+.headerValueLeg {
+  line-height: 1.75rem;
+}
+
+.coverLegendCovLo, .headerCovTableEntryLo, .coverPerLo, .coverNumLo, .coverFnLo {
+	background-color: rgba(255, 0, 0, 0.75);
+	padding: 0.25rem;
+}
+
+.coverLegendCovMed, .headerCovTableEntryMed, .coverPerMed, .coverNumMed, .coverFnMed {
+	background-color: rgb(255, 255, 0, 0.75);
+	padding: 0.25rem;
+}
+
+.coverLegendCovHi, .headerCovTableEntryHi, .coverPerHi, .coverNumHi, .coverFnHi {
+	background-color: rgb(0, 255, 0, 0.75);
+	padding: 0.25rem;
+}
+
+.headerCovTableEntry {
+	background-color: rgb(0, 0, 255, 0.1);
+}
+
+center table {
+	width: 100%;
+}
+
+.tableHead {
+	background-color: rgb(0, 0, 255, 0.25);
+	font-weight: 300;
+	padding: 1rem;
+}
+
+.tableHeadSort {
+	padding: 0.5rem;
+}
+
+.coverFile, .coverBar, .coverfn {
+	background-color: rgb(0, 0, 255, 0.1);
+	padding: 0.25rem;
+}
+
+.coverFile a:hover {
+	color: rgb(0, 0, 255, 1);
+}
+
+.coverPerLo, .coverPerMed, .coverPerHi {
+	font-weight: bold;
+}
+
+.versionInfo {
+	color: #aaaaaa;
+	text-align: center;
+}
+
+.versioninfo a {
+	color: #999999;
+}
+
+.sourceHeading {
+	font-weight: bold;
+}
+
+.linecov {
+	background-color: rgba(0, 255, 0, 0.25);
+}
+
+.linenocov {
+	background-color: rgba(255, 0, 0, 0.25);
+} */
