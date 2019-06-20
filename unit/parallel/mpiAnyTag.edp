@@ -1,0 +1,5 @@
+include "test.idp"
+
+cout << "mpiAnyTag" << endl;
+cout << mpiAnyTag << endl;
+test(mpiAnyTag == -1);

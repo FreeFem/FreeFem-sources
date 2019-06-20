@@ -20,7 +20,6 @@ for (int i = 0; i < mpisize; i++)
 	if (mpirank == i)
 		test(b[i] == i + 1);
 
-
 cout << IND << "real[int]" << endl;
 real[int] ar(mpisize), br(mpisize);
 if (!mpirank)
@@ -44,14 +43,11 @@ if (!mpirank)
 		ai = i+1;
 
 t = mpiWtime();
-mpiScatter(ac, bc, processor(0));
+mpiScatter(ac, bc(mpirank), processor(0));
 t = mpiWtime() - t;
 cout << IND << IND << t << endl;
 
-// for (int i = 0; i < mpisize; i++)
-// 	if (mpirank == i) {
-// 		// test(bc[i] == i + 1);
-// 	}
-// test(bc[mpirank] == mpirank);
-cout << "ac" << ac << endl;
-cout << "bc" << bc << endl;
+for (int i = 0; i < mpisize; i++)
+	if (mpirank == i) {
+		test(bc[i] == i + 1);
+	}

@@ -1,0 +1,36 @@
+include "test.idp"
+
+cout << "mpiGatherv" << endl;
+
+real t;
+
+cout << IND << "int[int]" << endl;
+
+int[int] snd(mpisize), rcv(mpisize * mpisize), a(mpisize), b(mpisize);
+
+snd[mpirank] = mpirank;
+
+int i;
+for (i = 0; i < mpisize; i++) {
+	a[i] = mpisize;
+	b[i] = i * mpisize;
+}
+
+t = mpiWtime();
+mpiGatherv(snd, rcv, processor(0), a, b);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+// cout << snd << endl;
+// if (mpirank == 0) cout << rcv << endl;
+
+// int[int, int] dataRcv(mpisize, mpisize);
+// int j = 0;
+// for (j= 0; j < mpisize; j++) {
+//   for (int idx = 0; idx < mpisize * i; idx++) {
+//     dataRcv(idx, j) = rcv[idx];
+//   }
+// }
+cout << dataRcv << endl;
+// test(rcv[mpirank] = mpirank);
+// cout << a << endl;
+// cout << b << end   l;

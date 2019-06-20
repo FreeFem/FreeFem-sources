@@ -1,0 +1,24 @@
+include "test.idp"
+
+cout << "mpiAllGatherv" << endl;
+
+real t;
+
+cout << IND << "int[int]" << endl;
+
+// int rank = mpirank;
+int[int] a(mpisize), b(mpisize), c(mpisize), e(mpisize);
+b[mpirank] = mpirank;
+
+for (int i = 0; i < mpisize; i++) {
+	c[i] = mpisize;
+	e[i] = 0;
+}
+
+cout << "mpirank : " << mpirank << endl;
+
+// t = mpiWtime();
+// mpiAllgatherv(a, b, c, e);
+// t = mpiWtime() - t;
+// cout << IND << IND << t << endl;
+// test(nbRcv[mpirank] == mpirank);
