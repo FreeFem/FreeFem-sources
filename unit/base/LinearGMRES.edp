@@ -33,7 +33,7 @@ func real J(real[int] & u2)
 
 u = 0;
 b = 1;
-cout << parameter << "with A and x" << endl;
+cout << parameterDEFINITION << "with A and x" << endl;
 t = clock();
 Conv = LinearGMRES(DJ, u);
 t = clock() - t;
@@ -48,7 +48,7 @@ u=0.;
 
 func real[int] matId(real[int] &u2) { return u2;};
 
-cout << parameter << "with A, x, eps, precon, nbiter, verbosity" << endl;
+cout << parameterDEFINITION << "with A, x, eps, precon, nbiter, verbosity" << endl;
 t = clock();
 Conv = LinearGMRES(DJ,u,nbiter=20, eps=Eps, veps=Veps, verbosity=verb, precon=matId, stop=stop);
 t = clock() - t;
