@@ -1,0 +1,7 @@
+include "test.idp"
+
+cout << "mpiWtick" << endl;
+real t1;
+
+t1 = mpiWtick();
+cout << t1 << endl;

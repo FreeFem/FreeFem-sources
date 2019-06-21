@@ -1,0 +1,12 @@
+include "test.idp"
+
+cout << "splitComm" << endl;
+
+real t;
+int i = 2;
+mpiComm cc;
+
+t = mpiWtime();
+cout << splitComm(mpiCommWorld, i, cc) << endl;
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;

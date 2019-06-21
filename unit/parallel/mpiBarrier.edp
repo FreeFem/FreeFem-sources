@@ -1,0 +1,11 @@
+include "test.idp"
+
+cout << "mpiBarrier" << endl;
+
+real t;
+mpiComm cc;
+
+t = mpiWtime();
+mpiBarrier(cc);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;

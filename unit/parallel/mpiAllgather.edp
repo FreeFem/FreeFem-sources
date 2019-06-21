@@ -23,12 +23,24 @@ t = mpiWtime() - t;
 cout << IND << IND << t << endl;
 test(ArrayRcv[mpirank] == mpirank);
 
+t = mpiWtime();
+mpiAllgather(rankr, ArrayRcv);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+test(ArrayRcv[mpirank] == mpirank);
+
 cout << IND << "complex[int]" << endl;
 
 complex rankc = mpirank;
 complex[int] ArrayRcvc(mpisize);
 t = mpiWtime();
 mpiAllgather(rankc, ArrayRcvc, mpiCommWorld);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+test(ArrayRcvc[mpirank] == mpirank);
+
+t = mpiWtime();
+mpiAllgather(rankc, ArrayRcvc);
 t = mpiWtime() - t;
 cout << IND << IND << t << endl;
 test(ArrayRcvc[mpirank] == mpirank);

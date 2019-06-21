@@ -6,19 +6,95 @@ real t;
 
 cout << IND << "int[int]" << endl;
 
-// int rank = mpirank;
-int[int] a(mpisize), b(mpisize), c(mpisize), e(mpisize);
-b[mpirank] = mpirank;
+int[int] a(mpisize), b(mpisize * mpisize), c(mpisize), e(mpisize);
+a[mpirank] = mpirank + 1;
 
 for (int i = 0; i < mpisize; i++) {
 	c[i] = mpisize;
-	e[i] = 0;
+	e[i] = i * mpisize;
 }
 
-cout << "mpirank : " << mpirank << endl;
+t = mpiWtime();
+mpiAllgatherv(a, b, c, e);
+mpiBarrier(mpiCommWorld);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+int i = 0;
+for (int counter = 0; counter < mpisize; counter++) {
+	test(b[i] == counter + 1);
+	i += (mpisize + 1);
+}
 
-// t = mpiWtime();
-// mpiAllgatherv(a, b, c, e);
-// t = mpiWtime() - t;
-// cout << IND << IND << t << endl;
-// test(nbRcv[mpirank] == mpirank);
+t = mpiWtime();
+mpiAllgatherv(a, b, mpiCommWorld, c, e);
+mpiBarrier(mpiCommWorld);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+i = 0;
+for (int counter = 0; counter < mpisize; counter++) {
+	test(b[i] == counter + 1);
+	i += (mpisize + 1);
+}
+
+
+cout << IND << "real[int]" << endl;
+
+real[int] ar(mpisize), br(mpisize * mpisize);
+int[int] cr(mpisize), er(mpisize);
+ar[mpirank] = mpirank + 1.;
+
+for (int i = 0; i < mpisize; i++) {
+	cr[i] = mpisize;
+	er[i] = i * mpisize;
+}
+
+t = mpiWtime();
+mpiAllgatherv(ar, br, cr, er);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+int ir = 0;
+for (int counter = 0; counter < mpisize; counter++) {
+	test(br[ir] == counter + 1.);
+	ir += (mpisize + 1);
+}
+
+t = mpiWtime();
+mpiAllgatherv(ar, br, mpiCommWorld, cr, er);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+ir = 0;
+for (int counter = 0; counter < mpisize; counter++) {
+	test(br[ir] == counter + 1.);
+	ir += (mpisize + 1);
+}
+
+cout << IND << "complex[int]" << endl;
+
+complex[int] ac(mpisize), bc(mpisize * mpisize);
+int[int] cc(mpisize), ec(mpisize);
+ac[mpirank] = mpirank + (1 + 2i);
+
+for (int i = 0; i < mpisize; i++) {
+	cc[i] = mpisize;
+	ec[i] = i * mpisize;
+}
+
+t = mpiWtime();
+mpiAllgatherv(ac, bc, cc, ec);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+int ic = 0;
+for (int counter = 0; counter < mpisize; counter++) {
+	test(bc[ic] == counter + (1 + 2i));
+	ic += (mpisize + 1);
+}
+
+t = mpiWtime();
+mpiAllgatherv(ac, bc, mpiCommWorld, cc, ec);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+ic = 0;
+for (int counter = 0; counter < mpisize; counter++) {
+	test(bc[ic] == counter + (1 + 2i));
+	ic += (mpisize + 1);
+}

@@ -10,8 +10,7 @@ int[int] snd(mpisize), rcv(mpisize * mpisize), a(mpisize), b(mpisize);
 
 snd[mpirank] = mpirank;
 
-int i;
-for (i = 0; i < mpisize; i++) {
+for (int i = 0; i < mpisize; i++) {
 	a[i] = mpisize;
 	b[i] = i * mpisize;
 }
@@ -20,17 +19,60 @@ t = mpiWtime();
 mpiGatherv(snd, rcv, processor(0), a, b);
 t = mpiWtime() - t;
 cout << IND << IND << t << endl;
-// cout << snd << endl;
-// if (mpirank == 0) cout << rcv << endl;
+if (mpirank == 0) {
+	int i = 0;
+	for (int counter = 0; counter < mpisize; counter++) {
+		test(rcv[i] == counter);
+		i += (mpisize + 1);
+	}
+}
 
-// int[int, int] dataRcv(mpisize, mpisize);
-// int j = 0;
-// for (j= 0; j < mpisize; j++) {
-//   for (int idx = 0; idx < mpisize * i; idx++) {
-//     dataRcv(idx, j) = rcv[idx];
-//   }
-// }
-// cout << dataRcv << endl;
-// test(rcv[mpirank] = mpirank);
-// cout << a << endl;
-// cout << b << end   l;
+
+cout << IND << "real[int]" << endl;
+
+real[int] sndr(mpisize), rcvr(mpisize * mpisize);
+int[int] ar(mpisize), br(mpisize);
+
+sndr[mpirank] = mpirank;
+
+for (int i = 0; i < mpisize; i++) {
+	ar[i] = mpisize;
+	br[i] = i * mpisize;
+}
+
+t = mpiWtime();
+mpiGatherv(sndr, rcvr, processor(0), ar, br);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+if (mpirank == 0) {
+	int i = 0;
+	for (int counter = 0; counter < mpisize; counter++) {
+		test(rcvr[i] == counter);
+		i += (mpisize + 1);
+	}
+}
+
+
+cout << IND << "complex[int]" << endl;
+
+complex[int] sndc(mpisize), rcvc(mpisize * mpisize);
+int[int] ac(mpisize), bc(mpisize);
+
+sndc[mpirank] = mpirank + (1 + 2i);
+
+for (int i = 0; i < mpisize; i++) {
+	ac[i] = mpisize;
+	bc[i] = i * mpisize;
+}
+
+t = mpiWtime();
+mpiGatherv(sndc, rcvc, processor(0), ac, bc);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+if (mpirank == 0) {
+	int i = 0;
+	for (int counter = 0; counter < mpisize; counter++) {
+		test(rcvc[i] == counter + (1 + 2i));
+		i += (mpisize + 1);
+	}
+}
