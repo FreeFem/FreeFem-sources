@@ -17,7 +17,7 @@ for (int i = 0; i < mpisize; i++) {
 }
 
 t = mpiWtime();
-//mpiScatterv(a, b, processor(0), c, e);
+mpiScatterv(a, b, processor(0), c, e);
 t = mpiWtime() - t;
 cout << IND << IND << t << endl;
 

@@ -30,7 +30,7 @@ cout << IND << IND << t << endl;
 //     dataRcv(idx, j) = rcv[idx];
 //   }
 // }
-cout << dataRcv << endl;
+// cout << dataRcv << endl;
 // test(rcv[mpirank] = mpirank);
 // cout << a << endl;
 // cout << b << end   l;
