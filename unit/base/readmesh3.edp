@@ -5,7 +5,7 @@ real t;
 mesh3 Th;
 
 t = clock();
-Th = readmesh3("Th.mesh");
+Th = readmesh3("assets/Th.mesh");
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(Th.nt > 0);

@@ -46,15 +46,16 @@ test(D[0] == 1 && D[1] == 1 && D[2] == 2 &&
     D[3] == 5 && D[4] == -2 && D[5] == 6);
 
 t = clock();
-RES = intarray.im;
+matrix resarray = intarray.im;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-[I, J, D] = RES;
+[I, J, D] = resarray;
 test(D[0] == 2 && D[1] == 2 && D[2] == -2);
 
 t = clock();
-res = intintarray.im;
+real[int, int] resarray2 = intintarray.im;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-test(res(0,0) == 1 && res(0,1) == 1 && res(0,2) == 2 &&
-res(1,0) == 5 && res(1,1) == -2 && res(1,2) == 6);
+[I, J, D] = resarray;
+test(resarray2(0,0) == 1 && resarray2(0,1) == 1 && resarray2(0,2) == 2 &&
+resarray2(1,0) == 5 && resarray2(1,1) == -2 && resarray2(1,2) == 6);

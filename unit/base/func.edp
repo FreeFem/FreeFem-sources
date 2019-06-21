@@ -10,6 +10,5 @@ cout << timeELAPSED << t << endl;
 test(f[1]);
 
 int i;
-for (i = 0; i < 4; i++);
-int savei = i;
-cout << f[savei] << endl;
+for (i = 0; i < 4; i++)
+  cout << f[i] << endl;

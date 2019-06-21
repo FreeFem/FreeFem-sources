@@ -19,7 +19,7 @@ t = clock();
 int retvalue2 = exec(commandfail);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-test(retvalue2 == -1);
+test(retvalue2 != 0);
 
 t = clock();
 int retvalue3 = exec(commandempty);
