@@ -25,6 +25,7 @@ func matrix DDJ (real[int] &u) {
 	}
 	Hessian.resize(u.n, u.n);
 	Hessian = [I, J, C];
+	return Hessian;
 }
 
 Newton(J, DJ, DDJ, u);
