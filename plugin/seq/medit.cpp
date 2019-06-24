@@ -2649,9 +2649,8 @@ AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
     assert(ibe = nbe);
     if (verbosity > 2) {cout << "meditff :: Value of elements: vertex " << nv << " surface Triangle " << nt << " boundary edge " << nbe << endl;}
 
-    Mesh3 *pTho = new Mesh3();;
-    pTho->meshS = new MeshS(nv, nt, nbe, v, t, b);
-    MeshS &Th = *pTho->meshS;
+    MeshS *pTh = new MeshS(nv, nt, nbe, v, t, b);
+    MeshS &Th = *pTh;   cout << "test ok " << endl;
 
     // determination of the number of elements to represent the solution
     int datasize;
@@ -3155,7 +3154,7 @@ AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
     }
 
     delete [] commandline;
-    delete pTho;
+    delete pTh;
 
     return valsortie;
 }
