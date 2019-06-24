@@ -184,3 +184,25 @@ if (mpirank != 0) {
   mesh3 Th4 = cube(5, 5, 5);
   test(Th3.nt == Th4.nt);
 }
+
+real[int] C(5);
+int[int] I(5);
+int[int] J(5);
+matrix mc;
+
+cout << IND << "mesh3" << endl;
+
+if (mpirank == 0) {
+  C = [1, 2, 3, 9, 1];
+  I = [0, 2, 4, 4, 6];
+  J = [0, 1, 1, 6, 2];
+  mc.resize(8, 8);
+  mc = [I, J, C];
+}
+t = mpiWtime();
+broadcast(processor(0), mc);
+t = mpiWtime() - t;
+cout << IND << IND << t << endl;
+if (mpirank == 1) {
+  test(mc(0,0) == 1 && mc(2,1) == 2);
+}

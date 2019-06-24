@@ -29,3 +29,10 @@ Th = buildmesh(C01(-n) + C02(-n) + C03(-n) + C04(-n), fixedborder=fborder);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(nbt == Th.nbe);
+
+real[int, int] Points = [[0, 0, 0], [0, 0, 1]];
+t = clock();
+Th = buildmesh(C01(-n) + C02(-n) + C03(-n) + C04(-n), fixedborder=fborder, points=Points);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(nbt == Th.nbe);
