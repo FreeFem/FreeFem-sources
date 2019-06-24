@@ -126,6 +126,15 @@ t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(ress4 == "6 + 1i * 75+6i");
 
+cout << typeDEFINITION << "mesh" << endl;
+
+mesh Th1 = square(10, 10);
+mesh Th2 = square(10, 10, [1+x, 1+y]);
+t = clock();
+mesh Th = Th1 + Th2;
+t = clock() - t;
+cout << IND << t << endl;
+
 
 cout << functionDEFINITION << "operator -" << endl;
 
@@ -951,8 +960,8 @@ arrayreal = [1.1, 2.2, 3.3];
 
 cout << typeDEFINITION << "mesh" << endl;
 
-mesh Th = square(10, 10);
-mesh Th2 = square(4, 4);
+Th = square(10, 10);
+Th2 = square(4, 4);
 t = clock();
 Th = Th2;
 t = clock() - t;
