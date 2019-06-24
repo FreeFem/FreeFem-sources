@@ -25,11 +25,14 @@ func matrix DDJ (real[int] &u) {
 	}
 	Hessian.resize(u.n, u.n);
 	Hessian = [I, J, C];
+	set(Hessian, solver=sparsesolver);
 	return Hessian;
 }
 
 u = 0;
 Newton(J, DJ, DDJ, u);
+cout << u << endl;
 
 u = 1;
 Newton(J, DJ, DDJ, u);
+cout << u << endl;

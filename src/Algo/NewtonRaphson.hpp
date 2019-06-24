@@ -96,7 +96,7 @@ typename Newt<LS>::Param Newt<LS>::optimizer(Param &model0) {
   while (this->finalResidue() > this->tol && this->iterNum < this->iterMax) {
     //searching directions
     // s = g0/(*this->ls->hessian(model0)); // LU reinitialization at each step
-    // this->ls->hessian(model0)->Solve(s, g0); //TODO bug here
+    this->ls->hessian(model0)->Solve(s, g0);
     s = -1.*s;
 
     descent = (s,g0);
