@@ -28,4 +28,8 @@ func matrix DDJ (real[int] &u) {
 	return Hessian;
 }
 
+u = 0;
+Newton(J, DJ, DDJ, u);
+
+u = 1;
 Newton(J, DJ, DDJ, u);
