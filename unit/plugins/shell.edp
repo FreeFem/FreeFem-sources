@@ -1,3 +1,47 @@
 include "test.idp"
+load  "shell"
 
-// cout << shell << endl;
+cout << "shell" << endl;
+
+cout << IND << "readdir" << endl;
+
+real t;
+Directory dir = "assets";
+string readData="empty";
+string[int] dataArray = [".", "..", "Th.mesh", "Th.msh", "triangle.msh"];
+
+while (readData != "") {
+  t = clock();
+  readData = readdir(dir);
+  t = clock() - t;
+  if (readData != "") {
+    test(readData == dataArray[0] || readData == dataArray[1] ||
+      readData == dataArray[2] || readData == dataArray[3] ||
+      readData == dataArray[4]);
+    cout << IND << IND << t << endl;
+  }
+}
+
+cout << IND << "mkdir" << endl;
+
+t = clock();
+int makeDir = mkdir("toto");
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(makeDir == 0);
+
+cout << IND << "isdir" << endl;
+
+t = clock();
+int isDir = isdir("toto");
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(isDir == true);
+
+cout << IND << "rmdir" << endl;
+
+t = clock();
+int rmDir = rmdir("toto");
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(rmDir == 0);
