@@ -8,7 +8,7 @@ cout << IND << "readdir" << endl;
 real t;
 Directory dir = "assets";
 string readData="empty";
-string[int] dataArray = [".", "..", "Th.mesh", "Th.msh", "triangle.msh"];
+string[int] dataArray = [".", "..", "Th.mesh", "Th.msh", "triangle.msh", "test.txt"];
 
 while (readData != "") {
   t = clock();
@@ -17,7 +17,7 @@ while (readData != "") {
   if (readData != "") {
     test(readData == dataArray[0] || readData == dataArray[1] ||
       readData == dataArray[2] || readData == dataArray[3] ||
-      readData == dataArray[4]);
+      readData == dataArray[4] || readData == dataArray[5]);
     cout << IND << IND << t << endl;
   }
 }
@@ -45,3 +45,72 @@ int rmDir = rmdir("toto");
 t = clock() - t;
 cout << IND << IND << t << endl;
 test(rmDir == 0);
+
+cout << IND << "getenv" << endl;
+
+t = clock();
+string getEnv = getenv("USER");
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(getEnv != "");
+
+t = clock();
+string getEnv2 = getenv("toto");
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(getEnv2 == "");
+
+cout << IND << "setenv" << endl;
+
+t = clock();
+int setEnv = setenv("TOTO", "toto");
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(setEnv == 0);
+
+t = clock();
+string getEnv3 = getenv("TOTO");
+t = clock() - t;
+cout << IND << IND << t << endl;
+cout << getEnv3 << endl;
+// test(getEnv3 != "");
+//TODO seems to be a bug
+
+cout << IND << "chmod" << endl;
+
+t = clock();
+int chMod = chmod("toto", 655);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(chMod == -1);
+
+t = clock();
+int chMod2 = chmod("assets/test.txt", 777);
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(chMod2 == 0);
+chmod("assets/test.txt", 655);
+
+cout << IND << "chdir" << endl;
+
+t = clock();
+int chDir = chdir("toto");
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(chDir == -1);
+
+t = clock();
+int chDir2 = chdir("assets");
+t = clock() - t;
+cout << IND << IND << t << endl;
+test(chDir2 == 0);
+chdir("..");
+
+cout << IND << "cpfile" << endl;
+
+t = clock();
+int cpFile = chdir("toto");
+t = clock() - t;
+cout << IND << IND << t << endl;
+cout << cpFile << endl;
+// test(chDir == -1);
