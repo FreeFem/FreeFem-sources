@@ -266,13 +266,18 @@ void setCompositePC(PC pc, const std::vector<Mat>* S) {
         PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
         if(S->size() == 1) {
             KSPSetOperators(subksp[nsplits - 1], (*S)[0], (*S)[0]);
-#if !PETSC_VERSION_RELEASE
             IS is;
+#if !PETSC_VERSION_RELEASE
             PCFieldSplitGetISByIndex(pc, nsplits - 1, &is);
-            PetscObjectCompose((PetscObject)is, "pmat", (PetscObject)(*S)[0]);
 #else
-            ffassert(0);
+            const char* prefixPC;
+            PCGetOptionsPrefix(pc, &prefixPC);
+            const char* prefixIS;
+            KSPGetOptionsPrefix(subksp[nsplits - 1], &prefixIS);
+            std::string str = std::string(prefixIS).substr(std::string(prefixPC).size() + std::string("fieldsplit_").size(), std::string(prefixIS).size() - (std::string(prefixPC).size() + std::string("fieldsplit_").size() + 1));
+            PCFieldSplitGetIS(pc, str.c_str(), &is);
 #endif
+            PetscObjectCompose((PetscObject)is, "pmat", (PetscObject)(*S)[0]);
         }
         else if(!S->empty()) {
             PC pcS;

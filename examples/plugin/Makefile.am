@@ -145,7 +145,6 @@ TESTS = APk-AdaptEpsDeltaPk.edp \
 	load.edp \
 	meditddm.edp \
 	MetricKuate.edp \
-	mshmet.edp \
 	myfunction2.edp \
 	myType.edp \
 	NS_P2BR_P0.edp \
@@ -180,6 +179,7 @@ TESTS = APk-AdaptEpsDeltaPk.edp \
 	testFEMorley.edp \
 	testp1dcnc.edp \
 	thresholdings.edp \
+	Schur-Complement.edp \
 	$(CONDITIONAL_FFTW3) \
 	$(CONDITIONAL_FORTRAN) \
 	$(CONDITIONAL_GMM) \

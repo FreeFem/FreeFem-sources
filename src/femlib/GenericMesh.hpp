@@ -526,9 +526,8 @@ public:
     nbe=mbe;
     vertices=new V[nv];
     if(nt) elements= new T[nt];
-    if(nbe) borderelements = new B[nbe];
+    if(nbe>0) borderelements = new B[nbe];
     assert( nt >=0 && elements);
-    assert( nbe >=0 && borderelements);
     assert( nv >0 && vertices);
 
   }

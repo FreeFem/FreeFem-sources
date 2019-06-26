@@ -133,7 +133,7 @@ long  ff_ShurComplement(Stack stack,KNM<R> *  pS,Matrice_Creuse<R> *  pmcA,KN_<l
     int n=pA->n,m=pA->m;
     ffassert( n == m);
     S.resize(ni,ni);
-    pV->resize(n,ni); //
+    if(pV) pV->resize(n,ni); //
     S=zero;
     ffassert( n>ni);
     KN<long> mark(n,-1L);

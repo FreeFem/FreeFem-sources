@@ -1,5 +1,7 @@
+// ShurComplement  full matrix 
 load "lapack"
-load "Shur-Complement"
+// ShurComplement  sparse matrix 
+load "Schur-Complement"
 include "ExtractDofsonBorder.idp"
 macro grad(u) [dx(u),dy(u)] //
 real hsize= 0.1; 
