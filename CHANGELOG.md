@@ -32,6 +32,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - replaced custom implementations (`RNM::real`, `RNM::norm2`, and `Fem2D::norm`) by C++11 functions
 - API of the macro `plotMPI`
+- switched to inexact coarse operators in HPDDM by default
 
 ### Removed
 - legacy linear solver interfaces using the old matrix type

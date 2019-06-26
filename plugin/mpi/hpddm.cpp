@@ -4,7 +4,7 @@
 #define HPDDM_SCHWARZ                   1
 #define HPDDM_FETI                      0
 #define HPDDM_BDD                       0
-#define HPDDM_INEXACT_COARSE_OPERATOR   0
+#define HPDDM_INEXACT_COARSE_OPERATOR   1
 
 #include "common.hpp"
 
