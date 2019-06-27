@@ -1,0 +1,22 @@
+include "test.idp"
+load "myfunction2"
+
+real t;
+
+cout << functionDEFINITION << "Why" << endl;
+
+t = clock();
+int myFunc2 = Why("toto");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(myFunc2 == 0);
+
+cout << functionDEFINITION << "f" << endl;
+
+int nb = 2;
+
+t = clock();
+int retf = f(2);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(retf == 5);
