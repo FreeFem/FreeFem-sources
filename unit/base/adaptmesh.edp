@@ -1,7 +1,7 @@
 include "test.idp"
 load "msh3"
 
-cout << "adaptmesh" << endl;
+cout << functionDEFINITION << "adaptmesh" << endl;
 
 real t;
 
@@ -46,7 +46,7 @@ mesh Thnew = adaptmesh(Th, [u, uu], hmin=hMin, hmax=hMax, err=Err, errg=Errg,
   keepbackvertices=keepBackVertices, IsMetric=isMetric, power=poweer, thetamax=thetaMax,
   splitin2=splitInTwo, nomeshgeneration=noMeshGeneration, periodic=perio, metric=[m11, m12, m22]);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(Thnew.nt != Th.nt);
 test(Thnew.nv != Th.nv);
 test(Thnew.nbe != Th.nbe);
@@ -66,7 +66,7 @@ test(Thnew.nbe != Th.nbe);
 //   keepbackvertices=keepBackVertices, IsMetric=isMetric, power=poweer, thetamax=thetaMax,
 //   splitin2=splitInTwo, nomeshgeneration=noMeshGeneration, periodic=perio, metric=[m113, m123, m223]);
 // t = clock() - t;
-// cout << IND << IND << t << endl;
+// cout  timeELAPSED << t << endl;
 // test(Thnew3D.nt != Th3D.nt);
 // test(Thnew3D.nv != Th3D.nv);
 // test(Thnew3D.nbe != Th3D.nbe);

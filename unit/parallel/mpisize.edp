@@ -2,9 +2,11 @@
 include "test.idp"
 real t;
 
+cout << functionDEFINITION << "mpisize" << endl;
+
 t = mpiWtime();
 if (mpirank  == 0)
   cout << mpisize << endl;
 t = mpiWtime() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(mpisize == 4);

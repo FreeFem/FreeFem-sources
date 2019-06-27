@@ -1,11 +1,11 @@
 include "test.idp"
 
-cout << "mpiAnySource" << endl;
+cout << functionDEFINITION << "mpiAnySource" << endl;
 
 real t;
 
 t = mpiWtime();
 cout << mpiAnySource << endl;
 t = mpiWtime() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(mpiAnySource == -1);

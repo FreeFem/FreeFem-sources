@@ -133,7 +133,7 @@ mesh Th2 = square(10, 10, [1+x, 1+y]);
 t = clock();
 mesh Th = Th1 + Th2;
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
 
 cout << functionDEFINITION << "operator -" << endl;

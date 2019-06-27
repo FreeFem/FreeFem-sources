@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "mpiBarrier" << endl;
+cout << functionDEFINITION << "mpiBarrier" << endl;
 
 real t;
 mpiComm cc;
@@ -8,4 +8,4 @@ mpiComm cc;
 t = mpiWtime();
 mpiBarrier(cc);
 t = mpiWtime() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;

@@ -3,7 +3,7 @@ load  "shell"
 
 cout << "shell" << endl;
 
-cout << IND << "readdir" << endl;
+cout << functionDEFINITION << "readdir" << endl;
 
 real t;
 Directory dir = "assets";
@@ -18,99 +18,99 @@ while (readData != "") {
     test(readData == dataArray[0] || readData == dataArray[1] ||
       readData == dataArray[2] || readData == dataArray[3] ||
       readData == dataArray[4] || readData == dataArray[5]);
-    cout << IND << IND << t << endl;
+    cout << timeELAPSED << t << endl;
   }
 }
 
-cout << IND << "mkdir" << endl;
+cout << functionDEFINITION << "mkdir" << endl;
 
 t = clock();
 int makeDir = mkdir("toto");
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(makeDir == 0);
 
-cout << IND << "isdir" << endl;
+cout << functionDEFINITION << "isdir" << endl;
 
 t = clock();
 int isDir = isdir("toto");
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(isDir == true);
 
-cout << IND << "rmdir" << endl;
+cout << functionDEFINITION << "rmdir" << endl;
 
 t = clock();
 int rmDir = rmdir("toto");
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(rmDir == 0);
 
-cout << IND << "getenv" << endl;
+cout << functionDEFINITION << "getenv" << endl;
 
 t = clock();
 string getEnv = getenv("USER");
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(getEnv != "");
 
 t = clock();
 string getEnv2 = getenv("toto");
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(getEnv2 == "");
 
-cout << IND << "setenv" << endl;
+cout << functionDEFINITION << "setenv" << endl;
 
 t = clock();
 int setEnv = setenv("TOTO", "toto");
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(setEnv == 0);
 
 t = clock();
 string getEnv3 = getenv("TOTO");
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 cout << getEnv3 << endl;
 // test(getEnv3 != "");
 //TODO seems to be a bug
 
-cout << IND << "chmod" << endl;
+cout << functionDEFINITION << "chmod" << endl;
 
 t = clock();
 int chMod = chmod("toto", 655);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(chMod == -1);
 
 t = clock();
 int chMod2 = chmod("assets/test.txt", 777);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(chMod2 == 0);
 chmod("assets/test.txt", 655);
 
-cout << IND << "chdir" << endl;
+cout << functionDEFINITION << "chdir" << endl;
 
 t = clock();
 int chDir = chdir("toto");
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(chDir == -1);
 
 t = clock();
 int chDir2 = chdir("assets");
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(chDir2 == 0);
 chdir("..");
 
-cout << IND << "cpfile" << endl;
+cout << functionDEFINITION << "cpfile" << endl;
 
 t = clock();
 int cpFile = chdir("toto");
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 cout << cpFile << endl;
 // test(chDir == -1);
