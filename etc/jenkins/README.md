@@ -97,3 +97,20 @@ make -j4 all
 make check
 sudo make install
 ```
+
+# Job 1
+without mpi  (for macOS, compiled with gcc)
+runs on VM0
+# Job 2 
+without-mpi  (for macOS, compiled with clang)
+runs on VM1
+# Job 3 sequential version of FreeFEM
+with 3dparty, without-mpi  (for macOS, compiled with clang)
+runs on VM2
+# Job 4 Full version of FreeFEM compiled in release mode
+with 3dparty, compilation in release mode (for macOS, compiled with gcc) 
+runs on VM2-2
+# Job 5 Full version of FreeFEM compiled in debug mode
+with mpi with 3dparty,, compilation in debug mode (for macOS, compiled with clang)
+runs on VM2 every night
+

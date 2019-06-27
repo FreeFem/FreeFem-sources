@@ -15,7 +15,7 @@ test -f "$change_compiler" && source "$change_compiler"
 
 # configuration & build
 autoreconf -i \
-  && ./configure --prefix=/builds/workspace/freefem \
+  && ./configure --enable-download --prefix=/builds/workspace/freefem \
   && chmod +x ./etc/jenkins/blob/build.sh && sh ./etc/jenkins/blob/build.sh
 
 if [ $? -eq 0 ]
