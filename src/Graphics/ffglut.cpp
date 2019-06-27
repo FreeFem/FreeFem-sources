@@ -471,7 +471,24 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
     bool cc[3]= { plotborder , plotborder && fill , plotmesh && fill };
     double saturation =plotmesh ? 1 :  0.25;
     int kk=0;
-    if(cc[kk])
+    if(Th.nbe==0)
+    {
+        if(lok[kk])   glCallList(gllists+kk);
+        else
+        { // draw all vertex
+           glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
+           glBegin(GL_POINTS);
+            for(int i=0; i<Th.nv; ++i)
+            {
+             plot.color(1+Th(i).lab,saturation);
+              glVertex3d(Th(i).x,Th(i).y,Th(i).z);
+            }
+            glEnd();
+           glEndList();  // fin de la list
+            
+        }
+    }
+    else  if(cc[kk])
     {
         if(lok[kk])   glCallList(gllists+kk);
         else
@@ -1195,7 +1212,7 @@ void OnePlotFE<Mesh>::dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn2,R & vmx2) c
 }
 
 OnePlotCurve::OnePlotCurve(PlotStream & f,int nfield,ThePlot *theplot)
-:OnePlot(3,2,1)
+:OnePlot(3,2,1),cas(0)
 {
     f >> xx>>yy;
     if( nfield >=3)
@@ -1204,8 +1221,8 @@ OnePlotCurve::OnePlotCurve(PlotStream & f,int nfield,ThePlot *theplot)
         f >> cc;
     ffassert(f.good());
     ffassert(xx.N() && yy.N() && xx.N() == yy.N());
-    Pmin=Minc(Pmin,R2(xx.min(),yy.min()));
-    Pmax=Maxc(Pmax,R2(xx.max(),yy.max()));
+    Pmin=Minc(Pmin,R3(xx.min(),yy.min(),Pmin.z));
+    Pmax=Maxc(Pmax,R3(xx.max(),yy.max(),Pmax.z));
     if(zz.N())
     {
         Pmin.z = Min(Pmin.z,zz.min());
@@ -1218,6 +1235,8 @@ OnePlotCurve::OnePlotCurve(PlotStream & f,int nfield,ThePlot *theplot)
         }
 
     }
+    else
+        Pmin.z=Pmax.z=0.; // Bof Bof .. FH Juin 2019 ...
     if( cc.N() )
     {
         fmax = Max(fmax,cc.max());
@@ -1242,7 +1261,10 @@ void OnePlotCurve::Draw(OneWindow *win)
     ThePlot & plot= *win->theplot;
     double z = plot.z0;
     if(debug>3) cout << " OnePlotCurve::Draw " << (cc.N() != xx.N()) << endl;
-    glBegin(GL_LINE_STRIP);
+    if(cas%2)
+        glBegin(GL_POINTS);
+    else
+        glBegin(GL_LINE_STRIP);
     plot.color(2);
     if( (zz.N()!=xx.N())  && (cc.N()==0)  )
         for (int i=0;i<xx.N();i++)

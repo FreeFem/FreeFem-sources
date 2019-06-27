@@ -3,6 +3,20 @@ load "lapack"
 // ShurComplement  sparse matrix 
 load "Schur-Complement"
 include "ExtractDofsonBorder.idp"
+
+macro FindDofOnBorder(l,Vh,I)
+{
+	varf von(u,v) = on(l,u=1);
+    int[int] J=0:Vh.ndof;
+	real[int] vl = von(0,Vh); 
+	sort(vl,J);
+	vl = vl ? 1. :0.;
+	int n = vl.sum+0.5; 
+
+	I.resize(n);
+	I=J(0:n-1);
+}//
+
 macro grad(u) [dx(u),dy(u)] //
 real hsize= 0.1; 
 mesh Th=square(2/hsize,1/hsize,[x*2,y]);
@@ -16,15 +30,32 @@ varf va(u,v) = int2d(Th)(grad(u)'*grad(v))+on(1,3,4,u=0);
 if(verbosity>9) cout << A << endl; 
 int[int] I; 
 ExtractDofsonBorder(2,Vh,I,1);
+
 if(verbosity>9)cout << "I = "<< I << endl; 
 real[int,int] S(I.n,I.n);
-int ns=ShurComplement(S,A,I);
+int ns=SchurComplement(S,A,I);
 cout << ns <<" " << S << endl; 
 real[int,int] F(n,n);
 copy(F,A);
 real[int,int] SF(I.n,I.n);
 verbosity=1;
 if(verbosity>9) cout << F << endl; 
- ns=ShurComplement(SF,F,I);
+ ns=SchurComplement(SF,F,I);
 
 cout << " SF = " << SF << endl;
+/*
+//  model 2 
+int[int] I10;
+FindDofOnBorder(10,Vh,I10);
+
+int[int] If(n);
+int In=I.n; 
+If=-1;
+for [i,Ii:I]
+  If[Ii]=i; 
+  for [i,I10i:I10]
+    If[II10ij]=In; 
+	
+int nfs=SchurComplement(S,A,If,B);
+cout << nfs << " "<< In+1  <<" " << S << endl;  
+*/ 

@@ -1,18 +1,65 @@
+#!/bin/bash
+##  fist tentavie to create un mac installer 
 #  first 
 #  create dir for install
-version
-dst=/tmp/ff-dst""
+
+grep ' = ' Makefile| grep ff_prefix_dir| sed 's/ = /=/' >/tmp/prefix-list.sh
+source /tmp/prefix-list.sh
+dst=/tmp/ff-dst
+dstlib="$dst/$ff_prefix_dir_lib"
 pkg=
 id=fr.upmc.math.ljll.FreeFem-v4.pkg.app
 if [ -f ""$dst"" ] ; then 
 echo fatal error the dst dir exist , please remeo of change 
 exit 1
 fi
+
 mkdir $dst
-make install "DESTDIR=$dst"
+#make install "DESTDIR=$dst"
+echo copy dynamic libs ....
+rm /tmp/BaseSearchdylib /tmp/Searchdylib
+./bin/Searchdylib >/tmp/Searchdylib
+for f in /tmp/Searchdylib ; do
+  lib=$dst/`basename $f`
+  echo $lib >>/tmp/BaseSearchdylib
+  dlib=`dirname $f`
+  ff=$dstlib/$ff_prefix_dir_lib/$lib 
+  echo cp $f $ff
+  cp $f $ff
+done
+
+echo change dynamic libs in $dst 
+for f in  $dst/$ff_prefix_dir_lib/*.dylib $dst/$ff_prefix_dir_lib_mpi/*.dylib ; do
+  lib=$dst/`basename $f`
+  dlib=`dirname $f`
+  dirlib=`dirname $lib`
+  ooo=/tmp/otool-`basename $lib .dylib`.txt
+ # echo $lib
+  otool -L $lib| grep -v '/usr/lib/'|awk '/compatibility version/ {print $1}'>$ooo
+  for l in `cat /tmp/BaseSearchdylib`; do
+  for i in `grep $pwd3lib $ooo` ; do
+	  l=`basename $i`
+	  li=`egrep "/$l$" /tmp/Searchdylib|wc`
+	  if [ "$li" -ge 1 ]; then
+		  $fl=$ff_prefix_dir_lib/$l
+		  echo $i "->" $fl
+		  chmod a+w $lib
+	  fi
+	chmod a+w $lib
+	test -n "$j" -a $i != "$j" && install_name_tool -change $i $j $lib
+	test -n "$j" -a $i != "$j" && echo install_name_tool -change $i $j $lib
+	chmod a-w $lib
+  done
+done 
+  
+done 
+for lib in $dstlib/*.dylib ; do
+done
+
+#awk -F / -v l="$dstlib" '{print  "cp",$0,l "/" $NF}' /tmp/Searchdylib | sh
 # copy lib ... 
 # buildpkg ...
- pkgbuild --identifier $id  --root "$dst"  $pkg 
+# pkgbuild --identifier $id  --root "$dst"  $pkg 
 # productbuild 
  
  

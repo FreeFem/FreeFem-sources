@@ -1094,9 +1094,9 @@ KNM<R>*mult (KNM<R> *a, const KNM_<R> &A, const KNM_<R> &B) {	// C=A*B
     return mult_ab<R,init>(a,A,B,alpha,beta);
 }
 template<class R>
-long  ff_ShurComplement(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const &  I,KNM<R> * const & pV)
+long  ff_SchurComplement(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const &  I,KNM<R> * const & pV)
 {
-    // I given numbering of Shur complement I[i] is the index in A of the i in S
+    // I given numbering of Schur complement I[i] is the index in A of the i in S
     R zero(0.);
     KNM<R>   & S= *pS;
     KNM<R>   & A= *pA;
@@ -1180,10 +1180,10 @@ long  ff_ShurComplement(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const 
     return ni;
 }
 template<class R>
-long  ff_ShurComplement(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const &  I)
+long  ff_SchurComplement(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const &  I)
 {
     KNM<R> * pV=0;
-    return ff_ShurComplement<R>(pS,pA,I,pV);
+    return ff_SchurComplement<R>(pS,pA,I,pV);
 }
 
 
@@ -1324,8 +1324,8 @@ static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3
 		Global.Add("dgelsy", "(", new OneOperator2_<long, KNM<double> *, KN<double> *>(lapack_dgelsy));
 		Global.Add("dgelsy", "(", new OneOperator2_<long, KNM<double> *, KNM<double> *>(lapack_dgelsy));
            // Add FH.  for P. Ventura... Jun 2019 ..
-            Global.Add("ShurComplement", "(", new OneOperator3_<long, KNM<R> *, KNM<R> *, KN_<long> >(ff_ShurComplement<R>));
-            Global.Add("ShurComplement", "(", new OneOperator3_<long, KNM<Complex> *, KNM<Complex> *, KN_<long> >(ff_ShurComplement<Complex>));
+            Global.Add("SchurComplement", "(", new OneOperator3_<long, KNM<R> *, KNM<R> *, KN_<long> >(ff_SchurComplement<R>));
+            Global.Add("SchurComplement", "(", new OneOperator3_<long, KNM<Complex> *, KNM<Complex> *, KN_<long> >(ff_SchurComplement<Complex>));
 
 	} else if (verbosity) {
 		cout << "( load: lapack <=> fflapack , skeep ) ";
