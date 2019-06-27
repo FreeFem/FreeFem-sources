@@ -76,6 +76,15 @@ cout << getEnv3 << endl;
 // test(getEnv3 != "");
 //TODO seems to be a bug
 
+cout << functionDEFINITION << "unsetenv" << endl;
+
+t = clock();
+int unsetEnv = unsetenv("PWD");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << unsetEnv << endl;
+test(unsetEnv == 0);
+
 cout << functionDEFINITION << "chmod" << endl;
 
 t = clock();
@@ -108,9 +117,60 @@ chdir("..");
 
 cout << functionDEFINITION << "cpfile" << endl;
 
+verbosity = 10000;
+
 t = clock();
-int cpFile = chdir("toto");
+int cpFile = chdir("Makefile");
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 cout << cpFile << endl;
 // test(chDir == -1);
+
+cout << functionDEFINITION << "stat" << endl;
+
+// verbosity = 10000;
+
+t = clock();
+int st = stat("Makefile");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << st << endl;
+test(st == 0);
+
+cout << functionDEFINITION << "dirname" << endl;
+
+t = clock();
+string dirName = dirname("/usr/local/bin/add.sh");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << dirName << endl;
+//TODO seems to be a bug,missing the last letter
+// test(dirName == "assets");
+
+cout << functionDEFINITION << "basername" << endl;
+
+t = clock();
+string baseName = basename("/usr/local/bin/add.sh");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(baseName == "add.sh");
+
+cout << functionDEFINITION << "cddir" << endl;
+
+t = clock();
+int cdDir = cddir("assets");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << cdDir << endl;
+test(cdDir == 0);
+cddir("..");
+
+cout << functionDEFINITION << "unlink" << endl;
+
+mkdir("test");
+t = clock();
+int unLink = unlink("test");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << unLink << endl;
+test(unLink == -1);
