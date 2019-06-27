@@ -120,11 +120,11 @@ cout << functionDEFINITION << "cpfile" << endl;
 verbosity = 10000;
 
 t = clock();
-int cpFile = chdir("Makefile");
+int cpFile = cpfile("Makefile", "toto");
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 cout << cpFile << endl;
-// test(chDir == -1);
+test(cpFile == 0);
 
 cout << functionDEFINITION << "stat" << endl;
 
