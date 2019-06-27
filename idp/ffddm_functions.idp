@@ -140,11 +140,11 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
           preffe#prmesh#tic(pr#tcsi)
           /*
           destroyRecycling(Addmc);
-          DDM(Addmc, solc, tmp, O=Optc);
+          DDM(Addmc, tmp, solc, O=Optc);
           solc = 0;
           */
           
-          /*DDM(pr#Addmc, solc, tmp, O=pr#Optc);*/
+          /*DDM(pr#Addmc, tmp, solc, O=pr#Optc);*/
           solc = pr#CoarsefGMRES(solc, tmp, ffddminexactCStol, ffddmmaxit, ffddmvariant);
           preffe#prmesh#toc(pr#tcsi,"",pr#tcs)
           if (!preffe#prmesh#excluded)
@@ -492,9 +492,9 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
       set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction deflated");
     
     if (pr#prec == "oras" || pr#prec == "soras")
-      DDM(pr#hpddmOP,uni,rhs,O=pr#aR[mpiRank(preffe#prmesh#commddm)],timing=timings);
+      DDM(pr#hpddmOP,rhs,uni,O=pr#aR[mpiRank(preffe#prmesh#commddm)],timing=timings);
     else
-      DDM(pr#hpddmOP,uni,rhs,timing=timings);
+      DDM(pr#hpddmOP,rhs,uni,timing=timings);
     
     /*
     real[int] timingsg(timings.n);

@@ -90,7 +90,7 @@ pair ret;
 Wh<real> def(u);    // local solution
 
 if(Opt.n > 0)       // optimized Schwarz methods
-    DDM(A, u[], rhs, excluded = excluded, ret = ret, O = Opt);
+    DDM(A, rhs, u[], excluded = excluded, ret = ret, O = Opt);
 else
     u[] = A^-1 * rhs;
 

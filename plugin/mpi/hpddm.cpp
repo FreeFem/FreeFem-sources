@@ -179,12 +179,12 @@ template<class Type, class K>
 class solveDDM_Op : public E_F0mps {
     public:
         Expression A;
-        Expression x;
         Expression rhs;
-        static const int n_name_param = 9;
+        Expression x;
+        static const int n_name_param = 5;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
-        solveDDM_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : A(param1), x(param2), rhs(param3) {
+        solveDDM_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : A(param1), rhs(param2), x(param3) {
             args.SetNameParam(n_name_param, name_param, nargs);
         }
 
@@ -192,14 +192,10 @@ class solveDDM_Op : public E_F0mps {
 };
 template<class Type, class K>
 basicAC_F0::name_and_type solveDDM_Op<Type, K>::name_param[] = {
-    {"eps", &typeid(HPDDM::underlying_type<K>)},
-    {"dim", &typeid(long)},
-    {"iter", &typeid(long)},
     {"timing", &typeid(KN<double>*)},
     {"excluded", &typeid(bool)},
     {"ret", &typeid(Pair<K>*)},
     {"O", &typeid(Matrice_Creuse<K>*)},
-    {"solver", &typeid(long)},
     {"communicator", &typeid(pcommworld)}
 };
 template<class Type, class K>
@@ -213,38 +209,21 @@ class solveDDM : public OneOperator {
 };
 template<class Type, class K>
 AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
-    KN<K>* ptX = GetAny<KN<K>*>((*x)(stack));
     KN<K>* ptRHS = GetAny<KN<K>*>((*rhs)(stack));
+    KN<K>* ptX = GetAny<KN<K>*>((*x)(stack));
     Type* ptA = GetAny<Type*>((*A)(stack));
     if(ptX->n != ptRHS->n || ptRHS->n < ptA->getDof())
         return 0L;
     HPDDM::Option& opt = *HPDDM::Option::get();
     const std::string& prefix = ptA->prefix();
-    HPDDM::underlying_type<K> eps = nargs[0] ? GetAny<HPDDM::underlying_type<K>>((*nargs[0])(stack)) : -1.0;
-    if(nargs[0])
-        std::cerr << "Please do not use the legacy option \"-eps\", set instead \"-hpddm_tol\", cf. \"-hpddm_help\"" << std::endl;
-    if(std::abs(eps + 1.0) > 1.0e-6)
-        opt[prefix + "tol"] = eps;
-    int dim = nargs[1] ? GetAny<long>((*nargs[1])(stack)) : -1;
-    if(nargs[1])
-        std::cerr << "Please do not use the legacy option \"-dim\", set instead \"-hpddm_gmres_restart\", cf. \"-hpddm_help\"" << std::endl;
-    if(dim != -1)
-        opt[prefix + "gmres_restart"] = dim;
-    int iter = nargs[2] ? GetAny<long>((*nargs[2])(stack)) : -1;
-    if(nargs[2])
-        std::cerr << "Please do not use the legacy option \"-iter\", set instead \"-hpddm_max_it\", cf. \"-hpddm_help\"" << std::endl;
-    if(iter != -1)
-        opt[prefix + "max_it"] = iter;
-    if(nargs[7])
-        std::cerr << "Please do not use the legacy option \"-solver\", set instead \"-hpddm_schwarz_method\" and \"-hpddm_schwarz_coarse_correction\", cf. \"-hpddm_help\"" << std::endl;
-    KN<double>* timing = nargs[3] ? GetAny<KN<double>*>((*nargs[3])(stack)) : 0;
-    Pair<K>* pair = nargs[5] ? GetAny<Pair<K>*>((*nargs[5])(stack)) : 0;
+    KN<double>* timing = nargs[0] ? GetAny<KN<double>*>((*nargs[0])(stack)) : 0;
+    Pair<K>* pair = nargs[2] ? GetAny<Pair<K>*>((*nargs[2])(stack)) : 0;
     if(opt.set(prefix + "schwarz_coarse_correction") && pair)
         if(pair->p) {
             int flag;
             MPI_Test(&(pair->p->first), &flag, MPI_STATUS_IGNORE);
         }
-    MatriceMorse<K>* mA = nargs[6] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[6])(stack))->A)) : 0;
+    MatriceMorse<K>* mA = nargs[3] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[3])(stack))->A)) : 0;
     unsigned short mu = ptX->n / ptA->getDof();
     MPI_Allreduce(MPI_IN_PLACE, &mu, 1, MPI_UNSIGNED_SHORT, MPI_MAX, ptA->getCommunicator());
     const HPDDM::MatrixCSR<K>* A = ptA->getMatrix();
@@ -277,7 +256,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
         std::for_each(A->_ia, A->_ia + A->_n + 1, [](int& i) { ++i; });
         std::for_each(A->_ja, A->_ja + A->_nnz, [](int& i) { ++i; });
     }
-    bool excluded = nargs[4] && GetAny<bool>((*nargs[4])(stack));
+    bool excluded = nargs[1] && GetAny<bool>((*nargs[1])(stack));
     if(excluded)
         opt[prefix + "level_2_exclude"];
     if(pair)
@@ -287,7 +266,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
             pair->destroy();
             pair = nullptr;
         }
-    MPI_Comm comm = nargs[8] ? *(MPI_Comm*)GetAny<pcommworld>((*nargs[8])(stack)) : MPI_COMM_WORLD;
+    MPI_Comm comm = nargs[4] ? *(MPI_Comm*)GetAny<pcommworld>((*nargs[4])(stack)) : MPI_COMM_WORLD;
     int rank;
     MPI_Comm_rank(ptA->getCommunicator(), &rank);
     if(rank != mpirank || rank != 0) {

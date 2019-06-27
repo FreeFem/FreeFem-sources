@@ -1120,7 +1120,7 @@ class initCSRfromBlockMatrix : public E_F0 {
                 }
                 if(posX == -1 && posY == -1)
                     ExecError("Zero row and zero column");
-                else if(posX == -1 || posY == -1) {
+                else {
                     PetscInt x, X, y, Y;
                     if(posX != -1) {
                         MatGetSize(a[zeros[i] * M + posX], &X, &Y);

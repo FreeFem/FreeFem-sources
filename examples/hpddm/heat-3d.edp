@@ -93,7 +93,7 @@ for(int i = 0; i < iMax; ++i) {
     newRhs += rhs;
 
     if(Opt.n > 0)       // optimized Schwarz methods
-        DDM(A, u[], newRhs, excluded = excluded, ret = ret, O = Opt);
+        DDM(A, newRhs, u[], excluded = excluded, ret = ret, O = Opt);
     else
         u[] = A^-1 * newRhs;
 
