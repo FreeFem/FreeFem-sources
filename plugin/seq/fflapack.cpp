@@ -1117,20 +1117,16 @@ long  ff_SchurComplement(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const
         for(int i=0; i< n; ++i)
         {
             int Ii=I[i];
-            
             if (Ii>=0)
             {
-                nn+=mi[Ii] ; // conunt numbrer of item Ii
+                nn+=mi[Ii] ; // count number of item  Ii
                 mi[Ii] = 0;  // to count only once
                 mark[i]=Ii;
             }
-            
-            if(mark[Ii]>=0) err++; // not injection
-            mark[Ii]=i;
         }
         
-        if ( nn != imx ) cerr << " Error SchurComplement  the positive full numbering is not surjective "<< nn << " <> " << imx << endl;
-        ffassert( nn == imx);
+        if ( nn != imx+1 ) cerr << " Error SchurComplement  the positive full numbering is not surjective "<< nn << " <> " << imx+1 << endl;
+        ffassert( nn == imx+1);
         ni = nn;
         if(verbosity)  cout << " SchurComplement with full non negative full shur complement numbering "<< endl
             << "        size of compl.  "<< ni << " < size of mat. " << n << endl;
@@ -1215,7 +1211,7 @@ long  ff_SchurComplement(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const
             int ki = mi <0 ? -mi-2 : -1;
             if( mi <0)
                 for(int k=0; k<ni;++k)
-                    (*pV)(i,k) = BJI(ki,k);
+                    (*pV)(i,k) = -BJI(ki,k);
             else
                 for(int k=0; k<ni;++k)
                 (*pV)(i,k) = R(k==mi);
@@ -1379,6 +1375,8 @@ static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3
            // Add FH.  for P. Ventura... Jun 2019 ..
             Global.Add("SchurComplement", "(", new OneOperator3_<long, KNM<R> *, KNM<R> *, KN_<long> >(ff_SchurComplement<R>));
             Global.Add("SchurComplement", "(", new OneOperator3_<long, KNM<Complex> *, KNM<Complex> *, KN_<long> >(ff_SchurComplement<Complex>));
+            Global.Add("SchurComplement", "(", new OneOperator4_<long, KNM<R> *, KNM<R> *, KN_<long> , KNM<R> *>(ff_SchurComplement<R>));
+            Global.Add("SchurComplement", "(", new OneOperator4_<long, KNM<Complex> *, KNM<Complex> *, KN_<long>, KNM<Complex> * >(ff_SchurComplement<Complex>));
 
 	} else if (verbosity) {
 		cout << "( load: lapack <=> fflapack , skeep ) ";

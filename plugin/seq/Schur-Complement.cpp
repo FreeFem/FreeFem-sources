@@ -90,7 +90,7 @@ template<class R>
 class SchurComplement : public OneOperator { public:
     int cas;
     SchurComplement() : OneOperator(atype<long>(),atype<KNM<R> *>(),atype<Matrice_Creuse<R> *>(),atype<KN<long> *>() ) ,  cas(0) {}
-    SchurComplement(int ) : OneOperator(atype<long>(),atype<KNM<R> *>(),atype<Matrice_Creuse<R> *>(),atype<KN<long> *, atype<KNM<R> *>()>() ) ,  cas(1){}
+    SchurComplement(int ) : OneOperator(atype<long>(),atype<KNM<R> *>(),atype<Matrice_Creuse<R> *>(),atype<KN<long> *>(), atype<KNM<R> *>() ) ,  cas(1){}
 
     E_F0 * code(const basicAC_F0 & args) const
     {
@@ -151,20 +151,16 @@ long  ff_SchurComplement(Stack stack,KNM<R> *  pS,Matrice_Creuse<R> *  pmcA,KN_<
              for(int i=0; i< n; ++i)
             {
                 int Ii=I[i];
-                
                 if (Ii>=0)
                 {
-                    nn+=mi[Ii] ; // conunt numbrer of item Ii
+                    nn+=mi[Ii] ; // count number of item  Ii
                     mi[Ii] = 0;  // to count only once
                     mark[i]=Ii;
                 }
-                
-                if(mark[Ii]>=0) err++; // not injection
-                mark[Ii]=i;
             }
         
-        if ( nn != imx ) cerr << " Error SchurComplement  the positive full numbering is not surjective "<< nn << " <> " << imx << endl;
-        ffassert( nn == imx);
+        if ( nn != imx+1 ) cerr << " Error SchurComplement  the positive full numbering is not surjective "<< nn << " <> " << imx+1 << endl;
+        ffassert( nn == imx+1);
         ni = nn;
         if(verbosity)  cout << " SchurComplement with full non negative full shur complement numbering "<< endl
             << "        size of compl.  "<< ni << " < size of mat. " << n << endl;
@@ -268,7 +264,7 @@ long  ff_SchurComplement(Stack stack,KNM<R> *  pS,Matrice_Creuse<R> *  pmcA,KN_<
         rJ=zero;
         
         for (int l = AJI.p[k]; l <AJI.p[k+1];++l)
-            rJ[AJI.i[l]]= AIJ.aij[l], err+= AJI.j[l]!=k;
+            rJ[AJI.i[l]] += AJI.aij[l], err+= AJI.j[l]!=k;
         AJJ.solve(sJ,rJ);
         if(pV)
         {
@@ -277,7 +273,7 @@ long  ff_SchurComplement(Stack stack,KNM<R> *  pS,Matrice_Creuse<R> *  pmcA,KN_<
                int mi= mark[i];
               int ki = mi <0 ? -mi-2 : -1;
               if( mi < 0)
-                  (*pV)(i,k) = sJ[ki];
+                  (*pV)(i,k) = -sJ[ki];
               else
                   (*pV)(i,k) = R(k==mi);
             }
@@ -318,6 +314,8 @@ static void Load_Init () {
     cout << " load: init SchurComplement " << endl;
     Global.Add("SchurComplement", "(", new SchurComplement<R>);
     Global.Add("SchurComplement", "(", new SchurComplement<Complex>);
+    Global.Add("SchurComplement", "(", new SchurComplement<R>(1));
+    Global.Add("SchurComplement", "(", new SchurComplement<Complex>(1));
     Global.Add("copy","(", new OneOperator2<long, KNM<R> *,Matrice_Creuse<R> *  >(copy_mat));
     Global.Add("copy","(", new OneOperator2<long, KNM<Complex> *,Matrice_Creuse<Complex> *  >(copy_mat));
 
