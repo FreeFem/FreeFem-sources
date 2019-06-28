@@ -19,10 +19,10 @@ func real error(real[int]& u , real[int]& b) {
 
 b = 1;
 u = 0;
-IterativeMethod(A, u, b, sparams = "-hpddm_tol 1e-6 -hpddm_foo_krylov_method gcrodr -hpddm_foo_recycle 4 -hpddm_foo_variant flexible" + (mpirank == 0 ? " -hpddm_foo_verbosity 4" : ""), prefix = "foo_");
+IterativeMethod(A, b, u, sparams = "-hpddm_tol 1e-6 -hpddm_foo_krylov_method gcrodr -hpddm_foo_recycle 4 -hpddm_foo_variant flexible" + (mpirank == 0 ? " -hpddm_foo_verbosity 4" : ""), prefix = "foo_");
 assert(error(u, b) < 1e-5);
 u = 0;
-IterativeMethod(A, u, b, precon = matId, prefix = "foo_");
+IterativeMethod(A, b, u, precon = matId, prefix = "foo_");
 assert(error(u, b) < 1e-5);
 func real[int] B(real[int]& u) {
     for(int i = 0; i < u.n; ++i)
@@ -36,7 +36,7 @@ func real[int] time(real[int]& u) {
     return u;
 }
 u = 0;
-IterativeMethod(B, u, b, precon = time, prefix = "foo_");
+IterativeMethod(B, b, u, precon = time, prefix = "foo_");
 func real errorB(real[int]& u , real[int]& b) {
     real s = 0;
     for(int i = 0; i < u.n; ++i)
