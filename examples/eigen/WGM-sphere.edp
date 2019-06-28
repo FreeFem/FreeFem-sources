@@ -83,8 +83,8 @@ int2d(Th)(
 +int1d(Th,1)(EWall(Hr,Hphi,Hz)*EWall(vHr, vHphi, vHz));
 
 //setting sparce matrices and assigning the solver UMFPACK to solve eigenvalue problem
-matrix B=b(Vh,Vh,solver=UMFPACK);
-matrix OP= op(Vh,Vh,solver=UMFPACK);
+matrix B=b(Vh,Vh,solver="SPARSESOLVER");
+matrix OP= op(Vh,Vh,solver="SPARSESOLVER");
 
 real[int] ev(nev); // to store the nev eigenvalue
 Vh[int] [eHr,eHphi,eHz](nev); // to store the nev eigenvector

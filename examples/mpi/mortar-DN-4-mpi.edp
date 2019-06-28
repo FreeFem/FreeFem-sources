@@ -105,8 +105,8 @@ epssd[]= vepsi(0,Ehi);
 epssd = -real(epssd <-0.00001) + real(epssd >0.00001);
 
 Csd  = cci(Lh,Vhi);
-Asd  = vLapMi(Vhi,Vhi,solver=UMFPACK);
-PAsd = vPLapMi(Vhi,Vhi,solver=UMFPACK);
+Asd  = vLapMi(Vhi,Vhi,solver="SPARSESOLVER");
+PAsd = vPLapMi(Vhi,Vhi,solver="SPARSESOLVER");
 matrix IVL=interpolate(Vhi,Lh,inside=1);
 //   v = IVL*l
 varf vonext(u,v)=on(labext,u=1);

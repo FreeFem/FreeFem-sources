@@ -56,7 +56,7 @@ varf NS ([u1, u2, p], [v1, v2, q], init=i)
 [up1, up2, pp] = [0., 0., 0.];
 
 // Solve (Stokes)
-matrix A = NS(Wh, Wh, solver=UMFPACK);
+matrix A = NS(Wh, Wh, solver="SPARSESOLVER");
 real[int] b = NS(0, Wh);
 u1[] = A^-1 * b;
 
@@ -70,7 +70,7 @@ for (iter = 1; iter <= nbiter; iter++){
 	cout << "dt = " << dt << endl;
 	alpha = 1./dt;
 	
-	A = NS(Wh, Wh, solver=UMFPACK);
+	A = NS(Wh, Wh, solver="SPARSESOLVER");
 	
 	// Time loop
 	for (i = 0; i <= 10; i++){

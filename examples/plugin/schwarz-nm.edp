@@ -118,7 +118,7 @@ for(int i=0;i<npart;++i)
     
     
     aA[i]=va(Vhi,Vhi);
-    set(aA[i],solver=UMFPACK);
+    set(aA[i],solver="SPARSESOLVER");
     rhsi[i][]= va(0,Vhi);
     Dih[i]=pun[i][];
     real[int]  un(Vhi.ndof);

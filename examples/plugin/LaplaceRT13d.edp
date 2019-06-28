@@ -36,7 +36,7 @@ func f = 1.;
 Vh [u1,u2,u3],[v1,v2,v3];
 Ph p,q;
 Wh pp,qq;
-problem laplaceMixte([u1,u2,u3,p],[v1,v2,v3,q],solver=UMFPACK,eps=1.0e-10,tgv=1e30,dimKrylov=150) =
+problem laplaceMixte([u1,u2,u3,p],[v1,v2,v3,q],solver="SPARSESOLVER",eps=1.0e-10,tgv=1e30,dimKrylov=150) =
    int3d(Th)( p*q*0e-10+ u1*v1 + u2*v2 + u3*v3
 	   + p*(dx(v1)+dy(v2)+dz(v3)) + (dx(u1)+dy(u2)+dz(u3))*q )
  + int3d(Th) ( f*q)
