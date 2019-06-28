@@ -1100,21 +1100,74 @@ long  ff_SchurComplement(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const
     R zero(0.);
     KNM<R>   & S= *pS;
     KNM<R>   & A= *pA;
-    int ni = I.N();
     int n=pA->N(),m=pA->M();
+
+
+    int Ni = I.N(),ni=0;
+    //  ni = # Imag(I)
     ffassert( n == m);
-    S.resize(ni,ni);
-    S=0.;
-    ffassert( n>ni);
     KN<long> mark(n,-1L);
-    for(int i=0; i< ni; ++i)
-        mark[I[i]]=i;
+    int err=0;
+    if( Ni == n) //
+    {
+        long imx = I.max(),nn=0;
+        
+        ffassert( imx < n);
+        KN<long> mi(imx+1,1);
+        for(int i=0; i< n; ++i)
+        {
+            int Ii=I[i];
+            
+            if (Ii>=0)
+            {
+                nn+=mi[Ii] ; // conunt numbrer of item Ii
+                mi[Ii] = 0;  // to count only once
+                mark[i]=Ii;
+            }
+            
+            if(mark[Ii]>=0) err++; // not injection
+            mark[Ii]=i;
+        }
+        
+        if ( nn != imx ) cerr << " Error SchurComplement  the positive full numbering is not surjective "<< nn << " <> " << imx << endl;
+        ffassert( nn == imx);
+        ni = nn;
+        if(verbosity)  cout << " SchurComplement with full non negative full shur complement numbering "<< endl
+            << "        size of compl.  "<< ni << " < size of mat. " << n << endl;
+        
+    }
+    else {
+        ni = Ni;
+        if(verbosity)  cout << " SchurComplement with just the shur complement numbering (injection)" << endl
+            << "        size of compl.  "<< ni << " < size of mat. " << n << endl;
+        for(int i=0; i< Ni; ++i)
+        {
+            int Ii=I[i];
+            ffassert(Ii>=0 && Ii <n);
+            if(mark[Ii]>=0) err++; // not injection
+            mark[Ii]=i;
+        }
+    }
+    // build numbering of no in shur complement .. -2 - number
+    if( err) {
+        if( Ni != n)  cerr  << " SchurComplement get all numbering i -> j  if i in [0,n[ if  I[i]>=0  j=I[i] " << Ni << " == " << n << endl;
+        else cerr  << " SchurComplement get all numbering  i -> j  if i in [0,ni[ , j = I[i]   " <<endl;
+        cerr << " Fatal Error  in SchurComplement def numbering : nb err= "<< err << endl;
+        
+        ffassert(err==0);
+    }
     int nj=0;
     for(int i=0; i<n;++i)
         if (mark[i] <0 ) mark[i] = -2 - nj++;
-    KN<int> J(nj);
-    for(int i=0; i<n;++i)
-        if (mark[i] <0 ) J[-mark[i]+2]= i;
+
+    
+    S.resize(ni,ni);
+    S=0.;
+    ffassert( n>ni);
+ 
+//    KN<int> J(nj);
+//    for(int i=0; i<n;++i)
+//        if (mark[i] <0 ) J[-mark[i]-2]= i;
     KNM<R> AII(ni,ni),AIJ(ni,nj), AJI(nj,ni), AJJ(nj,nj);
     AII=zero;
     AIJ=zero;
