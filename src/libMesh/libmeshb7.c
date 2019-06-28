@@ -1060,7 +1060,7 @@ int NAMF77(GmfSetLin, gmfsetlin)(TYPF77(int64_t) MshIdx, TYPF77(int) KwdCod, ...
 #ifdef F77API
                   fprintf(msh->hdl, "%g ", *(va_arg(VarArg, float *)));
 #else
-                  fprintf(msh->hdl, "%.15g ", va_arg(VarArg, double));
+                  fprintf(msh->hdl, "%g ", va_arg(VarArg, double));
 #endif
                else
                   fprintf(msh->hdl, "%.15g ", VALF77(va_arg(VarArg, TYPF77(double))));
@@ -1139,7 +1139,7 @@ int NAMF77(GmfSetLin, gmfsetlin)(TYPF77(int64_t) MshIdx, TYPF77(int) KwdCod, ...
 
          if(msh->typ & Asc)
             for(i=0; i<kwd->SolSiz; i++)
-               fprintf(msh->hdl, "%.15g ", (double)FltSolTab[i]);
+               fprintf(msh->hdl, "%g ", (double)FltSolTab[i]);
          else
             RecBlk(msh, (unsigned char *)FltSolTab, kwd->NmbWrd);
       }
@@ -1209,7 +1209,7 @@ int GmfCpyLin(int64_t InpIdx, int64_t OutIdx, int KwdCod)
 
          if(OutMsh->ver == 1)
             if(OutMsh->typ & Asc)
-               fprintf(OutMsh->hdl, "%.15g ", (double)f);
+               fprintf(OutMsh->hdl, "%g ", (double)f);
             else
                RecWrd(OutMsh, (unsigned char *)&f);
          else
