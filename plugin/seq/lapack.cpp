@@ -1165,9 +1165,9 @@ long  ff_SchurComplement(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const
     S=0.;
     ffassert( n>ni);
  
-    KN<int> J(nj);
-    for(int i=0; i<n;++i)
-        if (mark[i] <0 ) J[-mark[i]+2]= i;
+//    KN<int> J(nj);
+//    for(int i=0; i<n;++i)
+//        if (mark[i] <0 ) J[-mark[i]-2]= i;
     KNM<R> AII(ni,ni),AIJ(ni,nj), AJI(nj,ni), AJJ(nj,nj);
     AII=zero;
     AIJ=zero;

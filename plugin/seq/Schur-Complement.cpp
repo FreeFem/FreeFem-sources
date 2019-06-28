@@ -202,9 +202,9 @@ long  ff_SchurComplement(Stack stack,KNM<R> *  pS,Matrice_Creuse<R> *  pmcA,KN_<
         cout << "       - warning the SchurComplement numbering is not injectif !"
              <<  ni<< " +" << nj << " ==" <<ni + nj << " < "<<  n << endl;
     ffassert(ni>0 && nj >0);
-    KN<int> J(nj);
-    for(int i=0; i<n;++i)
-    if (mark[i] <0 ) J[-mark[i]+2]= i;
+//    KN<int> J(nj);
+//    for(int i=0; i<n;++i)
+//    if (mark[i] <-1) J[-mark[i]-2]= i;
     // I, J partionne in 2 set ..
     // the 4 matrix
     MatriceMorse<R> AII(ni,ni),AIJ(ni,nj), AJI(nj,ni), AJJ(nj,nj);
