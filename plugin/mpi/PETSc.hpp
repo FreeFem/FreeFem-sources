@@ -274,7 +274,7 @@ void setCompositePC(PC pc, const std::vector<Mat>* S) {
             PCGetOptionsPrefix(pc, &prefixPC);
             const char* prefixIS;
             KSPGetOptionsPrefix(subksp[nsplits - 1], &prefixIS);
-            std::string str = std::string(prefixIS).substr(std::string(prefixPC).size() + std::string("fieldsplit_").size(), std::string(prefixIS).size() - (std::string(prefixPC).size() + std::string("fieldsplit_").size() + 1));
+            std::string str = std::string(prefixIS).substr((prefixPC ? std::string(prefixPC).size() : 0) + std::string("fieldsplit_").size(), std::string(prefixIS).size() - ((prefixPC ? std::string(prefixPC).size() : 0) + std::string("fieldsplit_").size() + 1));
             PCFieldSplitGetIS(pc, str.c_str(), &is);
 #endif
             PetscObjectCompose((PetscObject)is, "pmat", (PetscObject)(*S)[0]);
