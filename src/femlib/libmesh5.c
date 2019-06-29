@@ -702,7 +702,7 @@ int GmfSetLin(int MshIdx, int KwdCod, ...)
                     if(kwd->fmt[i] == 'r')
                     {
                         d = va_arg(par, double);
-                        fprintf(msh->hdl, "%.15lg ", d);
+                        fprintf(msh->hdl, "%g ", (float)d);
                     }
                     else
                     {

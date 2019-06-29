@@ -762,7 +762,7 @@ namespace Fem2D
     
     int MeshS::Save(const string & filename) const
     {
-        int ver = GmfFloat, outm;
+        int ver = GmfDouble, outm;
         if ( !(outm = GmfOpenMesh(filename.c_str(),GmfWrite,ver,3)) ) {
             cerr <<"  -- MeshS**::Save  UNABLE TO OPEN  :"<< filename << endl;
             return(1);
