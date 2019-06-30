@@ -73,7 +73,7 @@ CONDITIONAL_PETSC = bratu-2d-PETSc.edp \
 	laplace-RT-2d-PETSc.edp \
 	stokes-2d-PETSc.edp \
 	stokes-2d-PETSc-fieldsplit.edp \
-	stokes-2d-block-PETSc.edp
+	stokes-2d-block-PETSc.edp \
 	stokes-3d-PETSc.edp \
 	stokes-3d-PETSc-fieldsplit.edp \
 	transpose-solve-PETSc.edp \
