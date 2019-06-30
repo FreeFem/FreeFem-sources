@@ -310,8 +310,9 @@ void change(Type* const& ptA, Matrice_Creuse<PetscScalar>* const& mat, Type* con
                 ptA->dtor();
                 ptA->_petsc = backup;
                 PetscMPIInt flag;
-                MPI_Comm_compare(PetscObjectComm((PetscObject)ptA->_petsc), PetscObjectComm((PetscObject)ptB->_petsc), &flag);
-                if(flag != MPI_CONGRUENT && flag != MPI_IDENT) {
+                if(ptA->_petsc)
+                    MPI_Comm_compare(PetscObjectComm((PetscObject)ptA->_petsc), PetscObjectComm((PetscObject)ptB->_petsc), &flag);
+                if(!ptA->_petsc || (flag != MPI_CONGRUENT && flag != MPI_IDENT)) {
                     MatDestroy(&ptA->_petsc);
                     MatConvert(ptB->_petsc, MATSAME, MAT_INITIAL_MATRIX, &ptA->_petsc);
                     MatDestroy(&ptB->_petsc);
@@ -1165,7 +1166,7 @@ template<class Type>
 class setOptions_Op : public E_F0mps {
     public:
         Expression A;
-        static const int n_name_param = 11;
+        static const int n_name_param = 12;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         setOptions_Op(const basicAC_F0& args, Expression param1) : A(param1) {
@@ -1186,7 +1187,8 @@ basicAC_F0::name_and_type setOptions_Op<Type>::name_param[] = {
     {"parent", &typeid(Type*)},
     {"MatNullSpace", &typeid(KNM<PetscScalar>*)},
     {"fieldsplit", &typeid(long)},
-    {"schurComplement", &typeid(KNM<PetscScalar>*)}
+    {"schurComplement", &typeid(KNM<PetscScalar>*)},
+    {"schur", &typeid(KN<Dmat>*)}
 };
 template<class Type, char> class LinearSolver;
 template<class Type> class NonlinearSolver;
@@ -1276,10 +1278,6 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
             KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
         }
         if(std::is_same<Type, Dmat>::value && isFieldSplit) {
-            KN<double>* fields = nargs[2] ? GetAny<KN<double>*>((*nargs[2])(stack)) : 0;
-            KN<String>* names = nargs[3] ? GetAny<KN<String>*>((*nargs[3])(stack)) : 0;
-            KN<Matrice_Creuse<PetscScalar>>* mS = nargs[5] ? GetAny<KN<Matrice_Creuse<PetscScalar>>*>((*nargs[5])(stack)) : 0;
-            KN<double>* pL = nargs[6] ? GetAny<KN<double>*>((*nargs[6])(stack)) : 0;
             if(FS < 0)
                 ksp = ptA->_ksp;
             else {
@@ -1292,7 +1290,15 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
                     ksp = subksp[FS];
                 PetscFree(subksp);
             }
-            setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
+            KN<double>* fields = nargs[2] ? GetAny<KN<double>*>((*nargs[2])(stack)) : 0;
+            KN<String>* names = nargs[3] ? GetAny<KN<String>*>((*nargs[3])(stack)) : 0;
+            KN<Matrice_Creuse<PetscScalar>>* mS = nargs[5] ? GetAny<KN<Matrice_Creuse<PetscScalar>>*>((*nargs[5])(stack)) : 0;
+            KN<double>* pL = nargs[6] ? GetAny<KN<double>*>((*nargs[6])(stack)) : 0;
+            KN<Dmat>* mdS = nargs[11] ? GetAny<KN<Dmat>*>((*nargs[11])(stack)) : 0;
+            if(mdS)
+                setFieldSplitPC(ptA, ksp, fields, names, mdS);
+            else
+                setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
         }
         else
             ksp = ptA->_ksp;
@@ -1346,8 +1352,8 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
         if(nargs[4])
             KSPSetOptionsPrefix(ptA->_ksp, GetAny<std::string*>((*nargs[4])(stack))->c_str());
         KSPSetFromOptions(ksp);
-        if(std::is_same<Type, Dmat>::value && nargs[6]) {
-            if(nargs[2] && nargs[5]) {
+        if(std::is_same<Type, Dmat>::value && (nargs[6] || nargs[11])) {
+            if(nargs[2] && (nargs[5] || nargs[11])) {
                 if(assembled) {
                     if(ptParent)
                         MatAssembled(ptParent->_petsc, &assembled);
@@ -1597,6 +1603,7 @@ template<class Type>
 AnyType changeNumbering<Type>::changeNumbering_Op::operator()(Stack stack) const {
     KN<PetscScalar>* ptOut = GetAny<KN<PetscScalar>*>((*out)(stack));
     bool inverse = nargs[0] && GetAny<bool>((*nargs[0])(stack));
+    int sum = 0;
     if(c == 0 || c == 2) {
         PetscScalar* pt = *ptOut;
         for(int j = 0; j < E.size(); ++j) {
@@ -1622,6 +1629,11 @@ AnyType changeNumbering<Type>::changeNumbering_Op::operator()(Stack stack) const
                     changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getMatrix()->_n, bs, ptIn, ptOut, inverse);
                 }
                 else {
+                    sum += bs * m;
+                    if(ptOut->n < sum && !inverse) {
+                        ptOut->resize(sum);
+                        pt = *ptOut + sum - bs * m;
+                    }
                     KN_<PetscScalar> ptOutShift(pt, bs * m);
                     changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getMatrix()->_n, bs, ptIn, &ptOutShift, inverse);
                 }
@@ -1633,7 +1645,7 @@ AnyType changeNumbering<Type>::changeNumbering_Op::operator()(Stack stack) const
                 if(c == 2) {
                     pt += bs * m;
                     if(j == E.size() - 1)
-                        ffassert(ptOut->n == std::distance(static_cast<PetscScalar*>(*ptOut), pt));
+                        ffassert(ptOut->n == std::distance(static_cast<PetscScalar*>(*ptOut), pt) || (!inverse && ptOut->n == sum));
                 }
             }
         }
@@ -2970,6 +2982,43 @@ class ProdPETSc {
             return mv(Ax, A);
         }
 };
+template<class A>
+inline AnyType DestroyKN(Stack, const AnyType& x) {
+    KN<A>* a = GetAny<KN<A>*>(x);
+    for(int i = 0; i < a->N(); ++i)
+        (*a)[i].dtor();
+    a->destroy();
+    return Nothing;
+}
+template<class R>
+R* InitKN(R* const& a, const long& n) {
+    a->init(n);
+    return a;
+}
+template<class R, class A, class B>
+R* getElement(const A& a, const B& b) {
+    if( b<0 || a->N() <= b) {
+        cerr << "Out of bound  0 <= " << b << " < " << a->N() << " array type = " << typeid(A).name() << endl;
+        ExecError("Out of bound in operator []");
+    }
+    return  &((*a)[b]);
+}
+template<class T>
+struct Resize {
+    T* v;
+    Resize(T* w) : v(w) { }
+};
+template<class T>
+Resize<T> toResize(T* v) { return Resize<T>(v); }
+template<class T>
+T* resizeClean(const Resize<T>& t, const long &n) {
+    int m = t.v->N();
+    for(int i = n; i < m; ++i) {
+        (*t.v)[i].dtor();
+    }
+    t.v->resize(n);
+    return  t.v;
+}
 }
 
 template<typename Type>
@@ -3037,6 +3086,14 @@ static void Init_PETSc() {
 
     TheOperators->Add("<-", new OneOperator1_<long, Dbddc*>(PETSc::initEmptyCSR<Dbddc>));
     TheOperators->Add("<-", new PETSc::initCSR<HpSchur<PetscScalar>>);
+
+    Dcl_Type<KN<Dmat>*>(0, PETSc::DestroyKN<Dmat>);
+    TheOperators->Add("<-", new OneOperator2_<KN<Dmat>*, KN<Dmat>*, long>(&PETSc::InitKN));
+    atype<KN<Dmat>*>()->Add("[", "", new OneOperator2_<Dmat*, KN<Dmat>*, long>(PETSc::getElement<Dmat, KN<Dmat>*, long>));
+    Dcl_Type<PETSc::Resize<KN<Dmat>>>();
+    Add<KN<Dmat>*>("resize", ".", new OneOperator1<PETSc::Resize<KN<Dmat>>, KN<Dmat>*>(PETSc::toResize));
+    Add<PETSc::Resize<KN<Dmat>>>("(", "", new OneOperator2_<KN<Dmat>*, PETSc::Resize<KN<Dmat>>, long>(PETSc::resizeClean));
+    map_type_of_map[make_pair(atype<long>(), atype<Dmat*>())] = atype<KN<Dmat>*>();
 
     Global.Add("exchange", "(", new exchangeIn<Dmat, PetscScalar>);
     Global.Add("exchange", "(", new exchangeInOut<Dmat, PetscScalar>);

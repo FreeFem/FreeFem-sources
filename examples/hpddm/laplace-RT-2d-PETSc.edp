@@ -1,0 +1,62 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"                        // PETSc plugin
+macro dimension()2// EOM            // 2D or 3D
+include "macro_ddm.idp"             // additional DDM functions
+
+macro def1(i)i// EOM
+macro def2(i)[i, i#B]// EOM
+macro def(i)[i, i#B, i#C]// EOM
+macro init(i)[i, i, i]// EOM
+load "Element_Mixte"
+func PkV = RT2;
+func PkP = P2dc;
+func Pk = [PkV, PkP];               // finite element space
+border a(t=0,1) { x = -t+1; y = t; label = 1; };
+border b(t=0,1) { x = -t; y = 1-t; label = 2; };
+border c(t=0,1) { x = t-1; y = -t; label = 3; };
+border d(t=0,1) { x = t; y = -1+t; label = 4; };
+mesh Th = buildmesh(a(getARGV("-global", 20)) + b(getARGV("-global", 20)) + c(getARGV("-global", 20)) + d(getARGV("-global", 20)));
+int s = getARGV("-split", 1); // refinement factor
+fespace Wh(Th, Pk);           // local finite element space
+int[int][int] intersection;   // local-to-neighbors renumbering
+real[int] D;                  // partition of unity
+{
+    build(Th, s, intersection, D, Pk, mpiCommWorld)
+    Wh def(u);
+    varf onG(def(u), def(v)) = on(-111111, u = 10 + x + y, uB = 100 + y - x) + int1d(Th, -111111)(vC * 1000);
+    // varf onG(def(u), def(v)) = int1d(Th, -111111)(v * 1000 + vB * 1000 + vC * 1000);
+    u[] = onG(0, Wh);
+    D = u[];
+    for [j, dj : D] dj = abs(dj) > 1e-1 ? 0.0 : 1.0;
+}
+
+varf vMixedLaplace([u1, u2, p], [v1, v2, q]) = int2d(Th)(u1 * v1 + u2 * v2 + p*(dx(v1) + dy(v2)) + (dx(u1) + dy(u2))*q)
+                                             + int2d(Th)(q)
+                                             - int1d(Th, 1, 2, 3)(v1*N.x + v2*N.y)
+                                             + on(4, u1 = 1.0, u2 = 1.0);
+
+matrix Loc = vMixedLaplace(Wh, Wh,tgv = -1);
+real[int] rhs = vMixedLaplace(0, Wh, tgv = -1);
+Mat A(Loc, intersection, D);
+set(A, sparams ="-pc_type lu");
+Wh def(u);
+u[] = A^-1 * rhs;
+macro params()cmm = "Global solution", wait = 1, fill = 1// EOM
+plotMPI(Th, def2(u), PkV, def2, real, params)
+plotMPI(Th, uC, PkP, def1, real, params)
+[u, uB, uC] = [0.0, 0.0, 1.0];
+u[] += 1.0;
+set(A, sparams = "-pc_type fieldsplit -ksp_monitor -ksp_view " +
+    "-ksp_type fgmres " +
+    "-pc_fieldsplit_type schur " +
+    "-pc_fieldsplit_schur_fact_type full " +
+    "-fieldsplit_0_ksp_type preonly " +
+    "-fieldsplit_1_ksp_type gmres " +
+    "-fieldsplit_1_ksp_monitor -fieldsplit_1_ksp_rtol 1e-4 " +
+    "-pc_fieldsplit_schur_precondition selfp " +
+    "-fieldsplit_1_pc_type hypre", fields = u[]);
+u[] = A^-1 * rhs;
+plotMPI(Th, def2(u), PkV, def2, real, params)
+plotMPI(Th, uC, PkP, def1, real, params)

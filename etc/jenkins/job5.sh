@@ -19,6 +19,7 @@ test -f "$change_compiler" && source "$change_compiler"
 autoreconf -i \
   && ./configure  --enable-download --enable-debug --prefix=/builds/workspace/freefem \
   && ./3rdparty/getall -a \
+  && chmod +x ./etc/jenkins/blob/build_PETSc.sh && sh ./etc/jenkins/blob/build_PETSc.sh \
   && chmod +x ./etc/jenkins/blob/build.sh && sh ./etc/jenkins/blob/build.sh
 
 if [ $? -eq 0 ]
