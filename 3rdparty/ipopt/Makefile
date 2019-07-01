@@ -5,6 +5,8 @@ include Makefile.inc
 
 all-local: Ipopt
 
+MAKEFLAGS += -j1
+
 # Downloading and compiling mumps
 # ------------------------------
 
@@ -92,4 +94,4 @@ clean: clean-local
 #FH	-rm $(PACKAGE)
 
 .PHONY:$(SRCDIR)/$(INSTALL)
-.NOTPARALLEL:
+#.NOTPARALLEL:$(SRCDIR)/$(INSTALL)
