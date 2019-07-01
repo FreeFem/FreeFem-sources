@@ -1,0 +1,14 @@
+include "test.idp"
+load "splitmesh3"
+
+cout << functionDEFINITION << "splitmesh3" << endl;
+
+real t;
+
+mesh Th=square(5, 5);
+t = clock();
+mesh Th3=splitmesh3(Th);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(Th.nv != Th3.nv);
+test(Th.nt != Th3.nt);
