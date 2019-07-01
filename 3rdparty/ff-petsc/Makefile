@@ -155,7 +155,7 @@ $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 		FOPTFLAGS='-O3 -march=native -mtune=native' \
 		CFLAGS=' -mtune=native' \
 		CXXFLAGS='-mtune=native' \
-		FFLAGS='-mtune=native' \		
+		FFLAGS='-mtune=native' \
 		--with-scalar-type=complex \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
