@@ -45,11 +45,6 @@ for(int i=0; i<Q.n; ++i)
 
  cout << functionDEFINITION << "ClosePoints" << endl;
 
- // example of mesh with a given set of internal point (P)
- // P(i,0) x,
- // P(i,1) y,
- // P(i,2) = mesh density close to x,y not mandatory ..
-
  real regtest;
 
  {
@@ -121,7 +116,7 @@ for(int i=0; i<Q.n; ++i)
 }
 
 {
-  cout << functionDEFINITION << "Voisinage" << endl;
+  cout << functionDEFINITION << "neighborhood" << endl;
 
   verbosity = 100;
   real[int,int] P(10,2);
