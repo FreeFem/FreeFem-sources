@@ -236,25 +236,26 @@ sub download{
 	}
 
 	# uses [[file:../bin/build/download]]
-	push @downloads,"$url,pkg/$pkg,$md5,$opts";
+	push @downloads,"$url,$pkg,$md5,$opts";
 }
 
 sub downloadone{
-	my($url,$pkg,$md5,$opts)=split(/,/,$_[0]);
-	my $cmd="../bin/build/download $url $pkg $opts";
+	##  correct rescue server for done load
+	my($url,$pkg,$md5,$opts)=split(/,/,$_[0]);# warning just $pkg without pkg/$pkg  
+	my $cmd="../bin/build/download $url pkg/$pkg $opts";
 	print "$cmd\n";
 	system $cmd;
 	if($?){
-		print "Download failed from $url\n";
+		print "Download failed from $url of $pkg\n";
 		my $url="http://pkgs.freefem.org/$pkg";
-		my $cmd="../bin/build/download $url $pkg $opts";
+		my $cmd="../bin/build/download $url pkg/$pkg $opts";
 		print "Try other site: $url\n";
 		system $cmd;
 		if($?){
-			print "Download failed from $url\n";
-			my $url="http://104.46.50.187/$pkg";
-			my $cmd="../bin/build/download $url $pkg $opts";
-			print "Try other site: $url\n";
+			print "Download 2 times failed from $url of $pkg\n";
+			my $url="http://104.46.50.187/pkg/$pkg";
+			my $cmd="../bin/build/download $url pkg/$pkg $opts";
+			print "Try (2 times)  other site: $url\n";
 			system $cmd;
 			if ($?){
 				$errors.="ERROR: $cmd FAILED\n"
