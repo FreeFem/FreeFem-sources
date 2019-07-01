@@ -342,7 +342,7 @@ namespace Fem2D
                 vertices[i].y=cr[1];
                 vertices[i].z=cr[2];}
             else
-                GmfGetLin(inm,GmfVertices,vertices[i].x,vertices[i].y,vertices[i].z,&lab);
+                GmfGetLin(inm,GmfVertices,&vertices[i].x,&vertices[i].y,&vertices[i].z,&lab);
             vertices[i].lab=lab;
             mxlab= max(mxlab,lab);
             mnlab= min(mnlab,lab);
