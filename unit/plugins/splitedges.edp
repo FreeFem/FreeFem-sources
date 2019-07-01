@@ -1,0 +1,21 @@
+include "test.idp"
+load "splitedges"
+
+cout << functionDEFINITION << "SplitEdgeMesh" << endl;
+
+real t;
+
+mesh Th=square(50,50);
+mesh Th2;
+real xx=1.1,yy=1.1;
+for(int i=0;i<4;++i)
+{
+  xx *= 0.5;
+  yy *= 0.5;
+  t = clock();
+  mesh Th2=SplitEdgeMesh(Th,x<yy && y < yy );
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}
+test(Th2.nt != Th.nt);
+test(Th2.nv != Th.nv);
