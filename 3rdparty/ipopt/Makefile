@@ -92,4 +92,4 @@ clean: clean-local
 #FH	-rm $(PACKAGE)
 
 .PHONY:$(SRCDIR)/$(INSTALL)
-.NOTPARALLEL
+.NOTPARALLEL:
