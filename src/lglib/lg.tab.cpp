@@ -332,14 +332,16 @@ void ff_atend(AtEnd f)
     AtFFEnd.push_back(f);
 }
 
+#ifndef _WIN32
 #include <csignal>
+
 void signalCPUHandler( int signum ) {
     ff_finalize();
     std::cout << "Cputime limit exceeded:  (" << signum << ") received.\n";
     
     exit(24);
 }
-
+#endif
 
 
 /* Enabling traces.  */
@@ -3541,7 +3543,9 @@ extern  bool echo_edp;
 
 int mainff (int  argc, char **argv)
 {
-  signal(SIGXCPU, signalCPUHandler);
+#ifndef _WIN32
+    signal(SIGXCPU, signalCPUHandler);
+#endif
   if(argc)
     prognamearg=argv[0];
 
