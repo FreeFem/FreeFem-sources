@@ -539,7 +539,7 @@ class IterativeMethod : public OneOperator {
                 static basicAC_F0::name_and_type name_param[];
                 Expression nargs[n_name_param];
                 const OneOperator *A, *C;
-                Expression X, B;
+                Expression B, X;
                 E_LCG(const basicAC_F0& args) {
                     args.SetNameParam(n_name_param, name_param, nargs);
                     { const Polymorphic* op = dynamic_cast<const Polymorphic*>(args[0].LeftValue());
@@ -552,8 +552,8 @@ class IterativeMethod : public OneOperator {
                     }
                     else
                         C = 0;
-                    X = to<Kn*>(args[1]);
-                    B = to<Kn*>(args[2]);
+                    B = to<Kn*>(args[1]);
+                    X = to<Kn*>(args[2]);
                 }
                 virtual AnyType operator()(Stack stack)  const {
                     int ret = -1;

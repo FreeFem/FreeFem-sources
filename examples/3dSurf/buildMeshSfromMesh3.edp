@@ -1,8 +1,8 @@
 load "msh3"
-load "medit"
+//load "medit"
 
-load "gmsh"
-load "iovtk"
+//load "gmsh"
+//load "iovtk"
 
 int n= 10;
 int nvb = (n+1)^3 - (n-1)^3;// Nb boundary vertices
@@ -18,6 +18,7 @@ assert(Th1.nbe==120);
 
 plot(Th1);
 savemesh(Th1, "Th1.mesh");
+
 meshS Th2 = readmeshS("Th1.mesh");
 
 assert(Th1.nv==Th2.nv); 

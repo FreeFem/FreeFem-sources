@@ -1102,12 +1102,12 @@ namespace Fem2D
     
     int Mesh3::Save(const string & filename) const
     {
-        int ver = GmfFloat, outm;
+        int ver = GmfDouble, outm;
         if ( !(outm = GmfOpenMesh(filename.c_str(),GmfWrite,ver,3)) ) {
             cerr <<"  -- Mesh3::Save  UNABLE TO OPEN  :"<< filename << endl;
             return(1);
         }
-        float fx,fy,fz;
+        double fx,fy,fz;
         
         // write vertices (mesh3)
         GmfSetKwd(outm,GmfVertices,this->nv);
@@ -1160,7 +1160,7 @@ namespace Fem2D
     
     int Mesh3::SaveSurface(const string & filename) const
     {
-        int ver = GmfFloat, outm;
+        int ver = GmfDouble, outm;
         if ( !(outm = GmfOpenMesh(filename.c_str(),GmfWrite,ver,3)) )
         {
             cerr <<"  -- Mesh3::Save  UNABLE TO OPEN  :"<< filename << endl;
@@ -1191,7 +1191,7 @@ namespace Fem2D
                 }
             }
             // print in file the surface vertex
-            float fx,fy,fz;
+            double fx,fy,fz;
             GmfSetKwd(outm,GmfVertices,nbv_surf);
             for (int k=0; k<nbv_surf; k++) {
                 int k0 = mapSurf2Vol[k];
@@ -1218,7 +1218,7 @@ namespace Fem2D
             int ntS = meshS->nt;
             int nbeS = meshS->nbe;
             // print in file the surface vertex
-            float fx,fy,fz;
+            double fx,fy,fz;
             GmfSetKwd(outm,GmfVertices,nvS);
             for (int k=0; k<nvS; k++) {
                 const  Vertex & P = meshS->vertices[k];
@@ -1283,7 +1283,6 @@ namespace Fem2D
             FILE *fpoints = fopen(filename1.c_str(),"w");
             fprintf(fpoints,"%i\n",nbv_surf);
             // print in filename1 the surface vertex
-            float fx,fy,fz;
             for (int k=0; k<nbv_surf; k++) {
                 int k0 = map_v_num_surf[k];
                 const  Vertex & P = this->vertices[k0];
@@ -1322,7 +1321,6 @@ namespace Fem2D
             int ntS = meshS->nt;
             int nbeS = meshS->nbe;
             // print in file the surface vertex
-            float fx,fy,fz;
             FILE *fpoints = fopen(filename1.c_str(),"w");
             fprintf(fpoints,"%i\n",nvS);
             for (int k=0; k<nvS; k++) {

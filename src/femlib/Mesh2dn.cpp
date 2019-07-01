@@ -220,12 +220,12 @@ int Mesh2::load(const string & filename)
 
 int Mesh2::Save(const string & filename)
 {
-  int ver = GmfFloat, outm;
+  int ver = GmfDouble, outm;
   if ( !(outm = GmfOpenMesh(filename.c_str(),GmfWrite,ver,2)) ) {
     cerr <<"  -- Mesh2::Save  UNABLE TO OPEN  :"<< filename << endl;
     return(1);
   }
-  float fx,fy;
+  double fx,fy;
   GmfSetKwd(outm,GmfVertices,this->nv);
   for (int k=0; k<nv; k++) {
     const  Vertex & P = this->vertices[k];

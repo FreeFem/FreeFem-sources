@@ -12,10 +12,19 @@ test -f "$change_compiler" && echo  source file "$change_compiler"
 test -f "$change_compiler" && cat  "$change_compiler"
 test -f "$change_compiler" && source "$change_compiler"
 
+if [ "$(uname)" == "Darwin" ]; then
+  # in case where the OS type is Darwin
+  PETSC_DIR='/Users/Shared/ff-petsc'
+elif [ "$(uname)" == "Linux" ]; then
+  # in case where the OS type is Linux
+PETSC_DIR='/builds/Shared/ff-petsc'
+fi
 
 # configuration & build
 autoreconf -i \
   && ./configure --enable-download --prefix=/builds/workspace/freefem \
+  --with-petsc=$PETSC_DIR/real/lib \
+  --with-petsc_complex=$PETSC_DIR/complex/lib \
   && ./3rdparty/getall -a \
   && chmod +x ./etc/jenkins/blob/build.sh && sh ./etc/jenkins/blob/build.sh
 

@@ -1184,24 +1184,26 @@ fi
 
 # ALH - 18/9/13 - deactivates FFTW detection for testing purposes
 
-AC_ARG_ENABLE(system_fftw,AC_HELP_STRING([--disable-system-fftw],[Disable the automatic detection of FFTW]))
-if test "$enable_system_fftw" != no
-then
-
-    # ALH - 4/9/13 - avoid recompiling FFTW if a copy was found on the system (request from Helmut Jarausch, 1/8/13)
-
-    AC_CHECK_LIB(fftw3,fftw_execute,ff_fftw_ok=yes)
-    AC_CHECK_HEADERS(fftw3.h,ff_fftw_h=yes, ff_fftw_h=no)
-fi
-
-if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
-then
-    AC_FF_ADDWHERELIB(fftw3,-lfftw3,)
-    fftw_download=
-else
-    if test "$enable_download" = yes
+if test "$ff_where_lib_conf_fftw3_mpi" != 1  ; then
+    AC_ARG_ENABLE(system_fftw,AC_HELP_STRING([--disable-system-fftw],[Disable the automatic detection of FFTW]))
+    if test "$enable_system_fftw" != no
     then
-	ff_DOWNLOAD_FFTW=fftw
+
+        # ALH - 4/9/13 - avoid recompiling FFTW if a copy was found on the system (request from Helmut Jarausch, 1/8/13)
+
+        AC_CHECK_LIB(fftw3,fftw_execute,ff_fftw_ok=yes)
+        AC_CHECK_HEADERS(fftw3.h,ff_fftw_h=yes, ff_fftw_h=no)
+    fi
+
+    if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
+    then
+        AC_FF_ADDWHERELIB(fftw3,-lfftw3,)
+        fftw_download=
+    else
+        if test "$enable_download" = yes
+        then
+        ff_DOWNLOAD_FFTW=fftw
+        fi
     fi
 fi
 

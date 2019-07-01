@@ -186,10 +186,10 @@ download('htool','https://github.com/PierreMarchand20/htool/archive/4af73fa94bd9
 		'fb2fdfc77c5e7b53d0bb7cab0d10fe7e');
 
 	
-download('hpddm','https://github.com/hpddm/hpddm/archive/86afc825d5b01d6df619b2724ac24d3baaf20646.zip',
+download('hpddm','https://github.com/hpddm/hpddm/archive/a3b1de84e76d966e14c1a2f37dac9d99dcc3f174.zip',
 	'https://github.com/hpddm',
 	'hpddm.zip',
-	'13649feaf2521c8768a78c51aa6af972');
+	'9fe70034892c4527057f6d7273e123ce');
 
 # run all downloads concurrently
 
@@ -236,25 +236,26 @@ sub download{
 	}
 
 	# uses [[file:../bin/build/download]]
-	push @downloads,"$url,pkg/$pkg,$md5,$opts";
+	push @downloads,"$url,$pkg,$md5,$opts";
 }
 
 sub downloadone{
-	my($url,$pkg,$md5,$opts)=split(/,/,$_[0]);
-	my $cmd="../bin/build/download $url $pkg $opts";
+	##  correct rescue server for done load
+	my($url,$pkg,$md5,$opts)=split(/,/,$_[0]);# warning just $pkg without pkg/$pkg  
+	my $cmd="../bin/build/download $url pkg/$pkg $opts";
 	print "$cmd\n";
 	system $cmd;
 	if($?){
-		print "Download failed from $url\n";
+		print "Download failed from $url of $pkg\n";
 		my $url="http://pkgs.freefem.org/$pkg";
-		my $cmd="../bin/build/download $url $pkg $opts";
+		my $cmd="../bin/build/download $url pkg/$pkg $opts";
 		print "Try other site: $url\n";
 		system $cmd;
 		if($?){
-			print "Download failed from $url\n";
-			my $url="http://104.46.50.187/$pkg";
-			my $cmd="../bin/build/download $url $pkg $opts";
-			print "Try other site: $url\n";
+			print "Download 2 times failed from $url of $pkg\n";
+			my $url="http://104.46.50.187/pkg/$pkg";
+			my $cmd="../bin/build/download $url pkg/$pkg $opts";
+			print "Try (2 times)  other site: $url\n";
 			system $cmd;
 			if ($?){
 				$errors.="ERROR: $cmd FAILED\n"

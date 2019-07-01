@@ -43,7 +43,7 @@ then
     ret=$?
 elif test -x /usr/bin/curl
 then
-    curl -L "$1" --output "$2"
+    curl -L "$1" --output "$2" --connect-timeout 30
     ret=$?
 
 elif test -x /usr/bin/GET
