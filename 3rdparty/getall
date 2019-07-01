@@ -263,6 +263,6 @@ sub downloadone{
 		}
 	}
 	# check if resulting package contents are valid
-	my $md5check=md5_hex(`cat $pkg`);
+	my $md5check=md5_hex(`cat pkg/$pkg`);
 	if( ( $md5 ne "none") && ($md5check ne $md5)){$errors.="ERROR: INVALID MD5 for $pkg  $md5check\n"}
 }
