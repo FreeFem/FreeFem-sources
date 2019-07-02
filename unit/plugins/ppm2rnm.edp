@@ -1,0 +1,28 @@
+include "test.idp"
+load "ppm2rnm"
+
+cout << functionDEFINITION << "ppm2rnm" << endl;
+
+// Paremeters
+string figName = "plugins/fig.pgm";
+real t;
+
+// Read PPM
+t = clock();
+real[int, int] img1(figName);
+cout << timeELAPSED << t - clock() << endl;
+
+// Read PPM
+t = clock();
+real[int, int] img2 = readPPM(figName);
+cout << timeELAPSED << t - clock() << endl;
+
+// Save PPM
+t = clock();
+bool res = savePPM("figout.ppm", img2);
+cout << timeELAPSED << t - clock() << endl;
+
+// Diff PPM
+t = clock();
+real[int, int] imgDiff = diffPPM(img1, img2);
+cout << timeELAPSED << t - clock() << endl;
