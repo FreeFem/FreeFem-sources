@@ -1,0 +1,55 @@
+include "test.idp"
+load "msh3"
+
+cout << functionDEFINITION << "movemesh3" << endl;
+
+real t;
+
+int savex = x;
+int savey = y;
+int savez = z;
+int[int] refx=[0,1];  //  bas
+mesh3 Th3 = cube(10, 10, 10);
+t = clock();
+mesh3 MovedTh3 = movemesh3(Th3);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(x != savex && y != savey && z != savez);
+
+cout << functionDEFINITION << "deplacement" << endl;
+
+mesh3 Th3D = cube(15, 15, 15);
+real[int] deltx(Th3D.nv);
+real[int] delty(Th3D.nv);
+real[int] deltz(Th3D.nv);
+real ptm = 1e-5;
+
+savex = x;
+savey = y;
+savez = z;
+deltx = 0;
+delty = 0;
+deltz = 0;
+mesh3 depMesh = deplacement(Th3D, deltax = deltx, deltay = delty, deltaz = deltz,
+   ptmerge=ptm, facemerge=1, boolsurface=true);
+test(x != savex && y != savey && z != savez);
+
+cout << functionDEFINITION << "checkbemesh" << endl;
+
+{
+  mesh3 Th3 = cube (5, 5, 5);
+  Th3 = buildSurface(Th3); // build the surface mesh;
+  meshS ThS3 = Th3.Gamma;
+  int checked = checkbemesh(ThS3, manifolds=[[[11,1],[12,1],[13,1],[14,1],[15,1],[16,1]]]);
+  test(checked == 1);
+}
+
+cout << functionDEFINITION << "buildlayers" << endl;
+{
+  mesh Th = square(5, 5);
+  int i = 1;
+  mesh3 Th3 = cube (5, 5, 5);
+  // Th3 = buildSurface(Th3); // build the surface mesh;
+  meshS ThS3 = Th3.Gamma;
+  mesh res = buildlayers(Th3, i);
+}
