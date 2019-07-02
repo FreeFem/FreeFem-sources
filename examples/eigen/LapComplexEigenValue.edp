@@ -21,7 +21,7 @@ varf  a(u1,u2)= int2d(Th)(  nu*(dx(u1)*dx(u2) + dy(u1)*dy(u2))   )
 varf b([u1],[u2]) = int2d(Th)(  u1*u2 ) ;//+  on(1,2,3,4,u1=0);
 
 
-matrix<complex> OP= op(Vh,Vh,solver=UMFPACK); 
+matrix<complex> OP= op(Vh,Vh,solver="SPARSESOLVER"); 
 matrix<complex> A= a(Vh,Vh,solver=GMRES); 
 matrix<complex> B= b(Vh,Vh,solver=GMRES,eps=1e-20); 
 int nev=10;

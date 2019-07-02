@@ -4,7 +4,7 @@ otool -L  ./src/mpi/FreeFem++-mpi src/nw/FreeFem++ ./src/nw/ffglut ./src/medit/f
 for i in  0 1 2 3 4 5 ; do
     ((i1=i+1))
     
-    ( for f in `cat /tmp/l-ff++$i`; do
+    ( for f in `sed 's:@rpath/::' < /tmp/l-ff++$i`; do
 	    if [ -f $f ] ; then 
 		echo $f
 	    else

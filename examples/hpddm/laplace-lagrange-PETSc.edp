@@ -31,14 +31,12 @@ matrix<real> Loc = vPb(Wh, Wh);
 real[int] F = vL(0, Wh);
 real[int] B = vb(0, Wh);
 real[int] pB, pF, pSol;
-real[int] zero(mpirank == 0 ? 1 : 0);
-zero = 0;
 Mat A(Loc, intersection, D);
 changeNumbering(A, B, pB);
 changeNumbering(A, F, pF);
 
 Mat AA = [[ A, pB ],
-          [ pB', zero ]];
+          [ pB', 0 ]];
 if(mpirank == 0) {
     pF.resize(pF.n + 1);
     pF = [pF(0:pF.n - 2), 0];

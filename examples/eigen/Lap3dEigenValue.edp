@@ -33,7 +33,7 @@ macro Grad(u) [dx(u),dy(u),dz(u)] // EOM
                    
 varf b([u1],[u2]) = int3d(Th)(  u1*u2 ) ; // no  Boundary condition
 
-matrix A= a(Vh,Vh,solver=UMFPACK); 
+matrix A= a(Vh,Vh,solver="SPARSESOLVER"); 
 cout << " fin A .. " << endl;
 matrix B= b(Vh,Vh,solver=CG,eps=1e-20); 
 

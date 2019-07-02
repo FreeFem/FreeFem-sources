@@ -88,7 +88,7 @@ Wh<real> def(u);          // local solution
 if(mpisize == mpiSize(comm))
     u[] = A^-1 * rhs;
 else
-    DDM(A, u[], rhs, excluded = excluded);
+    DDM(A, rhs, u[], excluded = excluded);
 
 if(!excluded)
     originalNumbering(A, u[], interfaceNb);

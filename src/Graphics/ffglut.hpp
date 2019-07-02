@@ -208,9 +208,11 @@ struct OnePlotFES: public OnePlot
 
 struct OnePlotCurve: public OnePlot {
     KN<double> xx,yy,zz,cc;
+    int cas;
     OnePlotCurve(PlotStream & f,int nfield=2,ThePlot *theplot=0);
     void Draw(OneWindow *win);
     void  dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn2,R & vmx2) const;
+     bool  NextCase() { cas++; return false;}
 };
 
 struct OnePlotBorder: public OnePlot {

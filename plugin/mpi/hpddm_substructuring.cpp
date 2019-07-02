@@ -403,12 +403,12 @@ template<class Type, class K>
 class solveDDM_Op : public E_F0mps {
     public:
         Expression A;
-        Expression x;
         Expression rhs;
-        static const int n_name_param = 5;
+        Expression x;
+        static const int n_name_param = 3;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
-        solveDDM_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : A(param1), x(param2), rhs(param3) {
+        solveDDM_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : A(param1), rhs(param2), x(param3) {
             args.SetNameParam(n_name_param, name_param, nargs);
         }
 
@@ -416,8 +416,6 @@ class solveDDM_Op : public E_F0mps {
 };
 template<class Type, class K>
 basicAC_F0::name_and_type solveDDM_Op<Type, K>::name_param[] = {
-    {"eps", &typeid(HPDDM::underlying_type<K>)},
-    {"iter", &typeid(long)},
     {"timing", &typeid(KN<double>*)},
     {"excluded", &typeid(bool)},
     {"ret", &typeid(Pair<K>*)}
@@ -433,22 +431,14 @@ class solveDDM : public OneOperator {
 };
 template<class Type, class K>
 AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
-    KN<K>* ptX = GetAny<KN<K>*>((*x)(stack));
     KN<K>* ptRHS = GetAny<KN<K>*>((*rhs)(stack));
+    KN<K>* ptX = GetAny<KN<K>*>((*x)(stack));
     Type* ptA = GetAny<Type*>((*A)(stack));
     if(ptX->n != ptRHS->n)
         return 0L;
     HPDDM::Option& opt = *HPDDM::Option::get();
-    HPDDM::underlying_type<K> eps = nargs[0] ? GetAny<HPDDM::underlying_type<K>>((*nargs[0])(stack)) : -1.0;
-    if(nargs[0])
-        std::cerr << "Please do not use the legacy option \"-eps\", set instead \"-hpddm_tol\", cf. \"-hpddm_help\"" << std::endl;
-    if(std::abs(eps + 1.0) > 1.0e-6)
-        opt["tol"] = eps;
-    int iter = nargs[1] ? GetAny<long>((*nargs[1])(stack)) : -1;
-    if(iter != -1)
-        opt["max_it"] = iter;
-    KN<double>* timing = nargs[2] ? GetAny<KN<double>*>((*nargs[2])(stack)) : 0;
-    bool excluded = nargs[3] && GetAny<bool>((*nargs[3])(stack));
+    KN<double>* timing = nargs[0] ? GetAny<KN<double>*>((*nargs[0])(stack)) : 0;
+    bool excluded = nargs[1] && GetAny<bool>((*nargs[1])(stack));
     if(excluded)
         opt["level_2_exclude"];
     double timer = MPI_Wtime();

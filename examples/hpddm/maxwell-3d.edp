@@ -91,7 +91,7 @@ if(solver == 1 || solver == 2 || solver == 4) { // optimized Schwarz methods
         + on(Dirichlet, Ex=0, Ey=0, Ez=0);
     Opt = vPbOpt(Wh, Wh);
 }
-DDM(A, nEx, rhs, O = Opt);
+DDM(A, rhs, nEx, O = Opt);
 Wh<complex> def(sol);
 sol[] = nEx;
 medit("Global solution", Th, [real(sol), real(soly), real(solz)]);

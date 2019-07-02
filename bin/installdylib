@@ -6,13 +6,13 @@ esac
 echo DESTDIR=$DESTDIR
 cd `dirname $0`
 cd ..
-grep ' = ' Makefile| grep ff_prefix_dir| sed 's/ = /=/' >prefix-list.sh
-source prefix-list.sh
+grep ' = ' Makefile| grep ff_prefix_dir| sed 's/ = /=/' >/tmp/prefix-list.sh
+source /tmp/prefix-list.sh
 pwd=`pwd`
 pwd3lib="$pwd/3rdparty/lib"
 #echo $pwd
 #echo $pwd3lib
-for lib in $ff_prefix_dir_lib/*.dylib; do
+for lib in $DESTDIR/$ff_prefix_dir_lib/*.dylib $DESTDIR/$ff_prefix_dir_lib_mpi/*dylib ; do
   echo -- $lib 
   dirlib=`dirname $lib`
   ooo=/tmp/otool-`basename $lib`

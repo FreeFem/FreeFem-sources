@@ -13,7 +13,7 @@ load "Element_P3dc"
    - int2d(Th)( f*vh )                          //  linear form
    + on(1,2,3,4,uh=g) ;                      //  boundary condition form
   ;
-  matrix A = vLap(Vh,Vh,solver=UMFPACK);
+  matrix A = vLap(Vh,Vh,solver="SPARSESOLVER");
   real[int] b= vLap(0,Vh);
   //cout << A << endl;
   uh[]=A^-1*b ;// solve the problem plot(uh); // to see the result

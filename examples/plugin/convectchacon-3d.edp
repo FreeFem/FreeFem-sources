@@ -10,7 +10,7 @@ Vh wh=0,Bwh;
 real dt = 0.001,t=0, tmax=3.14;
 int kk=0;
 varf aa(v,vh) = int3d(th)(v*vh/dt) ;
-matrix  AA= aa(Vh,Vh,solver=UMFPACK);
+matrix  AA= aa(Vh,Vh,solver="SPARSESOLVER");
 
 problem  A(v,vh) = int3d(th)(v*vh/dt)   - int3d(th)(vo*vh/dt) + rhs[];
 

@@ -70,8 +70,10 @@ CONDITIONAL_PETSC = bratu-2d-PETSc.edp \
 	Newton-vi-2d-PETSc.edp \
 	Newton-vi-adaptmesh-2d-PETSc.edp \
 	PETSc-block.edp \
+	laplace-RT-2d-PETSc.edp \
 	stokes-2d-PETSc.edp \
 	stokes-2d-PETSc-fieldsplit.edp \
+	stokes-2d-block-PETSc.edp \
 	stokes-3d-PETSc.edp \
 	stokes-3d-PETSc-fieldsplit.edp \
 	transpose-solve-PETSc.edp \

@@ -125,9 +125,12 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 		--prefix=$(DIR_INSTALL_REAL) \
 		--with-debugging=no \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
-		COPTFLAGS='-O3 -march=native -mtune=native' \
-		CXXOPTFLAGS='-O3 -march=native -mtune=native' \
-		FOPTFLAGS='-O3 -march=native -mtune=native' \
+		COPTFLAGS='-O3  -mtune=native' \
+		CXXOPTFLAGS='-O3  -mtune=native' \
+		FOPTFLAGS='-O3  -mtune=native' \
+		CFLAGS=' -mtune=native' \
+		CXXFLAGS='-mtune=native' \
+		FFLAGS='-mtune=native' \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 		--with-scalar-type=real $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
@@ -150,6 +153,9 @@ $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 		COPTFLAGS='-O3 -march=native -mtune=native' \
 		CXXOPTFLAGS='-O3 -march=native -mtune=native' \
 		FOPTFLAGS='-O3 -march=native -mtune=native' \
+		CFLAGS=' -mtune=native' \
+		CXXFLAGS='-mtune=native' \
+		FFLAGS='-mtune=native' \
 		--with-scalar-type=complex \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \

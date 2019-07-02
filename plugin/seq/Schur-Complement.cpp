@@ -56,20 +56,23 @@ typedef void VOID;
 // KN<long>*CloseTo (Stack stack, double const &eps, KNM<double> *const &p, KNM<double> *const &q) {
 
 template<class R>
-long  ff_ShurComplement(Stack stack,KNM<R> *  pS,Matrice_Creuse<R> *  pmcA,KN_<long> const &  I,Data_Sparse_Solver &ds,KNM<R> *  pV=0   );
+long  ff_SchurComplement(Stack stack,KNM<R> *  pS,Matrice_Creuse<R> *  pmcA,KN_<long> const &  I,Data_Sparse_Solver &ds,KNM<R> *  pV=0   );
 
 template<class R>
-class ShurComplement_OP : public E_F0mps { public:
+class SchurComplement_OP : public E_F0mps { public:
     Expression ess,eaa,eii,epV;
     
     static  aType btype;
-    static const int n_name_param =NB_NAME_PARM_MAT; //  add nbiter FH 30/01/2007 11 -> 12  //add var MUMPS+autre
+    static const int n_name_param =NB_NAME_PARM_MAT ;// +1; //  add nbiter FH 30/01/2007 11 -> 12  //add var MUMPS+autre
     static basicAC_F0::name_and_type name_param[] ;
     Expression nargs[n_name_param];
     const OneOperator * precon;
     
 public:
-    ShurComplement_OP(const basicAC_F0 &  args,Expression s,Expression a,Expression i,Expression ev=0) : ess(s),eaa(a),eii(i),epV(ev)  {
+    template<class T>
+    T arg (int i, Stack stack, const T &a) const { return nargs[i] ? GetAny<T>((*nargs[i])(stack)) : a; }
+    
+    SchurComplement_OP(const basicAC_F0 &  args,Expression s,Expression a,Expression i,Expression ev=0) : ess(s),eaa(a),eii(i),epV(ev)  {
         args.SetNameParam(n_name_param,name_param,nargs);
         precon = 0; //  a changer
         if ( nargs[3])
@@ -84,29 +87,31 @@ public:
 };
 
 template<class R>
-class ShurComplement : public OneOperator { public:  
+class SchurComplement : public OneOperator { public:
     int cas;
-    ShurComplement() : OneOperator(atype<long>(),atype<KNM<R> *>(),atype<Matrice_Creuse<R> *>(),atype<KN<long> *>() ) ,  cas(0) {}
-    ShurComplement(int ) : OneOperator(atype<long>(),atype<KNM<R> *>(),atype<Matrice_Creuse<R> *>(),atype<KN<long> *, atype<KNM<R> *>()>() ) ,  cas(1){}
+    SchurComplement() : OneOperator(atype<long>(),atype<KNM<R> *>(),atype<Matrice_Creuse<R> *>(),atype<KN<long> *>() ) ,  cas(0) {}
+    SchurComplement(int ) : OneOperator(atype<long>(),atype<KNM<R> *>(),atype<Matrice_Creuse<R> *>(),atype<KN<long> *>(), atype<KNM<R> *>() ) ,  cas(1){}
 
     E_F0 * code(const basicAC_F0 & args) const
     {
         if(cas==0)
-        return  new ShurComplement_OP<R>(args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]));
+        return  new SchurComplement_OP<R>(args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]));
         else
-        return  new ShurComplement_OP<R>(args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]),t[3]->CastTo(args[3]));
+        return  new SchurComplement_OP<R>(args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]),t[3]->CastTo(args[3]));
 
     }
 };
 
 template <class R> 
-basicAC_F0::name_and_type  ShurComplement_OP<R>::name_param[]= {
+basicAC_F0::name_and_type  SchurComplement_OP<R>::name_param[]= {
     LIST_NAME_PARM_MAT
+ //   ,
+ //   {"inv", &typeid(bool)}
     
 };
 
 template<class R>
-AnyType ShurComplement_OP<R>::operator()(Stack stack)  const
+AnyType SchurComplement_OP<R>::operator()(Stack stack)  const
 {
     Matrice_Creuse<R> *  pA= GetAny<Matrice_Creuse<R> *>((*eaa)(stack));
     KNM<R> *  pE= GetAny<KNM<R> *>((*ess)(stack));
@@ -116,12 +121,14 @@ AnyType ShurComplement_OP<R>::operator()(Stack stack)  const
     Data_Sparse_Solver ds;
     ds.factorize=0;
     SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
-    return ff_ShurComplement(stack,pE,pA,*pII,ds,pV);
+   // bool inv = arg(NB_NAME_PARM_MAT,stack,false);  not used ..
+    
+    return ff_SchurComplement(stack,pE,pA,*pII,ds,pV);
 }
 template<class R>
-long  ff_ShurComplement(Stack stack,KNM<R> *  pS,Matrice_Creuse<R> *  pmcA,KN_<long> const &  I,Data_Sparse_Solver &ds,KNM<R> *  pV   )
+long  ff_SchurComplement(Stack stack,KNM<R> *  pS,Matrice_Creuse<R> *  pmcA,KN_<long> const &  I,Data_Sparse_Solver &ds,KNM<R> *  pV   )
 {
-    // I given numbering of Shur complement I[i] is the index in A of the i in S
+    // I given numbering of Schur complement I[i] is the index in A of the i in S
     R zero(0.);
     KNM<R>   & S= *pS;
     MatriceCreuse<R> * pa=pmcA->A;
@@ -129,22 +136,71 @@ long  ff_ShurComplement(Stack stack,KNM<R> *  pS,Matrice_Creuse<R> *  pmcA,KN_<l
     MatriceMorse<R> *pA= dynamic_cast<MatriceMorse<R>* > (pa);
     ffassert(pA);
     MatriceMorse<R> & A=*pA;
-    int ni = I.N();
+    int Ni = I.N(),ni=0;
+    //  ni = # Imag(I)
     int n=pA->n,m=pA->m;
     ffassert( n == m);
-    S.resize(ni,ni);
-    if(pV) pV->resize(n,ni); //
-    S=zero;
-    ffassert( n>ni);
     KN<long> mark(n,-1L);
-    for(int i=0; i< ni; ++i)
-        mark[I[i]]=i;
+    int err=0;
+    if( Ni == n) //
+    {
+        long imx = I.max(),nn=0;
+        
+        ffassert( imx < n);
+        KN<long> mi(imx+1,1);
+             for(int i=0; i< n; ++i)
+            {
+                int Ii=I[i];
+                if (Ii>=0)
+                {
+                    nn+=mi[Ii] ; // count number of item  Ii
+                    mi[Ii] = 0;  // to count only once
+                    mark[i]=Ii;
+                }
+            }
+        
+        if ( nn != imx+1 ) cerr << " Error SchurComplement  the positive full numbering is not surjective "<< nn << " <> " << imx+1 << endl;
+        ffassert( nn == imx+1);
+        ni = nn;
+        if(verbosity)  cout << " SchurComplement with full non negative full shur complement numbering "<< endl
+            << "        size of compl.  "<< ni << " < size of mat. " << n << endl;
+
+    }
+    else {
+        ni = Ni;
+        if(verbosity)  cout << " SchurComplement with just the shur complement numbering (injection)" << endl
+            << "        size of compl.  "<< ni << " < size of mat. " << n << endl;
+            for(int i=0; i< Ni; ++i)
+            {
+                int Ii=I[i];
+                ffassert(Ii>=0 && Ii <n);
+                if(mark[Ii]>=0) err++; // not injection
+                mark[Ii]=i;
+            }
+    }
+    // build numbering of no in shur complement .. -2 - number
+    if( err) {
+        if( Ni != n)  cerr  << " SchurComplement get all numbering i -> j  if i in [0,n[ if  I[i]>=0  j=I[i] " << Ni << " == " << n << endl;
+        else cerr  << " SchurComplement get all numbering  i -> j  if i in [0,ni[ , j = I[i]   " <<endl;
+        cerr << " Fatal Error  in SchurComplement def numbering : nb err= "<< err << endl;
+        
+     ffassert(err==0);
+    }
     int nj=0;
     for(int i=0; i<n;++i)
         if (mark[i] <0 ) mark[i] = -2 - nj++;
-    KN<int> J(nj);
-    for(int i=0; i<n;++i)
-    if (mark[i] <0 ) J[-mark[i]+2]= i;
+    
+     S.resize(ni,ni);
+    if(pV) pV->resize(n,ni); //
+    S=zero;
+    ffassert( n>ni);
+    if( ni + nj < n  && verbosity>2 )
+        cout << "       - warning the SchurComplement numbering is not injectif !"
+             <<  ni<< " +" << nj << " ==" <<ni + nj << " < "<<  n << endl;
+    ffassert(ni>0 && nj >0);
+//    KN<int> J(nj);
+//    for(int i=0; i<n;++i)
+//    if (mark[i] <-1) J[-mark[i]-2]= i;
     // I, J partionne in 2 set ..
     // the 4 matrix
     MatriceMorse<R> AII(ni,ni),AIJ(ni,nj), AJI(nj,ni), AJJ(nj,nj);
@@ -202,13 +258,13 @@ long  ff_ShurComplement(Stack stack,KNM<R> *  pS,Matrice_Creuse<R> *  pmcA,KN_<l
     KN<R> rJ(nj),sJ(nj),sI(ni);
     AJI.CSC(); // column priority
     AII.CSC(); // column priority
-    long err=0;
+  
     for( int k=0; k<ni; ++k) // for each col
     {
         rJ=zero;
         
         for (int l = AJI.p[k]; l <AJI.p[k+1];++l)
-            rJ[AJI.i[l]]= AIJ.aij[l], err+= AJI.j[l]!=k;
+            rJ[AJI.i[l]] += AJI.aij[l], err+= AJI.j[l]!=k;
         AJJ.solve(sJ,rJ);
         if(pV)
         {
@@ -217,7 +273,7 @@ long  ff_ShurComplement(Stack stack,KNM<R> *  pS,Matrice_Creuse<R> *  pmcA,KN_<l
                int mi= mark[i];
               int ki = mi <0 ? -mi-2 : -1;
               if( mi < 0)
-                  (*pV)(i,k) = sJ[ki];
+                  (*pV)(i,k) = -sJ[ki];
               else
                   (*pV)(i,k) = R(k==mi);
             }
@@ -255,9 +311,11 @@ long copy_mat(KNM<R> *  pS,Matrice_Creuse<R> *  pmcA)
    return 1;
 }
 static void Load_Init () {
-    cout << " load: init ShurComplement " << endl;
-    Global.Add("ShurComplement", "(", new ShurComplement<R>);
-    Global.Add("ShurComplement", "(", new ShurComplement<Complex>);
+    cout << " load: init SchurComplement " << endl;
+    Global.Add("SchurComplement", "(", new SchurComplement<R>);
+    Global.Add("SchurComplement", "(", new SchurComplement<Complex>);
+    Global.Add("SchurComplement", "(", new SchurComplement<R>(1));
+    Global.Add("SchurComplement", "(", new SchurComplement<Complex>(1));
     Global.Add("copy","(", new OneOperator2<long, KNM<R> *,Matrice_Creuse<R> *  >(copy_mat));
     Global.Add("copy","(", new OneOperator2<long, KNM<Complex> *,Matrice_Creuse<Complex> *  >(copy_mat));
 

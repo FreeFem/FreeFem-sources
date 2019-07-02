@@ -37,7 +37,7 @@ func f=1;
 func g=0;
 Vh u,v;
 Xh uu,vv;
-problem A(u,v,solver=UMFPACK) = Ans 
+problem A(u,v,solver="SPARSESOLVER") = Ans 
 - int2d(Th)(f*v) 
 - int1d(Th)(g*dn(v)  + pena*g*v) 
 ;

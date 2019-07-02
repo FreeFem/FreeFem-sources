@@ -39,7 +39,7 @@ varf vNS([u1,u2,p],[v1,v2,q]) =
   + on(1,2,4,u1=0,u2=0) ;
 
 
-solve NS ([u1,u2,p],[v1,v2,q],solver=UMFPACK,init=i,save="toto") =   vNS; 
+solve NS ([u1,u2,p],[v1,v2,q],solver="SPARSESOLVER",init=i,save="toto") =   vNS; 
 
      cout << "-- n " << p[].n << " stokes " << endl;
      cout << "-- u1 : " << u1[].min << " " << u1[].max << endl;
@@ -63,12 +63,12 @@ for (iter=1;iter<=nbiter;iter++)
     {
       up1=u1;
       up2=u2;     
-      matrix A=vNS(Wh,Wh,solver=UMFPACK);
-      //     set(A,solver=UMFPACK); // set a solver 	
+      matrix A=vNS(Wh,Wh,solver="SPARSESOLVER");
+      //     set(A,solver="SPARSESOLVER"); // set a solver 	
       verbosity=3;
       if(classique) {
 	//NS;
-	solve NS1 ([uu1,uu2,pp],[vv1,vv2,qq],solver=UMFPACK,init=i,save="toto") =   vNS; 	
+	solve NS1 ([uu1,uu2,pp],[vv1,vv2,qq],solver="SPARSESOLVER",init=i,save="toto") =   vNS; 	
       }
       else {
 		  [f1,f2,fp]=[0,0,0];

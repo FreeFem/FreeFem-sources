@@ -32,6 +32,9 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - replaced custom implementations (`RNM::real`, `RNM::norm2`, and `Fem2D::norm`) by C++11 functions
 - API of the macro `plotMPI`
+- switched to inexact coarse operators in HPDDM by default
+- RHS and solution vectors permuted in `IterativeMethod` and `DDM`
+- `.mesh` are now saved using version 2 (which stores floating-point scalars in double precision)
 
 ### Removed
 - legacy linear solver interfaces using the old matrix type
@@ -48,7 +51,7 @@ All notable changes to this project will be documented in this file.
 - check selectivity during `make check`, depending on available 3rd party librairies
 - new CI/CD tools for `develop` branch
 - new gestion of mesh3 - meshS coupling
-- square3, buildSurface, ... operators for meshS
+- square3, buildSurface... operators for meshS
 
 ### Changed
 - SLEPc is now directly downloaded by PETSc with `--download-slepc`
@@ -114,7 +117,7 @@ All notable changes to this project will be documented in this file.
 - Add missing file `curvature.edp`
 - Add `imax`, `jmax`, `imin`, `jmin` to get index of row or column of the min or max coefficient<br/>
   We have: `A(A.imin,A.jmin) = A.min`
-- Add cosmetics in macro (macro name, macro line, ...)
+- Add cosmetics in macro (macro name, macro line...)
 
 ### Changed
 - Pass to PETSc/SLEPc version 3.8.4/3.8.3

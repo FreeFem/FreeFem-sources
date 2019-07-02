@@ -120,8 +120,88 @@ void globalMapping(HpddmType* const& A, unsigned int*& num, unsigned int& start,
 }
 template<class HpddmType, typename std::enable_if<!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value>::type* = nullptr>
 void globalMapping(HpddmType* const& A, unsigned int* const& num, unsigned int& start, unsigned int& end, unsigned int& global, unsigned int* const list) { }
-template<class Type>
-void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* const& names, KN<Matrice_Creuse<PetscScalar>>* const& mT, KN<double>* const& pL) {
+template<class Type, class Tab, typename std::enable_if<!std::is_same<Tab, PETSc::DistributedCSR<HpSchwarz<PetscScalar>>>::value>::type* = nullptr>
+void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
+    int *is, *js;
+    PetscScalar *s;
+    unsigned int* re = new unsigned int[pL->n];
+    unsigned int nbSchur = 1;
+    for(int i = 0; i < pL->n; ++i)
+        re[i] = std::abs((*pL)[i]) > 1.0e-12 ? nbSchur++ : 0;
+    nbSchur--;
+    unsigned int* num;
+    unsigned int start, end, global;
+    ptA->_A->clearBuffer();
+    globalMapping(ptA->_A, num, start, end, global, re);
+    delete [] re;
+    re = new unsigned int[2 * nbSchur];
+    unsigned int* numSchur = re + nbSchur;
+    for(int i = 0, j = 0; i < pL->n; ++i) {
+        if(std::abs((*pL)[i]) > 1.0e-12) {
+            *numSchur++ = num[i];
+            re[std::lround((*pL)[i]) - 1] = j++;
+        }
+    }
+    numSchur -= nbSchur;
+    delete [] num;
+    for(int k = 0; k < mT->n; ++k) {
+        MatriceMorse<PetscScalar>* mS = (mT->operator[](k)).A ? static_cast<MatriceMorse<PetscScalar>*>(&(*(mT->operator[](k)).A)) : nullptr;
+        int n = mS ? mS->n : 0;
+        std::vector<std::vector<std::pair<int, PetscScalar>>> tmp(n);
+        if(mS)
+            mS->CSR();
+        int nnz = mS ? mS->nnz : 0;
+        for(int i = 0; i < n; ++i) {
+            unsigned int row = re[i];
+            tmp[row].reserve(mS->p[i + 1] - mS->p[i]);
+            for(int j = mS->p[i]; j < mS->p[i + 1]; ++j)
+                tmp[row].emplace_back(re[mS->j[j]], mS->aij[j]);
+            std::sort(tmp[row].begin(), tmp[row].end(), [](const std::pair<int, PetscScalar>& lhs, const std::pair<int, PetscScalar>& rhs) { return lhs.first < rhs.first; });
+        }
+        is = new int[n + 1];
+        js = new int[nnz];
+        s = new PetscScalar[nnz];
+        is[0] = 0;
+        for(int i = 0; i < n; ++i) {
+            for(int j = 0; j < tmp[i].size(); ++j) {
+                *js++ = tmp[i][j].first;
+                *s++ = tmp[i][j].second;
+            }
+            is[i + 1] = is[i] + tmp[i].size();
+        }
+        js -= nnz;
+        s -= nnz;
+        int* ia, *ja;
+        PetscScalar* c;
+        ia = ja = nullptr;
+        c = nullptr;
+        HPDDM::MatrixCSR<PetscScalar>* dN = new_HPDDM_MatrixCSR<PetscScalar>(mS,true,s,is,js);//->n, mS->m, mS->nbcoef, s, is, js, mS->symetrique, true);
+        bool free = dN ? ptA->_A->HPDDM::template Subdomain<PetscScalar>::distributedCSR(numSchur, start, end, ia, ja, c, dN) : false;
+        MatCreate(PETSC_COMM_WORLD, &(*ptA->_vS)[k]);
+        MatSetSizes((*ptA->_vS)[k], end - start, end - start, global, global);
+        MatSetType((*ptA->_vS)[k], MATMPIAIJ);
+        MatMPIAIJSetPreallocationCSR((*ptA->_vS)[k], reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
+        MatSetOption((*ptA->_vS)[k], MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
+        if(free) {
+            delete [] ia;
+            delete [] ja;
+            delete [] c;
+        }
+        delete dN;
+    }
+    delete [] re;
+    ptA->_A->setBuffer();
+}
+template<class Type, class Tab, typename std::enable_if<std::is_same<Tab, PETSc::DistributedCSR<HpSchwarz<PetscScalar>>>::value>::type* = nullptr>
+void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
+    assert(pL == nullptr);
+    for(int k = 0; k < mT->n; ++k) {
+        (*ptA->_vS)[k] = mT->operator[](k)._petsc;
+        PetscObjectReference((PetscObject)mT->operator[](k)._petsc);
+    }
+}
+template<class Type, class Tab>
+void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* const& names, KN<Tab>* const& mT, KN<double>* const& pL = nullptr) {
     if(fields) {
         PC pc;
         KSPGetPC(ksp, &pc);
@@ -174,29 +254,7 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
             PCFieldSplitSetIS(pc, names && j < names->size() ? (*(names->operator[](j))).c_str() : NULL, is);
             ISDestroy(&is);
         }
-        if(mT && mT->n > 0 && pL) {
-            int *is, *js;
-            PetscScalar *s;
-            unsigned int* re = new unsigned int[pL->n];
-            unsigned int nbSchur = 1;
-            for(int i = 0; i < pL->n; ++i)
-                re[i] = std::abs((*pL)[i]) > 1.0e-12 ? nbSchur++ : 0;
-            nbSchur--;
-            unsigned int* num;
-            unsigned int start, end, global;
-            ptA->_A->clearBuffer();
-            globalMapping(ptA->_A, num, start, end, global, re);
-            delete [] re;
-            re = new unsigned int[2 * nbSchur];
-            unsigned int* numSchur = re + nbSchur;
-            for(int i = 0, j = 0; i < pL->n; ++i) {
-                if(std::abs((*pL)[i]) > 1.0e-12) {
-                    *numSchur++ = num[i];
-                    re[std::lround((*pL)[i]) - 1] = j++;
-                }
-            }
-            numSchur -= nbSchur;
-            delete [] num;
+        if(mT && mT->n > 0 && (pL || std::is_same<Tab, PETSc::DistributedCSR<HpSchwarz<PetscScalar>>>::value)) {
             if(ptA->_vS) {
                 for(int i = 0; i < ptA->_vS->size(); ++i)
                     MatDestroy(&(*ptA->_vS)[i]);
@@ -205,53 +263,7 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
             }
             ptA->_vS = new std::vector<Mat>();
             ptA->_vS->resize(mT->n);
-            for(int k = 0; k < mT->n; ++k) {
-                MatriceMorse<PetscScalar>* mS = (mT->operator[](k)).A ? static_cast<MatriceMorse<PetscScalar>*>(&(*(mT->operator[](k)).A)) : nullptr;
-                int n = mS ? mS->n : 0;
-                std::vector<std::vector<std::pair<int, PetscScalar>>> tmp(n);
-                if(mS)
-                    mS->CSR();
-                int nnz = mS ? mS->nnz : 0;
-                for(int i = 0; i < n; ++i) {
-                    unsigned int row = re[i];
-                    tmp[row].reserve(mS->p[i + 1] - mS->p[i]);
-                    for(int j = mS->p[i]; j < mS->p[i + 1]; ++j)
-                        tmp[row].emplace_back(re[mS->j[j]], mS->aij[j]);
-                    std::sort(tmp[row].begin(), tmp[row].end(), [](const std::pair<int, PetscScalar>& lhs, const std::pair<int, PetscScalar>& rhs) { return lhs.first < rhs.first; });
-                }
-                is = new int[n + 1];
-                js = new int[nnz];
-                s = new PetscScalar[nnz];
-                is[0] = 0;
-                for(int i = 0; i < n; ++i) {
-                    for(int j = 0; j < tmp[i].size(); ++j) {
-                        *js++ = tmp[i][j].first;
-                        *s++ = tmp[i][j].second;
-                    }
-                    is[i + 1] = is[i] + tmp[i].size();
-                }
-                js -= nnz;
-                s -= nnz;
-                int* ia, *ja;
-                PetscScalar* c;
-                ia = ja = nullptr;
-                c = nullptr;
-                HPDDM::MatrixCSR<PetscScalar>* dN = new_HPDDM_MatrixCSR<PetscScalar>(mS,true,s,is,js);//->n, mS->m, mS->nbcoef, s, is, js, mS->symetrique, true);
-                bool free = dN ? ptA->_A->HPDDM::template Subdomain<PetscScalar>::distributedCSR(numSchur, start, end, ia, ja, c, dN) : false;
-                MatCreate(PETSC_COMM_WORLD, &(*ptA->_vS)[k]);
-                MatSetSizes((*ptA->_vS)[k], end - start, end - start, global, global);
-                MatSetType((*ptA->_vS)[k], MATMPIAIJ);
-                MatMPIAIJSetPreallocationCSR((*ptA->_vS)[k], reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
-                MatSetOption((*ptA->_vS)[k], MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
-                if(free) {
-                    delete [] ia;
-                    delete [] ja;
-                    delete [] c;
-                }
-                delete dN;
-            }
-            delete [] re;
-            ptA->_A->setBuffer();
+            setVectorSchur(ptA, mT, pL);
         }
         delete [] idx;
         delete [] counts;
@@ -274,7 +286,7 @@ void setCompositePC(PC pc, const std::vector<Mat>* S) {
             PCGetOptionsPrefix(pc, &prefixPC);
             const char* prefixIS;
             KSPGetOptionsPrefix(subksp[nsplits - 1], &prefixIS);
-            std::string str = std::string(prefixIS).substr(std::string(prefixPC).size() + std::string("fieldsplit_").size(), std::string(prefixIS).size() - (std::string(prefixPC).size() + std::string("fieldsplit_").size() + 1));
+            std::string str = std::string(prefixIS).substr((prefixPC ? std::string(prefixPC).size() : 0) + std::string("fieldsplit_").size(), std::string(prefixIS).size() - ((prefixPC ? std::string(prefixPC).size() : 0) + std::string("fieldsplit_").size() + 1));
             PCFieldSplitGetIS(pc, str.c_str(), &is);
 #endif
             PetscObjectCompose((PetscObject)is, "pmat", (PetscObject)(*S)[0]);

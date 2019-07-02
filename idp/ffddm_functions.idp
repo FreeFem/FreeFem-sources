@@ -140,11 +140,11 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
           preffe#prmesh#tic(pr#tcsi)
           /*
           destroyRecycling(Addmc);
-          DDM(Addmc, solc, tmp, O=Optc);
+          DDM(Addmc, tmp, solc, O=Optc);
           solc = 0;
           */
           
-          /*DDM(pr#Addmc, solc, tmp, O=pr#Optc);*/
+          /*DDM(pr#Addmc, tmp, solc, O=pr#Optc);*/
           solc = pr#CoarsefGMRES(solc, tmp, ffddminexactCStol, ffddmmaxit, ffddmvariant);
           preffe#prmesh#toc(pr#tcsi,"",pr#tcs)
           if (!preffe#prmesh#excluded)
@@ -474,7 +474,7 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     IFMACRO(pr#withhpddmkrylov)
     if (!preffe#prmesh#excluded) {
       uni = x0;
-      IterativeMethod(pr#A, uni,rhs, precon = pr#PREC, sparams = "-hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+nbiter+(mpirank == 0 ? " -hpddm_verbosity "+pr#verbosity : "")+" -hpddm_orthogonalization mgs",comm = preffe#prmesh#mpicomm);
+      IterativeMethod(pr#A, rhs,uni, precon = pr#PREC, sparams = "-hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+nbiter+(mpirank == 0 ? " -hpddm_verbosity "+pr#verbosity : "")+" -hpddm_orthogonalization mgs",comm = preffe#prmesh#mpicomm);
     }
     else
     IterativeMethod(pr#A, uni,uni, precon = pr#PREC, sparams = "-hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+nbiter+(mpirank == 0 ? " -hpddm_verbosity "+pr#verbosity : "")+" -hpddm_orthogonalization mgs",comm = preffe#prmesh#mpicomm);
@@ -492,9 +492,9 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
       set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction deflated");
     
     if (pr#prec == "oras" || pr#prec == "soras")
-      DDM(pr#hpddmOP,uni,rhs,O=pr#aR[mpiRank(preffe#prmesh#commddm)],timing=timings);
+      DDM(pr#hpddmOP,rhs,uni,O=pr#aR[mpiRank(preffe#prmesh#commddm)],timing=timings);
     else
-      DDM(pr#hpddmOP,uni,rhs,timing=timings);
+      DDM(pr#hpddmOP,rhs,uni,timing=timings);
     
     /*
     real[int] timingsg(timings.n);

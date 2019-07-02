@@ -30,7 +30,7 @@ varf NS ([u1,u2,p],[v1,v2,q],init=i) =
   - int2d(Th) ( -alpha*convect([up1,up2],-dt,up1)*v1 -alpha*convect([up1,up2],-dt,up2)*v2 )
   + on(3,u1=g,u2=0)
   + on(1,2,4,u1=0,u2=0) ;
-  matrix A= NS(Wh,Wh,solver=UMFPACK);
+  matrix A= NS(Wh,Wh,solver="SPARSESOLVER");
   real[int] b=  NS(0,Wh);
   u1[] = A^-1*b;
 plot(coef=0.2,cmm=" [u1,u2] et p  ",p,[u1,u2],ps="o/StokesP2P1.eps",value=1,wait=1);
@@ -58,7 +58,7 @@ for (iter=1;iter<=nbiter;iter++)
 {
   cout << " dt = " << dt << " ------------------------ " << endl;
   alpha=1/dt;
-  A= NS(Wh,Wh,solver=UMFPACK);
+  A= NS(Wh,Wh,solver="SPARSESOLVER");
   for (i=0;i<=10;i++)
    {
      up1[]=u1[]; // copie vectoriel
