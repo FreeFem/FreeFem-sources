@@ -15,7 +15,7 @@ autoreconf -i \
   && cd - \
   && ./reconfigure \
 
-  && make
+  && make -j2
 
 
 if [ $? -eq 0 ]
