@@ -1,6 +1,18 @@
 # Choosing debugging and/or optimization flags for compilation
 # ------------------------------------------------------------
-
+#   get CPU Type
+cputype=unknow
+if test -x /usr/bin/machine ; then
+  cputype=`/usr/bin/machine`
+elif test -x /usr/bin/arch ; then
+  cputype=`/usr/bin/arch`
+fi
+cpuintel=no;
+case "$cputype" in 
+i386|i486| x86_64*)  cpuintel=yes;;
+*) cpuintel=no;;
+esac
+AC_MSG_NOTICE([    -----   CPU kind: $cputype , intel/amd: $cpuintel ])
 AC_ARG_ENABLE(profiling,[  --enable-profiling	Turn on profiling])
 if test "$enable_profiling" = yes
 then
@@ -89,19 +101,15 @@ AC_ARG_ENABLE(generic,
 [  --enable-generic	Turn off hardware-dependant optimization options])
 
 # FFCS: remove "-mcpu=common" to allow other hardware-dependant values of cpu for PowerPC - thank you Fred (20/02/11)
-
-if test $enable_ffcs = yes
-then
+# FH 
     # Generic code
-    if test "$enable_debug" != yes \
-	-a "$enable_optim" != no \
-	-a "$enable_generic" = yes
+if test  "$enable_generic" = yes 
     then
-	CHECK_COMPILE_FLAG(C,-mcpu=common,CFLAGS)
-	CHECK_COMPILE_FLAG(C++,-mcpu=common,CXXFLAGS)
-	CHECK_COMPILE_FLAG(Fortran 77,-mcpu=common,FFLAGS)
-    fi
+	CHECK_COMPILE_FLAG(C,-mtune=generic,CFLAGS)
+	CHECK_COMPILE_FLAG(C++,-mtune=generic,CXXFLAGS)
+	CHECK_COMPILE_FLAG(Fortran 77,-mtune=generic,FFLAGS)
 fi
+
 
 # Hardware-dependant optimization
 # -------------------------------
@@ -273,3 +281,4 @@ fi
 # is used.
 
 AC_SUBST(OPTIM_TYPE,$ff_optim_type)
+AC_MSG_NOTICE([     CXXFLAGS =   $CXXFLAGS  ])

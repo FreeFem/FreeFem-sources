@@ -958,13 +958,17 @@ AC_ARG_ENABLE(summary,AC_HELP_STRING([--enable-summary],[Display activated libra
 AC_ARG_ENABLE(download,AC_HELP_STRING([--enable-download],[Download missing libraries (BLAS,ARPACK,UMFPACK,...)]))
 ## PETSc
 AC_ARG_WITH(petsc,[  --with-petsc=/usr/local/petsc/conf/petscvariables   --without-petsc  ])
+AC_ARG_WITH(prefix_petsc,[ --prefix_petsc=dirtory where all petsc/slepc  will be install if you download ])
+if test -z "${prefix_petsc}"  ; then   prefix_petsc="${prefix}/ff-petsc/"; fi
+AC_SUBST([FF_prefix_petsc],"$prefix_petsc")
+AC_SUBST([FF_generic_petsc],"$enable_generic")
 # /usr/local/petsc/conf/petscvariables
 #/usr/local/ff++/petsc/lib/petsc/conf/petscvariables
 ff_petsc_ok=no
 ff_slepc_ok=no
 ## echo --$with_petsc--
 if test "$with_petsc" != no -a  $ff_mpi = yes; then
-    for d in "$with_petsc" "${prefix}/ff-petsc/real/lib" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
+    for d in "$with_petsc" "${prefix_petsc}/real/lib" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
 	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
 	    ffconfpetsc="$d$dd"
 		ffconfslepc="$d/slepc/conf/slepcvariables"
@@ -2444,3 +2448,7 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - TETGEN: $ff_tetgen_ok])
   AC_MSG_NOTICE([ - UMFPACK: $ff_umfpack_ok])
 fi
+if test "${prefix_petsc}" != no -a   ! -d ${prefix_petsc}/real/lib  ; then
+  AC_MSG_NOTICE([ petsc dirs do no exist  , do build do:])
+  AC_MSG_NOTICE([cd 3rdparty/ff-petsc/;  make   ])
+fi 

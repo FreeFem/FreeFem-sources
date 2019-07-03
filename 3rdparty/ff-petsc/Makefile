@@ -27,7 +27,11 @@ PYTHON2?=python2.7
 include Makefile.inc
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(prefix)/ff-petsc" && test -w "$(DESTDIR)$(prefix)/ff-petsc" || echo sudo)
 W_SUDO1=$(SHELL ls	)
-
+ifeq ($(FF_generic_petsc), yes)
+  FLAGS_MTUNE := "-mtune=generic"
+else
+  FLAGS_MTUNE := "-mtune=native"
+endif
 all-local:
 	@echo " # To build petsc and slepc do $ make petsc-slepc"
 	@echo " # warning you have no write acces in $(DESTDIR)$(prefix)/ff-petsc"
@@ -125,12 +129,12 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 		--prefix=$(DIR_INSTALL_REAL) \
 		--with-debugging=no \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
-		COPTFLAGS='-O3  -mtune=native' \
-		CXXOPTFLAGS='-O3  -mtune=native' \
-		FOPTFLAGS='-O3  -mtune=native' \
-		CFLAGS=' -mtune=native' \
-		CXXFLAGS='-mtune=native' \
-		FFLAGS='-mtune=native' \
+		COPTFLAGS='-O3  $(FLAGS_MTUNE)' \
+		CXXOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
+		FOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
+		CFLAGS=' $(FLAGS_MTUNE)' \
+		CXXFLAGS='$(FLAGS_MTUNE)' \
+		FFLAGS='$(FLAGS_MTUNE)' \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 		--with-scalar-type=real $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
@@ -150,12 +154,12 @@ $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 		--prefix=$(DIR_INSTALL_COMPLEX) \
 		--with-debugging=no \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
-		COPTFLAGS='-O3 -march=native -mtune=native' \
-		CXXOPTFLAGS='-O3 -march=native -mtune=native' \
-		FOPTFLAGS='-O3 -march=native -mtune=native' \
-		CFLAGS=' -mtune=native' \
-		CXXFLAGS='-mtune=native' \
-		FFLAGS='-mtune=native' \
+		COPTFLAGS='-O3  $(FLAGS_MTUNE)' \
+		CXXOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
+		FOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
+		CFLAGS=' $(FLAGS_MTUNE)' \
+		CXXFLAGS='$(FLAGS_MTUNE)' \
+		FFLAGS='$(FLAGS_MTUNE)' \
 		--with-scalar-type=complex \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
@@ -277,6 +281,7 @@ clean-local:
 echo:
 	@echo " with_dir_mpi #$(W_MPICC)# #$(MPICC)# ::: #$(WITH_MPI_DIR)#  "
 	@echo SUDO: $(SUDO)
+	@echo MTUNE: $(FLAGS_MTUNE)
 	@echo "sudo using user env: $(SUDO_WITH_ENV)"
 	@echo MPI_DIR: $(MPI_DIR)
 	@echo " dir install real :" $(DIR_INSTALL_REAL)
