@@ -25,7 +25,7 @@ SPELC_ADDCONF?=
 
 PYTHON2?=python2.7
 include Makefile.inc
-W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(prefix)/ff-petsc" && test -w "$(DESTDIR)$(prefix)/ff-petsc" || echo sudo)
+W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(FF_prefix_petsc)" && test -w "$(DESTDIR)$(FF_prefix_petsc) || echo sudo)
 W_SUDO1=$(SHELL ls	)
 ifeq ($(FF_generic_petsc), yes)
   FLAGS_MTUNE := "-mtune=generic"
@@ -34,13 +34,13 @@ else
 endif
 all-local:
 	@echo " # To build petsc and slepc do $ make petsc-slepc"
-	@echo " # warning you have no write acces in $(DESTDIR)$(prefix)/ff-petsc"
+	@echo " # warning you have no write acces in $(DESTDIR)$(FF_prefix_petsc)"
 	@echo " # need sudo if '$(W_SUDO)' == 'sudo'  .." $(W_SUDO1)
 	@echo " # run under root "
-	@echo " # or create / add access to $(DESTDIR)$(prefix)/ff-petsc "
+	@echo " # or create / add access to $(DESTDIR)$(FF_prefix_petsc) "
 	@echo " # do for examples:"
-	@echo "	sudo mkdir  $(DESTDIR)$(prefix)/ff-petsc"
-	@echo "	sudo chown -R $(LOGNAME)  $(DESTDIR)$(prefix)/ff-petsc"
+	@echo "	sudo mkdir  $(DESTDIR)$(FF_prefix_petsc)"
+	@echo "	sudo chown -R $(LOGNAME)  $(DESTDIR)$(FF_prefix_petsc)"
 	@echo "	make petsc-slepc "
 # Downloading and compiling mumps
 # -------------------------------
@@ -66,8 +66,8 @@ else
  # WITH_MPI_DIR=--with-mpi-dir='$(MPI_DIR)'
 endif
 
-DIR_INSTALL_REAL:=$(prefix)/ff-petsc/real
-DIR_INSTALL_COMPLEX:=$(prefix)/ff-petsc/complex
+DIR_INSTALL_REAL:=$(FF_prefix_petsc)/real
+DIR_INSTALL_COMPLEX:=$(FF_prefix_petsc)/complex
 PETSC_DIR:=$(shell pwd)/$(SRCDIR)
 petsc-slepc: Makefile.inc dir-install WHERE-all
 recompile: recompile-real recompile-complex
@@ -274,9 +274,9 @@ clean-local:
 	-rm -rf ../include/*PETSc*
 	-rm -rf ../lib/lib*PETSc*
 	-rm -rf $(SRCDIR)
-	-rm -rf $(prefix)/ff-petsc
+	-rm -rf $(FF_prefix_petsc)
 	-rm WHERE-all config.log *.done
-	-if test -d $(prefix)/ff-petsc ; then echo " try of  remove of $(prefix)/ff-petsc under sudo .."; sudo rm -rf $(prefix)/ff-petsc ; fi
+	-if test -d $(FF_prefix_petsc) ; then echo " try of  remove of $(FF_prefix_petsc) under sudo .."; sudo rm -rf $(FF_prefix_petsc) ; fi
 	-rm do-sudo
 echo:
 	@echo " with_dir_mpi #$(W_MPICC)# #$(MPICC)# ::: #$(WITH_MPI_DIR)#  "
