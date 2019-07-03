@@ -7,14 +7,13 @@ autoreconf -i \
   && ./configure --with-mpi-lib=['/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Lib/x64/msmpi.lib'] \
                  --with-mpi-include=/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Include --with-fc=0 \
                  --download-metis --download-suitesparse --with-ssl=0 --with-x=0 --with-debugging=0  \
-                 --download-f2cblaslapack=1 --with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'
+                 --download-f2cblaslapack=1 --with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
+                 --prefix=/builds/workspace/freefem \
   && ./3rdparty/getall -a \
-
   && cd 3rdparty/ff-petsc \
   && make petsc-slepc \
   && cd - \
   && ./reconfigure \
-
   && make -j2
 
 
