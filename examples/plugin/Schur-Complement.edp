@@ -1,0 +1,141 @@
+// ShurComplement  full matrix 
+load "lapack"
+// ShurComplement  sparse matrix 
+load "Schur-Complement"
+include "ExtractDofsonBorder.idp"
+
+
+// popur CL Dirichet
+macro FindDofOnBorder(l,Vh,I)
+{
+	varf von(u,v) = on(l,u=-1);
+    int[int] J=0:Vh.ndof-1;
+	real[int] vl = von(0,Vh); 
+	sort(vl,J);
+	vl = vl ? 1. :0.;
+	int n = vl.sum+0.5; 
+
+	I.resize(n);
+	I=J(0:n-1);
+	cout << " n = "<< n << endl; 
+}//
+
+macro grad(u) [dx(u),dy(u)] //
+real hsize= 0.1; 
+
+real htt = max(hsize/2,0.1);
+mesh Th=square(2/hsize,1/hsize,[x*2,y]);
+
+Th=trunc(Th,(abs(x-1)>4*htt)||(abs(y-0.5)>htt),label=10);
+
+mesh Th2=movemesh(Th,[2-(x-2),y]);
+plot(Th,Th2,wait=1);
+fespace Vh(Th,P1);
+fespace Vh2(Th2,P1);
+int n = Vh.ndof;
+varf va(u,v) = int2d(Th)(grad(u)'*grad(v))+on(1,3,4,u=0);
+
+ matrix A= va(Vh,Vh,sym=0,tgv=-2);
+if(verbosity>9) cout << A << endl; 
+int[int] I; 
+ExtractDofsonBorder(2,Vh,I,1);
+
+real[int,int] B(1,1);
+
+//  model 2 
+int[int] I10;
+FindDofOnBorder(10,Vh,I10);
+if(verbosity>9) cout << " I10 "<< I10 << endl; 
+int[int] If(n);
+int In=I.n; 
+If=-1;
+for [i,Ii:I]
+  If[Ii]=i; 
+for [i,I10i:I10]
+    If[I10i]=In; 
+if( verbosity>9) cout << If << endl; 	
+real[int,int] S(1,1);
+int nfs=SchurComplement(S,A,If,B);
+
+cout << nfs << " "<< In+1  << endl;
+if( verbosity>9)  cout << " S = "<<" " << S << endl;  
+/*
+dans S  les dof sont : 0 a In-1 : cote doite vertical 
+       In =  cl troue
+    PB symetrique => resoudre S+S 
+*/
+int iclr=nfs;
+int icll=nfs-1;
+int iclS = nfs-1;
+int[int] Il=0:nfs;
+int[int] Ir=0:nfs;
+
+Ir[iclr]=iclS;
+Ir[icll]=-1;
+
+Il[iclr]=-1;
+Il[icll]=iclS;
+ 
+int nd = nfs+1;
+//matrix St(nd,nd);// manque une matrix vide 
+cout << " S ="<< S << endl;
+real[int,int] St(nd,nd);
+func real[int,int]  to(int[int] &I,real[int,int] &S)
+{
+	int n = I.n;
+	real[int,int]  A(n,n);
+	A=0;
+	for(int i=0; i<n; ++i)
+		for(int j=0; j<n; ++j)
+		if(I[i]>=0 && I[j]>=0 )
+	  	  A(i,j) += S(I[i],I[j]);
+		  return A;
+}
+St =0;
+{// a ameliorer ... il maque des fonction ff++ 
+	//St+=S(Ir,Ir);
+	St=to(Ir,S);
+	real[int,int] Stt=to(Il,S);
+	St+= Stt;
+	/*  bug ... in Matrixfull2mapIJ in  v 4.3-1
+	{
+    matrix Stt = S(Ir,Ir);
+    real[int,int] Sb(nd,nd);
+    copy(Sb,Stt);
+	cout << Ir << endl; 
+	cout << "Sbr " << Sb << endl;
+     St += Sb; 
+    }
+	{
+    matrix Stt = S(Il,Il);
+    real[int,int] Sb(nd,nd);
+    copy(Sb,Stt);
+	cout << Il << endl; 
+	cout << "Sbl " << Sb << endl;
+    St += Sb; 
+    }
+*/
+}
+cout << " St=" <<  St << endl; 
+cout << "ic  = "<< icll <<" " << iclr << endl; 
+int[int] It=[icll,iclr];
+real[int,int] SS(1,1), B0(1,1);
+matrix Stm = St;
+int nfs0=SchurComplement(SS,Stm,It,B0);
+
+cout << "B0=" << B0 << endl; 
+for(int j=0; j<B0.m; ++j)
+{	
+	Vh ul=0;
+	Vh2 ur = 0; 
+	for(int i=0; i<nfs-1; ++i)
+  	 ur[] +=  B(:,i)*B0(i,j);
+	for(int i=0; i<nfs-1; ++i)
+ 	 ul[] +=  B(:,i)*B0(i,j);
+	{
+	  ur[] +=  B(:,nfs-1)*B0(nfs-1,j);
+	  ul[] +=  B(:,nfs-1)*B0(nfs,j);
+	 }   
+	plot(ul,ur, wait=1);
+}
+
