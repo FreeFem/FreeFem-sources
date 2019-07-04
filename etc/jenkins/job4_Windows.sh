@@ -9,7 +9,6 @@ autoreconf -i \
         --prefix=/builds/workspace/freefem \
   && ./3rdparty/getall -a \
   && cd 3rdparty/ff-petsc \
-  && patch -p0 <make_windows.patch \
   && make petsc-slepc \
   && cd - \
   && ./reconfigure \
