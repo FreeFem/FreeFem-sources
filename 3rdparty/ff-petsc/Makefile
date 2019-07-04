@@ -25,6 +25,9 @@ SPELC_ADDCONF?=
 
 PYTHON2?=python2.7
 include Makefile.inc
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+dir3rdparty := $(dir $(dir $(mkfile_path)))
+ 
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(FF_prefix_petsc)" && test -w "$(DESTDIR)$(FF_prefix_petsc) || echo sudo)
 W_SUDO1=$(SHELL ls	)
 ifeq ($(FF_generic_petsc), yes)
@@ -80,9 +83,11 @@ else
 	CXXFLAGS='$(FLAGS_MTUNE) -D__int64=long\ long' \
 	--with-mpi-lib=['/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Lib/x64/msmpi.lib'] \
 	--with-mpi-include=/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Include \
-	--download-metis \
-	--download-ptscotch \
-	--download-suitesparse \
+	--with-metis-lib=$(dir3rdparty)/lib/parmetis/libmetis.a \
+	--with-metis-include=$(dir3rdparty)/include/parmetis \
+	--with-parmetis-lib=$(dir3rdparty)/lib/parmetis/libparmetis.a \
+	--with-parmetis-include=$(dir3rdparty)/include/parmetis \
+	--with-suitesparse-dir=$(dir3rdparty) \
 	--with-ssl=0 --with-x=0 --with-debugging=0  \
 	--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'\
@@ -97,9 +102,11 @@ else
 	CXXFLAGS='$(FLAGS_MTUNE) -D__int64=long\ long' \
 	--with-mpi-lib=['/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Lib/x64/msmpi.lib'] \
 	--with-mpi-include=/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Include \
-	--with-metis-dir=$(DIR_INSTALL_REAL) \
-	--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
-	--with-suitesparse-include='$(SUITESPARSE_INCLUDE)' --with-suitesparse-lib='$(SUITESPARSE_LIB)' \
+	--with-metis-lib=$(dir3rdparty)/lib/parmetis/libmetis.a \
+	--with-metis-include=$(dir3rdparty)/include/parmetis \
+	--with-parmetis-lib=$(dir3rdparty)/lib/parmetis/libparmetis.a \
+	--with-parmetis-include=$(dir3rdparty)/include/parmetis \
+	--with-suitesparse-dir=$(dir3rdparty) \
 	--with-ssl=0 --with-x=0 --with-debugging=0  \
 	--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'\
@@ -333,6 +340,7 @@ echo:
 	@echo " BLAS_LAPACK_LIBS: $(BLAS_LAPACK_LIBS)"
 	@echo " # need sudo if '$(W_SUDO)' == 'sudo'  .." $(W_SUDO1)
 	@echo " on WINDOWS: $(FFWINDOWS)"
+	@echo " dir3rdparty: $(dir3rdparty)"
 	-@otool -L $(DIR_INSTALL_COMPLEX)/lib/libslepc.$(VERSION_SLEPC).dylib  | awk '/3rdparty/ {print $$1}'
 	-@otool -L $(DIR_INSTALL_REAL)/lib/libslepc.$(VERSION_SLEPC).dylib  | awk '/3rdparty/ {print $$1}'
 
