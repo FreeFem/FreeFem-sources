@@ -26,7 +26,7 @@ SPELC_ADDCONF?=
 PYTHON2?=python2.7
 include Makefile.inc
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-dir3rdparty := $(dir $(dir $(mkfile_path)))
+dir3rdparty := $(abspath $(dir $(mkfile_path))/..)
  
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(FF_prefix_petsc)" && test -w "$(DESTDIR)$(FF_prefix_petsc) || echo sudo)
 W_SUDO1=$(SHELL ls	)
@@ -85,14 +85,13 @@ else
 	--with-mpi-include=/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Include \
 	--with-metis-lib=$(dir3rdparty)/lib/parmetis/libmetis.a \
 	--with-metis-include=$(dir3rdparty)/include/parmetis \
-	--with-parmetis-lib=$(dir3rdparty)/lib/parmetis/libparmetis.a \
-	--with-parmetis-include=$(dir3rdparty)/include/parmetis \
-	--with-suitesparse-dir=$(dir3rdparty) \
+	 --download-suitesparse \
 	--with-ssl=0 --with-x=0 --with-debugging=0  \
+	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
 	--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
-	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'\
 	--download-slepc 
-  
+  #	--with-blas-lapack-lib='/mingw64/lib/libopenblas.a' \
+
   
  FLAGS_CONF_PETSC_COMPLEX= 		--with-debugging=no \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 \
@@ -104,18 +103,19 @@ else
 	--with-mpi-include=/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Include \
 	--with-metis-lib=$(dir3rdparty)/lib/parmetis/libmetis.a \
 	--with-metis-include=$(dir3rdparty)/include/parmetis \
-	--with-parmetis-lib=$(dir3rdparty)/lib/parmetis/libparmetis.a \
-	--with-parmetis-include=$(dir3rdparty)/include/parmetis \
-	--with-suitesparse-dir=$(dir3rdparty) \
+	 --download-suitesparse \
 	--with-ssl=0 --with-x=0 --with-debugging=0  \
 	--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
-	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'\
+	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
 	--download-slepc 
 	
+#	--with-suitesparse-include=$(dir3rdparty)/include \
+#	--with-suitesparse-lib='[$(dir3rdparty)/lib/libumfpack.a,$(dir3rdparty)/lib/libcholmod.a,$(dir3rdparty)/lib/libcolamd.a,$(dir3rdparty)/lib/libamd.a,$(dir3rdparty)/lib/libsuitesparseconfig.a]' \	--with-suitesparse-lib='[$(dir3rdparty)/lib/libumfpack.a,$(dir3rdparty)/lib/libcolmod.a,$(dir3rdparty)/lib/libcholamd.a,$(dir3rdparty)/lib/libamd.a,$(dir3rdparty)/lib/libsuitesparseconfig.a]' \
 
    
 endif
 all-local:
+	@echo make .. 
 	@echo " # To build petsc and slepc do $ make petsc-slepc"
 	@echo " # warning you have no write acces in $(DESTDIR)$(FF_prefix_petsc)"
 	@echo " # need sudo if '$(W_SUDO)' == 'sudo'  .." $(W_SUDO1)
