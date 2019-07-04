@@ -4,7 +4,9 @@ source shell mingw64
 echo "Job 6"
 
 autoreconf -i \
-  && ./configure --enable-download --enable-debug --prefix=/builds/workspace/freefem \
+  && ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
+      CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
+      --prefix=/builds/workspace/freefem   --disable-hpddm \
   && ./3rdparty/getall -a \
   && make
 

@@ -8,6 +8,7 @@ autoreconf -i \
         CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
         --prefix=/builds/workspace/freefem \
   && ./3rdparty/getall -a \
+  && make
   && cd 3rdparty/ff-petsc \
   && make petsc-slepc \
   && cd - \
