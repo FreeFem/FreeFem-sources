@@ -73,7 +73,7 @@ else
 ##   On  windows ....
   FFWINDOWS=true
  FLAGS_CONF_PETSC_REAL= 		--with-debugging=no \
-	--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc=0 \
+	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 \
 	COPTFLAGS='-O3  $(FLAGS_MTUNE)' \
 	CXXOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
 	CFLAGS=' $(FLAGS_MTUNE)' \
@@ -90,7 +90,7 @@ else
   
   
  FLAGS_CONF_PETSC_COMPLEX= 		--with-debugging=no \
-	--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc=0 \
+	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 \
 	COPTFLAGS='-O3  $(FLAGS_MTUNE)' \
 	CXXOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
 	CFLAGS=' $(FLAGS_MTUNE)' \
