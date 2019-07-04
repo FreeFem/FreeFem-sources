@@ -25,12 +25,95 @@ SPELC_ADDCONF?=
 
 PYTHON2?=python2.7
 include Makefile.inc
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+dir3rdparty := $(dir $(dir $(mkfile_path)))
+ 
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(FF_prefix_petsc)" && test -w "$(DESTDIR)$(FF_prefix_petsc) || echo sudo)
 W_SUDO1=$(SHELL ls	)
 ifeq ($(FF_generic_petsc), yes)
   FLAGS_MTUNE := "-mtune=generic"
 else
   FLAGS_MTUNE := "-mtune=native"
+endif
+ifeq ($(WIN32DLLTARGET),)
+##   Not on  windows ....
+  FFWINDOWS=false
+  FLAGS_CONF_PETSC_REAL= 		--with-debugging=no \
+		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
+		COPTFLAGS='-O3  $(FLAGS_MTUNE)' \
+		CXXOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
+		FOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
+		CFLAGS=' $(FLAGS_MTUNE)' \
+		CXXFLAGS='$(FLAGS_MTUNE)' \
+		FFLAGS='$(FLAGS_MTUNE)' \
+        --with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
+		--with-scalar-type=real $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
+		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
+		--download-scalapack --download-metis --download-ptscotch \
+		--download-mumps --download-ml --download-hypre --download-parmetis \
+		--download-superlu --download-suitesparse --download-fftw --download-slepc 
+
+FLAGS_CONF_PETSC_COMPLEX= 	--with-debugging=no \
+		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
+		COPTFLAGS='-O3  $(FLAGS_MTUNE)' \
+		CXXOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
+		FOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
+		CFLAGS=' $(FLAGS_MTUNE)' \
+		CXXFLAGS='$(FLAGS_MTUNE)' \
+		FFLAGS='$(FLAGS_MTUNE)' \
+		--with-scalar-type=complex \
+		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
+		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
+		--with-scalapack-dir=$(DIR_INSTALL_REAL) \
+		--with-metis-dir=$(DIR_INSTALL_REAL) \
+		--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
+		--with-suitesparse-include='$(SUITESPARSE_INCLUDE)' --with-suitesparse-lib='$(SUITESPARSE_LIB)' \
+		--with-mumps-dir=$(DIR_INSTALL_REAL) \
+		--with-parmetis-dir=$(DIR_INSTALL_REAL) \
+		--with-fftw-dir=$(DIR_INSTALL_REAL) \
+		--download-slepc  
+else
+##   On  windows ....
+  FFWINDOWS=true
+ FLAGS_CONF_PETSC_REAL= 		--with-debugging=no \
+	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 \
+	COPTFLAGS='-O3  $(FLAGS_MTUNE) -D__int64=long\ long' \
+	CXXOPTFLAGS='-O3  $(FLAGS_MTUNE) -D__int64=long\ long' \
+	CFLAGS=' $(FLAGS_MTUNE) -D__int64=long\ long' \
+	CXXFLAGS='$(FLAGS_MTUNE) -D__int64=long\ long' \
+	--with-mpi-lib=['/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Lib/x64/msmpi.lib'] \
+	--with-mpi-include=/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Include \
+	--with-metis-lib=$(dir3rdparty)/lib/parmetis/libmetis.a \
+	--with-metis-include=$(dir3rdparty)/include/parmetis \
+	--with-parmetis-lib=$(dir3rdparty)/lib/parmetis/libparmetis.a \
+	--with-parmetis-include=$(dir3rdparty)/include/parmetis \
+	--with-suitesparse-dir=$(dir3rdparty) \
+	--with-ssl=0 --with-x=0 --with-debugging=0  \
+	--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
+	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'\
+	--download-slepc 
+  
+  
+ FLAGS_CONF_PETSC_COMPLEX= 		--with-debugging=no \
+	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 \
+	COPTFLAGS='-O3  $(FLAGS_MTUNE) -D__int64=long\ long' \
+	CXXOPTFLAGS='-O3  $(FLAGS_MTUNE) -D__int64=long\ long' \
+	CFLAGS=' $(FLAGS_MTUNE) -D__int64=long\ long' \
+	CXXFLAGS='$(FLAGS_MTUNE) -D__int64=long\ long' \
+	--with-mpi-lib=['/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Lib/x64/msmpi.lib'] \
+	--with-mpi-include=/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Include \
+	--with-metis-lib=$(dir3rdparty)/lib/parmetis/libmetis.a \
+	--with-metis-include=$(dir3rdparty)/include/parmetis \
+	--with-parmetis-lib=$(dir3rdparty)/lib/parmetis/libparmetis.a \
+	--with-parmetis-include=$(dir3rdparty)/include/parmetis \
+	--with-suitesparse-dir=$(dir3rdparty) \
+	--with-ssl=0 --with-x=0 --with-debugging=0  \
+	--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
+	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'\
+	--download-slepc 
+	
+
+   
 endif
 all-local:
 	@echo " # To build petsc and slepc do $ make petsc-slepc"
@@ -127,21 +210,7 @@ Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
 $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 	cd $(SRCDIR) &&  $(PYTHON2) ./configure MAKEFLAGS='' \
 		--prefix=$(DIR_INSTALL_REAL) \
-		--with-debugging=no \
-		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
-		COPTFLAGS='-O3  $(FLAGS_MTUNE)' \
-		CXXOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
-		FOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
-		CFLAGS=' $(FLAGS_MTUNE)' \
-		CXXFLAGS='$(FLAGS_MTUNE)' \
-		FFLAGS='$(FLAGS_MTUNE)' \
-		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
-		--with-scalar-type=real $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
-		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
-		--download-scalapack --download-metis --download-ptscotch \
-		--download-mumps --download-ml --download-hypre --download-parmetis \
-		--download-superlu --download-suitesparse --download-fftw --download-slepc \
-		PETSC_ARCH=ff-real
+		$(FLAGS_CONF_PETSC_REAL) PETSC_ARCH=ff-real
 	test -f $(SRCDIR)/ff-real/lib/petsc/conf/petscvariables
 	touch $@
 Make-petsc-download.mk:$(SRCDIR)/tag-install-real $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
@@ -152,26 +221,7 @@ ifdef 	MUMPS_LIB
 $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
 	cd $(SRCDIR) &&  $(PYTHON2) ./configure MAKEFLAGS='' \
 		--prefix=$(DIR_INSTALL_COMPLEX) \
-		--with-debugging=no \
-		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
-		COPTFLAGS='-O3  $(FLAGS_MTUNE)' \
-		CXXOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
-		FOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
-		CFLAGS=' $(FLAGS_MTUNE)' \
-		CXXFLAGS='$(FLAGS_MTUNE)' \
-		FFLAGS='$(FLAGS_MTUNE)' \
-		--with-scalar-type=complex \
-		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
-		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
-		--with-scalapack-dir=$(DIR_INSTALL_REAL) \
-		--with-metis-dir=$(DIR_INSTALL_REAL) \
-		--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
-		--with-suitesparse-include='$(SUITESPARSE_INCLUDE)' --with-suitesparse-lib='$(SUITESPARSE_LIB)' \
-		--with-mumps-dir=$(DIR_INSTALL_REAL) \
-		--with-parmetis-dir=$(DIR_INSTALL_REAL) \
-		--with-fftw-dir=$(DIR_INSTALL_REAL) \
-		--download-slepc \
-		PETSC_ARCH=ff-complex
+		$(FLAGS_CONF_PETSC_COMPLEX) PETSC_ARCH=ff-complex
 	test -f $(SRCDIR)/ff-complex/lib/petsc/conf/petscvariables
 	touch $@
 
@@ -289,6 +339,8 @@ echo:
 	@echo " do-sudo auto ???:" $(SHELL  cat do-sudo)
 	@echo " BLAS_LAPACK_LIBS: $(BLAS_LAPACK_LIBS)"
 	@echo " # need sudo if '$(W_SUDO)' == 'sudo'  .." $(W_SUDO1)
+	@echo " on WINDOWS: $(FFWINDOWS)"
+	@echo " dir3rdparty: $(dir3rdparty)"
 	-@otool -L $(DIR_INSTALL_COMPLEX)/lib/libslepc.$(VERSION_SLEPC).dylib  | awk '/3rdparty/ {print $$1}'
 	-@otool -L $(DIR_INSTALL_REAL)/lib/libslepc.$(VERSION_SLEPC).dylib  | awk '/3rdparty/ {print $$1}'
 
