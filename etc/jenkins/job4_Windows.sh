@@ -5,8 +5,8 @@ echo "Job 4"
 
 autoreconf -i \
 && ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
-  && CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
-  && --prefix=/builds/workspace/freefem \
+        CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
+        --prefix=/builds/workspace/freefem \
   && ./3rdparty/getall -a \
   && cd 3rdparty/ff-petsc \
   && patch -p0 <make_windows.patch \
