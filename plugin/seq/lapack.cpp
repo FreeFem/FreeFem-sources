@@ -1205,6 +1205,7 @@ long  ff_SchurComplement(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const
     mult_ab<R>(&BJI,AJJ1,AJI);
     if(pV)
     {
+        pV->resize(n,ni);
         for(int i=0; i< n; ++i)
         {
             int mi= mark[i];
