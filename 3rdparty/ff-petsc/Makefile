@@ -74,10 +74,10 @@ else
   FFWINDOWS=true
  FLAGS_CONF_PETSC_REAL= 		--with-debugging=no \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 \
-	COPTFLAGS='-O3  $(FLAGS_MTUNE)' \
-	CXXOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
-	CFLAGS=' $(FLAGS_MTUNE)' \
-	CXXFLAGS='$(FLAGS_MTUNE)' \
+	COPTFLAGS='-O3  $(FLAGS_MTUNE) -D__int64=long\ long' \
+	CXXOPTFLAGS='-O3  $(FLAGS_MTUNE) -D__int64=long\ long' \
+	CFLAGS=' $(FLAGS_MTUNE) -D__int64=long\ long' \
+	CXXFLAGS='$(FLAGS_MTUNE) -D__int64=long\ long' \
 	--with-mpi-lib=['/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Lib/x64/msmpi.lib'] \
 	--with-mpi-include=/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Include \
 	--download-metis \
@@ -91,10 +91,10 @@ else
   
  FLAGS_CONF_PETSC_COMPLEX= 		--with-debugging=no \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 \
-	COPTFLAGS='-O3  $(FLAGS_MTUNE)' \
-	CXXOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
-	CFLAGS=' $(FLAGS_MTUNE)' \
-	CXXFLAGS='$(FLAGS_MTUNE)' \
+	COPTFLAGS='-O3  $(FLAGS_MTUNE) -D__int64=long\ long' \
+	CXXOPTFLAGS='-O3  $(FLAGS_MTUNE) -D__int64=long\ long' \
+	CFLAGS=' $(FLAGS_MTUNE) -D__int64=long\ long' \
+	CXXFLAGS='$(FLAGS_MTUNE) -D__int64=long\ long' \
 	--with-mpi-lib=['/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Lib/x64/msmpi.lib'] \
 	--with-mpi-include=/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Include \
 	--with-metis-dir=$(DIR_INSTALL_REAL) \
