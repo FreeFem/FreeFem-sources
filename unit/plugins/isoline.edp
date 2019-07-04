@@ -1,0 +1,63 @@
+include "test.idp"
+load "isoline"
+
+cout << functionDEFINITION << "isoline" << endl;
+
+real[int,int] xy(3,1);
+int[int] be(1);
+{
+  mesh Th=square(10,10);//,[x*.5,y*0.5]);
+  fespace Vh(Th,P1);
+  Vh u= sqrt(square(x-0.5)+square(y-0.5));
+  real iso= 0.2 ;
+  real[int] viso=[iso];
+
+  int nbc= isoline(Th,u,xy,close=1,iso=iso,beginend=be,smoothing=0.1, eps=1e-5, ratio=1);
+
+  border Curve0(t=0,1)
+  { int c =0;
+    int i0 = be[2*c], i1 = be[2*c+1]-1;
+    P=Curve(xy,i0,i1,t);
+    label=1;
+  }
+
+  for( int c=0;c<nbc; ++c)
+  {
+      int i0 = be[2*c], i1 = be[2*c+1]-1; // begin and end  the  connexe line comp. c
+      for(int i=i0; i<= i1; ++i)
+         cout << " x = " <<  xy(0,i) << " y =  " << xy(1,i) << " s =  " << xy(2,i) << endl;
+  }
+}
+
+cout << functionDEFINITION << "curve" << endl;
+
+cout << " len of the curve 1 = " << xy(2,xy.m-1) << endl;;
+
+border Curve0(t=0,1)
+{
+  int c =0;
+  int i0 = be[2*c], i1 = be[2*c+1]-1;
+  P=Curve(xy,i0,i1,t);
+  label=1;
+}
+
+border Curve1(t=0,1)
+{ int c =1;
+  int i0 = be[2*c], i1 = be[2*c+1]-1;
+  P=Curve(xy,i0,i1,t);
+  label=1;
+}
+
+cout << functionDEFINITION << "findalllocalmin" << endl;
+
+mesh Th=square(100,100,[x*2-1,y*2-1]);
+fespace Vh(Th,P1);
+fespace Ph(Th,P0);
+func rr= sqrt(x^2+y^2);
+int k =5;
+Vh u= sin(k*pi*x)*sin(k*pi*y);//rr*(1-rr);
+Ph r;
+
+verbosity=3;
+int[int] lm=findalllocalmin(Th,u[],r[],convex=1,eps=0);
+cout << lm << endl;
