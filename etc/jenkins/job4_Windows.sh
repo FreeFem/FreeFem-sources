@@ -4,18 +4,16 @@ source shell mingw64
 echo "Job 4"
 
 autoreconf -i \
-  && ./configure --with-mpi-lib=['/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Lib/x64/msmpi.lib'] \
-                 --with-mpi-include=/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Include --with-fc=0 \
-                 --download-metis --download-suitesparse --with-ssl=0 --with-x=0 --with-debugging=0  \
-                 --download-f2cblaslapack=1 --with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
-                 --prefix=/builds/workspace/freefem \
+&& ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
+  && CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
+  && --prefix=/builds/workspace/freefem \
   && ./3rdparty/getall -a \
   && cd 3rdparty/ff-petsc \
+  && patch -p0 <make_windows.patch \
   && make petsc-slepc \
   && cd - \
   && ./reconfigure \
   && make -j2
-
 
 if [ $? -eq 0 ]
 then
