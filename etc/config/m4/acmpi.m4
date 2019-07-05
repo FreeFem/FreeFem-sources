@@ -123,7 +123,7 @@ esac
     if  with_mpilibs=`where msmpi.dll`
     then
 #  Remove for scotch and parmetis
-	ff_MPI_INCLUDE="-I$ff_MPI_INCLUDE_DIR  '-D__int64=long long'"
+	ff_MPI_INCLUDE="-I$ff_MPI_INCLUDE_DIR  -D__int64=long\ long"
 	with_mpiinc="$ff_MPI_INCLUDE"
 	test -z "$MPIRUN" && MPIRUN="where mpiexe.exe"
 	ff_MPI_LIBC="'$ff_msmpi_lib/msmpi.lib'"
