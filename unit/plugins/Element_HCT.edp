@@ -1,0 +1,30 @@
+include "test.idp"
+load "Element_HCT"
+load "msh3"
+
+cout << functionDEFINITION << "Element_HCT" << endl;
+
+real t;
+mesh Th = square(10, 10);
+mesh3 Th3 = cube(5, 5, 5);
+
+cout << parameterDEFINITION << "mesh" << endl;
+
+fespace Uh1(Th, HCT);
+Uh1 [u1, u2, u3];
+Uh1 [err1, err2, err3];
+t = clock();
+[u1, u2, u3] = [0, dx(u1), 3];
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+// [err1, err2, err3 = [u1, u2, u2-u3];
+// test;
+
+cout << parameterDEFINITION << "mesh3" << endl;
+
+t = clock();
+[u1, u2, u3] = [0, dx(u1), 3];
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+// [err1, err2, err3 = [u1, u2, u2-u3];
+// test;
