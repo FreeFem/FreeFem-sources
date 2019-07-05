@@ -257,28 +257,28 @@ endif
 ##  need include include Make-petsc-download.mk
 WHERE-all:Makefile WHERE WHERE-complex
 	echo >$@
-	(test -n  "$(SCALAPACK_LIB)"  && echo scalapack LD) $(SCALAPACK_LIB) ) >>$@
-	(test -n  "$(SCALAPACK_INCLUDE)"  &&  echo scalapack INCLUDE -I$(SCALAPACK_INCLUDE) )>>$@
-	(test -n  "$(METIS_LIB)"  && echo metis LD $(METIS_LIB) )>>$@
-	(test -n  "$(METIS_INCLUDE)"  && echo metis INCLUDE -I$(METIS_INCLUDE) )>>$@
-	(test -n  "$(MUMPS_LIB)"  && echo mumps LD $(MUMPS_LIB) )>>$@
-	(test -n  "$(MUMPS_INCLUDE)"  && echo mumps INCLUDE -I$(MUMPS_INCLUDE) )>>$@
-	(test -n  "$(SUPERLU_LIB)"  && echo superlu LD $(SUPERLU_LIB) )>>$@
-	(test -n  "$(SUPERLU_INCLUDE)"  && echo superlu INCLUDE -I$(SUPERLU_INCLUDE) )>>$@
-	(test -n  "$(FFTW_LIB)"  && echo fftw LD $(FFTW_LIB) )>>$@
-	(test -n  "$(FFTW_INCLUDE)"  && echo fftw INCLUDE -I$(FFTW_INCLUDE)  )>>$@
-	(test -n  "$(PTSCOTCH_LIB)"  && echo ptscotch LD $(PTSCOTCH_LIB) )>>$@
-	(test -n  "$(PTSCOTCH_INCLUDE)"  && echo ptscotch INCLUDE -I$(PTSCOTCH_INCLUDE) )>>$@
-	(test -n  "$(PARMETIS_LIB)"  && echo parmetis LD $(PARMETIS_LIB))>>$@
-	(test -n  "$(PARMETIS_INCLUDE)"  && echo parmetis INCLUDE -I$(PARMETIS_INCLUDE) )>0>$@
-	echo 'petsc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lpetsc' >> $@
-	echo 'petsc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'  >> $@
-	echo 'petsccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lpetsc' >> $@
+	test -n  "$(SCALAPACK_LIB)"  && (  echo scalapack LD) $(SCALAPACK_LIB)  >>$@ )
+	test -n  "$(SCALAPACK_INCLUDE)"  && (   echo scalapack INCLUDE -I$(SCALAPACK_INCLUDE)  >>$@ )
+	test -n  "$(METIS_LIB)"  && (  echo metis LD $(METIS_LIB)  >>$@ )
+	test -n  "$(METIS_INCLUDE)"  && (  echo metis INCLUDE -I$(METIS_INCLUDE)  >>$@ )
+	test -n  "$(MUMPS_LIB)"  && (  echo mumps LD $(MUMPS_LIB)  >>$@ )
+	test -n  "$(MUMPS_INCLUDE)"  && (  echo mumps INCLUDE -I$(MUMPS_INCLUDE)  >>$@ )
+	test -n  "$(SUPERLU_LIB)"  && (  echo superlu LD $(SUPERLU_LIB)  >>$@ )
+	test -n  "$(SUPERLU_INCLUDE)"  && (  echo superlu INCLUDE -I$(SUPERLU_INCLUDE)  >>$@ )
+	test -n  "$(FFTW_LIB)"  && (  echo fftw LD $(FFTW_LIB)  >>$@ )
+	test -n  "$(FFTW_INCLUDE)"  && (  echo fftw INCLUDE -I$(FFTW_INCLUDE)   >>$@ )
+	test -n  "$(PTSCOTCH_LIB)"  && (  echo ptscotch LD $(PTSCOTCH_LIB)  >>$@ )
+	test -n  "$(PTSCOTCH_INCLUDE)"  && (  echo ptscotch INCLUDE -I$(PTSCOTCH_INCLUDE)  >>$@ )
+	test -n  "$(PARMETIS_LIB)"  && (  echo parmetis LD $(PARMETIS_LIB) >>$@ )
+	test -n  "$(PARMETIS_INCLUDE)"  && (  echo parmetis INCLUDE -I$(PARMETIS_INCLUDE) )>0>$@
+	echo 'petsc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lpetsc' >>$@
+	echo 'petsc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'  >>$@
+	echo 'petsccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lpetsc' >>$@
 	echo 'petsccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
-	(test -n "$(WITH_SLEPC)" = yes && echo 'slepc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lslepc' )>> $@
-	(test -n "$(WITH_SLEPC)" = yes && echo 'slepc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'  )>> $@
-	(test -n "$(WITH_SLEPC)" = yes && echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lslepc' )>> $@
-	(test -n "$(WITH_SLEPC)" = yes && echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  )>> $@
+	test -n "$(WITH_SLEPC)" = yes && (  echo 'slepc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lslepc'  >>$@ )
+	test -n "$(WITH_SLEPC)" = yes && (  echo 'slepc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'   >>$@ )
+	test -n "$(WITH_SLEPC)" = yes && (  echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lslepc'  >>$@ )
+	test -n "$(WITH_SLEPC)" = yes && (  echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  )>> $@
 
 #
 else
