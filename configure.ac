@@ -966,14 +966,14 @@ AC_SUBST([FF_generic_petsc],"$enable_generic")
 #/usr/local/ff++/petsc/lib/petsc/conf/petscvariables
 ff_petsc_ok=no
 ff_slepc_ok=no
-## echo --$with_petsc--
+echo --$with_petsc-- $ff_mpi 
 if test "$with_petsc" != no -a  $ff_mpi = yes; then
     for d in "$with_petsc" "${prefix_petsc}/real/lib" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
 	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
 	    ffconfpetsc="$d$dd"
 		ffconfslepc="$d/slepc/conf/slepcvariables"
 
-		# echo " petsc ... $ffconfpetsc"
+		 echo " petsc ... $ffconfpetsc"
 	    if test -f "$ffconfpetsc" ; then
 		if test  "$ff_petsc_ok" = no ; then
 		    PETSC_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetsc"`

@@ -53,13 +53,13 @@ if test -z "$MPIRUN" ; then
     AC_PATH_PROGS(MPIRUN,mpirun mpiexec mpiexec.exe,no)
     if test "$MPIRUN" = no
     then
-	ff_mpi=no
-    fi
+		 ff_mpi=no
+	fi
 fi
 AC_MSG_RESULT($MPIRUN)
 if test "ff_mpi" != "no" ; then 
  AC_MSG_CHECKING(for MPIRUN option: )
- ff_okkk=`$MPIRUN  -np 2 --oversubscribe echo ff__okkk| grep ff__okkk |wc -l`
+ ff_okkk=`"$MPIRUN"  -np 2 --oversubscribe echo ff__okkk| grep ff__okkk |wc -l`
  if test "$ff_okkk" -eq 2 ; then ff_mpi_option="--oversubscribe" ; fi 
  AC_MSG_RESULT($ff_mpi_option)
 fi
@@ -120,7 +120,7 @@ esac
 		   # to reinstall msmpi .. 
 		   
 #  MSMPI
-    if  with_mpilibs=`where msmpi.dll`
+    if  "$with_mpilibs"=`where msmpi.dll`
     then
 #  Remove for scotch and parmetis
 	ff_MPI_INCLUDE="-I$ff_MPI_INCLUDE_DIR  -D__int64=long\ long"
@@ -261,7 +261,7 @@ fi
 		ff_mpiprog="FreeFem++-mpi${EXEEXT}"
    		  AC_SUBST(MPIPROG,"$ff_mpiprog")
    		  AC_SUBST(MPISCRIPT,"ff-mpirun")
-   		  AC_SUBST(MPIRUN,$MPIRUN)
+   		  AC_SUBST(MPIRUN,"$MPIRUN")
                   AC_SUBST(MPICXX,$MPICXX)
 	else
 	        AC_SUBST(MPICXX,$ff_save_cxx)

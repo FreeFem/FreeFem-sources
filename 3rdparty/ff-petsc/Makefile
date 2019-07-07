@@ -270,7 +270,7 @@ WHERE-all:Makefile WHERE WHERE-complex
 	test -z  "$(PTSCOTCH_LIB)"  || (  echo ptscotch LD $(PTSCOTCH_LIB)  >>$@ )
 	test -z  "$(PTSCOTCH_INCLUDE)"  || (  echo ptscotch INCLUDE -I$(PTSCOTCH_INCLUDE)  >>$@ )
 	test -z  "$(PARMETIS_LIB)"  || (  echo parmetis LD $(PARMETIS_LIB) >>$@ )
-	test -z  "$(PARMETIS_INCLUDE)"  || (  echo parmetis INCLUDE -I$(PARMETIS_INCLUDE) )>0>$@
+	test -z  "$(PARMETIS_INCLUDE)"  || (  echo parmetis INCLUDE -I$(PARMETIS_INCLUDE) >>$@ )
 	echo 'petsc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lpetsc' >>$@
 	echo 'petsc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'  >>$@
 	echo 'petsccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lpetsc' >>$@
@@ -278,7 +278,7 @@ WHERE-all:Makefile WHERE WHERE-complex
 	test -z "$(WITH_SLEPC)" = yes || (  echo 'slepc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lslepc'  >>$@ )
 	test -z "$(WITH_SLEPC)" = yes || (  echo 'slepc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'   >>$@ )
 	test -z "$(WITH_SLEPC)" = yes || (  echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lslepc'  >>$@ )
-	test -n "$(WITH_SLEPC)" = yes || (  echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  )>> $@
+	test -n "$(WITH_SLEPC)" = yes || (  echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >>$@ )
 
 #
 else
