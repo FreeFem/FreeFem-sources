@@ -983,6 +983,23 @@ public:
          pmc=0;
         return  pmcc;
     }
+    Matrice_Creuse<K> * add(Matrice_Creuse<K> *pmcc,double cc=1)   {
+        //  pmcc->A.cswap(pmc);
+        HashMatrix<int,K> *pA= pmcc->pHM();
+        HashMatrix<int,K> *pC= dynamic_cast<HashMatrix<int,K> *>(pmc);
+        
+        if(pA==0) { cerr<< " error A  += B (A) empty matrix" << endl; }
+        if(pC==0) { cerr<< " error += B  (B)  empty matrix" << endl; }
+        ffassert(pA && pC);
+        HashMatrix<int,K> A=*pA;
+        pA->Add(pC,cc);
+      // to do.. XXXX  July 2017 FH.
+        if(verbosity>99999)   cerr << "newpMatrice_Creuse  add " << pmcc << " " << pmcc->count <<" " << pmcc->A
+            << " to " << pmc  << endl; ;;
+        
+        pmc=0;//  pcm is delete after instriction
+        return  pmcc;
+    }
   //  ~newpMatrice_Creuse() { if(pmc) delete pmc;pmc=0; }
 };
 

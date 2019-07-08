@@ -514,7 +514,9 @@ public:
       vertices(0),elements(0),borderelements(0),bnormalv(0),
       TheAdjacencesLink(0),BoundaryElementHeadLink(0),
       ElementConteningVertex(0), gtree(0)
-  {}
+  {
+      
+  }
 
   GenericMesh(const  Serialize &serialized) ;
 

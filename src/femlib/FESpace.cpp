@@ -297,7 +297,7 @@ FEProduitConstruct::FEProduitConstruct(int kk,const TypeOfFE &t)
   for(int j=0;j<kk;++j)
     for(int i=0;i<No;++i)
       data1[ci++]=m*kk;//j*m+teb.end_dfcomp[i];
-  cout << " kk "<< kk << " " << m << " : ";
+  if (verbosity) cout << " kk "<< kk << " " << m << " : ";
 }
 
 FESumConstruct::FESumConstruct(int kk,const TypeOfFE **t)
