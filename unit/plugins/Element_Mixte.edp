@@ -1,17 +1,129 @@
 include "test.idp"
+load "Element_Mixte"
+load "msh3"
 
 cout << functionDEFINITION << " Element_Mixte" << endl;
 
 real t;
 mesh Th = square(10, 10);
+mesh3 Th3 = cube(5, 5, 5);
 
-cout << parameterDEFINITION << "mesh" << endl;
 
-// fespace Uh1(Th, TDNNS0);
-// Uh1 [u1, u2, u3];
-// Uh1 [err1, err2, err3];
-//
-// t = clock();
-// [u1, u2, u3] = [0, dx(u1), 3];
-// t = clock() - t;
-// cout << timeELAPSED << t << endl;
+cout << parameterDEFINITION << "TDNNS0" << endl;
+{
+  fespace Uh1(Th, TDNNS0);
+  Uh1 [u1, u2, u3];
+  Uh1 [err1, err2, err3];
+
+  t = clock();
+  [u1, u2, u3] = [0, dx(u1), 3];
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  [err1, err2, err3] = [abs(u2 - u1), 0, 0];
+  test(err1[].linfty < HWERROR);
+}
+
+cout << parameterDEFINITION << "TDNNS1" << endl;
+
+{
+  fespace Uh1(Th, TDNNS1);
+  Uh1 [u1, u2, u3];
+  Uh1 [err1, err2, err3];
+
+  t = clock();
+  [u1, u2, u3] = [0, dx(u1), 3];
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  [err1, err2, err3] = [abs(u2 - u1), 0, 0];
+  test(err1[].linfty < HWERROR);
+}
+
+cout << parameterDEFINITION << "RT1" << endl;
+
+{
+  fespace Uh1(Th, RT1);
+  Uh1 [u1, u2];
+  Uh1 [err1, err2];
+
+  t = clock();
+  [u1, u2] = [0, dx(u1)];
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  [err1, err2] = [abs(u2 - u1), 0];
+  test(err1[].linfty < HWERROR);
+}
+
+cout << parameterDEFINITION << "RT1Ortho" << endl;
+
+{
+  fespace Uh1(Th, RT1Ortho);
+  Uh1 [u1, u2];
+  Uh1 [err1, err2];
+
+  t = clock();
+  [u1, u2] = [0, dx(u1)];
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  [err1, err2] = [abs(u2 - u1), 0];
+  test(err1[].linfty < HWERROR);
+}
+
+cout << parameterDEFINITION << "RT2" << endl;
+
+{
+  fespace Uh1(Th, RT2);
+  Uh1 [u1, u2];
+  Uh1 [err1, err2];
+
+  t = clock();
+  [u1, u2] = [0, dx(u1)];
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  [err1, err2] = [abs(u2 - u1), 0];
+  test(err1[].linfty < HWERROR);
+}
+
+cout << parameterDEFINITION << "RT2Ortho" << endl;
+
+{
+  fespace Uh1(Th, RT2Ortho);
+  Uh1 [u1, u2];
+  Uh1 [err1, err2];
+
+  t = clock();
+  [u1, u2] = [0, dx(u1)];
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  [err1, err2] = [abs(u2 - u1), 0];
+  test(err1[].linfty < HWERROR);
+}
+
+cout << parameterDEFINITION << "BDM1" << endl;
+
+{
+  fespace Uh1(Th, BDM1);
+  Uh1 [u1, u2];
+  Uh1 [err1, err2];
+
+  t = clock();
+  [u1, u2] = [0, dx(u1)];
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  [err1, err2] = [abs(u2 - u1), 0];
+  test(err1[].linfty < HWERROR);
+}
+
+cout << parameterDEFINITION << "BDM1Ortho" << endl;
+
+{
+  fespace Uh1(Th, BDM1Ortho);
+  Uh1 [u1, u2];
+  Uh1 [err1, err2];
+
+  t = clock();
+  [u1, u2] = [0, dx(u1)];
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  [err1, err2] = [abs(u2 - u1), 0];
+  test(err1[].linfty < HWERROR);
+}

@@ -17,14 +17,15 @@ t = clock();
 [u1, u2, u3] = [0, dx(u1), 3];
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-// [err1, err2, err3 = [u1, u2, u2-u3];
-// test;
+[err1, err2, err3] = [abs(u2 - u1), 0, 0];
+test(err1[].linfty < HWERROR);
+
 
 cout << parameterDEFINITION << "mesh3" << endl;
 
 t = clock();
-[u1, u2, u3] = [0, dx(u1), 3];
+[u1, u2, u3] = [0, dx(u1), 1];
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-// [err1, err2, err3 = [u1, u2, u2-u3];
-// test;
+[err1, err2, err3] = [abs(u2 - u1), 0, 0];
+test(err1[].linfty < HWERROR);
