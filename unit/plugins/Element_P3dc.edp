@@ -1,16 +1,16 @@
 include "test.idp"
-load "Element_P2pnc"
+load "Element_P3dc"
 load "msh3"
 
-cout << functionDEFINITION << " Element_P2pnc" << endl;
+cout << functionDEFINITION << "Element_P3dc" << endl;
 
 real t;
 mesh3 Th = cube(5, 5, 5);
 
-cout << parameterDEFINITION << "P2pnc" << endl;
+cout << parameterDEFINITION << "P3dc" << endl;
 {
   mesh Th2 = square(5, 5);
-  fespace Uh1(Th2, P2pnc);
+  fespace Uh1(Th2, P3dc);
   Uh1 u1;
   Uh1 u2;
   Uh1 err1;
