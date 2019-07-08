@@ -1941,8 +1941,8 @@ newpMatrice_Creuse<R>  Matrixfull2mapIJ (Stack s, KNM<R>   * const & pa,const KN
     HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m);
     HashMatrix<int,R> & A =*pA;
 
-   for (long il=0;il<N;++il)
-    for (long jl=0;jl<M;++jl)
+   for (long il=0;il<n;++il)// correct juil 2017 FH N --> n
+    for (long jl=0;jl<m;++jl)// correct juil 2017 FH M --> m
      {
        long i = ii[il];
        long j = jj[jl];
@@ -2735,6 +2735,11 @@ Matrice_Creuse<R> * SetMatrice_Creuse(Matrice_Creuse<R> * p,newpMatrice_Creuse<R
 {
     return np.set(p,Init);
 }
+template<class R,int c>
+Matrice_Creuse<R> * AddtoMatrice_Creuse(Matrice_Creuse<R> * p,newpMatrice_Creuse<R>  np)
+{
+    return np.add(p,double(c));
+}
 template <class R>
 void AddSparseMat()
 {
@@ -2772,6 +2777,11 @@ TheOperators->Add("^", new OneBinaryOperatorAt_inv<R>());
        new OneOperatorCode<BlockMatrix1<R> >()
 
        );
+    TheOperators->Add("+=",
+                      new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,newpMatrice_Creuse<R> > (AddtoMatrice_Creuse<R, 1> ));
+    TheOperators->Add("-=",
+                      new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,newpMatrice_Creuse<R> > (AddtoMatrice_Creuse<R, -1> ));
+
 
  TheOperators->Add("<-",
        new OneOperatorCode<BlockMatrix<R> >(),

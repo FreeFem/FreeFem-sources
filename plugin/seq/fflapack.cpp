@@ -1205,6 +1205,7 @@ long  ff_SchurComplement(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const
     mult_ab<R>(&BJI,AJJ1,AJI);
     if(pV)
     {
+        pV->resize(n,ni);
         for(int i=0; i< n; ++i)
         {
             int mi= mark[i];
@@ -1381,6 +1382,9 @@ static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3
 	} else if (verbosity) {
 		cout << "( load: lapack <=> fflapack , skeep ) ";
 	}
+	cerr << " This  is an obsolete plugin fflacpack please use  the  plugin lapack " <<endl;
+	cerr << " This plugin will be removed in 2020 "<<endl; 
+	ffassert(0);
 }
 
 LOADFUNC(Load_Init)

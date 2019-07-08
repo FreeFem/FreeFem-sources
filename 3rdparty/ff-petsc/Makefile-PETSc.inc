@@ -1,4 +1,6 @@
 abs_top_builddir=@abs_top_builddir@
+FF_prefix_petsc=@FF_prefix_petsc@
+FF_generic_petsc=@FF_generic_petsc@
 CC=@CC@
 CXX=@CXX@
 # FC : Fortran 90 compiler
@@ -31,4 +33,5 @@ MPIPROG=@MPIPROG@
 MPIRUN=@MPIRUN@
 MPISCRIPT=@MPISCRIPT@
 prefix=@prefix@
+WIN32DLLTARGET=@WIN32DLLTARGET@
 

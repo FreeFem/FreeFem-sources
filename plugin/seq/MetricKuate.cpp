@@ -360,9 +360,9 @@ void metrique (int nbpoints, R2 *Point, R &A, R &B, R &C, R epsilon) {
 // 			f >> noeuds[i - 1].y >> buffer;
 // 		}
 // 	}
-
-	return 0;
-}
+//
+// 	return 0;
+// }
 
 R Min (const R a, const R b) {return a < b ? a : b;}
 
