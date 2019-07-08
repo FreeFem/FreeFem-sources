@@ -1,0 +1,18 @@
+include "test.idp"
+load "IncompleteCholesky"
+
+cout << functionDEFINITION << "ichol" << endl;
+
+real t;
+matrix A = [[0, 2, 3],
+            [0, 5, 6],
+            [0, 8, 9]];
+matrix B = [[0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]];
+
+t = clock();
+// real res = ichol(A, B);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+// cout << res << endl;
