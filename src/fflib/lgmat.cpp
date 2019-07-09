@@ -1488,6 +1488,21 @@ AnyType CombMat(Stack stack,Expression emat,Expression combMat)
   delete lcB;
   return sparse_mat;
 }
+template<class R,int cc> //  July 2019 FH  A += c M +  ...
+AnyType AddCombMat(Stack stack,Expression emat,Expression combMat)
+{
+    using namespace Fem2D;
+    
+    Matrice_Creuse<R> * pMCA =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
+    HashMatrix<int,R> * pA=pMCA->pHM();
+    ffassert(pA);
+    list<tuple<R,VirtualMatrix<int,R> *,bool> > *  lcB = GetAny<list<tuple<R,VirtualMatrix<int,R> *,bool> >*>((*combMat)(stack));
+    if( cc!=1) Op1_LCMd<R,cc>::f(lcB);
+    BuildCombMat<R>(*pA,*lcB,false,0,0,false);
+   
+    delete lcB;
+    return pMCA;
+}
 
 template<class R,int init>
 AnyType DiagMat(Stack stack,Expression emat,Expression edia)
@@ -2809,9 +2824,13 @@ TheOperators->Add("^", new OneBinaryOperatorAt_inv<R>());
 
        );
     TheOperators->Add("+=",
-                      new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,newpMatrice_Creuse<R> > (AddtoMatrice_Creuse<R, 1> ));
+        new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,newpMatrice_Creuse<R> > (AddtoMatrice_Creuse<R, 1> ),
+        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<tuple<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(AddCombMat<R,1>));
+
     TheOperators->Add("-=",
-                      new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,newpMatrice_Creuse<R> > (AddtoMatrice_Creuse<R, -1> ));
+                      new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,newpMatrice_Creuse<R> > (AddtoMatrice_Creuse<R, -1> ),
+                      new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<tuple<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(AddCombMat<R,-1>));
+
 
 
  TheOperators->Add("<-",
