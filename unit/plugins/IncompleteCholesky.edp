@@ -4,15 +4,141 @@ load "IncompleteCholesky"
 cout << functionDEFINITION << "ichol" << endl;
 
 real t;
-matrix A = [[0, 2, 3],
-            [0, 5, 6],
-            [0, 8, 9]];
-matrix B = [[0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0]];
+mesh Th = square(5, 5);
+fespace Uh(Th, P1);
+macro grad(u)[dx(u),dy(u)]//
+varf vA (u, v)
+	= int2d(Th)(
+		  grad(u)' * grad(v)
+	)
+	+ on(1, u=0);
+
+matrix L;
+func real[int] preconIcho (real[int] &b) {
+	icholSolve(L, b);
+	return b;
+}
+
+matrix A = vA(Uh, Uh, sym=1, solver=CG);
+L = A;
 
 t = clock();
-// real res = ichol(A, B);
+real res = ichol(L, A);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-// cout << res << endl;
+test(res == 0);
+
+matrix C= vA(Uh, Uh, sym=1, precon=preconIcho);
+L = C;
+
+t = clock();
+res = ichol(L, C);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(res == 0);
+
+t = clock();
+res = ichol(L, C, 0);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(res == 0);
+
+
+cout << functionDEFINITION << "iLU" << endl;
+{
+  matrix L,U;// to store in incomplet factorizatin.
+  real kconv = 0;
+  fespace Vh(Th,P1);
+  int nn = 50;
+  func f = sin(2*pi*x)*sin(2*pi*y);
+  varf va(u,v) = int2d(Th) (grad(u)'*grad(v) + u*v + kconv*u*dx(v) ) + int2d(Th)( f*v) +on(1,2,3,4,u=0);
+  macro grad(u) [dx(u),dy(u)]//
+  func real[int] PreconILU(real[int] & b) {
+     iluSolve(L,U,b);
+     return b;}
+
+  matrix AI = va(Vh,Vh,solver=GMRES,precon=PreconILU);
+  matrix A = va(Vh,Vh,solver=GMRES);
+
+  real[int] b = va(0,Vh);
+
+  L=removeHalf(AI,-1);  // build the structure of L
+  if (nn < 10)
+    cout << " L " <<  L << endl;
+  U=removeHalf(AI,1); // build the structure of Ut ( transpose of )
+  if (nn < 10)
+    cout << " U " <<  U << endl;
+
+  t = clock();
+  iLU(AI, L, U);// do the incomplet LU
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(res == 0);
+
+  t = clock();
+  iLU(AI,L,U, 0);// do the incomplet LU
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(res == 0);
+}
+
+cout << functionDEFINITION << "iluSolve" << endl;
+{
+  matrix L,U;// to store in incomplet factorizatin.
+  real kconv = 0;
+  fespace Vh(Th,P1);
+  int nn = 50;
+  func f = sin(2*pi*x)*sin(2*pi*y);
+  varf va(u,v) = int2d(Th) (grad(u)'*grad(v) + u*v + kconv*u*dx(v) ) + int2d(Th)( f*v) +on(1,2,3,4,u=0);
+  macro grad(u) [dx(u),dy(u)]//
+  func real[int] PreconILU(real[int] & b) {
+     iluSolve(L,U,b);
+     return b;}
+
+  matrix AI = va(Vh,Vh,solver=GMRES,precon=PreconILU);
+  matrix A = va(Vh,Vh,solver=GMRES);
+
+  real[int] b = va(0,Vh);
+
+  L=removeHalf(AI,-1);  // build the structure of L
+  if (nn < 10)
+    cout << " L " <<  L << endl;
+  U=removeHalf(AI,1); // build the structure of Ut ( transpose of )
+  if (nn < 10)
+    cout << " U " <<  U << endl;
+
+  real[int] C = vA(0, Uh);
+  t = clock();
+  bool res = iluSolve(AI, L, C);// do the incomplet LU
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(res == 1);
+}
+
+cout << functionDEFINITION << "icholSolve" << endl;
+{
+  // mesh Th = square(5, 5);
+  // fespace Uh(Th, P1);
+  macro grad(u)[dx(u),dy(u)]//
+  varf vA (u, v)
+  	= int2d(Th)(
+  		  grad(u)' * grad(v)
+  	)
+  	+ on(1, u=0);
+
+  matrix L;
+  func real[int] preconIcho (real[int] &b) {
+  	icholSolve(L, b);
+  	return b;
+  }
+
+  matrix A = vA(Uh, Uh, sym=1, solver=CG);
+  L = A;
+
+  real[int] C = vA(0, Uh);
+  t = clock();
+  bool res = icholSolve(L, C);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(res == 1);
+}

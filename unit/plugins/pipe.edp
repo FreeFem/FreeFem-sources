@@ -45,6 +45,6 @@ real t4;
 
 t3 = clock();
 usleep(1); // to flush the io  buffer of file
-t4 = clock() - t;
+t4 = clock() - t3;
 cout << timeELAPSED << t4 - t3 << endl;
-test(t4 > t3);
+test(t4 != t3);

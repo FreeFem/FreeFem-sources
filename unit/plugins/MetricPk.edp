@@ -1,0 +1,35 @@
+include "test.idp"
+load "MetricPk"
+load "Element_P3"
+
+cout << functionDEFINITION << "MetricPk" << endl;
+
+real t;
+
+int nIter=4;
+mesh Th=square(20,20,[x,y]);
+fespace Vh(Th,P3); int kDeg=3;
+int rdeg=1;
+real ratio = 2.;
+real rmax = 1;
+
+Vh u,v;
+fespace Metric(Th,[P1,P1,P1]);
+Metric [m11,m12,m22];
+real eps=0.01;
+problem EpsDelta(u,v) =
+		int2d(Th)(eps*dx(u)*dx(v)+eps*dy(u)*dy(v)+(dx(u)+dy(u))*v)+
+		on(1,u=atan(10*x*(1-x)))+on(2,3,4, u=0);
+real massRef = Th.nt/2;
+EpsDelta;
+for(int i=0; i<nIter; i++){
+	[m11,m12,m22]=[0,0,0];
+  t = clock();
+	m11[]=MetricPk(Th,u,kDeg=kDeg,rDeg=rdeg, mass=massRef);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+	Th = adaptmesh(Th,m11,m12,m22,IsMetric=true);
+	cout << "expected number of triangles : " << massRef/20 << "; obtained " << Th.nt << "\n";
+	EpsDelta;
+	massRef=ratio*massRef;
+}
