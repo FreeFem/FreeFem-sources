@@ -231,6 +231,8 @@ struct Op2_ListMCMadd: public binary_function<Matrice_Creuse<R> *,
   {
 
     b->push_front(make_tuple<R,MatriceCreuse<R> *>(R(cc),a->A,false));
+    if(cc == -1)
+        Op1_LCMd<R>::f(b);
     return b;
   }
 
