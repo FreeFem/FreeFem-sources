@@ -107,7 +107,7 @@ struct Op2_ListCM: public binary_function<R,Matrice_Creuse<R> *,list<tuple<R,Mat
 };
 template<class R> void PrintL(const char* cc, list<tuple<R,VirtualMatrix<int,R>*,bool> > const  * const lM)
 {
-    if(verbosity>99) return; 
+    if(verbosity<100) return; 
     typedef typename list<tuple<R,VirtualMatrix<int,R> *,bool> >::const_iterator lconst_iterator;
     
     lconst_iterator begin=lM->begin();
