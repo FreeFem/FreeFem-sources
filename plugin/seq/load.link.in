@@ -24,15 +24,15 @@ if [ "$FFFLIBS" = '@'FLIBS'@' ] ; then FFFLIBS=""; fi
 if [ "$FFVERSION" = '@'VERSION'@' ] ; then FFVERSION=""; fi
 if [ -z "$INCFF" ] ; then
     if [ -f "@INCFF@/ff++.hpp" ] ; then
-	INCFF="-I@INCFF@"
+	INCFF="'-I@INCFF@'"
     elif [ -f "${dircommand}/include/ff++.hpp" ]; then
-	INCFF="-I${dircommand}/include"
+	INCFF="'-I${dircommand}/include'"
     elif [ -f ../seq/include/ff++.hpp ]; then
 	INCFF="-I../seq/include"
-    elif [ -f "FFAPPLI_INC/ff++.hpp" ] ; then
-	INCFF="-IFFAPPLI_INC"
+    elif [ -f "@FFAPPLI_INC@/ff++.hpp" ] ; then
+	INCFF="'-I@FFAPPLI_INC@'"
     elif [ -f '@ff_prefix_dir@/include/ff++.hpp' ] ; then
-	INCFF='-I@ff_prefix_dir@/include'
+	INCFF="'-I@ff_prefix_dir@/include'"
     else
 	ff=`which freefem++.exe`;
 	ffinc=`dirname "$ff"`/seq/include

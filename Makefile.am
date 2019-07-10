@@ -226,6 +226,7 @@ speedtest: all
 win32:WindowsPackage.iss FreeFEM-documentation.pdf
 	test ! -d plugin/include-tmp  || rm -r plugin/include-tmp
 	cd plugin;mkdir include-tmp;cp -Lr seq/include/*  */*.h  include-tmp
+	cp -r 3rdparty/include/. plugin/include-tmp/.
 	/c/Program\ Files\ \(x86\)/Inno\ Setup\ 5/ISCC.exe  "`cygpath.exe WindowsPackage.iss`"
 WindowsPackage.iss: etc/config/m4/WindowsPackage.m4 configure.ac Makefile.am
 	m4 -DVERSION='$(VERSION)$(ADD_PACKAGE_NAME)' \
