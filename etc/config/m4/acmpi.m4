@@ -50,13 +50,12 @@ AC_ARG_VAR(MPIRUN,[MPI run command ])
 AC_MSG_CHECKING(for MPIRUN)
 
 if test -z "$MPIRUN" ; then
-  if test -z "$MSMPI_BIN/mpiexec.exe" ;  then
-    AC_PATH_PROGS(MPIRUN,mpirun mpiexec mpiexec.exe,no)
-  elif test -x "$MSMPI_BIN"\mpiexec.exe  ; then
-    MPIRUN="$MSMPI_BIN"\mpiexec.exe
+  if test -n "$MSMPI_BIN" -a -x "$MSMPI_BIN/mpiexec.exe" ;  then
+     MPIRUN="$MSMPI_BIN"\mpiexec.exe
+  else
+    AC_PATH_PROGS(MPIRUN,mpirun mpiexec mpiexec.exe,no)   
   fi
-  
-    if test "$MPIRUN" = no
+  if test "$MPIRUN" = no
     then
 		 ff_mpi=no
 	fi

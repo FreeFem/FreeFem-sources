@@ -544,7 +544,7 @@ CYGWIN*|MINGW*|MSYS_NT*)
 	ff_suffix_dylib="dll";
 	ff_suffix_dylib_a="dll.a";
         ff_win32=yes;
-
+    # echo "ff win 32 --------------------------------------------"
 	# FFCS - 8/3/12 - remove -D_MSC_VER under MinGW64 because it forces system calls to be compiled into any object
 	# (which creates thousands of duplicate definitions for sytem calls like time()).
 
@@ -589,6 +589,7 @@ CYGWIN*|MINGW*|MSYS_NT*)
 		# FFCS uses a specific compiler, so we specify its libraries explicitely
 		if test $enable_ffcs = no
 		then
+		    export PATH="$PATH:`cygpath $MSMPI_BIN`"
 		    test -z "$MPIRUN" &&  MPIRUN=`which mpiexe.exe`
 		    if test "$enable_fortran" != no  -o  "$with_flib" != no ;   then
 			case "$F77" in
@@ -980,8 +981,9 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
 				PETSC_MPIRUN=`echo "$PETSC_MPIRUN" | awk '{gsub(" --oversubscribe", ""); print}'`	#remove --oversubscribe
 			AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]);
-
-		    test  "$PETSC_SCALAR" = "real" && test  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_MPIRUN"` `which "$MPIRUN"`
+            WPETSC_MPIRUN=`which "$PETSC_MPIRUN"`
+            WMPIRUN=`which "$MPIRUN"` 
+		    test  "$PETSC_SCALAR" = "real" && test "$ff_win32" = yes -o  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s  "$WPETSC_MPIRUN" "$WMPIRUN"
 		    if test "$?"  -eq 0 ; then
 		        AC_FF_PETSC_WHERELIB_BASIC(petsc,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetsc)
@@ -1040,7 +1042,7 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
 				PETSC_COMPLEX_MPIRUN=`echo "$PETSC_COMPLEX_MPIRUN" | awk '{print $1}'`	#remove --oversubscribe
 		    AC_MSG_NOTICE([ find complex ($PETSC_COMPLEX_SCALAR) petsc in $ffconfpetscc]);
 
-		    test  "$PETSC_COMPLEX_SCALAR" = "complex" &&  test  "$PETSC_COMPLEX_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_COMPLEX_MPIRUN"` `which "$MPIRUN"`
+		    test  "$PETSC_COMPLEX_SCALAR" = "complex" &&  test  "$ff_win32" = yes -o  "$PETSC_COMPLEX_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_COMPLEX_MPIRUN"` `which "$MPIRUN"`
 		    if test "$?"  -eq 0 ; then
 	        AC_FF_PETSC_WHERELIB_BASIC(petsccomplex,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetscc)
@@ -2448,7 +2450,7 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - TETGEN: $ff_tetgen_ok])
   AC_MSG_NOTICE([ - UMFPACK: $ff_umfpack_ok])
 fi
-if test "${prefix_petsc}" != no -a   ! -d ${prefix_petsc}/real/lib  ; then
+if test "${prefix_petsc}" != no -a   ! -d "${prefix_petsc}/real/lib"  ; then
   AC_MSG_NOTICE([ petsc dirs do no exist  , do build do:])
   AC_MSG_NOTICE([cd 3rdparty/ff-petsc/;  make   ])
 fi
