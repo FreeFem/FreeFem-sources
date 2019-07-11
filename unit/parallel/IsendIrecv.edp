@@ -2,7 +2,7 @@
 load "msh3"
 include "test.idp"
 
-cout << functionDEFINITION << "Isend and I recv" << endl;
+if (!mpirank) cout << functionDEFINITION << "Isend and I recv" << endl;
 
 real t;
 

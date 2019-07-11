@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << functionDEFINITION << "mpiWait" << endl;
+if (!mpirank) cout << functionDEFINITION << "mpiWait" << endl;
 
 real t;
 

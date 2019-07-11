@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << functionDEFINITION << "processorblock" << endl;
+if (!mpirank) cout << functionDEFINITION << "processorblock" << endl;
 real t;
 
 mpiComm Comm(mpiCommWorld, 0, 0);
@@ -8,7 +8,7 @@ mpiComm Comm(mpiCommWorld, 0, 0);
 int MPICommSize = mpiSize(Comm);
 int MPIRank = mpiRank(Comm);
 
-if (MPIRank == 0) cout << "MPI Comm size = " << MPICommSize << endl;
+cout << "MPI Comm size = " << MPICommSize << endl;
 cout << "MPI rank in Comm = " << mpiRank(Comm) << endl;
 
 mpiRequest Req;
@@ -18,15 +18,15 @@ for (int i = 0; i < MPICommSize; i++){
     t = mpiWtime();
     processorblock(i);
     t = mpiWtime() - t;
-    cout << timeELAPSED << t << endl;
+    if (!mpirank) cout << timeELAPSED << t << endl;
     t = mpiWtime();
     processorblock(mpiAnySource);
     t = mpiWtime() - t;
-    cout << timeELAPSED << t << endl;
+    if (!mpirank) cout << timeELAPSED << t << endl;
     t = mpiWtime();
     processorblock(i, Comm);
     t = mpiWtime() - t;
-    cout << timeELAPSED << t << endl;
+    if (!mpirank) cout << timeELAPSED << t << endl;
     int res;
     processorblock(i) << 42;
     processorblock(i) >> res;

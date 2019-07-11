@@ -1,14 +1,12 @@
 //NBPROC 4
 include "test.idp"
 
-if (mpirank == 0)
-  cout << "mpiAlltoall" << endl;
+if (!mpirank) cout << functionDEFINITION << "mpiAlltoall" << endl;
 
 real t;
 mpiComm cc;
 
-if (mpirank == 0)
-  cout << typeDEFINITION << "int[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "int[int]" << endl;
 
 int[int] a(mpisize), b(mpisize);
 a[mpirank] = mpirank;
@@ -16,17 +14,16 @@ a[mpirank] = mpirank;
 t = mpiWtime();
 mpiAlltoall(a, b);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 test(b[mpirank] == mpirank);
 
 t = mpiWtime();
 mpiAlltoall(a, b, cc);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 test(b[mpirank] == mpirank);
 
-if (mpirank == 0)
-  cout << typeDEFINITION << "real[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "real[int]" << endl;
 
 real[int] c(mpisize), e(mpisize);
 c[mpirank] = mpirank;
@@ -34,17 +31,16 @@ c[mpirank] = mpirank;
 t = mpiWtime();
 mpiAlltoall(c, e);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 test(e[mpirank] == mpirank);
 
 t = mpiWtime();
 mpiAlltoall(c, e, cc);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 test(e[mpirank] == mpirank);
 
-if (mpirank == 0)
-  cout << typeDEFINITION << "complex[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "complex[int]" << endl;
 
 complex[int] f(mpisize), g(mpisize);
 f[mpirank] = mpirank;
@@ -52,11 +48,11 @@ f[mpirank] = mpirank;
 t = mpiWtime();
 mpiAlltoall(f, g);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 test(g[mpirank] == mpirank);
 
 t = mpiWtime();
 mpiAlltoall(f, g, cc);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 test(g[mpirank] == mpirank);

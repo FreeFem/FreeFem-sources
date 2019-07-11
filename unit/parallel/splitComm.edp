@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << functionDEFINITION << "splitComm" << endl;
+if (!mpirank) cout << functionDEFINITION << "splitComm" << endl;
 
 real t;
 int i = 2;
@@ -9,4 +9,4 @@ mpiComm cc;
 t = mpiWtime();
 cout << splitComm(mpiCommWorld, i, cc) << endl;
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;

@@ -1,7 +1,7 @@
 include "test.idp"
 
-cout << "mpiWtick" << endl;
+if (!mpirank) cout << functionDEFINITION << "mpiWtick" << endl;
 real t1;
 
 t1 = mpiWtick();
-cout << t1 << endl;
+if (!mpirank) cout << timeELAPSED << t1 << endl;

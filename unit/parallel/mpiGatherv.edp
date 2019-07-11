@@ -1,10 +1,10 @@
 include "test.idp"
 
-cout << functionDEFINITION << "mpiGatherv" << endl;
+if (!mpirank) cout << functionDEFINITION << "mpiGatherv" << endl;
 
 real t;
 
-cout << typeDEFINITION << "int[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "int[int]" << endl;
 
 int[int] snd(mpisize), rcv(mpisize * mpisize), a(mpisize), b(mpisize);
 
@@ -18,7 +18,7 @@ for (int i = 0; i < mpisize; i++) {
 t = mpiWtime();
 mpiGatherv(snd, rcv, processor(0), a, b);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 if (mpirank == 0) {
 	int i = 0;
 	for (int counter = 0; counter < mpisize; counter++) {
@@ -28,7 +28,7 @@ if (mpirank == 0) {
 }
 
 
-cout << typeDEFINITION << "real[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "real[int]" << endl;
 
 real[int] sndr(mpisize), rcvr(mpisize * mpisize);
 int[int] ar(mpisize), br(mpisize);
@@ -43,7 +43,7 @@ for (int i = 0; i < mpisize; i++) {
 t = mpiWtime();
 mpiGatherv(sndr, rcvr, processor(0), ar, br);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 if (mpirank == 0) {
 	int i = 0;
 	for (int counter = 0; counter < mpisize; counter++) {
@@ -53,7 +53,7 @@ if (mpirank == 0) {
 }
 
 
-cout << typeDEFINITION << "complex[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "complex[int]" << endl;
 
 complex[int] sndc(mpisize), rcvc(mpisize * mpisize);
 int[int] ac(mpisize), bc(mpisize);
@@ -68,7 +68,7 @@ for (int i = 0; i < mpisize; i++) {
 t = mpiWtime();
 mpiGatherv(sndc, rcvc, processor(0), ac, bc);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 if (mpirank == 0) {
 	int i = 0;
 	for (int counter = 0; counter < mpisize; counter++) {

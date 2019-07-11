@@ -3,9 +3,9 @@ assert(mpisize == 4);
 include "test.idp"
 
 real t;
-cout << functionDEFINITION << "mpiScatter" << endl;
+if (!mpirank) cout << functionDEFINITION << "mpiScatter" << endl;
 
-cout << typeDEFINITION << "int[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "int[int]" << endl;
 int[int] a(mpisize), b(mpisize);
 if (!mpirank)
 	for [i, ai:a]
@@ -14,13 +14,13 @@ if (!mpirank)
 t = mpiWtime();
 mpiScatter(a, b(mpirank), processor(0));
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 
 for (int i = 0; i < mpisize; i++)
 	if (mpirank == i)
 		test(b[i] == i + 1);
 
-cout << typeDEFINITION << "real[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "real[int]" << endl;
 real[int] ar(mpisize), br(mpisize);
 if (!mpirank)
 	for [i, ai:ar]
@@ -29,14 +29,14 @@ if (!mpirank)
 t = mpiWtime();
 mpiScatter(ar, br(mpirank), processor(0));
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 
 for (int i = 0; i < mpisize; i++)
 	if (mpirank == i)
 		test(br[i] == i + 1);
 
 
-cout << typeDEFINITION << "complex[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "complex[int]" << endl;
 complex[int] ac(mpisize), bc(mpisize);
 if (!mpirank)
 	for [i, ai:ac]
@@ -45,7 +45,7 @@ if (!mpirank)
 t = mpiWtime();
 mpiScatter(ac, bc(mpirank), processor(0));
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 
 for (int i = 0; i < mpisize; i++)
 	if (mpirank == i) {
