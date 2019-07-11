@@ -65,10 +65,20 @@ cout << functionDEFINITION << "equiparameter" << endl;
   real X0 = 0.1, Y0 =1*X0,Y1=0, CC0=Y0;
   real meshsize=X0/10;
   real[int,int] SL(3,nsl);
-  // real lgc = setcurveabcisse(SL);
-  // nsl = lgc/meshsize;
-  real[int,int] SL1=equiparameter(SL,nsl);
-  cout << SL1 << endl;
+  for(int i=0; i< nsl; ++i) {
+      real ll = i/(nsl-1.);
+      SL(0,i) = 0*(1-ll)+X0*ll;
+      real l0=ll;
+      real RR=1.2*1.2, YY=sqrt(RR-1);
+      SL(1,i) = -CC0*(sqrt(RR-l0*l0)-YY);
+      SL(2,i) = ll;
+  }
+  real lgc = setcurveabcisse(SL);
+   {  nsl = lgc/meshsize;
+     real[int,int] SL1=equiparameter(SL,nsl);
+     SL.resize(SL1.n,SL1.m);
+     SL = SL1;
+   }
 }
 
 cout << functionDEFINITION << "Tresca" << endl;
@@ -76,7 +86,9 @@ cout << functionDEFINITION << "Tresca" << endl;
   cout << " tersca " << Tresca(1,2,3,0,0,0) << endl;
 }
 
-// cout << functionDEFINITION << "VonMises" << endl;
-// {
-//
-// }
+cout << functionDEFINITION << "VonMises" << endl;
+{
+    real res = VonMises(1., 2., 3.);
+    res = VonMises(1., 2., 3., 4.);
+    res = VonMises(1., 2., 3., 4., 5., 6.);
+}
