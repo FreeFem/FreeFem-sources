@@ -146,6 +146,7 @@ esac
 	test -z "$MPIF77" && MPIF77="$F77 $ff_MPI_INCLUDE"
 	test -z "$MPIFC"  && MPIFC="$FC  $ff_MPI_INCLUDE"
 	test -z "$MPICC"  && MPICC="$CC  $ff_MPI_INCLUDE"
+	ff_mpitype=MSMPI
     else
 	echo " #### no msmpi.dll  => no mpi under windows .... (FH) " >&AS_MESSAGE_LOG_FD
 	echo " #### no msmpi.dll  => no mpi under windows .... (FH) " >&AS_MESSAGE_FD
