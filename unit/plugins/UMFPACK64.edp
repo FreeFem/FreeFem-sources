@@ -1,0 +1,21 @@
+include "test.idp"
+load "UMFPACK64"
+
+mesh Th = square(5, 5);
+real[int] vit=[0,0,-0.3];
+func zero = 0.;
+func dep  = vit[2];
+
+fespace Vh(Th,P1);
+macro Grad(u) [dx(u),dy(u),dz(u)] //
+
+Vh uh,vh; //  to compute the displacemnt field
+problem Lap(uh,vh) = int2d(Th)(Grad(uh)'*Grad(vh))  //') for emacs
+				  + on(310,300,uh=dep) +on(311,uh=0.);
+//
+// for(int it=0; it<29; it++){
+//   cout<<"  ITERATION       "<<it<<endl;
+//   Lap;
+//   plot(Th,uh);
+//   Th=mmg3d(Th,opt="-O 9",displacement=[zero,zero,uh]);
+//  }
