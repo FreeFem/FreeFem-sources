@@ -1,10 +1,10 @@
 include "test.idp"
 
-cout << functionDEFINITION << "mpiAllGatherv" << endl;
+if (!mpirank) cout << functionDEFINITION << "mpiAllGatherv" << endl;
 
 real t;
 
-cout << typeDEFINITION << "int[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "int[int]" << endl;
 
 int[int] a(mpisize), b(mpisize * mpisize), c(mpisize), e(mpisize);
 a[mpirank] = mpirank + 1;
@@ -18,7 +18,7 @@ t = mpiWtime();
 mpiAllgatherv(a, b, c, e);
 mpiBarrier(mpiCommWorld);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 int i = 0;
 for (int counter = 0; counter < mpisize; counter++) {
 	test(b[i] == counter + 1);
@@ -29,7 +29,7 @@ t = mpiWtime();
 mpiAllgatherv(a, b, mpiCommWorld, c, e);
 mpiBarrier(mpiCommWorld);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 i = 0;
 for (int counter = 0; counter < mpisize; counter++) {
 	test(b[i] == counter + 1);
@@ -37,7 +37,7 @@ for (int counter = 0; counter < mpisize; counter++) {
 }
 
 
-cout << typeDEFINITION << "real[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "real[int]" << endl;
 
 real[int] ar(mpisize), br(mpisize * mpisize);
 int[int] cr(mpisize), er(mpisize);
@@ -51,7 +51,7 @@ for (int i = 0; i < mpisize; i++) {
 t = mpiWtime();
 mpiAllgatherv(ar, br, cr, er);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 int ir = 0;
 for (int counter = 0; counter < mpisize; counter++) {
 	test(br[ir] == counter + 1.);
@@ -61,14 +61,14 @@ for (int counter = 0; counter < mpisize; counter++) {
 t = mpiWtime();
 mpiAllgatherv(ar, br, mpiCommWorld, cr, er);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 ir = 0;
 for (int counter = 0; counter < mpisize; counter++) {
 	test(br[ir] == counter + 1.);
 	ir += (mpisize + 1);
 }
 
-cout << typeDEFINITION << "complex[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "complex[int]" << endl;
 
 complex[int] ac(mpisize), bc(mpisize * mpisize);
 int[int] cc(mpisize), ec(mpisize);
@@ -82,7 +82,7 @@ for (int i = 0; i < mpisize; i++) {
 t = mpiWtime();
 mpiAllgatherv(ac, bc, cc, ec);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 int ic = 0;
 for (int counter = 0; counter < mpisize; counter++) {
 	test(bc[ic] == counter + (1 + 2i));
@@ -92,7 +92,7 @@ for (int counter = 0; counter < mpisize; counter++) {
 t = mpiWtime();
 mpiAllgatherv(ac, bc, mpiCommWorld, cc, ec);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 ic = 0;
 for (int counter = 0; counter < mpisize; counter++) {
 	test(bc[ic] == counter + (1 + 2i));

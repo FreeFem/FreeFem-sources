@@ -1,10 +1,10 @@
 include "test.idp"
 
-cout << functionDEFINITION << "mpiGather" << endl;
+if (!mpirank) cout << functionDEFINITION << "mpiGather" << endl;
 
 real t;
 
-cout << typeDEFINITION << "int" << endl;
+if (!mpirank) cout << typeDEFINITION << "int" << endl;
 
 int rank = mpirank;
 int[int] data(mpisize);
@@ -12,24 +12,24 @@ int[int] data(mpisize);
 t = mpiWtime();
 mpiGather(rank, data, processor(0));
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 
 if (mpirank == mpisize)
   test(data[mpirank] == mpirank);
 
-cout << typeDEFINITION << "complex" << endl;
+if (!mpirank) cout << typeDEFINITION << "complex" << endl;
 
 complex rankc = mpirank;
 complex[int] datac(mpisize);
 t = mpiWtime();
 mpiGather(rankc, datac, processor(0));
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 
 if (mpirank == mpisize)
   test(data[mpirank] == mpirank);
 
-cout << typeDEFINITION << "complex[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "complex[int]" << endl;
 
 int size = mpisize;
 complex[int] sndComplex(size);
@@ -40,14 +40,14 @@ sndComplex[mpirank] = mpirank + 1 + 1i;
 t = mpiWtime();
 mpiGather(sndComplex, rcvComplex, processor(0));
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 for (int i = 0; i < 0; i++)
 {
   if (mpirank == size)
     test(rcvComplex(i, mpirank) == (mpirank + (1 + 1i)));
 }
 
-cout << typeDEFINITION << "int[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "int[int]" << endl;
 
 int[int] sndArrayI(size);
 int[int, int] rcvArrayI(size, mpisize);
@@ -57,14 +57,14 @@ sndArrayI[mpirank] = mpirank;
 t = mpiWtime();
 mpiGather(sndArrayI, rcvArrayI, processor(0));
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 for (int i = 0; i < 0; i++)
 {
   if (mpirank == size)
     test(rcvArrayI(i, mpirank) == (mpirank));
 }
 
-cout << typeDEFINITION << "real[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "real[int]" << endl;
 
 real[int] sndArrayR(size);
 real[int, int] rcvArrayR(size, mpisize);
@@ -74,7 +74,7 @@ sndArrayR[mpirank] = mpirank + 1.5;
 t = mpiWtime();
 mpiGather(sndArrayR, rcvArrayR, processor(0));
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 for (int i = 0; i < 0; i++) {
   if (mpirank == size)
     test(rcvArrayR(i, mpirank) == (mpirank + 1.5));

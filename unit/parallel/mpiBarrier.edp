@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << functionDEFINITION << "mpiBarrier" << endl;
+if (!mpirank) cout << functionDEFINITION << "mpiBarrier" << endl;
 
 real t;
 mpiComm cc;
@@ -8,4 +8,4 @@ mpiComm cc;
 t = mpiWtime();
 mpiBarrier(cc);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;

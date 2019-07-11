@@ -1,46 +1,46 @@
 include "test.idp"
 
-cout << functionDEFINITION << "mpiAllGather" << endl;
+if (!mpirank) cout << functionDEFINITION << "mpiAllGather" << endl;
 real t;
 
-cout << typeDEFINITION << "int[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "int[int]" << endl;
 
 int rank = mpirank;
 int[int] nbRcv(mpisize);
 t = mpiWtime();
 mpiAllgather(rank, nbRcv, mpiCommWorld);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 test(nbRcv[mpirank] == mpirank);
 
-cout << typeDEFINITION << "real[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "real[int]" << endl;
 
 real rankr = mpirank;
 real[int] ArrayRcv(mpisize);
 t = mpiWtime();
 mpiAllgather(rankr, ArrayRcv, mpiCommWorld);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 test(ArrayRcv[mpirank] == mpirank);
 
 t = mpiWtime();
 mpiAllgather(rankr, ArrayRcv);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 test(ArrayRcv[mpirank] == mpirank);
 
-cout << typeDEFINITION << "complex[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "complex[int]" << endl;
 
 complex rankc = mpirank;
 complex[int] ArrayRcvc(mpisize);
 t = mpiWtime();
 mpiAllgather(rankc, ArrayRcvc, mpiCommWorld);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 test(ArrayRcvc[mpirank] == mpirank);
 
 t = mpiWtime();
 mpiAllgather(rankc, ArrayRcvc);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 test(ArrayRcvc[mpirank] == mpirank);

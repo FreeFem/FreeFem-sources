@@ -2,7 +2,7 @@
 load "msh3"
 include "test.idp"
 
-cout << "send and rcv" << endl;
+if (!mpirank) cout << functionDEFINITION << "send and rcv" << endl;
 
 real t;
 int rank;

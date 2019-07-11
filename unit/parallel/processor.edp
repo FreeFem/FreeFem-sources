@@ -1,7 +1,7 @@
 //NBPROC 4
 include "test.idp"
 
-cout << "processor" << endl;
+if (!mpirank) cout << functionDEFINITION << "processor" << endl;
 
 real t;
 

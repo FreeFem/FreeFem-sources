@@ -1,7 +1,7 @@
 include "test.idp"
 assert(mpisize >= 2);
 
-cout << functionDEFINITION << "mpiWtime" << endl;
+if (!mpirank) cout << functionDEFINITION << "mpiWtime" << endl;
 
 real t;
 real time1;
@@ -10,7 +10,7 @@ real time2;
 t = mpiWtime();
 time1 = mpiWtime();
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
 system("sleep 1");
 time2 = time();
 test(time2 > time1);

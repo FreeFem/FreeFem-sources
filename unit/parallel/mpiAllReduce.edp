@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << functionDEFINITION << "mpiAllReduce" << endl;
+if (!mpirank) cout << functionDEFINITION << "mpiAllReduce" << endl;
 
 real t;
-if (!mpirank) cout << "mpiMAX" << endl;
+cout << "mpiMAX" << endl;
 
 if (!mpirank) cout << typeDEFINITION << "int" << endl;
 int rank = mpirank;
@@ -11,8 +11,8 @@ int globalRank;
 t = mpiWtime();
 mpiAllReduce(rank, globalRank, mpiCommWorld, mpiMAX);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
-if (mpirank == 0) cout << globalRank << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
+cout << globalRank << endl;
 test(globalRank == 3);
 
 if (!mpirank) cout << typeDEFINITION << "real" << endl;
@@ -23,8 +23,8 @@ real globalRankr;
 t = mpiWtime();
 mpiAllReduce(rankr, globalRankr, mpiCommWorld, mpiMAX);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
-if (mpirank == 0) cout << globalRankr << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
+cout << globalRankr << endl;
 test(globalRankr == 1.);
 
 if (!mpirank) cout << typeDEFINITION << "complex" << endl;
@@ -35,6 +35,6 @@ complex globalRankc;
 t = mpiWtime();
 mpiAllReduce(rankc, globalRankc, mpiCommWorld, mpiSUM);
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
-if (mpirank == 0) cout << globalRankc << endl;
+if (!mpirank) cout << timeELAPSED << t << endl;
+cout << globalRankc << endl;
 test((globalRank - (4.85882 + 1.43529i)) < ALGERROR);
