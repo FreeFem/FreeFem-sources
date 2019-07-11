@@ -8,6 +8,18 @@ func preffe#K[int] pr#A(preffe#K[int] &u)
     if (!bpara)
     res = pr#Aglobal*u;
     else if (!preffe#prmesh#excluded){
+      IFMACRO(bem,1)
+      preffe#K[int] scaledu = preffe#Dih[mpiRank(preffe#prmesh#commddm)]*u;
+      preffe#K[int] scaledug(preffe#Vhglob.ndof);
+      scaledug = preffe#Rih[mpiRank(preffe#prmesh#commddm)]'*scaledu;
+      preffe#K[int] ug(scaledug.n);
+      ug = 0;
+      mpiAllReduce(scaledug,ug,preffe#prmesh#commddm,mpiSUM);
+      preffe#K[int] resg = pr#Aglobal*ug;
+      res = preffe#Rih[mpiRank(preffe#prmesh#commddm)]*resg;
+      ENDIFMACRO
+
+      IFMACRO(!bem)
       if (preffe#prmesh#overlap > 0) {
         res = pr#aRd[mpiRank(preffe#prmesh#commddm)]*u;
         pr#prfe#update(res,true);
@@ -16,6 +28,7 @@ func preffe#K[int] pr#A(preffe#K[int] &u)
         res = pr#matN*u;
         pr#prfe#update(res,false);
       }
+      ENDIFMACRO
     }
     /*res = B*u;*/
     preffe#prmesh#toc(pr#tmvi,"",pr#tmv)
@@ -27,6 +40,13 @@ func preffe#K[int] pr#directsolve(preffe#K[int]& rhs)
 {
   preffe#K[int] res(rhs.n);
 
+  IFMACRO(bem,1)
+  if (mpirank == 0)
+    cout << "No way to use a direct solver for BEM for now !" << endl;
+  assert(0);
+  ENDIFMACRO
+
+  IFMACRO(!bem)
   preffe#prmesh#tic(pr#tloc)
 
   if (preffe#prmesh#isincomm) {
@@ -53,6 +73,7 @@ func preffe#K[int] pr#directsolve(preffe#K[int]& rhs)
   }
   
   preffe#prmesh#toc(pr#tloc,"direct solver",pr#tdirect)
+  ENDIFMACRO
   
   return res;
 }
@@ -161,24 +182,37 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
         if (!bpara) {
           int cpt = 0;
           for (int jj=0; jj<preffe#prmesh#npart; jj++) {
+            IFMACRO(!pr#Zglobal)
             preffe#K[int] tmp(preffe#Rih[jj].n);
             tmp = preffe#Rih[jj]*l;
             for (int ii=0; ii < pr#sizelg[jj]; ii++) {
               vaux[cpt]=pr#Z[cpt]'*tmp;
               cpt++;
             }
+            ENDIFMACRO
+            IFMACRO(pr#Zglobal,1)
+            for (int ii=0; ii < pr#sizelg[jj]; ii++) {
+              vaux[cpt]=pr#Z[cpt]'*l;
+              cpt++;
+            }
+            ENDIFMACRO
           }
-          /* Z E^-1 vaux */	
           zaux=pr#E^-1*vaux;
           cpt = 0;
           /* the 2 fors loop over the columns of Z subdomainwise */
           for (int jj=0; jj<preffe#prmesh#npart; jj++)
           for (int ii=0; ii < pr#sizelg[jj]; ii++) {
+            IFMACRO(!pr#Zglobal)
             preffe#K[int] tmp(preffe#Rih[jj].m);
             tmp = preffe#Rih[jj]'*pr#Z[cpt];
             res += zaux[cpt]*tmp;
             cpt++; /* keeps track of the global numbering of the columns of Z */
             /* we multiply 'column by element' */
+            ENDIFMACRO
+            IFMACRO(pr#Zglobal,1)
+            res += zaux[cpt]*pr#Z[cpt];
+            cpt++;
+            ENDIFMACRO
           }
         }
         else {

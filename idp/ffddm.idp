@@ -10,6 +10,7 @@ macro meshN()mesh// EOM             // two-dimensional problem
 macro intN()int2d// EOM             // two-dimensional integral
 macro intbN()int1d// EOM            // one-dimensional integral
 macro minimalMesh()square(1,1)// EOM
+macro Tmatrix() matrix// EOM
 ENDIFMACRO
 
 IFMACRO(dimension,3)
@@ -18,6 +19,7 @@ macro meshN()mesh3// EOM            // three-dimensional problem
 macro intN()int3d// EOM             // three-dimensional integral
 macro intbN()int2d// EOM            // two-dimensional integral
 macro minimalMesh()cube(1,1,1)// EOM
+macro Tmatrix() matrix// EOM
 ENDIFMACRO
 
 IFMACRO(dimension,3S)
@@ -26,6 +28,8 @@ macro meshN()meshS// EOM            // three-dimensional surface problem
 macro intN()int2d// EOM
 macro intbN()int1d// EOM
 macro minimalMesh()square3(1,1,[x,y,z])// EOM
+macro bem()1// EOM
+macro Tmatrix() HMatrix// EOM
 ENDIFMACRO
 
 IFMACRO(WITHHPDDM)
@@ -195,7 +199,7 @@ int pr#verbosity = ffddmverbosity;
 
 int pr#bdirect = ffddmbdirect;
 
-matrix<preffe#K> pr#Aglobal;
+Tmatrix<preffe#K> pr#Aglobal;
 matrix<preffe#K>[int] pr#aRd(preffe#prmesh#npart);      /* local Dirichlet matrices for parallel matrix vector product */
 matrix<preffe#K> pr#matN;
 
@@ -295,6 +299,11 @@ if (preffe#prmesh#isincomm)
 {	
 	preffe#prmesh#tic(pr#tfactoi)
 
+	IFMACRO(bem,1)
+	pr#Aglobal = assemble(preffe#Vhglob,preffe#Vhglob,eta=-1e+0,epsilon=1e-3,minclustersize=20,maxblocksize=1000000,comm=preffe#prmesh#commddm);
+	ENDIFMACRO
+
+	IFMACRO(!bem)
   if (pr#bdirect || bseq) {
     Varf(vaglobal,preffe#prmesh#Thglob,preffe#Vhglob)
     pr#Aglobal = vaglobal(preffe#Vhglob,preffe#Vhglob,solver = (vsym ? CG : GMRES),tgv=vtgvelim);
@@ -351,7 +360,8 @@ if (preffe#prmesh#isincomm)
   }
   if (bseq)
     preffe#prmesh#Thi = preffe#prmesh#Thglob;
-		
+  ENDIFMACRO
+
   preffe#prmesh#toc(pr#tfactoi,"",pr#tfacto)
 }
 //EOM
@@ -370,6 +380,19 @@ if (pr#prfe#prmesh#isincomm)
   if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#commddm)))) {
   	     
     if (pr#verbosity > 1 && !bpara) cout << "["+Stringification(pr)+"] Domain :" << i << "/" << pr#prfe#prmesh#npart << endl;
+
+		IFMACRO(bem,1)
+		pr#prfe#prmesh#Thi = pr#prfe#prmesh#aTh[i];
+		Tmatrix<pr#prfe#K> Hloc = assemble(pr#prfe#Vhi,pr#prfe#Vhi,eta=-1e+0,epsilon=1e-3,minclustersize=20,maxblocksize=1000000,comm=pr#prfe#prmesh#commself);
+		pr#prfe#K[int,int] mdense(pr#prfe#Vhi.ndof, pr#prfe#Vhi.ndof);
+		mdense = Hloc;
+		pr#aR[i] = mdense;
+		display(Hloc);
+		display(pr#Aglobal);
+		set(pr#aR[i],solver = sparsesolver,commworld=pr#prfe#prmesh#commself,factorize=3);
+		ENDIFMACRO
+
+		IFMACRO(!bem)
 
 		IFMACRO(!VarfPrec)
 		if (bseq) cout << "Error in ffddmsetupPrecond: you need to provide the varf macro for the preconditioner in sequential mode" << endl;
@@ -420,6 +443,8 @@ if (pr#prfe#prmesh#isincomm)
 		ENDIFMACRO
 		IFMACRO(!pr#withhpddm)
 		set(pr#aR[i],solver = sparsesolver,commworld=pr#prfe#prmesh#commself,factorize=3);
+		ENDIFMACRO
+
 		ENDIFMACRO
   }
   if (bseq)
