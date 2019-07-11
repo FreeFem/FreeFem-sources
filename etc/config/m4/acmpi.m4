@@ -50,7 +50,12 @@ AC_ARG_VAR(MPIRUN,[MPI run command ])
 AC_MSG_CHECKING(for MPIRUN)
 
 if test -z "$MPIRUN" ; then
+  if test -z "$MSMPI_BIN/mpiexec.exe" ;  then
     AC_PATH_PROGS(MPIRUN,mpirun mpiexec mpiexec.exe,no)
+  elif test -x "$MSMPI_BIN"\mpiexec.exe  ; then
+    MPIRUN="$MSMPI_BIN"\mpiexec.exe
+  fi
+  
     if test "$MPIRUN" = no
     then
 		 ff_mpi=no
@@ -106,12 +111,18 @@ esac
  if test -n "$MSMPI_INC" -a -n "$MSMPI_BIN" -a  "$ff_win32" = yes   ; then
    echo " ####  check  MSMPI"
 		   # MSMPI_LIB64 MSMPI_LIB32   $ff_ptrbit is  32 or 64
+		   ffMSMPI_BIN=`cygpath $MSMPI_BIN` 
+		   ffMSMPI_INC=`cygpath $MSMPI_INC` 
+		   ffMSMPI_LIB32=`cygpath $MSMPI_LIB32` 
+		   ffMSMPI_LIB64=`cygpath $MSMPI_LIB64` 
+		   
 		   mkdir -p 3rdparty/include/msmpi
 		   mkdir -p 3rdparty/lib/msmpi
+		   
 		   cp "$MSMPI_INC"/*.h 3rdparty/include/msmpi
-		   grep -v INT_PTR_KIND "$MSMPI_INC"/mpif.h >3rdparty/include/msmpi/mpif.h
-		   test "$ff_ptrbit" -eq 64 && cp "$MSMPI_INC"/x64/*.h 3rdparty/include/msmpi
-		   test "$ff_ptrbit" -eq 32 && cp "$MSMPI_INC"/x86/*.h 3rdparty/include/msmpi
+		   grep -v INT_PTR_KIND "ff$MSMPI_INC"/mpif.h >3rdparty/include/msmpi/mpif.h
+		   test "$ff_ptrbit" -eq 64 && cp "ff$MSMPI_INC"/x64/*.h 3rdparty/include/msmpi
+		   test "$ff_ptrbit" -eq 32 && cp "$ffMSMPI_INC"/x86/*.h 3rdparty/include/msmpi
 		   ff_MPI_INCLUDE_DIR=`pwd`/3rdparty/include/msmpi
 		   ff_msmpi_lib="$MSMPI_LIB64"
 		   test "$ff_ptrbit" -eq 32 && ff_msmpi_lib="$MSMPI_LIB32"
@@ -120,12 +131,12 @@ esac
 		   # to reinstall msmpi .. 
 		   
 #  MSMPI
-    if  "$with_mpilibs"=`where msmpi.dll`
+    if test -x "`which msmpi.dll`"
     then
 #  Remove for scotch and parmetis
 	ff_MPI_INCLUDE="-I$ff_MPI_INCLUDE_DIR  -D__int64=long\ long"
 	with_mpiinc="$ff_MPI_INCLUDE"
-	test -z "$MPIRUN" && MPIRUN="where mpiexe.exe"
+	test -z "$MPIRUN" -a -x "$ffMSMPI_BIN/mpiexe.exe" && MPIRUN="$MSMPI_BIN\mpiexe.exe"
 	ff_MPI_LIBC="'$ff_msmpi_lib/msmpi.lib'"
 	ff_MPI_LIB="'$ff_msmpi_lib/msmpi.lib'"
 	ff_MPI_LIBFC="'$ff_msmpi_lib/msmpifec.lib' '$ff_msmpi_lib/msmpi.lib'"
@@ -367,7 +378,7 @@ if test "$ff_mpi" != yes ; then
 	  AC_SUBST(MPI_LIBFC,"")
           AC_SUBST(SKIP_TESTS_MPI,"yes")
 	  ff_mpi=no
-
+dnl    AC_MSG_ERROR([ Sorry nompi  compiler !])
 fi
 
 # Local Variables:
