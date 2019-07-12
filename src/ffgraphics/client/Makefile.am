@@ -20,4 +20,8 @@
 # AUTHORS : Simon Garnotel
 # E-MAIL  : simon.garnotel@gmail.com
 
-EXTRA_DIST = client.cpp Client.hpp
+bin_PROGRAMS = ffclient
+
+ffclient_SOURCES = client.cpp Client.hpp
+ffclient_LDADD = @LIBSPTHREAD@
+AM_CPPFLAGS = -I../asio/asio/include
