@@ -14,14 +14,12 @@
 # You should have received a copy of the GNU Lesser General Public License #
 # along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          #
 ############################################################################
-# SUMMARY : Makefile for FreeFem++
+# SUMMARY : ...
 # LICENSE : LGPLv3
 # ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-# AUTHORS : ...
-# E-MAIL  : ...
+# AUTHORS : Simon Garnotel
+# E-MAIL  : simon.garnotel@gmail.com
 
-SUBDIRS = libMesh bamglib femlib Graphics Algo lglib fflib \
-  nw mpi bamg medit bin-win32 \
-  ffgraphics
+SOURCES = ffserver.hpp
 
-EXTRA_DIST= Carbon.r
+AM_CPPFLAGS = -I../asio/asio/include
