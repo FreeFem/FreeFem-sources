@@ -20,4 +20,6 @@
 # AUTHORS : Simon Garnotel
 # E-MAIL  : simon.garnotel@gmail.com
 
-SUBDIRS = server client
+SOURCES = ffserver.hpp
+
+AM_CPPFLAGS = -I../asio/asio/include

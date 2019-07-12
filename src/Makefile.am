@@ -20,7 +20,8 @@
 # AUTHORS : ...
 # E-MAIL  : ...
 
-SUBDIRS=libMesh  bamglib femlib  Graphics Algo lglib fflib 	\
-nw mpi  bamg medit bin-win32
+SUBDIRS = libMesh bamglib femlib Graphics Algo lglib fflib \
+  nw mpi bamg medit bin-win32 \
+  ffgraphics
 
 EXTRA_DIST= Carbon.r

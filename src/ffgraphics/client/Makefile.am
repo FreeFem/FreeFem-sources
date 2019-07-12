@@ -20,4 +20,4 @@
 # AUTHORS : Simon Garnotel
 # E-MAIL  : simon.garnotel@gmail.com
 
-SUBDIRS = server client
+EXTRA_DIST = client.cpp Client.hpp

@@ -966,7 +966,7 @@ AC_SUBST([FF_generic_petsc],"$enable_generic")
 #/usr/local/ff++/petsc/lib/petsc/conf/petscvariables
 ff_petsc_ok=no
 ff_slepc_ok=no
-echo --$with_petsc-- $ff_mpi 
+echo --$with_petsc-- $ff_mpi
 if test "$with_petsc" != no -a  $ff_mpi = yes; then
     for d in "$with_petsc" "${prefix_petsc}/real/lib" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
 	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
@@ -2292,6 +2292,9 @@ AC_OUTPUT(
     src/femlib/Makefile
     src/Algo/Makefile
     src/lglib/Makefile
+    src/ffgraphics/Makefile
+      src/ffgraphics/server/Makefile
+      src/ffgraphics/client/Makefile
     src/fflib/Makefile
     src/nw/Makefile
     src/mpi/Makefile
