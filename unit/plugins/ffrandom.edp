@@ -1,0 +1,35 @@
+include "test.idp"
+load "ffrandom"
+
+real t;
+
+t = clock();
+cout << random() << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+t = clock();
+cout << random() << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+t = clock();
+cout << random() << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+t = clock();
+srandom(10);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+t = clock();
+cout << random() << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+t = clock();
+real randnb = random() % 10;
+test(randnb < 10);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+t = clock();
+cout << random() << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+real randdev = srandomdev();
