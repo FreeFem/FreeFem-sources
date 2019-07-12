@@ -1,3 +1,6 @@
 [submodule "src/ffgraphics/asio"]
 	path = src/ffgraphics/asio
 	url = https://github.com/chriskohlhoff/asio
+[submodule "src/ffgraphics/json"]
+	path = src/ffgraphics/json
+	url = https://github.com/nlohmann/json
