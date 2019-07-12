@@ -12,34 +12,70 @@ for(int i=0; i<N.n; i++) {
 Vh P = 2.0;
 Vh uh1;
 real a;
+real t;
 
+cout << functionDEFINITION << "CppModTemplate3" << endl;
+t = clock();
 CppModTemplate3(uh1[], N[], P[]);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 cout << endl;
 cout << "uh1: " << uh1[].min  << " " << uh1[].max << endl;
 
+cout << functionDEFINITION << "CppModTemplate4" << endl;
+t = clock();
 CppModTemplate4(uh1[], N[], P[], P[]);
 cout << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 cout << "uh1: " << uh1[].min  << " " << uh1[].max << endl;
 
+cout << functionDEFINITION << "CppModTemplate5" << endl;
+t = clock();
 CppModTemplate5(uh1[], N[], P[], P[], P[]);
 cout << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 cout << "5 args: uh1: " << uh1[].min  << " " << uh1[].max << endl;
 
+cout << functionDEFINITION << "CppModTemplate6" << endl;
+t = clock();
 CppModTemplate6(uh1[], N[], P[], P[], P[], P[]);
 cout << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 cout << "6 args: uh1: " << uh1[].min  << " " << uh1[].max << endl;
 
+cout << functionDEFINITION << "CppModTemplate7" << endl;
+t = clock();
 CppModTemplate7(uh1[], N[], P[], P[], P[], P[], P[]);
 cout << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 cout << "7 args: uh1: " << uh1[].min  << " " << uh1[].max << endl;
 
-
+cout << functionDEFINITION << "CppModTemplate8" << endl;
+t = clock();
 CppModTemplate8(uh1[], N[], P[], P[], P[], P[], P[], P[]);
 cout << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 cout << "8 args: uh1: " << uh1[].min  << " " << uh1[].max << endl;
+cout << functionDEFINITION << "funcs1" << endl;
+t = clock();
 cout << " funcs1 " << funcs1(2) << endl;
+cout << functionDEFINITION << "funcs1" << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 cout << " funcs2 " << funcs2(2,3) << endl;
+t = clock();
+cout << functionDEFINITION << "funcs1" << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+t = clock();
 cout << " funcs3 " << funcs3(1,2,3) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 test(funcs1(2) == 2);
 test(funcs2(2, 3) == 5);
 test(funcs3(1, 2, 3) == 6);

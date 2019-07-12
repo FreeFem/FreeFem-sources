@@ -3,6 +3,7 @@ load "ffrandom"
 
 real t;
 
+cout << functionDEFINITION << "random" << endl;
 t = clock();
 cout << random() << endl;
 t = clock() - t;
@@ -15,6 +16,7 @@ t = clock();
 cout << random() << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
+cout << functionDEFINITION << "srandom" << endl;
 t = clock();
 srandom(10);
 t = clock() - t;
@@ -32,4 +34,8 @@ t = clock();
 cout << random() << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
+cout << functionDEFINITION << "srandomdev" << endl;
+t = clock();
 real randdev = srandomdev();
+t = clock() - t;
+cout << timeELAPSED << t << endl;
