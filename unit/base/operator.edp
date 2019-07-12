@@ -1436,7 +1436,6 @@ test(arrayreal[1] - 1.2 < HWERROR);
 test(arrayreal[2] - 2.3 < HWERROR);
 arrayreal = [1.1, 2.2, 3.3];
 
-
 cout << functionDEFINITION << "operator *=" << endl;
 
 cout << typeDEFINITION << "int" << endl;
