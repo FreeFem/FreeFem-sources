@@ -151,6 +151,7 @@ iter = 1000;
 cout << functionDEFINITION << "cmaes" << endl;
 
 t = clock();
-cout << cmaes(J,start,initialStdDevs=isd,stopTolFun=1e-1,stopMaxIter=200,stopMaxFunEval=1000);
+real res = cmaes(J,start,initialStdDev=1e-1, initialStdDevs=isd,stopTolFun=1e-1, stopTolFunHist=1, stopMaxIter=200,stopMaxFunEval=1000, seed=1, stopTolX = 1, popsize=4.);
+cout << res << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
