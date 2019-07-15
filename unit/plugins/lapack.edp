@@ -1,6 +1,8 @@
 include "test.idp"
 load "lapack"
 
+real t;
+
 cout << functionDEFINITION << "inv" << endl;
 int nerr=0; // nomber of err ..
 //  to set a full matrix ..
@@ -46,7 +48,10 @@ B = A*A1; // version 3.13
 B -= Id;
 cout <<" ||A*A1-Id|| " <<  B.linfty << endl;
 nerr += B.linfty > 1e-9;
+t = clock();
 inv(A1);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 A1 -= A;
 cout <<  "|| inv(A1) - A ||" << A1.linfty << endl;
 nerr += A1.linfty > 1e-9;
@@ -55,14 +60,23 @@ EndMacro
 
 cout << functionDEFINITION << "dgeev" << endl;
 cout << "Testing real complex dgeev..." << endl;
+t = clock();
 TEST(real,complex,-100.,dgeev)
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 cout << nerr << endl;
 cout << functionDEFINITION << "zgeev" << endl;
 cout << "Testing complex complex zgeev..." << endl;
+t = clock();
 TEST(complex,complex,100i,zgeev)
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 cout << nerr << endl;
 cout << functionDEFINITION << "dsyev" << endl;
 cout << "Testing real real dsyev..." << endl;
+t = clock();
 TEST(real,real,1,dsyev)
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 cout << nerr << endl;
 assert(nerr==0);
