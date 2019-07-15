@@ -19,3 +19,5 @@ solve laplacep(uh,vh,solver=CG,tgv=1e5) =      //  definion of  the problem
 cout << "vtk information" << endl;
 int[int] fforder=[0,0,1,0,1];
 int[int] array = savevtk("disque.vtk",Th2,uh,ggg,uh,[uh,ggg],[uh,ggg],dataname="kkdjd jyqql bidule45 vector nnn nn44233T",order=fforder);
+
+// mesh Th = vtkload3("assets/bidule.vtk");
