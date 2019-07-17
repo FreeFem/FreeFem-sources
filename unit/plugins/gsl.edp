@@ -75,9 +75,6 @@ for (int i=0; i<=mm; ++i) {
   err = max( err , abs(yy[i]-zz[i]));
   cout << xx[i] << " " << yy[i] << "  ~ " << zz[i] << ",  " << dyy[i] << " ~ " << dzz [i] <<  " , " << ddyy[i] << " " << ddzz[i] <<  endl;
 }
-//  test out of  bound v 3.50
-// OUT => VALUE AT BOUND ... FH OCT 2015
 cout << dspline(1,0) << " ==  " << spline(-1) << " " << spline(100) << " == "<< dspline(1,dspline.m-1) << endl;
 cout << " err = " << err << endl;
 test(err < 0.3);
-assert(err < 0.3);

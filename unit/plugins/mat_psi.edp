@@ -1,0 +1,32 @@
+include "test.idp"
+load "mat_psi"
+
+real t1;
+border a(t=0, 2*pi)     {    x = cos(t);    y = sin(t);  };
+mesh th = buildmesh(a(70));
+fespace Vh(th,P1);
+
+Vh vh,vo,u1 = y, u2 = -x, v = exp(-10*((x-0.3)^2 +(y-0.3)^2)), rhs =0;
+Vh wh=0,Bwh;
+real dt = 0.001,t=0, tmax=pi/4;
+int kk=0;
+varf aa(v,vh) = int2d(th)(v*vh/dt) ;
+matrix  AA= aa(Vh,Vh,solver=CG);
+
+problem  A(v,vh) = int2d(th)(v*vh/dt)   - int2d(th)(vo*vh/dt) + rhs[];
+
+real[int] viso=[-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,10,100,1000];
+verbosity = 4;
+for ( t=0; t< tmax ; t+=dt)
+{
+  vo[]=v[];
+  matrix B;
+  t1 = clock();
+  MatUpWind0(B,th,vo,[u1,u2]);
+  t1 = clock() - t;
+  cout << timeELAPSED << t << endl;
+  rhs[] = B* vo[] ;
+  rhs[] = -rhs[] ;
+  rhs[] += AA* vo[];
+  v[] = AA^-1*rhs[];
+};
