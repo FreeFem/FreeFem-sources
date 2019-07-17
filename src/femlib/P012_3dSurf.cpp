@@ -361,6 +361,84 @@
           
       }
  
+ 
+ 
+	  class TypeOfFE_P1bLagrange_surf : public TypeOfFE_Lagrange<MeshS>  { 
+	      public:  
+	  	 typedef MeshS Mesh;
+	  	 typedef GFElement<MeshS> FElement;
+	  	 TypeOfFE_P1bLagrange_surf(): TypeOfFE_Lagrange<MeshS>(-1) {  }
+	  	 void FB(const What_d whatd,const Mesh & Th,const MeshS::Element & K,const RdHat &PHat, RNMK_ & val) const;
+	  } ;
+     
+ 
+ 
+ 
+      void TypeOfFE_P1bLagrange_surf::FB(const What_d whatd,const Mesh & ,const Element & K,const RdHat & PHat,RNMK_ & val) const
+      {
+ 	 //  const Triangle & K(FE.T);
+ 
+	 
+	 
+ 	 R l[]={1.-PHat.sum(),PHat.x,PHat.y};
+ 	 R lb=l[0]*l[1]*l[2]*9.;
+ 	 
+ 	 assert(val.N() >=4);
+ 	 assert(val.M()==1 );
+	 
+ 	 val=0; 
+ 	 RN_ f0(val('.',0,op_id)); 
+	 
+ 	 if (whatd & Fop_D0) {
+		 f0[0] = l[0]-lb;
+		 f0[1] = l[1]-lb;
+		 f0[2] = l[2]-lb;
+		 f0[3] = 3.*lb;
+ 	 }
+ 	 if (whatd & Fop_D1) {
+ 	       R3 Dl[3];
+ 	       K.Gradlambda(Dl);
+ 	       R3 Dlb = (Dl[0]*l[1]*l[2] + Dl[1]*l[0]*l[2] + Dl[2]*l[0]*l[1])*9.;
+	       
+ 	       //for(int i=0;i<4;++i)
+ 	       //      cout << Dl[i] << endl;
+	      
+ 	       if (whatd & Fop_dx) 
+ 		 {
+ 		     RN_ f0x(val('.',0,op_dx)); 
+ 		     f0x[0] = Dl[0].x-Dlb.x;
+ 		     f0x[1] = Dl[1].x-Dlb.x;
+ 		     f0x[2] = Dl[2].x-Dlb.x;
+ 		     f0x[3] = Dlb.x*3.;
+		     
+ 		 }
+	       
+ 	       if (whatd & Fop_dy) {
+ 		   RN_ f0y(val('.',0,op_dy)); 
+ 		   f0y[0] = Dl[0].y-Dlb.y;
+ 		   f0y[1] = Dl[1].y-Dlb.y;
+ 		   f0y[2] = Dl[2].y-Dlb.y;
+ 		   f0y[3] = Dlb.y*3.;
+ 	       }
+	       
+ 	       if (whatd & Fop_dz) {
+ 		   RN_ f0z(val('.',0,op_dz)); 
+ 		   f0z[0] = Dl[0].z-Dlb.z;
+ 		   f0z[1] = Dl[1].z-Dlb.z;
+ 		   f0z[2] = Dl[2].z-Dlb.z;
+ 		   f0z[3] = Dlb.z*3.;
+		   
+ 	       }
+ 	   }
+ 	 else if (whatd & Fop_D2)
+ 	     ffassert(0); // a faire ...
+ 	 //  cout << val << endl;
+      }
+ 
+ 
+ 
+ 
+ 
    static TypeOfFE_P0Lagrange_surf P0_surf;
    GTypeOfFE<MeshS> & P0Lagrange_surf(P0_surf);
      
@@ -372,7 +450,11 @@
      
    static TypeOfFE_RT0_surf  RT0_surf;
    GTypeOfFE<MeshS> & RT0surf(RT0_surf);
-      
+    
+   static TypeOfFE_P1bLagrange_surf P1b_surf;
+   GTypeOfFE<MeshS> & P1bLagrange_surf(P1b_surf);
+   
+   	  
    template<> GTypeOfFE<MeshS> & DataFE<MeshS>::P0=P0_surf;
    template<> GTypeOfFE<MeshS> & DataFE<MeshS>::P1=P1_surf;
    template<> GTypeOfFE<MeshS> & DataFE<MeshS>::P2=P2_surf;
