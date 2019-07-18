@@ -10,14 +10,14 @@ Vh vh,vo,u1 = y, u2 = -x, v = exp(-10*((x-0.3)^2 +(y-0.3)^2)), rhs =0;
 Vh wh=0,Bwh;
 real dt = 0.001,t=0, tmax=pi/4;
 int kk=0;
-varf aa(v,vh) = int2d(th)(v*vh/dt) ;
+varf aa(v,vh) = int2d(th)(v*vh/dt);
 matrix  AA= aa(Vh,Vh,solver=CG);
 
 problem  A(v,vh) = int2d(th)(v*vh/dt)   - int2d(th)(vo*vh/dt) + rhs[];
 
 real[int] viso=[-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,10,100,1000];
 verbosity = 4;
-for ( t=0; t< tmax ; t+=dt)
+for ( t=0; t < tmax; t += dt)
 {
   vo[]=v[];
   matrix B;

@@ -1,0 +1,94 @@
+include "test.idp"
+load "medit"
+load "msh3"
+load "shell"
+
+real t;
+
+cout << functionDEFINITION << "medit" << endl;
+{
+  real RR=1,HH=1;
+  border Taxe(t=0,HH){x=t;y=0;label=0;};
+  border Hypo(t=1,0){x=HH*t;y=RR*t;label=1;};
+  border Vert(t=0,RR){x=HH;y=t;label=2;};
+
+  int nn=10;
+  real h= 1./nn;
+  mesh Th2=buildmesh(Taxe(HH*nn)+ Hypo(sqrt(HH*HH+RR*RR)*nn) + Vert(RR*nn));
+
+  int MaxLayersT=(int(2*pi*RR/h)/4)*4;
+  func zminT = 0;
+  func zmaxT = 2*pi;
+  func fx= y*cos(z);// / max( abs(cos(z) ), abs(sin(z)));
+  func fy= y*sin(z);// / max( abs(cos(z) ), abs(sin(z)));
+  func fz= x;
+  int[int] r1T=[0,0], r2T=[0,0,2,2];
+  int[int] r4T=[0,2];
+  mesh3 Th3T=buildlayers(Th2,coef= max(.01,y/max(x,0.4) ), MaxLayersT,zbound=[zminT,zmaxT],transfo=[fx,fy,fz],facemerge=1, region=r1T, labelmid=r2T);
+  t = clock();
+  medit("cone",Th3T,wait=1);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}
+
+cout << functionDEFINITION << "savesol" << endl;
+{
+  verbosity=3;
+  {
+  border Gamma(t=0,2*pi){x=cos(t); y=sin(t); label=1;};
+  border Gamma1(t=0,2*pi){x=2*cos(t); y=2*sin(t); label=2;};
+  border Gamma2(t=0,2*pi){x=0.5*cos(t); y=0.5*sin(t); label=3;};
+
+  // construction of mesh of domain $\Omega$
+  mesh Th=buildmesh(Gamma1(40)+Gamma(-40));
+
+  fespace Vh(Th,P2);
+  func f=sqrt(x*x+y*y);
+  Vh us,v;
+  macro Grad2(us) [dx(us),dy(us)]  // EOM
+
+  problem Lap2dOmega(us,v,init=false)=int2d(Th)(Grad2(v)' *Grad2(us)) - int2d(Th)(f*v)+on(Gamma,us=1) ;
+
+  Lap2dOmega;
+
+  // construction of mesh of domain $\Omega1 =\{ (x,y) |  0.5 \leq sqrt(x^2+y^2) \geq 1.}$
+  mesh Th1=buildmesh(Gamma(40)+Gamma2(-40));
+
+  fespace Vh1(Th1,P2);
+  func f1=10*sqrt(x*x+y*y);
+  Vh1 u1,v1;
+  macro Grad21(u1) [dx(u1),dy(u1)]  // EOM
+
+  problem Lap2dOmega1(u1,v1,init=false)=int2d(Th1)(Grad21(v1)' *Grad21(u1)) - int2d(Th1)(f1*v1)+on(Gamma,u1=1) ;
+  Lap2dOmega1;
+
+  medit("solution",Th,us,Th1,u1,order=1,meditff="ffmedit",save="testsavemedit.solb");
+  //
+  }
+  {
+  	mesh3 Th=cube(10,10,10);
+  	fespace Vh(Th,P1);
+
+  	Vh u= x+2*y+3*z;
+  	savemesh(Th,"meditcube.meshb");
+    t = clock();
+  	savesol("meditcube.solb",Th,u,order=1);
+    t = clock() - t;
+    cout << timeELAPSED << t << endl;
+  }
+  {
+  mesh3 Th=readmesh3("meditcube.meshb");
+  fespace Vh(Th,P1);
+  Vh u;
+  verbosity=99;
+  cout << functionDEFINITION << "savesol" << endl;
+  t = clock();
+  u[]=readsol("meditcube.solb");
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << u[].max << " " << u[].min << endl;
+  test(abs(u[].max-6) < 1e-6);
+  unlink("meditcube.meshb");
+  unlink("meditcube.solb");
+  }
+}
