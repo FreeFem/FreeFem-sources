@@ -1,0 +1,60 @@
+include "test.idp"
+load "ff-mmap-semaphore"
+
+real t;
+
+Psemaphore smff("ff-slave1",0);
+Psemaphore smc("ff-master1",0);
+Pmmap sharedata("shared-data",1024);
+if(verbosity<4) verbosity =0;
+mesh Th=square(10,10);
+fespace Vh(Th,P1);
+Vh u,v;
+int[int] Lab=[1,2,3,4];
+
+macro grad(u) [dx(u),dy(u)] //
+
+int status=1;
+//Read(sharedata,8,status);
+cout << " ff status = "<< status << endl;
+real cff,rff;
+problem Pb(u,v) = int2d(Th)(grad(u)'*grad(v))-int2d(Th)(cff*v)+ on(Lab,u=0);
+if(verbosity>9) cout << " ff: before ff post\n";
+Post(smff); // un lock master fin init
+
+
+while( 1)
+{
+	if(verbosity>9) cout << " ff: before ff wait \n";
+  cout << functionDEFINITION << "Wait" << endl;
+  t = clock();
+	Wait(smc); // wait from cint ecriture ok
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << functionDEFINITION << "Read" << endl;
+  t = clock();
+	Read(sharedata,0,cff);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  t = clock();
+	Read(sharedata,8,status);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+
+	cout << " After wait ..  ff "<< cff << " " << status << endl;
+	if(status<=0) break;
+	Pb;
+	rff = int2d(Th)(u*u);
+	cout << " ** ff "<< cff << " " << rff << endl;
+
+  cout << functionDEFINITION << "Write" << endl;
+  t = clock();
+	Write(sharedata,16,rff);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << functionDEFINITION << "Post" << endl;
+  t = clock();
+	Post(smff); // unlock cc
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}
