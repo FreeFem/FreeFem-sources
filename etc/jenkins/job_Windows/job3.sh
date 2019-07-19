@@ -8,7 +8,7 @@ autoreconf -i \
         CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
         --prefix=/builds/workspace/freefem \
   && ./3rdparty/getall -a \
-  && make -j2
+  && make
 
 if [ $? -eq 0 ]
 then

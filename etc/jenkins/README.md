@@ -92,11 +92,11 @@ local Petsc 3.11.2 installed on /Users/Shared
 pacman -S autoconf automake-wrapper bash bash-completion \
 bison bsdcpio bsdtar bzip2 coreutils curl dash file filesystem \
 findutils flex gawk gcc gcc-fortran gcc-libs grep gzip inetutils info less lndir \
-make man-db git  mingw-w64-x86_64-tool-chain mingw-w64-x86_64-gsl mingw-w64-x86_64-hdf5 \
- mintty msys2-keyring msys2-launcher-git \
+make man-db git  mingw-w64-x86_64-tool-chain mingw-w64-x86_64-hdf5 \
+mingw-w64-x86_64-arpack mintty msys2-keyring msys2-launcher-git \
 msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
 perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
-mingw-w64-x86_64-libmicroutils  cmake
+mingw-w64-x86_64-libmicroutils  
 ```
 
 
@@ -109,7 +109,7 @@ pacman -S autoconf automake-wrapper bash bash-completion \
   mingw-w64-x86_64-openblas mintty msys2-keyring msys2-launcher-git \
   msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
   perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
-  mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-arpack cmake
+  mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-arpack 
 ```
 
 [MSMPI 9](https://www.microsoft.com/en-us/download/details.aspx?id=56727)

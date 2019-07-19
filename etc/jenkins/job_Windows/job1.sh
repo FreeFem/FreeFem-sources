@@ -7,7 +7,7 @@ autoreconf -i \
 && ./configure --enable-generic --enable-optim --enable-maintainer-mode \
         CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
         --prefix=/builds/workspace/freefem \
-  && make -j2
+  && make
 
 if [ $? -eq 0 ]
 then
