@@ -4,7 +4,7 @@ source shell mingw64
 echo "Job 1"
 
 autoreconf -i \
-&& ./configure --enable-generic --enable-optim --enable-maintainer-mode \
+&& ./configure --enable-generic --enable-optim --without-mpi --enable-maintainer-mode \
         CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
         --prefix=/builds/workspace/freefem \
   && make
