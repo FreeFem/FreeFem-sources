@@ -5,7 +5,7 @@ echo "Job 5"
 
 autoreconf -i \
 && ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
-        --enable-debug  CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
+        CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
         --prefix=/builds/workspace/freefem \
   && ./3rdparty/getall -a \
   && cd 3rdparty/ff-petsc \
