@@ -9,10 +9,8 @@ autoreconf -i \
         --prefix=/builds/workspace/freefem \
   && cd 3rdparty/ \
   && ./getall -a \
-  && cd parmetis \			
-  && make \
-  && cd -	   			
-  && cd ff-petsc \
+  && cd parmetis/ && make    
+cd ../ff-petsc \
   && make petsc-slepc \
   && cd ../.. \
   && ./reconfigure \
