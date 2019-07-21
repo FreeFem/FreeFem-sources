@@ -12,7 +12,7 @@ autoreconf -i \
   && make petsc-slepc \
   && cd - \
   && ./reconfigure \
-  && make -j2
+  && make
 
 if [ $? -eq 0 ]
 then
