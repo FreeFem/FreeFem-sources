@@ -119,9 +119,9 @@ esac
 		   mkdir -p 3rdparty/lib/msmpi
 		   
 		   cp "$MSMPI_INC"/*.h 3rdparty/include/msmpi
-		   grep -v INT_PTR_KIND "ff$MSMPI_INC"/mpif.h >3rdparty/include/msmpi/mpif.h
-		   test "$ff_ptrbit" -eq 64 && cp "ff$MSMPI_INC"/x64/*.h 3rdparty/include/msmpi
-		   test "$ff_ptrbit" -eq 32 && cp "$ffMSMPI_INC"/x86/*.h 3rdparty/include/msmpi
+		   grep -v INT_PTR_KIND "$MSMPI_INC"/mpif.h >3rdparty/include/msmpi/mpif.h
+		   test "$ff_ptrbit" -eq 64 && cp "$MSMPI_INC"/x64/*.h 3rdparty/include/msmpi
+		   test "$ff_ptrbit" -eq 32 && cp "$MSMPI_INC"/x86/*.h 3rdparty/include/msmpi
 		   ff_MPI_INCLUDE_DIR=`pwd`/3rdparty/include/msmpi
 		   ff_msmpi_lib="$MSMPI_LIB64"
 		   test "$ff_ptrbit" -eq 32 && ff_msmpi_lib="$MSMPI_LIB32"

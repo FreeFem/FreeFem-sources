@@ -2785,6 +2785,14 @@ AnyType SetMesh3D_Op::operator () (Stack stack)  const {
     *mp = mps;
     Mesh3 *mpq = new Mesh3(nbv, nbt, nbe, v, t, b);
     mpq->BuildGTree();
+    
+    if(Th.meshS) {
+        if(verbosity>2)
+            cout << "build the new meshS after change mesh3 "<<endl;
+        Th.BuildMeshS();
+    }
+    
+    
     Add2StackOfPtr2FreeRC(stack, mpq);
     
     return mpq;
