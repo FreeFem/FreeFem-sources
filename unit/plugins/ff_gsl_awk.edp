@@ -341,13 +341,13 @@ cout << timeELAPSED << t << endl;
 
 cout << functionDEFINITION << "gslcdfgumbel1Pinv" << endl;
 t = clock();
-cout << gslcdfgumbel1Q(0.55, 0.55, 0.55) << endl;
+cout << gslcdfgumbel1Pinv(0.55, 0.55, 0.55) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
 cout << functionDEFINITION << "gslcdfgumbel1Qinv" << endl;
 t = clock();
-cout << gslcdfgumbel1Q(0.55, 0.55, 0.55) << endl;
+cout << gslcdfgumbel1Qinv(0.55, 0.55, 0.55) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
@@ -524,29 +524,129 @@ t = clock();
 cout << gslcdfpascalQ(0, 0.55, 10) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-// cout << "gsl_cdf_pascal_P(0,0.55,0) =  " << gslcdfpascalP(0,0.55,0)  << endl;
-// cout << "gsl_cdf_pascal_Q(0,0.55,0) =  " << gslcdfpascalQ(0,0.55,0)  << endl;
-// cout << "gsl_ran_bernoulli_pdf(0, 0.55) =  " << gslranbernoullipdf(0, 0.55)  << endl;
-// cout << "gsl_ran_beta(ffrng,0.55,0.55) =  " << gslranbeta(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_beta_pdf(0.55,0.55,0.55) =  " << gslranbetapdf(0.55,0.55,0.55)  << endl;
-// cout << "gsl_ran_binomial_pdf(0,0.55,0) =  " << gslranbinomialpdf(0,0.55,0)  << endl;
-// cout << "gsl_ran_exponential(ffrng, 0.55) =  " << gslranexponential(ffrng, 0.55)  << endl;
-// cout << "gsl_ran_exponential_pdf(0.55, 0.55) =  " << gslranexponentialpdf(0.55, 0.55)  << endl;
-// cout << "gsl_ran_exppow(ffrng,0.55,0.55) =  " << gslranexppow(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_exppow_pdf(0.55,0.55,0.55) =  " << gslranexppowpdf(0.55,0.55,0.55)  << endl;
-// cout << "gsl_ran_cauchy(ffrng, 0.55) =  " << gslrancauchy(ffrng, 0.55)  << endl;
-// cout << "gsl_ran_cauchy_pdf(0.55, 0.55) =  " << gslrancauchypdf(0.55, 0.55)  << endl;
-// cout << "gsl_ran_chisq(ffrng, 0.55) =  " << gslranchisq(ffrng, 0.55)  << endl;
-// cout << "gsl_ran_chisq_pdf(0.55, 0.55) =  " << gslranchisqpdf(0.55, 0.55)  << endl;
-// cout << "gsl_ran_erlang(ffrng,0.55,0.55) =  " << gslranerlang(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_erlang_pdf(0.55,0.55,0.55) =  " << gslranerlangpdf(0.55,0.55,0.55)  << endl;
-// cout << "gsl_ran_fdist(ffrng,0.55,0.55) =  " << gslranfdist(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_fdist_pdf(0.55,0.55,0.55) =  " << gslranfdistpdf(0.55,0.55,0.55)  << endl;
-// cout << "gsl_ran_flat(ffrng,0.55,0.55) =  " << gslranflat(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_flat_pdf(0.55,0.55,0.55) =  " << gslranflatpdf(0.55,0.55,0.55)  << endl;
-// cout << "gsl_ran_gamma(ffrng,0.55,0.55) =  " << gslrangamma(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_gamma_int(ffrng, 0) =  " << gslrangammaint(ffrng, 0)  << endl;
-// cout << "gsl_ran_gamma_pdf(0.55,0.55,0.55) =  " << gslrangammapdf(0.55,0.55,0.55)  << endl;
+
+cout << functionDEFINITION << "gslranbernoullipdf" << endl;
+t = clock();
+cout << gslranbernoullipdf(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+gslrng ffrng;
+ gslabortonerror=0;
+
+cout << functionDEFINITION << "gslranbeta" << endl;
+t = clock();
+cout << gslranbeta(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranbetapdf" << endl;
+t = clock();
+cout << gslranbetapdf(0, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranbinomialpdf" << endl;
+t = clock();
+cout << gslranbinomialpdf(0, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranexponential" << endl;
+t = clock();
+cout << gslranexponential(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranexponentialpdf" << endl;
+t = clock();
+cout << gslranexponentialpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranexppow" << endl;
+t = clock();
+cout << gslranexppow(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranexppowpdf" << endl;
+t = clock();
+cout << gslranexppowpdf(0.55, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrancauchy" << endl;
+t = clock();
+cout << gslrancauchy(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrancauchypdf" << endl;
+t = clock();
+cout << gslrancauchypdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranchisq" << endl;
+t = clock();
+cout << gslranchisq(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranchisqpdf" << endl;
+t = clock();
+cout << gslranchisqpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranfdist" << endl;
+t = clock();
+cout << gslranfdist(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranfdistpdf" << endl;
+t = clock();
+cout << gslranfdistpdf(0, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranflat" << endl;
+t = clock();
+cout << gslranflat(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranflatpdf" << endl;
+t = clock();
+cout << gslranflatpdf(0, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangamma" << endl;
+t = clock();
+cout << gslrangamma(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangammaint" << endl;
+t = clock();
+cout << gslrangammaint(ffrng, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangammapdf" << endl;
+t = clock();
+cout << gslrangammapdf(0.55, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangammamt" << endl;
+t = clock();
+cout << gslrangammamt(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 // cout << "gsl_ran_gamma_mt(ffrng,0.55,0.55) =  " << gslrangammamt(ffrng,0.55,0.55)  << endl;
 // cout << "gsl_ran_gamma_knuth(ffrng,0.55,0.55) =  " << gslrangammaknuth(ffrng,0.55,0.55)  << endl;
 // cout << "gsl_ran_gaussian(ffrng, 0.55) =  " << gslrangaussian(ffrng, 0.55)  << endl;
