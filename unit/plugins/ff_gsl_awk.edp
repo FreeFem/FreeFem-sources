@@ -21,6 +21,12 @@ cout << gslcdfugaussianPinv(0.55) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
+cout << functionDEFINITION << "gslcdfugaussianQinv" << endl;
+t = clock();
+cout << gslcdfugaussianQinv(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
 cout << functionDEFINITION << "gslcdfgaussianP" << endl;
 t = clock();
 cout << gslcdfgaussianP(0.55, 0.55) << endl;
@@ -36,6 +42,12 @@ cout << timeELAPSED << t << endl;
 cout << functionDEFINITION << "gslcdfgaussianQinv" << endl;
 t = clock();
 cout << gslcdfgaussianQinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgaussianPinv" << endl;
+t = clock();
+cout << gslcdfgaussianPinv(0.55, 0.55) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
@@ -119,7 +131,7 @@ cout << timeELAPSED << t << endl;
 
 cout << functionDEFINITION << "gslcdfrayleighQ" << endl;
 t = clock();
-cout << gslcdfrayleighP(0.55, 0.55) << endl;
+cout << gslcdfrayleighQ(0.55, 0.55) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
@@ -159,22 +171,105 @@ cout << gslcdfchisqQ(0.55, 0.55) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
-// cout << "gsl_cdf_chisq_Pinv(0.55, 0.55) =  " << gslcdfchisqPinv(0.55, 0.55)  << endl;
-// cout << "gsl_cdf_chisq_Qinv(0.55, 0.55) =  " << gslcdfchisqQinv(0.55, 0.55)  << endl;
-// cout << "gsl_cdf_exponential_P(0.55, 0.55) =  " << gslcdfexponentialP(0.55, 0.55)  << endl;
-// cout << "gsl_cdf_exponential_Q(0.55, 0.55) =  " << gslcdfexponentialQ(0.55, 0.55)  << endl;
-// cout << "gsl_cdf_exponential_Pinv(0.55, 0.55) =  " << gslcdfexponentialPinv(0.55, 0.55)  << endl;
-// cout << "gsl_cdf_exponential_Qinv(0.55, 0.55) =  " << gslcdfexponentialQinv(0.55, 0.55)  << endl;
-// cout << "gsl_cdf_exppow_P(0.55,0.55,0.55) =  " << gslcdfexppowP(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_exppow_Q(0.55,0.55,0.55) =  " << gslcdfexppowQ(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_tdist_P(0.55, 0.55) =  " << gslcdftdistP(0.55, 0.55)  << endl;
-// cout << "gsl_cdf_tdist_Q(0.55, 0.55) =  " << gslcdftdistQ(0.55, 0.55)  << endl;
-// cout << "gsl_cdf_tdist_Pinv(0.55, 0.55) =  " << gslcdftdistPinv(0.55, 0.55)  << endl;
-// cout << "gsl_cdf_tdist_Qinv(0.55, 0.55) =  " << gslcdftdistQinv(0.55, 0.55)  << endl;
-// cout << "gsl_cdf_fdist_P(0.55,0.55,0.55) =  " << gslcdffdistP(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_fdist_Q(0.55,0.55,0.55) =  " << gslcdffdistQ(0.55,0.55,0.55)  << endl;
+cout << functionDEFINITION << "gslcdfexponentialP" << endl;
+t = clock();
+cout << gslcdfexponentialP(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfexponentialQ" << endl;
+t = clock();
+cout << gslcdfexponentialQ(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfexponentialPinv" << endl;
+t = clock();
+cout << gslcdfexponentialPinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfexponentialQinv" << endl;
+t = clock();
+cout << gslcdfexponentialQinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfexppowP" << endl;
+t = clock();
+cout << gslcdfexppowP(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfexppowQ" << endl;
+t = clock();
+cout << gslcdfexppowQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdftdistP" << endl;
+t = clock();
+cout << gslcdftdistP(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdftdistQ" << endl;
+t = clock();
+cout << gslcdftdistQ(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdftdistPinv" << endl;
+t = clock();
+cout << gslcdftdistPinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdftdistQinv" << endl;
+t = clock();
+cout << gslcdftdistQinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdffdistP" << endl;
+t = clock();
+cout << gslcdffdistP(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdffdistQ" << endl;
+t = clock();
+cout << gslcdffdistQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+// cout << functionDEFINITION << "gslcdffdistPinv" << endl;
+// t = clock();
+// cout << gslcdffdistPinv(0.55, 0.55, 0.55) << endl;
+// t = clock() - t;
+// cout << timeELAPSED << t << endl;
+
+// cout << functionDEFINITION << "gslcdffdistQinv" << endl;
+// t = clock();
+// cout << gslcdffdistQinv(0.55, 0.55, 0.55) << endl;
+// t = clock() - t;
+// cout << timeELAPSED << t << endl;
+
 // cout << "gsl_cdf_fdist_Pinv(0.55,0.55,0.55) =  " << gslcdffdistPinv(0.55,0.55,0.55)  << endl;
 // cout << "gsl_cdf_fdist_Qinv(0.55,0.55,0.55) =  " << gslcdffdistQinv(0.55,0.55,0.55)  << endl;
+
+cout << functionDEFINITION << "gslcdfbetaP" << endl;
+t = clock();
+cout << gslcdfbetaP(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfbetaQ" << endl;
+t = clock();
+cout << gslcdfbetaQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
 // cout << "gsl_cdf_beta_P(0.55,0.55,0.55) =  " << gslcdfbetaP(0.55,0.55,0.55)  << endl;
 // cout << "gsl_cdf_beta_Q(0.55,0.55,0.55) =  " << gslcdfbetaQ(0.55,0.55,0.55)  << endl;
 // cout << "gsl_cdf_beta_Pinv(0.55,0.55,0.55) =  " << gslcdfbetaPinv(0.55,0.55,0.55)  << endl;
