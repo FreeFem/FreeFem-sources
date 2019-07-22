@@ -47,11 +47,52 @@ real err= abs(w[].max)+abs(w[].min) ;
 cout << " err = " << err << endl;
 test(err < HWERROR);
 
+{
+  t = clock();
+  u[]=dfft(fhat[],ny, 1, 1);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  u[] /= complex(N);
+  ur = real(u); // the solution
+  w = real(ue); // the exact solution
+  w[] -= ur[]; // array sub
+  real err= abs(w[].max)+abs(w[].min) ;
+  cout << " err = " << err << endl;
+  test(err < HWERROR);
+}
+
+{
+  t = clock();
+  u[]=dfft(fhat[],ny);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  u[] /= complex(N);
+  ur = real(u); // the solution
+  w = real(ue); // the exact solution
+  w[] -= ur[]; // array sub
+  real err= abs(w[].max)+abs(w[].min) ;
+  cout << " err = " << err << endl;
+}
+
 cout << functionDEFINITION << "plandfft" << endl;
 t = clock();
 fftwplan p1=plandfft(u[],v[],ny,-1);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
+
+{
+  t = clock();
+  fftwplan p1=plandfft(u[],v[],ny);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}
+
+{
+  t = clock();
+  fftwplan p1=plandfft(u[],v[], 1, 1, 1);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}
 
 cout << functionDEFINITION << "map" << endl;
 real ccc = square(2.*pi);
