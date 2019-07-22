@@ -243,20 +243,17 @@ cout << gslcdffdistQ(0.55, 0.55, 0.55) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
-// cout << functionDEFINITION << "gslcdffdistPinv" << endl;
-// t = clock();
-// cout << gslcdffdistPinv(0.55, 0.55, 0.55) << endl;
-// t = clock() - t;
-// cout << timeELAPSED << t << endl;
+cout << functionDEFINITION << "gslcdffdistPinv" << endl;
+t = clock();
+cout << gslcdffdistPinv(0.5, 1, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 
-// cout << functionDEFINITION << "gslcdffdistQinv" << endl;
-// t = clock();
-// cout << gslcdffdistQinv(0.55, 0.55, 0.55) << endl;
-// t = clock() - t;
-// cout << timeELAPSED << t << endl;
-
-// cout << "gsl_cdf_fdist_Pinv(0.55,0.55,0.55) =  " << gslcdffdistPinv(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_fdist_Qinv(0.55,0.55,0.55) =  " << gslcdffdistQinv(0.55,0.55,0.55)  << endl;
+cout << functionDEFINITION << "gslcdffdistQinv" << endl;
+t = clock();
+cout << gslcdffdistQinv(0.5, 1, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 
 cout << functionDEFINITION << "gslcdfbetaP" << endl;
 t = clock();
@@ -324,36 +321,209 @@ cout << gslcdflognormalPinv(0.55, 0.55, 0.55) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
-// cout << "gsl_cdf_lognormal_Pinv(0.55,0.55,0.55) =  " << gslcdflognormalPinv(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_lognormal_Qinv(0.55,0.55,0.55) =  " << gslcdflognormalQinv(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_gumbel1_P(0.55,0.55,0.55) =  " << gslcdfgumbel1P(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_gumbel1_Q(0.55,0.55,0.55) =  " << gslcdfgumbel1Q(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_gumbel1_Pinv(0.55,0.55,0.55) =  " << gslcdfgumbel1Pinv(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_gumbel1_Qinv(0.55,0.55,0.55) =  " << gslcdfgumbel1Qinv(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_gumbel2_P(0.55,0.55,0.55) =  " << gslcdfgumbel2P(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_gumbel2_Q(0.55,0.55,0.55) =  " << gslcdfgumbel2Q(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_gumbel2_Pinv(0.55,0.55,0.55) =  " << gslcdfgumbel2Pinv(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_gumbel2_Qinv(0.55,0.55,0.55) =  " << gslcdfgumbel2Qinv(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_weibull_P(0.55,0.55,0.55) =  " << gslcdfweibullP(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_weibull_Q(0.55,0.55,0.55) =  " << gslcdfweibullQ(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_weibull_Pinv(0.55,0.55,0.55) =  " << gslcdfweibullPinv(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_weibull_Qinv(0.55,0.55,0.55) =  " << gslcdfweibullQinv(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_pareto_P(0.55,0.55,0.55) =  " << gslcdfparetoP(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_pareto_Q(0.55,0.55,0.55) =  " << gslcdfparetoQ(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_pareto_Pinv(0.55,0.55,0.55) =  " << gslcdfparetoPinv(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_pareto_Qinv(0.55,0.55,0.55) =  " << gslcdfparetoQinv(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_logistic_P(0.55, 0.55) =  " << gslcdflogisticP(0.55, 0.55)  << endl;
-// cout << "gsl_cdf_logistic_Q(0.55, 0.55) =  " << gslcdflogisticQ(0.55, 0.55)  << endl;
-// cout << "gsl_cdf_logistic_Pinv(0.55, 0.55) =  " << gslcdflogisticPinv(0.55, 0.55)  << endl;
-// cout << "gsl_cdf_logistic_Qinv(0.55, 0.55) =  " << gslcdflogisticQinv(0.55, 0.55)  << endl;
-// cout << "gsl_cdf_binomial_P(0,0.55,0) =  " << gslcdfbinomialP(0,0.55,0)  << endl;
-// cout << "gsl_cdf_binomial_Q(0,0.55,0) =  " << gslcdfbinomialQ(0,0.55,0)  << endl;
-// cout << "gsl_cdf_poisson_P(0, 0.55) =  " << gslcdfpoissonP(0, 0.55)  << endl;
-// cout << "gsl_cdf_poisson_Q(0, 0.55) =  " << gslcdfpoissonQ(0, 0.55)  << endl;
-// cout << "gsl_cdf_geometric_P(0, 0.55) =  " << gslcdfgeometricP(0, 0.55)  << endl;
-// cout << "gsl_cdf_geometric_Q(0, 0.55) =  " << gslcdfgeometricQ(0, 0.55)  << endl;
-// cout << "gsl_cdf_negative_binomial_P(0,0.55,0.55) =  " << gslcdfnegativebinomialP(0,0.55,0.55)  << endl;
-// cout << "gsl_cdf_negative_binomial_Q(0,0.55,0.55) =  " << gslcdfnegativebinomialQ(0,0.55,0.55)  << endl;
+cout << functionDEFINITION << "gslcdflognormalQinv" << endl;
+t = clock();
+cout << gslcdflognormalQinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel1P" << endl;
+t = clock();
+cout << gslcdfgumbel1P(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel1Q" << endl;
+t = clock();
+cout << gslcdfgumbel1Q(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel1Pinv" << endl;
+t = clock();
+cout << gslcdfgumbel1Q(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel1Qinv" << endl;
+t = clock();
+cout << gslcdfgumbel1Q(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel2P" << endl;
+t = clock();
+cout << gslcdfgumbel2P(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel2Q" << endl;
+t = clock();
+cout << gslcdfgumbel2Q(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel2Pinv" << endl;
+t = clock();
+cout << gslcdfgumbel2Pinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel2Qinv" << endl;
+t = clock();
+cout << gslcdfgumbel2Qinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfweibullP" << endl;
+t = clock();
+cout << gslcdfweibullP(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfweibullQ" << endl;
+t = clock();
+cout << gslcdfweibullQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfweibullPinv" << endl;
+t = clock();
+cout << gslcdfweibullPinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfweibullQinv" << endl;
+t = clock();
+cout << gslcdfweibullQinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfparetoP" << endl;
+t = clock();
+cout << gslcdfparetoP(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfparetoQ" << endl;
+t = clock();
+cout << gslcdfparetoQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfparetoQ" << endl;
+t = clock();
+cout << gslcdfparetoQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfparetoPinv" << endl;
+t = clock();
+cout << gslcdfparetoPinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfparetoQinv" << endl;
+t = clock();
+cout << gslcdfparetoQinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflogisticP" << endl;
+t = clock();
+cout << gslcdflogisticP(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflogisticQ" << endl;
+t = clock();
+cout << gslcdflogisticQ(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflogisticPinv" << endl;
+t = clock();
+cout << gslcdflogisticPinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflogisticQinv" << endl;
+t = clock();
+cout << gslcdflogisticQinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfbinomialP" << endl;
+t = clock();
+cout << gslcdfbinomialP(0, 0.55, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfbinomialQ" << endl;
+t = clock();
+cout << gslcdfbinomialQ(0, 0.55, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfpoissonP" << endl;
+t = clock();
+cout << gslcdfpoissonP(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfpoissonQ" << endl;
+t = clock();
+cout << gslcdfpoissonQ(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgeometricP" << endl;
+t = clock();
+cout << gslcdfgeometricP(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgeometricQ" << endl;
+t = clock();
+cout << gslcdfgeometricQ(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgeometricP" << endl;
+t = clock();
+cout << gslcdfgeometricP(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgeometricQ" << endl;
+t = clock();
+cout << gslcdfgeometricQ(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfnegativebinomialP" << endl;
+t = clock();
+cout << gslcdfnegativebinomialP(0, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfnegativebinomialQ" << endl;
+t = clock();
+cout << gslcdfnegativebinomialQ(0, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfpascalP" << endl;
+t = clock();
+cout << gslcdfpascalP(0, 0.55, 10) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfpascalQ" << endl;
+t = clock();
+cout << gslcdfpascalQ(0, 0.55, 10) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 // cout << "gsl_cdf_pascal_P(0,0.55,0) =  " << gslcdfpascalP(0,0.55,0)  << endl;
 // cout << "gsl_cdf_pascal_Q(0,0.55,0) =  " << gslcdfpascalQ(0,0.55,0)  << endl;
 // cout << "gsl_ran_bernoulli_pdf(0, 0.55) =  " << gslranbernoullipdf(0, 0.55)  << endl;
