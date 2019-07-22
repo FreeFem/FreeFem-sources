@@ -61,6 +61,7 @@ class ffServer {
           nThreadCount(thread_number) {}
 
     ~ffServer() {
+        m_ioService.stop();
         for (int i = 0; i < nThreadCount; i += 1) {
             m_ThreadPool[i].join();
         }

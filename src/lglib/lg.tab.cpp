@@ -338,7 +338,7 @@ void ff_atend(AtEnd f)
 void signalCPUHandler( int signum ) {
     ff_finalize();
     std::cout << "Cputime limit exceeded:  (" << signum << ") received.\n";
-    
+
     exit(24);
 }
 #endif
@@ -1904,7 +1904,7 @@ yyparse ()
 #endif
 #endif
 {
-  
+
   int yystate;
   int yyn;
   int yyresult;
@@ -3541,6 +3541,9 @@ extern  bool echo_edp;
 
 /// <<mainff>> Called by [[file:mymain.cpp::mymain]] and calls [[Compile]] to run the FF language parser
 
+#include "ffServer.hpp"
+extern ffServer *graphicServer;
+
 int mainff (int  argc, char **argv)
 {
 #ifndef _WIN32
@@ -3650,6 +3653,10 @@ int mainff (int  argc, char **argv)
   //  currentblock->close(currentblock).eval(thestack);
  // fingraphique();
   // FFCS: divert stream to FFCS
+  if (graphicServer) {
+    // graphicServer->stop();
+    delete graphicServer;
+  }
   if(ThePlotStream){
     ffapi::ff_pclose(ThePlotStream);
     ThePlotStream=0;
@@ -3669,4 +3676,3 @@ int mainff (int  argc, char **argv)
  * coding:utf-8
  * End:
  */
-
