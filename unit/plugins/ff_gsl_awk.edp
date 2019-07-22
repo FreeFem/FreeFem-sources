@@ -161,13 +161,13 @@ cout << timeELAPSED << t << endl;
 
 cout << functionDEFINITION << "gslcdfchisqPinv" << endl;
 t = clock();
-cout << gslcdfchisqQ(0.55, 0.55) << endl;
+cout << gslcdfchisqPinv(0.55, 0.55) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
 cout << functionDEFINITION << "gslcdfchisqQinv" << endl;
 t = clock();
-cout << gslcdfchisqQ(0.55, 0.55) << endl;
+cout << gslcdfchisqQinv(0.55, 0.55) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
@@ -270,16 +270,60 @@ cout << gslcdfbetaQ(0.55, 0.55, 0.55) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
-// cout << "gsl_cdf_beta_P(0.55,0.55,0.55) =  " << gslcdfbetaP(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_beta_Q(0.55,0.55,0.55) =  " << gslcdfbetaQ(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_beta_Pinv(0.55,0.55,0.55) =  " << gslcdfbetaPinv(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_beta_Qinv(0.55,0.55,0.55) =  " << gslcdfbetaQinv(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_flat_P(0.55,0.55,0.55) =  " << gslcdfflatP(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_flat_Q(0.55,0.55,0.55) =  " << gslcdfflatQ(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_flat_Pinv(0.55,0.55,0.55) =  " << gslcdfflatPinv(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_flat_Qinv(0.55,0.55,0.55) =  " << gslcdfflatQinv(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_lognormal_P(0.55,0.55,0.55) =  " << gslcdflognormalP(0.55,0.55,0.55)  << endl;
-// cout << "gsl_cdf_lognormal_Q(0.55,0.55,0.55) =  " << gslcdflognormalQ(0.55,0.55,0.55)  << endl;
+cout << functionDEFINITION << "gslcdfbetaPinv" << endl;
+t = clock();
+cout << gslcdfbetaPinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfbetaQinv" << endl;
+t = clock();
+cout << gslcdfbetaQinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfflatP" << endl;
+t = clock();
+cout << gslcdfflatP(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfflatQ" << endl;
+t = clock();
+cout << gslcdfflatQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfflatPinv" << endl;
+t = clock();
+cout << gslcdfflatPinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfflatQinv" << endl;
+t = clock();
+cout << gslcdfflatQinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflognormalP" << endl;
+t = clock();
+cout << gslcdflognormalP(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflognormalQ" << endl;
+t = clock();
+cout << gslcdflognormalQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflognormalPinv" << endl;
+t = clock();
+cout << gslcdflognormalPinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
 // cout << "gsl_cdf_lognormal_Pinv(0.55,0.55,0.55) =  " << gslcdflognormalPinv(0.55,0.55,0.55)  << endl;
 // cout << "gsl_cdf_lognormal_Qinv(0.55,0.55,0.55) =  " << gslcdflognormalQinv(0.55,0.55,0.55)  << endl;
 // cout << "gsl_cdf_gumbel1_P(0.55,0.55,0.55) =  " << gslcdfgumbel1P(0.55,0.55,0.55)  << endl;
