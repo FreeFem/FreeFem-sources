@@ -647,89 +647,511 @@ t = clock();
 cout << gslrangammamt(ffrng, 0.55, 1) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-// cout << "gsl_ran_gamma_mt(ffrng,0.55,0.55) =  " << gslrangammamt(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_gamma_knuth(ffrng,0.55,0.55) =  " << gslrangammaknuth(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_gaussian(ffrng, 0.55) =  " << gslrangaussian(ffrng, 0.55)  << endl;
-// cout << "gsl_ran_gaussian_ratio_method(ffrng, 0.55) =  " << gslrangaussianratiomethod(ffrng, 0.55)  << endl;
-// cout << "gsl_ran_gaussian_ziggurat(ffrng, 0.55) =  " << gslrangaussianziggurat(ffrng, 0.55)  << endl;
-// cout << "gsl_ran_gaussian_pdf(0.55, 0.55) =  " << gslrangaussianpdf(0.55, 0.55)  << endl;
-// cout << "gsl_ran_ugaussian(ffrng) =  " << gslranugaussian(ffrng)  << endl;
-// cout << "gsl_ran_ugaussian_ratio_method(ffrng) =  " << gslranugaussianratiomethod(ffrng)  << endl;
-// cout << "gsl_ran_ugaussian_pdf(0.55) =  " << gslranugaussianpdf(0.55)  << endl;
-// cout << "gsl_ran_gaussian_tail(ffrng,0.55,0.55) =  " << gslrangaussiantail(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_gaussian_tail_pdf(0.55,0.55,0.55) =  " << gslrangaussiantailpdf(0.55,0.55,0.55)  << endl;
-// cout << "gsl_ran_ugaussian_tail(ffrng, 0.55) =  " << gslranugaussiantail(ffrng, 0.55)  << endl;
-// cout << "gsl_ran_ugaussian_tail_pdf(0.55, 0.55) =  " << gslranugaussiantailpdf(0.55, 0.55)  << endl;
-// cout << "gsl_ran_landau(ffrng) =  " << gslranlandau(ffrng)  << endl;
-// cout << "gsl_ran_landau_pdf(0.55) =  " << gslranlandaupdf(0.55)  << endl;
-// cout << "gsl_ran_geometric_pdf(0, 0.55) =  " << gslrangeometricpdf(0, 0.55)  << endl;
-// cout << "gsl_ran_gumbel1(ffrng,0.55,0.55) =  " << gslrangumbel1(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_gumbel1_pdf(0.55,0.55,0.55) =  " << gslrangumbel1pdf(0.55,0.55,0.55)  << endl;
-// cout << "gsl_ran_gumbel2(ffrng,0.55,0.55) =  " << gslrangumbel2(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_gumbel2_pdf(0.55,0.55,0.55) =  " << gslrangumbel2pdf(0.55,0.55,0.55)  << endl;
-// cout << "gsl_ran_logistic(ffrng, 0.55) =  " << gslranlogistic(ffrng, 0.55)  << endl;
-// cout << "gsl_ran_logistic_pdf(0.55, 0.55) =  " << gslranlogisticpdf(0.55, 0.55)  << endl;
-// cout << "gsl_ran_lognormal(ffrng,0.55,0.55) =  " << gslranlognormal(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_lognormal_pdf(0.55,0.55,0.55) =  " << gslranlognormalpdf(0.55,0.55,0.55)  << endl;
-// cout << "gsl_ran_logarithmic_pdf(0, 0.55) =  " << gslranlogarithmicpdf(0, 0.55)  << endl;
-// cout << "gsl_ran_negative_binomial_pdf(0,0.55,0.55) =  " << gslrannegativebinomialpdf(0,0.55,0.55)  << endl;
-// cout << "gsl_ran_pascal_pdf(0,0.55,0) =  " << gslranpascalpdf(0,0.55,0)  << endl;
-// cout << "gsl_ran_pareto(ffrng,0.55,0.55) =  " << gslranpareto(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_pareto_pdf(0.55,0.55,0.55) =  " << gslranparetopdf(0.55,0.55,0.55)  << endl;
-// cout << "gsl_ran_poisson_pdf(0, 0.55) =  " << gslranpoissonpdf(0, 0.55)  << endl;
-// cout << "gsl_ran_rayleigh(ffrng, 0.55) =  " << gslranrayleigh(ffrng, 0.55)  << endl;
-// cout << "gsl_ran_rayleigh_pdf(0.55, 0.55) =  " << gslranrayleighpdf(0.55, 0.55)  << endl;
-// cout << "gsl_ran_rayleigh_tail(ffrng,0.55,0.55) =  " << gslranrayleightail(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_rayleigh_tail_pdf(0.55,0.55,0.55) =  " << gslranrayleightailpdf(0.55,0.55,0.55)  << endl;
-// cout << "gsl_ran_tdist(ffrng, 0.55) =  " << gslrantdist(ffrng, 0.55)  << endl;
-// cout << "gsl_ran_tdist_pdf(0.55, 0.55) =  " << gslrantdistpdf(0.55, 0.55)  << endl;
-// cout << "gsl_ran_laplace(ffrng, 0.55) =  " << gslranlaplace(ffrng, 0.55)  << endl;
-// cout << "gsl_ran_laplace_pdf(0.55, 0.55) =  " << gslranlaplacepdf(0.55, 0.55)  << endl;
-// cout << "gsl_ran_levy(ffrng,0.55,0.55) =  " << gslranlevy(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_weibull(ffrng,0.55,0.55) =  " << gslranweibull(ffrng,0.55,0.55)  << endl;
-// cout << "gsl_ran_weibull_pdf(0.55,0.55,0.55) =  " << gslranweibullpdf(0.55,0.55,0.55)  << endl;
-// cout << "gsl_sf_airy_Ai(0.55, 0) =  " << gslsfairyAi(0.55, 0)  << endl;
-// cout << "gsl_sf_airy_Bi(0.55, 0) =  " << gslsfairyBi(0.55, 0)  << endl;
-// cout << "gsl_sf_airy_Ai_scaled(0.55, 0) =  " << gslsfairyAiscaled(0.55, 0)  << endl;
-// cout << "gsl_sf_airy_Bi_scaled(0.55, 0) =  " << gslsfairyBiscaled(0.55, 0)  << endl;
-// cout << "gsl_sf_airy_Ai_deriv(0.55, 0) =  " << gslsfairyAideriv(0.55, 0)  << endl;
-// cout << "gsl_sf_airy_Bi_deriv(0.55, 0) =  " << gslsfairyBideriv(0.55, 0)  << endl;
-// cout << "gsl_sf_airy_Ai_deriv_scaled(0.55, 0) =  " << gslsfairyAiderivscaled(0.55, 0)  << endl;
-// cout << "gsl_sf_airy_Bi_deriv_scaled(0.55, 0) =  " << gslsfairyBiderivscaled(0.55, 0)  << endl;
-// cout << "gsl_sf_airy_zero_Ai(0) =  " << gslsfairyzeroAi(0)  << endl;
-// cout << "gsl_sf_airy_zero_Bi(0) =  " << gslsfairyzeroBi(0)  << endl;
-// cout << "gsl_sf_airy_zero_Ai_deriv(0) =  " << gslsfairyzeroAideriv(0)  << endl;
-// cout << "gsl_sf_airy_zero_Bi_deriv(0) =  " << gslsfairyzeroBideriv(0)  << endl;
-// cout << "gsl_sf_bessel_J0(0.55) =  " << gslsfbesselJ0(0.55)  << endl;
-// cout << "gsl_sf_bessel_J1(0.55) =  " << gslsfbesselJ1(0.55)  << endl;
-// cout << "gsl_sf_bessel_Jn(0, 0.55) =  " << gslsfbesselJn(0, 0.55)  << endl;
-// cout << "gsl_sf_bessel_Y0(0.55) =  " << gslsfbesselY0(0.55)  << endl;
-// cout << "gsl_sf_bessel_Y1(0.55) =  " << gslsfbesselY1(0.55)  << endl;
-// cout << "gsl_sf_bessel_Yn(0, 0.55) =  " << gslsfbesselYn(0, 0.55)  << endl;
-// cout << "gsl_sf_bessel_I0(0.55) =  " << gslsfbesselI0(0.55)  << endl;
-// cout << "gsl_sf_bessel_I1(0.55) =  " << gslsfbesselI1(0.55)  << endl;
-// cout << "gsl_sf_bessel_In(0, 0.55) =  " << gslsfbesselIn(0, 0.55)  << endl;
-// cout << "gsl_sf_bessel_I0_scaled(0.55) =  " << gslsfbesselI0scaled(0.55)  << endl;
-// cout << "gsl_sf_bessel_I1_scaled(0.55) =  " << gslsfbesselI1scaled(0.55)  << endl;
-// cout << "gsl_sf_bessel_In_scaled(0, 0.55) =  " << gslsfbesselInscaled(0, 0.55)  << endl;
-// cout << "gsl_sf_bessel_K0(0.55) =  " << gslsfbesselK0(0.55)  << endl;
-// cout << "gsl_sf_bessel_K1(0.55) =  " << gslsfbesselK1(0.55)  << endl;
-// cout << "gsl_sf_bessel_Kn(0, 0.55) =  " << gslsfbesselKn(0, 0.55)  << endl;
-// cout << "gsl_sf_bessel_K0_scaled(0.55) =  " << gslsfbesselK0scaled(0.55)  << endl;
-// cout << "gsl_sf_bessel_K1_scaled(0.55) =  " << gslsfbesselK1scaled(0.55)  << endl;
-// cout << "gsl_sf_bessel_Kn_scaled(0, 0.55) =  " << gslsfbesselKnscaled(0, 0.55)  << endl;
-// cout << "gsl_sf_bessel_j0(0.55) =  " << gslsfbesselj0(0.55)  << endl;
-// cout << "gsl_sf_bessel_j1(0.55) =  " << gslsfbesselj1(0.55)  << endl;
-// cout << "gsl_sf_bessel_j2(0.55) =  " << gslsfbesselj2(0.55)  << endl;
-// cout << "gsl_sf_bessel_jl(0, 0.55) =  " << gslsfbesseljl(0, 0.55)  << endl;
-// cout << "gsl_sf_bessel_y0(0.55) =  " << gslsfbessely0(0.55)  << endl;
-// cout << "gsl_sf_bessel_y1(0.55) =  " << gslsfbessely1(0.55)  << endl;
-// cout << "gsl_sf_bessel_y2(0.55) =  " << gslsfbessely2(0.55)  << endl;
-// cout << "gsl_sf_bessel_yl(0, 0.55) =  " << gslsfbesselyl(0, 0.55)  << endl;
-// cout << "gsl_sf_bessel_i0_scaled(0.55) =  " << gslsfbesseli0scaled(0.55)  << endl;
-// cout << "gsl_sf_bessel_i1_scaled(0.55) =  " << gslsfbesseli1scaled(0.55)  << endl;
-// cout << "gsl_sf_bessel_i2_scaled(0.55) =  " << gslsfbesseli2scaled(0.55)  << endl;
-// cout << "gsl_sf_bessel_il_scaled(0, 0.55) =  " << gslsfbesselilscaled(0, 0.55)  << endl;
+
+cout << functionDEFINITION << "gslranerlang" << endl;
+t = clock();
+cout << gslranerlang(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranerlangpdf" << endl;
+t = clock();
+cout << gslranerlangpdf(0.5, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangammaknuth" << endl;
+t = clock();
+cout << gslrangammaknuth(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangaussian" << endl;
+t = clock();
+cout << gslrangaussian(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangaussianratiomethod" << endl;
+t = clock();
+cout << gslrangaussianratiomethod(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangaussianziggurat" << endl;
+t = clock();
+cout << gslrangaussianziggurat(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangaussianpdf" << endl;
+t = clock();
+cout << gslrangaussianpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranugaussian" << endl;
+t = clock();
+cout << gslranugaussian(ffrng) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranugaussianratiomethod" << endl;
+t = clock();
+cout << gslranugaussianratiomethod(ffrng) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranugaussianpdf" << endl;
+t = clock();
+cout << gslranugaussianpdf(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangaussiantail" << endl;
+t = clock();
+cout << gslrangaussiantail(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangaussiantail" << endl;
+t = clock();
+cout << gslrangaussiantail(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranugaussiantail" << endl;
+t = clock();
+cout << gslranugaussiantail(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranugaussiantailpdf" << endl;
+t = clock();
+cout << gslranugaussiantailpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlandau" << endl;
+t = clock();
+cout << gslranlandau(ffrng) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlandaupdf" << endl;
+t = clock();
+cout << gslranlandaupdf(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangeometricpdf" << endl;
+t = clock();
+cout << gslrangeometricpdf(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangumbel1" << endl;
+t = clock();
+cout << gslrangumbel1(ffrng, 0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangumbel1pdf" << endl;
+t = clock();
+cout << gslrangumbel1pdf(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangumbel2" << endl;
+t = clock();
+cout << gslrangumbel2(ffrng, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangumbel2pdf" << endl;
+t = clock();
+cout << gslrangumbel2pdf(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlogistic" << endl;
+t = clock();
+cout << gslranlogistic(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlogisticpdf" << endl;
+t = clock();
+cout << gslranlogisticpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlognormal" << endl;
+t = clock();
+cout << gslranlognormal(ffrng, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlognormalpdf" << endl;
+t = clock();
+cout << gslranlognormalpdf(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlogarithmicpdf" << endl;
+t = clock();
+cout << gslranlogarithmicpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrannegativebinomialpdf" << endl;
+t = clock();
+cout << gslrannegativebinomialpdf(0, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranpascalpdf" << endl;
+t = clock();
+cout << gslranpascalpdf(0, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranpareto" << endl;
+t = clock();
+cout << gslranpareto(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranparetopdf" << endl;
+t = clock();
+cout << gslranparetopdf(0.55, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranpoissonpdf" << endl;
+t = clock();
+cout << gslranpoissonpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranrayleigh" << endl;
+t = clock();
+cout << gslranrayleigh(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranrayleighpdf" << endl;
+t = clock();
+cout << gslranrayleighpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranrayleightail" << endl;
+t = clock();
+cout << gslranrayleightail(ffrng, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranrayleightailpdf" << endl;
+t = clock();
+cout << gslranrayleightailpdf(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrantdist" << endl;
+t = clock();
+cout << gslrantdist(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrantdistpdf" << endl;
+t = clock();
+cout << gslrantdistpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlaplace" << endl;
+t = clock();
+cout << gslranlaplace(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlaplacepdf" << endl;
+t = clock();
+cout << gslranlaplacepdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlevy" << endl;
+t = clock();
+cout << gslranlevy(ffrng, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranweibull" << endl;
+t = clock();
+cout << gslranweibull(ffrng, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranweibullpdf" << endl;
+t = clock();
+cout << gslranweibullpdf(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyAi" << endl;
+t = clock();
+cout << gslsfairyAi(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyBi" << endl;
+t = clock();
+cout << gslsfairyBi(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyAiscaled" << endl;
+t = clock();
+cout << gslsfairyAiscaled(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyBiscaled" << endl;
+t = clock();
+cout << gslsfairyBiscaled(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyAideriv" << endl;
+t = clock();
+cout << gslsfairyAideriv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyBideriv" << endl;
+t = clock();
+cout << gslsfairyBideriv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyAiderivscaled" << endl;
+t = clock();
+cout << gslsfairyAiderivscaled(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyBiderivscaled" << endl;
+t = clock();
+cout << gslsfairyBiderivscaled(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyzeroAi" << endl;
+t = clock();
+cout << gslsfairyzeroAi(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyzeroBi" << endl;
+t = clock();
+cout << gslsfairyzeroBi(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyzeroAideriv" << endl;
+t = clock();
+cout << gslsfairyzeroAideriv(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyzeroBideriv" << endl;
+t = clock();
+cout << gslsfairyzeroBideriv(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselJ0" << endl;
+t = clock();
+cout << gslsfbesselJ0(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselJ1" << endl;
+t = clock();
+cout << gslsfbesselJ1(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselJn" << endl;
+t = clock();
+cout << gslsfbesselJn(0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselY0" << endl;
+t = clock();
+cout << gslsfbesselY0(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselY1" << endl;
+t = clock();
+cout << gslsfbesselY1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselYn" << endl;
+t = clock();
+cout << gslsfbesselYn(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselI0" << endl;
+t = clock();
+cout << gslsfbesselI0(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselI1" << endl;
+t = clock();
+cout << gslsfbesselI1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselIn" << endl;
+t = clock();
+cout << gslsfbesselIn(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselI0scaled" << endl;
+t = clock();
+cout << gslsfbesselI0scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselI1scaled" << endl;
+t = clock();
+cout << gslsfbesselI1scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselInscaled" << endl;
+t = clock();
+cout << gslsfbesselInscaled(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselK0" << endl;
+t = clock();
+cout << gslsfbesselK0(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselK1" << endl;
+t = clock();
+cout << gslsfbesselK1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselKn" << endl;
+t = clock();
+cout << gslsfbesselKn(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselK0scaled" << endl;
+t = clock();
+cout << gslsfbesselK0scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselK1scaled" << endl;
+t = clock();
+cout << gslsfbesselK1scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselKnscaled" << endl;
+t = clock();
+cout << gslsfbesselKnscaled(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselj0" << endl;
+t = clock();
+cout << gslsfbesselj0(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselj1" << endl;
+t = clock();
+cout << gslsfbesselj1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselj2" << endl;
+t = clock();
+cout << gslsfbesselj2(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesseljl" << endl;
+t = clock();
+cout << gslsfbesseljl(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbessely0" << endl;
+t = clock();
+cout << gslsfbessely0(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbessely1" << endl;
+t = clock();
+cout << gslsfbessely1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbessely2" << endl;
+t = clock();
+cout << gslsfbessely2(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselyl" << endl;
+t = clock();
+cout << gslsfbesselyl(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesseli0scaled" << endl;
+t = clock();
+cout << gslsfbesseli0scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesseli1scaled" << endl;
+t = clock();
+cout << gslsfbesseli1scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesseli2scaled" << endl;
+t = clock();
+cout << gslsfbesseli2scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselilscaled" << endl;
+t = clock();
+cout << gslsfbesselilscaled(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
 // cout << "gsl_sf_bessel_k0_scaled(0.55) =  " << gslsfbesselk0scaled(0.55)  << endl;
 // cout << "gsl_sf_bessel_k1_scaled(0.55) =  " << gslsfbesselk1scaled(0.55)  << endl;
 // cout << "gsl_sf_bessel_k2_scaled(0.55) =  " << gslsfbesselk2scaled(0.55)  << endl;
