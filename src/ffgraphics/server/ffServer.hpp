@@ -31,91 +31,133 @@
 #include <list>
 #include <functional>
 #include <asio.hpp>
+#include "ffPacket.hpp"
 
 using asio::ip::tcp; // Quality of life using, get every asio's tcp class
 
-class Connection
-    : public std::enable_shared_from_this<Connection>
-{
-    public:
-        typedef std::shared_ptr<Connection> pointer;
+class Connection : public std::enable_shared_from_this<Connection> {
+  public:
+    typedef std::shared_ptr<Connection> pointer;
 
-        static pointer create(asio::io_service& io_service)
-        {
-            return pointer(new Connection(io_service));
-        }
+    static pointer create(asio::io_service& io_service) {
+        return pointer(new Connection(io_service));
+    }
 
-        tcp::socket& socket() { return m_Socket; }
+    tcp::socket& socket() { return m_Socket; }
+    std::string& message() { return m_Message; }
 
-        void start()
-        {
-            m_Message = "Message\n\0";
+  private:
+    Connection(asio::io_service& io_service) : m_Socket(io_service) {}
 
-            asio::async_write(m_Socket, asio::buffer(m_Message),
-                    [=](std::error_code const & err, size_t bytes_transferred)
-                    {
-                        std::cout << "Send message of " << bytes_transferred << " bytes.\n";
-                    });
-        }
-
-    private:
-        Connection(asio::io_service& io_service)
-            : m_Socket(io_service)
-        { }
-
-        tcp::socket m_Socket;
-        std::string m_Message;
+    tcp::socket m_Socket;
+    std::string m_Message;
 };
 
 class ffServer {
-    public:
-        ffServer(asio::io_service& io_service)
-            : m_ioService(io_service), m_Acceptor(io_service, tcp::endpoint(tcp::v4(), 12345))
-        {
-            start_accept();
+  public:
+    ffServer(int thread_number = 1)
+        : m_ioService(),
+          m_Acceptor(m_ioService, tcp::endpoint(tcp::v4(), 12345)),
+          nThreadCount(thread_number) {}
+
+    ~ffServer() {
+        for (int i = 0; i < nThreadCount; i += 1) {
+            m_ThreadPool[i].join();
         }
+    }
 
-        void send(std::string message)
-        {
-            auto ite = m_Connection.begin();
+    void start() {
+        std::cout << "Starting server\n";
+        start_accept();
+        for (int i = 0; i < nThreadCount; i += 1) {
+            m_ThreadPool.emplace_back([=] { m_ioService.run(); });
+        }
+    }
 
-            std::cout << "Broadcasting json.\n";
-            while (ite != m_Connection.end()) {
-                auto tmp = *ite;
-                asio::async_write(tmp->socket(), asio::buffer(message),
-                    [this, ite](std::error_code const & err, size_t bytes_transferred)
-                    {
-                        if (err) {
-                            m_Connection.erase(ite);
-                        } else {
-                            std::cout << "Send message of " << bytes_transferred << " bytes.\n";
-                        }
-                    });
-                ite++;
+    void stop() {
+        m_ioService.stop();
+        for (int i = 0; i < nThreadCount; i += 1) {
+            m_ThreadPool[i].join();
+        }
+    }
+
+    void send(ffPacket packet) {
+        auto ite = m_Connection.begin();
+
+        std::cout << "Broadcasting json.\n";
+        while (ite != m_Connection.end()) {
+            auto tmp = *ite;
+            asio::async_write(tmp->socket(), asio::buffer(packet.m_Header),
+                              [this, ite](std::error_code const& err,
+                                          size_t bytes_transferred) {
+                                  if (err) {
+                                      m_Connection.erase(ite);
+                                  } else {
+                                      std::cout << "Sent header\n";
+                                  }
+                              });
+            asio::async_write(tmp->socket(), asio::buffer(packet.m_Data),
+                              [this, ite](std::error_code const& err,
+                                          size_t bytes_transferred) {
+                                  if (err) {
+                                      m_Connection.erase(ite);
+                                  } else {
+                                      std::cout << "Sent Data\n";
+                                  }
+                              });
+            ite++;
+        }
+    }
+
+  private:
+    void handle_accept(Connection::pointer new_connection,
+                       const std::error_code& err) {
+        if (!err) {
+            m_Connection.push_back(new_connection);
+            start_read(new_connection);
+        }
+        start_accept();
+    }
+
+    void start_read(Connection::pointer new_connection) {
+        asio::steady_timer timer(m_ioService);
+        bool timer_result = false;
+        bool read_result = false;
+
+        timer.expires_after(std::chrono::seconds(10));
+        timer.async_wait([&timer_result](std::error_code const & err) {
+            timer_result = true;
+        });
+        asio::async_read(new_connection->socket(), asio::buffer(new_connection->message()),
+                        [&read_result](std::error_code const & err, size_t /* */) {
+                            read_result = true;
+                        });
+        while (!read_result && !timer_result) {
+            if (read_result)
+                timer.cancel();
+            else if (timer_result) {
+                std::cout << "Removing a client.\n";
+                m_Connection.remove(new_connection);
             }
         }
+        start_read(new_connection);
+    }
 
-    private:
-        void handle_accept(Connection::pointer new_connection, const std::error_code & err)
-        {
-            if (!err) {
-                m_Connection.push_back(new_connection);
-                new_connection->start();
-            }
-            start_accept();
-        }
+    void start_accept() {
+        std::cout << "start_accept\n";
+        Connection::pointer new_connection = Connection::create(m_ioService);
 
-        void start_accept()
-        {
-            Connection::pointer new_connection = Connection::create(m_ioService);
+        m_Acceptor.async_accept(new_connection->socket(),
+                                std::bind(&ffServer::handle_accept, this,
+                                          new_connection,
+                                          std::placeholders::_1));
+    }
 
-            m_Acceptor.async_accept(new_connection->socket(),
-                std::bind(&ffServer::handle_accept, this, new_connection, std::placeholders::_1));
-        }
-
-        asio::io_service& m_ioService;
-        tcp::acceptor m_Acceptor;
-        std::list<Connection::pointer> m_Connection;
+    int nThreadCount;
+    std::vector<std::thread> m_ThreadPool;
+    asio::io_service m_ioService;
+    tcp::acceptor m_Acceptor;
+    std::list<Connection::pointer> m_Connection;
 };
 
 #endif // FFSERVER_HPP
