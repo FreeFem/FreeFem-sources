@@ -313,6 +313,7 @@ src/mpi/ffapi.cpp
 src/mpi/lg.tab.cpp
 src/mpi/mymain.cpp
 src/mpi/sansrgraph.cpp
+src/ffgraphics/client/ffclient
 *stamp-h
 *stamp-h1
 *test-driver
