@@ -50,5 +50,5 @@ FreeFem___SOURCES = ../Graphics/sansrgraph.cpp ../mpi/parallelempi-empty.cpp ../
 FreeFem___nw_DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
 FreeFem___DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
 
-LDADD = ../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@
-AM_CPPFLAGS = -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../.. -I$(srcdir)/../femlib
+LDADD = ../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @LIBSPTHREAD@
+AM_CPPFLAGS = -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../.. -I$(srcdir)/../femlib -I$(srcdir)/../ffgraphics/asio/asio/include -I$(srcdir)/../ffgraphics/json/single_include -I$(srcdir)/../ffgraphics/server

@@ -68,10 +68,10 @@ class ffServer {
 
     void start() {
         std::cout << "Starting server\n";
-        start_accept();
         for (int i = 0; i < nThreadCount; i += 1) {
-            m_ThreadPool.emplace_back([=] { m_ioService.run(); });
+            m_ThreadPool.emplace_back([=] { start_accept(); m_ioService.run(); });
         }
+
     }
 
     void stop() {
