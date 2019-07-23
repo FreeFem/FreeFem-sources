@@ -1,3 +1,8 @@
+include "test.idp"
+
+cout << functionDEFINITION << "Newton" << endl;
+
+real t;
 real[int] u(10);
 
 func real J (real[int] &u) {
@@ -30,9 +35,15 @@ func matrix DDJ (real[int] &u) {
 }
 
 u = 0;
+t = clock();
 Newton(J, DJ, DDJ, u);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 cout << u << endl;
 
 u = 1;
+t = clock();
 Newton(J, DJ, DDJ, u);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 cout << u << endl;

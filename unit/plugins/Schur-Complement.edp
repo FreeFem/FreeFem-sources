@@ -1,4 +1,5 @@
 include "test.idp"
+include "ExtractDofsonBorder.idp"
 load "Schur-Complement"
 
 cout << functionDEFINITION << "SchurComplement" << endl;
