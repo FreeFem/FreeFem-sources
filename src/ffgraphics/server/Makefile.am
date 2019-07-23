@@ -22,4 +22,4 @@
 
 SOURCES = ffserver.hpp ffPacket.hpp
 
-AM_CPPFLAGS = -I../asio/asio/include -I../json/single_include/nlohmann
+AM_CPPFLAGS = -I../asio/asio/include -I../json/single_include/nlohmann -I$(srcdir)../femlib
