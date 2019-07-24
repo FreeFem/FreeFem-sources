@@ -180,12 +180,12 @@ reinstall-boost:./getall
 	-test -n "$(TOOL_COMPILE_boost)" && $(MAKE) install-boost || true
 include/boost/done.tag:./pkg/boost.tar.gz
 	-if test -f ./pkg/boost.tar.gz ; then \
-         cd pkg ; rm -rf boost boost_* ; tar xvzf boost.tar.gz ; cd boost_* ; ./bootstrap.sh ; ./b2 install --prefix=../../boost ; rm -rf boost_* ; touch boost/done.tag; \
+         cd pkg ; rm -rf boost boost_* ; tar xvzf boost.tar.gz ; cd boost_* ; ./bootstrap.sh ; ./b2 install --prefix=../../boost ; rm -rf boost_* ; touch ../../boost/done.tag; \
          else true;  fi
 lib/WHERE.boost: ./getall
 	if test -d boost/include ; then \
-	echo boost LD -L/boost/lib > $@ ;\
-	echo boost  INCLUDE -I/boost/include >> $@ ;\
+	echo boost LD -L@DIR@/boost/lib > $@ ;\
+	echo boost  INCLUDE -I@DIR@/boost/include >> $@ ;\
 	else true; 	fi
 # end BOOST
 
