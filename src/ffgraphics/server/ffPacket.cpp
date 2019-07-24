@@ -2,6 +2,7 @@
 #include "RNM.hpp"
 #include "rgraph.hpp"
 #include "fem.hpp"
+#include "Mesh3dn.hpp"
 
 /**
  * Transform a number of KN_<double> into JSON.
@@ -41,13 +42,13 @@ void ffPacket::jsonify<Fem2D::Mesh>(const Fem2D::Mesh& data)
 {
     // Extract all vertices off the mesh
     for (int i = 0; i < data.nv; i += 1) {
-        Fem2D::Mesh::Vertex& p = data(i);
+        const Fem2D::Mesh::Vertex& p = data(i);
         m_JSON["Mesh"]["Vertices"] += p.x;
         m_JSON["Mesh"]["Vertices"] += p.y;
     }
     // Extract all elements off the mesh
     for (int i = 0; i < data.nt; i += 1) {
-        Fem2D::Mesh::Element& e(data[i]);
+        const Fem2D::Mesh::Element& e(data[i]);
         m_JSON["Mesh"]["Elements"] += data(e[0]);
         m_JSON["Mesh"]["Elements"] += data(e[1]);
         m_JSON["Mesh"]["Elements"] += data(e[2]);
@@ -55,9 +56,68 @@ void ffPacket::jsonify<Fem2D::Mesh>(const Fem2D::Mesh& data)
     }
     // Extract all borders off the mesh
     for (int i = 0; i < data.nbBrdElmts(); i += 1) {
-        Fem2D::Mesh::BorderElement& b(data.be(i));
+        const Fem2D::Mesh::BorderElement& b(data.be(i));
         m_JSON["Mesh"]["Borders"] += data(b[0]);
         m_JSON["Mesh"]["Borders"] += data(b[1]);
         m_JSON["Mesh"]["Borders"] += b.lab;
+    }
+}
+
+template<>
+void ffPacket::jsonify<Fem2D::Mesh3>(const Fem2D::Mesh3& data)
+{
+    // Extract all vertices off the mesh
+    for (int i = 0; i < data.nv; i += 1) {
+        const Fem2D::TVertex<Fem2D::R3> p = data.vertices[i];
+        m_JSON["Mesh3"]["Vertices"] += p.x;
+        m_JSON["Mesh3"]["Vertices"] += p.y;
+        m_JSON["Mesh3"]["Vertices"] += p.z;
+        m_JSON["Mesh3"]["Vertices"] += p.lab;
+    }
+    // Extract all elements off the mesh
+    for (int i = 0; i < data.nt; i += 1) {
+        const auto& e(data.elements[i]);
+        m_JSON["Mesh3"]["Elements"] += data(e[0]);
+        m_JSON["Mesh3"]["Elements"] += data(e[1]);
+        m_JSON["Mesh3"]["Elements"] += data(e[2]);
+        m_JSON["Mesh3"]["Elements"] += data(e[3]);
+        m_JSON["Mesh3"]["Elements"] += e.lab;
+    }
+    // Extract all borders off the mesh
+    for (int i = 0; i < data.nbBrdElmts(); i += 1) {
+        const auto& b(data.borderelements[i]);
+        m_JSON["Mesh3"]["Borders"] += data(b[0]);
+        m_JSON["Mesh3"]["Borders"] += data(b[1]);
+        m_JSON["Mesh3"]["Borders"] += data(b[2]);
+        m_JSON["Mesh3"]["Borders"] += b.lab;
+    }
+}
+
+template<>
+void ffPacket::jsonify<Fem2D::MeshS>(const Fem2D::MeshS& data)
+{
+    // Extract all vertices off the mesh
+    for (int i = 0; i < data.nv; i += 1) {
+        const Fem2D::TVertex<Fem2D::R3> p = data.vertices[i];
+        m_JSON["Mesh3"]["Vertices"] += p.x;
+        m_JSON["Mesh3"]["Vertices"] += p.y;
+        m_JSON["Mesh3"]["Vertices"] += p.z;
+        m_JSON["Mesh3"]["Vertices"] += p.lab;
+    }
+    // Extract all elements off the mesh
+    for (int i = 0; i < data.nt; i += 1) {
+        const auto& e(data.elements[i]);
+        m_JSON["Mesh3"]["Elements"] += data(e[0]);
+        m_JSON["Mesh3"]["Elements"] += data(e[1]);
+        m_JSON["Mesh3"]["Elements"] += data(e[2]);
+        m_JSON["Mesh3"]["Elements"] += data(e[3]);
+        m_JSON["Mesh3"]["Elements"] += e.lab;
+    }
+    // Extract all borders off the mesh
+    for (int i = 0; i < data.nbBrdElmts(); i += 1) {
+        const auto& b(data.borderelements[i]);
+        m_JSON["Mesh3"]["Borders"] += data(b[0]);
+        m_JSON["Mesh3"]["Borders"] += data(b[1]);
+        m_JSON["Mesh3"]["Borders"] += b.lab;
     }
 }

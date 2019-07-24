@@ -3917,7 +3917,7 @@ if(nargs[VTK_START+index])                    \
 
         for (map<const Mesh *,long>::const_iterator i=mapth.begin();i != mapth.end(); ++i) {
             packet.jsonify(*i->first);
-            cout << packet.dump(4) << "\n";
+            cout << packet.dump() << "\n";
             packet.clear();
             theplot << i->second << *  i->first ;
         }
@@ -3927,17 +3927,25 @@ if(nargs[VTK_START+index])                    \
         {
             theplot.SendMeshes3();
             theplot << kth3 ;
-            for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i)
+            for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i) {
+                packet.jsonify(*i->first);
+                cout << packet.dump() << "\n";
+                packet.clear();
                 theplot << i->second << *  i->first ;
-           }
+            }
+        }
 
         // only send of surface meshes 3D
        if(kthS && kth3==0)
         {
             theplot.SendMeshesS();
             theplot << kthS ;
-            for (map<const MeshS *,long>::const_iterator i=mapthS.begin();i != mapthS.end(); ++i)
+            for (map<const MeshS *,long>::const_iterator i=mapthS.begin();i != mapthS.end(); ++i) {
+                packet.jsonify(*i->first);
+                cout << packet.dump() << "\n";
+                packet.clear();
                 theplot << i->second << *  i->first ;
+            }
        }
 
         // send of volume and surface meshes 3D
