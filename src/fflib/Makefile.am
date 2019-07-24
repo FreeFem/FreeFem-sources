@@ -94,7 +94,7 @@ libff_a_LIBADD=../Eigen/@EIGENOBJ@
 libff_a_DEPENDENCIES=../Eigen/@EIGENOBJ@
 endif
 
-AM_CPPFLAGS=-I$(srcdir)/../lglib -I$(srcdir)/../bamglib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib $(HDF5_CPPFLAGS) $(UMFPACK_CPPFLAGS)
+AM_CPPFLAGS=-I$(srcdir)/../lglib -I$(srcdir)/../bamglib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib $(HDF5_CPPFLAGS) $(UMFPACK_CPPFLAGS) -I$(srcdir)/../ffgraphics/server -I$(srcdir)/../ffgraphics/asio/asio/include -I$(srcdir)/../ffgraphics/json/single_include
 if ENABLE_EIGEN
 AM_CPPFLAGS+=-I$(srcdir)/../Eigen
 endif
@@ -103,6 +103,6 @@ endif
 # Build date changes at every change
 EXTRA_DIST=strversionnumber.m4
 BUILT_SOURCES=strversionnumber.cpp
-strversionnumber.cpp: $(libff_a_SOURCES2) ../../Makefile 
+strversionnumber.cpp: $(libff_a_SOURCES2) ../../Makefile
 	m4 -DVersionFreeFemDate="`date`" -DGitVersion="`git describe --tags 2>/dev/null|| echo 'no git'`" strversionnumber.m4 > $@
 FORCE:
