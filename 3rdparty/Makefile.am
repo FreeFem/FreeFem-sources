@@ -172,13 +172,13 @@ lib/WHERE.bemtool: ./getall
 
 # begin BOOST
 install-boost: ./getall
-	 if test -n "$(TOOL_COMPILE_boost)"; then   ./getall -o boost -a;  $(MAKE) include/boost/done.tag  lib/WHERE.boost; else true;fi
+	 if test -n "$(TOOL_COMPILE_boost)"; then   ./getall -o boost -a;  $(MAKE) boost/done.tag  lib/WHERE.boost; else true;fi
 reinstall-boost:./getall
 	-rm lib/WHERE.boost
 	-rm ./pkg/boost.tar.gz
 	-rm -rf boost
 	-test -n "$(TOOL_COMPILE_boost)" && $(MAKE) install-boost || true
-include/boost/done.tag:./pkg/boost.tar.gz
+boost/done.tag:./pkg/boost.tar.gz
 	-if test -f ./pkg/boost.tar.gz ; then \
          cd pkg ; rm -rf boost boost_* ; tar xvzf boost.tar.gz ; cd boost_* ; ./bootstrap.sh ; ./b2 install --prefix=../../boost ; rm -rf boost_* ; touch ../../boost/done.tag; \
          else true;  fi
