@@ -1536,6 +1536,12 @@ cout << gslsffermidiracmhalf(0.55) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
+cout << functionDEFINITION << "gslsffermidirachalf" << endl;
+t = clock();
+cout << gslsffermidirachalf(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
 cout << functionDEFINITION << "gslsffermidirac3half" << endl;
 t = clock();
 cout << gslsffermidirac3half(0.55) << endl;
@@ -1551,6 +1557,12 @@ cout << timeELAPSED << t << endl;
 cout << functionDEFINITION << "gslsflngamma" << endl;
 t = clock();
 cout << gslsflngamma(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflndoublefact" << endl;
+t = clock();
+cout << gslsflndoublefact (0.55) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
@@ -1818,53 +1830,248 @@ cout << gslsflegendresphPlm(0, 0, 0.55) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
-cout << functionDEFINITION << "gslsflegendrearraysize" << endl;
+cout << functionDEFINITION << "gslsfconicalPhalf" << endl;
 t = clock();
-// cout <<  gslsflegendrearraysize(0, 0) << endl;
+cout << gslsfconicalPhalf(0.55, 0.55) << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-// cout << "gsl_sf_legendre_Plm(0,0,0.55) =  " << gslsflegendrePlm(0,0,0.55)  << endl;
-// cout << "gsl_sf_legendre_sphPlm(0,0,0.55) =  " << gslsflegendresphPlm(0,0,0.55)  << endl;
-// //cout << "gsl_sf_legendre_array_size(0, 0) =  " << gslsflegendrearraysize(0, 0)  << endl;
 
-// cout << "gsl_sf_conicalP_half(0.55, 0.55) =  " << gslsfconicalPhalf(0.55, 0.55)  << endl;
-// cout << "gsl_sf_conicalP_mhalf(0.55, 0.55) =  " << gslsfconicalPmhalf(0.55, 0.55)  << endl;
-// cout << "gsl_sf_conicalP_0(0.55, 0.55) =  " << gslsfconicalP0(0.55, 0.55)  << endl;
-// cout << "gsl_sf_conicalP_1(0.55, 0.55) =  " << gslsfconicalP1(0.55, 0.55)  << endl;
-// cout << "gsl_sf_conicalP_sph_reg(0,0.55,0.55) =  " << gslsfconicalPsphreg(0,0.55,0.55)  << endl;
-// cout << "gsl_sf_conicalP_cyl_reg(0,0.55,0.55) =  " << gslsfconicalPcylreg(0,0.55,0.55)  << endl;
-// cout << "gsl_sf_legendre_H3d_0(0.55, 0.55) =  " << gslsflegendreH3d0(0.55, 0.55)  << endl;
-// cout << "gsl_sf_legendre_H3d_1(0.55, 0.55) =  " << gslsflegendreH3d1(0.55, 0.55)  << endl;
-// cout << "gsl_sf_legendre_H3d(0,0.55,0.55) =  " << gslsflegendreH3d(0,0.55,0.55)  << endl;
-// cout << "gsl_sf_log(0.55) =  " << gslsflog(0.55)  << endl;
-// cout << "gsl_sf_log_abs(0.55) =  " << gslsflogabs(0.55)  << endl;
-// cout << "gsl_sf_log_1plusx(0.55) =  " << gslsflog1plusx(0.55)  << endl;
-// cout << "gsl_sf_log_1plusx_mx(0.55) =  " << gslsflog1plusxmx(0.55)  << endl;
-// cout << "gsl_sf_pow_int(0.55, 0) =  " << gslsfpowint(0.55, 0)  << endl;
-// cout << "gsl_sf_psi_int(0) =  " << gslsfpsiint(0)  << endl;
-// cout << "gsl_sf_psi(0.55) =  " << gslsfpsi(0.55)  << endl;
-// cout << "gsl_sf_psi_1piy(0.55) =  " << gslsfpsi1piy(0.55)  << endl;
-// cout << "gsl_sf_psi_1_int(0) =  " << gslsfpsi1int(0)  << endl;
-// cout << "gsl_sf_psi_1(0.55) =  " << gslsfpsi1(0.55)  << endl;
-// cout << "gsl_sf_psi_n(0, 0.55) =  " << gslsfpsin(0, 0.55)  << endl;
-// cout << "gsl_sf_synchrotron_1(0.55) =  " << gslsfsynchrotron1(0.55)  << endl;
-// cout << "gsl_sf_synchrotron_2(0.55) =  " << gslsfsynchrotron2(0.55)  << endl;
-// cout << "gsl_sf_transport_2(0.55) =  " << gslsftransport2(0.55)  << endl;
-// cout << "gsl_sf_transport_3(0.55) =  " << gslsftransport3(0.55)  << endl;
-// cout << "gsl_sf_transport_4(0.55) =  " << gslsftransport4(0.55)  << endl;
-// cout << "gsl_sf_transport_5(0.55) =  " << gslsftransport5(0.55)  << endl;
-// cout << "gsl_sf_sin(0.55) =  " << gslsfsin(0.55)  << endl;
-// cout << "gsl_sf_cos(0.55) =  " << gslsfcos(0.55)  << endl;
-// cout << "gsl_sf_hypot(0.55, 0.55) =  " << gslsfhypot(0.55, 0.55)  << endl;
-// cout << "gsl_sf_sinc(0.55) =  " << gslsfsinc(0.55)  << endl;
-// cout << "gsl_sf_lnsinh(0.55) =  " << gslsflnsinh(0.55)  << endl;
-// cout << "gsl_sf_lncosh(0.55) =  " << gslsflncosh(0.55)  << endl;
-// cout << "gsl_sf_angle_restrict_symm(0.55) =  " << gslsfanglerestrictsymm(0.55)  << endl;
-// cout << "gsl_sf_angle_restrict_pos(0.55) =  " << gslsfanglerestrictpos(0.55)  << endl;
-// cout << "gsl_sf_zeta_int(0) =  " << gslsfzetaint(0)  << endl;
-// cout << "gsl_sf_zeta(0.55) =  " << gslsfzeta(0.55)  << endl;
-// cout << "gsl_sf_zetam1(0.55) =  " << gslsfzetam1(0.55)  << endl;
-// cout << "gsl_sf_zetam1_int(0) =  " << gslsfzetam1int(0)  << endl;
-// cout << "gsl_sf_hzeta(0.55, 0.55) =  " << gslsfhzeta(0.55, 0.55)  << endl;
-// cout << "gsl_sf_eta_int(0) =  " << gslsfetaint(0)  << endl;
-// cout << "gsl_sf_eta(0.55) =  " << gslsfeta(0.55)  << endl;
+cout << functionDEFINITION << "gslsfconicalPmhalf" << endl;
+t = clock();
+cout << gslsfconicalPmhalf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfconicalP0" << endl;
+t = clock();
+cout << gslsfconicalP0(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfconicalP1" << endl;
+t = clock();
+cout << gslsfconicalP1(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfconicalPsphreg" << endl;
+t = clock();
+cout << gslsfconicalPsphreg(0, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfconicalPcylreg" << endl;
+t = clock();
+cout << gslsfconicalPcylreg(0, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflegendreH3d0" << endl;
+t = clock();
+cout << gslsflegendreH3d0(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflegendreH3d1" << endl;
+t = clock();
+cout << gslsflegendreH3d1(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflegendreH3d" << endl;
+t = clock();
+cout << gslsflegendreH3d(0, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflog" << endl;
+t = clock();
+cout << gslsflog(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflogabs" << endl;
+t = clock();
+cout << gslsflogabs(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflog1plusx" << endl;
+t = clock();
+cout << gslsflog1plusx(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflog1plusxmx" << endl;
+t = clock();
+cout << gslsflog1plusxmx(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpowint" << endl;
+t = clock();
+cout << gslsfpowint(0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpsiint" << endl;
+t = clock();
+cout << gslsfpsiint(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpsi" << endl;
+t = clock();
+cout << gslsfpsi(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpsi1piy" << endl;
+t = clock();
+cout << gslsfpsi1piy(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpsin" << endl;
+t = clock();
+cout << gslsfpsin(0, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpsi1int" << endl;
+t = clock();
+cout << gslsfpsi1int(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpsi1" << endl;
+t = clock();
+cout << gslsfpsi1(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfsynchrotron1" << endl;
+t = clock();
+cout << gslsfsynchrotron1(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfsynchrotron2" << endl;
+t = clock();
+cout << gslsfsynchrotron2(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsftransport2" << endl;
+t = clock();
+cout << gslsftransport2(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsftransport3" << endl;
+t = clock();
+cout << gslsftransport3(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsftransport4" << endl;
+t = clock();
+cout << gslsftransport4(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsftransport5" << endl;
+t = clock();
+cout << gslsftransport5(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfsin" << endl;
+t = clock();
+cout << gslsfsin(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfcos" << endl;
+t = clock();
+cout << gslsfcos(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfhypot" << endl;
+t = clock();
+cout << gslsfhypot(0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfsinc" << endl;
+t = clock();
+cout << gslsfsinc(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflnsinh" << endl;
+t = clock();
+cout << gslsflnsinh(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflnscosh" << endl;
+t = clock();
+cout << gslsflncosh(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfanglerestrictsymm" << endl;
+t = clock();
+cout << gslsfanglerestrictsymm(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfanglerestrictpos" << endl;
+t = clock();
+cout << gslsfanglerestrictpos(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfzetaint" << endl;
+t = clock();
+cout << gslsfzetaint(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfzeta" << endl;
+t = clock();
+cout << gslsfzeta(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfzetam1" << endl;
+t = clock();
+cout << gslsfzetam1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfzetam1int" << endl;
+t = clock();
+cout << gslsfzetam1int(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfhzeta" << endl;
+t = clock();
+cout << gslsfhzeta(10, 10) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfetaint" << endl;
+t = clock();
+cout << gslsfetaint(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfeta" << endl;
+t = clock();
+cout << gslsfeta(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
