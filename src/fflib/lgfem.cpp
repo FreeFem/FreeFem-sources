@@ -64,6 +64,8 @@ using namespace std;
 #include "array_resize.hpp"
 #include "PlotStream.hpp"
 
+#include "ffServer.hpp"
+
 // add for the gestion of the endianness of the file.
 //PlotStream::fBytes PlotStream::zott; //0123;
 //PlotStream::hBytes PlotStream::zottffss; //012345678;
@@ -362,8 +364,8 @@ class E_P_Stack_areaTriangle   :public  E_F0mps { public:
     MeshPoint * mp=MeshPointStack(s);
     assert(mp->T) ;
       double l=-1; // unset ...
-    if(mp->d==2)	
-      l= mp->T->area;	
+    if(mp->d==2)
+      l= mp->T->area;
     else if (mp->d==3 && mp->dHat==3 && mp->f >=0) {
 	  R3 NN = mp->T3->N(mp->f);
 	  l= NN.norme()/2.;
@@ -412,9 +414,9 @@ class E_P_Stack_VolumeTet   :public  E_F0mps { public:
 	  	l= mp->T3->mesure();
     else {
 	    cout << "erreur : E_P_Stack_VolumeTet" << mp->d << " " << mp->f << endl;
-	    ffassert(0); // undef 
+	    ffassert(0); // undef
 	}
-	return SetAny<double>(l);} 
+	return SetAny<double>(l);}
     operator aType () const { return atype<double>();}
 
 };
@@ -495,12 +497,12 @@ class LinearCG : public OneOperator
     plusAx operator*(const Kn &  x) const {return plusAx(this,x);}
   virtual bool ChecknbLine(int n) const { return true;}
   virtual bool ChecknbColumn(int m) const { return true;}
-    
+
 };
 
   class E_LCG: public E_F0mps { public:
-      
-      
+
+
    const int cas;// <0 => Nolinear
    static const int n_name_param=6;
 
@@ -508,11 +510,11 @@ class LinearCG : public OneOperator
 
 
   Expression nargs[n_name_param];
-   
+
   const OneOperator *A, *C;
   Expression X,B;
 
-      
+
   E_LCG(const basicAC_F0 & args,int cc) :cas(cc)
    {
       args.SetNameParam(n_name_param,name_param,nargs);
@@ -534,7 +536,7 @@ class LinearCG : public OneOperator
       else
         B=0;
    }
-     
+
      virtual AnyType operator()(Stack stack)  const {
        int ret=-1;
        E_StopGC<R> *stop=0;
@@ -3874,7 +3876,7 @@ if(nargs[VTK_START+index])                    \
             //if (l[i].evalm3(0,s)).meshS) { ll[i].what=50; thS= &(l[i].evalmS(0,s));}  // 3d pure surface
             if (l[i].evalm3(0,s).meshS) { ll[i].what=52; th3= & (l[i].evalm3(0,s)); thS= &(l[i].evalmS(0,s)); } // 3d mixed volume and surface
             else { ll[i].what=51; th3= & (l[i].evalm3(0,s)); }   // 3d pure volume
-         
+
           }
           if( what ==50 )
             thS= (&(l[i].evalmS(0,s)));// 3d pure surface
@@ -3974,7 +3976,8 @@ if(nargs[VTK_START+index])                    \
 
             else if (what==3 || what==13 )
             {
-
+                std::vector<KN_<double>> curve_vector;
+                ffPacket packet;
                 what=13;
                 theplot << what  ; //
                 KN<double> z0;
@@ -3987,13 +3990,15 @@ if(nargs[VTK_START+index])                    \
                     if (ilat>=0)
                     {
                         KN_<double> t = GetAny<KN_<double> >(lat[ilat]);
+                        curve_vector.push_back(t);
                         theplot << t;
                         if(verbosity>99) cout << " (" << k <<" " << ilat << ") " << t.N();
                     }
                     else theplot << z0;// empty arry ...
                 }
+                packet.jsonify(curve_vector);
                 if(verbosity>99)
-                    cout <<endl;
+                    cout << packet.dump(4) << endl;
                 err=0;
             }
 

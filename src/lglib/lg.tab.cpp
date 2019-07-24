@@ -3542,7 +3542,6 @@ extern  bool echo_edp;
 /// <<mainff>> Called by [[file:mymain.cpp::mymain]] and calls [[Compile]] to run the FF language parser
 
 #include "ffServer.hpp"
-extern ffServer *graphicServer;
 
 int mainff (int  argc, char **argv)
 {

@@ -161,4 +161,6 @@ class ffServer {
     std::list<Connection::pointer> m_Connection;
 };
 
+extern ffServer *graphicServer;
+
 #endif // FFSERVER_HPP

@@ -43,9 +43,9 @@
 extern long mpirank;
 extern long verbosity;
 extern FILE *ThePlotStream; // Add for new plot. FH oct 2008
-extern ffServer *graphicServer; //TODO modify when merge feature branch
-// for the environ variables ...
+
 ffServer *graphicServer = 0; //TODO modify when merge feature branch
+
 extern const char *prognamearg;
 extern const char *edpfilenamearg;
 extern bool waitatend;
