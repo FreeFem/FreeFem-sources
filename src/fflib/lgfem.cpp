@@ -3704,6 +3704,7 @@ inline  void NewSetColorTable(int nb,float *colors=0,int nbcolors=0,bool hsv=tru
 AnyType Plot::operator()(Stack s) const{
 
     // remap  case 107 and 108 , 109  for array of FE.
+    ffPacket packet;
     vector<ListWhat> ll;
     vector<AnyType> lat;
     ll.reserve(l.size());
@@ -3914,8 +3915,12 @@ if(nargs[VTK_START+index])                    \
         theplot.SendMeshes();
         theplot << kth ;
 
-        for (map<const Mesh *,long>::const_iterator i=mapth.begin();i != mapth.end(); ++i)
+        for (map<const Mesh *,long>::const_iterator i=mapth.begin();i != mapth.end(); ++i) {
+            packet.jsonify(*i->first);
+            cout << packet.dump(4) << "\n";
+            packet.clear();
             theplot << i->second << *  i->first ;
+        }
 
        // only send of volume meshes 3D
         if(kth3 && kthS==0)
@@ -3977,7 +3982,6 @@ if(nargs[VTK_START+index])                    \
             else if (what==3 || what==13 )
             {
                 std::vector<KN_<double>> curve_vector;
-                ffPacket packet;
                 what=13;
                 theplot << what  ; //
                 KN<double> z0;

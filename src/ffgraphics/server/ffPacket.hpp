@@ -16,9 +16,11 @@ class ffPacket {
         inline std::vector<uint8_t>& GetPacketData() { return m_Data; }
 
         template <typename T>
-        void jsonify(T data);
+        void jsonify(const T& data);
 
         inline std::string dump(int indent = -1) { return m_JSON.dump(indent); }
+
+        inline void clear() { m_JSON.clear(); }
 
     private:
 
