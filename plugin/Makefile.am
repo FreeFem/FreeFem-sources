@@ -13,6 +13,7 @@ mpi/common.hpp \
 mpi/generaldefs.h \
 mpi/hpddm.cpp \
 mpi/hpddm_substructuring.cpp \
+mpi/htool_bem.cpp \
 mpi/htool.cpp \
 mpi/hypre_FreeFem.cpp \
 mpi/mpi-cmaes.cpp \

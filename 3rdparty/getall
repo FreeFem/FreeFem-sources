@@ -179,17 +179,29 @@ download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-
 	'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/',
 	'petsc-lite-3.11.2.tar.gz',
 	'ccd4f1e07edc453a74b52fd9a0c52a1c');
-	
+
 download('htool','https://github.com/PierreMarchand20/htool/archive/4af73fa94bd9ac7c81aba8191cb5da31da5f767a.zip',
 		'https://github.com/PierreMarchand20/',
 		'htool.zip',
 		'fb2fdfc77c5e7b53d0bb7cab0d10fe7e');
 
-	
 download('hpddm','https://github.com/hpddm/hpddm/archive/a3b1de84e76d966e14c1a2f37dac9d99dcc3f174.zip',
 	'https://github.com/hpddm',
 	'hpddm.zip',
 	'9fe70034892c4527057f6d7273e123ce');
+
+download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/master.zip',
+	'https://github.com/PierreMarchand20/BemTool',
+	'bemtool.zip',
+	'7d3b6f727627c3045ccd89ceb80668a0');
+
+download('Boost','https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.gz',
+	'https://www.boost.org',
+	'boost.tar.gz',
+	'fea771fe8176828fabf9c09242ee8c26');
+
+
+
 
 # run all downloads concurrently
 
@@ -241,7 +253,7 @@ sub download{
 
 sub downloadone{
 	##  correct rescue server for done load
-	my($url,$pkg,$md5,$opts)=split(/,/,$_[0]);# warning just $pkg without pkg/$pkg  
+	my($url,$pkg,$md5,$opts)=split(/,/,$_[0]);# warning just $pkg without pkg/$pkg
 	my $cmd="../bin/build/download $url pkg/$pkg $opts";
 	print "$cmd\n";
 	system $cmd;
