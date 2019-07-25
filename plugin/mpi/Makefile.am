@@ -21,7 +21,7 @@
 # E-MAIL  : ...
 
 LIST_COMPILE=@TOOL_DYLIB_mumps@ MPICG.$(DYLIB_SUFFIX)	\
-mpi-cmaes.$(DYLIB_SUFFIX) @TOOL_DYLIB_parmetis@ @TOOL_DYLIB_htool@ @TOOL_DYLIB_hpddm@
+mpi-cmaes.$(DYLIB_SUFFIX) @TOOL_DYLIB_parmetis@ @TOOL_DYLIB_htool@ @TOOL_DYLIB_hpddm@ @TOOL_DYLIB_htool_bem@
 
 if FFCS_MPIOK
 

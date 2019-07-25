@@ -1,0 +1,106 @@
+load "htool_bem"
+load"msh3"
+load"gmsh"
+
+include"MeshSurface.idp"
+// macro for ffddm
+macro dimension 3S// EOM            // 2D or 3D
+include "ffddm.idp"
+macro def(i)i// EOM                         // scalar field definition
+macro init(i)i// EOM                        // scalar field initialization
+func Pk = P1;  
+ffddmprecond="none";
+
+
+// generation of meshes
+// Domain, the full domain to plot the scattered field (plane domain)
+// Sphere the object 
+
+real scale=1;
+real l = 3;
+
+border a(t=-l,l){x=t; y=-l;label=1;};
+border b(t=-l,l){x=l; y=t;label=1;};
+border c(t=l,-l){x=t; y=l;label=1;};
+border d(t=l,-l){x=-l; y=t;label=1;};
+int n = 100;
+border i(t=0,2*pi){x=1.1*cos(t);y=1.1*sin(t);label=5;};
+mesh th= buildmesh(a(n)+b(n)+c(n)+d(n)+i(-n));
+
+meshS Domain= movemesh23(th,transfo=[scale*x,scale*y,scale*z]);
+
+meshS Obstacle = Ellipsoide(1,1,1,0.05,0,-1);
+Obstacle = movemesh(Obstacle,[scale*x,scale*y,scale*z]);
+
+
+ffddmbuildDmesh(Hel, Obstacle, mpiCommWorld)
+ffddmbuildDfespace(Hel, Hel, complex, def, init, Pk)
+
+HelVhi<complex> u,v;
+
+fespace Uh(Obstacle,P1);
+fespace Vh(Domain,P1);
+Vh<complex> w,uinc;
+
+Uh<complex> ug;
+
+HMatrix<complex> H;
+// output visu
+HMatrix<complex> B;
+//v = 1;
+
+fespace Uh2(Obstacle,P1);
+
+H = assemblecomplex(Uh,Uh,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000);
+B = assemblecomplex(Uh,Vh,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000,type=1);
+  
+ffddmsetupOperator(Hel, Hel, H)
+ffddmsetupPrecond(Hel, H)
+
+// incident wave
+real[int] dir=[1./sqrt(2),1./sqrt(2),0];
+int kappa=10;
+func finc = exp(1i*kappa*(x*dir[0]+y*dir[1]+z*dir[2]));
+ug = finc;
+  
+varf vmass(u,v) = int2d(Obstacle)(u*v);
+matrix<complex> massg = vmass(Uh,Uh);
+
+// RHS global
+complex[int] rhsg = massg*ug[];
+rhsg *= -1;
+  
+complex[int] rhs(HelVhi.ndof);
+ 
+rhs = HelRih[mpirank]*rhsg;
+
+u = 0.;
+
+u[] = HelfGMRES(u[], rhs, 1.e-6, 200, "right");
+	
+v[] = HelA(u[]);
+	
+HelfromVhi(u[], Uh, ug[])
+	
+w[] = B*ug[];
+	
+uinc = finc;
+w[] += uinc[];
+
+//visu of solution in the total domain
+// real part  
+Vh uplot = real(w); 
+plot(uplot);
+
+// info Hmatrix 
+// visu
+display(H);
+display(B);
+
+if (mpirank == 0)
+  cout << H.infos << endl;
+  
+if (mpirank == 0)
+   cout << B.infos << endl;
+
+mpiBarrier(mpiCommWorld);
