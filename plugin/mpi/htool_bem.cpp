@@ -15,12 +15,11 @@
 #include <bemtool/fem/dof.hpp>
 #include <bemtool/operator/operator.hpp>
 #include <bemtool/miscellaneous/htool_wrap.hpp>
-
 #include "PlotStream.hpp"
 
 extern FILE *ThePlotStream;
 
-//#include "solve.hpp"
+
 
 using namespace std;
 using namespace htool;
@@ -89,11 +88,11 @@ class assembleHMatrix : public OneOperator { public:
 
 void MeshS2Bemtool(const MeshS &ThS, Geometry &node, Mesh2D &mesh ) {
    
+    typedef typename MeshS::RdHat RdHat;
+    const int dHat =  RdHat::d;
+    
     // create the geometry;
-    //std::string meshname="Th.msh";   ////// be careful
-    //Geometry node(meshname);
-    //bemtool::Geometry node;
- 
+    
     bemtool::R3 p;
     for(int iv=0 ; iv<ThS.nv ; iv++){
         p[0]=ThS.vertices[iv].x;p[1]=ThS.vertices[iv].y;p[2]=ThS.vertices[iv].z;
@@ -102,14 +101,11 @@ void MeshS2Bemtool(const MeshS &ThS, Geometry &node, Mesh2D &mesh ) {
    
     node.initEltData();
    
-    // create the mesh
-    //bemtool::Mesh2D mesh;
-    //mesh.Load(node,0);
-    //node = &g;
     if(verbosity>10) std::cout << "Creating mesh domain (nodes)" << std::endl;
-    const int dim=2; //(RdHat)
+  
+    //const int dim=2; //(RdHat)
     mesh.set_elt(node);
-    bemtool::array<dim+1,int> I;
+    bemtool::array<dHat+1,int> I;
     if(verbosity>10) std::cout << "End creating mesh domain mesh" << std::endl;
     
    if(verbosity>10) std::cout << "Creating geometry domain (elements)" << std::endl;
@@ -127,10 +123,6 @@ void MeshS2Bemtool(const MeshS &ThS, Geometry &node, Mesh2D &mesh ) {
 
 void MeshS2Bemtool(const MeshS &ThS, Geometry &node) {
     
-    // create the geometry;
-    //std::string meshname="Th.msh";   ////// be careful
-    //Geometry node(meshname);
-    //bemtool::Geometry node;
     std::cout << "Creating mesh output" << std::endl;
     bemtool::R3 p;
     for(int iv=0 ; iv<ThS.nv ; iv++){
@@ -202,15 +194,7 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
     Geometry node; Mesh2D mesh;
     MeshS2Bemtool(ThGlobal, node, mesh);
    
-    ///////////////////////////////////////////////////////
-    //read the .msh
-	/*std::string meshname="Th.msh";   ////// be careful
-   	Geometry node(meshname);
-    Mesh2D mesh;
-    mesh.Load(node,0);
-	Orienting(mesh);
-	mesh = unbounded;*/
-	 ///////////////////////////////////////////////////////
+ 
 
     std::cout << "Creating dof" << std::endl;
    	Dof<P1_2D> dof(mesh);
