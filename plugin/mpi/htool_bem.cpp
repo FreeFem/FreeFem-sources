@@ -87,49 +87,53 @@ class assembleHMatrix : public OneOperator { public:
 	};
 
 
-void MeshS2Bemtool(const MeshS &ThS, Geometry node, Mesh2D mesh ) {
+void MeshS2Bemtool(const MeshS &ThS, Geometry &node, Mesh2D &mesh ) {
    
     // create the geometry;
     //std::string meshname="Th.msh";   ////// be careful
     //Geometry node(meshname);
     //bemtool::Geometry node;
+ 
     bemtool::R3 p;
-    for(int iv=0 ; iv<ThS.nv ; iv){
+    for(int iv=0 ; iv<ThS.nv ; iv++){
         p[0]=ThS.vertices[iv].x;p[1]=ThS.vertices[iv].y;p[2]=ThS.vertices[iv].z;
         node.setnodes(p);
-        
     }
+   
     node.initEltData();
-    
+   
     // create the mesh
     //bemtool::Mesh2D mesh;
     //mesh.Load(node,0);
-    
     //node = &g;
+    if(verbosity>10) std::cout << "Creating mesh domain (nodes)" << std::endl;
     const int dim=2; //(RdHat)
-    mesh.set_elt(&GetElt<dim>::Of(node));
+    mesh.set_elt(node);
     bemtool::array<dim+1,int> I;
+    if(verbosity>10) std::cout << "End creating mesh domain mesh" << std::endl;
     
+   if(verbosity>10) std::cout << "Creating geometry domain (elements)" << std::endl;
    for(int it=0; it<ThS.nt; it++){
        const TriangleS &K(ThS[it]);
        for(int j=0;j<3;j++)
-           I[j]=ThS.operator () (K[j]);
-       node[I-1];
+        I[j]=ThS.operator () (K[j]);
+       mesh.setOneElt(node,I);
    }
-    
     Orienting(mesh);
     mesh = unbounded;
+    if(verbosity>10) std::cout << "end creating geometry domain" << std::endl;
   
 }
 
-void MeshS2Bemtool(const MeshS &ThS, Geometry node) {
+void MeshS2Bemtool(const MeshS &ThS, Geometry &node) {
     
     // create the geometry;
     //std::string meshname="Th.msh";   ////// be careful
     //Geometry node(meshname);
     //bemtool::Geometry node;
+    std::cout << "Creating mesh output" << std::endl;
     bemtool::R3 p;
-    for(int iv=0 ; iv<ThS.nv ; iv){
+    for(int iv=0 ; iv<ThS.nv ; iv++){
         p[0]=ThS.vertices[iv].x;p[1]=ThS.vertices[iv].y;p[2]=ThS.vertices[iv].z;
         node.setnodes(p);
         
@@ -163,10 +167,6 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 	SetMinTargetDepth(mintargetdepth);
 	SetMinSourceDepth(minsourcedepth);
 
-	
-
-
-
 
 	MPI_Comm comm = pcomm ? *(MPI_Comm*)pcomm : MPI_COMM_WORLD;
 
@@ -190,10 +190,6 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
     
 	bool samemesh =  &Uh->Th == &Vh->Th;  // same Fem2D::Mesh
 
-	//cout << samemesh << " " << NUh << " " << n << " " << m << endl;
-
-
-
 	if (init)
 	delete *Hmat;
     double kappa=10;
@@ -216,7 +212,7 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 	mesh = unbounded;*/
 	 ///////////////////////////////////////////////////////
 
-     if (mpirank==0) std::cout << "Creating dof" << std::endl;
+    std::cout << "Creating dof" << std::endl;
    	Dof<P1_2D> dof(mesh);
 	// now the list of dof is known -> can acces to global num triangle and the local num vertice assiciated 
 
@@ -243,14 +239,7 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
         *Hmat = new HMatrix<LR,K>(generator_V,p1,-1,comm);
     }
     else if (type==1) {
-        
-        if (mpirank==0)
-            
-        std::cout << "Loading output mesh" << std::endl;
-        
-        
-        
-        
+   
         // ThV = meshS ThGlobal (in function argument?)
         // call interface MeshS2Bemtool MeshS-> geometry + mesh
         const  MeshS & ThOut=Vh->Th;
