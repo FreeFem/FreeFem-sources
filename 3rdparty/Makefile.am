@@ -180,8 +180,8 @@ reinstall-boost:./getall
 	-test -n "$(TOOL_COMPILE_boost)" && $(MAKE) install-boost || true
 boost/done.tag:./pkg/boost.tar.gz
 	-if test -f ./pkg/boost.tar.gz ; then \
-         cd pkg ; rm -rf boost boost_* ; tar xvzf boost.tar.gz ; cd boost_* ; ./bootstrap.sh ; ./b2 install --prefix=../../boost ; rm -rf boost_* ; touch ../../boost/done.tag; \
-         else true;  fi
+	cd pkg ; rm -rf boost boost_* ; tar xvzf boost.tar.gz  ; cd boost_* ; ./bootstrap.sh ; ./b2 install --prefix=../../boost ; cd - ; touch ../boost/done.tag; rm -rf boost_* \
+	else true;  fi
 lib/WHERE.boost: ./getall
 	if test -d boost/include ; then \
 	echo boost LD -L@DIR@/boost/lib > $@ ;\
@@ -235,7 +235,7 @@ install-exec-local:
 	cp -rp bin  $(DESTDIR)$(ff_prefix_dir)
 
 clean-local:
-	-rm -rf	 tag-* include lib bin
+	-rm -rf	 tag-* include lib bin boost
 	-mkdir   include lib bin
 	-rm */FAIT */FAIRE
 # 	FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no

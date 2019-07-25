@@ -39,35 +39,7 @@ public:
 	K get_coef(const int& i, const int& j)const {return 1./(0.01+(ThU.vertices[i]-ThV.vertices[j]).norme2());}
 
 };
-/*
-template<template<class> class LR, class K>
-class init_Op : public E_F0mps {
-public:
-	Expression A;
-	static const int n_name_param = 1;
-	static basicAC_F0::name_and_type name_param[];
-	Expression nargs[n_name_param];
-	init_Op(const basicAC_F0& args, Expression param1) : A(param1) {
-		args.SetNameParam(n_name_param, name_param, nargs);
-	}
 
-	AnyType operator()(Stack stack) const;
-};
-
-template<template<class> class LR, class K>
-basicAC_F0::name_and_type init_Op<LR, K>::name_param[] = {
-};
-
-template<template<class> class LR, class K>
-class init : public OneOperator {
-public:
-	init() : OneOperator(atype<HMatrix<LR,K>**>(), atype<HMatrix<LR,K>**>(), atype<Matrice_Creuse<K>*>()) { }
-
-	E_F0* code(const basicAC_F0& args) const {
-		return new init_Op<LR, K>(args, t[0]->CastTo(args[0]));
-	}
-};
-*/
 
 
 
@@ -114,40 +86,57 @@ class assembleHMatrix : public OneOperator { public:
         {        "type", &typeid(long)}
 	};
 
-	/*
-	template <template<class> class LR, class K, EquationEnum Eq, BIOpKernelEnum Op, BIOpKernelEnum local_Op, int dim, typename Discretization>
-	HMatrix<LR,K>* generateBIO() {
-	double kappa = 1;
-	Geometry node("Th.msh");
-	bemtool::Mesh<dim> mesh; mesh.Load(node,0);
-	Orienting(mesh);
-	int nb_elt = NbElt(mesh);
-	std::vector<bemtool::R3> normals= NormalTo(mesh);
 
-	// Dof
-	Dof<Discretization> dof(mesh);
-	int nb_dof = NbDof(dof);
-	std::vector<htool::R3> x(nb_dof);
-	for (int i=0;i<nb_dof;i++){
-	x[i][0]=dof(((dof.ToElt(i))[0])[0])[((dof.ToElt(i))[0])[1]][0];
-	x[i][1]=dof(((dof.ToElt(i))[0])[0])[((dof.ToElt(i))[0])[1]][1];
-	x[i][2]=dof(((dof.ToElt(i))[0])[0])[((dof.ToElt(i))[0])[1]][2];
+void MeshS2Bemtool(const MeshS &ThS, Geometry node, Mesh2D mesh ) {
+   
+    // create the geometry;
+    //std::string meshname="Th.msh";   ////// be careful
+    //Geometry node(meshname);
+    //bemtool::Geometry node;
+    bemtool::R3 p;
+    for(int iv=0 ; iv<ThS.nv ; iv){
+        p[0]=ThS.vertices[iv].x;p[1]=ThS.vertices[iv].y;p[2]=ThS.vertices[iv].z;
+        node.setnodes(p);
+        
+    }
+    node.initEltData();
+    
+    // create the mesh
+    //bemtool::Mesh2D mesh;
+    //mesh.Load(node,0);
+    
+    //node = &g;
+    const int dim=2; //(RdHat)
+    mesh.set_elt(&GetElt<dim>::Of(node));
+    bemtool::array<dim+1,int> I;
+    
+   for(int it=0; it<ThS.nt; it++){
+       const TriangleS &K(ThS[it]);
+       for(int j=0;j<3;j++)
+           I[j]=ThS.operator () (K[j]);
+       node[I-1];
+   }
+    
+    Orienting(mesh);
+    mesh = unbounded;
+  
 }
 
-BIO_Generator<BIOpKernel<Eq,Op,dim+1,Discretization,Discretization>,Discretization> generator_BIO(dof,kappa);
-HMatrix<LR,K>* H = new HMatrix<LR,K>(generator_BIO,x);
-
-
-//	if (apply_boundary(Op)){
-//			std::vector<int> boundary=is_boundary_nodes(dof);
-//			if (*max_element(boundary.begin(),boundary.end())!=0){
-//					H->apply_dirichlet(boundary);
-//			}
-//	}
-
-return H;
+void MeshS2Bemtool(const MeshS &ThS, Geometry node) {
+    
+    // create the geometry;
+    //std::string meshname="Th.msh";   ////// be careful
+    //Geometry node(meshname);
+    //bemtool::Geometry node;
+    bemtool::R3 p;
+    for(int iv=0 ; iv<ThS.nv ; iv){
+        p[0]=ThS.vertices[iv].x;p[1]=ThS.vertices[iv].y;p[2]=ThS.vertices[iv].z;
+        node.setnodes(p);
+        
+    }
 }
-*/
+
+
 
 
 template<template<class> class LR, class K>
@@ -198,6 +187,7 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 
 	const  MeshS & ThU =Uh->Th; // line
 	const  MeshS & ThV =Vh->Th; // colunm
+    
 	bool samemesh =  &Uh->Th == &Vh->Th;  // same Fem2D::Mesh
 
 	//cout << samemesh << " " << NUh << " " << n << " " << m << endl;
@@ -208,20 +198,25 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 	delete *Hmat;
     double kappa=10;
 	
+    
+    
+    // ThU = meshS ThGlobal (in function argument?
+    // call interface MeshS2Bemtool
+    const  MeshS & ThGlobal=Uh->Th;
+    Geometry node; Mesh2D mesh;
+    MeshS2Bemtool(ThGlobal, node, mesh);
+   
+    ///////////////////////////////////////////////////////
     //read the .msh
-	std::string meshname="Th.msh";   ////// be careful
+	/*std::string meshname="Th.msh";   ////// be careful
    	Geometry node(meshname);
     Mesh2D mesh;
     mesh.Load(node,0);
 	Orienting(mesh);
-	mesh = unbounded;
-	
-    
-    
-    
-    
-    
-    std::cout << "Creating dof" << std::endl;
+	mesh = unbounded;*/
+	 ///////////////////////////////////////////////////////
+
+     if (mpirank==0) std::cout << "Creating dof" << std::endl;
    	Dof<P1_2D> dof(mesh);
 	// now the list of dof is known -> can acces to global num triangle and the local num vertice assiciated 
 
@@ -250,11 +245,26 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
     else if (type==1) {
         
         if (mpirank==0)
+            
         std::cout << "Loading output mesh" << std::endl;
-        std::string meshname_output="Th_output.msh";   ////// be careful
-        Geometry node_output(meshname_output);
+        
+        
+        
+        
+        // ThV = meshS ThGlobal (in function argument?)
+        // call interface MeshS2Bemtool MeshS-> geometry + mesh
+        const  MeshS & ThOut=Vh->Th;
+        Geometry node_output; //, bemtool::Mesh2D mesh
+        MeshS2Bemtool(ThOut,node_output);
+        
+        //std::string meshname_output="Th_output.msh";   ////// be careful
+        //Geometry node_output(meshname_output);
         int nb_dof_output = NbNode(node_output);
       
+        
+        
+        
+        
         Potential<PotKernel<HE,SL_POT,3,P1_2D>> POT_SL(mesh,kappa);
         POT_Generator<PotKernel<HE,SL_POT,3,P1_2D>,P1_2D> generator_SL(POT_SL,dof,node_output);
         
