@@ -1,5 +1,4 @@
 #include "ffPacket.hpp"
-#include "RNM.hpp"
 #include "rgraph.hpp"
 #include "fem.hpp"
 #include "Mesh3dn.hpp"
@@ -119,5 +118,77 @@ void ffPacket::jsonify<Fem2D::MeshS>(const Fem2D::MeshS& data)
         m_JSON["Mesh3"]["Borders"] += data(b[0]);
         m_JSON["Mesh3"]["Borders"] += data(b[1]);
         m_JSON["Mesh3"]["Borders"] += b.lab;
+    }
+}
+
+template<>
+void ffPacket::jsonify<ffFE<Fem2D::R2, Fem2D::R>>(const ffFE<Fem2D::R2, Fem2D::R>& data)
+{
+    m_JSON["FE2D"]["Types"] = { "R2", "R" };
+
+    for (int i = 0; i < data.Psub.N(); i += 1) {
+        m_JSON["FE2D"]["Psub"] += data.Psub[i].x;
+        m_JSON["FE2D"]["Psub"] += data.Psub[i].y;
+    }
+    for (int i = 0; i < data.Ksub.N(); i += 1) {
+        m_JSON["FE2D"]["Ksub"] += data.Ksub[i];
+    }
+    for (int i = 0; i < data.V1.N(); i += 1) {
+        m_JSON["FE2D"]["V1"] += data.V1[i];
+    }
+}
+
+template<>
+void ffPacket::jsonify<ffFE<Fem2D::R2, complex<double>>>(const ffFE<Fem2D::R2, complex<double>>& data)
+{
+    m_JSON["FE2D"]["Types"] = { "R2", "complex<double>" };
+
+    for (int i = 0; i < data.Psub.N(); i += 1) {
+        m_JSON["FE2D"]["Psub"] += data.Psub[i].x;
+        m_JSON["FE2D"]["Psub"] += data.Psub[i].y;
+    }
+    for (int i = 0; i < data.Ksub.N(); i += 1) {
+        m_JSON["FE2D"]["Ksub"] += data.Ksub[i];
+    }
+    for (int i = 0; i < data.V1.N(); i += 1) {
+        m_JSON["FE2D"]["V1"] += data.V1[i].real();
+        m_JSON["FE2D"]["V1"] += data.V1[i].imag();
+    }
+}
+
+template<>
+void ffPacket::jsonify<ffFE<Fem2D::R3, Fem2D::R>>(const ffFE<Fem2D::R3, Fem2D::R>& data)
+{
+    m_JSON["FE2D"]["Types"] = { "R3", "R" };
+
+    for (int i = 0; i < data.Psub.N(); i += 1) {
+        m_JSON["FE2D"]["Psub"] += data.Psub[i].x;
+        m_JSON["FE2D"]["Psub"] += data.Psub[i].y;
+        m_JSON["FE2D"]["Psub"] += data.Psub[i].z;
+    }
+    for (int i = 0; i < data.Ksub.N(); i += 1) {
+        m_JSON["FE2D"]["Ksub"] += data.Ksub[i];
+    }
+    for (int i = 0; i < data.V1.N(); i += 1) {
+        m_JSON["FE2D"]["V1"] += data.V1[i];
+    }
+}
+
+template<>
+void ffPacket::jsonify<ffFE<Fem2D::R3, complex<double>>>(const ffFE<Fem2D::R3, complex<double>>& data)
+{
+    m_JSON["FE3D"]["Types"] = { "R3", "complex<double>" };
+
+    for (int i = 0; i < data.Psub.N(); i += 1) {
+        m_JSON["FE3D"]["Psub"] += data.Psub[i].x;
+        m_JSON["FE3D"]["Psub"] += data.Psub[i].y;
+        m_JSON["FE3D"]["Psub"] += data.Psub[i].z;
+    }
+    for (int i = 0; i < data.Ksub.N(); i += 1) {
+        m_JSON["FE3D"]["Ksub"] += data.Ksub[i];
+    }
+    for (int i = 0; i < data.V1.N(); i += 1) {
+        m_JSON["FE3D"]["V1"] += data.V1[i].real();
+        m_JSON["FE3D"]["V1"] += data.V1[i].imag();
     }
 }

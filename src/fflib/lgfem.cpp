@@ -3518,71 +3518,67 @@ void Show(const char * s,int k=1)
   }
 }
 template<class K,class v_fes>
-int Send2d(PlotStream & theplot,Plot::ListWhat & lli,map<const typename v_fes::FESpace::Mesh *,long> & mapth)
+int Send2d(PlotStream& theplot, Plot::ListWhat& lli, map<const typename v_fes::FESpace::Mesh *, long>& mapth)
 {
-    typedef FEbase<K,v_fes> * pfek ;
-    pfek fe[3]={0,0,0};
-    int cmp[3]={-1,-1,-1};
-    int err=1;
-    long what=lli.what;
-    int lg,nsb;
-    lli.eval(fe,cmp);
-    if (fe[0]->x() && what %10 ==1)
-	{
-	      err=0;
-	      theplot << what ;
-	      theplot <<mapth[ &(fe[0]->Vh->Th)];// numero du maillage
+    typedef FEbase<K,v_fes> *pfek ;
+    pfek fe[3] = {0, 0, 0};
+    int cmp[3] = {-1, -1, -1};
+    int err = 1;
+    long what = lli.what;
+    int lg, nsb;
+    lli.eval(fe, cmp);
+    ffPacket packet;
 
-	      KN<K> V1=fe[0]->Vh->newSaveDraw(*fe[0]->x(),cmp[0],lg,nsb);
+    if (fe[0]->x() && what % 10 == 1)
+	  {
+	      err = 0;
+	      theplot << what ;
+	      theplot << mapth[&(fe[0]->Vh->Th)]; // mesh's number
+
+	      KN<K> V1 = fe[0]->Vh->newSaveDraw(*fe[0]->x(), cmp[0], lg, nsb);
 
 	      // construction of the sub division ...
-	      int nsubT=NbOfSubTriangle(nsb);
-	      int nsubV=NbOfSubInternalVertices(nsb);
+	      int nsubT = NbOfSubTriangle(nsb);
+	      int nsubV = NbOfSubInternalVertices(nsb);
 	      KN<R2> Psub(nsubV);
-	      KN<int> Ksub(nsubT*3);
-	      for(int i=0;i<nsubV;++i)
-	      Psub[i]=SubInternalVertex(nsb,i);
-	      for(int sk=0,p=0;sk<nsubT;++sk)
-	      for(int i=0;i<3;++i,++p)
-	      Ksub[p]=numSubTriangle(nsb,sk,i);
-
-	      if(verbosity>9)
-	      cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N()
-	      << " Max "  << V1.max() << " min " << V1.min() << endl;
-	      theplot << Psub ;
-	      theplot << Ksub ;
+	      KN<int> Ksub(nsubT * 3);
+	      for(int i = 0; i < nsubV; ++i)
+	          Psub[i] = SubInternalVertex(nsb, i);
+	      for(int sk = 0, p = 0; sk < nsubT; ++sk)
+	          for(int i = 0; i < 3; ++i, ++p)
+	              Ksub[p] = numSubTriangle(nsb,sk,i);
+	      if(verbosity > 9)
+	      cout << " Send plot:what: " << what << " " << nsb << " " << V1.N() << " Max " << V1.max() << " min " << V1.min() << endl;
+	      ffFE<R2, K> fffe(Psub, Ksub, V1);
+        packet.jsonify(fffe);
+        if (verbosity > 99) { cout << packet.dump() << "\n"; }
+        theplot << Psub;
+	      theplot << Ksub;
 	      theplot << V1;
+	  } else if (fe[0]->x() && fe[1]->x() && what % 10 == 2) {
+	      err = 0;
+        theplot << what;
+        KN<K> V1 = fe[0]->Vh->newSaveDraw(*fe[0]->x(), *fe[1]->x(), cmp[0], cmp[1], lg, nsb);
 
-	      }
-    else if (fe[0]->x() && fe[1]->x() &&what %10 ==2)
-      {
-
-	{
-	  err=0;
-	  theplot << what ;
-
-
-	  KN<K> V1=fe[0]->Vh->newSaveDraw(*fe[0]->x(),*fe[1]->x(),cmp[0],cmp[1],lg,nsb);
-	  // construction of the sub division ...
-	  int nsubT=NbOfSubTriangle(nsb);
-	  int nsubV=NbOfSubInternalVertices(nsb);
-	  KN<R2> Psub(nsubV);
-	  KN<int> Ksub(nsubT*3);
-	  for(int i=0;i<nsubV;++i)
-	      Psub[i]=SubInternalVertex(nsb,i);
-	  for(int sk=0,p=0;sk<nsubT;++sk)
-	      for(int i=0;i<3;++i,++p)
-		  Ksub[p]=numSubTriangle(nsb,sk,i);
-
-	  theplot <<mapth[ &(fe[0]->Vh->Th)];// numero du maillage
-	  theplot << Psub ;
-	  theplot << Ksub ;
-	  theplot <<  V1;
-	}
-
-      }
+        // construction of the sub division ...
+        int nsubT = NbOfSubTriangle(nsb);
+        int nsubV = NbOfSubInternalVertices(nsb);
+        KN<R2> Psub(nsubV);
+        KN<int> Ksub(nsubT * 3);
+        for(int i=0;i<nsubV;++i)
+            Psub[i]=SubInternalVertex(nsb,i);
+        for(int sk=0,p=0;sk<nsubT;++sk)
+            for(int i=0;i<3;++i,++p)
+                Ksub[p] = numSubTriangle(nsb,sk,i);
+        ffFE<R2, K> fffe(Psub, Ksub, V1);
+        packet.jsonify(fffe);
+        if (verbosity > 99) { cout << packet.dump() << "\n"; }
+        theplot << mapth[&(fe[0]->Vh->Th)]; // mesh's number
+        theplot << Psub;
+        theplot << Ksub;
+        theplot << V1;
+    }
     return err;
-
 }
 
 template<class K,class v_fes>
@@ -3594,6 +3590,8 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
     int err=1;
     long what=lli.what;
     int lg,nsb;
+    ffPacket packet;
+
     if (what%10==6)
     {
         int lg,nsb;
@@ -3611,6 +3609,9 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
                 if(verbosity>9)
                     cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N()
                     << " "  << V1.max() << " " << V1.min() << endl;
+                ffFE<R3, K> fffe(Psub, Ksub, V1);
+                packet.jsonify(fffe);
+                if (verbosity > 99) { cout << packet.dump() << "\n"; }
                 theplot << Psub ;
                 theplot << Ksub ;
                 theplot << V1;
@@ -3645,7 +3646,9 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
                 V123(2,'.')=V3;
                 // FFCS: should be able to deal with complex as well
                 theplot << (KN_<K>&) V123;
-
+                ffFE<R3, K> fffe(Psub1, Ksub1, V123);
+                packet.jsonify(fffe);
+                if (verbosity > 99) { cout << packet.dump() << "\n"; }
             }
         }
     }
@@ -3664,7 +3667,7 @@ int SendS(PlotStream & theplot,Plot::ListWhat &lli,map<const MeshS *,long> &mapt
     long what=lli.what;
     int lg,nsb=0;
     lli.eval(feS,cmp);
-
+    ffPacket packet;
 
     if (what%10==8)
     {
@@ -3678,6 +3681,9 @@ int SendS(PlotStream & theplot,Plot::ListWhat &lli,map<const MeshS *,long> &mapt
         if(verbosity>9)
             cout << " Send plot:what: " << what << " " << nsb << " "<<  V1.N()
             << " Max "  << V1.max() << " min " << V1.min() << endl;
+        ffFE<R2, K> fffe(Psub, Ksub, V1);
+        packet.jsonify(fffe);
+        if (verbosity > 99) { cout << packet.dump() << "\n"; }
         theplot << Psub ;
         theplot << Ksub ;
         theplot << V1;
@@ -3703,12 +3709,12 @@ inline  void NewSetColorTable(int nb,float *colors=0,int nbcolors=0,bool hsv=tru
 /// <<Plot_operator_brackets>> from class [[Plot]]
 AnyType Plot::operator()(Stack s) const{
 
+    ffPacket packet; // packet to be sent using the TCP server
     // remap  case 107 and 108 , 109  for array of FE.
-    ffPacket packet;
     vector<ListWhat> ll;
     vector<AnyType> lat;
     ll.reserve(l.size());
-    // generation de la list de plot ...
+    // Generating plot list
     for (size_t i=0;i<l.size();i++)
     {
 
@@ -3753,26 +3759,26 @@ AnyType Plot::operator()(Stack s) const{
     {
         /*
          les different item of the plot are given by the number what:
-         what = 0 -> mesh
-         what = 1 -> real scalar field (FE function  2d)
-         what = 2 -> 2d vector field (two FE function  2d)
-         what = 3 -> curve def by 2,.., 4 array
-         what = 4 -> border
-         what = 5 -> 3d meshes
-         what = 6 -> real FE function 3D volume
-         what = 7 -> real 3d vector field (tree FE function  3d) volume
-         what = 8 -> real FE function 3D surface
-         what = 9 -> real 3d vector field (tree FE function  3d) surface
-         what = 11 -> complex scalar field (FE function  2d) real
-         what = 13 -> curve def by 4  array : x,y,z,  value for color ...
-         what = 16 -> complex FE function 3D volume
-         what = 17 -> complex 3d vector field (tree FE function  3d) volume
-         what = 18 -> complex FE function 3D surface
-         what = 19 -> complex 3d vector field (tree FE function  3d) surface
-         what = 50 -> 3D surface mesh
-         what = 100,101,106, ->   remap with real ... 2d, 3D volume, 3D surface
-         what = 111, 116 , 117 118 ->  remap with complex ... 2d, 3D volume, 3D surface
-         what = -1 -> error, item empty
+         what == 0 -> mesh
+         what == 1 -> real scalar field (FE function  2d)
+         what == 2 -> 2d vector field (two FE function  2d)
+         what == 3 -> curve def by 2,.., 4 array
+         what == 4 -> border
+         what == 5 -> 3d meshes
+         what == 6 -> real FE function 3D volume
+         what == 7 -> real 3d vector field (tree FE function  3d) volume
+         what == 8 -> real FE function 3D surface
+         what == 9 -> real 3d vector field (tree FE function  3d) surface
+         what == 11 -> complex scalar field (FE function  2d) real
+         what == 13 -> curve def by 4  array : x,y,z,  value for color ...
+         what == 16 -> complex FE function 3D volume
+         what == 17 -> complex 3d vector field (tree FE function  3d) volume
+         what == 18 -> complex FE function 3D surface
+         what == 19 -> complex 3d vector field (tree FE function  3d) surface
+         what == 50 -> 3D surface mesh
+         what == 100,101,106, ->   remap with real ... 2d, 3D volume, 3D surface
+         what == 111, 116 , 117 118 ->  remap with complex ... 2d, 3D volume, 3D surface
+         what == -1 -> error, item empty
          */
         PlotStream theplot(ThePlotStream);
         pferbase  fe[3]={0,0,0};
@@ -3867,10 +3873,10 @@ if(nargs[VTK_START+index])                    \
           const Mesh *th=0;
           const Mesh3 *th3=0;
             const MeshS *thS=0;
-          // Prepare for the sending mesh 2d
+          // Prepare to send mesh 2d
           if(what ==0)
             th= ll[ii].th();
-          // Prepare for the sending mesh 3d with differenciation 3D surface / volumuic / volum+surfac
+          // Prepare to send mesh 3d with differenciation 3D surface / volumuic / volum+surfac
           if( what ==5 ) {
             //const int th3type = (l[i].evalm3(0,s)).getTypeMesh3() ;
             // need to modifie the what for type mesh3 for identification in the ffglut reading
@@ -3881,14 +3887,14 @@ if(nargs[VTK_START+index])                    \
           }
           if( what ==50 )
             thS= (&(l[i].evalmS(0,s)));// 3d pure surface
-          // Prepare for the sending 2d iso values for ffglut
+          // Prepare to send 2d iso values for ffglut
           else if (what==1 || what==2|| what==11 || what==12) {
             ll[ii].eval(fe,cmp);
             if (fe[0]->x()) th=&fe[0]->Vh->Th;
               if(fe[1] && fe[1]->x())
                     ffassert(th == &fe[1]->Vh->Th);
           }
-          // Prepare for the sending 3D volume iso values for ffglut
+          // Prepare to send 3D volume iso values for ffglut
           else if (what==6 || what==7 || what==16 || what==17) {
             ll[ii].eval(fe3,cmp);
             if (fe3[0]->x()) th3=&fe3[0]->Vh->Th;
@@ -3896,7 +3902,7 @@ if(nargs[VTK_START+index])                    \
             if (fe3[2]) ffassert(th3 == &fe3[2]->Vh->Th);
 
           }
-          // Prepare for the sending 3D surface iso values for ffglut
+          // Prepare to send 3D surface iso values for ffglut
           else if (what==8 || what==9 || what==18 || what==19) {
             ll[ii].eval(feS,cmp);
             if (feS[0]->x()) thS=&feS[0]->Vh->Th;
@@ -3911,44 +3917,44 @@ if(nargs[VTK_START+index])                    \
           if(thS && (mapthS.find(thS)==mapthS.end()))
           mapthS[thS]=++kthS;
         }
-        // send of meshes 2d
+        // sending meshes 2d
         theplot.SendMeshes();
         theplot << kth ;
 
         for (map<const Mesh *,long>::const_iterator i=mapth.begin();i != mapth.end(); ++i) {
             packet.jsonify(*i->first);
-            cout << packet.dump() << "\n";
+            if (verbosity > 99) { cout << packet.dump() << "\n"; }
             packet.clear();
             theplot << i->second << *  i->first ;
         }
 
-       // only send of volume meshes 3D
+       // only sending volume meshes 3D
         if(kth3 && kthS==0)
         {
             theplot.SendMeshes3();
             theplot << kth3 ;
             for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i) {
                 packet.jsonify(*i->first);
-                cout << packet.dump() << "\n";
+                if (verbosity > 99) { cout << packet.dump() << "\n"; }
                 packet.clear();
                 theplot << i->second << *  i->first ;
             }
         }
 
-        // only send of surface meshes 3D
+        // only sending surface meshes 3D
        if(kthS && kth3==0)
         {
             theplot.SendMeshesS();
             theplot << kthS ;
             for (map<const MeshS *,long>::const_iterator i=mapthS.begin();i != mapthS.end(); ++i) {
                 packet.jsonify(*i->first);
-                cout << packet.dump() << "\n";
+                if (verbosity > 99) { cout << packet.dump() << "\n"; }
                 packet.clear();
                 theplot << i->second << *  i->first ;
             }
        }
 
-        // send of volume and surface meshes 3D
+        // sending volume and surface meshes 3D
         // in this case, plot the surface
         if(kthS && kth3) {
           theplot.SendMeshes3();

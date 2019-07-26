@@ -5,8 +5,20 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
+#include "RNM.hpp"
 
 using json = nlohmann::json;
+
+template <typename T, class K>
+struct ffFE {
+
+    ffFE(KN<T> psub, KN<int> ksub, KN<K> v1)
+        : Psub(psub), Ksub(ksub), V1(v1) { }
+
+    KN_<T> Psub;
+    KN_<int> Ksub;
+    KN_<K> V1;
+};
 
 class ffPacket {
     public:
