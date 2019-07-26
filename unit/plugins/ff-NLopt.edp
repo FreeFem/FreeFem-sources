@@ -41,6 +41,8 @@ for(int al=0;al<nadapt;++al)
   	Au1 -= b1;
   	Au2 -= b2;
   	real val = u1[]'*Au1 + u2[]'*Au2;
+  	// if(iter %10==9)
+  	// plot(u1,u2,nbiso=30,fill=1,dim=3,cmm="adapt level " + al + " - iteration " + iter + " - J = " + val,value=1);
   	return val;
   }
 
