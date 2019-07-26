@@ -15,7 +15,7 @@ int[int] Lab=[1,2,3,4];
 macro grad(u) [dx(u),dy(u)] //
 
 int status=1;
-//Read(sharedata,8,status);
+Read(sharedata,8,status);
 cout << " ff status = "<< status << endl;
 real cff,rff;
 problem Pb(u,v) = int2d(Th)(grad(u)'*grad(v))-int2d(Th)(cff*v)+ on(Lab,u=0);
