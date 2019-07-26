@@ -3,6 +3,65 @@
 #include "fem.hpp"
 #include "Mesh3dn.hpp"
 
+ffPacket::ffPacket()
+{
+    m_Header["Size"] = 0;
+    m_Header["Version"] = "FreeFem++ Header 0.1";
+    m_Header["Padding"] = "";
+    m_Data = std::vector<uint8_t>();
+    m_JSON = json();
+}
+
+ffPacket::ffPacket(json data)
+{
+    m_Header["Size"] = 0;
+    m_Header["Version"] = "FreeFem++ Header 0.1";
+    m_Header["Padding"] = "";
+
+    m_JSON = json(data);
+    m_Data = std::vector<uint8_t>();
+}
+
+ffPacket::ffPacket(const ffPacket& copy)
+    : m_JSON(copy.m_JSON), m_Data(copy.m_Data), m_Header(copy.m_Header)
+{}
+
+ffPacket& ffPacket::operator=(const ffPacket& copy) {
+    m_JSON = json(copy.m_JSON);
+    m_Data = std::vector<uint8_t>(copy.m_Data);
+    m_Header = json(copy.m_Header);
+
+    return *this;
+}
+
+std::string ffPacket::dump(int indent)
+{
+    return m_JSON.dump(indent);
+}
+
+void ffPacket::compress()
+{
+    std::vector<uint8_t> tmp = json::to_cbor(m_JSON);
+    std::string padding = "";
+    int size = 0;
+
+    m_Data.insert(m_Data.end(), tmp.begin(), tmp.end());
+    m_Header["Size"] = m_Data.size();
+    size = m_Header.dump().size();
+    for (int i = 0; i < (size - 66); i += 1) {
+        padding += "a";
+    }
+    m_Header["Padding"] = padding;
+}
+
+void ffPacket::clear()
+{
+    m_Header["Padding"].clear();
+    m_Header["Size"].clear();
+    m_Data.clear();
+    m_JSON.clear();
+}
+
 /**
  * Transform a number of KN_<double> into JSON.
  * Sample JSON file :

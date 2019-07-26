@@ -84,11 +84,12 @@ class ffServer {
 
     void send(ffPacket packet) {
         auto ite = m_Connection.begin();
+        m_Packets.push_back(packet);
 
         std::cout << "Broadcasting json.\n";
         while (ite != m_Connection.end()) {
             auto tmp = *ite;
-            asio::async_write(tmp->socket(), asio::buffer(packet.GetPacketHeader()),
+            asio::async_write(tmp->socket(), asio::buffer(packet.m_Header.dump()),
                               [this, ite](std::error_code const& err,
                                           size_t bytes_transferred) {
                                   if (err) {
@@ -97,7 +98,7 @@ class ffServer {
                                       std::cout << "Sent header\n";
                                   }
                               });
-            asio::async_write(tmp->socket(), asio::buffer(packet.GetPacketData()),
+            asio::async_write(tmp->socket(), asio::buffer(packet.m_Data),
                               [this, ite](std::error_code const& err,
                                           size_t bytes_transferred) {
                                   if (err) {
@@ -159,6 +160,7 @@ class ffServer {
     asio::io_service m_ioService;
     tcp::acceptor m_Acceptor;
     std::list<Connection::pointer> m_Connection;
+    std::list<ffPacket> m_Packets;
 };
 
 extern ffServer *graphicServer;

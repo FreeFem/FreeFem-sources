@@ -4079,6 +4079,8 @@ if(nargs[VTK_START+index])                    \
 
 
         }
+        packet.compress();
+        graphicServer->send(packet);
         theplot.SendEndPlot();
     }
 
