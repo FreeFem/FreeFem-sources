@@ -8,16 +8,22 @@ cout << functionDEFINITION << "readdir" << endl;
 real t;
 Directory dir = "assets";
 string readData="empty";
-string[int] dataArray = [".", "..", "Th.mesh", "Th.msh", "triangle.msh", "test.txt"];
+string[int] dataArray = [".", "..", "Th.mesh", "Th.msh", "triangle.msh", "test.txt",
+"bidule.vtk", "cube.msh", "gmsh_mesh.msh", "sol.vtk", "spherewithahole.mesh", "ThS.mesh", "ThS.msh", "triQA.msh"];
+int ssize = 14;
 
 while (readData != "") {
   t = clock();
   readData = readdir(dir);
   t = clock() - t;
+  cout << readData << endl;
   if (readData != "") {
     test(readData == dataArray[0] || readData == dataArray[1] ||
-      readData == dataArray[2] || readData == dataArray[3] ||
-      readData == dataArray[4] || readData == dataArray[5]);
+    readData == dataArray[2] || readData == dataArray[3] ||
+    readData == dataArray[4] || readData == dataArray[5] || readData == dataArray[6] ||
+    readData == dataArray[7] || readData == dataArray[8] ||
+    readData == dataArray[9] || readData == dataArray[10] ||
+    readData == dataArray[11] || readData == dataArray[12] || readData == dataArray[13]);
     cout << timeELAPSED << t << endl;
   }
 }
