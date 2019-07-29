@@ -3653,7 +3653,7 @@ int mainff (int  argc, char **argv)
  // fingraphique();
   // FFCS: divert stream to FFCS
   if (graphicServer) {
-    // graphicServer->stop();
+    graphicServer->Stop();
     delete graphicServer;
   }
   if(ThePlotStream){

@@ -7,7 +7,6 @@ ffPacket::ffPacket()
 {
     m_Header["Size"] = 0;
     m_Header["Version"] = "FreeFem++ Header 0.1";
-    m_Header["Padding"] = "";
     m_Data = std::vector<uint8_t>();
     m_JSON = json();
 }
@@ -16,7 +15,6 @@ ffPacket::ffPacket(json data)
 {
     m_Header["Size"] = 0;
     m_Header["Version"] = "FreeFem++ Header 0.1";
-    m_Header["Padding"] = "";
 
     m_JSON = json(data);
     m_Data = std::vector<uint8_t>();
@@ -34,32 +32,32 @@ ffPacket& ffPacket::operator=(const ffPacket& copy) {
     return *this;
 }
 
-std::string ffPacket::dump(int indent)
+std::string ffPacket::Dump(int indent)
 {
     return m_JSON.dump(indent);
 }
 
-void ffPacket::compress()
+void ffPacket::Compress()
 {
     std::vector<uint8_t> tmp = json::to_cbor(m_JSON);
-    std::string padding = "";
-    int size = 0;
 
     m_Data.insert(m_Data.end(), tmp.begin(), tmp.end());
     m_Header["Size"] = m_Data.size();
-    size = m_Header.dump().size();
-    for (int i = 0; i < (size - 66); i += 1) {
-        padding += "a";
-    }
-    m_Header["Padding"] = padding;
 }
 
-void ffPacket::clear()
+void ffPacket::Clear()
 {
-    m_Header["Padding"].clear();
     m_Header["Size"].clear();
     m_Data.clear();
     m_JSON.clear();
+}
+
+std::string ffPacket::GetHeader()
+{
+    std::string ret = m_Header.dump();
+    while (ret.length() < 66)
+        ret += ' ';
+    return (ret);
 }
 
 /**
@@ -75,7 +73,7 @@ void ffPacket::clear()
  * }
  */
 template<>
-void ffPacket::jsonify<std::vector<KN_<double>>>(const std::vector<KN_<double>>& data)
+void ffPacket::Jsonify<std::vector<KN_<double>>>(const std::vector<KN_<double>>& data)
 {
     // Store the number of dimension for the curve (Max : 4)
     m_JSON["Curve"]["Dimension"] = data.size();
@@ -96,7 +94,7 @@ void ffPacket::jsonify<std::vector<KN_<double>>>(const std::vector<KN_<double>>&
 }
 
 template<>
-void ffPacket::jsonify<Fem2D::Mesh>(const Fem2D::Mesh& data)
+void ffPacket::Jsonify<Fem2D::Mesh>(const Fem2D::Mesh& data)
 {
     // Extract all vertices off the mesh
     for (int i = 0; i < data.nv; i += 1) {
@@ -122,7 +120,7 @@ void ffPacket::jsonify<Fem2D::Mesh>(const Fem2D::Mesh& data)
 }
 
 template<>
-void ffPacket::jsonify<Fem2D::Mesh3>(const Fem2D::Mesh3& data)
+void ffPacket::Jsonify<Fem2D::Mesh3>(const Fem2D::Mesh3& data)
 {
     // Extract all vertices off the mesh
     for (int i = 0; i < data.nv; i += 1) {
@@ -152,7 +150,7 @@ void ffPacket::jsonify<Fem2D::Mesh3>(const Fem2D::Mesh3& data)
 }
 
 template<>
-void ffPacket::jsonify<Fem2D::MeshS>(const Fem2D::MeshS& data)
+void ffPacket::Jsonify<Fem2D::MeshS>(const Fem2D::MeshS& data)
 {
     // Extract all vertices off the mesh
     for (int i = 0; i < data.nv; i += 1) {
@@ -181,7 +179,7 @@ void ffPacket::jsonify<Fem2D::MeshS>(const Fem2D::MeshS& data)
 }
 
 template<>
-void ffPacket::jsonify<ffFE<Fem2D::R2, Fem2D::R>>(const ffFE<Fem2D::R2, Fem2D::R>& data)
+void ffPacket::Jsonify<ffFE<Fem2D::R2, Fem2D::R>>(const ffFE<Fem2D::R2, Fem2D::R>& data)
 {
     m_JSON["FE2D"]["Types"] = { "R2", "R" };
 
@@ -198,7 +196,7 @@ void ffPacket::jsonify<ffFE<Fem2D::R2, Fem2D::R>>(const ffFE<Fem2D::R2, Fem2D::R
 }
 
 template<>
-void ffPacket::jsonify<ffFE<Fem2D::R2, complex<double>>>(const ffFE<Fem2D::R2, complex<double>>& data)
+void ffPacket::Jsonify<ffFE<Fem2D::R2, complex<double>>>(const ffFE<Fem2D::R2, complex<double>>& data)
 {
     m_JSON["FE2D"]["Types"] = { "R2", "complex<double>" };
 
@@ -216,7 +214,7 @@ void ffPacket::jsonify<ffFE<Fem2D::R2, complex<double>>>(const ffFE<Fem2D::R2, c
 }
 
 template<>
-void ffPacket::jsonify<ffFE<Fem2D::R3, Fem2D::R>>(const ffFE<Fem2D::R3, Fem2D::R>& data)
+void ffPacket::Jsonify<ffFE<Fem2D::R3, Fem2D::R>>(const ffFE<Fem2D::R3, Fem2D::R>& data)
 {
     m_JSON["FE2D"]["Types"] = { "R3", "R" };
 
@@ -234,7 +232,7 @@ void ffPacket::jsonify<ffFE<Fem2D::R3, Fem2D::R>>(const ffFE<Fem2D::R3, Fem2D::R
 }
 
 template<>
-void ffPacket::jsonify<ffFE<Fem2D::R3, complex<double>>>(const ffFE<Fem2D::R3, complex<double>>& data)
+void ffPacket::Jsonify<ffFE<Fem2D::R3, complex<double>>>(const ffFE<Fem2D::R3, complex<double>>& data)
 {
     m_JSON["FE3D"]["Types"] = { "R3", "complex<double>" };
 

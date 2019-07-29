@@ -84,6 +84,8 @@ libff_a_SOURCES2=  UMFPack_Solver.cpp \
 	../femlib/SolverSkyLine.hpp \
 	../femlib/VirtualSolverSparseSuite.hpp \
 	../femlib/VirtualSolverSkyLine.hpp	\
+	../ffgraphics/server/ffServer.hpp \
+	../ffgraphics/server/ffServer.cpp \
 	../ffgraphics/server/ffPacket.cpp \
 	../ffgraphics/server/ffPacket.hpp
 

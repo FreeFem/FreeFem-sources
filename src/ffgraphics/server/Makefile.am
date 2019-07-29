@@ -20,6 +20,6 @@
 # AUTHORS : Simon Garnotel
 # E-MAIL  : simon.garnotel@gmail.com
 
-SOURCES = ffserver.hpp ffPacket.hpp ffPacket.cpp
+SOURCES = ffserver.hpp ffServer.cpp ffPacket.hpp ffPacket.cpp
 
 AM_CPPFLAGS = -I../asio/asio/include -I../json/single_include/nlohmann -I$(srcdir)../femlib

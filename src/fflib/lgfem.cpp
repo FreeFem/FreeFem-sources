@@ -3550,8 +3550,8 @@ int Send2d(PlotStream& theplot, Plot::ListWhat& lli, map<const typename v_fes::F
 	      if(verbosity > 9)
 	      cout << " Send plot:what: " << what << " " << nsb << " " << V1.N() << " Max " << V1.max() << " min " << V1.min() << endl;
 	      ffFE<R2, K> fffe(Psub, Ksub, V1);
-        packet.jsonify(fffe);
-        if (verbosity > 99) { cout << packet.dump() << "\n"; }
+        packet.Jsonify(fffe);
+        if (verbosity > 99) { cout << packet.Dump() << "\n"; }
         theplot << Psub;
 	      theplot << Ksub;
 	      theplot << V1;
@@ -3571,8 +3571,8 @@ int Send2d(PlotStream& theplot, Plot::ListWhat& lli, map<const typename v_fes::F
             for(int i=0;i<3;++i,++p)
                 Ksub[p] = numSubTriangle(nsb,sk,i);
         ffFE<R2, K> fffe(Psub, Ksub, V1);
-        packet.jsonify(fffe);
-        if (verbosity > 99) { cout << packet.dump() << "\n"; }
+        packet.Jsonify(fffe);
+        if (verbosity > 99) { cout << packet.Dump() << "\n"; }
         theplot << mapth[&(fe[0]->Vh->Th)]; // mesh's number
         theplot << Psub;
         theplot << Ksub;
@@ -3610,8 +3610,8 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
                     cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N()
                     << " "  << V1.max() << " " << V1.min() << endl;
                 ffFE<R3, K> fffe(Psub, Ksub, V1);
-                packet.jsonify(fffe);
-                if (verbosity > 99) { cout << packet.dump() << "\n"; }
+                packet.Jsonify(fffe);
+                if (verbosity > 99) { cout << packet.Dump() << "\n"; }
                 theplot << Psub ;
                 theplot << Ksub ;
                 theplot << V1;
@@ -3647,8 +3647,8 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
                 // FFCS: should be able to deal with complex as well
                 theplot << (KN_<K>&) V123;
                 ffFE<R3, K> fffe(Psub1, Ksub1, V123);
-                packet.jsonify(fffe);
-                if (verbosity > 99) { cout << packet.dump() << "\n"; }
+                packet.Jsonify(fffe);
+                if (verbosity > 99) { cout << packet.Dump() << "\n"; }
             }
         }
     }
@@ -3682,8 +3682,8 @@ int SendS(PlotStream & theplot,Plot::ListWhat &lli,map<const MeshS *,long> &mapt
             cout << " Send plot:what: " << what << " " << nsb << " "<<  V1.N()
             << " Max "  << V1.max() << " min " << V1.min() << endl;
         ffFE<R2, K> fffe(Psub, Ksub, V1);
-        packet.jsonify(fffe);
-        if (verbosity > 99) { cout << packet.dump() << "\n"; }
+        packet.Jsonify(fffe);
+        if (verbosity > 99) { cout << packet.Dump() << "\n"; }
         theplot << Psub ;
         theplot << Ksub ;
         theplot << V1;
@@ -3922,9 +3922,8 @@ if(nargs[VTK_START+index])                    \
         theplot << kth ;
 
         for (map<const Mesh *,long>::const_iterator i=mapth.begin();i != mapth.end(); ++i) {
-            packet.jsonify(*i->first);
-            if (verbosity > 99) { cout << packet.dump() << "\n"; }
-            packet.clear();
+            packet.Jsonify(*i->first);
+            if (verbosity > 99) { cout << packet.Dump() << "\n"; }
             theplot << i->second << *  i->first ;
         }
 
@@ -3934,9 +3933,8 @@ if(nargs[VTK_START+index])                    \
             theplot.SendMeshes3();
             theplot << kth3 ;
             for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i) {
-                packet.jsonify(*i->first);
-                if (verbosity > 99) { cout << packet.dump() << "\n"; }
-                packet.clear();
+                packet.Jsonify(*i->first);
+                if (verbosity > 99) { cout << packet.Dump() << "\n"; }
                 theplot << i->second << *  i->first ;
             }
         }
@@ -3947,9 +3945,8 @@ if(nargs[VTK_START+index])                    \
             theplot.SendMeshesS();
             theplot << kthS ;
             for (map<const MeshS *,long>::const_iterator i=mapthS.begin();i != mapthS.end(); ++i) {
-                packet.jsonify(*i->first);
-                if (verbosity > 99) { cout << packet.dump() << "\n"; }
-                packet.clear();
+                packet.Jsonify(*i->first);
+                if (verbosity > 99) { cout << packet.Dump() << "\n"; }
                 theplot << i->second << *  i->first ;
             }
        }
@@ -4014,9 +4011,9 @@ if(nargs[VTK_START+index])                    \
                     }
                     else theplot << z0;// empty arry ...
                 }
-                packet.jsonify(curve_vector);
+                packet.Jsonify(curve_vector);
                 if(verbosity>99)
-                    cout << packet.dump(4) << endl;
+                    cout << packet.Dump(4) << endl;
                 err=0;
             }
 
@@ -4079,8 +4076,8 @@ if(nargs[VTK_START+index])                    \
 
 
         }
-        packet.compress();
-        graphicServer->send(packet);
+        packet.Compress();
+        graphicServer->Send(packet);
         theplot.SendEndPlot();
     }
 

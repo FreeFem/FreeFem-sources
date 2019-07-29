@@ -35,132 +35,54 @@
 
 using asio::ip::tcp; // Quality of life using, get every asio's tcp class
 
-class Connection : public std::enable_shared_from_this<Connection> {
-  public:
-    typedef std::shared_ptr<Connection> pointer;
+class ConnectHandle : public std::enable_shared_from_this<ConnectHandle>
+{
+    public:
+        typedef std::shared_ptr<ConnectHandle> pConnectHandle;
 
-    static pointer create(asio::io_service& io_service) {
-        return pointer(new Connection(io_service));
-    }
+        static pConnectHandle create(asio::io_service& io_service)
+        { return pConnectHandle(new ConnectHandle(io_service)); }
 
-    tcp::socket& socket() { return m_Socket; }
-    std::string& message() { return m_Message; }
+        ConnectHandle(asio::io_service& io_service);
 
-  private:
-    Connection(asio::io_service& io_service) : m_Socket(io_service) {}
-
-    tcp::socket m_Socket;
-    std::string m_Message;
+        tcp::socket m_Socket;
+        asio::steady_timer m_Deadline;
+        std::string m_MessageBuffer;
 };
 
 class ffServer {
-  public:
-    ffServer(int thread_number = 1)
-        : m_ioService(),
-          m_Acceptor(m_ioService, tcp::endpoint(tcp::v4(), 12345)),
-          nThreadCount(thread_number) {}
+    private:
+        // ThreadPool on which the server will run
+        int ThreadCount;
+        std::vector<std::thread> m_ThreadPool;
 
-    ~ffServer() {
-        m_ioService.stop();
-        for (int i = 0; i < nThreadCount; i += 1) {
-            m_ThreadPool[i].join();
-        }
-    }
+        asio::io_service m_ioService;
+        tcp::acceptor m_Acceptor;
 
-    void start() {
-        std::cout << "Starting server\n";
-        for (int i = 0; i < nThreadCount; i += 1) {
-            m_ThreadPool.emplace_back([=] { start_accept(); m_ioService.run(); });
-        }
+        std::list<ConnectHandle::pConnectHandle> m_Connections;
+        std::list<ffPacket> m_Packets;
 
-    }
+    public:
+        ffServer(int ThreadNumber = 1);
+        ffServer(short int Port, int ThreadNumber = 1);
 
-    void stop() {
-        m_ioService.stop();
-        for (int i = 0; i < nThreadCount; i += 1) {
-            m_ThreadPool[i].join();
-        }
-    }
+        // Deleting copy constructors (Using them will throw a error at compilation)
+        ffServer(const ffServer& tocopy) = delete;
+        ffServer& operator=(const ffServer& tocopy) = delete;
 
-    void send(ffPacket packet) {
-        auto ite = m_Connection.begin();
-        m_Packets.push_back(packet);
+        void Start();
+        void Stop();
 
-        std::cout << "Broadcasting json.\n";
-        while (ite != m_Connection.end()) {
-            auto tmp = *ite;
-            asio::async_write(tmp->socket(), asio::buffer(packet.m_Header.dump()),
-                              [this, ite](std::error_code const& err,
-                                          size_t bytes_transferred) {
-                                  if (err) {
-                                      m_Connection.erase(ite);
-                                  } else {
-                                      std::cout << "Sent header\n";
-                                  }
-                              });
-            asio::async_write(tmp->socket(), asio::buffer(packet.m_Data),
-                              [this, ite](std::error_code const& err,
-                                          size_t bytes_transferred) {
-                                  if (err) {
-                                      m_Connection.erase(ite);
-                                  } else {
-                                      std::cout << "Sent Data\n";
-                                  }
-                              });
-            ite++;
-        }
-    }
+        void AcceptConnection();
+        void HandleConnection(ConnectHandle::pConnectHandle new_connect, std::error_code const & err);
 
-  private:
-    void handle_accept(Connection::pointer new_connection,
-                       const std::error_code& err) {
-        if (!err) {
-            m_Connection.push_back(new_connection);
-            start_read(new_connection);
-        }
-        start_accept();
-    }
+        void CheckDeadline(ConnectHandle::pConnectHandle connect, std::error_code const & err);
 
-    void start_read(Connection::pointer new_connection) {
-        asio::steady_timer timer(m_ioService);
-        bool timer_result = false;
-        bool read_result = false;
+        void StartRead(ConnectHandle::pConnectHandle connect);
+        void HandleRead(ConnectHandle::pConnectHandle connect, std::error_code const & err, size_t bytes_transferred);
 
-        timer.expires_after(std::chrono::seconds(10));
-        timer.async_wait([&timer_result](std::error_code const & err) {
-            timer_result = true;
-        });
-        asio::async_read(new_connection->socket(), asio::buffer(new_connection->message()),
-                        [&read_result](std::error_code const & err, size_t /* */) {
-                            read_result = true;
-                        });
-        while (!read_result && !timer_result) {
-            if (read_result)
-                timer.cancel();
-            else if (timer_result) {
-                std::cout << "Removing a client.\n";
-                m_Connection.remove(new_connection);
-            }
-        }
-        start_read(new_connection);
-    }
-
-    void start_accept() {
-        std::cout << "start_accept\n";
-        Connection::pointer new_connection = Connection::create(m_ioService);
-
-        m_Acceptor.async_accept(new_connection->socket(),
-                                std::bind(&ffServer::handle_accept, this,
-                                          new_connection,
-                                          std::placeholders::_1));
-    }
-
-    int nThreadCount;
-    std::vector<std::thread> m_ThreadPool;
-    asio::io_service m_ioService;
-    tcp::acceptor m_Acceptor;
-    std::list<Connection::pointer> m_Connection;
-    std::list<ffPacket> m_Packets;
+        void Send(ffPacket packet);
+        void SendAllStoredPacket(ConnectHandle::pConnectHandle connect);
 };
 
 extern ffServer *graphicServer;

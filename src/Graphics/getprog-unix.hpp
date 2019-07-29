@@ -94,7 +94,7 @@ int getprog(char *fn, int argc, char **argv) {
   // TODO Already start ffServer for now
   // To move when merge feature branch
   graphicServer = new ffServer();
-  graphicServer->start();
+  graphicServer->Start();
 
   waitatend = 0; // init_lgparallele==0; // wait if no parallele
   consoleatend = false; // bug with redirection FH

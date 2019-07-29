@@ -21,21 +21,20 @@ struct ffFE {
 };
 
 struct ffPacket {
-    // Basic Constructor
     ffPacket();
     ffPacket(json data);
 
-    // Copy Constructor
     ffPacket(const ffPacket& copy);
     ffPacket& operator=(const ffPacket& copy);
 
-    // Methods
-    std::string dump(int indent = -1);
-    void compress();
-    void clear();
+    std::string Dump(int indent = -1);
+    void Compress();
+    void Clear();
+
+    std::string GetHeader();
 
     template <typename T>
-    void jsonify(const T& data);
+    void Jsonify(const T& data);
 
     json m_JSON;
     std::vector<uint8_t> m_Data;
