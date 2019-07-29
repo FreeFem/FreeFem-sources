@@ -1,4 +1,4 @@
-PARAM=-ne -nw -v 1000000
+PARAM=-ne -fglut out -v 1000000
 
 FF=../src/nw/FreeFem++
 SRC=$(wildcard base/*.edp)
