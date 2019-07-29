@@ -58,3 +58,39 @@ t = clock();
 int nfs=SchurComplement(S,A,If,B);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
+
+{
+	int iclr=nfs;
+	int icll=nfs-1;
+	int iclS = nfs-1;
+	int[int] Il=0:nfs;
+	int[int] Ir=0:nfs;
+
+	Ir[iclr]=iclS;
+	Ir[icll]=-1;
+
+	Il[iclr]=-1;
+	Il[icll]=iclS;
+
+	int nd = nfs+1;
+	//matrix St(nd,nd);// manque une matrix vide
+	cout << " S ="<< S << endl;
+	real[int,int] St(nd,nd);
+	func real[int,int]  to(int[int] &I,real[int,int] &S)
+	{
+		int n = I.n;
+		real[int,int]  A(n,n);
+		A=0;
+		for(int i=0; i<n; ++i)
+			for(int j=0; j<n; ++j)
+			if(I[i]>=0 && I[j]>=0 )
+		  	  A(i,j) += S(I[i],I[j]);
+			  return A;
+	}
+	{
+		matrix Stt = S(Ir,Ir);
+		real[int,int] Sb(nd,nd);
+		copy(Sb,Stt);
+		 St += Sb;
+		}
+}
