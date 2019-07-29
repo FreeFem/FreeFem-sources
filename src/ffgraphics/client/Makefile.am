@@ -22,6 +22,6 @@
 
 bin_PROGRAMS = ffclient
 
-ffclient_SOURCES = client.cpp Client.hpp
+ffclient_SOURCES = ffClient.cpp ffClient.hpp
 ffclient_LDADD = @LIBSPTHREAD@
 AM_CPPFLAGS = -I../asio/asio/include

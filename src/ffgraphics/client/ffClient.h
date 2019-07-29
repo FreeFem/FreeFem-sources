@@ -14,38 +14,53 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          */
 /****************************************************************************/
-// SUMMARY : main file for TCP client
+// SUMMARY : TCP Client class
 // LICENSE : LGPLv3
 // ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
 // AUTHORS : Quentin Tessier
 // E-MAIL  : tessier.quentin.pro@gmail.com
 
-#include <unistd.h>
-#include <limits.h>
-#include "Client.h"
+#include <asio/buffer.hpp>
+#include <asio/io_context.hpp>
+#include <asio/ip/tcp.hpp>
+#include <asio/read_until.hpp>
+#include <asio/steady_timer.hpp>
+#include <asio/write.hpp>
+#include <nlohmann/json.hpp>
+#include <functional>
+#include <iostream>
+#include <string>
+#include <deque>
+#include <asio/read.hpp>
+#include <utility>
 
-int main(int argc, char* argv[])
-{
-  try
-  {
-    if (argc != 3)
-    {
-      std::cerr << "Usage: client <host> <port>\n";
-      return 1;
-    }
+using asio::steady_timer;
+using asio::ip::tcp;
+using std::placeholders::_1;
+using std::placeholders::_2;
 
-    asio::io_context io_context;
-    tcp::resolver r(io_context);
-    client c(io_context);
+class ffClient {
+    private:
+        tcp::socket m_Socket;
+        std::string m_HeaderBuffer;
+        std::vector<uint8_t> m_DataBuffer;
+        asio::steady_timer m_Timer;
+        tcp::resolver::results_type m_Endpoints;
 
-    c.start(r.resolve(argv[1], argv[2]));
+    public:
+        bool stopped = false;
 
-    io_context.run();
-  }
-  catch (std::exception& e)
-  {
-    std::cerr << "Exception: " << e.what() << "\n";
-  }
+        ffClient(asio::io_context& io_context);
 
-  return 0;
-}
+        void Start(tcp::resolver::results_type endpoints);
+        void Stop();
+
+        void StartConnect(tcp::resolver::results_type::iterator endpoint_iter);
+        void HandleConnect(tcp::resolver::results_type::iterator endpoint_iter, std::error_code const & err);
+
+        void StartWrite();
+        void HandleWrite(const std::error_code& err);
+
+        void StartRead();
+        void HandleRead(const std::error_code& error, std::size_t n);
+};
