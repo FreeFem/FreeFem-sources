@@ -33,6 +33,11 @@ struct ffPacket {
 
     std::string GetHeader();
 
+    /**
+     * @brief Convert the templated type to JSON
+     *
+     * @param const T& - Data to convert
+     */
     template <typename T>
     void Jsonify(const T& data);
 
