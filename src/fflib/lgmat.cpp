@@ -1665,7 +1665,7 @@ template<class R>
 R * get_elementp2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & c){
     MatriceMorse<R> * a= ac ? ac->pHM() : 0 ;
   if(  !a || a->n <= b || c<0 || a->m <= c  )
-   { cerr << " Out of bound  0 <=" << b << " < "  << a->n << ",  0 <= " << c << " < "  << a->m
+   { cerr << " Out of bound  0 <=" << b << " < "  << (a ? a->n : 0) << ",  0 <= " << c << " < "  << (a ? a->m : 0)
            << " Matrix type = " << typeid(ac).name() << endl;
      cerr << ac << " " << a << endl;
      ExecError("Out of bound in operator Matrice_Creuse<R> (,)");}

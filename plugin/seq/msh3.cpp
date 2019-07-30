@@ -2832,11 +2832,11 @@ public:
     SetMeshS_Op (const basicAC_F0 &args, Expression aa): a(aa) {
         args.SetNameParam(n_name_param, name_param, nargs);
         if (nargs[0] && nargs[2]) {
-            CompileError("uncompatible change(... region= , reftet=  ");
+            CompileError("uncompatible change(... region= , reftri=  ");
         }
         
         if (nargs[1] && nargs[3]) {
-            CompileError("uncompatible  change(...label= , refface=  ");
+            CompileError("uncompatible  change(...label= , refedge=  ");
         }
     }
     
@@ -2844,14 +2844,14 @@ public:
 };
 
 basicAC_F0::name_and_type SetMeshS_Op::name_param [] = {
-    {"reftet", &typeid(KN_<long>)},
-    {"refface", &typeid(KN_<long>)},
+    {"reftri", &typeid(KN_<long>)},
+    {"refedge", &typeid(KN_<long>)},
     {"region", &typeid(KN_<long>)},
     {"label", &typeid(KN_<long>)},
     {"fregion", &typeid(long)},
     {"flabel", &typeid(long)},
-    {"rmlfaces", &typeid(long)},
-    {"rmInternalFaces", &typeid(bool)}
+    {"rmledge", &typeid(long)},
+    {"rmInternalEges", &typeid(bool)}
 };
 // besoin en cas de fichier 2D / fichier 3D
 
@@ -6697,7 +6697,7 @@ Mesh3*truncmesh (const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
     
     nv = nv + nvtrunc;
     if (verbosity > 100) {cout << "       4) nv= " << nv << endl;}
-    
+	
     int itt = 0;
     int ie = 0;
     Vertex3 *v = new Vertex3[nv];

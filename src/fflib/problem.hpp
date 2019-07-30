@@ -954,7 +954,15 @@ public:
     :A(aa),Uh(*pUh),Vh(*pVh) {}//,pUh(ppUh),pVh(ppVh),Uh(*ppUh),Vh(*ppVh) {}
   long N() const {return  A ? A->n : 0;}
   long M() const { return A ? A->m : 0;}
-  void resize(int n,int m) { if(A) A->resize(n,m);}
+  void resize(int n,int m) {
+      if(A) A->resize(n,m);
+      else {//  matrice vide a cree
+          HashMatrix<int,K> *phm= new HashMatrix<int,K>(n,m);
+          MatriceCreuse<K> *pmc(phm);
+          A.master(pmc);
+      }
+      
+  }
   void increment(){ count++;}
     VMat *pMC()  {return A ? ( MatriceCreuse<K> *)A:0; }
     HMat *pHM()  {return dynamic_cast<HashMatrix<int,K> *>(pMC());}
