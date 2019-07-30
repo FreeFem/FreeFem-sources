@@ -258,3 +258,23 @@ ml[]/=2.;
   
     }
   }
+  
+  { // verification v 4.3-2 F. H
+	  matrix A = [[1,2],[3,4]],B;
+	  matrix D2 = -(A-( (-1.5)*A- (2.2)*A));
+	  real a00= -(1.-( (-1.5)*1.- (2.2)*1.));
+	  //  -1 ---1.5 ---2.2
+	  cout << D2 << endl; 
+	  cout << a00 <<endl ;
+	  assert( abs(D2(0,0)-a00 ) < 1e-10);  
+	  B=A;
+	  B+= A;// ???
+	  B+= 2*A;
+	  cout << B << endl;
+	  assert( abs(B(0,0)-4 ) < 1e-10);  
+	  cout << A << endl;
+	  B -= 2*A - 3*A;// 
+	  cout << B << endl;
+	  assert( abs(B(0,0)-5) < 1e-10);  
+  
+  }

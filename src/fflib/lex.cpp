@@ -1043,7 +1043,7 @@ bool mylex::CallMacro(int &ret)
                     	expandtxt+=currentexpand+ReadCommentAndSpace;
                     	break;
                     }
-                    if (nbparam && (ret==ID||ret==CNUM||ret==DNUM||ret==LNUM))
+                    if (nbparam && (ret != '#') && (ret != ')' || !inifmacro))
                     {
                     	if (strncmp(buf,ifm,8)==0 || strncmp(buf,ifs,15)==0)
 	                    	inifmacro = 1;

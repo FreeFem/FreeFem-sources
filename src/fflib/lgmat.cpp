@@ -105,7 +105,30 @@ struct Op2_ListCM: public binary_function<R,Matrice_Creuse<R> *,list<tuple<R,Mat
     r ->push_back(p);
     return r;}
 };
-
+template<class R> void PrintL(const char* cc, list<tuple<R,VirtualMatrix<int,R>*,bool> > const  * const lM)
+{
+    if(verbosity<100) return; 
+    typedef typename list<tuple<R,VirtualMatrix<int,R> *,bool> >::const_iterator lconst_iterator;
+    
+    lconst_iterator begin=lM->begin();
+    lconst_iterator end=lM->end();
+    lconst_iterator i;
+    cout << cc << " (" ;
+    for(i=begin;i!=end;i++++)
+    {
+        if(std::get<1>(*i)) // M == 0 => zero matrix
+        {
+            VirtualMatrix<int,R>& M=*std::get<1>(*i);
+            bool transpose = std::get<2>(*i) ;
+            R coef=std::get<0>(*i);
+            cout << "  + " << coef << "*" << &M <<"^" << transpose  ;
+            
+        }
+    }
+    
+    
+    cout << ") "<< endl;
+}
 template<class R>
 struct Op2_ListMC: public binary_function<Matrice_Creuse<R> *,R,list<tuple<R,MatriceCreuse<R> *,bool> > *>
  {
@@ -161,7 +184,7 @@ struct Op2_ListMtC: public binary_function<Matrice_Creuse_Transpose<R> ,R,list<t
 
 
 
-template<class R>
+template<class R,int c=-1>
 struct Op1_LCMd: public unary_function<list<tuple<R,MatriceCreuse<R> *,bool> > *,
 list<tuple<R,MatriceCreuse<R> *,bool> > *  >
 {  //  - ...
@@ -172,8 +195,9 @@ list<tuple<R,MatriceCreuse<R> *,bool> > *  >
     static   RR f(const RR & l)
     {
 	typedef typename list<tuple<R,MatriceCreuse<R> *,bool> >::iterator lci;
-	for (lci i= l->begin();i !=l->end();++i)
-             get<0>(*i) *= R(-1);
+        for(lci i= l->begin();i !=l->end();++i)
+            get<0>(*i) *= R(c);
+        PrintL(" - Op1_LCMd: ",l);
 	return l;
     }
 
@@ -208,9 +232,12 @@ list<tuple<R,MatriceCreuse<R> *,bool> > *  >
 
     static   RR f(const RR & a,const RR & b)
     {
-        Op1_LCMd<R>::f(b);
-        a->insert(a->end(),b->begin(),b->end());
+        Op1_LCMd<R,-1>::f(b);
+        PrintL("Op2_ListCMCMsub +",a);
+        PrintL(" -(-) ",b);
 
+        a->insert(a->end(),b->begin(),b->end());
+        PrintL(" =>  ",a);
         delete b;
         return a;
     }
@@ -229,8 +256,11 @@ struct Op2_ListMCMadd: public binary_function<Matrice_Creuse<R> *,
 
   static   RR f(const MM & a,const RR & b)
   {
+    // M  + c*L
+    Op1_LCMd<R,cc>::f(b);
+      PrintL("Op2_ListMCMadd M +",b);
 
-    b->push_front(make_tuple<R,MatriceCreuse<R> *>(R(cc),a->A,false));
+    b->push_front(make_tuple<R,MatriceCreuse<R> *,bool>(R(1.),a->A,false));
     return b;
   }
 
@@ -249,7 +279,7 @@ struct Op2_ListCMMadd: public binary_function< list<tuple<R,MatriceCreuse<R> *,b
 
   static   RR f(const RR & a,const MM & b)
   {
-
+    // L + c*M
     a->push_back(make_tuple<R,MatriceCreuse<R> *,bool>(R(cc),b->A,false));
     return a;
   }
@@ -269,6 +299,7 @@ struct Op2_ListMMadd: public binary_function< Matrice_Creuse<R> *,
 
   static   RR f(const MM & a,const MM & b)
   {
+    // M + c M
     L * l=to(a);
     l->push_back(make_tuple<R,MatriceCreuse<R> *>(R(cc),b->A,false));
     return l;
@@ -1457,6 +1488,21 @@ AnyType CombMat(Stack stack,Expression emat,Expression combMat)
   delete lcB;
   return sparse_mat;
 }
+template<class R,int cc> //  July 2019 FH  A += c M +  ...
+AnyType AddCombMat(Stack stack,Expression emat,Expression combMat)
+{
+    using namespace Fem2D;
+    
+    Matrice_Creuse<R> * pMCA =GetAny<Matrice_Creuse<R>* >((*emat)(stack));
+    HashMatrix<int,R> * pA=pMCA->pHM();
+    ffassert(pA);
+    list<tuple<R,VirtualMatrix<int,R> *,bool> > *  lcB = GetAny<list<tuple<R,VirtualMatrix<int,R> *,bool> >*>((*combMat)(stack));
+    if( cc!=1) Op1_LCMd<R,cc>::f(lcB);
+    BuildCombMat<R>(*pA,*lcB,false,0,0,false);
+   
+    delete lcB;
+    return pMCA;
+}
 
 template<class R,int init>
 AnyType DiagMat(Stack stack,Expression emat,Expression edia)
@@ -1619,7 +1665,7 @@ template<class R>
 R * get_elementp2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & c){
     MatriceMorse<R> * a= ac ? ac->pHM() : 0 ;
   if(  !a || a->n <= b || c<0 || a->m <= c  )
-   { cerr << " Out of bound  0 <=" << b << " < "  << a->n << ",  0 <= " << c << " < "  << a->m
+   { cerr << " Out of bound  0 <=" << b << " < "  << (a ? a->n : 0) << ",  0 <= " << c << " < "  << (a ? a->m : 0)
            << " Matrix type = " << typeid(ac).name() << endl;
      cerr << ac << " " << a << endl;
      ExecError("Out of bound in operator Matrice_Creuse<R> (,)");}
@@ -2778,9 +2824,13 @@ TheOperators->Add("^", new OneBinaryOperatorAt_inv<R>());
 
        );
     TheOperators->Add("+=",
-                      new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,newpMatrice_Creuse<R> > (AddtoMatrice_Creuse<R, 1> ));
+        new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,newpMatrice_Creuse<R> > (AddtoMatrice_Creuse<R, 1> ),
+        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<tuple<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(AddCombMat<R,1>));
+
     TheOperators->Add("-=",
-                      new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,newpMatrice_Creuse<R> > (AddtoMatrice_Creuse<R, -1> ));
+                      new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,newpMatrice_Creuse<R> > (AddtoMatrice_Creuse<R, -1> ),
+                      new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<tuple<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(AddCombMat<R,-1>));
+
 
 
  TheOperators->Add("<-",
@@ -2814,15 +2864,19 @@ TheOperators->Add("+",
 
        );
     TheOperators->Add("-",
-                      new OneBinaryOperator<Op2_ListCMCMsub<R> >,
-                      new OneBinaryOperator<Op2_ListCMMadd<R,-1> >,
-                      new OneBinaryOperator<Op2_ListMCMadd<R,-1> >,
-                      new OneBinaryOperator<Op2_ListMMadd<R,-1> >
+                      new OneBinaryOperator<Op2_ListCMCMsub<R> >,   //  (L) - (L)
+                      new OneBinaryOperator<Op2_ListCMMadd<R,-1> >, // L - M
+                      new OneBinaryOperator<Op2_ListMCMadd<R,-1> >, // M - L
+                      new OneBinaryOperator<Op2_ListMMadd<R,-1> >   // M - M
 
                       );
  TheOperators->Add("-",
-	 new OneUnaryOperator<Op1_LCMd<R> >
+	 new OneUnaryOperator<Op1_LCMd<R,-1> >
      );
+TheOperators->Add("+",
+                      new OneUnaryOperator<Op1_LCMd<R,1> >
+                      );
+
     Add<Matrice_Creuse<R> *>("COO",".",new OneOperator1<bool,Matrice_Creuse<R> *>(set_mat_COO<R>) );
     Add<Matrice_Creuse<R> *>("CSR",".",new OneOperator1<bool,Matrice_Creuse<R> *>(set_mat_CSR<R>) );
     Add<Matrice_Creuse<R> *>("CSC",".",new OneOperator1<bool,Matrice_Creuse<R> *>(set_mat_CSC<R>) );

@@ -1882,12 +1882,12 @@ MeshS*GluMeshS (listMeshS const &lst) {
 
     for(list<MeshS const *>::const_iterator i=lth.begin();i != lth.end();++i)
     {
-        if(! *i ) continue; //
+        if(! *i ) continue;
         ++kk;
         const MeshS &Th(**i);
         th0=&Th;
         if(verbosity>1)  cout << " GluMeshS + "<< "nv: " << Th.nv << " nt: " << Th.nt << " nbe: " << Th.nbe <<endl;
-        nbt+= Th.nt;
+        nbtx += Th.nt;
         nbvx += Th.nv;
         nbex += Th.nbe;
 
@@ -1908,7 +1908,7 @@ MeshS*GluMeshS (listMeshS const &lst) {
         cout << "      - hmin =" <<  hmin << " ,  Bounding Box: " << Pn << " "<< Px << endl;
 
     Vertex3 * v= new Vertex3[nbvx];
-    TriangleS *t= new TriangleS[nbt];
+    TriangleS *t= new TriangleS[nbtx];
     TriangleS *tt=t;
     BoundaryEdgeS *b= new BoundaryEdgeS[nbex];
     BoundaryEdgeS *bb= b;
@@ -1916,21 +1916,17 @@ MeshS*GluMeshS (listMeshS const &lst) {
     ffassert(hmin>Norme2(Pn-Px)/1e9);
     double hseuil =hmin/10.;
 
-
     EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(v, Pn, Px, 0);
 
-    map<pair<int,int>,int> bbe;
-    for(list<MeshS const  *>::const_iterator i=lth.begin();i != lth.end();++i)
-    {
+    for(list<MeshS const  *>::const_iterator i=lth.begin();i != lth.end();++i) {
         if(! *i ) continue; //
         const MeshS &Th(**i);
         if(!*i) continue;
-        if(verbosity>1)   cout << " GluMeshS + "<< "nv: " << Th.nv << " nt: " << Th.nt << " nbe: " << Th.nbe <<endl;
+        if(verbosity>1)
+            cout << " GluMeshS + "<< "nv: " << Th.nv << " nt: " << Th.nt << " nbe: " << Th.nbe <<endl;
 
-        //int nbv0 = nbv;
 
-        for (int ii=0;ii<Th.nv;ii++)
-        {
+        for (int ii=0;ii<Th.nv;ii++) {
             const Vertex3 &vi(Th(ii));
             Vertex3 * pvi=gtree->ToClose(vi,hseuil);
             if(!pvi) {
@@ -1942,93 +1938,86 @@ MeshS*GluMeshS (listMeshS const &lst) {
             }
         }
 
-        for (int k=0;k<Th.nt;k++)
-        {
-            const TriangleS  &K(Th[k]);
-            int ivt[3];
-            ivt[0]=gtree->ToClose(K[0],hseuil)-v; //NearestVertex(K[0])-v;
-            ivt[1]=gtree->ToClose(K[1],hseuil)-v; //NearestVertex(K[1])-v;
-            ivt[2]=gtree->ToClose(K[2],hseuil)-v; //NearestVertex(K[2])-v;
-            (*tt++).set(v,ivt,K.lab);
-        }
+
     }
 
-    if (verbosity > 1) {cout << " creation of : BuildGTree for border elements" << endl;}
 
-    Vertex3 *becog = new Vertex3[nbex];
-    // Vertex3  becog[nbex];
-    EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(becog, Pn, Px, 0);
     double hseuil_border = hseuil / 3.;
+    // gtree for barycenter of elements
+    Vertex3 *becog1 = new Vertex3[nbtx];
+    EF23::GTree<Vertex3> *gtree_e = new EF23::GTree<Vertex3>(becog1, Pn, Px, 0);
+    // gtree for barycenter of border elements
+    Vertex3 *becog2 = new Vertex3[nbex];
+    EF23::GTree<Vertex3> *gtree_be = new EF23::GTree<Vertex3>(becog2, Pn, Px, 0);
 
-    // nbv0=0;
+
     for (list<const MeshS *>::const_iterator i = lth.begin(); i != lth.end(); i++) {
         if (!*i) {continue;}
-
         const MeshS &ThS(**i);
-        R1 PtHat(1./2.);
+
+        if (verbosity > 1)
+            cout << " creation of : BuildGTree for elements" << endl;
+        R2 PtHat1(1. / 3., 1. / 3.);
+        for (int k = 0; k < ThS.nt; k++) {
+            const TriangleS &K(ThS[k]);
+
+            int iv[3];
+            for(int i=0;i<3;i++)
+                iv[i] = ThS.operator () (K[i]);
+            const R3 r3vi(K(PtHat1));
+            const Vertex3 &vi(r3vi);
+            Vertex3 *pvi = gtree_e->ToClose(vi, hseuil_border);
+            if (!pvi) {
+                becog1[nbt].x = vi.x;
+                becog1[nbt].y = vi.y;
+                becog1[nbt].z = vi.z;
+                becog1[nbt].lab = vi.lab;
+                gtree_e->Add(becog1[nbt++]);
+
+                int igluv[3];
+                for(int i=0;i<3;i++)
+                    igluv[i] = gtree->ToClose(K[i], hseuil) - v;
+                (tt++)->set(v, igluv, K.lab);
+
+            }
+        }
+
+        if (verbosity > 1) {cout << " creation of : BuildGTree for border elements" << endl;}
+
+        R1 PtHat2(1./2.);
         for (int k = 0; k < ThS.nbe; k++) {
             const BoundaryEdgeS &K(ThS.be(k));
 
             int iv[2];
-            iv[0] = ThS.operator () (K[0]);
-            iv[1] = ThS.operator () (K[1]);
-            const R3 r3vi(K(PtHat));
+            for(int i=0;i<2;i++)
+            iv[i] = ThS.operator () (K[i]);
+            const R3 r3vi(K(PtHat2));
             const Vertex3 &vi(r3vi);
             Vertex3 *pvi = gtree_be->ToClose(vi, hseuil_border);
             if (!pvi) {
-                becog[nbe].x = vi.x;
-                becog[nbe].y = vi.y;
-                becog[nbe].z = vi.z;
-                becog[nbe].lab = vi.lab;
-                gtree_be->Add(becog[nbe++]);
+                becog2[nbe].x = vi.x;
+                becog2[nbe].y = vi.y;
+                becog2[nbe].z = vi.z;
+                becog2[nbe].lab = vi.lab;
+                gtree_be->Add(becog2[nbe++]);
 
                 int igluv[2];
-                igluv[0] = gtree->ToClose(K[0], hseuil) - v;// NumSom[iv[0]+nbv0];
-                igluv[1] = gtree->ToClose(K[1], hseuil) - v;// NumSom[iv[1]+nbv0];
+                for(int i=0;i<2;i++)
+                igluv[i] = gtree->ToClose(K[i], hseuil) - v;
 
                 (bb++)->set(v, igluv, K.lab);
 
             }
         }
 
-        // nbv0 =+Th3.nv;
     }
-
-    // treatment of boundary edges....internal, manifold, true boundary
-
-    /*  for (int i = 0; i < Th.nt; i++)
-
-     // computation of number of border elements -- edge element boundary o internal
-     for (int j = 0; j < 3; j++) {
-     int jt = j, it = Th.ElementAdj(i, jt);
-     if ((it == i || it < 0) || !split[it]) {
-     nbeee++;// boundary edge ...
-     } else {
-     nbfi++;// internal edge count 2 times ...
-     }
-
-     }*/
-
-    /*  for (int ibe = 0; ibe < nbe; ibe++) {
-     int iff;
-     int it = Th.BoundaryElement(ibe, iff); // it num of element and iff num of local boundary
-     tagTonB[it] |= tagb[iff];
-     int ifff = iff, itt = Th.ElementAdj(it, ifff);
-     if (itt >= 0 && itt != it) {
-     tagTonB[itt] |= tagb[ifff];
-     }
-     }
-
-     */
-
-
-
 
 
     delete gtree;
+    delete gtree_e;
     delete gtree_be;
-    delete [] becog;
-
+    delete [] becog1;
+    delete [] becog2;
 
     if(verbosity>1)
     {
@@ -2798,6 +2787,14 @@ AnyType SetMesh3D_Op::operator () (Stack stack)  const {
     *mp = mps;
     Mesh3 *mpq = new Mesh3(nbv, nbt, nbe, v, t, b);
     mpq->BuildGTree();
+
+    if(Th.meshS) {
+        if(verbosity>2)
+            cout << "build the new meshS after change mesh3 "<<endl;
+        Th.BuildMeshS();
+    }
+
+
     Add2StackOfPtr2FreeRC(stack, mpq);
 
     return mpq;
@@ -2837,11 +2834,11 @@ public:
     SetMeshS_Op (const basicAC_F0 &args, Expression aa): a(aa) {
         args.SetNameParam(n_name_param, name_param, nargs);
         if (nargs[0] && nargs[2]) {
-            CompileError("uncompatible change(... region= , reftet=  ");
+            CompileError("uncompatible change(... region= , reftri=  ");
         }
 
         if (nargs[1] && nargs[3]) {
-            CompileError("uncompatible  change(...label= , refface=  ");
+            CompileError("uncompatible  change(...label= , refedge=  ");
         }
     }
 
@@ -2849,14 +2846,14 @@ public:
 };
 
 basicAC_F0::name_and_type SetMeshS_Op::name_param [] = {
-    {"reftet", &typeid(KN_<long>)},
-    {"refface", &typeid(KN_<long>)},
+    {"reftri", &typeid(KN_<long>)},
+    {"refedge", &typeid(KN_<long>)},
     {"region", &typeid(KN_<long>)},
     {"label", &typeid(KN_<long>)},
     {"fregion", &typeid(long)},
     {"flabel", &typeid(long)},
-    {"rmlfaces", &typeid(long)},
-    {"rmInternalFaces", &typeid(bool)}
+    {"rmledge", &typeid(long)},
+    {"rmInternalEges", &typeid(bool)}
 };
 // besoin en cas de fichier 2D / fichier 3D
 
@@ -3793,10 +3790,10 @@ MeshS*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *
     SamePointElement_Mesh2(precis_mesh, tab_XX, tab_YY, tab_ZZ, Th2, recollement_border, point_confondus_ok,
                            Numero_Som, ind_nv_t, ind_nt_t, ind_nbe_t, label_nt_t, label_nbe_t, nv_t, nt_t, nbe_t);
 
-    if (verbosity > 1)
+    if (verbosity > 1) {
         cout << " fin: SamePointElement " << endl;
-    cout << "After movemesh::Vertex  triangle  border " << nv_t << " " << nt_t << " " << nbe_t << endl;
-
+        cout << "After movemesh::Vertex  triangle  border " << nv_t << " " << nt_t << " " << nbe_t << endl;
+    }
     Vertex3 *vS = new Vertex3[nv_t];
     TriangleS *tS = new TriangleS[nt_t];
     TriangleS *ttS = tS;

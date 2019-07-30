@@ -78,20 +78,21 @@ else
 ##   On  windows ....
   FFWINDOWS=true
   WITH_SLEPC=no
- FLAGS_CONF_PETSC_REAL= 	--with-python-exec=/usr/bin/python2 	-with-shared-libraries=0	--with-debugging=no \
+  FLAGS_CONF_PETSC_REAL= --with-python-exec=/usr/bin/python2 --with-shared-libraries=0 --with-debugging=no \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 \
 	COPTFLAGS='-O3  $(FLAGS_MTUNE) -D__int64=long\ long' \
 	CXXOPTFLAGS='-O3  $(FLAGS_MTUNE) -D__int64=long\ long' \
 	CFLAGS=' $(FLAGS_MTUNE) -D__int64=long\ long' \
 	CXXFLAGS='$(FLAGS_MTUNE) -D__int64=long\ long' \
-	--with-mpi-lib=['/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Lib/x64/msmpi.lib'] \
-	--with-mpi-include=/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Include \
+	--with-scalar-type=real \
+	--with-mpi-lib='$(MPI_LIB)' \
+	--with-mpi-include='$(MPI_INC_DIR)' \
 	--with-metis-lib=$(dir3rdparty)/lib/parmetis/libmetis.a \
 	--with-metis-include=$(dir3rdparty)/include/parmetis \
 	 --download-suitesparse \
-	--with-ssl=0 --with-x=0 --with-debugging=0  \
+	--with-ssl=0 --with-x=0 --with-debugging=0 \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
-	--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' 
+	--download-f2cblaslapack
   #--download-slepc 
   #	--with-blas-lapack-lib='/mingw64/lib/libopenblas.a' \
 
@@ -102,14 +103,15 @@ else
 	CXXOPTFLAGS='-O3  $(FLAGS_MTUNE) -D__int64=long\ long' \
 	CFLAGS=' $(FLAGS_MTUNE) -D__int64=long\ long' \
 	CXXFLAGS='$(FLAGS_MTUNE) -D__int64=long\ long' \
-	--with-mpi-lib=['/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Lib/x64/msmpi.lib'] \
-	--with-mpi-include=/C/Program\ Files\ \(x86\)/Microsoft\ SDKs/MPI/Include \
+	--with-scalar-type=complex \
+    --with-mpi-lib='$(MPI_LIB)' \
+	--with-mpi-include='$(MPI_INC_DIR)' \
 	--with-metis-lib=$(dir3rdparty)/lib/parmetis/libmetis.a \
 	--with-metis-include=$(dir3rdparty)/include/parmetis \
-	 --download-suitesparse \
+	--download-suitesparse \
 	--with-ssl=0 --with-x=0 --with-debugging=0  \
-	--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
-	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' 
+	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
+	--download-f2cblaslapack
 #	--download-slepc 
 	
 #	--with-suitesparse-include=$(dir3rdparty)/include \
@@ -152,8 +154,18 @@ else
  # WITH_MPI_DIR=--with-mpi-dir='$(MPI_DIR)'
 endif
 
+ifeq ($(WIN32DLLTARGET),)
+##   Not on  windows ....
 DIR_INSTALL_REAL:=$(FF_prefix_petsc)/real
 DIR_INSTALL_COMPLEX:=$(FF_prefix_petsc)/complex
+else
+##   On  windows ....
+DIR_INSTALL_REAL:=$(FF_prefix_petsc)/r
+DIR_INSTALL_COMPLEX:=$(FF_prefix_petsc)/c
+endif
+
+
+
 PETSC_DIR:=$(shell pwd)/$(SRCDIR)
 petsc-slepc: Makefile.inc dir-install WHERE-all
 recompile: recompile-real recompile-complex

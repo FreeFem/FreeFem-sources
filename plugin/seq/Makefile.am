@@ -48,7 +48,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernardiRaugel.$(DYLIB_SUFFIX) \
 	Element_QF.$(DYLIB_SUFFIX) distance.$(DYLIB_SUFFIX) Element_P1ncdc.$(DYLIB_SUFFIX) \
 	Element_P2bulle3.$(DYLIB_SUFFIX)  \
 	Element_P2pnc.$(DYLIB_SUFFIX) SaveHB.$(DYLIB_SUFFIX) IncompleteCholesky.$(DYLIB_SUFFIX) \
-	Schur-Complement.$(DYLIB_SUFFIX) 
+	Schur-Complement.$(DYLIB_SUFFIX)  biofunc.$(DYLIB_SUFFIX)
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.
 
