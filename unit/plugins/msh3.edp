@@ -1,7 +1,6 @@
 include "test.idp"
 load "msh3"
 load "gsl"
-load "medit"
 load "tetgen"
 
 cout << functionDEFINITION << "movemesh3" << endl;
@@ -226,4 +225,9 @@ cout << functionDEFINITION << "getborder" << endl;
 
     real[int] domaine = [0,0,Htube,1,hh^3/6.];
     mesh3 Th=tetg(Ths,switch="pqaAYY",regionlist=domaine);
+}
+
+cout << functionDEFINITION << "bcube" << endl;
+{
+  mesh3 th3 = bcube(5, 5, 5);
 }

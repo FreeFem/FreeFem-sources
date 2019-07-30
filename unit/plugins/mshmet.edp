@@ -2,7 +2,6 @@ include "test.idp"
 load "mshmet"
 load "msh3"
 load "tetgen"
-load "medit"
 
 real t;
 
