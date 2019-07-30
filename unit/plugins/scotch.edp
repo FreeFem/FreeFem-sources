@@ -1,6 +1,5 @@
 include "test.idp"
 load "scotch"
-load "metis"
 
 cout << functionDEFINITION << "scotch" << endl;
 
