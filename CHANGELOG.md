@@ -28,6 +28,7 @@ All notable changes to this project will be documented in this file.
 - interface to `TSSolve`, DAE/ODE solvers from PETSc
 - interface to `TaoSolve`, Toolkit for Advance Optimization from PETSc
 - simpler constructor for sequential PETSc matrices (no need for the restriction array and the partition of unity)
+- some unit tests
 
 ### Changed
 - replaced custom implementations (`RNM::real`, `RNM::norm2`, and `Fem2D::norm`) by C++11 functions
@@ -39,6 +40,7 @@ All notable changes to this project will be documented in this file.
 ### Removed
 - legacy linear solver interfaces using the old matrix type
 - dot products using CBLAS because of errors at link time
+- Newtow function (bad name)
 
 ### Fixed
 - assertion failure with some 3D meshes when doing `trunc(Th, true)` (thanks to F. Feppon)
