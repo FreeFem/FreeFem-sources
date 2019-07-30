@@ -1868,11 +1868,12 @@ public:
 
 
 MeshS*GluMeshS (listMeshS const &lst) {
+    int nbv=0;
     int nbt=0;
     int nbe=0;
-    int nbex=0;
-    int nbv=0;
     int nbvx=0;
+    int nbtx = 0;
+    int nbex=0;
 
     double hmin=1e100;
     R3 Pn(1e100,1e100,1e100),Px(-1e100,-1e100,-1e100);
