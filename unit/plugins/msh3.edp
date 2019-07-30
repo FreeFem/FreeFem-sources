@@ -86,18 +86,19 @@ cout << functionDEFINITION << "showborder" << endl;
 {
   mesh Th = square(5, 5);
   int i = 1;
-  // mesh3 Th3 = cube (5, 5, 5);
+  mesh3 Th3 = cube (5, 5, 5);
   // meshS ThS3 = Th3.Gamma;
-  // showborder(Th)S3;
+  // plot(ThS3);
+  // showborder(Th3);
 }
 
 cout << functionDEFINITION << "gluemesh" << endl;
 {
   mesh Th = square(5, 5);
   int i = 1;
-  // mesh3 Th3 = cube (5, 5, 5);
-  // meshS ThS3 = Th3.Gamma;
-  // gluemesh("");
+  mesh3 Th3 = cube (5, 5, 5);
+  meshS ThS3 = Th3.Gamma;
+  gluemesh("");
 }
 
 cout << functionDEFINITION << "movemesh23" << endl;
