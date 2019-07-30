@@ -1,0 +1,26 @@
+include "test.idp"
+load "scotch"
+load "metis"
+
+cout << functionDEFINITION << "scotch" << endl;
+
+real t;
+border C(t=0, 2*pi){ x=cos(t); y=sin(t); }
+mesh Th = buildmesh(C(1000)); // first mesh: a simple circle
+int lpart = 10; // how many clusters must be created ?
+fespace Ph(Th, P0); // using P0 FE to store the partition
+int[int] nupart(Th.nt); // the actual partition
+Ph part = nuTriangle; // number of each triangles in the mesh
+int[int] weight(Th.nt); // array of integers to store weights
+for(int i = 0; i < Th.nt;++i)
+    weight[i] = Th[i][1].x > 0. && Th[i][1].y > 0. ? 10 : 1; // if we want to partition has much as possible the region x > 0 && y > 0
+t = clock();
+scotch(nupart, Th, lpart, weight = weight); // with weight
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+Ph balance;
+
+t = clock();
+scotch(nupart, Th, lpart); // without weight
+t = clock() - t;
+cout << timeELAPSED << t << endl;
