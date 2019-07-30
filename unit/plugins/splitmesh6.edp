@@ -1,0 +1,13 @@
+include "test.idp"
+load "splitmesh6"
+
+cout << functionDEFINITION << "splitmesh6" << endl;
+
+real t;
+
+mesh Th=square(5,5);
+t = clock();
+mesh Th6=splitmesh6(Th);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(Th6.nt == Th.nt * 6);

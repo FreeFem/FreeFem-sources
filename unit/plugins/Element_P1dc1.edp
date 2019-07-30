@@ -1,0 +1,74 @@
+include "test.idp"
+load "Element_P1dc1"
+load "msh3"
+
+cout << functionDEFINITION << " Element_P1dc1" << endl;
+
+real t;
+mesh3 Th = cube(5, 5, 5);
+
+cout << parameterDEFINITION << "P1dc1" << endl;
+{
+  mesh Th2 = square(10, 10);
+  fespace Uh1(Th2, P1dc1);
+  Uh1 u1;
+  Uh1 u2;
+  Uh1 err1;
+
+  u1 = 0;
+  t = clock();
+  u2 = dx(u1);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  err1 = abs(u2 - u1);
+  test(err1[].linfty < HWERROR);
+}
+
+cout << parameterDEFINITION << "P2dc1" << endl;
+{
+  mesh Th2 = square(10, 10);
+  fespace Uh1(Th2, P2dc1);
+  Uh1 u1;
+  Uh1 u2;
+  Uh1 err1;
+
+  u1 = 0;
+  t = clock();
+  u2 = dx(u1);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  err1 = abs(u2 - u1);
+  test(err1[].linfty < HWERROR);
+}
+
+cout << parameterDEFINITION << "P1dc3d" << endl;
+{
+  fespace Uh1(Th, P1dc3d);
+  Uh1 u1;
+  Uh1 u2;
+  Uh1 err1;
+
+  u1 = 0;
+  t = clock();
+  u2 = dx(u1);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  err1 = abs(u2 - u1);
+  test(err1[].linfty < HWERROR);
+}
+
+cout << parameterDEFINITION << "P1dc3d1" << endl;
+{
+  fespace Uh1(Th, P1dc3d1);
+  Uh1 u1;
+  Uh1 u2;
+  Uh1 err1;
+
+  u1 = 0;
+  t = clock();
+  u2 = dx(u1);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  err1 = abs(u2 - u1);
+  test(err1[].linfty < HWERROR);
+}

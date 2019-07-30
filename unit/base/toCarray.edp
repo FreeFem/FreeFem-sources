@@ -1,13 +1,13 @@
 include "test.idp"
 
-cout << "toCarray" << endl;
+cout << functionDEFINITION << "toCarray" << endl;
 real t;
 complex[int] c(3);
 
 t = clock();
 c = toCarray([1,2,3]);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(c[0] == 1 + 0i);
 test(c[1] == 2 + 0i);
 test(c[2] == 3 + 0i);

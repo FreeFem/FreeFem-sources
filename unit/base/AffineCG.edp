@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "Affine CG" << endl;
+cout << functionDEFINITION << "Affine CG" << endl;
 real t;
 real eps = 1e-4;
 int Conv;
@@ -11,7 +11,6 @@ real Veps = - 1e-6;
 
 func  bool stop(int iter,real[int] u,real[int] g)
 {
- cout << " stop = " << iter << " " << u.linfty << " " << g.linfty << endl;
  return g.linfty < 1e-15 || iter > 15;;
 }
 
@@ -33,11 +32,11 @@ func real J(real[int] & u2)
 
 u = 0;
 b = 1;
-cout << IND << "with A and x" << endl;
+cout << parameterDEFINITION << "with A and x" << endl;
 t = clock();
 Conv = AffineCG(DJ, u);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(Conv == 1);
 test(DJ(u).max < HWERROR);
 
@@ -49,10 +48,10 @@ u=0.;
 
 func real[int] matId(real[int] &u2) { return u2;};
 
-cout << IND << "with A, x, eps, precon, nbiter, verbosity" << endl;
+cout << parameterDEFINITION << "with A, x, eps, precon, nbiter, verbosity" << endl;
 t = clock();
 Conv = AffineCG(DJ,u,nbiter=20, eps=Eps, veps=Veps, verbosity=verb, precon=matId, stop=stop);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(Conv == 1);
 test(DJ(u).max < HWERROR);

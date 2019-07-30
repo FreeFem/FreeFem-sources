@@ -2,18 +2,18 @@
 load "msh3"
 include "test.idp"
 
-cout << "Isend and I recv" << endl;
+if (!mpirank) cout << functionDEFINITION << "Isend and I recv" << endl;
 
 real t;
 
 cout << "MPI rank = " << mpirank << endl;
 
 if( mpirank==0) {
-  cout << IND << "int" << endl;
+  cout << typeDEFINITION << "int" << endl;
   t = mpiWtime();
   processor(1) << 123456;
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
 } else if (mpirank==1) {
   int k;
   processor(0) >> k;
@@ -22,18 +22,18 @@ if( mpirank==0) {
 {
   mpiRequest rq;
   if (mpirank == 0) {
-    cout << IND << "real" << endl;
+    cout << typeDEFINITION << "real" << endl;
     t = mpiWtime() - t;
     Isend(processor(1,rq),16.);
     mpiWait(rq);
     t = mpiWtime() - t;
-    cout << IND << IND << t << endl;
+    cout << timeELAPSED << t << endl;
   } else if (mpirank == 1) {
     real  k;
     t = mpiWtime() - t;
     Irecv(processor(0,rq),k);
     t = mpiWtime() - t;
-    cout << IND << IND << t << endl;
+    cout << timeELAPSED << t << endl;
     mpiWait(rq);
     test(k == 16);
   }
@@ -43,20 +43,20 @@ if( mpirank==0) {
   matrix A;
   mpiRequest rq;
   if (mpirank == 0) {
-  cout << IND << "matrix" << endl;
+  cout << typeDEFINITION << "matrix" << endl;
   A = [[1, 2],
       [3, 4]];
   t = mpiWtime();
   Isend(processor(1, rq), A);
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   mpiWait(rq);
   } else if (mpirank == 1) {
     matrix  k;
     t = mpiWtime();
     Irecv(processor(0,rq), k);
     t = mpiWtime() - t;
-    cout << IND << IND << t << endl;
+    cout << timeELAPSED << t << endl;
     mpiWait(rq);
     test(k(0, 0) == 1);
     test(k(0, 1) == 2);
@@ -68,36 +68,36 @@ if( mpirank==0) {
 complex toSendComplex;
 mpiRequest rq;
 if (mpirank == 0) {
-  cout << IND << "complex" << endl;
+  cout << typeDEFINITION << "complex" << endl;
   toSendComplex = 4 + 2i;
   t = mpiWtime();
   Isend(processor(1, rq), toSendComplex);
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   mpiWait(rq);
 } else if (mpirank == 1) {
   t = mpiWtime();
   Irecv(processor(0, rq), toSendComplex);
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   mpiWait(rq);
   test(toSendComplex == 4 + 2i);
 }
 
 int[int] toSendArrayInt(3);
 if (mpirank == 0) {
-  cout << IND << "int[int]" << endl;
+  cout << typeDEFINITION << "int[int]" << endl;
   toSendArrayInt = [1, 2, 3];
   t = mpiWtime();
   Isend(processor(1, rq), toSendArrayInt);
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   mpiWait(rq);
 } else if (mpirank == 1) {
   t = mpiWtime();
   Irecv(processor(0, rq), toSendArrayInt);
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   mpiWait(rq);
   test(toSendArrayInt[0] == 1);
   test(toSendArrayInt[1] == 2);
@@ -105,18 +105,18 @@ if (mpirank == 0) {
 
 real[int] toSendArrayRealInt(3);
 if (mpirank == 0) {
-  cout << IND << "real[int]" << endl;
+  cout << typeDEFINITION << "real[int]" << endl;
   toSendArrayRealInt = [4.2, 4.3, 4.4];
   t = mpiWtime();
   Isend(processor(1, rq), toSendArrayRealInt);
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   mpiWait(rq);
 } else if (mpirank == 1) {
   t = mpiWtime();
   Irecv(processor(0, rq), toSendArrayRealInt);
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   mpiWait(rq);
   test(toSendArrayRealInt[0] == 4.2);
   test(toSendArrayRealInt[1] == 4.3);
@@ -125,18 +125,18 @@ if (mpirank == 0) {
 
 complex[int] toSendArrayComplexInt(3);
 if (mpirank == 0) {
-  cout << IND << "complex[int]" << endl;
+  cout << typeDEFINITION << "complex[int]" << endl;
   toSendArrayComplexInt = [4 + 2i, 4 + 3i, 4 + 4i];
   t = mpiWtime();
   Isend(processor(1, rq), toSendArrayComplexInt);
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   mpiWait(rq);
 } else if (mpirank == 1) {
   t = mpiWtime();
   Irecv(processor(0, rq), toSendArrayComplexInt);
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   mpiWait(rq);
   test(toSendArrayComplexInt[0] == 4 + 2i);
   test(toSendArrayComplexInt[1] == 4 + 3i);
@@ -145,18 +145,18 @@ if (mpirank == 0) {
 
 mesh toSendMesh;
 if (mpirank == 0) {
-  cout << IND << "mesh" << endl;
+  cout << typeDEFINITION << "mesh" << endl;
   toSendMesh = square(5, 5);
   t = mpiWtime();
   Isend(processor(1, rq), toSendMesh);
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   mpiWait(rq);
 } else if (mpirank == 1) {
   t = mpiWtime();
   Irecv(processor(0, rq), toSendMesh);
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   mpiWait(rq);
   mesh Th = square(5, 5);
   test(toSendMesh.nv == Th.nv);
@@ -164,18 +164,18 @@ if (mpirank == 0) {
 
 mesh3 toSendMesh3;
 if (mpirank == 0) {
-  cout << IND << "mesh3" << endl;
+  cout << typeDEFINITION << "mesh3" << endl;
   toSendMesh3 = cube(5, 5, 5);
   t = mpiWtime();
   Isend(processor(1, rq), toSendMesh3);
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   mpiWait(rq);
 } else if (mpirank == 1) {
   t = mpiWtime();
   Irecv(processor(0, rq), toSendMesh3);
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   mpiWait(rq);
   mesh3 Th3 = cube(5, 5, 5);
   test(toSendMesh3.nv == Th3.nv);
@@ -186,18 +186,18 @@ matrix A = [[1, 2, 3],
             [7, 8, 9]];
 matrix toSendMatrix;
 if (mpirank == 0) {
-  cout << IND << "matrix" << endl;
+  cout << typeDEFINITION << "matrix" << endl;
   toSendMatrix = A;
   t = mpiWtime();
   Isend(processor(1, rq), toSendMatrix);
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   mpiWait(rq);
 } else if (mpirank == 1) {
   t = mpiWtime();
   Irecv(processor(0, rq), toSendMatrix);
   t = mpiWtime() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   mpiWait(rq);
   test(toSendMatrix(0, 0) == A(0, 0));
   test(toSendMatrix(0, 1) == A(0, 1));

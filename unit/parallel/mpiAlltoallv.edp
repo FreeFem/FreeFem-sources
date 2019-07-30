@@ -1,16 +1,114 @@
+//NBPROC 4
 include "test.idp"
 
-cout << "mpiAlltoall" << endl;
+if (!mpirank) cout << functionDEFINITION << "mpiAlltoallv" << endl;
 
 real t;
+mpiComm cc;
 
-cout << IND << "int[int]" << endl;
+if (!mpirank) cout << typeDEFINITION << "int[int]" << endl;
 
-int[int] a(mpisize), b(mpisize), c(mpisize), e(mpisize), f(mpisize);
+int[int] a(mpisize), b(mpisize);
 a[mpirank] = mpirank;
 
-// t = mpiWtime();
-// mpiAlltoallv(a, b, c, f, e);
-// t = mpiWtime() - t;
-// cout << IND << IND << t << endl;
-// test(b[mpirank] == mpirank);
+int[int] sc(mpisize), sd(mpisize), rc(mpisize), rd(mpisize);
+
+for (int i = 0; i < mpisize; i++) {
+	sc[i] = mpisize;
+	sd[i] = 0;
+	rc[i] = mpisize;
+	rd[i] = 0;
+}
+
+t = mpiWtime();
+mpiAlltoallv(a, b, sc, sd, rc, rd);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+if (mpirank == 0) test(b[0] == 0);
+if (mpirank == 0) test(b[1] == 1);
+if (mpirank == 1) test(b[2] == 2);
+if (mpirank == 2) test(b[3] == 3);
+
+t = mpiWtime();
+mpiAlltoallv(a, b, cc, sc, sd, rc, rd);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+if (mpirank == 0) test(b[0] == 0);
+if (mpirank == 0) test(b[1] == 1);
+if (mpirank == 1) test(b[2] == 2);
+if (mpirank == 2) test(b[3] == 3);
+
+mpiBarrier(mpiCommWorld);
+
+
+if (!mpirank) cout << typeDEFINITION << "complex[int]" << endl;
+
+complex[int] ac(mpisize), bc(mpisize);
+ac[mpirank] = mpirank;
+
+int[int] scc(mpisize), sdc(mpisize), rcc(mpisize), rdc(mpisize);
+
+for (int i = 0; i < mpisize; i++) {
+	scc[i] = mpisize;
+	sdc[i] = 0;
+	rcc[i] = mpisize;
+	rdc[i] = 0;
+}
+
+t = mpiWtime();
+mpiAlltoallv(ac, bc, scc, sdc, rcc, rdc);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+
+if (mpirank == 0) test(bc[0] == 0.);
+if (mpirank == 0) test(bc[1] == 1.);
+if (mpirank == 1) test(bc[2] == 2.);
+if (mpirank == 2) test(bc[3] == 3.);
+
+t = mpiWtime();
+mpiAlltoallv(ac, bc, cc, scc, sdc, rcc, rdc);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+
+if (mpirank == 0) test(bc[0] == 0.);
+if (mpirank == 0) test(bc[1] == 1.);
+if (mpirank == 1) test(bc[2] == 2.);
+if (mpirank == 2) test(bc[3] == 3.);
+
+mpiBarrier(mpiCommWorld);
+
+if (!mpirank) cout << typeDEFINITION << "real[int]" << endl;
+
+real[int] ar(mpisize), br(mpisize);
+ar[mpirank] = mpirank;
+
+int[int] scr(mpisize), sdr(mpisize), rcr(mpisize), rdr(mpisize);
+
+for (int i = 0; i < mpisize; i++) {
+	scr[i] = mpisize;
+	sdr[i] = 0;
+	rcr[i] = mpisize;
+	rdr[i] = 0;
+}
+
+t = mpiWtime();
+mpiAlltoallv(ar, br, scr, sdr, rcr, rdr);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+
+if (mpirank == 0) test(br[0] == 0.);
+if (mpirank == 0) test(br[1] == 1.);
+if (mpirank == 1) test(br[2] == 2.);
+if (mpirank == 2) test(br[3] == 3.);
+
+t = mpiWtime();
+mpiAlltoallv(ar, br, cc, scr, sdr, rcr, rdr);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+
+if (mpirank == 0) test(br[0] == 0.);
+if (mpirank == 0) test(br[1] == 1.);
+if (mpirank == 1) test(br[2] == 2.);
+if (mpirank == 2) test(br[3] == 3.);
+
+mpiBarrier(mpiCommWorld);

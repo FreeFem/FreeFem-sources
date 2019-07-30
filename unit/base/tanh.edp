@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "tanh" << endl;
+cout << functionDEFINITION << "tanh" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real zero = 0.;
 real rpi = pi;
@@ -14,17 +14,17 @@ real r = 4.2;
 t = clock();
 real reszero = tanh(zero);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reszero == 0.);
 
 t = clock();
 real resrminf = tanh(minf);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resrminf == -1.);
 
 t = clock();
 real resrpinf = tanh(pinf);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resrpinf == 1.);

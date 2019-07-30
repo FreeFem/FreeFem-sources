@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "display" << endl;
+cout << functionDEFINITION << "display" << endl;
 real t;
 real r = 42;
 matrix A = [[1, 2, 3], [4, 5, 6]];
@@ -26,7 +26,7 @@ fespace Uh(Th, Pk);
 Uh u, uh;
 Uh uerror;
 
-cout << IND << "varf" << endl;
+cout << typeDEFINITION << "varf" << endl;
 	t = clock();
 	varf vPoisson (u, uh)
 		= int2d(Th)(
@@ -38,10 +38,10 @@ cout << IND << "varf" << endl;
 		+ on(Wall, u=uD)
 		;
 	t = clock() - t;
-	cout << IND << IND << t << endl;
+	cout << timeELAPSED << t << endl;
 	matrix<real> Poisson = vPoisson(Uh, Uh, solver=sparsesolver);
 
 t = clock();
 display(Poisson);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;

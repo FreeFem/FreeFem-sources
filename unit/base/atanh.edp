@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "atanh" << endl;
+cout << functionDEFINITION << "atanh" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real zero = 0.;
 real rpos = 1.;
@@ -14,17 +14,17 @@ real pinf = -log(0.);
 t = clock();
 real resr1 = atanh(zero);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr1 == 0.);
 
 t = clock();
 real resr2 = atanh(rpos);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr2 == pinf);
 
 t = clock();
 real resr3 = atanh(rneg);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr3 == minf);

@@ -1,0 +1,229 @@
+include "test.idp"
+load "msh3"
+load "gsl"
+load "medit"
+load "tetgen"
+
+cout << functionDEFINITION << "movemesh3" << endl;
+
+real t;
+
+int savex = x;
+int savey = y;
+int savez = z;
+int[int] refx=[0,1];  //  bas
+mesh3 Th3 = cube(10, 10, 10);
+t = clock();
+mesh3 MovedTh3 = movemesh3(Th3);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(x != savex && y != savey && z != savez);
+
+cout << functionDEFINITION << "deplacement" << endl;
+
+mesh3 Th3D = cube(15, 15, 15);
+real[int] deltx(Th3D.nv);
+real[int] delty(Th3D.nv);
+real[int] deltz(Th3D.nv);
+real ptm = 1e-5;
+
+savex = x;
+savey = y;
+savez = z;
+deltx = 0;
+delty = 0;
+deltz = 0;
+mesh3 depMesh = deplacement(Th3D, deltax = deltx, deltay = delty, deltaz = deltz,
+   ptmerge=ptm, facemerge=1, boolsurface=true);
+test(x != savex && y != savey && z != savez);
+
+cout << functionDEFINITION << "checkbemesh" << endl;
+
+{
+  mesh3 Th3 = cube (5, 5, 5);
+  Th3 = buildSurface(Th3); // build the surface mesh;
+  meshS ThS3 = Th3.Gamma;
+  int checked = checkbemesh(ThS3, manifolds=[[[11,1],[12,1],[13,1],[14,1],[15,1],[16,1]]]);
+  test(checked == 1);
+}
+
+cout << functionDEFINITION << "buildlayers" << endl;
+{
+  mesh Th = square(5, 5);
+  int i = 1;
+  mesh3 Th3 = cube (5, 5, 5);
+  mesh3 res = buildlayers(Th, i);
+  test(Th3.nt != res.nt);
+  test(Th3.nbe != res.nbe);
+  test(Th3.nv != res.nv);
+}
+
+cout << functionDEFINITION << "trunc" << endl;
+{
+  int nn=10;
+
+  border cc(t=0,2*pi){x=cos(t);y=sin(t);label=1;}
+  mesh Th2= buildmesh(cc(100));
+  fespace Vh2(Th2,P2);
+  Vh2 ux,uz,p2;
+  int[int] rup=[0,2],  rdown=[0,1], rmid=[1,1,2,1,3,1,4,1];
+  func zmin= 2-sqrt(4-(x*x+y*y));
+  func zmax= 2-sqrt(3.);
+
+  mesh3 Th=buildlayers(Th2,nn,
+    coef=  (zmax-zmin)/zmax,
+    zbound=[zmin,zmax],
+    labelmid=rmid,
+    reffaceup = rup,
+    reffacelow = rdown);
+
+  func u=x^2+y^2;
+  int i = 1;
+  mesh3 Th3=trunc(Th,(u-0.5)>1.e-10,split=1,label=135);
+  test(Th3.nt < Th.nt);
+}
+
+cout << functionDEFINITION << "showborder" << endl;
+{
+  mesh Th = square(5, 5);
+  int i = 1;
+  // mesh3 Th3 = cube (5, 5, 5);
+  // meshS ThS3 = Th3.Gamma;
+  // showborder(Th)S3;
+}
+
+cout << functionDEFINITION << "gluemesh" << endl;
+{
+  mesh Th = square(5, 5);
+  int i = 1;
+  // mesh3 Th3 = cube (5, 5, 5);
+  // meshS ThS3 = Th3.Gamma;
+  // gluemesh("");
+}
+
+cout << functionDEFINITION << "movemesh23" << endl;
+{
+  real x0,x1,y0,y1;
+  mesh Th = square(5, 5);
+  int i = 1;
+  mesh3 Th3 = cube (5, 5, 5);
+  meshS ThS3 = Th3.Gamma;
+  x0=1.; x1=2.; y0=0.; y1=1.5;
+  mesh Thsq2 = square(5,8,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+
+  func ZZ2 = y;
+  func XX2 = x;
+  func YY2min = 0.;
+  func YY2max = 2*pi;
+
+  int[int] ref32h = [0,13];
+  int[int] ref32b = [0,14];
+
+  meshS Th32h = movemesh23(Thsq2,transfo=[XX2,YY2max,ZZ2],label=ref32h,orientation=-1);
+  test(Th32h.nt != 0);
+}
+
+cout << functionDEFINITION << "square3" << endl;
+{
+  real R = 3, r=1;
+  real h = 0.2; //
+  int nx = R*2*pi/h;
+  int ny = r*2*pi/h;
+  func torex = (R+r*cos(y*pi*2))*cos(x*pi*2);
+  func torey = (R+r*cos(y*pi*2))*sin(x*pi*2);
+  func torez = r*sin(y*pi*2);
+
+  t = clock();
+  meshS ThS=square3(nx,ny,[torex,torey,torez]);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(ThS.nt != 0);
+}
+
+cout << functionDEFINITION << "getborder" << endl;
+{
+  real hh=.15;// mesh size
+  real Htube=8;
+  real Hneck=2;
+  real Hbot=Htube+Hneck;
+
+  real Rext = 1.;// External radius
+  real Rneck= 0.2; // Radius of the neck of the bootle
+  int labtop =3, labbottom =2, labcyl = 1;
+
+  meshS Ths;
+  {
+    meshS Th3c,Th3bottom, Th3top;
+    {
+      // form of the neck ...
+      real[int,int] srneck=
+      [
+      [Htube-0.001,Htube,Htube+Hneck*0.1, Htube+Hneck*0.3  , Htube+Hneck*0.7   , Htube+Hneck*0.9, Htube+Hneck+0.1],
+      [Rext       ,Rext ,Rext           , Rext*.7+Rneck*.3 , Rext*.1 + Rneck*.9, Rneck          , Rneck  ]]
+      ;
+      gslspline rneck(gslinterpcspline,srneck);// Curve of tthe bollte form z = 0 to Hbot neck of the bottle
+
+      //  il faut adapte le maillage 2 pour qu'il soit beau
+      mesh Th2c= square(Hbot/hh,2*pi*Rext/hh,[x*Hbot,y*2*pi]);
+      fespace V2x(Th2c,P1);
+      macro Dx(u) [dx(u#1),dx(u#2),dx(u#3)] //
+      macro Dy(u) [dy(u#1),dy(u#2),dy(u#3)] //
+      // The transformation
+      func E1 = rneck(x)*cos(y);
+      func E2 = rneck(x)*sin(y);
+      func E3 = x;
+      V2x ex1,ex2,ex3;
+      // the metric
+      real hh2 = hh*hh;
+      func  em11 = Dx(ex)'*Dx(ex)/hh2;
+      func  em21 = Dx(ex)'*Dy(ex)/hh2;
+      func  em22 = Dy(ex)'*Dy(ex)/hh2;
+      func perio=[[1,x],[3,x]];
+      for(int i=0;i<4;++i)
+      {
+        ex1=E1;ex2=E2;ex3=E3;
+        Th2c=adaptmesh(Th2c,em11,em21,em22,IsMetric=1,periodic=perio,nbvx=100000);
+      }
+      Th2c=change(Th2c,fregion=labcyl);
+      Th3c = movemesh23(Th2c,transfo=[E1 , E2 , E3]);// maillage exterieur
+    }
+    // extraction of the border of the bottle
+    int[int] databoder(1);
+    t = clock();
+    int ncb= getborder(Th3c,databoder);
+    t = clock() - t;
+    cout << timeELAPSED << t << endl;
+    int ktop= Th3c(databoder[databoder[1]]).z < Th3c(databoder[databoder[0]]).z;
+    int  kbot=1-ktop;
+    real Zbot = Th3c(databoder[databoder[kbot]]).z;
+    real Ztop = Th3c(databoder[databoder[ktop]]).z;
+    cout << " Z  top  " << Zbot  << endl;
+    cout << " Z  bot  " << Ztop << endl;
+    assert( ncb ==2);
+    test(ncb == 2);
+    macro DefBorder(bname,kk,Th3,bb,ll)
+    int n#bname= bb[kk+1]-bb[kk];
+    border bname(t=bb[kk], bb[kk+1])
+    {
+      real iv = int(t);
+      if( iv == bb[kk+1]) iv = bb[kk];
+
+      cout << t << " iv = " << iv << endl;
+      iv = bb[iv];
+      x= Th3(iv).x ;
+      y= Th3(iv).y ;
+      label = ll;
+      }//
+      DefBorder(btop,ktop,Th3c,databoder,1)
+      DefBorder(bbot,kbot,Th3c,databoder,1)
+      cout << " btop " << nbtop << " bot: " << nbbot << endl;
+
+      // plot(btop(nbtop)+bbot(-nbbot),wait=1);
+      Th3bottom=movemesh23(change(buildmesh(bbot(nbbot),fixeborder=1),fregion=labbottom),transfo=[x,y,Zbot],orientation=-1);
+      Th3top=movemesh23(change(buildmesh(btop(-nbtop),fixeborder=1),fregion=labtop),transfo=[x,y,Ztop],orientation=1);
+      Ths = Th3c + Th3bottom + Th3top;
+    }
+
+    real[int] domaine = [0,0,Htube,1,hh^3/6.];
+    mesh3 Th=tetg(Ths,switch="pqaAYY",regionlist=domaine);
+}

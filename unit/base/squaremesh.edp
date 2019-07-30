@@ -1,23 +1,23 @@
 include "test.idp"
 real t;
 
-cout << "square" << endl;
+cout << functionDEFINITION << "square" << endl;
 
 func int testMesh(mesh &Th, int nx, int ny, real X, real Y,
                   int[int] &Label, int Region) {
 
   test(abs((X * Y) - Th.measure) < HWERROR);
   t = clock() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   test(abs(((2 * X) + (2 * Y)) - Th.bordermeasure) < HWERROR);
   t = clock() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
 
   real[int] bb(4);
   t = clock() - t;
   boundingbox(Th, bb);
   t = clock() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   test(bb[0] == 0);
   test(bb[1] == X);
   test(bb[2] == 0);
@@ -35,7 +35,7 @@ func int testMesh(mesh &Th, int nx, int ny, real X, real Y,
     int a = Th[i].adj(e);
   }
   t = clock() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
 
   //vertices
   int nv = Th.nv;
@@ -59,12 +59,12 @@ func int testMesh(mesh &Th, int nx, int ny, real X, real Y,
     int e = Th.be(i).whoinElement;
   }
 
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   test(Th(0.5, 0.5).region == 0);
   t = clock() - t;
   test(Th.nbe == 2 * nx + 2 * ny);
   t = clock() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
 }
 
 int nx = 10;

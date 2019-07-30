@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "fmin" << endl;
+cout << functionDEFINITION << "fmin" << endl;
 real t;
 int i1 = 1;
 int i2 = 2;
@@ -10,32 +10,32 @@ real r1 = -3.5;
 real r2 = -4.5;
 real nan = sqrt(-1);
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 real rmin = fmin(i1, i2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(rmin == i1);
 
 t = clock();
 rmin = fmin(i4, i5);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(rmin == i5);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 rmin = fmin(r1, r2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(rmin == r2);
 
-cout << IND << "nan" << endl;
+cout << typeDEFINITION << "nan" << endl;
 
 t = clock();
 rmin = fmin(i1, nan);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(rmin == i1);

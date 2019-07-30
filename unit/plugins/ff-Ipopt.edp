@@ -1,0 +1,216 @@
+include "test.idp"
+load "ff-Ipopt"
+
+real t;
+
+cout << functionDEFINITION << "IPOPT" << endl;
+{
+   real[int] xlb=[1.,1.,1.,1.],xub=[5.,5.,5.,5.],glb=[25.,40.],gub=[1.e19,40.];
+
+   func real J(real[int] &X)
+   {
+     return X[0]*X[3]*(X[0] + X[1] + X[2]) + X[2];
+   }
+
+   func real[int] dJ(real[int] &X)
+   {
+     real[int] grad(X.n);
+     grad[0] = 2.*X[0]*X[3] + X[1]*X[3] + X[2]*X[3];
+     grad[1] = X[0]*X[3];
+     grad[2] = X[0]*X[3] + 1.;
+     grad[3] = X[0]*X[0] + X[0]*X[1] + X[0]*X[2];
+     return grad;
+   }
+
+   matrix H;
+
+   int[int] hi=[0,1,1,2,2,2,3,3,3,3],hj=[0,0,1,0,1,2,0,1,2,3];
+   real[int] hc(hi.n);
+   hc=0.;
+
+   func matrix HJ(real[int] &X,real jfactor,real[int] &lambda)
+   {
+     H = [hi,hj,hc];
+     H(0,0) = jfactor * 2*X[3];
+     H(1,0) = jfactor * X[3];
+     H(2,0) = jfactor * X[3];
+     H(3,0) = jfactor * (2*X[0] + X[1] + X[2]);
+     H(3,1) = jfactor * X[0];
+     H(3,2) = jfactor * X[0];
+     H(1,0) += lambda[0] * (X[2]*X[3]);
+     H(2,0) += lambda[0] * (X[1]*X[3]);
+     H(2,1) += lambda[0] * (X[0]*X[3]);
+     H(3,0) += lambda[0] * (X[1]*X[2]);
+     H(3,1) += lambda[0] * (X[0]*X[2]);
+     H(3,2) += lambda[0] * (X[0]*X[1]);
+     H(0,0) += lambda[1] * 2.;
+     H(1,1) += lambda[1] * 2.;
+     H(2,2) += lambda[1] * 2.;
+     H(3,3) += lambda[1] * 2.;
+     return H;
+   }
+
+   func real[int] G(real[int] &X)
+   {
+     real[int] g(2);
+     g[0] = X[0]*X[1]*X[2]*X[3];
+     g[1] = square(X.l2);
+     return g;
+   }
+
+   matrix GG;
+   int[int] II=[0, 0, 0, 0, 1, 1, 1, 1], JJ=[0, 1, 2, 3, 0, 1, 2, 3];
+   real[int] CC=[0.,0.,0.,0.,0.,0.,0.,0.];
+
+   GG = [II,JJ,CC];
+
+   func matrix jacG(real[int] &X)
+   {
+     GG(0,0) = X[1]*X[2]*X[3];
+     GG(0,1) = X[0]*X[2]*X[3];
+     GG(0,2) = X[0]*X[1]*X[3];
+     GG(0,3) = X[0]*X[1]*X[2];
+     GG(1,0) = 2.*X[0];
+     GG(1,1) = 2.*X[1];
+     GG(1,2) = 2.*X[2];
+     GG(1,3) = 2.*X[3];
+     return GG;
+   }
+
+   real[int] start=[1, 5, 5, 1];
+   real[int] optimsol=[1.00000000, 4.74299963, 3.82114998, 1.37940829];
+   t = clock();
+   IPOPT(J,dJ,HJ,G,jacG,start,ub=xub, lb=xlb,clb=glb,cub=gub);
+   t = clock() - t;
+   cout << timeELAPSED << t << endl;
+   optimsol -= start;
+}
+
+{
+  int NN=10;
+
+  mesh Th = square(NN,NN);
+  fespace Vh(Th,P1);
+  {  // verif no thresholding in operation 1*A;
+  	macro grad(u) [dx(u),dy(u)]//
+  	varf a(u,v) = int2d(Th)(grad(u)'*grad(v));
+  	matrix A = a(Vh,Vh);
+  	matrix A1 = 1.*A;
+  	assert(A.nnz == A1.nnz );
+  }  // end verification
+
+
+  func f=1;
+  func g=0;
+
+  varf Poiss(u,v) = int2d(Th)(0.5*dx(u)*dx(v) + 0.5*dy(u)*dy(v)) - int2d(Th)(v*f);
+  varf dPoiss(u,v) = int2d(Th)(dx(u)*dx(v) + dy(u)*dy(v)) ;
+  matrix A = Poiss(Vh,Vh);
+  matrix dA = dPoiss(Vh,Vh);
+  real[int] b = Poiss(0,Vh);
+
+  varf Bord(u,v) = int1d(Th,1,2,3,4)(0.5*u*v) - int1d(Th,1,2,3,4)(v*g);
+  varf dBord(u,v) = int1d(Th,1,2,3,4)(u*v);
+  real intg2 = int1d(Th,1,2,3,4)(0.5*g*g);
+
+  matrix M = dBord(Vh,Vh);
+  real[int] bc= Bord(0,Vh);
+
+
+  int iter=0;
+
+  func real J(real[int] &X)
+  {
+  	Vh u;
+  	u[]=X;
+  	real[int] Au = A*X;
+  	Au += b;
+  	real res = X '* Au;
+  	return res;
+  }
+
+  int nj=0;
+  func real[int] dJ(real[int] &X)
+  {
+  	real[int] Au = dA*X;
+  	//Au *= 2.;
+  	Au += b;
+  	return Au;
+  }
+
+  int nh=0;
+
+  matrix MH;
+  func matrix HJ(real[int] &X,real objfact,real[int] &lm)
+  {
+  	int[int] ia(0),ja(0),ic(0),jc(0);
+  	real[int] ca(0),cc(0);
+  	[ia,ja,ca] = dA;
+  	[ic,jc,cc] = M;
+  	ca *= (objfact ? objfact : 0.0001);
+  	cc *= (lm[0] ? lm[0] : 0.0001);
+  	matrix odA = [ia,ja,ca];
+  	matrix lmM = [ic,jc,cc];
+  	MH = odA + lmM;
+  	return MH;
+  }
+  int nc=0;
+  func real[int] C(real[int] &X)
+  {
+  	real[int] res=M*X;
+  	res *= 0.5;
+  	res += bc;
+  	real result = X '* res;
+  	result += intg2;
+  	real[int] rrr = [result];
+  	return rrr;
+  }
+
+  int ndc=0;
+  matrix MdC;
+  for(int i=0;i<Vh.ndof;++i)
+  {
+  	Vh xx=0.;
+  	xx[][i] = 1.;
+  	real[int] Mxx = M*xx[];
+  	real[int,int] MMxx(1,Mxx.n);
+  	MMxx(0,:) = Mxx;
+  	matrix MMMxx = MMxx;
+  	matrix temp = MMMxx;
+  	if(i==0) MdC = MMMxx;
+  	else MMMxx = MdC + temp;
+  	MdC = MMMxx;
+  }
+  cout << MdC << endl;
+  int[int] imdc(0),jmdc(0);
+  real[int] cmdc(0);
+  [imdc,jmdc,cmdc] = MdC;
+  func matrix dC(real[int] &X)
+  {
+  	real[int] res = M*X;
+  	res += bc;
+  	real[int,int] mdc(1,X.n);
+  	mdc(0,:) = res;
+  	for(int i=0;i<res.n;++i) if(res[i]) MdC(0,i) = res[i];
+
+  	return MdC;
+  }
+  real[int] Clb(1),Cub(1);
+  Clb=0.;
+  Cub=0.;
+  Vh start=0.;//x*(x-1)*y*(1-y);
+
+  real[int] xub(Vh.ndof),xlb(Vh.ndof);
+  xub=1.e19;
+  xlb=-1.e19;
+
+  t = clock();
+  IPOPT(J,dJ,HJ,C,dC,start[],ub=xub, lb=xlb,cub=Cub,clb=Clb);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+
+  Vh uff,v;
+  solve LaplaceFF(uff,v) = int2d(Th)(dx(uff)*dx(v) + dy(uff)*dy(v)) - int2d(Th)(v*f) + on(1,2,3,4,uff=0);
+  real nl2 = sqrt(int2d(Th)(square(uff-start))), ninf = sqrt(int2d(Th)(square(dx(uff)-dx(start)) + square(dy(uff)-dy(start))));
+  cout << "||ipopt - ff||_2 = " << nl2 << "   ||grad||_2 = "  << ninf << endl;
+}

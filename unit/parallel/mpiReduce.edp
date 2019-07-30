@@ -4,23 +4,23 @@ assert(mpisize == 4);
 include "test.idp"
 
 real t;
-if (!mpirank) cout << "mpiReduce" << endl;
-if (!mpirank) cout << IND << "mpiMAX" << endl;
+if (!mpirank) cout << functionDEFINITION << "mpiReduce" << endl;
+cout << "mpiMAX" << endl;
 int rank = mpirank;
 int globalRank;
 
-if (!mpirank) cout << IND << IND << "int" << endl;
+if (!mpirank) cout << typeDEFINITION << "int" << endl;
 for (int i = 0; i < mpisize; i++) {
   t = mpiWtime();
   mpiReduce(rank, globalRank, processor(i), mpiMAX);
   t = mpiWtime() - t;
-  cout << IND << t << endl;
+  if (!mpirank) cout << timeELAPSED << t << endl;
   if (mpirank == i) cout << globalRank << endl;
   if (mpirank == i)
     test(globalRank == 3);
 }
 
-if (!mpirank) cout << IND << IND << "real" << endl;
+if (!mpirank) cout << typeDEFINITION << "real" << endl;
 
 real rankr = 1./(1. + mpirank);
 real globalRankr;
@@ -29,68 +29,68 @@ for (int i = 0; i < mpisize; i++) {
   t = mpiWtime();
   mpiReduce(rankr, globalRankr, processor(i), mpiMAX);
   t = mpiWtime() - t;
-  cout << IND << t << endl;
+  if (!mpirank) cout << timeELAPSED << t << endl;
   if (mpirank == i) cout << globalRankr << endl;
   if (mpirank == i)
     test(globalRankr == 1.);
 }
 
 //mpiMIN, mpiSUM, mpiPROD, mpiLAND, mpiLOR, mpiLXOR, mpiBAND, mpiBXOR
-if (!mpirank) cout << IND << "mpiMIN" << endl;
+if (!mpirank) cout << typeDEFINITION << "mpiMIN" << endl;
 mpiReduce(rank, globalRank, processor(0), mpiMIN);
-if (mpirank) cout << IND << IND << globalRank << endl;
-if (!mpirank) cout << IND << IND << globalRank << endl;
+if (mpirank) cout << globalRank << endl;
+cout << globalRank << endl;
 
-if (!mpirank) cout << IND << "mpiSUM" << endl;
+if (!mpirank) cout << typeDEFINITION << "mpiSUM" << endl;
 mpiReduce(rank, globalRank, processor(0), mpiSUM);
-if (!mpirank) cout << IND << IND <<  globalRank << endl;
+cout << globalRank << endl;
 
-if (!mpirank) cout << IND << "mpiPROD" << endl;
+if (!mpirank) cout << typeDEFINITION << "mpiPROD" << endl;
 mpiReduce(rank, globalRank, processor(0), mpiPROD);
-if (!mpirank) cout << IND << IND << globalRank << endl;
+cout << globalRank << endl;
 
-if (!mpirank) cout << IND << "mpiLAND" << endl;
+if (!mpirank) cout << typeDEFINITION << "mpiLAND" << endl;
 mpiReduce(rank, globalRank, processor(0), mpiLAND);
-if (!mpirank) cout << IND << IND << globalRank << endl;
+cout << globalRank << endl;
 
-if (!mpirank) cout << IND << "mpiLOR" << endl;
+if (!mpirank) cout << typeDEFINITION << "mpiLOR" << endl;
 mpiReduce(rank, globalRank, processor(0), mpiLOR);
-if (!mpirank) cout << IND << IND << globalRank << endl;
+cout << globalRank << endl;
 
-if (!mpirank) cout << IND << "mpiBAND" << endl;
+if (!mpirank) cout << typeDEFINITION << "mpiBAND" << endl;
 mpiReduce(rank, globalRank, processor(0), mpiBAND);
-if (!mpirank) cout << IND << IND << globalRank << endl;
+cout << globalRank << endl;
 
 mpiReduce(rank, globalRank, processor(0), mpiBXOR);
 
 int ranki = mpirank % 2;
 int globalRanki;
 
-if (!mpirank) cout << IND << "mpiMIN" << endl;
+if (!mpirank) cout << typeDEFINITION << "mpiMIN" << endl;
 mpiReduce(rankr, globalRankr, processor(0), mpiMIN);
-if (mpirank) cout << IND << IND << globalRankr << endl;
-if (!mpirank) cout << IND << IND << globalRankr << endl;
+if (mpirank) cout << globalRankr << endl;
+cout << globalRankr << endl;
 
-if (!mpirank) cout << IND << "mpiSUM" << endl;
+if (!mpirank) cout << typeDEFINITION << "mpiSUM" << endl;
 mpiReduce(rankr, globalRankr, processor(0), mpiSUM);
-if (!mpirank) cout << IND << IND << globalRankr << endl;
+cout << globalRankr << endl;
 
-if (!mpirank) cout << IND << "mpiPROD" << endl;
+if (!mpirank) cout << typeDEFINITION << "mpiPROD" << endl;
 mpiReduce(rankr, globalRankr, processor(0), mpiPROD);
-if (!mpirank) cout << IND << "mpiSUM" << endl;
-if (!mpirank) cout << IND << IND << globalRankr << endl;
+if (!mpirank) cout << typeDEFINITION << "mpiSUM" << endl;
+cout << globalRankr << endl;
 
-if (!mpirank) cout << IND << "mpiLAND" << endl;
+if (!mpirank) cout << typeDEFINITION << "mpiLAND" << endl;
 mpiReduce(ranki, globalRanki, processor(0), mpiLAND);
-if (!mpirank) cout << IND << IND << globalRanki << endl;
+cout << globalRanki << endl;
 
-if (!mpirank) cout << IND << "mpiLOR" << endl;
+if (!mpirank) cout << typeDEFINITION << "mpiLOR" << endl;
 mpiReduce(ranki, globalRanki, processor(0), mpiLOR);
-if (!mpirank) cout << IND << IND << globalRanki << endl;
+cout << globalRanki << endl;
 
-if (!mpirank) cout << IND << "mpiBAND" << endl;
+if (!mpirank) cout << typeDEFINITION << "mpiBAND" << endl;
 mpiReduce(ranki, globalRanki, processor(0), mpiBAND);
 
-if (!mpirank) cout << IND << "mpiBXOR" << endl;
-if (!mpirank) cout << IND << IND << globalRanki << endl;
+if (!mpirank) cout << typeDEFINITION << "mpiBXOR" << endl;
+cout << globalRanki << endl;
 mpiReduce(ranki, globalRanki, processor(0), mpiBXOR);

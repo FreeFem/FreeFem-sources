@@ -1,25 +1,29 @@
 load "msh3"
 include "test.idp"
 
-cout << "labels" << endl;
+cout << functionDEFINITION << "labels" << endl;
 
 real t;
 mesh Th = square(10, 10);
 mesh3 Th3 = cube(10, 10, 10);
 
-func int getsize(int[int] array) {
-  int i;
-  for (i = 0; array[i] != "\0"; i++);
-  return i + 1;
-}
-
 t = clock();
 int[int] res = labels(Th);
 t = clock() - t;
-cout << IND << t << endl;
-cout << res << endl;
+cout << timeELAPSED << t << endl;
+test(res.n == 4);
+test(res[0] == 1);
+test(res[1] == 2);
+test(res[2] == 3);
+test(res[3] == 4);
 
 t = clock();
-res = labels(Th3);
+int[int] res3 = labels(Th3);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
+test(res3[0] == 1);
+test(res3[1] == 2);
+test(res3[2] == 3);
+test(res3[3] == 4);
+test(res3[4] == 5);
+test(res3[5] == 6);

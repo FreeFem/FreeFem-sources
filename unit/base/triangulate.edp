@@ -1,30 +1,24 @@
 include "test.idp"
 
-cout << "triangulate" << endl;
+cout << functionDEFINITION << "triangulate" << endl;
 
 real t;
-string filetr = "triangle.msh";
-real[int] x = [1, 2, 5, 7];
-real[int] y =  [4, 8, 9, 10];
+string filetr = "assets/triangle.msh";
 
 t = clock();
 mesh Thxy = triangulate(filetr);
 t = clock() - t;
-cout << IND << t << endl;
-// test(Thxy);
-
-// Fespace
-fespace Vhxy(Thxy, P1);
-Vhxy fxy;
+cout << timeELAPSED << t << endl;
+test(Thxy.nv > 0);
 
 {
-    ifstream file("triangle.msh");
-    real xx, yy;
-    for(int i = 0; i < fxy.n; i++)
-        file >> xx >> yy >> fxy[][i]; //to read third row only.                                      //xx and yy are just skipped
+    ifstream file("assets/triangle.msh");
+    int nv = Thxy.nv;
+    real[int] xx(nv), yy(nv);
+    real sol;
+    for(int i = 0; i < nv; i++) {
+        file >> xx[i] >> yy[i] >> sol;
+        test(Thxy(i).x == xx[i]);
+        test(Thxy(i).y == yy[i]);
+      }
 }
-plot(fxy);
-
-Vhxy xx=x, yy=y;
-
-// mesh Th2 = triangulate(xx[], yy[]);

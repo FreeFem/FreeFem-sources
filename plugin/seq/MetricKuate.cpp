@@ -42,8 +42,8 @@ R Max (const R a, const R b);
 inline void Exchange (R a, R b) {R c = a; a = b; b = c;};
 // const R precision = 1e-10;
 
-int LireTaille (const char *NomDuFichier, int &nbnoeuds);
-int Lire (const char *NomDuFichier, int n, R2 noeuds []);
+//int LireTaille (const char *NomDuFichier, int &nbnoeuds);
+//int Lire (const char *NomDuFichier, int n, R2 noeuds []);
 template<typename T>
 bool from_string (const string &Str, T &Dest) {
 	// cr�er un flux � partir de la chaine donn�e
@@ -325,44 +325,44 @@ void metrique (int nbpoints, R2 *Point, R &A, R &B, R &C, R epsilon) {
 	delete [] PPoint;
 }
 
-int LireTaille (const char *NomDuFichier, int &nbnoeuds) {	// Lire le maillage  sur le fichier de nom NomDuFichier
-															// Ouverture du fichier  a partir de son nom
-	ifstream f(NomDuFichier);
-	string buffer;
-
-	nbnoeuds = 0;
-	if (!f) {
-		cerr << "Erreur a l'ouverture du fichier " << NomDuFichier << endl;
-		return 1;
-	}
-
-	while (getline(f, buffer, '\n')) {
-		if ((buffer[0] != '#') && (buffer != "")) {
-			nbnoeuds += 1;
-		}
-	}
-
-	return 0;
-}
-
-int Lire (const char *NomDuFichier, int n, R2 noeuds []) {
-	ifstream f(NomDuFichier);
-	string buffer;
-	int i = 0;
-
-	while (i < n) {
-		f >> buffer;
-		if (buffer[0] == '#')
-		{getline(f, buffer);} else {
-			// Lecture X Y Z de chacun des noeuds
-
-			from_string(buffer, noeuds[i++].x);
-			f >> noeuds[i - 1].y >> buffer;
-		}
-	}
-
-	return 0;
-}
+// int LireTaille (const char *NomDuFichier, int &nbnoeuds) {	// Lire le maillage  sur le fichier de nom NomDuFichier
+// 															// Ouverture du fichier  a partir de son nom
+// 	ifstream f(NomDuFichier);
+// 	string buffer;
+//
+// 	nbnoeuds = 0;
+// 	if (!f) {
+// 		cerr << "Erreur a l'ouverture du fichier " << NomDuFichier << endl;
+// 		return 1;
+// 	}
+//
+// 	while (getline(f, buffer, '\n')) {
+// 		if ((buffer[0] != '#') && (buffer != "")) {
+// 			nbnoeuds += 1;
+// 		}
+// 	}
+//
+// 	return 0;
+// }
+//
+// int Lire (const char *NomDuFichier, int n, R2 noeuds []) {
+// 	ifstream f(NomDuFichier);
+// 	string buffer;
+// 	int i = 0;
+//
+// 	while (i < n) {
+// 		f >> buffer;
+// 		if (buffer[0] == '#')
+// 		{getline(f, buffer);} else {
+// 			// Lecture X Y Z de chacun des noeuds
+//
+// 			from_string(buffer, noeuds[i++].x);
+// 			f >> noeuds[i - 1].y >> buffer;
+// 		}
+// 	}
+//
+// 	return 0;
+// }
 
 R Min (const R a, const R b) {return a < b ? a : b;}
 

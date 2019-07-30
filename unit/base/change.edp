@@ -12,14 +12,14 @@ int[int] L = [1, 0];
 t = clock();
 mesh Thnew = change(Th1, region=R);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(Thnew[0].region == 1);
 test(Thnew[1].region == 1);
 
 t = clock();
 Thnew = change(Th1, label=L);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(Thnew[0].label == 0);
 test(Thnew[1].label == 0);
 
@@ -31,7 +31,7 @@ func int flabelfunc()
 t = clock();
 Thnew = change(Th1, flabel=flabelfunc());
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
 int number1 = Thnew(0, 0.5).nuTriangle;
 test(Thnew[number1].label == 0);
@@ -53,7 +53,7 @@ func int fregionfunc()
 t = clock();
 Thnew = change(Thnew, fregion=fregionfunc());
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
 int number5 = Thnew(0, 0).nuTriangle;
 plot(Thnew);
@@ -67,7 +67,7 @@ func int fregionfunc2()
 t = clock();
 Thnew = change(Thnew, fregion=fregionfunc2());
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
 int number6 = Thnew(0, 0).nuTriangle;
 plot(Thnew);

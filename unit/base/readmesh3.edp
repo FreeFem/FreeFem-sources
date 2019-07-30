@@ -1,11 +1,11 @@
 include "test.idp"
 
-cout << "readmesh3" << endl;
+cout << functionDEFINITION << "readmesh3" << endl;
 real t;
 mesh3 Th;
 
 t = clock();
-Th = readmesh3("Th.mesh");
+Th = readmesh3("assets/Th.mesh");
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(Th.nt > 0);

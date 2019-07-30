@@ -1,20 +1,20 @@
 include "test.idp"
 
-cout << "atof" << endl;
+cout << functionDEFINITION << "atof" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 string stringnb = "4.2";
 t = clock();
 real realnb = atof(stringnb);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(realnb == 4.2);
 
 string stringnb3 = "abc4.2";
 t = clock();
 real realnb3 = atoi(stringnb3);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(realnb3 == 0);

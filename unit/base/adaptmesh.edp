@@ -1,0 +1,72 @@
+include "test.idp"
+load "msh3"
+
+cout << functionDEFINITION << "adaptmesh" << endl;
+
+real t;
+
+mesh Th = square(5, 5);
+
+fespace Uh(Th, P1);
+Uh u=x+y, uu=x*y;
+real hMin = 0.1;
+real hMax = 0.5;
+real Err = 1e-3;
+real Errg = 1e-3;
+int nbvtx = 1000;
+int nbSmooth = 21;
+int nbJacoby = 21;
+real Ratio = 5;
+real Omega = 1;
+bool Iso = true;
+bool AbsError = true;
+real cutOff = 10;
+real verbos = 1.5;
+bool Inquire = true;
+bool splitPbEdge = true;
+int maxSubDiv = 5;
+bool rescal = true;
+bool keepBackVertices = true;
+bool isMetric = false;
+int poweer = 4;
+int thetaMax = 90;
+int splitInTwo = true;
+bool noMeshGeneration = false;
+real[int, int] Periodic = [[1., 1., 0.], [0., 1., 0.]];
+func perio=[[4,y],[2,y],[1,x],[3,x]];
+real[int] m11(Th.nv);
+real[int] m12(Th.nv);
+real[int] m22(Th.nv);
+
+t = clock();
+mesh Thnew = adaptmesh(Th, [u, uu], hmin=hMin, hmax=hMax, err=Err, errg=Errg,
+  nbvx=nbvtx, nbsmooth=nbSmooth, nbjacoby=nbJacoby, ratio=Ratio, omega=Omega,
+  iso=Iso, abserror=AbsError, cutoff=cutOff, verbosity=verbos, inquire=Inquire,
+  splitpbedge=splitPbEdge, maxsubdiv=maxSubDiv, rescaling=rescal,
+  keepbackvertices=keepBackVertices, IsMetric=isMetric, power=poweer, thetamax=thetaMax,
+  splitin2=splitInTwo, nomeshgeneration=noMeshGeneration, periodic=perio, metric=[m11, m12, m22]);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(Thnew.nt != Th.nt);
+test(Thnew.nv != Th.nv);
+test(Thnew.nbe != Th.nbe);
+
+// mesh3 Th3D = cube(5, 5, 5);
+// real[int] m113(Th3D.nv);
+// real[int] m123(Th3D.nv);
+// real[int] m223(Th3D.nv);
+// fespace Vh(Th3D, P1);
+// Vh v=x+y+z, vv=x*y*z, vvv = x+y+z;
+
+// t = clock();
+// mesh3 Thnew3D = adaptmesh(Th3D, [v, vv, vvv], hmin=hMin, hmax=hMax, err=Err, errg=Errg,
+//   nbvx=nbvtx, nbsmooth=nbSmooth, nbjacoby=nbJacoby, ratio=Ratio, omega=Omega,
+//   iso=Iso, abserror=AbsError, cutoff=cutOff, verbosity=verbos, inquire=Inquire,
+//   splitpbedge=splitPbEdge, maxsubdiv=maxSubDiv, rescaling=rescal,
+//   keepbackvertices=keepBackVertices, IsMetric=isMetric, power=poweer, thetamax=thetaMax,
+//   splitin2=splitInTwo, nomeshgeneration=noMeshGeneration, periodic=perio, metric=[m113, m123, m223]);
+// t = clock() - t;
+// cout  timeELAPSED << t << endl;
+// test(Thnew3D.nt != Th3D.nt);
+// test(Thnew3D.nv != Th3D.nv);
+// test(Thnew3D.nbe != Th3D.nbe);

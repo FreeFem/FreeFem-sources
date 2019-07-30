@@ -1,29 +1,29 @@
 include "test.idp"
 
-cout << "lgamma" << endl;
+cout << functionDEFINITION << "lgamma" << endl;
 real t;
 real pinf = -log(0.);
 
 t = clock();
 real lg = lgamma(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(lg == 0);
 
 t = clock();
 real lg2 = lgamma(2.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(lg2 == 0);
 
 t = clock();
 real lg3 = lgamma(0.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(lg3 == pinf);
 
 t = clock();
 real lg4 = lgamma(1.5);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(lg4 < 0);

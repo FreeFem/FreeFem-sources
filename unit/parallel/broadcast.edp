@@ -1,31 +1,208 @@
 //NBPROC 4
+load "msh3"
 include "test.idp"
 
-cout << "broadcast" << endl;
+if (!mpirank) cout << functionDEFINITION << "broadcast" << endl;
 
 real t;
 
 cout << "MPI rank = " << mpirank << endl;
 
-if (mpisize > 4) {
-  int[int] procs=[1, 4];
-  mpiGroup grp(procs);
-  mpiComm comm(grp);
-}
-
-int l = mpirank + 100;
+int l;
+if (mpirank  == 0)
+  l = mpirank + 100;
 cout << " l == " << l << " broadcast l from 0   mpirank = " << mpirank << endl;
 broadcast(processor(0),l);
-cout << " l == " << l << "  mpirank = "<< mpirank << endl;
+cout << " l == " << l << "  mpirank = " << mpirank << endl;
 test(l == 100);
+
+if (!mpirank) cout << typeDEFINITION << "real" << endl;
+
+real realnb;
+if (mpirank == 0)
+  realnb = 4.2;
+t = mpiWtime();
+broadcast(processor(0), realnb);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+if (mpirank != 0) {
+  test(realnb == 4.2);
+}
+
+if (!mpirank) cout << typeDEFINITION << "int" << endl;
+
+int intnb;
+if (mpirank == 0)
+  intnb = 42;
+t = mpiWtime();
+broadcast(processor(0), intnb);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+if (mpirank != 0) {
+  test(intnb == 42);
+}
+
+if (!mpirank) cout << typeDEFINITION << "int[int]" << endl;
+
+int[int] arrayInt(3);
+if (mpirank == 0)
+arrayInt = [1, 2, 3];
+t = mpiWtime();
+broadcast(processor(0), arrayInt);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+if (mpirank != 0) {
+  test(arrayInt[0] == 1 && arrayInt[1] == 2
+    && arrayInt[2] == 3);
+}
+
+if (!mpirank) cout << typeDEFINITION << "int[int, int]" << endl;
+
+int[int, int] arrayIntInt(2, 3);
+if (mpirank == 0)
+arrayIntInt = [[1, 2, 3], [4, 5, 6]];
+t = mpiWtime();
+broadcast(processor(0), arrayIntInt);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+if (mpirank != 0) {
+  test(arrayIntInt(0,0) == 1 && arrayIntInt(0, 1) == 2  && arrayIntInt(0, 2) == 3
+  && arrayIntInt(1,0) == 4 && arrayIntInt(1, 1) == 5 && arrayIntInt(1, 2) == 6);
+}
+
+if (!mpirank) cout << typeDEFINITION << "real[int]" << endl;
+
+real[int] arrayReal(3);
+if (mpirank == 0)
+  arrayReal = [1.1, 2.2, 3.3];
+t = mpiWtime();
+broadcast(processor(0), arrayReal);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+if (mpirank != 0) {
+  test(arrayReal[0] == 1.1 && arrayReal[1] == 2.2
+  && arrayReal[2] == 3.3);
+}
+
+if (!mpirank) cout << typeDEFINITION << "real[int, int]" << endl;
+
+real[int, int] arrayRIntInt(2, 3);
+if (mpirank == 0)
+arrayRIntInt = [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]];
+t = mpiWtime();
+broadcast(processor(0), arrayRIntInt);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+if (mpirank != 0) {
+  test(arrayRIntInt(0,0) == 1.1 && arrayRIntInt(0, 1) == 2.2 && arrayRIntInt(0, 2) == 3.3
+  && arrayRIntInt(1,0) == 4.4 && arrayRIntInt(1, 1) == 5.5 && arrayRIntInt(1, 2) == 6.6);
+}
+
+if (!mpirank) cout << typeDEFINITION << "complex[int]" << endl;
+
+complex[int] arrayComplex(3);
+if (mpirank == 0)
+  arrayComplex = [1 + 1i, 2 + 2i, 3 + 3i];
+t = mpiWtime();
+broadcast(processor(0), arrayComplex);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+if (mpirank != 0) {
+  test(arrayComplex[0] == 1 + 1i && arrayComplex[1] == 2 + 2i
+  && arrayComplex[2] == 3 + 3i);
+}
+
+if (!mpirank) cout << typeDEFINITION << "complex[int, int]" << endl;
+
+complex[int, int] arrayCIntInt(2, 3);
+if (mpirank == 0)
+arrayCIntInt = [[1 + 1i, 2 + 2i, 3 + 3i], [4 + 4i, 5 + 5i, 6 + 6i]];
+t = mpiWtime();
+broadcast(processor(0), arrayCIntInt);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+if (mpirank != 0) {
+  test(arrayCIntInt(0,0) == 1 + 1i && arrayCIntInt(0, 1) == 2 + 2i && arrayCIntInt(0, 2) == 3 + 3i
+  && arrayCIntInt(1,0) == 4 + 4i && arrayCIntInt(1, 1) == 5 + 5i && arrayCIntInt(1, 2) == 6 + 6i);
+}
+
+if (!mpirank) cout << typeDEFINITION << "matrix" << endl;
+
+matrix M;
+if (mpirank == 0)
+  M = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
+t = mpiWtime();
+broadcast(processor(0), M);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+if (mpirank != 0) {
+  test(M(0, 0) == 1 && M(0, 1) == 2 && M(0, 2) == 3
+  && M(1, 0) == 4 && M(1, 1) == 5 && M(1, 2) == 6
+  && M(2, 0) == 7 && M(2, 1) == 8 && M(2, 2) == 9);
+}
+
+if (!mpirank) cout << typeDEFINITION << "matrix<complex>" << endl;
 
 matrix<complex> A;
 matrix<complex>[int]  B(10);
 if (mpirank == 0)
    A=[[1+1i,1i],[0,2-1i],[0,2-1i]];
+t = mpiWtime();
 broadcast(processor(0),A);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
 if (mpirank != 0) {
   test(A(0, 0) == 1+1i && A(0, 1) == 1i
   && A(1, 0) == 0 && A(1, 1) == 2-1i
   && A(2, 0) == 0 && A(2, 1) == 2-1i);
+}
+
+if (!mpirank) cout << typeDEFINITION << "mesh" << endl;
+
+mesh Th;
+if (mpirank == 0)
+  Th = square(5, 5);
+t = mpiWtime();
+broadcast(processor(0),Th);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+if (mpirank != 0) {
+  mesh Th2 = square(5, 5);
+  test(Th.nt == Th2.nt);
+}
+
+if (!mpirank) cout << typeDEFINITION << "mesh3" << endl;
+
+mesh3 Th3;
+if (mpirank == 0)
+  Th3 = cube(5, 5, 5);
+t = mpiWtime();
+broadcast(processor(0),Th3);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+if (mpirank != 0) {
+  mesh3 Th4 = cube(5, 5, 5);
+  test(Th3.nt == Th4.nt);
+}
+
+real[int] C(5);
+int[int] I(5);
+int[int] J(5);
+matrix mc;
+
+if (!mpirank) cout << typeDEFINITION << "mesh3" << endl;
+
+if (mpirank == 0) {
+  C = [1, 2, 3, 9, 1];
+  I = [0, 2, 4, 4, 6];
+  J = [0, 1, 1, 6, 2];
+  mc.resize(8, 8);
+  mc = [I, J, C];
+}
+t = mpiWtime();
+broadcast(processor(0), mc);
+t = mpiWtime() - t;
+if (!mpirank) cout << timeELAPSED << t << endl;
+if (mpirank == 1) {
+  test(mc(0,0) == 1 && mc(2,1) == 2);
 }

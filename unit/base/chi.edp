@@ -3,7 +3,7 @@ load "tetgen"
 load "medit"
 include "test.idp"
 
-cout << "chi" << endl;
+cout << functionDEFINITION << "chi" << endl;
 real t;
 mesh Th = square(10, 10);
 bool isInMesh;
@@ -11,13 +11,13 @@ bool isInMesh;
 t = clock();
 isInMesh = chi(Th)(1, 1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(isInMesh == true);
 
 t = clock();
 isInMesh = chi(Th)(11, 11);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(isInMesh == false);
 
 mesh3 Th3D = cube(3, 4, 5);
@@ -25,17 +25,17 @@ mesh3 Th3D = cube(3, 4, 5);
 t = clock();
 isInMesh = chi(Th3D)(1, 1, 1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(isInMesh == true);
 
 t = clock();
 isInMesh = chi(Th3D)(11, 11, 11);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(isInMesh == false);
 
 t = clock();
 isInMesh = chi(Th3D)(1, 1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(isInMesh == true);

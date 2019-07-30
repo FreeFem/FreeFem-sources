@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "EigenValue" << endl;
+cout << functionDEFINITION << "EigenValue" << endl;
 real t;
 
 real kc2 = 1.;
@@ -36,8 +36,6 @@ solve sound(u, v)
 
 real sigma = 20; //value of the shift
 
-// Problem
-// OP = A - sigma B ; // The shifted matrix
 varf op(u1, u2)
    = int2d(Th)(
         dx(u1)*dx(u2)
@@ -50,8 +48,7 @@ varf b([u1], [u2])
    = int2d(Th)(
         u1*u2
    )
-   ; // No Boundary condition see note \ref{note BC EV}
-
+   ;
 matrix OP = op(Vh, Vh, solver=Crout, factorize=1);
 matrix B = b(Vh, Vh, solver=CG, eps=1e-20);
 
@@ -62,8 +59,14 @@ real[int] ev(nev);  // To store the nev eigenvalue
 Vh[int] eV(nev);    // To store the nev eigenvector
 t = clock();
 int k=EigenValue(OP, B, sym=true, sigma=sigma, value=ev, vector=eV,
-   tol=1e-10, nev=nev);
+   tol=1e-10, nev=nev, maxit=0, ncv=0);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 real rounded = round(ev[0]);
 test(rounded == 20);
+
+func real[int] FOP1(real[int] & u){ real[int] Au = OP^-1*u; return Au; }
+func real[int] FB(real[int] & u){ real[int] Au = B*u; return Au; }
+int n = OP.n;
+
+int kk3 = EigenValue(n, A1=FOP1, B=FB, mode=3, sigma=sigma, nev=nev);

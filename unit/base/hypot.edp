@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "hypot" << endl;
+cout << functionDEFINITION << "hypot" << endl;
 real t;
 real c1 = 3.;
 real c2 = 4.;
@@ -10,11 +10,11 @@ real c4 = -4.;
 t = clock();
 real res = hypot(c1, c2);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(res == 5.);
 
 t = clock();
 res = hypot(c3, c4);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(res == 5.);

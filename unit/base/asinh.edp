@@ -1,27 +1,27 @@
 include "test.idp"
 
-cout << "asinh" << endl;
+cout << functionDEFINITION << "asinh" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real zero = 0.;
 t = clock();
 real theta1 = asinh(zero);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(theta1 == 0);
 
 real moins1 = -1.;
 t = clock();
 real theta2 = asinh(moins1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(theta2 - log(moins1 + sqrt(moins1^2 + 1))) < HWERROR);
 
 real plus1 = 1.;
 t = clock();
 real theta3 = asinh(plus1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(theta3 - log(plus1 + sqrt(plus1^2 + 1))) < HWERROR);

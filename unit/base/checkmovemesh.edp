@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "checkmovemesh" << endl;
+cout << functionDEFINITION << "checkmovemesh" << endl;
 real t;
 real minT;
 mesh Th = square(10, 10);
@@ -12,5 +12,5 @@ UH ux = 1, uy = 1;
 t = clock();
 minT = checkmovemesh(Th, [x + uu, y + vv]);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(minT > 0);

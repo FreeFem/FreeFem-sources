@@ -1,0 +1,23 @@
+include "test.idp"
+load "iovtk"
+cout << functionDEFINITION << "savevtk" << endl;
+
+border Gamma(t=0,2*pi){x=cos(t);y=sin(t);label=3;}
+border Gamma1(t=0,2*pi){x=2*cos(t);y=2*sin(t);label=5;}
+mesh Th2 = buildmesh( Gamma(10)+Gamma1(20) );
+
+fespace Vh(Th2,P1);     // P1 FE space
+func gg=x;
+Vh uh,vh,u;
+Vh ggg=gg;
+
+
+solve laplacep(uh,vh,solver=CG,tgv=1e5) =      //  definion of  the problem
+    int2d(Th2)( dx(uh)*dx(vh) + dy(uh)*dy(vh) )   //  bilinear form
+       + on(3,uh=1)+ on(5,uh=2) ;                        //  boundary condition form
+
+cout << "vtk information" << endl;
+int[int] fforder=[0,0,1,0,1];
+int[int] array = savevtk("disque.vtk",Th2,uh,ggg,uh,[uh,ggg],[uh,ggg],dataname="kkdjd jyqql bidule45 vector nnn nn44233T",order=fforder);
+
+// mesh Th = vtkload3("assets/bidule.vtk");

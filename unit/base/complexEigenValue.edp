@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "complex" << endl;
+cout << functionDEFINITION << "complex" << endl;
 real t;
 
 real kc2 = 1.;

@@ -1,0 +1,31 @@
+include "test.idp"
+load "DxWriter"
+
+real t;
+
+cout << functionDEFINITION << "Dxaddmesh" << endl;
+
+mesh Th=square(5,5);
+cout << parameterDEFINITION << "DxWriter" << endl;
+DxWriter ff("pippo");
+t = clock();
+Dxaddmesh(ff, Th);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "Dxaddtimeseries" << endl;
+
+t = clock();
+Dxaddtimeseries(ff, "Vx",Th);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "Dxaddsol2ts" << endl;
+
+fespace Vh(Th, P1);
+real t1=1.0;
+Vh vx=x*y*t1;
+t = clock();
+Dxaddsol2ts(ff,"Vx",t1, vx);
+t = clock() - t;
+cout << timeELAPSED << t << endl;

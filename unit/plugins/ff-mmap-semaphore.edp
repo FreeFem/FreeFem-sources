@@ -1,0 +1,141 @@
+include "test.idp"
+load "ff-mmap-semaphore"
+
+real t;
+
+Psemaphore smff("ff-slave1", 0);
+Psemaphore smc("ff-master1", 0);
+Pmmap sharedata("shared-data", 1024);
+if (verbosity < 4) verbosity = 0;
+
+// Mesh
+mesh Th = square(10, 10);
+int[int] Lab = [1, 2, 3, 4];
+
+// Fespace
+fespace Vh(Th, P1);
+Vh u, v;
+
+// Macro
+macro grad(u) [dx(u), dy(u)] //
+
+int status = 1;
+cout << " FF status = " << status << endl;
+real cff, rff;
+
+// Problem
+problem Pb (u, v)
+   = int2d(Th)(
+        grad(u)'*grad(v)
+   )
+   - int2d(Th)(
+        cff*v
+   )
+   + on(Lab, u=0)
+   ;
+
+if (verbosity > 9) cout << " FF: before FF post\n";
+Post(smff); //unlock master end init
+
+while (1){
+   if (verbosity > 9) cout << " FF: before FF wait \n";
+   Wait(smc); //wait from cint write ok
+   Read(sharedata, 0, cff);
+   Read(sharedata, 8, status);
+
+   cout << " After wait .. FF " << cff << " " << status << endl;
+   if(status <= 0) break;
+
+   // Solve
+   Pb;
+   rff = int2d(Th)(u*u);
+   cout << " ** FF " << cff << " " << rff << endl;
+
+   // Write
+   Write(sharedata, 16, rff);
+   Post(smff); //unlock cc
+}
+
+Post(smff); //wait from cint
+cout << " End FreeFEM " << endl;
+// Psemaphore smff("ff-slave1", 0);
+// Psemaphore smc("ff-master1", 0);
+// Pmmap sharedata("shared-data", 1024);
+// if(verbosity<4) verbosity =0;
+// mesh Th=square(10,10);
+// fespace Vh(Th,P1);
+// Vh u,v;
+// int[int] Lab=[1,2,3,4];
+//
+// macro grad(u) [dx(u),dy(u)] //
+//
+// int status=1;
+// Read(sharedata,8,status);
+// cout << " ff status = "<< status << endl;
+// real cff,rff;
+// complex c = 4 + 2i;
+// problem Pb(u,v) = int2d(Th)(grad(u)'*grad(v))-int2d(Th)(cff*v)+ on(Lab,u=0);
+// if(verbosity>9) cout << " ff: before ff post\n";
+// Post(smff); // un lock master fin init
+//
+//
+// while (1)
+// {
+// 	if(verbosity>9) cout << " ff: before ff wait \n";
+//   cout << functionDEFINITION << "Wait" << endl;
+//   t = clock();
+// 	Wait(smc); // wait from cint ecriture ok
+//   t = clock() - t;
+//   cout << timeELAPSED << t << endl;
+//   cout << functionDEFINITION << "Read" << endl;
+// 	{
+// 	  t = clock();
+// 		Read(sharedata,0,cff);
+// 	  t = clock() - t;
+// 	  cout << timeELAPSED << t << endl;
+// 	  t = clock();
+// 		Read(sharedata,8,status);
+// 	  t = clock() - t;
+// 	  cout << timeELAPSED << t << endl;
+// 	}
+// 	{
+// 		t = clock();
+// 		Read(sharedata,0,c);
+// 	  t = clock() - t;
+// 	  cout << timeELAPSED << t << endl;
+// 	  t = clock();
+// 		Read(sharedata,8,status);
+// 	  t = clock() - t;
+// 	  cout << timeELAPSED << t << endl;
+// 	}
+// 	cout << " After wait ..  ff "<< cff << " " << status << endl;
+// 	if(status<=0) break;
+// 	Pb;
+// 	rff = int2d(Th)(u*u);
+// 	cout << " ** ff "<< cff << " " << rff << endl;
+//
+//   cout << functionDEFINITION << "Write" << endl;
+// 	{
+// 	  t = clock();
+// 		Write(sharedata,16,rff);
+// 	  t = clock() - t;
+// 	  cout << timeELAPSED << t << endl;
+// 	  cout << functionDEFINITION << "Post" << endl;
+// 	  t = clock();
+// 		Post(smff); // unlock cc
+// 	  t = clock() - t;
+// 	  cout << timeELAPSED << t << endl;
+// 	}
+// 	{
+// 		t = clock();
+// 		Write(sharedata,16,c);
+// 		t = clock() - t;
+// 		cout << timeELAPSED << t << endl;
+// 		cout << functionDEFINITION << "Post" << endl;
+// 		t = clock();
+// 		Post(smff); // unlock cc
+// 		t = clock() - t;
+// 		cout << timeELAPSED << t << endl;
+// 	}
+//
+// }

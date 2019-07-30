@@ -1,32 +1,32 @@
 include "test.idp"
 
-cout << "isNaN" << endl;
+cout << functionDEFINITION << "isNaN" << endl;
 real t;
 int i = 42;
 real nan = sqrt(-1);
 real r = 4.2;
 complex c = 4 + 2i;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 bool resi = isNaN(i);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resi == false);
 
-cout << IND << "Nan" << endl;
+cout << typeDEFINITION << "Nan" << endl;
 
 t = clock();
 bool resnan = isNaN(nan);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resnan == true);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 bool resr = isNaN(r);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr == false);

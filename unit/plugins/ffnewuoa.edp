@@ -1,0 +1,44 @@
+include "test.idp"
+load "ffnewuoa"
+
+int N=2;
+real[int,int] Y(N+1,N);
+real[int] X(N);
+func real J(real[int] & X)
+{
+  Y(0,:)=1.;
+  Y(1,:)=2.*X;
+  for(int i=2;i<=N;++i)
+    for(int j=0;j<N;++j)
+      Y(i,j) = Y(1,j) * Y(i-1,j)- Y(i-2,j);
+
+  real f=0;
+  int np=N+1,iw=1;
+  for(int i=0;i<=N;i++)
+    {
+      real s=Y(i,:).sum/N;
+      int i1=i+1;
+      if(iw>0) s+= 1./(i1*i1-2.*i1);
+      iw=-iw;
+      f += s*s;
+    }
+  return 2.14+f;
+}
+real delta=1;
+mesh Th=square(30,30,[(x-0.5)*delta,(y-0.5)*delta]);
+fespace Vh(Th,P1);
+Vh u;
+for(int i=0;i<Th.nv;++i)
+  {X[0]=Th(i).x;X[1]=Th(i).y;
+    u[][i]=J(X);
+  }
+
+for(int i=0;i<N;++i)
+  X[i]=(i+1)/(N+1.);
+real t;
+t = clock();
+real mincost=newuoa(J,X,rhobeg=2*X[0],rhoend=1e-6,npt=2*N+1);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << " min " << mincost << "  at :" << X << endl;
+test(mincost == 2.14);

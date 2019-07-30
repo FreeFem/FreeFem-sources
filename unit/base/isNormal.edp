@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "isNormal" << endl;
+cout << functionDEFINITION << "isNormal" << endl;
 real t;
 
 real nan = sqrt(-1);
@@ -8,32 +8,32 @@ real pinf = -log(0.);
 real minf = log(0.);
 int normal = 42;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 bool resi = isNormal(normal);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resi == true);
 
-cout << IND << "inf" << endl;
+cout << typeDEFINITION << "inf" << endl;
 
 t = clock();
 bool respinf = isNormal(pinf);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(respinf == false);
 
 t = clock();
 bool resminf = isNormal(minf);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resminf == false);
 
-cout << IND << "NaN" << endl;
+cout << typeDEFINITION << "NaN" << endl;
 
 t = clock();
 bool resnan = isNormal(nan);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resnan == false);

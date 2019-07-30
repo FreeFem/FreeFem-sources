@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "ijmin" << endl;
+cout << functionDEFINITION << "ijmin" << endl;
 real t;
 real[int, int] array = [[1, 2, 3],[4, 5, 6]];
 int i;
@@ -9,5 +9,5 @@ int j;
 t = clock();
 ijmin(array, i, j);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(i == 0 && j == 0);

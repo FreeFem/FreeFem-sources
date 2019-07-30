@@ -1,10 +1,10 @@
 include "test.idp"
 
-cout << "clock" << endl;
+cout << functionDEFINITION << "clock" << endl;
 real time1;
 real time2;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 time1 = clock();
 system("sleep 1");

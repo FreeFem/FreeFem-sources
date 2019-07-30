@@ -2,13 +2,13 @@ load "msh3"
 load "Element_P3"
 include "test.idp"
 
-cout << "dzz" << endl;
+cout << functionDEFINITION << "dzz" << endl;
 real t;
 
 {
 	mesh3 Th = cube(4, 4, 4);
 
-	cout << IND << "P0" << endl;
+	cout << parameterDEFINITION << "P0" << endl;
 	fespace Uh0(Th, P0);
 	Uh0 u0, du0, du0ex;
 	Uh0 uerr0;
@@ -18,11 +18,11 @@ real t;
 	t = clock();
 	du0 = dzz(u0);
 	t = clock() - t;
-	cout << IND << t << endl;
+	cout << timeELAPSED << t << endl;
 	uerr0 = abs(du0 - du0ex);
 	test(uerr0[].linfty < HWERROR);
 
-	cout << IND << "P1" << endl;
+	cout << parameterDEFINITION << "P1" << endl;
 	fespace Uh1(Th, P1);
 	Uh1 u1, du1, du1ex;
 	Uh1 uerr1;
@@ -32,11 +32,11 @@ real t;
 	t = clock();
 	du1 = dzz(u1);
 	t = clock() - t;
-	cout << IND << t << endl;
+	cout << timeELAPSED << t << endl;
 	uerr1 = abs(du1 - du1ex);
 	test(uerr1[].linfty < HWERROR);
 
-	cout << IND << "P2" << endl;
+	cout << parameterDEFINITION << "P2" << endl;
 	fespace Uh2(Th, P2);
 	Uh2 u2, du2, du2ex;
 	Uh2 uerr2;
@@ -46,7 +46,7 @@ real t;
 	t = clock();
 	du2 = dzz(u2);
 	t = clock() - t;
-	cout << IND << t << endl;
+	cout << timeELAPSED << t << endl;
 	uerr2 = abs(du2 - du2ex);
 	test(uerr2[].linfty < HWERROR);
 }

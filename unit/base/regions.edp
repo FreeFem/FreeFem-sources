@@ -1,7 +1,7 @@
 load "msh3"
 include "test.idp"
 
-cout << "regions" << endl;
+cout << functionDEFINITION << "regions" << endl;
 
 real t;
 mesh Th = square(10, 10);
@@ -10,9 +10,9 @@ mesh3 Th3 = cube(10, 10, 10);
 t = clock();
 int[int] reg = regions(Th);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
 t = clock();
 reg = regions(Th3);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;

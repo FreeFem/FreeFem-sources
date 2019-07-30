@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "setw" << endl;
+cout << functionDEFINITION << "setw" << endl;
 real t;
 real op = 100;
 string str = "Welcome to Airthium";
@@ -8,4 +8,4 @@ string str = "Welcome to Airthium";
 t = clock();
 cout << setw(op) << str << endl;
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;

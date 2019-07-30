@@ -1,0 +1,23 @@
+include "test.idp"
+
+if (!mpirank) cout << functionDEFINITION << "mpiWait" << endl;
+
+real t;
+
+mpiRequest rq;
+if (mpirank == 0) {
+  cout << typeDEFINITION << "real" << endl;
+  t = mpiWtime() - t;
+  Isend(processor(1,rq),16.);
+  mpiWait(rq);
+  t = mpiWtime() - t;
+  cout << timeELAPSED << t << endl;
+} else if (mpirank == 1) {
+  real  k;
+  t = mpiWtime() - t;
+  Irecv(processor(0,rq),k);
+  t = mpiWtime() - t;
+  cout << timeELAPSED << t << endl;
+  mpiWait(rq);
+  test(k == 16);
+}

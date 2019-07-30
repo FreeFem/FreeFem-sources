@@ -1,13 +1,13 @@
 include "test.idp"
 
-cout << "randres53" << endl;
+cout << functionDEFINITION << "randres53" << endl;
 real t;
 
 randinit(time());
 t = clock();
 real r53 = randres53();
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 for (int i = 0; i < 100; i++) {
   r53 = randres53();
   test(r53 >= 0 && r53 < 1);

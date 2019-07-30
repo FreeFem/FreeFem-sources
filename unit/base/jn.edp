@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "jn" << endl;
+cout << functionDEFINITION << "jn" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real r1 = 0;
 int n = 1;
@@ -11,5 +11,5 @@ int n = 1;
 t = clock();
 real resr1 = jn(n, r1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr1 == 0.);

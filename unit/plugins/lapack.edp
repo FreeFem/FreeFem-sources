@@ -1,0 +1,82 @@
+include "test.idp"
+load "lapack"
+
+real t;
+
+cout << functionDEFINITION << "inv" << endl;
+int nerr=0; // nomber of err ..
+//  to set a full matrix ..
+macro SETM(A,i,j,fij)
+{
+    for(int i=0;i<A.n;++i)
+      for(int j=0;j<A.m;++j)
+        A(i,j)= (fij) ;
+}//EOM
+
+// The of Eigen Problem ..
+NewMacro TEST(Type,Typevp,vtype,ComputeEV)
+{
+cout << "\n\n *****************   VP \n\n\n";
+int n=5;
+Type[int,int] A(n,n),A1(n,n),B(n,n),Id(n,n);
+SETM(A,i,j,(i==j) ? n+1 : 1);
+SETM(Id,i,j,real(i==j));
+A(0,n-1)=vtype;
+
+cout << A << endl;
+A1=A^-1;
+cout << A1 << endl;
+
+Typevp[int] vp(n);
+Typevp[int,int] VP(n,n),KK(n,n);
+
+int nn= ComputeEV(A,vp,VP);
+ cout << " vp = " << vp << endl;
+ cout << " VP = " << VP << endl;
+
+ // verification ...
+ KK =0.;
+ for(int i=0;i<n;++i)
+   for(int j=0;j<n;++j)
+     for(int k=0;k<n;++k)
+       //KK(i,j) += (A(i,k) - vp[j]* real(i==k) ) *VP(k,j);
+       KK(i,j) += (A(i,k) - ((i==k)?vp[j]:0.0) ) *VP(k,j);
+ cout <<" ||KK|| " <<  KK.linfty << endl;
+ nerr += KK.linfty > 1e-9;
+B=0;
+B = A*A1; // version 3.13
+B -= Id;
+cout <<" ||A*A1-Id|| " <<  B.linfty << endl;
+nerr += B.linfty > 1e-9;
+t = clock();
+inv(A1);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+A1 -= A;
+cout <<  "|| inv(A1) - A ||" << A1.linfty << endl;
+nerr += A1.linfty > 1e-9;
+}
+EndMacro
+
+cout << functionDEFINITION << "dgeev" << endl;
+cout << "Testing real complex dgeev..." << endl;
+t = clock();
+TEST(real,complex,-100.,dgeev)
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << nerr << endl;
+cout << functionDEFINITION << "zgeev" << endl;
+cout << "Testing complex complex zgeev..." << endl;
+t = clock();
+TEST(complex,complex,100i,zgeev)
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << nerr << endl;
+cout << functionDEFINITION << "dsyev" << endl;
+cout << "Testing real real dsyev..." << endl;
+t = clock();
+TEST(real,real,1,dsyev)
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << nerr << endl;
+assert(nerr==0);

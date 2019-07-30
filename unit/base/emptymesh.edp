@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "emptymesh" << endl;
+cout << functionDEFINITION << "emptymesh" << endl;
 real t;
 
 mesh Th = square(10, 10);

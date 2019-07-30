@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "RestrictArray" << endl;
+cout << functionDEFINITION << "RestrictArray" << endl;
 real t;
 mesh  Th = square(4,4);
 func Pk=P2;
@@ -13,5 +13,5 @@ t = clock();
 int[int] res = restrict(VCh, VFh, n2ok);
 cout << res << endl;
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 // test();

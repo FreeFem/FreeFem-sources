@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << ".n()" << endl;
+cout << functionDEFINITION << ".n()" << endl;
 real t;
 
 int[int] intarray = [1, 2, 3];
@@ -12,29 +12,29 @@ int size;
 t = clock();
 size = intarray.n;
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(size == 3);
 
 t = clock();
 size = realarray.n;
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(size == 3);
 
 t = clock();
 size = realarray.n;
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(size == 3);
 
 t = clock();
 size = intintarray.n;
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(size == 2);
 
 t = clock();
 size = rintintarray.n;
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(size == 3);

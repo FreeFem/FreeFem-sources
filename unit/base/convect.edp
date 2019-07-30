@@ -1,7 +1,7 @@
 load "msh3"
 include "test.idp"
 
-cout << "convect.edp" << endl;
+cout << functionDEFINITION << "convect.edp" << endl;
 real t;
 
 border C(t=0., 2.*pi) {x=cos(t); y=sin(t);};
@@ -19,7 +19,7 @@ for (int m = 0; m < 2.*pi/dt; m++) {
     t = clock();
     c = convect([u1, u2], -dt, cold);
     t = clock() - t;
-    cout << IND << t << endl;
+    cout << timeELAPSED << t << endl;
     plot(c, cmm=" t="+t +", min="+c[].min+", max="+c[].max);
 }
 real cerror = csave[].l2 - c[].l2;

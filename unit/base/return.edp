@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "return" << endl;
+cout << functionDEFINITION << "return" << endl;
 real t;
 
 
@@ -21,7 +21,7 @@ func int main() {
     isCaught = true;
     valueReturned = ret1;
   }
-  cout << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   test((isCaught == true) && (valueReturned == ret1));
 
   isCaught = false;
@@ -33,7 +33,7 @@ func int main() {
     isCaught = true;
     valueReturned = ret2;
   }
-  cout << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   test((isCaught == true) && (valueReturned == ret2));
 
   isCaught = false;
@@ -45,7 +45,7 @@ func int main() {
     isCaught = true;
     valueReturned = ret2;
   }
-  cout << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   test((isCaught == true) && (valueReturned == true));
   return true;
 }

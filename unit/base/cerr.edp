@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "cerr" << endl;
+cout << functionDEFINITION << "cerr" << endl;
 real t;
 
 int i = 42;
@@ -16,68 +16,68 @@ matrix A = [[1 , 2],
             [3, 4]];
 matrix<complex> B = [[1. + 2*1i, 2.* 1i],
                      [4. * 1i, 2. * 1i]];
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 t = clock();
 cerr << i << endl;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
-cout << IND << "int[int]" << endl;
+cout << typeDEFINITION << "int[int]" << endl;
 t = clock();
 cerr << iarray << endl;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
-cout << IND << "int[string]" << endl;
+cout << typeDEFINITION << "int[string]" << endl;
 t = clock();
 cerr << isarray << endl;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 t = clock();
 cerr << r << endl;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
-cout << IND << "real[int]" << endl;
+cout << typeDEFINITION << "real[int]" << endl;
 t = clock();
 cerr << rarray << endl;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
-cout << IND << "real[string]" << endl;
+cout << typeDEFINITION << "real[string]" << endl;
 t = clock();
 cerr << rsarray << endl;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
-cout << IND << "boolean" << endl;
+cout << typeDEFINITION << "boolean" << endl;
 t = clock();
 cerr << b << endl;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
-cout << IND << "string" << endl;
+cout << typeDEFINITION << "string" << endl;
 t = clock();
 cerr << s << endl;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 t = clock();
 cerr << c << endl;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
-cout << IND << "matrix" << endl;
+cout << typeDEFINITION << "matrix" << endl;
 t = clock();
 cerr << A << endl;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
-cout << IND << "complex matrix" << endl;
+cout << typeDEFINITION << "matrix<complex>" << endl;
 t = clock();
 cerr << B << endl;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;

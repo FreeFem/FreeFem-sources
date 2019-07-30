@@ -1,29 +1,29 @@
 include "test.idp"
 
-cout << "trunc" << endl;
+cout << functionDEFINITION << "trunc" << endl;
 real t;
 mesh Th = square(10, 10);
 
 t = clock();
 mesh Th3 = trunc(Th, 1);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(Th3.nt >= Th.nt);
 
 t = clock();
 mesh Th3split = trunc(Th, 1, split=3);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(Th3split.nt >= Th.nt);
 
 t = clock();
 mesh Th3bis = trunc(Th, 1, split=3, label=2);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(Th3bis.nt >= Th.nt);
 
 t = clock();
 mesh Th3label = trunc(Th, 1, label=2);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(Th3label.nt >= Th.nt);
