@@ -14,7 +14,7 @@ all: freefem++.pref base parallel plugins
 
 freefem++.pref:
 	echo loadpath += "../plugin/seq" > freefem++.pref
-	echo includepath += "../idp" > freefem++.pref
+	echo includepath += "../idp" >> freefem++.pref
 
 base:
 	(for test in $(SRC); do \
