@@ -2781,6 +2781,26 @@ Matrice_Creuse<R> * SetMatrice_Creuse(Matrice_Creuse<R> * p,newpMatrice_Creuse<R
 {
     return np.set(p,Init);
 }
+//  Add F.H July 2019
+template<class R>
+Matrice_Creuse<R> * InitMatrice_Creuse_nm(Matrice_Creuse<R> * const & p,const long &n,const long &m)
+{
+    p->init() ;
+    HashMatrix<int,R> *phm= new HashMatrix<int,R>((int) n,(int) m);
+    MatriceCreuse<R> *pmc(phm);
+    p->A.master(pmc);
+    return p;
+}
+template<class R>
+Matrice_Creuse<R> * InitMatrice_Creuse_n(Matrice_Creuse<R> * const & p,const long &n)
+{
+    p->init() ;
+    HashMatrix<int,R> *phm= new HashMatrix<int,R>((int)n,(int) n);
+    MatriceCreuse<R> *pmc(phm);
+    p->A.master(pmc);
+    return p;
+}
+
 template<class R,int c>
 Matrice_Creuse<R> * AddtoMatrice_Creuse(Matrice_Creuse<R> * p,newpMatrice_Creuse<R>  np)
 {
@@ -2836,6 +2856,8 @@ TheOperators->Add("^", new OneBinaryOperatorAt_inv<R>());
  TheOperators->Add("<-",
        new OneOperatorCode<BlockMatrix<R> >(),
        new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,newpMatrice_Creuse<R> > (SetMatrice_Creuse<R,1> ),
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,long > (InitMatrice_Creuse_n<R> ),
+       new OneOperator3_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,long,long > (InitMatrice_Creuse_nm<R> ),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const Matrix_Prod<R,R>,E_F_StackF0F0>(ProdMat<R,R,R,0>),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KN<R> *,E_F_StackF0F0>(DiagMat<R,0>)  ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R,0>),

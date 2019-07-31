@@ -1,15 +1,11 @@
-//  example of using the Schur Complement. 
-// solve a Poisson problme on on symmetric domain with un hole
-// with constant Dichilet Boundary condition par  hole. 
-// but we only  just using half domain left Domain to buil matrix.
-
-// for ShurComplement  full matrix 
+// ShurComplement  full matrix 
 load "lapack"
-// for ShurComplement  sparse matrix 
+// ShurComplement  sparse matrix 
 load "Schur-Complement"
-
 include "ExtractDofsonBorder.idp"
-// for  to find dof with  Dirichet Boundary on l lablel 
+
+
+// popur CL Dirichet
 macro FindDofOnBorder(l,Vh,I)
 {
 	varf von(u,v) = on(l,u=-1);
@@ -21,13 +17,12 @@ macro FindDofOnBorder(l,Vh,I)
 
 	I.resize(n);
 	I=J(0:n-1);
-	if(verbosity) cout << " FindDofOnBorder:n = "<< n << endl; 
+	cout << " n = "<< n << endl; 
 }//
 
-
 macro grad(u) [dx(u),dy(u)] //
-
 real hsize= 0.1; 
+
 real htt = max(hsize/2,0.1);
 mesh Th=square(2/hsize,1/hsize,[x*2,y]);
 
@@ -48,7 +43,7 @@ ExtractDofsonBorder(2,Vh,I,1);
 real[int,int] B(1,1);
 
 //  model 2 
-int[int] I10;//list of  DoD  on label 10. (the hole) 
+int[int] I10;
 FindDofOnBorder(10,Vh,I10);
 if(verbosity>9) cout << " I10 "<< I10 << endl; 
 int[int] If(n);
@@ -65,14 +60,12 @@ int nfs=SchurComplement(S,A,If,B);
 cout << nfs << " "<< In+1  << endl;
 if( verbosity>9)  cout << " S = "<<" " << S << endl;  
 /*
-In S  the dof are from 0 to  In-1 : right side 
-  number is    In =  Boundary condition on hole
-  PB build by symetry  so   solve  S(Il,Il)+S(Ir,Ir) 
+dans S  les dof sont : 0 a In-1 : cote doite vertical 
+       In =  cl troue
+    PB symetrique => resoudre S+S 
 */
-// compute the renumbing of left au right part Il,Ir
-// here the the DoF on hole will be differente on left   and  right  part. 
-int iclr=nfs; // DOF of B.C on  left part 
-int icll=nfs-1;// DOF of B.C on  right part 
+int iclr=nfs;
+int icll=nfs-1;
 int iclS = nfs-1;
 int[int] Il=0:nfs;
 int[int] Ir=0:nfs;
@@ -83,33 +76,62 @@ Ir[icll]=-1;
 Il[iclr]=-1;
 Il[icll]=iclS;
  
-int nd = nfs+1;//   Number of Dof on full problem
-// need v4.3.2-177-g84744c98
-// missing in previoux version : FH: 31th july 2018 
-matrix St(nd,nd);
+int nd = nfs+1;
+//matrix St(nd,nd);// manque une matrix vide 
 cout << " S ="<< S << endl;
-St+=S(Ir,Ir);//  right matrix
-St+=S(Il,Il);//  left  matrix
-
-
+real[int,int] St(nd,nd);
+func real[int,int]  to(int[int] &I,real[int,int] &S)
+{
+	int n = I.n;
+	real[int,int]  A(n,n);
+	A=0;
+	for(int i=0; i<n; ++i)
+		for(int j=0; j<n; ++j)
+		if(I[i]>=0 && I[j]>=0 )
+	  	  A(i,j) += S(I[i],I[j]);
+		  return A;
+}
+St =0;
+{// a ameliorer ... il maque des fonction ff++ 
+	//St+=S(Ir,Ir);
+	St=to(Ir,S);
+	real[int,int] Stt=to(Il,S);
+	St+= Stt;
+	/*  bug ... in Matrixfull2mapIJ in  v 4.3-1
+	{
+    matrix Stt = S(Ir,Ir);
+    real[int,int] Sb(nd,nd);
+    copy(Sb,Stt);
+	cout << Ir << endl; 
+	cout << "Sbr " << Sb << endl;
+     St += Sb; 
+    }
+	{
+    matrix Stt = S(Il,Il);
+    real[int,int] Sb(nd,nd);
+    copy(Sb,Stt);
+	cout << Il << endl; 
+	cout << "Sbl " << Sb << endl;
+    St += Sb; 
+    }
+*/
+}
 cout << " St=" <<  St << endl; 
 cout << "ic  = "<< icll <<" " << iclr << endl; 
 int[int] It=[icll,iclr];
 real[int,int] SS(1,1), B0(1,1);
-int nfs0=SchurComplement(SS,St,It,B0);
+matrix Stm = St;
+int nfs0=SchurComplement(SS,Stm,It,B0);
 
 cout << "B0=" << B0 << endl; 
-// plot the solution on the 2  meshes. 
 for(int j=0; j<B0.m; ++j)
 {	
 	Vh ul=0;
 	Vh2 ur = 0; 
-	//  vertical Dof  left aund right part
 	for(int i=0; i<nfs-1; ++i)
   	 ur[] +=  B(:,i)*B0(i,j);
 	for(int i=0; i<nfs-1; ++i)
  	 ul[] +=  B(:,i)*B0(i,j);
-	//  for DoF on Holes (left and right).   
 	{
 	  ur[] +=  B(:,nfs-1)*B0(nfs-1,j);
 	  ul[] +=  B(:,nfs-1)*B0(nfs,j);
