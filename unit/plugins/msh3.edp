@@ -257,3 +257,19 @@ cout << functionDEFINITION << "bcube" << endl;
 {
   mesh3 th3 = bcube(5, 5, 5);
 }
+
+cout << functionDEFINITION << "extract" << endl;
+{
+  int n= 10;
+  int nvb = (n+1)^3 - (n-1)^3;// Nb boundary vertices
+  int ntb = n*n*12; // Nb of Boundary triangle
+  mesh3 Th=cube(n,n,n);
+  int[int] ll=labels(Th);//  get all labels of the mesh ..
+  cout << " the labels "<< ll << endl;
+  cout << Th.nbe << endl;
+  meshS ThS=extract(Th,label=ll);// extract boundary of 3d Mesh with given label
+  cout <<"  mesh nv, nt, nbe" <<  ThS.nv << " - " << ThS. nt << " - " << ThS.nbe << endl;
+  cout <<"  computed by hand: " << ntb  << " " << nvb  << endl;
+  test(ThS.nt == ntb);
+  test(ThS.nv == nvb);
+}
