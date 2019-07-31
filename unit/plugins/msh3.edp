@@ -139,14 +139,6 @@ cout << functionDEFINITION << "AddLayers" << endl;
   Vh  sun=0,unssd=0;
   Ph xx=x,yy=y,nupp;
   part = int(xx*nn)*mm + int(yy*mm);
-  if(withmetis)
-    {
-      load "metis";
-      int[int] nupart(Th.nt);
-      metisdual(nupart,Th,npart);
-      for(int i=0;i<nupart.n;++i)
-        part[][i]=nupart[i];
-    }
   mesh[int] aTh(npart);
   mesh Thi=Th;
   fespace Vhi(Thi,P1);
