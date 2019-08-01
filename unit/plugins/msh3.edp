@@ -404,7 +404,10 @@ cout << functionDEFINITION << "getborder" << endl;
 
 cout << functionDEFINITION << "bcube" << endl;
 {
+  t = clock();
   mesh3 th3 = bcube(5, 5, 5);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
 }
 
 cout << functionDEFINITION << "extract" << endl;
@@ -421,4 +424,9 @@ cout << functionDEFINITION << "extract" << endl;
   cout <<"  computed by hand: " << ntb  << " " << nvb  << endl;
   test(ThS.nt == ntb);
   test(ThS.nv == nvb);
+}
+
+cout << functionDEFINITION << "bcube" << endl;
+{
+  mesh3 th3 = bcube(5, 5, 5);
 }
