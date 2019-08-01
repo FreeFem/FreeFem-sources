@@ -1834,7 +1834,11 @@ template <class R>
      A->A->getcoef(x);}
   void   set_mat_coef(const  KN_<R> & x) { ffassert(A && A->A && x.N() == A->A->NbCoef() );
      A->A->setcoef(x);}
-     R trace() { return A->A->trace(); }
+  void   set_mat_coef(const  R & v) { ffassert(A && A->A  );
+         KN<R> x(1,0,v);//  vertor constant to v
+         A->A->setcoef(x);}
+
+    R trace() { return A->A->trace(); }
  };
 
 template<class R>
@@ -1843,6 +1847,13 @@ R get_trace_mat(Matrice_Creuse<R> * p)
     return p ? p->A->trace():0.;
 
 }
+template<class R>
+bool clear_mat(Matrice_Creuse<R> * p)
+{
+   if(p)  p->A->clear();
+   return true;
+}
+
 
 template<class R>
 TheDiagMat<R> thediag(Matrice_Creuse<R> * p)
@@ -1879,11 +1890,62 @@ TheCoefMat<R> set_mat_coef(TheCoefMat<R> dm,KN<R> * x)
   return dm;
 }
 template<class R>
+TheCoefMat<R> set_mat_coef(TheCoefMat<R> dm,R  x)
+{
+    dm.set_mat_coef(x);
+    return dm;
+}
+template<class R>
 KN<R> * get_mat_coef(KN<R> * x,TheCoefMat<R> dm)
 {
   dm.get_mat_coef(*x);
   return x;
 }
+
+template<class T> struct  Thresholding {
+    Matrice_Creuse<T> *v;
+    Thresholding (Matrice_Creuse<T> *vv): v(vv) {}
+};
+
+template<class R>
+Matrice_Creuse<R>*thresholding2 (const Thresholding<R> &t, const double &threshold) {
+    typedef HashMatrix<int,R> HMat;
+    Matrice_Creuse<R> *sparse_mat = t.v;
+    if (sparse_mat) {
+        HMat *phm=sparse_mat->pHM() ;
+        if( phm)
+        {
+            int n = phm->n, m = phm->m;
+            int nnzo = phm->nnz;
+            phm->resize(n,m,0,threshold);
+            if (verbosity) {cout << "  thresholding : remove " << nnzo-phm->nnz  << " them in the matrix " << sparse_mat << " " << threshold << endl;}
+        } else if (verbosity) {cout << " empty matrix " << sparse_mat << endl;}
+    }
+    
+    return t.v;
+}
+
+template<class T>
+long symmetrizeCSR (Matrice_Creuse<T> *const &sparse_mat)
+{
+    
+    typedef HashMatrix<int,T> HMat;
+    if (sparse_mat) {
+        HMat *phm=sparse_mat->pHM() ;
+        if( phm)
+        {
+            int n = phm->n, m = phm->m;
+            int nnzo = phm->nnz;
+            phm->resize(n,m,0,-1,true);
+            if (verbosity) {cout << "  symmetrizeCSR remove " << (long) nnzo-(long) phm->nnz   << " them in the matrix " << sparse_mat << endl;}
+        } else if (verbosity) {cout << " empty matrix " << sparse_mat << endl;}
+    }
+    
+    return 1L;
+}
+
+template<class T>
+Thresholding<T> to_Thresholding (Matrice_Creuse<T> *v) {return Thresholding<T>(v);}
 
 template<class R>
 bool IsRawMat(const basicAC_F0 & args)
@@ -2908,6 +2970,7 @@ TheOperators->Add("+",
  Add<Matrice_Creuse<R> *>("nnz",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_nbcoef<R>) );
  Add<Matrice_Creuse<R> *>("size",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_nbcoef<R>) );
  Add<Matrice_Creuse<R> *>("trace",".",new OneOperator1<R,Matrice_Creuse<R>* >(get_trace_mat<R>) );
+ Add<Matrice_Creuse<R> *>("clear",".",new OneOperator1<bool,Matrice_Creuse<R>* >(clear_mat<R>) );
 
  Add<Matrice_Creuse<R> *>("diag",".",new OneOperator1<TheDiagMat<R> ,Matrice_Creuse<R> *>(thediag<R>) );
  Add<Matrice_Creuse<R> *>("coef",".",new OneOperator1<TheCoefMat<R> ,Matrice_Creuse<R> *>(thecoef<R>) );
@@ -2920,6 +2983,7 @@ TheOperators->Add("+",
 // ADD oct 2005
  TheOperators->Add("=", new OneOperator2<KN<R>*,KN<R>*,TheCoefMat<R> >(get_mat_coef<R>) );
  TheOperators->Add("=", new OneOperator2<TheCoefMat<R>,TheCoefMat<R>,KN<R>*>(set_mat_coef<R>) );
+ TheOperators->Add("=", new OneOperator2<TheCoefMat<R>,TheCoefMat<R>,R>(set_mat_coef<R>) );
 
  Global.Add("set","(",new SetMatrix<R>);
  Add<Matrice_Creuse<R> *>("linfty",".",new OneOperator1<double,Matrice_Creuse<R> *>(get_norme_linfty));
@@ -2963,8 +3027,15 @@ TheOperators->Add("+",
 
 
     TheOperators->Add("{}",new ForAllLoop<E_ForAllLoopMatrix<R> >);
-
-
+   // remove 2 plugin thresholding and symmetrizeCSR
+    typedef Thresholding<R> TMR;
+    typedef Matrice_Creuse<R> MR;
+     Dcl_Type<TMR>();
+    TMR t(0);
+    //thresholding2(t, 0.);
+    Add<MR *>("thresholding", ".", new OneOperator1<TMR, MR *>(to_Thresholding));
+    Add<TMR>("(", "", new OneOperator2_<MR *, TMR, double>(thresholding2));
+    Global.Add("symmetrizeCSR", "(", new OneOperator1_<long, Matrice_Creuse<R> *>(symmetrizeCSR<R> ));
 //  --- end
 }
 
