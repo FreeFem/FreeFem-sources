@@ -64,7 +64,7 @@ cout << functionDEFINITION << "checkbemesh" << endl;
 
 {
   mesh3 Th3 = cube (5, 5, 5);
-  Th3 = buildSurface(Th3); // build the surface mesh;
+  Th3 = buildSurface(Th3);
   meshS ThS3 = Th3.Gamma;
   int checked = checkbemesh(ThS3, manifolds=[[[11,1],[12,1],[13,1],[14,1],[15,1],[16,1]]]);
   test(checked == 1);
@@ -83,14 +83,9 @@ cout << functionDEFINITION << "buildlayers" << endl;
 
 cout << functionDEFINITION << "AddLayers" << endl;
 {
-  // int i = 1;
-  // mesh3 Th3 = cube (5, 5, 5);
-  // real[int] array = [1, 2, 3];
-  // real[int] array2 = [1, 2, 3];
-  // bool res = AddLayers(Th3, array, i, array2);
   bool withmetis=0;
   bool RAS=0;
-  int sizeoverlaps=2; // size off overlap
+  int sizeoverlaps=2;
   int nn=2,mm=2;
 
   func bool AddLayers(mesh & Th,real[int] &ssd,int n,real[int] &unssd)
@@ -161,8 +156,6 @@ cout << functionDEFINITION << "AddLayers" << endl;
           varf vSuppi(u,v)=int2d(Th,qforder=1)(suppi*v/area);
           unssd[]= vSuppi(0,Vh);
           unssd = unssd>0.;
-          // if(withplot>19)
-            // plot(unssd,wait=1);
         }
       pun[i][]=Rih[i]*unssd[];
       sun[] += Rih[i]'*pun[i][];//';
@@ -172,9 +165,6 @@ cout << functionDEFINITION << "AddLayers" << endl;
       Thi=aTh[i];
       pun[i]= pun[i]/sun;
     }
-
-  //  verif partition of unite
-
   macro Grad(u) [dx(u),dy(u)]//EOM
     sun=0;
 
@@ -197,13 +187,11 @@ cout << functionDEFINITION << "AddLayers" << endl;
       real[int] ui=Dih[i]*un;
       sun[] += Rih[i]'*ui;;//';
       varf vaun(u,v) = on(10,u=1);
-      auntgv[i][]=vaun(0,Vhi); // store arry of tgv on Gamma intern.
+      auntgv[i][]=vaun(0,Vhi);
     }
   cout << sun[].max << " " << sun[].min<< endl;
-  // verification of the partition of the unite.
   assert( 1.-1e-9 <= sun[].min  && 1.+1e-9 >= sun[].max);
 
-  // FFCS: reference value for regression tests
   Vh ref;
 
   int nitermax=1000;
@@ -267,9 +255,19 @@ cout << functionDEFINITION << "showborder" << endl;
 {
   mesh Th = square(5, 5);
   int i = 1;
-  mesh3 Th3 = cube (5, 5, 5);
-  meshS ThS3 = Th3.Gamma;
-  // showborder(ThS3);
+
+  int nx=10;
+  int nth=50;
+  real xmin=1.,xmax=3.;
+  border cc(t=0,2*pi){x=cos(t);y=sin(t);label=1;}
+  mesh Thcercle = buildmesh(cc(nth));
+
+  mesh Thcarre=square(nx,nth,[xmin+x*(xmax-xmin),2*pi*y]);
+  func f1 = x;
+  func f2 = cos(y);
+  func f3 = sin(y);
+  meshS Thsurf1=movemesh23(Thcarre,transfo=[f1,f2,f3],orientation=-1);
+  showborder(Thsurf1);
 }
 
 cout << functionDEFINITION << "gluemesh" << endl;
@@ -324,38 +322,34 @@ cout << functionDEFINITION << "square3" << endl;
 
 cout << functionDEFINITION << "getborder" << endl;
 {
-  real hh=.15;// mesh size
+  real hh=.15;
   real Htube=8;
   real Hneck=2;
   real Hbot=Htube+Hneck;
 
-  real Rext = 1.;// External radius
-  real Rneck= 0.2; // Radius of the neck of the bootle
+  real Rext = 1.;
+  real Rneck= 0.2;
   int labtop =3, labbottom =2, labcyl = 1;
 
   meshS Ths;
   {
     meshS Th3c,Th3bottom, Th3top;
     {
-      // form of the neck ...
       real[int,int] srneck=
       [
       [Htube-0.001,Htube,Htube+Hneck*0.1, Htube+Hneck*0.3  , Htube+Hneck*0.7   , Htube+Hneck*0.9, Htube+Hneck+0.1],
       [Rext       ,Rext ,Rext           , Rext*.7+Rneck*.3 , Rext*.1 + Rneck*.9, Rneck          , Rneck  ]]
       ;
-      gslspline rneck(gslinterpcspline,srneck);// Curve of tthe bollte form z = 0 to Hbot neck of the bottle
+      gslspline rneck(gslinterpcspline,srneck);
 
-      //  il faut adapte le maillage 2 pour qu'il soit beau
       mesh Th2c= square(Hbot/hh,2*pi*Rext/hh,[x*Hbot,y*2*pi]);
       fespace V2x(Th2c,P1);
       macro Dx(u) [dx(u#1),dx(u#2),dx(u#3)] //
       macro Dy(u) [dy(u#1),dy(u#2),dy(u#3)] //
-      // The transformation
       func E1 = rneck(x)*cos(y);
       func E2 = rneck(x)*sin(y);
       func E3 = x;
       V2x ex1,ex2,ex3;
-      // the metric
       real hh2 = hh*hh;
       func  em11 = Dx(ex)'*Dx(ex)/hh2;
       func  em21 = Dx(ex)'*Dy(ex)/hh2;
@@ -367,9 +361,8 @@ cout << functionDEFINITION << "getborder" << endl;
         Th2c=adaptmesh(Th2c,em11,em21,em22,IsMetric=1,periodic=perio,nbvx=100000);
       }
       Th2c=change(Th2c,fregion=labcyl);
-      Th3c = movemesh23(Th2c,transfo=[E1 , E2 , E3]);// maillage exterieur
+      Th3c = movemesh23(Th2c,transfo=[E1 , E2 , E3]);
     }
-    // extraction of the border of the bottle
     int[int] databoder(1);
     t = clock();
     int ncb= getborder(Th3c,databoder);
@@ -400,7 +393,6 @@ cout << functionDEFINITION << "getborder" << endl;
       DefBorder(bbot,kbot,Th3c,databoder,1)
       cout << " btop " << nbtop << " bot: " << nbbot << endl;
 
-      // plot(btop(nbtop)+bbot(-nbbot),wait=1);
       Th3bottom=movemesh23(change(buildmesh(bbot(nbbot),fixeborder=1),fregion=labbottom),transfo=[x,y,Zbot],orientation=-1);
       Th3top=movemesh23(change(buildmesh(btop(-nbtop),fixeborder=1),fregion=labtop),transfo=[x,y,Ztop],orientation=1);
       Ths = Th3c + Th3bottom + Th3top;
@@ -413,4 +405,20 @@ cout << functionDEFINITION << "getborder" << endl;
 cout << functionDEFINITION << "bcube" << endl;
 {
   mesh3 th3 = bcube(5, 5, 5);
+}
+
+cout << functionDEFINITION << "extract" << endl;
+{
+  int n= 10;
+  int nvb = (n+1)^3 - (n-1)^3;// Nb boundary vertices
+  int ntb = n*n*12; // Nb of Boundary triangle
+  mesh3 Th=cube(n,n,n);
+  int[int] ll=labels(Th);//  get all labels of the mesh ..
+  cout << " the labels "<< ll << endl;
+  cout << Th.nbe << endl;
+  meshS ThS=extract(Th,label=ll);// extract boundary of 3d Mesh with given label
+  cout <<"  mesh nv, nt, nbe" <<  ThS.nv << " - " << ThS. nt << " - " << ThS.nbe << endl;
+  cout <<"  computed by hand: " << ntb  << " " << nvb  << endl;
+  test(ThS.nt == ntb);
+  test(ThS.nv == nvb);
 }
