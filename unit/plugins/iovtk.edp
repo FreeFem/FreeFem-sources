@@ -1,7 +1,9 @@
 include "test.idp"
 load "iovtk"
-cout << functionDEFINITION << "savevtk" << endl;
 
+real t;
+
+cout << functionDEFINITION << "savevtk" << endl;
 border Gamma(t=0,2*pi){x=cos(t);y=sin(t);label=3;}
 border Gamma1(t=0,2*pi){x=2*cos(t);y=2*sin(t);label=5;}
 mesh Th2 = buildmesh( Gamma(10)+Gamma1(20) );
@@ -18,6 +20,28 @@ solve laplacep(uh,vh,solver=CG,tgv=1e5) =      //  definion of  the problem
 
 cout << "vtk information" << endl;
 int[int] fforder=[0,0,1,0,1];
+t = clock();
 int[int] array = savevtk("disque.vtk",Th2,uh,ggg,uh,[uh,ggg],[uh,ggg],dataname="kkdjd jyqql bidule45 vector nnn nn44233T",order=fforder);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 
-// mesh Th = vtkload3("assets/bidule.vtk");
+cout << functionDEFINITION << "vtkload3" << endl;
+
+t = clock();
+vtkload3("assets/bidule.vtk");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "vtkload" << endl;
+
+t = clock();
+vtkload("assets/disque.vtk");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "vtkloadS" << endl;
+
+t = clock();
+vtkloadS("assets/disque.vtk");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
