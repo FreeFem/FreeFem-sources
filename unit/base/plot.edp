@@ -1,5 +1,5 @@
 include "test.idp"
-include "MeshSurface.idp"
+// include "MeshSurface.idp"
 load "msh3"
 
 real t;
@@ -24,9 +24,9 @@ cout << functionDEFINITION << "plot" << endl;
   real [int,int]  BB=[[-1.1,1.1],[-.9,.9],[-1,1]];
   int [int,int]  LL=[[1,2],[3,4],[5,6]];
 
-  meshS ThHS = SurfaceHex(NN,BB,LL,1)+Sphere(0.5,hs,7,1);
-  t = clock();
-  plot(ThHS);
-  t = clock() - t;
-  cout << timeELAPSED << t << endl;
+  // meshS ThHS = SurfaceHex(NN,BB,LL,1)+Sphere(0.5,hs,7,1);
+  // t = clock();
+  // plot(ThHS);
+  // t = clock() - t;
+  // cout << timeELAPSED << t << endl;
 }
