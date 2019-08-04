@@ -232,8 +232,11 @@ void change(Type* const& ptA, Matrice_Creuse<PetscScalar>* const& mat, Type* con
                     delete [] c;
                 }
             }
-            else if(!assembled)
-                MatMPIAIJSetPreallocationCSR(ptA->_petsc, NULL, NULL, NULL);
+            else if(!assembled) {
+                PetscInt* ia = new PetscInt[2]();
+                MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, NULL, NULL);
+                delete [] ia;
+            }
             MatAssemblyBegin(ptA->_petsc, MAT_FINAL_ASSEMBLY);
             MatAssemblyEnd(ptA->_petsc, MAT_FINAL_ASSEMBLY);
             if(ptParent) {
