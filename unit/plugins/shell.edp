@@ -9,8 +9,8 @@ real t;
 Directory dir = "assets";
 string readData="empty";
 string[int] dataArray = [".", "..", "Th.mesh", "Th.msh", "triangle.msh", "test.txt",
-"bidule.vtk", "cube.msh", "gmsh_mesh.msh", "sol.vtk", "spherewithahole.mesh", "ThS.mesh", "ThS.msh", "triQA.msh"];
-int ssize = 14;
+"bidule.vtk", "cube.msh", "gmsh_mesh.msh", "sol.vtk", "spherewithahole.mesh", "ThS.mesh", "ThS.msh", "triQA.msh", "disque.vtk", "getline.txt"];
+int ssize = 16;
 
 while (readData != "") {
   t = clock();
@@ -23,7 +23,8 @@ while (readData != "") {
     readData == dataArray[4] || readData == dataArray[5] || readData == dataArray[6] ||
     readData == dataArray[7] || readData == dataArray[8] ||
     readData == dataArray[9] || readData == dataArray[10] ||
-    readData == dataArray[11] || readData == dataArray[12] || readData == dataArray[13]);
+    readData == dataArray[11] || readData == dataArray[12] || readData == dataArray[13]
+    || readData == dataArray[14] || readData == dataArray[15]);
     cout << timeELAPSED << t << endl;
   }
 }
@@ -39,7 +40,7 @@ test(makeDir == 0);
 cout << functionDEFINITION << "isdir" << endl;
 
 t = clock();
-int isDir = isdir("toto");
+bool isDir = isdir("toto");
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(isDir == true);
