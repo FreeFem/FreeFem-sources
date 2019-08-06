@@ -83,42 +83,104 @@ cout << timeELAPSED << t << endl;
 cout << nerr << endl;
 
 t = clock();
-// TEST(real,complex,100i,geev)
+real[int] re = [0, 0, 0];
+real[int, int] r = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+complex[int] c = [0 + 1i, 0 + 1i, 0 + 1i];
+complex[int, int] cc = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+geev(r, c, cc);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 cout << nerr << endl;
+assert(nerr == 0);
 
-cout << functionDEFINITION << "dggev" << endl;
-cout << "Testing complex complex dggev..." << endl;
-t = clock();
-// TEST(real, real, 1, dggev)
-t = clock() - t;
-cout << timeELAPSED << t << endl;
-cout << nerr << endl;
+{
+  cout << functionDEFINITION << "dggev" << endl;
+  cout << "Testing complex complex dggev..." << endl;
+  t = clock();
+  dggev(r, r, c, re, cc);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+}
 
-cout << functionDEFINITION << "dsyev" << endl;
-cout << "Testing real real dsyev..." << endl;
-t = clock();
-TEST(real,real,1,dsyev)
-t = clock() - t;
-cout << timeELAPSED << t << endl;
-cout << nerr << endl;
-assert(nerr==0);
+{
+  cout << functionDEFINITION << "zggev" << endl;
+  cout << "Testing complex complex zggev..." << endl;
+  t = clock();
+  int res = zggev(cc, cc, c, c, cc);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+  test(res == 0);
+}
 
-cout << functionDEFINITION << "zheev" << endl;
-cout << "Testing real real zheev..." << endl;
-t = clock();
-// TEST(complex,real,1, zheev)
-t = clock() - t;
-cout << timeELAPSED << t << endl;
-cout << nerr << endl;
-assert(nerr==0);
+{
+  cout << functionDEFINITION << "dsygvd" << endl;
+  cout << "Testing complex complex dsygvd..." << endl;
+  t = clock();
+  int res = dsygvd(r, r, re, r);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+  test(nerr == 0);
+}
 
-// cout << functionDEFINITION << "dggev" << endl;
-// cout << "Testing real real dsyev..." << endl;
-// t = clock();
-// TEST(real,real,1,dggev)
-// t = clock() - t;
-// cout << timeELAPSED << t << endl;
-// cout << nerr << endl;
-// assert(nerr==0);
+{
+  cout << functionDEFINITION << "dgesdd" << endl;
+  cout << "Testing complex complex dgesdd..." << endl;
+  t = clock();
+  dgesdd(r, r, re, r);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+}
+
+{
+  cout << functionDEFINITION << "zhegv" << endl;
+  cout << "Testing complex complex zhegv..." << endl;
+  t = clock();
+  zhegv(cc, cc, re, cc);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+}
+
+{
+  cout << functionDEFINITION << "dsyev" << endl;
+  cout << "Testing real real dsyev..." << endl;
+  t = clock();
+  TEST(real,real,1,dsyev)
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+  test(nerr == 0);
+}
+
+{
+  cout << functionDEFINITION << "zheev" << endl;
+  cout << "Testing real real zheev..." << endl;
+  t = clock();
+  zheev(cc, re, cc);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+  test(nerr == 0);
+}
+
+{
+  cout << functionDEFINITION << "dgelsy" << endl;
+  cout << "Testing real real dgelsy..." << endl;
+  t = clock();
+  dgelsy(r, re);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+  test(nerr == 0);
+
+  t = clock();
+  dgelsy(r, r);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+  test(nerr == 0);
+}
