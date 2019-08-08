@@ -10,6 +10,7 @@ matrix A = [[1, 2, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 1, 0, 0, 0, 0, 4 ]];
 
+verbosity = 100;
 t = clock();
 real ret = symmetrizeCSR(A);
 t = clock() - t;
