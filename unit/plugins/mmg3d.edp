@@ -1,7 +1,73 @@
 include "test.idp"
 load "mmg3d-v4.0"
+load "msh3"
+load "medit"
 load "tetgen"
-include "MeshSurface.idp"
+
+func meshS SurfaceHex(int[int] & N,real[int,int] &B ,int[int,int] & L,int orientation)
+{
+    real x0=B(0,0),x1=B(0,1);
+    real y0=B(1,0),y1=B(1,1);
+    real z0=B(2,0),z1=B(2,1);
+
+    int nx=N[0],ny=N[1],nz=N[2];
+
+    mesh Thx = square(ny,nz,[y0+(y1-y0)*x,z0+(z1-z0)*y]);
+    mesh Thy = square(nx,nz,[x0+(x1-x0)*x,z0+(z1-z0)*y]);
+    mesh Thz = square(nx,ny,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+
+    int[int] refx=[0,L(0,0)],refX=[0,L(0,1)];   //  Xmin, Ymax faces labels renumbering
+    int[int] refy=[0,L(1,0)],refY=[0,L(1,1)];   //  Ymin, Ymax faces labesl renumbering
+    int[int] refz=[0,L(2,0)],refZ=[0,L(2,1)];   //  Zmin, Zmax faces labels renumbering
+
+    meshS Thx0 = movemesh23(Thx,transfo=[x0,x,y],orientation=-orientation,label=refx);
+    meshS Thx1 = movemesh23(Thx,transfo=[x1,x,y],orientation=+orientation,label=refX);
+    meshS Thy0 = movemesh23(Thy,transfo=[x,y0,y],orientation=+orientation,label=refy);
+    meshS Thy1 = movemesh23(Thy,transfo=[x,y1,y],orientation=-orientation,label=refY);
+    meshS Thz0 = movemesh23(Thz,transfo=[x,y,z0],orientation=-orientation,label=refz);
+    meshS Thz1 = movemesh23(Thz,transfo=[x,y,z1],orientation=+orientation,label=refZ);
+    meshS Th= Thx0+Thx1+Thy0+Thy1+Thz0+Thz1;
+    return Th;
+}
+func meshS Ellipsoide (real RX,real RY, real RZ,real h,int L,int orientation)
+{
+  mesh  Th=square(10,20,[x*pi-pi/2,2*y*pi]);  //  $]\frac{-pi}{2},frac{-pi}{2}[\times]0,2\pi[ $
+  //  a parametrization of a sphere
+  func f1 =RX*cos(x)*cos(y);
+  func f2 =RY*cos(x)*sin(y);
+  func f3 =RZ*sin(x);
+  //    partiel derivative
+  func f1x= -RX*sin(x)*cos(y);
+  func f1y= -RX*cos(x)*sin(y);
+  func f2x= -RY*sin(x)*sin(y);
+  func f2y= +RY*cos(x)*cos(y);
+  func f3x=-RZ*cos(x);
+  func f3y=0;
+  // the metric on the sphere  $  M = DF^t DF $
+  func m11=f1x^2+f2x^2+f3x^2;
+  func m21=f1x*f1y+f2x*f2y+f3x*f3y;
+  func m22=f1y^2+f2y^2+f3y^2;
+
+  func perio=[[4,y],[2,y],[1,x],[3,x]];  // to store the periodic condition
+
+  real hh=h;// hh  mesh size on unite sphere
+  real vv= 1/square(hh);
+  Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+  Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+  Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+  Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
+  int[int] ref=[0,L];
+
+  meshS  ThS= movemesh23(Th,transfo=[f1,f2,f3],orientation=orientation,refface=ref);
+  return ThS;
+}
+
+
+func meshS Sphere(real R,real h,int L,int orientation)
+{
+
+  return Ellipsoide(R,R,R,h,L,orientation);
+}
 
 cout << functionDEFINITION << "mmg3d" << endl;
 
