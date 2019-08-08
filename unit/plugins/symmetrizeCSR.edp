@@ -15,3 +15,13 @@ t = clock();
 real ret = symmetrizeCSR(A);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
+
+{
+  verbosity = 100;
+  matrix B;
+
+  t = clock();
+  real ret = symmetrizeCSR(B);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}
