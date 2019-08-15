@@ -33,6 +33,10 @@
 #define HPDDM_NUMBERING 'C'
 #undef CBLAS_H
 
+#if HPDDM_PETSC && defined(PCHPDDM)
+#include "../interface/hpddm_petsc.hpp"
+#endif
+
 #include <HPDDM.hpp>
 template<class K> K* newCopy(bool mfree,K *p,int n)
 {  if( !mfree) return p;
@@ -367,15 +371,21 @@ AnyType exchangeInOut_Op<Type, K>::operator()(Stack stack) const {
     return 0L;
 }
 
+#if !HPDDM_PETSC || !defined(PCHPDDM)
 double getOpt(string* const& ss) {
     return HPDDM::Option::get()->val(*ss);
 }
 bool isSetOpt(string* const& ss) {
     return HPDDM::Option::get()->set(*ss);
 }
+#endif
 template<class Type, class K>
 bool destroyRecycling(Type* const& Op) {
+#ifndef PCHPDDM
     HPDDM::Recycling<K>::get()->destroy(Op->prefix());
+#else
+    Op->destroy();
+#endif
     return false;
 }
 template<class Type>
