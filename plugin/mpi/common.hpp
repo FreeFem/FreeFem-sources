@@ -371,7 +371,7 @@ AnyType exchangeInOut_Op<Type, K>::operator()(Stack stack) const {
     return 0L;
 }
 
-#if !HPDDM_PETSC || !defined(PCHPDDM)
+#if !HPDDM_PETSC || !defined(HPDDM_SLEPC)
 double getOpt(string* const& ss) {
     return HPDDM::Option::get()->val(*ss);
 }
@@ -381,7 +381,7 @@ bool isSetOpt(string* const& ss) {
 #endif
 template<class Type, class K>
 bool destroyRecycling(Type* const& Op) {
-#ifndef PCHPDDM
+#ifndef HPDDM_SLEPC
     HPDDM::Recycling<K>::get()->destroy(Op->prefix());
 #else
     Op->destroy();

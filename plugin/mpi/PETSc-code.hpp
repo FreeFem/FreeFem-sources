@@ -1364,7 +1364,6 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
             PetscBool isType;
             PetscStrcmp(type, PCHPDDM, &isType);
             if(isType && ptA->_A && ptA->_A->getMatrix() && ptA->_num) {
-
                 const HPDDM::MatrixCSR<PetscScalar>* A = ptA->_A->getMatrix();
                 Mat aux;
                 MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, ptA->_A->getMatrix()->_n, ptA->_A->getMatrix()->_m, ptA->_A->getMatrix()->_ia, ptA->_A->getMatrix()->_ja, ptA->_A->getMatrix()->_a, &aux);
@@ -1480,7 +1479,7 @@ AnyType IterativeMethod_Op<Type>::operator()(Stack stack) const {
     }
     KSPSetFromOptions(ptA->_ksp);
     HPDDM::PETScOperator op(ptA->_ksp, ptA->_last - ptA->_first, bs);
-#ifndef PCHPDDM
+#ifndef HPDDM_SLEPC
     if(prefix)
         op.setPrefix(*prefix);
     HPDDM::Option& opt = *HPDDM::Option::get();
@@ -3071,7 +3070,7 @@ static void Init_PETSc() {
     PetscInitialize(&argc, &argv, 0, "");
     PetscSysInitializePackage();
     MatInitializePackage();
-#ifndef PCHPDDM
+#ifndef HPDDM_SLEPC
     KSPRegister("hpddm", HPDDM::KSPCreate_HPDDM);
     if(argc > 1) {
         HPDDM::Option& opt = *HPDDM::Option::get();
