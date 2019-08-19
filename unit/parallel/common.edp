@@ -1,0 +1,63 @@
+include "test.idp"
+macro dimension()3// EOM            // 2D or 3D
+macro def(i)i// EOM                         // scalar field definition
+macro init(i)i// EOM                        // scalar field initialization
+macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
+include "ffddm.idp"
+load "hpddm_substructuring"         // HPDDM plugin
+
+real t;
+
+cout << functionDEFINITION << "dscalprod" << endl;
+
+func Pk = P1;                               // finite element space
+
+int[int] LL = [2,2, 1,2, 2,2];
+meshN ThGlobal = cube(10, 10, 10);
+
+macro Varf(varfName, meshName, PhName)
+    varf varfName(u,v) = intN(meshName)(grad(u)' * grad(v)) + intN(meshName)(v) + on(1, u = 1.0); // EOM
+
+// Domain decomposition
+ffddmbuildDmesh( Lap , ThGlobal , mpiCommWorld )
+savemesh(LapThi,"localTh"+mpirank+".mesh");
+ffddmbuildDfespace( Lap , Lap , real , def , init , P1 )
+ffddmsetupOperator( Lap , Lap , Varf)
+
+//distributed matrix vector product
+LapVhi uux=1.;
+real[int] Au = LapA(uux[]);
+
+// Distributed Direct and domain decomposition solves
+real[int] rhs(LapVhi.ndof);//rhs(1) works as well
+ffddmbuildrhs(Lap,Varf,rhs)
+LapVhi def(u) , def(udirectsolver);
+
+//Direct solve
+if (mpirank == 0) cout << endl << "Lap: Direct solver (MUMPS) :" << endl;//direct parallel solver
+udirectsolver[] = Lapdirectsolve(rhs);
+Lapwritesummary//process 0 prints convergence history
+ffddmplot(Lap,udirectsolver, "Lap Global solution with direct solver");
+
+// Two-level Schwarz solve
+if (mpirank == 0) cout << endl << "Lap: RAS + GENEO :" << endl; //second level method with a GenEO coarse space
+ffddmsetupPrecond(Lap,Varf)
+ffddmgeneosetup(Lap,Varf)
+
+real[int] x0(LapVhi.ndof);
+x0 = 0;
+u[] = LapfGMRES(x0, rhs, 1.e-6, 200, "right");
+Lapwritesummary//process 0 prints convergence history
+ffddmplot(Lap,u, "Lap Global solution with fGMRES");
+
+// Visualization and computation of relative error w.r.t. direct solver
+LapVhi error;
+error[] = u[]-udirectsolver[];
+real solnorm2 = Lapscalprod(u[],u[]) ,  errnorm2 = Lapscalprod(error[],error[])  ;
+if(mpirank == 0) cout << endl << "Relative error w.r.t. to direct solver : " <<  sqrt(errnorm2/solnorm2) << "\n" << endl;
+ffddmplot(Lap,error, "Difference between direct and ddm solve");
+t = clock();
+real solnorm2global = dscalprod(LapDk[mpirank],u[],u[]);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << solnorm2 << " ==  " <<  solnorm2global << "??"  << endl;
