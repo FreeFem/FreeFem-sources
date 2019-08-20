@@ -1,0 +1,176 @@
+include "test.idp"
+
+{
+  assert(mpisize == 4);
+  load "hpddm_substructuring"         // HPDDM plugin
+  macro dimension()2// EOM            // 2D or 3D
+  include "macro_ddm_substructuring.idp" // additional DDM functions
+
+  macro def(i)i// EOM                 // scalar field definition
+  macro init(i)i// EOM                // scalar field initialization
+  macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
+  macro BC(u, val)u = val// EOM       // Dirichlet boundary conditions
+  func Pk = P1;                       // finite element space
+
+  real t;
+  int labNeumann = getARGV("-labNeumann", 2);                     // interface between subdomains
+  int s = getARGV("-split", 1);                                   // refinement factor
+
+  mpiComm comm;
+  int p = getARGV("-hpddm_level_2_p", 1);
+  bool excluded = splitComm(mpiCommWorld, p, comm, topology = getARGV("-hpddm_level_2_topology", 0), exclude = (usedARGV("-hpddm_level_2_exclude") != -1));
+
+  if(verbosity > 0 && mpirank == 0) {
+    cout << " --- " << mpirank << "/" << mpisize;
+    cout << " - diffusion-2d-substructuring.edp - input parameters: refinement factor = " << s << endl;
+  }
+
+  meshN Th = square(1, 1);
+  fespace Wh(Th, Pk);           // local finite element space
+  int[int][int] intersection;   // local-to-neighbors renumbering
+  int[int] interfaceNb;         //
+  int[int] labDirichlet = [1, 3];
+  {
+    int[int] l = [2, 1, 3, 2];
+    Th = square(10, 10);    // global mesh
+    fespace Ph(Th, P0);
+    Ph part;
+    part = (x > 0.5 && y > 0.5 ? 3 : (x > 0.5 ? 2 : (y < 0.5 ? 1 : 0)));
+    buildSubstructuringWithPartitioning(Th, interfaceNb, part[], 10, labDirichlet, labNeumann, s, intersection, Pk, BC, comm, excluded)
+  }
+
+  func f = 10;
+  varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(f * v) + on(labDirichlet, u = 1.0);
+  matrix<real> Mat = vPb(Wh, Wh, sym = 1); // local operator
+  real[int] rhs = vPb(0, Wh);                  // local right-hand side
+
+  bdd A(Mat, intersection, communicator = comm);
+  // this can be replaced by feti
+  bool adaptive = isSetOption("geneo_nu") || isSetOption("geneo_threshold");
+
+  pair ret;
+  if(mpisize == 1)
+  renumber(A, Mat, interfaceNb, effort = rhs);
+  else {
+    if(excluded) {
+      cout << functionDEFINITION << "attachCoarseOperator" << endl;
+      t = mpiWtime();
+      attachCoarseOperator(mpiCommWorld, A);
+      t = mpiWtime() - t;
+      cout << timeELAPSED << t << endl;
+      } else {
+        Wh[int] def(Rb)(0);
+        real[int] float(Wh.ndof);
+        varf floatingPb(def(u), def(v)) = on(labDirichlet, BC(u, 1.0));
+        float = floatingPb(0, Wh);
+        if(float.max < 0.9 && !adaptive) {
+          Rb.resize(1);
+          Rb[0][] = 1;
+        }
+        if(getARGV("-hpddm_substructuring_scaling", 0) != 2) {
+          cout << functionDEFINITION << "renumber" << endl;
+          t = mpiWtime();
+          renumber(A, Mat, interfaceNb, R = Rb, effort = rhs);
+          t = mpiWtime() - t;
+          cout << timeELAPSED << t << endl;
+          } else {
+            Wh def(mu) = 1.0;
+            cout << functionDEFINITION << "renumber" << endl;
+            t = mpiWtime();
+            renumber(A, Mat, interfaceNb, R = Rb, effort = rhs, rho = mu[]);
+            t = mpiWtime() - t;
+            cout << timeELAPSED << t << endl;
+          }
+          cout << functionDEFINITION << "attachCoarseOperator" << endl;
+          t = mpiWtime();
+          attachCoarseOperator(mpiCommWorld, A, R = Rb, ret = ret);
+          t = mpiWtime() - t;
+          cout << timeELAPSED << t << endl;
+        }
+      }
+
+      Wh<real> def(u) = 0.0;    // local solution
+
+      if(mpisize == mpiSize(comm))
+      u[] = A^-1 * rhs;
+      else {
+        cout << functionDEFINITION << "DDM" << endl;
+        t = mpiWtime();
+        DDM(A, rhs, u[], excluded = excluded);
+        t = mpiWtime() - t;
+        cout << timeELAPSED << t << endl;
+      }
+
+      if(!excluded) {
+        cout << functionDEFINITION << "originalNumbering" << endl;
+        t = mpiWtime();
+        originalNumbering(A, u[], interfaceNb);
+        t = mpiWtime() - t;
+        cout << timeELAPSED << t << endl;
+      }
+      cout << functionDEFINITION << "statistics" << endl;
+      t = mpiWtime();
+      statistics(A);
+      t = mpiWtime() - t;
+      cout << timeELAPSED << t << endl;
+}
+
+// {
+  // load "PETSc"
+  // macro trueRestrict()true// EOM
+  // macro removeZeros()true// EOM
+  // macro dimension()2// EOM
+  // include "macro_ddm.idp"
+  // macro def(i)i// EOM
+  // macro init(i)i// EOM
+  //
+  // real c = 6.25;
+  // int N  = 80;
+  //
+  // // domain: unit square
+  // border aa(t=0,1) { x=t;   y=0;   };
+  // border bb(t=0,1) { x=1;   y=t;   };
+  // border cc(t=0,1) { x=1-t; y=1;   };
+  // border dd(t=0,1) { x=0;   y=1-t; };
+  //
+  // mesh M = buildmesh(aa(N)+bb(N)+cc(N)+dd(N));
+  //
+  // load "Element_P3"
+  // func Pk = P3;
+  // fespace Vh(M, Pk);
+  // int[int][int] intersection;
+  // real[int] D;
+  // {
+  //     int s = getARGV("-split", 1);
+  //     build(M, s, intersection, D, Pk, mpiCommWorld)
+  // }
+  // Vh u;
+  // func BC = cos(pi*x)*cos(pi*y);
+  // varf vInit(w, v) = on(aa, bb, cc, dd, w = BC);
+  // varf vJ(w, v) = int2d(M)(dx(w)*dx(v) + dy(w)*dy(v) - c*exp(u)*w*v) + on(aa, bb, cc, dd, w = 0);
+  // varf vRes(w, v) = int2d(M)(dx(u)*dx(v) + dy(u)*dy(v) - c*exp(u)*v) + on(aa, bb, cc, dd, w = u);
+  // Mat A(Vh.ndof, intersection, D);
+  // set(A, sparams = "-pc_type asm -sub_pc_type lu -ksp_converged_reason");
+  // matrix J;
+  // func real[int] funcRes(real[int]& inPETSc) {
+  //     changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
+  //     real[int] out(Vh.ndof);
+  //     out = vRes(0, Vh, tgv = -2);
+  //     real[int] outPETSc;
+  //     changeNumbering(A, out, outPETSc);
+  //     return outPETSc;
+  // }
+  // func int funcJ(real[int]& inPETSc) {
+  //     changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
+  //     J = vJ(Vh, Vh, tgv = -2);
+  //     A = J;
+  //     return 0;
+  // }
+  // real[int] bPETSc;
+  // u[] = vInit(0, Vh, tgv = -2);
+  // changeNumbering(A, u[], bPETSc);
+  // real[int] xPETSc = bPETSc;
+  // SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_linesearch_monitor -snes_type newtontr -snes_converged_reason -snes_view");
+  // changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
+  // plotMPI(M, u, Pk, def, real, cmm = "Global solution")
+// }
