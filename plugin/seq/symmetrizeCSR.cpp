@@ -26,7 +26,7 @@
 // *INDENT-ON* //
 
 #include "ff++.hpp"
-
+/*
 template<class T>
 long symmetrizeCSR (Matrice_Creuse<T> *const &sparse_mat) 
 {
@@ -45,10 +45,14 @@ long symmetrizeCSR (Matrice_Creuse<T> *const &sparse_mat)
 
 	return 1L;
 }
-
+*/
 static void Load_Init () {
+ if(mpirank==0)
+ cerr << " ++ WARNING Obsolete plugin: symmetrizeCSR  is now in FreeFem++ core " << endl;
+/*
 	Global.Add("symmetrizeCSR", "(", new OneOperator1_<long, Matrice_Creuse<double> *>(symmetrizeCSR<double> ));
 	Global.Add("symmetrizeCSR", "(", new OneOperator1_<long, Matrice_Creuse<std::complex<double> > *>(symmetrizeCSR<std::complex<double> > ));
+ */ 
 }
 
 LOADFUNC(Load_Init)

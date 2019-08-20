@@ -180,6 +180,8 @@ void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
         MatCreate(PETSC_COMM_WORLD, &(*ptA->_vS)[k]);
         MatSetSizes((*ptA->_vS)[k], end - start, end - start, global, global);
         MatSetType((*ptA->_vS)[k], MATMPIAIJ);
+        if(!ia && !ja && !c)
+            ia = new int[2]();
         MatMPIAIJSetPreallocationCSR((*ptA->_vS)[k], reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
         MatSetOption((*ptA->_vS)[k], MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
         if(free) {
@@ -187,6 +189,8 @@ void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
             delete [] ja;
             delete [] c;
         }
+        else if(!ja && !c)
+            delete [] ia;
         delete dN;
     }
     delete [] re;

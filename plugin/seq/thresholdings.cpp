@@ -31,7 +31,7 @@
  */
 
 #include "ff++.hpp"
-
+/*
 // using namespace Fem2D;
 
 template<class T> struct  Thresholding {
@@ -59,20 +59,24 @@ Matrice_Creuse<R>*thresholding2 (const Thresholding<R> &t, const double &thresho
 
 template<class T>
 Thresholding<T> to_Thresholding (Matrice_Creuse<T> *v) {return Thresholding<T>(v);}
-
+*/
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
+    if(mpirank==0)
+        cerr << " ++ WARNING Obsolete plugin: thresholding  is now in FreeFem++ core " << endl;
+    /*
 	typedef Thresholding<double> TMR;
 	typedef Thresholding<Complex> TMC;
 	typedef Matrice_Creuse<double> MR;
 	typedef Matrice_Creuse<Complex> MC;
 	Dcl_Type<TMR>();
 	Dcl_Type<TMC>();
-	TMR t(0);
-	thresholding2(t, 0.);
+	//TMR t(0);
+	//thresholding2(t, 0.);
 	Add<MR *>("thresholding", ".", new OneOperator1<TMR, MR *>(to_Thresholding));
 	Add<TMR>("(", "", new OneOperator2_<MR *, TMR, double>(thresholding2));
 	Add<MC *>("thresholding", ".", new OneOperator1<TMC, MC *>(to_Thresholding));
 	Add<TMC>("(", "", new OneOperator2_<MC *, TMC, double>(thresholding2));
+    */
 }
 
 LOADFUNC(Load_Init)

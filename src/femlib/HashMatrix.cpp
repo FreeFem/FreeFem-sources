@@ -366,6 +366,7 @@ void  HashMatrix<I,R>::resize(I nn, I mm,size_t nnnz, double tol , bool sym )
     this->M=mm;
     R mxt =0;
     size_t kk=0;
+    if( (nn>0) && (mm >0))
     for(size_t k=0; k <nnz ;++k)
     {
         double t =abs(aij[k]);
