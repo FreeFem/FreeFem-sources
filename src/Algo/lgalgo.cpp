@@ -39,17 +39,6 @@ extern Block *currentblock;
 
 typedef double R;
 
-class PrintErrorCompileNewtow :  public E_F0info {
-  public:
-    typedef double Result;
-    static E_F0 * f(const basicAC_F0 & args) {
-      lgerror("\n\n *** change Newtow in Newton .\n  *** Bad name in previous version,\n *** sorry FH.\n\n");
-      return 0;
-    }
-    static ArrayOfaType typeargs() { return ArrayOfaType(true); }
-    operator aType () const { return atype<double>(); }
-};
-
 class OptimAlgo : public OneOperator {
 public:
   typedef KN<R> Kn;
@@ -268,7 +257,6 @@ void init_algo();
 void init_algo() {
   Global.Add("BFGS", "(", new OptimAlgo(1, 1));  // j + dJ
   Global.Add("Newton", "(", new OptimAlgo(2, 2, 2));  // j + dJ
-  Global.Add("Newtow", "(", new OneOperatorCode<PrintErrorCompileNewtow>); // error
 
   // Start msh3 debug
   // extern void init_msh3();

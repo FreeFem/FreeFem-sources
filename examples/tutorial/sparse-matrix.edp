@@ -278,3 +278,18 @@ ml[]/=2.;
 	  assert( abs(B(0,0)-5) < 1e-10);  
   
   }
+  {  // version 4.3-2-b F.H. (31 july 2017)
+	  real[int] diag=[1,2,3,4,6,7,9,10];
+	  int n = diag.n; 
+	  
+	  matrix A(n,n);
+	  A.diag = diag;
+	  cout << " A " << A << endl;
+	  A.coef =0; // put all coef to zero 
+	  cout << " A " << A << endl;
+	  assert( A.l2 ==0);
+	  A.diag = diag;
+	  A.clear; 
+	  cout << " A " << A << endl;
+	  assert(A.nnz==0); 
+  }
