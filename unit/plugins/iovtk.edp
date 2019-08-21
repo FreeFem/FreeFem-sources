@@ -42,13 +42,13 @@ cout << timeELAPSED << t << endl;
   func gg2=x+y;
   int[int] fforder2=[0,0,1,1];
   verbosity=6;
-  savevtk("bidule.vtk",Th3,gg2,[gg2,gg2,gg2],gg2,[gg2,gg2,gg2],order=fforder2,dataname="kkdjd jyqql bidule45");
+  savevtk("test.vtk",Th3,gg2,[gg2,gg2,gg2],gg2,[gg2,gg2,gg2],order=fforder2,dataname="kkdjd jyqql bidule45");
 }
 
 cout << functionDEFINITION << "vtkload3" << endl;
 
 t = clock();
-vtkload3("assets/bidule.vtk");
+vtkload3("assets/test.vtk");
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
