@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFEM,4.3-2,frederic.hecht@sorbonne-universite.fr,FreeFEM)
+AC_INIT(FreeFEM,4.4,frederic.hecht@sorbonne-universite.fr,FreeFEM)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -84,6 +84,9 @@ m4_define([AC_FF_PETSC_WHERELIB],
 	  [
 	    ff_$2=`AC_FF_PETSC_AWK($2,$4)`
 	    ff_$3=`AC_FF_PETSC_AWK($3,$4)`
+		if test -n "$5" ; then 
+		   ff_$2="[$]ff_$2 `AC_FF_PETSC_AWK($5,$4)`"
+		fi
 	   if test -n "[$]ff_$2"; then
 			    ff_$1_ok=yes;
 			    AC_FF_ADDWHERELIB($1,[$]ff_$2,[$]ff_$3)
@@ -986,8 +989,8 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		    test  "$PETSC_SCALAR" = "real" && test "$ff_win32" = yes -o  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s "$WPETSC_MPIRUN" "$WMPIRUN"
 		    if test "$?"  -eq 0 ; then
 		        AC_FF_PETSC_WHERELIB_BASIC(petsc,$ffconfpetsc)
-		        AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetsc)
-		        AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetsc)
+		        AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetsc,METIS_LIB)
+dnl		        AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetsc)
                 ff_SCOTCH_INCLUDE=$ff_PTSCOTCH_INCLUDE
                 ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*ptscotch@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*ptes@<:@^ @:>@*//g'`
@@ -1044,8 +1047,8 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
 		    test  "$PETSC_COMPLEX_SCALAR" = "complex" &&  test  "$ff_win32" = yes -o  "$PETSC_COMPLEX_MPIRUN" = "$MPIRUN" ||  cmp -s `which "$PETSC_COMPLEX_MPIRUN"` `which "$MPIRUN"`
 		   	if test "$?"  -eq 0 ; then
 			AC_FF_PETSC_WHERELIB_BASIC(petsccomplex,$ffconfpetscc)
-            AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetscc)
-            AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetscc,METIS_LIB)
+dnl            AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetscc)
             ff_SCOTCH_INCLUDE=$ff_PTSCOTCH_INCLUDE
             ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*ptscotch@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*ptes@<:@^ @:>@*//g'`
@@ -1557,16 +1560,16 @@ AC_MSG_CHECKING([for lapack in $LIBS, $ff_blas_libs and -llapack] )
 	fi
     fi
 
-AC_MSG_RESULT($ff_lapack_ok)
-if test "$ff_lapack_ok" != no ; then
-AC_SUBST(LAPACKLIBS,$ff_lapack_lib)
-fi
 if test "$ff_lapack_ok" = no; then
     AC_ARG_WITH(lapack,
 	AC_HELP_STRING([--with-lapack=library],[Use a specific version of Lapack]),
 	ff_lapack_ok=yes
 	ff_lapack_lib="${withval}"
 	LIBS="$ff_lapack_lib $LIBS")
+fi
+AC_MSG_RESULT($ff_lapack_ok)
+if test "$ff_lapack_ok" != no ; then
+AC_SUBST(LAPACKLIBS,$ff_lapack_lib)
 fi
 
 # Lapack configuration for Arpack
@@ -2452,7 +2455,7 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - TETGEN: $ff_tetgen_ok])
   AC_MSG_NOTICE([ - UMFPACK: $ff_umfpack_ok])
 fi
-if test "${prefix_petsc}" != no -a   ! -d "${prefix_petsc}/real/lib"  ; then
+if test "${prefix_petsc}" != no -a   ! \( -d "${prefix_petsc}/real/lib"  -o  -d "${prefix_petsc}/r/lib" \) ; then
   AC_MSG_NOTICE([ petsc dirs do no exist  , do build do:])
   AC_MSG_NOTICE([cd 3rdparty/ff-petsc/;  make   ])
 fi
