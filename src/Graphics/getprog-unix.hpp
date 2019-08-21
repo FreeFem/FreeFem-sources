@@ -286,7 +286,7 @@ int getprog(char *fn, int argc, char **argv) {
     const char *ff = argc ? argv[0] : "FreeFem++";
 
     cout << ff << " - version " << StrVersionNumber() << " " << sizeof(void*)*8 << "bits" << endl;
-    cout << "License: LGPL 3+ https://www.gnu.org/licenses/lgpl-3.0.en.html" << endl;
+    cout << "License: LGPL 3+ (https://www.gnu.org/licenses/lgpl-3.0.en.html)" << endl;
     cout << "Usage: " << ff << " [FreeFEM arguments] filename [script arguments]" << endl;
     cout << "FreeFEM arguments:" << endl;
     cout << "\t-f:     [filename]  script file name" << endl;
