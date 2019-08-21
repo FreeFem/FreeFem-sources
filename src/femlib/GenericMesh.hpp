@@ -769,6 +769,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
     template<typename T,typename B,typename V>
     void GenericMesh<T,B,V>::BuildAdj()
     {
+        int verb = verbosity ;
         if(TheAdjacencesLink!=0) return ;//  already build ...
         TheAdjacencesLink = new int[nea*nt];
         BoundaryElementHeadLink = new int[nbe];
@@ -793,11 +794,14 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                     if(p->v<0 ) {// no manifold TO DO
                         // clean adj
                         int nk1=-1-p->v;
-                        int nk2= TheAdjacencesLink[nk1];
+                        int nk2= TheAdjacencesLink[nk1];// next
                         if(nk2>=0) { // firt time remove existing link ...
                             nadjnomanifold++;
-                            TheAdjacencesLink[nk1]=-2;
-                            TheAdjacencesLink[nk2]=-2;// on no manifold border .
+                            TheAdjacencesLink[nk1]=nk  ; // inserting between nk1 and nk2
+                            TheAdjacencesLink[nk]=nk2 ;
+                            //  on no manifold border .
+                            if( verb>99 ) cout << " Border manifold " << k << " "<< i << " ::  " << itemadj(k,i)<< " ::  " << nk1/nea << " " << nk2/nea
+                            << " :: " <<TheAdjacencesLink[nk1]/nea << '.' << TheAdjacencesLink[nk]/nea << '.' << TheAdjacencesLink[nk2]/nea << endl;
                             //nba--;
                             // no manifold TO DO if false
                         }
@@ -807,14 +811,40 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                         TheAdjacencesLink[nk]=p->v;
                         TheAdjacencesLink[p->v]=nk;
                         p->v=-1-nk;
+                        nba--;
                     }
-                    nba--;
+                   
                     
                 }
                 ++nk;
             }
-      
-        if(verbosity&& nadjnomanifold) cerr << "  --- Warning manifold obj nb:" << nadjnomanifold << " of  dim =" << T::RdHat::d << endl;
+        int nbordnomanifold=0;
+        if(nadjnomanifold)
+        {
+            
+            // remove all adj of no manifold border
+            int k3= nt*nea;
+            for (int p=0; p< k3; ++p )
+            {
+                int pp=TheAdjacencesLink[p];
+                if(pp>0 && TheAdjacencesLink[pp]>=0 && TheAdjacencesLink[pp] != p )
+                    { // border of no manifold
+                        if( verb>19 ) cout << "  -- " <<  p/nea << " " ;
+                        ++nbordnomanifold;
+                       // remove link ...
+                        TheAdjacencesLink[p]=-2;
+                        while (TheAdjacencesLink[pp]>=0)
+                        {
+                            if( verb>19 ) cout <<  pp/nea << " " ;
+                            TheAdjacencesLink[pp]=-2;
+                             pp=TheAdjacencesLink[pp];
+                        }
+                        if( verb>19 ) cout << " . " << endl;
+                    }
+            }
+            
+        }
+        if(verbosity&& nadjnomanifold) cerr << "  --- Warning manifold obj nb:" << nbordnomanifold<< " adj "<< nadjnomanifold << " of  dim =" << T::RdHat::d << endl;
         int kerr=0,kerrf=0,nbei=0,fwarn=0;
         map<pair<int,int>,pair<int,int> > mapfs;
         int uncorrect =0, nbchangeorient=0;

@@ -19,7 +19,7 @@
 # ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
 # AUTHORS : ...
 # E-MAIL  : ...
-
+.NOTPARALLEL:
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
 TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
