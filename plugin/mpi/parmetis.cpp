@@ -23,7 +23,7 @@
 //  merge of metis and parmetis interface (F. Hecht aug 2019)
 
 // *INDENT-OFF* //
-//ff-c++-LIBRARY-dep: [mpi parmetis|metis]
+//ff-c++-LIBRARY-dep: parmetis mpi
 //ff-c++-cpp-dep:
 // *INDENT-ON* //
 
@@ -33,7 +33,7 @@ typedef KNM<double> *pRnm;
 typedef KN<double> *pRn;
 typedef string *pstring;
 
-#ifdef WITH_mpi
+#ifdef WITH_parmetis
 
 #include <parmetis.h>
 #ifndef IDX_T
@@ -287,7 +287,7 @@ static void Load_Init () {
 	Global.Add("metisdual", "(", new OneOperator3_<KN<double> *, KN<double> *, const MeshS *, long, E_F_stackF0F0F0_<KN<double> *, KN<double> *, const MeshS *, long> >(&partmetis<const MeshS, 1> ));
     }
     else if(mpirank==0 && verbosity) cout << " already load of metis  ... skeep  \n";
-#ifdef WITH_mpi
+#ifdef WITH_parmetis
     if (!Global.Find("parmetis").NotNull()) {
      Global.Add("parmetis", "(", new ParMETIS<long, Mesh>);
      Global.Add("parmetis", "(", new ParMETIS<double, Mesh>);
