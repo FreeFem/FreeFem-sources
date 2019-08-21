@@ -285,11 +285,8 @@ int getprog(char *fn, int argc, char **argv) {
   if (ret != 1) {
     const char *ff = argc ? argv[0] : "FreeFem++";
 
-    cout << ff << " - version " << StrVersionNumber() << "bits" << endl;
-    cout << "FreeFEM website: https://freefem.org/" << endl;
-    cout << "FreeFEM documentation: https://doc.freefem.org/" << endl;
-    cout << "FreeFEM forum: https://community.freefem.org/" << endl;
-    cout << "FreeFEM modules: https://modules.freefem.org/" << endl;
+    cout << ff << " - version " << StrVersionNumber() << sizeof(void*)*8 << "bits" << endl;
+    cout << "License: LGPL 3+" << endl;
     cout << "Usage: " << ff << " [FreeFEM arguments] filename [script arguments]" << endl;
     cout << "FreeFEM arguments:" << endl;
     cout << "\t-f:     [filename]  script file name" << endl;
@@ -313,6 +310,11 @@ int getprog(char *fn, int argc, char **argv) {
     if (noffglut) cout << "without default ffglut: " << ffglut << endl;
     else cout << "with default ffglut: " << ffglut << endl;
 
+    cout << endl;
+    cout << "FreeFEM website: https://freefem.org/" << endl;
+    cout << "FreeFEM documentation: https://doc.freefem.org/" << endl;
+    cout << "FreeFEM forum: https://community.freefem.org/" << endl;
+    cout << "FreeFEM modules: https://modules.freefem.org/" << endl;
     exit(1);
     return ret;
   }
