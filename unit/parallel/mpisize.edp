@@ -1,12 +1,12 @@
-//NBPROC 4
 include "test.idp"
-real t;
 
-cout << functionDEFINITION << "mpisize" << endl;
+cout << functionDEFINITION << "mpiSize" << endl;
+
+real t;
+mpiComm cc;
 
 t = mpiWtime();
-if (mpirank  == 0)
-  cout << mpisize << endl;
+cout << mpiSize(cc) << endl;
 t = mpiWtime() - t;
-cout << timeELAPSED << t << endl;
-test(mpisize == 4);
+cout << timeELAPSED << endl;
+test(mpiSize(cc) == mpisize);
