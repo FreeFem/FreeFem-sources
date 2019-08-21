@@ -315,6 +315,22 @@ int getprog(char *fn, int argc, char **argv) {
     cout << "FreeFEM documentation: https://doc.freefem.org/" << endl;
     cout << "FreeFEM forum: https://community.freefem.org/" << endl;
     cout << "FreeFEM modules: https://modules.freefem.org/" << endl;
+
+    cout << endl;
+    cout << "Please cite us in your research papers and add a link to FreeFEM on your personnal website" << endl;
+    cout << "@article{FreeFEM," << endl;
+    cout << "\tAUTHOR = {Hecht, F.}," << endl;
+    cout << "\tTITLE = {New development in FreeFem++}," << endl;
+    cout << "\tJOURNAL = {J. Numer. Math.}," << endl;
+    cout << "\tFJOURNAL = {Journal of Numerical Mathematics}," << endl;
+    cout << "\tVOLUME = {20}, YEAR = {2012}," << endl;
+    cout << "\tNUMBER = {3-4}, PAGES = {251--265}," << endl;
+    cout << "\tISSN = {1570-2820}," << endl;
+    cout << "\tMRCLASS = {65Y15}," << endl;
+    cout << "\tMRNUMBER = {3043640}," << endl;
+    cout << "\tURL = {https://freefem.org/}" << endl;
+    cout << "}" << endl;
+
     exit(1);
     return ret;
   }
