@@ -15,7 +15,7 @@ complex c = 4. + 2 * i;
 matrix A = [[1 , 2],
             [3, 4]];
 matrix<complex> B = [[1. + 2*1i, 2.* 1i],
-                      [4. * 1i, 2. * 1i]];
+                     [4. * 1i, 2. * 1i]];
 
 cout << typeDEFINITION << "int" << endl;
 t = clock();
