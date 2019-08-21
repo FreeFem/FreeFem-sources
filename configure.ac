@@ -2455,7 +2455,7 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - TETGEN: $ff_tetgen_ok])
   AC_MSG_NOTICE([ - UMFPACK: $ff_umfpack_ok])
 fi
-if test "${prefix_petsc}" != no -a   ! -d "${prefix_petsc}/real/lib"  ; then
+if test "${prefix_petsc}" != no -a   ! \( -d "${prefix_petsc}/real/lib"  -o  -d "${prefix_petsc}/r/lib" \) ; then
   AC_MSG_NOTICE([ petsc dirs do no exist  , do build do:])
   AC_MSG_NOTICE([cd 3rdparty/ff-petsc/;  make   ])
 fi
