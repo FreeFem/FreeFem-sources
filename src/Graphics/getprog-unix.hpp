@@ -284,27 +284,35 @@ int getprog(char *fn, int argc, char **argv) {
 
   if (ret != 1) {
     const char *ff = argc ? argv[0] : "FreeFem++";
-    cout << " Error parameter: "<< ff << " , version : " << StrVersionNumber() << " " << sizeof(void*)*8 <<"bits "<< endl;
-    cout << " Syntaxe = " << ff  << "   [ -v verbosity ] [ -fglut filepath ] [ -glut command ] [ -nw] [ -f] filename  [SCRIPT-arguments]\n"
-    << "        -v      verbosity : 0 -- 1000000 level of freefem output \n"
-    << "        -fglut  filepath  : the file name of save all plots (replot with ffglut command ) \n"
-    << "        -glut    command  : change  command  compatible with ffglut  \n"
-    << "        -gff     command  : change  command  compatible with ffglut (with space quoting)\n"
-    << "        -nowait           : nowait at the end on window   \n"
-    << "        -wait             : wait at the end on window   \n"
-    << "        -nw  or -ng       : no ffglut, ffmedit  (=> no graphics windows) \n"
-    << "        -wg               : with graphic   (=>  graphics windows) \n"
-    << "        -ne               : no edp script output\n"
-    << "        -cd               : Change dir to script dir\n"
-    << "        -jc               : just compile\n"
-    << "        -cdtmp            : Change dir to tmp dir (for test)\n"
-    << endl ;
 
-    ;
+    cout << ff << " - version " << StrVersionNumber() << "bits" << endl;
+    cout << "FreeFEM website: https://freefem.org/" << endl;
+    cout << "FreeFEM documentation: https://doc.freefem.org/" << endl;
+    cout << "FreeFEM forum: https://community.freefem.org/" << endl;
+    cout << "FreeFEM modules: https://modules.freefem.org/" << endl;
+    cout << "Usage: " << ff << " [FreeFEM arguments] filename [script arguments]" << endl;
+    cout << "FreeFEM arguments:" << endl;
+    cout << "\t-f:     [filename]  script file name" << endl;
+    cout << "\t-v:     [verbosity] level of FreeFEM output (0 - 1000000)" << endl;
+    cout << "\t-nw:                no graphics" << endl;
+    cout << "\t-wg:                with graphics" << endl;
+    cout << "\t-ne:                no edp script output" << endl;
+    cout << "\t-cd:                change directory to script directory"<< endl;
+    cout << "\t-cdtmp:             change directory to /tmp" << endl;
+    cout << "\t-jc:                just compile" << endl;
+    cout << "\t-ns:                same as -ne" << endl;
+    cout << "\t-nowait:            do not wait graphics at the end" << endl;
+    cout << "\t-nc:                without console (MS Windows only)" << endl;
+    cout << "\t-log:               with console (MS Windows only)" << endl;
+    cout << "\t-wait:              wait graphics at the end" << endl;
+    cout << "\t-fglut: [filename]  redirect graphics in file" << endl;
+    cout << "\t-glut:  [command]   use custom glut" << endl;
+    cout << "\t-gff:   [command]   use custom glut (with space quoting)" << endl;
+    cout << "\t-?:                 show help" << endl << endl;
 
-    if(noffglut)  cout << " without     default ffglut : " << ffglut << endl;
-    else          cout << " with        default ffglut : " << ffglut << endl;
-    cout   << endl;
+    if (noffglut) cout << "without default ffglut: " << ffglut << endl;
+    else cout << "with default ffglut: " << ffglut << endl;
+
     exit(1);
     return ret;
   }
