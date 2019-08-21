@@ -233,7 +233,9 @@ void change(Type* const& ptA, Matrice_Creuse<PetscScalar>* const& mat, Type* con
                 }
             }
             else if(!assembled) {
-                PetscInt* ia = new PetscInt[2]();
+                PetscInt m;
+                MatGetLocalSize(ptA->_petsc, &m, NULL);
+                PetscInt* ia = new PetscInt[m + 1]();
                 MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, NULL, NULL);
                 delete [] ia;
             }

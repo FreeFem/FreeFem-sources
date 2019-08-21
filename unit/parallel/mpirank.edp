@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << functionDEFINITION << "mpiRank" << endl;
+cout << functionDEFINITION << "mpirank" << endl;
 
 mpiComm cc;
 real t;

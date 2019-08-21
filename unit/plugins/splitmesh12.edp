@@ -1,6 +1,5 @@
 include "test.idp"
 load "splitmesh12"
-load "medit"
 load "msh3"
 
 cout << functionDEFINITION << endl;

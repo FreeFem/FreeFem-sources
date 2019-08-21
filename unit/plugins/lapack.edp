@@ -1,5 +1,7 @@
 include "test.idp"
+include "ExtractDofsonBorder.idp"
 load "lapack"
+load "Schur-Complement"
 
 real t;
 
@@ -65,6 +67,7 @@ TEST(real,complex,-100.,dgeev)
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 cout << nerr << endl;
+
 cout << functionDEFINITION << "zgeev" << endl;
 cout << "Testing complex complex zgeev..." << endl;
 t = clock();
@@ -72,11 +75,169 @@ TEST(complex,complex,100i,zgeev)
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 cout << nerr << endl;
-cout << functionDEFINITION << "dsyev" << endl;
-cout << "Testing real real dsyev..." << endl;
+
+cout << functionDEFINITION << "geev" << endl;
+cout << "Testing complex complex geev..." << endl;
 t = clock();
-TEST(real,real,1,dsyev)
+TEST(complex,complex,100i,geev)
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 cout << nerr << endl;
-assert(nerr==0);
+
+t = clock();
+real[int] re = [0, 0, 0];
+real[int, int] r = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+complex[int] c = [0 + 1i, 0 + 1i, 0 + 1i];
+complex[int, int] cc = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+geev(r, c, cc);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << nerr << endl;
+assert(nerr == 0);
+
+{
+  cout << functionDEFINITION << "dggev" << endl;
+  cout << "Testing complex complex dggev..." << endl;
+  t = clock();
+  dggev(r, r, c, re, cc);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+}
+
+{
+  cout << functionDEFINITION << "zggev" << endl;
+  cout << "Testing complex complex zggev..." << endl;
+  t = clock();
+  int res = zggev(cc, cc, c, c, cc);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+  test(res == 0);
+}
+
+{
+  cout << functionDEFINITION << "dsygvd" << endl;
+  cout << "Testing complex complex dsygvd..." << endl;
+  t = clock();
+  int res = dsygvd(r, r, re, r);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+  test(nerr == 0);
+}
+
+{
+  cout << functionDEFINITION << "dgesdd" << endl;
+  cout << "Testing complex complex dgesdd..." << endl;
+  t = clock();
+  dgesdd(r, r, re, r);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+}
+
+{
+  cout << functionDEFINITION << "zhegv" << endl;
+  cout << "Testing complex complex zhegv..." << endl;
+  t = clock();
+  zhegv(cc, cc, re, cc);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+}
+
+{
+  cout << functionDEFINITION << "dsyev" << endl;
+  cout << "Testing real real dsyev..." << endl;
+  t = clock();
+  TEST(real,real,1,dsyev)
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+  test(nerr == 0);
+}
+
+{
+  cout << functionDEFINITION << "zheev" << endl;
+  cout << "Testing real real zheev..." << endl;
+  t = clock();
+  zheev(cc, re, cc);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+  test(nerr == 0);
+}
+
+{
+  cout << functionDEFINITION << "dgelsy" << endl;
+  cout << "Testing real real dgelsy..." << endl;
+  t = clock();
+  dgelsy(r, re);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+  test(nerr == 0);
+
+  t = clock();
+  dgelsy(r, r);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << nerr << endl;
+  test(nerr == 0);
+}
+
+{
+  macro FindDofOnBorder(l,Vh,I)
+  {
+  	varf von(u,v) = on(l,u=-1);
+      int[int] J=0:Vh.ndof-1;
+  	real[int] vl = von(0,Vh);
+  	sort(vl,J);
+  	vl = vl ? 1. :0.;
+  	int n = vl.sum+0.5;
+
+  	I.resize(n);
+  	I=J(0:n-1);
+  	cout << " n = "<< n << endl;
+  }//
+
+  macro grad(u) [dx(u),dy(u)] //
+  real hsize= 0.1;
+
+  real htt = max(hsize/2,0.1);
+  mesh Th=square(2/hsize,1/hsize,[x*2,y]);
+
+  Th=trunc(Th,(abs(x-1)>4*htt)||(abs(y-0.5)>htt),label=10);
+
+  mesh Th2=movemesh(Th,[2-(x-2),y]);
+  plot(Th,Th2,wait=1);
+  fespace Vh(Th,P1);
+  fespace Vh2(Th2,P1);
+  int n = Vh.ndof;
+  varf va(u,v) = int2d(Th)(grad(u)'*grad(v))+on(1,3,4,u=0);
+
+   matrix A= va(Vh,Vh,sym=0,tgv=-2);
+  if(verbosity>9) cout << A << endl;
+  int[int] I;
+  ExtractDofsonBorder(2,Vh,I,1);
+
+  real[int,int] B(1,1);
+
+  int[int] I10;
+  FindDofOnBorder(10,Vh,I10);
+  if(verbosity>9) cout << " I10 "<< I10 << endl;
+  int[int] If(n);
+  int In=I.n;
+  If=-1;
+  for [i,Ii:I]
+    If[Ii]=i;
+  for [i,I10i:I10]
+      If[I10i]=In;
+  if( verbosity>9) cout << If << endl;
+  real[int,int] S(1,1);
+  t = clock();
+  int nfs=SchurComplement(S,A,If,B);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}

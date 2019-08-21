@@ -1,0 +1,232 @@
+include "test.idp"
+load "MPICG"
+
+real t;
+real eps = 1e-4;
+int Conv;
+real[int] b(10),u(10);
+int NbIter = 5;
+real Eps = 1e-6;
+real Veps = - 1e-6;
+
+cout << functionDEFINITION << "MPILinearCG" << endl;
+{
+
+  func  bool stop(int iter,real[int] u,real[int] g)
+  {
+   return g.linfty < 1e-15 || iter > 15;;
+  }
+
+  func real[int] DJ(real[int] &u)
+  {
+    for (int i=0;i<u.n;i++)
+      u[i]=(i+1)*u[i];
+    u -= b;
+    return u;
+  };
+
+  func real J(real[int] &u2)
+  {
+    real s=0;
+    for (int i=0;i<u2.n;i++)
+    s +=(i+1)*u2[i]*u2[i]*0.5 - b[i]*u2[i];
+    return s;
+  }
+
+  u = 0;
+  b = 1;
+  cout << parameterDEFINITION << "with A and x" << endl;
+  t = clock();
+  Conv = MPILinearCG(DJ, u, u);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(Conv == 0);
+}
+
+cout << functionDEFINITION << "MPIAffineCG" << endl;
+{
+  func  bool stop(int iter,real[int] u,real[int] g)
+  {
+    return g.linfty < 1e-15 || iter > 15;;
+  }
+
+  func real[int] DJ(real[int] &u)
+  {
+    for (int i=0;i<u.n;i++)
+    u[i]=(i+1)*u[i];
+    u -= b;
+    return u;
+  };
+
+  func real J(real[int] & u2)
+  {
+    real s=0;
+    for (int i=0;i<u2.n;i++)
+    s +=(i+1)*u2[i]*u2[i]*0.5 - b[i]*u2[i];
+    return s;
+  }
+
+  u = 0;
+  b = 1;
+  cout << parameterDEFINITION << "with A and x" << endl;
+  t = clock();
+  Conv = MPIAffineCG(DJ, u);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(Conv == 1);
+  test(DJ(u).max < HWERROR);
+
+  int verb=5;
+  b = 1;
+  u=0.;
+
+  func real[int] matId(real[int] &u2) { return u2;};
+
+  cout << parameterDEFINITION << "with A, x, eps, precon, nbiter, verbosity" << endl;
+  t = clock();
+  Conv = MPIAffineCG(DJ,u,nbiter=20, eps=Eps, veps=Veps, verbosity=verb, precon=matId);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(Conv == 1);
+  test(DJ(u).max < HWERROR);
+}
+
+cout << functionDEFINITION << "MPILinearGMRES" << endl;
+{
+  func  bool stop(int iter,real[int] u,real[int] g)
+  {
+    return g.linfty < 1e-5 || iter > 15;;
+  }
+
+  func real[int] DJ(real[int] &u)
+  {
+    for (int i=0;i<u.n;i++)
+    u[i]=(i+1)*u[i];
+    u -= b;
+    return u;
+  };
+
+  func real J(real[int] & u2)
+  {
+    real s=0;
+    for (int i=0;i<u2.n;i++)
+    s +=(i+1)*u2[i]*u2[i]*0.5 - b[i]*u2[i];
+    return s;
+  }
+
+  u = 0;
+  b = 1;
+  cout << parameterDEFINITION << "with A and x" << endl;
+  t = clock();
+  Conv = MPILinearGMRES(DJ, b, u);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(Conv == 0);
+  test(DJ(u).max < HWERROR);
+
+  int verb=5;
+  u=0.;
+
+  func real[int] matId(real[int] &u2) { return u2;};
+
+  cout << parameterDEFINITION << "with A, x, eps, precon, nbiter, verbosity" << endl;
+  t = clock();
+  Conv = MPILinearGMRES(DJ, b, u, nbiter=20, veps=Eps ,eps=Eps, verbosity=verb, precon=matId);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(Conv == 0);
+}
+
+cout << functionDEFINITION << "MPIAfiineGMRES" << endl;
+{
+  func  bool stop(int iter,real[int] u,real[int] g)
+  {
+    return g.linfty < 1e-5 || iter > 15;;
+  }
+
+  func real[int] DJ(real[int] &u)
+  {
+    for (int i=0;i<u.n;i++)
+    u[i]=(i+1)*u[i];
+    u -= b;
+    return u;
+  };
+
+  func real J(real[int] & u2)
+  {
+    real s=0;
+    for (int i=0;i<u2.n;i++)
+    s +=(i+1)*u2[i]*u2[i]*0.5 - b[i]*u2[i];
+    return s;
+  }
+
+  u = 0;
+  b = 1;
+  cout << parameterDEFINITION << "with A and x" << endl;
+  t = clock();
+  Conv = MPIAffineGMRES(DJ, u);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(Conv == 0);
+  test(DJ(u).max < HWERROR);
+
+  int verb=5;
+  u=0.;
+
+  func real[int] matId(real[int] &u2) { return u2;};
+
+  cout << parameterDEFINITION << "with A, x, eps, precon, nbiter, verbosity" << endl;
+  t = clock();
+  Conv = MPIAffineGMRES(DJ,u,nbiter=20, verbosity=verb, precon=matId);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(Conv == 0);
+}
+
+cout << functionDEFINITION << "NLCG" << endl;
+{
+  func  bool stop(int iter,real[int] u,real[int] g)
+  {
+    return g.linfty < 1e-15 || iter > 15;;
+  }
+
+  func real[int] DJ(real[int] &u)
+  {
+    for (int i=0;i<u.n;i++)
+    u[i]=(i+1)*u[i];
+    u -= b;
+    return u;
+  };
+
+  func real J(real[int] & u2)
+  {
+    real s=0;
+    for (int i=0;i<u2.n;i++)
+    s +=(i+1)*u2[i]*u2[i]*0.5 - b[i]*u2[i];
+    return s;
+  }
+
+  u = 0;
+  b = 1;
+  cout << parameterDEFINITION << "with A and x" << endl;
+  t = clock();
+  Conv = MPINLCG(DJ, u);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(Conv == 1);
+  test(DJ(u).max < HWERROR);
+
+  int verb=5;
+  b = 1;
+  u=0.;
+
+  func real[int] matId(real[int] &u2) { return u2;};
+
+  cout << parameterDEFINITION << "with A, x, eps, precon, nbiter, verbosity" << endl;
+  t = clock();
+  Conv = MPINLCG(DJ,u,nbiter=20, eps=Eps, veps=Veps, verbosity=verb, precon=matId);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(Conv == 1);
+  test(DJ(u).max < HWERROR);
+}

@@ -1,10 +1,12 @@
 include "test.idp"
 load "iovtk"
-cout << functionDEFINITION << "savevtk" << endl;
 
+real t;
+
+cout << functionDEFINITION << "savevtk" << endl;
 border Gamma(t=0,2*pi){x=cos(t);y=sin(t);label=3;}
 border Gamma1(t=0,2*pi){x=2*cos(t);y=2*sin(t);label=5;}
-mesh Th2 = buildmesh( Gamma(10)+Gamma1(20) );
+mesh Th2 = buildmesh(Gamma(10)+Gamma1(20));
 
 fespace Vh(Th2,P1);     // P1 FE space
 func gg=x;
@@ -16,8 +18,50 @@ solve laplacep(uh,vh,solver=CG,tgv=1e5) =      //  definion of  the problem
     int2d(Th2)( dx(uh)*dx(vh) + dy(uh)*dy(vh) )   //  bilinear form
        + on(3,uh=1)+ on(5,uh=2) ;                        //  boundary condition form
 
-cout << "vtk information" << endl;
+cout << "savevtk" << endl;
 int[int] fforder=[0,0,1,0,1];
+t = clock();
 int[int] array = savevtk("disque.vtk",Th2,uh,ggg,uh,[uh,ggg],[uh,ggg],dataname="kkdjd jyqql bidule45 vector nnn nn44233T",order=fforder);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 
-// mesh Th = vtkload3("assets/bidule.vtk");
+{
+  mesh3 Th3;
+  try {
+  Th3=readmesh3("assets/spherewithahole.mesh"); // This .mesh file is obtaing with tetgenholeregion.edp
+  }
+  catch (...) {
+    mesh3 Thedp;// mesh3 variable  out the block
+    {
+    include "../examples/plugin/tetgenholeregion_rugby.edp"
+    Thedp=Th3finhole;// save de correcte mesh
+    }
+    Th3=Thedp;// set coorect variable ...
+  }
+  fespace Vh3(Th3,P1);     // P1 FE space
+  func gg2=x+y;
+  int[int] fforder2=[0,0,1,1];
+  verbosity=6;
+  savevtk("bidule.vtk",Th3,gg2,[gg2,gg2,gg2],gg2,[gg2,gg2,gg2],order=fforder2,dataname="kkdjd jyqql bidule45");
+}
+
+cout << functionDEFINITION << "vtkload3" << endl;
+
+t = clock();
+vtkload3("assets/bidule.vtk");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "vtkload" << endl;
+
+t = clock();
+vtkload("assets/disque.vtk");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "vtkloadS" << endl;
+
+t = clock();
+vtkloadS("assets/disque.vtk");
+t = clock() - t;
+cout << timeELAPSED << t << endl;

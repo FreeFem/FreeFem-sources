@@ -41,7 +41,6 @@ ExtractDofsonBorder(2,Vh,I,1);
 
 real[int,int] B(1,1);
 
-//  model 2
 int[int] I10;
 FindDofOnBorder(10,Vh,I10);
 if(verbosity>9) cout << " I10 "<< I10 << endl;
@@ -73,7 +72,6 @@ cout << timeELAPSED << t << endl;
 	Il[icll]=iclS;
 
 	int nd = nfs+1;
-	//matrix St(nd,nd);// manque une matrix vide
 	cout << " S ="<< S << endl;
 	real[int,int] St(nd,nd);
 	func real[int,int]  to(int[int] &I,real[int,int] &S)
