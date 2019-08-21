@@ -1560,16 +1560,16 @@ AC_MSG_CHECKING([for lapack in $LIBS, $ff_blas_libs and -llapack] )
 	fi
     fi
 
-AC_MSG_RESULT($ff_lapack_ok)
-if test "$ff_lapack_ok" != no ; then
-AC_SUBST(LAPACKLIBS,$ff_lapack_lib)
-fi
 if test "$ff_lapack_ok" = no; then
     AC_ARG_WITH(lapack,
 	AC_HELP_STRING([--with-lapack=library],[Use a specific version of Lapack]),
 	ff_lapack_ok=yes
 	ff_lapack_lib="${withval}"
 	LIBS="$ff_lapack_lib $LIBS")
+fi
+AC_MSG_RESULT($ff_lapack_ok)
+if test "$ff_lapack_ok" != no ; then
+AC_SUBST(LAPACKLIBS,$ff_lapack_lib)
 fi
 
 # Lapack configuration for Arpack
