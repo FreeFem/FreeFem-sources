@@ -7,7 +7,7 @@ cout << typeDEFINITION << "real" << endl;
 
 real zero = 0.;
 real rpos = 1.;
-real rneg = -1.; //
+real rneg = -1.;
 real minf = log(0.);
 real pinf = -log(0.);
 
