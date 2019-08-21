@@ -57,9 +57,9 @@ cout << functionDEFINITION << "dscalprod" << endl;
   real solnorm2 = Lapscalprod(u[],u[]) ,  errnorm2 = Lapscalprod(error[],error[])  ;
   if(mpirank == 0) cout << endl << "Relative error w.r.t. to direct solver : " <<  sqrt(errnorm2/solnorm2) << "\n" << endl;
   ffddmplot(Lap,error, "Difference between direct and ddm solve");
-  t = clock();
+  t = mpiWtime();
   real solnorm2global = dscalprod(LapDk[mpirank],u[],u[]);
-  t = clock() - t;
+  t = mpiWtime() - t;
   cout << timeELAPSED << t << endl;
   cout << solnorm2 << " ==  " <<  solnorm2global << "??"  << endl;
 }
