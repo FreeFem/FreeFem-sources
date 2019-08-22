@@ -8,5 +8,5 @@ mpiComm cc;
 t = mpiWtime();
 cout << mpiSize(cc) << endl;
 t = mpiWtime() - t;
-cout << timeELAPSED << endl;
+cout << timeELAPSED << t << endl;
 test(mpiSize(cc) == mpisize);
