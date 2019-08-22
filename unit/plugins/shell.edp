@@ -29,29 +29,27 @@ while (readData != "") {
   }
 }
 
-cout << functionDEFINITION << "mkdir" << endl;
-
-t = clock();
-int makeDir = mkdir("toto");
-t = clock() - t;
-cout << timeELAPSED << t << endl;
-test(makeDir == 0);
-
 cout << functionDEFINITION << "isdir" << endl;
-
 t = clock();
 bool isDir = isdir("toto");
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-test(isDir == true);
-
-cout << functionDEFINITION << "rmdir" << endl;
-
-t = clock();
-int rmDir = rmdir("toto");
-t = clock() - t;
-cout << timeELAPSED << t << endl;
-test(rmDir == 0);
+if (isDir == -1) {
+  cout << functionDEFINITION << "mkdir" << endl;
+  int makeDir = mkdir("toto");
+  test(makeDir == 0);
+  t = clock();
+  isDir = isdir("toto");
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(isDir == true);
+  cout << functionDEFINITION << "rmdir" << endl;
+  t = clock();
+  int rmDir = rmdir("toto");
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(rmDir == 0);
+}
 
 cout << functionDEFINITION << "getenv" << endl;
 
@@ -93,12 +91,6 @@ cout << unsetEnv << endl;
 test(unsetEnv == 0);
 
 cout << functionDEFINITION << "chmod" << endl;
-
-t = clock();
-int chMod = chmod("toto", 655);
-t = clock() - t;
-cout << timeELAPSED << t << endl;
-test(chMod == -1);
 
 t = clock();
 int chMod2 = chmod("assets/test.txt", 555);
