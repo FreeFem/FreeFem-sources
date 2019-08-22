@@ -134,7 +134,7 @@ all-local:
 # -------------------------------
 
 DIRPKG=../pkg
-VERSION=3.11.2
+VERSION=3.11.3
 VERSION_SLEPC=3.11.0
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
@@ -304,7 +304,7 @@ WHERE-all:Makefile  Make-petsc-download.mk
 endif
 $(SRCDIR)/tag-tar:$(PACKAGE)
 	tar xvzf $(PACKAGE)
-	patch -p1 < petsc-3.11.2.patch
+	patch -p1 < petsc-metis.patch
 	touch $@
 $(PACKAGE):
 	../getall -o PETSc -a
