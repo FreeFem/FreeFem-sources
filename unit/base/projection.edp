@@ -13,10 +13,10 @@ t = clock();
 real r1 = projection(a, b, c);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-test(r1 == min(max(a,c),b) * (a < b) +  min(max(b, c), a) * (1-(a < b)));
+test(r1 == min(max(a,c),b) * (a < b) + min(max(b, c), a) * (1-(a < b)));
 
 t = clock();
 real r2 = projection(c, b, a);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-test(r2 == min(max(c,a),b) * (c < b) +  min(max(b, a), c) * (1-(c < b)));
+test(r2 == min(max(c,a),b) * (c < b) + min(max(b, a), c) * (1-(c < b)));

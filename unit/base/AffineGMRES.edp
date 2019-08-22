@@ -9,7 +9,7 @@ int NbIter = 5;
 real Eps = 1e-6;
 real Veps = -1e-6;
 
-func  bool stop (int iter,real[int] u,real[int] g) {
+func bool stop (int iter,real[int] u,real[int] g) {
   return g.linfty < 1e-15 || iter > 15;
 }
 

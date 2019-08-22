@@ -3,7 +3,7 @@ include "test.idp"
 cout << functionDEFINITION << "set" << endl;
 real t;
 
-verbosity=3;
+verbosity = 3;
 
 matrix A = [[1, 0], [0, 1]];
 real[int] b = [1, 0];

@@ -107,7 +107,7 @@ for (int i = 0; i < n; i++) {
 cout << typeDEFINITION << "real[int, int]" << endl;
 
 int tab = 2;
-real[int, int] AA = [[-1., 5., 8., -9.], [5.,  6., -8., -9.]];
+real[int, int] AA = [[-1., 5., 8., -9.], [5., 6., -8., -9.]];
 real[int, int] BB(tab, n);
 
 t = clock();

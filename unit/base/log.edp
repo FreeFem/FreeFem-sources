@@ -16,13 +16,13 @@ cout << timeELAPSED << t << endl;
 test(resr == 0.);
 
 t = clock();
-real rminf  = log(0.);
+real rminf = log(0.);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(rminf == minf);
 
 t = clock();
-real rpinf  = log(pinf);
+real rpinf = log(pinf);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(rpinf == pinf);
@@ -33,13 +33,13 @@ complex cpos = 4. + 2.i;
 complex cneg = 4. - 2.i;
 
 t = clock();
-complex rescpos  = log(cpos);
+complex rescpos = log(cpos);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(rescpos == log(abs(cpos)) + 1i * arg(cpos));
 
 t = clock();
-complex rescneg  = log(cneg);
+complex rescneg = log(cneg);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(rescneg == log(abs(cneg)) + 1i * arg(cneg));

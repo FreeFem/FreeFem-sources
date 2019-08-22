@@ -10,7 +10,7 @@ t = clock() - t;
 randinit(time());
 int i31bis = randint31();
 cout << timeELAPSED << t << endl;
-test((i31 - i31bis) < HWERROR);
+test(i31 == i31bis);
 
 randinit(time());
 t = clock();
@@ -19,7 +19,7 @@ t = clock() - t;
 randinit(time());
 int i32bis = randint32();
 cout << timeELAPSED << t << endl;
-test((i32 - i32bis) < HWERROR);
+test(i32 == i32bis);
 
 randinit(time());
 t = clock();
@@ -28,7 +28,7 @@ t = clock() - t;
 randinit(time());
 real r1bis = randreal1();
 cout << timeELAPSED << t << endl;
-test((r1 - r1bis) < HWERROR);
+test(abs(r1 - r1bis) < HWERROR);
 
 randinit(time());
 t = clock();
@@ -37,7 +37,7 @@ t = clock() - t;
 randinit(time());
 real r2bis = randreal2();
 cout << timeELAPSED << t << endl;
-test((r2 - r2bis) < HWERROR);
+test(abs(r2 - r2bis) < HWERROR);
 
 randinit(time());
 t = clock();
@@ -46,7 +46,7 @@ t = clock() - t;
 randinit(time());
 real r3bis = randreal3();
 cout << timeELAPSED << t << endl;
-test((r3 - r3bis) < HWERROR);
+test(abs(r3 - r3bis) < HWERROR);
 
 randinit(time());
 t = clock();
@@ -55,4 +55,4 @@ t = clock() - t;
 randinit(time());
 real r53bis = randres53();
 cout << timeELAPSED << t << endl;
-test((r53 - r53bis) < HWERROR);
+test(abs(r53 - r53bis) < HWERROR);
