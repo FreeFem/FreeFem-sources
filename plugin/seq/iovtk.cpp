@@ -2151,9 +2151,9 @@ void VTK_WRITE_MESH (const string &filename, FILE *fp, const Mesh &Th, bool bina
     }
     
     fprintf(fp, "\n");
-    if (verbosity > 1) {printf("writting vertices is finish\n");}
+    if (verbosity > 1) {printf("writing vertices is finish\n");}
     
-    if (verbosity > 1) {printf("writting elements now\n");}
+    if (verbosity > 1) {printf("writing elements now\n");}
     
     //= ===============
     // CELL
@@ -2168,14 +2168,14 @@ void VTK_WRITE_MESH (const string &filename, FILE *fp, const Mesh &Th, bool bina
         totalNumInt = Th.nt * 3 + numElements;
     }
     
-    if (verbosity > 1) {printf("writting cells \n");}
+    if (verbosity > 1) {printf("writing cells \n");}
     
     // print vertex indices in ascii or binary
     fprintf(fp, "CELLS %d %d\n", numElements, totalNumInt);
     
     if (binary) {
         int IntType = 3;
-        if (verbosity > 1) {printf("writting triangle elements \n");}
+        if (verbosity > 1) {printf("writing triangle elements \n");}
         
         for (int it = 0; it < Th.nt; it++) {
             const Mesh::Triangle &K(Th.t(it));
@@ -2193,7 +2193,7 @@ void VTK_WRITE_MESH (const string &filename, FILE *fp, const Mesh &Th, bool bina
         }
         
         if (surface) {
-            if (verbosity > 1) {printf("writting edge elements \n");}
+            if (verbosity > 1) {printf("writing edge elements \n");}
             
             IntType = 2;
             
@@ -2213,7 +2213,7 @@ void VTK_WRITE_MESH (const string &filename, FILE *fp, const Mesh &Th, bool bina
         }
     } else {
         int IntType = 3;
-        if (verbosity > 1) {printf("writting triangle elements \n");}
+        if (verbosity > 1) {printf("writing triangle elements \n");}
         
         for (int it = 0; it < Th.nt; it++) {
             const Mesh::Triangle &K(Th.t(it));
@@ -2228,7 +2228,7 @@ void VTK_WRITE_MESH (const string &filename, FILE *fp, const Mesh &Th, bool bina
         }
         
         if (surface) {
-            if (verbosity > 1) {printf("writting edge elements \n");}
+            if (verbosity > 1) {printf("writing edge elements \n");}
             
             IntType = 2;
             
@@ -3769,9 +3769,9 @@ void VTK_WRITE_MESH3 (const string &filename, FILE *fp, const Mesh3 &Th, bool bi
     }
     
     fprintf(fp, "\n");
-    if (verbosity > 1) {printf("writting vertices is finish\n");}
+    if (verbosity > 1) {printf("writing vertices is finish\n");}
     
-    if (verbosity > 1) {printf("writting elements now\n");}
+    if (verbosity > 1) {printf("writing elements now\n");}
     
     //= ===============
     // CELL
@@ -3786,14 +3786,14 @@ void VTK_WRITE_MESH3 (const string &filename, FILE *fp, const Mesh3 &Th, bool bi
         totalNumInt = Th.nt * 4 + numElements;
     }
     
-    if (verbosity > 1) {printf("writting cells \n");}
+    if (verbosity > 1) {printf("writing cells \n");}
     
     // print vertex indices in ascii or binary
     fprintf(fp, "CELLS %d %d\n", numElements, totalNumInt);
     
     if (binary) {
         int IntType = 4;
-        if (verbosity > 1) {printf("writting tetrahedron elements \n");}
+        if (verbosity > 1) {printf("writing tetrahedron elements \n");}
         
         for (int it = 0; it < Th.nt; it++) {
             const Tet &K(Th.elements[it]);
@@ -3811,7 +3811,7 @@ void VTK_WRITE_MESH3 (const string &filename, FILE *fp, const Mesh3 &Th, bool bi
         }
         
         if (surface) {
-            if (verbosity > 1) {printf("writting triangle elements \n");}
+            if (verbosity > 1) {printf("writing triangle elements \n");}
             
             IntType = 3;
             
@@ -3831,7 +3831,7 @@ void VTK_WRITE_MESH3 (const string &filename, FILE *fp, const Mesh3 &Th, bool bi
         }
     } else {
         int IntType = 4;
-        if (verbosity > 1) {printf("writting tetrahedron elements \n");}
+        if (verbosity > 1) {printf("writing tetrahedron elements \n");}
         
         for (int it = 0; it < Th.nt; it++) {
             const Tet &K(Th.elements[it]);
@@ -3846,7 +3846,7 @@ void VTK_WRITE_MESH3 (const string &filename, FILE *fp, const Mesh3 &Th, bool bi
         }
         
         if (surface) {
-            if (verbosity > 1) {printf("writting triangle elements \n");}
+            if (verbosity > 1) {printf("writing triangle elements \n");}
             
             IntType = 3;
             
@@ -4874,7 +4874,7 @@ public:
                 const E_Array *a0 = dynamic_cast<const E_Array *>(args[i].LeftValue());
                 // cout << "taille" << a0->size() << endl;
                 if (a0->size() != ddim && a0->size() != stsize) {
-                    CompileError("savesol in 2D: vector solution is 2 composant, tensor solution is 3 composant");
+                    CompileError("savesol in 3D: vector solution is 3 composant, tensor solution is 3 composant");
                 }
                 
                 if (a0->size() == ddim) {
@@ -4908,7 +4908,7 @@ public:
                 }
             } else {
                 cout << " arg " << i << " " << args[i].left() << endl;
-                CompileError("savesol in 2D: Sorry no way to save this kind of data");
+                CompileError("savesol in 3D: Sorry no way to save this kind of data");
             }
         }
     }
@@ -4956,13 +4956,13 @@ void VTK_WRITE_MESHS (const string &filename, FILE *fp, const MeshS &Th, bool bi
             float f[3];
             f[0] = P.x;
             f[1] = P.y;
-            f[2] = P.z;    // P.z; 3D case
+            f[2] = P.z;
             if (binary) {
                 if (!bigEndian) {SwapBytes((char *)&f, sizeof(float), 3);}
                 
                 fwrite(&f, sizeof(float), 3, fp);
             } else {
-                fprintf(fp, "%.8g %.8g %.8g\n", P.x, P.y, 0.);
+                fprintf(fp, "%.8g %.8g %.8g\n", P.x, P.y, P.z);
             }
         }
     } else if (datasize == sizeof(double)) {
@@ -4985,9 +4985,9 @@ void VTK_WRITE_MESHS (const string &filename, FILE *fp, const MeshS &Th, bool bi
     }
     
     fprintf(fp, "\n");
-    if (verbosity > 1) {printf("writting vertices is finish\n");}
+    if (verbosity > 1) {printf("writing vertices is finish\n");}
     
-    if (verbosity > 1) {printf("writting elements now\n");}
+    if (verbosity > 1) {printf("writing elements now\n");}
     
     //= ===============
     // CELL
@@ -5002,14 +5002,14 @@ void VTK_WRITE_MESHS (const string &filename, FILE *fp, const MeshS &Th, bool bi
         totalNumInt = Th.nt * 3 + numElements;
     }
     
-    if (verbosity > 1) {printf("writting cells \n");}
+    if (verbosity > 1) {printf("writing cells \n");}
     
     // print vertex indices in ascii or binary
     fprintf(fp, "CELLS %d %d\n", numElements, totalNumInt);
     
     if (binary) {
         int IntType = 3;
-        if (verbosity > 1) {printf("writting triangle elements \n");}
+        if (verbosity > 1) {printf("writing triangle elements \n");}
         
         for (int it = 0; it < Th.nt; it++) {
             const TriangleS &K(Th.t(it));
@@ -5027,7 +5027,7 @@ void VTK_WRITE_MESHS (const string &filename, FILE *fp, const MeshS &Th, bool bi
         }
         
         if (surface) {
-            if (verbosity > 1) {printf("writting edge elements \n");}
+            if (verbosity > 1) {printf("writing edge elements \n");}
             
             IntType = 2;
             
@@ -5047,7 +5047,7 @@ void VTK_WRITE_MESHS (const string &filename, FILE *fp, const MeshS &Th, bool bi
         }
     } else {
         int IntType = 3;
-        if (verbosity > 1) {printf("writting triangle elements \n");}
+        if (verbosity > 1) {printf("writing triangle elements \n");}
         
         for (int it = 0; it < Th.nt; it++) {
             const TriangleS &K(Th.t(it));
@@ -5062,7 +5062,7 @@ void VTK_WRITE_MESHS (const string &filename, FILE *fp, const MeshS &Th, bool bi
         }
         
         if (surface) {
-            if (verbosity > 1) {printf("writting edge elements \n");}
+            if (verbosity > 1) {printf("writing edge elements \n");}
             
             IntType = 2;
             
