@@ -170,7 +170,7 @@ cout << functionDEFINITION << "changeNumbering" << endl;
       return outPETSc;
   }
   func int funcJ(real[int]& inPETSc) {
-      t = mpiWtime();
+      t = mpiWtime();
       changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
       t = mpiWtime() - t;
       cout << timeELAPSED << t << endl;
