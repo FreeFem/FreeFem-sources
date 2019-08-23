@@ -3,360 +3,228 @@ load "ClosePoints"
 
 cout << functionDEFINITION << "Voisinage" << endl;
 
-verbosity = 100;
-real[int,int] P(10,2);
-real[int,int] Q(11,2);
-for (int i=0; i<P.n; ++i)
- {
-  P(i,0)= i;
-  P(i,1)= i-1;
-  Q(i,0)= P(i,0)+i*0.001;
-  Q(i,1)= P(i,1)+i*0.001;
- }
- for (int i=P.n; i<Q.n; ++i)
- {
-  Q(i,0)= randreal1();
-  Q(i,1)= randreal1();
- }
- Q(P.n,:)=P(0,:);
- Q(P.n-2,:)=P(0,:);
-for (int i=0; i<P.n; ++i)
-  cout <<" P " << i << " = " <<P(i,0) << " " << P(i,1) << endl;
-  cout << endl;
-for (int i=0; i<Q.n; ++i)
-  cout <<" Q " << i << " = " <<Q(i,0) << " " << Q(i,1) << endl;
-int[int][int] ij(10);
-Voisinage(P,Q,0.01,ij);
-cout << " ij: "<< endl;
-for(int i=0; i<Q.n; ++i)
- {
-  cout << i << " " << ij[i].n <<" : " ;
-  for(int j=0; j<ij[i].n; ++j)
-   cout << ij[i][j] << " ";
-  cout << endl;
- }
- test(ij[0][0] == 0 && ij[0][1] == 8 && ij[0][2] == 10);
- test(ij[1][0] == 1);
- test(ij[2][0] == 2);
- test(ij[3][0] == 3);
- test(ij[4][0] == 4);
- test(ij[5][0] == 5);
- test(ij[6][0] == 6);
-
- cout << functionDEFINITION << "ClosePoints" << endl;
-
- real regtest;
-
- {
-   verbosity=1;
-
-  real[int,int] P(100,3);
-  real[int,int] Q(100,2);
-  for(int i=0; i<P.n; ++i)
-  {
-     P(i,0) = 0.5+0.1*cos(i*0.02*pi);
-     P(i,1) = 0.5+0.1*sin(i*0.02*pi);
-     Q(i,0)=P(i,0)+i*0.001;
-     Q(i,1)=P(i,1);
-
-     P(i,2) = 0.05*0.05*2*pi;// mesh size auron point..
-  }
-  // multy border syntax version 3.30 avril 2014 ...
-  real[int] xx=[0,1,1,0],
-           yy=[0,0,1,1];
-  // radius, centre of the 4 circles ..
-  real[int] RC=[ 0.1, 0.05, 0.05, 0.1],
-           XC= [0.2,0.8,0.2,0.8],
-           YC= [0.2,0.8,0.8,0.2];
-  int[int]  NC=[-10,-11,-12,13]; //list number of $\pm$ segments
-  // of the 4 circles borders
-
-  border bb(t=0,1;i)
-  {
-  // i is the the index variable of the multi border loop
-   int ii = (i+1)%4; real t1 = 1-t;
-   x =  xx[i]*t1 + xx[ii]*t;
-   y =  yy[i]*t1 + yy[ii]*t;
-   label = 0; ;
-  }
-
-  border cc(t=0,2*pi;i)
-  {
-   x = RC[i]*cos(t)+XC[i];
-   y = RC[i]*sin(t)+YC[i];
-   label = i+1;
-  }
-  int[int] nn=[4,4,5,7];// 4 border , with 4,4,5,7 segment respectively .
-  // plot(bb(nn),cc(NC),wait=1);
-  mesh th= buildmesh(bb(nn)+cc(NC), points=P,nbvx=100000) ;
-  // plot(th,wait=1,ps="o/multy-border+internal.eps");
-  regtest = th.area;
-  real eps= 0.01;
-  //dumptable(cout);
-
-  int[int] I= ClosePoints(eps,th,Q);
-  //  j=I[i] is a array given number point Q_i in th_j
-  cout << " Q_i -> th_j " << I << endl;
-  int[int] J= ClosePoints1(eps,th,Q);
-  //  j=J[i] is a array given number point th_i in Q_j
-  cout << " th_i -> Q_j " << J << endl;
-  // same try of
-  int[int] II= ClosePoints(eps,Q');// remove point to close is a set {i/ Q[I[i]] }is without commun point at eps
-  int[int] JJ= ClosePoints1(eps,Q');// remove point to close and is J[i] == J[j] => the point are to close at eps
-  cout << " II=" << II << endl;
-  cout << " JJ=" << JJ << endl;
-  int[int] KK(II.n);
-  KK=JJ(II); // Identity KK(i)==i
-  II=0:II.n-1;
-  KK-=KK;
-  test(KK.min == 0 && KK.max == 0);
-  cout <<  "------->" << II << endl;
-  cout <<  "------->" << JJ << endl;
+real[int, int] P(10, 2);
+real[int, int] Q(11, 2);
+for (int i = 0; i < P.n; ++i) {
+  P(i, 0) = i;
+  P(i, 1) = i-1;
+  Q(i, 0) = P(i,0) + i*0.001;
+  Q(i, 1) = P(i,1) + i*0.001;
 }
+for (int i = P.n; i < Q.n; ++i) {
+  Q(i, 0) = randreal1();
+  Q(i, 1) = randreal1();
+}
+Q(P.n, :) = P(0, :);
+Q(P.n-2, :) = P(0, :);
+
+int[int][int] ij(10);
+Voisinage(P, Q, 0.01, ij);
+test(ij[0][0] == 0 && ij[0][1] == 8 && ij[0][2] == 10);
+test(ij[1][0] == 1);
+test(ij[2][0] == 2);
+test(ij[3][0] == 3);
+test(ij[4][0] == 4);
+test(ij[5][0] == 5);
+test(ij[6][0] == 6);
+
+cout << functionDEFINITION << "ClosePoints" << endl;
+
 {
-  verbosity=1;
+  real[int, int] P(100, 3);
+  real[int, int] Q(100, 2);
+  for (int i = 0; i < P.n; ++i) {
+    P(i, 0) = 0.5 + 0.1*cos(i*0.02*pi);
+    P(i, 1) = 0.5 + 0.1*sin(i*0.02*pi);
+    P(i, 2) = 0.05*0.05*2*pi;
+    Q(i, 0) = P(i, 0) + i*0.001;
+    Q(i, 1) = P(i, 1);
+  }
 
- real[int,int] P(100,3);
- real[int,int] Q(2, 100);
- for(int i=0; i<P.n; ++i)
- {
-    P(i,0) = 0.5+0.1*cos(i*0.02*pi);
-    P(i,1) = 0.5+0.1*sin(i*0.02*pi);
-    Q(0, i)=P(i,0)+i*0.001;
-    Q(1, i)=P(i,1);
+  real[int] xx = [0, 1, 1, 0], yy = [0, 0, 1, 1];
 
-    P(i,2) = 0.05*0.05*2*pi;// mesh size auron point..
- }
- // multy border syntax version 3.30 avril 2014 ...
- real[int] xx=[0,1,1,0],
-          yy=[0,0,1,1];
- // radius, centre of the 4 circles ..
- real[int] RC=[ 0.1, 0.05, 0.05, 0.1],
-          XC= [0.2,0.8,0.2,0.8],
-          YC= [0.2,0.8,0.8,0.2];
- int[int]  NC=[-10,-11,-12,13]; //list number of $\pm$ segments
- // of the 4 circles borders
+  real[int] RC = [0.1, 0.05, 0.05, 0.1],
+            XC = [0.2, 0.8, 0.2, 0.8],
+            YC = [0.2, 0.8, 0.8, 0.2];
+  int[int] NC = [-10, -11, -12, 13];
 
- border bb(t=0,1;i)
- {
- // i is the the index variable of the multi border loop
-  int ii = (i+1)%4; real t1 = 1-t;
-  x =  xx[i]*t1 + xx[ii]*t;
-  y =  yy[i]*t1 + yy[ii]*t;
-  label = 0; ;
- }
+  border bb(t=0,1;i) {
+    int ii = (i+1)%4;
+    real t1 = 1-t;
+    x = xx[i]*t1 + xx[ii]*t;
+    y = yy[i]*t1 + yy[ii]*t;
+    label = 0;
+  }
 
- border cc(t=0,2*pi;i)
- {
-  x = RC[i]*cos(t)+XC[i];
-  y = RC[i]*sin(t)+YC[i];
-  label = i+1;
- }
- int[int] nn=[4,4,5,7];// 4 border , with 4,4,5,7 segment respectively .
- // plot(bb(nn),cc(NC),wait=1);
- mesh th= buildmesh(bb(nn)+cc(NC), points=P,nbvx=100000) ;
- // plot(th,wait=1,ps="o/multy-border+internal.eps");
- regtest = th.area;
- real eps= 0.01;
- //dumptable(cout);
+  border cc(t=0,2*pi;i) {
+    x = RC[i]*cos(t)+XC[i];
+    y = RC[i]*sin(t)+YC[i];
+    label = i+1;
+  }
+  int[int] nn = [4, 4, 5, 7];
+  mesh th = buildmesh(bb(nn) + cc(NC), points=P, nbvx=100000);
+  real eps = 0.01;
 
- int[int] I= ClosePoints(eps,Q);
-  // int[int] I= ClosePoints(eps,Q);
-  mesh Th = square(10, 10);
+  int[int] I = ClosePoints(eps, th, Q);
+  int[int] J = ClosePoints1(eps, th, Q);
+  int[int] II = ClosePoints(eps, Q');
+  int[int] JJ = ClosePoints1(eps, Q');
+
+  test(I.n == 100);
+  test(J.n == 665);
+  test(II.n == 52);
+  test(JJ.n == 100);
+}
+
+{
+  real[int, int] P(100, 3);
+  real[int, int] Q(2, 100);
+  for (int i=0; i<P.n; ++i) {
+    P(i, 0) = 0.5 + 0.1*cos(i*0.02*pi);
+    P(i, 1) = 0.5 + 0.1*sin(i*0.02*pi);
+    P(i, 2) = 0.05*0.05*2*pi;
+    Q(0, i) = P(i, 0) + i*0.001;
+    Q(1, i) = P(i, 1);
+  }
+
+  real[int] xx = [0, 1, 1, 0], yy = [0, 0, 1, 1];
+
+  real[int] RC = [0.1, 0.05, 0.05, 0.1],
+            XC = [0.2, 0.8, 0.2, 0.8],
+            YC = [0.2, 0.8, 0.8, 0.2];
+  int[int] NC = [-10, -11, -12, 13];
+
+  border bb(t=0,1;i) {
+    int ii = (i+1)%4;
+    real t1 = 1-t;
+    x = xx[i]*t1 + xx[ii]*t;
+    y = yy[i]*t1 + yy[ii]*t;
+    label = 0;
+  }
+
+  border cc(t=0,2*pi;i) {
+    x = RC[i]*cos(t)+XC[i];
+    y = RC[i]*sin(t)+YC[i];
+    label = i+1;
+  }
+  int[int] nn = [4, 4, 5, 7];
+  mesh th = buildmesh(bb(nn) + cc(NC), points=P, nbvx=100000);
+  real eps = 0.01;
+
+  int[int] I = ClosePoints(eps, Q);
+
+  test(I.n == 52);
 }
 
 {
   cout << functionDEFINITION << "neighborhood" << endl;
 
-  verbosity = 100;
-  real[int,int] P(10,2);
-  real[int,int] Q(11,2);
-  for (int i=0; i<P.n; ++i)
-   {
-    P(i,0)= i;
-    P(i,1)= i-1;
-    Q(i,0)= P(i,0)+i*0.001;
-    Q(i,1)= P(i,1)+i*0.001;
-   }
-   for (int i=P.n; i<Q.n; ++i)
-   {
-    Q(i,0)= randreal1();
-    Q(i,1)= randreal1();
-   }
-   Q(P.n,:)=P(0,:);
-   Q(P.n-2,:)=P(0,:);
-  for (int i=0; i<P.n; ++i)
-    cout <<" P " << i << " = " <<P(i,0) << " " << P(i,1) << endl;
-    cout << endl;
-  for (int i=0; i<Q.n; ++i)
-    cout <<" Q " << i << " = " <<Q(i,0) << " " << Q(i,1) << endl;
+  real[int,int] P(10, 2);
+  real[int,int] Q(11, 2);
+  for (int i = 0; i < P.n; ++i) {
+    P(i, 0) = i;
+    P(i, 1) = i - 1;
+    Q(i, 0) = P(i, 0) + i*0.001;
+    Q(i, 1) = P(i, 1) + i*0.001;
+  }
+  for (int i = P.n; i < Q.n; ++i) {
+    Q(i, 0) = randreal1();
+    Q(i, 1) = randreal1();
+  }
+  Q(P.n, :) = P(0, :);
+  Q(P.n-2, :) = P(0, :);
   int[int][int] ij(10);
-  neighborhood(P,Q,0.01,ij);
-  cout << " ij: "<< endl;
-  for(int i=0; i<Q.n; ++i)
-   {
-    cout << i << " " << ij[i].n <<" : " ;
-    for(int j=0; j<ij[i].n; ++j)
-     cout << ij[i][j] << " ";
-    cout << endl;
-   }
-   test(ij[0][0] == 0 && ij[0][1] == 8 && ij[0][2] == 10);
-   test(ij[1][0] == 1);
-   test(ij[2][0] == 2);
-   test(ij[3][0] == 3);
-   test(ij[4][0] == 4);
-   test(ij[5][0] == 5);
-   test(ij[6][0] == 6);
+  neighborhood(P, Q, 0.01, ij);
+  test(ij[0][0] == 0 && ij[0][1] == 8 && ij[0][2] == 10);
+  test(ij[1][0] == 1);
+  test(ij[2][0] == 2);
+  test(ij[3][0] == 3);
+  test(ij[4][0] == 4);
+  test(ij[5][0] == 5);
+  test(ij[6][0] == 6);
 }
-
 
 cout << functionDEFINITION << "ClosePoints2" << endl;
 {
-  real regtest;
+  real[int,int] P(100, 3);
+  real[int,int] Q(100, 2);
+  for (int i = 0; i < P.n; ++i) {
+    P(i, 0) = 0.5 + 0.1*cos(i*0.02*pi);
+    P(i, 1) = 0.5 + 0.1*sin(i*0.02*pi);
+    P(i, 2) = 0.05*0.05*2*pi;
+    Q(i, 0) = P(i, 0) + i*0.001;
+    Q(i, 1) = P(i, 1);
+  }
 
-  {
-    verbosity=1;
+  real[int] xx = [0, 1, 1, 0], yy = [0, 0, 1, 1];
 
-   real[int,int] P(100,3);
-   real[int,int] Q(100,2);
-   for(int i=0; i<P.n; ++i)
-   {
-      P(i,0) = 0.5+0.1*cos(i*0.02*pi);
-      P(i,1) = 0.5+0.1*sin(i*0.02*pi);
-      Q(i,0)=P(i,0)+i*0.001;
-      Q(i,1)=P(i,1);
+  real[int] RC = [0.1, 0.05, 0.05, 0.1],
+            XC = [0.2, 0.8, 0.2, 0.8],
+            YC = [0.2, 0.8, 0.8, 0.2];
+  int[int] NC = [-10, -11, -12, 13];
 
-      P(i,2) = 0.05*0.05*2*pi;// mesh size auron point..
-   }
-   // multy border syntax version 3.30 avril 2014 ...
-   real[int] xx=[0,1,1,0],
-            yy=[0,0,1,1];
-   // radius, centre of the 4 circles ..
-   real[int] RC=[ 0.1, 0.05, 0.05, 0.1],
-            XC= [0.2,0.8,0.2,0.8],
-            YC= [0.2,0.8,0.8,0.2];
-   int[int]  NC=[-10,-11,-12,13]; //list number of $\pm$ segments
-   // of the 4 circles borders
+  border bb(t=0,1;i) {
+    int ii = (i+1)%4;
+    real t1 = 1-t;
+    x = xx[i]*t1 + xx[ii]*t;
+    y = yy[i]*t1 + yy[ii]*t;
+    label = 0;
+  }
 
-   border bb(t=0,1;i)
-   {
-   // i is the the index variable of the multi border loop
-    int ii = (i+1)%4; real t1 = 1-t;
-    x =  xx[i]*t1 + xx[ii]*t;
-    y =  yy[i]*t1 + yy[ii]*t;
-    label = 0; ;
-   }
-
-   border cc(t=0,2*pi;i)
-   {
+  border cc(t=0,2*pi;i) {
     x = RC[i]*cos(t)+XC[i];
     y = RC[i]*sin(t)+YC[i];
     label = i+1;
-   }
-   int[int] nn=[4,4,5,7];// 4 border , with 4,4,5,7 segment respectively .
-   // plot(bb(nn),cc(NC),wait=1);
-   mesh th= buildmesh(bb(nn)+cc(NC), points=P,nbvx=100000) ;
-   // plot(th,wait=1,ps="o/multy-border+internal.eps");
-   regtest = th.area;
-   real eps= 0.01;
-   //dumptable(cout);
-
-   real[int, int] thReal = P;
-   real[int, int] thReal2 = Q;
-   int[int] I= ClosePoints2(eps, thReal, thReal2);
-    // j=I[i] is a array given number point Q_i in th_j
-   cout << " Q_i -> th_j " << I << endl;
-   int[int] J= ClosePoints2(eps, thReal, thReal2);
-    // j=J[i] is a array given number point th_i in Q_j
-   cout << " th_i -> Q_j " << J << endl;
-   // same try of
-   int[int] II= ClosePoints2(eps, thReal, thReal2);// remove point to close is a set {i/ Q[I[i]] }is without commun point at eps
-   int[int] JJ= ClosePoints2(eps, thReal, thReal2);// remove point to close and is J[i] == J[j] => the point are to close at eps
-   cout << " II=" << II << endl;
-   cout << " JJ=" << JJ << endl;
-   int[int] KK(II.n);
-   KK=JJ(II); // Identity KK(i)==i
-   II=0:II.n-1;
-   KK-=KK;
-   test(KK.min == 0 && KK.max == 0);
-   cout <<  "------->" << II << endl;
-   cout <<  "------->" << JJ << endl;
   }
-}
+  int[int] nn = [4, 4, 5, 7];
+  mesh th = buildmesh(bb(nn) + cc(NC), points=P, nbvx=100000);
+  real eps = 0.01;
 
+  real[int, int] thReal = P;
+  real[int, int] thReal2 = Q;
+  int[int] I = ClosePoints2(eps, thReal, thReal2);
+  test(I[0] == 0 && I[1] == 1);
+}
 
 cout << functionDEFINITION << "BorderIntersect" << endl;
 {
-  real regtest;
+  real[int, int] P(100, 3);
+  real[int, int] Q(100, 2);
+  for (int i = 0; i < P.n; ++i) {
+    P(i, 0) = 0.5 + 0.1*cos(i*0.02*pi);
+    P(i, 1) = 0.5 + 0.1*sin(i*0.02*pi);
+    P(i, 2) = 0.05*0.05*2*pi;
+    Q(i, 0) = P(i, 0) + i*0.001;
+    Q(i, 1) = P(i, 1);
+  }
 
-  {
-    verbosity=1;
+  real[int] xx = [0, 1, 1, 0], yy = [0, 0, 1, 1];
 
-   real[int,int] P(100,3);
-   real[int,int] Q(100,2);
-   for(int i=0; i<P.n; ++i)
-   {
-      P(i,0) = 0.5+0.1*cos(i*0.02*pi);
-      P(i,1) = 0.5+0.1*sin(i*0.02*pi);
-      Q(i,0)=P(i,0)+i*0.001;
-      Q(i,1)=P(i,1);
+  real[int] RC = [0.1, 0.05, 0.05, 0.1],
+            XC = [0.2, 0.8, 0.2, 0.8],
+            YC = [0.2, 0.8, 0.8, 0.2];
+  int[int] NC = [-10, -11, -12, 13];
 
-      P(i,2) = 0.05*0.05*2*pi;// mesh size auron point..
-   }
-   // multy border syntax version 3.30 avril 2014 ...
-   real[int] xx=[0,1,1,0],
-            yy=[0,0,1,1];
-   // radius, centre of the 4 circles ..
-   real[int] RC=[ 0.1, 0.05, 0.05, 0.1],
-            XC= [0.2,0.8,0.2,0.8],
-            YC= [0.2,0.8,0.8,0.2];
-   int[int]  NC=[-10,-11,-12,13]; //list number of $\pm$ segments
-   // of the 4 circles borders
+  border bb(t=0,1;i) {
+    int ii = (i+1)%4;
+    real t1 = 1-t;
+    x = xx[i]*t1 + xx[ii]*t;
+    y = yy[i]*t1 + yy[ii]*t;
+    label = 0;
+  }
 
-   border bb(t=0,1;i)
-   {
-   // i is the the index variable of the multi border loop
-    int ii = (i+1)%4; real t1 = 1-t;
-    x =  xx[i]*t1 + xx[ii]*t;
-    y =  yy[i]*t1 + yy[ii]*t;
-    label = 0; ;
-   }
-
-   border cc(t=0,2*pi;i)
-   {
+  border cc(t=0,2*pi;i) {
     x = RC[i]*cos(t)+XC[i];
     y = RC[i]*sin(t)+YC[i];
     label = i+1;
-   }
-   int[int] nn=[4,4,5,7];// 4 border , with 4,4,5,7 segment respectively .
-   // plot(bb(nn),cc(NC),wait=1);
-   mesh th= buildmesh(bb(nn)+cc(NC), points=P,nbvx=100000) ;
-   // plot(th,wait=1,ps="o/multy-border+internal.eps");
-   regtest = th.area;
-   real eps= 0.01;
-   //dumptable(cout);
-
-   real[int, int] thReal = P;
-   real[int, int] thReal2 = Q;
-   int[int, int] thReal3 = [[0, 0, 0], [0, 0, 0]];
-   // BorderIntersect(th, P, Q, P, Q, thReal3);
-   int[int] I= ClosePoints2(eps, thReal, thReal2);
-    // j=I[i] is a array given number point Q_i in th_j
-   cout << " Q_i -> th_j " << I << endl;
-   int[int] J= ClosePoints2(eps, thReal, thReal2);
-    // j=J[i] is a array given number point th_i in Q_j
-   cout << " th_i -> Q_j " << J << endl;
-   // same try of
-   int[int] II= ClosePoints2(eps, thReal, thReal2);// remove point to close is a set {i/ Q[I[i]] }is without commun point at eps
-   int[int] JJ= ClosePoints2(eps, thReal, thReal2);// remove point to close and is J[i] == J[j] => the point are to close at eps
-   cout << " II=" << II << endl;
-   cout << " JJ=" << JJ << endl;
-   int[int] KK(II.n);
-   KK=JJ(II); // Identity KK(i)==i
-   II=0:II.n-1;
-   KK-=KK;
-   assert(KK.min==0 &&KK.max==0 );
-   cout <<  "------->" << II << endl;
-   cout <<  "------->" << JJ << endl;
   }
+  int[int] nn = [4, 4, 5, 7];
+  mesh th = buildmesh(bb(nn) + cc(NC), points=P, nbvx=100000);
+  real eps = 0.01;
+
+  real[int, int] thReal = P;
+  real[int, int] thReal2 = Q;
+  int[int, int] thReal3 = [[0, 0, 0], [0, 0, 0]];
+  int[int] I = ClosePoints2(eps, thReal, thReal2);
+  test(I[0] == 0 && I[1] == 1);
 }
