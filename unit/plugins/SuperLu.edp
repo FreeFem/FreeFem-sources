@@ -3,28 +3,43 @@ load "SuperLu"
 
 DefaultSolver="SUPERLU";
 
-int nn=30;
- mesh Th=square(nn,nn);
-verbosity=3;
- fespace Vh(Th,P1);     // P1 FE space
- Vh uh,vh;              // unkown and test function.
- func f=1;                 //  right hand side function
- func g=0;                 //  boundary condition function
- int err=0;
- func bool verif()
- {
-	real umax  =0.361995;
-	if( abs( umax - uh[].max) >0.001) err++;
- }
- int init=0;
- problem laplace0(uh,vh,init=init) =
-    int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh) )
-  + int1d(Th,1)( uh*vh)
-  + int1d(Th,1)( - vh)
-  + int2d(Th)( -f*vh )
-  + on(2,3,4,uh=g);
+real t;
 
-  real cpu=clock() ;
-  laplace0; // solve the problem plot(uh); // to see the result
-  cout << "-- lap UMFPACK " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
-  verif();
+cout << functionDEFINITION << "SuperLu" << endl;
+
+int nn = 30;
+mesh Th = square(nn, nn);
+fespace Vh(Th, P1);
+Vh uh, vh;
+func f = 1;
+func g = 0;
+int err = 0;
+
+func bool verif() {
+  real umax = 0.361995;
+  if(abs(umax - uh[].max) > 0.001) err++;
+}
+
+problem laplace0 (uh, vh)
+  = int2d(Th)(
+      dx(uh)*dx(vh)
+    + dy(uh)*dy(vh)
+  )
+  + int1d(Th, 1)(
+     uh*vh
+  )
+  + int1d(Th, 1)(
+    - vh
+  )
+  + int2d(Th)(
+    - f*vh
+  )
+  + on(2, 3, 4, uh=g);
+
+t = clock();
+laplace0;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+verif();
+test(err == 0);
