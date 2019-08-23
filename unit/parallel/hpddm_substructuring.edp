@@ -192,3 +192,17 @@ cout << functionDEFINITION << "changeNumbering" << endl;
   cout << timeELAPSED << t << endl;
   plotMPI(M, u, Pk, def, real, cmm = "Global solution")
 }
+
+cout << functionDEFINITION << "DDM" << endl;
+// {
+  // matrix A = [[1, 2, 0, 0, 0, 0, 0, 0],
+  // [0, 3, 0, 0, 0, 0, 9, 0],
+  // [0, 0, 0, 0, 0, 0, 0, 0],
+  // [0, 0, 1, 0, 0, 0, 0, 4 ]];
+  // real[int] b = [1, 2, 3, 4];
+  // real[int] c = [1, 2, 3, 4];
+  // mesh Th = square(5, 5);
+  // fespace Uh(Th, P1);
+  // Uh u=x+y, uu=x*y;
+  // DDM(A, b, c);
+// }
