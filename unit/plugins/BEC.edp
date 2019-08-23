@@ -57,5 +57,5 @@ cout << functionDEFINITION << "dyGPvortex" << endl;
   complex vortex = dyGPvortex(4, 2, 0);
   t = clock() - t;
   cout << timeELAPSED << t << endl;
-  test(abs(vortex) < HWERROR)
+  test(abs(vortex) < HWERROR);
 }
