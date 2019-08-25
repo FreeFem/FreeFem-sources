@@ -1145,6 +1145,12 @@ AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
 {
   typedef v_fes *pfes;
   typedef typename  v_fes::FESpace FESpace;
+  typedef typename  FESpace::Mesh Mesh;
+  typedef typename  FESpace::FElement FElement;
+  typedef typename  Mesh::Element Element;
+  typedef typename  Mesh::Vertex Vertex;
+  typedef typename  Mesh::RdHat RdHat;
+  typedef typename  Mesh::Rd Rd;
 
   pfes  &  pp= *GetAny<pfes * >((*l->ppfes)(stack));
   FESpace * pVh = *pp ;
@@ -1215,6 +1221,15 @@ struct CGMatVirtPreco : CGMatVirt<int,R>
 template<class R,class v_fes>
 AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
 {
+  typedef typename  v_fes::pfes pfes;
+  typedef typename  v_fes::FESpace FESpace;
+  typedef typename  FESpace::Mesh Mesh;
+  typedef typename  FESpace::FElement FElement;
+  typedef typename  Mesh::Element Element;
+  typedef typename  Mesh::Vertex Vertex;
+  typedef typename  Mesh::RdHat RdHat;
+  typedef typename  Mesh::Rd Rd;
+
   assert(b && b->nargs);// *GetAny<pfes * >
   pfes  * pUh= GetAny<pfes *>((*b->euh)(stack));
   pfes  * pVh= GetAny<pfes *>((*b->evh)(stack));
