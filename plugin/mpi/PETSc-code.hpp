@@ -1360,12 +1360,6 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
         if(std::is_same<Type, Dmat>::value) {
             PC pc;
             KSPGetPC(ksp, &pc);
-            KNM<double>* ptCoordinates = nargs[12] ? GetAny<KNM<double>*>((*nargs[12])(stack)) : 0;
-            if(ptCoordinates) {
-                PetscInt bs;
-                MatGetBlockSize(ptA->_petsc, &bs);
-                PCSetCoordinates(pc, ptCoordinates->M(), ptCoordinates->N(), (double*)*ptCoordinates);
-            }
 #ifdef PCHPDDM
             PCType type;
             PCGetType(pc, &type);

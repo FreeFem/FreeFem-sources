@@ -1144,6 +1144,7 @@ template<class R,class v_fes>
 AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
 {
   typedef v_fes *pfes;
+  typedef typename  v_fes::FESpace FESpace;
 
   pfes  &  pp= *GetAny<pfes * >((*l->ppfes)(stack));
   FESpace * pVh = *pp ;
