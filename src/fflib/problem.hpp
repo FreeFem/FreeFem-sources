@@ -284,7 +284,7 @@ public:
   enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3, int3d = 4, intallfaces= 5,intallVFfaces=6 } ; //3d
   typeofkind  kind; //  0
   int d; // 3d
-  bool isMeshS;;
+  bool isMeshS;
   typedef const CDomainOfIntegration* Result;
   Expression Th;
   Expression mapt[3],mapu[3];
@@ -986,7 +986,7 @@ public:
       //  pmcc->A.cswap(pmc);
 
         if(verbosity>99999)   cerr << "newpMatrice_Creuse  set " << pmcc << " " << pmcc->count <<" " << pmcc->A
-        << " to " << pmc  << " init: "<< init << endl; ;;
+        << " to " << pmc  << " init: "<< init << endl;
        // pmc->dump(cerr) << endl;
          pmc=0;
         return  pmcc;
@@ -1003,7 +1003,7 @@ public:
         pA->Add(pC,cc);
       // to do.. XXXX  July 2017 FH.
         if(verbosity>99999)   cerr << "newpMatrice_Creuse  add " << pmcc << " " << pmcc->count <<" " << pmcc->A
-            << " to " << pmc  << endl; ;;
+            << " to " << pmc  << endl;
         
         pmc=0;//  pcm is delete after instriction
         return  pmcc;
@@ -1144,13 +1144,6 @@ template<class R,class v_fes>
 AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
 {
   typedef v_fes *pfes;
-  typedef typename  v_fes::FESpace FESpace;
-  typedef typename  FESpace::Mesh Mesh;
-  typedef typename  FESpace::FElement FElement;
-  typedef typename  Mesh::Element Element;
-  typedef typename  Mesh::Vertex Vertex;
-  typedef typename  Mesh::RdHat RdHat;
-  typedef typename  Mesh::Rd Rd;
 
   pfes  &  pp= *GetAny<pfes * >((*l->ppfes)(stack));
   FESpace * pVh = *pp ;
@@ -1221,15 +1214,6 @@ struct CGMatVirtPreco : CGMatVirt<int,R>
 template<class R,class v_fes>
 AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
 {
-  typedef typename  v_fes::pfes pfes;
-  typedef typename  v_fes::FESpace FESpace;
-  typedef typename  FESpace::Mesh Mesh;
-  typedef typename  FESpace::FElement FElement;
-  typedef typename  Mesh::Element Element;
-  typedef typename  Mesh::Vertex Vertex;
-  typedef typename  Mesh::RdHat RdHat;
-  typedef typename  Mesh::Rd Rd;
-
   assert(b && b->nargs);// *GetAny<pfes * >
   pfes  * pUh= GetAny<pfes *>((*b->euh)(stack));
   pfes  * pVh= GetAny<pfes *>((*b->evh)(stack));

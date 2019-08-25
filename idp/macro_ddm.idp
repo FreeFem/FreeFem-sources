@@ -1,4 +1,3 @@
-load "thresholdings"
 include "getARGV.idp"
 IFMACRO(!partitioner)
 macro partitioner()metis// EOM

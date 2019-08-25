@@ -27,7 +27,7 @@ PYTHON2?=python2.7
 include Makefile.inc
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 dir3rdparty := $(abspath $(dir $(mkfile_path))/..)
- 
+
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(FF_prefix_petsc)" && test -w "$(DESTDIR)$(FF_prefix_petsc) || echo sudo)
 W_SUDO1=$(SHELL ls	)
 ifeq ($(FF_generic_petsc), yes)
@@ -39,7 +39,7 @@ ifeq ($(WIN32DLLTARGET),)
 ##   Not on  windows ....
   FFWINDOWS=false
   WITH_SLEPC=yes
-  FLAGS_CONF_PETSC_REAL= 		--with-debugging=no \
+  FLAGS_CONF_PETSC_REAL= --with-debugging=no \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
 		COPTFLAGS='-O3  $(FLAGS_MTUNE)' \
 		CXXOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
@@ -47,14 +47,14 @@ ifeq ($(WIN32DLLTARGET),)
 		CFLAGS=' $(FLAGS_MTUNE)' \
 		CXXFLAGS='$(FLAGS_MTUNE)' \
 		FFLAGS='$(FLAGS_MTUNE)' \
-        --with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
+		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 		--with-scalar-type=real $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
 		--download-scalapack --download-metis --download-ptscotch \
 		--download-mumps --download-ml --download-hypre --download-parmetis \
 		--download-superlu --download-suitesparse --download-fftw --download-slepc 
 
-FLAGS_CONF_PETSC_COMPLEX= 	--with-debugging=no \
+FLAGS_CONF_PETSC_COMPLEX= --with-debugging=no \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
 		COPTFLAGS='-O3  $(FLAGS_MTUNE)' \
 		CXXOPTFLAGS='-O3  $(FLAGS_MTUNE)' \
@@ -93,10 +93,10 @@ else
 	--with-ssl=0 --with-x=0 --with-debugging=0 \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
 	--download-f2cblaslapack
-  #--download-slepc 
-  #	--with-blas-lapack-lib='/mingw64/lib/libopenblas.a' \
+  #--download-slepc
+  #--with-blas-lapack-lib='/mingw64/lib/libopenblas.a' \
 
-  
+
  FLAGS_CONF_PETSC_COMPLEX= --with-python-exec=/usr/bin/python2 	--with-shared-libraries=0	--with-debugging=no \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 \
 	COPTFLAGS='-O3  $(FLAGS_MTUNE) -D__int64=long\ long' \
@@ -104,23 +104,22 @@ else
 	CFLAGS=' $(FLAGS_MTUNE) -D__int64=long\ long' \
 	CXXFLAGS='$(FLAGS_MTUNE) -D__int64=long\ long' \
 	--with-scalar-type=complex \
-    --with-mpi-lib='$(MPI_LIB)' \
+	--with-mpi-lib='$(MPI_LIB)' \
 	--with-mpi-include='$(MPI_INC_DIR)' \
 	--with-metis-lib=$(dir3rdparty)/lib/parmetis/libmetis.a \
 	--with-metis-include=$(dir3rdparty)/include/parmetis \
 	--download-suitesparse \
-	--with-ssl=0 --with-x=0 --with-debugging=0  \
+	--with-ssl=0 --with-x=0 --with-debugging=0 \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
 	--download-f2cblaslapack
-#	--download-slepc 
-	
+#	--download-slepc
 #	--with-suitesparse-include=$(dir3rdparty)/include \
 #	--with-suitesparse-lib='[$(dir3rdparty)/lib/libumfpack.a,$(dir3rdparty)/lib/libcholmod.a,$(dir3rdparty)/lib/libcolamd.a,$(dir3rdparty)/lib/libamd.a,$(dir3rdparty)/lib/libsuitesparseconfig.a]' \	--with-suitesparse-lib='[$(dir3rdparty)/lib/libumfpack.a,$(dir3rdparty)/lib/libcolmod.a,$(dir3rdparty)/lib/libcholamd.a,$(dir3rdparty)/lib/libamd.a,$(dir3rdparty)/lib/libsuitesparseconfig.a]' \
 
-   
+
 endif
 all-local:
-	@echo make .. 
+	@echo make ..
 	@echo " # To build petsc and slepc do $ make petsc-slepc"
 	@echo " # warning you have no write acces in $(DESTDIR)$(FF_prefix_petsc)"
 	@echo " # need sudo if '$(W_SUDO)' == 'sudo'  .." $(W_SUDO1)
@@ -269,28 +268,28 @@ endif
 ##  need include include Make-petsc-download.mk
 WHERE-all:Makefile WHERE WHERE-complex
 	echo >$@
-	test -z  '$(SCALAPACK_LIB)'  ||   echo scalapack LD $(SCALAPACK_LIB)  >>$@ 
-	test -z  '$(SCALAPACK_INCLUDE)'  ||    echo scalapack INCLUDE -I$(SCALAPACK_INCLUDE)  >>$@ 
-	test -z  '$(METIS_LIB)'  ||   echo metis LD $(METIS_LIB)  >>$@ 
-	test -z  '$(METIS_INCLUDE)'  ||   echo metis INCLUDE -I$(METIS_INCLUDE)  >>$@ 
-	test -z  '$(MUMPS_LIB)'  ||   echo mumps LD $(MUMPS_LIB)  >>$@ 
-	test -z  '$(MUMPS_INCLUDE)'  ||   echo mumps INCLUDE -I$(MUMPS_INCLUDE)  >>$@ 
-	test -z  '$(SUPERLU_LIB)'  ||   echo superlu LD $(SUPERLU_LIB)  >>$@ 
-	test -z  '$(SUPERLU_INCLUDE)'  ||   echo superlu INCLUDE -I$(SUPERLU_INCLUDE)  >>$@ 
-	test -z  '$(FFTW_LIB)'  ||   echo fftw LD $(FFTW_LIB)  >>$@ 
-	test -z  '$(FFTW_INCLUDE)'  ||   echo fftw INCLUDE -I$(FFTW_INCLUDE)   >>$@ 
-	test -z  '$(PTSCOTCH_LIB)'  ||   echo ptscotch LD $(PTSCOTCH_LIB)  >>$@ 
-	test -z  '$(PTSCOTCH_INCLUDE)'  ||   echo ptscotch INCLUDE -I$(PTSCOTCH_INCLUDE)  >>$@ 
-	test -z  '$(PARMETIS_LIB)'  ||   echo parmetis LD $(PARMETIS_LIB) >>$@ 
-	test -z  '$(PARMETIS_INCLUDE)'  ||   echo parmetis INCLUDE -I$(PARMETIS_INCLUDE) >>$@ 
+	test -z  '$(SCALAPACK_LIB)'  ||   echo scalapack LD $(SCALAPACK_LIB)  >>$@
+	test -z  '$(SCALAPACK_INCLUDE)'  ||    echo scalapack INCLUDE -I$(SCALAPACK_INCLUDE)  >>$@
+	test -z  '$(METIS_LIB)'  ||   echo metis LD $(METIS_LIB)  >>$@
+	test -z  '$(METIS_INCLUDE)'  ||   echo metis INCLUDE -I$(METIS_INCLUDE)  >>$@
+	test -z  '$(MUMPS_LIB)'  ||   echo mumps LD $(MUMPS_LIB)  >>$@
+	test -z  '$(MUMPS_INCLUDE)'  ||   echo mumps INCLUDE -I$(MUMPS_INCLUDE)  >>$@
+	test -z  '$(SUPERLU_LIB)'  ||   echo superlu LD $(SUPERLU_LIB)  >>$@
+	test -z  '$(SUPERLU_INCLUDE)'  ||   echo superlu INCLUDE -I$(SUPERLU_INCLUDE)  >>$@
+	test -z  '$(FFTW_LIB)'  ||   echo fftw LD $(FFTW_LIB)  >>$@
+	test -z  '$(FFTW_INCLUDE)'  ||   echo fftw INCLUDE -I$(FFTW_INCLUDE)   >>$@
+	test -z  '$(PTSCOTCH_LIB)'  ||   echo ptscotch LD $(PTSCOTCH_LIB)  >>$@
+	test -z  '$(PTSCOTCH_INCLUDE)'  ||   echo ptscotch INCLUDE -I$(PTSCOTCH_INCLUDE)  >>$@
+	test -z  '$(PARMETIS_LIB)'  ||   echo parmetis LD $(PARMETIS_LIB) >>$@
+	test -z  '$(PARMETIS_INCLUDE)'  ||   echo parmetis INCLUDE -I$(PARMETIS_INCLUDE) >>$@
 	echo 'petsc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lpetsc' >>$@
 	echo 'petsc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'  >>$@
 	echo 'petsccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lpetsc' >>$@
 	echo 'petsccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >> $@
-	test  '$(WITH_SLEPC)' = yes ||  echo 'slepc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lslepc'  >>$@ 
-	test  '$(WITH_SLEPC)' = yes ||   echo 'slepc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'   >>$@ 
-	test  '$(WITH_SLEPC)' = yes ||  echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lslepc'  >>$@ 
-	test  '$(WITH_SLEPC)' = yes ||   echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >>$@ 
+	test  '$(WITH_SLEPC)' = yes ||  echo 'slepc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lslepc'  >>$@
+	test  '$(WITH_SLEPC)' = yes ||   echo 'slepc INCLUDE -I"$(DIR_INSTALL_REAL)/include"'   >>$@
+	test  '$(WITH_SLEPC)' = yes ||  echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lslepc'  >>$@
+	test  '$(WITH_SLEPC)' = yes ||   echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"'  >>$@
 
 #
 else
@@ -335,7 +334,7 @@ ifeq ($(WITH_SLEPC),yes)
 	echo 'slepc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lslepc' > $@
 	echo 'slepc INCLUDE -I"$(DIR_INSTALL_REAL)/include"' >> $@
 else
-	echo "sorry no SLEPC" 
+	echo "sorry no SLEPC"
 endif
 
 clean:clean-local
