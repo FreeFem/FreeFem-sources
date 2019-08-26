@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << functionDEFINITION << "complex" << endl;
+cout << functionDEFINITION << "complexEigenValue" << endl;
 real t;
 
 real kc2 = 1.;
@@ -20,7 +20,7 @@ mesh Th = buildmesh(a0(20) + a1(20) + a2(20)
 
 // Fespace
 fespace Vh(Th, P1);
-Vh u, v;
+Vh<complex> u, v;
 
 // Solve
 solve sound(u, v)
@@ -34,11 +34,11 @@ solve sound(u, v)
    )
    ;
 
-real sigma = 20; //value of the shift
+real sigma = 20; // value of the shift
 
 // Problem
-// OP = A - sigma B ; // The shifted matrix
-varf op(u1, u2)
+// OP = A - sigma B;
+varf vA(u1, u2)
    = int2d(Th)(
         dx(u1)*dx(u2)
       + dy(u1)*dy(u2)
@@ -46,14 +46,13 @@ varf op(u1, u2)
    )
    ;
 
-varf b([u1], [u2])
+varf vB([u1], [u2])
    = int2d(Th)(
         u1*u2
    )
-   ; // No Boundary condition see note \ref{note BC EV}
+   ;
 
-matrix OP = op(Vh, Vh, solver=Crout, factorize=1);
-matrix B = b(Vh, Vh, solver=CG, eps=1e-20);
+matrix<complex> A = vA(Vh, Vh, solver=Crout, factorize=1);
+matrix<complex> B = vB(Vh, Vh, solver=CG, eps=1e-20);
 
-
-// test(rounded == 20);
+// test(abs(rounded - 20.) < 1.);

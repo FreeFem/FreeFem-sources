@@ -2,7 +2,6 @@ include "test.idp"
 
 cout << functionDEFINITION << "average" << endl;
 real t;
-macro dn(u) (N.x*dx(u)+N.y*dy(u) ) //  def the normal derivative
 
 cout << parameterDEFINITION << "complex" << endl;
 {
@@ -30,8 +29,8 @@ cout << parameterDEFINITION << "real" << endl;
   mesh Th = square(10, 10);
   fespace Uh(Th, P1);
   varf vTest (u, v)
-  = intalledges(Th)(
-    average(u) * v
+    = intalledges(Th)(
+      average(u) * v
     )
     + on(1, u=0)
     ;
@@ -44,8 +43,8 @@ cout << parameterDEFINITION << "real" << endl;
   mesh Th = square(10, 10);
   fespace Uh(Th, P1);
   varf vTest (u, v)
-  = intalledges(Th)(
-    average(u) * v
+    = intalledges(Th)(
+      average(u) * v
     )
     + on(1, 2, 3, 4, u=1)
     ;

@@ -2,6 +2,8 @@ include "test.idp"
 
 load "mpi-cmaes"
 
+cout << functionDEFINITION << "cmaesMPI" << endl;
+
 real t;
 int NN = 6;
 mesh Th = square(NN,NN);

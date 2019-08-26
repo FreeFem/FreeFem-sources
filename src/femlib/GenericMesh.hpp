@@ -60,7 +60,7 @@ namespace Fem2D  {
 
 inline int  randwalk(int ncas)
 {
-        const long long a = 314125421, b =1, m=  777777;
+        const long long a = 314125421, m=  777777;
         static long xn = 19999999%m;
         if(ncas <=0) xn=19999999%m;
         long long xxn = xn;
@@ -852,7 +852,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         {
             for (int ke=0;ke<nbe;++ke)
             {
-                int sens,s=0,ss=0,sk=0;
+                int sens,s=0,ss=0;
                 SortArray<int,nva> a(itembe(ke,&sens));
 
                 typename HashTable<SortArray<int,nva>,int>::iterator p= h.find(a);

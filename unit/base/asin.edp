@@ -44,7 +44,7 @@ test(isNaN(theta5));
 cout << typeDEFINITION << "real[int]" << endl;
 
 int n = 4;
-real[int] A = [-1.,0.,0.3,1.];
+real[int] A = [-1., 0., 0.3, 1.];
 real[int] B(n);
 
 t = clock();
@@ -55,8 +55,10 @@ for (int i = 0; i < n; i++) {
   test(B[i] == asin(A[i]));
 }
 
+cout << typeDEFINITION << "real[int, int]" << endl;
+
 int tab = 2;
-real[int, int] AA = [[-1.,0.8,0.3,1.],[-0.9, -1.,1.,0.8]];
+real[int, int] AA = [[-1., 0.8, 0.3, 1.], [-0.9, -1., 1., 0.8]];
 real[int, int] BB(tab, n);
 
 t = clock();

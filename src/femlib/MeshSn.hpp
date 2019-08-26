@@ -140,7 +140,7 @@ typedef GenericVertex<R3> Vertex3;
          // mapping for volume/surface vertices
         int *mapSurf2Vol; //*liste_v_num_surf;
         int *mapVol2Surf; //*v_num_surf;
-        MeshS():mapVol2Surf(0),mapSurf2Vol(0) {};
+        MeshS():mapSurf2Vol(0),mapVol2Surf(0) {};
         MeshS(const string);
         MeshS(const string, const long);
         void read(istream &f);
