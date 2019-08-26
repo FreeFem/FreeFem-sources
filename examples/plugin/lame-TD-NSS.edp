@@ -11,6 +11,8 @@
 
   This formulation is call TD-NSS
 */
+if (HaveUMFPACK) //  need UMPACK  computation 
+{
 load "Element_Mixte"
 load "Element_P3"
 int nn=10;
@@ -81,7 +83,7 @@ plot([u1,u2], wait=1);
 
 real errl2 = sqrt(int2d(Th)( square(w1-u1) + square(w2-w2)));
 cout << " errL2 = " << errl2 << endl;
-
+}
 
 
 
