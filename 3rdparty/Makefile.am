@@ -179,9 +179,9 @@ reinstall-boost:./getall
 	-rm -rf boost
 	-test -n "$(TOOL_COMPILE_boost)" && $(MAKE) install-boost || true
 boost/done.tag:./pkg/boost.tar.gz
-	-if test -f ./pkg/boost.tar.gz ; then \
-	cd pkg ; rm -rf boost boost_* ; tar xvzf boost.tar.gz  ; cd boost_* ; ./bootstrap.sh ; ./b2 install --prefix=../../boost ; cd - ; touch ../boost/done.tag; rm -rf boost_* \
-	else true;  fi
+	if test -f ./pkg/boost.tar.gz ; then \
+	cd pkg ; rm -rf boost boost_* ; tar xvzf boost.tar.gz  ; mkdir -p ../boost/include ; cp boost_*/boost/math/*.hpp ../boost/include ; touch ../boost/done.tag; rm -rf boost_* \
+	else true;  fi	
 lib/WHERE.boost: ./getall
 	if test -d boost/include ; then \
 	echo boost LD -L@DIR@/boost/lib > $@ ;\
