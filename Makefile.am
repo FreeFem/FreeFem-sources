@@ -389,6 +389,7 @@ LIST_GENERATE_FILE= configure config.h.in \
     src/Makefile.in \
     src/bamglib/Makefile.in \
     src/Graphics/Makefile.in \
+    src/ffgraphics/Makefile.in \
     src/femlib/Makefile.in \
     src/Algo/Makefile.in \
     src/lglib/Makefile.in \
