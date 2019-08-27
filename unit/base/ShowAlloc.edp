@@ -1,15 +1,15 @@
 include "test.idp"
 
-cout << "ShowAlloc" << endl;
+cout << functionDEFINITION << "ShowAlloc" << endl;
 real t;
 string str = "toto";
 
 t = clock();
 string res = ShowAlloc(str);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 
 t = clock();
 res = ShowAlloc("");
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;

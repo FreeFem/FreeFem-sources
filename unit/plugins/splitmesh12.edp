@@ -1,0 +1,22 @@
+include "test.idp"
+load "splitmesh12"
+load "msh3"
+
+cout << functionDEFINITION << endl;
+
+real t;
+
+int[int, int] LL = [[2,2], [1,1], [1,1]];
+real[int, int] BB = [[0,1], [0,1], [0,1]];
+int[int] CC = [4, 4, 4];
+mesh3 Th3=cube(4, 4, 4);
+t = clock();
+mesh3 Th12=splitmesh12(Th3);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(Th12.nt == Th3.nt * 12);
+test(Th12.nbe == Th3.nbe * 3);
+assert(Th12.nt == Th3.nt * 12);
+cout << Th12.nt << " == 12 x " << Th3.nt << endl;
+assert(Th12.nbe == Th3.nbe * 3);
+cout << Th12.nbe << " == 3 x " << Th3.nbe << endl;

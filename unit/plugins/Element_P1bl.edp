@@ -1,0 +1,41 @@
+include "test.idp"
+load "Element_P1bl"
+load "msh3"
+
+cout << functionDEFINITION << " Element_P1bl" << endl;
+
+real t;
+mesh3 Th = cube(5, 5, 5);
+
+cout << parameterDEFINITION << "P1bl3d" << endl;
+{
+  fespace Uh1(Th, P1bl3d);
+  Uh1 u1;
+  Uh1 u2;
+  Uh1 err1;
+
+  u1 = 0;
+  t = clock();
+  u2 = dx(u1);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  err1 = abs(u2 - u1);
+  test(err1[].linfty < HWERROR);
+}
+
+cout << parameterDEFINITION << "P1bl" << endl;
+{
+  mesh Th2 = square(5, 5);
+  fespace Uh1(Th2, P1bl);
+  Uh1 u1;
+  Uh1 u2;
+  Uh1 err1;
+
+  u1 = 0;
+  t = clock();
+  u2 = dx(u1);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  err1 = abs(u2 - u1);
+  test(err1[].linfty < HWERROR);
+}

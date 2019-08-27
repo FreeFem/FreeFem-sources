@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "buildmesh" << endl;
+cout << functionDEFINITION << "buildmesh" << endl;
 real t;
 
 border C01(t=0, 1){x=0; y=-1+t;}
@@ -12,14 +12,14 @@ int n = 10;
 t = clock();
 mesh Th = buildmesh(C01(-n) + C02(-n) + C03(-n) + C04(-n));
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(Th.nt && Th.nv && Th.nbe);
 
 int vx = 42;
 t = clock();
 Th = buildmesh(C01(-n) + C02(-n) + C03(-n) + C04(-n), nbvx=vx);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(Th.nv <= 42);
 
 bool fborder = true;
@@ -27,5 +27,12 @@ int nbt = Th.nbe;
 t = clock();
 Th = buildmesh(C01(-n) + C02(-n) + C03(-n) + C04(-n), fixedborder=fborder);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
+test(nbt == Th.nbe);
+
+real[int, int] Points = [[0, 0, 0], [0, 0, 1]];
+t = clock();
+Th = buildmesh(C01(-n) + C02(-n) + C03(-n) + C04(-n), fixedborder=fborder, points=Points);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 test(nbt == Th.nbe);

@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "square" << endl;
+cout << functionDEFINITION << "square" << endl;
 real t;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 int i = 4;
 real ineg = -4;
@@ -11,16 +11,16 @@ real ineg = -4;
 t = clock();
 real resi1 = square(i);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resi1 == 16);
 
 t = clock();
 real resineg = square(ineg);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resineg == 16);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real r = 4.0;
 real rneg = -4.0;
@@ -28,16 +28,16 @@ real rneg = -4.0;
 t = clock();
 real resr1 = square(r);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr1 == 16.0);
 
 t = clock();
 real resrneg = square(rneg);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resrneg == 16.0);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 complex c = 4 + 2i;
 complex cneg = -4 + 2i;
@@ -45,16 +45,16 @@ complex cneg = -4 + 2i;
 t = clock();
 complex rescint = square(c);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(rescint == 12.0 + 16i);
 
 t = clock();
 complex rescneg = square(cneg);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(rescneg == 12.0 - 16i);
 
-cout << IND << "real[int]" << endl;
+cout << typeDEFINITION << "real[int]" << endl;
 
 real[int] u(5), v(5);
 
@@ -64,10 +64,10 @@ for[i, vi:v]
 t = clock();
 u = square(v);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(u[0] == 0 && u[1] == 1 && u[2] == 4 && u[3] == 9 && u[4] == 16);
 
-cout << IND << "complex[int]" << endl;
+cout << typeDEFINITION << "complex[int]" << endl;
 
 complex[int] w(2), s(2);
 
@@ -76,5 +76,5 @@ w = [1 + 1i, 2 + 3i];
 t = clock();
 s = square(w);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(s[0] == 2i && s[1] == -5 + 12i);

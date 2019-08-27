@@ -95,7 +95,7 @@ public:
     
     virtual size_t size() const {return 0; };
     virtual VirtualMatrix  & operator +=(MatriceElementaire<R> & ){AFAIRE("VirtualMatrix::+=");}
-    virtual void operator=(const R & v){AFAIRE("VirtualMatrix::=v");};; // Mise a zero
+    virtual void operator=(const R & v){AFAIRE("VirtualMatrix::=v");} // Mise a zero
     virtual ostream& dump (ostream&)  const {cout << mpirank << " BUG virtualmatrix " << this << endl; AFAIRE("VirtualMatrix::dump");}
     virtual R & diag(I i){AFAIRE("VirtualMatrix::diab");}
     virtual void SetBC(I i,double tgv){AFAIRE("VirtualMatrix::setbc");}
@@ -115,6 +115,11 @@ public:
     virtual bool sym() const {return false;}
  
     virtual  void  resize(I n,I m)  {AFAIRE("VirtualMatrix::resize");}
+    virtual void clear()
+    { I NN=this->N, MM=this->M;
+        resize(0,0);
+        resize(NN,MM);
+    }
    virtual R trace() const {ffassert(this->n==this->m);  R t=R(), *p;  for(int i=0; i<this->n; ++i)  { p=pij(i,i);  if(p) t+= *p;} return t; }
    virtual void SetBC(char *wbc,double tgv) { for (int i=0; i<this->n; ++i)  if(wbc[i]) SetBC(i,tgv);}
   //  void init(int nn=0,int mm=0) { VMat *p=new VMat(nn,mm);  }

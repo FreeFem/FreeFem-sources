@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "floor" << endl;
+cout << functionDEFINITION << "floor" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real r1 = 0.5;
 real r2 = 42.0;
@@ -12,17 +12,17 @@ real r3 = -1.5;
 t = clock();
 real resr1 = floor(r1);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr1 == 0);
 
 t = clock();
 real resr2 = floor(r2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr2 == 42);
 
 t = clock();
 real resr3 = floor(r3);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr3 == -2);

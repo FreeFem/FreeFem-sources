@@ -1,9 +1,11 @@
 include "test.idp"
 
+cout << functionDEFINITION << "BFGS" << endl;
+
 real[int] b(10), u(10);
 
 // Error
-func real error (real[int] & u, real[int] & b){
+func real error (real[int] &u, real[int] &b) {
 	real s = 0;
 	for (int i = 0; i < u.n; i++)
 		s += abs((i+1)*u[i] - b[i]);
@@ -11,7 +13,7 @@ func real error (real[int] & u, real[int] & b){
 }
 
 //J
-func real J (real[int] & u){
+func real J (real[int] &u) {
 	real s = 0;
 	for (int i = 0; i < u.n; i++)
 		s += (i+1)*u[i]*u[i]*0.5 - b[i]*u[i];
@@ -19,13 +21,14 @@ func real J (real[int] & u){
 }
 
 //the gradiant of J
-func real[int] DJ (real[int] &u){
+func real[int] DJ (real[int] &u) {
 	for (int i = 0; i < u.n; i++)
 		u[i] = (i+1)*u[i];
 	u -= b;
 	return u;
 }
 
+cout << parameterDEFINITION << "with J, DJ, u, eps, nbiter, nbiterline" << endl;
 b = 1;
 u = 2;
 BFGS(J, DJ, u, eps=1.e-6, nbiter=20, nbiterline=20);

@@ -1,0 +1,94 @@
+include "test.idp"
+load "Curvature"
+
+real R= 1;
+real meshsize= 0.1;
+border axe(t=R,-R) {x=0; y=t; label=2;}
+border DC(t=pi/2,-pi/2) { x=R*cos(t); y=R*sin(t); label=1;}
+mesh Th=buildmesh(DC(-R*pi/meshsize)+axe(2*R/meshsize));
+
+cout << functionDEFINITION << "Curvature" << endl;
+{
+  cout << " tersca " << Tresca(1,2,3,0,0,0) << endl;
+
+  int[int] raxi = [1, 1, 1];
+  fespace Vh(Th,P1);
+  Vh ca,c,cc,ccc;;
+  c[]=curvature(Th, 1);
+  real cmean= int1d(Th,1,qforder=1)(c)/int1d(Th,1,qforder=1)(1.);
+  cout<< " cmean = " << cmean << " == " << 1/R << endl;
+  verbosity=1000;
+
+  c[]=curvature(Th, raxi);
+  cmean= int1d(Th,1,qforder=1)(c)/int1d(Th,1,qforder=1)(1.);
+  cout<< " cmean = " << cmean << " == " << 1/R << endl;
+
+
+  cout << functionDEFINITION << "raxicurvature" << endl;
+
+  ca[]=raxicurvature(Th, 1);
+  cout << c[] << endl;
+
+  ca[]=raxicurvature(Th, raxi);
+  cout << c[] << endl;
+}
+
+cout << functionDEFINITION << "extractborder" << endl;
+{
+  int[int] ll=[1,2];
+  real[int,int] b12(1,3);
+  real l12=extractborder(Th,ll,b12);
+  cout << l12 << endl;
+  test(l12);
+
+  l12=extractborder(Th,1,b12);
+  test(l12);
+}
+
+cout << functionDEFINITION << "curves" << endl;
+{
+  real[int, int] raxi = [[0, 0, 0], [0, 0, 0]];
+
+  curves(raxi, 1);
+}
+
+cout << functionDEFINITION << "setcurveabcisse" << endl;
+{
+  int nsl=100;
+  real[int,int] SL(3,nsl) ;
+  real lgc = setcurveabcisse(SL);
+}
+
+cout << functionDEFINITION << "equiparameter" << endl;
+{
+  int nsl=100;
+  real X0 = 0.1, Y0 =1*X0,Y1=0, CC0=Y0;
+  real meshsize=X0/10;
+  real[int,int] SL(3,nsl);
+  for(int i=0; i< nsl; ++i) {
+      real ll = i/(nsl-1.);
+      SL(0,i) = 0*(1-ll)+X0*ll;
+      real l0=ll;
+      real RR=1.2*1.2, YY=sqrt(RR-1);
+      SL(1,i) = -CC0*(sqrt(RR-l0*l0)-YY);
+      SL(2,i) = ll;
+  }
+  real lgc = setcurveabcisse(SL);
+   {  nsl = lgc/meshsize;
+     real[int,int] SL1=equiparameter(SL,nsl);
+     SL.resize(SL1.n,SL1.m);
+     SL = SL1;
+   }
+}
+
+cout << functionDEFINITION << "Tresca" << endl;
+{
+  cout << " tersca " << Tresca(1,2,3,0,0,0) << endl;
+}
+
+cout << functionDEFINITION << "VonMises" << endl;
+{
+    real res = VonMises(1., 2., 3.);
+    res = VonMises(1., 2., 3., 4.);
+    res = VonMises(1., 2., 3., 4., 5., 6.);
+}

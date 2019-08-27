@@ -1801,7 +1801,7 @@ void OneWindow::Display()
     if(help)
     {
         theplot->DrawHelp(this);
-        help=false;
+       // help=false;
     }
     else
     {
@@ -3088,7 +3088,7 @@ static void Key( unsigned char key, int x, int y )
     if(debug>1) cout << "Key winnum:  " <<win->theplot->winnum << endl;
     int ni=win->theplot->Viso.N();
     int na=win->theplot->Varrow.N();
-
+    win->help= false;
     switch (key)
     {
         case 27: // esc char
@@ -3106,8 +3106,8 @@ static void Key( unsigned char key, int x, int y )
             break;
         case '?' :
             if(win)
-                win->help=true;
-
+                win->help= true;
+            break;
         case '+':
             win->zoom(x,y,0.7);
             win->coef_dist /= 1.2;

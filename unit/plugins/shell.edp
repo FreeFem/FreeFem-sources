@@ -1,0 +1,183 @@
+include "test.idp"
+load  "shell"
+
+cout << "shell" << endl;
+
+cout << functionDEFINITION << "readdir" << endl;
+
+real t;
+Directory dir = "assets";
+string readData="empty";
+string[int] dataArray = [".", "..", "Th.mesh", "Th.msh", "triangle.msh", "test.txt",
+"bidule.vtk", "cube.msh", "gmsh_mesh.msh", "sol.vtk", "spherewithahole.mesh", "ThS.mesh", "ThS.msh", "triQA.msh", "disque.vtk", "getline.txt"];
+int ssize = 16;
+
+while (readData != "") {
+  t = clock();
+  readData = readdir(dir);
+  t = clock() - t;
+  cout << readData << endl;
+  if (readData != "") {
+    test(readData == dataArray[0] || readData == dataArray[1] ||
+    readData == dataArray[2] || readData == dataArray[3] ||
+    readData == dataArray[4] || readData == dataArray[5] || readData == dataArray[6] ||
+    readData == dataArray[7] || readData == dataArray[8] ||
+    readData == dataArray[9] || readData == dataArray[10] ||
+    readData == dataArray[11] || readData == dataArray[12] || readData == dataArray[13]
+    || readData == dataArray[14] || readData == dataArray[15]);
+    cout << timeELAPSED << t << endl;
+  }
+}
+
+cout << functionDEFINITION << "mkdir" << endl;
+
+t = clock();
+int makeDir = mkdir("toto");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(makeDir == 0);
+
+cout << functionDEFINITION << "isdir" << endl;
+
+t = clock();
+bool isDir = isdir("toto");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(isDir == true);
+
+cout << functionDEFINITION << "rmdir" << endl;
+
+t = clock();
+int rmDir = rmdir("toto");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(rmDir == 0);
+
+cout << functionDEFINITION << "getenv" << endl;
+
+t = clock();
+string getEnv = getenv("USER");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(getEnv != "");
+
+t = clock();
+string getEnv2 = getenv("toto");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(getEnv2 == "");
+
+cout << functionDEFINITION << "setenv" << endl;
+
+t = clock();
+int setEnv = setenv("TOTO", "toto");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(setEnv == 0);
+
+t = clock();
+string getEnv3 = getenv("TOTO");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << getEnv3 << endl;
+// test(getEnv3 != "");
+//TODO seems to be a bug
+
+cout << functionDEFINITION << "unsetenv" << endl;
+
+t = clock();
+int unsetEnv = unsetenv("PWD");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << unsetEnv << endl;
+test(unsetEnv == 0);
+
+cout << functionDEFINITION << "chmod" << endl;
+
+t = clock();
+int chMod = chmod("toto", 655);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(chMod == -1);
+
+t = clock();
+int chMod2 = chmod("assets/test.txt", 777);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(chMod2 == 0);
+chmod("assets/test.txt", 655);
+
+cout << functionDEFINITION << "chdir" << endl;
+
+t = clock();
+int chDir = chdir("toto");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(chDir == -1);
+
+t = clock();
+int chDir2 = chdir("assets");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(chDir2 == 0);
+chdir("..");
+
+cout << functionDEFINITION << "cpfile" << endl;
+
+verbosity = 10000;
+
+t = clock();
+int cpFile = cpfile("Makefile", "toto");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << cpFile << endl;
+test(cpFile == 0);
+
+cout << functionDEFINITION << "stat" << endl;
+
+// verbosity = 10000;
+
+t = clock();
+int st = stat("Makefile");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << st << endl;
+test(st == 0);
+
+cout << functionDEFINITION << "dirname" << endl;
+
+t = clock();
+string dirName = dirname("/usr/local/bin/add.sh");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << dirName << endl;
+//TODO seems to be a bug,missing the last letter
+// test(dirName == "assets");
+
+cout << functionDEFINITION << "basername" << endl;
+
+t = clock();
+string baseName = basename("/usr/local/bin/add.sh");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(baseName == "add.sh");
+
+cout << functionDEFINITION << "cddir" << endl;
+
+t = clock();
+int cdDir = cddir("assets");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << cdDir << endl;
+test(cdDir == 0);
+cddir("..");
+
+cout << functionDEFINITION << "unlink" << endl;
+
+mkdir("test");
+t = clock();
+int unLink = unlink("test");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << unLink << endl;
+test(unLink == -1);

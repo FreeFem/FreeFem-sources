@@ -1,16 +1,16 @@
 include "test.idp"
 
-cout << "ltime" << endl;
+cout << functionDEFINITION << "ltime" << endl;
 real t;
 int time1;
 int time2;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 time1 = time();
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 system("sleep 1");
 time2 = time();
-test(time2 < time1);
+test(time2 > time1);

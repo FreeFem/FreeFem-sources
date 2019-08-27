@@ -1,0 +1,2077 @@
+include "test.idp"
+load "gsl"
+
+real t;
+
+cout << functionDEFINITION << "gslcdfugaussianP" << endl;
+t = clock();
+cout << gslcdfugaussianP(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfugaussianQ" << endl;
+t = clock();
+cout << gslcdfugaussianQ(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfugaussianPinv" << endl;
+t = clock();
+cout << gslcdfugaussianPinv(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfugaussianQinv" << endl;
+t = clock();
+cout << gslcdfugaussianQinv(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgaussianP" << endl;
+t = clock();
+cout << gslcdfgaussianP(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgaussianQ" << endl;
+t = clock();
+cout << gslcdfgaussianQ(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgaussianQinv" << endl;
+t = clock();
+cout << gslcdfgaussianQinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgaussianPinv" << endl;
+t = clock();
+cout << gslcdfgaussianPinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgammaP" << endl;
+t = clock();
+cout << gslcdfgammaP(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgammaQ" << endl;
+t = clock();
+cout << gslcdfgammaQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgammaPinv" << endl;
+t = clock();
+cout << gslcdfgammaPinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgammaQinv" << endl;
+t = clock();
+cout << gslcdfgammaQinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfcauchyP" << endl;
+t = clock();
+cout << gslcdfcauchyP(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfcauchyQ" << endl;
+t = clock();
+cout << gslcdfcauchyQ(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfcauchyPinv" << endl;
+t = clock();
+cout << gslcdfcauchyPinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfcauchyQinv" << endl;
+t = clock();
+cout << gslcdfcauchyQinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflaplaceP" << endl;
+t = clock();
+cout << gslcdflaplaceP(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflaplaceQ" << endl;
+t = clock();
+cout << gslcdflaplaceQ(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflaplacePinv" << endl;
+t = clock();
+cout <<  gslcdflaplacePinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflaplaceQinv" << endl;
+t = clock();
+cout <<  gslcdflaplaceQinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfrayleighP" << endl;
+t = clock();
+cout << gslcdfrayleighP(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfrayleighQ" << endl;
+t = clock();
+cout << gslcdfrayleighQ(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfrayleighPinv" << endl;
+t = clock();
+cout << gslcdfrayleighPinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfrayleighQinv" << endl;
+t = clock();
+cout << gslcdfrayleighQinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfchisqP" << endl;
+t = clock();
+cout << gslcdfchisqP(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfchisqQ" << endl;
+t = clock();
+cout << gslcdfchisqQ(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfchisqPinv" << endl;
+t = clock();
+cout << gslcdfchisqPinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfchisqQinv" << endl;
+t = clock();
+cout << gslcdfchisqQinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfexponentialP" << endl;
+t = clock();
+cout << gslcdfexponentialP(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfexponentialQ" << endl;
+t = clock();
+cout << gslcdfexponentialQ(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfexponentialPinv" << endl;
+t = clock();
+cout << gslcdfexponentialPinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfexponentialQinv" << endl;
+t = clock();
+cout << gslcdfexponentialQinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfexppowP" << endl;
+t = clock();
+cout << gslcdfexppowP(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfexppowQ" << endl;
+t = clock();
+cout << gslcdfexppowQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdftdistP" << endl;
+t = clock();
+cout << gslcdftdistP(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdftdistQ" << endl;
+t = clock();
+cout << gslcdftdistQ(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdftdistPinv" << endl;
+t = clock();
+cout << gslcdftdistPinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdftdistQinv" << endl;
+t = clock();
+cout << gslcdftdistQinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdffdistP" << endl;
+t = clock();
+cout << gslcdffdistP(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdffdistQ" << endl;
+t = clock();
+cout << gslcdffdistQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdffdistPinv" << endl;
+t = clock();
+cout << gslcdffdistPinv(0.5, 1, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdffdistQinv" << endl;
+t = clock();
+cout << gslcdffdistQinv(0.5, 1, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfbetaP" << endl;
+t = clock();
+cout << gslcdfbetaP(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfbetaQ" << endl;
+t = clock();
+cout << gslcdfbetaQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfbetaPinv" << endl;
+t = clock();
+cout << gslcdfbetaPinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfbetaQinv" << endl;
+t = clock();
+cout << gslcdfbetaQinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfflatP" << endl;
+t = clock();
+cout << gslcdfflatP(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfflatQ" << endl;
+t = clock();
+cout << gslcdfflatQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfflatPinv" << endl;
+t = clock();
+cout << gslcdfflatPinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfflatQinv" << endl;
+t = clock();
+cout << gslcdfflatQinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflognormalP" << endl;
+t = clock();
+cout << gslcdflognormalP(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflognormalQ" << endl;
+t = clock();
+cout << gslcdflognormalQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflognormalPinv" << endl;
+t = clock();
+cout << gslcdflognormalPinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflognormalQinv" << endl;
+t = clock();
+cout << gslcdflognormalQinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel1P" << endl;
+t = clock();
+cout << gslcdfgumbel1P(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel1Q" << endl;
+t = clock();
+cout << gslcdfgumbel1Q(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel1Pinv" << endl;
+t = clock();
+cout << gslcdfgumbel1Pinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel1Qinv" << endl;
+t = clock();
+cout << gslcdfgumbel1Qinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel2P" << endl;
+t = clock();
+cout << gslcdfgumbel2P(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel2Q" << endl;
+t = clock();
+cout << gslcdfgumbel2Q(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel2Pinv" << endl;
+t = clock();
+cout << gslcdfgumbel2Pinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgumbel2Qinv" << endl;
+t = clock();
+cout << gslcdfgumbel2Qinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfweibullP" << endl;
+t = clock();
+cout << gslcdfweibullP(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfweibullQ" << endl;
+t = clock();
+cout << gslcdfweibullQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfweibullPinv" << endl;
+t = clock();
+cout << gslcdfweibullPinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfweibullQinv" << endl;
+t = clock();
+cout << gslcdfweibullQinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfparetoP" << endl;
+t = clock();
+cout << gslcdfparetoP(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfparetoQ" << endl;
+t = clock();
+cout << gslcdfparetoQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfparetoQ" << endl;
+t = clock();
+cout << gslcdfparetoQ(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfparetoPinv" << endl;
+t = clock();
+cout << gslcdfparetoPinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfparetoQinv" << endl;
+t = clock();
+cout << gslcdfparetoQinv(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflogisticP" << endl;
+t = clock();
+cout << gslcdflogisticP(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflogisticQ" << endl;
+t = clock();
+cout << gslcdflogisticQ(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflogisticPinv" << endl;
+t = clock();
+cout << gslcdflogisticPinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdflogisticQinv" << endl;
+t = clock();
+cout << gslcdflogisticQinv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfbinomialP" << endl;
+t = clock();
+cout << gslcdfbinomialP(0, 0.55, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfbinomialQ" << endl;
+t = clock();
+cout << gslcdfbinomialQ(0, 0.55, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfpoissonP" << endl;
+t = clock();
+cout << gslcdfpoissonP(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfpoissonQ" << endl;
+t = clock();
+cout << gslcdfpoissonQ(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgeometricP" << endl;
+t = clock();
+cout << gslcdfgeometricP(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgeometricQ" << endl;
+t = clock();
+cout << gslcdfgeometricQ(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgeometricP" << endl;
+t = clock();
+cout << gslcdfgeometricP(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfgeometricQ" << endl;
+t = clock();
+cout << gslcdfgeometricQ(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfnegativebinomialP" << endl;
+t = clock();
+cout << gslcdfnegativebinomialP(0, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfnegativebinomialQ" << endl;
+t = clock();
+cout << gslcdfnegativebinomialQ(0, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfpascalP" << endl;
+t = clock();
+cout << gslcdfpascalP(0, 0.55, 10) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslcdfpascalQ" << endl;
+t = clock();
+cout << gslcdfpascalQ(0, 0.55, 10) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranbernoullipdf" << endl;
+t = clock();
+cout << gslranbernoullipdf(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+gslrng ffrng;
+ gslabortonerror=0;
+
+cout << functionDEFINITION << "gslranbeta" << endl;
+t = clock();
+cout << gslranbeta(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranbetapdf" << endl;
+t = clock();
+cout << gslranbetapdf(0, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranbinomialpdf" << endl;
+t = clock();
+cout << gslranbinomialpdf(0, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranexponential" << endl;
+t = clock();
+cout << gslranexponential(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranexponentialpdf" << endl;
+t = clock();
+cout << gslranexponentialpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranexppow" << endl;
+t = clock();
+cout << gslranexppow(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranexppowpdf" << endl;
+t = clock();
+cout << gslranexppowpdf(0.55, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrancauchy" << endl;
+t = clock();
+cout << gslrancauchy(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrancauchypdf" << endl;
+t = clock();
+cout << gslrancauchypdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranchisq" << endl;
+t = clock();
+cout << gslranchisq(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranchisqpdf" << endl;
+t = clock();
+cout << gslranchisqpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranfdist" << endl;
+t = clock();
+cout << gslranfdist(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranfdistpdf" << endl;
+t = clock();
+cout << gslranfdistpdf(0, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranflat" << endl;
+t = clock();
+cout << gslranflat(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranflatpdf" << endl;
+t = clock();
+cout << gslranflatpdf(0, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangamma" << endl;
+t = clock();
+cout << gslrangamma(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangammaint" << endl;
+t = clock();
+cout << gslrangammaint(ffrng, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangammapdf" << endl;
+t = clock();
+cout << gslrangammapdf(0.55, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangammamt" << endl;
+t = clock();
+cout << gslrangammamt(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranerlang" << endl;
+t = clock();
+cout << gslranerlang(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranerlangpdf" << endl;
+t = clock();
+cout << gslranerlangpdf(0.5, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangammaknuth" << endl;
+t = clock();
+cout << gslrangammaknuth(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangaussian" << endl;
+t = clock();
+cout << gslrangaussian(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangaussianratiomethod" << endl;
+t = clock();
+cout << gslrangaussianratiomethod(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangaussianziggurat" << endl;
+t = clock();
+cout << gslrangaussianziggurat(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangaussianpdf" << endl;
+t = clock();
+cout << gslrangaussianpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranugaussian" << endl;
+t = clock();
+cout << gslranugaussian(ffrng) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranugaussianratiomethod" << endl;
+t = clock();
+cout << gslranugaussianratiomethod(ffrng) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranugaussianpdf" << endl;
+t = clock();
+cout << gslranugaussianpdf(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangaussiantail" << endl;
+t = clock();
+cout << gslrangaussiantail(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangaussiantailpdf" << endl;
+t = clock();
+cout << gslrangaussiantailpdf(0.55, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranugaussiantail" << endl;
+t = clock();
+cout << gslranugaussiantail(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranugaussiantailpdf" << endl;
+t = clock();
+cout << gslranugaussiantailpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlandau" << endl;
+t = clock();
+cout << gslranlandau(ffrng) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlandaupdf" << endl;
+t = clock();
+cout << gslranlandaupdf(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangeometricpdf" << endl;
+t = clock();
+cout << gslrangeometricpdf(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangumbel1" << endl;
+t = clock();
+cout << gslrangumbel1(ffrng, 0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangumbel1pdf" << endl;
+t = clock();
+cout << gslrangumbel1pdf(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangumbel2" << endl;
+t = clock();
+cout << gslrangumbel2(ffrng, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrangumbel2pdf" << endl;
+t = clock();
+cout << gslrangumbel2pdf(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlogistic" << endl;
+t = clock();
+cout << gslranlogistic(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlogisticpdf" << endl;
+t = clock();
+cout << gslranlogisticpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlognormal" << endl;
+t = clock();
+cout << gslranlognormal(ffrng, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlognormalpdf" << endl;
+t = clock();
+cout << gslranlognormalpdf(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlogarithmicpdf" << endl;
+t = clock();
+cout << gslranlogarithmicpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrannegativebinomialpdf" << endl;
+t = clock();
+cout << gslrannegativebinomialpdf(0, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranpascalpdf" << endl;
+t = clock();
+cout << gslranpascalpdf(0, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranpareto" << endl;
+t = clock();
+cout << gslranpareto(ffrng, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranparetopdf" << endl;
+t = clock();
+cout << gslranparetopdf(0.55, 0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranpoissonpdf" << endl;
+t = clock();
+cout << gslranpoissonpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranrayleigh" << endl;
+t = clock();
+cout << gslranrayleigh(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranrayleighpdf" << endl;
+t = clock();
+cout << gslranrayleighpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranrayleightail" << endl;
+t = clock();
+cout << gslranrayleightail(ffrng, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranrayleightailpdf" << endl;
+t = clock();
+cout << gslranrayleightailpdf(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrantdist" << endl;
+t = clock();
+cout << gslrantdist(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslrantdistpdf" << endl;
+t = clock();
+cout << gslrantdistpdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlaplace" << endl;
+t = clock();
+cout << gslranlaplace(ffrng, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlaplacepdf" << endl;
+t = clock();
+cout << gslranlaplacepdf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranlevy" << endl;
+t = clock();
+cout << gslranlevy(ffrng, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranweibull" << endl;
+t = clock();
+cout << gslranweibull(ffrng, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslranweibullpdf" << endl;
+t = clock();
+cout << gslranweibullpdf(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyAi" << endl;
+t = clock();
+cout << gslsfairyAi(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyBi" << endl;
+t = clock();
+cout << gslsfairyBi(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyAiscaled" << endl;
+t = clock();
+cout << gslsfairyAiscaled(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyBiscaled" << endl;
+t = clock();
+cout << gslsfairyBiscaled(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyAideriv" << endl;
+t = clock();
+cout << gslsfairyAideriv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyBideriv" << endl;
+t = clock();
+cout << gslsfairyBideriv(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyAiderivscaled" << endl;
+t = clock();
+cout << gslsfairyAiderivscaled(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyBiderivscaled" << endl;
+t = clock();
+cout << gslsfairyBiderivscaled(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyzeroAi" << endl;
+t = clock();
+cout << gslsfairyzeroAi(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyzeroBi" << endl;
+t = clock();
+cout << gslsfairyzeroBi(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyzeroAideriv" << endl;
+t = clock();
+cout << gslsfairyzeroAideriv(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfairyzeroBideriv" << endl;
+t = clock();
+cout << gslsfairyzeroBideriv(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselJ0" << endl;
+t = clock();
+cout << gslsfbesselJ0(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselJ1" << endl;
+t = clock();
+cout << gslsfbesselJ1(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselJn" << endl;
+t = clock();
+cout << gslsfbesselJn(0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselY0" << endl;
+t = clock();
+cout << gslsfbesselY0(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselY1" << endl;
+t = clock();
+cout << gslsfbesselY1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselYn" << endl;
+t = clock();
+cout << gslsfbesselYn(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselI0" << endl;
+t = clock();
+cout << gslsfbesselI0(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselI1" << endl;
+t = clock();
+cout << gslsfbesselI1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselIn" << endl;
+t = clock();
+cout << gslsfbesselIn(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselI0scaled" << endl;
+t = clock();
+cout << gslsfbesselI0scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselI1scaled" << endl;
+t = clock();
+cout << gslsfbesselI1scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselInscaled" << endl;
+t = clock();
+cout << gslsfbesselInscaled(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselK0" << endl;
+t = clock();
+cout << gslsfbesselK0(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselK1" << endl;
+t = clock();
+cout << gslsfbesselK1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselKn" << endl;
+t = clock();
+cout << gslsfbesselKn(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselK0scaled" << endl;
+t = clock();
+cout << gslsfbesselK0scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselK1scaled" << endl;
+t = clock();
+cout << gslsfbesselK1scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselKnscaled" << endl;
+t = clock();
+cout << gslsfbesselKnscaled(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselj0" << endl;
+t = clock();
+cout << gslsfbesselj0(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselj1" << endl;
+t = clock();
+cout << gslsfbesselj1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselj2" << endl;
+t = clock();
+cout << gslsfbesselj2(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesseljl" << endl;
+t = clock();
+cout << gslsfbesseljl(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbessely0" << endl;
+t = clock();
+cout << gslsfbessely0(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbessely1" << endl;
+t = clock();
+cout << gslsfbessely1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbessely2" << endl;
+t = clock();
+cout << gslsfbessely2(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselyl" << endl;
+t = clock();
+cout << gslsfbesselyl(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesseli0scaled" << endl;
+t = clock();
+cout << gslsfbesseli0scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesseli1scaled" << endl;
+t = clock();
+cout << gslsfbesseli1scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesseli2scaled" << endl;
+t = clock();
+cout << gslsfbesseli2scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselilscaled" << endl;
+t = clock();
+cout << gslsfbesselilscaled(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselk0scaled" << endl;
+t = clock();
+cout << gslsfbesselk0scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselk1scaled" << endl;
+t = clock();
+cout << gslsfbesselk1scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselk2scaled" << endl;
+t = clock();
+cout << gslsfbesselk2scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselklscaled" << endl;
+t = clock();
+cout << gslsfbesselklscaled(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselJnu" << endl;
+t = clock();
+cout << gslsfbesselJnu(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselYnu" << endl;
+t = clock();
+cout << gslsfbesselYnu(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselInuScaled" << endl;
+t = clock();
+cout << gslsfbesselInuscaled(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselInu" << endl;
+t = clock();
+cout << gslsfbesselInu(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselKnuscaled" << endl;
+t = clock();
+cout << gslsfbesselKnuscaled(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselKnu" << endl;
+t = clock();
+cout << gslsfbesselKnu(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbessellnKnu" << endl;
+t = clock();
+cout << gslsfbessellnKnu(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselzeroJ0" << endl;
+t = clock();
+cout << gslsfbesselzeroJ0(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselzeroJ1" << endl;
+t = clock();
+cout << gslsfbesselzeroJ1(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbesselzeroJnu" << endl;
+t = clock();
+cout << gslsfbesselzeroJnu(1, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfclausen" << endl;
+t = clock();
+cout << gslsfclausen(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfhydrogenicR1" << endl;
+t = clock();
+cout << gslsfhydrogenicR1(1, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfdawson" << endl;
+t = clock();
+cout << gslsfdawson(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfdebye1" << endl;
+t = clock();
+cout << gslsfdebye1(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfdebye2" << endl;
+t = clock();
+cout << gslsfdebye2(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfdebye3" << endl;
+t = clock();
+cout << gslsfdebye3(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfdebye4" << endl;
+t = clock();
+cout << gslsfdebye4(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfdebye5" << endl;
+t = clock();
+cout << gslsfdebye5(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfdebye6" << endl;
+t = clock();
+cout << gslsfdebye6(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfdilog" << endl;
+t = clock();
+cout << gslsfdilog(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfmultiply" << endl;
+t = clock();
+cout << gslsfmultiply(1, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfellintKcomp" << endl;
+t = clock();
+cout << gslsfellintKcomp(0.55, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfellintEcomp" << endl;
+t = clock();
+cout << gslsfellintEcomp(0.55, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfellintPcomp" << endl;
+t = clock();
+cout << gslsfellintPcomp(0.55, 0, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfellintDcomp" << endl;
+t = clock();
+cout << gslsfellintDcomp(0.55, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfellintF" << endl;
+t = clock();
+cout << gslsfellintF(0.55, 0.55, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfellintE" << endl;
+t = clock();
+cout << gslsfellintE(0.55, 0.55, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfellintRC" << endl;
+t = clock();
+cout << gslsfellintRC(0.55, 0.55, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsferfc" << endl;
+t = clock();
+cout << gslsferfc(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflogerfc" << endl;
+t = clock();
+cout << gslsflogerfc(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsferf" << endl;
+t = clock();
+cout << gslsferf(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsferfZ" << endl;
+t = clock();
+cout << gslsferfZ(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsferfQ" << endl;
+t = clock();
+cout << gslsferfQ(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfhazard" << endl;
+t = clock();
+cout << gslsfhazard(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfexp" << endl;
+t = clock();
+cout << gslsfexp(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfexpmult" << endl;
+t = clock();
+cout << gslsfexpmult(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfexpm1" << endl;
+t = clock();
+cout << gslsfexpm1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfexprel" << endl;
+t = clock();
+cout << gslsfexprel(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfexprel2" << endl;
+t = clock();
+cout << gslsfexprel2(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfexpreln" << endl;
+t = clock();
+cout << gslsfexpreln(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfexpintE1" << endl;
+t = clock();
+cout << gslsfexpintE1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfexpintE2" << endl;
+t = clock();
+cout << gslsfexpintE2(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfexpintEn" << endl;
+t = clock();
+cout << gslsfexpintEn(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfexpintE1scaled" << endl;
+t = clock();
+cout << gslsfexpintE1scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfexpintE2scaled" << endl;
+t = clock();
+cout << gslsfexpintE2scaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfexpintEnscaled" << endl;
+t = clock();
+cout << gslsfexpintEnscaled(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfexpintEi" << endl;
+t = clock();
+cout << gslsfexpintEi(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfexpintEiscaled" << endl;
+t = clock();
+cout << gslsfexpintEiscaled(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfShi" << endl;
+t = clock();
+cout << gslsfShi(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfChi" << endl;
+t = clock();
+cout << gslsfChi(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfexpint3" << endl;
+t = clock();
+cout << gslsfexpint3(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfSi" << endl;
+t = clock();
+cout << gslsfSi(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfCi" << endl;
+t = clock();
+cout << gslsfCi(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfatanint" << endl;
+t = clock();
+cout << gslsfatanint(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsffermidiracm1" << endl;
+t = clock();
+cout << gslsffermidiracm1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsffermidirac0" << endl;
+t = clock();
+cout << gslsffermidirac0(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsffermidirac1" << endl;
+t = clock();
+cout << gslsffermidirac1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsffermidirac2" << endl;
+t = clock();
+cout << gslsffermidirac2(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsffermidiracint" << endl;
+t = clock();
+cout << gslsffermidiracint(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsffermidiracmhalf" << endl;
+t = clock();
+cout << gslsffermidiracmhalf(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsffermidirachalf" << endl;
+t = clock();
+cout << gslsffermidirachalf(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsffermidirac3half" << endl;
+t = clock();
+cout << gslsffermidirac3half(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsffermidiracinc0" << endl;
+t = clock();
+cout << gslsffermidiracinc0(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflngamma" << endl;
+t = clock();
+cout << gslsflngamma(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflndoublefact" << endl;
+t = clock();
+cout << gslsflndoublefact (0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfgamma" << endl;
+t = clock();
+cout << gslsfgamma(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfgammastar" << endl;
+t = clock();
+cout << gslsfgammastar(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfgammainv" << endl;
+t = clock();
+cout << gslsfgammainv(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsftaylorcoeff" << endl;
+t = clock();
+cout << gslsftaylorcoeff(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsffact" << endl;
+t = clock();
+cout << gslsffact(0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfdoublefact" << endl;
+t = clock();
+cout << gslsfdoublefact(0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflnfact" << endl;
+t = clock();
+cout << gslsflnfact(0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflnfact" << endl;
+t = clock();
+cout << gslsflnfact(0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflnchoose" << endl;
+t = clock();
+cout << gslsflnchoose(0, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfchoose" << endl;
+t = clock();
+cout << gslsfchoose(0, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflnpoch" << endl;
+t = clock();
+cout << gslsflnpoch(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpoch" << endl;
+t = clock();
+cout << gslsfpoch(0, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpochrel" << endl;
+t = clock();
+cout << gslsfpochrel(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfgammaincQ" << endl;
+t = clock();
+cout << gslsfgammaincQ(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfgammaincP" << endl;
+t = clock();
+cout << gslsfgammaincP(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfgammainc" << endl;
+t = clock();
+cout << gslsfgammainc(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflnbeta" << endl;
+t = clock();
+cout << gslsflnbeta(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbeta" << endl;
+t = clock();
+cout << gslsfbeta(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfbetainc" << endl;
+t = clock();
+cout << gslsfbetainc(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfgegenpoly1" << endl;
+t = clock();
+cout << gslsfgegenpoly1(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfgegenpoly2" << endl;
+t = clock();
+cout << gslsfgegenpoly2(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfgegenpoly3" << endl;
+t = clock();
+cout << gslsfgegenpoly3(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfgegenpolyn" << endl;
+t = clock();
+cout << gslsfgegenpolyn(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfhyperg0F1" << endl;
+t = clock();
+cout << gslsfhyperg0F1(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfhyperg1F1int" << endl;
+t = clock();
+cout << gslsfhyperg1F1int(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfhyperg1F1" << endl;
+t = clock();
+cout << gslsfhyperg1F1(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfhypergUint" << endl;
+t = clock();
+cout << gslsfhypergUint(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfhypergU" << endl;
+t = clock();
+cout << gslsfhypergU(0.55, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfhyperg2F0" << endl;
+t = clock();
+cout << gslsfhyperg2F0(0, 0, 0) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflaguerre1" << endl;
+t = clock();
+cout << gslsflaguerre1(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflaguerre2" << endl;
+t = clock();
+cout << gslsflaguerre2(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflaguerre3" << endl;
+t = clock();
+cout << gslsflaguerre3(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflaguerren" << endl;
+t = clock();
+cout << gslsflaguerren(0, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflambertW0" << endl;
+t = clock();
+cout << gslsflambertW0(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflambertWm1" << endl;
+t = clock();
+cout << gslsflambertWm1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflegendrePl" << endl;
+t = clock();
+cout << gslsflegendrePl(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflegendreP1" << endl;
+t = clock();
+cout << gslsflegendreP1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflegendreP2" << endl;
+t = clock();
+cout << gslsflegendreP2(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflegendreP3" << endl;
+t = clock();
+cout << gslsflegendreP3(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflegendreQ0" << endl;
+t = clock();
+cout << gslsflegendreQ0(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflegendreQ1" << endl;
+t = clock();
+cout << gslsflegendreQ1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflegendreQl" << endl;
+t = clock();
+cout << gslsflegendreQl(0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflegendrePlm" << endl;
+t = clock();
+cout << gslsflegendrePlm(0, 0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflegendresphPlm" << endl;
+t = clock();
+cout << gslsflegendresphPlm(0, 0, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfconicalPhalf" << endl;
+t = clock();
+cout << gslsfconicalPhalf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfconicalPmhalf" << endl;
+t = clock();
+cout << gslsfconicalPmhalf(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfconicalP0" << endl;
+t = clock();
+cout << gslsfconicalP0(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfconicalP1" << endl;
+t = clock();
+cout << gslsfconicalP1(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfconicalPsphreg" << endl;
+t = clock();
+cout << gslsfconicalPsphreg(0, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfconicalPcylreg" << endl;
+t = clock();
+cout << gslsfconicalPcylreg(0, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflegendreH3d0" << endl;
+t = clock();
+cout << gslsflegendreH3d0(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflegendreH3d1" << endl;
+t = clock();
+cout << gslsflegendreH3d1(0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflegendreH3d" << endl;
+t = clock();
+cout << gslsflegendreH3d(0, 0.55, 0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflog" << endl;
+t = clock();
+cout << gslsflog(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflogabs" << endl;
+t = clock();
+cout << gslsflogabs(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflog1plusx" << endl;
+t = clock();
+cout << gslsflog1plusx(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflog1plusxmx" << endl;
+t = clock();
+cout << gslsflog1plusxmx(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpowint" << endl;
+t = clock();
+cout << gslsfpowint(0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpsiint" << endl;
+t = clock();
+cout << gslsfpsiint(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpsi" << endl;
+t = clock();
+cout << gslsfpsi(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpsi1piy" << endl;
+t = clock();
+cout << gslsfpsi1piy(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpsin" << endl;
+t = clock();
+cout << gslsfpsin(0, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpsi1int" << endl;
+t = clock();
+cout << gslsfpsi1int(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfpsi1" << endl;
+t = clock();
+cout << gslsfpsi1(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfsynchrotron1" << endl;
+t = clock();
+cout << gslsfsynchrotron1(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfsynchrotron2" << endl;
+t = clock();
+cout << gslsfsynchrotron2(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsftransport2" << endl;
+t = clock();
+cout << gslsftransport2(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsftransport3" << endl;
+t = clock();
+cout << gslsftransport3(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsftransport4" << endl;
+t = clock();
+cout << gslsftransport4(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsftransport5" << endl;
+t = clock();
+cout << gslsftransport5(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfsin" << endl;
+t = clock();
+cout << gslsfsin(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfcos" << endl;
+t = clock();
+cout << gslsfcos(1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfhypot" << endl;
+t = clock();
+cout << gslsfhypot(0.55, 1) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfsinc" << endl;
+t = clock();
+cout << gslsfsinc(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflnsinh" << endl;
+t = clock();
+cout << gslsflnsinh(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsflnscosh" << endl;
+t = clock();
+cout << gslsflncosh(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfanglerestrictsymm" << endl;
+t = clock();
+cout << gslsfanglerestrictsymm(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfanglerestrictpos" << endl;
+t = clock();
+cout << gslsfanglerestrictpos(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfzetaint" << endl;
+t = clock();
+cout << gslsfzetaint(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfzeta" << endl;
+t = clock();
+cout << gslsfzeta(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfzetam1" << endl;
+t = clock();
+cout << gslsfzetam1(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfzetam1int" << endl;
+t = clock();
+cout << gslsfzetam1int(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfhzeta" << endl;
+t = clock();
+cout << gslsfhzeta(10, 10) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfetaint" << endl;
+t = clock();
+cout << gslsfetaint(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "gslsfeta" << endl;
+t = clock();
+cout << gslsfeta(0.55) << endl;
+t = clock() - t;
+cout << timeELAPSED << t << endl;

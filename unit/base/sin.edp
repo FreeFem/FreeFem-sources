@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "sin" << endl;
+cout << functionDEFINITION << "sin" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real zero = 0.;
 real rpi = pi;
@@ -12,22 +12,22 @@ real r = pi/2;
 t = clock();
 real reszero = sin(zero);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reszero == 0.);
 
 t = clock();
 real respi = sin(rpi);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test((respi - sin(pi)) < HWERROR);
 
 t = clock();
 real resr = sin(r);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr == 1.);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 complex cpos = 1 + 1i;
 complex cneg = 1 - 1i;
@@ -35,11 +35,11 @@ complex cneg = 1 - 1i;
 t = clock();
 complex rescpos = sin(cpos);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(rescpos == (sinh(1i * cpos))/1i);
 
 t = clock();
 complex rescneg = sin(cneg);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(rescneg == (sinh(1i * cneg))/1i);

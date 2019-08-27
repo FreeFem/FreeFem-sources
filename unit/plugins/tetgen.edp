@@ -1,0 +1,112 @@
+include "test.idp"
+load "tetgen"
+load "msh3"
+load "mshmet"
+
+cout << functionDEFINITION << "tetgconvexhull" << endl;
+
+real t;
+int nn=100;
+real[int] xx(nn),yy(nn),zz(nn);
+
+for(int i=0; i<nn; ++i)
+{
+  xx[i] = randreal1();
+  yy[i] = randreal1();
+  zz[i] = randreal1();
+}
+t = clock();
+mesh3 Th=tetgconvexhull(xx,yy,zz,region=1,label=3);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "tetgtransfo" << endl;
+
+func XX1 = cos(y)*sin(x);
+func YY1 = sin(y)*sin(x);
+func ZZ1 = cos(x);
+
+int C1 = 99, C2 = 98; // Boundary labels, could be anything
+
+border C01(t=0, pi){x=t; y=0; label=1;}
+border C02(t=0, 2*pi){x=pi; y=t; label=1;}
+border C03(t=0, pi){x=pi-t; y=2*pi; label=1;}
+border C04(t=0, 2*pi){x=0; y=2*pi-t; label=1;}
+
+border C11(t=0, 0.7){x=0.5+t; y=2.5; label=C1;}
+border C12(t=0, 2){x=1.2; y=2.5+t; label=C1;}
+border C13(t=0, 0.7){x=1.2-t; y=4.5; label=C1;}
+border C14(t=0, 2){x=0.5; y=4.5-t; label=C1;}
+
+mesh Ths = buildmesh(
+	  C01(10) + C02(10) + C03(10) + C04(10)
+	+ C11(5) + C12(5) + C13(5) + C14(5)
+	);
+
+real [int] domain = [0., 0., 0., 0, 0.001];
+string test2 = "paACQ";
+cout << "test=" << test2 << endl;
+t = clock();
+mesh3 Th3sph = tetgtransfo(Ths, transfo=[XX1, YY1, ZZ1], switch=test2,
+	nbofregions=1, regionlist=domain);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "tetg" << endl;
+
+{
+  func f1 =cos(x)*cos(y);
+  func f2 =cos(x)*sin(y);
+  func f3 = sin(x);
+  mesh Th=square(10,20,[x*pi-pi/2,2*y*pi]);
+
+  real Rmin  = 1.;
+  func f1min = Rmin*f1;
+  func f2min = Rmin*f2;
+  func f3min = Rmin*f3;
+
+  meshS Th3sph=movemesh23(Th,transfo=[f1min,f2min,f3min],orientation=-1);
+  real Rmax  = 2.;
+  func f1max = Rmax*f1;
+  func f2max = Rmax*f2;
+  func f3max = Rmax*f3;
+  meshS Th3sph2=movemesh23(Th,transfo=[f1max,f2max,f3max],orientation=1);
+  meshS Th3=Th3sph+Th3sph2;
+
+  real[int] domain2 = [1.5,0.,0.,145,0.001,0.5,0.,0.,18,0.01];
+  t = clock();
+  mesh3 Th3fin=tetg(Th3,switch="paAAYYCCV",nbofregions=2,regionlist=domain2);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}
+
+cout << functionDEFINITION << "tetgreconstruction" << endl;
+{
+  int nn  = 6;
+  int[int] l1111=[1,1,1,1],l01=[0,1],l11=[1,1];//   label numbering
+  mesh3 Th3=buildlayers(square(nn,nn,region=0,label=l1111),
+        nn,  zbound=[0,1],  labelmid=l11,   labelup = l01,  labeldown = l01);
+  Th3 = trunc(Th3,(x<0.5) | (y < 0.5) | (z < 0.5) ,label=1);// remove the $]0.5,1[^3 cube$
+  //end of build initial mesh
+  fespace Vh(Th3,P1);
+  Vh u,v,usol;
+
+  macro Grad(u) [dx(u),dy(u),dz(u)] // EOM
+
+  problem Poisson(u,v,solver=CG) = int3d(Th3)( Grad(u)'*Grad(v) )  // ') for emacs
+    -int3d(Th3)( 1*v ) + on(1,u=0);
+
+  real errm=1e-2;// level of error
+
+  for(int ii=0; ii<5; ii++)
+  {
+    Poisson;
+    cout <<" u min, max = " <<  u[].min << " "<< u[].max << endl;
+    Vh h ;
+    h[]=mshmet(Th3,u,normalization=1,aniso=0,nbregul=1,hmin=1e-3,hmax=0.3,err=errm);//loptions=MSHloptions,doptions=MSHdoptions);
+    cout <<" h min, max = " <<  h[].min << " "<< h[].max << " " << h[].n << " " << Th3.nv << endl;
+    errm*= 0.8;// change the level of error
+    cout << " Th3" << Th3.nv < " " << Th3.nt << endl;
+    Th3=tetgreconstruction(Th3,switch="raAQ",sizeofvolume=h*h*h/6.);
+  }
+}

@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "max" << endl;
+cout << functionDEFINITION << "max" << endl;
 real t;
 int i1 = 1;
 int i2 = 2;
@@ -12,48 +12,48 @@ real r2 = 2.5;
 real r3 = -3.5;
 real r4 = -4.5;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 int maxi = max(i1, i2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(maxi == i2);
 
 t = clock();
 int maxi2 = max(i1, i2, i3);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(maxi2 == i3);
 
 t = clock();
 int maxi3 = max(i1, i2, i3, i4);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(maxi3 == i3);
 
 t = clock();
 int maxineg = max(i4, i5);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(maxineg == i4);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 real maxr1 = max(r1, r2, r3);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(maxr1 == r2);
 
 t = clock();
 real maxr2 = max(r1, r2, r3, r4);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(maxr2 == r2);
 
 t = clock();
 real maxrneg = max(r3, r4);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(maxrneg == r3);

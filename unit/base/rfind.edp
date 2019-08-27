@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "rfind" << endl;
+cout << functionDEFINITION << "rfind" << endl;
 real t;
 string sentence = "a 42 a 42";
 string sentence2 = "acdc";
@@ -13,23 +13,23 @@ int posFound;
 t = clock();
 posFound = sentence.rfind(toFind);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(posFound == 7);
 
 t = clock();
 posFound = sentence2.rfind(toFind2);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(posFound == 3);
 
 t = clock();
 posFound = sentence2.rfind(toFind2, atPos);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(posFound == 1);
 
 t = clock();
 posFound = sentence2.rfind(toFind2, atPosr);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(posFound == 1.);

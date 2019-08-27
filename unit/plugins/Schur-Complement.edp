@@ -1,0 +1,94 @@
+include "test.idp"
+include "ExtractDofsonBorder.idp"
+load "Schur-Complement"
+
+cout << functionDEFINITION << "SchurComplement" << endl;
+real t;
+
+macro FindDofOnBorder(l,Vh,I)
+{
+	varf von(u,v) = on(l,u=-1);
+    int[int] J=0:Vh.ndof-1;
+	real[int] vl = von(0,Vh);
+	sort(vl,J);
+	vl = vl ? 1. :0.;
+	int n = vl.sum+0.5;
+
+	I.resize(n);
+	I=J(0:n-1);
+	cout << " n = "<< n << endl;
+}//
+
+macro grad(u) [dx(u),dy(u)] //
+real hsize= 0.1;
+
+real htt = max(hsize/2,0.1);
+mesh Th=square(2/hsize,1/hsize,[x*2,y]);
+
+Th=trunc(Th,(abs(x-1)>4*htt)||(abs(y-0.5)>htt),label=10);
+
+mesh Th2=movemesh(Th,[2-(x-2),y]);
+plot(Th,Th2,wait=1);
+fespace Vh(Th,P1);
+fespace Vh2(Th2,P1);
+int n = Vh.ndof;
+varf va(u,v) = int2d(Th)(grad(u)'*grad(v))+on(1,3,4,u=0);
+
+ matrix A= va(Vh,Vh,sym=0,tgv=-2);
+if(verbosity>9) cout << A << endl;
+int[int] I;
+ExtractDofsonBorder(2,Vh,I,1);
+
+real[int,int] B(1,1);
+
+int[int] I10;
+FindDofOnBorder(10,Vh,I10);
+if(verbosity>9) cout << " I10 "<< I10 << endl;
+int[int] If(n);
+int In=I.n;
+If=-1;
+for [i,Ii:I]
+  If[Ii]=i;
+for [i,I10i:I10]
+    If[I10i]=In;
+if( verbosity>9) cout << If << endl;
+real[int,int] S(1,1);
+t = clock();
+int nfs=SchurComplement(S,A,If,B);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+{
+	int iclr=nfs;
+	int icll=nfs-1;
+	int iclS = nfs-1;
+	int[int] Il=0:nfs;
+	int[int] Ir=0:nfs;
+
+	Ir[iclr]=iclS;
+	Ir[icll]=-1;
+
+	Il[iclr]=-1;
+	Il[icll]=iclS;
+
+	int nd = nfs+1;
+	cout << " S ="<< S << endl;
+	real[int,int] St(nd,nd);
+	func real[int,int]  to(int[int] &I,real[int,int] &S)
+	{
+		int n = I.n;
+		real[int,int]  A(n,n);
+		A=0;
+		for(int i=0; i<n; ++i)
+			for(int j=0; j<n; ++j)
+			if(I[i]>=0 && I[j]>=0 )
+		  	  A(i,j) += S(I[i],I[j]);
+			  return A;
+	}
+	{
+		matrix Stt = S(Ir,Ir);
+		real[int,int] Sb(nd,nd);
+		copy(Sb,Stt);
+		 St += Sb;
+		}
+}

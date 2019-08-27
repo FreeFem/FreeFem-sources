@@ -1,0 +1,13 @@
+include "test.idp"
+load "FreeFemQA"
+
+cout << functionDEFINITION << "FreeFemQA" << endl;
+
+real t;
+mesh Th = square(5, 5);
+
+t = clock();
+mesh ThRes = MeshGenQA(Th, 0, 0, 0);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(Th.nt != 0);

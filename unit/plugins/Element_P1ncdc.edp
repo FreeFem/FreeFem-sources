@@ -1,0 +1,25 @@
+include "test.idp"
+load "Element_P1ncdc"
+load "msh3"
+
+cout << functionDEFINITION << " Element_P1ncdc" << endl;
+
+real t;
+mesh3 Th = cube(5, 5, 5);
+
+cout << parameterDEFINITION << "P1dcnc" << endl;
+{
+  mesh Th2 = square(10, 10);
+  fespace Uh1(Th2, P1dcnc);
+  Uh1 u1;
+  Uh1 u2;
+  Uh1 err1;
+
+  u1 = 0;
+  t = clock();
+  u2 = dx(u1);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  err1 = abs(u2 - u1);
+  test(err1[].linfty < HWERROR);
+}

@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "strtod" << endl;
+cout << functionDEFINITION << "strtod" << endl;
 real t;
 
 string text = "4.2";
@@ -10,12 +10,12 @@ real realnb = 4.2;
 t = clock();
 real resnb = strtod(text);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resnb == realnb);
 
 real realnb2 = -4.2;
 t = clock();
 real resnb2 = strtod(text2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resnb2 == realnb2);

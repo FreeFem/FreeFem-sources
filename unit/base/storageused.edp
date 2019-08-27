@@ -1,12 +1,12 @@
 include "test.idp"
 
-cout << "storageused" << endl;
+cout << functionDEFINITION << "storageused" << endl;
 real t;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 int total = storageused();
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(total);

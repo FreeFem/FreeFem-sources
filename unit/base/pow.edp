@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "pow" << endl;
+cout << functionDEFINITION << "pow" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real i1 = 4.0;
 real i2 = 2.0;
@@ -11,6 +11,6 @@ real i2 = 2.0;
 t = clock();
 int respowi1 = pow(i1, i2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(respowi1 == 16);
 t = clock();

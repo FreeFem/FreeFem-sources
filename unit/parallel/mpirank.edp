@@ -1,8 +1,17 @@
 include "test.idp"
 
-cout << "mprirank" << endl;
+cout << functionDEFINITION << "mpirank" << endl;
 
-if (mpirank == 0)
+real t;
+
+if (mpirank == 0) {
+  t = mpiWtime();
   test(mpirank == 0);
-else if (mpirank == 1)
+  t = mpiWtime() - t;
+  cout << timeELAPSED << t << endl;
+} else if (mpirank == 1) {
+  t = mpiWtime();
   test(mpirank == 1);
+  t = mpiWtime() - t;
+  cout << timeELAPSED << t << endl;
+}

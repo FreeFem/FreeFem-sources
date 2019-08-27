@@ -1,0 +1,19 @@
+include "test.idp"
+load "splitmesh4"
+load "msh3"
+
+cout << functionDEFINITION << "splitmesh4" << endl;
+
+real t;
+
+mesh3 Th3=cube(4, 4, 4);
+t = clock();
+mesh3 Th4=splitmesh4(Th3);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(Th4.nt == Th3.nt * 4);
+test(Th4.nbe == Th3.nbe);
+assert(Th4.nt == Th3.nt * 4);
+cout << Th4.nt << " == 4 x " << Th3.nt << endl;
+assert(Th4.nbe == Th3.nbe);
+cout << Th4.nbe << " == " << Th3.nbe << endl;

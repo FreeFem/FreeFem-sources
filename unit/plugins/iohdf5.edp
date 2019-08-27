@@ -1,0 +1,28 @@
+include "test.idp"
+load "iohdf5"
+
+real t;
+
+cout << functionDEFINITION << "savehdf5sol" << endl;
+{
+  int bottombeam = 2;
+  border a(t=2,0)  { x=0; y=t ;label=1;};        //  left beam
+  border b(t=0,10) { x=t; y=0 ;label=bottombeam;};        //  bottom of beam
+  border c(t=0,2)  { x=10; y=t ;label=1;};       //  rigth beam
+  border d(t=0,10) { x=10-t; y=2; label=3;};     //  top beam
+  real E = 21.5;
+  real sigma = 0.29;
+  real mu = E/(2*(1+sigma));
+  real lambda = E*sigma/((1+sigma)*(1-2*sigma));
+  real gravity = -0.05;
+  mesh th = buildmesh( b(20)+c(5)+d(20)+a(5));
+  real sqrt2=sqrt(2.);
+  macro epsilon(u1,u2)  [dx(u1),dy(u2),(dy(u1)+dx(u2))/sqrt2] // EOM
+  fespace Vh(th, [P1, P1]);
+  Vh [uu,vv], [w,s];
+  mesh th1 = movemesh(th, [x+uu, y+vv]);
+  t = clock();
+  savehdf5sol("beam-2d-def.sol.h5",th1,uu,"uu",[uu,vv],"U",(epsilon(uu,vv)),"eps");
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}

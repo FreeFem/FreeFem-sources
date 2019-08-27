@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "renumbering" << endl;
+cout << functionDEFINITION << "renumbering" << endl;
 real t;
 real r = 12;
 matrix A = [[1, 4, 6], [2, 7, 9], [1, 2, 3]];
@@ -9,7 +9,7 @@ matrix B = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
 t = clock();
 cout << renumbering(A, B) << endl;
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 cout << A << endl;
 test(A(0, 0) == 1);
 test(A(0, 1) == 4);

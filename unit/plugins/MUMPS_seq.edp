@@ -1,0 +1,54 @@
+include "test.idp"
+load "MUMPS"
+
+verbosity=3;
+int nn=30;
+ mesh Th=square(nn,nn);
+verbosity=3;
+ fespace Vh(Th,P1);
+ Vh uh,vh;
+ func f=1;
+ func g=0;
+ int err=0;
+ func bool verif()
+ {
+	real umax  =0.361995;
+	if( abs( umax - uh[].max) >0.001) err++;
+ }
+ int init=0;
+ problem laplace0(uh,vh,init=init) =
+    int2d(Th)( dx(uh)*dx(vh) + dy(uh)*dy(vh))
+  + int1d(Th,1)( uh*vh)
+  + int1d(Th,1)( - vh)
+  + int2d(Th)( -f*vh )
+  + on(2,3,4,uh=g) ;
+real cpu=clock() ;
+laplace0;
+cout << "-- lap UMFPACK " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
+verif();
+
+uh=0;
+
+cpu=clock() ;
+laplace0;
+cout << "-- lap SuperLU " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
+verif();
+DefaultSolver="MUMPS";
+DefaultSolverSym="MUMPS";
+cpu=clock() ;
+laplace0;
+cout << "-- lap MUMPS " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
+verif();
+assert(err==0);
+
+cpu=clock() ;
+laplace0;
+cout << "-- lap SuperLU " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
+verif();
+DefaultSolver="MUMPSSEQ";
+DefaultSolverSym="MUMPSSEQ";
+cpu=clock() ;
+laplace0;
+cout << "-- lap MUMPS " << nn << "x" << nn << "  : " <<  -cpu+clock() << " s,  max =" << uh[].max << endl;
+verif();
+assert(err==0);

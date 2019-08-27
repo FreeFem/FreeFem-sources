@@ -1,7 +1,7 @@
 load "msh3"
 include "test.idp"
 
-cout << "int3d" << endl;
+cout << functionDEFINITION << "int3d" << endl;
 real t;
 real res;
 
@@ -13,129 +13,129 @@ mesh3 Th3 = cube(10, 10, 10);
 t = clock();
 res = int3d(Th3)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3)(x);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(0.5 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3, levelset=-0.5+x)(x);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(0.125 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3)(x + y);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3, qfV=qfV1)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3, qforder=2)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3, qfV=qfV2)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3, qforder=3)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3, qfV=qfV5)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3, qforder=6)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3, qfV=qfV1lump)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
-cout << "change label" << endl;
+cout << functionDEFINITION << "change label" << endl;
 
 Th3 = change(Th3, fregion=fRegion());
 
 t = clock();
 res = int3d(Th3)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3)(x);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(0.5 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3)(x + y);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3, qfV=qfV1)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3, qforder=2)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3, qfV=qfV2)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3, qforder=3)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3, qfV=qfV5)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3, qforder=6)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);
 
 t = clock();
 res = int3d(Th3, qfV=qfV1lump)(1.);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(1 - res) < HWERROR);

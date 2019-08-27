@@ -1,10 +1,10 @@
 load "msh3"
 include "test.idp"
 
-cout << "operator +" << endl;
+cout << functionDEFINITION << "operator +" << endl;
 real t;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 int i1 = 2;
 int i2 = 3;
@@ -27,239 +27,248 @@ real[int] arrayreal = [1.1, 2.2, 3.3];
 t = clock();
 int resi1 = i1 + i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resi1 == 5);
 
 t = clock();
 real resi2 = i1 + ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resi2 == 3.);
 
 t = clock();
 complex resi3 = i1 + ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resi3 == 7 + 1i * 6);
 
 t = clock();
 string resi4 = i1 + is;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resi4 == "26 + 1i * 7");
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 real resr1 = ir + ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr1 == 2.);
 
 t = clock();
 real resr2 = ir  + i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr2 == 3.);
 
 t = clock();
 complex resr3 = ir + ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr3 == 6 + 1i * 6);
 
 t = clock();
 string resr4 = ir + is;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr4 == "16 + 1i * 7");
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 complex resc1 = ic + ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resc1 == 10 + 1i * 12);
 
 t = clock();
 complex resc2 = ic + i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resc2 == 7. + 1i * 6);
 
 t = clock();
 complex resc3 = ic + ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resc3 == 6. + 1i * 6);
 
 t = clock();
 string resc4 = ic + is;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resc4 == "5+6i6 + 1i * 7");
 
-cout << IND << "string" << endl;
+cout << typeDEFINITION << "string" << endl;
 
 t = clock();
 string ress1 = is + is;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ress1 == "6 + 1i * 76 + 1i * 7");
 
 t = clock();
 string ress2 = is + i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ress2 == "6 + 1i * 72");
 
 t = clock();
 string ress3 = is + ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ress3 == "6 + 1i * 71");
 
 t = clock();
 string ress4 = is + ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ress4 == "6 + 1i * 75+6i");
 
+cout << typeDEFINITION << "mesh" << endl;
 
-cout << "operator -" << endl;
+mesh Th1 = square(10, 10);
+mesh Th2 = square(10, 10, [1+x, 1+y]);
+t = clock();
+mesh Th = Th1 + Th2;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 
-cout << IND << "int" << endl;
+
+cout << functionDEFINITION << "operator -" << endl;
+
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 int ressi1 = i1 - i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressi1 == -1);
 
 t = clock();
 real ressi2 = i1 - ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressi2 == 1.);
 
 t = clock();
 complex ressi3 = i1 - ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressi3 == -3 - 6i);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 real ressr1 = ir - ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressr1 == 0.);
 
 t = clock();
 real ressr2 = ir - i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressr2 == -1.);
 
 t = clock();
 complex ressr3 = ir - ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressr3 == -4 - 6i);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 complex ressc1 = ic - ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressc1 == 0.);
 
 t = clock();
 complex ressc2 = ic - i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressc2 == 3. + 1i * 6);
 
 t = clock();
 complex ressc3 = ic - ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressc3 == 4. + 1i * 6);
 
 
-cout << "operator *" << endl;
+cout << functionDEFINITION << "operator *" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 int resmi1 = i1 * i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmi1 == 6);
 
 t = clock();
 real resmi2 = i1 * ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmi2 == 2.);
 
 t = clock();
 complex resmi3 = i1 * ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmi3 == 10+12i);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 real resmr1 = ir * ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmr1 == 1.);
 
 t = clock();
 real resmr2 = ir * i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmr2 == 2.);
 
 t = clock();
 complex resmr3 = ir * ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmr3 == 5 + 1i * 6);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 complex resmc1 = ic * ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
   test(resmc1 == -11 + 60i);
 
 t = clock();
 complex resmc2 = ic * i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmc2 == 10 + 12i);
 
 t = clock();
 complex resmc3 = ic * ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmc3 == 5. + 1i * 6);
 
-cout << IND << "matrix" << endl;
+cout << typeDEFINITION << "matrix" << endl;
 
 int[int] I, J;
 real[int] D;
 t = clock();
 matrix resmm4 = A * i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 matrix C = resmm4 - B;
 [I, J, D] = C;
 test(abs(D.max) == 0);
@@ -267,15 +276,15 @@ test(abs(D.max) == 0);
 t = clock();
 matrix resmm5 = A * ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 C = resmm5 - A;
 [I, J, D] = C;
 test(abs(D.max) == 0);
 
 
-cout << "operator .*" << endl;
+cout << functionDEFINITION << "operator .*" << endl;
 
-cout << IND << "int[int]" << endl;
+cout << typeDEFINITION << "int[int]" << endl;
 
 real[int] ri1 = [1, 2, 3];
 real[int] ri2 = [4, 5, 6];
@@ -284,12 +293,12 @@ real[int] resmuli = [4, 10, 18];
 t = clock();
 real[int] multbti = ri1 .* ri2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 for (int i = 0; i < 2; i++) {
   test(multbti[i] == resmuli[i]);
 }
 
-cout << IND << "real[int]" << endl;
+cout << typeDEFINITION << "real[int]" << endl;
 
 real[int] rr1 = [1., 2., 3.];
 real[int] rr2 = [4., 5., 6.];
@@ -298,180 +307,180 @@ real[int] resmul = [4., 10., 18.];
 t = clock();
 real[int] multbt = rr1 .* rr2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 for (int i = 0; i < 2; i++) {
   test(multbt[i] == resmul[i]);
 }
 
-cout << "operator /" << endl;
+cout << functionDEFINITION << "operator /" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 int i3 = 4;
 int resdi1 = i3 / i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdi1 == 2);
 
 t = clock();
 real resdi2 = i1 / ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdi2 == 2.);
 
 t = clock();
 complex resdi3 = i1 / ic2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdi3 == 1-1i);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 real resdr1 = ir / ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdr1 == 1.);
 
 t = clock();
 real resdr2 = ir / i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdr2 == 0.5);
 
 t = clock();
 complex resdr3 = ir / (ic2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdr3 == 0.5-0.5i);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 t = clock();
 complex resdc1 = ic / ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdc1 == 1);
 
 t = clock();
 complex resdc2 = ic / i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdc2 == 2.5 + 3i);
 
 t = clock();
 complex resdc3 = ic / ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdc3 == 5. + 1i * 6);
 
 
-cout << "operator ./" << endl;
+cout << functionDEFINITION << "operator ./" << endl;
 
-cout << IND << "int[int]" << endl;
+cout << typeDEFINITION << "int[int]" << endl;
 
 real[int] resdivi = [0.25, 0.4, 0.5];
 
 t = clock();
 real[int] divtbti = ri1 ./ ri2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 for (int i = 0; i < 2; i++) {
   test(divtbti[i] == resdivi[i]);
 }
 
-cout << IND << "real[int]" << endl;
+cout << typeDEFINITION << "real[int]" << endl;
 
 real[int] resdivr = [0.25, 0.4, 0.5];
 
 t = clock();
 real[int] divtbt = rr1 ./ rr2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 for (int i = 0; i < 2; i++) {
   test(divtbt[i] == resdivr[i]);
 }
 
-cout << "operator %" << endl;
+cout << functionDEFINITION << "operator %" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 int resmodi1 = i3 % i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmodi1 == 0);
 
 t = clock();
 real resmodi2 = i2 % ir2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmodi2 == 1.);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 real resmodr1 = ir % ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmodr1 == 0);
 
 t = clock();
 real resmodr2 = ir % i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmodr2 == 1);
 
 
-cout << "operator ^" << endl;
+cout << functionDEFINITION << "operator ^" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 int respowi1 = i3 ^ i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(respowi1 == 16);
 
 t = clock();
 real respowi2 = i2 ^ ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(respowi2 == 3);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 real respowr1 = ir ^ ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(respowr1 == 1.);
 
 t = clock();
 real respowr2 = ir ^ i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(respowr2 == 1.);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 complex respowc1 = (ic) ^ i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 //cout << respowc1 << endl;
 //test(respowc1 == 11 + 60i); //to fix
 
 t = clock();
 complex respowc2 = ic ^ ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(respowc2 == 5.+6i);
 
 
-cout << "operator '" << endl;
+cout << functionDEFINITION << "operator '" << endl;
 
-cout << IND << "matrix" << endl;
+cout << typeDEFINITION << "matrix" << endl;
 
 A = [[1, 2, 3],
 [4, 5, 6],
@@ -479,659 +488,659 @@ A = [[1, 2, 3],
 t = clock();
 matrix a = A';
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 C = A - a';
 [I, J, D] = C;
 test(D.max == 0);
 
-cout << "ternary" << endl;
+cout << functionDEFINITION << "ternary" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 int resterni1 = i1 < i2 ? i1 : i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resterni1 == i1);
 
 t = clock();
 int resterni2 = i1 < ir ? i1 : ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resterni2 == ir);
 
 t = clock();
 complex resterni3 = i1 < ic ? i1 : ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resterni3 == i1);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 real resternr1 = ir > ir2 ? ir : ir2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resternr1 == ir2);
 
 t = clock();
 int resternr2 = ir < i1 ? ir : i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resternr2 == ir);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 complex resternc1 = ic > ic2 ? ic : ic2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resternc1 == ic);
 
 t = clock();
 complex resternc2 = ic > i1 ? ic : i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resternc2 == ic);
 
 t = clock();
 complex resternc3 = ic > ir ? ic : ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resternc3 == ic);
 
 
-cout << "operator >" << endl;
+cout << functionDEFINITION << "operator >" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 bool ressupi = i1 > i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupi == false);
 
 t = clock();
 bool ressupineg = -i1 > -i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupineg == true);
 
 t = clock();
 bool ressupir = i1 > ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupir == true);
 
 t = clock();
 bool ressupic = i1 > ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupic == false);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 bool ressupr = ir > ir2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupr == false);
 
 t = clock();
 bool ressuprneg = -ir > -ir2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressuprneg == true);
 
 t = clock();
 bool ressupri = ir > i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupri == false);
 
 t = clock();
 bool ressuprc = ir > ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressuprc == false);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 bool ressupc = ic > ic2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupc == true);
 
 t = clock();
 bool ressupci = ic > i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupci == true);
 
 t = clock();
 bool ressupcr = ic > ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupcr == true);
 
 
-cout << "operator <" << endl;
+cout << functionDEFINITION << "operator <" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 bool resinfi = i1 < i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfi == true);
 
 t = clock();
 bool resinfineg = -i1 < -i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfineg == false);
 
 t = clock();
 bool resinfir = i1 < ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfir == false);
 
 t = clock();
 bool resinfic = i1 < ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfic == true);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 bool resinfr = ir < ir2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfr == true);
 
 t = clock();
 bool resinfrneg = -ir < -ir2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfrneg == false);
 
 t = clock();
 bool resinfri = ir < i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfri == true);
 
 t = clock();
 bool resinfrc = ir < ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfrc == true);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 bool resinfc = ic < ic2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfc == false);
 
 t = clock();
 bool resinfci = ic < i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfci == false);
 
 t = clock();
 bool resinfcr = ic < ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfcr == false);
 
 
-cout << "operator >=" << endl;
+cout << functionDEFINITION << "operator >=" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 bool ressupeqi = i1 >= i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupeqi == false);
 
 t = clock();
 bool ressupeqi2 = i1 >= i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupeqi2 == true);
 
 t = clock();
 bool ressupeqineg = -i1 >= -i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupeqineg == true);
 
 t = clock();
 bool ressupeqineg2 = -i2 >= -i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupeqineg2 == true);
 
 t = clock();
 bool ressupeqir = i1 >= ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupeqir == true);
 
 t = clock();
 bool ressupeqic = i1 >= ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupeqic == false);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 bool ressupeqr = ir >= ir2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupeqr == false);
 
 t = clock();
 bool ressupeqr2 = ir >= ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupeqr2 == true);
 
 t = clock();
 bool ressupeqrneg = -ir >= -ir2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupeqrneg == true);
 
 t = clock();
 bool ressupeqrneg2 = -ir >= -ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupeqrneg2 == true);
 
 t = clock();
 bool ressupeqri = ir >= i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupeqri == false);
 
 t = clock();
 bool ressupeqrc = ir >= ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupeqrc == false);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 bool ressupeqc = ic >= ic2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupeqc == true);
 
 t = clock();
 bool ressupeqci = ic >= i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupeqci == true);
 
 t = clock();
 bool ressupeqcr = ic >= ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ressupeqcr == true);
 
 
-cout << "operator <=" << endl;
+cout << functionDEFINITION << "operator <=" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 bool resinfeqi = i1 <= i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfeqi == true);
 
 t = clock();
 bool resinfeqi2 = i1 <= i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfeqi2 == true);
 
 t = clock();
 bool resinfeqineg = -i1 <= -i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfeqineg == false);
 
 t = clock();
 bool resinfeqineg2 = -i2 <= -i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfeqineg2 == true);
 
 t = clock();
 bool resinfeqir = i1 <= ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfeqir == false);
 
 t = clock();
 bool resinfeqic = i1 <= ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfeqic == true);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 bool resinfeqr = ir <= ir2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfeqr == true);
 
 t = clock();
 bool resinfeqr2 = ir <= ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfeqr2 == true);
 
 t = clock();
 bool resinfeqrneg = -ir <= -ir2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfeqrneg == false);
 
 t = clock();
 bool resinfeqrneg2 = -ir <= -ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfeqrneg2 == true);
 
 t = clock();
 bool resinfeqri = ir <= i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfeqri == true);
 
 t = clock();
 bool resinfeqrc = ir <= ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfeqrc == true);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 bool resinfeqc = ic <= ic2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfeqc == false);
 
 t = clock();
 bool resinfeqci = ic <= i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfeqci == false);
 
 t = clock();
 bool resinfeqcr = ic <= ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfeqcr == false);
 
 
-cout << "operator =" << endl;
+cout << functionDEFINITION << "operator =" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 int reseqi = i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqi == i1);
 
-cout << IND << "bool" << endl;
+cout << typeDEFINITION << "bool" << endl;
 
 t = clock();
 bool b = true;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(b == true);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 real reseqr = ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqr == ir);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 complex reseqc = ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqc == ic);
 
-cout << IND << "string" << endl;
+cout << typeDEFINITION << "string" << endl;
 
 t = clock();
 string reseqs = is;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqs == is);
 
-cout << IND << "int[int]" << endl;
+cout << typeDEFINITION << "int[int]" << endl;
 
 t = clock();
 arrayint = [2, 3, 4];
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arrayint[0] == 2 && arrayint[1] == 3 && arrayint[2] == 4);
 arrayint = [1, 2, 3];
 
-cout << IND << "real[int]" << endl;
+cout << typeDEFINITION << "real[int]" << endl;
 
 t = clock();
 arrayreal = [1., 2., 3.];
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arrayreal[0] == 1. && arrayreal[1] == 2. && arrayreal[2] == 3.);
 arrayreal = [1.1, 2.2, 3.3];
 
-cout << IND << "mesh" << endl;
+cout << typeDEFINITION << "mesh" << endl;
 
-mesh Th = square(10, 10);
-mesh Th2 = square(4, 4);
+Th = square(10, 10);
+Th2 = square(4, 4);
 t = clock();
 Th = Th2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(Th.nt == Th2.nt && Th.nbe == Th2.nbe);
 
-cout << IND << "mesh3" << endl;
+cout << typeDEFINITION << "mesh3" << endl;
 
 mesh3 Th3 = cube(10, 10, 10);
 mesh3 Th4 = cube(4, 4, 4);
 t = clock();
 Th3 = Th4;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(Th3.nt == Th4.nt && Th3.nbe == Th4.nbe);
 
 
-cout << "operator ==" << endl;
+cout << functionDEFINITION << "operator ==" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 bool reseqeqi = i1 == i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqi == false);
 
 t = clock();
 bool reseqeqi2 = i1 == i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqi2 == true);
 
 t = clock();
 bool reseqeqir = i1 == ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqir == false);
 
 t = clock();
 bool reseqeqic = i1 == ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqir == false);
 
 t = clock();
 bool reseqeqis = i1 == is;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqis == false);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 bool reseqeqr = ir == ir2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqr == false);
 
 t = clock();
 bool reseqeqr2 = ir == ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqr2 == true);
 
 t = clock();
 bool reseqeqri = ir == i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqri == false);
 
 t = clock();
 bool reseqeqrc = ir == ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqrc == false);
 
 t = clock();
 bool reseqeqrs = ir == is;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqrs == false);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 bool reseqeqc = ic == ic2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqc == false);
 
 t = clock();
 bool reseqeqc2 = ic == ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqc2 == true);
 
 t = clock();
 bool reseqeqci = ic == i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqci == false);
 
 t = clock();
 bool reseqeqcr = ic == ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqcr == false);
 
 t = clock();
 bool reseqeqcs = ic == is;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqcs == false);
 
-cout << IND << "string" << endl;
+cout << typeDEFINITION << "string" << endl;
 
 t = clock();
 bool reseqeqs = is == is2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqs == false);
 
 t = clock();
 bool reseqeqs2 = is2 == is2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqs2 == true);
 
 t = clock();
 bool reseqeqsi = is == i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqci == false);
 
 t = clock();
 bool reseqeqcsr = is == ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqcsr == false);
 
 t = clock();
 bool reseqeqsc = is == ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqsc == false);
 
-cout << IND << "mesh" << endl;
+cout << typeDEFINITION << "mesh" << endl;
 
 t = clock();
 bool reseqeqmesh = Th.nt == Th.nt;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqmesh == true);
 
-cout << IND << "mesh3" << endl;
+cout << typeDEFINITION << "mesh3" << endl;
 
 t = clock();
 bool reseqeqmsh3 = Th4.nt == Th4.nt;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(reseqeqmsh3 == true);
 
-cout << IND << "bool" << endl;
+cout << typeDEFINITION << "bool" << endl;
 
 t = clock();
 bool resb = b == true;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resb == true);
 
-cout << "operator ++" << endl;
+cout << functionDEFINITION << "operator ++" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 int resplusplusi = ++i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resplusplusi == 3);
 i1 = 2;
 
@@ -1140,14 +1149,14 @@ while (i2 < 3) {
   i2 == i2++;
   t = clock() - t;
 }
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(i2 == 3);
 i1 = 2;
 
 t = clock();
 int resplusplusineg = ++ineg;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resplusplusineg == -41);
 ineg = -42;
 
@@ -1156,18 +1165,18 @@ while (ineg < -41) {
   ineg == ineg++;
   t = clock() - t;
 }
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ineg == -41);
 ineg = -42;
 
-cout << "operator --" << endl;
+cout << functionDEFINITION << "operator --" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 int resminusminusi = --i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resminusminusi == 1);
 i1 = 2;
 
@@ -1176,14 +1185,14 @@ while (i2 < 3) {
   i2 == i2--;
   t = clock() - t;
 }
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(i2 == 3);
 i1 = 2;
 
 t = clock();
 int resminusminusineg = --ineg;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resminusminusineg == -43);
 ineg = -42;
 
@@ -1192,339 +1201,338 @@ while (ineg > -43) {
   ineg == ineg--;
   t = clock() - t;
 }
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ineg == -43);
 ineg = -42;
 
 
-cout << "operator !=" << endl;
+cout << functionDEFINITION << "operator !=" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 bool resdiffi = i1 != i2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffi == true);
 
 t = clock();
 bool resdiffi2 = i1 != i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffi2 == false);
 
 t = clock();
 bool resdiffir = i1 != ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffir == true);
 
 t = clock();
 bool resdiffic = i1 != ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffic == true);
 
 t = clock();
 bool resdiffis = i1 != is;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffis == true);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 bool resdiffr = ir != ir2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffr == true);
 
 t = clock();
 bool resdiffr2 = ir != ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffr2 == false);
 
 t = clock();
 bool resdiffri = ir != i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffri == true);
 
 t = clock();
 bool resdiffrc = ir != ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffrc == true);
 
 t = clock();
 bool resdiffrs = ir != is;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffrs == true);
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 bool resdiffc = ic != ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffc == false);
 
 t = clock();
 bool resdiffc2 = ic != ic2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffc2 == true);
 
 t = clock();
 bool resdiffci = ic != i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffci == true);
 
 t = clock();
 bool resdiffcr = ic != ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffcr == true);
 
 t = clock();
 bool resdiffcs = ic != is;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffcs == true);
 
-cout << IND << "string" << endl;
+cout << typeDEFINITION << "string" << endl;
 
 t = clock();
 bool resdiffs = is != is;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffs == false);
 
 t = clock();
 bool resdiffs2 = is != is2;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffs2 == true);
 
 t = clock();
 bool resdiffsr = is != ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffsr == true);
 
 t = clock();
 bool resdiffsc = is != ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffsc == true);
 
 t = clock();
 bool resdiffsi = is != i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resdiffsi == true);
 
 
-cout << "operator +=" << endl;
+cout << functionDEFINITION << "operator +=" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 i1 += i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(i1 == 4);
 i1 = 2;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 ir += ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(i1 == 2.);
 ir = 1.;
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 ic += ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ic == 10. + 12i);
 ic = 5.0 + 6i;
 
-cout << IND << "int[int]" << endl;
+cout << typeDEFINITION << "int[int]" << endl;
 
 t = clock();
 arrayint += 1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arrayint[0] == 2 && arrayint[1] == 3 && arrayint[2] == 4);
 arrayint = [1, 2, 3];
 
-cout << IND << "real[int]" << endl;
+cout << typeDEFINITION << "real[int]" << endl;
 
 t = clock();
 arrayreal += 1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arrayreal[0] - 3.1 < HWERROR);
 test(arrayreal[1] - 3.2 < HWERROR);
 test(arrayreal[2] - 4.3 < HWERROR);
 arrayreal = [1.1, 2.2, 3.3];
 
 
-cout << "operator -=" << endl;
+cout << functionDEFINITION << "operator -=" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 i1 -= i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(i1 == 0);
 i1 = 2;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 ir -= ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ir == 0.);
 ir = 1.;
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 ic -= ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ic == 0.);
 ic = 5.0 + 6i;
 
-cout << IND << "int[int]" << endl;
+cout << typeDEFINITION << "int[int]" << endl;
 
 t = clock();
 arrayint -= 1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arrayint[0] == 0 && arrayint[1] == 1 && arrayint[2] == 2);
 arrayint = [1, 2, 3];
 
-cout << IND << "real[int]" << endl;
+cout << typeDEFINITION << "real[int]" << endl;
 
 t = clock();
 arrayreal -= 1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arrayreal[0] - 0.1 < HWERROR);
 test(arrayreal[1] - 1.2 < HWERROR);
 test(arrayreal[2] - 2.3 < HWERROR);
 arrayreal = [1.1, 2.2, 3.3];
 
+cout << functionDEFINITION << "operator *=" << endl;
 
-cout << "operator *=" << endl;
-
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 i1 *= i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(i1 == 4);
 i1 = 2;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 ir *= ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ir == 1.);
 ir = 1.;
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 ic *= ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ic == -11. + 60i);
 ic = 5.0 + 6i;
 
-cout << IND << "int[int]" << endl;
+cout << typeDEFINITION << "int[int]" << endl;
 
 t = clock();
 arrayint *= 1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arrayint[0] == 1 && arrayint[1] == 2 && arrayint[2] == 3);
 arrayint = [1, 2, 3];
 
-cout << IND << "real[int]" << endl;
+cout << typeDEFINITION << "real[int]" << endl;
 
 t = clock();
 arrayreal *= 1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arrayreal[0] == 1.1 && arrayreal[1] == 2.2 && arrayreal[2] == 3.3);
 arrayreal = [1.1, 2.2, 3.3];
 
 
-cout << "operator /=" << endl;
+cout << functionDEFINITION << "operator /=" << endl;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 i1 /= i1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(i1 == 1);
 i1 = 2;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 ir *= ir;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ir == 1.);
 ir = 1.;
 
-cout << IND << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 
 t = clock();
 ic /= ic;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(ic == 1);
 ic = 5.0 + 6i;
 
-cout << IND << "int[int]" << endl;
+cout << typeDEFINITION << "int[int]" << endl;
 
 t = clock();
 arrayint /= 1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arrayint[0] == 1 && arrayint[1] == 2 && arrayint[2] == 3);
 
-cout << IND << "real[int]" << endl;
+cout << typeDEFINITION << "real[int]" << endl;
 
 t = clock();
 arrayreal /= 1;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(arrayreal[0] == 1.1 && arrayreal[1] == 2.2 && arrayreal[2] == 3.3);
 
 
-cout << "operator &&" << endl;
+cout << functionDEFINITION << "operator &&" << endl;
 
-cout << IND << "boolean" << endl;
+cout << typeDEFINITION << "boolean" << endl;
 
 bool b1 = false;
 bool b2 = false;
@@ -1533,33 +1541,33 @@ t = clock();
 if (b1 == false && b2 == false)
   b3 = true;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(b3 == true);
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 b3 = false;
 t = clock();
 if (i1 && i2)
   b3 = true;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(b3 == true);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 b3 = false;
 t = clock();
 if (ir && ir2)
   b3 = true;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(b3 == true);
 
 
-cout << "operator |" << endl;
+cout << functionDEFINITION << "operator |" << endl;
 
-cout << IND << "boolean" << endl;
+cout << typeDEFINITION << "boolean" << endl;
 
 b1 = false;
 b2 = true;
@@ -1568,58 +1576,58 @@ t = clock();
 if (b1 == false | b2 == true)
   b3 = true;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(b3 == true);
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 b3 = false;
 t = clock();
 if (i1 | i2)
   b3 = true;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(b3 == true);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 b3 = false;
 t = clock();
 if (ir | ir2)
   b3 = true;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(b3 == true);
 
 
-cout << "operator !" << endl;
+cout << functionDEFINITION << "operator !" << endl;
 
-cout << IND << "boolean" << endl;
+cout << typeDEFINITION << "boolean" << endl;
 
 bool isNot = false;
 t = clock();
 if (!(isNot) == true)
   isNot = true;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(isNot == true);
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 isNot = false;
 t = clock();
 if (!i1)
   isNot = true;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(isNot == false);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 isNot = false;
 t = clock();
 if (!ir)
   isNot = true;
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(isNot == false);

@@ -1,0 +1,50 @@
+include "test.idp"
+load "pipe"
+
+cout << functionDEFINITION << "flush" << endl;
+
+real t;
+int where;
+border floor(t=0,1){ x=t; y=0; label=1;}; // the unit square
+border right(t=0,1){ x=1; y=t; label=5;};
+border ceiling(t=1,0){ x=t; y=1; label=5;};
+border left(t=1,0){ x=0; y=t; label=5;};
+int n=10;
+mesh th= buildmesh(floor(n)+right(n)+ceiling(n)+left(n));
+fespace femp1(th,P1);
+femp1 f = sin(x)*cos(y),g;
+ofstream file("f.txt",binary);// for windows add binary version 3.30
+file.precision(16);
+file << f[] << endl;
+where=file.tellp();
+file << 0.1 ;
+file << " " << 0.2 ;
+cout << " where in file " << where << endl;
+file << " # comment bla bla ...  0.3 \n";
+file << 0.2 << endl;
+t = clock();
+file.flush; // to flush the io  buffer of file
+t = clock() - t;
+cout << timeELAPSED << endl;
+
+cout << functionDEFINITION << "sleep" << endl;
+
+real t1;
+real t2;
+
+t1 = clock();
+sleep(1); // to flush the io  buffer of file
+t2 = clock() - t;
+cout << timeELAPSED << t2 - t1 << endl;
+test(t2 != t1);
+
+cout << functionDEFINITION << "usleep" << endl;
+
+real t3;
+real t4;
+
+t3 = clock();
+usleep(1); // to flush the io  buffer of file
+t4 = clock() - t3;
+cout << timeELAPSED << t4 - t3 << endl;
+test(t4 != t3);

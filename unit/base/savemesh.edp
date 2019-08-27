@@ -1,7 +1,7 @@
 load "msh3"
 include "test.idp"
 
-cout << "savemesh" << endl;
+cout << functionDEFINITION << "savemesh" << endl;
 real t;
 mesh Th = square(2,2);
 string myfile = "toto.msh";
@@ -11,11 +11,11 @@ mesh3 Th3 = cube(2, 2, 2);
 t = clock();
 savemesh(Th, myfile);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(system("test -e toto.msh") == 0);
 
 t = clock();
 savemesh(Th3, myfile2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(system("test -e toto3D.mesh") == 0);

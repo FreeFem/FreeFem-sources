@@ -1,45 +1,45 @@
 include "test.idp"
-cout << "isInf" << endl;
+cout << functionDEFINITION << "isInf" << endl;
 real t;
 int i = 42;
 real r = 4.2;
 complex c = 4 + 2i;
 real nan = sqrt(-1);
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 t = clock();
 bool resi = isInf(i);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resi == false);
 
-cout << IND << "Inf" << endl;
+cout << typeDEFINITION << "Inf" << endl;
 
 t = clock();
 bool resinf = isInf(-log(0.00));
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinf == true);
 
 t = clock();
 bool resinfneg = isInf(log(0.00));
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinfneg == true);
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 bool resr = isInf(r);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resr == false);
 
-cout << IND << "NaN" << endl;
+cout << typeDEFINITION << "NaN" << endl;
 
 t = clock();
 bool resnan = isInf(nan);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resnan == false);

@@ -284,7 +284,7 @@ public:
   enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3, int3d = 4, intallfaces= 5,intallVFfaces=6 } ; //3d
   typeofkind  kind; //  0
   int d; // 3d
-  bool isMeshS;;
+  bool isMeshS;
   typedef const CDomainOfIntegration* Result;
   Expression Th;
   Expression mapt[3],mapu[3];
@@ -954,7 +954,15 @@ public:
     :A(aa),Uh(*pUh),Vh(*pVh) {}//,pUh(ppUh),pVh(ppVh),Uh(*ppUh),Vh(*ppVh) {}
   long N() const {return  A ? A->n : 0;}
   long M() const { return A ? A->m : 0;}
-  void resize(int n,int m) { if(A) A->resize(n,m);}
+  void resize(int n,int m) {
+      if(A) A->resize(n,m);
+      else {//  matrice vide a cree
+          HashMatrix<int,K> *phm= new HashMatrix<int,K>(n,m);
+          MatriceCreuse<K> *pmc(phm);
+          A.master(pmc);
+      }
+      
+  }
   void increment(){ count++;}
     VMat *pMC()  {return A ? ( MatriceCreuse<K> *)A:0; }
     HMat *pHM()  {return dynamic_cast<HashMatrix<int,K> *>(pMC());}
@@ -978,7 +986,7 @@ public:
       //  pmcc->A.cswap(pmc);
 
         if(verbosity>99999)   cerr << "newpMatrice_Creuse  set " << pmcc << " " << pmcc->count <<" " << pmcc->A
-        << " to " << pmc  << " init: "<< init << endl; ;;
+        << " to " << pmc  << " init: "<< init << endl;
        // pmc->dump(cerr) << endl;
          pmc=0;
         return  pmcc;
@@ -995,7 +1003,7 @@ public:
         pA->Add(pC,cc);
       // to do.. XXXX  July 2017 FH.
         if(verbosity>99999)   cerr << "newpMatrice_Creuse  add " << pmcc << " " << pmcc->count <<" " << pmcc->A
-            << " to " << pmc  << endl; ;;
+            << " to " << pmc  << endl;
         
         pmc=0;//  pcm is delete after instriction
         return  pmcc;

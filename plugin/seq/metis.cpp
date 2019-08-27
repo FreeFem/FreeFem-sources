@@ -14,14 +14,15 @@
 /* You should have received a copy of the GNU Lesser General Public License */
 /* along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          */
 /****************************************************************************/
-// SUMMARY : ...
+// SUMMARY  :   add interface with partionning library METSI and ParMETIS
 // LICENSE : LGPLv3
 // ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
-// AUTHORS : Frederic Hecht
+// AUTHORS : Frederic Hecht, P. Jolivet
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
+// E-MAIL  :  P. Jolivet <pierre.jolivet@enseeiht.fr>
 
 // *INDENT-OFF* //
-//ff-c++-LIBRARY-dep: [mpi parmetis|metis]
+//ff-c++-LIBRARY-dep: metis
 //ff-c++-cpp-dep:
 // *INDENT-ON* //
 
@@ -124,10 +125,10 @@ KN<long>*partmetisd (Stack s, KN<long> *const &part, Mesh *const &pTh, long cons
 static void Load_Init () {
 	if (verbosity && mpirank == 0)
 #ifdef METIS_VER_MAJOR
-	{cout << " lood: init metis (v  " << METIS_VER_MAJOR << " )\n";}
+	{cout << " load: init metis (v  " << METIS_VER_MAJOR << " )\n";}
 
 #else
-	{cout << " lood: init metis (v 4 )\n";}
+	{cout << " load: init metis (v 4 )\n";}
 #endif
 	Global.Add("metisnodal", "(", new OneOperator3_<KN<long> *, KN<long> *, const Mesh *, long, E_F_stackF0F0F0_<KN<long> *, KN<long> *, const Mesh *, long> >(&partmetis<const Mesh, 0> ));
 	Global.Add("metisdual", "(", new OneOperator3_<KN<long> *, KN<long> *, const Mesh *, long, E_F_stackF0F0F0_<KN<long> *, KN<long> *, const Mesh *, long> >(&partmetis<const Mesh, 1> ));
@@ -143,7 +144,6 @@ static void Load_Init () {
 	Global.Add("metisdual", "(", new OneOperator3_<KN<double> *, KN<double> *, const Mesh3 *, long, E_F_stackF0F0F0_<KN<double> *, KN<double> *, const Mesh3 *, long> >(&partmetis<const Mesh3, 1> ));
 	Global.Add("metisnodal", "(", new OneOperator3_<KN<double> *, KN<double> *, const MeshS *, long, E_F_stackF0F0F0_<KN<double> *, KN<double> *, const MeshS *, long> >(&partmetis<const MeshS, 0> ));
 	Global.Add("metisdual", "(", new OneOperator3_<KN<double> *, KN<double> *, const MeshS *, long, E_F_stackF0F0F0_<KN<double> *, KN<double> *, const MeshS *, long> >(&partmetis<const MeshS, 1> ));
-
 }
 
 LOADFUNC(Load_Init)

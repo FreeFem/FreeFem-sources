@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "solver" << endl;
+cout << functionDEFINITION << "solver" << endl;
 real t;
 
-// Parameters
+// parameterDEFINITIONs
 func Pk = P2;
 
 func f = -2.*x*(y-1.)*(y-2.*x+x*y+2.)*exp(x-y);
@@ -29,7 +29,7 @@ fespace Uh(Th, Pk);
 Uh u, uh;
 Uh uerror;
 
-cout << IND << "varf" << endl;
+cout << typeDEFINITION << "varf" << endl;
  //using varf
  t = clock();
  varf vPoisson (u, uh)
@@ -42,70 +42,70 @@ cout << IND << "varf" << endl;
   	+ on(Wall, u=uD)
   	;
 t = clock() - t;
-cout << IND << IND << t << endl;
-cout << IND << "solver CG" << endl;
+cout << timeELAPSED << t << endl;
+cout << typeDEFINITION << "solver CG" << endl;
 {
   matrix<real> Poisson = vPoisson(Uh, Uh, solver=CG);
   real[int] PoissonBoundary = vPoisson(0, Uh);
   t = clock();
   u[] = Poisson^-1 * PoissonBoundary;
   t = clock() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   uerror = u - ue;
   test(uerror[].max < eps);
 }
-cout << IND << "solver Cholesky" << endl;
+cout << typeDEFINITION << "solver Cholesky" << endl;
 {
   matrix<real> Poisson = vPoisson(Uh, Uh, solver=Cholesky);
   real[int] PoissonBoundary = vPoisson(0, Uh);
   t = clock();
   u[] = Poisson^-1 * PoissonBoundary;
   t = clock() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   uerror = u - ue;
   test(uerror[].max < eps);
 }
-cout << "solver Crout" << endl;
+cout << functionDEFINITION << "solver Crout" << endl;
 {
   matrix<real> Poisson = vPoisson(Uh, Uh, solver=Crout);
   real[int] PoissonBoundary = vPoisson(0, Uh);
   t = clock();
   u[] = Poisson^-1 * PoissonBoundary;
   t = clock() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   uerror = u - ue;
   test(uerror[].max < eps);
 }
-cout << IND << "solver GMRES" << endl;
+cout << typeDEFINITION << "solver GMRES" << endl;
 {
   matrix<real> Poisson = vPoisson(Uh, Uh, solver=GMRES);
   real[int] PoissonBoundary = vPoisson(0, Uh);
   t = clock();
   u[] = Poisson^-1 * PoissonBoundary;
   t = clock() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   uerror = u - ue;
   test(uerror[].max < eps);
 }
-cout << IND << "solver LU" << endl;
+cout << typeDEFINITION << "solver LU" << endl;
 {
   matrix<real> Poisson = vPoisson(Uh, Uh, solver=LU);
   real[int] PoissonBoundary = vPoisson(0, Uh);
   t = clock();
   u[] = Poisson^-1 * PoissonBoundary;
   t = clock() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   uerror = u - ue;
   test(uerror[].max < eps);
 }
-cout << IND << "solver sparsesolver" << endl;
+cout << typeDEFINITION << "solver sparsesolver" << endl;
 {
   matrix<real> Poisson = vPoisson(Uh, Uh, solver=sparsesolver);
   real[int] PoissonBoundary = vPoisson(0, Uh);
   t = clock();
   u[] = Poisson^-1 * PoissonBoundary;
   t = clock() - t;
-  cout << IND << IND << t << endl;
+  cout << timeELAPSED << t << endl;
   uerror = u - ue;
   test(uerror[].max < eps);
 }

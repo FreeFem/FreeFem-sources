@@ -33,56 +33,11 @@
 #define HPDDM_NUMBERING 'C'
 #undef CBLAS_H
 
+#if HPDDM_PETSC && defined(PCHPDDM)
+#include "../interface/hpddm_petsc.hpp"
+#endif
+
 #include <HPDDM.hpp>
-#ifndef VERSION_MATRICE_CREUSE
-//  OLD CODE
-#define RNM_VirtualMatrix VirtualMatrice
-template<class K>
-struct ff_HPDDM_MatrixCSR : public HPDDM::MatrixCSR<K>
-{
-    ff_HPDDM_MatrixCSR(MatriceMorse<K>* pA) :
-    HPDDM::MatrixCSR<K>(pA->n, pA->m, pA->nbcoef, pA->a, pA->lg, pA->cl, pA->symetrique) {}
-};
-template<class K>
-HPDDM::MatrixCSR<K> * new_HPDDM_MatrixCSR(MatriceMorse<K>* mA,bool  mfree=false,K *s=0,int *is=0,int *js=0)
-{
- 
-    if(mA)
-    {
-        if(!s) s=mA->a;
-        if(!is) is=mA->lg;
-        if(!js) js=mA->cl;
-    return new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nbcoef, s, is, js , mA->symetrique,mfree);
-    }
-    else return nullptr;
-    
-}
-template<class K>
-HPDDM::MatrixCSR<void> * new_HPDDM_MatrixCSRvoid(MatriceMorse<K>* mA,bool  mfree=false,int *is=0,int *js=0)
-{
-    
-    if(mA)
-    {
-        if(!is) is=mA->lg;
-        if(!js) js=mA->cl;
-        return new HPDDM::MatrixCSR<void>(mA->n, mA->m, mA->nbcoef, is, js , mA->symetrique,mfree);
-    }
-    else return nullptr;
-    
-}
-
-template<class K>
-void set_ff_matrix(MatriceMorse<K>* mA,const HPDDM::MatrixCSR<K> &dA)
-{
-    // bof Bof
-    mA->nbcoef = dA._nnz;
-    mA->a = dA._a;
-    mA->lg = dA._ia;
-    mA->cl = dA._ja;
-}
-
-#else
-//  version 4
 template<class K> K* newCopy(bool mfree,K *p,int n)
 {  if( !mfree) return p;
 	K *q= new K[n];
@@ -142,7 +97,6 @@ void set_ff_matrix(MatriceMorse<K>* mA,const HPDDM::MatrixCSR<K> &dA)
     
     mA->set(dA._n,dA._m,dA._sym,dA._nnz,dA._ia,dA._ja,dA._a,0,1);
 }
-#endif
 
 template<typename T>
 inline bool exist_type() {
@@ -417,15 +371,21 @@ AnyType exchangeInOut_Op<Type, K>::operator()(Stack stack) const {
     return 0L;
 }
 
+#if !HPDDM_PETSC || !defined(HPDDM_SLEPC)
 double getOpt(string* const& ss) {
     return HPDDM::Option::get()->val(*ss);
 }
 bool isSetOpt(string* const& ss) {
     return HPDDM::Option::get()->set(*ss);
 }
+#endif
 template<class Type, class K>
 bool destroyRecycling(Type* const& Op) {
+#ifndef HPDDM_SLEPC
     HPDDM::Recycling<K>::get()->destroy(Op->prefix());
+#else
+    Op->destroy();
+#endif
     return false;
 }
 template<class Type>

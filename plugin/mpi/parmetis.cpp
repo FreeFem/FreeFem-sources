@@ -1,30 +1,30 @@
-// SUMMARY  :   add interface with partionning library ParMETIS
-// USAGE    : LGPL
-// ORG      : Centre National de la Recherche Scientifique
-// AUTHOR   : P. Jolivet
-// E-MAIL   : P. Jolivet <pierre.jolivet@enseeiht.fr>
+/****************************************************************************/
+/* This file is part of FreeFEM.                                            */
+/*                                                                          */
+/* FreeFEM is free software: you can redistribute it and/or modify          */
+/* it under the terms of the GNU Lesser General Public License as           */
+/* published by the Free Software Foundation, either version 3 of           */
+/* the License, or (at your option) any later version.                      */
+/*                                                                          */
+/* FreeFEM is distributed in the hope that it will be useful,               */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of           */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            */
+/* GNU Lesser General Public License for more details.                      */
+/*                                                                          */
+/* You should have received a copy of the GNU Lesser General Public License */
+/* along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          */
+/****************************************************************************/
+// SUMMARY  :   add interface with partionning library METSI and ParMETIS
+// LICENSE : LGPLv3
+// ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+// AUTHORS : Frederic Hecht, P. Jolivet
+// E-MAIL  : frederic.hecht@sorbonne-universite.fr
+// E-MAIL  :  P. Jolivet <pierre.jolivet@enseeiht.fr>
 
-/*
- This file is part of Freefem++
-
- Freefem++ is free software; you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
-
- Freefem++  is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU Lesser General Public License for more details.
-
- You should have received a copy of the GNU Lesser General Public License
- along with Freefem++; if not, write to the Free Software
- Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
- */
-
-//ff-c++-LIBRARY-dep: mpi parmetis
+// *INDENT-OFF* //
+//ff-c++-LIBRARY-dep: parmetis mpi
 //ff-c++-cpp-dep:
+// *INDENT-ON* //
 
 #include <ff++.hpp>
 #include <cmath>
@@ -35,17 +35,17 @@
 
 template<class Type, class Mesh>
 class ParMETIS_Op : public E_F0mps {
-    public:
-        Expression part;
-        Expression pTh;
-        Expression lparts;
-        static const int n_name_param = 2;
-        static basicAC_F0::name_and_type name_param[];
-        Expression nargs[n_name_param];
-        ParMETIS_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : part(param1), pTh(param2), lparts(param3) {
-            args.SetNameParam(n_name_param, name_param, nargs);
-        }
-        AnyType operator()(Stack stack) const;
+public:
+    Expression part;
+    Expression pTh;
+    Expression lparts;
+    static const int n_name_param = 2;
+    static basicAC_F0::name_and_type name_param[];
+    Expression nargs[n_name_param];
+    ParMETIS_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : part(param1), pTh(param2), lparts(param3) {
+        args.SetNameParam(n_name_param, name_param, nargs);
+    }
+    AnyType operator()(Stack stack) const;
 };
 template<class Type, class Mesh>
 basicAC_F0::name_and_type ParMETIS_Op<Type, Mesh>::name_param[] = {
@@ -54,11 +54,11 @@ basicAC_F0::name_and_type ParMETIS_Op<Type, Mesh>::name_param[] = {
 };
 template<class Type, class Mesh>
 class ParMETIS : public OneOperator {
-    public:
-        ParMETIS() : OneOperator(atype<long>(), atype<KN<Type>*>(), atype<const Mesh*>(), atype<long>()) { }
-        E_F0* code(const basicAC_F0& args) const {
-            return new ParMETIS_Op<Type, Mesh>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
-        }
+public:
+    ParMETIS() : OneOperator(atype<long>(), atype<KN<Type>*>(), atype<const Mesh*>(), atype<long>()) { }
+    E_F0* code(const basicAC_F0& args) const {
+        return new ParMETIS_Op<Type, Mesh>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
+    }
 };
 template<class Type, class Mesh>
 AnyType ParMETIS_Op<Type, Mesh>::operator()(Stack stack) const {

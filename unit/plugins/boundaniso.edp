@@ -1,0 +1,26 @@
+include "test.idp"
+load "aniso"
+
+cout << functionDEFINITION << "boundaniso" << endl;
+
+real t;
+
+real nb = 3;
+real[int] M2 = [1, 0, 100];
+real r = 3;
+
+t = clock();
+int boundAnIso = boundaniso(nb, M2, r);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << boundAnIso << endl;
+// test(boundAnIso == 1);
+
+real[int] M3 = [1, 0, 10, 0, 0, 100];
+
+t = clock();
+int boundAnIso2 = boundaniso(nb, M3, r);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << boundAnIso2 << endl;
+// test(boundAnIso2 == 2);

@@ -1,11 +1,57 @@
 include "test.idp"
 
-cout << "average" << endl;
+cout << functionDEFINITION << "average" << endl;
 real t;
-macro dn(u) (N.x*dx(u)+N.y*dy(u) ) //  def the normal derivative
 
+cout << parameterDEFINITION << "complex" << endl;
+{
+  complex c = 4 + 2i;
 
-t = clock();
-// average();
-t = clock() - t;
-cout << IND << t << endl;
+  t = clock();
+  complex res = average(c);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(res == 4 + 2i);
+}
+
+cout << parameterDEFINITION << "real" << endl;
+{
+  real r = 42;
+
+  t = clock();
+  complex res = average(r);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(res == 42);
+}
+
+{
+  mesh Th = square(10, 10);
+  fespace Uh(Th, P1);
+  varf vTest (u, v)
+    = intalledges(Th)(
+      average(u) * v
+    )
+    + on(1, u=0)
+    ;
+
+    matrix Test = vTest(Uh, Uh);
+    real[int] TestRHS = vTest(0, Uh);
+}
+
+{
+  mesh Th = square(10, 10);
+  fespace Uh(Th, P1);
+  varf vTest (u, v)
+    = intalledges(Th)(
+      average(u) * v
+    )
+    + on(1, 2, 3, 4, u=1)
+    ;
+
+    matrix Test = vTest(Uh, Uh);
+    real[int] TestRHS = vTest(0, Uh);
+
+    Uh u;
+    u[] = Test^-1 * TestRHS;
+}

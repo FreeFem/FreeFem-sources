@@ -191,6 +191,7 @@ if [ -f  "$out.$SUF" ] ; then rm $out.$SUF ; fi
 
 # Default compiler
 if [ -z "$CXX"  ];then  CXX=g++ ; fi
+if [ -n "$withmpi" -a -z "$MPICXX" ] ; then echo $0: Sorry NO MPI; exit 0; fi
 if [ -n "$withmpi" ]; then  CXX=$MPICXX;fi
 
 test "$withmpi" = "yes" && WMPI_LIB="$MPI_LIB"

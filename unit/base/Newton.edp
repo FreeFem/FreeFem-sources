@@ -1,0 +1,49 @@
+include "test.idp"
+
+cout << functionDEFINITION << "Newton" << endl;
+
+real t;
+real[int] u(10);
+
+func real J (real[int] &u) {
+	real f = 0.;
+	for (int i = 0; i < u.n; i++)
+		f += (1-u[i])*(1-u[i]);
+	return f;
+}
+
+func real[int] DJ (real[int] &u) {
+	for (int i = 0; i < u.n; i++)
+		u[i] = -2.*(1-u[i]);
+	return u;
+}
+
+matrix Hessian;
+Hessian.resize(u.n, u.n);
+func matrix DDJ (real[int] &u) {
+	int[int] I(u.n), J(u.n);
+	real[int] C(u.n);
+	for (int i = 0; i < u.n; i++) {
+		I[i] = i;
+		J[i] = i;
+		C[i] = 2.;
+	}
+	Hessian.resize(u.n, u.n);
+	Hessian = [I, J, C];
+	set(Hessian, solver=sparsesolver);
+	return Hessian;
+}
+
+u = 0;
+t = clock();
+Newton(J, DJ, DDJ, u);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << u << endl;
+
+u = 1;
+t = clock();
+Newton(J, DJ, DDJ, u);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+cout << u << endl;

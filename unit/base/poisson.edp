@@ -1,9 +1,9 @@
 include "test.idp"
 
 real t;
-cout << "poisson" << endl;
+cout << functionDEFINITION << "poisson" << endl;
 
-// Parameters
+// parameterDEFINITIONs
 func Pk = P2;
 
 func f = -2.*x*(y-1.)*(y-2.*x+x*y+2.)*exp(x-y);
@@ -29,7 +29,7 @@ fespace Uh(Th, Pk);
 Uh u, uh;
 Uh uerror;
 
-cout << IND << "solve" << endl;
+cout << functionDEFINITION << "solve" << endl;
 // Problem
 { // using solve
 	t = clock();
@@ -43,11 +43,11 @@ cout << IND << "solve" << endl;
 		+ on(Wall, u=uD)
 		;
 	t = clock() - t;
-	cout << IND << IND << t << endl;
+	cout << timeELAPSED << t << endl;
 	uerror = u - ue;
 	test(uerror[].max < eps);
 }
-cout << IND << "problem" << endl;
+cout << functionDEFINITION << "problem" << endl;
 {// using Problem
 	t = clock();
 	problem Poisson (u, uh)
@@ -61,11 +61,11 @@ cout << IND << "problem" << endl;
 		;
 	Poisson;
 	t = clock() - t;
-	cout << IND << IND << t << endl;
+	cout << timeELAPSED << t << endl;
 	uerror = u - ue;
 	test(uerror[].max < eps);
 }
-cout << IND << "varf" << endl;
+cout << typeDEFINITION << "varf" << endl;
 { //using varf
 	t = clock();
 	varf vPoisson (u, uh)
@@ -78,14 +78,14 @@ cout << IND << "varf" << endl;
 		+ on(Wall, u=uD)
 		;
 	t = clock() - t;
-	cout << IND << IND << t << endl;
+	cout << timeELAPSED << t << endl;
 	matrix<real> Poisson = vPoisson(Uh, Uh, solver=sparsesolver);
 	real[int] PoissonBoundary = vPoisson(0, Uh);
-	cout << IND << "^-1" << endl;
+	cout << functionDEFINITION << "^-1" << endl;
 	t = clock();
 	u[] = Poisson^-1 * PoissonBoundary;
 	t = clock() - t;
-	cout << IND << IND << t << endl;
+	cout << timeELAPSED << t << endl;
 	uerror = u - ue;
 	test(uerror[].max < eps);
 }

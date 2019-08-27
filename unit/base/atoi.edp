@@ -1,27 +1,27 @@
 include "test.idp"
 
-cout << "atoi" << endl;
+cout << functionDEFINITION << "atoi" << endl;
 real t;
 
-cout << IND << "int" << endl;
+cout << typeDEFINITION << "int" << endl;
 
 string stringnb = "42";
 t = clock();
 int intnb = atoi(stringnb);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(intnb == 42);
 
 string stringnb2 = "42abc";
 t = clock();
 int intnb2 = atoi(stringnb2);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(intnb2 == 42);
 
 string stringnb3 = "abc42";
 t = clock();
 int intnb3 = atoi(stringnb3);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(intnb3 == 0);

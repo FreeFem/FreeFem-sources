@@ -1,11 +1,9 @@
 include "test.idp"
 
-cout << "dumptable" << endl;
+cout << functionDEFINITION << "dumptable" << endl;
 real t;
-ofstream file("dumptable");
 
 t = clock();
-dumptable(file);
+dumptable(cout);
 t = clock() - t;
-cout << IND << IND << t << endl;
-test(!system("ls dumptable"));
+cout << timeELAPSED << t << endl;

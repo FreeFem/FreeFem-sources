@@ -1,0 +1,23 @@
+include "test.idp"
+load "Morley"
+load "msh3"
+
+cout << parameterDEFINITION << "P2Morley" << endl;
+
+real t;
+{
+    mesh Th = square(5, 5);
+
+  t = clock();
+  fespace Vh(Th, P2Morley);	// HCT finite element space
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  Vh [u, ux, uy], [v, vx, vy];
+
+  t = clock();
+  [u, ux, uy] = [0, dx(u), 1];
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  [v, vx, vy] = [abs(ux - u), 0, 0];
+  test(v[].linfty < 1);
+}

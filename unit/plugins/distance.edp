@@ -1,0 +1,51 @@
+include "test.idp"
+load "distance"
+load "msh3"
+
+cout << functionDEFINITION << "distance" << endl;
+
+real t;
+
+{
+  mesh Th;
+  Th=square(100,100);
+
+  fespace Vh(Th,P1);
+  Vh u = y-0.500;
+  u = 0.400-max(abs(x-y),abs(-1.+x+y));
+  Vh v=u;
+  bool d;
+
+  t = clock();
+  d = distance(Th,u,v[],distmax=100);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(d == false);
+}
+
+{
+  mesh3 Th;
+  Th=cube(10, 10, 10);
+
+  fespace Vh(Th,P2);
+  Vh u = y-0.500;
+  u = 0.400-max(abs(x-y),abs(-1.+x+y));
+  Vh v=u;
+  bool d;
+
+  t = clock();
+  d = distance(Th,u,v[],distmax=100);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(d == false);
+}
+
+{
+  int d;
+
+  t = clock();
+  d = checkdist(-1, 100);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(d == 0);
+}

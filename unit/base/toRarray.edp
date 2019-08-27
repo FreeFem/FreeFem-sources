@@ -1,11 +1,11 @@
 include "test.idp"
 
-cout << "toRarray" << endl;
+cout << functionDEFINITION << "toRarray" << endl;
 real t;
 real[int] c(3);
 
 t = clock();
 c = toRarray([0, 1, 2]);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(c[0] == 0 && c[1] == 1 && c[2] ==2);

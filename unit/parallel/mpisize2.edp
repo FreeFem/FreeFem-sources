@@ -1,0 +1,12 @@
+include "test.idp"
+
+cout << functionDEFINITION << "mpiSize" << endl;
+
+real t;
+mpiComm cc;
+
+t = mpiWtime();
+cout << mpiSize(cc) << endl;
+t = mpiWtime() - t;
+cout << timeELAPSED << endl;
+test(mpiSize(cc) == mpisize);

@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << "arealevelset" << endl;
+cout << functionDEFINITION << "arealevelset" << endl;
 
 real t;
 real r = 0.5;
@@ -10,10 +10,9 @@ mesh Th = buildmesh(c1(i));
 
 fespace Uh(Th, P1);
 Uh phi = 1. - (x^2+y^2);
-// plot(phi);
 
 t = clock();
 real res = arealevelset(Th, phi[], r);
 t = clock() - t;
-cout << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(abs(res - (pi/2)) < (1./i));

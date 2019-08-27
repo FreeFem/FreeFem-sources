@@ -1,9 +1,9 @@
 include "test.idp"
 
-cout << "rint" << endl;
+cout << functionDEFINITION << "rint" << endl;
 real t;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 real rpos = 0.5;
 real rneg = -0.5;
@@ -13,47 +13,47 @@ real toolong = 2.8e63;
 t = clock();
 real respos = rint(rpos);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(respos == 0.0);
 
 t = clock();
 real resneg = rint(rneg);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resneg == -0.0);
 
 t = clock();
 real restoolong = rint(toolong);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(restoolong == toolong);
 
-cout << IND << "NaN" << endl;
+cout << typeDEFINITION << "NaN" << endl;
 
 t = clock();
 real resnan = rint(nanb);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(isNaN(resnan));
 
-cout << IND << "zero" << endl;
+cout << typeDEFINITION << "zero" << endl;
 
 t = clock();
 real respzero = rint(+0);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(respzero == +0);
 
 t = clock();
 real resmzero = rint(-0);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resmzero == -0);
 
-cout << IND << "Inf" << endl;
+cout << typeDEFINITION << "Inf" << endl;
 
 t = clock();
 real resinf = rint(log(0.0));
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(resinf == log(0.0));

@@ -58,7 +58,7 @@ complex cplusmoins = 5. - 1i *3;
 complex cmoinsplus = -5. + 1i * 3;
 complex cmoinsmoins = -5. - 1i * 3;
 complex czero = 0.;
-real cabs = sqrt(5^2+3^2);
+real cabs = sqrt(5^2 + 3^2);
 
 t = clock();
 real acplusplus = abs(cplusplus);
@@ -93,7 +93,7 @@ test(azero == 0.);
 cout << typeDEFINITION << "real[int]" << endl;
 
 int n = 4;
-real[int] A = [1.,-1.,5.,-58.];
+real[int] A = [1., -1., 5., -58.];
 real[int] B(n);
 
 t = clock();
@@ -104,8 +104,10 @@ for (int i = 0; i < n; i++) {
   test(B[i] == abs(A[i]));
 }
 
+cout << typeDEFINITION << "real[int, int]" << endl;
+
 int tab = 2;
-real[int, int] AA = [[-1.,5.,8.,-9.],[5., 6.,-8.,-9.]];
+real[int, int] AA = [[-1., 5., 8., -9.], [5.,  6., -8., -9.]];
 real[int, int] BB(tab, n);
 
 t = clock();
@@ -114,38 +116,36 @@ t = clock() - t;
 cout << timeELAPSED << t << endl;
 for (int i = 0; i < tab; i++) {
   for (int j = 0; j < n; j++) {
-    test(BB(i,j) == abs(AA(i,j)));
+    test(BB(i, j) == abs(AA(i, j)));
   }
 }
 
-cout << typeDEFINITION << "int[int]" << endl;
+// REMARK: abs function is not usable with int[int] & int[int, int]
+// cout << typeDEFINITION << "int[int]" << endl;
+//
+// int[int] Aint = [1, -1, 5, -58];
+// int[int] Bint(n);
+//
+// t = clock();
+// Bint = abs(Aint);
+// t = clock() - t;
+// cout << timeELAPSED << t << endl;
+// for (int i = 0; i < n; i++) {
+//   test(Bint[i] == abs(Aint[i]));
+// }
+//
+// cout << typeDEFINITION << "int[int, int]" << endl;
+// int[int, int] AAint = [[-1, 5, 8, -9], [5, 6, -8, -9]];
+// int[int, int] BBint(tab, n);
+//
+// t = clock();
+// BBint = abs(AAint);
+// t = clock() - t;
+// cout << timeELAPSED << t << endl;
+// for (int i = 0; i < tab; i++) {
+//   for (int j = 0; j < n; j++) {
+//     test(BBint(i, j) == abs(AAint(i, j)));
+//   }
+// }
 
-int[int] Aint = [1, -1, 5, -58];
-int[int] Bint(n);
-
-t = clock();
-for (int i = 0; i < n; i++) {
-  Bint[i] = abs(Aint[i]);
-}
-t = clock() - t;
-cout << timeELAPSED << t << endl;
-for (int i = 0; i < n; i++) {
-  test(Bint[i] == abs(Aint[i]));
-}
-
-int[int, int] AAint = [[-1,5,8,-9],[5, 6,-8,-9]];
-int[int, int] BBint(tab, n);
-
-t = clock();
-for (int i = 0; i < tab; i++) {
-  for (int j = 0; j < n; j++) {
-    BBint(i,j) = abs(AAint(i,j));
-  }
-}
-t = clock() - t;
-cout << timeELAPSED << t << endl;
-for (int i = 0; i < tab; i++) {
-  for (int j = 0; j < n; j++) {
-    test(BBint(i,j) == abs(AAint(i,j)));
-  }
-}
+// REMARK: abs function is not usable with complex[int] & complex[int, int]

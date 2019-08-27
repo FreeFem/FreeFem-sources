@@ -1,0 +1,20 @@
+include "test.idp"
+load "myfunction"
+
+real t;
+
+cout << functionDEFINITION << "myfunction" << endl;
+
+t = clock();
+int myFunc = myfunction();
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(myFunc == 0);
+
+cout << functionDEFINITION << "testio" << endl;
+
+t = clock();
+int io = testio();
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(io == 0);

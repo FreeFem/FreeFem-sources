@@ -1,0 +1,25 @@
+include "test.idp"
+
+cout << functionDEFINITION << "SevedHB" << endl;
+
+real t;
+
+mesh Th = square(3,3);
+macro Grad(u) [dx(u),dy(u)] // EOM
+
+fespace Vh(Th,P1);
+varf vP(u,v) = int2d(Th)(Grad(u)'*Grad(v)) + int2d(Th)(v) + on(1,u=1);
+
+matrix<complex> A = vP(Vh,Vh);
+complex[int] rhs = vP(0,Vh);
+
+load "SaveHB"
+
+cout << " A = " << A << endl;
+cout << " rhs  = " << rhs << endl;
+
+t = clock();
+int ret = SaveHB("sample_z.hb", A, rhs, "sample of SaveHB");
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(ret == 0);

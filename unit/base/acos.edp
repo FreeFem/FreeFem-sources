@@ -1,63 +1,65 @@
 include "test.idp"
 
-cout << "acos" << endl;
+cout << functionDEFINITION << "acos" << endl;
 real t;
 real eps = 1e-6;
 
-cout << IND << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 
 t = clock();
 real am1 = acos(-1.);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(am1 == pi);
 
 t = clock();
 real a0 = acos(0.);
 t = clock() - t;
-cout << IND << IND << t << endl;
-test(a0 == pi / 2);
+cout << timeELAPSED << t << endl;
+test(a0 == pi / 2.);
 
 t = clock();
 real ap1 = acos(1.);
 t = clock() - t;
-cout << IND << IND << t << endl;
-test(ap1 == 0);
+cout << timeELAPSED << t << endl;
+test(ap1 == 0.);
 
 t = clock();
 real ap1eps = acos(1. + eps);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(isNaN(ap1eps));
 
 t = clock();
 real am1eps = acos(-1. - eps);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 test(isNaN(am1eps));
 
-cout << IND << "real array" << endl;
+cout << typeDEFINITION << "real[int]" << endl;
 
 int n = 4;
-real[int] A = [-1.,0.,0.3,1.];
+real[int] A = [-1., 0., 0.3, 1.];
 real[int] B(n);
 
 t = clock();
 B = acos(A);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 for (int i = 0; i < n; i++) {
   test(B[i] == acos(A[i]));
 }
 
+cout << typeDEFINITION << "real[int, int]" << endl;
+
 int tab = 2;
-real[int, int] AA = [[-1.,0.8,0.3,1.],[-0.9, -1.,1.,0.8]];
+real[int, int] AA = [[-1., 0.8, 0.3, 1.], [-0.9, -1., 1., 0.8]];
 real[int, int] BB(tab, n);
 
 t = clock();
 BB = acos(AA);
 t = clock() - t;
-cout << IND << IND << t << endl;
+cout << timeELAPSED << t << endl;
 for (int i = 0; i < tab; i++) {
   for (int j = 0; j < n; j++) {
     test(BB(i,j) == acos(AA(i,j)));
