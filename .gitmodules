@@ -1,0 +1,3 @@
+[submodule "src/ffgraphics/asio"]
+	path = src/ffgraphics/asio
+	url = https://github.com/chriskohlhoff/asio

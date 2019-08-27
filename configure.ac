@@ -544,7 +544,7 @@ CYGWIN*|MINGW*|MSYS_NT*)
 	ff_suffix_dylib="dll";
 	ff_suffix_dylib_a="dll.a";
         ff_win32=yes;
-
+    # echo "ff win 32 --------------------------------------------"
 	# FFCS - 8/3/12 - remove -D_MSC_VER under MinGW64 because it forces system calls to be compiled into any object
 	# (which creates thousands of duplicate definitions for sytem calls like time()).
 
@@ -589,6 +589,7 @@ CYGWIN*|MINGW*|MSYS_NT*)
 		# FFCS uses a specific compiler, so we specify its libraries explicitely
 		if test $enable_ffcs = no
 		then
+		    export PATH="$PATH:`cygpath $MSMPI_BIN`"
 		    test -z "$MPIRUN" &&  MPIRUN=`which mpiexe.exe`
 		    if test "$enable_fortran" != no  -o  "$with_flib" != no ;   then
 			case "$F77" in
@@ -966,9 +967,9 @@ AC_SUBST([FF_generic_petsc],"$enable_generic")
 #/usr/local/ff++/petsc/lib/petsc/conf/petscvariables
 ff_petsc_ok=no
 ff_slepc_ok=no
-echo --$with_petsc-- $ff_mpi 
+echo --$with_petsc-- $ff_mpi
 if test "$with_petsc" != no -a  $ff_mpi = yes; then
-    for d in "$with_petsc" "${prefix_petsc}/real/lib" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
+    for d in "$with_petsc" "${prefix_petsc}/real/lib" "${prefix_petsc}/r/lib" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
 	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
 	    ffconfpetsc="$d$dd"
 		ffconfslepc="$d/slepc/conf/slepcvariables"
@@ -980,8 +981,9 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
 				PETSC_MPIRUN=`echo "$PETSC_MPIRUN" | awk '{gsub(" --oversubscribe", ""); print}'`	#remove --oversubscribe
 			AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]);
-
-		    test  "$PETSC_SCALAR" = "real" && test  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_MPIRUN"` `which "$MPIRUN"`
+            WPETSC_MPIRUN=`which "$PETSC_MPIRUN"`
+            WMPIRUN=`which "$MPIRUN"` 
+		    test  "$PETSC_SCALAR" = "real" && test "$ff_win32" = yes -o  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s "$WPETSC_MPIRUN" "$WMPIRUN"
 		    if test "$?"  -eq 0 ; then
 		        AC_FF_PETSC_WHERELIB_BASIC(petsc,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetsc)
@@ -1031,18 +1033,17 @@ AC_ARG_WITH(petsc_complex,[  --with-petsc_complex=/usr/local/petsc/conf/petscvar
 ff_petsccomplex_ok=no
 ff_slepccomplex_ok=no
 if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
-    for d in "$with_petsc_complex" "${prefix}/ff-petsc/complex/lib" /usr/local/ff++/petsc-complex/lib ;do
+    for d in "$with_petsc_complex" "${prefix_petsc}/complex/lib" "${prefix_petsc}/c/lib" /usr/local/ff++/petsc-complex/lib ;do
 	for dd in ""  "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
 	    ffconfpetscc="$d$dd"
 	    if test -f "$ffconfpetscc" -a  "$ff_petsccomplex_ok" = no ; then
 		    PETSC_COMPLEX_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetscc"`
 		    PETSC_COMPLEX_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetscc"`
-				PETSC_COMPLEX_MPIRUN=`echo "$PETSC_COMPLEX_MPIRUN" | awk '{print $1}'`	#remove --oversubscribe
-		    AC_MSG_NOTICE([ find complex ($PETSC_COMPLEX_SCALAR) petsc in $ffconfpetscc]);
-
-		    test  "$PETSC_COMPLEX_SCALAR" = "complex" &&  test  "$PETSC_COMPLEX_MPIRUN" = "$MPIRUN" ||  cmp -s  `which "$PETSC_COMPLEX_MPIRUN"` `which "$MPIRUN"`
-		    if test "$?"  -eq 0 ; then
-	        AC_FF_PETSC_WHERELIB_BASIC(petsccomplex,$ffconfpetscc)
+			PETSC_COMPLEX_MPIRUN=`echo "$PETSC_COMPLEX_MPIRUN" | awk '{print $1}'`	#remove --oversubscribe
+			AC_MSG_NOTICE([ find complex ($PETSC_COMPLEX_SCALAR) petsc in $ffconfpetscc]);
+		    test  "$PETSC_COMPLEX_SCALAR" = "complex" &&  test  "$ff_win32" = yes -o  "$PETSC_COMPLEX_MPIRUN" = "$MPIRUN" ||  cmp -s `which "$PETSC_COMPLEX_MPIRUN"` `which "$MPIRUN"`
+		   	if test "$?"  -eq 0 ; then
+			AC_FF_PETSC_WHERELIB_BASIC(petsccomplex,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetscc)
@@ -2306,6 +2307,9 @@ AC_OUTPUT(
     src/femlib/Makefile
     src/Algo/Makefile
     src/lglib/Makefile
+    src/ffgraphics/Makefile
+      src/ffgraphics/server/Makefile
+      src/ffgraphics/client/Makefile
     src/fflib/Makefile
     src/nw/Makefile
     src/mpi/Makefile
@@ -2465,7 +2469,7 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - TETGEN: $ff_tetgen_ok])
   AC_MSG_NOTICE([ - UMFPACK: $ff_umfpack_ok])
 fi
-if test "${prefix_petsc}" != no -a   ! -d ${prefix_petsc}/real/lib  ; then
+if test "${prefix_petsc}" != no -a   ! -d "${prefix_petsc}/real/lib"  ; then
   AC_MSG_NOTICE([ petsc dirs do no exist  , do build do:])
   AC_MSG_NOTICE([cd 3rdparty/ff-petsc/;  make   ])
 fi
