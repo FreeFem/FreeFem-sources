@@ -9,6 +9,14 @@ int[int] Nxyz = [getARGV("-global", 50), getARGV("-global", 50), getARGV("-globa
 real[int,int] Bxyz = [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0]];
 int[int,int] Lxyz = [[1, 2], [2, 2], [2, 2]];
 mesh3 Th = Cube(Nxyz, Bxyz, Lxyz);
+int nx=10; // nombre de points le long de l'axe
+int nth=50; // nombre de points sur la circonference
+real xmin=1.,xmax=3.;
+mesh Thcarre=square(nx,nth,[xmin+x*(xmax-xmin),2*pi*y]);
+func f1 = x;
+func f2 = cos(y);
+func f3 = sin(y);
+meshS Thsurf1=movemesh23(Thcarre,transfo=[f1,f2,f3],orientation=-1);
 mesh Th2 = square(5, 5);
 fespace Ph(Th, P0);
 real t;
@@ -42,8 +50,22 @@ cout << functionDEFINITION << "metisdual" << endl;
       t = mpiWtime() - t;
       cout << timeELAPSED << t << endl;
     }
-    // broadcast(processor(0, mpiCommWorld), part[]);
-    // mpiBarrier(mpiCommWorld);
+    if(mpirank == 0) {
+        cout << "METIS: " << mpiWtime() - time << endl;
+        medit("METIS", Th, part);
+    }
+}
+
+{
+    mpiBarrier(mpiCommWorld);
+    real time = mpiWtime();
+    Ph part;
+    if(mpirank == 0) {
+      t = mpiWtime();
+      metisdual(part[], Thsurf1, getARGV("-lpart", mpisize));
+      t = mpiWtime() - t;
+      cout << timeELAPSED << t << endl;
+    }
     if(mpirank == 0) {
         cout << "METIS: " << mpiWtime() - time << endl;
         medit("METIS", Th, part);
