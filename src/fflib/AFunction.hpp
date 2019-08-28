@@ -1688,7 +1688,7 @@ class E_BorderN :public E_F0mps { public:
     }
     E_BorderN(const E_Border *  bb, C_F0  nn,const E_BorderN * nx=0) ;
     E_BorderN(const E_BorderN & bb,const E_BorderN * nx)
-    : b(bb.b),n(bb.n),cas(bb.cas),next(nx)
+    : b(bb.b),cas(bb.cas),n(bb.n),next(nx)
     {
       int kk=1;
 	if(bb.next) {// modif FH. 13/02/2008

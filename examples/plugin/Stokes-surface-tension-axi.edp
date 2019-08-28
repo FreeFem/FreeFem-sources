@@ -1,4 +1,6 @@
 // Stokes Quasi static avec tension superficiel
+if (HaveUMFPACK) //  need UMPACK  computation 
+{
 verbosity=0; 
 // voir https://fr.wikipedia.org/wiki/Pression_de_Laplace
 load "isoline"
@@ -154,3 +156,4 @@ plot([u1,u2],p,bSL(lgc/meshsize),coef=dt,cmm=" temps " + temps+ " / " + dt + " /
 Th= Bmesh;
 }
 cout << " End loop \n"; 
+}

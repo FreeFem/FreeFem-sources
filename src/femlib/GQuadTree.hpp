@@ -191,11 +191,11 @@ namespace EF23 {
     Vertex * NearestVertexWithNormal(const Rd & P);
     Vertex * NearestVertex(Zd i2);
     
-    Vertex *  ToClose(const Rd & ,R ,Zd );
-    Vertex *  ToClose(const Rd & P,R delta){
+    Vertex *  ToClose(const Rd & ,R ,Zd, bool nearest=false );
+    Vertex *  ToClose(const Rd & P,R delta,bool nearest=false){
       int hx = (int) (coef*delta);
       //if(verbosity > 5 ) cout << "hx=" << hx << " coef=" << coef << endl;
-      return ToClose(P,delta,Zd(hx));}
+      return ToClose(P,delta,Zd(hx),nearest);}
     int SizeOf() const {return sizeof(GTree)+sb->SizeOf();}
     
     void  Add( Vertex & w);
