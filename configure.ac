@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFEM,4.3-2,frederic.hecht@sorbonne-universite.fr,FreeFEM)
+AC_INIT(FreeFEM,4.4,frederic.hecht@sorbonne-universite.fr,FreeFEM)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -1557,16 +1557,16 @@ AC_MSG_CHECKING([for lapack in $LIBS, $ff_blas_libs and -llapack] )
 	fi
     fi
 
-AC_MSG_RESULT($ff_lapack_ok)
-if test "$ff_lapack_ok" != no ; then
-AC_SUBST(LAPACKLIBS,$ff_lapack_lib)
-fi
 if test "$ff_lapack_ok" = no; then
     AC_ARG_WITH(lapack,
 	AC_HELP_STRING([--with-lapack=library],[Use a specific version of Lapack]),
 	ff_lapack_ok=yes
 	ff_lapack_lib="${withval}"
 	LIBS="$ff_lapack_lib $LIBS")
+fi
+AC_MSG_RESULT($ff_lapack_ok)
+if test "$ff_lapack_ok" != no ; then
+AC_SUBST(LAPACKLIBS,$ff_lapack_lib)
 fi
 
 # Lapack configuration for Arpack
@@ -2242,11 +2242,11 @@ if test "$ff_mkl_ok" == yes ; then
 fi
 
 ## Condtional for check
-AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = yes])
+AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = yes ])
 AM_CONDITIONAL([BLACS], [test "$ff_blacs_ok" = yes])
 AM_CONDITIONAL([FFTW3], [test "$ff_fftw_ok" = yes])
 AM_CONDITIONAL([FORTRAN], [test "$enable_fortran" = yes])
-AM_CONDITIONAL([FREEYAMS], [test "$ff_freeyams_ok" = yes])
+AM_CONDITIONAL([FREEYAMS], [test "$ff_freeyams_ok" = yes -o -n "$TOOL_COMPILE_freeyams"])
 AM_CONDITIONAL([GMM], [test "$enable_gmm" = yes])
 AM_CONDITIONAL([GSL], [test "$ff_with_gsl" = yes])
 AM_CONDITIONAL([HDF5], [test "$with_hdf5" = yes])
@@ -2255,15 +2255,15 @@ AM_CONDITIONAL([HPDDM], [test "$enable_hpddm" = yes])
 AM_CONDITIONAL([HYPRE], [test "$ff_hypre_ok" = yes])
 AM_CONDITIONAL([IPOPT], [test "$ff_ipopt_ok" = yes])
 AM_CONDITIONAL([LIBSEQ], [test "$ff_libseq_ok" = yes])
-AM_CONDITIONAL([METIS], [test "$ff_metis_ok" = yes])
+AM_CONDITIONAL([METIS], [test "$ff_metis_ok" = yes -o -n "$TOOL_COMPILE_metis" ])
 AM_CONDITIONAL([MKL], [test "$ff_mkl" = yes])
-AM_CONDITIONAL([MMG3D], [test "$ff_mmg3d_ok" = yes])
+AM_CONDITIONAL([MMG3D], [test "$ff_mmg3d_ok" = yes -o -n "$TOOL_COMPILE_mmg3d"])
 AM_CONDITIONAL([MPI], [test "$ff_mpi" = yes])
-AM_CONDITIONAL([MSHMET], [test "$ff_mshmet_ok" = yes])
-AM_CONDITIONAL([MUMPS], [test "$ff_mumps_ok" = yes])
+AM_CONDITIONAL([MSHMET], [test "$ff_mshmet_ok" = yes -o -n "$TOOL_COMPILE_mshmet"])
+AM_CONDITIONAL([MUMPS], [test "$ff_mumps_ok" = yes -o -n "$TOOL_COMPILE_mumps"])
 AM_CONDITIONAL([MUMPS_ptscotch], [test "$ff_mumps_ptscotch_ok" = yes])
 AM_CONDITIONAL([MUMPS_scotch], [test "$ff_mumps_scotch_ok" = yes])
-AM_CONDITIONAL([MUMPS_seq], [test "$ff_mumps_seq_ok" = yes])
+AM_CONDITIONAL([MUMPS_seq], [test "$ff_mumps_seq_ok" = yes -o -n "$TOOL_COMPILE_mumps_seq"])
 AM_CONDITIONAL([NLOPT], [test "$ff_nlopt_ok" = yes])
 AM_CONDITIONAL([PARMETIS], [test "$ff_parmetis_ok" = yes])
 AM_CONDITIONAL([PETSC], [test "$ff_petsc_ok" = yes])
@@ -2271,12 +2271,12 @@ AM_CONDITIONAL([PETSCCOMPLEX], [test "$ff_petsccomplex_ok" = yes])
 AM_CONDITIONAL([PTHREAD], [test -n "$ff_pthread"])
 AM_CONDITIONAL([PTSCOTCH], [test "$ff_ptscotch_ok" = yes])
 AM_CONDITIONAL([SCALAPACK], [test "$ff_scalapack_ok" = yes])
-AM_CONDITIONAL([SCOTCH], [test "$ff_scotch_ok" = yes])
+AM_CONDITIONAL([SCOTCH], [test "$ff_scotch_ok" = yes -o -n "$TOOL_COMPILE_scotch"])
 AM_CONDITIONAL([SLEPC], [test "$ff_slepc_ok" = yes])
 AM_CONDITIONAL([SLEPCCOMPLEX], [test "$ff_slepccomplex_ok" = yes])
 AM_CONDITIONAL([SUPERLU], [test "$ff_superlu_ok" = yes])
-AM_CONDITIONAL([TETGEN], [test "$ff_tetgen_ok" = yes])
-AM_CONDITIONAL([UMFPACK], [test "$ff_umfpack_ok" = yes])
+AM_CONDITIONAL([TETGEN], [test "$ff_tetgen_ok" = yes -o -n "$TOOL_COMPILE_tetgen"])
+AM_CONDITIONAL([UMFPACK], [test "$ff_umfpack_ok" = yes -o -n "$TOOL_COMPILE_umfpack"])
 
 ##
 # All makefiles
@@ -2452,7 +2452,7 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - TETGEN: $ff_tetgen_ok])
   AC_MSG_NOTICE([ - UMFPACK: $ff_umfpack_ok])
 fi
-if test "${prefix_petsc}" != no -a   ! -d "${prefix_petsc}/real/lib"  ; then
+if test "${prefix_petsc}" != no -a   ! \( -d "${prefix_petsc}/real/lib"  -o  -d "${prefix_petsc}/r/lib" \) ; then
   AC_MSG_NOTICE([ petsc dirs do no exist  , do build do:])
   AC_MSG_NOTICE([cd 3rdparty/ff-petsc/;  make   ])
 fi

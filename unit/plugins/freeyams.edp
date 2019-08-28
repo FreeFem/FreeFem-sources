@@ -1,7 +1,6 @@
 include "test.idp"
 load "freeyams"
 load "msh3"
-load "medit"
 
 cout << functionDEFINITION << "freeyams" << endl;
 

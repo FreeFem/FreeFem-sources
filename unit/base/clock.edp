@@ -7,6 +7,6 @@ real time2;
 cout << typeDEFINITION << "real" << endl;
 
 time1 = clock();
-system("sleep 1");
+system("sleep 0.1");
 time2 = clock();
 test(time2 > time1);

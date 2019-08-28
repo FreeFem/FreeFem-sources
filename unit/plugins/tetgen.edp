@@ -1,6 +1,5 @@
 include "test.idp"
 load "tetgen"
-load "medit"
 load "msh3"
 load "mshmet"
 

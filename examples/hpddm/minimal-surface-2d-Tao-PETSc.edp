@@ -21,10 +21,6 @@ int[int][int] restriction;
     partitionerPar(part[], Th, mpiCommWorld, size);
     buildWithPartitioning(Th, part[], 1, restriction, D, Pk, mpiCommWorld);
     part = part;
-    int[int] partInt(part[].n);
-    for(int i = 0; i < part[].n; ++i)
-        partInt[i] = part[][i];
-    Th = change(Th, fregion = partInt[nuTriangle]);
     ThNo = trunc(Th, abs(part - mpirank) < 1e-1);
 }
 fespace Vh(Th, Pk);

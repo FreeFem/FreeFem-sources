@@ -1,0 +1,27 @@
+include "test.idp"
+load "symmetrizeCSR"
+
+real t;
+
+cout << functionDEFINITION << "symmetrizeCSR" << endl;
+
+matrix A = [[1, 2, 0, 0, 0, 0, 0, 0],
+[0, 3, 0, 0, 0, 0, 9, 0],
+[0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 1, 0, 0, 0, 0, 4 ]];
+
+verbosity = 100;
+t = clock();
+real ret = symmetrizeCSR(A);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+{
+  verbosity = 100;
+  matrix B;
+
+  t = clock();
+  real ret = symmetrizeCSR(B);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}

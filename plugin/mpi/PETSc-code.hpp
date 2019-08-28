@@ -233,7 +233,9 @@ void change(Type* const& ptA, Matrice_Creuse<PetscScalar>* const& mat, Type* con
                 }
             }
             else if(!assembled) {
-                PetscInt* ia = new PetscInt[2]();
+                PetscInt m;
+                MatGetLocalSize(ptA->_petsc, &m, NULL);
+                PetscInt* ia = new PetscInt[m + 1]();
                 MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, NULL, NULL);
                 delete [] ia;
             }
@@ -1364,12 +1366,12 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
             PetscBool isType;
             PetscStrcmp(type, PCHPDDM, &isType);
             if(isType && ptA->_A && ptA->_A->getMatrix() && ptA->_num) {
-                const HPDDM::MatrixCSR<PetscScalar>* A = ptA->_A->getMatrix();
+                const HPDDM::MatrixCSR<PetscScalar>* const A = ptA->_A->getMatrix();
                 Mat aux;
-                MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, ptA->_A->getMatrix()->_n, ptA->_A->getMatrix()->_m, ptA->_A->getMatrix()->_ia, ptA->_A->getMatrix()->_ja, ptA->_A->getMatrix()->_a, &aux);
+                MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, A->_n, A->_m, A->_ia, A->_ja, A->_a, &aux);
                 PetscInt* idx;
-                PetscMalloc1(ptA->_A->getMatrix()->_n, &idx);
-                std::copy_n(ptA->_num, ptA->_A->getMatrix()->_n, idx);
+                PetscMalloc1(A->_n, &idx);
+                std::copy_n(ptA->_num, A->_n, idx);
                 IS is;
                 ISCreateGeneral(PETSC_COMM_SELF, ptA->_A->getMatrix()->_n, idx, PETSC_OWN_POINTER, &is);
                 PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_IS", (PetscObject)is);
@@ -2328,12 +2330,10 @@ basicAC_F0::name_and_type NonlinearSolver<Type>::E_NonlinearSolver::name_param[]
 };
 template<class Type>
 PetscErrorCode FormJacobian(SNES snes, Vec x, Mat J, Mat B, void* ctx) {
-    User<Type>*            user;
-    const PetscScalar*       in;
-    PetscScalar*            out;
-    PetscErrorCode         ierr;
+    User<Type>*      user;
+    const PetscScalar* in;
 
-    PetscFunctionBegin;
+    PetscFunctionBeginUser;
     user = reinterpret_cast<User<Type>*>(ctx);
     typename NonlinearSolver<Type>::VecF_O* mat = reinterpret_cast<typename NonlinearSolver<Type>::VecF_O*>((*user)->op);
     VecGetArrayRead(x, &in);
@@ -2344,12 +2344,10 @@ PetscErrorCode FormJacobian(SNES snes, Vec x, Mat J, Mat B, void* ctx) {
 }
 template<class Type, int I>
 PetscErrorCode FormJacobianTao(Tao tao, Vec x, Mat J, Mat B, void* ctx) {
-    User<Type>*            user;
-    const PetscScalar*       in;
-    PetscScalar*            out;
-    PetscErrorCode         ierr;
+    User<Type>*      user;
+    const PetscScalar* in;
 
-    PetscFunctionBegin;
+    PetscFunctionBeginUser;
     user = reinterpret_cast<User<Type>*>(ctx);
     typename NonlinearSolver<Type>::VecF_O* mat = reinterpret_cast<typename NonlinearSolver<Type>::VecF_O*>(I == 0 ? (*user)->icJ : (I == 1 ? (*user)->ecJ : (*user)->op));
     VecGetArrayRead(x, &in);
@@ -2391,12 +2389,11 @@ PetscErrorCode FormJacobianTao(Tao tao, Vec x, Mat J, Mat B, void* ctx) {
 }
 template<class Type, int I>
 PetscErrorCode FormConstraintsTao(Tao obj, Vec x, Vec c, void* ctx) {
-    User<Type>*            user;
-    const PetscScalar*       in;
-    PetscScalar*            out;
-    PetscErrorCode         ierr;
+    User<Type>*      user;
+    const PetscScalar* in;
+    PetscScalar*      out;
 
-    PetscFunctionBegin;
+    PetscFunctionBeginUser;
     user = reinterpret_cast<User<Type>*>(ctx);
     typename LinearSolver<Type, 'N'>::MatF_O* mat = reinterpret_cast<typename LinearSolver<Type, 'N'>::MatF_O*>(I == 0 ? (*user)->ic : (*user)->ec);
     VecGetArrayRead(x, &in);
@@ -2410,12 +2407,11 @@ PetscErrorCode FormConstraintsTao(Tao obj, Vec x, Vec c, void* ctx) {
 }
 template<class PType, class Type>
 PetscErrorCode FormFunction(PType obj, Vec x, Vec f, void* ctx) {
-    User<Type>*            user;
-    const PetscScalar*       in;
-    PetscScalar*            out;
-    PetscErrorCode         ierr;
+    User<Type>*      user;
+    const PetscScalar* in;
+    PetscScalar*      out;
 
-    PetscFunctionBegin;
+    PetscFunctionBeginUser;
     user = reinterpret_cast<User<Type>*>(ctx);
     typename LinearSolver<Type, 'N'>::MatF_O* mat = reinterpret_cast<typename LinearSolver<Type, 'N'>::MatF_O*>((*user)->r);
     VecGetArrayRead(x, &in);
@@ -2429,11 +2425,10 @@ PetscErrorCode FormFunction(PType obj, Vec x, Vec f, void* ctx) {
 }
 template<class Type>
 PetscErrorCode FormObjectiveRoutine(Tao tao, Vec x, PetscReal *f, void* ctx) {
-    User<Type>*            user;
-    const PetscScalar*       in;
-    PetscErrorCode         ierr;
+    User<Type>*      user;
+    const PetscScalar* in;
 
-    PetscFunctionBegin;
+    PetscFunctionBeginUser;
     user = reinterpret_cast<User<Type>*>(ctx);
     typename NonlinearSolver<Type>::VecF_O* J = reinterpret_cast<typename NonlinearSolver<Type>::VecF_O*>((*user)->J);
     VecGetArrayRead(x, &in);
@@ -2446,10 +2441,8 @@ template<class Type>
 PetscErrorCode FormIJacobian(TS ts, PetscReal t, Vec u, Vec u_t, PetscReal a, Mat J, Mat B, void* ctx) {
     User<Type>*             user;
     const PetscScalar* in, *in_t;
-    PetscScalar*             out;
-    PetscErrorCode          ierr;
 
-    PetscFunctionBegin;
+    PetscFunctionBeginUser;
     user = reinterpret_cast<User<Type>*>(ctx);
     typename NonlinearSolver<Type>::IVecF_O* mat = reinterpret_cast<typename NonlinearSolver<Type>::IVecF_O*>((*user)->op);
     VecGetArrayRead(u, &in);
@@ -2466,9 +2459,8 @@ PetscErrorCode FormIFunction(TS ts, PetscReal t, Vec u, Vec u_t, Vec F, void* ct
     User<Type>*             user;
     const PetscScalar* in, *in_t;
     PetscScalar*             out;
-    PetscErrorCode          ierr;
 
-    PetscFunctionBegin;
+    PetscFunctionBeginUser;
     user = reinterpret_cast<User<Type>*>(ctx);
     typename NonlinearSolver<Type>::IMatF_O* mat = reinterpret_cast<typename NonlinearSolver<Type>::IMatF_O*>((*user)->r);
     VecGetArrayRead(u, &in);
@@ -2485,12 +2477,11 @@ PetscErrorCode FormIFunction(TS ts, PetscReal t, Vec u, Vec u_t, Vec F, void* ct
 }
 template<class Type>
 PetscErrorCode FormRHSFunction(TS ts, PetscReal t, Vec u, Vec F, void* ctx) {
-    User<Type>*             user;
-    const PetscScalar* in, *in_t;
-    PetscScalar*             out;
-    PetscErrorCode          ierr;
+    User<Type>*      user;
+    const PetscScalar* in;
+    PetscScalar*      out;
 
-    PetscFunctionBegin;
+    PetscFunctionBeginUser;
     user = reinterpret_cast<User<Type>*>(ctx);
     typename NonlinearSolver<Type>::IMatF_O* mat = reinterpret_cast<typename NonlinearSolver<Type>::IMatF_O*>((*user)->rhs);
     VecGetArrayRead(u, &in);
@@ -2504,12 +2495,10 @@ PetscErrorCode FormRHSFunction(TS ts, PetscReal t, Vec u, Vec F, void* ctx) {
 }
 template<class Type>
 PetscErrorCode Monitor(TS ts, PetscInt step, PetscReal time, Vec u, void* ctx) {
-    User<Type>*             user;
-    const PetscScalar* in, *in_t;
-    PetscScalar*             out;
-    PetscErrorCode          ierr;
+    User<Type>*      user;
+    const PetscScalar* in;
 
-    PetscFunctionBegin;
+    PetscFunctionBeginUser;
     user = reinterpret_cast<User<Type>*>(ctx);
     typename NonlinearSolver<Type>::IMonF_O* mat = reinterpret_cast<typename NonlinearSolver<Type>::IMonF_O*>((*user)->mon);
     VecGetArrayRead(u, &in);

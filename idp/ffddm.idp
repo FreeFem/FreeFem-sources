@@ -32,8 +32,6 @@ IFMACRO(WITHHPDDM)
 load "hpddm"
 ENDIFMACRO
 
-load "thresholdings"
-
 include "ffddm_partitioning.idp"
 
 include "ffddm_coarsemeshCS.idp"

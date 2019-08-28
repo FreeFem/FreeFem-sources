@@ -33,6 +33,20 @@ func real[int] ilutMp(real[int] & xx) {
   cout << timeELAPSED << t << endl;
 	ilutOUT=[uuout,ppin];
 	return ilutOUT;
+
+	cout << functionDEFINITION << "applyIlutPrecond" << endl;
+	{
+		int[int] precon1 = [0, 0, 0];
+		int[int] precon2 = [1, 1, 1];
+		real[int] precon3 = [2, 2, 2];
+		t = clock();
+		// int[int] I, J;
+		// real[int] C;
+		// [I, J, C] = makeIlutPrecond(precon1, precon2, precon3);
+		t = clock() - t;
+		cout << timeELAPSED << t << endl;
+	}
+
 }
 //dumptable(cout);
 // Uses ILUT for the velocity and I for the pressure

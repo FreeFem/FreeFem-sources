@@ -210,13 +210,13 @@ if(verbosity>2000)
   
   
   template<class Vertex>
-  Vertex *  GTree<Vertex>::ToClose(const Rd & v,R seuil,Zd H)
+  Vertex *  GTree<Vertex>::ToClose(const Rd & v,R seuil,Zd H,bool nearest)
   {
     const Rd X(v);
     const Zd p(RdtoZd(v));
     R seuil2 = seuil*seuil;
     // const Metric  Mx(v.m);
-    
+    Vertex * pvr=0; 
     QuadTreeBox * pb[ MaxDeep ];
     int  pi[ MaxDeep  ];
     Zd pp[  MaxDeep ];
@@ -255,8 +255,13 @@ if(verbosity>2000)
 		  R dd;
 		  if( (dd= (XY,XY) ) < seuil2 ) // LengthInterpole(Mx(XY), b->v[k]->m(XY)))  < seuil )
 		    { 
-		
-		      return &V; 
+                        if( nearest )  // modif FH  aug. 2019 For P. Jolivet.
+                        {
+                            seuil2=dd;
+                            pvr = & V;
+                        }
+                        else
+                            return &V;
 		    }
 		}
 	    }
@@ -288,7 +293,7 @@ if(verbosity>2000)
       hb <<= 1; // mul by 2 
     } while (l--);
 
-    return 0;
+    return pvr;
     
   }
   

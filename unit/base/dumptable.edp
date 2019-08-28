@@ -2,10 +2,8 @@ include "test.idp"
 
 cout << functionDEFINITION << "dumptable" << endl;
 real t;
-ofstream file("dumptable");
 
 t = clock();
-dumptable(file);
+dumptable(cout);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-test(!system("ls dumptable"));

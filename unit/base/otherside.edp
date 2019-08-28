@@ -1,0 +1,56 @@
+include "test.idp"
+
+real t;
+
+cout << parameterDEFINITION << "complex" << endl;
+{
+  complex c = 4 + 2i;
+
+  t = clock();
+  complex res = otherside(c);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}
+
+cout << parameterDEFINITION << "real" << endl;
+{
+  real r = 42;
+
+  t = clock();
+  real res = otherside(r);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  cout << res << endl;
+}
+
+{
+
+  mesh Th = square(10, 10);
+  fespace Uh(Th, P1);
+  varf vTest (u, v)
+  = intalledges(Th)(
+    otherside(u) * v
+    )
+    + on(1, u=0)
+    ;
+
+    matrix Test = vTest(Uh, Uh);
+    real[int] TestRHS = vTest(0, Uh);
+}
+
+{
+  mesh Th = square(10, 10);
+  fespace Uh(Th, P1);
+  varf vTest (u, v)
+  = intalledges(Th)(
+    otherside(u) * v
+    )
+    + on(1, 2, 3, 4, u=1)
+    ;
+
+    matrix Test = vTest(Uh, Uh);
+    real[int] TestRHS = vTest(0, Uh);
+
+    Uh u;
+    u[] = Test^-1 * TestRHS;
+}

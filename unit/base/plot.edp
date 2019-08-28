@@ -1,0 +1,32 @@
+include "test.idp"
+// include "MeshSurface.idp"
+load "msh3"
+
+real t;
+
+cout << functionDEFINITION << "plot" << endl;
+{
+  mesh Th = square(5, 5);
+  mesh3 Th3 = cube(5, 5, 5);
+
+  t = clock();
+  plot(Th);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+
+  t = clock();
+  plot(Th3);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+
+  real hs = 0.2;  // mesh size on sphere
+  int[int]  NN=[11,9,10];
+  real [int,int]  BB=[[-1.1,1.1],[-.9,.9],[-1,1]];
+  int [int,int]  LL=[[1,2],[3,4],[5,6]];
+
+  // meshS ThHS = SurfaceHex(NN,BB,LL,1)+Sphere(0.5,hs,7,1);
+  // t = clock();
+  // plot(ThHS);
+  // t = clock() - t;
+  // cout << timeELAPSED << t << endl;
+}

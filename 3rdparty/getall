@@ -175,10 +175,10 @@ download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
 	'tetgen1.5.1-beta1.tar.gz',
 	'3d55c197bcbfc611b7ced6f343643756');
 
-download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.11.2.tar.gz',
+download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.11.3.tar.gz',
 	'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/',
-	'petsc-lite-3.11.2.tar.gz',
-	'ccd4f1e07edc453a74b52fd9a0c52a1c');
+	'petsc-lite-3.11.3.tar.gz',
+	'e04cbb1aaccde4a33c8843e75a1fba15');
 	
 download('htool','https://github.com/PierreMarchand20/htool/archive/4af73fa94bd9ac7c81aba8191cb5da31da5f767a.zip',
 		'https://github.com/PierreMarchand20/',
@@ -186,10 +186,10 @@ download('htool','https://github.com/PierreMarchand20/htool/archive/4af73fa94bd9
 		'fb2fdfc77c5e7b53d0bb7cab0d10fe7e');
 
 	
-download('hpddm','https://github.com/hpddm/hpddm/archive/a3b1de84e76d966e14c1a2f37dac9d99dcc3f174.zip',
+download('hpddm','https://github.com/hpddm/hpddm/archive/c19bfa259083a5093bdbe86af4c9a3a9cfeb9e56.zip',
 	'https://github.com/hpddm',
 	'hpddm.zip',
-	'9fe70034892c4527057f6d7273e123ce');
+	'c17d6bbd887d47edb1c88a72d4c9dcd0');
 
 # run all downloads concurrently
 

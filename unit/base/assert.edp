@@ -19,6 +19,5 @@ try {
   cout << timeELAPSED << t << endl;
 } catch(...) {
   isCaught = true;
-  cout << "assert failed" << endl;
 }
 test(isCaught == true);

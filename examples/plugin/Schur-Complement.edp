@@ -24,7 +24,8 @@ macro FindDofOnBorder(l,Vh,I)
 	if(verbosity) cout << " FindDofOnBorder:n = "<< n << endl; 
 }//
 
-
+if (HaveUMFPACK) //  need UMPACK  computation 
+{
 macro grad(u) [dx(u),dy(u)] //
 
 real hsize= 0.1; 
@@ -116,4 +117,4 @@ for(int j=0; j<B0.m; ++j)
 	 }   
 	plot(ul,ur, wait=1);
 }
-
+}

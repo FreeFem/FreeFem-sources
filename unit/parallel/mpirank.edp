@@ -1,6 +1,6 @@
 include "test.idp"
 
-cout << functionDEFINITION << "mprirank" << endl;
+cout << functionDEFINITION << "mpirank" << endl;
 
 real t;
 

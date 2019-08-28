@@ -26,7 +26,7 @@ cout << functionDEFINITION << "gslpolysolvecubic" << endl;
   test(retvalue == 3);
 }
 
-cout << functionDEFINITION << "gslpolysolvecubic" << endl;
+cout << functionDEFINITION << "gslpolycomplexsolve" << endl;
 {
   t = clock();
   real retvalue = gslpolycomplexsolve(Q4,Z);
@@ -35,12 +35,13 @@ cout << functionDEFINITION << "gslpolysolvecubic" << endl;
   test(retvalue == 0);
 }
 
-cout << functionDEFINITION << "gslpolysolvecubic" << endl;
+cout << functionDEFINITION << "gslrnguniform" << endl;
 {
   cout << "\n\n gsl random :\n\n";
   cout << " list of generator " << ngslrng << endl;
+  cout << functionDEFINITION << "gslname" << endl;
   for(int i=0; i <ngslrng ; ++i)
-  cout << i << " name  " <<  gslname(gslrngtype(i)) << endl;
+    cout << i << " name  " <<  gslname(gslrngtype(i)) << endl;
   gslrng r=gslrngtype(1);// chose a generator
   for (int i = 0; i < 10; i++) {
     t = clock();
@@ -48,6 +49,59 @@ cout << functionDEFINITION << "gslpolysolvecubic" << endl;
     t = clock() - t;
     cout << timeELAPSED << t << endl;
   }
+}
+
+cout << functionDEFINITION << "gslrnguniformpos" << endl;
+{
+  gslrng r=gslrngtype(1);
+  t = clock();
+  real retvalue = gslrnguniformpos(r);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}
+
+cout << functionDEFINITION << "gslrngget" << endl;
+{
+  gslrng r=gslrngtype(1);
+  t = clock();
+  real retvalue = gslrngget(r);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}
+
+cout << functionDEFINITION << "gslrngmin" << endl;
+{
+  gslrng r=gslrngtype(1);
+  t = clock();
+  real retvalue = gslrngmin(r);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}
+
+cout << functionDEFINITION << "gslrngmax" << endl;
+{
+  gslrng r=gslrngtype(1);
+  t = clock();
+  real retvalue = gslrngmax(r);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}
+
+cout << functionDEFINITION << "gslrngset" << endl;
+{
+  gslrng r=gslrngtype(1);
+  t = clock();
+  real retvalue = gslrngset(r, 1);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+}
+
+cout << functionDEFINITION << "gslrngtype" << endl;
+{
+  t = clock();
+  gslrng r = gslrngtype(1);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
 }
 
 real x0=0.2;

@@ -184,10 +184,10 @@ inline complex<double> Max(const complex<double> &a,const complex<double> &b)
 template<class R> class KNMK_ ;
 template<class R> class KNM_ ;
 template<class R> class KN_ ;
-template<class R> class TKN_ ; // KN_ Hermitain
-template<class R> class ConjKNM_ ;//  take the conj of the matrix.
-template<class R> class notKN_ ; // KN_ not
-template<class R> class notnotKN_ ; // KN_ not not
+template<class R> struct TKN_ ; // KN_ Hermitain
+template<class R> struct ConjKNM_ ;//  take the conj of the matrix.
+template<class R> struct notKN_ ; // KN_ not
+template<class R> struct notnotKN_ ; // KN_ not not
 
 template<class R> class KNMK ;
 template<class R> class KNM ;
@@ -204,11 +204,11 @@ template<class R> class Mul_KNMh_KN_;
 template<class R> class DotStar_KN_;
 template<class R> class DotSlash_KN_;
 
-template<class R> class outProduct_KN_;
-template<class R> class if_KN_;
+template<class R> struct outProduct_KN_;
+template<class R> struct if_KN_;
 template<class R> class if_arth_KN_;
-template<class R> class ifnot_KN_;
-template<class R,class I> class KN_ITAB;
+template<class R> struct ifnot_KN_;
+template<class R,class I> struct KN_ITAB;
 
 template<class R,typename A,typename B,typename BB> class F_KN_;
 

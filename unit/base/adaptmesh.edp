@@ -1,5 +1,4 @@
 include "test.idp"
-load "msh3"
 
 cout << functionDEFINITION << "adaptmesh" << endl;
 
@@ -33,7 +32,7 @@ int thetaMax = 90;
 int splitInTwo = true;
 bool noMeshGeneration = false;
 real[int, int] Periodic = [[1., 1., 0.], [0., 1., 0.]];
-func perio=[[4,y],[2,y],[1,x],[3,x]];
+func perio=[[4, y], [2, y], [1, x], [3, x]];
 real[int] m11(Th.nv);
 real[int] m12(Th.nv);
 real[int] m22(Th.nv);
@@ -50,23 +49,3 @@ cout << timeELAPSED << t << endl;
 test(Thnew.nt != Th.nt);
 test(Thnew.nv != Th.nv);
 test(Thnew.nbe != Th.nbe);
-
-// mesh3 Th3D = cube(5, 5, 5);
-// real[int] m113(Th3D.nv);
-// real[int] m123(Th3D.nv);
-// real[int] m223(Th3D.nv);
-// fespace Vh(Th3D, P1);
-// Vh v=x+y+z, vv=x*y*z, vvv = x+y+z;
-
-// t = clock();
-// mesh3 Thnew3D = adaptmesh(Th3D, [v, vv, vvv], hmin=hMin, hmax=hMax, err=Err, errg=Errg,
-//   nbvx=nbvtx, nbsmooth=nbSmooth, nbjacoby=nbJacoby, ratio=Ratio, omega=Omega,
-//   iso=Iso, abserror=AbsError, cutoff=cutOff, verbosity=verbos, inquire=Inquire,
-//   splitpbedge=splitPbEdge, maxsubdiv=maxSubDiv, rescaling=rescal,
-//   keepbackvertices=keepBackVertices, IsMetric=isMetric, power=poweer, thetamax=thetaMax,
-//   splitin2=splitInTwo, nomeshgeneration=noMeshGeneration, periodic=perio, metric=[m113, m123, m223]);
-// t = clock() - t;
-// cout  timeELAPSED << t << endl;
-// test(Thnew3D.nt != Th3D.nt);
-// test(Thnew3D.nv != Th3D.nv);
-// test(Thnew3D.nbe != Th3D.nbe);

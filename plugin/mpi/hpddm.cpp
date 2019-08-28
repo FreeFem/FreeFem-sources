@@ -381,15 +381,12 @@ class distributedMV_Op : public E_F0mps {
         Expression in;
         Expression out;
         static const int n_name_param = 0;
-        static basicAC_F0::name_and_type name_param[];
         distributedMV_Op<Type, K>(const basicAC_F0& args, Expression param1, Expression param2, Expression param3, Expression param4) : A(param1), Mat(param2), in(param3), out(param4) {
-            args.SetNameParam(n_name_param, name_param, nullptr);
+            args.SetNameParam(n_name_param, nullptr, nullptr);
         }
 
         AnyType operator()(Stack stack) const;
 };
-template<class Type, class K>
-basicAC_F0::name_and_type distributedMV_Op<Type, K>::name_param[] = { };
 template<class Type, class K>
 class distributedMV : public OneOperator {
     public:
@@ -521,7 +518,7 @@ class IterativeMethod : public OneOperator {
             public:
                 MatF_O& mat;
                 MatF_O& prec;
-                Operator(MatF_O& m, MatF_O& p) : mat(m), prec(p), HPDDM::EmptyOperator<R>(m.x.N()) { }
+                Operator(MatF_O& m, MatF_O& p) : HPDDM::EmptyOperator<R>(m.x.N()), mat(m), prec(p) { }
                 void GMV(const R* const in, R* const out, const int& mu = 1) const {
                     mat.mv(in, HPDDM::EmptyOperator<R>::_n, out);
                 }

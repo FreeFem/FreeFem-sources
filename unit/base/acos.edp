@@ -16,13 +16,13 @@ t = clock();
 real a0 = acos(0.);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-test(a0 == pi / 2);
+test(a0 == pi / 2.);
 
 t = clock();
 real ap1 = acos(1.);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-test(ap1 == 0);
+test(ap1 == 0.);
 
 t = clock();
 real ap1eps = acos(1. + eps);
@@ -39,7 +39,7 @@ test(isNaN(am1eps));
 cout << typeDEFINITION << "real[int]" << endl;
 
 int n = 4;
-real[int] A = [-1.,0.,0.3,1.];
+real[int] A = [-1., 0., 0.3, 1.];
 real[int] B(n);
 
 t = clock();
@@ -50,8 +50,10 @@ for (int i = 0; i < n; i++) {
   test(B[i] == acos(A[i]));
 }
 
+cout << typeDEFINITION << "real[int, int]" << endl;
+
 int tab = 2;
-real[int, int] AA = [[-1.,0.8,0.3,1.],[-0.9, -1.,1.,0.8]];
+real[int, int] AA = [[-1., 0.8, 0.3, 1.], [-0.9, -1., 1., 0.8]];
 real[int, int] BB(tab, n);
 
 t = clock();
