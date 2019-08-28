@@ -2245,6 +2245,7 @@ fi
 ##echo @@@@@@@@@@@@ $ff_petsc_ok @@ "hpddm.$DYLIB_SUFFIX $FF_PETCS_DYLIB"
 TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_PETSC_DYLIB"])
 TOOL_DISABLE(htool,["htool.$DYLIB_SUFFIX"])
+TOOL_DISABLE(htool_bem,["htool_bem.$DYLIB_SUFFIX"])
 TOOL_DISABLE(bemtool,["bemtool.$DYLIB_SUFFIX"])
 TOOL_DISABLE(boost,["boost.$DYLIB_SUFFIX"])
 
@@ -2308,8 +2309,8 @@ AC_OUTPUT(
     src/Algo/Makefile
     src/lglib/Makefile
     src/ffgraphics/Makefile
-      src/ffgraphics/server/Makefile
-      src/ffgraphics/client/Makefile
+    src/ffgraphics/server/Makefile
+    src/ffgraphics/client/Makefile
     src/fflib/Makefile
     src/nw/Makefile
     src/mpi/Makefile
@@ -2333,6 +2334,7 @@ AC_OUTPUT(
     examples/other/Makefile
     examples/3d/Makefile
     examples/3dSurf/Makefile
+    examples/bem/Makefile
 )
 
 AC_MSG_NOTICE([  freefem++ used download: $enable_download ])

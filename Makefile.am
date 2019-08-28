@@ -417,7 +417,8 @@ LIST_GENERATE_FILE= configure config.h.in \
     examples/bug/Makefile.in \
     examples/other/Makefile.in \
     examples/3d/Makefile.in \
-    examples/3dSurf/Makefile.in
+    examples/3dSurf/Makefile.in\
+    examples/bem/Makefile.in
 
 LIST_GENERATE_FILE_AM= \
   Makefile.am \
@@ -454,7 +455,8 @@ LIST_GENERATE_FILE_AM= \
     examples/bug/Makefile.am \
     examples/other/Makefile.am \
     examples/3d/Makefile.am \
-    examples/3dSurf/Makefile.am
+    examples/3dSurf/Makefile.am\
+    examples/bem/Makefile.am
 
 
 #$(LIST_GENERATE_FILE):$(LIST_GENERATE_FILE_AM)

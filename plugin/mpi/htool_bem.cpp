@@ -197,7 +197,7 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
  
 
     std::cout << "Creating dof" << std::endl;
-   	Dof<P1_2D> dof(mesh);
+   	Dof<P1_2D> dof(mesh,true);
 	// now the list of dof is known -> can acces to global num triangle and the local num vertice assiciated 
 
 	

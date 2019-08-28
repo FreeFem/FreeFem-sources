@@ -184,7 +184,6 @@ boost/done.tag:./pkg/boost.tar.gz
 	else true;  fi	
 lib/WHERE.boost: ./getall
 	if test -d boost/include ; then \
-	echo boost LD -L@DIR@/boost/lib > $@ ;\
 	echo boost  INCLUDE -I@DIR@/boost/include >> $@ ;\
 	else true; 	fi
 # end BOOST
