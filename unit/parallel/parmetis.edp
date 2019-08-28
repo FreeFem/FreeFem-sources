@@ -72,7 +72,58 @@ cout << functionDEFINITION << "metisdual" << endl;
     }
 }
 
-cout << functionDEFINITION << "parametis" << endl;
+cout << functionDEFINITION << "metisnodal" << endl;
+{
+    mpiBarrier(mpiCommWorld);
+    real time = mpiWtime();
+    Ph part;
+    if(mpirank == 0){
+      t = mpiWtime();
+      metisnodal(part[], Th, getARGV("-lpart", mpisize));
+      t = mpiWtime() - t;
+      cout << functionDEFINITION << t << endl;
+    }
+    broadcast(processor(0, mpiCommWorld), part[]);
+    mpiBarrier(mpiCommWorld);
+    if(mpirank == 0) {
+        cout << "METIS: " << mpiWtime() - time << endl;
+        medit("METIS", Th, part);
+    }
+}
+
+{
+  mpiBarrier(mpiCommWorld);
+  real time = mpiWtime();
+  Ph part;
+  if(mpirank == 0){
+    t = mpiWtime();
+    metisnodal(part[], Th2, getARGV("-lpart", mpisize));
+    t = mpiWtime() - t;
+    cout << functionDEFINITION << t << endl;
+  }
+  if(mpirank == 0) {
+    cout << "METIS: " << mpiWtime() - time << endl;
+    medit("METIS", Th, part);
+  }
+}
+
+{
+    mpiBarrier(mpiCommWorld);
+    real time = mpiWtime();
+    Ph part;
+    if(mpirank == 0){
+      t = mpiWtime();
+      metisnodal(part[], Thsurf1, getARGV("-lpart", mpisize));
+      t = mpiWtime() - t;
+      cout << functionDEFINITION << t << endl;
+    }
+    if(mpirank == 0) {
+        cout << "METIS: " << mpiWtime() - time << endl;
+        medit("METIS", Th, part);
+    }
+}
+
+cout << functionDEFINITION << "parmetis" << endl;
 {
     mpiBarrier(mpiCommWorld);
     real time = mpiWtime();
@@ -80,7 +131,7 @@ cout << functionDEFINITION << "parametis" << endl;
     t = mpiWtime();
     parmetis(part[], Th, getARGV("-lpart", mpisize), communicator = mpiCommWorld, worker = getARGV("-worker", mpisize));
     t = mpiWtime() - t;
-    cout << functionDEFINITION << t << endl;
+    cout << timeELAPSED << t << endl;
     mpiBarrier(mpiCommWorld);
     if(mpirank == 0) {
         cout << "ParMETIS: " << mpiWtime() - time << endl;
