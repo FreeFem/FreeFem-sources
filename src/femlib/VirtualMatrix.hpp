@@ -95,7 +95,7 @@ public:
     
     virtual size_t size() const {return 0; };
     virtual VirtualMatrix  & operator +=(MatriceElementaire<R> & ){AFAIRE("VirtualMatrix::+=");}
-    virtual void operator=(const R & v){AFAIRE("VirtualMatrix::=v");};; // Mise a zero
+    virtual void operator=(const R & v){AFAIRE("VirtualMatrix::=v");} // Mise a zero
     virtual ostream& dump (ostream&)  const {cout << mpirank << " BUG virtualmatrix " << this << endl; AFAIRE("VirtualMatrix::dump");}
     virtual R & diag(I i){AFAIRE("VirtualMatrix::diab");}
     virtual void SetBC(I i,double tgv){AFAIRE("VirtualMatrix::setbc");}

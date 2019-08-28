@@ -52,7 +52,7 @@ meshS Th33b = movemesh23(Thsq3,transfo=[XX3min,YY3,ZZ3],label=ref33b,orientation
 ////////////////////////////////
 meshS Th33 = Th31h+Th31b+Th32h+Th32b+Th33h+Th33b; // "gluing" surface meshs to obtain the surface of cube
 //medit("glumesh",Th33);
-Th33=change(Th33, rmInternalFaces=true);
+Th33=change(Th33, rmInternalEdges=true);
 savemesh(Th33,"Th33.mesh");
 
 // build a mesh of a axis parallel box with TetGen

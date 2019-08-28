@@ -2854,7 +2854,7 @@ basicAC_F0::name_and_type SetMeshS_Op::name_param [] = {
     {"fregion", &typeid(long)},
     {"flabel", &typeid(long)},
     {"rmledge", &typeid(long)},
-    {"rmInternalEges", &typeid(bool)}
+    {"rmInternalEdges", &typeid(bool)}
 };
 // besoin en cas de fichier 2D / fichier 3D
 

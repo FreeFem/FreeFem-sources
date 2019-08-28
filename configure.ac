@@ -84,9 +84,6 @@ m4_define([AC_FF_PETSC_WHERELIB],
 	  [
 	    ff_$2=`AC_FF_PETSC_AWK($2,$4)`
 	    ff_$3=`AC_FF_PETSC_AWK($3,$4)`
-		if test -n "$5" ; then 
-		   ff_$2="[$]ff_$2 `AC_FF_PETSC_AWK($5,$4)`"
-		fi
 	   if test -n "[$]ff_$2"; then
 			    ff_$1_ok=yes;
 			    AC_FF_ADDWHERELIB($1,[$]ff_$2,[$]ff_$3)
@@ -989,8 +986,8 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		    test  "$PETSC_SCALAR" = "real" && test "$ff_win32" = yes -o  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s "$WPETSC_MPIRUN" "$WMPIRUN"
 		    if test "$?"  -eq 0 ; then
 		        AC_FF_PETSC_WHERELIB_BASIC(petsc,$ffconfpetsc)
-		        AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetsc,METIS_LIB)
-dnl		        AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetsc)
+		        AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetsc)
+		        AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetsc)
                 ff_SCOTCH_INCLUDE=$ff_PTSCOTCH_INCLUDE
                 ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*ptscotch@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*ptes@<:@^ @:>@*//g'`
@@ -1047,8 +1044,8 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
 		    test  "$PETSC_COMPLEX_SCALAR" = "complex" &&  test  "$ff_win32" = yes -o  "$PETSC_COMPLEX_MPIRUN" = "$MPIRUN" ||  cmp -s `which "$PETSC_COMPLEX_MPIRUN"` `which "$MPIRUN"`
 		   	if test "$?"  -eq 0 ; then
 			AC_FF_PETSC_WHERELIB_BASIC(petsccomplex,$ffconfpetscc)
-            AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetscc,METIS_LIB)
-dnl            AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetscc)
             ff_SCOTCH_INCLUDE=$ff_PTSCOTCH_INCLUDE
             ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*ptscotch@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*ptes@<:@^ @:>@*//g'`
@@ -2245,11 +2242,11 @@ if test "$ff_mkl_ok" == yes ; then
 fi
 
 ## Condtional for check
-AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = yes])
+AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = yes ])
 AM_CONDITIONAL([BLACS], [test "$ff_blacs_ok" = yes])
 AM_CONDITIONAL([FFTW3], [test "$ff_fftw_ok" = yes])
 AM_CONDITIONAL([FORTRAN], [test "$enable_fortran" = yes])
-AM_CONDITIONAL([FREEYAMS], [test "$ff_freeyams_ok" = yes])
+AM_CONDITIONAL([FREEYAMS], [test "$ff_freeyams_ok" = yes -o -n "$TOOL_COMPILE_freeyams"])
 AM_CONDITIONAL([GMM], [test "$enable_gmm" = yes])
 AM_CONDITIONAL([GSL], [test "$ff_with_gsl" = yes])
 AM_CONDITIONAL([HDF5], [test "$with_hdf5" = yes])
@@ -2258,15 +2255,15 @@ AM_CONDITIONAL([HPDDM], [test "$enable_hpddm" = yes])
 AM_CONDITIONAL([HYPRE], [test "$ff_hypre_ok" = yes])
 AM_CONDITIONAL([IPOPT], [test "$ff_ipopt_ok" = yes])
 AM_CONDITIONAL([LIBSEQ], [test "$ff_libseq_ok" = yes])
-AM_CONDITIONAL([METIS], [test "$ff_metis_ok" = yes])
+AM_CONDITIONAL([METIS], [test "$ff_metis_ok" = yes -o -n "$TOOL_COMPILE_metis" ])
 AM_CONDITIONAL([MKL], [test "$ff_mkl" = yes])
-AM_CONDITIONAL([MMG3D], [test "$ff_mmg3d_ok" = yes])
+AM_CONDITIONAL([MMG3D], [test "$ff_mmg3d_ok" = yes -o -n "$TOOL_COMPILE_mmg3d"])
 AM_CONDITIONAL([MPI], [test "$ff_mpi" = yes])
-AM_CONDITIONAL([MSHMET], [test "$ff_mshmet_ok" = yes])
-AM_CONDITIONAL([MUMPS], [test "$ff_mumps_ok" = yes])
+AM_CONDITIONAL([MSHMET], [test "$ff_mshmet_ok" = yes -o -n "$TOOL_COMPILE_mshmet"])
+AM_CONDITIONAL([MUMPS], [test "$ff_mumps_ok" = yes -o -n "$TOOL_COMPILE_mumps"])
 AM_CONDITIONAL([MUMPS_ptscotch], [test "$ff_mumps_ptscotch_ok" = yes])
 AM_CONDITIONAL([MUMPS_scotch], [test "$ff_mumps_scotch_ok" = yes])
-AM_CONDITIONAL([MUMPS_seq], [test "$ff_mumps_seq_ok" = yes])
+AM_CONDITIONAL([MUMPS_seq], [test "$ff_mumps_seq_ok" = yes -o -n "$TOOL_COMPILE_mumps_seq"])
 AM_CONDITIONAL([NLOPT], [test "$ff_nlopt_ok" = yes])
 AM_CONDITIONAL([PARMETIS], [test "$ff_parmetis_ok" = yes])
 AM_CONDITIONAL([PETSC], [test "$ff_petsc_ok" = yes])
@@ -2274,12 +2271,12 @@ AM_CONDITIONAL([PETSCCOMPLEX], [test "$ff_petsccomplex_ok" = yes])
 AM_CONDITIONAL([PTHREAD], [test -n "$ff_pthread"])
 AM_CONDITIONAL([PTSCOTCH], [test "$ff_ptscotch_ok" = yes])
 AM_CONDITIONAL([SCALAPACK], [test "$ff_scalapack_ok" = yes])
-AM_CONDITIONAL([SCOTCH], [test "$ff_scotch_ok" = yes])
+AM_CONDITIONAL([SCOTCH], [test "$ff_scotch_ok" = yes -o -n "$TOOL_COMPILE_scotch"])
 AM_CONDITIONAL([SLEPC], [test "$ff_slepc_ok" = yes])
 AM_CONDITIONAL([SLEPCCOMPLEX], [test "$ff_slepccomplex_ok" = yes])
 AM_CONDITIONAL([SUPERLU], [test "$ff_superlu_ok" = yes])
-AM_CONDITIONAL([TETGEN], [test "$ff_tetgen_ok" = yes])
-AM_CONDITIONAL([UMFPACK], [test "$ff_umfpack_ok" = yes])
+AM_CONDITIONAL([TETGEN], [test "$ff_tetgen_ok" = yes -o -n "$TOOL_COMPILE_tetgen"])
+AM_CONDITIONAL([UMFPACK], [test "$ff_umfpack_ok" = yes -o -n "$TOOL_COMPILE_umfpack"])
 
 ##
 # All makefiles
