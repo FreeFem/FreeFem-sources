@@ -193,7 +193,7 @@ download('hpddm','https://github.com/hpddm/hpddm/archive/a3b1de84e76d966e14c1a2f
 download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/master.zip',
 	'https://github.com/PierreMarchand20/BemTool',
 	'bemtool.zip',
-	'7d3b6f727627c3045ccd89ceb80668a0');
+	'b83688e09d4b47a3bcd8bf434c987846');
 
 download('Boost','https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.gz',
 	'https://www.boost.org',
