@@ -46,7 +46,8 @@ vsym = 1;
 vtgv = 1.e+30;
 vtgvelim = 1.e+30;
 
-ffddmbuildEdge(M,Th,complex,def,init,Pk,defPart,initPart,PkPart,mpiCommWorld)
+ffddmbuildDmesh(M,Th,mpiCommWorld)
+ffddmbuildDfespaceEdge(M,M,complex,def,init,Pk,defPart,initPart,PkPart)
 
 macro Varf(varfName, meshName, PhName)
     varf varfName([Ex,Ey,Ez],[vx,vy,vz]) =

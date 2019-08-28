@@ -146,7 +146,7 @@ namespace Fem2D
                 {
                     this->be(i).Read1(f,this->vertices,this->nv);
                     mesb += this->be(i).mesure();
-                    for(int j=0;j<3;++j)
+                    for(int j=0;j<BorderElement::nv;++j)
                         if(!vertices[ij=this->be(i,j)].lab)
                         {
                             vertices[ij].lab=1;
@@ -467,13 +467,13 @@ namespace Fem2D
             KN<int> takevertex(nv_t,0);
             for (int k=0; k<nbe; k++) {
                 const BorderElement & K(this->borderelements[k]);
-                for(int jj=0; jj<3; jj++){
+                for(int jj=0; jj<BorderElement::nv; jj++){
                     takevertex[ Numero_Som[this->operator()(K[jj])] ] = 1;
                 }
             }
             for(int k=0; k< this->nt; k++){
                 const Element & K(this->elements[k]);
-                for(int jj=0; jj<4; jj++){
+                for(int jj=0; jj<Element::nv; jj++){
                     takevertex[ Numero_Som[this->operator()(K[jj])] ] = 1;
                 }
             }

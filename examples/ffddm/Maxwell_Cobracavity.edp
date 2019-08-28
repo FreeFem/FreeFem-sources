@@ -6,7 +6,6 @@
 // NBPROC 4
 // PARAM -raspart -ffddm_schwarz_method oras -frequency 0.8e+9
 
-load "metis"
 load "medit"
 load "Element_Mixte3d"
 
@@ -177,16 +176,20 @@ vsym = 1;
 vtgv = 1.e+30;
 vtgvelim = -2;
 
-ffddmbuildEdgeTwolevel(M,Thc,mysplit,complex,def,init,Pk,defpart,initpart,PkP0,mpiCommWorld)
+ffddmbuildDmeshNested(M,Thc,mysplit,mpiCommWorld)
+ffddmbuildDfespaceEdge(M,M,complex,def,init,Pk,defpart,initpart,PkP0)
+ffddmbuildDfespaceEdge(MCoarse,MCoarse,complex,def,init,Pk,defpart,initpart,PkP0)
 
 //macro Mwithhpddmkrylov()1//
 macro MCoarsewithhpddm()1//
 
-ffddmsetup(MCoarse,MCoarse,VarfEprec,VarfOpt)
+ffddmsetupOperator(MCoarse,MCoarse,VarfEprec)
+ffddmsetupPrecond(MCoarse,VarfOpt)
 
 ffddmset(MCoarse,verbosity,1)
 
-ffddmsetup(M,M,Varf,VarfOpt)
+ffddmsetupOperator(M,M,Varf)
+ffddmsetupPrecond(M,VarfOpt)
 
 complex[int] rhs(1);
 

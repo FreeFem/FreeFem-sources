@@ -831,13 +831,14 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                     { // border of no manifold
                         if( verb>19 ) cout << "  -- " <<  p/nea << " " ;
                         ++nbordnomanifold;
-                       // remove link ...
+                       // remove link ...  put -2 in all list ...
                         TheAdjacencesLink[p]=-2;
-                        while (TheAdjacencesLink[pp]>=0)
+                        while (pp>=0 && TheAdjacencesLink[pp]>=0 )
                         {
                             if( verb>19 ) cout <<  pp/nea << " " ;
-                            TheAdjacencesLink[pp]=-2;
-                             pp=TheAdjacencesLink[pp];
+                            int ppp=pp;
+                            pp=TheAdjacencesLink[pp];
+                            TheAdjacencesLink[ppp]=-2;// break the list ...
                         }
                         if( verb>19 ) cout << " . " << endl;
                     }

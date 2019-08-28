@@ -38,7 +38,7 @@ vsym = 0;
 
 int nsuper = getARGV("-nsuper",2);
 
-ffddmbuildNested(E,ThGlobal,nsuper,real,def,init,Pk)
+ffddmbuildSuper(E,ThGlobal,nsuper,real,def,init,Pk)
 
 real[int] rhs(1);
 real[int] x0(EVhi.ndof);

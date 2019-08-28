@@ -114,7 +114,7 @@ macro Nsimple(PhGlobal, part, comm)
 // EOM
 */
 
-ffddmbuildTwolevel(N,Thc,mysplit,complex,def,init,Pk,mpiCommWorld)
+ffddmbuildNested(N,Thc,mysplit,complex,def,init,Pk,mpiCommWorld)
 
 //macro NCoarsewithhpddmkrylov()1//
 //macro Nwithhpddmkrylov()1//

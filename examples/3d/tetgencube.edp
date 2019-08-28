@@ -68,14 +68,18 @@ func mv2y = x*sin(y);
 func mv2z = z;
 //mesh3 Thmv2 = movemesh3(Thfinal, transfo=[mv2x,mv2y,mv2z]);
 //savemesh(Thmv2,"halfcylindricalshell.mesh");
-//verbosity=2;
-meshS Thmv2surf = movemesh(Th33,[mv2x,mv2y,mv2z], facemerge=0);
+verbosity=20;
+plot(Th33,wait=1);
+meshS Thmv2surf = movemesh(Th33,[mv2x,mv2y,mv2z], facemerge=2);
 //medit("maillagesurf",Thmv2surf,wait=1);
 //savemesh(Thmv2surf,"maillagesurfacecylindre.mesh");
 //plot(Thmv2surf);
 //medit("maillageplein",Thmv2surf);
 //savemesh(Thmv2surf,"toto.mesh");
 // FFCS: testing 3d plots
-plot(Thmv2surf);
+plot(Thmv2surf,wait=1);
+cout<< "  nb face Th33   " <<  Th33.nt << " " << Th33.nv << endl; 
+cout<< "  nb face Thmv2surf   " <<  Thmv2surf.nt << " " << Thmv2surf.nv<<  endl; 
+if( Th33.nt ==  Thmv2surf.nt ) cout << "\n\n ***  Warning merge no implemented !!!! \n\n"<< endl;
 
-
+assert( Th33.nt-Thmv2surf.nt == Thsq2.nt); 
