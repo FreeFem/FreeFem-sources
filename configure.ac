@@ -2388,6 +2388,10 @@ if test "$enable_download" = yes; then
     AC_MSG_NOTICE([      try to download: $ff_download_lib])
   fi
 
+  if test "$enable_boost" = yes; then
+    AC_MSG_NOTICE([      use of download boost        see 3rdparty/boost/LICENSE_1_0.txt  ])
+  fi
+
   if test "$ff_download_blas" = "generic"; then
     AC_MSG_NOTICE([      use of download generic blas and cblas freefem may be slow  ])
     AC_MSG_NOTICE([      you can try to use the  Kazushige Goto s BLAS at http://www.cs.utexas.edu/users/flame/goto/  ])

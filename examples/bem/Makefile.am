@@ -19,32 +19,24 @@
 # ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
 # AUTHORS : ...
 # E-MAIL  : ...
-
+.NOTPARALLEL:
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
-all-local: all.edp freefem++.pref
+all-local: freefem++.pref
 
 
 TESTS = htool_bem_ffddm.edp
 
-XFAIL_TESTS = 
+XFAIL_TESTS = $(TESTS)
 
-EXTRA_DIST = *.edp all.edp
+EXTRA_DIST = *.edp
 
-all.edp: Makefile
-	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;int MEM1234=storageused();"; \
-	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do \
-		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
-		echo "verbosity=verbosityy;searchMethod=0;" ; \
-		echo \{ include \"$$i\"\;\}\; ;\
-		echo ' cout << " mem leak = " <<storageused() - MEM1234 << endl << "------------------------------------------------------------------------------ " << endl;' ;\
-	done) > $@
-
-
-freefem++.pref:Makefile
+freefem++.pref:Makefile.am
 	echo includepath = \"../../idp/\" > freefem++.pref
 	echo loadpath = \"../../plugin/seq/\" >> freefem++.pref
 	echo loadpath += \"../../plugin/mpi/\" >> freefem++.pref
+
+$(TESTS)::freefem++.pref
 
 FORCE:

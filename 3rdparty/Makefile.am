@@ -180,7 +180,7 @@ reinstall-boost:./getall
 	-test -n "$(TOOL_COMPILE_boost)" && $(MAKE) install-boost || true
 boost/done.tag:./pkg/boost.tar.gz
 	if test -f ./pkg/boost.tar.gz ; then \
-	cd pkg ; rm -rf boost boost_* ; tar xvzf boost.tar.gz  ; mkdir -p ../boost/include/boost ; cp -r boost_*/boost/* ../boost/include/boost ; touch ../boost/done.tag; rm -rf boost_* \
+	cd pkg ; rm -rf boost boost_* ; tar xvzf boost.tar.gz  ; mkdir -p ../boost/include/boost ; cp -r boost_*/boost/* ../boost/include/boost ; cp boost_*/boost/LICENSE_0_1.txt ../boost/ ; touch ../boost/done.tag; rm -rf boost_* \
 	else true;  fi	
 lib/WHERE.boost: ./getall
 	if test -d boost/include ; then \
