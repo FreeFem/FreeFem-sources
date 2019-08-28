@@ -30,7 +30,7 @@ vtgvelim = vtgv;
 
 int nsuper = getARGV("-nsuper",2);
 
-ffddmbuildNested(Lap,ThGlobal,nsuper,real,def,init,Pk)
+ffddmbuildSuper(Lap,ThGlobal,nsuper,real,def,init,Pk)
 
 real[int] rhs(1);
 real[int] x0(LapVhi.ndof);

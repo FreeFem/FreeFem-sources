@@ -121,7 +121,9 @@ macro Rdefplot(u)u//EOM
 
 //macro Rwithhpddmkrylov()1//EOM
 
-ffddmbuildAug(R,Th,real,def,init,Pk,mpiCommWorld)
+ffddmbuildDmeshAug(R,Th,mpiCommWorld)
+
+ffddmbuildDfespace(R,R,real,def,init,Pk)
 
 ffddmsetupinit(R,R)// 
 
@@ -167,7 +169,8 @@ for(int ii=0;ii<100;ii++)
   broadcast(processor(0),Th);
   
   // the mesh has changed ; we create a new decomposition and obtain new local meshes
-  ffddmbuildAug(R,Th,real,def,init,Pk,mpiCommWorld)
+  ffddmbuildDmeshAug(R,Th,mpiCommWorld)
+  ffddmbuildDfespace(R,R,real,def,init,Pk)
   // interpolate the solution at the previous time step on the new local mesh 
   hi = h;
   
