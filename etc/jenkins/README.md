@@ -112,7 +112,7 @@ pacman -S autoconf automake-wrapper bash bash-completion \
     mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-arpack 
 ```
 
-[MSMPI 9](https://www.microsoft.com/en-us/download/details.aspx?id=56727)
+[MSMPI 7](https://www.microsoft.com/en-us/download/details.aspx?id=49926)
 
 # OpenMPI
 
