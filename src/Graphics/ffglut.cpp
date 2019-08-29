@@ -2344,7 +2344,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
 
       fin.GetPlots();
     }
-
+  
     long nbplot;
     int iso3d=0;
     fin >>nbplot;
@@ -2444,6 +2444,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
         ffassert(fin.good());
         datadim=max(datadim,p->dim);
     }
+    if(dimpp) plotdim=dimpp;
     if(Niso==0)
         Niso = iso3d ? 5 : 20;
 
@@ -2481,7 +2482,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
 
     SetColorTable(Max(Niso,Narrow)+4) ;
     SetDefIsoV(Niso,Narrow,fmin,fmax) ;
-
+    
 }
 
 
