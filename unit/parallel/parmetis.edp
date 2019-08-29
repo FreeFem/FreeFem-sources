@@ -17,7 +17,7 @@ func f1 = x;
 func f2 = cos(y);
 func f3 = sin(y);
 meshS Thsurf1=movemesh23(Thcarre,transfo=[f1,f2,f3],orientation=-1);
-mesh Th2 = square(5, 5);
+mesh Th2 = square(3, 3);
 fespace Ph(Th, P0);
 real t;
 
@@ -52,7 +52,7 @@ cout << functionDEFINITION << "metisdual" << endl;
     }
     if(mpirank == 0) {
         cout << "METIS: " << mpiWtime() - time << endl;
-        medit("METIS", Th, part);
+        medit("METIS", Th2, part);
     }
 }
 
@@ -68,7 +68,7 @@ cout << functionDEFINITION << "metisdual" << endl;
     }
     if(mpirank == 0) {
         cout << "METIS: " << mpiWtime() - time << endl;
-        medit("METIS", Th, part);
+        medit("METIS", Thsurf1, part);
     }
 }
 
@@ -103,7 +103,7 @@ cout << functionDEFINITION << "metisnodal" << endl;
   }
   if(mpirank == 0) {
     cout << "METIS: " << mpiWtime() - time << endl;
-    medit("METIS", Th, part);
+    medit("METIS", Th2, part);
   }
 }
 
@@ -119,7 +119,7 @@ cout << functionDEFINITION << "metisnodal" << endl;
     }
     if(mpirank == 0) {
         cout << "METIS: " << mpiWtime() - time << endl;
-        medit("METIS", Th, part);
+        medit("METIS", Thsurf1, part);
     }
 }
 
