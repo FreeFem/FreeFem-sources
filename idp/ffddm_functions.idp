@@ -15,7 +15,7 @@ func preffe#K[int] pr#A(preffe#K[int] &u)
       preffe#K[int] ug(scaledug.n);
       ug = 0;
       mpiAllReduce(scaledug,ug,preffe#prmesh#commddm,mpiSUM);
-      preffe#K[int] resg = H*ug;
+      preffe#K[int] resg = pr#Aglobal*ug;
       res = preffe#Rih[mpiRank(preffe#prmesh#commddm)]*resg;
       ENDIFMACRO
 

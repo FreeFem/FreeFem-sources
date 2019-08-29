@@ -15,7 +15,7 @@ include "ffddm.idp"
 macro def(i)i// EOM                         // scalar field definition
 macro init(i)i// EOM                        // scalar field initialization
 func Pk = P1;  
-ffddmprecond="none";
+ffddmprecond="ras";
 
 
 // generation of meshes
@@ -29,7 +29,7 @@ border a(t=-l,l){x=t; y=-l;label=1;};
 border b(t=-l,l){x=l; y=t;label=1;};
 border c(t=l,-l){x=t; y=l;label=1;};
 border d(t=l,-l){x=-l; y=t;label=1;};
-int n = 30;
+int n = 100;
 border i(t=0,2*pi){x=1.1*cos(t);y=1.1*sin(t);label=5;};
 mesh th= buildmesh(a(n)+b(n)+c(n)+d(n)+i(-n));
 
@@ -50,18 +50,23 @@ Vh<complex> w,uinc;
 
 Uh<complex> ug;
 
-HMatrix<complex> H;
-// output visu
-HMatrix<complex> B;
-//v = 1;
-
 fespace Uh2(Obstacle,P1);
 
-H = assemblecomplex(Uh,Uh,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000);
-B = assemblecomplex(Uh,Vh,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000,type=1);
+macro Varf(Uh, Vh)
+assemblecomplex(Uh,Uh,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000)
+//
+
+macro VarfPrec(Uh, Vh)
+assemblecomplex(Uh,Uh,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000,comm=Helcommself)
+//
   
-ffddmsetupOperator(Hel, Hel, H)
-ffddmsetupPrecond(Hel, H)
+ffddmsetupOperator(Hel, Hel, Varf)
+
+if (mpirank == 0)
+  cout << HelAglobal.infos << endl;
+display(HelAglobal);
+
+ffddmsetupPrecond(Hel, VarfPrec)
 
 // incident wave
 real[int] dir=[1./sqrt(2),1./sqrt(2),0];
@@ -83,11 +88,23 @@ rhs = HelRih[mpirank]*rhsg;
 u = 0.;
 
 u[] = HelfGMRES(u[], rhs, 1.e-6, 200, "right");
-	
+
+Helwritesummary
+
+ffddmplot(Hel, real(u), "bem solution");
+
 v[] = HelA(u[]);
 	
 HelfromVhi(u[], Uh, ug[])
-	
+
+// output visu
+HMatrix<complex> B;
+
+B = assemblecomplex(Uh,Vh,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000,type=1);
+if (mpirank == 0)
+   cout << B.infos << endl;
+display(B);
+
 w[] = B*ug[];
 	
 uinc = finc;
@@ -97,16 +114,3 @@ w[] += uinc[];
 // real part  
 Vh uplot = real(w); 
 plot(uplot);
-
-// info Hmatrix 
-// visu
-display(H);
-display(B);
-
-if (mpirank == 0)
-  cout << H.infos << endl;
-  
-if (mpirank == 0)
-   cout << B.infos << endl;
-
-mpiBarrier(mpiCommWorld);

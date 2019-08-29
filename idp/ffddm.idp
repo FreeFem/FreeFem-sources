@@ -298,7 +298,7 @@ if (preffe#prmesh#isincomm)
 	preffe#prmesh#tic(pr#tfactoi)
 
 	IFMACRO(bem,1)
-	/*pr#Aglobal = assemble(preffe#Vhglob,preffe#Vhglob,eta=-1e+0,epsilon=1e-3,minclustersize=20,maxblocksize=1000000,comm=preffe#prmesh#commddm);*/
+	pr#Aglobal = Varf(preffe#Vhglob,preffe#Vhglob);
 	ENDIFMACRO
 
 	IFMACRO(!bem)
@@ -380,16 +380,14 @@ if (pr#prfe#prmesh#isincomm)
     if (pr#verbosity > 1 && !bpara) cout << "["+Stringification(pr)+"] Domain :" << i << "/" << pr#prfe#prmesh#npart << endl;
 
 		IFMACRO(bem,1)
-		/*
+		IFMACRO(VarfPrec)
 		pr#prfe#prmesh#Thi = pr#prfe#prmesh#aTh[i];
-		Tmatrix<pr#prfe#K> Hloc = assemble(pr#prfe#Vhi,pr#prfe#Vhi,eta=-1e+0,epsilon=1e-3,minclustersize=20,maxblocksize=1000000,comm=pr#prfe#prmesh#commself);
+		Tmatrix<pr#prfe#K> Hloc = VarfPrec(pr#prfe#Vhi, pr#prfe#Vhi);
 		pr#prfe#K[int,int] mdense(pr#prfe#Vhi.ndof, pr#prfe#Vhi.ndof);
 		mdense = Hloc;
 		pr#aR[i] = mdense;
-		display(Hloc);
-		display(pr#Aglobal);
 		set(pr#aR[i],solver = sparsesolver,commworld=pr#prfe#prmesh#commself,factorize=3);
-		*/
+		ENDIFMACRO
 		ENDIFMACRO
 
 		IFMACRO(!bem)
