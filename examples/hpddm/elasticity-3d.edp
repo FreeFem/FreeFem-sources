@@ -59,7 +59,7 @@ schwarz A(Mat, intersection, D);
 /*# SchwarzMethodEnd #*/
 
 /*# OsmTwolevel #*/
-set(A, sparams = "-hpddm_schwarz_method ras -hpddm_schwarz_coarse_correction balanced -hpddm_variant right -hpddm_verbosity 1 -hpddm_geneo_nu 20");
+set(A, sparams = "-hpddm_schwarz_method ras -hpddm_schwarz_coarse_correction balanced -hpddm_variant right -hpddm_verbosity 1 -hpddm_geneo_threshold 0.1");
 /*# OsmTwolevelEnd #*/
 
 matrix<real> Opt;                           // local operator with optimized boundary conditions

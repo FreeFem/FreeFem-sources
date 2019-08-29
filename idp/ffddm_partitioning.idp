@@ -61,14 +61,14 @@ if (pr#isincomm)
       pr#partitionIntersectionbasei.resize(arrayIntersectioni.n);
       
       if(ffddmsplit>1) {
-        overlapName = trunc(overlapName, suppSmooth > 0.001, split = ffddmsplit);
+        overlapName = trunc(overlapName, suppSmooth > 0.001, split = ffddmsplit, label=9999);
         supp = abs(part - ii) < 0.1;
         suppSmooth = 0;
         AddLayers(overlapName, supp[], (sizeoverlaps == 0) + 2 * sizeoverlaps, suppSmooth[]);
       }
       
       pr#Thi = trunc(overlapName, suppSmooth > 0.001, split=ssplit);
-      overlapName = trunc(overlapName, suppSmooth > 0.001);
+      overlapName = trunc(overlapName, suppSmooth > 0.001, label=9999);
       supp = supp;
       suppSmooth = suppSmooth;
 
@@ -445,8 +445,8 @@ NewMacro pr#minit uinit EndMacro
 NewMacro pr#mdefpart udefpart EndMacro
 NewMacro pr#minitpart uinitpart EndMacro
 
-func pr#fPk = mPk;
-func pr#fPkP0 = mPkP0;
+NewMacro pr#fPk mPk EndMacro
+NewMacro pr#fPkP0 mPkP0 EndMacro
 
 fespace pr#Vhi(prmsh#Thi,pr#fPk);
 
@@ -576,7 +576,7 @@ if (prmsh#isincomm && !prmsh#excluded)
           matrix R;
           int[int] n2o(1);
           if (prmsh#overlap > 0) {
-            meshN meshIntersection = trunc(prmsh#Thi, (prmsh#partitionIntersectionbasei[i] > 1.0e-6), new2old = n2o);
+            meshN meshIntersection = trunc(prmsh#Thi, (prmsh#partitionIntersectionbasei[i] > 1.0e-6), new2old = n2o, label=9999);
             fespace WhIntersection(meshIntersection, pr#fPk);
             int[int] renum = restrict(WhIntersection, pr#Vhi,n2o);
             int[int] Ic = (0:WhIntersection.ndof-1);
@@ -837,9 +837,9 @@ ENDIFMACRO
 }
 // EOM
 
-macro ffddmbuildDmeshtwolevel(pr,Thc,sp,comm)
+macro ffddmbuildDmeshNested(pr,Thc,sp,comm)
 if ((mpirank == 0) && !bpara)
-cout << "["+Stringification(pr)+"] ffddmbuildtwolevelEdge PB: two-level decomposition is to be used only in parallel mode" << endl;
+cout << "["+Stringification(pr)+"] ffddmbuildDmeshNested PB: two-level nested mesh decomposition is to be used only in parallel mode" << endl;
 assert(bpara);
 if ((mpirank == 0) && ffddmverbosity)
 cout << "["+Stringification(pr)+ "] Building two-level decomposition from coarse mesh of " << Thc.nt << " elements, with splitting parameter " << sp << endl << "["+Stringification(pr)+"] Setting binexactCS = 1, pCS = mpisize, exclude = 0" << endl;
@@ -901,13 +901,13 @@ ENDIFMACRO
 ffddmbuildDmesh(pr,Th,comm)
 // EOM
 
-macro ffddmbuildDfespaceEdgeTwolevel(pr,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
+macro ffddmbuildDfespaceEdgeNested(pr,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
 ffddmbuildDfespaceEdge(pr#Coarse,prmesh#Coarse,scalar,def,init,Pk,defpart,initpart,Pkpart)
 ffddmbuildDfespaceEdge(pr,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
 // EOM
 
-macro ffddmbuildDfespaceTwolevel(pr,prmesh,scalar,def,init,Pk)
-ffddmbuildDfespaceEdgeTwolevel(pr,prmesh,scalar,def,init,Pk,def,init,Pk)
+macro ffddmbuildDfespaceNested(pr,prmesh,scalar,def,init,Pk)
+ffddmbuildDfespaceEdgeNested(pr,prmesh,scalar,def,init,Pk,def,init,Pk)
 // EOM
 
 macro ffddmbuild(pr,Th,scalar,def,init,Pk,comm)
@@ -920,13 +920,13 @@ ffddmbuildDmesh(pr,Th,comm)
 ffddmbuildDfespaceEdge(pr,pr,scalar,def,init,Pk,defpart,initpart,Pkpart)
 // EOM
 
-macro ffddmbuildEdgeTwolevel(pr,Thc,sp,scalar,def,init,Pk,defpart,initpart,Pkpart,comm)
-ffddmbuildDmeshtwolevel(pr,Thc,sp,comm)
-ffddmbuildDfespaceEdgeTwolevel(pr,pr,scalar,def,init,Pk,defpart,initpart,Pkpart)
+macro ffddmbuildEdgeNested(pr,Thc,sp,scalar,def,init,Pk,defpart,initpart,Pkpart,comm)
+ffddmbuildDmeshNested(pr,Thc,sp,comm)
+ffddmbuildDfespaceEdgeNested(pr,pr,scalar,def,init,Pk,defpart,initpart,Pkpart)
 // EOM
 
-macro ffddmbuildTwolevel(pr,Thc,sp,scalar,def,init,Pk,comm)
-ffddmbuildEdgeTwolevel(pr,Thc,sp,scalar,def,init,Pk,def,init,Pk,comm)
+macro ffddmbuildNested(pr,Thc,sp,scalar,def,init,Pk,comm)
+ffddmbuildEdgeNested(pr,Thc,sp,scalar,def,init,Pk,def,init,Pk,comm)
 // EOM
 
 macro ffddmbuildEdgeAug(pr,Th,scalar,def,init,Pk,defpart,initpart,PkP0,comm)
@@ -987,12 +987,12 @@ ffddmbuildEdge(pr,Th,scalar,def,init,Pk,defpart,initpart,PkP0,comm) // EOM
 macro ffddmbuildaug(pr,Th,scalar,def,init,Pk,comm)
 ffddmbuildaugEdge(pr,Th,scalar,def,init,Pk,def,init,Pk,comm) // EOM
 
-macro ffddmbuildtwolevelEdge(pr,Thc,sp,scalar,def,init,Pk,defpart,initpart,PkP0,comm)
+macro ffddmbuildNestedEdge(pr,Thc,sp,scalar,def,init,Pk,defpart,initpart,PkP0,comm)
 if ((mpirank == 0) && !bpara)
-cout << "ffddmbuildtwolevelEdge PB: two-level decomposition is to be used only in parallel mode" << endl;
+cout << "ffddmbuildNestedEdge PB: two-level nested mesh decomposition is to be used only in parallel mode" << endl;
 assert(bpara);
 if ((mpirank == 0) && ffddmverbosity)
-cout << "Building two-level decomposition from coarse mesh of " << Thc.nt << " elements, with splitting parameter " << sp << endl << "Setting binexactCS = 1, pCS = mpisize, exclude = 0 for prefix \""+Stringification(pr)+"\"" << endl;
+cout << "Building nested decomposition from coarse mesh of " << Thc.nt << " elements, with splitting parameter " << sp << endl << "Setting binexactCS = 1, pCS = mpisize, exclude = 0 for prefix \""+Stringification(pr)+"\"" << endl;
 
 int pr#inexactCSsplit = sp;
 int pr#binexactCS = 1;
@@ -1019,5 +1019,5 @@ pr#Coarseverbosity = 1;
 
 // EOM
 
-macro ffddmbuildtwolevel(pr,Thc,sp,scalar,def,init,Pk,comm) ffddmbuildtwolevelEdge(pr,Thc,sp,scalar,def,init,Pk,def,init,Pk,comm) // EOM
+macro ffddmbuildNested(pr,Thc,sp,scalar,def,init,Pk,comm) ffddmbuildNestedEdge(pr,Thc,sp,scalar,def,init,Pk,def,init,Pk,comm) // EOM
 */

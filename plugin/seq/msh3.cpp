@@ -2520,17 +2520,19 @@ AnyType MovemeshS_Op::operator () (Stack stack)  const {
         recollement_border = 0;
         point_confondus_ok = 0;
     }
+    else
+    {
+    recollement_elem = 1;
+    recollement_border = 1;
+    point_confondus_ok = 1;
+    }
 
-    if (mergefacemesh == 1) {
+/*    if (mergefacemesh == 1) {
         recollement_border = 1;
         point_confondus_ok = 0;
     }
-
-    if (mergefacemesh == 2) {
-        recollement_elem = 1;
-        recollement_border = 1;
-        point_confondus_ok = 1;
-    }
+*/
+  
 
     MeshS *T_Th = Transfo_MeshS(precis_mesh, Th, txx, tyy, tzz, border_only,
                                 recollement_elem, recollement_border, point_confondus_ok, orientationelement);

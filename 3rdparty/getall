@@ -180,15 +180,16 @@ download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-
 	'petsc-lite-3.11.3.tar.gz',
 	'e04cbb1aaccde4a33c8843e75a1fba15');
 	
-download('htool','https://github.com/PierreMarchand20/htool/archive/4af73fa94bd9ac7c81aba8191cb5da31da5f767a.zip',
+download('htool','https://github.com/PierreMarchand20/htool/archive/84fb0d9bd429556e131c5447283514509d44ab73.zip',
 		'https://github.com/PierreMarchand20/',
 		'htool.zip',
-		'fb2fdfc77c5e7b53d0bb7cab0d10fe7e');
+		'b8a8177c811ef6a232867d672ab416f3');
 
-download('hpddm','https://github.com/hpddm/hpddm/archive/a3b1de84e76d966e14c1a2f37dac9d99dcc3f174.zip',
+	
+download('hpddm','https://github.com/hpddm/hpddm/archive/c19bfa259083a5093bdbe86af4c9a3a9cfeb9e56.zip',
 	'https://github.com/hpddm',
 	'hpddm.zip',
-	'9fe70034892c4527057f6d7273e123ce');
+	'c17d6bbd887d47edb1c88a72d4c9dcd0');
 
 download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/master.zip',
 	'https://github.com/PierreMarchand20/BemTool',

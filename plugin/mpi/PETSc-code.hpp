@@ -1078,9 +1078,22 @@ class initCSRfromBlockMatrix : public E_F0 {
                         }
                         else if(t == 7) {
                             PetscScalar r = GetAny<PetscScalar>(e_ij);
-                            if(std::abs(r) > 1.0e-16)
-                                ExecError("Nonzero scalar in submatrix");
-                            if(i == j)
+                            if(std::abs(r) > 1.0e-16) {
+                                Mat B;
+                                MatCreate(PETSC_COMM_WORLD, &B);
+                                MatSetSizes(B, PETSC_DECIDE, PETSC_DECIDE, 1, 1);
+                                MatSetType(B, MATMPIDENSE);
+                                MatMPIDenseSetPreallocation(B, PETSC_NULL);
+                                PetscScalar* array;
+                                MatDenseGetArray(B, &array);
+                                if(array)
+                                    array[0] = r;
+                                MatDenseRestoreArray(B, &array);
+                                MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
+                                MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
+                                a[i * M + j] = B;
+                            }
+                            else if(i == j)
                                 zeros.emplace_back(i);
                         }
                         else if(t == 3 || t == 4) {

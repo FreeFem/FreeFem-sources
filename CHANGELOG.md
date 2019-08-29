@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file.
 - some unit tests
 
 ### Changed
+- PETSc version 3.11.3
 - replaced custom implementations (`RNM::real`, `RNM::norm2`, and `Fem2D::norm`) by C++11 functions
 - API of the macro `plotMPI`
 - switched to inexact coarse operators in HPDDM by default
