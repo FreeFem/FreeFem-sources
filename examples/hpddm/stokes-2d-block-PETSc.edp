@@ -130,3 +130,22 @@ for(int i = 0; i < 2; ++i) {
     plotMPI(Th, def2(solV), PkV, def2, real, cmm = "Global velocity with tgv = -1" + plus)
     plotMPI(Th, solP, PkP, def1, real, cmm = "Global pressure with tgv = -1" + plus)
 }
+{
+    view(dS);
+    real c = 20.0;
+    real[int] v, vPETSc;
+    v.resize(VhV.ndof);
+    v = mpirank;
+    changeNumbering(dA, v, vPETSc);
+    {
+        Mat dSC = [[dA     , dB, vPETSc],
+                   [dBT    , 0 , 0     ],
+                   [vPETSc', 0 , c     ]];
+        view(dSC);
+    }
+    {
+        Mat dSC = [[dA     , vPETSc],
+                   [vPETSc', c     ]];
+        view(dSC);
+    }
+}
