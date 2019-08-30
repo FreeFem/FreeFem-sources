@@ -63,21 +63,71 @@ AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
 }
 
 template<class Type, class K>
-class attachCoarseOperator_Op : public E_F0mps {
+class attachCoarseOperator : public OneOperator {
     public:
-        Expression comm;
-        Expression A;
-        static const int n_name_param = 7;
-        static basicAC_F0::name_and_type name_param[];
-        Expression nargs[n_name_param];
-        attachCoarseOperator_Op(const basicAC_F0& args, Expression param1, Expression param2) : comm(param1), A(param2) {
-            args.SetNameParam(n_name_param, name_param, nargs);
-        }
+        typedef KN<K> Kn;
+        typedef KN_<K> Kn_;
+        class MatF_O : public RNM_VirtualMatrix<K>, public Type::super::CoarseCorrection {
+            public:
+                typedef typename Type::super::CoarseCorrection super;
+                Stack stack;
+                mutable Kn x;
+                C_F0 c_x;
+                Expression mat;
+                typedef typename RNM_VirtualMatrix<K>::plusAx plusAx;
+                MatF_O(int n, Stack stk, const OneOperator* op) :
+                    RNM_VirtualMatrix<K>(n), stack(stk), x(n), c_x(CPValue(x)),
+                    mat(op ? CastTo<Kn_>(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : 0) { }
+                ~MatF_O() {
+                    delete mat;
+                    Expression zzz = c_x;
+                    delete zzz;
+                }
+                virtual void operator()(const K* const in, K* const out) {
+                    KN_<K> xx(const_cast<K*>(in), this->N);
+                    KN_<K> yy(out, this->N);
+                    addMatMul(xx, yy);
+                }
+                void addMatMul(const Kn_& xx, Kn_& Ax) const {
+                    ffassert(xx.N() == this->N && Ax.N() == this->M);
+                    x = xx;
+                    Ax += GetAny<Kn_>((*mat)(stack));
+                    WhereStackOfPtr2Free(stack)->clean();
+                }
+                plusAx operator*(const Kn& x) const { return plusAx(this, x); }
+                bool ChecknbLine(int) const { return true; }
+                bool ChecknbColumn(int) const { return true; }
+        };
+        const int c;
+        class E_attachCoarseOperator : public E_F0mps {
+            public:
+                Expression A;
+                Expression comm;
+                const OneOperator *codeC;
+                const int c;
+                static const int n_name_param = 7;
+                static basicAC_F0::name_and_type name_param[];
+                Expression nargs[n_name_param];
+                E_attachCoarseOperator(const basicAC_F0& args, int d) : A(0), comm(0), codeC(0), c(d) {
+                    args.SetNameParam(n_name_param, name_param, nargs);
+                    comm = to<pcommworld>(args[0]);
+                    A = to<Type*>(args[1]);
+                    if(c == 1) {
+                        const Polymorphic* op = dynamic_cast<const Polymorphic*>(args[2].LeftValue());
+                        ffassert(op);
+                        codeC = op->Find("(", ArrayOfaType(atype<KN<K>*>(), false));
+                    }
+                }
 
-        AnyType operator()(Stack stack) const;
+                AnyType operator()(Stack stack) const;
+                operator aType() const { return atype<long>(); }
+        };
+        E_F0* code(const basicAC_F0 & args) const { return new E_attachCoarseOperator(args, c); }
+        attachCoarseOperator() : OneOperator(atype<long>(), atype<pcommworld>(), atype<Type*>()), c(0) { }
+        attachCoarseOperator(int) : OneOperator(atype<long>(), atype<pcommworld>(), atype<Type*>(), atype<Polymorphic*>()), c(1) { }
 };
 template<class Type, class K>
-basicAC_F0::name_and_type attachCoarseOperator_Op<Type, K>::name_param[] = {
+basicAC_F0::name_and_type attachCoarseOperator<Type, K>::E_attachCoarseOperator::name_param[] = {
     {"A", &typeid(Matrice_Creuse<K>*)},
     {"B", &typeid(Matrice_Creuse<K>*)},
     {"pattern", &typeid(Matrice_Creuse<K>*)},
@@ -87,92 +137,89 @@ basicAC_F0::name_and_type attachCoarseOperator_Op<Type, K>::name_param[] = {
     {"deflation", &typeid(FEbaseArrayKn<K>*)}
 };
 template<class Type, class K>
-class attachCoarseOperator : public OneOperator {
-    public:
-        attachCoarseOperator() : OneOperator(atype<long>(), atype<pcommworld>(), atype<Type*>()) { }
-
-        E_F0* code(const basicAC_F0& args) const {
-            return new attachCoarseOperator_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
-        }
-};
-template<class Type, class K>
-AnyType attachCoarseOperator_Op<Type, K>::operator()(Stack stack) const {
+AnyType attachCoarseOperator<Type, K>::E_attachCoarseOperator::operator()(Stack stack) const {
     pcommworld ptComm = GetAny<pcommworld>((*comm)(stack));
     MPI_Comm comm = *(MPI_Comm*)ptComm;
     Type* ptA = GetAny<Type*>((*A)(stack));
-    MatriceMorse<K>* mA = nargs[0] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[0])(stack))->A)) : 0;
-    Pair<K>* pair = nargs[5] ? GetAny<Pair<K>*>((*nargs[5])(stack)) : 0;
-    FEbaseArrayKn<K>* deflation = nargs[6] ? GetAny<FEbaseArrayKn<K>*>((*nargs[6])(stack)) : 0;
-    HPDDM::Option& opt = *HPDDM::Option::get();
-    KN<double>* timing = nargs[4] ? GetAny<KN<double>*>((*nargs[4])(stack)) : 0;
-    std::pair<MPI_Request, const K*>* ret = nullptr;
-    if(mA) {
-        ff_HPDDM_MatrixCSR<K> dA(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
-        MatriceMorse<K>* mB = nargs[1] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[1])(stack))->A)) : nullptr;
-        MatriceMorse<K>* mP = nargs[2] && opt.any_of("schwarz_method", { 1, 2, 4 }) ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[2])(stack))->A)) : nullptr;
-        if(dA._n == dA._m && !deflation) {
+    if(c == 0) {
+        MatriceMorse<K>* mA = nargs[0] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[0])(stack))->A)) : 0;
+        Pair<K>* pair = nargs[5] ? GetAny<Pair<K>*>((*nargs[5])(stack)) : 0;
+        FEbaseArrayKn<K>* deflation = nargs[6] ? GetAny<FEbaseArrayKn<K>*>((*nargs[6])(stack)) : 0;
+        HPDDM::Option& opt = *HPDDM::Option::get();
+        KN<double>* timing = nargs[4] ? GetAny<KN<double>*>((*nargs[4])(stack)) : 0;
+        std::pair<MPI_Request, const K*>* ret = nullptr;
+        if(mA) {
+            ff_HPDDM_MatrixCSR<K> dA(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+            MatriceMorse<K>* mB = nargs[1] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[1])(stack))->A)) : nullptr;
+            MatriceMorse<K>* mP = nargs[2] && opt.any_of("schwarz_method", { 1, 2, 4 }) ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[2])(stack))->A)) : nullptr;
+            if(dA._n == dA._m && !deflation) {
+                if(timing) { // tic
+                    timing->resize(timing->n + 1);
+                    (*timing)[timing->n - 1] = MPI_Wtime();
+                }
+                const HPDDM::MatrixCSR<K>* const dP = new_HPDDM_MatrixCSR<K>(mP);
+                //mP ? new HPDDM::MatrixCSR<K>(mP->n, mP->m, mP->nbcoef, mP->a, mP->lg, mP->cl, mP->symetrique) : nullptr;
+                if(mB) {
+       //                 HPDDM::MatrixCSR<K> dB(mB->n, mB->m, mB->nbcoef, mB->a, mB->lg, mB->cl, mB->symetrique);
+                    ff_HPDDM_MatrixCSR<K> dB(mB);
+                    ptA->template solveGEVP<EIGENSOLVER>(&dA, &dB, dP);
+                }
+                else
+                    ptA->template solveGEVP<EIGENSOLVER>(&dA, nullptr, dP);
+                set_ff_matrix(mA,dA);
+                delete dP;
+                if(timing) { // toc
+                    (*timing)[timing->n - 1] = MPI_Wtime() - (*timing)[timing->n - 1];
+                }
+            }
+            else if(deflation && deflation->N > 0 && !ptA->getVectors()) {
+                K** ev = new K*[deflation->N];
+                *ev = new K[deflation->N * deflation->get(0)->n];
+                for(int i = 0; i < deflation->N; ++i) {
+                    ev[i] = *ev + i * deflation->get(0)->n;
+                    std::copy(&(*deflation->get(i))[0], &(*deflation->get(i))[deflation->get(i)->n], ev[i]);
+                }
+                ptA->setVectors(ev);
+                ptA->Type::super::initialize(deflation->N);
+            }
+            MPI_Barrier(comm);
             if(timing) { // tic
                 timing->resize(timing->n + 1);
                 (*timing)[timing->n - 1] = MPI_Wtime();
             }
-            const HPDDM::MatrixCSR<K>* const dP = new_HPDDM_MatrixCSR<K>(mP);
-            //mP ? new HPDDM::MatrixCSR<K>(mP->n, mP->m, mP->nbcoef, mP->a, mP->lg, mP->cl, mP->symetrique) : nullptr;
-            if(mB) {
-   //                 HPDDM::MatrixCSR<K> dB(mB->n, mB->m, mB->nbcoef, mB->a, mB->lg, mB->cl, mB->symetrique);
-                ff_HPDDM_MatrixCSR<K> dB(mB);
-                ptA->template solveGEVP<EIGENSOLVER>(&dA, &dB, dP);
+            if(ptA->exclusion(comm)) {
+                if(pair)
+                    pair->p = ptA->template buildTwo<1>(comm, &dA);
+                else
+                    ret = ptA->template buildTwo<1>(comm, &dA);
             }
-            else
-                ptA->template solveGEVP<EIGENSOLVER>(&dA, nullptr, dP);
-            set_ff_matrix(mA,dA);
-            delete dP;
+            else {
+                if(pair)
+                    pair->p = ptA->template buildTwo<0>(comm, &dA);
+                else
+                    ret = ptA->template buildTwo<0>(comm, &dA);
+            }
             if(timing) { // toc
                 (*timing)[timing->n - 1] = MPI_Wtime() - (*timing)[timing->n - 1];
             }
         }
-        else if(deflation && deflation->N > 0 && !ptA->getVectors()) {
-            K** ev = new K*[deflation->N];
-            *ev = new K[deflation->N * deflation->get(0)->n];
-            for(int i = 0; i < deflation->N; ++i) {
-                ev[i] = *ev + i * deflation->get(0)->n;
-                std::copy(&(*deflation->get(i))[0], &(*deflation->get(i))[deflation->get(i)->n], ev[i]);
-            }
-            ptA->setVectors(ev);
-            ptA->Type::super::initialize(deflation->N);
-        }
-        MPI_Barrier(comm);
-        if(timing) { // tic
-            timing->resize(timing->n + 1);
-            (*timing)[timing->n - 1] = MPI_Wtime();
-        }
-        if(ptA->exclusion(comm)) {
-            if(pair)
-                pair->p = ptA->template buildTwo<1>(comm, &dA);
-            else
-                ret = ptA->template buildTwo<1>(comm, &dA);
-        }
         else {
-            if(pair)
-                pair->p = ptA->template buildTwo<0>(comm, &dA);
+            MPI_Barrier(comm);
+            if(!ptA->getVectors())
+                ret = ptA->template buildTwo<2>(comm);
+            else if(ptA->exclusion(comm))
+                ret = ptA->template buildTwo<1>(comm);
             else
-                ret = ptA->template buildTwo<0>(comm, &dA);
+                ret = ptA->template buildTwo<0>(comm);
         }
-        if(timing) { // toc
-            (*timing)[timing->n - 1] = MPI_Wtime() - (*timing)[timing->n - 1];
-        }
+        if(ret)
+            delete ret;
+        return 0L;
     }
     else {
-        MPI_Barrier(comm);
-        if(!ptA->getVectors())
-            ret = ptA->template buildTwo<2>(comm);
-        else if(ptA->exclusion(comm))
-            ret = ptA->template buildTwo<1>(comm);
-        else
-            ret = ptA->template buildTwo<0>(comm);
+        ptA->_cc = new attachCoarseOperator<Type, K>::MatF_O(ptA->getDof(), stack, codeC);
+        return 0L;
     }
-    if(ret)
-        delete ret;
-    return 0L;
 }
 
 template<class Type, class K>
@@ -607,6 +654,7 @@ void add() {
 
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>);
     Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>);
+    Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>(1));
     Global.Add("DDM", "(", new solveDDM<Type<K, S>, K>);
     Global.Add("changeOperator", "(", new changeOperator<Type<K, S>, K>);
     Global.Add("set", "(", new set<Type<K, S>, K>);
