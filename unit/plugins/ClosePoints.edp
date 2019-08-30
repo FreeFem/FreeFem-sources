@@ -3,6 +3,7 @@ load "ClosePoints"
 
 cout << functionDEFINITION << "Voisinage" << endl;
 
+real t;
 real[int, int] P(10, 2);
 real[int, int] Q(11, 2);
 for (int i = 0; i < P.n; ++i) {
@@ -19,7 +20,10 @@ Q(P.n, :) = P(0, :);
 Q(P.n-2, :) = P(0, :);
 
 int[int][int] ij(10);
+t = clock();
 Voisinage(P, Q, 0.01, ij);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 test(ij[0][0] == 0 && ij[0][1] == 8 && ij[0][2] == 10);
 test(ij[1][0] == 1);
 test(ij[2][0] == 2);
@@ -65,10 +69,22 @@ cout << functionDEFINITION << "ClosePoints" << endl;
   mesh th = buildmesh(bb(nn) + cc(NC), points=P, nbvx=100000);
   real eps = 0.01;
 
+  t = clock();
   int[int] I = ClosePoints(eps, th, Q);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  t = clock();
   int[int] J = ClosePoints1(eps, th, Q);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  t = clock();
   int[int] II = ClosePoints(eps, Q');
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  t = clock();
   int[int] JJ = ClosePoints1(eps, Q');
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
 
   test(I.n == 100);
   test(J.n == 665);
@@ -111,7 +127,10 @@ cout << functionDEFINITION << "ClosePoints" << endl;
   mesh th = buildmesh(bb(nn) + cc(NC), points=P, nbvx=100000);
   real eps = 0.01;
 
+  t = clock();
   int[int] I = ClosePoints(eps, Q);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
 
   test(I.n == 52);
 }
@@ -134,7 +153,10 @@ cout << functionDEFINITION << "ClosePoints" << endl;
   Q(P.n, :) = P(0, :);
   Q(P.n-2, :) = P(0, :);
   int[int][int] ij(10);
+  t = clock();
   neighborhood(P, Q, 0.01, ij);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
   test(ij[0][0] == 0 && ij[0][1] == 8 && ij[0][2] == 10);
   test(ij[1][0] == 1);
   test(ij[2][0] == 2);
@@ -182,7 +204,10 @@ cout << functionDEFINITION << "ClosePoints2" << endl;
 
   real[int, int] thReal = P;
   real[int, int] thReal2 = Q;
+  t = clock();
   int[int] I = ClosePoints2(eps, thReal, thReal2);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
   test(I[0] == 0 && I[1] == 1);
 }
 
