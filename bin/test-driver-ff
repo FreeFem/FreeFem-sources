@@ -85,7 +85,11 @@ if test $color_tests = yes; then
 else
   red= grn= lgn= blu= mgn= std=
 fi
-
+if test -n "${LIST_SKIP:-}" ; then
+    if 	echo "${LIST_SKIP}" | sed 's/ /\n/' | grep -q "$test_name"  ; then
+		SKIP=yes
+	fi
+fi
 if test "${SKIP:-no}" = yes; then
 echo SKIP ${TEST_FFPP} ${FLAGS_FFPP}  "$@" >$log_file 2>&1
 estatus=77
@@ -123,7 +127,7 @@ if test $enable_hard_errors = no && test $estatus -eq 99; then
   estatus=1
 fi
 if test "${FAIL_CPU_LIMIT:-0}" -ge 1  ; then
-	expect_failure=yes;
+	expect_failure=cpu;
 fi 
 case $estatus:$expect_failure in
   0:yes) col=$grn res=PASS recheck=yes gcopy=yes;;
@@ -131,6 +135,7 @@ case $estatus:$expect_failure in
   77:*)  col=$blu res=SKIP  recheck=no  gcopy=yes;;
   99:*)  col=$mgn res=ERROR recheck=yes gcopy=yes;;
   *:yes) col=$lgn res=XFAIL recheck=no  gcopy=yes;;
+  *:cpu) col=$lgn res=CPU   recheck=no  gcopy=yes;;
   *:*)   col=$red res=FAIL  recheck=yes gcopy=yes;;
 esac
 
