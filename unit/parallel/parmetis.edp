@@ -5,7 +5,7 @@ include "cube.idp"
 load "metis"
 load "parmetis"
 load "medit"
-int[int] Nxyz = [getARGV("-global", 50), getARGV("-global", 50), getARGV("-global", 50)];
+int[int] Nxyz = [50, 50, 50];
 real[int,int] Bxyz = [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0]];
 int[int,int] Lxyz = [[1, 2], [2, 2], [2, 2]];
 mesh3 Th = Cube(Nxyz, Bxyz, Lxyz);
@@ -28,7 +28,7 @@ cout << functionDEFINITION << "metisdual" << endl;
     Ph part;
     if(mpirank == 0){
       t = mpiWtime();
-      metisdual(part[], Th, getARGV("-lpart", mpisize));
+      metisdual(part[], Th, mpisize);
       t = mpiWtime() - t;
       cout << functionDEFINITION << t << endl;
     }
@@ -46,7 +46,7 @@ cout << functionDEFINITION << "metisdual" << endl;
     Ph part;
     if(mpirank == 0) {
       t = mpiWtime();
-      metisdual(part[], Th2, getARGV("-lpart", mpisize));
+      metisdual(part[], Th2, mpisize);
       t = mpiWtime() - t;
       cout << timeELAPSED << t << endl;
     }
@@ -62,7 +62,7 @@ cout << functionDEFINITION << "metisdual" << endl;
     Ph part;
     if(mpirank == 0) {
       t = mpiWtime();
-      metisdual(part[], Thsurf1, getARGV("-lpart", mpisize));
+      metisdual(part[], Thsurf1, mpisize);
       t = mpiWtime() - t;
       cout << timeELAPSED << t << endl;
     }
@@ -79,7 +79,7 @@ cout << functionDEFINITION << "metisnodal" << endl;
     Ph part;
     if(mpirank == 0){
       t = mpiWtime();
-      metisnodal(part[], Th, getARGV("-lpart", mpisize));
+      metisnodal(part[], Th, mpisize);
       t = mpiWtime() - t;
       cout << functionDEFINITION << t << endl;
     }
@@ -97,7 +97,7 @@ cout << functionDEFINITION << "metisnodal" << endl;
   Ph part;
   if(mpirank == 0){
     t = mpiWtime();
-    metisnodal(part[], Th2, getARGV("-lpart", mpisize));
+    metisnodal(part[], Th2, mpisize);
     t = mpiWtime() - t;
     cout << functionDEFINITION << t << endl;
   }
@@ -113,7 +113,7 @@ cout << functionDEFINITION << "metisnodal" << endl;
     Ph part;
     if(mpirank == 0){
       t = mpiWtime();
-      metisnodal(part[], Thsurf1, getARGV("-lpart", mpisize));
+      metisnodal(part[], Thsurf1, mpisize);
       t = mpiWtime() - t;
       cout << functionDEFINITION << t << endl;
     }
@@ -129,7 +129,7 @@ cout << functionDEFINITION << "parmetis" << endl;
     real time = mpiWtime();
     Ph part;
     t = mpiWtime();
-    parmetis(part[], Th, getARGV("-lpart", mpisize), communicator = mpiCommWorld, worker = getARGV("-worker", mpisize));
+    parmetis(part[], Th, mpisize, communicator = mpiCommWorld, worker = mpisize);
     t = mpiWtime() - t;
     cout << timeELAPSED << t << endl;
     mpiBarrier(mpiCommWorld);

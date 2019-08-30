@@ -16,15 +16,15 @@ cout << functionDEFINITION << "dmv" << endl;
   macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
   func Pk = P2;                               // finite element space
 
-  string deflation = getARGV("-deflation", "geneo");              // coarse space construction
-  int overlap = getARGV("-overlap", 1);                           // geometric overlap between subdomains
-  int fakeInterface = getARGV("-interface", 10);                  // interface between subdomains
-  int s = getARGV("-split", 1);                                   // refinement factor
-  real dt = getARGV("-dt", 0.01);                                 // time step
-  int iMax = getARGV("-iMax", 10);                                // number of iterations
+  string deflation = 1;              // coarse space construction
+  int overlap = 1;                           // geometric overlap between subdomains
+  int fakeInterface = 10;                  // interface between subdomains
+  int s = 1;                                   // refinement factor
+  real dt = 0.01;                                 // time step
+  int iMax = 10;                                // number of iterations
 
   mpiComm comm;
-  int p = getARGV("-hpddm_level_2_p", 1);
+  int p = 1;
   bool excluded = splitComm(mpiCommWorld, p, comm, topology = getARGV("-hpddm_level_2_topology", 0), exclude = (usedARGV("-hpddm_level_2_exclude") != -1));
 
   if(verbosity > 0 && mpirank == 0) {
@@ -67,7 +67,7 @@ cout << functionDEFINITION << "dmv" << endl;
     int solver = getOption("schwarz_method");
     if(solver == 1 || solver == 2 || solver == 4) { // optimized Schwarz methods
       fespace Ph(Th, P0);
-      real kZero = getARGV("-kZero", 10.0);
+      real kZero = 10.0;
       Ph transmission = kZero;
       varf vOptimized(u, v) = intN(Th)(u * v + dt * (grad(u)' * grad(v))) + intN1(Th, fakeInterface)(transmission * (u * v)) + on(1, u = 0.0);
       Opt = vOptimized(Wh, Wh, tgv = -1);
@@ -168,61 +168,3 @@ cout << functionDEFINITION << "IterativeMethod" << endl;
   }
   test(errorB(u, b) < 1e-5);
 }
-
-// cout << functionDEFINITION << "destroyRecycling" << endl;
-// {
-//   destroyRecycling();
-// }
-
-// cout << functionDEFINITION << "globalNumbering" << endl;
-// {
-//   load "PETSc"
-//   load "hpddm_substructuring"         // HPDDM plugin
-//   macro dimension()2// EOM            // 2D or 3D
-//   include "macro_ddm_substructuring.idp" // additional DDM functions
-//
-//   macro def(i)i// EOM                 // scalar field definition
-//   macro init(i)i// EOM                // scalar field initialization
-//   macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
-//   macro BC(u, val)u = val// EOM       // Dirichlet boundary conditions
-//   func Pk = P1;                       // finite element space
-//
-//   int labNeumann = getARGV("-labNeumann", 2);                     // interface between subdomains
-//   int s = getARGV("-split", 1);                                   // refinement factor
-//
-//   if(verbosity > 0 && mpirank == 0) {
-//       cout << " --- " << mpirank << "/" << mpisize;
-//       cout << " - diffusion-2d-substructuring-PETSc.edp - input parameters: refinement factor = " << s << endl;
-//   }
-//
-//   meshN Th = square(1, 1);
-//   fespace Wh(Th, Pk);           // local finite element space
-//   int[int][int] intersection;   // local-to-neighbors renumbering
-//   int[int] interfaceNb;         //
-//   {
-//       int[int] l = [2, 1, 2, 2];
-//       Th = square(2, 2);    // global mesh
-//       buildSubstructuring(Th, interfaceNb, 10, 1, labNeumann, s, intersection, Pk, BC, mpiCommWorld, false)
-//   }
-//
-//   func f = 10;
-//   varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(f * v) + on(1, u = 0.0);
-//   matrix<real> Loc = vPb(Wh, Wh, sym = 1, tgv = -2); // local operator
-//   real[int] rhs = vPb(0, Wh, tgv = -2);              // local right-hand side
-//
-//   MatIS A(Loc, intersection, interfaceNb, communicator = mpiCommWorld);
-//   Wh<real> def(u) = 0.0;    // local solution
-//
-//   int[int] numbering;
-//   globalNumbering(A, numbering);
-//   for(int i = 0; i < u[].n; ++i)
-//       u[][i] = numbering[i];
-//   originalNumbering(A, u[], interfaceNb);
-//   plotMPI(Th, u, Pk, def, real, cmm = "Global numbering")
-//
-//   set(A, sparams = "-pc_type bddc -ksp_monitor");
-//   u[] = A^-1 * rhs;
-//
-//   originalNumbering(A, u[], interfaceNb);
-//   plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
-// }

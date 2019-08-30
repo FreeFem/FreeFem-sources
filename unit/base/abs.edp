@@ -6,7 +6,7 @@ real t;
 cout << typeDEFINITION << "int" << endl;
 
 int lplus = 5;
-int lmoins = -5;
+int lminus = -5;
 int lzero = 0;
 
 t = clock();
@@ -16,10 +16,10 @@ cout << timeELAPSED << t << endl;
 test(alplus == lplus);
 
 t = clock();
-real almoins = abs(lmoins);
+real alminus = abs(lminus);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-test(almoins == -lmoins);
+test(alminus == -lminus);
 
 t = clock();
 real alzero = abs(lzero);

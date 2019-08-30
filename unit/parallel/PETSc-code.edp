@@ -11,7 +11,7 @@ real time;
 macro def(u)u//
 macro init(u)u//
 border C(t = 0, 2*pi){ x=cos(t); y=sin(t); }
-mesh Th = buildmesh(C(getARGV("-global", 100)));
+mesh Th = buildmesh(C(100));
 
 func Pk = P1dc;
 fespace Vh(Th, Pk);
