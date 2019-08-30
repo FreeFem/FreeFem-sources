@@ -603,13 +603,12 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
     kk++;
     if(cc[kk])
     {
-        glEnable(GL_DEPTH_TEST);
         if(lok[kk])   glCallList(gllists+kk);
         else
         {
             lok[kk]=1;
             glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
-            glPolygonMode(GL_FRONT,GL_FILL);//GL_FILL
+            glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);//GL_FILL
             glBegin(GL_TRIANGLES);
             for (int i=0;i<Th.nt;i++)
             {
@@ -625,7 +624,6 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
             glEnd();
             glEndList();
         }
-        glDisable(GL_DEPTH_TEST);
     }
     kk++;
     if(cc[kk])
