@@ -603,6 +603,7 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
     kk++;
     if(cc[kk])
     {
+        glEnable(GL_DEPTH_TEST);
         if(lok[kk])   glCallList(gllists+kk);
         else
         {
@@ -618,12 +619,13 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
                 //glColor3d(r,g,b);
                 glVertex3d(K[0].x,K[0].y,K[0].z);
                 glVertex3d(K[1].x,K[1].y,K[1].z);
-                glVertex3d(K[2].x,K[2].y,K[1].z);
+                glVertex3d(K[2].x,K[2].y,K[2].z);
 
             }
             glEnd();
             glEndList();
         }
+        glDisable(GL_DEPTH_TEST);
     }
     kk++;
     if(cc[kk])
