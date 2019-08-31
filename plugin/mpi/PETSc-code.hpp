@@ -3055,13 +3055,6 @@ T* resizeClean(const Resize<T>& t, const long &n) {
 }
 }
 
-template<typename Type>
-bool CheckPetscMatrix(Type* ptA) {
-    ffassert(ptA);
-    PetscValidHeaderSpecific(ptA->_petsc, MAT_CLASSID, 2);
-    return true;
-}
-
 static void Init_PETSc() {
     if(verbosity > 1 && mpirank == 0)
         cout << " PETSc (" << typeid(PetscScalar).name() << ")" << endl;
@@ -3170,8 +3163,6 @@ static void Init_PETSc() {
     Global.Add("set", "(", new PETSc::setOptions<Dbddc>());
     addInv<Dbddc, PETSc::InvPETSc, KN<PetscScalar>, PetscScalar>();
     Init_Common();
-
-    Global.Add("check", "(", new OneOperator1<bool, Dmat*>(CheckPetscMatrix<Dmat>));
 }
 #ifndef PETScandSLEPc
 LOADFUNC(Init_PETSc)
