@@ -42,6 +42,7 @@ CONDITIONAL_HPDDM = diffusion-2d.edp \
 	heat-2d-io.edp \
 	heat-3d.edp \
 	helmholtz-2d.edp \
+	helmholtz-2d-mg.edp \
 	iterative.edp \
 	maxwell-3d.edp \
 	stokes-2d.edp \

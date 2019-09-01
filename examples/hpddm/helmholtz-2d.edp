@@ -55,7 +55,6 @@ matrix<complex> Mat;                        // local operator
     Mat = vPb(WhAugmented, WhAugmented, tgv = -1);
     complex[int] rhsFull = vPb(0, WhAugmented, tgv = -1);
     matrix R = interpolate(Wh, WhAugmented);
-	cout << "renumbering " << Mat.n << " "<< R.n<< endl; 
     renumbering(Mat, R, rhsFull, rhs);
 }
 ThBorder = square(1, 1);

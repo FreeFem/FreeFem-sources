@@ -10,53 +10,65 @@
 
 namespace Schwarz {
 template<class Type, class K>
-class initDDM_Op : public E_F0mps {
+class initDDM : public OneOperator {
     public:
-        Expression A;
-        Expression Mat;
-        Expression R;
-        Expression D;
-        static const int n_name_param = 3;
-        static basicAC_F0::name_and_type name_param[];
-        Expression nargs[n_name_param];
-        initDDM_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3, Expression param4) : A(param1), Mat(param2), R(param3), D(param4) {
-            args.SetNameParam(n_name_param, name_param, nargs);
-        }
+        const int c;
+        class E_initDDM : public E_F0mps {
+            public:
+                Expression A;
+                Expression Mat;
+                Expression R;
+                Expression D;
+                const int c;
+                static const int n_name_param = 3;
+                static basicAC_F0::name_and_type name_param[];
+                Expression nargs[n_name_param];
+                E_initDDM(const basicAC_F0& args, int d) : A(0), Mat(0), R(0), D(0), c(d) {
+                    args.SetNameParam(n_name_param, name_param, nargs);
+                    A = to<Type*>(args[0]);
+                    Mat = to<Matrice_Creuse<K>*>(args[1]);
+                    if(c == 0) {
+                        R = to<KN<KN<long>>*>(args[2]);
+                        D = to<KN<HPDDM::underlying_type<K>>*>(args[3]);
+                    }
+                }
 
-        AnyType operator()(Stack stack) const;
+                AnyType operator()(Stack stack) const;
+                operator aType() const { return atype<Type*>(); }
+        };
+        E_F0* code(const basicAC_F0 & args) const { return new E_initDDM(args, c); }
+        initDDM() : OneOperator(atype<Type*>(), atype<Type*>(), atype<Matrice_Creuse<K>*>(), atype<KN<KN<long>>*>(), atype<KN<HPDDM::underlying_type<K>>*>()), c(0) { }
+        initDDM(int) : OneOperator(atype<Type*>(), atype<Type*>(), atype<Matrice_Creuse<K>*>()), c(1) { }
 };
 template<class Type, class K>
-basicAC_F0::name_and_type initDDM_Op<Type, K>::name_param[] = {
+basicAC_F0::name_and_type initDDM<Type, K>::E_initDDM::name_param[] = {
     {"communicator", &typeid(pcommworld)},
     {"scaled", &typeid(bool)},
     {"prefix", &typeid(string*)}
 };
 template<class Type, class K>
-class initDDM : public OneOperator {
-    public:
-        initDDM() : OneOperator(atype<Type*>(), atype<Type*>(), atype<Matrice_Creuse<K>*>(), atype<KN<KN<long>>*>(), atype<KN<HPDDM::underlying_type<K>>*>()) { }
-
-        E_F0* code(const basicAC_F0& args) const {
-            return new initDDM_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]));
-        }
-};
-template<class Type, class K>
-AnyType initDDM_Op<Type, K>::operator()(Stack stack) const {
+AnyType initDDM<Type, K>::E_initDDM::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
     Matrice_Creuse<K>* pA = GetAny<Matrice_Creuse<K>*>((*Mat)(stack));
     MatriceMorse<K>* mA = pA->A ? static_cast<MatriceMorse<K>*>(&(*pA->A)) : nullptr;
-    KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
-    KN<HPDDM::underlying_type<K>>* ptD = GetAny<KN<HPDDM::underlying_type<K>>*>((*D)(stack));
-    if(ptR) {
-        KN_<KN<long>> sub(ptR->n > 0 && ptR->operator[](0).n > 0 ? (*ptR)(FromTo(1, ptR->n - 1)) : KN<KN<long>>());
-        ptA->HPDDM::template Subdomain<K>::initialize(new_HPDDM_MatrixCSR<K>(mA), STL<long>(ptR->n > 0 ? ptR->operator[](0) : KN<long>()), sub, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
+    if(c == 0) {
+        KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
+        KN<HPDDM::underlying_type<K>>* ptD = GetAny<KN<HPDDM::underlying_type<K>>*>((*D)(stack));
+        if(ptR) {
+            KN_<KN<long>> sub(ptR->n > 0 && ptR->operator[](0).n > 0 ? (*ptR)(FromTo(1, ptR->n - 1)) : KN<KN<long>>());
+            ptA->HPDDM::template Subdomain<K>::initialize(new_HPDDM_MatrixCSR<K>(mA), STL<long>(ptR->n > 0 ? ptR->operator[](0) : KN<long>()), sub, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
+        }
+        if(ptD)
+            ptA->initialize(*ptD);
+        else
+            std::cerr << "Something is really wrong here!" << std::endl;
+        if(!nargs[1] || GetAny<bool>((*nargs[1])(stack)))
+            ptA->exchange();
     }
-    if(ptD)
-        ptA->initialize(*ptD);
-    else
-        std::cerr << "Something is really wrong here!" << std::endl;
-    if(!nargs[1] || GetAny<bool>((*nargs[1])(stack)))
-        ptA->exchange();
+    else {
+        const MPI_Comm& comm = MPI_COMM_SELF;
+        ptA->HPDDM::template Subdomain<K>::initialize(new_HPDDM_MatrixCSR<K>(mA), STL<long>( KN<long>()), KN<KN<long>>(), const_cast<MPI_Comm*>(&comm));
+    }
     if(nargs[2])
         ptA->setPrefix(*(GetAny<string*>((*nargs[2])(stack))));
     return ptA;
@@ -91,7 +103,7 @@ class attachCoarseOperator : public OneOperator {
                 void addMatMul(const Kn_& xx, Kn_& Ax) const {
                     ffassert(xx.N() == this->N && Ax.N() == this->M);
                     x = xx;
-                    Ax += GetAny<Kn_>((*mat)(stack));
+                    Ax = GetAny<Kn_>((*mat)(stack));
                     WhereStackOfPtr2Free(stack)->clean();
                 }
                 plusAx operator*(const Kn& x) const { return plusAx(this, x); }
@@ -141,6 +153,10 @@ AnyType attachCoarseOperator<Type, K>::E_attachCoarseOperator::operator()(Stack 
     pcommworld ptComm = GetAny<pcommworld>((*comm)(stack));
     MPI_Comm comm = *(MPI_Comm*)ptComm;
     Type* ptA = GetAny<Type*>((*A)(stack));
+    if(ptA->_cc) {
+        delete ptA->_cc;
+        ptA->_cc = nullptr;
+    }
     if(c == 0) {
         MatriceMorse<K>* mA = nargs[0] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[0])(stack))->A)) : 0;
         Pair<K>* pair = nargs[5] ? GetAny<Pair<K>*>((*nargs[5])(stack)) : 0;
@@ -653,6 +669,7 @@ void add() {
     map_type_of_map[make_pair(atype<Type<HPDDM::underlying_type<K>, U>*>(), atype<K*>())] = atype<Type<K, S>*>();
 
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>);
+    TheOperators->Add("<-", new initDDM<Type<K, S>, K>(1));
     Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>);
     Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>(1));
     Global.Add("DDM", "(", new solveDDM<Type<K, S>, K>);
