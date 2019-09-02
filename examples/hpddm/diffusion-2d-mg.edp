@@ -1,0 +1,126 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "hpddm"                        // HPDDM plugin
+macro dimension()2// EOM            // 2D or 3D
+include "macro_ddm.idp"             // additional DDM functions
+
+macro def(i)i// EOM                 // scalar field definition
+macro init(i)i// EOM                // scalar field initialization
+macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
+func Pk = P2;                       // finite element space
+
+int s = getARGV("-split", 8);       // refinement factor
+
+border aa(t=0,1) { x=t;   y=0;   label=1; };
+border bb(t=0,1) { x=1;   y=t;   label=2; };
+border cc(t=0,1) { x=1-t; y=1;   label=3; };
+border dd(t=0,1) { x=0;   y=1-t; label=4; };
+
+meshN Th, ThCoarse = buildmesh(aa(getARGV("-global", 20)) + bb(getARGV("-global", 20)) + cc(getARGV("-global", 20)) + dd(getARGV("-global", 20)));
+fespace Wh(Th, Pk);                 // local finite element space
+real[int] part;
+fespace PhCoarse(ThCoarse, P0);
+PhCoarse partCoarse;
+if(mpirank == 0)
+    partitionerSeq(partCoarse[], ThCoarse, mpisize);
+partitionerPar(partCoarse[], ThCoarse, mpiCommWorld, mpisize);
+int[int][int] intersection;   // local-to-neighbors renumbering
+real[int] D;                  // partition of unity
+{
+    Th = trunc(ThCoarse, 1, split = s);
+    fespace Ph(Th, P0);
+    Ph part;
+    part = partCoarse;
+    buildWithPartitioning(Th, part[], 1, intersection, D, Pk, mpiCommWorld);
+}
+
+varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(v) + on(1, u = 1.0);
+matrix<real> Mat = vPb(Wh, Wh, sym = 1);
+fespace WhCoarse(ThCoarse, Pk);
+matrix MatCoarse;
+{
+    meshN ThBackup = Th;
+    Th = ThCoarse;
+    MatCoarse = vPb(Wh, Wh, sym = 1);
+    Th = ThBackup;
+}
+set(MatCoarse, solver = sparsesolverSym, sym = 1);
+matrix R = interpolate(Wh, WhCoarse);
+real[int] rhs = vPb(0, Wh);
+
+schwarz A(Mat, intersection, D);
+set(A, sparams = "-hpddm_verbosity " + (!mpirank ? "3" : "0") + "-hpddm_schwarz_method ras -hpddm_schwarz_coarse_correction deflated -hpddm_variant flexible");
+func real[int] correctionExact(real[int]& in) {
+    real[int] out(in.n), tmp(WhCoarse.ndof), tmpReduced(WhCoarse.ndof);
+    in .*= D;
+    tmp = R' * in;
+    mpiAllReduce(tmp, tmpReduced, mpiCommWorld, mpiSUM);
+    tmp = MatCoarse^-1 * tmpReduced;
+    out = R * tmp;
+    return out;
+}
+if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) { // two-level Schwarz methods
+    attachCoarseOperator(mpiCommWorld, A, correctionExact);
+}
+
+Wh<real> def(u);    // local solution
+u[] = A^-1 * rhs;
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution with a redundant coarse correction")
+
+int[int][int] intersectionCoarse;
+real[int] DCoarse;
+{
+    buildWithPartitioning(ThCoarse, partCoarse[], 1, intersectionCoarse, DCoarse, Pk, mpiCommWorld);
+    meshN ThBackup = Th;
+    Th = ThCoarse;
+    MatCoarse = vPb(Wh, Wh, sym = 1);
+    Th = ThBackup;
+}
+matrix NeumannCoarse = MatCoarse;
+R = interpolate(Wh, WhCoarse);
+schwarz ACoarse(MatCoarse, intersectionCoarse, DCoarse, prefix = "level_2_");
+set(A, sparams = "-hpddm_variant flexible -hpddm_verbosity " + (!mpirank ? "3" : "0"));
+set(ACoarse, sparams = "-hpddm_level_2_verbosity " + (!mpirank ? "1" : "0") + " -hpddm_level_2_schwarz_method ras -hpddm_level_2_tol 1e-10");
+macro mplot()wait = 1, cmm = "Transfers on the correction at iteration " + ijk//
+int ijk = 1;
+func real[int] correctionInexact(real[int]& in) {
+    real[int] out(in.n), tmp(WhCoarse.ndof), tmpReduced(WhCoarse.ndof);
+    if(!NoGraphicWindow && ijk > 0 && ijk < 10) {
+        Wh outW;
+        outW[] = in;
+        plotMPI(Th, outW, Pk, def, real, mplot)
+    }
+    tmpReduced = R' * in;
+    exchange(ACoarse, tmpReduced, scaled = true);
+    if(!NoGraphicWindow && ijk > 0 && ijk < 10) {
+        WhCoarse outWCoarse;
+        outWCoarse[] = tmpReduced;
+        plotMPI(ThCoarse, outWCoarse, Pk, def, real, mplot)
+        ++ijk;
+    }
+    tmp = ACoarse^-1 * tmpReduced;
+    out = R * tmp;
+    exchange(A, out);
+    return out;
+}
+if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) // two-level Schwarz methods
+    attachCoarseOperator(mpiCommWorld, A, correctionInexact);
+else
+    exit(0);
+
+u[] = 0;
+u[] = A^-1 * rhs;
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution with a one-level inner coarse correction (two levels in total)")
+
+set(ACoarse, sparams = "-hpddm_level_2_verbosity " + (!mpirank ? "4" : "0") + " -hpddm_level_2_schwarz_coarse_correction deflated -hpddm_level_2_geneo_nu 10");
+attachCoarseOperator(mpiCommWorld, ACoarse, A = NeumannCoarse);
+set(ACoarse, sparams = "-hpddm_level_2_verbosity " + (!mpirank ? "1" : "0") + " -hpddm_level_3_verbosity 0");
+
+ijk = 0;
+u[] = 0;
+u[] = A^-1 * rhs;
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution with a two-level inner coarse correction (three levels in total)")
+
+statistics(A);
+statistics(ACoarse);

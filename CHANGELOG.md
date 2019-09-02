@@ -25,6 +25,26 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- new examples `diffusion-2d-mg.edp` and `helmholtz-2d-mg.edp` showing how to use user-defined coarse corrections
+- support for nonzero scalars in PETSc block matrices
+- simpler constructor for sequential HPDDM matrices (no need for the restriction array and the partition of unity)
+
+### Changed
+-
+
+### Deprecated
+-
+
+### Removed
+-
+
+### Fixed
+- spurious output in PARDISO
+
+### Security
+
+## [4.4]
+### Added
 - interface to `TSSolve`, DAE/ODE solvers from PETSc
 - interface to `TaoSolve`, Toolkit for Advance Optimization from PETSc
 - simpler constructor for sequential PETSc matrices (no need for the restriction array and the partition of unity)
@@ -134,7 +154,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.2.1...develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4...develop
+[4.4]: https://github.com/FreeFem/FreeFem-sources/compare/v4.2.1...v4.4
 [4.2.1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.0...v4.2.1
 [4.1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.0...v4.1
 [4.0]: https://github.com/FreeFem/FreeFem-sources/compare/3.62...v4.0

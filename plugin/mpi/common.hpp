@@ -33,11 +33,8 @@
 #define HPDDM_NUMBERING 'C'
 #undef CBLAS_H
 
-#if HPDDM_PETSC && defined(PCHPDDM)
-#include "../interface/hpddm_petsc.hpp"
-#endif
-
 #include <HPDDM.hpp>
+
 template<class K> K* newCopy(bool mfree,K *p,int n)
 {  if( !mfree) return p;
 	K *q= new K[n];

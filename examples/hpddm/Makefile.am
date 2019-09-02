@@ -27,6 +27,7 @@ all-local: freefem++.pref
 
 if HPDDM
 CONDITIONAL_HPDDM = diffusion-2d.edp \
+	diffusion-2d-mg.edp \
 	diffusion-2d-substructuring.edp \
 	diffusion-2d-substructuring-withPartitioning.edp \
 	diffusion-3d.edp \
@@ -41,6 +42,7 @@ CONDITIONAL_HPDDM = diffusion-2d.edp \
 	heat-2d-io.edp \
 	heat-3d.edp \
 	helmholtz-2d.edp \
+	helmholtz-2d-mg.edp \
 	iterative.edp \
 	maxwell-3d.edp \
 	stokes-2d.edp \

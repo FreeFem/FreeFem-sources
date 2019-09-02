@@ -118,10 +118,6 @@ Mat DistB(DistA, B, clean = true);
 /***************************************/
 real[int]     EigenVAL(0);       // array to store eigenvalues
 Vh<real>[int] def(EigenVEC)(1);  // array to store eigenvectors
-cout << " Before Check " <<endl;
-check(DistA);
-check(DistB);
-cout << " After Check " <<endl;
 string ssparams =            // Parameters for the distributed EigenValue solver
   " -eps_nev " + nEV       + // Number of eigenvalues
   " -eps_type krylovschur" +

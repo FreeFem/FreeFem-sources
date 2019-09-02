@@ -1159,7 +1159,7 @@ void HashMatrix<I,R>::SetBC(char *wbc,double ttgv)
                 if( wbc[ii] )
                 {
                     for (I k=p[ii];k<p[ii+1]; ++k)
-                        if( j[k]==ii)
+                        if( j[k]==ii )
                             aij[k] = 1.;
                         else
                             aij[k]=0;// put the line to Zero.
