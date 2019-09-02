@@ -21,30 +21,41 @@
 # E-MAIL  : ...
 
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw LIST_SKIP="$(LIST_SKIP)"
 
 all-local: freefem++.pref all.edp regtests.edp
 
 if FFTW3
 CONDITIONAL_FFTW3 = dfft.edp
-endif FFTW3
+else 
+SKIP_FFTW3 = dfft.edp
+endif !FFTW3
 
 if FORTRAN
 CONDITIONAL_FORTRAN = ffnewuoa.edp
-endif FORTRAN
+else
+SKIP_FORTRAN = ffnewuoa.edp
+endif !FORTRAN
 
 if GMM
 CONDITIONAL_GMM = ilut.edp
-endif GMM
+else
+SKIP_GMM = ilut.edp
+endif !GMM
 
 if GSL
 CONDITIONAL_GSL = gsl.edp
-endif GSL
+else
+SKIP_GSL = gsl.edp
+endif !GSL
 
 if HDF5
 CONDITIONAL_HDF5 = iohd5-beam-2d.edp \
 	iohd5-beam-3d.edp
-endif HDF5
+else
+	SKIP_HDF5 = iohd5-beam-2d.edp \
+	iohd5-beam-3d.edp
+endif !HDF5
 
 if IPOPT
 CONDITIONAL_IPOPT = IpoptLap.edp \
@@ -53,42 +64,66 @@ CONDITIONAL_IPOPT = IpoptLap.edp \
 	IpoptVI.edp \
 	IpoptVI2.edp \
 	IpoptTest.edp
-endif IPOPT
+else
+SKIP_IPOPT = IpoptLap.edp \
+	IpoptMinSurf.edp \
+	IpoptMinSurfVol.edp \
+	IpoptVI.edp \
+	IpoptVI2.edp \
+	IpoptTest.edp
+endif !IPOPT
 
 if METIS
 CONDITIONAL_METIS = metis.edp \
 	schwarz-nm.edp
-
 if SCOTCH
 CONDITIONAL_METIS_SCOTCH = scotch.edp
+else
+SKIP_METIS_SCOTCH = scotch.edp
 endif
-endif METIS
+else
+SKIP_METIS = metis.edp schwarz-nm.edp scotch.edp
+endif !METIS
 
 if MKL
 CONDITIONAL_MKL = PARDISO.edp
+else
+SKIP_MKL = PARDISO.edp
 endif
 
 if MSHMET
 CONDITIONAL_MSHMET = aniso.edp
-endif MSHMET
+else
+SKIP_MSHMET = aniso.edp
+endif !MSHMET
 
 if MUMPS_seq
 CONDITIONAL_MUMPS_seq = LapMUMPS_seq.edp
-endif MUMPS_seq
+else
+SKIP_MUMPS_seq = LapMUMPS_seq.edp
+endif !MUMPS_seq
 
-if MUMPS
+if MUMPS_seq
 if SUPERLU
 CONDITIONAL_MUMPS_SUPERLU = lap-solvers.edp
-endif SUPERLU
-endif MUMPS
+else
+SKIP_MUMPS_SUPERLU = lap-solvers.edp
+endif !SUPERLU
+else
+SKIP_MUMPS_SUPERLU = lap-solvers.edp
+endif !MUMPS_seq
 
 if NLOPT
 CONDITIONAL_NLOPT = VarIneq2.edp
-endif NLOPT
+else
+SKIP_NLOPT = VarIneq2.edp
+endif !NLOPT
 
 if SUPERLU
 CONDITIONAL_SUPERLU = SuperLU.edp
-endif SUPERLU
+else
+SKIP_SUPERLU = SuperLU.edp
+endif !SUPERLU
 
 if TETGEN
 CONDITIONAL_TETGEN = buildlayermesh.edp \
@@ -96,13 +131,23 @@ CONDITIONAL_TETGEN = buildlayermesh.edp \
 	convexehull3d.edp \
 	tetgenholeregion_rugby.edp \
 	ttestio.edp
-endif TETGEN
+else
+SKIP_TETGEN = buildlayermesh.edp \
+	checkglumeshcube.edp \
+	convexehull3d.edp \
+	tetgenholeregion_rugby.edp \
+	ttestio.edp
+endif !TETGEN
 
 if UMFPACK
 CONDITIONAL_UMFPACK = LapLNewSolver.edp \
 	LapNewSolver.edp \
 	LapUmfpack64.edp
-endif UMFPACK
+else
+SKIP_UMFPACK = LapLNewSolver.edp \
+	LapNewSolver.edp \
+	LapUmfpack64.edp
+endif !UMFPACK
 
 TESTS = APk-AdaptEpsDeltaPk.edp \
 	APk-ExplicitPkTest.edp \
@@ -194,7 +239,39 @@ TESTS = APk-AdaptEpsDeltaPk.edp \
 	$(CONDITIONAL_NLOPT) \
 	$(CONDITIONAL_SUPERLU) \
 	$(CONDITIONAL_TETGEN) \
-	$(CONDITIONAL_UMFPACK)
+	$(CONDITIONAL_UMFPACK) \
+    $(SKIP_FFTW3) \
+	$(SKIP_FORTRAN) \
+	$(SKIP_GMM) \
+	$(SKIP_GSL) \
+	$(SKIP_IPOPT) \
+	$(SKIP_METIS) \
+	$(SKIP_METIS_SCOTCH) \
+	$(SKIP_MKL) \
+	$(SKIP_MSHMET) \
+	$(SKIP_MUMPS_seq) \
+	$(SKIP_MUMPS_SUPERLU) \
+	$(SKIP_NLOPT) \
+	$(SKIP_SUPERLU) \
+	$(SKIP_TETGEN) \
+	$(SKIP_UMFPACK)	
+LIST_SKIP= 	$(SKIP_FFTW3) \
+	$(SKIP_FORTRAN) \
+	$(SKIP_GMM) \
+	$(SKIP_GSL) \
+	$(SKIP_IPOPT) \
+	$(SKIP_METIS) \
+	$(SKIP_METIS_SCOTCH) \
+	$(SKIP_MKL) \
+	$(SKIP_MSHMET) \
+	$(SKIP_MUMPS_seq) \
+	$(SKIP_MUMPS_SUPERLU) \
+	$(SKIP_NLOPT) \
+	$(SKIP_SUPERLU) \
+	$(SKIP_TETGEN) \
+	$(SKIP_UMFPACK)
+
+	
 # all test can fail must but clean ????  FH...
 
 XFAIL_TESTS = $(TESTS)
@@ -229,7 +306,8 @@ all.edp:
 	        echo ' cout << "--------- error compile  file : '$$i' ---------------------------------------------" << endl;'; \
 	      fi; done) > $@
 	@awk '/error compile/ {print "Error freefem++ file ," $$6}' $@
-
+skip:
+	echo  skip examples:  "$(LIST_SKIP)"
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../../etc/config/m4/regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp

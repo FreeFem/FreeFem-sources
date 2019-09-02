@@ -85,11 +85,15 @@ if test $color_tests = yes; then
 else
   red= grn= lgn= blu= mgn= std=
 fi
+
 if test -n "${LIST_SKIP:-}" ; then
-    if 	echo "${LIST_SKIP}" | sed 's/ /\n/' | grep -q "$test_name"  ; then
-		SKIP=yes
-	fi
+#	echo LIST_SKIP:
+	case " $LIST_SKIP "  in
+	    *"$test_name"*) SKIP=yes;;
+	 esac
+#echo SKIP "${SKIP:-no}"	
 fi
+
 if test "${SKIP:-no}" = yes; then
 echo SKIP ${TEST_FFPP} ${FLAGS_FFPP}  "$@" >$log_file 2>&1
 estatus=77
