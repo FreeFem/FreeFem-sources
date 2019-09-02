@@ -25,8 +25,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
-- new example `diffusion-2d-mg.edp` showing how to use user-defined coarse corrections
+- new examples `diffusion-2d-mg.edp` and `helmholtz-2d-mg.edp` showing how to use user-defined coarse corrections
 - support for nonzero scalars in PETSc block matrices
+- simpler constructor for sequential HPDDM matrices (no need for the restriction array and the partition of unity)
 
 ### Changed
 -
