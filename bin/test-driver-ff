@@ -85,11 +85,15 @@ if test $color_tests = yes; then
 else
   red= grn= lgn= blu= mgn= std=
 fi
-
-if test -n "${LIST_SKIP:-}" ; then
+if test -n "${LIST_CONDITIONAL:-}" ; then
+	SKIP=yes;
+	case " ${LIST_CONDITIONAL} "  in
+	    *" $test_name "*) SKIP=no;;
+	 esac	
+elif test -n "${LIST_SKIP:-}" ; then
 #	echo LIST_SKIP:
 	case " $LIST_SKIP "  in
-	    *"$test_name"*) SKIP=yes;;
+	    *" $test_name "*) SKIP=yes;;
 	 esac
 #echo SKIP "${SKIP:-no}"	
 fi

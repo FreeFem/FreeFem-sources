@@ -21,23 +21,20 @@
 # E-MAIL  : ...
 .NOTPARALLEL:
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" LIST_CONDITIONAL="$(LIST_CONDITIONAL)"
 
 all-local: freefem++.pref
 
-if MPI
-CONDITIONAL_MPI =  \
+
+TESTS_MPI =  \
 	cmaes-mpi-VarIneq.edp \
 	essai.edp \
 	mortar-DN-4-mpi.edp \
 	MPICGLap.edp
 
-if HTOOL
-CONDITIONAL_MPI_HTOOL = htool.edp
-endif HTOOL
+TESTS_MPI_HTOOL = htool.edp
 
-if METIS
-CONDITIONAL_MPI_METIS = DDM-Schwarz-Lame-2d.edp \
+TESTS_MPI_METIS = DDM-Schwarz-Lame-2d.edp \
 	DDM-Schwarz-Lame-3d.edp \
 	DDM-Schwarz-Lap-2dd.edp \
 	DDM-Schwarz-Lap-3d.edp \
@@ -45,14 +42,10 @@ CONDITIONAL_MPI_METIS = DDM-Schwarz-Lame-2d.edp \
 	MPIGMRES2D.edp \
 	MPIGMRES3D.edp
 
-if PARMETIS
-CONDITIONAL_MPI_METIS_PARMETIS = parmetis-3d.edp \
+TESTS_MPI_METIS_PARMETIS = parmetis-3d.edp \
 	parmetis.edp
-endif PARMETIS
-endif METIS
 
-if MUMPS
-CONDITIONAL_MPI_MUMPS = cavityNewtow-MUMPS.edp \
+TESTS_MPI_MUMPS = cavityNewtow-MUMPS.edp \
 	LaplaceRT-3d-matrix-mumps.edp \
 	MUMPS.edp \
 	NSI3d-carac-mumps.edp \
@@ -61,14 +54,40 @@ CONDITIONAL_MPI_MUMPS = cavityNewtow-MUMPS.edp \
 	Stokes-v3-matrix-mumps.edp \
 	testsolver_MUMPS.edp \
 	VG.edp
+TESTS_MPI_MUMPS_ARPACK = LapMPIEigenValue.edp
+## the test to do ...
+if MPI
+CONDITIONAL_MPI =  $(TESTS_MPI)
 
+if HTOOL
+CONDITIONAL_MPI_HTOOL = $(TESTS_MPI_HTOOL)
+endif HTOOL
+
+if METIS
+CONDITIONAL_MPI_METIS = $(TESTS_MPI_METIS)
+
+if PARMETIS
+CONDITIONAL_MPI_METIS_PARMETIS = $(TESTS_MPI_METIS_PARMETIS)
+endif PARMETIS
+endif METIS
+
+if MUMPS
+CONDITIONAL_MPI_MUMPS = $(TESTS_MPI_MUMPS)
 if ARPACK
-CONDITIONAL_MPI_MUMPS_ARPACK = LapMPIEigenValue.edp
+CONDITIONAL_MPI_MUMPS_ARPACK = $(TESTS_MPI_MUMPS_ARPACK)
 endif ARPACK
 endif MUMPS
 endif MPI
 
-TESTS = $(CONDITIONAL_MPI) \
+TESTS= 	$(TESTS_MPI) \
+	$(TESTS_MPI_HTOOL) \
+	$(TESTS_MPI_METIS) \
+	$(TESTS_MPI_METIS_PARMETIS) \
+	$(TESTS_MPI_MUMPS) \
+	$(TESTS_MPI_MUMPS_ARPACK)
+	
+	
+LIST_CONDITIONAL = $(CONDITIONAL_MPI) \
 	$(CONDITIONAL_MPI_HTOOL) \
 	$(CONDITIONAL_MPI_METIS) \
 	$(CONDITIONAL_MPI_METIS_PARMETIS) \

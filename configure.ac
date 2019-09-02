@@ -1086,12 +1086,13 @@ fi
 ##  slepc
 
 ### end petsc ....
-
-if test "$ff_where_lib_conf_fftw3_mpi" = 1  ; then
-  ff_where_fftw3=`echo $ff_where_lib_fftw3_mpi| sed -e 's/-lfftw3_mpi//g'`
-  AC_FF_ADDWHERELIB(fftw3,$ff_where_fftw3,$ff_where_inc_fftw3_mpi)
-  AC_MSG_NOTICE([ fftw3 from  petsc ***** ])
-fi
+dnl FH:   to bad because libmpi  in use un dynamic fftw3 lib.
+dnl FH: so recompile sep 2019 
+dnl if test "$ff_where_lib_conf_fftw3_mpi" = 1  ; then
+dnl   ff_where_fftw3=`echo $ff_where_lib_fftw3_mpi| sed -e 's/-lfftw3_mpi//g'`
+dnl  AC_FF_ADDWHERELIB(fftw3,$ff_where_fftw3,$ff_where_inc_fftw3_mpi)
+dnl   AC_MSG_NOTICE([ fftw3 from  petsc ***** ])
+dnl fi
 
 
 #replacing wget with another command
@@ -1190,8 +1191,8 @@ fi
 # ----------------
 
 # ALH - 18/9/13 - deactivates FFTW detection for testing purposes
-
-if test "$ff_where_lib_conf_fftw3_mpi" != 1  ; then
+# FH: remove the test if fftw3_mpi exist in petsc 
+#if test "$ff_where_lib_conf_fftw3_mpi" != 1  ; then
     AC_ARG_ENABLE(system_fftw,AC_HELP_STRING([--disable-system-fftw],[Disable the automatic detection of FFTW]))
     if test "$enable_system_fftw" != no
     then
@@ -1212,7 +1213,7 @@ if test "$ff_where_lib_conf_fftw3_mpi" != 1  ; then
         ff_DOWNLOAD_FFTW=fftw
         fi
     fi
-fi
+#fi
 
 # used in [[file:3rdparty/fftw/Makefile.am::DOWNLOAD_FFTW]]
 
