@@ -53,7 +53,7 @@ if HDF5
 CONDITIONAL_HDF5 = iohd5-beam-2d.edp \
 	iohd5-beam-3d.edp
 else
-	SKIP_HDF5 = iohd5-beam-2d.edp \
+SKIP_HDF5 = iohd5-beam-2d.edp \
 	iohd5-beam-3d.edp
 endif !HDF5
 
