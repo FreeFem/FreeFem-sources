@@ -82,8 +82,9 @@ if test $color_tests = yes; then
   blu='[1;34m' # Blue.
   mgn='[0;35m' # Magenta.
   std='[m'     # No color.
+  ora='[38;5;202m'     # orange
 else
-  red= grn= lgn= blu= mgn= std=
+  red= grn= lgn= blu= mgn= std= ora=
 fi
 if test -n "${LIST_CONDITIONAL:-}" ; then
 	SKIP=yes;
@@ -143,7 +144,7 @@ case $estatus:$expect_failure in
   77:*)  col=$blu res=SKIP  recheck=no  gcopy=yes;;
   99:*)  col=$mgn res=ERROR recheck=yes gcopy=yes;;
   *:yes) col=$lgn res=XFAIL recheck=no  gcopy=yes;;
-  *:cpu) col=$lgn res=CPU   recheck=no  gcopy=yes;;
+  *:cpu) col=$ora res=CPU   recheck=no  gcopy=yes;;
   *:*)   col=$red res=FAIL  recheck=yes gcopy=yes;;
 esac
 
