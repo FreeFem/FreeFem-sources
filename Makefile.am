@@ -429,9 +429,9 @@ LIST_GENERATE_FILE_AM= \
     src/Makefile.am \
     src/bamglib/Makefile.am \
     src/Graphics/Makefile.am \
-    src/ffgraphics/Makefile.an \
-    src/ffgraphics/client/Makefile.an \
-    src/ffgraphics/server/Makefile.an \
+    src/ffgraphics/Makefile.am \
+    src/ffgraphics/client/Makefile.am \
+    src/ffgraphics/server/Makefile.am \
     src/femlib/Makefile.am \
     src/Algo/Makefile.am \
     src/lglib/Makefile.am \
