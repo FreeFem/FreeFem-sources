@@ -1,3 +1,9 @@
+! compile in fortran 
+!  ifort f90_master.f90 -I. libff-mmap-semaphore.o -o f90_master
+! launch
+!   ./f90_master
+! warning path of freefem++ command and of ffslave.edp  is in hard. 
+   
 program main
 
   integer*8            :: sem_ff, sem_fo, shd, status, ret
@@ -9,7 +15,8 @@ program main
   call ffmmap_init(shd,'shared-data'//achar(0),1024)
 
   status=1
-  call system('FreeFem++ ffslave.edp -nw -ns  &')
+  call system('../../src/nw/FreeFem++ ../../examples/plugin/ffslave.edp -nw -ns  &')
+! here warning path of freefem++ command and of ffslave.edp  is in hard. 
 
   call ffmmap_write(shd, status, 8, 8,ret)
   call ffmmap_msync(shd,0,32,ret)
