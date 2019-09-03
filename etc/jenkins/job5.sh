@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ## This job must be executed on VM2 machines
 ## See ./README.md
@@ -6,6 +6,8 @@
 ## Nightly launched
 
 echo "Job 5"
+set -e
+
 casejob=5
 # change default  compiler
 change_compiler=etc/jenkins/change_compiler-`uname -s`-`uname -r`-$casejob.sh
@@ -19,8 +21,8 @@ test -f "$change_compiler" && source "$change_compiler"
 autoreconf -i \
   && ./configure  --enable-download --enable-debug --prefix=/builds/workspace/freefem \
   && ./3rdparty/getall -a \
-  && chmod +x ./etc/jenkins/blob/build_PETSc.sh && sh ./etc/jenkins/blob/build_PETSc.sh \
-  && chmod +x ./etc/jenkins/blob/build.sh && sh ./etc/jenkins/blob/build.sh
+  && ./etc/jenkins/blob/build_PETSc.sh \
+  && ./etc/jenkins/blob/build.sh
 
 if [ $? -eq 0 ]
 then
@@ -31,7 +33,7 @@ else
 fi
 
 # check
-chmod +x ./etc/jenkins/blob/check.sh && sh ./etc/jenkins/blob/check.sh
+./etc/jenkins/blob/check.sh
 
 if [ $? -eq 0 ]
 then
@@ -42,7 +44,7 @@ else
 fi
 
 # install
-chmod +x ./etc/jenkins/blob/install.sh && sh ./etc/jenkins/blob/install.sh
+./etc/jenkins/blob/install.sh
 
 if [ $? -eq 0 ]
 then

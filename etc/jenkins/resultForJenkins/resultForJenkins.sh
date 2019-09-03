@@ -4,10 +4,10 @@
 rm report.xml
 rm result.txt
 
-grep 'global-test-result: FAIL' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g  " | cut -c10- >> result.txt
-grep 'global-test-result: XFAIL' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c10- >> result.txt
-grep 'global-test-result: SKIP' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c10- >> result.txt
-grep 'global-test-result: PASS' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c10- >> result.txt
+grep 'global-test-result: FAIL' ../../../examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g  " | cut -c19- >> result.txt
+grep 'global-test-result: XFAIL' ../../../examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c19- >> result.txt
+grep 'global-test-result: SKIP' ../../../examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c19- >> result.txt
+grep 'global-test-result: PASS' ../../../examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c19- >> result.txt
 
 tests=0 failures=0 errors=0 skipped=0 xerrors=0
 Gtests=0 Gfailures=0 Gerrors=0 Gskipped=0 Gxerrors=0

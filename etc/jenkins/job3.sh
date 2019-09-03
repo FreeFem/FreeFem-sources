@@ -1,9 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 ## This job must be executed on VM2 machines
 ## See ./README.md
 
 echo "Job 3"
+set -e
+
 casejob=3
 # change default  compiler
 change_compiler=etc/jenkins/change_compiler-`uname -s`-`uname -r`-$casejob.sh
@@ -17,7 +19,7 @@ test -f "$change_compiler" && source "$change_compiler"
 autoreconf -i \
   && ./configure --enable-download --without-mpi --prefix=/builds/workspace/freefem \
   && ./3rdparty/getall -a \
-  && chmod +x ./etc/jenkins/blob/build.sh && sh ./etc/jenkins/blob/build.sh
+  && ./etc/jenkins/blob/build.sh
 
 if [ $? -eq 0 ]
 then
@@ -28,7 +30,7 @@ else
 fi
 
 # check
-chmod +x ./etc/jenkins/blob/check.sh && sh ./etc/jenkins/blob/check.sh
+./etc/jenkins/blob/check.sh
 
 if [ $? -eq 0 ]
 then
@@ -39,7 +41,7 @@ else
 fi
 
 # install
-chmod +x ./etc/jenkins/blob/install.sh && sh ./etc/jenkins/blob/install.sh
+./etc/jenkins/blob/install.sh
 
 if [ $? -eq 0 ]
 then
