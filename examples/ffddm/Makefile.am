@@ -21,12 +21,12 @@
 # E-MAIL  : ...
 .NOTPARALLEL:
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI) LIST_CONDITIONAL="$(LIST_CONDITIONAL)"
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw"LIST_CONDITIONAL="$(LIST_CONDITIONAL)"
 
 all-local: freefem++.pref
 
 
-TESTS_OTHER = diffusion-2d-thirdlevelgeneo.edp \
+TESTS_MPI = diffusion-2d-thirdlevelgeneo.edp \
 	diffusion-3d-minimal-ddm.edp\
 	diffusion-3d-minimal-direct.edp \
 	diffusion-3d-simple.edp \
@@ -48,10 +48,10 @@ if METIS
 CONDITIONAL_METIS = $(TESTS_METIS)
 endif METIS
 
-TESTS = $(TESTS_OTHER) \
+TESTS = $(TESTS_MPI) \
 	$(TESTS_METIS)
 
-LIST_CONDITIONAL = $(TESTS_OTHER) \
+LIST_CONDITIONAL = $(CONDITIONAL_OTHER) \
 	$(CONDITIONAL_METIS)
 
 
