@@ -44,12 +44,14 @@ TESTS_HPDDM = diffusion-2d-thirdlevelgeneo.edp \
 
 TESTS_METIS = Maxwell_Cobracavity.edp
 
+if MPI
 if HPDDM
 CONDITIONAL_HPDDM = $(TESTS_HPDDM)
 if METIS
 CONDITIONAL_METIS_HPDDM = $(TESTS_METIS_HPDDM)
 endif METIS
 endif HPDDM
+endif MPI
 
 TESTS = $(TESTS_HPDDM) \
 	$(TESTS_METIS_HPDDM)
