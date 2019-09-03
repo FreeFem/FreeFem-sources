@@ -141,11 +141,18 @@ m4_define([TOOL_DISABLE],
         AC_SUBST([TOOL_DYLIB_$1],$2)
         enable_$1_download=no
     else
+	   if test "$enable_download"  != "yes" ; then
+	    AC_SUBST([TOOL_COMPILE_$1],"")
+		ff_uncompile_plugin+=" "$2
+		ff_unlib_plugin+=" $1"
+        AC_SUBST([TOOL_DYLIB_$1],"")
+	   else
         AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
         AC_SUBST([TOOL_DYLIB_$1],$2)
 		ifelse($4,,[ff_download_lib="$1 $ff_download_lib"])
-	    ifelse($4,,[enable_$1_download=yes])
-    fi
+	    ifelse($4,,[enable_$1_download=yes])		
+	   fi
+     fi
 
     # Also allow to disable the download of one tool if it is already locally installed
 
@@ -2417,6 +2424,7 @@ if test "$enable_summary" = yes; then
   else
     ff_pthread_ok=no
   fi
+ 	
 
   AC_MSG_NOTICE([ Activated libraries ])
   AC_MSG_NOTICE([ - ARPACK: $ff_arpack_ok])
