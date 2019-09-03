@@ -21,135 +21,11 @@
 # E-MAIL  : ...
 
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw LIST_SKIP="$(LIST_SKIP)"
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw LIST_CONDITIONAL="$(LIST_CONDITIONAL)"
 
 all-local: freefem++.pref all.edp regtests.edp
 
-if FFTW3
-CONDITIONAL_FFTW3 = dfft.edp
-else 
-SKIP_FFTW3 = dfft.edp
-endif !FFTW3
-
-if FORTRAN
-CONDITIONAL_FORTRAN = ffnewuoa.edp
-else
-SKIP_FORTRAN = ffnewuoa.edp
-endif !FORTRAN
-
-if GMM
-CONDITIONAL_GMM = ilut.edp
-else
-SKIP_GMM = ilut.edp
-endif !GMM
-
-if GSL
-CONDITIONAL_GSL = gsl.edp
-else
-SKIP_GSL = gsl.edp
-endif !GSL
-
-if HDF5
-CONDITIONAL_HDF5 = iohd5-beam-2d.edp \
-	iohd5-beam-3d.edp
-else
-SKIP_HDF5 = iohd5-beam-2d.edp \
-	iohd5-beam-3d.edp
-endif !HDF5
-
-if IPOPT
-CONDITIONAL_IPOPT = IpoptLap.edp \
-	IpoptMinSurf.edp \
-	IpoptMinSurfVol.edp \
-	IpoptVI.edp \
-	IpoptVI2.edp \
-	IpoptTest.edp
-else
-SKIP_IPOPT = IpoptLap.edp \
-	IpoptMinSurf.edp \
-	IpoptMinSurfVol.edp \
-	IpoptVI.edp \
-	IpoptVI2.edp \
-	IpoptTest.edp
-endif !IPOPT
-
-if METIS
-CONDITIONAL_METIS = metis.edp \
-	schwarz-nm.edp
-if SCOTCH
-CONDITIONAL_METIS_SCOTCH = scotch.edp
-else
-SKIP_METIS_SCOTCH = scotch.edp
-endif
-else
-SKIP_METIS = metis.edp schwarz-nm.edp scotch.edp
-endif !METIS
-
-if MKL
-CONDITIONAL_MKL = PARDISO.edp
-else
-SKIP_MKL = PARDISO.edp
-endif
-
-if MSHMET
-CONDITIONAL_MSHMET = aniso.edp
-else
-SKIP_MSHMET = aniso.edp
-endif !MSHMET
-
-if MUMPS_seq
-CONDITIONAL_MUMPS_seq = LapMUMPS_seq.edp
-else
-SKIP_MUMPS_seq = LapMUMPS_seq.edp
-endif !MUMPS_seq
-
-if MUMPS_seq
-if SUPERLU
-CONDITIONAL_MUMPS_SUPERLU = lap-solvers.edp
-else
-SKIP_MUMPS_SUPERLU = lap-solvers.edp
-endif !SUPERLU
-else
-SKIP_MUMPS_SUPERLU = lap-solvers.edp
-endif !MUMPS_seq
-
-if NLOPT
-CONDITIONAL_NLOPT = VarIneq2.edp
-else
-SKIP_NLOPT = VarIneq2.edp
-endif !NLOPT
-
-if SUPERLU
-CONDITIONAL_SUPERLU = SuperLU.edp
-else
-SKIP_SUPERLU = SuperLU.edp
-endif !SUPERLU
-
-if TETGEN
-CONDITIONAL_TETGEN = buildlayermesh.edp \
-	checkglumeshcube.edp \
-	convexehull3d.edp \
-	tetgenholeregion_rugby.edp \
-	ttestio.edp
-else
-SKIP_TETGEN = buildlayermesh.edp \
-	checkglumeshcube.edp \
-	convexehull3d.edp \
-	tetgenholeregion_rugby.edp \
-	ttestio.edp
-endif !TETGEN
-
-if UMFPACK
-CONDITIONAL_UMFPACK = LapLNewSolver.edp \
-	LapNewSolver.edp \
-	LapUmfpack64.edp
-else
-SKIP_UMFPACK = LapLNewSolver.edp \
-	LapNewSolver.edp \
-	LapUmfpack64.edp
-endif !UMFPACK
-
-TESTS = APk-AdaptEpsDeltaPk.edp \
+TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	APk-ExplicitPkTest.edp \
 	APk-FreeFemQA.edp \
 	APk-MetricPk.edp \
@@ -169,7 +45,6 @@ TESTS = APk-AdaptEpsDeltaPk.edp \
 	distance2.edp \
 	distance3.edp \
 	Element_QF.edp \
-	ffrandom.edp \
 	funcTemplate.edp \
 	glumesh3D.edp \
 	IncompleteCholesky.edp \
@@ -223,12 +98,144 @@ TESTS = APk-AdaptEpsDeltaPk.edp \
 	testFEHCT.edp \
 	testFEMorley.edp \
 	testp1dcnc.edp \
-	thresholdings.edp \
-	Schur-Complement.edp \
+	thresholdings.edp 
+
+
+TESTS_FFTW3 = dfft.edp
+
+TESTS_FORTRAN = ffnewuoa.edp
+
+TESTS_GMM = ilut.edp
+
+TESTS_GSL = gsl.edp
+
+TESTS_HDF5 = iohd5-beam-2d.edp \
+	iohd5-beam-3d.edp
+
+TESTS_IPOPT = IpoptLap.edp \
+	IpoptMinSurf.edp \
+	IpoptMinSurfVol.edp \
+	IpoptVI.edp \
+	IpoptVI2.edp \
+	IpoptTest.edp
+
+TESTS_METIS = metis.edp \
+	schwarz-nm.edp
+
+TESTS_METIS_SCOTCH = scotch.edp
+
+TEST_MKL = PARDISO.edp 
+
+TESTS_MSHMET = aniso.edp
+
+TESTS_MUMPS_seq = LapMUMPS_seq.edp
+
+TESTS_MUMPS_SUPERLU = lap-solvers.edp
+
+TESTS_NLOPT = VarIneq2.edp
+
+TESTS_SUPERLU = SuperLU.edp 
+
+TESTS_TETGEN = buildlayermesh.edp \
+	checkglumeshcube.edp \
+	convexehull3d.edp \
+	tetgenholeregion_rugby.edp \
+	ttestio.edp
+
+TESTS_UMFPACK = LapLNewSolver.edp \
+	LapNewSolver.edp \
+	LapUmfpack64.edp
+
+
+if FFTW3
+CONDITIONAL_FFTW3 = $(TESTS_FFTW3)
+endif FFTW3
+
+if FORTRAN
+CONDITIONAL_FORTRAN = $(TESTS_FORTRAN)
+endif FORTRAN
+
+if GMM
+CONDITIONAL_GMM = $(TESTS_GMM)
+endif GMM
+
+if GSL
+CONDITIONAL_GSL = $(TESTS_GSL)
+endif GSL
+
+if HDF5
+CONDITIONAL_HDF5 = $(TESTS_HDF5)
+endif HDF5
+
+if IPOPT
+CONDITIONAL_IPOPT = $(TESTS_IPOPT)
+endif IPOPT
+
+if METIS
+CONDITIONAL_METIS = $(TESTS_METIS)
+if SCOTCH
+CONDITIONAL_METIS_SCOTCH = $(TESTS_METIS_SCOTCH)
+endif SCOTCH
+endif METIS
+
+if MKL
+CONDITIONAL_MKL = $(TESTS_MKL)
+endif
+
+if MSHMET
+CONDITIONAL_MSHMET =$(TESTS_MSHMET)
+endif MSHMET
+
+if MUMPS_seq
+CONDITIONAL_MUMPS_seq = $(TESTS_MUMPS_seq) 
+endif MUMPS_seq
+
+if MUMPS_seq
+if SUPERLU
+CONDITIONAL_MUMPS_SUPERLU = $(TESTS_MUMPS_SUPERLU) 
+endif SUPERLU
+endif MUMPS_seq 
+
+if NLOPT
+CONDITIONAL_NLOPT = $(TESTS_NLOPT)
+endif NLOPT
+
+if SUPERLU
+CONDITIONAL_SUPERLU = $(TESTS_SUPERLU)
+endif SUPERLU
+
+if TETGEN
+CONDITIONAL_TETGEN = $(TESTS_TETGEN)
+endif TETGEN
+
+if UMFPACK
+CONDITIONAL_UMFPACK = $(TESTS_UMFPACK)
+endif UMFPACK
+
+TESTS = $(TESTS_OTHER) \
+	$(TESTS_FFTW3) \
+	$(TESTS_FORTRAN) \
+	$(TESTS_GMM) \
+	$(TESTS_GSL) \
+	$(TESTS_HDF5) \
+	$(TESTS_IPOPT) \
+	$(TESTS_METIS) \
+	$(TESTS_METIS_SCOTCH) \
+	$(TEST_MKL) \
+	$(TESTS_MSHMET) \
+	$(TESTS_MUMPS_seq) \
+	$(TESTS_MUMPS_SUPERLU) \
+	$(TESTS_NLOPT) \
+	$(TESTS_SUPERLU) \
+	$(TESTS_TETGEN) \
+	$(TESTS_UMFPACK)
+	
+LIST_CONDITIONAL =	$(TESTS_OTHER) \
 	$(CONDITIONAL_FFTW3) \
 	$(CONDITIONAL_FORTRAN) \
 	$(CONDITIONAL_GMM) \
 	$(CONDITIONAL_GSL) \
+	$(CONDITIONAL_HDF5) \
 	$(CONDITIONAL_IPOPT) \
 	$(CONDITIONAL_METIS) \
 	$(CONDITIONAL_METIS_SCOTCH) \
@@ -239,39 +246,8 @@ TESTS = APk-AdaptEpsDeltaPk.edp \
 	$(CONDITIONAL_NLOPT) \
 	$(CONDITIONAL_SUPERLU) \
 	$(CONDITIONAL_TETGEN) \
-	$(CONDITIONAL_UMFPACK) \
-    $(SKIP_FFTW3) \
-	$(SKIP_FORTRAN) \
-	$(SKIP_GMM) \
-	$(SKIP_GSL) \
-	$(SKIP_IPOPT) \
-	$(SKIP_METIS) \
-	$(SKIP_METIS_SCOTCH) \
-	$(SKIP_MKL) \
-	$(SKIP_MSHMET) \
-	$(SKIP_MUMPS_seq) \
-	$(SKIP_MUMPS_SUPERLU) \
-	$(SKIP_NLOPT) \
-	$(SKIP_SUPERLU) \
-	$(SKIP_TETGEN) \
-	$(SKIP_UMFPACK)	
-LIST_SKIP= 	$(SKIP_FFTW3) \
-	$(SKIP_FORTRAN) \
-	$(SKIP_GMM) \
-	$(SKIP_GSL) \
-	$(SKIP_IPOPT) \
-	$(SKIP_METIS) \
-	$(SKIP_METIS_SCOTCH) \
-	$(SKIP_MKL) \
-	$(SKIP_MSHMET) \
-	$(SKIP_MUMPS_seq) \
-	$(SKIP_MUMPS_SUPERLU) \
-	$(SKIP_NLOPT) \
-	$(SKIP_SUPERLU) \
-	$(SKIP_TETGEN) \
-	$(SKIP_UMFPACK)
+	$(CONDITIONAL_UMFPACK)
 
-	
 # all test can fail must but clean ????  FH...
 
 XFAIL_TESTS = $(TESTS)

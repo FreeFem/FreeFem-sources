@@ -37,23 +37,23 @@ sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuit
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libopenmpi-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
 local Petsc 3.11.2 installed on /builds/Shared
 ```
-# MacOS 10.10.5 - VM0 (Xcode 7.2.1, gcc g++ gfortran 4.9)
+# MacOS 10.10.5 - VM0 (Xcode 7.2.1, gcc g++ gfortran 5.1)
 ```
 brew install gcc@4.9 m4 git flex bison
 ```
 
-# MacOS 10.10.5 - VM1 (Xcode 7.2.1, gcc g++ gfortran 4.9)
+# MacOS 10.10.5 - VM1 (Xcode 7.2.1, gcc g++ gfortran 5.1)
 ```
 brew install gcc@4.9 m4 git flex bison suitesparse-4.5.4 hdf5
 ```
 
 [OpenMPI compilation](#openmpi) 2.1.6
 
-# MacOS 10.10.5 - VM2 (Xcode 7.2.1, gcc g++ gfortran 4.9)
+# MacOS 10.10.5 - VM2 (Xcode 7.2.1, gcc g++ gfortran 5.1)
 ```
 brew install gcc@4.9 m4 git flex bison suitesparse-4.5.4 hdf5 cmake wget autoconf automake
 ```
-# MacOS 10.10.5 - VM2-2 (Xcode 7.2.1, gcc g++ gfortran 4.9)
+# MacOS 10.10.5 - VM2-2 (Xcode 7.2.1, gcc g++ gfortran 5.1)
 ```
 brew install gcc@4.9 m4 git flex bison suitesparse-4.5.4 hdf5 cmake wget autoconf automake
 local Petsc 3.11.2 installed on /Users/Shared

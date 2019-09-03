@@ -21,15 +21,12 @@
 # E-MAIL  : ...
 .NOTPARALLEL:
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI) LIST_CONDITIONAL="$(LIST_CONDITIONAL)"
 
 all-local: freefem++.pref
 
-if METIS
-CONDITIONAL_METIS = Maxwell_Cobracavity.edp
-endif
 
-TESTS = diffusion-2d-thirdlevelgeneo.edp \
+TESTS_OTHER = diffusion-2d-thirdlevelgeneo.edp \
 	diffusion-3d-minimal-ddm.edp\
 	diffusion-3d-minimal-direct.edp \
 	diffusion-3d-simple.edp \
@@ -42,8 +39,21 @@ TESTS = diffusion-2d-thirdlevelgeneo.edp \
 	natural_convection_3D_obstacle.edp \
 	natural_convection.edp \
 	Richards-2d.edp \
-	heat-torus-3d-surf.edp \
+	heat-torus-3d-surf.edp
+
+
+TESTS_METIS = Maxwell_Cobracavity.edp
+
+if METIS
+CONDITIONAL_METIS = $(TESTS_METIS)
+endif METIS
+
+TESTS = $(TESTS_OTHER) \
+	$(TESTS_METIS)
+
+LIST_CONDITIONAL = $(TESTS_OTHER) \
 	$(CONDITIONAL_METIS)
+
 
 XFAIL_TESTS = $(TESTS)
 

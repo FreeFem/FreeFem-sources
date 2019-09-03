@@ -2075,8 +2075,8 @@ m4_map([AC_FF_WHERELIB],[
 	[[metis],[-lmetis],[metis.h],[]],
 	[[parmetis],[-lparmetis -lmetis],[],[]],
 	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
-	[[mmg3d],[-lmmg3d],[libmmg3d.h],[]],
-	[[mshmet],[-lmshmet],[],[]],
+	[[mmg3d],[-lmmg3d-v4],[libmmg3d.h],[]],
+	[[mshmet],[-lmshmet],[mshmetlib.h],[]],
 dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 	[[tetgen],[-ltet],[tetgen.h],[]],
 	[[ipopt],[ -lipopt],[${inc_usr_include}coin/IpTNLP.hpp],[]],
@@ -2249,7 +2249,7 @@ AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = yes ])
 AM_CONDITIONAL([BLACS], [test "$ff_blacs_ok" = yes])
 AM_CONDITIONAL([FFTW3], [test "$ff_fftw_ok" = yes -o -n "$ff_DOWNLOAD_FFTW"])
 AM_CONDITIONAL([FORTRAN], [test "$enable_fortran" != no ])
-AM_CONDITIONAL([FREEYAMS], [test "$ff_freeyams_ok" = yes -o -n "$TOOL_COMPILE_freeyams"])
+AM_CONDITIONAL([FREEYAMS], [test "$ff_freeyams_ok" = yes -o -n "$TOOL_COMPILE_yams"])
 AM_CONDITIONAL([GMM], [test "$enable_gmm" = yes -o -n "$TOOL_COMPILE_gmm"])
 AM_CONDITIONAL([GSL], [test "$ff_with_gsl" = yes])
 AM_CONDITIONAL([HDF5], [test "$with_hdf5" = yes])
