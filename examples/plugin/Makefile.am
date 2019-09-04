@@ -68,7 +68,6 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	myfunction2.edp \
 	myType.edp \
 	NS_P2BR_P0.edp \
-	pipe.edp \
 	plot-fb-P3.edp \
 	plot-fb-P3dc.edp \
 	plot-fb-P4.edp \
@@ -133,6 +132,8 @@ TESTS_MUMPS_seq = LapMUMPS_seq.edp
 TESTS_MUMPS_SUPERLU = lap-solvers.edp
 
 TESTS_NLOPT = VarIneq2.edp
+
+TESTS_PIPE = pipe.edp
 
 TESTS_SUPERLU = SuperLU.edp 
 
@@ -199,6 +200,10 @@ endif MUMPS_seq
 if NLOPT
 CONDITIONAL_NLOPT = $(TESTS_NLOPT)
 endif NLOPT
+
+if PIPE
+CONDITIONAL_PIPE =$(TESTS_PIPE)
+endif PIPE
 
 if SUPERLU
 CONDITIONAL_SUPERLU = $(TESTS_SUPERLU)
