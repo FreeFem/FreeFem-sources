@@ -2252,6 +2252,7 @@ if test "$ff_mkl_ok" == yes ; then
 fi
 
 ## Condtional for check
+AM_CONDITIONAL([DOWNLOAD], [test "$enable_download" = yes ])
 AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = yes ])
 AM_CONDITIONAL([BLACS], [test "$ff_blacs_ok" = yes])
 AM_CONDITIONAL([FFTW3], [test "$ff_fftw_ok" = yes -o -n "$ff_DOWNLOAD_FFTW"])

@@ -269,7 +269,7 @@ install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf
 	tar cvf - $(FF_EXAMPLES_FILES)| (cd $(DESTDIR)$(pkgdatadir)/$(VERSION); tar xvf -)
 	$(INSTALL_SCRIPT) examples/CheckAll examples/CheckAllEdp $(DESTDIR)$(pkgdatadir)/$(VERSION)
 	$(mkinstalldirs) -m 755 $(DESTDIR)${bindir}
-	-$(INSTALL_DATA) FreeFEM-documentation.pdf  "$(DESTDIR)$(pkgdatadir)" 
+	test ! -s FreeFEM-documentation.pdf || -$(INSTALL_DATA) FreeFEM-documentation.pdf  "$(DESTDIR)$(pkgdatadir)" 
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)${bindir}
 	test `uname` != Darwin ||  echo $(bindir) >$(DESTDIR)/etc/paths.d/FreeFem++
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)/usr/local/bin
@@ -282,10 +282,14 @@ bin/script/PostInstall.sh:./Makefile bin/script/PostInstall.m4
 	m4 bin/script/PostInstall.m4 "-DFF__FVER=$(PACKAGE_VERSION)" "-DFF_BINDIR=$(bindir)" "-DFF__DATADIR=$(pkgdatadir)" > bin/script/PostInstall.sh
 	chmod a+x bin/script/PostInstall.sh
 
-
 FreeFEM-documentation.pdf:Makefile
+if DOWNLOAD
 	-rm FreeFEM-documentation.pdf
-	-$(WGET) https://doc.freefem.org/pdf/FreeFEM-documentation.pdf
+	-$(WGET) https://doc.freefem.org/pdf/FreeFEM-documentation.pdf ; fi
+else
+	touch FreeFEM-documentation.pdf
+	echo "no downloaded documentation"
+endif
 
 ListFiles-natives: .FORCE
 	test `uname` != Darwin || $(MAKE)  FreeFem++-CoCoa
@@ -306,11 +310,15 @@ $(FF_MAC_PREFIX)_Macos:documentation ListFiles-natives
 	-mkdir $@
 	cat ListFiles-natives|xargs tar chf - | (cd $@ ; tar xf - )
 	/Developer/Tools/CpMac "FreeFem++(Carbon)" $@/FreeFem++
+if DOWNLOAD
 	cp   FreeFEM-documentation.pdf $@
+endif
 
 $(FF_MAC_PREFIX)_MacOsX: all documentation  ListFiles-natives List-agl-dylib
 	-mkdir $@
+if DOWNLOAD
 	cp   FreeFEM-documentation.pdf $@
+endif
 	cat ListFiles-natives|xargs tar chf - | (cd $@ ; tar xf - )
 	cd  $@ ; tar zxf ../src/agl/FreeFem++.app.tgz
 	sed <src/agl/Info-plist.am >$@/FreeFem++.app/Contents/Info.plist \
