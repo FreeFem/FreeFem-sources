@@ -4,11 +4,11 @@
 rm report.xml
 rm result.txt
 
-grep 'global-test-result: FAIL' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g  " | cut -c19- >> result.txt
-grep 'global-test-result: XFAIL' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c19- >> result.txt
-grep 'global-test-result: CPU' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c19- >> result.txt
-grep 'global-test-result: SKIP' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c19- >> result.txt
-grep 'global-test-result: PASS' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c19- >> result.txt
+grep 'global-test-result: FAIL' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g  " | cut -c10- >> result.txt
+grep 'global-test-result: XFAIL' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c10- >> result.txt
+grep 'global-test-result: CPU' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c10- >> result.txt
+grep 'global-test-result: SKIP' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c10- >> result.txt
+grep 'global-test-result: PASS' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c10- >> result.txt
 
 tests=0 failures=0 errors=0 skipped=0 xerrors=0 cpu=0
 Gtests=0 Gfailures=0 Gerrors=0 Gskipped=0 Gxerrors=0 Gcpu=0
@@ -43,22 +43,27 @@ elif [ "$result" == "SKIP" ]; then
 	 echo "            <skipped> Skipped test, not library/plugin on the VM </skipped> " >> report.xml
 	 echo "        </testcase>" >> report.xml 
  elif [ "$result" == "CPU" ]; then 
-      skipped=$((cpu+1))
- 	 Gskipped=$((Gcpu+1))
+     cpu=$((cpu+1))
+ 	 Gcpu=$((Gcpu+1))
  	 echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
  	 echo "            <failure> Cputime limit exceeded </failure> " >> report.xml
  	 echo "        </testcase>" >> report.xml 	 	 
 elif [ "$result" == "XFAIL" ]; then 
      errors=$((errors+1))
 	 Gerrors=$((Gerrors+1))
+echo " examples/$classname/$name "
+     message=$(tail -20 examples/$classname/$name.log)
 	 echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
-	 echo "            <error> message=put a message </error> " >> report.xml
+     echo "                  <error> This is the end of edp script with the error:
+$message </error> " >> report.xml
 	 echo "        </testcase>" >> report.xml
 elif [ "$result" == "FAIL" ]; then 
      failures=$((failures+1))
 	 Gfailures=$((Gfailures+1))
+     message=$(tail -20 examples/$classname/$name.log)
 	 echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
-	 echo "            <error> message=put a message </error> " >> report.xml
+	 echo "            <error> This is the end of edp script with the error:
+$message </error> " >> report.xml
      echo "        </testcase>" >> report.xml
 
 fi
@@ -71,6 +76,7 @@ sed -i -e "s/ffffff/    <testsuite name=\"$folder\" tests=\"$tests\" failures=\"
 
 sed -i -e "s/<testsuites name=\"FreeFEM\" duration=\"0.000\">/<testsuites name=\"FreeFEM\" tests=\"$Gtests\" failures=\"$Gfailures\" errors=\"$Gerrors\" skipped=\"$Gskipped\" duration=\"0.000\">/g" report.xml
 
+mv report.xml etc/jenkins/resultForJenkins/report.xml
 echo " ****************Make check results************ "
-echo " PASS: $Gtests  SKIPPED: $Gskipped   XFAIL: $Gerrors  FAIL:$ Gfailures  CPU: Gcpu"
+echo " PASS: $Gtests  SKIPPED: $Gskipped   XFAIL: $Gerrors  FAIL:$Gfailures  CPU: $Gcpu"
 
