@@ -269,10 +269,10 @@ install-exec-local:: bin/script/PostInstall.sh FreeFEM-documentation.pdf
 	tar cvf - $(FF_EXAMPLES_FILES)| (cd $(DESTDIR)$(pkgdatadir)/$(VERSION); tar xvf -)
 	$(INSTALL_SCRIPT) examples/CheckAll examples/CheckAllEdp $(DESTDIR)$(pkgdatadir)/$(VERSION)
 	$(mkinstalldirs) -m 755 $(DESTDIR)${bindir}
-	test ! -s FreeFEM-documentation.pdf || -$(INSTALL_DATA) FreeFEM-documentation.pdf  "$(DESTDIR)$(pkgdatadir)" 
+	test ! -s FreeFEM-documentation.pdf || $(INSTALL_DATA) FreeFEM-documentation.pdf  "$(DESTDIR)$(pkgdatadir)" 
 	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)${bindir}
-	test `uname` != Darwin ||  echo $(bindir) >$(DESTDIR)/etc/paths.d/FreeFem++
-	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)/usr/local/bin
+	test `uname` != Darwin || echo $(bindir) >$(DESTDIR)/etc/paths.d/FreeFem++
+	test `uname` != Darwin || ( -rm $(DESTDIR)/usr/local/bin/FreeFem++-CoCoa ; $(INSTALL_SCRIPT) FreeFem++-CoCoa  $(DESTDIR)/usr/local/bin )
 	test `uname` != Darwin || ( $(MAKE) FreeFem++.app.tgz  ; test -d $(DESTDIR)/Applications ||  mkdir $(DESTDIR)/Applications ; tar zxf FreeFem++.app.tgz  -C $(DESTDIR)/Applications )
 	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/idp
 	cd idp; for i in *.idp; do \
