@@ -1,8 +1,6 @@
 #!/bin/bash
  
 # script to generate a xml report, make a visualization with the Test Results Analyser plugin 
-rm report.xml
-rm result.txt
 
 grep 'global-test-result: XFAIL' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c10- >> result.txt
 grep 'global-test-result: CPU' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c10- >> result.txt
@@ -22,8 +20,8 @@ do
 
 if [ "$classname" != "$folder" ] && [ $first==1 ] ; then
 if [ "$folder" != 'toto' ]; then echo "    </testsuite>" >> report.xml ; fi
-sed -i -e "s/ffffff/    <testsuite name=\"$folder\" tests=\"$tests\" failures=\"$failures\" errors=\"$errors\" skipped=\"$skipped\" time=\"0.000\">/g" report.xml
-echo "ffffff" >> report.xml
+sed -i -e "s/beginTest/    <testsuite name=\"$folder\" tests=\"$tests\" failures=\"$failures\" errors=\"$errors\" skipped=\"$skipped\" time=\"0.000\">/g" report.xml
+echo "beginTest" >> report.xml
 tests=0 failures=0 errors=0 skipped=0 xerrors=0
 folder=$classname
 first=1
@@ -52,7 +50,7 @@ elif [ "$result" == "XFAIL" ]; then
      Gerrors=$((Gerrors+1))
      echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
      echo "                  <error> This is the end of edp script with the error:" >> report.xml
-     tail -35  examples/$classname/$name.log | sed -e "s/\&/\&#38;;/g" -e "s/</\&lt;/g" -e "s/>/\&gt;/g" -e "s/'/\&#39;/g"| tee -a  report.xml
+     tail -35  examples/$classname/$name.log | sed -e "s/\&/\&#38;;/g" -e "s/</\&lt;/g" -e "s/>/\&gt;/g" -e "s/'/\&#39;/g" >> report.xml
      echo "                 </error> " >> report.xml
      echo "        </testcase>" >> report.xml
 elif [ "$result" == "FAIL" ]; then
@@ -60,7 +58,7 @@ elif [ "$result" == "FAIL" ]; then
      Gfailures=$((Gfailures+1))
      echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
      echo "                  <error> This is the end of edp script with the error:" >> report.xml
-     tail -35  examples/$classname/$name.log | sed -e "s/\&/\&#38;;/g" -e "s/</\&lt;/g" -e "s/>/\&gt;/g" -e "s/'/\&#39;/g"| tee -a  report.xml
+     tail -35  examples/$classname/$name.log | sed -e "s/\&/\&#38;;/g" -e "s/</\&lt;/g" -e "s/>/\&gt;/g" -e "s/'/\&#39;/g" >> report.xml
      echo "                 </error> " >> report.xml
      echo "        </testcase>" >> report.xml
 fi
@@ -69,7 +67,7 @@ done < result.txt 2>/dev/null
 
 echo "    </testsuite>" >> report.xml
 echo "</testsuites>" >> report.xml
-sed -i -e "s/ffffff/    <testsuite name=\"$folder\" tests=\"$tests\" failures=\"$failures\" errors=\"$errors\" skipped=\"$skipped\" time=\"0.000\">/g" report.xml
+sed -i -e "s/beginTest/    <testsuite name=\"$folder\" tests=\"$tests\" failures=\"$failures\" errors=\"$errors\" skipped=\"$skipped\" time=\"0.000\">/g" report.xml
 
 sed -i -e "s/<testsuites name=\"FreeFEM\" duration=\"0.000\">/<testsuites name=\"FreeFEM\" tests=\"$Gtests\" failures=\"$Gfailures\" errors=\"$Gerrors\" skipped=\"$Gskipped\" duration=\"0.000\">/g" report.xml
 
