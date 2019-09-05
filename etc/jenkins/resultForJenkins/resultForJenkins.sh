@@ -52,7 +52,7 @@ elif [ "$result" == "XFAIL" ]; then
      errors=$((errors+1))
 	 Gerrors=$((Gerrors+1))
 echo " examples/$classname/$name "
-     message=$(tail -20 examples/$classname/$name.log)
+     message=$(cat examples/$classname/$name.log | sed -e "s/\</\&lt;/g ; s/\&/\&amt;/g ")
 	 echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
      echo "                  <error> This is the end of edp script with the error:
 $message </error> " >> report.xml
@@ -60,7 +60,7 @@ $message </error> " >> report.xml
 elif [ "$result" == "FAIL" ]; then 
      failures=$((failures+1))
 	 Gfailures=$((Gfailures+1))
-     message=$(tail -20 examples/$classname/$name.log)
+     message=$(cat examples/$classname/$name.log | sed -e "s/\</\&lt;/g ; s/\&/\&amt;/g ")
 	 echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
 	 echo "            <error> This is the end of edp script with the error:
 $message </error> " >> report.xml
