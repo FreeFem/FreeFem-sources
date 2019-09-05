@@ -4,7 +4,6 @@
 rm report.xml
 rm result.txt
 
-grep 'global-test-result: FAIL' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g  " | cut -c10- >> result.txt
 grep 'global-test-result: XFAIL' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c10- >> result.txt
 grep 'global-test-result: CPU' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c10- >> result.txt
 grep 'global-test-result: SKIP' examples/*/*trs  | sed -e "s/.trs::global-test-result/ /g ;  s/\//:/g ; s/ : /:/g " | cut -c10- >> result.txt
@@ -19,7 +18,7 @@ first=1
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" >> report.xml
 echo "<testsuites name=\"FreeFEM\" duration=\"0.000\">" >> report.xml
 while IFS=: read classname name result 
-do 
+do
 
 if [ "$classname" != "$folder" ] && [ $first==1 ] ; then
 if [ "$folder" != 'toto' ]; then echo "    </testsuite>" >> report.xml ; fi
@@ -28,44 +27,42 @@ echo "ffffff" >> report.xml
 tests=0 failures=0 errors=0 skipped=0 xerrors=0
 folder=$classname
 first=1
-else 
+else
 first=0
 fi
 
-if [ "$result" == "PASS" ]; then 
+if [ "$result" == "PASS" ]; then
     tests=$((tests+1))
-	Gtests=$((Gtests+1))
-	echo "        <testcase name=\"$name\" classname=\"$classname\"/>" >> report.xml
-elif [ "$result" == "SKIP" ]; then 
+        Gtests=$((Gtests+1))
+        echo "        <testcase name=\"$name\" classname=\"$classname\"/>" >> report.xml
+elif [ "$result" == "SKIP" ]; then
      skipped=$((skipped+1))
-	 Gskipped=$((Gskipped+1))
-	 echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
-	 echo "            <skipped> Skipped test, not library/plugin on the VM </skipped> " >> report.xml
-	 echo "        </testcase>" >> report.xml 
- elif [ "$result" == "CPU" ]; then 
+         Gskipped=$((Gskipped+1))
+         echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
+         echo "            <skipped> Skipped test, not library/plugin on the VM </skipped> " >> report.xml
+         echo "        </testcase>" >> report.xml
+ elif [ "$result" == "CPU" ]; then
      cpu=$((cpu+1))
- 	 Gcpu=$((Gcpu+1))
- 	 echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
- 	 echo "            <failure> Cputime limit exceeded </failure> " >> report.xml
- 	 echo "        </testcase>" >> report.xml 	 	 
-elif [ "$result" == "XFAIL" ]; then 
+         Gcpu=$((Gcpu+1))
+         echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
+         echo "            <failure> Cputime limit exceeded </failure> " >> report.xml
+         echo "        </testcase>" >> report.xml
+elif [ "$result" == "XFAIL" ]; then
      errors=$((errors+1))
-	 Gerrors=$((Gerrors+1))
-echo " examples/$classname/$name "
-     message=$(cat examples/$classname/$name.log | sed -e "s/\</\&lt;/g ; s/\&/\&amt;/g ")
-	 echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
-     echo "                  <error> This is the end of edp script with the error:
-$message </error> " >> report.xml
-	 echo "        </testcase>" >> report.xml
-elif [ "$result" == "FAIL" ]; then 
-     failures=$((failures+1))
-	 Gfailures=$((Gfailures+1))
-     message=$(cat examples/$classname/$name.log | sed -e "s/\</\&lt;/g ; s/\&/\&amt;/g ")
-	 echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
-	 echo "            <error> This is the end of edp script with the error:
-$message </error> " >> report.xml
+     Gerrors=$((Gerrors+1))
+     echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
+     echo "                  <error> This is the end of edp script with the error:" >> report.xml
+     tail -35  examples/$classname/$name.log | sed -e "s/\&/\&#38;;/g" -e "s/</\&lt;/g" -e "s/>/\&gt;/g" -e "s/'/\&#39;/g"| tee -a  report.xml
+     echo "                 </error> " >> report.xml
      echo "        </testcase>" >> report.xml
-
+elif [ "$result" == "FAIL" ]; then
+     failures=$((failures+1))
+     Gfailures=$((Gfailures+1))
+     echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
+     echo "                  <error> This is the end of edp script with the error:" >> report.xml
+     tail -35  examples/$classname/$name.log | sed -e "s/\&/\&#38;;/g" -e "s/</\&lt;/g" -e "s/>/\&gt;/g" -e "s/'/\&#39;/g"| tee -a  report.xml
+     echo "                 </error> " >> report.xml
+     echo "        </testcase>" >> report.xml
 fi
 
 done < result.txt 2>/dev/null
