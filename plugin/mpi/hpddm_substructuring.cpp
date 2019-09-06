@@ -5,7 +5,7 @@
 #define HPDDM_FETI    1
 #define HPDDM_BDD     1
 
-#include "common.hpp"
+#include "common_hpddm.hpp"
 
 namespace Substructuring {
 class Skeleton_Op : public E_F0mps {

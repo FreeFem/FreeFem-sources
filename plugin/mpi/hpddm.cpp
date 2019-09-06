@@ -6,7 +6,7 @@
 #define HPDDM_BDD                       0
 #define HPDDM_INEXACT_COARSE_OPERATOR   1
 
-#include "common.hpp"
+#include "common_hpddm.hpp"
 
 namespace Schwarz {
 template<class Type, class K>
