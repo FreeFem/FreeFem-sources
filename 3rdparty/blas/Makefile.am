@@ -187,7 +187,7 @@ openpatches.done:opendownload.done
 # ALH - 7/1/14 - The tar directory has changed names
 #
 	mv *OpenBLAS-* OpenBLAS
-	patch -u -p1 < openblas.patches
+#	patch -u -p1 < openblas.patches
 	touch $@
 
 clean::
