@@ -176,7 +176,7 @@ openblas.done:openpatches.done
 #
 
 	test  -d ../lib ||  mkdir  ../lib
-	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ "CC=$(CC)" "FC=$(FC)" DYNAMIC_ARCH=1 NO_SHARED=1  "FLIBS=$(FLIBS)" libs netlib
+	cd OpenBLAS && make BINARY=@SIZEOF_PTRINBIT@ "CC=$(CC)" "FC=$(FC)" DYNAMIC_ARCH=1 NO_SHARED=0  "FLIBS=$(FLIBS)" libs netlib
 	touch $@
 
 # The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory date
