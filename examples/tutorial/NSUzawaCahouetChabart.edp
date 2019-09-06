@@ -102,7 +102,8 @@ func  real[int]   Precon(real[int] & p)
     
      dt = min(dt,T-t);
      t += dt; 
-     if( dt < 1e-10*T) break;    
+     if( dt < 1e-10*T) break;  
+	 if( clock()>50)  break; // to remove CPU limit exceed on some slow machine  
  }
  plot(w,fill=1,wait=0, nbiso=40,ps="NScahouetChabart.eps");
  cout << " u1 max " << u1[].linfty 

@@ -93,10 +93,10 @@ download('BLAS','http://www.netlib.org/blas/blast-forum/cblas.tgz',
 	'http://www.netlib.org/blas/blast-forum',
 	'cblas.tgz',
 	'1e8830f622d2112239a4a8a83b84209a');
-download('OpenBLAS','http://github.com/xianyi/OpenBLAS/tarball/v0.2.12',
+download('OpenBLAS','http://github.com/xianyi/OpenBLAS/archive/v0.3.6.tar.gz',
 	'http://www.openblas.net/',
 	'OpenBLAS.tar.gz',
-	'dfc868e0c134855639f036d2723bf4be',
+	'8a110a25b819a4b94e8a9580702b6495',
 	'BAD_CERT');
 
 # downloading the binary package is required for Windows because
