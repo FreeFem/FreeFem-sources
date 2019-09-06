@@ -21,12 +21,12 @@
 # E-MAIL  : ...
 
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw SKIP=$(SKIP_TESTS_EIGEN)
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw SKIP=$(SKIP_TESTS_EIGEN) LIST_CONDITIONAL="$(LIST_CONDITIONAL)"
 
 all-local: all.edp freefem++.pref
 
-if ARPACK
-CONDITIONAL_ARPACK = BeamEigenValue.edp \
+
+TESTS_ARPACK = BeamEigenValue.edp \
 	BeamEigenValueperio.edp \
 	condition-number.edp \
 	free-cyl-axi.edp \
@@ -41,9 +41,14 @@ CONDITIONAL_ARPACK = BeamEigenValue.edp \
 	Stokes-eigen.edp \
 	VP-Steklov-Poincare.edp \
 	WGM-sphere.edp
-endif
 
-TESTS = $(CONDITIONAL_ARPACK)
+if ARPACK
+CONDITIONAL_ARPACK = $(TESTS_ARPACK)
+endif ARPACK
+
+TESTS =	$(TESTS_ARPACK)
+
+LIST_CONDITIONAL = $(CONDITIONAL_ARPACK)
 
 XFAIL_TESTS = LapnosymEigenValue.edp
 

@@ -446,12 +446,19 @@ AnyType initCSRfromDMatrix_Op<HpddmType>::operator()(Stack stack) const {
     DistributedCSR<HpddmType>* ptA = GetAny<DistributedCSR<HpddmType>*>((*A)(stack));
     DistributedCSR<HpddmType>* ptB = GetAny<DistributedCSR<HpddmType>*>((*B)(stack));
     Matrice_Creuse<PetscScalar>* ptK = GetAny<Matrice_Creuse<PetscScalar>*>((*K)(stack));
-    if(ptB->_A && ptK->A) {
+    if(ptB->_A) {
         ptA->_A = new HpddmType(static_cast<const HPDDM::Subdomain<PetscScalar>&>(*ptB->_A));
-        MatriceMorse<PetscScalar>* mA = static_cast<MatriceMorse<PetscScalar>*>(&(*ptK->A));
-        HPDDM::MatrixCSR<PetscScalar>* dA = new_HPDDM_MatrixCSR<PetscScalar>(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+        HPDDM::MatrixCSR<PetscScalar>* dA;
+        if(ptK->A) {
+            MatriceMorse<PetscScalar>* mA = static_cast<MatriceMorse<PetscScalar>*>(&(*ptK->A));
+            dA = new_HPDDM_MatrixCSR<PetscScalar>(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+        }
+        else {
+            int* ia = new int[1]();
+            dA = new HPDDM::MatrixCSR<PetscScalar>(0, 0, 0, nullptr, ia, nullptr, false, true);
+        }
         ptA->_A->setMatrix(dA);
-        ptA->_num = new unsigned int[mA->n];
+        ptA->_num = new unsigned int[dA->_n];
         std::copy_n(ptB->_num, dA->_n, ptA->_num);
         ptA->_first = ptB->_first;
         ptA->_last = ptB->_last;
@@ -3055,13 +3062,6 @@ T* resizeClean(const Resize<T>& t, const long &n) {
 }
 }
 
-template<typename Type>
-bool CheckPetscMatrix(Type* ptA) {
-    ffassert(ptA);
-    PetscValidHeaderSpecific(ptA->_petsc, MAT_CLASSID, 2);
-    return true;
-}
-
 static void Init_PETSc() {
     if(verbosity > 1 && mpirank == 0)
         cout << " PETSc (" << typeid(PetscScalar).name() << ")" << endl;
@@ -3170,8 +3170,6 @@ static void Init_PETSc() {
     Global.Add("set", "(", new PETSc::setOptions<Dbddc>());
     addInv<Dbddc, PETSc::InvPETSc, KN<PetscScalar>, PetscScalar>();
     Init_Common();
-
-    Global.Add("check", "(", new OneOperator1<bool, Dmat*>(CheckPetscMatrix<Dmat>));
 }
 #ifndef PETScandSLEPc
 LOADFUNC(Init_PETSc)

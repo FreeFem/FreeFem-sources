@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFEM,4.4,frederic.hecht@sorbonne-universite.fr,FreeFEM)
+AC_INIT(FreeFEM,4.4-1,frederic.hecht@sorbonne-universite.fr,FreeFEM)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -141,11 +141,18 @@ m4_define([TOOL_DISABLE],
         AC_SUBST([TOOL_DYLIB_$1],$2)
         enable_$1_download=no
     else
+	   if test "$enable_download"  != "yes" ; then
+	    AC_SUBST([TOOL_COMPILE_$1],"")
+		ff_uncompile_plugin+=" "$2
+		ff_unlib_plugin+=" $1"
+        AC_SUBST([TOOL_DYLIB_$1],"")
+	   else
         AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
         AC_SUBST([TOOL_DYLIB_$1],$2)
 		ifelse($4,,[ff_download_lib="$1 $ff_download_lib"])
-	    ifelse($4,,[enable_$1_download=yes])
-    fi
+	    ifelse($4,,[enable_$1_download=yes])		
+	   fi
+     fi
 
     # Also allow to disable the download of one tool if it is already locally installed
 
@@ -999,6 +1006,7 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		        AC_FF_PETSC_WHERELIB(fftw3_mpi,FFTW_LIB,FFTW_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetsc)
                 AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetsc)
+                AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetsc)
                 AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetsc)
   			    AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetsc)
@@ -1043,7 +1051,7 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
 			AC_MSG_NOTICE([ find complex ($PETSC_COMPLEX_SCALAR) petsc in $ffconfpetscc]);
 		    test  "$PETSC_COMPLEX_SCALAR" = "complex" &&  test  "$ff_win32" = yes -o  "$PETSC_COMPLEX_MPIRUN" = "$MPIRUN" ||  cmp -s `which "$PETSC_COMPLEX_MPIRUN"` `which "$MPIRUN"`
 		   	if test "$?"  -eq 0 ; then
-			AC_FF_PETSC_WHERELIB_BASIC(petsccomplex,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB_BASIC(petsccomplex,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetscc)
@@ -1057,7 +1065,8 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
             AC_FF_PETSC_WHERELIB(fftw3_mpi,FFTW_LIB,FFTW_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetscc)
-            AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetsc)
+            AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetscc)
@@ -1084,12 +1093,13 @@ fi
 ##  slepc
 
 ### end petsc ....
-
-if test "$ff_where_lib_conf_fftw3_mpi" = 1  ; then
-  ff_where_fftw3=`echo $ff_where_lib_fftw3_mpi| sed -e 's/-lfftw3_mpi//g'`
-  AC_FF_ADDWHERELIB(fftw3,$ff_where_fftw3,$ff_where_inc_fftw3_mpi)
-  AC_MSG_NOTICE([ fftw3 from  petsc ***** ])
-fi
+dnl FH:   to bad because libmpi  in use un dynamic fftw3 lib.
+dnl FH: so recompile sep 2019 
+dnl if test "$ff_where_lib_conf_fftw3_mpi" = 1  ; then
+dnl   ff_where_fftw3=`echo $ff_where_lib_fftw3_mpi| sed -e 's/-lfftw3_mpi//g'`
+dnl  AC_FF_ADDWHERELIB(fftw3,$ff_where_fftw3,$ff_where_inc_fftw3_mpi)
+dnl   AC_MSG_NOTICE([ fftw3 from  petsc ***** ])
+dnl fi
 
 
 #replacing wget with another command
@@ -1188,8 +1198,8 @@ fi
 # ----------------
 
 # ALH - 18/9/13 - deactivates FFTW detection for testing purposes
-
-if test "$ff_where_lib_conf_fftw3_mpi" != 1  ; then
+# FH: remove the test if fftw3_mpi exist in petsc 
+#if test "$ff_where_lib_conf_fftw3_mpi" != 1  ; then
     AC_ARG_ENABLE(system_fftw,AC_HELP_STRING([--disable-system-fftw],[Disable the automatic detection of FFTW]))
     if test "$enable_system_fftw" != no
     then
@@ -1210,7 +1220,7 @@ if test "$ff_where_lib_conf_fftw3_mpi" != 1  ; then
         ff_DOWNLOAD_FFTW=fftw
         fi
     fi
-fi
+#fi
 
 # used in [[file:3rdparty/fftw/Makefile.am::DOWNLOAD_FFTW]]
 
@@ -2073,8 +2083,8 @@ m4_map([AC_FF_WHERELIB],[
 	[[metis],[-lmetis],[metis.h],[]],
 	[[parmetis],[-lparmetis -lmetis],[],[]],
 	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
-	[[mmg3d],[-lmmg3d],[libmmg3d.h],[]],
-	[[mshmet],[-lmshmet],[],[]],
+	[[mmg3d],[-lmmg3d-v4],[libmmg3d.h],[]],
+	[[mshmet],[-lmshmet],[mshmetlib.h],[]],
 dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 	[[tetgen],[-ltet],[tetgen.h],[]],
 	[[ipopt],[ -lipopt],[${inc_usr_include}coin/IpTNLP.hpp],[]],
@@ -2212,13 +2222,13 @@ TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX",,nodowload)
 TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX",,nodowload)
 
 # echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
-test "$enable_download" != "yes" -a "$enable_hpddm" != yes && enable_hpddm=no
+test "$enable_download" != "yes" -a \( "$enable_hpddm" != yes -o "$ff_hpddm_ok" != "yes" \) && enable_hpddm=no
 test "$enable_download" != "yes" -a "$enable_htool" != yes && enable_htool=no
 
 test "$enable_download" != "yes" -a "$enable_bemtool" != yes && enable_bemtool=no
 test "$enable_download" != "yes" -a "$enable_boost" != yes && enable_boost=no
 
-test "$enable_download" = yes  -a "$enable_hpddm" != no && enable_hpddm=yes
+test \( "$enable_download" = yes  -a "$enable_hpddm" != no \) -o "$ff_hpddm_ok" = "yes" && enable_hpddm=yes
 test "$enable_download" = yes -a "$enable_htool" != no && enable_htool=yes
 
 test "$enable_download" = yes  -a "$enable_bemtool" != no && enable_bemtool=yes
@@ -2255,20 +2265,21 @@ if test "$ff_mkl_ok" == yes ; then
 fi
 
 ## Condtional for check
+AM_CONDITIONAL([DOWNLOAD], [test "$enable_download" = yes ])
 AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = yes ])
 AM_CONDITIONAL([BLACS], [test "$ff_blacs_ok" = yes])
 AM_CONDITIONAL([BEMTOOL], [test "$enable_bemtool" = yes])
 AM_CONDITIONAL([BOOST], [test "$enable_boostl" = yes])
-AM_CONDITIONAL([FFTW3], [test "$ff_fftw_ok" = yes])
-AM_CONDITIONAL([FORTRAN], [test "$enable_fortran" = yes])
-AM_CONDITIONAL([FREEYAMS], [test "$ff_freeyams_ok" = yes -o -n "$TOOL_COMPILE_freeyams"])
-AM_CONDITIONAL([GMM], [test "$enable_gmm" = yes])
+AM_CONDITIONAL([FFTW3], [test "$ff_fftw_ok" = yes -o -n "$ff_DOWNLOAD_FFTW"])
+AM_CONDITIONAL([FORTRAN], [test "$enable_fortran" != no ])
+AM_CONDITIONAL([FREEYAMS], [test "$ff_freeyams_ok" = yes -o -n "$TOOL_COMPILE_yams"])
+AM_CONDITIONAL([GMM], [test "$enable_gmm" = yes -o -n "$TOOL_COMPILE_gmm"])
 AM_CONDITIONAL([GSL], [test "$ff_with_gsl" = yes])
 AM_CONDITIONAL([HDF5], [test "$with_hdf5" = yes])
 AM_CONDITIONAL([HTOOL], [test "$enable_htool" = yes])
 AM_CONDITIONAL([HPDDM], [test "$enable_hpddm" = yes])
 AM_CONDITIONAL([HYPRE], [test "$ff_hypre_ok" = yes])
-AM_CONDITIONAL([IPOPT], [test "$ff_ipopt_ok" = yes])
+AM_CONDITIONAL([IPOPT], [test "$ff_ipopt_ok" = yes -o -n "$TOOL_COMPILE_ipopt"])
 AM_CONDITIONAL([LIBSEQ], [test "$ff_libseq_ok" = yes])
 AM_CONDITIONAL([METIS], [test "$ff_metis_ok" = yes -o -n "$TOOL_COMPILE_metis" ])
 AM_CONDITIONAL([MKL], [test "$ff_mkl" = yes])
@@ -2279,10 +2290,11 @@ AM_CONDITIONAL([MUMPS], [test "$ff_mumps_ok" = yes -o -n "$TOOL_COMPILE_mumps"])
 AM_CONDITIONAL([MUMPS_ptscotch], [test "$ff_mumps_ptscotch_ok" = yes])
 AM_CONDITIONAL([MUMPS_scotch], [test "$ff_mumps_scotch_ok" = yes])
 AM_CONDITIONAL([MUMPS_seq], [test "$ff_mumps_seq_ok" = yes -o -n "$TOOL_COMPILE_mumps_seq"])
-AM_CONDITIONAL([NLOPT], [test "$ff_nlopt_ok" = yes])
+AM_CONDITIONAL([NLOPT], [test "$ff_nlopt_ok" = yes -o -n "$TOOL_COMPILE_nlopt"])
 AM_CONDITIONAL([PARMETIS], [test "$ff_parmetis_ok" = yes])
 AM_CONDITIONAL([PETSC], [test "$ff_petsc_ok" = yes])
 AM_CONDITIONAL([PETSCCOMPLEX], [test "$ff_petsccomplex_ok" = yes])
+AM_CONDITIONAL([PIPE], [test -o -n "$TOOL_COMPILE_pipe"])
 AM_CONDITIONAL([PTHREAD], [test -n "$ff_pthread"])
 AM_CONDITIONAL([PTSCOTCH], [test "$ff_ptscotch_ok" = yes])
 AM_CONDITIONAL([SCALAPACK], [test "$ff_scalapack_ok" = yes])
@@ -2435,6 +2447,7 @@ if test "$enable_summary" = yes; then
   else
     ff_pthread_ok=no
   fi
+ 	
 
   AC_MSG_NOTICE([ Activated libraries ])
   AC_MSG_NOTICE([ - ARPACK: $ff_arpack_ok])

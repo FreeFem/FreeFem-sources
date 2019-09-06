@@ -27,6 +27,7 @@ then
   echo "Check process complete"
 else
   echo "Check process failed"
+  exit 1
 fi
 
 # install

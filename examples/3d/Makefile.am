@@ -21,48 +21,13 @@
 # E-MAIL  : ...
 
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw LIST_CONDITIONAL="$(LIST_CONDITIONAL)"
 
 all-local: all.edp regtests.edp freefem++.pref
 
-if METIS
-CONDITIONAL_METIS = schwarz-nm-3d.edp
-endif
 
-if TETGEN
-CONDITIONAL_TETGEN = cylinder.edp \
-	Period-Poisson-cube-ballon.edp \
-	Poisson3d.edp \
-	Poisson-cube-ballon.edp \
-	refinesphere.edp \
-	sphereincube.edp \
-	tetgencube.edp \
-	tetgenholeregion.edp
 
-if FREEYAMS
-CONDITIONAL_TETGEN_FREEYAMS = Sphere-Isocahedron.edp
-
-if MMG3D
-if MSHMET
-CONDITIONAL_TETGEN_FREEYAMS_MMG3D_MSHMET = Laplace-Adapt-aniso-3d.edp
-endif MSHMET
-endif MMG3D
-endif FREEYAMS
-
-if GSL
-CONDITIONAL_TETGEN_GSL = bottle.edp
-endif GSL
-
-if MMG3D
-CONDITIONAL_TETGEN_MMG3D = fallingspheres.edp
-endif MMG3D
-
-if MSHMET
-CONDITIONAL_TETGEN_MSHMET = Laplace-Adapt-3d.edp
-endif
-endif TETGEN
-
-TESTS = 3d-Leman.edp \
+TESTS_OTHER = 3d-Leman.edp \
 	ArrayFE-3d.edp \
 	beam-3d.edp \
 	cone.edp \
@@ -86,14 +51,76 @@ TESTS = 3d-Leman.edp \
 	sphere2.edp \
 	sphere6.edp \
 	Stokes.edp \
-	TruncLac.edp \
+	TruncLac.edp 
+	
+
+TESTS_METIS = schwarz-nm-3d.edp
+
+TESTS_TETGEN = cylinder.edp \
+	Period-Poisson-cube-ballon.edp \
+	Poisson3d.edp \
+	Poisson-cube-ballon.edp \
+	refinesphere.edp \
+	sphereincube.edp \
+	tetgencube.edp \
+	tetgenholeregion.edp
+
+TESTS_TETGEN_FREEYAMS = Sphere-Isocahedron.edp  
+
+TESTS_TETGEN_FREEYAMS_MMG3D_MSHMET = Laplace-Adapt-aniso-3d.edp 
+
+TESTS_TETGEN_GSL = bottle.edp
+
+TESTS_TETGEN_MMG3D = fallingspheres.edp
+
+TESTS_TETGEN_MSHMET = Laplace-Adapt-3d.edp 
+
+
+
+
+if METIS
+CONDITIONAL_METIS = $(TESTS_METIS)
+endif METIS
+if TETGEN
+CONDITIONAL_TETGEN = $(TESTS_TETGEN)
+if FREEYAMS
+CONDITIONAL_TETGEN_FREEYAMS = $(TESTS_TETGEN_FREEYAMS) 
+if MMG3D
+if MSHMET
+CONDITIONAL_TETGEN_FREEYAMS_MMG3D_MSHMET = $(TESTS_TETGEN_FREEYAMS_MMG3D_MSHMET) 
+endif MSHMET
+endif MMG3D
+endif FREEYAMS
+if GSL
+CONDITIONAL_TETGEN_GSL = $(TESTS_TETGEN_GSL)
+endif GSL
+if MMG3D
+CONDITIONAL_TETGEN_MMG3D = $(TESTS_TETGEN_MMG3D)
+endif MMG3D
+if MSHMET
+CONDITIONAL_TETGEN_MSHMET = $(TESTS_TETGEN_MSHMET)
+endif MSHMET
+endif TETGEN
+
+
+
+TESTS = $(TESTS_OTHER) \
+	$(TESTS_METIS) \
+	$(TESTS_TETGEN) \
+	$(TESTS_TETGEN_FREEYAMS) \
+	$(TESTS_TETGEN_FREEYAMS_MMG3D_MSHMET) \
+	$(TESTS_TETGEN_GSL)  \
+	$(TESTS_TETGEN_MMG3D) \
+	$(TESTS_TETGEN_MSHMET)
+
+LIST_CONDITIONAL = $(TESTS_OTHER) \
 	$(CONDITIONAL_METIS) \
 	$(CONDITIONAL_TETGEN) \
 	$(CONDITIONAL_TETGEN_FREEYAMS) \
 	$(CONDITIONAL_TETGEN_FREEYAMS_MMG3D_MSHMET) \
-	$(CONDITIONAL_TETGEN_GSL)  \
+	$(CONDITIONAL_TETGEN_GSL) \
 	$(CONDITIONAL_TETGEN_MMG3D) \
-	$(CONDITIONAL_TETGEN_MSHMET)
+	$(CONDITIONAL_TETGEN_MSHMET)	
 
 XFAIL_TESTS =
 

@@ -72,7 +72,7 @@ int main (int argc, const char **argv) {
 	ffmmap_msync(shd, 0, 32);
 
 	char ff[1024];
-	sprintf(ff, "FreeFem++ ffslave.edp -nw -ns -v %d&", debug);
+	sprintf(ff, "../../src/nw/FreeFem++ ../../examples/plugin/ffslave.edp -nw -ns -v %d&", debug);
 	ret = system(ff);	// Lauch FF++ in batch no graphique
 	if (ret == -1) printf("system function error\n");
 	if (debug) {printf(" cc: before wait\n");}

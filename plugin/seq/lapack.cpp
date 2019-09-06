@@ -1235,6 +1235,38 @@ long  ff_SchurComplement(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const
     KNM<R> * pV=0;
     return ff_SchurComplement<R>(pS,pA,I,pV);
 }
+template<class R>
+KNM<R> *   Add4(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const &  I,KN_<long> const & J)
+{
+    ffassert(pS); // To do ..
+    int n = I.N(), m=J.N();
+    if(pA)
+    {
+        KNM<R> &S=*pS, &A=*pA;
+        ffassert(S.N()==n && S.M()==m);
+        int An = A.N(), Am=A.M();
+        for(int i=0;i<n; ++i)
+            {
+                int ii = I[i];
+                if( ii >=0 && ii < An )
+                    for(int j=0;j<n; ++j)
+                    {
+                     int jj = J[j];
+                     if( jj >=0 && jj < An )
+                         S(i,j) += A(ii,jj);
+                    }
+            }
+                
+    }
+    
+    return pS;
+}
+template<class R>
+KNM<R> *   Add3(KNM<R> * const & pS,KNM<R> * const & pA,KN_<long> const &  I)
+{
+    return Add4(pS,pA,I,I);
+}
+
 
 
 template<class R, bool init, int ibeta>
@@ -1374,10 +1406,15 @@ static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3
 		Global.Add("dgelsy", "(", new OneOperator2_<long, KNM<double> *, KN<double> *>(lapack_dgelsy));
 		Global.Add("dgelsy", "(", new OneOperator2_<long, KNM<double> *, KNM<double> *>(lapack_dgelsy));
            // Add FH.  for P. Ventura... Jun 2019 ..
+            typedef Complex C;
             Global.Add("SchurComplement", "(", new OneOperator3_<long, KNM<R> *, KNM<R> *, KN_<long> >(ff_SchurComplement<R>));
             Global.Add("SchurComplement", "(", new OneOperator3_<long, KNM<Complex> *, KNM<Complex> *, KN_<long> >(ff_SchurComplement<Complex>));
             Global.Add("SchurComplement", "(", new OneOperator4_<long, KNM<R> *, KNM<R> *, KN_<long> , KNM<R> *>(ff_SchurComplement<R>));
             Global.Add("SchurComplement", "(", new OneOperator4_<long, KNM<Complex> *, KNM<Complex> *, KN_<long>, KNM<Complex> * >(ff_SchurComplement<Complex>));
+            Global.Add("Add", "(", new OneOperator3_<KNM<C> *, KNM<C> *, KNM<C> *, KN_<long> >(Add3<C>));
+            Global.Add("Add", "(", new OneOperator4_<KNM<C> *, KNM<C> *, KNM<C> *, KN_<long>, KN_<long> >(Add4<C>));
+            Global.Add("Add", "(", new OneOperator3_<KNM<R> *, KNM<R> *, KNM<R> *, KN_<long> >(Add3<R>));
+            Global.Add("Add", "(", new OneOperator4_<KNM<R> *, KNM<R> *, KNM<R> *, KN_<long>, KN_<long> >(Add4<R>));
 
 	} else if (verbosity) {
 		cout << "( load: lapack <=> fflapack , skeep ) ";

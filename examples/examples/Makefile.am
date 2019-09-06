@@ -21,15 +21,11 @@
 # E-MAIL  : ...
 
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw LIST_CONDITIONAL="$(LIST_CONDITIONAL)"
 
 all-local: all.edp regtests.edp freefem++.pref
 
-if ARPACK
-CONDITIONAL_ARPACK = sound.edp
-endif
-
-TESTS = BlackScholes2D.edp \
+TESTS_OTHER = BlackScholes2D.edp \
 	condensor.edp \
 	convects.edp \
 	Heat.edp \
@@ -46,8 +42,22 @@ TESTS = BlackScholes2D.edp \
 	stokes.edp \
 	test1.edp \
 	thermal.edp \
-	thermic.edp \
-	$(CONDITIONAL_ARPACK)
+	thermic.edp
+
+TESTS_ARPARCK = sound.edp
+
+
+if ARPACK
+CONDITIONAL_ARPACK = $(TESTS_ARPACK)
+endif ARPACK
+
+TESTS = $(TESTS_OTHER) \
+	$(TESTS_ARPACK)
+	
+LIST_CONDITIONAL = $(TESTS_OTHER) \
+	$(TESTS_ARPACK)
+
+
 
 # if .. no arpack or too long
 XFAIL_TESTS = NSprojection.edp

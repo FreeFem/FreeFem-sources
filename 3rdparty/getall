@@ -93,10 +93,10 @@ download('BLAS','http://www.netlib.org/blas/blast-forum/cblas.tgz',
 	'http://www.netlib.org/blas/blast-forum',
 	'cblas.tgz',
 	'1e8830f622d2112239a4a8a83b84209a');
-download('OpenBLAS','http://github.com/xianyi/OpenBLAS/tarball/v0.2.12',
+download('OpenBLAS','http://github.com/xianyi/OpenBLAS/archive/v0.3.6.tar.gz',
 	'http://www.openblas.net/',
 	'OpenBLAS.tar.gz',
-	'dfc868e0c134855639f036d2723bf4be',
+	'8a110a25b819a4b94e8a9580702b6495',
 	'BAD_CERT');
 
 # downloading the binary package is required for Windows because
@@ -186,10 +186,10 @@ download('htool','https://github.com/PierreMarchand20/htool/archive/84fb0d9bd429
 		'b8a8177c811ef6a232867d672ab416f3');
 
 	
-download('hpddm','https://github.com/hpddm/hpddm/archive/c19bfa259083a5093bdbe86af4c9a3a9cfeb9e56.zip',
+download('hpddm','https://github.com/hpddm/hpddm/archive/4f8e0001d7fb2da74157e1c2af4569fc099656d7.zip',
 	'https://github.com/hpddm',
 	'hpddm.zip',
-	'c17d6bbd887d47edb1c88a72d4c9dcd0');
+	'cd6837e4e05720616009ec16706c1e14');
 
 download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/master.zip',
 	'https://github.com/PierreMarchand20/BemTool',
@@ -274,8 +274,22 @@ sub downloadone{
 				$errors.="ERROR: $cmd FAILED\n"
 			}
 		}
+		
 	}
 	# check if resulting package contents are valid
 	my $md5check=md5_hex(`cat pkg/$pkg`);
-	if( ( $md5 ne "none") && ($md5check ne $md5)){$errors.="ERROR: INVALID MD5 for $pkg  $md5check\n"}
+	if( ( $md5 ne "none") && ($md5check ne $md5)){
+		print "Download failed (MD5 check) from $url of $pkg\n";
+		my $url="http://pkgs.freefem.org/$pkg";
+		my $cmd="../bin/build/download $url pkg/$pkg $opts";
+		print "Try other site: $url\n";
+		system $cmd;
+		if($?){
+			$errors.="ERROR 2: $cmd FAILED\n"
+		}
+		else { $md5check=md5_hex(`cat pkg/$pkg`);}
+		if(  ($md5check ne $md5))
+		{
+		  $errors.="ERROR2: INVALID MD5 for $pkg  $md5check\n"}
+	    }
 }

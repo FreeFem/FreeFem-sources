@@ -16,7 +16,7 @@
 #define HPDDM_BDD     0
 #define HPDDM_PETSC   1
 
-#include "common.hpp"
+#include "common_hpddm.hpp"
 
 namespace PETSc {
 template<class HpddmType>
