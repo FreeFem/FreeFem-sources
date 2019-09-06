@@ -24,7 +24,7 @@ fi
 
 # configuration & build
 autoreconf -i \
-  && ./configure --enable-download --prefix=/builds/workspace/freefem \
+  && ./configure --enable-download --prefix=/builds/workspace/freefem_job4 \
   --with-petsc=$PETSC_DIR/real/lib \
   --with-petsc_complex=$PETSC_DIR/complex/lib \
   && ./3rdparty/getall -a \
@@ -57,4 +57,5 @@ then
   echo "Install process complete"
 else
   echo "Install process failed"
+  exit 1
 fi

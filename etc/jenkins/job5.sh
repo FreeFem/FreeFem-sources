@@ -19,7 +19,7 @@ test -f "$change_compiler" && source "$change_compiler"
 
 # configuration & build
 autoreconf -i \
-  && ./configure  --enable-download --enable-debug --prefix=/builds/workspace/freefem \
+  && ./configure  --enable-download --enable-debug --prefix=/builds/workspace/freefem_job5 \
   && ./3rdparty/getall -a \
   && ./etc/jenkins/blob/build_PETSc.sh \
   && ./etc/jenkins/blob/build.sh
@@ -51,4 +51,5 @@ then
   echo "Install process complete"
 else
   echo "Install process failed"
+  exit 1
 fi
