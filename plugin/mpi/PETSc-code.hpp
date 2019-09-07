@@ -15,12 +15,13 @@ struct _n_User;
 template<class Type>
 using User = _n_User<Type>*;
 template<class HpddmType, typename std::enable_if<std::is_same<HpddmType, Dmat>::value>::type* = nullptr>
-void initPETScStructure(HpddmType* ptA, PetscInt bs, PetscBool symmetric, KN<typename std::conditional<std::is_same<HpddmType, Dmat>::value, double, long>::type>* ptD, KN<PetscScalar>* rhs) {
+void initPETScStructure(HpddmType* ptA, PetscInt bs, PetscBool symmetric, KN<typename std::conditional<std::is_same<HpddmType, Dmat>::value, double, long>::type>* ptD, KN<PetscScalar>* rhs, bool restrict = true) {
     double timing = MPI_Wtime();
     PetscInt global;
     if(ptD || mpisize == 1) {
         if(ptD) {
-            ptA->_A->restriction(*ptD);
+            if(restrict)
+                ptA->_A->restriction(*ptD);
             ptA->_A->initialize(*ptD);
         }
         unsigned int g;
@@ -59,7 +60,7 @@ void initPETScStructure(HpddmType* ptA, PetscInt bs, PetscBool symmetric, KN<typ
         ptA->_A->exchange(*rhs);
 }
 template<class HpddmType, typename std::enable_if<!std::is_same<HpddmType, Dmat>::value>::type* = nullptr>
-void initPETScStructure(HpddmType* ptA, PetscInt& bs, PetscBool symmetric, KN<typename std::conditional<std::is_same<HpddmType, Dmat>::value, double, long>::type>* ptD, KN<PetscScalar>* rhs) {
+void initPETScStructure(HpddmType* ptA, PetscInt& bs, PetscBool symmetric, KN<typename std::conditional<std::is_same<HpddmType, Dmat>::value, double, long>::type>* ptD, KN<PetscScalar>* rhs, bool) {
     const HPDDM::MatrixCSR<PetscScalar>* M = ptA->_A->getMatrix();
     if(!M->_sym)
         cout << "Please assemble a symmetric CSR" << endl;
@@ -919,6 +920,7 @@ AnyType initCSR<HpddmType>::E_initCSR::operator()(Stack stack) const {
         Matrice_Creuse<double>* pList = nargs[5] ? GetAny<Matrice_Creuse<double>*>((*nargs[5])(stack)) : 0;
         HPDDM::MatrixCSR<void>* dL = nullptr;
         KN_<KN<long>> sub((c == 0 || c == 1) && ptR->n > 0 && ptR->operator[](0).n > 0 ? (*ptR)(FromTo(1, ptR->n - 1)) : KN<KN<long>>());
+        bool restrict = true;
         if(std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value && pList && (mA || (c != 0 && c != 2))) {
             int n = 0;
             ptA->_exchange = new HPDDM::template Subdomain<PetscScalar>*[2]();
@@ -926,6 +928,7 @@ AnyType initCSR<HpddmType>::E_initCSR::operator()(Stack stack) const {
             ptA->_exchange[0]->initialize(dA, STL<long>((c == 0 || c == 1) && ptR->n > 0 ? ptR->operator[](0) : KN<long>()), sub, comm);
             ptA->_exchange[0]->setBuffer();
             if(pList->A) {
+                restrict = false;
                 MatriceMorse<double>* mList = static_cast<MatriceMorse<double>*>(&*(pList->A));
                 mList->CSR();
                 ffassert(mList->n == mList->nnz);
@@ -948,7 +951,7 @@ AnyType initCSR<HpddmType>::E_initCSR::operator()(Stack stack) const {
         ptA->_A->HPDDM::template Subdomain<PetscScalar>::initialize(dA, STL<long>((c == 0 || c == 1) && ptR->n > 0 ? ptR->operator[](0) : KN<long>()), sub, comm, dL);
         delete dL;
         ptA->_num = new unsigned int[ptA->_A->getMatrix()->_n];
-        initPETScStructure(ptA, bs, nargs[4] ? (GetAny<bool>((*nargs[4])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE, ptD, rhs);
+        initPETScStructure(ptA, bs, nargs[4] ? (GetAny<bool>((*nargs[4])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE, ptD, rhs, restrict);
         if(!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value) {
 #ifndef VERSION_MATRICE_CREUSE
             mA->lg = ptA->_A->getMatrix()->_ia;
