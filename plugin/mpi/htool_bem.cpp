@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: cxx11 [mkl|blas] mpi pthread htool bemtool boost hpddm
+//ff-c++-LIBRARY-dep: cxx11 [mkl|blas] mpi pthread htool bemtool boost
 //ff-c++-cpp-dep:
 // for def  M_PI under windows in <cmath>
 #define _USE_MATH_DEFINES
@@ -16,6 +16,8 @@
 #include <bemtool/operator/operator.hpp>
 #include <bemtool/miscellaneous/htool_wrap.hpp>
 #include "PlotStream.hpp"
+
+#include "common.hpp"
 
 extern FILE *ThePlotStream;
 
@@ -39,15 +41,12 @@ public:
 
 };
 
-
-
-
 template<template<class> class LR, class K>
 class assembleHMatrix : public OneOperator { public:
 
 	class Op : public E_F0info {
 	public:
-		Expression a,b;
+		Expression a,b,c;
 
 		static const int n_name_param = 8;
 		static basicAC_F0::name_and_type name_param[] ;
@@ -58,18 +57,20 @@ class assembleHMatrix : public OneOperator { public:
 		KN_<long> arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
 		pcommworld arg(int i,Stack stack,pcommworld a ) const{ return nargs[i] ? GetAny<pcommworld>( (*nargs[i])(stack) ): a;}
 	public:
-		Op(const basicAC_F0 &  args,Expression aa,Expression bb) : a(aa),b(bb) {
+		Op(const basicAC_F0 &  args,Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {
 			args.SetNameParam(n_name_param,name_param,nargs); }
 		};
 
 		assembleHMatrix() : OneOperator(atype<const typename assembleHMatrix<LR,K>::Op *>(),
 		atype<pfesS *>(),
-		atype<pfesS *>()) {}
+		atype<pfesS *>(),
+		atype<K*>()) {}
 
 		E_F0 * code(const basicAC_F0 & args) const
 		{
 			return  new Op(args,t[0]->CastTo(args[0]),
-			t[1]->CastTo(args[1]));
+			t[1]->CastTo(args[1]),
+			t[2]->CastTo(args[2]));
 		}
 	};
 
@@ -171,6 +172,9 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 	FESpaceS * Vh = **pVh;
 	int NVh =Vh->N;
 
+	K * coef = GetAny< K * >((* mi->c)(stack));
+	double kappa = coef->real();
+
 	ffassert(Vh);
 	ffassert(Uh);
 
@@ -184,9 +188,6 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 
 	if (init)
 	delete *Hmat;
-    double kappa=10;
-	
-    
     
     // ThU = meshS ThGlobal (in function argument?
     // call interface MeshS2Bemtool
@@ -250,22 +251,9 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 	return Hmat;
 }
 
-
-
-
-
-
-
-
-
-
 template<template<class> class LR, class K, int init>
 AnyType SetHMatrix(Stack stack,Expression emat,Expression einter)
 { return SetHMatrix<LR,K>(stack,emat,einter,init);}
-
-template<class R, class A, class B> R Build(A a, B b) {
-	return R(a, b);
-}
 
 template<template<class> class LR, class K>
 AnyType ToDense(Stack stack,Expression emat,Expression einter,int init)
@@ -502,6 +490,65 @@ basicAC_F0::name_and_type  plotHMatrix<LR, K>::Op::name_param[]= {
 	{  "wait", &typeid(bool)}
 };
 
+template<class T, class U, class K, char trans>
+class HMatrixInv {
+    public:
+        const T t;
+        const U u;
+
+        struct HMatVirt: CGMatVirt<int,K> {
+            const T tt;
+
+            HMatVirt(T ttt) : tt(ttt), CGMatVirt<int,K>((*ttt)->nb_rows()) {}
+            K*  addmatmul(K* x,K* Ax) const { (*tt)->mvprod_global(x, Ax); return Ax;}
+        };
+
+        struct HMatVirtPrec: CGMatVirt<int,K> {
+            const T tt;
+            std::vector<K> invdiag;
+
+            HMatVirtPrec(T ttt) : tt(ttt), CGMatVirt<int,K>((*ttt)->nb_rows()), invdiag((*ttt)->nb_rows(),0) {
+              std::vector<SubMatrix<K>*> diagblocks = (*tt)->get_MyStrictlyDiagNearFieldMats();
+              std::vector<K> tmp((*ttt)->nb_rows(),0);
+              for (int j=0;j<diagblocks.size();j++){
+                SubMatrix<K>& submat = *(diagblocks[j]);
+                int local_nr = submat.nb_rows();
+                int local_nc = submat.nb_cols();
+                int offset_i = submat.get_offset_i();
+                int offset_j = submat.get_offset_j();
+                for (int i=offset_i;i<offset_i+std::min(local_nr,local_nc);i++){
+                  tmp[i] = 1./submat(i-offset_i,i-offset_i);
+                }
+              }
+            (*tt)->cluster_to_target_permutation(tmp.data(),invdiag.data());
+            MPI_Allreduce(MPI_IN_PLACE, &(invdiag[0]), (*ttt)->nb_rows(), wrapper_mpi<K>::mpi_type(), MPI_SUM, (*tt)->get_comm());
+            }
+
+            K*  addmatmul(K* x,K* Ax) const {
+              for (int i=0; i<(*tt)->nb_rows(); i++)
+                Ax[i] = invdiag[i] * x[i];
+              return Ax;
+            }
+        };
+
+        HMatrixInv(T v, U w) : t(v), u(w) {}
+
+        void solve(U out) const {
+            HMatVirt A(t);
+            HMatVirtPrec P(t);
+            bool res=fgmres(A,P,1,(K*)*u,(K*)*out,1.e-6,2000,200,(mpirank==0)*verbosity);
+        }
+
+        static U inv(U Ax, HMatrixInv<T, U, K, trans> A) {
+            A.solve(Ax);
+            return Ax;
+        }
+        static U init(U Ax, HMatrixInv<T, U, K, trans> A) {
+            Ax->init(A.u->n);
+            return inv(Ax, A);
+        }
+};
+
 template<template<class> class LR, class K>
 void add(const char* namec) {
 	Dcl_Type<HMatrix<LR ,K>**>(Initialize<HMatrix<LR,K>*>, Delete<HMatrix<LR,K>*>);
@@ -523,6 +570,8 @@ void add(const char* namec) {
 	TheOperators->Add("*", new OneOperator2<Prod<KN<K>*, LR, K>, HMatrix<LR ,K>**, KN<K>*>(Build));
 	TheOperators->Add("=", new OneOperator2<KN<K>*, KN<K>*, Prod<KN<K>*, LR, K>>(Prod<KN<K>*, LR, K>::mv));
 	TheOperators->Add("<-", new OneOperator2<KN<K>*, KN<K>*, Prod<KN<K>*, LR, K>>(Prod<KN<K>*, LR, K>::init));
+
+	addInv<HMatrix<LR ,K>*, HMatrixInv, KN<K>, K>();
 
 	Global.Add("display","(",new plotHMatrix<LR, K>);
 

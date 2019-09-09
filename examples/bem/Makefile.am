@@ -26,7 +26,7 @@ TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP
 all-local: freefem++.pref
 
 
-TESTS = htool_bem_ffddm.edp
+TESTS = Helmholtz_Cobracavity.edp htool_bem_ffddm.edp
 
 XFAIL_TESTS = $(TESTS)
 
