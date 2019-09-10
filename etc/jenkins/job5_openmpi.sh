@@ -5,12 +5,12 @@
 
 ## Nightly launched
 
-echo "Job 5"
+echo "Job 5 (openmpi)"
 set -e
 
-casejob=5
+casejob=5_openmi
 # change default  compiler
-change_compiler=etc/jenkins/change_compiler-`uname -s`-`uname -r`-$casejob.sh
+change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-$casejob.sh
 echo try to source file  "$change_compiler"
 test -f "$change_compiler" && echo  source file "$change_compiler"
 test -f "$change_compiler" && cat  "$change_compiler"
