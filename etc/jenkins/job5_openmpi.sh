@@ -8,7 +8,7 @@
 echo "Job 5 (openmpi)"
 set -e
 
-casejob=5_openmi
+casejob=5_openmpi
 # change default  compiler
 change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-$casejob.sh
 echo try to source file  "$change_compiler"
@@ -19,7 +19,7 @@ test -f "$change_compiler" && source "$change_compiler"
 
 # configuration & build
 autoreconf -i \
-  && ./configure  --enable-download --enable-debug --prefix=/builds/workspace/freefem_job5 \
+  && ./configure  --enable-download --enable-debug --prefix=/builds/workspace/freefem \
   && ./3rdparty/getall -a \
   && ./etc/jenkins/blob/build_PETSc.sh \
   && ./etc/jenkins/blob/build.sh
@@ -53,3 +53,17 @@ else
   echo "Install process failed"
   exit 1
 fi
+
+# uninstall
+./etc/jenkins/blob/uninstall.sh
+
+if [ $? -eq 0 ]
+then
+echo "Uninstall process complete"
+else
+echo "Uninstall process failed"
+exit 1
+fi
+
+# visu for jenkins tests results analyser
+./etc/jenkins/resultForJenkins/resultForJenkins.sh

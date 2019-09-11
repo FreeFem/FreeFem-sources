@@ -44,3 +44,17 @@ then
 else
   echo "Install process failed"
 fi
+
+# uninstall
+./etc/jenkins/blob/uninstall.sh
+
+if [ $? -eq 0 ]
+then
+echo "Uninstall process complete"
+else
+echo "Uninstall process failed"
+exit 1
+fi
+
+# visu for jenkins tests results analyser
+./etc/jenkins/resultForJenkins/resultForJenkins.sh

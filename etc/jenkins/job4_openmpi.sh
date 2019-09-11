@@ -16,15 +16,15 @@ test -f "$change_compiler" && source "$change_compiler"
 
 if [ "$(uname)" == "Darwin" ]; then
   # in case where the OS type is Darwin
-  PETSC_DIR='/Users/Shared/ff-petsc'   # _openmpi
+  PETSC_DIR='/Users/Shared/openmpi/ff-petsc'
 elif [ "$(uname)" == "Linux" ]; then
   # in case where the OS type is Linux  
-PETSC_DIR='/builds/Shared/ff-petsc'   #_openmpi 
+PETSC_DIR='/builds/Shared/openmpi/ff-petsc'
 fi
 
 # configuration & build
 autoreconf -i \
-  && ./configure --enable-download --prefix=/builds/workspace/freefem_job4 \
+  && ./configure --enable-download --prefix=/builds/workspace/freefem \
   --with-petsc=$PETSC_DIR/real/lib \
   --with-petsc_complex=$PETSC_DIR/complex/lib \
   && ./3rdparty/getall -a \
@@ -59,3 +59,17 @@ else
   echo "Install process failed"
   exit 1
 fi
+
+# uninstall
+./etc/jenkins/blob/uninstall.sh
+
+if [ $? -eq 0 ]
+then
+echo "Uninstall process complete"
+else
+echo "Uninstall process failed"
+exit 1
+fi
+
+# visu for jenkins tests results analyser
+./etc/jenkins/resultForJenkins/resultForJenkins.sh
