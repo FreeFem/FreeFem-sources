@@ -146,8 +146,10 @@ template<> struct MPI_TAG<KNM<double>* > { static const int TAG=15; };
 template<> struct MPI_TAG<KNM<Complex>* > { static const int TAG=16; };
 template<> struct MPI_TAG<Mesh* > { static const int TAG=1000; };
 template<> struct MPI_TAG<Mesh3* > { static const int TAG=1010; };
+template<> struct MPI_TAG<MeshS* > { static const int TAG=1040; };
 template<> struct MPI_TAG<const Mesh* > { static const int TAG=1000; };
 template<> struct MPI_TAG<const Mesh3* > { static const int TAG=1010; };
+template<> struct MPI_TAG<const MeshS* > { static const int TAG=1040; };
 
 template<> struct MPI_TAG<Matrice_Creuse<double> *> { static const int TAG=1020; };
 template<> struct MPI_TAG<Matrice_Creuse<Complex> *> { static const int TAG=1030; };
@@ -471,8 +473,10 @@ struct MPIrank {
   template<class R> long Recv (Matrice_Creuse<R> &a) const;
   long Send (Fem2D::Mesh const *a) const;
   long Send (Fem2D::Mesh3 const *a) const;
+  long Send (Fem2D::MeshS const *a) const;
   long Recv (Fem2D::Mesh const *&a) const;
   long Recv (Fem2D::Mesh3 const *&a) const;
+  long Recv (Fem2D::MeshS const *&a) const;
 
   operator int () const { return who; }
 };
@@ -535,6 +539,13 @@ void DeSerialize (Serialize * sTh, Fem2D::Mesh const ** ppTh) {
 void DeSerialize (Serialize *sTh, const Fem2D::Mesh3 **ppTh) {
   if (*ppTh) (**ppTh).decrement();
   Fem2D::Mesh3 *pTh = new Fem2D::Mesh3(*sTh);
+  pTh->BuildGTree();
+  *ppTh = pTh;
+}
+
+void DeSerialize (Serialize *sTh, const Fem2D::MeshS **ppTh) {
+  if (*ppTh) (**ppTh).decrement();
+  Fem2D::MeshS *pTh = new Fem2D::MeshS(*sTh);
   pTh->BuildGTree();
   *ppTh = pTh;
 }
@@ -794,6 +805,14 @@ long MPIrank::Send (const Fem2D::Mesh3 *  a) const {
     if( rwm->DoSR() ) delete rwm;
     return MPI_SUCCESS;
   }
+long MPIrank::Send (const Fem2D::MeshS *  a) const {
+    if(verbosity>100)
+      cout << " MPI << (meshS *) " << a << endl;
+    ffassert(a);
+    SendWMeshd<MeshS> *rwm= new SendWMeshd<MeshS>(this,&a);
+    if( rwm->DoSR() ) delete rwm;
+    return MPI_SUCCESS;
+  }
 
 // new version asyncrone ...  Now 2010 ...
 long MPIrank::Recv(const Fem2D::Mesh *& a) const  {
@@ -816,6 +835,15 @@ long MPIrank::Recv(const Fem2D::Mesh3 *& a) const  {
     return MPI_SUCCESS;
 }
 
+long MPIrank::Recv(const Fem2D::MeshS *& a) const  {
+    if(verbosity>100)
+      cout << " MPI >> (meshS *) &" << a << " " << &a << endl;
+    RevcWMeshd<MeshS> *rwm= new RevcWMeshd<MeshS>(this,&a);
+    if( rwm->DoSR() ) delete rwm;
+    if((rq==0 || rq == Syncro_block))
+      ffassert( a );
+    return MPI_SUCCESS;
+}
 
 void Serialize::mpisend(const MPIrank & rank,long tag,const void * vmpirank)
 {
@@ -2542,6 +2570,7 @@ void f_init_lgparallele()
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<KNM<Complex> *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<const Mesh *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<const Mesh3 *> >);
+     Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<const MeshS *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<Matrice_Creuse<R> *> >);
      Global.Add("Isend","(", new OneBinaryOperator<Op_ISendmpi<Matrice_Creuse<Complex> *> >);
 
@@ -2570,6 +2599,7 @@ void f_init_lgparallele()
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<KNM<Complex> > >);
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<const Mesh *> >);
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<const Mesh3 *> >);
+      Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<const MeshS *> >);
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<Matrice_Creuse<R> > >);
       Global.Add("Irecv","(", new OneBinaryOperator<Op_IRecvmpi<Matrice_Creuse<Complex> > >);
 

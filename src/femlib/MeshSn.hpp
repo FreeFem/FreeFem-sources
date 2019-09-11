@@ -148,6 +148,7 @@ typedef GenericVertex<R3> Vertex3;
         MeshS(FILE *f,int offset=0);
         //MeshS(const string);
         MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb);
+        MeshS(const Serialize&);
        
         int load(const string & filename);
         const Element * Find( Rd P, R2 & Phat,bool & outside,const Element * tstart=0) const;

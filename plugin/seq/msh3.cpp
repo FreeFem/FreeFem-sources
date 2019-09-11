@@ -6011,7 +6011,8 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
     KN<int> tagTonB(Th.nt);
     tagTonB = 0;
 
-    cout << "initial mesh, nb vertices:  " << Th.nv << ", nb triangles: " << Th.nt << ", nb boundary edges:" << Th.nbe << endl;
+    if(verbosity > 2)
+        cout << "initial mesh, nb vertices:  " << Th.nv << ", nb triangles: " << Th.nt << ", nb boundary edges:" << Th.nbe << endl;
 
     for (int ibe = 0; ibe < Th.nbe; ibe++) {
         int iff;

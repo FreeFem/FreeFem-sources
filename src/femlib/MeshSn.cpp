@@ -757,6 +757,9 @@ namespace Fem2D
         
         assert(mes>=0.);
     }
+    MeshS::MeshS(const Serialize&) : mapVol2Surf(0), mapSurf2Vol(0) {
+        ffassert(0);
+    }
     
     
     
