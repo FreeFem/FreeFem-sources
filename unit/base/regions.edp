@@ -11,8 +11,12 @@ t = clock();
 int[int] reg = regions(Th);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
+test(reg.n == 1);
+test(reg[0] == 0);
 
 t = clock();
 reg = regions(Th3);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
+test(reg.n == 1);
+test(reg[0] == 0);

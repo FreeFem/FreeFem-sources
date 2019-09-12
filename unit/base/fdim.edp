@@ -3,4 +3,44 @@ include "test.idp"
 cout << functionDEFINITION << "fdim" << endl;
 real t;
 
+cout << typeDEFINITION << "int" << endl;
+
+{
+	int a = 1;
+	int b = 2;
+
+	t = clock();
+	int c = fdim(a, b);
+	t = clock() - t;
+	cout << timeELAPSED << t << endl;
+
+	test(c == 0);
+
+	t = clock();
+	int d = fdim(b, a);
+	t = clock() - t;
+	cout << timeELAPSED << t << endl;
+
+	test(d == 1);
+}
+
 cout << typeDEFINITION << "real" << endl;
+
+{
+	real a = 1.1;
+	real b = 2.2;
+
+	t = clock();
+	real c = fdim(a, b);
+	t = clock() - t;
+	cout << timeELAPSED << t << endl;
+
+	test(c == 0);
+
+	t = clock();
+	real d = fdim(b, a);
+	t = clock() - t;
+	cout << timeELAPSED << t << endl;
+
+	test(d == 1.1);
+}

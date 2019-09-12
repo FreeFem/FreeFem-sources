@@ -7,9 +7,9 @@ cout << functionDEFINITION << "readdir" << endl;
 
 real t;
 Directory dir = "assets";
-string readData="empty";
+string readData = "empty";
 string[int] dataArray = [".", "..", "Th.mesh", "Th.msh", "triangle.msh", "test.txt",
-"bidule.vtk", "cube.msh", "gmsh_mesh.msh", "sol.vtk", "spherewithahole.mesh", "ThS.mesh", "ThS.msh", "triQA.msh", "disque.vtk", "getline.txt"];
+"test.vtk", "cube.msh", "gmsh_mesh.msh", "sol.vtk", "spherewithahole.mesh", "ThS.mesh", "ThS.msh", "triQA.msh", "disque.vtk", "getline.txt"];
 int ssize = 16;
 
 while (readData != "") {
@@ -17,7 +17,7 @@ while (readData != "") {
   readData = readdir(dir);
   t = clock() - t;
   cout << readData << endl;
-  if (readData != "") {
+  if (readData != "" && readData != "empty") {
     test(readData == dataArray[0] || readData == dataArray[1] ||
     readData == dataArray[2] || readData == dataArray[3] ||
     readData == dataArray[4] || readData == dataArray[5] || readData == dataArray[6] ||
@@ -29,29 +29,27 @@ while (readData != "") {
   }
 }
 
-cout << functionDEFINITION << "mkdir" << endl;
-
-t = clock();
-int makeDir = mkdir("toto");
-t = clock() - t;
-cout << timeELAPSED << t << endl;
-test(makeDir == 0);
-
 cout << functionDEFINITION << "isdir" << endl;
-
 t = clock();
 bool isDir = isdir("toto");
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-test(isDir == true);
-
-cout << functionDEFINITION << "rmdir" << endl;
-
-t = clock();
-int rmDir = rmdir("toto");
-t = clock() - t;
-cout << timeELAPSED << t << endl;
-test(rmDir == 0);
+if (isDir == -1) {
+  cout << functionDEFINITION << "mkdir" << endl;
+  int makeDir = mkdir("toto");
+  test(makeDir == 0);
+  t = clock();
+  isDir = isdir("toto");
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(isDir == true);
+  cout << functionDEFINITION << "rmdir" << endl;
+  t = clock();
+  int rmDir = rmdir("toto");
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+  test(rmDir == 0);
+}
 
 cout << functionDEFINITION << "getenv" << endl;
 
@@ -95,13 +93,7 @@ test(unsetEnv == 0);
 cout << functionDEFINITION << "chmod" << endl;
 
 t = clock();
-int chMod = chmod("toto", 655);
-t = clock() - t;
-cout << timeELAPSED << t << endl;
-test(chMod == -1);
-
-t = clock();
-int chMod2 = chmod("assets/test.txt", 777);
+int chMod2 = chmod("assets/test.txt", 555);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(chMod2 == 0);

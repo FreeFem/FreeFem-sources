@@ -1,32 +1,56 @@
 include "test.idp"
-// include "MeshSurface.idp"
 load "msh3"
+
+// Copy of MeshSurface.idp part (freeyams dependancy failed)
+func meshS SurfaceHex(int[int] & N,real[int,int] &B ,int[int,int] & L,int orientation)
+{
+    real x0=B(0,0),x1=B(0,1);
+    real y0=B(1,0),y1=B(1,1);
+    real z0=B(2,0),z1=B(2,1);
+
+    int nx=N[0],ny=N[1],nz=N[2];
+
+    mesh Thx = square(ny,nz,[y0+(y1-y0)*x,z0+(z1-z0)*y]);
+    mesh Thy = square(nx,nz,[x0+(x1-x0)*x,z0+(z1-z0)*y]);
+    mesh Thz = square(nx,ny,[x0+(x1-x0)*x,y0+(y1-y0)*y]);
+
+    int[int] refx=[0,L(0,0)],refX=[0,L(0,1)];   //  Xmin, Ymax faces labels renumbering
+    int[int] refy=[0,L(1,0)],refY=[0,L(1,1)];   //  Ymin, Ymax faces labesl renumbering
+    int[int] refz=[0,L(2,0)],refZ=[0,L(2,1)];   //  Zmin, Zmax faces labels renumbering
+
+    meshS Thx0 = movemesh23(Thx,transfo=[x0,x,y],orientation=-orientation,label=refx);
+    meshS Thx1 = movemesh23(Thx,transfo=[x1,x,y],orientation=+orientation,label=refX);
+    meshS Thy0 = movemesh23(Thy,transfo=[x,y0,y],orientation=+orientation,label=refy);
+    meshS Thy1 = movemesh23(Thy,transfo=[x,y1,y],orientation=-orientation,label=refY);
+    meshS Thz0 = movemesh23(Thz,transfo=[x,y,z0],orientation=-orientation,label=refz);
+    meshS Thz1 = movemesh23(Thz,transfo=[x,y,z1],orientation=+orientation,label=refZ);
+    meshS Th= Thx0+Thx1+Thy0+Thy1+Thz0+Thz1;
+    return Th;
+}
 
 real t;
 
 cout << functionDEFINITION << "plot" << endl;
-{
-  mesh Th = square(5, 5);
-  mesh3 Th3 = cube(5, 5, 5);
+mesh Th = square(5, 5);
+mesh3 Th3 = cube(5, 5, 5);
 
-  t = clock();
-  plot(Th);
-  t = clock() - t;
-  cout << timeELAPSED << t << endl;
+t = clock();
+plot(Th);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 
-  t = clock();
-  plot(Th3);
-  t = clock() - t;
-  cout << timeELAPSED << t << endl;
+t = clock();
+plot(Th3);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 
-  real hs = 0.2;  // mesh size on sphere
-  int[int]  NN=[11,9,10];
-  real [int,int]  BB=[[-1.1,1.1],[-.9,.9],[-1,1]];
-  int [int,int]  LL=[[1,2],[3,4],[5,6]];
+real hs = 0.2;
+int[int] NN = [11, 9, 10];
+real [int,int] BB = [[-1.1, 1.1], [-.9, .9], [-1, 1]];
+int [int,int] LL = [[1, 2], [3, 4], [5, 6]];
 
-  // meshS ThHS = SurfaceHex(NN,BB,LL,1)+Sphere(0.5,hs,7,1);
-  // t = clock();
-  // plot(ThHS);
-  // t = clock() - t;
-  // cout << timeELAPSED << t << endl;
-}
+meshS ThHS = SurfaceHex(NN, BB, LL, 1);
+t = clock();
+plot(ThHS);
+t = clock() - t;
+cout << timeELAPSED << t << endl;

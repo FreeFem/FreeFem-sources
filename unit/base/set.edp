@@ -3,28 +3,43 @@ include "test.idp"
 cout << functionDEFINITION << "set" << endl;
 real t;
 
-verbosity=3;
+verbosity = 3;
 
 matrix A = [[1, 0], [0, 1]];
 real[int] b = [1, 0];
 real[int] sol(2);
 
+t = clock();
 set(A, solver=CG);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 sol = A^-1 * b;
 cout << sol << endl;
 
+t = clock();
 set(A, solver=LU);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 sol = A^-1 * b;
 cout << sol << endl;
 
+t = clock();
 set(A, solver=Crout);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 sol = A^-1 * b;
 cout << sol << endl;
 
+t = clock();
 set(A, solver=Cholesky);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 sol = A^-1 * b;
 cout << sol << endl;
 
+t = clock();
 set(A, solver=sparsesolver);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 sol = A^-1 * b;
 cout << sol << endl;

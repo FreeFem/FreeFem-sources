@@ -2,6 +2,8 @@ include "test.idp"
 
 real t;
 cout << functionDEFINITION << "adj" << endl;
+
+cout << typeDEFINITION << "mesh" << endl;
 mesh Th = square(10, 10);
 int T, k = 0, e = 0;
 

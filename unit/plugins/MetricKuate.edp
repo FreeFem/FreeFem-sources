@@ -29,7 +29,10 @@ for(int i=1;i<4;i++)
     Vh m11,m12,m22;
     coef = 1;
     Wh f2=f;
+    t = clock();
     MetricKuate(Th,200,0.0001,3,err,[m11[],m12[],m22[]],[x0,y0]);
+    t = clock() - t;
+    cout << timeELAPSED << t << endl;
    // plot(m11,m22,wait=1,cmm="mmmm");
     real cc=10;
     Th=adaptmesh(Th,cc*m11,cc*m12,cc*m22,IsMetric=1,inquire=1,hmin=0.00001,nbvx=1000000);

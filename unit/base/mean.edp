@@ -24,27 +24,13 @@ cout << parameterDEFINITION << "real" << endl;
   test(res == 42);
 }
 
-{
-
-  mesh Th = square(10, 10);
-  fespace Uh(Th, P1);
-  varf vTest (u, v)
-  = intalledges(Th)(
-    mean(u) * v
-    )
-    + on(1, u=0)
-    ;
-
-    matrix Test = vTest(Uh, Uh);
-    real[int] TestRHS = vTest(0, Uh);
-}
-
+cout << parameterDEFINITION << "varf" << endl;
 {
   mesh Th = square(10, 10);
   fespace Uh(Th, P1);
   varf vTest (u, v)
   = intalledges(Th)(
-    mean(u) * v
+        mean(u) * v
     )
     + on(1, 2, 3, 4, u=1)
     ;
@@ -54,4 +40,5 @@ cout << parameterDEFINITION << "real" << endl;
 
     Uh u;
     u[] = Test^-1 * TestRHS;
+    test(u[].linfty == 1);
 }

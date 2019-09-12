@@ -22,10 +22,16 @@ if (mpisize > 4) {
     }
 }
 
-if (mpirank == 0)
+if (mpirank == 0) {
+  t = mpiWtime();
   processor(1) << 123456; //  unblock send
-else if (mpirank == 1) {
+  t = mpiWtime() - t;
+  cout << timeELAPSED << t << endl;
+} else if (mpirank == 1) {
   int k;
+  t = mpiWtime();
   processor(0) >> k; // block recv
+  t = mpiWtime() - t;
+  cout << timeELAPSED << t << endl;
   test(k == 123456);
 }

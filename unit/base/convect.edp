@@ -24,4 +24,4 @@ for (int m = 0; m < 2.*pi/dt; m++) {
   c = c;
 }
 real cerror = csave[].max - c[].max;
-test(abs(cerror) < 0.12);
+test(abs(cerror) < 0.15);

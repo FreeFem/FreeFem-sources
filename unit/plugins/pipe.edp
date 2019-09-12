@@ -25,7 +25,7 @@ file << 0.2 << endl;
 t = clock();
 file.flush; // to flush the io  buffer of file
 t = clock() - t;
-cout << timeELAPSED << endl;
+cout << timeELAPSED << t << endl;
 
 cout << functionDEFINITION << "sleep" << endl;
 

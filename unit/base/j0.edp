@@ -15,14 +15,14 @@ t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(resr1 == 1);
 
-// t = clock();
-// real resr2 = j0(r2);
-// t = clock() - t;
-// cout << timeELAPSED << t << endl;
-// test((resr2 - ((sin(r2)) / r2)) < HWERROR);
-//
-// t = clock();
-// real resr3 = j0(r3);
-// t = clock() - t;
-// cout << timeELAPSED << t << endl;
-// test((resr3 - ((sin(r3))/r3)) < HWERROR);
+t = clock();
+real resr2 = j0(r2);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+t = clock();
+real resr3 = j0(r3);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+test(abs(resr2 - resr3) < HWERROR);

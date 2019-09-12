@@ -3,7 +3,6 @@ include "test.idp"
 cout << functionDEFINITION << "solver" << endl;
 real t;
 
-// parameterDEFINITIONs
 func Pk = P2;
 
 func f = -2.*x*(y-1.)*(y-2.*x+x*y+2.)*exp(x-y);
@@ -11,12 +10,10 @@ func uD = 0;
 func ue = exp(x-y)*x*(1.-x)*y*(1.-y);
 real eps = 1e-4;
 
-int nn = 10;	//Mesh quality
+int nn = 10;
 
-// Macro
 macro grad(A) [dx(A), dy(A)] //
 
-// Mesh
 border b1(t=0, 1){x=t; y=0; label=1;}
 border b2(t=0, 1){x=1; y=t; label=2;}
 border b3(t=0, 1){x=1-t; y=1; label=3;}
@@ -24,25 +21,20 @@ border b4(t=0, 1){x=0; y=1-t; label=4;}
 mesh Th = buildmesh(b1(nn) + b2(nn) + b3(nn) + b4(nn));
 int[int] Wall = [1, 2, 3, 4];
 
-// Fespace
 fespace Uh(Th, Pk);
 Uh u, uh;
 Uh uerror;
 
-cout << typeDEFINITION << "varf" << endl;
- //using varf
- t = clock();
- varf vPoisson (u, uh)
-  	= int2d(Th)(
-  		  grad(u)' * grad(uh)
-  	)
-  	+ int2d(Th)(
-  		  f * uh
-  	)
-  	+ on(Wall, u=uD)
-  	;
-t = clock() - t;
-cout << timeELAPSED << t << endl;
+varf vPoisson (u, uh)
+  = int2d(Th)(
+      grad(u)' * grad(uh)
+  )
+  + int2d(Th)(
+    f * uh
+  )
+  + on(Wall, u=uD)
+  ;
+
 cout << typeDEFINITION << "solver CG" << endl;
 {
   matrix<real> Poisson = vPoisson(Uh, Uh, solver=CG);
@@ -54,6 +46,7 @@ cout << typeDEFINITION << "solver CG" << endl;
   uerror = u - ue;
   test(uerror[].max < eps);
 }
+
 cout << typeDEFINITION << "solver Cholesky" << endl;
 {
   matrix<real> Poisson = vPoisson(Uh, Uh, solver=Cholesky);
@@ -65,6 +58,7 @@ cout << typeDEFINITION << "solver Cholesky" << endl;
   uerror = u - ue;
   test(uerror[].max < eps);
 }
+
 cout << functionDEFINITION << "solver Crout" << endl;
 {
   matrix<real> Poisson = vPoisson(Uh, Uh, solver=Crout);
@@ -76,6 +70,7 @@ cout << functionDEFINITION << "solver Crout" << endl;
   uerror = u - ue;
   test(uerror[].max < eps);
 }
+
 cout << typeDEFINITION << "solver GMRES" << endl;
 {
   matrix<real> Poisson = vPoisson(Uh, Uh, solver=GMRES);
@@ -87,6 +82,7 @@ cout << typeDEFINITION << "solver GMRES" << endl;
   uerror = u - ue;
   test(uerror[].max < eps);
 }
+
 cout << typeDEFINITION << "solver LU" << endl;
 {
   matrix<real> Poisson = vPoisson(Uh, Uh, solver=LU);
@@ -98,6 +94,7 @@ cout << typeDEFINITION << "solver LU" << endl;
   uerror = u - ue;
   test(uerror[].max < eps);
 }
+
 cout << typeDEFINITION << "solver sparsesolver" << endl;
 {
   matrix<real> Poisson = vPoisson(Uh, Uh, solver=sparsesolver);

@@ -5,7 +5,7 @@ real t;
 
 int i = 42;
 int[int] iarray = [1, 2, 3];
-int[string] isarray = ["a", 1, " b",  2, "c", 3];
+int[string] isarray = ["a", 1, " b", 2, "c", 3];
 real r = 4.2;
 real[int] rarray = [1., 2., 3.];
 real[string] rsarray = ["a", 1., "b", 2., "c", 3.];
