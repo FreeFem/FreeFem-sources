@@ -91,7 +91,7 @@ real t;
   Uh2 u2, du2, du2ex;
   Uh2 uerr2;
 
-  u2 =  x*x + y*x + x*z + y*z + y*y + z*z + x + y + z + 1.;
+  u2 = x*x + y*x + x*z + y*z + y*y + z*z + x + y + z + 1.;
   du2ex = 1.;
   t = clock();
   du2 = dyx(u2);

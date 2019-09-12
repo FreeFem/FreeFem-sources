@@ -106,9 +106,9 @@ for(int al=0;al<nadapt;++al)
   }
   else FEFToSSP(ou1[],ou2[],start);
 
-  t = clock();
+  t = mpiWtime();
   real mini = cmaesMPI(J,start,stopMaxFunEval=10000*(al+1),stopTolX=1.e-4/(10*(al+1)),initialStdDev=(0.025/(pow(100.,al))));
-  t = clock() - t;
+  t = mpiWtime() - t;
   cout << timeELAPSED << t << endl;
   Vh best1,best2;
   SSPToFEF(best1[],best2[],start);

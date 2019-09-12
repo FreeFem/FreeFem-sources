@@ -4,22 +4,36 @@ load "msh3"
 cout << functionDEFINITION << "func" << endl;
 real t;
 
-border C(t=0,2*pi) { x = cos(t); y=sin(t); label=1;}
-mesh Baseh = buildmesh(C(20));
+t = clock();
+func fmin = 1;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 
-int[int] rup=[0,1],  rdown=[0,2], rmid=[1,3];
+test(fmin == 1);
+
 t = clock();
-func zmin= 1;
+func fmax = 10;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
+
+test(fmax == 10);
+
 t = clock();
-func zmax= 10;
+func fxy = x + y;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-int nlayer=100;
-mesh3 Th=buildlayers(Baseh,nlayer,
-  coef= 1.,
-  zbound=[zmin,zmax],
-  labelmid=rmid,
-  reffaceup = rup,
-  reffacelow = rdown);
+
+x = 1.;
+y = 2.;
+test(fxy == 3.);
+
+t = clock();
+func real fxyt (real t) {
+  return x + y + t;
+}
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+x = 10.;
+y = 20.;
+test(fxyt(30.) == 60.);

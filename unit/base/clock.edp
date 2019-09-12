@@ -10,3 +10,4 @@ time1 = clock();
 system("sleep 0.1");
 time2 = clock();
 test(time2 > time1);
+cout << timeELAPSED << time2 - time1 << endl;

@@ -14,17 +14,3 @@ real resr1 = j1(r1);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(resr1 == 0.);
-
-// t = clock();
-// real resr2 = j1(r2);
-// t = clock() - t;
-// cout << timeELAPSED << t << endl;
-// cout << (sin(r2) / (r2^2)) - (cos(r2) / r2) << endl;
-// cout << resr2 << endl;
-// test(abs(resr2 - ((sin(r2) / (r2^2)) - (cos(r2) / r2))) < HWERROR);
-//
-// t = clock();
-// real resr3 = j1(r3);
-// t = clock() - t;
-// cout << timeELAPSED << t << endl;
-// test(abs(resr3 - ((sin(r3) / (r3^2)) - (cos(r3) / r3))) < HWERROR);

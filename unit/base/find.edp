@@ -1,6 +1,7 @@
 include "test.idp"
 
 cout << functionDEFINITION << "find" << endl;
+
 real t;
 string sentence = "a 42 a 42";
 string toFind = "42";
