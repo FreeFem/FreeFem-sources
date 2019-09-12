@@ -49,7 +49,11 @@ namespace Fem2D
 
 namespace Fem2D
 {
+    //template<>
+   // void SameElement( Vertex3 *vertice, Vertex3 *new_vertice, TriangleS *list, int nelt, TriangleS *new_list, int *old2new, int &new_nelt, double &mes);
     
+   // template<>
+  //  void SameElement( Vertex3 *vertice, Vertex3 *new_vertice, BoundaryEdgeS *list, int nelt, BoundaryEdgeS *new_list, int *old2new, int &new_nelt, double &mes);
     
     template<> int   GenericMesh<TriangleS,BoundaryEdgeS,Vertex3>::kfind=0;
     template<> int   GenericMesh<TriangleS,BoundaryEdgeS,Vertex3>::kthrough=0;
@@ -717,7 +721,7 @@ namespace Fem2D
     
     
     
-    MeshS::MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb)
+    MeshS::MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb, bool cleanmesh, bool removeduplicate)
     :mapVol2Surf(0),mapSurf2Vol(0)
     {
         nv = nnv;
@@ -733,7 +737,12 @@ namespace Fem2D
             mes += this->elements[i].mesure();
         for (int i=0;i<nbe;i++)
             mesb += this->be(i).mesure();
-        
+        double precis_mesh=1e-7;
+        if (cleanmesh) {
+            if(verbosity>5)
+            cout << "before clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+            clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate);
+        }
         BuildBound();
         BuildAdj();
         Buildbnormalv();

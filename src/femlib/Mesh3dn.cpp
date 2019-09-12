@@ -1363,7 +1363,7 @@ namespace Fem2D
     }
     
     
-    Mesh3::Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb)
+    Mesh3::Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb, bool cleanmesh, bool removeduplicate)
     :meshS(0)
     {
         nv = nnv;
@@ -1393,6 +1393,10 @@ namespace Fem2D
         
         for (int i=0;i<nbe;i++)
             mesb += this->be(i).mesure();
+        
+        double precis_mesh=1e-7;
+        if (cleanmesh)
+        clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate);
         
         //  Add FH to be consitant we all constructor ...  July 09
         BuildBound();

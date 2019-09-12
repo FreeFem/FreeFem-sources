@@ -127,7 +127,7 @@ namespace Fem2D {
     { 
     public:
 	Mesh2(const char *); // 
-	Mesh2(int nnv, int nnt, int nnbe, Vertex2 *vv, Triangle2 *tt, BoundaryEdge2 *bb); 
+	Mesh2(int nnv, int nnt, int nnbe, Vertex2 *vv, Triangle2 *tt, BoundaryEdge2 *bb);
 	const Element * Find( R2 P, R2 & Phat,bool & outside,const Element * tstart) const;
 	int Save(const string & filename);
 	//int Popen(const FILE *namestream);

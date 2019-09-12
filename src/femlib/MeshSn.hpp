@@ -147,7 +147,7 @@ typedef GenericVertex<R3> Vertex3;
         void readmsh(ifstream & f,int offset);
         MeshS(FILE *f,int offset=0);
         //MeshS(const string);
-        MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb);
+        MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb, bool cleanmesh=false, bool removeduplicate=false);
        
         int load(const string & filename);
         const Element * Find( Rd P, R2 & Phat,bool & outside,const Element * tstart=0) const;
