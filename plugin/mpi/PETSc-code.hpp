@@ -1230,6 +1230,7 @@ template<class Type>
 struct _n_User<NonlinearSolver<Type>> {
     typename NonlinearSolver<Type>::VecF_O* op;
     typename LinearSolver<Type, 'N'>::MatF_O* r;
+    typename NonlinearSolver<Type>::IConvF_O* conv;
 };
 template<class Type>
 struct _n_User<TimeStepper<Type>> {
@@ -2282,6 +2283,53 @@ class NonlinearSolver : public OneOperator {
                     return ret;
                 }
         };
+        class IConvF_O {
+            public:
+                Stack stack;
+                mutable long it;
+                C_F0 c_it;
+                mutable double xnorm;
+                C_F0 c_xnorm;
+                mutable double gnorm;
+                C_F0 c_gnorm;
+                mutable double f;
+                C_F0 c_f;
+                mutable Kn x;
+                C_F0 c_x;
+                mutable Kn dx;
+                C_F0 c_dx;
+                Expression mat;
+                IConvF_O(int n, Stack stk, const OneOperator* op) :
+                    stack(stk), it(0), c_it(CPValue(it)), xnorm(0), c_xnorm(CPValue(xnorm)), gnorm(0), c_gnorm(CPValue(gnorm)), f(0), c_f(CPValue(f)),
+                    x(n), c_x(CPValue(x)), dx(n), c_dx(CPValue(dx)),
+                    mat(op ? CastTo<long>(C_F0(op->code(basicAC_F0_wa({ c_it, c_xnorm, c_gnorm, c_f, c_x, c_dx })), (aType)*op)) : 0) { }
+                ~IConvF_O() {
+                    delete mat;
+                    Expression zzz = c_it;
+                    delete zzz;
+                    zzz = c_xnorm;
+                    delete zzz;
+                    zzz = c_gnorm;
+                    delete zzz;
+                    zzz = c_f;
+                    delete zzz;
+                    zzz = c_x;
+                    delete zzz;
+                    zzz = c_dx;
+                    delete zzz;
+                }
+                long apply(const long& iit, const double& ixnorm, const double& ignorm, const double& iff, const Kn_& ix, const Kn_& idx) const {
+                    it = iit;
+                    xnorm = ixnorm;
+                    gnorm = ignorm;
+                    f = iff;
+                    x = ix;
+                    dx = idx;
+                    long ret = GetAny<long>((*mat)(stack));
+                    WhereStackOfPtr2Free(stack)->clean();
+                    return ret;
+                }
+        };
         const int c;
         class E_NonlinearSolver : public E_F0mps {
             public:
@@ -2364,6 +2412,29 @@ PetscErrorCode FormJacobian(SNES snes, Vec x, Mat J, Mat B, void* ctx) {
     long ret = mat->apply(xx);
     VecRestoreArrayRead(x, &in);
     PetscFunctionReturn(ret);
+}
+template<class Type>
+PetscErrorCode Convergence(SNES snes, PetscInt it, PetscReal xnorm, PetscReal gnorm, PetscReal f, SNESConvergedReason* reason, void* ctx) {
+    User<Type>*       user;
+    const PetscScalar*  in;
+    const PetscScalar* din;
+    Vec u, du;
+
+    PetscFunctionBeginUser;
+    user = reinterpret_cast<User<Type>*>(ctx);
+    typename NonlinearSolver<Type>::IConvF_O* mat = reinterpret_cast<typename NonlinearSolver<Type>::IConvF_O*>((*user)->conv);
+    SNESGetSolution(snes, &u);
+    SNESGetSolutionUpdate(snes, &du);
+    VecGetArrayRead(u, &in);
+    VecGetArrayRead(du, &din);
+    KN_<PetscScalar> xx(const_cast<PetscScalar*>(in), mat->x.n);
+    KN_<PetscScalar> ww(const_cast<PetscScalar*>(din), mat->x.n);
+    SNESConvergedDefault(snes, it, xnorm, gnorm, f, reason, ctx);
+    if(*reason == SNES_CONVERGED_ITERATING)
+        *reason = SNESConvergedReason(mat->apply(it, xnorm, gnorm, f, xx, ww));
+    VecRestoreArrayRead(du, &din);
+    VecRestoreArrayRead(u, &in);
+    PetscFunctionReturn(0);
 }
 template<class Type, int I>
 PetscErrorCode FormJacobianTao(Tao tao, Vec x, Mat J, Mat B, void* ctx) {
@@ -2673,6 +2744,7 @@ AnyType NonlinearSolver<Type>::E_NonlinearSolver::operator()(Stack stack) const 
                 PetscNew(&user);
                 user->op = new NonlinearSolver<Type>::VecF_O(in->n, stack, codeJ);
                 user->r = new typename LinearSolver<Type, 'N'>::MatF_O(in->n, stack, codeR);
+                user->conv = nullptr;
                 SNES snes;
                 SNESCreate(PETSC_COMM_WORLD, &snes);
                 Vec f;
@@ -2693,6 +2765,13 @@ AnyType NonlinearSolver<Type>::E_NonlinearSolver::operator()(Stack stack) const 
                     ffassert(fb->n == last - first);
                     VecCreateMPIWithArray(PETSC_COMM_WORLD, 1, fb->n, n, static_cast<PetscScalar*>(*fb), &f);
                 }
+                const Polymorphic* op = nargs[3] ? dynamic_cast<const Polymorphic*>(nargs[3]) : nullptr;
+                if(op) {
+                    ffassert(op);
+                    const OneOperator *codeM = op->Find("(", ArrayOfaType(atype<long>(), atype<double>(), atype<double>(), atype<double>(), atype<KN<PetscScalar>*>(), atype<KN<PetscScalar>*>(), false));
+                    user->conv = new NonlinearSolver<Type>::IConvF_O(in->n, stack, codeM);
+                    SNESSetConvergenceTest(snes, Convergence<NonlinearSolver<Type>>, &user, NULL);
+                }
                 SNESSolve(snes, c == 1 ? f : NULL, x);
                 if(c == 1)
                     VecDestroy(&f);
@@ -2701,6 +2780,7 @@ AnyType NonlinearSolver<Type>::E_NonlinearSolver::operator()(Stack stack) const 
                     KSPDestroy(&ksp);
                 }
                 SNESDestroy(&snes);
+                delete user->conv;
                 delete user->r;
                 delete user->op;
                 PetscFree(user);
@@ -2737,8 +2817,8 @@ AnyType NonlinearSolver<Type>::E_NonlinearSolver::operator()(Stack stack) const 
                 ffassert(op);
                 const OneOperator *codeM = op->Find("(", ArrayOfaType(atype<long>(), atype<double>(), atype<Kn*>(), false));
                 user->mon = new NonlinearSolver<Type>::IMonF_O(in->n, stack, codeM);
+                TSMonitorSet(ts, Monitor<TimeStepper<Type>>, &user, NULL);
             }
-            TSMonitorSet(ts, Monitor<TimeStepper<Type>>, &user, NULL);
             TSSetSolution(ts, x);
             TSSolve(ts, x);
             if(ptA->_ksp) {

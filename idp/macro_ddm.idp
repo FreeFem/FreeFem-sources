@@ -40,8 +40,15 @@ macro intN()int3d// EOM             // three-dimensional integral
 macro intN1()int2d// EOM            // two-dimensional integral
 macro readmeshN()readmesh3// EOM    // three-dimensional problem
 ENDIFMACRO
+IFMACRO(dimension,3S)
+load "msh3"
+macro meshN()meshS// EOM            // three-dimensional surface problem
+macro bbN()bb3// EOM                // three-dimensional bounding box
+macro intN()int2d// EOM             // two-dimensional integral
+macro intN1()int1d// EOM            // one-dimensional integral
+ENDIFMACRO
 IFMACRO(!meshN)
-cout << "The macro 'dimension' must be set to '2' or '3'" << endl;
+cout << "The macro 'dimension' must be set to '2', '3', or '3S'" << endl;
 exit(1);
 ENDIFMACRO
 searchMethod = 1;
