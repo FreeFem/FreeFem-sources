@@ -1,0 +1,52 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+//
+// code borrowed from examples/ffddm/heat-torus-3d-surf.edp
+
+load "hpddm"                        // HPDDM plugin
+load "PETSc"
+macro dimension()3S// EOM           // 2D, 3D, or 3S
+include "macro_ddm.idp"             // additional DDM functions
+
+macro def(i)i// EOM                         // scalar field definition
+macro init(i)i// EOM                        // scalar field initialization
+macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // two-dimensional gradient
+func Pk = P2;                               // finite element space
+
+int s = getARGV("-split", 1);               // refinement factor
+real dt = getARGV("-dt", 0.1);              // time step
+int iMax = getARGV("-iMax", 50);            // number of iterations
+
+real R = 3, r = 1;
+int nx = r*2*pi*getARGV("-global", 5);
+int ny = R*2*pi*getARGV("-global", 5);
+
+meshN Th = square3(nx, ny, [(R+r*cos(2*pi*x))*cos(2*pi*y), (R+r*cos(2*pi*x))*sin(2*pi*y), r*sin(2*pi*x)]);
+fespace Wh(Th, Pk);           // local finite element space
+int[int][int] intersection;   // local-to-neighbors renumbering
+real[int] D;                  // partition of unity
+buildMinimalist(Th, intersection, D, Pk)
+
+real[int] rhs(Wh.ndof);                     // local right-hand side
+matrix<real> mat;                           // local operator
+
+Wh<real> u = 0;
+Wh<real> w = 0;
+func f = 100 * exp(-20*(x^2 + (y-(R+r))^2 + z^2));
+varf vPb(u, v) = intN(Th)(u * v + dt * grad(u)' * grad(v)) + intN(Th)(w * v + f * v);
+mat = vPb(Wh, Wh);
+matrix Neumann = mat;
+schwarz A(mat, intersection, D);
+if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) { // two-level Schwarz methods
+    attachCoarseOperator(mpiCommWorld, A, A = Neumann);
+}
+
+for(int i = 0; i < iMax; ++i) {
+    rhs = vPb(0, Wh);
+    u[] = A^-1 * rhs;
+    macro myplot()cmm = "Global solution at iteration " + i, fill = 1, value = 1//
+    /* plotMPI(Th, u, Pk, def, real, myplot) TODO */
+    w[] = u[];
+    mat = vPb(Wh, Wh);
+    changeOperator(A, mat);
+}
