@@ -2,102 +2,101 @@ include "test.idp"
 load "dfft"
 
 real t;
-int nx=32,ny=16,N=nx*ny;
-mesh Th=square(nx-1,ny-1,[(nx-1)*x/nx,(ny-1)*y/ny]);
-
-fespace Vh(Th,P1);
-
-func f1 = cos(2*x*2*pi)*cos(3*y*2*pi);
-Vh<complex> u=f1,v;
-Vh w=f1;
-
-
-Vh  ur,ui;
-
- v[]=dfft(u[],ny,-1);
- u[]=dfft(v[],ny,+1);
- cout << " ||u||_\infty " << u[].linfty << endl;
- u[] *= 1./N; // remark: operator /= bug  before version 2.0-3 (FH)
- cout << " ||u||_\infty " << u[].linfty <<  endl;
-  ur=real(u);
- v = w-u;
-cout << " diff = "<< v[].max << " " <<  v[].min << endl;
-test(norm(v[].max) < 1e-10 &&  norm(v[].min) < 1e-10);
-func f = cos(3*2*pi*x)*cos(2*2*pi*y); //
-func ue =  +(1./(square(2*pi)*13.))*cos(3*2*pi*x)*cos(2*2*pi*y);  // the exact solution
-Vh<complex> ff = f;
-Vh<complex> fhat;
-fhat[] = dfft(ff[],ny,-1);
-
-Vh<complex> wij;
-wij = square(2.*pi)*(square(( x<0.5?x*nx:(x-1)*nx)) + square((y<0.5?y*ny:(y-1)*ny)));
-wij[][0] = 1e-5; // to remove div / 0
-fhat[] = fhat[]./ wij[];  //
+bool res;
+int nx = 32, ny = 16;
+mesh Th = square(nx-1, ny-1, [(nx-1)*x/nx, (ny-1)*y/ny]);
+func f = cos(2.*x*2.*pi)*cos(3.*y*2.*pi);
+fespace Vh(Th, P1);
+Vh<complex> u = f, v;
+Vh ur = f, vr;
 
 cout << functionDEFINITION << "dfft" << endl;
+
 t = clock();
-u[]=dfft(fhat[],ny,1);
+v[] = dfft(u[], ny, -1);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-u[] /= complex(N);
-ur = real(u); // the solution
-w = real(ue); // the exact solution
-w[] -= ur[]; // array sub
-real err= abs(w[].max)+abs(w[].min) ;
-cout << " err = " << err << endl;
-test(err < HWERROR);
 
-{
-  t = clock();
-  u[]=dfft(fhat[],ny, 1, 1);
-  t = clock() - t;
-  cout << timeELAPSED << t << endl;
-  u[] /= complex(N);
-  ur = real(u); // the solution
-  w = real(ue); // the exact solution
-  w[] -= ur[]; // array sub
-  real err= abs(w[].max)+abs(w[].min) ;
-  cout << " err = " << err << endl;
-  test(err < HWERROR);
-}
+t = clock();
+u[] = dfft(v[], ny, +1);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 
-{
-  t = clock();
-  u[]=dfft(fhat[],ny);
-  t = clock() - t;
-  cout << timeELAPSED << t << endl;
-  u[] /= complex(N);
-  ur = real(u); // the solution
-  w = real(ue); // the exact solution
-  w[] -= ur[]; // array sub
-  real err= abs(w[].max)+abs(w[].min) ;
-  cout << " err = " << err << endl;
-}
+u[] /= nx*ny;
+vr = ur - real(u);
+test(abs(vr) < HWERROR);
+
+t = clock();
+u[] = dfft(v[], ny, 1, 1);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+u[] /= nx*ny;
+vr = ur - real(u);
+test(abs(vr) < HWERROR);
 
 cout << functionDEFINITION << "plandfft" << endl;
+
 t = clock();
-fftwplan p1=plandfft(u[],v[],ny,-1);
+fftwplan p0 = plandfft(v[], u[], ny);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
-{
-  t = clock();
-  fftwplan p1=plandfft(u[],v[],ny);
-  t = clock() - t;
-  cout << timeELAPSED << t << endl;
-}
+t = clock();
+fftwplan p1 = plandfft(u[], v[], ny, 1);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 
-{
-  t = clock();
-  fftwplan p1=plandfft(u[],v[], 1, 1, 1);
-  t = clock() - t;
-  cout << timeELAPSED << t << endl;
-}
+t = clock();
+fftwplan p2 = plandfft(u[], v[], ny, 1, 1);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+cout << functionDEFINITION << "execute" << endl;
+
+// t = clock();
+// res = execute(p0);
+// t = clock() - t;
+// cout << timeELAPSED << t << endl;
+//
+// t = clock();
+// res = execute(p1);
+// t = clock() - t;
+// cout << timeELAPSED << t << endl;
+//
+// t = clock();
+// res = execute(p2);
+// t = clock() - t;
+// cout << timeELAPSED << t << endl;
+
+// TODO segmentation fault
+
+cout << functionDEFINITION << "execute" << endl;
+
+t = clock();
+res = delete(p0);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(res == 0);
+
+t = clock();
+res = delete(p1);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(res == 0);
+
+t = clock();
+res = delete(p2);
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+test(res == 0);
 
 cout << functionDEFINITION << "map" << endl;
-real ccc = square(2.*pi);
-cout << " ny = " << ny << endl;
+
+res = square(2.*pi);
 t = clock();
-map(wij[],ny,ccc*(x*x+y*y));
+map(u[], ny, res*(x*x+y*y));
 t = clock() - t;
 cout << timeELAPSED << t << endl;
+vr = ur - real(u);
+test(abs(vr) < HWERROR);

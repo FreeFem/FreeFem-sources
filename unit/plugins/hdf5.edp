@@ -2,7 +2,9 @@ load "msh3"
 load "iohdf5"
 include "test.idp"
 
-cout << "hdf5" << endl;
+cout << functionDEFINITION << "hdf5" << endl;
+
+real t;
 
 cout << "2D" << endl;
 {

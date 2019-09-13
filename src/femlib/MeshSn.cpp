@@ -721,7 +721,7 @@ namespace Fem2D
     
     
     
-    MeshS::MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb, bool cleanmesh, bool removeduplicate)
+    MeshS::MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
     :mapVol2Surf(0),mapSurf2Vol(0)
     {
         nv = nnv;
@@ -737,11 +737,12 @@ namespace Fem2D
             mes += this->elements[i].mesure();
         for (int i=0;i<nbe;i++)
             mesb += this->be(i).mesure();
-        double precis_mesh=1e-7;
+        
+        
         if (cleanmesh) {
             if(verbosity>5)
             cout << "before clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
-            clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate);
+            clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
         }
         BuildBound();
         BuildAdj();
@@ -765,6 +766,10 @@ namespace Fem2D
             cout << "  -- End of read meshS: mesure = " << mes << " border mesure " << mesb << endl;
         
         assert(mes>=0.);
+    }
+    
+    MeshS::MeshS(const Serialize&) : mapVol2Surf(0), mapSurf2Vol(0) {
+        ffassert(0);
     }
     
     

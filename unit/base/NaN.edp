@@ -5,18 +5,16 @@ real t;
 
 cout << typeDEFINITION << "string" << endl;
 
-string str = "Airthium";
+string str = "FreeFEM";
 
 t = clock();
 real res = NaN("");
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-//test(isNaN(res) == true);
 test(res != res);
 
 t = clock();
 real res2 = NaN(str);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-//test(isNaN(res2) == true);
 test(res2 != res2);

@@ -3,7 +3,7 @@ include "test.idp"
 real t;
 cout << functionDEFINITION << "poisson" << endl;
 
-// parameterDEFINITIONs
+// parameter
 func Pk = P2;
 
 func f = -2.*x*(y-1.)*(y-2.*x+x*y+2.)*exp(x-y);
@@ -11,12 +11,10 @@ func uD = 0;
 func ue = exp(x-y)*x*(1.-x)*y*(1.-y);
 real eps = 1e-4;
 
-int nn = 10;	//Mesh quality
+int nn = 10;
 
-// Macro
 macro grad(A) [dx(A), dy(A)] //
 
-// Mesh
 border b1(t=0, 1){x=t; y=0; label=1;}
 border b2(t=0, 1){x=1; y=t; label=2;}
 border b3(t=0, 1){x=1-t; y=1; label=3;}
@@ -24,14 +22,12 @@ border b4(t=0, 1){x=0; y=1-t; label=4;}
 mesh Th = buildmesh(b1(nn) + b2(nn) + b3(nn) + b4(nn));
 int[int] Wall = [1, 2, 3, 4];
 
-// Fespace
 fespace Uh(Th, Pk);
 Uh u, uh;
 Uh uerror;
 
 cout << functionDEFINITION << "solve" << endl;
-// Problem
-{ // using solve
+{
 	t = clock();
 	solve Poisson (u, uh)
 		= int2d(Th)(
@@ -47,8 +43,9 @@ cout << functionDEFINITION << "solve" << endl;
 	uerror = u - ue;
 	test(uerror[].max < eps);
 }
+
 cout << functionDEFINITION << "problem" << endl;
-{// using Problem
+{
 	t = clock();
 	problem Poisson (u, uh)
 		= int2d(Th)(
@@ -65,8 +62,9 @@ cout << functionDEFINITION << "problem" << endl;
 	uerror = u - ue;
 	test(uerror[].max < eps);
 }
+
 cout << typeDEFINITION << "varf" << endl;
-{ //using varf
+{
 	t = clock();
 	varf vPoisson (u, uh)
 		= int2d(Th)(
@@ -81,6 +79,7 @@ cout << typeDEFINITION << "varf" << endl;
 	cout << timeELAPSED << t << endl;
 	matrix<real> Poisson = vPoisson(Uh, Uh, solver=sparsesolver);
 	real[int] PoissonBoundary = vPoisson(0, Uh);
+
 	cout << functionDEFINITION << "^-1" << endl;
 	t = clock();
 	u[] = Poisson^-1 * PoissonBoundary;

@@ -1615,17 +1615,19 @@ AnyType CopyMat_tt(Stack stack,Expression emat,Expression eA,bool transp)
     else   Mat =GetAny<Matrice_Creuse<R>*>((*eA)(stack));
     MatriceMorse<R> * mr=Mat->pHM();
 
-    MatriceMorse<RR> * mrr = new MatriceMorse<RR>(mr->n,mr->n);
-    *mrr = *mr;
-    if(transp) mrr->dotranspose();
-
-
     Matrice_Creuse<RR> * sparse_mat =GetAny<Matrice_Creuse<RR>* >((*emat)(stack));
-    if(!init) sparse_mat->init() ;
-    sparse_mat->typemat=Mat->typemat; //  none square matrice (morse)
-    sparse_mat->A.master(mrr);
-    VirtualMatrix<int,RR> *pvm = sparse_mat->pMC();
-    pvm->SetSolver(); // copy solver ???
+    if(mr) {
+        MatriceMorse<RR> * mrr = new MatriceMorse<RR>(mr->n,mr->n);
+        *mrr = *mr;
+        if(transp) mrr->dotranspose();
+
+
+        if(!init) sparse_mat->init() ;
+        sparse_mat->typemat=Mat->typemat; //  none square matrice (morse)
+        sparse_mat->A.master(mrr);
+        VirtualMatrix<int,RR> *pvm = sparse_mat->pMC();
+        pvm->SetSolver(); // copy solver ???
+    }
     return sparse_mat;
 }
 

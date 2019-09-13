@@ -75,7 +75,7 @@ cout << functionDEFINITION << "getOption" << endl;
   macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
   func Pk = P1;                               // finite element space
 
-  int s = getARGV("-split", 1);                                   // refinement factor
+  int s = 1;
 
   int[int] LL = [2,2, 1,2, 2,2];
   meshN Th = cube(1, 1, 1, [x, y, z]);
@@ -83,7 +83,7 @@ cout << functionDEFINITION << "getOption" << endl;
   int[int][int] intersection;   // local-to-neighbors renumbering
   real[int] D;                  // partition of unity
   {
-      Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10), [x, y, z], label = LL);      // global mesh
+      Th = cube(10, 10, 10, [x, y, z], label = LL);      // global mesh
       build(Th, s, intersection, D, Pk, mpiCommWorld)
   }
 

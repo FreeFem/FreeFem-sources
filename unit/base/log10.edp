@@ -21,13 +21,13 @@ cout << timeELAPSED << t << endl;
 test(resr2 == 1.);
 
 t = clock();
-real rminf  = log10(0.);
+real rminf = log10(0.);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(rminf == minf);
 
 t = clock();
-real rpinf  = log10(pinf);
+real rpinf = log10(pinf);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(rpinf == pinf);

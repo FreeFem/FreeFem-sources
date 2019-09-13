@@ -6,7 +6,7 @@ real t;
 cout << typeDEFINITION << "int" << endl;
 
 int lplus = 5;
-int lmoins = -5;
+int lminus = -5;
 int lzero = 0;
 
 t = clock();
@@ -16,10 +16,10 @@ cout << timeELAPSED << t << endl;
 test(alplus == lplus);
 
 t = clock();
-real almoins = abs(lmoins);
+real alminus = abs(lminus);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-test(almoins == -lmoins);
+test(alminus == -lminus);
 
 t = clock();
 real alzero = abs(lzero);
@@ -107,7 +107,7 @@ for (int i = 0; i < n; i++) {
 cout << typeDEFINITION << "real[int, int]" << endl;
 
 int tab = 2;
-real[int, int] AA = [[-1., 5., 8., -9.], [5.,  6., -8., -9.]];
+real[int, int] AA = [[-1., 5., 8., -9.], [5., 6., -8., -9.]];
 real[int, int] BB(tab, n);
 
 t = clock();

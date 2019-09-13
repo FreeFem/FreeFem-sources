@@ -1,3 +1,4 @@
+load "msh3"
 include "test.idp"
 
 cout << functionDEFINITION << "on" << endl;
@@ -8,67 +9,59 @@ mesh Th = buildmesh(C(5));
 fespace Vh(Th, P1);
 Vh u, v;
 
-func f= x*y;
+func f = x*y;
 
 t = clock();
-solve Poisson(u, v, solver=LU)
-    = int2d(Th)(
-          dx(u)*dx(v)
-        + dy(u)*dy(v)
-    )
-    - int2d(Th)(
-          f*v
-    )
-    + on(C, u=0);
-t = clock() - t;
-cout << timeELAPSED << t << endl;
-real bound = int1d(Th, C)(u);
-test(abs(0 - bound) < HWERROR);
-t = clock();
-solve Poisson2(u, v, solver=LU)
-    = int2d(Th)(
-          dx(u)*dx(v)
-        + dy(u)*dy(v)
-    )
-    - int2d(Th)(
-          f*v
-    )
-    + on(C, u=1);
-    ;
-bound = int1d(Th, C)(u)/int1d(Th, C)(1);
-test(abs(bound - 1) < HWERROR);
+solve Poisson (u, v)
+  = int2d(Th)(
+      dx(u)*dx(v)
+    + dy(u)*dy(v)
+  )
+  - int2d(Th)(
+      f*v
+  )
+  + on(C, u=1);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 
-// Mesh
-border aaa(t=0, 1){x=t; y=0; label=1;}
-border bbb(t=0, 0.5){x=1; y=t; label=2;}
-border ccc(t=0, 0.5){x=1-t; y=0.5; label=3;}
-border ddd(t=0.5, 1){x=0.5; y=t; label=4;}
-border eee(t=0.5, 1){x=1-t; y=1; label=5;}
-border fff(t=0, 1){x=0; y=1-t; label=6;}
-mesh Th2 = buildmesh(aaa(6) + bbb(4) + ccc(4) +ddd(4) + eee(4) + fff(6));
-mesh Th3 = movemesh(Th2,[x+1.1, y]);
+test(u(1., 0.) == 1);
 
-func f2 = 1;
-func g = 0;
-fespace Wh(Th2, P1);
-Wh uu, vv, zero;
-uu = 0;
-zero = 0;
-int i = 0;
 t = clock();
-problem Probem1(uu, vv, solver=CG, init=i, eps=-1.0e-6)
-	= int2d(Th2)(
-		  dx(uu)*dx(vv)
-		+ dy(uu)*dy(vv)
-	)
-	+ int2d(Th)(
-		  vv*f2
-	)
-	+ on(1, 2, 3, 4, 5, 6, uu=g)
-	;
-real boundpb = int1d(Th2)(u)/int1d(Th2)(1);
+varf vBound(u, v) = on(C, u=1);
+real[int] bound = vBound(0, Vh);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-test(abs(1 - boundpb) < HWERROR);
+
+for (int i = 0; i < Vh.ndof; i++)
+  test(bound[i] == tgv);
+
+{
+  mesh3 Th3 = buildlayers(Th, 5, zbound=[0, 1]);
+  fespace Vh3(Th3, P1);
+  Vh3 u3, v3;
+
+  t = clock();
+  solve Poisson3 (u3, v3)
+    = int3d(Th3)(
+        dx(u3)*dx(v3)
+      + dy(u3)*dy(v3)
+      + dz(u3)*dz(v3)
+    )
+    - int3d(Th3)(
+        f*v3
+    )
+    + on(C, u3=1);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+
+  test(u(1., 0.) == 1);
+
+  t = clock();
+  varf vBound(u3, v3) = on(C, u3=1);
+  real[int] bound = vBound(0, Vh3);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
+
+  for (int i = 0; i < Vh3.ndof; i++)
+    test(bound[i] == tgv);
+}

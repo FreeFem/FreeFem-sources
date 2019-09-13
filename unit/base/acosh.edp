@@ -13,10 +13,10 @@ cout << timeELAPSED << t << endl;
 test(ac1 == 0.);
 
 t = clock();
-real ac1moinseps = acosh(1. - eps);
+real ac1minuseps = acosh(1. - eps);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-test(isNaN(ac1moinseps));
+test(isNaN(ac1minuseps));
 
 real nb = 5.67;
 t = clock();

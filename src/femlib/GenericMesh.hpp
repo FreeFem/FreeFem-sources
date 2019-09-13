@@ -557,7 +557,7 @@ public:
   //template<>
   void SameVertex(const double precis_mesh, Vertex *v, Element *t, int nv, int nt, int *ind_nv_t, int *Numero_Som, int &new_nv, bool removeduplicate);
   void VertexInElement( Vertex *vertice, Element *list, int &nv, int *(&ind_nv), int nt, int *ind_nt, int *(&old2new) );
-  void clean_mesh(const double precis_mesh, int &nv, int &nt, int &nbe, V *(&v), T *(&t), B *(&b), bool removeduplicate);
+  void clean_mesh(const double precis_mesh, int &nv, int &nt, int &nbe, V *(&v), T *(&t), B *(&b), bool removeduplicate, bool rebuildboundary, int orientation);
  
   void Buildbnormalv();
   void BuildBound();
@@ -1168,14 +1168,13 @@ void GenericMesh<T,B,V>::BuildBoundaryElementAdj(const int &nbsurf, int* firstDe
 
     
 template<typename T,typename B,typename V>
-    void GenericMesh<T,B,V>::VertexInElement( V *vertice, T *list, int &nv, int *(&ind_nv), int nt, int *ind_nt, int *(&old2new) ) {
+void GenericMesh<T,B,V>::VertexInElement(V *vertice, T *list, int &nv, int *(&ind_nv), int nt, int *ind_nt, int *(&old2new) ) {
     
     // new map and list vertices after clean multiple elements
-    int *new_old2new=new int[nv];
-    int *map=new_old2new;
-    int *new_ind_nv=new int[nv];
-    int *indv=new_ind_nv;
-        
+
+    int map[nv];
+    int indv[nv];
+  
     int takev[nv], takenewv[nv] ;
     for (int i=0;i<nv;i++) {
         indv[i]=-1;
@@ -1205,11 +1204,13 @@ template<typename T,typename B,typename V>
     }
     if(verbosity>5)  cout << " real used vertice:" << np << endl;
  
-        ind_nv=new_ind_nv;
-        old2new=new_old2new;
-        nv=np;
-        
+    for(int i=0;i<nv;i++) {
+        ind_nv[i]=indv[i];
+        old2new[i]=map[i];
     }
+    nv=np;
+        
+}
     
  
     
@@ -1217,7 +1218,7 @@ template<typename T,typename B,typename V>
 template<typename T,typename B,typename V>
 void GenericMesh<T,B,V>::SameVertex(const double precis_mesh, V *vertice, T *element, int nv, int nt, int *ind_nv_t, int *old2new, int &new_nv, bool removmult) {
 
-    if (verbosity > 1)
+    if (verbosity > 2)
     cout << "clean mesh: remove multiple vertices, elements, border elements and check border elements " << endl;
     double precispt=0;
     // remove the multiple vertices
@@ -1290,56 +1291,55 @@ void GenericMesh<T,B,V>::SameVertex(const double precis_mesh, V *vertice, T *ele
         }
 
         assert(hmin < longmini_box);
-            if (verbosity > 5) cout << "    Norme2(bmin-bmax)=" << Norme2(bmin - bmax) << endl;
+        if (verbosity > 5)
+            cout << "    Norme2(bmin-bmax)=" << Norme2(bmin - bmax) << endl;
     
-            // assertion pour la taille de l octree
-            assert(hmin > Norme2(bmin - bmax) / 1e9);
+        // assertion pour la taille de l octree
+        assert(hmin > Norme2(bmin - bmax) / 1e9);
     
     
-            double hseuil = hmin / 10.;
-            if (verbosity > 3) {cout << "    hseuil=" << hseuil << endl;}
-            // hseuil = hseuil/10.;
-            //V *vv = new V[nv];
-             V *vv = new V[nv];
-            GTree *gtree = new GTree(vv, bmin, bmax, 0);
+        double hseuil = hmin / 10.;
+        if (verbosity > 3)
+            cout << "    hseuil=" << hseuil << endl;
+
+        V *vv = new V[nv];
+        GTree *gtree = new GTree(vv, bmin, bmax, 0);
     
-            if (verbosity > 2) {
-                cout << "  -- taille de la boite " << endl;
-                cout << "\t" << bmin.x << " " << bmin.y << " " << bmin.z << endl;
-                cout << "\t" << bmax.x << " " << bmax.y << " " << bmax.z << endl;
+        if (verbosity > 2) {
+            cout << "  -- taille de la boite " << endl;
+            cout << "\t" << bmin.x << " " << bmin.y << " " << bmin.z << endl;
+            cout << "\t" << bmax.x << " " << bmax.y << " " << bmax.z << endl;
+        }
+    
+        // creation of octree
+        for (int i = 0; i < nv; i++) {
+            const V &vi(vertice[i]);
+            V *pvi = gtree->ToClose(vi, hseuil);
+            if (!pvi) {
+                vv[new_nv].x = vi.x;
+                vv[new_nv].y = vi.y;
+                vv[new_nv].z = vi.z;
+                vv[new_nv].lab = vi.lab;
+                ind_nv_t[new_nv] = i;
+                old2new[i] = new_nv;
+                gtree->Add(vv[new_nv]);
+                new_nv++;
             }
-    
-            // creation of octree
-            for (int i = 0; i < nv; i++) {
-                const V &vi(vertice[i]);
-                V *pvi = gtree->ToClose(vi, hseuil);
-                if (!pvi) {
-                    vv[new_nv].x = vi.x;
-                    vv[new_nv].y = vi.y;
-                    vv[new_nv].z = vi.z;
-                    vv[new_nv].lab = vi.lab;    // lab mis a zero par default
-                    ind_nv_t[new_nv] = i;
-                    old2new[i] = new_nv;  // old2new
-                    gtree->Add(vv[new_nv]);
-                    new_nv++;
-                }
-                // treatment of multiple vertice made in sameElement
-                else
-                    old2new[i] = pvi - vv;
+            // treatment of multiple vertice made in sameElement
+            else
+                old2new[i] = pvi - vv;
                 
-            }
-            delete gtree;
-            delete [] vv;
+        }
+        delete gtree;
+        delete [] vv;
     
 }
     
     
 template<typename T,typename B,typename V>
-void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &nbe, V *(&v), T *(&t), B *(&b), bool removeduplicate) {
-    // nv, nt, nbe modif after treatment
-    // v, t, b list V, T, B after treatment
-    
-    
+void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &nbe, V *(&v), T *(&t), B *(&b), bool removeduplicate, bool rebuildboundary, int orientation) {
+
+  
     // array for the index of new vertices, element, borderelement in the old numbering
     int new_nv=0, new_nt=0, new_nbe=0;
    // double mes = 0, mesb = 0;
@@ -1349,86 +1349,85 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
     // mapping old to new vertices index
     int *old2new=new int[nv];
 
-    for (int i = 0; i < nv; i++)
-        old2new[i] = -1;
     // clean multiples vertice
     SameVertex(precis_mesh, v, t, nv, nt, ind_nv, old2new, new_nv, removeduplicate);
-    V *vv;
-    if(!removeduplicate) {
+   
+    if(!removeduplicate)
         nv=new_nv;
-        vv=new V[nv];
-        for(int i=0;i<nv;i++) {
-            int &iv=ind_nv[i];
-            vv[i].x=v[iv].x;
-            vv[i].y=v[iv].y;
-            vv[i].z=v[iv].z;
-            vv[i].lab=v[iv].lab;
-        }
-    }
-    
     
     // clean multiple elements and border elements
-    SameElement( v, t, nt, ind_nt, old2new, new_nt, removeduplicate);
-    SameElement( v, b, nbe, ind_nbe, old2new, new_nbe, removeduplicate);
+    SameElement(v, t, nt, ind_nt, old2new, new_nt, removeduplicate);
+    SameElement(v, b, nbe, ind_nbe, old2new, new_nbe, removeduplicate);
     
     // if removeduplicate, must recheck the vertice -> could have some vertex are not at least in one element
     
-    if(removeduplicate) {
+    if(removeduplicate)
         VertexInElement(v, t, nv, ind_nv, new_nt, ind_nt, old2new);
   
-        vv=new V[nv];
-        for(int i=0;i<nv;i++) {
-            int &iv=ind_nv[i];
-            vv[i].x=v[iv].x;
-            vv[i].y=v[iv].y;
-            vv[i].z=v[iv].z;
-            vv[i].lab=v[iv].lab;
-        }
-    }
+    V *vv;
+    vv=new V[nv];
     
-    double mes=0.;
+    for(int i=0;i<nv;i++) {
+        int &iv=ind_nv[i];
+        vv[i].x=v[iv].x;
+        vv[i].y=v[iv].y;
+        vv[i].z=v[iv].z;
+        vv[i].lab=v[iv].lab;
+    }
+  
+  
+    double mes=0., mesb=0.;
     nt=new_nt;
-    T *tt = new T[nt] ;
-    T *ttt=tt;
+
     for(int i=0;i<nt;i++) {
         int &it=ind_nt[i];
         const T &K(t[it]);
         mes=K.mesure();
-        int iv[T::nea];
+        int iv[T::nv];
         for (int j = 0; j < T::nea ; j++) {
             iv[j] =  old2new[ &(K[j]) - v];
             assert(iv[j] >= 0 && iv[j] < nv);
-        }  if (mes < 0.)
+        }
+        if (orientation<0)
             swap(iv[1], iv[2]);
-        ttt++->set(vv, iv, K.lab);
+        
+        t[i].set(vv, iv, K.lab);
+        mes+=t[i].mesure();
     }
     
     nbe=new_nbe;
-    B *bb=new B[nbe];
-    B *bbb=bb;
     for(int i=0;i<nbe;i++) {
         int &ie=ind_nbe[i];
         const B &K(b[ie]);
-        int iv[B::nea];
+        int iv[B::nv];
         for (int j = 0; j < B::nea ; j++) {
             iv[j] =  old2new[ &(K[j]) - v];
             assert(iv[j] >= 0 && iv[j] < nv);
         }
-        bbb++->set(vv, iv, K.lab);
+        if (orientation<0)
+            swap(iv[(B::nv)-2], iv[(B::nv)-1]);
+        b[i].set(vv, iv, K.lab);
+        mesb+=b[i].mesure();
     }
  
-    
+  
  if(verbosity>2)
-     cout << "clean mesh results, nv = " << nv << " nt = " << nt << " nbe = " << nbe << endl;
+     cout << "after clean mesh, nv = " << nv << " nt = " << nt << " nbe = " << nbe << endl;
+   
+ if (mes<0) {
+        cerr << " Error of mesh orientation , current orientation = " << orientation << endl;
+        cerr << " mesure element mesh = " << mes << endl;
+        cerr << " mesure border mesh = " << mesb << endl;
+ }
+  
+ // stack problem here
  v=vv;
- t=tt;
- b=bb;
 
  delete []ind_nv;
  delete []ind_nt;
  delete []ind_nbe;
  delete []old2new;
- 
+
 }
 
 
@@ -2022,12 +2021,11 @@ Serialize GenericMesh<T,B,V>::serialize() const
         static const int nk=TypeGenericElement::nv;
         int iv[nk];
         
-        int *indice1=new int[nelt];
-        int *indice2=indice1;
-        
         HashTable<SortArray<int,nk>,int> h(nk*nelt,nelt);
+        
         int *originmulti=new int[nelt];
         int *allmulti=new int[nelt];
+        
         int originTypeGenericElement=0;
         int multiTypeGenericElement=0;
         int indice[nelt];
@@ -2071,28 +2069,23 @@ Serialize GenericMesh<T,B,V>::serialize() const
          int cmp=0;
             for(int i=0;i<nelt;i++) {
                 if(originmulti[i]==-1) {
-                    indice2[cmp]=i;
+                    ind_nv_t[cmp]=i;
                     cmp++;
                 }
             }
            assert((nelt-originTypeGenericElement-multiTypeGenericElement)==cmp);
             new_nelt=cmp;
             if (verbosity>2)
-            cout << "no duplicate elements: "<< cmp << " and remove " << multiTypeGenericElement << "elements, corresponding to " << originTypeGenericElement << " simple elements " << endl;
-            //ind_nv_t=indice1;
+                cout << "no duplicate elements: "<< cmp << " and remove " << multiTypeGenericElement << " multiples elements, corresponding to " << originTypeGenericElement << " original elements " << endl;
             
         }
         else {
             for(int i=0;i<nelt;i++)
-               indice2[i]=indice[i];
+               ind_nv_t[i]=indice[i];
             if (verbosity>2)
-            cout << " Warning, the mesh could contain multiple same elements, keep a single copy in mesh...option removemulti in the operator mesh is avalaible" << endl;
-
+                cout << " Warning, the mesh could contain multiple same elements, keep a single copy in mesh...option removemulti in the operator mesh is avalaible" << endl;
         }
-       
-        ind_nv_t=indice1;
-    
-        
+ 
         delete [] originmulti;
         delete [] allmulti;
 

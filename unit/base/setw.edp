@@ -3,7 +3,7 @@ include "test.idp"
 cout << functionDEFINITION << "setw" << endl;
 real t;
 real op = 100;
-string str = "Welcome to Airthium";
+string str = "FreeFEM";
 
 t = clock();
 cout << setw(op) << str << endl;
