@@ -2740,6 +2740,368 @@ public:
 };
 
 
+/* ancien fichier de TransfoMesh */
+Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *tab_XX, const double *tab_YY, const double *tab_ZZ,
+                     int &border_only, int &recollement_element, int &recollement_border, int &point_confondus_ok, int orientation) {
+
+    // cas besoin memoire important
+
+    // Mesh3 *T_Th3=new Mesh3;
+    int nv_t, nt_t, nbe_t;
+    int *Numero_Som;
+    int *ind_nv_t;
+    int *ind_nt_t;
+    int *ind_nbe_t;
+    int *label_nt_t;
+    int *label_nbe_t;
+    int i_som, i_elem, i_border;
+
+    Numero_Som = new int[Th3.nv];
+
+    ind_nv_t = new int[Th3.nv];
+    ind_nt_t = new int[Th3.nt];
+    ind_nbe_t = new int[Th3.nbe];
+
+    label_nt_t = new int[Th3.nt];
+    label_nbe_t = new int[Th3.nbe];
+
+    // cout << "Vertex, Tetrahedra, Border : "<<Th3.nv << ", "<<Th3.nt<< ", " << Th3.nbe<< endl;
+
+    for (int ii = 0; ii < Th3.nv; ii++) {
+        Numero_Som[ii] = ii;
+    }
+
+    if (verbosity > 1) {cout << " debut: SamePointElement " << endl;}
+
+    SamePointElement(precis_mesh, tab_XX, tab_YY, tab_ZZ, Th3, recollement_element, recollement_border, point_confondus_ok,
+                     Numero_Som, ind_nv_t, ind_nt_t, ind_nbe_t, label_nt_t, label_nbe_t, nv_t, nt_t, nbe_t);
+
+    if (verbosity > 1) {cout << " fin: SamePointElement " << endl;}
+
+    // set size of Mesh T_Th3
+    // T_Th3->set(nv_t,nt_t,nbe_t);
+    Vertex3 *v = new Vertex3[nv_t];
+    Tet *t = new Tet[nt_t];
+    Tet *tt = t;
+    Triangle3 *b = new Triangle3[nbe_t];
+    Triangle3 *bb = b;
+    double mes = 0, mesb = 0;
+    if (verbosity > 1) {
+        cout << "Transfo TH3 : Vertex, Tetrahedra, Border : " << "nv_t=" << nv_t << " nt_t=" << nt_t << " nbe_t=" << nbe_t << endl;
+    }
+
+    // determination of vertex
+    i_som = 0;
+
+    for (int i = 0; i < nv_t; i++) {
+        int &ii = ind_nv_t[i];
+        assert(Numero_Som[ii] == i_som);
+
+        const Vertex3 &K(Th3.vertices[ii]);
+
+        v[i_som].x = tab_XX[ii];
+        v[i_som].y = tab_YY[ii];
+        v[i_som].z = tab_ZZ[ii];
+        v[i_som].lab = K.lab;
+
+        i_som = i_som + 1;
+    }
+
+    assert(i_som == nv_t);
+
+    // cout << " Transfo volume elements " << endl;
+    // determination of volume elements
+    i_elem = 0;
+
+    for (int i = 0; i < nt_t; i++) {
+        int &ii = ind_nt_t[i];
+
+        // creation of elements
+        const Tet &K(Th3.elements[ii]);
+        int iv[4];
+        int lab;
+        lab = label_nt_t[i];
+
+        for (int jj = 0; jj < 4; jj++) {
+            iv[jj] = Numero_Som[Th3.operator () (K[jj])];
+            assert(iv[jj] >= 0 && iv[jj] < nv_t);
+        }
+
+        if (orientation < 0)
+            swap(iv[1], iv[2]);
+
+        (tt)->set(v, iv, lab);
+        mes += tt++->mesure();
+        i_elem++;
+    }
+
+    assert(i_elem == nt_t);
+
+    // cout << " Transfo border elements " << endl;
+    // determination of border elements
+    i_border = 0;
+
+    for (int i = 0; i < nbe_t; i++) {
+        int &ii = ind_nbe_t[i];
+        // creation of elements
+        const Triangle3 &K(Th3.be(ii));
+        int iv[3];
+        int lab;
+        lab = label_nbe_t[i];
+
+        for (int jj = 0; jj < 3; jj++) {
+            iv[jj] = Numero_Som[Th3.operator () (K[jj])];
+            assert(iv[jj] >= 0 && iv[jj] < nv_t);
+        }
+
+        if (orientation < 0) {swap(iv[1], iv[2]);}
+
+        bb->set(v, iv, lab);
+        mesb += bb++->mesure();
+        i_border++;
+    }
+
+    assert(i_border == nbe_t);
+    if (mes < 0) {
+        cerr << " E rror of mesh orientation , current orientation = " << orientation << endl;
+        cerr << " volume mesh = " << mes << endl;
+        cerr << " surface border mesh = " << mesb << endl;
+        ErrorExec(" movemesh 3d ", 1);
+    }
+
+    delete [] Numero_Som;
+    delete [] ind_nv_t;
+    delete [] ind_nt_t;
+    delete [] ind_nbe_t;
+    delete [] label_nt_t;
+    delete [] label_nbe_t;
+
+    Mesh3 *T_Th3 = new Mesh3(nv_t, nt_t, nbe_t, v, t, b);
+    return T_Th3;
+
+}
+
+
+void SamePointElement (const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh3 &Th3,
+                       int &recollement_element, int &recollement_border, int &point_confondus_ok,
+                       int *Numero_Som, int *ind_nv_t, int *ind_nt_t, int *ind_nbe_t,
+                       int *label_nt_t, int *label_nbe_t, int &nv_t, int &nt_t, int &nbe_t) {
+    int Elem_ok, Border_ok;
+    double hmin, hmin_elem, hmin_border;
+    R3 bmin, bmax;
+
+    // int recollement_element=1,recollement_border=1;
+
+    if (verbosity > 2) {cout << "    BuilBound " << endl;}
+
+    BuildBoundMinDist_th3(precis_mesh, tab_XX, tab_YY, tab_ZZ, Th3, bmin, bmax, hmin);
+    if (verbosity > 2) {cout << "   =============================== " << endl;}
+
+    double bmin3[3], bmax3[3];
+    bmin3[0] = bmin.x;
+    bmin3[1] = bmin.y;
+    bmin3[2] = bmin.z;
+
+    bmax3[0] = bmax.x;
+    bmax3[1] = bmax.y;
+    bmax3[2] = bmax.z;
+
+    if (verbosity > 2) {cout << "    OrderVertexTransfo_hcode gtree " << endl;}
+
+    OrderVertexTransfo_hcode_nv_gtree(Th3.nv, bmin, bmax, hmin, tab_XX, tab_YY, tab_ZZ, Numero_Som, ind_nv_t, nv_t);
+    if (verbosity > 2) {cout << "    fin order vertex gtree: nv_t=" << nv_t << endl;}
+
+    if (verbosity > 2) {cout << "   =============================== " << endl;}
+
+    /* determination de nt_t et de nbe_t*/
+    int i_elem, i_border;
+
+    i_elem = 0;
+
+    for (int ii = 0; ii < Th3.nt; ii++) {
+        const Tet &K(Th3.elements[ii]);
+        int iv[4];
+
+        Elem_ok = 1;
+
+        for (int jj = 0; jj < 4; jj++) {
+            iv[jj] = Numero_Som[Th3.operator () (K[jj])];
+        }
+
+        for (int jj = 0; jj < 4; jj++) {
+            for (int kk = jj + 1; kk < 4; kk++) {
+                if (iv[jj] == iv[kk]) {
+                    Elem_ok = 0;
+                }
+            }
+        }
+
+        if (Elem_ok == 1) {
+            ind_nt_t[i_elem] = ii;
+            label_nt_t[i_elem] = K.lab;
+            i_elem = i_elem + 1;
+        }
+    }
+
+    nt_t = i_elem;
+
+    if (recollement_element == 1) {
+        // int point_confondus_ok_e = 0;
+        if (verbosity > 1) {cout << "debut recollement : nt_t= " << nt_t << endl;}
+
+        int np, dim = 3;
+        int *ind_np = new int [nt_t];
+        int *label_t = new int [nt_t];
+        double **Cdg_t = new double *[nt_t];
+
+        for (int i = 0; i < nt_t; i++) {
+            Cdg_t[i] = new double[dim];
+        }
+
+        for (int i_elem = 0; i_elem < nt_t; i_elem++) {
+            int &ii = ind_nt_t[i_elem];
+            const Tet &K(Th3.elements[ii]);
+            int iv[4];
+
+            for (int jj = 0; jj < 4; jj++) {
+                iv[jj] = Th3.operator () (K[jj]);
+            }
+
+            Cdg_t[i_elem][0] = (tab_XX[iv[0]] + tab_XX[iv[1]] + tab_XX[iv[2]] + tab_XX[iv[3]]) / 4.;
+            Cdg_t[i_elem][1] = (tab_YY[iv[0]] + tab_YY[iv[1]] + tab_YY[iv[2]] + tab_YY[iv[3]]) / 4.;
+            Cdg_t[i_elem][2] = (tab_ZZ[iv[0]] + tab_ZZ[iv[1]] + tab_ZZ[iv[2]] + tab_ZZ[iv[3]]) / 4.;
+            label_t[i_elem] = K.lab;
+        }
+
+        hmin_elem = hmin / 4;
+        PointCommun_hcode_gtree(dim, nt_t, 0, Cdg_t, label_t, bmin, bmax, hmin_elem,
+                                ind_np, label_nt_t, np);// nv
+
+        assert(np <= nt_t);
+
+        int *ind_nt_t_tmp = new int [np];
+
+        for (int i_elem = 0; i_elem < np; i_elem++) {
+            assert(ind_np[i_elem] >= 0 && ind_np[i_elem] <= nt_t);
+            ind_nt_t_tmp[i_elem] = ind_nt_t[ind_np[i_elem]];
+        }
+
+        for (int i_elem = 0; i_elem < np; i_elem++) {
+            ind_nt_t[i_elem] = ind_nt_t_tmp[i_elem];
+        }
+
+        delete [] ind_np;
+        delete [] label_t;
+
+        for (int i = 0; i < nt_t; i++) {
+            delete [] Cdg_t[i];
+        }
+
+        delete [] Cdg_t;
+
+        delete [] ind_nt_t_tmp;
+
+        nt_t = np;
+        if (verbosity > 1) {cout << "fin recollement : nt_t= " << nt_t << endl;}
+    }
+
+    // determination of border elements
+    i_border = 0;
+
+    for (int ii = 0; ii < Th3.nbe; ii++) {
+        Border_ok = 1;
+
+        const Triangle3 &K(Th3.be(ii));
+        int iv[3];
+
+        for (int jj = 0; jj < 3; jj++) {
+            iv[jj] = Numero_Som[Th3.operator () (K[jj])];
+            assert(iv[jj] >= 0 && iv[jj] < nv_t);
+        }
+
+        for (int jj = 0; jj < 3; jj++) {
+            for (int kk = jj + 1; kk < 3; kk++) {
+                if (iv[jj] == iv[kk]) {Border_ok = 0;}
+            }
+        }
+
+        if (Border_ok == 1) {
+            ind_nbe_t[i_border] = ii;
+            label_nbe_t[i_border] = K.lab;
+            i_border = i_border + 1;
+        }
+    }
+
+    nbe_t = i_border;
+
+    if (recollement_border == 1) {
+        // int point_confondus_ok = 1;
+        if (verbosity > 1) {cout << "debut recollement : nbe_t= " << nbe_t << endl;}
+
+        int np, dim = 3;
+        int *ind_np = new int [nbe_t];
+        double **Cdg_be = new double *[nbe_t];
+        int *label_be = new int [nbe_t];
+
+        for (int i = 0; i < nbe_t; i++) {
+            Cdg_be[i] = new double[dim];
+        }
+
+        for (int i_border = 0; i_border < nbe_t; i_border++) {
+            int &ii = ind_nbe_t[i_border];
+            const Triangle3 &K(Th3.be(ii));
+            int iv[3];
+
+            for (int jj = 0; jj < 3; jj++) {
+                iv[jj] = Th3.operator () (K[jj]);
+            }
+
+            Cdg_be[i_border][0] = (tab_XX[iv[0]] + tab_XX[iv[1]] + tab_XX[iv[2]]) / 3.;    // ( Th3.vertices[iv[0]].x + Th3.vertices[iv[1]].x + Th3.vertices[iv[2]].x )/3.;
+            Cdg_be[i_border][1] = (tab_YY[iv[0]] + tab_YY[iv[1]] + tab_YY[iv[2]]) / 3.;    // ( Th3.vertices[iv[0]].y + Th3.vertices[iv[1]].y + Th3.vertices[iv[2]].y )/3.;
+            Cdg_be[i_border][2] = (tab_ZZ[iv[0]] + tab_ZZ[iv[1]] + tab_ZZ[iv[2]]) / 3.;    // ( Th3.vertices[iv[0]].z + Th3.vertices[iv[1]].z + Th3.vertices[iv[2]].z )/3.;
+
+            label_be[i_border] = K.lab;
+        }
+
+        hmin_border = hmin / 3.;
+        if (verbosity > 1) {cout << "hmin_border=" << hmin_border << endl;}
+
+        if (verbosity > 1) {cout << "appele de PointCommun_hcode := " << point_confondus_ok << endl;}
+
+        PointCommun_hcode_gtree(dim, nbe_t, point_confondus_ok, Cdg_be, label_be,
+                                bmin, bmax, hmin_border, ind_np, label_nbe_t, np);
+        if (verbosity > 1) {cout << "fin appele de PointCommun_hcode" << endl;}
+
+        assert(np <= nbe_t);
+
+        int *ind_nbe_t_tmp = new int [np];
+
+        for (int i_border = 0; i_border < np; i_border++) {
+            ind_nbe_t_tmp[i_border] = ind_nbe_t[ind_np[i_border]];
+        }
+
+        for (int i_border = 0; i_border < np; i_border++) {
+            ind_nbe_t[i_border] = ind_nbe_t_tmp[i_border];
+        }
+
+        delete [] ind_np;
+        delete [] label_be;
+
+        for (int i = 0; i < nbe_t; i++) {
+            delete [] Cdg_be[i];
+        }
+
+        delete [] Cdg_be;
+
+        delete [] ind_nbe_t_tmp;
+
+        nbe_t = np;
+        if (verbosity > 1) {cout << "fin recollement : nbe_t= " << nbe_t << endl;}
+
+        // Affectation de la nouvelle valeur du label
+    }
+}
+
 
 void Transfo_Mesh2_map_face (const Mesh &Th2, map<int, int> &maptri) {
     int numero_label = 0;
@@ -3124,6 +3486,119 @@ void BuildBoundMinDist_th2 (const double &precis_mesh, const double *tab_XX, con
      + // assertion pour la taille de l octree
      + assert(hmin>Norme2(bmin-bmax)/1e9);
      */
+}
+
+// version Mesh3
+
+void BuildBoundMinDist_th3 (const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh3 &Th3, R3 &bmin, R3 &bmax, double &hmin) {
+    // determination de la boite englobante
+    // R3 bmin,bmax;
+    double precispt;
+
+    bmin.x = tab_XX[0];
+    bmin.y = tab_YY[0];
+    bmin.z = tab_ZZ[0];
+
+    bmax.x = bmin.x;
+    bmax.y = bmin.y;
+    bmax.z = bmin.z;
+
+    // R3 bmax = new R3(bmin);
+
+    if (verbosity > 1) {cout << " determination of bmin and bmax" << endl;}
+
+    for (int ii = 1; ii < Th3.nv; ii++) {
+        bmin.x = min(bmin.x, tab_XX[ii]);
+        bmin.y = min(bmin.y, tab_YY[ii]);
+        bmin.z = min(bmin.z, tab_ZZ[ii]);
+
+        bmax.x = max(bmax.x, tab_XX[ii]);
+        bmax.y = max(bmax.y, tab_YY[ii]);
+        bmax.z = max(bmax.z, tab_ZZ[ii]);
+    }
+
+    double longmini_box;
+
+    // longmini_box = min(bmax.x-bmin.x, bmax.y-bmin.y);
+    // longmini_box = min(longmini_box, bmax.z-bmin.z);
+
+    longmini_box = pow(bmax.x - bmin.x, 2) + pow(bmax.y - bmin.y, 2) + pow(bmax.z - bmin.z, 2);
+    longmini_box = sqrt(longmini_box);
+
+    if (verbosity > 1) {cout << " bmin := " << bmin.x << " " << bmin.y << " " << bmin.z << endl;}
+
+    if (verbosity > 1) {cout << " bmax := " << bmax.x << " " << bmax.y << " " << bmax.z << endl;}
+
+    if (verbosity > 1) {cout << " box volume :=" << longmini_box << endl;}
+
+    if (precis_mesh < 0) {
+        precispt = longmini_box * 1e-7;
+    } else {
+        precispt = precis_mesh;
+    }
+
+    // determination de hmin
+
+    hmin =longmini_box;
+
+    for (int ii = 0; ii < Th3.nt; ii++) {
+        const Tet &K(Th3.elements[ii]);
+        double longedge;
+        int iv[4];
+
+        for (int jj = 0; jj < 4; jj++) {
+            iv[jj] = Th3.operator () (K[jj]);
+        }
+
+        for (int jj = 0; jj < 4; jj++) {
+            for (int kk = jj + 1; kk < 4; kk++) {
+                int &i1 = iv[jj];
+                int &i2 = iv[kk];
+                longedge = pow(tab_XX[i1] - tab_XX[i2], 2)
+                + pow(tab_YY[i1] - tab_YY[i2], 2)
+                + pow(tab_ZZ[i1] - tab_ZZ[i2], 2);
+                longedge = sqrt(longedge); 
+                if (longedge > precispt) {hmin = min(hmin, longedge);}
+            }
+        }
+    }
+
+    if (Th3.nt == 0) {
+        for (int ii = 0; ii < Th3.nbe; ii++) {
+            if (verbosity > 10) {cout << "border " << ii << " hmin =" << hmin << endl;}
+
+            const Triangle3 &K(Th3.be(ii));
+            double longedge;
+            int iv[3];
+
+            for (int jj = 0; jj < 3; jj++) {
+                iv[jj] = Th3.operator () (K[jj]);
+            }
+
+            for (int jj = 0; jj < 3; jj++) {
+                for (int kk = jj + 1; kk < 3; kk++) {
+                    int &i1 = iv[jj];
+                    int &i2 = iv[kk];
+                    longedge = pow(tab_XX[i1] - tab_XX[i2], 2)
+                    + pow(tab_YY[i1] - tab_YY[i2], 2)
+                    + pow(tab_ZZ[i1] - tab_ZZ[i2], 2);
+                    longedge = sqrt(longedge);
+                    if (longedge > precispt) {hmin = min(hmin, longedge);}
+                }
+            }
+        }
+    }
+    if(hmin/longmini_box < 1e7)
+        hmin = hmin*0.1;//  in case of bad shape element
+    if (verbosity > 5) {cout << "    longmini_box" << longmini_box
+        << "    hmin =" << hmin << " longmini_box/hmin "
+        <<hmin/longmini_box<< endl;}
+
+
+    if (verbosity > 9) {cout << "    Norme2(bmin-bmax)=" << Norme2(bmin - bmax) << endl;}
+
+    // assertion pour la taille de l octree
+    ffassert(hmin > Norme2(bmin - bmax) / 1e9);
 }
 
 
@@ -7609,7 +8084,8 @@ static void Load_Init () {
     TheOperators->Add("<-", new OneBinaryOperator_st<Op3_setmeshS<true, pmeshS *, pmeshS *, listMeshS> > );
 
     Global.Add("change", "(", new SetMeshS);
-
+   // Global.Add("movemeshS", "(", new MovemeshS);
+   // Global.Add("movemesh", "(", new MovemeshS(1));
     Global.Add("trunc", "(", new Op_trunc_meshS);
 
     Global.Add("showborder", "(", new OneOperator1<long, const MeshS *>(ShowBorder));
