@@ -7787,10 +7787,28 @@ public:
 
 
 
+template<class MMesh>
+void finalize(MMesh *(&Th));
+
+template<>
+void finalize<MeshS>(MeshS *(&Th)) {
+    Th->mapSurf2Vol=0;
+    Th->mapVol2Surf=0;
+}
+
+template<>
+void finalize<Mesh3>(Mesh3 *(&Th)) {
+    if(Th->meshS) {
+        if(verbosity>5)
+        cout << "Build the meshS associated to the mesh3"<<endl;
+        Th->BuildMeshS();
+    }
+}
+
 
 // movemesh
 template< class MMesh>
-class MovemeshTest_Op: public E_F0mps
+class Movemesh_Op: public E_F0mps
 {
 public:
     Expression eTh;
@@ -7812,7 +7830,7 @@ public:
     bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
     
 public:
-    MovemeshTest_Op (const basicAC_F0 &args, Expression tth, Expression xxx = 0, Expression yyy = 0, Expression zzz = 0)
+    Movemesh_Op (const basicAC_F0 &args, Expression tth, Expression xxx = 0, Expression yyy = 0, Expression zzz = 0)
     : eTh(tth), xx(xxx), yy(yyy), zz(zzz) {
         args.SetNameParam(n_name_param, name_param, nargs);
         const E_Array *a1 = 0;
@@ -7842,7 +7860,7 @@ public:
 };
 
 template<class MMesh>
-basicAC_F0::name_and_type MovemeshTest_Op<MMesh>::name_param [] = {
+basicAC_F0::name_and_type Movemesh_Op<MMesh>::name_param [] = {
     {"transfo", &typeid(E_Array)},    // 0
     {"reftet", &typeid(KN_<long>)},    // 1
     {"refface", &typeid(KN_<long>)},
@@ -7856,7 +7874,7 @@ basicAC_F0::name_and_type MovemeshTest_Op<MMesh>::name_param [] = {
 };
 
 template<class MMesh>
-AnyType MovemeshTest_Op<MMesh>::operator () (Stack stack)  const {
+AnyType Movemesh_Op<MMesh>::operator () (Stack stack)  const {
     MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
     MMesh *pTh = GetAny<MMesh *>((*eTh)(stack));
     ffassert(pTh);
@@ -7986,7 +8004,13 @@ AnyType MovemeshTest_Op<MMesh>::operator () (Stack stack)  const {
             int l0, l1 = ChangeLab(mapBref, l0 = K.lab);
             T_Th->be(i).lab = l1;
         }
-  
+    T_Th->BuildGTree();
+    
+    // case MeshS: T_Th->mapSurf2Vol=0;_Th->mapVol2Surf=0;
+    // case Mesh3: if(Th.meshS) T_Th->BuildMeshS();
+    
+    finalize(T_Th);
+    
     Add2StackOfPtr2FreeRC(stack, T_Th);
     *mp = mps;
     return T_Th;
@@ -7995,18 +8019,19 @@ AnyType MovemeshTest_Op<MMesh>::operator () (Stack stack)  const {
 
 
 
+
 template< class MMesh>
-class MovemeshTest: public OneOperator {
+class Movemesh: public OneOperator {
 public:
     int cas;
 	typedef const MMesh *ppmesh;  
-    MovemeshTest (): OneOperator(atype<ppmesh>(), atype<ppmesh>()), cas(0) {}
+    Movemesh (): OneOperator(atype<ppmesh>(), atype<ppmesh>()), cas(0) {}
     
-    MovemeshTest (int): OneOperator(atype<ppmesh>(), atype<ppmesh>(), atype<E_Array>()), cas(1) {}
+    Movemesh (int): OneOperator(atype<ppmesh>(), atype<ppmesh>(), atype<E_Array>()), cas(1) {}
     
     E_F0*code (const basicAC_F0 &args) const {
         if (cas == 0) {
-            return new MovemeshTest_Op<MMesh>(args, t[0]->CastTo(args[0]));
+            return new Movemesh_Op<MMesh>(args, t[0]->CastTo(args[0]));
         } else if (cas == 1) {
             const E_Array *a = dynamic_cast<const E_Array *>(args[1].LeftValue());
             
@@ -8016,7 +8041,7 @@ public:
             Expression X = to<double>((*a)[0]);
             Expression Y = to<double>((*a)[1]);
             Expression Z = to<double>((*a)[2]);
-            return new MovemeshTest_Op<MMesh>(args, t[0]->CastTo(args[0]), X, Y, Z);
+            return new Movemesh_Op<MMesh>(args, t[0]->CastTo(args[0]), X, Y, Z);
         } else {return 0;}
     }
 };
@@ -8098,11 +8123,11 @@ static void Load_Init () {
 	
     
     
-    Global.Add("movemeshS", "(", new MovemeshTest<MeshS>);
-    Global.Add("movemesh", "(", new MovemeshTest<MeshS>(1));
+    Global.Add("movemeshS", "(", new Movemesh<MeshS>);
+    Global.Add("movemesh", "(", new Movemesh<MeshS>(1));
     
-    Global.Add("movemesh3", "(", new MovemeshTest<Mesh3>);
-    Global.Add("movemesh", "(", new MovemeshTest<Mesh3>(1));
+    Global.Add("movemesh3", "(", new Movemesh<Mesh3>);
+    Global.Add("movemesh", "(", new Movemesh<Mesh3>(1));
 
 }
 

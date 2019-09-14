@@ -72,7 +72,8 @@ plot(Th33,wait=1);
 meshS Thmv2surf = movemesh(Th33,[mv2x,mv2y,mv2z]);
 meshS Thmv2surfclean = movemesh(Th33,[mv2x,mv2y,mv2z],cleanmesh=true, removeduplicate=true);
 
+savemesh(Thmv2surfclean,"Thmv2surfclean.mesh");
 plot(Thmv2surf,wait=1,cmm="th without clean mesh");
-plot(Thmv2surfclean,wait=1,cmm="th without clean mesh");
+plot(Thmv2surfclean,wait=1,cmm="th with clean mesh and remove all multiples ");
 
 
