@@ -2058,14 +2058,31 @@ struct Op3_setmeshS: public binary_function<AA, BB, RR> {
 };
 
 
+template<class MMesh>
+void finalize(MMesh *(&Th));
 
-//// version 3D de change label
+template<>
+void finalize<MeshS>(MeshS *(&Th)) {
+    Th->mapSurf2Vol=0;
+    Th->mapVol2Surf=0;
+}
 
-class SetMesh3D_Op: public E_F0mps
+template<>
+void finalize<Mesh3>(Mesh3 *(&Th)) {
+    if(Th->meshS) {
+        if(verbosity>5)
+            cout << "Build the meshS associated to the mesh3"<<endl;
+        Th->BuildMeshS();
+    }
+}
+
+
+template<class MMesh>
+class SetMesh_Op: public E_F0mps
 {
 public:
     Expression a;
-    static const int n_name_param = 2 + 2 + 2 + 2;    //
+    static const int n_name_param = 8;
     static basicAC_F0::name_and_type name_param [];
     Expression nargs[n_name_param];
     KN_<long> arg (int i, Stack stack, KN_<long> a) const {
@@ -2073,27 +2090,29 @@ public:
         i = nargs[i] ? i : i + 2;
         return nargs[i] ? GetAny<KN_<long> >((*nargs[i])(stack)) : a;
     }
-
     long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
-
     bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
-
+    
 public:
-    SetMesh3D_Op (const basicAC_F0 &args, Expression aa): a(aa) {
+    SetMesh_Op (const basicAC_F0 &args, Expression aa): a(aa) {
         args.SetNameParam(n_name_param, name_param, nargs);
-        if (nargs[0] && nargs[2]) {
+        if (nargs[0] && nargs[2])
             CompileError("uncompatible change(... region= , reftet=  ");
-        }
-
-        if (nargs[1] && nargs[3]) {
+        if (nargs[1] && nargs[3])
             CompileError("uncompatible  change(...label= , refface=  ");
+        if (nargs[7] && (is_same<MMesh,MeshS>::value))
+            cout << " Warning: remove internal border isn't implemented " << endl;
         }
-    }
-
     AnyType operator () (Stack stack)  const;
 };
 
-basicAC_F0::name_and_type SetMesh3D_Op::name_param [] = {
+/*template<class MMesh>
+basicAC_F0::name_and_type SetMesh_Op<MMesh>::name_param [] = {
+};
+*/
+
+template<>
+basicAC_F0::name_and_type SetMesh_Op<Mesh3>::name_param [] = {
     {"reftet", &typeid(KN_<long>)},
     {"refface", &typeid(KN_<long>)},
     {"region", &typeid(KN_<long>)},
@@ -2103,369 +2122,143 @@ basicAC_F0::name_and_type SetMesh3D_Op::name_param [] = {
     {"rmlfaces", &typeid(long)},
     {"rmInternalFaces", &typeid(bool)}
 };
-// besoin en cas de fichier 2D / fichier 3D
+
+
+template<>
+ basicAC_F0::name_and_type SetMesh_Op<MeshS>::name_param [] = {
+ {"reftri", &typeid(KN_<long>)},
+ {"refedge", &typeid(KN_<long>)},
+ {"region", &typeid(KN_<long>)},
+ {"label", &typeid(KN_<long>)},
+ {"fregion", &typeid(long)},
+ {"flabel", &typeid(long)},
+ {"rmledge", &typeid(long)},
+ {"rmInternalEdges", &typeid(bool)}
+ };
+
+
 
 int ChangeLab (const map<int, int> &m, int lab) {
     map<int, int>::const_iterator i = m.find(lab);
     if (i != m.end()) {
         lab = i->second;
     }
-
+    
     return lab;
 }
 
-AnyType SetMesh3D_Op::operator () (Stack stack)  const {
+template<class MMesh>
+AnyType SetMesh_Op<MMesh>::operator () (Stack stack)  const {
     MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
-    Mesh3 *pTh = GetAny<Mesh3 *>((*a)(stack));
-    Mesh3 &Th = *pTh;
-
+    MMesh *pTh = GetAny<MMesh *>((*a)(stack));
+    MMesh &Th = *pTh;
+    
     if (!pTh) {return pTh;}
+    
+    typedef typename MMesh::Element T;
+    typedef typename MMesh::BorderElement B;
+    typedef typename MMesh::Vertex V;
+    typedef typename MMesh::Element::RdHat TRdHat;
+    typedef typename MMesh::BorderElement::RdHat BRdHat;
+    
+    int nbv = Th.nv;
+    int nbt = Th.nt;
+    int nbe = Th.nbe;
 
-    //Mesh3 *m = pTh;
-    //   int typeMesh3 = Th.getTypeMesh3();
-    int nbv = Th.nv;// nombre de sommet
-    int nbt = Th.nt;// nombre de triangles
-    int nbe = Th.nbe;    // nombre d'aretes fontiere
-    // cout << "Number of Vertex="<< nbv << "Number of BorderElement=" << nbe << endl;
     KN<long> zz;
-    KN<long> nrtet(arg(0, stack, zz));
-    KN<long> nrface(arg(1, stack, zz));
+    KN<long> nrT(arg(0, stack, zz));
+    KN<long> nrB(arg(1, stack, zz));
+    
+    // arguments
     Expression freg = nargs[4];
     Expression flab = nargs[5];
     bool rm_faces = nargs[6];
     long rmlabfaces(arg(6, stack, 0L));
     bool rm_i_faces(arg(7, stack, false));
-
-    // cout << " Chnage " << freg << " " << flab << endl;
-    if (nrface.N() <= 0 && nrtet.N() <= 0 && (!freg) && (!flab) && !rmlabfaces && !rm_i_faces) {
-        return pTh;    // modf J.M. oct 2010
-    }
-
-    ffassert(nrtet.N() % 2 == 0);
-    ffassert(nrface.N() % 2 == 0);
-
-    map<int, int> maptet, mapface;
-
+   
+    if (nrB.N() <= 0 && nrT.N() <= 0 && (!freg) && (!flab) && !rmlabfaces && !rm_i_faces)
+        return pTh;
+    
+    ffassert(nrT.N() % 2 == 0);
+    ffassert(nrB.N() % 2 == 0);
+    
+    // mapping to change label
+    map<int, int> mapTref, mapBref;
+    for (int i = 0; i < nrT.N(); i += 2)
+        mapTref[nrT[i]] = nrT[i + 1];
     int z00 = false;
-
-    for (int i = 0; i < nrface.N(); i += 2) {
-        z00 = z00 || (nrface[i] == 0 && nrface[i + 1] == 0);
-
-        if (nrface[i] != nrface[i + 1]) {
-            mapface[nrface[i]] = nrface[i + 1];
-        }
+    for (int i = 0; i < nrB.N(); i += 2) {
+        z00 = z00 || (nrB[i] == 0 && nrB[i + 1] == 0);
+        if (nrB[i] != nrB[i + 1])
+            mapBref[nrB[i]] = nrB[i + 1];
     }
 
-    for (int i = 0; i < nrtet.N(); i += 2) {
-        maptet[nrtet[i]] = nrtet[i + 1];
-    }
-
-    // sert a quoi ???
     int nben = 0;
-
     for (int i = 0; i < nbe; ++i) {
-        const Triangle3 &K = Th.be(i);
-        int l0, l1 = ChangeLab(mapface, l0 = K.lab);
+        const B &K = Th.be(i);
+        int l0, l1 = ChangeLab(mapBref, l0 = K.lab);
         nben++;
     }
-
-    Vertex3 *v = new Vertex3[nbv];
-    Tet *t;
-    if (nbt != 0) {t = new Tet[nbt];}
-
-    Triangle3 *b = new Triangle3[nben];
-    // generation des nouveaux sommets
-    Vertex3 *vv = v;
-
-    // copie des anciens sommets (remarque il n'y a pas operateur de copy des sommets)
+    
+    //copy vertices
+    V *v = new Vertex3[nbv];
+    V *vv = v;
     for (int i = 0; i < nbv; i++) {
-        const Vertex3 &V(Th.vertices[i]);
+        const V &V(Th.vertices[i]);
         vv->x = V.x;
         vv->y = V.y;
         vv->z = V.z;
         vv->lab = V.lab;
         vv++;
     }
-
-    // generation des triangles
-    Tet *tt = t;
+    
+    // new elements
+    T *t = new T[nbt];
+    T *tt = t;
     int lmn = 2000000000;
     int lmx = -2000000000;
-    int nberr = 0;
-    R3 PtHat(1. / 4., 1. / 4., 1. / 4.);
-
+    double k=T::nv;
+    TRdHat PtHat=TRdHat::diag(1./k);
     for (int i = 0; i < nbt; i++) {
-        const Tet &K(Th.elements[i]);
-        int iv[4];
-        // int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
-        iv[0] = Th.operator () (K[0]);
-        iv[1] = Th.operator () (K[1]);
-        iv[2] = Th.operator () (K[2]);
-        iv[3] = Th.operator () (K[3]);
-        // les 3 triangles par triangles origines
-        int lab = K.lab;
-
-        tt->set(v, iv, ChangeLab(maptet, lab));
-        if (freg) {    // R3 B(1./4.,1./4.,1./4.);  // 27/09/10 : J.Morice error in msh3.cpp
+        const T &K(Th.elements[i]);
+        int iv[T::nv];
+        for (int j=0;j<k;j++)
+            iv[j] = Th.operator()(K[j]);
+        tt->set(v, iv, ChangeLab(mapTref, K.lab));
+        if (freg) {
             mp->set(Th, K(PtHat), PtHat, K, 0);
             tt->lab = GetAny<long>((*freg)(stack));
             lmn = min(lmn, tt->lab);
             lmx = max(lmx, tt->lab);
         }
-
         tt++;
     }
-
-    if (freg && verbosity > 1) {cout << "    -- Change : new region number bound : " << lmn << " " << lmx << endl;}
-
-    // les arete frontieres qui n'ont pas change
+    
+    if (freg && verbosity > 1)
+        cout << "    -- Change : new region number bound : " << lmn << " " << lmx << endl;
+    
+    // new border elements
     lmn = 2000000000;
     lmx = -2000000000;
-
-    Triangle3 *bb = b;
-    R2 PtHat2(1. / 3., 1. / 3.);
-    int nrmf = 0;
-
+    B *b = new B[nben];
+    B *bb = b;
+    k=B::nv;
+    BRdHat PtHat2=BRdHat::diag(1./k);
+    int nrmf=0;
+    
     for (int i = 0; i < nbe; i++) {
-        const Triangle3 &K(Th.be(i));
-        int fk, ke = Th.BoundaryElement(i, fk);    // element co
-        int fkk, kke = Th.ElementAdj(ke, fkk = fk);    // element co
-        bool onborder = (kke == ke) || (kke < 0);
-        const Tet &KE(Th[ke]);
-        R3 B = KE.PBord(fk, PtHat2);
-        int iv[3];
+        const B &K(Th.be(i));
+        int fk, ke=Th.BoundaryElement(i, fk);
+        int fkk, kke=Th.ElementAdj(ke, fkk=fk);
+        bool onborder = (kke==ke) || (kke<0);
+        const T &KE(Th[ke]);
+        TRdHat B = KE.PBord(fk, PtHat2);
+        int iv[B::nv];
+        for (int j=0;j<k;j++)
+            iv[j] = Th.operator () (K[j]);
         bool rmf = rm_i_faces && !onborder;
-        iv[0] = Th.operator () (K[0]);
-        iv[1] = Th.operator () (K[1]);
-        iv[2] = Th.operator () (K[2]);
-
-        int l0, l1 = ChangeLab(mapface, l0 = K.lab);
-        if (flab) {    // R3 B(1./4.,1./4.,1./4.);  // 27/09/10 : J.Morice error in msh3.cpp
-            R3 NN = KE.N(fk);
-            double mes = NN.norme();
-            NN /= mes;
-            mp->set(Th, KE(B), B, KE, K.lab, NN, fk);
-            l1 = GetAny<long>((*flab)(stack));
-            lmn = min(lmn, bb->lab);
-            lmx = max(lmx, bb->lab);
-        }
-
-        if (!rmf && rm_faces) {
-            rmf = !onborder && (l1 == rmlabfaces);
-        }
-
-        if (rmf) {
-            nrmf++;
-        } else {
-            (*bb++).set(v, iv, l1);
-        }
-    }
-
-    if (nrmf && verbosity > 2) {cout << "   change  mesh3 : number of removed  internal faces " << nrmf << " == " << nbe - (bb - b) << endl;}
-
-    nben -= nrmf;
-    nbe -= nrmf;
-    assert(nben == bb - b);
-    *mp = mps;
-    Mesh3 *mpq = new Mesh3(nbv, nbt, nbe, v, t, b);
-    mpq->BuildGTree();
-
-    if(Th.meshS) {
-        if(verbosity>2)
-            cout << "build the new meshS after change mesh3 "<<endl;
-        mpq->BuildMeshS();
-    }
-
-
-    Add2StackOfPtr2FreeRC(stack, mpq);
-
-    return mpq;
-
-}
-
-class SetMesh3D: public OneOperator {
-public:
-    typedef const Mesh3 *pmesh3;
-    SetMesh3D (): OneOperator(atype<pmesh3>(), atype<pmesh3>()) {}
-
-    E_F0*code (const basicAC_F0 &args) const {
-        return new SetMesh3D_Op(args, t[0]->CastTo(args[0]));
-    }
-};
-
-
-
-class SetMeshS_Op: public E_F0mps
-{
-public:
-    Expression a;
-    static const int n_name_param = 2 + 2 + 2 + 2;    //
-    static basicAC_F0::name_and_type name_param [];
-    Expression nargs[n_name_param];
-    KN_<long> arg (int i, Stack stack, KN_<long> a) const {
-        ffassert(!(nargs[i] && nargs[i + 2]));
-        i = nargs[i] ? i : i + 2;
-        return nargs[i] ? GetAny<KN_<long> >((*nargs[i])(stack)) : a;
-    }
-
-    long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
-
-    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
-
-public:
-    SetMeshS_Op (const basicAC_F0 &args, Expression aa): a(aa) {
-        args.SetNameParam(n_name_param, name_param, nargs);
-        if (nargs[0] && nargs[2]) {
-            CompileError("uncompatible change(... region= , reftri=  ");
-        }
-
-        if (nargs[1] && nargs[3]) {
-            CompileError("uncompatible  change(...label= , refedge=  ");
-        }
-    }
-
-    AnyType operator () (Stack stack)  const;
-};
-
-basicAC_F0::name_and_type SetMeshS_Op::name_param [] = {
-    {"reftri", &typeid(KN_<long>)},
-    {"refedge", &typeid(KN_<long>)},
-    {"region", &typeid(KN_<long>)},
-    {"label", &typeid(KN_<long>)},
-    {"fregion", &typeid(long)},
-    {"flabel", &typeid(long)},
-    {"rmledge", &typeid(long)},
-    {"rmInternalEdges", &typeid(bool)}
-};
-// besoin en cas de fichier 2D / fichier 3D
-
-/*int ChangeLabS (const map<int, int> &m, int lab) {
-    map<int, int>::const_iterator i = m.find(lab);
-    if (i != m.end()) {
-        lab = i->second;
-    }
-
-    return lab;
-}*/
-
-AnyType SetMeshS_Op::operator () (Stack stack)  const {
-    MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
-    MeshS *pTh = GetAny<MeshS *>((*a)(stack));
-    MeshS &Th = *pTh;
-
-    if (!pTh) return pTh;
-
-    int nbv = Th.nv;// nombre de sommet
-    int nbt = Th.nt;// nombre de triangles
-    int nbe = Th.nbe;    // nombre d'aretes fontiere
-    KN<long> zz;
-    KN<long> nrtet(arg(0, stack, zz));
-    KN<long> nrface(arg(1, stack, zz));
-    Expression freg = nargs[4];
-    Expression flab = nargs[5];
-    bool rm_faces = nargs[6];
-    long rmlabfaces(arg(6, stack, 0L));
-    bool rm_i_faces(arg(7, stack, false));
-
-    if (nrface.N() <= 0 && nrtet.N() <= 0 && (!freg) && (!flab) && !rmlabfaces && !rm_i_faces) {
-        return pTh;    // modf J.M. oct 2010
-    }
-
-    ffassert(nrtet.N() % 2 == 0);
-    ffassert(nrface.N() % 2 == 0);
-
-    map<int, int> maptet, mapface;
-
-    int z00 = false;
-
-    for (int i = 0; i < nrface.N(); i += 2) {
-        z00 = z00 || (nrface[i] == 0 && nrface[i + 1] == 0);
-
-        if (nrface[i] != nrface[i + 1]) {
-            mapface[nrface[i]] = nrface[i + 1];
-        }
-    }
-
-    for (int i = 0; i < nrtet.N(); i += 2)
-        maptet[nrtet[i]] = nrtet[i + 1];
-
-
-    // sert a quoi ???
-    int nben = 0;
-
-    for (int i = 0; i < nbe; ++i) {
-        const BoundaryEdgeS &K = Th.be(i);
-        int l0, l1 = ChangeLab(mapface, l0 = K.lab);
-        nben++;
-    }
-
-    Vertex3 *v = new Vertex3[nbv];
-    TriangleS *t;
-    if (nbt != 0) {t = new TriangleS[nbt];}
-
-    BoundaryEdgeS *b = new BoundaryEdgeS[nben];
-    // generation des nouveaux sommets
-    Vertex3 *vv = v;
-
-    // copie des anciens sommets (remarque il n'y a pas operateur de copy des sommets)
-    for (int i = 0; i < nbv; i++) {
-        const Vertex3 &V(Th.vertices[i]);
-        vv->x = V.x;
-        vv->y = V.y;
-        vv->z = V.z;
-        vv->lab = V.lab;
-        vv++;
-    }
-
-    // generation des triangles
-    TriangleS *tt = t;
-    int lmn = 2000000000;
-    int lmx = -2000000000;
-    int nberr = 0;
-    R2 PtHat(1. / 3., 1. / 3.);
-
-    for (int i = 0; i < nbt; i++) {
-        const TriangleS &K(Th.elements[i]);
-        int iv[3];
-        for (int i=0;i<3;i++) iv[i] = Th.operator () (K[i]);
-        ;
-        // les 3 triangles par triangles origines
-        int lab = K.lab;
-
-        tt->set(v, iv, ChangeLab(maptet, lab));
-        if (freg) {    // R3 B(1./4.,1./4.,1./4.);  // 27/09/10 : J.Morice error in msh3.cpp
-            mp->set(Th, K(PtHat), PtHat, K, 0);
-            tt->lab = GetAny<long>((*freg)(stack));
-            lmn = min(lmn, tt->lab);
-            lmx = max(lmx, tt->lab);
-        }
-
-        tt++;
-    }
-
-    if (freg && verbosity > 1) {cout << "    -- Change : new region number bound : " << lmn << " " << lmx << endl;}
-
-    // les arete frontieres qui n'ont pas change
-    lmn = 2000000000;
-    lmx = -2000000000;
-
-    BoundaryEdgeS *bb = b;
-    R1 PtHat2(1. / 2.);
-    int nrmf = 0;
-
-    for (int i = 0; i < nbe; i++) {
-        const BoundaryEdgeS &K(Th.be(i));
-        int fk, ke = Th.BoundaryElement(i, fk);    // element co
-        int fkk, kke = Th.ElementAdj(ke, fkk = fk);    // element co
-        bool onborder = (kke == ke) || (kke < 0);
-        const TriangleS &KE(Th[ke]);
-        R2 B = KE.PBord(fk, PtHat2);
-        int iv[2];
-        bool rmf = rm_i_faces && !onborder;
-        for(int i=0;i<2;i++) iv[i] = Th.operator () (K[i]);
-
-
-        int l0, l1 = ChangeLab(mapface, l0 = K.lab);
+        
+        int l0, l1 = ChangeLab(mapBref, l0 = K.lab);
         if (flab) {
             R3 NN = KE.N(fk);
             double mes = NN.norme();
@@ -2475,42 +2268,44 @@ AnyType SetMeshS_Op::operator () (Stack stack)  const {
             lmn = min(lmn, bb->lab);
             lmx = max(lmx, bb->lab);
         }
-
-        if (!rmf && rm_faces) {
+        
+        if (!rmf && rm_faces)
             rmf = !onborder && (l1 == rmlabfaces);
-        }
-
-        if (rmf) {
+        if (rmf)
             nrmf++;
-        } else {
+        else
             (*bb++).set(v, iv, l1);
-        }
+    
     }
-
-    if (nrmf && verbosity > 2) {cout << "   change  mesh3 : number of removed  internal faces " << nrmf << " == " << nbe - (bb - b) << endl;}
-
+    
+    if (nrmf && verbosity > 2)
+        cout << "   change  mesh3 : number of removed  internal faces " << nrmf << " == " << nbe - (bb - b) << endl;
+    
     nben -= nrmf;
     nbe -= nrmf;
     assert(nben == bb - b);
+    
     *mp = mps;
-    MeshS *mpq = new MeshS(nbv, nbt, nbe, v, t, b);
-    mpq->BuildGTree();
-    Add2StackOfPtr2FreeRC(stack, mpq);
-
-    return mpq;
-
+    MMesh *T_Th = new MMesh(nbv, nbt, nbe, v, t, b);
+    T_Th->BuildGTree();
+ 
+    // case MeshS: T_Th->mapSurf2Vol=0;_Th->mapVol2Surf=0;
+    // case Mesh3: if(Th.meshS) T_Th->BuildMeshS();
+    finalize(T_Th);
+    Add2StackOfPtr2FreeRC(stack, T_Th);
+    return T_Th;
+    
 }
 
-class SetMeshS: public OneOperator {
+template< class MMesh>class SetMesh: public OneOperator {
 public:
-    typedef const MeshS *pmeshS;
-    SetMeshS (): OneOperator(atype<pmeshS>(), atype<pmeshS>()) {}
-
+    typedef const MMesh *ppmesh;
+    SetMesh (): OneOperator(atype<ppmesh>(), atype<ppmesh>()) {}
+    
     E_F0*code (const basicAC_F0 &args) const {
-        return new SetMeshS_Op(args, t[0]->CastTo(args[0]));
+        return new SetMesh_Op<MMesh>(args, t[0]->CastTo(args[0]));
     }
 };
-
 
 
 
@@ -7787,23 +7582,7 @@ public:
 
 
 
-template<class MMesh>
-void finalize(MMesh *(&Th));
 
-template<>
-void finalize<MeshS>(MeshS *(&Th)) {
-    Th->mapSurf2Vol=0;
-    Th->mapVol2Surf=0;
-}
-
-template<>
-void finalize<Mesh3>(Mesh3 *(&Th)) {
-    if(Th->meshS) {
-        if(verbosity>5)
-        cout << "Build the meshS associated to the mesh3"<<endl;
-        Th->BuildMeshS();
-    }
-}
 
 
 // movemesh
@@ -8073,7 +7852,7 @@ static void Load_Init () {
     TheOperators->Add("=", new OneBinaryOperator_st<Op3_setmesh<false, pmesh3 *, pmesh3 *, listMesh3> > );
     TheOperators->Add("<-", new OneBinaryOperator_st<Op3_setmesh<true, pmesh3 *, pmesh3 *, listMesh3> > );
 
-    Global.Add("change", "(", new SetMesh3D);
+   // Global.Add("change", "(", new SetMesh3D);
     //Global.Add("movemesh2D3Dsurf", "(", new Movemesh2D_3D_surf_cout);   // remove ?
     //Global.Add("movemesh3", "(", new Movemesh3D);  // apply transfo to mesh3 and meshS if surface can be built
    //Global.Add("movemesh", "(", new Movemesh3D(1));
@@ -8108,7 +7887,7 @@ static void Load_Init () {
     TheOperators->Add("=", new OneBinaryOperator_st<Op3_setmeshS<false, pmeshS *, pmeshS *, listMeshS> > );
     TheOperators->Add("<-", new OneBinaryOperator_st<Op3_setmeshS<true, pmeshS *, pmeshS *, listMeshS> > );
 
-    Global.Add("change", "(", new SetMeshS);
+   // Global.Add("change", "(", new SetMeshS);
    // Global.Add("movemeshS", "(", new MovemeshS);
    // Global.Add("movemesh", "(", new MovemeshS(1));
     Global.Add("trunc", "(", new Op_trunc_meshS);
@@ -8128,7 +7907,9 @@ static void Load_Init () {
     
     Global.Add("movemesh3", "(", new Movemesh<Mesh3>);
     Global.Add("movemesh", "(", new Movemesh<Mesh3>(1));
-
+    
+    Global.Add("change", "(", new SetMesh<MeshS>);
+    Global.Add("change", "(", new SetMesh<Mesh3>);
 }
 
 // <<msh3_load_init>> static loading: calling Load_Init() from a function which is accessible from
