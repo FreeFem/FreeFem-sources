@@ -862,7 +862,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
 
                 if(!p) { err++;
                     if(err==1) cerr << "Err  Border element not in mesh \n";
-                    if (err<10)  cerr << " \t " << ke << " " << a << endl;
+                    if (err<10)  cerr << " \t " << ke << " : " << a << endl;
                 }
                 else
                 {

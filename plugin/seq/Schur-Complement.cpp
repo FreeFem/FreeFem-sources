@@ -89,16 +89,15 @@ public:
 template<class R>
 class SchurComplement : public OneOperator { public:
     int cas;
-    SchurComplement() : OneOperator(atype<long>(),atype<KNM<R> *>(),atype<Matrice_Creuse<R> *>(),atype<KN<long> *>() ) ,  cas(0) {}
-    SchurComplement(int ) : OneOperator(atype<long>(),atype<KNM<R> *>(),atype<Matrice_Creuse<R> *>(),atype<KN<long> *>(), atype<KNM<R> *>() ) ,  cas(1){}
+    SchurComplement()     : OneOperator(atype<long>(), atype<KNM<R> *>(), atype<Matrice_Creuse<R> *>(), atype<KN<long> *>() ) ,  cas(0) {}
+    SchurComplement(int ) : OneOperator(atype<long>(), atype<KNM<R> *>(), atype<Matrice_Creuse<R> *>(), atype<KN<long> *>(), atype<KNM<R> *>() ) ,  cas(1){}
 
     E_F0 * code(const basicAC_F0 & args) const
     {
-        if(cas==0)
-        return  new SchurComplement_OP<R>(args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]));
-        else
-        return  new SchurComplement_OP<R>(args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]),t[3]->CastTo(args[3]));
-
+       if(cas==0)
+        return  new SchurComplement_OP<R>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]) );
+       else
+        return  new SchurComplement_OP<R>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]) );
     }
 };
 
@@ -128,7 +127,13 @@ AnyType SchurComplement_OP<R>::operator()(Stack stack)  const
 template<class R>
 long  ff_SchurComplement(Stack stack,KNM<R> *  pS,Matrice_Creuse<R> *  pmcA,KN_<long> const &  I,Data_Sparse_Solver &ds,KNM<R> *  pV   )
 {
-    // I given numbering of Schur complement I[i] is the index in A of the i in S
+    // I given numbering of Schur complement I[i] is the index in A of the i in S if I[i] >=0
+    //  the matrix A in splited in  4 blocks  [[AII,AIJ],[AJI, AJJ]]  where
+    
+    // J = index not in I, AII = A(I,I), 
+    // S =  AII  - AIJ AJJ^-1 AJI
+    // V(I(i),j)  =   $\delta_{ij}$ if I(i) >=0, j
+    // V(J(i),j)  = - (AJJ^-1 AJI(i,j))   if ( J(i) >=0;
     R zero(0.);
     KNM<R>   & S= *pS;
     MatriceCreuse<R> * pa=pmcA->A;
@@ -310,7 +315,8 @@ long copy_mat(KNM<R> *  pS,Matrice_Creuse<R> *  pmcA)
     }
    return 1;
 }
-static void Load_Init () {
+static void Load_Init ()
+{
     cout << " load: init SchurComplement " << endl;
     Global.Add("SchurComplement", "(", new SchurComplement<R>);
     Global.Add("SchurComplement", "(", new SchurComplement<Complex>);
