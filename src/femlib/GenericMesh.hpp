@@ -2040,31 +2040,31 @@ Serialize GenericMesh<T,B,V>::serialize() const
             
             const TypeGenericElement &K(list[i]);
             for (int j=0;j<nk;j++)
-                iv[j] = old2new[ &(K[j]) - vertice ];    // vertice of element in new numbering
-            
+            iv[j] = old2new[ &(K[j]) - vertice ];    // vertice of element in new numbering
             int sens;
             SortArray<int,nk> a(iv,&sens);
             typename HashTable<SortArray<int,nk>,int>::iterator p= h.find(a);
             // check multiple element
             // 1/ keep the original
-            if(!p) {
-                h.add(a,new_nelt);
-                indice[new_nelt]=i;
-                new_nelt++;
-            }
-            // or 2/ rm all multiples or keep the orinal
-            else if(removeduplicate) {
-                originmulti[i]=p->v;  // the double elt the current
-                multiTypeGenericElement++;
+            if (!commonValue(a)) {   // if iv[0] != iv[1] (!= iv[2] != iv[3])
+                if(!p) {
+                    h.add(a,new_nelt);
+                    indice[new_nelt]=i;
+                    new_nelt++;
+                }
+                // or 2/ rm all multiples or keep the orinal
+                else if(removeduplicate) {
+                    originmulti[i]=p->v;  // the double elt the current
+                    multiTypeGenericElement++;
                
-                if(originmulti[p->v]==-1) {   // the origin elt
-                   originmulti[p->v]=p->v;
-                   originTypeGenericElement++;
+                    if(originmulti[p->v]==-1) {   // the origin elt
+                        originmulti[p->v]=p->v;
+                        originTypeGenericElement++;
+                    }
                 }
             }
         }
-        
-   // rebuild the index list if remove all multiples
+        // rebuild the index list if remove all multiples
         if(removeduplicate) {
          int cmp=0;
             for(int i=0;i<nelt;i++) {

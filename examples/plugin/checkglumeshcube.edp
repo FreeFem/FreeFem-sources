@@ -16,8 +16,8 @@ func YY1 = y;
 int[int] ref31h = [0,12];
 int[int] ref31b = [0,11];
 
-meshS Th31h = movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1max],label=ref31h,orientation=1);
-meshS Th31b = movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1min],label=ref31b,orientation=-1);   
+meshS Th31h = movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1max],region=ref31h,orientation=1);
+meshS Th31b = movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1min],region=ref31b,orientation=-1);   
 
 //medit("haut",Th31h);
 //medit("bas",Th31b);
@@ -34,8 +34,8 @@ func YY2max = 2*pi;
 int[int] ref32h = [0,13];
 int[int] ref32b = [0,14];
 
-meshS Th32h = movemesh23(Thsq2,transfo=[XX2,YY2max,ZZ2],label=ref32h,orientation=-1);  
-meshS Th32b = movemesh23(Thsq2,transfo=[XX2,YY2min,ZZ2],label=ref32b,orientation=1);
+meshS Th32h = movemesh23(Thsq2,transfo=[XX2,YY2max,ZZ2],region=ref32h,orientation=-1);  
+meshS Th32b = movemesh23(Thsq2,transfo=[XX2,YY2min,ZZ2],region=ref32b,orientation=1);
 
 /////////////////////////////////
 x0=0.; x1=2*pi; y0=0.; y1=1.5;
@@ -50,9 +50,9 @@ int[int] ref33h = [0,15];
 int[int] ref33b = [0,16];
 cout << "tyty\n";
 verbosity = 4; 
-meshS Th33h = movemesh23(Thsq3,transfo=[XX3max,YY3,ZZ3],label=ref33h,orientation=1);  
+meshS Th33h = movemesh23(Thsq3,transfo=[XX3max,YY3,ZZ3],region=ref33h,orientation=1);  
 cout << "tyty\n";
-meshS Th33b = movemesh23(Thsq3,transfo=[XX3min,YY3,ZZ3],label=ref33b,orientation=-1); 
+meshS Th33b = movemesh23(Thsq3,transfo=[XX3min,YY3,ZZ3],region=ref33b,orientation=-1); 
 
 ////////////////////////////////
 meshS Th33 = Th31h+Th31b+Th32h+Th32b+Th33h+Th33b; // "gluing" surface meshs to obtain the surface of cube

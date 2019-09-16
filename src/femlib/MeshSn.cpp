@@ -737,12 +737,12 @@ namespace Fem2D
             mes += this->elements[i].mesure();
         for (int i=0;i<nbe;i++)
             mesb += this->be(i).mesure();
-        
-        
-        if (cleanmesh) {
-            if(verbosity>5)
-            cout << "before clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+                if (cleanmesh) {
+            if(verbosity>3)
+                cout << "before clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
             clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
+            if(verbosity>3)
+                cout << "after clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
         }
         BuildBound();
         BuildAdj();
@@ -750,6 +750,8 @@ namespace Fem2D
         BuildjElementConteningVertex();
         // if not edges then build the edges - need access to the old adjacensce to build eges and rebuild the new adj
         if (nbe==0) {
+            if(verbosity>3)
+                cout << " building of boundary " << endl;
             BuildEdges();
             delete [] TheAdjacencesLink;
             delete [] BoundaryElementHeadLink;

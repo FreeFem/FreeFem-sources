@@ -30,7 +30,8 @@ All notable changes to this project will be documented in this file.
 - simpler constructor for sequential HPDDM matrices (no need for the restriction array and the partition of unity)
 
 ### Changed
--
+- in the FreeFEM function movemesh23, correct the argument label -> region to change label
+- new implementation for the moving mesh functions, new arguments: boolean cleanmesh, removemultiple, rebuildborder 
 
 ### Deprecated
 -

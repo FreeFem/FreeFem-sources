@@ -130,6 +130,14 @@ ostream & operator<<(ostream & f,const SortArray<T,N> & item)
     return f;
 }
 
+template<typename T,int N>
+bool commonValue(const SortArray<T,N> & t) {
+    for(int i=1;i<N;i++)
+        if(t.v[i-1]==t.v[i])
+            return true;
+    return false;
+}
+
 template<class K,class V>
 class HashTable {
 public:

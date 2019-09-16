@@ -29,12 +29,12 @@ int[int] refx=[0,1];  // gauche
 int[int] refX=[0,2];   // droite 
 
 
-meshS Thx0 = movemesh23(Thx,transfo=[x0,x,y],orientation=-1,label=refx);
-meshS Thx1 = movemesh23(Thx,transfo=[x1,x,y],orientation=1,label=refX);
-meshS Thy0 = movemesh23(Thy,transfo=[x,y0,y],orientation=+1,label=refy);
-meshS Thy1 = movemesh23(Thy,transfo=[x,y1,y],orientation=-1,label=refY);
-meshS Thz0 = movemesh23(Thz,transfo=[x,y,z0],orientation=-1,label=refz);
-meshS Thz1 = movemesh23(Thz,transfo=[x,y,z1],orientation=+1,label=refZ);
+meshS Thx0 = movemesh23(Thx,transfo=[x0,x,y],orientation=-1,region=refx,removeduplicate=true);
+meshS Thx1 = movemesh23(Thx,transfo=[x1,x,y],orientation=1,region=refX,removeduplicate=true);
+meshS Thy0 = movemesh23(Thy,transfo=[x,y0,y],orientation=+1,region=refy,removeduplicate=true);
+meshS Thy1 = movemesh23(Thy,transfo=[x,y1,y],orientation=-1,region=refY,removeduplicate=true);
+meshS Thz0 = movemesh23(Thz,transfo=[x,y,z0],orientation=-1,region=refz,removeduplicate=true);
+meshS Thz1 = movemesh23(Thz,transfo=[x,y,z1],orientation=+1,region=refZ,removeduplicate=true);
 
 //medit("  --- ", Thx0,Thx1,Thy0,Thy1,Thz0,Thz1);
  ThHex = Thx0+Thx1+Thy0+Thy1+Thz0+Thz1;

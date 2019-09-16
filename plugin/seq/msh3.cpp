@@ -2100,17 +2100,11 @@ public:
             CompileError("uncompatible change(... region= , reftet=  ");
         if (nargs[1] && nargs[3])
             CompileError("uncompatible  change(...label= , refface=  ");
-        if (nargs[7] && (is_same<MMesh,MeshS>::value))
-            cout << " Warning: remove internal border isn't implemented " << endl;
         }
     AnyType operator () (Stack stack)  const;
 };
 
-/*template<class MMesh>
-basicAC_F0::name_and_type SetMesh_Op<MMesh>::name_param [] = {
-};
-*/
-
+// special instance, list arguments for mesh3
 template<>
 basicAC_F0::name_and_type SetMesh_Op<Mesh3>::name_param [] = {
     {"reftet", &typeid(KN_<long>)},
@@ -2123,7 +2117,7 @@ basicAC_F0::name_and_type SetMesh_Op<Mesh3>::name_param [] = {
     {"rmInternalFaces", &typeid(bool)}
 };
 
-
+// special instance, list arguments for meshS
 template<>
  basicAC_F0::name_and_type SetMesh_Op<MeshS>::name_param [] = {
  {"reftri", &typeid(KN_<long>)},
@@ -2136,14 +2130,12 @@ template<>
  {"rmInternalEdges", &typeid(bool)}
  };
 
-
-
+// function to apply the change of label with the map
 int ChangeLab (const map<int, int> &m, int lab) {
     map<int, int>::const_iterator i = m.find(lab);
     if (i != m.end()) {
         lab = i->second;
     }
-    
     return lab;
 }
 
@@ -2176,6 +2168,9 @@ AnyType SetMesh_Op<MMesh>::operator () (Stack stack)  const {
     long rmlabfaces(arg(6, stack, 0L));
     bool rm_i_faces(arg(7, stack, false));
    
+    if (rm_i_faces && is_same<MMesh,MeshS>::value )
+        cout << " Warning: remove internal border isn't implemented " << endl;
+    
     if (nrB.N() <= 0 && nrT.N() <= 0 && (!freg) && (!flab) && !rmlabfaces && !rm_i_faces)
         return pTh;
     
@@ -2201,7 +2196,7 @@ AnyType SetMesh_Op<MMesh>::operator () (Stack stack)  const {
     }
     
     //copy vertices
-    V *v = new Vertex3[nbv];
+    V *v = new V[nbv];
     V *vv = v;
     for (int i = 0; i < nbv; i++) {
         const V &V(Th.vertices[i]);
@@ -2275,7 +2270,6 @@ AnyType SetMesh_Op<MMesh>::operator () (Stack stack)  const {
             nrmf++;
         else
             (*bb++).set(v, iv, l1);
-    
     }
     
     if (nrmf && verbosity > 2)
@@ -2421,118 +2415,6 @@ MeshS*func_movemesh23(const Mesh &Th, KN<double> txx, KN<double> tyy, KN<double>
 
 }
 
-
-
-
-class Movemesh2D_S_Op: public E_F0mps
-{
-public:
-    Expression eTh;
-    Expression xx, yy, zz;
-    static const int n_name_param = 5 + 1;
-    static basicAC_F0::name_and_type name_param [];
-    Expression nargs[n_name_param];
-    KN_<long> arg (int i, Stack stack, KN_<long> a) const {
-        return nargs[i] ? GetAny<KN_<long> >((*nargs[i])(stack)) : a;
-    }
-
-    long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
-    double arg (int i, Stack stack, double a) const {return nargs[i] ? GetAny<double>((*nargs[i])(stack)) : a;}
-
-public:
-    Movemesh2D_S_Op (const basicAC_F0 &args, Expression tth):
-    eTh(tth), xx(0), yy(0), zz(0) {
-        args.SetNameParam(n_name_param, name_param, nargs);
-
-        const E_Array *a1 = 0;
-        if (nargs[0]) {a1 = dynamic_cast<const E_Array *>(nargs[0]);}
-
-        int err = 0;
-        if (nargs[2] && nargs[5]) {
-            CompileError("uncompatible movemesh2S (Th, label= , refface=  ");
-        }
-
-        if (nargs[4])
-            CompileError("obselete argument movemesh23, movemesh23 function returns a meshS type ");
-
-        if (a1) {
-            if (a1->size() != 3) {
-                CompileError("movemesh2S (Th,transfo=[X,Y,Z],) ");
-            }
-
-            xx = to<double>((*a1)[0]);
-            yy = to<double>((*a1)[1]);
-            zz = to<double>((*a1)[2]);
-        }
-    }
-
-    AnyType operator () (Stack stack)  const;
-};
-
-
-
-// modif to create a real surface mesh on meshS
-basicAC_F0::name_and_type Movemesh2D_S_Op::name_param [] = {
-    {"transfo", &typeid(E_Array)},
-    {"orientation", &typeid(long)},
-    {"refface", &typeid(KN_<long>)},
-    {"ptmerge", &typeid(double)},
-    {"boolsurface", &typeid(long)},
-    {"label", &typeid(KN_<long>)}
-};
-AnyType Movemesh2D_S_Op::operator () (Stack stack)  const {
-
-    const Mesh *pTh = GetAny<const Mesh *>((*eTh)(stack));
-    const Mesh &Th = *pTh;
-    const Mesh *m = pTh;
-
-
-    KN<long> zzempty;
-    // int intempty=0;
-    int mesureM(arg(1, stack, 0L));
-    KN<long> nrface(arg(2, stack, arg(5, stack, zzempty)));
-    double precis_mesh(arg(3, stack, -1.));
-    long flagsurfaceall=-1L;//(arg(4, stack, -1L));
-    if (nrface.N() < 0) {return m;}
-    // movemesh
-    int nbv = Th.nv;
-    KN<double> txx(nbv), tyy(nbv), tzz(nbv);
-    KN<int> takemesh(nbv);
-    MeshPoint *mp3(MeshPointStack(stack));
-    takemesh = 0;
-    // by defaut transfo = [x,y,0]
-    for (int it = 0; it < Th.nt; ++it)
-        for (int iv = 0; iv < 3; ++iv) {
-            int i = Th(it, iv);
-            if (takemesh[i] == 0) {
-                mp3->setP(&Th, it, iv);
-                if (xx) txx[i] = GetAny<double>((*xx)(stack));
-                if (yy) tyy[i] = GetAny<double>((*yy)(stack));
-                if (zz) tzz[i] = GetAny<double>((*zz)(stack));
-                takemesh[i] = takemesh[i] + 1;
-            }
-        }
-
-    MeshS *ThS = func_movemesh23(Th, txx, tyy, tzz, mesureM, nrface, precis_mesh, flagsurfaceall, stack);
-    Add2StackOfPtr2FreeRC(stack, ThS);
-    return ThS;
-
-}
-
-
-
-// function to move a mesh from a 2D to new meshS type
-class Movemesh2D_S: public OneOperator {
-public:
-    typedef const Mesh *pmesh;
-    typedef const MeshS *pmeshS;
-
-    Movemesh2D_S (): OneOperator(atype<pmeshS>(), atype<pmesh>()) {}
-
-    E_F0*code (const basicAC_F0 &args) const {
-        return new Movemesh2D_S_Op(args, t[0]->CastTo(args[0]));    // CastTo(args[]); // plus tard
-    }
-};
 
 
 /* ancien fichier de TransfoMesh */
@@ -7638,11 +7520,27 @@ public:
     AnyType operator () (Stack stack)  const;
 };
 
-template<class MMesh>
-basicAC_F0::name_and_type Movemesh_Op<MMesh>::name_param [] = {
+// instance arguments for mesh3
+template<>
+basicAC_F0::name_and_type Movemesh_Op<Mesh3>::name_param [] = {
     {"transfo", &typeid(E_Array)},    // 0
     {"reftet", &typeid(KN_<long>)},    // 1
     {"refface", &typeid(KN_<long>)},
+    {"precismesh", &typeid(double)},
+    {"orientation", &typeid(long)},    // 4
+    {"region", &typeid(KN_<long>)},    // 5
+    {"label", &typeid(KN_<long>)},    // 6
+    {"cleanmesh", &typeid(bool)},  // 7
+    {"removeduplicate", &typeid(bool)},  // 8
+    {"rebuildboundary", &typeid(bool)}  // 9
+};
+
+// instance arguments for meshS
+template<>
+basicAC_F0::name_and_type Movemesh_Op<MeshS>::name_param [] = {
+    {"transfo", &typeid(E_Array)},    // 0
+    {"reftri", &typeid(KN_<long>)},    // 1
+    {"refedge", &typeid(KN_<long>)},
     {"precismesh", &typeid(double)},
     {"orientation", &typeid(long)},    // 4
     {"region", &typeid(KN_<long>)},    // 5
@@ -7672,7 +7570,7 @@ AnyType Movemesh_Op<MMesh>::operator () (Stack stack)  const {
     long orientation(arg(4, stack, 1L));
     bool cleanmesh(arg(7, stack, true));
     bool removeduplicate(arg(8, stack, false));
-    bool rebuildboundary(arg(8, stack, false));
+    bool rebuildboundary(arg(9, stack, false));
     
     KN<int> takemesh(Th.nv);
     takemesh = 0;
@@ -7702,10 +7600,9 @@ AnyType Movemesh_Op<MMesh>::operator () (Stack stack)  const {
     assert((xx) && (yy) && (zz));
     
     // loop over elements
-    
     for (int it = 0; it < Th.nt; ++it) {
         const T &K(Th.elements[it]);
-        for (int iv = 0; iv < T::nv; ++iv) {
+        for (int iv = 0; iv < T::nv; iv++) {
              int i = Th.operator () (K[iv]);
             if (takemesh[i] == 0) {
                 mpp->setP(&Th, it, iv);
@@ -7717,10 +7614,11 @@ AnyType Movemesh_Op<MMesh>::operator () (Stack stack)  const {
                     v[i].y = GetAny<double>((*yy)(stack));
                 else
                     v[i].y = mpp->P.y;
-                if (zz) v[i].z = GetAny<double>((*zz)(stack));
+                if (zz)
+                v[i].z = GetAny<double>((*zz)(stack));
                     else
                 v[i].z = mpp->P.z;
-                v[iv].lab=Th.vertices[iv].lab;
+                v[i].lab=Th.vertices[i].lab;
                 takemesh[i] = takemesh[i] + 1;
             }
         }
@@ -7729,24 +7627,22 @@ AnyType Movemesh_Op<MMesh>::operator () (Stack stack)  const {
     // loop over border elements
     for (int ibe = 0; ibe < Th.nbe; ++ibe) {
         const B &K(Th.be(ibe));
-     
         for (int j = 0; j < B::nv; j++) {
             int i = Th.operator () (K[j]);
             if (takemesh[i] == 0) {
                 mpp->set(Th.vertices[i].x, Th.vertices[i].y, Th.vertices[i].z);
-                
                 if (xx)
                     v[i].x = GetAny<double>((*xx)(stack));
                 if (yy)
                     v[i].y = GetAny<double>((*yy)(stack));
                 if (zz)
                     v[i].z = GetAny<double>((*zz)(stack));
+                v[i].lab=Th.vertices[i].lab;
                 takemesh[i] = takemesh[i] + 1;
             }
         }
     }
 
-    
     // copy elements
     for (int it = 0; it < Th.nt; ++it) {
         const T &K = (Th[it]);
@@ -7756,7 +7652,6 @@ AnyType Movemesh_Op<MMesh>::operator () (Stack stack)  const {
         //cp element
         t[it].set(v,iv,K.lab);
     }
-    
     // copy border elements
     for (int ibe = 0; ibe < Th.nbe; ++ibe) {
         const B &K(Th.be(ibe));
@@ -7776,7 +7671,6 @@ AnyType Movemesh_Op<MMesh>::operator () (Stack stack)  const {
             int lab = K.lab;
             T_Th->elements[i].lab = ChangeLab(mapTref, lab);
         }
-    
     if (nrB.N() > 0)
         for (int i = 0; i < T_Th->nbe; i++) {
             const B &K(T_Th->be(i));
@@ -7784,19 +7678,14 @@ AnyType Movemesh_Op<MMesh>::operator () (Stack stack)  const {
             T_Th->be(i).lab = l1;
         }
     T_Th->BuildGTree();
-    
     // case MeshS: T_Th->mapSurf2Vol=0;_Th->mapVol2Surf=0;
     // case Mesh3: if(Th.meshS) T_Th->BuildMeshS();
-    
     finalize(T_Th);
     
     Add2StackOfPtr2FreeRC(stack, T_Th);
     *mp = mps;
     return T_Th;
 }
-
-
-
 
 
 template< class MMesh>
@@ -7815,7 +7704,7 @@ public:
             const E_Array *a = dynamic_cast<const E_Array *>(args[1].LeftValue());
             
             ffassert(a);
-            if (a->size() != 3) {CompileError("movemesh(Th,[X,Y,Z],...) need 3 componates in array ", atype<pmesh>());}
+            if (a->size() != 3) {CompileError("movemesh(Th,[X,Y,Z],...) need 3 componates in array ", atype<ppmesh>());}
             
             Expression X = to<double>((*a)[0]);
             Expression Y = to<double>((*a)[1]);
@@ -7824,6 +7713,160 @@ public:
         } else {return 0;}
     }
 };
+
+
+// special instance movemesh from 2D to 3D surface
+template<>
+basicAC_F0::name_and_type Movemesh_Op<Mesh>::name_param [] = {
+    {"transfo", &typeid(E_Array)},    // 0
+    {"reftri", &typeid(KN_<long>)},    // 1
+    {"refedge", &typeid(KN_<long>)},
+    {"precismesh", &typeid(double)},
+    {"orientation", &typeid(long)},    // 4
+    {"region", &typeid(KN_<long>)},    // 5
+    {"label", &typeid(KN_<long>)},    // 6
+    {"cleanmesh", &typeid(bool)},  // 7
+    {"removeduplicate", &typeid(bool)},  // 8
+    {"rebuildboundary", &typeid(bool)}  // 9
+};
+
+template<>
+AnyType Movemesh_Op<Mesh>::operator () (Stack stack)  const {
+    MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+    Mesh *pTh = GetAny<Mesh *>((*eTh)(stack));
+    ffassert(pTh);
+    MeshPoint *mpp(MeshPointStack(stack));
+    
+    typedef typename Mesh::Element T;
+    typedef typename Mesh::BorderElement B;
+    typedef typename Mesh::Vertex V;
+    Mesh &Th = *pTh; // tthe 2D mesh
+    
+    typedef typename MeshS::Element TS;
+    typedef typename MeshS::BorderElement BS;
+    typedef typename MeshS::Vertex VS;
+    // arguments
+    KN<long> zzempty;
+    KN<long> nrT(arg(1, 5, stack, zzempty));
+    KN<long> nrB(arg(2, 6, stack, zzempty));
+    double precis_mesh(arg(3, stack, -1.));
+    long orientation(arg(4, stack, 1L));
+    bool cleanmesh(arg(7, stack, true));
+    bool removeduplicate(arg(8, stack, false));
+    bool rebuildboundary(arg(9, stack, false));
+    
+    if (verbosity > 5)
+        cout << "before movemesh: Vertex " << Th.nv << " Triangles " << Th.nt << " Edges " << Th.neb << endl;
+    
+    // map to change lab
+    ffassert(nrT.N() % 2 == 0);
+    ffassert(nrB.N() % 2 == 0);
+    
+    map<int, int> mapBref;
+    for (int i = 0; i < nrB.N(); i += 2)
+        if (nrB[i] != nrB[i + 1])
+            mapBref[nrB[i]] = nrB[i + 1];
+    
+    map<int, int> mapTref;
+    for (int i = 0; i < nrT.N(); i += 2)
+        if (nrT[i] != nrT[i + 1])
+            mapTref[nrT[i]] = nrT[i + 1];
+   
+    // copy to clean proprely the stack
+    VS* vS=new VS[Th.nv];
+    TS* tS=new TS[Th.nt];
+    BS* bS=new BS[Th.neb];
+    KN<int> takemesh(Th.nv);
+    takemesh = 0;
+    
+    // apply the geometric transfo and copy vertices
+    assert((xx) && (yy) && (zz));
+
+    for (int it = 0; it < Th.nt; it++)
+        for (int iv = 0; iv < 3; iv++) {
+            int i = Th(it, iv);
+            if (takemesh[i] == 0) {
+                mpp->setP(&Th, it, iv);
+                if (xx)
+                    vS[i].x = GetAny<double>((*xx)(stack));
+                if (yy)
+                    vS[i].y = GetAny<double>((*yy)(stack));
+                if (zz)
+                    vS[i].z = GetAny<double>((*zz)(stack));
+                vS[i].lab=Th.vertices[i].lab;
+                takemesh[i] = takemesh[i] + 1;
+            }
+        }
+
+    // transform elements 2D->3D surface
+    for (int it = 0; it < Th.nt; it++) {
+        const T &K=(Th[it]);
+        int iv[3];
+        for (int i=0;i<3;i++)
+            iv[i] = Th.operator () (K[i]);
+        tS[it].set(vS,iv,K.lab);
+    }
+    
+    // copy border elements
+    for (int ibe = 0; ibe < Th.neb; ibe++) {
+        const B &K(Th.be(ibe));
+        int iv[2];
+        for (int i=0;i<2;i++)
+            iv[i] = Th.operator () (K[i]);
+        bS[ibe].set(vS,iv,K.lab);
+    }
+    
+    // build the moved mesh and apply option
+    MeshS *T_Th = new MeshS(Th.nv, Th.nt, Th.neb, vS, tS, bS, cleanmesh, removeduplicate, rebuildboundary, orientation);
+    
+    // apply the change of elements and borderelements references
+    if (nrT.N() > 0)
+        for (int i = 0; i < T_Th->nt; i++) {
+            const TS &K(T_Th->elements[i]);
+            int lab = K.lab;
+            T_Th->elements[i].lab = ChangeLab(mapTref, lab);
+        }
+    
+    if (nrB.N() > 0)
+        for (int i = 0; i < T_Th->nbe; i++) {
+            const BS &K(T_Th->be(i));
+            int l0, l1 = ChangeLab(mapBref, l0 = K.lab);
+            T_Th->be(i).lab = l1;
+        }
+    
+    T_Th->BuildGTree();
+    Add2StackOfPtr2FreeRC(stack, T_Th);
+    *mp = mps;
+    return T_Th;
+}
+
+template<>
+class Movemesh<Mesh>: public OneOperator {
+public:
+    int cas;
+    typedef const Mesh *pmesh;
+    typedef const MeshS *pmeshS;
+    Movemesh (): OneOperator(atype<pmeshS>(), atype<pmesh>()), cas(0) {}
+    
+    Movemesh (int): OneOperator(atype<pmeshS>(), atype<pmesh>(), atype<E_Array>()), cas(1) {}
+    
+    E_F0*code (const basicAC_F0 &args) const {
+        if (cas == 0) {
+            return new Movemesh_Op<Mesh>(args, t[0]->CastTo(args[0]));
+        } else if (cas == 1) {
+            const E_Array *a = dynamic_cast<const E_Array *>(args[1].LeftValue());
+            
+            ffassert(a);
+            if (a->size() != 3) {CompileError("movemesh(Th,[X,Y,Z],...) need 3 componates in array ", atype<pmesh>());}
+            
+            Expression X = to<double>((*a)[0]);
+            Expression Y = to<double>((*a)[1]);
+            Expression Z = to<double>((*a)[2]);
+            return new Movemesh_Op<Mesh>(args, t[0]->CastTo(args[0]), X, Y, Z);
+        } else {return 0;}
+    }
+};
+
 
 
 
@@ -7866,7 +7909,7 @@ static void Load_Init () {
     Global.Add("gluemesh", "(", new Op_GluMesh3tab);
     Global.Add("extract", "(", new ExtractMesh2D);   // obselete function -> use trunc function
     Global.Add("extract", "(", new ExtractMesh);     // take a Mesh3 in arg and return a part of MeshS
-    Global.Add("movemesh23", "(", new Movemesh2D_S);
+    //Global.Add("movemesh23", "(", new Movemesh2D_S);
     // for a mesh3 Th3, if Th3->meshS=NULL, build the meshS associated
     Global.Add("buildSurface", "(", new BuildMeshSFromMesh3);
 
@@ -7907,6 +7950,9 @@ static void Load_Init () {
     
     Global.Add("movemesh3", "(", new Movemesh<Mesh3>);
     Global.Add("movemesh", "(", new Movemesh<Mesh3>(1));
+    
+    Global.Add("movemesh23", "(", new Movemesh<Mesh>);
+    //Global.Add("movemesh", "(", new Movemesh<Mesh>(1));
     
     Global.Add("change", "(", new SetMesh<MeshS>);
     Global.Add("change", "(", new SetMesh<Mesh3>);
