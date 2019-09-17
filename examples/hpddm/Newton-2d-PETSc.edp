@@ -72,9 +72,9 @@ plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
 
 xPETSc = 0;
 Vh v;
-int j, i = 0;
-real absTol = 1e-1;
-macro myplot() cmm = "Global " + (j == 0 ? "solution" : "decrement") + " at iteration " + i, wait = 1, fill = 1, dim = 3// EOM
+int j;
+real absTol = 1e-2;
+macro myplot() cmm = "Global " + (j == 0 ? "solution" : "decrement") + " at iteration " + it, wait = 1, fill = 1, dim = 3// EOM
 func int funcMonitor(int it, real xnorm, real gnorm, real f, real[int]& u, real[int]& du) {
     changeNumbering(dJ, v[], u, inverse = true, exchange = true);
     j = 0;
@@ -82,10 +82,10 @@ func int funcMonitor(int it, real xnorm, real gnorm, real f, real[int]& u, real[
     changeNumbering(dJ, v[], du, inverse = true, exchange = true);
     j = 1;
     plotMPI(Th, v, Pk, def, real, myplot);
-    ++i;
     real abs = du.linfty, red;
     mpiAllReduce(abs, red, mpiCommWorld, mpiMAX);
-    return i > 1 && red < absTol ? 2 : 0; // reasons defined there https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/SNES/SNESConvergedReason.html
+    return it > 0 && red < absTol ? 2 : 0; // reasons defined there https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/SNES/SNESConvergedReason.html
 }
 SNESSolve(dJ, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_converged_reason", monitor = funcMonitor);
 changeNumbering(dJ, u[], xPETSc, inverse = true, exchange = true);
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
