@@ -1368,7 +1368,7 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
     vv=new V[nv];
     
     for(int i=0;i<nv;i++) {
-        int &iv=ind_nv[i];
+        int iv=ind_nv[i];
         vv[i].x=v[iv].x;
         vv[i].y=v[iv].y;
         vv[i].z=v[iv].z;
@@ -1378,7 +1378,7 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
   
     double mes=0., mesb=0.;
     nt=new_nt;
-
+    T *tt=new T[nt];
     for(int i=0;i<nt;i++) {
         int &it=ind_nt[i];
         const T &K(t[it]);
@@ -1391,11 +1391,12 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
         if (orientation<0)
             swap(iv[1], iv[2]);
         
-        t[i].set(vv, iv, K.lab);
-        mes+=t[i].mesure();
+        tt[i].set(vv, iv, K.lab);
+        mes+=tt[i].mesure();
     }
     
     nbe=new_nbe;
+    B *bb=new B[nbe];
     for(int i=0;i<nbe;i++) {
         int &ie=ind_nbe[i];
         const B &K(b[ie]);
@@ -1406,27 +1407,30 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
         }
         if (orientation<0)
             swap(iv[(B::nv)-2], iv[(B::nv)-1]);
-        b[i].set(vv, iv, K.lab);
-        mesb+=b[i].mesure();
+        bb[i].set(vv, iv, K.lab);
+        mesb+=bb[i].mesure();
     }
  
   
- if(verbosity>2)
-     cout << "after clean mesh, nv = " << nv << " nt = " << nt << " nbe = " << nbe << endl;
+    if(verbosity>2)
+        cout << "after clean mesh, nv = " << nv << " nt = " << nt << " nbe = " << nbe << endl;
    
- if (mes<0) {
+    if (mes<0) {
         cerr << " Error of mesh orientation , current orientation = " << orientation << endl;
         cerr << " mesure element mesh = " << mes << endl;
         cerr << " mesure border mesh = " << mesb << endl;
- }
+    }
   
- // stack problem here
- v=vv;
-
- delete []ind_nv;
- delete []ind_nt;
- delete []ind_nbe;
- delete []old2new;
+    delete [] v;
+    delete [] t;
+    delete [] b;
+    v=vv;
+    t=tt;
+    b=bb;
+    delete []ind_nv;
+    delete []ind_nt;
+    delete []ind_nbe;
+    delete []old2new;
 
 }
 
