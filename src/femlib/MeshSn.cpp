@@ -769,11 +769,27 @@ namespace Fem2D
         
         assert(mes>=0.);
     }
+   
     
-    MeshS::MeshS(const Serialize&) : mapVol2Surf(0), mapSurf2Vol(0) {
-        ffassert(0);
+    MeshS::MeshS(const  Serialize &serialized)
+    :GenericMesh<TriangleS,BoundaryEdgeS,Vertex3> (serialized),
+    mapVol2Surf(0), mapSurf2Vol(0)
+    {
+        BuildBound();
+        if(verbosity>1)
+            cout << "  -- End of serialized: mesure = " << mes << " border mesure " << mesb << endl;
+        
+
+            BuildAdj();
+            Buildbnormalv();
+            BuildjElementConteningVertex();
+
+        
+        if(verbosity>1)
+            cout << "  -- MeshS  (serialized), d "<< 3  << ", n Vtx " << nv <<", n Tri " << nt <<  " n Bord " << nbe << endl;
+        ffassert(mes>=0); // add F. Hecht sep 2009.
+        
     }
-    
     
     
     int MeshS::Save(const string & filename) const

@@ -45,7 +45,7 @@ for(int i = 0; i < iMax; ++i) {
     rhs = vPb(0, Wh);
     u[] = A^-1 * rhs;
     macro myplot()cmm = "Global solution at iteration " + i, fill = 1, value = 1//
-    /* plotMPI(Th, u, Pk, def, real, myplot) TODO */
+    plotMPI(Th, u, Pk, def, real, myplot)
     w[] = u[];
     mat = vPb(Wh, Wh);
     changeOperator(A, mat);
