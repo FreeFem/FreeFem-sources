@@ -55,6 +55,7 @@ using namespace std;
 #include "MeshPoint.hpp"
 #include "Mesh2dn.hpp"
 #include "Mesh3dn.hpp"
+#include "MeshSn.hpp"
 #include "Operator.hpp"
 #include "lex.hpp"
 #include "libmesh5.h"
@@ -426,12 +427,65 @@ struct MPIrank {
       aa->BuildGTree();
       a = aa;
     }
-    delete a->meshS;
-    const_cast<Fem2D::Mesh3*>(a)->meshS = nullptr;
     delete buf;
-    return *this;
+      if(a->meshS) {
+          if(verbosity>100)
+              cout << " MPI Bcast (const mesh3->meshS *) " << a->meshS << endl;
+          buf = 0;
+          nbsize = 0;
+          if (who == mpirank) {
+              buf = new Serialize((*a->meshS).serialize());
+              nbsize = buf->size();
+          }
+          WBcast(&nbsize, 1, who, comm);
+          if (who != mpirank)
+              buf = new Serialize(nbsize, Fem2D::GenericMesh_magicmesh);
+          assert(nbsize);
+          if (verbosity > 200)
+              cout << " size to bcast for mesh3->meshS : " << nbsize << " mpirank : " << mpirank << endl;
+          
+          WBcast((char *)(*buf), nbsize, who, comm);
+          
+          if (who != mpirank) {
+              if ((*a).meshS) ((*a).meshS)->decrement();
+              (*a).meshS = new Fem2D::MeshS(*buf);
+              (*a).meshS->BuildGTree();
+              //a->meshS = new MeshS(aaS);
+          }
+          delete buf;
+      }
+      return *this;
   }
 
+  const MPIrank & Bcast (Fem2D::MeshS const *&a) const {
+      if(verbosity>100)
+          cout << " MPI Bcast (const meshS *) " << a << endl;
+      Serialize *buf = 0;
+      long nbsize = 0;
+      if (who == mpirank) {
+          buf = new Serialize((*a).serialize());
+          nbsize = buf->size();
+      }
+      WBcast(&nbsize, 1, who, comm);
+      if (who != mpirank)
+          buf = new Serialize(nbsize, Fem2D::GenericMesh_magicmesh);
+      assert(nbsize);
+      if (verbosity > 200)
+          cout << " size to bcast : " << nbsize << " mpirank : " << mpirank << endl;
+        
+      WBcast((char *)(*buf), nbsize, who, comm);
+        
+      if (who != mpirank) {
+          if (a) (*a).decrement();
+          Fem2D::MeshS * aa = new Fem2D::MeshS(*buf);
+          aa->BuildGTree();
+          a = aa;
+      }
+      delete buf;
+      return *this;
+  }
+
+    
   template<class R>
   const MPIrank & Bcast(Matrice_Creuse<R> &a) const {
     if(verbosity>100)
@@ -541,6 +595,12 @@ void DeSerialize (Serialize *sTh, const Fem2D::Mesh3 **ppTh) {
   Fem2D::Mesh3 *pTh = new Fem2D::Mesh3(*sTh);
   pTh->BuildGTree();
   *ppTh = pTh;
+  // build the meshS ???
+  //  if (sTh->meshS) { cout << " WARNING ONGOING " << endl;
+        //Fem2D::MeshS *pThS = new Fem2D::MeshS( *(sTh->meshS) );
+        //pThS->BuildGTree();
+        //*(ppTh->meshS) = pThS;
+   // }
 }
 
 void DeSerialize (Serialize *sTh, const Fem2D::MeshS **ppTh) {
@@ -2514,9 +2574,10 @@ void f_init_lgparallele()
 		      new OneBinaryOperator<Op_Readmpi<long> > ,
 		      new OneBinaryOperator<Op_Readmpi<KN<double> > > ,
 		      new OneBinaryOperator<Op_Readmpi<KN<long> > > ,
-		       new OneBinaryOperator<Op_Readmpi<KN<Complex> > > ,
+		      new OneBinaryOperator<Op_Readmpi<KN<Complex> > > ,
 		      new OneBinaryOperator<Op_Readmpi<const Mesh *> > ,
 		      new OneBinaryOperator<Op_Readmpi<const Mesh3 *> > ,
+              new OneBinaryOperator<Op_Readmpi<const MeshS *> > ,
 		      new OneBinaryOperator<Op_Readmpi<Matrice_Creuse<R> > > ,
 		      new OneBinaryOperator<Op_Readmpi<Matrice_Creuse<Complex> > >
 		      );
@@ -2535,6 +2596,7 @@ void f_init_lgparallele()
 		       new OneBinaryOperator<Op_Writempi<KN<Complex> * > > ,
 		       new OneBinaryOperator<Op_Writempi<const Mesh *> > ,
 		       new OneBinaryOperator<Op_Writempi<const Mesh3 *> > ,
+               new OneBinaryOperator<Op_Writempi<const MeshS *> > ,
 		       new OneBinaryOperator<Op_Writempi<Matrice_Creuse<R> * > > ,
 		       new OneBinaryOperator<Op_Writempi<Matrice_Creuse<Complex>* > >
 
@@ -2556,6 +2618,7 @@ void f_init_lgparallele()
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<KNM<Complex> *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<const Mesh *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<const Mesh3 *> >);
+     Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<const MeshS *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Matrice_Creuse<R> *> >);
      Global.Add("Send","(", new OneBinaryOperator<Op_Sendmpi<Matrice_Creuse<Complex> *> >);
 
@@ -2585,6 +2648,7 @@ void f_init_lgparallele()
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<KNM<Complex> > >);
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<const Mesh *> >);
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<const Mesh3 *> >);
+       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<const MeshS *> >);
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<Matrice_Creuse<R> > >);
       Global.Add("Recv","(", new OneBinaryOperator<Op_Recvmpi<Matrice_Creuse<Complex> > >);
 
@@ -2617,6 +2681,7 @@ void f_init_lgparallele()
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<KNM<Complex> > >);
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<const Mesh *> >);
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<const Mesh3 *> >);
+      Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<const MeshS *> >);
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<Matrice_Creuse<R> > >);
       Global.Add("broadcast","(",new OneBinaryOperator<Op_Bcastmpi<Matrice_Creuse<Complex> > >);
 

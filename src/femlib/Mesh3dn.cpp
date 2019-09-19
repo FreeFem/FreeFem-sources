@@ -416,6 +416,32 @@ namespace Fem2D
         ffassert(mes>=0); // add F. Hecht sep 2009.
         
     }
+    
+    Mesh3::Mesh3(const Serialize &serialized1, const Serialize &serialized2)
+    :GenericMesh<Tet,Triangle3,Vertex3> (serialized1),
+    meshS(0)
+    {
+        // build the meshS with serialized2
+        meshS=new MeshS(serialized2);
+        
+        BuildBound();
+        if(verbosity>1)
+            cout << "  -- End of serialized: mesure = " << mes << " border mesure " << mesb << endl;
+        
+        if(nt > 0){
+            BuildAdj();
+            Buildbnormalv();
+            BuildjElementConteningVertex();
+        }
+        
+        if(verbosity>1)
+            cout << "  -- Mesh3  (serialized), d "<< 3  << ", n Tet " << nt << ", n Vtx "
+            << nv << " n Bord " << nbe << endl;
+        ffassert(mes>=0); // add F. Hecht sep 2009.
+        
+    }
+    
+    
     Mesh3::Mesh3(FILE *f,int offset)
     :meshS(0)
     {
