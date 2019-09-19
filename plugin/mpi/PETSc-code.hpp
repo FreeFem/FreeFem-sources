@@ -298,7 +298,7 @@ void change(Type* const& ptA, Matrice_Creuse<PetscScalar>* const& mat, Type* con
                                 break;
                             }
                         }
-                        PETSc::setCompositePC(pc, ptA->_vS);
+                        setCompositePC(pc, ptA->_vS);
                     }
                 }
             }
@@ -1415,7 +1415,7 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
                 }
                 PC pc;
                 KSPGetPC(ksp, &pc);
-                PETSc::setCompositePC(pc, ptA->_vS);
+                setCompositePC(pc, ptA->_vS);
             }
             else if(mpisize == 1 && nargs[10]) {
                 IS is;

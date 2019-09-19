@@ -597,7 +597,7 @@ AnyType SplitMesh::operator()(Stack stack) const
    MeshPoint *mp(MeshPointStack(stack)) , mps=*mp;
   const  Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
    ffassert(Thh);
-   int label=1;
+   int label=0;
   const  Mesh & Th(*Thh);
    long nbt=Thh->nt;
    KN<int> split(nbt);
