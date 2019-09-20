@@ -434,10 +434,13 @@ namespace Fem2D
             BuildjElementConteningVertex();
         }
         
-        if(verbosity>1)
-            cout << "  -- Mesh3  (serialized), d "<< 3  << ", n Tet " << nt << ", n Vtx "
-            << nv << " n Bord " << nbe << endl;
+        if(verbosity>1) {
+            cout << "  -- Mesh3  (serialized), d "<< 3  << ", n Tet " << nt << ", n Vtx " << nv << " n Bord " << nbe << endl;
+            cout << "  -- Mesh3:MeshS  (serialized), d "<< 3 << "on surface, n Tri " << nt << ", n Vtx " << nv << " n Bord " << nbe << endl;
+        }
+        
         ffassert(mes>=0); // add F. Hecht sep 2009.
+        ffassert( (meshS->mes) >=0);
         
     }
     

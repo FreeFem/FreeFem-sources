@@ -420,12 +420,12 @@ struct MPIrank {
       cout << " size to bcast : " << nbsize << " mpirank : " << mpirank << endl;
 
     WBcast((char *)(*buf), nbsize, who, comm);
-
+    Fem2D::Mesh3 * aa;
     if (who != mpirank) {
       if (a) (*a).decrement();
-      Fem2D::Mesh3 * aa = new Fem2D::Mesh3(*buf);
+      aa = new Fem2D::Mesh3(*buf);
       aa->BuildGTree();
-      a = aa;
+      //a = aa;
     }
     delete buf;
       if(a->meshS) {
@@ -446,14 +446,15 @@ struct MPIrank {
           
           WBcast((char *)(*buf), nbsize, who, comm);
           
+          // or use the mesh3 constructor with 2 serialize objets: better
           if (who != mpirank) {
               if ((*a).meshS) ((*a).meshS)->decrement();
-              (*a).meshS = new Fem2D::MeshS(*buf);
-              (*a).meshS->BuildGTree();
-              //a->meshS = new MeshS(aaS);
+              aa->meshS = new Fem2D::MeshS(*buf);
+              aa->meshS->BuildGTree();
           }
           delete buf;
       }
+      a=aa;
       return *this;
   }
 

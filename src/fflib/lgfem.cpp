@@ -2615,7 +2615,7 @@ public:
 
             else if (BCastTo<pfSrarray>(args[i])) { // [[file:lgmesh3.hpp::pfSrarray]]
                 l[i].composant=false;
-                l[i].what=108; ffassert(0); //arry iso value array iso value 3d
+                l[i].what=108; //arry iso value array iso value 3d
                 l[i][0]=CastTo<pfSrarray>(args[i]);}
             else if (BCastTo<pfScarray>(args[i])) { // [[file:lgmesh3.hpp::pfScarray]]
                 l[i].composant=false;
