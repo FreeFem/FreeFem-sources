@@ -146,7 +146,8 @@ public:
   Mesh3(const string, const long); // Add J. Morice 11/10
   Mesh3(FILE *f,int offset=0);     
   Mesh3(const Serialize &);
-  Mesh3(const Serialize &serialized1, const Serialize &serialized2);
+  Mesh3(const  Serialize &serialized, bool withSurface);
+  //Mesh3(const Serialize &serialized1, const Serialize &serialized2);
   Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb, bool cleanmesh=true, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
   double hmin() const; // Add J. Morice 11/10
   //surface mesh possible
@@ -161,6 +162,7 @@ public:
   void read(istream &);
   void readmsh(ifstream & f,int offset);
   void TrueVertex();
+  Serialize serialize_withBorderMesh() const;
   void BuildMeshS(double angle=8.*atan(1.)/9.);  // default angle = 40 deg
     ~Mesh3() {
         

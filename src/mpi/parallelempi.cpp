@@ -409,7 +409,10 @@ struct MPIrank {
     Serialize *buf = 0;
     long nbsize = 0;
     if (who == mpirank) {
-      buf = new Serialize((*a).serialize());
+        if((*a).meshS)
+            buf = new Serialize((*a).serialize_withBorderMesh());
+        else
+            buf = new Serialize((*a).serialize());
       nbsize = buf->size();
     }
     WBcast(&nbsize, 1, who, comm);
@@ -423,39 +426,16 @@ struct MPIrank {
     Fem2D::Mesh3 * aa;
     if (who != mpirank) {
       if (a) (*a).decrement();
-      aa = new Fem2D::Mesh3(*buf);
+        if((*a).meshS)
+            aa = new Fem2D::Mesh3(*buf, (*a).meshS);
+        else
+            aa = new Fem2D::Mesh3(*buf);
+        
       aa->BuildGTree();
-      //a = aa;
+      a = aa;
     }
     delete buf;
-      if(a->meshS) {
-          if(verbosity>100)
-              cout << " MPI Bcast (const mesh3->meshS *) " << a->meshS << endl;
-          buf = 0;
-          nbsize = 0;
-          if (who == mpirank) {
-              buf = new Serialize((*a->meshS).serialize());
-              nbsize = buf->size();
-          }
-          WBcast(&nbsize, 1, who, comm);
-          if (who != mpirank)
-              buf = new Serialize(nbsize, Fem2D::GenericMesh_magicmesh);
-          assert(nbsize);
-          if (verbosity > 200)
-              cout << " size to bcast for mesh3->meshS : " << nbsize << " mpirank : " << mpirank << endl;
-          
-          WBcast((char *)(*buf), nbsize, who, comm);
-          
-          // or use the mesh3 constructor with 2 serialize objets: better
-          if (who != mpirank) {
-              if ((*a).meshS) ((*a).meshS)->decrement();
-              aa->meshS = new Fem2D::MeshS(*buf);
-              aa->meshS->BuildGTree();
-          }
-          delete buf;
-      }
-      a=aa;
-      return *this;
+    return *this;
   }
 
   const MPIrank & Bcast (Fem2D::MeshS const *&a) const {
@@ -596,13 +576,16 @@ void DeSerialize (Serialize *sTh, const Fem2D::Mesh3 **ppTh) {
   Fem2D::Mesh3 *pTh = new Fem2D::Mesh3(*sTh);
   pTh->BuildGTree();
   *ppTh = pTh;
-  // build the meshS ???
-  //  if (sTh->meshS) { cout << " WARNING ONGOING " << endl;
-        //Fem2D::MeshS *pThS = new Fem2D::MeshS( *(sTh->meshS) );
-        //pThS->BuildGTree();
-        //*(ppTh->meshS) = pThS;
-   // }
 }
+
+/*void DeSerialize (Serialize *sTh3, const Fem2D::Mesh3 **ppTh, bool withBorderMesh) {
+ ffassert(withBorder);
+    if (*ppTh) (**ppTh).decrement();
+    Fem2D::Mesh3 *pTh = new Fem2D::Mesh3(*sTh3,withBorderMesh);
+    pTh->BuildGTree();
+    *ppTh = pTh;
+ 
+}*/
 
 void DeSerialize (Serialize *sTh, const Fem2D::MeshS **ppTh) {
   if (*ppTh) (**ppTh).decrement();
@@ -891,6 +874,8 @@ long MPIrank::Recv(const Fem2D::Mesh3 *& a) const  {
       cout << " MPI >> (mesh3 *) &" << a << " " << &a << endl;
     RevcWMeshd<Mesh3> *rwm= new RevcWMeshd<Mesh3>(this,&a);
     if( rwm->DoSR() ) delete rwm;
+    // TODO if meshS
+    
     if((rq==0 || rq == Syncro_block))
       ffassert( a );
     return MPI_SUCCESS;

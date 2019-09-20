@@ -829,6 +829,17 @@ namespace Fem2D
         return (0);
     }
     
+    
+    Serialize MeshS::serialize_withBorderMesh() const {
+        
+        // structure here for MeshL...but not use now
+        ffassert(0);
+    }
+    
+    
+    
+    
+    
     void MeshS::flipSurfaceMeshS(int surface_orientation)
     {
         /* inverse the orientation of the surface if necessary*/

@@ -159,6 +159,7 @@ typedef GenericVertex<R3> Vertex3;
         double hmin() const;
         int Save(const string & filename) const;
         void BuildEdges(const double angle=8.*atan(1.)/9.);  // default angle = 40 deg);
+        Serialize serialize_withBorderMesh() const;
         
         ~MeshS() {
             delete [] mapSurf2Vol ;

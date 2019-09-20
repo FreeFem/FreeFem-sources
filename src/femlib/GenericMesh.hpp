@@ -739,6 +739,7 @@ public:
   }
 
   Serialize serialize() const;
+  Serialize serialize(Serialize &serialize1, Serialize serialize2) const;
 
 private:
   GenericMesh(const GenericMesh &); // pas de construction par copie
