@@ -110,17 +110,61 @@ class attachCoarseOperator : public OneOperator {
                 bool ChecknbLine(int) const { return true; }
                 bool ChecknbColumn(int) const { return true; }
         };
+        class MatMatF_O : public RNM_VirtualMatrix<K>, public Type::super::CoarseCorrection {
+            public:
+                typedef typename Type::super::CoarseCorrection super;
+                Stack stack;
+                mutable Kn x;
+                C_F0 c_x;
+                mutable long mu;
+                C_F0 c_mu;
+                Expression mat;
+                typedef typename RNM_VirtualMatrix<K>::plusAx plusAx;
+                MatMatF_O(int n, Stack stk, const OneOperator* op) :
+                    RNM_VirtualMatrix<K>(n), stack(stk), x(0), c_x(CPValue(x)), mu(1), c_mu(CPValue(mu)),
+                    mat(op ? CastTo<Kn_>(C_F0(op->code(basicAC_F0_wa({ c_x, c_mu })), (aType)*op)) : 0) { }
+                ~MatMatF_O() {
+                    delete mat;
+                    Expression zzz = c_x;
+                    delete zzz;
+                    zzz = c_mu;
+                    delete zzz;
+                }
+                virtual void operator()(const K* const in, K* const out) {
+                    KN_<K> xx(const_cast<K*>(in), this->N);
+                    KN_<K> yy(out, this->N);
+                    addMatMul(xx, yy);
+                }
+                virtual void operator()(const K* const in, K* const out, int n, unsigned short nu) {
+                    mu = nu;
+                    KN_<K> xx(const_cast<K*>(in), this->N * mu);
+                    KN_<K> yy(out, this->N * mu);
+                    addMatMul(xx, yy);
+                }
+                void addMatMul(const Kn_& xx, Kn_& Ax) const {
+                    ffassert(xx.N() == this->N * mu && Ax.N() == this->M * mu);
+                    K* backup = x;
+                    x.set(xx, this->N * mu);
+                    Ax = GetAny<Kn_>((*mat)(stack));
+                    x.set(backup, 0);
+                    WhereStackOfPtr2Free(stack)->clean();
+                }
+                plusAx operator*(const Kn& x) const { return plusAx(this, x); }
+                bool ChecknbLine(int) const { return true; }
+                bool ChecknbColumn(int) const { return true; }
+        };
         const int c;
         class E_attachCoarseOperator : public E_F0mps {
             public:
                 Expression A;
                 Expression comm;
                 const OneOperator *codeC;
+                const OneOperator *codeMatC;
                 const int c;
                 static const int n_name_param = 7;
                 static basicAC_F0::name_and_type name_param[];
                 Expression nargs[n_name_param];
-                E_attachCoarseOperator(const basicAC_F0& args, int d) : A(0), comm(0), codeC(0), c(d) {
+                E_attachCoarseOperator(const basicAC_F0& args, int d) : A(0), comm(0), codeC(0), codeMatC(0), c(d) {
                     args.SetNameParam(n_name_param, name_param, nargs);
                     comm = to<pcommworld>(args[0]);
                     A = to<Type*>(args[1]);
@@ -128,6 +172,8 @@ class attachCoarseOperator : public OneOperator {
                         const Polymorphic* op = dynamic_cast<const Polymorphic*>(args[2].LeftValue());
                         ffassert(op);
                         codeC = op->Find("(", ArrayOfaType(atype<KN<K>*>(), false));
+                        if(!codeC)
+                            codeMatC = op->Find("(", ArrayOfaType(atype<KN<K>*>(), atype<long>(), false));
                     }
                 }
 
@@ -233,7 +279,12 @@ AnyType attachCoarseOperator<Type, K>::E_attachCoarseOperator::operator()(Stack 
         return 0L;
     }
     else {
-        ptA->_cc = new attachCoarseOperator<Type, K>::MatF_O(ptA->getDof(), stack, codeC);
+        if(codeC)
+            ptA->_cc = new attachCoarseOperator<Type, K>::MatF_O(ptA->getDof(), stack, codeC);
+        else if(codeMatC)
+            ptA->_cc = new attachCoarseOperator<Type, K>::MatMatF_O(ptA->getDof(), stack, codeMatC);
+        else
+            ffassert(0);
         return 0L;
     }
 }
