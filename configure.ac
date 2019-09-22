@@ -2196,14 +2196,19 @@ if test "$with_hdf5" = "yes"; then
   CPPFLAGS="$CPPFLAGS $HDF5_CPPFLAGS"
   AC_CHECK_HEADER([H5Cpp.h],[],[with_hdf=no])
   CPPFLAGS="$ff_save_cppflags"
-  if test "$with_hdf5" = "yes"; then
-   AC_FF_ADDWHERELIB(hdf5,$HDF5_LDFLAGS  $HDF5_LIBS,$HDF5_CPPFLAGS)
-   LIBS="$LIBS $HDF5_LDFLAGS  $HDF5_LIBS"
-  fi
+  #if test "$with_hdf5" = "yes"; then
+  AC_FF_ADDWHERELIB(hdf5,$HDF5_LDFLAGS  $HDF5_LIBS,$HDF5_CPPFLAGS)
+  LIBS="$LIBS $HDF5_LDFLAGS  $HDF5_LIBS"
+  # hack, if enable_download=no
+  AC_SUBST([TOOL_COMPILE_iohdf5],ifelse(,,iohdf5,))
+  AC_SUBST([TOOL_DYLIB_iohdf5],iohdf5.$DYLIB_SUFFIX)
+  ifelse(nodownload,,[ff_download_lib="iohdf5 $ff_download_lib"])
+  ifelse(nodownload,,[enable_iohdf5_download=yes])
+  #fi
 else
   enable_iohdf5=no
 fi
-TOOL_DISABLE(iohdf5,iohdf5.$DYLIB_SUFFIX,,nodownload)
+#TOOL_DISABLE(iohdf5,iohdf5.$DYLIB_SUFFIX,,nodownload)
 
 
 AM_CONDITIONAL([FFCS_WINDOWS],[test "$OS" = Windows_NT])
