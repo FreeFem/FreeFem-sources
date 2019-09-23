@@ -2060,20 +2060,19 @@ Serialize GenericMesh<T,B,V>::serialize() const
                     indice[new_nelt]=i;
                     new_nelt++;
                 }
-                // or 2/ rm all multiples or keep the orinal
-               // else if(removeduplicate) {
+                // 2/ rm  the multiples and keep the original
+                else {
                     originmulti[i]=p->v;  // the double elt the current
                     multiTypeGenericElement++;
                
-                    if(removeduplicate &&originmulti[p->v]==-1) {   // the origin elt
+                    if(removeduplicate &&originmulti[p->v]==-1) {   // the origin elt is removed
                         originmulti[p->v]=p->v;
                         originTypeGenericElement++;
                     }
-                //}
+                }
             }
         }
         // rebuild the index list if remove all multiples
-        if(removeduplicate) {
          int cmp=0;
             for(int i=0;i<nelt;i++) {
                 if(originmulti[i]==-1) {
@@ -2085,15 +2084,7 @@ Serialize GenericMesh<T,B,V>::serialize() const
             new_nelt=cmp;
             if (verbosity>2)
                 cout << "no duplicate elements: "<< cmp << " and remove " << multiTypeGenericElement << " multiples elements, corresponding to " << originTypeGenericElement << " original elements " << endl;
-            
-        }
-        else {
-            for(int i=0;i<nelt;i++)
-               ind_nv_t[i]=indice[i];
-            if (verbosity>2)
-                cout << " Warning, the mesh could contain multiple same elements, keep a single copy in mesh...option removemulti in the operator mesh is avalaible" << endl;
-        }
- 
+     
         delete [] originmulti;
         delete [] allmulti;
 
