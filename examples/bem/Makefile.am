@@ -34,8 +34,8 @@ EXTRA_DIST = *.edp
 
 freefem++.pref:Makefile.am
 	echo includepath = \"../../idp/\" > freefem++.pref
-	echo loadpath = \"../../plugin/seq/\" >> freefem++.pref
-	echo loadpath += \"../../plugin/mpi/\" >> freefem++.pref
+	echo loadpath = \"../../plugin/mpi/\" >> freefem++.pref
+	echo loadpath += \"../../plugin/seq/\" >> freefem++.pref
 
 $(TESTS)::freefem++.pref
 
