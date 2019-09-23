@@ -8,7 +8,7 @@ func preffe#K[int] pr#A(preffe#K[int] &u)
     if (!bpara)
     res = pr#Aglobal*u;
     else if (!preffe#prmesh#excluded){
-      IFMACRO(bem,1)
+      IFMACRO(pr#bem,1)
       preffe#K[int] scaledu = preffe#Dih[mpiRank(preffe#prmesh#commddm)]*u;
       preffe#K[int] scaledug(preffe#Vhglob.ndof);
       scaledug = preffe#Rih[mpiRank(preffe#prmesh#commddm)]'*scaledu;
@@ -19,7 +19,7 @@ func preffe#K[int] pr#A(preffe#K[int] &u)
       res = preffe#Rih[mpiRank(preffe#prmesh#commddm)]*resg;
       ENDIFMACRO
 
-      IFMACRO(!bem)
+      IFMACRO(!pr#bem)
       if (preffe#prmesh#overlap > 0) {
         res = pr#aRd[mpiRank(preffe#prmesh#commddm)]*u;
         pr#prfe#update(res,true);
@@ -40,13 +40,13 @@ func preffe#K[int] pr#directsolve(preffe#K[int]& rhs)
 {
   preffe#K[int] res(rhs.n);
 
-  IFMACRO(bem,1)
+  IFMACRO(pr#bem,1)
   if (mpirank == 0)
     cout << "No way to use a direct solver for BEM for now !" << endl;
   assert(0);
   ENDIFMACRO
 
-  IFMACRO(!bem)
+  IFMACRO(!pr#bem)
   preffe#prmesh#tic(pr#tloc)
 
   if (preffe#prmesh#isincomm) {
@@ -85,12 +85,17 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
   {
     preffe#K[int] res(x.n);
     if (preffe#prmesh#isincomm) {
+      IFMACRO(!pr#bem)
       if (!bpara)
       res = pr#AglobEprec*x;
       else if (!preffe#prmesh#excluded){	
         res = pr#aRdEprec*x;
         pr#prfe#update(res,true);
       }
+      ENDIFMACRO
+      IFMACRO(pr#bem,1)
+      res = pr#A(x);
+      ENDIFMACRO
     }
     return res;
   }   
@@ -134,7 +139,7 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
         if (!preffe#prmesh#binexactCS) {
           if (!bpara || mpiRank(preffe#prmesh#mpicomm) < preffe#prmesh#pCS) {
             preffe#prmesh#tic(pr#tcsi)
-            if (mpiRank(preffe#prmesh#mpicomm) == 0)
+            if (mpiRank(preffe#prmesh#mpicomm) < preffe#prmesh#pCS)
             zaux = pr#ECM^-1*vaux;
             else {
               preffe#K[int] dumx(pr#ECM.n), dumb(pr#ECM.n);

@@ -5,6 +5,7 @@ if (pr#prfe#prmesh#isincomm)
 pr#prfe#prmesh#tic(pr#tloc)
 
 if (!bpara) {
+  IFMACRO(!bem)
   pr#ncoarsespace=pr#si;
   if (mpiRank(pr#prfe#prmesh#mpicomm) == 0)
     cout << "["+Stringification(pr)+"] CS size = " << pr#ncoarsespace << endl;
@@ -24,6 +25,8 @@ if (!bpara) {
   matrix<pr#prfe#K> tmp = pr#Aglobal*Zms;
   pr#E = Zms'*tmp;
   set(pr#E,solver=sparsesolver,commworld=pr#prfe#prmesh#commself,factorize=3);
+  ENDIFMACRO
+  ;
 }
 else {
   pr#ncoarsespace = 0; /* coarse space dimension */
@@ -626,7 +629,7 @@ IFMACRO(!pr#algebraic)
 }
 ENDIFMACRO
 
-varf vmass(def(u),def(v)) = intbN(pr#prfe#prmesh#Thi,ffddminterfacelabel)(pr#prfe#mdef(u)'*pr#prfe#mdef(v));
+varf vmass(def(u),def(v)) = pr#prfe#prmesh#intbN(pr#prfe#prmesh#Thi,ffddminterfacelabel)(pr#prfe#mdef(u)'*pr#prfe#mdef(v));
 matrix<pr#prfe#K> mmass = vmass(pr#prfe#Vhi,pr#prfe#Vhi);
 
 attachCoarseOperator(pr#prfe#prmesh#commddm, pr#hpddmOP, A = pr#matN, B = mmass, pattern = pr#aRd[mpiRank(pr#prfe#prmesh#commddm)]);
@@ -717,7 +720,7 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
   matrix<pr#prfe#K> A10int = A10intt*Rint';
 
   /* Interface mass matrix */
-  varf vmass(def(u),def(v)) = intbN(pr#prfe#prmesh#Thi,ffddminterfacelabel)(pr#prfe#mdef(u)'*pr#prfe#mdef(v));
+  varf vmass(def(u),def(v)) = pr#prfe#prmesh#intbN(pr#prfe#prmesh#Thi,ffddminterfacelabel)(pr#prfe#mdef(u)'*pr#prfe#mdef(v));
   matrix<pr#prfe#K> mmass = vmass(pr#prfe#Vhi,pr#prfe#Vhi);
   matrix<pr#prfe#K> mmass10t = R10*mmass;
   matrix<pr#prfe#K> mmass10 = mmass10t*R10';

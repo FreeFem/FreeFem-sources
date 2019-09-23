@@ -5,33 +5,6 @@ include "getARGV.idp"// to process command line options
 
 include "ffddm_parameters.idp"
 
-IFMACRO(dimension,2)
-macro meshN()mesh// EOM             // two-dimensional problem
-macro intN()int2d// EOM             // two-dimensional integral
-macro intbN()int1d// EOM            // one-dimensional integral
-macro minimalMesh()square(1,1)// EOM
-macro Tmatrix() matrix// EOM
-ENDIFMACRO
-
-IFMACRO(dimension,3)
-load "msh3"
-macro meshN()mesh3// EOM            // three-dimensional problem
-macro intN()int3d// EOM             // three-dimensional integral
-macro intbN()int2d// EOM            // two-dimensional integral
-macro minimalMesh()cube(1,1,1)// EOM
-macro Tmatrix() matrix// EOM
-ENDIFMACRO
-
-IFMACRO(dimension,3S)
-load "msh3"
-macro meshN()meshS// EOM            // three-dimensional surface problem
-macro intN()int2d// EOM
-macro intbN()int1d// EOM
-macro minimalMesh()square3(1,1,[x,y,z])// EOM
-macro bem()1// EOM
-macro Tmatrix() HMatrix// EOM
-ENDIFMACRO
-
 IFMACRO(WITHHPDDM)
 load "hpddm"
 ENDIFMACRO
@@ -56,6 +29,13 @@ func string removespaces(string& str) {
 
 macro ffddmsetupOperatorinit(pr,preffe)
 IFMACRO(!pr#setupoperatorinit)
+
+IFMACRO(pr#bem,1)
+NewMacro pr#Tmatrix() HMatrix EndMacro
+ENDIFMACRO
+IFMACRO(!pr#bem)
+NewMacro pr#Tmatrix() matrix EndMacro
+ENDIFMACRO
 
 NewMacro pr#localmacroaug preffe#prmesh#buildAug EndMacro
 
@@ -197,7 +177,7 @@ int pr#verbosity = ffddmverbosity;
 
 int pr#bdirect = ffddmbdirect;
 
-Tmatrix<preffe#K> pr#Aglobal;
+pr#Tmatrix<preffe#K> pr#Aglobal;
 matrix<preffe#K>[int] pr#aRd(preffe#prmesh#npart);      /* local Dirichlet matrices for parallel matrix vector product */
 matrix<preffe#K> pr#matN;
 
@@ -284,6 +264,11 @@ NewMacro pr#setupprecondinit()1 EndMacro
 ENDIFMACRO
 // EOM
 
+macro ffddmsetupOperatorBeminit(pr,preffe)
+NewMacro pr#bem()1 EndMacro
+ffddmsetupOperatorinit(pr,preffe)
+// EOM
+
 macro ffddmsetupinit(pr,preffe)
 ffddmsetupOperatorinit(pr,preffe)
 ffddmsetupPrecondinit(pr)
@@ -297,11 +282,11 @@ if (preffe#prmesh#isincomm)
 {	
 	preffe#prmesh#tic(pr#tfactoi)
 
-	IFMACRO(bem,1)
+	IFMACRO(pr#bem,1)
 	pr#Aglobal = Varf(preffe#Vhglob,preffe#Vhglob);
 	ENDIFMACRO
 
-	IFMACRO(!bem)
+	IFMACRO(!pr#bem)
   if (pr#bdirect || bseq) {
     Varf(vaglobal,preffe#prmesh#Thglob,preffe#Vhglob)
     pr#Aglobal = vaglobal(preffe#Vhglob,preffe#Vhglob,solver = (vsym ? CG : GMRES),tgv=vtgvelim);
@@ -319,7 +304,7 @@ if (preffe#prmesh#isincomm)
   	preffe#prmesh#AugThi = preffe#prmesh#AugaTh[i];
   	ENDIFMACRO
   	IFMACRO(localmacroaug,0)
-    meshN preffe#prmesh#AugThi = preffe#prmesh#Thi + preffe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
+    preffe#prmesh#meshN preffe#prmesh#AugThi = preffe#prmesh#Thi + preffe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
     fespace preffe#AugVhi(preffe#prmesh#AugThi, preffe#fPk);
     int[int] n2o = (0:preffe#prmesh#Thi.nt-1);
     int[int] renum = restrict(preffe#Vhi, preffe#AugVhi,n2o);
@@ -364,6 +349,11 @@ if (preffe#prmesh#isincomm)
 }
 //EOM
 
+macro ffddmsetupOperatorBem(pr,preffe,Varf)
+ffddmsetupOperatorBeminit(pr,preffe)
+ffddmsetupOperator(pr,preffe,Varf)
+//EOM
+
 macro ffddmsetupPrecond(pr,VarfPrec)
 
 ffddmsetupPrecondinit(pr)
@@ -379,10 +369,10 @@ if (pr#prfe#prmesh#isincomm)
   	     
     if (pr#verbosity > 1 && !bpara) cout << "["+Stringification(pr)+"] Domain :" << i << "/" << pr#prfe#prmesh#npart << endl;
 
-		IFMACRO(bem,1)
+		IFMACRO(pr#bem,1)
 		IFMACRO(VarfPrec)
 		pr#prfe#prmesh#Thi = pr#prfe#prmesh#aTh[i];
-		Tmatrix<pr#prfe#K> Hloc = VarfPrec(pr#prfe#Vhi, pr#prfe#Vhi);
+		pr#Tmatrix<pr#prfe#K> Hloc = VarfPrec(pr#prfe#Vhi, pr#prfe#Vhi);
 		pr#prfe#K[int,int] mdense(pr#prfe#Vhi.ndof, pr#prfe#Vhi.ndof);
 		mdense = Hloc;
 		pr#aR[i] = mdense;
@@ -390,7 +380,7 @@ if (pr#prfe#prmesh#isincomm)
 		ENDIFMACRO
 		ENDIFMACRO
 
-		IFMACRO(!bem)
+		IFMACRO(!pr#bem)
 
 		IFMACRO(!VarfPrec)
 		if (bseq) cout << "Error in ffddmsetupPrecond: you need to provide the varf macro for the preconditioner in sequential mode" << endl;
@@ -405,7 +395,7 @@ if (pr#prfe#prmesh#isincomm)
   	pr#prfe#prmesh#AugThi = pr#prfe#prmesh#AugaTh[i];
   	ENDIFMACRO
   	IFMACRO(localmacroaug,0)
-    meshN pr#prfe#prmesh#AugThi = pr#prfe#prmesh#Thi + pr#prfe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
+    pr#prfe#prmesh#meshN pr#prfe#prmesh#AugThi = pr#prfe#prmesh#Thi + pr#prfe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
     fespace pr#prfe#AugVhi(pr#prfe#prmesh#AugThi, pr#prfe#fPk);
     int[int] n2o = (0:pr#prfe#prmesh#Thi.nt-1);
     int[int] renum = restrict(pr#prfe#Vhi, pr#prfe#AugVhi,n2o);
