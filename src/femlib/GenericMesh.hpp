@@ -2061,15 +2061,15 @@ Serialize GenericMesh<T,B,V>::serialize() const
                     new_nelt++;
                 }
                 // or 2/ rm all multiples or keep the orinal
-                else if(removeduplicate) {
+               // else if(removeduplicate) {
                     originmulti[i]=p->v;  // the double elt the current
                     multiTypeGenericElement++;
                
-                    if(originmulti[p->v]==-1) {   // the origin elt
+                    if(removeduplicate &&originmulti[p->v]==-1) {   // the origin elt
                         originmulti[p->v]=p->v;
                         originTypeGenericElement++;
                     }
-                }
+                //}
             }
         }
         // rebuild the index list if remove all multiples
