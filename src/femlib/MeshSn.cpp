@@ -654,8 +654,8 @@ namespace Fem2D
         f >> s;
         ffassert( s== GsbeginS);
         f >> nv >> nt >> nbe;
-        /*if(verbosity>2)*/
-        cout << " GRead : nv " << nv << " " << nt << " " << nbe << endl;
+        if(verbosity>2)
+            cout << " GRead : nv " << nv << " " << nt << " " << nbe << endl;
         this->vertices = new Vertex[nv];
         this->elements = new Element [nt];
         this->borderelements = new BorderElement[nbe];
