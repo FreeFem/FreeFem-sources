@@ -739,8 +739,7 @@ public:
   }
 
   Serialize serialize() const;
- // Serialize serialize(Serialize &serialize1, Serialize serialize2) const;
-
+    
 private:
   GenericMesh(const GenericMesh &); // pas de construction par copie
    void operator=(const GenericMesh &);// pas affectation par copy
@@ -1918,7 +1917,7 @@ Serialize GenericMesh<T,B,V>::serialize() const
     const int d = Rd::d;
     long long  l=0;
     l += sizeof(long long);
-    l += 6*sizeof(int);
+    l += 7*sizeof(int);   // add bordermesh
     l += nt*(sizeof(int)*(nve + 1));
     l += nv*( sizeof(int) + sizeof(double)*d);
     l += nbe*(sizeof(int)*(nvbe+1));
@@ -1927,8 +1926,10 @@ Serialize GenericMesh<T,B,V>::serialize() const
     Serialize  serialized(l,GenericMesh_magicmesh);
     // cout << l << magicmesh << endl;
     size_t pp=0;
+    int havebordermesh=0;  // by defaut, no border mesh in the genericmesh
     serialized.put(pp, l);
     serialized.put( pp,d);
+    serialized.put( pp,havebordermesh);
     serialized.put( pp,nve);
     serialized.put( pp,nvbe);
     serialized.put( pp,nt);
@@ -1978,11 +1979,13 @@ Serialize GenericMesh<T,B,V>::serialize() const
 	const int nve = T::nv;
 	const int nvbe = B::nv;
 	const int d = Rd::d;
+    int havebordermesh;
 	int dd,nnve,nnvbe,nnt,nnv,nnbe;
 	long long  l=0;
 	size_t pp=0;
 	serialized.get(pp, l);
 	serialized.get( pp,dd);
+    serialized.get( pp,havebordermesh);
 	serialized.get( pp,nnve);
 	serialized.get( pp,nnvbe);
 	serialized.get( pp,nnt);

@@ -407,27 +407,29 @@ struct MPIrank {
     if(verbosity>100)
       cout << " MPI Bcast (const mesh3 *) " << a << endl;
     Serialize *buf = 0;
-    long nbsize = 0;
+    long nbsize[2]={0,0};
     if (who == mpirank) {
-        if((*a).meshS)
+        if((*a).meshS) {
             buf = new Serialize((*a).serialize_withBorderMesh());
+            nbsize[1]=1;
+        }
         else
             buf = new Serialize((*a).serialize());
-      nbsize = buf->size();
+      nbsize[0] = buf->size();
     }
-    WBcast(&nbsize, 1, who, comm);
+    WBcast(&nbsize[0], 2, who, comm);
     if (who != mpirank)
-      buf = new Serialize(nbsize, Fem2D::GenericMesh_magicmesh);
+      buf = new Serialize(nbsize[0], Fem2D::GenericMesh_magicmesh);
     assert(nbsize);
     if (verbosity > 200)
-      cout << " size to bcast : " << nbsize << " mpirank : " << mpirank << endl;
+      cout << " size to bcast : " << nbsize[0] << " mpirank : " << mpirank << endl;
 
-    WBcast((char *)(*buf), nbsize, who, comm);
+    WBcast((char *)(*buf), nbsize[0], who, comm);
     Fem2D::Mesh3 * aa;
     if (who != mpirank) {
       if (a) (*a).decrement();
-        if((*a).meshS)
-            aa = new Fem2D::Mesh3(*buf, (*a).meshS);
+        if(nbsize[1])
+            aa = new Fem2D::Mesh3(*buf, 1);
         else
             aa = new Fem2D::Mesh3(*buf);
         
@@ -573,19 +575,17 @@ void DeSerialize (Serialize * sTh, Fem2D::Mesh const ** ppTh) {
 
 void DeSerialize (Serialize *sTh, const Fem2D::Mesh3 **ppTh) {
   if (*ppTh) (**ppTh).decrement();
-  Fem2D::Mesh3 *pTh = new Fem2D::Mesh3(*sTh);
+    Fem2D::Mesh3 *pTh;
+  int havebordermesh = sTh->havebordermesh();
+  if( !havebordermesh) pTh = new Fem2D::Mesh3(*sTh);
+  else if(havebordermesh==1) {
+      if (verbosity>99) cout << " DeSerialize mesh3:meshS " << endl;
+      pTh = new Fem2D::Mesh3(*sTh, havebordermesh); // have a meshS
+  }
   pTh->BuildGTree();
   *ppTh = pTh;
 }
 
-/*void DeSerialize (Serialize *sTh3, const Fem2D::Mesh3 **ppTh, bool withBorderMesh) {
- ffassert(withBorder);
-    if (*ppTh) (**ppTh).decrement();
-    Fem2D::Mesh3 *pTh = new Fem2D::Mesh3(*sTh3,withBorderMesh);
-    pTh->BuildGTree();
-    *ppTh = pTh;
- 
-}*/
 
 void DeSerialize (Serialize *sTh, const Fem2D::MeshS **ppTh) {
   if (*ppTh) (**ppTh).decrement();
@@ -776,6 +776,33 @@ public:
       WSend(p, sizempibuf, who, tag, comm, rq);
   }
 
+    
+  SendWMeshd(const MPIrank *mpirank, const Mesh ** ppThh, bool havebordermesh)
+  : DoOnWaitMPI_Request(*mpirank), Serialize((**ppThh).serialize_withBorderMesh()),
+  ppTh(ppThh), state(0) {
+      {
+          long long lsz;
+          size_t kk = 0;
+          get(kk, lsz);
+          ffassert(lsz == lg); // verif
+          kk=2*sizeof(int);
+          int bordermesh=0;
+          get(kk, bordermesh);
+          ffassert(bordermesh == 1);
+          
+      }
+      int tag = MPI_TAG<Mesh *>::TAG;
+      
+      if (verbosity > 100)
+          cout << " -- SendWMeshd with border mesh" << rq << " " << comm << " " << p << " " << lg << " "<< " p[]= "
+          << (int)p[0] << (int)p[1] << (int)p[2] << (int)p[3] << endl;
+      
+      if (lg <= sizempibuf)
+          WSend(p, lg, who, tag, comm, rq);
+      else
+          WSend(p, sizempibuf, who, tag, comm, rq);
+  }
+  
   bool Do(MPI_Request *rrq) {
     int tag = MPI_TAG<Mesh *>::TAG;
     long l1 = lg -sizempibuf;
@@ -841,6 +868,8 @@ long MPIrank::Send(const Fem2D::Mesh *  a) const {
     if( rwm->DoSR() ) delete rwm;
     return MPI_SUCCESS;
   }
+
+
 long MPIrank::Send (const Fem2D::Mesh3 *  a) const {
     if(verbosity>100)
       cout << " MPI << (mesh3 *) " << a << endl;
@@ -849,6 +878,10 @@ long MPIrank::Send (const Fem2D::Mesh3 *  a) const {
     if( rwm->DoSR() ) delete rwm;
     return MPI_SUCCESS;
   }
+
+
+
+
 long MPIrank::Send (const Fem2D::MeshS *  a) const {
     if(verbosity>100)
       cout << " MPI << (meshS *) " << a << endl;

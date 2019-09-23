@@ -2000,15 +2000,15 @@ namespace Fem2D
         
         const int nvTet = Tet::nv;
         const int nvTriangle = Triangle3::nv;
-        const int nvEdge = Triangle3::nv;
+        const int nvEdge = BoundaryEdgeS::nv;
         const int d = Rd::d;
         long long  l=0;
         int nvS=meshS->nv;
-        int ntS=meshS->nt;
         int nbeS=meshS->nbe;
-
+        int havebordermesh(1);
+        
         l += sizeof(long long);
-        l += 9*sizeof(int); //( +nv nt nbe)
+        l += 10*sizeof(int); //( +nv nt nbe bordermesh(=1))
         l += nt*(sizeof(int)*(nvTet + 1));
         l += nv*( sizeof(int) + sizeof(double)*d);
         l += nbe*(sizeof(int)*(nvTriangle+1));
@@ -2024,6 +2024,7 @@ namespace Fem2D
         size_t pp=0;
         serialized.put(pp, l);
         serialized.put(pp,d);
+        serialized.put(pp,havebordermesh);
         serialized.put(pp,nvTet);
         serialized.put(pp,nvTriangle);
         serialized.put(pp,nvEdge);
@@ -2058,19 +2059,18 @@ namespace Fem2D
             serialized.put(pp, K.lab);
         }
         // copy mappings to the vertice of the surface
+        int vp;
         for (int i=0;i<nv;i++) {
-            int vp=meshS->mapSurf2Vol[i];
+            vp=meshS->mapSurf2Vol[i];
             serialized.put(pp,vp);
-        }
-        for (int i=0;i<nv;i++) {
-            int vp=meshS->mapVol2Surf[i];
+            vp=meshS->mapVol2Surf[i];
             serialized.put(pp,vp);
         }
         for (int i=0;i<nbeS;i++)
         {
             const BoundaryEdgeS & K(meshS->borderelements[i]);
             for(int j=0;j<nvEdge;++j)
-                serialized.put(pp,(int) operator()(K[j]));
+                serialized.put(pp,(int) meshS->operator()(K[j]));
             serialized.put(pp, K.lab);
         }
         assert(pp==serialized.size());
@@ -2079,29 +2079,39 @@ namespace Fem2D
     
     
     
-    Mesh3::Mesh3(const Serialize &serialized, bool withSurface)
+    Mesh3::Mesh3(const Serialize &serialized, int withSurface)
     {
+        
+        nt=0;nv=0;nbe=0;
+        mes=0.;mesb=0.;
+        vertices=0;elements=0;
+        borderelements=0;bnormalv=0;
+        TheAdjacencesLink=0;BoundaryElementHeadLink=0;
+        ElementConteningVertex=0; gtree=0;
+       
+        ffassert(withSurface==1);
         const int nvTet = Tet::nv;
         const int nvTriangle = Triangle3::nv;
         const int nvEdge = BoundaryEdgeS::nv;
         const int d = Rd::d;
-        int dd,nnvTet,nnvTriangle,nnvEdge,nnt,nnv,nnbe,nnvS,nnbeS;
+        int havebordermesh(0);
+        int dd,nnvTet,nnvTriangle,nnvEdge,nnvS,nnbeS,nnv,nnt,nnbe;
         long long  l=0;
         size_t pp=0;
         serialized.get(pp, l);
         serialized.get(pp,dd);
+        serialized.get(pp,havebordermesh);
         serialized.get(pp,nnvTet);
         serialized.get(pp,nnvTriangle);
         serialized.get(pp,nnvEdge);
-        serialized.get(pp,nt);
-        serialized.get(pp,nv);
-        serialized.get(pp,nbe);
+        serialized.get(pp,nnt);
+        serialized.get(pp,nnv);
+        serialized.get(pp,nnbe);
         serialized.get(pp,nnvS);
         serialized.get(pp,nnbeS);
         
-        
-        
-        ffassert(d==dd && nvTet == nnvTet && nvTriangle == nnvTriangle && nvEdge == nnvEdge);
+        ffassert(d==dd && nvTet == nnvTet && nvTriangle == nnvTriangle && nvEdge == nnvEdge && havebordermesh==1);
+ 
         set(nnv,nnt,nnbe);
         for (int i=0;i<nv;++i)
         {
@@ -2128,17 +2138,24 @@ namespace Fem2D
             serialized.get(pp, lab);
             mesb += borderelements[i].set(vertices,ii,lab).mesure();
         }
-        
          // build the meshS
         meshS = new MeshS();
-        meshS->set(nnvS,nt,nnbeS);
+        meshS->nt=0;meshS->nv=0;meshS->nbe=0;
+        meshS->mes=0.;meshS->mesb=0.;
+        meshS->vertices=0;meshS->elements=0;
+        meshS->borderelements=0;meshS->bnormalv=0;
+        meshS->TheAdjacencesLink=0;meshS->BoundaryElementHeadLink=0;
+        meshS->ElementConteningVertex=0; meshS->gtree=0;
+        
+        meshS->set(nnvS,nbe,nnbeS);
+        
         // Number of Vertex in the surface
         meshS->mapVol2Surf=new int[nv];
         meshS->mapSurf2Vol=new int[nv];
-        for (int k=0; k<nv; k++)
+        for (int k=0; k<nv; ++k) {
             serialized.get(pp,meshS->mapSurf2Vol[k]);
-        for (int k=0; k<nv; k++)
-            serialized.get(pp,meshS->mapSurf2Vol[k]);
+            serialized.get(pp,meshS->mapVol2Surf[k]);
+        }
         
         for (int k=0; k<nnvS; ++k) {
             int k0 = meshS->mapSurf2Vol[k];
@@ -2148,34 +2165,27 @@ namespace Fem2D
             meshS->vertices[k].y=P.y;
             meshS->vertices[k].z=P.z;
         }
-        
         int iv[nvTriangle];
-        for(int i=0;i<nt;++i) {
+        for(int i=0;i<nbe;++i) {
                const BorderElement & K(borderelements[i]);
             for (int j=0;j<3;++j)
                 iv[j]=meshS->mapVol2Surf[this->operator()(K[j])];
- 
-            /*for(int j=0;j<3;++j)
-                if(!meshS->vertices[iv[j]].lab) {
-                    meshS->vertices[iv[j]].lab=1;
-                    kmv++;
-                }*/
+            
             meshS->elements[i].set(meshS->vertices,iv,K.lab);
             meshS->mes += meshS->elements[i].mesure();
         }
-        
-        for (int i=0;i<nnbeS;++i)
-        {
-            int ii[nvEdge],lab;
+
+        for (int i=0;i<nnbeS;++i) {
+            int iv[nvEdge],lab;
             for(int j=0;j<nvEdge;++j)
-                serialized.get(pp,ii[j]);
+                serialized.get(pp,iv[j]);
             serialized.get(pp, lab);
-            meshS->mesb += borderelements[i].set(meshS->vertices,ii,lab).mesure();
+            meshS->borderelements[i].set(meshS->vertices,iv,lab);
+            meshS->mesb += meshS->borderelements[i].mesure();
         }
-        
+        // check pp reading
         assert(pp==serialized.size());
-        
-        
+
         // end building for mesh3
         BuildBound();
         if(verbosity>1)
@@ -2199,7 +2209,7 @@ namespace Fem2D
         if(verbosity>1)
             cout << "  -- End of serialized Mesh3:MeshS: mesure = " << meshS->mes << " border mesure " << meshS->mesb << endl;
         
-        
+       
         meshS->BuildAdj();
         meshS->Buildbnormalv();
         meshS->BuildjElementConteningVertex();
@@ -2209,7 +2219,6 @@ namespace Fem2D
             cout << "  -- Mesh3:MeshS  (serialized), d "<< 3  << ", n Tri " << nt << ", n Vtx "
             << nv << " n Bord " << nbe << endl;
         ffassert(meshS->mes>=0);
-        
         
     }
     
