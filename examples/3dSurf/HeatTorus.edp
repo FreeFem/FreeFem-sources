@@ -11,6 +11,7 @@ func torez= r*sin(y*pi*2);
 
 
 meshS ThS=square3(nx,ny,[torex,torey,torez],removeduplicate=true) ;
+cout << "test" << ThS.nv << " " <<ThS.nt << " " << ThS.nbe << endl;
 mesh3 Th3=tetg(ThS,switch="paAAQYY"); //,nbofregions=1,regionlist=domain);
 
 plot(Th3);

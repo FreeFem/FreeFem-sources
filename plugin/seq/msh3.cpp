@@ -2091,7 +2091,7 @@ public:
         return nargs[i] ? GetAny<KN_<long> >((*nargs[i])(stack)) : a;
     }
     long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
-    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
+    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
     
 public:
     SetMesh_Op (const basicAC_F0 &args, Expression aa): a(aa) {

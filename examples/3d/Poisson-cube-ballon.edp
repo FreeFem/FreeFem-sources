@@ -29,12 +29,12 @@ int[int] refx=[0,1];  // gauche
 int[int] refX=[0,2];   // droite 
 
 
-meshS Thx0 = movemesh23(Thx,transfo=[x0,x,y],orientation=-1,region=refx,removeduplicate=true);
-meshS Thx1 = movemesh23(Thx,transfo=[x1,x,y],orientation=1,region=refX,removeduplicate=true);
-meshS Thy0 = movemesh23(Thy,transfo=[x,y0,y],orientation=+1,region=refy,removeduplicate=true);
-meshS Thy1 = movemesh23(Thy,transfo=[x,y1,y],orientation=-1,region=refY,removeduplicate=true);
-meshS Thz0 = movemesh23(Thz,transfo=[x,y,z0],orientation=-1,region=refz,removeduplicate=true);
-meshS Thz1 = movemesh23(Thz,transfo=[x,y,z1],orientation=+1,region=refZ,removeduplicate=true);
+meshS Thx0 = movemesh23(Thx,transfo=[x0,x,y],orientation=-1,region=refx,removeduplicate=false); 
+meshS Thx1 = movemesh23(Thx,transfo=[x1,x,y],orientation=1,region=refX,removeduplicate=false);
+meshS Thy0 = movemesh23(Thy,transfo=[x,y0,y],orientation=+1,region=refy,removeduplicate=false);
+meshS Thy1 = movemesh23(Thy,transfo=[x,y1,y],orientation=-1,region=refY,removeduplicate=false);
+meshS Thz0 = movemesh23(Thz,transfo=[x,y,z0],orientation=-1,region=refz,removeduplicate=false);
+meshS Thz1 = movemesh23(Thz,transfo=[x,y,z1],orientation=+1,region=refZ,removeduplicate=false);
 
 //medit("  --- ", Thx0,Thx1,Thy0,Thy1,Thz0,Thz1);
  ThHex = Thx0+Thx1+Thy0+Thy1+Thz0+Thz1;
@@ -76,7 +76,7 @@ Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
 plot(Th,wait=1);
 Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
 
-Thsph = movemesh23(Th,transfo=[f1*R,f2*R,f3*R],orientation=-1);
+Thsph = movemesh23(Th,transfo=[f1*R,f2*R,f3*R],orientation=-1,removeduplicate=false);
 }
 
 
@@ -115,7 +115,7 @@ problem P(uh,vh)=
   ; 
   
   P;
-
+  
 // FFCS: with 3D view parameters
 real[int] CameraPositionValue = [3.50634,-2.51489,2.60313];
 real[int] CameraFocalPointValue = [0.0604689,-0.304636,-0.256484];
