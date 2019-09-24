@@ -183,9 +183,9 @@ class attachCoarseOperator : public OneOperator {
                     if(c == 1) {
                         const Polymorphic* op = dynamic_cast<const Polymorphic*>(args[2].LeftValue());
                         ffassert(op);
-                        codeC = op->Find("(", ArrayOfaType(atype<KN<K>*>(), false));
-                        if(!codeC)
-                            codeMatC = op->Find("(", ArrayOfaType(atype<KN<K>*>(), atype<long>(), false));
+                        codeMatC = op->Find("(", ArrayOfaType(atype<KN<K>*>(), atype<long>(), false));
+                        if(!codeMatC)
+                            codeC = op->Find("(", ArrayOfaType(atype<KN<K>*>(), false));
                     }
                 }
 
@@ -291,10 +291,10 @@ AnyType attachCoarseOperator<Type, K>::E_attachCoarseOperator::operator()(Stack 
         return 0L;
     }
     else {
-        if(codeC)
-            ptA->_cc = new attachCoarseOperator<Type, K>::MatF_O(ptA->getDof(), stack, codeC);
-        else if(codeMatC)
+        if(codeMatC)
             ptA->_cc = new attachCoarseOperator<Type, K>::MatMatF_O(ptA->getDof(), stack, codeMatC);
+        else if(codeC)
+            ptA->_cc = new attachCoarseOperator<Type, K>::MatF_O(ptA->getDof(), stack, codeC);
         else
             ffassert(0);
         return 0L;
