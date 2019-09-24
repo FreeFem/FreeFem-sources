@@ -489,7 +489,7 @@ class GMSH_LoadMesh3_Op: public E_F0mps
 		static basicAC_F0::name_and_type name_param [];
 		Expression nargs[n_name_param];
         long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
-        bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
+        bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
     
 	public:
 		GMSH_LoadMesh3_Op (const basicAC_F0 &args, Expression ffname)
@@ -920,7 +920,7 @@ public:
     static basicAC_F0::name_and_type name_param [];
     Expression nargs[n_name_param];
     long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
-    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
+    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
     
 public:
     GMSH_LoadMeshS_Op (const basicAC_F0 &args, Expression ffname)
