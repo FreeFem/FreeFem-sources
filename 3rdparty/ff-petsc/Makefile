@@ -216,6 +216,7 @@ $(SRCDIR)/tag-install-real :$(SRCDIR)/tag-make-real
 	-test -x "`type -p otool`"  &&  make changer
 	cd $(SRCDIR) && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=fr check
 	test -e $(DIR_INSTALL_REAL)/include/petsc.h
+	test -e $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
 	touch $@
 
 Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
@@ -227,7 +228,8 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 		$(FLAGS_CONF_PETSC_REAL) PETSC_ARCH=fr
 	test -f $(SRCDIR)/fr/lib/petsc/conf/petscvariables
 	touch $@
-Make-petsc-download.mk:$(SRCDIR)/tag-install-real $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
+Make-petsc-download.mk:$(SRCDIR)/tag-install-real 
+	test -e $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
 	egrep 'PETSC_LIB_BASIC|SCALAPACK_|METIS_|MUMPS_|SUPERLU_|FFTW_|PTSCOTCH_|SUITESPARSE_'   $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables | sed 's/-I/ /g'|sort >$@
 ifdef 	COMPLEX_CASE
 #  version COMPLEX  .....

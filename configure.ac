@@ -1367,6 +1367,7 @@ then
 	    AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
 	    AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
 		ff_mkl_ok=yes
+		ff_mkl=yes
 dnl            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
 
 	else
@@ -2281,7 +2282,7 @@ AM_CONDITIONAL([MUMPS_ptscotch], [test "$ff_mumps_ptscotch_ok" = yes])
 AM_CONDITIONAL([MUMPS_scotch], [test "$ff_mumps_scotch_ok" = yes])
 AM_CONDITIONAL([MUMPS_seq], [test "$ff_mumps_seq_ok" = yes -o -n "$TOOL_COMPILE_mumps_seq"])
 AM_CONDITIONAL([NLOPT], [test "$ff_nlopt_ok" = yes -o -n "$TOOL_COMPILE_nlopt"])
-AM_CONDITIONAL([PARMETIS], [test "$ff_parmetis_ok" = yes])
+AM_CONDITIONAL([PARMETIS], [test "$ff_parmetis_ok" = yes -o -n "$TOOL_COMPILE_parmetis"])
 AM_CONDITIONAL([PETSC], [test "$ff_petsc_ok" = yes])
 AM_CONDITIONAL([PETSCCOMPLEX], [test "$ff_petsccomplex_ok" = yes])
 AM_CONDITIONAL([PIPE], [test -o -n "$TOOL_COMPILE_pipe"])
