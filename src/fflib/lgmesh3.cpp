@@ -37,6 +37,7 @@ extern bool NoWait;
 typedef Mesh const * pmesh;
 typedef Mesh3 const * pmesh3;
 typedef MeshS const * pmeshS;
+typedef MeshL const * pmeshL;
 
 map<pair<int,int>,int>::iterator closeto(map<pair<int,int>,int> & m, pair<int,int> & k)
 {
@@ -742,12 +743,50 @@ AnyType ReadMeshS::operator()(Stack stack) const
     string * fn =  GetAny<string*>((*filename)(stack));
     if(verbosity > 2)
         cout << "ReadMeshS " << *fn << endl;
-    MeshS *Th = new MeshS(*fn,0);  // param 0-> initialize just the meshS
+    MeshS *Th = new MeshS(*fn);
     Th->BuildGTree();
     Add2StackOfPtr2FreeRC(stack,Th);
     return SetAny<pmeshS>(Th);
     
 }
+
+
+class ReadMeshL :  public E_F0 { public:
+    
+    Expression filename;
+    typedef pmeshL  Result;
+    ReadMeshL(const basicAC_F0 & args)
+    {
+        args.SetNameParam();
+        filename=to<string*>(args[0]);
+    }
+    static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<string*>());}
+    static  E_F0 * f(const basicAC_F0 & args){ return new ReadMeshL(args);}
+    AnyType operator()(Stack stack) const;
+};
+
+
+AnyType ReadMeshL::operator()(Stack stack) const
+{
+    using  Fem2D::MeshPointStack;
+    
+    string * fn =  GetAny<string*>((*filename)(stack));
+    if(verbosity > 2)
+        cout << "ReadMeshL " << *fn << endl;
+    MeshL *Th = new MeshL(*fn,0);  // param 0-> initialize just the meshS
+    Th->BuildGTree();
+    Add2StackOfPtr2FreeRC(stack,Th);
+    return SetAny<pmeshL>(Th);
+    
+}
+
+
+
+
+
+
+
+
 
 // 3D Volume SaveMesh
 class SaveMesh3 :  public E_F0 { public:  
@@ -763,8 +802,9 @@ class SaveMesh3 :  public E_F0 { public:
       zz=0;
       args.SetNameParam();
       getmesh=to<pmesh3>(args[0]); 
-      filename=to<string*>(args[1]); 
-      if (args.size() >2) 
+      filename=to<string*>(args[1]);
+      // what's it mean in 3d?
+      /*if (args.size() >2)
         {
           const E_Array * a = dynamic_cast<const E_Array *>(args[2].LeftValue());
           if (!a) CompileError("savemesh(Th,\"filename\",[u,v,w],...");
@@ -775,7 +815,7 @@ class SaveMesh3 :  public E_F0 { public:
           yy=to<double>( (*a)[1]);
           if(k==3)
            zz=to<double>( (*a)[2]);
-         }
+         }*/
       
    }   
     static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<pmesh3>(),atype<string*>(),true);}
@@ -809,16 +849,17 @@ class SaveMeshS :  public E_F0 { public:
     typedef pmeshS Result;
     Expression getmesh;
     Expression filename;
-    Expression xx,yy,zz;
+    //Expression xx,yy,zz;
     SaveMeshS(const basicAC_F0 & args)
     {
-        xx=0;
-        yy=0;
-        zz=0;
+        //xx=0;
+        //yy=0;
+        //zz=0;
         args.SetNameParam();
         getmesh=to<pmeshS>(args[0]);
         filename=to<string*>(args[1]);
-        if (args.size() >2)
+        // what's it mean in 3d?
+        /* if (args.size() >2)
         {
             const E_Array * a = dynamic_cast<const E_Array *>(args[2].LeftValue());
             if (!a) CompileError("savemesh(Th,\"filename\",[u,v,w],...");
@@ -829,7 +870,7 @@ class SaveMeshS :  public E_F0 { public:
             yy=to<double>( (*a)[1]);
             if(k==3)
                 zz=to<double>( (*a)[2]);
-        }
+        }*/
         
     }
     static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<pmeshS>(),atype<string*>(),true);}
@@ -837,7 +878,6 @@ class SaveMeshS :  public E_F0 { public:
     AnyType operator()(Stack s) const ;
     
 };
-
 
 AnyType SaveMeshS::operator()(Stack stack) const
 {
@@ -852,6 +892,60 @@ AnyType SaveMeshS::operator()(Stack stack) const
     int ret=Thh->Save(*fn);
     if( ret!=0) {ExecError("PB Write error !");}
     return SetAny<pmeshS>(Thh);
+    
+}
+
+
+class SaveMeshL :  public E_F0 { public:
+    
+    typedef pmeshL Result;
+    Expression getmesh;
+    Expression filename;
+    //Expression xx,yy,zz;
+    SaveMeshL(const basicAC_F0 & args)
+    {
+        //xx=0;
+        //yy=0;
+        //zz=0;
+        args.SetNameParam();
+        getmesh=to<pmeshL>(args[0]);
+        filename=to<string*>(args[1]);
+        // what's it mean in 3d?
+        /* if (args.size() >2)
+         {
+         const E_Array * a = dynamic_cast<const E_Array *>(args[2].LeftValue());
+         if (!a) CompileError("savemesh(Th,\"filename\",[u,v,w],...");
+         int k=a->size() ;
+         // cout << k << endl;
+         if ( k!=2 && k !=3) CompileError("savemesh(Th,\"filename\",[u,v,w]) need 2 or 3  componate in array ",atype<pmeshS>());
+         xx=to<double>( (*a)[0]);
+         yy=to<double>( (*a)[1]);
+         if(k==3)
+         zz=to<double>( (*a)[2]);
+         }*/
+        
+    }
+    static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<pmeshL>(),atype<string*>(),true);}
+    static  E_F0 * f(const basicAC_F0 & args){ return new SaveMeshL(args);}
+    AnyType operator()(Stack s) const ;
+    
+};
+
+
+// 3D line SaveMesh
+AnyType SaveMeshL::operator()(Stack stack) const
+{
+    using  Fem2D::MeshPointStack;
+    
+    
+    pmeshL Thh = GetAny<pmeshL>((*getmesh)(stack));
+    string * fn =  GetAny<string*>((*filename)(stack));
+    
+    if (verbosity > 2)
+        cout << "SaveMeshS " << *fn << " " << Thh << endl;
+    int ret=Thh->Save(*fn);
+    if( ret!=0) {ExecError("PB Write error !");}
+    return SetAny<pmeshL>(Thh);
     
 }
 
@@ -966,12 +1060,23 @@ inline pmesh3 *  initMesh(pmesh3 * const & p, string * const & s) {
   return p;
  }
 
-//3D surface   ///TODOCHECK
+//3D surface
 inline pmeshS *  initMesh(pmeshS * const & p, string * const & s) {
     MeshS * m;
     if(verbosity > 2)
         cout << " initMesh " << *s << endl;
     *p= m =new MeshS(*s);
+    m->BuildGTree();
+    //  delete s;  modif mars 2006 auto del ptr
+    return p;
+}
+
+//3D line
+inline pmeshL *  initMesh(pmeshL * const & p, string * const & s) {
+    MeshL * m;
+    if(verbosity > 2)
+        cout << " initMesh " << *s << endl;
+    *p= m =new MeshL(*s);
     m->BuildGTree();
     //  delete s;  modif mars 2006 auto del ptr
     return p;
@@ -1914,12 +2019,23 @@ void init_lgmesh3() {
     //   Global.Add("buildmesh","(",new OneOperatorCode<classBuildMesh3>);
     // Global.Add("buildmesh","(",new OneOperatorCode<BuildMeshFile3>);
 
-  //3D volumique
+  //3D volume
   atype<pmesh3>()->AddCast( new E_F1_funcT<pmesh3,pmesh3*>(UnRef<pmesh3 >));
   atype<pfes3 >()->AddCast(  new E_F1_funcT<pfes3,pfes3*>(UnRef<pfes3>));
-    
   atype<pf3rbase>()->AddCast(  new E_F1_funcT<pf3rbase,pf3rbase>(UnRef<pf3rbase>));
   atype<pf3cbase>()->AddCast(  new E_F1_funcT<pf3cbase,pf3cbase>(UnRef<pf3cbase>));
+  // 3D surface
+  atype<pmeshS>()->AddCast( new E_F1_funcT<pmeshS,pmeshS*>(UnRef<pmeshS >));
+  atype<pfesS >()->AddCast(  new E_F1_funcT<pfesS,pfesS*>(UnRef<pfesS>));
+  atype<pfSrbase>()->AddCast(  new E_F1_funcT<pfSrbase,pfSrbase>(UnRef<pfSrbase>));
+  atype<pfScbase>()->AddCast(  new E_F1_funcT<pfScbase,pfScbase>(UnRef<pfScbase>));
+  // 3D line
+  atype<pmeshL>()->AddCast( new E_F1_funcT<pmeshL,pmeshL*>(UnRef<pmeshL>));
+  // atype<pfesL >()->AddCast(  new E_F1_funcT<pfesS,pfesL*>(UnRef<pfesL>));
+  // atype<pfLrbase>()->AddCast(  new E_F1_funcT<pfLrbase,pfLrbase>(UnRef<pfLrbase>));
+  // atype<pfLcbase>()->AddCast(  new E_F1_funcT<pfLcbase,pfLcbase>(UnRef<pfLcbase>));
+    
+ 
   //3D volume
   Add<pf3r>("[]",".",new OneOperator1<KN<double> *,pf3r>(pf3r2vect<R,v_fes3>));
   Add<pf3c>("[]",".",new OneOperator1<KN<Complex> *,pf3c>(pf3r2vect<Complex,v_fes3>));
@@ -1928,54 +2044,53 @@ void init_lgmesh3() {
   //3D surface
   Add<pfSr>("[]",".",new OneOperator1<KN<double> *,pfSr>(pf3r2vect<R,v_fesS>));
   Add<pfSc>("[]",".",new OneOperator1<KN<Complex> *,pfSc>(pf3r2vect<Complex,v_fesS>));
- // Add<pfSr>("(","",new OneQuadOperator<Op4_pf32K<R,v_fesS>,Op4_pf32K<R,v_fesS>::Op> );
- // Add<pfSc>("(","",new OneQuadOperator<Op4_pf32K<Complex,v_fesS>,Op4_pf32K<Complex,v_fes3>::Op> );
+  Add<pfSr>("(","",new OneQuadOperator<Op4_pf32K<R,v_fesS>,Op4_pf32K<R,v_fesS>::Op> );
+  Add<pfSc>("(","",new OneQuadOperator<Op4_pf32K<Complex,v_fesS>,Op4_pf32K<Complex,v_fesS>::Op> );
+  //3D line
+  // Add<pfLr>("[]",".",new OneOperator1<KN<double> *,pfSr>(pf3r2vect<R,v_fesL>));
+  // Add<pfLc>("[]",".",new OneOperator1<KN<Complex> *,pfSc>(pf3r2vect<Complex,v_fesL>));
+  // Add<pfLr>("(","",new OneQuadOperator<Op4_pf32K<R,v_fesL>,Op4_pf32K<R,v_fesL>::Op> );
+  // Add<pfLc>("(","",new OneQuadOperator<Op4_pf32K<Complex,v_fesL>,Op4_pf32K<Complex,v_fesL>::Op> );
     
   Add<double>("(","",new OneQuadOperator<Op4_K2R<R>,Op4_K2R<R>::Op> );
   // Add<long>("(","",new OneTernaryOperator<Op3_K2R<long>,Op3_K2R<long>::Op> ); // FH stupide
   Add<Complex>("(","",new OneQuadOperator<Op4_K2R<Complex>,Op4_K2R<Complex>::Op> );
   Add<pmesh3 *>("(","",new OneQuadOperator<Op4_Mesh32mp,Op4_Mesh32mp::Op> );
     
-  // 3D surface
- atype<pmeshS>()->AddCast( new E_F1_funcT<pmeshS,pmeshS*>(UnRef<pmeshS >));
- atype<pfesS >()->AddCast(  new E_F1_funcT<pfesS,pfesS*>(UnRef<pfesS>));
-    
- atype<pfSrbase>()->AddCast(  new E_F1_funcT<pfSrbase,pfSrbase>(UnRef<pfSrbase>));
- atype<pfScbase>()->AddCast(  new E_F1_funcT<pfScbase,pfScbase>(UnRef<pfScbase>));
-
-    
-    
     
 
   //3D volume
   TheOperators->Add("<-",
        new OneOperator2_<pmesh3*,pmesh3*,string* >(&initMesh));
-       
   // use for :   mesh Th = readmesh ( ...);
   TheOperators->Add("<-",
        new OneOperator2_<pmesh3*,pmesh3*,pmesh3 >(&set_copy_incr));
-
   TheOperators->Add("=",
 		    new OneOperator2<pmesh3*,pmesh3*,pmesh3 >(&set_eqdestroy_incr));
-    
   //3D surface
   TheOperators->Add("<-",
                     new OneOperator2_<pmeshS*,pmeshS*,string* >(&initMesh));
-   
   // use for :   mesh Th = readmesh ( ...);
   TheOperators->Add("<-",
                     new OneOperator2_<pmeshS*,pmeshS*,pmeshS >(&set_copy_incr));
-  
   TheOperators->Add("=",
                     new OneOperator2<pmeshS*,pmeshS*,pmeshS >(&set_eqdestroy_incr));
-   
+  //3D line
+  TheOperators->Add("<-",
+                    new OneOperator2_<pmeshL*,pmeshL*,string* >(&initMesh));
+  // use for :   mesh Th = readmesh ( ...);
+  TheOperators->Add("<-",
+                    new OneOperator2_<pmeshL*,pmeshL*,pmeshL >(&set_copy_incr));
+  TheOperators->Add("=",
+                    new OneOperator2<pmeshL*,pmeshL*,pmeshL >(&set_eqdestroy_incr));
     
-    
- 
+
   Global.Add("readmesh3","(",new OneOperatorCode<ReadMesh3>);
   Global.Add("readmeshS","(",new OneOperatorCode<ReadMeshS>);
+  Global.Add("readmeshL","(",new OneOperatorCode<ReadMeshL>);
   Global.Add("savemesh","(",new OneOperatorCode<SaveMesh3>);
   Global.Add("savemesh","(",new OneOperatorCode<SaveMeshS>);
+  Global.Add("savemesh","(",new OneOperatorCode<SaveMeshL>);
   Global.Add("savesurfacemesh","(",new OneOperatorCode<SaveSurfaceMesh3>);
 
     

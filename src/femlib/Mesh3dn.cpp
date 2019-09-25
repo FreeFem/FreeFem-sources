@@ -202,7 +202,7 @@ namespace Fem2D
     // Read a mesh with correct the mesh :
     // 1) delete multiple points defined
     // 2) delete points which is not in element or in border element
-    Mesh3::Mesh3(const string  filename, const long change)
+    Mesh3::Mesh3(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, double precis_mesh)
     :meshS(0)
     {
         
@@ -224,6 +224,34 @@ namespace Fem2D
                 read(f);
         }
         
+        int orientation=1;
+        if (cleanmesh) {
+            if(verbosity>3)
+                cout << "before clean mesh3, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+            clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
+            if(verbosity>3)
+                cout << "after clean mesh3, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+            if(meshS) {
+                if (verbosity>3)
+                    cout << "build Mesh3::meshS with cleaned mesh3, before clean meshS, meshS:nv: " <<meshS->nv << " meshS:nt:" << meshS->nt << " meshS:nbe:" << meshS->nbe << endl;
+            meshS=NULL;
+            BuildMeshS();
+            if (verbosity>3)
+                cout << "after clean Mesh3::meshS, meshS:nv: " <<meshS->nv << " meshS:nt:" << meshS->nt << " meshS:nbe:" << meshS->nbe << endl;
+            }
+        }
+            
+        
+        if(meshS) {
+            meshS->BuildBound();
+            if(meshS->nt > 0){
+                meshS->BuildAdj();
+                meshS->Buildbnormalv();
+                meshS->BuildjElementConteningVertex();
+            }
+        }
+        
+        /*
         if(change){
             // verification multiple points
             double hseuil=hmin();
@@ -351,6 +379,8 @@ namespace Fem2D
             }
             delete [] Numero_Som;
         }
+        */
+        
         
         BuildBound();
         if(nt && nbe){

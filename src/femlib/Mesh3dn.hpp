@@ -144,7 +144,8 @@ class Mesh3 : public GenericMesh<Tet,Triangle3,Vertex3> {
 public:
   Mesh3():meshS(0){} 
   Mesh3(const string);
-  Mesh3(const string, const long); // Add J. Morice 11/10
+  Mesh3(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, double precis_mesh);
+  //Mesh3(const string, const long); // Add J. Morice 11/10
   Mesh3(FILE *f,int offset=0);     
   Mesh3(const Serialize &);
   Mesh3(const  Serialize &serialized, int withSurface);

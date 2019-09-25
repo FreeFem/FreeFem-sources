@@ -415,7 +415,7 @@ namespace Fem2D
     }
     
     
-    MeshS::MeshS(const string filename, const long change)
+    MeshS::MeshS(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, double precis_mesh)//const long change)
     :mapSurf2Vol(0),mapVol2Surf(0) {
         
         
@@ -436,6 +436,17 @@ namespace Fem2D
             else
                 read(f);
         }
+        int orientation=1;
+        if (cleanmesh) {
+            if(verbosity>3)
+                cout << "before clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+            clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
+            if(verbosity>3)
+                cout << "after clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+        }
+        
+        
+        /*
         
         if(change){
             // verification multiple points
@@ -562,7 +573,7 @@ namespace Fem2D
             }
             delete [] Numero_Som;
         }
-        
+        */
         BuildBound();
         BuildAdj();
         Buildbnormalv();
@@ -749,7 +760,7 @@ namespace Fem2D
             mes += this->elements[i].mesure();
         for (int i=0;i<nbe;i++)
             mesb += this->be(i).mesure();
-                if (cleanmesh) {
+        if (cleanmesh) {
             if(verbosity>3)
                 cout << "before clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
             clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
