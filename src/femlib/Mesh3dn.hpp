@@ -1,7 +1,7 @@
 // ORIG-DATE:     Dec 2007
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :  Model  mesh 1d   
+// SUMMARY  :  Model  mesh 3d   
 // USAGE    : LGPL      
 // ORG      : LJLL Universite Pierre et Marie Curi, Paris,  FRANCE 
 // AUTHOR   : Frederic Hecht
@@ -43,6 +43,7 @@
  using namespace ::std;
 #include "GenericMesh.hpp"
 #include "MeshSn.hpp"
+//#include "MeshLn.hpp"
 
 namespace Fem2D {
   

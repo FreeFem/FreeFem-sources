@@ -1,7 +1,7 @@
 // ORIG-DATE:     Dec 2007
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :  Model  mesh 2d   
+// SUMMARY  :  Model  mesh surface 3d   
 // USAGE    : LGPL      
 // ORG      : LJLL Universite Pierre et Marie Curi, Paris,  FRANCE 
 // AUTHOR   : Frederic Hecht

@@ -43,6 +43,7 @@ namespace Fem2D
 #include "Mesh2dn.hpp"
 #include "Mesh3dn.hpp"
 #include "MeshSn.hpp"
+#include "MeshLn.hpp"
 #include "rgraph.hpp"
 #include "fem.hpp"
 #include "PlotStream.hpp"
@@ -73,11 +74,7 @@ namespace Fem2D
     // definition of the reference triangle 0 1 2
     static const int  nvfaceTria[1][3]  = { {0,1,2} };
     static const int  nvedgeTria[3][2] = { {1,2},{2,0},{0,1}};
-    // definition of the reference segment 0 1
-    static const int  nvfaceSeg[1][3]  = {{-1,-1,1}};
-    static const int  nvedgeSeg[1][2] = { {0,1} };
-    static const int  nvadjSeg[2][1] = { {0},{1} };
-    
+
     // geometry element for Triangle ( triangle for boudary elements in volume mesh, Rd=3 RdHat=2 )
     template<>
     const int (* const GenericElement<DataTriangle3>::nvface)[3] = nvfaceTria ;
@@ -108,23 +105,11 @@ namespace Fem2D
     static PtrConst15int SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2]);
     template<>
     const int (* const GenericElement<DataTet>::onWhatBorder)[15] = SetonWhatIsFace(onWhatIsFace,nvfaceTet,nvedgeTet) ;
-    
-    
-    // geometry element for segment ( boundary elements in surface mesh, Rd=3 RdHat=1 )
-    template<> const int (* const GenericElement<DataSeg3>::nvface)[3] = 0 ;
-    template<> const int (* const GenericElement<DataSeg3>::nvedge)[2] = nvedgeSeg; //nvedgeTria ;
-    template<> const int (* const GenericElement<DataSeg3>::nvadj)[1] = nvadjSeg ;
-    
-    
+
     // template for Mesh3 ( volume mesh )
     template<> int   GenericMesh<Tet,Triangle3,Vertex3>::kfind=0;
     template<> int   GenericMesh<Tet,Triangle3,Vertex3>::kthrough=0;
-    
-    //template for MeshS ( surface mesh )
-    //  template<> int   GenericMesh<TriangleS,BoundaryEdgeS,Vertex3>::kfind=0;
-    // template<> int   GenericMesh<TriangleS,BoundaryEdgeS,Vertex3>::kthrough=0;
-    
-    
+  
     //  const int (* const SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2]))[15]
     PtrConst15int  SetonWhatIsFace(int  onWhatIsFace[4][15] ,const int  nvfaceTet[4][3],const int nvedgeTet[6][2])
     {
@@ -155,18 +140,7 @@ namespace Fem2D
         return onWhatIsFace;
     }
     
-    
-    
-    void Addr(int *p,int n,int o)
-    {
-        for(int i=0;i<n;++i)
-            p[i] += o;
-    }
-    
-    
-    
-    
-    
+   
     // constructor of the class Mesh3
     
     Mesh3::Mesh3(const string  filename)
@@ -1049,7 +1023,7 @@ namespace Fem2D
                 int i[4],lab;
                 Element & K(this->elements[k]);
                 f >> i[0] >> i[1] >> i[2] >> i[3] >> lab;
-                Addr(i,4,offset);
+                Add(i,4,offset);
                 K.set(this->vertices,i,lab);
                 mes += K.mesure();
             }
@@ -1058,7 +1032,7 @@ namespace Fem2D
                 int i[3],lab;
                 BorderElement & K(this->borderelements[k]);
                 f >> i[0] >> i[1] >> i[2]  >> lab;
-                Addr(i,3,offset);
+                Add(i,3,offset);
                 K.set(this->vertices,i,lab);
                 mesb += K.mesure();
         }
@@ -1103,7 +1077,7 @@ namespace Fem2D
                 int i[4],lab;
                 Element & K(this->elements[k]);
                 f >> i[0] >> i[1] >> i[2] >> i[3] >> lab;
-                Addr(i,4,offset);
+                Add(i,4,offset);
                 K.set(this->vertices,i,lab);
                 mes += K.mesure();
                 err += K.mesure() <0;
@@ -1113,7 +1087,7 @@ namespace Fem2D
                 int i[3],lab;
                 BorderElement & K(this->borderelements[k]);
                 f >> i[0] >> i[1] >> i[2]  >> lab;
-                Addr(i,3,offset);
+                Add(i,3,offset);
                 K.set(this->vertices,i,lab);
                 mesb += K.mesure();
             }

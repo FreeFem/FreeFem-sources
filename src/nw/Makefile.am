@@ -35,6 +35,7 @@ ffglut_SOURCES = ../femlib/Drawing.cpp \
   ../femlib/Mesh2dn.cpp \
   ../femlib/Mesh3dn.cpp \
   ../femlib/MeshSn.cpp \
+  ../femlib/MeshLn.cpp \
   ../femlib/mshptg.cpp \
   ../Graphics/ffglut.cpp \
   ../Graphics/ffthreads.cpp \

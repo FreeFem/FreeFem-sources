@@ -28,6 +28,8 @@ Mesh3dn.cpp \
 Mesh3dn.hpp \
 MeshSn.cpp \
 MeshSn.hpp \
+MeshLn.cpp \
+MeshLn.hpp \
 HashTable.hpp \
 Label.hpp \
 assertion.hpp \

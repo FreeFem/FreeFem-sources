@@ -43,6 +43,7 @@ namespace Fem2D
 #include "Mesh2dn.hpp"
 #include "Mesh3dn.hpp"
 #include "MeshSn.hpp"
+#include "MeshLn.hpp"
 #include "rgraph.hpp"
 #include "fem.hpp"
 #include "PlotStream.hpp"
@@ -54,15 +55,26 @@ namespace Fem2D
     
    // template<>
   //  void SameElement( Vertex3 *vertice, Vertex3 *new_vertice, BoundaryEdgeS *list, int nelt, BoundaryEdgeS *new_list, int *old2new, int &new_nelt, double &mes);
+   
+     // definition of the reference segment 0 1
+     static const int  nvfaceSeg[1][3]  = {{-1,-1,1}};
+     static const int  nvedgeSeg[1][2] = { {0,1} };
+     static const int  nvadjSeg[2][1] = { {0},{1} };
+    
+    // geometry element for segment ( boundary elements in surface mesh, Rd=3 RdHat=1 )
+    template<> const int (* const GenericElement<DataSeg3>::nvface)[3] = 0 ;
+    template<> const int (* const GenericElement<DataSeg3>::nvedge)[2] = nvedgeSeg; //nvedgeTria ;
+    template<> const int (* const GenericElement<DataSeg3>::nvadj)[1] = nvadjSeg ;
+    
     
     template<> int   GenericMesh<TriangleS,BoundaryEdgeS,Vertex3>::kfind=0;
     template<> int   GenericMesh<TriangleS,BoundaryEdgeS,Vertex3>::kthrough=0;
     
-    void Add(int *p,int n,int o)
+  /*  void Add(int *p,int n,int o)
     {
         for(int i=0;i<n;++i)
             p[i] += o;
-    }
+    }*/
     
     
     const string GsbeginS="MeshS::GSave v0",GsendS="end";
