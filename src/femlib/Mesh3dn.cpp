@@ -202,7 +202,7 @@ namespace Fem2D
     // Read a mesh with correct the mesh :
     // 1) delete multiple points defined
     // 2) delete points which is not in element or in border element
-    Mesh3::Mesh3(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, double precis_mesh)
+    Mesh3::Mesh3(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
     :meshS(0)
     {
         
@@ -224,7 +224,6 @@ namespace Fem2D
                 read(f);
         }
         
-        int orientation=1;
         if (cleanmesh) {
             if(verbosity>3)
                 cout << "before clean mesh3, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;

@@ -95,7 +95,7 @@ allheaders=../../src/fflib/AddNewFE.h ../../src/fflib/AFunction_ext.hpp ../../sr
 	../../src/fflib/lgmesh3.hpp ../../src/fflib/lgsolver.hpp ../../src/lglib/lg.tab.hpp ../../src/femlib/libmesh5.h		\
 	../../src/Algo/LineSearch.hpp ../../src/femlib/MatriceCreuse.hpp ../../src/femlib/MatriceCreuse_tpl.hpp			\
 	../../src/femlib/Mesh1dn.hpp ../../src/femlib/Mesh2dn.hpp ../../src/bamglib/Mesh2.h ../../src/femlib/Mesh3dn.hpp		\
-	../../src/femlib/MeshSn.hpp    												\
+	../../src/femlib/MeshSn.hpp ../../src/femlib/MeshLn.hpp   												\
 	../../src/bamglib/Meshio.h ../../src/femlib/MeshPoint.hpp ../../src/bamglib/meshtype.h ../../src/bamglib/Metric.h		\
 	../../src/Graphics/mode_open.hpp ../../src/Algo/NewtonRaphson.hpp ../../src/Algo/NRJ.hpp ../../src/fflib/Operator.hpp	\
 	../../src/Algo/Optima.hpp ../../src/Algo/Param.hpp ../../src/femlib/PkLagrange.hpp ../../src/fflib/PlotStream.hpp		\

@@ -5216,8 +5216,9 @@ void  init_lgfem()
  map_type[typeid(R3*).name()] = new ForEachType<R3*>(Initialize<R3>);
   Dcl_TypeandPtr<pmesh>(0,0, ::InitializePtr<pmesh>,::DestroyPtr<pmesh>,AddIncrement<pmesh>,NotReturnOfthisType);
   Dcl_TypeandPtr<pmesh3>(0,0,::InitializePtr<pmesh3>,::DestroyPtr<pmesh3>,AddIncrement<pmesh3>,NotReturnOfthisType);
-  Dcl_TypeandPtr<pmeshS>(0,0,::InitializePtr<pmeshS>,::DestroyPtr<pmeshS>,AddIncrement<pmeshS>,NotReturnOfthisType);    ///TODOCHECK
-
+  Dcl_TypeandPtr<pmeshS>(0,0,::InitializePtr<pmeshS>,::DestroyPtr<pmeshS>,AddIncrement<pmeshS>,NotReturnOfthisType);
+  Dcl_TypeandPtr<pmeshL>(0,0,::InitializePtr<pmeshL>,::DestroyPtr<pmeshL>,AddIncrement<pmeshL>,NotReturnOfthisType);
+    
   Dcl_Type<lgVertex>();
   Dcl_Type<lgElement>( );
   Dcl_Type<lgElement::Adj>( );
@@ -5524,6 +5525,8 @@ void  init_lgfem()
  zzzfff->Add("mesh3",atype<pmesh3*>());
  // pmeshS is a pointer to MeshS defined at [[file:lgfem.hpp::typedef MeshS pmeshS]]
  zzzfff->Add("meshS",atype<pmeshS*>());
+ // pmeshL is a pointer to MeshL defined at [[file:lgfem.hpp::typedef MeshL pmeshL]]
+ zzzfff->Add("meshL",atype<pmeshL*>());
 
  zzzfff->Add("element",atype<lgElement>());
  zzzfff->Add("vertex",atype<lgVertex>());

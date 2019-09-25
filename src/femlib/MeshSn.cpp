@@ -415,7 +415,7 @@ namespace Fem2D
     }
     
     
-    MeshS::MeshS(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, double precis_mesh)//const long change)
+    MeshS::MeshS(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
     :mapSurf2Vol(0),mapVol2Surf(0) {
         
         
@@ -436,7 +436,6 @@ namespace Fem2D
             else
                 read(f);
         }
-        int orientation=1;
         if (cleanmesh) {
             if(verbosity>3)
                 cout << "before clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;

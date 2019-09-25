@@ -138,16 +138,16 @@ typedef GenericVertex<R3> Vertex3;
     class MeshS : public GenericMesh<TriangleS,BoundaryEdgeS,Vertex3> {
     public:
          // mapping for volume/surface vertices
-        int *mapSurf2Vol; //*liste_v_num_surf;
-        int *mapVol2Surf; //*v_num_surf;
+        int *mapSurf2Vol;
+        int *mapVol2Surf;
         MeshS():mapSurf2Vol(0),mapVol2Surf(0) {};
         MeshS(const string);
         //MeshS(const string, const long);
-        MeshS(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, double precis_mesh);
+        MeshS(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
         void read(istream &f);
         void readmsh(ifstream & f,int offset);
         MeshS(FILE *f,int offset=0);
-        //MeshS(const string);
+   
         MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb, bool cleanmesh=true, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
         MeshS(const Serialize&);
 

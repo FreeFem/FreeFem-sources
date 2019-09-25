@@ -43,7 +43,7 @@
  using namespace ::std;
 #include "GenericMesh.hpp"
 #include "MeshSn.hpp"
-//#include "MeshLn.hpp"
+#include "MeshLn.hpp"
 
 namespace Fem2D {
   
@@ -144,7 +144,7 @@ class Mesh3 : public GenericMesh<Tet,Triangle3,Vertex3> {
 public:
   Mesh3():meshS(0){} 
   Mesh3(const string);
-  Mesh3(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, double precis_mesh);
+  Mesh3(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
   //Mesh3(const string, const long); // Add J. Morice 11/10
   Mesh3(FILE *f,int offset=0);     
   Mesh3(const Serialize &);

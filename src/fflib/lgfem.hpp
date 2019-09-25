@@ -51,9 +51,11 @@ namespace  Fem2D {
 using Fem2D::Mesh;
 using Fem2D::Mesh3;
 using Fem2D::MeshS;
+using Fem2D::MeshL;
 typedef const Mesh  *  pmesh;
 typedef const Mesh3  * pmesh3;
 typedef const MeshS  * pmeshS;
+typedef const MeshL  * pmeshL;
 
 using  Fem2D::FESpace;
 using  Fem2D::TypeOfFE;

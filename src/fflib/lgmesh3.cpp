@@ -751,6 +751,79 @@ AnyType ReadMeshS::operator()(Stack stack) const
 }
 
 
+
+class ReadMeshTEST_Op:  public E_F0mps
+{
+    public:
+    
+        Expression filename;
+    //typedef pmeshS  Result;
+        static const int n_name_param = 3;
+        static basicAC_F0::name_and_type name_param [];
+        Expression nargs[n_name_param];
+        bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
+    
+    public:
+        ReadMeshTEST_Op (const basicAC_F0 &args,Expression ffname)
+        : filename(ffname) {
+            args.SetNameParam(n_name_param, name_param, nargs);
+        }
+        AnyType operator()(Stack stack) const;
+    };
+
+
+    basicAC_F0::name_and_type ReadMeshTEST_Op::name_param [] = {
+        {"cleanmesh", &typeid(bool)},
+        {"removeduplicate", &typeid(bool)},
+        {"rebuildboundary", &typeid(bool)}
+    };
+
+
+
+class ReadMeshTEST: public OneOperator {
+public:
+    ReadMeshTEST (): OneOperator(atype<pmeshS>(), atype<string *>()) {}
+    
+    E_F0*code (const basicAC_F0 &args) const {
+        return new ReadMeshTEST_Op(args,t[0]->CastTo(args[0]));
+    }
+};
+
+AnyType ReadMeshTEST_Op::operator () (Stack stack)  const {
+
+    string * fn =  GetAny<string*>((*filename)(stack));
+    bool cleanmesh(arg(0, stack, false));
+    bool removeduplicate(arg(1, stack, false));
+    bool rebuildboundary(arg(2, stack, false));
+    
+    MeshS *Th = new MeshS(*fn, cleanmesh, removeduplicate, rebuildboundary);//, int orientation=1, double precis_mesh=1e-7););
+    Th->BuildGTree();
+    Add2StackOfPtr2FreeRC(stack,Th);
+    return Th;
+}
+
+
+
+/*
+AnyType ReadMeshTEST_Op::operator () (Stack stack)  const {
+    using  Fem2D::MeshPointStack;
+ 
+    bool cleanmesh(arg(0, stack, false));
+    bool removeduplicate(arg(1, stack, false));
+    bool rebuildboundary(arg(2, stack, false));
+    //string * fn =  GetAny<string*>((*filename)(stack));
+    if(verbosity > 2)
+        cout << "ReadMeshS " << *fn << endl;
+    MeshS *Th = new MeshS(*fn,cleanmesh,removeduplicate,rebuildboundary);
+    Th->BuildGTree();
+    Add2StackOfPtr2FreeRC(stack,Th);
+    return SetAny<pmeshS>(Th);
+
+}
+ 
+*/
+
+
 class ReadMeshL :  public E_F0 { public:
     
     Expression filename;
@@ -904,25 +977,9 @@ class SaveMeshL :  public E_F0 { public:
     //Expression xx,yy,zz;
     SaveMeshL(const basicAC_F0 & args)
     {
-        //xx=0;
-        //yy=0;
-        //zz=0;
         args.SetNameParam();
         getmesh=to<pmeshL>(args[0]);
         filename=to<string*>(args[1]);
-        // what's it mean in 3d?
-        /* if (args.size() >2)
-         {
-         const E_Array * a = dynamic_cast<const E_Array *>(args[2].LeftValue());
-         if (!a) CompileError("savemesh(Th,\"filename\",[u,v,w],...");
-         int k=a->size() ;
-         // cout << k << endl;
-         if ( k!=2 && k !=3) CompileError("savemesh(Th,\"filename\",[u,v,w]) need 2 or 3  componate in array ",atype<pmeshS>());
-         xx=to<double>( (*a)[0]);
-         yy=to<double>( (*a)[1]);
-         if(k==3)
-         zz=to<double>( (*a)[2]);
-         }*/
         
     }
     static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<pmeshL>(),atype<string*>(),true);}
@@ -1967,6 +2024,23 @@ void init_meshS_array()
 }
 
 
+//3D Line
+void init_meshL_array()
+{
+    Dcl_Type<KN<pmeshL> *>(0,::DestroyKN<pmeshL> );
+    atype<KN<pmeshL>* >()->Add("[","",new OneOperator2_<pmeshL*,KN<pmeshL>*,long >(get_elementp_<pmeshL,KN<pmeshL>*,long>));
+    TheOperators->Add("<-",
+                      new OneOperator2_<KN<pmeshL> *,KN<pmeshL> *,long>(&set_initinit));
+    map_type_of_map[make_pair(atype<long>(),atype<pmeshL>())]=atype<KN<pmeshL>*>(); // vector
+    
+    Dcl_Type< Resize<KN<pmeshL> > > ();
+    Add<KN<pmeshL>*>("resize",".",new OneOperator1< Resize<KN<pmeshL> >,KN<pmeshL>*>(to_Resize));
+    Add<Resize<KN<pmeshL> > >("(","",new OneOperator2_<KN<pmeshL> *,Resize<KN<pmeshL> > , long   >(resizeandclean1));
+    
+    
+}
+
+
 template<class K,class v_fes>
 bool pfer_refresh3(pair<FEbase<K,v_fes> *,int> p)
 {
@@ -2044,8 +2118,9 @@ void init_lgmesh3() {
   //3D surface
   Add<pfSr>("[]",".",new OneOperator1<KN<double> *,pfSr>(pf3r2vect<R,v_fesS>));
   Add<pfSc>("[]",".",new OneOperator1<KN<Complex> *,pfSc>(pf3r2vect<Complex,v_fesS>));
-  Add<pfSr>("(","",new OneQuadOperator<Op4_pf32K<R,v_fesS>,Op4_pf32K<R,v_fesS>::Op> );
-  Add<pfSc>("(","",new OneQuadOperator<Op4_pf32K<Complex,v_fesS>,Op4_pf32K<Complex,v_fesS>::Op> );
+  // Add<pfSr>("(","",new OneQuadOperator<Op4_pf32K<R,v_fesS>,Op4_pf32K<R,v_fesS>::Op> );
+  // Add<pfSc>("(","",new OneQuadOperator<Op4_pf32K<Complex,v_fesS>,Op4_pf32K<Complex,v_fes3>::Op> );
+    
   //3D line
   // Add<pfLr>("[]",".",new OneOperator1<KN<double> *,pfSr>(pf3r2vect<R,v_fesL>));
   // Add<pfLc>("[]",".",new OneOperator1<KN<Complex> *,pfSc>(pf3r2vect<Complex,v_fesL>));
@@ -2370,14 +2445,15 @@ TheOperators->Add("=",
  Add<pf3carray>("[","",new OneOperator2_FE_get_elmnt<Complex,v_fes3>());
  Add<pfes3*>("(","", new OneTernaryOperator<pVh3_ndf,pVh3_ndf::Op>  );
  
-init_mesh3_array(); //3D vomlume
-init_meshS_array();  //3D surface
+ init_mesh3_array(); //3D vomlume
+ init_meshS_array();  //3D surface
+ init_meshL_array();  //3D line
 
-    // Add jan 2019 F.H ..to get a sorted the array of label and region of a mesh.
-    Global.Add("labels","(",new OneOperator1s_<KN_<long>,pmesh3>(listoflabel));
-    Global.Add("labels","(",new OneOperator1s_<KN_<long>,pmesh>(listoflabel));
-    Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmesh3>(listofregion));
-    Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmesh>(listofregion));
+ // Add jan 2019 F.H ..to get a sorted the array of label and region of a mesh.
+ Global.Add("labels","(",new OneOperator1s_<KN_<long>,pmesh3>(listoflabel));
+ Global.Add("labels","(",new OneOperator1s_<KN_<long>,pmesh>(listoflabel));
+ Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmesh3>(listofregion));
+ Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmesh>(listofregion));
  
  // 3d surface
  Add<pfScbasearray*>("[","",new OneOperator2_<pfScbase*,pfScbasearray*,long>(get_element));  // use ???? FH sep. 2009

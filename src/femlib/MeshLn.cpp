@@ -59,13 +59,7 @@ namespace Fem2D
     
   template<> int  GenericMesh<EdgeL,BoundaryPointL,Vertex3>::kfind=0;
   template<> int  GenericMesh<EdgeL,BoundaryPointL,Vertex3>::kthrough=0;
-    
-   
-  /*   void Add(int *p,int n,int o) {
-       for(int i=0;i<n;++i)
-       p[i] += o;
-       }
-  */
+
     
   const string GsbeginL="MeshS::GSave v0",GsendL="end";
   void MeshL::GSave(FILE * ff,int offset) const
@@ -402,7 +396,7 @@ namespace Fem2D
   }
     
     
-  MeshL::MeshL(const string filename, const long change)
+  MeshL::MeshL(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
     :mapSurf2Curv(0),mapCurv2Surf(0)  {
         
         
@@ -423,131 +417,13 @@ namespace Fem2D
 	else
 	  read(f);
       }
-        
-    if(change){
-      // verification multiple points
-      double hseuil=hmin();
-      hseuil = hseuil/10;
-      cout << " hseuil = " << hseuil << endl;
-      KN<int> Numero_Som(this->nv);
-      Vertex *vv=new Vertex[this->nv];
-      int nv_t=0;
-      {
-	R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);
-	for (int ii=0;ii< this->nv;ii++){
-	  R3 P( vertices[ii].x, vertices[ii].y, vertices[ii].z);
-	  Pinf=Minc(P,Pinf);
-	  Psup=Maxc(P,Psup);
-	}
-	EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(vv,Pinf,Psup,0);
-	// creation of octree
-	for (int ii=0;ii<this->nv;ii++){
-	  const R3 r3vi( this->vertices[ii].x, this->vertices[ii].y, this->vertices[ii].z );
-	  const Vertex3 &vi(r3vi);
-                    
-	  Vertex3 * pvi=gtree->ToClose(vi,hseuil);
-                    
-	  if(!pvi){
-	    vv[nv_t].x = vi.x;
-	    vv[nv_t].y = vi.y;
-	    vv[nv_t].z = vi.z;
-	    vv[nv_t].lab = this->vertices[ii].lab; // lab mis a zero par default
-	    Numero_Som[ii] = nv_t;
-	    gtree->Add( vv[nv_t] );
-	    nv_t=nv_t+1;
-	  }
-	  else{
-	    Numero_Som[ii] = pvi-vv;
-	  }
-	}
-                
-	delete gtree;
-	//delete [] vv;
-      }
-            
-      // general case
-            
-      KN<int> takevertex(nv_t,0);
-      for (int k=0; k<nbe; k++) {
-	const BorderElement & K(this->borderelements[k]);
-	for(int jj=0; jj<BorderElement::nv; jj++){
-	  takevertex[ Numero_Som[this->operator()(K[jj])] ] = 1;
-	}
-      }
-      for(int k=0; k< this->nt; k++){
-	const Element & K(this->elements[k]);
-	for(int jj=0; jj<Element::nv; jj++){
-	  takevertex[ Numero_Som[this->operator()(K[jj])] ] = 1;
-	}
-      }
-            
-      int newvertex=0;
-      for(int iv=0; iv<nv_t; iv++){
-	newvertex+=takevertex[iv];
-      }
-            
-      if( newvertex != this->nv){
-                
-	// determination of vertex
-	Vertex *vvv = new Vertex[ newvertex ];
-	KN<int> newNumero_Som(nv_t);
-	int iii=0;
-	for(int iv=0;  iv< nv_t; iv++){
-	  if( takevertex[iv ] == 1  ){
-	    vvv[iii].x = vv[iv].x;
-	    vvv[iii].y = vv[iv].y;
-	    vvv[iii].z = vv[iv].z;
-	    vvv[iii].lab = vv[iv].lab; // lab mis a zero par default
-	    newNumero_Som[iv] = iii;
-	    iii++;
-	  }
-	}
-	ffassert( newvertex== iii );
-                
-	Element *tt=new Element[this->nt];
-	BorderElement *bb = new BorderElement[this->nbe];
-                
-	Element *ttt=tt;
-	BorderElement *bbb=bb;
-                
-	for (int k=0; k<this->nbe; k++) {
-	  const BorderElement & K(this->borderelements[k]);
-	  int iv[2];
-	  for(int jj=0; jj<2; jj++){
-	    iv[jj] = Numero_Som[this->operator()(K[jj])];
-	    iv[jj] = newNumero_Som[iv[jj]];
-	  }
-	  (bbb++)->set(vvv,iv,K.lab);
-	}
-                
-	for(int k=0; k< this->nt; k++){
-	  const Element & K(this->elements[k]);
-	  int iv[3];
-	  for(int jj=0; jj<3; jj++){
-	    iv[jj] = Numero_Som[this->operator()(K[jj])];
-	    iv[jj] = newNumero_Som[iv[jj]];
-	  }
-	  (ttt++)->set(vvv,iv,K.lab);
-	}
-	cout << " delete vertices + autre " << endl;
-	delete [] vertices;
-	delete [] elements;
-	delete [] borderelements;
-                
-	nv = newvertex;
-                
-	vertices = vvv;
-	elements = tt;
-	borderelements = bb;
-                
-	//&this = new Mesh3(newvertex,this->nt,this-nbe,vvv,tt,bb);
-                
-	delete [] newNumero_Som;
-      }
-      else{
-	cout << " no need to change the mesh " << endl;
-      }
-      delete [] Numero_Som;
+     
+    if (cleanmesh) {
+        if(verbosity>3)
+            cout << "before clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+        clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
+        if(verbosity>3)
+            cout << "after clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
     }
         
     BuildBound();
@@ -564,10 +440,9 @@ namespace Fem2D
   }
     
  
-  /*
-    MeshS::MeshS(FILE *f,int offset)
-    :mapSurf2Vol(0),mapVol2Surf(0)
-    {
+  
+  MeshL::MeshL(FILE *f,int offset)
+  :mapSurf2Curv(0),mapCurv2Surf(0)     {
     GRead(f,offset);// remove 1
     assert( (nt >= 0 || nbe>=0)  && nv>0) ;
     BuildBound();
@@ -577,29 +452,19 @@ namespace Fem2D
     BuildAdj();
     Buildbnormalv();
     BuildjElementConteningVertex();
-        
-    // if not edges then build the edges - need access to the old adjacensce to build eges and rebuild the new adj
-    if (nbe==0) {
-    BuildEdges();
-    delete [] TheAdjacencesLink;
-    delete [] BoundaryElementHeadLink;
-    TheAdjacencesLink=0;
-    BoundaryElementHeadLink=0;
-    BuildBound();
-    BuildAdj();
-    Buildbnormalv();
-    BuildjElementConteningVertex();
-    }
-        
+      
     if(verbosity>2)
     cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
         
     if(verbosity>1)
-    cout << "  -- MeshS  (File *), d "<< 3  << ", n Tri " << nt << ", n Vtx "
+    cout << "  -- MeshL  (File *), d "<< 3  << ", n Tri " << nt << ", n Vtx "
     << nv << " n Bord " << nbe << endl;
     ffassert(mes>=0); // add F. Hecht sep 2009.
     }
-  */
+  
+    
+    
+    
     
   double MeshL::hmin() const
   {
@@ -687,7 +552,6 @@ namespace Fem2D
   }
     
     
-    
   MeshL::MeshL(int nnv, int nnt, int nnbe, Vertex3 *vv, EdgeL *tt, BoundaryPointL *bb, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
     :mapSurf2Curv(0),mapCurv2Surf(0)
   {
@@ -723,9 +587,7 @@ namespace Fem2D
     assert(mesb==nbe);
   }
    
-    
-    
-    
+ 
   int MeshL::Save(const string & filename) const
   {
     int ver = GmfDouble, outm;
@@ -755,6 +617,8 @@ namespace Fem2D
     GmfCloseMesh(outm);
     return (0);
   }
+
+    
     
     
 }

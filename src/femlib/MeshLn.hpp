@@ -111,16 +111,16 @@ namespace Fem2D {
     
   class MeshL : public GenericMesh<EdgeL,BoundaryPointL,Vertex3> {
   public:
-    // mapping for volume/surface vertices
-    int *mapSurf2Curv; //*liste_v_num_surf;
-    int *mapCurv2Surf; //*v_num_surf;
+    // mapping for surface/line vertices
+    int *mapSurf2Curv;
+    int *mapCurv2Surf;
     MeshL():mapSurf2Curv(0),mapCurv2Surf(0) {};
     MeshL(const string);
-    MeshL(const string, const long);
+    MeshL(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
+      
     void read(istream &f);
     void readmsh(ifstream & f,int offset);
-    //MeshL(FILE *f,int offset=0);
-    //MeshL(const string);
+    MeshL(FILE *f,int offset=0);
     MeshL(int nnv, int nnt, int nnbe, Vertex3 *vv, EdgeL *tt, BoundaryPointL *bb, bool cleanmesh=true, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
     //MeshL(const Serialize&);
 
