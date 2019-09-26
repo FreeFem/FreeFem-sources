@@ -120,6 +120,19 @@ struct OnePlotMeshS : public OnePlot
     void Draw(OneWindow *win);
 };
 
+struct OnePlotMeshL : public OnePlot
+{
+    const MeshL *Th;
+    OnePlotMeshL(const MeshL *T)
+    : OnePlot(0,3,3),Th(T)
+    {
+        Pmin=Th->Pmin;
+        Pmax=Th->Pmax;
+        //Th->BoundingBox(Pmin,Pmax);
+    }
+    void Draw(OneWindow *win);
+};
+
 template<class Mesh>
 struct OnePlotFE: public OnePlot
 {
@@ -335,6 +348,7 @@ public:
     vector<Mesh2 *> Ths2;
     vector<Mesh3 *> Ths3;
     vector<MeshS *> ThsS;
+    vector<MeshL *> ThsL;
     list<OnePlot *> plots;
     bool changeViso,changeVarrow,changeColor,changeBorder,changeFill;
     R3 Pvue,Peyes;
@@ -362,7 +376,9 @@ public:
         for (vector<Mesh3 *>::iterator i= Ths3.begin();i != Ths3.end(); ++i)
             if(*i) delete *i;
         for (vector<MeshS *>::iterator i= ThsS.begin();i != ThsS.end(); ++i)
-        if(*i) delete *i;
+            if(*i) delete *i;
+        for (vector<MeshL *>::iterator i= ThsL.begin();i != ThsL.end(); ++i)
+            if(*i) delete *i;
         
     }
     ThePlot(PlotStream & fin,ThePlot *old , int kcount);

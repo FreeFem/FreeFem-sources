@@ -2165,7 +2165,8 @@ public:
 	pmesh th() { assert(v[0] && what==0); return static_cast<pmesh>(cv[0]);}
 	pmesh3 th3() { assert(v[0] && what==5); return static_cast<pmesh3>(cv[0]);}
  	pmeshS thS() { assert(v[0] && what==5); return static_cast<pmeshS>(cv[0]);}
-
+    pmeshL thL() { assert(v[0] && what==5); return static_cast<pmeshL>(cv[0]);}
+        
 	void Set(int nn=0,void **vv=0,int *c=0) {
 	    cmp[0]=cmp[1]=cmp[2]=cmp[3]=-1;
 	    v[0]=v[1]=v[2]=v[3]=0;
@@ -2447,6 +2448,7 @@ public:
 	KN<pmesh> * evalma(int i,Stack s) const  { throwassert(e[i]);return   GetAny< KN<pmesh> * >((*e[i])(s)) ;}
 	const Mesh3 & evalm3(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh3 >((*e[i])(s)) ;}
     const MeshS & evalmS(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmeshS >((*e[i])(s)) ;}
+    const MeshL & evalmL(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmeshL >((*e[i])(s)) ;}
 	const E_BorderN * evalb(int i,Stack s) const  { throwassert(e[i]);return   GetAny< const E_BorderN *>((*e[i])(s)) ;}
 	tab  evalt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<tab>((*e[i])(s)) ;}
          pttab  evalptt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<pttab>((*e[i])(s)) ;}
@@ -2629,12 +2631,16 @@ public:
                 l[i][0]=CastTo<pmesh>(args[i]);}
             else if (BCastTo<pmesh3>(args[i])){
                 l[i].composant=true;
-                l[i].what=5;// 3d mesh ...
+                l[i].what=5;// 3d mesh (real volume or if contains a meshS pointer...
                 l[i][0]=CastTo<pmesh3>(args[i]);}
             else if (BCastTo<pmeshS>(args[i])){
                 l[i].composant=true;
-                l[i].what=50;// 3d surface mesh ...
+                l[i].what=50;// 3d surface mesh
                 l[i][0]=CastTo<pmeshS>(args[i]);}
+            else if (BCastTo<pmeshL>(args[i])){
+                l[i].composant=true;
+                l[i].what=55;// 3d line mesh
+                l[i][0]=CastTo<pmeshL>(args[i]);}
             else if (BCastTo<const E_BorderN *>(args[i])){
                 l[i].what=4; // border 2d
                 l[i].composant=true;
@@ -3726,6 +3732,7 @@ AnyType Plot::operator()(Stack s) const{
             case 18 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 19 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 50 : l[i].EvalandPush<void *>(s,i,ll); break;
+            case 55 : l[i].EvalandPush<void *>(s,i,ll); break;
             case  100 : l[i].MEvalandPush< pmesh>(s,i,ll); break;
             case  101 : l[i].AEvalandPush<asol, sol>(s,i,ll); break;
             case  102 : l[i].AEvalandPush<asol, sol>(s,i,ll); break;
@@ -3755,7 +3762,7 @@ AnyType Plot::operator()(Stack s) const{
          what = 2 -> 2d vector field (two FE function  2d)
          what = 3 -> curve def by 2,.., 4 array
          what = 4 -> border
-         what = 5 -> 3d meshes
+         what = 5 -> 3d mesh, real volume or if contains a surface mesh
          what = 6 -> real FE function 3D volume
          what = 7 -> real 3d vector field (tree FE function  3d) volume
          what = 8 -> real FE function 3D surface
@@ -3767,6 +3774,7 @@ AnyType Plot::operator()(Stack s) const{
          what = 18 -> complex FE function 3D surface
          what = 19 -> complex 3d vector field (tree FE function  3d) surface
          what = 50 -> 3D surface mesh
+         what = 55 -> 3D line mesh
          what = 100,101,106, ->   remap with real ... 2d, 3D volume, 3D surface
          what = 111, 116 , 117 118 ->  remap with complex ... 2d, 3D volume, 3D surface
          what = -1 -> error, item empty
@@ -3856,28 +3864,27 @@ if(nargs[VTK_START+index])                    \
         map<const Mesh *,long> mapth;
         map<const Mesh3 *,long> mapth3;
         map<const MeshS *,long> mapthS;
-        long kth=0,kth3=0,kthS=0;
+        map<const MeshL *,long> mapthL;
+        
+        long kth=0,kth3=0,kthS=0,kthL=0;
         //  send all the mesh:
         for (size_t ii=0;ii<ll.size();ii++) {
           int i=ll[ii].i;
           long what = ll[i].what;
           const Mesh *th=0;
           const Mesh3 *th3=0;
-            const MeshS *thS=0;
+          const MeshS *thS=0;
+          const MeshL *thL=0;
           // Prepare for the sending mesh 2d
-          if(what ==0)
+          if(what==0)
             th= ll[ii].th();
-          // Prepare for the sending mesh 3d with differenciation 3D surface / volumuic / volum+surfac
-          if( what ==5 ) {
-            //const int th3type = (l[i].evalm3(0,s)).getTypeMesh3() ;
-            // need to modifie the what for type mesh3 for identification in the ffglut reading
-            //if (l[i].evalm3(0,s)).meshS) { ll[i].what=50; thS= &(l[i].evalmS(0,s));}  // 3d pure surface
-            if (l[i].evalm3(0,s).meshS) { ll[i].what=52; th3= & (l[i].evalm3(0,s)); thS= &(l[i].evalmS(0,s)); } // 3d mixed volume and surface
-            else { ll[i].what=51; th3= & (l[i].evalm3(0,s)); }   // 3d pure volume
-         
-          }
-          if( what ==50 )
-            thS= (&(l[i].evalmS(0,s)));// 3d pure surface
+          // Prepare for the sending mesh 3d with differenciation 3D line / surface / volumuic / volum+surfac / line+volum+surfac
+          if( what==5 )
+              th3= & (l[i].evalm3(0,s)); // 3d mesh3 -> if contains a meshS or meshL pointer, send only the principal mesh: the mesh3
+          if( what==50 )
+            thS= (&(l[i].evalmS(0,s))); // 3d meshS
+          if( what ==55 )
+            thL= (&(l[i].evalmL(0,s))); // 3d  meshL
           // Prepare for the sending 2d iso values for ffglut
           else if (what==1 || what==2|| what==11 || what==12) {
             ll[ii].eval(fe,cmp);
@@ -3906,7 +3913,9 @@ if(nargs[VTK_START+index])                    \
           if(th3 && (mapth3.find(th3)==mapth3.end()))
             mapth3[th3]=++kth3;
           if(thS && (mapthS.find(thS)==mapthS.end()))
-          mapthS[thS]=++kthS;
+            mapthS[thS]=++kthS;
+          if(thL && (mapthL.find(thL)==mapthL.end()))
+            mapthL[thL]=++kthL;
         }
         // send of meshes 2d
         theplot.SendMeshes();
@@ -3915,30 +3924,23 @@ if(nargs[VTK_START+index])                    \
         for (map<const Mesh *,long>::const_iterator i=mapth.begin();i != mapth.end(); ++i)
             theplot << i->second << *  i->first ;
 
-       // only send of volume meshes 3D
-        if(kth3 && kthS==0)
-        {
+       // only send of volume meshes 3D if completed mesh3 (meshS!=NULL or/and !=meshL!=NULL)
+        if(kth3) {
             theplot.SendMeshes3();
             theplot << kth3 ;
             for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i)
                 theplot << i->second << *  i->first ;
            }
-
-        // only send of surface meshes 3D
-       if(kthS && kth3==0)
-        {
+       if(kthS) {
             theplot.SendMeshesS();
             theplot << kthS ;
             for (map<const MeshS *,long>::const_iterator i=mapthS.begin();i != mapthS.end(); ++i)
                 theplot << i->second << *  i->first ;
        }
-
-        // send of volume and surface meshes 3D
-        // in this case, plot the surface
-        if(kthS && kth3) {
-          theplot.SendMeshes3();
-          theplot << kthS ;
-          for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i)
+        if(kthL) {
+          theplot.SendMeshesL();
+          theplot << kthL ;
+          for (map<const MeshL *,long>::const_iterator i=mapthL.begin();i != mapthL.end(); ++i)
             theplot << i->second << *  i->first ;
         }
 
@@ -3955,6 +3957,7 @@ if(nargs[VTK_START+index])                    \
             const Mesh *pTh=0;
             const Mesh3 *pTh3=0;
             const MeshS *pThS=0;
+            const MeshL *pThL=0;
 
             // send 2d meshes for ffglut
             if(what ==0)
@@ -3997,16 +4000,14 @@ if(nargs[VTK_START+index])                    \
                 err=0;
             }
 
-            else if (l[i].what==4 )
-            {
+            else if (l[i].what==4 ) {
                 err=0;
                 theplot << what ;
                 const  E_BorderN * Bh= l[i].evalb(0,s);
                 Bh->SavePlot(s,theplot);
             }
-            // send 3d meshes for ffglut
-            else if(what ==51)
-            {
+            // send volume 3d meshes for ffglut
+            else if(what ==5) {
                 pTh3=&l[i].evalm3(0,s);
                 if(pTh3) {
                     err=0;
@@ -4023,13 +4024,12 @@ if(nargs[VTK_START+index])                    \
                  }
             }
 
-            else if(what ==52)
-            {
-                pThS=&(l[i].evalmS(0,s));
-                if(pThS) {
+            else if(what ==55) {
+                pThL=&(l[i].evalmL(0,s));
+                if(pThL) {
                     err=0;
                     theplot << what ;
-                    theplot <<mapthS[ &(l[i].evalmS(0,s))];// numero du maillage 3D surface
+                    theplot <<mapthL[ &(l[i].evalmL(0,s))];// numero du maillage 3D line
                 }
             }
 

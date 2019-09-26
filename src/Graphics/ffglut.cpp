@@ -102,6 +102,7 @@ int   ReadOnePlot(FILE *fp)
     const char *  magic3_1="#!ffglutdata3.1";
     const char *  magic3_2="#!ffglutdata3.2";
     const char *  magic4_0="#!ffglutdata4.0";
+    const char *  magic4_1="#!ffglutdata4.1";
     /*
 
      change version 3.2 add colored curve
@@ -122,7 +123,8 @@ int   ReadOnePlot(FILE *fp)
         else if( strcmp(magicxx,magic3)==0)  version=3;
         else if( strcmp(magicxx,magic3_1)==0)  version=3;
         else if( strcmp(magicxx,magic3_2)==0)  version=3;
-         else if( strcmp(magicxx,magic4_0)==0)  version=4;
+        else if( strcmp(magicxx,magic4_0)==0)  version=4;
+        else if( strcmp(magicxx,magic4_1)==0)  version=4.1;
         else err =1;
 
         if(err) {
@@ -459,7 +461,7 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
     typedef Mesh3::BorderElement BE;
     typedef Mesh3::Element Tet;
     glEnable(GL_DEPTH_TEST);
-    ShowGlerror("begin Mesh plot");
+    ShowGlerror("begin Mesh3 plot");
 
     glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
@@ -554,7 +556,7 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
         }
     }
     kk++;
-    ShowGlerror("end Mesh plot");
+    ShowGlerror("end Mesh3 plot");
 
 }
 
@@ -565,7 +567,7 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 {
     glDisable(GL_DEPTH_TEST);
 
-    ShowGlerror("begin Mesh plot");
+    ShowGlerror("begin MeshS plot");
     glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
     R z1= plot.z0;
     R z2= plot.z0;
@@ -649,9 +651,102 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
             glEndList();  // fin de la list
         }
     }
-    ShowGlerror("end Mesh plot");
+    ShowGlerror("end MeshS plot");
 
 }
+
+
+
+
+void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot,GLint gllists,int * lok)
+{
+    glDisable(GL_DEPTH_TEST);
+    
+    ShowGlerror("begin MeshL plot");
+    glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    R z1= plot.z0;
+    R z2= plot.z0;
+    
+    
+    double r=0,g=0,b=0;
+    if((debug > 3)) cout<< " OnePlotMeshL::Draw " << plotmesh << " " << plotborder << " " <<  Th.nbBrdElmts() << " " << z1 << " "  << z2 << endl;
+    // plot.SetColorTable(16) ;
+    bool cc[3]= { plotborder , plotmesh && fill , plotmesh };
+    int kk=0;
+    
+    if(cc[kk])
+        if(lok[kk])   glCallList(gllists+kk);
+        else
+        {
+            lok[kk]=1;
+            glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
+            glLineWidth(2);
+            glBegin(GL_LINES);
+            for (int i=0;i<Th.nbBrdElmts();i++)
+            {
+                const MeshL::BorderElement  & K(Th.be(i));
+                plot.color(1+abs(K.lab));
+                glVertex3d(K[0].x,K[0].y,K[0].z);
+                
+            }
+            glEnd();
+            glLineWidth(1);
+            glEndList();  // fin de la list
+        }
+        else ;
+    
+    kk++;
+    if(cc[kk])
+    {
+        if(lok[kk])   glCallList(gllists+kk);
+        else
+        {
+            lok[kk]=1;
+            glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
+            glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);//GL_FILL
+            glBegin(GL_TRIANGLES);
+            for (int i=0;i<Th.nt;i++)
+            {
+                const MeshL::Element & K(Th[i]);
+                plot.color(K.lab?1+abs(K.lab):0);
+                
+                //glColor3d(r,g,b);
+                glVertex3d(K[0].x,K[0].y,K[0].z);
+                glVertex3d(K[1].x,K[1].y,K[1].z);
+                
+            }
+            glEnd();
+            glEndList();
+        }
+    }
+    kk++;
+    if(cc[kk])
+    {
+        if(lok[kk])   glCallList(gllists+kk);
+        else
+        {
+            lok[kk]=1;
+            glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
+            glPolygonMode(GL_FRONT,GL_LINE);
+            glBegin(GL_TRIANGLES);
+            for (int i=0;i<Th.nt;i++)
+            {
+                const MeshL::Element  & K(Th[i]);
+                plot.color(fill? 1 : 1+abs(K.lab));
+                glVertex3d(K[0].x,K[0].y,K[0].z);
+                glVertex3d(K[1].x,K[1].y,K[1].z);
+                
+            }
+            
+            glEnd();
+            glEndList();  // fin de la list
+        }
+    }
+    ShowGlerror("end MeshL plot");
+    
+}
+
+
 
 void OnePlotError::Draw(OneWindow *win)
 {
@@ -683,6 +778,14 @@ void OnePlotMesh3::Draw(OneWindow *win)
 }
 
 void OnePlotMeshS::Draw(OneWindow *win)
+{
+    initlist();
+    ThePlot & plot=*win->theplot;
+    Plot(*Th,plot.fill,true,true,plot,gllists,oklist);
+    ShowGlerror("OnePlotMeshS::Draw");
+}
+
+void OnePlotMeshL::Draw(OneWindow *win)
 {
     initlist();
     ThePlot & plot=*win->theplot;
@@ -2262,7 +2365,9 @@ case 20+index: {type dummy; fin >= dummy;} break;
     }
     long nbmeshes3=0;
     long nbmeshesS=0;
-    int getMesh3Type = fin.GetMeshes3(); // 0 : dt_mesh3, 1 : dt_meshS, 12 : dt_mesh3S, 2 : dt_plots
+    long nbmeshesL=0;
+    
+    int getMesh3Type = fin.GetMeshes3(); // 0 : dt_mesh3, 1 : dt_meshS, 2 : dt_meshL, 3 : dt_plots
     if (getMesh3Type!=3) //  read GetPlots if false ...
     {
      //  There are 3D volume solution
@@ -2287,7 +2392,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
                  ffassert(Ths3[l]==0);
                  fin >>Ths3[l] ;
                  if((debug > 3))
-                     cout << i << " nt/nv " << l << " "  <<Ths3[l]->nt << " "
+                     cout << "mesh3 i: "<< i << " nt/nv " << l << " "  <<Ths3[l]->nt << " "
                      << Ths3[l]->nv << endl;
                  ffassert(fin.good());
              }
@@ -2304,8 +2409,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
         getMesh3Type=fin.GetMeshes3();
      }
      //  There are 3D surface solution
-     if(getMesh3Type==1)
-     {
+     if(getMesh3Type==1) {
          fin >> nbmeshesS;
          if((debug > 2)) cout << " read nb : meshS " << nbmeshesS << endl;
          ThsS.resize(nbmeshesS);
@@ -2317,14 +2421,14 @@ case 20+index: {type dummy; fin >= dummy;} break;
              fin >> l;
              if(l>=0)
              {
-                 if((debug > 3)) cout << " read meshS " << i  << " -> " << l
+                 if((debug > 3)) cout << "meshS i: "<< " read meshS " << i  << " -> " << l
                      << "  " <<nbmeshesS << endl;
                  l--;
                  ffassert(l>=0 && l < nbmeshesS);
                  ffassert(ThsS[l]==0);
                  fin >>ThsS[l] ;
                  if((debug > 3))
-                     cout << i << " nt/nv " << l << " "  <<ThsS[l]->nt << " "
+                     cout << "meshS i: "<< i << " nt/nv " << l << " "  <<ThsS[l]->nt << " "
                      << ThsS[l]->nv << endl;
                  ffassert(fin.good());
              }
@@ -2340,6 +2444,42 @@ case 20+index: {type dummy; fin >= dummy;} break;
         }
         getMesh3Type=fin.GetMeshes3();
      }
+     //  There are 3D line solution
+     if(getMesh3Type==2) {
+            fin >> nbmeshesL;
+            if((debug > 2)) cout << " read nb : meshL " << nbmeshesL << endl;
+            ThsL.resize(nbmeshesL);
+            for(int i=0;i<nbmeshesL;++i)
+                ThsL[i]=0;
+            for(int i=0;i<nbmeshesL;++i)
+            {
+                long l;
+                fin >> l;
+                if(l>=0)
+                {
+                    if((debug > 3)) cout << " read meshL " << i  << " -> " << l
+                        << "  " <<nbmeshesL << endl;
+                    l--;
+                    ffassert(l>=0 && l < nbmeshesL);
+                    ffassert(ThsL[l]==0);
+                    fin >>ThsL[l] ;
+                    if((debug > 3))
+                        cout << "meshL i: "<< i << " nt/nv " << l << " "  <<ThsL[l]->nt << " "
+                        << ThsL[l]->nv << endl;
+                    ffassert(fin.good());
+                }
+                else // Add FH optimisation FH 11/12/2008 (not use to day)
+                {// the mesh is already in the previous plot with number ll
+                    ffassert(l==-1);
+                    long ll;
+                    fin >> l>> ll; // read l and ll
+                    ffassert(old);
+                    ThsL[l]=old->ThsL[ll];
+                    ThsL[l]->increment(); //
+                }
+            }
+            getMesh3Type=fin.GetMeshes3();
+        }
      else if (getMesh3Type==3)
 
       fin.GetPlots();
@@ -2388,23 +2528,23 @@ case 20+index: {type dummy; fin >= dummy;} break;
             p=new OnePlotCurve(fin,4,this);// add zz and color ..
         else if(what==4)
             p=new OnePlotBorder(fin);
-        // volume 3D mesh
-        else if (what==51 || what == 5)
+        // volume 3D meshes (mesh3 or mesh3 only in case with pointer on meshS or/and meshL
+        else if (what == 5)
         {
             fin >> imsh;
-            p=new OnePlotMesh3(Ths3[imsh-1]);if((debug > 9)) cout << " plot : mesh3 (volume) " << imsh << endl;
+            p=new OnePlotMesh3(Ths3[imsh-1]);if((debug > 9)) cout << " plot : mesh3 (volume 3D) " << imsh << endl;
         }
-        //surface 3D mesh
+        // surface 3D meshes
         else if(what==50)
         {
-            fin >> imsh;if((debug > 9)) cout << " plot : mesh3 (surface) " << imsh << endl;
+            fin >> imsh;if((debug > 9)) cout << " plot : meshS (surface 3D) " << imsh << endl;
             p=new OnePlotMeshS(ThsS[imsh-1]);
         }
-        //volume and surface 3D meshes but only plot the volume
-        else if (what==52)
+        // line 3D meshes
+        else if (what==55)
         {
-            fin >> imsh;if((debug > 9)) cout << " plot : mesh3 (contains a surface mesh too) " << imsh << endl;
-            p=new OnePlotMesh3(Ths3[imsh-1]);
+            fin >> imsh;if((debug > 9)) cout << " plot : meshL (line 3D) " << imsh << endl;
+            p=new OnePlotMeshL(ThsL[imsh-1]);
         }
         else if (what==6  || what==7|| what==16  || what==17)
         {

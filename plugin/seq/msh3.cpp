@@ -7868,6 +7868,120 @@ public:
 };
 
 
+// generator for meshL
+
+
+class Line_Op: public E_F0mps
+{
+public:
+    static const int n_name_param = 2;    //
+    static basicAC_F0::name_and_type name_param [];
+    Expression nargs[n_name_param], enx, xx, yy, zz;
+
+public:
+    Line_Op (const basicAC_F0 &args, Expression nx, Expression transfo = 0)
+    : enx(nx), xx(0), yy(0), zz(0) {
+        args.SetNameParam(n_name_param, name_param, nargs);
+        if (transfo) {
+            const E_Array *a2 = dynamic_cast<const E_Array *>(transfo);
+            int err = 0;
+            if (a2) {
+                if (a2->size() != 3)
+                    CompileError("Square (n1,n2, [X,Y,Z]) ");
+                xx = to<double>((*a2)[0]);
+                yy = to<double>((*a2)[1]);
+                zz = to<double>((*a2)[2]);
+            }
+        }
+    }
+
+    AnyType operator () (Stack stack)  const;
+};
+
+basicAC_F0::name_and_type Line_Op::name_param [] = {
+    {"region", &typeid(long)},
+    {"label", &typeid(KN_<long>)}
+   
+};
+
+class Line: public OneOperator {
+public:
+    int cas;
+    Line (): OneOperator(atype<pmeshL>(), atype<long>()), cas(0) {}
+
+    Line (int): OneOperator(atype<pmeshL>(), atype<long>(), atype<E_Array>()), cas(1) {}
+
+    E_F0*code (const basicAC_F0 &args) const {
+        if (cas == 0) {
+            return new Line_Op(args, t[0]->CastTo(args[0]));
+        } else {
+            return new Line_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
+        }
+    }
+};
+
+
+AnyType Line_Op::operator () (Stack stack)  const {
+    
+	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+    typedef typename MeshL::Element T;
+    typedef typename MeshL::BorderElement B;
+    typedef typename MeshL::Vertex V;
+	
+	
+	
+	long region = 0;
+    int nt=GetAny<long>((*enx)(stack));
+	int nv=nt+1,nbe=2;
+
+    V *v= new V[nv];
+    T *t= new T[nt];
+    B *b= new B[nbe];
+	V *vv=v;
+	
+    for (int i=0;i<nv;++i) {
+       MeshL::Rd P((R) i/nt, 0., 0.);
+	   vv[i].x=P.x;
+	   vv[i].y=P.y;
+	   vv[i].z=P.z;
+	   vv[i].lab = 0;
+	   mp->set(vv->x,vv->y,vv->z);
+       if (xx)
+           vv[i].x = GetAny<double>((*xx)(stack));
+       if (yy)
+           vv[i].y = GetAny<double>((*yy)(stack));
+       if (zz)
+           vv[i].z = GetAny<double>((*zz)(stack));
+    }
+
+	T *tt=t;   
+	for (int i=0;i<nt;++i) { 
+		int iv[2]; iv[0]=i, iv[1]=i+1;
+		int lab=0;
+		(tt++)->set(v,iv,lab);   
+	}
+	
+	B *bb=b;
+	int ibeg[1], iend[1];
+	ibeg[0]=0, iend[0]=nv-1;
+	int lab=0;
+	(bb++)->set(v,ibeg,lab); 
+	(bb++)->set(v,iend,lab);
+	cout << "test nv nt "<< nv << " " << nt << endl;
+	MeshL *ThL = new MeshL(nv,nt,nbe,v,t,b);
+    ThL->BuildGTree();
+
+
+    Add2StackOfPtr2FreeRC(stack, ThL);
+
+    return ThL;
+}
+
+
+
+
+
+
 
 
 
@@ -7880,9 +7994,11 @@ public:
 static void Load_Init () {
     Dcl_Type<listMesh3>();
     Dcl_Type<listMeshS>();
+	//Dcl_Type<listMeshL>();
     typedef const Mesh *pmesh;
     typedef const Mesh3 *pmesh3;
     typedef const MeshS *pmeshS;
+	typedef const MeshL *pmeshL;
 
     if (verbosity > 1 && mpirank == 0) {
         cout << " load: msh3  " << endl;
@@ -7894,13 +8010,9 @@ static void Load_Init () {
     TheOperators->Add("+", new OneBinaryOperator_st<Op3_addmesh<listMesh3, listMesh3, pmesh3> > );
     TheOperators->Add("=", new OneBinaryOperator_st<Op3_setmesh<false, pmesh3 *, pmesh3 *, listMesh3> > );
     TheOperators->Add("<-", new OneBinaryOperator_st<Op3_setmesh<true, pmesh3 *, pmesh3 *, listMesh3> > );
-
-   // Global.Add("change", "(", new SetMesh3D);
-    //Global.Add("movemesh2D3Dsurf", "(", new Movemesh2D_3D_surf_cout);   // remove ?
-    //Global.Add("movemesh3", "(", new Movemesh3D);  // apply transfo to mesh3 and meshS if surface can be built
-   //Global.Add("movemesh", "(", new Movemesh3D(1));
-    // Global.Add("movemesh3D", "(", new Movemesh3D_cout);
-
+    Global.Add("movemesh3", "(", new Movemesh<Mesh3>);
+    Global.Add("movemesh", "(", new Movemesh<Mesh3>(1));
+	 Global.Add("change", "(", new SetMesh<Mesh3>);
     Global.Add("deplacement", "(", new DeplacementTab);  // movemesh ?
     Global.Add("checkbemesh", "(", new CheckManifoldMesh);   // ??
     Global.Add("buildlayers", "(", new BuildLayerMesh);
@@ -7909,8 +8021,7 @@ static void Load_Init () {
     Global.Add("gluemesh", "(", new Op_GluMesh3tab);
     Global.Add("extract", "(", new ExtractMesh2D);   // obselete function -> use trunc function
     Global.Add("extract", "(", new ExtractMesh);     // take a Mesh3 in arg and return a part of MeshS
-    //Global.Add("movemesh23", "(", new Movemesh2D_S);
-    // for a mesh3 Th3, if Th3->meshS=NULL, build the meshS associated
+    
     Global.Add("buildSurface", "(", new BuildMeshSFromMesh3);
 
     // Global.Add("showborder", "(", new OneOperator1<long, const Mesh3 *>(ShowBorder<Mesh3>));
@@ -7930,32 +8041,30 @@ static void Load_Init () {
     TheOperators->Add("=", new OneBinaryOperator_st<Op3_setmeshS<false, pmeshS *, pmeshS *, listMeshS> > );
     TheOperators->Add("<-", new OneBinaryOperator_st<Op3_setmeshS<true, pmeshS *, pmeshS *, listMeshS> > );
 
-   // Global.Add("change", "(", new SetMeshS);
-   // Global.Add("movemeshS", "(", new MovemeshS);
-   // Global.Add("movemesh", "(", new MovemeshS(1));
     Global.Add("trunc", "(", new Op_trunc_meshS);
-
-    Global.Add("showborder", "(", new OneOperator1<long, const MeshS *>(ShowBorder));
+	Global.Add("showborder", "(", new OneOperator1<long, const MeshS *>(ShowBorder));
     Global.Add("getborder", "(", new OneOperator2<long, const MeshS *, KN<long> *>(GetBorder));
-
-    Global.Add("AddLayers", "(", new OneOperator4_<bool, const MeshS *, KN<double> *, long, KN<double> *>(AddLayers));
+	Global.Add("AddLayers", "(", new OneOperator4_<bool, const MeshS *, KN<double> *, long, KN<double> *>(AddLayers));
 
     Global.Add("square3", "(", new Square);
     Global.Add("square3", "(", new Square(1));
 	
-    
-    
     Global.Add("movemeshS", "(", new Movemesh<MeshS>);
     Global.Add("movemesh", "(", new Movemesh<MeshS>(1));
-    
-    Global.Add("movemesh3", "(", new Movemesh<Mesh3>);
-    Global.Add("movemesh", "(", new Movemesh<Mesh3>(1));
-    
+  
     Global.Add("movemesh23", "(", new Movemesh<Mesh>);
-    //Global.Add("movemesh", "(", new Movemesh<Mesh>(1));
-    
+    //Global.Add("movemesh", "(", new Movemesh<Mesh>(1));  // no possible, ambiguity
     Global.Add("change", "(", new SetMesh<MeshS>);
-    Global.Add("change", "(", new SetMesh<Mesh3>);
+	
+	
+	// operators for MeshL
+	Global.Add("line3", "(", new Line);
+	
+	
+	
+	
+	
+   
 }
 
 // <<msh3_load_init>> static loading: calling Load_Init() from a function which is accessible from
