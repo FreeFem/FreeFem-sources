@@ -178,7 +178,7 @@ download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
 download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.12.0.tar.gz',
 	'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/',
 	'petsc-lite-3.12.0.tar.gz',
-	'd4f5d7feb782cf83bfe57f596c583ab2');
+	'997dc9475c634891ba63fefa56ac3621');
 	
 download('htool','https://github.com/PierreMarchand20/htool/archive/84fb0d9bd429556e131c5447283514509d44ab73.zip',
 		'https://github.com/PierreMarchand20/',
