@@ -648,7 +648,7 @@ class IterativeMethod : public OneOperator {
                 void GMV(const R* const in, R* const out, const int& mu = 1) const {
                     mat.mv(in, HPDDM::EmptyOperator<R>::_n, out);
                 }
-                template<bool = true>
+                template<bool>
                 void apply(const R* const in, R* const out, const unsigned short& mu = 1, R* = nullptr, const unsigned short& = 0) const {
                     if(prec.mat)
                         prec.mv(in, HPDDM::EmptyOperator<R>::_n, out);

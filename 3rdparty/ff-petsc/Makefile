@@ -51,8 +51,10 @@ ifeq ($(WIN32DLLTARGET),)
 		--with-scalar-type=real $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
 		--download-scalapack --download-metis --download-ptscotch \
-		--download-mumps --download-ml --download-hypre --download-parmetis \
-		--download-superlu --download-suitesparse --download-fftw --download-slepc 
+		--download-mumps --download-hypre --download-parmetis \
+		--download-superlu --download-suitesparse --download-fftw --download-tetgen \
+		--download-hpddm \
+		--download-slepc
 
 FLAGS_CONF_PETSC_COMPLEX= --with-debugging=no \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
@@ -72,7 +74,9 @@ FLAGS_CONF_PETSC_COMPLEX= --with-debugging=no \
 		--with-mumps-dir=$(DIR_INSTALL_REAL) \
 		--with-parmetis-dir=$(DIR_INSTALL_REAL) \
 		--with-fftw-dir=$(DIR_INSTALL_REAL) \
-		--download-slepc  
+		--with-tetgen-dir=$(DIR_INSTALL_REAL) \
+		--download-hpddm \
+		--download-slepc
 
 else
 ##   On  windows ....
@@ -133,8 +137,8 @@ all-local:
 # -------------------------------
 
 DIRPKG=../pkg
-VERSION=3.11.3
-VERSION_SLEPC=3.11.0
+VERSION=3.12.0
+VERSION_SLEPC=3.11.2
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))

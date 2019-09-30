@@ -1381,10 +1381,10 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
         if(nargs[4])
             KSPSetOptionsPrefix(ptA->_ksp, GetAny<std::string*>((*nargs[4])(stack))->c_str());
         KSPSetFromOptions(ksp);
-        if(std::is_same<Type, Dmat>::value) {
+#ifdef PCHPDDM
+        if(std::is_same<Type, Dmat>::value && assembled) {
             PC pc;
             KSPGetPC(ksp, &pc);
-#ifdef PCHPDDM
             PCType type;
             PCGetType(pc, &type);
             PetscBool isType;
@@ -1392,19 +1392,21 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
             if(isType && ptA->_A && ptA->_A->getMatrix() && ptA->_num) {
                 const HPDDM::MatrixCSR<PetscScalar>* const A = ptA->_A->getMatrix();
                 Mat aux;
-                MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, A->_n, A->_m, A->_ia, A->_ja, A->_a, &aux);
+                if(A->_sym)
+                    MatCreateSeqSBAIJWithArrays(PETSC_COMM_SELF, 1, A->_n, A->_m, A->_ia, A->_ja, A->_a, &aux);
+                else
+                    MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, A->_n, A->_m, A->_ia, A->_ja, A->_a, &aux);
                 PetscInt* idx;
                 PetscMalloc1(A->_n, &idx);
                 std::copy_n(ptA->_num, A->_n, idx);
                 IS is;
                 ISCreateGeneral(PETSC_COMM_SELF, ptA->_A->getMatrix()->_n, idx, PETSC_OWN_POINTER, &is);
-                PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_IS", (PetscObject)is);
-                PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject)aux);
+                PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
                 ISDestroy(&is);
                 MatDestroy(&aux);
             }
-#endif
         }
+#endif
         if(std::is_same<Type, Dmat>::value && (nargs[6] || nargs[11])) {
             if(nargs[2] && (nargs[5] || nargs[11])) {
                 if(assembled) {
