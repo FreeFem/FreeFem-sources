@@ -268,7 +268,7 @@ void WBcast<Complex> (Complex *v, int n, int who, MPI_Comm comm) {
 }
 
 struct MPIrank {
-  int who;
+  int who,lmpirank;
   MPI_Comm comm;
   MPI_Request *rq;
   // mutable bool block;
@@ -277,6 +277,7 @@ struct MPIrank {
     : who(i), comm(com), rq(rqq) {
     int n;
     MPI_Comm_size(comm, &n);
+    MPI_Comm_rank(comm, &lmpirank);
   }
 
   long Send(double a) const { return WSend(&a, 1, who, MPI_TAG< double >::TAG, comm, rq); }
@@ -378,12 +379,12 @@ struct MPIrank {
       cout << " MPI Bcast (mesh *) " << a << endl;
     Serialize *buf = 0;
     long nbsize = 0;
-    if (who == mpirank) {
+    if (who == lmpirank) {
       buf = new Serialize((*a).serialize());
       nbsize = buf->size();
     }
     WBcast(&nbsize, 1, who, comm);
-    if (who != mpirank)
+    if (who != lmpirank)
       buf = new Serialize(nbsize, Fem2D::Mesh::magicmesh);
     assert(nbsize);
     if (verbosity > 200)
@@ -391,7 +392,7 @@ struct MPIrank {
 
     WBcast((char *)(*buf), nbsize, who, comm);
 
-    if (who != mpirank) {
+    if (who != lmpirank) {
       if (a) (*a).decrement();
       Fem2D::Mesh *pTh = new Fem2D::Mesh(*buf);
       Fem2D::R2 Pn, Px;
@@ -408,7 +409,7 @@ struct MPIrank {
       cout << " MPI Bcast (const mesh3 *) " << a << endl;
     Serialize *buf = 0;
     long nbsize[2]={0,0};
-    if (who == mpirank) {
+    if (who == lmpirank) {
         if((*a).meshS) {
             buf = new Serialize((*a).serialize_withBorderMesh());
             nbsize[1]=1;
@@ -418,7 +419,7 @@ struct MPIrank {
       nbsize[0] = buf->size();
     }
     WBcast(&nbsize[0], 2, who, comm);
-    if (who != mpirank)
+    if (who != lmpirank)
       buf = new Serialize(nbsize[0], Fem2D::GenericMesh_magicmesh);
     assert(nbsize);
     if (verbosity > 200)
@@ -426,7 +427,7 @@ struct MPIrank {
 
     WBcast((char *)(*buf), nbsize[0], who, comm);
     Fem2D::Mesh3 * aa;
-    if (who != mpirank) {
+    if (who != lmpirank) {
       if (a) (*a).decrement();
         if(nbsize[1])
             aa = new Fem2D::Mesh3(*buf, 1);
@@ -445,12 +446,12 @@ struct MPIrank {
           cout << " MPI Bcast (const meshS *) " << a << endl;
       Serialize *buf = 0;
       long nbsize = 0;
-      if (who == mpirank) {
+      if (who == lmpirank) {
           buf = new Serialize((*a).serialize());
           nbsize = buf->size();
       }
       WBcast(&nbsize, 1, who, comm);
-      if (who != mpirank)
+      if (who != lmpirank)
           buf = new Serialize(nbsize, Fem2D::GenericMesh_magicmesh);
       assert(nbsize);
       if (verbosity > 200)
@@ -458,7 +459,7 @@ struct MPIrank {
         
       WBcast((char *)(*buf), nbsize, who, comm);
         
-      if (who != mpirank) {
+      if (who != lmpirank) {
           if (a) (*a).decrement();
           Fem2D::MeshS * aa = new Fem2D::MeshS(*buf);
           aa->BuildGTree();
@@ -475,7 +476,7 @@ struct MPIrank {
       cout << mpirank << ": MPI Bcast " << who << " (Matrice_Creuse &) " << &a << " " << a.A << endl;
     MatriceMorse<R> *mA = 0;
     int ldata[4] = {0, 0, 0, 0};
-    if (who == mpirank) {
+    if (who == lmpirank) {
       if(a.A) {
         mA = a.pHM();
         ldata[0] = mA->n;
@@ -486,7 +487,7 @@ struct MPIrank {
     }
     int n4 = 4;
     WBcast(ldata, n4, who, comm);
-    if (who != mpirank && ldata[0])
+    if (who != lmpirank && ldata[0])
       mA = new MatriceMorse<R>(ldata[0], ldata[1], ldata[2], ldata[3]);
     else
       CheckPtrHashMatrix(mA, "Bcast 2");
@@ -498,7 +499,7 @@ struct MPIrank {
       mA->Increaze(ldata[2], ldata[2]);
     }
     CheckPtrHashMatrix(mA, "Bcast 2");
-    if (who != mpirank)
+    if (who != lmpirank)
       a.A.master(mA);
     // else
     //	delete mA;
