@@ -2030,11 +2030,11 @@ Serialize GenericMesh<T,B,V>::serialize() const
         
         HashTable<SortArray<int,nk>,int> h(nk*nelt,nelt);
         
-        int originmulti[nelt];
+        int *originmulti=new int [nelt];
         
         int originTypeGenericElement=0;
         int multiTypeGenericElement=0;
-        int indice[nelt];
+        int *indice=new int [nelt];
         
         for (int i=0;i<nelt;i++) {
             originmulti[i]=-1;
@@ -2090,6 +2090,8 @@ Serialize GenericMesh<T,B,V>::serialize() const
             if (verbosity>2)
                 cout << " Warning, the mesh could contain multiple same elements, keep a single copy in mesh...option removemulti in the operator mesh is avalaible" << endl;
         }
+        delete[] originmulti;
+        delete[] indice;
         
     }
     
