@@ -138,7 +138,7 @@ all-local:
 
 DIRPKG=../pkg
 VERSION=3.12.0
-VERSION_SLEPC=3.11.2
+VERSION_SLEPC=3.011.2
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
