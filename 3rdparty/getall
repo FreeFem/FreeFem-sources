@@ -113,10 +113,10 @@ download('OpenBLAS-Win32','http://downloads.sourceforge.net/project/openblas/v0.
 	'OpenBLAS-v0.2.14-Win32.zip',
 	'eefdf170439620d78fabb3139b7aeb2f');
 
-download('FFTW','http://www.fftw.org/fftw-3.3.2.tar.gz',
+download('FFTW','http://www.fftw.org/fftw-3.3.8.tar.gz',
 	'http://www.fftw.org',
-	'fftw-3.3.2.tar.gz',
-	'6977ee770ed68c85698c7168ffa6e178');
+	'fftw-3.3.8.tar.gz','8aac833c943d8e90d51b697b27d4384d');
+# 3.3.2	'6977ee770ed68c85698c7168ffa6e178');
 download('freeYams','https://www.ljll.math.upmc.fr/frey/ftp/archives/freeyams.2012.02.05.tgz',
 	'https://www.ljll.math.upmc.fr/frey/software.html',
 	'freeyams.2012.02.05.tgz',

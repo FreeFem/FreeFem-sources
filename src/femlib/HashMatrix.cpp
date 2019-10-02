@@ -693,6 +693,8 @@ void HashMatrix<I,R>::set(I nn,I mm,bool hhalf,size_t nnnz, I *ii, I*jj, R *aa,i
     clear();
     this->n=nn;
     this->m=mm;
+    this->N=nn;
+    this->M=mm;
     fortran=f77;
     half=hhalf;
     Increaze(nnnz);

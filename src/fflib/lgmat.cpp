@@ -1617,7 +1617,7 @@ AnyType CopyMat_tt(Stack stack,Expression emat,Expression eA,bool transp)
 
     Matrice_Creuse<RR> * sparse_mat =GetAny<Matrice_Creuse<RR>* >((*emat)(stack));
     if(mr) {
-        MatriceMorse<RR> * mrr = new MatriceMorse<RR>(mr->n,mr->n);
+        MatriceMorse<RR> * mrr = new MatriceMorse<RR>(mr->n,mr->m);
         *mrr = *mr;
         if(transp) mrr->dotranspose();
 
