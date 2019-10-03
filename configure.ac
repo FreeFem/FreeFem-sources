@@ -2067,6 +2067,11 @@ AC_SUBST(STD_LIBS,$ff_std_libs)
 AX_PATH_GSL(1.15, ff_with_gsl=yes, ff_with_gsl=no)
 if test "$ff_with_gsl" = "yes"; then
   AC_FF_ADDWHERELIB(gsl,$GSL_LIBS,$GSL_CFLAGS)
+  # hack, if enable_download=no
+  AC_SUBST([TOOL_COMPILE_gsl],ifelse(,,gsl,))
+  AC_SUBST([TOOL_DYLIB_gsl],gsl.$DYLIB_SUFFIX)
+  ifelse(nodownload,,[ff_download_lib="gsl $ff_download_lib"])
+  ifelse(nodownload,,[enable_gsl_download=yes])  
 fi
 
 ##
