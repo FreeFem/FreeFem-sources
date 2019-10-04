@@ -5,6 +5,10 @@
 
 echo "Job 3"
 casejob=3
+
+# remove file for jenkins tests results analyser
+rm /etc/jenkins/resultForJenkins/report.xml
+
 # change default  compiler
 change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-$casejob.sh
 echo try to source file  "$change_compiler"
@@ -45,6 +49,7 @@ then
   echo "Install process complete"
 else
   echo "Install process failed"
+exit 1
 fi
 
 # uninstall

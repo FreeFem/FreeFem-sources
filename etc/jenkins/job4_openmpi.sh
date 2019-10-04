@@ -7,6 +7,10 @@ echo "Job 4 (openmpi)"
 set -e
 
 casejob=4_openmpi
+
+# remove file for jenkins tests results analyser
+rm /etc/jenkins/resultForJenkins/report.xml
+
 # change default  compiler
 change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-$casejob.sh
 echo try to source file  "$change_compiler"
