@@ -4,9 +4,6 @@ source shell mingw64
 echo "Job 3"
 set -e
 
-# remove file for jenkins tests results analyser
-rm /etc/jenkins/resultForJenkins/report.xml
-
 autoreconf -i \
 && ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
         CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \

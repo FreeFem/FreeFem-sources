@@ -6,8 +6,7 @@
 echo "Job 2"
 casejob=2
 
-# remove file for jenkins tests results analyser
-rm /etc/jenkins/resultForJenkins/report.xml
+set -e
 
 # change default  compiler
 change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-$casejob.sh
