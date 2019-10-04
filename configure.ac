@@ -2067,13 +2067,6 @@ AC_SUBST(STD_LIBS,$ff_std_libs)
 AX_PATH_GSL(1.15, ff_with_gsl=yes, ff_with_gsl=no)
 if test "$ff_with_gsl" = "yes"; then
   AC_FF_ADDWHERELIB(gsl,$GSL_LIBS,$GSL_CFLAGS)
-  # hack, if enable_download=no
-  AC_SUBST([TOOL_COMPILE_gsl],ifelse(,,gsl,))
-  AC_SUBST([TOOL_DYLIB_gsl],gsl.$DYLIB_SUFFIX)
-  ifelse(nodownload,,[ff_download_lib="gsl $ff_download_lib"])
-  ifelse(nodownload,,[enable_gsl_download=yes])  
-else
-  enable_gsl=no
 fi
 
 m4_map([AC_FF_WHERELIB],[
@@ -2232,7 +2225,18 @@ then
     if test  "$ff_where_lib_conf_gsl" = 1  -a  "$enable_gsl" != "no" ; then enable_gsl=yes; fi;
     if test  "$ff_where_lib_conf_mkl" = 1  -a  "$enable_mkl" != "no" ; then enable_pardiso=yes; fi;
 fi
-TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX",,nodowload)
+
+# hack, if enable_download=no
+if test "$ff_with_gsl" = "yes"; then
+  AC_SUBST([TOOL_COMPILE_gsl],ifelse(,,gsl,))
+  AC_SUBST([TOOL_DYLIB_gsl],gsl.$DYLIB_SUFFIX)
+  ifelse(nodownload,,[ff_download_lib="gsl $ff_download_lib"])
+  ifelse(nodownload,,[enable_gsl_download=yes])  
+else
+  enable_gsl=no
+fi
+
+#TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX",,nodowload)
 TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX",,nodowload)
 TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX",,nodowload)
 
