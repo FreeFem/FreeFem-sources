@@ -43,6 +43,7 @@ namespace Fem2D {
     
 #include "R3.hpp"
 #include "R2.hpp"
+#include "R1.hpp"
 
 }
 
@@ -59,7 +60,7 @@ namespace Fem2D {
       p[i] += o;
   }
     
-    
+  static R1 EdgeHat[2] = { R1(0.), R1(1.) } ;
  
   struct DataPoint3  {
     static const int NbOfVertices =1;

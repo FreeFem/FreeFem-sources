@@ -29,6 +29,8 @@
 #include "ff++.hpp"
 #include "array_resize.hpp"
 #include "AFunction_ext.hpp"
+#include "PlotStream.hpp"
+
 using Fem2D::Mesh;
 using Fem2D::MeshPoint;
 
@@ -1057,7 +1059,7 @@ AnyType SaveMeshL::operator()(Stack stack) const
     string * fn =  GetAny<string*>((*filename)(stack));
     
     if (verbosity > 2)
-        cout << "SaveMeshS " << *fn << " " << Thh << endl;
+        cout << "SaveMeshL " << *fn << " " << Thh << endl;
     int ret=Thh->Save(*fn);
     if( ret!=0) {ExecError("PB Write error !");}
     return SetAny<pmeshL>(Thh);
@@ -1116,6 +1118,306 @@ AnyType SaveSurfaceMesh3::operator()(Stack stack) const
   return SetAny<pmesh3>(Thh);
   
 }
+
+
+
+
+// version 3d of buildmeshborder
+const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bool justboundary,int nbvmax=0,bool Requiredboundary       ,KNM<double> *pintern,double alea)
+{
+    int nbvinter=0;
+    double precis_mesh=1.e-7;
+ 
+    int brefintp= -2000000000;
+
+    MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+    
+    int Gnbv=0,Gnbt=0,nbsd=0;    // vertice, edges, nb subdomains
+    for (E_Curve3N const *k=b;k;k=k->next) {
+        int nbd = k->NbBorder(stack);
+        for(int index=0;index<nbd;++index ) {
+            long n=Max(1L,Abs(k->Nbseg(stack,index)));
+            Gnbv+=n+1;
+            Gnbt+=n;
+            nbsd++;
+        }
+    }
+    
+    cout << "test " << Gnbv << " " << Gnbt << " " << nbsd << endl;
+    
+    MeshL *Th =  new MeshL();
+    
+    if(verbosity>2)
+        cout <<" Begin: MeshL from nb Border  "  << nbsd <<endl;
+
+    //Th->nv = nbv;
+    //Th->nt = nbt;
+    Vertex3 *vertices =  new Vertex3[Gnbv];
+    //Th->elements = new EdgeL[nbt];
+    
+    double lmin=0.;
+
+    //  generation des points et des lignes
+    long i=0,n=0;
+    for (E_Curve3N const * k=b;k;k=k->next) {
+        int nbd = k->NbBorder(stack);
+        for(int index=0; index<nbd; ++index ) {
+            assert(k->b->xfrom); // a faire
+            double & t = *  k->var(stack),tt;
+            double a(k->from(stack)),b(k->to(stack));
+            long * indx = k->index(stack);
+            if(indx) *indx = index;
+            else ffassert(index==0);
+            n=Max(Abs(k->Nbseg(stack,index)),1L);
+            tt=t=a;
+            double delta = (b-a)/n;
+            for ( int nn=0;nn<=n;++nn,++i, tt += delta) {
+                t = tt;
+                if (nn==n) t=b; // to remove roundoff error
+                //if( nn >0 && nn < n) { t += NormalDistrib(alea); } // Add F. Hecht Juin 2018 for J-M Sac Epee:  jean-marc.sac-epee@univ-lorraine.fr
+                mp->label = k->label();
+                k->code(stack); // compute x,y, label
+                vertices[i].x=mp->P.x;
+                vertices[i].y=mp->P.y;
+                vertices[i].z=mp->P.z;
+                vertices[i].lab= mp->label;
+               
+                //vertices[i].color = i;
+                if (nn>0) {
+                    lmin=min(lmin,Norme2(vertices[i]-vertices[i-1]));
+                }
+            }
+        }
+    }
+    lmin = sqrt(lmin);
+    double eps = (lmin)/16.;
+    int nbvprev = i;
+    //long nbv=0;
+    R3 bmin, bmax;
+    bmin.x = vertices[0].x;
+    bmin.y = vertices[0].y;
+    bmin.z = vertices[0].z;
+    bmax.x = bmin.x;
+    bmax.y = bmin.y;
+    bmax.z = bmin.z;
+
+    // recherche des extrema des vertices pmin,pmax
+
+    for (int ii = 1; ii < nbvprev; ii++) {
+        bmin.x = min(bmin.x, vertices[ii].x);
+        bmin.y = min(bmin.y, vertices[ii].y);
+        bmin.z = min(bmin.z, vertices[ii].z);
+        
+        bmax.x = max(bmax.x, vertices[ii].x);
+        bmax.y = max(bmax.y, vertices[ii].y);
+        bmax.z = max(bmax.z, vertices[ii].z);
+    }
+
+    
+    double longmini_box = pow(bmax.x - bmin.x, 2) + pow(bmax.y - bmin.y, 2) + pow(bmax.z - bmin.z, 2);
+    longmini_box = sqrt(longmini_box);
+    
+    if (verbosity > 1) {
+        cout << " bmin := " << bmin.x << " " << bmin.y << " " << bmin.z << endl;
+        cout << " bmax := " << bmax.x << " " << bmax.y << " " << bmax.z << endl;
+        cout << " box volume :=" << longmini_box << endl;
+    }
+    
+    if (precis_mesh < 0)
+        precis_mesh = longmini_box * 1e-7;
+    else
+        precis_mesh = precis_mesh;
+    
+    // determination de hmin
+    double hmin =longmini_box;
+    
+
+    if (verbosity > 5)
+        cout << "    Norme2(bmin-bmax)=" << Norme2(bmin - bmax) << endl;
+    
+    // assertion pour la taille de l octree
+    assert(hmin > Norme2(bmin - bmax) / 1e9);
+    
+    
+    double hseuil = hmin *1e-7;
+    if (verbosity > 3)
+        cout << "    hseuil=" << hseuil << endl;
+    
+    Vertex3 *vv = new Vertex3[nbvprev];
+    EF23::GTree<Vertex3> *gtree = new EF23::GTree<Vertex3>(vv, bmin, bmax, 0);
+    
+    if (verbosity > 2) {
+        cout << "  -- taille de la boite " << endl;
+        cout << "\t" << bmin.x << " " << bmin.y << " " << bmin.z << endl;
+        cout << "\t" << bmax.x << " " << bmax.y << " " << bmax.z << endl;
+    }
+    
+    // creation of octree
+    int new_nv=0;
+    int *old2new=new int[nbvprev];
+    for(int i = 0; i < nbvprev; ++i)
+        old2new[i]=i;
+    
+    for (int ii = 0; ii < nbvprev; ++ii) {
+        const Vertex3 &vi(vertices[ii]);
+        Vertex3 *pvi = gtree->ToClose(vi, hseuil);
+        if (!pvi) {
+            vv[new_nv].x = vi.x;
+            vv[new_nv].y = vi.y;
+            vv[new_nv].z = vi.z;
+            vv[new_nv].lab = vi.lab;       // besoin mapping
+            //ind_nv_t[new_nv] = i;
+            old2new[ii] = new_nv;
+            gtree->Add(vv[new_nv]);
+            new_nv++;
+        }
+        else
+            old2new[ii] = pvi - vv;
+    }
+   delete gtree;
+    
+   Th->nv = new_nv;
+   Th->vertices = new Vertex3[new_nv];
+   for(int ii=0;ii<new_nv;++ii) {
+       Th->vertices[ii].x = vv[ii].x;
+       Th->vertices[ii].y = vv[ii].y;
+       Th->vertices[ii].z = vv[ii].z;
+       Th->vertices[ii].lab = vv[ii].lab;
+   }
+   delete [] vv;
+    
+    
+    //R2 zero2(0,0);
+   // if(verbosity>5)
+     //   cout <<"\t\t"  << "     Record Edges: Nb of Edge " << Gh->nbe <<endl;
+   //throwassert(Th->elements);
+   //throwassert (Th->nbe=0);
+   //double *len =0;
+    /*if (!hvertices)
+    {
+        len = new Real4[Gh->nbv];
+        for(i=0;i<Gh->nbv;i++)
+            len[i]=0;
+    }*/
+   int nnn=0;
+   i=0;
+    
+Th->elements = new EdgeL[Gnbt];
+    
+    
+   for (E_Curve3N const * k=b;k;k=k->next) {
+       int nbd = k->NbBorder(stack);
+       for(int index=0; index<nbd; ++index ) {
+           double & t = *  k->var(stack);
+           double a(k->from(stack)),b(k->to(stack));
+           n=Max(Abs(k->Nbseg(stack,index)),1L);
+           long * indx = (k->index(stack));
+           if(indx) *indx = index;
+           else ffassert(index==0);
+            
+           double delta = (b-a)/n;
+           t=a+delta/2;
+           for (int nn=0;nn<n;nn++,i++, t += delta) {
+               
+               mp->label = k->label();
+               k->code(stack);
+               int iv[2]; cout << "test edge " <<  old2new[nnn] <<" "<< old2new[nnn+1]<<endl;
+               iv[0]=old2new[nnn];
+               iv[1]=old2new[++nnn];
+               Th->elements[i].set(Th->vertices,iv,mp->label);
+            }
+            nnn++;
+        }
+   }
+    Th->nt=i;
+    cout << "test " << i << endl;
+    return Th;
+}
+
+
+
+
+
+void E_Curve3N::SavePlot(Stack stack,PlotStream & plot) const
+{
+    
+    MeshPoint & mp (*MeshPointStack(stack)), mps = mp;
+    
+    long nbd1=0;// nb of sub border
+    for (E_Curve3N const * k=this;k;k=k->next) {
+        int nbdr = k->NbBorder(stack);
+        for(int index=0; index<nbdr; ++index )
+            nbd1++;
+    }
+    plot << nbd1;
+    int nbd=0;
+    for (E_Curve3N const * k=this;k;k=k->next) {
+        int nbdr = k->NbBorder(stack);
+        for(int index=0; index<nbdr; ++index ) {
+            nbd++;
+            assert(k->b->xfrom); // a faire
+            double & t = *  k->var(stack);
+            double a(k->from(stack)),b(k->to(stack));
+            long n=Max(Abs(k->Nbseg(stack,index)),1L);
+            long * indx = (k->index(stack));
+            if(indx) *indx = index;
+            else ffassert(index==0);
+            
+            t=a;
+            double delta = (b-a)/n;
+            plot<< (long) n;
+            for (int  nn=0;nn<=n;nn++, t += delta)
+            {
+                if (nn==n) t=b; // to remove roundoff error
+                mp.label = k->label();
+                k->code(stack);
+                plot << (long) mp.label <<mp.P.x << mp.P.y << mp.P.z;
+            }
+            
+        }}
+    assert(nbd==nbd1);
+    if(verbosity>9) cout << "  -- Plot size : " << nbd << " Curve3 \n";
+    mp=mps;
+}
+
+
+void E_Curve3N::BoundingBox(Stack stack,double  &xmin,double & xmax, double & ymin,double & ymax, double & zmin,double & zmax) const
+{
+    MeshPoint & mp (*MeshPointStack(stack)), mps = mp;
+    for (E_Curve3N const * k=this;k;k=k->next)
+    {
+        int nbd = k->NbBorder(stack);
+        for(int index=0; index<nbd; ++index )
+        {
+            assert(k->b->xfrom); // a faire
+            double & t = *  k->var(stack);
+            double a(k->from(stack)),b(k->to(stack));
+            long * indx = (k->index(stack));
+            if(indx) *indx = index;
+            else ffassert(index==0);
+            
+            long n=Max(Abs(k->Nbseg(stack,index)),1L);
+            t=a;
+            double delta = (b-a)/n;
+            for (int  nn=0;nn<=n;nn++, t += delta)
+            {
+                if (nn==n) t=b; // to remove roundoff error
+                mp.label = k->label();
+                k->code(stack); // compute x,y, label
+                xmin=Min(xmin,mp.P.x);
+                xmax=Max(xmax,mp.P.x);
+                ymin=Min(ymin,mp.P.y);
+                ymax=Max(ymax,mp.P.y);
+                zmin=Min(ymin,mp.P.z);
+                zmax=Max(ymax,mp.P.z);
+            }
+        }}
+    mp=mps;
+}
+
+
+
+
 
 
 
@@ -2225,6 +2527,8 @@ void init_lgmesh3() {
   Global.Add("savemesh","(",new OneOperatorCode<SaveMeshS>);
   Global.Add("savemesh","(",new OneOperatorCode<SaveMeshL>);
   Global.Add("savesurfacemesh","(",new OneOperatorCode<SaveSurfaceMesh3>);
+    
+  Global.Add("buildmesh","(",new OneOperator1s_<pmeshL,const E_Curve3N *>(BuildMeshCurve3));
 
     
   // 3D volume

@@ -2164,8 +2164,8 @@ public:
        };
 	pmesh th() { assert(v[0] && what==0); return static_cast<pmesh>(cv[0]);}
 	pmesh3 th3() { assert(v[0] && what==5); return static_cast<pmesh3>(cv[0]);}
- 	pmeshS thS() { assert(v[0] && what==5); return static_cast<pmeshS>(cv[0]);}
-    pmeshL thL() { assert(v[0] && what==5); return static_cast<pmeshL>(cv[0]);}
+ 	pmeshS thS() { assert(v[0] && what==50); return static_cast<pmeshS>(cv[0]);}
+    pmeshL thL() { assert(v[0] && what==55); return static_cast<pmeshL>(cv[0]);}
         
 	void Set(int nn=0,void **vv=0,int *c=0) {
 	    cmp[0]=cmp[1]=cmp[2]=cmp[3]=-1;
@@ -2450,6 +2450,7 @@ public:
     const MeshS & evalmS(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmeshS >((*e[i])(s)) ;}
     const MeshL & evalmL(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmeshL >((*e[i])(s)) ;}
 	const E_BorderN * evalb(int i,Stack s) const  { throwassert(e[i]);return   GetAny< const E_BorderN *>((*e[i])(s)) ;}
+    const E_Curve3N * evalc(int i,Stack s) const  { throwassert(e[i]);return   GetAny< const E_Curve3N *>((*e[i])(s)) ;}
 	tab  evalt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<tab>((*e[i])(s)) ;}
          pttab  evalptt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<pttab>((*e[i])(s)) ;}
     };
@@ -2645,6 +2646,10 @@ public:
                 l[i].what=4; // border 2d
                 l[i].composant=true;
                 l[i][0]=CastTo<const E_BorderN *>(args[i]);}
+            else if (BCastTo<const E_Curve3N *>(args[i])){
+                l[i].what=40; // border 3d
+                l[i].composant=true;
+                l[i][0]=CastTo<const E_Curve3N *>(args[i]);}
             else if (BCastTo<KN<pmesh> *>(args[i])){
                 l[i].composant=true;
                 l[i].what=100; //  mesh 2d array
@@ -3761,7 +3766,7 @@ AnyType Plot::operator()(Stack s) const{
          what = 1 -> real scalar field (FE function  2d)
          what = 2 -> 2d vector field (two FE function  2d)
          what = 3 -> curve def by 2,.., 4 array
-         what = 4 -> border
+         what = 4 -> border 2d
          what = 5 -> 3d mesh, real volume or if contains a surface mesh
          what = 6 -> real FE function 3D volume
          what = 7 -> real 3d vector field (tree FE function  3d) volume
@@ -3773,6 +3778,7 @@ AnyType Plot::operator()(Stack s) const{
          what = 17 -> complex 3d vector field (tree FE function  3d) volume
          what = 18 -> complex FE function 3D surface
          what = 19 -> complex 3d vector field (tree FE function  3d) surface
+         what = 40 -> 3D border mesh
          what = 50 -> 3D surface mesh
          what = 55 -> 3D line mesh
          what = 100,101,106, ->   remap with real ... 2d, 3D volume, 3D surface
@@ -3939,7 +3945,7 @@ if(nargs[VTK_START+index])                    \
        }
         if(kthL) {
           theplot.SendMeshesL();
-          theplot << kthL ;
+            theplot << kthL ;
           for (map<const MeshL *,long>::const_iterator i=mapthL.begin();i != mapthL.end(); ++i)
             theplot << i->second << *  i->first ;
         }
@@ -4015,6 +4021,12 @@ if(nargs[VTK_START+index])                    \
                     theplot <<mapth3[ &l[i].evalm3(0,s)];// numero du maillage 3D volume
                 }
             }
+            else if (l[i].what==40 ) {
+                err=0;
+                theplot << what ;
+                const  E_Curve3N * Bh3= l[i].evalc(0,s);
+                Bh3->SavePlot(s,theplot);
+            }
             else if(what ==50) {
                 pThS=&(l[i].evalmS(0,s));
                     if(pThS) {
@@ -4023,7 +4035,6 @@ if(nargs[VTK_START+index])                    \
                         theplot <<mapthS[ &(l[i].evalmS(0,s))];// numero du maillage 3D surface
                  }
             }
-
             else if(what ==55) {
                 pThL=&(l[i].evalmL(0,s));
                 if(pThL) {
@@ -4168,6 +4179,7 @@ if(nargs[VTK_START+index])                    \
             int i=ll[ii].i;
             long what = ll[ii].what;
             R2  P1,P2;
+            R3  P11,P22;
             if (what==1 || what==2)
             {
 
@@ -4208,6 +4220,13 @@ if(nargs[VTK_START+index])                    \
                 const  E_BorderN * Bh= l[i].evalb(0,s);
                 Bh->BoundingBox(s,P1.x,P2.x,P1.y,P2.y);
 
+            }
+            else if (l[i].what==40)
+            {
+                if( !uaspectratio) aspectratio= true;
+                const  E_Curve3N * Bh3= l[i].evalc(0,s);
+                Bh3->BoundingBox(s,P11.x,P22.x,P11.y,P22.y,P11.z,P22.z);
+                
             }
             else if (l[i].what==3)
             {
@@ -4331,12 +4350,10 @@ if(nargs[VTK_START+index])                    \
                     if (drawmeshes) fe->Vh->Th.Draw(0,fill);
 
                 }
-                else if (l[i].what==4)
-                {
+                else if (l[i].what==4) {
                     const  E_BorderN * Bh= l[i].evalb(0,s);
                     Bh->Plot(s);
                 }
-
                 else if(l[i].what==3)
                 {
                     penthickness(6);

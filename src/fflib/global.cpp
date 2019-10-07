@@ -161,6 +161,7 @@ YYSTYPE *plglval;
 TableOfIdentifier Global;
 
  long E_Border::Count =0;
+ long E_Curve3::Count =0;
 
 /// <<tables_of_identifier>> declared at [[file:AFunction.hpp::tables_of_identifier]]
 typedef list<TableOfIdentifier *> ListOfTOfId;

@@ -234,6 +234,12 @@ struct OnePlotBorder: public OnePlot {
     void Draw(OneWindow *win);
 };
 
+struct OnePlotCurve3: public OnePlot {
+    vector<vector<pair<long,R3> > > data;
+    OnePlotCurve3(PlotStream & f);
+    void Draw(OneWindow *win);
+};
+
 struct OnePlotHMatrix: public OnePlot
 {
     int si;
@@ -471,6 +477,10 @@ public:
     void Seg(R2 A, R2 B) const  {
         glVertex3d(A.x,A.y,theplot->z0);
         glVertex3d(B.x,B.y,theplot->z0);
+    }
+    void Seg3(R3 A, R3 B) const  {
+        glVertex3d(A.x,A.y,A.z);
+        glVertex3d(B.x,B.y,B.z);
     }
     
     int InRecScreen(R2 P1,R2 P2) const

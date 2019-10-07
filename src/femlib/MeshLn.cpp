@@ -56,11 +56,18 @@ namespace Fem2D
     
   template<> const int (* const GenericElement<DataPoint3>::nvface)[3] = 0 ;
   template<> const int (* const GenericElement<DataPoint3>::nvedge)[2] = 0 ;
+  template<> const int (* const GenericElement<DataPoint3>::nvadj)[1] = 0 ;
     
   template<> int  GenericMesh<EdgeL,BoundaryPointL,Vertex3>::kfind=0;
   template<> int  GenericMesh<EdgeL,BoundaryPointL,Vertex3>::kthrough=0;
-
     
+  static const int onWhatIsVertex[2][3] = {  {1,0,0}, // sommet  0
+        {0,1,0}}; // sommet 1
+    
+  template<>
+  const int (* const GenericElement<DataSeg3>::onWhatBorder)[3] = onWhatIsVertex ;
+  
+   
   const string GsbeginL="MeshS::GSave v0",GsendL="end";
   void MeshL::GSave(FILE * ff,int offset) const
   {

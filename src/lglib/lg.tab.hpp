@@ -88,7 +88,7 @@
      DOTDIVEQ = 304,
      ARROW = 305,
      BORDER = 306,
-     CURVE = 307,
+     CURVE3 = 307,
      SOLVE = 308
    };
 #endif
@@ -142,7 +142,7 @@
 #define DOTDIVEQ 304
 #define ARROW 305
 #define BORDER 306
-#define CURVE 307
+#define CURVE3 307
 #define SOLVE 308
 
 
