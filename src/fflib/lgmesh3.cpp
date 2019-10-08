@@ -1264,7 +1264,6 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
         else
             old2new[ii] = pvi - vv;
     }
-   delete gtree;
     
    Th->nv = new_nv;
    Th->vertices = new Vertex3[new_nv];
@@ -1274,7 +1273,6 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
        Th->vertices[ii].z = vv[ii].z;
        Th->vertices[ii].lab = vv[ii].lab;
    }
-   delete [] vv;
 
    int nnn=0;
    i=0;
@@ -1307,6 +1305,14 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
         }
    }
     Th->nt=i;
+    
+    delete [] vv;
+    delete []vertices;
+    delete gtree;
+    delete [] old2new;
+    Add2StackOfPtr2FreeRC(stack, Th); 
+    *mp=mps;
+    
     return Th;
 }
 
