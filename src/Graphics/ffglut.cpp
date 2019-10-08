@@ -675,19 +675,17 @@ void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
     int kk=0;
     
     if(cc[kk])
-        if(lok[kk])   glCallList(gllists+kk);
-        else
-        {
+        if(lok[kk])
+            glCallList(gllists+kk);
+        else {
             lok[kk]=1;
             glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
-            glLineWidth(2);
-            glBegin(GL_LINES);
-            for (int i=0;i<Th.nbBrdElmts();i++)
-            {
+            glPointSize(2);
+            glBegin(GL_POINTS);
+            for (int i=0;i<Th.nbBrdElmts();i++) {
                 const MeshL::BorderElement  & K(Th.be(i));
                 plot.color(1+abs(K.lab));
                 glVertex3d(K[0].x,K[0].y,K[0].z);
-                
             }
             glEnd();
             glLineWidth(1);
@@ -696,21 +694,18 @@ void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
         else ;
     
     kk++;
-    if(cc[kk])
-    {
-        if(lok[kk])   glCallList(gllists+kk);
-        else
-        {
+    if(cc[kk]) {
+        if(lok[kk])
+            glCallList(gllists+kk);
+        else {
             lok[kk]=1;
             glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
-            glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);//GL_FILL
-            glBegin(GL_TRIANGLES);
-            for (int i=0;i<Th.nt;i++)
-            {
+            glLineWidth(2);
+            //glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);//GL_FILL
+            glBegin(GL_LINES);
+            for (int i=0;i<Th.nt;i++) {
                 const MeshL::Element & K(Th[i]);
                 plot.color(K.lab?1+abs(K.lab):0);
-                
-                //glColor3d(r,g,b);
                 glVertex3d(K[0].x,K[0].y,K[0].z);
                 glVertex3d(K[1].x,K[1].y,K[1].z);
                 
@@ -720,24 +715,21 @@ void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
         }
     }
     kk++;
-    if(cc[kk])
-    {
-        if(lok[kk])   glCallList(gllists+kk);
-        else
-        {
+    if(cc[kk]) {
+        if(lok[kk])
+            glCallList(gllists+kk);
+        else {
             lok[kk]=1;
             glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
             glPolygonMode(GL_FRONT,GL_LINE);
-            glBegin(GL_TRIANGLES);
-            for (int i=0;i<Th.nt;i++)
-            {
+            glBegin(GL_LINES);
+            for (int i=0;i<Th.nt;i++) {
                 const MeshL::Element  & K(Th[i]);
                 plot.color(fill? 1 : 1+abs(K.lab));
                 glVertex3d(K[0].x,K[0].y,K[0].z);
                 glVertex3d(K[1].x,K[1].y,K[1].z);
                 
             }
-            
             glEnd();
             glEndList();  // fin de la list
         }

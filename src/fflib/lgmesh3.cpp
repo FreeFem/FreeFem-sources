@@ -1120,8 +1120,6 @@ AnyType SaveSurfaceMesh3::operator()(Stack stack) const
 }
 
 
-
-
 // version 3d of buildmeshborder
 const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bool justboundary,int nbvmax=0,bool Requiredboundary       ,KNM<double> *pintern,double alea)
 {
@@ -1143,17 +1141,12 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
         }
     }
     
-    cout << "test " << Gnbv << " " << Gnbt << " " << nbsd << endl;
-    
     MeshL *Th =  new MeshL();
     
     if(verbosity>2)
         cout <<" Begin: MeshL from nb Border  "  << nbsd <<endl;
 
-    //Th->nv = nbv;
-    //Th->nt = nbt;
     Vertex3 *vertices =  new Vertex3[Gnbv];
-    //Th->elements = new EdgeL[nbt];
     
     double lmin=0.;
 
@@ -1162,7 +1155,7 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
     for (E_Curve3N const * k=b;k;k=k->next) {
         int nbd = k->NbBorder(stack);
         for(int index=0; index<nbd; ++index ) {
-            assert(k->b->xfrom); // a faire
+            assert(k->b->xfrom);
             double & t = *  k->var(stack),tt;
             double a(k->from(stack)),b(k->to(stack));
             long * indx = k->index(stack);
@@ -1174,9 +1167,8 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
             for ( int nn=0;nn<=n;++nn,++i, tt += delta) {
                 t = tt;
                 if (nn==n) t=b; // to remove roundoff error
-                //if( nn >0 && nn < n) { t += NormalDistrib(alea); } // Add F. Hecht Juin 2018 for J-M Sac Epee:  jean-marc.sac-epee@univ-lorraine.fr
                 mp->label = k->label();
-                k->code(stack); // compute x,y, label
+                k->code(stack); // compute x,y,z label
                 vertices[i].x=mp->P.x;
                 vertices[i].y=mp->P.y;
                 vertices[i].z=mp->P.z;
@@ -1230,8 +1222,7 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
     
     // determination de hmin
     double hmin =longmini_box;
-    
-
+   
     if (verbosity > 5)
         cout << "    Norme2(bmin-bmax)=" << Norme2(bmin - bmax) << endl;
     
@@ -1265,8 +1256,7 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
             vv[new_nv].x = vi.x;
             vv[new_nv].y = vi.y;
             vv[new_nv].z = vi.z;
-            vv[new_nv].lab = vi.lab;       // besoin mapping
-            //ind_nv_t[new_nv] = i;
+            vv[new_nv].lab = vi.lab;
             old2new[ii] = new_nv;
             gtree->Add(vv[new_nv]);
             new_nv++;
@@ -1285,25 +1275,11 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
        Th->vertices[ii].lab = vv[ii].lab;
    }
    delete [] vv;
-    
-    
-    //R2 zero2(0,0);
-   // if(verbosity>5)
-     //   cout <<"\t\t"  << "     Record Edges: Nb of Edge " << Gh->nbe <<endl;
-   //throwassert(Th->elements);
-   //throwassert (Th->nbe=0);
-   //double *len =0;
-    /*if (!hvertices)
-    {
-        len = new Real4[Gh->nbv];
-        for(i=0;i<Gh->nbv;i++)
-            len[i]=0;
-    }*/
+
    int nnn=0;
    i=0;
     
-Th->elements = new EdgeL[Gnbt];
-    
+   Th->elements = new EdgeL[Gnbt];
     
    for (E_Curve3N const * k=b;k;k=k->next) {
        int nbd = k->NbBorder(stack);
@@ -1312,16 +1288,17 @@ Th->elements = new EdgeL[Gnbt];
            double a(k->from(stack)),b(k->to(stack));
            n=Max(Abs(k->Nbseg(stack,index)),1L);
            long * indx = (k->index(stack));
-           if(indx) *indx = index;
-           else ffassert(index==0);
-            
+           if(indx)
+               *indx = index;
+           else
+               ffassert(index==0);
            double delta = (b-a)/n;
            t=a+delta/2;
            for (int nn=0;nn<n;nn++,i++, t += delta) {
                
                mp->label = k->label();
                k->code(stack);
-               int iv[2]; cout << "test edge " <<  old2new[nnn] <<" "<< old2new[nnn+1]<<endl;
+               int iv[2];
                iv[0]=old2new[nnn];
                iv[1]=old2new[++nnn];
                Th->elements[i].set(Th->vertices,iv,mp->label);
@@ -1330,7 +1307,6 @@ Th->elements = new EdgeL[Gnbt];
         }
    }
     Th->nt=i;
-    cout << "test " << i << endl;
     return Th;
 }
 
