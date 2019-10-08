@@ -1320,25 +1320,31 @@ then
 	    if test ! -d "$ff_mkl_libpath" ; then
 		ff_mkl_libpath="$ff_mkl_root/lib/$ff_mkl_arch"
 	    fi
-
+		mkl_l="-Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath"
+		mkl_piomp5=$(realpath $ff_mkl_libpath/../../compiler/lib/)
+		ff_mkl_inc=$(realpath $ff_mkl_libpath/../include)
+		ff_blas_inc="-I$ff_mkl_inc"
+		
+		if test -d "$mkl_piomp5" ; then mkl_l="$mkl_l -Wl,-rpath,$mkl_piomp5 -L$mkl_piomp5" ; fi
+#		echo " ################### $mkl_l $ff_blas_inc " 
 	    if test  -f "$ff_mkl_libpath/libmkl_rt.$ff_suffix_dylib" ; then
-		mkl_blas=rt
-		mkl_lapack=rt
-		ff_mkl_mlt="-Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_rt -lmkl_intel_thread -lmkl_core  $ff_iomp5 $ff_pthread"
-		ff_mkl_blas="-Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_rt -lmkl_sequential -lmkl_core   $ff_iomp5 $ff_pthread"
-		ff_mkl_lapack="$ff_mkl_blas"
+		 mkl_blas=rt
+		 mkl_lapack=rt
+		 ff_mkl_mlt="$mkl_l -lmkl_rt -lmkl_intel_thread -lmkl_core  $ff_iomp5 $ff_pthread"
+		 ff_mkl_blas="$mkl_l -lmkl_rt -lmkl_sequential -lmkl_core   $ff_iomp5 $ff_pthread"
+		 ff_mkl_lapack="$ff_mkl_blas"
 	    elif test -f "$ff_mkl_libpath/libmkl_lapack.$ff_suffix_dylib" ; then
-		ff_mkl_mlt="-Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
-		ff_mkl_blas="-Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
-		ff_mkl_lapack="-Wl,-rpath,$ff_mkl_root/lib/$ff_mkl_arch -L$ff_mkl_root/lib/$ff_mkl_arch -lmkl_lapack"
+		 ff_mkl_mlt="$mkl_l -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
+		 ff_mkl_blas="$mkl_l -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core -lguide -lm -lpthread"
+		 ff_mkl_lapack="$mkl_l -lmkl_lapack"
 	    else
-		ff_mkl_mlt="$ff_ldbg -Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp}  -lmkl_intel_thread  -lmkl_core -lmkl_intel_thread $ff_iomp5  $ff_ldeg  -lm $ff_pthread"
-		ff_mkl_blas="$ff_ldbg -Wl,-rpath,$ff_mkl_libpath  -L$ff_mkl_libpath -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core  -lmkl_sequential $ff_ldeg   -lm $ff_pthread"
-		ff_mkl_lapack="$ff_mkl_blas"
+		 ff_mkl_mlt="$ff_ldbg $mkl_l  -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp}  -lmkl_intel_thread  -lmkl_core -lmkl_intel_thread $ff_iomp5  $ff_ldeg  -lm $ff_pthread"
+		 ff_mkl_blas="$ff_ldbg $mkl_l -lmkl_${ff_mkl_cc}${ff_mkl_lp}  -lmkl_intel${ff_mkl_lp} -lmkl_sequential -lmkl_core  -lmkl_sequential $ff_ldeg   -lm $ff_pthread"
+		 ff_mkl_lapack="$ff_mkl_blas"
 	    fi
 	    if test -f "-L$ff_mkl_libpathmkl_scalapack${ff_mkl_lp}" ; then
-            ff_mkl_scalapack="-Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp} "
-            ff_mkl_blacs="-Wl,-rpath,$ff_mkl_libpath -L$ff_mkl_libpath -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
+            ff_mkl_scalapack="$mkl_l -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp} "
+            ff_mkl_blacs="$mkl_l -lmkl_blacs${ff_mkl_mpi}${ff_mkl_lp} -lmkl_scalapack${ff_mkl_lp}"
 	    fi
 	    ff_blas_ok=yes
 	    ff_lapack_ok=yes
@@ -1367,6 +1373,7 @@ then
 	    AC_FF_ADDWHERELIB(lapack,$ff_mkl_lapack,$ff_blas_inc)
 	    AC_FF_ADDWHERELIB(mkl,$ff_mkl_mlt,$ff_blas_inc)
 		ff_mkl_ok=yes
+		ff_mkl=yes
 dnl            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
 
 	else
@@ -2062,9 +2069,6 @@ if test "$ff_with_gsl" = "yes"; then
   AC_FF_ADDWHERELIB(gsl,$GSL_LIBS,$GSL_CFLAGS)
 fi
 
-##
-
-
 m4_map([AC_FF_WHERELIB],[
 	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[dmumps_c.h],[]],
 	[[mumps_seq],[-ldmumps_seq -lzmumps_seq  -lmumps_common_seq  -lpord_seq -lmpiseq_seq],[dmumps_c.h],[]],
@@ -2221,7 +2225,18 @@ then
     if test  "$ff_where_lib_conf_gsl" = 1  -a  "$enable_gsl" != "no" ; then enable_gsl=yes; fi;
     if test  "$ff_where_lib_conf_mkl" = 1  -a  "$enable_mkl" != "no" ; then enable_pardiso=yes; fi;
 fi
-TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX",,nodowload)
+
+# hack, if enable_download=no
+if test "$ff_with_gsl" = "yes"; then
+  AC_SUBST([TOOL_COMPILE_gsl],ifelse(,,gsl,))
+  AC_SUBST([TOOL_DYLIB_gsl],gsl.$DYLIB_SUFFIX)
+  ifelse(nodownload,,[ff_download_lib="gsl $ff_download_lib"])
+  ifelse(nodownload,,[enable_gsl_download=yes])  
+else
+  enable_gsl=no
+fi
+
+#TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX",,nodowload)
 TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX",,nodowload)
 TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX",,nodowload)
 
@@ -2281,7 +2296,7 @@ AM_CONDITIONAL([MUMPS_ptscotch], [test "$ff_mumps_ptscotch_ok" = yes])
 AM_CONDITIONAL([MUMPS_scotch], [test "$ff_mumps_scotch_ok" = yes])
 AM_CONDITIONAL([MUMPS_seq], [test "$ff_mumps_seq_ok" = yes -o -n "$TOOL_COMPILE_mumps_seq"])
 AM_CONDITIONAL([NLOPT], [test "$ff_nlopt_ok" = yes -o -n "$TOOL_COMPILE_nlopt"])
-AM_CONDITIONAL([PARMETIS], [test "$ff_parmetis_ok" = yes])
+AM_CONDITIONAL([PARMETIS], [test "$ff_parmetis_ok" = yes -o -n "$TOOL_COMPILE_parmetis"])
 AM_CONDITIONAL([PETSC], [test "$ff_petsc_ok" = yes])
 AM_CONDITIONAL([PETSCCOMPLEX], [test "$ff_petsccomplex_ok" = yes])
 AM_CONDITIONAL([PIPE], [test -o -n "$TOOL_COMPILE_pipe"])

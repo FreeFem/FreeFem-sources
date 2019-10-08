@@ -86,7 +86,6 @@ template<> inline  complex<double> blas_sdot( int n,  complex<double> *sx, int i
 
 
 
-using Fem2D::HeapSort;
 using std::numeric_limits;
 
 //  -----------

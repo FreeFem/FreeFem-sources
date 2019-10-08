@@ -33,6 +33,7 @@
 
 #ifndef lgfem_hpp_
 #define lgfem_hpp_
+#include <array_resize.hpp>
 extern Block *currentblock;
 
 void init_lgmat(); // initialisation for sparse mat functionnallity
@@ -684,10 +685,6 @@ inline FESpaceS * v_fesS::update() {
         return  buildupdate();
 }
 
-
-template<class A,class B>  A Build(B b) {  return A(b);}
-
-
 class TabFuncArg { public:
   typedef double R;  
   typedef  Fem2D::R2 R2;
@@ -723,7 +720,6 @@ private: // no copy
   TabFuncArg(const TabFuncArg & );
   void operator=(const TabFuncArg & );  
 };
-
 
 template<class K> 
  class E_F_StackF0F0opt2 :public  E_F0mps { public:

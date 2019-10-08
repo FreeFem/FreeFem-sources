@@ -1920,7 +1920,7 @@ public:
         return nargs[i] ? GetAny<KN_<long> >((*nargs[i])(stack)) : a;
     }
     long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
-    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
+    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
     
 public:
     SetMesh_Op (const basicAC_F0 &args, Expression aa): a(aa) {
@@ -2129,121 +2129,6 @@ public:
         return new SetMesh_Op<MMesh>(args, t[0]->CastTo(args[0]));
     }
 };
-
-
-
-// function called in movemesh23 and square to make the transfo
-
-MeshS*func_movemesh23(const Mesh &Th, KN<double> txx, KN<double> tyy, KN<double> tzz, int mesureM, KN<long> nrface, double precis_mesh, long flagsurfaceall, Stack stack )
-{
-
-    int nbv = Th.nv;// nombre de sommet
-    int nbt = Th.nt;// nombre de triangles
-    int nbe = Th.neb;    // nombre d'aretes fontiere
-    if (verbosity > 5)
-        cout << "before movemesh: Vertex Triangle Edge" << nbv << " " << nbt << " " << nbe << endl;
-
-    ffassert(nrface.N() % 2 == 0);
-    map<int, int> mapface;
-
-    int z00 = false;
-
-    for (int i = 0; i < nrface.N(); i += 2) {
-        z00 = z00 || (nrface[i] == 0 && nrface[i + 1] == 0);
-
-        if (nrface[i] != nrface[i + 1])
-            mapface[nrface[i]] = nrface[i + 1];
-    }
-    int surface_orientation = 1;
-    if (mesureM < 0)
-        surface_orientation = -1;
-    //
-    //   KN<double> txx(nbv), tyy(nbv), tzz(nbv);
-    MeshPoint *mp3(MeshPointStack(stack));
-
-    /*   {
-     KN<int> takemesh(nbv);
-     takemesh = 0;
-     // const Mesh &rTh = Th;
-     //
-     for (int it = 0; it < nbt; ++it) {
-     for (int iv = 0; iv < 3; ++iv) {
-     int i = Th(it, iv);
-     if (takemesh[i] == 0) {
-     mp3->setP(&Th, it, iv);
-     if (xx) txx[i] = GetAny<double>((*xx)(stack));
-     if (yy) tyy[i] = GetAny<double>((*yy)(stack));
-     if (zz) tzz[i] = GetAny<double>((*zz)(stack));
-     takemesh[i] = takemesh[i] + 1;
-     }
-     }
-     }
-     }*/
-    ///
-    /* determinate the same vertex */
-    int border_only = 0;
-    int recollement_border = 1, point_confondus_ok = 0;
-
-    MeshS *ThS = MoveMesh2_func(precis_mesh, Th, txx, tyy, tzz,            //here
-                                border_only, recollement_border, point_confondus_ok);
-
-    // Rajouter fonction flip a l interieure
-    int nbflip = 0;
-
-    // loop on triangles meshS
-    for (int ii = 0; ii < ThS->nt; ii++) {
-        const TriangleS &K(ThS->elements[ii]);
-        int iv[3];
-        int lab;
-        double mes_triangleS;
-
-        iv[0] = ThS->operator () (K[0]);
-        iv[1] = ThS->operator () (K[1]);
-        iv[2] = ThS->operator () (K[2]);
-
-        map<int, int>::const_iterator imap;
-        imap = mapface.find(K.lab);
-
-        if (imap != mapface.end())
-            lab = imap->second;
-        else
-            lab = K.lab;
-
-        ThS->elements[ii].set(ThS->vertices, iv, lab);
-        mes_triangleS = ThS->elements[ii].mesure();
-
-        if (surface_orientation * mes_triangleS < 0) {
-            swap(iv[1], iv[2]);
-            ThS->elements[ii].set(ThS->vertices, iv, lab);
-            nbflip++;
-        }
-    }
-    // loop on eges meshS
-    for (int ii = 0; ii < ThS->nbe; ii++) {
-        const BoundaryEdgeS &K(ThS->be(ii));
-        int iv[2];
-        int lab;
-        iv[0] = ThS->operator () (K[0]);
-        iv[1] = ThS->operator () (K[1]);
-
-        map<int, int>::const_iterator imap;
-        imap = mapface.find(K.lab);
-
-        if (imap != mapface.end())
-            lab = imap->second;
-        else
-            lab = K.lab;
-
-        ThS->be(ii).set(ThS->vertices, iv, lab);
-    }
-
-    ffassert(nbflip == 0 || nbflip == ThS->nt);
-    //if (flagsurfaceall == 1) {ThS->BuildBoundaryElementAdj();}
-
-    return ThS;
-
-}
-
 
 
 /* ancien fichier de TransfoMesh */
@@ -6789,9 +6674,12 @@ class Square_Op: public E_F0mps
 {
 public:
     Expression filename;
-    static const int n_name_param = 4;    //
+    static const int n_name_param = 7;    //
     static basicAC_F0::name_and_type name_param [];
     Expression nargs[n_name_param], enx, eny, xx, yy, zz;
+    long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
+    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
+    
 
 public:
     Square_Op (const basicAC_F0 &args, Expression nx, Expression ny, Expression transfo = 0)
@@ -6817,7 +6705,11 @@ basicAC_F0::name_and_type Square_Op::name_param [] = {
     {"region", &typeid(long)},
     {"label", &typeid(KN_<long>)},
     {"flags", &typeid(long)},
-    {"orientation", &typeid(long)}
+    {"orientation", &typeid(long)},
+	{"cleanmesh", &typeid(bool)},  
+	{"removeduplicate", &typeid(bool)},  
+	{"rebuildboundary", &typeid(bool)}  
+	
 };
 
 class Square: public OneOperator {
@@ -7092,7 +6984,6 @@ AnyType Cube_Op::operator () (Stack stack)  const {
     MovePoint pf(stack, xx, yy, zz);
     Mesh3 *Th3_t = BuildCube(nx, ny, nz, region, label, kind, &pf);
     Th3_t->BuildGTree();
-    // Th3_t->getTypeMesh3()=1;
     Add2StackOfPtr2FreeRC(stack, Th3_t);
 
     return Th3_t;
@@ -7101,60 +6992,83 @@ AnyType Cube_Op::operator () (Stack stack)  const {
 
 
 AnyType Square_Op::operator () (Stack stack)  const {
-    long nx, ny, region = 0, /*label [] = {1, 2, 3, 4},*/ kind = 4;
-    KN<long> label(4);
-    for (int i=0;i<4;i++) label[i]=i+1;//{1, 2, 3, 4};
-    nx = GetAny<long>((*enx)(stack));
-    ny = GetAny<long>((*eny)(stack));
 
-    if (nargs[0]) {region = GetAny<long>((*nargs[0])(stack));}
-
-    if (nargs[2]) {kind = GetAny<long>((*nargs[2])(stack));}
-
+	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+	KN<long> label(4);
+    for (int i=0;i<4;i++) 
+		label[i]=i+1;
+    long nx = GetAny<long>((*enx)(stack));
+    long ny = GetAny<long>((*eny)(stack));
+    MeshPoint *mpp(MeshPointStack(stack));
+	
+    long region = arg(0, stack, 0L);
     if (nargs[1]) {
         KN<long> l = GetAny<KN_<long> >((*nargs[1])(stack));
         ffassert(l.N() == 4);
         for (int i = 0; i < 4; ++i)
             label[i] = l[i];
     }
+	long kind(arg(2, stack, 4L));
+	long orientation(arg(3, stack, 1L));
+    long cleanmesh(arg(4, stack, true));
+    long removeduplicate(arg(5, stack, false));
+    bool rebuildboundary(arg(6, stack, false));
 
-    long mesureM=0;
-    if (nargs[3]) mesureM=GetAny< long >((*nargs[3])(stack));
     Mesh *pTh = Carre_(nx,ny,0,0,stack,region,label,0L);
     Mesh &Th = *pTh;
-    int nbv = Th.nv;// nombre de sommet
-    int nbt = Th.nt;// nombre de triangles
-    int neb = Th.neb;    // nombre d'aretes fontiere
-    if (verbosity > 2)
-        cout << "  -- SquareMesh_Op input: nv" << nbv << "  nt: " << nbt << " nbe " << neb << endl;
 
-    KN<double> txx(nbv), tyy(nbv), tzz(nbv);
-    KN<int> takemesh(nbv);
-    MeshPoint *mp3(MeshPointStack(stack));
+    KN<int> takemesh(Th.nv);
     takemesh = 0;
-    // by defaut transfo = [x,y,0]
+    if (verbosity > 2)
+        cout << "  -- SquareMesh_Op input: nv" << Th.nv << "  nt: " << Th.nt << " nbe " << Th.neb << endl;
+    typedef typename MeshS::Element T;
+    typedef typename MeshS::BorderElement B;
+    typedef typename MeshS::Vertex V;
+	V* v=new V[Th.nv];
+	T* t=new T[Th.nt];
+	B* b=new B[Th.neb];
+	// loop over 2d elements
     for (int it = 0; it < Th.nt; ++it)
         for (int iv = 0; iv < 3; ++iv) {
             int i = Th(it, iv);
             if (takemesh[i] == 0) {
-                mp3->setP(&Th, it, iv);
-                txx[i] = xx ? GetAny<double>((*xx)(stack)) : txx[i] = mp3->P.x;
-                tyy[i] = yy ? GetAny<double>((*yy)(stack)) : tyy[i] = mp3->P.y;
-                tzz[i] = zz ? GetAny<double>((*zz)(stack)) : tzz[i] = 0.;
+                mpp->setP(&Th, it, iv);
+                if (xx)
+                    v[i].x = GetAny<double>((*xx)(stack));
+                if (yy)
+                    v[i].y = GetAny<double>((*yy)(stack));
+                if (zz)
+                    v[i].z = GetAny<double>((*zz)(stack));
+                v[i].lab=Th.vertices[i].lab;
                 takemesh[i] = takemesh[i] + 1;
             }
         }
-    KN<long> zzempty;
-    MeshS *ThS_t = func_movemesh23(Th, txx, tyy, tzz, mesureM, zzempty, -1., -1L, stack);
-    ThS_t->BuildGTree();
+
+	 for (int it = 0; it < Th.nt; ++it) {
+		 const Mesh::Element &K=(Th[it]);
+	     int iv[3];
+	  	 for (int i=0;i<3;i++)
+			 iv[i] = Th.operator () (K[i]);
+	         t[it].set(v,iv,K.lab);
+	 }
+	 for (int ibe = 0; ibe < Th.neb; ++ibe) {
+	 	const Mesh::BorderElement &K(Th.be(ibe));
+	    int iv[2];
+		for (int i=0;i<2;i++)
+	    	iv[i] = Th.operator () (K[i]);
+	        b[ibe].set(v,iv,K.lab);
+	 }
+	// build the moved mesh and apply option
+    MeshS *T_Th = new MeshS(Th.nv, Th.nt, Th.neb, v, t, b, cleanmesh, removeduplicate, rebuildboundary, orientation);
+    T_Th->BuildGTree();
 
     delete pTh;
     if (verbosity > 2)
         cout << "  -- SquareMesh_Op: end movemesh23 " << endl;
 
-    Add2StackOfPtr2FreeRC(stack, ThS_t);
-
-    return ThS_t;
+    Add2StackOfPtr2FreeRC(stack, T_Th);
+	*mp = mps;
+    return T_Th;
 }
 
 
@@ -7317,7 +7231,7 @@ public:
     
     long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
     
-    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
+    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
     
 public:
     Movemesh_Op (const basicAC_F0 &args, Expression tth, Expression xxx = 0, Expression yyy = 0, Expression zzz = 0)

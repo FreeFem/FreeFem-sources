@@ -361,7 +361,7 @@ void  HashMatrix<I,R>::resize(I nn, I mm,size_t nnnz, double tol , bool sym )
     mm= mm ? mm : nn;
     if( nn == this->n && mm == this->m && nnz == nnnz && sym == half && tol <0) return ;
     this->m=mm;
-    this->n = nn;
+    this->n=nn;
     this->N=nn;
     this->M=mm;
     R mxt =0;
@@ -502,6 +502,7 @@ void HashMatrix<I,R>::dotranspose()
 {
     swap(i,j);
     swap(this->n,this->m);
+    swap(this->N,this->M);
     conj(aij,this->nnz);
     ReHash();
     state=unsorted;
@@ -524,6 +525,8 @@ void HashMatrix<I,R>::Renumbering(I nn,I mm,KN_<I> ii,KN_<I> jj)
     nnz = kk;
     this->n=nn;
     this->m=mm;
+    this->N=nn;
+    this->M=mm;
     state=unsorted;
     
     RemoveDoubleij(kk); // remove double term 
@@ -693,6 +696,8 @@ void HashMatrix<I,R>::set(I nn,I mm,bool hhalf,size_t nnnz, I *ii, I*jj, R *aa,i
     clear();
     this->n=nn;
     this->m=mm;
+    this->N=nn;
+    this->M=mm;
     fortran=f77;
     half=hhalf;
     Increaze(nnnz);

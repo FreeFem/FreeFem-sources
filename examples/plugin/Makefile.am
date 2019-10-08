@@ -123,7 +123,7 @@ TESTS_METIS = metis.edp \
 
 TESTS_METIS_SCOTCH = scotch.edp
 
-TEST_MKL = PARDISO.edp 
+TESTS_MKL = PARDISO.edp 
 
 TESTS_MSHMET = aniso.edp
 
@@ -226,7 +226,7 @@ TESTS = $(TESTS_OTHER) \
 	$(TESTS_IPOPT) \
 	$(TESTS_METIS) \
 	$(TESTS_METIS_SCOTCH) \
-	$(TEST_MKL) \
+	$(TESTS_MKL) \
 	$(TESTS_MSHMET) \
 	$(TESTS_MUMPS_seq) \
 	$(TESTS_MUMPS_SUPERLU) \

@@ -1381,10 +1381,10 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
         if(nargs[4])
             KSPSetOptionsPrefix(ptA->_ksp, GetAny<std::string*>((*nargs[4])(stack))->c_str());
         KSPSetFromOptions(ksp);
-        if(std::is_same<Type, Dmat>::value) {
+#ifdef PCHPDDM
+        if(std::is_same<Type, Dmat>::value && assembled) {
             PC pc;
             KSPGetPC(ksp, &pc);
-#ifdef PCHPDDM
             PCType type;
             PCGetType(pc, &type);
             PetscBool isType;
@@ -1392,19 +1392,21 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
             if(isType && ptA->_A && ptA->_A->getMatrix() && ptA->_num) {
                 const HPDDM::MatrixCSR<PetscScalar>* const A = ptA->_A->getMatrix();
                 Mat aux;
-                MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, A->_n, A->_m, A->_ia, A->_ja, A->_a, &aux);
+                if(A->_sym)
+                    MatCreateSeqSBAIJWithArrays(PETSC_COMM_SELF, 1, A->_n, A->_m, A->_ia, A->_ja, A->_a, &aux);
+                else
+                    MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, A->_n, A->_m, A->_ia, A->_ja, A->_a, &aux);
                 PetscInt* idx;
                 PetscMalloc1(A->_n, &idx);
                 std::copy_n(ptA->_num, A->_n, idx);
                 IS is;
                 ISCreateGeneral(PETSC_COMM_SELF, ptA->_A->getMatrix()->_n, idx, PETSC_OWN_POINTER, &is);
-                PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_IS", (PetscObject)is);
-                PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject)aux);
+                PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
                 ISDestroy(&is);
                 MatDestroy(&aux);
             }
-#endif
         }
+#endif
         if(std::is_same<Type, Dmat>::value && (nargs[6] || nargs[11])) {
             if(nargs[2] && (nargs[5] || nargs[11])) {
                 if(assembled) {
@@ -3106,43 +3108,6 @@ class ProdPETSc {
             return mv(Ax, A);
         }
 };
-template<class A>
-inline AnyType DestroyKN(Stack, const AnyType& x) {
-    KN<A>* a = GetAny<KN<A>*>(x);
-    for(int i = 0; i < a->N(); ++i)
-        (*a)[i].dtor();
-    a->destroy();
-    return Nothing;
-}
-template<class R>
-R* InitKN(R* const& a, const long& n) {
-    a->init(n);
-    return a;
-}
-template<class R, class A, class B>
-R* getElement(const A& a, const B& b) {
-    if( b<0 || a->N() <= b) {
-        cerr << "Out of bound  0 <= " << b << " < " << a->N() << " array type = " << typeid(A).name() << endl;
-        ExecError("Out of bound in operator []");
-    }
-    return  &((*a)[b]);
-}
-template<class T>
-struct Resize {
-    T* v;
-    Resize(T* w) : v(w) { }
-};
-template<class T>
-Resize<T> toResize(T* v) { return Resize<T>(v); }
-template<class T>
-T* resizeClean(const Resize<T>& t, const long &n) {
-    int m = t.v->N();
-    for(int i = n; i < m; ++i) {
-        (*t.v)[i].dtor();
-    }
-    t.v->resize(n);
-    return  t.v;
-}
 }
 
 static void Init_PETSc() {
@@ -3206,13 +3171,7 @@ static void Init_PETSc() {
     TheOperators->Add("<-", new OneOperator1_<long, Dbddc*>(PETSc::initEmptyCSR<Dbddc>));
     TheOperators->Add("<-", new PETSc::initCSR<HpSchur<PetscScalar>>);
 
-    Dcl_Type<KN<Dmat>*>(0, PETSc::DestroyKN<Dmat>);
-    TheOperators->Add("<-", new OneOperator2_<KN<Dmat>*, KN<Dmat>*, long>(&PETSc::InitKN));
-    atype<KN<Dmat>*>()->Add("[", "", new OneOperator2_<Dmat*, KN<Dmat>*, long>(PETSc::getElement<Dmat, KN<Dmat>*, long>));
-    Dcl_Type<PETSc::Resize<KN<Dmat>>>();
-    Add<KN<Dmat>*>("resize", ".", new OneOperator1<PETSc::Resize<KN<Dmat>>, KN<Dmat>*>(PETSc::toResize));
-    Add<PETSc::Resize<KN<Dmat>>>("(", "", new OneOperator2_<KN<Dmat>*, PETSc::Resize<KN<Dmat>>, long>(PETSc::resizeClean));
-    map_type_of_map[make_pair(atype<long>(), atype<Dmat*>())] = atype<KN<Dmat>*>();
+    addArray<Dmat>();
 
     Global.Add("exchange", "(", new exchangeIn<Dmat, PetscScalar>);
     Global.Add("exchange", "(", new exchangeInOut<Dmat, PetscScalar>);

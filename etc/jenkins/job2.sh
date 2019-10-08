@@ -5,6 +5,9 @@
 
 echo "Job 2"
 casejob=2
+
+set -e
+
 # change default  compiler
 change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-$casejob.sh
 echo try to source file  "$change_compiler"
@@ -33,6 +36,7 @@ then
   echo "Check process complete"
 else
   echo "Check process failed"
+exit 1
 fi
 
 # install

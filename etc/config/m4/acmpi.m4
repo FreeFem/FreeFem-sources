@@ -117,6 +117,13 @@ esac
 		   
 		   mkdir -p 3rdparty/include/msmpi
 		   mkdir -p 3rdparty/lib/msmpi
+		   ## add to msmpi 10.0
+		   echo " hack MSMPI V10.0 "
+		   echo "void __guard_check_icall_fptr(unsigned long ptr) { }" > 3rdparty/lib/msmpi/cfg_stub.c
+		   gcc -o 3rdparty/lib/msmpi/cfg_stub.o -c 3rdparty/lib/msmpi/cfg_stub.c
+		   #gcc -shared -o 3rdparty/lib/msmpi/cfg_stub.dll 3rdparty/lib/msmpi/cfg_stub.o
+		   #rm 3rdparty/lib/msmpi/cfg_stub.o
+		   #rm 3rdparty/lib/msmpi/cfg_stub.c
 		   
 		   cp "$MSMPI_INC"/*.h 3rdparty/include/msmpi
 		   grep -v INT_PTR_KIND "$MSMPI_INC"/mpif.h >3rdparty/include/msmpi/mpif.h
@@ -127,6 +134,8 @@ esac
 		   test "$ff_ptrbit" -eq 32 && ff_msmpi_lib="$MSMPI_LIB32"
 		   cp "$ff_msmpi_lib/msmpifec.lib" "$ff_msmpi_lib/msmpi.lib" 3rdparty/lib/msmpi
 		   ff_msmpi_lib=`pwd`/3rdparty/lib/msmpi
+		   
+		   
 		   # to reinstall msmpi .. 
 		   
 #  MSMPI
@@ -138,7 +147,7 @@ esac
 	test -z "$MPIRUN" -a -x "$ffMSMPI_BIN/mpiexe.exe" && MPIRUN="$MSMPI_BIN\mpiexe.exe"
 	ff_MPI_LIBC="'$ff_msmpi_lib/msmpi.lib'"
 	ff_MPI_LIB="'$ff_msmpi_lib/msmpi.lib'"
-	ff_MPI_LIBFC="'$ff_msmpi_lib/msmpifec.lib' '$ff_msmpi_lib/msmpi.lib'"
+	ff_MPI_LIBFC="'$ff_msmpi_lib/msmpifec.lib' '$ff_msmpi_lib/msmpi.lib' '$ff_msmpi_lib/cfg_stub.o' "
 	ff_mpiexec_win="C:\Program Files\Microsoft MPI\Bin\mpiexec.exe"
 	test -z "$ff_mpiexec_win" && MPIRUN="$ff_mpiexec_win"
 	test -z "$MPICXX" && MPICXX="$CXX $ff_MPI_INCLUDE"

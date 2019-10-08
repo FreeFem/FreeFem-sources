@@ -556,6 +556,8 @@ void HashMatrix<I,R>::set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, RR 
     clear();
     this->n=nn;
     this->m=mm;
+    this->N=nn;
+    this->M=mm;
     fortran=f77;
     half=hhalf;
     Increaze(nnnz);
@@ -572,6 +574,8 @@ void HashMatrix<I,R>::set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, R *
     clear();
     this->n=nn;
     this->m=mm;
+    this->N=nn;
+    this->M=mm;
     fortran=f77;
     half=hhalf;
     Increaze(nnnz);

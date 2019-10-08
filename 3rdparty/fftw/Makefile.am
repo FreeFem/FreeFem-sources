@@ -7,7 +7,7 @@ all-local: $(DOWNLOAD_FFTW)
 # ------------------------------
 
 # FFTW information
-FFTW_VERSION=3.3.2
+FFTW_VERSION=3.3.8
 SRCDIR=fftw-$(FFTW_VERSION)
 PACKAGE=fftw-$(FFTW_VERSION).tar.gz
 SERVER=http://www.fftw.org

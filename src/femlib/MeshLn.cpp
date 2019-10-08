@@ -102,7 +102,6 @@ namespace Fem2D
   void  MeshL::read(istream &f)
   { // read the mesh
     int i;
-    //    f >> nv >> nt >> neb ;
     string str;
     int err=0;
     while(!f.eof())
@@ -138,6 +137,7 @@ namespace Fem2D
 		mes += this->t(i).mesure();
 	      }
 	  }
+    // np present for the moment
 	else if (str=="Points")
 	  {
 	    mesb=0;
@@ -159,27 +159,15 @@ namespace Fem2D
 		    }
 	      }
 	  }
-	else if(str[0]=='#')
-	  {// on mange la ligne
+	else if(str[0]=='#') {
 	    int c;
 	    while ( (c=f.get()) != '\n' &&  c != EOF)
-	      //cout << c << endl;
 	      ;
 	  }
       }
     assert( (nt >= 0 || nbe>=0)  && nv>0) ;
-    /*   done at up level ...
-         BuildBound();
-         
-         if(nt > 0){
-         BuildAdj();
-         Buildbnormalv();
-         BuildjElementConteningVertex();
-         }
-    */
-    if(err!=0)
-      {
-	cerr << " MeshS::read: sorry bad mesh. Number of negative Triangles " << err << endl;
+    if(err!=0) {
+	cerr << " MeshL::read: sorry bad mesh. Number of negative Edges " << err << endl;
 	this->~MeshL();
 	ffassert(0);
       }
@@ -203,7 +191,7 @@ namespace Fem2D
     mesb=0.;
         
     if(nt == 0) {
-      cerr << "  A meshS type must have elements  " << endl;
+      cerr << "  A meshL type must have elements  " << endl;
       ffassert(0);exit(1);
             
     }
@@ -218,12 +206,10 @@ namespace Fem2D
       err += K.mesure() <0;
                 
     }
-        
-        
-        
+   
     for (int k=0; k<nbe; k++) {
       int i[1],lab;
-      BorderElement & K(this->borderelements[0]);
+      BorderElement & K(this->borderelements[k]);
       f >> i[0] >> lab;
       Add(i,1,offset);
       K.set(this->vertices,i,lab);
@@ -232,7 +218,7 @@ namespace Fem2D
     }
     if(err!=0)
       {
-	cerr << " MeshS::readmsh : sorry bad mesh. Number of negative Tri " << err << endl;
+	cerr << " MeshL::readmsh : sorry bad mesh. Number of negative Edges " << err << endl;
 	this->~MeshL();
 	ffassert(0);
       }
@@ -266,7 +252,7 @@ namespace Fem2D
     BuildjElementConteningVertex();
         
         
-    if(verbosity>2) cout << "  -- End of read: MeshS mesure = " << mes << " border mesure " << mesb << endl;
+    if(verbosity>2) cout << "  -- End of read: MeshL mesure = " << mes << " border mesure " << mesb << endl;
         
     if(verbosity) cout << "  -- MeshL : "<<filename  << ", space dimension "<< 3  << ", num Edges elts " << nt << ", num Vertice "
 		       << nv << " num Bondary Points " << nbe << endl;
@@ -317,7 +303,7 @@ namespace Fem2D
     int nv=-1,nEdge=-1,nPts=-1;
     nv=GmfStatKwd(inm,GmfVertices);  // vertice
     nEdge=GmfStatKwd(inm,GmfEdges); // segment elements
-    ///  nPts=GmfStatKwd(inm,GmfVertices);  // points border element
+    nPts=0; // GmfStatKwd(inm,GmfVertices);  // points border element
     this->set(nv,nEdge,nPts);
        
     if(nEdge == 0) {
@@ -352,50 +338,49 @@ namespace Fem2D
       mxlab= max(mxlab,lab);
       mnlab= min(mnlab,lab);
     }
-    // read triangles (element meshS)
     if(mnlab==0 && mxlab==0 ) {
-      int kmv=0;
-      mes=0;
-      GmfGotoKwd(inm,GmfEdges);
-      for(int i=0;i<nEdge;++i) {
-	GmfGetLin(inm,GmfEdges,&iv[0],&iv[1],&lab);
-	assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv);
-	for(int j=0;j<2;++j)
-	  if(!vertices[iv[j]-1].lab) {
-	    vertices[iv[j]-1].lab=1;
-	    kmv++;
-	  }
-	for (int j=0;j<2;++j) iv[j]--;
-	elements[i].set(vertices,iv,lab);
-	mes += elements[i].mesure();
-      }
-      if(kmv&& verbosity>1) cout << "    Aucun label Hack (FH)  ??? => 1 sur les triangle frontiere "<<endl;
+        int kmv=0;
+        mes=0;
+        GmfGotoKwd(inm,GmfEdges);
+        for(int i=0;i<nEdge;++i) {
+            GmfGetLin(inm,GmfEdges,&iv[0],&iv[1],&lab);
+            assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv);
+            for(int j=0;j<2;++j)
+                if(!vertices[iv[j]-1].lab) {
+                    vertices[iv[j]-1].lab=1;
+                    kmv++;
+                }
+            for (int j=0;j<2;++j) iv[j]--;
+                elements[i].set(vertices,iv,lab);
+          mes += elements[i].mesure();
+        }
+        if(kmv&& verbosity>1) cout << "    Aucun label Hack (FH)  ??? => 1 sur les triangle frontiere "<<endl;
     }
     else {
-      mes=0;
-      GmfGotoKwd(inm,GmfEdges);
-      for(int i=0;i<nEdge;++i) {
-	GmfGetLin(inm,GmfEdges,&iv[0],&iv[1],&lab);
-	assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv);
-	for (int j=0;j<2;++j) iv[j]--;
-	elements[i].set(this->vertices,iv,lab);
-	mes += elements[i].mesure();
-      }
+        mes=0;
+        GmfGotoKwd(inm,GmfEdges);
+        for(int i=0;i<nEdge;++i) {
+            GmfGetLin(inm,GmfEdges,&iv[0],&iv[1],&lab);
+            assert( iv[0]>0 && iv[0]<=nv && iv[1]>0 && iv[1]<=nv);
+            for (int j=0;j<2;++j) iv[j]--;
+                elements[i].set(this->vertices,iv,lab);
+            mes += elements[i].mesure();
+        }
     }
-    // read edges (boundary elements meshS)
+    // unused loop...not border points in .mesh
     mesb=0;
     GmfGotoKwd(inm,GmfVertices);
     for(int i=0;i<nPts;++i) {
-      GmfGetLin(inm,GmfVertices,&iv[0],&lab);
-      assert( iv[0]>0 && iv[0]<=nv);
-      borderelements[i].set(this->vertices,iv,lab);   //element
-      mesb += this->borderelements[i].mesure();
+        GmfGetLin(inm,GmfVertices,&iv[0],&lab);
+        assert( iv[0]>0 && iv[0]<=nv);
+        borderelements[i].set(this->vertices,iv,lab);
+        mesb += this->borderelements[i].mesure();
     }
         
         
     if(verbosity>1)
-      cout << "  -- MeshL(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
-	   << ", Edges elts:= " << nt << ", num vertice:= " << nv << ", num Points boundaries:= " << nbe << endl;
+        cout << "  -- MeshL(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
+	    << ", Edges elts:= " << nt << ", num vertice:= " << nv << ", num Points boundaries:= " << nbe << endl;
         
     GmfCloseMesh(inm);
     delete[] data;
@@ -409,28 +394,27 @@ namespace Fem2D
         
     int ok=load(filename);
     if(verbosity) {
-      cout << "read mesh ok " << ok  << endl;
+      cout << "read meshL ok " << ok  << endl;
       cout << ", nt " << nt << ", nv " << nv << " nbe:  = " << nbe << endl;
     }
-    if(ok)
-      {
-	ifstream f(filename.c_str());
-	if(!f) {
-	  cerr << "  --  Mesh3::Mesh3 Erreur openning " << filename<<endl;ffassert(0);exit(1);}
-	if(verbosity>2)
-	  cout << "  -- Mesh3:  Read On file \"" <<filename<<"\""<<  endl;
-	if(filename.rfind(".msh")==filename.length()-4)
-	  readmsh(f,-1);
-	else
-	  read(f);
-      }
+    if(ok) {
+        ifstream f(filename.c_str());
+        if(!f)
+            cerr << "  --  MeshL Erreur openning " << filename<<endl;ffassert(0);exit(1);
+        if(verbosity>2)
+                cout << "  -- MeshL:  Read On file \"" <<filename<<"\""<<  endl;
+        if(filename.rfind(".msh")==filename.length()-4)
+            readmsh(f,-1);
+        else
+            read(f);
+    }
      
     if (cleanmesh) {
         if(verbosity>3)
-            cout << "before clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+            cout << "before clean meshL, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
         clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
         if(verbosity>3)
-            cout << "after clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+            cout << "after clean meshL, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
     }
         
     BuildBound();
@@ -441,8 +425,8 @@ namespace Fem2D
     if(verbosity>2)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
     if(verbosity)
-      cout << "  -- MeshS : "<<filename  << ", d "<< 3  << ", n Tri " << nt << ", n Vtx "
-	   << nv << " n Bord Edges " << nbe << endl;
+      cout << "  -- MeshL : "<<filename  << ", d "<< 3  << ", n Edges " << nt << ", n Vtx "
+	   << nv << " n Border points " << nbe << endl;
     ffassert(mes>=0); // add F. Hecht sep 2009.
   }
     
@@ -461,20 +445,15 @@ namespace Fem2D
     BuildjElementConteningVertex();
       
     if(verbosity>2)
-    cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
+        cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
         
     if(verbosity>1)
-    cout << "  -- MeshL  (File *), d "<< 3  << ", n Tri " << nt << ", n Vtx "
-    << nv << " n Bord " << nbe << endl;
+        cout << "  -- MeshL  (File *), d "<< 3  << ", n Tri " << nt << ", n Vtx " << nv << " n Bord " << nbe << endl;
     ffassert(mes>=0); // add F. Hecht sep 2009.
-    }
+  }
   
     
-    
-    
-    
-  double MeshL::hmin() const
-  {
+  double MeshL::hmin() const {
     R3 Pinf(1e100,1e100,1e100),Psup(-1e100,-1e100,-1e100);   // Extremite de la boite englobante
     double hmin=1e10;
         
@@ -486,17 +465,17 @@ namespace Fem2D
         
     for (int k=0;k<this->nt;k++) {
         
-      if( this->elements[k].lenEdge(0) < Norme2(Psup-Pinf)/1e9 ){
-	const EdgeL & K(this->elements[k]);
-	int iv[3];
-	for(int jj=0; jj <2; jj++)
-	  iv[jj] = this->operator()(K[jj]);
-	if(verbosity>2)
-	  cout << "EdgeL: " << k << " lenght "<<  this->elements[k].lenEdge(0) << endl;
-	if(verbosity>2) cout << " A triangleS with a very small edge was created " << endl;
-	return 1;
-      }
-      hmin=min(hmin,this->elements[k].lenEdge(0));   // calcul de .lenEdge pour un Mesh3
+        if( this->elements[k].lenEdge(0) < Norme2(Psup-Pinf)/1e9 ) {
+            const EdgeL & K(this->elements[k]);
+            int iv[2];
+            for(int jj=0; jj <2; jj++)
+                iv[jj] = this->operator()(K[jj]);
+            if(verbosity>2)
+                cout << "EdgeL: " << k << " lenght "<<  this->elements[k].lenEdge(0) << endl;
+            if(verbosity>2) cout << " A triangleS with a very small edge was created " << endl;
+            return 1;
+        }
+        hmin=min(hmin,this->elements[k].lenEdge(0));   // calcul de .lenEdge pour un Mesh3
           
     }
     ffassert(hmin>Norme2(Psup-Pinf)/1e9);
@@ -572,15 +551,15 @@ namespace Fem2D
     mesb=0.;
         
     for (int i=0;i<nt;i++)
-      mes += this->elements[i].mesure();
+        mes += this->elements[i].mesure();
     for (int i=0;i<nbe;i++)
-      mesb += this->be(i).mesure();
+        mesb += this->be(i).mesure();
     if (cleanmesh) {
-      if(verbosity>3)
-	cout << "before clean meshL, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
-      clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
-      if(verbosity>3)
-	cout << "after clean meshL, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+        if(verbosity>3)
+            cout << "before clean meshL, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+        clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
+        if(verbosity>3)
+            cout << "after clean meshL, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
     }
     BuildBound();
     BuildAdj();
@@ -599,8 +578,8 @@ namespace Fem2D
   {
     int ver = GmfDouble, outm;
     if ( !(outm = GmfOpenMesh(filename.c_str(),GmfWrite,ver,3)) ) {
-      cerr <<"  -- MeshS**::Save  UNABLE TO OPEN  :"<< filename << endl;
-      return(1);
+        cerr <<"  -- MeshL**::Save  UNABLE TO OPEN  :"<< filename << endl;
+        return(1);
     }
     float fx,fy,fz;
     // write vertice (meshL)

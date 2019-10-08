@@ -139,7 +139,7 @@ namespace Fem2D {
       delete [] mapSurf2Curv ;
       delete [] mapCurv2Surf ;
             
-      SHOWVERB(cout << " %%%% delete MeshS"<< this << endl) ; }
+      SHOWVERB(cout << " %%%% delete MeshL"<< this << endl) ; }
   private:
     MeshL(const MeshL &); // pas de construction par copie
     void operator=(const MeshL &);// pas affectation par copy

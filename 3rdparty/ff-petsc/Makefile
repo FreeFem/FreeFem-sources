@@ -30,6 +30,33 @@ dir3rdparty := $(abspath $(dir $(mkfile_path))/..)
 
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(FF_prefix_petsc)" && test -w "$(DESTDIR)$(FF_prefix_petsc) || echo sudo)
 W_SUDO1=$(SHELL ls	)
+ifeq ($(PETSC_PKG),yes)
+pkg_dir=$(mkfile_path)/pkg
+PETSC_DOWLOAD :=  --download-scalapack=$(pkg_dir)/pkg-scalapack.tar.gz \
+ --download-metis=$(pkg_dir)/pkg-metis.tar.gz
+ --download-ptscotch=$(pkg_dir)/scotch-v6.0.8.tar.gz \
+--download-mumps=$(pkg_dir)/pkg-mumps.tar.gz \
+--download-hypre=$(pkg_dir)/hypre.tar.gz \
+		 --download-parmetis=$(pkg_dir)/pkg-parmetis.tar.gz \
+		--download-superlu=$(pkg_dir)/superlu.tar.gz \
+		--download-suitesparse=$(pkg_dir)/SuiteSparse-4.4.3.tar.gz \
+		 --download-fftw=$(pkg_dir)/fftw-3.3.8.tar.gz \
+		 --download-tetgen=tetgen1.5.1.tar.gz \
+		--download-hpddm=$(pkg_dir)/hpddm.tar.gz \
+		--download-slepc=$(pkg_dir)/slepc.tar.gz
+PETSC_DOWLOAD_C :=  	--download-hpddm=$(pkg_dir)/hpddm.tar.gz \
+		--download-slepc=$(pkg_dir)/slepc.tar.gz
+
+		
+else
+PETSC_DOWLOAD := 	--download-scalapack --download-metis --download-ptscotch \
+		--download-mumps --download-hypre --download-parmetis \
+		--download-superlu --download-suitesparse --download-fftw --download-tetgen \
+		--download-hpddm \
+		--download-slepc
+PETSC_DOWLOAD_C:=  --download-hpddm \
+		--download-slepc
+endif
 ifeq ($(FF_generic_petsc), yes)
   FLAGS_MTUNE := "-mtune=generic"
 else
@@ -50,10 +77,7 @@ ifeq ($(WIN32DLLTARGET),)
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 		--with-scalar-type=real $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
-		--download-scalapack --download-metis --download-ptscotch \
-		--download-mumps --download-ml --download-hypre --download-parmetis \
-		--download-superlu --download-suitesparse --download-fftw --download-slepc 
-
+        $(PETSC_DOWLOAD)
 FLAGS_CONF_PETSC_COMPLEX= --with-debugging=no \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
 		COPTFLAGS='-O3  $(FLAGS_MTUNE)' \
@@ -72,8 +96,8 @@ FLAGS_CONF_PETSC_COMPLEX= --with-debugging=no \
 		--with-mumps-dir=$(DIR_INSTALL_REAL) \
 		--with-parmetis-dir=$(DIR_INSTALL_REAL) \
 		--with-fftw-dir=$(DIR_INSTALL_REAL) \
-		--download-slepc  
-
+		--with-tetgen-dir=$(DIR_INSTALL_REAL) \
+        $(PETSC_DOWLOAD_C)
 else
 ##   On  windows ....
   FFWINDOWS=true
@@ -126,6 +150,7 @@ all-local:
 	@echo " # run under root "
 	@echo " # or create / add access to $(DESTDIR)$(FF_prefix_petsc) "
 	@echo " # do for examples:"
+	@echo " # PETSC_DOWLOAD = $(PETSC_DOWLOAD)"
 	@echo "	sudo mkdir  $(DESTDIR)$(FF_prefix_petsc)"
 	@echo "	sudo chown -R $(LOGNAME)  $(DESTDIR)$(FF_prefix_petsc)"
 	@echo "	make petsc-slepc "
@@ -133,8 +158,8 @@ all-local:
 # -------------------------------
 
 DIRPKG=../pkg
-VERSION=3.11.3
-VERSION_SLEPC=3.11.0
+VERSION=3.12.0
+VERSION_SLEPC=3.011.2
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
@@ -216,6 +241,7 @@ $(SRCDIR)/tag-install-real :$(SRCDIR)/tag-make-real
 	-test -x "`type -p otool`"  &&  make changer
 	cd $(SRCDIR) && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=fr check
 	test -e $(DIR_INSTALL_REAL)/include/petsc.h
+	test -e $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
 	touch $@
 
 Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
@@ -227,7 +253,8 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 		$(FLAGS_CONF_PETSC_REAL) PETSC_ARCH=fr
 	test -f $(SRCDIR)/fr/lib/petsc/conf/petscvariables
 	touch $@
-Make-petsc-download.mk:$(SRCDIR)/tag-install-real $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
+Make-petsc-download.mk:$(SRCDIR)/tag-install-real 
+	test -e $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
 	egrep 'PETSC_LIB_BASIC|SCALAPACK_|METIS_|MUMPS_|SUPERLU_|FFTW_|PTSCOTCH_|SUITESPARSE_'   $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables | sed 's/-I/ /g'|sort >$@
 ifdef 	COMPLEX_CASE
 #  version COMPLEX  .....

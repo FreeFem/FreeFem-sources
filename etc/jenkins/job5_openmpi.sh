@@ -9,6 +9,7 @@ echo "Job 5 (openmpi)"
 set -e
 
 casejob=5_openmpi
+
 # change default  compiler
 change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-$casejob.sh
 echo try to source file  "$change_compiler"

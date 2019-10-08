@@ -555,7 +555,7 @@ public:
   void BuildBoundaryElementAdj(const int &nbsurf, int* firstDefSurface, int* labelDefSurface, int* senslabelDefSurface); // version avec plusieurs vari�t�s
   
   //template<>
-  void SameVertex(const double precis_mesh, Vertex *v, Element *t, int nv, int nt, int *ind_nv_t, int *Numero_Som, int &new_nv, bool removeduplicate);
+  void SameVertex(const double precis_mesh, Vertex *v, Element *t, int nv, int nt, int *ind_nv_t, int *Numero_Som, int &new_nv);
   void VertexInElement( Vertex *vertice, Element *list, int &nv, int *(&ind_nv), int nt, int *ind_nt, int *(&old2new) );
   void clean_mesh(const double precis_mesh, int &nv, int &nt, int &nbe, V *(&v), T *(&t), B *(&b), bool removeduplicate, bool rebuildboundary, int orientation);
  
@@ -1216,7 +1216,7 @@ void GenericMesh<T,B,V>::VertexInElement(V *vertice, T *list, int &nv, int *(&in
     
 // output int *ind_nv_t, int *old2new, int &new_nv
 template<typename T,typename B,typename V>
-void GenericMesh<T,B,V>::SameVertex(const double precis_mesh, V *vertice, T *element, int nv, int nt, int *ind_nv_t, int *old2new, int &new_nv, bool removmult) {
+void GenericMesh<T,B,V>::SameVertex(const double precis_mesh, V *vertice, T *element, int nv, int nt, int *ind_nv_t, int *old2new, int &new_nv) {
 
     if (verbosity > 2)
     cout << "clean mesh: remove multiple vertices, elements, border elements and check border elements " << endl;
@@ -1350,7 +1350,7 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
     int *old2new=new int[nv];
 
     // clean multiples vertice
-    SameVertex(precis_mesh, v, t, nv, nt, ind_nv, old2new, new_nv, removeduplicate);
+    SameVertex(precis_mesh, v, t, nv, nt, ind_nv, old2new, new_nv);
    
     if(!removeduplicate)
         nv=new_nv;
@@ -2021,25 +2021,22 @@ Serialize GenericMesh<T,B,V>::serialize() const
        assert(pp==serialized.size());
     }
 
-    
     template<typename TypeGenericElement, typename TypeVert >
     void SameElement( TypeVert *vertice, TypeGenericElement *list, int nelt, int *(&ind_nv_t), int *old2new, int &new_nelt, bool removeduplicate) {
-
+        
         new_nelt=0;
         static const int nk=TypeGenericElement::nv;
         int iv[nk];
         
         HashTable<SortArray<int,nk>,int> h(nk*nelt,nelt);
         
-        int *originmulti=new int[nelt];
-        int *allmulti=new int[nelt];
+        int *originmulti=new int [nelt];
         
         int originTypeGenericElement=0;
         int multiTypeGenericElement=0;
-        int indice[nelt];
+        int *indice=new int [nelt];
         
         for (int i=0;i<nelt;i++) {
-            allmulti[i]=-1;
             originmulti[i]=-1;
             indice[i]=-1;
         }
@@ -2048,7 +2045,7 @@ Serialize GenericMesh<T,B,V>::serialize() const
             
             const TypeGenericElement &K(list[i]);
             for (int j=0;j<nk;j++)
-            iv[j] = old2new[ &(K[j]) - vertice ];    // vertice of element in new numbering
+                iv[j] = old2new[ &(K[j]) - vertice ];    // vertice of element in new numbering
             int sens;
             SortArray<int,nk> a(iv,&sens);
             typename HashTable<SortArray<int,nk>,int>::iterator p= h.find(a);
@@ -2061,11 +2058,11 @@ Serialize GenericMesh<T,B,V>::serialize() const
                     new_nelt++;
                 }
                 // or 2/ rm all multiples or keep the orinal
-                else if(removeduplicate) {
+                else  {
                     originmulti[i]=p->v;  // the double elt the current
                     multiTypeGenericElement++;
-               
-                    if(originmulti[p->v]==-1) {   // the origin elt
+                    
+                    if(removeduplicate && originmulti[p->v]==-1) {   // the origin elt
                         originmulti[p->v]=p->v;
                         originTypeGenericElement++;
                     }
@@ -2074,14 +2071,14 @@ Serialize GenericMesh<T,B,V>::serialize() const
         }
         // rebuild the index list if remove all multiples
         if(removeduplicate) {
-         int cmp=0;
+            int cmp=0;
             for(int i=0;i<nelt;i++) {
                 if(originmulti[i]==-1) {
                     ind_nv_t[cmp]=i;
                     cmp++;
                 }
             }
-           assert((nelt-originTypeGenericElement-multiTypeGenericElement)==cmp);
+            assert((nelt-originTypeGenericElement-multiTypeGenericElement)==cmp);
             new_nelt=cmp;
             if (verbosity>2)
                 cout << "no duplicate elements: "<< cmp << " and remove " << multiTypeGenericElement << " multiples elements, corresponding to " << originTypeGenericElement << " original elements " << endl;
@@ -2089,14 +2086,13 @@ Serialize GenericMesh<T,B,V>::serialize() const
         }
         else {
             for(int i=0;i<nelt;i++)
-               ind_nv_t[i]=indice[i];
+                ind_nv_t[i]=indice[i];
             if (verbosity>2)
                 cout << " Warning, the mesh could contain multiple same elements, keep a single copy in mesh...option removemulti in the operator mesh is avalaible" << endl;
         }
- 
-        delete [] originmulti;
-        delete [] allmulti;
-
+        delete[] originmulti;
+        delete[] indice;
+        
     }
     
 }

@@ -70,9 +70,7 @@ typedef GenericVertex<R3> Vertex3;
         typedef R1 RdHat;
         typedef R0 RdHatBord;
         static RdHat PBord(const int * nvb,const RdHatBord &P)  { return RdHat(*nvb) ;}
-        
-        //static const int (* const nvface)[3];// = nvfaceSeg ;
-        //static const int (* const nvedge)[2];//  = nvedgeSeg;
+
         
     };
     
@@ -123,11 +121,6 @@ typedef GenericVertex<R3> Vertex3;
             ASSERTION(i>=0 && i <3);
             return R3( Edge(2)^Edge(1) );
         }
-        
-       /* R EdgeOrientationS(int i) const {
-            R Orient[2]={-1.,1.};
-            return Orient[EdgeOrientation(i)];
-        }*/
         
     };
     
