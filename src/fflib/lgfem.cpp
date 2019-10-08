@@ -3788,42 +3788,68 @@ AnyType Plot::operator()(Stack s) const{
         int cmp[3]={-1,-1,-1};
         theplot.SendNewPlot();
         if (nargs[0]) (theplot<< 0L) <=  GetAny<double>((*nargs[0])(s));
+        packet.JsonifyArgs<double>(std::string("coefficient"), (nargs[0]) ? GetAny<double>((*nargs[0])(s)) : 0.f);
         if (nargs[1]) (theplot<< 1L) <=  GetAny<string *>((*nargs[1])(s));
+        packet.JsonifyArgs<string>(std::string("comment"), (nargs[1]) ? *(GetAny<string *>((*nargs[1])(s))) : "");
         if (nargs[2]) (theplot<< 2L) <=  GetAny<string*>((*nargs[2])(s));
+        packet.JsonifyArgs<string>(std::string("post-script"), (nargs[2]) ? *(GetAny<string *>((*nargs[2])(s))) : "");
         if (nargs[3]) (theplot<< 3L)  <= (bool) (!NoWait &&  GetAny<bool>((*nargs[3])(s)));
         else (theplot<< 3L)  <=  (bool)  (TheWait&& !NoWait);
+        packet.JsonifyArgs<bool>(std::string("wait"), (nargs[3]) ? (!NoWait &&  GetAny<bool>((*nargs[3])(s))) : (TheWait && !NoWait));
         if (nargs[4]) (theplot<< 4L)  <= GetAny<bool>((*nargs[4])(s));
+        packet.JsonifyArgs<bool>(std::string("fill"), (nargs[4]) ? GetAny<bool>((*nargs[4])(s)) : -1);
         if (nargs[5]) (theplot<< 5L) <=  GetAny<bool>((*nargs[5])(s));
+        packet.JsonifyArgs<bool>(std::string("value"), (nargs[4]) ? GetAny<bool>((*nargs[5])(s)) : -1);
         if (nargs[6]) (theplot<< 6L) <=  GetAny<bool>((*nargs[6])(s));
+        packet.JsonifyArgs<bool>(std::string("clean"), (nargs[4]) ? GetAny<bool>((*nargs[6])(s)) : -1);
         if (nargs[7]) (theplot<< 7L)  <= GetAny<bool>((*nargs[7])(s));
+        packet.JsonifyArgs<bool>(std::string("aspect-ratio"), (nargs[4]) ? GetAny<bool>((*nargs[7])(s)) : -1);
         if (nargs[8])
-        {  KN<double> bbox(4);
-            for (int i=0;i<4;i++)
-                bbox[i]= GetAny<double>((*bb[i])(s));
+        {
+          KN<double> bbox(4);
+          for (int i=0;i<4;i++)
+            bbox[i]= GetAny<double>((*bb[i])(s));
 
-            (theplot<< 8L) <= bbox ;
+          (theplot<< 8L) <= bbox ;
+          packet.JsonifyArgs<KN<double>>(std::string("boundding-box"), bbox);
+        } else {
+          KN<double> bbox(4);
+          bbox[0] = bbox[1] = bbox[2] = bbox[3] = 0.f;
+          packet.JsonifyArgs<KN<double>>(std::string("boundding-box"), bbox);
         }
         if (nargs[9])  (theplot<< 9L)   <=  GetAny<long>((*nargs[9])(s));
+        packet.JsonifyArgs<long int>(std::string("nb-iso"), (nargs[9]) ? GetAny<long>((*nargs[9])(s)) : 0);
         if (nargs[10])  (theplot<< 10L) <= GetAny<long>((*nargs[10])(s));
+        packet.JsonifyArgs<long int>(std::string("nb-arrow"), (nargs[10]) ? GetAny<long>((*nargs[10])(s)) : 0);
         if (nargs[11]) {
-            KN_<double> v =GetAny<KN_<double> >((*nargs[11])(s)) ;
-            (theplot<< 11L)  <= v   ;}
+          KN_<double> v = GetAny<KN_<double> >((*nargs[11])(s)) ;
+          packet.JsonifyArgs<KN_<double>>(std::string("iso-value"), v);
+          (theplot<< 11L) <= v;
+        } else {
+          packet.JsonifyArgs<KN_<double>>(std::string("iso-value"), KN_<double>(nullptr, 0));
+        }
 
-        if (nargs[12])
-            (theplot<< 12L) <=  GetAny<KN_<double> >((*nargs[12])(s)) ;
-
+        if (nargs[12]) (theplot<< 12L) <=  GetAny<KN_<double> >((*nargs[12])(s)) ;
+        packet.JsonifyArgs<KN_<double>>(std::string("arrow-value"), (nargs[12]) ? GetAny<KN_<double>>((*nargs[12])(s)) : KN_<double>(nullptr, 0));
 
 
         if (nargs[13]) (theplot<< 13L)  <= GetAny<bool>((*nargs[13])(s));
+        packet.JsonifyArgs<bool>(std::string("back-white"), (nargs[13]) ? GetAny<bool>((*nargs[13])(s)) : -1);
         if (nargs[14]) (theplot<< 14L) <= GetAny<bool>((*nargs[14])(s));
-        if (nargs[15])
-            (theplot<< 15L)  <= GetAny<KN_<double> >((*nargs[15])(s));
+        packet.JsonifyArgs<bool>(std::string("grey-scale"), (nargs[14]) ? GetAny<bool>((*nargs[14])(s)) : -1);
+        if (nargs[15]) (theplot<< 15L)  <= GetAny<KN_<double>>((*nargs[15])(s));
+        packet.JsonifyArgs<KN_<double>>(std::string("HSV"), (nargs[15]) ? GetAny<KN_<double>>((*nargs[15])(s)) : KN_<double>(nullptr, 0));
         if (nargs[16]) (theplot<< 16L)  <= GetAny<bool>((*nargs[16])(s));
+        packet.JsonifyArgs<bool>(std::string("boundary"), (nargs[16]) ? GetAny<bool>((*nargs[16])(s)) : -1);
         // add frev 2008 FH for 3d plot ...
         if (nargs[17]) (theplot<< 17L)  <= GetAny<long>((*nargs[17])(s));
+        packet.JsonifyArgs<long int>(std::string("dimension"), (nargs[17]) ? GetAny<long int>((*nargs[17])(s)) : -1);
         if (nargs[18]) (theplot<< 18L)  <= GetAny<bool>((*nargs[18])(s));
+        packet.JsonifyArgs<int>(std::string("add"), (nargs[18]) ? GetAny<bool>((*nargs[18])(s)) : -1);
         if (nargs[19]) (theplot<< 19L)  <= GetAny<bool>((*nargs[19])(s));
-        if (nargs[20]) (theplot<< 20L)  <= (echelle=GetAny<double>((*nargs[20])(s)));
+        packet.JsonifyArgs<bool>(std::string("prev"), (nargs[19]) ? GetAny<bool>((*nargs[19])(s)) : -1);
+        if (nargs[20]) (theplot<< 20L)  <= (echelle = GetAny<double>((*nargs[20])(s)));
+        packet.JsonifyArgs<double>(std::string("ech"), (nargs[20]) ? GetAny<double>((*nargs[20])(s)) : -1.f);
 
         // FFCS: extra plot options for VTK (indexed from 1 to keep these lines unchanged even if the number of standard
         // FF parameters above changes) received in [[file:../ffcs/src/visudata.cpp::receiving_plot_parameters]]. When
@@ -4068,8 +4094,8 @@ if(nargs[VTK_START+index])                    \
                 ffassert(0);// erreur type theplot inconnue
             if(err==1)
             { if(verbosity)
-                cerr << "Warning: May be a bug in your script, \n"
-                << " a part of the plot is wrong t (mesh or FE function, curve)  => skip the item  " << i+1
+                cerr << "Warning: There may be a bug in your script, \n"
+                << " a part of the plot is wrong t (mesh or FE function, curve) => skip the item " << i+1
                 << " in plot command " << endl;
                 theplot << -1L << (long) i ;
             }

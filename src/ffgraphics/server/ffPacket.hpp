@@ -19,7 +19,29 @@ struct ffFE {
     KN_<int> Ksub;
     KN_<K> V1;
 };
-
+/**
+ * @brief Class used to create a block of data which the server will send.
+ * A basic ffPacket will look like this :
+ * {
+ *      "Version": "FreeFem++ Header 0.1",
+ *      "Size": ** Compressed data size **
+ * }
+ * ** Header is padded using space to a size of 66 bytes using spaces **
+ * ** The next data is compressed using the CBOR algorithm **
+ * {
+ *      "Geometry": [
+ *          {
+ *           "Type": ** Type of the data (eg: Curve, Mesh2D, Mesh3D) **,
+ *           "ElementCount": ** Number of element in the array **,
+ *           "ElementSize": ** Size of one element written as string formatted as "type number_of_elements ..." **,
+ *           "Vertices": [...],
+ *           "Indices": [...]
+ *          },
+ *          {},
+ *          ...
+ *      ]
+ * }
+ */
 struct ffPacket {
     ffPacket();
     ffPacket(json data);
@@ -40,6 +62,9 @@ struct ffPacket {
      */
     template <typename T>
     void Jsonify(const T& data);
+
+    template <typename T>
+    void JsonifyArgs(std::string Name, const T Data);
 
     json m_JSON;
     std::vector<uint8_t> m_Data;
