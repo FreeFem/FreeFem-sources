@@ -45,6 +45,7 @@
 #include <cstring>
 #include "error.hpp"
 #include "lex.hpp"
+#include "ufunction.hpp"
 
 #include "RNM.hpp"
 
@@ -84,11 +85,6 @@ extern basicForEachType *  typevarreal,  * typevarcomplex;  //  type of real and
 extern int TheCurrentLine; // unset: by default
 extern long mpisize,mpirank;
 
-template<class T> inline T Max (const T &a,const T & b){return a > b ? a : b;}
-template<class T> inline T Min (const T &a,const T & b){return a < b ? a : b;}
-template<class T> inline T Abs (const T &a){return a <0 ? -a : a;}
-template<class T> inline T Max (const T &a,const T & b,const T & c){return Max(Max(a,b),c);}
-template<class T> inline T Min (const T &a,const T & b,const T & c){return Min(Min(a,b),c);}
 template<class T> inline T Square (const T &a){return a*a;}
 
 
@@ -102,8 +98,6 @@ template<class K>
 struct Op2_dotproduct_: public binary_function<Transpose<KN_<K> >,KN_<K> ,K> {
   static K f( Transpose<KN_<K> > const & a, KN_<K>  const& b)
    { return (conj(a.t),b);} };
-
-template<class A,class B>  A Build(B b) {  return A(b);}
 
 template<class T>
 void  HeapSort(T *c,long n,long o)
