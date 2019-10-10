@@ -724,6 +724,14 @@ long globalNumbering(Type* const& A, KN<long>* const& numbering) {
     return 0L;
 }
 
+template<class Type, class K>
+Type* changeOperatorSimple(Type* const& A, Type* const& B) {
+#if 0 // if you need this, please make sure you are using the master branch of HPDDM
+    *A = *B;
+#endif
+    return A;
+}
+
 template<template<class, char> class Type, class K, char S, char U = S>
 void add() {
     Dcl_Type<Type<K, S>*>(Initialize<Type<K, S>>, Delete<Type<K, S>>);
@@ -735,6 +743,7 @@ void add() {
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>(1));
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>(1, 1));
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>(1, 1, 1));
+    TheOperators->Add("=", new OneOperator2_<Type<K, S>*, Type<K, S>*, Type<K, S>*>(Schwarz::changeOperatorSimple<Type<K, S>, K>));
     Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>);
     Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>(1));
     Global.Add("DDM", "(", new solveDDM<Type<K, S>, K>);
@@ -742,6 +751,9 @@ void add() {
     Global.Add("set", "(", new set<Type<K, S>, K>);
     addProd<Type<K, S>, ProdSchwarz, KN<K>, K>();
     addInv<Type<K, S>, InvSchwarz, KN<K>, K>();
+#if 0 // if you need this, please make sure you are using the master branch of HPDDM
+    addArray<Type<K, S>>();
+#endif
     Global.Add("dmv", "(", new distributedMV<Type<K, S>, K>);
     Global.Add("destroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(destroyRecycling<Type<K, S>, K>));
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));

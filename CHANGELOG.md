@@ -28,10 +28,12 @@ All notable changes to this project will be documented in this file.
 - new examples `diffusion-2d-mg.edp` and `helmholtz-2d-mg.edp` showing how to use user-defined coarse corrections
 - support for nonzero scalars in PETSc block matrices
 - simpler constructor for sequential HPDDM matrices (no need for the restriction array and the partition of unity)
+- array of `Mat` and `schwarz` types
 
 ### Changed
 - in the FreeFEM function movemesh23, correct the argument label -> region to change label
 - new implementation for the moving mesh functions, new arguments: boolean cleanmesh, removemultiple, rebuildborder 
+- new PETSc version 3.12
 
 ### Deprecated
 -
