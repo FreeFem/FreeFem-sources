@@ -31,7 +31,7 @@ dir3rdparty := $(abspath $(dir $(mkfile_path))/..)
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(FF_prefix_petsc)" && test -w "$(DESTDIR)$(FF_prefix_petsc) || echo sudo)
 W_SUDO1=$(SHELL ls	)
 ifeq ($(PETSC_PKG),yes)
-pkg_dir=$(mkfile_path)/pkg
+pkg_dir=$(abspath $(dir $(mkfile_path))/pkg)
 PETSC_DOWLOAD :=  --download-scalapack=$(pkg_dir)/pkg-scalapack.tar.gz \
  --download-metis=$(pkg_dir)/pkg-metis.tar.gz
  --download-ptscotch=$(pkg_dir)/scotch-v6.0.8.tar.gz \

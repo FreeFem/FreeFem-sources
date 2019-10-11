@@ -2940,8 +2940,8 @@ void Triangles::FindSubDomain(int OutSide=0)
 		        || t->link == 0) // Ajoute aout 200 
 		     {
 			cerr << " Error in the def of sub domain "<<i
-			     << " form border " << NbSubDomains - i  << "/" << NbSubDomains
-			     << ": Bad sens  " << Gh.Number(eg) <<" "<< sens <<  endl;  
+			     << " boundary border " << NbSubDomains - i  << "/" << NbSubDomains
+			     << ": wrong direction  " << Gh.Number(eg) <<" "<< sens <<  endl;
 			err++;
 			break;}
 		    Int4 it = Number(t);
@@ -2968,7 +2968,7 @@ void Triangles::FindSubDomain(int OutSide=0)
 			tt=tt->link;
 		    } while (tt!=t);
 		    if(verbosity>7)
-			cout << "     Nb de triangles dans le sous domaine " << i << " de ref " << subdomains[i].ref << " = " << kkk << endl;
+			cout << "     Nb of triangles in each sub  domain " << i << " of ref " << subdomains[i].ref << " = " << kkk << endl;
 		    break;}
 		ta = Previous(Adj(ta));         
 		if(t == (Triangle *) ta) {
