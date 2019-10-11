@@ -2646,7 +2646,7 @@ void Triangles::ForceBoundary()
     if (!triangles[t].det)
       k++,cerr << " det T " << t << " = " << 0 << endl;
   if (k!=0) {
-    cerr << " There are " << k << " triangles of mesh = 0 " << endl;
+    cerr << " There are " << k << " triangles of measure = 0 " << endl;
     MeshError(11,this);}
   
   TriangleAdjacent ta(0,0);
@@ -4296,12 +4296,12 @@ void Triangles::FillHoleInMesh()
       if(k != 0) {
 	if (verbosity>20)
 	  {
-	    cout << " The given edge are " << endl;
+	    cout << " The given edges are " << endl;
 	      for (int i=0;i< nbe;i++)
 		cout <<  " Edge " << i << " : " <<  Number(edges[i][0]) << " " <<  Number(edges[i][1]) 
 		     << " " << edges[i].ref << endl; 
 	  }
-	cerr << k << " Boundary edges are not defined as edges " << endl;
+	cerr << k << " boundary edges are not defined as edges " << endl;
 	MeshError(9998,this);
       }
       // generation of the mesh with boundary points   
