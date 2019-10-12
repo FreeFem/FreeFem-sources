@@ -110,7 +110,7 @@ const Direction NoDirOfSearch = Direction();
 inline void MyAssert(int i,char*ex,char * file,long line) 
 {
   if( i) {
-    cerr << "Error Assert:" << ex << " in " << file << " line: " << line << endl;
+    cerr << "Error Assert: " << ex << " in " << file << " line: " << line << endl;
 #ifdef  NOTFREEFEM
     exit(1); 
 #else
@@ -140,7 +140,7 @@ Int4 AGoodNumberPrimeWith(Int4 n)
 
 class Triangles;
 void MeshError(int Err,const Triangles *Th){
- cerr << " Fatal error in the meshgenerator " << Err << endl ;
+ cerr << " Fatal error in the mesh generator " << Err << endl ;
 #ifdef  NOTFREEFEM
     exit(1); 
 #else
@@ -175,7 +175,7 @@ void  swap(Triangle *t1,Int1 a1,
                  Vertex *s1,Vertex *s2,Icoor2 det1,Icoor2 det2)
 { // swap 
   // --------------------------------------------------------------
-  // Int1 a2=aa[a];// les 2 numero de l arete dans les 2 triangles
+  // Int1 a2=aa[a];// les 2 numeros de l'arete dans les 2 triangles
   //                               
   //               sb                     sb    
   //             / | \                   /   \                      !
@@ -256,7 +256,7 @@ Int4 FindTriangle(Triangles &Th, Real8 x, Real8 y, double* a,int & inside)
    Triangle & tb = *Th.FindTriangleContening(I,dete);
    
    if  (tb.link) 
-     { // internal point in a true triangles
+     { // internal point in a true triangle
        a[0]= (Real8) dete[0]/ tb.det;
        a[1]= (Real8) dete[1] / tb.det;
        a[2] = (Real8) dete[2] / tb.det;
@@ -612,7 +612,7 @@ void ListofIntersectionTriangles::SplitEdge(const Triangles & Bh,
       if (t == tbegin) { // 
 	double ba,bb;
 	if (verbosity>7) 
-	  cout << "       SplitEdge: All the edge " << A << B << nbegin <<  det(vi,vj,b) 
+	  cout << " SplitEdge: All the edges " << A << B << nbegin <<  det(vi,vj,b) 
 	       << " deti= " << deti <<  " detj=" <<detj << endl;
 	TriangleAdjacent edge=CloseBoundaryEdge(a,t,ba,bb);
 	Vertex & v0 = *edge.EdgeVertex(0), & v1 = *edge.EdgeVertex(1);
@@ -647,7 +647,7 @@ void ListofIntersectionTriangles::SplitEdge(const Triangles & Bh,
     // we revert vi,vj because vi,vj is def in Adj triangle
     if ( det(vi,vj,b)>=0) {
       if (verbosity>7)
-      cout << "       SplitEdge: all AB outside " << A << B << endl;
+      cout << " SplitEdge: all AB outside " << A << B << endl;
       t=tbegin;
       Real8 ba,bb;
       TriangleAdjacent edge=CloseBoundaryEdge(b,t,ba,bb);
@@ -1068,7 +1068,7 @@ int SwapForForcingEdge(Vertex   *  & pva ,Vertex  * &   pvb ,
     if(!ToSwap) tt1 =  Next(tt2);
     }
   else { // changement de sens 
-     if (ForDebugging)  cout << "changement de sens" << endl;
+     if (ForDebugging)  cout << " Direction change " << endl;
     ret = -1;
     Exchange(pva,pvb);
     Exchange(detsa,detsb);
@@ -1160,11 +1160,11 @@ int ForceEdge(Vertex &a, Vertex & b,TriangleAdjacent & taret)
 #endif 
       while ((ks=SwapForForcingEdge(  va,  vb, tc, detss, det1,det2,NbSwap)))
 	if(l++ > 10000000) {
-	  cerr << " Loop in forcing Egde AB" 
+	  cerr << " Loop in forcing Egde AB " 
                <<"\n vertex A " << a 
                <<"\n vertex B " <<  b 
                <<"\n nb de swap " << NbSwap 
-               <<"\n nb of try  swap too big = " <<  l << " gearter than " <<  1000000 << endl;
+               <<"\n nb of try swap too big = " <<  l << " greater than " <<  1000000 << endl;
    
          if ( CurrentTh ) 
             cerr << " vertex number " << CurrentTh->Number(a) << " " <<  CurrentTh->Number(b) << endl;
@@ -1272,7 +1272,7 @@ int Triangle::swap(Int2 a,int koption){
      OnSwap = (Abs(det1) + Abs(det2)) < detA;// convexe
 
      Icoor2 detMinNew=Min(det1,det2);
-       if(verbosity>99999) cout << "Triangle::swap int "<< OnSwap << " " <<  det1 << " " << det2 << " "<< detMinNew << endl;
+       if(verbosity>99999) cout << " Triangle::swap int "<< OnSwap << " " <<  det1 << " " << det2 << " "<< detMinNew << endl;
 
      //     if (detMin<0 && (Abs(det1) + Abs(det2) == detA)) OnSwap=BinaryRand();// just for test
      if (! OnSwap &&(detMinNew>0)) {
@@ -1299,7 +1299,7 @@ int Triangle::swap(Int2 a,int koption){
 	 
 	 // angle b12 > angle ba2 => cotg(angle b12) < cotg(angle ba2)
 	 OnSwap =  ((double) cosb12 * (double)  sinba2) <  ((double) cosba2 * (double) sinb12);
-             if(verbosity>99999) cout << "Triangle::swap "<< OnSwap << " " <<  ((double) cosb12 * (double)  sinba2)
+             if(verbosity>99999) cout << " Triangle::swap "<< OnSwap << " " <<  ((double) cosb12 * (double)  sinba2)
                                                 << " " << ((double) cosba2 * (double) sinb12)
                  << " " << ((double) cosba2 * (double) sinb12)-((double) cosb12 * (double)  sinba2) << endl;
 //  	 if(CurrentTh) 
@@ -1357,7 +1357,7 @@ int Triangle::swap(Int2 a,int koption){
    }
 #ifdef  DEBUG1   
    if (OnSwap &&  ( munswap1  || munswap2)) {
-     cout << " erreur Mark unswap T " << CurrentTh->Number(t1) << " " <<  CurrentTh->Number(t2) << endl
+     cout << " Error Mark unswap T " << CurrentTh->Number(t1) << " " <<  CurrentTh->Number(t2) << endl
 	  << *t1 << endl
           << *t2 << endl;
      return 0;
@@ -1518,7 +1518,7 @@ void Triangles::Add( Vertex & s,Triangle * t, Icoor2 * det3)
   
   if ( (( infv <0 ) && (detOld <0)) ||  (( infv >=0  ) && (detOld >0)) ) 
     {
-      cerr << "  infv " << infv << " det = " << detOld << endl;
+      cerr << " infv " << infv << " det = " << detOld << endl;
       cerr << Number(s) << " "<< Number(s0) << " "  
 	   << Number(s1) << " "  << Number(s2) << endl;
       MeshError(3);
@@ -1549,7 +1549,7 @@ void Triangles::Add( Vertex & s,Triangle * t, Icoor2 * det3)
       TriangleAdjacent ta = t->Adj(iedge);
 
 #ifdef DEBUG1      
-      cout << " the point " << Number(s) << " is the edge " <<  izerodet 
+      cout << " The point " << Number(s) << " is the edge " <<  izerodet 
 	   << " of " << Number(t)	   << " det3 = " 
 	   << det3[0] << " " <<  det3[1] << " " <<  det3[2] << " " <<  endl;
       cout  << " ta = "  <<  ta << "ta->det =" << ((Triangle*) ta)->det  
@@ -1566,7 +1566,7 @@ void Triangles::Add( Vertex & s,Triangle * t, Icoor2 * det3)
 	  return;}
       }}
     else {
-      cerr << " bug  " << nbd0 <<endl;
+      cerr << " Bug " << nbd0 <<endl;
       cerr << " Bug double points in " << endl ;
       cerr << " s = " << Number(s) << " " <<  s << endl;
       cerr << " s0 = "<< Number(s0) << " "  << s0 << endl;
@@ -1584,7 +1584,7 @@ void Triangles::Add( Vertex & s,Triangle * t, Icoor2 * det3)
   tt[2]= &triangles[nbt++];
   
   if (nbt>nbtx) {
-    cerr << " No enougth triangles " << endl;
+    cerr << " Too few triangles " << endl;
     MeshError(999,this);
   }
 
@@ -1626,7 +1626,7 @@ void Triangles::Add( Vertex & s,Triangle * t, Icoor2 * det3)
     
     if (!rswap) 
      {
-       cout << " Pb swap the point s is on a edge =>swap " << iedge << " "  << *tt[izerodet] << endl;
+       cout << " Problem swap: the point s is on an edge => swap " << iedge << " "  << *tt[izerodet] << endl;
 #ifdef DRAWING
        if(  CurrentTh &&  withrgraphique) 
         {
@@ -1710,7 +1710,7 @@ Int4  Triangles::SplitInternalEdgeWithBorderVertices()
       // << "   " <<  Number(vi) << " <--> " << Number(vi) <<endl;
       Triangle *tcvi = FindTriangleContening(vi.i,dete);
       if (tcvi && !tcvi->link) {
-	cout << i <<  " PB insert point " << Number(vi) << vi << Number(vi) 
+	cout << i <<  " Problem insert point " << Number(vi) << vi << Number(vi) 
 	     << " tcvi = " << tcvi << " " << tcvi->link << endl;
 	cout << (*tcvi)[1] <<  (*tcvi)[2] << endl;
 	tcvi = FindTriangleContening(vi.i,dete);
@@ -1739,19 +1739,19 @@ Int4  Triangles::SplitInternalEdgeWithBorderVertices()
 	}
       if (verbosity>3) 
 	{
-	  cout << "    Nb Of New Point " << iv ;
-	  cout << " Nb swap = " << NbSwap << " to  split internal edges with border vertices" ;}
+	  cout << " Number of new points " << iv ;
+	  cout << " Number swap = " << NbSwap << " to  split internal edges with border vertices" ;}
       
       nbv = iv;
     }
   if (NbSplitEdge >  nbv-nbvold)
   {
-    cout << " Warning not enough vertices  to split all internal edges "  << endl
-	 << "    we lost " << NbSplitEdge - ( nbv-nbvold) << " Edges Sorry " << endl;
+    cout << " Warning: too few vertices to split all internal edges "  << endl
+	 << " We lost " << NbSplitEdge - ( nbv-nbvold) << " edges. Sorry! " << endl;
       warning = 2;
   }
   if (verbosity>2)
-  cout << "SplitInternalEdgeWithBorderVertices: Number of splited edge " << NbSplitEdge << endl;
+  cout << "SplitInternalEdgeWithBorderVertices: Number of splited edges " << NbSplitEdge << endl;
   return  NbSplitEdge;
 }
 Int4 Triangles::InsertNewPoints(Int4 nbvold,Int4 & NbTSwap)
@@ -1762,7 +1762,7 @@ Int4 Triangles::InsertNewPoints(Int4 nbvold,Int4 & NbTSwap)
 
   const Int4 nbvnew = nbv-nbvold;
   if (verbosity>5) 
-    cout << "    Try to Insert the " <<nbvnew<< " new points " << endl;
+    cout << " Try to insert the " <<nbvnew<< " new points " << endl;
   if( verbosity > 99)
       cout << "       coefIcoor "<< coefIcoor << " pmin:  "<< pmin << endl;
      
@@ -1810,7 +1810,7 @@ Int4 Triangles::InsertNewPoints(Int4 nbvold,Int4 & NbTSwap)
 			Triangle *tcvj = FindTriangleContening(vj.i,dete);
 			if (tcvj && !tcvj->link) 
 			 {
-			  cerr << i <<  " PB insert point " << Number(vj) << vj << Number(vi) 
+			  cerr << i <<  " Problem: insert point " << Number(vj) << vj << Number(vi) 
 			       << " tcvj = " << tcvj << " " << tcvj->link << endl;
 			  cerr << (*tcvj)[1] <<  (*tcvj)[2] << endl;
 			  tcvj = FindTriangleContening(vj.i,dete);
@@ -1839,7 +1839,7 @@ Int4 Triangles::InsertNewPoints(Int4 nbvold,Int4 & NbTSwap)
          }
     } 
   if (verbosity>3) {
-    cout << "    Nb Of New Point " << iv << " Nb Of To close Points " << nbv-iv ;
+    cout << "    Number of new points " << iv << " Number of points which are too close " << nbv-iv ;
     cout << " Nb swap = " << NbSwap << " after " ;}
 
     nbv = iv;
@@ -1869,7 +1869,7 @@ Int4 Triangles::InsertNewPoints(Int4 nbvold,Int4 & NbTSwap)
 	  NbErr++;
 	  cerr << " det triangle i " << i << " = " << triangles[i].det ;
 	  cerr << " det triangle  " << dd ;
-	    cerr << " Les trois sommets " ;
+	    cerr << " The three vertices " ;
 	    cerr << Number(triangles[i][0]) << " "  << Number(triangles[i][1]) << " " 
 		 << Number(triangles[i][2]) << endl;
 	    cerr << "I2     " <<triangles[i][0].r << triangles[i][1].r << triangles[i][2].r << endl;
@@ -1886,7 +1886,7 @@ Int4 Triangles::InsertNewPoints(Int4 nbvold,Int4 & NbTSwap)
     //  for (i=0;i<nbv;i++)
     //  kkk += vertices[i].Optim(0);
     if(verbosity>3)
-    cout << "    Nb of swap louche " << kkk << endl;
+    cout << " Strange number of swaps " << kkk << endl;
     if(kkk) {
   for (i=0;i<nbt;i++)
     if (triangles[i].link) 
@@ -2061,8 +2061,8 @@ void  Triangles::NewPoints(Triangles & Bh,int KeepBackVertex)
   NbTSwap +=  NbSwapf ;
   if (verbosity>3) cout << "   " ;
   if (verbosity>2) 
-     cout << " Nb Of Vertices =" << nbv << " Nb of triangles = " << nbt-NbOutT 
-	  << " NbSwap final = " << NbSwapf << " Nb Total Of Swap = " << NbTSwap << endl;
+     cout << " Number of vertices =" << nbv << " Number of triangles = " << nbt-NbOutT 
+	  << " NbSwap final = " << NbSwapf << " Total number of swaps = " << NbTSwap << endl;
 
 
 }
@@ -2071,7 +2071,7 @@ void  Triangles::NewPointsOld(Triangles & Bh)
 { // Triangles::NewPointsOld
   Real8 seuil= 0.7 ;// for two neart point 
   if (verbosity>1) 
-    cout << " begin :  Triangles::NewPointsOld " << endl;
+    cout << " begin: Triangles::NewPointsOld " << endl;
   Int4 i,k;
   int j;
   Int4 BeginNewPoint[3];
@@ -2153,7 +2153,7 @@ void  Triangles::NewPointsOld(Triangles & Bh)
 #ifdef TRACETRIANGLE
 	  trace = trace || k == TRACETRIANGLE;
 	  if(trace) {
-	    cout << "Test Arete " << i << " AB = " << A << B 
+	    cout << "Test edge " << i << " AB = " << A << B 
 		 << "i "  <<Number(vA)<< "j" <<Number(vB); 
 	    cout << " link" <<(int)t->link << " ta=" << Number( ta) 
 		 << " det " <<ta->det ;
@@ -2300,7 +2300,7 @@ void  Triangles::NewPointsOld(Triangles & Bh)
 		   << " " << cii1 << " sss=" << sss << endl;
 #endif
 	      if (kstack >5) // bug ?
-	    	cout << "NewPoints: bug????? " << kstack << " stack  " << stack[kstack]<< endl;
+	    	cout << "NewPoints: bug????? " << kstack << " stack " << stack[kstack]<< endl;
 	    }
 	    
 	    stack[kstack++] = -1; // to stop
@@ -2409,8 +2409,8 @@ void  Triangles::NewPointsOld(Triangles & Bh)
 
   const Int4 nbvnew = kkk-nbvold;
 
-  cout << "    Remove " << nbv - kkk  << " to close  vertex " ;
-  cout << " and   Insert the " <<nbvnew<< " new points " << endl;  
+  cout << " Remove " << nbv - kkk  << " to close vertices " ;
+  cout << " and insert " <<nbvnew<< " new points " << endl;  
   nbv = kkk;
   Int4 NbSwap=0;
   Icoor2 dete[3];
@@ -2479,13 +2479,13 @@ void  Triangles::NewPointsOld(Triangles & Bh)
       if(nberr++<10) cerr << "Bug Triangle nul" << it << triangles[it] << endl;
   if(nberr) MeshError(992,this);
 #endif
-  cout << " end :  Triangles::NewPoints old  nbv=" << nbv << endl;
+  cout << " end: Triangles::NewPoints old nbv=" << nbv << endl;
 
 }
 
 void Triangles::Insert() 
 {
-  if (verbosity>2) cout << "  -- Insert initial " << nbv << " vertices " << endl ;
+  if (verbosity>2) cout << " -- Insert initial " << nbv << " vertices " << endl ;
 
   Triangles * OldCurrentTh =CurrentTh;
 
@@ -2581,7 +2581,7 @@ void Triangles::Insert()
   }// fin de boucle en icount
   time2=CPUtime();
   if (verbosity>3) 
-    cout << "    NbSwap of insertion " <<    NbSwap 
+    cout << " NbSwap of insertion " <<    NbSwap 
 	 << " NbSwap/Nbv " <<  (float) NbSwap / (float) nbv 
 	 << " NbUnSwap " << NbUnSwap << " Nb UnSwap/Nbv "
 	 << (float)NbUnSwap /(float) nbv 
@@ -2639,14 +2639,14 @@ void Triangles::Insert()
 void Triangles::ForceBoundary()
 {
   if (verbosity > 2)
-    cout << "  -- ForceBoundary  nb of edge " << nbe << endl;
+    cout << "  -- ForceBoundary: number of edges " << nbe << endl;
   int k=0;
   Int4  nbfe=0,nbswp=0,Nbswap=0;
   for (Int4 t = 0; t < nbt; t++)  
     if (!triangles[t].det)
-      k++,cerr << " det T" << t << " = " << 0 << endl;
+      k++,cerr << " det T " << t << " = " << 0 << endl;
   if (k!=0) {
-    cerr << " ther is  " << k << "  triangles of mes = 0 " << endl;
+    cerr << " There are " << k << " triangles of measure = 0 " << endl;
     MeshError(11,this);}
   
   TriangleAdjacent ta(0,0);
@@ -2659,12 +2659,12 @@ void Triangles::ForceBoundary()
       if (nbswp) nbfe++;
       if ( nbswp < 0 && k < 5)
       {
-         cerr << " Missing  Edge " << i << " v0 =  " << Number(edges[i][0]) << edges[i][0].r
-      	   <<" v1= " << Number(edges[i][1]) << edges[i][1].r << " " << edges[i].on->Cracked() << "  " << (Triangle *) ta ;
+         cerr << " Missing edge " << i << " v0 =  " << Number(edges[i][0]) << edges[i][0].r
+      	   <<" v1= " << Number(edges[i][1]) << edges[i][1].r << " " << edges[i].on->Cracked() << " " << (Triangle *) ta ;
 	  if(ta.t)
 	  {
 	      Vertex *aa = ta.EdgeVertex(0), *bb = ta.EdgeVertex(1);  
-	      cerr << " crossing with  [" << Number(aa) << ", " << Number(bb) << "]\n";
+	      cerr << " crossing with [" << Number(aa) << ", " << Number(bb) << "]\n";
 	  }
 	  else cerr << endl;
 	   
@@ -2675,14 +2675,14 @@ void Triangles::ForceBoundary()
 		  
   
   if (k!=0) {
-    cerr << " they is " << k << " lost edges " << endl;
-    cerr << " The boundary is crossing may be!" << endl;
+    cerr << " There are " << k << " lost edges " << endl;
+    cerr << " The boundary is crossing maybe! " << endl;
     MeshError(10,this);
   }
   for (Int4 j=0;j<nbv;j++)
     Nbswap +=  vertices[j].Optim(1,0);
   if (verbosity > 3)
-    cout << "     Nb of inforced edge = " << nbfe << " Nb of Swap " << Nbswap << endl;
+    cout << " Number of inforced edges = " << nbfe << " Nb of Swap " << Nbswap << endl;
 
 }
 
@@ -2693,9 +2693,9 @@ void Triangles::FindSubDomain(int OutSide=0)
     if (verbosity >2)
     {
 	if (OutSide)
-	    cout << "  -- Find all external sub-domain ";	
+	    cout << " -- Find all external sub-domains ";	
 	else
-	    cout << "  -- Find all internal sub-domain ";
+	    cout << " -- Find all internal sub-domains ";
       if(verbosity>99)
 	{
 	  
@@ -2779,8 +2779,8 @@ void Triangles::FindSubDomain(int OutSide=0)
 	it++;} // end while (it<nbt)
     if (nbt == NbOutT ||  !NbSubDomTot) 
     {
-	cout << "\n error : " <<  NbOutT << " " << NbSubDomTot <<" " << nbt << endl;
-	cerr << "Error: The boundary is not close => All triangles are outside " << endl;
+	cout << "\n Error: " <<  NbOutT << " " << NbSubDomTot <<" " << nbt << endl;
+	cerr << "Error: The boundary is not closed => All triangles are outside " << endl;
 	MeshError(888,this);
     }
     
@@ -2877,7 +2877,7 @@ void Triangles::FindSubDomain(int OutSide=0)
 		    }
 		    
 		    if(verbosity>4)
-			cout << " Number of remove sub domain (OutSideMesh) =" << NbSubDomains-j << endl;
+			cout << " Number of removed subdomains (OutSideMesh) = " << NbSubDomains-j << endl;
 	    NbSubDomains=j;
 	}
 	
@@ -2892,7 +2892,7 @@ void Triangles::FindSubDomain(int OutSide=0)
 	    subdomains = new SubDomain[ Gh.NbSubDomains];
 	NbSubDomains =Gh.NbSubDomains;
 	if(verbosity>4)
-	    cout << "     find the " << NbSubDomains << " sub domain " << endl;
+	    cout << " Find the " << NbSubDomains << " subdomain " << endl;
 	Int4 err=0;
 	ReMakeTriangleContainingTheVertex();
 	Int4 * mark = new Int4[nbt];
@@ -2939,18 +2939,18 @@ void Triangles::FindSubDomain(int OutSide=0)
 		    if(t<triangles || t >= triangles+nbt || t->det < 0 
 		        || t->link == 0) // Ajoute aout 200 
 		     {
-			cerr << " Error in the def of sub domain "<<i
+			cerr << " Error in the definition of subdomain "<<i
 			     << " boundary border " << NbSubDomains - i  << "/" << NbSubDomains
-			     << ": wrong direction  " << Gh.Number(eg) <<" "<< sens <<  endl;
+			     << ": wrong direction " << Gh.Number(eg) <<" "<< sens <<  endl;
 			err++;
 			break;}
 		    Int4 it = Number(t);
 		    if (mark[it] >=0) {
                         
 			if(verbosity>10)
-			    cerr << "     Warning: the sub domain " << i << " ref = " << subdomains[i].ref 
+			    cerr << " Warning: the subdomain " << i << " ref = " << subdomains[i].ref 
 				<< " is previouly defined with "  <<mark[it] << " ref = " << subdomains[mark[it]].ref
-				<< " skip this def " << endl;
+				<< " skip this definition " << endl;
 			break;}
 		    if(i != inew) 
 			Exchange(subdomains[i],subdomains[inew]);
@@ -2968,13 +2968,13 @@ void Triangles::FindSubDomain(int OutSide=0)
 			tt=tt->link;
 		    } while (tt!=t);
 		    if(verbosity>7)
-			cout << "     Nb of triangles in each sub  domain " << i << " of ref " << subdomains[i].ref << " = " << kkk << endl;
+			cout << " Number of triangles in each subdomain " << i << " of ref " << subdomains[i].ref << " = " << kkk << endl;
 		    break;}
 		ta = Previous(Adj(ta));         
 		if(t == (Triangle *) ta) {
 		    err++;
-		    cerr << " Error in the def of sub domain " << i 
-			<< " edge=" << Gh.Number(eg) << " " << sens << endl;
+		    cerr << " Error in the definition of subdomain " << i 
+			<< " edge = " << Gh.Number(eg) << " " << sens << endl;
 		    break;}
 		//         cout << " NB of remove subdomain " << NbSubDomTot-NbSubDomains<< endl;
 		
@@ -2985,7 +2985,7 @@ void Triangles::FindSubDomain(int OutSide=0)
 	
 	if (inew < NbSubDomains) {
 	    if (verbosity>5) 
-		cout << "     Warning: We remove " << NbSubDomains-inew << " SubDomains " << endl;
+		cout << " Warning: we remove " << NbSubDomains-inew << " subdomains " << endl;
 	    NbSubDomains=inew;}
 	
 	
@@ -3006,7 +3006,7 @@ void Triangles::FindSubDomain(int OutSide=0)
     if (verbosity> 4)
 	cout << "    " ;
     if (verbosity> 2)
-	cout << " Nb of Sub borned Domain  = " <<  NbSubDomTot << " NbOutTriangles = " << NbOutT <<endl;
+	cout << " Number of bounded subdomains = " <<  NbSubDomTot << " NbOutTriangles = " << NbOutT <<endl;
 #ifdef DRAWING1
     inquire();
 #endif
@@ -3103,7 +3103,7 @@ void Triangles::ReNumberingTheTriangleBySubDomain(bool justcompress)
      while (t0 != (t=t->link));
    }
   if (verbosity>9)
-    cout << " number of inside triangles " << k << " nbt = " << nbt << endl;
+    cout << " Number of inside triangles " << k << " nbt = " << nbt << endl;
   // take is same numbering if possible    
   if(justcompress)
       for ( k=0,it=0;it<nbt;it++) 
@@ -3170,7 +3170,7 @@ Int4  Triangles::ConsRefTriangle(Int4 *reft) const
    }
   //  NbOutT = nbt - k;
   if (verbosity>5) 
-    cout << " Nb of Sub Domain =" << NbSubDomains  << " Nb of In Triangles " << k 
+    cout << " Number of subdomain =" << NbSubDomains  << " Number of inner triangles " << k 
 	 << " Nbt = " << nbt << " Out Triangles = " << nbt - k <<  endl;
    
   return k;   
@@ -3314,7 +3314,7 @@ void Triangles::PreInit(Int4 inbvx,char *fname)
 //  Meshbegin = vertices;
 //  Meshend  = vertices + nbvx;
   if (verbosity>98) 
-    cout << "Triangles::PreInit() " << nbvx << " " << nbtx 
+    cout << " Triangles::PreInit() " << nbvx << " " << nbtx 
 	 << " " << vertices 
 	 << " " << ordre << " " <<  triangles <<endl;
 
@@ -3382,7 +3382,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
   //
   if( NbVerticesOnGeomVertex >= nbvx) 
     {
-      cerr << " Too much vertices on geometry " << NbVerticesOnGeomVertex << " >= " << nbvx << endl; 
+      cerr << " Too many vertices on geometry " << NbVerticesOnGeomVertex << " >= " << nbvx << endl; 
       MeshError(1,this);
     }
   assert(vertices);
@@ -3575,14 +3575,14 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 			  if(verbosity>99)
 				cout << i << "+ New P "<< nbv-1 << " "  <<sNew<< " L0=" << L0 
 				<< " AB=" << LAB << " s=" << (sNew-L0)/LAB << " se= "  
-				<< se <<" B edge " << BTh.Number(ee) << " signe = " << k1 <<" " << A1->r <<endl;
+				<< se <<" B edge " << BTh.Number(ee) << " sign = " << k1 <<" " << A1->r <<endl;
 			    
 #ifdef DEBUG
 			  // code \label(xxx)
 			    R2  A1A0 = A1->r - A0->r;
 			    Real8 dp = LengthInterpole(A0->m,A1->m,A1A0);
 			    if (dp > 1.4) {
-			      cerr << " PB new Points "<< nbv-1 ;
+			      cerr << " Problem with new points "<< nbv-1 ;
 			      cerr << " AB=" << LAB << " s=" << (sNew-L0)/LAB << " se= "  ;
 			      cerr << se <<" B edge " << BTh.Number(ee) << " signe = " << k1 <<endl;	      
 			      cerr << " PB calcul new on cuver points trop loin l=" << dp 
@@ -3619,7 +3619,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 			assert (A1-vertices>=0 && A1-vertices <nbv);
 			break;}
 		      if (!ee.adj[k1])
-			{cerr << "Error adj edge " << BTh.Number(ee) << ", nbe = "  << nbe 
+			{cerr << "Error adjacent edges " << BTh.Number(ee) << ", nbe = "  << nbe 
 			      << " Gh.vertices " << Gh.vertices 
 			      << " k1 = " << k1 << " on=" << *ee[k1].on << endl;
 			cerr << ee[k1].on->gv-Gh.vertices << endl;
@@ -3691,7 +3691,7 @@ void Triangles::GeomToTriangles1(Int4 inbvx,int KeepBackVertices)
 	//if(!NbOfNewPoints) break;// nothing ????? bug 
 	if(nbv+NbOfNewPoints > nbvx) 
 	  {
-	    cerr << " Too much vertices on geometry " << nbv+NbOfNewPoints  << " >= " << nbvx << endl;
+	    cerr << " Too many vertices on geometry " << nbv+NbOfNewPoints  << " >= " << nbvx << endl;
 	    MeshError(3,this);
 	  }
 	//cout << " NbOfNewEdge" << NbOfNewEdge << " NbOfNewPoints " << NbOfNewPoints << endl;
@@ -3766,7 +3766,7 @@ void Triangles::GeomToTriangles0(Int4 inbvx)
 //
   if( NbVerticesOnGeomVertex >= nbvx) 
     {
-      cerr << " Too much vertices on geometry " << NbVerticesOnGeomVertex << " >= " << nbvx << endl;
+      cerr << " Too many vertices on geometry " << NbVerticesOnGeomVertex << " >= " << nbvx << endl;
       MeshError(1,this);
     }
   for (i=0;i<Gh.nbv;i++)
@@ -4088,7 +4088,7 @@ Edge** Triangles::MakeGeometricalEdgeToEdge()
        if (!e[i]) 
 	 if(kk++<10) {
 	   cerr << " Bug -- the geometrical edge " << i << " is on no edge curve = " << Gh.edges[i].CurveNumber 
-		<< " s0 " << Gh.Number( Gh.edges[i][0]) << " s1  " << Gh.Number( Gh.edges[i][1]) << endl; 
+		<< " s0 " << Gh.Number( Gh.edges[i][0]) << " s1 " << Gh.Number( Gh.edges[i][1]) << endl; 
 	 //	 assert( e[i]);
        }
   if(kk) MeshError(997,this);
@@ -4177,12 +4177,12 @@ void Triangles::SetIntCoor(const char * strfrom)
 	  {
 	    if(Nberr==1)
             { if (strfrom)
-		cerr << "+++ Fatal Error " << strfrom << "(SetInCoor)  Error :  area of Triangle < 0 " << endl; 
+		cerr << "+++ Fatal Error " << strfrom << "(SetInCoor) Error: area of triangle < 0 " << endl; 
 	      else 
-                  cerr << "+++  Fatal Error Triangle (in SetInCoor) area of Triangle < 0" << endl;}
+                  cerr << "+++ Fatal Error Triangle (in SetInCoor) area of triangle < 0" << endl;}
 	    cerr << " Triangle " << i << "  det  (I2) = " << triangles[i].det ;
 	    cerr << " (R2) " << Det(pv1->r-pv0->r,pv2->r-pv0->r);
-	    cerr << "; The 3  vertices " << endl;
+	    cerr << "; The three vertices " << endl;
 	    cerr << Number(pv0) << " "  << Number(pv1) << " "
 		 << Number(pv2) << " : " ;
 	    cerr << pv0->r << pv1->r << pv2->r << " ; ";
@@ -4208,7 +4208,7 @@ void Triangles::FillHoleInMesh()
     // recherche des extrema des vertices pmin,pmax
     Int4 i;
     if(verbosity>2)
-      cout << "  -- FillHoleInMesh: Nb of vertices =" << nbv 
+      cout << " -- FillHoleInMesh: Number of vertices =" << nbv 
 	   << " Pmin = "<< pmin << " Pmax = "<< pmax << endl;
     
     assert(ordre);
@@ -4228,7 +4228,7 @@ void Triangles::FillHoleInMesh()
       kk += (i == edge4->addtrie(Number(edges[i][0]),Number(edges[i][1])));
     if (kk != nbe)
       { 
-	cerr << " Some Double edge in the mesh, the number is " << kk-nbe << endl;
+	cerr << " Double edge in the mesh: the number is " << kk-nbe << endl;
 	MeshError(1002,this);
       }
     for (i=0;i<nbt;i++)
@@ -4296,12 +4296,12 @@ void Triangles::FillHoleInMesh()
       if(k != 0) {
 	if (verbosity>20)
 	  {
-	    cout << " The given edge are " << endl;
+	    cout << " The given edges are " << endl;
 	      for (int i=0;i< nbe;i++)
 		cout <<  " Edge " << i << " : " <<  Number(edges[i][0]) << " " <<  Number(edges[i][1]) 
 		     << " " << edges[i].ref << endl; 
 	  }
-	cerr << k << " boundary edges  are not defined as edges " << endl;
+	cerr << k << " boundary edges are not defined as edges " << endl;
 	MeshError(9998,this);
       }
       // generation of the mesh with boundary points   
@@ -4331,7 +4331,7 @@ void Triangles::FillHoleInMesh()
       
 	for (i=2 ; det( ordre[0]->i, ordre[1]->i, ordre[i]->i ) == 0;) 
 	  if  ( ++i >= nbvb) {
-	    cerr << "FillHoleInMesh: All the vertices are aline " << nbvb << endl;
+	    cerr << "FillHoleInMesh: All the vertices are aligned " << nbvb << endl;
 	    MeshError(998,this); }
 	Exchange( ordre[2], ordre[i]);
 
@@ -4414,7 +4414,7 @@ void Triangles::FillHoleInMesh()
 	   }
 	 if(nbloss)
 	   {
-	     cerr << " we loss some  " << nbloss << " "  << " edges other " << knbe << endl;
+	     cerr << " We lost " << nbloss << " "  << " other edges " << knbe << endl;
 	     MeshError(1100,this);
 	   }
 	 FindSubDomain(1);
@@ -4503,7 +4503,7 @@ void Triangles::FillHoleInMesh()
 	     k++;
 	     */
 	 if (k) {
-	   cerr << "Error Nb of triangles edge alone = " << k << endl;
+	   cerr << "Error: Number of single triangle edges = " << k << endl;
 	   MeshError(9997,this);
 	 }
 	 FindSubDomain();
@@ -4825,7 +4825,7 @@ void  Triangles::ShowRegulaty() const// Add FH avril 2007
     gammamx=sqrt(gammamx);    
     cout << "  -- adaptmesh Regulary:  Nb triangles " << nt <<  " , h  min " << hmin  << " , h max " << hmax << endl;  
     cout << "     area =  " << area << " , M area = " << Marea << " , M area/( |Khat| nt) " << Marea/(aireKh*nt) << endl; 
-    cout << "     infiny-regulaty:  min " << gammamn << "  max " << gammamx << endl;  
+    cout << "     infiny-regularity:  min " << gammamn << "  max " << gammamx << endl;  
     cout << "     anisomax  "<< sqrt(alpha2) << ", beta max = " << 1./sqrt(beta/aireKh) 
 	 << " min  "<<  1./sqrt(beta0/aireKh)  << endl;
 }
@@ -4867,7 +4867,7 @@ void  Triangles::ShowHistogram() const
 		}
 	    }
 	}  
-	    cout << "  -- Histogram of the unit mesh,  nb of edges" << nbedges << endl <<endl;
+	    cout << "  -- Histogram of the unit mesh, number of edges" << nbedges << endl <<endl;
  
     cout << "        length of edge in   | % of edge  | Nb of edges " << endl;
     cout << "        ------------------- | ---------- | ----------- " << endl;
@@ -4919,7 +4919,7 @@ int Triangles::CrackMesh()
     if(edges[i].on->Cracked()) k++;
   if( k==0) return 0;
     CurrentTh = this;
-  cout << " Nb of Cracked Edges = " << k << endl;
+  cout << " Number of Cracked Edges = " << k << endl;
   NbCrackedEdges =k;
   CrackedEdges = new  CrackedEdge[k];
   //  new edge
@@ -5001,7 +5001,7 @@ int Triangles::CrackMesh()
   nbv = vlast - vertices;
   int nbnewv =  nbv - nbv; // nb of new vrtices 
   if (nbcrakev && verbosity > 1 )
-    cout << " Nb of craked vertices = " << nbcrakev << " Nb of created vertices " <<   nbnewv<< endl;
+    cout << " Number of craked vertices = " << nbcrakev << " Number of created vertices " <<   nbnewv<< endl;
   // all the new vertices are on geometry 
   //  BOFBO--  A VOIR
   if (nbnewv)
@@ -5044,7 +5044,7 @@ int Triangles::CrackMesh()
  
   if (vlast >= vend)
     {  
-      cerr << " Not enougth vertices to crack the mesh we need " << nbv << " vertices " << endl;
+      cerr << " Too few vertices. In order to crack the mesh, we need " << nbv << " vertices " << endl;
       MeshError(555,this);
     }
   cout << "  NbCrackedVertices " <<  NbCrackedVertices << endl;
@@ -5101,9 +5101,9 @@ Triangles::Triangles(const Triangles & Tho,const int *flag ,const int *bb)
   for (i=0;i<Tho.nbv;i++)
     if (kk[i]>=0) 
       kk[i]=k++;
-  cout << " number of vertices " << k << " remove = " << Tho.nbv - k << endl;
-  cout << " number of triangles " << kt << " remove = " << nbInT-kt << endl;
-  cout << " number of New boundary edge " << nbNewBedge << endl;
+  cout << " Number of vertices " << k << " remove = " << Tho.nbv - k << endl;
+  cout << " Number of triangles " << kt << " remove = " << nbInT-kt << endl;
+  cout << " Number of new boundary edges " << nbNewBedge << endl;
   Int4 inbvx =k;
   PreInit(inbvx,cname);
   for (i=0;i<Tho.nbv;i++)
@@ -5132,7 +5132,7 @@ Triangles::Triangles(const Triangles & Tho,const int *flag ,const int *bb)
       }
   assert(kt==nbt);
   if (nbt ==0 && nbv ==0) {
-    cout << "Error all triangles was remove " << endl;
+    cout << "Error: all triangles were removed " << endl;
     MeshError(999,this);
   }
   delete [] kk;
@@ -5167,9 +5167,9 @@ Triangle * Triangles::FindTriangleContening(const I2 & B,Icoor2 dete[3], Triangl
   
   if (! a || !a->t ) {
     if (a) 
-      {cerr << " Attention PB TriangleConteningTheVertex  vertex number=" << Number(a) << endl;
-       cerr  << "We forget a call to ReMakeTriangleContainingTheVertex" << endl;}
-    cerr << " Pb with " << B << toR2(B) << endl;
+      {cerr << " Warning: problem TriangleConteningTheVertex vertex number=" << Number(a) << endl;
+       cerr  << " We forgot a call to ReMakeTriangleContainingTheVertex" << endl;}
+    cerr << " Problem with " << B << toR2(B) << endl;
     MeshError(7777);
   }
   assert(a>= vertices && a < vertices+nbv);
