@@ -162,6 +162,7 @@ typedef GenericVertex<R3> Vertex3;
         Serialize serialize_withBorderMesh() const;
         
         ~MeshS() {
+            if (verbosity>4) cout << "destroy meshS" << this << " " << this->mapSurf2Vol << " " << this->mapVol2Surf << endl;
             delete [] mapSurf2Vol ;
             delete [] mapVol2Surf ;
             

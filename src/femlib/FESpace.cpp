@@ -40,6 +40,8 @@ using namespace std;
 #include "FESpacen.hpp"
 #include "FESpace.hpp"
 extern long verbosity ;
+extern bool lockOrientation;
+
 namespace  Fem2D {
 
  int  Make(const TypeOfFE ** t,int k,KN<R2> & P,KN<int> & I)
