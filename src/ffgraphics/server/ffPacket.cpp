@@ -485,11 +485,19 @@ void ffPacket::Jsonify<Fem2D::MeshS>(const Fem2D::MeshS& data)
 template<>
 void ffPacket::Jsonify<ffFE<Fem2D::R2, Fem2D::R>>(const ffFE<Fem2D::R2, Fem2D::R>& data)
 {
-    m_JSON["FE2D"]["Types"] = { "R2", "R" };
+    m_JSON["Geometry"] += json::object();
+    auto Obj_JSON = --(m_JSON["Geometry"].end());
+
+    (*Obj_JSON)["Type"] = "Mesh2D";
+    (*Obj_JSON)["GeometryType"] = "Surface";
+    (*Obj_JSON)["Primitive"] = "Line";
+    (*Obj_JSON)["Vertices"] = json::array();
+    (*Obj_JSON)["Indices"] = json::array();
+    (*Obj_JSON)["Labels"] = json::array();
 
     for (int i = 0; i < data.Psub.N(); i += 1) {
-        m_JSON["FE2D"]["Psub"] += data.Psub[i].x;
-        m_JSON["FE2D"]["Psub"] += data.Psub[i].y;
+        (*Obj_JSON)["Vertices"] += data.Psub[i].x;
+        (*Obj_JSON)["Vertices"] += data.Psub[i].y;
     }
     for (int i = 0; i < data.Ksub.N(); i += 1) {
         m_JSON["FE2D"]["Ksub"] += data.Ksub[i];
