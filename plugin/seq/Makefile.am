@@ -72,7 +72,7 @@ load_compile: ff-c++ WHERE_LIBRARY-download include.done
 	@echo " Warning missing plugin:" `for i in $(LIST_COMPILE) $(LIST_COMPILE_PKG); do if test ! -s $i ; then j=1; echo "$i," ;fi; done`
 	@echo " finish build list $(DYLIB_SUFFIX)"
 
-.cpp.$(DYLIB_SUFFIX): ff-c++
+.cpp.$(DYLIB_SUFFIX): ff-c++ Makefile
 	 ./ff-c++ -auto $<
 
 #to force the recompile if change ... FH
