@@ -29,8 +29,8 @@ All notable changes to this project will be documented in this file.
 ###Deprecated
 ## [4.4-2]
 ### Added
-- add matrix and array (FH)
-   
+- add matrix and array tools (FH)
+   ```
     matrix A=eye(10);
 	real[int,int] af = eye(10,10);
     real[int,int] a(10,10);
@@ -41,6 +41,7 @@ All notable changes to this project will be documented in this file.
     real[int] aa= a.asarray; //  view full the matrice  as an array (no copy)
 	a(2:5,3:7).diag= 200;
 	a.diag += 100;
+	```
 - adding of a global variable `lockOrientation` to allows the building of mesh without checking the orientation elements (AF)
 - add plugin tool to build matrix edge/P1 with sign `mat_edgeP1`	(FH)
 - new examples `diffusion-2d-mg.edp` and `helmholtz-2d-mg.edp` showing how to use user-defined coarse corrections
