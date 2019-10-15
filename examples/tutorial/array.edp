@@ -422,7 +422,7 @@ cout << vh.n <<endl;
 
 }
 {//    version 4.4-1 
-	nt n=10; 
+	int n=10; 
 	real[int,int] a(10,10);
 	int[int] I=[1,3,6];
 	for [i,j,aij:a] aij = i + 10 *j; 
