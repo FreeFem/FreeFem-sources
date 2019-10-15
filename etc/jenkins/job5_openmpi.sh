@@ -21,7 +21,7 @@ test -f "$change_compiler" && source "$change_compiler"
 # configuration & build
 autoreconf -i \
   && ./configure  --enable-download --enable-debug --prefix=/builds/workspace/freefem \
-  && ./3rdparty/getall -a \
+  && ./3rdparty/getall -o PETSc -a \
   && ./etc/jenkins/blob/build_PETSc.sh \
   && ./etc/jenkins/blob/build.sh
 

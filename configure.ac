@@ -1003,7 +1003,6 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
                     AC_FF_ADDWHERELIB(scotch,$ff_SCOTCH_LIB,$ff_SCOTCH_INCLUDE)
                     AC_SUBST([TOOL_COMPILE_scotch],"")
                 fi
-		        AC_FF_PETSC_WHERELIB(fftw3_mpi,FFTW_LIB,FFTW_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetsc)
                 AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetsc)
                 AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetsc)
@@ -1062,7 +1061,6 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
                 AC_FF_ADDWHERELIB(scotch,$ff_SCOTCH_LIB,$ff_SCOTCH_INCLUDE)
                 AC_SUBST([TOOL_COMPILE_scotch],"")
             fi
-            AC_FF_PETSC_WHERELIB(fftw3_mpi,FFTW_LIB,FFTW_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetscc)
@@ -1093,14 +1091,6 @@ fi
 ##  slepc
 
 ### end petsc ....
-dnl FH:   to bad because libmpi  in use un dynamic fftw3 lib.
-dnl FH: so recompile sep 2019 
-dnl if test "$ff_where_lib_conf_fftw3_mpi" = 1  ; then
-dnl   ff_where_fftw3=`echo $ff_where_lib_fftw3_mpi| sed -e 's/-lfftw3_mpi//g'`
-dnl  AC_FF_ADDWHERELIB(fftw3,$ff_where_fftw3,$ff_where_inc_fftw3_mpi)
-dnl   AC_MSG_NOTICE([ fftw3 from  petsc ***** ])
-dnl fi
-
 
 #replacing wget with another command
 ff_wget_command="wget --no-check-certificate"

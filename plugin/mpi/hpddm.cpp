@@ -251,7 +251,7 @@ AnyType attachCoarseOperator<Type, K>::E_attachCoarseOperator::operator()(Stack 
                 *ev = new K[deflation->N * deflation->get(0)->n];
                 for(int i = 0; i < deflation->N; ++i) {
                     ev[i] = *ev + i * deflation->get(0)->n;
-                    std::copy(&(*deflation->get(i))[0], &(*deflation->get(i))[deflation->get(i)->n], ev[i]);
+                    std::copy_n(&(*deflation->get(i))[0], deflation->get(i)->n, ev[i]);
                 }
                 ptA->setVectors(ev);
                 ptA->Type::super::initialize(deflation->N);
