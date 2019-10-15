@@ -421,37 +421,42 @@ cout << vh.n <<endl;
 	
 
 }
-{//    
-	int n=10; 
-	real[int,int] a(n,n);
+{//    version 4.4-1 
+	nt n=10; 
+	real[int,int] a(10,10);
 	int[int] I=[1,3,6];
 	for [i,j,aij:a] aij = i + 10 *j; 
 
 	cout << a << endl; 
 
 	real[int] b(I.n);
-	b= a(1,:)(I);  // ok because a(1,:) is a subarray 
+	b= a(1,:)(I);
 	cout << b << endl; 
 	real[int] c= a(:,1)(I);
 	cout << b << endl; 
 
 	real[int] d = a.diag ; // 
-	real[int] aa= a.asarray; //  view full mat as an array 
-	real[int] d1= a.asarray(1:n*n-1:n+1); // build a other diag = j+1 == i  
+	real[int] aa= a.asarray; //  view full mat as a arry 
+	real[int] d1= a.asarray(1:n*n-1:n+1); // build 
 
 	cout <<  " d =" << d <<endl; 
 	cout <<  " aa =" << aa <<endl; 
 	cout <<  " d1=" << d1  <<endl; // diag shifted to one
 	// change the diag of a
-	a.diag += 100; 
+	//cout << a(2:5,3:7) <<endl; 
+	//cout << " diag " << a(2:5,3:7).diag << endl; // a piece of diag
+	a(2:5,3:7).diag= 200;
+	a.diag += 100;
 
 	cout << a << endl; 
-	// build ey
 
 	assert( a(9,9) == 199 );
-	a =eye(5);// warning resize a 
+	assert( a(5,6) == 200 );
+	a =eye(5);
 	cout << a << endl;
-	real[int,int] id(n); 
-	
-	
+
+	matrix A=eye(10);
+	cout << A << endl; 
+	A=eye(5);
+	cout << A << endl; 	
 }

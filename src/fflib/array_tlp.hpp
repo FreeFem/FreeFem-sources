@@ -1306,13 +1306,22 @@ class E_ForAllLoopMapSI
 
 };
 template <class K>
-KN_<K> getdiag(KNM<K> *pA) {
-    int n = pA->N(), m=pA->M();
+KN_<K> getdiag_(KNM_<K> A) {
+    int n = A.N(), m=A.M();
     int nn= min(n,m);
-    ffassert( pA->IsVector1());
-    KN_<K> d(*pA,SubArray(nn,0,n+1));
+    int si= A.shapei.step;
+    //int ni =A.shapei.next;
+    int sj= A.shapej.step;
+    
+    KN_<K> d(A,SubArray(nn,0,sj+si));
     return d;
 }
+template <class K>
+KN_<K> getdiag(KNM<K> *pA) {
+    ffassert(pA);
+    return getdiag_(*pA);
+}
+
 template <class K>
 KN_<K> asarray(KNM<K> *pA) {
     ffassert( pA->IsVector1());
@@ -1746,6 +1755,7 @@ void ArrayOperator()
  //atype<KN_<K> >()->Add("(","",new OneOperator2_< pair<KN_<K>,KN_<long> > * ,KN_<K>  , KN_<long>  >(pBuild< KN_<K>   , KN_<long>  >,atype<KN_<K>  >(), knlp ));
  //atype<KN<K> *>()->Add("(","",new OneOperator2_< pair<KN_<K>,KN_<long> > * ,KN_<K>  , KN_<long>  >(pBuild< KN_<K>   , KN_<long>  >,atype<KN<K> * >(), knlp ));
  Add<KNM<K> *>("diag",".",new OneOperator1<KN_<K> ,KNM<K> *>(getdiag<K>) );
+  Add<KNM_<K> >("diag",".",new OneOperator1<KN_<K> ,KNM_<K> >(getdiag_<K>) );
  Add<KNM<K> *>("asarray",".",new OneOperator1<KN_<K> ,KNM<K> *>(asarray<K>) );
 
  TheOperators->Add("<-",
