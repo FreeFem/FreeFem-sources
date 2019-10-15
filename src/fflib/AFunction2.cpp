@@ -985,7 +985,7 @@ void lgerror (const char* s)
          const LocalVariable *lv = dynamic_cast<LocalVariable*>((E_F0*) cv);
          if(verbosity>1000)
          cout << " new id " << tt[i] << " "<< (*id)[i].id << " "  << " E="
-             <<  (Expression)  args[i] << " "
+             <<  (Expression)  args[j] << " "
          <<  (Expression)  ci << " " <<args.size()-1  << " ov: " << (lv ? lv->offset: -1) << " " << *cv.left() << endl;
      }
      Expression loop= new PolymorphicLoop(m,args);
