@@ -27,7 +27,7 @@ All notable changes to this project will be documented in this file.
 ###Added
 ###Changed
 ###Deprecated
-## [4.4-2]
+## [4.4-2]  oct 15, 2019
 ### Added
 - add matrix and array tools (FH)
    ```
@@ -66,7 +66,7 @@ All notable changes to this project will be documented in this file.
 - fixe problem in ffglut (AF)
 ### Security
 
-## [4.4]
+## [4.4] 
 ### Added
 - interface to `TSSolve`, DAE/ODE solvers from PETSc
 - interface to `TaoSolve`, Toolkit for Advance Optimization from PETSc
