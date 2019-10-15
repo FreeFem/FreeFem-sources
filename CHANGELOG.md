@@ -24,13 +24,32 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+###Added
+###Changed
+###Deprecated
+## [4.4-2]
 ### Added
+- add matrix and array (FH)
+   
+    matrix A=eye(10);
+	real[int,int] af = eye(10,10);
+    real[int,int] a(10,10);
+    int[int] I=[1,3,6];
+    real[int] d = a.diag ; // get the diag of full matrix (no copy)
+	real[int] dI= d(I); // init a array from renumbering array
+    real[int] c= a(:,1)(I); // init a array from renumbering array
+    real[int] aa= a.asarray; //  view full the matrice  as an array (no copy)
+	a(2:5,3:7).diag= 200;
+	a.diag += 100;
+- adding of a global variable `lockOrientation` to allows the building of mesh without checking the orientation elements (AF)
+- add plugin tool to build matrix edge/P1 with sign `mat_edgeP1`	(FH)
 - new examples `diffusion-2d-mg.edp` and `helmholtz-2d-mg.edp` showing how to use user-defined coarse corrections
 - support for nonzero scalars in PETSc block matrices
 - simpler constructor for sequential HPDDM matrices (no need for the restriction array and the partition of unity)
 - array of `Mat` and `schwarz` types
 
 ### Changed
+- correct mistake in mpirank in case of broadcast with comm (thank tp PHT)
 - in the FreeFEM function movemesh23, correct the argument label -> region to change label
 - new implementation for the moving mesh functions, new arguments: boolean cleanmesh, removemultiple, rebuildborder 
 - new PETSc version 3.12
@@ -43,7 +62,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - spurious output in PARDISO
-
+- fixe problem in ffglut (AF)
 ### Security
 
 ## [4.4]
