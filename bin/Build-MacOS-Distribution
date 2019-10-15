@@ -1,0 +1,119 @@
+#/bin/bash
+
+
+while [ $# -ne 0 ]  ; do
+    argsp=$args
+    args="$args '$1'"
+    case "$1" in
+	-[h?]*) echo usage $0 ""
+	    exit 0;
+	    ;;
+	DIRMPI=*) MPI=`echo $1|sed 's/[A-Z0-9]*=//'` ;; 
+	DESTDIR=*) DESTDIR=`echo $1|sed 's/[A-Z0-9]*=//'` ;; 
+    *);;
+    esac; 
+    shift
+done
+echo "DESTDIR=$DESTDIR ."
+if [ ! -f src/Graphics/sansrgraph.cpp ] ; then
+  echo " Not in FreeFrem++ current dir :$PWD"
+  exit 1;
+fi
+mkdir -p "$DESTDIR"
+DESTDIR=`realpath $DESTDIR`
+dylib_of() {
+( otool -L $* | awk 'NR>2 {print $1}'; for i in $* ; do echo $i; done )|sed  's/:$//'  | sort -u | egrep -v "/usr/lib/|/System/Library/Frameworks/|$DESTDIR"
+}
+if [ ! -d $DESTDIR ]  ; then
+  echo dir $DESTDIR is no created
+  exit 1;
+fi
+MPIRUN=`awk '$1=="MPIRUN" {print $3}'  Makefile`
+MPICC=`awk '$1=="MPIRUN" {print $3}'  Makefile`
+FC=`awk '$1=="FC" {print $3}'  Makefile`
+FF_prefix_petsc=`awk '$1=="FF_prefix_petsc" {print $3}'  Makefile`
+
+# install lib fortran
+# install mpi
+# install petsc 
+# install ggplugin libs
+if [ -n "$DIRMPI" -a -d  "$DIRMPI" ] ; then
+( cd $DIRMPI; make install DESTDIR=$DESTDIR )
+if [ $? -ne 0 ] ; then
+  echo error install MPI 
+  exit 1; 
+fi
+fi
+make 
+make 
+make install DESTDIR="$DESTDIR"
+ffexe=$(find "$DESTDIR" -type f -name FreeFem++|grep -v /etc/paths.d)
+fflibmsh3=$(find "$DESTDIR" -type f  -name msh3.dylib|grep -v '/lib/mpi/'| grep -v  '/etc/paths.d')
+echo ffexe = $ffexe
+export  DYLD_PRINT_LIBRARIES=yes
+listdylib=/tmp/ffdylb.$$.txt
+$ffexe 2>&1| awk '/dyld: loaded:/ {print $3}'  > $listdylib
+grep -q libmkl $listdylib && withMKL=yes 
+mkl_arch=libmkl_mc.dylib libmkl_mc3.dylib libmkl_avx.dylib libmkl_avx2.dylib libmkl_avx512.dylib
+
+echo "ffexe $ffexe"
+echo "ffmsh3 $fflibmsh3"
+test -z "$ffexe" && exit 1
+test -z "$fflibmsh3" && exit 1
+
+dirff=$(dirname "$ffexe");
+dirfflib=$(dirname "$fflibmsh3")
+echo "dirlib=..$dirfflib.."
+test -f $dirff/FreeFem++-mpi && ffmpi=$dirff/FreeFem++-mpi
+test -d "$dirfflib/mpi" && dirfflibmpi="$dirfflib/mpi"
+
+ffmain="$dirff/FreeFem++ $dirff/FreeFem++-nw $dirff/bamg $dirff/cvmsh2 $dirff/ffglut $dirff/ffmedit $ffmpi"
+#echo --
+lib1=$(dylib_of $ffmain)
+lib2=$(dylib_of $dirfflib/*.dylib)
+#echo ..
+test -d $dirfflib/mpi/ && lib3=$(dylib_of $dirfflib/mpi/*.dylib)
+echo $lib1
+echo $lib2
+echo $lib3
+ldy="$lib1 $lib2 $lib3"
+nldy=$(echo $ldy|wc -w)
+#echo ++++ $ldy .. $nldy
+
+mldy=0
+echo ..... $nldy $mldy
+while [ "$nldy" -ne "$mldy" ] ; do 
+ mldy=$nldy;
+ ldy=$(dylib_of $ldy)
+ nldy=$(echo $ldy|wc -w)
+ echo ".. $nldy  .. $ldy"
+done
+
+for i in $ldy ; do
+ case $i in 
+ /usr/local/*) 
+   if [ ! -f $i ] ; then
+     mkdir -p $DESTDIR/$(dirname $i)
+	 cp $i $DESTDIR/$i
+   fi
+   ;;
+  *)
+  j=$(basename $i)
+  if [ ! -f $DESTDIR/usr/local/lib/$j ] ; then
+	  
+	  if [  -f /usr/local/lib/$j ] ; then
+		  mkdir -p $DESTDIR/usr/local/lib
+		  cp /usr/local/lib/$j $DESTDIR/usr/local/lib/$j
+	  else
+        echo missing $DESTDIR/usr/local/lib/$j
+    fi 
+	
+  fi
+  
+  
+  ;;
+esac  
+done
+
+
+
