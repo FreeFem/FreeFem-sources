@@ -120,8 +120,7 @@ struct set_Inv_pKN_longI: public binary_function<A,B,A> {
     return a;
   }
 };
-Eye fEye(long n){ return Eye(n);}
-Eye fEye(long  n,long m){ return Eye(n,m);}
+
 
 
 void initArrayOperatorlong()

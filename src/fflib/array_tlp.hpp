@@ -1318,10 +1318,6 @@ KN_<K> asarray(KNM<K> *pA) {
     ffassert( pA->IsVector1());
     return *pA; }
 // Add Oct 2019
-struct  Eye{ int n, m;
-    Eye(long nn) : n(nn),m(nn) {}
-    Eye(long nn,int mm) : n(nn),m(nn) {}
-};
 template<class K, bool init>
 KNM<K> * set_Eye(KNM<K> *pA,const  Eye eye)
 {

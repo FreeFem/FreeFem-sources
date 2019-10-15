@@ -353,7 +353,13 @@ class ShapeOfArray{ protected:
            return step*k;}
   void init(long nn,long s=1,long nextt=-1) { n=nn; step=s; next=nextt;}
 };
-
+// to set Diag matrix ..
+struct  Eye{ int n, m;
+    Eye(long nn) : n(nn),m(nn) {}
+    Eye(long nn,int mm) : n(nn),m(nn) {}
+};
+inline Eye fEye(long n){ return Eye(n);}
+inline Eye fEye(long  n,long m){ return Eye(n,m);}
 ostream & operator<<(ostream & f,const ShapeOfArray & s);
 
 inline bool  SameShape(const ShapeOfArray & a,const ShapeOfArray & b)
