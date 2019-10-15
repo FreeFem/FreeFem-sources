@@ -48,12 +48,16 @@ All notable changes to this project will be documented in this file.
 - support for nonzero scalars in PETSc block matrices
 - simpler constructor for sequential HPDDM matrices (no need for the restriction array and the partition of unity)
 - array of `Mat` and `schwarz` types
+- add mpi meshS (serialize object)
 
 ### Changed
 - correct mistake in mpirank in case of broadcast with comm (thank tp PHT)
-- in the FreeFEM function movemesh23, correct the argument label -> region to change label
+- update fftw to v3.3.8 and openblas v0.3.6
+- in movemesh23 correct the argument label -> region to change label
 - new implementation for the moving mesh functions, new arguments: boolean cleanmesh, removemultiple, rebuildborder 
 - new PETSc version 3.12
+- templatize movemesh, setMesh functions
+- add conditional tests in make check
 
 ### Deprecated
 -
@@ -63,7 +67,9 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - spurious output in PARDISO
-- fixe problem in ffglut (AF)
+- fix problem in ffglut (AF)
+- detect hdf5 and gsl if no enable-download
+
 ### Security
 
 ## [4.4] 
