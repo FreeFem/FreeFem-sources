@@ -1205,7 +1205,7 @@ then
 else
     if test "$enable_download" = yes
     then
-    ff_DOWNLOAD_FFTW=fftw
+        ff_DOWNLOAD_FFTW=fftw
     fi
 fi
 
@@ -2363,7 +2363,7 @@ if test "$ff_arpack_download" = yes -a  -n "$TOOL_COMPILE_arpack"  ; then
 fi
 
 if test "$enable_download" = yes; then
-  if test -n "$TOOL_COMPILE_fftw3"; then
+  if test -n "$ff_DOWNLOAD_FFTW"; then
     AC_MSG_NOTICE([      use of download fftw   see  3rdparty/fftw/fftw-3.2/COPYRIGHT ])
   fi
   if test -n "$TOOL_COMPILE_tetgen"; then
