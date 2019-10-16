@@ -1,7 +1,8 @@
 #!C:\msys64\usr\bin\bash.exe --login
 source shell mingw64
 
-echo "Job 1"
+echo "Job 1 Windows"
+set -e
 
 # configuration & build
 
@@ -27,6 +28,7 @@ then
   echo "Check process complete"
 else
   echo "Check process failed"
+  exit 1
 fi
 
 # install
@@ -37,4 +39,21 @@ then
   echo "Install process complete"
 else
   echo "Install process failed"
+  exit 1
 fi
+
+# uninstall
+make uninstall
+
+if [ $? -eq 0 ]
+then
+echo "Uninstall process complete"
+else
+echo "Uninstall process failed"
+exit 1
+fi
+
+
+# visu for jenkins tests results analyser
+./etc/jenkins/resultForJenkins/resultForJenkins.sh
+

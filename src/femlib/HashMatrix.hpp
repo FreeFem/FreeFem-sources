@@ -85,7 +85,8 @@ public:
     I ntgv;
 
     I NbCoef() const {return  (I) nnz;}
-    void setcoef(const KN_<R> & x){KN_<R>c(this->aij,nnz); ffassert(x.SameShape(c));c = x;}
+    void setcoef(const KN_<R> & x){KN_<R>c(this->aij,nnz); ffassert(x.SameShape(c));
+        if( x.constant())  c=x[0];   else c = x;}
     void getcoef( KN_<R> & x) const {ffassert(x.N()==(I) nnz);x =KN_<R>(this->aij,nnz);}
 
     void setdiag(const KN_<R> & d);
@@ -555,6 +556,8 @@ void HashMatrix<I,R>::set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, RR 
     clear();
     this->n=nn;
     this->m=mm;
+    this->N=nn;
+    this->M=mm;
     fortran=f77;
     half=hhalf;
     Increaze(nnnz);
@@ -571,6 +574,8 @@ void HashMatrix<I,R>::set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, R *
     clear();
     this->n=nn;
     this->m=mm;
+    this->N=nn;
+    this->M=mm;
     fortran=f77;
     half=hhalf;
     Increaze(nnnz);

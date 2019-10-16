@@ -560,6 +560,15 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
       
       g[0] = sqrt(real(pr#prfe#scalprod(zi,zi)));
       
+      if(abs(g[0])/normb < abs(eps)) {
+          if (pr#verbosity && (mpiRank(preffe#prmesh#mpicomm)==0)) {
+            cout << "["+Stringification(pr)+"] GMRES has converged in 0 iteration " << endl;
+            cout << "["+Stringification(pr)+"] The relative residual is " +  abs(g[0])/normb << endl;
+          }
+          uni = x0;
+          break;
+      }
+
       Vi[0]=1/g[0]*zi;           /* first basis vector */
       
       for(int it=0; it<dim; it++) {

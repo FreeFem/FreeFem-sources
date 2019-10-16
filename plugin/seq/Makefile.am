@@ -48,7 +48,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX)  BernardiRaugel.$(DYLIB_SUFFIX) \
 	Element_QF.$(DYLIB_SUFFIX) distance.$(DYLIB_SUFFIX) Element_P1ncdc.$(DYLIB_SUFFIX) \
 	Element_P2bulle3.$(DYLIB_SUFFIX)  \
 	Element_P2pnc.$(DYLIB_SUFFIX) SaveHB.$(DYLIB_SUFFIX) IncompleteCholesky.$(DYLIB_SUFFIX) \
-	Schur-Complement.$(DYLIB_SUFFIX)  biofunc.$(DYLIB_SUFFIX)
+	Schur-Complement.$(DYLIB_SUFFIX)  biofunc.$(DYLIB_SUFFIX) mat_edgeP1.$(DYLIB_SUFFIX)
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.
 
@@ -72,7 +72,7 @@ load_compile: ff-c++ WHERE_LIBRARY-download include.done
 	@echo " Warning missing plugin:" `for i in $(LIST_COMPILE) $(LIST_COMPILE_PKG); do if test ! -s $i ; then j=1; echo "$i," ;fi; done`
 	@echo " finish build list $(DYLIB_SUFFIX)"
 
-.cpp.$(DYLIB_SUFFIX): ff-c++
+.cpp.$(DYLIB_SUFFIX): ff-c++ Makefile
 	 ./ff-c++ -auto $<
 
 #to force the recompile if change ... FH

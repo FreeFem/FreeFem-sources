@@ -42,6 +42,7 @@ func f3min = Rmin*f3;
 
 cout << "=====================" << endl;
 cout << "=====================" << endl;
+savemesh(Th,"Th.mesh");
 meshS Th3sph=movemesh23(Th,transfo=[f1min,f2min,f3min],orientation=-1);
 cout << "=====================" << endl;
 cout << "=====================" << endl;

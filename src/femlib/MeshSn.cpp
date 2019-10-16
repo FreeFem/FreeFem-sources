@@ -49,7 +49,11 @@ namespace Fem2D
 
 namespace Fem2D
 {
+    //template<>
+   // void SameElement( Vertex3 *vertice, Vertex3 *new_vertice, TriangleS *list, int nelt, TriangleS *new_list, int *old2new, int &new_nelt, double &mes);
     
+   // template<>
+  //  void SameElement( Vertex3 *vertice, Vertex3 *new_vertice, BoundaryEdgeS *list, int nelt, BoundaryEdgeS *new_list, int *old2new, int &new_nelt, double &mes);
     
     template<> int   GenericMesh<TriangleS,BoundaryEdgeS,Vertex3>::kfind=0;
     template<> int   GenericMesh<TriangleS,BoundaryEdgeS,Vertex3>::kthrough=0;
@@ -146,7 +150,7 @@ namespace Fem2D
                 {
                     this->be(i).Read1(f,this->vertices,this->nv);
                     mesb += this->be(i).mesure();
-                    for(int j=0;j<3;++j)
+                    for(int j=0;j<BorderElement::nv;++j)
                         if(!vertices[ij=this->be(i,j)].lab)
                         {
                             vertices[ij].lab=1;
@@ -467,13 +471,13 @@ namespace Fem2D
             KN<int> takevertex(nv_t,0);
             for (int k=0; k<nbe; k++) {
                 const BorderElement & K(this->borderelements[k]);
-                for(int jj=0; jj<3; jj++){
+                for(int jj=0; jj<BorderElement::nv; jj++){
                     takevertex[ Numero_Som[this->operator()(K[jj])] ] = 1;
                 }
             }
             for(int k=0; k< this->nt; k++){
                 const Element & K(this->elements[k]);
-                for(int jj=0; jj<4; jj++){
+                for(int jj=0; jj<Element::nv; jj++){
                     takevertex[ Numero_Som[this->operator()(K[jj])] ] = 1;
                 }
             }
@@ -650,8 +654,8 @@ namespace Fem2D
         f >> s;
         ffassert( s== GsbeginS);
         f >> nv >> nt >> nbe;
-        /*if(verbosity>2)*/
-        cout << " GRead : nv " << nv << " " << nt << " " << nbe << endl;
+        if(verbosity>2)
+            cout << " GRead : nv " << nv << " " << nt << " " << nbe << endl;
         this->vertices = new Vertex[nv];
         this->elements = new Element [nt];
         this->borderelements = new BorderElement[nbe];
@@ -717,7 +721,7 @@ namespace Fem2D
     
     
     
-    MeshS::MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb)
+    MeshS::MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
     :mapVol2Surf(0),mapSurf2Vol(0)
     {
         nv = nnv;
@@ -733,13 +737,21 @@ namespace Fem2D
             mes += this->elements[i].mesure();
         for (int i=0;i<nbe;i++)
             mesb += this->be(i).mesure();
-        
+                if (cleanmesh) {
+            if(verbosity>3)
+                cout << "before clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+            clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
+            if(verbosity>3)
+                cout << "after clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+        }
         BuildBound();
         BuildAdj();
         Buildbnormalv();
         BuildjElementConteningVertex();
         // if not edges then build the edges - need access to the old adjacensce to build eges and rebuild the new adj
         if (nbe==0) {
+            if(verbosity>3)
+                cout << " building of boundary " << endl;
             BuildEdges();
             delete [] TheAdjacencesLink;
             delete [] BoundaryElementHeadLink;
@@ -757,7 +769,27 @@ namespace Fem2D
         
         assert(mes>=0.);
     }
+   
     
+    MeshS::MeshS(const  Serialize &serialized)
+    :GenericMesh<TriangleS,BoundaryEdgeS,Vertex3> (serialized),
+    mapVol2Surf(0), mapSurf2Vol(0)
+    {
+        BuildBound();
+        if(verbosity>1)
+            cout << "  -- End of serialized: mesure = " << mes << " border mesure " << mesb << endl;
+        
+
+            BuildAdj();
+            Buildbnormalv();
+            BuildjElementConteningVertex();
+
+        
+        if(verbosity>1)
+            cout << "  -- MeshS  (serialized), d "<< 3  << ", n Vtx " << nv <<", n Tri " << nt <<  " n Bord " << nbe << endl;
+        ffassert(mes>=0); // add F. Hecht sep 2009.
+        
+    }
     
     
     int MeshS::Save(const string & filename) const
@@ -796,6 +828,17 @@ namespace Fem2D
         GmfCloseMesh(outm);
         return (0);
     }
+    
+    
+    Serialize MeshS::serialize_withBorderMesh() const {
+        
+        // structure here for MeshL...but not use now
+        ffassert(0);
+    }
+    
+    
+    
+    
     
     void MeshS::flipSurfaceMeshS(int surface_orientation)
     {

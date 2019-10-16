@@ -51,20 +51,21 @@ func f = 1;
 int[int]  ref=[0,1]; 
 
 meshS Triangle3 = movemesh23(Triangle,transfo=[x,0,y],label=ref);//trianglesup
-plot (cmm="Triangle3",Triangle3,wait=1);
+plot (cmm="Triangle3",Triangle3,wait=1); 
+
 meshS TriangleS = movemeshS(Triangle3,transfo=[x,sinico*y+cosico*z,-cosico*y+sinico*z],label=ref);//rotation de -(pi - diedre) par rapport à l'axe des x pour former une face de la pyramide pentagonale
 plot (cmm="TriangleS",TriangleS,wait=1);
 //medit("face pyramide pentagonale",TriangleS);
 
 meshS TriangleI = movemeshS(TriangleS,transfo=[x,-cosdiedre*y+sindiedre*z,-sindiedre*y-cosdiedre*z],orientation=-1,label=ref);//triangle inf rotation de l'angle diedre par rapport au triangle sup
+plot (cmm="TriangleI",TriangleI,wait=1);
 
 meshS Triangles = TriangleI+TriangleS;cout << "test bug " << endl;
-plot (cmm="TriangleI",TriangleI,wait=1);
+
 plot (cmm="Triangles",Triangles,wait=1);
 //medit("face pyramide pentagonale + face antiprisme d'ordre 5",Triangles);
 
 meshS T1 = movemeshS(Triangles,transfo=[x-0.5,y-sinpi3*cosico,z],label=ref,orientation=1);//translation pour que la figure soit sur le bord du pentagone
-
 meshS T2 = movemeshS(T1,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref,orientation=1);
 meshS T3 = movemeshS(T2,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref);
 meshS T4 = movemeshS(T3,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],label=ref);

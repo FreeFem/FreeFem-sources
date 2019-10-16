@@ -1,17 +1,15 @@
 include "test.idp"
 
-cout << functionDEFINITION << "RestrictArray" << endl;
+cout << functionDEFINITION << "restrict" << endl;
 real t;
-mesh  Th = square(4,4);
-func Pk=P2;
+mesh Th = square(4, 4);
+func Pk = P1;
 int[int] n2ok(1);
-mesh ThC = trunc(Th,x < 0.5,new2old=n2ok);
-fespace VFh(Th,Pk);
-fespace VCh(ThC,Pk);
+mesh ThC = trunc(Th, x < 0.5, new2old=n2ok);
+fespace VFh(Th, Pk);
+fespace VCh(ThC, Pk);
 
 t = clock();
 int[int] res = restrict(VCh, VFh, n2ok);
-cout << res << endl;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-// test();

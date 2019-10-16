@@ -1,21 +1,33 @@
 include "test.idp"
 load "UMFPACK64"
 
-mesh Th = square(5, 5);
-real[int] vit=[0,0,-0.3];
-func zero = 0.;
-func dep  = vit[2];
+real t;
 
-fespace Vh(Th,P1);
-macro Grad(u) [dx(u),dy(u),dz(u)] //
+cout << functionDEFINITION << "UMFPACK64" << endl;
 
-Vh uh,vh; //  to compute the displacemnt field
-problem Lap(uh,vh) = int2d(Th)(Grad(uh)'*Grad(vh))  //') for emacs
-				  + on(310,300,uh=dep) +on(311,uh=0.);
-//
-// for(int it=0; it<29; it++){
-//   cout<<"  ITERATION       "<<it<<endl;
-//   Lap;
-//   plot(Th,uh);
-//   Th=mmg3d(Th,opt="-O 9",displacement=[zero,zero,uh]);
-//  }
+mesh Th = square(50, 50);
+fespace Vh(Th, P1);
+
+func f = -2.*x*(y-1.)*(y-2.*x+x*y+2.)*exp(x-y);
+func ue = exp(x-y)*x*(1.-x)*y*(1.-y);
+
+macro grad(u) [dx(u),dy(u)] //
+
+Vh uh, vh;
+problem Lap(uh, vh)
+	= int2d(Th)(
+		  grad(uh)' * grad(vh)
+	)
+	- int2d(Th)(
+			f * vh
+	)
+	+ on(1, 2, 3, 4, uh=0)
+	;
+
+t = clock();
+Lap;
+t = clock() - t;
+cout << timeELAPSED << t << endl;
+
+uh = uh - ue;
+test(uh[].l2 < 1.e-3);

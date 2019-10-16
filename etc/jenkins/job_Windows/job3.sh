@@ -2,6 +2,7 @@
 source shell mingw64
 
 echo "Job 3"
+set -e
 
 autoreconf -i \
 && ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
@@ -26,6 +27,7 @@ then
   echo "Check process complete"
 else
   echo "Check process failed"
+  exit 1
 fi
 
 # install
@@ -36,4 +38,19 @@ then
   echo "Install process complete"
 else
   echo "Install process failed"
+  exit 1
 fi
+
+# uninstall
+make uninstall
+
+if [ $? -eq 0 ]
+then
+echo "Uninstall process complete"
+else
+echo "Uninstall process failed"
+exit 1
+fi
+
+# visu for jenkins tests results analyser
+./etc/jenkins/resultForJenkins/resultForJenkins.sh

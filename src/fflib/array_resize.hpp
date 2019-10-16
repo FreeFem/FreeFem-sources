@@ -36,4 +36,6 @@ template<class T> struct  Resize1{ T v;
 };
 template<class T> Resize1<T> to_Resize1( T v){ return Resize1<T>(v);}
 
+template<class A,class B>  A Build(B b) {  return A(b);}
+
 #endif // ARRAY_RESIZE_HPP_

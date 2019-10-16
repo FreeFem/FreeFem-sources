@@ -1,4 +1,4 @@
-macro ffddmbuildNested(pr,Th,nsup,scalar,def,init,Pk)
+macro ffddmbuildSuper(pr,Th,nsup,scalar,def,init,Pk)
 
 int pr#nsuper = nsup;
 

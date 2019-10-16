@@ -9,7 +9,7 @@ int nbnt = Th.nt;
 
 t = clock();
 Th = splitmesh(Th, 1 + 5*(square(x-0.5) + y*y));
-t = clock() - t ;
+t = clock() - t;
 cout << timeELAPSED << t << endl;
 int nbnt2 = Th.nt;
 test(nbnt2 > nbnt);

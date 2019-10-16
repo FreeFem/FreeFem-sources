@@ -87,11 +87,55 @@ struct SortArray<T,3> {
   size_t hash() const {return (size_t) v[0];}
 };
 
+template<typename T>
+struct SortArray<T,4> {
+    T v[4];
+    SortArray(T *a,int *sens=0)
+    {
+        int s=1;
+        v[0]=a[0];
+        v[1]=a[1];
+        v[2]=a[2];
+        v[3]=a[3];
+        if(v[0]>v[1]) s=-s,swap(v[0],v[1]);
+        if(v[1]>v[2]) {
+            s=-s,swap(v[1],v[2]);
+            if(v[0]>v[1]) s=-s,swap(v[0],v[1]);
+        }
+        if(v[2]>v[3]) {
+            s=-s,swap(v[3],v[2]);
+            if(v[1]>v[2]) s=-s,swap(v[1],v[2]);
+            if(v[0]>v[1]) s=-s,swap(v[0],v[1]);
+        }
+
+        ASSERTION(v[0] <= v[1] && v[1] <= v[2]  && v[2] <= v[3]);
+
+        if(sens) *sens=s;
+    }
+    
+    SortArray(){}
+    bool operator == (const SortArray<T,4> & t)  const
+    {  return v[0] == t.v[0] && v[1] == t.v[1]  && v[2] == t.v[2]  && v[3] == t.v[3] ;}
+    
+    bool operator<(const SortArray<T,4> & t)  const
+    {  return v[0] != t.v[0] ? v[0] < t.v[0] :
+        ( v[1] != t.v[1] ? v[1] < t.v[1] :
+        ( v[2] !=  t.v[2] ? v[2] < t.v[2]: v[3] < t.v[3] ));}
+    size_t hash() const {return (size_t) v[0]+((size_t) v[1] << 8 ) + ((size_t) v[2] << 16 ) + ((size_t) v[3] << 24);}
+};
 template<typename T,int N>
 ostream & operator<<(ostream & f,const SortArray<T,N> & item)
 { 
     for (int i=0;i<N;++i) f << " " << item.v[i];
     return f;
+}
+
+template<typename T,int N>
+bool commonValue(const SortArray<T,N> & t) {
+    for(int i=1;i<N;i++)
+        if(t.v[i-1]==t.v[i])
+            return true;
+    return false;
 }
 
 template<class K,class V>

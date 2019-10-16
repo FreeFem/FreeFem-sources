@@ -2,54 +2,60 @@ include "test.idp"
 load "BEC"
 
 real t;
-real[int, int] i = [[1, 2, 3], [1, 2, 3], [1, 2, 3]];
 
 cout << functionDEFINITION << "BECtrap" << endl;
 
-real[int] j = [0, 0, 0, 0];
-real[int] k = [0, 0, 0, 0, 0, 0];
+mesh Th = square(2, 2);
+real[int] b1 = [0, 0, 0, 0];
+real[int] b2 = [0, 0, 0, 0, 0, 0];
+real res;
 
 t = clock();
-BECtrap(j);
+res = int2d(Th)(BECtrap(b1));
 t = clock() - t;
 cout << timeELAPSED << t << endl;
+test(abs(res) < HWERROR);
+
 t = clock();
-BECtrap(k);
+res = int2d(Th)(BECtrap(b2));
 t = clock() - t;
 cout << timeELAPSED << t << endl;
+test(abs(res) < HWERROR);
 
 cout << functionDEFINITION << "GPvortex" << endl;
+
 {
   t = clock();
-  complex vortex = GPvortex(4, 2, 6);
+  complex vortex = int2d(Th)(GPvortex(4, 2, 0));
   t = clock() - t;
   cout << timeELAPSED << t << endl;
-  cout << vortex << endl;
+  test(abs(vortex) < HWERROR);
 }
 
 cout << functionDEFINITION << "GPvortices" << endl;
 {
+  real[int, int] i = [[1, 2, 0], [1, 2, 0], [1, 2, 0]];
   t = clock();
-  complex vortex = GPvortices(i);
+  complex vortex = int2d(Th)(GPvortices(i));
   t = clock() - t;
   cout << timeELAPSED << t << endl;
-  cout << vortex << endl;
+  test(abs(vortex) < HWERROR);
 }
 
 cout << functionDEFINITION << "dxGPvortex" << endl;
 {
   t = clock();
-  complex vortex = dxGPvortex(4, 2, 6);
+  complex vortex = dxGPvortex(4, 2, 0);
   t = clock() - t;
   cout << timeELAPSED << t << endl;
-  cout << vortex << endl;
+  test(abs(vortex) < HWERROR);
 }
 
 cout << functionDEFINITION << "dyGPvortex" << endl;
 {
   t = clock();
-  complex vortex = dyGPvortex(4, 2, 6);
+  complex vortex = dyGPvortex(4, 2, 0);
   t = clock() - t;
   cout << timeELAPSED << t << endl;
-  cout << vortex << endl;
+  test(abs(vortex) < HWERROR);
 }

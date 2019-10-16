@@ -293,3 +293,9 @@ ml[]/=2.;
 	  cout << " A " << A << endl;
 	  assert(A.nnz==0); 
   }
+  { // add Oct 2019 version 4.4-1
+  matrix A=eye(10);
+  cout << A << endl; 
+  A=eye(5);
+  cout << A << endl; 
+}

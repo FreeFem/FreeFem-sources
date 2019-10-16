@@ -185,7 +185,8 @@ void dosolver(R *x,R*b,int N,int trans)
         printf ("\nERROR during solution: %d", error);
         exit (3);
     }
-    printf ("\nSolve completed ... ");
+    if(verbosity > 0)
+        printf ("\nSolve completed ... ");
 
 
 }

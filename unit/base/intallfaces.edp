@@ -9,8 +9,6 @@ real edge;
 t = clock();
 edge = intallfaces(Th)(1);
 t = clock() - t;
-plot(Th);
-cout << edge << endl;
-// test(edge == 4 + 2 * sqrt(2));
 cout << timeELAPSED << t << endl;
-//TODO
+
+test(edge == 0);

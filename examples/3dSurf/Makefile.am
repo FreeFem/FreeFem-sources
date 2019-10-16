@@ -21,21 +21,31 @@
 # E-MAIL  : ...
 
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw LIST_CONDITIONAL="$(LIST_CONDITIONAL)"
 
 all-local: all.edp freefem++.pref
 
-if TETGEN
-CONDITIONAL_TETGEN = HeatTorus.edp
-endif
-
-TESTS = buildMeshSfromMesh3.edp \
+TESTS_OTHER = buildMeshSfromMesh3.edp \
 	glu3DSurf.edp \
 	Laplace3dSP2.edp \
 	LaplacianSurf.edp \
 	operatorsOnMeshS.edp \
-	extractSurfFromMesh3.edp \
+	extractSurfFromMesh3.edp
+
+
+TESTS_TETGEN = HeatTorus.edp
+
+if TETGEN
+CONDITIONAL_TETGEN = $(TESTS_TETGEN)
+endif
+
+
+TESTS = $(TESTS_OTHER) \
+	$(TESTS_TETGEN)
+
+LIST_CONDITIONAL = $(TESTS_OTHER) \
 	$(CONDITIONAL_TETGEN)
+
 
 XFAIL_TESTS = buildMeshSfromMesh3.edp \
 	Laplace3dSP2.edp

@@ -608,7 +608,7 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
         {
             lok[kk]=1;
             glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
-            glPolygonMode(GL_FRONT,GL_FILL);//GL_FILL
+            glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);//GL_FILL
             glBegin(GL_TRIANGLES);
             for (int i=0;i<Th.nt;i++)
             {
@@ -618,7 +618,7 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
                 //glColor3d(r,g,b);
                 glVertex3d(K[0].x,K[0].y,K[0].z);
                 glVertex3d(K[1].x,K[1].y,K[1].z);
-                glVertex3d(K[2].x,K[2].y,K[1].z);
+                glVertex3d(K[2].x,K[2].y,K[2].z);
 
             }
             glEnd();
@@ -2234,9 +2234,9 @@ case 20+index: {type dummy; fin >= dummy;} break;
             if((debug > 3))
             {
                 if(version==2)
-                    cout << i << " nt/nv " << l << " "  <<Ths[l]->nt << " " << Ths[l]->nv << endl;
+                    cout << "mesh i: "<< i << " nt/nv " << l << " "  <<Ths[l]->nt << " " << Ths[l]->nv << endl;
                 else
-                    cout << i << " nt/nv " << l << " "  <<Ths2[l]->nt << " " << Ths2[l]->nv << endl;
+                    cout << "mesh i: "<< i << " nt/nv " << l << " "  <<Ths2[l]->nt << " " << Ths2[l]->nv << endl;
             }
             ffassert(fin.good());
         }
@@ -2263,6 +2263,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
     long nbmeshes3=0;
     long nbmeshesS=0;
     int getMesh3Type = fin.GetMeshes3(); // 0 : dt_mesh3, 1 : dt_meshS, 12 : dt_mesh3S, 2 : dt_plots
+     if((debug > 2)) cout << " type mesh3 " << getMesh3Type << endl;
     if (getMesh3Type!=3) //  read GetPlots if false ...
     {
      //  There are 3D volume solution
@@ -2287,7 +2288,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
                  ffassert(Ths3[l]==0);
                  fin >>Ths3[l] ;
                  if((debug > 3))
-                     cout << i << " nt/nv " << l << " "  <<Ths3[l]->nt << " "
+                     cout << "mesh3 i: "<< i << " nt/nv " << l << " "  <<Ths3[l]->nt << " "
                      << Ths3[l]->nv << endl;
                  ffassert(fin.good());
              }
@@ -2302,6 +2303,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
              }
         }
         getMesh3Type=fin.GetMeshes3();
+         if((debug > 2)) cout << " type mesh3 " << getMesh3Type << endl;
      }
      //  There are 3D surface solution
      if(getMesh3Type==1)
@@ -2324,7 +2326,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
                  ffassert(ThsS[l]==0);
                  fin >>ThsS[l] ;
                  if((debug > 3))
-                     cout << i << " nt/nv " << l << " "  <<ThsS[l]->nt << " "
+                     cout << "meshS i: "<< i << " nt/nv " << l << " "  <<ThsS[l]->nt << " "
                      << ThsS[l]->nv << endl;
                  ffassert(fin.good());
              }
@@ -2344,7 +2346,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
 
       fin.GetPlots();
     }
-
+  
     long nbplot;
     int iso3d=0;
     fin >>nbplot;
@@ -2444,6 +2446,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
         ffassert(fin.good());
         datadim=max(datadim,p->dim);
     }
+    if(dimpp) plotdim=dimpp;
     if(Niso==0)
         Niso = iso3d ? 5 : 20;
 
@@ -2481,7 +2484,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
 
     SetColorTable(Max(Niso,Narrow)+4) ;
     SetDefIsoV(Niso,Narrow,fmin,fmax) ;
-
+    
 }
 
 

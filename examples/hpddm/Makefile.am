@@ -21,12 +21,14 @@
 # E-MAIL  : ...
 .NOTPARALLEL:
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" LIST_CONDITIONAL="$(LIST_CONDITIONAL)"
 
 all-local: freefem++.pref
 
-if HPDDM
-CONDITIONAL_HPDDM = diffusion-2d.edp \
+TESTS_MPI = withPartitioning.edp
+
+TESTS_HPDDM = diffusion-2d.edp \
+	diffusion-2d-mg.edp \
 	diffusion-2d-substructuring.edp \
 	diffusion-2d-substructuring-withPartitioning.edp \
 	diffusion-3d.edp \
@@ -41,19 +43,17 @@ CONDITIONAL_HPDDM = diffusion-2d.edp \
 	heat-2d-io.edp \
 	heat-3d.edp \
 	helmholtz-2d.edp \
+	helmholtz-2d-mg.edp \
 	iterative.edp \
 	maxwell-3d.edp \
 	stokes-2d.edp \
 	stokes-3d.edp \
-	stokes-3d-io.edp
+	stokes-3d-io.edp \
+	heat-torus-3d-surf.edp
 
-if PETSC
-CONDITIONAL_HPDDM_PETSC = diffusion-2d-substructuring-PETSc.edp
-endif PETSC
-endif HPDDM
+TESTS_HPDDM_PETSC = diffusion-2d-substructuring-PETSc.edp
 
-if PETSC
-CONDITIONAL_PETSC = bratu-2d-PETSc.edp \
+TESTS_PETSC = bratu-2d-PETSc.edp \
 	diffusion-2d-PETSc.edp \
 	diffusion-3d-PETSc.edp \
 	diffusion-periodic-2d-PETSc.edp \
@@ -86,27 +86,56 @@ CONDITIONAL_PETSC = bratu-2d-PETSc.edp \
 	minimal-surface-2d-Tao-PETSc.edp \
 	Schur-complement-PETSc.edp
 
-if SLEPC
-CONDITIONAL_PETSC_SLEPC = laplace-2d-SLEPc.edp \
+TESTS_PETSC_SLEPC = laplace-2d-SLEPc.edp \
 	laplace-2d-spherical-harmonics-SLEPc.edp \
 	laplace-2d-torus-SLEPc.edp \
 	schrodinger-1d-harmonic-oscillator-SLEPc.edp \
 	schrodinger-1d-square-well-SLEPc.edp \
 	schrodinger-2d-axial-well-SLEPc.edp \
 	schrodinger-2d-harmonic-oscillator-SLEPc.edp
+
+
+TESTS_PETSCCOMPLEX = diffusion-2d-PETSc-complex.edp \
+	helmholtz-2d-PETSc.edp
+
+TESTS_PETSCCOMPLEX_SLEPCCOMPLEX = laplace-complex-2d-SLEPc.edp
+
+if MPI
+CONDITIONAL_MPI = $(TESTS_MPI)
+
+if HPDDM
+CONDITIONAL_HPDDM = $(TESTS_HPDDM)
+if PETSC
+CONDITIONAL_HPDDM_PETSC = $(TESTS_HPDDM_PETSC)
+endif PETSC
+endif HPDDM
+
+
+if PETSC
+CONDITIONAL_PETSC = $(TESTS_PETSC)
+if SLEPC
+CONDITIONAL_PETSC_SLEPC = $(TESTS_PETSC_SLEPC)
 endif SLEPC
 endif PETSC
 
 if PETSCCOMPLEX
-CONDITIONAL_PETSCCOMPLEX = diffusion-2d-PETSc-complex.edp \
-	helmholtz-2d-PETSc.edp
-
+CONDITIONAL_PETSCCOMPLEX = $(TESTS_PETSCCOMPLEX)
 if SLEPCCOMPLEX
-CONDITIONAL_PETSCCOMPLEX_SLEPCCOMPLEX = laplace-complex-2d-SLEPc.edp
+CONDITIONAL_PETSCCOMPLEX_SLEPCCOMPLEX = $(TESTS_PETSCCOMPLEX_SLEPCCOMPLEX)
 endif SLEPCCOMPLEX
 endif PETSCCOMPLEX
 
-TESTS = withPartitioning.edp \
+endif MPI
+
+TESTS = $(TESTS_MPI) \
+	$(TESTS_HPDDM) \
+	$(TESTS_HPDDM_PETSC) \
+	$(TESTS_PETSC) \
+	$(TESTS_PETSC_SLEPC) \
+	$(TESTS_PETSCCOMPLEX) \
+	$(TESTS_PETSCCOMPLEX_SLEPCCOMPLEX)
+
+LIST_CONDITIONAL = $(CONDITIONAL_MPI) \
 	$(CONDITIONAL_HPDDM) \
 	$(CONDITIONAL_HPDDM_PETSC) \
 	$(CONDITIONAL_PETSC) \

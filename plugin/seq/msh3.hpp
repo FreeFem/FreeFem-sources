@@ -35,7 +35,7 @@ using namespace std;
 /* avant TransfoMesh_v2.cpp */
 void BuildBoundMinDist_th2 (const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh &Th2, R3 &bmin, R3 &bmax, double &hmin);
 void BuildBoundMinDist_th3 (const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const Mesh3 &Th3, R3 &bmin, R3 &bmax, double &hmin);
-void BuildBoundMinDist_thS (const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const MeshS &ThS, R3 &bmin, R3 &bmax, double &hmin);
+//void BuildBoundMinDist_thS (const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const MeshS &ThS, R3 &bmin, R3 &bmax, double &hmin);
 
 // void PointCommun_hcode( const int &dim, const int &NbPoints, const int &point_confondus_ok,double **Coord_Point, int * ind_np, int & np);
 //void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_confondus_ok, double **Coord_Point,
@@ -58,12 +58,12 @@ void SamePointElement (const double &precis_mesh, const double *tab_XX, const do
 Mesh3*Transfo_Mesh3 (const double &precis_mesh, const Mesh3 &Th3, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, int &border_only,
                      int &recollement_element, int &recollement_border, int &point_confondus_ok, int orientation);
 // 3D surface
-MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, int &border_only,
+/*MeshS*Transfo_MeshS (const double &precis_mesh, const MeshS &ThS, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, int &border_only,
                      int &recollement_element, int &recollement_border, int &point_confondus_ok, int orientation);
 void SamePointElement_MeshS (const double &precis_mesh, const double *tab_XX, const double *tab_YY, const double *tab_ZZ, const MeshS &ThS,
                              int &recollement_element, int &recollement_border, int &point_confondus_ok, int *Numero_Som, int *ind_nv_t,
                              int *ind_nt_t, int *ind_nbe_t, int *label_nt_t, int *label_nbe_t, int &nv_t, int &nt_t, int &nbe_t);
-
+*/
 
 // CAS 3D surfacique(old version)
 

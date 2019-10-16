@@ -10,6 +10,11 @@ int ntb = n*n*12; // Nb of Boundary triangle
 mesh3 Th=cube(n,n,n);
 Th = buildSurface(Th); // build the surface mesh
 
+
+int[int] ref2=[1,0,2,0];
+mesh3 Thm=change(Th,label=ref2);
+
+
 meshS Th1 = Th.Gamma;
 
 assert(Th1.nv==602); 

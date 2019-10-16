@@ -117,8 +117,6 @@ cout << functionDEFINITION << "iluSolve" << endl;
 
 cout << functionDEFINITION << "icholSolve" << endl;
 {
-  // mesh Th = square(5, 5);
-  // fespace Uh(Th, P1);
   macro grad(u)[dx(u),dy(u)]//
   varf vA (u, v)
   	= int2d(Th)(

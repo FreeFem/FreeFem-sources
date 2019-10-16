@@ -15,12 +15,13 @@ struct _n_User;
 template<class Type>
 using User = _n_User<Type>*;
 template<class HpddmType, typename std::enable_if<std::is_same<HpddmType, Dmat>::value>::type* = nullptr>
-void initPETScStructure(HpddmType* ptA, PetscInt bs, PetscBool symmetric, KN<typename std::conditional<std::is_same<HpddmType, Dmat>::value, double, long>::type>* ptD, KN<PetscScalar>* rhs) {
+void initPETScStructure(HpddmType* ptA, PetscInt bs, PetscBool symmetric, KN<typename std::conditional<std::is_same<HpddmType, Dmat>::value, double, long>::type>* ptD, KN<PetscScalar>* rhs, bool restrict = true) {
     double timing = MPI_Wtime();
     PetscInt global;
     if(ptD || mpisize == 1) {
         if(ptD) {
-            ptA->_A->restriction(*ptD);
+            if(restrict)
+                ptA->_A->restriction(*ptD);
             ptA->_A->initialize(*ptD);
         }
         unsigned int g;
@@ -59,7 +60,7 @@ void initPETScStructure(HpddmType* ptA, PetscInt bs, PetscBool symmetric, KN<typ
         ptA->_A->exchange(*rhs);
 }
 template<class HpddmType, typename std::enable_if<!std::is_same<HpddmType, Dmat>::value>::type* = nullptr>
-void initPETScStructure(HpddmType* ptA, PetscInt& bs, PetscBool symmetric, KN<typename std::conditional<std::is_same<HpddmType, Dmat>::value, double, long>::type>* ptD, KN<PetscScalar>* rhs) {
+void initPETScStructure(HpddmType* ptA, PetscInt& bs, PetscBool symmetric, KN<typename std::conditional<std::is_same<HpddmType, Dmat>::value, double, long>::type>* ptD, KN<PetscScalar>* rhs, bool) {
     const HPDDM::MatrixCSR<PetscScalar>* M = ptA->_A->getMatrix();
     if(!M->_sym)
         cout << "Please assemble a symmetric CSR" << endl;
@@ -297,7 +298,7 @@ void change(Type* const& ptA, Matrice_Creuse<PetscScalar>* const& mat, Type* con
                                 break;
                             }
                         }
-                        PETSc::setCompositePC(pc, ptA->_vS);
+                        setCompositePC(pc, ptA->_vS);
                     }
                 }
             }
@@ -446,12 +447,19 @@ AnyType initCSRfromDMatrix_Op<HpddmType>::operator()(Stack stack) const {
     DistributedCSR<HpddmType>* ptA = GetAny<DistributedCSR<HpddmType>*>((*A)(stack));
     DistributedCSR<HpddmType>* ptB = GetAny<DistributedCSR<HpddmType>*>((*B)(stack));
     Matrice_Creuse<PetscScalar>* ptK = GetAny<Matrice_Creuse<PetscScalar>*>((*K)(stack));
-    if(ptB->_A && ptK->A) {
+    if(ptB->_A) {
         ptA->_A = new HpddmType(static_cast<const HPDDM::Subdomain<PetscScalar>&>(*ptB->_A));
-        MatriceMorse<PetscScalar>* mA = static_cast<MatriceMorse<PetscScalar>*>(&(*ptK->A));
-        HPDDM::MatrixCSR<PetscScalar>* dA = new_HPDDM_MatrixCSR<PetscScalar>(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+        HPDDM::MatrixCSR<PetscScalar>* dA;
+        if(ptK->A) {
+            MatriceMorse<PetscScalar>* mA = static_cast<MatriceMorse<PetscScalar>*>(&(*ptK->A));
+            dA = new_HPDDM_MatrixCSR<PetscScalar>(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+        }
+        else {
+            int* ia = new int[1]();
+            dA = new HPDDM::MatrixCSR<PetscScalar>(0, 0, 0, nullptr, ia, nullptr, false, true);
+        }
         ptA->_A->setMatrix(dA);
-        ptA->_num = new unsigned int[mA->n];
+        ptA->_num = new unsigned int[dA->_n];
         std::copy_n(ptB->_num, dA->_n, ptA->_num);
         ptA->_first = ptB->_first;
         ptA->_last = ptB->_last;
@@ -912,6 +920,7 @@ AnyType initCSR<HpddmType>::E_initCSR::operator()(Stack stack) const {
         Matrice_Creuse<double>* pList = nargs[5] ? GetAny<Matrice_Creuse<double>*>((*nargs[5])(stack)) : 0;
         HPDDM::MatrixCSR<void>* dL = nullptr;
         KN_<KN<long>> sub((c == 0 || c == 1) && ptR->n > 0 && ptR->operator[](0).n > 0 ? (*ptR)(FromTo(1, ptR->n - 1)) : KN<KN<long>>());
+        bool restrict = true;
         if(std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value && pList && (mA || (c != 0 && c != 2))) {
             int n = 0;
             ptA->_exchange = new HPDDM::template Subdomain<PetscScalar>*[2]();
@@ -919,6 +928,7 @@ AnyType initCSR<HpddmType>::E_initCSR::operator()(Stack stack) const {
             ptA->_exchange[0]->initialize(dA, STL<long>((c == 0 || c == 1) && ptR->n > 0 ? ptR->operator[](0) : KN<long>()), sub, comm);
             ptA->_exchange[0]->setBuffer();
             if(pList->A) {
+                restrict = false;
                 MatriceMorse<double>* mList = static_cast<MatriceMorse<double>*>(&*(pList->A));
                 mList->CSR();
                 ffassert(mList->n == mList->nnz);
@@ -941,7 +951,7 @@ AnyType initCSR<HpddmType>::E_initCSR::operator()(Stack stack) const {
         ptA->_A->HPDDM::template Subdomain<PetscScalar>::initialize(dA, STL<long>((c == 0 || c == 1) && ptR->n > 0 ? ptR->operator[](0) : KN<long>()), sub, comm, dL);
         delete dL;
         ptA->_num = new unsigned int[ptA->_A->getMatrix()->_n];
-        initPETScStructure(ptA, bs, nargs[4] ? (GetAny<bool>((*nargs[4])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE, ptD, rhs);
+        initPETScStructure(ptA, bs, nargs[4] ? (GetAny<bool>((*nargs[4])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE, ptD, rhs, restrict);
         if(!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value) {
 #ifndef VERSION_MATRICE_CREUSE
             mA->lg = ptA->_A->getMatrix()->_ia;
@@ -1078,9 +1088,22 @@ class initCSRfromBlockMatrix : public E_F0 {
                         }
                         else if(t == 7) {
                             PetscScalar r = GetAny<PetscScalar>(e_ij);
-                            if(std::abs(r) > 1.0e-16)
-                                ExecError("Nonzero scalar in submatrix");
-                            if(i == j)
+                            if(std::abs(r) > 1.0e-16) {
+                                Mat B;
+                                MatCreate(PETSC_COMM_WORLD, &B);
+                                MatSetSizes(B, PETSC_DECIDE, PETSC_DECIDE, 1, 1);
+                                MatSetType(B, MATMPIDENSE);
+                                MatMPIDenseSetPreallocation(B, PETSC_NULL);
+                                PetscScalar* array;
+                                MatDenseGetArray(B, &array);
+                                if(array)
+                                    array[0] = r;
+                                MatDenseRestoreArray(B, &array);
+                                MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
+                                MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
+                                a[i * M + j] = B;
+                            }
+                            else if(i == j)
                                 zeros.emplace_back(i);
                         }
                         else if(t == 3 || t == 4) {
@@ -1207,6 +1230,7 @@ template<class Type>
 struct _n_User<NonlinearSolver<Type>> {
     typename NonlinearSolver<Type>::VecF_O* op;
     typename LinearSolver<Type, 'N'>::MatF_O* r;
+    typename NonlinearSolver<Type>::IConvF_O* conv;
 };
 template<class Type>
 struct _n_User<TimeStepper<Type>> {
@@ -1357,10 +1381,10 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
         if(nargs[4])
             KSPSetOptionsPrefix(ptA->_ksp, GetAny<std::string*>((*nargs[4])(stack))->c_str());
         KSPSetFromOptions(ksp);
-        if(std::is_same<Type, Dmat>::value) {
+#ifdef PCHPDDM
+        if(std::is_same<Type, Dmat>::value && assembled) {
             PC pc;
             KSPGetPC(ksp, &pc);
-#ifdef PCHPDDM
             PCType type;
             PCGetType(pc, &type);
             PetscBool isType;
@@ -1368,19 +1392,21 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
             if(isType && ptA->_A && ptA->_A->getMatrix() && ptA->_num) {
                 const HPDDM::MatrixCSR<PetscScalar>* const A = ptA->_A->getMatrix();
                 Mat aux;
-                MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, A->_n, A->_m, A->_ia, A->_ja, A->_a, &aux);
+                if(A->_sym)
+                    MatCreateSeqSBAIJWithArrays(PETSC_COMM_SELF, 1, A->_n, A->_m, A->_ia, A->_ja, A->_a, &aux);
+                else
+                    MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, A->_n, A->_m, A->_ia, A->_ja, A->_a, &aux);
                 PetscInt* idx;
                 PetscMalloc1(A->_n, &idx);
                 std::copy_n(ptA->_num, A->_n, idx);
                 IS is;
                 ISCreateGeneral(PETSC_COMM_SELF, ptA->_A->getMatrix()->_n, idx, PETSC_OWN_POINTER, &is);
-                PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_IS", (PetscObject)is);
-                PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject)aux);
+                PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
                 ISDestroy(&is);
                 MatDestroy(&aux);
             }
-#endif
         }
+#endif
         if(std::is_same<Type, Dmat>::value && (nargs[6] || nargs[11])) {
             if(nargs[2] && (nargs[5] || nargs[11])) {
                 if(assembled) {
@@ -1391,7 +1417,7 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
                 }
                 PC pc;
                 KSPGetPC(ksp, &pc);
-                PETSc::setCompositePC(pc, ptA->_vS);
+                setCompositePC(pc, ptA->_vS);
             }
             else if(mpisize == 1 && nargs[10]) {
                 IS is;
@@ -2259,6 +2285,53 @@ class NonlinearSolver : public OneOperator {
                     return ret;
                 }
         };
+        class IConvF_O {
+            public:
+                Stack stack;
+                mutable long it;
+                C_F0 c_it;
+                mutable double xnorm;
+                C_F0 c_xnorm;
+                mutable double gnorm;
+                C_F0 c_gnorm;
+                mutable double f;
+                C_F0 c_f;
+                mutable Kn x;
+                C_F0 c_x;
+                mutable Kn dx;
+                C_F0 c_dx;
+                Expression mat;
+                IConvF_O(int n, Stack stk, const OneOperator* op) :
+                    stack(stk), it(0), c_it(CPValue(it)), xnorm(0), c_xnorm(CPValue(xnorm)), gnorm(0), c_gnorm(CPValue(gnorm)), f(0), c_f(CPValue(f)),
+                    x(n), c_x(CPValue(x)), dx(n), c_dx(CPValue(dx)),
+                    mat(op ? CastTo<long>(C_F0(op->code(basicAC_F0_wa({ c_it, c_xnorm, c_gnorm, c_f, c_x, c_dx })), (aType)*op)) : 0) { }
+                ~IConvF_O() {
+                    delete mat;
+                    Expression zzz = c_it;
+                    delete zzz;
+                    zzz = c_xnorm;
+                    delete zzz;
+                    zzz = c_gnorm;
+                    delete zzz;
+                    zzz = c_f;
+                    delete zzz;
+                    zzz = c_x;
+                    delete zzz;
+                    zzz = c_dx;
+                    delete zzz;
+                }
+                long apply(const long& iit, const double& ixnorm, const double& ignorm, const double& iff, const Kn_& ix, const Kn_& idx) const {
+                    it = iit;
+                    xnorm = ixnorm;
+                    gnorm = ignorm;
+                    f = iff;
+                    x = ix;
+                    dx = idx;
+                    long ret = GetAny<long>((*mat)(stack));
+                    WhereStackOfPtr2Free(stack)->clean();
+                    return ret;
+                }
+        };
         const int c;
         class E_NonlinearSolver : public E_F0mps {
             public:
@@ -2341,6 +2414,29 @@ PetscErrorCode FormJacobian(SNES snes, Vec x, Mat J, Mat B, void* ctx) {
     long ret = mat->apply(xx);
     VecRestoreArrayRead(x, &in);
     PetscFunctionReturn(ret);
+}
+template<class Type>
+PetscErrorCode Convergence(SNES snes, PetscInt it, PetscReal xnorm, PetscReal gnorm, PetscReal f, SNESConvergedReason* reason, void* ctx) {
+    User<Type>*       user;
+    const PetscScalar*  in;
+    const PetscScalar* din;
+    Vec u, du;
+
+    PetscFunctionBeginUser;
+    user = reinterpret_cast<User<Type>*>(ctx);
+    typename NonlinearSolver<Type>::IConvF_O* mat = reinterpret_cast<typename NonlinearSolver<Type>::IConvF_O*>((*user)->conv);
+    SNESGetSolution(snes, &u);
+    SNESGetSolutionUpdate(snes, &du);
+    VecGetArrayRead(u, &in);
+    VecGetArrayRead(du, &din);
+    KN_<PetscScalar> xx(const_cast<PetscScalar*>(in), mat->x.n);
+    KN_<PetscScalar> ww(const_cast<PetscScalar*>(din), mat->x.n);
+    SNESConvergedDefault(snes, it, xnorm, gnorm, f, reason, ctx);
+    if(*reason == SNES_CONVERGED_ITERATING)
+        *reason = SNESConvergedReason(mat->apply(it, xnorm, gnorm, f, xx, ww));
+    VecRestoreArrayRead(du, &din);
+    VecRestoreArrayRead(u, &in);
+    PetscFunctionReturn(0);
 }
 template<class Type, int I>
 PetscErrorCode FormJacobianTao(Tao tao, Vec x, Mat J, Mat B, void* ctx) {
@@ -2650,6 +2746,7 @@ AnyType NonlinearSolver<Type>::E_NonlinearSolver::operator()(Stack stack) const 
                 PetscNew(&user);
                 user->op = new NonlinearSolver<Type>::VecF_O(in->n, stack, codeJ);
                 user->r = new typename LinearSolver<Type, 'N'>::MatF_O(in->n, stack, codeR);
+                user->conv = nullptr;
                 SNES snes;
                 SNESCreate(PETSC_COMM_WORLD, &snes);
                 Vec f;
@@ -2670,6 +2767,13 @@ AnyType NonlinearSolver<Type>::E_NonlinearSolver::operator()(Stack stack) const 
                     ffassert(fb->n == last - first);
                     VecCreateMPIWithArray(PETSC_COMM_WORLD, 1, fb->n, n, static_cast<PetscScalar*>(*fb), &f);
                 }
+                const Polymorphic* op = nargs[3] ? dynamic_cast<const Polymorphic*>(nargs[3]) : nullptr;
+                if(op) {
+                    ffassert(op);
+                    const OneOperator *codeM = op->Find("(", ArrayOfaType(atype<long>(), atype<double>(), atype<double>(), atype<double>(), atype<KN<PetscScalar>*>(), atype<KN<PetscScalar>*>(), false));
+                    user->conv = new NonlinearSolver<Type>::IConvF_O(in->n, stack, codeM);
+                    SNESSetConvergenceTest(snes, Convergence<NonlinearSolver<Type>>, &user, NULL);
+                }
                 SNESSolve(snes, c == 1 ? f : NULL, x);
                 if(c == 1)
                     VecDestroy(&f);
@@ -2678,6 +2782,7 @@ AnyType NonlinearSolver<Type>::E_NonlinearSolver::operator()(Stack stack) const 
                     KSPDestroy(&ksp);
                 }
                 SNESDestroy(&snes);
+                delete user->conv;
                 delete user->r;
                 delete user->op;
                 PetscFree(user);
@@ -2714,8 +2819,8 @@ AnyType NonlinearSolver<Type>::E_NonlinearSolver::operator()(Stack stack) const 
                 ffassert(op);
                 const OneOperator *codeM = op->Find("(", ArrayOfaType(atype<long>(), atype<double>(), atype<Kn*>(), false));
                 user->mon = new NonlinearSolver<Type>::IMonF_O(in->n, stack, codeM);
+                TSMonitorSet(ts, Monitor<TimeStepper<Type>>, &user, NULL);
             }
-            TSMonitorSet(ts, Monitor<TimeStepper<Type>>, &user, NULL);
             TSSetSolution(ts, x);
             TSSolve(ts, x);
             if(ptA->_ksp) {
@@ -3003,50 +3108,6 @@ class ProdPETSc {
             return mv(Ax, A);
         }
 };
-template<class A>
-inline AnyType DestroyKN(Stack, const AnyType& x) {
-    KN<A>* a = GetAny<KN<A>*>(x);
-    for(int i = 0; i < a->N(); ++i)
-        (*a)[i].dtor();
-    a->destroy();
-    return Nothing;
-}
-template<class R>
-R* InitKN(R* const& a, const long& n) {
-    a->init(n);
-    return a;
-}
-template<class R, class A, class B>
-R* getElement(const A& a, const B& b) {
-    if( b<0 || a->N() <= b) {
-        cerr << "Out of bound  0 <= " << b << " < " << a->N() << " array type = " << typeid(A).name() << endl;
-        ExecError("Out of bound in operator []");
-    }
-    return  &((*a)[b]);
-}
-template<class T>
-struct Resize {
-    T* v;
-    Resize(T* w) : v(w) { }
-};
-template<class T>
-Resize<T> toResize(T* v) { return Resize<T>(v); }
-template<class T>
-T* resizeClean(const Resize<T>& t, const long &n) {
-    int m = t.v->N();
-    for(int i = n; i < m; ++i) {
-        (*t.v)[i].dtor();
-    }
-    t.v->resize(n);
-    return  t.v;
-}
-}
-
-template<typename Type>
-bool CheckPetscMatrix(Type* ptA) {
-    ffassert(ptA);
-    PetscValidHeaderSpecific(ptA->_petsc, MAT_CLASSID, 2);
-    return true;
 }
 
 static void Init_PETSc() {
@@ -3110,13 +3171,7 @@ static void Init_PETSc() {
     TheOperators->Add("<-", new OneOperator1_<long, Dbddc*>(PETSc::initEmptyCSR<Dbddc>));
     TheOperators->Add("<-", new PETSc::initCSR<HpSchur<PetscScalar>>);
 
-    Dcl_Type<KN<Dmat>*>(0, PETSc::DestroyKN<Dmat>);
-    TheOperators->Add("<-", new OneOperator2_<KN<Dmat>*, KN<Dmat>*, long>(&PETSc::InitKN));
-    atype<KN<Dmat>*>()->Add("[", "", new OneOperator2_<Dmat*, KN<Dmat>*, long>(PETSc::getElement<Dmat, KN<Dmat>*, long>));
-    Dcl_Type<PETSc::Resize<KN<Dmat>>>();
-    Add<KN<Dmat>*>("resize", ".", new OneOperator1<PETSc::Resize<KN<Dmat>>, KN<Dmat>*>(PETSc::toResize));
-    Add<PETSc::Resize<KN<Dmat>>>("(", "", new OneOperator2_<KN<Dmat>*, PETSc::Resize<KN<Dmat>>, long>(PETSc::resizeClean));
-    map_type_of_map[make_pair(atype<long>(), atype<Dmat*>())] = atype<KN<Dmat>*>();
+    addArray<Dmat>();
 
     Global.Add("exchange", "(", new exchangeIn<Dmat, PetscScalar>);
     Global.Add("exchange", "(", new exchangeInOut<Dmat, PetscScalar>);
@@ -3157,8 +3212,6 @@ static void Init_PETSc() {
     Global.Add("set", "(", new PETSc::setOptions<Dbddc>());
     addInv<Dbddc, PETSc::InvPETSc, KN<PetscScalar>, PetscScalar>();
     Init_Common();
-
-    Global.Add("check", "(", new OneOperator1<bool, Dmat*>(CheckPetscMatrix<Dmat>));
 }
 #ifndef PETScandSLEPc
 LOADFUNC(Init_PETSc)

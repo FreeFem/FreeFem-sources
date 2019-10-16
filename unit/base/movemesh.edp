@@ -32,11 +32,10 @@ test(x != savex && y != savey && z != savez);
 savex = x;
 savey = y;
 savez = z;
-int[int] refx=[0,1];  //  bas
+int[int] refx=[0,1];
 t = clock();
 MovedTh3 = movemesh(Th3, [x + uu, y + vv, z + ww], label=refx, region=refx,
                     facemerge=1, ptmerge=4.2, orientation=1);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(x != savex && y != savey && z != savez);
-plot(MovedTh3);

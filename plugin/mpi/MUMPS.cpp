@@ -33,8 +33,8 @@
 __declspec(dllexport) int toto;
 MPI_Fint* _imp__MPI_F_STATUS_IGNORE;
 MPI_Fint* _imp__MPI_F_STATUSES_IGNORE;
+//__declspec(dllexport) void __guard_check_icall_fptr(unsigned long ptr) { }
 #endif
-
 #include  <iostream>
 using namespace std;
 

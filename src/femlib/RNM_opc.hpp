@@ -69,7 +69,7 @@ inline    KNMK_<R> & KNMK_<R>::operator oper (const_R a)
 
 template<class R>
 inline KN_<R>&  KN_<R>::operator oper (const KN_<const_R> & u)   {
-    K_throwassert(u.n == n);
+    K_throwassert(!u.step || u.n == n);// Add constant vector
     R * l(v);
     const R *r(u);
     for (long i=0;i<n;i++,l += step, r += u.step) *l oper *r;

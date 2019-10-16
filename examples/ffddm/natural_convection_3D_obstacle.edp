@@ -52,7 +52,8 @@ meshN ThGlobal = trunc(Thc,1,split=mysplit);
 // on construit la decomposition avec recouvrement (le "aug" signifie qu'on fait egalement le necessaire pour pouvoir recuperer la solution syncronisee sur les ThAugmented, ce qui va nous servir pour avoir la matrice restreinte au sous-domaine (qui depend de la solution precedente) correcte).
 // "NC" est un prefixe, un nom qu'on choisit en input, qui va correspondre a une simulation (on peut combiner et resoudre de maniere differente plusieurs problemes dans le meme script)
 // Toutes les structures de donnees creees par la suite auront un nom prefixe par "NC"
-ffddmbuildAug(NC,ThGlobal,real,def,init,Pk,mpiCommWorld)
+ffddmbuildDmeshAug(NC,ThGlobal,mpiCommWorld)
+ffddmbuildDfespace(NC,NC,real,def,init,Pk)
 
 // tgv = -1 -> pseudo elimination pour les conditions de Dirichlet (on met 1 sur la diagonale et 0 ailleurs sur la ligne).
 vtgv = -1;

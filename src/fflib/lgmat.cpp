@@ -1238,9 +1238,75 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace3 & Uh,const KN_<doubl
 
 MatriceMorse<R> *  buildInterpolationMatrix1(const FESpaceS & Uh,const KN_<double> & xx,const KN_<double> & yy ,const KN_<double> & zz,int *data)
 {
-  // TODO
-    ffassert(0);
-    return 0;
+  typedef FESpaceS::Mesh Mesh;
+  typedef FESpaceS::FElement  FElement;
+  typedef Mesh::Element  Element;
+  typedef FESpaceS::Rd  Rd;
+
+  int op=op_id; //  value of the function
+  int icomp=0;
+  bool transpose=false;
+  bool inside=false;
+  if (data){
+    transpose=data[0];
+    op=data[1];
+    inside=data[2];
+    icomp = data[3];
+    ffassert(op>=0 && op < 4);
+    if(op==3) op=op_dz;//  correct missing
+  }
+  if(verbosity>2){
+    cout << "  -- buildInterpolationMatrix   transpose =" << transpose << endl
+    << "              value, dx , dy          op = " << op << endl
+    << "              composante                 = " << icomp << endl
+    << "                            just  inside = " << inside << endl;
+  }
+  using namespace Fem2D;
+  int n=Uh.NbOfDF;
+  int mm=xx.N();
+  int nbxx= mm;
+  if(transpose) Exchange(n,mm);
+  const  Mesh & ThU =Uh.Th; // line
+
+  FElement Uh0 = Uh[0];
+
+  int nbdfUK= Uh0.NbDoF();
+  int NUh= Uh0.N;
+
+  ffassert(icomp < NUh && icomp >=0);
+
+  const int sfb1=Uh0.N*last_operatortype*Uh0.NbDoF();
+  KN<R> kv(sfb1);
+  R * v = kv;
+  const R eps = 1.0e-10;
+
+  What_d whatd= 1 <<op;
+  KN<bool> fait(Uh.NbOfDF);
+  fait=false;
+  // map< pair<int,int> , double > sij;
+  MatriceMorse<R> * m = new MatriceMorse<R>(n,mm);
+  R2 Phat;
+  bool outside;
+
+  for(int ii=0;ii<nbxx;ii++){
+    const Element *ts=ThU.Find(Rd(xx[ii],yy[ii],zz[ii]),Phat,outside);
+    if(outside && !inside) continue;
+    int it = ThU(ts);
+    FElement KU(Uh[it]);
+    KNMK_<R> fb(v,nbdfUK,NUh,last_operatortype);
+    Uh0.tfe->FB(whatd,ThU,ThU[it],Phat,fb);
+    KN_<R> Fwi(fb('.',icomp,op));
+    for (int idfu=0;idfu<nbdfUK;idfu++){
+      int  j = ii;
+      int  i = KU(idfu);
+      if(transpose) Exchange(i,j);
+      R c = Fwi(idfu);
+      if(Abs(c)>eps)
+        (*m)(i,j) += c;
+    }
+  }
+
+  return m;
 }
 
 AnyType SetMatrixInterpolation1(Stack stack,Expression emat,Expression einter,int init)
@@ -1549,17 +1615,19 @@ AnyType CopyMat_tt(Stack stack,Expression emat,Expression eA,bool transp)
     else   Mat =GetAny<Matrice_Creuse<R>*>((*eA)(stack));
     MatriceMorse<R> * mr=Mat->pHM();
 
-    MatriceMorse<RR> * mrr = new MatriceMorse<RR>(mr->n,mr->n);
-    *mrr = *mr;
-    if(transp) mrr->dotranspose();
-
-
     Matrice_Creuse<RR> * sparse_mat =GetAny<Matrice_Creuse<RR>* >((*emat)(stack));
-    if(!init) sparse_mat->init() ;
-    sparse_mat->typemat=Mat->typemat; //  none square matrice (morse)
-    sparse_mat->A.master(mrr);
-    VirtualMatrix<int,RR> *pvm = sparse_mat->pMC();
-    pvm->SetSolver(); // copy solver ???
+    if(mr) {
+        MatriceMorse<RR> * mrr = new MatriceMorse<RR>(mr->n,mr->m);
+        *mrr = *mr;
+        if(transp) mrr->dotranspose();
+
+
+        if(!init) sparse_mat->init() ;
+        sparse_mat->typemat=Mat->typemat; //  none square matrice (morse)
+        sparse_mat->A.master(mrr);
+        VirtualMatrix<int,RR> *pvm = sparse_mat->pMC();
+        pvm->SetSolver(); // copy solver ???
+    }
     return sparse_mat;
 }
 
@@ -2868,6 +2936,21 @@ Matrice_Creuse<R> * AddtoMatrice_Creuse(Matrice_Creuse<R> * p,newpMatrice_Creuse
 {
     return np.add(p,double(c));
 }
+
+template<class K, bool init>
+Matrice_Creuse<K>* set_H_Eye(Matrice_Creuse<K> *pA,const  Eye eye)
+{
+    int n = eye.n, m=eye.m, nn= min(n,m);
+    if( init) pA->init();
+    pA->resize(n,m);
+    HashMatrix<int,K> * pH= pA->pHM();
+    ffassert(pH);
+    pH->clear();
+    pH->resize(n,m,nn);
+    for(int i=0; i< n; ++i)
+        (*pH)(i,i)=1.;
+    return  pA;
+}
 template <class R>
 void AddSparseMat()
 {
@@ -2902,7 +2985,8 @@ TheOperators->Add("^", new OneBinaryOperatorAt_inv<R>());
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R,1>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparse<R,1>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<tuple<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R,1>) ,
-       new OneOperatorCode<BlockMatrix1<R> >()
+       new OneOperatorCode<BlockMatrix1<R> >(),
+       new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Eye>(set_H_Eye<R,false> )
 
        );
     TheOperators->Add("+=",
@@ -2925,7 +3009,8 @@ TheOperators->Add("^", new OneBinaryOperatorAt_inv<R>());
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R,0>),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R,0>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparse<R,0>) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<tuple<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R,0>)
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<tuple<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R,0>),
+       new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Eye>(set_H_Eye<R,true> )
 
 
        );

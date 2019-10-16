@@ -1,0 +1,170 @@
+include "test.idp"
+load "hpddm"                        // HPDDM plugin
+
+real t;
+
+cout << functionDEFINITION << "dmv" << endl;
+{
+  //  run with MPI:  ff-mpirun -np 4 script.edp
+  // NBPROC 4
+
+  macro dimension()3// EOM            // 2D or 3D
+  include "macro_ddm.idp"             // additional DDM functions
+
+  macro def(i)i// EOM                         // scalar field definition
+  macro init(i)i// EOM                        // scalar field initialization
+  macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
+  func Pk = P2;                               // finite element space
+
+  string deflation = 1;              // coarse space construction
+  int overlap = 1;                           // geometric overlap between subdomains
+  int fakeInterface = 10;                  // interface between subdomains
+  int s = 1;                                   // refinement factor
+  real dt = 0.01;                                 // time step
+  int iMax = 10;                                // number of iterations
+
+  mpiComm comm;
+  int p = 1;
+  bool excluded = splitComm(mpiCommWorld, p, comm, topology = getARGV("-hpddm_level_2_topology", 0), exclude = (usedARGV("-hpddm_level_2_exclude") != -1));
+
+  if(verbosity > 0 && mpirank == 0) {
+    cout << " --- " << mpirank << "/" << mpisize;
+    cout << " - heat-3d.edp - input parameters: refinement factor = " << s << " - overlap = " << overlap << endl;
+  }
+
+  int[int] LL = [1,2, 1,1, 1,1];
+  meshN ThBorder, Th = cube(1, 1, 1, [x, y, z]);
+  fespace Wh(Th, Pk);           // local finite element space
+  int[int][int] intersection;   // local-to-neighbors renumbering
+  real[int] D;                  // partition of unity
+  {
+    Th = cube(5,  5, 5);      // global mesh
+    buildOverlap(Th, ThBorder, fakeInterface, s, overlap, intersection, D, Pk, comm, excluded)
+  }
+
+  real[int] rhs;                              // local right-hand side
+  matrix<real> Mat;                           // local operator
+  matrix<real> M;                             // local mass matrix
+  {                                           // local weak form
+    meshN ThAugmented = Th + ThBorder;
+    varf vPb(u, v) = intN(ThAugmented)(u * v + dt * (grad(u)' * grad(v))) + intN(ThAugmented)(dt * v) + on(1, u = 0.0);
+    fespace WhAugmented(ThAugmented, Pk);
+    Mat = vPb(WhAugmented, WhAugmented, tgv = -1);
+    real[int] rhsFull = vPb(0, WhAugmented, tgv = -1);
+    matrix R = interpolate(Wh, WhAugmented);
+    varf vPbM(u, v) = intN(ThAugmented)(u * v);
+    M = vPbM(WhAugmented, WhAugmented);
+    renumbering(M, R, rhsFull, rhs);
+    renumbering(Mat, R, rhsFull, rhs);
+  }
+  ThBorder = cube(1, 1, 1, [x, y, z]);
+
+  schwarz A(Mat, intersection, D, scaled = false);
+
+  matrix<real> Opt;                           // local operator with optimized boundary conditions
+  pair ret;
+  {
+    int solver = getOption("schwarz_method");
+    if(solver == 1 || solver == 2 || solver == 4) { // optimized Schwarz methods
+      fespace Ph(Th, P0);
+      real kZero = 10.0;
+      Ph transmission = kZero;
+      varf vOptimized(u, v) = intN(Th)(u * v + dt * (grad(u)' * grad(v))) + intN1(Th, fakeInterface)(transmission * (u * v)) + on(1, u = 0.0);
+      Opt = vOptimized(Wh, Wh, tgv = -1);
+    }
+    if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) { // two-level Schwarz methods
+      if(excluded)
+      attachCoarseOperator(mpiCommWorld, A/*, A = noPen, B = overlapRestriction, threshold = 2. * h[].max / diam*/);
+      else {
+        varf vPbNoPen(u, v) = intN(Th)(u * v + dt * (grad(u)' * grad(v))) + on(1, u = 0.0);
+        matrix<real> noPen = vPbNoPen(Wh, Wh, sym = 1);
+        if(deflation == "geneo") // standard GenEO, no need for RHS -> deduced from LHS (Neumann matrix)
+        attachCoarseOperator(mpiCommWorld, A, A = noPen/*, threshold = 2. * h[].max / diam,*/, ret = ret);
+        else if(deflation == "dtn") {
+          varf vMass(def(u), def(v)) = intN1(Th, fakeInterface)(u * v);
+          matrix<real> massMatrix = vMass(Wh, Wh, sym = 1);
+          attachCoarseOperator(mpiCommWorld, A, A = noPen, B = massMatrix, pattern = Opt/*, threshold = k,*/, ret = ret);
+        }
+        else if(deflation == "geneo-2") // GenEO-2 for optimized Schwarz methods, need for RHS (LHS is still Neumann matrix)
+        attachCoarseOperator(mpiCommWorld, A, A = noPen, B = Opt, pattern = Opt/*, threshold = 2. * h[].max / diam,*/, ret = ret);
+      }
+    }
+  }
+  /*# SolvePlot #*/
+  cout << functionDEFINITION << "set" << endl;
+  t = mpiWtime();
+  set(A, sparams = "-hpddm_reuse_preconditioner=1");
+  t = mpiWtime() - t;
+  cout << timeELAPSED << t << endl;
+  Wh<real> def(u) = init(0.0);    // local solution
+  for(int i = 0; i < iMax; ++i) {
+    real[int] newRhs(rhs.n);
+    t = mpiWtime();
+    dmv(A, M, u[], newRhs);     // newRhs = M * u[]
+    t = mpiWtime() - t;
+    cout << timeELAPSED << t << endl;
+    newRhs += rhs;
+
+    if(Opt.n > 0)       // optimized Schwarz methods
+    DDM(A, newRhs, u[], excluded = excluded, ret = ret, O = Opt);
+    else
+    u[] = A^-1 * newRhs;
+
+    plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
+  }
+}
+
+cout << functionDEFINITION << "IterativeMethod" << endl;
+{
+  int n = 4;
+  real[int] b(n), u(n);
+  func real[int] matId(real[int]& u) { return u; };
+  func real[int] A(real[int]& u) {
+      for(int i = 0; i < u.n; ++i)
+          u[i] = (10 * mpirank + i + 1) * u[i];
+      return u;
+  }
+  func real error(real[int]& u , real[int]& b) {
+      real s = 0;
+      for(int i = 0; i < u.n; ++i)
+          s += abs((10 * mpirank + i + 1) * u[i] - b[i]);
+      return s;
+  }
+
+  b = 1;
+  u = 0;
+  t = mpiWtime();
+  IterativeMethod(A, b, u, sparams = "-hpddm_tol 1e-6 -hpddm_foo_krylov_method gcrodr -hpddm_foo_recycle 4 -hpddm_foo_variant flexible" + (mpirank == 0 ? " -hpddm_foo_verbosity 4" : ""), prefix = "foo_");
+  t = mpiWtime() - t;
+  cout << timeELAPSED << t << endl;
+  test(error(u, b) < 1e-5);
+  u = 0;
+  t = mpiWtime();
+  IterativeMethod(A, b, u, precon = matId, prefix = "foo_");
+  t = mpiWtime() - t;
+  cout << timeELAPSED << t << endl;
+  test(error(u, b) < 1e-5);
+  func real[int] B(real[int]& u) {
+      for(int i = 0; i < u.n; ++i)
+          u[i] = (2 * mpirank + i + 1) * u[i];
+      return u;
+  }
+  mpiWtime();
+  func real[int] time(real[int]& u) {
+      for(int i = 0;i < u.n; ++i)
+          u[i] *= (1.0 + 1.0 / mpiWtime());
+      return u;
+  }
+  u = 0;
+  t = mpiWtime();
+  IterativeMethod(B, b, u, precon = time, prefix = "foo_");
+  t = mpiWtime() - t;
+  cout << timeELAPSED << t << endl;
+  func real errorB(real[int]& u , real[int]& b) {
+      real s = 0;
+      for(int i = 0; i < u.n; ++i)
+          s += abs((2 * mpirank + i + 1) * u[i] - b[i]);
+      return s;
+  }
+  test(errorB(u, b) < 1e-5);
+}

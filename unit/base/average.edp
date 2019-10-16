@@ -3,7 +3,7 @@ include "test.idp"
 cout << functionDEFINITION << "average" << endl;
 real t;
 
-cout << parameterDEFINITION << "complex" << endl;
+cout << typeDEFINITION << "complex" << endl;
 {
   complex c = 4 + 2i;
 
@@ -14,7 +14,7 @@ cout << parameterDEFINITION << "complex" << endl;
   test(res == 4 + 2i);
 }
 
-cout << parameterDEFINITION << "real" << endl;
+cout << typeDEFINITION << "real" << endl;
 {
   real r = 42;
 

@@ -46,7 +46,7 @@ Pwritesummary
 This example solves a Laplace problem in 2D in parallel with a two-level GenEO domain decomposition method. To try this example, just copy and paste the script above in a file 'test.edp' and run it on 2 cores with
 
 ```console
-$ ff-mpirun -np 2 test.edp -glut ffglut
+$ ff-mpirun -np 2 test.edp -wg
 ```
 
 ## Documentation

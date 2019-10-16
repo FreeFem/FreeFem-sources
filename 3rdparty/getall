@@ -93,10 +93,10 @@ download('BLAS','http://www.netlib.org/blas/blast-forum/cblas.tgz',
 	'http://www.netlib.org/blas/blast-forum',
 	'cblas.tgz',
 	'1e8830f622d2112239a4a8a83b84209a');
-download('OpenBLAS','http://github.com/xianyi/OpenBLAS/tarball/v0.2.12',
+download('OpenBLAS','http://github.com/xianyi/OpenBLAS/archive/v0.3.6.tar.gz',
 	'http://www.openblas.net/',
 	'OpenBLAS.tar.gz',
-	'dfc868e0c134855639f036d2723bf4be',
+	'8a110a25b819a4b94e8a9580702b6495',
 	'BAD_CERT');
 
 # downloading the binary package is required for Windows because
@@ -113,10 +113,10 @@ download('OpenBLAS-Win32','http://downloads.sourceforge.net/project/openblas/v0.
 	'OpenBLAS-v0.2.14-Win32.zip',
 	'eefdf170439620d78fabb3139b7aeb2f');
 
-download('FFTW','http://www.fftw.org/fftw-3.3.2.tar.gz',
+download('FFTW','http://www.fftw.org/fftw-3.3.8.tar.gz',
 	'http://www.fftw.org',
-	'fftw-3.3.2.tar.gz',
-	'6977ee770ed68c85698c7168ffa6e178');
+	'fftw-3.3.8.tar.gz','8aac833c943d8e90d51b697b27d4384d');
+# 3.3.2	'6977ee770ed68c85698c7168ffa6e178');
 download('freeYams','https://www.ljll.math.upmc.fr/frey/ftp/archives/freeyams.2012.02.05.tgz',
 	'https://www.ljll.math.upmc.fr/frey/software.html',
 	'freeyams.2012.02.05.tgz',
@@ -175,21 +175,21 @@ download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
 	'tetgen1.5.1-beta1.tar.gz',
 	'3d55c197bcbfc611b7ced6f343643756');
 
-download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.11.3.tar.gz',
+download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.12.0.tar.gz',
 	'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/',
-	'petsc-lite-3.11.3.tar.gz',
-	'e04cbb1aaccde4a33c8843e75a1fba15');
+	'petsc-lite-3.12.0.tar.gz',
+	'997dc9475c634891ba63fefa56ac3621');
 	
-download('htool','https://github.com/PierreMarchand20/htool/archive/4af73fa94bd9ac7c81aba8191cb5da31da5f767a.zip',
+download('htool','https://github.com/PierreMarchand20/htool/archive/84fb0d9bd429556e131c5447283514509d44ab73.zip',
 		'https://github.com/PierreMarchand20/',
 		'htool.zip',
-		'fb2fdfc77c5e7b53d0bb7cab0d10fe7e');
+		'b8a8177c811ef6a232867d672ab416f3');
 
 	
-download('hpddm','https://github.com/hpddm/hpddm/archive/c19bfa259083a5093bdbe86af4c9a3a9cfeb9e56.zip',
+download('hpddm','https://github.com/hpddm/hpddm/archive/c68d87dd6f4c1f020227877554462c974ae4604f.zip',
 	'https://github.com/hpddm',
 	'hpddm.zip',
-	'c17d6bbd887d47edb1c88a72d4c9dcd0');
+	'1a629bc8e35c51d23f78ff27e5734a7e');
 
 # run all downloads concurrently
 
@@ -261,8 +261,22 @@ sub downloadone{
 				$errors.="ERROR: $cmd FAILED\n"
 			}
 		}
+		
 	}
 	# check if resulting package contents are valid
 	my $md5check=md5_hex(`cat pkg/$pkg`);
-	if( ( $md5 ne "none") && ($md5check ne $md5)){$errors.="ERROR: INVALID MD5 for $pkg  $md5check\n"}
+	if( ( $md5 ne "none") && ($md5check ne $md5)){
+		print "Download failed (MD5 check) from $url of $pkg\n";
+		my $url="http://pkgs.freefem.org/$pkg";
+		my $cmd="../bin/build/download $url pkg/$pkg $opts";
+		print "Try other site: $url\n";
+		system $cmd;
+		if($?){
+			$errors.="ERROR 2: $cmd FAILED\n"
+		}
+		else { $md5check=md5_hex(`cat pkg/$pkg`);}
+		if(  ($md5check ne $md5))
+		{
+		  $errors.="ERROR2: INVALID MD5 for $pkg  $md5check\n"}
+	    }
 }

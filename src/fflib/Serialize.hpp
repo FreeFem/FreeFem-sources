@@ -51,6 +51,14 @@ class Serialize {
     }
     ~Serialize() { if(count()-- == 0) delete [](p-sizeof(long)); }
     size_t size() const { return lg; }
+    
+    inline int havebordermesh() {
+      size_t pp=2*sizeof(int);
+      int bordermesh=0;
+      get( pp,bordermesh);
+      return bordermesh;
+    }
+    
     // mpi routine
     void mpisend(const MPIrank &, long tag, const void *comm);
     Serialize(const MPIrank &, const char *wht, long tag, const void *comm);

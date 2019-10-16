@@ -4,31 +4,28 @@ cout << functionDEFINITION << "LinearCG" << endl;
 real t;
 real eps = 1e-4;
 int Conv;
-real[int] b(10),u(10);
+real[int] b(10), u(10);
 int NbIter = 5;
 real Eps = 1e-6;
-real Veps = - 1e-6;
+real Veps = -1e-6;
 
-func  bool stop(int iter,real[int] u,real[int] g)
-{
- return g.linfty < 1e-15 || iter > 15;;
+func bool stop (int iter, real[int] u, real[int] g) {
+  return g.linfty < 1e-15 || iter > 15;
 }
 
-func real[int] DJ(real[int] &u)
-  {
-    for (int i=0;i<u.n;i++)
-      u[i]=(i+1)*u[i];
-    u -= b;
-    return u;
-  };
+func real[int] DJ (real[int] &u) {
+  for (int i = 0; i < u.n; i++)
+    u[i] = (i + 1)*u[i];
+  u -= b;
+  return u;
+}
 
-func real J(real[int] &u2)
-  {
-    real s=0;
-    for (int i=0;i<u2.n;i++)
-    s +=(i+1)*u2[i]*u2[i]*0.5 - b[i]*u2[i];
-    return s;
-  }
+func real J (real[int] &u2) {
+  real s = 0;
+  for (int i = 0; i < u2.n; i++)
+    s += (i + 1)*u2[i]*u2[i]*0.5 - b[i]*u2[i];
+  return s;
+}
 
 u = 0;
 b = 1;
@@ -40,17 +37,15 @@ cout << timeELAPSED << t << endl;
 test(Conv == 1);
 test(DJ(u).max < HWERROR);
 
-// minimisation of $J(u) = \frac12\sum (i+1) u_i^2 - b_i $
-  // work array
-int verb=5;
+int verb = 5;
 b = 1;
-u=0.;
+u = 0.;
 
-func real[int] matId(real[int] &u2) { return u2;};
+func real[int] matId (real[int] &u2) { return u2; }
 
 cout << parameterDEFINITION << "with A, x, eps, precon, nbiter, verbosity" << endl;
 t = clock();
-Conv = LinearCG(DJ,u,nbiter=20, eps=Eps, veps=Veps, verbosity=verb, precon=matId, stop=stop);
+Conv = LinearCG(DJ, u, nbiter=20, eps=Eps, veps=Veps, verbosity=verb, precon=matId, stop=stop);
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(Conv == 1);
