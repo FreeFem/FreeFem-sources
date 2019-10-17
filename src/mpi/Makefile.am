@@ -46,7 +46,7 @@ FreeFem___mpi_DEPENDENCIES = ../fflib/libff.a
 LDADD = ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @MPI_LIB@
 
 AM_CXXFLAGS = -DPARALLELE
-AM_CPPFLAGS = -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib @MPI_INCLUDE@ $(HDF5_CPPFLAGS) $(UMFPACK_CPPFLAGS)
+AM_CPPFLAGS = -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib @MPI_INCLUDE@ $(HDF5_CPPFLAGS) $(UMFPACK_CPPFLAGS) -I$(srcdir)/../ffgraphics/asio/asio/include -I$(srcdir)/../ffgraphics/json/single_include -I$(srcdir)/../ffgraphics/server
 ff-mpirun: ff-mpirun.in Makefile
 	../../config.status  --file=ff-mpirun:ff-mpirun.in
 	chmod a+x ff-mpirun
