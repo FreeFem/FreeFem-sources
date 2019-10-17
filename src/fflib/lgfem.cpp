@@ -3799,11 +3799,11 @@ AnyType Plot::operator()(Stack s) const{
         if (nargs[4]) (theplot<< 4L)  <= GetAny<bool>((*nargs[4])(s));
         packet.JsonifyArgs<bool>(std::string("fill"), (nargs[4]) ? GetAny<bool>((*nargs[4])(s)) : -1);
         if (nargs[5]) (theplot<< 5L) <=  GetAny<bool>((*nargs[5])(s));
-        packet.JsonifyArgs<bool>(std::string("value"), (nargs[4]) ? GetAny<bool>((*nargs[5])(s)) : -1);
+        packet.JsonifyArgs<bool>(std::string("value"), (nargs[5]) ? GetAny<bool>((*nargs[5])(s)) : -1);
         if (nargs[6]) (theplot<< 6L) <=  GetAny<bool>((*nargs[6])(s));
-        packet.JsonifyArgs<bool>(std::string("clean"), (nargs[4]) ? GetAny<bool>((*nargs[6])(s)) : -1);
+        packet.JsonifyArgs<bool>(std::string("clean"), (nargs[6]) ? GetAny<bool>((*nargs[6])(s)) : -1);
         if (nargs[7]) (theplot<< 7L)  <= GetAny<bool>((*nargs[7])(s));
-        packet.JsonifyArgs<bool>(std::string("aspect-ratio"), (nargs[4]) ? GetAny<bool>((*nargs[7])(s)) : -1);
+        packet.JsonifyArgs<bool>(std::string("aspect-ratio"), (nargs[7]) ? GetAny<bool>((*nargs[7])(s)) : -1);
         if (nargs[8])
         {
           KN<double> bbox(4);
