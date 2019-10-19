@@ -1416,6 +1416,7 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
                         }
                         ia[i + 1] = ia[i] + transpose[i].size();
                     }
+                    delete [] transpose;
                     MatCreate(PETSC_COMM_SELF, &aux);
                     MatSetSizes(aux, A->_n, A->_n, A->_n, A->_n);
                     MatSetType(aux, MATSEQSBAIJ);
