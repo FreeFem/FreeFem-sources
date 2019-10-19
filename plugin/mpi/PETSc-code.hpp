@@ -41,13 +41,19 @@ void initPETScStructure(HpddmType* ptA, PetscInt bs, PetscBool symmetric, KN<typ
     if(bs > 1)
         MatSetBlockSize(ptA->_petsc, bs);
     MatSetSizes(ptA->_petsc, ptA->_last - ptA->_first, ptA->_last - ptA->_first, global, global);
-    MatSetType(ptA->_petsc, MATMPIAIJ);
-    if(ia)
-        MatMPIAIJSetPreallocationCSR(ptA->_petsc, reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
+    bool sym = ptA->_A->getMatrix()->_sym;
+    MatSetType(ptA->_petsc, sym ? MATMPISBAIJ : MATMPIAIJ);
+    if(ia) {
+        if(sym)
+            MatMPISBAIJSetPreallocationCSR(ptA->_petsc, 1, reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
+        else
+            MatMPIAIJSetPreallocationCSR(ptA->_petsc, reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
+    }
     else
         MatSetUp(ptA->_petsc);
     MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
-    MatSetOption(ptA->_petsc, MAT_SYMMETRIC, symmetric);
+    if(!sym)
+        MatSetOption(ptA->_petsc, MAT_SYMMETRIC, symmetric);
     if(free) {
         delete [] ia;
         delete [] ja;
@@ -1392,8 +1398,32 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
             if(isType && ptA->_A && ptA->_A->getMatrix() && ptA->_num) {
                 const HPDDM::MatrixCSR<PetscScalar>* const A = ptA->_A->getMatrix();
                 Mat aux;
-                if(A->_sym)
-                    MatCreateSeqSBAIJWithArrays(PETSC_COMM_SELF, 1, A->_n, A->_m, A->_ia, A->_ja, A->_a, &aux);
+                if(A->_sym) {
+                    std::vector<std::pair<int, int>>* transpose = new std::vector<std::pair<int, int>>[A->_n]();
+                    for(int i = 0; i < A->_n; ++i)
+                        for(int j = A->_ia[i] - (HPDDM_NUMBERING == 'F'); j < A->_ia[i + 1] - (HPDDM_NUMBERING == 'F'); ++j)
+                            transpose[A->_ja[j] - (HPDDM_NUMBERING == 'F')].emplace_back(i, j);
+                    for(int i = 0; i < A->_n; ++i)
+                        std::sort(transpose[i].begin(), transpose[i].end());
+                    PetscInt* ia = new PetscInt[A->_n + 1];
+                    PetscInt* ja = new PetscInt[A->_nnz];
+                    PetscScalar* c = new PetscScalar[A->_nnz];
+                    ia[0] = 0;
+                    for(int i = 0; i < A->_n; ++i) {
+                        for(int j = 0; j < transpose[i].size(); ++j) {
+                            c[ia[i] + j] = A->_a[transpose[i][j].second];
+                            ja[ia[i] + j] = transpose[i][j].first;
+                        }
+                        ia[i + 1] = ia[i] + transpose[i].size();
+                    }
+                    MatCreate(PETSC_COMM_SELF, &aux);
+                    MatSetSizes(aux, A->_n, A->_n, A->_n, A->_n);
+                    MatSetType(aux, MATSEQSBAIJ);
+                    MatSeqSBAIJSetPreallocationCSR(aux, 1, ia, ja, c);
+                    delete [] c;
+                    delete [] ja;
+                    delete [] ia;
+                }
                 else
                     MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, A->_n, A->_m, A->_ia, A->_ja, A->_a, &aux);
                 PetscInt* idx;

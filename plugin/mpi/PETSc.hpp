@@ -273,14 +273,14 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
     }
 }
 void setCompositePC(PC pc, const std::vector<Mat>* S) {
-    if(S) {
+    if(S && !S->empty()) {
         PetscInt nsplits;
         KSP* subksp;
         PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
+        KSPSetOperators(subksp[nsplits - 1], (*S)[0], (*S)[0]);
         if(S->size() == 1) {
-            KSPSetOperators(subksp[nsplits - 1], (*S)[0], (*S)[0]);
             IS is;
-#if !PETSC_VERSION_RELEASE
+#if PETSC_VERSION_GE(3,12,0)
             PCFieldSplitGetISByIndex(pc, nsplits - 1, &is);
 #else
             const char* prefixPC;
@@ -292,7 +292,7 @@ void setCompositePC(PC pc, const std::vector<Mat>* S) {
 #endif
             PetscObjectCompose((PetscObject)is, "pmat", (PetscObject)(*S)[0]);
         }
-        else if(!S->empty()) {
+        else {
             PC pcS;
             KSPGetPC(subksp[nsplits - 1], &pcS);
             for(int i = 0; i < S->size(); ++i)

@@ -24,10 +24,16 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
-###Added
-###Changed
-###Deprecated
-## [4.4-2]  oct 15, 2019
+### Added
+- Preliminary support for symmetric distributed PETSc matrices (MATMPISBAIJ instead of MATMPIAIJ)
+
+### Changed
+-
+
+### Removed
+- FFTW is not compiled by PETSc anymore
+
+## [4.4-2]
 ### Added
 - add matrix and array tools (FH)
    ```
@@ -58,12 +64,6 @@ All notable changes to this project will be documented in this file.
 - new PETSc version 3.12
 - templatize movemesh, setMesh functions
 - add conditional tests in make check
-
-### Deprecated
--
-
-### Removed
--
 
 ### Fixed
 - spurious output in PARDISO
@@ -183,7 +183,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4...develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-2...develop
+[4.4-2]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4...v4.4-2
 [4.4]: https://github.com/FreeFem/FreeFem-sources/compare/v4.2.1...v4.4
 [4.2.1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.0...v4.2.1
 [4.1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.0...v4.1
