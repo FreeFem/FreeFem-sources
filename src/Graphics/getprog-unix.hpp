@@ -26,6 +26,7 @@ extern bool waitatend;
 extern bool consoleatend;
 extern bool echo_edp;
 extern bool NoGraphicWindow;
+extern const char *  check_plugin;
 
 char *Shell_Space(const char *s);
 
@@ -71,13 +72,14 @@ char *Shell_Space(const char *s) {
 }
 
 extern void (*init_lgparallele)();
-
+extern bool load(string s);
 // <<getprog>> called by [[file:../lglib/lg.ypp::getprog]]
 int getprog(char *fn, int argc, char **argv) {
   waitatend = 0; // init_lgparallele==0; // wait if not parallel
   consoleatend = false; // bug with redirection FH
   int ret = 0;
   *fn = '\0';
+check_plugin=0; // no pluging to check ..
 #ifdef _WIN32
   const int lsuffix = 4;
 #else
@@ -192,6 +194,11 @@ int getprog(char *fn, int argc, char **argv) {
         NoGraphicWindow = false;
         }
       }
+      else if (strcmp(argv[i], "-check_plugin") == 0 && i + 1 < argc) {
+          check_plugin=argv[++i];
+        ;// BUG because freefem++ is not initial .. so do after ..
+       
+          }
       else if (strcmp(argv[i], "-gff") == 0 && i + 1 < argc) {
         progffglut = Shell_Space(argv[++i]);
         if (flagnw) { // if -nw => no graphic in anycase
@@ -282,7 +289,7 @@ int getprog(char *fn, int argc, char **argv) {
   }
 #endif
 
-  if (ret != 1) {
+  if (ret != 1 && check_plugin==0) {
     const char *ff = argc ? argv[0] : "FreeFem++";
 
     cout << ff << " - version " << StrVersionNumber() << " " << sizeof(void*)*8 << "bits" << endl;
@@ -305,6 +312,7 @@ int getprog(char *fn, int argc, char **argv) {
     cout << "\t-fglut: [filename]  redirect graphics in file" << endl;
     cout << "\t-glut:  [command]   use custom glut" << endl;
     cout << "\t-gff:   [command]   use custom glut (with space quoting)" << endl;
+    cout << "\t-check_plugin [filename]        just try if the plugin is correct" <<endl;
     cout << "\t-?:                 show help" << endl << endl;
 
     if (noffglut) cout << "without default ffglut: " << ffglut << endl;

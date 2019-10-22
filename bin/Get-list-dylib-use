@@ -1,0 +1,19 @@
+
+#export DYLD_PRINT_LIBRARIES=1
+##((src/nw/FreeFem++ ;test -f src/mpi/FreeFem++-mpi && src/mpi/FreeFem++-mpi	) 2>&1 | awk '/dyld: loaded:/ {print $3}'| sort -u; 
+#otool -L plugin/seq/*.dylib plugin/mpi/*.dylib |\
+# awk ' NF>2 {print $1} ' |\
+#  sort -u) | sed s,@rpath/,,|\
+#    egrep -v ^/usr/lib/|\
+#	 grep -v ^/System/	|\
+#	  egrep '.dylib$'| sort -u \
+#|awk -F/ '{ if (f[$NF]!=1 ) print $0;  f[$NF]=1;}'
+(
+(echo export DYLD_PRINT_LIBRARIES=1;ls plugin/seq/*.dylib|grep -v fflapack| awk '{print "src/nw/FreeFem++ -check_plugin ",$0}' )|sh 2>&1|awk '/dyld: loaded:/ {print $3}'| sort -u
+(echo export DYLD_PRINT_LIBRARIES=1;ls plugin/mpi/*.dylib|grep -v fflapack| awk '{print "src/mpi/FreeFem++-mpi -check_plugin ",$0}' )|sh 2>&1|awk '/dyld: loaded:/ {print $3}'| sort -u
+)| sort -u | grep .dylib > etc/list-dylib
+
+egrep -v '/usr/lib/|/System/|./plugin/' etc/list-dylib >etc/list-dylib-no-os
+echo "list extern lib use by ff++"
+cat etc/list-dylib-no-os
+echo build file etc/list-dylib-no-os etc/list-dylib
