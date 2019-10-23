@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -x
 set -u
@@ -10,7 +10,18 @@ ORGANIZATION="FreeFem"
 REPOSITORY="FreeFem-sources"
 VERSION=`grep AC_INIT configure.ac | cut -d"," -f2 | tr - .`
 RELEASE_TAG_NAME="v$VERSION"
-DEB_NAME="freefem_${VERSION}-1_amd64.deb"
+distrib=`uname -s`-`uname -r`
+
+if [ "$distrib" == "Linux-4.4.0-166-generic" ]; then
+  # 16.04
+DISTRIB="Ubunutu_16.04"
+elif [ "$distrib" == "Linux-4.15.0-51-generic" ]; then
+  # 18.04
+DISTRIB="Ubunutu_18.04"
+fi
+
+
+DEB_NAME="freefem_${VERSION}-1_DISTRIB_amd64.deb"
 
 ## DEB build
 autoreconf -i
