@@ -32,6 +32,7 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 - FFTW is not compiled by PETSc anymore
+- Spurious outputs in TetGen plugin
 
 ## [4.4-2]
 ### Added
