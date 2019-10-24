@@ -1051,8 +1051,10 @@ struct SetArray2: public binary_function<K,K,SetArray<K> > {
     // cout << "SubArray: " << a << " " << b << endl;
     //     SetArray(long nn,R oo=R(),R sstep=R(1)): o(oo),n(nn),step(sstep) {}
     long  n= long(abs((b-a)));
-    ffassert(n);
-    K s= (b-a)/K(n);
+      
+      
+    ffassert(n>=0);
+    K s= (n==0) ? 1 : (b-a)/K(n);// correction oct 2019  FH Thanks to P. Ventura
     n++;
     if(verbosity>100)
       cout << "    SetArray " << n << " " << a << " " << s << endl;
