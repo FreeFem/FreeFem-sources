@@ -1486,88 +1486,6 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
 }
 
 template<class Type>
-class IterativeMethod_Op : public E_F0mps {
-    public:
-        Expression A;
-        Expression rhs;
-        Expression x;
-        static const int n_name_param = 2;
-        static basicAC_F0::name_and_type name_param[];
-        Expression nargs[n_name_param];
-        IterativeMethod_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3) : A(param1), rhs(param2), x(param3) {
-            args.SetNameParam(n_name_param, name_param, nargs);
-        }
-
-        AnyType operator()(Stack stack) const;
-};
-template<class Type>
-basicAC_F0::name_and_type IterativeMethod_Op<Type>::name_param[] = {
-    {"sparams", &typeid(std::string*)},
-    {"prefix", &typeid(std::string*)}
-};
-template<class Type>
-class IterativeMethod : public OneOperator {
-    public:
-        IterativeMethod() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<PetscScalar>*>(), atype<KN<PetscScalar>*>()) { }
-
-        E_F0* code(const basicAC_F0& args) const {
-            return new IterativeMethod_Op<Type>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
-        }
-};
-template<class Type>
-AnyType IterativeMethod_Op<Type>::operator()(Stack stack) const {
-    Type* ptA = GetAny<Type*>((*A)(stack));
-    KN<PetscScalar>* ptRhs = GetAny<KN<PetscScalar>*>((*rhs)(stack));
-    KN<PetscScalar>* ptX = GetAny<KN<PetscScalar>*>((*x)(stack));
-    std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
-    std::string* prefix = nargs[1] ? GetAny<std::string*>((*nargs[1])(stack)) : NULL;
-    PetscInt bs;
-    MatType type;
-    MatGetType(ptA->_petsc, &type);
-    PetscBool isNotBlock;
-    PetscStrcmp(type, MATMPIAIJ, &isNotBlock);
-    if(isNotBlock)
-        bs = 1;
-    else
-        MatGetBlockSize(ptA->_petsc, &bs);
-    if(!ptA->_ksp) {
-        KSPCreate(PETSC_COMM_WORLD, &ptA->_ksp);
-        KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
-        if(prefix)
-            KSPSetOptionsPrefix(ptA->_ksp, prefix->c_str());
-    }
-    KSPSetFromOptions(ptA->_ksp);
-    HPDDM::PETScOperator op(ptA->_ksp, ptA->_last - ptA->_first, bs);
-#ifndef HPDDM_SLEPC
-    if(prefix)
-        op.setPrefix(*prefix);
-    HPDDM::Option& opt = *HPDDM::Option::get();
-    if(options) {
-        opt.parse(*options, mpirank == 0);
-        if(mpirank != 0)
-            opt.remove("verbosity");
-    }
-#endif
-    Vec x, y;
-    MatCreateVecs(ptA->_petsc, &x, &y);
-    PetscScalar* ptr_x;
-    VecGetArray(x, &ptr_x);
-    HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, ptA->_first, ptA->_last, static_cast<PetscScalar*>(*ptRhs), ptr_x, ptRhs->n / bs, bs);
-    PetscScalar* ptr_y;
-    VecGetArray(y, &ptr_y);
-    std::fill_n(ptr_y, op._n, 0.0);
-    HPDDM::IterativeMethod::solve(op, ptr_x, ptr_y, 1, PETSC_COMM_WORLD);
-    VecRestoreArray(x, &ptr_x);
-    VecDestroy(&x);
-    HPDDM::Subdomain<PetscScalar>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<PetscScalar*>(*ptX), ptr_y, ptX->n / bs, bs);
-    VecRestoreArray(y, &ptr_y);
-    VecDestroy(&y);
-    if(ptA->_A)
-        ptA->_A->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<PetscScalar*>(*ptX));
-    return 0L;
-}
-
-template<class Type>
 class view_Op : public E_F0mps {
     public:
         Expression A;
@@ -3236,7 +3154,6 @@ static void Init_PETSc() {
     Global.Add("changeOperator", "(", new PETSc::changeOperator<Dmat>(1));
     TheOperators->Add("=", new OneOperator2_<Dmat*, Dmat*, Matrice_Creuse<PetscScalar>*>(PETSc::changeOperatorSimple));
     TheOperators->Add("=", new OneOperator2_<Dmat*, Dmat*, Dmat*>(PETSc::changeOperatorSimple));
-    Global.Add("IterativeMethod", "(", new PETSc::IterativeMethod<Dmat>);
     Global.Add("view", "(", new PETSc::view<Dmat>);
     Global.Add("originalNumbering", "(", new OneOperator3_<long, Dbddc*, KN<PetscScalar>*, KN<long>*>(PETSc::originalNumbering));
     Global.Add("renumber", "(", new OneOperator3_<long, KN<PetscScalar>*, KN<long>*, KN<PetscScalar>*>(PETSc::renumber));

@@ -49,16 +49,13 @@ class eigensolver : public OneOperator {
                 Stack stack;
                 mutable Kn x;
                 C_F0 c_x;
-                Expression mat1, mat;
+                Expression mat;
                 typedef typename RNM_VirtualMatrix<PetscScalar>::plusAx plusAx;
                 MatF_O(int n, Stack stk, const OneOperator* op) :
                     RNM_VirtualMatrix<PetscScalar>(n), stack(stk), x(n), c_x(CPValue(x)),
-                    mat1(op ? op->code(basicAC_F0_wa(c_x)) : 0),
-                    mat(op ? CastTo<Kn_>(C_F0(mat1, (aType)*op)) : 0) { }
+                    mat(op ? CastTo<Kn_>(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : 0) { }
                 ~MatF_O() {
-                    if(mat1 != mat)
-                        delete mat;
-                    delete mat1;
+                    delete mat;
                     Expression zzz = c_x;
                     delete zzz;
                 }
