@@ -21,7 +21,7 @@ DISTRIB="Ubuntu_18.04"
 fi
 
 
-DEB_NAME="FreeFEM_${VERSION}-1_${DISTRIB}_amd64.deb"
+DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_amd64.deb"
 
 ## DEB build
 autoreconf -i
