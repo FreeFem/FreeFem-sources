@@ -14,10 +14,10 @@ distrib=`uname -s`-`uname -r`
 
 if [ "$distrib" == "Linux-4.4.0-166-generic" ]; then
   # 16.04
-DISTRIB="Ubunutu_16.04"
+DISTRIB="Ubuntu_16.04"
 elif [ "$distrib" == "Linux-4.15.0-51-generic" ]; then
   # 18.04
-DISTRIB="Ubunutu_18.04"
+DISTRIB="Ubuntu_18.04"
 fi
 
 
