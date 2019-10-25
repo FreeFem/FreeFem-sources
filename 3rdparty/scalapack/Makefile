@@ -6,8 +6,7 @@ include SLmake.inc
 all-local: scalapack
 
 # FFCS: parallel compilation crashes on Win32 (same archive updated from 2 different parallel makes)
-#MAKEFLAGS=-j 1
-.NOTPARALLEL:
+
 # Downloading and compiling scalapack
 # ------------------------------
 # http://www.netlib.org/scalapack/
@@ -81,4 +80,3 @@ clean:
 #	-rm $(PACKAGE1)
 
 .PHONY:$(SRCDIR)/$(INSTALL)
-.NOTPARALLEL:
