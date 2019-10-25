@@ -164,7 +164,7 @@ int mylex::EatCommentAndSpace(string *data)
             if(c=='\n')
             {
                 linenumber++;
-                if (echo) cout << setw(5) <<linenumber << " : " ;
+                if (echo) cout << setw(5) <<linenumber << this->sep() ;
             };
             if(data) *data+=char(c);
             c=source().peek();
@@ -197,7 +197,7 @@ int mylex::EatCommentAndSpace(string *data)
                 if(c=='\n')
                 {
                     linenumber++;
-                    if (echo) cout << setw(5) <<linenumber << " : " ;
+                    if (echo) cout << setw(5) <<linenumber << this->sep() ;
                 };
             }
             while( (c!= '\n') && (c!= 10)  && (c!= 13)  &&  ( c != EOF) );
@@ -218,7 +218,7 @@ int mylex::EatCommentAndSpace(string *data)
                 if(c=='\n')
                 {
                     linenumber++;
-                    if (echo) cout << setw(5) <<linenumber << " : " ;
+                    if (echo) cout << setw(5) <<linenumber << this->sep() ;
                 };
                 caux = source().peek();
             }
@@ -259,7 +259,7 @@ debut:
     if (firsttime)
     {
         firsttime=false;
-        if(echo) cout << setw(5) <<linenumber << " : " ;
+        if(echo) cout << setw(5) <<linenumber << this->sep() ;
     }
     EatCommentAndSpace(); // [[mylex::EatCommentAndSpace]]
     c =source().get(); // the current char
@@ -712,12 +712,13 @@ bool mylex::SetMacro(int &ret)
         macroparm.d.push_back(def);
         if (nbparam)
             if(echo) cout << " )  " ;
+        if(0)//  stupide ..
         for (size_t i=0; i<def.size(); i++)
             if (def[i] == 10 || (def[i] == 13 ) )
             {
                 def[i]='\n';
                 linenumber++;
-                if(echo) cout << '\n' << setw(5) <<linenumber << " : " ;
+                if(echo) cout << '\n' << setw(5) <<linenumber << " @ " ;
             }
             else if(echo) cout << def[i]   ;
         MapMacroDef & MacroDef =listMacroDef->back();
@@ -1118,7 +1119,7 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
 
     l=0;
     nf=f=0;
-
+    sep=':';
     // Try to open the given file name without any extra path from [[file:lex.hpp::ffincludedir]]
     if (lex->ffincludedir.empty())
       nf=f= new ifstream(ff,ios_base::binary); //  modif of win32
@@ -1207,7 +1208,7 @@ void mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int mac
     macroarg=macroargs;
     l=0;
     nf=f= new istringstream(s.c_str());
-
+    sep='@';
     if (!f || !*f)
     {
         lex->cout << " Error readin string  :" <<s<< endl;

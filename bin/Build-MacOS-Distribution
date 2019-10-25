@@ -14,6 +14,17 @@ while [ $# -ne 0 ]  ; do
     esac; 
     shift
 done
+prefix=$(grep '"prefix"' config.status|awk -F'"' '{print $4}')
+bindir=$(grep '"bindir"' config.status|awk -F'"' '{print $4}')
+ff_prefix_dir_lib=$(grep '"ff_prefix_dir_lib"' config.status|awk -F'"' '{print $4}')
+echo prefix=$prefix
+echo lib=$prefix/lib
+echo biblib=$bindir
+echo rlib=../lib
+execrlib=@executable_path/$rlib
+if [ test $(dirname $bindir) != "prefix" ] ; then
+	echo wrong place to change dylib for install
+fi
 echo "DESTDIR=$DESTDIR ."
 if test "$DESTDIR" = no ; then
 	echo "usage $0 DESTDIR=/tmp/ff++ MPI=MPIcompiledir"
@@ -53,78 +64,45 @@ fi
 fi
 make 
 make 
+# build the lis of external 
+Get-list-dylib-use
 make install DESTDIR="$DESTDIR"
-ffexe=$(find "$DESTDIR" -type f -name FreeFem++|grep -v /etc/paths.d)
-fflibmsh3=$(find "$DESTDIR" -type f  -name msh3.dylib|grep -v '/lib/mpi/'| grep -v  '/etc/paths.d')
-echo ffexe = $ffexe
-export  DYLD_PRINT_LIBRARIES=yes
-listdylib=/tmp/ffdylb.$$.txt
-$ffexe 2>&1| awk '/dyld: loaded:/ {print $3}'  > $listdylib
-grep -q libmkl $listdylib && withMKL=yes 
-mkl_arch="libmkl_mc.dylib libmkl_mc3.dylib libmkl_avx.dylib libmkl_avx2.dylib libmkl_avx512.dylib"
 
-echo "ffexe $ffexe"
-echo "ffmsh3 $fflibmsh3"
-test -z "$ffexe" && exit 1
-test -z "$fflibmsh3" && exit 1
-
-dirff=$(dirname "$ffexe");
-dirfflib=$(dirname "$fflibmsh3")
-echo "dirlib=..$dirfflib.."
-test -f $dirff/FreeFem++-mpi && ffmpi=$dirff/FreeFem++-mpi
-test -d "$dirfflib/mpi" && dirfflibmpi="$dirfflib/mpi"
-
-ffmain="$dirff/FreeFem++ $dirff/FreeFem++-nw $dirff/bamg $dirff/cvmsh2 $dirff/ffglut $dirff/ffmedit $ffmpi"
-#echo --
-lib1=$(dylib_of $ffmain)
-lib2=$(dylib_of $dirfflib/*.dylib)
-#echo ..
-test -d $dirfflib/mpi/ && lib3=$(dylib_of $dirfflib/mpi/*.dylib)
-echo $lib1
-echo $lib2
-echo $lib3
-ldy="$lib1 $lib2 $lib3"
-nldy=$(echo $ldy|wc -w)
-#echo ++++ $ldy .. $nldy
-
-mldy=0
-echo ..... $nldy $mldy
-while [ "$nldy" -ne "$mldy" ] ; do 
- mldy=$nldy;
- ldy=$(dylib_of $ldy)
- nldy=$(echo $ldy|wc -w)
- # echo ".. $nldy  .. $ldy"
+// get relativ path of 
+MKL=no
+ffcpf=/tmp/copy-dylib.$$.txt
+rm $ffcpf 
+for i in $(cat etc/list-dylib|grep -v /intel/) ;do
+	d=$(dirname $i)
+	dl=$(dirname $i)
+	bi=$(basename $i)
+	case $i in
+	*/ff-petsc/*)
+		echo mkdir -p $DESTDIR/$d;
+		echo cp $i $DESTDIR/$d;;
+	/usr/local/ff++/*)
+		echo mkdir -p $DESTDIR/$lib;
+		echo cp $i $DESTDIR/$lib
+		echo $DESTDIR/$lib/$i $bi $execrlib  >> $ffcpf 
+		;;
+	*libmkl_*)	MKL=yes;;	
+   esac
+done
+if test $MKL = "yes" ; then
+	for i in $(list-dylib-mkl) ;do
+		bi=$(basename $i)
+		echo cp $i $DESTDIR/$lib
+		echo $DESTDIR/$lib/$i $bi $execrlib >> $ffcpf
+	done
+fi
+#  update lib in distrib ..
+bin/change-dylib $ffcpf $DESTDIR/$lib/*dylib
+bin/change-dylib $ffcpf $DESTDIR/$lib/*dylib
+bin/change-dylib $ffcpf $DESTDIR/$lib/*dylib
+bin/change-dylib $ffcpf  $(find $DESTDIR/$ff_prefix_dir_lib -name '*dylib')
+for i in FreeFem++		FreeFem++-mpi	FreeFem++-nw	bamg		cvmsh2			ffglut			ffmedit;do
+	bin/change-dylib $ffcpf $DESTDIR/$bindir/$i 
 done
 
-for i in $ldy ; do
- case $i in 
- /usr/local/*) 
- 
-   if [ -e $i ] ; then
-     mkdir -p $DESTDIR/$(dirname $i)
-	 echo cp $i $DESTDIR/$i
-	 cp $i $DESTDIR/$i
-   else
-	 echo " not a file" $i
-   fi
-   ;;
-  *)
-  j=$(basename $i)
-  if [ ! -e $DESTDIR/usr/local/lib/$j ] ; then
-	  
-	  if [  -e /usr/local/lib/$j ] ; then
-		  mkdir -p $DESTDIR/usr/local/lib
-		  cp /usr/local/lib/$j $DESTDIR/usr/local/lib/$j
-	  else
-        echo missing $DESTDIR/usr/local/lib/$j
-    fi 
-	
-  fi
-  
-  
-  ;;
-esac  
-done
-# 
 
 
