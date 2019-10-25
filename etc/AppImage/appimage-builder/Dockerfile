@@ -38,6 +38,7 @@ RUN apt update && apt full-upgrade -y && apt install -y --no-install-recommends 
     libscotch-dev \
     libsuitesparse-dev \
     libtet1.5-dev \
+    locales \
     m4 \
     make \
     mpich \
