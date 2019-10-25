@@ -17,7 +17,7 @@ RUN apt update && apt full-upgrade -y && apt install -y --no-install-recommends 
     ca-certificates \
     cmake \
     coinor-libipopt-dev \
-    coreutils \
+    file \
     flex \
     freeglut3-dev \
     g++ \
