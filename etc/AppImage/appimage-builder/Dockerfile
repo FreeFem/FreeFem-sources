@@ -45,6 +45,7 @@ RUN apt update && apt full-upgrade -y && apt install -y --no-install-recommends 
     patch \
     pkg-config \
     python \
+    sudo \
     unzip \
     valgrind \
     wget \
