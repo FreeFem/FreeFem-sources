@@ -49,5 +49,5 @@ then
 	echo "Release does not exists"
 	exit 1
 else
-  RESPONSE=`curl --data-binary "@$DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$DEB_NAME"`
+  RESPONSE=`curl --data-binary "@$GH_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_DEB_NAME"`
 fi
