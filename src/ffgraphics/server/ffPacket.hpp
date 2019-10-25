@@ -61,7 +61,7 @@ struct ffPacket {
      * @param const T& - Data to convert
      */
     template <typename T>
-    void Jsonify(const T& data);
+    void Jsonify(const T& data, long int Id);
 
     template <typename T>
     void JsonifyArgs(std::string Name, const T Data);

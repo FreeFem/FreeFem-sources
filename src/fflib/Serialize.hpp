@@ -35,11 +35,10 @@ class Serialize {
     const char *what;
     char *p;
     public:
-    Serialize(size_t lgg, const char *wht):
-      lg(lgg),
-      what(wht),
-      p((new char[lg + sizeof(long)]) + sizeof(long))
-      { count() = 0; }
+    Serialize(size_t lgg, const char *wht)
+      : lg(lgg), what(wht), p((new char[lg + sizeof(long)]) + sizeof(long))
+    { count() = 0; }
+
     void resize(size_t lgn) { // Add nov 2010 FH of asyncrone recv MPI ...
       if (lgn > lg) {
         char *p0 = new char[lgn+sizeof(long)];
@@ -51,14 +50,14 @@ class Serialize {
     }
     ~Serialize() { if(count()-- == 0) delete [](p-sizeof(long)); }
     size_t size() const { return lg; }
-    
+
     inline int havebordermesh() {
       size_t pp=2*sizeof(int);
       int bordermesh=0;
       get( pp,bordermesh);
       return bordermesh;
     }
-    
+
     // mpi routine
     void mpisend(const MPIrank &, long tag, const void *comm);
     Serialize(const MPIrank &, const char *wht, long tag, const void *comm);

@@ -148,7 +148,7 @@ std::string ffPacket::Dump(int indent)
  */
 void ffPacket::Compress()
 {
-    //std::cout << Dump() << "\n";
+    std::cout << Dump(1) << "\n";
     std::vector<uint8_t> tmp = json::to_cbor(m_JSON);
 
     m_Data.insert(m_Data.end(), tmp.begin(), tmp.end());
@@ -193,37 +193,34 @@ std::string ffPacket::GetHeader()
  * @param const std::vector<KN_<double>>& - a curve
  */
 template<>
-void ffPacket::Jsonify<std::vector<KN_<double>>>(const std::vector<KN_<double>>& data)
+void ffPacket::Jsonify<std::vector<KN_<double>>>(const std::vector<KN_<double>>& data, long int Id)
 {
     m_JSON["Geometry"] += json::object();
-    auto Obj_JSON = --(m_JSON["Geometry"].end());
+    json& Geometry = (*(--(m_JSON["Geometry"].end())));
 
-
-    (*Obj_JSON)["Primitive"] = "Line";
-    (*Obj_JSON)["GeometryType"] = "Surface";
-    (*Obj_JSON)["Vertices"] = json::array();
-    (*Obj_JSON)["Indices"] = json::array();
-    (*Obj_JSON)["Labels"] = json::array();
+    Geometry["ID"] = Id;
     size_t element_nbr = data[0].size();
     size_t dimensions = (data.size() == 4) ? 3 : data.size();
 
-    if (data.size() == 2)
-        (*Obj_JSON)["Type"] = "Mesh2D";
-    else
-        (*Obj_JSON)["Type"] = "Mesh3D";
-
+    Geometry["Vertices"] = json::array();
+    Geometry["Indices"] = json::array();
+    Geometry["Labels"] = json::array();
     for (size_t i = 0; i < element_nbr; ++i) {
-        for (size_t j = 0; j < dimensions; ++j) {
-            (*Obj_JSON)["Vertices"] += data[j][(long long int)i];
+        for (size_t j = 0; j < 3;² ++j) {
+            if (j < dimensions) {
+                Geometry["Vertices"] += data[j][(long long int)i];
+            } else {
+                Geometry["Vertices"] += 0.f;
+            }
         }
         if (data.size() == 4) {
-            (*Obj_JSON)["Labels"] += (long int)data[3][(long long int)i];
+            Geometry["Labels"] += (long int)data[3][(long long int)i];
         } else {
-            (*Obj_JSON)["Labels"] += 0;
+            Geometry["Labels"] += 0;
         }
         if (i != element_nbr - 1) {
-            (*Obj_JSON)["Indices"] += i;
-            (*Obj_JSON)["Indices"] += i + 1;
+            Geometry["Indices"] += i;
+            Geometry["Indices"] += i + 1;
         }
     }
 }
@@ -243,82 +240,47 @@ void ffPacket::Jsonify<std::vector<KN_<double>>>(const std::vector<KN_<double>>&
  * @param const Fem2D::Mesh& - a Mesh
  */
 template<>
-void ffPacket::Jsonify<Fem2D::Mesh>(const Fem2D::Mesh& data)
+void ffPacket::Jsonify<Fem2D::Mesh>(const Fem2D::Mesh& data, long int Id)
 {
     m_JSON["Geometry"] += json::object();
-    auto Obj_JSON = --(m_JSON["Geometry"].end());
+    json& Geometry = (*(--(m_JSON["Geometry"].end())));
 
-    (*Obj_JSON)["Type"] = "Mesh2D";
-    (*Obj_JSON)["GeometryType"] = "Volume";
-    (*Obj_JSON)["Primitive"] = "Triangle";
-    (*Obj_JSON)["Vertices"] = json::array();
-    (*Obj_JSON)["Indices"] = json::array();
-    (*Obj_JSON)["Labels"] = json::array();
+    // Adding Mesh Id to the JSON object that correspond
+    Geometry["Id"] = Id;
+    Geometry["Type"] = "Mesh2D";
+    Geometry["IsoValues"] = false;
+    Geometry["Borders"] = true;
 
-    std::cout << "Number of triangles : " << data.nt << "\n";
-    for (int i = 0; i < data.nt; ++i) {
-        const Fem2D::Mesh::Element& e(data[i]);
-        (*Obj_JSON)["Indices"] += data(e[0]);
-        (*Obj_JSON)["Indices"] += data(e[1]);
-        (*Obj_JSON)["Indices"] += data(e[2]);
+    Geometry["Vertices"] = json::array();
 
-        (*Obj_JSON)["Labels"] += e.lab;
-        (*Obj_JSON)["Labels"] += e.lab;
-        (*Obj_JSON)["Labels"] += e.lab;
-    }
     for (int i = 0; i < data.nv; ++i) {
         const Fem2D::Mesh::Vertex& p = data(i);
-        (*Obj_JSON)["Vertices"] += p.x;
-        (*Obj_JSON)["Vertices"] += p.y;
+
+        Geometry["Vertices"] += p.x;
+        Geometry["Vertices"] += p.y;
+        Geometry["Vertices"] += 0.f;
     }
 
-    // m_JSON["Geometry"] += json::object();
-    // Obj_JSON = --(m_JSON["Geometry"].end());
+    Geometry["MeshIndices"] = json::array();
+    Geometry["MeshLabels"] = json::array();
 
-    // (*Obj_JSON)["Type"] = "Mesh2D";
-    // (*Obj_JSON)["GeometryType"] = "Surface";
-    // (*Obj_JSON)["Primitive"] = "Line";
-    // (*Obj_JSON)["Vertices"] = json::array();
-    // (*Obj_JSON)["Indices"] = json::array();
+    for (int i = 0; i < data.nt; ++i) {
+        const Fem2D::Mesh::Element& e(data[i]);
+        Geometry["MeshIndices"] += data(e[0]);
+        Geometry["MeshIndices"] += data(e[1]);
+        Geometry["MeshIndices"] += data(e[2]);
+        Geometry["MeshLabels"] += e.lab;
+    }
 
-    // int index = 0;
-    // for (int i = 0; i < data.nbBrdElmts(); ++i) {
-    //     const Fem2D::Mesh::BorderElement& b(data.be(i));
-    //     const Fem2D::Mesh::Vertex& p = data(data(b[0]));
-    //     const Fem2D::Mesh::Vertex& p1 = data(data(b[1]));
 
-    //     (*Obj_JSON)["Vertices"] += p.x;
-    //     (*Obj_JSON)["Vertices"] += p.y;
-    //     (*Obj_JSON)["Vertices"] += 0.0f;
-    //     std::array<float, 4> Color = LabelToColor(b.lab);
-    //     (*Obj_JSON)["Vertices"] += Color[0];
-    //     (*Obj_JSON)["Vertices"] += Color[1];
-    //     (*Obj_JSON)["Vertices"] += Color[2];
-    //     (*Obj_JSON)["Vertices"] += Color[3];
+    Geometry["BorderIndices"] = json::array();
+    Geometry["BorderLabels"] = json::array();
 
-    //     (*Obj_JSON)["Indices"] += index;
-    //     index += 1;
-
-    //     (*Obj_JSON)["Vertices"] += p1.x;
-    //     (*Obj_JSON)["Vertices"] += p1.y;
-    //     (*Obj_JSON)["Vertices"] += 0.0f;
-    //     Color = LabelToColor(b.lab);
-    //     (*Obj_JSON)["Vertices"] += Color[0];
-    //     (*Obj_JSON)["Vertices"] += Color[1];
-    //     (*Obj_JSON)["Vertices"] += Color[2];
-    //     (*Obj_JSON)["Vertices"] += Color[3];
-
-    //     (*Obj_JSON)["Indices"] += index;
-    //     index += 1;
-    // }
-}
-
-static void PushVertex(json& VerticesArray, std::array<std::array<float, 21>, 4> triangles)
-{
-    for (int i = 0; i < triangles.size(); ++i) {
-        for (int j = 0; j < triangles[i].size(); ++j) {
-            VerticesArray += triangles[i][j];
-        }
+    for (int i = 0; i < data.neb; ++i) {
+        const Fem2D::Mesh::BorderElement& b(data.be(i));
+        Geometry["BorderIndices"] += data(b[0]);
+        Geometry["BorderIndices"] += data(b[1]);
+        Geometry["BorderLabels"] += b.lab;
     }
 }
 
@@ -337,90 +299,67 @@ static void PushVertex(json& VerticesArray, std::array<std::array<float, 21>, 4>
  * @param const Fem2D::Mesh3& - a Mesh3
  */
 template<>
-void ffPacket::Jsonify<Fem2D::Mesh3>(const Fem2D::Mesh3& data)
+void ffPacket::Jsonify<Fem2D::Mesh3>(const Fem2D::Mesh3& data, long int Id)
 {
     m_JSON["Geometry"] += json::object();
-    auto Obj_JSON = --(m_JSON["Geometry"].end());
+    json& Geometry = (*(--(m_JSON["Geometry"].end())));
 
-    (*Obj_JSON)["Type"] = "Mesh3D";
-    (*Obj_JSON)["GeometryType"] = "Volume";
-    (*Obj_JSON)["Primitive"] = "Triangle";
-    (*Obj_JSON)["Vertices"] = json::array();
-    (*Obj_JSON)["Indices"] = json::array();
-    (*Obj_JSON)["Labels"] = json::array();
+    // Adding Mesh Id to the JSON object that correspond
+    Geometry["Id"] = Id;
+    Geometry["Type"] = "Mesh2D";
+    Geometry["IsoValues"] = false;
+    Geometry["Borders"] = true;
+
+    Geometry["Vertices"] = json::array();
 
     for (int i = 0; i < data.nv; ++i) {
-        (*Obj_JSON)["Vertices"] += data.vertices[i].x;
-        (*Obj_JSON)["Vertices"] += data.vertices[i].y;
-        (*Obj_JSON)["Vertices"] += data.vertices[i].z;
+        Geometry["Vertices"] += data.vertices[i].x;
+        Geometry["Vertices"] += data.vertices[i].y;
+        Geometry["Vertices"] += data.vertices[i].z;
     }
+
+    Geometry["MeshIndices"] = json::array();
+    Geometry["MeshLabels"] = json::array();
+
     for (int i = 0; i < data.nt; ++i) {
         const auto& tetra(data.elements[i]);
+
         // Triangle 1
-        (*Obj_JSON)["Indices"] += data(tetra[0]);
-        (*Obj_JSON)["Indices"] += data(tetra[1]);
-        (*Obj_JSON)["Indices"] += data(tetra[2]);
-        (*Obj_JSON)["Labels"] += tetra.lab;
-        (*Obj_JSON)["Labels"] += tetra.lab;
-        (*Obj_JSON)["Labels"] += tetra.lab;
+        Geometry["MeshIndices"] += data(tetra[0]);
+        Geometry["MeshIndices"] += data(tetra[1]);
+        Geometry["MeshIndices"] += data(tetra[2]);
+        Geometry["MeshLabels"] += tetra.lab;
 
         // Triangle 2
-        (*Obj_JSON)["Indices"] += data(tetra[0]);
-        (*Obj_JSON)["Indices"] += data(tetra[2]);
-        (*Obj_JSON)["Indices"] += data(tetra[3]);
-        (*Obj_JSON)["Labels"] += tetra.lab;
-        (*Obj_JSON)["Labels"] += tetra.lab;
-        (*Obj_JSON)["Labels"] += tetra.lab;
+        Geometry["MeshIndices"] += data(tetra[0]);
+        Geometry["MeshIndices"] += data(tetra[2]);
+        Geometry["MeshIndices"] += data(tetra[3]);
+        Geometry["MeshLabels"] += tetra.lab;
 
         // Triangle 3
-        (*Obj_JSON)["Indices"] += data(tetra[0]);
-        (*Obj_JSON)["Indices"] += data(tetra[3]);
-        (*Obj_JSON)["Indices"] += data(tetra[1]);
-        (*Obj_JSON)["Labels"] += tetra.lab;
-        (*Obj_JSON)["Labels"] += tetra.lab;
-        (*Obj_JSON)["Labels"] += tetra.lab;
+        Geometry["MeshIndices"] += data(tetra[0]);
+        Geometry["MeshIndices"] += data(tetra[3]);
+        Geometry["MeshIndices"] += data(tetra[1]);
+        Geometry["MeshLabels"] += tetra.lab;
 
         // Triangle 4
-        (*Obj_JSON)["Indices"] += data(tetra[1]);
-        (*Obj_JSON)["Indices"] += data(tetra[2]);
-        (*Obj_JSON)["Indices"] += data(tetra[3]);
-        (*Obj_JSON)["Labels"] += tetra.lab;
-        (*Obj_JSON)["Labels"] += tetra.lab;
-        (*Obj_JSON)["Labels"] += tetra.lab;
+        Geometry["MeshIndices"] += data(tetra[1]);
+        Geometry["MeshIndices"] += data(tetra[2]);
+        Geometry["MeshIndices"] += data(tetra[3]);
+        Geometry["MeshLabels"] += tetra.lab;
     }
 
-    m_JSON["Geometry"] += json::object();
-    Obj_JSON = --(m_JSON["Geometry"].end());
 
-    (*Obj_JSON)["Type"] = "Mesh3D";
-    (*Obj_JSON)["GeometryType"] = "Surface";
-    (*Obj_JSON)["Primitive"] = "Triangle";
-    (*Obj_JSON)["Vertices"] = json::array();
-    (*Obj_JSON)["Indices"] = json::array();
-    (*Obj_JSON)["Labels"] = json::array();
+    Geometry["BorderIndices"] = json::array();
+    Geometry["BorderLabels"] = json::array();
 
-    int count = 0;
-    for (int i = 0; i < data.nbe; i += 1) {
-        const auto& b(data.borderelements[i]);
-        (*Obj_JSON)["Vertices"] += b[0].x;
-        (*Obj_JSON)["Vertices"] += b[0].y;
-        (*Obj_JSON)["Vertices"] += b[0].z;
+    for (int i = 0; i < data.nbe; ++i) {
+        const Fem2D::Mesh3::BorderElement& b(data.borderelements[i]);
 
-        (*Obj_JSON)["Vertices"] += b[1].x;
-        (*Obj_JSON)["Vertices"] += b[1].y;
-        (*Obj_JSON)["Vertices"] += b[1].z;
-
-        (*Obj_JSON)["Vertices"] += b[2].x;
-        (*Obj_JSON)["Vertices"] += b[2].y;
-        (*Obj_JSON)["Vertices"] += b[2].z;
-
-        (*Obj_JSON)["Indices"] += count;
-        (*Obj_JSON)["Indices"] += count + 1;
-        (*Obj_JSON)["Indices"] += count + 2;
-        count += 3;
-        (*Obj_JSON)["Labels"] += b.lab;
-        (*Obj_JSON)["Labels"] += b.lab;
-        (*Obj_JSON)["Labels"] += b.lab;
+        Geometry["BorderIndices"] += data(b[0]);
+        Geometry["BorderIndices"] += data(b[1]);
+        Geometry["BorderIndices"] += data(b[2]);
+        Geometry["BorderLabels"] += b.lab;
     }
 }
 
@@ -439,7 +378,7 @@ void ffPacket::Jsonify<Fem2D::Mesh3>(const Fem2D::Mesh3& data)
  * @param const Fem2D::MeshS& - a MeshS
  */
 template<>
-void ffPacket::Jsonify<Fem2D::MeshS>(const Fem2D::MeshS& data)
+void ffPacket::Jsonify<Fem2D::MeshS>(const Fem2D::MeshS& data, long int)
 {
     // Extract all vertices off the mesh
     for (int i = 0; i < data.nv; i += 1) {
@@ -483,28 +422,21 @@ void ffPacket::Jsonify<Fem2D::MeshS>(const Fem2D::MeshS& data)
  * @param const ffFE<Fem2D::R2, Fem2D::R>& - a 2D FEspace using real
  */
 template<>
-void ffPacket::Jsonify<ffFE<Fem2D::R2, Fem2D::R>>(const ffFE<Fem2D::R2, Fem2D::R>& data)
+void ffPacket::Jsonify<ffFE<Fem2D::R2, Fem2D::R>>(const ffFE<Fem2D::R2, Fem2D::R>& data, long int Id)
 {
-    m_JSON["Geometry"] += json::object();
-    auto Obj_JSON = --(m_JSON["Geometry"].end());
+    size_t i = 0;
+    for (i = 0; i < m_JSON["Geometry"].size(); ++i) {
+        long int cId = m_JSON["Geometry"][i].at("Id");
+        if (cId == Id) {
+            std::cout << "Found mesh.\n";
+            break;
+        }
+    }
+    json& Geometry = m_JSON["Geometry"][i];
+    Geometry["IsoValues"] = true;
 
-    (*Obj_JSON)["Type"] = "Mesh2D";
-    (*Obj_JSON)["GeometryType"] = "Surface";
-    (*Obj_JSON)["Primitive"] = "Line";
-    (*Obj_JSON)["Vertices"] = json::array();
-    (*Obj_JSON)["Indices"] = json::array();
-    (*Obj_JSON)["Labels"] = json::array();
+    // To-Do
 
-    for (int i = 0; i < data.Psub.N(); i += 1) {
-        (*Obj_JSON)["Vertices"] += data.Psub[i].x;
-        (*Obj_JSON)["Vertices"] += data.Psub[i].y;
-    }
-    for (int i = 0; i < data.Ksub.N(); i += 1) {
-        m_JSON["FE2D"]["Ksub"] += data.Ksub[i];
-    }
-    for (int i = 0; i < data.V1.N(); i += 1) {
-        m_JSON["FE2D"]["V1"] += data.V1[i];
-    }
 }
 
 /**
@@ -523,7 +455,7 @@ void ffPacket::Jsonify<ffFE<Fem2D::R2, Fem2D::R>>(const ffFE<Fem2D::R2, Fem2D::R
  * @param const ffFE<Fem2D::R2, complex<double>>& - a 2D FEspace using complex
  */
 template<>
-void ffPacket::Jsonify<ffFE<Fem2D::R2, complex<double>>>(const ffFE<Fem2D::R2, complex<double>>& data)
+void ffPacket::Jsonify<ffFE<Fem2D::R2, complex<double>>>(const ffFE<Fem2D::R2, complex<double>>& data, long int)
 {
     m_JSON["FE2D"]["Types"] = { "R2", "complex<double>" };
 
@@ -556,7 +488,7 @@ void ffPacket::Jsonify<ffFE<Fem2D::R2, complex<double>>>(const ffFE<Fem2D::R2, c
  * @param const ffFE<Fem2D::R3, Fem2D::R>& - a 3D FEspace using real
  */
 template<>
-void ffPacket::Jsonify<ffFE<Fem2D::R3, Fem2D::R>>(const ffFE<Fem2D::R3, Fem2D::R>& data)
+void ffPacket::Jsonify<ffFE<Fem2D::R3, Fem2D::R>>(const ffFE<Fem2D::R3, Fem2D::R>& data, long int)
 {
     m_JSON["FE2D"]["Types"] = { "R3", "R" };
 
@@ -589,7 +521,7 @@ void ffPacket::Jsonify<ffFE<Fem2D::R3, Fem2D::R>>(const ffFE<Fem2D::R3, Fem2D::R
  * @param const ffFE<Fem2D::R3, complex<double>>& - a 3D FEspace using complex
  */
 template<>
-void ffPacket::Jsonify<ffFE<Fem2D::R3, complex<double>>>(const ffFE<Fem2D::R3, complex<double>>& data)
+void ffPacket::Jsonify<ffFE<Fem2D::R3, complex<double>>>(const ffFE<Fem2D::R3, complex<double>>& data, long int)
 {
     m_JSON["FE3D"]["Types"] = { "R3", "complex<double>" };
 

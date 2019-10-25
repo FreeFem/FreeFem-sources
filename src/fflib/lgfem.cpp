@@ -79,6 +79,8 @@ namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso);
 void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & setoflab,bool &all);
 }
 
+static ffPacket packet; // To-Do pass the packet as argument in the Send2D/Send3D/SendS function instead of using a global
+
 #include "BamgFreeFem.hpp"
 
 static bool TheWait=false;
@@ -2447,7 +2449,7 @@ public:
 
 	const Mesh & evalm(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh >((*e[i])(s)) ;}
 	KN<pmesh> * evalma(int i,Stack s) const  { throwassert(e[i]);return   GetAny< KN<pmesh> * >((*e[i])(s)) ;}
-	const Mesh3 & evalm3(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh3 >((*e[i])(s)) ;}
+	const Mesh3 *evalm3(int i,Stack s) const  { throwassert(e[i]);return  GetAny< pmesh3 >((*e[i])(s)) ;}
     const MeshS & evalmS(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmeshS >((*e[i])(s)) ;}
 	const E_BorderN * evalb(int i,Stack s) const  { throwassert(e[i]);return   GetAny< const E_BorderN *>((*e[i])(s)) ;}
 	tab  evalt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<tab>((*e[i])(s)) ;}
@@ -3527,7 +3529,6 @@ int Send2d(PlotStream& theplot, Plot::ListWhat& lli, map<const typename v_fes::F
     long what = lli.what;
     int lg, nsb;
     lli.eval(fe, cmp);
-    ffPacket packet;
 
     if (fe[0]->x() && what % 10 == 1)
 	  {
@@ -3550,7 +3551,7 @@ int Send2d(PlotStream& theplot, Plot::ListWhat& lli, map<const typename v_fes::F
 	      if(verbosity > 9)
 	      cout << " Send plot:what: " << what << " " << nsb << " " << V1.N() << " Max " << V1.max() << " min " << V1.min() << endl;
 	      ffFE<R2, K> fffe(Psub, Ksub, V1);
-        packet.Jsonify(fffe);
+        packet.Jsonify(fffe, mapth[&(fe[0]->Vh->Th)]);
         if (verbosity > 99) { cout << packet.Dump() << "\n"; }
         theplot << Psub;
 	      theplot << Ksub;
@@ -3571,8 +3572,7 @@ int Send2d(PlotStream& theplot, Plot::ListWhat& lli, map<const typename v_fes::F
             for(int i=0;i<3;++i,++p)
                 Ksub[p] = numSubTriangle(nsb,sk,i);
         ffFE<R2, K> fffe(Psub, Ksub, V1);
-        packet.Jsonify(fffe);
-        if (verbosity > 99) { cout << packet.Dump() << "\n"; }
+        packet.Jsonify(fffe, mapth[&(fe[0]->Vh->Th)]);
         theplot << mapth[&(fe[0]->Vh->Th)]; // mesh's number
         theplot << Psub;
         theplot << Ksub;
@@ -3590,7 +3590,6 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
     int err=1;
     long what=lli.what;
     int lg,nsb;
-    ffPacket packet;
 
     if (what%10==6)
     {
@@ -3610,7 +3609,7 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
                     cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N()
                     << " "  << V1.max() << " " << V1.min() << endl;
                 ffFE<R3, K> fffe(Psub, Ksub, V1);
-                packet.Jsonify(fffe);
+                packet.Jsonify(fffe, mapth3[ &(fe3[0]->Vh->Th)]);
                 if (verbosity > 99) { cout << packet.Dump() << "\n"; }
                 theplot << Psub ;
                 theplot << Ksub ;
@@ -3647,7 +3646,7 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
                 // FFCS: should be able to deal with complex as well
                 theplot << (KN_<K>&) V123;
                 ffFE<R3, K> fffe(Psub1, Ksub1, V123);
-                packet.Jsonify(fffe);
+                packet.Jsonify(fffe, mapth3[ &(fe3[0]->Vh->Th)]);
                 if (verbosity > 99) { cout << packet.Dump() << "\n"; }
             }
         }
@@ -3667,7 +3666,6 @@ int SendS(PlotStream & theplot,Plot::ListWhat &lli,map<const MeshS *,long> &mapt
     long what=lli.what;
     int lg,nsb=0;
     lli.eval(feS,cmp);
-    ffPacket packet;
 
     if (what%10==8)
     {
@@ -3682,8 +3680,7 @@ int SendS(PlotStream & theplot,Plot::ListWhat &lli,map<const MeshS *,long> &mapt
             cout << " Send plot:what: " << what << " " << nsb << " "<<  V1.N()
             << " Max "  << V1.max() << " min " << V1.min() << endl;
         ffFE<R2, K> fffe(Psub, Ksub, V1);
-        packet.Jsonify(fffe);
-        if (verbosity > 99) { cout << packet.Dump() << "\n"; }
+        packet.Jsonify(fffe, mapthS[ &(feS[0]->Vh->Th)]);
         theplot << Psub ;
         theplot << Ksub ;
         theplot << V1;
@@ -3709,7 +3706,6 @@ inline  void NewSetColorTable(int nb,float *colors=0,int nbcolors=0,bool hsv=tru
 /// <<Plot_operator_brackets>> from class [[Plot]]
 AnyType Plot::operator()(Stack s) const{
 
-    ffPacket packet; // packet to be sent using the TCP server
     // remap  case 107 and 108 , 109  for array of FE.
     vector<ListWhat> ll;
     vector<AnyType> lat;
@@ -3902,7 +3898,7 @@ if(nargs[VTK_START+index])                    \
           // Prepare to send mesh 2d
           if(what ==0)
             th= ll[ii].th();
-          // Prepare to send mesh 3d with differenciation 3D surface / volumuic / volum+surfac
+          // Prepare to send mesh 3d with differenciation 3D surface / volume / volume + surface
           if( what ==5 ) {
             //const int th3type = (l[i].evalm3(0,s)).getTypeMesh3() ;
             // need to modifie the what for type mesh3 for identification in the ffglut reading
@@ -3910,11 +3906,11 @@ if(nargs[VTK_START+index])                    \
             //if (l[i].evalm3(0,s).meshS) { ll[i].what=51; th3= & (l[i].evalm3(0,s)); /*thS= &(l[i].evalmS(0,s)); */} // 3d mixed volume and surface
             //else { ll[i].what=51; th3= & (l[i].evalm3(0,s)); }   // 3d pure volume
             ll[i].what=51;
-            th3= & (l[i].evalm3(0,s));
+            th3= (l[i].evalm3(0,s));
 
           }
           if( what ==50 )
-            thS= (&(l[i].evalmS(0,s)));// 3d pure surface
+            thS= (&(l[i].evalmS(0,s))); // 3d pure surface
           // Prepare to send 2d iso values for ffglut
           else if (what==1 || what==2|| what==11 || what==12) {
             ll[ii].eval(fe,cmp);
@@ -3950,8 +3946,7 @@ if(nargs[VTK_START+index])                    \
         theplot << kth ;
 
         for (map<const Mesh *,long>::const_iterator i=mapth.begin();i != mapth.end(); ++i) {
-            packet.Jsonify(*i->first);
-            if (verbosity > 99) { cout << packet.Dump() << "\n"; }
+            packet.Jsonify(*i->first, i->second);
             theplot << i->second << *  i->first ;
         }
 
@@ -3961,7 +3956,7 @@ if(nargs[VTK_START+index])                    \
             theplot.SendMeshes3();
             theplot << kth3 ;
             for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i) {
-                packet.Jsonify(*i->first);
+                packet.Jsonify(*i->first, i->second);
                 if (verbosity > 99) { cout << packet.Dump() << "\n"; }
                 theplot << i->second << *  i->first ;
             }
@@ -3973,7 +3968,7 @@ if(nargs[VTK_START+index])                    \
             theplot.SendMeshesS();
             theplot << kthS ;
             for (map<const MeshS *,long>::const_iterator i=mapthS.begin();i != mapthS.end(); ++i) {
-                packet.Jsonify(*i->first);
+                packet.Jsonify(*i->first, i->second);
                 if (verbosity > 99) { cout << packet.Dump() << "\n"; }
                 theplot << i->second << *  i->first ;
             }
@@ -4039,9 +4034,7 @@ if(nargs[VTK_START+index])                    \
                     }
                     else theplot << z0;// empty arry ...
                 }
-                packet.Jsonify(curve_vector);
-                if(verbosity>99)
-                    cout << packet.Dump(4) << endl;
+                packet.Jsonify(curve_vector, LONG_MAX);
                 err=0;
             }
 
@@ -4055,11 +4048,11 @@ if(nargs[VTK_START+index])                    \
             // send 3d meshes for ffglut
             else if(what ==51)
             {
-                pTh3=&l[i].evalm3(0,s);
+                pTh3=l[i].evalm3(0,s);
                 if(pTh3) {
                     err=0;
                     theplot << what ;
-                    theplot <<mapth3[ &l[i].evalm3(0,s)];// numero du maillage 3D volume
+                    theplot <<mapth3[l[i].evalm3(0,s)];// numero du maillage 3D volume
                 }
             }
             else if(what ==50) {
