@@ -2615,7 +2615,7 @@ public:
 
             else if (BCastTo<pfSrarray>(args[i])) { // [[file:lgmesh3.hpp::pfSrarray]]
                 l[i].composant=false;
-                l[i].what=108; ffassert(0); //arry iso value array iso value 3d
+                l[i].what=108; //arry iso value array iso value 3d
                 l[i][0]=CastTo<pfSrarray>(args[i]);}
             else if (BCastTo<pfScarray>(args[i])) { // [[file:lgmesh3.hpp::pfScarray]]
                 l[i].composant=false;
@@ -3863,7 +3863,7 @@ if(nargs[VTK_START+index])                    \
           long what = ll[i].what;
           const Mesh *th=0;
           const Mesh3 *th3=0;
-            const MeshS *thS=0;
+          const MeshS *thS=0;
           // Prepare for the sending mesh 2d
           if(what ==0)
             th= ll[ii].th();
@@ -3872,9 +3872,11 @@ if(nargs[VTK_START+index])                    \
             //const int th3type = (l[i].evalm3(0,s)).getTypeMesh3() ;
             // need to modifie the what for type mesh3 for identification in the ffglut reading
             //if (l[i].evalm3(0,s)).meshS) { ll[i].what=50; thS= &(l[i].evalmS(0,s));}  // 3d pure surface
-            if (l[i].evalm3(0,s).meshS) { ll[i].what=52; th3= & (l[i].evalm3(0,s)); thS= &(l[i].evalmS(0,s)); } // 3d mixed volume and surface
-            else { ll[i].what=51; th3= & (l[i].evalm3(0,s)); }   // 3d pure volume
-         
+            //if (l[i].evalm3(0,s).meshS) { ll[i].what=51; th3= & (l[i].evalm3(0,s)); /*thS= &(l[i].evalmS(0,s)); */} // 3d mixed volume and surface
+            //else { ll[i].what=51; th3= & (l[i].evalm3(0,s)); }   // 3d pure volume
+            ll[i].what=51;
+            th3= & (l[i].evalm3(0,s));
+              
           }
           if( what ==50 )
             thS= (&(l[i].evalmS(0,s)));// 3d pure surface
@@ -3916,7 +3918,7 @@ if(nargs[VTK_START+index])                    \
             theplot << i->second << *  i->first ;
 
        // only send of volume meshes 3D
-        if(kth3 && kthS==0)
+        if(kth3)// && kthS==0)
         {
             theplot.SendMeshes3();
             theplot << kth3 ;
@@ -3925,7 +3927,7 @@ if(nargs[VTK_START+index])                    \
            }
 
         // only send of surface meshes 3D
-       if(kthS && kth3==0)
+       if(kthS)// && kth3==0)
         {
             theplot.SendMeshesS();
             theplot << kthS ;
@@ -3935,12 +3937,12 @@ if(nargs[VTK_START+index])                    \
 
         // send of volume and surface meshes 3D
         // in this case, plot the surface
-        if(kthS && kth3) {
+        /*if(kthS && kth3) {
           theplot.SendMeshes3();
-          theplot << kthS ;
+          theplot << kth3 ;
           for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i)
             theplot << i->second << *  i->first ;
-        }
+        }*/
 
         // end of what ploting for meshes
         theplot.SendPlots();

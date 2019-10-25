@@ -3,6 +3,7 @@ load "isoline"
 
 cout << functionDEFINITION << "isoline" << endl;
 
+real t;
 real[int,int] xy(3,1);
 int[int] be(1);
 {
@@ -12,7 +13,10 @@ int[int] be(1);
   real iso= 0.2 ;
   real[int] viso=[iso];
 
+  t = clock();
   int nbc= isoline(Th,u,xy,close=1,iso=iso,beginend=be,smoothing=0.1, eps=1e-5, ratio=1);
+  t = clock() - t;
+  cout << timeELAPSED << t << endl;
 
   border Curve0(t=0,1)
   { int c =0;
@@ -33,6 +37,7 @@ cout << functionDEFINITION << "curve" << endl;
 
 cout << " len of the curve 1 = " << xy(2,xy.m-1) << endl;;
 
+t = clock();
 border Curve0(t=0,1)
 {
   int c =0;
@@ -40,13 +45,18 @@ border Curve0(t=0,1)
   P=Curve(xy,i0,i1,t);
   label=1;
 }
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 
+t = clock();
 border Curve1(t=0,1)
 { int c =1;
   int i0 = be[2*c], i1 = be[2*c+1]-1;
   P=Curve(xy,i0,i1,t);
   label=1;
 }
+t = clock() - t;
+cout << timeELAPSED << t << endl;
 
 cout << functionDEFINITION << "findalllocalmin" << endl;
 

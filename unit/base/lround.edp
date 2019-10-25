@@ -5,8 +5,6 @@ real t;
 
 real rpos = 0.5;
 real rneg = -0.5;
-real nanb = sqrt(-1);
-real toolong = 2e63;
 
 cout << typeDEFINITION << "real" << endl;
 

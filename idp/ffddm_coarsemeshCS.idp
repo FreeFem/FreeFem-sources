@@ -132,5 +132,9 @@ if (!pr#prfe#prmesh#binexactCS) {
   }
 }
 	
+IFMACRO(pr#withhpddm)
+attachCoarseOperator(pr#prfe#prmesh#commddm, pr#hpddmOP, pr#Q);
+ENDIFMACRO
+
 pr#prfe#prmesh#toc(pr#tloc,"building E",pr#tbuildE)
 } // EOM

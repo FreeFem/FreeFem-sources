@@ -138,3 +138,5 @@ RANLIB   = FF_RANLIB
 #
 help:
 	@$(ECHO) "usage: make ?"
+	
+.NOTPARALLEL:	

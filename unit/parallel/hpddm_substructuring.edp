@@ -14,12 +14,12 @@ include "test.idp"
   func Pk = P1;                       // finite element space
 
   real t;
-  int labNeumann = getARGV("-labNeumann", 2);                     // interface between subdomains
-  int s = getARGV("-split", 1);                                   // refinement factor
+  int labNeumann = 2;                     // interface between subdomains
+  int s = 1;                                   // refinement factor
 
   mpiComm comm;
-  int p = getARGV("-hpddm_level_2_p", 1);
-  bool excluded = splitComm(mpiCommWorld, p, comm, topology = getARGV("-hpddm_level_2_topology", 0), exclude = (usedARGV("-hpddm_level_2_exclude") != -1));
+  int p = 1;
+  bool excluded = splitComm(mpiCommWorld, p, comm, topology = 0, exclude = (usedARGV("-hpddm_level_2_exclude") != -1));
 
   if(verbosity > 0 && mpirank == 0) {
     cout << " --- " << mpirank << "/" << mpisize;
@@ -144,7 +144,7 @@ cout << functionDEFINITION << "changeNumbering" << endl;
   int[int][int] intersection;
   real[int] D;
   {
-      int s = getARGV("-split", 1);
+      int s = 1;
       build(M, s, intersection, D, Pk, mpiCommWorld)
   }
   Vh u;
@@ -170,7 +170,7 @@ cout << functionDEFINITION << "changeNumbering" << endl;
       return outPETSc;
   }
   func int funcJ(real[int]& inPETSc) {
-      t = mpiWtime();
+      t = mpiWtime();
       changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
       t = mpiWtime() - t;
       cout << timeELAPSED << t << endl;

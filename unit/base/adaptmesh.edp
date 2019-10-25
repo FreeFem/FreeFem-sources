@@ -4,6 +4,7 @@ cout << functionDEFINITION << "adaptmesh" << endl;
 
 real t;
 
+cout << typeDEFINITION << "mesh" << endl;
 mesh Th = square(5, 5);
 
 fespace Uh(Th, P1);

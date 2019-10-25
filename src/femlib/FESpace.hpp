@@ -688,8 +688,11 @@ extern TypeOfFE & P1ncLagrange;
     tom(0),
     MaxNbNodePerElement(3),
     MaxNbDFPerElement(3*Nproduit)
- {}
-
+    {    if(!lockOrientation) {
+            cerr << " Error, lockOrientation must be true to build fespace ; must check orientation element for mesh" ;
+            assert(lockOrientation);
+        }
+    }
 
   int FirstDFOfNode(int i) const {return FirstDfOfNodeData ? FirstDfOfNodeData[i] : i*Nproduit;}
   int LastDFOfNode(int i)  const {return FirstDfOfNodeData ? FirstDfOfNodeData[i+1] : (i+1)*Nproduit;}

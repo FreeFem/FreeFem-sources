@@ -5,6 +5,7 @@
 #include <mpi.h>
 #include <ff++.hpp>
 #include <AFunction_ext.hpp>
+#include <array_tlp.hpp>
 
 #ifdef WITH_mkl
 #define HPDDM_MKL 1
@@ -381,6 +382,39 @@ AnyType distributedDot<K>::E_distributedDot::operator()(Stack stack) const {
         Add2StackOfPtr2Free(stack, ptab);
         return SetAny<KN<K>>(tab);
     }
+}
+
+template<class A>
+inline AnyType MyDestroyKN(Stack, const AnyType& x) {
+    KN<A>* a = GetAny<KN<A>*>(x);
+    for(int i = 0; i < a->N(); ++i)
+        (*a)[i].dtor();
+    a->destroy();
+    return Nothing;
+}
+template<class R>
+R* InitKN(R* const& a, const long& n) {
+    a->init(n);
+    return a;
+}
+template<class T>
+T* resizeClean(const Resize<T>& t, const long &n) {
+    int m = t.v->N();
+    for(int i = n; i < m; ++i)
+        (*t.v)[i].dtor();
+    t.v->resize(n);
+    return t.v;
+}
+
+template<class Op>
+void addArray() {
+    Dcl_Type<KN<Op>*>(0, MyDestroyKN<Op>);
+    TheOperators->Add("<-", new OneOperator2_<KN<Op>*, KN<Op>*, long>(&InitKN));
+    atype<KN<Op>*>()->Add("[", "", new OneOperator2_<Op*, KN<Op>*, long>(get_elementp_<Op, KN<Op>*, long>));
+    Dcl_Type<Resize<KN<Op>>>();
+    Add<KN<Op>*>("resize", ".", new OneOperator1<Resize<KN<Op>>, KN<Op>*>(to_Resize));
+    Add<Resize<KN<Op>>>("(", "", new OneOperator2_<KN<Op>*, Resize<KN<Op>>, long>(resizeClean));
+    map_type_of_map[make_pair(atype<long>(), atype<Op*>())] = atype<KN<Op>*>();
 }
 
 static void Init_Common() {

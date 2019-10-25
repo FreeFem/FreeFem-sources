@@ -109,6 +109,7 @@ while [ $# -ne 0 ]  ; do
 	    echo "    file.{cpp,cp,cxx,c,f,F}"
 	    exit 0;
 	    ;;
+	LIBFF=*) LIBFF=`echo $1|sed 's/[A-Z0-9]*=//'` ;; 
 	F77=*) F77=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	CXX=*) CXX=`echo $1|sed 's/[A-Z0-9]*=//'` ;;
 	MPICXX=*) MPICXX=`echo $1|sed 's/[A-Z0-9]*=//'`;withmpi=yes ;;
@@ -211,7 +212,16 @@ case "$WIN32$uu" in
 #        echo "export MACOSX_DEPLOYMENT_TARGET=10.3"
 #	export MACOSX_DEPLOYMENT_TARGET=10.4
 #	SUF=dylib
-	SHARED="-bundle -undefined dynamic_lookup"  ;;
+	SHARED="-bundle -undefined dynamic_lookup"  
+
+	if [  -f "$LIBFF" ] ; then
+		echo " xcode interface  with $LIBFF"
+		SHARED="-bundle"
+		out=`dirname "$LIBFF"`/$out
+		LIBS="$LIBFF $LIBS"
+		OWMPI=
+	fi 
+	;;
     win32-CYGWIN*|win32-win32)
         echo " Window without cygwin "
 	WMPI_LIB=''
@@ -278,9 +288,9 @@ if [ -n "$ffiles$files$fileso" ] ; then
 	echo
     fi
     if [ "$CONLY" != yes ]; then
-	echo $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $WMPI_LIB
+	echo $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $WMPI_LIB 
 	if [  $do = yes ] ; then
-	   eval $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $WMPI_LIB
+	   eval $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $WMPI_LIB 
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	fi
 	echo

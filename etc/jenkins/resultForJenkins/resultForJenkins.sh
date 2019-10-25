@@ -50,7 +50,7 @@ elif [ "$result" == "XFAIL" ]; then
      Gerrors=$((Gerrors+1))
      echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
      echo "                  <error> This is the end of edp script with the error:" >> report.xml
-     tail -35  examples/$classname/$name.log | sed -e "s/\&/\&#38;;/g" -e "s/</\&lt;/g" -e "s/>/\&gt;/g" -e "s/'/\&#39;/g" >> report.xml
+     cat -v examples/$classname/$name.log | tail -35 | sed -e "s/\&/\&#38;;/g" -e "s/</\&lt;/g" -e "s/>/\&gt;/g" -e "s/'/\&#39;/g" >> report.xml
      echo "                 </error> " >> report.xml
      echo "        </testcase>" >> report.xml
 elif [ "$result" == "FAIL" ]; then
@@ -58,7 +58,7 @@ elif [ "$result" == "FAIL" ]; then
      Gfailures=$((Gfailures+1))
      echo "        <testcase name=\"$name\" classname=\"$classname\">" >> report.xml
      echo "                  <error> This is the end of edp script with the error:" >> report.xml
-     tail -35  examples/$classname/$name.log | sed -e "s/\&/\&#38;;/g" -e "s/</\&lt;/g" -e "s/>/\&gt;/g" -e "s/'/\&#39;/g" >> report.xml
+     cat -v examples/$classname/$name.log | tail -35 | sed -e "s/\&/\&#38;;/g" -e "s/</\&lt;/g" -e "s/>/\&gt;/g" -e "s/'/\&#39;/g" >> report.xml
      echo "                 </error> " >> report.xml
      echo "        </testcase>" >> report.xml
 fi

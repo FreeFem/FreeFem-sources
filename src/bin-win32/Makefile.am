@@ -120,3 +120,4 @@ install-exec-local--::
 # FFCS: automake does not clean the exes automatically because they are not built automatically.
 clean-local::
 	-rm *.exe
+	-rm *.dll

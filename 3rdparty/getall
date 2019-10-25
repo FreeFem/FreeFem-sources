@@ -113,10 +113,10 @@ download('OpenBLAS-Win32','http://downloads.sourceforge.net/project/openblas/v0.
 	'OpenBLAS-v0.2.14-Win32.zip',
 	'eefdf170439620d78fabb3139b7aeb2f');
 
-download('FFTW','http://www.fftw.org/fftw-3.3.2.tar.gz',
+download('FFTW','http://www.fftw.org/fftw-3.3.8.tar.gz',
 	'http://www.fftw.org',
-	'fftw-3.3.2.tar.gz',
-	'6977ee770ed68c85698c7168ffa6e178');
+	'fftw-3.3.8.tar.gz','8aac833c943d8e90d51b697b27d4384d');
+# 3.3.2	'6977ee770ed68c85698c7168ffa6e178');
 download('freeYams','https://www.ljll.math.upmc.fr/frey/ftp/archives/freeyams.2012.02.05.tgz',
 	'https://www.ljll.math.upmc.fr/frey/software.html',
 	'freeyams.2012.02.05.tgz',
@@ -175,10 +175,10 @@ download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
 	'tetgen1.5.1-beta1.tar.gz',
 	'3d55c197bcbfc611b7ced6f343643756');
 
-download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.11.3.tar.gz',
+download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.12.0.tar.gz',
 	'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/',
-	'petsc-lite-3.11.3.tar.gz',
-	'e04cbb1aaccde4a33c8843e75a1fba15');
+	'petsc-lite-3.12.0.tar.gz',
+	'997dc9475c634891ba63fefa56ac3621');
 	
 download('htool','https://github.com/PierreMarchand20/htool/archive/1cb53402a76f84cef2c706a21100f3aa3218a269.zip',
 		'https://github.com/PierreMarchand20/',
@@ -186,10 +186,10 @@ download('htool','https://github.com/PierreMarchand20/htool/archive/1cb53402a76f
 		'0e81f6d40410a5a2ddde0d0cb95316e0');
 
 	
-download('hpddm','https://github.com/hpddm/hpddm/archive/4f8e0001d7fb2da74157e1c2af4569fc099656d7.zip',
+download('hpddm','https://github.com/hpddm/hpddm/archive/f94ef3fe56078cc59809f8b8ef568c0e98818e80.zip',
 	'https://github.com/hpddm',
 	'hpddm.zip',
-	'cd6837e4e05720616009ec16706c1e14');
+	'c22889eb79d571fb1e0e2be6fad2a410');
 
 download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/master.zip',
 	'https://github.com/PierreMarchand20/BemTool',

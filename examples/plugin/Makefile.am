@@ -65,6 +65,7 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	load.edp \
 	meditddm.edp \
 	MetricKuate.edp \
+	mat_edpeP1.edp \
 	myfunction2.edp \
 	myType.edp \
 	NS_P2BR_P0.edp \
@@ -98,7 +99,7 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	testFEMorley.edp \
 	testp1dcnc.edp \
 	thresholdings.edp 
-
+    
 
 TESTS_FFTW3 = dfft.edp
 
@@ -123,7 +124,7 @@ TESTS_METIS = metis.edp \
 
 TESTS_METIS_SCOTCH = scotch.edp
 
-TEST_MKL = PARDISO.edp 
+TESTS_MKL = PARDISO.edp 
 
 TESTS_MSHMET = aniso.edp
 
@@ -226,7 +227,7 @@ TESTS = $(TESTS_OTHER) \
 	$(TESTS_IPOPT) \
 	$(TESTS_METIS) \
 	$(TESTS_METIS_SCOTCH) \
-	$(TEST_MKL) \
+	$(TESTS_MKL) \
 	$(TESTS_MSHMET) \
 	$(TESTS_MUMPS_seq) \
 	$(TESTS_MUMPS_SUPERLU) \

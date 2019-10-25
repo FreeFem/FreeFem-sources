@@ -43,7 +43,7 @@ endif
 #to force the recompile if change ... FH
 $(LIST_COMPILE): ../seq/ff-c++ ../seq/WHERE_LIBRARY-download
 
-.cpp.$(DYLIB_SUFFIX): ../seq/ff-c++ ../seq/WHERE_LIBRARY-download ../seq/WHERE_LIBRARY-config
+.cpp.$(DYLIB_SUFFIX): ../seq/ff-c++ ../seq/WHERE_LIBRARY-download ../seq/WHERE_LIBRARY-config Makefile
 #	FFCS needs an error exit code to make sure that all libraries are correctly compiled
 #
 #	FFCS on Windows inserts all MPI options (include, lib, ...) in the $MPICXX compiler script, instead of "$CXX $MPI_xxx",

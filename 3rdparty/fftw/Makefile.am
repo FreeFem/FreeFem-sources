@@ -7,7 +7,7 @@ all-local: $(DOWNLOAD_FFTW)
 # ------------------------------
 
 # FFTW information
-FFTW_VERSION=3.3.2
+FFTW_VERSION=3.3.8
 SRCDIR=fftw-$(FFTW_VERSION)
 PACKAGE=fftw-$(FFTW_VERSION).tar.gz
 SERVER=http://www.fftw.org
@@ -17,7 +17,7 @@ fftw: $(SRCDIR)/FAIT WHERE
 	$(MAKE) WHERE
 
 $(SRCDIR)/FAIT:$(SRCDIR)/FAIT-1
-	cd $(SRCDIR) && ./configure --enable-shared --disable-dependency-tracking  --disable-fortran  --prefix=`cd ../..; pwd`  CXX="$(CXX)" CC="$(CC)"  CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
+	cd $(SRCDIR) && ./configure --disable-dependency-tracking  --disable-fortran  --prefix=`cd ../..; pwd`  CXX="$(CXX)" CC="$(CC)"  CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
 	touch $(SRCDIR)/FAIT

@@ -28,6 +28,7 @@
 
 extern long verbosity ;
 extern long searchMethod; //pichon
+extern bool lockOrientation;
 
 #include <cmath>
 #include  <cfloat>

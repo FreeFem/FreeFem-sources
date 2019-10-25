@@ -353,7 +353,13 @@ class ShapeOfArray{ protected:
            return step*k;}
   void init(long nn,long s=1,long nextt=-1) { n=nn; step=s; next=nextt;}
 };
-
+// to set Diag matrix ..
+struct  Eye{ int n, m;
+    Eye(long nn) : n(nn),m(nn) {}
+    Eye(long nn,int mm) : n(nn),m(nn) {}
+};
+inline Eye fEye(long n){ return Eye(n);}
+inline Eye fEye(long  n,long m){ return Eye(n,m);}
 ostream & operator<<(ostream & f,const ShapeOfArray & s);
 
 inline bool  SameShape(const ShapeOfArray & a,const ShapeOfArray & b)
@@ -1177,8 +1183,7 @@ class KN :public KN_<R> { public:
 //          { return   (KN<const_R> &) *this;}
 //    operator KN<const_R> const & ()  const
 //          { return (const KN<const_R>& ) *this;}
-    static void fill0(R *v,int n) { if(n && v) for(int i=0;i<n;++i) v[i]=R();}
-    void init(long nn) {this->n=nn;this->step=1;this->next=-1;this->v=new R[nn];fill0(this->v,this->n) ;}
+    void init(long nn) {this->n=nn;this->step=1;this->next=-1;this->v=new R[nn]();}
   void init() {this->n=0;this->step=1;this->next=-1;this->v=0;}
   void init(const KN_<R> & a){init(a.N()); operator=(a);}
   void resize(long nn) {

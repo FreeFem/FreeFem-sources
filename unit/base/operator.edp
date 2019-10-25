@@ -57,7 +57,7 @@ cout << timeELAPSED << t << endl;
 test(resr1 == 2.);
 
 t = clock();
-real resr2 = ir  + i1;
+real resr2 = ir + i1;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
 test(resr2 == 3.);
@@ -468,8 +468,8 @@ t = clock();
 complex respowc1 = (ic) ^ i1;
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-//cout << respowc1 << endl;
-//test(respowc1 == 11 + 60i); //to fix
+test(real(respowc1) == -11);
+test(abs(imag(respowc1) - 60.) < HWERROR);
 
 t = clock();
 complex respowc2 = ic ^ ir;

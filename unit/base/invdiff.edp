@@ -7,8 +7,8 @@ cout << typeDEFINITION << "real" << endl;
 
 real a = 2.;
 real b = 1.;
-real c = 1.5 * 10^-40;
-real d = 1.4 * 10^-40;
+real c = 1.5 * 1.e-40;
+real d = 1.4 * 1.e-40;
 real e = 42.;
 real zero = 0.;
 

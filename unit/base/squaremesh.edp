@@ -54,7 +54,7 @@ func int testMesh(mesh &Th, int nx, int ny, real X, real Y,
     test((label == Label[0]) || (label == Label[1])
     || (label == Label[2]) || (label == Label[3]));
     int v1 = Th.be(i)[0];
-    int v2 =  Th.be(i)[1];
+    int v2 = Th.be(i)[1];
     int tri = Th.be(i).Element;
     int e = Th.be(i).whoinElement;
   }

@@ -147,8 +147,9 @@ typedef GenericVertex<R3> Vertex3;
         void readmsh(ifstream & f,int offset);
         MeshS(FILE *f,int offset=0);
         //MeshS(const string);
-        MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb);
-       
+        MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb, bool cleanmesh=true, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
+        MeshS(const Serialize&);
+
         int load(const string & filename);
         const Element * Find( Rd P, R2 & Phat,bool & outside,const Element * tstart=0) const;
         int Save(const string & filename);
@@ -158,8 +159,10 @@ typedef GenericVertex<R3> Vertex3;
         double hmin() const;
         int Save(const string & filename) const;
         void BuildEdges(const double angle=8.*atan(1.)/9.);  // default angle = 40 deg);
+        Serialize serialize_withBorderMesh() const;
         
         ~MeshS() {
+            if (verbosity>4) cout << "destroy meshS" << this << " " << this->mapSurf2Vol << " " << this->mapVol2Surf << endl;
             delete [] mapSurf2Vol ;
             delete [] mapVol2Surf ;
             

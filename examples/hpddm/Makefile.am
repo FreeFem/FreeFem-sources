@@ -48,7 +48,8 @@ TESTS_HPDDM = diffusion-2d.edp \
 	maxwell-3d.edp \
 	stokes-2d.edp \
 	stokes-3d.edp \
-	stokes-3d-io.edp
+	stokes-3d-io.edp \
+	heat-torus-3d-surf.edp
 
 TESTS_HPDDM_PETSC = diffusion-2d-substructuring-PETSc.edp
 

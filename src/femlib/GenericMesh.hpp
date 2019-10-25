@@ -34,6 +34,7 @@
 
 // la regle de programmation 3
 extern long verbosity;
+extern bool lockOrientation;
 extern long searchMethod; //pichon
 #include <map>  // Add J. Morice
 
@@ -553,6 +554,12 @@ public:
   void BuildAdj();
   void BuildBoundaryElementAdj();  // Add J. Morice function that give the TheAdjacencesSurfaceLink :: Version avec un manifold
   void BuildBoundaryElementAdj(const int &nbsurf, int* firstDefSurface, int* labelDefSurface, int* senslabelDefSurface); // version avec plusieurs vari�t�s
+  
+  //template<>
+  void SameVertex(const double precis_mesh, Vertex *v, Element *t, int nv, int nt, int *ind_nv_t, int *Numero_Som, int &new_nv);
+  void VertexInElement( Vertex *vertice, Element *list, int &nv, int *(&ind_nv), int nt, int *ind_nt, int *(&old2new) );
+  void clean_mesh(const double precis_mesh, int &nv, int &nt, int &nbe, V *(&v), T *(&t), B *(&b), bool removeduplicate, bool rebuildboundary, int orientation);
+ 
   void Buildbnormalv();
   void BuildBound();
   void BuildjElementConteningVertex();
@@ -733,7 +740,7 @@ public:
   }
 
   Serialize serialize() const;
-
+    
 private:
   GenericMesh(const GenericMesh &); // pas de construction par copie
    void operator=(const GenericMesh &);// pas affectation par copy
@@ -769,7 +776,6 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
     template<typename T,typename B,typename V>
     void GenericMesh<T,B,V>::BuildAdj()
     {
-        int verb = verbosity ;
         if(TheAdjacencesLink!=0) return ;//  already build ...
         TheAdjacencesLink = new int[nea*nt];
         BoundaryElementHeadLink = new int[nbe];
@@ -800,7 +806,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                             TheAdjacencesLink[nk1]=nk  ; // inserting between nk1 and nk2
                             TheAdjacencesLink[nk]=nk2 ;
                             //  on no manifold border .
-                            if( verb>99 ) cout << " Border manifold " << k << " "<< i << " ::  " << itemadj(k,i)<< " ::  " << nk1/nea << " " << nk2/nea
+                            if(verbosity>99 ) cout << " Border manifold " << k << " "<< i << " ::  " << itemadj(k,i)<< " ::  " << nk1/nea << " " << nk2/nea
                             << " :: " <<TheAdjacencesLink[nk1]/nea << '.' << TheAdjacencesLink[nk]/nea << '.' << TheAdjacencesLink[nk2]/nea << endl;
                             //nba--;
                             // no manifold TO DO if false
@@ -829,18 +835,18 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                 int pp=TheAdjacencesLink[p];
                 if(pp>0 && TheAdjacencesLink[pp]>=0 && TheAdjacencesLink[pp] != p )
                     { // border of no manifold
-                        if( verb>19 ) cout << "  -- " <<  p/nea << " " ;
+                        if(verbosity>19) cout << "  -- " <<  p/nea << " " ;
                         ++nbordnomanifold;
                        // remove link ...  put -2 in all list ...
                         TheAdjacencesLink[p]=-2;
                         while (pp>=0 && TheAdjacencesLink[pp]>=0 )
                         {
-                            if( verb>19 ) cout <<  pp/nea << " " ;
+                            if(verbosity>19) cout <<  pp/nea << " " ;
                             int ppp=pp;
                             pp=TheAdjacencesLink[pp];
                             TheAdjacencesLink[ppp]=-2;// break the list ...
                         }
-                        if( verb>19 ) cout << " . " << endl;
+                        if(verbosity>19) cout << " . " << endl;
                     }
             }
             
@@ -862,7 +868,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
 
                 if(!p) { err++;
                     if(err==1) cerr << "Err  Border element not in mesh \n";
-                    if (err<10)  cerr << " \t " << ke << " " << a << endl;
+                    if (err<10)  cerr << " \t " << ke << " : " << a << endl;
                 }
                 else
                 {
@@ -877,7 +883,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                         itemadj(k,e,&s); if(verbosity>15) cout << " item(k,e)= " << itemadj(k,e) <<  " k " << k << " e " << e << " s " << s << endl;
                         itemadj(kk,ee,&ss); if(verbosity>15) cout << " item(kk,ee)= " << itemadj(kk,ee) << " kk " << kk << " ee " << ee << " ss " << ss << endl;
                        //assert(s && ss && s== -ss);
-                         if (!(s && ss && s== -ss)) {
+                         if (!(s && ss && s== -ss) && lockOrientation) {
                             cerr << " Bad orientation: The adj border element  defined by [ " << itemadj(k,e) << " ]  is oriented in the same direction in element "
                         << k << " and in the element " << kk << " ****** bug in mesh construction? orientation parameter? "<< endl;
                         ffassert(0);
@@ -1160,8 +1166,280 @@ void GenericMesh<T,B,V>::BuildBoundaryElementAdj(const int &nbsurf, int* firstDe
   }
 }
 
+    
+template<typename T,typename B,typename V>
+void GenericMesh<T,B,V>::VertexInElement(V *vertice, T *list, int &nv, int *(&ind_nv), int nt, int *ind_nt, int *(&old2new) ) {
+    
+    // new map and list vertices after clean multiple elements
+
+    int map[nv];
+    int indv[nv];
+  
+    int takev[nv], takenewv[nv] ;
+    for (int i=0;i<nv;i++) {
+        indv[i]=-1;
+        map[i]=i; // identidy by default
+        takev[i]=-1;
+        takenewv[i]=-1;
+    }
+    int ik,oldik, np=0;
+    // loop on new elements to check used vertice
+    for (int it=0;it<nt;it++) {
+       int itri=ind_nt[it];
+        const T &K(list[itri]);
+        // the vertices in new triangles (vertice in new num
+        for (int j=0;j<T::nv;j++){
+            ik=old2new[&(K[j]) - vertice]; // new indi v
+            oldik=&(K[j]) - vertice;  // origin ind v
+          
+            if ( takenewv[ik]==-1){
+                map[oldik]=np;
+                indv[np]=ind_nv[ik] ;
+                takenewv[ik]=np;
+                np++;
+            }
+           map[oldik]=takenewv[ik];
+    
+        }
+    }
+    if(verbosity>5)  cout << " real used vertice:" << np << endl;
+ 
+    for(int i=0;i<nv;i++) {
+        ind_nv[i]=indv[i];
+        old2new[i]=map[i];
+    }
+    nv=np;
+        
+}
+    
+ 
+    
+// output int *ind_nv_t, int *old2new, int &new_nv
+template<typename T,typename B,typename V>
+void GenericMesh<T,B,V>::SameVertex(const double precis_mesh, V *vertice, T *element, int nv, int nt, int *ind_nv_t, int *old2new, int &new_nv) {
+
+    if (verbosity > 2)
+    cout << "clean mesh: remove multiple vertices, elements, border elements and check border elements " << endl;
+    double precispt=0;
+    // remove the multiple vertices
+    // 1/ compute bmin, bmax, hmin with the criteria precis_mesh
+    // 2/ build a gtree to extract the simple vertices (not multiple)
+
+    double hmin = 1e10;
+    Rd bmin, bmax;
+    if (verbosity > 2) {cout << " BuilBound " << endl;}
+    //Mesh::Vertex ?
+    bmin.x = vertice[0].x;
+    bmin.y = vertice[0].y;
+    bmin.z = vertice[0].z;
+    bmax.x = bmin.x;
+    bmax.y = bmin.y;
+    bmax.z = bmin.z;
+
+    if (verbosity > 1) {cout << " determination of bmin and bmax" << endl;}
+
+    for (int i = 1; i < nv; i++) {
+        bmin.x = min(bmin.x, vertice[i].x);
+        bmin.y = min(bmin.y, vertice[i].y);
+        bmin.z = min(bmin.z, vertice[i].z);
+        
+        bmax.x = max(bmax.x, vertice[i].x);
+        bmax.y = max(bmax.y, vertice[i].y);
+        bmax.z = max(bmax.z, vertice[i].z);
+    }
+
+    double longmini_box;
+    longmini_box = pow(bmax.x - bmin.x, 2) + pow(bmax.y - bmin.y, 2) + pow(bmax.z - bmin.z, 2);
+    longmini_box = sqrt(longmini_box);
+
+    if (verbosity > 1) {
+        cout << " bmin := " << bmin.x << " " << bmin.y << " " << bmin.z << endl;
+        cout << " bmax := " << bmax.x << " " << bmax.y << " " << bmax.z << endl;
+        cout << " box volume :=" << longmini_box << endl;
+    }
+
+    if (precis_mesh < 0)
+        precispt = longmini_box * 1e-7;
+    else
+        precispt = precis_mesh;
+
+    // determination de hmin
+    for (int i = 0; i < nt ; i++) {
+        const T &K(element[i]);
+        double longedge=0.;
+        int iv[T::nea];
+        
+        for (int j = 0; j < T::nea ; j++)
+            iv[j] = operator()(K[j]);
+        for (int j = 0; j < T::nea ; j++)
+            for (int k = j + 1; k < T::nea; k++) {
+                int &i1 = iv[j];
+                int &i2 = iv[k];
+                longedge = pow(vertice[i1].x - vertice[i2].x, 2)
+                + pow(vertice[i1].y - vertice[i2].y, 2)
+                + pow(vertice[i1].z - vertice[i2].z, 2);
+                longedge = sqrt(longedge);
+                if (longedge > precispt) hmin = min(hmin, longedge);
+            }
+        
+        }
+
+    
+        if (verbosity > 5) {
+            cout << "    longmini_box" << longmini_box << endl;
+            cout << "    hmin =" << hmin << endl;
+        }
+
+        assert(hmin < longmini_box);
+        if (verbosity > 5)
+            cout << "    Norme2(bmin-bmax)=" << Norme2(bmin - bmax) << endl;
+    
+        // assertion pour la taille de l octree
+        assert(hmin > Norme2(bmin - bmax) / 1e9);
+    
+    
+        double hseuil = hmin / 10.;
+        if (verbosity > 3)
+            cout << "    hseuil=" << hseuil << endl;
+
+        V *vv = new V[nv];
+        GTree *gtree = new GTree(vv, bmin, bmax, 0);
+    
+        if (verbosity > 2) {
+            cout << "  -- taille de la boite " << endl;
+            cout << "\t" << bmin.x << " " << bmin.y << " " << bmin.z << endl;
+            cout << "\t" << bmax.x << " " << bmax.y << " " << bmax.z << endl;
+        }
+    
+        // creation of octree
+        for (int i = 0; i < nv; i++) {
+            const V &vi(vertice[i]);
+            V *pvi = gtree->ToClose(vi, hseuil);
+            if (!pvi) {
+                vv[new_nv].x = vi.x;
+                vv[new_nv].y = vi.y;
+                vv[new_nv].z = vi.z;
+                vv[new_nv].lab = vi.lab;
+                ind_nv_t[new_nv] = i;
+                old2new[i] = new_nv;
+                gtree->Add(vv[new_nv]);
+                new_nv++;
+            }
+            // treatment of multiple vertice made in sameElement
+            else
+                old2new[i] = pvi - vv;
+                
+        }
+        delete gtree;
+        delete [] vv;
+    
+}
+    
+    
+template<typename T,typename B,typename V>
+void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &nbe, V *(&v), T *(&t), B *(&b), bool removeduplicate, bool rebuildboundary, int orientation) {
+
+  
+    // array for the index of new vertices, element, borderelement in the old numbering
+    int new_nv=0, new_nt=0, new_nbe=0;
+   // double mes = 0, mesb = 0;
+    int *ind_nv=new int[nv];
+    int *ind_nt=new int[nt];
+    int *ind_nbe=new int[nbe];
+    // mapping old to new vertices index
+    int *old2new=new int[nv];
+
+    // clean multiples vertice
+    SameVertex(precis_mesh, v, t, nv, nt, ind_nv, old2new, new_nv);
+   
+    if(!removeduplicate)
+        nv=new_nv;
+    
+    // clean multiple elements and border elements
+    SameElement(v, t, nt, ind_nt, old2new, new_nt, removeduplicate);
+    SameElement(v, b, nbe, ind_nbe, old2new, new_nbe, removeduplicate);
+    
+    // if removeduplicate, must recheck the vertice -> could have some vertex are not at least in one element
+    
+    if(removeduplicate)
+        VertexInElement(v, t, nv, ind_nv, new_nt, ind_nt, old2new);
+  
+    V *vv;
+    vv=new V[nv];
+    
+    for(int i=0;i<nv;i++) {
+        int iv=ind_nv[i];
+        vv[i].x=v[iv].x;
+        vv[i].y=v[iv].y;
+        vv[i].z=v[iv].z;
+        vv[i].lab=v[iv].lab;
+    }
+  
+  
+    double mes=0., mesb=0.;
+    nt=new_nt;
+    T *tt=new T[nt];
+    for(int i=0;i<nt;i++) {
+        int &it=ind_nt[i];
+        const T &K(t[it]);
+        mes=K.mesure();
+        int iv[T::nv];
+        for (int j = 0; j < T::nea ; j++) {
+            iv[j] =  old2new[ &(K[j]) - v];
+            assert(iv[j] >= 0 && iv[j] < nv);
+        }
+        if (orientation<0)
+            swap(iv[1], iv[2]);
+        
+        tt[i].set(vv, iv, K.lab);
+        mes+=tt[i].mesure();
+    }
+    
+    nbe=new_nbe;
+    B *bb=new B[nbe];
+    for(int i=0;i<nbe;i++) {
+        int &ie=ind_nbe[i];
+        const B &K(b[ie]);
+        int iv[B::nv];
+        for (int j = 0; j < B::nea ; j++) {
+            iv[j] =  old2new[ &(K[j]) - v];
+            assert(iv[j] >= 0 && iv[j] < nv);
+        }
+        if (orientation<0)
+            swap(iv[(B::nv)-2], iv[(B::nv)-1]);
+        bb[i].set(vv, iv, K.lab);
+        mesb+=bb[i].mesure();
+    }
+ 
+  
+    if(verbosity>2)
+        cout << "after clean mesh, nv = " << nv << " nt = " << nt << " nbe = " << nbe << endl;
+   
+    if (mes<0) {
+        cerr << " Error of mesh orientation , current orientation = " << orientation << endl;
+        cerr << " mesure element mesh = " << mes << endl;
+        cerr << " mesure border mesh = " << mesb << endl;
+    }
+  
+    delete [] v;
+    delete [] t;
+    delete [] b;
+    v=vv;
+    t=tt;
+    b=bb;
+    delete []ind_nv;
+    delete []ind_nt;
+    delete []ind_nbe;
+    delete []old2new;
+
+}
 
 
+    
+    
+    
+    
+    
 
 // template<typename T,typename B,typename V>
 // void GenericMesh<T,B,V>::BuildBoundaryElementAdj_V2(const int &nbsurf,int *firstDefSurface, int *labelDefSurface, int *senslabelDefSurface)
@@ -1639,7 +1917,7 @@ Serialize GenericMesh<T,B,V>::serialize() const
     const int d = Rd::d;
     long long  l=0;
     l += sizeof(long long);
-    l += 6*sizeof(int);
+    l += 7*sizeof(int);   // add bordermesh
     l += nt*(sizeof(int)*(nve + 1));
     l += nv*( sizeof(int) + sizeof(double)*d);
     l += nbe*(sizeof(int)*(nvbe+1));
@@ -1648,8 +1926,10 @@ Serialize GenericMesh<T,B,V>::serialize() const
     Serialize  serialized(l,GenericMesh_magicmesh);
     // cout << l << magicmesh << endl;
     size_t pp=0;
+    int havebordermesh=0;  // by defaut, no border mesh in the genericmesh
     serialized.put(pp, l);
     serialized.put( pp,d);
+    serialized.put( pp,havebordermesh);
     serialized.put( pp,nve);
     serialized.put( pp,nvbe);
     serialized.put( pp,nt);
@@ -1699,11 +1979,13 @@ Serialize GenericMesh<T,B,V>::serialize() const
 	const int nve = T::nv;
 	const int nvbe = B::nv;
 	const int d = Rd::d;
+    int havebordermesh;
 	int dd,nnve,nnvbe,nnt,nnv,nnbe;
 	long long  l=0;
 	size_t pp=0;
 	serialized.get(pp, l);
 	serialized.get( pp,dd);
+    serialized.get( pp,havebordermesh);
 	serialized.get( pp,nnve);
 	serialized.get( pp,nnvbe);
 	serialized.get( pp,nnt);
@@ -1739,5 +2021,79 @@ Serialize GenericMesh<T,B,V>::serialize() const
        assert(pp==serialized.size());
     }
 
+    template<typename TypeGenericElement, typename TypeVert >
+    void SameElement( TypeVert *vertice, TypeGenericElement *list, int nelt, int *(&ind_nv_t), int *old2new, int &new_nelt, bool removeduplicate) {
+        
+        new_nelt=0;
+        static const int nk=TypeGenericElement::nv;
+        int iv[nk];
+        
+        HashTable<SortArray<int,nk>,int> h(nk*nelt,nelt);
+        
+        int *originmulti=new int [nelt];
+        
+        int originTypeGenericElement=0;
+        int multiTypeGenericElement=0;
+        int *indice=new int [nelt];
+        
+        for (int i=0;i<nelt;i++) {
+            originmulti[i]=-1;
+            indice[i]=-1;
+        }
+        
+        for (int i=0;i<nelt;i++) {
+            
+            const TypeGenericElement &K(list[i]);
+            for (int j=0;j<nk;j++)
+                iv[j] = old2new[ &(K[j]) - vertice ];    // vertice of element in new numbering
+            int sens;
+            SortArray<int,nk> a(iv,&sens);
+            typename HashTable<SortArray<int,nk>,int>::iterator p= h.find(a);
+            // check multiple element
+            // 1/ keep the original
+            if (!commonValue(a)) {   // if iv[0] != iv[1] (!= iv[2] != iv[3])
+                if(!p) {
+                    h.add(a,new_nelt);
+                    indice[new_nelt]=i;
+                    new_nelt++;
+                }
+                // or 2/ rm all multiples or keep the orinal
+                else  {
+                    originmulti[i]=p->v;  // the double elt the current
+                    multiTypeGenericElement++;
+                    
+                    if(removeduplicate && originmulti[p->v]==-1) {   // the origin elt
+                        originmulti[p->v]=p->v;
+                        originTypeGenericElement++;
+                    }
+                }
+            }
+        }
+        // rebuild the index list if remove all multiples
+        if(removeduplicate) {
+            int cmp=0;
+            for(int i=0;i<nelt;i++) {
+                if(originmulti[i]==-1) {
+                    ind_nv_t[cmp]=i;
+                    cmp++;
+                }
+            }
+            assert((nelt-originTypeGenericElement-multiTypeGenericElement)==cmp);
+            new_nelt=cmp;
+            if (verbosity>2)
+                cout << "no duplicate elements: "<< cmp << " and remove " << multiTypeGenericElement << " multiples elements, corresponding to " << originTypeGenericElement << " original elements " << endl;
+            
+        }
+        else {
+            for(int i=0;i<nelt;i++)
+                ind_nv_t[i]=indice[i];
+            if (verbosity>2)
+                cout << " Warning, the mesh could contain multiple same elements, keep a single copy in mesh...option removemulti in the operator mesh is avalaible" << endl;
+        }
+        delete[] originmulti;
+        delete[] indice;
+        
+    }
+    
 }
 #endif

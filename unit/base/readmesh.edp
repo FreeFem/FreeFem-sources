@@ -8,4 +8,4 @@ t = clock();
 Th = readmesh("assets/Th.msh");
 t = clock() - t;
 cout << timeELAPSED << t << endl;
-test(Th.nt > 0);
+test(Th.nv > 0);
