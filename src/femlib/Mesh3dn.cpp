@@ -770,11 +770,12 @@ namespace Fem2D
                 bin=true;
             else if( (inm=GmfOpenMesh(pfile=filef, GmfRead,&ver,&dim)) )
                 bin=false;
-            else
-                if(verbosity>5){
+            else {
+                if(verbosity>5)
                     cerr << " Erreur ouverture file " << (char *) fileb  << " " << (char *) filef  <<endl;
                     return   1;
-                }
+                
+            }
         }
         else{
             if( !(inm=GmfOpenMesh(data, GmfRead,&ver,&dim)) ){
