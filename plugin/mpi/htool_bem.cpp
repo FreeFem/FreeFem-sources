@@ -6,6 +6,8 @@
 #include <AFunction_ext.hpp>
 
 #include <htool/lrmat/partialACA.hpp>
+#include <htool/lrmat/fullACA.hpp>
+#include <htool/lrmat/SVD.hpp>
 #include <htool/types/matrix.hpp>
 #include <htool/types/hmatrix.hpp>
 
@@ -20,8 +22,6 @@
 #include "common.hpp"
 
 extern FILE *ThePlotStream;
-
-
 
 using namespace std;
 using namespace htool;
@@ -41,18 +41,61 @@ public:
 
 };
 
+template<class K>
+class HMatrixVirt {
+public:
+		virtual const std::map<std::string, std::string>& get_infos() const = 0;
+		virtual void mvprod_global(const K* const in, K* const out,const int& mu=1) const = 0;
+		virtual int nb_rows() const = 0;
+		virtual int nb_cols() const = 0;
+		virtual void cluster_to_target_permutation(const K* const in, K* const out) const = 0;
+		virtual const MPI_Comm& get_comm() const = 0;
+		virtual int get_rankworld() const = 0;
+		virtual int get_sizeworld() const = 0;
+		virtual const std::vector<SubMatrix<K>*>& get_MyNearFieldMats() const = 0;
+		virtual const LowRankMatrix<K>& get_MyFarFieldMats(int i) const = 0;
+		virtual int get_MyFarFieldMats_size() const = 0;
+		virtual const std::vector<SubMatrix<K>*>& get_MyStrictlyDiagNearFieldMats() const = 0;
+		virtual Matrix<K> to_dense_perm() const = 0;
+
+		virtual ~HMatrixVirt() {};
+};
+
 template<template<class> class LR, class K>
+class HMatrixImpl : public HMatrixVirt<K> {
+private:
+		HMatrix<LR,K> H;
+public:
+		HMatrixImpl(IMatrix<K>& I, const std::vector<htool::R3>& xt, const int& reqrank=-1, MPI_Comm comm=MPI_COMM_WORLD) : H(I,xt,reqrank,comm){}
+		HMatrixImpl(IMatrix<K>& I, const std::vector<htool::R3>& xt, const std::vector<htool::R3>& xs, const int& reqrank=-1, MPI_Comm comm=MPI_COMM_WORLD) : H(I,xt,xs,reqrank,comm){}
+		const std::map<std::string, std::string>& get_infos() const {return H.get_infos();}
+		void mvprod_global(const K* const in, K* const out,const int& mu=1) const {return H.mvprod_global(in,out,mu);}
+		int nb_rows() const { return H.nb_rows();}
+		int nb_cols() const { return H.nb_cols();}
+		void cluster_to_target_permutation(const K* const in, K* const out) const {return H.cluster_to_target_permutation(in,out);}
+		const MPI_Comm& get_comm() const {return H.get_comm();}
+		int get_rankworld() const {return H.get_rankworld();}
+		int get_sizeworld() const {return H.get_sizeworld();}
+		const std::vector<SubMatrix<K>*>& get_MyNearFieldMats() const {return H.get_MyNearFieldMats();}
+		const LowRankMatrix<K>& get_MyFarFieldMats(int i) const {return *(H.get_MyFarFieldMats()[i]);}
+		int get_MyFarFieldMats_size() const {return H.get_MyFarFieldMats().size();}
+		const std::vector<SubMatrix<K>*>& get_MyStrictlyDiagNearFieldMats() const {return H.get_MyStrictlyDiagNearFieldMats();}
+		Matrix<K> to_dense_perm() const {return H.to_dense_perm();}
+};
+
+template<class K>
 class assembleHMatrix : public OneOperator { public:
 
 	class Op : public E_F0info {
 	public:
 		Expression a,b,c;
 
-		static const int n_name_param = 8;
+		static const int n_name_param = 9;
 		static basicAC_F0::name_and_type name_param[] ;
 		Expression nargs[n_name_param];
 		bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
 		long argl(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+		string* args(int i,Stack stack,string* a) const{ return nargs[i] ? GetAny<string*>( (*nargs[i])(stack) ): a;}
 		double arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
 		KN_<long> arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
 		pcommworld arg(int i,Stack stack,pcommworld a ) const{ return nargs[i] ? GetAny<pcommworld>( (*nargs[i])(stack) ): a;}
@@ -61,7 +104,7 @@ class assembleHMatrix : public OneOperator { public:
 			args.SetNameParam(n_name_param,name_param,nargs); }
 		};
 
-		assembleHMatrix() : OneOperator(atype<const typename assembleHMatrix<LR,K>::Op *>(),
+		assembleHMatrix() : OneOperator(atype<const typename assembleHMatrix<K>::Op *>(),
 		atype<pfesS *>(),
 		atype<pfesS *>(),
 		atype<K*>()) {}
@@ -74,16 +117,17 @@ class assembleHMatrix : public OneOperator { public:
 		}
 	};
 
-	template<template<class> class LR, class K>
-	basicAC_F0::name_and_type  assembleHMatrix<LR, K>::Op::name_param[]= {
+	template<class K>
+	basicAC_F0::name_and_type  assembleHMatrix<K>::Op::name_param[]= {
 		{  "epsilon", &typeid(double)},
 		{  "eta", &typeid(double)},
 		{  "minclustersize", &typeid(long)},
 		{  "maxblocksize", &typeid(long)},
 		{  "mintargetdepth", &typeid(long)},
 		{  "minsourcedepth", &typeid(long)},
-		{		"comm", &typeid(pcommworld)},
-        {        "type", &typeid(long)}
+		{  "comm", &typeid(pcommworld)},
+		{  "type", &typeid(long)},
+		{  "compressor", &typeid(string*)}
 	};
 
 
@@ -124,7 +168,7 @@ void MeshS2Bemtool(const MeshS &ThS, Geometry &node, Mesh2D &mesh ) {
 
 void MeshS2Bemtool(const MeshS &ThS, Geometry &node) {
     
-    std::cout << "Creating mesh output" << std::endl;
+    if(verbosity>10) std::cout << "Creating mesh output" << std::endl;
     bemtool::R3 p;
     for(int iv=0 ; iv<ThS.nv ; iv++){
         p[0]=ThS.vertices[iv].x;p[1]=ThS.vertices[iv].y;p[2]=ThS.vertices[iv].z;
@@ -136,22 +180,23 @@ void MeshS2Bemtool(const MeshS &ThS, Geometry &node) {
 
 
 
-template<template<class> class LR, class K>
+template<class K>
 AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 {
 	using namespace Fem2D;
 
-	HMatrix<LR,K>** Hmat =GetAny<HMatrix<LR,K>** >((*emat)(stack));
-	const typename assembleHMatrix<LR, K>::Op * mi(dynamic_cast<const typename assembleHMatrix<LR, K>::Op *>(einter));
+	HMatrixVirt<K>** Hmat =GetAny<HMatrixVirt<K>** >((*emat)(stack));
+	const typename assembleHMatrix<K>::Op * mi(dynamic_cast<const typename assembleHMatrix<K>::Op *>(einter));
 
 	double epsilon=mi->arg(0,stack,htool::Parametres::epsilon);
 	double eta=mi->arg(1,stack,htool::Parametres::eta);
 	int minclustersize=mi->argl(2,stack,htool::Parametres::minclustersize);
-	int maxblocksize=mi->argl(3,stack,htool::Parametres::eta);
+	int maxblocksize=mi->argl(3,stack,htool::Parametres::maxblocksize);
 	int mintargetdepth=mi->argl(4,stack,htool::Parametres::mintargetdepth);
 	int minsourcedepth=mi->argl(5,stack,htool::Parametres::minsourcedepth);
 	pcommworld pcomm=mi->arg(6,stack,nullptr);
-    int type=mi->argl(7,stack,0);
+	int type=mi->argl(7,stack,0);
+	string* compressor=mi->args(8,stack,0);
 
 	SetMaxBlockSize(maxblocksize);
 	SetMinClusterSize(minclustersize);
@@ -197,7 +242,7 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
    
  
 
-    std::cout << "Creating dof" << std::endl;
+    if(verbosity>10) std::cout << "Creating dof" << std::endl;
    	Dof<P1_2D> dof(mesh,true);
 	// now the list of dof is known -> can acces to global num triangle and the local num vertice assiciated 
 
@@ -220,11 +265,20 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
     if (type==0) {
         // equivalent myMatrix
         // MyMatrix<K> A(Uh,Vh);
+
         BIO_Generator<HE_SL_3D_P1xP1,P1_2D> generator_V(dof,kappa);
-        *Hmat = new HMatrix<LR,K>(generator_V,p1,-1,comm);
+        if (!compressor || *compressor == "partialACA")
+          *Hmat = new HMatrixImpl<partialACA,K>(generator_V,p1,-1,comm);
+        else if (*compressor == "fullACA")
+          *Hmat = new HMatrixImpl<fullACA,K>(generator_V,p1,-1,comm);
+        else if (*compressor == "SVD")
+          *Hmat = new HMatrixImpl<SVD,K>(generator_V,p1,-1,comm);
+        else {
+          cerr << "Error: unknown htool compressor \""+*compressor+"\"" << endl;
+          ffassert(0);
+        }
     }
     else if (type==1) {
-   
         // ThV = meshS ThGlobal (in function argument?)
         // call interface MeshS2Bemtool MeshS-> geometry + mesh
         const  MeshS & ThOut=Vh->Th;
@@ -234,34 +288,37 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
         //std::string meshname_output="Th_output.msh";   ////// be careful
         //Geometry node_output(meshname_output);
         int nb_dof_output = NbNode(node_output);
-      
-        
-        
-        
-        
+
         Potential<PotKernel<HE,SL_POT,3,P1_2D>> POT_SL(mesh,kappa);
         POT_Generator<PotKernel<HE,SL_POT,3,P1_2D>,P1_2D> generator_SL(POT_SL,dof,node_output);
         
-        *Hmat = new HMatrix<LR,K>(generator_SL,p2,p1,-1,comm);
-        
-        
+        if (!compressor || *compressor == "partialACA")
+          *Hmat = new HMatrixImpl<partialACA,K>(generator_SL,p2,p1,-1,comm);
+        else if (*compressor == "fullACA")
+          *Hmat = new HMatrixImpl<fullACA,K>(generator_SL,p2,p1,-1,comm);
+        else if (*compressor == "SVD")
+          *Hmat = new HMatrixImpl<SVD,K>(generator_SL,p2,p1,-1,comm);
+        else {
+          cerr << "Error: unknown htool compressor \""+*compressor+"\"" << endl;
+          ffassert(0);
+        }
     }
 	//*Hmat = generateBIO<LR,K,EquationEnum::YU,BIOpKernelEnum::HS_OP,BIOpKernelEnum::SL_OP,2,P1_2D>();
 
 	return Hmat;
 }
 
-template<template<class> class LR, class K, int init>
+template<class K, int init>
 AnyType SetHMatrix(Stack stack,Expression emat,Expression einter)
-{ return SetHMatrix<LR,K>(stack,emat,einter,init);}
+{ return SetHMatrix<K>(stack,emat,einter,init);}
 
-template<template<class> class LR, class K>
+template<class K>
 AnyType ToDense(Stack stack,Expression emat,Expression einter,int init)
 {
 	ffassert(einter);
-	HMatrix<LR,K>** Hmat =GetAny<HMatrix<LR,K>** >((*einter)(stack));
+	HMatrixVirt<K>** Hmat =GetAny<HMatrixVirt<K>** >((*einter)(stack));
 	ffassert(Hmat && *Hmat);
-	HMatrix<LR,K>& H = **Hmat;
+	HMatrixVirt<K>& H = **Hmat;
 	Matrix<K> mdense = H.to_dense_perm();
 	const std::vector<K>& vdense = mdense.get_mat();
 
@@ -274,33 +331,33 @@ AnyType ToDense(Stack stack,Expression emat,Expression einter,int init)
 	return M;
 }
 
-template<template<class> class LR, class K, int init>
+template<class K, int init>
 AnyType ToDense(Stack stack,Expression emat,Expression einter)
-{ return ToDense<LR,K>(stack,emat,einter,init);}
+{ return ToDense<K>(stack,emat,einter,init);}
 
-template<class V, template<class> class LR, class K>
+template<class V, class K>
 class Prod {
 public:
-	const HMatrix<LR ,K>* h;
+	const HMatrixVirt<K>* h;
 	const V u;
-	Prod(HMatrix<LR ,K>** v, V w) : h(*v), u(w) {}
+	Prod(HMatrixVirt<K>** v, V w) : h(*v), u(w) {}
 
 	void prod(V x) const {h->mvprod_global(*(this->u), *x);};
 
-	static V mv(V Ax, Prod<V, LR, K> A) {
+	static V mv(V Ax, Prod<V, K> A) {
 		*Ax = K();
 		A.prod(Ax);
 		return Ax;
 	}
-	static V init(V Ax, Prod<V, LR, K> A) {
+	static V init(V Ax, Prod<V, K> A) {
 		Ax->init(A.u->n);
 		return mv(Ax, A);
 	}
 
 };
 
-template<template<class> class LR, class K>
-std::map<std::string, std::string>* get_infos(HMatrix<LR ,K>** const& H) {
+template<class K>
+std::map<std::string, std::string>* get_infos(HMatrixVirt<K>** const& H) {
 	return new std::map<std::string, std::string>((*H)->get_infos());
 }
 
@@ -324,7 +381,7 @@ struct PrintPinfos: public binary_function<ostream*,A,ostream*> {
 	}
 };
 
-template<template<class> class LR, class K>
+template<class K>
 class plotHMatrix : public OneOperator {
 public:
 
@@ -332,11 +389,11 @@ public:
 	public:
 		Expression a;
 
-		static const int n_name_param = 1;
+		static const int n_name_param = 2;
 		static basicAC_F0::name_and_type name_param[] ;
 		Expression nargs[n_name_param];
 		bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
-		long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+		long argl(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
 
 	public:
 		Op(const basicAC_F0 &  args,Expression aa) : a(aa) {
@@ -346,8 +403,9 @@ public:
 		AnyType operator()(Stack stack) const{
 
 			bool wait = arg(0,stack,false);
+			long dim = argl(1,stack,2);
 
-			HMatrix<LR,K>** H =GetAny<HMatrix<LR,K>** >((*a)(stack));
+			HMatrixVirt<K>** H =GetAny<HMatrixVirt<K>** >((*a)(stack));
 
 			PlotStream theplot(ThePlotStream);
 
@@ -355,6 +413,8 @@ public:
 				theplot.SendNewPlot();
 				theplot << 3L;
 				theplot <= wait;
+				theplot << 17L;
+				theplot <= dim;
 				theplot.SendEndArgPlot();
 				theplot.SendMeshes();
 				theplot << 0L;
@@ -372,11 +432,10 @@ public:
 				}
 			}
 			else {
-				const std::vector<LR<K>*>& lrmats = (*H)->get_MyFarFieldMats();
 				const std::vector<SubMatrix<K>*>& dmats = (*H)->get_MyNearFieldMats();
 
 				int nbdense = dmats.size();
-				int nblr = lrmats.size();
+				int nblr = (*H)->get_MyFarFieldMats_size();
 
 				int sizeworld = (*H)->get_sizeworld();
 				int rankworld = (*H)->get_rankworld();
@@ -394,7 +453,7 @@ public:
 
 				int* buf = new int[4*(mpirank==0?nbdenseg:nbdense) + 5*(mpirank==0?nblrg:nblr)];
 
-				for (int i=0;i<dmats.size();i++) {
+				for (int i=0;i<nbdense;i++) {
 					const SubMatrix<K>& l = *(dmats[i]);
 					buf[4*i] = l.get_offset_i();
 					buf[4*i+1] = l.get_offset_j();
@@ -415,8 +474,8 @@ public:
 				int* buflr = buf + 4*(mpirank==0?nbdenseg:nbdense);
 				double* bufcomp = new double[mpirank==0?nblrg:nblr];
 
-				for (int i=0;i<lrmats.size();i++) {
-					const LR<K>& l = *(lrmats[i]);
+				for (int i=0;i<nblr;i++) {
+					const LowRankMatrix<K>& l = (*H)->get_MyFarFieldMats(i);
 					buflr[5*i] = l.get_offset_i();
 					buflr[5*i+1] = l.get_offset_j();
 					buflr[5*i+2] = l.nb_rows();
@@ -477,7 +536,7 @@ public:
 		}
 	};
 
-	plotHMatrix() : OneOperator(atype<long>(),atype<HMatrix<LR ,K> **>()) {}
+	plotHMatrix() : OneOperator(atype<long>(),atype<HMatrixVirt<K> **>()) {}
 
 	E_F0 * code(const basicAC_F0 & args) const
 	{
@@ -485,9 +544,10 @@ public:
 	}
 };
 
-template<template<class> class LR, class K>
-basicAC_F0::name_and_type  plotHMatrix<LR, K>::Op::name_param[]= {
-	{  "wait", &typeid(bool)}
+template<class K>
+basicAC_F0::name_and_type  plotHMatrix<K>::Op::name_param[]= {
+	{  "wait", &typeid(bool)},
+	{  "dim", &typeid(long)}
 };
 
 template<class T, class U, class K, char trans>
@@ -549,37 +609,37 @@ class HMatrixInv {
         }
 };
 
-template<template<class> class LR, class K>
+template<class K>
 void add(const char* namec) {
-	Dcl_Type<HMatrix<LR ,K>**>(Initialize<HMatrix<LR,K>*>, Delete<HMatrix<LR,K>*>);
-	Dcl_TypeandPtr<HMatrix<LR ,K>*>(0,0,::InitializePtr<HMatrix<LR ,K>*>,::DeletePtr<HMatrix<LR ,K>*>);
+	Dcl_Type<HMatrixVirt<K>**>(Initialize<HMatrixVirt<K>*>, Delete<HMatrixVirt<K>*>);
+	Dcl_TypeandPtr<HMatrixVirt<K>*>(0,0,::InitializePtr<HMatrixVirt<K>*>,::DeletePtr<HMatrixVirt<K>*>);
 	//TheOperators->Add("<-", new init<LR,K>);
-	Dcl_Type<const typename assembleHMatrix<LR, K>::Op *>();
-	Add<const typename assembleHMatrix<LR, K>::Op *>("<-","(", new assembleHMatrix<LR, K>);
+	Dcl_Type<const typename assembleHMatrix<K>::Op *>();
+	Add<const typename assembleHMatrix<K>::Op *>("<-","(", new assembleHMatrix<K>);
 
 	TheOperators->Add("=",
-	new OneOperator2_<HMatrix<LR ,K>**,HMatrix<LR ,K>**,const typename assembleHMatrix<LR, K>::Op*,E_F_StackF0F0>(SetHMatrix<LR, K, 1>));
+	new OneOperator2_<HMatrixVirt<K>**,HMatrixVirt<K>**,const typename assembleHMatrix<K>::Op*,E_F_StackF0F0>(SetHMatrix<K, 1>));
 	TheOperators->Add("<-",
-	new OneOperator2_<HMatrix<LR ,K>**,HMatrix<LR ,K>**,const typename assembleHMatrix<LR, K>::Op*,E_F_StackF0F0>(SetHMatrix<LR, K, 0>));
-	Global.Add(namec,"(",new assembleHMatrix<LR, K>);
+	new OneOperator2_<HMatrixVirt<K>**,HMatrixVirt<K>**,const typename assembleHMatrix<K>::Op*,E_F_StackF0F0>(SetHMatrix<K, 0>));
+	Global.Add(namec,"(",new assembleHMatrix<K>);
 
 	//atype<HMatrix<LR ,K>**>()->Add("(","",new OneOperator2_<string*, HMatrix<LR ,K>**, string*>(get_infos<LR,K>));
-	Add<HMatrix<LR ,K>**>("infos",".",new OneOperator1_<std::map<std::string, std::string>*, HMatrix<LR ,K>**>(get_infos));
+	Add<HMatrixVirt<K>**>("infos",".",new OneOperator1_<std::map<std::string, std::string>*, HMatrixVirt<K>**>(get_infos));
 
-	Dcl_Type<Prod<KN<K>*, LR, K>>();
-	TheOperators->Add("*", new OneOperator2<Prod<KN<K>*, LR, K>, HMatrix<LR ,K>**, KN<K>*>(Build));
-	TheOperators->Add("=", new OneOperator2<KN<K>*, KN<K>*, Prod<KN<K>*, LR, K>>(Prod<KN<K>*, LR, K>::mv));
-	TheOperators->Add("<-", new OneOperator2<KN<K>*, KN<K>*, Prod<KN<K>*, LR, K>>(Prod<KN<K>*, LR, K>::init));
+	Dcl_Type<Prod<KN<K>*, K>>();
+	TheOperators->Add("*", new OneOperator2<Prod<KN<K>*, K>, HMatrixVirt<K>**, KN<K>*>(Build));
+	TheOperators->Add("=", new OneOperator2<KN<K>*, KN<K>*, Prod<KN<K>*, K>>(Prod<KN<K>*, K>::mv));
+	TheOperators->Add("<-", new OneOperator2<KN<K>*, KN<K>*, Prod<KN<K>*, K>>(Prod<KN<K>*, K>::init));
 
-	addInv<HMatrix<LR ,K>*, HMatrixInv, KN<K>, K>();
+	addInv<HMatrixVirt<K>*, HMatrixInv, KN<K>, K>();
 
-	Global.Add("display","(",new plotHMatrix<LR, K>);
+	Global.Add("display","(",new plotHMatrix<K>);
 
 	// to dense:
 	TheOperators->Add("=",
-	new OneOperator2_<KNM<K>*, KNM<K>*, HMatrix<LR ,K>**,E_F_StackF0F0>(ToDense<LR, K, 1>));
+	new OneOperator2_<KNM<K>*, KNM<K>*, HMatrixVirt<K>**,E_F_StackF0F0>(ToDense<K, 1>));
 	TheOperators->Add("<-",
-	new OneOperator2_<KNM<K>*, KNM<K>*, HMatrix<LR ,K>**,E_F_StackF0F0>(ToDense<LR, K, 0>));
+	new OneOperator2_<KNM<K>*, KNM<K>*, HMatrixVirt<K>**,E_F_StackF0F0>(ToDense<K, 0>));
 }
 
 static void Init_Schwarz() {
@@ -588,11 +648,11 @@ static void Init_Schwarz() {
 	Add<std::map<std::string, std::string>*>("[","",new OneOperator2_<string*, std::map<std::string, std::string>*, string*>(get_info));
 
 	//add<partialACA,double>("assemble");
-	add<partialACA,std::complex<double>>("assemblecomplex");
+	add<std::complex<double>>("assemblecomplex");
 
-	zzzfff->Add("HMatrix", atype<HMatrix<partialACA ,std::complex<double> > **>());
+	zzzfff->Add("HMatrix", atype<HMatrixVirt<std::complex<double> > **>());
 	//map_type_of_map[make_pair(atype<HMatrix<partialACA ,double>**>(), atype<double*>())] = atype<HMatrix<partialACA ,double>**>();
-	map_type_of_map[make_pair(atype<HMatrix<partialACA ,std::complex<double> >**>(), atype<Complex*>())] = atype<HMatrix<partialACA ,std::complex<double> >**>();
+	map_type_of_map[make_pair(atype<HMatrixVirt<std::complex<double> >**>(), atype<Complex*>())] = atype<HMatrixVirt<std::complex<double> >**>();
 }
 
 LOADFUNC(Init_Schwarz)
