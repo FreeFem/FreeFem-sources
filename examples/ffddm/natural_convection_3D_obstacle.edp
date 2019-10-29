@@ -36,7 +36,7 @@ real tolNewton = 1.e-3;
 
 real coef;
 
-int np = getARGV("-global", 9);
+int np = getARGV("-global", 6);
 
 int mysplit = getARGV("-CSsplit", 3);
 

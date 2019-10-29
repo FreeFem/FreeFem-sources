@@ -14,7 +14,7 @@ macro def(i)i// EOM                         // scalar field definition
 macro init(i)i// EOM                        // scalar field initialization
 func Pk = P2;
 
-real k = getARGV("-waven",40.);
+real k = getARGV("-waven",20.);
 func f = 100*exp(-((x-.5)^2+(y-.5)^2)*k*10);
 
 real lambda = 2*pi/k;

@@ -661,6 +661,7 @@ class IterativeMethod : public OneOperator {
                 void addMatMul(const KNM_<R>& xx, KNM_<R>& Ax) const {
                     ffassert(xx.N() == Ax.N());
                     ffassert(xx.M() == Ax.M());
+                    x.resize(xx.N(), xx.M());
                     x = xx;
                     Ax = GetAny<KNM_<R>>((*mat)(stack));
                     WhereStackOfPtr2Free(stack)->clean();
