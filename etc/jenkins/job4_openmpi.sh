@@ -28,7 +28,7 @@ autoreconf -i \
   && ./configure --enable-download --prefix=/builds/workspace/freefem \
   --with-petsc=$PETSC_DIR/real/lib \
   --with-petsc_complex=$PETSC_DIR/complex/lib \
-  && ./3rdparty/getall -a \
+  && ./3rdparty/getall -a -o Ipopt,NLopt,freeYams,FFTW,ARPACK,Gmm++,MMG3D,mshmet,MUMPS,htool \
   && ./etc/jenkins/blob/build.sh
 
 if [ $? -eq 0 ]
