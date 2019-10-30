@@ -149,6 +149,8 @@ void ffServer::HandleRead(ConnectHandle::pConnectHandle connect, std::error_code
 void ffServer::Send(ffPacket packet)
 {
     auto ite = m_Connections.begin();
+    packet.m_JSON["Plot"] = m_Packets.size();
+    packet.Compress();
 
     while (ite != m_Connections.end()) {
         ConnectHandle::pConnectHandle tmp = *ite;
