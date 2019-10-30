@@ -51,8 +51,8 @@ else
 PETSC_DOWNLOAD := --download-scalapack --download-metis --download-ptscotch \
 		--download-mumps --download-hypre --download-parmetis \
 		--download-superlu --download-suitesparse --download-tetgen \
-		--download-hpddm --download-hpddm-commit=c68d87dd6f4c1f020227877554462c974ae4604f --download-slepc
-PETSC_DOWNLOAD_C:= --download-hpddm --download-hpddm-commit=c68d87dd6f4c1f020227877554462c974ae4604f --download-slepc
+		--download-hpddm --download-hpddm-commit=1686037 --download-slepc
+PETSC_DOWNLOAD_C:= --download-hpddm --download-hpddm-commit=1686037 --download-slepc
 endif
 ifeq ($(FF_generic_petsc), yes)
   FLAGS_MTUNE := "-mtune=generic"

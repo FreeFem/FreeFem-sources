@@ -54,7 +54,7 @@ matrix<real> Mat;                           // local operator
 ThBorder = buildlayers(square(1, 1), 1);
 
 schwarz A(Mat, intersection, D, scaled = false);
-set(A, sparams = "-hpddm_mkl_pardiso_iparm_13 1 --hpddm_schwarz_method oras -hpddm_schwarz_coarse_correction deflated -hpddm_geneo_nu 5");
+set(A, sparams = "-hpddm_mkl_pardiso_iparm_13 1 --hpddm_schwarz_method oras -hpddm_schwarz_coarse_correction deflated -hpddm_geneo_nu 1");
 
 matrix<real> Opt;                           // local operator with optimized boundary conditions
 pair ret;
