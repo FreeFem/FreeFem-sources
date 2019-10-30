@@ -206,7 +206,7 @@ void ffPacket::Jsonify<std::vector<KN_<double>>>(const std::vector<KN_<double>>&
     Geometry["Indices"] = json::array();
     Geometry["Labels"] = json::array();
     for (size_t i = 0; i < element_nbr; ++i) {
-        for (size_t j = 0; j < 3;² ++j) {
+        for (size_t j = 0; j < 3; ++j) {
             if (j < dimensions) {
                 Geometry["Vertices"] += data[j][(long long int)i];
             } else {
