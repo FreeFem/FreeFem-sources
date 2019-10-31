@@ -89,15 +89,9 @@ else
     u[] = A^-1 * rhs;
 
 {
-    Wh def(z);
-    z[] = D;
-    mesh3 ThExport = trunc(Th, z > 0.4);
-    fespace WhExport(ThExport, Pk);
-    WhExport def(uExport);
-    def(uExport) = def(u);
     int[int] order = [1, 1];
-    macro sol()[uExport, uExportB, uExportC], uExportD//
+    macro sol()[u, uB, uC], uD//
     macro orderAndName()order, dataname = "velocity pressure"//
-    export("sol_stokes_3d_io", ThExport, sol, orderAndName, comm);
+    export("sol_stokes_3d_io", Th, sol, orderAndName, comm);
 }
 
