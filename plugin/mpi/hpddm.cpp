@@ -20,7 +20,7 @@ class initDDM : public OneOperator {
                 Expression R;
                 Expression D;
                 const int c;
-                static const int n_name_param = 3;
+                static const int n_name_param = 2;
                 static basicAC_F0::name_and_type name_param[];
                 Expression nargs[n_name_param];
                 E_initDDM(const basicAC_F0& args, int d) : A(0), Mat(0), R(0), D(0), c(d) {
