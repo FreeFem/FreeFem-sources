@@ -1382,7 +1382,6 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
     for(int i=0;i<nt;i++) {
         int &it=ind_nt[i];
         const T &K(t[it]);
-        mes=K.mesure();
         int iv[T::nv];
         for (int j = 0; j < T::nea ; j++) {
             iv[j] =  old2new[ &(K[j]) - v];
