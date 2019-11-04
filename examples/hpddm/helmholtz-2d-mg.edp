@@ -65,7 +65,8 @@ matrix<complex> MatCoarse;
     Th = ThBackup;
 }
 set(MatCoarse, solver = sparsesolverSym, sym = 1);
-schwarz<complex> ACoarseSeq(MatCoarse, prefix = "level_2_");
+schwarz<complex> ACoarseSeq(MatCoarse);
+set(ACoarseSeq, prefix = "level_2_");
 matrix R = interpolate(Wh, WhCoarse);
 complex[int] rhs = vPb(0, Wh);
 
@@ -105,8 +106,8 @@ real[int] DCoarse;
     Th = ThBackup;
 }
 R = interpolate(Wh, WhCoarse);
-schwarz<complex> ACoarse(MatCoarse, intersectionCoarse, DCoarse, prefix = "level_2_");
-set(ACoarse, sparams = "-hpddm_level_2_verbosity " + (!mpirank ? "1" : "0") + " -hpddm_level_2_schwarz_method ras -hpddm_level_2_tol 1e-1 -hpddm_level_2_gmres_restart 200 -hpddm_level_2_max_it 200 -hpddm_level_2_krylov_method gcrodr -hpddm_level_2_recycle 10");
+schwarz<complex> ACoarse(MatCoarse, intersectionCoarse, DCoarse);
+set(ACoarse, sparams = "-hpddm_level_2_verbosity " + (!mpirank ? "1" : "0") + " -hpddm_level_2_schwarz_method ras -hpddm_level_2_tol 1e-1 -hpddm_level_2_gmres_restart 200 -hpddm_level_2_max_it 200 -hpddm_level_2_krylov_method gcrodr -hpddm_level_2_recycle 10", prefix = "level_2_");
 macro mplot()wait = 1, cmm = "Transfers on the correction at iteration " + ijk//
 int ijk = 1;
 func complex[int] correctionInexact(complex[int]& in) {
