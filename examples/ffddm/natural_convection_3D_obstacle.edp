@@ -22,7 +22,7 @@ macro div(u)(dx(u) + dy(u#B) + dz(u#C))// EOM
 macro UgradU(uw,u)[[uw,uw#B,uw#C]'*grad(u),[uw,uw#B,uw#C]'*grad(u#B),[uw,uw#B,uw#C]'*grad(u#C)]//
 func Pk = [P2, P2, P2, P1, P1];             // finite element space
 
-real Ra=getARGV("-Ra", 1.e5);
+real Ra=getARGV("-Ra", 1.e4);
 real Pr=0.71;
 real Rey=sqrt(Ra/Pr);
 real IRe=1./Rey, IRa=Ra/(Rey*Rey*Pr), IPr=1./(Rey*Pr);
