@@ -6485,11 +6485,13 @@ namespace Fem2D {
             }
         }
         if( Aii) A->SetBC(onBC,tgv);
-        if (! ktbc  && nbon && verbosity )
+        if (! ktbc  && nbon && verbosity>1 )
         {
             cout << " Warning: -- Your set of boundary condition is incompatible with the mesh label." << endl;
+            if(verbosity>4)
             for (map<int,int>::const_iterator i=lll.begin();i!=lll.end();i++)
-            cout << " lab " << i-> first << "  nb " << i->second  << endl;
+                if( on.find(i->first) != on.end() )
+                    cout << " on: missing lab " << i-> first << "  nb " << i->second  << endl;
         }
         *mps =mp;
     }
@@ -6638,11 +6640,13 @@ namespace Fem2D {
             }
         }
         if( Aii) A->SetBC(onBC,tgv);
-        if (! ktbc  && nbon && verbosity )
+        if (! ktbc  && nbon && verbosity>1 )
         {
             cout << " Warning: -- Your set of boundary condition is incompatible with the mesh label." << endl;
+            if(verbosity>9)
             for (map<int,int>::const_iterator i=lll.begin();i!=lll.end();i++)
-                cout << " lab " << i-> first << "  nb " << i->second  << endl;
+              if( on.find(i->first) != on.end() )
+                  cout << " on: missing lab " << i-> first << "  nb " << i->second  << endl;
         }
         *mps =mp;
     }
