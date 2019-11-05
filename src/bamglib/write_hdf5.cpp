@@ -5,6 +5,7 @@
 extern long verbosity;
 #ifdef HAVE_HDF5
 #include "write_hdf5.hpp"
+#include <cassert>
 using std::max;
 using std::min;
 
