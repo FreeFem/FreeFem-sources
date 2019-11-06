@@ -1798,20 +1798,20 @@ void ArrayOperator()
      //-  new OneBinaryOperator<Op2_build<DotSlash_KN_<K>,KN_<K>,KN_<K> > >(knrp,knr_)
       );
 
-    /* TheOperators->Add("<<",
+     TheOperators->Add("<<",
     //   new OneBinaryOperator<PrintPnd<KN<K>*> >,
        new OneBinaryOperator<Print<KNM_<K> > >,
        new OneBinaryOperator<Print<KN_<K> > >
-       );*/
-    /*TheOperators->Add("<<",
+       );
+    TheOperators->Add("<<",
                       new OneBinaryOperator< PrintPnd< KN< KNM<K> >* > >,
                       new OneBinaryOperator< PrintPnd< KN< KN<K> >* > >
-                      );*/
-    
-    TheOperators->Add("<<",
-       new OneBinaryOperator<Op_WriteKN<K> >,
-       new OneBinaryOperator<Op_WriteKNM<K> >
-     );
+                      );
+  // remove f.H ne marche pas
+  //  TheOperators->Add("<<",
+  //     new OneBinaryOperator<Op_WriteKN<K> >,
+  //     new OneBinaryOperator<Op_WriteKNM<K> >
+  //   );
 
      TheOperators->Add(">>",
         new OneBinaryOperator<Op_ReadKN<K> >,

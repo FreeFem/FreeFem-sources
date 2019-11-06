@@ -82,7 +82,7 @@ Complex square(const Complex &x){ return x*x; }
 void initArrayOperatorComplex() {
   typedef Complex K;
   typedef const K & KK;
-     Dcl_Type< KN_rmeps<K> > ();
+     Dcl_Type< KN_rmeps<K   > > ();
   typedef double R;
   typedef const R & RR;
   ArrayOperator<Complex, long>();
