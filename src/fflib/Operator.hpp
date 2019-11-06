@@ -169,8 +169,9 @@ struct Op2_pow: public binary_function<A,B,R> {
 template<class A>
 struct Op_Read : public binary_function<istream*,A*,istream*> {
   static istream *  f(istream  * const  & f,A  * const  &  a)  
-   { 
-     *f >> *a;
+   {
+       if( !f || !*f) ExecError("Fatal Error: file not open in read value (Op_Read)");
+       *f >> *a;
      return f;
    }
 };
@@ -200,10 +201,18 @@ struct Op_ReadKN : public binary_function<istream*,KN<A>*,istream*> {
         ExecError("Fatal Error: incompatible length in read array (Op_ReadKN)");
        assert(n==a->N());
        }
-     while (f->get(c) &&  (c!='\n' && c!='\r' ) ) ((void) 0); // eat until control (new line
+       double value=std::numeric_limits<double>::min();
+     while (f->get(c) && (c!='\n' && c!='\r' ) ) ((void) 0); // eat until control (new line
 
-     for (int i=0;i<n;i++)
-       *f >> (*a)[i] ;
+       // buffer problem if reading value are out range
+       for (int i=0;i<n;i++) {
+           *f >> (*a)[i] ;
+           if(!f->good())  {
+               f->clear();
+               if (verbosity) cout << " problem buffer " << endl;}
+           //if( value<std::numeric_limits<double>::min() ) value =std::numeric_limits<double>::min();
+           //if( value>std::numeric_limits<double>::max() ) value =std::numeric_limits<double>::max();
+           }
      return f;
    }
 };
@@ -211,10 +220,10 @@ template<class A>
 struct Op_ReadKNM : public binary_function<istream*,KNM<A>*,istream*> {
     static istream *  f(istream  * const  & f,KNM<A>* const  &  a)
     {
-        if( !f || !*f) ExecError("Fatal Error: file not open in read array (Op_ReadKN)");
+        if( !f || !*f) ExecError("Fatal Error: file not open in read array (Op_ReadKNM)");
         int n,m;char c;
         *f >> n >> m;
-        if(!f->good()) ExecError("Fatal Error: file  not good in read array (Op_ReadKN)");
+        if(!f->good()) ExecError("Fatal Error: file  not good in read array (Op_ReadKNM)");
         
         if(n !=a->N() || m != a->M()    ) {
             cerr << " length on the array  N " << a->N() << " != " << n << " n in file " << endl;
