@@ -267,7 +267,7 @@ struct Op_WriteKN : public binary_function<ostream*,KN<A>*,ostream*> {
     }
 };
 
-
+/*  FH je supprime  mauvais code nov 2019
 template<>
 struct Op_WriteKNM<double> : public binary_function<ostream*,KNM<double>*,ostream*> {
     static ostream *  f(ostream  * const  & f,KNM<double>* const  &  a)
@@ -295,7 +295,7 @@ struct Op_WriteKN<double> : public binary_function<ostream*,KN<double>*,ostream*
         return f;
     }
 };
-
+*/
 template<class A>
 struct Print: public binary_function<ostream*,A,ostream*> {
   static ostream* f(ostream* const  & a,const A & b)  { *a << b;  return a;}

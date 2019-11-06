@@ -61,6 +61,15 @@ KNM_<double> Get_C2R_(KNM_<complex<double> > vc) {
 /*!
  * \brief Initialization
  */
+KN_<Complex> rmeps(KN_rmeps<Complex> p,double eps)
+{
+    for(int i=0;i<p.v.N();++i)
+    {   int c=0;double a =p.v[i].real(), b=p.v[i].imag();
+        if(abs(a)<eps) c=1,a=0.;
+        if(abs(b)<eps) c=1,b=0.;
+        if(c) p.v[i]=Complex(a,b);
+    }
+    return p.v;}//
 void initArrayDCLComplex() {
   ArrayDCL<Complex>();
   Dcl_Type<Mul_KNMh_KN_<Complex> >();
@@ -73,10 +82,13 @@ Complex square(const Complex &x){ return x*x; }
 void initArrayOperatorComplex() {
   typedef Complex K;
   typedef const K & KK;
+     Dcl_Type< KN_rmeps<K> > ();
   typedef double R;
   typedef const R & RR;
   ArrayOperator<Complex, long>();
   ArrayOperatorF<Complex, const Complex&>();
+  Add<KN<K> *>("rmeps",".",new OneOperator1<KN_rmeps<K>,KN_<K> >(build_rmeps));
+  Add<KN_rmeps<K> >("(","",new OneOperator2<KN_<K>,KN_rmeps<K>,double>(rmeps));
 
   // Take the real or imaginary part of a complex array
   Add<KN<Complex> *>("im", ".", new OneOperator1<KN_<double>, KN_<Complex> >(Get_C2R_<1>, atype<KN<Complex>* >()));
