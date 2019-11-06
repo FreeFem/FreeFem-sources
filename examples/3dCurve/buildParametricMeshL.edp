@@ -21,11 +21,12 @@ plot(D01(-n) + D02(-n) + D03(-n) + D04(-n) + D05(-n)
 meshL ThL=buildmesh(D01(-n) + D02(-n) + D03(-n) + D04(-n) + D05(-n)
     + D06(-n) + D11(n) + D12(n) + D13(n));
 
-plot(ThL, wait=true);
+plot(ThL, cmm="ThL", wait=true);
 savemesh(ThL,"toto.mesh");
 	
 
 //helice conique
-curve3 E1(t=0, 30.*2.*pi){x=(1.)*t*cos(t); y=-(1.)*t*sin(t); z=t;}
-plot(E1(1000),wait=true);
+curve3 E1(t=0, 10.*pi){x=(1.)*t*cos(t); y=-(1.)*t*sin(t); z=t;}
+meshL ThL2=buildmesh(E1(1000));
+plot(ThL2,cmm="ThL2",wait=true);
 
