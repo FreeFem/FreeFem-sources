@@ -52,7 +52,11 @@ inline double norm(double x){return x*x;}
 inline double norm(float x){return x*x;}
 inline long norm(long x){return x*x;}
 inline int norm(int x){return x*x;}
-
+template <class T> inline T removeeps(const T & t){ return t;}
+template <> inline double  removeeps<double>(const double & t){ return abs(t) < 1e-305 ? 0. : t;}
+template <> inline complex<double>  removeeps<complex<double> >(const complex<double> & t)
+    { return complex<double>(removeeps(t.real()),removeeps(t.imag()) );}
+    
 }
 
 template<class R>
@@ -96,7 +100,7 @@ template<class R> ostream & operator<<(ostream & f,const KN_<const_R> & v)
     int prec=f.precision();
     if(prec<i10) f.precision(i10);    
     for (long i=0;i<v.N();i++)
-      f   << setw(3) << v[i] << ((i % 5) == 4 ? "\n\t" : "\t");
+        f   << setw(3) << RNM::removeeps(v[i]) << ((i % 5) == 4 ? "\n\t" : "\t");
     if(prec<i10) f.precision(prec); 
     return f;
   };
@@ -143,7 +147,7 @@ template<class R> ostream & operator<<(ostream & f,const KNM_<const_R> & v)
      f << v.N()<<' '<<v.M() /*<< "  n" << v.next<<" :"<< v.shapei.next << "," << v.shapej.next */<< "\t\n\t" ;
     for (long i=0;i<v.N();i++) {
       for (long j=0;j<v.M();j++) 
-        f << " " << setw(3) << v(i,j);
+          f << " " << setw(3) << RNM::removeeps(v(i,j));
        f << "\n\t";}
     if(prec<i10) f.precision(prec);
   return f;
@@ -163,7 +167,7 @@ template<class R> ostream & operator<<(ostream & f,const KNMK_<const_R> & v)
     for (long i=0;i<v.shapei.n;i++){
       for (long j=0;j<v.shapej.n;j++){
 	for (long k=0;k<v.shapek.n;k++)
-	  f << " " << setw(3) << v(i,j,k);
+            f << " " << setw(3) << RNM::removeeps(v(i,j,k));
 	f << "\n\t";}
       f << "\n\t";}
     if(prec<i10) f.precision(prec);
