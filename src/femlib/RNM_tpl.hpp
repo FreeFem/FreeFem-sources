@@ -52,6 +52,10 @@ inline double norm(double x){return x*x;}
 inline double norm(float x){return x*x;}
 inline long norm(long x){return x*x;}
 inline int norm(int x){return x*x;}
+template <class T> inline bool verysmall(const T & t){ return false;}
+template <> inline bool verysmall<double>(const double & t){ return abs(t)< 1e-305 ? 1: false;}
+template <> inline bool verysmall<complex<double> >(const complex<double> & t)
+    {return verysmall(t.real() )|| verysmall(t.imag() );}
 template <class T> inline T removeeps(const T & t){ return t;}
 template <> inline double  removeeps<double>(const double & t){ return abs(t) < 1e-305 ? 0. : t;}
 template <> inline complex<double>  removeeps<complex<double> >(const complex<double> & t)
@@ -115,6 +119,7 @@ template<class R> istream & operator>>(istream & f, KN_<R> & v)
 
      for (int i=0;i<n;i++)
       {  f >> v[i] ;
+       if(!f.good() && RNM::verysmall(v[i])) {f.clear(); RNM::removeeps(v[i]);}//  bug on apple correct
        ffassert(f.good());} // modif FH  main 2006
      return f;
 }
@@ -131,6 +136,7 @@ template<class R> istream & operator>>(istream & f, KN<R> & v)
      for (int i=0;i<n;i++)
        {
        f >> v[i] ;
+       if(!f.good() && RNM::verysmall(v[i])) {f.clear(); RNM::removeeps(v[i]);}//  bug on apple correct
        ffassert(f.good());}// modif FH  main 2006
      return f;
 }
