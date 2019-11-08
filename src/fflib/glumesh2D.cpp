@@ -47,7 +47,7 @@ public:
 };
 
 
-Mesh * GluMesh(listMesh const & lst)
+Mesh * GluMesh(list<Mesh const *> const & lth, long labtodel = -1)
 {
   int nbt=0;
   int neb=0;
@@ -56,7 +56,6 @@ Mesh * GluMesh(listMesh const & lst)
   int nbvx=0;
   double hmin=1e100;
   R2 Pn(1e100,1e100),Px(-1e100,-1e100);
-  const list<Mesh const *> lth(*lst.lth);
   const  Mesh * th0=0;
     int kk=0;
   for(list<Mesh const *>::const_iterator i=lth.begin();i != lth.end();++i)
@@ -135,7 +134,7 @@ Mesh * GluMesh(listMesh const & lst)
 	    int ii0=i0,ii1=i1;
 	    if(ii1<ii0) Exchange(ii0,ii1);
 	    pair<int,int> i01(ii0,ii1);
-	    if( bbe.find(i01) == bbe.end())
+	    if(be.lab != labtodel && bbe.find(i01) == bbe.end())
 	    {
 	      (*bb++).set(v,i0,i1,be.lab);
 	      bbe[i01]=	  neb++;
@@ -177,7 +176,7 @@ struct Op2_setmesh: public binary_function<AA,BB,RR> {
   static RR f(Stack stack, const AA & a,const BB & b)
   {
     ffassert(a );
-    pmesh  p=GluMesh(b);
+    pmesh  p=GluMesh(*(b.lth));
 
       if(!INIT &&  *a) (**a).destroy() ;
     return *a=p,a;
@@ -372,6 +371,48 @@ typedef Mesh const *pmesh;
   }
 };
 
+Mesh* GluMeshtab (KN<pmesh> *const &tab, long const &lab_delete) {
+  list<Mesh const *> l;
+  for (int i=0; i<tab->n; i++)
+    l.push_back((*tab)[i]);
+  return GluMesh(l,lab_delete);
+}
+
+struct Op_GluMeshtab: public OneOperator {
+    typedef const Mesh *pmesh;
+    class Op: public E_F0mps   {
+    public:
+        static basicAC_F0::name_and_type name_param [];
+        static const int n_name_param = 1;
+        Expression nargs[n_name_param];
+        Expression getmeshtab;
+        long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
+
+        Op (const basicAC_F0 &args, Expression t): getmeshtab(t)
+        {args.SetNameParam(n_name_param, name_param, nargs);}
+
+        AnyType operator () (Stack s)  const;
+    };
+
+    E_F0*code (const basicAC_F0 &args) const
+    {return new Op(args, t[0]->CastTo(args[0]));}
+
+    Op_GluMeshtab ():
+    OneOperator(atype<const pmesh>(), atype<KN<pmesh> *>()) {};
+};
+basicAC_F0::name_and_type Op_GluMeshtab::Op::name_param[Op_GluMeshtab::Op::n_name_param] =
+{
+    {"labtodel", &typeid(long)}
+};
+AnyType Op_GluMeshtab::Op::operator () (Stack stack)  const {
+    KN<const Mesh *> *tab = GetAny<KN<const Mesh *> *>((*getmeshtab)(stack));
+    long labtodel = arg(0, stack, LONG_MIN);
+    Mesh *Tht = GluMeshtab(tab, labtodel);
+
+    Add2StackOfPtr2FreeRC(stack, Tht);
+    return Tht;
+}
+
 //  truc pour que la fonction
 // Init::Init() soit appele a moment du chargement dynamique
 // du fichier
@@ -391,6 +432,7 @@ void init_glumesh2D()
 
   Global.Add("change","(",new SetMesh);
 
+  Global.Add("gluemesh", "(", new Op_GluMeshtab);
 }
 #else
 class Init { public:
@@ -412,5 +454,6 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
 
   Global.Add("change","(",new SetMesh);
 
+  Global.Add("gluemesh", "(", new Op_GluMeshtab);
 }
 #endif
