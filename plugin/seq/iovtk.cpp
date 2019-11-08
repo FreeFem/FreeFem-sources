@@ -330,7 +330,21 @@ void BEGINTYPE_VTU (FILE *fp, string begintype) {
 void ENDTYPE_VTU (FILE *fp, string endtype) {
     fprintf(fp, "</%s>\n", endtype.c_str());
 }
-
+void writebin64(FILE *fp,int nc)
+{
+ unsigned char ElementChars[256];
+ unsigned nbytes = nc;
+ int l = runEncodeB64(sizeof(int), (unsigned char *)&nbytes, ElementChars);
+ ElementChars[l] = 0;
+ fwrite(&ElementChars, l, 1, fp);
+}
+void  writebin64flush(FILE *fp)
+{
+unsigned char ElementChars[256];
+int l = runEncodeB64(0, NULL, ElementChars);
+ElementChars[l] = 0;
+fwrite(&ElementChars, l, 1, fp);
+}
 void VTU_WRITE_MESH (FILE *fp, const Mesh &Th, bool binary, int datasize, bool surface, bool bigEndian) {
     int nc, nv, nconnex;
     
@@ -576,24 +590,25 @@ void VTU_WRITE_MESH (FILE *fp, const Mesh &Th, bool binary, int datasize, bool s
     if (binary) {
         fprintf(fp, "<DataArray type=\"Int32\" Name=\"Label\" format=\"binary\">\n");
         int label;
-        
+        int nl =Th.nt;
+        if(surface) nl +=Th.neb;
+        nl *= sizeof(int);
+      //  cout << " nl =="<< nl << endl;
+        writebin64(fp,nl);
         for (int it = 0; it < Th.nt; it++) {
             const Mesh::Triangle &K(Th.t(it));
             label = K.lab;
-            if (!bigEndian) {SwapBytes((char *)&label, sizeof(int), 1);}
-            
-            fwrite(&label, sizeof(int), 1, fp);
+            writebin64(fp,label);
         }
         
         if (surface) {
             for (int ibe = 0; ibe < Th.neb; ibe++) {
                 const Mesh::BorderElement &K(Th.be(ibe));
                 label = K.lab;
-                if (!bigEndian) {SwapBytes((char *)&label, sizeof(int), 1);}
-                
-                fwrite(&label, sizeof(int), 1, fp);
+                writebin64(fp,label);
             }
         }
+        writebin64flush(fp);
     } else{
         fprintf(fp, "<DataArray type=\"Int32\" Name=\"Label\" format=\"ascii\">\n");
         int label;
@@ -872,24 +887,23 @@ void VTU_WRITE_MESH (FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool 
     if (binary) {
         fprintf(fp, "<DataArray type=\"Int32\" Name=\"Label\" format=\"binary\">\n");
         int label;
-        
+        int nl =Th.nt;
+        if(surface) nl +=Th.nbe;
+        nl *= sizeof(int);
+        //  cout << " nl =="<< nl << endl;
+        writebin64(fp,nl);
         for (int it = 0; it < Th.nt; it++) {
-            const Tet &K(Th.elements[it]);
-            label = K.lab;
-            if (!bigEndian) {SwapBytes((char *)&label, sizeof(int), 1);}
-            
-            fwrite(&label, sizeof(int), 1, fp);
+            label = Th[it].lab;
+            writebin64(fp,label);
         }
         
         if (surface) {
             for (int ibe = 0; ibe < Th.nbe; ibe++) {
-                const Triangle3 &K(Th.be(ibe));
-                label = K.lab;
-                if (!bigEndian) {SwapBytes((char *)&label, sizeof(int), 1);}
-                
-                fwrite(&label, sizeof(int), 1, fp);
+                label = Th.be(ibe).lab;
+                writebin64(fp,label);
             }
         }
+        writebin64flush(fp);        
     } else {
         fprintf(fp, "<DataArray type=\"Int32\" Name=\"Label\" format=\"ascii\">\n");
         int label;
