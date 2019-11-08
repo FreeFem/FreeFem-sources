@@ -345,7 +345,7 @@ int l = runEncodeB64(0, NULL, ElementChars);
 ElementChars[l] = 0;
 fwrite(&ElementChars, l, 1, fp);
 }
-void VTU_WRITE_MESH (FILE *fp, const Mesh &Th, bool binary, int datasize, bool surface, bool bigEndian) {
+void VTU_WRITE_MESH (FILE *fp, const Mesh &Th, bool binary, int datasize, bool surface) {
     int nc, nv, nconnex;
     
     if (surface) {nc = Th.nt + Th.neb;} else {nc = Th.nt;}
@@ -632,7 +632,7 @@ void VTU_WRITE_MESH (FILE *fp, const Mesh &Th, bool binary, int datasize, bool s
     //---------------------------------- LABELS WITH VTU -------------------------------------------//
 }
 
-void VTU_WRITE_MESH (FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool surface, bool bigEndian) {
+void VTU_WRITE_MESH (FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool surface) {
     int nc, nv, nconnex;
     
     if (surface) {nc = Th.nt + Th.nbe;} else {nc = Th.nt;}
@@ -928,7 +928,7 @@ void VTU_WRITE_MESH (FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool 
 }
 
 
-void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool surface, bool bigEndian) {
+void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool surface) {
     int nc, nv, nconnex;
     
     if (surface) {nc = Th.nt + Th.nbe;} else {nc = Th.nt;}
@@ -1179,9 +1179,7 @@ void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool 
         
         for (int it = 0; it < Th.nt; it++) {
             const TriangleS &K(Th.t(it));
-            label = K.lab;
-            if (!bigEndian) {SwapBytes((char *)&label, sizeof(int), 1);}
-            
+            label = K.lab;            
             fwrite(&label, sizeof(int), 1, fp);
         }
         
@@ -1189,9 +1187,7 @@ void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool 
             for (int ibe = 0; ibe < Th.nbe; ibe++) {
                 const BoundaryEdgeS &K(Th.be(ibe));
                 label = K.lab;
-                if (!bigEndian) {SwapBytes((char *)&label, sizeof(int), 1);}
-                
-                fwrite(&label, sizeof(int), 1, fp);
+				fwrite(&label, sizeof(int), 1, fp);
             }
         }
     } else{
@@ -2136,7 +2132,7 @@ void VTK_WRITE_MESH (const string &filename, FILE *fp, const Mesh &Th, bool bina
             float f[3];
             f[0] = P.x;
             f[1] = P.y;
-            f[2] = 0;	// P.z; 3D case
+            f[2] = 0.;	// P.z; 3D case
             if (binary) {
                 if (!bigEndian) {SwapBytes((char *)&f, sizeof(float), 3);}
                 
@@ -2153,7 +2149,7 @@ void VTK_WRITE_MESH (const string &filename, FILE *fp, const Mesh &Th, bool bina
             double f[3];
             f[0] = P.x;
             f[1] = P.y;
-            f[2] = 0;	// P.z; 3D case
+            f[2] = 0.;	// P.z; 3D case
             if (binary) {
                 if (!bigEndian) {SwapBytes((char *)&f, sizeof(double), 3);}
                 
@@ -2436,14 +2432,12 @@ AnyType VTK_WriteMesh_Op::operator () (Stack stack)  const {
     
     ffassert(pTh);
     Mesh &Th = *pTh;
-    bool swap = false;
-    bool bigEndian = true;
-    bool binary = false;
+	bool bigEndian = isBigEndian ();
+    bool swap = bigEndian;
+    bool binary = true;
     bool surface = true;
-    bool floatmesh = true;
-    bool floatsol = true;
-    int datasize = sizeof(float);
-    int datasizeSol = sizeof(float);
+    bool floatmesh = false;
+    bool floatsol = false;
     string *dataname;
     int nbofsol = l.size();
     KN<int> order(nbofsol);
@@ -2466,13 +2460,11 @@ AnyType VTK_WriteMesh_Op::operator () (Stack stack)  const {
     
     if (nargs[5]) {binary = GetAny<bool>((*nargs[5])(stack));}
     
-    if (nargs[6]) {bigEndian = GetAny<bool>((*nargs[6])(stack));}
+    if (nargs[6]) {swap = GetAny<bool>((*nargs[6])(stack));}
     
-    swap = bigEndian;
+    int datasize = floatmesh ?sizeof(float): sizeof(double);
     
-    if (!floatmesh) {datasize = sizeof(double);}
-    
-    if (!floatsol) {datasizeSol = sizeof(double);}
+    int datasizeSol =floatsol ?sizeof(float): sizeof(double);
     
     int iii = 0;
     if (nargs[0]) {
@@ -2670,7 +2662,7 @@ AnyType VTK_WriteMesh_Op::operator () (Stack stack)  const {
          * long offsetsol=0;
          * bool encode64=0;
          */
-        VTU_WRITE_MESH(fp, Th, binary, datasize, surface, swap);
+        VTU_WRITE_MESH(fp, Th, binary, datasize, surface);
         
         // Solution Order
         // order 1
@@ -3096,7 +3088,7 @@ Mesh3*VTK_Load3 (const string &filename, bool bigEndian) {
 
 AnyType VTK_LoadMesh3_Op::operator () (Stack stack)  const {
     string *pffname = GetAny<string *>((*filename)(stack));
-    bool swap = false;
+    bool swap = isBigEndian();
     int reftetra = 1;
     int reftri = 1;
     
@@ -4052,14 +4044,13 @@ AnyType VTK_WriteMesh3_Op::operator () (Stack stack)  const {
     
     ffassert(pTh);
     Mesh3 &Th = *pTh;
-    bool swap = false;
-    bool bigEndian = false;
-    bool binary = false;
+    bool bigEndian = isBigEndian ();
+    bool swap = bigEndian;
+    bool binary = true;
     bool surface = true;
-    bool floatmesh = true;
-    bool floatsol = true;
-    int datasize = sizeof(float);
-    int datasizeSol = sizeof(float);
+    bool floatmesh = false;
+    bool floatsol = false;
+
     string *dataname;
     int nbofsol = l.size();
     KN<int> order(nbofsol);
@@ -4082,13 +4073,12 @@ AnyType VTK_WriteMesh3_Op::operator () (Stack stack)  const {
     
     if (nargs[5]) {binary = GetAny<bool>((*nargs[5])(stack));}
     
-    if (nargs[6]) {bigEndian = GetAny<bool>((*nargs[6])(stack));}
+    if (nargs[6]) {swap = GetAny<bool>((*nargs[6])(stack));}
     
-    swap = bigEndian;
+    int datasize = floatmesh ?sizeof(float): sizeof(double);
     
-    if (!floatmesh) {datasize = sizeof(double);}
+    int datasizeSol =floatsol ?sizeof(float): sizeof(double);
     
-    if (!floatsol) {datasizeSol = sizeof(double);}
     
     int iii = 0;
     if (nargs[0]) {
@@ -4247,7 +4237,7 @@ AnyType VTK_WriteMesh3_Op::operator () (Stack stack)  const {
     } else if (VTK_FILE == 2) {
         int nc, nv;
         
-        VTU_WRITE_MESH(fp, Th, binary, datasize, surface, swap);
+        VTU_WRITE_MESH(fp, Th, binary, datasize, surface);
         // Solution Order
         // order 1
         if (Norder0 != nbofsol) {
@@ -5323,14 +5313,16 @@ AnyType VTK_WriteMeshS_Op::operator () (Stack stack)  const {
     
     ffassert(pTh);
     MeshS &Th = *pTh;
-    bool swap = false;
-    bool bigEndian = true;
-    bool binary = false;
+    
+    bool bigEndian = isBigEndian ();
+    bool swap = bigEndian;
+    
+    bool binary = true;
     bool surface = true;
-    bool floatmesh = true;
-    bool floatsol = true;
-    int datasize = sizeof(float);
-    int datasizeSol = sizeof(float);
+    bool floatmesh = false;
+    bool floatsol = false;
+ //   int datasize = sizeof(double);
+ //   int datasizeSol = sizeof(double);
     string *dataname;
     int nbofsol = l.size();
     KN<int> order(nbofsol);
@@ -5353,13 +5345,11 @@ AnyType VTK_WriteMeshS_Op::operator () (Stack stack)  const {
     
     if (nargs[5]) {binary = GetAny<bool>((*nargs[5])(stack));}
     
-    if (nargs[6]) {bigEndian = GetAny<bool>((*nargs[6])(stack));}
+    if (nargs[6]) {swap = GetAny<bool>((*nargs[6])(stack));}
+        
+    int datasize = floatmesh ?sizeof(float): sizeof(double);
     
-    swap = bigEndian;
-    
-    if (!floatmesh) {datasize = sizeof(double);}
-    
-    if (!floatsol) {datasizeSol = sizeof(double);}
+    int datasizeSol =floatsol ?sizeof(float): sizeof(double);
     
     int iii = 0;
     if (nargs[0]) {
@@ -5517,7 +5507,7 @@ AnyType VTK_WriteMeshS_Op::operator () (Stack stack)  const {
         }
     } else if (VTK_FILE == 2) {
         
-        VTU_WRITE_MESH(fp, Th, binary, datasize, surface, swap);
+        VTU_WRITE_MESH(fp, Th, binary, datasize, surface);
         
         // Solution Order
         // order 1
