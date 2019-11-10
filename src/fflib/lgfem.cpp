@@ -6385,8 +6385,8 @@ C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 
       return NewFEvariableT<v_fes3,3>(pids,currentblock,fespacetype,init,cplx,dim);
   else if  (dim==4)
       return NewFEvariableT<v_fesS,4>(pids,currentblock,fespacetype,init,cplx,dim);
- // else if  (dim==5)
- //       return NewFEvariableT<v_fesL,5>(pids,currentblock,fespacetype,init,cplx,dim);
+  else if  (dim==5)
+      return NewFEvariableT<v_fesL,5>(pids,currentblock,fespacetype,init,cplx,dim);
   else
     CompileError("Invalide fespace on Rd  ( d != 2 or 3) ");
     return C_F0();
@@ -6409,14 +6409,14 @@ size_t dimFESpaceImage(const basicAC_F0 &args)
   size_t dim23=0;
 
   for (int i=0;i<args.size();i++)
-    if (args[i].left() == t_tfe || args[i].left() == t_tfe3 || args[i].left() == t_tfeS)
+    if (args[i].left() == t_tfe || args[i].left() == t_tfe3 || args[i].left() == t_tfeS || args[i].left() == t_tfeL)
       dim23 += args[i].LeftValue()->nbitem();
     else if (args[i].left() == t_a)
       {
 	const E_Array & ea= *dynamic_cast<const E_Array *>(args[i].LeftValue());
 	ffassert(&ea);
 	for (int i=0;i<ea.size();i++)
-	  if (ea[i].left() == t_tfe || ea[i].left() == t_tfe3|| ea[i].left() == t_tfeS)
+	  if (ea[i].left() == t_tfe || ea[i].left() == t_tfe3|| ea[i].left() == t_tfeS || ea[i].left() == t_tfeL)
             dim23 += ea[i].nbitem();
 	  else ffassert(0); // bug
       }
