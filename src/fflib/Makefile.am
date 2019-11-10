@@ -56,6 +56,7 @@ libff_a_SOURCES2=  UMFPack_Solver.cpp \
 	../femlib/P012_2d.cpp \
 	../femlib/P012_3d.cpp \
 	../femlib/P012_3dSurf.cpp \
+	../femlib/P012_3dCurve.cpp \
 	../femlib/Mesh1dn.cpp \
 	../femlib/Mesh2dn.cpp \
 	../femlib/Mesh3dn.cpp \

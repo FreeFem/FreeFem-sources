@@ -431,8 +431,8 @@ list_of_id_args: /* returns [[YYSTYPE_clist_id]] */
   | list_of_id_args ',' FESPACE3 '&' id        { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double,3> **>(),true));}
   | list_of_id_args ',' FESPACES id            { $$ = $1; $$->push_back(UnId($4,Find($3),atype<FE<double,4> **>()));}
   | list_of_id_args ',' FESPACES '&' id        { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double,4> **>(),true));}
-  | list_of_id_args ',' FESPACEL id            { $$ = $1; $$->push_back(UnId($4,Find($3),atype<FE<double,4> **>()));}
-  | list_of_id_args ',' FESPACEL '&' id        { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double,4> **>(),true));}
+  | list_of_id_args ',' FESPACEL id            { $$ = $1; $$->push_back(UnId($4,Find($3),atype<FE<double,5> **>()));}
+  | list_of_id_args ',' FESPACEL '&' id        { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double,5> **>(),true));}
   | list_of_id_args ',' type_of_dcl id         { $$ = $1; $$->push_back(UnId($4,C_F0(),$3->right()));}
   | list_of_id_args ',' type_of_dcl '&' id     { $$ = $1; $$->push_back(UnId($5,C_F0(),$3,true));}
   ;
@@ -443,7 +443,7 @@ list_of_id1:  id                      { $$ = new ListOfId(); $$->push_back(UnId(
 
 /* <<id>> (anchor required because 'id:' is another type of hyperlink) */
 
-id: ID | FESPACE|FESPACE3|FESPACES|FESPACE1;
+id: ID | FESPACE|FESPACE3|FESPACES|FESPACEL|FESPACE1;
 
 list_of_dcls:
       ID                            {$$=currentblock->NewVar<LocalVariable>($1,dcltype);}
@@ -724,6 +724,7 @@ parameters: /* returns [[YYSTYPE_args]] */                  {$$ = 0;} /* <<no_pa
   | FESPACE1                                                {$$ = Find($1);}
   | FESPACE3                                                {$$ = Find($1);}
   | FESPACES                                                {$$ = Find($1);}
+  | FESPACEL                                                {$$ = Find($1);}
   | id /*[[id]]*/ '=' no_set_expr /*[[no_set_expr:]]*/      {$$ = make_pair<const char *,const C_F0>((const char *) $1,(C_F0) $3);}
   | sub_script_expr /*[[sub_script_expr:]]*/                {$$ = $1;}
   | parameters ',' FESPACE                                  {$$ = ($1 += Find($3));}

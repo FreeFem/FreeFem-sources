@@ -485,7 +485,9 @@ public:
   Data<FESpace> * dataptr (Stack stack) const {return   (Data<FESpace> *) (void *) (((char *) stack)+offset);}
   Data<FESpace3> * dataptr3 (Stack stack) const {return   (Data<FESpace3> *) (void *) (((char *) stack)+offset);}
   Data<FESpaceS> * dataptrS (Stack stack) const {return   (Data<FESpaceS> *) (void *) (((char *) stack)+offset);}
+  Data<FESpaceL> * dataptrL (Stack stack) const {return   (Data<FESpaceL> *) (void *) (((char *) stack)+offset);}
 
+    
   void init(Stack stack) const  {
       // cout << " init  " << (char *) dataptr(stack) - (char*) stack  << " " << offset <<  endl;
       if(dim==2)
@@ -494,11 +496,14 @@ public:
       dataptr3(stack)->init();
       else if(dim==4)
       dataptrS(stack)->init();
+      //else if(dim==5)
+      //dataptrL(stack)->init();
   }
   void destroy(Stack stack)  const  {
       if(dim==2) dataptr(stack)->destroy();
       else if(dim==3) dataptr3(stack)->destroy();
       else if(dim==4) dataptrS(stack)->destroy();
+      //else if(dim==5) dataptrL(stack)->destroy();
   }
 
   template<class R,class FESpace,class v_fes>

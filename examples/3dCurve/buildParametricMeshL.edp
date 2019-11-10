@@ -30,3 +30,8 @@ curve3 E1(t=0, 10.*pi){x=(1.)*t*cos(t); y=-(1.)*t*sin(t); z=t;}
 meshL ThL2=buildmesh(E1(1000));
 plot(ThL2,cmm="ThL2",wait=true);
 
+
+
+fespace Vh(ThL,P0);
+
+Vh u;

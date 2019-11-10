@@ -397,6 +397,11 @@ bool  v_fesS::buildperiodic(Stack stack, KN<int> & ndfe) {
     
 }
 
+bool  v_fesL::buildperiodic(Stack stack, KN<int> & ndfe) {
+    return BuildPeriodic(nbcperiodic,periodic,**ppTh,stack,ndfe);
+    
+}
+
 template<class Mesh> 
 class GlgVertex {
 public:
@@ -709,6 +714,28 @@ pfScbase* get_element(pfScbasearray *const & a, long const & n)
 pfSc get_element(pfScarray const & a, long const & n)
 {
     return pfSc( *(*a.first)[n],a.second);
+}
+
+// 3D line
+
+pfLrbase* get_element(pfLrbasearray *const & a, long const & n)
+{
+    return (**a)[n];
+}
+
+pfLr get_element(pfLrarray const & a, long const & n)
+{  //cout << " ************ " << n << " " << a.second << endl;
+    return pfLr( *(*a.first)[n],a.second);
+}
+
+//  complex case
+pfLcbase* get_element(pfLcbasearray *const & a, long const & n)
+{
+    return (**a)[n];
+}
+pfLc get_element(pfLcarray const & a, long const & n)
+{
+    return pfLc( *(*a.first)[n],a.second);
 }
 
 class MoveMesh3 :  public E_F0mps { public:  
@@ -1860,7 +1887,7 @@ inline FEbaseArray<K,v_fes3> ** MakePtrFE3_3(FEbaseArray<K,v_fes3> * * const &  
 
 // 3D surface
 template<class K>
-inline FEbase<K,v_fes> * MakePtrFE3_(pfesS * const &  a){
+inline FEbase<K,v_fesS> * MakePtrFE3_(pfesS * const &  a){
     FEbase<K,v_fesS> * p=new FEbase<K,v_fesS>(a);
     return p ;}
 
@@ -1872,6 +1899,23 @@ inline FEbase<K,v_fesS> ** MakePtrFE3_2(FEbase<K,v_fesS> * * const &  p,pfesS * 
 template<class K>
 inline FEbaseArray<K,v_fesS> ** MakePtrFE3_3(FEbaseArray<K,v_fesS> * * const &  p,pfesS * const &  a,const long & N){
     *p=new FEbaseArray<K,v_fesS>(a,N);
+    return p ;}
+
+
+// 3D curve
+template<class K>
+inline FEbase<K,v_fesL> * MakePtrFE3_(pfesL * const &  a){
+    FEbase<K,v_fesL> * p=new FEbase<K,v_fesL>(a);
+    return p ;}
+
+template<class K>
+inline FEbase<K,v_fesL> ** MakePtrFE3_2(FEbase<K,v_fesL> * * const &  p,pfesL * const &  a){
+    *p=new FEbase<K,v_fesL>(a);
+    return p ;}
+
+template<class K>
+inline FEbaseArray<K,v_fesL> ** MakePtrFE3_3(FEbaseArray<K,v_fesL> * * const &  p,pfesL * const &  a,const long & N){
+    *p=new FEbaseArray<K,v_fesL>(a,N);
     return p ;}
 
 
@@ -1983,6 +2027,23 @@ pmeshS pfSr_Th(pair<FEbase<K,v_fesS> *,int> p)
 }
 */
 
+// 3D curve
+template<class K>
+long pfSr_nbdf(pair<FEbase<K,v_fesL> *,int> p)
+{
+    if (!p.first->Vh) p.first->Vh= p.first->newVh();
+    throwassert( !!p.first->Vh);
+    return p.first->Vh->NbOfDF;
+}
+/*template<class K>
+ pmeshS pfSr_Th(pair<FEbase<K,v_fesS> *,int> p)
+ {
+ if (!p.first->Vh) p.first->Vh= p.first->newVh();
+ throwassert( !!p.first->Vh);
+ return & p.first->Vh->Th;
+ }
+ */
+
 //3D volume
 long pVh3_ndof(pfes3 * p)
  { throwassert(p && *p);
@@ -2010,6 +2071,20 @@ long pVhS_ndofK(pfesS * p)
 pmeshS pVhS_Th(pfesS * p)
 { throwassert(p && *p);
     FESpaceS *fes=**p; ;  return &fes->Th ;}
+
+//3D curve
+long pVhL_ndof(pfesL * p)
+{ throwassert(p && *p);
+    FESpaceL *fes=**p; ;  return fes->NbOfDF ;}
+long pVhL_nt(pfesL * p)
+{ throwassert(p && *p);
+    FESpaceL *fes=**p; ;  return fes->NbOfElements ;}
+long pVhL_ndofK(pfesL * p)
+{ throwassert(p && *p);
+    FESpaceL *fes=**p;   return (*fes)[0].NbDoF() ;}
+pmeshL pVhL_Th(pfesL * p)
+{ throwassert(p && *p);
+    FESpaceL *fes=**p; ;  return &fes->Th ;}
 
 
 
@@ -2192,6 +2267,80 @@ AnyType pfSr2R(Stack s,const AnyType &a)
   return SetAny<R>(rr);
 }
 
+template<class R,int dd,class v_fes>
+AnyType pfLr2R(Stack s,const AnyType &a)
+{
+    typedef typename  v_fes::pfes pfes;
+    typedef typename  v_fes::FESpace FESpace;
+    typedef typename  FESpace::Mesh Mesh;
+    typedef typename  FESpace::FElement FElement;
+    typedef typename  Mesh::Element Element;
+    typedef typename  Mesh::Vertex Vertex;
+    typedef typename  Mesh::RdHat RdHat;
+    typedef typename  Mesh::Rd Rd;
+    
+    pair< FEbase<R,v_fes> *  ,int> ppfe=GetAny<pair< FEbase<R,v_fes> *,int> >(a);
+    FEbase<R,v_fes> & fe( *ppfe.first);
+    int componante=ppfe.second;
+    if ( !fe.x()) {
+        if ( !fe.x()){
+            return   SetAny<R>(0.0);
+        }
+    }
+    
+    const FESpace & Vh(*fe.Vh);
+    const Mesh & Th(Vh.Th);
+    MeshPoint & mp = *MeshPointStack(s);
+    const Element *K;
+    R1 PHat;
+    bool outside=false;
+    bool qnu=true;
+    if (mp.ThL && mp.ThL->elements == Th.elements && mp.TL)
+    {
+        qnu=false;
+        K=mp.TL;
+        PHat.x = mp.PHat.x;
+    }
+    else if (mp.other.ThL
+             && (mp.other.ThL->elements ==  Th.elements)
+             && (mp.other.P.x == mp.P.x) && (mp.other.P.y == mp.P.y) && (mp.other.P.z == mp.P.z)   )
+    {
+        K=mp.other.TL;
+        PHat.x = mp.other.PHat.x;
+        outside = mp.other.outside;
+    }
+    else {
+        if (mp.isUnset()) ExecError("Try to get unset x,y, ...");
+        K=Th.Find(mp.P,PHat,outside);
+        mp.other.set(Th,mp.P,PHat,*K,0,outside);
+    }
+    if(verbosity>1000)
+    {
+        if(outside)
+            cout << "  ---  " << qnu << "  " << mp.P << " out=" << mp.outside <<  " out=" << outside << " K= " << K << " " << PHat << endl;
+        else
+            cout << "  ---  " << qnu << " P=  " << mp.P << " out=" << mp.outside <<  " out=" << outside << " K(PHat) == P =  " <<  (*K)(PHat) << " PHat = " << PHat << endl;
+    }
+    const FElement KK(Vh[Th(K)]);
+    if (outside && KK.tfe->discontinue)
+    {   if(verbosity>=10000) cout << " outside f() = 0. " << KK.tfe->discontinue << "\n";
+        return   SetAny<R>(0.0);
+    }
+#ifndef NDEBUG
+    if (!outside)
+    {
+        if ( Norme2_2( (*K)(PHat) - mp.P ) > 1e-12 )
+            cout << "bug ??  " << Norme2_2( (*K)(PHat) - mp.P ) << " " << mp.P << " " << (*K)(PHat) << endl;
+    }
+#endif
+    
+    const R rr = KK(PHat,*fe.x(),componante,dd);
+    
+    if(verbosity>=10000)
+        cout << componante<< " "<< dd << " f()  Tet:  " << Th(K) << " " << mp.P << " " << PHat << " =  " << rr <<  endl;
+    return SetAny<R>(rr);
+}
+
 
 template<class K,class v_fes>
 class Op4_pf32K : public quad_function<pair<FEbase<K,v_fes> *,int>,R,R,R,K> { public:
@@ -2272,6 +2421,30 @@ class pVhS_ndf : public ternary_function<pfesS *,long,long,long> { public:
             FESpaceS *fes=**p;
             throwassert(fes && k >=0 && k < fes->NbOfElements );
             FESpaceS::FElement K=(*fes)[k];
+            throwassert(i>=0 && i <K.NbDoF() );
+            long ret(K(i));
+            return  ret;
+        }
+        
+    };
+};
+
+//3D line
+class pVhL_ndf : public ternary_function<pfesL *,long,long,long> { public:
+    
+    
+    class Op : public E_F0mps { public:
+        Expression a,b,c;
+        Op(Expression aa,Expression bb,Expression cc) : a(aa),b(bb),c(cc) {}
+        AnyType operator()(Stack s)  const
+        {
+            pfesL * p(GetAny<pfesL *>((*a)(s)));
+            long  k(GetAny<long>((*b)(s)));
+            long  i(GetAny<long>((*c)(s)));
+            throwassert(p && *p);
+            FESpaceL *fes=**p;
+            throwassert(fes && k >=0 && k < fes->NbOfElements );
+            FESpaceL::FElement K=(*fes)[k];
             throwassert(i>=0 && i <K.NbDoF() );
             long ret(K(i));
             return  ret;
@@ -2445,11 +2618,11 @@ void init_lgmesh3() {
   atype<pfesS >()->AddCast(  new E_F1_funcT<pfesS,pfesS*>(UnRef<pfesS>));
   atype<pfSrbase>()->AddCast(  new E_F1_funcT<pfSrbase,pfSrbase>(UnRef<pfSrbase>));
   atype<pfScbase>()->AddCast(  new E_F1_funcT<pfScbase,pfScbase>(UnRef<pfScbase>));
-  // 3D line
+  // 3D curve
   atype<pmeshL>()->AddCast( new E_F1_funcT<pmeshL,pmeshL*>(UnRef<pmeshL>));
-  // atype<pfesL >()->AddCast(  new E_F1_funcT<pfesS,pfesL*>(UnRef<pfesL>));
-  // atype<pfLrbase>()->AddCast(  new E_F1_funcT<pfLrbase,pfLrbase>(UnRef<pfLrbase>));
-  // atype<pfLcbase>()->AddCast(  new E_F1_funcT<pfLcbase,pfLcbase>(UnRef<pfLcbase>));
+  atype<pfesL >()->AddCast(  new E_F1_funcT<pfesL,pfesL*>(UnRef<pfesL>));
+  atype<pfLrbase>()->AddCast(  new E_F1_funcT<pfLrbase,pfLrbase>(UnRef<pfLrbase>));
+  atype<pfLcbase>()->AddCast(  new E_F1_funcT<pfLcbase,pfLcbase>(UnRef<pfLcbase>));
     
  
   //3D volume
@@ -2463,9 +2636,9 @@ void init_lgmesh3() {
   // Add<pfSr>("(","",new OneQuadOperator<Op4_pf32K<R,v_fesS>,Op4_pf32K<R,v_fesS>::Op> );
   // Add<pfSc>("(","",new OneQuadOperator<Op4_pf32K<Complex,v_fesS>,Op4_pf32K<Complex,v_fes3>::Op> );
     
-  //3D line
-  // Add<pfLr>("[]",".",new OneOperator1<KN<double> *,pfSr>(pf3r2vect<R,v_fesL>));
-  // Add<pfLc>("[]",".",new OneOperator1<KN<Complex> *,pfSc>(pf3r2vect<Complex,v_fesL>));
+  //3D curve
+  //Add<pfLr>("[]",".",new OneOperator1<KN<double> *,pfSr>(pf3r2vect<R,v_fesL>));
+  //Add<pfLc>("[]",".",new OneOperator1<KN<Complex> *,pfSc>(pf3r2vect<Complex,v_fesL>));
   // Add<pfLr>("(","",new OneQuadOperator<Op4_pf32K<R,v_fesL>,Op4_pf32K<R,v_fesL>::Op> );
   // Add<pfLc>("(","",new OneQuadOperator<Op4_pf32K<Complex,v_fesL>,Op4_pf32K<Complex,v_fesL>::Op> );
     
@@ -2735,7 +2908,31 @@ TheOperators->Add("=",
       new OneOperator2_<pfSc,pfSc,Complex,E_F_StackF0F0opt2<Complex> >(set_fe3<Complex,v_fesS>) // modif/ use template
      ) ;
 
- 
+ // 3D curve
+ TheOperators->Add("<-",
+                   new OneOperator2_<pfLrbase*,pfLrbase*,pfesL* >(MakePtrFE3_2),
+                   new OneOperator3_<pfLrbasearray*,pfLrbasearray*,pfesL*,long >(MakePtrFE3_3),
+                   new OneOperator2_<pfLcbase*,pfLcbase*,pfesL* >(MakePtrFE3_2),
+                   new OneOperator3_<pfLcbasearray*,pfLcbasearray*,pfesL*,long >(MakePtrFE3_3) //,
+                   //  new OneOperator2_<pmesharray*,pmesharray*,long >(MakePtr)
+                   );
+ TheOperators->Add("<-",
+                   new OneOperatorMakePtrFE3<double,v_fesL>(atype<double>()),  //  scalar case
+                   new OneOperatorMakePtrFE3<double,v_fesL>(atype<E_Array>()),  //  vect case
+                   new OneOperatorMakePtrFE3<Complex,v_fesL>(atype<Complex>()),  //  scalar complex  case
+                   new OneOperatorMakePtrFE3<Complex,v_fesL>(atype<E_Array>())  //  vect complex case
+                      );
+ TheOperators->Add("<-",
+                   new OneOperator2_<pfesL*,pfesL*,pfesL>(&set_copy_incr));
+ TheOperators->Add("=",
+                   new OneOperator2<pfesL*,pfesL*,pfesL>(&set_eqdestroy_incr)
+                   );
+ TheOperators->Add("=",
+                   new OneOperator2_<pfLr,pfLr,double,E_F_StackF0F0opt2<double> >(set_fe3<double,v_fesL>) ,   // modif/ use template
+                    new OneOperator2_<pfLc,pfLc,Complex,E_F_StackF0F0opt2<Complex> >(set_fe3<Complex,v_fesL>) // modif/ use template
+                   ) ;
+    
+    
     
  map_type[typeid(double).name()]->AddCast(
    new E_F1_funcT<double,pf3r>(pf3r2R<R,0,v_fes3>)
@@ -2751,6 +2948,14 @@ TheOperators->Add("=",
 
  map_type[typeid(Complex).name()]->AddCast(
    new E_F1_funcT<Complex,pfSc>(pfSr2R<Complex,0,v_fesS>)
+ );
+    
+ map_type[typeid(double).name()]->AddCast(
+   new E_F1_funcT<double,pfLr>(pfLr2R<R,0,v_fesL>)
+ );
+    
+ map_type[typeid(Complex).name()]->AddCast(
+   new E_F1_funcT<Complex,pfLc>(pfLr2R<Complex,0,v_fesL>)
  );
 
  Global.Add("dz","(",new OneOperatorCode<CODE_Diff<Ftest,op_dz> >);
@@ -2844,29 +3049,41 @@ TheOperators->Add("=",
  //Add<pf3rarray>("[","",new OneOperator2_<pf3r,pf3rarray,long>(get_element));
  //Add<pf3carray>("[","",new OneOperator2_<pf3c,pf3carray,long>(get_element));
  
- // 3d new code
+ // 3d volume
  Add<pf3cbasearray*>("[","",new OneOperator2_<pf3cbase*,pf3cbasearray*,long>(get_element));  // use ???? FH sep. 2009
  Add<pf3rbasearray*>("[","",new OneOperator2_<pf3rbase*,pf3rbasearray*,long>(get_element));  //  use ???? FH sep. 2009
  Add<pf3rarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fes3>());// new version FH sep 2009
  Add<pf3carray>("[","",new OneOperator2_FE_get_elmnt<Complex,v_fes3>());
  Add<pfes3*>("(","", new OneTernaryOperator<pVh3_ndf,pVh3_ndf::Op>  );
- 
- init_mesh3_array(); //3D vomlume
- init_meshS_array();  //3D surface
- init_meshL_array();  //3D line
-
- // Add jan 2019 F.H ..to get a sorted the array of label and region of a mesh.
- Global.Add("labels","(",new OneOperator1s_<KN_<long>,pmesh3>(listoflabel));
- Global.Add("labels","(",new OneOperator1s_<KN_<long>,pmesh>(listoflabel));
- Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmesh3>(listofregion));
- Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmesh>(listofregion));
- 
  // 3d surface
  Add<pfScbasearray*>("[","",new OneOperator2_<pfScbase*,pfScbasearray*,long>(get_element));  // use ???? FH sep. 2009
  Add<pfSrbasearray*>("[","",new OneOperator2_<pfSrbase*,pfSrbasearray*,long>(get_element));  //  use ???? FH sep. 2009
  Add<pfSrarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fesS>());// new version FH sep 2009
  Add<pfScarray>("[","",new OneOperator2_FE_get_elmnt<Complex,v_fesS>());
  Add<pfesS*>("(","", new OneTernaryOperator<pVhS_ndf,pVhS_ndf::Op>  );
+ // 3d surface
+ Add<pfLcbasearray*>("[","",new OneOperator2_<pfLcbase*,pfLcbasearray*,long>(get_element));  // use ???? FH sep. 2009
+ Add<pfLrbasearray*>("[","",new OneOperator2_<pfLrbase*,pfLrbasearray*,long>(get_element));  //  use ???? FH sep. 2009
+ Add<pfLrarray>("[","",new OneOperator2_FE_get_elmnt<double,v_fesL>());// new version FH sep 2009
+ Add<pfLcarray>("[","",new OneOperator2_FE_get_elmnt<Complex,v_fesL>());
+ Add<pfesL*>("(","", new OneTernaryOperator<pVhL_ndf,pVhL_ndf::Op>  );
+    
+ 
+ init_mesh3_array(); //3D vomlume
+ init_meshS_array();  //3D surface
+ init_meshL_array();  //3D line
+
+ // Add jan 2019 F.H ..to get a sorted the array of label and region of a mesh.
+ Global.Add("labels","(",new OneOperator1s_<KN_<long>,pmeshL>(listoflabel));
+ Global.Add("labels","(",new OneOperator1s_<KN_<long>,pmeshS>(listoflabel));
+ Global.Add("labels","(",new OneOperator1s_<KN_<long>,pmesh3>(listoflabel));
+ Global.Add("labels","(",new OneOperator1s_<KN_<long>,pmesh>(listoflabel));
+ Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmeshL>(listofregion));
+ Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmeshS>(listofregion));
+ Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmesh3>(listofregion));
+ Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmesh>(listofregion));
+  
+    
 }
 
 //#include "InitFunct.hpp"

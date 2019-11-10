@@ -66,7 +66,7 @@ namespace Fem2D
     
   template<>
   const int (* const GenericElement<DataSeg3>::onWhatBorder)[3] = onWhatIsVertex ;
-  
+  template<> const int  GenericElement<DataSeg3>::nitemdim[4] = {2,1,0,0 }  ;
    
   const string GsbeginL="MeshS::GSave v0",GsendL="end";
   void MeshL::GSave(FILE * ff,int offset) const

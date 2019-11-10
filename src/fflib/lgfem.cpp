@@ -340,6 +340,8 @@ class E_P_Stack_nElementonB   :public  E_F0mps { public:
          l= mp->Th3->nElementonB(mp->t,mp->f);
       else if (mp->d==3 && mp->dHat==2 && mp->TS && ( mp->e>=0) )
           l= mp->ThS->nElementonB(mp->t,mp->e);
+      else if (mp->d==3 && mp->dHat==1 && mp->TL && ( mp->e>=0) )
+          l= mp->ThL->nElementonB(mp->t,mp->e);
       // cout << " nTonEdge " << l << endl;
       return SetAny<long>( l) ;}
     operator aType () const  { return atype<long>();}
@@ -1163,6 +1165,23 @@ AnyType TypeOfFESto2(Stack,const AnyType &b) {
     return tS;
 }
 
+// mapping between TypeOfFE2 and TypeOfFEL
+map<TypeOfFE *,TypeOfFEL *> TEF2dtoL;
+AnyType TypeOfFELto2(Stack,const AnyType &b) {
+    TypeOfFEL *tL=0;
+    TypeOfFE  *t2=GetAny<TypeOfFE *>(b);
+    map<TypeOfFE *,TypeOfFEL *>::const_iterator i=TEF2dtoL.find(t2);
+    if(i != TEF2dtoL.end())
+        tL=i->second;
+    
+    if(tL==0)
+    {
+        cerr << " sorry no cast to this surface finite element " <<endl;
+        ExecError( " sorry no cast to this surface finite element ");
+    }
+    return tL;
+}
+
 TypeOfFE * FindFE2(const char * s)
 {
     for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
@@ -1251,8 +1270,12 @@ inline pfes3* MakePtr3(pfes3 * const &p,pmesh3 * const &  a, TypeOfFE3 * const &
 { *p=new pfes3_tef(a,tef) ;
   return p;}
 
-inline pfesS* MakePtrS(pfesS * const &p,pmeshS * const &  a, TypeOfFES * const & tef)       ///TODO
+inline pfesS* MakePtrS(pfesS * const &p,pmeshS * const &  a, TypeOfFES * const & tef)
 { *p=new pfesS_tef(a,tef) ;
+    return p;}
+
+inline pfesL* MakePtrL(pfesL * const &p,pmeshL * const &  a, TypeOfFEL * const & tef)
+{ *p=new pfesL_tef(a,tef) ;
     return p;}
 
 
@@ -1355,6 +1378,40 @@ class OP_MakePtrS { public:
                             atype<Op::C>(),false ) ;}
 };
 
+class OP_MakePtrL { public:
+    class Op : public E_F0mps  { public:
+        //  static int GetPeriodic(Expression  bb, Expression & b,Expression & f);
+        static const int n_name_param =1;
+        static basicAC_F0::name_and_type name_param[] ;
+        Expression nargs[n_name_param];
+        typedef pfesL * R;
+        typedef pfesL * A;
+        typedef pmeshL * B;
+        typedef TypeOfFEL * C;
+        Expression a,b,c;
+        int nbcperiodic ;
+        Expression *periodic;
+        Op(const basicAC_F0 & args);
+        
+        AnyType operator()(Stack s) const  {
+            A p= GetAny<A>( (*a)(s) );
+            B th= GetAny<B>( (*b)(s) );
+            C tef= GetAny<C>( (*c)(s) );
+            *p=new pfesL_tef(th,tef,s,nbcperiodic,periodic) ;
+            return  SetAny<R>(p);
+        }
+    }; // end Op class
+    
+    typedef Op::R Result;
+    static  E_F0 * f(const basicAC_F0 & args) { return  new Op(args);}
+    static ArrayOfaType  typeargs() {
+        return ArrayOfaType(
+                            atype<Op::A>(),
+                            atype<Op::B>(),
+                            atype<Op::C>(),false ) ;}
+};
+
+
 void GetPeriodic(const int d,Expression perio,    int & nbcperiodic ,    Expression * &periodic)
 {
     ffassert(d==2 || d ==3);
@@ -1408,7 +1465,16 @@ OP_MakePtrS::Op::Op(const basicAC_F0 & args)
     nbcperiodic=0;
     periodic=0;
     args.SetNameParam(n_name_param,name_param,nargs);
-    GetPeriodic(2,nargs[0],nbcperiodic,periodic);
+    GetPeriodic(3,nargs[0],nbcperiodic,periodic);
+}
+//3D curve
+OP_MakePtrL::Op::Op(const basicAC_F0 & args)
+: a(to<A>(args[0])),b(to<B>(args[1])),c(to<C>(args[2]))
+{
+    nbcperiodic=0;
+    periodic=0;
+    args.SetNameParam(n_name_param,name_param,nargs);
+    GetPeriodic(3,nargs[0],nbcperiodic,periodic);    //
 }
 
 int GetPeriodic(Expression  bb, Expression & b,Expression & f)
@@ -1446,6 +1512,10 @@ basicAC_F0::name_and_type  OP_MakePtr3::Op::name_param[]= {
 };
 
 basicAC_F0::name_and_type  OP_MakePtrS::Op::name_param[]= {
+    "periodic", &typeid(E_Array)
+};
+
+basicAC_F0::name_and_type  OP_MakePtrL::Op::name_param[]= {
     "periodic", &typeid(E_Array)
 };
 
@@ -1560,8 +1630,12 @@ long mp_nuTriangle(MeshPoint * p)
    long nu=0;
    if(p->d==2)
      nu=(*p->Th)(p->T);
-   else if  (p->d==3)
+   else if  (p->d==3 && p->dHat==3)
      nu=(*p->Th3)(p->T3);
+   else if  (p->d==3 && p->dHat==2)
+       nu=(*p->ThS)(p->TS);
+   else if  (p->d==3 && p->dHat==1)
+       nu=(*p->ThL)(p->TL);
    else ffassert(0);
    delete p;
    return nu ;}
@@ -2144,14 +2218,18 @@ public:
     typedef pf3rbasearray asol3;
     typedef pfSrbase solS;
     typedef pfSrbasearray asolS;
-
+    typedef pfLrbase solL;
+    typedef pfLrbasearray asolL;
+    
     typedef pfecbase solc;
     typedef pfecbasearray asolc;
     typedef pf3cbase solc3;
     typedef pf3cbasearray asolc3;
     typedef pfScbase solcS;
     typedef pfScbasearray asolcS;
-
+    typedef pfLcbase solcL;
+    typedef pfLcbasearray asolcL;
+    
     typedef long  Result;
     struct ListWhat {
 	int what,i;
@@ -5206,6 +5284,13 @@ Type_Expr CConstantTFES(const EConstantTypeOfFES::T & v)
     return make_pair(map_type[typeid( EConstantTypeOfFES::T).name()],new EConstantTypeOfFES(v));
 }
 
+// FE 3D curve
+Type_Expr CConstantTFEL(const EConstantTypeOfFEL::T & v)
+{
+    throwassert(map_type[typeid( EConstantTypeOfFEL::T).name()] !=0);
+    return make_pair(map_type[typeid( EConstantTypeOfFEL::T).name()],new EConstantTypeOfFEL(v));
+}
+
 //  end --- call meth be ..
 // 2013 resize of array of fe function..
 template<typename  T> T fepresize(const Resize1<T> & rt,const long &n) {
@@ -5252,11 +5337,14 @@ void  init_lgfem()
  Dcl_Type<TypeOfFE*>();
  Dcl_Type<TypeOfFE3*>(); // 3D volume
  Dcl_Type<TypeOfFES*>(); // 3D surface
+ Dcl_Type<TypeOfFEL*>(); // 3D curve
  map_type[typeid(TypeOfFE3*).name()]->AddCast(
 				 new E_F1_funcT<TypeOfFE3*,TypeOfFE*>(TypeOfFE3to2)	);
  map_type[typeid(TypeOfFES*).name()]->AddCast(
                  new E_F1_funcT<TypeOfFES*,TypeOfFE*>(TypeOfFESto2)    );
-
+ map_type[typeid(TypeOfFEL*).name()]->AddCast(
+                 new E_F1_funcT<TypeOfFEL*,TypeOfFE*>(TypeOfFELto2)    );
+    
  DclTypeMatrix<R>();
  DclTypeMatrix<Complex>();
 
@@ -5295,7 +5383,7 @@ void  init_lgfem()
  Dcl_Type< pf3c >();
  Dcl_Type< pf3carray >();
 
- // Dcl type for 3D volume FE v 4.00
+ // Dcl type for 3D surface FE v 4.00
  Dcl_TypeandPtr<pfSrbase>(); // il faut le 2 pour pourvoir initialiser
  Dcl_TypeandPtr<pfSrbasearray>(); // il faut le 2 pour pourvoir initialiser
  Dcl_Type< pfSr >();
@@ -5307,7 +5395,17 @@ void  init_lgfem()
  Dcl_Type< pfSc >();
  Dcl_Type< pfScarray >();
 
-
+ // Dcl type for 3D curve FE v 4.5
+ Dcl_TypeandPtr<pfLrbase>(); // il faut le 2 pour pourvoir initialiser
+ Dcl_TypeandPtr<pfLrbasearray>(); // il faut le 2 pour pourvoir initialiser
+ Dcl_Type< pfLr >();
+ Dcl_Type< pfLrarray >();
+    
+ //  pour des Func FE complex
+ Dcl_TypeandPtr<pfLcbase>(); // il faut le 2 pour pourvoir initialiser
+ Dcl_TypeandPtr<pfLcbasearray>(); // il faut le 2 pour pourvoir initialiser
+ Dcl_Type< pfLc >();
+ Dcl_Type< pfLcarray >();
 
     //  cast of eigen value  mai 2009 ...
   map_type[typeid(FEbaseArrayKn<double> *).name()]->AddCast(
@@ -5329,6 +5427,9 @@ void  init_lgfem()
 
  map_type[typeid(pfesS).name()] = new ForEachType<pfesS>();  // 3D surface
  map_type[typeid(pfesS*).name()] = new ForEachTypePtrfspace<pfesS,4>(); // 3D surface
+    
+ map_type[typeid(pfesL).name()] = new ForEachType<pfesL>();  // 3D curve
+ map_type[typeid(pfesL*).name()] = new ForEachTypePtrfspace<pfesL,5>(); // 3D curve
 
  //
  Dcl_Type<const QuadratureFormular *>();
@@ -5375,6 +5476,8 @@ void  init_lgfem()
  Dcl_Type<const Call_FormBilinear<v_fes3> *>();  // to set Matrix 3D volume
  Dcl_Type<const Call_FormLinear<v_fesS> *>();    //   to set Vector 3D surface
  Dcl_Type<const Call_FormBilinear<v_fesS> *>();  // to set Matrix 3D surface
+// Dcl_Type<const Call_FormLinear<v_fesL> *>();    //   to set Vector 3D curve
+// Dcl_Type<const Call_FormBilinear<v_fesL> *>();  // to set Matrix 3D curve
  Dcl_Type<interpolate_f_X_1<double>::type>();  // to make  interpolation x=f o X^1 ;
 
  map_type[typeid(const FormBilinear*).name()] = new TypeFormBilinear;
@@ -5480,9 +5583,11 @@ void  init_lgfem()
 		   new OneOperatorCode<OP_MakePtr2>,
 		   new OneOperatorCode<OP_MakePtr3>,
            new OneOperatorCode<OP_MakePtrS>,
+           new OneOperatorCode<OP_MakePtrL>,
 		   new OpMake_pfes<pfes,Mesh,TypeOfFE,pfes_tefk>,
 		   new OpMake_pfes<pfes3,Mesh3,TypeOfFE3,pfes3_tefk>,
-           new OpMake_pfes<pfesS,MeshS,TypeOfFES,pfesS_tefk>      // add for 3D surface  FEspace
+           new OpMake_pfes<pfesS,MeshS,TypeOfFES,pfesS_tefk>,      // add for 3D surface  FEspace
+           new OpMake_pfes<pfesL,MeshL,TypeOfFEL,pfesL_tefk>
         );
     TheOperators->Add("=",new OneOperator2<R3*,R3*,R3* >(&set_eqp));
 
@@ -5708,7 +5813,9 @@ void  init_lgfem()
 		   new OpArraytoLinearForm<double,v_fes3>(atype< KN_<double> >(),false,false)  ,//3D volume
 		   new OpMatrixtoBilinearForm<double,v_fes3 > , // 3D volume
            new OpArraytoLinearForm<double,v_fesS>(atype< KN_<double> >(),false,false)  , // 3D surface
-           new OpMatrixtoBilinearForm<double,v_fesS >); // 3D surface
+           new OpMatrixtoBilinearForm<double,v_fesS > ); // 3D surface
+        //   new OpArraytoLinearForm<double,v_fesL>(atype< KN_<double> >(),false,false)  , // 3D curve
+        //   new OpMatrixtoBilinearForm<double,v_fesL >); // 3D curve
 
 
  TheOperators->Add("<-",
@@ -5717,7 +5824,9 @@ void  init_lgfem()
 		   new OpArraytoLinearForm<double,v_fes3>(atype< KN<double>* >(),true,true) , //3D volume
 		   new OpArraytoLinearForm<Complex,v_fes3>(atype< KN<Complex>* >(),true,true), //3D volume
            new OpArraytoLinearForm<double,v_fesS>(atype< KN<double>* >(),true,true) , //3D surface
-           new OpArraytoLinearForm<Complex,v_fesS>(atype< KN<Complex>* >(),true,true) //3D surface
+           new OpArraytoLinearForm<Complex,v_fesS>(atype< KN<Complex>* >(),true,true)  //3D surface
+          // new OpArraytoLinearForm<double,v_fesL>(atype< KN<double>* >(),true,true) , //3D curve
+          // new OpArraytoLinearForm<Complex,v_fesL>(atype< KN<Complex>* >(),true,true) //3D curve
         );
 
 
@@ -5734,7 +5843,9 @@ void  init_lgfem()
 		   new OpArraytoLinearForm<Complex,v_fes3>(atype< KN_<Complex> >(),false,false)   , //3D volume
 		   new OpMatrixtoBilinearForm<Complex,v_fes3 > , //3D volume
            new OpArraytoLinearForm<Complex,v_fesS>(atype< KN_<Complex> >(),false,false)   , //3D surface
-           new OpMatrixtoBilinearForm<Complex,v_fesS >); //3D surface
+                   new OpMatrixtoBilinearForm<Complex,v_fesS > ); //3D surface
+         //  new OpArraytoLinearForm<Complex,v_fesL>(atype< KN_<Complex> >(),false,false)   , //3D curve
+         //  new OpMatrixtoBilinearForm<Complex,v_fesL >) ; //3D surface
 
  // add august 2007
  TheOperators->Add("<-",
@@ -5793,6 +5904,7 @@ void  init_lgfem()
 		   new OpArraytoLinearForm<double,v_fes>(atype< KN_<double> >(),false,false,false)  ,
 		   new OpArraytoLinearForm<double,v_fes3>(atype< KN_<double> >(),false,false,false) ,  // 3D volume
 		   new OpArraytoLinearForm<double,v_fesS>(atype< KN_<double> >(),false,false,false)    // 3D surface
+        //   new OpArraytoLinearForm<double,v_fesL>(atype< KN_<double> >(),false,false,false)    // 3D surface
        );
 
  TheOperators->Add("+=",
@@ -5804,6 +5916,7 @@ void  init_lgfem()
 
 		   new OpArraytoLinearForm<Complex,v_fes3>(atype< KN_<Complex> >(),false,false,false) , // 3D volume
            new OpArraytoLinearForm<Complex,v_fesS>(atype< KN_<Complex> >(),false,false,false)  // 3D surface
+          // new OpArraytoLinearForm<Complex,v_fesL>(atype< KN_<Complex> >(),false,false,false)  // 3D curve
        );
 
 
@@ -5816,6 +5929,9 @@ void  init_lgfem()
 
  TheOperators->Add("<-",new OpMatrixtoBilinearForm<double,v_fesS >(1) ); // 3D surface
  TheOperators->Add("<-",new OpMatrixtoBilinearForm<Complex,v_fesS >(1) ); // 3D surface
+    
+// TheOperators->Add("<-",new OpMatrixtoBilinearForm<double,v_fesL >(1) ); // 3D curve
+// TheOperators->Add("<-",new OpMatrixtoBilinearForm<Complex,v_fesL >(1) ); // 3D curve
 
  Add<const  FormLinear   *>("(","",new OpCall_FormLinear<FormLinear,v_fes> );
  Add<const  FormBilinear *>("(","",new OpCall_FormBilinear<FormBilinear,v_fes> );
@@ -5834,6 +5950,12 @@ void  init_lgfem()
  Add<const  FormBilinear *>("(","",new OpCall_FormLinear2<FormBilinear,v_fesS> );  // 3D surface
  Add<const C_args*>("(","",new OpCall_FormLinear2<C_args,v_fesS>);  // 3D surface
  Add<const C_args*>("(","",new OpCall_FormBilinear<C_args,v_fesS> );  // 3D surface
+    
+// Add<const  FormLinear   *>("(","",new OpCall_FormLinear<FormLinear,v_fesL> );  // 3D curve
+// Add<const  FormBilinear *>("(","",new OpCall_FormBilinear<FormBilinear,v_fesL> );  // 3D curve
+// Add<const  FormBilinear *>("(","",new OpCall_FormLinear2<FormBilinear,v_fesL> );  // 3D curve
+// Add<const C_args*>("(","",new OpCall_FormLinear2<C_args,v_fesL>);  // 3D curve
+// Add<const C_args*>("(","",new OpCall_FormBilinear<C_args,v_fesL> );  // 3D curve
 
 //  correction du bug morale
 //  Attention il y a moralement un bug
@@ -6010,35 +6132,43 @@ void  init_lgfem()
        new OneOperator1<Matrice_Creuse_Transpose<Complex>,Matrice_Creuse<Complex> *>(&Build<Matrice_Creuse_Transpose<Complex>,Matrice_Creuse<Complex> *>)
   );
 
- Add<pfer>("(","",new interpolate_f_X_1<R> );
+  Add<pfer>("(","",new interpolate_f_X_1<R> );
   TheOperators->Add("=", new OneOperator2_<void,interpolate_f_X_1<R>::type,double,E_F_StackF0F0 >(set_feoX_1) ) ;
   init_lgmat();
   init_mesh_array();
 
- l2interpreter = new LinkToInterpreter;
- using namespace FreeFempp;
- FreeFempp::TypeVarForm<double>::Global = new TypeVarForm<double>();
- FreeFempp::TypeVarForm<Complex>::Global = new TypeVarForm<Complex>();
+  l2interpreter = new LinkToInterpreter;
+  using namespace FreeFempp;
+  FreeFempp::TypeVarForm<double>::Global = new TypeVarForm<double>();
+  FreeFempp::TypeVarForm<Complex>::Global = new TypeVarForm<Complex>();
 
 
- Global.New("P13d",CConstantTFE3(&DataFE<Mesh3>::P1));
- Global.New("P23d",CConstantTFE3(&DataFE<Mesh3>::P2));
- Global.New("P03d",CConstantTFE3(&DataFE<Mesh3>::P0));
- Global.New("RT03d",CConstantTFE3(&RT03d));
- Global.New("Edge03d",CConstantTFE3(&Edge03d));
- Global.New("P1b3d",CConstantTFE3(&P1bLagrange3d));
+  Global.New("P13d",CConstantTFE3(&DataFE<Mesh3>::P1));
+  Global.New("P23d",CConstantTFE3(&DataFE<Mesh3>::P2));
+  Global.New("P03d",CConstantTFE3(&DataFE<Mesh3>::P0));
+  Global.New("RT03d",CConstantTFE3(&RT03d));
+  Global.New("Edge03d",CConstantTFE3(&Edge03d));
+  Global.New("P1b3d",CConstantTFE3(&P1bLagrange3d));
 
- Global.New("RT0S",CConstantTFES(&DataFE<MeshS>::RT0));
- Global.New("P2S",CConstantTFES(&DataFE<MeshS>::P2));
- Global.New("P1S",CConstantTFES(&DataFE<MeshS>::P1));
- Global.New("P0S",CConstantTFES(&DataFE<MeshS>::P0));
- Global.New("P1bS",CConstantTFES(&P1bLagrange_surf));
+  Global.New("RT0S",CConstantTFES(&DataFE<MeshS>::RT0));
+  Global.New("P2S",CConstantTFES(&DataFE<MeshS>::P2));
+  Global.New("P1S",CConstantTFES(&DataFE<MeshS>::P1));
+  Global.New("P0S",CConstantTFES(&DataFE<MeshS>::P0));
+  Global.New("P1bS",CConstantTFES(&P1bLagrange_surf));
+    
+  Global.New("P2L",CConstantTFEL(&DataFE<MeshL>::P2));
+  Global.New("P1L",CConstantTFEL(&DataFE<MeshL>::P1));
+  Global.New("P0L",CConstantTFEL(&DataFE<MeshL>::P0));
 
- TEF2dtoS[FindFE2("P0")]=&DataFE<MeshS>::P0;
- TEF2dtoS[FindFE2("P1")]=&DataFE<MeshS>::P1;
- TEF2dtoS[FindFE2("P2")]=&DataFE<MeshS>::P2;
- TEF2dtoS[FindFE2("P1b")]=&P1bLagrange_surf;
- TEF2dtoS[FindFE2("RT0")]=&DataFE<MeshS>::RT0;
+  TEF2dtoS[FindFE2("P0")]=&DataFE<MeshS>::P0;
+  TEF2dtoS[FindFE2("P1")]=&DataFE<MeshS>::P1;
+  TEF2dtoS[FindFE2("P2")]=&DataFE<MeshS>::P2;
+  TEF2dtoS[FindFE2("P1b")]=&P1bLagrange_surf;
+  TEF2dtoS[FindFE2("RT0")]=&DataFE<MeshS>::RT0;
+    
+  TEF2dtoL[FindFE2("P0")]=&DataFE<MeshL>::P0;
+  TEF2dtoL[FindFE2("P1")]=&DataFE<MeshL>::P1;
+  TEF2dtoL[FindFE2("P2")]=&DataFE<MeshL>::P2;
 
   TEF2dto3d[FindFE2("P1")]=&DataFE<Mesh3>::P1;
   TEF2dto3d[FindFE2("P2")]=&DataFE<Mesh3>::P2;
@@ -6252,9 +6382,11 @@ C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 
   if(dim==2)
     return NewFEvariableT<v_fes,2>(pids,currentblock,fespacetype,init,cplx,dim);
   else if  (dim==3)
-  {return NewFEvariableT<v_fes3,3>(pids,currentblock,fespacetype,init,cplx,dim); }
-    else if  (dim==4)
-    {return NewFEvariableT<v_fesS,4>(pids,currentblock,fespacetype,init,cplx,dim); }
+      return NewFEvariableT<v_fes3,3>(pids,currentblock,fespacetype,init,cplx,dim);
+  else if  (dim==4)
+      return NewFEvariableT<v_fesS,4>(pids,currentblock,fespacetype,init,cplx,dim);
+ // else if  (dim==5)
+ //       return NewFEvariableT<v_fesL,5>(pids,currentblock,fespacetype,init,cplx,dim);
   else
     CompileError("Invalide fespace on Rd  ( d != 2 or 3) ");
     return C_F0();
@@ -6272,6 +6404,7 @@ size_t dimFESpaceImage(const basicAC_F0 &args)
   aType t_tfe= atype<TypeOfFE*>();
   aType t_tfe3= atype<TypeOfFE3*>();
   aType t_tfeS= atype<TypeOfFES*>();
+  aType t_tfeL= atype<TypeOfFEL*>();
   aType t_a= atype<E_Array>();
   size_t dim23=0;
 
@@ -6297,13 +6430,15 @@ aType  typeFESpace(const basicAC_F0 &args)
   aType t_m2= atype<pmesh*>();
   aType t_m3= atype<pmesh3*>();
   aType t_mS= atype<pmeshS*>();
+  aType t_mL= atype<pmeshL*>();
 
   aType t_tfe= atype<TypeOfFE*>();
   aType t_tfe3= atype<TypeOfFE3*>();
   aType t_tfeS= atype<TypeOfFES*>();
+  aType t_tfeL= atype<TypeOfFEL*>();
 
-  aType atfe[]={t_tfe,t_tfe3,t_tfeS};
-  aType atfs[]={atype<pfes *>(),atype<pfes3 *>(),atype<pfesS *>()};
+  aType atfe[]={t_tfe,t_tfe3,t_tfeS,t_tfeL};
+  aType atfs[]={atype<pfes *>(),atype<pfes3 *>(),atype<pfesS *>(),atype<pfesL *>()};
   aType t_a= atype<E_Array>();
   aType ret =0,tl=0;
   aType tMesh=0;
@@ -6314,19 +6449,20 @@ aType  typeFESpace(const basicAC_F0 &args)
     if ( tl == t_m2) {ffassert(dm==2 || dm<0); dm=2;}
     else if( tl  == t_m3 ) {ffassert(dm==3 || dm<0); dm=3;}
     else if( tl  == t_mS ) {ffassert(dm==4 || dm<0); dm=4;}
+    else if( tl  == t_mL ) {ffassert(dm==5 || dm<0); dm=5;}
     // array
     else if(tl==t_a) {
       const E_Array & ea= *dynamic_cast<const E_Array *>(args[i].LeftValue());
       ffassert(&ea);
       for (int i=0;i<ea.size();i++) {
         tl=ea[i].left();
-        for( int it=0; it<3; ++it)
+        for( int it=0; it<4; ++it)
           if (atfe[it]->CastingFrom(tl)) // Warning  P1 can be cast in 2d or 3d FE ...
             id = it;
       }
     }
     else
-      for( int it=0; it<3; ++it)
+      for( int it=0; it<4; ++it)
         if (atfe[it]->CastingFrom(tl))
           id = it;
   }
@@ -6334,6 +6470,7 @@ aType  typeFESpace(const basicAC_F0 &args)
   if (dm==2) ret =atfs[0]; // 2D fespace
   else if (dm==3) ret = atfs[1]; // 3D fespace (Volume)
   else if (dm==4) ret =atfs[2]; // 3D fespace (surface)
+  else if (dm==5) ret =atfs[3]; // 3D fespace (curve)
   else {
     cerr << " typeFESpace:: bug dim: maes/EZFv mesh dim :"  << dm << " type FE "<< id +2 <<endl;
     ffassert(0);
@@ -6406,6 +6543,8 @@ C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
     return NewFEarrayT<v_fes3,3>(pids,currentblock,fespacetype,sizeofarray,cplx,dim);
   else if  (dim==4)
       return NewFEarrayT<v_fesS,4>(pids,currentblock,fespacetype,sizeofarray,cplx,dim);
+ // else if  (dim==5)
+ //     return NewFEarrayT<v_fesL,5>(pids,currentblock,fespacetype,sizeofarray,cplx,dim);
   else
     CompileError("Invalid vectorial fespace on Rd  ( d != 2 or 3) ");
     return C_F0();

@@ -60,7 +60,7 @@ namespace Fem2D {
       p[i] += o;
   }
     
-  static R1 EdgeHat[2] = { R1(0.), R1(1.) } ;
+  static R1 PointHat[2] = { R1(0.), R1(1.) } ;
  
   struct DataPoint3  {
     static const int NbOfVertices =1;
@@ -98,7 +98,7 @@ namespace Fem2D {
     R1 H(int i) const { ASSERTION(i>=0 && i <1);
       return (2-i)/mesure();} // heigth
         
-    void Gradlambda(R1 * GradL) const
+    void Gradlambda(R3 * GradL) const
     {
       GradL[1]= H(1);
       GradL[0]=-GradL[1];

@@ -8142,6 +8142,8 @@ int dimProblem(const ListOfId &l)
                     if(BCastTo<pf3r>(c) ) ffassert(dim==0 || dim==3),dim=3;
                     if(BCastTo<pfSr>(c) ) ffassert(dim==0 || dim==4),dim=4;
                     if(BCastTo<pfSc>(c) ) ffassert(dim==0 || dim==4),dim=4;
+                    if(BCastTo<pfLr>(c) ) ffassert(dim==0 || dim==5),dim=5;
+                    if(BCastTo<pfLc>(c) ) ffassert(dim==0 || dim==5),dim=5;
                 }
             }
 
@@ -8155,6 +8157,8 @@ int dimProblem(const ListOfId &l)
             if(BCastTo<pf3r>(c) ) ffassert(dim==0 || dim==3),dim=3;
             if(BCastTo<pfSr>(c) ) ffassert(dim==0 || dim==4),dim=4;
             if(BCastTo<pfSc>(c) ) ffassert(dim==0 || dim==4),dim=4;
+            if(BCastTo<pfLr>(c) ) ffassert(dim==0 || dim==5),dim=5;
+            if(BCastTo<pfLc>(c) ) ffassert(dim==0 || dim==5),dim=5;
         }
         }
     }
@@ -8190,6 +8194,14 @@ AnyType Problem::operator()(Stack stack) const
         else
             return eval<double,FESpaceS,v_fesS>(stack,data,data->AR,data->AcadnaR);
     }
+   /* else if(dim==5)
+    {
+        Data<FESpaceL> *data= dataptrL(stack);
+        if (complextype)
+            return eval<Complex,FESpaceL,v_fesL>(stack,data,data->AC,data->AcadnaC);
+        else
+            return eval<double,FESpaceL,v_fesL>(stack,data,data->AR,data->AcadnaR);
+    }*/
 
     else ffassert(0);
 }
