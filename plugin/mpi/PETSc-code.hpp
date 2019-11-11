@@ -1223,7 +1223,7 @@ basicAC_F0::name_and_type setOptions_Op<Type>::name_param[] = {
     {"fieldsplit", &typeid(long)},
     {"schurComplement", &typeid(KNM<PetscScalar>*)},
     {"schur", &typeid(KN<Dmat>*)},
-    {"aux", &typeid(Matrice_Creuse<PetscScalar>*)},
+    {"aux", &typeid(Matrice_Creuse<PetscScalar>*)}
 };
 template<class Type, char> class LinearSolver;
 template<class Type> class NonlinearSolver;
