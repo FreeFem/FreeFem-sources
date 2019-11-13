@@ -148,10 +148,18 @@ std::string ffPacket::Dump(int indent)
  */
 void ffPacket::Compress()
 {
-    std::cout << Dump(1) << "\n";
     std::vector<uint8_t> tmp = json::to_cbor(m_JSON);
 
     m_Data.insert(m_Data.end(), tmp.begin(), tmp.end());
+
+    // std::string data = m_JSON.dump();
+
+    // for (uint8_t i : data) {
+    //     m_Data.push_back(i);
+    //     std::cout << i;
+    // }
+    // std::cout << "\n";
+
     m_Header["Size"] = m_Data.size();
 }
 
@@ -163,7 +171,6 @@ void ffPacket::Clear()
     m_Header["Size"].clear();
     m_Data.clear();
     m_JSON.clear();
-    m_JSON["Geometry"] += json::object();
 }
 
 /**
@@ -198,13 +205,19 @@ void ffPacket::Jsonify<std::vector<KN_<double>>>(const std::vector<KN_<double>>&
     m_JSON["Geometry"] += json::object();
     json& Geometry = (*(--(m_JSON["Geometry"].end())));
 
-    Geometry["ID"] = Id;
+    Geometry["Id"] = Id;
+    Geometry["Borders"] = false;
+    Geometry["IsoValues"] = false;
     size_t element_nbr = data[0].size();
     size_t dimensions = (data.size() == 4) ? 3 : data.size();
 
+    if (element_nbr == 2)
+        Geometry["Type"] = "Curve2D";
+    else
+        Geometry["Type"] = "Curve3D";
     Geometry["Vertices"] = json::array();
-    Geometry["Indices"] = json::array();
-    Geometry["Labels"] = json::array();
+    Geometry["MeshIndices"] = json::array();
+    Geometry["MeshLabels"] = json::array();
     for (size_t i = 0; i < element_nbr; ++i) {
         for (size_t j = 0; j < 3; ++j) {
             if (j < dimensions) {
@@ -214,13 +227,13 @@ void ffPacket::Jsonify<std::vector<KN_<double>>>(const std::vector<KN_<double>>&
             }
         }
         if (data.size() == 4) {
-            Geometry["Labels"] += (long int)data[3][(long long int)i];
+            Geometry["MeshLabels"] += (long int)data[3][(long long int)i];
         } else {
-            Geometry["Labels"] += 0;
+            Geometry["MeshLabels"] += 0;
         }
         if (i != element_nbr - 1) {
-            Geometry["Indices"] += i;
-            Geometry["Indices"] += i + 1;
+            Geometry["MeshIndices"] += i;
+            Geometry["MeshIndices"] += i + 1;
         }
     }
 }
@@ -270,6 +283,8 @@ void ffPacket::Jsonify<Fem2D::Mesh>(const Fem2D::Mesh& data, long int Id)
         Geometry["MeshIndices"] += data(e[1]);
         Geometry["MeshIndices"] += data(e[2]);
         Geometry["MeshLabels"] += e.lab;
+        Geometry["MeshLabels"] += e.lab;
+        Geometry["MeshLabels"] += e.lab;
     }
 
 
@@ -280,6 +295,7 @@ void ffPacket::Jsonify<Fem2D::Mesh>(const Fem2D::Mesh& data, long int Id)
         const Fem2D::Mesh::BorderElement& b(data.be(i));
         Geometry["BorderIndices"] += data(b[0]);
         Geometry["BorderIndices"] += data(b[1]);
+        Geometry["BorderLabels"] += b.lab;
         Geometry["BorderLabels"] += b.lab;
     }
 }
@@ -306,7 +322,7 @@ void ffPacket::Jsonify<Fem2D::Mesh3>(const Fem2D::Mesh3& data, long int Id)
 
     // Adding Mesh Id to the JSON object that correspond
     Geometry["Id"] = Id;
-    Geometry["Type"] = "Mesh2D";
+    Geometry["Type"] = "Mesh3D";
     Geometry["IsoValues"] = false;
     Geometry["Borders"] = true;
 
@@ -329,11 +345,15 @@ void ffPacket::Jsonify<Fem2D::Mesh3>(const Fem2D::Mesh3& data, long int Id)
         Geometry["MeshIndices"] += data(tetra[1]);
         Geometry["MeshIndices"] += data(tetra[2]);
         Geometry["MeshLabels"] += tetra.lab;
+        Geometry["MeshLabels"] += tetra.lab;
+        Geometry["MeshLabels"] += tetra.lab;
 
         // Triangle 2
         Geometry["MeshIndices"] += data(tetra[0]);
         Geometry["MeshIndices"] += data(tetra[2]);
         Geometry["MeshIndices"] += data(tetra[3]);
+        Geometry["MeshLabels"] += tetra.lab;
+        Geometry["MeshLabels"] += tetra.lab;
         Geometry["MeshLabels"] += tetra.lab;
 
         // Triangle 3
@@ -341,11 +361,15 @@ void ffPacket::Jsonify<Fem2D::Mesh3>(const Fem2D::Mesh3& data, long int Id)
         Geometry["MeshIndices"] += data(tetra[3]);
         Geometry["MeshIndices"] += data(tetra[1]);
         Geometry["MeshLabels"] += tetra.lab;
+        Geometry["MeshLabels"] += tetra.lab;
+        Geometry["MeshLabels"] += tetra.lab;
 
         // Triangle 4
         Geometry["MeshIndices"] += data(tetra[1]);
         Geometry["MeshIndices"] += data(tetra[2]);
         Geometry["MeshIndices"] += data(tetra[3]);
+        Geometry["MeshLabels"] += tetra.lab;
+        Geometry["MeshLabels"] += tetra.lab;
         Geometry["MeshLabels"] += tetra.lab;
     }
 
@@ -360,7 +384,10 @@ void ffPacket::Jsonify<Fem2D::Mesh3>(const Fem2D::Mesh3& data, long int Id)
         Geometry["BorderIndices"] += data(b[1]);
         Geometry["BorderIndices"] += data(b[2]);
         Geometry["BorderLabels"] += b.lab;
+        Geometry["BorderLabels"] += b.lab;
+        Geometry["BorderLabels"] += b.lab;
     }
+    std::cout << "Size Mesh : " << Geometry["MeshIndices"].size() << " Size Border : " << Geometry["BorderIndices"].size() << "\n";
 }
 
 /**

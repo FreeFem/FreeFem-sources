@@ -4098,6 +4098,7 @@ if(nargs[VTK_START+index])                    \
 
         }
         graphicServer->Send(packet);
+        packet.Clear();
         theplot.SendEndPlot();
     }
 

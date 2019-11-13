@@ -155,18 +155,10 @@ void ffServer::Send(ffPacket packet)
     while (ite != m_Connections.end()) {
         ConnectHandle::pConnectHandle tmp = *ite;
 
-        asio::async_write(tmp->m_Socket, asio::buffer(packet.GetHeader()),
-            [=](std::error_code const & err, size_t /* */)
-            {
-                if (err)
-                    m_Connections.erase(ite);
-            });
-        asio::async_write(tmp->m_Socket, asio::buffer(packet.m_Data),
-            [=](std::error_code const & err, size_t /* */)
-            {
-                if (err)
-                    m_Connections.erase(ite);
-            });
+        tmp->m_Socket.write_some(asio::buffer(packet.GetHeader()));
+        //asio::write(tmp->m_Socket, asio::buffer(packet.GetHeader()));
+        tmp->m_Socket.write_some(asio::buffer(packet.m_Data));
+        //asio::write(tmp->m_Socket, asio::buffer(packet.m_Data));
         ite++;
     }
     m_Packets.push_back(packet);
@@ -180,21 +172,32 @@ void ffServer::SendAllStoredPacket(ConnectHandle::pConnectHandle connect)
     auto ite = m_Packets.begin();
     asio::steady_timer timer(m_ioService);
 
+    std::cout << "Sending all saved data\n";
     while (ite != m_Packets.end()) {
-        timer.expires_after(std::chrono::seconds(2));
-        asio::async_write(connect->m_Socket, asio::buffer((*ite).GetHeader()),
+        // timer.expires_after(std::chrono::seconds(
+
+        // ));
+        std::vector<uint8_t> message;
+        message.resize(64 + (*ite).m_Data.size());
+
+        memset(message.data(), 0, 64 + (*ite).m_Data.size());
+        memcpy(message.data(), (*ite).GetHeader().c_str(), 64);
+        memcpy(message.data() + 64, (*ite).m_Data.data(), (*ite).m_Data.size());
+        asio::async_write(connect->m_Socket, asio::buffer(message),
             [=](std::error_code const & err, size_t /* */)
             {
                 if (err)
                     m_Connections.remove(connect);
             });
-        asio::async_write(connect->m_Socket, asio::buffer((*ite).m_Data),
-            [=](std::error_code const & err, size_t /* */)
-            {
-                if (err)
-                    m_Connections.remove(connect);
-            });
-        timer.wait();
+
+        //connect->m_Socket.write_some(asio::buffer((*ite).m_Data));
+        // asio::write(connect->m_Socket, asio::buffer((*ite).m_Data),
+        //     [=](std::error_code const & err, size_t /* */)
+        //     {
+        //         if (err)
+        //             m_Connections.remove(connect);
+        //     });
+        //timer.wait();
         ite++;
     }
 }
