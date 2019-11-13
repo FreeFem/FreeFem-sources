@@ -741,6 +741,98 @@ std::string trim(std::string s, const char* t = " \t\n\r\f\v")
     s.erase(s.find_last_not_of(t) + 1);
     return s;
 }
+bool mylex::IFMacroId(bool isnot,string & id,bool withval ,string &val)
+{ //  check value
+    bool rt=false;
+    bool exist=false;
+    MapMacroDef::const_iterator j;
+    for (list<MapMacroDef>::const_iterator i=listMacroDef->begin(); i != listMacroDef->end(); i++)
+    {
+        j=i->find(id.c_str());
+        if( j != i->end())
+        {
+            exist =true;
+            break;
+        }
+    }
+    
+    if(withval && exist)
+    {
+        const MacroData  & macroparm= j->second;
+        if(macroparm.d.size()>0)
+        {
+            const string & mval = macroparm.d[macroparm.d.size()-1];
+            if(debugmacro)  cout << " check IFMACRO '"<< val << "' '"<< mval <<"'"<<endl;
+            exist = trim(mval) == trim(val);
+            
+        }
+    }
+    return exist == (isnot==0);
+}
+bool mylex::IFMacroArgs(int lvl)
+{  //  wait for  string : ([!]ID [,val] )
+    bool isnot=0;
+    if (! lexdebug && echo  ) print(cout);
+    string val;
+    int rr=basescanprint();
+    if (rr!='(')
+    {
+        ErrorScan(" missing '(' after IFMACRO ");
+    }
+    rr=basescanprint();
+    if(rr=='(')
+    { // (..) *([&|] ())
+        source().putback('(');
+    
+        bool ok=IFMacroArgs(lvl+1);
+        while ((rr=basescanprint()))
+            if( rr=='&')
+                ok = IFMacroArgs(lvl+1) && ok;
+            else if( rr=='|')
+                ok = IFMacroArgs(lvl+1) || ok;
+            else if ( rr== ')') break;
+            else  ErrorScan(" missing '& | )' after IFMACRO expression ");
+        return ok;
+    }
+    else {
+    if( rr=='!')
+    {
+        isnot =1;
+        rr=basescanprint();
+    }
+    if (rr != ID)
+        cerr <<"IFMACRO: Erreur waiting of an ID: " << buf << " " << rr <<  endl;
+    string id =buf;
+    int withval=0;
+    rr=basescanprint();
+    if( rr == ',')
+    {
+        while(1)
+        {
+            int i = source().get();
+            if (i == EOF)
+            {
+                cerr << "in IFMACRO " <<id <<  endl;
+                ErrorScan(" ENDOFFILE in IFMACRO definition. remark:a end with ENDIFMACRO ");
+            }
+            
+            if( char(i) ==')') break;
+            val +=char(i);
+            withval=1;
+            
+        }
+        if (! lexdebug && echo  ) cout << val;
+        source().putback(')');
+        rr=basescanprint();
+    }
+    
+    if (rr!=')')
+    {
+        ErrorScan(" missing ')' after IFMACRO(macro)  ");
+    }
+    return IFMacroId(isnot,id,withval,val);
+    }
+}
 bool mylex::IFMacro(int &ret)
 {
     // A faire !!!! F.H
@@ -752,6 +844,8 @@ bool mylex::IFMacro(int &ret)
     int lgifm=0;
     if (strncmp(buf,ifm,8)==0  )
     {
+        rt=true; //  we see IFMACRO
+/*
         if (! lexdebug && echo  ) print(cout);
         string val;
         int rr=basescanprint();
@@ -795,8 +889,10 @@ bool mylex::IFMacro(int &ret)
         {
             ErrorScan(" missing ')' after IFMACRO(macro)  ");
         }
+ */
+        bool ok=IFMacroArgs();//
         int kmacro=0;
-        if(debugmacro) cout << " IFMacro:: " << id << endl;
+        if(debugmacro) cout << " IFMacro:: " << linenumber << endl;
         lgifm=linenumber;
         string def;
         do
@@ -807,7 +903,7 @@ bool mylex::IFMacro(int &ret)
 
             if (i == EOF)
             {
-                cerr << "in IFMACRO " <<id <<  endl;
+                cerr << "in IFMACRO " << linenumber <<  endl;
                 ErrorScan(" ENDOFFILE in IFMACRO definition. remark:a end with ENDIFMACRO ");
             }
             int ii = source().peek();
@@ -852,8 +948,9 @@ bool mylex::IFMacro(int &ret)
             if(echo && nl==1) cout << setw(5) <<linenumber << " & " ;
         }
         while(1);
-
+      
         if (! lexdebug && echo  ) cout  << ife ;
+        /*
         bool exist=false;
         MapMacroDef::const_iterator j;
         for (list<MapMacroDef>::const_iterator i=listMacroDef->begin(); i != listMacroDef->end(); i++)
@@ -878,8 +975,8 @@ bool mylex::IFMacro(int &ret)
             }
         }
         if(debugmacro)  cout << "IFMacro def: " << def << "\n .. exist "<< exist  << " " << isnot << " "<< (exist == (isnot==0)) << " \n....\n";
-
-        if(exist == (isnot==0))
+*/
+        if(ok) //exist == (isnot==0))
         {
             input(def,new string(file()),lgifm);
         }
