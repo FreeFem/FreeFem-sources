@@ -55,16 +55,16 @@ PETSC_DOWNLOAD := --download-scalapack --download-metis --download-ptscotch \
 PETSC_DOWNLOAD_C:= --download-hpddm --download-hpddm-commit=1686037 --download-slepc
 endif
 ifeq ($(FF_generic_petsc), yes)
-  FLAGS_MTUNE := "-mtune=generic"
+  FLAGS_MTUNE := -mtune=generic
 else
-  FLAGS_MTUNE := "-mtune=native"
+  FLAGS_MTUNE := -mtune=native
 endif
 ifeq ($(WIN32DLLTARGET),)
 ##   Not on windows....
   FFWINDOWS=false
   WITH_SLEPC=yes
   FLAGS_CONF_PETSC_REAL= --with-debugging=no \
-		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
+		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' --with-cxx-dialect=C++11 \
 		COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
@@ -76,7 +76,7 @@ ifeq ($(WIN32DLLTARGET),)
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
 		$(PETSC_DOWNLOAD)
 FLAGS_CONF_PETSC_COMPLEX= --with-debugging=no \
-		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
+		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' --with-cxx-dialect=C++11 \
 		COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \

@@ -1,4 +1,4 @@
-//ff-c++ overthrust.cpp
+//ff-c++ geophysics.cpp
 //ff-mpirun -np 8 Helmholtz-3d-overthrust.edp -wg -raspart -ffddm_schwarz_method oras -ffddm_medit
 
 // for the make check:
@@ -11,7 +11,7 @@ macro dimension 3// EOM            // 2D or 3D
 
 include "ffddm.idp"
 
-load "overthrust"
+load "geophysics"
 
 macro def(i)i// EOM                         // scalar field definition
 macro init(i)i// EOM                        // scalar field initialization
