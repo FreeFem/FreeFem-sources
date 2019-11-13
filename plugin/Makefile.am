@@ -102,7 +102,7 @@ seq/isoline.cpp \
 seq/lapack.cpp \
 seq/lgbmo.cpp \
 seq/libff-mmap-semaphore.h \
-seq/marmousi.cpp \
+seq/geophysics.cpp \
 seq/marmousi2.cpp \
 seq/mat_dervieux.cpp \
 seq/mat_psi.cpp \
@@ -117,7 +117,6 @@ seq/mshmet.cpp \
 seq/myfunction.cpp \
 seq/myfunction2.cpp \
 seq/netgen.cpp \
-seq/overthrust.cpp \
 seq/pcm.cpp \
 seq/pcm.hpp \
 seq/pcm2rnm.cpp \

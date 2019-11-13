@@ -1,4 +1,4 @@
-//ff-c++ -auto marmousi.cpp
+//ff-c++ -auto geophysics.cpp
 //ff-mpirun -np 4 Helmholtz-2d-marmousi.edp -wg -raspart -ffddm_schwarz_method oras -ffddm_medit
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
@@ -11,7 +11,7 @@ macro dimension 2// EOM            // 2D or 3D
 
 include "ffddm.idp"
 
-load "marmousi"
+load "geophysics"
 
 macro def(i)i// EOM                         // scalar field definition
 macro init(i)i// EOM                        // scalar field initialization
