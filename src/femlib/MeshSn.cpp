@@ -738,10 +738,10 @@ namespace Fem2D
         for (int i=0;i<nbe;i++)
             mesb += this->be(i).mesure();
                 if (cleanmesh) {
-            if(verbosity>3)
+            if(verbosity>5)
                 cout << "before clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
             clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
-            if(verbosity>3)
+            if(verbosity>5)
                 cout << "after clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
         }
         BuildBound();

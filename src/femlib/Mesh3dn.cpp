@@ -1428,6 +1428,8 @@ namespace Fem2D
             if(verbosity>5)
             cout << "before clean mesh3, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
             clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
+            if(verbosity>5)
+                cout << "after clean mesh3, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
         }
         
         //  Add FH to be consitant we all constructor ...  July 09
