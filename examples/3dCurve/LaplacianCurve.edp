@@ -4,6 +4,7 @@ meshL ThL3=line3(40,[x,1,x*0.1]);
 
 fespace Vh(ThL3,P1);
 func f = 1 ;
+macro Grad3(uh) [dx(uh),dy(uh),dz(uh)]  // EOM
 
 Vh uLPb,vLPb;
 
