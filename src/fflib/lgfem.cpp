@@ -1474,7 +1474,7 @@ OP_MakePtrL::Op::Op(const basicAC_F0 & args)
     nbcperiodic=0;
     periodic=0;
     args.SetNameParam(n_name_param,name_param,nargs);
-    GetPeriodic(3,nargs[0],nbcperiodic,periodic);    //
+    GetPeriodic(3,nargs[0],nbcperiodic,periodic);    
 }
 
 int GetPeriodic(Expression  bb, Expression & b,Expression & f)
@@ -2567,9 +2567,11 @@ public:
                 bool bpfer=  BCastTo<pfer>((*a)[0]);
                 bool bpf3r=  BCastTo<pf3r>((*a)[0]);
                 bool bpfSr=  BCastTo<pfSr>((*a)[0]); // for 3D surface with reals
+                bool bpfLr=  BCastTo<pfLr>((*a)[0]); // for 3D curve with reals
                 bool bpfec=  BCastTo<pfec>((*a)[0]);
                 bool bpf3c=  BCastTo<pf3c>((*a)[0]);
                 bool bpfSc=  BCastTo<pfSc>((*a)[0]); // for 3D surface with complex
+                bool bpfLc=  BCastTo<pfLc>((*a)[0]); // for 3D curve with complex
                 bool bptab=  BCastTo<tab> ((*a)[0]);
                 bool bpttab=  BCastTo<pttab>((*a)[0]);
                 bool bpferarray=  BCastTo<pferarray>((*a)[0]);
@@ -2626,6 +2628,20 @@ public:
                         l[i][j]= CastTo<pfSc>((*a)[j]);
 
                 }
+                else if (asizea == 3 && bpfLr ) // 3D vector for curve...
+                {
+                    l[i].what=15; // new 3d vector
+                    for (int j=0;j<a->size();j++)
+                        l[i][j]= CastTo<pfLr>((*a)[j]);
+                    
+                }
+                else if (asizea == 3 && bpfLc ) // 3D vector for curve...
+                {
+                    l[i].what=21; // new 3d vector
+                    for (int j=0;j<a->size();j++)
+                        l[i][j]= CastTo<pfLc>((*a)[j]);
+                    
+                }
                 else if (bpferarray && asizea == 2)
                 {
                     l[i].what=102;
@@ -2675,6 +2691,14 @@ public:
                 l[i].composant=false;
                 l[i].what=18;   // complex iso value 3D surface
                 l[i][0]=CastTo<pfSc>(args[i]);}
+            else if (BCastTo<pfLr>(args[i])) { // [[file:lgmesh3.hpp::pfSr]]
+                l[i].composant=false;
+                l[i].what=14; //  real iso value 3D curve
+                l[i][0]=CastTo<pfLr>(args[i]);}
+            else if (BCastTo<pfLc>(args[i])) { // [[file:lgmesh3.hpp::pfSc]]
+                l[i].composant=false;
+                l[i].what=20;   // complex iso value 3D curve
+                l[i][0]=CastTo<pfLc>(args[i]);}
 
             else if (BCastTo<pferarray>(args[i])) {
                 l[i].composant=false;
@@ -2702,8 +2726,14 @@ public:
                 l[i].composant=false;
                 l[i].what=118;  //arry iso value array iso value 3d
                 l[i][0]=CastTo<pfScarray>(args[i]);}
-
-
+            else if (BCastTo<pfLrarray>(args[i])) { // [[file:lgmesh3.hpp::pfSrarray]]
+                l[i].composant=false;
+                l[i].what=109; //arry iso value array iso value 3d
+                l[i][0]=CastTo<pfLrarray>(args[i]);}
+            else if (BCastTo<pfLcarray>(args[i])) { // [[file:lgmesh3.hpp::pfScarray]]
+                l[i].composant=false;
+                l[i].what=119;  //arry iso value array iso value 3d
+                l[i][0]=CastTo<pfLcarray>(args[i]);}
             else if (BCastTo<pmesh>(args[i])){
                 l[i].composant=true;
                 l[i].what=0; // mesh ...
@@ -2909,6 +2939,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
  const vector<Expression>  & what(di->what);
  const int dim =di->d;
  const bool surface=di->isMeshS;
+ const bool curve=di->isMeshL;
  const GQuadratureFormular<R1>& FIE = di->FIE(stack);
  const GQuadratureFormular<R2> & FIT = di->FIT(stack);
  const GQuadratureFormular<R3> & FIV = di->FIV(stack);
@@ -2926,19 +2957,26 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
           else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
           else cout << "  --  int 2d   (nQP: "<< FIT.n << " ) in "  ;
       }
-      else if(dim==3 && !surface)
+      else if(dim==3 && !surface && !curve)
       {
           if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") ,"  ;
           else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all faces ( nQP: "<< FIT.n << "),"  ;
           else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF face nQP: ("<< FIT.n << ")," ;
           else cout << "  --  int 3d volume  (nQP: "<< FIV.n << " ) in "  ;
       }
-      else if(dim==3 && surface)
+      else if(dim==3 && surface && !curve)
       {
           if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") levelset: "<< di->islevelset() << " ,"  ;
           else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
           else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
           else cout << "  --  int 3d surface  (nQP: "<< FIT.n << " ) in "  ;
+      }
+      else if(dim==3 && !surface  && curve)
+      {
+          //if (CDomainOfIntegration::int0d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") levelset: "<< di->islevelset() << " ,"  ;
+          //else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
+          //else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
+          cout << "  --  int 3d curve  (nQP: "<< FIT.n << " ) in "  ;
       }
   }
 
@@ -3181,7 +3219,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
    }
 
  // volume 3d
- else if(dim==3 && !surface)
+ else if(dim==3 && !surface  && !curve)
    {
      if(di->islevelset() &&  (CDomainOfIntegration::int2d!=kind) && (CDomainOfIntegration::int3d!=kind) )
          InternalError("So no levelset integration type on no int2d / int3d case (10 3d)");
@@ -3381,7 +3419,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 
    }
 
- else if(dim==3 && surface)
+ else if(dim==3 && surface  && !curve)
  {
      if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) &&  (CDomainOfIntegration::int2d!=kind) ) InternalError("So no levelset integration type  case (10 3d)");
      const MeshS  & Th = * GetAny<pmeshS>( (*di->Th)(stack) );
@@ -3586,7 +3624,212 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
          InternalError("CDomainOfIntegration kind unkown");
      }
  }
-
+ else if(dim==3 && !surface  && curve)
+ {
+     ffassert(0);
+     /*if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) &&  (CDomainOfIntegration::int2d!=kind) ) InternalError("So no levelset integration type  case (10 3d)");
+     const MeshS  & Th = * GetAny<pmeshS>( (*di->Th)(stack) );
+     ffassert(&Th);
+     
+     if (verbosity >3)
+     {
+         if (all) cout << " all " << endl ;
+         else cout << endl;
+     }
+     if (kind==CDomainOfIntegration::int1d)
+     {
+         const QuadratureFormular1d & FI = FIE;
+         if(di->islevelset())
+         {
+             double llevelset = 0;
+             double uset = HUGE_VAL;
+             R2 Q[3];
+             KN<double> phi(Th.nv);phi=uset;
+             double f[3];
+             for(int t=0; t< Th.nt;++t)
+             {
+                 double umx=-HUGE_VAL,umn=HUGE_VAL;
+                 for(int i=0;i<3;++i)
+                 {
+                     int j= Th(t,i);
+                     if( phi[j]==uset)
+                     {
+                         MeshPointStack(stack)->setP(&Th,t,i);
+                         phi[j]= di->levelset(stack);
+                     }
+                     f[i]=phi[j];
+                     umx = std::max(umx,phi[j]);
+                     umn = std::min(umn,phi[j]);
+                     
+                 }
+                 if( umn <=0 && umx >= 0)
+                 {
+                     
+                     int np= IsoLineK(f,Q,1e-10);
+                     if(np==2)
+                     {
+                         const TriangleS & K(Th[t]);
+                         double epsmes3=K.mesure()*K.mesure()*1e-18;
+                         R3 PA(K(Q[0])),PB(K(Q[1])), PC(K(Q[2]));
+                         R3 NN= R3(PB,PA)^R3(PC,PA); //R3 NAB(PA,PB);
+                         
+                         double mes2 = (NN,NN);
+                         double mes = sqrt(mes2);
+                         
+                         if(mes2*mes <epsmes3) continue; //  too small
+                         NN /= mes;
+                         llevelset += mes;
+                         
+                         for (int npi=0;npi<FI.n;npi++) // loop on the integration point
+                         {
+                             QuadratureFormular1dPoint pi( FI[npi]);
+                             double sa=pi.x,sb=1.-sa;
+                             R2 Pt(Q[0]*sa+Q[1]*sb ); //
+                             MeshPointStack(stack)->set(Th,K(Pt),Pt,K,-1,NN,-1);
+                             r += mes*pi.a*GetAny<R>( (*fonc)(stack));
+                             
+                         }
+                     }
+                     
+                 }
+                 wsptr2free->clean(swsptr2free);// ADD FH 11/2017
+             }
+             if(verbosity > 5) cout << " Lenght level set = " << llevelset << endl;
+             
+         }
+         
+         else
+             for( int e=0;e<Th.nbe;e++)
+             {
+                 if (all || setoflab.find(Th.be(e).lab) != setoflab.end())
+                 {
+                     
+                     int ie,i =Th.BoundaryElement(e,ie);
+                     const TriangleS & K(Th[i]);
+                     R3 E=K.Edge(ie);
+                     double le = sqrt((E,E));
+                     R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
+                     PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
+                     
+                     for (int npi=0;npi<FI.n;npi++) // loop on the integration point
+                     {
+                         QuadratureFormular1dPoint pi( FI[npi]);
+                         double sa=pi.x,sb=1.-sa;
+                         R2 Pt(PA*sa+PB*sb ); //
+                         MeshPointStack(stack)->set(Th,K(Pt),Pt,K,Th.be(e).lab,R2(E.y,-E.x)/le,ie);
+                         r += le*pi.a*GetAny<R>( (*fonc)(stack));
+                     }
+                 }
+                 wsptr2free->clean(swsptr2free);// ADD FH 11/2017
+             }
+     }
+     else if (kind==CDomainOfIntegration::int2d)
+     {
+         const QuadratureFormular & FI =FIT;
+         
+         if(di->islevelset())
+         { // add FH mars 2014 compute int2d  on phi < 0 ..
+             double llevelset = 0;
+             double uset = HUGE_VAL;
+             R2 Q[3];
+             KN<double> phi(Th.nv);phi=uset;
+             double f[3],umx,umn;
+             for(int t=0; t< Th.nt;++t)
+             {
+                 if (all || setoflab.find(Th[t].lab) != setoflab.end())
+                 {
+                     const TriangleS & K(Th[t]);
+                     
+                     double umx=-HUGE_VAL,umn=HUGE_VAL;
+                     for(int i=0;i<3;++i)
+                     {
+                         int j= Th(t,i);
+                         if( phi[j]==uset)
+                         {
+                             MeshPointStack(stack)->setP(&Th,t,i);
+                             phi[j]= di->levelset(stack);
+                         }
+                         f[i]=phi[j];
+                         umx = std::max(umx,phi[j]);
+                         umn = std::min(umn,phi[j]);
+                         
+                     }
+                     double area =K.mesure();
+                     if( umn >=0 ) continue; //  all positif => nothing
+                     if( umx >0 )
+                     { // coupe ..
+                         int i0 = 0, i1 = 1, i2 =2;
+                         
+                         if( f[i0] > f[i1] ) swap(i0,i1) ;
+                         if( f[i0] > f[i2] ) swap(i0,i2) ;
+                         if( f[i1] > f[i2] ) swap(i1,i2) ;
+                         
+                         double c = (f[i2]-f[i1])/(f[i2]-f[i0]); // coef Up Traing
+                         if( f[i1] < 0 ) {double y=f[i2]/(f[i2]-f[i1]); c *=y*y; }
+                         else {double y=f[i0]/(f[i0]-f[i1]) ; c = 1.- (1.-c)*y*y; };
+                         assert( c > 0 && c < 1);
+                         area *= 1-c;
+                     }
+                     //  warning  quadrature  wrong just ok for constante FH, we must also change the quadaturer points ..
+                     // just order 1  here ???
+                     for (int npi=0; npi<FI.n;npi++)
+                     {
+                         QuadraturePoint pi(FI[npi]);
+                         MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);
+                         r += area*pi.a*GetAny<R>( (*fonc)(stack));
+                     }
+                     
+                 }
+                 wsptr2free->clean(swsptr2free);// ADD FH 11/2017
+             }
+             
+         }
+         else
+             for (int i=0;i< Th.nt; i++)
+             {
+                 const TriangleS & K(Th[i]);
+                 if (all || setoflab.find(Th[i].lab) != setoflab.end())
+                     for (int npi=0; npi<FI.n;npi++)
+                     {
+                         QuadraturePoint pi(FI[npi]);
+                         MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);
+                         r += K.mesure()*pi.a*GetAny<R>( (*fonc)(stack));
+                     }
+                 wsptr2free->clean(swsptr2free);// ADD FH 11/2017
+             }
+     }
+     else   if (kind==CDomainOfIntegration::intalledges)
+     {
+         const QuadratureFormular1d & FI = FIE;
+         int lab;
+         for (int i=0;i< Th.nt; i++)
+             if (all || setoflab.find(Th[i].lab) != setoflab.end())
+                 for( int ie=0;ie<3;ie++)
+                 {
+                     
+                     const MeshS::Element  & K(Th[i]);
+                     R3 NN=K.N(ie);
+                     double mes = NN.norme();
+                     NN /= mes;
+                     for (int npi=0;npi<FI.n;npi++) // loop on the integration point
+                     {
+                         QuadratureFormular1dPoint pi( FI[npi]);
+                         R2 Pt(K.PBord(ie,pi)); // cout
+                         MeshPointStack(stack)->set(Th,K(Pt),Pt,K,lab,NN,ie);
+                         r += mes*pi.a*GetAny<R>( (*fonc)(stack));
+                     }
+                 }
+         wsptr2free->clean(swsptr2free);// ADD FH 11/2017
+     }
+     else   if (kind==CDomainOfIntegration::intallVFedges)
+     {
+         ffassert(0); //TODO AXEL
+     }
+     else
+     {
+         InternalError("CDomainOfIntegration kind unkown");
+     }*/
+ }
  else {  InternalError("CDomainOfIntegration dim unkown");}
 
  *MeshPointStack(stack)=mp;
@@ -3776,7 +4019,40 @@ int SendS(PlotStream & theplot,Plot::ListWhat &lli,map<const MeshS *,long> &mapt
     return err;
 }
 
-
+template<class K,class v_fes>
+int SendL(PlotStream & theplot,Plot::ListWhat &lli,map<const MeshL *,long> &mapthS)
+{
+    typedef FEbase<K,v_fes> * pfekS ;
+    pfekS feL[3]={0,0,0};
+    int cmp[3]={-1,-1,-1};
+    int err=1;
+    long what=lli.what;
+    int lg,nsb=0;
+    lli.eval(feL,cmp);
+    
+    
+    if (what==14 || what==20)
+    {
+        err=0;
+        theplot << what ;
+        theplot <<mapthS[ &(feL[0]->Vh->Th)];// numero du maillage
+        KN<R1> Psub;
+        KN<int> Ksub;
+        KN<K> V1=feL[0]->Vh->newSaveDraw(*feL[0]->x(),cmp[0],lg,Psub,Ksub,0);
+        
+        if(verbosity>9)
+            cout << " Send plot:what: " << what << " " << nsb << " "<<  V1.N()
+            << " Max "  << V1.max() << " min " << V1.min() << endl;
+        theplot << Psub ;
+        theplot << Ksub ;
+        theplot << V1;
+        
+    }
+    else  if (what==15 || what==21)
+    { ffassert(0);
+    }
+    return err;
+}
 //  missing function
 inline  void NewSetColorTable(int nb,float *colors=0,int nbcolors=0,bool hsv=true)
 {
@@ -3810,10 +4086,14 @@ AnyType Plot::operator()(Stack s) const{
             case 9 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 11 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 12 : l[i].EvalandPush<void *>(s,i,ll); break;
+            case 14 : l[i].EvalandPush<void *>(s,i,ll); break;
+            case 15 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 16 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 17 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 18 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 19 : l[i].EvalandPush<void *>(s,i,ll); break;
+            case 20 : l[i].EvalandPush<void *>(s,i,ll); break;
+            case 21 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 50 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 55 : l[i].EvalandPush<void *>(s,i,ll); break;
             case  100 : l[i].MEvalandPush< pmesh>(s,i,ll); break;
@@ -3823,10 +4103,12 @@ AnyType Plot::operator()(Stack s) const{
             case  105 : l[i].MEvalandPush< pmesh3>(s,i,ll); break;
             case  106 : l[i].AEvalandPush<asol3, sol3>(s,i,ll); break;
             case  108 : l[i].AEvalandPush<asolS, solS>(s,i,ll); break;
+            case  109 : l[i].AEvalandPush<asolL, solL>(s,i,ll); break;
             case  111 : l[i].AEvalandPush<asolc, solc>(s,i,ll); break;
             case  112 : l[i].AEvalandPush<asolc, solc>(s,i,ll); break;
             case  116 : l[i].AEvalandPush<asolc3, solc3>(s,i,ll); break;
             case  118 : l[i].AEvalandPush<asolcS, solcS>(s,i,ll); break;
+            case  119 : l[i].AEvalandPush<asolcL, solcL>(s,i,ll); break;
 
             default:
                 ffassert(l[i].what<100) ; // missing piece of code FH (jan 2010) ...
@@ -3852,21 +4134,26 @@ AnyType Plot::operator()(Stack s) const{
          what = 9 -> real 3d vector field (tree FE function  3d) surface
          what = 11 -> complex scalar field (FE function  2d) real
          what = 13 -> curve def by 4  array : x,y,z,  value for color ...
+         what = 14 -> real FE function 3D curve
+         what = 15 -> real 3d vector field (tree FE function  3d) curve
          what = 16 -> complex FE function 3D volume
          what = 17 -> complex 3d vector field (tree FE function  3d) volume
          what = 18 -> complex FE function 3D surface
          what = 19 -> complex 3d vector field (tree FE function  3d) surface
+         what = 20 -> complex FE function 3D curve
+         what = 21 -> complex 3d vector field (tree FE function  3d) curve
          what = 40 -> 3D border mesh
          what = 50 -> 3D surface mesh
          what = 55 -> 3D line mesh
-         what = 100,101,106, ->   remap with real ... 2d, 3D volume, 3D surface
-         what = 111, 116 , 117 118 ->  remap with complex ... 2d, 3D volume, 3D surface
+         what = 100,101,106,109 ->   remap with real ... 2d, 3D volume, 3D surface, 3D curve
+         what = 111, 116, 117 ,118,119 ->  remap with complex ... 2d, 3D volume, 3D surface, 3D curve
          what = -1 -> error, item empty
          */
         PlotStream theplot(ThePlotStream);
         pferbase  fe[3]={0,0,0};
         pf3rbase  fe3[3]={0,0,0};
         pfSrbase  feS[3]={0,0,0};
+        pfLrbase  feL[3]={0,0,0};
         double echelle=1;
         int cmp[3]={-1,-1,-1};
         theplot.SendNewPlot();
@@ -3990,6 +4277,13 @@ if(nargs[VTK_START+index])                    \
             if (feS[0]->x()) thS=&feS[0]->Vh->Th;
             if (feS[1] && feS[1]->x()) ffassert(thS == &feS[1]->Vh->Th);
             if (feS[2] && feS[2]->x()) ffassert(thS == &feS[2]->Vh->Th);
+          }
+          // Prepare for the sending 3D curve iso values for ffglut
+          else if (what==14 || what==15 || what==20 || what==21) {
+            ll[ii].eval(feL,cmp);
+            if (feL[0]->x()) thL=&feL[0]->Vh->Th;
+            if (feL[1] && feL[1]->x()) ffassert(thL == &feL[1]->Vh->Th);
+            if (feL[2] && feL[2]->x()) ffassert(thL == &feL[2]->Vh->Th);
           }
           // test on the type meshes --- 2D, 3D volume and 3D surface
           if(th && mapth.find(th)==mapth.end())
@@ -4132,7 +4426,11 @@ if(nargs[VTK_START+index])                    \
                 err = SendS<R,v_fesS>( theplot,ll[ii] ,mapthS);
             else if (what==18 || what==19 )
                 err = SendS<Complex,v_fesS>( theplot,ll[ii] ,mapthS);
-
+            // send 3D curve iso values for ffglut
+            else  if (what==14 ||what==15 )
+                err = SendL<R,v_fesL>( theplot,ll[ii] ,mapthL);
+            else if (what==20 || what==21 )
+                err = SendL<Complex,v_fesL>( theplot,ll[ii] ,mapthL);
             else
                 ffassert(0);// erreur type theplot inconnue
             if(err==1)
@@ -5476,8 +5774,8 @@ void  init_lgfem()
  Dcl_Type<const Call_FormBilinear<v_fes3> *>();  // to set Matrix 3D volume
  Dcl_Type<const Call_FormLinear<v_fesS> *>();    //   to set Vector 3D surface
  Dcl_Type<const Call_FormBilinear<v_fesS> *>();  // to set Matrix 3D surface
-// Dcl_Type<const Call_FormLinear<v_fesL> *>();    //   to set Vector 3D curve
-// Dcl_Type<const Call_FormBilinear<v_fesL> *>();  // to set Matrix 3D curve
+ Dcl_Type<const Call_FormLinear<v_fesL> *>();    //   to set Vector 3D curve
+ Dcl_Type<const Call_FormBilinear<v_fesL> *>();  // to set Matrix 3D curve
  Dcl_Type<interpolate_f_X_1<double>::type>();  // to make  interpolation x=f o X^1 ;
 
  map_type[typeid(const FormBilinear*).name()] = new TypeFormBilinear;
@@ -5813,9 +6111,9 @@ void  init_lgfem()
 		   new OpArraytoLinearForm<double,v_fes3>(atype< KN_<double> >(),false,false)  ,//3D volume
 		   new OpMatrixtoBilinearForm<double,v_fes3 > , // 3D volume
            new OpArraytoLinearForm<double,v_fesS>(atype< KN_<double> >(),false,false)  , // 3D surface
-           new OpMatrixtoBilinearForm<double,v_fesS > ); // 3D surface
-        //   new OpArraytoLinearForm<double,v_fesL>(atype< KN_<double> >(),false,false)  , // 3D curve
-        //   new OpMatrixtoBilinearForm<double,v_fesL >); // 3D curve
+           new OpMatrixtoBilinearForm<double,v_fesS > , // 3D surface
+           new OpArraytoLinearForm<double,v_fesL>(atype< KN_<double> >(),false,false)  , // 3D curve
+           new OpMatrixtoBilinearForm<double,v_fesL >); // 3D curve
 
 
  TheOperators->Add("<-",
@@ -5824,9 +6122,9 @@ void  init_lgfem()
 		   new OpArraytoLinearForm<double,v_fes3>(atype< KN<double>* >(),true,true) , //3D volume
 		   new OpArraytoLinearForm<Complex,v_fes3>(atype< KN<Complex>* >(),true,true), //3D volume
            new OpArraytoLinearForm<double,v_fesS>(atype< KN<double>* >(),true,true) , //3D surface
-           new OpArraytoLinearForm<Complex,v_fesS>(atype< KN<Complex>* >(),true,true)  //3D surface
-          // new OpArraytoLinearForm<double,v_fesL>(atype< KN<double>* >(),true,true) , //3D curve
-          // new OpArraytoLinearForm<Complex,v_fesL>(atype< KN<Complex>* >(),true,true) //3D curve
+           new OpArraytoLinearForm<Complex,v_fesS>(atype< KN<Complex>* >(),true,true),  //3D surface
+           new OpArraytoLinearForm<double,v_fesL>(atype< KN<double>* >(),true,true) , //3D curve
+           new OpArraytoLinearForm<Complex,v_fesL>(atype< KN<Complex>* >(),true,true) //3D curve
         );
 
 
@@ -5843,16 +6141,16 @@ void  init_lgfem()
 		   new OpArraytoLinearForm<Complex,v_fes3>(atype< KN_<Complex> >(),false,false)   , //3D volume
 		   new OpMatrixtoBilinearForm<Complex,v_fes3 > , //3D volume
            new OpArraytoLinearForm<Complex,v_fesS>(atype< KN_<Complex> >(),false,false)   , //3D surface
-                   new OpMatrixtoBilinearForm<Complex,v_fesS > ); //3D surface
-         //  new OpArraytoLinearForm<Complex,v_fesL>(atype< KN_<Complex> >(),false,false)   , //3D curve
-         //  new OpMatrixtoBilinearForm<Complex,v_fesL >) ; //3D surface
+           new OpMatrixtoBilinearForm<Complex,v_fesS > , //3D surface
+           new OpArraytoLinearForm<Complex,v_fesL>(atype< KN_<Complex> >(),false,false)   , //3D curve
+           new OpMatrixtoBilinearForm<Complex,v_fesL >) ; //3D surface
 
  // add august 2007
  TheOperators->Add("<-",
 		   new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::plusAx > > ,
 		   new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::plusAtx > >  ,
 		   new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::solveAxeqb > >  ,
-                   new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::solveAtxeqb > >  ,
+           new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::solveAtxeqb > >  ,
 
 		   new OneBinaryOperator<init_eqarray<KN<Complex> ,RNM_VirtualMatrix<Complex>::plusAx > > ,
 		   new OneBinaryOperator<init_eqarray<KN<Complex> ,RNM_VirtualMatrix<Complex>::plusAtx > >  ,
@@ -5903,8 +6201,8 @@ void  init_lgfem()
 
 		   new OpArraytoLinearForm<double,v_fes>(atype< KN_<double> >(),false,false,false)  ,
 		   new OpArraytoLinearForm<double,v_fes3>(atype< KN_<double> >(),false,false,false) ,  // 3D volume
-		   new OpArraytoLinearForm<double,v_fesS>(atype< KN_<double> >(),false,false,false)    // 3D surface
-        //   new OpArraytoLinearForm<double,v_fesL>(atype< KN_<double> >(),false,false,false)    // 3D surface
+		   new OpArraytoLinearForm<double,v_fesS>(atype< KN_<double> >(),false,false,false) ,  // 3D surface
+           new OpArraytoLinearForm<double,v_fesL>(atype< KN_<double> >(),false,false,false)    // 3D surface
        );
 
  TheOperators->Add("+=",
@@ -5915,8 +6213,8 @@ void  init_lgfem()
 		   new OpArraytoLinearForm<Complex,v_fes>(atype< KN_<Complex> >(),false,false,false)  ,
 
 		   new OpArraytoLinearForm<Complex,v_fes3>(atype< KN_<Complex> >(),false,false,false) , // 3D volume
-           new OpArraytoLinearForm<Complex,v_fesS>(atype< KN_<Complex> >(),false,false,false)  // 3D surface
-          // new OpArraytoLinearForm<Complex,v_fesL>(atype< KN_<Complex> >(),false,false,false)  // 3D curve
+           new OpArraytoLinearForm<Complex,v_fesS>(atype< KN_<Complex> >(),false,false,false) , // 3D surface
+           new OpArraytoLinearForm<Complex,v_fesL>(atype< KN_<Complex> >(),false,false,false)   // 3D curve
        );
 
 
@@ -5930,8 +6228,8 @@ void  init_lgfem()
  TheOperators->Add("<-",new OpMatrixtoBilinearForm<double,v_fesS >(1) ); // 3D surface
  TheOperators->Add("<-",new OpMatrixtoBilinearForm<Complex,v_fesS >(1) ); // 3D surface
     
-// TheOperators->Add("<-",new OpMatrixtoBilinearForm<double,v_fesL >(1) ); // 3D curve
-// TheOperators->Add("<-",new OpMatrixtoBilinearForm<Complex,v_fesL >(1) ); // 3D curve
+ TheOperators->Add("<-",new OpMatrixtoBilinearForm<double,v_fesL >(1) ); // 3D curve
+ TheOperators->Add("<-",new OpMatrixtoBilinearForm<Complex,v_fesL >(1) ); // 3D curve
 
  Add<const  FormLinear   *>("(","",new OpCall_FormLinear<FormLinear,v_fes> );
  Add<const  FormBilinear *>("(","",new OpCall_FormBilinear<FormBilinear,v_fes> );
@@ -5951,11 +6249,11 @@ void  init_lgfem()
  Add<const C_args*>("(","",new OpCall_FormLinear2<C_args,v_fesS>);  // 3D surface
  Add<const C_args*>("(","",new OpCall_FormBilinear<C_args,v_fesS> );  // 3D surface
     
-// Add<const  FormLinear   *>("(","",new OpCall_FormLinear<FormLinear,v_fesL> );  // 3D curve
-// Add<const  FormBilinear *>("(","",new OpCall_FormBilinear<FormBilinear,v_fesL> );  // 3D curve
-// Add<const  FormBilinear *>("(","",new OpCall_FormLinear2<FormBilinear,v_fesL> );  // 3D curve
-// Add<const C_args*>("(","",new OpCall_FormLinear2<C_args,v_fesL>);  // 3D curve
-// Add<const C_args*>("(","",new OpCall_FormBilinear<C_args,v_fesL> );  // 3D curve
+ Add<const  FormLinear   *>("(","",new OpCall_FormLinear<FormLinear,v_fesL> );  // 3D curve
+ Add<const  FormBilinear *>("(","",new OpCall_FormBilinear<FormBilinear,v_fesL> );  // 3D curve
+ Add<const  FormBilinear *>("(","",new OpCall_FormLinear2<FormBilinear,v_fesL> );  // 3D curve
+ Add<const C_args*>("(","",new OpCall_FormLinear2<C_args,v_fesL>);  // 3D curve
+ Add<const C_args*>("(","",new OpCall_FormBilinear<C_args,v_fesL> );  // 3D curve
 
 //  correction du bug morale
 //  Attention il y a moralement un bug

@@ -6714,17 +6714,10 @@ basicAC_F0::name_and_type Square_Op::name_param [] = {
 
 class Square: public OneOperator {
 public:
-    int cas;
-    Square (): OneOperator(atype<pmeshS>(), atype<long>(), atype<long>()), cas(0) {}
-
-    Square (int): OneOperator(atype<pmeshS>(), atype<long>(), atype<long>(), atype<E_Array>()), cas(1) {}
+    Square (): OneOperator(atype<pmeshS>(), atype<long>(), atype<long>(), atype<E_Array>()) {}
 
     E_F0*code (const basicAC_F0 &args) const {
-        if (cas == 0) {
-            return new Square_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
-        } else {
-            return new Square_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
-        }
+        return new Square_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
     }
 };
 
@@ -7633,23 +7626,27 @@ public:
 class Line_Op: public E_F0mps
 {
 public:
-    static const int n_name_param = 2;    //
+    static const int n_name_param = 3;    //
     static basicAC_F0::name_and_type name_param [];
     Expression nargs[n_name_param], enx, xx, yy, zz;
-
+    long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
+    
+    
 public:
     Line_Op (const basicAC_F0 &args, Expression nx, Expression transfo = 0)
     : enx(nx), xx(0), yy(0), zz(0) {
         args.SetNameParam(n_name_param, name_param, nargs);
         if (transfo) {
-            const E_Array *a2 = dynamic_cast<const E_Array *>(transfo);
-            int err = 0;
-            if (a2) {
-                if (a2->size() != 3)
-                    CompileError("Square (n1, [X,Y,Z]) ");
-                xx = to<double>((*a2)[0]);
-                yy = to<double>((*a2)[1]);
-                zz = to<double>((*a2)[2]);
+            const E_Array *a1 = dynamic_cast<const E_Array *>(transfo);
+        int err = 0;
+        
+        if (a1) {
+            if (a1->size() != 3 || xx || yy || zz)
+                CompileError("line (nx,[X,Y,Z]) ");
+            
+            xx = to<double>((*a1)[0]);
+            yy = to<double>((*a1)[1]);
+            zz = to<double>((*a1)[2]);
             }
         }
     }
@@ -7658,6 +7655,7 @@ public:
 };
 
 basicAC_F0::name_and_type Line_Op::name_param [] = {
+    {"orientation", &typeid(long)},
     {"region", &typeid(long)},
     {"label", &typeid(KN_<long>)}
    
@@ -7665,17 +7663,10 @@ basicAC_F0::name_and_type Line_Op::name_param [] = {
 
 class Line: public OneOperator {
 public:
-    int cas;
-    Line (): OneOperator(atype<pmeshL>(), atype<long>()), cas(0) {}
-
-    Line (int): OneOperator(atype<pmeshL>(), atype<long>(), atype<E_Array>()), cas(1) {}
+    Line (): OneOperator(atype<pmeshL>(), atype<long>(), atype<E_Array>()) {}
 
     E_F0*code (const basicAC_F0 &args) const {
-        if (cas == 0) {
-            return new Line_Op(args, t[0]->CastTo(args[0]));
-        } else {
-            return new Line_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
-        }
+            return new Line_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));    // array???
     }
 };
 
@@ -7683,16 +7674,19 @@ public:
 AnyType Line_Op::operator () (Stack stack)  const {
     
 	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+    
     typedef typename MeshL::Element T;
     typedef typename MeshL::BorderElement B;
     typedef typename MeshL::Vertex V;
-	
-	
-	
-	long region = 0;
+    
     int nt=GetAny<long>((*enx)(stack));
-	int nv=nt+1,nbe=2;
+    MeshPoint *mpp(MeshPointStack(stack));
 
+	long region = 0;
+
+	int nv=nt+1,nbe=2;
+    long orientation(arg(0, stack, 1L));
+    
     V *v= new V[nv];
     T *t= new T[nt];
     B *b= new B[nbe];
@@ -7704,7 +7698,7 @@ AnyType Line_Op::operator () (Stack stack)  const {
 	   vv[i].y=P.y;
 	   vv[i].z=P.z;
 	   vv[i].lab = 0;
-	   mp->set(vv->x,vv->y,vv->z);
+	   mpp->set(vv[i].x,vv[i].y,vv[i].z);
        if (xx)
            vv[i].x = GetAny<double>((*xx)(stack));
        if (yy)
@@ -7713,8 +7707,8 @@ AnyType Line_Op::operator () (Stack stack)  const {
            vv[i].z = GetAny<double>((*zz)(stack));
     }
 
-	T *tt=t;   
-	for (int i=0;i<nt;++i) { 
+	T *tt=t;
+	for (int i=0;i<nt;++i) {
 		int iv[2]; iv[0]=i, iv[1]=i+1;
 		int lab=0;
 		(tt++)->set(v,iv,lab);   
@@ -7730,154 +7724,11 @@ AnyType Line_Op::operator () (Stack stack)  const {
 	MeshL *ThL = new MeshL(nv,nt,nbe,v,t,b);
     ThL->BuildGTree();
 
-
     Add2StackOfPtr2FreeRC(stack, ThL);
-
-    return ThL;
-}
-
-
-
-
-///////////////////////
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-/*
-class Ellipse_Op: public E_F0mps
-{
-public:
-    static const int n_name_param = 2;    //
-    static basicAC_F0::name_and_type name_param [];
-    Expression nargs[n_name_param], enx, xx, yy, zz;
-
-public:
-    Ellipse_Op (const basicAC_F0 &args, Expression nx, Expression transfo = 0)
-    : enx(nx), xx(0), yy(0), zz(0) {
-        args.SetNameParam(n_name_param, name_param, nargs);
-        if (transfo) {
-            const E_Array *a2 = dynamic_cast<const E_Array *>(transfo);
-            int err = 0;
-            if (a2) {
-                if (a2->size() != 3)
-                    CompileError("Square (n1,n2, [X,Y,Z]) ");
-                xx = to<double>((*a2)[0]);
-                yy = to<double>((*a2)[1]);
-                zz = to<double>((*a2)[2]);
-            }
-        }
-    }
-
-    AnyType operator () (Stack stack)  const;
-};
-
-basicAC_F0::name_and_type ellipse_Op::name_param [] = {
-    {"region", &typeid(long)},
-    {"label", &typeid(KN_<long>)}
-   
-};
-
-class Ellipse: public OneOperator {
-public:
-    int cas;
-    Ellipse (): OneOperator(atype<pmeshL>(), atype<long>()), cas(0) {}
-
-    Ellipse (int): OneOperator(atype<pmeshL>(), atype<long>(), atype<E_Array>()), cas(1) {}
-
-    E_F0*code (const basicAC_F0 &args) const {
-        if (cas == 0) {
-            return new Ellipse_Op(args, t[0]->CastTo(args[0]));
-        } else {
-            return new Ellipse_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
-        }
-    }
-};
-
-
-AnyType Ellipse_Op::operator () (Stack stack)  const {
+    *mp = mps;
     
-	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
-    typedef typename MeshL::Element T;
-    typedef typename MeshL::BorderElement B;
-    typedef typename MeshL::Vertex V;
-	
-	
-	
-	long region = 0;
-    int nt=GetAny<long>((*enx)(stack));
-	int nv=nt+1,nbe=2;
-
-    V *v= new V[nv];
-    T *t= new T[nt];
-    B *b= new B[nbe];
-	V *vv=v;
-	
-    for (int i=0;i<nv;++i) {
-       MeshL::Rd P((R) i/nt, 0., 0.);
-	   vv[i].x=P.x;
-	   vv[i].y=P.y;
-	   vv[i].z=P.z;
-	   vv[i].lab = 0;
-	   mp->set(vv->x,vv->y,vv->z);
-       if (xx)
-           vv[i].x = GetAny<double>((*xx)(stack));
-       if (yy)
-           vv[i].y = GetAny<double>((*yy)(stack));
-       if (zz)
-           vv[i].z = GetAny<double>((*zz)(stack));
-    }
-
-	T *tt=t;   
-	for (int i=0;i<nt;++i) { 
-		int iv[2]; iv[0]=i, iv[1]=i+1;
-		int lab=0;
-		(tt++)->set(v,iv,lab);   
-	}
-	
-	B *bb=b;
-	int ibeg[1], iend[1];
-	ibeg[0]=0, iend[0]=nv-1;
-	int lab1=1, lab1=2;
-	(bb++)->set(v,ibeg,lab1); 
-	(bb++)->set(v,iend,lab);
-
-	MeshL *ThL = new MeshL(nv,nt,nbe,v,t,b);
-    ThL->BuildGTree();
-
-
-    Add2StackOfPtr2FreeRC(stack, ThL);
-
     return ThL;
 }
-
-*/
-
-
-
 
 
 
@@ -7938,13 +7789,11 @@ static void Load_Init () {
 	Global.Add("AddLayers", "(", new OneOperator4_<bool, const MeshS *, KN<double> *, long, KN<double> *>(AddLayers));
 
     Global.Add("square3", "(", new Square);
-    Global.Add("square3", "(", new Square(1));
 	
     Global.Add("movemeshS", "(", new Movemesh<MeshS>);
     Global.Add("movemesh", "(", new Movemesh<MeshS>(1));
   
     Global.Add("movemesh23", "(", new Movemesh<Mesh>);
-    //Global.Add("movemesh", "(", new Movemesh<Mesh>(1));  // no possible, ambiguity
     Global.Add("change", "(", new SetMesh<MeshS>);
 	
 	
@@ -7954,11 +7803,7 @@ static void Load_Init () {
     //TheOperators->Add("=", new OneBinaryOperator_st<Op3_setmesh<false, pmeshL *, MeshL, pmeshL *, listMeshL> > );
     //TheOperators->Add("<-", new OneBinaryOperator_st<Op3_setmesh<true, pmeshL *, MeshL, pmeshL *, listMeshL> > );
 	
-	
-	Global.Add("line3", "(", new Line);
-	Global.Add("line3", "(", new Line(1));
-	//Global.Add("ellipse3", "(", new Ellipse);
-	//Global.Add("ellipse3", "(", new Ellipse(1));
+    Global.Add("line3", "(", new Line);
 	Global.Add("movemeshL", "(", new Movemesh<MeshL>);
     Global.Add("movemesh", "(", new Movemesh<MeshL>(1));
 	

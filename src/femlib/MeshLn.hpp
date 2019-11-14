@@ -100,8 +100,9 @@ namespace Fem2D {
         
     void Gradlambda(R3 * GradL) const
     {
-      GradL[1]= H(1);
-      GradL[0]=-GradL[1];
+        R3 V(at(0),at(1));
+        GradL[1]= V/(V.norme2());
+        GradL[0]= -GradL[1];
     }
 
   };

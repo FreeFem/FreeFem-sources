@@ -141,7 +141,8 @@ namespace Fem2D
 	else if (str=="Points")
 	  {
 	    mesb=0;
-	    int kmv=0,ij;
+        cout <<   "  -- No boundary points in ff .mesh format  " << endl;
+	    /*int kmv=0,ij;
 	    f >> nbe;
 	    assert(vertices);
 	    this->borderelements = new BorderElement[nbe];
@@ -157,7 +158,7 @@ namespace Fem2D
 		      vertices[ij].lab=1;
 		      kmv++;
 		    }
-	      }
+	      }*/
 	  }
 	else if(str[0]=='#') {
 	    int c;
@@ -173,16 +174,16 @@ namespace Fem2D
       }
   }
     
-    
+  // no points border in this format
   void MeshL::readmsh(ifstream & f,int offset)
   {
     int err=0;
-    f >> nv >> nt >> nbe;
+      f >> nv >> nt ; //>> nbe;
     if(verbosity>2)
-      cout << " GRead : nv " << nv << " " << nt << " " << nbe << endl;
+        cout << " GRead : nv " << nv << " " << nt << endl; //" " << nbe << endl;
     this->vertices = new Vertex[nv];
     this->elements = new Element[nt];
-    this->borderelements = new BorderElement[nbe];
+    //this->borderelements = new BorderElement[nbe];
     for (int k=0; k<nv; k++) {
       Vertex & P = this->vertices[k];
       f >> P.x >>P.y >> P.z >> P.lab ;
@@ -206,8 +207,8 @@ namespace Fem2D
       err += K.mesure() <0;
                 
     }
-   
-    for (int k=0; k<nbe; k++) {
+    cout <<   "  -- No boundary points in .msh format  " << endl;
+    /*for (int k=0; k<nbe; k++) {
       int i[1],lab;
       BorderElement & K(this->borderelements[k]);
       f >> i[0] >> lab;
@@ -215,7 +216,7 @@ namespace Fem2D
       K.set(this->vertices,i,lab);
       mesb += K.mesure();
             
-    }
+    }*/
     if(err!=0)
       {
 	cerr << " MeshL::readmsh : sorry bad mesh. Number of negative Edges " << err << endl;
@@ -231,7 +232,7 @@ namespace Fem2D
     int ok=load(filename);
     if(verbosity) {
       cout << "read meshL ok " << ok ;
-      cout << "surface Mesh, num Edges:= " << nt << ", num Vertice:= " << nv << " num boundary Points:= " << nbe << endl;
+      cout << "curve Mesh, num element Edges:= " << nt << ", num Vertice:= " << nv << " num boundary Points:= " << nbe << endl;
     }
         
     if (ok) {
@@ -252,7 +253,7 @@ namespace Fem2D
     BuildjElementConteningVertex();
         
         
-    if(verbosity>2) cout << "  -- End of read: MeshL mesure = " << mes << " border mesure " << mesb << endl;
+    if(verbosity>2) cout << "  -- End of read: MeshL mesure = " << mes << endl;
         
     if(verbosity) cout << "  -- MeshL : "<<filename  << ", space dimension "<< 3  << ", num Edges elts " << nt << ", num Vertice "
 		       << nv << " num Bondary Points " << nbe << endl;
@@ -534,7 +535,20 @@ namespace Fem2D
   const MeshL::Element * MeshL::Find( Rd P, R1 & Phat,bool & outside,const Element * tstart) const
     
   {
-    ffassert(0);
+      for (int i=0;i<nt;i++) {
+          kthrough++;
+          const EdgeL & K(this->elements[i]);
+          R3 A(K[0]),B(K[1]);
+          R3 AP(A,P), BP(B,P);
+          R a=AP.norme(), b=BP.norme();
+          R s=a+b;
+          R eps=s*1e-6;
+          if (a>-eps && b >-eps ) {
+              Phat=R(b/s);
+              return this->elements + i;
+          }
+      }
+      return 0; // outside
   }
     
     

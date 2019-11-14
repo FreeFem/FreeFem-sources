@@ -61,7 +61,7 @@ varf aS(uSVar,vSVar) = int2d(ThS)(Grad3(uSVar)'*Grad3(vSVar))
 matrix ASVar =aS(VhS,VhS);
 real[int] bSVar = aS(0,VhS);
 real[int] solSVar = ASVar^-1*bSVar;
-
+plot(ThS,solSVar);
 // with problem
 problem Lap3dS(uSPb,vSPb , solver = CG )  = int2d(ThS)(Grad3(uSPb)'*Grad3(vSPb))
  - int2d ( ThS ) ( f * vSPb )

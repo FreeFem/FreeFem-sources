@@ -2633,12 +2633,12 @@ void init_lgmesh3() {
   //3D surface
   Add<pfSr>("[]",".",new OneOperator1<KN<double> *,pfSr>(pf3r2vect<R,v_fesS>));
   Add<pfSc>("[]",".",new OneOperator1<KN<Complex> *,pfSc>(pf3r2vect<Complex,v_fesS>));
-  // Add<pfSr>("(","",new OneQuadOperator<Op4_pf32K<R,v_fesS>,Op4_pf32K<R,v_fesS>::Op> );
-  // Add<pfSc>("(","",new OneQuadOperator<Op4_pf32K<Complex,v_fesS>,Op4_pf32K<Complex,v_fes3>::Op> );
+  //Add<pfSr>("(","",new OneQuadOperator<Op4_pf32K<R,v_fesS>,Op4_pf32K<R,v_fesS>::Op> );
+  //Add<pfSc>("(","",new OneQuadOperator<Op4_pf32K<Complex,v_fesS>,Op4_pf32K<Complex,v_fes3>::Op> );
     
   //3D curve
-  //Add<pfLr>("[]",".",new OneOperator1<KN<double> *,pfSr>(pf3r2vect<R,v_fesL>));
-  //Add<pfLc>("[]",".",new OneOperator1<KN<Complex> *,pfSc>(pf3r2vect<Complex,v_fesL>));
+  Add<pfLr>("[]",".",new OneOperator1<KN<double> *,pfLr>(pf3r2vect<R,v_fesL>));
+  Add<pfLc>("[]",".",new OneOperator1<KN<Complex> *,pfLc>(pf3r2vect<Complex,v_fesL>));
   // Add<pfLr>("(","",new OneQuadOperator<Op4_pf32K<R,v_fesL>,Op4_pf32K<R,v_fesL>::Op> );
   // Add<pfLc>("(","",new OneQuadOperator<Op4_pf32K<Complex,v_fesL>,Op4_pf32K<Complex,v_fesL>::Op> );
     
@@ -3013,6 +3013,11 @@ TheOperators->Add("=",
  Global.Add("int2d","(",new OneOperatorCode<CDomainOfIntegrationS>);
  Global.Add("int1d","(",new OneOperatorCode<CDomainOfIntegrationBorderS>);
  Global.Add("intalledges","(",new OneOperatorCode<CDomainOfIntegrationAllEdgesS>);
+    
+ // 3d surface
+ Global.Add("int1d","(",new OneOperatorCode<CDomainOfIntegrationL>);
+ //Global.Add("int0d","(",new OneOperatorCode<CDomainOfIntegrationBorderL>);
+ //Global.Add("intalledges","(",new OneOperatorCode<CDomainOfIntegrationAllEdgesS>);
 
  /*decommente par J. Morice 14/01/09*/
 

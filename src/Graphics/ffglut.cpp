@@ -680,7 +680,7 @@ void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
         else {
             lok[kk]=1;
             glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
-            glPointSize(2);
+            glPointSize(3);
             glBegin(GL_POINTS);
             for (int i=0;i<Th.nbBrdElmts();i++) {
                 const MeshL::BorderElement  & K(Th.be(i));
@@ -688,7 +688,7 @@ void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
                 glVertex3d(K[0].x,K[0].y,K[0].z);
             }
             glEnd();
-            glLineWidth(1);
+            glPointSize(1);
             glEndList();  // fin de la list
         }
         else ;
@@ -711,6 +711,7 @@ void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
                 
             }
             glEnd();
+            glLineWidth(1);
             glEndList();
         }
     }
@@ -946,6 +947,85 @@ void OnePlotFES::Draw(OneWindow *win)
     ShowGlerror("OnePlotFES::Draw");
 }
 
+void OnePlotFEL::Draw(OneWindow *win)
+{
+    
+    initlist();
+    ThePlot & plot=*win->theplot;
+    ShowGlerror("begin OnePlotFE plot");
+    win->setLighting();
+    assert(win);
+    const MeshL & Th(*this->Th);
+    int nsubT= Ksub.N()/2;
+    int nsubV=Psub.N();
+    int nK=v.N()/ Th.nt;
+    if(debug>4)
+        cout << "\t\t\tOnePlotMesh::Draw  " <<v.N() << " ,nt " << Th.nt << " " << nK << " "
+        << Psub.N() << " " << what << " ,nv " << Th.nv << " cas=" << cas << endl;
+    ffassert(v.N()== Th.nt*nK);
+    int o=0;
+    KN<R3> Pn(Psub.N());
+    if((debug > 10)) cout << " " <<nsubV  << " " << nsubT << endl;
+    
+    if(plot.fill && (what==14 || what==20))
+        glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+    else
+        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    
+    if(what==15 || what==21)
+        glDisable(GL_DEPTH_TEST);
+    else
+        glEnable(GL_DEPTH_TEST);
+    
+    R coef = plot.coeff;
+    double xmin,xmax,ymin,ymax;
+    win->getcadre(xmin,xmax,ymin,ymax);
+    R kk = 4*win->hpixel;
+    if(plot.ArrowSize>0) kk=win->hpixel*max(win->width*plot.ArrowSize/100.,1.);
+    
+    int klist=0;
+    bool  change=false;
+    if(what==14 || what==20) {
+        if ( plot.fill) klist=1;
+        change = win->changeiso ;
+    }
+    else if (what==15 || what==21)
+        change  =  win->changearrow ;
+    if(debug>9)
+        cout << change << " " << klist << " ... " << oklist[klist] << "  fill = "
+        <<  plot.fill <<  " " <<  coef << endl;
+    if (oklist[klist] && ! change )
+        glCallList(gllists+klist);
+    else {
+        oklist[klist]=1;
+        glNewList(gllists+klist,GL_COMPILE_AND_EXECUTE); // save  la list aevc  affichage
+        if(debug>100)
+            cout << win->Bmin << ", Bmax:   " << win->Bmax << " Viso: "<< plot.Viso << endl;
+        for(int k=0;k<Th.nt;++k, o+= nK) {
+            const typename MeshL::Element & K=Th[k];
+            for(int i=0;i<nsubV;++i)
+                Pn[i]=K(Psub[i]);// local to global coord.
+            if(what==14 || what==20) {
+                for(int sk=0;sk<nsubT;++sk) {
+                    int i0= Ksub[sk*2+0], i1=Ksub[sk*2+1];
+                    R ff[2]={v[o+i0],v[o+i1]};
+                    R3 Pt[2]={Pn[i0],Pn[i1]};
+                    plot.DrawIsoEfill( Pt, ff, plot.Viso,plot.Viso.N());
+                }
+            }
+            else
+                ffassert(0);
+            
+        }
+        glEndList();  // fin de la list
+        
+    }
+    ShowGlerror("b mesh  OnePlotFES plot");
+    win->unsetLighting();
+    Plot(Th,false,plot.drawmeshes,plot.drawborder,plot,gllists+2,&oklist[2]);
+    ShowGlerror("OnePlotFES::Draw");
+}
+
 
 template<class Mesh>
 OnePlotFE<Mesh>::OnePlotFE(const Mesh *T,long w,PlotStream & f)
@@ -1106,7 +1186,40 @@ bool  OnePlotFES::vc2v()
 }
 
 
-
+bool  OnePlotFEL::vc2v()
+{
+    bool ret=false;
+    if(what>=16)
+    {
+        ret=true;
+        int n = vc.N();
+        if(v.size() !=n)
+            v.resize(n);
+        for(int i=0;i<n;++i)
+            if( cas%4== 0) v[i] = vc[i].real();
+            else if( cas%4== 1) v[i] = vc[i].imag();
+            else if( cas%4== 2) v[i] = abs(vc[i]);
+            else if( cas%4== 3) v[i] = arg(vc[i]);
+    }
+    
+    
+    if(what==14 || what==20)
+    {
+        fmin = min(fmin,v.min());
+        fmax = max(fmax,v.max());
+    }
+    else if (what==15 || what==21)
+    {
+        
+        int n= v.N()/3;
+        for (int i=0,j=0;i<n;i++, j+=2)
+        {
+            R3 u(v[j],v[j+1],v[j+2]);
+            vmax2 = max(vmax2,u.norme2());
+        }
+    }
+    return ret;
+}
 template<class Mesh>
 void OnePlotFE<Mesh>::Draw(OneWindow *win)
 {
@@ -2649,10 +2762,20 @@ case 20+index: {type dummy; fin >= dummy;} break;
             fin >> imsh;
             if(what==8||what==18 ) withiso=true;
             else if (what%10==9) witharrow=true;
-            if((debug > 10)) cout << " plot : mesh3 (surface) " << imsh << endl;
+            if((debug > 10)) cout << " plot : meshS (3D surface) " << imsh << endl;
             ffassert(imsh>0 && imsh <=nbmeshesS);
 
             p=new OnePlotFES(ThsS[imsh-1],what,fin);
+        }
+        else if (what==14  || what==15 || what==20  || what==21)
+        {
+            iso3d++;
+            fin >> imsh;
+            if(what==14||what==20 ) withiso=true;
+            else if (what==15||what==21 ) witharrow=true;
+            if((debug > 10)) cout << " plot : meshL (3D curve) " << imsh << endl;
+            ffassert(imsh>0 && imsh <=nbmeshesL);
+            p=new OnePlotFEL(ThsL[imsh-1],what,fin);
         }
         else if (what == 31)
         {
@@ -3074,7 +3197,6 @@ void ThePlot::DrawIsoTfill(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso
 void ThePlot::DrawIsoTfill(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz)
 {
     R3 PQ[10];
-    R z[10];
 
     R eps= (Viso[NbIso-1]-Viso[0])*1e-6;
     for(int l=1;l< NbIso;l++)  //   loop on the level curves
@@ -3096,21 +3218,19 @@ void ThePlot::DrawIsoTfill(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso
             {
                 if (Abs(fi-fj)>=0.1e-20) {
                     R  xlam=(fi-xf)/(fi-fj);
-                    z[im] =  ff[i] * (1.F-xlam)  +  ff[j]* xlam;
                     PQ[im++]   = Pt[i] * (1.F-xlam)  +  Pt[j]* xlam;
+                    
                 }
             }
             xf = xxfh;
             if(((fi<=xf)&&(fj>=xf))||((fi>=xf)&&(fj<=xf)))  {
-                if (Abs(fi-fj)>=0.1e-20)
-                {
+                if (Abs(fi-fj)>=0.1e-20) {
                     R  xlam=(fi-xf)/(fi-fj);
-                    z[im] =  ff[i] * (1.F-xlam)  +  ff[j]* xlam;
                     PQ[im++]   = Pt[i] * (1.F-xlam)  +  Pt[j]* xlam;
                 }
             }
             if (  xfb-eps <=fj  && fj <= xfh+eps)
-                z[im]=ff[j],PQ[im++] = Pt[j];
+                PQ[im++] = Pt[j];
         }
         if (im>2) {
             color(l+4);
@@ -3124,10 +3244,65 @@ void ThePlot::DrawIsoTfill(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso
 
             glBegin(GL_POLYGON);
             for (int i=0;i<im;i++) {
-                if((debug > 10)) cout << i << " \t : " << PQ[i].x << " " <<  PQ[i].y << " " << z[i]*rapz << endl;
+                if((debug > 100)) cout << i << " \t : " << PQ[i].x << " " <<  PQ[i].y << " " << PQ[i].z << endl;
                 glVertex3f(P[i].x, P[i].y, P[i].z);
             }
             glEnd();
+        }
+    }
+}
+
+// draw filling values for 3d FE curve
+void ThePlot::DrawIsoEfill(const R3 Pt[2],const R ff[2],const R * Viso,int NbIso, R rapz)
+{
+    R3 PQ[10];
+    R z[10];
+    R eps= (Viso[NbIso-1]-Viso[0])*1e-6;
+    for(int l=1;l< NbIso;l++)  //   loop on the level curves
+    {
+        R xfb = Viso[l-1];
+        R xfh = Viso[l];
+        assert(xfb < xfh);
+        int im=0, is=0;
+        R fi=(ff[0]), fj=(ff[1]), xxfb=xfb, xxfh=xfh;
+        int sens = 0;
+        if (fj<fi ) {Exchange(xxfb,xxfh); sens=1;}
+        
+        if (Abs(fi-fj)>=0.1e-20)
+        if ((xxfh>=fi && xxfb<=fj) || (xxfh<=fi && xxfb>=fj)) {
+            PQ[im++] = Pt[0];
+            z[is++] = fi;
+            if ((!sens && (xxfb >= fi)) || (sens && (xxfb <= fi))) {
+                R  xlam=(fi-xxfb)/(fi-fj);
+                PQ[im-1] = Pt[0] * (1.F-xlam)  +  Pt[1]* xlam;
+                z[is-1] = fi * (1.F-xlam)  +  fj* xlam;
+            }
+            PQ[im++] = Pt[1];
+            z[is++] = fj;
+            if ((!sens && (xxfh <= fj)) || (sens && (xxfh >= fj))) {
+                R  xlam=(fi-xxfh)/(fi-fj);
+                PQ[im-1] = Pt[0] * (1.F-xlam)  +  Pt[1]* xlam;
+                z[is-1] = fi * (1.F-xlam)  +  fj* xlam;
+            }
+        }
+        
+        if (im>1) {
+            color(l+4);
+            R3 P[10];
+            for(int i=0;i<im;++i)
+                P[i]= R3(PQ[i].x,PQ[i].y,rapz*z[i]); //PQ[i].z);
+            
+            glLineWidth(3);
+            glPolygonMode(GL_FRONT,GL_LINE);
+
+            
+            glBegin(GL_LINES);
+            for (int i=0;i<im;i++) {
+                if((debug > 100)) cout << i << " \t : " << Pt[i].x << " " <<  Pt[i].y << " " << Pt[i].z << endl;
+                glVertex3f(P[i].x, P[i].y, P[i].z);
+            }
+            glEnd();
+            glLineWidth(1);
         }
     }
 }

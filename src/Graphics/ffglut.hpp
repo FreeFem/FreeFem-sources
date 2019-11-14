@@ -217,7 +217,38 @@ struct OnePlotFES: public OnePlot
     bool  NextCase() { cas++; return vc2v();}
 };
 
-
+struct OnePlotFEL: public OnePlot
+{
+    const MeshL *Th;
+    long nsub;
+    KN<double> v;
+    KN<Complex> vc;
+    KN<R1> Psub;
+    KN<int> Ksub;
+    int cas; // in cas of complex  chaage interpertation of complex value
+    
+    OnePlotFEL(const MeshL *T,long w,PlotStream & f)
+    :OnePlot(w,3,5),Th(T),cas(2)
+    {
+        Pmin=Th->Pmin;
+        Pmax=Th->Pmax;
+        
+        f >> Psub ;
+        f >> Ksub ;
+        if(what<16)
+            f >>  v;
+        else
+            f >> vc;
+        vc2v();
+        if(debug>3) cout << "OnePlotFEL :" << Th <<" " << what<< " " << nsub <<" " << v.N() << endl
+            << "       Pmin " << Pmin << " Pmax  " << Pmax << endl;
+        ffassert(f.good());
+        
+    }
+    void Draw(OneWindow *win);
+    bool  vc2v();
+    bool  NextCase() { cas++; return vc2v();}
+};
 
 struct OnePlotCurve: public OnePlot {
     KN<double> xx,yy,zz,cc;
@@ -418,6 +449,7 @@ public:
     void DrawIsoTfill(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
     void DrawIsoT(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
     void DrawIsoTfill(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
+    void DrawIsoEfill(const R3 Pt[2],const R ff[2],const R * Viso,int NbIso, R rapz=1);
     void dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn,R & vmx) const ;
     
 };
