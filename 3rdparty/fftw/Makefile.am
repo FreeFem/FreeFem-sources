@@ -17,7 +17,7 @@ fftw: $(SRCDIR)/FAIT WHERE
 	$(MAKE) WHERE
 
 $(SRCDIR)/FAIT:$(SRCDIR)/FAIT-1
-	cd $(SRCDIR) && ./configure --enable-shared --disable-dependency-tracking  --disable-fortran  --prefix=`cd ../..; pwd`  CXX="$(CXX)" CC="$(CC)"  CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
+	cd $(SRCDIR) && ./configure --disable-dependency-tracking  --disable-fortran  --prefix=`cd ../..; pwd`  CXX="$(CXX)" CC="$(CC)"  CFLAGS="$(CFLAGS)" CPP='gcc -E' CXXFLAGS="$(CXXFLAGS)"
 	cd $(SRCDIR) && make
 	cd $(SRCDIR) && make install
 	touch $(SRCDIR)/FAIT

@@ -83,7 +83,7 @@ istream*Read (Stream_b<istream> const &io, KN<T> *const &data) {
 	long n;
 
 	io.f->read(reinterpret_cast<char *>(&n), sizeof(long));
-	cout << " read  n =" << n << " " << n * sizeof(sizeof(T)) << " " << endl;
+	if(verbosity>0) cout << " read  n =" << n << " " << n * sizeof(sizeof(T)) << " " << endl;
 	if (n != data->N()) {data->resize(n);}
 
 	T *p = *data;
@@ -102,7 +102,7 @@ ostream*Write (Stream_b<ostream> const &io, KN<T> *const &data) {
 	T *p = *data;
 	long n = data->N();
 
-	cout << " write n =" << n << " " << n * sizeof(T) << " " << p << endl;
+	if(verbosity>0) cout << " write n =" << n << " " << n * sizeof(T) << " " << p << endl;
 	io.f->write(reinterpret_cast<const char *>(&n), sizeof(long));
 	io.f->write(reinterpret_cast<const char *>(p), n * sizeof(T));
 	return io.f;

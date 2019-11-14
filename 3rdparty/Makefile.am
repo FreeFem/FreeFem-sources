@@ -67,7 +67,7 @@ getall
 
 MPI_SOFT= @TOOL_COMPILE_scalapack@ @TOOL_COMPILE_parmetis@ @TOOL_COMPILE_mumps@ 
 
-LIST_SOFT= @DOWNLOAD_FFTW@ @TOOL_COMPILE_tetgen@ @TOOL_COMPILE_metis@ @TOOL_COMPILE_superlu@ @TOOL_COMPILE_fftw3_mpi@	\
+LIST_SOFT= @DOWNLOAD_FFTW@ @TOOL_COMPILE_tetgen@ @TOOL_COMPILE_metis@ @TOOL_COMPILE_superlu@ \
 	@TOOL_COMPILE_scotch@ @TOOL_COMPILE_mshmet@			\
 	@TOOL_COMPILE_yams@ @TOOL_COMPILE_mmg3d@  @TOOL_COMPILE_gmm@	\
 	@TOOL_COMPILE_nlopt@ @TOOL_COMPILE_mumps_seq@			\

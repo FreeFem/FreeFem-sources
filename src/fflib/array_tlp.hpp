@@ -963,7 +963,36 @@ struct set_A_BI: public binary_function<KN_<K>,pair<KN_<K>, KN_<L> > *,KN_<K> > 
 
   }
 };
+//  add oct 2019  To:  real[int] b = a(I); // where a and I is also a array..
+template<class K,class L,class OP>
+struct init_A_BI: public binary_function<KN<K>* ,pair<KN_<K>, KN_<L> > *,KN<K>* > {
+    static KN<K>* f( KN<K>  * const  & a, pair<KN_<K>, KN_<L> > * const & b)  {
+        KN<K> * px(a);
+        OP op;
+        const KN_<K> & y(b->first);
+        const KN_<L> & I(b->second);
+        L n = y.N();
+        px->init(I.N());
+        KN<K> & x=*px;
+        L  N = x.N();
 
+        L maxI=I.max() ;
+        L minI=I.min() ;
+        
+        if( maxI >= n )
+        { cerr << " Out of Bound x=y(I)  :  0 <= " << minI << " < "<< maxI << "< " << n  << endl;
+            cerr << " or I.N() " << I.N() << " > " << N << endl;
+            ExecError("Out of Bound error");
+        }
+        
+        for(int i=0;i<N;i++)
+            if(I[i]>=0)
+                op(x(i),y(I[i]));
+        delete b;
+        return a;
+        
+    }
+};
 template<class K,class L,class OP>
 struct set_AI_B: public binary_function<pair<KN_<K>, KN_<L> > * ,KN_<K>, NothingType > {
   static NothingType  f( pair<KN_<K>, KN_<L> > * const & b,const KN_<K>   & a)  {
@@ -1022,8 +1051,10 @@ struct SetArray2: public binary_function<K,K,SetArray<K> > {
     // cout << "SubArray: " << a << " " << b << endl;
     //     SetArray(long nn,R oo=R(),R sstep=R(1)): o(oo),n(nn),step(sstep) {}
     long  n= long(abs((b-a)));
-    ffassert(n);
-    K s= (b-a)/K(n);
+      
+      
+    ffassert(n>=0);
+    K s= (n==0) ? 1 : (b-a)/K(n);// correction oct 2019  FH Thanks to P. Ventura
     n++;
     if(verbosity>100)
       cout << "    SetArray " << n << " " << a << " " << s << endl;
@@ -1276,6 +1307,39 @@ class E_ForAllLoopMapSI
     }
 
 };
+template <class K>
+KN_<K> getdiag_(KNM_<K> A) {
+    int n = A.N(), m=A.M();
+    int nn= min(n,m);
+    int si= A.shapei.step;
+    //int ni =A.shapei.next;
+    int sj= A.shapej.step;
+    
+    KN_<K> d(A,SubArray(nn,0,sj+si));
+    return d;
+}
+template <class K>
+KN_<K> getdiag(KNM<K> *pA) {
+    ffassert(pA);
+    return getdiag_(*pA);
+}
+
+template <class K>
+KN_<K> asarray(KNM<K> *pA) {
+    ffassert( pA->IsVector1());
+    return *pA; }
+// Add Oct 2019
+template<class K, bool init>
+KNM<K> * set_Eye(KNM<K> *pA,const  Eye eye)
+{
+    int n = eye.n, m=eye.m, nn= min(n,m);
+    if( init) pA->init(n,m);
+    else pA->resize(n,m);
+    *pA = K();
+    KN_<K> d(*pA,SubArray(nn,0,n+1));
+    d= K(1.);
+    return  pA;
+}
 extern aType aaaa_knlp;
 template<class K,class Z>
 void ArrayOperator()
@@ -1291,6 +1355,7 @@ void ArrayOperator()
 
      Dcl_Type< Resize<KN<K> > > ();
      Dcl_Type< Resize<KNM<K> > > ();
+
    //-  typedef KN<Z> ZN;
 
     // add  dec 2009.  ne marche pas ( incompatible  avec MatrixBlock) a comprendre ????? FH.
@@ -1409,6 +1474,8 @@ void ArrayOperator()
     // Add<KN<K> *>("<-","(",new OneOperator2_<KN<K> *,KN<K> *,KN<K> * >(&set_initp));
      Add<KNM<K> *>("<-","(",new OneOperator3_<KNM<K> *,KNM<K> *,Z,Z>(&set_init2));
      TheOperators->Add("<-",new OneOperator2<KNM<K> *,KNM<K> *,Transpose<KNM<K> * > >(&set_initmat_t));// may 2011 FH..
+    TheOperators->Add("=",new OneOperator2<KNM<K> *,KNM<K> *, Eye  >(set_Eye<K,false>));// may 2011 FH..
+    TheOperators->Add("<-",new OneOperator2<KNM<K> *,KNM<K> *, Eye  >(set_Eye<K,true>));// may 2011 FH..
     TheOperators->Add("=",new OneOperator2<KNM<K> *,KNM<K> *,Transpose<KNM<K> * > >(&set_mat_t));// may 2011 FH..
     TheOperators->Add("+=",new OneOperator2<KNM<K> *,KNM<K> *,Transpose<KNM<K> * > >(&addto_mat_t));// oct 2011 FH..
     TheOperators->Add("-=",new OneOperator2<KNM<K> *,KNM<K> *,Transpose<KNM<K> * > >(&subto_mat_t));// oct 2011 FH..
@@ -1689,7 +1756,12 @@ void ArrayOperator()
  atype<KN<K> *>()->Add("(","",new OneOperator2_< pair<KN_<K>,KN_<long> > * ,KN_<K>  , KN_<long>  >(pBuild< KN_<K>   , KN_<long>  >,atype<KN<K> * >(), atype<KN_<long> >() ));
  //atype<KN_<K> >()->Add("(","",new OneOperator2_< pair<KN_<K>,KN_<long> > * ,KN_<K>  , KN_<long>  >(pBuild< KN_<K>   , KN_<long>  >,atype<KN_<K>  >(), knlp ));
  //atype<KN<K> *>()->Add("(","",new OneOperator2_< pair<KN_<K>,KN_<long> > * ,KN_<K>  , KN_<long>  >(pBuild< KN_<K>   , KN_<long>  >,atype<KN<K> * >(), knlp ));
+ Add<KNM<K> *>("diag",".",new OneOperator1<KN_<K> ,KNM<K> *>(getdiag<K>) );
+  Add<KNM_<K> >("diag",".",new OneOperator1<KN_<K> ,KNM_<K> >(getdiag_<K>) );
+ Add<KNM<K> *>("asarray",".",new OneOperator1<KN_<K> ,KNM<K> *>(asarray<K>) );
 
+ TheOperators->Add("<-",
+                   new OneBinaryOperator<init_A_BI< K,Z,affectation<K>  > > );
  TheOperators->Add("=",
         new OneBinaryOperator<set_A_BI< K,Z,affectation<K>  > > ,
         new OneBinaryOperator<set_AI_B< K,Z,affectation<K>  > >
@@ -1735,7 +1807,11 @@ void ArrayOperator()
                       new OneBinaryOperator< PrintPnd< KN< KNM<K> >* > >,
                       new OneBinaryOperator< PrintPnd< KN< KN<K> >* > >
                       );
-
+  // remove f.H ne marche pas
+  //  TheOperators->Add("<<",
+  //     new OneBinaryOperator<Op_WriteKN<K> >,
+  //     new OneBinaryOperator<Op_WriteKNM<K> >
+  //   );
 
      TheOperators->Add(">>",
         new OneBinaryOperator<Op_ReadKN<K> >,
@@ -1832,5 +1908,9 @@ void ArrayOperatorF()
     TheOperators->Add("<-", new OneOperator2_<KN<K> *,KN<K> *,F_KN_<K,K,K,KK> >(set_init_N));
 
 }
-
+// Add nov 2019  version 4.4-3 FH
+template<class K> struct KN_rmeps {KN_<K> v;
+    KN_rmeps(KN_<K> vv):v(vv) {}
+} ;
+template<class K> KN_rmeps<K> build_rmeps(KN_<K> v){ return KN_rmeps<K>(v);}
 #endif

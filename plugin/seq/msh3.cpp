@@ -4763,7 +4763,7 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
     }
     delete [] vertex1Dsub;
     delete [] edge1Dsub;
-
+    nbe =ie;
     if (verbosity>3 ) {
         cout << "  - Nb of vertices       " << nv << endl;
         cout << "  - Nb of triangle       " << nt << endl;

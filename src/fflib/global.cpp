@@ -125,7 +125,7 @@ using namespace std;
 
 /// <<verbosity>>
 long verbosity = 1;
- long searchMethod = 0; //pichon
+long searchMethod = 0; //pichon
 long npichon2d=0, npichon3d=0;
 long npichon2d1=0, npichon3d1=0;
 
@@ -196,6 +196,7 @@ CodeAlloc *CodeAlloc::tnull=0;
 #include <RefCounter.hpp>
 RefCounter *RefCounter::tnull=0;
 double ff_tgv=1e30;
+bool lockOrientation=true;
 
 void InitMeshPoint(void * p)
 {

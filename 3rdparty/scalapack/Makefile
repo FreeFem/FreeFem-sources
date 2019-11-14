@@ -6,8 +6,7 @@ include SLmake.inc
 all-local: scalapack
 
 # FFCS: parallel compilation crashes on Win32 (same archive updated from 2 different parallel makes)
-#MAKEFLAGS=-j 1
-.NOTPARALLEL:
+
 # Downloading and compiling scalapack
 # ------------------------------
 # http://www.netlib.org/scalapack/
@@ -34,8 +33,10 @@ scalapack: FAIRE
 # FFCS: shorten argument length to avoid "sh: ../ar: Argument list too long" under Cygwin
 $(SRCDIR)/FAIT-202:$(SRCDIR)/tag-tar
 	cp SLmake.inc $(SRCDIR)
-	cd $(SRCDIR);$(MAKE) lib
+	cd $(SRCDIR);$(MAKE) MAKEFLAGS=-j1 lib
 	rm $(SRCDIR)/libscalapack.a
+
+
 	cd $(SRCDIR) && $(ARCH) $(ARCHFLAGS) libscalapack.a $(DIR1) $(DIR2) $(DIR3) $(DIR4) $(DIR5) $(DIR6) $(DIR7) $(DIR8) $(DIR9)
 	$(RANLIB) $(SRCDIR)/libscalapack.a
 	touch $(SRCDIR)/FAIT-202
@@ -79,4 +80,3 @@ clean:
 #	-rm $(PACKAGE1)
 
 .PHONY:$(SRCDIR)/$(INSTALL)
-.NOTPARALLEL:

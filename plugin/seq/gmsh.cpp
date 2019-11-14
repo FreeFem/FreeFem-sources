@@ -892,7 +892,7 @@ AnyType GMSH_LoadMesh3_Op::operator () (Stack stack)  const {
     
 	if (nargs[1]) renumsurf = GetAny<long>((*nargs[1])(stack));
     
-    bool cleanmesh(arg(2, stack, true));
+    bool cleanmesh(arg(2, stack, false));
     bool removeduplicate(arg(3, stack, false));
     
     

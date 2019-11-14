@@ -164,7 +164,7 @@ int mylex::EatCommentAndSpace(string *data)
             if(c=='\n')
             {
                 linenumber++;
-                if (echo) cout << setw(5) <<linenumber << " : " ;
+                if (echo) cout << setw(5) <<linenumber << this->sep() ;
             };
             if(data) *data+=char(c);
             c=source().peek();
@@ -197,7 +197,7 @@ int mylex::EatCommentAndSpace(string *data)
                 if(c=='\n')
                 {
                     linenumber++;
-                    if (echo) cout << setw(5) <<linenumber << " : " ;
+                    if (echo) cout << setw(5) <<linenumber << this->sep() ;
                 };
             }
             while( (c!= '\n') && (c!= 10)  && (c!= 13)  &&  ( c != EOF) );
@@ -218,7 +218,7 @@ int mylex::EatCommentAndSpace(string *data)
                 if(c=='\n')
                 {
                     linenumber++;
-                    if (echo) cout << setw(5) <<linenumber << " : " ;
+                    if (echo) cout << setw(5) <<linenumber << this->sep() ;
                 };
                 caux = source().peek();
             }
@@ -259,7 +259,7 @@ debut:
     if (firsttime)
     {
         firsttime=false;
-        if(echo) cout << setw(5) <<linenumber << " : " ;
+        if(echo) cout << setw(5) <<linenumber << this->sep() ;
     }
     EatCommentAndSpace(); // [[mylex::EatCommentAndSpace]]
     c =source().get(); // the current char
@@ -712,12 +712,13 @@ bool mylex::SetMacro(int &ret)
         macroparm.d.push_back(def);
         if (nbparam)
             if(echo) cout << " )  " ;
+        if(0)//  stupide ..
         for (size_t i=0; i<def.size(); i++)
             if (def[i] == 10 || (def[i] == 13 ) )
             {
                 def[i]='\n';
                 linenumber++;
-                if(echo) cout << '\n' << setw(5) <<linenumber << " : " ;
+                if(echo) cout << '\n' << setw(5) <<linenumber << " @ " ;
             }
             else if(echo) cout << def[i]   ;
         MapMacroDef & MacroDef =listMacroDef->back();
@@ -740,6 +741,98 @@ std::string trim(std::string s, const char* t = " \t\n\r\f\v")
     s.erase(s.find_last_not_of(t) + 1);
     return s;
 }
+bool mylex::IFMacroId(bool isnot,string & id,bool withval ,string &val)
+{ //  check value
+    bool rt=false;
+    bool exist=false;
+    MapMacroDef::const_iterator j;
+    for (list<MapMacroDef>::const_iterator i=listMacroDef->begin(); i != listMacroDef->end(); i++)
+    {
+        j=i->find(id.c_str());
+        if( j != i->end())
+        {
+            exist =true;
+            break;
+        }
+    }
+    
+    if(withval && exist)
+    {
+        const MacroData  & macroparm= j->second;
+        if(macroparm.d.size()>0)
+        {
+            const string & mval = macroparm.d[macroparm.d.size()-1];
+            if(debugmacro)  cout << " check IFMACRO '"<< val << "' '"<< mval <<"'"<<endl;
+            exist = trim(mval) == trim(val);
+            
+        }
+    }
+    return exist == (isnot==0);
+}
+bool mylex::IFMacroArgs(int lvl)
+{  //  wait for  string : ([!]ID [,val] )
+    bool isnot=0;
+    if (! lexdebug && echo  ) print(cout);
+    string val;
+    int rr=basescanprint();
+    if (rr!='(')
+    {
+        ErrorScan(" missing '(' after IFMACRO ");
+    }
+    rr=basescanprint();
+    if(rr=='(')
+    { // (..) *([&|] ())
+        source().putback('(');
+    
+        bool ok=IFMacroArgs(lvl+1);
+        while ((rr=basescanprint()))
+            if( rr=='&')
+                ok = IFMacroArgs(lvl+1) && ok;
+            else if( rr=='|')
+                ok = IFMacroArgs(lvl+1) || ok;
+            else if ( rr== ')') break;
+            else  ErrorScan(" missing '& | )' after IFMACRO expression ");
+        return ok;
+    }
+    else {
+    if( rr=='!')
+    {
+        isnot =1;
+        rr=basescanprint();
+    }
+    if (rr != ID)
+        cerr <<"IFMACRO: Erreur waiting of an ID: " << buf << " " << rr <<  endl;
+    string id =buf;
+    int withval=0;
+    rr=basescanprint();
+    if( rr == ',')
+    {
+        while(1)
+        {
+            int i = source().get();
+            if (i == EOF)
+            {
+                cerr << "in IFMACRO " <<id <<  endl;
+                ErrorScan(" ENDOFFILE in IFMACRO definition. remark:a end with ENDIFMACRO ");
+            }
+            
+            if( char(i) ==')') break;
+            val +=char(i);
+            withval=1;
+            
+        }
+        if (! lexdebug && echo  ) cout << val;
+        source().putback(')');
+        rr=basescanprint();
+    }
+    
+    if (rr!=')')
+    {
+        ErrorScan(" missing ')' after IFMACRO(macro)  ");
+    }
+    return IFMacroId(isnot,id,withval,val);
+    }
+}
 bool mylex::IFMacro(int &ret)
 {
     // A faire !!!! F.H
@@ -751,6 +844,8 @@ bool mylex::IFMacro(int &ret)
     int lgifm=0;
     if (strncmp(buf,ifm,8)==0  )
     {
+        rt=true; //  we see IFMACRO
+/*
         if (! lexdebug && echo  ) print(cout);
         string val;
         int rr=basescanprint();
@@ -794,8 +889,10 @@ bool mylex::IFMacro(int &ret)
         {
             ErrorScan(" missing ')' after IFMACRO(macro)  ");
         }
+ */
+        bool ok=IFMacroArgs();//
         int kmacro=0;
-        if(debugmacro) cout << " IFMacro:: " << id << endl;
+        if(debugmacro) cout << " IFMacro:: " << linenumber << endl;
         lgifm=linenumber;
         string def;
         do
@@ -806,7 +903,7 @@ bool mylex::IFMacro(int &ret)
 
             if (i == EOF)
             {
-                cerr << "in IFMACRO " <<id <<  endl;
+                cerr << "in IFMACRO " << linenumber <<  endl;
                 ErrorScan(" ENDOFFILE in IFMACRO definition. remark:a end with ENDIFMACRO ");
             }
             int ii = source().peek();
@@ -851,8 +948,9 @@ bool mylex::IFMacro(int &ret)
             if(echo && nl==1) cout << setw(5) <<linenumber << " & " ;
         }
         while(1);
-
+      
         if (! lexdebug && echo  ) cout  << ife ;
+        /*
         bool exist=false;
         MapMacroDef::const_iterator j;
         for (list<MapMacroDef>::const_iterator i=listMacroDef->begin(); i != listMacroDef->end(); i++)
@@ -877,8 +975,8 @@ bool mylex::IFMacro(int &ret)
             }
         }
         if(debugmacro)  cout << "IFMacro def: " << def << "\n .. exist "<< exist  << " " << isnot << " "<< (exist == (isnot==0)) << " \n....\n";
-
-        if(exist == (isnot==0))
+*/
+        if(ok) //exist == (isnot==0))
         {
             input(def,new string(file()),lgifm);
         }
@@ -1118,7 +1216,7 @@ void  mylex::xxxx::open(mylex *lex,const char * ff)
 
     l=0;
     nf=f=0;
-
+    sep=':';
     // Try to open the given file name without any extra path from [[file:lex.hpp::ffincludedir]]
     if (lex->ffincludedir.empty())
       nf=f= new ifstream(ff,ios_base::binary); //  modif of win32
@@ -1207,7 +1305,7 @@ void mylex::xxxx::readin(mylex *lex,const string & s,const string *name, int mac
     macroarg=macroargs;
     l=0;
     nf=f= new istringstream(s.c_str());
-
+    sep='@';
     if (!f || !*f)
     {
         lex->cout << " Error readin string  :" <<s<< endl;

@@ -564,7 +564,11 @@ public:
     maxNbPtforInterpolation(TFE[0]->NbPtforInterpolation),
     maxNbcoefforInterpolation(TFE[0]->NbcoefforInterpolation)
     
-  { 
+  {
+      if(!lockOrientation) {
+          cerr << " Error, lockOrientation must be true to build fespace ; must check orientation element for mesh" ;
+          assert(lockOrientation);
+      }
 	if(verbosity) cout << "  -- FESpace: Nb of Nodes " << NbOfNodes 
 			   << " Nb of DoF " << NbOfDF <<endl;
     }

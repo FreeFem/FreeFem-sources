@@ -11,13 +11,14 @@ ORGANIZATION="FreeFem"
 REPOSITORY="FreeFem-sources"
 VERSION=`grep AC_INIT configure.ac | cut -d"," -f2 | tr - .`
 RELEASE_TAG_NAME="v$VERSION"
-EXE_NAME="Output/FreeFem++-${VERSION}-win64.exe"
+EXE_NAME="FreeFem++-${VERSION}-win64.exe"
+GH_EXE_NAME="FreeFEM-${VERSION}-win7-64.exe"
 
 ## EXE build
 autoreconf -i
 ./configure --enable-download --enable-optim --enable-generic
 ./3rdparty/getall -a
-make -j4
+make
 cp AUTHORS readme/AUTHORS
 touch readme/COPYING
 make win32
@@ -31,5 +32,6 @@ then
 	echo "Release does not exists"
 	exit 1
 else
-  RESPONSE=`curl --data-binary "@$EXE_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$EXE_NAME"`
+	mv Output/$EXE_NAME $GH_EXE_NAME
+  RESPONSE=`curl --data-binary "@$GH_EXE_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_EXE_NAME"`
 fi

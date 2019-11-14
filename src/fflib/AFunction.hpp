@@ -82,9 +82,8 @@ inline double CPUtime(){
 
 extern long verbosity;  // level off printing
 extern long searchMethod; //pichon
-
 extern bool  withrgraphique;
-
+extern bool lockOrientation; // lock the element orientation
 
 
 using namespace std;

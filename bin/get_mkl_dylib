@@ -1,0 +1,11 @@
+lmkl="libmkl_tbb_thread.dylib libmkl_mc.dylib libmkl_mc3.dylib libmkl_avx.dylib libmkl_avx2.dylib libmkl_avx512.dylib"
+dlp=$(echo $DYLD_LIBRARY_PATH| sed 's/:/ /g')
+
+(for i in $lmkl; do
+  for d in $dlp;do
+    test -f $d/$i && echo $d/$i
+  done
+  done
+grep /opt/intel/  etc/list-dylib  ) |sort -u > etc/list-dylib-mkl
+echo cat etc/list-dylib-mkl
+cat etc/list-dylib-mkl

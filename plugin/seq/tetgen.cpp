@@ -227,13 +227,15 @@ AnyType Build2D3D_Op::operator () (Stack stack)  const {
 	//= ===================================
 	// How to change string* into char*
 	//= ===================================
-	cout << "string" << switch_tet << endl;
+    if(verbosity > 1)
+        cout << "string" << switch_tet << endl;
 
 	size_t size_switch_tet = switch_tet->size() + 1;
 	char *switch_tetgen = new char[size_switch_tet];
 	strncpy(switch_tetgen, switch_tet->c_str(), size_switch_tet);
 
-	cout << "switch_tetgen=" << switch_tetgen << endl;
+    if(verbosity > 1)
+        cout << "switch_tetgen=" << switch_tetgen << endl;
 	// exit(1);
 	ffassert(nrf.N() % 2 == 0);
 
@@ -365,7 +367,7 @@ AnyType Build2D3D_Op::operator () (Stack stack)  const {
 
 	*mp = mps;
 	if (verbosity > 0) {
-		cout << "FreeFem++: End check mesh given by tetgen" << endl;
+		cout << "FreeFEM: End check mesh given by tetgen" << endl;
 	}
 
 	return Th3;
@@ -662,7 +664,8 @@ Mesh3*mesh3_tetgenio_out (const tetgenio &out) {
 	}
 
 	Mesh3 *T_TH3 = new Mesh3(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces, v, t, b);
-	cout << "FreeFem++: Check mesh given by tetgen" << endl;
+    if(verbosity > 1)
+        cout << "FreeFEM: Check mesh given by tetgen" << endl;
 
 	if (TestElementMesh3(*T_TH3) != 1) {
 		return T_TH3;
@@ -734,7 +737,8 @@ Mesh3*mesh3_tetgenio_out (const tetgenio &out, const int &label_tet) {
 	}
 
 	Mesh3 *T_TH3 = new Mesh3(out.numberofpoints, out.numberoftetrahedra, out.numberoftrifaces, v, t, b);
-	cout << "FreeFem++: Check mesh given by tetgen" << endl;
+    if(verbosity > 1)
+        cout << "FreeFEM: Check mesh given by tetgen" << endl;
 	if (TestElementMesh3(*T_TH3) != 1) {
 		return T_TH3;
 	} else {
@@ -855,7 +859,7 @@ Mesh3*Convexhull_3Dpoints (char *switch_tetgen, const int &nv_t, const double *X
 	Mesh3 *T_Th3 = mesh3_tetgenio_out(out, label_tet, label_face);
 	if (verbosity > 1) {cout << " Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " " << T_Th3->nt << " " << T_Th3->nbe << endl;}
 
-	if (verbosity > 1) {cout << "FreeFem++: End check mesh given by tetgen" << endl;}
+	if (verbosity > 1) {cout << "FreeFEM: End check mesh given by tetgen" << endl;}
 
 	return T_Th3;
 }
@@ -941,7 +945,7 @@ Mesh3*RemplissageSurf3D_tetgen (char *switch_tetgen, const Mesh3 &Th3, const int
 	Mesh3 *T_Th3 = mesh3_tetgenio_out(out, label_tet);
 	if (verbosity > 1) {
 		cout << " Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " " << T_Th3->nt << " " << T_Th3->nbe << endl;
-		cout << "FreeFem++: End check mesh given by tetgen" << endl;
+		cout << "FreeFEM: End check mesh given by tetgen" << endl;
 	}
 
 	return T_Th3;
@@ -1058,7 +1062,7 @@ Mesh3*RemplissageSurf3D_tetgen_new (char *switch_tetgen, const MeshS &ThS, const
 	Mesh3 *T_Th3 = mesh3_tetgenio_out(out);
 	if (verbosity > 0) {
 		cout << " Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " " << T_Th3->nt << " " << T_Th3->nbe << endl;
-		cout << "FreeFem++: End check mesh given by tetgen" << endl;
+		cout << "FreeFEM: End check mesh given by tetgen" << endl;
 	}
 	return T_Th3;
 }
@@ -1105,7 +1109,8 @@ Mesh3*RemplissageSurf3D_tetgen_new (char *switch_tetgen, const Mesh3 &Th3, const
 
 	// Add inside point
 	if (nbinside) {
-		cout << "nbinside=" << nbinside << endl;
+        if(verbosity > 1)
+            cout << "nbinside=" << nbinside << endl;
 		addin.firstnumber = 1;
 		addin.numberofpoints = nbinside;
 		addin.pointlist = new REAL[3 * nbinside];
@@ -1122,7 +1127,8 @@ Mesh3*RemplissageSurf3D_tetgen_new (char *switch_tetgen, const Mesh3 &Th3, const
 
 	// Add metric
 	if (sizeofmetric) {
-		cout << "sizeofmetric=" << sizeofmetric << endl;
+        if(verbosity > 1)
+            cout << "sizeofmetric=" << sizeofmetric << endl;
 		in.numberofpointmtrs = sizeofmetric;
 		in.pointmtrlist = new REAL[in.numberofpointmtrs * in.numberofpoints];
 
@@ -1201,7 +1207,7 @@ Mesh3*RemplissageSurf3D_tetgen_new (char *switch_tetgen, const Mesh3 &Th3, const
 	Mesh3 *T_Th3 = mesh3_tetgenio_out(out);
 	if (verbosity > 0) {
 		cout << " Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " " << T_Th3->nt << " " << T_Th3->nbe << endl;
-		cout << "FreeFem++: End check mesh given by tetgen" << endl;
+		cout << "FreeFEM: End check mesh given by tetgen" << endl;
 	}
 
 	return T_Th3;
@@ -1358,7 +1364,7 @@ Mesh3*ReconstructionRefine_tetgen (char *switch_tetgen, const Mesh3 &Th3,
 	Mesh3 *T_Th3 = mesh3_tetgenio_out(out);
 	if (verbosity > 0) {
 		cout << " Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " " << T_Th3->nt << " " << T_Th3->nbe << endl;
-		cout << "FreeFem++: End check mesh given by tetgen" << endl;
+		cout << "FreeFEM: End check mesh given by tetgen" << endl;
 	}
 
 	return T_Th3;
@@ -1521,13 +1527,13 @@ Mesh3*ReconstructionRefine_tetgen (char *switch_tetgen, const Mesh3 &Th3,
 	Mesh3 *T_Th3 = mesh3_tetgenio_out(out);
 	if (verbosity > 0) {
 		cout << " Finish Mesh3 tetgen :: Vertex, Element, Border" << T_Th3->nv << " " << T_Th3->nt << " " << T_Th3->nbe << endl;
-		cout << "FreeFem++: End check mesh given by tetgen" << endl;
+		cout << "FreeFEM: End check mesh given by tetgen" << endl;
 	}
 
 	return T_Th3;
 }
 
-// declaration pour FreeFem++
+// declaration pour FreeFEM
 
 class Remplissage_Op: public E_F0mps
 {
@@ -1643,7 +1649,8 @@ AnyType Remplissage_Op::operator () (Stack stack)  const {
 	int nbv = Th.nv;// nombre de sommet
 	int nbt = Th.nt;// nombre de triangles
 	int nbe = Th.nbe;	// nombre d'aretes fontiere
-	cout << "Tetgen: initial surface mesh - Vertex:  " << nbv << " Triangles:" << nbt << " Edges: " << nbe << endl;
+    if(verbosity > 1)
+        cout << "Tetgen: initial surface mesh - Vertex:  " << nbv << " Triangles:" << nbt << " Edges: " << nbe << endl;
 
 	KN<long> zzempty;
 	// int intempty=0;
@@ -1745,12 +1752,14 @@ AnyType Remplissage_Op::operator () (Stack stack)  const {
 	//= ===================================
 	// How to change string* into char*
 	//= ===================================
-	cout << "string" << *switch_tet << endl;
+    if(verbosity > 1)
+        cout << "string" << *switch_tet << endl;
 	size_t size_switch_tet = switch_tet->size() + 1;
 	char *switch_tetgen = new char[size_switch_tet];
 	strncpy(switch_tetgen, switch_tet->c_str(), size_switch_tet);
 
-	cout << "char" << switch_tetgen << endl;
+    if(verbosity > 1)
+        cout << "char" << switch_tetgen << endl;
 
 	ffassert(nrf.N() % 2 == 0);
 
@@ -1819,7 +1828,7 @@ AnyType Remplissage_Op::operator () (Stack stack)  const {
 	*mp = mps;
 	delete [] switch_tetgen;
 	if (verbosity > 0) {
-		cout << "FreeFem++: End check mesh given by tetgen" << endl;
+		cout << "FreeFEM: End check mesh given by tetgen" << endl;
 	}
 
 	return Th3;
@@ -2072,7 +2081,7 @@ AnyType ReconstructionRefine_Op::operator () (Stack stack)  const {
 	delete [] switch_tetgen;
 	*mp = mps;
 	if (verbosity > 0) {
-		cout << "FreeFem++: End check mesh given by tetgen" << endl;
+		cout << "FreeFEM: End check mesh given by tetgen" << endl;
 	}
 
 	return Th3;
@@ -2227,7 +2236,7 @@ AnyType ConvexHull3D_tetg_file_Op::operator () (Stack stack)  const {
 
 	delete [] switch_tetgen;
 	if (verbosity > 0) {
-		cout << "FreeFem++: End check mesh given by tetgen" << endl;
+		cout << "FreeFEM: End check mesh given by tetgen" << endl;
 	}
 
 	return Th3;

@@ -421,3 +421,45 @@ cout << vh.n <<endl;
 	
 
 }
+{//    version 4.4-1 
+	int n=10; 
+	real[int,int] a(10,10);
+	int[int] I=[1,3,6];
+	for [i,j,aij:a] aij = i + 10 *j; 
+
+	cout << a << endl; 
+
+	real[int] b(I.n);
+	b= a(1,:)(I);
+	cout << b << endl; 
+	real[int] c= a(:,1)(I);
+	cout << b << endl; 
+
+	real[int] d = a.diag ; // 
+	real[int] aa= a.asarray; //  view full mat as a arry 
+	real[int] d1= a.asarray(1:n*n-1:n+1); // build 
+
+	cout <<  " d =" << d <<endl; 
+	cout <<  " aa =" << aa <<endl; 
+	cout <<  " d1=" << d1  <<endl; // diag shifted to one
+	// change the diag of a
+	//cout << a(2:5,3:7) <<endl; 
+	//cout << " diag " << a(2:5,3:7).diag << endl; // a piece of diag
+	a(2:5,3:7).diag= 200;
+	a.diag += 100;
+
+	cout << a << endl; 
+
+	assert( a(9,9) == 199 );
+	assert( a(5,6) == 200 );
+	a =eye(5);
+	cout << a << endl;
+
+	matrix A=eye(10);
+	cout << A << endl; 
+	A=eye(5);
+	cout << A << endl; 
+	d.rmeps(15.);// put to zero term abs < 15
+	cout << d << endl;
+		
+}

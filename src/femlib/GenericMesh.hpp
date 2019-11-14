@@ -34,6 +34,7 @@
 
 // la regle de programmation 3
 extern long verbosity;
+extern bool lockOrientation;
 extern long searchMethod; //pichon
 #include <map>  // Add J. Morice
 
@@ -775,7 +776,6 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
     template<typename T,typename B,typename V>
     void GenericMesh<T,B,V>::BuildAdj()
     {
-        int verb = verbosity ;
         if(TheAdjacencesLink!=0) return ;//  already build ...
         TheAdjacencesLink = new int[nea*nt];
         BoundaryElementHeadLink = new int[nbe];
@@ -806,7 +806,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                             TheAdjacencesLink[nk1]=nk  ; // inserting between nk1 and nk2
                             TheAdjacencesLink[nk]=nk2 ;
                             //  on no manifold border .
-                            if( verb>99 ) cout << " Border manifold " << k << " "<< i << " ::  " << itemadj(k,i)<< " ::  " << nk1/nea << " " << nk2/nea
+                            if(verbosity>99 ) cout << " Border manifold " << k << " "<< i << " ::  " << itemadj(k,i)<< " ::  " << nk1/nea << " " << nk2/nea
                             << " :: " <<TheAdjacencesLink[nk1]/nea << '.' << TheAdjacencesLink[nk]/nea << '.' << TheAdjacencesLink[nk2]/nea << endl;
                             //nba--;
                             // no manifold TO DO if false
@@ -835,18 +835,18 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                 int pp=TheAdjacencesLink[p];
                 if(pp>0 && TheAdjacencesLink[pp]>=0 && TheAdjacencesLink[pp] != p )
                     { // border of no manifold
-                        if( verb>19 ) cout << "  -- " <<  p/nea << " " ;
+                        if(verbosity>19) cout << "  -- " <<  p/nea << " " ;
                         ++nbordnomanifold;
                        // remove link ...  put -2 in all list ...
                         TheAdjacencesLink[p]=-2;
                         while (pp>=0 && TheAdjacencesLink[pp]>=0 )
                         {
-                            if( verb>19 ) cout <<  pp/nea << " " ;
+                            if(verbosity>19) cout <<  pp/nea << " " ;
                             int ppp=pp;
                             pp=TheAdjacencesLink[pp];
                             TheAdjacencesLink[ppp]=-2;// break the list ...
                         }
-                        if( verb>19 ) cout << " . " << endl;
+                        if(verbosity>19) cout << " . " << endl;
                     }
             }
             
@@ -883,7 +883,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                         itemadj(k,e,&s); if(verbosity>15) cout << " item(k,e)= " << itemadj(k,e) <<  " k " << k << " e " << e << " s " << s << endl;
                         itemadj(kk,ee,&ss); if(verbosity>15) cout << " item(kk,ee)= " << itemadj(kk,ee) << " kk " << kk << " ee " << ee << " ss " << ss << endl;
                        //assert(s && ss && s== -ss);
-                         if (!(s && ss && s== -ss)) {
+                         if (!(s && ss && s== -ss) && lockOrientation) {
                             cerr << " Bad orientation: The adj border element  defined by [ " << itemadj(k,e) << " ]  is oriented in the same direction in element "
                         << k << " and in the element " << kk << " ****** bug in mesh construction? orientation parameter? "<< endl;
                         ffassert(0);
@@ -1382,7 +1382,6 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
     for(int i=0;i<nt;i++) {
         int &it=ind_nt[i];
         const T &K(t[it]);
-        mes=K.mesure();
         int iv[T::nv];
         for (int j = 0; j < T::nea ; j++) {
             iv[j] =  old2new[ &(K[j]) - v];

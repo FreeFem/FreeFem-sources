@@ -20,7 +20,7 @@ class initDDM : public OneOperator {
                 Expression R;
                 Expression D;
                 const int c;
-                static const int n_name_param = 3;
+                static const int n_name_param = 2;
                 static basicAC_F0::name_and_type name_param[];
                 Expression nargs[n_name_param];
                 E_initDDM(const basicAC_F0& args, int d) : A(0), Mat(0), R(0), D(0), c(d) {
@@ -48,8 +48,7 @@ class initDDM : public OneOperator {
 template<class Type, class K>
 basicAC_F0::name_and_type initDDM<Type, K>::E_initDDM::name_param[] = {
     {"communicator", &typeid(pcommworld)},
-    {"scaled", &typeid(bool)},
-    {"prefix", &typeid(string*)}
+    {"scaled", &typeid(bool)}
 };
 template<class Type, class K>
 AnyType initDDM<Type, K>::E_initDDM::operator()(Stack stack) const {
@@ -81,8 +80,6 @@ AnyType initDDM<Type, K>::E_initDDM::operator()(Stack stack) const {
         const MPI_Comm& comm = MPI_COMM_SELF;
         ptA->HPDDM::template Subdomain<K>::initialize(dA, STL<long>( KN<long>()), KN<KN<long>>(), const_cast<MPI_Comm*>(&comm));
     }
-    if(nargs[2])
-        ptA->setPrefix(*(GetAny<string*>((*nargs[2])(stack))));
     return ptA;
 }
 
@@ -251,7 +248,7 @@ AnyType attachCoarseOperator<Type, K>::E_attachCoarseOperator::operator()(Stack 
                 *ev = new K[deflation->N * deflation->get(0)->n];
                 for(int i = 0; i < deflation->N; ++i) {
                     ev[i] = *ev + i * deflation->get(0)->n;
-                    std::copy(&(*deflation->get(i))[0], &(*deflation->get(i))[deflation->get(i)->n], ev[i]);
+                    std::copy_n(&(*deflation->get(i))[0], deflation->get(i)->n, ev[i]);
                 }
                 ptA->setVectors(ev);
                 ptA->Type::super::initialize(deflation->N);
@@ -470,7 +467,7 @@ template<class Type, class K>
 class set_Op : public E_F0mps {
     public:
         Expression A;
-        static const int n_name_param = 1;
+        static const int n_name_param = 2;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         set_Op(const basicAC_F0& args, Expression param) : A(param) {
@@ -481,7 +478,8 @@ class set_Op : public E_F0mps {
 };
 template<class Type, class K>
 basicAC_F0::name_and_type set_Op<Type, K>::name_param[] = {
-    {"sparams", &typeid(string*)}
+    {"sparams", &typeid(string*)},
+    {"prefix", &typeid(string*)}
 };
 template<class Type, class K>
 class set : public OneOperator {
@@ -496,6 +494,10 @@ template<class Type, class K>
 AnyType set_Op<Type, K>::operator()(Stack stack) const {
     if(nargs[0])
         HPDDM::Option::get()->parse(*(GetAny<string*>((*nargs[0])(stack))));
+    if(nargs[1]) {
+        Type* ptA = GetAny<Type*>((*A)(stack));
+        ptA->setPrefix(*(GetAny<string*>((*nargs[1])(stack))));
+    }
     return 0L;
 }
 
@@ -590,6 +592,10 @@ class InvSchwarz {
             (*t).exchange(static_cast<K*>(*u), mu);
             (*t).clearBuffer(allocate);
             HPDDM::IterativeMethod::solve(*t, (K*)*u, (K*)*out, mu, MPI_COMM_WORLD);
+            if(HPDDM::Wrapper<K>::I == 'F' && mu > 1) {
+                std::for_each(A->_ja, A->_ja + A->_nnz, [](int& i) { --i; });
+                std::for_each(A->_ia, A->_ia + A->_n + 1, [](int& i) { --i; });
+            }
         }
         static U inv(U Ax, InvSchwarz<T, U, K, trans> A) {
             A.solve(Ax);
@@ -601,9 +607,10 @@ class InvSchwarz {
         }
 };
 
-template<class R>
+template<class R, char S>
 class IterativeMethod : public OneOperator {
     public:
+        const int c;
         typedef KN<R> Kn;
         typedef KN_<R> Kn_;
         class MatF_O : RNM_VirtualMatrix<R> {
@@ -611,16 +618,13 @@ class IterativeMethod : public OneOperator {
                 Stack stack;
                 mutable Kn x;
                 C_F0 c_x;
-                Expression mat1, mat;
+                Expression mat;
                 typedef typename RNM_VirtualMatrix<R>::plusAx plusAx;
                 MatF_O(int n, Stack stk, const OneOperator* op) :
                     RNM_VirtualMatrix<R>(n), stack(stk), x(n), c_x(CPValue(x)),
-                    mat1(op ? op->code(basicAC_F0_wa(c_x)) : 0),
-                    mat(op ? CastTo<Kn_>(C_F0(mat1, (aType)*op)) : 0) { }
+                    mat(op ? CastTo<Kn_>(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : 0) { }
                 ~MatF_O() {
-                    if(mat1 != mat)
-                        delete mat;
-                    delete mat1;
+                    delete mat;
                     Expression zzz = c_x;
                     delete zzz;
                 }
@@ -630,30 +634,77 @@ class IterativeMethod : public OneOperator {
                     Ax += GetAny<Kn_>((*mat)(stack));
                     WhereStackOfPtr2Free(stack)->clean();
                 }
-                void mv(const R* const in, const int& n, R* const out) const {
+                void mv(const R* const in, const int& n, const int& m, R* const out) const {
+                    ffassert(m == 1);
                     KN_<R> xx((R*)in, n);
                     KN_<R> yy(out, n);
                     yy = R();
                     addMatMul(xx,yy);
-                   // yy = plusAx(this, xx);
                 }
                 bool ChecknbLine(int) const { return true; }
                 bool ChecknbColumn(int) const { return true; }
         };
+        class MatMatF_O : RNM_VirtualMatrix<R> {
+            public:
+                Stack stack;
+                mutable KNM<R> x;
+                C_F0 c_x;
+                Expression mat;
+                typedef typename RNM_VirtualMatrix<R>::plusAx plusAx;
+                MatMatF_O(int n, int m, Stack stk, const OneOperator* op) :
+                    RNM_VirtualMatrix<R>(n), stack(stk), x(n, m), c_x(CPValue(x)),
+                    mat(op ? CastTo<KNM_<R>>(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : 0) /* */ { }
+                ~MatMatF_O() {
+                    delete mat;
+                    Expression zzz = c_x;
+                    delete zzz;
+                }
+                void addMatMul(const KN_<R>& xx, KN_<R>& Ax) const { }
+                void addMatMul(const KNM_<R>& xx, KNM_<R>& Ax) const {
+                    ffassert(xx.N() == Ax.N());
+                    ffassert(xx.M() == Ax.M());
+                    x.resize(xx.N(), xx.M());
+                    x = xx;
+                    Ax = GetAny<KNM_<R>>((*mat)(stack));
+                    WhereStackOfPtr2Free(stack)->clean();
+                }
+                void mv(const R* const in, const int& n, const int& m, R* const out) const {
+                    KNM_<R> xx((R*)in, n, m);
+                    KNM_<R> yy(out, n, m);
+                    yy = R();
+                    addMatMul(xx,yy);
+                }
+                bool ChecknbLine(int) const { return true; }
+                bool ChecknbColumn(int) const { return true; }
+        };
+        template<class Op>
         class Operator : public HPDDM::EmptyOperator<R> {
             public:
-                MatF_O& mat;
-                MatF_O& prec;
-                Operator(MatF_O& m, MatF_O& p) : HPDDM::EmptyOperator<R>(m.x.N()), mat(m), prec(p) { }
+                Op& mat;
+                Op& prec;
+                Operator(Op& m, Op& p) : HPDDM::EmptyOperator<R>(m.x.N()), mat(m), prec(p) { }
                 void GMV(const R* const in, R* const out, const int& mu = 1) const {
-                    mat.mv(in, HPDDM::EmptyOperator<R>::_n, out);
+                    mat.mv(in, HPDDM::EmptyOperator<R>::_n, mu, out);
                 }
                 template<bool>
                 void apply(const R* const in, R* const out, const unsigned short& mu = 1, R* = nullptr, const unsigned short& = 0) const {
                     if(prec.mat)
-                        prec.mv(in, HPDDM::EmptyOperator<R>::_n, out);
+                        prec.mv(in, HPDDM::EmptyOperator<R>::_n, mu, out);
                     else
-                        std::copy_n(in, HPDDM::EmptyOperator<R>::_n, out);
+                        std::copy_n(in, HPDDM::EmptyOperator<R>::_n * mu, out);
+                }
+        };
+        template<class Op>
+        class SchwarzOperator : public HpSchwarz<R, S> {
+            public:
+                Op& prec;
+                SchwarzOperator(HpSchwarz<R, S>* m, Op& p) : prec(p) { *reinterpret_cast<HpSchwarz<R, S>*>(this) = *m; }
+                template<bool>
+                void apply(const R* const in, R* const out, const unsigned short& mu = 1, R* = nullptr, const unsigned short& = 0) const {
+                    if(prec.mat)
+                        prec.mv(in, HPDDM::Subdomain<R>::_dof, mu, out);
+                    else
+                        std::copy_n(in, HPDDM::Subdomain<R>::_dof * mu, out);
                 }
         };
         class E_LCG : public E_F0mps {
@@ -662,37 +713,79 @@ class IterativeMethod : public OneOperator {
                 static basicAC_F0::name_and_type name_param[];
                 Expression nargs[n_name_param];
                 const OneOperator *A, *C;
+                Expression Op;
                 Expression B, X;
-                E_LCG(const basicAC_F0& args) {
+                const int c;
+                E_LCG(const basicAC_F0& args, int d) : Op(0), c(d) {
                     args.SetNameParam(n_name_param, name_param, nargs);
-                    { const Polymorphic* op = dynamic_cast<const Polymorphic*>(args[0].LeftValue());
+                    if(c == 0 || c == 2) {
+                        const Polymorphic* op = dynamic_cast<const Polymorphic*>(args[0].LeftValue());
                         ffassert(op);
-                        A = op->Find("(", ArrayOfaType(atype<Kn*>(), false)); }
+                        A = (c == 0 || c == 1 ? op->Find("(", ArrayOfaType(atype<Kn*>(), false)) : op->Find("(", ArrayOfaType(atype<KNM<R>*>(), false)));
+                    }
+                    else {
+                        Op = to<HpSchwarz<R, S>*>(args[0]);
+                    }
                     if(nargs[0]) {
                         const Polymorphic* op = dynamic_cast<const Polymorphic*>(nargs[0]);
                         ffassert(op);
-                        C = op->Find("(", ArrayOfaType(atype<Kn*>(), false));
+                        C = (c == 0 || c == 1 ? op->Find("(", ArrayOfaType(atype<Kn*>(), false)) : op->Find("(", ArrayOfaType(atype<KNM<R>*>(), false)));
                     }
                     else
                         C = 0;
-                    B = to<Kn*>(args[1]);
-                    X = to<Kn*>(args[2]);
+                    if(c == 0 || c == 1) {
+                        B = to<Kn*>(args[1]);
+                        X = to<Kn*>(args[2]);
+                    }
+                    else {
+                        B = to<KNM<R>*>(args[1]);
+                        X = to<KNM<R>*>(args[2]);
+                    }
                 }
                 virtual AnyType operator()(Stack stack)  const {
                     int ret = -1;
                     try {
-                        Kn& x = *GetAny<Kn*>((*X)(stack));
-                        int n = x.N();
                         MPI_Comm comm = nargs[3] ? *(MPI_Comm*)GetAny<pcommworld>((*nargs[3])(stack)) : MPI_COMM_WORLD;
-                        Kn& b = *GetAny<Kn*>((*B)(stack));
-                        MatF_O AA(n, stack, A);
-                        MatF_O PP(n, stack, C);
-                        Operator Op(AA, PP);
-                        if(nargs[1])
-                            Op.setPrefix(*(GetAny<string*>((*nargs[1])(stack))));
                         if(nargs[2])
                             HPDDM::Option::get()->parse(*(GetAny<string*>((*nargs[2])(stack))));
-                        ret = HPDDM::IterativeMethod::solve(Op, (R*)b, (R*)x, 1, comm);
+                        if(c == 0 || c == 1) {
+                            Kn& x = *GetAny<Kn*>((*X)(stack));
+                            int n = x.N();
+                            Kn& b = *GetAny<Kn*>((*B)(stack));
+                            cout << C << endl;
+                            MatF_O PP(n, stack, C);
+                            if(c == 0) {
+                                MatF_O AA(n, stack, A);
+                                Operator<MatF_O> Op(AA, PP);
+                                if(nargs[1])
+                                    Op.setPrefix(*(GetAny<string*>((*nargs[1])(stack))));
+                                ret = HPDDM::IterativeMethod::solve(Op, (R*)b, (R*)x, 1, comm);
+                            }
+                            else {
+                                HpSchwarz<R, S>* op = GetAny<HpSchwarz<R, S>*>((*Op)(stack));
+                                SchwarzOperator<MatF_O> SchwarzOp(op, PP);
+                                ret = HPDDM::IterativeMethod::solve(SchwarzOp, (R*)b, (R*)x, 1, comm);
+                            }
+                        }
+                        else {
+                            KNM<R>& x = *GetAny<KNM<R>*>((*X)(stack));
+                            int n = x.N();
+                            int m = x.M();
+                            KNM<R>& b = *GetAny<KNM<R>*>((*B)(stack));
+                            MatMatF_O PP(n, m, stack, C);
+                            if(c == 2) {
+                                MatMatF_O AA(n, m, stack, A);
+                                Operator<MatMatF_O> Op(AA, PP);
+                                if(nargs[1])
+                                    Op.setPrefix(*(GetAny<string*>((*nargs[1])(stack))));
+                                ret = HPDDM::IterativeMethod::solve(Op, (R*)b, (R*)x, m, comm);
+                            }
+                            else {
+                                HpSchwarz<R, S>* op = GetAny<HpSchwarz<R, S>*>((*Op)(stack));
+                                SchwarzOperator<MatMatF_O> SchwarzOp(op, PP);
+                                ret = HPDDM::IterativeMethod::solve(SchwarzOp, (R*)b, (R*)x, m, comm);
+                            }
+                        }
                     }
                     catch(...) {
                         throw;
@@ -701,12 +794,15 @@ class IterativeMethod : public OneOperator {
                 }
                 operator aType() const { return atype<long>(); }
         };
-        E_F0* code(const basicAC_F0& args) const { return new E_LCG(args); }
-        IterativeMethod() : OneOperator(atype<long>(), atype<Polymorphic*>(), atype<KN<R>*>(), atype<KN<R>*>()) { }
+        E_F0* code(const basicAC_F0& args) const { return new E_LCG(args, c); }
+        IterativeMethod() : OneOperator(atype<long>(), atype<Polymorphic*>(), atype<KN<R>*>(), atype<KN<R>*>()), c(0) { }
+        IterativeMethod(int) : OneOperator(atype<long>(), atype<HpSchwarz<R, S>*>(), atype<KN<R>*>(), atype<KN<R>*>()), c(1) { }
+        IterativeMethod(int, int) : OneOperator(atype<long>(), atype<Polymorphic*>(), atype<KNM<R>*>(), atype<KNM<R>*>()), c(2) { }
+        IterativeMethod(int, int, int) : OneOperator(atype<long>(), atype<HpSchwarz<R, S>*>(), atype<KNM<R>*>(), atype<KNM<R>*>()), c(3) { }
 };
 
-template<class R>
-basicAC_F0::name_and_type IterativeMethod<R>::E_LCG::name_param[] = {
+template<class R, char S>
+basicAC_F0::name_and_type IterativeMethod<R, S>::E_LCG::name_param[] = {
     {"precon", &typeid(Polymorphic*)},
     {"prefix", &typeid(string*)},
     {"sparams", &typeid(string*)},
@@ -724,6 +820,14 @@ long globalNumbering(Type* const& A, KN<long>* const& numbering) {
     return 0L;
 }
 
+template<class Type, class K>
+Type* changeOperatorSimple(Type* const& A, Type* const& B) {
+#if 0 // if you need this, please make sure you are using the master branch of HPDDM
+    *A = *B;
+#endif
+    return A;
+}
+
 template<template<class, char> class Type, class K, char S, char U = S>
 void add() {
     Dcl_Type<Type<K, S>*>(Initialize<Type<K, S>>, Delete<Type<K, S>>);
@@ -735,6 +839,7 @@ void add() {
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>(1));
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>(1, 1));
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>(1, 1, 1));
+    TheOperators->Add("=", new OneOperator2_<Type<K, S>*, Type<K, S>*, Type<K, S>*>(Schwarz::changeOperatorSimple<Type<K, S>, K>));
     Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>);
     Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>(1));
     Global.Add("DDM", "(", new solveDDM<Type<K, S>, K>);
@@ -742,12 +847,18 @@ void add() {
     Global.Add("set", "(", new set<Type<K, S>, K>);
     addProd<Type<K, S>, ProdSchwarz, KN<K>, K>();
     addInv<Type<K, S>, InvSchwarz, KN<K>, K>();
+#if 0 // if you need this, please make sure you are using the master branch of HPDDM
+    addArray<Type<K, S>>();
+#endif
     Global.Add("dmv", "(", new distributedMV<Type<K, S>, K>);
     Global.Add("destroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(destroyRecycling<Type<K, S>, K>));
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));
     Global.Add("exchange", "(", new exchangeIn<Type<K, S>, K>);
     Global.Add("exchange", "(", new exchangeInOut<Type<K, S>, K>);
-    Global.Add("IterativeMethod","(",new IterativeMethod<K>());
+    Global.Add("IterativeMethod","(",new IterativeMethod<K, S>());
+    Global.Add("IterativeMethod","(",new IterativeMethod<K, S>(1));
+    Global.Add("IterativeMethod","(",new IterativeMethod<K, S>(1, 1));
+    Global.Add("IterativeMethod","(",new IterativeMethod<K, S>(1, 1, 1));
     Global.Add("globalNumbering", "(", new OneOperator2_<long, Type<K, S>*, KN<long>*>(globalNumbering<Type<K, S>>));
 
     if(!exist_type<Pair<K>*>()) {

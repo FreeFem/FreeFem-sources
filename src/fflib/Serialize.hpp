@@ -53,7 +53,7 @@ class Serialize {
     size_t size() const { return lg; }
     
     inline int havebordermesh() {
-      size_t pp=2*sizeof(int);
+      size_t pp=3*sizeof(int); 
       int bordermesh=0;
       get( pp,bordermesh);
       return bordermesh;

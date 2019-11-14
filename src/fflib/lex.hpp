@@ -74,8 +74,8 @@ class mylex : public CodeAlloc {
     const string * filename; // <<filename>>
     int macroarg;
     istream * nf;
-
-    xxxx() : l(0), f(0) , filename(0),macroarg(0),nf(0)   {}
+    char sep;
+      xxxx() : l(0), f(0) , filename(0),macroarg(0),nf(0),sep(':')   {}
     void  open(mylex *lexx,const char * ff) ;
     void  readin(mylex *lexx,const string & s,const string *name=0,int macroargg=0);
     void close() ;
@@ -85,6 +85,7 @@ class mylex : public CodeAlloc {
  
   xxxx pilesource[100];
   istream & source() const {return  * pilesource[level].f;}
+   const  char * sep() const {static char buf[]=" : "; buf[1]=pilesource[level].sep; return buf; }
     const string file() const  { return pilesource[level].filename? *pilesource[level].filename : string("") ;}
   ostream & cout ;
 
@@ -157,7 +158,9 @@ private:
   string ExpandMacro(const string &macroname,const MacroData *pmacro);
     
   bool IFMacro(int &ret);
-    
+  bool IFMacroArgs(int lvl=0);// scan IFMacroArgs
+  bool IFMacroId(bool isnot,string & id,bool withval ,string &val);// say if args is true or not ..
+
   bool AddMacro(string m,string def) ;
   char * match(int i);
   void ErrorScan(const char * s) {

@@ -2936,6 +2936,21 @@ Matrice_Creuse<R> * AddtoMatrice_Creuse(Matrice_Creuse<R> * p,newpMatrice_Creuse
 {
     return np.add(p,double(c));
 }
+
+template<class K, bool init>
+Matrice_Creuse<K>* set_H_Eye(Matrice_Creuse<K> *pA,const  Eye eye)
+{
+    int n = eye.n, m=eye.m, nn= min(n,m);
+    if( init) pA->init();
+    pA->resize(n,m);
+    HashMatrix<int,K> * pH= pA->pHM();
+    ffassert(pH);
+    pH->clear();
+    pH->resize(n,m,nn);
+    for(int i=0; i< n; ++i)
+        (*pH)(i,i)=1.;
+    return  pA;
+}
 template <class R>
 void AddSparseMat()
 {
@@ -2970,7 +2985,8 @@ TheOperators->Add("^", new OneBinaryOperatorAt_inv<R>());
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R,1>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparse<R,1>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<tuple<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R,1>) ,
-       new OneOperatorCode<BlockMatrix1<R> >()
+       new OneOperatorCode<BlockMatrix1<R> >(),
+       new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Eye>(set_H_Eye<R,false> )
 
        );
     TheOperators->Add("+=",
@@ -2993,7 +3009,8 @@ TheOperators->Add("^", new OneBinaryOperatorAt_inv<R>());
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse_Transpose<R>,E_F_StackF0F0>(CopyTrans<R,R,0>),
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Matrice_Creuse<R>*,E_F_StackF0F0>(CopyMat<R,R,0>) ,
        new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,KNM<R>*,E_F_StackF0F0>(MatFull2Sparse<R,0>) ,
-       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<tuple<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R,0>)
+       new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,list<tuple<R,MatriceCreuse<R> *,bool> > *,E_F_StackF0F0>(CombMat<R,0>),
+       new OneOperator2<Matrice_Creuse<R>*,Matrice_Creuse<R>*,Eye>(set_H_Eye<R,true> )
 
 
        );
@@ -3278,7 +3295,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
             else {
                 std::vector<std::vector<std::pair<unsigned int, T> > > tmp(n);
                 for(unsigned int i = 0; i < n; ++i)
-                    tmp[i].reserve(mA->p[mR->p[i] + 1] - mA->p[mR->j[i]]);
+                    tmp[i].reserve(mA->p[mR->j[i] + 1] - mA->p[mR->j[i]]);
 
                 unsigned int nnz = 0;
                 for(unsigned int i = 0; i < n; ++i) {
