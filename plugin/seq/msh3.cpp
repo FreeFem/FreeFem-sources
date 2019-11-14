@@ -7206,14 +7206,21 @@ AnyType Square_Op::operator () (Stack stack)  const {
                 mpp->setP(&Th, it, iv);
                 if (xx)
                     v[i].x = GetAny<double>((*xx)(stack));
+		        else
+		            v[i].x = mpp->P.x;
                 if (yy)
                     v[i].y = GetAny<double>((*yy)(stack));
+		        else
+		            v[i].y = mpp->P.y;
                 if (zz)
                     v[i].z = GetAny<double>((*zz)(stack));
+		        else
+		            v[i].z = mpp->P.z;
                 v[i].lab=Th.vertices[i].lab;
                 takemesh[i] = takemesh[i] + 1;
             }
         }
+
 
 	 for (int it = 0; it < Th.nt; ++it) {
 		 const Mesh::Element &K=(Th[it]);
