@@ -21,60 +21,9 @@ curve3 D13(t=0, 1){x=1; y=-0.5+0.5*t; z=3;label=inner;}
 meshL ThL=buildmesh(D01(-n) + D02(-n) + D03(-n) + D04(-n) + D05(-n)
     + D06(-n) + D11(n) + D12(n) + D13(n));
 
-//lot(ThL, cmm="ThL", wait=true);
 savemesh(ThL,"toto.mesh");
 	
-
 //helice conique
 curve3 E1(t=0, 10.*pi){x=(1.)*t*cos(t); y=-(1.)*t*sin(t); z=t;}
 meshL ThL2=buildmesh(E1(1000));
-//plot(ThL2,cmm="ThL2",wait=true);
-
-
-mesh Th2 = square(40,1,[x,y*1]);
-func perio=[[1,x],[3,x]];
-fespace Uh2(Th2,P1,periodic=perio);
-Uh2 u2,v2;
-macro Grad2(uh) [dx(uh),dy(uh)]  // EOM
-
-
-
-//problem pb2(u2,v2) 
-problem Lap2(u2,v2) = int2d(Th2)(Grad2(u2)'*Grad2(v2))
-+ int2d ( Th2 ) ( 1 * v2 )+on(4,u2=0);
-Lap2;
-//plot(u2,wait=1);
- 
-mesh3 Th3 = cube(40,10,10);
-fespace Uh3(Th3,P1);
-Uh3 u3,v3;
-macro Grad3(uh) [dx(uh),dy(uh),dz(uh)]  // EOM
-
-//problem pb2(u2,v2) 
-problem Lap3(u3,v3) = int3d(Th3)(Grad3(u3)'*Grad3(v3))
-+ int3d ( Th3 ) ( 1 * v3 )+on(4,u3=0);
-Lap3;
-//plot(u3,wait=1);
-  
- 
- 
-meshL ThL3=line3(40,[x,1,x*0.1]);
-savemesh(ThL3, "totot.mesh");
-fespace Vh(ThL3,P1);
-func f = 1 ;
-
-Vh uLPb,vLPb;
-//macro Grad3(uh) [dx(uh),dy(uh),dz(uh)]  // EOM
-
-// with problem
-problem Lap3dL(uLPb,vLPb)  = int1d(ThL3)(Grad3(uLPb)'*Grad3(vLPb))
- - int1d ( ThL3 ) ( f * vLPb )
-  + on(1,uLPb=0);
-Lap3dL;
-
-//cout << " test sol " << uLPb[] << endl;
-plot(ThL3,uLPb);
-
-// 
-// 
-// 
+//plot(ThL2);
