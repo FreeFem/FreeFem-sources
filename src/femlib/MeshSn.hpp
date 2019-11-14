@@ -147,7 +147,7 @@ typedef GenericVertex<R3> Vertex3;
         void readmsh(ifstream & f,int offset);
         MeshS(FILE *f,int offset=0);
         //MeshS(const string);
-        MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb, bool cleanmesh=true, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
+        MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb, bool cleanmesh=true, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-6);
         MeshS(const Serialize&);
 
         int load(const string & filename);
