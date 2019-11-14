@@ -148,7 +148,7 @@ public:
   Mesh3(const Serialize &);
   Mesh3(const  Serialize &serialized, int withSurface);
   //Mesh3(const Serialize &serialized1, const Serialize &serialized2);
-  Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb, bool cleanmesh=true, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
+  Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb, bool cleanmesh=true, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-6);
   double hmin() const; // Add J. Morice 11/10
   //surface mesh possible
   MeshS *meshS;
