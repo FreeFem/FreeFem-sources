@@ -7786,6 +7786,90 @@ public:
 };
 
 
+// function to clean mesh
+
+template< class MMesh>
+class CheckMesh_Op : public E_F0mps
+{
+public:
+    Expression eTh;
+static const int n_name_param = 3;
+    static basicAC_F0::name_and_type name_param [];
+    Expression nargs[n_name_param];
+    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
+    double arg (int i, Stack stack, double a) const {return nargs[i] ? GetAny<double>((*nargs[i])(stack)) : a;}
+
+
+public:
+    CheckMesh_Op (const basicAC_F0 &args, Expression tth)
+    : eTh(tth) {
+        args.SetNameParam(n_name_param, name_param, nargs);
+
+    }
+    
+    AnyType operator () (Stack stack)  const;
+};
+
+
+template<>
+basicAC_F0::name_and_type CheckMesh_Op<Mesh3>::name_param [] = {
+  {"precisvertice",&typeid(double)},
+  {"removeduplicate", &typeid(bool)},  
+  {"rebuildboundary", &typeid(bool)}
+	 
+};
+
+template<>
+basicAC_F0::name_and_type CheckMesh_Op<MeshS>::name_param [] = {
+  {"precisvertice",&typeid(double)},
+  {"removeduplicate", &typeid(bool)},  
+  {"rebuildboundary", &typeid(bool)}
+	 
+};
+
+template<class MMesh>
+AnyType CheckMesh_Op<MMesh>::operator () (Stack stack)  const {
+    MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+
+    MMesh *pTh = GetAny<MMesh *>((*eTh)(stack));
+    MMesh &Th = *pTh;
+    ffassert(pTh);
+
+	double precis_mesh(arg(0, stack, 1e-6)); 
+    bool removeduplicate(arg(1, stack, false));
+    bool rebuildboundary(arg(2, stack, false));
+	int orientation=1;
+	if(verbosity>10) 
+		cout << "call cleanmesh function, precis_mesh:" << precis_mesh << " removeduplicate:"<< removeduplicate	<< " rebuildboundary:" << rebuildboundary <<endl;
+    
+	Th.clean_mesh(precis_mesh,Th.nv, Th.nt, Th.nbe, Th.vertices, Th.elements, Th.borderelements, removeduplicate, rebuildboundary,orientation);
+	
+	*mp = mps;  
+    return pTh;
+
+}
+
+
+
+template< class MMesh>
+class CheckMesh: public OneOperator {
+public:
+typedef const MMesh *ppmesh; 
+    CheckMesh (): OneOperator(atype<ppmesh>(),atype<ppmesh>()) {}
+
+    E_F0*code (const basicAC_F0 &args) const {
+        return new CheckMesh_Op<MMesh>(args,t[0]->CastTo(args[0]));
+
+    }
+};
+
+
+
+
+
+=======
+>>>>>>> External Changes
+=======
 
 // function to clean mesh
 
@@ -7872,6 +7956,7 @@ typedef const MMesh *ppmesh;
 
 
 
+>>>>>>> External Changes
 #ifndef WITH_NO_INIT
 
 // <<dynamic_loading>>
