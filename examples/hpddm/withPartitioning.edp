@@ -26,6 +26,7 @@ real[int] DZ;                  // partition of unity
     real[int] part(Ph.ndof);
     if(mpirank == 0)
         partitionerSeq(part, Th, mpisize);
+    partitionerPar(part, Th, mpiCommWorld, mpisize);
     buildOverlapWithPartitioning(Th, ThBorder, part, 11111, 1, 1, intersectionZ, DP, Pk, mpiCommWorld, false);
     Th = cube(getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5)); // need to reload the global mesh because it is destroyed in ''build*''
     buildOverlapEdgeWithPartitioning(Th, ThBorder, part, 22222, 1, 1, intersectionP, DZ, Zk, mpiCommWorld, false, Zk, def2, init2);
