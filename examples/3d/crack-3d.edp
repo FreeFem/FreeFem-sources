@@ -26,7 +26,7 @@ mesh3 Th = buildlayers(Th2,1./hs);
 plot(Th,wait=1);
  nt = Th.nt;
  nv = Th.nv;
-// check trunc
-Th=trunc(Th,1);
+// check mesh
+Th=checkmesh(Th);
 assert(nt==Th.nt);
 assert(nv==Th.nv);
