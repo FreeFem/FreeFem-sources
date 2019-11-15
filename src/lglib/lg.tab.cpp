@@ -3638,7 +3638,9 @@ extern  bool echo_edp;
 
 int mainff (int  argc, char **argv)
 {
-  signal(SIGXCPU, signalCPUHandler);
+#ifndef _WIN32
+  	signal(SIGXCPU, signalCPUHandler);
+#endif	
   if(argc)
     prognamearg=argv[0];
 
@@ -3731,7 +3733,7 @@ int mainff (int  argc, char **argv)
 
    if(init_lgparallele)  init_lgparallele();
   //  callInitsFunct() ; //  init for dynamique libs ...
-  
+
    if(verbosity>2 || ((mpirank==0)&& verbosity)  )  cout << endl;
   zzzfff->input(cc); // [[file:../fflib/lex.cpp::mylex_input_filename]]
   EnvironmentLoad(); // just before compile [[file:~/ff/src/fflib/environment.cpp::EnvironmentLoad]]

@@ -21,7 +21,7 @@ load "Element_P1dc1"
 and $ u.n = (g1n,g2n).n$ on $\Gamma_4$
 
 */
-int nn=8;
+int nn=7;
 mesh3 Th=cube(nn,nn,nn);
 fespace Wh(Th,P1);
 fespace Vh(Th,RT13d);
