@@ -120,6 +120,19 @@ struct OnePlotMeshS : public OnePlot
     void Draw(OneWindow *win);
 };
 
+struct OnePlotMeshL : public OnePlot
+{
+    const MeshL *Th;
+    OnePlotMeshL(const MeshL *T)
+    : OnePlot(0,3,3),Th(T)
+    {
+        Pmin=Th->Pmin;
+        Pmax=Th->Pmax;
+        //Th->BoundingBox(Pmin,Pmax);
+    }
+    void Draw(OneWindow *win);
+};
+
 template<class Mesh>
 struct OnePlotFE: public OnePlot
 {
@@ -204,7 +217,38 @@ struct OnePlotFES: public OnePlot
     bool  NextCase() { cas++; return vc2v();}
 };
 
-
+struct OnePlotFEL: public OnePlot
+{
+    const MeshL *Th;
+    long nsub;
+    KN<double> v;
+    KN<Complex> vc;
+    KN<R1> Psub;
+    KN<int> Ksub;
+    int cas; // in cas of complex  chaage interpertation of complex value
+    
+    OnePlotFEL(const MeshL *T,long w,PlotStream & f)
+    :OnePlot(w,3,5),Th(T),cas(2)
+    {
+        Pmin=Th->Pmin;
+        Pmax=Th->Pmax;
+        
+        f >> Psub ;
+        f >> Ksub ;
+        if(what<16)
+            f >>  v;
+        else
+            f >> vc;
+        vc2v();
+        if(debug>3) cout << "OnePlotFEL :" << Th <<" " << what<< " " << nsub <<" " << v.N() << endl
+            << "       Pmin " << Pmin << " Pmax  " << Pmax << endl;
+        ffassert(f.good());
+        
+    }
+    void Draw(OneWindow *win);
+    bool  vc2v();
+    bool  NextCase() { cas++; return vc2v();}
+};
 
 struct OnePlotCurve: public OnePlot {
     KN<double> xx,yy,zz,cc;
@@ -218,6 +262,12 @@ struct OnePlotCurve: public OnePlot {
 struct OnePlotBorder: public OnePlot {
     vector<vector<pair<long,R2> > > data;
     OnePlotBorder(PlotStream & f);
+    void Draw(OneWindow *win);
+};
+
+struct OnePlotCurve3: public OnePlot {
+    vector<vector<pair<long,R3> > > data;
+    OnePlotCurve3(PlotStream & f);
     void Draw(OneWindow *win);
 };
 
@@ -335,6 +385,7 @@ public:
     vector<Mesh2 *> Ths2;
     vector<Mesh3 *> Ths3;
     vector<MeshS *> ThsS;
+    vector<MeshL *> ThsL;
     list<OnePlot *> plots;
     bool changeViso,changeVarrow,changeColor,changeBorder,changeFill;
     R3 Pvue,Peyes;
@@ -362,7 +413,9 @@ public:
         for (vector<Mesh3 *>::iterator i= Ths3.begin();i != Ths3.end(); ++i)
             if(*i) delete *i;
         for (vector<MeshS *>::iterator i= ThsS.begin();i != ThsS.end(); ++i)
-        if(*i) delete *i;
+            if(*i) delete *i;
+        for (vector<MeshL *>::iterator i= ThsL.begin();i != ThsL.end(); ++i)
+            if(*i) delete *i;
         
     }
     ThePlot(PlotStream & fin,ThePlot *old , int kcount);
@@ -396,6 +449,7 @@ public:
     void DrawIsoTfill(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
     void DrawIsoT(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
     void DrawIsoTfill(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
+    void DrawIsoEfill(const R3 Pt[2],const R ff[2],const R * Viso,int NbIso, R rapz=1);
     void dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn,R & vmx) const ;
     
 };
@@ -455,6 +509,10 @@ public:
     void Seg(R2 A, R2 B) const  {
         glVertex3d(A.x,A.y,theplot->z0);
         glVertex3d(B.x,B.y,theplot->z0);
+    }
+    void Seg3(R3 A, R3 B) const  {
+        glVertex3d(A.x,A.y,A.z);
+        glVertex3d(B.x,B.y,B.z);
     }
     
     int InRecScreen(R2 P1,R2 P2) const

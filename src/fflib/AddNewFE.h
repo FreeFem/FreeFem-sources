@@ -94,6 +94,25 @@ public:
 Type_Expr CConstantTFES(const EConstantTypeOfFES::T & v);
 
 
+// 3d curve case
+
+class EConstantTypeOfFEL :public E_F0
+{ public:
+    //  using namespace   Fem2D;
+    typedef Fem2D::TypeOfFEL * T;
+    T  v;
+public:
+    AnyType operator()(Stack ) const { /*cout << " ()" << v << endl*/;return SetAny<T>(v);}
+    EConstantTypeOfFEL( T o):v(o) { /*cout << "New constant " << o << endl;*/}
+    size_t nbitem() const { assert(v);
+        if(verbosity > 2)
+            cout << " nb item = " << v->N << endl;
+        return v->N ;}
+    operator aType () const { return atype<T>();}
+};
+
+
+Type_Expr CConstantTFEL(const EConstantTypeOfFEL::T & v);
 
 /*
 class EConstantTypeOfFE3 :public E_F0

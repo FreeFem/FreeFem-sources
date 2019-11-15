@@ -41,9 +41,11 @@ void init_lgmat(); // initialisation for sparse mat functionnallity
 class v_fes; 
 class v_fes3;
 class v_fesS;
+class v_fesL;
 typedef v_fes *pfes;
 typedef v_fes3 *pfes3;
 typedef v_fesS *pfesS;
+typedef v_fesL *pfesL;
 
 namespace  Fem2D {
   class Mesh3;
@@ -52,9 +54,11 @@ namespace  Fem2D {
 using Fem2D::Mesh;
 using Fem2D::Mesh3;
 using Fem2D::MeshS;
+using Fem2D::MeshL;
 typedef const Mesh  *  pmesh;
 typedef const Mesh3  * pmesh3;
 typedef const MeshS  * pmeshS;
+typedef const MeshL  * pmeshL;
 
 using  Fem2D::FESpace;
 using  Fem2D::TypeOfFE;
@@ -275,6 +279,49 @@ class v_fesS : public RefCounter { public:
     
 };
 
+
+//3D curve
+class v_fesL : public RefCounter { public:
+    typedef pfesL pfes;
+    typedef FESpaceL FESpace;
+    
+    static const int dHat=1;
+    const int N;
+    const pmeshL* ppTh; // adr du maillage
+    
+    CountPointer<FESpaceL> pVh;
+    
+    Stack stack; // the stack is use whith periodique expression
+    
+    int nbcperiodic;
+    Expression *periodic;
+    
+    
+    operator FESpaceL * ()  {
+        throwassert( dHat==1);
+        if  ( !pVh || *ppTh !=  &pVh->Th )
+            pVh=CountPointer<FESpaceL>(update(),true);
+            return  pVh   ;}
+    FESpaceL * update() ;
+    
+    v_fesL(int NN,const pmeshL* t,Stack s, int n,Expression *p)    ///TODO
+    : N(NN), ppTh(t), pVh(0),stack(s), nbcperiodic(n),periodic(p) {}  //take a pmesh3 and use the pmeshS
+    v_fesL(int NN,const v_fesL *f,Stack s,int n,Expression *p)
+    :  N(NN),ppTh(f->ppTh),pVh(0),stack(s), nbcperiodic(n),periodic(p)
+    {}
+    
+    
+    
+    // void destroy(){ ppTh=0;pVh=0; delete this;}
+    virtual ~v_fesL() {}
+    bool buildperiodic(Stack stack, KN<int> & ndfe)  ;
+    virtual  FESpaceL * buildupdate( KN<int> & ndfe) {  return 0;}
+    virtual  FESpaceL * buildupdate() {return 0;};
+    
+};
+
+
+
 //2d
 class pfes_tef : public v_fes { public:
     
@@ -405,6 +452,52 @@ public:
 };
 
 
+//3D curve
+class pfesL_tef : public v_fesL { public:
+    
+    const TypeOfFEL * tef ;
+    pfesL_tef(const pmeshL* t,const TypeOfFEL * tt,Stack s=NullStack, int n=0,Expression *p=0 )
+    : v_fesL(tt->N,t,s,n,p),tef(tt) { operator FESpaceL * ();}
+    FESpaceL * buildupdate( KN<int> & ndfe)   { return  *ppTh ? new FESpaceL(**ppTh,*tef,ndfe.size()/2,ndfe):0;   }
+    FESpaceL * buildupdate()   {  return  *ppTh? new FESpaceL(**ppTh,*tef):0;}
+    
+};
+
+class pfesL_tefk : public v_fesL {
+public:
+    const TypeOfFEL ** tef ;
+    const int k;
+    KN< GTypeOfFE<MeshL> const *> atef;
+    GTypeOfFESum<MeshL> tefs;
+    
+    static int sum(const Fem2D::TypeOfFEL ** l,int const Fem2D::TypeOfFEL::*p,int n)
+    {
+        int r=0;
+        for (int i=0;i<n;i++)
+            r += l[i]->*p;
+        return r;
+    }
+    
+    pfesL_tefk(const pmeshL* t,const Fem2D::TypeOfFEL ** tt,int kk,Stack s=NullStack,int n=0,Expression *p=0 )
+    : v_fesL(sum((const Fem2D::TypeOfFEL **)tt,&Fem2D::TypeOfFEL::N,kk),t,s,n,p),
+    tef(tt),k(kk),
+    atef(kk,tt),tefs(atef)
+    
+    {
+        // cout << "pfes_tefk const" << tef << " " << this << endl;
+        operator FESpaceL * ();
+    }
+    FESpaceL * buildupdate() {
+        // cout << "pfes_tefk upd:" << tef << " " << this <<  endl;
+        //assert(tef);
+        return  *ppTh? new FESpaceL(**ppTh,tefs):0;}
+    virtual ~pfesL_tefk() { delete [] tef;}
+    FESpaceL * buildupdate(KN<int> & ndfe)
+    {
+        return *ppTh? new FESpaceL(**ppTh,tefs,ndfe.size()/2,ndfe):0;
+    }
+    
+};
 
 class pfes_fes : public v_fes {
 public:
@@ -656,10 +749,7 @@ inline FESpace3 * v_fes3::update() {
   if(!*ppTh) return 0;
   if (nbcperiodic ) {
     assert(periodic);
-    //const Mesh3 &Th(**ppTh);
-   //    KN<int> ndfv(Th.nv);
        KN<int> ndfe;
-     //  int nbdfv,nbdfe;    
        bool ret = buildperiodic(stack,ndfe);
        return   ret ? buildupdate(ndfe) : buildupdate();
       }
@@ -672,10 +762,20 @@ inline FESpaceS * v_fesS::update() {
     if(!*ppTh) return 0;
     if (nbcperiodic ) {
         assert(periodic);
-        //const MeshS &Th(**ppTh);
-        //    KN<int> ndfv(Th.nv);
         KN<int> ndfe;
-        //  int nbdfv,nbdfe;
+        bool ret = buildperiodic(stack,ndfe);
+        return   ret ? buildupdate(ndfe) : buildupdate();
+    }
+    else
+        return  buildupdate();
+}
+
+inline FESpaceL * v_fesL::update() {
+    assert(dHat==1);
+    if(!*ppTh) return 0;
+    if (nbcperiodic ) {
+        assert(periodic);
+        KN<int> ndfe;
         bool ret = buildperiodic(stack,ndfe);
         return   ret ? buildupdate(ndfe) : buildupdate();
     }
@@ -859,6 +959,34 @@ public:
     Expression optiexp0,optiexpK;
     
     E_set_fevS(const E_Array * a,Expression pp) ;
+    
+    AnyType operator()(Stack)  const ;
+    operator aType () const { return atype<void>();}
+    
+};
+
+// 3D curve
+template<class K,class  v_fes>
+class E_set_fevL: public E_F0mps {
+public:
+    typedef typename  v_fes::pfes pfes;
+    typedef typename  v_fes::FESpace FESpace;
+    typedef typename  FESpace::Mesh Mesh;
+    typedef typename  FESpace::FElement FElement;
+    typedef typename  Mesh::Element Element;
+    typedef typename  Mesh::Vertex Vertex;
+    typedef typename  Mesh::RdHat RdHat;
+    typedef typename  Mesh::Rd Rd;
+    
+    
+    E_Array  aa;
+    Expression   ppfe;
+    bool optimize, optimizecheck;
+    
+    vector<size_t>  where_in_stack_opt;
+    Expression optiexp0,optiexpK;
+    
+    E_set_fevL(const E_Array * a,Expression pp) ;
     
     AnyType operator()(Stack)  const ;
     operator aType () const { return atype<void>();}

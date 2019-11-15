@@ -501,9 +501,9 @@ int mylex::scan(int lvl)
             int ft = FindType(buf);
 
             // FESPACE, FESPACE1, FESPACE3 defined at [[file:../lglib/lg.ypp::FESPACE]]
-            int feid3[5]  = { ID,FESPACE1,FESPACE,FESPACE3,FESPACES};
+            int feid3[6]  = { ID,FESPACE1,FESPACE,FESPACE3,FESPACES,FESPACEL};
 
-            ffassert ( ft >= 0 && ft <= 4)  ;
+            ffassert ( ft >= 0 && ft <= 5 )  ;
             ret =  feid3[ft];
             plglval->str = newcopy(buf);
         }

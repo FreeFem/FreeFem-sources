@@ -7865,6 +7865,123 @@ typedef const MMesh *ppmesh;
 
 
 
+class Line_Op: public E_F0mps
+{
+public:
+    static const int n_name_param = 3;    //
+    static basicAC_F0::name_and_type name_param [];
+    Expression nargs[n_name_param], enx, xx, yy, zz;
+    long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
+    
+    
+public:
+    Line_Op (const basicAC_F0 &args, Expression nx, Expression transfo = 0)
+    : enx(nx), xx(0), yy(0), zz(0) {
+        args.SetNameParam(n_name_param, name_param, nargs);
+        if (transfo) {
+            const E_Array *a1 = dynamic_cast<const E_Array *>(transfo);
+        int err = 0;
+        
+        if (a1) {
+            if (a1->size() != 3 || xx || yy || zz)
+                CompileError("line (nx,[X,Y,Z]) ");
+            
+            xx = to<double>((*a1)[0]);
+            yy = to<double>((*a1)[1]);
+            zz = to<double>((*a1)[2]);
+            }
+        }
+    }
+
+    AnyType operator () (Stack stack)  const;
+};
+
+basicAC_F0::name_and_type Line_Op::name_param [] = {
+    {"orientation", &typeid(long)},
+    {"region", &typeid(long)},
+    {"label", &typeid(KN_<long>)}
+   
+};
+
+class Line: public OneOperator {
+public:
+int cas;
+Line (): OneOperator(atype<pmeshL>(), atype<long>()), cas(0) {}
+    Line (int): OneOperator(atype<pmeshL>(), atype<long>(), atype<E_Array>()), cas(1) {}
+
+    E_F0*code (const basicAC_F0 &args) const {
+if(cas==0)
+            return new Line_Op(args, t[0]->CastTo(args[0]));
+else
+return new Line_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));     
+    }
+};
+
+
+AnyType Line_Op::operator () (Stack stack)  const {
+    
+MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+    
+    typedef typename MeshL::Element T;
+    typedef typename MeshL::BorderElement B;
+    typedef typename MeshL::Vertex V;
+    
+    int nt=GetAny<long>((*enx)(stack));
+    MeshPoint *mpp(MeshPointStack(stack));
+
+long region = 0;
+
+int nv=nt+1,nbe=2;
+    long orientation(arg(0, stack, 1L));
+    
+    V *v= new V[nv];
+    T *t= new T[nt];
+    B *b= new B[nbe];
+V *vv=v;
+    for (int i=0;i<nv;++i) {
+       MeshL::Rd P((R) i/nt, 0., 0.);
+  vv[i].x=P.x;
+  vv[i].y=P.y;
+  vv[i].z=P.z;
+  vv[i].lab = 0;
+  
+  mpp->set(vv[i].x,vv[i].y,vv[i].z);
+       if (xx)
+           vv[i].x = GetAny<double>((*xx)(stack));
+       else
+           vv[i].x = mpp->P.x;
+       if (yy)
+           vv[i].y = GetAny<double>((*yy)(stack));
+       else
+           vv[i].y = mpp->P.y;
+       if (zz)
+           vv[i].z = GetAny<double>((*zz)(stack));
+       else
+           vv[i].z = mpp->P.z;
+    }
+
+T *tt=t;
+for (int i=0;i<nt;++i) {
+int iv[2]; iv[0]=i, iv[1]=i+1;
+int lab=0;
+(tt++)->set(v,iv,lab);   
+}
+B *bb=b;
+int ibeg[1], iend[1];
+ibeg[0]=0, iend[0]=nv-1;
+int lab1=1, lab2=2;
+(bb++)->set(v,ibeg,lab1); 
+(bb++)->set(v,iend,lab2);
+
+MeshL *ThL = new MeshL(nv,nt,nbe,v,t,b);
+    ThL->BuildGTree();
+
+    Add2StackOfPtr2FreeRC(stack, ThL);
+    *mp = mps;
+    
+    return ThL;
+}
+
 
 #ifndef WITH_NO_INIT
 
@@ -7941,6 +8058,10 @@ static void Load_Init () {
 	
     Global.Add("checkmesh", "(", new CheckMesh<MeshS>);
     Global.Add("checkmesh", "(", new CheckMesh<Mesh3>);
+	
+	Global.Add("line3", "(", new Line);
+	Global.Add("line3", "(", new Line(1));
+	
 	
 }
 

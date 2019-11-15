@@ -1,29 +1,42 @@
 #ifndef LGMESH3_HPP
 #define LGMESH3_HPP
 // 3d real (2d equivalent at [[file:problem.hpp::pferbase]])
-typedef FEbase<double,v_fes3> * pf3rbase ;		// <<pf3rbase>>
-typedef FEbaseArray<double,v_fes3> * pf3rbasearray ;	// <<pf3rbasearray>>
-typedef pair<pf3rbase,int> pf3r ;			// <<pf3r>>
-typedef pair<pf3rbasearray,int> pf3rarray ;		// <<pf3rarray>>
+typedef FEbase<double,v_fes3> * pf3rbase ;
+typedef FEbaseArray<double,v_fes3> * pf3rbasearray ;
+typedef pair<pf3rbase,int> pf3r ;
+typedef pair<pf3rbasearray,int> pf3rarray ;
 
 // 3d complex (2d equivalent at [[file:problem.hpp::pfecbase]])
-typedef FEbase<Complex,v_fes3> * pf3cbase ;		// <<pf3cbase>
-typedef FEbaseArray<Complex,v_fes3> * pf3cbasearray ;	// <<pf3cbasearray>>
-typedef pair<pf3cbase,int> pf3c ;			// <<pf3c>>
-typedef pair<pf3cbasearray,int> pf3carray ;		// <<pf3carray>>
+typedef FEbase<Complex,v_fes3> * pf3cbase ;
+typedef FEbaseArray<Complex,v_fes3> * pf3cbasearray ;
+typedef pair<pf3cbase,int> pf3c ;
+typedef pair<pf3cbasearray,int> pf3carray ;
 // fin
 
 // Surf real (2d equivalent at [[file:problem.hpp::pferbase]])
-typedef FEbase<double,v_fesS> * pfSrbase ;        // <<pf3rbase>>
-typedef FEbaseArray<double,v_fesS> * pfSrbasearray ;    // <<pf3rbasearray>>
-typedef pair<pfSrbase,int> pfSr ;            // <<pf3r>>
-typedef pair<pfSrbasearray,int> pfSrarray ;        // <<pf3rarray>>
+typedef FEbase<double,v_fesS> * pfSrbase ;
+typedef FEbaseArray<double,v_fesS> * pfSrbasearray ;
+typedef pair<pfSrbase,int> pfSr ;
+typedef pair<pfSrbasearray,int> pfSrarray ;
 
 // Surf complex (2d equivalent at [[file:problem.hpp::pfecbase]])
-typedef FEbase<Complex,v_fesS> * pfScbase ;        // <<pf3cbase>
-typedef FEbaseArray<Complex,v_fesS> * pfScbasearray ;    // <<pf3cbasearray>>
-typedef pair<pfScbase,int> pfSc ;            // <<pf3c>>
-typedef pair<pfScbasearray,int> pfScarray ;        // <<pf3carray>>
+typedef FEbase<Complex,v_fesS> * pfScbase ;
+typedef FEbaseArray<Complex,v_fesS> * pfScbasearray ;
+typedef pair<pfScbase,int> pfSc ;
+typedef pair<pfScbasearray,int> pfScarray ;
+
+// Curve real (2d equivalent at [[file:problem.hpp::pferbase]])
+typedef FEbase<double,v_fesL> * pfLrbase ;
+typedef FEbaseArray<double,v_fesL> * pfLrbasearray ;
+typedef pair<pfLrbase,int> pfLr ;
+typedef pair<pfLrbasearray,int> pfLrarray ;
+
+// Surf complex (2d equivalent at [[file:problem.hpp::pfecbase]])
+typedef FEbase<Complex,v_fesL> * pfLcbase ;
+typedef FEbaseArray<Complex,v_fesL> * pfLcbasearray ;
+typedef pair<pfLcbase,int> pfLc ;
+typedef pair<pfLcbasearray,int> pfLcarray ;       
+
 // fin
 
 

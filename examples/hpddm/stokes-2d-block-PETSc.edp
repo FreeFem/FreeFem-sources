@@ -35,6 +35,7 @@ real[int] DP;                 // partition of unity for the pressure
     real[int] part(Ph.ndof);
     if(mpirank == 0)
         partitionerSeq(part, ThGlobal, mpisize);
+    partitionerPar(part, ThGlobal, mpiCommWorld, mpisize);
     {
         macro def(u)def2(u)//
         macro init(u)init2(u)//

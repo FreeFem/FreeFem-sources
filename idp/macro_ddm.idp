@@ -167,17 +167,17 @@ if(mpiRank(comm) == 0) {
 // EOM
 
 macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank, size, s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs) {
-    assert(s == 1 || overlap == 1);
-    meshName[0] = trunc(globalName, abs(part - rank) < 0.1, label = fakeInterface);
+    assert(level >= 1);
+    meshName[level - 1] = trunc(globalName, abs(part - rank) < 0.1, label = fakeInterface);
     mpiBarrier(comm);
     real timerPartition = mpiWtime();
     intersection.resize(1);
     intersection[0].resize(0);
     {
-        fespace PhLocal(meshName[0], P0);
+        fespace PhLocal(meshName[level - 1], P0);
         PhLocal overshoot = hTriangle;
         real max = 4.0 * overlap * overshoot[].max;
-        bbN(meshName[0], max, globalName)
+        bbN(meshName[level - 1], max, globalName)
     }
     PhGlobal supp = abs(part - rank) < 0.1;
     VhGlobal suppSmooth;
@@ -188,7 +188,7 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank
         Oh partOverlap = part;
         Unique(partOverlap[], intersection[0], remove = rank);
     }
-    fespace VhLocal(meshName[0], P1);
+    fespace VhLocal(meshName[level - 1], P1);
     VhLocal[int] partitionIntersection(intersection[0].n);
     if(s > 1 && level <= 1) {
         globalName = trunc(globalName, suppSmooth > 0.001, split = s);
@@ -210,19 +210,26 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank
         epsTab = 1.0e+30;
     supp = supp;
     suppSmooth = suppSmooth;
-    meshName[0] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface);
+    meshName[level - 1] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface);
     prolongation.resize(level - 1);
-    for(int i = 1; i < level; ++i) {
-        meshName[i] = trunc(meshName[i - 1], 1, split = s);
-        fespace WhRefined(meshName[i], P);
-        fespace WhCoarse(meshName[i - 1], P);
-        prolongation[i - 1] = interpolate(WhRefined, WhCoarse);
+    for(int i = level - 1; i > 0; --i) {
+        meshName[i - 1] = trunc(meshName[i], 1, split = s);
+        fespace WhLocalRefined(meshName[i - 1], P);
+        fespace WhLocalCoarse(meshName[i], P);
+        prolongation[i - 1] = interpolate(WhLocalRefined, WhLocalCoarse);
     }
     if(!removeZeros && (fakeInterface != -111111 || overlap != 1)) {
         if(suppSmooth[].min < 0.501) {
-            borderName[0] = trunc(globalName, (suppSmooth > (overlap - 0.999) / (2 * overlap)) && (suppSmooth < 0.501), label = (abs(fakeInterface) + 1) * 100);
-            for(int i = 1; i < level; ++i)
-                borderName[i] = trunc(borderName[i - 1], 1, split = s); /* TODO: slimmer border */
+            borderName[level - 1] = trunc(globalName, (suppSmooth > (overlap - 0.999) / real(2 * overlap)) && (suppSmooth < 0.501), label = (abs(fakeInterface) + 1) * 100);
+            for(int i = level - 2; i >= 0; --i) {
+                borderName[i] = trunc(borderName[i + 1], 1, split = s);
+                fespace PhRefined(meshName[i], P0);
+                PhRefined suppRefined;
+                suppRefined = supp;
+                fespace VhBorderRefined(borderName[i], P1);
+                VhBorderRefined suppBorder = suppRefined;
+                borderName[i] = trunc(borderName[i], suppBorder > 0.01);
+            }
         }
     }
     VhLocal khi = max(2 * suppSmooth - 1.0, 0.0);
@@ -266,23 +273,25 @@ ENDIFMACRO
         }
     }
     partitionIntersection.resize(0);
-    for(int i = (trueRestrict ? 0 : 1); i < level; ++i) {
+    for(int i = 0; i < (trueRestrict ? level : level - 1); ++i) {
         fespace VhRefined(meshName[i], P1);
         fespace PhRefined(meshName[i], P0);
         PhRefined partRefined = part;
         PhRefined supp = abs(partRefined - rank) < 0.1;
         varf vSupp(u, v) = intN(meshName[i], qforder = 1)(supp * v);
-        VhRefined khiL = vSupp(0, VhRefined);
+        VhRefined khiL;
+        khiL[] = vSupp(0, VhRefined);
         khiL = khiL > 0.0;
         VhRefined sum = khiL;
         for(int j = 0; j < numberIntersection; ++j) {
             supp = abs(partRefined - intersection[0][j]) < 0.1;
-            VhRefined phiL = vSupp(0, VhRefined);
+            VhRefined phiL;
+            phiL[] = vSupp(0, VhRefined);
             phiL = phiL > 0.0;
             sum[] += phiL[];
         }
         khiL[] ./= sum[];
-        if(i > 0) {
+        if(i < level - 1) {
             fespace WhRefined(meshName[i], PkPart);
             WhRefined defPart(func2vec);
             defPart(func2vec) = initPart(khiL);
@@ -294,7 +303,7 @@ ENDIFMACRO
     }
     if(!trueRestrict)
         khi[] = khi[] ./= sum[];
-    fespace WhPart(meshName[0], PkPart);
+    fespace WhPart(meshName[level - 1], PkPart);
     WhPart defPart(func2vec);
     if(trueRestrict && mpiSize(comm) == size && removeZeros) {
         assert(level == 1);
@@ -373,18 +382,21 @@ IFMACRO(vectorialfe)
         }
 ENDIFMACRO
     defPart(func2vec) = initPart(khi);
-    D[0].resize(WhPart.ndof);
-    D[0] = func2vec[];
-    if(trueRestrict && ((WhPart.ndof % meshName[0].nt) == 0)) {
+    D[level - 1].resize(WhPart.ndof);
+    D[level - 1] = func2vec[];
+    if(trueRestrict && ((WhPart.ndof % meshName[level - 1].nt) == 0)) {
         defPart(func2vec) = initPart(abs(part - rank) < 0.1);
-        D[0] = func2vec[];
+        D[level - 1] = func2vec[];
     }
 }// EOM
 
 macro buildOverlapEdgePeriodicRecursive(Th, ThBorder, fakeInterface, s, overlap, level, prolongation, intersection, D, P, comm, excluded, PkPart, defPart, initPart, labPeriodic, userPartitioning, bs) {
+    Th.resize(level);
+    ThBorder.resize(level);
+    prolongation.resize(level - 1);
     real timing = mpiWtime();
     if(mpiSize(comm) > 1 && !excluded) {
-        meshN ThGlobal = Th[0];
+        meshN ThGlobal = Th[level - 1];
         fespace PhGlobal(ThGlobal, P0);
         fespace VhGlobal(ThGlobal, P1);
         PhGlobal partGlobal;
@@ -480,7 +492,7 @@ IFMACRO(vectorialfe)
 macro buildOverlapEdgeRecursive(Th, ThBorder, fakeInterface, s, overlap, level, prolongation, intersection, D, P, comm, excluded, PkPart, defPart, initPart, bs) {
     int[int] emptyArray(0);
     real[int] emptyRealArray(0);
-    buildOverlapEdgePeriodicRecursive(Th, ThBorder, fakeInterface, s, overlap, level, prolongation, intersection, DTab, P, comm, excluded, PkPart, defPart, initPart, emptyArray, emptyRealArray, bs)
+    buildOverlapEdgePeriodicRecursive(Th, ThBorder, fakeInterface, s, overlap, level, prolongation, intersection, D, P, comm, excluded, PkPart, defPart, initPart, emptyArray, emptyRealArray, bs)
 }// EOM
 macro buildOverlapEdge(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, PkPart, defPart, initPart, bs) {
     int[int] emptyArray(0);
@@ -552,7 +564,7 @@ IFMACRO(!vectorialfe)
 macro buildOverlapEdgeRecursive(Th, ThBorder, fakeInterface, s, overlap, level, prolongation, intersection, D, P, comm, excluded, PkPart, defPart, initPart) {
     int[int] emptyArray(0);
     real[int] emptyRealArray(0);
-    buildOverlapEdgePeriodicRecursive(Th, ThBorder, fakeInterface, s, overlap, level, prolongation, intersection, DTab, P, comm, excluded, PkPart, defPart, initPart, emptyArray, emptyRealArray, 1)
+    buildOverlapEdgePeriodicRecursive(Th, ThBorder, fakeInterface, s, overlap, level, prolongation, intersection, D, P, comm, excluded, PkPart, defPart, initPart, emptyArray, emptyRealArray, 1)
 }// EOM
 macro buildOverlapEdge(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, PkPart, defPart, initPart) {
     int[int] emptyArray(0);

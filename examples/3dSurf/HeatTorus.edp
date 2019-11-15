@@ -11,20 +11,15 @@ func torez= r*sin(y*pi*2);
 
 
 meshS ThS=square3(nx,ny,[torex,torey,torez],removeduplicate=true) ;
-//cout << "test" << ThS.nv << " " <<ThS.nt << " " << ThS.nbe << endl;
-//mesh3 Th3=tetg(ThS,switch="paAAQYY"); //,nbofregions=1,regionlist=domain);
+cout << "test" << ThS.nv << " " <<ThS.nt << " " << ThS.nbe << endl;
+mesh3 Th3=tetg(ThS,switch="paAAQYY"); //,nbofregions=1,regionlist=domain);
 
-cout << " tetetetetetetetete" << endl;
-ThS=checkmesh(ThS);
+plot(Th3);
 
-
-plot(ThS);
-
-/*fespace VhS(ThS,P1);
+fespace VhS(ThS,P1);
 VhS u,v;
 macro grad3(u) [dx(u),dy(u),dz(u)]  // EOM
 
 solve Lap(u,v) = int2d(ThS)( u*v+grad3(u)'*grad3(v)) -int2d(ThS)((x+y)*v);
 
 plot(u,wait=1,nbiso=20,fill=1);
-*/

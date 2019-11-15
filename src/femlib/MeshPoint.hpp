@@ -25,11 +25,14 @@ class MeshPointBase { public:
   const Mesh * Th;
   const Mesh3 * Th3;
   const MeshS * ThS;
+  const MeshL * ThL;
   };
   union{
   const Triangle * T;
   const Tet * T3;
   const TriangleS * TS;
+  const EdgeL * TL;
+      
   };
   long region, t,v,f,e,gsens; // triangle,vertex, face or edge
   long  label;
@@ -498,7 +501,7 @@ class MeshPointBase { public:
         dHat=2;
     }
 
-    void set(const  MeshS &aTh, const R3 &P2,const R3 & P_Hat,const TriangleS & aK,const int ll,bool coutside=false)
+    void set(const  MeshS &aTh, const R3 &P2,const R3 & P_Hat,const TriangleS & aK,const int ll,bool coutside=false)      ////// wwwwww
     {
         P=P2;
         PHat=P_Hat;
@@ -523,7 +526,6 @@ class MeshPointBase { public:
         const Mesh3::Vertex & V=(*TS)[ss];
         P= V ;
         PHat = TriangleHat[ss];
-        PHat.z=0;
         ThS=pTh;
         region = TS->lab;
         label = V.lab;
@@ -537,6 +539,111 @@ class MeshPointBase { public:
 
 
   // --------
+    
+    
+ // --------3D line
+ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,int ipoint)
+ {
+        P=P2;
+        PHat=P_Hat;
+        TL=&K.T;
+        ThL=&K.Vh.Th;
+        region = TL->lab;
+        label = ll;
+        v=f=-1;
+        e=ipoint;
+        t=(*ThL)(TL);
+        VF=0;
+        d=3;
+        dHat=1;
+    }
+    
+    void set(const MeshL & aTh,const R3 &P2,const R1 & P_Hat,const EdgeL & aK,int ll,int ipoint,int VFF=0)
+    {
+        P=P2;
+        PHat=P_Hat;
+        TL=&aK;
+        ThL=&aTh;
+        region = TS->lab;
+        label = ll;
+        v=f=-1;
+        t=(*Th)(T);
+        e=ipoint;
+        VF=VFF;
+        d=3;
+        dHat=1;
+    }
+    
+    void set(const R3 &P2, const R1 & P_Hat,const baseFElementL & K,int ll)
+    {
+        P=P2;
+        PHat=P_Hat;
+        TL=&K.T;
+        ThL=&K.Vh.Th;
+        region = TL->lab;
+        label = ll;
+        t=(*ThL)(TL);
+        v=f=e=-1;
+        VF=0;
+        d=3;
+        dHat=1;
+    }
+    
+    void set(const R3 &P2, const R1 & P_Hat,const  baseFElementL & K)
+    {
+        P=P2;
+        PHat=P_Hat;
+        TL=&K.T;
+        ThL=&K.Vh.Th;
+        region = TL->lab;
+        v=f=e=-1;
+        VF=0;
+        int ll[3],kk(0);
+        if ( P_Hat.x<1.e-6) label=0;
+        else
+            label=-1;// to say
+       
+        t=(*ThL)(TL);
+        d=3;
+        dHat=1;
+    }
+    
+    void set(const  MeshL &aTh, const R3 &P2,const R1 & P_Hat,const EdgeL & aK,const int ll,bool coutside=false)
+    {
+        P=P2;
+        PHat=P_Hat;
+        TL=&aK;
+        ThL=&aTh;
+        region = TL->lab;
+        label = ll;
+        t=(*ThL)(TL);
+        v=f=e=-1;
+        outside=coutside;
+        VF=0;
+        d=3;
+        dHat=1;
+    }
+    
+    void setP(const MeshL * pTh,int tt,int ss)
+    {
+        TL=&(*pTh)[tt];
+        const MeshL::Vertex & V=(*TL)[ss];
+        P= V ;
+        PHat = PointHat[ss];
+        ThL=pTh;
+        region = TL->lab;
+        label = V.lab;
+        t=tt;
+        v=f=e=-1;
+        v=ss;
+        VF=0;
+        d=3;
+        dHat=1;
+    }
+    
+    
+    // --------
+
 };
 class MeshPoint : public MeshPointBase { public:
   MeshPointBase other;
@@ -598,6 +705,25 @@ class MeshPoint : public MeshPointBase { public:
       MeshPointBase::set(aTh,P2,P_Hat,aK,ll,coutside);
       other.unset();
     }
+    
+  // 3D curve
+  void set(const R3 &P2,const R1 & P_Hat,const  baseFElementL & K,int ll,int ipoint) {
+      MeshPointBase::set(P2,P_Hat,K,ll,/*NN,*/ipoint);
+      other.unset();}
+  void set(const MeshL & aTh,const R3 &P2,const R1 & P_Hat,const EdgeL &aK,int ll,int ipoint) {
+      MeshPointBase::set(aTh,P2,P_Hat,aK,ll,ipoint);
+      other.unset();}
+  void set(const MeshL & aTh,const R3 &P2,const R1 & P_Hat,const EdgeL &aK,int ll,int ipoint,int VFF) {
+      MeshPointBase::set(aTh,P2,P_Hat,aK,ll,ipoint,VFF);
+      other.unset();}
+  void set(const R3 &P2,const R1 & P_Hat,const  baseFElementL & K) {
+      MeshPointBase::set(P2,P_Hat,K);
+      other.unset();
+   }
+  void set(const MeshL &aTh, const R3 &P2,const R1 & P_Hat,const EdgeL &aK, const int ll,bool coutside=false) {
+      MeshPointBase::set(aTh,P2,P_Hat,aK,ll,coutside);
+      other.unset();
+   }
 //fin 3d
  
     
@@ -617,6 +743,9 @@ class MeshPoint : public MeshPointBase { public:
       MeshPointBase::setP(pTh,tt,ss);
       other.unset(); }
   void setP(const MeshS * pTh,int tt,int ss) {  // 3D surface
+      MeshPointBase::setP(pTh,tt,ss);
+      other.unset(); }
+  void setP(const MeshL * pTh,int tt,int ss) {  // 3D line
       MeshPointBase::setP(pTh,tt,ss);
       other.unset(); }
 

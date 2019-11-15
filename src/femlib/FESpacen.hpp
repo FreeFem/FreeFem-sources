@@ -51,6 +51,7 @@
 using namespace std;
 #include "error.hpp"
 #include "ufunction.hpp"
+#include "MeshLn.hpp"
 #include "MeshSn.hpp"
 #include "Mesh3dn.hpp"
 #include "Mesh2dn.hpp"
@@ -802,15 +803,19 @@ void InterpolationMatrix<RdHat>::set(const GFElement<Mesh> & FK)
 
 typedef  GTypeOfFE<Mesh3> TypeOfFE3;
 typedef  GTypeOfFE<MeshS> TypeOfFES;
+typedef  GTypeOfFE<MeshL> TypeOfFEL;
 typedef  GFESpace<Mesh3> FESpace3;
 typedef  GFESpace<MeshS> FESpaceS;
+typedef  GFESpace<MeshL> FESpaceL;
 typedef  GFESpace<Mesh2> FESpace2;
+typedef  GFElement<MeshL> FElementL;
 typedef  GFElement<Mesh3> FElement3;
 typedef  GFElement<MeshS> FElementS;
 typedef  GFElement<Mesh2> FElement2;
 typedef  GbaseFElement<Mesh2> baseFElement2;
 typedef  GbaseFElement<Mesh3> baseFElement3;
 typedef  GbaseFElement<MeshS> baseFElementS;
+typedef  GbaseFElement<MeshL> baseFElementL;
 
 }
 

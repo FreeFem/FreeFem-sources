@@ -231,6 +231,7 @@ void signalCPUHandler( int signum ) {
 %type <cexp>  ID_array_space
 %type <args> bornes;
 %type <args>   border_expr;
+%type <args>   curve3_expr;
 %type <type>   type_of_dcl;
 %type <str> id;
 %type <str> fespace123;
@@ -295,7 +296,7 @@ void signalCPUHandler( int signum ) {
 %token <str> FESPACE1
 %token <str> FESPACE3
 %token <str> FESPACES
-
+%token <str> FESPACEL
 
 %token DOTSTAR
 %token DOTSLASH
@@ -321,7 +322,7 @@ void signalCPUHandler( int signum ) {
 %token GTGT
 %token ARROW
 %token BORDER
-%token CURVE
+%token CURVE3
 %token SOLVE
 
 %%
@@ -329,7 +330,7 @@ void signalCPUHandler( int signum ) {
 start:   input ENDOFFILE {
                         if(  ffapi::ff_justcompile) exit(0);
     // clean FH  mach 2014
-		        const char *  magicffglut="#!ffglutdata4.0\n";// for complex and vector 3d plot
+		        const char *  magicffglut="#!ffglutdata4.1\n";// for complex and vector 3d plot
 			//FFCS: divert stream to FFCS
                         if(ThePlotStream) ffapi::fwriteinit(magicffglut,strlen(magicffglut),1,ThePlotStream);
 
@@ -416,6 +417,8 @@ list_of_id_args: /* returns [[YYSTYPE_clist_id]] */
   | FESPACE3 '&' id                            { $$ = new ListOfId(); $$->push_back(UnId($3,Find($1),atype<FE<double,3> **>(),true));}
   | FESPACES id                                { $$ = new ListOfId(); $$->push_back(UnId($2,Find($1),atype<FE<double,4> **>()));}
   | FESPACES '&' id                            { $$ = new ListOfId(); $$->push_back(UnId($3,Find($1),atype<FE<double,4> **>(),true));}
+  | FESPACEL id                                { $$ = new ListOfId(); $$->push_back(UnId($2,Find($1),atype<FE<double,5> **>()));}
+  | FESPACEL '&' id                            { $$ = new ListOfId(); $$->push_back(UnId($3,Find($1),atype<FE<double,5> **>(),true));}
   | type_of_dcl id                             { $$ = new ListOfId(); $$->push_back(UnId($2,C_F0(),$1->right()));}
   | type_of_dcl '&' id                         { $$ = new ListOfId(); $$->push_back(UnId($3,C_F0(),$1,true));}
   | '[' list_of_id_args ']'                    { $$ = new ListOfId(); $$->push_back(UnId($2));}
@@ -428,6 +431,8 @@ list_of_id_args: /* returns [[YYSTYPE_clist_id]] */
   | list_of_id_args ',' FESPACE3 '&' id        { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double,3> **>(),true));}
   | list_of_id_args ',' FESPACES id            { $$ = $1; $$->push_back(UnId($4,Find($3),atype<FE<double,4> **>()));}
   | list_of_id_args ',' FESPACES '&' id        { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double,4> **>(),true));}
+  | list_of_id_args ',' FESPACEL id            { $$ = $1; $$->push_back(UnId($4,Find($3),atype<FE<double,5> **>()));}
+  | list_of_id_args ',' FESPACEL '&' id        { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double,5> **>(),true));}
   | list_of_id_args ',' type_of_dcl id         { $$ = $1; $$->push_back(UnId($4,C_F0(),$3->right()));}
   | list_of_id_args ',' type_of_dcl '&' id     { $$ = $1; $$->push_back(UnId($5,C_F0(),$3,true));}
   ;
@@ -438,7 +443,7 @@ list_of_id1:  id                      { $$ = new ListOfId(); $$->push_back(UnId(
 
 /* <<id>> (anchor required because 'id:' is another type of hyperlink) */
 
-id: ID | FESPACE|FESPACE3|FESPACES|FESPACE1;
+id: ID | FESPACE|FESPACE3|FESPACES|FESPACEL|FESPACE1;
 
 list_of_dcls:
       ID                            {$$=currentblock->NewVar<LocalVariable>($1,dcltype);}
@@ -455,6 +460,7 @@ parameters_list:
 	| FESPACE1  ID                           { $$=Find($1);}
 	| FESPACE3  ID                           { $$=Find($1);}
     | FESPACES  ID                           { $$=Find($1);}
+    | FESPACEL  ID                           { $$=Find($1);}
 	| ID '=' no_set_expr                     { $$=make_pair<const char *,const C_F0>((const char *) $1,(C_F0) $3);}
 	| parameters_list ',' no_set_expr        { $$ = ($1 += $3);}
 	| parameters_list ',' id '=' no_set_expr { $$= ($1+= make_pair<const char *,const C_F0>((const char *) $3,(C_F0) $5));}
@@ -490,6 +496,7 @@ fespace123:
     | FESPACE1 { fespacedim=1;}
     | FESPACE3 { fespacedim=3;}
     | FESPACES { fespacedim=4;}
+    | FESPACEL { fespacedim=5;}
     ;
 
 fespace:  fespace123 {fespacecomplex=false;  fespacetype = Find($1);}
@@ -596,6 +603,12 @@ instruction:   ';' {$$=0;}
          |  BORDER  ID   '['  array ']' ';' {
                       $$=0;currentblock->NewID(atype<const E_Border *>(),$2,C_F0(TheOperators,"[border]",$4));}
 
+        |  CURVE3  ID   curve3_expr { /* <<BORDER_ID>> */
+                $$=0;currentblock->NewID(atype<const E_Curve3 *>(),$2,C_F0(TheOperators,"[curve3]",$3));}
+        |  CURVE3  ID   '['  array ']' ';' {
+                $$=0;currentblock->NewID(atype<const E_Curve3 *>(),$2,C_F0(TheOperators,"[curve3]",$4));}
+
+
          |  BREAK ';' {
                     if(inloopcount)
                       $$= C_F0(new E_throw(E_exception::e_break),atype<void>());
@@ -635,6 +648,12 @@ border_expr:   bornes instruction {
    $$ = ($1 += currentblock->close(currentblock,$2));
    }
  ;
+
+curve3_expr:   bornes instruction {
+    //currentblock->close(currentblock;);
+    $$ = ($1 += currentblock->close(currentblock,$2));
+}
+;
 
 Expr:
     no_comma_expr /*[[no_comma_expr:]]*/
@@ -705,12 +724,14 @@ parameters: /* returns [[YYSTYPE_args]] */                  {$$ = 0;} /* <<no_pa
   | FESPACE1                                                {$$ = Find($1);}
   | FESPACE3                                                {$$ = Find($1);}
   | FESPACES                                                {$$ = Find($1);}
+  | FESPACEL                                                {$$ = Find($1);}
   | id /*[[id]]*/ '=' no_set_expr /*[[no_set_expr:]]*/      {$$ = make_pair<const char *,const C_F0>((const char *) $1,(C_F0) $3);}
   | sub_script_expr /*[[sub_script_expr:]]*/                {$$ = $1;}
   | parameters ',' FESPACE                                  {$$ = ($1 += Find($3));}
   | parameters ',' FESPACE1                                 {$$ = ($1 += Find($3));}
   | parameters ',' FESPACE3                                 {$$ = ($1 += Find($3));}
   | parameters ',' FESPACES                                 {$$ = ($1 += Find($3));}
+  | parameters ',' FESPACEL                                 {$$ = ($1 += Find($3));}
   | parameters ',' sub_script_expr /*[[sub_script_expr:]]*/ {$$ = ($1 += $3);}
 
     /* <<named_function_parameters>> */
@@ -768,6 +789,8 @@ primary: /* returns a [[YYSTYPE_cexp]] */
   |        FESPACE3 '(' parameters ')'     { $$=C_F0(Find($1),$2,$3) ;}
   |        FESPACES '.'  ID       { $$=C_F0(Find($1),$3) ;}
   |        FESPACES '(' parameters ')'     { $$=C_F0(Find($1),$2,$3) ;}
+  |        FESPACEL '.'  ID       { $$=C_F0(Find($1),$3) ;}
+  |        FESPACEL '(' parameters ')'     { $$=C_F0(Find($1),$2,$3) ;}
   |        primary PLUSPLUS      {$$=C_F0(TheRightOperators,$2,$1);}
   |        primary MOINSMOINS    {$$=C_F0(TheRightOperators,$2,$1);}
   |        TYPE '('  Expr ')' {
@@ -970,6 +993,7 @@ int mainff (int  argc, char **argv)
    zzzfff->Add("continue",CONTINUE);
    zzzfff->Add("return",RETURN);
    zzzfff->Add("border",BORDER);
+   zzzfff->Add("curve3",CURVE3);
    zzzfff->Add("fespace",FESPACEID);
    zzzfff->Add("try",TRY);
    zzzfff->Add("catch",CATCH);

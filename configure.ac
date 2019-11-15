@@ -2313,8 +2313,8 @@ AC_OUTPUT(
     src/Algo/Makefile
     src/lglib/Makefile
     src/ffgraphics/Makefile
-      src/ffgraphics/server/Makefile
-      src/ffgraphics/client/Makefile
+    src/ffgraphics/server/Makefile
+    src/ffgraphics/client/Makefile
     src/fflib/Makefile
     src/nw/Makefile
     src/mpi/Makefile
@@ -2338,6 +2338,7 @@ AC_OUTPUT(
     examples/other/Makefile
     examples/3d/Makefile
     examples/3dSurf/Makefile
+	examples/3dCurve/Makefile
 )
 
 AC_MSG_NOTICE([  freefem++ used download: $enable_download ])

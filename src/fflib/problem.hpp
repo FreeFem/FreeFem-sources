@@ -284,26 +284,29 @@ public:
   enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3, int3d = 4, intallfaces= 5,intallVFfaces=6 } ; //3d
   typeofkind  kind; //  0
   int d; // 3d
-  bool isMeshS;
+  bool isMeshS,isMeshL;
   typedef const CDomainOfIntegration* Result;
   Expression Th;
   Expression mapt[3],mapu[3];
   vector<Expression> what;
   vector<int> whatis; // 0 -> long , 1 -> array ???
-  CDomainOfIntegration( const basicAC_F0 & args,typeofkind b=int2d,int ddim=2,bool surface=false) // 3d
+  CDomainOfIntegration( const basicAC_F0 & args,typeofkind b=int2d,int ddim=2,bool surface=false, bool curve=false) // 3d
     :kind(b),d(ddim), Th(0), what(args.size()-1),whatis(args.size()-1)
 
   {
-      isMeshS=surface;
+    isMeshS=surface;
+    isMeshL=curve;
     mapt[0]=mapt[1]=mapt[2]=0; // no map of intergration points for test function
     mapu[0]=mapu[1]=mapu[2]=0; // no map of intergration points for unknows function
     args.SetNameParam(n_name_param,name_param,nargs);
     if(d==2) // 3d
       Th=CastTo<pmesh>(args[0]);
-    else if(d==3 && !surface){
+    else if(d==3 && !surface && !curve){
         Th=CastTo<pmesh3>(args[0]);}
-    else if(d==3 && surface){
+    else if(d==3 && surface && !curve){
         Th=CastTo<pmeshS>(args[0]);}
+    else if(d==3 && !surface && curve){
+        Th=CastTo<pmeshL>(args[0]);}
     else ffassert(0); // a faire
     int n=args.size();
 
@@ -415,6 +418,15 @@ public:
 };
 
 
+// 3D curve
+
+class CDomainOfIntegrationL: public CDomainOfIntegration {
+public:
+    CDomainOfIntegrationL( const basicAC_F0 & args) :CDomainOfIntegration(args,int1d,3,false,true) {}
+    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int1d,3,false,true);}
+    static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshL>(), true);} // all type
+};
+
 // hack build template
 template<class T> struct CadnaType{
    typedef T  Scalaire;
@@ -485,7 +497,9 @@ public:
   Data<FESpace> * dataptr (Stack stack) const {return   (Data<FESpace> *) (void *) (((char *) stack)+offset);}
   Data<FESpace3> * dataptr3 (Stack stack) const {return   (Data<FESpace3> *) (void *) (((char *) stack)+offset);}
   Data<FESpaceS> * dataptrS (Stack stack) const {return   (Data<FESpaceS> *) (void *) (((char *) stack)+offset);}
+  Data<FESpaceL> * dataptrL (Stack stack) const {return   (Data<FESpaceL> *) (void *) (((char *) stack)+offset);}
 
+    
   void init(Stack stack) const  {
       // cout << " init  " << (char *) dataptr(stack) - (char*) stack  << " " << offset <<  endl;
       if(dim==2)
@@ -494,11 +508,14 @@ public:
       dataptr3(stack)->init();
       else if(dim==4)
       dataptrS(stack)->init();
+      else if(dim==5)
+      dataptrL(stack)->init();
   }
   void destroy(Stack stack)  const  {
       if(dim==2) dataptr(stack)->destroy();
       else if(dim==3) dataptr3(stack)->destroy();
       else if(dim==4) dataptrS(stack)->destroy();
+      else if(dim==5) dataptrL(stack)->destroy();
   }
 
   template<class R,class FESpace,class v_fes>
@@ -1136,7 +1153,15 @@ template<class R>   void  Element_Op(MatriceElementairePleine<R,FESpaceS> & mat,
 template<class R>   void  Element_Op(MatriceElementaireSymetrique<R,FESpaceS> & mat,const FElementS & Ku,double * p,int ie,int label,
                                     void * stack,R3 *B);
 
-									// End surf version
+// 3d curve case
+template<class R>   void AssembleLinearForm(Stack stack,const MeshL & Th,const FESpaceL & Vh,KN_<R> * B,const  FormLinear * const l);
+template<class R>   void  Element_rhs(const FElementL & Kv,int ie,int label,const LOperaD &Op,double * p,void * stack,KN_<R> & B,bool all,int optim);
+template<class R>   void  Element_rhs(const FElementL & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,int optim);
+template<class R>   void  Element_Op(MatriceElementairePleine<R,FESpaceL> & mat,const FElementL & Ku,const FElementL & Kv,double * p,
+                                     int ie,int label, void *stack,R3 *B);
+template<class R>   void  Element_Op(MatriceElementaireSymetrique<R,FESpaceL> & mat,const FElementL & Ku,double * p,int ie,int label,
+                                     void * stack,R3 *B);
+    
 }
 
 

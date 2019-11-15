@@ -52,7 +52,8 @@ public:
   R3 (R2 P2,R zz):x(P2.x),y(P2.y),z(zz)  {}
   R3 (const R3 & A,const R3 & B) :x(B.x-A.x),y(B.y-A.y),z(B.z-A.z)  {}
   static  R3 diag(R a){ return R3(a,a,a);}
-  R3 & operator=(const R2 &P2) {x=P2.x;y=P2.y;z=0;return *this;}
+  R3 & operator=(const R2 &P2) {x=P2.x;y=P2.y;z=0.;return *this;}
+  R3 & operator=(const R1 &P2) {x=P2.x;y=0.;z=0.;return *this;}
   R3   operator+(const R3 &P)const   {return R3(x+P.x,y+P.y,z+P.z);}
   R3 & operator+=(const R3 &P)  {x += P.x;y += P.y;z += P.z;return *this;}
   R3   operator-(const R3 &P)const   {return R3(x-P.x,y-P.y,z-P.z);}

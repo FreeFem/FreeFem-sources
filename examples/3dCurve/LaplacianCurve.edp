@@ -1,0 +1,17 @@
+load "msh3" 
+ 
+meshL ThL3=line3(40); //,[x,1,x*0.1]);
+
+fespace Vh(ThL3,P1);
+func f = 1 ;
+macro Grad3(uh) [dx(uh),dy(uh),dz(uh)]  // EOM
+
+Vh uLPb,vLPb;
+
+// with problem
+problem Lap3dL(uLPb,vLPb)  = int1d(ThL3)(Grad3(uLPb)'*Grad3(vLPb))
+ - int1d ( ThL3 ) ( f * vLPb )
+  + on(1,uLPb=0);
+Lap3dL;
+
+plot(ThL3,uLPb);
