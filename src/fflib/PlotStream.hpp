@@ -35,7 +35,7 @@ public:
   operator bool() const { return TheStream;}
   // datatype mush be < 0 to have no collistion with arg number. 
   // FFCS: <<PlotStream::datatype>>
-    enum datatype { dt_meshes=-1,dt_plots=-2,dt_endplot=-3,dt_meshes3=-10,dt_endarg=99999,dt_newplot=-5, dt_meshesS=-12};    // modif order
+    enum datatype { dt_meshes=-1,dt_plots=-2,dt_endplot=-3,dt_meshes3=-10,dt_endarg=99999,dt_newplot=-5, dt_meshesS=-12, dt_meshesL=-13};    // modif order
   
   //  dt_plots3=-11,dt_plotsS=-13,dt_plots3S=-14
   //FFCS:need to send control data to FFCS at least once per plot
@@ -47,6 +47,7 @@ public:
   void SendMeshes() { write((long )dt_meshes);}
   void SendMeshes3() { write((long )dt_meshes3);}
   void SendMeshesS() { write((long )dt_meshesS);}
+  void SendMeshesL() { write((long )dt_meshesL);}
   //FFCS: divert stream to FFCS
   void write(const void *data,size_t l) {ffapi::ff_fwrite(data,1,l,TheStream);}
 
@@ -113,7 +114,7 @@ public:
   PlotStream & operator << (const Fem2D::Mesh2& Th) { Th.GSave(TheStream); return *this;}
   PlotStream & operator << (const Fem2D::Mesh3& Th) { Th.GSave(TheStream); return *this;}
   PlotStream & operator << (const Fem2D::MeshS& Th) { Th.GSave(TheStream); return *this;}
-    
+  PlotStream & operator << (const Fem2D::MeshL& Th) { Th.GSave(TheStream); return *this;}
     
   void read( void *data,size_t l) {
 	char * p= (char*)data;
@@ -141,9 +142,10 @@ public:
       
        if(tt== dt_meshes3) return 0;
         else if (tt== dt_meshesS) return 1;
-        else if (tt== dt_plots) return 2;
+       else if (tt== dt_meshesL) return 2;
+        else if (tt== dt_plots) return 3;    /// modif dans ff gl
      
-        cout << " Error Check :  get " << tt << " == wait for  "<< dt_meshes3 << " or "<< dt_meshesS << " or "<< dt_plots << endl;
+        cout << " Error Check :  get " << tt << " == wait for  "<< dt_meshes3 << " or "<< dt_meshesS << " or "<< dt_meshesL << " or " << dt_plots << endl;
         ffassert(0);
     }
 
@@ -221,6 +223,7 @@ public:
     PlotStream &  operator >> ( Fem2D::Mesh3 *& Th) {	Th= new Fem2D::Mesh3(TheStream); return *this;}
     PlotStream &  operator >> ( Fem2D::Mesh2 *& Th) {	Th= new Fem2D::Mesh2(TheStream); return *this;}
     PlotStream &  operator >> ( Fem2D::MeshS *& Th) {    Th= new Fem2D::MeshS(TheStream); return *this;}
+    PlotStream &  operator >> ( Fem2D::MeshL *& Th) {    Th= new Fem2D::MeshL(TheStream); return *this;}
     
     // ---   I also write the type .. to skip data if we  need  to skip data 
     // just change   >> and <<  by :  <= and >= 

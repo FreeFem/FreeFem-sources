@@ -19,6 +19,7 @@ P012_1d.cpp \
 P012_2d.cpp \
 P012_3d.cpp \
 P012_3dSurf.cpp \
+P012_3dCurve.cpp \
 PkLagrange.hpp \
 Mesh1dn.cpp \
 Mesh1dn.hpp \
@@ -28,6 +29,8 @@ Mesh3dn.cpp \
 Mesh3dn.hpp \
 MeshSn.cpp \
 MeshSn.hpp \
+MeshLn.cpp \
+MeshLn.hpp \
 HashTable.hpp \
 Label.hpp \
 assertion.hpp \

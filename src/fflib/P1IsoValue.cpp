@@ -72,6 +72,84 @@ inline void pen23tet(R3 P[6],R3 Q[3][4])
      for(int i=0; i<4;++i)
         Q[k][i]=P[d0[k][i]];
 }
+
+/*int UnderIso(double *f,R1 Q[1][2] ,double area2[2],  double eps)
+{
+    
+    const R1 *K = R1::KHat;
+    const  int p1[]= {0,1};
+    const  int p2[]= {1,0};
+    R v=0;
+    //  build  the negative tetra under zero iso value of f ..
+    double fmx=f[0], fmn=f[0];
+    fmx = std::max(fmx,f[1]);
+    fmn = std::min(fmn,f[1]);
+    
+    if( fmn >= v - eps)
+    {
+        area2[0]=1;
+        return 0; // no intersection ..
+    }
+    if( fmx <= v+ eps)
+    {
+        area2[0]=1;
+        return 1;
+    }; //  full triz ..
+    
+    int np[4],nm[4];
+    int km=0,kp=0;
+    
+    int nedge=0;
+    for (int i=0;i<2;++i)
+    {
+        if(f[i]<=v+eps) nm[km++]=i;
+        else np[kp++] = i;
+    }
+    if(km == 0)
+    {
+        area2[0]=0;
+        return 0;
+    }
+    else if( km == 1)
+    { //  1 tet  j, j+1, j+2, j+3
+        int j0=nm[0];
+        int j1=p1[j0], j2=p2[j0];
+        Q[0][0]=K[j0];
+        Q[0][1]=bary(K,f,j0,j1,v);
+        Q[0][2]=bary(K,f,j0,j2,v);
+        ntria=1;
+    }
+    else if( km == 2)
+    {// 1 prisme
+        ntria=2;
+        int j0 = np[0];
+        int j1=p1[j0], j2=p2[j0];
+        R2 Q1=bary(K,f,j0,j1,v);
+        R2 Q2=bary(K,f,j0,j2,v);
+        Q[0][0]=K[j1];
+        Q[0][1]=K[j2];
+        Q[0][2]=Q2;
+        Q[1][0]=K[j1];
+        Q[1][1]=Q2;
+        Q[1][2]=Q1;
+    }
+    else if( km == 3)
+    {
+        area2[0]=1;
+        return 1;
+    }
+    // vol computation
+    for(int k=0; k< ntria; ++k)
+    {
+        area2[k]=det(Q[k][0],Q[k][1],Q[k][2]);
+        //cout <<area2[k] << endl;
+        assert(area2[k] >= - eps);
+    }
+    
+    return ntria;
+    
+}
+*/
 int UnderIso(double *f,R2 Q[2][3] ,double area2[2],  double eps)
 {
  

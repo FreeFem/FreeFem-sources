@@ -37,7 +37,7 @@ matrix<real> Mat = vPb(Wh, Wh, tgv = -1);
 real[int] rhs = vPb(0, Wh, tgv = -1);
 
 schwarz A(Mat, intersection, D);
-set(A, sparams = "-hpddm_schwarz_coarse_correction balanced -hpddm_geneo_nu 20");
+set(A, sparams = "-hpddm_schwarz_coarse_correction balanced -hpddm_geneo_nu 10");
 
 int solver = getOption("schwarz_method");
 if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) { // two-level Schwarz methods

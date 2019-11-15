@@ -20,7 +20,7 @@ class initDDM : public OneOperator {
                 Expression R;
                 Expression D;
                 const int c;
-                static const int n_name_param = 3;
+                static const int n_name_param = 2;
                 static basicAC_F0::name_and_type name_param[];
                 Expression nargs[n_name_param];
                 E_initDDM(const basicAC_F0& args, int d) : A(0), Mat(0), R(0), D(0), c(d) {
@@ -48,8 +48,7 @@ class initDDM : public OneOperator {
 template<class Type, class K>
 basicAC_F0::name_and_type initDDM<Type, K>::E_initDDM::name_param[] = {
     {"communicator", &typeid(pcommworld)},
-    {"scaled", &typeid(bool)},
-    {"prefix", &typeid(string*)}
+    {"scaled", &typeid(bool)}
 };
 template<class Type, class K>
 AnyType initDDM<Type, K>::E_initDDM::operator()(Stack stack) const {
@@ -81,8 +80,6 @@ AnyType initDDM<Type, K>::E_initDDM::operator()(Stack stack) const {
         const MPI_Comm& comm = MPI_COMM_SELF;
         ptA->HPDDM::template Subdomain<K>::initialize(dA, STL<long>( KN<long>()), KN<KN<long>>(), const_cast<MPI_Comm*>(&comm));
     }
-    if(nargs[2])
-        ptA->setPrefix(*(GetAny<string*>((*nargs[2])(stack))));
     return ptA;
 }
 
@@ -470,7 +467,7 @@ template<class Type, class K>
 class set_Op : public E_F0mps {
     public:
         Expression A;
-        static const int n_name_param = 1;
+        static const int n_name_param = 2;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         set_Op(const basicAC_F0& args, Expression param) : A(param) {
@@ -481,7 +478,8 @@ class set_Op : public E_F0mps {
 };
 template<class Type, class K>
 basicAC_F0::name_and_type set_Op<Type, K>::name_param[] = {
-    {"sparams", &typeid(string*)}
+    {"sparams", &typeid(string*)},
+    {"prefix", &typeid(string*)}
 };
 template<class Type, class K>
 class set : public OneOperator {
@@ -496,6 +494,10 @@ template<class Type, class K>
 AnyType set_Op<Type, K>::operator()(Stack stack) const {
     if(nargs[0])
         HPDDM::Option::get()->parse(*(GetAny<string*>((*nargs[0])(stack))));
+    if(nargs[1]) {
+        Type* ptA = GetAny<Type*>((*A)(stack));
+        ptA->setPrefix(*(GetAny<string*>((*nargs[1])(stack))));
+    }
     return 0L;
 }
 
@@ -661,6 +663,7 @@ class IterativeMethod : public OneOperator {
                 void addMatMul(const KNM_<R>& xx, KNM_<R>& Ax) const {
                     ffassert(xx.N() == Ax.N());
                     ffassert(xx.M() == Ax.M());
+                    x.resize(xx.N(), xx.M());
                     x = xx;
                     Ax = GetAny<KNM_<R>>((*mat)(stack));
                     WhereStackOfPtr2Free(stack)->clean();

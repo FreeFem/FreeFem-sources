@@ -34,6 +34,12 @@ All notable changes to this project will be documented in this file.
 - FFTW is not compiled by PETSc anymore
 - Spurious outputs in TetGen plugin
 
+### Fixed
+-  plotMPI function for plotting 3D solutions, problem with serialize
+-  variable mes in clean_mesh function
+-  correct bug verflow in plugin iohdf5
+- correct problem with buffer iostrean function (buffer must be out of range )
+
 ## [4.4-2]
 ### Added
 - add matrix and array tools (FH)

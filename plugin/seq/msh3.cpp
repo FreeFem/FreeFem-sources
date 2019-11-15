@@ -4934,7 +4934,7 @@ MeshS*truncmesh (const MeshS &Th, const long &kksplit, int *split, bool WithMort
     }
     delete [] vertex1Dsub;
     delete [] edge1Dsub;
-
+    nbe =ie;
     if (verbosity>3 ) {
         cout << "  - Nb of vertices       " << nv << endl;
         cout << "  - Nb of triangle       " << nt << endl;
@@ -7206,14 +7206,21 @@ AnyType Square_Op::operator () (Stack stack)  const {
                 mpp->setP(&Th, it, iv);
                 if (xx)
                     v[i].x = GetAny<double>((*xx)(stack));
+		        else
+		            v[i].x = mpp->P.x;
                 if (yy)
                     v[i].y = GetAny<double>((*yy)(stack));
+		        else
+		            v[i].y = mpp->P.y;
                 if (zz)
                     v[i].z = GetAny<double>((*zz)(stack));
+		        else
+		            v[i].z = mpp->P.z;
                 v[i].lab=Th.vertices[i].lab;
                 takemesh[i] = takemesh[i] + 1;
             }
         }
+
 
 	 for (int it = 0; it < Th.nt; ++it) {
 		 const Mesh::Element &K=(Th[it]);
@@ -7375,9 +7382,6 @@ public:
 
     }
 };
-
-
-
 
 
 
@@ -7782,9 +7786,201 @@ public:
 };
 
 
+// function to clean mesh
+
+template< class MMesh>
+class CheckMesh_Op : public E_F0mps
+{
+public:
+    Expression eTh;
+static const int n_name_param = 3;
+    static basicAC_F0::name_and_type name_param [];
+    Expression nargs[n_name_param];
+    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
+    double arg (int i, Stack stack, double a) const {return nargs[i] ? GetAny<double>((*nargs[i])(stack)) : a;}
+
+
+public:
+    CheckMesh_Op (const basicAC_F0 &args, Expression tth)
+    : eTh(tth) {
+        args.SetNameParam(n_name_param, name_param, nargs);
+
+    }
+    
+    AnyType operator () (Stack stack)  const;
+};
+
+
+template<>
+basicAC_F0::name_and_type CheckMesh_Op<Mesh3>::name_param [] = {
+  {"precisvertice",&typeid(double)},
+  {"removeduplicate", &typeid(bool)},  
+  {"rebuildboundary", &typeid(bool)}
+	 
+};
+
+template<>
+basicAC_F0::name_and_type CheckMesh_Op<MeshS>::name_param [] = {
+  {"precisvertice",&typeid(double)},
+  {"removeduplicate", &typeid(bool)},  
+  {"rebuildboundary", &typeid(bool)}
+	 
+};
+
+template<class MMesh>
+AnyType CheckMesh_Op<MMesh>::operator () (Stack stack)  const {
+    MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+
+    MMesh *pTh = GetAny<MMesh *>((*eTh)(stack));
+    MMesh &Th = *pTh;
+    ffassert(pTh);
+
+	double precis_mesh(arg(0, stack, 1e-6)); 
+    bool removeduplicate(arg(1, stack, false));
+    bool rebuildboundary(arg(2, stack, false));
+	int orientation=1;
+	if(verbosity>10) 
+		cout << "call cleanmesh function, precis_mesh:" << precis_mesh << " removeduplicate:"<< removeduplicate	<< " rebuildboundary:" << rebuildboundary <<endl;
+    
+	Th.clean_mesh(precis_mesh,Th.nv, Th.nt, Th.nbe, Th.vertices, Th.elements, Th.borderelements, removeduplicate, rebuildboundary,orientation);
+	
+	*mp = mps;  
+    return pTh;
+
+}
 
 
 
+template< class MMesh>
+class CheckMesh: public OneOperator {
+public:
+typedef const MMesh *ppmesh; 
+    CheckMesh (): OneOperator(atype<ppmesh>(),atype<ppmesh>()) {}
+
+    E_F0*code (const basicAC_F0 &args) const {
+        return new CheckMesh_Op<MMesh>(args,t[0]->CastTo(args[0]));
+
+    }
+};
+
+
+
+class Line_Op: public E_F0mps
+{
+public:
+    static const int n_name_param = 3;    //
+    static basicAC_F0::name_and_type name_param [];
+    Expression nargs[n_name_param], enx, xx, yy, zz;
+    long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
+    
+    
+public:
+    Line_Op (const basicAC_F0 &args, Expression nx, Expression transfo = 0)
+    : enx(nx), xx(0), yy(0), zz(0) {
+        args.SetNameParam(n_name_param, name_param, nargs);
+        if (transfo) {
+            const E_Array *a1 = dynamic_cast<const E_Array *>(transfo);
+        int err = 0;
+        
+        if (a1) {
+            if (a1->size() != 3 || xx || yy || zz)
+                CompileError("line (nx,[X,Y,Z]) ");
+            
+            xx = to<double>((*a1)[0]);
+            yy = to<double>((*a1)[1]);
+            zz = to<double>((*a1)[2]);
+            }
+        }
+    }
+
+    AnyType operator () (Stack stack)  const;
+};
+
+basicAC_F0::name_and_type Line_Op::name_param [] = {
+    {"orientation", &typeid(long)},
+    {"region", &typeid(long)},
+    {"label", &typeid(KN_<long>)}
+   
+};
+
+class Line: public OneOperator {
+public:
+int cas;
+Line (): OneOperator(atype<pmeshL>(), atype<long>()), cas(0) {}
+    Line (int): OneOperator(atype<pmeshL>(), atype<long>(), atype<E_Array>()), cas(1) {}
+
+    E_F0*code (const basicAC_F0 &args) const {
+if(cas==0)
+            return new Line_Op(args, t[0]->CastTo(args[0]));
+else
+return new Line_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));     
+    }
+};
+
+
+AnyType Line_Op::operator () (Stack stack)  const {
+    
+MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+    
+    typedef typename MeshL::Element T;
+    typedef typename MeshL::BorderElement B;
+    typedef typename MeshL::Vertex V;
+    
+    int nt=GetAny<long>((*enx)(stack));
+    MeshPoint *mpp(MeshPointStack(stack));
+
+long region = 0;
+
+int nv=nt+1,nbe=2;
+    long orientation(arg(0, stack, 1L));
+    
+    V *v= new V[nv];
+    T *t= new T[nt];
+    B *b= new B[nbe];
+V *vv=v;
+    for (int i=0;i<nv;++i) {
+       MeshL::Rd P((R) i/nt, 0., 0.);
+  vv[i].x=P.x;
+  vv[i].y=P.y;
+  vv[i].z=P.z;
+  vv[i].lab = 0;
+  
+  mpp->set(vv[i].x,vv[i].y,vv[i].z);
+       if (xx)
+           vv[i].x = GetAny<double>((*xx)(stack));
+       else
+           vv[i].x = mpp->P.x;
+       if (yy)
+           vv[i].y = GetAny<double>((*yy)(stack));
+       else
+           vv[i].y = mpp->P.y;
+       if (zz)
+           vv[i].z = GetAny<double>((*zz)(stack));
+       else
+           vv[i].z = mpp->P.z;
+    }
+
+T *tt=t;
+for (int i=0;i<nt;++i) {
+int iv[2]; iv[0]=i, iv[1]=i+1;
+int lab=0;
+(tt++)->set(v,iv,lab);   
+}
+B *bb=b;
+int ibeg[1], iend[1];
+ibeg[0]=0, iend[0]=nv-1;
+int lab1=1, lab2=2;
+(bb++)->set(v,ibeg,lab1); 
+(bb++)->set(v,iend,lab2);
+
+MeshL *ThL = new MeshL(nv,nt,nbe,v,t,b);
+    ThL->BuildGTree();
+
+    Add2StackOfPtr2FreeRC(stack, ThL);
+    *mp = mps;
+    
+    return ThL;
+}
 
 
 #ifndef WITH_NO_INIT
@@ -7809,11 +8005,6 @@ static void Load_Init () {
     TheOperators->Add("=", new OneBinaryOperator_st<Op3_setmesh<false, pmesh3 *, pmesh3 *, listMesh3> > );
     TheOperators->Add("<-", new OneBinaryOperator_st<Op3_setmesh<true, pmesh3 *, pmesh3 *, listMesh3> > );
 
-   // Global.Add("change", "(", new SetMesh3D);
-    //Global.Add("movemesh2D3Dsurf", "(", new Movemesh2D_3D_surf_cout);   // remove ?
-    //Global.Add("movemesh3", "(", new Movemesh3D);  // apply transfo to mesh3 and meshS if surface can be built
-   //Global.Add("movemesh", "(", new Movemesh3D(1));
-    // Global.Add("movemesh3D", "(", new Movemesh3D_cout);
 
     Global.Add("deplacement", "(", new DeplacementTab);  // movemesh ?
     Global.Add("checkbemesh", "(", new CheckManifoldMesh);   // ??
@@ -7826,9 +8017,6 @@ static void Load_Init () {
     //Global.Add("movemesh23", "(", new Movemesh2D_S);
     // for a mesh3 Th3, if Th3->meshS=NULL, build the meshS associated
     Global.Add("buildSurface", "(", new BuildMeshSFromMesh3);
-
-    // Global.Add("showborder", "(", new OneOperator1<long, const Mesh3 *>(ShowBorder<Mesh3>));
-    // Global.Add("getborder", "(", new OneOperator2<long, const Mesh3 *, KN<long> *>(GetBorder<Mesh3>));
 
     Global.Add("AddLayers", "(", new OneOperator4_<bool, const Mesh3 *, KN<double> *, long, KN<double> *>(AddLayers));
 
@@ -7844,9 +8032,6 @@ static void Load_Init () {
     TheOperators->Add("=", new OneBinaryOperator_st<Op3_setmeshS<false, pmeshS *, pmeshS *, listMeshS> > );
     TheOperators->Add("<-", new OneBinaryOperator_st<Op3_setmeshS<true, pmeshS *, pmeshS *, listMeshS> > );
 
-   // Global.Add("change", "(", new SetMeshS);
-   // Global.Add("movemeshS", "(", new MovemeshS);
-   // Global.Add("movemesh", "(", new MovemeshS(1));
     Global.Add("trunc", "(", new Op_trunc_meshS);
 
     Global.Add("showborder", "(", new OneOperator1<long, const MeshS *>(ShowBorder));
@@ -7870,6 +8055,14 @@ static void Load_Init () {
     
     Global.Add("change", "(", new SetMesh<MeshS>);
     Global.Add("change", "(", new SetMesh<Mesh3>);
+	
+    Global.Add("checkmesh", "(", new CheckMesh<MeshS>);
+    Global.Add("checkmesh", "(", new CheckMesh<Mesh3>);
+	
+	Global.Add("line3", "(", new Line);
+	Global.Add("line3", "(", new Line(1));
+	
+	
 }
 
 // <<msh3_load_init>> static loading: calling Load_Init() from a function which is accessible from

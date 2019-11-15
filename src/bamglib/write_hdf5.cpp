@@ -5,6 +5,7 @@
 extern long verbosity;
 #ifdef HAVE_HDF5
 #include "write_hdf5.hpp"
+#include <cassert>
 using std::max;
 using std::min;
 
@@ -357,7 +358,8 @@ void WriteHdf5::WriteHdf5SolFile2DAddField(string * fieldname, int result_order,
   size_t size_str_float=str_float.size() + 1;
   string str_underscore="_";
   size_t size_str_underscore=str_underscore.size() + 1;
-  char data_type[17];
+  const int ldata_type=100;
+  char data_type[ldata_type];// to be sure
   hid_t dataset_id_data, dataspace_id_data;
   hid_t type_id;
   hid_t attr_type;
@@ -371,14 +373,14 @@ void WriteHdf5::WriteHdf5SolFile2DAddField(string * fieldname, int result_order,
   type_char[2]= "Vector";
   res_char[0]= "Cell";
   res_char[1]= "Node";
-
+  
   size_t size_datafieldname = fieldname->size() + 1;
   char * char_datafieldname = new char[size_datafieldname];
   strncpy(char_datafieldname, fieldname->c_str(), size_datafieldname);
   char * char_datafieldname_tot=new char[size_data+size_datafieldname];
   strncpy(char_datafieldname_tot, str_data.c_str(), size_data);
   strncat(char_datafieldname_tot,char_datafieldname,size_data+size_datafieldname);
-  strncpy(data_type, str_float.c_str(), size_str_float);
+  strncpy(data_type, str_float.c_str(), ldata_type);
 
   if(result_order==0)
     {
@@ -392,12 +394,10 @@ void WriteHdf5::WriteHdf5SolFile2DAddField(string * fieldname, int result_order,
 
   //ajout des champs fonction de la dimension de l'element (triangle ou noeud) et du type
   //de donnees (vecteur, ...) affectees a l'element
-  strncat(data_type,  res_char[result_order].c_str(), size_str_float + (res_char[result_order].size()+1));
-  strncat(data_type, str_underscore.c_str(), size_str_float
-  	  + (res_char[result_order].size()+1) + size_str_underscore);
-  strncat(data_type, type_char[what_type].c_str(),
-  	  size_str_float + (res_char[result_order].size()+1)
-  	  + size_str_underscore + (type_char[what_type].size() + 1));
+  strncat(data_type,  res_char[result_order].c_str(), ldata_type);
+  strncat(data_type, str_underscore.c_str(), ldata_type);
+  strncat(data_type, type_char[what_type].c_str(),ldata_type);
+  assert(strnlen(data_type,ldata_type)<ldata_type-2); // verif data_type is long enough
   dataspace_id_data = H5Screate_simple(2, dims_data, NULL);
   dataset_id_data = H5Dcreate2(file_id, char_datafieldname_tot, H5T_IEEE_F32LE,
   			      dataspace_id_data, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -440,7 +440,8 @@ void WriteHdf5::WriteHdf5SolFile3DAddField(string * fieldname, int result_order,
   size_t size_str_float=str_float.size() + 1;
   string str_underscore="_";
   size_t size_str_underscore=str_underscore.size() + 1;
-  char data_type[18];
+  const int ldata_type=100;
+  char data_type[ldata_type];
   hid_t dataset_id_data, dataspace_id_data;
   hid_t type_id;
   hid_t attr_type;
@@ -461,7 +462,7 @@ void WriteHdf5::WriteHdf5SolFile3DAddField(string * fieldname, int result_order,
   char * char_datafieldname_tot=new char[size_data+size_datafieldname];
   strncpy(char_datafieldname_tot, str_data.c_str(), size_data);
   strncat(char_datafieldname_tot,char_datafieldname,size_data+size_datafieldname);
-  strncpy(data_type, str_float.c_str(), size_str_float);
+  strncpy(data_type, str_float.c_str(), ldata_type);
 
   if(result_order==0)
     {
@@ -475,12 +476,10 @@ void WriteHdf5::WriteHdf5SolFile3DAddField(string * fieldname, int result_order,
 
   //ajout des champs fonction de la dimension de l'element (tetraedre ou noeud) et du type
   //de donnees (tenseur de 6 composantes, ...) affectees a l'element
-  strncat(data_type,  res_char[result_order].c_str(), size_str_float + (res_char[result_order].size()+1));
-  strncat(data_type, str_underscore.c_str(), size_str_float
-  	  + (res_char[result_order].size()+1) + size_str_underscore);
-  strncat(data_type, type_char[what_type].c_str(),
-  	  size_str_float + (res_char[result_order].size()+1)
-  	  + size_str_underscore + (type_char[what_type].size() + 1));
+  strncat(data_type,  res_char[result_order].c_str(), ldata_type);
+  strncat(data_type, str_underscore.c_str(), ldata_type);
+  strncat(data_type, type_char[what_type].c_str(),ldata_type);
+  assert(strnlen(data_type,ldata_type)< ldata_type-2);
   dataspace_id_data = H5Screate_simple(2, dims_data, NULL);
   dataset_id_data = H5Dcreate2(file_id, char_datafieldname_tot, H5T_IEEE_F32LE,
   			      dataspace_id_data, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);

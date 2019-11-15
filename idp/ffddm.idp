@@ -5,10 +5,6 @@ include "getARGV.idp"// to process command line options
 
 include "ffddm_parameters.idp"
 
-IFMACRO(WITHHPDDM)
-load "hpddm"
-ENDIFMACRO
-
 include "ffddm_partitioning.idp"
 
 include "ffddm_coarsemeshCS.idp"
@@ -181,10 +177,10 @@ pr#Tmatrix<preffe#K> pr#Aglobal;
 matrix<preffe#K>[int] pr#aRd(preffe#prmesh#npart);      /* local Dirichlet matrices for parallel matrix vector product */
 matrix<preffe#K> pr#matN;
 
-IFMACRO(pr#withhpddm)
+IFMACRO((pr#withhpddm)|(pr#withpetsc))
 if (!bpara){
 	if (mpiRank(preffe#prmesh#mpicomm) == 0)
-		cout << "["+Stringification(pr)+"] Error: HPDDM is to be used only in parallel mode" << endl;
+		cout << "["+Stringification(pr)+"] Error: HPDDM/PETSc is to be used only in parallel mode" << endl;
 	assert(bpara);
 }
 
@@ -200,6 +196,10 @@ int[int][int] pr#intersectionhpddm(1 + preffe#prmesh#numberIntersection);
       pr#intersectionhpddm[1 + j].resize(CC.n-1);
   }
 }
+ENDIFMACRO
+
+IFMACRO(pr#withhpddm)
+load "hpddm"
 IFMACRO(preffe#K,real)
 schwarz<preffe#K> pr#hpddmOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, preffe#Dk[mpiRank(preffe#prmesh#commddm)], scaled = false, communicator = preffe#prmesh#commddm);
 ENDIFMACRO
@@ -211,6 +211,16 @@ if (preffe#prmesh#inexactCSsplit == 1)
   set(pr#hpddmOP,sparams="-hpddm_reuse_preconditioner 1");
 ENDIFMACRO
 
+IFMACRO(pr#withpetsc)
+load "PETSc"
+IFMACRO(preffe#K,real)
+Mat<preffe#K> pr#petscOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, preffe#Dk[mpiRank(preffe#prmesh#commddm)], communicator = preffe#prmesh#commddm);
+ENDIFMACRO
+IFMACRO(preffe#K,complex)
+real[int] pr#petscDk = preffe#Dk[mpiRank(preffe#prmesh#commddm)].re;
+Mat<preffe#K> pr#petscOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, pr#petscDk, scaled = false, communicator = preffe#prmesh#commddm);
+ENDIFMACRO
+ENDIFMACRO
 
 NewMacro pr#localmacrominoverlap() preffe#prmesh#mminoverlap EndMacro
 
@@ -333,6 +343,16 @@ if (preffe#prmesh#isincomm)
         IFMACRO(pr#withhpddm)
         changeOperator(pr#hpddmOP,pr#aRd[mpiRank(preffe#prmesh#commddm)]);
         ENDIFMACRO
+        IFMACRO(pr#withpetsc)
+        IFMACRO(preffe#K,real)
+        Mat<preffe#K> mat(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, preffe#Dk[mpiRank(preffe#prmesh#commddm)], communicator = preffe#prmesh#commddm);
+        ENDIFMACRO
+        IFMACRO(preffe#K,complex)
+        real[int] pr#hpddmDk = preffe#Dk[mpiRank(preffe#prmesh#commddm)].re;
+        schwarz<preffe#K> mat(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, pr#hpddmDk, scaled = false, communicator = preffe#prmesh#commddm);
+        ENDIFMACRO
+        pr#petscOP = mat;
+        ENDIFMACRO
       }
       else {
         Varf(vN,preffe#prmesh#Thi,preffe#Vhi)
@@ -429,7 +449,7 @@ if (pr#prfe#prmesh#isincomm)
     else if (pr#prec != "none")
       assert(0);
 		ENDIFMACRO
-		IFMACRO(!pr#withhpddm)
+		IFMACRO((!pr#withhpddm)&(!pr#withpetsc))
 		set(pr#aR[i],solver = sparsesolver,commworld=pr#prfe#prmesh#commself,factorize=3);
 		ENDIFMACRO
 

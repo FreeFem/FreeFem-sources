@@ -79,9 +79,9 @@ real[int] DCoarse;
 }
 matrix NeumannCoarse = MatCoarse;
 R = interpolate(Wh, WhCoarse);
-schwarz ACoarse(MatCoarse, intersectionCoarse, DCoarse, prefix = "level_2_");
+schwarz ACoarse(MatCoarse, intersectionCoarse, DCoarse);
 set(A, sparams = "-hpddm_variant flexible -hpddm_verbosity " + (!mpirank ? "3" : "0"));
-set(ACoarse, sparams = "-hpddm_level_2_verbosity " + (!mpirank ? "1" : "0") + " -hpddm_level_2_schwarz_method ras -hpddm_level_2_tol 1e-10");
+set(ACoarse, sparams = "-hpddm_level_2_verbosity " + (!mpirank ? "1" : "0") + " -hpddm_level_2_schwarz_method ras -hpddm_level_2_tol 1e-10", prefix = "level_2_");
 macro mplot()wait = 1, cmm = "Transfers on the correction at iteration " + ijk//
 int ijk = 1;
 func real[int] correctionInexact(real[int]& in) {

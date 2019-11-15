@@ -1,0 +1,32 @@
+// F. HECHT example to check eps in trunc check mesh
+
+load "msh3"
+real theta = 1*pi/180.; // 0.7 degree  limit to build the 2d mesh if no refinement in zero
+real xt = cos(theta),yt=sin(theta);
+cout << xt << " " << yt << endl;
+border C(t=theta, 2*pi-theta) { x = cos(t); y=sin(t); label=1;}
+border Ss(t=0,1;i){ t= t; x= t*xt; y = t*yt;if(i) y = -y; label=2+i;}
+real hs = 0.05;
+int nC = (2*pi-2*theta)/hs;
+int ns = (1./hs)/1;//   
+int[int] nS=[ ns,-ns ];
+func bord = C(nC)+Ss(nS); 
+plot(bord,wait=1);
+mesh Th2 = buildmesh(bord,nbvx=1000000);
+plot(Th2);
+int nt,nv; 
+nt = Th2.nt;
+nv = Th2.nv;
+Th2=trunc(Th2,1);// verif to close point
+assert(nt==Th2.nt);
+assert(nv==Th2.nv);
+
+
+mesh3 Th = buildlayers(Th2,1./hs);
+plot(Th,wait=1);
+ nt = Th.nt;
+ nv = Th.nv;
+// check mesh
+Th=checkmesh(Th);
+assert(nt==Th.nt);
+assert(nv==Th.nv);

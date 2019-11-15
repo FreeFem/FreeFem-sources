@@ -169,8 +169,10 @@ struct Op2_pow: public binary_function<A,B,R> {
 template<class A>
 struct Op_Read : public binary_function<istream*,A*,istream*> {
   static istream *  f(istream  * const  & f,A  * const  &  a)  
-   { 
-     *f >> *a;
+   {
+       if( !f || !*f) ExecError("Fatal Error: file not open in read value (Op_Read)");
+       *f >> *a;
+       if(!f->good()) ExecError("Fatal Error: file  not good in read array (Op_ReadKN)");
      return f;
    }
 };
@@ -180,8 +182,10 @@ struct Op_ReadP : public binary_function<istream*,A**,istream*> {
   static istream *  f(istream  * const  & f,A  ** const  &  a)  
    {
      assert(a);
-     if( ! *a)  *a= new A ; 
+     if( ! *a)  *a= new A ;
+     if( !f || !*f) ExecError("Fatal Error: file not open in read value (Op_Read)");
      *f >> **a;
+     if(!f->good()) ExecError("Fatal Error: file  not good in read array (Op_ReadKN)");
      return f;
    }
 };
@@ -200,10 +204,18 @@ struct Op_ReadKN : public binary_function<istream*,KN<A>*,istream*> {
         ExecError("Fatal Error: incompatible length in read array (Op_ReadKN)");
        assert(n==a->N());
        }
-     while (f->get(c) &&  (c!='\n' && c!='\r' ) ) ((void) 0); // eat until control (new line
+       double value=std::numeric_limits<double>::min();
+     while (f->get(c) && (c!='\n' && c!='\r' ) ) ((void) 0); // eat until control (new line
 
-     for (int i=0;i<n;i++)
-       *f >> (*a)[i] ;
+       // buffer problem if reading value are out range
+       for (int i=0;i<n;i++) {
+           *f >> (*a)[i] ;
+           if (!f->good()) {
+               cerr << " reading problem with value i:" << i << " .... " <<(*a)[i]<<endl;
+               ExecError("Fatal Error: file  not good in read array (Op_ReadKN)");
+               cout << "test i: " << i << " -> " << (*a)[i] << " " << f->good() << endl;
+           }
+        }
      return f;
    }
 };
@@ -211,10 +223,10 @@ template<class A>
 struct Op_ReadKNM : public binary_function<istream*,KNM<A>*,istream*> {
     static istream *  f(istream  * const  & f,KNM<A>* const  &  a)
     {
-        if( !f || !*f) ExecError("Fatal Error: file not open in read array (Op_ReadKN)");
+        if( !f || !*f) ExecError("Fatal Error: file not open in read array (Op_ReadKNM)");
         int n,m;char c;
         *f >> n >> m;
-        if(!f->good()) ExecError("Fatal Error: file  not good in read array (Op_ReadKN)");
+        if(!f->good()) ExecError("Fatal Error: file  not good in read array (Op_ReadKNM)");
         
         if(n !=a->N() || m != a->M()    ) {
             cerr << " length on the array  N " << a->N() << " != " << n << " n in file " << endl;
@@ -225,19 +237,70 @@ struct Op_ReadKNM : public binary_function<istream*,KNM<A>*,istream*> {
         while (f->get(c) &&  (c!='\n' && c!='\r' ) ) ((void) 0); // eat until control (new line
         
         for (int i=0;i<n;i++)
-            for (int j=0;j<m;j++)
+            for (int j=0;j<m;j++) {
                 *f >> (*a)(i,j) ;
-        if(!f->good())  ExecError("Fatal Error: file  not good in read array after reading )");
+                if (!f->good()) {
+                    cerr << " reading problem with value i:" << i << " .... " <<(*a)[i]<<endl;
+                    ExecError("Fatal Error: file  not good in read array (Op_ReadKN)");
+                    cout << "test (i,j): (" << i <<","<<j<<")"<< " -> " << (*a)(i,j) << " " << f->good() << endl;
+                }
+            }
         return f;
     }
 };
 
 
+template<class A>
+struct Op_WriteKNM : public binary_function<ostream*,KNM<A>*,ostream*> {
+    static ostream *  f(ostream  * const  & f,KNM<A>* const  &  a) {
+        *f << *a;
+        return f;
+    }
+};
 
+
+template<class A>
+struct Op_WriteKN : public binary_function<ostream*,KN<A>*,ostream*> {
+    static ostream *  f(ostream  * const  & f,KN<A>* const  &  a) {
+         *f << *a;
+        return f;
+    }
+};
+
+/*  FH je supprime  mauvais code nov 2019
+template<>
+struct Op_WriteKNM<double> : public binary_function<ostream*,KNM<double>*,ostream*> {
+    static ostream *  f(ostream  * const  & f,KNM<double>* const  &  a)
+    {
+       int n =a->N(), m = a->M();
+        
+        for (int i=0;i<n;i++)
+            for (int j=0;j<m;j++)
+                if(abs((*a)(i,j))>1.e300 || abs((*a)(i,j))<1.e-300)
+                    (*a)(i,j)=0.;
+        *f << *a ;
+        return f;
+    }
+};
+
+template<>
+struct Op_WriteKN<double> : public binary_function<ostream*,KN<double>*,ostream*> {
+    static ostream *  f(ostream  * const  & f,KN<double>* const  &  a)
+    {
+        int n =a->N();
+        for (int i=0;i<n;i++)
+            if( (abs((*a)[i])>1.e300) || (abs((*a)[i])<1.e-300) )
+                (*a)[i]=0.;
+        *f << *a ;
+        return f;
+    }
+};
+*/
 template<class A>
 struct Print: public binary_function<ostream*,A,ostream*> {
   static ostream* f(ostream* const  & a,const A & b)  { *a << b;  return a;}
 };
+
 //  ---------------------------------------------
 template<class A>
 struct set_eq: public binary_function<A*,A,A*> {

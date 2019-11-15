@@ -397,7 +397,7 @@ double NormalDistrib(double sigma)
     double rand = genrand_res53()  ;
     const double TWOPI = 3.14159265358979323846264338328*2.;
     return  sigma*sqrt(-2.0*log(rand))*cos(TWOPI*rand);
-}
+}    // (stack,b,true,0,true); bool Requiredboundary=true, KNM<double> *pintern=0, double alea=0)
 const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax,bool Requiredboundary,KNM<double> *pintern,double alea)
 {
     if(alea) Requiredboundary=1;
@@ -785,6 +785,8 @@ void E_BorderN::BoundingBox(Stack stack,double  &xmin,double & xmax, double & ym
         }}
   mp=mps;
 }
+
+
 void E_BorderN::Plot(Stack stack) const
 {
   using Fem2D::R2;

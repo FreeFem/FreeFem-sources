@@ -340,6 +340,8 @@ class E_P_Stack_nElementonB   :public  E_F0mps { public:
          l= mp->Th3->nElementonB(mp->t,mp->f);
       else if (mp->d==3 && mp->dHat==2 && mp->TS && ( mp->e>=0) )
           l= mp->ThS->nElementonB(mp->t,mp->e);
+      else if (mp->d==3 && mp->dHat==1 && mp->TL && ( mp->e>=0) )
+          l= mp->ThL->nElementonB(mp->t,mp->e);
       // cout << " nTonEdge " << l << endl;
       return SetAny<long>( l) ;}
     operator aType () const  { return atype<long>();}
@@ -1163,6 +1165,23 @@ AnyType TypeOfFESto2(Stack,const AnyType &b) {
     return tS;
 }
 
+// mapping between TypeOfFE2 and TypeOfFEL
+map<TypeOfFE *,TypeOfFEL *> TEF2dtoL;
+AnyType TypeOfFELto2(Stack,const AnyType &b) {
+    TypeOfFEL *tL=0;
+    TypeOfFE  *t2=GetAny<TypeOfFE *>(b);
+    map<TypeOfFE *,TypeOfFEL *>::const_iterator i=TEF2dtoL.find(t2);
+    if(i != TEF2dtoL.end())
+        tL=i->second;
+    
+    if(tL==0)
+    {
+        cerr << " sorry no cast to this surface finite element " <<endl;
+        ExecError( " sorry no cast to this surface finite element ");
+    }
+    return tL;
+}
+
 TypeOfFE * FindFE2(const char * s)
 {
     for (ListOfTFE * i=ListOfTFE::all;i;i=i->next)
@@ -1251,8 +1270,12 @@ inline pfes3* MakePtr3(pfes3 * const &p,pmesh3 * const &  a, TypeOfFE3 * const &
 { *p=new pfes3_tef(a,tef) ;
   return p;}
 
-inline pfesS* MakePtrS(pfesS * const &p,pmeshS * const &  a, TypeOfFES * const & tef)       ///TODO
+inline pfesS* MakePtrS(pfesS * const &p,pmeshS * const &  a, TypeOfFES * const & tef)
 { *p=new pfesS_tef(a,tef) ;
+    return p;}
+
+inline pfesL* MakePtrL(pfesL * const &p,pmeshL * const &  a, TypeOfFEL * const & tef)
+{ *p=new pfesL_tef(a,tef) ;
     return p;}
 
 
@@ -1355,6 +1378,40 @@ class OP_MakePtrS { public:
                             atype<Op::C>(),false ) ;}
 };
 
+class OP_MakePtrL { public:
+    class Op : public E_F0mps  { public:
+        //  static int GetPeriodic(Expression  bb, Expression & b,Expression & f);
+        static const int n_name_param =1;
+        static basicAC_F0::name_and_type name_param[] ;
+        Expression nargs[n_name_param];
+        typedef pfesL * R;
+        typedef pfesL * A;
+        typedef pmeshL * B;
+        typedef TypeOfFEL * C;
+        Expression a,b,c;
+        int nbcperiodic ;
+        Expression *periodic;
+        Op(const basicAC_F0 & args);
+        
+        AnyType operator()(Stack s) const  {
+            A p= GetAny<A>( (*a)(s) );
+            B th= GetAny<B>( (*b)(s) );
+            C tef= GetAny<C>( (*c)(s) );
+            *p=new pfesL_tef(th,tef,s,nbcperiodic,periodic) ;
+            return  SetAny<R>(p);
+        }
+    }; // end Op class
+    
+    typedef Op::R Result;
+    static  E_F0 * f(const basicAC_F0 & args) { return  new Op(args);}
+    static ArrayOfaType  typeargs() {
+        return ArrayOfaType(
+                            atype<Op::A>(),
+                            atype<Op::B>(),
+                            atype<Op::C>(),false ) ;}
+};
+
+
 void GetPeriodic(const int d,Expression perio,    int & nbcperiodic ,    Expression * &periodic)
 {
     ffassert(d==2 || d ==3);
@@ -1408,7 +1465,16 @@ OP_MakePtrS::Op::Op(const basicAC_F0 & args)
     nbcperiodic=0;
     periodic=0;
     args.SetNameParam(n_name_param,name_param,nargs);
-    GetPeriodic(2,nargs[0],nbcperiodic,periodic);
+    GetPeriodic(3,nargs[0],nbcperiodic,periodic);
+}
+//3D curve
+OP_MakePtrL::Op::Op(const basicAC_F0 & args)
+: a(to<A>(args[0])),b(to<B>(args[1])),c(to<C>(args[2]))
+{
+    nbcperiodic=0;
+    periodic=0;
+    args.SetNameParam(n_name_param,name_param,nargs);
+    GetPeriodic(3,nargs[0],nbcperiodic,periodic);    
 }
 
 int GetPeriodic(Expression  bb, Expression & b,Expression & f)
@@ -1446,6 +1512,10 @@ basicAC_F0::name_and_type  OP_MakePtr3::Op::name_param[]= {
 };
 
 basicAC_F0::name_and_type  OP_MakePtrS::Op::name_param[]= {
+    "periodic", &typeid(E_Array)
+};
+
+basicAC_F0::name_and_type  OP_MakePtrL::Op::name_param[]= {
     "periodic", &typeid(E_Array)
 };
 
@@ -1560,8 +1630,12 @@ long mp_nuTriangle(MeshPoint * p)
    long nu=0;
    if(p->d==2)
      nu=(*p->Th)(p->T);
-   else if  (p->d==3)
+   else if  (p->d==3 && p->dHat==3)
      nu=(*p->Th3)(p->T3);
+   else if  (p->d==3 && p->dHat==2)
+       nu=(*p->ThS)(p->TS);
+   else if  (p->d==3 && p->dHat==1)
+       nu=(*p->ThL)(p->TL);
    else ffassert(0);
    delete p;
    return nu ;}
@@ -2144,14 +2218,18 @@ public:
     typedef pf3rbasearray asol3;
     typedef pfSrbase solS;
     typedef pfSrbasearray asolS;
-
+    typedef pfLrbase solL;
+    typedef pfLrbasearray asolL;
+    
     typedef pfecbase solc;
     typedef pfecbasearray asolc;
     typedef pf3cbase solc3;
     typedef pf3cbasearray asolc3;
     typedef pfScbase solcS;
     typedef pfScbasearray asolcS;
-
+    typedef pfLcbase solcL;
+    typedef pfLcbasearray asolcL;
+    
     typedef long  Result;
     struct ListWhat {
 	int what,i;
@@ -2164,8 +2242,9 @@ public:
        };
 	pmesh th() { assert(v[0] && what==0); return static_cast<pmesh>(cv[0]);}
 	pmesh3 th3() { assert(v[0] && what==5); return static_cast<pmesh3>(cv[0]);}
- 	pmeshS thS() { assert(v[0] && what==5); return static_cast<pmeshS>(cv[0]);}
-
+ 	pmeshS thS() { assert(v[0] && what==50); return static_cast<pmeshS>(cv[0]);}
+    pmeshL thL() { assert(v[0] && what==55); return static_cast<pmeshL>(cv[0]);}
+        
 	void Set(int nn=0,void **vv=0,int *c=0) {
 	    cmp[0]=cmp[1]=cmp[2]=cmp[3]=-1;
 	    v[0]=v[1]=v[2]=v[3]=0;
@@ -2447,7 +2526,9 @@ public:
 	KN<pmesh> * evalma(int i,Stack s) const  { throwassert(e[i]);return   GetAny< KN<pmesh> * >((*e[i])(s)) ;}
 	const Mesh3 & evalm3(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmesh3 >((*e[i])(s)) ;}
     const MeshS & evalmS(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmeshS >((*e[i])(s)) ;}
+    const MeshL & evalmL(int i,Stack s) const  { throwassert(e[i]);return  * GetAny< pmeshL >((*e[i])(s)) ;}
 	const E_BorderN * evalb(int i,Stack s) const  { throwassert(e[i]);return   GetAny< const E_BorderN *>((*e[i])(s)) ;}
+    const E_Curve3N * evalc(int i,Stack s) const  { throwassert(e[i]);return   GetAny< const E_Curve3N *>((*e[i])(s)) ;}
 	tab  evalt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<tab>((*e[i])(s)) ;}
          pttab  evalptt(int i,Stack s) const  { throwassert(e[i]);return  GetAny<pttab>((*e[i])(s)) ;}
     };
@@ -2486,9 +2567,11 @@ public:
                 bool bpfer=  BCastTo<pfer>((*a)[0]);
                 bool bpf3r=  BCastTo<pf3r>((*a)[0]);
                 bool bpfSr=  BCastTo<pfSr>((*a)[0]); // for 3D surface with reals
+                bool bpfLr=  BCastTo<pfLr>((*a)[0]); // for 3D curve with reals
                 bool bpfec=  BCastTo<pfec>((*a)[0]);
                 bool bpf3c=  BCastTo<pf3c>((*a)[0]);
                 bool bpfSc=  BCastTo<pfSc>((*a)[0]); // for 3D surface with complex
+                bool bpfLc=  BCastTo<pfLc>((*a)[0]); // for 3D curve with complex
                 bool bptab=  BCastTo<tab> ((*a)[0]);
                 bool bpttab=  BCastTo<pttab>((*a)[0]);
                 bool bpferarray=  BCastTo<pferarray>((*a)[0]);
@@ -2545,6 +2628,20 @@ public:
                         l[i][j]= CastTo<pfSc>((*a)[j]);
 
                 }
+                else if (asizea == 3 && bpfLr ) // 3D vector for curve...
+                {
+                    l[i].what=15; // new 3d vector
+                    for (int j=0;j<a->size();j++)
+                        l[i][j]= CastTo<pfLr>((*a)[j]);
+                    
+                }
+                else if (asizea == 3 && bpfLc ) // 3D vector for curve...
+                {
+                    l[i].what=21; // new 3d vector
+                    for (int j=0;j<a->size();j++)
+                        l[i][j]= CastTo<pfLc>((*a)[j]);
+                    
+                }
                 else if (bpferarray && asizea == 2)
                 {
                     l[i].what=102;
@@ -2594,6 +2691,14 @@ public:
                 l[i].composant=false;
                 l[i].what=18;   // complex iso value 3D surface
                 l[i][0]=CastTo<pfSc>(args[i]);}
+            else if (BCastTo<pfLr>(args[i])) { // [[file:lgmesh3.hpp::pfSr]]
+                l[i].composant=false;
+                l[i].what=14; //  real iso value 3D curve
+                l[i][0]=CastTo<pfLr>(args[i]);}
+            else if (BCastTo<pfLc>(args[i])) { // [[file:lgmesh3.hpp::pfSc]]
+                l[i].composant=false;
+                l[i].what=20;   // complex iso value 3D curve
+                l[i][0]=CastTo<pfLc>(args[i]);}
 
             else if (BCastTo<pferarray>(args[i])) {
                 l[i].composant=false;
@@ -2621,24 +2726,38 @@ public:
                 l[i].composant=false;
                 l[i].what=118;  //arry iso value array iso value 3d
                 l[i][0]=CastTo<pfScarray>(args[i]);}
-
-
+            else if (BCastTo<pfLrarray>(args[i])) { // [[file:lgmesh3.hpp::pfSrarray]]
+                l[i].composant=false;
+                l[i].what=109; //arry iso value array iso value 3d
+                l[i][0]=CastTo<pfLrarray>(args[i]);}
+            else if (BCastTo<pfLcarray>(args[i])) { // [[file:lgmesh3.hpp::pfScarray]]
+                l[i].composant=false;
+                l[i].what=119;  //arry iso value array iso value 3d
+                l[i][0]=CastTo<pfLcarray>(args[i]);}
             else if (BCastTo<pmesh>(args[i])){
                 l[i].composant=true;
                 l[i].what=0; // mesh ...
                 l[i][0]=CastTo<pmesh>(args[i]);}
             else if (BCastTo<pmesh3>(args[i])){
                 l[i].composant=true;
-                l[i].what=5;// 3d mesh ...
+                l[i].what=5;// 3d mesh (real volume or if contains a meshS pointer...
                 l[i][0]=CastTo<pmesh3>(args[i]);}
             else if (BCastTo<pmeshS>(args[i])){
                 l[i].composant=true;
-                l[i].what=50;// 3d surface mesh ...
+                l[i].what=50;// 3d surface mesh
                 l[i][0]=CastTo<pmeshS>(args[i]);}
+            else if (BCastTo<pmeshL>(args[i])){
+                l[i].composant=true;
+                l[i].what=55;// 3d line mesh
+                l[i][0]=CastTo<pmeshL>(args[i]);}
             else if (BCastTo<const E_BorderN *>(args[i])){
                 l[i].what=4; // border 2d
                 l[i].composant=true;
                 l[i][0]=CastTo<const E_BorderN *>(args[i]);}
+            else if (BCastTo<const E_Curve3N *>(args[i])){
+                l[i].what=40; // border 3d
+                l[i].composant=true;
+                l[i][0]=CastTo<const E_Curve3N *>(args[i]);}
             else if (BCastTo<KN<pmesh> *>(args[i])){
                 l[i].composant=true;
                 l[i].what=100; //  mesh 2d array
@@ -2820,6 +2939,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
  const vector<Expression>  & what(di->what);
  const int dim =di->d;
  const bool surface=di->isMeshS;
+ const bool curve=di->isMeshL;
  const GQuadratureFormular<R1>& FIE = di->FIE(stack);
  const GQuadratureFormular<R2> & FIT = di->FIT(stack);
  const GQuadratureFormular<R3> & FIV = di->FIV(stack);
@@ -2837,19 +2957,26 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
           else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
           else cout << "  --  int 2d   (nQP: "<< FIT.n << " ) in "  ;
       }
-      else if(dim==3 && !surface)
+      else if(dim==3 && !surface && !curve)
       {
           if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") ,"  ;
           else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all faces ( nQP: "<< FIT.n << "),"  ;
           else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF face nQP: ("<< FIT.n << ")," ;
           else cout << "  --  int 3d volume  (nQP: "<< FIV.n << " ) in "  ;
       }
-      else if(dim==3 && surface)
+      else if(dim==3 && surface && !curve)
       {
           if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") levelset: "<< di->islevelset() << " ,"  ;
           else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
           else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
           else cout << "  --  int 3d surface  (nQP: "<< FIT.n << " ) in "  ;
+      }
+      else if(dim==3 && !surface  && curve)
+      {
+          //if (CDomainOfIntegration::int0d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") levelset: "<< di->islevelset() << " ,"  ;
+          //else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
+          //else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
+          cout << "  --  int 3d curve  (nQP: "<< FIT.n << " ) in "  ;
       }
   }
 
@@ -3092,7 +3219,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
    }
 
  // volume 3d
- else if(dim==3 && !surface)
+ else if(dim==3 && !surface  && !curve)
    {
      if(di->islevelset() &&  (CDomainOfIntegration::int2d!=kind) && (CDomainOfIntegration::int3d!=kind) )
          InternalError("So no levelset integration type on no int2d / int3d case (10 3d)");
@@ -3292,7 +3419,7 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
 
    }
 
- else if(dim==3 && surface)
+ else if(dim==3 && surface  && !curve)
  {
      if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) &&  (CDomainOfIntegration::int2d!=kind) ) InternalError("So no levelset integration type  case (10 3d)");
      const MeshS  & Th = * GetAny<pmeshS>( (*di->Th)(stack) );
@@ -3497,7 +3624,212 @@ struct set_eqvect_fl: public binary_function<KN<K>*,const  FormLinear *,KN<K>*> 
          InternalError("CDomainOfIntegration kind unkown");
      }
  }
-
+ else if(dim==3 && !surface  && curve)
+ {
+     ffassert(0);
+     /*if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) &&  (CDomainOfIntegration::int2d!=kind) ) InternalError("So no levelset integration type  case (10 3d)");
+     const MeshS  & Th = * GetAny<pmeshS>( (*di->Th)(stack) );
+     ffassert(&Th);
+     
+     if (verbosity >3)
+     {
+         if (all) cout << " all " << endl ;
+         else cout << endl;
+     }
+     if (kind==CDomainOfIntegration::int1d)
+     {
+         const QuadratureFormular1d & FI = FIE;
+         if(di->islevelset())
+         {
+             double llevelset = 0;
+             double uset = HUGE_VAL;
+             R2 Q[3];
+             KN<double> phi(Th.nv);phi=uset;
+             double f[3];
+             for(int t=0; t< Th.nt;++t)
+             {
+                 double umx=-HUGE_VAL,umn=HUGE_VAL;
+                 for(int i=0;i<3;++i)
+                 {
+                     int j= Th(t,i);
+                     if( phi[j]==uset)
+                     {
+                         MeshPointStack(stack)->setP(&Th,t,i);
+                         phi[j]= di->levelset(stack);
+                     }
+                     f[i]=phi[j];
+                     umx = std::max(umx,phi[j]);
+                     umn = std::min(umn,phi[j]);
+                     
+                 }
+                 if( umn <=0 && umx >= 0)
+                 {
+                     
+                     int np= IsoLineK(f,Q,1e-10);
+                     if(np==2)
+                     {
+                         const TriangleS & K(Th[t]);
+                         double epsmes3=K.mesure()*K.mesure()*1e-18;
+                         R3 PA(K(Q[0])),PB(K(Q[1])), PC(K(Q[2]));
+                         R3 NN= R3(PB,PA)^R3(PC,PA); //R3 NAB(PA,PB);
+                         
+                         double mes2 = (NN,NN);
+                         double mes = sqrt(mes2);
+                         
+                         if(mes2*mes <epsmes3) continue; //  too small
+                         NN /= mes;
+                         llevelset += mes;
+                         
+                         for (int npi=0;npi<FI.n;npi++) // loop on the integration point
+                         {
+                             QuadratureFormular1dPoint pi( FI[npi]);
+                             double sa=pi.x,sb=1.-sa;
+                             R2 Pt(Q[0]*sa+Q[1]*sb ); //
+                             MeshPointStack(stack)->set(Th,K(Pt),Pt,K,-1,NN,-1);
+                             r += mes*pi.a*GetAny<R>( (*fonc)(stack));
+                             
+                         }
+                     }
+                     
+                 }
+                 wsptr2free->clean(swsptr2free);// ADD FH 11/2017
+             }
+             if(verbosity > 5) cout << " Lenght level set = " << llevelset << endl;
+             
+         }
+         
+         else
+             for( int e=0;e<Th.nbe;e++)
+             {
+                 if (all || setoflab.find(Th.be(e).lab) != setoflab.end())
+                 {
+                     
+                     int ie,i =Th.BoundaryElement(e,ie);
+                     const TriangleS & K(Th[i]);
+                     R3 E=K.Edge(ie);
+                     double le = sqrt((E,E));
+                     R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
+                     PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
+                     
+                     for (int npi=0;npi<FI.n;npi++) // loop on the integration point
+                     {
+                         QuadratureFormular1dPoint pi( FI[npi]);
+                         double sa=pi.x,sb=1.-sa;
+                         R2 Pt(PA*sa+PB*sb ); //
+                         MeshPointStack(stack)->set(Th,K(Pt),Pt,K,Th.be(e).lab,R2(E.y,-E.x)/le,ie);
+                         r += le*pi.a*GetAny<R>( (*fonc)(stack));
+                     }
+                 }
+                 wsptr2free->clean(swsptr2free);// ADD FH 11/2017
+             }
+     }
+     else if (kind==CDomainOfIntegration::int2d)
+     {
+         const QuadratureFormular & FI =FIT;
+         
+         if(di->islevelset())
+         { // add FH mars 2014 compute int2d  on phi < 0 ..
+             double llevelset = 0;
+             double uset = HUGE_VAL;
+             R2 Q[3];
+             KN<double> phi(Th.nv);phi=uset;
+             double f[3],umx,umn;
+             for(int t=0; t< Th.nt;++t)
+             {
+                 if (all || setoflab.find(Th[t].lab) != setoflab.end())
+                 {
+                     const TriangleS & K(Th[t]);
+                     
+                     double umx=-HUGE_VAL,umn=HUGE_VAL;
+                     for(int i=0;i<3;++i)
+                     {
+                         int j= Th(t,i);
+                         if( phi[j]==uset)
+                         {
+                             MeshPointStack(stack)->setP(&Th,t,i);
+                             phi[j]= di->levelset(stack);
+                         }
+                         f[i]=phi[j];
+                         umx = std::max(umx,phi[j]);
+                         umn = std::min(umn,phi[j]);
+                         
+                     }
+                     double area =K.mesure();
+                     if( umn >=0 ) continue; //  all positif => nothing
+                     if( umx >0 )
+                     { // coupe ..
+                         int i0 = 0, i1 = 1, i2 =2;
+                         
+                         if( f[i0] > f[i1] ) swap(i0,i1) ;
+                         if( f[i0] > f[i2] ) swap(i0,i2) ;
+                         if( f[i1] > f[i2] ) swap(i1,i2) ;
+                         
+                         double c = (f[i2]-f[i1])/(f[i2]-f[i0]); // coef Up Traing
+                         if( f[i1] < 0 ) {double y=f[i2]/(f[i2]-f[i1]); c *=y*y; }
+                         else {double y=f[i0]/(f[i0]-f[i1]) ; c = 1.- (1.-c)*y*y; };
+                         assert( c > 0 && c < 1);
+                         area *= 1-c;
+                     }
+                     //  warning  quadrature  wrong just ok for constante FH, we must also change the quadaturer points ..
+                     // just order 1  here ???
+                     for (int npi=0; npi<FI.n;npi++)
+                     {
+                         QuadraturePoint pi(FI[npi]);
+                         MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);
+                         r += area*pi.a*GetAny<R>( (*fonc)(stack));
+                     }
+                     
+                 }
+                 wsptr2free->clean(swsptr2free);// ADD FH 11/2017
+             }
+             
+         }
+         else
+             for (int i=0;i< Th.nt; i++)
+             {
+                 const TriangleS & K(Th[i]);
+                 if (all || setoflab.find(Th[i].lab) != setoflab.end())
+                     for (int npi=0; npi<FI.n;npi++)
+                     {
+                         QuadraturePoint pi(FI[npi]);
+                         MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);
+                         r += K.mesure()*pi.a*GetAny<R>( (*fonc)(stack));
+                     }
+                 wsptr2free->clean(swsptr2free);// ADD FH 11/2017
+             }
+     }
+     else   if (kind==CDomainOfIntegration::intalledges)
+     {
+         const QuadratureFormular1d & FI = FIE;
+         int lab;
+         for (int i=0;i< Th.nt; i++)
+             if (all || setoflab.find(Th[i].lab) != setoflab.end())
+                 for( int ie=0;ie<3;ie++)
+                 {
+                     
+                     const MeshS::Element  & K(Th[i]);
+                     R3 NN=K.N(ie);
+                     double mes = NN.norme();
+                     NN /= mes;
+                     for (int npi=0;npi<FI.n;npi++) // loop on the integration point
+                     {
+                         QuadratureFormular1dPoint pi( FI[npi]);
+                         R2 Pt(K.PBord(ie,pi)); // cout
+                         MeshPointStack(stack)->set(Th,K(Pt),Pt,K,lab,NN,ie);
+                         r += mes*pi.a*GetAny<R>( (*fonc)(stack));
+                     }
+                 }
+         wsptr2free->clean(swsptr2free);// ADD FH 11/2017
+     }
+     else   if (kind==CDomainOfIntegration::intallVFedges)
+     {
+         ffassert(0); //TODO AXEL
+     }
+     else
+     {
+         InternalError("CDomainOfIntegration kind unkown");
+     }*/
+ }
  else {  InternalError("CDomainOfIntegration dim unkown");}
 
  *MeshPointStack(stack)=mp;
@@ -3687,7 +4019,40 @@ int SendS(PlotStream & theplot,Plot::ListWhat &lli,map<const MeshS *,long> &mapt
     return err;
 }
 
-
+template<class K,class v_fes>
+int SendL(PlotStream & theplot,Plot::ListWhat &lli,map<const MeshL *,long> &mapthS)
+{
+    typedef FEbase<K,v_fes> * pfekS ;
+    pfekS feL[3]={0,0,0};
+    int cmp[3]={-1,-1,-1};
+    int err=1;
+    long what=lli.what;
+    int lg,nsb=0;
+    lli.eval(feL,cmp);
+    
+    
+    if (what==14 || what==20)
+    {
+        err=0;
+        theplot << what ;
+        theplot <<mapthS[ &(feL[0]->Vh->Th)];// numero du maillage
+        KN<R1> Psub;
+        KN<int> Ksub;
+        KN<K> V1=feL[0]->Vh->newSaveDraw(*feL[0]->x(),cmp[0],lg,Psub,Ksub,0);
+        
+        if(verbosity>9)
+            cout << " Send plot:what: " << what << " " << nsb << " "<<  V1.N()
+            << " Max "  << V1.max() << " min " << V1.min() << endl;
+        theplot << Psub ;
+        theplot << Ksub ;
+        theplot << V1;
+        
+    }
+    else  if (what==15 || what==21)
+    { ffassert(0);
+    }
+    return err;
+}
 //  missing function
 inline  void NewSetColorTable(int nb,float *colors=0,int nbcolors=0,bool hsv=true)
 {
@@ -3721,11 +4086,16 @@ AnyType Plot::operator()(Stack s) const{
             case 9 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 11 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 12 : l[i].EvalandPush<void *>(s,i,ll); break;
+            case 14 : l[i].EvalandPush<void *>(s,i,ll); break;
+            case 15 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 16 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 17 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 18 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 19 : l[i].EvalandPush<void *>(s,i,ll); break;
+            case 20 : l[i].EvalandPush<void *>(s,i,ll); break;
+            case 21 : l[i].EvalandPush<void *>(s,i,ll); break;
             case 50 : l[i].EvalandPush<void *>(s,i,ll); break;
+            case 55 : l[i].EvalandPush<void *>(s,i,ll); break;
             case  100 : l[i].MEvalandPush< pmesh>(s,i,ll); break;
             case  101 : l[i].AEvalandPush<asol, sol>(s,i,ll); break;
             case  102 : l[i].AEvalandPush<asol, sol>(s,i,ll); break;
@@ -3733,10 +4103,12 @@ AnyType Plot::operator()(Stack s) const{
             case  105 : l[i].MEvalandPush< pmesh3>(s,i,ll); break;
             case  106 : l[i].AEvalandPush<asol3, sol3>(s,i,ll); break;
             case  108 : l[i].AEvalandPush<asolS, solS>(s,i,ll); break;
+            case  109 : l[i].AEvalandPush<asolL, solL>(s,i,ll); break;
             case  111 : l[i].AEvalandPush<asolc, solc>(s,i,ll); break;
             case  112 : l[i].AEvalandPush<asolc, solc>(s,i,ll); break;
             case  116 : l[i].AEvalandPush<asolc3, solc3>(s,i,ll); break;
             case  118 : l[i].AEvalandPush<asolcS, solcS>(s,i,ll); break;
+            case  119 : l[i].AEvalandPush<asolcL, solcL>(s,i,ll); break;
 
             default:
                 ffassert(l[i].what<100) ; // missing piece of code FH (jan 2010) ...
@@ -3754,27 +4126,34 @@ AnyType Plot::operator()(Stack s) const{
          what = 1 -> real scalar field (FE function  2d)
          what = 2 -> 2d vector field (two FE function  2d)
          what = 3 -> curve def by 2,.., 4 array
-         what = 4 -> border
-         what = 5 -> 3d meshes
+         what = 4 -> border 2d
+         what = 5 -> 3d mesh, real volume or if contains a surface mesh
          what = 6 -> real FE function 3D volume
          what = 7 -> real 3d vector field (tree FE function  3d) volume
          what = 8 -> real FE function 3D surface
          what = 9 -> real 3d vector field (tree FE function  3d) surface
          what = 11 -> complex scalar field (FE function  2d) real
          what = 13 -> curve def by 4  array : x,y,z,  value for color ...
+         what = 14 -> real FE function 3D curve
+         what = 15 -> real 3d vector field (tree FE function  3d) curve
          what = 16 -> complex FE function 3D volume
          what = 17 -> complex 3d vector field (tree FE function  3d) volume
          what = 18 -> complex FE function 3D surface
          what = 19 -> complex 3d vector field (tree FE function  3d) surface
+         what = 20 -> complex FE function 3D curve
+         what = 21 -> complex 3d vector field (tree FE function  3d) curve
+         what = 40 -> 3D border mesh
          what = 50 -> 3D surface mesh
-         what = 100,101,106, ->   remap with real ... 2d, 3D volume, 3D surface
-         what = 111, 116 , 117 118 ->  remap with complex ... 2d, 3D volume, 3D surface
+         what = 55 -> 3D line mesh
+         what = 100,101,106,109 ->   remap with real ... 2d, 3D volume, 3D surface, 3D curve
+         what = 111, 116, 117 ,118,119 ->  remap with complex ... 2d, 3D volume, 3D surface, 3D curve
          what = -1 -> error, item empty
          */
         PlotStream theplot(ThePlotStream);
         pferbase  fe[3]={0,0,0};
         pf3rbase  fe3[3]={0,0,0};
         pfSrbase  feS[3]={0,0,0};
+        pfLrbase  feL[3]={0,0,0};
         double echelle=1;
         int cmp[3]={-1,-1,-1};
         theplot.SendNewPlot();
@@ -3856,7 +4235,9 @@ if(nargs[VTK_START+index])                    \
         map<const Mesh *,long> mapth;
         map<const Mesh3 *,long> mapth3;
         map<const MeshS *,long> mapthS;
-        long kth=0,kth3=0,kthS=0;
+        map<const MeshL *,long> mapthL;
+        
+        long kth=0,kth3=0,kthS=0,kthL=0;
         //  send all the mesh:
         for (size_t ii=0;ii<ll.size();ii++) {
           int i=ll[ii].i;
@@ -3864,22 +4245,17 @@ if(nargs[VTK_START+index])                    \
           const Mesh *th=0;
           const Mesh3 *th3=0;
           const MeshS *thS=0;
+          const MeshL *thL=0;
           // Prepare for the sending mesh 2d
-          if(what ==0)
+          if(what==0)
             th= ll[ii].th();
-          // Prepare for the sending mesh 3d with differenciation 3D surface / volumuic / volum+surfac
-          if( what ==5 ) {
-            //const int th3type = (l[i].evalm3(0,s)).getTypeMesh3() ;
-            // need to modifie the what for type mesh3 for identification in the ffglut reading
-            //if (l[i].evalm3(0,s)).meshS) { ll[i].what=50; thS= &(l[i].evalmS(0,s));}  // 3d pure surface
-            //if (l[i].evalm3(0,s).meshS) { ll[i].what=51; th3= & (l[i].evalm3(0,s)); /*thS= &(l[i].evalmS(0,s)); */} // 3d mixed volume and surface
-            //else { ll[i].what=51; th3= & (l[i].evalm3(0,s)); }   // 3d pure volume
-            ll[i].what=51;
-            th3= & (l[i].evalm3(0,s));
-              
-          }
-          if( what ==50 )
-            thS= (&(l[i].evalmS(0,s)));// 3d pure surface
+          // Prepare for the sending mesh 3d with differenciation 3D line / surface / volumuic / volum+surfac / line+volum+surfac
+          if( what==5 )
+              th3= & (l[i].evalm3(0,s)); // 3d mesh3 -> if contains a meshS or meshL pointer, send only the principal mesh: the mesh3
+          if( what==50 )
+            thS= (&(l[i].evalmS(0,s))); // 3d meshS
+          if( what ==55 )
+            thL= (&(l[i].evalmL(0,s))); // 3d  meshL
           // Prepare for the sending 2d iso values for ffglut
           else if (what==1 || what==2|| what==11 || what==12) {
             ll[ii].eval(fe,cmp);
@@ -3902,13 +4278,22 @@ if(nargs[VTK_START+index])                    \
             if (feS[1] && feS[1]->x()) ffassert(thS == &feS[1]->Vh->Th);
             if (feS[2] && feS[2]->x()) ffassert(thS == &feS[2]->Vh->Th);
           }
+          // Prepare for the sending 3D curve iso values for ffglut
+          else if (what==14 || what==15 || what==20 || what==21) {
+            ll[ii].eval(feL,cmp);
+            if (feL[0]->x()) thL=&feL[0]->Vh->Th;
+            if (feL[1] && feL[1]->x()) ffassert(thL == &feL[1]->Vh->Th);
+            if (feL[2] && feL[2]->x()) ffassert(thL == &feL[2]->Vh->Th);
+          }
           // test on the type meshes --- 2D, 3D volume and 3D surface
           if(th && mapth.find(th)==mapth.end())
             mapth[th]=++kth;
           if(th3 && (mapth3.find(th3)==mapth3.end()))
             mapth3[th3]=++kth3;
           if(thS && (mapthS.find(thS)==mapthS.end()))
-          mapthS[thS]=++kthS;
+            mapthS[thS]=++kthS;
+          if(thL && (mapthL.find(thL)==mapthL.end()))
+            mapthL[thL]=++kthL;
         }
         // send of meshes 2d
         theplot.SendMeshes();
@@ -3917,32 +4302,25 @@ if(nargs[VTK_START+index])                    \
         for (map<const Mesh *,long>::const_iterator i=mapth.begin();i != mapth.end(); ++i)
             theplot << i->second << *  i->first ;
 
-       // only send of volume meshes 3D
-        if(kth3)// && kthS==0)
-        {
+       // only send of volume meshes 3D if completed mesh3 (meshS!=NULL or/and !=meshL!=NULL)
+        if(kth3) {
             theplot.SendMeshes3();
             theplot << kth3 ;
             for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i)
                 theplot << i->second << *  i->first ;
            }
-
-        // only send of surface meshes 3D
-       if(kthS)// && kth3==0)
-        {
+       if(kthS) {
             theplot.SendMeshesS();
             theplot << kthS ;
             for (map<const MeshS *,long>::const_iterator i=mapthS.begin();i != mapthS.end(); ++i)
                 theplot << i->second << *  i->first ;
        }
-
-        // send of volume and surface meshes 3D
-        // in this case, plot the surface
-        /*if(kthS && kth3) {
-          theplot.SendMeshes3();
-          theplot << kth3 ;
-          for (map<const Mesh3 *,long>::const_iterator i=mapth3.begin();i != mapth3.end(); ++i)
+        if(kthL) {
+          theplot.SendMeshesL();
+            theplot << kthL ;
+          for (map<const MeshL *,long>::const_iterator i=mapthL.begin();i != mapthL.end(); ++i)
             theplot << i->second << *  i->first ;
-        }*/
+        }
 
         // end of what ploting for meshes
         theplot.SendPlots();
@@ -3957,6 +4335,7 @@ if(nargs[VTK_START+index])                    \
             const Mesh *pTh=0;
             const Mesh3 *pTh3=0;
             const MeshS *pThS=0;
+            const MeshL *pThL=0;
 
             // send 2d meshes for ffglut
             if(what ==0)
@@ -3999,22 +4378,26 @@ if(nargs[VTK_START+index])                    \
                 err=0;
             }
 
-            else if (l[i].what==4 )
-            {
+            else if (l[i].what==4 ) {
                 err=0;
                 theplot << what ;
                 const  E_BorderN * Bh= l[i].evalb(0,s);
                 Bh->SavePlot(s,theplot);
             }
-            // send 3d meshes for ffglut
-            else if(what ==51)
-            {
+            // send volume 3d meshes for ffglut
+            else if(what ==5) {
                 pTh3=&l[i].evalm3(0,s);
                 if(pTh3) {
                     err=0;
                     theplot << what ;
                     theplot <<mapth3[ &l[i].evalm3(0,s)];// numero du maillage 3D volume
                 }
+            }
+            else if (l[i].what==40 ) {
+                err=0;
+                theplot << what ;
+                const  E_Curve3N * Bh3= l[i].evalc(0,s);
+                Bh3->SavePlot(s,theplot);
             }
             else if(what ==50) {
                 pThS=&(l[i].evalmS(0,s));
@@ -4024,14 +4407,12 @@ if(nargs[VTK_START+index])                    \
                         theplot <<mapthS[ &(l[i].evalmS(0,s))];// numero du maillage 3D surface
                  }
             }
-
-            else if(what ==52)
-            {
-                pThS=&(l[i].evalmS(0,s));
-                if(pThS) {
+            else if(what ==55) {
+                pThL=&(l[i].evalmL(0,s));
+                if(pThL) {
                     err=0;
                     theplot << what ;
-                    theplot <<mapthS[ &(l[i].evalmS(0,s))];// numero du maillage 3D surface
+                    theplot <<mapthL[ &(l[i].evalmL(0,s))];// numero du maillage 3D line
                 }
             }
 
@@ -4045,7 +4426,11 @@ if(nargs[VTK_START+index])                    \
                 err = SendS<R,v_fesS>( theplot,ll[ii] ,mapthS);
             else if (what==18 || what==19 )
                 err = SendS<Complex,v_fesS>( theplot,ll[ii] ,mapthS);
-
+            // send 3D curve iso values for ffglut
+            else  if (what==14 ||what==15 )
+                err = SendL<R,v_fesL>( theplot,ll[ii] ,mapthL);
+            else if (what==20 || what==21 )
+                err = SendL<Complex,v_fesL>( theplot,ll[ii] ,mapthL);
             else
                 ffassert(0);// erreur type theplot inconnue
             if(err==1)
@@ -4170,6 +4555,7 @@ if(nargs[VTK_START+index])                    \
             int i=ll[ii].i;
             long what = ll[ii].what;
             R2  P1,P2;
+            R3  P11,P22;
             if (what==1 || what==2)
             {
 
@@ -4210,6 +4596,13 @@ if(nargs[VTK_START+index])                    \
                 const  E_BorderN * Bh= l[i].evalb(0,s);
                 Bh->BoundingBox(s,P1.x,P2.x,P1.y,P2.y);
 
+            }
+            else if (l[i].what==40)
+            {
+                if( !uaspectratio) aspectratio= true;
+                const  E_Curve3N * Bh3= l[i].evalc(0,s);
+                Bh3->BoundingBox(s,P11.x,P22.x,P11.y,P22.y,P11.z,P22.z);
+                
             }
             else if (l[i].what==3)
             {
@@ -4333,12 +4726,10 @@ if(nargs[VTK_START+index])                    \
                     if (drawmeshes) fe->Vh->Th.Draw(0,fill);
 
                 }
-                else if (l[i].what==4)
-                {
+                else if (l[i].what==4) {
                     const  E_BorderN * Bh= l[i].evalb(0,s);
                     Bh->Plot(s);
                 }
-
                 else if(l[i].what==3)
                 {
                     penthickness(6);
@@ -5191,6 +5582,13 @@ Type_Expr CConstantTFES(const EConstantTypeOfFES::T & v)
     return make_pair(map_type[typeid( EConstantTypeOfFES::T).name()],new EConstantTypeOfFES(v));
 }
 
+// FE 3D curve
+Type_Expr CConstantTFEL(const EConstantTypeOfFEL::T & v)
+{
+    throwassert(map_type[typeid( EConstantTypeOfFEL::T).name()] !=0);
+    return make_pair(map_type[typeid( EConstantTypeOfFEL::T).name()],new EConstantTypeOfFEL(v));
+}
+
 //  end --- call meth be ..
 // 2013 resize of array of fe function..
 template<typename  T> T fepresize(const Resize1<T> & rt,const long &n) {
@@ -5218,8 +5616,9 @@ void  init_lgfem()
  map_type[typeid(R3*).name()] = new ForEachType<R3*>(Initialize<R3>);
   Dcl_TypeandPtr<pmesh>(0,0, ::InitializePtr<pmesh>,::DestroyPtr<pmesh>,AddIncrement<pmesh>,NotReturnOfthisType);
   Dcl_TypeandPtr<pmesh3>(0,0,::InitializePtr<pmesh3>,::DestroyPtr<pmesh3>,AddIncrement<pmesh3>,NotReturnOfthisType);
-  Dcl_TypeandPtr<pmeshS>(0,0,::InitializePtr<pmeshS>,::DestroyPtr<pmeshS>,AddIncrement<pmeshS>,NotReturnOfthisType);    ///TODOCHECK
-
+  Dcl_TypeandPtr<pmeshS>(0,0,::InitializePtr<pmeshS>,::DestroyPtr<pmeshS>,AddIncrement<pmeshS>,NotReturnOfthisType);
+  Dcl_TypeandPtr<pmeshL>(0,0,::InitializePtr<pmeshL>,::DestroyPtr<pmeshL>,AddIncrement<pmeshL>,NotReturnOfthisType);
+    
   Dcl_Type<lgVertex>();
   Dcl_Type<lgElement>( );
   Dcl_Type<lgElement::Adj>( );
@@ -5236,11 +5635,14 @@ void  init_lgfem()
  Dcl_Type<TypeOfFE*>();
  Dcl_Type<TypeOfFE3*>(); // 3D volume
  Dcl_Type<TypeOfFES*>(); // 3D surface
+ Dcl_Type<TypeOfFEL*>(); // 3D curve
  map_type[typeid(TypeOfFE3*).name()]->AddCast(
 				 new E_F1_funcT<TypeOfFE3*,TypeOfFE*>(TypeOfFE3to2)	);
  map_type[typeid(TypeOfFES*).name()]->AddCast(
                  new E_F1_funcT<TypeOfFES*,TypeOfFE*>(TypeOfFESto2)    );
-
+ map_type[typeid(TypeOfFEL*).name()]->AddCast(
+                 new E_F1_funcT<TypeOfFEL*,TypeOfFE*>(TypeOfFELto2)    );
+    
  DclTypeMatrix<R>();
  DclTypeMatrix<Complex>();
 
@@ -5279,7 +5681,7 @@ void  init_lgfem()
  Dcl_Type< pf3c >();
  Dcl_Type< pf3carray >();
 
- // Dcl type for 3D volume FE v 4.00
+ // Dcl type for 3D surface FE v 4.00
  Dcl_TypeandPtr<pfSrbase>(); // il faut le 2 pour pourvoir initialiser
  Dcl_TypeandPtr<pfSrbasearray>(); // il faut le 2 pour pourvoir initialiser
  Dcl_Type< pfSr >();
@@ -5291,7 +5693,17 @@ void  init_lgfem()
  Dcl_Type< pfSc >();
  Dcl_Type< pfScarray >();
 
-
+ // Dcl type for 3D curve FE v 4.5
+ Dcl_TypeandPtr<pfLrbase>(); // il faut le 2 pour pourvoir initialiser
+ Dcl_TypeandPtr<pfLrbasearray>(); // il faut le 2 pour pourvoir initialiser
+ Dcl_Type< pfLr >();
+ Dcl_Type< pfLrarray >();
+    
+ //  pour des Func FE complex
+ Dcl_TypeandPtr<pfLcbase>(); // il faut le 2 pour pourvoir initialiser
+ Dcl_TypeandPtr<pfLcbasearray>(); // il faut le 2 pour pourvoir initialiser
+ Dcl_Type< pfLc >();
+ Dcl_Type< pfLcarray >();
 
     //  cast of eigen value  mai 2009 ...
   map_type[typeid(FEbaseArrayKn<double> *).name()]->AddCast(
@@ -5313,6 +5725,9 @@ void  init_lgfem()
 
  map_type[typeid(pfesS).name()] = new ForEachType<pfesS>();  // 3D surface
  map_type[typeid(pfesS*).name()] = new ForEachTypePtrfspace<pfesS,4>(); // 3D surface
+    
+ map_type[typeid(pfesL).name()] = new ForEachType<pfesL>();  // 3D curve
+ map_type[typeid(pfesL*).name()] = new ForEachTypePtrfspace<pfesL,5>(); // 3D curve
 
  //
  Dcl_Type<const QuadratureFormular *>();
@@ -5359,6 +5774,8 @@ void  init_lgfem()
  Dcl_Type<const Call_FormBilinear<v_fes3> *>();  // to set Matrix 3D volume
  Dcl_Type<const Call_FormLinear<v_fesS> *>();    //   to set Vector 3D surface
  Dcl_Type<const Call_FormBilinear<v_fesS> *>();  // to set Matrix 3D surface
+ Dcl_Type<const Call_FormLinear<v_fesL> *>();    //   to set Vector 3D curve
+ Dcl_Type<const Call_FormBilinear<v_fesL> *>();  // to set Matrix 3D curve
  Dcl_Type<interpolate_f_X_1<double>::type>();  // to make  interpolation x=f o X^1 ;
 
  map_type[typeid(const FormBilinear*).name()] = new TypeFormBilinear;
@@ -5464,9 +5881,11 @@ void  init_lgfem()
 		   new OneOperatorCode<OP_MakePtr2>,
 		   new OneOperatorCode<OP_MakePtr3>,
            new OneOperatorCode<OP_MakePtrS>,
+           new OneOperatorCode<OP_MakePtrL>,
 		   new OpMake_pfes<pfes,Mesh,TypeOfFE,pfes_tefk>,
 		   new OpMake_pfes<pfes3,Mesh3,TypeOfFE3,pfes3_tefk>,
-           new OpMake_pfes<pfesS,MeshS,TypeOfFES,pfesS_tefk>      // add for 3D surface  FEspace
+           new OpMake_pfes<pfesS,MeshS,TypeOfFES,pfesS_tefk>,      // add for 3D surface  FEspace
+           new OpMake_pfes<pfesL,MeshL,TypeOfFEL,pfesL_tefk>
         );
     TheOperators->Add("=",new OneOperator2<R3*,R3*,R3* >(&set_eqp));
 
@@ -5526,6 +5945,8 @@ void  init_lgfem()
  zzzfff->Add("mesh3",atype<pmesh3*>());
  // pmeshS is a pointer to MeshS defined at [[file:lgfem.hpp::typedef MeshS pmeshS]]
  zzzfff->Add("meshS",atype<pmeshS*>());
+ // pmeshL is a pointer to MeshL defined at [[file:lgfem.hpp::typedef MeshL pmeshL]]
+ zzzfff->Add("meshL",atype<pmeshL*>());
 
  zzzfff->Add("element",atype<lgElement>());
  zzzfff->Add("vertex",atype<lgVertex>());
@@ -5690,7 +6111,9 @@ void  init_lgfem()
 		   new OpArraytoLinearForm<double,v_fes3>(atype< KN_<double> >(),false,false)  ,//3D volume
 		   new OpMatrixtoBilinearForm<double,v_fes3 > , // 3D volume
            new OpArraytoLinearForm<double,v_fesS>(atype< KN_<double> >(),false,false)  , // 3D surface
-           new OpMatrixtoBilinearForm<double,v_fesS >); // 3D surface
+           new OpMatrixtoBilinearForm<double,v_fesS > , // 3D surface
+           new OpArraytoLinearForm<double,v_fesL>(atype< KN_<double> >(),false,false)  , // 3D curve
+           new OpMatrixtoBilinearForm<double,v_fesL >); // 3D curve
 
 
  TheOperators->Add("<-",
@@ -5699,7 +6122,9 @@ void  init_lgfem()
 		   new OpArraytoLinearForm<double,v_fes3>(atype< KN<double>* >(),true,true) , //3D volume
 		   new OpArraytoLinearForm<Complex,v_fes3>(atype< KN<Complex>* >(),true,true), //3D volume
            new OpArraytoLinearForm<double,v_fesS>(atype< KN<double>* >(),true,true) , //3D surface
-           new OpArraytoLinearForm<Complex,v_fesS>(atype< KN<Complex>* >(),true,true) //3D surface
+           new OpArraytoLinearForm<Complex,v_fesS>(atype< KN<Complex>* >(),true,true),  //3D surface
+           new OpArraytoLinearForm<double,v_fesL>(atype< KN<double>* >(),true,true) , //3D curve
+           new OpArraytoLinearForm<Complex,v_fesL>(atype< KN<Complex>* >(),true,true) //3D curve
         );
 
 
@@ -5716,14 +6141,16 @@ void  init_lgfem()
 		   new OpArraytoLinearForm<Complex,v_fes3>(atype< KN_<Complex> >(),false,false)   , //3D volume
 		   new OpMatrixtoBilinearForm<Complex,v_fes3 > , //3D volume
            new OpArraytoLinearForm<Complex,v_fesS>(atype< KN_<Complex> >(),false,false)   , //3D surface
-           new OpMatrixtoBilinearForm<Complex,v_fesS >); //3D surface
+           new OpMatrixtoBilinearForm<Complex,v_fesS > , //3D surface
+           new OpArraytoLinearForm<Complex,v_fesL>(atype< KN_<Complex> >(),false,false)   , //3D curve
+           new OpMatrixtoBilinearForm<Complex,v_fesL >) ; //3D surface
 
  // add august 2007
  TheOperators->Add("<-",
 		   new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::plusAx > > ,
 		   new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::plusAtx > >  ,
 		   new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::solveAxeqb > >  ,
-                   new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::solveAtxeqb > >  ,
+           new OneBinaryOperator<init_eqarray<KN<double> ,RNM_VirtualMatrix<double>::solveAtxeqb > >  ,
 
 		   new OneBinaryOperator<init_eqarray<KN<Complex> ,RNM_VirtualMatrix<Complex>::plusAx > > ,
 		   new OneBinaryOperator<init_eqarray<KN<Complex> ,RNM_VirtualMatrix<Complex>::plusAtx > >  ,
@@ -5774,7 +6201,8 @@ void  init_lgfem()
 
 		   new OpArraytoLinearForm<double,v_fes>(atype< KN_<double> >(),false,false,false)  ,
 		   new OpArraytoLinearForm<double,v_fes3>(atype< KN_<double> >(),false,false,false) ,  // 3D volume
-		   new OpArraytoLinearForm<double,v_fesS>(atype< KN_<double> >(),false,false,false)    // 3D surface
+		   new OpArraytoLinearForm<double,v_fesS>(atype< KN_<double> >(),false,false,false) ,  // 3D surface
+           new OpArraytoLinearForm<double,v_fesL>(atype< KN_<double> >(),false,false,false)    // 3D surface
        );
 
  TheOperators->Add("+=",
@@ -5785,7 +6213,8 @@ void  init_lgfem()
 		   new OpArraytoLinearForm<Complex,v_fes>(atype< KN_<Complex> >(),false,false,false)  ,
 
 		   new OpArraytoLinearForm<Complex,v_fes3>(atype< KN_<Complex> >(),false,false,false) , // 3D volume
-           new OpArraytoLinearForm<Complex,v_fesS>(atype< KN_<Complex> >(),false,false,false)  // 3D surface
+           new OpArraytoLinearForm<Complex,v_fesS>(atype< KN_<Complex> >(),false,false,false) , // 3D surface
+           new OpArraytoLinearForm<Complex,v_fesL>(atype< KN_<Complex> >(),false,false,false)   // 3D curve
        );
 
 
@@ -5798,6 +6227,9 @@ void  init_lgfem()
 
  TheOperators->Add("<-",new OpMatrixtoBilinearForm<double,v_fesS >(1) ); // 3D surface
  TheOperators->Add("<-",new OpMatrixtoBilinearForm<Complex,v_fesS >(1) ); // 3D surface
+    
+ TheOperators->Add("<-",new OpMatrixtoBilinearForm<double,v_fesL >(1) ); // 3D curve
+ TheOperators->Add("<-",new OpMatrixtoBilinearForm<Complex,v_fesL >(1) ); // 3D curve
 
  Add<const  FormLinear   *>("(","",new OpCall_FormLinear<FormLinear,v_fes> );
  Add<const  FormBilinear *>("(","",new OpCall_FormBilinear<FormBilinear,v_fes> );
@@ -5816,6 +6248,12 @@ void  init_lgfem()
  Add<const  FormBilinear *>("(","",new OpCall_FormLinear2<FormBilinear,v_fesS> );  // 3D surface
  Add<const C_args*>("(","",new OpCall_FormLinear2<C_args,v_fesS>);  // 3D surface
  Add<const C_args*>("(","",new OpCall_FormBilinear<C_args,v_fesS> );  // 3D surface
+    
+ Add<const  FormLinear   *>("(","",new OpCall_FormLinear<FormLinear,v_fesL> );  // 3D curve
+ Add<const  FormBilinear *>("(","",new OpCall_FormBilinear<FormBilinear,v_fesL> );  // 3D curve
+ Add<const  FormBilinear *>("(","",new OpCall_FormLinear2<FormBilinear,v_fesL> );  // 3D curve
+ Add<const C_args*>("(","",new OpCall_FormLinear2<C_args,v_fesL>);  // 3D curve
+ Add<const C_args*>("(","",new OpCall_FormBilinear<C_args,v_fesL> );  // 3D curve
 
 //  correction du bug morale
 //  Attention il y a moralement un bug
@@ -5992,35 +6430,43 @@ void  init_lgfem()
        new OneOperator1<Matrice_Creuse_Transpose<Complex>,Matrice_Creuse<Complex> *>(&Build<Matrice_Creuse_Transpose<Complex>,Matrice_Creuse<Complex> *>)
   );
 
- Add<pfer>("(","",new interpolate_f_X_1<R> );
+  Add<pfer>("(","",new interpolate_f_X_1<R> );
   TheOperators->Add("=", new OneOperator2_<void,interpolate_f_X_1<R>::type,double,E_F_StackF0F0 >(set_feoX_1) ) ;
   init_lgmat();
   init_mesh_array();
 
- l2interpreter = new LinkToInterpreter;
- using namespace FreeFempp;
- FreeFempp::TypeVarForm<double>::Global = new TypeVarForm<double>();
- FreeFempp::TypeVarForm<Complex>::Global = new TypeVarForm<Complex>();
+  l2interpreter = new LinkToInterpreter;
+  using namespace FreeFempp;
+  FreeFempp::TypeVarForm<double>::Global = new TypeVarForm<double>();
+  FreeFempp::TypeVarForm<Complex>::Global = new TypeVarForm<Complex>();
 
 
- Global.New("P13d",CConstantTFE3(&DataFE<Mesh3>::P1));
- Global.New("P23d",CConstantTFE3(&DataFE<Mesh3>::P2));
- Global.New("P03d",CConstantTFE3(&DataFE<Mesh3>::P0));
- Global.New("RT03d",CConstantTFE3(&RT03d));
- Global.New("Edge03d",CConstantTFE3(&Edge03d));
- Global.New("P1b3d",CConstantTFE3(&P1bLagrange3d));
+  Global.New("P13d",CConstantTFE3(&DataFE<Mesh3>::P1));
+  Global.New("P23d",CConstantTFE3(&DataFE<Mesh3>::P2));
+  Global.New("P03d",CConstantTFE3(&DataFE<Mesh3>::P0));
+  Global.New("RT03d",CConstantTFE3(&RT03d));
+  Global.New("Edge03d",CConstantTFE3(&Edge03d));
+  Global.New("P1b3d",CConstantTFE3(&P1bLagrange3d));
 
- Global.New("RT0S",CConstantTFES(&DataFE<MeshS>::RT0));
- Global.New("P2S",CConstantTFES(&DataFE<MeshS>::P2));
- Global.New("P1S",CConstantTFES(&DataFE<MeshS>::P1));
- Global.New("P0S",CConstantTFES(&DataFE<MeshS>::P0));
- Global.New("P1bS",CConstantTFES(&P1bLagrange_surf));
+  Global.New("RT0S",CConstantTFES(&DataFE<MeshS>::RT0));
+  Global.New("P2S",CConstantTFES(&DataFE<MeshS>::P2));
+  Global.New("P1S",CConstantTFES(&DataFE<MeshS>::P1));
+  Global.New("P0S",CConstantTFES(&DataFE<MeshS>::P0));
+  Global.New("P1bS",CConstantTFES(&P1bLagrange_surf));
+    
+  Global.New("P2L",CConstantTFEL(&DataFE<MeshL>::P2));
+  Global.New("P1L",CConstantTFEL(&DataFE<MeshL>::P1));
+  Global.New("P0L",CConstantTFEL(&DataFE<MeshL>::P0));
 
- TEF2dtoS[FindFE2("P0")]=&DataFE<MeshS>::P0;
- TEF2dtoS[FindFE2("P1")]=&DataFE<MeshS>::P1;
- TEF2dtoS[FindFE2("P2")]=&DataFE<MeshS>::P2;
- TEF2dtoS[FindFE2("P1b")]=&P1bLagrange_surf;
- TEF2dtoS[FindFE2("RT0")]=&DataFE<MeshS>::RT0;
+  TEF2dtoS[FindFE2("P0")]=&DataFE<MeshS>::P0;
+  TEF2dtoS[FindFE2("P1")]=&DataFE<MeshS>::P1;
+  TEF2dtoS[FindFE2("P2")]=&DataFE<MeshS>::P2;
+  TEF2dtoS[FindFE2("P1b")]=&P1bLagrange_surf;
+  TEF2dtoS[FindFE2("RT0")]=&DataFE<MeshS>::RT0;
+    
+  TEF2dtoL[FindFE2("P0")]=&DataFE<MeshL>::P0;
+  TEF2dtoL[FindFE2("P1")]=&DataFE<MeshL>::P1;
+  TEF2dtoL[FindFE2("P2")]=&DataFE<MeshL>::P2;
 
   TEF2dto3d[FindFE2("P1")]=&DataFE<Mesh3>::P1;
   TEF2dto3d[FindFE2("P2")]=&DataFE<Mesh3>::P2;
@@ -6234,9 +6680,11 @@ C_F0 NewFEvariable(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 
   if(dim==2)
     return NewFEvariableT<v_fes,2>(pids,currentblock,fespacetype,init,cplx,dim);
   else if  (dim==3)
-  {return NewFEvariableT<v_fes3,3>(pids,currentblock,fespacetype,init,cplx,dim); }
-    else if  (dim==4)
-    {return NewFEvariableT<v_fesS,4>(pids,currentblock,fespacetype,init,cplx,dim); }
+      return NewFEvariableT<v_fes3,3>(pids,currentblock,fespacetype,init,cplx,dim);
+  else if  (dim==4)
+      return NewFEvariableT<v_fesS,4>(pids,currentblock,fespacetype,init,cplx,dim);
+  else if  (dim==5)
+      return NewFEvariableT<v_fesL,5>(pids,currentblock,fespacetype,init,cplx,dim);
   else
     CompileError("Invalide fespace on Rd  ( d != 2 or 3) ");
     return C_F0();
@@ -6254,18 +6702,19 @@ size_t dimFESpaceImage(const basicAC_F0 &args)
   aType t_tfe= atype<TypeOfFE*>();
   aType t_tfe3= atype<TypeOfFE3*>();
   aType t_tfeS= atype<TypeOfFES*>();
+  aType t_tfeL= atype<TypeOfFEL*>();
   aType t_a= atype<E_Array>();
   size_t dim23=0;
 
   for (int i=0;i<args.size();i++)
-    if (args[i].left() == t_tfe || args[i].left() == t_tfe3 || args[i].left() == t_tfeS)
+    if (args[i].left() == t_tfe || args[i].left() == t_tfe3 || args[i].left() == t_tfeS || args[i].left() == t_tfeL)
       dim23 += args[i].LeftValue()->nbitem();
     else if (args[i].left() == t_a)
       {
 	const E_Array & ea= *dynamic_cast<const E_Array *>(args[i].LeftValue());
 	ffassert(&ea);
 	for (int i=0;i<ea.size();i++)
-	  if (ea[i].left() == t_tfe || ea[i].left() == t_tfe3|| ea[i].left() == t_tfeS)
+	  if (ea[i].left() == t_tfe || ea[i].left() == t_tfe3|| ea[i].left() == t_tfeS || ea[i].left() == t_tfeL)
             dim23 += ea[i].nbitem();
 	  else ffassert(0); // bug
       }
@@ -6279,13 +6728,15 @@ aType  typeFESpace(const basicAC_F0 &args)
   aType t_m2= atype<pmesh*>();
   aType t_m3= atype<pmesh3*>();
   aType t_mS= atype<pmeshS*>();
+  aType t_mL= atype<pmeshL*>();
 
   aType t_tfe= atype<TypeOfFE*>();
   aType t_tfe3= atype<TypeOfFE3*>();
   aType t_tfeS= atype<TypeOfFES*>();
+  aType t_tfeL= atype<TypeOfFEL*>();
 
-  aType atfe[]={t_tfe,t_tfe3,t_tfeS};
-  aType atfs[]={atype<pfes *>(),atype<pfes3 *>(),atype<pfesS *>()};
+  aType atfe[]={t_tfe,t_tfe3,t_tfeS,t_tfeL};
+  aType atfs[]={atype<pfes *>(),atype<pfes3 *>(),atype<pfesS *>(),atype<pfesL *>()};
   aType t_a= atype<E_Array>();
   aType ret =0,tl=0;
   aType tMesh=0;
@@ -6296,19 +6747,20 @@ aType  typeFESpace(const basicAC_F0 &args)
     if ( tl == t_m2) {ffassert(dm==2 || dm<0); dm=2;}
     else if( tl  == t_m3 ) {ffassert(dm==3 || dm<0); dm=3;}
     else if( tl  == t_mS ) {ffassert(dm==4 || dm<0); dm=4;}
+    else if( tl  == t_mL ) {ffassert(dm==5 || dm<0); dm=5;}
     // array
     else if(tl==t_a) {
       const E_Array & ea= *dynamic_cast<const E_Array *>(args[i].LeftValue());
       ffassert(&ea);
       for (int i=0;i<ea.size();i++) {
         tl=ea[i].left();
-        for( int it=0; it<3; ++it)
+        for( int it=0; it<4; ++it)
           if (atfe[it]->CastingFrom(tl)) // Warning  P1 can be cast in 2d or 3d FE ...
             id = it;
       }
     }
     else
-      for( int it=0; it<3; ++it)
+      for( int it=0; it<4; ++it)
         if (atfe[it]->CastingFrom(tl))
           id = it;
   }
@@ -6316,6 +6768,7 @@ aType  typeFESpace(const basicAC_F0 &args)
   if (dm==2) ret =atfs[0]; // 2D fespace
   else if (dm==3) ret = atfs[1]; // 3D fespace (Volume)
   else if (dm==4) ret =atfs[2]; // 3D fespace (surface)
+  else if (dm==5) ret =atfs[3]; // 3D fespace (curve)
   else {
     cerr << " typeFESpace:: bug dim: maes/EZFv mesh dim :"  << dm << " type FE "<< id +2 <<endl;
     ffassert(0);
@@ -6388,6 +6841,8 @@ C_F0 NewFEarray(ListOfId * pids,Block *currentblock,C_F0 & fespacetype,CC_F0 siz
     return NewFEarrayT<v_fes3,3>(pids,currentblock,fespacetype,sizeofarray,cplx,dim);
   else if  (dim==4)
       return NewFEarrayT<v_fesS,4>(pids,currentblock,fespacetype,sizeofarray,cplx,dim);
+ // else if  (dim==5)
+ //     return NewFEarrayT<v_fesL,5>(pids,currentblock,fespacetype,sizeofarray,cplx,dim);
   else
     CompileError("Invalid vectorial fespace on Rd  ( d != 2 or 3) ");
     return C_F0();

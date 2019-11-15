@@ -619,7 +619,32 @@ template<class MMesh>
      }
    
      
-     
+     template< >
+     template<class R>
+     KN<R>  GFESpace<MeshL>::newSaveDraw(const KN_<R> & U,int componante,int & lg,KN<typename MeshL::RdHat> &Psub,KN<int> &Ksub,int op_U) const
+     {
+         typedef typename MeshL::RdHat RdHat;
+         const int dHat =  RdHat::d;
+         MeshL::RdHat  *Ps=0;
+         int *Ks=0;
+         int nsb = TFE[0]->nbsubdivision;
+         int nvsub,nksub;
+         SplitSimplex<RdHat>(nsb, nvsub,  Ps,  nksub ,  Ks);
+         ffassert( Psub.unset());
+         ffassert( Ksub.unset());
+         Psub.set(Ps,nvsub);
+         Ksub.set(Ks,nksub*(dHat+1));
+         lg= nvsub*Th.nt;
+         KN<R> v(lg);
+         for (int k=0,i=0;k<Th.nt;k++)
+         {
+             FElementL K=(*this)[k];
+             for(int l=0;l<nvsub;l++)
+                 v[i++] =   K(Psub[l], U, componante, op_U)  ;
+             
+         }
+         return KN<R>(true,v);// to remove the copy.
+     }
      
      
      
@@ -645,17 +670,21 @@ template<class MMesh>
      template class GTypeOfFESum<Mesh2>;
      template class GTypeOfFESum<Mesh3>;
      template class GTypeOfFESum<MeshS>;
+     template class GTypeOfFESum<MeshL>;
      template class GFESpace<Mesh1>;
      template class GFESpace<Mesh2>;
      template class GFESpace<Mesh3>;
      template class GFESpace<MeshS>;
+     template class GFESpace<MeshL>;
      
+     template  KN<double>  GFESpace<MeshL>::newSaveDraw<double>(const KN_<double> & U,int componante,int & lg,KN<typename MeshL::RdHat> &Psub,KN<int> &Ksub,int op_U) const ;
      template  KN<double>  GFESpace<MeshS>::newSaveDraw<double>(const KN_<double> & U,int componante,int & lg,KN<typename MeshS::RdHat> &Psub,KN<int> &Ksub,int op_U) const ;
      template  KN<double>  GFESpace<Mesh3>::newSaveDraw<double>(const KN_<double> & U,int componante,int & lg,KN<typename Mesh3::RdHat> &Psub,KN<int> &Ksub,int op_U) const ;
      template  KN<double>  GFESpace<Mesh2>::newSaveDraw<double>(const KN_<double> & U,int componante,int & lg,KN<typename Mesh2::RdHat> &Psub,KN<int> &Ksub,int op_U) const ;
      template  KN<double>  GFESpace<Mesh1>::newSaveDraw<double>(const KN_<double> & U,int componante,int & lg,KN<typename Mesh1::RdHat> &Psub,KN<int> &Ksub,int op_U) const  ;
      
      typedef std::complex<double> Complex;
+     template  KN<Complex>  GFESpace<MeshL>::newSaveDraw<Complex>(const KN_<Complex> & U,int componante,int & lg,KN<typename MeshL::RdHat> &Psub,KN<int> &Ksub,int op_U) const ;
      template  KN<Complex>  GFESpace<MeshS>::newSaveDraw<Complex>(const KN_<Complex> & U,int componante,int & lg,KN<typename MeshS::RdHat> &Psub,KN<int> &Ksub,int op_U) const ;
      template  KN<Complex>  GFESpace<Mesh3>::newSaveDraw<Complex>(const KN_<Complex> & U,int componante,int & lg,KN<typename Mesh3::RdHat> &Psub,KN<int> &Ksub,int op_U) const ;
      template  KN<Complex>  GFESpace<Mesh2>::newSaveDraw<Complex>(const KN_<Complex> & U,int componante,int & lg,KN<typename Mesh2::RdHat> &Psub,KN<int> &Ksub,int op_U) const ;

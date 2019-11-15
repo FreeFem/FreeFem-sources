@@ -60,7 +60,7 @@ plot (cmm="TriangleS",TriangleS,wait=1);
 meshS TriangleI = movemeshS(TriangleS,transfo=[x,-cosdiedre*y+sindiedre*z,-sindiedre*y-cosdiedre*z],orientation=-1,label=ref);//triangle inf rotation de l'angle diedre par rapport au triangle sup
 plot (cmm="TriangleI",TriangleI,wait=1);
 
-meshS Triangles = TriangleI+TriangleS;cout << "test bug " << endl;
+meshS Triangles = TriangleI+TriangleS;
 
 plot (cmm="Triangles",Triangles,wait=1);
 //medit("face pyramide pentagonale + face antiprisme d'ordre 5",Triangles);

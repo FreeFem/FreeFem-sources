@@ -284,8 +284,9 @@ bin/script/PostInstall.sh:./Makefile bin/script/PostInstall.m4
 
 FreeFEM-documentation.pdf:Makefile
 if DOWNLOAD
-	-rm FreeFEM-documentation.pdf
-	-$(WGET) https://doc.freefem.org/pdf/FreeFEM-documentation.pdf
+	-rm FreeFEM-documentation.pdf.md5
+	-$(WGET) https://doc.freefem.org/pdf/FreeFEM-documentation.pdf.md5
+	-md5sum -c FreeFEM-documentation.pdf.md5 || (rm FreeFEM-documentation.pdf ; $(WGET) https://doc.freefem.org/pdf/FreeFEM-documentation.pdf)
 else
 	touch FreeFEM-documentation.pdf
 	echo "no downloaded documentation"
@@ -425,8 +426,9 @@ LIST_GENERATE_FILE= configure config.h.in \
     examples/bug/Makefile.in \
     examples/other/Makefile.in \
     examples/3d/Makefile.in \
-    examples/3dSurf/Makefile.in\
-    examples/bem/Makefile.in
+    examples/bem/Makefile.in \
+    examples/3dSurf/Makefile.in \
+    examples/3dCurve/Makefile.in
 
 LIST_GENERATE_FILE_AM= \
   Makefile.am \
@@ -466,8 +468,9 @@ LIST_GENERATE_FILE_AM= \
     examples/bug/Makefile.am \
     examples/other/Makefile.am \
     examples/3d/Makefile.am \
-    examples/3dSurf/Makefile.am\
-    examples/bem/Makefile.am
+    examples/bem/Makefile.am \
+    examples/3dSurf/Makefile.am \
+    examples/3dCurve/Makefile.am
 
 
 #$(LIST_GENERATE_FILE):$(LIST_GENERATE_FILE_AM)

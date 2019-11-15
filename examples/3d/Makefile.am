@@ -51,8 +51,8 @@ TESTS_OTHER = 3d-Leman.edp \
 	sphere2.edp \
 	sphere6.edp \
 	Stokes.edp \
-	TruncLac.edp 
-	
+	TruncLac.edp \
+	crack-3d.edp 
 
 TESTS_METIS = schwarz-nm-3d.edp
 

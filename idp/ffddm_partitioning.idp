@@ -383,7 +383,7 @@ if (pr#isincomm) {
     for (int i=0; i<mpiSize(comm);i++)
     pr#procddm[i] = globranks[i];
     else
-    pr#procddm = [0];
+    pr#procddm = [mpirank];
   }
   else {
     pr#procddm.resize(mpiSize(comm)-pr#pCS);
@@ -391,7 +391,7 @@ if (pr#isincomm) {
     for (int i=0; i<mpiSize(comm)-pr#pCS;i++)
     pr#procddm[i] = globranks[i+pr#pCS];
     else
-    pr#procddm = [0];
+    pr#procddm = [mpirank];
     if (mpiRank(comm) < pr#pCS)
     pr#excluded = 1;	
   }
@@ -464,7 +464,7 @@ macro ffddmpartf(pr,Th,res)
       ENDIFMACRO
     }    	
     
-    if (ffddmbplot && (mpiRank(pr#commddm) == 0)) {	
+    if (ffddmbplot && (mpiRank(pr#commddm) == 0 && ffddmverbosity >= 5)) {
       if (ffddmbffplot)
       plot(upart,wait=0,cmm="partition",value=1,fill=1);
       if (ffddmbmedit)
@@ -538,6 +538,10 @@ func int pr#update(scalar[int] vv, bool scale)
   return 0;
 }
 
+IFMACRO (pr#myscalprod)
+pr#myscalprod
+ENDIFMACRO
+IFMACRO (!pr#myscalprod)
 func scalar pr#scalprod(scalar[int] va, scalar[int] vb)
 {
   scalar res = 0;
@@ -556,6 +560,7 @@ func scalar pr#scalprod(scalar[int] va, scalar[int] vb)
   }
   return res;
 }
+ENDIFMACRO
 
 NewMacro pr#plot(u,s)
   if (prmsh#isincomm) {

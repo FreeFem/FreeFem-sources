@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 
 MAINTAINER Alexander Sashnov "sashnov@ngs.ru"
 
@@ -17,6 +17,7 @@ RUN apt update && apt full-upgrade -y && apt install -y --no-install-recommends 
     ca-certificates \
     cmake \
     coinor-libipopt-dev \
+    file \
     flex \
     freeglut3-dev \
     g++ \
@@ -38,12 +39,14 @@ RUN apt update && apt full-upgrade -y && apt install -y --no-install-recommends 
     libscotch-dev \
     libsuitesparse-dev \
     libtet1.5-dev \
+    locales \
     m4 \
     make \
     mpich \
     patch \
     pkg-config \
     python \
+    sudo \
     unzip \
     valgrind \
     wget \

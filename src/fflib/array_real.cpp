@@ -29,14 +29,21 @@ void initArrayDCLdouble() {
   // ArrayOperator<long>();
   ArrayDCL<double>();
 }
-
+ KN_<double> rmeps(KN_rmeps<double> p,double eps){
+    for(int i=0;i<p.v.N();++i)
+        if(abs(p.v[i]) < eps) p.v[i]=0;
+    return p.v;}//
 //template<class A, class B>  A Build(B b) { return A(b); }
 void initArrayOperatordouble() {
+  Dcl_Type< KN_rmeps<double> > ();
   ArrayOperator<double, long>();
   ArrayOperatorF<double, double>();
   typedef double K;
   typedef double KK;
   Dcl_Type<QuantileKN<K> >();
+  Add<KN<K> *>("rmeps",".",new OneOperator1<KN_rmeps<K>,KN_<K> >(build_rmeps));
+  Add<KN_rmeps<K> >("(","",new OneOperator2<KN_<K>,KN_rmeps<K>,double>(rmeps));
+  Global.Add("abs", "(", new OneOperator1F_KN_<F_KN_<K, K, K, KK>, K, KK, KN_<K> >(fabs));
   Global.Add("abs", "(", new OneOperator1F_KN_<F_KN_<K, K, K, KK>, K, KK, KN_<K> >(fabs));
   Global.Add("acos", "(", new OneOperator1F_KN_<F_KN_<K, K, K, KK>, K, KK, KN_<K> >(acos));
   Global.Add("asin", "(", new OneOperator1F_KN_<F_KN_<K, K, K, KK>, K, KK, KN_<K> >(asin));

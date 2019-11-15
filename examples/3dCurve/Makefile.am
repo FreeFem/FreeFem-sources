@@ -14,42 +14,46 @@
 # You should have received a copy of the GNU Lesser General Public License #
 # along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          #
 ############################################################################
-# SUMMARY : ...
+# SUMMARY : Makefile for FreeFEM
 # LICENSE : LGPLv3
 # ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
 # AUTHORS : ...
 # E-MAIL  : ...
 
-# To create statically linked executables (see configure.ac)
-CXXLD = $(STATICTOOL) $(CXX)
-bin_PROGRAMS = FreeFem++ FreeFem++-nw @FFGLUTPROG@
-EXTRA_PROGRAMS = ffglut
+LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw LIST_CONDITIONAL="$(LIST_CONDITIONAL)"
 
-# FFCS:visualization stream redirection
-ffglut_SOURCES = ../femlib/Drawing.cpp \
-  ../femlib/fem.cpp \
-  ../fflib/ffapi.cpp \
-  ../femlib/FQuadTree.cpp \
-  ../femlib/GQuadTree.cpp \
-  ../femlib/Mesh1dn.cpp \
-  ../femlib/Mesh2dn.cpp \
-  ../femlib/Mesh3dn.cpp \
-  ../femlib/MeshSn.cpp \
-  ../femlib/MeshLn.cpp \
-  ../femlib/mshptg.cpp \
-  ../Graphics/ffglut.cpp \
-  ../Graphics/ffthreads.cpp \
-  ../Graphics/ffthreads.hpp \
-  ../Graphics/gggg.cpp
+all-local: all.edp freefem++.pref
 
-ffglut_DEPENDENCIES = ../libMesh/libMesh.a
-ffglut_LDADD = ../libMesh/libMesh.a @LIBSGLUT@ @LIBSPTHREAD@
+TESTS_OTHER = buildParametricMeshL.edp \
+	LaplacianCurve.edp
 
-FreeFem___nw_SOURCES = ../Graphics/sansrgraph.cpp ../mpi/parallelempi-empty.cpp ../fflib/ffapi.cpp
-FreeFem___SOURCES = ../Graphics/sansrgraph.cpp ../mpi/parallelempi-empty.cpp ../fflib/ffapi.cpp
 
-FreeFem___nw_DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
-FreeFem___DEPENDENCIES = ../fflib/libff.a ../lglib/liblg.a
 
-LDADD = ../lglib/liblg.a ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@
-AM_CPPFLAGS = -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../.. -I$(srcdir)/../femlib
+
+TESTS = $(TESTS_OTHER) \
+	$(TESTS_TETGEN)
+
+LIST_CONDITIONAL = $(TESTS_OTHER) \
+	$(CONDITIONAL_TETGEN)
+
+
+XFAIL_TESTS = buildParametricMeshL.edp
+
+EXTRA_DIST = *.edp all.edp
+
+all.edp: Makefile
+	(echo "NoGraphicWindow=true;NoUseOfWait=true;int verbosityy=verbosity;int MEM1234=storageused();"; \
+	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do \
+		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
+		echo "verbosity=verbosityy;searchMethod=0;" ; \
+		echo \{ include \"$$i\"\;\}\; ;\
+		echo ' cout << " mem leak = " <<storageused() - MEM1234 << endl << "------------------------------------------------------------------------------ " << endl;' ;\
+	done) > $@
+
+
+freefem++.pref:Makefile
+	echo includepath = \"../../idp/\" > freefem++.pref
+	echo loadpath = \"../../plugin/seq/\" >> freefem++.pref
+
+FORCE:

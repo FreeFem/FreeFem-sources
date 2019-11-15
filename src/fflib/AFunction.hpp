@@ -1749,6 +1749,96 @@ static C_F0 to(int cas, C_F0 nn)
     
   void BoundingBox(Stack stack,double  &xmin,double & xmax, double & ymin,double & ymax) const ;
 };
+///
+class E_Curve3 ;
+class E_Curve3N :public E_F0mps { public:
+    const E_Curve3 * b;
+    int cas;// 0 long , 1, KN_ , 2 : Array // FH april 14 ... cas 1 and 2 not implemented
+    Expression  n;
+    const E_Curve3N * next;
+    
+    static   int Cas(C_F0  nn)
+    {
+        if( atype<long>()->CastingFrom(nn.left())) return 0;
+        else if(atype<KN_<long> >()->CastingFrom(nn.left())) return 1;
+        else if( atype< const E_Array * >()->CastingFrom(nn.left())  )
+        {
+            E_Array & a =  *dynamic_cast< E_Array *>((Expression) nn);
+            ffassert(a);
+            a.map(::to<long>);
+            //   a[i]=CastTo<long>(a[i]);
+            return 2;
+        }
+        else CompileError(" Number of element of a border ( longn , int array, [ ] array ");
+        return -1; // bug
+    }
+    E_Curve3N(const E_Curve3 *  bb, C_F0  nn,const E_Curve3N * nx=0) ;
+    E_Curve3N(const E_Curve3N & bb,const E_Curve3N * nx)
+    : b(bb.b),cas(bb.cas),n(bb.n),next(nx)
+    {
+        int kk=1;
+        if(bb.next) {// modif FH. 13/02/2008
+        
+            const E_Curve3N ** pnext = &next;
+            E_Curve3N  *pp;
+            next = bb.next;  // copy bb;
+            for(int step=0;step<2;++step)
+            {
+                while (*pnext)
+                {
+                    kk++;
+                    pp = new E_Curve3N(**pnext); // copy
+                    *pnext = pp;
+                    pnext = & pp->next;
+                }
+                if(step==0)
+                    *pnext= nx;  // copy de nx
+            }
+            // cout << "  BorderN : nb item : " << kk << " == " << size()<< endl;
+        }
+    }
+    AnyType operator()(Stack)  const {
+        return  SetAny<const  E_Curve3N *>(this);}
+    operator aType () const { return atype<const  E_BorderN *>();}
+    int size() const { int k=0;for(const E_Curve3N  *pp=this;pp; pp=pp->next) k++; return k;}
+    E_Curve3N * operator+( const E_Curve3N & bb)  const
+    { throwassert(bb.next==0);
+        return new E_Curve3N(bb,this);}
+    
+    static C_F0 to(int cas, C_F0 nn)
+    {
+        if(cas==0) return ::to<long>(nn);
+        else if(cas ==1) return ::to<KN_<long> >(nn);
+        else if(cas == 2) return ::to<E_Array> (nn);
+        else ffassert(0); // Big bug .. FH ..
+    }
+    long Nbseg(Stack stack,int index) const {
+        if(cas==0) {assert(index==0);  return GetAny<long>((*n)(stack));}
+        else if (cas==1 ) return  (GetAny<KN_<long> >((*n)(stack)))(index);
+        else if (cas==2)  {E_Array & a =  *dynamic_cast< E_Array *>((Expression) n);assert(a); Expression nn= a[index]; return  GetAny<long>((*nn)(stack));}
+        else return 0;
+    }
+    long NbBorder(Stack stack) const {
+        if(cas==0) return 1;
+        else if (cas==1 ) return  GetAny<KN_<long> >((*n)(stack)).N();
+        else if (cas==2)  return dynamic_cast<const E_Array *>(n)->size();
+        else return 0;
+    } //GetAny<long>((*n)(stack));}
+    
+    double from(Stack stack) const ;//{ return GetAny<double>((*n)(stack));}
+    double to(Stack stack) const ;//{ return GetAny<double>((*b)(stack));}
+    long * index(Stack stack) const ;//{ return GetAny<double>((*b)(stack));}
+    double * var(Stack stack) const ;//{ return GetAny<double*>((*n)(stack));}
+    void code(Stack stack) const ;
+    long label()const  ;
+    void Plot(Stack stack) const ;
+    void SavePlot(Stack stack,PlotStream & plot ) const;
+    
+    void BoundingBox(Stack stack,double  &xmin,double & xmax, double & ymin,double & ymax, double & zmin,double & zmax) const ;
+};
+
+
+
 
 class AddBorderOperator: public  OneOperator{
   typedef const E_BorderN * A;
@@ -1779,6 +1869,39 @@ class  OneOperator_borderN : public OneOperator {public:
     theborder(b),cas(1){}
     OneOperator_borderN(const  E_Border * b,int,int )
     : OneOperator(atype<const E_BorderN *>(),atype<E_Array >()),
+    theborder(b),cas(2){}
+    
+};
+
+class AddCurve3Operator: public  OneOperator{
+    typedef const E_Curve3N * A;
+public:
+    E_F0 * code(const basicAC_F0 & args) const
+    {
+        A a0=dynamic_cast<A>((Expression) args[0]);
+        A a1=dynamic_cast<A>((Expression) args[1]);
+        ffassert( a0 && a1);
+        //ffassert(a1->next==0);  // change FH 13/02/2008
+        return  new E_Curve3N(*a1,a0);}
+    AddCurve3Operator():
+    OneOperator(map_type[typeid(A).name()],map_type[typeid(A).name()],map_type[typeid(A).name()])
+    {pref = 0;}
+    
+};
+
+
+class  OneOperator_Curve3N : public OneOperator {public:
+    const  E_Curve3 * theborder;int cas;
+    E_F0 * code(const basicAC_F0 & a) const
+    { return  new E_Curve3N(theborder,a[0]);}
+    OneOperator_Curve3N(const  E_Curve3 * b)
+    : OneOperator(atype<const E_Curve3N *>(),atype<long>()),
+    theborder(b),cas(0){}
+    OneOperator_Curve3N(const  E_Curve3 * b,int )
+    : OneOperator(atype<const E_Curve3N *>(),atype<KN_<long> >()),
+    theborder(b),cas(1){}
+    OneOperator_Curve3N(const  E_Curve3 * b,int,int )
+    : OneOperator(atype<const E_Curve3N *>(),atype<E_Array >()),
     theborder(b),cas(2){}
     
 };
@@ -1819,7 +1942,6 @@ class E_Border  :public Polymorphic  {  public:
     return  SetAny<const  E_Border *>(this);}
   double length(Stack ) const { ffassert(0);return 0.0; /* a faire */ }
 };
-  
 inline  E_BorderN::E_BorderN(const E_Border *bb, C_F0  nn,const E_BorderN * nx)
 :b(bb),cas(Cas(nn)),n(to(cas,nn) ),next(nx) { /* cout << "  -- E_BorderN  : cas " << cas << endl; */ throwassert(b);}
 
@@ -1830,6 +1952,72 @@ inline  long *  E_BorderN::index(Stack stack) const { return b->xindex ? GetAny<
 inline  void  E_BorderN::code(Stack stack)const { (*b->xcode)(stack);}
 inline  long  E_BorderN::label()const { return b->label;}
 
+//////
+class  OneOperator_curve3N : public OneOperator {public:
+    const  E_Curve3 * theborder;int cas;
+    E_F0 * code(const basicAC_F0 & a) const
+    {return  new E_Curve3N(theborder,a[0]);}
+    
+    OneOperator_curve3N(const  E_Curve3 * b)
+    : OneOperator(atype<const E_Curve3N *>(),atype<long>()),
+    theborder(b),cas(0){}
+    OneOperator_curve3N(const  E_Curve3 * b,int )
+    : OneOperator(atype<const E_Curve3N *>(),atype<KN_<long> >()),
+    theborder(b),cas(1){}
+    OneOperator_curve3N(const  E_Curve3 * b,int,int )
+    : OneOperator(atype<const E_Curve3N *>(),atype<E_Array >()),
+    theborder(b),cas(2){}
+    
+};
+class E_Curve3  :public Polymorphic  {  public:
+    static basicAC_F0::name_and_type name_param[] ;
+    static const int n_name_param =0;
+    static long Count;
+    Expression xvar,xfrom,xto,xcode,xindex;
+    basicAC_F0_wa * tab;
+    long label;
+    E_Curve3(const E_Array * a) :
+    xvar(0),xfrom(0),xto(0),xcode(0),xindex(0), tab(a? a->v:0) ,label(++Count)
+    {   cout << " tototot" << endl;
+        assert(tab);
+        Add("(",new OneOperator_curve3N(this));   // no use
+        Add("(",new OneOperator_curve3N(this,1));  // no use
+        Add("(",new OneOperator_curve3N(this,1,1));  // no use
+        /* A FAIRE pour multy border ****/
+    }
+    
+    E_Curve3(const basicAC_F0 & aa) :
+    xvar(to<double*>(aa[0])),
+    xfrom(to<double>(aa[1])),
+    xto(to<double>(aa[2])),
+    xcode(aa[aa.size()-1].LeftValue()),
+    xindex( (aa.size() > 5) ? (Expression) to<long*>(aa[4]) : 0 ),     // modif
+    //xindex( to<long*>(aa[3])  ),
+    tab(0),
+    label(++Count)
+    {
+        Add("(",new OneOperator_curve3N(this));
+       /* Add("(",new OneOperator_curve3N(this,1));// not defined
+        Add("(",new OneOperator_curve3N(this,1,1));// not defined*/
+    }
+    
+    AnyType operator()(Stack)  const {
+        return  SetAny<const  E_Curve3 *>(this);}
+    double length(Stack ) const { ffassert(0);return 0.0; /* a faire */ }
+};
+
+
+inline  E_Curve3N::E_Curve3N(const E_Curve3 *bb, C_F0  nn,const E_Curve3N * nx)
+:b(bb),cas(Cas(nn)),n(to(cas,nn) ),next(nx) { /*cout << "  -- E_Curve3N  : cas " << cas << endl;*/  throwassert(b);}
+
+inline  double E_Curve3N::from(Stack stack) const { return b->xfrom ? GetAny<double>((*b->xfrom)(stack)): double(0.0);}
+inline  double  E_Curve3N::to(Stack stack) const { return b->xto? GetAny<double>((*b->xto)(stack)): b->length(stack) ;}
+inline  double *  E_Curve3N::var(Stack stack) const { return b->xvar ? GetAny<double*>((*b->xvar)(stack)): (double*) 0 ;}
+inline  long *  E_Curve3N::index(Stack stack) const { return b->xindex ? GetAny<long*>((*b->xindex)(stack)): (long*) 0 ;}
+inline  void  E_Curve3N::code(Stack stack)const { (*b->xcode)(stack);}
+inline  long  E_Curve3N::label()const { return b->label;}
+
+//////
 inline ArrayOfaType::ArrayOfaType(const basicAC_F0 & aa) : n(aa.size()),t(n ? (n<=4 ? tt : new aType[n]):0),ellipse(false) { 
    for (int i=0;i<n;i++) t[i]=aa[i].left();}
    

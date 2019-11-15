@@ -1,7 +1,7 @@
 // ORIG-DATE:     Dec 2007
 // -*- Mode : c++ -*-
 //
-// SUMMARY  :  Model  mesh 1d   
+// SUMMARY  :  Model  mesh 3d   
 // USAGE    : LGPL      
 // ORG      : LJLL Universite Pierre et Marie Curi, Paris,  FRANCE 
 // AUTHOR   : Frederic Hecht
@@ -43,6 +43,7 @@
  using namespace ::std;
 #include "GenericMesh.hpp"
 #include "MeshSn.hpp"
+#include "MeshLn.hpp"
 
 namespace Fem2D {
   
@@ -143,12 +144,13 @@ class Mesh3 : public GenericMesh<Tet,Triangle3,Vertex3> {
 public:
   Mesh3():meshS(0){} 
   Mesh3(const string);
-  Mesh3(const string, const long); // Add J. Morice 11/10
+  Mesh3(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
+  //Mesh3(const string, const long); // Add J. Morice 11/10
   Mesh3(FILE *f,int offset=0);     
   Mesh3(const Serialize &);
   Mesh3(const  Serialize &serialized, int withSurface);
   //Mesh3(const Serialize &serialized1, const Serialize &serialized2);
-  Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb, bool cleanmesh=true, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
+  Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb, bool cleanmesh=false, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-6);
   double hmin() const; // Add J. Morice 11/10
   //surface mesh possible
   MeshS *meshS;

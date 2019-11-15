@@ -1,4 +1,8 @@
 macro ffddmgenerateOperatorfunctions(pr,preffe)
+IFMACRO (pr#myA)
+pr#myA
+ENDIFMACRO
+IFMACRO (!pr#myA)
 func preffe#K[int] pr#A(preffe#K[int] &u)
 {
   /* Matrix vector product with the global matrix */
@@ -35,6 +39,7 @@ func preffe#K[int] pr#A(preffe#K[int] &u)
   }
   return res;
 }
+ENDIFMACRO
 
 func preffe#K[int] pr#directsolve(preffe#K[int]& rhs)
 {
@@ -100,7 +105,7 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
     return res;
   }   
 
-  func preffe#K[int] pr#Q(preffe#K[int] &l)      /* Q = Z*E^-1*Z^T */
+  func preffe#K[int] pr#Q(preffe#K[int] &l, int mrhs)      /* Q = Z*E^-1*Z^T */
   {
     preffe#K[int] res(l.n);
     res=0.;
@@ -127,11 +132,13 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
           NewMacro localmacroinexact preffe#prmesh#minexactCS EndMacro
           IFMACRO (localmacroinexact,1)
           if (!preffe#prmesh#excluded) {
-            tmp.resize(preffe#CoarseVhi.ndof);
-            tmp = pr#ZCMi'*l;
+            tmp.resize(mrhs*preffe#CoarseVhi.ndof);
+            for (int m=0; m<mrhs; m++)
+              tmp(m*preffe#CoarseVhi.ndof:(m+1)*preffe#CoarseVhi.ndof-1) = pr#ZCMi'*l(m*preffe#Vhi.ndof:(m+1)*preffe#Vhi.ndof-1);
           }
           /*exchange(pr#Addmc,tmp,scaled=true);*/
-          pr#prfe#Coarseupdate(tmp,true);
+          for (int m=0; m<mrhs; m++)
+            pr#prfe#Coarseupdate(tmp(m*preffe#CoarseVhi.ndof:(m+1)*preffe#CoarseVhi.ndof-1),true);
           ENDIFMACRO
           ;
         }
@@ -161,7 +168,7 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
         else {
           NewMacro localmacroinexact preffe#prmesh#minexactCS EndMacro
           IFMACRO (localmacroinexact,1)
-          preffe#K[int] solc(preffe#CoarseVhi.ndof);
+          preffe#K[int] solc(mrhs*preffe#CoarseVhi.ndof);
           solc = 0;
           preffe#prmesh#tic(pr#tcsi)
           /*
@@ -174,7 +181,8 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
           solc = pr#CoarsefGMRES(solc, tmp, ffddminexactCStol, ffddmmaxit, ffddmvariant);
           preffe#prmesh#toc(pr#tcsi,"",pr#tcs)
           if (!preffe#prmesh#excluded)
-          res = pr#ZCMi*solc;
+          for (int m=0; m<mrhs; m++)
+            res(m*preffe#Vhi.ndof:(m+1)*preffe#Vhi.ndof-1) = pr#ZCMi*solc(m*preffe#CoarseVhi.ndof:(m+1)*preffe#CoarseVhi.ndof-1);
           ENDIFMACRO
           ;	  
         }	
@@ -327,6 +335,15 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
     return res;
 }
 
+func preffe#K[int] pr#Q(preffe#K[int] &l)      /* Q = Z*E^-1*Z^T */
+{
+  return pr#Q(l, 1);
+}
+
+IFMACRO (pr#myPREC1)
+pr#myPREC1
+ENDIFMACRO
+IFMACRO (!pr#myPREC1)
 func preffe#K[int] pr#PREC1(preffe#K[int] &l)
 {
   /* Application of the 1 level preconditioner
@@ -374,6 +391,7 @@ func preffe#K[int] pr#PREC1(preffe#K[int] &l)
   }
   return s;
 }
+ENDIFMACRO
 
 func preffe#K[int] pr#PREC2level(preffe#K[int] &l)
 {
@@ -511,6 +529,7 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     int dim = min(nbiter,ffddmrestart);
 
     IFMACRO(pr#withhpddmkrylov)
+    load "hpddm"
     if (!preffe#prmesh#excluded) {
       uni = x0;
       IterativeMethod(pr#A, rhs,uni, precon = pr#PREC, sparams = "-hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+nbiter+(mpirank == 0 ? " -hpddm_verbosity "+pr#verbosity : "")+" -hpddm_orthogonalization mgs",comm = preffe#prmesh#mpicomm);
@@ -542,9 +561,13 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     pr#tgmres -= timings[0];
     pr#tfacto += timings[0];
     ENDIFMACRO
-    
-    IFMACRO(!pr#withhpddm)
-    IFMACRO(!pr#withhpddmkrylov)
+
+    IFMACRO(pr#withpetsc)
+    uni = x0;
+    uni = pr#petscOP^-1*rhs;
+    ENDIFMACRO
+
+    IFMACRO((!pr#withhpddm)&(!pr#withhpddmkrylov)&(!pr#withpetsc))
     preffe#K[int,int] Hn(dim+2,dim+1);     /* Hessenberg matrix */
     Hn = 0.;
     preffe#K[int,int] rot(2,dim+2);
@@ -722,7 +745,6 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
       cout << "["+Stringification(pr)+"] GMRES did not converge in " + nbiter + " iterations " << endl;
       cout << "["+Stringification(pr)+"] The relative residual is " +  relres/normb << endl;
     }
-    ENDIFMACRO
     ENDIFMACRO
     preffe#prmesh#toc(pr#tgmresi,"",pr#tgmres)
     return uni;

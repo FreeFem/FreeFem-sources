@@ -1,7 +1,5 @@
-macro WITHHPDDM()1//
-
 verbosity = 0;
-int ffddmverbosity = getARGV("-ffddm_verbosity", 3);
+int ffddmverbosity = getARGV("-ffddm_verbosity", 5);
 /*
 if (mpirank != 0)
   mverbosity = 0;

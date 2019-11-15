@@ -1807,7 +1807,11 @@ void ArrayOperator()
                       new OneBinaryOperator< PrintPnd< KN< KNM<K> >* > >,
                       new OneBinaryOperator< PrintPnd< KN< KN<K> >* > >
                       );
-
+  // remove f.H ne marche pas
+  //  TheOperators->Add("<<",
+  //     new OneBinaryOperator<Op_WriteKN<K> >,
+  //     new OneBinaryOperator<Op_WriteKNM<K> >
+  //   );
 
      TheOperators->Add(">>",
         new OneBinaryOperator<Op_ReadKN<K> >,
@@ -1904,5 +1908,9 @@ void ArrayOperatorF()
     TheOperators->Add("<-", new OneOperator2_<KN<K> *,KN<K> *,F_KN_<K,K,K,KK> >(set_init_N));
 
 }
-
+// Add nov 2019  version 4.4-3 FH
+template<class K> struct KN_rmeps {KN_<K> v;
+    KN_rmeps(KN_<K> vv):v(vv) {}
+} ;
+template<class K> KN_rmeps<K> build_rmeps(KN_<K> v){ return KN_rmeps<K>(v);}
 #endif

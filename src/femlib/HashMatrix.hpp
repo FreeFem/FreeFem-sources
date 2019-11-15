@@ -406,7 +406,7 @@ std::ostream & operator<<(std::ostream & f,  const HashMatrix<I,R> &A)
     {
         I ke=A.p[i+1];
         for (;k<ke;k++)
-            f << setw(9) << i+1 << ' ' << setw(9) << A.j[k]+1 << ' ' << setprecision( p20) << A.aij[k]<< '\n' ;
+            f << setw(9) << i+1 << ' ' << setw(9) << A.j[k]+1 << ' ' << setprecision( p20) << RNM::removeeps(A.aij[k])<< '\n' ;
 
     }
     }
