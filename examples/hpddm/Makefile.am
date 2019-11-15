@@ -25,7 +25,7 @@ TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" LIST_CONDIT
 
 all-local: freefem++.pref
 
-TESTS_MPI = withPartitioning.edp
+TESTS_MPI = withPartitioning.edp buildRecursive.edp
 
 TESTS_HPDDM = diffusion-2d.edp \
 	diffusion-2d-mg.edp \

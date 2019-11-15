@@ -1,5 +1,3 @@
-macro WITHHPDDM()1//
-
 verbosity = 0;
 int ffddmverbosity = getARGV("-ffddm_verbosity", 5);
 /*
