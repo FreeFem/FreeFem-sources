@@ -16,14 +16,14 @@ int[int][int] intersection;
     mesh[int] ThTab(level);
     mesh[int] ThBorderTab(level);
     real[int][int] DTab(level);
-    ThTab[0] = square(getARGV("-global", 10), getARGV("-global", 10));
+    ThTab[level - 1] = square(getARGV("-global", 10), getARGV("-global", 10));
     matrix[int] P(level - 1);
-    buildOverlapEdgeRecursive(ThTab, ThBorderTab, -111111, s, overlap, level, P, intersection, DTab, Pk, mpiCommWorld, false, Pk, def, init);
+    buildOverlapEdgeRecursive(ThTab, ThBorderTab, 10, s, overlap, level, P, intersection, DTab, Pk, mpiCommWorld, false, Pk, def, init);
     for(int i = 0; i < level; ++i) {
         fespace Vh(ThTab[i], Pk);
         Vh u;
         u[] = DTab[i];
-        plotMPI(ThTab[i], u, Pk, def, real, cmm = "Global recursive partition of unity")
+        plotMPI(ThTab[i], u, Pk, def, real, cmm = "Global recursive partition of unity at level " + (i + 1))
     }
 }
 {
@@ -35,13 +35,13 @@ int[int][int] intersection;
     mesh3[int] ThTab(level);
     mesh3[int] ThBorderTab(level);
     real[int][int] DTab(level);
-    ThTab[0] = cube(getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5), [x, y, z]);
+    ThTab[level - 1] = cube(getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5), [x, y, z]);
     matrix[int] P(level - 1);
     buildOverlapEdgeRecursive(ThTab, ThBorderTab, -111111, s, overlap, level, P, intersection, DTab, Pk, mpiCommWorld, false, Pk, def, init);
     for(int i = 0; i < level; ++i) {
         fespace Vh(ThTab[i], Pk);
         Vh u;
         u[] = DTab[i];
-        plotMPI(ThTab[i], u, Pk, def, real, cmm = "Global recursive partition of unity")
+        plotMPI(ThTab[i], u, Pk, def, real, cmm = "Global recursive partition of unity at level " + (i + 1))
     }
 }
