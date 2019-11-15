@@ -9,10 +9,8 @@ func torex= (R+r*cos(y*pi*2))*cos(x*pi*2);
 func torey= (R+r*cos(y*pi*2))*sin(x*pi*2);
 func torez= r*sin(y*pi*2);
 
+
 meshS ThS=square3(nx,ny,[torex,torey,torez],removeduplicate=true) ;
-
-plot(ThS,wait=1);
-
 cout << "test" << ThS.nv << " " <<ThS.nt << " " << ThS.nbe << endl;
 mesh3 Th3=tetg(ThS,switch="paAAQYY"); //,nbofregions=1,regionlist=domain);
 
