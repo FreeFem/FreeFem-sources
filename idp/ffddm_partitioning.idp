@@ -493,6 +493,10 @@ func int pr#update(scalar[int] vv, bool scale)
   return 0;
 }
 
+IFMACRO (pr#myscalprod)
+pr#myscalprod
+ENDIFMACRO
+IFMACRO (!pr#myscalprod)
 func scalar pr#scalprod(scalar[int] va, scalar[int] vb)
 {
   scalar res = 0;
@@ -511,6 +515,7 @@ func scalar pr#scalprod(scalar[int] va, scalar[int] vb)
   }
   return res;
 }
+ENDIFMACRO
 
 NewMacro pr#plot(u,s)
   if (prmsh#isincomm) {

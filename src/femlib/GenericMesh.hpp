@@ -1217,7 +1217,6 @@ void GenericMesh<T,B,V>::VertexInElement(V *vertice, T *list, int &nv, int *(&in
 // output int *ind_nv_t, int *old2new, int &new_nv
 template<typename T,typename B,typename V>
 void GenericMesh<T,B,V>::SameVertex(const double precis_mesh, V *vertice, T *element, int nv, int nt, int *ind_nv_t, int *old2new, int &new_nv) {
-
     if (verbosity > 2)
     cout << "clean mesh: remove multiple vertices, elements, border elements and check border elements " << endl;
     double precispt=0;
@@ -1252,16 +1251,16 @@ void GenericMesh<T,B,V>::SameVertex(const double precis_mesh, V *vertice, T *ele
     longmini_box = pow(bmax.x - bmin.x, 2) + pow(bmax.y - bmin.y, 2) + pow(bmax.z - bmin.z, 2);
     longmini_box = sqrt(longmini_box);
 
+    if (precis_mesh < 0)
+        precispt = -longmini_box;
+    else
+        precispt = precis_mesh*longmini_box;
     if (verbosity > 1) {
         cout << " bmin := " << bmin.x << " " << bmin.y << " " << bmin.z << endl;
         cout << " bmax := " << bmax.x << " " << bmax.y << " " << bmax.z << endl;
         cout << " box volume :=" << longmini_box << endl;
+        cout << " eps size edges "<< precispt << endl;
     }
-
-    if (precis_mesh < 0)
-        precispt = longmini_box * 1e-7;
-    else
-        precispt = precis_mesh;
 
     // determination de hmin
     for (int i = 0; i < nt ; i++) {
@@ -1275,10 +1274,7 @@ void GenericMesh<T,B,V>::SameVertex(const double precis_mesh, V *vertice, T *ele
             for (int k = j + 1; k < T::nea; k++) {
                 int &i1 = iv[j];
                 int &i2 = iv[k];
-                longedge = pow(vertice[i1].x - vertice[i2].x, 2)
-                + pow(vertice[i1].y - vertice[i2].y, 2)
-                + pow(vertice[i1].z - vertice[i2].z, 2);
-                longedge = sqrt(longedge);
+                longedge = Rd(vertice[i1],vertice[i2]).norme();
                 if (longedge > precispt) hmin = min(hmin, longedge);
             }
         
@@ -1298,7 +1294,7 @@ void GenericMesh<T,B,V>::SameVertex(const double precis_mesh, V *vertice, T *ele
         assert(hmin > Norme2(bmin - bmax) / 1e9);
     
     
-        double hseuil = hmin / 10.;
+        double hseuil = hmin / 1000.;
         if (verbosity > 3)
             cout << "    hseuil=" << hseuil << endl;
 

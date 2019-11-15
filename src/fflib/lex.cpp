@@ -1127,6 +1127,7 @@ bool mylex::CallMacro(int &ret)
     			const char *ifs="Stringification";
                 bool inifmacro = 0;
                 bool isconc = 0;
+                int nbparenth = 0;
                 while(1)
                 {
                 	ReadCommentAndSpace = "";
@@ -1141,6 +1142,10 @@ bool mylex::CallMacro(int &ret)
                     	expandtxt+=currentexpand+ReadCommentAndSpace;
                     	break;
                     }
+                    if (inifmacro && (ret == '('))
+                      nbparenth++;
+                    if (inifmacro && (ret == ')'))
+                      nbparenth--;
                     if (nbparam && (ret != '#') && (ret != ')' || !inifmacro))
                     {
                     	if (strncmp(buf,ifm,8)==0 || strncmp(buf,ifs,15)==0)
@@ -1186,7 +1191,7 @@ bool mylex::CallMacro(int &ret)
                         }
                     }
                     else if (ret!='#') {  //  macro concatenation operator
-                    	if (ret == ')' && inifmacro)
+                    	if (ret == ')' && inifmacro && nbparenth == 0)
                     		inifmacro = 0;
                     	if (!isconc) {
                         	expandtxt+=currentexpand+ReadCommentAndSpace;
