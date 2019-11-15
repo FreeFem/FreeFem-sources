@@ -2598,21 +2598,21 @@ AnyType VTK_WriteMesh_Op::operator () (Stack stack)  const {
                         l[ii].writesolutionP0_double(fp, Th, stack, surface, binary, swap);
                     }
                 }
+            }
                 
-                if (Norder0 < nbofsol) {
-                    fprintf(fp, "POINT_DATA %d\n", Th.nv);
-                    fprintf(fp, "FIELD FieldData %d\n", nbofsol - Norder0);
+            if (Norder0 < nbofsol) {
+                fprintf(fp, "POINT_DATA %d\n", Th.nv);
+                fprintf(fp, "FIELD FieldData %d\n", nbofsol - Norder0);
                     
-                    for (int ii = 0; ii < nbofsol; ii++) {
-                        if (order[ii] == 1) {
-                            fprintf(fp, "%s %ld %d double\n", nameofuser[ii], l[ii].nbfloat, Th.nv);
-                            if (verbosity > 5) {
-                                cout << "name of data(" << ii << ")=" << nameofuser[ii] << endl;
-                            }
+                for (int ii = 0; ii < nbofsol; ii++) {
+                    if (order[ii] == 1) {
+                        fprintf(fp, "%s %ld %d double\n", nameofuser[ii], l[ii].nbfloat, Th.nv);
+                        if (verbosity > 5) {
+                            cout << "name of data(" << ii << ")=" << nameofuser[ii] << endl;
+                        }
                             
                             // changement ecriture solution
-                            l[ii].writesolutionP1_double(fp, Th, stack, binary, swap);
-                        }
+                        l[ii].writesolutionP1_double(fp, Th, stack, binary, swap);
                     }
                 }
             }
@@ -2746,9 +2746,12 @@ class VTK_LoadMesh3_Op: public E_F0mps
 {
 public:
     Expression filename;
-    static const int n_name_param = 4;	//
+    static const int n_name_param = 7;	//
     static basicAC_F0::name_and_type name_param [];
     Expression nargs[n_name_param];
+    int arg (int i, Stack stack, int a) const {return nargs[i] ? GetAny<int>((*nargs[i])(stack)) : a;}
+    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
+    double arg (int i, Stack stack, double a) const {return nargs[i] ? GetAny<double>((*nargs[i])(stack)) : a;}
     
 public:
     VTK_LoadMesh3_Op (const basicAC_F0 &args, Expression ffname)
@@ -2765,7 +2768,10 @@ basicAC_F0::name_and_type VTK_LoadMesh3_Op::name_param [] = {
     {"reftet", &typeid(long)},
     {"swap", &typeid(bool)},
     {"refface", &typeid(long)},
-    {"namelabel", &typeid(string)}
+    {"namelabel", &typeid(string)},
+    {"cleanmesh", &typeid(bool)},
+    {"removeduplicate", &typeid(bool)},
+    {"precisvertice", &typeid(double)}
 };
 
 class VTK_LoadMesh3: public OneOperator {
@@ -2777,7 +2783,7 @@ public:
     }
 };
 
-Mesh3*VTK_Load3 (const string &filename, bool bigEndian) {
+Mesh3*VTK_Load3 (const string &filename, bool bigEndian, bool cleanmesh, bool removeduplicate, double precisvertice) {
     // swap = bigEndian or not bigEndian
     // variable freefem++
     int nv, nt = 0, nbe = 0;
@@ -3081,27 +3087,27 @@ Mesh3*VTK_Load3 (const string &filename, bool bigEndian) {
     delete [] firstCell;
     delete [] TypeCells;
     
-    Mesh3 *pTh = new Mesh3(nv, nt, nbe, vff, tff, bff);
+    Mesh3 *pTh = new Mesh3(nv, nt, nbe, vff, tff, bff, cleanmesh, removeduplicate, precisvertice);
     return pTh;
     
 }
 
 AnyType VTK_LoadMesh3_Op::operator () (Stack stack)  const {
     string *pffname = GetAny<string *>((*filename)(stack));
-    bool swap = isBigEndian();
-    int reftetra = 1;
-    int reftri = 1;
-    
-    if (nargs[0]) {reftetra = GetAny<long>((*nargs[0])(stack));}
-    
-    if (nargs[1]) {swap = GetAny<bool>((*nargs[1])(stack));}
-    
-    if (nargs[2]) {reftri = GetAny<long>((*nargs[2])(stack));}
+   
+    int reftetra(arg(0, stack, 1));
+    bool swap(arg(1, stack, false));
+    int reftri(arg(2, stack, 1));
+
     
     string *DataLabel;
     if (nargs[3]) {DataLabel = GetAny<string *>((*nargs[3])(stack));}
+	
+    bool cleanmesh(arg(4, stack, false));
+    bool removeduplicate(arg(5, stack, false));
+    double precisvertice(arg(6, stack, 1e-6));
     
-    Mesh3 *Th = VTK_Load3(*pffname, swap);
+    Mesh3 *Th = VTK_Load3(*pffname, swap, cleanmesh,removeduplicate,precisvertice);
     
     // A faire fonction pour changer le label
     
@@ -5321,8 +5327,7 @@ AnyType VTK_WriteMeshS_Op::operator () (Stack stack)  const {
     bool surface = true;
     bool floatmesh = false;
     bool floatsol = false;
- //   int datasize = sizeof(double);
- //   int datasizeSol = sizeof(double);
+    
     string *dataname;
     int nbofsol = l.size();
     KN<int> order(nbofsol);
@@ -5397,7 +5402,7 @@ AnyType VTK_WriteMeshS_Op::operator () (Stack stack)  const {
     
     // determination of number of order 0 et 1.
     int Norder0 = 0;
-    
+	
     for (int ii = 0; ii < nbofsol; ii++) {
         if (order[ii] == 0) {Norder0++;}}
     
@@ -5486,21 +5491,20 @@ AnyType VTK_WriteMeshS_Op::operator () (Stack stack)  const {
                         l[ii].writesolutionP0_double(fp, Th, stack, surface, binary, swap);
                     }
                 }
+			}
+            if (Norder0 < nbofsol) {
+                fprintf(fp, "POINT_DATA %d\n", Th.nv);
+                fprintf(fp, "FIELD FieldData %d\n", nbofsol - Norder0);
                 
-                if (Norder0 < nbofsol) {
-                    fprintf(fp, "POINT_DATA %d\n", Th.nv);
-                    fprintf(fp, "FIELD FieldData %d\n", nbofsol - Norder0);
-                    
-                    for (int ii = 0; ii < nbofsol; ii++) {
-                        if (order[ii] == 1) {
-                            fprintf(fp, "%s %ld %d double\n", nameofuser[ii], l[ii].nbfloat, Th.nv);
-                            if (verbosity > 5) {
-                                cout << "iovtk writeMeshS: name of data(" << ii << ")=" << nameofuser[ii] << endl;
-                            }
+                for (int ii = 0; ii < nbofsol; ii++) {
+                    if (order[ii] == 1) {
+                        fprintf(fp, "%s %ld %d double\n", nameofuser[ii], l[ii].nbfloat, Th.nv);
+                        if (verbosity > 5) {
+                            cout << "iovtk writeMeshS: name of data(" << ii << ")=" << nameofuser[ii] << endl;
+                        }
                             
                             // changement ecriture solution
                             l[ii].writesolutionP1_double(fp, Th, stack, binary, swap);
-                        }
                     }
                 }
             }
@@ -5583,9 +5587,12 @@ class VTK_LoadMeshS_Op: public E_F0mps
 {
 public:
     Expression filename;
-    static const int n_name_param = 4;    //
+    static const int n_name_param = 7;    //
     static basicAC_F0::name_and_type name_param [];
     Expression nargs[n_name_param];
+    int arg (int i, Stack stack, int a) const {return nargs[i] ? GetAny<int>((*nargs[i])(stack)) : a;}
+    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
+    double arg (int i, Stack stack, double a) const {return nargs[i] ? GetAny<double>((*nargs[i])(stack)) : a;}
     
 public:
     VTK_LoadMeshS_Op (const basicAC_F0 &args, Expression ffname)
@@ -5602,7 +5609,11 @@ basicAC_F0::name_and_type VTK_LoadMeshS_Op::name_param [] = {
     {"reftri", &typeid(long)},
     {"swap", &typeid(bool)},
     {"refedge", &typeid(long)},
-    {"namelabel", &typeid(string)}
+    {"namelabel", &typeid(string)},
+    {"cleanmesh", &typeid(bool)},
+    {"removeduplicate", &typeid(bool)},
+    {"precisvertice", &typeid(double)}
+    
 };
 
 class VTK_LoadMeshS: public OneOperator {
@@ -5615,7 +5626,7 @@ public:
 };
 
 
-MeshS*VTK_LoadS (const string &filename, bool bigEndian) {
+MeshS*VTK_LoadS (const string &filename, bool bigEndian, bool cleanmesh, bool removeduplicate, double precisvertice) {
     // swap = bigEndian or not bigEndian
     // variable freefem++
     int nv, nt = 0, nbe = 0;
@@ -5916,27 +5927,25 @@ MeshS*VTK_LoadS (const string &filename, bool bigEndian) {
     delete [] firstCell;
     delete [] TypeCells;
     
-    MeshS *pTh = new MeshS(nv, nt, nbe, vff, tff, bff);
+    MeshS *pTh = new MeshS(nv, nt, nbe, vff, tff, bff, cleanmesh, removeduplicate, precisvertice);
     return pTh;
 }
 
 
 AnyType VTK_LoadMeshS_Op::operator () (Stack stack)  const {
     string *pffname = GetAny<string *>((*filename)(stack));
-    bool swap = false;
-    int reftri = 1;
-    int refedges = 1;
-    
-    if (nargs[0]) {reftri = GetAny<long>((*nargs[0])(stack));}
-    
-    if (nargs[1]) {swap = GetAny<bool>((*nargs[1])(stack));}
-    
-    if (nargs[2]) {refedges = GetAny<long>((*nargs[2])(stack));}
-    
+  
+    int reftri(arg(0, stack, 1));
+    bool swap(arg(1, stack, false));
+    int refedges(arg(2, stack, 1));
     string *DataLabel;
     if (nargs[3]) {DataLabel = GetAny<string *>((*nargs[3])(stack));}
+   
+    bool cleanmesh(arg(4, stack, false));
+    bool removeduplicate(arg(5, stack, false));
+    double precisvertice(arg(6, stack, 1e-6));
     
-    MeshS *Th = VTK_LoadS(*pffname, swap);
+    MeshS *Th = VTK_LoadS(*pffname, swap, cleanmesh,removeduplicate,precisvertice);
     
     // A faire fonction pour changer le label
     
