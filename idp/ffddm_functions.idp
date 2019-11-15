@@ -489,6 +489,7 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     int dim = min(nbiter,ffddmrestart);
 
     IFMACRO(pr#withhpddmkrylov)
+    load "hpddm"
     if (!preffe#prmesh#excluded) {
       uni = x0;
       IterativeMethod(pr#A, rhs,uni, precon = pr#PREC, sparams = "-hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+nbiter+(mpirank == 0 ? " -hpddm_verbosity "+pr#verbosity : "")+" -hpddm_orthogonalization mgs",comm = preffe#prmesh#mpicomm);
@@ -520,9 +521,13 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     pr#tgmres -= timings[0];
     pr#tfacto += timings[0];
     ENDIFMACRO
-    
-    IFMACRO(!pr#withhpddm)
-    IFMACRO(!pr#withhpddmkrylov)
+
+    IFMACRO(pr#withpetsc)
+    uni = x0;
+    uni = pr#petscOP^-1*rhs;
+    ENDIFMACRO
+
+    IFMACRO((!pr#withhpddm)&(!pr#withhpddmkrylov)&(!pr#withpetsc))
     preffe#K[int,int] Hn(dim+2,dim+1);     /* Hessenberg matrix */
     Hn = 0.;
     preffe#K[int,int] rot(2,dim+2);
@@ -700,7 +705,6 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
       cout << "["+Stringification(pr)+"] GMRES did not converge in " + nbiter + " iterations " << endl;
       cout << "["+Stringification(pr)+"] The relative residual is " +  relres/normb << endl;
     }
-    ENDIFMACRO
     ENDIFMACRO
     preffe#prmesh#toc(pr#tgmresi,"",pr#tgmres)
     return uni;
