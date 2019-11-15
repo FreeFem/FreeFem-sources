@@ -37,7 +37,7 @@ FF_OBJ_AC = array_complex.o
 FF_OBJ_AR = array_real.o
 FF_OBJ_AL = array_long.o
 FF_OBJ1 = AFunction.o InitFunct.o strversionnumber.o mt19937ar.o string_def.o
-FF_OBJ2 = BamgFreeFem.o Drawing.o Element_P2h.o Element_RT.o FESpace.o FQuadTree.o InitFunct.o Mesh2.o MeshDraw.o MeshGeom.o MeshQuad.o MeshRead.o MeshWrite.o Meshio.o Metric.o QuadTree.o QuadratureFormular.o R2.o SetOfE4.o @EIGENOBJ@ fem.o gibbs.o  lgalgo.o lgfem.o lgmat.o lgmesh.o  mshptg.o problem.o DefColor.o lgmesh3.o  P012_2d.o P012_3d.o P012_3dSurf.o FESpacen.o HashMatrix.o CG.o SparseLinearSolver.o chrono.o libmeshb7.o memory.o eigenv.o Mesh1dn.o Mesh2dn.o Mesh3dn.o MeshSn.o GQuadTree.o glumesh2D.o UMFPack_Solver.o splitsimplex.o P1IsoValue.o
+FF_OBJ2 = BamgFreeFem.o Drawing.o Element_P2h.o Element_RT.o FESpace.o FQuadTree.o InitFunct.o Mesh2.o MeshDraw.o MeshGeom.o MeshQuad.o MeshRead.o MeshWrite.o Meshio.o Metric.o QuadTree.o QuadratureFormular.o R2.o SetOfE4.o @EIGENOBJ@ fem.o gibbs.o  lgalgo.o lgfem.o lgmat.o lgmesh.o  mshptg.o problem.o DefColor.o lgmesh3.o  P012_2d.o P012_3d.o P012_3dSurf.o P012_3dCurve.o FESpacen.o HashMatrix.o CG.o SparseLinearSolver.o chrono.o libmeshb7.o memory.o eigenv.o Mesh1dn.o Mesh2dn.o Mesh3dn.o MeshSn.o MeshSL.o GQuadTree.o glumesh2D.o UMFPack_Solver.o splitsimplex.o P1IsoValue.o
 FF_OBJIDE = FreeFem___cs-cs.o FreeFem___cs-commands.o FreeFem___cs-draw.o FreeFem___cs-strversionnumber.o FreeFem___cs-socket.o FreeFem___cs-threads.o FreeFem___cs-hl_yacc.o FreeFem___cs-hl_lex.o FreeFem___cs-highlight.o FreeFem___cs-spawn.o FreeFem___cs-editor.o FreeFem___cs-server.o    windres.o
 
 FFD_OBJ0 = ../fflib/CodeAlloc.o ../fflib/AFunction2.o ../femlib/CheckPtr.o ../fflib/lex.o ../fflib/global.o ../fflib/environment.o ../fflib/load.o
