@@ -2318,9 +2318,9 @@ namespace Fem2D {
 
         if ( verbosity >1)
         {
-            cout << " Integral   on Th nv :  " << Th.nv << " nt : " << Th.nt << endl;
-            cout << "        Th/ u nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
-            cout << "        Th/ v nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
+            cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+            cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
+            cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
             cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
         }
         Expression  const * const mapt=*di.mapt?di.mapt:0 ;
@@ -2612,9 +2612,9 @@ namespace Fem2D {
         const bool intmortar=di.intmortar(stack);
         if ( verbosity >1)
         {
-            cout << " Integral   on Th nv :  " << Th.nv << " nt : " << Th.nt << endl;
-            cout << "        Th/ u nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
-            cout << "        Th/ v nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
+            cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+            cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
+            cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
             cout << "        suppose in mortar " << intmortar << endl;
         }
         assert(pThdi == & Th);
@@ -2833,9 +2833,9 @@ namespace Fem2D {
         const bool intmortar=di.intmortar(stack);
         if ( verbosity >1)
         {
-            cout << " Integral   on Th nv :  " << Th.nv << " nt : " << Th.nt << endl;
-            cout << "        Th/ u nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
-            cout << "        Th/ v nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
+            cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+            cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
+            cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
             cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
         }
         Expression  const * const mapt=*di.mapt?di.mapt:0 ;

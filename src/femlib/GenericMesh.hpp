@@ -979,7 +979,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         int na= h.n;
         if(verbosity>1)
         {
-            cout << "  -- BuildAdj: nb Elememt " << nt << " nb vertices " << nv << endl;
+            cout << "  -- BuildAdj:"<< this <<" nb Elememt " << nt << " nb vertices " << nv << endl;
             cout << "             : nb adj  = "<< na << " on border " << nba << " nea = " << nea << " nva = " << nva
                  << " nb no manifold border " << nadjnomanifold << endl;
             if(nea==2)
