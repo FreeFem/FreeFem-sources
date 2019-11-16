@@ -212,20 +212,24 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank
     suppSmooth = suppSmooth;
     meshName[level - 1] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface);
     prolongation.resize(level - 1);
-    for(int i = level - 1; i > 0; --i) {
-        meshName[i - 1] = trunc(meshName[i], 1, split = s);
-        fespace WhLocalRefined(meshName[i - 1], P);
-        fespace WhLocalCoarse(meshName[i], P);
-        prolongation[i - 1] = interpolate(WhLocalRefined, WhLocalCoarse);
+    {
+        meshN globalNameRefined = globalName;
+        for(int i = level - 1; i > 0; --i) {
+            globalNameRefined = trunc(globalNameRefined, 1, split = s);
+            meshName[i - 1] = trunc(globalNameRefined, suppSmooth > 0.501, label = fakeInterface);
+            fespace WhLocalRefined(meshName[i - 1], P);
+            fespace WhLocalCoarse(meshName[i], P);
+            prolongation[i - 1] = interpolate(WhLocalRefined, WhLocalCoarse);
+        }
     }
     if(!removeZeros && (fakeInterface != -111111 || overlap != 1)) {
         if(suppSmooth[].min < 0.501) {
             borderName[level - 1] = trunc(globalName, (suppSmooth > (overlap - 0.999) / real(2 * overlap)) && (suppSmooth < 0.501), label = (abs(fakeInterface) + 1) * 100);
             for(int i = level - 2; i >= 0; --i) {
-                borderName[i] = trunc(borderName[i + 1], 1, split = s);
-                fespace PhRefined(meshName[i], P0);
-                PhRefined suppRefined;
-                suppRefined = supp;
+                borderName[i] = trunc(borderName[i + 1], 1, split = s, label = (abs(fakeInterface) + 1) * 100);
+                meshN tempRefined = meshName[i] + borderName[i];
+                fespace PhRefined(tempRefined, P0);
+                PhRefined suppRefined = supp;
                 fespace VhBorderRefined(borderName[i], P1);
                 VhBorderRefined suppBorder = suppRefined;
                 borderName[i] = trunc(borderName[i], suppBorder > 0.01);
