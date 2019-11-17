@@ -62,3 +62,11 @@ fi
 
 # visu for jenkins tests results analyser
 ./etc/jenkins/resultForJenkins/resultForJenkins.sh
+
+if [ $? -eq 0 ]
+then
+echo "Jenkins process complete"
+else
+echo "Jenkins process failed"
+exit 1
+fi
