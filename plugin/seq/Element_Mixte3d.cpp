@@ -2268,7 +2268,7 @@ namespace Fem2D {
 	// Quadrature formula on the tetraedron
 	const GQuadratureFormular<R3> TypeOfFE_RT1_3d::QFtetra(QuadratureFormular_Tet_2);
 
-	TypeOfFE_RT1_3d::TypeOfFE_RT1_3d (): GTypeOfFE<Mesh3>(dfon, d, 1, 3 * QFface.n * 3 * Element::nf + 3 * QFtetra.n * 3 * 3, Element::nf *QFface.n + QFtetra.n, false, true) {
+	TypeOfFE_RT1_3d::TypeOfFE_RT1_3d (): GTypeOfFE<Mesh3>(dfon, d, 1, 3 * QFface.n * 3 * Element::nf + 3 * QFtetra.n * 3, Element::nf *QFface.n + QFtetra.n, false, true) {
 		assert(QFface.n);
 		assert(QFtetra.n);
 		// 4 ref tetra vertices
