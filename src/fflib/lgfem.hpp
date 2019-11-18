@@ -170,7 +170,7 @@ public:
   typedef ::pfes pfes;
   typedef ::FESpace FESpace;
   
-  static const int dHat=2;
+  static const int dHat=2, d=2;
   const int N;
   const pmesh* ppTh; // adr du maillage
   CountPointer<FESpace>  pVh;
@@ -207,7 +207,7 @@ class v_fes3 : public RefCounter { public:
     typedef pfes3 pfes;
   typedef FESpace3 FESpace;
 
-  static const int dHat=3;
+  static const int dHat=3, d=3;
   const int N;
   const pmesh3* ppTh; // adr du maillage
   CountPointer<FESpace3> pVh;
@@ -244,7 +244,7 @@ class v_fesS : public RefCounter { public:
     typedef pfesS pfes;
     typedef FESpaceS FESpace;
     
-    static const int dHat=2;
+    static const int dHat=2, d=3;
     const int N;
     const pmeshS* ppTh; // adr du maillage
 
@@ -285,7 +285,7 @@ class v_fesL : public RefCounter { public:
     typedef pfesL pfes;
     typedef FESpaceL FESpace;
     
-    static const int dHat=1;
+    static const int dHat=1, d=3;
     const int N;
     const pmeshL* ppTh; // adr du maillage
     

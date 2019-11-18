@@ -6547,8 +6547,10 @@ Expression Op_CopyArrayT(const E_Array & a,const E_Array & b)
 	      C_F0 aa_ii(aa,"[",ii);
 	      rr=aa_ii.LeftValue();
 	  }
-	  if(v_fes::dHat==2) r=new E_set_fev<K>(&b,rr,2);
-	  else if(v_fes::dHat==3) r=new  E_set_fev3<K,v_fes3>(&b,rr);
+	  if(v_fes::dHat==2 && v_fes::d==2) r=new E_set_fev<K>(&b,rr,2);
+	  else if(v_fes::dHat==3 && v_fes::d==3) r=new  E_set_fev3<K,v_fes3>(&b,rr);
+      else if(v_fes::dHat==2 && v_fes::d==3) r=new  E_set_fevS<K,v_fesS>(&b,rr);
+      else if(v_fes::dHat==1 && v_fes::d==3) r=new  E_set_fevL<K,v_fesL>(&b,rr);
       }
     //  try complex vector value FE interpolation
     return r;
