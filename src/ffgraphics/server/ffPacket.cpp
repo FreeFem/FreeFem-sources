@@ -458,9 +458,21 @@ void ffPacket::Jsonify<ffFE<Fem2D::R2, Fem2D::R>>(const ffFE<Fem2D::R2, Fem2D::R
     json& Iso = *(Geometry["IsoArray"].end() - 1);
     Iso["IsoVector"] = data.Vector;
 
-    for (int i = 0; i < data.Psub.N(); i += 1) {
-        Iso["IsoPSub"] += data.Psub[i].x;
-        Iso["IsoPSub"] += data.Psub[i].y;
+    if (data.Psub.N() != 3) {
+        // for (int i = 0; i < data.Psub.N(); i += 1) {
+        //     Iso["IsoPSub"] += data.Psub[i].x;
+        //     Iso["IsoPSub"] += data.Psub[i].y;
+        //     std::cout << "{ " << data.Psub[i].x << ", " << data.Psub[i].y << " }\n";
+        // }
+        Iso["IsoPSub"] = { 0.f, 0.f,
+                           1.f, 0.f,
+                           0.f, 1.f,
+                           0.f, 0.5f,
+                           0.5f, 0.f,
+                           0.5f, 0.5f
+                         };
+    } else {
+        Iso["IsoPSub"] = { 0.f, 0.f, 1.f, 0.f, 0.f, 1.f };
     }
 
     std::vector<int> indices = Geometry["MeshIndices"].get<std::vector<int>>();

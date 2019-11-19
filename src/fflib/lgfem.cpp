@@ -3528,9 +3528,6 @@ int Send2d(PlotStream& theplot, Plot::ListWhat& lli, map<const typename v_fes::F
     long what = lli.what;
     int lg, nsb;
     lli.eval(fe, cmp);
-    for (int i = 0; i < 3; ++i) {
-      std::cout << "cmp[" << i << "] : " << cmp[i] << "\n";
-    }
 
     if (fe[0]->x() && what % 10 == 1)
 	  {
