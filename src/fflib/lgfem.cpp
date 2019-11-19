@@ -3522,13 +3522,15 @@ void Show(const char * s,int k=1)
 template<class K,class v_fes>
 int Send2d(PlotStream& theplot, Plot::ListWhat& lli, map<const typename v_fes::FESpace::Mesh *, long>& mapth)
 {
-    typedef FEbase<K,v_fes> *pfek ;
-    pfek fe[3] = {0, 0, 0};
+    FEbase<K,v_fes> *fe[3] = {0, 0, 0};
     int cmp[3] = {-1, -1, -1};
     int err = 1;
     long what = lli.what;
     int lg, nsb;
     lli.eval(fe, cmp);
+    for (int i = 0; i < 3; ++i) {
+      std::cout << "cmp[" << i << "] : " << cmp[i] << "\n";
+    }
 
     if (fe[0]->x() && what % 10 == 1)
 	  {
@@ -3550,7 +3552,7 @@ int Send2d(PlotStream& theplot, Plot::ListWhat& lli, map<const typename v_fes::F
 	              Ksub[p] = numSubTriangle(nsb,sk,i);
 	      if(verbosity > 9)
 	      cout << " Send plot:what: " << what << " " << nsb << " " << V1.N() << " Max " << V1.max() << " min " << V1.min() << endl;
-	      ffFE<R2, K> fffe(Psub, Ksub, V1);
+	      ffFE<R2, K> fffe(Psub, Ksub, *fe[0]->x(), V1.max(), V1.min(), false);
         packet.Jsonify(fffe, mapth[&(fe[0]->Vh->Th)]);
         if (verbosity > 99) { cout << packet.Dump() << "\n"; }
         theplot << Psub;
@@ -3571,7 +3573,20 @@ int Send2d(PlotStream& theplot, Plot::ListWhat& lli, map<const typename v_fes::F
         for(int sk=0,p=0;sk<nsubT;++sk)
             for(int i=0;i<3;++i,++p)
                 Ksub[p] = numSubTriangle(nsb,sk,i);
-        ffFE<R2, K> fffe(Psub, Ksub, V1);
+
+        // Use cmp[1] to know if the vectors are stored on 1 or 2 arrays and construct the right sized vector.
+        KN<K> tmp_V1(fe[0]->x()->N() + ((cmp[1] == 0) ? fe[1]->x()->N() : 0));
+
+        for (long int i = 0; i < fe[0]->x()->N() + ((cmp[1] == 0) ? fe[1]->x()->N() : 0); ++i) {
+            // Add value from first array
+            tmp_V1[i] = (*fe[0]->x())[i / ((cmp[1] == 0) ? 2 : 1)];
+            // If there is a 2 arrays
+            if (cmp[1] == 0) {
+              i += 1;
+              tmp_V1[i] = (*fe[1]->x())[i / 2];
+            }
+        }
+        ffFE<R2, K> fffe(Psub, Ksub, tmp_V1, V1.max(), V1.min(), true);
         packet.Jsonify(fffe, mapth[&(fe[0]->Vh->Th)]);
         theplot << mapth[&(fe[0]->Vh->Th)]; // mesh's number
         theplot << Psub;
@@ -3584,8 +3599,7 @@ int Send2d(PlotStream& theplot, Plot::ListWhat& lli, map<const typename v_fes::F
 template<class K,class v_fes>
 int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FESpace::Mesh *,long> &mapth3)
 {
-    typedef FEbase<K,v_fes> * pfek3 ;
-    pfek3 fe3[3]={0,0,0};
+    FEbase<K,v_fes> *fe3[3]={0,0,0};
     int cmp[3]={-1,-1,-1};
     int err=1;
     long what=lli.what;
@@ -3608,7 +3622,7 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
                 if(verbosity>9)
                     cout << " Send plot:what: " << what << " " << nsb << " "<< V1.N()
                     << " "  << V1.max() << " " << V1.min() << endl;
-                ffFE<R3, K> fffe(Psub, Ksub, V1);
+                ffFE<R3, K> fffe(Psub, Ksub, V1, V1.max(), V1.min(), false);
                 packet.Jsonify(fffe, mapth3[ &(fe3[0]->Vh->Th)]);
                 if (verbosity > 99) { cout << packet.Dump() << "\n"; }
                 theplot << Psub ;
@@ -3645,7 +3659,7 @@ int Send3d(PlotStream & theplot,Plot::ListWhat &lli,map<const typename v_fes::FE
                 V123(2,'.')=V3;
                 // FFCS: should be able to deal with complex as well
                 theplot << (KN_<K>&) V123;
-                ffFE<R3, K> fffe(Psub1, Ksub1, V123);
+                ffFE<R3, K> fffe(Psub1, Ksub1, V123, 0, 0, false);
                 packet.Jsonify(fffe, mapth3[ &(fe3[0]->Vh->Th)]);
                 if (verbosity > 99) { cout << packet.Dump() << "\n"; }
             }
@@ -3679,7 +3693,7 @@ int SendS(PlotStream & theplot,Plot::ListWhat &lli,map<const MeshS *,long> &mapt
         if(verbosity>9)
             cout << " Send plot:what: " << what << " " << nsb << " "<<  V1.N()
             << " Max "  << V1.max() << " min " << V1.min() << endl;
-        ffFE<R2, K> fffe(Psub, Ksub, V1);
+        ffFE<R2, K> fffe(Psub, Ksub, V1, 0, 0, false);
         packet.Jsonify(fffe, mapthS[ &(feS[0]->Vh->Th)]);
         theplot << Psub ;
         theplot << Ksub ;

@@ -9,15 +9,20 @@
 
 using json = nlohmann::json;
 
+#define MAX_PACKET_SIZE 16384
+
 template <typename T, class K>
 struct ffFE {
 
-    ffFE(KN<T> psub, KN<int> ksub, KN<K> v1)
-        : Psub(psub), Ksub(ksub), V1(v1) { }
+    ffFE(KN<T> psub, KN<int> ksub, KN<K> v1, K max, K min, bool AsVector)
+        : Psub(psub), Ksub(ksub), V1(v1), Vector(AsVector) { }
 
     KN_<T> Psub;
     KN_<int> Ksub;
-    KN_<K> V1;
+    KN<K> V1;
+    K max;
+    K min;
+    bool Vector;
 };
 /**
  * @brief Class used to create a block of data which the server will send.

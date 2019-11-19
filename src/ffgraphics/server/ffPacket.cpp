@@ -88,7 +88,6 @@ static std::array<float, 4> ComputeLabel(int ColorIndex, int ColorCount)
 ffPacket::ffPacket()
 {
     m_Header["Size"] = 0;
-    m_Header["Version"] = "FreeFem++ Header 0.1";
     m_Data = std::vector<uint8_t>();
     m_JSON = json();
     m_JSON["Geometry"] = json::array();
@@ -151,16 +150,6 @@ void ffPacket::Compress()
     std::vector<uint8_t> tmp = json::to_cbor(m_JSON);
 
     m_Data.insert(m_Data.end(), tmp.begin(), tmp.end());
-
-    // std::string data = m_JSON.dump();
-
-    // for (uint8_t i : data) {
-    //     m_Data.push_back(i);
-    //     std::cout << i;
-    // }
-    // std::cout << "\n";
-
-    m_Header["Size"] = m_Data.size();
 }
 
 /**
@@ -266,6 +255,7 @@ void ffPacket::Jsonify<Fem2D::Mesh>(const Fem2D::Mesh& data, long int Id)
 
     Geometry["Vertices"] = json::array();
 
+    std::cout << "Vertices count when building mesh : " << data.nv << "\n";
     for (int i = 0; i < data.nv; ++i) {
         const Fem2D::Mesh::Vertex& p = data(i);
 
@@ -451,19 +441,33 @@ void ffPacket::Jsonify<Fem2D::MeshS>(const Fem2D::MeshS& data, long int)
 template<>
 void ffPacket::Jsonify<ffFE<Fem2D::R2, Fem2D::R>>(const ffFE<Fem2D::R2, Fem2D::R>& data, long int Id)
 {
+    // Search attached geometry using Id
     size_t i = 0;
     for (i = 0; i < m_JSON["Geometry"].size(); ++i) {
         long int cId = m_JSON["Geometry"][i].at("Id");
         if (cId == Id) {
-            std::cout << "Found mesh.\n";
             break;
         }
     }
     json& Geometry = m_JSON["Geometry"][i];
+
+    // Set IsoValues flag to true.
     Geometry["IsoValues"] = true;
+    // Add a entry to the Array of IsoValues.
+    Geometry["IsoArray"] += json::object();
+    json& Iso = *(Geometry["IsoArray"].end() - 1);
+    Iso["IsoVector"] = data.Vector;
 
-    // To-Do
+    for (int i = 0; i < data.Psub.N(); i += 1) {
+        Iso["IsoPSub"] += data.Psub[i].x;
+        Iso["IsoPSub"] += data.Psub[i].y;
+    }
 
+    std::vector<int> indices = Geometry["MeshIndices"].get<std::vector<int>>();
+
+    for (size_t i = 0; i < data.V1.size(); ++i)  {
+        Iso["IsoV1"] += data.V1[(long int)i];
+    }
 }
 
 /**

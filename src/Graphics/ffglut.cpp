@@ -485,7 +485,7 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
             }
             glEnd();
            glEndList();  // fin de la list
-            
+
         }
     }
     else  if(cc[kk])
@@ -2346,7 +2346,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
 
       fin.GetPlots();
     }
-  
+
     long nbplot;
     int iso3d=0;
     fin >>nbplot;
@@ -2484,7 +2484,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
 
     SetColorTable(Max(Niso,Narrow)+4) ;
     SetDefIsoV(Niso,Narrow,fmin,fmax) ;
-    
+
 }
 
 

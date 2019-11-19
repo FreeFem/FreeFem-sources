@@ -148,18 +148,34 @@ void ffServer::HandleRead(ConnectHandle::pConnectHandle connect, std::error_code
  */
 void ffServer::Send(ffPacket packet)
 {
-    auto ite = m_Connections.begin();
     packet.m_JSON["Plot"] = m_Packets.size();
     packet.Compress();
 
-    while (ite != m_Connections.end()) {
-        ConnectHandle::pConnectHandle tmp = *ite;
+    asio::steady_timer timer(m_ioService);
+    size_t s = packet.m_Data.size();
+    size_t i = s / MAX_PACKET_SIZE;
 
-        tmp->m_Socket.write_some(asio::buffer(packet.GetHeader()));
-        //asio::write(tmp->m_Socket, asio::buffer(packet.GetHeader()));
-        tmp->m_Socket.write_some(asio::buffer(packet.m_Data));
-        //asio::write(tmp->m_Socket, asio::buffer(packet.m_Data));
-        ite++;
+    for (auto & ite : m_Connections) {
+
+        for (int j = 0; j < i; ++j) {
+            timer.expires_after(std::chrono::seconds(1));
+            packet.m_Header["Size"] = MAX_PACKET_SIZE;
+            packet.m_Header["IDs"] = {m_Packets.size(), j};
+            packet.m_Header["MaxPacket"] = i + ((s % MAX_PACKET_SIZE != 0) ? 1 : 0);
+            ite->m_Socket.write_some(asio::buffer(packet.GetHeader(), MAX_PACKET_SIZE));
+
+            ite->m_Socket.write_some(asio::buffer(packet.m_Data.data() + (MAX_PACKET_SIZE * j), MAX_PACKET_SIZE));
+            //asio::write(tmp->m_Socket, asio::buffer(packet.m_Data));
+            timer.wait();
+        }
+        if (s % MAX_PACKET_SIZE != 0) {
+            packet.m_Header["Size"] = s % MAX_PACKET_SIZE;
+            packet.m_Header["IDs"] = {m_Packets.size(), i + 1};
+            packet.m_Header["MaxPacket"] = i + ((s % MAX_PACKET_SIZE != 0) ? 1 : 0);
+            ite->m_Socket.write_some(asio::buffer(packet.GetHeader(), MAX_PACKET_SIZE));
+
+            ite->m_Socket.write_some(asio::buffer(packet.m_Data.data() + (MAX_PACKET_SIZE * i), s % MAX_PACKET_SIZE));
+        }
     }
     m_Packets.push_back(packet);
 }
@@ -171,33 +187,34 @@ void ffServer::SendAllStoredPacket(ConnectHandle::pConnectHandle connect)
 {
     auto ite = m_Packets.begin();
     asio::steady_timer timer(m_ioService);
+    std::error_code err;
 
-    std::cout << "Sending all saved data\n";
-    while (ite != m_Packets.end()) {
-        // timer.expires_after(std::chrono::seconds(
+    for (ffPacket &p : m_Packets) {
+        timer.expires_after(std::chrono::seconds(1));
+        size_t s = p.m_Data.size();
+        size_t i = s / MAX_PACKET_SIZE;
 
-        // ));
-        std::vector<uint8_t> message;
-        message.resize(64 + (*ite).m_Data.size());
+        for (auto & ite : m_Connections) {
 
-        memset(message.data(), 0, 64 + (*ite).m_Data.size());
-        memcpy(message.data(), (*ite).GetHeader().c_str(), 64);
-        memcpy(message.data() + 64, (*ite).m_Data.data(), (*ite).m_Data.size());
-        asio::async_write(connect->m_Socket, asio::buffer(message),
-            [=](std::error_code const & err, size_t /* */)
-            {
-                if (err)
-                    m_Connections.remove(connect);
-            });
+            for (int j = 0; j < i; ++j) {
+                p.m_Header["Size"] = MAX_PACKET_SIZE;
+                p.m_Header["IDs"] = {m_Packets.size(), j};
+                p.m_Header["MaxPacket"] = i + ((s % MAX_PACKET_SIZE != 0) ? 1 : 0);
+                ite->m_Socket.write_some(asio::buffer(p.GetHeader(), MAX_PACKET_SIZE));
 
-        //connect->m_Socket.write_some(asio::buffer((*ite).m_Data));
-        // asio::write(connect->m_Socket, asio::buffer((*ite).m_Data),
-        //     [=](std::error_code const & err, size_t /* */)
-        //     {
-        //         if (err)
-        //             m_Connections.remove(connect);
-        //     });
-        //timer.wait();
+                ite->m_Socket.write_some(asio::buffer(p.m_Data.data() + (MAX_PACKET_SIZE * j), MAX_PACKET_SIZE));
+                //asio::write(tmp->m_Socket, asio::buffer(packet.m_Data));
+            }
+            if (s % MAX_PACKET_SIZE != 0) {
+                p.m_Header["Size"] = s % MAX_PACKET_SIZE;
+                p.m_Header["IDs"] = {m_Packets.size(), i + 1};
+                p.m_Header["MaxPacket"] = i + ((s % MAX_PACKET_SIZE != 0) ? 1 : 0);
+                ite->m_Socket.write_some(asio::buffer(p.GetHeader(), MAX_PACKET_SIZE));
+
+                ite->m_Socket.write_some(asio::buffer(p.m_Data.data() + (MAX_PACKET_SIZE * i), s % MAX_PACKET_SIZE));
+            }
+        }
+        timer.wait();
         ite++;
     }
 }
