@@ -30,15 +30,15 @@
 #pragma optimization_level 0
 #endif
 
-#include  <cmath>
-#include  <iostream>
+#include <cmath>
+#include <iostream>
 #include <cfloat>
+#include <cstdio>
 
 using namespace std;
 #include "error.hpp"
 #include "AFunction.hpp"
 #include "rgraph.hpp"
-#include <cstdio>
 #include "fem.hpp"
 #include "Mesh3dn.hpp"
 
@@ -71,160 +71,187 @@ using namespace std;
 //PlotStream::hBytes PlotStream::zottffss; //012345678;
 // ---- FH
 namespace bamg { class Triangles; }
-namespace Fem2D { void DrawIsoT(const R2 Pt[3],const R ff[3],const RN_ & Viso);
-   extern GTypeOfFE<Mesh3> &P1bLagrange3d;
-   extern GTypeOfFE<Mesh3> &RT03d;
-   extern GTypeOfFE<Mesh3> &Edge03d;
-   extern GTypeOfFE<MeshS> &P1bLagrange_surf;
-void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & setoflab,bool &all);
+namespace Fem2D {
+  void DrawIsoT(const R2 Pt[3], const R ff[3], const RN_ & Viso);
+  extern GTypeOfFE<Mesh3> &P1bLagrange3d;
+  extern GTypeOfFE<Mesh3> &RT03d;
+  extern GTypeOfFE<Mesh3> &Edge03d;
+  extern GTypeOfFE<MeshS> &P1bLagrange_surf;
+  void Expandsetoflab(Stack stack, const CDomainOfIntegration & di, set<int> & setoflab, bool &all);
 }
 
 static ffPacket packet; // To-Do pass the packet as argument in the Send2D/Send3D/SendS function instead of using a global
 
 #include "BamgFreeFem.hpp"
 
-static bool TheWait=false;
-bool  NoWait=false;
-extern bool  NoGraphicWindow;
+static bool TheWait = false;
+bool NoWait = false;
+extern bool NoGraphicWindow;
 
 extern long verbosity;
 extern FILE *ThePlotStream; //  Add for new plot. FH oct 2008
-void init_lgmesh() ;
+void init_lgmesh();
 
 namespace FreeFempp {
-template<class R>
- TypeVarForm<R> * TypeVarForm<R>::Global;
+  template<class R>
+  TypeVarForm<R> * TypeVarForm<R>::Global;
 }
 
 basicAC_F0::name_and_type  OpCall_FormBilinear_np::name_param[]= {
-{   "bmat",&typeid(Matrice_Creuse<R>* )},
-     LIST_NAME_PARM_MAT
+  { "bmat", &typeid(Matrice_Creuse<R>* ) },
+  LIST_NAME_PARM_MAT
 };
 
 
 basicAC_F0::name_and_type  OpCall_FormLinear_np::name_param[]= {
-  "tgv",&typeid(double )
+  "tgv", &typeid(double )
 };
 
 
-const E_Array * Array(const C_F0 & a) {
-  if (a.left() == atype<E_Array>() )
+const E_Array *Array(const C_F0 & a) {
+  if (a.left() == atype<E_Array>())
     return dynamic_cast<const E_Array *>(a.LeftValue());
   else
     return 0;
 }
+
 bool Box2(const C_F0 & bb, Expression * box)
 {
   const E_Array * a= Array(bb);
-  if(a && a->size() == 2)
-   {
+  if (a && a->size() == 2) {
     box[0] = to<double>((*a)[0]);
     box[1] = to<double>((*a)[1]);
     return true;
-    }
-  else
+  } else
     return false;
+}
 
-}
-bool Box2x2(Expression  bb, Expression * box)
+bool Box2x2(Expression bb, Expression *box)
 {
-  const E_Array * a= dynamic_cast<const E_Array *>(bb);
-  if(a && a->size() == 2)
-     return Box2((*a)[0],box)  &&  Box2((*a)[1],box+2) ;
+  const E_Array * a = dynamic_cast<const E_Array *>(bb);
+  if (a && a->size() == 2)
+     return Box2((*a)[0], box) && Box2((*a)[1], box + 2) ;
   else
     return false;
 }
+
 void dump_table()
 {
-   cout << " dump the table of the language " << endl;
-   cout << " ------------------------------ " <<endl <<endl;
-	map<const string,basicForEachType *>::const_iterator i; ;
+  cout << " dump the language's table " << endl;
+  cout << " ------------------------------ " << endl << endl;
+	map<const string, basicForEachType *>::const_iterator i;
 
-	for (i= map_type.begin();i !=map_type.end();i++)
-	  {
-	   cout << " type : " << i->first << endl;
-	   if( i->second )
-	     i->second->ShowTable(cout);
-	   else cout << " Null \n";
-	   cout << "\n\n";
-	  }
+	for (i = map_type.begin(); i != map_type.end(); i++) {
+	  cout << " type : " << i->first << endl;
+	  if (i->second)
+	    i->second->ShowTable(cout);
+	  else cout << " Null \n";
+	  cout << "\n\n";
+	}
 
-	for (i= map_type.begin();i !=map_type.end();i++)
-	  {
-	   cout << " type : " << i->first << endl;
-	   if( i->second )
-	     i->second->ShowTable(cout);
-	   else cout << " Null \n";
-	   cout << "\n\n";
-
-	  }
-
-	 cout << "--------------------- " << endl;
-	 cout << *TheOperators << endl;
-	 cout << "--------------------- " << endl;
-
+	for (i = map_type.begin(); i != map_type.end(); i++) {
+	  cout << " type : " << i->first << endl;
+	  if (i->second)
+	    i->second->ShowTable(cout);
+	  else cout << " Null \n";
+	  cout << "\n\n";
+  }
+  cout << "--------------------- " << endl;
+  cout << *TheOperators << endl;
+  cout << "--------------------- " << endl;
 }
 
 
-bool In(long *viso,int n,long v)
+bool In(long *viso, int n, long v)
 {
-  int i=0,j=n,k;
-  if  (v <viso[0] || v >viso[j-1])
+  int i = 0;
+  int j = n;
+  int k;
+  if (v < viso[0] || v > viso[j - 1])
     return false;
-  while (i<j-1)
-   if ( viso[k=(i+j)/2]> v) j=k;
-   else i=k;
-  return (viso[i]=v);
+  while (i < j - 1)
+   if (viso[k = (i+j) / 2] > v)
+    j = k;
+   else
+    i = k;
+  return (viso[i] = v);
 }
 
 
-class  LinkToInterpreter { public:
- Type_Expr   P,N,x,y,z,label,region,nu_triangle,nu_face,nu_edge,lenEdge,hTriangle,area,inside,volume;
-  LinkToInterpreter() ;
+class  LinkToInterpreter {
+  public:
+    Type_Expr P;
+    Type_Expr N;
+    Type_Expr x;
+    Type_Expr y;
+    Type_Expr z;
+    Type_Expr label;
+    Type_Expr region;
+    Type_Expr nu_triangle;
+    Type_Expr nu_face;
+    Type_Expr nu_edge;
+    Type_Expr lenEdge;
+    Type_Expr hTriangle;
+    Type_Expr area;
+    Type_Expr inside;
+    Type_Expr volume;
+    LinkToInterpreter() ;
 };
 
-LinkToInterpreter * l2interpreter;
+LinkToInterpreter *l2interpreter;
 
-  using namespace Fem2D;
-  using namespace EF23;
+using namespace Fem2D;
+using namespace EF23;
 
-template<class Result,class A>
-class E_F_A_Ptr_o_R :public  E_F0 { public:
-  typedef Result A::* ptr;
-  Expression a0;
-  ptr p;
-  E_F_A_Ptr_o_R(Expression aa0,ptr pp)
-    : a0(aa0),p(pp) {}
-  AnyType operator()(Stack s)  const {
-    return SetAny<Result*>(&(GetAny<A*>((*a0)(s))->*p));}
-  bool MeshIndependent() const {return a0->MeshIndependent();} //
-
+template<class Result, class A>
+class E_F_A_Ptr_o_R :public  E_F0 {
+  public:
+    typedef Result A::* ptr;
+    Expression a0;
+    ptr p;
+    E_F_A_Ptr_o_R(Expression aa0,ptr pp)
+      : a0(aa0),p(pp) {}
+    AnyType operator()(Stack s) const { return SetAny<Result*>(&(GetAny<A*>((*a0)(s))->*p)); }
+    bool MeshIndependent() const { return a0->MeshIndependent(); }
 };
 //  ----
 //  remarque pas de template, cela ne marche pas encore ......
- class E_P_Stack_P   :public  E_F0mps { public:
-  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<R3*>(&MeshPointStack(s)->P);}
-    operator aType () const { return atype<R3*>();}
+class E_P_Stack_P : public E_F0mps {
+  public:
+    AnyType operator()(Stack s) const {
+      throwassert(* (long *) s);
+      return SetAny<R3*>(&MeshPointStack(s)->P);
+    }
+
+    operator aType () const { return atype<R3*>(); }
+};
+class E_P_Stack_Px : public E_F0mps {
+  public:
+    AnyType operator()(Stack s) const {
+      throwassert(* (long *) s);
+      return SetAny<R*>(&MeshPointStack(s)->P.x);
+    }
+
+    operator aType() const { return atype<R*>(); }
 
 };
- class E_P_Stack_Px   :public  E_F0mps { public:
-  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<R*>(&MeshPointStack(s)->P.x);}
-    operator aType () const { return atype<R*>();}
+class E_P_Stack_Py : public E_F0mps {
+  public:
+    AnyType operator()(Stack s) const {
+      throwassert(* (long *) s);
+      return SetAny<R*>(&MeshPointStack(s)->P.y);
+    }
 
+    operator aType () const { return atype<R*>(); }
 };
- class E_P_Stack_Py   :public  E_F0mps { public:
-  AnyType operator()(Stack s)  const {throwassert(* (long *) s);
-    return SetAny<R*>(&MeshPointStack(s)->P.y);}
-    operator aType () const { return atype<R*>();}
+class E_P_Stack_Pz : public E_F0mps {
+  public:
+    AnyType operator()(Stack s) const {
+      throwassert(* (long *) s);
+      return SetAny<R*>(&MeshPointStack(s)->P.z);
+    }
 
-};
- class E_P_Stack_Pz   :public  E_F0mps { public:
-  AnyType operator()(Stack s)  const { throwassert(* (long *) s);
-    return SetAny<R*>(&MeshPointStack(s)->P.z);}
-    operator aType () const { return atype<R*>();}
-
+    operator aType () const { return atype<R*>(); }
 };
 
  class E_P_Stack_N   :public  E_F0mps { public:
@@ -3549,6 +3576,13 @@ int Send2d(PlotStream& theplot, Plot::ListWhat& lli, map<const typename v_fes::F
 	              Ksub[p] = numSubTriangle(nsb,sk,i);
 	      if(verbosity > 9)
 	      cout << " Send plot:what: " << what << " " << nsb << " " << V1.N() << " Max " << V1.max() << " min " << V1.min() << endl;
+        for (int i = 0; i < fe[0]->Vh[0].NbOfElements; ++i) {
+          //std::cout << "fe[0]->Vh[0].NbOfElements : " << fe[0]->Vh[0].NbOfElements << "\n";
+          //std::cout << "fe[0]->Vh[0][i].NbDoF() : " << fe[0]->Vh[0][i].NbDoF() << "\n";
+          for (int j = 0; j < fe[0]->Vh[0][i].NbDoF(); ++j) {
+            std::cout << "=====> " << fe[0]->Vh[0][i].DFOfNode(j) << "\n";
+          }
+        }
 	      ffFE<R2, K> fffe(Psub, Ksub, *fe[0]->x(), V1.max(), V1.min(), false);
         packet.Jsonify(fffe, mapth[&(fe[0]->Vh->Th)]);
         if (verbosity > 99) { cout << packet.Dump() << "\n"; }
@@ -3565,6 +3599,7 @@ int Send2d(PlotStream& theplot, Plot::ListWhat& lli, map<const typename v_fes::F
         int nsubV = NbOfSubInternalVertices(nsb);
         KN<R2> Psub(nsubV);
         KN<int> Ksub(nsubT * 3);
+        std::cout << nsubT << "\n";
         for(int i=0;i<nsubV;++i)
             Psub[i]=SubInternalVertex(nsb,i);
         for(int sk=0,p=0;sk<nsubT;++sk)

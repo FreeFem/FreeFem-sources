@@ -467,12 +467,15 @@ void ffPacket::Jsonify<ffFE<Fem2D::R2, Fem2D::R>>(const ffFE<Fem2D::R2, Fem2D::R
         Iso["IsoPSub"] = { 0.f, 0.f,
                            1.f, 0.f,
                            0.f, 1.f,
+                           0.5f, 0.5f,
                            0.f, 0.5f,
                            0.5f, 0.f,
-                           0.5f, 0.5f
                          };
     } else {
         Iso["IsoPSub"] = { 0.f, 0.f, 1.f, 0.f, 0.f, 1.f };
+    }
+    for (int i = 0; i < data.Ksub.N(); ++i) {
+        std::cout << "Ksub[" << i << "] = " << data.Ksub[i] << "\n";
     }
 
     std::vector<int> indices = Geometry["MeshIndices"].get<std::vector<int>>();
