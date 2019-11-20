@@ -45,7 +45,7 @@ int labo = labmetal; // label out
 real[int] dir=[1,0,0];
 func finc = exp(1i*k*(x*dir[0]+y*dir[1]+z*dir[2]));
 
-int nloc = 5.*sec3/lambda;
+int nloc = 10.*sec3/lambda;
 
 mesh3 Th3;
 buildcobramesh(Th3);
@@ -58,7 +58,9 @@ plot(ThS);
 
 fespace Uh(ThS,P1);
 
-HMatrix<complex> H = assemblecomplex(Uh,Uh,k,eta=10,epsilon=1e-2,minclustersize=10,maxblocksize=1000000);
+cout << "ndof = " << Uh.ndof << endl;
+
+HMatrix<complex> H = assemblecomplexHESL(Uh,Uh,k,eta=10,epsilon=1e-2,minclustersize=10,maxblocksize=1000000);
 if (mpirank == 0) cout << H.infos << endl;
 display(H);
 
@@ -85,7 +87,7 @@ meshS ThOut = square3(np,np,[(sec1+(radius-height)*sin(angle)+sec2*cos(angle)+ra
 
 fespace UhOut(ThOut,P1);
 
-HMatrix<complex> B = assemblecomplex(Uh,UhOut,k,eta=10,epsilon=1e-2,minclustersize=10,maxblocksize=1000000,type=1);
+HMatrix<complex> B = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1e-2,minclustersize=10,maxblocksize=1000000);
 if (mpirank == 0) cout << B.infos << endl;
 display(B);
 
