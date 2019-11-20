@@ -51,7 +51,7 @@ else
 PETSC_DOWNLOAD := --download-scalapack --download-metis --download-ptscotch \
 		--download-mumps --download-hypre --download-parmetis \
 		--download-superlu --download-suitesparse --download-tetgen \
-		--download-hpddm --download-hpddm-commit=1686037 --download-slepc
+		--download-hpddm --download-hpddm-commit=1622afb --download-slepc
 PETSC_DOWNLOAD_C:= --download-hpddm --download-hpddm-commit=1686037 --download-slepc
 endif
 ifeq ($(FF_generic_petsc), yes)
