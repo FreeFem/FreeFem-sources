@@ -2751,9 +2751,8 @@ MeshS*MoveMesh2_func (const double &precis_mesh, const Mesh &Th2, const double *
 
 
     MeshS *T_ThS = new MeshS(nv_t, nt_t, nbe_t, vS, tS, b);
-    T_ThS->mapSurf2Vol=0;
-    T_ThS->mapVol2Surf=0;
 
+    
     delete [] Numero_Som;
     delete [] ind_nv_t;
     delete [] ind_nt_t;

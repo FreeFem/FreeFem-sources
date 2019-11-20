@@ -52,7 +52,16 @@ namespace Fem2D
 
 namespace Fem2D
 {
-   
+  static const int  nvfaceSeg[1][3]  = {{-1,-1,1}};
+  static const int  nvedgeSeg[1][2] = { {0,1} };
+  static const int  nvadjSeg[2][1] = { {0},{1} };
+    
+  // geometry element for segment ( boundary elements in surface mesh, Rd=3 RdHat=1 )
+  template<> const int (* const GenericElement<DataSeg3>::nvface)[3] = 0 ;
+  template<> const int (* const GenericElement<DataSeg3>::nvedge)[2] = nvedgeSeg; //nvedgeTria ;
+  template<> const int (* const GenericElement<DataSeg3>::nvadj)[1] = nvadjSeg ;
+    
+    
     
   template<> const int (* const GenericElement<DataPoint3>::nvface)[3] = 0 ;
   template<> const int (* const GenericElement<DataPoint3>::nvedge)[2] = 0 ;

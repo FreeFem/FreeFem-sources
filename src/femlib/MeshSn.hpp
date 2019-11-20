@@ -48,31 +48,11 @@ namespace Fem2D {
 
 using namespace ::std;
 #include "GenericMesh.hpp"
-//#include "Mesh3dn.hpp"
+#include "MeshLn.hpp"
 
 namespace Fem2D {
 
 typedef GenericVertex<R3> Vertex3;
-    
-
-    struct DataSeg3  {
-        static const int NbOfVertices =2;
-        static const int NbOfEdges =1;
-        static const int NbOfFaces =0;
-        static const int NT =0;
-        static const int NbOfAdjElem =NbOfVertices;
-        static const int NbOfVertexOnHyperFace =NbOfVertices-1;
-        typedef Vertex3 V;
-        typedef  V::Rd Rd;
-        static R mesure(  V *  pv[NbOfVertices]) {
-            return R3(*pv[0],*pv[1]).norme();
-        }
-        typedef R1 RdHat;
-        typedef R0 RdHatBord;
-        static RdHat PBord(const int * nvb,const RdHatBord &P)  { return RdHat(*nvb) ;}
-
-        
-    };
     
     
     struct DataTriangle3  {
@@ -133,7 +113,8 @@ typedef GenericVertex<R3> Vertex3;
          // mapping for volume/surface vertices
         int *mapSurf2Vol;
         int *mapVol2Surf;
-        MeshS():mapSurf2Vol(0),mapVol2Surf(0) {};
+        MeshL *meshL;
+        MeshS():mapSurf2Vol(0),mapVol2Surf(0),meshL(0) {};
         MeshS(const string);
         //MeshS(const string, const long);
         MeshS(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
@@ -156,9 +137,12 @@ typedef GenericVertex<R3> Vertex3;
         Serialize serialize_withBorderMesh() const;
         
         ~MeshS() {
-            if (verbosity>4) cout << "destroy meshS" << this << " " << this->mapSurf2Vol << " " << this->mapVol2Surf << endl;
+            if (verbosity>4) cout << "destroy meshS" << this << " " << this->mapSurf2Vol << " " << this->mapVol2Surf << " destroy meshL " << this->meshL << endl;
             delete [] mapSurf2Vol ;
             delete [] mapVol2Surf ;
+            if (meshL)
+                meshL->destroy();//  Add clean mesh if necessary ...FH and AF. april 2019
+            
             
             SHOWVERB(cout << " %%%% delete MeshS"<< this << endl) ; }
     private:

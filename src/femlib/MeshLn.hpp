@@ -49,7 +49,7 @@ namespace Fem2D {
 
 using namespace ::std;
 #include "GenericMesh.hpp"
-#include "MeshSn.hpp"
+//#include "MeshSn.hpp"
 
 namespace Fem2D {
     
@@ -80,6 +80,27 @@ namespace Fem2D {
         
         
   };
+    
+    
+    struct DataSeg3  {
+        static const int NbOfVertices =2;
+        static const int NbOfEdges =1;
+        static const int NbOfFaces =0;
+        static const int NT =0;
+        static const int NbOfAdjElem =NbOfVertices;
+        static const int NbOfVertexOnHyperFace =NbOfVertices-1;
+        typedef Vertex3 V;
+        typedef  V::Rd Rd;
+        static R mesure(  V *  pv[NbOfVertices]) {
+            return R3(*pv[0],*pv[1]).norme();
+        }
+        typedef R1 RdHat;
+        typedef R0 RdHatBord;
+        static RdHat PBord(const int * nvb,const RdHatBord &P)  { return RdHat(*nvb) ;}
+        
+        
+    };
+    
  
   class BoundaryPointL: public GenericElement<DataPoint3>
   {

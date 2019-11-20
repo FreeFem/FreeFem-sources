@@ -50,32 +50,10 @@ namespace Fem2D
 
 namespace Fem2D
 {
-    //template<>
-   // void SameElement( Vertex3 *vertice, Vertex3 *new_vertice, TriangleS *list, int nelt, TriangleS *new_list, int *old2new, int &new_nelt, double &mes);
-    
-   // template<>
-  //  void SameElement( Vertex3 *vertice, Vertex3 *new_vertice, BoundaryEdgeS *list, int nelt, BoundaryEdgeS *new_list, int *old2new, int &new_nelt, double &mes);
-   
-     // definition of the reference segment 0 1
-     static const int  nvfaceSeg[1][3]  = {{-1,-1,1}};
-     static const int  nvedgeSeg[1][2] = { {0,1} };
-     static const int  nvadjSeg[2][1] = { {0},{1} };
-    
-    // geometry element for segment ( boundary elements in surface mesh, Rd=3 RdHat=1 )
-    template<> const int (* const GenericElement<DataSeg3>::nvface)[3] = 0 ;
-    template<> const int (* const GenericElement<DataSeg3>::nvedge)[2] = nvedgeSeg; //nvedgeTria ;
-    template<> const int (* const GenericElement<DataSeg3>::nvadj)[1] = nvadjSeg ;
-    
     
     template<> int   GenericMesh<TriangleS,BoundaryEdgeS,Vertex3>::kfind=0;
     template<> int   GenericMesh<TriangleS,BoundaryEdgeS,Vertex3>::kthrough=0;
-    
-  /*  void Add(int *p,int n,int o)
-    {
-        for(int i=0;i<n;++i)
-            p[i] += o;
-    }*/
-    
+  
     
     const string GsbeginS="MeshS::GSave v0",GsendS="end";
     void MeshS::GSave(FILE * ff,int offset) const
@@ -252,7 +230,7 @@ namespace Fem2D
     
     
     MeshS::MeshS(const string filename)
-    :mapSurf2Vol(0),mapVol2Surf(0)    {
+    :mapSurf2Vol(0),mapVol2Surf(0),meshL(0)  {
         int ok=load(filename);
         if(verbosity) {
             cout << "read meshS ok " << ok ;
@@ -416,7 +394,7 @@ namespace Fem2D
     
     
     MeshS::MeshS(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
-    :mapSurf2Vol(0),mapVol2Surf(0) {
+    :mapSurf2Vol(0),mapVol2Surf(0),meshL(0) {
         
         
         int ok=load(filename);
@@ -473,7 +451,7 @@ namespace Fem2D
  
     
     MeshS::MeshS(FILE *f,int offset)
-    :mapSurf2Vol(0),mapVol2Surf(0)
+    :mapSurf2Vol(0),mapVol2Surf(0),meshL(0)
     {
         GRead(f,offset);// remove 1
         assert( (nt >= 0 || nbe>=0)  && nv>0) ;
@@ -615,7 +593,7 @@ namespace Fem2D
     
     
     MeshS::MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
-    :mapVol2Surf(0),mapSurf2Vol(0)
+    :mapVol2Surf(0),mapSurf2Vol(0),meshL(0)
     {
         nv = nnv;
         nt = nnt;
@@ -667,7 +645,7 @@ namespace Fem2D
     
     MeshS::MeshS(const  Serialize &serialized)
     :GenericMesh<TriangleS,BoundaryEdgeS,Vertex3> (serialized),
-    mapVol2Surf(0), mapSurf2Vol(0)
+    mapVol2Surf(0), mapSurf2Vol(0), meshL(0)
     {
         BuildBound();
         if(verbosity>1)
