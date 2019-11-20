@@ -457,7 +457,8 @@ namespace Fem2D
                 meshS->mesb += meshS->borderelements[i].mesure();
             }*/
         }
-        
+        else
+            this->BuildMeshL();
         
         
         if(verbosity>1)
@@ -921,5 +922,87 @@ namespace Fem2D
         BuildjElementConteningVertex();
     }
     
-    
+    void MeshS::BuildMeshL()
+    {
+        
+        if (meshL) {
+            cout << "error, MeshS::meshL previously created " << endl;
+            ffassert(0);
+        }
+        if (verbosity) cout << "Build meshL from meshS.... " << endl;
+        
+        
+        int mes = 0, mesb = 0;
+        
+        int *v_num_curve, *map_v_num_curve;
+        // Extraction of Vertex  belongs to the surface
+        v_num_curve=new int[nv];
+        map_v_num_curve=new int[nv];
+        for (int k=0; k<nv; k++){
+            v_num_curve[k]=-1;
+            map_v_num_curve[k]=0;
+        }
+        // Search Vertex on the surface
+        int nbv_curve=0;
+        for (int k=0; k<nbe; k++) {
+            const BoundaryEdgeS & K(borderelements[k]);
+            for(int jj=0; jj<2; jj++){
+                int i0=this->operator()(K[jj]);
+                if( v_num_curve[i0] == -1 ){
+                    v_num_curve[i0] = nbv_curve;
+                    map_v_num_curve[nbv_curve]= i0;
+                    nbv_curve++;
+                }
+            }
+        }
+        
+        // set the surface vertex in meshS
+        ffassert(nbv_curve);
+        
+        Vertex3 *vL = new Vertex3[nbv_curve];
+        EdgeL *tL = new EdgeL[nbe];
+        EdgeL *ttL = tL;
+        
+        
+        for (int iv=0; iv<nbv_curve; iv++) {
+            int k0 = map_v_num_curve[iv];
+            const Vertex3 & P = vertices[k0];
+            vL[iv].x=P.x;
+            vL[iv].y=P.y;
+            vL[iv].z=P.z;
+            vL[iv].lab=P.lab;
+        }
+        
+        ffassert(nbe);
+        
+        
+        for (int it=0; it<nbe; it++) {
+            int iv[2];
+            const BoundaryEdgeS & K(borderelements[it]);
+            for (int j=0;j<2;++j)
+                iv[j]=v_num_curve[this->operator()(K[j])];
+            
+            int lab=K.lab;
+            (ttL)->set(vL,iv,lab);
+            mes += ttL++->mesure();
+        }
+        
+        // first building without list edges
+        
+        meshL = new MeshL(nbv_curve,nbe,0,vL,tL,0);
+        meshL->mapSurf2Curv = new int[nv];
+        meshL->mapCurv2Surf= new int[nv];
+        for(int i=0 ; i<nv ; i++) {
+            meshL->mapSurf2Curv[i] = v_num_curve[i];
+            meshL->mapCurv2Surf[i] = map_v_num_curve[i];
+        }
+        
+        delete [] v_num_curve;
+        delete [] map_v_num_curve;
+        // build the edge list
+        meshL->BuildBorderPt();
+        meshL->BuildGTree();
+        
+        
+    }
 }

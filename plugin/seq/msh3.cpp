@@ -7383,6 +7383,103 @@ public:
 };
 
 
+class BuildMeshL_Op: public E_F0mps
+{
+public:
+    Expression eTh;
+ 
+public:
+    BuildMeshL_Op (const basicAC_F0 &args, Expression tth)
+		: eTh(tth) {}
+    AnyType operator () (Stack stack)  const;
+};
+
+
+
+AnyType BuildMeshL_Op::operator () (Stack stack)  const {
+
+    MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+    MeshS *pTh = GetAny<MeshS *>((*eTh)(stack));
+    MeshS &Th = *pTh;
+    ffassert(pTh);
+
+    if (verbosity>5) cout << "Enter in BuilMesh_Op.... " << endl;
+
+    if (Th.meshL) {
+        cout << "Caution, MeshS::meshL previously created " << endl;;
+        Add2StackOfPtr2FreeRC(stack, pTh);
+        return pTh;
+    }
+
+    else {
+        int nv = Th.nv, nt = Th.nt, nbe = Th.nbe;
+
+        Vertex3 *v = new Vertex3[nv];
+        TriangleS *t = new TriangleS[nt];
+        TriangleS *tt = t;
+        BoundaryEdgeS *b = new BoundaryEdgeS[nbe];
+        BoundaryEdgeS *bb = b;
+        double mes = 0, mesb = 0;
+
+        if (verbosity>5) cout << "copy the original meshS... nv= " << nv <<" nt= " << nt << " nbe= " << nbe << endl;
+        int i_som=0, i_elem=0, i_border=0;
+
+        for (int i = 0; i < nv; i++) {
+            const Vertex3 &K(Th.vertices[i]);
+            v[i].x = K.x;
+            v[i].y = K.y;
+            v[i].z = K.z;
+            v[i].lab = K.lab;
+        }
+
+
+        for (int i = 0; i < nt; i++) {
+            const TriangleS &K(Th.elements[i]);
+            int iv[3];
+            int lab=K.lab;
+
+            for (int jj = 0; jj < 3; jj++) {
+                iv[jj] = Th.operator () (K[jj]);
+                assert(iv[jj] >= 0 && iv[jj] < nv);
+            }
+            (tt)->set(v, iv, lab);
+            mes += tt++->mesure();
+        }
+
+
+        for (int i = 0; i < nbe; i++) {
+            const BoundaryEdgeS &K(Th.be(i));
+            int iv[2];
+            int lab=K.lab;
+            for (int jj = 0; jj < 2; jj++) {
+                iv[jj] = Th.operator () (K[jj]);
+                assert(iv[jj] >= 0 && iv[jj] < nv);
+            }
+            (bb)->set(v, iv, lab);
+            mesb += bb++->mesure();
+        }
+
+        MeshS *Th_t = new MeshS(nv,nt,nbe,v,t,b);
+        Th_t->BuildGTree();
+        // build the meshS and the edges list
+        Th_t->BuildMeshL();
+        *mp = mps;
+        Add2StackOfPtr2FreeRC(stack, Th_t);
+        return Th_t;
+    }
+
+}
+class BuildMeshLFromMeshS: public OneOperator {
+public:
+    BuildMeshLFromMeshS (): OneOperator(atype<pmeshS>(), atype<pmeshS>()) {}
+
+    E_F0*code (const basicAC_F0 &args) const {
+        return new BuildMeshL_Op(args,t[0]->CastTo(args[0]));
+
+    }
+};
+
+
 
 // movemesh
 template< class MMesh>
@@ -8061,6 +8158,7 @@ static void Load_Init () {
 	Global.Add("line3", "(", new Line);
 	Global.Add("line3", "(", new Line(1));
 	
+	Global.Add("buildCurve", "(", new BuildMeshLFromMeshS);
 	
 }
 

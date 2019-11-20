@@ -550,13 +550,24 @@ double pmesh_hmin(pmesh3 * p)
     return sqrt(hmin2);}
 
 
-pmeshS pmesh_gamma(Stack stack, pmesh3 * const & p)
+pmeshS pmesh3_gamma(Stack stack, pmesh3 * const & p)
 { throwassert(p && *p) ;
   const Mesh3 & Th = **p;
   const MeshS *ThS = Th.meshS;
-    if(ThS==NULL) cout << "The meshS member is empty! " << endl;
+    if(ThS==NULL) cout << "The meshS member is empty!, use <meshS>=<mesh3>.BuildMeshS()" << endl;
   return (ThS);
 }
+
+pmeshL pmeshS_gamma(Stack stack, pmeshS * const & p)
+{ throwassert(p && *p) ;
+    const MeshS & Th = **p;
+    const MeshL *ThS = Th.meshL;
+    if(ThS==NULL)
+        cout << "The input meshL member is empty, build it " << endl;
+    return (ThS);
+}
+
+
 long pmesh_nadjnomanifold(pmesh3 * p) { ffassert(p) ;  return *p ? ((**p).meshS)->nadjnomanifold : 0;}
 
 long pmesh_nadjnomanifold(pmeshS * p) { ffassert(p) ;  return *p ? (**p).nadjnomanifold : 0;}
@@ -2748,8 +2759,10 @@ void init_lgmesh3() {
  Add<pmesh3*>("hmax",".",new OneOperator1<double,pmesh3*>(pmesh_hmax));
  Add<pmesh3*>("hmin",".",new OneOperator1<double,pmesh3*>(pmesh_hmin));
 
- Add<pmesh3*>("Gamma",".",new OneOperator1s_<pmeshS,pmesh3*>(pmesh_gamma));
+ Add<pmesh3*>("Gamma",".",new OneOperator1s_<pmeshS,pmesh3*>(pmesh3_gamma));
  Add<pmesh3*>("nbnomanifold",".",new OneOperator1<long,pmesh3*>(pmesh_nadjnomanifold));
+ 
+ Add<pmeshS*>("Gamma",".",new OneOperator1s_<pmeshL,pmeshS*>(pmeshS_gamma));
     
  //3D surface
  Dcl_Type<GlgVertex<MeshS> >();

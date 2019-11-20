@@ -627,7 +627,56 @@ namespace Fem2D
     return (0);
   }
 
+  
     
+    // determine the bounder points list for meshL
+    void MeshL::BuildBorderPt() {
+        
+       // delete [] borderelements; // to remove the previous pointers
+        borderelements = new BoundaryPointL[2 * nt]; // 2 * nt upper evaluated
+        
+       // HashTable<SortArray<int, 1>, int> edgesI(3 * nt, nt);
+       // int* AdjLink = new int[3 * nt];
+        
+        int nbeL=0, nk=0;
+        // Build points from the edges list
+        for (int i = 0; i < nt; i++)
+            for (int j = 0; j < 2; j++) {
+                
+                int jt = j, it = ElementAdj(i, jt);
+                EdgeL &K(elements[i]);  // current element
+                EdgeL &K_adj(elements[it]); //adjacence element
+                
+                // True boundary edge -> no adjacence / on domain border
+                if ((it == i || it < 0)) {
+                    int iv[1];
+                    iv[0]=this->operator () (K [EdgeL::nvedge[j][0]]);
+                    if(verbosity>15)
+                        cout << " the points " << iv << " is a border point " << endl;
+                    int lab = min(K.lab, K_adj.lab);
+                    be(nbeL).set(vertices,iv,lab);
+                    mesb += be(nbeL).mesure();
+                    nbeL++;
+                    
+                }
+             
+                nk++;  // increment the total edge jump --- nt * 3
+                
+            }
+        assert(nt*2==nk);
+        // update the number of border points
+        nbe = nbeL;
+        if (verbosity>5) cout << " Building border points from meshS nbe: "<< nbeL << endl;
+        
+        BuildBound();
+        delete []TheAdjacencesLink;
+        delete [] BoundaryElementHeadLink;
+        TheAdjacencesLink=0;
+        BoundaryElementHeadLink=0;
+        BuildAdj();
+        Buildbnormalv();
+        BuildjElementConteningVertex();
+    }
     
     
 }

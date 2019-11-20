@@ -144,7 +144,7 @@ namespace Fem2D {
     void read(istream &f);
     void readmsh(ifstream & f,int offset);
     MeshL(FILE *f,int offset=0);
-    MeshL(int nnv, int nnt, int nnbe, Vertex3 *vv, EdgeL *tt, BoundaryPointL *bb, bool cleanmesh=true, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
+    MeshL(int nnv, int nnt, int nnbe, Vertex3 *vv, EdgeL *tt, BoundaryPointL *bb, bool cleanmesh=false, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
     //MeshL(const Serialize&);
 
     int load(const string & filename);
@@ -156,7 +156,8 @@ namespace Fem2D {
     double hmin() const;
     //int Save(const string & filename) const;
     //Serialize serialize_withBorderMesh() const;
-        
+    void BuildBorderPt();
+
     ~MeshL() {
       delete [] mapSurf2Curv ;
       delete [] mapCurv2Surf ;
