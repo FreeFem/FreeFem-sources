@@ -752,7 +752,6 @@ class IterativeMethod : public OneOperator {
                             Kn& x = *GetAny<Kn*>((*X)(stack));
                             int n = x.N();
                             Kn& b = *GetAny<Kn*>((*B)(stack));
-                            cout << C << endl;
                             MatF_O PP(n, stack, C);
                             if(c == 0) {
                                 MatF_O AA(n, stack, A);
