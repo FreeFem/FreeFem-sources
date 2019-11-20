@@ -164,8 +164,85 @@
    void TypeOfFE_P2Lagrange_curve::FB(const What_d whatd,const Mesh & ,const Element & K,const RdHat & PHat,RNMK_ & val) const
    {
        
-       ffassert(0);
-         
+       
+       R l[]={1.-PHat.x,PHat.x};
+       
+       assert(val.N() >=E::nv);
+       assert(val.M()==1 );
+       
+       val=0;
+       RN_ f0(val('.',0,op_id));
+       //
+       if (whatd & Fop_D0)
+       {
+           int k=0;
+           for(int i=0;i<E::nv;++i)
+               f0[k++] = l[i]*(2*l[i]-1.);
+           for(int i=0;i<E::ne;++i)
+               f0[k++] = 4.*l[E::nvedge[i][0]]*l[E::nvedge[i][1]];
+           assert(k==3);
+       }
+       
+       if (whatd & (Fop_D1|Fop_D2))
+       {
+           
+           R3 Dl[2];
+           R l3[3]={ (4*l[0]-1),(4*l[1]-1),(4*l[2]-1)};
+           
+           K.Gradlambda(Dl);
+           
+           if( whatd & Fop_dx)
+           {
+               RN_ f0x(val('.',0,op_dx));
+               
+               int k=0;
+               for(int i=0;i<E::nv;++i,++k)
+               {
+                   f0x[k] = Dl[i].x*l3[i];
+               }
+               for(int i=0;i<E::ne;++i,++k)
+               {
+                   int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+                   f0x[k] = 4*(Dl[i1].x*l[i0] + Dl[i0].x*l[i1]) ;
+               }
+               assert(k==3);
+           }
+           
+           if( whatd & Fop_dy)
+           {
+               RN_ f0y(val('.',0,op_dy));
+               
+               int k=0;
+               for(int i=0;i<E::nv;++i,++k)
+               {
+                   f0y[k] = Dl[i].y*l3[i];
+               }
+               for(int i=0;i<E::ne;++i,++k)
+               {
+                   int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+                   f0y[k] = 4*(Dl[i1].y*l[i0] + Dl[i0].y*l[i1]) ;
+               }
+               assert(k==3);
+           }
+           
+           if( whatd & Fop_dz)
+           {
+               RN_ f0z(val('.',0,op_dz));
+               
+               int k=0;
+               for(int i=0;i<E::nv;++i,++k)
+               {
+                   f0z[k] = Dl[i].z*l3[i];
+               }
+               for(int i=0;i<E::ne;++i,++k)
+               {
+                   int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+                   f0z[k] = 4*(Dl[i1].z*l[i0] + Dl[i0].z*l[i1]) ;
+               }
+               assert(k==3);
+           }
+       }
+       
    }
      
  

@@ -485,12 +485,13 @@ class GMSH_LoadMesh3_Op: public E_F0mps
 {
 	public:
 		Expression filename;
-		static const int n_name_param = 4;	//
+		static const int n_name_param = 5;	//
 		static basicAC_F0::name_and_type name_param [];
 		Expression nargs[n_name_param];
         long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
         bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
-    
+    	double arg (int i, Stack stack, double a) const {return nargs[i] ? GetAny<double>((*nargs[i])(stack)) : a;}
+		
 	public:
 		GMSH_LoadMesh3_Op (const basicAC_F0 &args, Expression ffname)
 			: filename(ffname) {
@@ -507,6 +508,7 @@ basicAC_F0::name_and_type GMSH_LoadMesh3_Op::name_param [] = {
 	{"renum", &typeid(long)},
     {"cleanmesh", &typeid(bool)},
     {"removeduplicate", &typeid(bool)},
+	{"precisvertice",&typeid(double) }
     
 };
 
@@ -519,7 +521,7 @@ class GMSH_LoadMesh3: public OneOperator {
 		}
 };
 
-Mesh3*GMSH_Load3 (const string &filename, bool cleanmesh, bool removeduplicate) {
+Mesh3*GMSH_Load3 (const string &filename, bool cleanmesh, bool removeduplicate,double precisvertice) {
 	// variable freefem++
 	int nv, nt = 0, nbe = 0, ret;
 	Vertex3 *vff;
@@ -881,7 +883,7 @@ Mesh3*GMSH_Load3 (const string &filename, bool cleanmesh, bool removeduplicate) 
         cout << " Return type false, your mesh is MeshS type, use gmshloadS function" << endl;
         ffassert(0);
 	} else {
-		Mesh3 *Th3 = new Mesh3(nv, nt, nbe, vff, tff, bff, cleanmesh, removeduplicate);
+		Mesh3 *Th3 = new Mesh3(nv, nt, nbe, vff, tff, bff, cleanmesh, removeduplicate, precisvertice);
 		return Th3;
 	}
 }
@@ -894,12 +896,12 @@ AnyType GMSH_LoadMesh3_Op::operator () (Stack stack)  const {
     
     bool cleanmesh(arg(2, stack, false));
     bool removeduplicate(arg(3, stack, false));
-    
+    double precisvertice(arg(4, stack, 1e-6));
     
 
 	assert(renumsurf <= 1 && renumsurf >= 0);
 
-	Mesh3 *Th3_t = GMSH_Load3(*pffname,cleanmesh,removeduplicate);
+	Mesh3 *Th3_t = GMSH_Load3(*pffname,cleanmesh,removeduplicate,precisvertice);
 
     //Th3_t->getTypeMesh3() = 1;
 	Th3_t->BuildGTree();
@@ -916,11 +918,12 @@ class GMSH_LoadMeshS_Op: public E_F0mps
 {
 public:
     Expression filename;
-    static const int n_name_param = 4;    //
+    static const int n_name_param = 5;    //
     static basicAC_F0::name_and_type name_param [];
     Expression nargs[n_name_param];
     long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
     bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
+	double arg (int i, Stack stack, double a) const {return nargs[i] ? GetAny<double>((*nargs[i])(stack)) : a;}
     
 public:
     GMSH_LoadMeshS_Op (const basicAC_F0 &args, Expression ffname)
@@ -938,6 +941,7 @@ basicAC_F0::name_and_type GMSH_LoadMeshS_Op::name_param [] = {
     {"renum", &typeid(long)},
     {"cleanmesh", &typeid(bool)},
     {"removeduplicate", &typeid(bool)},
+	{"precisvertice", &typeid(double)}                 
 };
 
 class GMSH_LoadMeshS: public OneOperator {
@@ -949,7 +953,7 @@ public:
     }
 };
 
-MeshS*GMSH_LoadS (const string &filename, bool cleanmesh, bool removeduplicate) {
+MeshS*GMSH_LoadS (const string &filename, bool cleanmesh, bool removeduplicate, double precisvertice) {
     // variable freefem++
     int nv, nt = 0, nbe = 0;
     Vertex3 *vff;
@@ -1302,7 +1306,7 @@ MeshS*GMSH_LoadS (const string &filename, bool cleanmesh, bool removeduplicate) 
     
     fclose(fp);
     
-    MeshS *ThS = new MeshS(nv, nt, nbe, vff, tff, bff, cleanmesh, removeduplicate);
+    MeshS *ThS = new MeshS(nv, nt, nbe, vff, tff, bff, cleanmesh, removeduplicate, precisvertice); 
     return ThS;
     
 }
@@ -1310,13 +1314,15 @@ MeshS*GMSH_LoadS (const string &filename, bool cleanmesh, bool removeduplicate) 
 AnyType GMSH_LoadMeshS_Op::operator () (Stack stack)  const {
     string *pffname = GetAny<string *>((*filename)(stack));
     int renumsurf = 0;
-    bool cleanmesh=false, removeduplicate=false;
-    if (nargs[1]) renumsurf = GetAny<long>((*nargs[1])(stack));
-    if (nargs[2]) cleanmesh = GetAny<bool>((*nargs[2])(stack));
-    if (nargs[3]) removeduplicate = GetAny<bool>((*nargs[3])(stack));
+    
+	if (nargs[1]) renumsurf = GetAny<long>((*nargs[1])(stack));
+    bool cleanmesh(arg(2, stack, false));
+    bool removeduplicate(arg(3, stack, false));
+    double precisvertice(arg(4, stack, 1e-6));
+	
     assert(renumsurf <= 1 && renumsurf >= 0);
     
-    MeshS *ThS_t = GMSH_LoadS(*pffname,cleanmesh,removeduplicate);
+    MeshS *ThS_t = GMSH_LoadS(*pffname,cleanmesh,removeduplicate,precisvertice);
  
     ThS_t->BuildGTree();
     Add2StackOfPtr2FreeRC(stack, ThS_t);

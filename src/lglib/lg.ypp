@@ -919,7 +919,9 @@ extern  bool echo_edp;
 
 int mainff (int  argc, char **argv)
 {
-  signal(SIGXCPU, signalCPUHandler);
+#ifndef _WIN32
+  	signal(SIGXCPU, signalCPUHandler);
+#endif	
   if(argc)
     prognamearg=argv[0];
 

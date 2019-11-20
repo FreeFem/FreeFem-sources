@@ -1337,6 +1337,13 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
     delete []vertices;
     delete gtree;
     delete [] old2new;
+    
+    Th->BuildBound();
+    Th->BuildAdj();
+   // Th->Buildbnormalv(); // no normal with 3d curve
+    Th->BuildjElementConteningVertex();
+    
+    
     Add2StackOfPtr2FreeRC(stack, Th); 
     *mp=mps;
     
@@ -1769,7 +1776,7 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
   const  FESpace & Vh(*fe.newVh());
  // KN<K> gg(Vh.MaximalNbOfDF()); 
   
-  const  Mesh & Th(Vh.Th);
+  const  Mesh & Th(Vh.Th); 
   const int dim=Vh.N;
   K ** copt=0;
   if (optimize)   copt= new K *[dim];

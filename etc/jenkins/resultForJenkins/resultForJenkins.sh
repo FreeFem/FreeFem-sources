@@ -75,3 +75,8 @@ mv report.xml etc/jenkins/resultForJenkins/report.xml
 echo " ****************Make check results************ "
 echo " PASS: $Gtests  SKIPPED: $Gskipped   XFAIL: $Gerrors  FAIL:$Gfailures  CPU: $Gcpu"
 
+[ "$Gfailures" -ne 0 ] && exit 1 || [ "$Gerrors" -ne 0 ]  && exit 1
+
+if [ "$Gfailures" -ne 0 ] || [ "$Gerrors" -ne 0 ]; then
+exit 1
+fi
