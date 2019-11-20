@@ -287,7 +287,7 @@ struct OnePlotHMatrix: public OnePlot
     OnePlotHMatrix(long w, PlotStream & f)
     :OnePlot(w)
     {
-        dim = 2;
+        //dim = 2;
         Pmin = R3(0,0,0);
         Pmax = R3(1,1,0);
 

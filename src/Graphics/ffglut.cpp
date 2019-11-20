@@ -1620,42 +1620,101 @@ void OnePlotCurve3::Draw(OneWindow *win)
     
 }
 
+inline void plotquadx(float y, float iy, float z, float iz, float x1, bool outline = 0){
+  glVertex3d(x1, y, z);
+  glVertex3d(x1, y+iy, z);
+  if (outline) glVertex3d(x1, y+iy, z);
+  glVertex3d(x1, y+iy, z+iz);
+  glVertex3d(x1, y+iy, z+iz);
+  glVertex3d(x1, y, z+iz);
+  if (outline) glVertex3d(x1, y, z+iz);
+  glVertex3d(x1, y, z);
+}
+
+inline void plotquady(float x, float ix, float z, float iz, float y1, bool outline = 0){
+  glVertex3d(x, y1, z);
+  glVertex3d(x+ix, y1, z);
+  if (outline) glVertex3d(x+ix, y1, z);
+  glVertex3d(x+ix, y1, z+iz);
+  glVertex3d(x+ix, y1, z+iz);
+  glVertex3d(x, y1, z+iz);
+  if (outline) glVertex3d(x, y1, z+iz);
+  glVertex3d(x, y1, z);
+}
+
+inline void plotquadz(float x, float ix, float y, float iy, float z1, bool outline = 0){
+  glVertex3d(x, y, z1);
+  glVertex3d(x+ix, y, z1);
+  if (outline) glVertex3d(x+ix, y, z1);
+  glVertex3d(x+ix, y+iy, z1);
+  glVertex3d(x+ix, y+iy, z1);
+  glVertex3d(x, y+iy, z1);
+  if (outline) glVertex3d(x, y+iy, z1);
+  glVertex3d(x, y, z1);
+}
+
 void OnePlotHMatrix::Draw(OneWindow *win)
 {
   if (si <= 0 || sj <= 0)
     return;
 
-  glDisable(GL_DEPTH_TEST);
+  R scalez, zeps, dx, dy, dz;
+
+  if (win->plotdim==2) {
+    glDisable(GL_DEPTH_TEST);
+    scalez = 0;
+    zeps = 0;
+    dx = 0;
+    dy = 0;
+    dz = 0;
+  }
+  else {
+    glEnable(GL_DEPTH_TEST);
+    scalez = 0.5;
+    zeps = 0.001;
+    dx = -5e-4*(win->Pvue3.x - win->cam.x);
+    dy = -5e-4*(win->Pvue3.y - win->cam.y);
+    dz = -5e-4*(win->Pvue3.z - win->cam.z);
+  }
 
   glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+
   R z1= 0;
 
   glBegin(GL_TRIANGLES);
   for (int i=0;i < nbdense; i++) {
     std::pair<int,int>& offset = offsetsdense[i];
     std::pair<int,int>& size = sizesdense[i];
+    z1 = scalez;
     if (size.first > 1 || size.second > 1) {
-      glColor3f(1,0,0);
-      glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
-      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)offset.first/si ,z1);
-      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-      glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
-      glVertex3d((float)offset.second/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+      glColor3f(1,0,0); //glColor3f((20.)/255,(80.)/255,(20.)/255);
+      plotquadz((float)offset.second/sj, (float)size.second/sj, 1.-(float)offset.first/si, -(float)size.first/si, z1);
+
+      if (win->plotdim==3) {
+        plotquadx(1.-(float)offset.first/si, -(float)size.first/si, 0, z1, (float)offset.second/sj);
+        plotquadx(1.-(float)offset.first/si, -(float)size.first/si, 0, z1, (float)(offset.second+size.second)/sj);
+        plotquady((float)offset.second/sj, (float)size.second/sj, 0, z1, 1.-(float)offset.first/si);
+        plotquady((float)offset.second/sj, (float)size.second/sj, 0, z1, 1.-(float)(offset.first+size.first)/si);
+        plotquadz((float)offset.second/sj, (float)size.second/sj, 1.-(float)offset.first/si, -(float)size.first/si, 0);
+      }
     }
   }
 
   for (int i=0;i < nblr; i++) {
     std::pair<int,int>& offset = offsetslr[i];
     std::pair<int,int>& size = sizeslr[i];
+    z1 = scalez*(1-compression[i]);
     if (size.first > 1 || size.second > 1) {
       glColor3f((20+compression[i]*80)/255,(80+compression[i]*170)/255,(20+compression[i]*80)/255);
-      glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
-      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)offset.first/si ,z1);
-      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-      glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
-      glVertex3d((float)offset.second/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
+      plotquadz((float)offset.second/sj, (float)size.second/sj, 1.-(float)offset.first/si, -(float)size.first/si, z1);
+
+      if (win->plotdim==3) {
+        plotquadx(1.-(float)offset.first/si, -(float)size.first/si, 0, z1, (float)offset.second/sj);
+        plotquadx(1.-(float)offset.first/si, -(float)size.first/si, 0, z1, (float)(offset.second+size.second)/sj);
+        plotquady((float)offset.second/sj, (float)size.second/sj, 0, z1, 1.-(float)offset.first/si);
+        plotquady((float)offset.second/sj, (float)size.second/sj, 0, z1, 1.-(float)(offset.first+size.first)/si);
+        plotquadz((float)offset.second/sj, (float)size.second/sj, 1.-(float)offset.first/si, -(float)size.first/si, 0);
+      }
     }
   }
   glEnd();
@@ -1666,6 +1725,7 @@ void OnePlotHMatrix::Draw(OneWindow *win)
   for (int i=0;i < nbdense; i++) {
     std::pair<int,int>& offset = offsetsdense[i];
     std::pair<int,int>& size = sizesdense[i];
+    z1 = 0;
     if (size.first == 1 && size.second == 1) {
       glColor3f(1,0,0);
       glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
@@ -1680,47 +1740,67 @@ void OnePlotHMatrix::Draw(OneWindow *win)
   for (int i=0;i < nbdense; i++) {
     std::pair<int,int>& offset = offsetsdense[i];
     std::pair<int,int>& size = sizesdense[i];
+    z1 = scalez;
     if (size.first > 1 || size.second > 1) {
-      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
-      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
-      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
-      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
+      plotquadz((float)offset.second/sj+dx, (float)size.second/sj, 1.-(float)offset.first/si+dy, -(float)size.first/si, dz,1);
+
+      if (win->plotdim==3) {
+        plotquadx(1.-(float)offset.first/si+dy, -(float)size.first/si, dz, z1+dz, (float)offset.second/sj+dx,1);
+        plotquadx(1.-(float)offset.first/si+dy, -(float)size.first/si, dz, z1+dz, (float)(offset.second+size.second)/sj+dx,1);
+        plotquadz((float)offset.second/sj+dx, (float)size.second/sj, 1.-(float)offset.first/si+dy, -(float)size.first/si, z1+dz,1);
+      }
     }
   }
 
   for (int i=0;i < nblr; i++) {
     std::pair<int,int>& offset = offsetslr[i];
     std::pair<int,int>& size = sizeslr[i];
+    z1 = scalez*(1-compression[i]);
     if (size.first > 1 || size.second > 1) {
-      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
-      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
-      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first)/si ,z1);
-      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-      glVertex3d((float)(offset.second+size.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first+size.first)/si ,z1);
-      glVertex3d((float)(offset.second)/sj, 1.-(float)(offset.first)/si ,z1);
+      plotquadz((float)offset.second/sj+dx, (float)size.second/sj, 1.-(float)offset.first/si+dy, -(float)size.first/si, dz,1);
+
+      if (win->plotdim==3) {
+        plotquadx(1.-(float)offset.first/si+dy, -(float)size.first/si, dz, z1+dz, (float)offset.second/sj+dx,1);
+        plotquadx(1.-(float)offset.first/si+dy, -(float)size.first/si, dz, z1+dz, (float)(offset.second+size.second)/sj+dx,1);
+        plotquadz((float)offset.second/sj+dx, (float)size.second/sj, 1.-(float)offset.first/si+dy, -(float)size.first/si, z1+dz,1);
+      }
     }
   }
 
   glEnd();
-
   glColor3f(0,0,0);
   for (int i=0;i < nblr; i++) {
     std::pair<int,int>& offset = offsetslr[i];
     std::pair<int,int>& size = sizeslr[i];
-    string s = std::to_string(rankslr[i]);
+    z1 = scalez*(1-compression[i]);
+    string s = win->theplot->value ? std::to_string(int(100*compression[i])) : std::to_string(rankslr[i]);
     float scale = 0.005*std::min((float)size.first/si,(float)size.second/sj)/**std::min(mSize.x(),mSize.y())*/;
-    if (scale > 0.04/std::min(win->height,win->width)) {
+    if (win->theplot->value)
+      scale *= 0.9;
+
+    R textx = -36*scale*s.length()+(float)(offset.second+size.second*0.5)/sj;
+    R texty = -48*scale+1.-float(offset.first+size.first*0.5)/si;
+    R textz = z1+zeps;
+
+    if (win->theplot->value)
+      textx -= 10*scale*s.length();
+
+    bool ptext = 0;
+    if (win->plotdim==2 && scale > 0.028/std::min(win->height,win->width)*win->hpixel*win->width)
+      ptext = 1;
+    if (win->plotdim==3)// && sqrt((win->Pvue3.x-textx)*(win->Pvue3.x-textx)+(win->Pvue3.y-texty)*(win->Pvue3.y-texty)+(win->Pvue3.z-textz)*(win->Pvue3.z-textz)) < 0.1)
+      ptext = 1;
+
+    if (ptext) {
       glPushMatrix();
-      glTranslatef(-36*scale*s.length()+(float)(offset.second+size.second*0.5)/sj,-48*scale+1.-float(offset.first+size.first*0.5)/si, 0);
+      glTranslatef(textx, texty, textz);
       glScalef(scale,scale,scale);
       for(char& c : s)
         glutStrokeCharacter(GLUT_STROKE_ROMAN,c);
+      if (win->theplot->value) {
+        glScalef(0.3,0.3,0.3);
+        glutStrokeCharacter(GLUT_STROKE_ROMAN,'%');
+      }
       glPopMatrix();
     }
   }
