@@ -806,7 +806,7 @@ namespace Fem2D
         }*/
         if (nTet>0 && nTri>0 && nSeg==0)
             if(verbosity>1)
-                cout << "data file "<< pfile <<  " contains only a Mesh3, possible to create the MeshS associated using the command <Mesh3>.buildSurface(<Mesh3>)." << endl;
+                cout << "data file "<< pfile <<  " contains only a Mesh3, creation the MeshS associated." << endl;
         if (nTet>0 && nTri>0 && nSeg>0)
             if(verbosity>1) cout << "data file "<< pfile <<  " contains a Mesh3 and MeshS" << endl;
         if(verbosity && !nTri && !nTet)
@@ -963,6 +963,12 @@ namespace Fem2D
                 meshS->mesb += meshS->borderelements[i].mesure();
             }
         }
+        else
+            // if not input surface mesh, build it
+            this->BuildMeshS();
+        
+        
+        
         if(verbosity>1 && (meshS) )
             cout << "  -- MeshS(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
             << ", Triangle elts:= " << meshS->nt << ", num vertice:= " << meshS->nv << ", num edges boundaries:= " << meshS->nbe << endl;

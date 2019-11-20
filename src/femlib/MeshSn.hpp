@@ -114,6 +114,7 @@ typedef GenericVertex<R3> Vertex3;
         int *mapSurf2Vol;
         int *mapVol2Surf;
         MeshL *meshL;
+        int nPoints;
         MeshS():mapSurf2Vol(0),mapVol2Surf(0),meshL(0) {};
         MeshS(const string);
         //MeshS(const string, const long);

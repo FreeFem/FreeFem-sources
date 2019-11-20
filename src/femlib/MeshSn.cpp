@@ -303,12 +303,25 @@ namespace Fem2D
             }
         }
         // data file is readed and the meshes are initilized
-        int nv=-1,nTet=-1,nTri=-1,nSeg=-1;
+        int nv=-1,nTet=-1,nTri=-1,nSeg=-1, nPt=-1;
         nv = GmfStatKwd(inm,GmfVertices);  // vertice
         nTri= GmfStatKwd(inm,GmfTriangles); // triangles in case of volume mesh -> boundary element / in case of surface mesh -> element
         nSeg=GmfStatKwd(inm,GmfEdges); // segment elements only present in surface mesh
+        nPt=0; //GmfStatKwd(inm,GmfEdges); // points border on border mesh, not available at this time
+        
+        if (nTri>0 && nSeg>0 && nPt==0)
+            if(verbosity>1)
+                cout << "data file "<< pfile <<  " contains only a MeshS, the MeshL associated is created (whitout border points)." << endl;
+        if (nTri>0 && nSeg>0 && nPt>0)
+            if(verbosity>1) cout << "data file "<< pfile <<  " contains a MeshS and MeshL" << endl;
+        if(verbosity && !nTri && !nTet)
+            cerr << " WARNING!!! The mesh file just contains a set of vertices" << endl;
+
+        
+        
         this->set(nv,nTri,nSeg);
-       
+        nPoints=nPt;
+        
         if(nTri == 0) {
             cerr << "  A meshS type must have elements  " << endl;
             ffassert(0);exit(1);}
@@ -382,10 +395,77 @@ namespace Fem2D
             mesb += this->borderelements[i].mesure();
         }
         
+        // the .mesh contains edges, Building the meshS
+        // for this, surface vertices must be extract of the original vertice list and a mapping must be created between surface and volume vertices
+        if (nPoints>0) {
+            meshL = new MeshL();
+            // Number of Vertex in the surface
+            meshL->mapSurf2Curv=new int[nv];
+            meshL->mapCurv2Surf=new int[nv]; // mapping to curve/surface vertices
+            for (int k=0; k<nv; k++) {
+                meshL->mapSurf2Curv[k]=-1;
+                meshL->mapCurv2Surf[k]=0;
+            }
+            // search Vertex on the surface
+            int nbv_curv=0;
+            for (int k=0; k<nbe; k++) {
+                const BorderElement & K(this->borderelements[k]);
+                for(int jj=0; jj<2; jj++) {
+                    int i0=this->operator()(K[jj]);
+                    if( meshL->mapSurf2Curv[i0] == -1 ) {
+                        // the mapping v_num_surf -> new numbering /  liste_v_num_surf[nbv_surf] -> the global num
+                        meshL->mapSurf2Curv[i0] = nbv_curv;
+                        meshL->mapCurv2Surf[nbv_curv]= i0;
+                        nbv_curv++;
+                    }
+                }
+            }
+            this->meshL->set(nbv_curv,nSeg,nPoints);
+            // save the surface vertices
+            for (int k=0; k<nbv_curv; k++) {
+                int k0 = meshL->mapCurv2Surf[k];
+                const  Vertex & P = this->vertices[k0];
+                meshL->vertices[k].lab=P.lab;
+                meshL->vertices[k].x=P.x;
+                meshL->vertices[k].y=P.y;
+                meshL->vertices[k].z=P.z;
+            }
+            // read triangles and change with the surface numbering
+            int kmv=0;
+            meshL->mes=0;
+            GmfGotoKwd(inm,GmfEdges);
+            for(int i=0;i<nSeg;++i) {
+                GmfGetLin(inm,GmfEdges,&iv[0],&iv[1],&lab);
+                for (int j=0;j<2;++j)
+                    iv[j]=meshL->mapSurf2Curv[iv[j]-1];
+                for(int j=0;j<2;++j)
+                    if(!meshL->vertices[iv[j]].lab) {
+                        meshL->vertices[iv[j]].lab=1;
+                        kmv++;
+                    }
+                meshL->elements[i].set(meshL->vertices,iv,lab);
+                meshL->mes += meshL->elements[i].mesure();
+            }
+            // reading border points with the curv numbering  not available at this moment
+            meshL->mesb=0;
+            /*GmfGotoKwd(inm,GmfEdges);
+            for(int i=0;i<nSeg;++i) {
+                GmfGetLin(inm,GmfEdges,&iv[0],&iv[1],&lab);
+                for (int j=0;j<2;++j) iv[j]=meshS->mapVol2Surf[iv[j]-1];
+                // assert( iv[0]>0 && iv[0]<=nbv_surf && iv[1]>0 && iv[1]<=nbv_surf);
+                meshS->borderelements[i].set(meshS->vertices,iv,lab);
+                meshS->mesb += meshS->borderelements[i].mesure();
+            }*/
+        }
+        
+        
         
         if(verbosity>1)
             cout << "  -- MeshS(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
             << ", Triangle elts:= " << nt << ", num vertice:= " << nv << ", num edges boundaries:= " << nbe << endl;
+        if(verbosity>1)
+            cout << "  -- MeshS::MeshL(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
+            << ", Edges elts:= " << meshL->nt << ", num vertice:= " << meshL->nv << ", num border points:= " << meshL->nbe << endl;
         
         GmfCloseMesh(inm);
         delete[] data;
