@@ -2,17 +2,27 @@ load "mat_edgeP1"
 load "msh3"
 load "Element_PkEdge"
 load "Element_Mixte3d"
+int err=0;
 { mesh Th=square(3,3);
 	fespace Eh(Th,P0edge);
 matrix A;
 MatrixEdgeP1(A,Th);
-cout << " " << A.nnz << " " << 2*Eh.ndof << endl;
+cout << "2d " << A.nnz << " " << 2*Eh.ndof << endl;
+err+=  A.nnz != 2*Eh.ndof;
+if(verbosity>4)
 cout << A << endl;
 }
-{ mesh3 Th=cube(3,3,3);
-	fespace Eh3(Th,Edge03d );
+{ mesh3 Th=cube(10,10,10);
+ fespace Eh(Th,Edge03d );
 matrix A;
+verbosity=5;
 MatrixEdgeP1(A,Th);
+if(verbosity>5)
 cout << A << endl;
-cout << " 3d:: " << A.nnz << " " << 2*Eh3.ndof << endl;
+cout << " 3d:: " << A.nnz << " " << 2*Eh.ndof << endl;
+cout << " 3d:: " << A.n << " " << Eh.ndof << endl;
+err+=  A.nnz != 2*Eh.ndof;
+err += A.n != Eh.ndof;
+
 }
+assert(err==0);

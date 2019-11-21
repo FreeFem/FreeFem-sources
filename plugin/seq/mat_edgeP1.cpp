@@ -61,11 +61,8 @@ AnyType MatrixEdgeP1<Mesh>::operator () (Stack stack) const
     
     typedef   typename Mesh::Element Element;
     typedef   typename Mesh::RdHat RdHat;
-    static const int  nvfaceTet[4][3]  = { {2,1,3},{0,2,3},{1,0,3},{0,1,2} };
-    static const int  nvedgeTet[6][2] = { {0,1},{0,2},{0,3},{0,1},{1,2},{2,3} };
-    static const int  nvfaceTria[1][3]  = { {0,1,2} };
+    static const int  nvedgeTet[6][2] = { {0,1},{0,2},{0,3},{1,2},{1,3},{2,3} };
     static const int  nvedgeTria[3][2] = { {1,2},{2,0},{0,1}};
-    static const int   nvfaceSeg[1][3]  = {{-1,-1,1}};
     static const int  nvedgeSeg[1][2] = { {0,1} };
 
     const int d = RdHat::d;
@@ -91,7 +88,7 @@ AnyType MatrixEdgeP1<Mesh>::operator () (Stack stack) const
                     SortArray<int,2> eki(Th(k,i0),Th(k,i1) );
                     if(!e.find(eki)) e.add(eki,ne++);
                 }
-            if(verbosity>4 && mpirank==0) cout << " ne = " << ne  << endl;
+            if(verbosity>2 && mpirank==0) cout << " ne = " << ne  << " " << nbedgeE << " " << Th.nv << endl;
             MatriceMorse<R> * pAij= new MatriceMorse<R>(ne,Th.nv), &Aij = *pAij ;
             //ffassert(Th.ne==ne);
 		for (int k = 0; k < ne; k++)
