@@ -51,9 +51,27 @@ class MatrixEdgeP1:  public E_F0 {
 		AnyType operator () (Stack s) const;
 };
 
-
+// petit Pb de compatibitile
+template<class Mesh>  int fnvedge(const Mesh *th,int i,int j) { ffassert(0); return  0;  }
+template<>  int fnvedge<Mesh>(const Mesh *th,int i,int j)  {   return  (i+1+j)%3;}
+template<>  int fnvedge<Mesh3>(const Mesh3 *th,int i,int j)   {return Mesh3::Element::nvedge[i][j];}
 template<class Mesh>
-AnyType MatrixEdgeP1<Mesh>::operator () (Stack stack) const {
+AnyType MatrixEdgeP1<Mesh>::operator () (Stack stack) const
+{
+    
+    typedef   typename Mesh::Element Element;
+    typedef   typename Mesh::RdHat RdHat;
+    static const int  nvfaceTet[4][3]  = { {2,1,3},{0,2,3},{1,0,3},{0,1,2} };
+    static const int  nvedgeTet[6][2] = { {0,1},{0,2},{0,3},{0,1},{1,2},{2,3} };
+    static const int  nvfaceTria[1][3]  = { {0,1,2} };
+    static const int  nvedgeTria[3][2] = { {1,2},{2,0},{0,1}};
+    static const int   nvfaceSeg[1][3]  = {{-1,-1,1}};
+    static const int  nvedgeSeg[1][2] = { {0,1} };
+
+    const int d = RdHat::d;
+    ffassert(d==2 || d==3|| d== 1);
+    const int nbedgeE = d*(d+1)/2;
+    const int (* const nvedge)[2]= (d==1) ? nvedgeSeg : ( d==2 ?nvedgeTria : nvedgeTet);
 	Matrice_Creuse<R> *sparce_mat = GetAny<Matrice_Creuse<R> *>((*emat)(stack));
 	MatriceMorse<R> *amorse = 0;
 	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
@@ -68,9 +86,9 @@ AnyType MatrixEdgeP1<Mesh>::operator () (Stack stack) const {
             HashTable<SortArray<int,2>,int> e(Th.nv+Th.nt,Th.nv);
             int ne=0;
             for(int k=0; k<Th.nt;++k)
-                for(int i=0;i<3; ++i)
-                {
-                    SortArray<int,2> eki(Th(k,(i+1)%3),Th(k,(i+2)%3) );
+                for(int i=0;i<nbedgeE; ++i)
+                {  int i0= nvedge[i][0],i1= nvedge[i][1];
+                    SortArray<int,2> eki(Th(k,i0),Th(k,i1) );
                     if(!e.find(eki)) e.add(eki,ne++);
                 }
             if(verbosity>4 && mpirank==0) cout << " ne = " << ne  << endl;
