@@ -65,7 +65,7 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	load.edp \
 	meditddm.edp \
 	MetricKuate.edp \
-	mat_edpeP1.edp \
+	mat_edgeP1.edp \
 	myfunction2.edp \
 	myType.edp \
 	NS_P2BR_P0.edp \

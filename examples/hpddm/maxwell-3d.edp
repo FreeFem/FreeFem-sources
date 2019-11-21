@@ -14,7 +14,6 @@ macro defPart(u)u// EOM                     // partition of unity definition
 macro initPart(u)u// EOM                    // partition of unity initialization
 macro Curl(ux, uy, uz)[dy(uz)-dz(uy), dz(ux)-dx(uz), dx(uy)-dy(ux)]// EOM
 macro CrossN(ux, uy, uz)[uy*N.z-uz*N.y, uz*N.x-ux*N.z, ux*N.y-uy*N.x]// EOM
-macro Curlabs(ux, uy, uz)[abs(dy(uz)-dz(uy)), abs(dz(ux)-dx(uz)), abs(dx(uy)-dy(ux))]// EOM
 func Pk = Edge03d;
 func PkPart = Edge03ds0;
 
