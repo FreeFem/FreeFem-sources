@@ -825,7 +825,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                 ++nk;
             }
         int nbordnomanifold=0;
-        if(nadjnomanifold)
+        if(nadjnomanifold && B::nv>1)
         {
             
             // remove all adj of no manifold border
@@ -883,7 +883,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
                         itemadj(k,e,&s); if(verbosity>15) cout << " item(k,e)= " << itemadj(k,e) <<  " k " << k << " e " << e << " s " << s << endl;
                         itemadj(kk,ee,&ss); if(verbosity>15) cout << " item(kk,ee)= " << itemadj(kk,ee) << " kk " << kk << " ee " << ee << " ss " << ss << endl;
                        //assert(s && ss && s== -ss);
-                         if (!(s && ss && s== -ss) && lockOrientation) {
+                         if (!(s && ss && s== -ss) && lockOrientation && (B::nv>1)) {
                             cerr << " Bad orientation: The adj border element  defined by [ " << itemadj(k,e) << " ]  is oriented in the same direction in element "
                         << k << " and in the element " << kk << " ****** bug in mesh construction? orientation parameter? "<< endl;
                         ffassert(0);

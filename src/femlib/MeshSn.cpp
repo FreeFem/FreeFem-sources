@@ -922,12 +922,13 @@ namespace Fem2D
         BuildjElementConteningVertex();
     }
     
-    void MeshS::BuildMeshL()
+    
+    void MeshS::BuildMeshL(double angle)
     {
         
         if (meshL) {
             cout << "error, MeshS::meshL previously created " << endl;
-            ffassert(0);
+            return;
         }
         if (verbosity) cout << "Build meshL from meshS.... " << endl;
         
@@ -956,7 +957,7 @@ namespace Fem2D
             }
         }
         
-        // set the surface vertex in meshS
+        // set the curve vertex in meshL
         ffassert(nbv_curve);
         
         Vertex3 *vL = new Vertex3[nbv_curve];
@@ -981,8 +982,7 @@ namespace Fem2D
             const BoundaryEdgeS & K(borderelements[it]);
             for (int j=0;j<2;++j)
                 iv[j]=v_num_curve[this->operator()(K[j])];
-            
-            int lab=K.lab;
+             int lab=K.lab;
             (ttL)->set(vL,iv,lab);
             mes += ttL++->mesure();
         }
@@ -996,13 +996,10 @@ namespace Fem2D
             meshL->mapSurf2Curv[i] = v_num_curve[i];
             meshL->mapCurv2Surf[i] = map_v_num_curve[i];
         }
-        
+        meshL->BuildBorderPt(angle);
+        meshL->BuildGTree();
         delete [] v_num_curve;
         delete [] map_v_num_curve;
-        // build the edge list
-        meshL->BuildBorderPt();
-        meshL->BuildGTree();
-        
         
     }
 }

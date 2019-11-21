@@ -1927,7 +1927,7 @@ namespace Fem2D
         
         if (meshS) {
             cout << "error, Mesh3::meshS previously created " << endl;
-            ffassert(0);
+            return;
         }
         if (verbosity) cout << "Build meshS from mesh3.... " << endl;
         

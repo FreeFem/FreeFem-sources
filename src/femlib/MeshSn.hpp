@@ -136,7 +136,7 @@ typedef GenericVertex<R3> Vertex3;
         int Save(const string & filename) const;
         void BuildEdges(const double angle=8.*atan(1.)/9.);  // default angle = 40 deg);
         Serialize serialize_withBorderMesh() const;
-        void BuildMeshL();
+        void BuildMeshL(double angle=8.*atan(1.)/9.);  // default angle = 40 deg);
         ~MeshS() {
             if (verbosity>4) cout << "destroy meshS" << this << " " << this->mapSurf2Vol << " " << this->mapVol2Surf << " destroy meshL " << this->meshL << endl;
             delete [] mapSurf2Vol ;

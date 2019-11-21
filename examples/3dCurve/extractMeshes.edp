@@ -1,0 +1,18 @@
+load "msh3"
+
+int n=10;
+
+int[int] labs = [1, 2, 2, 1, 1, 2]; // Label numbering
+mesh3 Th = cube(n, n, n, label=labs);
+// extract the surface (boundary) of the cube
+int[int] llabs = [1]; 
+meshS ThS = extract(Th,label=llabs);
+ThS = buildCurve(ThS);
+meshL ThL= ThS.Gamma;
+assert(ThL.nv==88); 
+assert(ThL.nt==90);
+assert(ThL.nbe==7);
+
+plot(ThL, wait=1);
+
+savemesh(ThL, "testL.mesh");

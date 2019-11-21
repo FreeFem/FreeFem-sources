@@ -72,7 +72,7 @@ namespace Fem2D {
     typedef Vertex3 V;
     typedef  V::Rd Rd;
     static R mesure(  V * pv[NbOfVertices]  ) {
-      return 1.;
+      return 0.;
     }
     typedef R0 RdHat;
     typedef R0 RdHatBord;   //hack no defined
@@ -156,7 +156,7 @@ namespace Fem2D {
     double hmin() const;
     //int Save(const string & filename) const;
     //Serialize serialize_withBorderMesh() const;
-    void BuildBorderPt();
+    void BuildBorderPt(const double angle=8.*atan(1.)/9.);
 
     ~MeshL() {
       delete [] mapSurf2Curv ;

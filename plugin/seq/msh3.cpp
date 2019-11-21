@@ -2067,6 +2067,19 @@ void finalize<MeshS>(MeshS *(&Th)) {
     Th->mapVol2Surf=0;
 }
 
+/*
+ template<class MMesh>
+ void finalize(MMesh *(&Th));
+ 
+ template<>
+ void finalize<MeshS>(MeshS *(&Th)) {
+ if(Th->meshL) {
+ if(verbosity>5)
+ cout << "Build the meshL associated to the meshS"<<endl;
+ Th->BuildMeshL();
+ }
+ }
+ */
 template<>
 void finalize<Mesh3>(Mesh3 *(&Th)) {
     if(Th->meshS) {
@@ -2074,6 +2087,32 @@ void finalize<Mesh3>(Mesh3 *(&Th)) {
             cout << "Build the meshS associated to the mesh3"<<endl;
         Th->BuildMeshS();
     }
+}
+
+template<class MMesh>
+void copyMapping(MMesh *(&Th), int *map1, int *map2);
+                
+template<>
+void copyMapping<MeshS>(MeshS *(&Th), int *map1, int *map2) {
+    
+     Th->mapVol2Surf = new int[Th->nv];
+     Th->mapSurf2Vol= new int[Th->nv];
+     for(int i=0 ; i<Th->nv ; i++) {
+         Th->mapVol2Surf[i]= map1[i];
+         Th->mapSurf2Vol[i]= map2[i];
+     }
+}
+
+template<>
+void copyMapping<MeshL>(MeshL *(&Th), int *map1, int *map2) {
+    
+    Th->mapSurf2Curv = new int[Th->nv];
+    Th->mapCurv2Surf= new int[Th->nv];
+    for(int i=0 ; i<Th->nv ; i++) {
+        Th->mapSurf2Curv[i]= map1[i];
+        Th->mapCurv2Surf[i]= map2[i];
+    }
+    
 }
 
 
@@ -6011,9 +6050,10 @@ AnyType ExtractMesh2D_Op::operator () (Stack stack)  const {
 
 
 
-// extraction on 3D mesh a part of the surface
-// return a meshS (part boundary+label)
+// mesh3 case: extraction of border 3D mesh (surface) return a meshS (part boundary+label)
+// meshS case: extraction of border 3D surface mesh (curve) return a meshL (part boundary+label)
 
+template< class MMesh,class MMeshO>
 class ExtractMesh_Op: public E_F0mps
 {
 public:
@@ -6053,35 +6093,51 @@ public:
 
     AnyType operator () (Stack stack)  const;
 };
-
-
-basicAC_F0::name_and_type ExtractMesh_Op::name_param [] = {
+// instance arguments for mesh3
+template<>
+basicAC_F0::name_and_type ExtractMesh_Op<Mesh3,MeshS>::name_param [] = {
     {"refface", &typeid(KN_<long>)},
     {"reftet", &typeid(KN_<long>)},
     {"label", &typeid(KN_<long>)},
     {"region", &typeid(KN_<long>)},
 };
 
+// instance arguments for meshS
+template<>
+basicAC_F0::name_and_type ExtractMesh_Op<MeshS,MeshL>::name_param [] = {
+    {"refedge", &typeid(KN_<long>)},
+    {"reftri", &typeid(KN_<long>)},
+    {"label", &typeid(KN_<long>)},
+    {"region", &typeid(KN_<long>)},
+};
 
-
-
+template< class MMesh, class MMeshO>
 class ExtractMesh: public OneOperator {
 public:
-    ExtractMesh (): OneOperator(atype<pmeshS>(), atype<pmesh3>()) {}
+	typedef const MMesh *ppmesh;  
+	typedef const MMeshO *ppmeshO;
+    ExtractMesh (): OneOperator(atype<ppmeshO>(), atype<ppmesh>()) {}
 
     E_F0*code (const basicAC_F0 &args) const {
-        return new ExtractMesh_Op(args, t[0]->CastTo(args[0]));
+        return new ExtractMesh_Op<MMesh,MMeshO>(args, t[0]->CastTo(args[0]));
     }
 };
 
 
-// extrat a part of the surface given in a mesh3 and return a meshS
-
-AnyType ExtractMesh_Op::operator () (Stack stack)  const {
+template< class MMesh, class MMeshO>
+AnyType ExtractMesh_Op<MMesh, MMeshO>::operator () (Stack stack)  const {
     MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
-    Mesh3 *pTh = GetAny<Mesh3 *>((*eTh)(stack));
-    Mesh3 &Th = *pTh;
+    MMesh *pTh = GetAny<MMesh *>((*eTh)(stack));
+    MMesh &Th = *pTh;
 
+    typedef typename MMesh::Element T;
+    typedef typename MMesh::BorderElement B;
+    typedef typename MMesh::Vertex V;
+	
+    typedef typename MMeshO::Element TO;
+    typedef typename MMeshO::BorderElement BO;
+    typedef typename MMeshO::Vertex VO;
+	
     int nbv = Th.nv;// nombre de sommet
     int nbt = Th.nt;// nombre de triangles
     int nbe = Th.nbe;
@@ -6091,28 +6147,26 @@ AnyType ExtractMesh_Op::operator () (Stack stack)  const {
     KN<long> labelelement(arg(1, 3, stack, zzempty));
 
     // a trier les tableaux d'entier
-
-    int nv = 0, nt = 0, ns = 0;
-    if(verbosity>9)
-    {
-    cout << " labelface.N()  " << labelface.N() << endl;
-    for (int ii = 0; ii < labelface.N(); ii++)
-        cout << ii << " " << labelface[ii] << endl;
+	int nv = 0, nt = 0, ns = 0;
+    if(verbosity>9) {
+    	cout << " labelface.N()  " << labelface.N() << endl;
+   	 	for (int ii = 0; ii < labelface.N(); ii++)
+        	cout << ii << " " << labelface[ii] << endl;
     }
-    KN<int> takevertex(Th.nv, -1);
+    
+	KN<int> takevertex(Th.nv, -1);
     KN<int> takebe(Th.nbe, -1);
 
     int nbeLab = 0;
 
-    for (int ibe = 0; ibe < Th.nbe; ibe++) {
-        const Triangle3 &K(Th.be(ibe));
-
-        for (int ii = 0; ii < labelface.N(); ii++) {
+    for (int ibe = 0; ibe < Th.nbe; ++ibe) {
+        const B &K(Th.be(ibe));
+		for (int ii = 0; ii < labelface.N(); ++ii) {
             if (K.lab == labelface[ii]) {
                 nbeLab++;
                 takebe[ibe] = 1;
 
-                for (int jj = 0; jj < 3; jj++) {
+                for (int jj = 0; jj < B::nv; ++jj) {
                     if (takevertex[Th.operator () (K[jj])] != -1) continue;
                     takevertex[Th.operator () (K[jj])] = nv;
                     nv++;
@@ -6123,12 +6177,12 @@ AnyType ExtractMesh_Op::operator () (Stack stack)  const {
 
     ns = nbeLab;
     int  nbv_surf=0;
-    Vertex3 *v = new Vertex3[nv];
-    TriangleS *b = new TriangleS[ns];
-    TriangleS *bb = b;
+    VO *v = new VO[nv];
+    TO *b = new TO[ns];
+    TO *bb = b;
     int *mapVol2Surf=new int[nv], *mapSurf2Vol=new int[nv];
 
-    for (int ii = 0; ii < Th.nv; ii++) {
+    for (int ii = 0; ii < Th.nv; ++ii) {
         if (takevertex[ii] == -1) {continue;}
 
         int iv = takevertex[ii];
@@ -6146,22 +6200,23 @@ AnyType ExtractMesh_Op::operator () (Stack stack)  const {
 
     for (int ibe = 0; ibe < Th.nbe; ibe++) {
         if (takebe[ibe] != 1) continue;
-        const Triangle3 &K(Th.be(ibe));
-        int ivv[3];
-        for (int jj = 0; jj < 3; jj++)
+        const B &K(Th.be(ibe));
+        int ivv[B::nv];
+        for (int jj = 0; jj < B::nv; jj++)
             ivv[jj] = takevertex[Th.operator () (K[jj])];
         (bb++)->set(v, ivv, K.lab);
     }
 
-    MeshS *pThnew = new MeshS(nv, ns, 0, v, b, 0);
-    pThnew->mapVol2Surf = new int[nv];
+    MMeshO *pThnew = new MMeshO(nv, ns, 0, v, b, 0);
+    
+	/*pThnew->mapVol2Surf = new int[nv];
     pThnew->mapSurf2Vol= new int[nv];
     for(int i=0 ; i<nv ; i++) {
         pThnew->mapVol2Surf[i]= mapVol2Surf[i];
         pThnew->mapSurf2Vol[i]= mapSurf2Vol[i];
-    }
+    }*/
 
-    pThnew->BuildEdges();
+    //pThnew->BuildEdges(); call in MMeshO constructor if nbe=0
     delete [] mapVol2Surf;
     delete [] mapSurf2Vol;
     pThnew->BuildGTree();
@@ -6170,6 +6225,12 @@ AnyType ExtractMesh_Op::operator () (Stack stack)  const {
     return pThnew;
 
 }
+
+
+
+
+
+
 
 
 
@@ -8101,7 +8162,6 @@ static void Load_Init () {
     TheOperators->Add("=", new OneBinaryOperator_st<Op3_setmesh<false, pmesh3 *, pmesh3 *, listMesh3> > );
     TheOperators->Add("<-", new OneBinaryOperator_st<Op3_setmesh<true, pmesh3 *, pmesh3 *, listMesh3> > );
 
-
     Global.Add("deplacement", "(", new DeplacementTab);  // movemesh ?
     Global.Add("checkbemesh", "(", new CheckManifoldMesh);   // ??
     Global.Add("buildlayers", "(", new BuildLayerMesh);
@@ -8109,8 +8169,8 @@ static void Load_Init () {
     Global.Add("trunc", "(", new Op_trunc_mesh3);
     Global.Add("gluemesh", "(", new Op_GluMesh3tab);
     Global.Add("extract", "(", new ExtractMesh2D);   // obselete function -> use trunc function
-    Global.Add("extract", "(", new ExtractMesh);     // take a Mesh3 in arg and return a part of MeshS
-    //Global.Add("movemesh23", "(", new Movemesh2D_S);
+    Global.Add("extract", "(", new ExtractMesh<Mesh3,MeshS>);     // take a Mesh3 in arg and return a part of MeshS
+
     // for a mesh3 Th3, if Th3->meshS=NULL, build the meshS associated
     Global.Add("buildSurface", "(", new BuildMeshSFromMesh3);
 
@@ -8137,7 +8197,6 @@ static void Load_Init () {
 
     Global.Add("square3", "(", new Square);
     Global.Add("square3", "(", new Square(1));
-	
     
     
     Global.Add("movemeshS", "(", new Movemesh<MeshS>);
@@ -8155,10 +8214,11 @@ static void Load_Init () {
     Global.Add("checkmesh", "(", new CheckMesh<MeshS>);
     Global.Add("checkmesh", "(", new CheckMesh<Mesh3>);
 	
-	Global.Add("line3", "(", new Line);
-	Global.Add("line3", "(", new Line(1));
+	Global.Add("Sline", "(", new Line);
+	Global.Add("Sline", "(", new Line(1));
 	
 	Global.Add("buildCurve", "(", new BuildMeshLFromMeshS);
+	Global.Add("extract", "(", new ExtractMesh<MeshS,MeshL>);     // take a Mesh3 in arg and return a part of MeshS
 	
 }
 
