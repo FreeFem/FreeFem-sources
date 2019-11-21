@@ -117,10 +117,10 @@ AnyType MatrixEdgeP1<Mesh>::operator () (Stack stack) const
 
 
 static void Load_Init () {
-	cout << " lood: init Mat Edge 1 " << endl;
-	Global.Add("MatrixEdgeP1", "(", new OneOperatorCode<MatrixEdgeP1<Mesh> >());
-        Global.Add("MatrixEdgeP1", "(", new OneOperatorCode<MatrixEdgeP1<Mesh3> >());
-	//Global.Add("MatUpWind0", "(", new OneOperatorCode<MatrixUpWind3>());
+    if(verbosity > 4)
+        cout << " load: init Mat Edge 1 " << endl;
+    Global.Add("MatrixEdgeP1", "(", new OneOperatorCode<MatrixEdgeP1<Mesh> >());
+    Global.Add("MatrixEdgeP1", "(", new OneOperatorCode<MatrixEdgeP1<Mesh3> >());
 }
 
 LOADFUNC(Load_Init)
