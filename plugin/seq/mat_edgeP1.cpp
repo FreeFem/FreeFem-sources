@@ -83,7 +83,7 @@ AnyType MatrixEdgeP1<Mesh>::operator () (Stack stack) const
 		
 
 		// const edge ...
-            HashTable<SortArray<int,2>,int> e(Th.nv+Th.nt,Th.nv);
+            HashTable<SortArray<int,2>,int> e(nbedgeE*Th.nt,Th.nv);
             int ne=0;
             for(int k=0; k<Th.nt;++k)
                 for(int i=0;i<nbedgeE; ++i)

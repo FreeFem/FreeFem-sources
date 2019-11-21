@@ -1,14 +1,18 @@
 load "mat_edgeP1"
 load "msh3"
+load "Element_PkEdge"
+load "Element_Mixte3d"
 { mesh Th=square(3,3);
+	fespace Eh(Th,P0edge);
 matrix A;
 MatrixEdgeP1(A,Th);
-
+cout << " " << A.nnz << " " << 2*Eh.ndof << endl;
 cout << A << endl;
 }
 { mesh3 Th=cube(3,3,3);
+	fespace Eh3(Th,Edge03d );
 matrix A;
 MatrixEdgeP1(A,Th);
-
 cout << A << endl;
+cout << " 3d:: " << A.nnz << " " << 2*Eh3.ndof << endl;
 }
