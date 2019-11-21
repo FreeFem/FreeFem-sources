@@ -180,10 +180,10 @@ download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-
 	'petsc-lite-3.12.0.tar.gz',
 	'997dc9475c634891ba63fefa56ac3621');
 	
-download('htool','https://github.com/PierreMarchand20/htool/archive/527a8db8973ffc8da26508b7ed79d0ff4aae4d66.zip',
+download('htool','https://github.com/PierreMarchand20/htool/archive/0ba76eaca05217fceabf3f0269548b354590eef3.zip',
 		'https://github.com/PierreMarchand20/',
 		'htool.zip',
-		'57670d61782126e7c3673d4f9cc7748e');
+		'1fc76ca089bb76f668a935d0d3678bf9');
 
 	
 download('hpddm','https://github.com/hpddm/hpddm/archive/1686037a7fa62641917f9a10f57c487900891113.zip',

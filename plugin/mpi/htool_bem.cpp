@@ -90,7 +90,7 @@ class assembleHMatrix : public OneOperator { public:
 	public:
 		Expression a,b,c;
 
-		static const int n_name_param = 9;
+		static const int n_name_param = 10;
 		static basicAC_F0::name_and_type name_param[] ;
 		Expression nargs[n_name_param];
 		bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
@@ -127,7 +127,8 @@ basicAC_F0::name_and_type  assembleHMatrix<v_fes1,v_fes2,K>::Op::name_param[]= {
 		{  "minsourcedepth", &typeid(long)},
 		{  "comm", &typeid(pcommworld)},
 		{  "alpha", &typeid(double)},
-		{  "compressor", &typeid(string*)}
+		{  "compressor", &typeid(string*)},
+		{  "combinedcoef", &typeid(K)}
 };
 
 template<class ffmesh, class bemtoolmesh>
@@ -177,9 +178,9 @@ void Mesh2Bemtool(const ffmesh &Th, Geometry &node) {
     }
 }
 
-enum TypeEnum { tBIOp, tBIOpwithmass, tPotential };
+enum TypeEnum { tBIOp, tBIOpwithmass, tBIOpcombined, tPotential };
 
-template<class K, class v_fes1, class v_fes2, EquationEnum Eq, BIOpKernelEnum Ker, TypeEnum type, PotKernelEnum Pot>
+template<class K, class v_fes1, class v_fes2, EquationEnum Eq, TypeEnum type, BIOpKernelEnum Ker, BIOpKernelEnum Ker2, PotKernelEnum Pot>
 AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 {
 	using namespace Fem2D;
@@ -196,6 +197,7 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 	pcommworld pcomm=mi->arg(6,stack,nullptr);
 	double alpha=mi->arg(7,stack,0.5);
 	string* compressor=mi->args(8,stack,0);
+	K combinedcoef=mi->arg(9,stack,0.5);
 
 	SetMaxBlockSize(maxblocksize);
 	SetMinClusterSize(minclustersize);
@@ -278,6 +280,8 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 	    generator = new BIO_Generator<BIOpKernel<Eq,Ker,Mesh1::RdHat::d+1,P1,P1>,P1>(dof,kappa);
 	  else if (type == tBIOpwithmass)
 	    generator = new BIO_Generator_w_mass<BIOpKernel<Eq,Ker,Mesh1::RdHat::d+1,P1,P1>,P1>(dof,kappa,alpha);
+	  else if (type == tBIOpcombined)
+	    generator = new Combined_BIO_Generator<BIOpKernel<Eq,Ker,Mesh1::RdHat::d+1,P1,P1>,BIOpKernel<Eq,Ker2,Mesh1::RdHat::d+1,P1,P1>,P1>(dof,kappa,combinedcoef,alpha);
 
 	  if (!compressor || *compressor == "partialACA")
 	    *Hmat = new HMatrixImpl<partialACA,K>(*generator,p1,-1,comm);
@@ -313,9 +317,9 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 	return Hmat;
 }
 
-template<class K, class v_fes1, class v_fes2, EquationEnum Eq, BIOpKernelEnum Ker, TypeEnum type, PotKernelEnum Pot, int init>
+template<class K, class v_fes1, class v_fes2, EquationEnum Eq,  TypeEnum type, BIOpKernelEnum Ker, BIOpKernelEnum Ker2, PotKernelEnum Pot, int init>
 AnyType SetHMatrix(Stack stack,Expression emat,Expression einter)
-{ return SetHMatrix<K,v_fes1,v_fes2,Eq,Ker,type,Pot>(stack,emat,einter,init);}
+{ return SetHMatrix<K,v_fes1,v_fes2,Eq,type,Ker,Ker2,Pot>(stack,emat,einter,init);}
 
 template<class K>
 AnyType ToDense(Stack stack,Expression emat,Expression einter,int init)
@@ -637,15 +641,28 @@ void addHmat() {
 	new OneOperator2_<KNM<K>*, KNM<K>*, HMatrixVirt<K>**,E_F_StackF0F0>(ToDense<K, 0>));
 }
 
-template<class K, class v_fes1, class v_fes2, EquationEnum Eq, BIOpKernelEnum Ker, TypeEnum type, PotKernelEnum Pot>
-void addOperator(const char* namec) {
+template<class K, class v_fes1, class v_fes2, EquationEnum Eq, TypeEnum type, BIOpKernelEnum Ker, BIOpKernelEnum Ker2 = SL_OP>
+void addBIOp(const char* namec) {
 	Dcl_Type<const typename assembleHMatrix<v_fes1,v_fes2,K>::Op *>();
 	Add<const typename assembleHMatrix<v_fes1,v_fes2,K>::Op *>("<-","(", new assembleHMatrix<v_fes1,v_fes2,K>);
 
 	TheOperators->Add("=",
-	new OneOperator2_<HMatrixVirt<K>**,HMatrixVirt<K>**,const typename assembleHMatrix<v_fes1,v_fes2,K>::Op*,E_F_StackF0F0>(SetHMatrix<K,v_fes1,v_fes2,Eq,Ker,type,Pot, 1>));
+	new OneOperator2_<HMatrixVirt<K>**,HMatrixVirt<K>**,const typename assembleHMatrix<v_fes1,v_fes2,K>::Op*,E_F_StackF0F0>(SetHMatrix<K,v_fes1,v_fes2,Eq,type,Ker,Ker2,SL_POT, 1>));
 	TheOperators->Add("<-",
-	new OneOperator2_<HMatrixVirt<K>**,HMatrixVirt<K>**,const typename assembleHMatrix<v_fes1,v_fes2,K>::Op*,E_F_StackF0F0>(SetHMatrix<K,v_fes1,v_fes2,Eq,Ker,type,Pot, 0>));
+	new OneOperator2_<HMatrixVirt<K>**,HMatrixVirt<K>**,const typename assembleHMatrix<v_fes1,v_fes2,K>::Op*,E_F_StackF0F0>(SetHMatrix<K,v_fes1,v_fes2,Eq,type,Ker,Ker2,SL_POT, 0>));
+
+	Global.Add(namec,"(",new assembleHMatrix<v_fes1,v_fes2,K>);
+}
+
+template<class K, class v_fes1, class v_fes2, EquationEnum Eq, PotKernelEnum Pot>
+void addPotential(const char* namec) {
+	Dcl_Type<const typename assembleHMatrix<v_fes1,v_fes2,K>::Op *>();
+	Add<const typename assembleHMatrix<v_fes1,v_fes2,K>::Op *>("<-","(", new assembleHMatrix<v_fes1,v_fes2,K>);
+
+	TheOperators->Add("=",
+	new OneOperator2_<HMatrixVirt<K>**,HMatrixVirt<K>**,const typename assembleHMatrix<v_fes1,v_fes2,K>::Op*,E_F_StackF0F0>(SetHMatrix<K,v_fes1,v_fes2,Eq,tPotential,SL_OP,SL_OP,Pot, 1>));
+	TheOperators->Add("<-",
+	new OneOperator2_<HMatrixVirt<K>**,HMatrixVirt<K>**,const typename assembleHMatrix<v_fes1,v_fes2,K>::Op*,E_F_StackF0F0>(SetHMatrix<K,v_fes1,v_fes2,Eq,tPotential,SL_OP,SL_OP,Pot, 0>));
 
 	Global.Add(namec,"(",new assembleHMatrix<v_fes1,v_fes2,K>);
 }
@@ -659,26 +676,36 @@ static void Init_Schwarz() {
 	//add<partialACA,double>("assemble");
 
 	// 3D BIOp
-	addOperator<std::complex<double>,v_fesS,v_fesS,HE,SL_OP,tBIOp,SL_POT>("assemblecomplexHESL");
-	addOperator<std::complex<double>,v_fesS,v_fesS,HE,DL_OP,tBIOp,SL_POT>("assemblecomplexHEDL");
-	addOperator<std::complex<double>,v_fesS,v_fesS,HE,HS_OP,tBIOp,SL_POT>("assemblecomplexHEHS");
-	addOperator<std::complex<double>,v_fesS,v_fesS,HE,DL_OP,tBIOpwithmass,SL_POT>("assemblecomplexHEDLwmass");
-	addOperator<std::complex<double>,v_fesS,v_fesS,HE,TDL_OP,tBIOpwithmass,SL_POT>("assemblecomplexHETDLwmass");
+	addBIOp<std::complex<double>,v_fesS,v_fesS,HE,tBIOp,SL_OP>("assemblecomplexHESL");
+	addBIOp<std::complex<double>,v_fesS,v_fesS,HE,tBIOp,DL_OP>("assemblecomplexHEDL");
+	addBIOp<std::complex<double>,v_fesS,v_fesS,HE,tBIOp,HS_OP>("assemblecomplexHEHS");
+	addBIOp<std::complex<double>,v_fesS,v_fesS,HE,tBIOpwithmass,DL_OP>("assemblecomplexHEDLwmass");
+	addBIOp<std::complex<double>,v_fesS,v_fesS,HE,tBIOpwithmass,TDL_OP>("assemblecomplexHETDLwmass");
+
+	addBIOp<std::complex<double>,v_fesS,v_fesS,HE,tBIOpcombined,SL_OP,DL_OP>("assemblecomplexHEcombinedSLDL");
+	addBIOp<std::complex<double>,v_fesS,v_fesS,HE,tBIOpcombined,SL_OP,TDL_OP>("assemblecomplexHEcombinedSLTDL");
+	addBIOp<std::complex<double>,v_fesS,v_fesS,HE,tBIOpcombined,HS_OP,DL_OP>("assemblecomplexHEcombinedHSDL");
+	addBIOp<std::complex<double>,v_fesS,v_fesS,HE,tBIOpcombined,HS_OP,TDL_OP>("assemblecomplexHEcombinedHSTDL");
 
 	// 3D Potential
-	addOperator<std::complex<double>,v_fesS,v_fesS,HE,SL_OP,tPotential,SL_POT>("assemblecomplexHESLPot");
-	addOperator<std::complex<double>,v_fesS,v_fesS,HE,SL_OP,tPotential,DL_POT>("assemblecomplexHEDLPot");
+	addPotential<std::complex<double>,v_fesS,v_fesS,HE,SL_POT>("assemblecomplexHESLPot");
+	addPotential<std::complex<double>,v_fesS,v_fesS,HE,DL_POT>("assemblecomplexHEDLPot");
 
 	// 2D BIOp
-	addOperator<std::complex<double>,v_fesL,v_fesL,HE,SL_OP,tBIOp,SL_POT>("assemblecomplexHESL");
-	addOperator<std::complex<double>,v_fesL,v_fesL,HE,DL_OP,tBIOp,SL_POT>("assemblecomplexHEDL");
-	addOperator<std::complex<double>,v_fesL,v_fesL,HE,HS_OP,tBIOp,SL_POT>("assemblecomplexHEHS");
-	addOperator<std::complex<double>,v_fesL,v_fesL,HE,DL_OP,tBIOpwithmass,SL_POT>("assemblecomplexHEDLwmass");
-	addOperator<std::complex<double>,v_fesL,v_fesL,HE,TDL_OP,tBIOpwithmass,SL_POT>("assemblecomplexHETDLwmass");
+	addBIOp<std::complex<double>,v_fesL,v_fesL,HE,tBIOp,SL_OP>("assemblecomplexHESL");
+	addBIOp<std::complex<double>,v_fesL,v_fesL,HE,tBIOp,DL_OP>("assemblecomplexHEDL");
+	addBIOp<std::complex<double>,v_fesL,v_fesL,HE,tBIOp,HS_OP>("assemblecomplexHEHS");
+	addBIOp<std::complex<double>,v_fesL,v_fesL,HE,tBIOpwithmass,DL_OP>("assemblecomplexHEDLwmass");
+	addBIOp<std::complex<double>,v_fesL,v_fesL,HE,tBIOpwithmass,TDL_OP>("assemblecomplexHETDLwmass");
+
+	addBIOp<std::complex<double>,v_fesL,v_fesL,HE,tBIOpcombined,SL_OP,DL_OP>("assemblecomplexHEcombinedSLDL");
+	addBIOp<std::complex<double>,v_fesL,v_fesL,HE,tBIOpcombined,SL_OP,TDL_OP>("assemblecomplexHEcombinedSLTDL");
+	addBIOp<std::complex<double>,v_fesL,v_fesL,HE,tBIOpcombined,HS_OP,DL_OP>("assemblecomplexHEcombinedHSDL");
+	addBIOp<std::complex<double>,v_fesL,v_fesL,HE,tBIOpcombined,HS_OP,TDL_OP>("assemblecomplexHEcombinedHSTDL");
 
 	// 2D Potential
-	addOperator<std::complex<double>,v_fesL,v_fes,HE,SL_OP,tPotential,SL_POT>("assemblecomplexHESLPot");
-	addOperator<std::complex<double>,v_fesL,v_fes,HE,SL_OP,tPotential,DL_POT>("assemblecomplexHEDLPot");
+	addPotential<std::complex<double>,v_fesL,v_fes,HE,SL_POT>("assemblecomplexHESLPot");
+	addPotential<std::complex<double>,v_fesL,v_fes,HE,DL_POT>("assemblecomplexHEDLPot");
 
 	zzzfff->Add("HMatrix", atype<HMatrixVirt<std::complex<double> > **>());
 	//map_type_of_map[make_pair(atype<HMatrix<partialACA ,double>**>(), atype<double*>())] = atype<HMatrix<partialACA ,double>**>();
