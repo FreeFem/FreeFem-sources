@@ -1200,7 +1200,7 @@ template<class Type>
 class setOptions_Op : public E_F0mps {
     public:
         Expression A;
-        static const int n_name_param = 13;
+        static const int n_name_param = 15;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         setOptions_Op(const basicAC_F0& args, Expression param1) : A(param1) {
@@ -1211,19 +1211,21 @@ class setOptions_Op : public E_F0mps {
 };
 template<class Type>
 basicAC_F0::name_and_type setOptions_Op<Type>::name_param[] = {
-    {"sparams", &typeid(std::string*)},
-    {"nearnullspace", &typeid(FEbaseArrayKn<PetscScalar>*)},
-    {"fields", &typeid(KN<double>*)},
-    {"names", &typeid(KN<String>*)},
-    {"prefix", &typeid(std::string*)},
-    {"schurPreconditioner", &typeid(KN<Matrice_Creuse<PetscScalar>>*)},
-    {"schurList", &typeid(KN<double>*)},
-    {"parent", &typeid(Type*)},
-    {"MatNullSpace", &typeid(KNM<PetscScalar>*)},
-    {"fieldsplit", &typeid(long)},
-    {"schurComplement", &typeid(KNM<PetscScalar>*)},
-    {"schur", &typeid(KN<Dmat>*)},
-    {"aux", &typeid(Matrice_Creuse<PetscScalar>*)}
+    {"sparams", &typeid(std::string*)},                                 // 0
+    {"nearnullspace", &typeid(FEbaseArrayKn<PetscScalar>*)},            // 1
+    {"fields", &typeid(KN<double>*)},                                   // 2
+    {"names", &typeid(KN<String>*)},                                    // 3
+    {"prefix", &typeid(std::string*)},                                  // 4
+    {"schurPreconditioner", &typeid(KN<Matrice_Creuse<PetscScalar>>*)}, // 5
+    {"schurList", &typeid(KN<double>*)},                                // 6
+    {"parent", &typeid(Type*)},                                         // 7
+    {"MatNullSpace", &typeid(KNM<PetscScalar>*)},                       // 8
+    {"fieldsplit", &typeid(long)},                                      // 9
+    {"schurComplement", &typeid(KNM<PetscScalar>*)},                    // 10
+    {"schur", &typeid(KN<Dmat>*)},                                      // 11
+    {"aux", &typeid(Matrice_Creuse<PetscScalar>*)},                     // 12
+    {"coordinates", &typeid(KNM<double>*)},                             // 13
+    {"gradient", &typeid(Dmat*)}                                        // 14
 };
 template<class Type, char> class LinearSolver;
 template<class Type> class NonlinearSolver;
@@ -1388,15 +1390,24 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
         if(nargs[4])
             KSPSetOptionsPrefix(ptA->_ksp, GetAny<std::string*>((*nargs[4])(stack))->c_str());
         KSPSetFromOptions(ksp);
-#ifdef PCHPDDM
-        if(std::is_same<Type, Dmat>::value && assembled) {
+        if(std::is_same<Type, Dmat>::value) {
             PC pc;
             KSPGetPC(ksp, &pc);
             PCType type;
             PCGetType(pc, &type);
             PetscBool isType;
+            KNM<double>* coordinates = nargs[13] ? GetAny<KNM<double>*>((*nargs[13])(stack)) : nullptr;
+            Dmat* G = nargs[14] ? GetAny<Dmat*>((*nargs[14])(stack)) : nullptr;
+            if(coordinates)
+                PCSetCoordinates(pc, coordinates->N(), coordinates->M(), *coordinates);
+            if(G) {
+                PetscStrcmp(type, PCHYPRE, &isType);
+                if(isType)
+                    PCHYPRESetDiscreteGradient(pc, G->_petsc);
+            }
+#ifdef PCHPDDM
             PetscStrcmp(type, PCHPDDM, &isType);
-            if(isType && ptA->_A && ptA->_A->getMatrix() && ptA->_num) {
+            if(assembled && isType && ptA->_A && ptA->_A->getMatrix() && ptA->_num) {
                 std::function<Mat(const HPDDM::MatrixCSR<PetscScalar>* const)> func = [](const HPDDM::MatrixCSR<PetscScalar>* const A) {
                     Mat aux;
                     if(A->_sym) {
@@ -1452,8 +1463,8 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
                 }
 #endif
             }
-        }
 #endif
+        }
         if(std::is_same<Type, Dmat>::value && (nargs[6] || nargs[11])) {
             if(nargs[2] && (nargs[5] || nargs[11])) {
                 if(assembled) {
