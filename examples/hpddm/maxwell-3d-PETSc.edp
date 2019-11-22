@@ -24,7 +24,6 @@ Th = change(Th, refface = chlab);
 
 fespace Wh(Th, Pk);
 
-meshN ThBorder;
 int[int][int] intersection;  // local-to-neighbors renumbering
 real[int] D;
 int[int][int] intersectionN; // local-to-neighbors renumbering
@@ -39,6 +38,7 @@ real[int] DN;
     {
         macro def(i)[i, i#y, i#z]// EOM // vector field definition
         macro init(i)[i, i, i]// EOM    // vector field initialization
+        meshN ThBorder;
         buildOverlapEdgeWithPartitioning(Th, ThBorder, part, 10, getARGV("-split", 1), 1, intersection, D, Pk, mpiCommWorld, 0, PkPart, defPart, initPart)
     }
     Th = ThBackup;
@@ -54,27 +54,16 @@ macro init(i)[i, i, i]// EOM            // vector field initialization
 matrix Loc;
 real[int] rhs(Wh.ndof);
 {
-    meshN ThAugmented = Th + ThBorder;
-    ThBorder = cube(1, 1, 1);
-    fespace WhAugmented(ThAugmented, Pk);
     varf vPb([Ex,Ey,Ez],[vx,vy,vz]) =
-        intN(ThAugmented)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
-        + intN(ThAugmented)([vx,vy,vz]'*[Ex,Ey,Ez])
+        intN(Th)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+        + intN(Th)([vx,vy,vz]'*[Ex,Ey,Ez])
         + on(Dirichlet, Ex=0, Ey=0, Ez=0);
-    Loc = vPb(WhAugmented, WhAugmented, solver=GMRES);
+    Loc = vPb(Wh, Wh);
     func f = exp(-2.0*((x-0.5)^2+(y-0.5)^2+(z-0.5)^2));
     varf vPbRhs([Ex,Ey,Ez],[vx,vy,vz]) =
-        - intN(ThAugmented)([vx,vy,vz]'*[0,0,f])
+        - intN(Th)([vx,vy,vz]'*[0,0,f])
         + on(Dirichlet, Ex=0,Ey=0,Ez=0);
-    if(mpisize > 1) {
-        real[int] rhsFull(WhAugmented.ndof);
-        rhsFull = vPbRhs(0, WhAugmented);
-        matrix R = interpolate(Wh, WhAugmented);
-        R.thresholding(1.0e-10);
-        renumbering(Loc, R, rhsFull, rhs);
-    }
-    else
-        rhs = vPbRhs(0, WhAugmented);
+    rhs = vPbRhs(0, Wh);
 }
 
 Mat A(Loc, intersection, D);
