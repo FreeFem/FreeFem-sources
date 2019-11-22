@@ -97,6 +97,7 @@ class assembleHMatrix : public OneOperator { public:
 		long argl(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
 		string* args(int i,Stack stack,string* a) const{ return nargs[i] ? GetAny<string*>( (*nargs[i])(stack) ): a;}
 		double arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
+		K argk(int i,Stack stack,K a) const{ return nargs[i] ? GetAny<K>( (*nargs[i])(stack) ): a;}
 		KN_<long> arg(int i,Stack stack,KN_<long> a ) const{ return nargs[i] ? GetAny<KN_<long> >( (*nargs[i])(stack) ): a;}
 		pcommworld arg(int i,Stack stack,pcommworld a ) const{ return nargs[i] ? GetAny<pcommworld>( (*nargs[i])(stack) ): a;}
 	public:
@@ -197,7 +198,7 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 	pcommworld pcomm=mi->arg(6,stack,nullptr);
 	double alpha=mi->arg(7,stack,0.5);
 	string* compressor=mi->args(8,stack,0);
-	K combinedcoef=mi->arg(9,stack,0.5);
+	K combinedcoef=mi->argk(9,stack,0.5);
 
 	SetMaxBlockSize(maxblocksize);
 	SetMinClusterSize(minclustersize);
