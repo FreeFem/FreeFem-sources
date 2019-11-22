@@ -7,7 +7,7 @@ int nn = 10; // Mesh quality
 
 // read the imput mesh, vertice/tetra/triangle/edge 
 mesh3 Th3 = cube(nn,nn,nn);
-Th3 = buildSurface(Th3); // build the surface mesh 
+Th3 = buildBdMesh(Th3); // build the surface mesh 
 meshS ThS = Th3.Gamma;
 //split the extrating surface
 //plot(Th3);

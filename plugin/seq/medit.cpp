@@ -460,11 +460,12 @@ AnyType datasolMesh2_Op::operator () (Stack stack)  const {
 
 
 // datasolMeshS for 3D surface
-template<class v_fes>
-class datasolMeshS_Op: public E_F0mps
+template<class MMesh,class v_fes>
+class datasolMeshT_Op: public E_F0mps
 {
 public:
     typedef long Result;
+    typedef const MMesh *ppmesh;
     Expression eTh;
     Expression filename;
     struct Expression2 {
@@ -489,14 +490,14 @@ public:
     long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
 
 public:
-    datasolMeshS_Op (const basicAC_F0 &args): l(args.size() - 2) {
+    datasolMeshT_Op (const basicAC_F0 &args): l(args.size() - 2) {
         int ddim = 3;
         int stsize = 3;
 
         args.SetNameParam(n_name_param, name_param, nargs);
 
         filename = CastTo<string *>(args[0]);
-        eTh = CastTo<pmeshS>(args[1]);
+        eTh = CastTo<ppmesh>(args[1]);
 
         for (size_t i = 2; i < args.size(); i++) {
             size_t jj = i - 2;
@@ -535,25 +536,35 @@ public:
         }
     }
 
-    static ArrayOfaType typeargs () {return ArrayOfaType(atype<string *>(), atype<pmeshS>(), true);}// all type
+    static ArrayOfaType typeargs () {return ArrayOfaType(atype<string *>(), atype<ppmesh>(), true);}// all type
 
-    static E_F0*f (const basicAC_F0 &args) {return new datasolMeshS_Op(args);}
+    static E_F0*f (const basicAC_F0 &args) {return new datasolMeshT_Op<MMesh,v_fes>(args);}
 
     AnyType operator () (Stack stack)  const;
 };
 
-template<class v_fes>
-basicAC_F0::name_and_type datasolMeshS_Op<v_fes>::name_param [] = {
+template< >
+basicAC_F0::name_and_type datasolMeshT_Op<MeshS, v_fesS>::name_param [] = {
     {"order", &typeid(long)}
 };
-template<class v_fes>
-AnyType datasolMeshS_Op<v_fes>::operator () (Stack stack)  const {
-    MeshPoint *mp(MeshPointStack(stack));
-    MeshS *pTh = GetAny<MeshS *>((*eTh)(stack));
-    string *ffname = GetAny<string *>((*filename)(stack));
+template< >
+basicAC_F0::name_and_type datasolMeshT_Op<MeshL, v_fesL>::name_param [] = {
+    {"order", &typeid(long)}
+};
 
+template<class MMesh, class v_fes>
+AnyType datasolMeshT_Op<MMesh, v_fes>::operator () (Stack stack)  const {
+    MeshPoint *mp(MeshPointStack(stack));
+    MMesh *pTh = GetAny<MMesh *>((*eTh)(stack));
+    string *ffname = GetAny<string *>((*filename)(stack));
+    typedef typename MMesh::Element T;
+    typedef typename MMesh::BorderElement B;
+    typedef typename MMesh::Vertex V;
+    typedef typename MMesh::Element::RdHat TRdHat;
+    typedef typename MMesh::BorderElement::RdHat BRdHat;
+    
     ffassert(pTh);
-    MeshS &Th = *pTh;
+    MMesh &Th = *pTh;
     int nt = Th.nt;
     int nv = Th.nv;
     int nbtype = l.size();
@@ -584,39 +595,43 @@ AnyType datasolMeshS_Op<v_fes>::operator () (Stack stack)  const {
         cerr << "  -- MeshS::Save  UNABLE TO OPEN  :" << filename << endl;
         exit(1);
     }
-
+    double k=T::nv;
+    TRdHat Cdg_hat=TRdHat::diag(1./k);
+    
     if (resultorder == 0) {
-        // TriangleS
+        // Element
         // ordre 0
         nbsol = nt;
         KN<double> valsol(solnbfloat * nbsol);
-
         MeshPoint *mp3(MeshPointStack(stack));
-        R2 Cdg_hat = R2(1. / 3., 1. / 3.);
-
+        
         for (int it = 0; it < nt; it++) {
             int h = 0;
-            const TriangleS &K(Th.elements[it]);
+            const T &K(Th.elements[it]);
             mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
 
-            for (size_t i = 0; i < l.size(); i++) {
+            for (size_t i = 0; i < l.size(); i++)
                 for (size_t j = 0; j < l[i].nbfloat; j++) {
                     valsol[it * solnbfloat + h] = l[i].eval(j, stack);
                     h = h + 1;
                 }
-            }
-
+      
             assert(solnbfloat == h);
         }
-
-        GmfSetKwd(outm, GmfSolAtTriangles, nbsol, nbtype, TypTab);
-
+        if (std::is_same<MMesh, MeshS>::value)
+            GmfSetKwd(outm, GmfSolAtTriangles, nbsol, nbtype, TypTab);
+        else if (std::is_same<MMesh, MeshL>::value)
+            GmfSetKwd(outm, GmfSolAtEdges, nbsol, nbtype, TypTab);
+        
+        
         for (int k = 0; k < nbsol; k++) {
             for (int i = 0; i < solnbfloat; i++) {
                 OutSolTab[i] = valsol(k * solnbfloat + i);
             }
-
-            GmfSetLin(outm, GmfSolAtTriangles, OutSolTab);
+            if (std::is_same<MMesh, MeshS>::value)
+                GmfSetLin(outm, GmfSolAtTriangles, OutSolTab);
+            else if (std::is_same<MMesh, MeshL>::value)
+                GmfSetLin(outm, GmfSolAtEdges, OutSolTab);
         }
     }
 
@@ -627,11 +642,10 @@ AnyType datasolMeshS_Op<v_fes>::operator () (Stack stack)  const {
         KN<double> valsol(solnbfloat * nbsol);
         KN<int> takemesh(nbsol);
         MeshPoint *mp3(MeshPointStack(stack));
-        R2 Cdg_hat = R2(1. / 3., 1. / 3.);
         takemesh = 0;
 
-        for (int it = 0; it < nt; it++) {
-            for (int iv = 0; iv < 3; iv++) {
+        for (int it = 0; it < nt; it++)
+            for (int iv = 0; iv < T::nv; iv++) {
                 int i = Th(it, iv);
 
                 if (takemesh[i] == 0) {
@@ -649,8 +663,7 @@ AnyType datasolMeshS_Op<v_fes>::operator () (Stack stack)  const {
                     takemesh[i] = takemesh[i] + 1;
                 }
             }
-        }
-
+      
         GmfSetKwd(outm, GmfSolAtVertices, nbsol, nbtype, TypTab);
 
         for (int k = 0; k < nbsol; k++) {
@@ -2431,11 +2444,12 @@ AnyType PopenMeditMesh3_Op<v_fes>::operator () (Stack stack)  const {
 }
 
 
-template<class v_fes>
-class PopenMeditMeshS_Op: public E_F0mps
+template<class MMesh, class v_fes>
+class PopenMeditMeshT_Op: public E_F0mps
 {
 public:
     typedef long Result;
+    typedef const MMesh *ppmesh;
     Expression eTh;
     Expression filename;
     long offset;
@@ -2443,7 +2457,7 @@ public:
     struct Expression2 {
         long what;    // 0 mesh, 1 scalar, 2 vector, 3 symtensor
         long nbfloat;    // 0 mesh(3D), 1 scalar, 2 vector (3D), 3 symtensor(3D)
-        Expression e[6];
+        Expression e[3];
         Expression2 () {e[0] = 0; e[1] = 0; e[2] = 0; what = 0; nbfloat = 0;};
         Expression &operator [] (int i) {return e[i];}
 
@@ -2455,7 +2469,7 @@ public:
             }
         }
 
-        const MeshS&evalm (int i, Stack stack) const {throwassert(e[i]); return *GetAny<pmeshS>((*e[i])(stack));}
+        const MMesh &evalm (int i, Stack stack) const {throwassert(e[i]); return *GetAny<ppmesh>((*e[i])(stack));}
     };
     vector<Expression2> l;
 
@@ -2467,7 +2481,7 @@ public:
     string*arg (int i, Stack stack, string *a) const {return nargs[i] ? GetAny<string *>((*nargs[i])(stack)) : a;}
 
 public:
-    PopenMeditMeshS_Op (const basicAC_F0 &args): l(args.size() - 1) {
+    PopenMeditMeshT_Op (const basicAC_F0 &args): l(args.size() - 1) {
         int nbofsol;
         int ddim = 3;
         int stsize = 3;
@@ -2506,10 +2520,10 @@ public:
                         l[jj][j] = to<double>((*a0)[j]);
                     }
                 }
-            } else if (BCastTo<pmeshS>(args[i])) {
+            } else if (BCastTo<ppmesh>(args[i])) {
                 l[jj].what = 0;
                 l[jj].nbfloat = 0;
-                l[jj][0] = CastTo<pmeshS>(args[i]);
+                l[jj][0] = CastTo<ppmesh>(args[i]);
             } else {
                 CompileError("medit 3d: Sorry no way to save this kind of data");
             }
@@ -2537,15 +2551,23 @@ public:
         if (offset == 0) {offset = l.size();}
     }
 
-    static ArrayOfaType typeargs () {return ArrayOfaType(atype<string *>(), atype<pmeshS>(), true);}// all type
+    static ArrayOfaType typeargs () {return ArrayOfaType(atype<string *>(), atype<ppmesh>(), true);}// all type
 
-    static E_F0*f (const basicAC_F0 &args) {return new PopenMeditMeshS_Op(args);}
+    static E_F0*f (const basicAC_F0 &args) {return new PopenMeditMeshT_Op<MMesh,v_fes>(args);}
 
     AnyType operator () (Stack stack)  const;
 };
 
-template<class v_fes>
-basicAC_F0::name_and_type PopenMeditMeshS_Op<v_fes>::name_param [] = {
+template< >
+basicAC_F0::name_and_type PopenMeditMeshT_Op<MeshS, v_fesS>::name_param [] = {
+    {"order", &typeid(long)},
+    {"meditff", &typeid(string *)},
+    {"save", &typeid(string *)},
+    {"wait", &typeid(bool)},
+    {"bin", &typeid(long)}
+};
+template< >
+basicAC_F0::name_and_type PopenMeditMeshT_Op<MeshL, v_fesL>::name_param [] = {
     {"order", &typeid(long)},
     {"meditff", &typeid(string *)},
     {"save", &typeid(string *)},
@@ -2554,10 +2576,17 @@ basicAC_F0::name_and_type PopenMeditMeshS_Op<v_fes>::name_param [] = {
 };
 
 
-
-template<class v_fes>
-AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
+template<class MMesh, class v_fes>
+AnyType PopenMeditMeshT_Op<MMesh, v_fes>::operator () (Stack stack)  const {
     if (NoGraphicWindow) {return Nothing;}
+    
+    typedef typename MMesh::Element T;
+    typedef typename MMesh::BorderElement B;
+    typedef typename MMesh::Vertex V;
+    typedef typename MMesh::Element::RdHat TRdHat;
+    typedef typename MMesh::BorderElement::RdHat BRdHat;
+    
+    
     MeshPoint *mp(MeshPointStack(stack));
     long order(arg(0, stack, 1L));
     //
@@ -2581,66 +2610,63 @@ AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
     int smedit = max(1, nbsol);
     char *commandline = meditcmd(filebin, nbsol, smedit, *meditff, *ffname);
     printf("version de medit %s\n", commandline);
-    if (verbosity > 2) {cout << "number of solution = " << offset - 1 << endl;}
+    if (verbosity > 2) cout << "number of solution = " << offset - 1 << endl;
 
-    if (verbosity > 2) {cout << "number of mesh     = " << nbTh << endl;}
+    if (verbosity > 2) cout << "number of mesh     = " << nbTh << endl;
 
     // lecture des differents maillages
     int nv = 0, nt = 0, nbe = 0;// sommet, triangles, arretes du maillage unifies
 
     for (size_t i = 0; i < l.size(); i = i + offset) {
-        if (l[i].what != 0) {
+        if (l[i].what != 0)
             cerr << "this element is not a mesh" << i << endl;
-        }
+        
 
-        const MeshS &Thtmp = l[i].evalm(0, stack);
+        const MMesh &Thtmp = l[i].evalm(0, stack);
         nv += Thtmp.nv;
         nt += Thtmp.nt;
         nbe += Thtmp.nbe;
     }
-    Vertex3 *v = new Vertex3[nv];
-    TriangleS *t;
-    if (nt != 0) {t = new TriangleS[nt];}
+    V *v = new V[nv];
+    T *t;
+    if (nt != 0) t = new T[nt];
 
-    BoundaryEdgeS *b = new BoundaryEdgeS[nbe];
-    TriangleS *tt = t;
-    BoundaryEdgeS *bb = b;
+    B *b = new B[nbe];
+    T *tt = t;
+    B *bb = b;
     int iv = 0, it = 0, ibe = 0;
     int *numTht = new int[nt];    // numero of Th assoctiated with a surface triangle
     int jt = 0;
 
     for (size_t i = 0; i < l.size(); i = i + offset) {
         int nvtmp = iv;
-        const MeshS &Thtmp = l[i].evalm(0, stack);
+        const MMesh &Thtmp = l[i].evalm(0, stack);
 
         for (int ii = 0; ii < Thtmp.nv; ii++) {
-            const Vertex3 &vi(Thtmp.vertices[ii]);
+            const V &vi(Thtmp.vertices[ii]);
             v[iv].x = vi.x;
             v[iv].y = vi.y;
             v[iv].z = vi.z;
-            v[iv].lab = vi.lab;
-            iv++;
+            v[iv++].lab = vi.lab;
         }
 
-        for (int ii = 0; ii < Thtmp.nt; ii++) {
-            const TriangleS &vi(Thtmp.elements[ii]);
-            int iv[3];
-            iv[0] = nvtmp + Thtmp.operator () (vi[0]);
-            iv[1] = nvtmp + Thtmp.operator () (vi[1]);
-            iv[2] = nvtmp + Thtmp.operator () (vi[2]);
+        for (int ii = 0; ii < Thtmp.nt; ++ii) {
+            const T &vi(Thtmp.elements[ii]);
+            int iv[T::nv];
+            for (int itt=0;itt<T::nv;itt++)
+                iv[itt] = nvtmp + Thtmp.operator () (vi[itt]);
             (*tt++).set(v, iv, vi.lab);
             numTht[it] = jt;
             it++;
         }
-        for (int ii = 0; ii < Thtmp.nbe; ii++) {
-            const BoundaryEdgeS &vi(Thtmp.be(ii));
-            int iv[2];
-            iv[0] = nvtmp + Thtmp.operator () (vi[0]);
-            iv[1] = nvtmp + Thtmp.operator () (vi[1]);
+        for (int ii = 0; ii < Thtmp.nbe; ++ii) {
+            const B &vi(Thtmp.be(ii));
+            int iv[B::nv];
+            for (int ib=0;ib<B::nv;++ib)
+                iv[ib] = nvtmp + Thtmp.operator () (vi[ib]);
             (*bb++).set(v, iv, vi.lab);
             ibe++;
         }
-
         jt++;
     }
 
@@ -2649,14 +2675,14 @@ AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
     assert(ibe = nbe);
     if (verbosity > 2) {cout << "meditff :: Value of elements: vertex " << nv << " surface Triangle " << nt << " boundary edge " << nbe << endl;}
 
-    MeshS *pTh = new MeshS(nv, nt, nbe, v, t, b);
-    MeshS &Th = *pTh;   cout << "test ok " << endl;
+    MMesh *pTh = new MMesh(nv, nt, nbe, v, t, b);
+    MMesh &Th = *pTh;
 
     // determination of the number of elements to represent the solution
     int datasize;
-    if (order == 0) {datasize = nt;}
+    if (order == 0) datasize = nt;
 
-    if (order == 1) {datasize = nv;}
+    if (order == 1) datasize = nv;
 
     // cas de sauvegarde
     bool boolsave = false;
@@ -2677,15 +2703,13 @@ AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
             boolsave = true;
             saveff = GetAny<string *>((*nargs[2])(stack));
 
-            for (size_t i = 0; i < offset; i++) {
+            for (size_t i = 0; i < offset; i++)
                 solnbfloat = solnbfloat + l[i].nbfloat;
-            }
-
+           
             solsave.init(solnbfloat, datasize);
             solsave = 0.;
         }
     }
-
     int nboftmp = 0;
     FILE *popenstream = popen(commandline, MODE_WRITE_BINARY);
     if (!popenstream) {
@@ -2695,7 +2719,6 @@ AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
 
     // mesh
     int jojo1;
-
     for (int jojo = 0; jojo < smedit; jojo++) {
         if (filebin) {
             int cod = 1;
@@ -2717,7 +2740,7 @@ AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
             fwrite((unsigned char *)&nv, WrdSiz, 1, popenstream);
 
             for (int k = 0; k < nv; k++) {
-                const Vertex3 &P = Th.vertices[k];
+                const V &P = Th.vertices[k];
                 fx = P.x;
                 fy = P.y;
                 fz = P.z;
@@ -2727,40 +2750,41 @@ AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
                 fwrite((unsigned char *)&(P.lab), WrdSiz, 1, popenstream);
             }
 
-            // triangle
-            KwdCod = GmfTriangles;
+            // element
+             if (std::is_same<MMesh, MeshS>::value)
+                 KwdCod = GmfTriangles;
+            else  if (std::is_same<MMesh, MeshL>::value)
+                 KwdCod = GmfEdges;
             fwrite((unsigned char *)&KwdCod, WrdSiz, 1, popenstream);
             fwrite((unsigned char *)&NulPos, WrdSiz, 1, popenstream);
             fwrite((unsigned char *)&nt, WrdSiz, 1, popenstream);
 
             for (int k = 0; k < nt; k++) {
-                const TriangleS &K(Th.elements[k]);
-                int i0 = Th.operator () (K[0]) + 1;
-                int i1 = Th.operator () (K[1]) + 1;
-                int i2 = Th.operator () (K[2]) + 1;
-                int lab = K.lab;
-                fwrite((unsigned char *)&i0, WrdSiz, 1, popenstream);
-                fwrite((unsigned char *)&i1, WrdSiz, 1, popenstream);
-                fwrite((unsigned char *)&i2, WrdSiz, 1, popenstream);
-                fwrite((unsigned char *)&lab, WrdSiz, 1, popenstream);
+                const T &K(Th.elements[k]);
+                int iv[T::nv];
+                for(int it=0;it<T::nv;it++) {
+                    iv[it] = Th.operator () (K[it]) + 1;
+                    fwrite((unsigned char *)&iv[it], WrdSiz, 1, popenstream);
+                }
+                fwrite((unsigned char *)&(K.lab), WrdSiz, 1, popenstream);
             }
 
-            // edge
+            if (std::is_same<MMesh, MeshS>::value) {
             KwdCod = GmfEdges;
             fwrite((unsigned char *)&KwdCod, WrdSiz, 1, popenstream);
             fwrite((unsigned char *)&NulPos, WrdSiz, 1, popenstream);
             fwrite((unsigned char *)&nbe, WrdSiz, 1, popenstream);
 
             for (int k = 0; k < nbe; k++) {
-                const BoundaryEdgeS &K(Th.be(k));
-                int i0 = Th.operator () (K[0]) + 1;
-                int i1 = Th.operator () (K[1]) + 1;
-                int lab = K.lab;
-                fwrite((unsigned char *)&i0, WrdSiz, 1, popenstream);
-                fwrite((unsigned char *)&i1, WrdSiz, 1, popenstream);
-                fwrite((unsigned char *)&lab, WrdSiz, 1, popenstream);
+                const B &K(Th.be(k));
+                int iv[B::nv];
+                for(int ib=0;ib<B::nv;ib++) {
+                    iv[ib] = Th.operator () (K[ib]) + 1;
+                    fwrite((unsigned char *)&iv[ib], WrdSiz, 1, popenstream);
+                }
+                fwrite((unsigned char *)&(K.lab), WrdSiz, 1, popenstream);
             }
-
+            }
             // End
             KwdCod = GmfEnd;
             fwrite((unsigned char *)&KwdCod, WrdSiz, 1, popenstream);
@@ -2774,34 +2798,41 @@ AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
             fprintf(popenstream, "%i\n", nv);
 
             for (int k = 0; k < nv; k++) {
-                const Vertex3 &P = Th.vertices[k];
+                const V &P = Th.vertices[k];
                 fx = P.x;
                 fy = P.y;
                 fz = P.z;
                 fprintf(popenstream, "%f %f %f %i\n", fx, fy, fz, P.lab);
             }
-
-            fprintf(popenstream, "Triangles\n");
+            if (std::is_same<MMesh, MeshS>::value)
+                fprintf(popenstream, "Triangles\n");
+            else if (std::is_same<MMesh, MeshL>::value)
+                fprintf(popenstream, "Edges\n");
             fprintf(popenstream, "%i\n", nt);
 
             for (int k = 0; k < nt; k++) {
-                const TriangleS &K(Th.elements[k]);
-                int i0 = Th.operator () (K[0]) + 1;
-                int i1 = Th.operator () (K[1]) + 1;
-                int i2 = Th.operator () (K[2]) + 1;
-                int lab = K.lab;
-                fprintf(popenstream, "%i %i %i %i\n", i0, i1, i2, lab);
+                const T &K(Th.elements[k]);
+                int iv[T::nv];
+                for(int it=0;it<T::nv;it++)
+                    iv[it] = Th.operator () (K[it]) + 1;
+                if (std::is_same<T, TriangleS>::value)
+                fprintf(popenstream, "%i %i %i %i\n", iv[0], iv[1], iv[2], K.lab);
+                else  if (std::is_same<T, EdgeL>::value)
+                    fprintf(popenstream, "%i %i %i\n", iv[0], iv[1], K.lab);
             }
 
-            fprintf(popenstream, "Edges\n");
-            fprintf(popenstream, "%i\n", nbe);
+            if (std::is_same<MMesh, MeshS>::value) {
+                fprintf(popenstream, "Edges\n");
+           
+                fprintf(popenstream, "%i\n", nbe);
 
             for (int k = 0; k < nbe; k++) {
-                const BoundaryEdgeS &K(Th.be(k));
-                int i0 = Th.operator () (K[0]) + 1;
-                int i1 = Th.operator () (K[1]) + 1;
-                int lab = K.lab;
-                fprintf(popenstream, "%i %i %i\n", i0, i1, lab);
+                const B &K(Th.be(k));
+                int iv[B::nv];
+                for(int ib=0;ib<B::nv;ib++)
+                    iv[ib] = Th.operator () (K[ib]) + 1;
+                fprintf(popenstream, "%i %i %i\n", iv[0], iv[1], K.lab);
+            }
             }
 
             fprintf(popenstream, "End");
@@ -2839,20 +2870,24 @@ AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
                     fwrite((unsigned char *)&codtypjm, WrdSiz, 1, popenstream);
                     fwrite((unsigned char *)&typsol, WrdSiz, 1, popenstream);
                 } else {
-                    fprintf(popenstream, "SolAtTetrahedra\n");
+                    if (std::is_same<MMesh, MeshS>::value)
+                        fprintf(popenstream, "SolAtTriangles\n");
+                    else if (std::is_same<MMesh, MeshL>::value)
+                        fprintf(popenstream, "SolAtEdges\n");
+                    
                     fprintf(popenstream, "%i\n", datasize);
                     fprintf(popenstream, "%i %i\n", 1, typsol);
                 }
 
+                double k=T::nv;
+                TRdHat Cdg_hat=TRdHat::diag(1./k);
+                
                 if (typsol == 1) {
                     MeshPoint *mp3(MeshPointStack(stack));
-                    R2 Cdg_hat = R2(1. / 3., 1. / 3.);
-
                     vxx = 0.;
-
                     for (int it = 0; it < nt; it++) {
                         jojo1 = jojo + 1 + offset * numTht[it];
-                        const TriangleS &K(Th.elements[it]);
+                        const T &K(Th.elements[it]);
                         mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
 
                         vxx[it] = l[jojo1].eval(0, stack);    // GetAny< double >( (*nargs[1])(stack) );
@@ -2872,11 +2907,9 @@ AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
                     vyy = 0.;
                     vzz = 0.;
                     MeshPoint *mp3(MeshPointStack(stack));
-                    R2 Cdg_hat = R2(1. / 3., 1. / 3.);
-
                     for (int it = 0; it < Th.nt; ++it) {
                         jojo1 = jojo + 1 + offset * numTht[it];
-                        const TriangleS &K(Th.elements[it]);
+                        const T &K(Th.elements[it]);
                         mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
 
                         vxx[it] = l[jojo1].eval(0, stack);    // GetAny< double >( (*xx)(stack) );
@@ -2890,12 +2923,11 @@ AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
                             fwrite((unsigned char *)&(vyy[k]), WrdSiz, 2, popenstream);
                             fwrite((unsigned char *)&(vzz[k]), WrdSiz, 2, popenstream);
                         }
-                    } else {
-                        for (int k = 0; k < nt; k++) {
+                    } else
+                        for (int k = 0; k < nt; k++)
                             fprintf(popenstream, "%f %f %f\n", vxx[k], vyy[k], vzz[k]);
-                        }
-                    }
-                } else if (typsol == 3) {
+                }
+                else if (typsol == 3) {
                     vxx(nv) = 0.;
                     vyx(nv) = 0.;
                     vyy(nv) = 0.;
@@ -2903,11 +2935,10 @@ AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
                     vzy(nv) = 0.;
                     vzz(nv) = 0.;
                     MeshPoint *mp3(MeshPointStack(stack));
-                    R2 Cdg_hat = R2(1. / 3., 1. / 3.);
 
                     for (int it = 0; it < Th.nt; ++it) {
                         jojo1 = jojo + 1 + offset * numTht[it];
-                        const TriangleS &K(Th.elements[it]);
+                        const T &K(Th.elements[it]);
                         mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
 
                         vxx[it] = l[jojo1].eval(0, stack);    // GetAny< double >( (*tsxx)(stack) );
@@ -3128,14 +3159,18 @@ AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
         }
 
         if (order == 0) {
-            GmfSetKwd(outm, GmfSolAtTriangles, datasize, nbtype, TypTab);
-
+            if (std::is_same<MMesh, MeshS>::value)
+                GmfSetKwd(outm, GmfSolAtTriangles, datasize, nbtype, TypTab);
+            else if (std::is_same<MMesh, MeshL>::value)
+                GmfSetKwd(outm, GmfSolAtEdges, datasize, nbtype, TypTab);
             for (int k = 0; k < datasize; k++) {
                 for (int i = 0; i < solnbfloat; i++) {
                     OutSolTab[i] = solsave(i, k);
                 }
-
+                if (std::is_same<MMesh, MeshS>::value)
                 GmfSetLin(outm, GmfSolAtTriangles, OutSolTab);
+                else  if (std::is_same<MMesh, MeshL>::value)
+                    GmfSetLin(outm, GmfSolAtEdges, OutSolTab);
             }
         } else if (order == 1) {
             GmfSetKwd(outm, GmfSolAtVertices, datasize, nbtype, TypTab);
@@ -3169,7 +3204,8 @@ AnyType PopenMeditMeshS_Op<v_fes>::operator () (Stack stack)  const {
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
 	typedef Mesh *pmesh;
 	typedef Mesh3 *pmesh3;
-    typedef MeshS *pmeshS;
+    //typedef MeshS *pmeshS;
+    //typedef MeshL *pmeshL;
 
 	if (verbosity > 2) {
 		cout << " load:popen.cpp  " << endl;
@@ -3178,16 +3214,19 @@ static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3
 	// 2D
 	Global.Add("medit", "(", new OneOperatorCode<PopenMeditMesh_Op> );
 	Global.Add("savesol", "(", new OneOperatorCode<datasolMesh2_Op> );
-
-    // 3D surface
-    Global.Add("medit", "(", new OneOperatorCode<PopenMeditMeshS_Op<v_fesS> > );
-    Global.Add("savesol", "(", new OneOperatorCode<datasolMeshS_Op<v_fesS> > );
+    
+    // 3D curve
+    Global.Add("medit", "(", new OneOperatorCode<PopenMeditMeshT_Op<MeshL, v_fesL> > );
+    Global.Add("savesol", "(", new OneOperatorCode<datasolMeshT_Op<MeshL, v_fesL> > );
+    
+    // 3D surface/curve
+    Global.Add("medit", "(", new OneOperatorCode<PopenMeditMeshT_Op<MeshS, v_fesS> > );
+    Global.Add("savesol", "(", new OneOperatorCode<datasolMeshT_Op<MeshS, v_fesS> > );
 
 	// 3D volume
 	Global.Add("medit", "(", new OneOperatorCode<PopenMeditMesh3_Op<v_fes3> > );
 	Global.Add("savesol", "(", new OneOperatorCode<datasolMesh3_Op<v_fes3> > );
-
-	Global.Add("readsol", "(", new OneOperatorCode<readsol_Op> );
+    Global.Add("readsol", "(", new OneOperatorCode<readsol_Op> );
 }
 
 // <<medit_Load_Init>> static loading: calling Load_Init() from a function which is accessible from

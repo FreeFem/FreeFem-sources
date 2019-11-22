@@ -26,7 +26,8 @@ TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw LIST_CONDITIONAL="$(LI
 all-local: all.edp freefem++.pref
 
 TESTS_OTHER = buildParametricMeshL.edp \
-	LaplacianCurve.edp
+	LaplacianCurve.edp \
+	extractMeshes.edp
 
 
 

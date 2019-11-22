@@ -1454,8 +1454,8 @@ namespace Fem2D {
         if (di.kind == CDomainOfIntegration::int1d )
         {
 
-            /*if(di.islevelset())
-            {
+            if(di.islevelset()) cout << "totototototo"<<endl;
+            /*{
                 double uset = HUGE_VAL;
                 R1 Q[1][2];
                 double vol6[2];

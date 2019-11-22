@@ -6216,6 +6216,8 @@ AnyType ExtractMesh_Op<MMesh, MMeshO>::operator () (Stack stack)  const {
         pThnew->mapSurf2Vol[i]= mapSurf2Vol[i];
     }*/
 
+	copyMapping(pThnew,mapVol2Surf,mapSurf2Vol);
+
     //pThnew->BuildEdges(); call in MMeshO constructor if nbe=0
     delete [] mapVol2Surf;
     delete [] mapSurf2Vol;
@@ -8172,7 +8174,7 @@ static void Load_Init () {
     Global.Add("extract", "(", new ExtractMesh<Mesh3,MeshS>);     // take a Mesh3 in arg and return a part of MeshS
 
     // for a mesh3 Th3, if Th3->meshS=NULL, build the meshS associated
-    Global.Add("buildSurface", "(", new BuildMeshSFromMesh3);
+    Global.Add("buildBdMesh", "(", new BuildMeshSFromMesh3);
 
     Global.Add("AddLayers", "(", new OneOperator4_<bool, const Mesh3 *, KN<double> *, long, KN<double> *>(AddLayers));
 
@@ -8217,7 +8219,7 @@ static void Load_Init () {
 	Global.Add("Sline", "(", new Line);
 	Global.Add("Sline", "(", new Line(1));
 	
-	Global.Add("buildCurve", "(", new BuildMeshLFromMeshS);
+	Global.Add("buildBdMesh", "(", new BuildMeshLFromMeshS);
 	Global.Add("extract", "(", new ExtractMesh<MeshS,MeshL>);     // take a Mesh3 in arg and return a part of MeshS
 	
 }

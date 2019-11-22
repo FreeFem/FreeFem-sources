@@ -13,7 +13,7 @@ mesh3 Th=buildlayers(Th2,nn,
   reffaceup = rup,
   reffacelow = rdown);
 
-Th = buildSurface(Th); // build the surface mesh
+Th = buildBdMesh(Th); // build the surface mesh
 meshS ThS= Th.Gamma;
 
 fespace Vh(ThS,P2);
