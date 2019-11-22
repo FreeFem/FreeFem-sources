@@ -26,7 +26,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - Preliminary support for symmetric distributed PETSc matrices (MATMPISBAIJ instead of MATMPIAIJ)
-- Interface to AMS, Hiptmair--Xu preconditioner for problemis in H(curl), see maxwell-3d-PETSc.edp
+- Interface to AMS, Hiptmair--Xu preconditioner for problems in H(curl), see maxwell-3d-PETSc.edp
 
 ### Changed
 -
