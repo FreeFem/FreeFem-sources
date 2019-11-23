@@ -191,8 +191,9 @@ void change(Type* const& ptA, Matrice_Creuse<PetscScalar>* const& mat, Type* con
             MatriceMorse<PetscScalar>* mN = nullptr;
             if(mat->A)
                 mN = static_cast<MatriceMorse<PetscScalar>*>(&*(mat->A));
-            PetscBool assembled;
-            MatAssembled(ptA->_petsc, &assembled);
+            PetscBool assembled = PETSC_FALSE;
+            if(ptA->_petsc)
+                MatAssembled(ptA->_petsc, &assembled);
             if(mN) {
                 HPDDM::MatrixCSR<void>* dL = nullptr;
                 if(pList && pList->A) {
@@ -231,8 +232,17 @@ void change(Type* const& ptA, Matrice_Creuse<PetscScalar>* const& mat, Type* con
                         MatSetValues(ptA->_petsc, 1, &row, ia[i + 1] - ia[i], reinterpret_cast<PetscInt*>(ja + ia[i]), c + ia[i], INSERT_VALUES);
                     }
                 }
-                else
-                    MatMPIAIJSetPreallocationCSR(ptA->_petsc, reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
+                else {
+                    if(!ptA->_petsc) {
+                        MatCreate(PETSC_COMM_WORLD, &ptA->_petsc);
+                        MatSetSizes(ptA->_petsc, ptA->_last - ptA->_first, ptA->_last - ptA->_first, PETSC_DECIDE, PETSC_DECIDE);
+                        MatSetType(ptA->_petsc, ptA->_A->getMatrix()->_sym ? MATMPISBAIJ : MATMPIAIJ);
+                    }
+                    if(ptA->_A->getMatrix()->_sym)
+                        MatMPISBAIJSetPreallocationCSR(ptA->_petsc, 1, reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
+                    else
+                        MatMPIAIJSetPreallocationCSR(ptA->_petsc, reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
+                }
                 if(free) {
                     delete [] ia;
                     delete [] ja;
@@ -311,43 +321,48 @@ void change(Type* const& ptA, Matrice_Creuse<PetscScalar>* const& mat, Type* con
         }
     }
     else {
+        MatType type;
+        PetscBool isType = PETSC_FALSE;
         if(ptB->_petsc) {
-            MatType type;
-            PetscBool isType;
             MatGetType(ptB->_petsc, &type);
             PetscStrcmp(type, MATNEST, &isType);
-            if(!isType) {
-                Mat backup = ptA->_petsc;
-                ptA->_petsc = nullptr;
-                ptA->dtor();
-                ptA->_petsc = backup;
-                PetscMPIInt flag;
-                if(ptA->_petsc)
-                    MPI_Comm_compare(PetscObjectComm((PetscObject)ptA->_petsc), PetscObjectComm((PetscObject)ptB->_petsc), &flag);
-                if(!ptA->_petsc || (flag != MPI_CONGRUENT && flag != MPI_IDENT)) {
-                    MatDestroy(&ptA->_petsc);
-                    MatConvert(ptB->_petsc, MATSAME, MAT_INITIAL_MATRIX, &ptA->_petsc);
+        }
+        if(!isType) {
+            Mat backup = ptA->_petsc;
+            ptA->_petsc = nullptr;
+            ptA->dtor();
+            ptA->_petsc = backup;
+            PetscMPIInt flag;
+            if(ptA->_petsc)
+                MPI_Comm_compare(PetscObjectComm((PetscObject)ptA->_petsc), PetscObjectComm((PetscObject)ptB->_petsc), &flag);
+            if(!ptA->_petsc || (flag != MPI_CONGRUENT && flag != MPI_IDENT)) {
+                MatDestroy(&ptA->_petsc);
+                if(ptB->_petsc) {
+                    PetscBool assembled;
+                    MatAssembled(ptB->_petsc, &assembled);
+                    if(assembled)
+                        MatConvert(ptB->_petsc, MATSAME, MAT_INITIAL_MATRIX, &ptA->_petsc);
                     MatDestroy(&ptB->_petsc);
                 }
-                else {
-                    MatHeaderReplace(ptA->_petsc, &ptB->_petsc);
-                }
-                if(ptB->_ksp)
-                    KSPDestroy(&ptB->_ksp);
-                ptA->_A = ptB->_A;
-                ptB->_A = nullptr;
-                ptA->_num = ptB->_num;
-                ptA->_cnum = ptB->_cnum;
-                ptA->_first = ptB->_first;
-                ptA->_cfirst = ptB->_cfirst;
-                ptA->_last = ptB->_last;
-                ptA->_clast = ptB->_clast;
-                ptB->_num = nullptr;
-                ptA->_exchange = ptB->_exchange;
-                if(ptB->_exchange) {
-                    ptA->_exchange[1] = ptB->_exchange[1];
-                    ptB->_exchange = nullptr;
-                }
+            }
+            else {
+                MatHeaderReplace(ptA->_petsc, &ptB->_petsc);
+            }
+            if(ptB->_ksp)
+                KSPDestroy(&ptB->_ksp);
+            ptA->_A = ptB->_A;
+            ptB->_A = nullptr;
+            ptA->_num = ptB->_num;
+            ptA->_cnum = ptB->_cnum;
+            ptA->_first = ptB->_first;
+            ptA->_cfirst = ptB->_cfirst;
+            ptA->_last = ptB->_last;
+            ptA->_clast = ptB->_clast;
+            ptB->_num = nullptr;
+            ptA->_exchange = ptB->_exchange;
+            if(ptB->_exchange) {
+                ptA->_exchange[1] = ptB->_exchange[1];
+                ptB->_exchange = nullptr;
             }
         }
     }
