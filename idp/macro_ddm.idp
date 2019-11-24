@@ -108,64 +108,6 @@ if(!NoGraphicWindow) {
     }
 }// EOM
 
-macro export(name, mesh, sol, fforder, comm)
-load "iovtk"
-savevtk(name + "_" + mpiRank(comm) + "_" + mpiSize(comm) + ".vtu", mesh, sol, order = fforder);
-
-if(mpiRank(comm) == 0) {
-    ofstream pvd(name + "_" + mpiSize(comm) + ".pvd");
-    pvd << "<?xml version=\"1.0\"?>\n";
-    pvd << "<VTKFile type=\"Collection\" version=\"0.1\"\n";
-    pvd << "         byte_order=\"LittleEndian\"\n";
-    pvd << "         compressor=\"vtkZLibDataCompressor\">\n";
-    pvd << "  <Collection>\n";
-    string en = name;
-    int n = string(en).rfind("/");
-    string fn = en(n + 1:en.length);
-    for(int i = 0; i < mpiSize(comm); ++i) {
-        pvd << "    <DataSet timestep=\"0\" group=\"\" part=\"" << i << "\"\n";
-        pvd << "             file=\""; pvd << fn << "_" << i << "_" << mpiSize(comm) << ".vtu\"/>\n";
-    }
-    pvd << "  </Collection>\n";
-    pvd << "</VTKFile>\n";
-}
-// EOM
-
-macro exportBegin(name, comm)
-load "iovtk"
-if(mpiRank(comm) == 0) {
-    ofstream pvd(name + "_" + mpiSize(comm) + ".pvd");
-    pvd << "<?xml version=\"1.0\"?>\n";
-    pvd << "<VTKFile type=\"Collection\" version=\"0.1\"\n";
-    pvd << "         byte_order=\"LittleEndian\"\n";
-    pvd << "         compressor=\"vtkZLibDataCompressor\">\n";
-    pvd << "  <Collection>\n";
-}
-// EOM
-
-macro exportTimeStep(name, mesh, sol, fforder, ts, comm)
-savevtk(name + "_" + int(ts) + "_" + mpiRank(comm) + "_" + mpiSize(comm) + ".vtu", mesh, sol, order = fforder);
-
-if(mpiRank(comm) == 0) {
-    ofstream pvd(name + "_" + mpiSize(comm) + ".pvd", append);
-    string en = name;
-    int n = en.rfind("/");
-    string fn = en(n + 1:en.length);
-    for(int ijk = 0; ijk < mpiSize(comm); ++ijk) {
-        pvd << "    <DataSet timestep=\"" + int(ts) + "\" group=\"\" part=\"" << ijk << "\"\n";
-        pvd << "             file=\""; pvd << fn << "_" << int(ts) << "_" << ijk << "_" << mpiSize(comm) << ".vtu\"/>\n";
-    }
-}
-// EOM
-
-macro exportEnd(name, comm)
-if(mpiRank(comm) == 0) {
-    ofstream pvd(name + "_" + mpiSize(comm) + ".pvd", append);
-    pvd << "  </Collection>\n";
-    pvd << "</VTKFile>\n";
-}
-// EOM
-
 macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank, size, s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs) {
     assert(level >= 1);
     meshName[level - 1] = trunc(globalName, abs(part - rank) < 0.1, label = fakeInterface);

@@ -805,7 +805,7 @@ basicAC_F0::name_and_type IterativeMethod<R, S>::E_LCG::name_param[] = {
     {"precon", &typeid(Polymorphic*)},
     {"prefix", &typeid(string*)},
     {"sparams", &typeid(string*)},
-    {"comm", &typeid(pcommworld)}
+    {"communicator", &typeid(pcommworld)}
 };
 
 template<class Type>

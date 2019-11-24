@@ -2011,7 +2011,11 @@ public:
         }
     };
     vector<Expression2> l;
-    static const int n_name_param = 7;
+#ifndef COMMON_HPDDM_PARALLEL_IO
+    static const int n_name_param = 8;
+#else
+    static const int n_name_param = 9;
+#endif
     static basicAC_F0::name_and_type name_param [];
     Expression nargs[n_name_param];
     long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
@@ -2107,7 +2111,11 @@ basicAC_F0::name_and_type VTK_WriteMesh_Op::name_param [] = {
     {"floatmesh", &typeid(bool)},
     {"floatsol", &typeid(bool)},
     {"bin", &typeid(bool)},
-    {"swap", &typeid(bool)}
+    {"swap", &typeid(bool)},
+#ifdef COMMON_HPDDM_PARALLEL_IO
+    {"communicator", &typeid(pcommworld)},
+#endif
+    {"append", &typeid(bool)}
 };
 
 void VTK_WRITE_MESH (const string &filename, FILE *fp, const Mesh &Th, bool binary, int datasize, bool surface, bool bigEndian) {
@@ -2461,6 +2469,9 @@ AnyType VTK_WriteMesh_Op::operator () (Stack stack)  const {
     if (nargs[5]) {binary = GetAny<bool>((*nargs[5])(stack));}
     
     if (nargs[6]) {swap = GetAny<bool>((*nargs[6])(stack));}
+#ifdef COMMON_HPDDM_PARALLEL_IO
+    parallelIO(pffname, nargs[7] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[7])(stack)) : 0, nargs[8] && GetAny<bool>((*nargs[8])(stack)));
+#endif
     
     int datasize = floatmesh ?sizeof(float): sizeof(double);
     
@@ -3632,7 +3643,11 @@ public:
         }
     };
     vector<Expression2> l;
-    static const int n_name_param = 7;
+#ifndef COMMON_HPDDM_PARALLEL_IO
+    static const int n_name_param = 8;
+#else
+    static const int n_name_param = 9;
+#endif
     static basicAC_F0::name_and_type name_param [];
     Expression nargs[n_name_param];
     long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
@@ -3728,7 +3743,11 @@ basicAC_F0::name_and_type VTK_WriteMesh3_Op::name_param [] = {
     {"floatmesh", &typeid(bool)},
     {"floatsol", &typeid(bool)},
     {"bin", &typeid(bool)},
-    {"swap", &typeid(bool)}
+    {"swap", &typeid(bool)},
+#ifdef COMMON_HPDDM_PARALLEL_IO
+    {"communicator", &typeid(pcommworld)},
+#endif
+    {"append", &typeid(bool)}
 };
 
 void VTK_WRITE_MESH3 (const string &filename, FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool surface, bool bigEndian) {
@@ -4080,6 +4099,9 @@ AnyType VTK_WriteMesh3_Op::operator () (Stack stack)  const {
     if (nargs[5]) {binary = GetAny<bool>((*nargs[5])(stack));}
     
     if (nargs[6]) {swap = GetAny<bool>((*nargs[6])(stack));}
+#ifdef COMMON_HPDDM_PARALLEL_IO
+    parallelIO(pffname, nargs[7] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[7])(stack)) : 0, nargs[8] && GetAny<bool>((*nargs[8])(stack)));
+#endif
     
     int datasize = floatmesh ?sizeof(float): sizeof(double);
     
@@ -6042,6 +6064,7 @@ void saveTecplot (const string &file, const Mesh &Th) {
  *
  * $1 */
 
+#ifndef COMMON_HPDDM_PARALLEL_IO
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
     typedef Mesh *pmesh;
     // typedef Mesh2 *pmesh2;
@@ -6050,12 +6073,15 @@ static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3
     // if (verbosity)
     if (verbosity && (mpirank == 0)) {cout << " load: iovtk " << endl;}
     
-    Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMesh_Op> );
-    Global.Add("vtkload", "(", new VTK_LoadMesh);
-    Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMesh3_Op> );
-    Global.Add("vtkload3", "(", new VTK_LoadMesh3);
+    if(!Global.Find("savevtk").NotNull()) {
+        Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMesh_Op> );
+        Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMesh3_Op> );
+    }
     Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMeshS_Op> );
+    Global.Add("vtkload", "(", new VTK_LoadMesh);
+    Global.Add("vtkload3", "(", new VTK_LoadMesh3);
     Global.Add("vtkloadS", "(", new VTK_LoadMeshS);
 }
 
 LOADFUNC(Load_Init)
+#endif
