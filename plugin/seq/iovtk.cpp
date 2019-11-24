@@ -221,7 +221,7 @@ static const int nvElemVTK[25] = {1, 0, 2, 0, 3,
 // 3  :: Edge/line
 // 5  :: triangles
 // 10  :: tetrahedrons
-enum FFppCells {VTK_EDGE=3, VTK_TRI=5, VTK_TET=10};
+enum FFppCells {VTK_VERTEX=1, VTK_EDGE=3, VTK_TRI=5, VTK_TET=10};
 static const int NbColorTable = 30;
 // Table of colors for Labels of elements :: RGB
 static const float ColorTable[30][3] = {
@@ -345,6 +345,7 @@ int l = runEncodeB64(0, NULL, ElementChars);
 ElementChars[l] = 0;
 fwrite(&ElementChars, l, 1, fp);
 }
+
 void VTU_WRITE_MESH (FILE *fp, const Mesh &Th, bool binary, int datasize, bool surface) {
     int nc, nv, nconnex;
     
@@ -927,22 +928,27 @@ void VTU_WRITE_MESH (FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool 
     //---------------------------------- LABELS WITH VTU -------------------------------------------//
 }
 
-
-void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool surface) {
-    int nc, nv, nconnex;
+template<class MMesh>
+void VTU_WRITE_MESHT(FILE *fp, const MMesh &Th, bool binary, int datasize, bool surface) {
+    typedef typename MMesh::Element T;
+    typedef typename MMesh::BorderElement B;
+    typedef typename MMesh::Vertex V;
     
-    if (surface) {nc = Th.nt + Th.nbe;} else {nc = Th.nt;}
-    
-    if (surface) {nconnex = 3 * Th.nt + 2 * Th.nbe;} else {nconnex = 3 * Th.nt;}
+    int nv, nconnex;
+    int nc = surface ? Th.nt + Th.nbe : Th.nt;
+    if (std::is_same<MMesh, MeshS>::value)
+        nconnex = surface ? nconnex = 3 * Th.nt + 2 * Th.nbe : 3 * Th.nt;
+    else if (std::is_same<MMesh, MeshL>::value)
+        nconnex = surface ? nconnex = 2 * Th.nt + Th.nbe : 2 * Th.nt;
     
     unsigned char ElementChars[256];
     fprintf(fp, "<?xml version=\"1.0\"?>\n");
     fprintf(fp, "<VTKFile type=\"UnstructuredGrid\" ");
-    if (isBigEndian()) {
+    if (isBigEndian())
         fprintf(fp, "byte_order=\"BigEndian\">\n");
-    } else {
+     else
         fprintf(fp, " byte_order=\"LittleEndian\">\n");
-    }
+    
     
     fprintf(fp, "<UnstructuredGrid>\n");
     fprintf(fp, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\" %d\">\n", Th.nv, nc);
@@ -995,21 +1001,17 @@ void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool 
     long *ien = new long[nconnex];
     
     for (long it = 0; it < Th.nt; it++) {
-        const TriangleS &K(Th.t(it));
-        
-        for (int ii = 0; ii < 3; ii++) {
-            ien[3 * it + ii] = Th.operator () (K[ii]);
-        }
+        const T &K(Th.t(it));
+        for (int ii = 0; ii < T::nv; ii++)
+            ien[(T::nv) * it + ii] = Th.operator () (K[ii]);
     }
     
     if (surface) {
         for (long ibe = 0; ibe < Th.nbe; ibe++) {
-            const BoundaryEdgeS &K(Th.be(ibe));
-            
-            for (int ii = 0; ii < 2; ii++) {
-                ien[3 * Th.nt + 2 * ibe + ii] = Th.operator () (K[ii]);
-            }
-        }
+            const B &K(Th.be(ibe));
+            for (int ii = 0; ii < B::nv; ii++)
+                ien[(T::nv) * Th.nt + (B::nv) * ibe + ii] = Th.operator () (K[ii]);
+         }
     }
     
     fprintf(fp, "<DataArray type=\"Int32\" Name=\"connectivity\" ");
@@ -1023,28 +1025,31 @@ void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool 
         fwrite(&ElementChars, l, 1, fp);
         
         for (long i = 0; i < Th.nt; i++) {
-            l = runEncodeB64(sizeof(int), (unsigned char *)(ien + i * 3), ElementChars);
+            l = runEncodeB64(sizeof(int), (unsigned char *)(ien + i * (T::nv)), ElementChars);
             ElementChars[l] = 0;
             fwrite(&ElementChars, l, 1, fp);
             
-            l = runEncodeB64(sizeof(int), (unsigned char *)(ien + i * 3 + 1), ElementChars);
+            l = runEncodeB64(sizeof(int), (unsigned char *)(ien + i * (T::nv) + 1), ElementChars);
             ElementChars[l] = 0;
             fwrite(&ElementChars, l, 1, fp);
             
-            l = runEncodeB64(sizeof(int), (unsigned char *)(ien + i * 3 + 2), ElementChars);
-            ElementChars[l] = 0;
-            fwrite(&ElementChars, l, 1, fp);
+            if (std::is_same<MMesh, MeshS>::value) {
+                l = runEncodeB64(sizeof(int), (unsigned char *)(ien + i * (T::nv) + 2), ElementChars);
+                ElementChars[l] = 0;
+                fwrite(&ElementChars, l, 1, fp);   cout << " toto "<< endl;
+            }
         }
         
         if (surface) {
             for (long i = 0; i < Th.nbe; i++) {
-                l = runEncodeB64(sizeof(int), (unsigned char *)(ien + 3 * Th.nt + i * 2), ElementChars);
+                l = runEncodeB64(sizeof(int), (unsigned char *)(ien + (T::nv) * Th.nt + i * (B::nv)), ElementChars);
                 ElementChars[l] = 0;
                 fwrite(&ElementChars, l, 1, fp);
-                
-                l = runEncodeB64(sizeof(int), (unsigned char *)(ien + 3 * Th.nt + i * 2 + 1), ElementChars);
-                ElementChars[l] = 0;
-                fwrite(&ElementChars, l, 1, fp);
+                if (std::is_same<MMesh, MeshS>::value) {
+                    l = runEncodeB64(sizeof(int), (unsigned char *)(ien + (T::nv) * Th.nt + i * (B::nv) + 1), ElementChars);
+                    ElementChars[l] = 0;
+                    fwrite(&ElementChars, l, 1, fp);
+                }
             }
         }
         
@@ -1052,17 +1057,22 @@ void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool 
         l = runEncodeB64(0, NULL, ElementChars);
         ElementChars[l] = 0;
         fwrite(&ElementChars, l, 1, fp);
-    } else {
+    }
+    else {
         fprintf(fp, " format=\"ascii\">\n");
         
-        for (long i = 0; i < Th.nt; i++) {
-            fprintf(fp, "%ld %ld %ld ", ien[i * 3 + 0], ien[i * 3 + 1], ien[i * 3 + 2]);
-        }
+        for (long i = 0; i < Th.nt; i++)
+            if (std::is_same<MMesh, MeshS>::value)
+                fprintf(fp, "%ld %ld %ld ", ien[i * 3 + 0], ien[i * 3 + 1], ien[i * 3 + 2]);
+            else if (std::is_same<MMesh, MeshL>::value)
+                 fprintf(fp, "%ld %ld ", ien[i * 2 + 0], ien[i * 2 + 1]);
         
         if (surface) {
-            for (long i = 0; i < Th.nbe; i++) {
-                fprintf(fp, "%ld %ld ", ien[i * 2 + 3 * Th.nt], ien[i * 2 + 3 * Th.nt + 1]);
-            }
+            for (long i = 0; i < Th.nbe; i++)
+                if (std::is_same<MMesh, MeshS>::value)
+                    fprintf(fp, "%ld %ld ", ien[i * 2 + 3 * Th.nt], ien[i * 2 + 3 * Th.nt + 1]);
+                else if (std::is_same<MMesh, MeshL>::value)
+                    fprintf(fp, "%ld ", ien[i  + 2 * Th.nt]);
         }
     }
     
@@ -1070,6 +1080,7 @@ void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool 
     delete [] ien;
     
     fprintf(fp, "<DataArray type=\"Int32\" Name=\"offsets\" ");
+   // long nelem;
     if (binary) {
         fprintf(fp, "format=\"binary\">\n    ");
         {
@@ -1077,18 +1088,15 @@ void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool 
             int l = runEncodeB64(sizeof(int), (unsigned char *)&nbytes, ElementChars);
             ElementChars[l] = 0;
             fwrite(&ElementChars, l, 1, fp);
-            long nelem = 3;
             
-            for (long i = nelem; i <= nelem * Th.nt; i += nelem) {
+            for (long i = (T::nv); i <= (T::nv) * Th.nt; i += (T::nv)) {
                 l = runEncodeB64(sizeof(int), (unsigned char *)&i, ElementChars);
                 ElementChars[l] = 0;
                 fwrite(&ElementChars, l, 1, fp);
             }
             
             if (surface) {
-                nelem = 2;
-                
-                for (long i = nelem + 3 * Th.nt; i <= nelem * Th.nbe + 3 * Th.nt; i += nelem) {
+                for (long i = (B::nv) + (T::nv) * Th.nt; i <= (B::nv) * Th.nbe + (T::nv) * Th.nt; i += (B::nv)) {
                     l = runEncodeB64(sizeof(int), (unsigned char *)&i, ElementChars);
                     ElementChars[l] = 0;
                     fwrite(&ElementChars, l, 1, fp);
@@ -1100,26 +1108,23 @@ void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool 
             ElementChars[l] = 0;
             fwrite(&ElementChars, l, 1, fp);
         }
-    } else {
+    }
+    else {
         fprintf(fp, "format=\"ascii\" >\n");
-        long nelem = 3;
-        
-        for (long i = nelem; i <= nelem * Th.nt; i += nelem) {
+        for (long i = (T::nv); i <= (T::nv) * Th.nt; i += (T::nv))
             fprintf(fp, "%ld ", i);
-        }
+        
         
         if (surface) {
-            nelem = 2;
-            
-            for (long i = nelem; i <= nelem * Th.nbe; i += nelem) {
-                fprintf(fp, "%ld ", i + 3 * Th.nt);
-            }
+            for (long i = (B::nv); i <= (B::nv) * Th.nbe; i += (B::nv))
+                fprintf(fp, "%ld ", i + (T::nv) * Th.nt);
         }
     }
     
     fprintf(fp, "\n</DataArray>\n");
     
     fprintf(fp, "<DataArray type=\"UInt8\" Name=\"types\" ");
+    unsigned char types;
     if (binary) {
         fprintf(fp, "format=\"binary\" >\n    ");
         {
@@ -1129,7 +1134,8 @@ void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool 
             fwrite(&ElementChars, l, 1, fp);
             
             for (long i = 0; i < Th.nt; i++) {
-                unsigned char types = 5;
+                if (std::is_same<MMesh, MeshS>::value) types= 5;
+                else  if (std::is_same<MMesh, MeshL>::value) types= 3;
                 l = runEncodeB64(1, &types, ElementChars);
                 ElementChars[l] = 0;
                 fwrite(&ElementChars, l, 1, fp);
@@ -1137,7 +1143,8 @@ void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool 
             
             if (surface) {
                 for (long i = 0; i < Th.nbe; i++) {
-                    unsigned char types = 3;
+                    if (std::is_same<MMesh, MeshS>::value) types= 3;
+                    else  if (std::is_same<MMesh, MeshL>::value) types= 1;
                     l = runEncodeB64(1, &types, ElementChars);
                     ElementChars[l] = 0;
                     fwrite(&ElementChars, l, 1, fp);
@@ -1153,13 +1160,15 @@ void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool 
         fprintf(fp, "format=\"ascii\" >\n");
         
         for (long i = 0; i < Th.nt; i++) {
-            unsigned int types = 5;
+            if (std::is_same<MMesh, MeshS>::value) types= 5;
+            else  if (std::is_same<MMesh, MeshL>::value) types= 3;
             fprintf(fp, "%d ", types);
         }
         
         if (surface) {
             for (long i = 0; i < Th.nbe; i++) {
-                unsigned int types = 3;
+                if (std::is_same<MMesh, MeshS>::value) types= 3;
+                else  if (std::is_same<MMesh, MeshL>::value) types= 1;
                 fprintf(fp, "%d ", types);
             }
         }
@@ -1167,44 +1176,41 @@ void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool 
     
     fprintf(fp, "\n</DataArray>\n");
     fprintf(fp, "</Cells>\n");
-    // fprintf(fp,"</Piece>\n");
-    // fprintf(fp,"</UnstructuredGrid>\n");
-    // fprintf(fp,"</VTKFile>\n");
     
     //---------------------------------- LABELS WITH VTU -------------------------------------------//
     fprintf(fp, "<CellData Scalars=\"Label\">\n");
+    int label;
     if (binary) {
         fprintf(fp, "<DataArray type=\"Int32\" Name=\"Label\" format=\"binary\">\n");
-        int label;
-        
+       
+        int nl =Th.nt;
+        if(surface) nl +=Th.nbe;
+        nl *= sizeof(int);
+        writebin64(fp,nl);
         for (int it = 0; it < Th.nt; it++) {
-            const TriangleS &K(Th.t(it));
-            label = K.lab;            
-            fwrite(&label, sizeof(int), 1, fp);
+            label = Th[it].lab;
+            writebin64(fp,label);
         }
-        
         if (surface) {
             for (int ibe = 0; ibe < Th.nbe; ibe++) {
-                const BoundaryEdgeS &K(Th.be(ibe));
-                label = K.lab;
-				fwrite(&label, sizeof(int), 1, fp);
+                label = Th.be(ibe).lab;
+                writebin64(fp,label);
             }
         }
-    } else{
+        writebin64flush(fp);
+    }
+    else {
         fprintf(fp, "<DataArray type=\"Int32\" Name=\"Label\" format=\"ascii\">\n");
-        int label;
-        
         for (int it = 0; it < Th.nt; it++) {
-            const TriangleS &K(Th.t(it));
+            const T &K(Th.elements[it]);
             label = K.lab;
-            fprintf(fp, "%d ", label);
+            fprintf(fp, "%d\n", label);
         }
-        
         if (surface) {
             for (int ibe = 0; ibe < Th.nbe; ibe++) {
-                const BoundaryEdgeS &K(Th.be(ibe));
+                const B &K(Th.be(ibe));
                 label = K.lab;
-                fprintf(fp, "%d ", label);
+                fprintf(fp, "%d\n", label);
             }
         }
     }
@@ -1212,6 +1218,14 @@ void VTU_WRITE_MESH (FILE *fp, const MeshS &Th, bool binary, int datasize, bool 
     fprintf(fp, "</CellData>\n");
     //---------------------------------- LABELS WITH VTU -------------------------------------------//
 }
+
+
+
+
+
+
+
+
 
 
 //= =============================================
@@ -4318,11 +4332,21 @@ AnyType VTK_WriteMesh3_Op::operator () (Stack stack)  const {
 // ECRITURE DE FICHIER .vtk
 //= =============================================
 
-class VTK_WriteMeshS_Op: public E_F0mps
+template<class MMesh>
+class VTK_WriteMeshT_Op: public E_F0mps
 {
 public:
     typedef long Result;
     Expression eTh;
+    typedef const MMesh *ppmesh;
+    /*typedef typename MMesh::Element T;
+     typedef typename MMesh::Element::RdHat TRdHat;
+    
+    typedef typename MMesh::BorderElement B;
+    typedef typename MMesh::Vertex V;
+   
+    typedef typename MMesh::BorderElement::RdHat BRdHat;*/
+    
     Expression filename;
     struct Expression2 {
         string name;
@@ -4333,27 +4357,29 @@ public:
         Expression &operator [] (int i) {return e[i];}
         
         double eval (int i, Stack stack) const {
-            if (e[i]) {
+            if (e[i])
                 return GetAny<double>((*e[i])(stack));
-            } else {
+             else
                 return 0;
-            }
+            
         }
         
         
         
-        void writesolutionP0_float_binary (FILE *fp, const MeshS &Th, Stack stack, bool surface, bool bigEndian) const {
+        void writesolutionP0_float_binary (FILE *fp, const MMesh &Th, Stack stack, bool surface, bool bigEndian) const {
             MeshPoint *mp3(MeshPointStack(stack));
-            R2 Cdg_hat = R2(1. / 3., 1. / 3.);
+            typedef typename MMesh::Element T;
+            typedef typename MMesh::Element::RdHat TRdHat;
+            double k=T::nv;
+            TRdHat Cdg_hat=TRdHat::diag(1./k);
             
             if (!bigEndian) {
                 for (int it = 0; it < Th.nt; it++) {
-                    const TriangleS &K(Th.elements[it]);
+                    const T &K(Th.elements[it]);
                     mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                     
                     for (int j = 0; j < nbfloat; j++) {
                         float value = eval(j, stack);
-                        
                         SwapBytes((char *)&value, sizeof(float), 1);
                         fwrite(&value, sizeof(float), 1, fp);
                     }
@@ -4361,10 +4387,10 @@ public:
                 
                 if (surface) {
                     for (int ibe = 0; ibe < Th.nbe; ibe++) {
-                        // determination du triangle contenant cette edge
+                        // determine the element contening this border
                         int ie;
                         int it = Th.BoundaryElement(ibe, ie);
-                        const TriangleS &K(Th.elements[it]);
+                        const T &K(Th.elements[it]);
                         mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                         
                         for (int j = 0; j < nbfloat; j++) {
@@ -4375,9 +4401,10 @@ public:
                         }
                     }
                 }
-            } else {
+            }
+            else {
                 for (int it = 0; it < Th.nt; it++) {
-                    const TriangleS &K(Th.elements[it]);
+                    const T &K(Th.elements[it]);
                     mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                     
                     for (int j = 0; j < nbfloat; j++) {
@@ -4389,10 +4416,10 @@ public:
                 
                 if (surface) {
                     for (int ibe = 0; ibe < Th.nbe; ibe++) {
-                        // determination du triangle contenant cette edge
+                        // determine the element contening this border
                         int ie;
                         int it = Th.BoundaryElement(ibe, ie);
-                        const TriangleS &K(Th.elements[it]);
+                        const T &K(Th.elements[it]);
                         mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                         
                         for (int j = 0; j < nbfloat; j++) {
@@ -4408,12 +4435,15 @@ public:
         }
         
         
-        void writesolutionP0_float (FILE *fp, const MeshS &Th, Stack stack, bool surface) const {
+        void writesolutionP0_float (FILE *fp, const MMesh &Th, Stack stack, bool surface) const {
             MeshPoint *mp3(MeshPointStack(stack));
-            R2 Cdg_hat = R2(1. / 3., 1. / 3.);
+            typedef typename MMesh::Element T;
+            typedef typename MMesh::Element::RdHat TRdHat;
+            double k=T::nv;
+            TRdHat Cdg_hat=TRdHat::diag(1./k);
             
             for (int it = 0; it < Th.nt; it++) {
-                const TriangleS &K(Th.t(it));
+                const T &K(Th.t(it));
                 mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                 
                 for (int j = 0; j < nbfloat; j++) {
@@ -4428,7 +4458,7 @@ public:
                     // determination du triangle contenant cette edge
                     int ie;
                     int it = Th.BoundaryElement(ibe, ie);
-                    const TriangleS &K(Th.t(it));
+                    const T &K(Th.t(it));
                     mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                     
                     for (int j = 0; j < nbfloat; j++) {
@@ -4443,13 +4473,16 @@ public:
         }
         
         
-        void writesolutionP0_float_XML (FILE *fp, const MeshS &Th, Stack stack, bool surface) const {
+        void writesolutionP0_float_XML (FILE *fp, const MMesh &Th, Stack stack, bool surface) const {
             MeshPoint *mp3(MeshPointStack(stack));
-            R2 Cdg_hat = R2(1. / 3., 1. / 3.);
+            typedef typename MMesh::Element T;
+            typedef typename MMesh::Element::RdHat TRdHat;
+            double k=T::nv;
+            TRdHat Cdg_hat=TRdHat::diag(1./k);
             unsigned char ElementChars[256];
             long nc = Th.nt;
             
-            if (surface) {nc = nc + Th.nbe;}
+            if (surface) nc = nc + Th.nbe;
             
             unsigned nbytes = nc * sizeof(float) * (*this).nbfloat;
             int l = runEncodeB64(sizeof(int), (unsigned char *)&nbytes, ElementChars);
@@ -4457,7 +4490,7 @@ public:
             fwrite(&ElementChars, l, 1, fp);
             
             for (int it = 0; it < Th.nt; it++) {
-                const TriangleS &K(Th.t(it));
+                const T &K(Th.t(it));
                 mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                 
                 for (int j = 0; j < nbfloat; j++) {
@@ -4474,7 +4507,7 @@ public:
                     // determination du triangle contenant cette edge
                     int ie;
                     int it = Th.BoundaryElement(ibe, ie);
-                    const TriangleS &K(Th.t(it));
+                    const T &K(Th.t(it));
                     mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                     
                     for (int j = 0; j < nbfloat; j++) {
@@ -4495,7 +4528,7 @@ public:
         }
         
         
-        void writesolutionP0_float (FILE *fp, const MeshS &Th, Stack stack, bool surface, bool binary, bool bigEndian, bool XML = false) const {
+        void writesolutionP0_float (FILE *fp, const MMesh &Th, Stack stack, bool surface, bool binary, bool bigEndian, bool XML = false) const {
             if (binary) {
                 if (!XML) {
                     (*this).writesolutionP0_float_binary(fp, Th, stack, surface, bigEndian);
@@ -4508,13 +4541,16 @@ public:
         }
         
         
-        void writesolutionP0_double_binary (FILE *fp, const MeshS &Th, Stack stack, bool surface, bool bigEndian) const {
+        void writesolutionP0_double_binary (FILE *fp, const MMesh &Th, Stack stack, bool surface, bool bigEndian) const {
             MeshPoint *mp3(MeshPointStack(stack));
-            R2 Cdg_hat = R2(1. / 3., 1. / 3.);
+            typedef typename MMesh::Element T;
+            typedef typename MMesh::Element::RdHat TRdHat;
+            double k=T::nv;
+            TRdHat Cdg_hat=TRdHat::diag(1./k);
             
             if (!bigEndian) {
                 for (int it = 0; it < Th.nt; it++) {
-                    const TriangleS &K(Th.elements[it]);
+                    const T &K(Th.elements[it]);
                     mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                     
                     for (int j = 0; j < (*this).nbfloat; j++) {
@@ -4530,7 +4566,7 @@ public:
                         // determination du triangle contenant cette edge
                         int ie;
                         int it = Th.BoundaryElement(ibe, ie);
-                        const TriangleS &K(Th.elements[it]);
+                        const T &K(Th.elements[it]);
                         mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                         
                         for (int j = 0; j < (*this).nbfloat; j++) {
@@ -4543,7 +4579,7 @@ public:
                 }
             } else {
                 for (int it = 0; it < Th.nt; it++) {
-                    const TriangleS &K(Th.elements[it]);
+                    const T &K(Th.elements[it]);
                     mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                     
                     for (int j = 0; j < (*this).nbfloat; j++) {
@@ -4558,7 +4594,7 @@ public:
                         // determination du triangle contenant cette edge
                         int ie;
                         int it = Th.BoundaryElement(ibe, ie);
-                        const TriangleS &K(Th.elements[it]);
+                        const T &K(Th.elements[it]);
                         mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                         
                         for (int j = 0; j < (*this).nbfloat; j++) {
@@ -4576,12 +4612,15 @@ public:
         
         
         
-        void writesolutionP0_double (FILE *fp, const MeshS &Th, Stack stack, bool surface) const {
+        void writesolutionP0_double (FILE *fp, const MMesh &Th, Stack stack, bool surface) const {
             MeshPoint *mp3(MeshPointStack(stack));
-            R2 Cdg_hat = R2(1. / 3., 1. / 3.);
+            typedef typename MMesh::Element T;
+            typedef typename MMesh::Element::RdHat TRdHat;
+            double k=T::nv;
+            TRdHat Cdg_hat=TRdHat::diag(1./k);
             
             for (int it = 0; it < Th.nt; it++) {
-                const TriangleS &K(Th.t(it));
+                const T &K(Th.t(it));
                 mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                 
                 for (int j = 0; j < (*this).nbfloat; j++) {
@@ -4596,7 +4635,7 @@ public:
                     // determination du triangle contenant cette edge
                     int ie;
                     int it = Th.BoundaryElement(ibe, ie);
-                    const TriangleS &K(Th.t(it));
+                    const T &K(Th.t(it));
                     mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                     
                     for (int j = 0; j < (*this).nbfloat; j++) {
@@ -4612,13 +4651,16 @@ public:
         
         
         
-        void writesolutionP0_double_XML (FILE *fp, const MeshS &Th, Stack stack, bool surface) const {
+        void writesolutionP0_double_XML (FILE *fp, const MMesh &Th, Stack stack, bool surface) const {
             unsigned char ElementChars[256];
             MeshPoint *mp3(MeshPointStack(stack));
-            R2 Cdg_hat = R2(1. / 3., 1. / 3.);
+            typedef typename MMesh::Element T;
+            typedef typename MMesh::Element::RdHat TRdHat;
+            double k=T::nv;
+            TRdHat Cdg_hat=TRdHat::diag(1./k);
             long nc = Th.nt;
             
-            if (surface) {nc = nc + Th.nbe;}
+            if (surface) nc = nc + Th.nbe;
             
             unsigned nbytes = nc * sizeof(double) * (*this).nbfloat;
             int l = runEncodeB64(sizeof(int), (unsigned char *)&nbytes, ElementChars);
@@ -4626,7 +4668,7 @@ public:
             fwrite(&ElementChars, l, 1, fp);
             
             for (int it = 0; it < Th.nt; it++) {
-                const TriangleS &K(Th.t(it));
+                const T &K(Th.t(it));
                 mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                 
                 for (int j = 0; j < (*this).nbfloat; j++) {
@@ -4643,7 +4685,7 @@ public:
                     // determination du triangle contenant cette edge
                     int ie;
                     int it = Th.BoundaryElement(ibe, ie);
-                    const TriangleS &K(Th.t(it));
+                    const T &K(Th.t(it));
                     mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
                     
                     for (int j = 0; j < (*this).nbfloat; j++) {
@@ -4664,20 +4706,20 @@ public:
         }
         
         
-        void writesolutionP0_double (FILE *fp, const MeshS &Th, Stack stack, bool surface, bool binary, bool bigEndian, bool XML = false) const {
-            if (binary) {
-                if (!XML) {
+        void writesolutionP0_double (FILE *fp, const MMesh &Th, Stack stack, bool surface, bool binary, bool bigEndian, bool XML = false) const {
+            if (binary)
+                if (!XML)
                     (*this).writesolutionP0_double_binary(fp, Th, stack, surface, bigEndian);
-                } else {
+                else
                     (*this).writesolutionP0_double_XML(fp, Th, stack, surface);
-                }
-            } else {
+                
+            else
                 (*this).writesolutionP0_double(fp, Th, stack, surface);
-            }
+            
         }
         
         
-        void writesolutionP1_float (FILE *fp, const MeshS &Th, Stack stack, bool binary, bool bigEndian, bool XML = false) const {
+        void writesolutionP1_float (FILE *fp, const MMesh &Th, Stack stack, bool binary, bool bigEndian, bool XML = false) const {
             unsigned char ElementChars[256];
             MeshPoint *mp3(MeshPointStack(stack));
             
@@ -4686,19 +4728,16 @@ public:
             takemesh = 0;
             valsol = 0.;
             
-            for (int it = 0; it < Th.nt; it++) {
+            for (int it = 0; it < Th.nt; it++)
                 for (int iv = 0; iv < 3; iv++) {
                     int i = Th(it, iv);
                     mp3->setP(&Th, it, iv);
                     
-                    for (int j = 0; j < (*this).nbfloat; j++) {
+                    for (int j = 0; j < (*this).nbfloat; j++)
                         valsol[i * (*this).nbfloat + j] = valsol[i * (*this).nbfloat + j] + (*this).eval(j, stack);
-                    }
-                    
-                    takemesh[i] = takemesh[i] + 1;
+                   takemesh[i] = takemesh[i] + 1;
                 }
-            }
-            
+           
             if (binary) {
                 if (!XML) {
                     if (!bigEndian) {
@@ -4706,12 +4745,12 @@ public:
                             for (int j = 0; j < (*this).nbfloat; j++) {
                                 valsol[iv * (*this).nbfloat + j] = valsol[iv * (*this).nbfloat + j] / takemesh[iv];
                                 float value = valsol[iv * (*this).nbfloat + j];
-                                
                                 SwapBytes((char *)&value, sizeof(float), 1);
                                 fwrite(&value, sizeof(float), 1, fp);
                             }
                         }
-                    } else {
+                    }
+                    else {
                         for (int iv = 0; iv < Th.nv; iv++) {
                             for (int j = 0; j < (*this).nbfloat; j++) {
                                 valsol[iv * (*this).nbfloat + j] = valsol[iv * (*this).nbfloat + j] / takemesh[iv];
@@ -4721,7 +4760,8 @@ public:
                             }
                         }
                     }
-                } else {
+                }
+                else {
                     long nc = Th.nv;
                     unsigned nbytes = nc * sizeof(float) * (*this).nbfloat;
                     int l = runEncodeB64(sizeof(int), (unsigned char *)&nbytes, ElementChars);
@@ -4744,21 +4784,20 @@ public:
                     ElementChars[l] = 0;
                     fwrite(&ElementChars, l, 1, fp);
                 }
-            } else {
-                for (int iv = 0; iv < Th.nv; iv++) {
+            }
+            else {
+                for (int iv = 0; iv < Th.nv; iv++)
                     for (int j = 0; j < (*this).nbfloat; j++) {
                         valsol[iv * (*this).nbfloat + j] = valsol[iv * (*this).nbfloat + j] / takemesh[iv];
                         float value = valsol[iv * (*this).nbfloat + j];
                         
                         fprintf(fp, "%.8e ", value);
                     }
-                }
             }
-            
             fprintf(fp, "\n");
         }
         
-        void writesolutionP1_double (FILE *fp, const MeshS &Th, Stack stack, bool binary, bool bigEndian, bool XML = false) const {
+        void writesolutionP1_double (FILE *fp, const MMesh &Th, Stack stack, bool binary, bool bigEndian, bool XML = false) const {
             unsigned char ElementChars[256];
             MeshPoint *mp3(MeshPointStack(stack));
             
@@ -4767,23 +4806,21 @@ public:
             takemesh = 0;
             valsol = 0.;
             
-            for (int it = 0; it < Th.nt; it++) {
+            for (int it = 0; it < Th.nt; it++)
                 for (int iv = 0; iv < 3; iv++) {
                     int i = Th(it, iv);
                     mp3->setP(&Th, it, iv);
                     
-                    for (int j = 0; j < (*this).nbfloat; j++) {
+                    for (int j = 0; j < (*this).nbfloat; j++)
                         valsol[i * (*this).nbfloat + j] = valsol[i * (*this).nbfloat + j] + (*this).eval(j, stack);
-                    }
-                    
-                    takemesh[i] = takemesh[i] + 1;
+                   takemesh[i] = takemesh[i] + 1;
                 }
-            }
+            
             
             if (binary) {
                 if (!XML) {
-                    if (!bigEndian) {
-                        for (int iv = 0; iv < Th.nv; iv++) {
+                    if (!bigEndian)
+                        for (int iv = 0; iv < Th.nv; iv++)
                             for (int j = 0; j < (*this).nbfloat; j++) {
                                 valsol[iv * (*this).nbfloat + j] = valsol[iv * (*this).nbfloat + j] / takemesh[iv];
                                 double value = valsol[iv * (*this).nbfloat + j];
@@ -4791,25 +4828,24 @@ public:
                                 SwapBytes((char *)&value, sizeof(double), 1);
                                 fwrite(&value, sizeof(double), 1, fp);
                             }
-                        }
-                    } else {
-                        for (int iv = 0; iv < Th.nv; iv++) {
+                        
+                    else
+                        for (int iv = 0; iv < Th.nv; iv++)
                             for (int j = 0; j < (*this).nbfloat; j++) {
                                 valsol[iv * (*this).nbfloat + j] = valsol[iv * (*this).nbfloat + j] / takemesh[iv];
                                 double value = valsol[iv * (*this).nbfloat + j];
                                 
                                 fwrite(&value, sizeof(double), 1, fp);
                             }
-                        }
-                    }
-                } else {
+                }
+                else {
                     long nc = Th.nv;
                     unsigned nbytes = nc * sizeof(double) * (*this).nbfloat;
                     int l = runEncodeB64(sizeof(int), (unsigned char *)&nbytes, ElementChars);
                     ElementChars[l] = 0;
                     fwrite(&ElementChars, l, 1, fp);
                     
-                    for (int iv = 0; iv < Th.nv; iv++) {
+                    for (int iv = 0; iv < Th.nv; iv++)
                         for (int j = 0; j < (*this).nbfloat; j++) {
                             valsol[iv * (*this).nbfloat + j] = valsol[iv * (*this).nbfloat + j] / takemesh[iv];
                             double value = valsol[iv * (*this).nbfloat + j];
@@ -4818,37 +4854,40 @@ public:
                             ElementChars[l] = 0;
                             fwrite(&ElementChars, l, 1, fp);
                         }
-                    }
-                    
                     // flush buffer
                     l = runEncodeB64(0, NULL, ElementChars);
                     ElementChars[l] = 0;
                     fwrite(&ElementChars, l, 1, fp);
                 }
-            } else {
-                for (int iv = 0; iv < Th.nv; iv++) {
+            }
+            else {
+                for (int iv = 0; iv < Th.nv; iv++)
                     for (int j = 0; j < (*this).nbfloat; j++) {
                         valsol[iv * (*this).nbfloat + j] = valsol[iv * (*this).nbfloat + j] / takemesh[iv];
                         double value = valsol[iv * (*this).nbfloat + j];
                         
                         fprintf(fp, "%.16e ", value);
                     }
-                }
+                
             }
             
             fprintf(fp, "\n");
         }
     };
+    
     vector<Expression2> l;
     static const int n_name_param = 7;
     static basicAC_F0::name_and_type name_param [];
     Expression nargs[n_name_param];
     long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
+    int arg (int i, Stack stack, int a) const {return nargs[i] ? GetAny<int>((*nargs[i])(stack)) : a;}
+    bool arg (int i, Stack stack, bool a) const {return nargs[i] ? GetAny<bool>((*nargs[i])(stack)) : a;}
+    double arg (int i, Stack stack, double a) const {return nargs[i] ? GetAny<double>((*nargs[i])(stack)) : a;}
     
     
     
 public:
-    VTK_WriteMeshS_Op (const basicAC_F0 &args): l(args.size() - 2) {
+    VTK_WriteMeshT_Op (const basicAC_F0 &args): l(args.size() - 2) {
         int nbofsol;
         int ddim = 3;
         int stsize = 3;
@@ -4857,13 +4896,18 @@ public:
         string vecs("vector");
         string tens("tensor");
         
-        if (verbosity > 2) {cout << "Write MeshS and Solutions in VTK Formats" << endl;}
+        if ( (std::is_same<MMesh, MeshS>::value) && (verbosity > 2) )
+            cout << "Write MeshS and Solutions in VTK Formats" << endl;
+        else if ( (std::is_same<MMesh, MeshL>::value) && (verbosity > 2) )
+            cout << "Write MeshL and Solutions in VTK Formats" << endl;
         
         args.SetNameParam(n_name_param, name_param, nargs);
         
-        if (BCastTo<string *>(args[0])) {filename = CastTo<string *>(args[0]);}
+        if (BCastTo<string *>(args[0]))
+            filename = CastTo<string *>(args[0]);
         
-        if (BCastTo<pmeshS>(args[1])) {eTh = CastTo<pmeshS>(args[1]);}
+        if (BCastTo<ppmesh>(args[1]))
+            eTh = CastTo<ppmesh>(args[1]);
         
         nbofsol = l.size();
         
@@ -4923,17 +4967,16 @@ public:
         }
     }
     
-    static ArrayOfaType typeargs () {return ArrayOfaType(atype<string *>(), atype<pmeshS>(), true);}    // all type
+    static ArrayOfaType typeargs () {return ArrayOfaType(atype<string *>(), atype<ppmesh>(), true);}    // all type
     
-    static E_F0*f (const basicAC_F0 &args) {return new VTK_WriteMeshS_Op(args);}
+    static E_F0*f (const basicAC_F0 &args) {return new VTK_WriteMeshT_Op<MMesh>(args);}
     
     AnyType operator () (Stack stack)  const;
 };
 
 
-
-
-basicAC_F0::name_and_type VTK_WriteMeshS_Op::name_param [] = {
+template< >
+basicAC_F0::name_and_type VTK_WriteMeshT_Op<MeshS>::name_param [] = {
     {"dataname", &typeid(string *)},
     {"withsurfacemesh", &typeid(bool)},
     {"order", &typeid(KN_<long>)},
@@ -4944,14 +4987,33 @@ basicAC_F0::name_and_type VTK_WriteMeshS_Op::name_param [] = {
     {"swap", &typeid(bool)}
 };
 
-void VTK_WRITE_MESHS (const string &filename, FILE *fp, const MeshS &Th, bool binary, int datasize, bool surface, bool bigEndian) {
+template< >
+basicAC_F0::name_and_type VTK_WriteMeshT_Op<MeshL>::name_param [] = {
+    {"dataname", &typeid(string *)},
+    {"withsurfacemesh", &typeid(bool)},
+    {"order", &typeid(KN_<long>)},
+    // A rajouter dans le 3D
+    {"floatmesh", &typeid(bool)},
+    {"floatsol", &typeid(bool)},
+    {"bin", &typeid(bool)},
+    {"swap", &typeid(bool)}
+};
+
+
+
+template<class MMesh>
+void VTK_WRITE_MESHT (const string &filename, FILE *fp, const MMesh &Th, bool binary, int datasize, bool surface, bool bigEndian) {
+    typedef typename MMesh::Element T;
+    typedef typename MMesh::BorderElement B;
+    typedef typename MMesh::Vertex V;
+    
     fprintf(fp, "# vtk DataFile Version 2.0\n");
     fprintf(fp, "%s, Created by Freefem++ \n", filename.c_str());
-    if (binary) {
+    if (binary)
         fprintf(fp, "BINARY\n");
-    } else {
+    else
         fprintf(fp, "ASCII\n");
-    }
+    
     
     fprintf(fp, "DATASET UNSTRUCTURED_GRID\n");
     // get all the entities in the model
@@ -4968,124 +5030,151 @@ void VTK_WRITE_MESHS (const string &filename, FILE *fp, const MeshS &Th, bool bi
             f[1] = P.y;
             f[2] = P.z;
             if (binary) {
-                if (!bigEndian) {SwapBytes((char *)&f, sizeof(float), 3);}
-                
+                if (!bigEndian)
+                    SwapBytes((char *)&f, sizeof(float), 3);
                 fwrite(&f, sizeof(float), 3, fp);
-            } else {
+            } else
                 fprintf(fp, "%.8g %.8g %.8g\n", P.x, P.y, P.z);
-            }
-        }
-    } else if (datasize == sizeof(double)) {
+       }
+    }
+    else if (datasize == sizeof(double)) {
         fprintf(fp, "POINTS %d double\n", Th.nv);
         
         for (unsigned int i = 0; i < Th.nv; i++) {
-            const Vertex3 &P = Th.vertices[i];
+            const V &P = Th.vertices[i];
             double f[3];
             f[0] = P.x;
             f[1] = P.y;
             f[2] = P.z;
             if (binary) {
-                if (!bigEndian) {SwapBytes((char *)&f, sizeof(double), 3);}
-                
-                fwrite((unsigned char *)&f, sizeof(double), 3, fp);
-            } else {
+                if (!bigEndian)
+                    SwapBytes((char *)&f, sizeof(double), 3);
+               fwrite((unsigned char *)&f, sizeof(double), 3, fp);
+            } else
                 fprintf(fp, "%.15lg %.15lg %.15lg\n", f[0], f[1], f[2]);
-            }
         }
     }
-    
     fprintf(fp, "\n");
-    if (verbosity > 1) {printf("writing vertices is finish\n");}
-    
-    if (verbosity > 1) {printf("writing elements now\n");}
+    if (verbosity > 1)
+        printf("writing vertices is finish, writing elements now\n");
     
     //= ===============
     // CELL
     //= ===============
     // loop over all elements we need to save and count vertices
-    int numElements, totalNumInt;
-    if (surface) {
-        numElements = Th.nt + Th.nbe;
-        totalNumInt = Th.nt * 3 + Th.nbe * 2 + numElements;
-    } else {
-        numElements = Th.nt;
-        totalNumInt = Th.nt * 3 + numElements;
-    }
-    
-    if (verbosity > 1) {printf("writing cells \n");}
+    int numElements = surface ? Th.nt + Th.nbe : Th.nt;
+    int totalNumInt;
+    if (std::is_same<MMesh, MeshS>::value)
+        totalNumInt = surface ? Th.nt * 3 + Th.nbe * 2 + numElements : Th.nt * 3 + numElements;
+    else  if (std::is_same<MMesh, MeshL>::value)
+        totalNumInt = surface ? Th.nt * 2 + Th.nbe + numElements : Th.nt * 2 + numElements;
+    if (verbosity > 1)
+        printf("writing cells \n");
     
     // print vertex indices in ascii or binary
     fprintf(fp, "CELLS %d %d\n", numElements, totalNumInt);
     
     if (binary) {
-        int IntType = 3;
-        if (verbosity > 1) {printf("writing triangle elements \n");}
-        
-        for (int it = 0; it < Th.nt; it++) {
-            const TriangleS &K(Th.t(it));
-            int iv[IntType + 1];
-            
-            iv[0] = IntType;
-            
-            for (int ii = 0; ii < IntType; ii++) {
-                iv[ii + 1] = Th.operator () (K[ii]);
-            }
-            
-            if (!bigEndian) {SwapBytes((char *)&iv, sizeof(int), IntType + 1);}
-            
-            fwrite(&iv, sizeof(int), IntType + 1, fp);
+        int IntType;
+        if (std::is_same<MMesh, MeshS>::value) {
+            IntType = 3;
+            if (verbosity > 1) {printf("writing triangle elements \n");}
         }
-        
-        if (surface) {
-            if (verbosity > 1) {printf("writing edge elements \n");}
-            
+        else if (std::is_same<MMesh, MeshL>::value) {
             IntType = 2;
-            
-            for (int ibe = 0; ibe < Th.nbe; ibe++) {
-                const BoundaryEdgeS &K(Th.be(ibe));
-                int iv[IntType + 1];
-                iv[0] = IntType;
-                
-                for (int ii = 0; ii < IntType; ii++) {
-                    iv[ii + 1] = Th.operator () (K[ii]);
-                }
-                
-                if (!bigEndian) {SwapBytes((char *)&iv, sizeof(int), IntType + 1);}
-                
-                fwrite(&iv, sizeof(int), IntType + 1, fp);
-            }
+            if (verbosity > 1) {printf("writing edge elements \n");}
         }
-    } else {
-        int IntType = 3;
-        if (verbosity > 1) {printf("writing triangle elements \n");}
         
         for (int it = 0; it < Th.nt; it++) {
-            const TriangleS &K(Th.t(it));
+            const T &K(Th.t(it));
             int iv[IntType + 1];
             iv[0] = IntType;
             
-            for (int ii = 0; ii < IntType; ii++) {
+            for (int ii = 0; ii < IntType; ii++)
                 iv[ii + 1] = Th.operator () (K[ii]);
-            }
-            
-            fprintf(fp, "%d %d %d %d\n", iv[0], iv[1], iv[2], iv[3]);
+            if (!bigEndian)
+                SwapBytes((char *)&iv, sizeof(int), IntType + 1);
+           fwrite(&iv, sizeof(int), IntType + 1, fp);
         }
         
         if (surface) {
-            if (verbosity > 1) {printf("writing edge elements \n");}
             
-            IntType = 2;
-            
+            if (std::is_same<MMesh, MeshS>::value) {
+                IntType = 2;
+                if (verbosity > 1) {printf("writing edge border elements \n");}
+            }
+            if (std::is_same<MMesh, MeshL>::value) {
+                IntType = 1;
+                if (verbosity > 1) {printf("writing point border elements \n");}
+            }
             for (int ibe = 0; ibe < Th.nbe; ibe++) {
-                const BoundaryEdgeS &K(Th.be(ibe));
+                const B &K(Th.be(ibe));
                 int iv[IntType + 1];
                 iv[0] = IntType;
                 
-                for (int ii = 0; ii < IntType; ii++) {
+                for (int ii = 0; ii < IntType; ii++)
                     iv[ii + 1] = Th.operator () (K[ii]);
-                }
+                if (!bigEndian)
+                    SwapBytes((char *)&iv, sizeof(int), IntType + 1);
+               fwrite(&iv, sizeof(int), IntType + 1, fp);
+            }
+        }
+    }
+    else {
+          int IntType;
+          if (std::is_same<MMesh, MeshS>::value) {
+              
+              IntType = 3;
+              if (verbosity > 1)
+                  printf("writing triangle elements \n");
+              for (int it = 0; it < Th.nt; it++) {
+                  const T &K(Th.t(it));
+                  int iv[IntType + 1];
+                  iv[0] = IntType;
+                  for (int ii = 0; ii < IntType; ii++)
+                      iv[ii + 1] = Th.operator () (K[ii]);
+                  fprintf(fp, "%d %d %d %d\n", iv[0], iv[1], iv[2], iv[3]);
+              }
+              if (surface) {
+                  if (verbosity > 1)
+                      printf("writing edge border elements \n");
+                  IntType = 2;
+            
+                  for (int ibe = 0; ibe < Th.nbe; ibe++) {
+                      const B &K(Th.be(ibe));
+                      int iv[IntType + 1];
+                      iv[0] = IntType;
+                      for (int ii = 0; ii < IntType; ii++)
+                          iv[ii + 1] = Th.operator () (K[ii]);
+                      fprintf(fp, "%d %d %d\n", iv[0], iv[1], iv[2]);
+                  }
+              }
+          }
+          else if (std::is_same<MMesh, MeshL>::value) {
+              IntType = 2;
+              if (verbosity > 1)
+                  printf("writing edge elements \n");
+              for (int it = 0; it < Th.nt; it++) {
+                  const T &K(Th.t(it));
+                  int iv[IntType + 1];
+                  iv[0] = IntType;
                 
-                fprintf(fp, "%d %d %d\n", iv[0], iv[1], iv[2]);
+                  for (int ii = 0; ii < IntType; ii++)
+                      iv[ii + 1] = Th.operator () (K[ii]);
+                  fprintf(fp, "%d %d %d\n", iv[0], iv[1], iv[2]);
+              }
+              if (surface) {
+                if (verbosity > 1)
+                    printf("writing point border elements \n");
+                  IntType = 1;
+                for (int ibe = 0; ibe < Th.nbe; ibe++) {
+                    const B &K(Th.be(ibe));
+                    int iv[IntType + 1];
+                    iv[0] = IntType;
+                    for (int ii = 0; ii < IntType; ii++)
+                        iv[ii + 1] = Th.operator () (K[ii]);
+                   fprintf(fp, "%d %d\n", iv[0], iv[1]);
+                }
             }
         }
     }
@@ -5098,37 +5187,41 @@ void VTK_WRITE_MESHS (const string &filename, FILE *fp, const MeshS &Th, bool bi
     fprintf(fp, "CELL_TYPES %d\n", numElements);
     if (binary) {
         int type;
-        
-        for (int it = 0; it < Th.nt; it++) {
-            type = VTK_TRI;
-            if (!bigEndian) {SwapBytes((char *)&type, sizeof(int), 1);}
-            
-            fwrite(&type, sizeof(int), 1, fp);
-        }
-        
-        if (surface) {
-            for (int ibe = 0; ibe < Th.nbe; ibe++) {
-                type = VTK_EDGE;
-                if (!bigEndian) {SwapBytes((char *)&type, sizeof(int), 1);}
+        if (std::is_same<MMesh, MeshS>::value) type = VTK_TRI;
+        else if (std::is_same<MMesh, MeshL>::value) type = VTK_EDGE;
+            for (int it = 0; it < Th.nt; it++) {
                 
+                if (!bigEndian)
+                    SwapBytes((char *)&type, sizeof(int), 1);
                 fwrite(&type, sizeof(int), 1, fp);
             }
-        }
-    } else {
-        int type;
-        type = VTK_TRI;
         
-        for (int it = 0; it < Th.nt; it++) {
-            fprintf(fp, "%d ", type);
+            if (surface) {
+                
+                if (std::is_same<MMesh, MeshS>::value) type = VTK_EDGE;
+                else if (std::is_same<MMesh, MeshL>::value) type = VTK_VERTEX;
+                for (int ibe = 0; ibe < Th.nbe; ibe++) {
+                    if (!bigEndian)
+                        SwapBytes((char *)&type, sizeof(int), 1);
+                    fwrite(&type, sizeof(int), 1, fp);
+                }
+            }
         }
+
+    else {
+        int type;
+        if (std::is_same<MMesh, MeshS>::value) type = VTK_TRI;
+        else if (std::is_same<MMesh, MeshL>::value) type = VTK_EDGE;
+        
+        for (int it = 0; it < Th.nt; it++)
+            fprintf(fp, "%d ", type);
+        
         
         if (surface) {
-            type = VTK_EDGE;
-            
-            for (int ibe = 0; ibe < Th.nbe; ibe++) {
-                // fprintf(fp,"%d%c",type,(ibe%10==9)? '\n' : ' ');
+            if (std::is_same<MMesh, MeshS>::value) type = VTK_EDGE;
+            else if (std::is_same<MMesh, MeshL>::value) type = VTK_VERTEX;
+            for (int ibe = 0; ibe < Th.nbe; ibe++)
                 fprintf(fp, "%d ", type);
-            }
         }
     }
     
@@ -5140,38 +5233,31 @@ void VTK_WRITE_MESHS (const string &filename, FILE *fp, const MeshS &Th, bool bi
     //= ================================
     
     list<int> list_label_Elem;
-    // list<int> list_label_Border_Elem;
-    {
         for (int it = 0; it < Th.nt; it++) {
-            const TriangleS &K(Th.t(it));
+            const T &K(Th.t(it));
             list<int>::const_iterator ilist;
             int labOk = 0;
             
-            for (ilist = list_label_Elem.begin(); ilist != list_label_Elem.end(); ilist++) {
+            for (ilist = list_label_Elem.begin(); ilist != list_label_Elem.end(); ilist++)
                 if (*ilist == K.lab) {labOk = 1; break;}
-            }
-            
-            if (labOk == 0) {
+           if (labOk == 0)
                 list_label_Elem.push_back(K.lab);
-            }
+            
         }
         
         if (surface) {
             for (int ibe = 0; ibe < Th.nbe; ibe++) {
-                const BoundaryEdgeS &K(Th.be(ibe));
+                const B &K(Th.be(ibe));
                 list<int>::const_iterator ilist;
                 int labOk = 0;
                 
-                for (ilist = list_label_Elem.begin(); ilist != list_label_Elem.end(); ilist++) {
+                for (ilist = list_label_Elem.begin(); ilist != list_label_Elem.end(); ilist++)
                     if (*ilist == K.lab) {labOk = 1; break;}
-                }
-                
-                if (labOk == 0) {
+                if (labOk == 0)
                     list_label_Elem.push_back(K.lab);
-                }
+                
             }
         }
-    }
     list_label_Elem.sort();
     
     //= ================================
@@ -5180,19 +5266,19 @@ void VTK_WRITE_MESHS (const string &filename, FILE *fp, const MeshS &Th, bool bi
     fprintf(fp, "CELL_DATA %d\n", numElements);
     int cell_fd = 1;
     int cell_lab = 1;
-    
-    fprintf(fp, "COLOR_SCALARS Label 4\n");
+    fprintf(fp, "Scalars  Label int%d\n", cell_fd);
+    fprintf(fp, "LOOKUP_TABLE FreeFempp_table\n");
+    int label;
     if(binary){
-        int label;
         for(int it=0; it< Th.nt; it++){
-            const TriangleS &K( Th.t(it) );
+            const T &K( Th.t(it) );
             label =K.lab;
             if(!bigEndian) SwapBytes((char*)&label, sizeof(int), 1);
             fwrite(&label, sizeof(int), 1, fp);
         }
         if(surface){
             for(int ibe=0; ibe<Th.nbe; ibe++){
-                const BoundaryEdgeS &K( Th.be(ibe) );
+                const B &K( Th.be(ibe) );
                 label =K.lab;
                 if(!bigEndian) SwapBytes((char*)&label, sizeof(int), 1);
                 fwrite(&label, sizeof(int), 1, fp);
@@ -5200,82 +5286,19 @@ void VTK_WRITE_MESHS (const string &filename, FILE *fp, const MeshS &Th, bool bi
         }
     }
     else{
-        int label;
-        for(int it=0; it< Th.nt; it++){
-            const TriangleS &K( Th.t(it) );
-            list<int>::const_iterator ilist;
-            
-            for( ilist=list_label_Elem.begin(); ilist!=list_label_Elem.end(); ilist++){
-                if( *ilist == K.lab ){
-                    
-                    fprintf(fp,"%f %f %f 1.0\n",ColorTable[abs(*ilist)%NbColorTable][0],
-                            ColorTable[abs(*ilist)%NbColorTable][1],
-                            ColorTable[abs(*ilist)%NbColorTable][2]);
-                    break;
-                }
-            }
-            
-            
+        for (int it = 0; it < Th.nt; it++) {
+            const T &K(Th.elements[it]);
+            fprintf(fp, "%d\n", K.lab);
         }
-        if(surface){
-            for(int ibe=0; ibe<Th.nbe; ibe++){
-                const BoundaryEdgeS &K( Th.be(ibe) );
-                list<int>::const_iterator ilist;
-                for( ilist=list_label_Elem.begin(); ilist!=list_label_Elem.end(); ilist++){
-                    if( *ilist == K.lab ){
-                        fprintf(fp,"%f %f %f 1.0\n",ColorTable[abs(*ilist)%NbColorTable][0],
-                                ColorTable[abs(*ilist)%NbColorTable][1],
-                                ColorTable[abs(*ilist)%NbColorTable][2]);
-                        break;
-                    }
-                }
+        
+        if (surface) {
+            for (int ibe = 0; ibe < Th.nbe; ibe++) {
+                const B &K(Th.be(ibe));
+                fprintf(fp, "%d\n", K.lab);
             }
         }
     }
     fprintf(fp,"\n");
-    
-    fprintf(fp, "Scalars  Label int %d\n", cell_fd);
-    fprintf(fp, "LOOKUP_TABLE FreeFempp_table\n");
-    // Determination des labels
-    if (binary) {
-        int label;
-        
-        for (int it = 0; it < Th.nt; it++) {
-            const TriangleS &K(Th.t(it));
-            label = K.lab;
-            if (!bigEndian) {SwapBytes((char *)&label, sizeof(int), 1);}
-            
-            fwrite(&label, sizeof(int), 1, fp);
-        }
-        
-        if (surface) {
-            for (int ibe = 0; ibe < Th.nbe; ibe++) {
-                const BoundaryEdgeS &K(Th.be(ibe));
-                label = K.lab;
-                if (!bigEndian) {SwapBytes((char *)&label, sizeof(int), 1);}
-                
-                fwrite(&label, sizeof(int), 1, fp);
-            }
-        }
-    } else {
-        int label;
-        
-        for (int it = 0; it < Th.nt; it++) {
-            const TriangleS &K(Th.t(it));
-            label = K.lab;
-            fprintf(fp, "%d\n", label);
-        }
-        
-        if (surface) {
-            for (int ibe = 0; ibe < Th.nbe; ibe++) {
-                const BoundaryEdgeS &K(Th.be(ibe));
-                label = K.lab;
-                fprintf(fp, "%d\n", label);
-            }
-        }
-    }
-    
-    fprintf(fp, "\n");
     
     int size_list = 0;
     list<int>::const_iterator ilist;
@@ -5306,6 +5329,7 @@ void VTK_WRITE_MESHS (const string &filename, FILE *fp, const MeshS &Th, bool bi
                 tab[1] = ColorTable[abs(*ilist) % NbColorTable][1];
                 tab[2] = ColorTable[abs(*ilist) % NbColorTable][2];
                 tab[3] = 1.0;
+                
                 fprintf(fp, "%.8f %.8f %.8f %.8f\n", tab[0], tab[1], tab[2], tab[3]);
             }
         }
@@ -5313,47 +5337,29 @@ void VTK_WRITE_MESHS (const string &filename, FILE *fp, const MeshS &Th, bool bi
     fprintf(fp, "\n");
 }
 
-AnyType VTK_WriteMeshS_Op::operator () (Stack stack)  const {
+
+template<class MMesh>
+AnyType VTK_WriteMeshT_Op<MMesh>::operator () (Stack stack)  const {
     string *pffname = GetAny<string *>((*filename)(stack));
-    MeshS *pTh = GetAny<MeshS*>((*eTh)(stack));
+    MMesh *pTh = GetAny<MMesh*>((*eTh)(stack));
     
     ffassert(pTh);
-    MeshS &Th = *pTh;
-    
-    bool bigEndian = isBigEndian ();
-    bool swap = bigEndian;
-    
-    bool binary = true;
-    bool surface = true;
-    bool floatmesh = false;
-    bool floatsol = false;
-    
+    MMesh &Th = *pTh;
     string *dataname;
     int nbofsol = l.size();
     KN<int> order(nbofsol);
+   char *nameofuser[nbofsol];
     
-    char *nameofuser[nbofsol];
-    
-    for (int ii = 0; ii < nbofsol; ii++) {
+    for (int ii = 0; ii < nbofsol; ii++)
         order[ii] = 0;
-    }
-    
     if (nargs[0]) {dataname = GetAny<string *>((*nargs[0])(stack));}
-    
-    if (nargs[1]) {surface = GetAny<bool>((*nargs[1])(stack));}
-    
+    bool surface(arg(1, stack, true));
     if (nargs[2]) {order = GetAny<KN_<long> >((*nargs[2])(stack));}
-    
-    if (nargs[3]) {floatmesh = GetAny<bool>((*nargs[3])(stack));}
-    
-    if (nargs[4]) {floatsol = GetAny<bool>((*nargs[4])(stack));}
-    
-    if (nargs[5]) {binary = GetAny<bool>((*nargs[5])(stack));}
-    
-    if (nargs[6]) {swap = GetAny<bool>((*nargs[6])(stack));}
-        
+    bool floatmesh(arg(3, stack, false));
+    bool floatsol(arg(4, stack, false));
+    bool binary(arg(5, stack, true));
+    bool swap(arg(6, stack, isBigEndian ()));
     int datasize = floatmesh ?sizeof(float): sizeof(double);
-    
     int datasizeSol =floatsol ?sizeof(float): sizeof(double);
     
     int iii = 0;
@@ -5363,48 +5369,37 @@ AnyType VTK_WriteMeshS_Op::operator () (Stack stack)  const {
         char *name = strtok(data, " \t\n");
         
         nameofuser[iii] = newcopy(name);
-        if (verbosity > 5) {
-            cout << "   iovtk writeMeshS: value of iii  =" << iii << "  \"" << nameofuser[iii] << "\"\n";
-        }
-        
-        iii++;
-        {
+        if (verbosity > 5)
+            cout << "   iovtk writeMesh: value of iii  =" << iii << "  \"" << nameofuser[iii] << "\"\n";
+            iii++;
+       
             while ((name = strtok(NULL, " \t\n\0"))) {
                 if (iii >= nbofsol) {
-                    if (verbosity > 5) {
-                        cout << " iovtk writeMeshS: The number of data name is too large " << endl;
-                    }
-                    
-                    break;
+                    if (verbosity > 5)
+                        cout << " iovtk writeMesh: The number of data name is too large " << endl;
+                  break;
                 }
-                
                 nameofuser[iii] = newcopy(name);
-                if (verbosity > 5) {
-                    cout << "   iovtk writeMeshS: value of iii  =" << iii << "  \"" << nameofuser[iii] << "\"\n";
-                }
-                
+                if (verbosity > 5)
+                    cout << "   iovtk writeMesh: value of iii  =" << iii << "  \"" << nameofuser[iii] << "\"\n";
                 iii++;
             }
             
-            if (iii < nbofsol) {
-                if (verbosity) {
-                    cout << "   iovtk writeMeshS:  The number of data name is too small, we give default name " << endl;
-                }
-            }
-        }
+            if (iii < nbofsol)
+                if (verbosity)
+                    cout << "   iovtk writeMesh:  The number of data name is too small, we give default name " << endl;
     }
     
-    if (iii < nbofsol) {
-        for (int iiii = iii; iiii < nbofsol; iiii++) {
+    if (iii < nbofsol)
+        for (int iiii = iii; iiii < nbofsol; iiii++)
             nameofuser[iiii] = newcopy(l[iiii].name.c_str());    // dataff;
-        }
-    }
-    
+        
     // determination of number of order 0 et 1.
     int Norder0 = 0;
 	
-    for (int ii = 0; ii < nbofsol; ii++) {
-        if (order[ii] == 0) {Norder0++;}}
+    for (int ii = 0; ii < nbofsol; ii++)
+        if (order[ii] == 0)
+            Norder0++;
     
     // lecture du nom des variables
     
@@ -5420,13 +5415,16 @@ AnyType VTK_WriteMeshS_Op::operator () (Stack stack)  const {
     int VTK_FILE = 0;
     int ls = 0;
     int lll = strlen(pch);
-    if (!strcmp(pch + lll - (ls = 4), ".vtk")) {VTK_FILE = 1;} else if (!strcmp(pch + lll - (ls = 4), ".vtu")) {VTK_FILE = 2;}
+    if (!strcmp(pch + lll - (ls = 4), ".vtk")) VTK_FILE = 1;
+    else if (!strcmp(pch + lll - (ls = 4), ".vtu"))
+        VTK_FILE = 2;
     
-    if (verbosity) {cout << " " << pffname << " VTK_FILE " << VTK_FILE << endl;}
+    if (verbosity)
+        cout << " " << pffname << " VTK_FILE " << VTK_FILE << endl;
     
     if (VTK_FILE == 1) {
         // CAS VTK
-        VTK_WRITE_MESHS(*pffname, fp, Th, binary, datasize, surface, swap);
+        VTK_WRITE_MESHT<MMesh>(*pffname, fp, Th, binary, datasize, surface, swap);
         
         // WRITE SOLUTIONS
         if (datasizeSol == sizeof(float)) {
@@ -5444,7 +5442,7 @@ AnyType VTK_WriteMeshS_Op::operator () (Stack stack)  const {
                         
                         fprintf(fp, "%s %ld %d float\n", nameofuser[ii], l[ii].nbfloat, nsol);
                         if (verbosity > 5)
-                            cout << "   iovtk writeMeshS: name of data(" << ii << ")=" << nameofuser[ii] << endl;
+                            cout << "   iovtk writeMesh: name of data(" << ii << ")=" << nameofuser[ii] << endl;
                         // changement ecriture solution
                         l[ii].writesolutionP0_float(fp, Th, stack, surface, binary, swap);
                     }
@@ -5509,9 +5507,10 @@ AnyType VTK_WriteMeshS_Op::operator () (Stack stack)  const {
                 }
             }
         }
-    } else if (VTK_FILE == 2) {
+    }
+    else if (VTK_FILE == 2) {
         
-        VTU_WRITE_MESH(fp, Th, binary, datasize, surface);
+        VTU_WRITE_MESHT<MMesh>(fp, Th, binary, datasize, surface);
         
         // Solution Order
         // order 1
@@ -5572,7 +5571,7 @@ AnyType VTK_WriteMeshS_Op::operator () (Stack stack)  const {
     }
     
     delete [] pch;
-    return (MeshS *)NULL;
+    return (MMesh *)NULL;
 }
 
 //= =============================================
@@ -5582,8 +5581,8 @@ AnyType VTK_WriteMeshS_Op::operator () (Stack stack)  const {
 
 
 
-
-class VTK_LoadMeshS_Op: public E_F0mps
+template< class MMesh>
+class VTK_LoadMeshT_Op: public E_F0mps
 {
 public:
     Expression filename;
@@ -5595,7 +5594,7 @@ public:
     double arg (int i, Stack stack, double a) const {return nargs[i] ? GetAny<double>((*nargs[i])(stack)) : a;}
     
 public:
-    VTK_LoadMeshS_Op (const basicAC_F0 &args, Expression ffname)
+    VTK_LoadMeshT_Op (const basicAC_F0 &args, Expression ffname)
     : filename(ffname) {
         if (verbosity) {cout << "Load mesh given by VTK " << endl;}
         
@@ -5605,7 +5604,8 @@ public:
     AnyType operator () (Stack stack)  const;
 };
 
-basicAC_F0::name_and_type VTK_LoadMeshS_Op::name_param [] = {
+template< >
+basicAC_F0::name_and_type VTK_LoadMeshT_Op<MeshS>::name_param [] = {
     {"reftri", &typeid(long)},
     {"swap", &typeid(bool)},
     {"refedge", &typeid(long)},
@@ -5616,19 +5616,37 @@ basicAC_F0::name_and_type VTK_LoadMeshS_Op::name_param [] = {
     
 };
 
-class VTK_LoadMeshS: public OneOperator {
+template< >
+basicAC_F0::name_and_type VTK_LoadMeshT_Op<MeshL>::name_param [] = {
+    {"refedge", &typeid(long)},
+    {"swap", &typeid(bool)},
+    {"refbdpoint", &typeid(long)},
+    {"namelabel", &typeid(string)},
+    {"cleanmesh", &typeid(bool)},
+    {"removeduplicate", &typeid(bool)},
+    {"precisvertice", &typeid(double)}
+    
+};
+
+template< class MMesh>
+class VTK_LoadMeshT: public OneOperator {
 public:
-    VTK_LoadMeshS (): OneOperator(atype<pmeshS>(), atype<string *>()) {}
+    typedef const MMesh *ppmesh;
+    VTK_LoadMeshT (): OneOperator(atype<ppmesh>(), atype<string *>()) {}
     
     E_F0*code (const basicAC_F0 &args) const {
-        return new VTK_LoadMeshS_Op(args, t[0]->CastTo(args[0]));
+        return new VTK_LoadMeshT_Op<MMesh>(args, t[0]->CastTo(args[0]));
     }
 };
 
-
-MeshS*VTK_LoadS (const string &filename, bool bigEndian, bool cleanmesh, bool removeduplicate, double precisvertice) {
+template< class MMesh>
+MMesh *VTK_LoadT (const string &filename, bool bigEndian, bool cleanmesh, bool removeduplicate, double precisvertice) {
     // swap = bigEndian or not bigEndian
     // variable freefem++
+    typedef typename MMesh::Element T;
+    typedef typename MMesh::BorderElement B;
+    typedef typename MMesh::Vertex V;
+    
     int nv, nt = 0, nbe = 0;
     int nerr = 0;
     char* res;
@@ -5647,7 +5665,7 @@ MeshS*VTK_LoadS (const string &filename, bool bigEndian, bool cleanmesh, bool re
     
     fscanf(fp, "%s", buffer);    // ASCII or BINARY
     bool binary = false;
-    if (!strncmp(buffer, "BINARY",6)) {binary = true;}
+    if (!strncmp(buffer, "BINARY",6)) binary = true;
     
     if (fscanf(fp, "%s %s", buffer, buffer2) != 2) {
         cerr << "error in reading vtk files" << filename << endl;
@@ -5674,22 +5692,21 @@ MeshS*VTK_LoadS (const string &filename, bool bigEndian, bool cleanmesh, bool re
     }
     
     int datasize;
-    if (!strncmp(buffer2, "double", 6)) {
+    if (!strncmp(buffer2, "double", 6))
         datasize = sizeof(double);
-    } else if (!strncmp(buffer2, "float", 5)) {
+     else if (!strncmp(buffer2, "float", 5))
         datasize = sizeof(float);
-    } else {
+     else {
         cout << "VTK reader only accepts float or double datasets" << endl;
         ExecError("error in reading vtk file: VTK reader only accepts float or double datasets");
         exit(1);
     }
     
-    if (verbosity > 3) {
+    if (verbosity > 3)
         cout << "Reading %d points" << nv << " buffer2" << buffer2 << "binary"
         << binary << " " << datasize << " " << sizeof(float) << endl;
-    }
-    
-    Vertex3 *vff = new Vertex3[nv];
+  
+    V *vff = new V[nv];
     
     for (int i = 0; i < nv; i++) {
         if (verbosity > 9)
@@ -5703,18 +5720,22 @@ MeshS*VTK_LoadS (const string &filename, bool bigEndian, bool cleanmesh, bool re
                     ExecError("error in reading vtk file");
                 }
                 
-                if (!bigEndian) {SwapBytes((char *)f, sizeof(float), 3);}
+                if (!bigEndian)
+                    SwapBytes((char *)f, sizeof(float), 3);
                 
-                for (int j = 0; j < 3; j++) {
+                for (int j = 0; j < 3; j++)
                     xyz[j] = f[j];
-                }
-            } else              if (fread(xyz, sizeof(double), 3, fp) != 3) {
+                
+            }
+            else if (fread(xyz, sizeof(double), 3, fp) != 3) {
                 cout << "error in reading vtk files" << endl;
                 ExecError("error in reading vtk file");}
             
-            if (!bigEndian) SwapBytes((char *)xyz, sizeof(double), 3);
+                if (!bigEndian)
+                    SwapBytes((char *)xyz, sizeof(double), 3);
             
-        } else {
+        }
+        else {
             if(verbosity >10) cout << datasize << " " << sizeof(float) << endl;
             if (datasize == sizeof(float)) {
                 if (fscanf(fp, "%lf %lf %lf", &xyz[0], &xyz[1], &xyz[2]) != 3) {
@@ -5774,15 +5795,18 @@ MeshS*VTK_LoadS (const string &filename, bool bigEndian, bool cleanmesh, bool re
                 ExecError("error in reading vtk file");
             }
             
-            if (!bigEndian) {SwapBytes((char *)&numVerts, sizeof(int), 1);}
+            if (!bigEndian)
+                SwapBytes((char *)&numVerts, sizeof(int), 1);
             
             if ((int)fread(n, sizeof(int), numVerts, fp) != numVerts) {
                 cout << "error in reading VTK files " << endl;
                 ExecError("error in reading vtk file");
             }
             
-            if (!bigEndian) {SwapBytes((char *)n, sizeof(int), numVerts);}
-        } else {
+            if (!bigEndian)
+                SwapBytes((char *)n, sizeof(int), numVerts);
+        }
+        else {
             if (fscanf(fp, "%d", &numVerts) != 1) {
                 cout << "error in reading VTK files " << endl;
                 ExecError("error in reading vtk file");
@@ -5850,19 +5874,27 @@ MeshS*VTK_LoadS (const string &filename, bool bigEndian, bool cleanmesh, bool re
         
         switch (type) {
             case 1:    // Vertex
-                if (nerr++ < 10 && verbosity) {
-                    cout << "this type of cell (vertex) is not taking account in Freefem++ " << type << endl;
-                }
-                
+               if (std::is_same<MMesh, MeshL>::value)
+                    nbe++;
                 break;
+             
             case 3:    // Edge/line
-                nbe++;    // 2D
+                if (std::is_same<MMesh, MeshS>::value)
+                    nbe++;
+                else if (std::is_same<MMesh, MeshL>::value)
+                    nt++;
                 break;
             case 5:    // Triangle
-                nt++;    // 2D
+                if (std::is_same<MMesh, MeshS>::value)
+                    nt++;
+                else  if (std::is_same<MMesh, MeshL>::value) cout << "We are loading a three dimensional CURVE mesh. Three is no triangle." << endl;
+                    ExecError("error in reading vtk file");
                 break;
             case 10:// Tetrah�dre
-                cout << "We are loading a three dimensional SURFACE mesh. Three is no tetrahedron." << endl;
+                if (std::is_same<MMesh, MeshS>::value)
+                    cout << "We are loading a three dimensional SURFACE mesh. Three is no tetrahedron." << endl;
+                else if (std::is_same<MMesh, MeshL>::value)
+                    cout << "We are loading a three dimensional CURVE mesh. Three is no tetrahedron." << endl;
                 ExecError("error in reading vtk file");
                 break;
             default:
@@ -5874,49 +5906,49 @@ MeshS*VTK_LoadS (const string &filename, bool bigEndian, bool cleanmesh, bool re
     
     fclose(fp);
     
-    TriangleS *tff;
+    T *tff;
     if (nt > 0)
-        tff = new TriangleS [nt];
+        tff = new T [nt];
     else
         ExecError("error in reading vtk file: Not triangle");
-    TriangleS *ttff = tff;
-    BoundaryEdgeS *bff;
+    T *ttff = tff;
+    B *bff;
     
     if (nbe > 0)
-        bff = new BoundaryEdgeS[nbe];
+        bff = new B[nbe];
     else
         ExecError("error in reading vtk file: Not edge");
-    BoundaryEdgeS *bbff = bff;
+    B *bbff = bff;
     
     for (unsigned int i = 0; i < numElements; i++) {
         int type = TypeCells[i];
-        int ivb[2], ivt[3];
+        int ivb[B::nv], ivt[T::nv];
         int label = 1;
         
         switch (type) {
             case 1:    // Vertex
-                
-                if (nerr++ < 10 && verbosity)
-                    cout << "this type of cell (vertex) is not taking account in Freefem++ " << type << " " << endl;
-                
-                break;
-            case 3:    // Edge/line
-                assert((firstCell[i + 1] - firstCell[i]) == 2);
-                
-                for (int j = firstCell[i]; j < firstCell[i + 1]; j++) {
+                assert((firstCell[i + 1] - firstCell[i]) == 1);
+                for (int j = firstCell[i]; j < firstCell[i + 1]; j++)
                     ivb[j - firstCell[i]] = IntCells[j];
-                }
-                
-                (bbff++)->set(vff, ivb, label);
+                if(std::is_same<MMesh, MeshL>::value)
+                    (bbff++)->set(vff, ivb, label);
                 break;
+            case 3:    // Edge
+                assert((firstCell[i + 1] - firstCell[i]) == 2);
+               for (int j = firstCell[i]; j < firstCell[i + 1]; j++)
+                    ivb[j - firstCell[i]] = IntCells[j];
+               if(std::is_same<MMesh, MeshS>::value)
+                    (bbff++)->set(vff, ivb, label);
+                else if(std::is_same<MMesh, MeshL>::value)
+                    (ttff++)->set(vff, ivt, label);
+                break;
+            
             case 5:    // Triangle
                 assert((firstCell[i + 1] - firstCell[i]) == 3);
-                
-                for (int j = firstCell[i]; j < firstCell[i + 1]; j++) {
+               for (int j = firstCell[i]; j < firstCell[i + 1]; j++)
                     ivt[j - firstCell[i]] = IntCells[j];
-                }
-                
-                (ttff++)->set(vff, ivt, label);
+               if(std::is_same<MMesh, MeshS>::value)
+                    (ttff++)->set(vff, ivt, label);
                 break;
             default:
                 break;
@@ -5927,12 +5959,12 @@ MeshS*VTK_LoadS (const string &filename, bool bigEndian, bool cleanmesh, bool re
     delete [] firstCell;
     delete [] TypeCells;
     
-    MeshS *pTh = new MeshS(nv, nt, nbe, vff, tff, bff, cleanmesh, removeduplicate, precisvertice);
+    MMesh *pTh = new MMesh(nv, nt, nbe, vff, tff, bff, cleanmesh, removeduplicate, precisvertice);
     return pTh;
 }
 
-
-AnyType VTK_LoadMeshS_Op::operator () (Stack stack)  const {
+template<class MMesh>
+AnyType VTK_LoadMeshT_Op<MMesh>::operator () (Stack stack)  const {
     string *pffname = GetAny<string *>((*filename)(stack));
   
     int reftri(arg(0, stack, 1));
@@ -5945,7 +5977,7 @@ AnyType VTK_LoadMeshS_Op::operator () (Stack stack)  const {
     bool removeduplicate(arg(5, stack, false));
     double precisvertice(arg(6, stack, 1e-6));
     
-    MeshS *Th = VTK_LoadS(*pffname, swap, cleanmesh,removeduplicate,precisvertice);
+    MMesh *Th = VTK_LoadT<MMesh>(*pffname, swap, cleanmesh,removeduplicate,precisvertice);
     
     // A faire fonction pour changer le label
     
@@ -6044,9 +6076,10 @@ void saveTecplot (const string &file, const Mesh &Th) {
 
 static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
     typedef Mesh *pmesh;
-    // typedef Mesh2 *pmesh2;
     typedef Mesh3 *pmesh3;
     typedef MeshS *pmeshS;
+    typedef MeshL *pmeshL;
+
     // if (verbosity)
     if (verbosity && (mpirank == 0)) {cout << " load: iovtk " << endl;}
     
@@ -6054,8 +6087,11 @@ static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3
     Global.Add("vtkload", "(", new VTK_LoadMesh);
     Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMesh3_Op> );
     Global.Add("vtkload3", "(", new VTK_LoadMesh3);
-    Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMeshS_Op> );
-    Global.Add("vtkloadS", "(", new VTK_LoadMeshS);
+    Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMeshT_Op<MeshS>> );
+    Global.Add("vtkloadS", "(", new VTK_LoadMeshT<MeshS>);
+    Global.Add("vtkloadL", "(", new VTK_LoadMeshT<MeshL>);
+    Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMeshT_Op<MeshL>> );
+
 }
 
 LOADFUNC(Load_Init)
