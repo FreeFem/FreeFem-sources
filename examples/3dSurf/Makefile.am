@@ -30,7 +30,8 @@ TESTS_OTHER = buildMeshSfromMesh3.edp \
 	Laplace3dSP2.edp \
 	LaplacianSurf.edp \
 	operatorsOnMeshS.edp \
-	extractSurfFromMesh3.edp
+	extractSurfFromMesh3.edp \
+	testvtk.edp
 
 
 TESTS_TETGEN = HeatTorus.edp
