@@ -7973,16 +7973,16 @@ public:
 template<>
 basicAC_F0::name_and_type CheckMesh_Op<Mesh3>::name_param [] = {
   {"precisvertice",&typeid(double)},
-  {"removeduplicate", &typeid(bool)},  
-  {"rebuildboundary", &typeid(bool)}
+  {"removeduplicate", &typeid(bool)}  
+  //{"rebuildboundary", &typeid(bool)}
 	 
 };
 
 template<>
 basicAC_F0::name_and_type CheckMesh_Op<MeshS>::name_param [] = {
   {"precisvertice",&typeid(double)},
-  {"removeduplicate", &typeid(bool)},  
-  {"rebuildboundary", &typeid(bool)}
+  {"removeduplicate", &typeid(bool)}  
+  //{"rebuildboundary", &typeid(bool)}
 	 
 };
 
@@ -7996,7 +7996,7 @@ AnyType CheckMesh_Op<MMesh>::operator () (Stack stack)  const {
 
 	double precis_mesh(arg(0, stack, 1e-6)); 
     bool removeduplicate(arg(1, stack, false));
-    bool rebuildboundary(arg(2, stack, false));
+    bool rebuildboundary=false; // (arg(2, stack, false));
 	int orientation=1;
 	if(verbosity>10) 
 		cout << "call cleanmesh function, precis_mesh:" << precis_mesh << " removeduplicate:"<< removeduplicate	<< " rebuildboundary:" << rebuildboundary <<endl;
