@@ -27,20 +27,28 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Preliminary support for symmetric distributed PETSc matrices (MATMPISBAIJ instead of MATMPIAIJ)
 - Interface to AMS, Hiptmair--Xu preconditioner for problems in H(curl), see maxwell-3d-PETSc.edp
+- FEM on curve 3D (in test)
+- P0, P1, P2 curve 3D FE (scalar for the moment)
+- i/o medit and vtk format for curve FE
+- checkMesh() function, allow to remove multiple vertices, elements and border elements (argument: precisvertice(double),removeduplicate(bool)) 
+- possible to build a curve mesh from a surface, ThS = buildBdMesh(ThS) and define this new mesh by meshL ThL= ThS.Gamma
+- can extract a border part of a meshL (meshL ThL = extract(ThL,label=llabs))
 
 ### Changed
--
+- function buildSurface(...) renamed by buildBdMesh(...)
+- line3(...) renamed by SLine(...)
 
 ### Removed
 - FFTW is not compiled by PETSc anymore
 - Spurious outputs in TetGen plugin
 
 ### Fixed
--  plotMPI function for plotting 3D solutions, problem with serialize
--  variable mes in clean_mesh function
--  correct bug verflow in plugin iohdf5
+- plotMPI function for plotting 3D solutions, problem with serialize
+- variable mes in clean_mesh function
+- correct bug verflow in plugin iohdf5
 - correct problem with buffer iostrean function (buffer must be out of range )
-
+- correct i/o vtk and by defaut write at binary format
+- fix an overflow in RT13d FE
 ## [4.4-2]
 ### Added
 - add matrix and array tools (FH)
