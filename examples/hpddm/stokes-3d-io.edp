@@ -87,4 +87,6 @@ if(Opt.n > 0)       // optimized Schwarz methods
     DDM(A, rhs, u[], excluded = excluded, ret = ret, O = Opt);
 else
     u[] = A^-1 * rhs;
-savevtk("sol_stokes_3d_io.vtu", Th, [u, uB, uC], uD, order = [1, 1], dataname = "velocity pressure");
+int[int] fforder(2);
+fforder = [1, 1];
+savevtk("sol_stokes_3d_io.vtu", Th, [u, uB, uC], uD, order = fforder, dataname = "velocity pressure");
