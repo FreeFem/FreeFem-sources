@@ -86,7 +86,8 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	minimal-surface-2d-Tao-PETSc.edp \
 	Schur-complement-PETSc.edp \
 	maxwell-2d-PETSc.edp \
-	maxwell-3d-PETSc.edp
+	maxwell-3d-PETSc.edp \
+	laplace-adapt-3d-PETSc.edp
 
 TESTS_PETSC_SLEPC = laplace-2d-SLEPc.edp \
 	laplace-2d-spherical-harmonics-SLEPc.edp \

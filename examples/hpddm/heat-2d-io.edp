@@ -90,7 +90,6 @@ pair ret;
 
 set(A, sparams = "-hpddm_reuse_preconditioner=1");
 Wh<real> def(u) = init(0.0);    // local solution
-exportBegin("sol_heat_2d_io", mpiCommWorld);
 for(int i = 0; i < iMax; ++i) {
     real[int] newRhs(rhs.n);
     dmv(A, M, u[], newRhs);
@@ -102,7 +101,5 @@ for(int i = 0; i < iMax; ++i) {
         u[] = A^-1 * newRhs;
 
     int[int] fforder(1);
-    fforder = 1;
-    exportTimeStep("sol_heat_2d_io", Th, u, fforder, i, mpiCommWorld);
+    savevtk("sol_heat_2d_io.vtu", Th, u, append = true);
 }
-exportEnd("sol_heat_2d_io", mpiCommWorld);
