@@ -1,0 +1,60 @@
+load "msh3"
+load "tetgen"
+load "mshmet"
+load "medit"
+load "PETSc"
+macro dimension()3// EOM            // 2D or 3D
+include "macro_ddm.idp"             // additional DDM functions
+
+macro def(i)i// EOM                         // scalar field definition
+macro init(i)i// EOM                        // scalar field initialization
+int n = 12;
+int[int] L=[1,1,1,1], LU=[0,1], LD=[1,1];
+mesh3 Th3=buildlayers(square(n, n, region=0, label=L), n, zbound=[0,1], labelmid=LD, labelup = LU, labeldown = LU);
+Th3 = trunc(Th3, x < 0.5 || y < 0.5 || z < 0.5, label=1);
+
+macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
+
+varf vPoisson(u, v) = int3d(Th3)(grad(u)' * grad(v)) + int3d(Th3)(v) + on(1, u=0);
+
+real[int] D;
+int[int][int] intersection;
+meshN ThBackup = Th3;
+buildMinimalist(Th3, intersection, D, P1)
+fespace Vh(Th3, P1);
+Vh u;
+Mat dA(Vh.ndof, intersection, D);
+real err = 1e-2;
+
+int iMax = 4;
+for(int i = 0; i < iMax; ++i) {
+    matrix Loc = vPoisson(Vh, Vh, tgv = -2);
+    dA = Loc;
+    set(dA, sparams = "-ksp_monitor -pc_type hypre");
+    real[int] rhs = vPoisson(0, Vh, tgv = -1);
+    u[] = dA^-1 * rhs;
+    if(i < iMax - 1) {
+        fespace VhBackup(ThBackup, P1);
+        VhBackup h, hReduced;
+        u[] .*= D;
+        searchMethod = 0;
+        h = u;
+        searchMethod = 1;
+        mpiAllReduce(h[], hReduced[], mpiCommWorld, mpiSUM);
+        if(mpirank == 0) {
+            h[] = mshmet(ThBackup, hReduced, normalization=1, aniso=0, nbregul=1, hmin=1e-3, hmax=0.3, err=err);
+            plot(hReduced, wait=1, fill=0, boundary=0, CutPlane=0, ShowMeshes=1, LabelColors=0);
+            Th3 = tetgreconstruction(ThBackup, switch="raAQ", sizeofvolume=h*h*h/6.0);
+            medit("U-adapt-iso-" + i, Th3, hReduced, wait=1);
+        }
+        broadcast(processor(0), Th3);
+        ThBackup = Th3;
+        intersection.resize(0);
+        D.resize(0);
+        buildMinimalist(Th3, intersection, D, P1)
+        Mat dAdapt(Vh.ndof, intersection, D);
+        dA = dAdapt;
+        u = hReduced;
+        err *= 0.8;
+    }
+}
