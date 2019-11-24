@@ -1415,11 +1415,13 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
             Dmat* G = nargs[14] ? GetAny<Dmat*>((*nargs[14])(stack)) : nullptr;
             if(coordinates)
                 PCSetCoordinates(pc, coordinates->N(), coordinates->M(), *coordinates);
+#ifdef PETSC_HAVE_HYPRE
             if(G) {
                 PetscStrcmp(type, PCHYPRE, &isType);
                 if(isType)
                     PCHYPRESetDiscreteGradient(pc, G->_petsc);
             }
+#endif
 #ifdef PCHPDDM
             PetscStrcmp(type, PCHPDDM, &isType);
             if(assembled && isType && ptA->_A && ptA->_A->getMatrix() && ptA->_num) {
