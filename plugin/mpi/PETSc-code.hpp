@@ -1215,7 +1215,7 @@ template<class Type>
 class setOptions_Op : public E_F0mps {
     public:
         Expression A;
-        static const int n_name_param = 15;
+        static const int n_name_param = 16;
         static basicAC_F0::name_and_type name_param[];
         Expression nargs[n_name_param];
         setOptions_Op(const basicAC_F0& args, Expression param1) : A(param1) {
@@ -1240,7 +1240,8 @@ basicAC_F0::name_and_type setOptions_Op<Type>::name_param[] = {
     {"schur", &typeid(KN<Dmat>*)},                                      // 11
     {"aux", &typeid(Matrice_Creuse<PetscScalar>*)},                     // 12
     {"coordinates", &typeid(KNM<double>*)},                             // 13
-    {"gradient", &typeid(Dmat*)}                                        // 14
+    {"gradient", &typeid(Dmat*)},                                       // 14
+    {"O", &typeid(Matrice_Creuse<PetscScalar>*)}                        // 15
 };
 template<class Type, char> class LinearSolver;
 template<class Type> class NonlinearSolver;
@@ -1272,6 +1273,16 @@ struct _n_User<TaoSolver<Type>> {
     typename NonlinearSolver<Type>::VecF_O* icJ;
     typename LinearSolver<Type, 'N'>::MatF_O* ec;
     typename NonlinearSolver<Type>::VecF_O* ecJ;
+};
+struct ModifierO {
+    Mat O;
+};
+PetscErrorCode Modifier(PC pc, PetscInt nsub, const IS row[], const IS col[], Mat submat[], void* ctx) {
+    ModifierO* user;
+    PetscFunctionBeginUser;
+    user = reinterpret_cast<ModifierO*>(ctx);
+    MatCopy(user->O, submat[0], DIFFERENT_NONZERO_PATTERN);
+    PetscFunctionReturn(0);
 };
 template<class Type>
 class setOptions : public OneOperator {
@@ -1422,9 +1433,7 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
                     PCHYPRESetDiscreteGradient(pc, G->_petsc);
             }
 #endif
-#ifdef PCHPDDM
-            PetscStrcmp(type, PCHPDDM, &isType);
-            if(assembled && isType && ptA->_A && ptA->_A->getMatrix() && ptA->_num) {
+            if(assembled && ptA->_A && ptA->_A->getMatrix() && ptA->_num) {
                 std::function<Mat(const HPDDM::MatrixCSR<PetscScalar>* const)> func = [](const HPDDM::MatrixCSR<PetscScalar>* const A) {
                     Mat aux;
                     if(A->_sym) {
@@ -1459,28 +1468,57 @@ AnyType setOptions_Op<Type>::operator()(Stack stack) const {
                     return aux;
                 };
                 const HPDDM::MatrixCSR<PetscScalar>* const A = ptA->_A->getMatrix();
-                Mat aux = func(A);
                 PetscInt* idx;
                 PetscMalloc1(A->_n, &idx);
                 std::copy_n(ptA->_num, A->_n, idx);
                 IS is;
                 ISCreateGeneral(PETSC_COMM_SELF, ptA->_A->getMatrix()->_n, idx, PETSC_OWN_POINTER, &is);
-                PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
-                ISDestroy(&is);
-                MatDestroy(&aux);
-                Matrice_Creuse<PetscScalar>* ptK = nargs[12] ? GetAny<Matrice_Creuse<PetscScalar>*>((*nargs[12])(stack)) : nullptr;
-#if PETSC_VERSION_GE(3,13,0)
-                if(ptK->A) {
-                    MatriceMorse<PetscScalar>* mA = static_cast<MatriceMorse<PetscScalar>*>(&(*ptK->A));
-                    HPDDM::MatrixCSR<PetscScalar>* B = new_HPDDM_MatrixCSR<PetscScalar>(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
-                    aux = func(B);
-                    PCHPDDMSetRHSMat(pc, aux);
+#ifdef PCHPDDM
+                PetscStrcmp(type, PCHPDDM, &isType);
+                if(isType) {
+                    Mat aux = func(A);
+                    PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
                     MatDestroy(&aux);
-                    delete B;
+                    Matrice_Creuse<PetscScalar>* ptK = nargs[12] ? GetAny<Matrice_Creuse<PetscScalar>*>((*nargs[12])(stack)) : nullptr;
+#if PETSC_VERSION_GE(3,13,0)
+                    if(ptK->A) {
+                        MatriceMorse<PetscScalar>* mA = static_cast<MatriceMorse<PetscScalar>*>(&(*ptK->A));
+                        HPDDM::MatrixCSR<PetscScalar>* B = new_HPDDM_MatrixCSR<PetscScalar>(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+                        aux = func(B);
+                        PCHPDDMSetRHSMat(pc, aux);
+                        MatDestroy(&aux);
+                        delete B;
+                    }
+#endif
                 }
 #endif
+                Matrice_Creuse<PetscScalar>* ptO = nargs[15] ? GetAny<Matrice_Creuse<PetscScalar>*>((*nargs[15])(stack)) : nullptr;
+                if(ptO && ptO->A) {
+                    MatriceMorse<PetscScalar>* mO = static_cast<MatriceMorse<PetscScalar>*>(&(*ptO->A));
+                    ff_HPDDM_MatrixCSR<PetscScalar> dO(mO);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+                    PCSetType(pc, PCASM);
+                    IS loc;
+                    PetscInt n, first;
+                    MatGetOwnershipRange(ptA->_petsc, &first, &n);
+                    n -= first;
+                    ISCreateStride(PETSC_COMM_SELF, n, first, 1, &loc);
+                    PCASMSetLocalSubdomains(pc, 1, &is, &loc);
+                    ModifierO* ctx = new ModifierO;
+                    Mat aux = func(&dO);
+                    IS perm;
+                    ISSortPermutation(is, PETSC_TRUE, &perm);
+                    MatPermute(aux, perm, perm, &ctx->O);
+                    ISDestroy(&perm);
+                    MatDestroy(&aux);
+                    PCSetModifySubMatrices(pc, Modifier, ctx);
+                    PCSetUp(pc);
+                    PCSetModifySubMatrices(pc, NULL, NULL);
+                    MatDestroy(&ctx->O);
+                    delete ctx;
+                    ISDestroy(&loc);
+                }
+                ISDestroy(&is);
             }
-#endif
         }
         if(std::is_same<Type, Dmat>::value && (nargs[6] || nargs[11])) {
             if(nargs[2] && (nargs[5] || nargs[11])) {
@@ -2847,7 +2885,7 @@ static PetscErrorCode Op_User(Container A, Vec x, Vec y) {
     PetscErrorCode         ierr;
 
     PetscFunctionBegin;
-    ierr = ContainerGetContext(A, user); CHKERRQ(ierr);
+    ierr = ContainerGetContext(A, user);CHKERRQ(ierr);
     typename LinearSolver<Type, 'N'>::MatF_O* mat = reinterpret_cast<typename LinearSolver<Type, 'N'>::MatF_O*>(user->op);
     VecGetArrayRead(x, &in);
     VecGetArray(y, &out);

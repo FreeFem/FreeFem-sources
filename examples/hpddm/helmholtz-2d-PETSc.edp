@@ -42,13 +42,16 @@ matrix<complex> Loc;                        // local operator
     fespace Ph(Th, P0);
     Ph val = wedge(x, y);
     Ph k = omega / val;
-    varf vPb(u, v) = intN(Th)(-k^2 * u * v + (grad(u)' * grad(v))) + intN1(Th, 2)(1i * k * u * v) + intN(Th)(f * v) + on(1, u = 0.0);
+    varf vPb(u, v) = intN(Th)(-k^2 * u * v + (grad(u)' * grad(v))) + intN1(Th, -111111)(1i * k * u * v) + intN1(Th, 2)(1i * k * u * v) + intN(Th)(f * v) + on(1, u = 0.0);
     Loc = vPb(Wh, Wh, tgv = -1);
     rhs = vPb(0, Wh, tgv = -1);
 }
 
 Mat<complex> A(Loc, intersection, D);
-set(A, sparams = "-ksp_view -pc_type lu");
+if(usedARGV("-optimized_Schwarz") != -1)
+    set(A, sparams = "-ksp_view -sub_pc_type lu", O = Loc);
+else
+    set(A, sparams = "-ksp_view -pc_type lu");
 Wh<complex> def(u);    // local solution
 
 u[] = A^-1 * rhs;
