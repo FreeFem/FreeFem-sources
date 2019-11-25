@@ -84,12 +84,8 @@ typename CubicLineSearch< LS >::Param CubicLineSearch< LS >::search(const Param&
                                                                     double lambda) {
 
   int tst = 0;    // useful vars
-  Real alpha2 = 0, alpha_tmp = 0, alpha_prev = 0;
-  Real alpha_prev2 = 0, alpha = 0;
-  Real f1 = 0, f2 = 0, fprev = 0;
-  Real a = 0, b = 0;
-  Real c = 0, cm11 = 0, cm12 = 0, cm21 = 0, cm22 = 0;
-  Real disc = 0;
+  Real alpha = 0., alpha_prev = 0;
+  Real fprev = 0;
   Real new_m = 0, old_m = 0;
   Param new_solution(current_solution);
   cout << " search " << p.max( ) << endl;
@@ -116,8 +112,11 @@ typename CubicLineSearch< LS >::Param CubicLineSearch< LS >::search(const Param&
   // Armijo's test for alpha too large
   alpha_prev = alpha;    // H.L. Deng, 6/13/95
   while (new_m > old_m + lambda * alpha * slope && this->iterNum < this->iterMax) {
-    alpha2 = alpha * alpha;
-    f1 = new_m - old_m - slope * alpha;
+    Real alpha2 = alpha * alpha, alpha_tmp = 0.;
+    Real f1 = new_m - old_m - slope * alpha;
+    Real a = 0, b = 0;
+    Real c = 0, cm11 = 0, cm12 = 0, cm21 = 0, cm22 = 0;
+    Real disc = 0;
 
     if (tst == 0) {
       alpha_tmp = -slope * alpha2 / (f1 * 2.);
@@ -125,8 +124,8 @@ typename CubicLineSearch< LS >::Param CubicLineSearch< LS >::search(const Param&
 
       tst = 1;
     } else {
-      alpha_prev2 = alpha_prev * alpha_prev;
-      f2 = fprev - old_m - alpha_prev * slope;
+      Real alpha_prev2 = alpha_prev * alpha_prev;
+      Real f2 = fprev - old_m - alpha_prev * slope;
 
       c = 1. / (alpha - alpha_prev);
       cm11 = 1. / alpha2;

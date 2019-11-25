@@ -75,14 +75,13 @@ tNRJ< Param, Vect, Mat, Real >::~tNRJ( ) {
 }
 
 template< class Param, class Vect, class Mat, class Real >
-tNRJ< Param, Vect, Mat, Real >::tNRJ(int n) {
+tNRJ< Param, Vect, Mat, Real >::tNRJ(int n) : val(0.) {
   nparam = n;
   nappel_val = 0;
   nappel_grad = 0;
   nappel_hess = 0;
   grad = NULL;
   hess = NULL;
-  val = 0.;
 }
 
 template< class Param, class Vect, class Mat, class Real >

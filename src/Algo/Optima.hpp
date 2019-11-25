@@ -18,9 +18,9 @@
   Optima. This class cannot be instantiated directly.
 */
 
-// Attention :
-// pas de copie
-// pas d'opérateur =
+// WARNING :
+// No copy constructor
+// No copy operator =
 
 template< class LS >
 class Optima {
@@ -36,7 +36,7 @@ class Optima {
   int iterMax;
   int iterNum;
   // tolerance error
-  // c'est une tolérance sur la norme euclidienne du gradient
+  // This is a tolerance on the euclidiean norm of the gradient
   Real tol;
   // mlist of residue
   mlist* residue;
@@ -66,6 +66,11 @@ class Optima {
   mlist allResidue( );
   //  normalized residues of all iterations
   mlist normResidue( );
+
+  //  No copy operator
+  Optima operator = (Optima&) = delete;
+  //  No copy constructor
+  Optima(Optima&) = delete;
 };
 
 template< class LS >

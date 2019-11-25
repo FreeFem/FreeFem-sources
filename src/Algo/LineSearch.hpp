@@ -85,7 +85,7 @@ class LineSearch {
  public:
   // a constructor with pointer to the nrj and
   // to the step if numerical gradient is computed
-  LineSearch(NRJ *f, Vect *interval = NULL);
+  explicit LineSearch(NRJ *f, Vect *interval = NULL);
   virtual ~LineSearch( );
 
   // Start point and descent direction + parameters

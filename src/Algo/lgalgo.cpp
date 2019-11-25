@@ -232,7 +232,7 @@ class OptimAlgo : public OneOperator {
 
   E_F0 *code(const basicAC_F0 &args) const { return new E_LCG(args, cas); }
 
-  OptimAlgo(int c)
+  explicit OptimAlgo(int c)
     : OneOperator(atype< long >( ), atype< Polymorphic * >( ), atype< KN< R > * >( )), cas(c) {}
 
   OptimAlgo(int c, int cc)

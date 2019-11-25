@@ -47,13 +47,13 @@ class Param : public KN< Real > {
  public:
   Param( );
   // construct a continuous model with size n
-  Param(int n);
+  explicit Param(int n);
   // construct a continuous model space with boundary and initial values
   Param(const KN< Real >& maxp, const KN< Real >& minp, const KN< Real >& initmod);
   // construct a continuous model space with boundary
   Param(const KN< Real >& maxp, const KN< Real >& minp);
   // construct a continuous model space with initial values
-  Param(const KN< Real >& initmod);
+  explicit Param(const KN< Real >& initmod);
   // copy operator
   Param(const Param< Real >& p);
   virtual ~Param( );

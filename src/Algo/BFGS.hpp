@@ -47,7 +47,7 @@ class BFGS : public Optima< LS > {
   ~BFGS( ) { ; }
 
   // the BFGS search starting from model0, returns an optimum model
-  Param optimizer(Param& model0);
+  Param optimizer(Param& model0) override;
 };
 
 template< class LS >

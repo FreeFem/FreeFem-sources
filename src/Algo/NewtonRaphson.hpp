@@ -46,7 +46,7 @@ class Newt : public Optima< LS > {
   ~Newt( ) { ; }
 
   // the Newt search starting from model0, returns an optimum model
-  Param optimizer(Param& model0);
+  Param optimizer(Param& model0) override;
 };
 
 template< class LS >
@@ -72,7 +72,6 @@ typename Newt< LS >::Param Newt< LS >::optimizer(Param& model0) {
   int n = model0.size( );
   Vect g0(n);
   double lambda = 0.025;
-  double descent = 0.;
 
   g0 = *(this->ls->gradient(model0));
 
@@ -99,7 +98,7 @@ typename Newt< LS >::Param Newt< LS >::optimizer(Param& model0) {
     this->ls->hessian(model0)->Solve(s, g0);
     s = -1. * s;
 
-    descent = (s, g0);
+    double descent = (s, g0);
     // Cubic Line Search
     model1 = this->ls->search(model0, s, descent, lambda);
     g1 = *(this->ls->gradient(model1));

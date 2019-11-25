@@ -12,7 +12,7 @@ class RosenBrock : public tNRJ< Param< Real >, KN< Real >, Mat, Real > {
  protected:
  public:
   // Constructors and Destructors
-  RosenBrock(int);
+  explicit RosenBrock(int);
   ~RosenBrock( );
 
   Real Val(const Param< Real >&);
