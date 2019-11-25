@@ -350,7 +350,7 @@ int parsop(pScene sc, pMesh mesh) {
       if (!EatSpace(in)) {
         ret = fscanf(in, "%c", &ub);
         if (ret == EOF) printf("fscanf error\n");
-        sc->par.nbpart = max(atoi(ub), 1);
+        sc->par.nbpart = max(ub - '0', 1);
       }
     } else if (!strcmp(key, "nbmaterial")) {
       ret = fscanf(in, "%d", &nbmat);
