@@ -78,7 +78,7 @@ int mymain(int argc, char **argv) {
   set_new_handler(&NewHandler);
   char *fmeshback = "1.mesh";
   char *fmetrix = 0;
-  ostream *f_metr(&cout);
+  // ostream *f_metr(&cout);
   if (argc >= 2) fmeshback = argv[1];
   if (argc >= 3) fmetrix = argv[2];
   if (argc >= 4) raison = atof(argv[3]);

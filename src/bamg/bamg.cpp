@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
     exit(10);
   }
 #endif
-  double time0, time1, time2, time3, time4;
+  double time0, time2, time3, time4;
   //   2 way for uses ---
   //   1 first mesh
   //   or adaptation
@@ -252,10 +252,6 @@ int main(int argc, char **argv) {
       maxsubdiv = atof(argv[i]);
     else if (!strcmp(argv[i], "-iso"))
       iso = 1;
-    else if (!strcmp(argv[i], "-KeepBackVertices"))
-      KeepBackVertices = 1;
-    else if (!strcmp(argv[i], "-noKeepBackVertices"))
-      KeepBackVertices = 0;
     else if (!strcmp(argv[i], "-KeepBackVertices"))
       KeepBackVertices = 1;
     else if (!strcmp(argv[i], "-noKeepBackVertices"))
@@ -449,8 +445,8 @@ int main(int argc, char **argv) {
   }
 #endif
 
-  if (verbosity) cout << bamgversion << " : ";
   if (verbosity)
+    cout << bamgversion << " : ";
     if (fgeom && fileout)
       cout << " Construction of a mesh from the geometry : " << fgeom << endl
            << "     with less than " << nbvx << " vertices " << endl;
@@ -465,6 +461,7 @@ int main(int argc, char **argv) {
       cout << " Construction of the metric file on the background mesh: " << fmeshback << endl;
 
   if (fgeom && fileout) {
+    double time1;
     if (verbosity)
       cout << " Construction of a mesh from the geometry : " << fgeom << endl
            << "     with less than " << nbvx << " vertices " << endl;
@@ -548,7 +545,7 @@ int main(int argc, char **argv) {
     hmax = Min(hmax, BTh.MaximalHmax( ));
 
     BTh.MakeQuadTree( );
-    time1 = CPUtime( );
+    // time1 = CPUtime( );
     if (fmetrix)
       BTh.ReadMetric(fmetrix, hmin, hmax, coef);
     else {    // init with hmax
@@ -665,11 +662,11 @@ int main(int argc, char **argv) {
         Int4 nbfieldBB = 0, nbfieldbb = nbsolbb;
         if (fbb) *fbb << dim << " " << nbsolbb << " " << Th.nbv << " " << 2 << endl;
         if (fBB) {
-          int i;
+          // int i;
           *fBB << dim << " " << nbsolBB;
           for (i = 0; i < nbsolBB; i++) *fBB << " " << (typesolsBB ? typesolsBB[i] + 1 : 1);
           *fBB << " " << Th.nbv << " " << 2 << endl;
-          assert(dim == 2);
+          // assert(dim == 2);  // dim is defined as const int = 2
           for (i = 0; i < nbsolBB; i++) nbfieldBB += typesolsBB ? typesolsBB[i] + 1 : 1;
           // this code is good only if dim == 2
         }
