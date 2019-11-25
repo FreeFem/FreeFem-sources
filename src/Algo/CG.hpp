@@ -82,33 +82,31 @@
   Practical Optimization by Powell.
 */
 
-template <class LS>
-class ConjugateGradient : public Optima<LS> {
+template< class LS >
+class ConjugateGradient : public Optima< LS > {
   typedef typename LS::Real Real;
   typedef typename LS::Param Param;
   typedef typename LS::Vect Vect;
   typedef typename LS::VMat VMat;
   typedef LS LineSearch;
 
-public:
+ public:
   // a constructor
-  ConjugateGradient(
-    LS * ls, // Pointer to the line-search object
-    int iter, // Maximum number of iterations
-    Real tol, // Minimum accepted gradient at optimum solution
-    int verb=0 // verbose or quiet
+  ConjugateGradient(LS* ls,         // Pointer to the line-search object
+                    int iter,       // Maximum number of iterations
+                    Real tol,       // Minimum accepted gradient at optimum solution
+                    int verb = 0    // verbose or quiet
   );
   /* At the present version, you must use the CubicLineSearch procedure */
   // a constructor
-  ~ConjugateGradient(){;}
+  ~ConjugateGradient( ) { ; }
 
   // Conjugate gradient search starting from m0, returns an optimum Model
   Param optimizer(Param& m0);
 };
 
-template <class LS>
-ConjugateGradient<LS>::ConjugateGradient(LS * p, int it, Real eps, int verb)
-  : Optima<LS>(verb) {
+template< class LS >
+ConjugateGradient< LS >::ConjugateGradient(LS* p, int it, Real eps, int verb) : Optima< LS >(verb) {
   ls = p;
   iterMax = it;
   tol = eps;
@@ -120,24 +118,24 @@ ConjugateGradient<LS>::ConjugateGradient(LS * p, int it, Real eps, int verb)
 // A Real Vect product: operator*
 // A Real Vect product: operator*=
 // A Vect difference: operator-
-template <class LS>
-ConjugateGradient<LS>::Param ConjugateGradient<LS>::optimizer(Param& model0) {
+template< class LS >
+ConjugateGradient< LS >::Param ConjugateGradient< LS >::optimizer(Param& model0) {
   // Reset the residue history for every new optimizer
   iterNum = 0;
   isSuccess = 0;
   if (residue != NULL) {
     delete residue;
-    residue = new list<Real>;
+    residue = new list< Real >;
   }
 
-  int n = model0.size();
-  Param model1(model0); // new model
-  Vect search(n); // search direction
-  Vect g0(n); // old gradient vector
-  Vect g1(n); // new gradient vector
-  double beta; // beta parameter
-  double lambda = .025; // line search parameter
-  double descent = 0.; // descent direction
+  int n = model0.size( );
+  Param model1(model0);    // new model
+  Vect search(n);          // search direction
+  Vect g0(n);              // old gradient vector
+  Vect g1(n);              // new gradient vector
+  double beta;             // beta parameter
+  double lambda = .025;    // line search parameter
+  double descent = 0.;     // descent direction
 
   // Beginning iterations
   g0 = *(ls->gradient(model0));
@@ -145,16 +143,16 @@ ConjugateGradient<LS>::Param ConjugateGradient<LS>::optimizer(Param& model0) {
   // Check the gradient, in case the initial model is the optimal
   Real err = (Real)sqrt((g0, g0));
   if (isVerbose) cout << "Initial residue : " << err << endl;
-  appendResidue(err);	// residual
+  appendResidue(err);    // residual
   if (err < tol) {
-  if (isVerbose) cout << "Initial guess was great!" << endl;
-  isSuccess = 1;
-  return model0;
+    if (isVerbose) cout << "Initial guess was great!" << endl;
+    isSuccess = 1;
+    return model0;
   }
 
   // Considering first iteration
   search = -1. * g0;
-  descent = (search,g0);
+  descent = (search, g0);
 
   // We use CubicLineSearch
   //    cerr << "Line Search" << endl;
@@ -165,34 +163,34 @@ ConjugateGradient<LS>::Param ConjugateGradient<LS>::optimizer(Param& model0) {
   //    cerr << endl;
 
   model1 = ls->search(model0, search, descent, lambda);
-  g1 = *(ls->gradient(model1)); // Gradient at new model
+  g1 = *(ls->gradient(model1));    // Gradient at new model
   err = (Real)sqrt((g1, g1));
   if (isVerbose)
-    cout << "Iteration (0) : " << "current value of the objective function: "
-         << ls->currentValue() << "\t current residue: " << err << endl;
-  appendResidue(err);	// residual
+    cout << "Iteration (0) : "
+         << "current value of the objective function: " << ls->currentValue( )
+         << "\t current residue: " << err << endl;
+  appendResidue(err);    // residual
 
   iterNum = 0;
   Real temp;
-    do {
+  do {
     iterNum++;
 
-    temp = 1./((g0, g0));
+    temp = 1. / ((g0, g0));
     beta = ((g1 - g0), g1);
-    beta *= temp; // computation Polak & Ribiere
+    beta *= temp;    // computation Polak & Ribiere
 
-    search = beta * search - g1; // search direction
+    search = beta * search - g1;    // search direction
 
-    descent = (search, g1); // descent
+    descent = (search, g1);    // descent
     if (descent > 0.) {
-      if (isVerbose)
-        cout << "Reset search direction to gradient vector!" << endl;
-      search = -1.*g1;
+      if (isVerbose) cout << "Reset search direction to gradient vector!" << endl;
+      search = -1. * g1;
       descent = (search, g1);
     }
 
     model0 = model1;
-    g0 = g1; // save the old model and gradient before new search
+    g0 = g1;    // save the old model and gradient before new search
 
     // We use CubicLineSearch
     //  	  cerr << "Line Search" << endl;
@@ -202,20 +200,21 @@ ConjugateGradient<LS>::Param ConjugateGradient<LS>::optimizer(Param& model0) {
     //  	  cerr << "lambda " << lambda << endl;
     //  	  cerr << endl;
 
-    model1 = ls->search(model0, search, descent, lambda); // line search
+    model1 = ls->search(model0, search, descent, lambda);    // line search
     g1 = *(ls->gradient(model1));
 
     err = (Real)sqrt((g1, g1));
     if (isVerbose)
-      cout << "Iteration (" << iterNum << ") : " << "current value of the nrj : "
-           << ls->currentValue() << "\t current residue : " << err << endl;
-    appendResidue(err);	// residual
+      cout << "Iteration (" << iterNum << ") : "
+           << "current value of the nrj : " << ls->currentValue( ) << "\t current residue : " << err
+           << endl;
+    appendResidue(err);    // residual
 
-  } while (finalResidue() > tol && iterNum < iterMax); // stopping criterion
+  } while (finalResidue( ) > tol && iterNum < iterMax);    // stopping criterion
 
-  if (finalResidue() <= tol) isSuccess = 1;
+  if (finalResidue( ) <= tol) isSuccess = 1;
 
-  return(model1); // hopefully answer
+  return (model1);    // hopefully answer
 }
 
 #endif
