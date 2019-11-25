@@ -42,7 +42,7 @@ using namespace std;
 #ifndef Pi
 #define Pi (3.141592653589793)
 #endif
-#ifndef TINY // used in BrentLS and Matrix
+#ifndef TINY    // used in BrentLS and Matrix
 #define TINY 1.0e-20
 #endif
 #ifndef True
@@ -66,14 +66,14 @@ using namespace std;
 #define Abs(x) ((x) < 0 ? -(x) : (x))
 #endif
 #ifndef Max
-#define Max(x,y) ((x) > (y) ? (x) : (y))
+#define Max(x, y) ((x) > (y) ? (x) : (y))
 #endif
 #ifndef Min
-#define Min(x,y) ((x) < (y) ? (x) : (y))
+#define Min(x, y) ((x) < (y) ? (x) : (y))
 #endif
 
 #ifndef inValidSize
-#define inValidSize() cerr << "Warning: incompatible sizes!" << endl;
+#define inValidSize( ) cerr << "Warning: incompatible sizes!" << endl;
 #endif
 
 // Lists operations
@@ -82,10 +82,10 @@ using namespace std;
  * \brief Display list
  * \param l List
  */
-template<class Type>
-void display (list<Type> l) {
-  typename list<Type>::iterator il;
-  for (il = l.begin(); il != l.end(); ++il) cout << (*il) << " ";
+template< class Type >
+void display(list< Type > l) {
+  typename list< Type >::iterator il;
+  for (il = l.begin( ); il != l.end( ); ++il) cout << (*il) << " ";
   cout << endl;
 }
 
@@ -93,20 +93,19 @@ void display (list<Type> l) {
  * \brief Normalize list
  * \param l List
  */
-template<class Type>
-list<Type> normalize (list<Type> l) {
-  list<Type> v(l);
-  Type scale = l.front();
-  typename list<Type>::iterator il;
+template< class Type >
+list< Type > normalize(list< Type > l) {
+  list< Type > v(l);
+  Type scale = l.front( );
+  typename list< Type >::iterator il;
 
   if (scale == 0) {
     cerr << "First element is zero, cannot be normed! \n";
     return v;
   } else {
-    for (il = v.begin(); il != v.end(); ++il)
-      *il /= scale;
+    for (il = v.begin( ); il != v.end( ); ++il) *il /= scale;
     return v;
   }
 }
 
-#endif //_DEFS_H_
+#endif    //_DEFS_H_

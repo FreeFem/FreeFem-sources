@@ -28,32 +28,30 @@
 #include "Optima.hpp"
 #include "defs.hpp"
 
-
 // Need a "true" Matrix class
-template <class LS>
-class BFGS : public Optima<LS> {
+template< class LS >
+class BFGS : public Optima< LS > {
   typedef typename LS::Real Real;
   typedef typename LS::Param Param;
   typedef typename LS::Vect Vect;
   typedef typename LS::VMat VMat;
   typedef typename LS::Mat Mat;
-  typedef list<Real> mlist;
+  typedef list< Real > mlist;
 
-  public:
-    BFGS(
-      LS* ls, //pointer to the line-search object
-      int iter, // Maximum number of iterations
-      Real tol, // Minimum accepted gradient at optimum solution
-      int verb=0 //vebose or quiet
-    );
-    ~BFGS(){;}
+ public:
+  BFGS(LS* ls,         // pointer to the line-search object
+       int iter,       // Maximum number of iterations
+       Real tol,       // Minimum accepted gradient at optimum solution
+       int verb = 0    // vebose or quiet
+  );
+  ~BFGS( ) { ; }
 
-    // the BFGS search starting from model0, returns an optimum model
-    Param optimizer(Param& model0);
+  // the BFGS search starting from model0, returns an optimum model
+  Param optimizer(Param& model0);
 };
 
-template <class LS>
-BFGS<LS>::BFGS (LS* p, int it, Real eps, int verb) : Optima<LS>(verb) {
+template< class LS >
+BFGS< LS >::BFGS(LS* p, int it, Real eps, int verb) : Optima< LS >(verb) {
   this->ls = p;
   this->iterMax = it;
   this->tol = eps;
@@ -69,9 +67,9 @@ BFGS<LS>::BFGS (LS* p, int it, Real eps, int verb) : Optima<LS>(verb) {
 // - An operator +
 // - An operator = Real
 // - An operator = Vect
-template <class LS>
-typename BFGS<LS>::Param BFGS<LS>::optimizer(Param& model0) {
-  //reset the residue history for every new optimizer
+template< class LS >
+typename BFGS< LS >::Param BFGS< LS >::optimizer(Param& model0) {
+  // reset the residue history for every new optimizer
   this->iterNum = 0;
   if (this->residue != NULL) {
     delete this->residue;
@@ -79,7 +77,7 @@ typename BFGS<LS>::Param BFGS<LS>::optimizer(Param& model0) {
   }
 
   // Initial settings for some parameters
-  int n = model0.size();
+  int n = model0.size( );
   Vect g0(n);
   double lambda = 0.025;
   double descent = 0.;
@@ -91,7 +89,7 @@ typename BFGS<LS>::Param BFGS<LS>::optimizer(Param& model0) {
 
   if (this->isVerbose) cerr << "Initial residue : " << err << endl;
 
-  this->appendResidue(err);	// residual
+  this->appendResidue(err);    // residual
 
   if (err < this->tol) {
     if (this->isVerbose) cerr << "Initial guess was great! \n";
@@ -102,16 +100,18 @@ typename BFGS<LS>::Param BFGS<LS>::optimizer(Param& model0) {
   // Initial identical matrix for estimating inverse of the Hessian
   // Vect diag(n, 1.);
 
-  Mat H(n, n); H = 0; diagonal(H) = 1;
+  Mat H(n, n);
+  H = 0;
+  diagonal(H) = 1;
   Real d, dd, scale;
   Param model1(model0);
   Vect s(n), gamma(n), delta(n), g1(n);
 
   // Searching directions
-  s = Real();
-  s -= H*g0;
+  s = Real( );
+  s -= H * g0;
   descent = (s, g0);
-  assert(s.max() < 1e100);
+  assert(s.max( ) < 1e100);
 
   // Cubic line search for a new model
   model1 = this->ls->search(model0, s, descent, lambda);
@@ -119,20 +119,20 @@ typename BFGS<LS>::Param BFGS<LS>::optimizer(Param& model0) {
   err = (Real)sqrt((g1, g1));
   if (this->isVerbose)
     cerr << "Iteration (" << this->iterNum << ") : "
-         << "current value of the objective function: "
-         << this->ls->currentValue() << "\t current residue: " << err << endl;
+         << "current value of the objective function: " << this->ls->currentValue( )
+         << "\t current residue: " << err << endl;
 
-  this->appendResidue(err);	// residual
-  this->iterNum ++;
+  this->appendResidue(err);    // residual
+  this->iterNum++;
 
   Mat B(n, n);
 
-  while (this->finalResidue() > this->tol && this->iterNum < this->iterMax) {
+  while (this->finalResidue( ) > this->tol && this->iterNum < this->iterMax) {
     gamma = g1 - g0;
     delta = model1 - model0;
 
     // Replace the searching direction with temporal storage
-    s = H*gamma;
+    s = H * gamma;
 
     // Factor of the denominator
     dd = (delta, gamma);
@@ -141,43 +141,45 @@ typename BFGS<LS>::Param BFGS<LS>::optimizer(Param& model0) {
     if (Abs(dd) < 1e-20) {
       // Re-initialize the Hessian Matrix
       // It must be zeroed first (cf. Matrix.hpp)
-      H = 0.; diagonal(H) = 1.;
+      H = 0.;
+      diagonal(H) = 1.;
     } else {
       assert(dd);
-      d = 1./dd;
+      d = 1. / dd;
 
-      scale = d*((gamma, s));
+      scale = d * ((gamma, s));
       scale += 1;
       scale *= d;
 
       // Update the first term
-      H += scale*delta*delta.t();
+      H += scale * delta * delta.t( );
 
       // Update the second term
-      H -= d*s*delta.t();
-      H -= d*delta*s.t();
+      H -= d * s * delta.t( );
+      H -= d * delta * s.t( );
 
       // Store the current model and gradient
       g0 = g1;
       model0 = model1;
     }
 
-    s = Real();
-    s -= H*g0;
+    s = Real( );
+    s -= H * g0;
     descent = (s, g0);
     model1 = this->ls->search(model0, s, descent, lambda);
     g1 = *(this->ls->gradient(model1));
     err = (Real)sqrt((g1, g1));
 
     if (this->isVerbose)
-      cerr << "Iteration (" << this->iterNum << ") : " << "current value of the objective function: "
-           << this->ls->currentValue() << "\t current residue: " << err << endl;
+      cerr << "Iteration (" << this->iterNum << ") : "
+           << "current value of the objective function: " << this->ls->currentValue( )
+           << "\t current residue: " << err << endl;
 
-    this->appendResidue(err);	// residual
-    this->iterNum ++;
+    this->appendResidue(err);    // residual
+    this->iterNum++;
   }
 
-  return(model1);
+  return (model1);
 }
 
-#endif //_BFGS_HH_
+#endif    //_BFGS_HH_

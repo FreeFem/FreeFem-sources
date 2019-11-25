@@ -29,28 +29,28 @@
 /* At the present version, you must use the CubicLS procedure */
 
 // Need a "real" Matrix classe
-template <class LS>
-class Newt : public Optima<LS> {
+template< class LS >
+class Newt : public Optima< LS > {
   typedef typename LS::Real Real;
   typedef typename LS::Param Param;
   typedef typename LS::Vect Vect;
   typedef typename LS::VMat VMat;
   typedef typename LS::Mat Mat;
-  typedef list<Real> mlist;
-  public:
-  Newt(
-    LS *ls, //pointer to the line-search object.
-    int iter, //Maximum number of iterations
-    Real tol, //minimum accepted gradient at optimum solution
-    int verb=0); // verbose or quiet
-  ~Newt(){;}
+  typedef list< Real > mlist;
+
+ public:
+  Newt(LS* ls,           // pointer to the line-search object.
+       int iter,         // Maximum number of iterations
+       Real tol,         // minimum accepted gradient at optimum solution
+       int verb = 0);    // verbose or quiet
+  ~Newt( ) { ; }
 
   // the Newt search starting from model0, returns an optimum model
   Param optimizer(Param& model0);
 };
 
-template <class LS>
-Newt<LS>::Newt(LS* p, int it, Real eps, int verb) : Optima<LS>(verb) {
+template< class LS >
+Newt< LS >::Newt(LS* p, int it, Real eps, int verb) : Optima< LS >(verb) {
   this->ls = p;
   this->iterMax = it;
   this->tol = eps;
@@ -59,9 +59,9 @@ Newt<LS>::Newt(LS* p, int it, Real eps, int verb) : Optima<LS>(verb) {
 
 // MAT class needs:
 // - Ax=b resolution method
-template <class LS>
-typename Newt<LS>::Param Newt<LS>::optimizer(Param &model0) {
-  //reset the this->residue history for every new optimizer
+template< class LS >
+typename Newt< LS >::Param Newt< LS >::optimizer(Param& model0) {
+  // reset the this->residue history for every new optimizer
   this->iterNum = 0;
   if (this->residue != NULL) {
     delete this->residue;
@@ -69,7 +69,7 @@ typename Newt<LS>::Param Newt<LS>::optimizer(Param &model0) {
   }
 
   // Initial settings for some parameters
-  int n = model0.size();
+  int n = model0.size( );
   Vect g0(n);
   double lambda = 0.025;
   double descent = 0.;
@@ -81,7 +81,7 @@ typename Newt<LS>::Param Newt<LS>::optimizer(Param &model0) {
 
   if (this->isVerbose) cerr << "Initial this->residue : " << err << endl;
 
-  this->appendResidue(err);	// residual
+  this->appendResidue(err);    // residual
 
   if (err < this->tol) {
     if (this->isVerbose) cerr << "Initial guess was great!" << endl;
@@ -93,31 +93,32 @@ typename Newt<LS>::Param Newt<LS>::optimizer(Param &model0) {
   Vect s(n);
   Param model1(model0);
 
-  while (this->finalResidue() > this->tol && this->iterNum < this->iterMax) {
-    //searching directions
+  while (this->finalResidue( ) > this->tol && this->iterNum < this->iterMax) {
+    // searching directions
     // s = g0/(*this->ls->hessian(model0)); // LU reinitialization at each step
     this->ls->hessian(model0)->Solve(s, g0);
-    s = -1.*s;
+    s = -1. * s;
 
-    descent = (s,g0);
+    descent = (s, g0);
     // Cubic Line Search
     model1 = this->ls->search(model0, s, descent, lambda);
     g1 = *(this->ls->gradient(model1));
     err = (Real)sqrt((g1, g1));
 
     if (this->isVerbose)
-      cerr << "Iteration (" << this->iterNum << ") : " << "current value of the objective function: "
-           << this->ls->currentValue() << "\t current this->residue: " << err << endl;
+      cerr << "Iteration (" << this->iterNum << ") : "
+           << "current value of the objective function: " << this->ls->currentValue( )
+           << "\t current this->residue: " << err << endl;
 
-    this->appendResidue(err);	// residual
+    this->appendResidue(err);    // residual
 
     g0 = g1;
     model0 = model1;
 
-    this->iterNum ++;
+    this->iterNum++;
   }
 
-  return(model1);
+  return (model1);
 }
 
 #endif
