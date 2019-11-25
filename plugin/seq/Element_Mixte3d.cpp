@@ -29,8 +29,8 @@
 // test-ElementMixte.edp
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep:
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 #include "ff++.hpp"

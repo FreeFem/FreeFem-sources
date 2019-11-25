@@ -21,8 +21,8 @@
 // E-MAIL  : ...
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep:
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 // to compile ff-c++ pipe.cpp

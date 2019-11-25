@@ -21,8 +21,8 @@
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep:
-// ff-c++-cpp-dep: bmo.cpp
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep: bmo.cpp
 // *INDENT-ON* //
 
 #include <iostream>

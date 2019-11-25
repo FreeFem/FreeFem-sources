@@ -21,8 +21,8 @@
 // E-MAIL  : auliac@ann.jussieu.fr
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep: ipopt mumps_seq blas libseq fc
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: ipopt mumps_seq blas libseq fc
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 // using namespace std;

@@ -21,8 +21,8 @@
 // E-MAIL  : frederic.hecht@sorbonne-unviersite.fr
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep: mumps_seq blas libseq fc pthread
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: mumps_seq blas libseq fc pthread
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 // F. Hecht  december 2011

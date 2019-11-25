@@ -21,8 +21,8 @@
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep:
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 // the Polynomial space is P2, an the degree of freedom are

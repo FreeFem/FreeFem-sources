@@ -23,8 +23,8 @@
 // Example C++ function "CppModTemplate" dynamically loaded into "load.edp"
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep:
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 #include <ff++.hpp>

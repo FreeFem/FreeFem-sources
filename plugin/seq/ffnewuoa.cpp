@@ -21,8 +21,8 @@
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep:
-// ff-c++-cpp-dep: newuoa.f
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep: newuoa.f
 // *INDENT-ON* //
 
 #include "ff++.hpp"

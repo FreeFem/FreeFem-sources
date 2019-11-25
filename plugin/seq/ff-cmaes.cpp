@@ -21,8 +21,8 @@
 // E-MAIL  : auliac@ann.jussieu.fr
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep:
-// ff-c++-cpp-dep: cmaes.cpp
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep: cmaes.cpp
 // *INDENT-ON* //
 
 /*

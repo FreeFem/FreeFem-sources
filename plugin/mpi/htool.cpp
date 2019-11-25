@@ -1,5 +1,5 @@
-// ff-c++-LIBRARY-dep: cxx11 [mkl|blas] mpi pthread htool
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: cxx11 [mkl|blas] mpi pthread htool
+//ff-c++-cpp-dep:
 // for def  M_PI under windows in <cmath>
 #define _USE_MATH_DEFINES
 #include <ff++.hpp>

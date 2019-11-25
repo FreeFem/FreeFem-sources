@@ -22,8 +22,8 @@
 // E-MAIL  : ...
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep: gmm
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: gmm
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 #include <cmath>

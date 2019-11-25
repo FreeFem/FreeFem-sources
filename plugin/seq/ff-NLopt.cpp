@@ -21,8 +21,8 @@
 // E-MAIL  : auliac@ann.jussieu.fr
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep: nlopt
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: nlopt
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 #include <iostream>

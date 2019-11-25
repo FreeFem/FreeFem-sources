@@ -23,8 +23,8 @@
 // compile and link with ff-c++ metric_Pk.cpp
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep:
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 #include <iostream>

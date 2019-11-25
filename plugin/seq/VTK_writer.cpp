@@ -21,8 +21,8 @@
 // E-MAIL  : cedric.listes@gmail.com
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep:
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 // from the work of  Sala Lorenzo (Dxwriter)

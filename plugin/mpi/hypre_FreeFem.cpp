@@ -8,8 +8,8 @@
 // AUTHOR   : Guy Atenekeng
 // E-MAIL   : Guy_Antoine_Atenekeng_Kahou@lri.fr
 //
-// ff-c++-LIBRARY-dep: hypre  metis  blas  mpi
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: hypre  metis  blas  mpi
+//ff-c++-cpp-dep:
 
 /*
  This file is part of Freefem++
@@ -33,8 +33,8 @@
  */
 
 // FFCS: add requirement for MPI
-// ff-c++-LIBRARY-dep: hypre mpi
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: hypre mpi
+//ff-c++-cpp-dep:
 
 // add F.Hecht ...  oct 2010
 #define HYPRE_TIMING

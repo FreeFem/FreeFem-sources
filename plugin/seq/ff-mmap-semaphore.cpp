@@ -21,8 +21,8 @@
 // E-MAIL  : ...
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep: pthread
-// ff-c++-cpp-dep: libff-mmap-semaphore.c
+//ff-c++-LIBRARY-dep: pthread
+//ff-c++-cpp-dep: libff-mmap-semaphore.c
 // *INDENT-ON* //
 
 #include "ff++.hpp"

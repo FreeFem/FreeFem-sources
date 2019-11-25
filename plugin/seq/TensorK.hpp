@@ -21,8 +21,8 @@
 // E-MAIL  : jean-marie.mirebeau@math.u-psud.fr
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep:
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 // This file contains two main routines :

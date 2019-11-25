@@ -23,8 +23,8 @@
 // Example C++ function "myfunction", dynamically loaded into "ff-c++ dfft.cpp "
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep: fftw3
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: fftw3
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 #include "ff++.hpp"

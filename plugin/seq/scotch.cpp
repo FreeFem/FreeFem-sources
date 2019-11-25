@@ -21,8 +21,8 @@
 // E-MAIL  : pierre.jolivet@enseeiht.fr
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep: [mpi ptscotch] scotch
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: [mpi ptscotch] scotch
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 #ifndef _ALL_IN_ONE_

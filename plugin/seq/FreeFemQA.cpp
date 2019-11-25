@@ -23,8 +23,8 @@
 // compilation : ff-c++ FreeFemQA.cpp -I/usr/local/boost_1_47_0
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep:
-// ff-c++-cpp-dep: GeometryQA.cpp
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep: GeometryQA.cpp
 // *INDENT-ON* //
 
 #include <iostream>

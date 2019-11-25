@@ -1,5 +1,5 @@
-// ff-c++-LIBRARY-dep: cxx11
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: cxx11
+//ff-c++-cpp-dep:
 
 // -*- C++ -*-
 // Time-stamp: "2018-07-05 14:34:38 fujiwara"

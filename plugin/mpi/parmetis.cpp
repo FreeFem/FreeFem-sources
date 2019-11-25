@@ -22,8 +22,8 @@
 // E-MAIL  :  P. Jolivet <pierre.jolivet@enseeiht.fr>
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep: parmetis mpi
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: parmetis mpi
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 #include <ff++.hpp>

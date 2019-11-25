@@ -24,8 +24,8 @@
 
 // *INDENT-OFF* //
 // for automatic  compilation with ff-c++
-// ff-c++-LIBRARY-dep: mshmet libMesh
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: mshmet libMesh
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 /*

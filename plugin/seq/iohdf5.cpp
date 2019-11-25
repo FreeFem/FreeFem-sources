@@ -21,8 +21,8 @@
 // E-MAIL  : cloirec@cines.fr
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep: hdf5
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: hdf5
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 #include "ff++.hpp"

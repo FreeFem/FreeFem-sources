@@ -23,8 +23,8 @@
 // Example C++ function "add random function ", dynamically loaded into "load.edp"
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep:
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 // TODO: remove this block as soon as autoconf is removed from FreeFem++

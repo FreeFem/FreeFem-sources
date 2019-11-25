@@ -21,8 +21,8 @@
 // E-MAIL  : pierre.joliver@enseeiht.fr
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep: mkl
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: mkl
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 #include <mkl_pardiso.h>

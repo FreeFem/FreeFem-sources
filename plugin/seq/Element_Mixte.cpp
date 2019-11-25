@@ -21,8 +21,8 @@
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep: lapack blas
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: lapack blas
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 // RT1 and BDM1 conforme in H(div) space, ie u.n  continuous (n = is the normal)
@@ -44,7 +44,7 @@
 // lame-TD-NSS.edp
 // test-ElementMixte.edp
 
-// ff-c++-LIBRARY-dep:   lapack blas
+//ff-c++-LIBRARY-dep:   lapack blas
 // lapack: dgetrf and dgetri
 
 #include "ff++.hpp"

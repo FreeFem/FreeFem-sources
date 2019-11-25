@@ -21,8 +21,8 @@
 // E-MAIL  : jacques.morice@ann.jussieu.fr
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep: tetgen
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: tetgen
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 /*

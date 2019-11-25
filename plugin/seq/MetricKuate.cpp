@@ -25,8 +25,8 @@
 // compile and link with ./load.link  mat\_dervieux.cpp
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep:
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep:
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 #define _USE_MATH_DEFINES
 #include <iostream>

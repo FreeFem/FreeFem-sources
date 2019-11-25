@@ -21,8 +21,8 @@
 // E-MAIL  : ...
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep: umfpack amd blas
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: umfpack amd blas
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 // file to add UMFPACK solver with dynamic load.

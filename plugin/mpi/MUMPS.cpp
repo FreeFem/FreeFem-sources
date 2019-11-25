@@ -21,8 +21,8 @@
 // E-MAIL  : frederic.hecht@sorbonne-unviersite.fr
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep:  mumps parmetis [ptscotch scotch]  scalapack blas  mpifc  fc mpi  pthread
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep:  mumps parmetis [ptscotch scotch]  scalapack blas  mpifc  fc mpi  pthread
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 // F. Hecht  december 2011

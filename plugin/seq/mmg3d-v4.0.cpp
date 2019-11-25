@@ -23,8 +23,8 @@
 // frederic.hecht@sorbonne-universite.fr
 
 // *INDENT-OFF* //
-// ff-c++-LIBRARY-dep: mmg3d-v4
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep: mmg3d-v4
+//ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 /*

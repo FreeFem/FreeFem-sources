@@ -7,8 +7,8 @@
 // AUTHOR   : Jacques Morice
 // E-MAIL   : jacques.morice@ann.jussieu.fr
 //
-// ff-c++-LIBRARY-dep:  mpi
-// ff-c++-cpp-dep:
+//ff-c++-LIBRARY-dep:  mpi
+//ff-c++-cpp-dep:
 
 /*
  This file is part of Freefem++
