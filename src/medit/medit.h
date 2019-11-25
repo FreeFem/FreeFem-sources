@@ -71,38 +71,38 @@
 #define EPS 1.e-06
 #define EPS2 2.e-10
 
-#ifndef  TRUE
-#define  TRUE 1
-#define  FALSE 0
+#ifndef TRUE
+#define TRUE 1
+#define FALSE 0
 #endif
 #ifdef M_PI
 #undef M_PI
 #undef M_PI_2
 #endif
-#define M_PI 3.14159265358979323846	/* pi   */
-#define M_PI_2 1.57079632679489661923	/* pi/2 */
+#define M_PI 3.14159265358979323846   /* pi   */
+#define M_PI_2 1.57079632679489661923 /* pi/2 */
 
 #ifdef min
 #undef min
 #undef max
 #endif
-#define  min(a, b) (((a) < (b)) ? (a) : (b))
-#define  max(a, b) (((b) > (a)) ? (b) : (a))
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#define max(a, b) (((b) > (a)) ? (b) : (a))
 
 /* check if numbers are equal */
-#define egal(x, y) ( \
-		(((x) == 0.0f) ? (fabs(y) < EPS) : \
-		 (((y) == 0.0f) ? (fabs(x) < EPS) : \
-		  (fabs((x) - (y)) / (fabs(x) + fabs(y)) < EPS2))))
+#define egal(x, y)      \
+  ((((x) == 0.0f)       \
+      ? (fabs(y) < EPS) \
+      : (((y) == 0.0f) ? (fabs(x) < EPS) : (fabs((x) - (y)) / (fabs(x) + fabs(y)) < EPS2))))
 
 /* options */
-enum {STANDARD=1, SEQUENCE, VERYBIG, MORPHING, SCHNAUZER, ISOSURF, PARTICLE};
+enum { STANDARD = 1, SEQUENCE, VERYBIG, MORPHING, SCHNAUZER, ISOSURF, PARTICLE };
 
 /* structure canvas */
 typedef struct canvas {
-	pMesh mesh[MAX_MESH];
-	pScene scene[MAX_SCENE];
-	int nbm, nbs;
+  pMesh mesh[MAX_MESH];
+  pScene scene[MAX_SCENE];
+  int nbm, nbs;
 } Canvas;
 typedef Canvas *pCanvas;
 
