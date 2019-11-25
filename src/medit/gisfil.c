@@ -59,7 +59,7 @@ int loadGIS(pMesh mesh) {
 
   /* remove leading spaces */
   /* 13: carriage return */
-  while (buf[0] == ' ') { //  && ((buf[0] != 13) && (buf[0] != '\n'))) {
+  while (buf[0] == ' ') {    //  && ((buf[0] != 13) && (buf[0] != '\n'))) {
     memmove(&buf[0], &buf[1], strlen(buf));
   }
 

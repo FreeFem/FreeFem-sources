@@ -28,6 +28,7 @@ extern "C" {
 #include "extern.h"
 #include "sproto.h"
 #include <time.h>
+#include <limits.h>
 
 #define NC (int)32
 #define NC2 (NC * NC)
@@ -46,7 +47,7 @@ static int idirt[7] = {0, 1, 2, 3, 0, 1, 2};
 int hashTetra(pMesh mesh) {
   pTetra pt, pt1;
   int k, kk, pp, l, ll, mins, mins1, maxs, maxs1, sum, sum1, iadr;
-  int *hcode, *link, inival, hsize;
+  int *hcode, *link, hsize;
   char *hvoy;
   ubyte i, ii, i1, i2, i3;
   unsigned int key;
@@ -72,10 +73,8 @@ int hashTetra(pMesh mesh) {
   hvoy = (char *)hcode;
 
   /* init */
-  inival = 2 << 30;
-
   for (k = 0; k <= mesh->ntet; k++) {
-    hcode[k] = INT_MIN-inival;
+    hcode[k] = INT_MIN;
   }
 
   /* build hash table */
@@ -132,7 +131,7 @@ int hashTetra(pMesh mesh) {
     link[l] = 0;
     hvoy[l] = 0;
 
-    while (ll != inival) {
+    while (ll != INT_MIN) {
       kk = (ll - 1) / 4 + 1;
       ii = (ll - 1) % 4;
       i1 = idirt[ii + 1];
@@ -176,7 +175,7 @@ int hashHexa(pMesh mesh) {
   pHexa ph, ph1;
   int k, kk, iadr, pp, l, ll, v;
   int imin, mins, mins1, opps, opps1;
-  int *hcode, *link, inival, hsize;
+  int *hcode, *link, hsize;
   char *hvoy;
   ubyte i, i1, ii;
   unsigned int key;
@@ -201,10 +200,8 @@ int hashHexa(pMesh mesh) {
   hvoy = (char *)hcode;
 
   /* init */
-  inival = 2 << 30;
-
   for (k = 0; k <= 6 * mesh->nhex / 4; k++) {
-    hcode[k] = -inival;
+    hcode[k] = INT_MIN;
   }
 
   /* build hash table */
@@ -268,7 +265,7 @@ int hashHexa(pMesh mesh) {
     link[l] = 0;
     hvoy[l] = 0;
 
-    while (ll != inival) {
+    while (ll != INT_MIN) {
       kk = (ll - 1) / 6 + 1;
       ii = (ll - 1) % 6;
       ph1 = &mesh->hexa[kk];
@@ -312,7 +309,7 @@ int hashHexa(pMesh mesh) {
 int hashTria(pMesh mesh) {
   pTriangle pt, pt1;
   int k, kk, l, ll, mins, maxs, mins1, maxs1, hsize;
-  int *hcode, *link, inival, iadr, pp;
+  int *hcode, *link, iadr, pp;
   char *hvoy;
   ubyte i, i1, i2, ii;
   unsigned int key;
@@ -337,10 +334,8 @@ int hashTria(pMesh mesh) {
   hvoy = (char *)hcode;
 
   /* init */
-  inival = 2 << 30;
-
   for (k = 0; k <= 3 * mesh->nt / 4; k++) {
-    hcode[k] = -inival;
+    hcode[k] = INT_MIN;
   }
 
   /* build hash table */
@@ -389,7 +384,7 @@ int hashTria(pMesh mesh) {
     link[l] = 0;
     hvoy[l] = 0;
 
-    while (ll != inival) {
+    while (ll != INT_MIN) {
       kk = (ll - 1) / 3 + 1;
       ii = (ll - 1) % 3;
       i1 = idir[ii + 1];
