@@ -37,7 +37,7 @@ int loadGIS(pMesh mesh) {
   FILE *fp;
   double xxm, yym, ggx, ggy, hhz;
   float *te, cx, cy, cz, gu, hu, xmi, ymi;
-  int i, j, k, sx, sy, ret, bitsize, pos, ref;
+  int i, j, k, sx, sy, ret, bitsize, ref;
   char *ptr, c, buf[256], data[256];
   ubyte ityp;
 
@@ -58,9 +58,8 @@ int loadGIS(pMesh mesh) {
   }
 
   /* remove leading spaces */
-  pos = 0;
-
-  while ((buf[0] == ' ') && (buf[0] != 0x0d) && (buf[0] != 0x0a)) {
+  /* 13: carriage return */
+  while (buf[0] == ' ') { //  && ((buf[0] != 13) && (buf[0] != '\n'))) {
     memmove(&buf[0], &buf[1], strlen(buf));
   }
 
@@ -201,7 +200,7 @@ int loadGIS(pMesh mesh) {
 
   /* read references, if any */
   if (ityp == 1) {
-    pos = ftell(fp);
+    int pos = ftell(fp);
     ret = fscanf(fp, "%d", &i);
     if (ret != EOF) {
       fseek(fp, pos, SEEK_SET);

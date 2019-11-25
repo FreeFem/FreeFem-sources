@@ -42,12 +42,12 @@ void getline_bin_float_vertex(int ddim, double *c, int *ref) {
   size_t ret;
 
   for (i = 0; i < ddim; i++) {
-    ret = fread((unsigned char *)&(ff), WrdSiz, 1, stdin);
+    ret = fread((unsigned char *)(&ff), WrdSiz, 1, stdin);
     if (ret == 0) printf("fread error\n");
     c[i] = ff;
   }
 
-  ret = fread((unsigned char *)&(*ref), WrdSiz, 1, stdin);
+  ret = fread((unsigned char *)ref, WrdSiz, 1, stdin);
   if (ret == 0) printf("fread error\n");
 }
 
@@ -56,11 +56,11 @@ void getline_bin_double_vertex(int ddim, double *c, int *ref) {
   size_t ret;
 
   for (i = 0; i < ddim; i++) {
-    ret = fread((unsigned char *)&(c[i]), WrdSiz, 2, stdin);
+    ret = fread((unsigned char *)(&c[i]), WrdSiz, 2, stdin);
     if (ret == 0) printf("fread error\n");
   }
 
-  ret = fread((unsigned char *)&(*ref), WrdSiz, 1, stdin);
+  ret = fread((unsigned char *)ref, WrdSiz, 1, stdin);
   if (ret == 0) printf("fread error\n");
 }
 
@@ -69,31 +69,30 @@ void getline_bin_elem(int ddim, int *v, int *ref) {
   size_t ret;
 
   for (i = 0; i < ddim; i++) {
-    ret = fread((unsigned char *)&(v[i]), WrdSiz, 1, stdin);
+    ret = fread((unsigned char *)(&v[i]), WrdSiz, 1, stdin);
     if (ret == 0) printf("fread error\n");
   }
 
-  ret = fread((unsigned char *)&(*ref), WrdSiz, 1, stdin);
+  ret = fread((unsigned char *)ref, WrdSiz, 1, stdin);
   if (ret == 0) printf("fread error\n");
 }
 
 void getline_bin_edge(int *v0, int *v1, int *ref) {
   size_t ret;
 
-  ret = fread((unsigned char *)&(*v0), WrdSiz, 1, stdin);
+  ret = fread((unsigned char *)v0, WrdSiz, 1, stdin);
   if (ret == 0) printf("fread error\n");
-  ret = fread((unsigned char *)&(*v1), WrdSiz, 1, stdin);
+  ret = fread((unsigned char *)v1, WrdSiz, 1, stdin);
   if (ret == 0) printf("fread error\n");
-  ret = fread((unsigned char *)&(*ref), WrdSiz, 1, stdin);
+  ret = fread((unsigned char *)ref, WrdSiz, 1, stdin);
   if (ret == 0) printf("fread error\n");
 }
 
 void getline_bin_int_noref(int ddim, int *v) {
   int i;
-  size_t ret;
 
   for (i = 0; i < ddim; i++) {
-    ret = fread((unsigned char *)&(v[i]), WrdSiz, 1, stdin);
+    size_t ret = fread((unsigned char *)(&v[i]), WrdSiz, 1, stdin);
     if (ret == 0) printf("fread error\n");
   }
 }
@@ -101,10 +100,9 @@ void getline_bin_int_noref(int ddim, int *v) {
 void getline_bin_float_noref(int ddim, double *v) {
   int i;
   float ff;
-  size_t ret;
 
   for (i = 0; i < ddim; i++) {
-    ret = fread((unsigned char *)&(ff), WrdSiz, 1, stdin);
+    size_t ret = fread((unsigned char *)(&ff), WrdSiz, 1, stdin);
     if (ret == 0) printf("fread error\n");
     if (debug) printf("value of ff %f\n", ff);
 
@@ -114,10 +112,9 @@ void getline_bin_float_noref(int ddim, double *v) {
 
 void getline_bin_double_noref(int ddim, double *v) {
   int i;
-  size_t ret;
 
   for (i = 0; i < ddim; i++) {
-    ret = fread((unsigned char *)&(v[i]), WrdSiz, 2, stdin);
+    size_t ret = fread((unsigned char *)(&v[i]), WrdSiz, 2, stdin);
     if (ret == 0) printf("fread error\n");
   }
 }
@@ -130,14 +127,14 @@ void read_TypeSizeTyptab_bin(int *type, int *size, int *typtab) {
   int tmpsize;
   size_t ret;
 
-  ret = fread((unsigned char *)&(tmptype), WrdSiz, 1, stdin);
+  ret = fread((unsigned char *)(&tmptype), WrdSiz, 1, stdin);
   if (ret == 0) printf("fread error\n");
   assert(tmptype <= GmfMaxTyp);
 
   tmpsize = 0;
 
   for (i = 0; i < tmptype; i++) {
-    ret = fread((unsigned char *)&(typtab[i]), WrdSiz, 1, stdin);
+    ret = fread((unsigned char *)(&typtab[i]), WrdSiz, 1, stdin);
     if (ret == 0) printf("fread error\n");
     tmpsize += typtab[i];
   }
@@ -783,8 +780,10 @@ int loadScaVecTen_bin(pMesh mesh, int numsol, int dim, int ver, int nel, int typ
     }
   }
 
-  if (ddebug) printf("typtab[%i]=%i, off%i", i, typtab[i], off);
-  if (ddebug) printf("numsol=%i,typtab[i]=%i\n", numsol, typtab[i]);
+  if (ddebug) {
+    printf("typtab[%i]=%i, off%i", i, typtab[i], off);
+    printf("numsol=%i,typtab[i]=%i\n", numsol, typtab[i]);
+  }
 
   fflush(stdout);
 

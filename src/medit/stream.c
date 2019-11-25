@@ -1006,7 +1006,6 @@ int parseStream(pScene sc, pMesh mesh) {
     } else if (key[0] == '#') {
       res = fgets(key, 255, in);
       if (res == NULL) printf("fgets error\n");
-      ;
     }
   }
 
@@ -1070,7 +1069,6 @@ int listTetraStream(pScene sc, pMesh mesh, float *pp, int squiet) {
   /* compute streamline */
   nbp = 0;
   nsdep = mesh->ntet / 2;
-  step = 0.0;
   nbar = 0;
   if (ddebug)
     printf("   start point %d: %f %f %f\n", 3 * k / 3, st->listp[k], st->listp[k + 1],

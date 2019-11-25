@@ -369,8 +369,6 @@ void keyScene(unsigned char key, int x, int y) {
   pCube cube;
   pPersp p;
   pCamera cam;
-  double dd;
-  float a, b, c, d;
   int ret, k, keyact, numit, idw = currentScene( );
   ubyte post = FALSE, dolist = FALSE;
 
@@ -892,39 +890,39 @@ void keyScene(unsigned char key, int x, int y) {
 
       case '!': /* clip plane */
         return;
-        if (!(clip->active & C_ON)) return;
-
-        dd = clip->eqn[3] - clip->eqn[0] * mesh->xtra - clip->eqn[1] * mesh->ytra -
-             clip->eqn[2] * mesh->ztra;
-        fprintf(stdout, "\nCurrent plane: %gx %+gy %+gz %+g = 0\n", clip->eqn[0], clip->eqn[1],
-                clip->eqn[2], dd);
-        fprintf(stdout, "Plane coeffs : ");
-        fflush(stdout);
-        while (fgetc(stdin) != EOF)
-          ; /* fflush() called on input stream 'stdin' may result in undefined behaviour on
-               non-linux systems */
-        ret = fscanf(stdin, "%f %f %f %f", &a, &b, &c, &d);
-        if (ret == EOF) printf("fscanf error\n");
-        resetClip(sc, clip, mesh);
-        clip->eqn[0] = a;
-        clip->eqn[1] = b;
-        clip->eqn[2] = c;
-        clip->eqn[3] = d;
-
-        fprintf(stdout, "New plane eq.: ");
-        if (clip->eqn[0]) fprintf(stdout, "%+gx", clip->eqn[0]);
-
-        if (clip->eqn[1]) fprintf(stdout, " %+gy", clip->eqn[1]);
-
-        if (clip->eqn[2]) fprintf(stdout, " %+gz", clip->eqn[2]);
-
-        if (clip->eqn[3]) fprintf(stdout, " %+g", clip->eqn[3]);
-
-        fprintf(stdout, " = 0\n");
-        clip->eqn[3] += (a * mesh->xtra + b * mesh->ytra + c * mesh->ztra);
-        post = TRUE;
-        dolist = TRUE;
-        break;
+        // if (!(clip->active & C_ON)) return;
+        //
+        // dd = clip->eqn[3] - clip->eqn[0] * mesh->xtra - clip->eqn[1] * mesh->ytra -
+        //      clip->eqn[2] * mesh->ztra;
+        // fprintf(stdout, "\nCurrent plane: %gx %+gy %+gz %+g = 0\n", clip->eqn[0], clip->eqn[1],
+        //         clip->eqn[2], dd);
+        // fprintf(stdout, "Plane coeffs : ");
+        // fflush(stdout);
+        // while (fgetc(stdin) != EOF)
+        //   ; /* fflush() called on input stream 'stdin' may result in undefined behaviour on
+        //        non-linux systems */
+        // ret = fscanf(stdin, "%f %f %f %f", &a, &b, &c, &d);
+        // if (ret == EOF) printf("fscanf error\n");
+        // resetClip(sc, clip, mesh);
+        // clip->eqn[0] = a;
+        // clip->eqn[1] = b;
+        // clip->eqn[2] = c;
+        // clip->eqn[3] = d;
+        //
+        // fprintf(stdout, "New plane eq.: ");
+        // if (clip->eqn[0]) fprintf(stdout, "%+gx", clip->eqn[0]);
+        //
+        // if (clip->eqn[1]) fprintf(stdout, " %+gy", clip->eqn[1]);
+        //
+        // if (clip->eqn[2]) fprintf(stdout, " %+gz", clip->eqn[2]);
+        //
+        // if (clip->eqn[3]) fprintf(stdout, " %+g", clip->eqn[3]);
+        //
+        // fprintf(stdout, " = 0\n");
+        // clip->eqn[3] += (a * mesh->xtra + b * mesh->ytra + c * mesh->ztra);
+        // post = TRUE;
+        // dolist = TRUE;
+        // break;
 
       case '@': /* add trajectoire point */
         if (p->pmode == CAMERA) pathAdd(sc, x, y);

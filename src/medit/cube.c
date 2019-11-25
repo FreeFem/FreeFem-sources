@@ -88,15 +88,17 @@ void updateCube(pCube cube, pMesh mesh) {
 }
 
 void dumpCube(pScene sc, pMesh mesh, pCube cube) {
-  float *tr, u[4];
-  double v[4];
-  int i;
+  float *tr;
   FILE *out;
 
   tr = cube->cubetr->matrix;
 
   out = fopen("tr.data", "w");
   if (out) {
+    int i;
+    float u[4];
+    double v[4];
+
     for (i = 0; i < 4; i++) {
       fprintf(out, "%f %f %f %f\n", tr[i], tr[4 + i], tr[8 + i], tr[12 + i]);
     }

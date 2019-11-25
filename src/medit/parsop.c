@@ -189,8 +189,8 @@ int parsop(pScene sc, pMesh mesh) {
   pMaterial pm;
   double dd;
   float r, g, b, ca, cb, cc, na, nb, nc;
-  int k, i, m, n, xs, ys, ret, ref, nbmat;
-  char *ptr, ub, data[128], key[256], buf[256], pscol[32], *res = "";
+  int k, i, m, n, xs, ys, ref, nbmat;
+  char *ptr, ub, data[128], key[256], buf[256], pscol[32];
 
   /* check if user-specified parameters */
   iniopt(sc, mesh);
@@ -221,7 +221,8 @@ int parsop(pScene sc, pMesh mesh) {
   m = n = 0;
 
   while (!feof(in)) {
-    ret = fscanf(in, "%255s", key);
+    char *res = 0;
+    int ret = fscanf(in, "%255s", key);
     if (ret == EOF) printf("fscanf error\n");
     if (feof(in)) break;
 
@@ -349,7 +350,7 @@ int parsop(pScene sc, pMesh mesh) {
       if (!EatSpace(in)) {
         ret = fscanf(in, "%c", &ub);
         if (ret == EOF) printf("fscanf error\n");
-        sc->par.nbpart = max(atoi(&ub), 1);
+        sc->par.nbpart = max(atoi(ub), 1);
       }
     } else if (!strcmp(key, "nbmaterial")) {
       ret = fscanf(in, "%d", &nbmat);

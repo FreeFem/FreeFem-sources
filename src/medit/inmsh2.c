@@ -109,8 +109,6 @@ int inmsh2(pMesh mesh) {
   /* read mesh vertices */
   for (k = 1; k <= mesh->np; k++) {
     char *ptr;
-    int ret;
-
     pPoint ppt;
 
     ppt = &mesh->point[k];

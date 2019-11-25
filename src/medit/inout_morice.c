@@ -327,7 +327,7 @@ int loadMesh_popen(pMesh mesh) {
   float *n;
   int i, ia, ib, ref, is = 0, k, disc = 0, nn = 0, nt = 0, nq = 0;
   char data[256];
-  char *natureread, *res;
+  char *natureread;
   int loopdebug;
   int vatn[2];
   int tvatn[3];
@@ -352,7 +352,7 @@ int loadMesh_popen(pMesh mesh) {
   while (!feof(stdin)) {
     char *tictac;
 
-    res = fgets(data, 256, stdin);
+    char *res = fgets(data, 256, stdin);
     if (res == NULL) printf("fgets error\n");
     tictac = strtok(data, " \n");
 

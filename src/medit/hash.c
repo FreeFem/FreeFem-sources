@@ -75,7 +75,7 @@ int hashTetra(pMesh mesh) {
   inival = 2 << 30;
 
   for (k = 0; k <= mesh->ntet; k++) {
-    hcode[k] = -inival;
+    hcode[k] = INT_MIN-inival;
   }
 
   /* build hash table */

@@ -278,7 +278,7 @@ int bbfile(pMesh mesh) {
       for (l = 0; l < 6; l++) {
         if (fscanf(in, "%127s", data) != 1) {
           continue;
-          m[l] = 0;
+          // m[l] = 0;
         }
 
         if ((ptr = strpbrk(data, "dD"))) *ptr = 'E';

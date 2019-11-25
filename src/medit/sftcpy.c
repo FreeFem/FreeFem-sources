@@ -156,13 +156,13 @@ int coreps(FILE *file, GLsizei size, GLfloat *buffer) {
     ptr++;
   }
 
-  if (ddebug)
+  if (ddebug) {
     printf("size = %d  ptr = %p  buffer = %p  -> size = %d\n", size, ptr, buffer,
            (int)(ptr - buffer));
+    printf("%d tokens found\n", nit);
+  }
 
   /* allocate mem to store tokens */
-  if (ddebug) printf("%d tokens found\n", nit);
-
   ttoken = (Token *)malloc((1 + nit) * sizeof(struct Token));
   assert(ttoken);
 

@@ -869,7 +869,6 @@ static int closestPoint(pScene sc, pMesh mesh, int x, int y, int item, int type)
 
 GLuint pickingScene(pScene sc, int x, int y, int ident) {
   pMesh mesh;
-  pClip clip;
   GLint viewport[4];
   GLubyte pixel[4] = {};
   GLuint dlist;

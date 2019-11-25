@@ -233,7 +233,6 @@ int medit0( ) {
 int medit0_popen( ) {
   int k;
   clock_t ct;
-  char *res;
 
   /* default */
   fprintf(stdout, " Loading data file(s)\n");
@@ -242,6 +241,7 @@ int medit0_popen( ) {
   /* enter number of mesh */
   if (!cv.nbm) {
     char data[128];
+    char *res;
 
     fprintf(stdout, "  Number of mesh missing:. Please enter : ");
     fflush(stdout);
