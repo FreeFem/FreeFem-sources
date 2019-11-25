@@ -32,24 +32,23 @@ typedef unsigned char ubyte;
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-enum imgtyp {DEFAULT=0, P2, P3, P4, P5, P6,
-	         GREY, RGB, RED, GREEN, BLUE, COLOR};
+enum imgtyp { DEFAULT = 0, P2, P3, P4, P5, P6, GREY, RGB, RED, GREEN, BLUE, COLOR };
 
 typedef struct {
-	short sizeX, sizeY;
-	ubyte type;
-	ubyte *data;
+  short sizeX, sizeY;
+  ubyte type;
+  ubyte *data;
 } PPMimage;
 typedef PPMimage *pPPMimage;
 
 /* prototypes */
-PPMimage *loadPPM (const char *imgname, ubyte quiet);
-int savePPM (const char *imgname, pPPMimage img);
-pPPMimage diffImg (pPPMimage bits, pPPMimage img);
+PPMimage *loadPPM(const char *imgname, ubyte quiet);
+int savePPM(const char *imgname, pPPMimage img);
+pPPMimage diffImg(pPPMimage bits, pPPMimage img);
 void freePPMimage(pPPMimage &image);
 
-pRnm PPMimage2Rnm (pPPMimage const &img);
-pPPMimage Rnm2PPMimage (pRnm const &array);
+pRnm PPMimage2Rnm(pPPMimage const &img);
+pPPMimage Rnm2PPMimage(pRnm const &array);
 
 #ifdef __cplusplus
 }

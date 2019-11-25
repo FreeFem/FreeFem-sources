@@ -21,11 +21,11 @@
 // E-MAIL  : ...
 
 // *INDENT-OFF* //
-//ff-c++-LIBRARY-dep: umfpack amd blas
-//ff-c++-cpp-dep:
+// ff-c++-LIBRARY-dep: umfpack amd blas
+// ff-c++-cpp-dep:
 // *INDENT-ON* //
 
-#include  <iostream>
+#include <iostream>
 using namespace std;
 using namespace std;
 #include "rgraph.hpp"
@@ -49,14 +49,14 @@ extern "C" {
 #include <suitesparse/umfpack.h>
 #else
 
-	// Defaults to a local version of the UMFPACK headers
+// Defaults to a local version of the UMFPACK headers
 #include "../../3rdparty/include/umfpack.h"
 
-#endif	// HAVE_SUITESPARSE_UMFPACK_H
-#endif	// HAVE_UFSPARSE_UMFPACK_H
-#endif	// HAVE_BIG_UMFPACK_UMFPACK_H
-#endif	// HAVE_UMFPACK_UMFPACK_H
-#endif	// HAVE_UMFPACK_H
+#endif    // HAVE_SUITESPARSE_UMFPACK_H
+#endif    // HAVE_UFSPARSE_UMFPACK_H
+#endif    // HAVE_BIG_UMFPACK_UMFPACK_H
+#endif    // HAVE_UMFPACK_UMFPACK_H
+#endif    // HAVE_UMFPACK_H
 }
 #endif
 
@@ -64,9 +64,6 @@ extern "C" {
 #include <cholmod.h>
 #endif
 
-
-static void Load_Init () {
-
-}
+static void Load_Init( ) {}
 
 LOADFUNC(Load_Init)

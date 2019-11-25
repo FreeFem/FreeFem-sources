@@ -22,8 +22,8 @@
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
 // *INDENT-OFF* //
-//ff-c++-LIBRARY-dep:
-//ff-c++-cpp-dep:
+// ff-c++-LIBRARY-dep:
+// ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 /*
@@ -42,28 +42,28 @@
 #include <cstdio>
 using namespace std;
 typedef struct {
-	float r, i;
+  float r, i;
 } pcm_complex;
 
 class PCM {
-	void CalcMax ();
+  void CalcMax( );
 
-	public:
-		int width, height;
-		unsigned long pixels;
-		float max;
-		pcm_complex *image;
-		PCM (int w, int h);
-		PCM (const char *filename);
-		pcm_complex*Get (int x, int y);
-		void Set (int x, int y, pcm_complex c);
-		void Load (const char *filename);
-		void Save (const char *filename);
-		~PCM ();
+ public:
+  int width, height;
+  unsigned long pixels;
+  float max;
+  pcm_complex *image;
+  PCM(int w, int h);
+  PCM(const char *filename);
+  pcm_complex *Get(int x, int y);
+  void Set(int x, int y, pcm_complex c);
+  void Load(const char *filename);
+  void Save(const char *filename);
+  ~PCM( );
 
-	private:
-		PCM (const PCM &);
-		void operator = (const PCM &);
+ private:
+  PCM(const PCM &);
+  void operator=(const PCM &);
 };
 
 #endif

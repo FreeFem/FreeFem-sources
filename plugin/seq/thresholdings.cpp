@@ -21,8 +21,8 @@
 // E-MAIL  : jacques.morice@ann.jussieu.fr
 
 // *INDENT-OFF* //
-//ff-c++-LIBRARY-dep:
-//ff-c++-cpp-dep:
+// ff-c++-LIBRARY-dep:
+// ff-c++-cpp-dep:
 // *INDENT-ON* //
 
 /*
@@ -35,48 +35,49 @@
 // using namespace Fem2D;
 
 template<class T> struct  Thresholding {
-	Matrice_Creuse<T> *v;
-	Thresholding (Matrice_Creuse<T> *vv): v(vv) {}
+        Matrice_Creuse<T> *v;
+        Thresholding (Matrice_Creuse<T> *vv): v(vv) {}
 };
 
 template<class R>
 Matrice_Creuse<R>*thresholding2 (const Thresholding<R> &t, const double &threshold) {
-	typedef HashMatrix<int,R> HMat;
-	Matrice_Creuse<R> *sparse_mat = t.v;
-	if (sparse_mat) {
-		HMat *phm=sparse_mat->pHM() ;
-		if( phm)
-		{
-		int n = phm->n, m = phm->m;
-		int nnzo = phm->nnz;
-		phm->resize(n,m,0,threshold);
-		  if (verbosity) {cout << "  thresholding : remove " << nnzo-phm->nnz  << " them in the matrix " << sparse_mat << " " << threshold << endl;}
-		} else if (verbosity) {cout << " empty matrix " << sparse_mat << endl;}
-	}
+        typedef HashMatrix<int,R> HMat;
+        Matrice_Creuse<R> *sparse_mat = t.v;
+        if (sparse_mat) {
+                HMat *phm=sparse_mat->pHM() ;
+                if( phm)
+                {
+                int n = phm->n, m = phm->m;
+                int nnzo = phm->nnz;
+                phm->resize(n,m,0,threshold);
+                  if (verbosity) {cout << "  thresholding : remove " << nnzo-phm->nnz  << " them in
+the matrix " << sparse_mat << " " << threshold << endl;} } else if (verbosity) {cout << " empty
+matrix " << sparse_mat << endl;}
+        }
 
-	return t.v;
+        return t.v;
 }
 
 template<class T>
 Thresholding<T> to_Thresholding (Matrice_Creuse<T> *v) {return Thresholding<T>(v);}
 */
-static void Load_Init () {	// le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
-    if(mpirank==0)
-        cerr << " ++ WARNING Obsolete plugin: thresholding  is now in FreeFem++ core " << endl;
-    /*
-	typedef Thresholding<double> TMR;
-	typedef Thresholding<Complex> TMC;
-	typedef Matrice_Creuse<double> MR;
-	typedef Matrice_Creuse<Complex> MC;
-	Dcl_Type<TMR>();
-	Dcl_Type<TMC>();
-	//TMR t(0);
-	//thresholding2(t, 0.);
-	Add<MR *>("thresholding", ".", new OneOperator1<TMR, MR *>(to_Thresholding));
-	Add<TMR>("(", "", new OneOperator2_<MR *, TMR, double>(thresholding2));
-	Add<MC *>("thresholding", ".", new OneOperator1<TMC, MC *>(to_Thresholding));
-	Add<TMC>("(", "", new OneOperator2_<MC *, TMC, double>(thresholding2));
-    */
+static void Load_Init( ) {    // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
+  if (mpirank == 0)
+    cerr << " ++ WARNING Obsolete plugin: thresholding  is now in FreeFem++ core " << endl;
+  /*
+      typedef Thresholding<double> TMR;
+      typedef Thresholding<Complex> TMC;
+      typedef Matrice_Creuse<double> MR;
+      typedef Matrice_Creuse<Complex> MC;
+      Dcl_Type<TMR>();
+      Dcl_Type<TMC>();
+      //TMR t(0);
+      //thresholding2(t, 0.);
+      Add<MR *>("thresholding", ".", new OneOperator1<TMR, MR *>(to_Thresholding));
+      Add<TMR>("(", "", new OneOperator2_<MR *, TMR, double>(thresholding2));
+      Add<MC *>("thresholding", ".", new OneOperator1<TMC, MC *>(to_Thresholding));
+      Add<TMC>("(", "", new OneOperator2_<MC *, TMC, double>(thresholding2));
+  */
 }
 
 LOADFUNC(Load_Init)

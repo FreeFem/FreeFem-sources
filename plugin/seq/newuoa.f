@@ -1452,4 +1452,4 @@ C
       IF (I .GT. NPT) BMAT(JP,I-NPT)=BMAT(I,J)
    70 CONTINUE
       RETURN
-      END 
+      END

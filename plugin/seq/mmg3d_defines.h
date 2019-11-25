@@ -26,9 +26,9 @@
 #define EPSOK 1.e-18
 #define EPS30 1.e-30
 
-#define ALPHAC 0.20412415	/* sqrt(6)/12 */
-#define ALPHAD 0.04811252	/* 1.0/(12*sqrt(3)) */
-#define BETAC 0.03928371/* sqrt(2)/36 */
+#define ALPHAC 0.20412415 /* sqrt(6)/12 */
+#define ALPHAD 0.04811252 /* 1.0/(12*sqrt(3)) */
+#define BETAC 0.03928371  /* sqrt(2)/36 */
 
 #define LLONG 1.3
 #define LSHORT 0.72
