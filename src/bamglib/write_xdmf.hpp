@@ -10,32 +10,32 @@
 using namespace std;
 using std::string;
 using std::vector;
-typedef long   Int4;
+typedef long Int4;
 
-class WriteXdmf
-{
-private:
-  const char * WXffname;
+class WriteXdmf {
+ private:
+  const char* WXffname;
   ofstream xdmf_file;
-  char * Elemtype;
+  char* Elemtype;
   Int4 nbofelem;
   Int4 nbofvertex;
   Int4 nbvperelem;
-  char * xdmf_filename;
+  char* xdmf_filename;
   int dimension;
 
-public:
-
-  WriteXdmf(const char * ffname, Int4 nbelem, Int4 nbvertex);
-  virtual ~WriteXdmf();
-  void WriteXdmfMeshFile2D();
+ public:
+  WriteXdmf(const char* ffname, Int4 nbelem, Int4 nbvertex);
+  virtual ~WriteXdmf( );
+  void WriteXdmfMeshFile2D( );
   // void WriteXdmfMeshFile3D();
-  void WriteXdmfSolFile2DInit();
-  void WriteXdmfSolFile2DAddField(string * fieldname, int data_type, int result_order, int trans_dim);
-  void WriteXdmfSolFile2DFinalize();
-  void WriteXdmfSolFile3DInit();
-  void WriteXdmfSolFile3DAddField(string * fieldname, int data_type, int result_order, int trans_dim);
-  void WriteXdmfSolFile3DFinalize();
+  void WriteXdmfSolFile2DInit( );
+  void WriteXdmfSolFile2DAddField(string* fieldname, int data_type, int result_order,
+                                  int trans_dim);
+  void WriteXdmfSolFile2DFinalize( );
+  void WriteXdmfSolFile3DInit( );
+  void WriteXdmfSolFile3DAddField(string* fieldname, int data_type, int result_order,
+                                  int trans_dim);
+  void WriteXdmfSolFile3DFinalize( );
 };
 
 #endif
