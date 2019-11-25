@@ -156,7 +156,6 @@ typename LineSearch< P, V, M, VM, R >::Param LineSearch< P, V, M, VM, R >::searc
                                                                                   double beta) {
   cerr << "You need to specify the LineSearch method!" << endl;
   exit(1);
-  return 0;
 }
 
 // Centered finite difference
@@ -252,7 +251,7 @@ typename LineSearch< P, V, M, VM, R >::Param LineSearch< P, V, M, VM, R >::updat
   // check to see if the new model is out of the upper bound
   cout << "update " << m.min( ) << " " << m.max( ) << " " << direction.max( ) << " " << dmod.max( );
   direction = alpha * m + beta * direction;
-  newparam = direction;
+  newparam = Param(direction);
   cout << " ; " << newparam.min( ) << " " << newparam.max( ) << endl;
   if ((m.modMax( ) != NULL) && (m.modMin( ) != NULL)) {
     for (long i = 0; i < ndim; i++) {

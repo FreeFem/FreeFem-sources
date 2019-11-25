@@ -66,11 +66,6 @@ class Optima {
   mlist allResidue( );
   //  normalized residues of all iterations
   mlist normResidue( );
-
-  //  No copy operator
-  Optima operator = (Optima&) = delete;
-  //  No copy constructor
-  Optima(Optima&) = delete;
 };
 
 template< class LS >
