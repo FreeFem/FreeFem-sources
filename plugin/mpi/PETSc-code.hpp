@@ -1411,6 +1411,34 @@ namespace PETSc {
         std::copy_n(out, ptIn->n, static_cast< PetscScalar* >(*ptIn));
     }
   }
+  template< bool T, class K, typename std::enable_if< std::is_same< K, PetscScalar >::value >::type* =
+                       nullptr >
+  void MatMult(MatriceMorse<K>* const& A, KN<PetscScalar>& in, KN<PetscScalar>& out) {
+    if(!T)
+      A->addMatMul(in, out);
+    else
+      A->addMatTransMul(in, out);
+  }
+  template< bool T, class K, typename std::enable_if< !std::is_same< K, PetscScalar >::value >::type* =
+                       nullptr >
+  void MatMult(MatriceMorse<K>* const& A, KN<PetscScalar>& in, KN<PetscScalar>& out) {
+    PetscScalar* pc = in;
+    double* pr = reinterpret_cast<double*>(pc);
+    KN_< K > realIn = KN_<double>(pr + 0, in.N(), 2 * in.step);
+    KN_< K > imagIn = KN_<double>(pr + 1, in.N(), 2 * in.step);
+    pc = out;
+    pr = reinterpret_cast<double*>(pc);
+    KN_< K > realOut = KN_<double>(pr + 0, out.N(), 2 * out.step);
+    KN_< K > imagOut = KN_<double>(pr + 1, out.N(), 2 * out.step);
+    if(!T) {
+      A->MatMul(realIn, realOut);
+      A->MatMul(imagIn, imagOut);
+    }
+    else {
+      A->MatTransMul(realIn, realOut);
+      A->MatTransMul(imagIn, imagOut);
+    }
+  }
   template< bool T >
   static PetscErrorCode ShellInjectionOp(Mat A, Vec x, Vec y) {
     User< ShellInjection > user;
@@ -1424,7 +1452,7 @@ namespace PETSc {
     ierr = VecGetArrayRead(x, &in);
     CHKERRQ(ierr);
     VecGetArray(y, &out);
-    MatriceMorse< PetscScalar >* mP = static_cast< MatriceMorse< PetscScalar >* >(&(*user->P->A));
+    MatriceMorse< double >* mP = static_cast< MatriceMorse< double >* >(&(*user->P->A));
     if (!T) {
       PetscInt mFine, nCoarse;
       MatGetLocalSize(A, &mFine, nullptr);
@@ -1436,7 +1464,7 @@ namespace PETSc {
       KN< PetscScalar > fine(user->f->_A->getDof( ));
       fine = PetscScalar( );
       user->C->_A->HPDDM::template Subdomain< PetscScalar >::exchange(coarse);
-      mP->addMatMul(coarse, fine);
+      MatMult<false>(mP, coarse, fine);
       KN_< PetscScalar > fineOut(out, mFine);
       fineOut = PetscScalar( );
       changeNumbering_func(user->f->_num, user->f->_first, user->f->_last, mFine,
@@ -1452,7 +1480,7 @@ namespace PETSc {
       KN< PetscScalar > coarse(user->C->_A->getDof( ));
       coarse = PetscScalar( );
       user->f->_A->HPDDM::template Subdomain< PetscScalar >::exchange(fine);
-      mP->addMatTransMul(fine, coarse);
+      MatMult<true>(mP, fine, coarse);
       KN_< PetscScalar > coarseOut(out, mCoarse);
       changeNumbering_func(user->C->_num, user->C->_first, user->C->_last, mCoarse,
                            user->C->_A->getMatrix( )->_n, 1, &coarse, &coarseOut, false);
