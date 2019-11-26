@@ -398,7 +398,7 @@ namespace Fem2D
   }
     
     
-  MeshL::MeshL(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
+  MeshL::MeshL(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh, double ridgeangledetection)
     :mapSurf2Curv(0),mapCurv2Surf(0)  {
         
         
@@ -561,7 +561,7 @@ namespace Fem2D
   }
     
     
-  MeshL::MeshL(int nnv, int nnt, int nnbe, Vertex3 *vv, EdgeL *tt, BoundaryPointL *bb, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
+  MeshL::MeshL(int nnv, int nnt, int nnbe, Vertex3 *vv, EdgeL *tt, BoundaryPointL *bb, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh, double ridgeangledetection)
     :mapSurf2Curv(0),mapCurv2Surf(0)
   {
     nv = nnv;

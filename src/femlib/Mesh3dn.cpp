@@ -143,10 +143,10 @@ namespace Fem2D
    
     // constructor of the class Mesh3
     
-    Mesh3::Mesh3(const string  filename)
+    Mesh3::Mesh3(const string  filename, double ridgeangledetection)
     :meshS(0)
     {
-        int ok=load(filename);
+        int ok=load(filename,ridgeangledetection);
         if(verbosity) {
             cout << "read mesh ok " << ok ;
             cout << "Mesh3, num Tetra:= " << nt << ", num Vertice:= " << nv << " num boundary Triangles:= " << nbe << endl;
@@ -202,11 +202,11 @@ namespace Fem2D
     // Read a mesh with correct the mesh :
     // 1) delete multiple points defined
     // 2) delete points which is not in element or in border element
-    Mesh3::Mesh3(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
+    Mesh3::Mesh3(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh, double ridgeangledetection)
     :meshS(0)
     {
         
-        int ok=load(filename);     // 1 fixed for the moment, just initialize a mesh3, meshS isn't used
+        int ok=load(filename,ridgeangledetection);     // 1 fixed for the moment, just initialize a mesh3, meshS isn't used
         if(verbosity) {
             cout << "read mesh ok " << ok  << endl;
             cout << ", nt " << nt << ", nv " << nv << " nbe:  = " << nbe << endl;
@@ -234,7 +234,7 @@ namespace Fem2D
                 if (verbosity>3)
                     cout << "build Mesh3::meshS with cleaned mesh3, before clean meshS, meshS:nv: " <<meshS->nv << " meshS:nt:" << meshS->nt << " meshS:nbe:" << meshS->nbe << endl;
             meshS=NULL;
-            BuildMeshS();
+            BuildMeshS(ridgeangledetection);
             if (verbosity>3)
                 cout << "after clean Mesh3::meshS, meshS:nv: " <<meshS->nv << " meshS:nt:" << meshS->nt << " meshS:nbe:" << meshS->nbe << endl;
             }
@@ -752,7 +752,7 @@ namespace Fem2D
     
     
     
-    int Mesh3::load(const string & filename)
+    int Mesh3::load(const string & filename, double angle)
     {
         int bin;
         int ver,inm,dim,err=0;
@@ -965,7 +965,7 @@ namespace Fem2D
         }
         else
             // if not input surface mesh, build it
-            this->BuildMeshS();
+            this->BuildMeshS(angle);
         
         
         

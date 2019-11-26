@@ -1065,7 +1065,7 @@ AnyType GMSH_LoadMesh3_Op::operator( )(Stack stack) const {
 class GMSH_LoadMeshS_Op : public E_F0mps {
  public:
   Expression filename;
-  static const int n_name_param = 5;    //
+  static const int n_name_param = 6;    //
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   long arg(int i, Stack stack, long a) const {
@@ -1094,7 +1094,8 @@ basicAC_F0::name_and_type GMSH_LoadMeshS_Op::name_param[] = {{"reftri", &typeid(
                                                              {"renum", &typeid(long)},
                                                              {"cleanmesh", &typeid(bool)},
                                                              {"removeduplicate", &typeid(bool)},
-                                                             {"precisvertice", &typeid(double)}};
+                                                             {"precisvertice", &typeid(double)},
+														 	 {"ridgeangledetection", &typeid(double) }};
 
 class GMSH_LoadMeshS : public OneOperator {
  public:
@@ -1106,7 +1107,7 @@ class GMSH_LoadMeshS : public OneOperator {
 };
 
 MeshS *GMSH_LoadS(const string &filename, bool cleanmesh, bool removeduplicate,
-                  double precisvertice) {
+                  double precisvertice, double ridgeangledetection) {
   // variable freefem++
   int nv, nt = 0, nbe = 0;
   Vertex3 *vff;
@@ -1527,7 +1528,7 @@ MeshS *GMSH_LoadS(const string &filename, bool cleanmesh, bool removeduplicate,
 
   fclose(fp);
 
-  MeshS *ThS = new MeshS(nv, nt, nbe, vff, tff, bff, cleanmesh, removeduplicate, precisvertice);
+  MeshS *ThS = new MeshS(nv, nt, nbe, vff, tff, bff, cleanmesh, removeduplicate, precisvertice, ridgeangledetection);
   return ThS;
 }
 
@@ -1539,10 +1540,11 @@ AnyType GMSH_LoadMeshS_Op::operator( )(Stack stack) const {
   bool cleanmesh(arg(2, stack, false));
   bool removeduplicate(arg(3, stack, false));
   double precisvertice(arg(4, stack, 1e-6));
+  double ridgeangledetection(arg(5, stack, 8.*atan(1.)/9.));
 
   assert(renumsurf <= 1 && renumsurf >= 0);
 
-  MeshS *ThS_t = GMSH_LoadS(*pffname, cleanmesh, removeduplicate, precisvertice);
+  MeshS *ThS_t = GMSH_LoadS(*pffname, cleanmesh, removeduplicate, precisvertice, ridgeangledetection);
 
   ThS_t->BuildGTree( );
   Add2StackOfPtr2FreeRC(stack, ThS_t);

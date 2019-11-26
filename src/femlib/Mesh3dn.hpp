@@ -143,8 +143,8 @@ template<typename Mesh> void GSave2(FILE * ff,const Mesh & Th) ;
 class Mesh3 : public GenericMesh<Tet,Triangle3,Vertex3> { 
 public:
   Mesh3():meshS(0){} 
-  Mesh3(const string);
-  Mesh3(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
+  Mesh3(const string, double ridgeangledetection=8.*atan(1.)/9.);
+  Mesh3(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7, double ridgeangledetection=8.*atan(1.)/9.);
   //Mesh3(const string, const long); // Add J. Morice 11/10
   Mesh3(FILE *f,int offset=0);     
   Mesh3(const Serialize &);
@@ -173,7 +173,7 @@ public:
         
         SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl);}
 private:
-  int load(const string & filename); 
+  int load(const string & filename, double angle); 
   Mesh3(const Mesh3 &); // pas de construction par copie
   void operator=(const Mesh3 &);// pas affectation par copy
 };

@@ -229,9 +229,9 @@ namespace Fem2D
     }
     
     
-    MeshS::MeshS(const string filename)
+    MeshS::MeshS(const string filename, double ridgeangledetection)
     :mapSurf2Vol(0),mapVol2Surf(0),meshL(0)  {
-        int ok=load(filename);
+        int ok=load(filename,ridgeangledetection);
         if(verbosity) {
             cout << "read meshS ok " << ok ;
             cout << "surface Mesh, num Triangles:= " << nt << ", num Vertice:= " << nv << " num boundary Edges:= " << nbe << endl;
@@ -268,7 +268,7 @@ namespace Fem2D
     
     
     
-    int MeshS::load(const string & filename)
+    int MeshS::load(const string & filename, double angle)
     {
         int bin;
         int ver,inm,dim;
@@ -458,7 +458,7 @@ namespace Fem2D
             }*/
         }
         else
-            this->BuildMeshL();
+            this->BuildMeshL(angle);
         
         
         if(verbosity>1)
@@ -474,11 +474,11 @@ namespace Fem2D
     }
     
     
-    MeshS::MeshS(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
+    MeshS::MeshS(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh, double ridgeangledetection)
     :mapSurf2Vol(0),mapVol2Surf(0),meshL(0) {
         
         
-        int ok=load(filename);
+        int ok=load(filename,ridgeangledetection);
         if(verbosity) {
             cout << "read mesh ok " << ok  << endl;
             cout << ", nt " << nt << ", nv " << nv << " nbe:  = " << nbe << endl;

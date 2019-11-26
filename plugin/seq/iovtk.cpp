@@ -5817,7 +5817,7 @@ template< class MMesh >
 class VTK_LoadMeshT_Op : public E_F0mps {
  public:
   Expression filename;
-  static const int n_name_param = 7;    //
+  static const int n_name_param = 8;    //
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   int arg(int i, Stack stack, int a) const {
@@ -5844,19 +5844,26 @@ class VTK_LoadMeshT_Op : public E_F0mps {
 
 template<>
 basicAC_F0::name_and_type VTK_LoadMeshT_Op< MeshS >::name_param[] = {
-  {"reftri", &typeid(long)},         {"swap", &typeid(bool)},
-  {"refedge", &typeid(long)},        {"namelabel", &typeid(string)},
-  {"cleanmesh", &typeid(bool)},      {"removeduplicate", &typeid(bool)},
-  {"precisvertice", &typeid(double)}
-
+  {"reftri", &typeid(long)},         
+  {"swap", &typeid(bool)},
+  {"refedge", &typeid(long)},        
+  {"namelabel", &typeid(string)},
+  {"cleanmesh", &typeid(bool)},      
+  {"removeduplicate", &typeid(bool)},
+  {"precisvertice", &typeid(double)},
+  {"ridgeangledetection", &typeid(double)}
 };
 
 template<>
 basicAC_F0::name_and_type VTK_LoadMeshT_Op< MeshL >::name_param[] = {
-  {"refedge", &typeid(long)},        {"swap", &typeid(bool)},
-  {"refbdpoint", &typeid(long)},     {"namelabel", &typeid(string)},
-  {"cleanmesh", &typeid(bool)},      {"removeduplicate", &typeid(bool)},
-  {"precisvertice", &typeid(double)}
+  {"refedge", &typeid(long)},        
+  {"swap", &typeid(bool)},
+  {"refbdpoint", &typeid(long)},     
+  {"namelabel", &typeid(string)},
+  {"cleanmesh", &typeid(bool)},      
+  {"removeduplicate", &typeid(bool)},
+  {"precisvertice", &typeid(double)},
+  {"ridgeangledetection", &typeid(double)}
 
 };
 
@@ -5873,7 +5880,7 @@ class VTK_LoadMeshT : public OneOperator {
 
 template< class MMesh >
 MMesh *VTK_LoadT(const string &filename, bool bigEndian, bool cleanmesh, bool removeduplicate,
-                 double precisvertice) {
+                 double precisvertice, double ridgeangledetection) {
   // swap = bigEndian or not bigEndian
   // variable freefem++
   typedef typename MMesh::Element T;
@@ -6197,8 +6204,9 @@ AnyType VTK_LoadMeshT_Op< MMesh >::operator( )(Stack stack) const {
   bool cleanmesh(arg(4, stack, false));
   bool removeduplicate(arg(5, stack, false));
   double precisvertice(arg(6, stack, 1e-6));
-
-  MMesh *Th = VTK_LoadT< MMesh >(*pffname, swap, cleanmesh, removeduplicate, precisvertice);
+  double ridgeangledetection(arg(7, stack, 8.*atan(1.)/9.));
+  
+  MMesh *Th = VTK_LoadT< MMesh >(*pffname, swap, cleanmesh, removeduplicate, precisvertice,ridgeangledetection);
 
   // A faire fonction pour changer le label
 
