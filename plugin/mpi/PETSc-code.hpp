@@ -1609,8 +1609,9 @@ namespace PETSc {
           setFieldSplitPC(ptA, ksp, fields, names, mdS);
         else
           setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
-        KSPSetFromOptions(ksp);
       }
+      else ksp = ptA->_ksp;
+      KSPSetFromOptions(ksp);
       if (c != 1) {
         if (std::is_same< Type, Dmat >::value) {
           FEbaseArrayKn< PetscScalar >* ptNS =
