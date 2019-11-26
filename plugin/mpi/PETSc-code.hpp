@@ -1562,8 +1562,10 @@ namespace PETSc {
         PCMGSetGalerkin(pc, PC_MG_GALERKIN_NONE);
         PCSetFromOptions(pc);
         for (int i = 0; i < tabA->N( ); ++i) {
-          PCMGSetOperators(pc, tabA->N( ) - i - 1, tabA->operator[](i)._petsc,
-                           tabA->operator[](i)._petsc);
+          KSP smoother;
+          PCMGGetSmoother(pc, tabA->N( ) - i - 1, &smoother);
+          KSPSetOperators(smoother, tabA->operator[](i)._petsc,
+                          tabA->operator[](i)._petsc);
           if (i < tabA->N( ) - 1) {
             User< ShellInjection > user = nullptr;
             PetscNew(&user);
