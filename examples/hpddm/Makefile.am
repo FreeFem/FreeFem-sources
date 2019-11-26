@@ -88,6 +88,7 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	maxwell-2d-PETSc.edp \
 	maxwell-3d-PETSc.edp \
 	laplace-adapt-3d-PETSc.edp
+	diffusion-3d-mg-PETSc.edp \
 
 TESTS_PETSC_SLEPC = laplace-2d-SLEPc.edp \
 	laplace-2d-spherical-harmonics-SLEPc.edp \
