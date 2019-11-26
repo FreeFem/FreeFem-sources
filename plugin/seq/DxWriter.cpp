@@ -20,10 +20,10 @@
 // AUTHORS : Sala Lorenzo
 // E-MAIL  : salallo80@gmail.com
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include "mode_open.hpp"
 #include <iostream>

@@ -21,10 +21,10 @@
 // David Radice
 // E-MAIL  : ...
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep: gmm
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include <cmath>
 #include <iostream>

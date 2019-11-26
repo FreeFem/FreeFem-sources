@@ -24,10 +24,10 @@
 
 // compile and link with ./load.link  mat\_dervieux.cpp
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 #define _USE_MATH_DEFINES
 #include <iostream>
 #include <cfloat>

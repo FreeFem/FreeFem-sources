@@ -20,10 +20,10 @@
 // AUTHORS : Cedric Ody
 // E-MAIL  : cedric.listes@gmail.com
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 // from the work of  Sala Lorenzo (Dxwriter)
 

@@ -20,10 +20,10 @@
 // AUTHORS : Pierre Jolivet
 // E-MAIL  : pierre.jolivet@enseeiht.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include "ff++.hpp"
 /*

@@ -20,10 +20,10 @@
 // AUTHORS : Pierre Jolivet
 // E-MAIL  : pierre.jolivet@enseeiht.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep: [mpi ptscotch] scotch
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #ifndef _ALL_IN_ONE_
 // add for missing  def of int32_t

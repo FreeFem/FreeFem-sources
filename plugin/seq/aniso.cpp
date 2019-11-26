@@ -22,11 +22,11 @@
 
 // ORIG-DATE : March 2015
 
-// *INDENT-OFF* //
+/* clang-format off */
 // for automatic  compilation with ff-c++
 //ff-c++-LIBRARY-dep: mshmet libMesh
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 /*
  * Thank to the ARN () FF2A3 grant

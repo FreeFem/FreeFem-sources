@@ -20,10 +20,10 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 // compile and link with ./load.link  mat\_dervieux.cpp
 

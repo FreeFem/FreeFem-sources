@@ -22,10 +22,10 @@
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 // ferchichihanen@gmail.com
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 // Reference
 // Sur l'implementation des elements finis de Hsieh-Clough-Tocher complet et reduit

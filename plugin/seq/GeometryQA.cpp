@@ -20,10 +20,10 @@
 // AUTHORS : Jean-Marie Mirebeau
 // E-MAIL  : jean-marie.mirebeau@math.u-psud.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 #define _USE_MATH_DEFINES
 #include <iostream>
 #include <cfloat>

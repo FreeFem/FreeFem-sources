@@ -22,10 +22,10 @@
 
 // compile and link with ff-c++ metric_Pk.cpp
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include <iostream>
 #include <cfloat>

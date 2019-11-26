@@ -20,10 +20,10 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep: pthread
 //ff-c++-cpp-dep: libff-mmap-semaphore.c
-// *INDENT-ON* //
+/* clang-format on */
 
 #include "ff++.hpp"
 #include "libff-mmap-semaphore.h"

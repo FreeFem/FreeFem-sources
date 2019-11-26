@@ -22,10 +22,10 @@
 
 // Example C++ function "CppModTemplate" dynamically loaded into "load.edp"
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include <ff++.hpp>
 #include "AFunction_ext.hpp"    // Extension of "AFunction.hpp" to deal with more than 3 parameters function

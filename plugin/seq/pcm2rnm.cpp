@@ -20,10 +20,10 @@
 // AUTHORS : Frederic Hecht
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep: pcm.cpp
-// *INDENT-ON* //
+/* clang-format on */
 
 /*  use in freefem++ edp
  * see :

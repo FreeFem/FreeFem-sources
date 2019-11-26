@@ -22,10 +22,10 @@
 
 // Example C++ function "add random function ", dynamically loaded into "load.edp"
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 // TODO: remove this block as soon as autoconf is removed from FreeFem++
 #ifndef CMAKE

@@ -22,10 +22,10 @@
 // E-MAIL  : jacques.morice@ann.jussieu.fr
 // frederic.hecht@sorbonne-universite.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep: mmg3d-v4
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 /*
  * Thank to the ARN ()  FF2A3 grant

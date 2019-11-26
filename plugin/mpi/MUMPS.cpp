@@ -20,10 +20,10 @@
 // AUTHORS : Frederic Hecht
 // E-MAIL  : frederic.hecht@sorbonne-unviersite.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:  mumps parmetis [ptscotch scotch]  scalapack blas  mpifc  fc mpi  pthread
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 // F. Hecht  december 2011
 // ----------------------------

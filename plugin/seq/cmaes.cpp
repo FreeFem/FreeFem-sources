@@ -20,10 +20,10 @@
 // AUTHORS : Nikolaus Hansen
 // E-MAIL  : ...
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 /* --- Changes : ---
  * 03/03/21: argument const double *rgFunVal of

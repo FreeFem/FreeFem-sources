@@ -22,10 +22,10 @@
 
 // compilation : ff-c++ FreeFemQA.cpp -I/usr/local/boost_1_47_0
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep: GeometryQA.cpp
-// *INDENT-ON* //
+/* clang-format on */
 
 #include <iostream>
 #include <cfloat>

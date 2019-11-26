@@ -20,10 +20,10 @@
 // AUTHORS : Mathieu Cloirec
 // E-MAIL  : cloirec@cines.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep: hdf5
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include "ff++.hpp"
 #include "write_xdmf.hpp"

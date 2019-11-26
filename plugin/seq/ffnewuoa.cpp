@@ -20,10 +20,10 @@
 // AUTHORS : Frederic Hecht
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep: newuoa.f
-// *INDENT-ON* //
+/* clang-format on */
 
 #include "ff++.hpp"
 typedef int integer;

@@ -20,10 +20,10 @@
 // AUTHOR  : Sylvain Auliac
 // E-MAIL  : auliac@ann.jussieu.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep: nlopt
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include <iostream>
 #include <stack>

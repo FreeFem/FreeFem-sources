@@ -21,10 +21,10 @@
 // Frederic Hecht
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 /*
  * Author: Dion Crannitch (adapted from Dave Mason's complexMap class)

@@ -22,10 +22,10 @@
 
 // Example C++ function "myfunction", dynamically loaded into "ff-c++ dfft.cpp "
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep: fftw3
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include "ff++.hpp"
 #include "AFunction_ext.hpp"

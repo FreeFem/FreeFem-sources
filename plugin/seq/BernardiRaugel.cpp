@@ -24,10 +24,10 @@
 // VALIDATION: test_P2BR.edp
 // EXAMPLE: NS_P2BR_P0.edp
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include <ff++.hpp>
 #include "AddNewFE.h"

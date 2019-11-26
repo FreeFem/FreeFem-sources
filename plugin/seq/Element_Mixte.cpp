@@ -20,10 +20,10 @@
 // AUTHORS : Frederic Hecht
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep: lapack blas
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 // RT1 and BDM1 conforme in H(div) space, ie u.n  continuous (n = is the normal)
 // RT1Ortho , BDM1 are conforme in H(curl) space ie u.t  continuous  (t = is the tangent)

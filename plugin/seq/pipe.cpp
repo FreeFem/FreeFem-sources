@@ -20,10 +20,10 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 // to compile ff-c++ pipe.cpp
 // warning do not compile under windows...

@@ -20,10 +20,10 @@
 // AUTHORS : Jacques Morice
 // E-MAIL  : jacques.morice@ann.jussieu.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep: tetgen
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 /*
  * Thank to the ARN ()  FF2A3 grant

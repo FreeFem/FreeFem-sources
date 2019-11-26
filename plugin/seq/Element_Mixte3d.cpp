@@ -28,10 +28,10 @@
 // lame-TD-NSS.edp
 // test-ElementMixte.edp
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include "ff++.hpp"
 #include "AddNewFE.h"

@@ -20,10 +20,10 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep: [flann]
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include <ff++.hpp>
 #include <AFunction_ext.hpp>

@@ -20,10 +20,10 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 // Example C++ function "myfunction", dynamically loaded into "load.edp"
 

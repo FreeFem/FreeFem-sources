@@ -20,10 +20,10 @@
 // AUTHORS : Sylvain Auliac
 // E-MAIL  : auliac@ann.jussieu.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep: cmaes.cpp
-// *INDENT-ON* //
+/* clang-format on */
 
 /*
  *      This is a freefem interface of the Hansen's CMA-ES C optimizer.

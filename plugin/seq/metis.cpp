@@ -21,10 +21,10 @@
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 // E-MAIL  :  P. Jolivet <pierre.jolivet@enseeiht.fr>
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep: metis
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include <ff++.hpp>
 #include <cmath>

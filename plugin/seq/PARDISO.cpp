@@ -20,10 +20,10 @@
 // AUTHORS : Pierre Jolivet
 // E-MAIL  : pierre.joliver@enseeiht.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep: mkl
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include <mkl_pardiso.h>
 #include <mkl_spblas.h>
