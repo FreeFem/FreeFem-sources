@@ -1,5 +1,7 @@
+/* clang-format off */
 //ff-c++-LIBRARY-dep: cxx11
 //ff-c++-cpp-dep:
+/* clang-format on */
 
 // -*- C++ -*-
 // Time-stamp: "2018-07-05 14:34:38 fujiwara"

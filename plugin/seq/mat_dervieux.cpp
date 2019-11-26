@@ -154,7 +154,7 @@ AnyType MatrixUpWind0::operator( )(Stack stack) const {
   sparce_mat->A.master(amorse);
   sparce_mat->typemat =
     0;    //(amorse->n == amorse->m) ? TypeSolveMat(TypeSolveMat::GMRES) :
-          //TypeSolveMat(TypeSolveMat::NONESQUARE);// none square matrice (morse)
+          // TypeSolveMat(TypeSolveMat::NONESQUARE);// none square matrice (morse)
   *mp = mps;
 
   if (verbosity > 3) {

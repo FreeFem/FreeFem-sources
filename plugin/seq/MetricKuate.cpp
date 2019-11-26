@@ -409,8 +409,8 @@ void metrique(int nbpoints, R2 *Point, R &A, R &B, R &C, R epsilon) {
 
 // int LireTaille (const char *NomDuFichier, int &nbnoeuds) {	// Lire le maillage  sur le fichier
 // de nom NomDuFichier
-// 															// Ouverture du
-// fichier  a partir de son nom 	ifstream f(NomDuFichier); 	string buffer;
+// 															// Ouverture
+// du fichier  a partir de son nom 	ifstream f(NomDuFichier); 	string buffer;
 //
 // 	nbnoeuds = 0;
 // 	if (!f) {

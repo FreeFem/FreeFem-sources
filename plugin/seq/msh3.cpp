@@ -3378,7 +3378,7 @@ void BuildBoundMinDist_th3(const double &precis_mesh, const double *tab_XX, cons
 //
 //= =====================
 ///*void OrderVertexTransfo_hcode_nv (const int &tab_nv, const double *tab_XX, const double *tab_YY,
-///const double *tab_ZZ,
+/// const double *tab_ZZ,
 //                                  const double *bmin, const double *bmax, const double hmin, int
 //                                  *Numero_Som, int *ind_nv_t, int &nv_t) {
 //    size_t i;
@@ -3528,7 +3528,7 @@ void BuildBoundMinDist_th3(const double &precis_mesh, const double *tab_XX, cons
 //}
 
 ///*void PointCommun_hcode (const int &dim, const int &NbPoints, const int &point_confondus_ok,
-///double **Coord_Point,
+/// double **Coord_Point,
 //                        const double *bmin, const double *bmax, const double hmin, int *ind_np,
 //                        int &np) {
 //    size_t i;

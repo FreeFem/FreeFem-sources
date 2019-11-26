@@ -1444,7 +1444,8 @@ static void Load_Init( ) {
   Global.Add("nloptOrigDIRECTL", "(", new OptimNLopt< nlopt::GN_ORIG_DIRECT_L >(1));
   Global.Add("nloptStoGO", "(", new OptimNLopt< nlopt::GD_STOGO >(1));
   Global.Add("nloptStoGORand", "(", new OptimNLopt< nlopt::GD_STOGO_RAND >(1));
-  // Global.Add("nloptLBFGSNocedal",					"(",new OptimNLopt<nlopt::LD_LBFGS_NOCEDAL>(1));
+  // Global.Add("nloptLBFGSNocedal",					"(",new
+  // OptimNLopt<nlopt::LD_LBFGS_NOCEDAL>(1));
   // //Invalid argument
   Global.Add("nloptLBFGS", "(", new OptimNLopt< nlopt::LD_LBFGS >(1));
   Global.Add("nloptPRAXIS", "(", new OptimNLopt< nlopt::LN_PRAXIS >(1));
