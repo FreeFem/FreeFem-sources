@@ -5,25 +5,28 @@ int others = 2;
 int inner = 3;
 int n = 10;
 
-curve3 D01(t=0, 1){x=0; y=-1+t; z=3; label=upper;}
-curve3 D02(t=0, 1){x=1.5-1.5*t; y=-1; z=3;label=upper;}
-curve3 D03(t=0, 1){x=1.5; y=-t; z=3;label=upper;}
-curve3 D04(t=0, 1){x=1+0.5*t; y=0; z=3;label=others;}
-curve3 D05(t=0, 1){x=0.5+0.5*t; y=0; z=3;label=others;}
-curve3 D06(t=0, 1){x=0.5*t; y=0; z=3;label=others;}
-curve3 D11(t=0, 1){x=0.5; y=-0.5*t; z=3;label=inner;}
-curve3 D12(t=0, 1){x=0.5+0.5*t; y=-0.5; z=3;label=inner;}
-curve3 D13(t=0, 1){x=1; y=-0.5+0.5*t; z=3;label=inner;}
+border D01(t=0, 1) {x=0; y=-1+t; }
+border D02(t=0, 1){x=1.5-1.5*t; y=-1; z=3;label=upper;}
+border D03(t=0, 1){x=1.5; y=-t; z=3;label=upper;}
+border D04(t=0, 1){x=1+0.5*t; y=0; z=3;label=others;}
+border D05(t=0, 1){x=0.5+0.5*t; y=0; z=3;label=others;}
+border D06(t=0, 1){x=0.5*t; y=0; z=3;label=others;}
+border D11(t=0, 1){x=0.5; y=-0.5*t; z=3;label=inner;}
+border D12(t=0, 1){x=0.5+0.5*t; y=-0.5; z=3;label=inner;}
+border D13(t=0, 1){x=1; y=-0.5+0.5*t; z=3;label=inner;}
 
-//plot(D01(-n) + D02(-n) + D03(-n) + D04(-n) + D05(-n)
- //  + D06(-n) + D11(n) + D12(n) + D13(n), wait=true);
+plot(D01(-n) + D02(-n) + D03(-n) + D04(-n) + D05(-n)
+   + D06(-n) + D11(n) + D12(n) + D13(n), wait=true);
  
-meshL ThL=buildmesh(D01(-n) + D02(-n) + D03(-n) + D04(-n) + D05(-n)
+meshL ThL=buildmeshL(D01(-n) + D02(-n) + D03(-n) + D04(-n) + D05(-n)
     + D06(-n) + D11(n) + D12(n) + D13(n));
 
 savemesh(ThL,"toto.mesh");
 	
 //helice conique
-curve3 E1(t=0, 10.*pi){x=(1.)*t*cos(t); y=-(1.)*t*sin(t); z=t;}
-meshL ThL2=buildmesh(E1(1000));
-//plot(ThL2);
+border E1(t=0, 10.*pi){x=(1.)*t*cos(t); y=-(1.)*t*sin(t); z=t;}
+meshL ThL2=buildmeshL(E1(1000));
+plot(ThL2);
+
+
+

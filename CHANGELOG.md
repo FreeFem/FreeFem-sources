@@ -34,6 +34,7 @@ All notable changes to this project will be documented in this file.
 - possible to build a curve mesh from a surface, ThS = buildBdMesh(ThS) and define this new mesh by meshL ThL= ThS.Gamma
 - can extract a border part of a meshL (meshL ThL = extract(ThL,label=llabs))
 - Support for optimized boundary conditions with PETSc, see helmholtz-2d-PETSc.edp
+- buildmeshL() function: build meshL from borders
 
 ### Changed
 - function buildSurface(...) renamed by buildBdMesh(...)
@@ -42,6 +43,7 @@ All notable changes to this project will be documented in this file.
 ### Removed
 - FFTW is not compiled by PETSc anymore
 - Spurious outputs in TetGen plugin
+- curve3 type -> border
 
 ### Fixed
 - plotMPI function for plotting 3D solutions, problem with serialize
@@ -50,6 +52,7 @@ All notable changes to this project will be documented in this file.
 - correct problem with buffer iostrean function (buffer must be out of range )
 - correct i/o vtk and by defaut write at binary format
 - fix an overflow in RT13d FE
+- problem with auto-build of border mesh
 ## [4.4-2]
 ### Added
 - add matrix and array tools (FH)

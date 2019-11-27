@@ -2568,10 +2568,6 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
       throwassert(e[i]);
       return GetAny< const E_BorderN * >((*e[i])(s));
     }
-    const E_Curve3N *evalc(int i, Stack s) const {
-      throwassert(e[i]);
-      return GetAny< const E_Curve3N * >((*e[i])(s));
-    }
     tab evalt(int i, Stack s) const {
       throwassert(e[i]);
       return GetAny< tab >((*e[i])(s));
@@ -2777,13 +2773,9 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
         l[i].what = 55;    // 3d line mesh
         l[i][0] = CastTo< pmeshL >(args[i]);
       } else if (BCastTo< const E_BorderN * >(args[i])) {
-        l[i].what = 4;    // border 2d
+        l[i].what = 4;    // border 2d / 3d
         l[i].composant = true;
         l[i][0] = CastTo< const E_BorderN * >(args[i]);
-      } else if (BCastTo< const E_Curve3N * >(args[i])) {
-        l[i].what = 40;    // border 3d
-        l[i].composant = true;
-        l[i][0] = CastTo< const E_Curve3N * >(args[i]);
       } else if (BCastTo< KN< pmesh > * >(args[i])) {
         l[i].composant = true;
         l[i].what = 100;    //  mesh 2d array
@@ -4367,12 +4359,8 @@ AnyType Plot::operator( )(Stack s) const {
           theplot << what;
           theplot << mapth3[&l[i].evalm3(0, s)];    // numero du maillage 3D volume
         }
-      } else if (l[i].what == 40) {
-        err = 0;
-        theplot << what;
-        const E_Curve3N *Bh3 = l[i].evalc(0, s);
-        Bh3->SavePlot(s, theplot);
-      } else if (what == 50) {
+      }
+      else if (what == 50) {
         pThS = &(l[i].evalmS(0, s));
         if (pThS) {
           err = 0;
@@ -4553,13 +4541,7 @@ AnyType Plot::operator( )(Stack s) const {
       } else if (l[i].what == 4) {
         if (!uaspectratio) aspectratio = true;
         const E_BorderN *Bh = l[i].evalb(0, s);
-        Bh->BoundingBox(s, P1.x, P2.x, P1.y, P2.y);
-
-      } else if (l[i].what == 40) {
-        if (!uaspectratio) aspectratio = true;
-        const E_Curve3N *Bh3 = l[i].evalc(0, s);
-        Bh3->BoundingBox(s, P11.x, P22.x, P11.y, P22.y, P11.z, P22.z);
-
+        Bh->BoundingBox(s, P11.x, P22.x, P11.y, P22.y, P11.z, P22.z);
       } else if (l[i].what == 3) {
         tab ttx = l[i].evalt(0, s);
         tab tty = l[i].evalt(1, s);

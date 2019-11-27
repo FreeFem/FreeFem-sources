@@ -1159,7 +1159,7 @@ AnyType SaveSurfaceMesh3::operator()(Stack stack) const
 
 
 // version 3d of buildmeshborder
-const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bool justboundary,int nbvmax=0,bool Requiredboundary       ,KNM<double> *pintern,double alea)
+const MeshL* BuildMeshCurve3(Stack stack, E_BorderN const * const & b)   //  ,bool justboundary,int nbvmax=0,bool Requiredboundary       ,KNM<double> *pintern,double alea)
 {
     int nbvinter=0;
     double precis_mesh=1.e-7;
@@ -1169,7 +1169,7 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
     MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
     
     int Gnbv=0,Gnbt=0,nbsd=0;    // vertice, edges, nb subdomains
-    for (E_Curve3N const *k=b;k;k=k->next) {
+    for (E_BorderN const *k=b;k;k=k->next) {
         int nbd = k->NbBorder(stack);
         for(int index=0;index<nbd;++index ) {
             long n=Max(1L,Abs(k->Nbseg(stack,index)));
@@ -1190,7 +1190,7 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
 
     //  generation des points et des lignes
     long i=0,n=0;
-    for (E_Curve3N const * k=b;k;k=k->next) {
+    for (E_BorderN const * k=b;k;k=k->next) {
         int nbd = k->NbBorder(stack);
         for(int index=0; index<nbd; ++index ) {
             assert(k->b->xfrom);
@@ -1317,7 +1317,7 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
     
    Th->elements = new EdgeL[Gnbt];
     
-   for (E_Curve3N const * k=b;k;k=k->next) {
+   for (E_BorderN const * k=b;k;k=k->next) {
        int nbd = k->NbBorder(stack);
        for(int index=0; index<nbd; ++index ) {
            double & t = *  k->var(stack);
@@ -1360,92 +1360,6 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
     
     return Th;
 }
-
-
-
-
-
-void E_Curve3N::SavePlot(Stack stack,PlotStream & plot) const
-{
-    
-    MeshPoint & mp (*MeshPointStack(stack)), mps = mp;
-    
-    long nbd1=0;// nb of sub border
-    for (E_Curve3N const * k=this;k;k=k->next) {
-        int nbdr = k->NbBorder(stack);
-        for(int index=0; index<nbdr; ++index )
-            nbd1++;
-    }
-    plot << nbd1;
-    int nbd=0;
-    for (E_Curve3N const * k=this;k;k=k->next) {
-        int nbdr = k->NbBorder(stack);
-        for(int index=0; index<nbdr; ++index ) {
-            nbd++;
-            assert(k->b->xfrom); // a faire
-            double & t = *  k->var(stack);
-            double a(k->from(stack)),b(k->to(stack));
-            long n=Max(Abs(k->Nbseg(stack,index)),1L);
-            long * indx = (k->index(stack));
-            if(indx) *indx = index;
-            else ffassert(index==0);
-            
-            t=a;
-            double delta = (b-a)/n;
-            plot<< (long) n;
-            for (int  nn=0;nn<=n;nn++, t += delta)
-            {
-                if (nn==n) t=b; // to remove roundoff error
-                mp.label = k->label();
-                k->code(stack);
-                plot << (long) mp.label <<mp.P.x << mp.P.y << mp.P.z;
-            }
-            
-        }}
-    assert(nbd==nbd1);
-    if(verbosity>9) cout << "  -- Plot size : " << nbd << " Curve3 \n";
-    mp=mps;
-}
-
-
-void E_Curve3N::BoundingBox(Stack stack,double  &xmin,double & xmax, double & ymin,double & ymax, double & zmin,double & zmax) const
-{
-    MeshPoint & mp (*MeshPointStack(stack)), mps = mp;
-    for (E_Curve3N const * k=this;k;k=k->next)
-    {
-        int nbd = k->NbBorder(stack);
-        for(int index=0; index<nbd; ++index )
-        {
-            assert(k->b->xfrom); // a faire
-            double & t = *  k->var(stack);
-            double a(k->from(stack)),b(k->to(stack));
-            long * indx = (k->index(stack));
-            if(indx) *indx = index;
-            else ffassert(index==0);
-            
-            long n=Max(Abs(k->Nbseg(stack,index)),1L);
-            t=a;
-            double delta = (b-a)/n;
-            for (int  nn=0;nn<=n;nn++, t += delta)
-            {
-                if (nn==n) t=b; // to remove roundoff error
-                mp.label = k->label();
-                k->code(stack); // compute x,y, label
-                xmin=Min(xmin,mp.P.x);
-                xmax=Max(xmax,mp.P.x);
-                ymin=Min(ymin,mp.P.y);
-                ymax=Max(ymax,mp.P.y);
-                zmin=Min(ymin,mp.P.z);
-                zmax=Max(ymax,mp.P.z);
-            }
-        }}
-    mp=mps;
-}
-
-
-
-
-
 
 
 AnyType MoveMesh3::operator()(Stack stack) const 
@@ -2701,7 +2615,7 @@ void init_lgmesh3() {
   Global.Add("savemesh","(",new OneOperatorCode<SaveMeshL>);
   Global.Add("savesurfacemesh","(",new OneOperatorCode<SaveSurfaceMesh3>);
     
-  Global.Add("buildmesh","(",new OneOperator1s_<pmeshL,const E_Curve3N *>(BuildMeshCurve3));
+  Global.Add("buildmeshL","(",new OneOperator1s_<pmeshL,const E_BorderN *>(BuildMeshCurve3));
 
     
   // 3D volume
