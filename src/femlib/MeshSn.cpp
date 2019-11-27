@@ -458,7 +458,7 @@ namespace Fem2D
             }*/
         }
         else
-            cout << " use Th = buildBdMesh(Th) to build the curve mesh associated" << endl;
+            if(verbosity>5) cout << " use Th = buildBdMesh(Th) to build the curve mesh associated" << endl;
 
         
         if(verbosity>1)

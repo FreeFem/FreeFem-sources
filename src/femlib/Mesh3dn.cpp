@@ -965,7 +965,7 @@ namespace Fem2D
         }
         else
             // if not input surface mesh, build it
-            cout << " use Th = buildBdMesh(Th) to build the surface mesh associated" << endl;
+            if(verbosity>5) cout << " use Th = buildBdMesh(Th) to build the surface mesh associated" << endl;
         
         
         
