@@ -2318,7 +2318,7 @@ AnyType ConvexHull3D_tetg_file_Op::operator( )(Stack stack) const {
     ifstream fp(pointsfile->c_str( ));
 
     if (!fp) {
-      cerr << "  -- tetgconvexhull : Erreur openning " << pointsfile << endl;
+      cerr << "  -- tetgconvexhull : Erreur opening " << pointsfile << endl;
       exit(1);
     }
 

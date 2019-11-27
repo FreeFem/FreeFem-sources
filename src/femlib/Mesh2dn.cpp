@@ -91,7 +91,7 @@ Mesh2::Mesh2(const char * filename)
   if(ok)
     {
       ifstream f(filename);
-      if(!f) {cerr << "Mesh2::Mesh2 Erreur openning " << filename<<endl;exit(1);}
+      if(!f) {cerr << "Mesh2::Mesh2 Erreur opening " << filename<<endl;exit(1);}
       if(verbosity)
       cout << " Read On file \"" <<filename<<"\""<<  endl;
       f >> nv >> nt >> nbe ;

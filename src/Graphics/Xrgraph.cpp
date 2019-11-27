@@ -419,7 +419,7 @@ void initgraphique()
   display = XOpenDisplay(NULL);
   if (!display) 
     {
-      cerr << " Erreur openning  display " << endl;
+      cerr << " Erreur opening  display " << endl;
       exit(2);
     }
   colortable=0;
@@ -1114,7 +1114,7 @@ void openPS(const char *filename )
     fprintf(psfile," 1 setlinewidth\n");
   }
   else 
-    cerr << " Err openning postscript file " << fps << endl;
+    cerr << " Err opening postscript file " << fps << endl;
 }
 void closePS(void)
 {

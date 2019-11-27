@@ -259,8 +259,8 @@ template<class R,class RR>
 struct Op2_set_pstring: public binary_function<R,string*,R> {
   static R  f(R const & p,string * const & a)  {*p =  new RR(a->c_str());
    if ( !*p || !**p) {
-       cerr << " Error openning file " << *a << endl;
-       ExecError("Error openning file");}
+       cerr << " Error opening file " << *a << endl;
+       ExecError("Error opening file");}
    return p;} };
 
 template<class R,class RR>
