@@ -569,7 +569,7 @@ void initgraphique(void)
       dpy = XOpenDisplay(0);
   if (!dpy) 
     {
-      cerr << " Error openning  dpy " << endl;
+      cerr << " Error opening  dpy " << endl;
       exit(2);
     }
 

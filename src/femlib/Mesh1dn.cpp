@@ -85,7 +85,7 @@ namespace Fem2D {
     if(ok)
       {
 	ifstream f(filename);
-	if(!f) {cerr << "Mesh1::Mesh1 Erreur openning " << filename<<endl;exit(1);}
+	if(!f) {cerr << "Mesh1::Mesh1 Erreur opening " << filename<<endl;exit(1);}
 	if(verbosity)
 	  cout << " Read On file \"" <<filename<<"\""<<  endl;
 	f >> nv >> nt >> nbe ;

@@ -912,7 +912,7 @@ const Fem2D::Mesh *  ReadTriangulate( string  * const & s) {
     {
       nv=0;
       ifstream f(s->c_str());
-      if(!f) {cerr <<" Error openning file " << *s << endl;
+      if(!f) {cerr <<" Error opening file " << *s << endl;
       ExecError("Openning file ");}
       while (f.good())
         {

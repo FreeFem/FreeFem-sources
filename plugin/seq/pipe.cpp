@@ -127,8 +127,8 @@ static pstream **pstream_init(pstream **const &p, string *const &a, string *cons
   *p = new pstream(pp, om);
 
   if (!*p || !pp) {
-    cerr << " Error openning pipe  " << *a << endl;
-    ExecError("Error openning pipe");
+    cerr << " Error opening pipe  " << *a << endl;
+    ExecError("Error opening pipe");
   }
 
   return p;
@@ -232,8 +232,8 @@ static pstream **pstream_init(pstream **const &p, string *const &a, string *cons
   *p = new pstream(pp, om);
 
   if (!*p || !pp) {
-    cerr << " Error openning pipe  " << *a << endl;
-    ExecError("Error openning pipe");
+    cerr << " Error opening pipe  " << *a << endl;
+    ExecError("Error opening pipe");
   }
 
   return p;

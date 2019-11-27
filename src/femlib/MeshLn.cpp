@@ -247,7 +247,7 @@ namespace Fem2D
     if (ok) {
       ifstream f(filename.c_str());
       if(!f) {
-	cerr << "  --  MeshL::MeshL Erreur openning " << filename<<endl;ffassert(0);exit(1);}
+	cerr << "  --  MeshL::MeshL Erreur opening " << filename<<endl;ffassert(0);exit(1);}
       if(verbosity>2)
 	cout << "  -- MeshL:  Read On file \"" <<filename<<"\""<<  endl;
       if(filename.rfind(".msh")==filename.length()-4)
@@ -410,7 +410,7 @@ namespace Fem2D
     if(ok) {
         ifstream f(filename.c_str());
         if(!f)
-            cerr << "  --  MeshL Erreur openning " << filename<<endl;ffassert(0);exit(1);
+            cerr << "  --  MeshL Erreur opening " << filename<<endl;ffassert(0);exit(1);
         if(verbosity>2)
                 cout << "  -- MeshL:  Read On file \"" <<filename<<"\""<<  endl;
         if(filename.rfind(".msh")==filename.length()-4)

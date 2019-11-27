@@ -186,7 +186,7 @@ namespace bamg {
           MeshError(1);
       }
     else {
-      cerr << " Error openning file " << filename << endl;
+      cerr << " Error opening file " << filename << endl;
       MeshError(1);
     }
     if (verbosity > 5) cout << "end write" << endl;

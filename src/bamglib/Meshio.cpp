@@ -289,7 +289,7 @@ namespace bamg {
   void OFortranUnFormattedFile::Error(int err) {
     cerr << "Fatal Error Output FortranUnFormattedFile " << endl;
     if (err == 0)
-      cerr << "-- Error openning ";
+      cerr << "-- Error opening ";
     else if (err == 1)
       cerr << "-- OverFlow write ";
     else if (err == 2)
@@ -309,7 +309,7 @@ namespace bamg {
   void IFortranUnFormattedFile::Error(int err) {
     cerr << "Fatal Error Input FortranUnFormattedFile " << endl;
     if (err == 0)
-      cerr << " Error openning ";
+      cerr << " Error opening ";
     else if (err == 1)
       cerr << " OverFlow read";
     else if (err == 2)
