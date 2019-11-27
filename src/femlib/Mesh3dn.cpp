@@ -965,7 +965,7 @@ namespace Fem2D
         }
         else
             // if not input surface mesh, build it
-            this->BuildMeshS(angle);
+            cout << " use Th = buildBdMesh(Th) to build the surface mesh associated" << endl;
         
         
         

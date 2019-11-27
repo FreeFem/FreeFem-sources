@@ -458,8 +458,8 @@ namespace Fem2D
             }*/
         }
         else
-            this->BuildMeshL(angle);
-        
+            cout << " use Th = buildBdMesh(Th) to build the curve mesh associated" << endl;
+
         
         if(verbosity>1)
             cout << "  -- MeshS(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
