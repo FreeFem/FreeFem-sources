@@ -146,7 +146,7 @@ namespace Fem2D
     Mesh3::Mesh3(const string  filename, double ridgeangledetection)
     :meshS(0)
     {
-        int ok=load(filename,ridgeangledetection);
+        int ok=load(filename);
         if(verbosity) {
             cout << "read mesh ok " << ok ;
             cout << "Mesh3, num Tetra:= " << nt << ", num Vertice:= " << nv << " num boundary Triangles:= " << nbe << endl;
@@ -183,6 +183,7 @@ namespace Fem2D
                 meshS->BuildjElementConteningVertex();
             }
         }
+        else BuildMeshS(ridgeangledetection);
         if(verbosity>2) {
             cout << "  -- End of read: Mesh3 mesure = " << mes << " border mesure " << mesb << endl;
             if(meshS ) cout << "  -- End of read: MeshS mesure = " << meshS->mes << " border mesure " << meshS->mesb << endl;
@@ -206,7 +207,7 @@ namespace Fem2D
     :meshS(0)
     {
         
-        int ok=load(filename,ridgeangledetection);     // 1 fixed for the moment, just initialize a mesh3, meshS isn't used
+        int ok=load(filename);     // 1 fixed for the moment, just initialize a mesh3, meshS isn't used
         if(verbosity) {
             cout << "read mesh ok " << ok  << endl;
             cout << ", nt " << nt << ", nv " << nv << " nbe:  = " << nbe << endl;
@@ -249,6 +250,7 @@ namespace Fem2D
                 meshS->BuildjElementConteningVertex();
             }
         }
+        else BuildMeshS(ridgeangledetection);
         
         /*
         if(change){
@@ -752,7 +754,7 @@ namespace Fem2D
     
     
     
-    int Mesh3::load(const string & filename, double angle)
+    int Mesh3::load(const string & filename)
     {
         int bin;
         int ver,inm,dim,err=0;
@@ -2001,7 +2003,6 @@ namespace Fem2D
         // build the edge list
         meshS->BuildEdges(angle);
         meshS->BuildGTree();
-        
         
     }
 

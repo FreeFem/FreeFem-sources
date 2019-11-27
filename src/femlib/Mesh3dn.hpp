@@ -173,7 +173,7 @@ public:
         
         SHOWVERB(cout << " %%%% delete Mesh3"<< this << endl);}
 private:
-  int load(const string & filename, double angle); 
+  int load(const string & filename); 
   Mesh3(const Mesh3 &); // pas de construction par copie
   void operator=(const Mesh3 &);// pas affectation par copy
 };

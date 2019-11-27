@@ -7601,10 +7601,8 @@ AnyType BuildMeshS_Op::operator( )(Stack stack) const {
   if (verbosity > 5) cout << "Angle criteria to determine an edge:" << angle << endl;
 
   if (Th.meshS) {
-    cout << "Caution, Mesh3::meshS previously created " << endl;
-    ;
-    Add2StackOfPtr2FreeRC(stack, pTh);
-    return pTh;
+    cout << "Caution, Mesh3::meshS previously created, don't use builBdMesh operator " << endl;
+	return pTh;
   }
 
   else {
@@ -7694,9 +7692,7 @@ AnyType BuildMeshL_Op::operator( )(Stack stack) const {
   if (verbosity > 5) cout << "Enter in BuilMesh_Op.... " << endl;
 
   if (Th.meshL) {
-    cout << "Caution, MeshS::meshL previously created " << endl;
-    ;
-    Add2StackOfPtr2FreeRC(stack, pTh);
+    cout << "Caution, MeshS::meshL previously created, don't use builBdMesh operator " << endl;
     return pTh;
   }
 
