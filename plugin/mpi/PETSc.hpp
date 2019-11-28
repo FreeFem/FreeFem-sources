@@ -20,6 +20,7 @@ template<class HpddmType>
 class DistributedCSR {
     public:
         HpddmType*                             _A;
+        KN<double>*                            _D;
         Mat                                _petsc;
         std::vector<Mat>*                     _vS;
         VecScatter                       _scatter;
@@ -31,7 +32,7 @@ class DistributedCSR {
         unsigned int*                       _cnum;
         unsigned int                      _cfirst;
         unsigned int                       _clast;
-        DistributedCSR() : _A(), _petsc(), _vS(), _ksp(), _exchange(), _num(), _first(), _last(), _cnum(), _cfirst(), _clast() { }
+        DistributedCSR() : _A(), _D(), _petsc(), _vS(), _ksp(), _exchange(), _num(), _first(), _last(), _cnum(), _cfirst(), _clast() { }
         ~DistributedCSR() {
             dtor();
         }
@@ -107,6 +108,11 @@ class DistributedCSR {
             }
             delete [] _num;
             _num = nullptr;
+            if(_D) {
+                _D->destroy();
+                delete _D;
+                _D = nullptr;
+            }
         }
 };
 

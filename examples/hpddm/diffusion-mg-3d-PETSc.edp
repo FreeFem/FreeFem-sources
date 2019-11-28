@@ -1,37 +1,33 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
 
+load "PETSc"
 macro dimension()3// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
-macro def(i)i// EOM                 // scalar field definition
-macro init(i)i// EOM                // scalar field initialization
 macro grad(u)[dx(u), dy(u), dz(u)]// EOM
-int overlap = getARGV("-overlap", 1);
-int s = getARGV("-split", 2);
-int[int][int] intersection;
 
 func Pk = P1;                       // finite element space
 int level = getARGV("-level", 3);
-mesh3[int] ThTab(level);
-mesh3[int] ThBorderTab(level);
-real[int][int] DTab(level);
 int[int] LL = [1,2, 1,2, 1,1];
+mesh3[int] ThTab(level);
 ThTab[level - 1] = cube(getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5), [x, y, z], label = LL);
-matrix[int] P(level - 1);
-buildOverlapEdgeRecursive(ThTab, ThBorderTab, -111111, s, overlap, level, P, intersection, DTab, Pk, mpiCommWorld, false, Pk, def, init);
-load "PETSc"
 Mat[int] MG(level);
+matrix[int] P(level - 1);
+buildMatRecursive(ThTab, getARGV("-split", 2), level, P, MG, Pk, mpiCommWorld);
 real[int] rhs;
 for(int i = 0; i < level; ++i) {
     varf vPb(u, v) = intN(ThTab[i])(grad(u)' * grad(v)) + intN(ThTab[i])(v) + on(1, u = 0.0);
     fespace Wh(ThTab[i], Pk);
     matrix<real> Loc = vPb(Wh, Wh, tgv = -2);
-    Mat A(Loc, intersection, DTab[i], level = i);
-    MG[i] = A;
+    MG[i] = Loc;
     if(i == 0) {
         rhs.resize(Wh.ndof);
         rhs = vPb(0, Wh);
     }
 }
 set(MG, P, sparams = "-pc_type mg");
-real[int] x = MG[0]^-1 * rhs;
+fespace Wh(ThTab[0], Pk);
+Wh u;
+u[] = MG[0]^-1 * rhs;
+macro def(u)u//
+plotMPI(ThTab[0], u, Pk, def, real, cmm = "Global solution")

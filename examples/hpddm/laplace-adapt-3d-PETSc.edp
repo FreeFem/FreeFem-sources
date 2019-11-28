@@ -6,8 +6,6 @@ load "PETSc"
 macro dimension()3// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
-macro def(i)i// EOM                         // scalar field definition
-macro init(i)i// EOM                        // scalar field initialization
 int n = 12;
 int[int] L=[1,1,1,1], LU=[0,1], LD=[1,1];
 mesh3 Th3=buildlayers(square(n, n, region=0, label=L), n, zbound=[0,1], labelmid=LD, labelup = LU, labeldown = LU);
@@ -17,26 +15,24 @@ macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
 
 varf vPoisson(u, v) = int3d(Th3)(grad(u)' * grad(v)) + int3d(Th3)(v) + on(1, u=0);
 
-real[int] D;
-int[int][int] intersection;
 meshN ThBackup = Th3;
-buildMinimalist(Th3, intersection, D, P1)
+Mat A;
+buildMatMinimalist(Th3, A, P1);
 fespace Vh(Th3, P1);
 Vh u;
-Mat dA(Vh.ndof, intersection, D);
 real err = 1e-2;
 
 int iMax = 4;
 for(int i = 0; i < iMax; ++i) {
     matrix Loc = vPoisson(Vh, Vh, tgv = -2);
-    dA = Loc;
-    set(dA, sparams = "-ksp_monitor -pc_type hypre");
+    A = Loc;
+    set(A, sparams = "-ksp_monitor -pc_type hypre");
     real[int] rhs = vPoisson(0, Vh, tgv = -1);
-    u[] = dA^-1 * rhs;
+    u[] = A^-1 * rhs;
     if(i < iMax - 1) {
         fespace VhBackup(ThBackup, P1);
         VhBackup h, hReduced;
-        u[] .*= D;
+        u[] .*= A.D;
         searchMethod = 0;
         h = u;
         searchMethod = 1;
@@ -49,11 +45,9 @@ for(int i = 0; i < iMax; ++i) {
         }
         broadcast(processor(0), Th3);
         ThBackup = Th3;
-        intersection.resize(0);
-        D.resize(0);
-        buildMinimalist(Th3, intersection, D, P1)
-        Mat dAdapt(Vh.ndof, intersection, D);
-        dA = dAdapt;
+        Mat Adapt;
+        buildMatMinimalist(Th3, Adapt, P1);
+        A = Adapt;
         u = hReduced;
         err *= 0.8;
     }

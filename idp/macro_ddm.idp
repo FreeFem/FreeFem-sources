@@ -337,6 +337,12 @@ ENDIFMACRO
 }// EOM
 
 macro buildOverlapEdgePeriodicRecursive(Th, ThBorder, fakeInterface, s, overlap, level, prolongation, intersection, D, P, comm, excluded, PkPart, defPart, initPart, labPeriodic, userPartitioning, bs) {
+IFMACRO(!def)
+    NewMacro def(i)i EndMacro
+ENDIFMACRO
+IFMACRO(!init)
+    NewMacro init(i)i EndMacro
+ENDIFMACRO
     Th.resize(level);
     ThBorder.resize(level);
     prolongation.resize(level - 1);
@@ -513,6 +519,46 @@ macro buildMinimalist(Th, intersection, D, P, bs) {
     bool excluded = false;
     buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, 1, overlap, intersection, D, P, mpiCommWorld, excluded, P, def, init, emptyArray, emptyRealArray, bs)
 }// EOM
+macro buildMatRecursive(Th, s, level, prolongation, A, P, comm, bsMat) {
+    int[int] emptyArray(0);
+    real[int] emptyRealArray(0);
+    meshN[int] ThBorderTab(level);
+    int[int][int] intersectionMat;
+    real[int][int] DTab(level);
+    buildOverlapEdgePeriodicRecursive(Th, ThBorderTab, -111111, s, 1, level, prolongation, intersection, DTab, P, comm, false, P, def, init, emptyArray, emptyRealArray, bsMat)
+    for(int i = 0; i < level; ++i)
+        constructor(A[i], DTab[i].n, intersectionMat, DTab[i], bs = bsMat, communicator = comm, level = i);
+}// EOM
+macro buildMatEdgeWithPartitioning(Th, part, s, A, P, comm, PkPart, defPart, initPart, bsMat) {
+    real[int] DMat;
+    int[int][int] intersectionMat;
+    buildEdgeWithPartitioning(Th, part, s, intersectionMat, DMat, P, comm, PkPart, defPart, initPart, bsMat)
+    constructor(A, DMat.n, intersectionMat, DMat, bs = bsMat, communicator = comm);
+}// EOM
+macro buildMatWithPartitioning(Th, part, s, A, P, comm, bsMat) {
+    real[int] DMat;
+    int[int][int] intersectionMat;
+    buildWithPartitioning(Th, part, s, intersectionMat, DMat, P, comm, bsMat)
+    constructor(A, DMat.n, intersectionMat, DMat, bs = bsMat, communicator = comm);
+}// EOM
+macro buildMat(Th, s, A, P, comm, bsMat) {
+    real[int] DMat;
+    int[int][int] intersectionMat;
+    build(Th, s, intersectionMat, DMat, P, comm, bsMat)
+    constructor(A, DMat.n, intersectionMat, DMat, bs = bsMat, communicator = comm);
+}// EOM
+macro buildMatPeriodic(Th, s, A, P, comm, labPeriodic, bsMat) {
+    real[int] DMat;
+    int[int][int] intersectionMat;
+    buildPeriodic(Th, s, intersectionMat, DMat, P, comm, labPeriodic, bsMat)
+    constructor(A, DMat.n, intersectionMat, DMat, bs = bsMat, communicator = comm);
+}// EOM
+macro buildMatMinimalist(Th, A, P, bsMat) {
+    real[int] DMat;
+    int[int][int] intersectionMat;
+    buildMinimalist(Th, intersectionMat, DMat, P, bsMat)
+    constructor(A, DMat.n, intersectionMat, DMat, bs = bsMat, communicator = comm);
+}// EOM
 ENDIFMACRO
 IFMACRO(!vectorialfe)
 macro buildOverlapEdgeRecursive(Th, ThBorder, fakeInterface, s, overlap, level, prolongation, intersection, D, P, comm, excluded, PkPart, defPart, initPart) {
@@ -584,5 +630,45 @@ macro buildMinimalist(Th, intersection, D, P) {
     int overlap = 1;
     bool excluded = false;
     buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, 1, overlap, intersection, D, P, mpiCommWorld, excluded, P, def, init, emptyArray, emptyRealArray, 1)
+}// EOM
+macro buildMatRecursive(Th, s, level, prolongation, A, P, comm) {
+    int[int] emptyArray(0);
+    real[int] emptyRealArray(0);
+    meshN[int] ThBorderTab(level);
+    int[int][int] intersectionMat;
+    real[int][int] DTab(level);
+    buildOverlapEdgePeriodicRecursive(Th, ThBorderTab, -111111, s, 1, level, prolongation, intersectionMat, DTab, P, comm, false, P, def, init, emptyArray, emptyRealArray, bs)
+    for(int i = 0; i < level; ++i)
+        constructor(A[i], DTab[i].n, intersectionMat, DTab[i], communicator = comm, level = i);
+}// EOM
+macro buildMatEdgeWithPartitioning(Th, part, s, A, P, comm, PkPart, defPart, initPart) {
+    real[int] DMat;
+    int[int][int] intersectionMat;
+    buildEdgeWithPartitioning(Th, part, s, intersectionMat, DMat, P, comm, PkPart, defPart, initPart)
+    constructor(A, DMat.n, intersectionMat, DMat, communicator = comm);
+}// EOM
+macro buildMatWithPartitioning(Th, part, s, A, P, comm) {
+    real[int] DMat;
+    int[int][int] intersectionMat;
+    buildWithPartitioning(Th, part, s, intersectionMat, DMat, P, comm)
+    constructor(A, DMat.n, intersectionMat, DMat, communicator = comm);
+}// EOM
+macro buildMat(Th, s, A, P, comm) {
+    real[int] DMat;
+    int[int][int] intersectionMat;
+    build(Th, s, intersectionMat, DMat, P, comm)
+    constructor(A, DMat.n, intersectionMat, DMat, communicator = comm);
+}// EOM
+macro buildMatPeriodic(Th, s, A, P, comm, labPeriodic) {
+    real[int] DMat;
+    int[int][int] intersectionMat;
+    buildPeriodic(Th, s, intersectionMat, DMat, P, comm, labPeriodic)
+    constructor(A, DMat.n, intersectionMat, DMat, communicator = comm);
+}// EOM
+macro buildMatMinimalist(Th, A, P) {
+    real[int] DMat;
+    int[int][int] intersectionMat;
+    buildMinimalist(Th, intersectionMat, DMat, P)
+    constructor(A, DMat.n, intersectionMat, DMat);
 }// EOM
 ENDIFMACRO

@@ -14,7 +14,7 @@ namespace PETSc {
   struct _n_User;
   template< class Type >
   using User = _n_User< Type >*;
-  template< class HpddmType,
+  template< bool C, class HpddmType,
             typename std::enable_if< std::is_same< HpddmType, Dmat >::value >::type* = nullptr >
   void initPETScStructure(
     HpddmType* ptA, PetscInt bs, PetscBool symmetric,
@@ -26,7 +26,12 @@ namespace PETSc {
     if (ptD || mpisize == 1) {
       if (ptD) {
         if (restrict) ptA->_A->restriction(*ptD);
-        ptA->_A->initialize(*ptD);
+        if (!C) ptA->_A->initialize(*ptD);
+        else {
+          ptA->_D = new KN<double>(ptD->n);
+          *ptA->_D = *ptD;
+          ptA->_A->initialize(*ptA->_D);
+        }
       }
       unsigned int g;
       ptA->_A->distributedNumbering(ptA->_num, ptA->_first, ptA->_last, g);
@@ -68,7 +73,7 @@ namespace PETSc {
       cout << " --- global CSR created (in " << MPI_Wtime( ) - timing << ")" << endl;
     if (rhs) ptA->_A->exchange(*rhs);
   }
-  template< class HpddmType,
+  template< bool C, class HpddmType,
             typename std::enable_if< !std::is_same< HpddmType, Dmat >::value >::type* = nullptr >
   void initPETScStructure(
     HpddmType* ptA, PetscInt& bs, PetscBool symmetric,
@@ -370,6 +375,8 @@ namespace PETSc {
           ptA->_exchange[1] = ptB->_exchange[1];
           ptB->_exchange = nullptr;
         }
+        ptA->_D = ptB->_D;
+        ptB->_D = nullptr;
       }
     }
   }
@@ -501,7 +508,7 @@ namespace PETSc {
       MatGetBlockSize(ptB->_petsc, &bs);
       KN< PetscScalar >* rhs =
         nargs[0] ? GetAny< KN< PetscScalar >* >((*nargs[0])(stack)) : nullptr;
-      initPETScStructure(
+      initPETScStructure<false>(
         ptA, bs,
         nargs[2] ? (GetAny< bool >((*nargs[2])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE,
         static_cast< KN< double >* >(nullptr), rhs);
@@ -910,7 +917,7 @@ namespace PETSc {
     return ptA;
   }
 
-  template< class HpddmType >
+  template< class HpddmType, bool C = false >
   class initCSR : public OneOperator {
    public:
     const int c;
@@ -969,8 +976,8 @@ namespace PETSc {
                     atype< DistributedCSR< HpddmType >* >( ), atype< long >( )),
         c(3) {}
   };
-  template< class HpddmType >
-  basicAC_F0::name_and_type initCSR< HpddmType >::E_initCSR::name_param[] = {
+  template< class HpddmType, bool C >
+  basicAC_F0::name_and_type initCSR< HpddmType, C >::E_initCSR::name_param[] = {
     {"communicator", &typeid(pcommworld)},
     {"bs", &typeid(long)},
     {"rhs", &typeid(KN< PetscScalar >*)},
@@ -978,8 +985,8 @@ namespace PETSc {
     {"symmetric", &typeid(bool)},
     {"restriction", &typeid(Matrice_Creuse< double >*)},
     {"level", &typeid(long)}};
-  template< class HpddmType >
-  AnyType initCSR< HpddmType >::E_initCSR::operator( )(Stack stack) const {
+  template< class HpddmType, bool C >
+  AnyType initCSR< HpddmType, C >::E_initCSR::operator( )(Stack stack) const {
     DistributedCSR< HpddmType >* ptA = GetAny< DistributedCSR< HpddmType >* >((*A)(stack));
     KN< KN< long > >* ptR = (c == 0 || c == 1 ? GetAny< KN< KN< long > >* >((*R)(stack)) : nullptr);
     KN< typename std::conditional< std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value,
@@ -1049,7 +1056,7 @@ namespace PETSc {
         comm, dL);
       delete dL;
       ptA->_num = new unsigned int[ptA->_A->getMatrix( )->_n];
-      initPETScStructure(
+      initPETScStructure<C>(
         ptA, bs,
         nargs[4] ? (GetAny< bool >((*nargs[4])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE,
         ptD, rhs, restrict);
@@ -3414,6 +3421,11 @@ namespace PETSc {
       return mv(Ax, A);
     }
   };
+  KN_<double> Dmat_D(Dmat* p) {
+    throwassert(p && p->_A);
+    KN_<double> D(const_cast<double*>(p->_A->getScaling()), p->_A->getDof());
+    return D;
+  }
 }    // namespace PETSc
 
 static void Init_PETSc( ) {
@@ -3458,6 +3470,11 @@ static void Init_PETSc( ) {
     TheOperators->Add("<-", new PETSc::initCSR< HpSchwarz< PetscScalar > >(1));
     TheOperators->Add("<-", new PETSc::initCSR< HpSchwarz< PetscScalar > >(1, 1));
     TheOperators->Add("<-", new PETSc::initCSR< HpSchwarz< PetscScalar > >(1, 1, 1));
+    Global.Add("constructor", "(", new PETSc::initCSR< HpSchwarz< PetscScalar >, true >);
+    Global.Add("constructor", "(", new PETSc::initCSR< HpSchwarz< PetscScalar >, true >(1));
+    Global.Add("constructor", "(", new PETSc::initCSR< HpSchwarz< PetscScalar >, true >(1, 1));
+    Global.Add("constructor", "(", new PETSc::initCSR< HpSchwarz< PetscScalar >, true >(1, 1, 1));
+    Add< Dmat* >("D", ".", new OneOperator1< KN_<double>, Dmat* >(PETSc::Dmat_D));
     TheOperators->Add("<-", new PETSc::initCSRfromArray< HpSchwarz< PetscScalar > >);
     TheOperators->Add("<-", new PETSc::initCSRfromMatrix< HpSchwarz< PetscScalar > >);
     TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar > >);
