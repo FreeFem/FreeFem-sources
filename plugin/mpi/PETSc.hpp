@@ -295,7 +295,10 @@ void setCompositePC(PC pc, const std::vector<Mat>* S) {
         else {
             PC pcS;
             KSPGetPC(subksp[nsplits - 1], &pcS);
-            for(int i = 0; i < S->size(); ++i)
+            PCSetType(pcS, PCCOMPOSITE);
+            PetscInt j;
+            PCCompositeGetNumberPC(pcS, &j);
+            for(int i = j; i < S->size(); ++i)
                 PCCompositeAddPC(pcS, PCNONE);
             PCSetUp(pcS);
             for(int i = 0; i < S->size(); ++i) {

@@ -3278,6 +3278,7 @@ namespace PETSc {
         if (!(*t)._ksp) {
           KSPCreate(PETSC_COMM_WORLD, &(*t)._ksp);
           KSPSetOperators((*t)._ksp, (*t)._petsc, (*t)._petsc);
+          KSPSetFromOptions((*t)._ksp);
         }
         if (trans == 'N')
           KSPSolve((*t)._ksp, x, y);
