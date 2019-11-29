@@ -31,3 +31,16 @@ Wh u;
 u[] = MG[0]^-1 * rhs;
 macro def(u)u//
 plotMPI(ThTab[0], u, Pk, def, real, cmm = "Global solution")
+real[int] tmp(Wh.ndof);
+tmp = u[];
+for(int i = 0; i < level; ++i) {
+    fespace Vh(ThTab[i], Pk);
+    Vh w;
+    w[] = tmp;
+    exchange(MG[i], w[], scaled = true);
+    savevtk("diffusion-mg-3d.vtu", ThTab[i], w, bin = 1, append = true);
+    if(i == level - 1)
+        break;
+    tmp.resize(P[i].m);
+    tmp = P[i]' * w[];
+}
