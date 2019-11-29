@@ -157,4 +157,4 @@ freefem++.pref: Makefile
 	echo includepath = \"../../idp/\" >> freefem++.pref
 
 clean-local:
-	rm -rf sol_heat_2d_io* sol_stokes_3d_io*
+	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_*

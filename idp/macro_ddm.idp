@@ -111,35 +111,21 @@ if(!NoGraphicWindow) {
 macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank, size, s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs) {
     assert(level >= 1);
     meshName[level - 1] = trunc(globalName, abs(part - rank) < 0.1, label = fakeInterface);
-    mpiBarrier(comm);
-    real timerPartition = mpiWtime();
     intersection.resize(1);
     intersection[0].resize(0);
-    {
-        fespace PhLocal(meshName[level - 1], P0);
-        PhLocal overshoot = hTriangle;
-        real max = 4.0 * overlap * overshoot[].max;
-        bbN(meshName[level - 1], max, globalName)
-    }
     PhGlobal supp = abs(part - rank) < 0.1;
     VhGlobal suppSmooth;
     AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
-    {
-        meshN neighbors = trunc(globalName, suppSmooth > 0.001 && suppSmooth < 0.999);
-        fespace Oh(neighbors, P0);
-        Oh partOverlap = part;
-        Unique(partOverlap[], intersection[0], remove = rank);
-    }
+    Unique(part[], intersection[0], remove = rank);
     fespace VhLocal(meshName[level - 1], P1);
     VhLocal[int] partitionIntersection(intersection[0].n);
     if(s > 1 && level <= 1) {
         globalName = trunc(globalName, suppSmooth > 0.001, split = s);
         supp = abs(part - rank) < 0.1;
-        suppSmooth = 0;
         AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
     }
     globalName = trunc(globalName, suppSmooth > 0.001, label = 9999);
-    real eps = intN(globalName)(1.0);
+    real eps = globalName.measure;
     real[int] epsTab(intersection[0].n);
     mpiRequest[int] rq(2 * intersection[0].n);
     if(mpiSize(comm) == size) {
@@ -150,11 +136,10 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank
     }
     else
         epsTab = 1.0e+30;
-    supp = supp;
     suppSmooth = suppSmooth;
     meshName[level - 1] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface);
-    prolongation.resize(level - 1);
-    {
+    if(level > 1) {
+        prolongation.resize(level - 1);
         meshN globalNameRefined = globalName;
         for(int i = level - 1; i > 0; --i) {
             globalNameRefined = trunc(globalNameRefined, 1, split = s);
@@ -166,6 +151,7 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank
     }
     if(!removeZeros && (fakeInterface != -111111 || overlap != 1)) {
         if(suppSmooth[].min < 0.501) {
+            supp = supp;
             borderName[level - 1] = trunc(globalName, (suppSmooth > (overlap - 0.999) / real(2 * overlap)) && (suppSmooth < 0.501), label = (abs(fakeInterface) + 1) * 100);
             for(int i = level - 2; i >= 0; --i) {
                 borderName[i] = trunc(borderName[i + 1], 1, split = s, label = (abs(fakeInterface) + 1) * 100);
@@ -180,7 +166,7 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank
     }
     VhLocal khi = max(2 * suppSmooth - 1.0, 0.0);
     VhLocal sum = khi;
-    VhGlobal phi = 0;
+    VhGlobal phi;
     part = part;
     int numberIntersection = 0;
     for(int k = 0; k < 2 * intersection[0].n; ++k)
@@ -346,14 +332,14 @@ ENDIFMACRO
     Th.resize(level);
     ThBorder.resize(level);
     prolongation.resize(level - 1);
-    real timing = mpiWtime();
+    real timerPartition = mpiWtime();
     if(mpiSize(comm) > 1 && !excluded) {
         meshN ThGlobal = Th[level - 1];
         fespace PhGlobal(ThGlobal, P0);
         fespace VhGlobal(ThGlobal, P1);
         PhGlobal partGlobal;
         if(userPartitioning.n != PhGlobal.ndof || labPeriodic.n > 0) {
-            timing = mpiWtime();
+            timerPartition = mpiWtime();
             meshN ThGlobalPeriodic;
             if(labPeriodic.n > 0) {
                 VhGlobal marker;
@@ -402,8 +388,8 @@ ENDIFMACRO
             else
                 partitionerPar(partGlobal[], ThGlobal, comm, mpiSize(comm));
             if(mpiRank(comm) == 0 && verbosity > 0)
-                cout.scientific << " (in " << mpiWtime() - timing << ")" << endl;
-            timing = mpiWtime();
+                cout.scientific << " (in " << mpiWtime() - timerPartition << ")" << endl;
+            timerPartition = mpiWtime();
         }
         else {
             partGlobal[] = userPartitioning;
@@ -414,6 +400,8 @@ ENDIFMACRO
 IFMACRO(!removeZeros)
         bool removeZeros = trueRestrict && overlap == 1 && usedARGV("-remove_zeros") != -1;
 ENDIFMACRO
+        mpiBarrier(comm);
+        timerPartition = mpiWtime();
         partition(Th, ThBorder, ThGlobal, PhGlobal, VhGlobal, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs)
     }
     else if(mpiSize(comm) == 1) {
@@ -431,8 +419,8 @@ ENDIFMACRO
         D[0].resize(WhLocal.ndof);
         D[0] = 1.0;
     }
-    mpiBarrier(mpiCommWorld);
-    if(verbosity > 0 && mpirank == 0) cout.scientific << " --- partition of unity built (in " << mpiWtime() - timing << ")" << endl;
+    mpiBarrier(comm);
+    if(verbosity > 0 && mpirank == 0) cout.scientific << " --- partition of unity built (in " << mpiWtime() - timerPartition << ")" << endl;
 }// EOM
 
 macro buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, PkPart, defPart, initPart, labPeriodic, userPartitioning, bs) {

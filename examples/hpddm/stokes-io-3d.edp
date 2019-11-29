@@ -89,4 +89,4 @@ else
     u[] = A^-1 * rhs;
 int[int] fforder(2);
 fforder = [1, 1];
-savevtk("sol_stokes_3d_io.vtu", Th, [u, uB, uC], uD, order = fforder, dataname = "velocity pressure");
+savevtk("stokes-io-3d.vtu", Th, [u, uB, uC], uD, order = fforder, dataname = "velocity pressure");

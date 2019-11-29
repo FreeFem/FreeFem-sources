@@ -101,5 +101,5 @@ for(int i = 0; i < iMax; ++i) {
         u[] = A^-1 * newRhs;
 
     int[int] fforder(1);
-    savevtk("sol_heat_2d_io.vtu", Th, u, append = true);
+    savevtk("heat-io-2d.vtu", Th, u, append = i ? true : false);
 }

@@ -38,7 +38,7 @@ for(int i = 0; i < level; ++i) {
     Vh w;
     w[] = tmp;
     exchange(MG[i], w[], scaled = true);
-    savevtk("diffusion-mg-3d.vtu", ThTab[i], w, bin = 1, append = true);
+    savevtk("diffusion-mg-3d.vtu", ThTab[i], w, bin = 1, append = i ? true : false);
     if(i == level - 1)
         break;
     tmp.resize(P[i].m);
