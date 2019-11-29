@@ -16,8 +16,6 @@ EXTRA_DIST= \
 ./gmm/Makefile \
 ./gmm/cxxflags \
 ./headers-sparsesolver.inc \
-./hypre/Makefile \
-./hypre/ff-flags.inc \
 ./metis/Makefile \
 ./metis/Makefile-metis.in \
 ./metis/metis-5.1.patch \
