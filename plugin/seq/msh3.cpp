@@ -2182,24 +2182,17 @@ template< class MMesh >
 void finalize(MMesh *(&Th));
 
 template<>
+void finalize< MeshL >(MeshL *(&Th)) {
+    Th->mapCurv2Surf = 0;
+    Th->mapSurf2Curv = 0;
+}
+
+template<>
 void finalize< MeshS >(MeshS *(&Th)) {
   Th->mapSurf2Vol = 0;
   Th->mapVol2Surf = 0;
 }
 
-/*
- template<class MMesh>
- void finalize(MMesh *(&Th));
-
- template<>
- void finalize<MeshS>(MeshS *(&Th)) {
- if(Th->meshL) {
- if(verbosity>5)
- cout << "Build the meshL associated to the meshS"<<endl;
- Th->BuildMeshL();
- }
- }
- */
 template<>
 void finalize< Mesh3 >(Mesh3 *(&Th)) {
   if (Th->meshS) {
@@ -7827,7 +7820,8 @@ template<>
 basicAC_F0::name_and_type Movemesh_Op< Mesh3 >::name_param[] = {
   {"transfo", &typeid(E_Array)},       // 0
   {"reftet", &typeid(KN_< long >)},    // 1
-  {"refface", &typeid(KN_< long >)},  {"precismesh", &typeid(double)},
+  {"refface", &typeid(KN_< long >)},
+  {"precismesh", &typeid(double)},
   {"orientation", &typeid(long)},        // 4
   {"region", &typeid(KN_< long >)},      // 5
   {"label", &typeid(KN_< long >)},       // 6
@@ -7841,7 +7835,8 @@ template<>
 basicAC_F0::name_and_type Movemesh_Op< MeshS >::name_param[] = {
   {"transfo", &typeid(E_Array)},       // 0
   {"reftri", &typeid(KN_< long >)},    // 1
-  {"refedge", &typeid(KN_< long >)},  {"precismesh", &typeid(double)},
+  {"refedge", &typeid(KN_< long >)},
+  {"precismesh", &typeid(double)},
   {"orientation", &typeid(long)},        // 4
   {"region", &typeid(KN_< long >)},      // 5
   {"label", &typeid(KN_< long >)},       // 6
@@ -7850,6 +7845,21 @@ basicAC_F0::name_and_type Movemesh_Op< MeshS >::name_param[] = {
   {"rebuildboundary", &typeid(bool)}     // 9
 };
 
+      // instance arguments for meshS
+template<>
+basicAC_F0::name_and_type Movemesh_Op< MeshL >::name_param[] = {
+    {"transfo", &typeid(E_Array)},       // 0
+    {"refedge", &typeid(KN_< long >)},    // 1
+    {"refpoint", &typeid(KN_< long >)},
+    {"precismesh", &typeid(double)},
+    {"orientation", &typeid(long)},        // 4
+    {"region", &typeid(KN_< long >)},      // 5
+    {"label", &typeid(KN_< long >)},       // 6
+    {"cleanmesh", &typeid(bool)},          // 7
+    {"removeduplicate", &typeid(bool)},    // 8
+    {"rebuildboundary", &typeid(bool)}     // 9
+};
+      
 template< class MMesh >
 AnyType Movemesh_Op< MMesh >::operator( )(Stack stack) const {
   MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
@@ -7868,7 +7878,7 @@ AnyType Movemesh_Op< MMesh >::operator( )(Stack stack) const {
   KN< long > nrB(arg(2, 6, stack, zzempty));
   double precis_mesh(arg(3, stack, 1e-7));
   long orientation(arg(4, stack, 1L));
-  bool cleanmesh(arg(7, stack, true));
+  bool cleanmesh(arg(7, stack, false));
   bool removeduplicate(arg(8, stack, false));
   bool rebuildboundary(arg(9, stack, false));
 
@@ -8416,6 +8426,9 @@ static void Load_Init( ) {
   Global.Add("square3", "(", new Square);
   Global.Add("square3", "(", new Square(1));
 
+  Global.Add("movemeshL", "(", new Movemesh< MeshL >);
+  Global.Add("movemesh", "(", new Movemesh< MeshL >(1));
+    
   Global.Add("movemeshS", "(", new Movemesh< MeshS >);
   Global.Add("movemesh", "(", new Movemesh< MeshS >(1));
 
