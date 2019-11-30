@@ -140,28 +140,37 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank
     meshName[level - 1] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface);
     if(level > 1) {
         prolongation.resize(level - 1);
-        meshN globalNameRefined = globalName;
-        for(int i = level - 1; i > 0; --i) {
-            globalNameRefined = trunc(globalNameRefined, 1, split = s);
-            meshName[i - 1] = trunc(globalNameRefined, suppSmooth > 0.501, label = fakeInterface);
-            fespace WhLocalRefined(meshName[i - 1], P);
-            fespace WhLocalCoarse(meshName[i], P);
-            prolongation[i - 1] = interpolate(WhLocalRefined, WhLocalCoarse);
+        if(s > 1) {
+            meshN globalNameRefined = globalName;
+            for(int i = level - 1; i > 0; --i) {
+                globalNameRefined = trunc(globalNameRefined, 1, split = s);
+                meshName[i - 1] = trunc(globalNameRefined, suppSmooth > 0.501, label = fakeInterface);
+                fespace WhLocalRefined(meshName[i - 1], P);
+                fespace WhLocalCoarse(meshName[i], P);
+                prolongation[i - 1] = interpolate(WhLocalRefined, WhLocalCoarse);
+            }
         }
+        else
+            for(int i = level - 1; i > 0; --i)
+                meshName[i - 1] = meshName[i];
     }
     if(!removeZeros && (fakeInterface != -111111 || overlap != 1)) {
         if(suppSmooth[].min < 0.501) {
             supp = supp;
             borderName[level - 1] = trunc(globalName, (suppSmooth > (overlap - 0.999) / real(2 * overlap)) && (suppSmooth < 0.501), label = (abs(fakeInterface) + 1) * 100);
-            for(int i = level - 2; i >= 0; --i) {
-                borderName[i] = trunc(borderName[i + 1], 1, split = s, label = (abs(fakeInterface) + 1) * 100);
-                meshN tempRefined = meshName[i] + borderName[i];
-                fespace PhRefined(tempRefined, P0);
-                PhRefined suppRefined = supp;
-                fespace VhBorderRefined(borderName[i], P1);
-                VhBorderRefined suppBorder = suppRefined;
-                borderName[i] = trunc(borderName[i], suppBorder > 0.01);
-            }
+            if(s > 1)
+                for(int i = level - 2; i >= 0; --i) {
+                    borderName[i] = trunc(borderName[i + 1], 1, split = s, label = (abs(fakeInterface) + 1) * 100);
+                    meshN tempRefined = meshName[i] + borderName[i];
+                    fespace PhRefined(tempRefined, P0);
+                    PhRefined suppRefined = supp;
+                    fespace VhBorderRefined(borderName[i], P1);
+                    VhBorderRefined suppBorder = suppRefined;
+                    borderName[i] = trunc(borderName[i], suppBorder > 0.01);
+                }
+            else
+                for(int i = level - 2; i >= 0; --i)
+                    borderName[i] = borderName[i + 1];
         }
     }
     VhLocal khi = max(2 * suppSmooth - 1.0, 0.0);
@@ -187,7 +196,7 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank
         intersection[0].resize(numberIntersection);
     intersection.resize(1 + level * numberIntersection);
     meshN[int] meshIntersection(numberIntersection);
-    for(int j = 0; j < level; ++j) {
+    for(int j = 0; j < (s == 1 ? 1 : level); ++j) {
         for(int i = 0; i < numberIntersection; ++i) {
             int[int] n2o;
             meshIntersection[i] = trunc(meshName[j], partitionIntersection[i] > 1.0e-6, new2old = n2o, label = 9999);
@@ -204,6 +213,12 @@ ENDIFMACRO
             }
         }
     }
+    if(s == 1 && level > 1 && !removeZeros)
+        for(int j = 1; j < level; ++j)
+            for(int i = 0; i < numberIntersection; ++i) {
+                intersection[1 + i + j * numberIntersection].resize(intersection[1 + i].n);
+                intersection[1 + i + j * numberIntersection] = intersection[1 + i];
+            }
     partitionIntersection.resize(0);
     for(int i = 0; i < (trueRestrict ? level : level - 1); ++i) {
         fespace VhRefined(meshName[i], P1);
