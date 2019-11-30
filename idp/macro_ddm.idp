@@ -122,6 +122,7 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank
     if(s > 1 && level <= 1) {
         globalName = trunc(globalName, suppSmooth > 0.001, split = s);
         supp = abs(part - rank) < 0.1;
+        suppSmooth = 0;
         AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
     }
     globalName = trunc(globalName, suppSmooth > 0.001, label = 9999);

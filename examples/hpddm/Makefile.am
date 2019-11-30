@@ -100,7 +100,8 @@ TESTS_PETSC_SLEPC = laplace-2d-SLEPc.edp \
 
 
 TESTS_PETSCCOMPLEX = diffusion-2d-PETSc-complex.edp \
-	helmholtz-2d-PETSc-complex.edp
+	helmholtz-2d-PETSc-complex.edp \
+	helmholtz-mg-2d-PETSc-complex.edp
 
 TESTS_PETSCCOMPLEX_SLEPCCOMPLEX = laplace-2d-SLEPc-complex.edp
 

@@ -1386,7 +1386,7 @@ namespace PETSc {
     ModifierO* user;
     PetscFunctionBeginUser;
     user = reinterpret_cast< ModifierO* >(ctx);
-    MatCopy(user->O, submat[0], DIFFERENT_NONZERO_PATTERN);
+    MatHeaderReplace(submat[0], &user->O);
     PetscFunctionReturn(0);
   };
   template< class T, typename std::enable_if< std::is_same< T, KN< PetscScalar > >::value >::type* =
@@ -1422,31 +1422,22 @@ namespace PETSc {
   }
   template< bool T, class K, typename std::enable_if< std::is_same< K, PetscScalar >::value >::type* =
                        nullptr >
-  void MatMult(MatriceMorse<K>* const& A, KN<PetscScalar>& in, KN<PetscScalar>& out) {
-    if(!T)
-      A->addMatMul(in, out);
-    else
-      A->addMatTransMul(in, out);
+  void MatMult(MatriceMorse<K>* const& A, KN_<PetscScalar>& in, KN_<PetscScalar>& out) {
+    A->addMatMul(in, out, T, in.step, out.step);
   }
   template< bool T, class K, typename std::enable_if< !std::is_same< K, PetscScalar >::value >::type* =
                        nullptr >
-  void MatMult(MatriceMorse<K>* const& A, KN<PetscScalar>& in, KN<PetscScalar>& out) {
+  void MatMult(MatriceMorse<K>* const& A, KN_<PetscScalar>& in, KN_<PetscScalar>& out) {
     PetscScalar* pc = in;
     double* pr = reinterpret_cast<double*>(pc);
-    KN_< K > realIn = KN_<double>(pr + 0, in.N(), 2 * in.step);
-    KN_< K > imagIn = KN_<double>(pr + 1, in.N(), 2 * in.step);
+    KN_< K > realIn(pr + 0, in.N(), 2 * in.step);
+    KN_< K > imagIn(pr + 1, in.N(), 2 * in.step);
     pc = out;
     pr = reinterpret_cast<double*>(pc);
-    KN_< K > realOut = KN_<double>(pr + 0, out.N(), 2 * out.step);
-    KN_< K > imagOut = KN_<double>(pr + 1, out.N(), 2 * out.step);
-    if(!T) {
-      A->MatMul(realIn, realOut);
-      A->MatMul(imagIn, imagOut);
-    }
-    else {
-      A->MatTransMul(realIn, realOut);
-      A->MatTransMul(imagIn, imagOut);
-    }
+    KN_< K > realOut(pr + 0, out.N(), 2 * out.step);
+    KN_< K > imagOut(pr + 1, out.N(), 2 * out.step);
+    A->addMatMul(realIn, realOut, T, 2 * in.step, 2 * out.step);
+    A->addMatMul(imagIn, imagOut, T, 2 * in.step, 2 * out.step);
   }
   template< bool T >
   static PetscErrorCode ShellInjectionOp(Mat A, Vec x, Vec y) {
@@ -1787,7 +1778,6 @@ namespace PETSc {
               PCSetModifySubMatrices(pc, Modifier, ctx);
               PCSetUp(pc);
               PCSetModifySubMatrices(pc, NULL, NULL);
-              MatDestroy(&ctx->O);
               delete ctx;
               ISDestroy(&loc);
             }
