@@ -2584,7 +2584,7 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
   /// <<number_of_distinct_named_parameters_for_plot>> FFCS: added new parameters for VTK graphics.
   /// See
   /// [[Plot_name_param]] for new parameter names
-  static const int n_name_param = 43;
+  static const int n_name_param = 44;
 
   Expression bb[4];
 
@@ -2830,7 +2830,7 @@ basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
 
   // FFCS: more options for VTK graphics (numbers are required for processing)
 
-  {"ZScale", &typeid(double)},                        // #1
+  {"ZScale", &typeid(double)},                        // 21
   {"WhiteBackground", &typeid(bool)},                 // #2
   {"OpaqueBorders", &typeid(bool)},                   // #3
   {"BorderAsMesh", &typeid(bool)},                    // #4
@@ -2851,7 +2851,8 @@ basicAC_F0::name_and_type Plot::name_param[Plot::n_name_param] = {
   {"CutPlaneNormal", &typeid(KN_< double >)},         // #19
   {"WindowIndex", &typeid(long)},                     // #20
   {"NbColorTicks", &typeid(long)},                    // #21
-  {"NbColors", &typeid(long)}                         // #22
+  {"NbColors", &typeid(long)},                        // #22
+  {"pNormalT", &typeid(bool)}                         //43
 };
 
 template< class K >
@@ -4211,7 +4212,7 @@ AnyType Plot::operator( )(Stack s) const {
     SEND_VTK_PARAM(20, long);             // WindowIndex
     SEND_VTK_PARAM(21, long);             // NbColorTicks
     SEND_VTK_PARAM(22, long);             // NbColors
-
+    SEND_VTK_PARAM(23, bool);             // pNormalT
     theplot.SendEndArgPlot( );
     map< const Mesh *, long > mapth;
     map< const Mesh3 *, long > mapth3;
@@ -4477,9 +4478,10 @@ AnyType Plot::operator( )(Stack s) const {
   if (nargs[16]) drawborder = GetAny< bool >((*nargs[16])(s));
   int dimplot = 2;
   if (nargs[17]) dimplot = GetAny< long >((*nargs[17])(s));
-  bool addtoplot = false, keepPV = false;
+  bool addtoplot = false, keepPV = false, pNormalT = false;
   if (nargs[18]) addtoplot = GetAny< bool >((*nargs[18])(s));
   if (nargs[19]) keepPV = GetAny< bool >((*nargs[19])(s));
+  if (nargs[VTK_START + 23]) pNormalT = GetAny< bool >((*nargs[VTK_START + 23])(s));
   if (nargs[VTK_START + 8]) ArrowSize = GetAny< double >((*nargs[VTK_START + 8])(s));
   //  for the gestion of the PTR.
   WhereStackOfPtr2Free(s) = new StackOfPtr2Free(s);    // FH aout 2007

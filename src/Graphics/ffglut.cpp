@@ -560,10 +560,10 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 
 }
 
+  //  Plot(*Th,               plot.fill,true,true,/*plot.plotNormalT,*/                   plot,          gllists,oklist);
 
 
-
-void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot,GLint gllists,int * lok)
+void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, bool pNormalT, ThePlot & plot,GLint gllists,int * lok)    ////Axel
 {
     glDisable(GL_DEPTH_TEST);
 
@@ -651,6 +651,26 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
             glEndList();  // fin de la list
         }
     }
+    if (pNormalT) {
+       if (debug>5) cout << " plot Normal element at triangles " << pNormalT << endl;
+     
+            //glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
+            glLineWidth(0.5);
+            glBegin(GL_LINES);
+            for (int i=0;i<Th.nt;i++) {
+                const MeshS::Element & K(Th[i]);
+                R3 NN=K.NormalS();
+                R2 PtHat = R2::diag(1. / 3.);
+                R3 A(K(PtHat));
+                NN+=A;
+                glVertex3d(A.x,A.y,A.z);
+                glVertex3d(NN.x,NN.y,NN.z);     // fleche ou cone ???
+            }
+            glEnd();
+            glLineWidth(1);
+        }
+  
+
     ShowGlerror("end MeshS plot");
 
 }
@@ -774,7 +794,7 @@ void OnePlotMeshS::Draw(OneWindow *win)
 {
     initlist();
     ThePlot & plot=*win->theplot;
-    Plot(*Th,plot.fill,true,true,plot,gllists,oklist);
+    Plot(*Th,plot.fill,true,true,plot.pNormalT,plot,gllists,oklist);
     ShowGlerror("OnePlotMeshS::Draw");
 }
 
@@ -943,7 +963,7 @@ void OnePlotFES::Draw(OneWindow *win)
 }
     ShowGlerror("b mesh  OnePlotFES plot");
     win->unsetLighting();
-    Plot(Th,false,plot.drawmeshes,plot.drawborder,plot,gllists+2,&oklist[2]);
+    Plot(Th,false,plot.drawmeshes,plot.drawborder,plot.pNormalT,plot,gllists+2,&oklist[2]);
     ShowGlerror("OnePlotFES::Draw");
 }
 
@@ -1681,7 +1701,8 @@ void OneWindow::set(ThePlot *p)
     if(p)
     {
         plotdim=p->plotdim;
-        blockwin=p->keepPV;
+        keepPV=p->keepPV;
+        pNormalT=p->pNormalT;
         rapz0 = p->ZScale;
     }
     if(!init)
@@ -1696,7 +1717,7 @@ void OneWindow::set(ThePlot *p)
 void OneWindow::add(ThePlot *p)
 {
     if(p) {
-        keepPV=p->blockwin;
+        keepPV=p->keepPV;
         lplots.push_back(p);
         lplotssize++;
         ++icurrentPlot;
@@ -1735,7 +1756,8 @@ void OneWindow::DefaultView(int state)
     {
         init =1;
         plotdim=theplot->plotdim;
-        blockwin=theplot->blockwin;
+        keepPV=theplot->keepPV;
+        //plotNormalT=theplot->plotNormalT;
         R3 A(theplot->Pmin),B(theplot->Pmax);
         R3 D(A,B);
         R dxy= max(D.x,D.y);
@@ -2161,6 +2183,7 @@ void ThePlot::DrawHelp(OneWindow *win)
     win->Show("w)  window dump in file ffglutXXXX.ppm ",i++);
     win->Show("*)  keep/unkeep viewpoint for next plot",i++);
     win->Show("k)  complex data / change view type ",i++);
+    win->Show("T)  show normal at element surface (only meshS)",i++);
 
     win->Show("any other key : nothing ",++i);
 }
@@ -2251,7 +2274,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 changeViso(true),changeVarrow(true),changeColor(true),
 changeBorder(true),changeFill(true), withiso(false),witharrow(false),
 plotdim(2),theta(30.*M_PI/180.),phi(20.*M_PI/180.),dcoef(1),focal(20.*M_PI/180.),
-datadim(1), winnum(0), blockwin(0)
+datadim(1), winnum(0), keepPV(0), pNormalT(0)
 
 {
 
@@ -2281,6 +2304,7 @@ datadim(1), winnum(0), blockwin(0)
     drawmeshes=false;
     add=false;
     keepPV=false;
+    pNormalT=false;
     echelle=1.;
 
     Pmin=R3(+dinfty,+dinfty,+dinfty);
@@ -2375,7 +2399,11 @@ case 20+index: {type dummy; fin >= dummy;} break;
                     READ_VTK_PARAM(17,KN<double>); // CameraClippingRange
                     READ_VTK_PARAM(18,KN<double>); // CutPlaneOrigin
                     READ_VTK_PARAM(19,KN<double>); // CutPlaneNormal
-                case 40: fin >= winnum; break;
+                    READ_VTK_PARAM(20,KN<long>); //WindowIndex
+                    READ_VTK_PARAM(21,KN<long>); //NbColorTicks
+                    READ_VTK_PARAM(22,KN<long>); //NbColors
+                //case 43: fin >= winnum; break;
+                case 43: fin >= pNormalT;break;
 
                 default:
                     static int nccc=0;
@@ -2388,7 +2416,8 @@ case 20+index: {type dummy; fin >= dummy;} break;
         ffassert(fin.good() && ! fin.eof());
     }
     if(dimpp) plotdim=dimpp;
-    if(keepPV) blockwin=keepPV;
+   // if(keepPV) blockwin=keepPV;
+   // if(pNormalT) plotNormalT=pNormalT;
     ffassert(cas==PlotStream::dt_endarg);
     if((debug > 2))
     {  cout << "    ***** get ::: ";
@@ -3559,6 +3588,9 @@ static void Key( unsigned char key, int x, int y )
                 win->set(*++win->icurrentPlot);
             break;
         }
+        case 'T':
+            win->theplot->pNormalT = ! win->theplot->pNormalT  ;
+            break;
         default:
             if((debug > 10)) cout << " Key Character " << (int) key << " " << key << endl;
 

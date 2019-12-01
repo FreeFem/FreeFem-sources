@@ -373,7 +373,8 @@ public:
     bool greyo;
     bool drawborder;
     bool drawmeshes;
-    bool add,keepPV;
+    bool add,keepPV,pNormalT;
+    int periodNormalT;
     double echelle;
     double ArrowSize;
     vector<Mesh *> Ths;
@@ -390,7 +391,7 @@ public:
     R ZScale;
     //  for 3d plot jan 2009
     int  plotdim;
-    bool blockwin;
+    bool blockwin, plotNormalT;
     R theta, phi, dcoef, focal;
     int datadim;
     // 2D
@@ -471,14 +472,13 @@ public:
     GLint viewport[4];
     
     int  plotdim;
-    bool blockwin;
     R theta, phi, coef_dist, focal, dtheta;
     R  rapz,rapz0;
     R3 Bmin3,Bmax3,Pvue3;
     R3 cam;
     bool withlight;
     bool changearrow,changeiso;// to rebuild de graphic list if neccessary
-    bool keepPV,init;
+    bool keepPV,init,pNormalT;
     //double  aspx, aspy, echx,echy,ech,rxmin,rxmax,rymin,rymax;
     OneWindow(int h,int w,ThePlot *p);
     void DefaultView(int state) ;
