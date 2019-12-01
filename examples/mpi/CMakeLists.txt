@@ -7,7 +7,6 @@ IF(MPI_FOUND)
 #  FILE(GLOB CPPFILES *.cpp)
 #
 #  LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-mpi/example-mumps.cpp
-#                            ${CMAKE_SOURCE_DIR}/examples++-mpi/hypre_FreeFem.cpp
 #                            ${CMAKE_SOURCE_DIR}/examples++-mpi/mpi-cmaes.cpp
 #                            ${CMAKE_SOURCE_DIR}/examples++-mpi/MUMPS.cpp
 #                            ${CMAKE_SOURCE_DIR}/examples++-mpi/MUMPS_FreeFem.cpp
@@ -105,12 +104,10 @@ ENDIF(NOT FF_PLUGIN_MPI_CMAES)
 
 
 IF (NOT FF_PLUGIN_MSH3)
-  LIST(REMOVE_ITEM EDP_FILES ${CMAKE_SOURCE_DIR}/examples/mpi/Laplace3d-hypre.edp
-                             ${CMAKE_SOURCE_DIR}/examples/mpi/NSI3d-carac-mumps.edp
+  LIST(REMOVE_ITEM EDP_FILES ${CMAKE_SOURCE_DIR}/examples/mpi/NSI3d-carac-mumps.edp
                              ${CMAKE_SOURCE_DIR}/examples/mpi/Stokes-v1-matrix-mumps.edp
                              ${CMAKE_SOURCE_DIR}/examples/mpi/Stokes-v2-matrix-mumps.edp
                              ${CMAKE_SOURCE_DIR}/examples/mpi/Stokes-v3-matrix-mumps.edp
-                             ${CMAKE_SOURCE_DIR}/examples/mpi/chaleur3D-hypre.edp
                              ${CMAKE_SOURCE_DIR}/examples/mpi/schwarz-3.edp)
 ENDIF(NOT FF_PLUGIN_MSH3)
 

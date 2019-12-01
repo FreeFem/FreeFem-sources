@@ -1560,21 +1560,18 @@ bool AddLayers(Mesh const * const & pTh, KN<double> * const & psupp, long const 
     {
         u = 0.;
         for(int k=0; k<nt; ++k)
-            for(int i=0; i<nve; ++i)
-                u[Th(k,i)] += s[k];
-
-        for(int v=0; v < nv; ++v)
-            u[v] = u[v] >0.;
+            if(s[k] > 0.0)
+                for(int i=0; i<nve; ++i)
+                    u[Th(k,i)] = 1.0;
 
         phi += u;
 
         s = 0.;
         for(int k=0; k<nt; ++k)
             for(int i=0; i<nve; ++i)
-                s[k] += u[Th(k,i)];
+                if(u[Th(k,i)] > 0.0)
+                    s[k] = 1.0;
 
-        for(int k=0; k < nt; ++k)
-            s[k] = s[k] > 0.;
         supp += s;
     }
     phi *= (1./nlayer);

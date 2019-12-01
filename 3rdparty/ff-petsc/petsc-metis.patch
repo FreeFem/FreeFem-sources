@@ -2,11 +2,15 @@ diff --git a/petsc-3.12.2/config/BuildSystem/config/packages/metis.py b/petsc-3.
 index 136526da05..2d1c4d3271 100644
 --- a/petsc-3.12.2/config/BuildSystem/config/packages/metis.py
 +++ b/petsc-3.12.2/config/BuildSystem/config/packages/metis.py
-@@ -42,6 +42,7 @@ class Configure(config.package.CMakePackage):
+@@ -43,6 +43,11 @@ class Configure(config.package.CMakePackage):
      if self.framework.argDB['download-metis-use-doubleprecision']:
        args.append('-DMETIS_USE_DOUBLEPRECISION=1')
      args.append('-DMATH_LIB="'+self.libraries.toStringNoDupes(self.mathlib.lib)+'"')
++    mpicc = self.framework.getMakeMacro('MPICC_SHOW')
++    mpicxx = self.framework.getMakeMacro('MPICXX_SHOW')
 +    args = self.rmArgsStartsWith(args,['-DCMAKE_CXX_COMPILER','-DCMAKE_C_COMPILER'])
++    args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
++    args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
 
    def configureLibrary(self):

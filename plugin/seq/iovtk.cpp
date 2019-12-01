@@ -658,7 +658,6 @@ void VTU_WRITE_MESH(FILE *fp, const Mesh &Th, bool binary, int datasize, bool su
     }
   }
   fprintf(fp, "\n</DataArray>\n");
-  fprintf(fp, "</CellData>\n");
   //---------------------------------- LABELS WITH VTU -------------------------------------------//
 }
 
@@ -965,7 +964,6 @@ void VTU_WRITE_MESH(FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool s
     }
   }
   fprintf(fp, "\n</DataArray>\n");
-  fprintf(fp, "</CellData>\n");
   //---------------------------------- LABELS WITH VTU -------------------------------------------//
 }
 
@@ -2854,8 +2852,24 @@ AnyType VTK_WriteMesh_Op::operator( )(Stack stack) const {
      * bool encode64=0;
      */
     VTU_WRITE_MESH(fp, Th, binary, datasize, surface);
-
     // Solution Order
+    // order 0
+    if (Norder0 > 0) {
+      for (int ii = 0; ii < nbofsol; ii++) {
+        if (order[ii] == 0) {
+          if (datasize == sizeof(float)) {
+            VTU_DATA_ARRAY(fp, "Float32", nameofuser[ii], l[ii].nbfloat, binary);
+            l[ii].writesolutionP0_float(fp, Th, stack, surface, binary, swap, 1);
+          } else if (datasize == sizeof(double)) {
+            VTU_DATA_ARRAY(fp, "Float64", nameofuser[ii], l[ii].nbfloat, binary);
+            l[ii].writesolutionP0_double(fp, Th, stack, surface, binary, swap, 1);
+          }
+
+          ENDTYPE_VTU(fp, "DataArray");
+        }
+      }
+    }
+    ENDTYPE_VTU(fp, "CellData");
     // order 1
     if (Norder0 != nbofsol) {
       BEGINTYPE_VTU(fp, "PointData");
@@ -2875,27 +2889,6 @@ AnyType VTK_WriteMesh_Op::operator( )(Stack stack) const {
       }
 
       ENDTYPE_VTU(fp, "PointData");
-    }
-
-    // order 0
-    if (Norder0 > 0) {
-      BEGINTYPE_VTU(fp, "CellData");
-
-      for (int ii = 0; ii < nbofsol; ii++) {
-        if (order[ii] == 0) {
-          if (datasize == sizeof(float)) {
-            VTU_DATA_ARRAY(fp, "Float32", nameofuser[ii], l[ii].nbfloat, binary);
-            l[ii].writesolutionP0_float(fp, Th, stack, surface, binary, swap, 1);
-          } else if (datasize == sizeof(double)) {
-            VTU_DATA_ARRAY(fp, "Float64", nameofuser[ii], l[ii].nbfloat, binary);
-            l[ii].writesolutionP0_double(fp, Th, stack, surface, binary, swap, 1);
-          }
-
-          ENDTYPE_VTU(fp, "DataArray");
-        }
-      }
-
-      ENDTYPE_VTU(fp, "CellData");
     }
 
     fprintf(fp, "</Piece>\n");
@@ -4557,6 +4550,23 @@ AnyType VTK_WriteMesh3_Op::operator( )(Stack stack) const {
 
     VTU_WRITE_MESH(fp, Th, binary, datasize, surface);
     // Solution Order
+    // order 0
+    if (Norder0 > 0) {
+      for (int ii = 0; ii < nbofsol; ii++) {
+        if (order[ii] == 0) {
+          if (datasize == sizeof(float)) {
+            VTU_DATA_ARRAY(fp, "Float32", nameofuser[ii], l[ii].nbfloat, binary);
+            l[ii].writesolutionP0_float(fp, Th, stack, surface, binary, swap, 1);
+          } else if (datasize == sizeof(double)) {
+            VTU_DATA_ARRAY(fp, "Float64", nameofuser[ii], l[ii].nbfloat, binary);
+            l[ii].writesolutionP0_double(fp, Th, stack, surface, binary, swap, 1);
+          }
+
+          ENDTYPE_VTU(fp, "DataArray");
+        }
+      }
+    }
+    ENDTYPE_VTU(fp, "CellData");
     // order 1
     if (Norder0 != nbofsol) {
       BEGINTYPE_VTU(fp, "PointData");
@@ -4574,29 +4584,7 @@ AnyType VTK_WriteMesh3_Op::operator( )(Stack stack) const {
           ENDTYPE_VTU(fp, "DataArray");
         }
       }
-
       ENDTYPE_VTU(fp, "PointData");
-    }
-
-    // order 0
-    if (Norder0 > 0) {
-      BEGINTYPE_VTU(fp, "CellData");
-
-      for (int ii = 0; ii < nbofsol; ii++) {
-        if (order[ii] == 0) {
-          if (datasize == sizeof(float)) {
-            VTU_DATA_ARRAY(fp, "Float32", nameofuser[ii], l[ii].nbfloat, binary);
-            l[ii].writesolutionP0_float(fp, Th, stack, surface, binary, swap, 1);
-          } else if (datasize == sizeof(double)) {
-            VTU_DATA_ARRAY(fp, "Float64", nameofuser[ii], l[ii].nbfloat, binary);
-            l[ii].writesolutionP0_double(fp, Th, stack, surface, binary, swap, 1);
-          }
-
-          ENDTYPE_VTU(fp, "DataArray");
-        }
-      }
-
-      ENDTYPE_VTU(fp, "CellData");
     }
 
     ENDTYPE_VTU(fp, "Piece");

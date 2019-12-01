@@ -1,30 +1,19 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
 
-load "PETSc-complex"                        // PETSc plugin
+load "PETSc-complex"                // PETSc plugin
 macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
-macro def(i)i// EOM                 // scalar field definition
-macro init(i)i// EOM                // scalar field initialization
 macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
 func Pk = P1;                       // finite element space
 
-int s = getARGV("-split", 1);                                   // refinement factor
+meshN Th = square(getARGV("-global", 40), getARGV("-global", 40)); // global mesh
+Mat<complex> A;
+int s = getARGV("-split", 1);
+buildMat(Th, s, A, Pk, mpiCommWorld)
 
-if(verbosity > 0 && mpirank == 0) {
-    cout << " --- " << mpirank << "/" << mpisize;
-    cout << " - helmholtz-2d-PETSc.edp - input parameters: refinement factor = " << s << endl;
-}
-
-meshN Th = square(1, 1);
-fespace Wh(Th, Pk);           // local finite element space
-int[int][int] intersection;   // local-to-neighbors renumbering
-real[int] D;                  // partition of unity
-{
-    Th = square(getARGV("-global", 40), getARGV("-global", 40));    // global mesh
-    build(Th, s, intersection, D, Pk, mpiCommWorld)
-}
+fespace Wh(Th, Pk);                 // local finite element space
 
 func real wedge(real a, real b) {
     if(y < 0.4 + 0.1 * 0.75 * x)
@@ -47,22 +36,14 @@ matrix<complex> Loc;                        // local operator
     rhs = vPb(0, Wh, tgv = -1);
 }
 
-Mat<complex> A(Loc, intersection, D);
+A = Loc;
 if(usedARGV("-optimized_Schwarz") != -1)
     set(A, sparams = "-ksp_view -sub_pc_type lu", O = Loc);
 else
     set(A, sparams = "-ksp_view -pc_type lu");
-Wh<complex> def(u);    // local solution
+Wh<complex> u;                      // local solution
 
 u[] = A^-1 * rhs;
 
-complex[int] err(u[].n);
-err = A * u[];      // global matrix-vector product
-err -= rhs;
-for(int i = 0; i < D.n; ++i)
-    if(abs(D[i] - 1.0) > 1e-6)
-        err[i] = 0.0;
-
+macro def(u)u//
 plotMPI(Th, u, Pk, def, complex, cmm = "Global solution")
-u[] = err;
-plotMPI(Th, u, Pk, def, complex, cmm = "Global residual")

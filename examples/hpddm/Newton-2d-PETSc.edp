@@ -12,16 +12,11 @@ macro init(i)i// EOM                // scalar field initialization
 func Pk = P2;                       // finite element space
 func Pkdc = P2dc;                   // finite element space
 
-mesh Th;
+mesh Th = square(getARGV("-global", 40), getARGV("-global", 40));
+Mat A;
+buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
 fespace Vh(Th, Pk);
 fespace Ph(Th, Pkdc);
-int[int][int] intersection;   // local-to-neighbors renumbering
-real[int] D;                  // partition of unity
-{
-    Th = square(getARGV("-global", 40), getARGV("-global", 40));
-    int s = getARGV("-split", 1);
-    build(Th, s, intersection, D, Pk, mpiCommWorld)
-}
 
 Vh b = 1;
 real a = 0.001;
@@ -41,33 +36,32 @@ varf vC(uh, vh) = int2d(Th)(b*vh)
 varf vhJ(uh, vh) = int2d(Th)(dfalpha*(dx(uh)*dx(vh) + dy(uh)*dy(vh)) + ddfalpha*(dx(u)*dx(vh) + dy(u)*dy(vh)) * (dx(u)*dx(uh) + dy(u)*dy(uh)))
     + on(1, 2, 3, 4, uh = 0);
 
-Mat dJ(Vh.ndof, intersection, D);
 matrix H;
 
 func real[int] funcRes(real[int]& inPETSc) {
-    changeNumbering(dJ, u[], inPETSc, inverse = true, exchange = true);
+    changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
     alpha = dx(u)*dx(u) + dy(u)*dy(u);
     dfalpha = df(alpha);
     ddfalpha = 2 * ddf(alpha);
     real[int] v = vdJ(0, Vh, tgv = -1);
     real[int] outPETSc;
-    changeNumbering(dJ, v, outPETSc);
+    changeNumbering(A, v, outPETSc);
     return outPETSc;
 }
 func int funcJ(real[int]& inPETSc) {
-    changeNumbering(dJ, u[], inPETSc, inverse = true, exchange = true);
+    changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
     H = vhJ(Vh, Vh, tgv = -1);
-    dJ = H;
+    A = H;
     return 0;
 }
 
 real[int] xPETSc, bPETSc;
 u[] = vC(0, Vh);
-changeNumbering(dJ, u[], bPETSc);
+changeNumbering(A, u[], bPETSc);
 xPETSc.resize(bPETSc.n);
 xPETSc = 0;
-SNESSolve(dJ, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -ksp_monitor_true_residual -snes_converged_reason -ksp_converged_reason -pc_type lu -snes_view");
-changeNumbering(dJ, u[], xPETSc, inverse = true, exchange = true);
+SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -ksp_monitor_true_residual -snes_converged_reason -ksp_converged_reason -pc_type lu -snes_view");
+changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
 plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
 
 xPETSc = 0;
@@ -76,16 +70,16 @@ int j;
 real absTol = 1e-2;
 macro myplot() cmm = "Global " + (j == 0 ? "solution" : "decrement") + " at iteration " + it, wait = 1, fill = 1, dim = 3// EOM
 func int funcMonitor(int it, real xnorm, real gnorm, real f, real[int]& u, real[int]& du) {
-    changeNumbering(dJ, v[], u, inverse = true, exchange = true);
+    changeNumbering(A, v[], u, inverse = true, exchange = true);
     j = 0;
     plotMPI(Th, v, Pk, def, real, myplot);
-    changeNumbering(dJ, v[], du, inverse = true, exchange = true);
+    changeNumbering(A, v[], du, inverse = true, exchange = true);
     j = 1;
     plotMPI(Th, v, Pk, def, real, myplot);
     real abs = du.linfty, red;
     mpiAllReduce(abs, red, mpiCommWorld, mpiMAX);
     return it > 0 && red < absTol ? 2 : 0; // reasons defined there https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/SNES/SNESConvergedReason.html
 }
-SNESSolve(dJ, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_converged_reason", monitor = funcMonitor);
-changeNumbering(dJ, u[], xPETSc, inverse = true, exchange = true);
+SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_converged_reason", monitor = funcMonitor);
+changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
 plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

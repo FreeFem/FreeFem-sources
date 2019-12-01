@@ -1,0 +1,59 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc-complex"
+macro dimension()2// EOM            // 2D or 3D
+include "macro_ddm.idp"             // additional DDM functions
+
+macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
+func Pk = P2;                       // finite element space
+
+real k = getARGV("-waven", 40.0);
+func f = 100 * exp(-10 * k * ((x-0.5)^2 + (y-0.5)^2));
+
+real lambda = 2 * pi / k;
+
+real epsilonA = 0;
+real epsilonE = 0;
+
+int Dirichlet = 1;
+int Robin = -111111;
+
+int s = getARGV("-split", 2);
+int level = getARGV("-level", 2);
+mesh[int] ThTab(level);
+int nloc = (20.0 * k) / ((level - 1) * s * 2 * pi);
+ThTab[level - 1] = square(nloc, nloc);
+{
+    int[int] chlab = [1, Dirichlet, 2, Dirichlet, 3, Dirichlet, 4, Dirichlet];
+    ThTab[level - 1] = change(ThTab[level - 1], refe = chlab);
+}
+Mat<complex>[int] MG(level);
+matrix[int] P(level - 1);
+buildMatRecursive(ThTab, s, level, P, MG, Pk, mpiCommWorld);
+
+complex[int] rhs;
+matrix<complex>[int] Opt(level);
+for(int i = 0; i < level; ++i) {
+    real epsilon = (i == level - 1 ? k : 0);
+    varf vPb(u, v) = intN(ThTab[i])(-(k^2 - 1i*epsilon)*u*v + grad(u)'*grad(v))
+                   + intN1(ThTab[i], Robin)(1i*k*u*v)
+                   - intN(ThTab[i])(f*v)
+                   + on(Dirichlet, u = 0);
+    fespace Wh(ThTab[i], Pk);
+    matrix<complex> Loc = vPb(Wh, Wh, tgv = -2, sym = 1);
+    Opt[i] = Loc;
+    MG[i] = Loc;
+    if(i == 0) {
+        rhs.resize(Wh.ndof);
+        rhs = vPb(0, Wh);
+    }
+}
+set(MG, P, sparams = "-pc_type mg -ksp_monitor -ksp_view -ksp_type fgmres -ksp_gmres_restart 200 -ksp_max_it 200");
+set(MG, 0, sparams = "-mg_coarse_ksp_type gmres -mg_coarse_ksp_rtol 1e-1 -mg_coarse_ksp_pc_side right -mg_coarse_ksp_gmres_restart 100 " + " -mg_coarse_ksp_max_it 100 -mg_coarse_ksp_converged_reason -mg_coarse_pc_type cholesky -mg_coarse_pc_asm_type restrict");
+set(MG, level - 1, sparams = "-mg_levels_ksp_type gmres -mg_levels_ksp_max_it 1 -mg_levels_ksp_pc_side right -mg_levels_pc_type asm -mg_levels_sub_pc_type icc -mg_levels_pc_asm_type restrict");//, O = Opt[0]);
+fespace Wh(ThTab[0], Pk);
+Wh<complex> u;
+u[] = MG[0]^-1 * rhs;
+macro def(u)u//
+plotMPI(ThTab[0], real(u), Pk, def, real, cmm = "Global solution")

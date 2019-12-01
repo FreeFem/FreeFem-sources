@@ -14,7 +14,6 @@ mpi/generaldefs.h \
 mpi/hpddm.cpp \
 mpi/hpddm_substructuring.cpp \
 mpi/htool.cpp \
-mpi/hypre_FreeFem.cpp \
 mpi/mpi-cmaes.cpp \
 mpi/parmetis.cpp \
 seq/BEC.cpp \
@@ -106,6 +105,7 @@ seq/geophysics.cpp \
 seq/marmousi2.cpp \
 seq/mat_dervieux.cpp \
 seq/mat_psi.cpp \
+seq/mat_edgeP1.cpp \
 seq/medit.cpp \
 seq/metis.cpp \
 seq/mmg3d-v4.0.cpp \

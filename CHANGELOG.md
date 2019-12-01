@@ -30,11 +30,12 @@ All notable changes to this project will be documented in this file.
 - FEM on curve 3D (in test)
 - P0, P1, P2 curve 3D FE (scalar for the moment)
 - i/o medit and vtk format for curve FE
-- checkMesh() function, allow to remove multiple vertices, elements and border elements (argument: precisvertice(double),removeduplicate(bool)) 
+- checkMesh() function, allow to remove multiple vertices, elements and border elements (argument: precisvertice(double),removeduplicate(bool))
 - possible to build a curve mesh from a surface, ThS = buildBdMesh(ThS) and define this new mesh by meshL ThL= ThS.Gamma
 - can extract a border part of a meshL (meshL ThL = extract(ThL,label=llabs))
 - Support for optimized boundary conditions with PETSc, see helmholtz-2d-PETSc.edp
 - buildmeshL() function: build meshL from borders
+- `mpiCommSelf` keyword
 
 ### Changed
 - function buildSurface(...) renamed by buildBdMesh(...)
@@ -44,6 +45,7 @@ All notable changes to this project will be documented in this file.
 - FFTW is not compiled by PETSc anymore
 - Spurious outputs in TetGen plugin
 - curve3 type -> border
+- hypre examples since it is not downloaded by FreeFEM for many months (use PETSc instead)
 
 ### Fixed
 - plotMPI function for plotting 3D solutions, problem with serialize

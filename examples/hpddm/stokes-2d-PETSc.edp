@@ -13,34 +13,28 @@ macro epsilon(u)[dx(u), dy(u#B), (dy(u) + dx(u#B)) / Sqrt]// EOM
 macro div(u)(dx(u) + dy(u#B))// EOM
 func Pk = [P2, P2, P1];             // finite element space
 
-int s = getARGV("-split", 1);                                   // refinement factor
-
-if(verbosity > 0 && mpirank == 0) {
-    cout << " --- " << mpirank << "/" << mpisize;
-    cout << " - stokes-2d-PETSc.edp - input parameters: refinement factor = " << s << endl;
-}
-
-meshN Th = square(1, 1);
-fespace Wh(Th, Pk);           // local finite element space
-int[int][int] intersection;   // local-to-neighbors renumbering
-real[int] D;                  // partition of unity
+meshN Th;
 {
     meshN ThGlobal = square(getARGV("-global", 40), getARGV("-global", 40), [x, y]);    // global mesh
     ThGlobal = trunc(ThGlobal, (x < 0.5) || (y < 0.5), label = 5);
     Th = movemesh(ThGlobal, [-x, y]);
     Th = ThGlobal + Th;
-    build(Th, s, intersection, D, Pk, mpiCommWorld)
 }
+Mat A;
+buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
 
+fespace Wh(Th, Pk);                 // local finite element space
 varf vPb([u, uB, p], [v, vB, q]) = intN(Th)(grad(u)' * grad(v) + grad(uB)' * grad(vB) - div(u) * q - div(v) * p + 1e-10 * p * q) + on(1, 3, 5, u = 0, uB = 0) + on(2, u = y*(0.5-y), uB = 0);
-matrix<real> K = vPb(Wh, Wh);
+matrix<real> Loc = vPb(Wh, Wh);
 real[int] rhs = vPb(0, Wh);
 
-Mat A(K, intersection, D, bs = 1);
 set(A, sparams = "-pc_type lu -pc_factor_mat_solver_type mumps");
-Wh<real> def(b);
-b[] = A^-1 * rhs;
+Wh<real> def(u);
+
+A = Loc;
+u[] = A^-1 * rhs;
+
 macro def2(u)[u, u#B]// EOM
 macro def1(u)u// EOM
-plotMPI(Th, def2(b), [P2, P2], def2, real, cmm = "Global velocity")
-plotMPI(Th, bC, P1, def1, real, cmm = "Global pressure")
+plotMPI(Th, def2(u), [P2, P2], def2, real, cmm = "Global velocity")
+plotMPI(Th, uC, P1, def1, real, cmm = "Global pressure")

@@ -119,9 +119,6 @@ AppDir/
 3rdparty/gmm/FAIT
 3rdparty/gmm/cxxflags
 3rdparty/gmm/gmm-.*/
-3rdparty/hypre/FAIT
-3rdparty/hypre/ff-flags
-3rdparty/hypre/hypre-
 3rdparty/include/
 3rdparty/ipopt/Ipopt-3.10.2/
 3rdparty/ipopt/Makefile.inc

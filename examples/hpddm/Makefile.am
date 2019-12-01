@@ -100,7 +100,8 @@ TESTS_PETSC_SLEPC = laplace-2d-SLEPc.edp \
 
 
 TESTS_PETSCCOMPLEX = diffusion-2d-PETSc-complex.edp \
-	helmholtz-2d-PETSc-complex.edp
+	helmholtz-2d-PETSc-complex.edp \
+	helmholtz-mg-2d-PETSc-complex.edp
 
 TESTS_PETSCCOMPLEX_SLEPCCOMPLEX = laplace-2d-SLEPc-complex.edp
 
@@ -157,4 +158,4 @@ freefem++.pref: Makefile
 	echo includepath = \"../../idp/\" >> freefem++.pref
 
 clean-local:
-	rm -rf sol_heat_2d_io* sol_stokes_3d_io*
+	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_*
