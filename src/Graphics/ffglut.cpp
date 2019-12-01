@@ -783,7 +783,7 @@ void OnePlotMeshL::Draw(OneWindow *win)
     initlist();
     ThePlot & plot=*win->theplot;
     Plot(*Th,plot.fill,true,true,plot,gllists,oklist);
-    ShowGlerror("OnePlotMeshS::Draw");
+    ShowGlerror("OnePlotMeshL::Draw");
 }
 
 void OnePlotFE3::Draw(OneWindow *win)
@@ -1551,74 +1551,6 @@ void OnePlotBorder::Draw(OneWindow *win)
 
 }
 
-void OnePlotCurve3::Draw(OneWindow *win)
-{
-    initlist();
-    
-    glDisable(GL_DEPTH_TEST);
-    ThePlot & plot= *win->theplot;
-    R h = 8*win->hpixel;
-    
-    double z = plot.z0;
-    plot.SetColorTable(16) ;
-    
-    for(int i=0;i<data.size() ;++i)
-    {
-        vector<pair<long,R3> > & v=data[i];
-        ShowGlerror("end OnePlotBorder::Draw  1");
-        for(int j=1;j<v.size();++j)
-        {
-            plot.color(2+v[j].first);
-            R3 Po(v[j-1].second), Pn(v[j].second);
-            R3 uv(Po,Pn);
-            double l = Max(sqrt((uv,uv)),1e-20);
-            R3 nx(1.,0.,0.);
-            R3 ny(0.,1.,0.);
-            R3 nz(0.,0.,1.);
-            R3 dd = uv*(-h/l);
-            R3 dnx = (dd^nx)*0.5;//dd.perp()*0.5;
-            R3 dny = (dd^ny)*0.5;//dd.perp()*0.5;
-            R3 dnz = (dd^nz)*0.5;//dd.perp()*0.5;
-            
-            //cout << "test" << dny << " " <<dnz<<endl;
-
-            glLineWidth(2);
-            glBegin(GL_LINES);
-            win->Seg3(Po,Pn);
-            glEnd();
-            
-            glLineWidth(1);
-            glBegin(GL_LINES);
-            // to do direction
-            if(j!=1)
-            {
-                win->Seg3(Po,Po+dd+dnx);
-                win->Seg3(Po,Po+dd-dnx);
-                win->Seg3(Po,Po+dd+dny);
-                win->Seg3(Po,Po+dd-dny);
-                win->Seg3(Po,Po+dd+dnz);
-                win->Seg3(Po,Po+dd-dnz);
-                
-            }
-            glEnd();
-        }
-        
-        ShowGlerror("end OnePlotBorder::Draw  2");
-        
-        glPointSize(7);
-        glBegin(GL_POINTS);
-        int l= v.size()-1;
-        plot.color(2+v[0].first);
-        glVertex3d(v[0].second.x,v[0].second.y,v[0].second.z);
-        plot.color(2+v[l].first);
-        glVertex3d(v[l].second.x,v[l].second.y,v[l].second.z);
-        glEnd();
-        glPointSize(1);
-        ShowGlerror("end OnePlotBorder::Draw  3");
-    }
-    ShowGlerror("end OnePlotBorder::Draw");
-    
-}
 
 void OnePlotHMatrix::Draw(OneWindow *win)
 {
@@ -1749,6 +1681,7 @@ void OneWindow::set(ThePlot *p)
     if(p)
     {
         plotdim=p->plotdim;
+        blockwin=p->keepPV;
         rapz0 = p->ZScale;
     }
     if(!init)
@@ -1763,6 +1696,7 @@ void OneWindow::set(ThePlot *p)
 void OneWindow::add(ThePlot *p)
 {
     if(p) {
+        keepPV=p->blockwin;
         lplots.push_back(p);
         lplotssize++;
         ++icurrentPlot;
@@ -1801,6 +1735,7 @@ void OneWindow::DefaultView(int state)
     {
         init =1;
         plotdim=theplot->plotdim;
+        blockwin=theplot->blockwin;
         R3 A(theplot->Pmin),B(theplot->Pmax);
         R3 D(A,B);
         R dxy= max(D.x,D.y);
@@ -2181,30 +2116,7 @@ OnePlotBorder::OnePlotBorder(PlotStream & f)
     ffassert(f.good());
 }
 
-OnePlotCurve3::OnePlotCurve3(PlotStream & f)
-:OnePlot(4,3,1)
-{
-    long nbd;
-    f>> nbd;
-    data.resize(nbd);
-    for(int i=0;i<nbd;++i)
-    {
-        long n;
-        f>> n;
-        data[i].resize(n+1);
-        for(int j=0;j<=n;++j)
-        {
-            long l;
-            double x,y,z;
-            f >> l>> x >> y >> z;
-            R3 P(x,y,z);
-            Pmin=Minc(Pmin,P);
-            Pmax=Maxc(Pmax,P);
-            data[i][j]=make_pair(l,P);
-        }
-    }
-    ffassert(f.good());
-}
+
 void OnePlot::GLDraw(OneWindow *win)
 {
     Draw(win);
@@ -2339,7 +2251,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 changeViso(true),changeVarrow(true),changeColor(true),
 changeBorder(true),changeFill(true), withiso(false),witharrow(false),
 plotdim(2),theta(30.*M_PI/180.),phi(20.*M_PI/180.),dcoef(1),focal(20.*M_PI/180.),
-datadim(1), winnum(0)
+datadim(1), winnum(0), blockwin(0)
 
 {
 
@@ -2476,6 +2388,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
         ffassert(fin.good() && ! fin.eof());
     }
     if(dimpp) plotdim=dimpp;
+    if(keepPV) blockwin=keepPV;
     ffassert(cas==PlotStream::dt_endarg);
     if((debug > 2))
     {  cout << "    ***** get ::: ";
@@ -2725,8 +2638,6 @@ case 20+index: {type dummy; fin >= dummy;} break;
             p=new OnePlotCurve(fin,4,this);// add zz and color ..
         else if(what==4)
             p=new OnePlotBorder(fin);
-        else if(what==40)
-            p=new OnePlotCurve3(fin);
         
         // volume 3D meshes (mesh3 or mesh3 only in case with pointer on meshS or/and meshL
         else if (what == 5)

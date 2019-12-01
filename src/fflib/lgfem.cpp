@@ -4125,7 +4125,6 @@ AnyType Plot::operator( )(Stack s) const {
      what = 19 -> complex 3d vector field (tree FE function  3d) surface
      what = 20 -> complex FE function 3D curve
      what = 21 -> complex 3d vector field (tree FE function  3d) curve
-     what = 40 -> 3D border mesh
      what = 50 -> 3D surface mesh
      what = 55 -> 3D line mesh
      what = 100,101,106,109 ->   remap with real ... 2d, 3D volume, 3D surface, 3D curve

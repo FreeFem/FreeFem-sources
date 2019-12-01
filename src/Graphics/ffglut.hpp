@@ -265,11 +265,6 @@ struct OnePlotBorder: public OnePlot {
     void Draw(OneWindow *win);
 };
 
-struct OnePlotCurve3: public OnePlot {
-    vector<vector<pair<long,R3> > > data;
-    OnePlotCurve3(PlotStream & f);
-    void Draw(OneWindow *win);
-};
 
 struct OnePlotHMatrix: public OnePlot
 {
@@ -395,6 +390,7 @@ public:
     R ZScale;
     //  for 3d plot jan 2009
     int  plotdim;
+    bool blockwin;
     R theta, phi, dcoef, focal;
     int datadim;
     // 2D
@@ -475,6 +471,7 @@ public:
     GLint viewport[4];
     
     int  plotdim;
+    bool blockwin;
     R theta, phi, coef_dist, focal, dtheta;
     R  rapz,rapz0;
     R3 Bmin3,Bmax3,Pvue3;

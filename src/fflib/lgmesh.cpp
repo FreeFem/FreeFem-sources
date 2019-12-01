@@ -1685,7 +1685,8 @@ long Boundingbox(KN<double>* const& pb, pmesh const& pTh)
      }
     return -1; // error
 }
-long Boundingbox(KN<double>* const& pb, pmesh3 const& pTh)
+template < class ppmesh >
+long Boundingbox(KN<double>* const& pb, ppmesh const& pTh)
 {
     KN<double> & bb =*pb;
     if(pTh && bb.N()>=6)
@@ -1702,26 +1703,15 @@ long Boundingbox(KN<double>* const& pb, pmesh3 const& pTh)
     return -1; // error
 }
 
-long Boundingbox(KN<double>* const& pb, pmeshS const& pTh)
-{
-    KN<double> & bb =*pb;
-    if(pTh && bb.N()>=6)
-    {
-        R3 Pn=pTh->Pmin,Px=pTh->Pmax  ;
-        bb[0] = Pn.x;
-        bb[1] = Px.x;
-        bb[2] = Pn.y;
-        bb[3] = Px.y;
-        bb[4] = Pn.z;
-        bb[5] = Px.z;
-        return 0;
-    }
-    return -1; // error
-}
+long Boundingbox(pmeshL const& pTh,KN<double>* const& pb )
+{ return  Boundingbox<pmeshL>(pb,pTh);}
+
 long Boundingbox(pmeshS const& pTh,KN<double>* const& pb )
-{ return  Boundingbox(pb,pTh);}
+{ return  Boundingbox<pmeshS>(pb,pTh);}
+
 long Boundingbox(pmesh3 const& pTh,KN<double>* const& pb )
-{ return  Boundingbox(pb,pTh);}
+{ return  Boundingbox<pmesh3>(pb,pTh);}
+
 long Boundingbox(pmesh const& pTh,KN<double>* const& pb )
 { return  Boundingbox(pb,pTh);}
 double Chi(Stack stack,pmesh const &pTh)
@@ -1798,6 +1788,7 @@ void init_lgmesh() {
     Global.Add("boundingbox", "(", new OneOperator2_<long, pmesh,KN<double>*>(Boundingbox));
     Global.Add("boundingbox", "(", new OneOperator2_<long, pmesh3,KN<double>*>(Boundingbox));
     Global.Add("boundingbox", "(", new OneOperator2_<long, pmeshS,KN<double>*>(Boundingbox));
+    Global.Add("boundingbox", "(", new OneOperator2_<long, pmeshL,KN<double>*>(Boundingbox));
     Global.Add("chi", "(", new OneOperator1s_<double,pmesh,E_F_F0s_<double,pmesh,E_F0mps> >(Chi)); // oct 2017 FH function characteristic
     Global.Add("chi", "(", new OneOperator1s_<double,pmesh3,E_F_F0s_<double,pmesh3,E_F0mps> >(Chi));// oct 2017 FH function characteristic
 
