@@ -2116,9 +2116,6 @@ MeshS *GluMeshS(listMeshS const &lst) {
         TRdHat PtHat1 = TRdHat::diag(1. / T::nv);
         for (int k = 0; k < Th.nt; k++) {
             const T &K(Th[k]);
-            int iv[T::nv];
-            for (int i = 0; i < T::nv; i++)
-                iv[i] = Th.operator( )(K[i]);
             const R3 r3vi(K(PtHat1));
             const V &vi(r3vi);
             V *pvi = gtree_e->ToClose(vi, hseuil_border);
@@ -2130,7 +2127,7 @@ MeshS *GluMeshS(listMeshS const &lst) {
                 gtree_e->Add(becog1[nbt++]);
                 
                 int igluv[T::nv];
-                for (int i = 0; i < T::nv; i++)
+                for (int i = 0; i < (T::nv); i++)
                     igluv[i] = gtree->ToClose(K[i], hseuil) - v;
                 (tt++)->set(v, igluv, K.lab);
             }
@@ -2152,8 +2149,8 @@ MeshS *GluMeshS(listMeshS const &lst) {
                     becog2[nbe].lab = vi.lab;
                     gtree_be->Add(becog2[nbe++]);
                     
-                    int igluv[k];
-                    for (int i = 0; i < k; i++)
+                    int igluv[B::nv];
+                    for (int i = 0; i < (B::nv); i++)
                         igluv[i] = gtree->ToClose(K[i], hseuil) - v;
                     
                     (bb++)->set(v, igluv, K.lab);
