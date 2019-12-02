@@ -1950,31 +1950,29 @@ long pfSr_nbdf(pair<FEbase<K,v_fesS> *,int> p)
     throwassert( !!p.first->Vh);
     return p.first->Vh->NbOfDF;
 }
-/*template<class K>
+template<class K>
 pmeshS pfSr_Th(pair<FEbase<K,v_fesS> *,int> p)
 {
     if (!p.first->Vh) p.first->Vh= p.first->newVh();
     throwassert( !!p.first->Vh);
     return & p.first->Vh->Th;
 }
-*/
 
 // 3D curve
 template<class K>
-long pfSr_nbdf(pair<FEbase<K,v_fesL> *,int> p)
+long pfLr_nbdf(pair<FEbase<K,v_fesL> *,int> p)
 {
     if (!p.first->Vh) p.first->Vh= p.first->newVh();
     throwassert( !!p.first->Vh);
     return p.first->Vh->NbOfDF;
 }
-/*template<class K>
- pmeshS pfSr_Th(pair<FEbase<K,v_fesS> *,int> p)
- {
- if (!p.first->Vh) p.first->Vh= p.first->newVh();
- throwassert( !!p.first->Vh);
- return & p.first->Vh->Th;
- }
- */
+template<class K>
+pmeshL pfLr_Th(pair<FEbase<K,v_fesL> *,int> p)
+{
+    if (!p.first->Vh) p.first->Vh= p.first->newVh();
+    throwassert( !!p.first->Vh);
+    return & p.first->Vh->Th;
+}
 
 //3D volume
 long pVh3_ndof(pfes3 * p)
@@ -2973,15 +2971,21 @@ TheOperators->Add("=",
  // 3d surface FE
  Add<pfSr>("n",".",new OneOperator1<long,pfSr>(pfSr_nbdf<R>));
  Add<pfSc>("n",".",new OneOperator1<long,pfSc>(pfSr_nbdf<Complex>));
-    
- //Add<pfSr>("Th",".",new OneOperator1<pmeshS ,pfSr>(pfSr_Th<R>));
- //Add<pfSc>("Th",".",new OneOperator1<pmeshS,pfSc>(pfSr_Th<Complex>));
-    
+ Add<pfSr>("Th",".",new OneOperator1<pmeshS ,pfSr>(pfSr_Th<R>));
+ Add<pfSc>("Th",".",new OneOperator1<pmeshS,pfSc>(pfSr_Th<Complex>));
  Add<pfesS*>("ndof",".",new OneOperator1<long,pfesS*>(pVhS_ndof));
  Add<pfesS*>("nt",".",new OneOperator1<long,pfesS*>(pVhS_nt));
  Add<pfesS*>("ndofK",".",new OneOperator1<long,pfesS*>(pVhS_ndofK));
 // Add<pfesS*>("Th",".",new OneOperator1<pmesh3,pfesS*>(pVhS_Th));
  
+// 3d surface FE
+Add<pfLr>("n",".",new OneOperator1<long,pfLr>(pfLr_nbdf<R>));
+Add<pfLc>("n",".",new OneOperator1<long,pfLc>(pfLr_nbdf<Complex>));
+Add<pfLr>("Th",".",new OneOperator1<pmeshL ,pfLr>(pfLr_Th<R>));
+Add<pfLc>("Th",".",new OneOperator1<pmeshL,pfLc>(pfLr_Th<Complex>));
+Add<pfesS*>("ndof",".",new OneOperator1<long,pfesL*>(pVhL_ndof));
+Add<pfesS*>("nt",".",new OneOperator1<long,pfesL*>(pVhL_nt));
+Add<pfesS*>("ndofK",".",new OneOperator1<long,pfesL*>(pVhL_ndofK));
     
     
  //Add<pf3rbasearray*>("[","",new OneOperator2_<pf3rbase*,pf3rbasearray*,long>(get_element));
