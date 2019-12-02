@@ -2002,159 +2002,336 @@ class listMeshS {
   }
 };
 
+class listMeshL {
+public:
+    list< const MeshL * > *lth;
+    void init( ) { lth = new list< const MeshL * >; }
+    
+    void destroy( ) { delete lth; }
+    
+    listMeshL(Stack s, const MeshL *th) : lth(Add2StackOfPtr2Free(s, new list< const MeshL * >)) {
+        lth->push_back(th);
+    }
+    
+    listMeshL(Stack s, const MeshL *tha, const MeshL *thb)
+    : lth(Add2StackOfPtr2Free(s, new list< const MeshL * >)) {
+        lth->push_back(tha);
+        lth->push_back(thb);
+    }
+    
+    listMeshL(Stack s, const listMeshL &l, const MeshL *th)
+    : lth(Add2StackOfPtr2Free(s, new list< const MeshL * >(*l.lth))) {
+        lth->push_back(th);
+    }
+};
+
+
+
 MeshS *GluMeshS(listMeshS const &lst) {
-  int nbv = 0;
-  int nbt = 0;
-  int nbe = 0;
-  int nbvx = 0;
-  int nbtx = 0;
-  int nbex = 0;
-
-  double hmin = 1e100;
-  R3 Pn(1e100, 1e100, 1e100), Px(-1e100, -1e100, -1e100);
-  const list< MeshS const * > lth(*lst.lth);
-  const MeshS *th0 = 0;
-  int kk = 0;
-
-  for (list< MeshS const * >::const_iterator i = lth.begin( ); i != lth.end( ); ++i) {
-    if (!*i) continue;
-    ++kk;
-    const MeshS &Th(**i);
-    th0 = &Th;
-    if (verbosity > 1)
-      cout << " GluMeshS + "
-           << "nv: " << Th.nv << " nt: " << Th.nt << " nbe: " << Th.nbe << endl;
-    nbtx += Th.nt;
-    nbvx += Th.nv;
-    nbex += Th.nbe;
-
-    for (int k = 0; k < Th.nt; k++)
-      for (int e = 0; e < 3; e++) hmin = min(hmin, Th[k].lenEdge(e));
-
-    for (int i = 0; i < Th.nv; i++) {
-      R3 P(Th(i));
-      Pn = Minc(P, Pn);
-      Px = Maxc(P, Px);
+    typedef typename MeshS::Element T;
+    typedef typename MeshS::BorderElement B;
+    typedef typename MeshS::Vertex V;
+    typedef typename MeshS::Element::RdHat TRdHat;
+    typedef typename MeshS::BorderElement::RdHat BRdHat;
+    
+    int nbv = 0, nbt = 0, nbe = 0, nbvx = 0, nbtx = 0, nbex = 0;
+    
+    double hmin = 1e100;
+    R3 Pn(1e100, 1e100, 1e100), Px(-1e100, -1e100, -1e100);
+    const list< MeshS const * > lth(*lst.lth);
+    const MeshS *th0 = 0;
+    int kk = 0;
+    
+    for (typename list< MeshS const * >::const_iterator i = lth.begin( ); i != lth.end( ); ++i) {
+        if (!*i) continue;
+        ++kk;
+        const MeshS &Th(**i);
+        th0 = &Th;
+        if (verbosity > 1)
+            cout << " GluMesh + "<< "nv: " << Th.nv << " nt: " << Th.nt << " nbe: " << Th.nbe << endl;
+        nbtx += Th.nt;
+        nbvx += Th.nv;
+        nbex += Th.nbe;
+        
+        for (int k = 0; k < Th.nt; k++)
+            for (int e = 0; e < 3; e++)
+                hmin = min(hmin, Th[k].lenEdge(e));
+        
+        for (int i = 0; i < Th.nv; i++) {
+            R3 P(Th(i));
+            Pn = Minc(P, Pn);
+            Px = Maxc(P, Px);
+        }
     }
-  }
-
-  if (kk == 0) return 0;    //  no mesh ...
-  if (verbosity > 2)
-    cout << "      - hmin =" << hmin << " ,  Bounding Box: " << Pn << " " << Px << endl;
-
-  Vertex3 *v = new Vertex3[nbvx];
-  TriangleS *t = new TriangleS[nbtx];
-  TriangleS *tt = t;
-  BoundaryEdgeS *b = new BoundaryEdgeS[nbex];
-  BoundaryEdgeS *bb = b;
-
-  ffassert(hmin > Norme2(Pn - Px) / 1e9);
-  double hseuil = hmin / 10.;
-
-  EF23::GTree< Vertex3 > *gtree = new EF23::GTree< Vertex3 >(v, Pn, Px, 0);
-
-  for (list< MeshS const * >::const_iterator i = lth.begin( ); i != lth.end( ); ++i) {
-    if (!*i) continue;    //
-    const MeshS &Th(**i);
-    if (!*i) continue;
-    if (verbosity > 1)
-      cout << " GluMeshS + "
-           << "nv: " << Th.nv << " nt: " << Th.nt << " nbe: " << Th.nbe << endl;
-
-    for (int ii = 0; ii < Th.nv; ii++) {
-      const Vertex3 &vi(Th(ii));
-      Vertex3 *pvi = gtree->ToClose(vi, hseuil);
-      if (!pvi) {
-        v[nbv].x = vi.x;
-        v[nbv].y = vi.y;
-        v[nbv].z = vi.z;
-        v[nbv].lab = vi.lab;
-        gtree->Add(v[nbv++]);
-      }
+    if (kk == 0) return 0;    //  no mesh ...
+    if (verbosity > 2)
+        cout << "      - hmin =" << hmin << " ,  Bounding Box: " << Pn << " " << Px << endl;
+    V *v = new V[nbvx];
+    T *t = new T[nbtx];
+    T *tt = t;
+    B *b = new B[nbex];
+    B *bb = b;
+    ffassert(hmin > Norme2(Pn - Px) / 1e9);
+    double hseuil = hmin / 10.;
+    
+    EF23::GTree< V > *gtree = new EF23::GTree< V >(v, Pn, Px, 0);
+    
+    for (typename list< MeshS const * >::const_iterator i = lth.begin( ); i != lth.end( ); ++i) {
+        if (!*i) continue;    //
+        const MeshS &Th(**i);
+        if (!*i) continue;
+        if (verbosity > 1)
+            cout << " GluMesh + "
+            << "nv: " << Th.nv << " nt: " << Th.nt << " nbe: " << Th.nbe << endl;
+        
+        for (int ii = 0; ii < Th.nv; ii++) {
+            const V &vi(Th(ii));
+            V *pvi = gtree->ToClose(vi, hseuil);
+            if (!pvi) {
+                v[nbv].x = vi.x;
+                v[nbv].y = vi.y;
+                v[nbv].z = vi.z;
+                v[nbv].lab = vi.lab;
+                gtree->Add(v[nbv++]);
+            }
+        }
     }
-  }
-
-  double hseuil_border = hseuil / 3.;
-  // gtree for barycenter of elements
-  Vertex3 *becog1 = new Vertex3[nbtx];
-  EF23::GTree< Vertex3 > *gtree_e = new EF23::GTree< Vertex3 >(becog1, Pn, Px, 0);
-  // gtree for barycenter of border elements
-  Vertex3 *becog2 = new Vertex3[nbex];
-  EF23::GTree< Vertex3 > *gtree_be = new EF23::GTree< Vertex3 >(becog2, Pn, Px, 0);
-
-  for (list< const MeshS * >::const_iterator i = lth.begin( ); i != lth.end( ); i++) {
-    if (!*i) {
-      continue;
-    }
-    const MeshS &ThS(**i);
-
-    if (verbosity > 1) cout << " creation of : BuildGTree for elements" << endl;
-    R2 PtHat1(1. / 3., 1. / 3.);
-    for (int k = 0; k < ThS.nt; k++) {
-      const TriangleS &K(ThS[k]);
-
-      int iv[3];
-      for (int i = 0; i < 3; i++) iv[i] = ThS.operator( )(K[i]);
-      const R3 r3vi(K(PtHat1));
-      const Vertex3 &vi(r3vi);
-      Vertex3 *pvi = gtree_e->ToClose(vi, hseuil_border);
-      if (!pvi) {
-        becog1[nbt].x = vi.x;
-        becog1[nbt].y = vi.y;
-        becog1[nbt].z = vi.z;
-        becog1[nbt].lab = vi.lab;
-        gtree_e->Add(becog1[nbt++]);
-
-        int igluv[3];
-        for (int i = 0; i < 3; i++) igluv[i] = gtree->ToClose(K[i], hseuil) - v;
-        (tt++)->set(v, igluv, K.lab);
-      }
-    }
-
+    
+    double hseuil_border = hseuil / 3.;
+    // gtree for barycenter of elements
+    Vertex3 *becog1 = new V[nbtx];
+    EF23::GTree< V > *gtree_e = new EF23::GTree< V >(becog1, Pn, Px, 0);
+    // gtree for barycenter of border elements
+    V *becog2 = new V[nbex];
+    EF23::GTree< V > *gtree_be = new EF23::GTree< V >(becog2, Pn, Px, 0);
+    
+    for (typename list< const MeshS * >::const_iterator i = lth.begin( ); i != lth.end( ); i++) {
+        if (!*i)
+            continue;
+        const MeshS &Th(**i);
+        
+        if (verbosity > 1)
+            cout << " creation of : BuildGTree for elements" << endl;
+    
+        TRdHat PtHat1 = TRdHat::diag(1. / T::nv);
+        for (int k = 0; k < Th.nt; k++) {
+            const T &K(Th[k]);
+            int iv[T::nv];
+            for (int i = 0; i < T::nv; i++)
+                iv[i] = Th.operator( )(K[i]);
+            const R3 r3vi(K(PtHat1));
+            const V &vi(r3vi);
+            V *pvi = gtree_e->ToClose(vi, hseuil_border);
+            if (!pvi) {
+                becog1[nbt].x = vi.x;
+                becog1[nbt].y = vi.y;
+                becog1[nbt].z = vi.z;
+                becog1[nbt].lab = vi.lab;
+                gtree_e->Add(becog1[nbt++]);
+                
+                int igluv[T::nv];
+                for (int i = 0; i < T::nv; i++)
+                    igluv[i] = gtree->ToClose(K[i], hseuil) - v;
+                (tt++)->set(v, igluv, K.lab);
+            }
+        }
+        
+        if (verbosity > 1)
+            cout << " creation of : BuildGTree for border elements" << endl;
+        BRdHat PtHat2 = BRdHat::diag(1. / B::nv);
+        for (int k = 0; k < Th.nbe; k++) {
+            const B &K(Th.be(k));
+            
+            const R3 r3vi(K(PtHat2));
+            const V &vi(r3vi);
+            V *pvi = gtree_be->ToClose(vi, hseuil_border);
+                if (!pvi) {
+                    becog2[nbe].x = vi.x;
+                    becog2[nbe].y = vi.y;
+                    becog2[nbe].z = vi.z;
+                    becog2[nbe].lab = vi.lab;
+                    gtree_be->Add(becog2[nbe++]);
+                    
+                    int igluv[k];
+                    for (int i = 0; i < k; i++)
+                        igluv[i] = gtree->ToClose(K[i], hseuil) - v;
+                    
+                    (bb++)->set(v, igluv, K.lab);
+                }
+            }
+        }
+    delete gtree_be;
+    delete gtree;
+    delete gtree_e;
+    delete[] becog1;
+    delete[] becog2;
+        
     if (verbosity > 1) {
-      cout << " creation of : BuildGTree for border elements" << endl;
+        cout << "     Nb points : " << nbv << " , nb edges : " << nbe << endl;
+        cout << "     Nb of glu point " << nbvx - nbv;
+        cout << "     Nb of glu  Boundary edge " << nbex - nbe;
     }
-
-    R1 PtHat2(1. / 2.);
-    for (int k = 0; k < ThS.nbe; k++) {
-      const BoundaryEdgeS &K(ThS.be(k));
-
-      int iv[2];
-      for (int i = 0; i < 2; i++) iv[i] = ThS.operator( )(K[i]);
-      const R3 r3vi(K(PtHat2));
-      const Vertex3 &vi(r3vi);
-      Vertex3 *pvi = gtree_be->ToClose(vi, hseuil_border);
-      if (!pvi) {
-        becog2[nbe].x = vi.x;
-        becog2[nbe].y = vi.y;
-        becog2[nbe].z = vi.z;
-        becog2[nbe].lab = vi.lab;
-        gtree_be->Add(becog2[nbe++]);
-
-        int igluv[2];
-        for (int i = 0; i < 2; i++) igluv[i] = gtree->ToClose(K[i], hseuil) - v;
-
-        (bb++)->set(v, igluv, K.lab);
-      }
-    }
-  }
-
-  delete gtree;
-  delete gtree_e;
-  delete gtree_be;
-  delete[] becog1;
-  delete[] becog2;
-
-  if (verbosity > 1) {
-    cout << "     Nb points : " << nbv << " , nb edges : " << nbe << endl;
-    cout << "     Nb of glu point " << nbvx - nbv;
-    cout << "     Nb of glu  Boundary edge " << nbex - nbe;
-  }
-
-  MeshS *m = new MeshS(nbv, nbt, nbe, v, t, b);
-  m->BuildGTree( );
-  return m;
+        
+    MeshS *m = new MeshS(nbv, nbt, nbe, v, t, b);
+    m->BuildGTree( );
+    return m;
+    
 }
+    
+
+
+MeshL *GluMeshL(listMeshL const &lst) {
+    typedef typename MeshL::Element T;
+    typedef typename MeshL::BorderElement B;
+    typedef typename MeshL::Vertex V;
+    typedef typename MeshL::Element::RdHat TRdHat;
+    typedef typename MeshL::BorderElement::RdHat BRdHat;
+    
+    int nbv = 0, nbt = 0, nbe = 0, nbvx = 0, nbtx = 0, nbex = 0;
+    
+    double hmin = 1e100;
+    R3 Pn(1e100, 1e100, 1e100), Px(-1e100, -1e100, -1e100);
+    const list< MeshL const * > lth(*lst.lth);
+    const MeshL *th0 = 0;
+    int kk = 0;
+    
+    for (typename list< MeshL const * >::const_iterator i = lth.begin( ); i != lth.end( ); ++i) {
+        if (!*i) continue;
+        ++kk;
+        const MeshL &Th(**i);
+        th0 = &Th;
+        if (verbosity > 1)
+            cout << " GluMesh + "<< "nv: " << Th.nv << " nt: " << Th.nt << " nbe: " << Th.nbe << endl;
+        nbtx += Th.nt;
+        nbvx += Th.nv;
+        nbex += Th.nbe;
+        
+        for (int k = 0; k < Th.nt; k++)
+                hmin = min(hmin, Th[k].mesure());
+        
+        for (int i = 0; i < Th.nv; i++) {
+            R3 P(Th(i));
+            Pn = Minc(P, Pn);
+            Px = Maxc(P, Px);
+        }
+    }
+    
+    if (kk == 0) return 0;    //  no mesh ...
+    if (verbosity > 2)
+        cout << "      - hmin =" << hmin << " ,  Bounding Box: " << Pn << " " << Px << endl;
+    
+    V *v = new V[nbvx];
+    T *t = new T[nbtx];
+    T *tt = t;
+    B *b = new B[nbex];
+    B *bb = b;
+    
+    ffassert(hmin > Norme2(Pn - Px) / 1e9);
+    double hseuil = hmin / 10.;
+    
+    EF23::GTree< V > *gtree = new EF23::GTree< V >(v, Pn, Px, 0);
+    
+    for (typename list< MeshL const * >::const_iterator i = lth.begin( ); i != lth.end( ); ++i) {
+        if (!*i) continue;    //
+        const MeshL &Th(**i);
+        if (!*i) continue;
+        if (verbosity > 1)
+            cout << " GluMesh + "
+            << "nv: " << Th.nv << " nt: " << Th.nt << " nbe: " << Th.nbe << endl;
+        
+        for (int ii = 0; ii < Th.nv; ii++) {
+            const V &vi(Th(ii));
+            V *pvi = gtree->ToClose(vi, hseuil);
+            if (!pvi) {
+                v[nbv].x = vi.x;
+                v[nbv].y = vi.y;
+                v[nbv].z = vi.z;
+                v[nbv].lab = vi.lab;
+                gtree->Add(v[nbv++]);
+            }
+        }
+    }
+    
+    double hseuil_border = hseuil / 3.;
+    // gtree for barycenter of elements
+    Vertex3 *becog1 = new V[nbtx];
+    EF23::GTree< V > *gtree_e = new EF23::GTree< V >(becog1, Pn, Px, 0);
+    // gtree for barycenter of border elements
+    V *becog2 = new V[nbex];
+    EF23::GTree< V > *gtree_be = new EF23::GTree< V >(becog2, Pn, Px, 0);
+    
+    for (typename list< const MeshL * >::const_iterator i = lth.begin( ); i != lth.end( ); i++) {
+        if (!*i)
+            continue;
+        
+        const MeshL &Th(**i);
+        
+        if (verbosity > 1)
+            cout << " creation of : BuildGTree for elements" << endl;
+        
+        double kk = T::nv;
+        TRdHat PtHat1 = TRdHat::diag(1. / kk);
+        
+        for (int k = 0; k < Th.nt; k++) {
+            const T &K(Th[k]);
+        
+            const R3 r3vi(K(PtHat1));
+            const V &vi(r3vi);
+            V *pvi = gtree_e->ToClose(vi, hseuil_border);
+            if (!pvi) {
+                becog1[nbt].x = vi.x;
+                becog1[nbt].y = vi.y;
+                becog1[nbt].z = vi.z;
+                becog1[nbt].lab = vi.lab;
+                gtree_e->Add(becog1[nbt++]);
+                
+                int igluv[T::nv];
+                for (int i = 0; i < 2/*T::nv*/; i++)
+                    igluv[i] = gtree->ToClose(K[i], hseuil) - v;
+                (tt++)->set(v, igluv, K.lab);
+            }
+        }
+        
+        if (verbosity > 1)
+            cout << " creation of : BuildGTree for border elements" << endl;
+       
+        cout << "test"  << endl;
+        for (int k = 0; k < Th.nbe; k++) {
+            const B &K(Th.be(k));
+            const V &vi(Th(Th.operator( )(K[0]) ));
+         
+            V *pvi = gtree_be->ToClose(vi, hseuil_border);
+            if (!pvi) {
+                becog2[nbe].x = vi.x;
+                becog2[nbe].y = vi.y;
+                becog2[nbe].z = vi.z;
+                becog2[nbe].lab = vi.lab;
+                gtree_be->Add(becog2[nbe++]);
+                int igluv[B::nv];
+                igluv[0] = gtree->ToClose(K[0], hseuil) - v;
+                (bb++)->set(v, igluv, K.lab);
+            }
+         }
+
+    }
+    delete gtree_be;
+    delete gtree;
+    delete gtree_e;
+    delete[] becog1;
+    delete[] becog2;
+    
+    if (verbosity > 1) {
+        cout << "     Nb points : " << nbv << " , nb edges : " << nbe << endl;
+        cout << "     Nb of glu point " << nbvx - nbv;
+        cout << "     Nb of glu  Boundary edge " << nbex - nbe;
+    }
+    
+    MeshL *m = new MeshL(nbv, nbt, nbe, v, t, b);
+    m->BuildGTree( );
+    return m;
+    
+}
+
 
 template< class RR, class AA = RR, class BB = AA >
 struct Op3_addmeshS : public binary_function< AA, BB, RR > {
@@ -2167,16 +2344,35 @@ struct Op3_setmeshS : public binary_function< AA, BB, RR > {
     ffassert(a);
     const pmeshS p = GluMeshS(b);
 
-    if (!INIT && *a) {
-      // Add2StackOfPtr2FreeRC(stack,*a);
+    if (!INIT && *a)
       (**a).destroy( );
-    }
-
-    // Add2StackOfPtr2FreeRC(stack,p); //  the pointer is use to set variable so no remove.
     *a = p;
     return a;
   }
 };
+
+
+template< class RR, class AA = RR, class BB = AA >
+struct Op3_addmeshL : public binary_function< AA, BB, RR > {
+    static RR f(Stack s, const AA &a, const BB &b) { return RR(s, a, b); }
+};
+
+template< bool INIT, class RR, class AA = RR, class BB = AA >
+struct Op3_setmeshL : public binary_function< AA, BB, RR > {
+    static RR f(Stack stack, const AA &a, const BB &b) {
+        ffassert(a);
+        const pmeshL p = GluMeshL(b);
+        
+        if (!INIT && *a)
+            (**a).destroy( );
+        *a = p;
+        return a;
+    }
+};
+
+
+
+
 
 template< class MMesh >
 void finalize(MMesh *(&Th));
@@ -8462,9 +8658,12 @@ AnyType Line_Op::operator( )(Stack stack) const {
 static void Load_Init( ) {
   Dcl_Type< listMesh3 >( );
   Dcl_Type< listMeshS >( );
+  Dcl_Type< listMeshL >( );
   typedef const Mesh *pmesh;
   typedef const Mesh3 *pmesh3;
   typedef const MeshS *pmeshS;
+  typedef const MeshL *pmeshL;
+
 
   if (verbosity > 1 && mpirank == 0) {
     cout << " load: msh3  " << endl;
@@ -8501,13 +8700,16 @@ static void Load_Init( ) {
   Global.Add("cube", "(", new Cube(1));
 
   // operators for MeshS
-
   TheOperators->Add("+", new OneBinaryOperator_st< Op3_addmeshS< listMeshS, pmeshS, pmeshS > >);
   TheOperators->Add("+", new OneBinaryOperator_st< Op3_addmeshS< listMeshS, listMeshS, pmeshS > >);
-  TheOperators->Add(
-    "=", new OneBinaryOperator_st< Op3_setmeshS< false, pmeshS *, pmeshS *, listMeshS > >);
-  TheOperators->Add(
-    "<-", new OneBinaryOperator_st< Op3_setmeshS< true, pmeshS *, pmeshS *, listMeshS > >);
+  TheOperators->Add("=", new OneBinaryOperator_st< Op3_setmeshS< false, pmeshS *, pmeshS *, listMeshS > >);
+  TheOperators->Add("<-", new OneBinaryOperator_st< Op3_setmeshS< true, pmeshS *, pmeshS *, listMeshS > >);
+  // operators for MeshL
+   
+  TheOperators->Add("+", new OneBinaryOperator_st< Op3_addmeshL< listMeshL, pmeshL, pmeshL > >);
+  TheOperators->Add("+", new OneBinaryOperator_st< Op3_addmeshL< listMeshL, listMeshL, pmeshL > >);
+  TheOperators->Add("=", new OneBinaryOperator_st< Op3_setmeshL< false, pmeshL *, pmeshL *, listMeshL > >);
+  TheOperators->Add("<-", new OneBinaryOperator_st< Op3_setmeshL< true, pmeshL *, pmeshL *, listMeshL > >);
 
   Global.Add("trunc", "(", new Op_trunc_meshS);
   Global.Add("trunc", "(", new Op_trunc_meshL);

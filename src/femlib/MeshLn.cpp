@@ -475,17 +475,17 @@ namespace Fem2D
         
     for (int k=0;k<this->nt;k++) {
         
-        if( this->elements[k].lenEdge(0) < Norme2(Psup-Pinf)/1e9 ) {
+        if( this->elements[k].mesure() < Norme2(Psup-Pinf)/1e9 ) {
             const EdgeL & K(this->elements[k]);
             int iv[2];
             for(int jj=0; jj <2; jj++)
                 iv[jj] = this->operator()(K[jj]);
             if(verbosity>2)
-                cout << "EdgeL: " << k << " lenght "<<  this->elements[k].lenEdge(0) << endl;
+                cout << "EdgeL: " << k << " lenght "<<  this->elements[k].mesure() << endl;
             if(verbosity>2) cout << " A triangleS with a very small edge was created " << endl;
             return 1;
         }
-        hmin=min(hmin,this->elements[k].lenEdge(0));   // calcul de .lenEdge pour un Mesh3
+        hmin=min(hmin,this->elements[k].mesure());   // calcul de .lenEdge pour un Mesh3
           
     }
     ffassert(hmin>Norme2(Psup-Pinf)/1e9);
@@ -648,19 +648,19 @@ namespace Fem2D
         for (int i = 0; i < nt; i++)
             for (int j = 0; j < 2; j++) {
                 int jt = j, it = ElementAdj(i, jt);
-                EdgeL &K(elements[i]), &K_adj(elements[it]);  // current element, adjacence element
+                EdgeL &K(elements[i]);  // current element
                 // True border point -> no adjacence / on domain border
                 if ((it == i || it < 0)) {
                     int iv[1];
                         iv[0] = this->operator () (K [EdgeL::nvedge[0][j]]);
                     if(verbosity>15)
                         cout << " the edge " << iv[0] << " is a boundary " << endl;
-                    int lab = min(K.lab, K_adj.lab);
-                    be(nbeL++).set(vertices,iv,lab);
+                    be(nbeL++).set(vertices,iv,K.lab);
                     
                 }
                 // internal point -- check angular and no manifold
                 else {
+                    EdgeL &K_adj(elements[it]); // adjacence element
                     int iv[1];
                     iv[0] = this->operator () (K [EdgeL::nvedge[0][j]]);
                     SortArray<int, 1> key(iv[0]);

@@ -836,7 +836,6 @@ namespace Fem2D
                 
                 int jt = j, it = ElementAdj(i, jt);
                 TriangleS &K(elements[i]);  // current element
-                TriangleS &K_adj(elements[it]); //adjacence element
                 
                 // True boundary edge -> no adjacence / on domain border
                 if ((it == i || it < 0)) {
@@ -845,14 +844,14 @@ namespace Fem2D
                         iv[ip] = this->operator () (K [TriangleS::nvedge[j][ip]]);
                     if(verbosity>15)
                         cout << " the edge " << iv[0] << " " << iv[1] << " is a boundary " << endl;
-                    int lab = min(K.lab, K_adj.lab);
-                    be(nbeS).set(vertices,iv,lab);
+                    be(nbeS).set(vertices,iv,K.lab);
                     mesb += be(nbeS).mesure();
                     nbeS++;
                     
                 }
                 // internal edge -- check angular and no manifold
                 else {
+                    TriangleS &K_adj(elements[it]); //adjacence element
                     int iv[2];
                     for(int ip=0;ip<2;ip++)
                         iv[ip] = this->operator () (K [TriangleS::nvedge[j][ip]]);
