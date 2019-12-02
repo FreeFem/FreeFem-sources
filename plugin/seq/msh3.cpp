@@ -6643,6 +6643,51 @@ bool AddLayers(MeshS const *const &pTh, KN< double > *const &psupp, long const &
   phi *= (1. / nlayer);
   return true;
 }
+      
+      
+bool AddLayers(MeshL const *const &pTh, KN< double > *const &psupp, long const &nlayer,
+                KN< double > *const &pphi) {
+    ffassert(pTh && psupp && pphi);
+    const int nve = MeshL::Element::nv;
+    const MeshL &Th = *pTh;
+    const int nt = Th.nt;
+    const int nv = Th.nv;
+    
+    KN< double > &supp(*psupp);
+    KN< double > u(nv), s(nt);
+    KN< double > &phi(*pphi);
+    ffassert(supp.N( ) == nt);    // P0
+    ffassert(phi.N( ) == nv);     // P1
+    s = supp;
+    phi = 0.;
+    
+    for (int step = 0; step < nlayer; ++step) {
+        u = 0.;
+        
+        for (int k = 0; k < nt; ++k)
+            for (int i = 0; i < nve; ++i) u[Th(k, i)] += s[k];
+        
+        for (int v = 0; v < nv; ++v) u[v] = u[v] > 0.;
+        
+        phi += u;
+        s = 0.;
+              
+        for (int k = 0; k < nt; ++k)
+            for (int i = 0; i < nve; ++i)
+                s[k] += u[Th(k, i)];
+        
+        for (int k = 0; k < nt; ++k)
+            s[k] = s[k] > 0.;
+        
+        supp += s;
+    }
+          
+    phi *= (1. / nlayer);
+    return true;
+}
+      
+      
+      
 
 Mesh3 *GluMesh3tab(KN< pmesh3 > *const &tab, long const &lab_delete) {
   int flagsurfaceall = 0;
@@ -8470,10 +8515,9 @@ static void Load_Init( ) {
   Global.Add("showborder", "(", new OneOperator1< long, const MeshS * >(ShowBorder));
   Global.Add("getborder", "(", new OneOperator2< long, const MeshS *, KN< long > * >(GetBorder));
 
-  Global.Add(
-    "AddLayers", "(",
-    new OneOperator4_< bool, const MeshS *, KN< double > *, long, KN< double > * >(AddLayers));
-
+  Global.Add("AddLayers", "(", new OneOperator4_< bool, const MeshS *, KN< double > *, long, KN< double > * >(AddLayers));
+  Global.Add("AddLayers", "(", new OneOperator4_< bool, const MeshL *, KN< double > *, long, KN< double > * >(AddLayers));
+    
   Global.Add("square3", "(", new Square);
   Global.Add("square3", "(", new Square(1));
 
@@ -8499,8 +8543,7 @@ static void Load_Init( ) {
   Global.Add("Sline", "(", new Line(1));
 
   Global.Add("buildBdMesh", "(", new BuildMeshLFromMeshS);
-  Global.Add("extract", "(",
-             new ExtractMesh< MeshS, MeshL >);    // take a Mesh3 in arg and return a part of MeshS
+  Global.Add("extract", "(", new ExtractMesh< MeshS, MeshL >);    // take a Mesh3 in arg and return a part of MeshS
 }
 
 // <<msh3_load_init>> static loading: calling Load_Init() from a function which is accessible from
