@@ -7878,7 +7878,7 @@ AnyType Movemesh_Op< MMesh >::operator( )(Stack stack) const {
   KN< long > nrB(arg(2, 6, stack, zzempty));
   double precis_mesh(arg(3, stack, 1e-7));
   long orientation(arg(4, stack, 1L));
-  bool cleanmesh(arg(7, stack, false));
+  bool cleanmesh(arg(7, stack, true));
   bool removeduplicate(arg(8, stack, false));
   bool rebuildboundary(arg(9, stack, false));
 
