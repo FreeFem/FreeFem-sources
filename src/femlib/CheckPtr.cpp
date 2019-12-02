@@ -27,6 +27,8 @@
  */
 #if __APPLE__
 #include <malloc/malloc.h>
+#elif __FreeBSD__
+#include <stdlib.h>
 #else
 #include <malloc.h>
 #endif
