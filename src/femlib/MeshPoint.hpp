@@ -394,7 +394,7 @@ class MeshPointBase { public:
    }
 
 // --------3D surface
-    void set(const R3 &P2,const R2 & P_Hat,const  baseFElementS & K,int ll,const R3 &NN,int iedge, const R3 &NNt=R3(0) )
+    void set(const R3 &P2,const R2 & P_Hat,const  baseFElementS & K,int ll,const R3 &NN,int iedge, const R3 &NNt=R3(0.,0.,0.) )
     {
         P=P2;
         PHat.x=P_Hat.x;
@@ -419,7 +419,7 @@ class MeshPointBase { public:
         d=3;
         dHat=2;
     }
-    void set(const MeshS & aTh,const R3 &P2,const R2 & P_Hat,const TriangleS & aK,int ll,const R3 &NN,int iedge,int VFF=0, const R3 &NNt=R3(0) )
+    void set(const MeshS & aTh,const R3 &P2,const R2 & P_Hat,const TriangleS & aK,int ll,const R3 &NN,int iedge,int VFF=0, const R3 &NNt=R3(0.,0.,0.) )
     {
         P=P2;
         PHat.x=P_Hat.x;
