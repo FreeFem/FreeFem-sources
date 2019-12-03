@@ -365,6 +365,7 @@ public:
     R  fmin,fmax,fminT,fmaxT; // with  bound with previous plot.
     R  vmax2;
     KN<R> Viso,Varrow;
+    int nbN; // intensity for plotting surface normal
     bool bw;
     string * psfile;
     string * cm;

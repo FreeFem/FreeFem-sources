@@ -570,7 +570,7 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & pl
     R z2= plot.z0;
     R coef = plot.coeff;
     bool pNormalT=plot.pNormalT;
-    int ni=plot.Viso.N();
+    int nbN=plot.nbN;
     
     double r=0,g=0,b=0;
     if((debug > 3)) cout<< " OnePlotMeshS::Draw " << plotmesh << " " << plotborder << " " <<  Th.nbBrdElmts() << " " << z1 << " "  << z2 << endl;
@@ -654,8 +654,8 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & pl
        if (debug>5) cout << " plot Normal element at triangles " << pNormalT << endl;
             R h = 8*win->hpixel;
             glLineWidth(0.5);
-            //glBegin(GL_LINES);
-            for (int i=0;i<Th.nt;i++) {
+
+            for (int i=0;i<Th.nt; i = 0 ? i++ : i+=nbN) {
                 const MeshS::Element & K(Th[i]);
                 R3 NN=K.NormalS();
                 NN/=NN.norme(); // unit normal
@@ -2200,7 +2200,7 @@ void ThePlot::DrawHelp(OneWindow *win)
     win->Show("*)  keep/unkeep viewpoint for next plot",i++);
     win->Show("k)  complex data / change view type ",i++);
     win->Show("T)  show normal at element surface (only meshS)",i++);
-
+    win->Show("q) Q) decrease or increase the number of Normal ploted at element surface (only meshS)",i++);
     win->Show("any other key : nothing ",++i);
 }
 
@@ -2321,6 +2321,7 @@ datadim(1), winnum(0), keepPV(0), pNormalT(0)
     add=false;
     keepPV=false;
     pNormalT=false;
+    nbN=1; // arbitrary initialisation
     echelle=1.;
 
     Pmin=R3(+dinfty,+dinfty,+dinfty);
@@ -3447,6 +3448,8 @@ static void Key( unsigned char key, int x, int y )
     if(debug>1) cout << "Key winnum:  " <<win->theplot->winnum << endl;
     int ni=win->theplot->Viso.N();
     int na=win->theplot->Varrow.N();
+    int nbN=win->theplot->nbN;
+    
     win->help= false;
     switch (key)
     {
@@ -3607,6 +3610,16 @@ static void Key( unsigned char key, int x, int y )
         case 'T':
             win->theplot->pNormalT = ! win->theplot->pNormalT  ;
             break;
+        case 'Q':
+        {
+            win->theplot->nbN  /= win->theplot->nbN < 0  ? 0 : 2;
+            break;
+        }
+        case 'q':
+        {
+            win->theplot->nbN  *= win->theplot->nbN < 0  ? 0 : 2;
+            break;
+        }
         default:
             if((debug > 10)) cout << " Key Character " << (int) key << " " << key << endl;
 
