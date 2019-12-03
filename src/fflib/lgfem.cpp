@@ -177,6 +177,7 @@ class LinkToInterpreter {
  public:
   Type_Expr P;
   Type_Expr N;
+  Type_Expr Nt;
   Type_Expr x;
   Type_Expr y;
   Type_Expr z;
@@ -280,8 +281,43 @@ class E_P_Stack_Nz : public E_F0mps {
     throwassert(*((long *)s));
     return SetAny< R * >(&MeshPointStack(s)->N.z);
   }
+    operator aType( ) const { return atype< R * >( ); }
+};
 
-  operator aType( ) const { return atype< R * >( ); }
+class E_P_Stack_Nt : public E_F0mps {
+ public:
+    AnyType operator( )(Stack s) const {
+        throwassert(*((long *)s));
+        return SetAny< R3 * >(&MeshPointStack(s)->Nt);
+    }
+        
+    operator aType( ) const { return atype< R3 * >( ); }
+};
+class E_P_Stack_Ntx : public E_F0mps {
+ public:
+    AnyType operator( )(Stack s) const {
+        throwassert(*((long *)s));
+        return SetAny< R * >(&MeshPointStack(s)->Nt.x);
+    }
+        
+    operator aType( ) const { return atype< R * >( ); }
+};
+class E_P_Stack_Nty : public E_F0mps {
+ public:
+    AnyType operator( )(Stack s) const {
+        throwassert(*((long *)s));
+        return SetAny< R * >(&MeshPointStack(s)->Nt.y);
+    }
+        
+    operator aType( ) const { return atype< R * >( ); }
+};
+class E_P_Stack_Ntz : public E_F0mps {
+ public:
+    AnyType operator( )(Stack s) const {
+        throwassert(*((long *)s));
+        return SetAny< R * >(&MeshPointStack(s)->Nt.z);
+    }
+    operator aType( ) const { return atype< R * >( ); }
 };
 
 class E_P_Stack_Region : public E_F0mps {
@@ -2886,7 +2922,7 @@ LinkToInterpreter::LinkToInterpreter( ) {
   y = make_Type_Expr(atype< R * >( ), new E_P_Stack_Py);
   z = make_Type_Expr(atype< R * >( ), new E_P_Stack_Pz);
   N = make_Type_Expr(atype< R3 * >( ), new E_P_Stack_N);
-
+  Nt = make_Type_Expr(atype< R3 * >( ), new E_P_Stack_Nt);
   region = make_Type_Expr(new E_P_Stack_Region, atype< long * >( ));
   label = make_Type_Expr(new E_P_Stack_Label, atype< long * >( ));
   nu_triangle = make_Type_Expr(atype< long >( ), new E_P_Stack_Nu_Triangle);
@@ -2909,7 +2945,7 @@ LinkToInterpreter::LinkToInterpreter( ) {
   Global.New("nuFace", nu_face);
   Global.New("P", P);
   Global.New("N", N);
-
+  Global.New("Nt", Nt);
   Global.New("lenEdge", lenEdge);
   Global.New("area", area);
   Global.New("volume", volume);

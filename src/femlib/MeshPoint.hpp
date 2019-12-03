@@ -41,6 +41,7 @@ class MeshPointBase { public:
   int VF;
   int d;
   int dHat;
+  R3 Nt; //  surface normal
     
   void set(const R2 &P2,const R2 & P_Hat,const  baseFElement & K,int ll,const R2 &NN,int iedge)
    {
@@ -393,7 +394,7 @@ class MeshPointBase { public:
    }
 
 // --------3D surface
-    void set(const R3 &P2,const R2 & P_Hat,const  baseFElementS & K,int ll,const R3 &NN,int iedge)
+    void set(const R3 &P2,const R2 & P_Hat,const  baseFElementS & K,int ll,const R3 &NN,int iedge, const R3 &NNt=R3(0) )
     {
         P=P2;
         PHat.x=P_Hat.x;
@@ -411,11 +412,14 @@ class MeshPointBase { public:
         N.x=NN.x;
         N.y=NN.y;
         N.z=NN.z;
+        Nt.x=NNt.x;
+        Nt.y=NNt.y;
+        Nt.z=NNt.z;
         VF=0;
         d=3;
         dHat=2;
     }
-    void set(const MeshS & aTh,const R3 &P2,const R2 & P_Hat,const TriangleS & aK,int ll,const R3 &NN,int iedge,int VFF=0)
+    void set(const MeshS & aTh,const R3 &P2,const R2 & P_Hat,const TriangleS & aK,int ll,const R3 &NN,int iedge,int VFF=0, const R3 &NNt=R3(0) )
     {
         P=P2;
         PHat.x=P_Hat.x;
@@ -432,6 +436,9 @@ class MeshPointBase { public:
         N.x=NN.x;
         N.y=NN.y;
         N.z=NN.z;
+        Nt.x=NNt.x;
+        Nt.y=NNt.y;
+        Nt.z=NNt.z;
         VF=VFF;
         d=3;
         dHat=2;
