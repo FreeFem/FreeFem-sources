@@ -7330,9 +7330,13 @@ namespace Fem2D {
 
                     R3 E=K.T.Edge(ie);
                     double le = sqrt((E,E));
-                    Rd NN=K.T.NormalS();
+                    // surface normal
+                    Rd NNt=K.T.NormalS();
+                    NNt /= NNt.norme();
+                    // exterior normal (flux)
+                    Rd NN=K.T.N(ie);
                     NN /= NN.norme();
-
+                    
                     for (int i=0;i<ipmat.ncoef;i++)
                         PtonB[ipmat.p[i]] +=  Element::onWhatBorder[ie][K.DFOnWhat(ipmat.dofe[i])] ;
 
@@ -7341,7 +7345,7 @@ namespace Fem2D {
                         if (PtonB[p]) // in on boundary
                         {
                             const RdHat & PtHat(ipmat.P[p]);
-                            mps->set(K.T(PtHat),PtHat,K,r,NN,ie); // la normal bofbof ?
+                            mps->set(K.T(PtHat),PtHat,K,r,NN,ie,NNt); // la normal bofbof ?
                             KN_<R> Vpp(Vp(p,'.'));
                             for (int j=0;j<dim;j++)
                                 if (tabexp[j])

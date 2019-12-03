@@ -412,6 +412,7 @@ class MeshPointBase { public:
         N.x=NN.x;
         N.y=NN.y;
         N.z=NN.z;
+        throwassert( Abs( (NNt,NNt) -1.0) < 1e-5 );
         Nt.x=NNt.x;
         Nt.y=NNt.y;
         Nt.z=NNt.z;
@@ -436,6 +437,7 @@ class MeshPointBase { public:
         N.x=NN.x;
         N.y=NN.y;
         N.z=NN.z;
+        throwassert( Abs( (NNt,NNt) -1.0) < 1e-5 );
         Nt.x=NNt.x;
         Nt.y=NNt.y;
         Nt.z=NNt.z;
