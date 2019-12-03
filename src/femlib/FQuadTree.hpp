@@ -115,6 +115,7 @@ public:
   Vertex *  ToClose(const R2 & ,R ,long,long,bool nearest=false);
   Vertex *  ToClose(const R2 & P,R delta,bool nearest=false){
       long hx = (long) (coef*delta);
+      hx = hx>0 ? hx:1; // bof bof ....
       return ToClose(P,delta,hx,hx,nearest);}
   long SizeOf() const {return sizeof(FQuadTree)+sb->SizeOf();}
 

@@ -194,6 +194,8 @@ namespace EF23 {
     Vertex *  ToClose(const Rd & ,R ,Zd, bool nearest=false );
     Vertex *  ToClose(const Rd & P,R delta,bool nearest=false){
       int hx = (int) (coef*delta);
+       hx = hx>0 ? hx:1; // bof bof ....
+ //      ffassert(hx>0);// bug if too small dec. 2019 FH.
       //if(verbosity > 5 ) cout << "hx=" << hx << " coef=" << coef << endl;
       return ToClose(P,delta,Zd(hx),nearest);}
     int SizeOf() const {return sizeof(GTree)+sb->SizeOf();}
