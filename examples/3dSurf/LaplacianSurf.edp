@@ -79,7 +79,7 @@ cout << "---> norm error l2 for variationnal form " << errVar.l2 << endl;
 real[int] errPb = uPb[] - uSPb[];
 cout << "---> norm error l2 with problem " << errPb.l2;
 
-//plot(uSPb,cmm=" USPd  ",wait=1);
+plot(uSPb,cmm=" USPd  ",wait=1);
 
-meshS Thhhh=square3(2,2);
-plot(Thhhh,cmm=" ThS",wait=1,pNormalT=1);
+//meshS Thhhh=square3(10,10);
+//plot(Thhhh,cmm=" ThS",wait=1,pNormalT=1);

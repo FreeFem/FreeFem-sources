@@ -560,10 +560,7 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 
 }
 
-  //  Plot(*Th,               plot.fill,true,true,/*plot.plotNormalT,*/                   plot,          gllists,oklist);
-
-
-void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, bool pNormalT, ThePlot & plot,GLint gllists,int * lok)    ////Axel
+void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & plot,GLint gllists,int * lok, OneWindow *win)
 {
     glDisable(GL_DEPTH_TEST);
 
@@ -571,8 +568,10 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, bool pNormal
     glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
     R z1= plot.z0;
     R z2= plot.z0;
-
-
+    R coef = plot.coeff;
+    bool pNormalT=plot.pNormalT;
+    int ni=plot.Viso.N();
+    
     double r=0,g=0,b=0;
     if((debug > 3)) cout<< " OnePlotMeshS::Draw " << plotmesh << " " << plotborder << " " <<  Th.nbBrdElmts() << " " << z1 << " "  << z2 << endl;
     // plot.SetColorTable(16) ;
@@ -653,20 +652,37 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, bool pNormal
     }
     if (pNormalT) {
        if (debug>5) cout << " plot Normal element at triangles " << pNormalT << endl;
-     
-            //glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
+            R h = 8*win->hpixel;
             glLineWidth(0.5);
-            glBegin(GL_LINES);
+            //glBegin(GL_LINES);
             for (int i=0;i<Th.nt;i++) {
                 const MeshS::Element & K(Th[i]);
                 R3 NN=K.NormalS();
+                NN/=NN.norme(); // unit normal
+                NN*=coef/10.;
                 R2 PtHat = R2::diag(1. / 3.);
                 R3 A(K(PtHat));
                 NN+=A;
-                glVertex3d(A.x,A.y,A.z);
-                glVertex3d(NN.x,NN.y,NN.z);     // fleche ou cone ???
+                R3 uv(A,NN);
+                double l = Max(sqrt((uv,uv)),1e-20);
+                glBegin(GL_LINES);
+                win->Seg3(A,NN);
+                glEnd();
+                
+                // fleche ou cone / orientation ???
+                R3 nx(1.,0.,0.), ny(0.,1.,0.), nz(0.,0.,1.);
+                R3 dd = uv*(-h/l);
+                R3 dnx = (dd^nx)*0.5, dny = (dd^ny)*0.5, dnz = (dd^nz)*0.5;
+                glLineWidth(1);
+                glBegin(GL_LINES);
+                win->Seg3(NN,NN+dd+dnx);
+                win->Seg3(NN,NN+dd-dnx);
+                win->Seg3(NN,NN+dd+dny);
+                win->Seg3(NN,NN+dd-dny);
+                win->Seg3(NN,NN+dd+dnz);
+                win->Seg3(NN,NN+dd-dnz);
+                glEnd();
             }
-            glEnd();
             glLineWidth(1);
         }
   
@@ -794,7 +810,7 @@ void OnePlotMeshS::Draw(OneWindow *win)
 {
     initlist();
     ThePlot & plot=*win->theplot;
-    Plot(*Th,plot.fill,true,true,plot.pNormalT,plot,gllists,oklist);
+    Plot(*Th,plot.fill,true,true,plot,gllists,oklist,win);
     ShowGlerror("OnePlotMeshS::Draw");
 }
 
@@ -963,7 +979,7 @@ void OnePlotFES::Draw(OneWindow *win)
 }
     ShowGlerror("b mesh  OnePlotFES plot");
     win->unsetLighting();
-    Plot(Th,false,plot.drawmeshes,plot.drawborder,plot.pNormalT,plot,gllists+2,&oklist[2]);
+    Plot(Th,false,plot.drawmeshes,plot.drawborder,plot,gllists+2,&oklist[2],win);
     ShowGlerror("OnePlotFES::Draw");
 }
 
