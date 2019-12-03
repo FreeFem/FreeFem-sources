@@ -7345,7 +7345,7 @@ namespace Fem2D {
                         if (PtonB[p]) // in on boundary
                         {
                             const RdHat & PtHat(ipmat.P[p]);
-                            mps->set(K.T(PtHat),PtHat,K,r,NN,ie,NNt); // la normal bofbof ?
+                            mps->set(K.T(PtHat),PtHat,K,r,NN,NNt,ie); // la normal bofbof ?
                             KN_<R> Vpp(Vp(p,'.'));
                             for (int j=0;j<dim;j++)
                                 if (tabexp[j])

@@ -3417,7 +3417,9 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
             R3 NN = K.N(ie);
             double mes = NN.norme( );
             NN /= mes;
-            mes *= 0.5;                             //  correction 05/01/09 FH
+            mes *= 0.5;
+              
+            //  correction 05/01/09 FH
             for (int npi = 0; npi < FI.n; npi++)    // loop on the integration point
             {
               GQuadraturePoint< R2 > pi(FI[npi]);
@@ -3479,13 +3481,14 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
               if (mes2 * mes < epsmes3) continue;    //  too small
               NN /= mes;
               llevelset += mes;
-
+              R3 NNt=K.NormalS();
+              NNt/=NNt.norme();
               for (int npi = 0; npi < FI.n; npi++)    // loop on the integration point
               {
                 QuadratureFormular1dPoint pi(FI[npi]);
                 double sa = pi.x, sb = 1. - sa;
                 R2 Pt(Q[0] * sa + Q[1] * sb);    //
-                MeshPointStack(stack)->set(Th, K(Pt), Pt, K, -1, NN, -1);
+                MeshPointStack(stack)->set(Th, K(Pt), Pt, K, -1, NN, NNt, -1);
                 r += mes * pi.a * GetAny< R >((*fonc)(stack));
               }
             }
@@ -3530,7 +3533,8 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
         for (int t = 0; t < Th.nt; ++t) {
           if (all || setoflab.find(Th[t].lab) != setoflab.end( )) {
             const TriangleS &K(Th[t]);
-
+            R3 NNt=K.NormalS();
+            NNt/=NNt.norme();
             double umx = -HUGE_VAL, umn = HUGE_VAL;
             for (int i = 0; i < 3; ++i) {
               int j = Th(t, i);
@@ -3567,7 +3571,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
             // just order 1  here ???
             for (int npi = 0; npi < FI.n; npi++) {
               QuadraturePoint pi(FI[npi]);
-              MeshPointStack(stack)->set(Th, K(pi), pi, K, K.lab);
+              MeshPointStack(stack)->set(Th, K(pi), pi, K, NNt, K.lab);
               r += area * pi.a * GetAny< R >((*fonc)(stack));
             }
           }
@@ -3577,10 +3581,12 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
       } else
         for (int i = 0; i < Th.nt; i++) {
           const TriangleS &K(Th[i]);
+          R3 NNt=K.NormalS();
+          NNt/=NNt.norme();
           if (all || setoflab.find(Th[i].lab) != setoflab.end( ))
             for (int npi = 0; npi < FI.n; npi++) {
               QuadraturePoint pi(FI[npi]);
-              MeshPointStack(stack)->set(Th, K(pi), pi, K, K.lab);
+              MeshPointStack(stack)->set(Th, K(pi), pi, K, NNt, K.lab);
               r += K.mesure( ) * pi.a * GetAny< R >((*fonc)(stack));
             }
           wsptr2free->clean(swsptr2free);    // ADD FH 11/2017
