@@ -10,11 +10,15 @@ fespace Vh(Th, P1);
 Vh u, v;
 verbosity = 0;
 varf lap(u,v) = int2d(Th)(dx(u)*dx(v) + dy(u)*dy(v)) + int2d(Th)(v) + on(1, u = 1);
+varf lapc(u,v) = int2d(Th)((1+1i)*dx(u)*dx(v) + dy(u)*dy(v)) + int2d(Th)((1+2i)*v) + on(1, u = 1+3i);
 real[int] b = lap(0, Vh);
 verbosity = 4;
 matrix A = lap(Vh, Vh,solver = "PARDISO",sym=0);
+matrix<complex>  C= lapc(Vh, Vh,solver = "PARDISO",sym=0);
 matrix B = A;// Warning no solver set in this case => set solver ..
+matrix Bspd = A;// Warning no solver set in this case => set solver ..
 set(B, solver = "PARDISO",sym=1);// Warning this sym the matrix 
+set(Bspd, solver = "PARDISO",sym=1,positive=1);// Warning this sym the matrix 
 
 
 
@@ -27,3 +31,10 @@ plot(Th, x, wait = 1, dim = 3, fill = 1, cmm = "sparsesolver unsymmetric", value
 
 x[] = B^-1 * b;
 plot(Th, x, wait = 1, dim = 3, fill = 1, cmm = "sparsesolver symmetric", value = 1);
+x[] = Bspd^-1 * b;
+plot(Th, x, wait = 1, dim = 3, fill = 1, cmm = "sparsesolver  spd", value = 1);
+Vh<complex>  c;
+complex[int] bc=lapc(0,Vh); 
+c[]= C^-1*bc;
+plot(Th, c, wait = 1, dim = 3, fill = 1, cmm = "sparsesolver  complex spd", value = 1);
+
