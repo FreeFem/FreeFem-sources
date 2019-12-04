@@ -42,17 +42,19 @@ extern void omp_set_num_threads(int);
 
 template< typename RR >
 struct PARDISO_STRUC_TRAIT {
-  typedef void R;
-  static const int unSYM = 0;
-  static const int SYM = 0;
-  static const char * name(){return "";}
+    typedef void R;
+    static const int unSYM = 0;
+    static const int SYM = 0;
+    static const int SPD = 0;//
+    static const char * name(){return "";}
 };
 template<>
 struct PARDISO_STRUC_TRAIT< double > {
-  typedef double R;
-  static const int unSYM = 11;
+    typedef double R;
+    static const int unSYM = 11;
     static const int SYM = -2;// Real symmetric matrix undef  (2: def ...)
-  static const char * name(){return "double";}
+    static const int SPD = 2;//
+    static const char * name(){return "double";}
     
     
 };
@@ -61,6 +63,8 @@ struct PARDISO_STRUC_TRAIT< Complex > {
   typedef Complex R;
   static const int unSYM = 13;
   static const int SYM = -4;// Complex and Hermitian indefinite
+    static const int SPD = 4;//
+
   static const char * name(){return "complex";}
 };
 
@@ -133,6 +137,9 @@ class SolverPardiso : public VirtualSolver< int, R > {
     msglvl = verb > 4; /* Print statistical information in file */
     error = 0;         //(const MatriceMorse<R> &A, KN<long> &param_int, KN<double> &param_double) {
     if (ptA->half)
+       if ( ds.positive)
+           mtype = PARDISO_STRUC_TRAIT< R >::SPD; /* Real symmetric matrix undef*/
+       else
         mtype = PARDISO_STRUC_TRAIT< R >::SYM; /* Real symmetric matrix undef*/
     else
         mtype = PARDISO_STRUC_TRAIT< R >::unSYM;    // Real 11/ complex  13 CSR
