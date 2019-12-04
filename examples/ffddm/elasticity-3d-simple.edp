@@ -40,7 +40,7 @@ ffddmbuild(E,ThGlobal,real,def,init,Pk,mpiCommWorld)
 
 //macro Ewithhpddm()1//
 
-macro Edefplot(u)u//
+macro Edefmplot(u)u//
 
 ffddmsetup(E,E,Varf,null)
 

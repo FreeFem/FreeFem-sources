@@ -117,7 +117,7 @@ macro VarfPb(varfName, meshName, VhName)
 
 plot(hn,wait=1,cmm=" hd ");
 
-macro Rdefplot(u)u//EOM
+macro Rdefmplot(u)u//EOM
 
 //macro Rwithhpddmkrylov()1//EOM
 
