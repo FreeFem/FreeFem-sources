@@ -20,39 +20,41 @@
 // AUTHORS : Pierre Jolivet
 // E-MAIL  : pierre.jolivet@enseeiht.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include "ff++.hpp"
 /*
 template<class T>
-long symmetrizeCSR (Matrice_Creuse<T> *const &sparse_mat) 
+long symmetrizeCSR (Matrice_Creuse<T> *const &sparse_mat)
 {
 
-	typedef HashMatrix<int,T> HMat;
-	if (sparse_mat) {
-		HMat *phm=sparse_mat->pHM() ;
-		if( phm)
-		{
-		int n = phm->n, m = phm->m;
-		int nnzo = phm->nnz; 
-		phm->resize(n,m,0,-1,true);
-		  if (verbosity) {cout << "  symmetrizeCSR remove " << (long) nnzo-(long) phm->nnz   << " them in the matrix " << sparse_mat << endl;}
-		} else if (verbosity) {cout << " empty matrix " << sparse_mat << endl;}
-	}
+        typedef HashMatrix<int,T> HMat;
+        if (sparse_mat) {
+                HMat *phm=sparse_mat->pHM() ;
+                if( phm)
+                {
+                int n = phm->n, m = phm->m;
+                int nnzo = phm->nnz;
+                phm->resize(n,m,0,-1,true);
+                  if (verbosity) {cout << "  symmetrizeCSR remove " << (long) nnzo-(long) phm->nnz
+<< " them in the matrix " << sparse_mat << endl;} } else if (verbosity) {cout << " empty matrix " <<
+sparse_mat << endl;}
+        }
 
-	return 1L;
+        return 1L;
 }
 */
-static void Load_Init () {
- if(mpirank==0)
- cerr << " ++ WARNING Obsolete plugin: symmetrizeCSR  is now in FreeFem++ core " << endl;
-/*
-	Global.Add("symmetrizeCSR", "(", new OneOperator1_<long, Matrice_Creuse<double> *>(symmetrizeCSR<double> ));
-	Global.Add("symmetrizeCSR", "(", new OneOperator1_<long, Matrice_Creuse<std::complex<double> > *>(symmetrizeCSR<std::complex<double> > ));
- */ 
+static void Load_Init( ) {
+  if (mpirank == 0)
+    cerr << " ++ WARNING Obsolete plugin: symmetrizeCSR  is now in FreeFem++ core " << endl;
+  /*
+          Global.Add("symmetrizeCSR", "(", new OneOperator1_<long, Matrice_Creuse<double>
+     *>(symmetrizeCSR<double> )); Global.Add("symmetrizeCSR", "(", new OneOperator1_<long,
+     Matrice_Creuse<std::complex<double> > *>(symmetrizeCSR<std::complex<double> > ));
+   */
 }
 
 LOADFUNC(Load_Init)

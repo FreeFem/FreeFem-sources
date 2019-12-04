@@ -49,13 +49,13 @@
 
 namespace Fem2D {
 
-  static const int  nvfaceTet[4][3]  = { {2,1,3},{0,2,3},{1,0,3},{0,1,2} };
-  static const int  nvedgeTet[6][2] = { {0,1},{0,2},{0,3},{0,1},{1,2},{2,3} };
+//  static const int  nvfaceTet[4][3]  = {{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}}    ;;
+//  static const int  nvedgeTet[6][2] = { {0,1},{0,2},{0,3},{1,2},{1,3},{2,3} };;
 
   static const int  nvfaceTria[1][3]  = { {0,1,2} };
   static const int  nvedgeTria[3][2] = { {1,2},{2,0},{0,1}}; //  tourne de le sens trigo  donc Normal ext   vect(1,0) ^ perp
 
-  static const int   nvfaceSeg[1][3]  = {{-1,-1,1}};
+  //static const int   nvfaceSeg[1][3]  = {{-1,-1,1}};
   static const int  nvedgeSeg[1][2] = { {0,1} };
 
   static const int  nvadjSeg[2][1] = { {0},{1} };
@@ -91,7 +91,7 @@ Mesh2::Mesh2(const char * filename)
   if(ok)
     {
       ifstream f(filename);
-      if(!f) {cerr << "Mesh2::Mesh2 Erreur openning " << filename<<endl;exit(1);}
+      if(!f) {cerr << "Mesh2::Mesh2 Erreur opening " << filename<<endl;exit(1);}
       if(verbosity)
       cout << " Read On file \"" <<filename<<"\""<<  endl;
       f >> nv >> nt >> nbe ;

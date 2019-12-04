@@ -33,301 +33,378 @@ using namespace std;
 
 /*
  *
- * The template class Tab implements arrays of arbitrary length, which does not need to be fixed in advance.
+ * The template class Tab implements arrays of arbitrary length, which does not need to be fixed in
+ * advance.
  *
- * The template class SortedList implements sorted lists of arbitrary length, which does not need to be fixed in advance either.
- * Common usages, such as insersion and deletion, access to minimal and maximal element, have the complexity log(n).
+ * The template class SortedList implements sorted lists of arbitrary length, which does not need to
+ * be fixed in advance either. Common usages, such as insersion and deletion, access to minimal and
+ * maximal element, have the complexity log(n).
  *
- * The template class RBTree implements Balanced Trees using the Red/Black labels approach. It should not be used directly, but only through SortedList.
+ * The template class RBTree implements Balanced Trees using the Red/Black labels approach. It
+ * should not be used directly, but only through SortedList.
  */
 
-template<class TabElement> class Tab;
-template<class TreeLabel> class SortedList;
-template<class TreeLabel> class RBTree;
+template< class TabElement >
+class Tab;
+template< class TreeLabel >
+class SortedList;
+template< class TreeLabel >
+class RBTree;
 
-/****************************** Arrays of arbitrary length : Tab *******************************************/
+/****************************** Arrays of arbitrary length : Tab
+ * *******************************************/
 
-template<class TabElement>
+template< class TabElement >
 class Tab {
-	public:
-		Tab (): cardMax(startCard), growIndex(0), max_accessed_pos(-1) {
-			elements[growIndex++].resize(startCard);
-		};
-		Tab (const Tab<TabElement> &tab): max_accessed_pos(tab.max_accessed_pos) {
-			cout << "Tab constructor Warning : copying Tab of cardinality " << tab.cardMax << "; max accessed pos : " << tab.max_accessed_pos << endl;
-			elements[growIndex++].resize(startCard);
+ public:
+  Tab( ) : cardMax(startCard), growIndex(0), max_accessed_pos(-1) {
+    elements[growIndex++].resize(startCard);
+  };
+  Tab(const Tab< TabElement > &tab) : max_accessed_pos(tab.max_accessed_pos) {
+    cout << "Tab constructor Warning : copying Tab of cardinality " << tab.cardMax
+         << "; max accessed pos : " << tab.max_accessed_pos << endl;
+    elements[growIndex++].resize(startCard);
 
-			for (int i = 0; i < tab.cardMax; i++) {Element(i) = tab[i];}
-		}
+    for (int i = 0; i < tab.cardMax; i++) {
+      Element(i) = tab[i];
+    }
+  }
 
-		TabElement &operator [] (int pos) {	// TabElement & Element(int pos)
-			assert_msg(pos >= 0, "Tab::Element Error : Negative index " << pos);
-			if (pos >= cardMax) {
-				const bool hasGrown = grow();	// contents of an assertion are not executed if NDEBUG
-				assert_msg(hasGrown, "Tab::Element Error : Maximum array size excessed. " << pos);
-				return operator [] (pos);
-			}
+  TabElement &operator[](int pos) {    // TabElement & Element(int pos)
+    assert_msg(pos >= 0, "Tab::Element Error : Negative index " << pos);
+    if (pos >= cardMax) {
+      const bool hasGrown = grow( );    // contents of an assertion are not executed if NDEBUG
+      assert_msg(hasGrown, "Tab::Element Error : Maximum array size excessed. " << pos);
+      return operator[](pos);
+    }
 
-			max_accessed_pos = max(pos, max_accessed_pos);
-			if (pos < startCard) {return elements[0][pos];}
+    max_accessed_pos = max(pos, max_accessed_pos);
+    if (pos < startCard) {
+      return elements[0][pos];
+    }
 
-			int i, pow;
+    int i, pow;
 
-			for (i = growIndex - 1, pow = cardMax / 2; pos < pow; i--, pow /= 2) {}
+    for (i = growIndex - 1, pow = cardMax / 2; pos < pow; i--, pow /= 2) {
+    }
 
-			;
-			// log(cardMax) complexity in worst case. Unit in average thanks to reversed loop
-			return elements[i][pos - pow];
-		};
-		const TabElement &operator [] (int pos) const {
-			assert_msg(pos >= 0, "Tab::Element Error : Negative index " << pos);
-			assert_msg(pos <= max_accessed_pos, "Tab::Element const Error : max_accessed_pos exceeded. " << pos);
-			if (pos < startCard) {return elements[0][pos];}
+    ;
+    // log(cardMax) complexity in worst case. Unit in average thanks to reversed loop
+    return elements[i][pos - pow];
+  };
+  const TabElement &operator[](int pos) const {
+    assert_msg(pos >= 0, "Tab::Element Error : Negative index " << pos);
+    assert_msg(pos <= max_accessed_pos,
+               "Tab::Element const Error : max_accessed_pos exceeded. " << pos);
+    if (pos < startCard) {
+      return elements[0][pos];
+    }
 
-			int i, pow;
+    int i, pow;
 
-			for (i = growIndex - 1, pow = cardMax / 2; pos < pow; i--, pow /= 2) {}
+    for (i = growIndex - 1, pow = cardMax / 2; pos < pow; i--, pow /= 2) {
+    }
 
-			;
-			return elements[i][pos - pow];
-		};
-		void export_content (const char *filename, Format_Math format = Mathematica, bool one_per_line = false) const {
-			ofstream data_out;
+    ;
+    return elements[i][pos - pow];
+  };
+  void export_content(const char *filename, Format_Math format = Mathematica,
+                      bool one_per_line = false) const {
+    ofstream data_out;
 
-			data_out.open(filename);
-			print_array(data_out << format, *this, one_per_line);
-			data_out.close();
-		}
+    data_out.open(filename);
+    print_array(data_out << format, *this, one_per_line);
+    data_out.close( );
+  }
 
-		void sort ();
-		int max_accessed_pos;
-		int card () const {return max_accessed_pos + 1;}
+  void sort( );
+  int max_accessed_pos;
+  int card( ) const { return max_accessed_pos + 1; }
 
-		TabElement*next () {return &operator [] (max_accessed_pos + 1);}
+  TabElement *next( ) { return &operator[](max_accessed_pos + 1); }
 
-		int index (TabElement const *ptr) const {
-			const int j0 = int(ptr - &elements[0][0]);
+  int index(TabElement const *ptr) const {
+    const int j0 = int(ptr - &elements[0][0]);
 
-			if (0 <= j0 && j0 < startCard) {return j0;}
+    if (0 <= j0 && j0 < startCard) {
+      return j0;
+    }
 
-			int i, pow;
+    int i, pow;
 
-			for (i = growIndex - 1, pow = cardMax / 2; i >= 1; i--, pow /= 2) {
-				const int j = int(ptr - &elements[i][0]);
-				if (0 <= j && j < pow) {return pow + j;}
-			}
+    for (i = growIndex - 1, pow = cardMax / 2; i >= 1; i--, pow /= 2) {
+      const int j = int(ptr - &elements[i][0]);
+      if (0 <= j && j < pow) {
+        return pow + j;
+      }
+    }
 
-			cout << "Tab::index error : element does not belong to tab" << endl;
-			return -1;
-		}
+    cout << "Tab::index error : element does not belong to tab" << endl;
+    return -1;
+  }
 
-	private:
-		int cardMax;
-		int growIndex;
-		const static int startCard = 4;
-		const static int growMax = 30;
+ private:
+  int cardMax;
+  int growIndex;
+  const static int startCard = 4;
+  const static int growMax = 30;
 
-		vector<TabElement> elements[growMax];
+  vector< TabElement > elements[growMax];
 
-		bool grow () {
-			if (growIndex == growMax) {return false;}
+  bool grow( ) {
+    if (growIndex == growMax) {
+      return false;
+    }
 
-			elements[growIndex++].resize(cardMax);
-			cardMax *= 2;
-			return true;
-		}
+    elements[growIndex++].resize(cardMax);
+    cardMax *= 2;
+    return true;
+  }
 
-		TabElement&Element (int pos) {return operator [] (pos);}
+  TabElement &Element(int pos) { return operator[](pos); }
 
-		const TabElement&Element (int pos) const {return operator [] (pos);}
+  const TabElement &Element(int pos) const { return operator[](pos); }
 };
 
-template<class TabElement>
-void Tab<TabElement>::sort () {
-	if (max_accessed_pos > 50) {// tri n ln(n).
-		SortedList<TabElement> list;
+template< class TabElement >
+void Tab< TabElement >::sort( ) {
+  if (max_accessed_pos > 50) {    // tri n ln(n).
+    SortedList< TabElement > list;
 
-		for (int i = 0; i <= max_accessed_pos; ++i) {
-			list.insert(Element(i));
-		}
+    for (int i = 0; i <= max_accessed_pos; ++i) {
+      list.insert(Element(i));
+    }
 
-		for (int i = 0; i <= max_accessed_pos; ++i) {
-			Element(i) = list.pop();
-		}
+    for (int i = 0; i <= max_accessed_pos; ++i) {
+      Element(i) = list.pop( );
+    }
 
-		return;
-	}
+    return;
+  }
 
-	TabElement swap;
+  TabElement swap;
 
-	for (int i = 0; i < max_accessed_pos; ++i) {
-		if (operator [] (i + 1) < operator [] (i)) {
-			swap = Element(i + 1);
-			Element(i + 1) = Element(i);
-			int j;
+  for (int i = 0; i < max_accessed_pos; ++i) {
+    if (operator[](i + 1) < operator[](i)) {
+      swap = Element(i + 1);
+      Element(i + 1) = Element(i);
+      int j;
 
-			for (j = i - 1; j >= 0 && Element(j) > swap; --j) {
-				Element(j + 1) = Element(j);
-			}
+      for (j = i - 1; j >= 0 && Element(j) > swap; --j) {
+        Element(j + 1) = Element(j);
+      }
 
-			Element(j + 1) = swap;
-		}
-	}
+      Element(j + 1) = swap;
+    }
+  }
 }
 
-template<class E> void print_array (ostream &f, const Tab<E> &tab, bool one_per_line = false) {
-	const int N = tab.max_accessed_pos + 1;
+template< class E >
+void print_array(ostream &f, const Tab< E > &tab, bool one_per_line = false) {
+  const int N = tab.max_accessed_pos + 1;
 
-	if (one_per_line) {
-		for (int i = 0; i < N; i++) {
-			f << tab[i] << endl;
-		}
-	} else {
-		for (int i = 0; i < N; i++) {
-			f << tab[i] << " ";
-		}
-	}
+  if (one_per_line) {
+    for (int i = 0; i < N; i++) {
+      f << tab[i] << endl;
+    }
+  } else {
+    for (int i = 0; i < N; i++) {
+      f << tab[i] << " ";
+    }
+  }
 }
 
-template<class E> void print_array (ostream_math f, const Tab<E> &tab, bool one_per_line = false) {
-	if (f.format == Mathematica) {
-		const int N = tab.max_accessed_pos + 1;
-		if (N <= 0) {f << "{}"; return;}
+template< class E >
+void print_array(ostream_math f, const Tab< E > &tab, bool one_per_line = false) {
+  if (f.format == Mathematica) {
+    const int N = tab.max_accessed_pos + 1;
+    if (N <= 0) {
+      f << "{}";
+      return;
+    }
 
-		f << "{";
+    f << "{";
 
-		for (int i = 0; i < N; i++) {
-			f << tab[i];
-			if (i < N - 1) {
-				f << ",";
-			}
-		}
+    for (int i = 0; i < N; i++) {
+      f << tab[i];
+      if (i < N - 1) {
+        f << ",";
+      }
+    }
 
-		f << "}";
-	} else {print_array(f.os, tab, one_per_line); return;}
+    f << "}";
+  } else {
+    print_array(f.os, tab, one_per_line);
+    return;
+  }
 }
 
-template<class TabElement> ostream &operator << (ostream &f, const Tab<TabElement> &tab) {print_array(f, tab); return f;}
+template< class TabElement >
+ostream &operator<<(ostream &f, const Tab< TabElement > &tab) {
+  print_array(f, tab);
+  return f;
+}
 
-template<class TabElement> ostream_math operator << (ostream_math f, const Tab<TabElement> &tab) {print_array(f, tab); return f;}
+template< class TabElement >
+ostream_math operator<<(ostream_math f, const Tab< TabElement > &tab) {
+  print_array(f, tab);
+  return f;
+}
 
 // ********************** Reservoir *********************
 // Reservoir of copies of a given object.  References are consistent over time.
-template<class E> class Reservoir {
-	Tab<E> reserve;
-	mutable vector<E *> unused;
+template< class E >
+class Reservoir {
+  Tab< E > reserve;
+  mutable vector< E * > unused;
 
-	public:
-		int card () const {return int(reserve.card() - unused.size());}
+ public:
+  int card( ) const { return int(reserve.card( ) - unused.size( )); }
 
-		E*next () {
-			if (unused.empty()) {
-				return reserve.next();
-			}
+  E *next( ) {
+    if (unused.empty( )) {
+      return reserve.next( );
+    }
 
-			E *e = unused.back();
-			unused.pop_back();
-			return e;
-		}	// bizarre that pop is void
+    E *e = unused.back( );
+    unused.pop_back( );
+    return e;
+  }    // bizarre that pop is void
 
-		bool free (E *e) {
-			if (reserve.index(e) < 0) {
-				return false;
-			}
+  bool free(E *e) {
+    if (reserve.index(e) < 0) {
+      return false;
+    }
 
-			unused.push_back(e);
-			return true;
-		}
+    unused.push_back(e);
+    return true;
+  }
 
-		void enumerate (vector<E *> &elems);
-		void enumerate (vector<const E *> &elems) const;
+  void enumerate(vector< E * > &elems);
+  void enumerate(vector< const E * > &elems) const;
 };
 
-template<class E> void Reservoir<E>::enumerate (vector<E *> &elems) {
-	sort(unused.begin(), unused.end());
-	int u = 0;	// vector<E*>::const_iterator u does not work for some reason
+template< class E >
+void Reservoir< E >::enumerate(vector< E * > &elems) {
+  sort(unused.begin( ), unused.end( ));
+  int u = 0;    // vector<E*>::const_iterator u does not work for some reason
 
-	for (int i = 0; i < reserve.card(); ++i) {
-		E *const e = &reserve[i];
-		if (e == unused[u]) {++u;} else {elems.push_back(e);}
-	}
+  for (int i = 0; i < reserve.card( ); ++i) {
+    E *const e = &reserve[i];
+    if (e == unused[u]) {
+      ++u;
+    } else {
+      elems.push_back(e);
+    }
+  }
 }
 
-template<class E> void Reservoir<E>::enumerate (vector<const E *> &elems) const {
-	sort(unused.begin(), unused.end());
-	int u = 0;	// vector<E*>::const_iterator u does not work for some reason
+template< class E >
+void Reservoir< E >::enumerate(vector< const E * > &elems) const {
+  sort(unused.begin( ), unused.end( ));
+  int u = 0;    // vector<E*>::const_iterator u does not work for some reason
 
-	for (int i = 0; i < reserve.card(); ++i) {
-		const E *const e = &reserve[i];
-		if (u < unused.size() && e == unused[u]) {++u;} else {elems.push_back(e);}
-	}
+  for (int i = 0; i < reserve.card( ); ++i) {
+    const E *const e = &reserve[i];
+    if (u < unused.size( ) && e == unused[u]) {
+      ++u;
+    } else {
+      elems.push_back(e);
+    }
+  }
 }
 
 /************************ Safe Vector (at debug time) *********************/
-// same as standard library's vector, but with additional checks at DEBUG time. Should be zero overhead at non debug time
+// same as standard library's vector, but with additional checks at DEBUG time. Should be zero
+// overhead at non debug time
 
-template<class E> class safe_vector: public vector<E> {
-	public:
-		E &operator [] (size_t n) {assert(0 <= n && n < this->size()); return this->vector<E>::operator [] (n);}
+template< class E >
+class safe_vector : public vector< E > {
+ public:
+  E &operator[](size_t n) {
+    assert(0 <= n && n < this->size( ));
+    return this->vector< E >::operator[](n);
+  }
 
-		const E &operator [] (size_t n) const {assert(0 <= n && n < this->size()); return this->vector<E>::operator [] (n);}
+  const E &operator[](size_t n) const {
+    assert(0 <= n && n < this->size( ));
+    return this->vector< E >::operator[](n);
+  }
 
-		E&front () {assert(0 < this->size()); return this->vector<E>::front();}
+  E &front( ) {
+    assert(0 < this->size( ));
+    return this->vector< E >::front( );
+  }
 
-		const E&front ()              const {assert(0 < this->size()); return this->vector<E>::front();}
+  const E &front( ) const {
+    assert(0 < this->size( ));
+    return this->vector< E >::front( );
+  }
 
-		E&back () {assert(0 < this->size()); return this->vector<E>::back();}
+  E &back( ) {
+    assert(0 < this->size( ));
+    return this->vector< E >::back( );
+  }
 
-		const E&back ()               const {assert(0 < this->size()); return this->vector<E>::back();}
+  const E &back( ) const {
+    assert(0 < this->size( ));
+    return this->vector< E >::back( );
+  }
 };
 
 /************************ Sorted List *********************/
 
 // new implementation : a simple interface with std::set
-template<class E>
+template< class E >
 class SortedList {
-	set<E> s;
+  set< E > s;
 
-	public:
-		int Card () {return int(s.size());}
+ public:
+  int Card( ) { return int(s.size( )); }
 
-		bool contains (E e) {return s.count(e);}
+  bool contains(E e) { return s.count(e); }
 
-		E min () {return *s.begin();}	// empty cases ?
+  E min( ) { return *s.begin( ); }    // empty cases ?
 
-		E max () {return *--s.end();}
+  E max( ) { return *--s.end( ); }
 
-		bool insert (E e) {return s.insert(e).second;}
+  bool insert(E e) { return s.insert(e).second; }
 
-		bool remove (E e) {return s.erase(e);}
+  bool remove(E e) { return s.erase(e); }
 
-		E pop () {E e = min(); remove(e); return e;}
+  E pop( ) {
+    E e = min( );
+    remove(e);
+    return e;
+  }
 
-		void print (ostream &f) {
-			Tab<E> tab;
-			enumerate(tab);
-			f << tab;
-		}
+  void print(ostream &f) {
+    Tab< E > tab;
+    enumerate(tab);
+    f << tab;
+  }
 
-		// int enumerate(Tab<E> &tab){set<E>::const_iterator it; int i; for(it=s.begin(), i=0; it!=s.end(); ++it, ++i){tab[i]=*it;} return i;}
-		// int enumerate(Tab<E> &tab){for(int i=0; i<Card(); ++i){tab[i]=s[i];} return Card();}
-		int enumerate (Tab<E> &tab);
-		void clear () {s.clear();}
+  // int enumerate(Tab<E> &tab){set<E>::const_iterator it; int i; for(it=s.begin(), i=0;
+  // it!=s.end(); ++it, ++i){tab[i]=*it;} return i;} int enumerate(Tab<E> &tab){for(int i=0;
+  // i<Card(); ++i){tab[i]=s[i];} return Card();}
+  int enumerate(Tab< E > &tab);
+  void clear( ) { s.clear( ); }
 };
 
 template<>
-inline int SortedList<RZ>::enumerate (Tab<RZ> &tab) {
-	set<RZ>::const_iterator it;
-	int i;
+inline int SortedList< RZ >::enumerate(Tab< RZ > &tab) {
+  set< RZ >::const_iterator it;
+  int i;
 
-	for (it = s.begin(), i = 0; it != s.end(); ++it, ++i) {
-		tab[i] = *it;
-	}
+  for (it = s.begin( ), i = 0; it != s.end( ); ++it, ++i) {
+    tab[i] = *it;
+  }
 
-	return i;
+  return i;
 }
 
-// old implementation based on personal construction of red black trees. Works fine, but the standard library might be safer and/or faster (?)
+// old implementation based on personal construction of red black trees. Works fine, but the
+// standard library might be safer and/or faster (?)
 /*
  * template <class TreeLabel>
  * class SortedList {
@@ -358,18 +435,15 @@ inline int SortedList<RZ>::enumerate (Tab<RZ> &tab) {
  *      return false;
  *  }
  *  bool remove(TreeLabel m){
- *      if(root.remove(m, pNodes[deleteNode], pNodes[deleteNode+1])){card--; deleteNode = (deleteNode+2)%(2*cardMax); return true;}
- *      return false;
+ *      if(root.remove(m, pNodes[deleteNode], pNodes[deleteNode+1])){card--; deleteNode =
+ * (deleteNode+2)%(2*cardMax); return true;} return false;
  *  }
  *  TreeLabel pop();
  *  void print(ostream& f) const {f << "{ "; root.printInOrder(f); f << "}";}
  *  void printTree(ostream& f) const {f << root;}
- *  int enumerate(Tab<TreeLabel> & tab){int counter=0; root.enumerate(tab, counter); return counter;}
- *  void clear(){while(Card>0) pop();}
- * private:
- *  const static int startCard = 64;
- *  const static int growMax   = 25;
- *  int growIndex;
+ *  int enumerate(Tab<TreeLabel> & tab){int counter=0; root.enumerate(tab, counter); return
+ * counter;} void clear(){while(Card>0) pop();} private: const static int startCard = 64; const
+ * static int growMax   = 25; int growIndex;
  *
  *  RBTree<TreeLabel> root;
  *  RBTree<TreeLabel> * nodes[growMax];
@@ -383,13 +457,11 @@ inline int SortedList<RZ>::enumerate (Tab<RZ> &tab) {
  *  bool grow(){
  *      //lorsque grow est appelé, on doit avoir card==cardMax, et donc newNode == deleteNode
  *      if(growIndex == growMax) return false;
- *      nodes[growIndex] = new RBTree<TreeLabel> [2*cardMax]; //création des nouveaux noeuds. même nombre que tous ceux créés jusque alors
- *      cardMax*=2;
- *      delete pNodes;
- *      pNodes = new RBTree<TreeLabel> * [2*cardMax]; //création des nouveaux pointeurs, autant que de noeuds au total
- *      for(int i=0; i<cardMax; i++) pNodes[i] = nodes[growIndex]+i;
- *      newNode = 0;    deleteNode = cardMax;   growIndex++;
- *      return true;
+ *      nodes[growIndex] = new RBTree<TreeLabel> [2*cardMax]; //création des nouveaux noeuds. même
+ * nombre que tous ceux créés jusque alors cardMax*=2; delete pNodes; pNodes = new RBTree<TreeLabel>
+ * * [2*cardMax]; //création des nouveaux pointeurs, autant que de noeuds au total for(int i=0;
+ * i<cardMax; i++) pNodes[i] = nodes[growIndex]+i; newNode = 0;    deleteNode = cardMax;
+ * growIndex++; return true;
  *  }
  * };
  *
@@ -405,13 +477,14 @@ inline int SortedList<RZ>::enumerate (Tab<RZ> &tab) {
  *
  * template<class TreeLabel> ostream& operator <<(ostream& f, const SortedList<TreeLabel> & list){
  *  list.print(f); return f;}
- * template<class TreeLabel> ostream_math operator <<(ostream_math f, const SortedList<TreeLabel> & list){
- *  if(f.format==Mathematica) {Tab<TreeLabel> tab; list.enumerate(tab); f<<tab;} else f.os << list;
- *  return f;}
+ * template<class TreeLabel> ostream_math operator <<(ostream_math f, const SortedList<TreeLabel> &
+ * list){ if(f.format==Mathematica) {Tab<TreeLabel> tab; list.enumerate(tab); f<<tab;} else f.os <<
+ * list; return f;}
  *
  * // ********************** RBTree *********************
  *
- * // Note : si le besoin s'en fait sentir, il est envisageable de diviser par 2 l'occupation mémoire,
+ * // Note : si le besoin s'en fait sentir, il est envisageable de diviser par 2 l'occupation
+ * mémoire,
  * // en faisant porter un noeud non trivial aux feuilles.
  *
  * enum RBL {Red, Black, Leaf};
@@ -420,7 +493,8 @@ inline int SortedList<RZ>::enumerate (Tab<RZ> &tab) {
  *
  * inline bool APb2bool(APb a){return a!=Absorbed_false;}
  * inline AP APb2AP(APb a){return a==Propagated_true ? Propagated : Absorbed;}
- * inline APb AP_b2APb(AP a, bool b){return a==Propagated ? Propagated_true : (b==true ? Absorbed_true : Absorbed_false);}
+ * inline APb AP_b2APb(AP a, bool b){return a==Propagated ? Propagated_true : (b==true ?
+ * Absorbed_true : Absorbed_false);}
  *
  * template <class TreeLabel> class RBTree {
  * public:
@@ -432,16 +506,11 @@ inline int SortedList<RZ>::enumerate (Tab<RZ> &tab) {
  *  int black_height();
  *  bool check();
  *  bool insert(TreeLabel m,    RBTree<TreeLabel> * leftTree,       RBTree<TreeLabel> * rightTree);
- *  bool remove(TreeLabel m,    RBTree<TreeLabel> * & leftTree,     RBTree<TreeLabel> * & rightTree);
- *  TreeLabel pop(              RBTree<TreeLabel> * & leftTree,     RBTree<TreeLabel> * & rightTree); //renvoie le plus petit élément, et le supprime
- *  void print(ostream& f) const;
- *  void printInOrder(ostream& f) const;
- *  bool isEmpty(){return color==Leaf;}
- *  void enumerate(Tab<TreeLabel> & tab, int & counter);
- *  void reset();
- * private:
- *  friend class SortedList<TreeLabel>;
- *  RBL color;
+ *  bool remove(TreeLabel m,    RBTree<TreeLabel> * & leftTree,     RBTree<TreeLabel> * &
+ * rightTree); TreeLabel pop(              RBTree<TreeLabel> * & leftTree,     RBTree<TreeLabel> * &
+ * rightTree); //renvoie le plus petit élément, et le supprime void print(ostream& f) const; void
+ * printInOrder(ostream& f) const; bool isEmpty(){return color==Leaf;} void enumerate(Tab<TreeLabel>
+ * & tab, int & counter); void reset(); private: friend class SortedList<TreeLabel>; RBL color;
  *  TreeLabel n;
  *  RBTree * left;
  *  RBTree * right;
@@ -481,18 +550,22 @@ inline int SortedList<RZ>::enumerate (Tab<RZ> &tab) {
  * }
  *
  * template <class TreeLabel>
- * bool RBTree<TreeLabel>::contains (TreeLabel m){return n==m || (color != Leaf && (m<n ? left->contains(m) : right->contains(m)) ); }
+ * bool RBTree<TreeLabel>::contains (TreeLabel m){return n==m || (color != Leaf && (m<n ?
+ * left->contains(m) : right->contains(m)) ); }
  *
  * template <class TreeLabel>
  * bool RBTree<TreeLabel>::checkColor(){
- *  return color==Leaf || (left->checkColor() && right->checkColor() && (color != Red || (left->color != Red && right->color != Red)));
+ *  return color==Leaf || (left->checkColor() && right->checkColor() && (color != Red ||
+ * (left->color != Red && right->color != Red)));
  * }
  *
  * template <class TreeLabel>
- * TreeLabel RBTree<TreeLabel>::min()  {return color==Leaf ? ELEMENT_MAX : (left->color==Leaf ? n : left->min() );}
+ * TreeLabel RBTree<TreeLabel>::min()  {return color==Leaf ? ELEMENT_MAX : (left->color==Leaf ? n :
+ * left->min() );}
  *
  * template <class TreeLabel>
- * TreeLabel RBTree<TreeLabel>::max()  {return color==Leaf ? ELEMENT_MIN : (right->color==Leaf ? n : right->max() );}
+ * TreeLabel RBTree<TreeLabel>::max()  {return color==Leaf ? ELEMENT_MIN : (right->color==Leaf ? n :
+ * right->max() );}
  *
  * template <class TreeLabel>
  * int RBTree<TreeLabel>::black_height(){
@@ -501,7 +574,8 @@ inline int SortedList<RZ>::enumerate (Tab<RZ> &tab) {
  *  int rh = right->black_height();
  *  return lh==rh ? (color == Black) + lh : INT_MIN;
  * }
- * // par construction, la hauteur noire à gauche et à droite doivent être égales. En cas de différence, la valeur reçue est négative.
+ * // par construction, la hauteur noire à gauche et à droite doivent être égales. En cas de
+ * différence, la valeur reçue est négative.
  *
  * template <class TreeLabel>
  * bool RBTree<TreeLabel>::check(){return checkColor() && black_height() >= 0;}
@@ -616,28 +690,22 @@ inline int SortedList<RZ>::enumerate (Tab<RZ> &tab) {
  * }
  *
  * template <class TreeLabel>
- * bool RBTree<TreeLabel>::rec_insert(TreeLabel m, RBTree<TreeLabel> * leftTree, RBTree<TreeLabel> * rightTree){
- *  if(color==Leaf){color=Red; n=m; left = leftTree; right = rightTree; return true;}
+ * bool RBTree<TreeLabel>::rec_insert(TreeLabel m, RBTree<TreeLabel> * leftTree, RBTree<TreeLabel> *
+ * rightTree){ if(color==Leaf){color=Red; n=m; left = leftTree; right = rightTree; return true;}
  *  if(n==m) return false;
- *  const bool ans = m < n ? left->rec_insert(m, leftTree, rightTree) : right->rec_insert(m, leftTree, rightTree);
- *  conflict();
- *  return ans;
+ *  const bool ans = m < n ? left->rec_insert(m, leftTree, rightTree) : right->rec_insert(m,
+ * leftTree, rightTree); conflict(); return ans;
  * }
  *
  * template <class TreeLabel>
- * bool RBTree<TreeLabel>::insert(TreeLabel m, RBTree<TreeLabel> * leftTree, RBTree<TreeLabel> * rightTree){
- *  const bool ans = rec_insert(m, leftTree, rightTree);
- *  color = Black;
- *  return ans;
+ * bool RBTree<TreeLabel>::insert(TreeLabel m, RBTree<TreeLabel> * leftTree, RBTree<TreeLabel> *
+ * rightTree){ const bool ans = rec_insert(m, leftTree, rightTree); color = Black; return ans;
  * }
  *
  * template <class TreeLabel>
- * AP RBTree<TreeLabel>::unbalanced_right(){ //branche de droite plus légère que celle de gauche (suite à une délétion)
- *  if(color == Red && left->color == Black){
- *      color = Black;
- *      left->color = Red;
- *      conflict();
- *      return Absorbed;
+ * AP RBTree<TreeLabel>::unbalanced_right(){ //branche de droite plus légère que celle de gauche
+ * (suite à une délétion) if(color == Red && left->color == Black){ color = Black; left->color =
+ * Red; conflict(); return Absorbed;
  *  }
  *  if(color == Black && left->color == Red){
  *      RBTree * OldLeft = left;
@@ -669,9 +737,8 @@ inline int SortedList<RZ>::enumerate (Tab<RZ> &tab) {
  * }
  *
  * template <class TreeLabel>
- * AP RBTree<TreeLabel>::unbalanced_left(){ //branche de gauche plus légère que celle de droite (suite à une délétion)
- *  if(color == Red && right->color == Black){
- *      color = Black;
+ * AP RBTree<TreeLabel>::unbalanced_left(){ //branche de gauche plus légère que celle de droite
+ * (suite à une délétion) if(color == Red && right->color == Black){ color = Black;
  *      right->color=Red;
  *      conflict();
  *      return Absorbed;
@@ -706,13 +773,10 @@ inline int SortedList<RZ>::enumerate (Tab<RZ> &tab) {
  * }
  *
  * template <class TreeLabel>
- * APb RBTree<TreeLabel>::rec_remove(TreeLabel m, RBTree<TreeLabel> * & leftTree, RBTree<TreeLabel> * & rightTree){
- *  if(color == Leaf) return Absorbed_false; //rien ne se passe
- *  if(m<n){
- *      const APb ans = left->rec_remove(m, leftTree, rightTree);
- *      conflict();
- *      if(ans != Propagated_true) return ans;
- *      return AP_b2APb(unbalanced_left(), APb2bool(ans));
+ * APb RBTree<TreeLabel>::rec_remove(TreeLabel m, RBTree<TreeLabel> * & leftTree, RBTree<TreeLabel>
+ * * & rightTree){ if(color == Leaf) return Absorbed_false; //rien ne se passe if(m<n){ const APb
+ * ans = left->rec_remove(m, leftTree, rightTree); conflict(); if(ans != Propagated_true) return
+ * ans; return AP_b2APb(unbalanced_left(), APb2bool(ans));
  *  }
  *  if(m>n){
  *      const APb ans = right->rec_remove(m, leftTree, rightTree);
@@ -745,20 +809,18 @@ inline int SortedList<RZ>::enumerate (Tab<RZ> &tab) {
  *  return Absorbed_true;
  * }
  *
- * template<class TreeLabel> void RBTree<TreeLabel>::reset() {color = Leaf; n=ELEMENT_MIN; left = NULL; right = NULL;}
+ * template<class TreeLabel> void RBTree<TreeLabel>::reset() {color = Leaf; n=ELEMENT_MIN; left =
+ * NULL; right = NULL;}
  *
  * template <class TreeLabel>
- * bool RBTree<TreeLabel>::remove(TreeLabel m, RBTree<TreeLabel> * & leftTree, RBTree<TreeLabel> * & rightTree){
- *  const APb ans = rec_remove(m, leftTree, rightTree);
- *  if(color == Red) color = Black;
+ * bool RBTree<TreeLabel>::remove(TreeLabel m, RBTree<TreeLabel> * & leftTree, RBTree<TreeLabel> * &
+ * rightTree){ const APb ans = rec_remove(m, leftTree, rightTree); if(color == Red) color = Black;
  *  return APb2bool(ans);
  * }
  *
  * template <class TreeLabel>
- * TreeLabel RBTree<TreeLabel>::pop(RBTree<TreeLabel> * & leftTree, RBTree<TreeLabel> * & rightTree){
- *  const TreeLabel m=min();
- *  remove(m, leftTree, rightTree);
- *  return m;
+ * TreeLabel RBTree<TreeLabel>::pop(RBTree<TreeLabel> * & leftTree, RBTree<TreeLabel> * &
+ * rightTree){ const TreeLabel m=min(); remove(m, leftTree, rightTree); return m;
  * }
  *
  * template <class TreeLabel>

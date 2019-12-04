@@ -46,13 +46,13 @@ namespace Fem2D {
   const R2 R2::KHat[3]={R2(0,0),R2(1,0),R2(0,1)};
   const  R3 R3::KHat[4]={R3(0,0,0),R3(1,0,0),R3(0,1,0),R3(0,0,1)};
   
-  static const int  nvfaceTet[4][3]  = { {2,1,3},{0,2,3},{1,0,3},{0,1,2} };
-  static const int  nvedgeTet[6][2] = { {0,1},{0,2},{0,3},{0,1},{1,2},{2,3} };
+ // static const int  nvfaceTet[4][3]  = {{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}}  ;
+ // static const int  nvedgeTet[6][2] = { {0,1},{0,2},{0,3},{1,2},{1,3},{2,3} };
   
-  static const int  nvfaceTria[1][3]  = { {0,1,2} };
-  static const int  nvedgeTria[3][2] = { {1,2},{2,0},{0,1}}; 
+//  static const int  nvfaceTria[1][3]  = { {0,1,2} };
+//  static const int  nvedgeTria[3][2] = { {1,2},{2,0},{0,1}};
   
-  static const int   nvfaceSeg[1][3]  = {{-1,-1,-1}};
+//  static const int   nvfaceSeg[1][3]  = {{-1,-1,-1}};
   static const int  nvedgeSeg[1][2] = { {0,1} };
   static const int  nvadjSeg[2][1] = { {0},{1} };
   
@@ -85,7 +85,7 @@ namespace Fem2D {
     if(ok)
       {
 	ifstream f(filename);
-	if(!f) {cerr << "Mesh1::Mesh1 Erreur openning " << filename<<endl;exit(1);}
+	if(!f) {cerr << "Mesh1::Mesh1 Erreur opening " << filename<<endl;exit(1);}
 	if(verbosity)
 	  cout << " Read On file \"" <<filename<<"\""<<  endl;
 	f >> nv >> nt >> nbe ;

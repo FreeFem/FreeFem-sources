@@ -1,0 +1,94 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"                        // PETSc plugin
+load "mat_edgeP1"
+load "Element_Mixte3d"
+macro dimension()3// EOM            // 2D or 3D
+include "macro_ddm.idp"
+include "cube.idp"
+
+macro defPart(u)u// EOM             // partition of unity definition
+macro initPart(u)u// EOM            // partition of unity initialization
+macro Curl(ux, uy, uz)[dy(uz)-dz(uy), dz(ux)-dx(uz), dx(uy)-dy(ux)]// EOM
+macro CrossN(ux, uy, uz)[uy*N.z-uz*N.y, uz*N.x-ux*N.z, ux*N.y-uy*N.x]// EOM
+func Pk = Edge03d;
+func PkNode = P1;
+func PkPart = Edge03ds0;
+
+int Dirichlet = 1;
+
+meshN Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10));
+int[int] chlab = [1, Dirichlet, 2, Dirichlet, 3, Dirichlet, 4, Dirichlet, 5, Dirichlet, 6, Dirichlet];
+Th = change(Th, refface = chlab);
+
+fespace Wh(Th, Pk);
+
+int[int][int] intersection;  // local-to-neighbors renumbering
+real[int] D;
+int[int][int] intersectionN; // local-to-neighbors renumbering
+real[int] DN;
+{
+    fespace Ph(Th, P0);
+    real[int] part(Ph.ndof);
+    if(mpirank == 0)
+        partitionerSeq(part, Th, mpisize);
+    partitionerPar(part, Th, mpiCommWorld, mpisize);
+    meshN ThBackup = Th;
+    {
+        macro def(i)[i, i#y, i#z]// EOM // vector field definition
+        macro init(i)[i, i, i]// EOM    // vector field initialization
+        meshN ThBorder;
+        buildOverlapEdgeWithPartitioning(Th, ThBorder, part, 10, getARGV("-split", 1), 1, intersection, D, Pk, mpiCommWorld, 0, PkPart, defPart, initPart)
+    }
+    Th = ThBackup;
+    {
+        macro def(i)i// EOM             // vector field definition
+        macro init(i)i// EOM            // vector field initialization
+        buildWithPartitioning(Th, part, getARGV("-split", 1), intersectionN, DN, PkNode, mpiCommWorld)
+    }
+}
+macro def(i)[i, i#y, i#z]// EOM         // vector field definition
+macro init(i)[i, i, i]// EOM            // vector field initialization
+
+matrix Loc;
+real[int] rhs(Wh.ndof);
+{
+    varf vPb([Ex,Ey,Ez],[vx,vy,vz]) =
+        intN(Th)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+        + intN(Th)([vx,vy,vz]'*[Ex,Ey,Ez])
+        + on(Dirichlet, Ex=0, Ey=0, Ez=0);
+    Loc = vPb(Wh, Wh);
+    func f = exp(-2.0*((x-0.5)^2+(y-0.5)^2+(z-0.5)^2));
+    varf vPbRhs([Ex,Ey,Ez],[vx,vy,vz]) =
+        - intN(Th)([vx,vy,vz]'*[0,0,f])
+        + on(Dirichlet, Ex=0,Ey=0,Ez=0);
+    rhs = vPbRhs(0, Wh);
+}
+
+Mat A(Loc, intersection, D);
+{
+    fespace VhNode(Th, PkNode);
+    matrix test = DN;
+    Mat B(test, intersectionN, DN);
+    matrix GLoc;
+    MatrixEdgeP1(GLoc, Th);
+    Mat G(A, B, GLoc);
+    VhNode coord = x;
+    real[int] tmp;
+    changeNumbering(B, coord[], tmp);
+    real[int, int] coordPETSc(3, tmp.n);
+    for(int j = 0; j < 3; ++j) {
+        for[i, ui : tmp] coordPETSc(j, i) = ui;
+        if(j == 0)
+            coord = y;
+        else if(j == 1)
+            coord = z;
+        changeNumbering(B, coord[], tmp);
+    }
+    set(A, sparams = "-pc_type hypre -pc_hypre_type ams -ksp_monitor -ksp_view -ksp_max_it 40", coordinates = coordPETSc, gradient = G);
+}
+
+Wh def(sol);
+sol[] = A^-1 * rhs;
+medit("Global solution", Th, [real(sol), real(soly), real(solz)]);

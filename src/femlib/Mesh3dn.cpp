@@ -143,7 +143,7 @@ namespace Fem2D
    
     // constructor of the class Mesh3
     
-    Mesh3::Mesh3(const string  filename)
+    Mesh3::Mesh3(const string  filename, double ridgeangledetection)
     :meshS(0)
     {
         int ok=load(filename);
@@ -158,7 +158,7 @@ namespace Fem2D
         {
             ifstream f(filename.c_str());
             if(!f) {
-                cerr << "  --  Mesh3::Mesh3 Erreur openning " << filename<<endl;ffassert(0);exit(1);}
+                cerr << "  --  Mesh3::Mesh3 Erreur opening " << filename<<endl;ffassert(0);exit(1);}
             if(verbosity>2)
                 cout << "  -- Mesh3:  Read On file \"" <<filename<<"\""<<  endl;
             if(filename.rfind(".msh")==filename.length()-4)
@@ -183,6 +183,7 @@ namespace Fem2D
                 meshS->BuildjElementConteningVertex();
             }
         }
+        else BuildMeshS(ridgeangledetection);
         if(verbosity>2) {
             cout << "  -- End of read: Mesh3 mesure = " << mes << " border mesure " << mesb << endl;
             if(meshS ) cout << "  -- End of read: MeshS mesure = " << meshS->mes << " border mesure " << meshS->mesb << endl;
@@ -202,7 +203,7 @@ namespace Fem2D
     // Read a mesh with correct the mesh :
     // 1) delete multiple points defined
     // 2) delete points which is not in element or in border element
-    Mesh3::Mesh3(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
+    Mesh3::Mesh3(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh, double ridgeangledetection)
     :meshS(0)
     {
         
@@ -215,7 +216,7 @@ namespace Fem2D
         {
             ifstream f(filename.c_str());
             if(!f) {
-                cerr << "  --  Mesh3::Mesh3 Erreur openning " << filename<<endl;ffassert(0);exit(1);}
+                cerr << "  --  Mesh3::Mesh3 Erreur opening " << filename<<endl;ffassert(0);exit(1);}
             if(verbosity>2)
                 cout << "  -- Mesh3:  Read On file \"" <<filename<<"\""<<  endl;
             if(filename.rfind(".msh")==filename.length()-4)
@@ -234,7 +235,7 @@ namespace Fem2D
                 if (verbosity>3)
                     cout << "build Mesh3::meshS with cleaned mesh3, before clean meshS, meshS:nv: " <<meshS->nv << " meshS:nt:" << meshS->nt << " meshS:nbe:" << meshS->nbe << endl;
             meshS=NULL;
-            BuildMeshS();
+            BuildMeshS(ridgeangledetection);
             if (verbosity>3)
                 cout << "after clean Mesh3::meshS, meshS:nv: " <<meshS->nv << " meshS:nt:" << meshS->nt << " meshS:nbe:" << meshS->nbe << endl;
             }
@@ -249,6 +250,7 @@ namespace Fem2D
                 meshS->BuildjElementConteningVertex();
             }
         }
+        else BuildMeshS(ridgeangledetection);
         
         /*
         if(change){
@@ -806,7 +808,7 @@ namespace Fem2D
         }*/
         if (nTet>0 && nTri>0 && nSeg==0)
             if(verbosity>1)
-                cout << "data file "<< pfile <<  " contains only a Mesh3, possible to create the MeshS associated using the command <Mesh3>.buildSurface(<Mesh3>)." << endl;
+                cout << "data file "<< pfile <<  " contains only a Mesh3, creation the MeshS associated." << endl;
         if (nTet>0 && nTri>0 && nSeg>0)
             if(verbosity>1) cout << "data file "<< pfile <<  " contains a Mesh3 and MeshS" << endl;
         if(verbosity && !nTri && !nTet)
@@ -963,6 +965,12 @@ namespace Fem2D
                 meshS->mesb += meshS->borderelements[i].mesure();
             }
         }
+        else
+            // if not input surface mesh, build it
+            if(verbosity>5) cout << " use Th = buildBdMesh(Th) to build the surface mesh associated" << endl;
+        
+        
+        
         if(verbosity>1 && (meshS) )
             cout << "  -- MeshS(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
             << ", Triangle elts:= " << meshS->nt << ", num vertice:= " << meshS->nv << ", num edges boundaries:= " << meshS->nbe << endl;
@@ -1921,7 +1929,7 @@ namespace Fem2D
         
         if (meshS) {
             cout << "error, Mesh3::meshS previously created " << endl;
-            ffassert(0);
+            return;
         }
         if (verbosity) cout << "Build meshS from mesh3.... " << endl;
         
@@ -1995,7 +2003,6 @@ namespace Fem2D
         // build the edge list
         meshS->BuildEdges(angle);
         meshS->BuildGTree();
-        
         
     }
 

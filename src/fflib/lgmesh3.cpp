@@ -550,13 +550,24 @@ double pmesh_hmin(pmesh3 * p)
     return sqrt(hmin2);}
 
 
-pmeshS pmesh_gamma(Stack stack, pmesh3 * const & p)
+pmeshS pmesh3_gamma(Stack stack, pmesh3 * const & p)
 { throwassert(p && *p) ;
   const Mesh3 & Th = **p;
   const MeshS *ThS = Th.meshS;
-    if(ThS==NULL) cout << "The meshS member is empty! " << endl;
+    if(ThS==NULL) cout << "The meshS member is empty!, use <meshS>=<mesh3>.BuildMeshS()" << endl;
   return (ThS);
 }
+
+pmeshL pmeshS_gamma(Stack stack, pmeshS * const & p)
+{ throwassert(p && *p) ;
+    const MeshS & Th = **p;
+    const MeshL *ThS = Th.meshL;
+    if(ThS==NULL)
+        cout << "The input meshL member is empty, build it " << endl;
+    return (ThS);
+}
+
+
 long pmesh_nadjnomanifold(pmesh3 * p) { ffassert(p) ;  return *p ? ((**p).meshS)->nadjnomanifold : 0;}
 
 long pmesh_nadjnomanifold(pmeshS * p) { ffassert(p) ;  return *p ? (**p).nadjnomanifold : 0;}
@@ -1148,7 +1159,7 @@ AnyType SaveSurfaceMesh3::operator()(Stack stack) const
 
 
 // version 3d of buildmeshborder
-const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bool justboundary,int nbvmax=0,bool Requiredboundary       ,KNM<double> *pintern,double alea)
+const MeshL* BuildMeshCurve3(Stack stack, E_BorderN const * const & b)   //  ,bool justboundary,int nbvmax=0,bool Requiredboundary       ,KNM<double> *pintern,double alea)
 {
     int nbvinter=0;
     double precis_mesh=1.e-7;
@@ -1158,7 +1169,7 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
     MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
     
     int Gnbv=0,Gnbt=0,nbsd=0;    // vertice, edges, nb subdomains
-    for (E_Curve3N const *k=b;k;k=k->next) {
+    for (E_BorderN const *k=b;k;k=k->next) {
         int nbd = k->NbBorder(stack);
         for(int index=0;index<nbd;++index ) {
             long n=Max(1L,Abs(k->Nbseg(stack,index)));
@@ -1179,7 +1190,7 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
 
     //  generation des points et des lignes
     long i=0,n=0;
-    for (E_Curve3N const * k=b;k;k=k->next) {
+    for (E_BorderN const * k=b;k;k=k->next) {
         int nbd = k->NbBorder(stack);
         for(int index=0; index<nbd; ++index ) {
             assert(k->b->xfrom);
@@ -1306,7 +1317,7 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
     
    Th->elements = new EdgeL[Gnbt];
     
-   for (E_Curve3N const * k=b;k;k=k->next) {
+   for (E_BorderN const * k=b;k;k=k->next) {
        int nbd = k->NbBorder(stack);
        for(int index=0; index<nbd; ++index ) {
            double & t = *  k->var(stack);
@@ -1349,92 +1360,6 @@ const MeshL* BuildMeshCurve3(Stack stack, E_Curve3N const * const & b)   //  ,bo
     
     return Th;
 }
-
-
-
-
-
-void E_Curve3N::SavePlot(Stack stack,PlotStream & plot) const
-{
-    
-    MeshPoint & mp (*MeshPointStack(stack)), mps = mp;
-    
-    long nbd1=0;// nb of sub border
-    for (E_Curve3N const * k=this;k;k=k->next) {
-        int nbdr = k->NbBorder(stack);
-        for(int index=0; index<nbdr; ++index )
-            nbd1++;
-    }
-    plot << nbd1;
-    int nbd=0;
-    for (E_Curve3N const * k=this;k;k=k->next) {
-        int nbdr = k->NbBorder(stack);
-        for(int index=0; index<nbdr; ++index ) {
-            nbd++;
-            assert(k->b->xfrom); // a faire
-            double & t = *  k->var(stack);
-            double a(k->from(stack)),b(k->to(stack));
-            long n=Max(Abs(k->Nbseg(stack,index)),1L);
-            long * indx = (k->index(stack));
-            if(indx) *indx = index;
-            else ffassert(index==0);
-            
-            t=a;
-            double delta = (b-a)/n;
-            plot<< (long) n;
-            for (int  nn=0;nn<=n;nn++, t += delta)
-            {
-                if (nn==n) t=b; // to remove roundoff error
-                mp.label = k->label();
-                k->code(stack);
-                plot << (long) mp.label <<mp.P.x << mp.P.y << mp.P.z;
-            }
-            
-        }}
-    assert(nbd==nbd1);
-    if(verbosity>9) cout << "  -- Plot size : " << nbd << " Curve3 \n";
-    mp=mps;
-}
-
-
-void E_Curve3N::BoundingBox(Stack stack,double  &xmin,double & xmax, double & ymin,double & ymax, double & zmin,double & zmax) const
-{
-    MeshPoint & mp (*MeshPointStack(stack)), mps = mp;
-    for (E_Curve3N const * k=this;k;k=k->next)
-    {
-        int nbd = k->NbBorder(stack);
-        for(int index=0; index<nbd; ++index )
-        {
-            assert(k->b->xfrom); // a faire
-            double & t = *  k->var(stack);
-            double a(k->from(stack)),b(k->to(stack));
-            long * indx = (k->index(stack));
-            if(indx) *indx = index;
-            else ffassert(index==0);
-            
-            long n=Max(Abs(k->Nbseg(stack,index)),1L);
-            t=a;
-            double delta = (b-a)/n;
-            for (int  nn=0;nn<=n;nn++, t += delta)
-            {
-                if (nn==n) t=b; // to remove roundoff error
-                mp.label = k->label();
-                k->code(stack); // compute x,y, label
-                xmin=Min(xmin,mp.P.x);
-                xmax=Max(xmax,mp.P.x);
-                ymin=Min(ymin,mp.P.y);
-                ymax=Max(ymax,mp.P.y);
-                zmin=Min(ymin,mp.P.z);
-                zmax=Max(ymax,mp.P.z);
-            }
-        }}
-    mp=mps;
-}
-
-
-
-
-
 
 
 AnyType MoveMesh3::operator()(Stack stack) const 
@@ -2025,31 +1950,29 @@ long pfSr_nbdf(pair<FEbase<K,v_fesS> *,int> p)
     throwassert( !!p.first->Vh);
     return p.first->Vh->NbOfDF;
 }
-/*template<class K>
+template<class K>
 pmeshS pfSr_Th(pair<FEbase<K,v_fesS> *,int> p)
 {
     if (!p.first->Vh) p.first->Vh= p.first->newVh();
     throwassert( !!p.first->Vh);
     return & p.first->Vh->Th;
 }
-*/
 
 // 3D curve
 template<class K>
-long pfSr_nbdf(pair<FEbase<K,v_fesL> *,int> p)
+long pfLr_nbdf(pair<FEbase<K,v_fesL> *,int> p)
 {
     if (!p.first->Vh) p.first->Vh= p.first->newVh();
     throwassert( !!p.first->Vh);
     return p.first->Vh->NbOfDF;
 }
-/*template<class K>
- pmeshS pfSr_Th(pair<FEbase<K,v_fesS> *,int> p)
- {
- if (!p.first->Vh) p.first->Vh= p.first->newVh();
- throwassert( !!p.first->Vh);
- return & p.first->Vh->Th;
- }
- */
+template<class K>
+pmeshL pfLr_Th(pair<FEbase<K,v_fesL> *,int> p)
+{
+    if (!p.first->Vh) p.first->Vh= p.first->newVh();
+    throwassert( !!p.first->Vh);
+    return & p.first->Vh->Th;
+}
 
 //3D volume
 long pVh3_ndof(pfes3 * p)
@@ -2690,7 +2613,7 @@ void init_lgmesh3() {
   Global.Add("savemesh","(",new OneOperatorCode<SaveMeshL>);
   Global.Add("savesurfacemesh","(",new OneOperatorCode<SaveSurfaceMesh3>);
     
-  Global.Add("buildmesh","(",new OneOperator1s_<pmeshL,const E_Curve3N *>(BuildMeshCurve3));
+  Global.Add("buildmeshL","(",new OneOperator1s_<pmeshL,const E_BorderN *>(BuildMeshCurve3));
 
     
   // 3D volume
@@ -2748,8 +2671,10 @@ void init_lgmesh3() {
  Add<pmesh3*>("hmax",".",new OneOperator1<double,pmesh3*>(pmesh_hmax));
  Add<pmesh3*>("hmin",".",new OneOperator1<double,pmesh3*>(pmesh_hmin));
 
- Add<pmesh3*>("Gamma",".",new OneOperator1s_<pmeshS,pmesh3*>(pmesh_gamma));
+ Add<pmesh3*>("Gamma",".",new OneOperator1s_<pmeshS,pmesh3*>(pmesh3_gamma));
  Add<pmesh3*>("nbnomanifold",".",new OneOperator1<long,pmesh3*>(pmesh_nadjnomanifold));
+ 
+ Add<pmeshS*>("Gamma",".",new OneOperator1s_<pmeshL,pmeshS*>(pmeshS_gamma));
     
  //3D surface
  Dcl_Type<GlgVertex<MeshS> >();
@@ -3046,15 +2971,21 @@ TheOperators->Add("=",
  // 3d surface FE
  Add<pfSr>("n",".",new OneOperator1<long,pfSr>(pfSr_nbdf<R>));
  Add<pfSc>("n",".",new OneOperator1<long,pfSc>(pfSr_nbdf<Complex>));
-    
- //Add<pfSr>("Th",".",new OneOperator1<pmeshS ,pfSr>(pfSr_Th<R>));
- //Add<pfSc>("Th",".",new OneOperator1<pmeshS,pfSc>(pfSr_Th<Complex>));
-    
+ Add<pfSr>("Th",".",new OneOperator1<pmeshS ,pfSr>(pfSr_Th<R>));
+ Add<pfSc>("Th",".",new OneOperator1<pmeshS,pfSc>(pfSr_Th<Complex>));
  Add<pfesS*>("ndof",".",new OneOperator1<long,pfesS*>(pVhS_ndof));
  Add<pfesS*>("nt",".",new OneOperator1<long,pfesS*>(pVhS_nt));
  Add<pfesS*>("ndofK",".",new OneOperator1<long,pfesS*>(pVhS_ndofK));
 // Add<pfesS*>("Th",".",new OneOperator1<pmesh3,pfesS*>(pVhS_Th));
  
+// 3d surface FE
+Add<pfLr>("n",".",new OneOperator1<long,pfLr>(pfLr_nbdf<R>));
+Add<pfLc>("n",".",new OneOperator1<long,pfLc>(pfLr_nbdf<Complex>));
+Add<pfLr>("Th",".",new OneOperator1<pmeshL ,pfLr>(pfLr_Th<R>));
+Add<pfLc>("Th",".",new OneOperator1<pmeshL,pfLc>(pfLr_Th<Complex>));
+Add<pfesS*>("ndof",".",new OneOperator1<long,pfesL*>(pVhL_ndof));
+Add<pfesS*>("nt",".",new OneOperator1<long,pfesL*>(pVhL_nt));
+Add<pfesS*>("ndofK",".",new OneOperator1<long,pfesL*>(pVhL_ndofK));
     
     
  //Add<pf3rbasearray*>("[","",new OneOperator2_<pf3rbase*,pf3rbasearray*,long>(get_element));

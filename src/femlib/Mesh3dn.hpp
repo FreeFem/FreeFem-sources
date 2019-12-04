@@ -143,8 +143,8 @@ template<typename Mesh> void GSave2(FILE * ff,const Mesh & Th) ;
 class Mesh3 : public GenericMesh<Tet,Triangle3,Vertex3> { 
 public:
   Mesh3():meshS(0){} 
-  Mesh3(const string);
-  Mesh3(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
+  Mesh3(const string, double ridgeangledetection=8.*atan(1.)/9.);
+  Mesh3(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7, double ridgeangledetection=8.*atan(1.)/9.);
   //Mesh3(const string, const long); // Add J. Morice 11/10
   Mesh3(FILE *f,int offset=0);     
   Mesh3(const Serialize &);
@@ -167,7 +167,7 @@ public:
   Serialize serialize_withBorderMesh() const;
   void BuildMeshS(double angle=8.*atan(1.)/9.);  // default angle = 40 deg
     ~Mesh3() {
-        if (verbosity>4) cout << "destroy mesh3" << this << " " << this->meshS << endl;
+        if (verbosity>4) cout << "destroy mesh3" << this << " destroy meshS " << this->meshS << endl;
         if (meshS)
             meshS->destroy();//  Add clean mesh if necessary ...FH and AF. april 2019
         

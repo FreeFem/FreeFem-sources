@@ -265,11 +265,6 @@ struct OnePlotBorder: public OnePlot {
     void Draw(OneWindow *win);
 };
 
-struct OnePlotCurve3: public OnePlot {
-    vector<vector<pair<long,R3> > > data;
-    OnePlotCurve3(PlotStream & f);
-    void Draw(OneWindow *win);
-};
 
 struct OnePlotHMatrix: public OnePlot
 {
@@ -370,6 +365,7 @@ public:
     R  fmin,fmax,fminT,fmaxT; // with  bound with previous plot.
     R  vmax2;
     KN<R> Viso,Varrow;
+    int nbN; // intensity for plotting surface normal
     bool bw;
     string * psfile;
     string * cm;
@@ -378,7 +374,8 @@ public:
     bool greyo;
     bool drawborder;
     bool drawmeshes;
-    bool add,keepPV;
+    bool add,keepPV,pNormalT;
+    int periodNormalT;
     double echelle;
     double ArrowSize;
     vector<Mesh *> Ths;
@@ -395,6 +392,7 @@ public:
     R ZScale;
     //  for 3d plot jan 2009
     int  plotdim;
+    bool blockwin, plotNormalT;
     R theta, phi, dcoef, focal;
     int datadim;
     // 2D
@@ -481,7 +479,7 @@ public:
     R3 cam;
     bool withlight;
     bool changearrow,changeiso;// to rebuild de graphic list if neccessary
-    bool keepPV,init;
+    bool keepPV,init,pNormalT;
     //double  aspx, aspy, echx,echy,ech,rxmin,rxmax,rymin,rymax;
     OneWindow(int h,int w,ThePlot *p);
     void DefaultView(int state) ;

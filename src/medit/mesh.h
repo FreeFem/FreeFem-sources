@@ -42,80 +42,80 @@ typedef unsigned short uShort;
 #endif
 
 typedef struct spoint {
-	double c[3];
-	int tmp;
-	short ref;
-	uShort mark;
-	char tag, clip, flag;
+  double c[3];
+  int tmp;
+  short ref;
+  uShort mark;
+  char tag, clip, flag;
 } Point;
 typedef Point *pPoint;
 typedef struct striangle {
-	int v[3], nxt;
-	short ref;	/* reference */
-	uShort mark, cpt;
-	char clip;
+  int v[3], nxt;
+  short ref; /* reference */
+  uShort mark, cpt;
+  char clip;
 } Triangle;
 typedef Triangle *pTriangle;
 typedef struct squad {
-	int v[4], nxt;
-	short ref;
-	char clip;
+  int v[4], nxt;
+  short ref;
+  char clip;
 } Quad;
 typedef Quad *pQuad;
 typedef struct edge {
-	int v[2];
-	short ref;
-	char tag;
+  int v[2];
+  short ref;
+  char tag;
 } Edge;
 typedef Edge *pEdge;
 typedef struct stetra {
-	int v[4], nxt, mark;
-	short ref;
-	uShort cpt;
-	char clip;
+  int v[4], nxt, mark;
+  short ref;
+  uShort cpt;
+  char clip;
 } Tetra;
 typedef Tetra *pTetra;
 typedef struct shexa {
-	int v[8], nxt, mark;
-	short ref;
-	uShort cpt;
-	char clip;
+  int v[8], nxt, mark;
+  short ref;
+  uShort cpt;
+  char clip;
 } Hexa;
 typedef Hexa *pHexa;
 typedef struct extra {
-	float *n, *t;
-	int *nv, *nt, *nq, *tv, *te;
-	int iv, it, iq, jv, je;
+  float *n, *t;
+  int *nv, *nt, *nq, *tv, *te;
+  int iv, it, iq, jv, je;
 } Extra;
 typedef Extra *pExtra;
 typedef struct solu {
-	float bb;
-	float *m;
-	int ver, dim;
+  float bb;
+  float *m;
+  int ver, dim;
 } Solution;
 typedef Solution *pSolution;
 
 /* Mesh: mesh data structure */
 typedef struct mesh {
-	double xmin, ymin, zmin, xmax, ymax, zmax;
-	double xtra, ytra, ztra;
-	float bbmin, bbmax;
-	int ne, nt, nq, ntet, nhex;
-	int np, nc, nr, na, nre, nri;
-	int nvn, ntg, dim, ver, nbb, typage, nfield;
-	uShort mark;
-	char name[256], typ;
-	pPoint point;
-	pTriangle tria;
-	pQuad quad;
-	pEdge edge;
-	pTetra tetra;
-	pHexa hexa;
-	int *adja;
-	int *grid;
-	ubyte *voy;
-	pExtra extra;
-	pSolution sol;
+  double xmin, ymin, zmin, xmax, ymax, zmax;
+  double xtra, ytra, ztra;
+  float bbmin, bbmax;
+  int ne, nt, nq, ntet, nhex;
+  int np, nc, nr, na, nre, nri;
+  int nvn, ntg, dim, ver, nbb, typage, nfield;
+  uShort mark;
+  char name[256], typ;
+  pPoint point;
+  pTriangle tria;
+  pQuad quad;
+  pEdge edge;
+  pTetra tetra;
+  pHexa hexa;
+  int *adja;
+  int *grid;
+  ubyte *voy;
+  pExtra extra;
+  pSolution sol;
 } Mesh;
 typedef Mesh *pMesh;
 

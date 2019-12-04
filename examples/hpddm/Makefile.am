@@ -28,30 +28,30 @@ all-local: freefem++.pref
 TESTS_MPI = withPartitioning.edp buildRecursive.edp
 
 TESTS_HPDDM = diffusion-2d.edp \
-	diffusion-2d-mg.edp \
-	diffusion-2d-substructuring.edp \
-	diffusion-2d-substructuring-withPartitioning.edp \
+	diffusion-mg-2d.edp \
+	diffusion-substructuring-2d.edp \
+	diffusion-substructuring-withPartitioning-2d.edp \
 	diffusion-3d.edp \
-	diffusion-3d-simple.edp \
+	diffusion-simple-3d.edp \
 	diffusion-periodic-2d.edp \
 	elasticity-2d.edp \
-	elasticity-2d-substructuring.edp \
+	elasticity-substructuring-2d.edp \
 	elasticity-3d.edp \
-	elasticity-3d-simple.edp \
+	elasticity-simple-3d.edp \
 	elasticity-block.edp \
 	heat-2d.edp \
-	heat-2d-io.edp \
+	heat-io-2d.edp \
 	heat-3d.edp \
 	helmholtz-2d.edp \
-	helmholtz-2d-mg.edp \
+	helmholtz-mg-2d.edp \
 	iterative.edp \
 	maxwell-3d.edp \
 	stokes-2d.edp \
 	stokes-3d.edp \
-	stokes-3d-io.edp \
+	stokes-io-3d.edp \
 	heat-torus-3d-surf.edp
 
-TESTS_HPDDM_PETSC = diffusion-2d-substructuring-PETSc.edp
+TESTS_HPDDM_PETSC = diffusion-substructuring-2d-PETSc.edp
 
 TESTS_PETSC = bratu-2d-PETSc.edp \
 	diffusion-2d-PETSc.edp \
@@ -60,45 +60,50 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	diffusion-periodic-balanced-2d-PETSc.edp \
 	elasticity-2d-PETSc.edp \
 	elasticity-3d-PETSc.edp \
-	elasticity-3d-SNES-PETSc.edp \
+	elasticity-SNES-3d-PETSc.edp \
 	heat-2d-PETSc.edp \
 	laplace-lagrange-PETSc.edp \
-	natural-convection-2d-PETSc-fieldsplit.edp \
+	natural-convection-fieldsplit-2d-PETSc.edp \
 	neo-Hookean-2d-PETSc.edp \
 	Newton-2d-PETSc.edp \
 	Newton-adaptmesh-2d-PETSc.edp \
 	Newton-vi-2d-PETSc.edp \
 	Newton-vi-adaptmesh-2d-PETSc.edp \
-	PETSc-block.edp \
+	block-PETSc.edp \
 	laplace-RT-2d-PETSc.edp \
 	stokes-2d-PETSc.edp \
-	stokes-2d-PETSc-fieldsplit.edp \
-	stokes-2d-block-PETSc.edp \
+	stokes-fieldsplit-2d-PETSc.edp \
+	stokes-block-2d-PETSc.edp \
 	stokes-3d-PETSc.edp \
-	stokes-3d-PETSc-fieldsplit.edp \
+	stokes-fieldsplit-3d-PETSc.edp \
 	transpose-solve-PETSc.edp \
 	vi-2d-PETSc.edp \
-	orego.edp \
-	heat-2d-TS-PETSc.edp \
-	heat-2d-TS-RHS-PETSc.edp \
-	advection-2d-TS-PETSc.edp \
+	orego-Tao-PETSc.edp \
+	heat-TS-2d-PETSc.edp \
+	heat-TS-RHS-2d-PETSc.edp \
+	advection-TS-2d-PETSc.edp \
 	toy-Tao-PETSc.edp \
-	minimal-surface-2d-Tao-PETSc.edp \
-	Schur-complement-PETSc.edp
+	minimal-surface-Tao-2d-PETSc.edp \
+	Schur-complement-PETSc.edp \
+	maxwell-2d-PETSc.edp \
+	maxwell-3d-PETSc.edp \
+	laplace-adapt-3d-PETSc.edp \
+	diffusion-mg-3d-PETSc.edp
 
 TESTS_PETSC_SLEPC = laplace-2d-SLEPc.edp \
-	laplace-2d-spherical-harmonics-SLEPc.edp \
-	laplace-2d-torus-SLEPc.edp \
-	schrodinger-1d-harmonic-oscillator-SLEPc.edp \
-	schrodinger-1d-square-well-SLEPc.edp \
-	schrodinger-2d-axial-well-SLEPc.edp \
-	schrodinger-2d-harmonic-oscillator-SLEPc.edp
+	laplace-spherical-harmonics-2d-SLEPc.edp \
+	laplace-torus-2d-SLEPc.edp \
+	schrodinger-harmonic-oscillator-1d-SLEPc.edp \
+	schrodinger-square-well-1d-SLEPc.edp \
+	schrodinger-axial-well-2d-SLEPc.edp \
+	schrodinger-harmonic-oscillator-2d-SLEPc.edp
 
 
 TESTS_PETSCCOMPLEX = diffusion-2d-PETSc-complex.edp \
-	helmholtz-2d-PETSc.edp
+	helmholtz-2d-PETSc-complex.edp \
+	helmholtz-mg-2d-PETSc-complex.edp
 
-TESTS_PETSCCOMPLEX_SLEPCCOMPLEX = laplace-complex-2d-SLEPc.edp
+TESTS_PETSCCOMPLEX_SLEPCCOMPLEX = laplace-2d-SLEPc-complex.edp
 
 if MPI
 CONDITIONAL_MPI = $(TESTS_MPI)
@@ -153,4 +158,4 @@ freefem++.pref: Makefile
 	echo includepath = \"../../idp/\" >> freefem++.pref
 
 clean-local:
-	rm -rf sol_heat_2d_io* sol_stokes_3d_io*
+	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_*

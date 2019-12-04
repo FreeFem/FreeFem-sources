@@ -119,9 +119,6 @@ AppDir/
 3rdparty/gmm/FAIT
 3rdparty/gmm/cxxflags
 3rdparty/gmm/gmm-.*/
-3rdparty/hypre/FAIT
-3rdparty/hypre/ff-flags
-3rdparty/hypre/hypre-
 3rdparty/include/
 3rdparty/ipopt/Ipopt-3.10.2/
 3rdparty/ipopt/Makefile.inc
@@ -198,6 +195,7 @@ bin/script/PostInstall.sh
 *.log
 *.log.err
 *.vtu
+*.vtk
 *.h5
 *.BB
 *.xmf
@@ -218,7 +216,6 @@ examples/bamg/test/*.mesh
 examples/bamg/test/*.mtr
 examples/chapt3/J.txt
 examples/chapt3/graph.txt
-examples/eigen/.*.eps
 examples/eigen/machinefile
 examples/plugin/ThFF.txt
 examples/plugin/ThFF_Metric.txt
@@ -235,12 +232,10 @@ examples/plugin/machinefile
 examples/plugin/pippo.data
 examples/plugin/pippo.dx
 examples/plugin/tetgenholeregion.edp
-examples/mpi/.*.eps
 examples/mpi/cube.idp
 examples/mpi/machinefile
 examples/other/gmon.out
 examples/other/speedtest.out
-examples/tutorial/.*.eps
 examples/tutorial/.*.ps
 examples/tutorial/A.matrix
 examples/tutorial/f.txt
@@ -252,7 +247,6 @@ examples/tutorial/plot.gp
 examples/tutorial/toto..*
 examples/tutorial/u.txt
 examples/misc/.*.BB
-examples/misc/.*.eps
 examples/misc/.*.points
 examples/misc/err.dat
 examples/misc/machinefile
@@ -317,8 +311,6 @@ src/mpi/sansrgraph.cpp
 *stamp-h1
 *test-driver
 examples/eigen/modes.txt
-examples/plugin/bidule.vtk
-examples/plugin/disque.vtk
 examples/plugin/ffmaster
 examples/plugin/ffmaster.dSYM/
 examples/plugin/toto.dt
@@ -329,7 +321,6 @@ examples/tutorial/toto.dbg
 examples/tutorial/u2.txt
 examples/examples/J.txt
 examples/examples/graph.txt
-examples/ffddm/sol.vtk
 examples/plugin/pipe.png
 *.ppm
 examples/plugin/testsavemedit.solb

@@ -52,7 +52,16 @@ namespace Fem2D
 
 namespace Fem2D
 {
-   
+  static const int  nvfaceSeg[1][3]  = {{-1,-1,1}};
+  static const int  nvedgeSeg[1][2] = { {0,1} };
+  static const int  nvadjSeg[2][1] = { {0},{1} };
+    
+  // geometry element for segment ( boundary elements in surface mesh, Rd=3 RdHat=1 )
+  template<> const int (* const GenericElement<DataSeg3>::nvface)[3] = 0 ;
+  template<> const int (* const GenericElement<DataSeg3>::nvedge)[2] = nvedgeSeg; //nvedgeTria ;
+  template<> const int (* const GenericElement<DataSeg3>::nvadj)[1] = nvadjSeg ;
+    
+    
     
   template<> const int (* const GenericElement<DataPoint3>::nvface)[3] = 0 ;
   template<> const int (* const GenericElement<DataPoint3>::nvedge)[2] = 0 ;
@@ -238,7 +247,7 @@ namespace Fem2D
     if (ok) {
       ifstream f(filename.c_str());
       if(!f) {
-	cerr << "  --  MeshL::MeshL Erreur openning " << filename<<endl;ffassert(0);exit(1);}
+	cerr << "  --  MeshL::MeshL Erreur opening " << filename<<endl;ffassert(0);exit(1);}
       if(verbosity>2)
 	cout << "  -- MeshL:  Read On file \"" <<filename<<"\""<<  endl;
       if(filename.rfind(".msh")==filename.length()-4)
@@ -249,7 +258,7 @@ namespace Fem2D
         
     BuildBound();
     BuildAdj();
-    Buildbnormalv();
+    //Buildbnormalv();
     BuildjElementConteningVertex();
         
         
@@ -389,7 +398,7 @@ namespace Fem2D
   }
     
     
-  MeshL::MeshL(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
+  MeshL::MeshL(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh, double ridgeangledetection)
     :mapSurf2Curv(0),mapCurv2Surf(0)  {
         
         
@@ -401,7 +410,7 @@ namespace Fem2D
     if(ok) {
         ifstream f(filename.c_str());
         if(!f)
-            cerr << "  --  MeshL Erreur openning " << filename<<endl;ffassert(0);exit(1);
+            cerr << "  --  MeshL Erreur opening " << filename<<endl;ffassert(0);exit(1);
         if(verbosity>2)
                 cout << "  -- MeshL:  Read On file \"" <<filename<<"\""<<  endl;
         if(filename.rfind(".msh")==filename.length()-4)
@@ -420,7 +429,7 @@ namespace Fem2D
         
     BuildBound();
     BuildAdj();
-    Buildbnormalv();
+    //Buildbnormalv();
     BuildjElementConteningVertex();
         
     if(verbosity>2)
@@ -466,17 +475,17 @@ namespace Fem2D
         
     for (int k=0;k<this->nt;k++) {
         
-        if( this->elements[k].lenEdge(0) < Norme2(Psup-Pinf)/1e9 ) {
+        if( this->elements[k].mesure() < Norme2(Psup-Pinf)/1e9 ) {
             const EdgeL & K(this->elements[k]);
             int iv[2];
             for(int jj=0; jj <2; jj++)
                 iv[jj] = this->operator()(K[jj]);
             if(verbosity>2)
-                cout << "EdgeL: " << k << " lenght "<<  this->elements[k].lenEdge(0) << endl;
+                cout << "EdgeL: " << k << " lenght "<<  this->elements[k].mesure() << endl;
             if(verbosity>2) cout << " A triangleS with a very small edge was created " << endl;
             return 1;
         }
-        hmin=min(hmin,this->elements[k].lenEdge(0));   // calcul de .lenEdge pour un Mesh3
+        hmin=min(hmin,this->elements[k].mesure());   // calcul de .lenEdge pour un Mesh3
           
     }
     ffassert(hmin>Norme2(Psup-Pinf)/1e9);
@@ -552,7 +561,7 @@ namespace Fem2D
   }
     
     
-  MeshL::MeshL(int nnv, int nnt, int nnbe, Vertex3 *vv, EdgeL *tt, BoundaryPointL *bb, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
+  MeshL::MeshL(int nnv, int nnt, int nnbe, Vertex3 *vv, EdgeL *tt, BoundaryPointL *bb, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh, double ridgeangledetection)
     :mapSurf2Curv(0),mapCurv2Surf(0)
   {
     nv = nnv;
@@ -568,6 +577,7 @@ namespace Fem2D
         mes += this->elements[i].mesure();
     for (int i=0;i<nbe;i++)
         mesb += this->be(i).mesure();
+      
     if (cleanmesh) {
         if(verbosity>3)
             cout << "before clean meshL, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
@@ -577,14 +587,14 @@ namespace Fem2D
     }
     BuildBound();
     BuildAdj();
-    Buildbnormalv();
+    //Buildbnormalv();
     BuildjElementConteningVertex();
         
     if(verbosity>1)
       cout << "  -- End of read meshL: mesure = " << mes << " border mesure " << mesb << endl;
         
     assert(mes>=0.);
-    assert(mesb==nbe);
+    assert(mesb==0.);
   }
    
  
@@ -611,14 +621,102 @@ namespace Fem2D
       int lab=K.lab;
       GmfSetLin(outm,GmfEdges,i0,i1,lab);
     }
-        
+    
+      
+      
+      
     // no boundary points ?
    
     GmfCloseMesh(outm);
     return (0);
   }
 
+  
     
+    // determine the bounder points list for meshL
+    void MeshL::BuildBorderPt(double angle) {
+      
+        
+        delete [] borderelements; // to remove the previous pointers
+        borderelements = new BoundaryPointL[2 * nt]; // 2 * nt upper evaluated
+        
+        HashTable<SortArray<int, 1>, int> pointI(2 * nt, nt);
+        int* AdjLink = new int[2 * nt];
+        
+        int nbeL=0,nbiL=0,nk=0;
+        // Build border points from the edge list
+        for (int i = 0; i < nt; i++)
+            for (int j = 0; j < 2; j++) {
+                int jt = j, it = ElementAdj(i, jt);
+                EdgeL &K(elements[i]);  // current element
+                // True border point -> no adjacence / on domain border
+                if ((it == i || it < 0)) {
+                    int iv[1];
+                        iv[0] = this->operator () (K [EdgeL::nvedge[0][j]]);
+                    if(verbosity>15)
+                        cout << " the edge " << iv[0] << " is a boundary " << endl;
+                    be(nbeL++).set(vertices,iv,K.lab);
+                    
+                }
+                // internal point -- check angular and no manifold
+                else {
+                    EdgeL &K_adj(elements[it]); // adjacence element
+                    int iv[1];
+                    iv[0] = this->operator () (K [EdgeL::nvedge[0][j]]);
+                    SortArray<int, 1> key(iv[0]);
+                    typename HashTable<SortArray<int,1>,int>::iterator p= pointI.find(key);
+                    if (!p) {
+                        //edge element
+                        R3 A(K[0]),B(K[1]);
+                        R3 E(B-A);
+                        E/=E.norme();
+                        // adj edge element
+                        R3 A_adj(K_adj[0]),B_adj(K_adj[1]);
+                        R3 E_adj(B_adj-A_adj);
+                           E_adj/=E_adj.norme();
+                        
+                        R pdt = (E,E_adj); // scalar product
+                        pdt = acos(pdt); // radian angle (Normal,Normal_adj)
+                        if(verbosity>15)
+                            cout << "Element num: " << i << " N " << E << " Element adjacent num: " << it << " E_adj " << E_adj << " angle between N N_adj = " << pdt <<endl;
+                        
+                        if(pdt >= angle) {
+                            if(verbosity>15)
+                                cout << " the edge " <<nbeL <<": [" << iv[0] << " " << iv[1] << "] is a boundary with the angular criteria" << endl;
+                            int lab = min(K.lab, K_adj.lab);                            
+                            be(nbeL).set(vertices,iv,lab);
+                            pointI.add(key, nbeL++);
+                        }
+                    }
+                }
+                nk++;  // increment the total edge jump --- nt * 2
+                
+            }
+        assert(nt*2==nk);
+        delete [] AdjLink;
+        // update the number of border points
+        nbe = nbeL;
+        if (verbosity>5)
+            cout << " Building border point from meshS nbe: "<< nbeL << " nbi: " << nbiL << endl;
+        
+        BuildBound();
+        delete []TheAdjacencesLink;
+        delete [] BoundaryElementHeadLink;
+        TheAdjacencesLink=0;
+        BoundaryElementHeadLink=0;
+        BuildAdj();
+        //Buildbnormalv();
+        BuildjElementConteningVertex();
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    }
     
     
 }

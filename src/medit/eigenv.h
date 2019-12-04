@@ -27,8 +27,8 @@ extern "C" {
 #ifndef _EIGENV_H_
 #define _EIGENV_H_
 
-int eigenv (int symmat, double *mat, double lambda[3], double v[3][3]);
-int eigen2 (double *mm, double *lambda, double vp[2][2]);
+int eigenv(int symmat, double *mat, double lambda[3], double v[3][3]);
+int eigen2(double *mm, double *lambda, double vp[2][2]);
 
 #endif /* _EIGENV_H_ */
 

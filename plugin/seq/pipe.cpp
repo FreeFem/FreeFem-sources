@@ -20,10 +20,10 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 // to compile ff-c++ pipe.cpp
 // warning do not compile under windows...
@@ -35,14 +35,20 @@
 #ifdef _WIN32
 #include <Windows.h>
 
-long ffsleep (long s) {Sleep(s * 1000); return 0;}
+long ffsleep(long s) {
+  Sleep(s * 1000);
+  return 0;
+}
 
-long ffusleep (long s) {Sleep(s / 1000); return 0;}
+long ffusleep(long s) {
+  Sleep(s / 1000);
+  return 0;
+}
 
 #else
-long ffsleep (long s) {return sleep(s);}
+long ffsleep(long s) { return sleep(s); }
 
-long ffusleep (long s) {return usleep(s);}
+long ffusleep(long s) { return usleep(s); }
 
 #endif
 
@@ -51,188 +57,245 @@ long ffusleep (long s) {return usleep(s);}
 #include "pstream.h"
 
 struct pstream {
-	redi::basic_pstream<char> *fb;
-	// stdiofilebuf * fb;
-	ostream *os;
-	istream *is;
-	pstream (redi::basic_pstream<char> *ff, std::ios_base::openmode mode)
-		: fb(ff), os(0), is(0) {
-		if (verbosity > 10) {cout << " mode " << mode << endl;}
+  redi::basic_pstream< char > *fb;
+  // stdiofilebuf * fb;
+  ostream *os;
+  istream *is;
+  pstream(redi::basic_pstream< char > *ff, std::ios_base::openmode mode) : fb(ff), os(0), is(0) {
+    if (verbosity > 10) {
+      cout << " mode " << mode << endl;
+    }
 
-		basic_iostream<char> *bs = fb;	// ->rdbuf();
-		ffassert(bs);
-		if (mode & ios_base::in) {is = dynamic_cast<istream *>(bs); assert(is);}// new istream(fb);
+    basic_iostream< char > *bs = fb;    // ->rdbuf();
+    ffassert(bs);
+    if (mode & ios_base::in) {
+      is = dynamic_cast< istream * >(bs);
+      assert(is);
+    }    // new istream(fb);
 
-		if (mode & ios_base::out) {os = dynamic_cast<ostream *>(bs); assert(os);}	// new ostream(fb);
+    if (mode & ios_base::out) {
+      os = dynamic_cast< ostream * >(bs);
+      assert(os);
+    }    // new ostream(fb);
 
-		if (verbosity > 10) {cout << is << " " << os << " ******* " << endl;}
-	}
+    if (verbosity > 10) {
+      cout << is << " " << os << " ******* " << endl;
+    }
+  }
 
-	~pstream () {
-		if (fb) {delete (fb);}
+  ~pstream( ) {
+    if (fb) {
+      delete (fb);
+    }
 
-		os = 0;
-		is = 0;
-		fb = 0;
-	}
+    os = 0;
+    is = 0;
+    fb = 0;
+  }
 
-	void flush () {
-		if (os) {os->flush();}
-
-	}
+  void flush( ) {
+    if (os) {
+      os->flush( );
+    }
+  }
 };
-static pstream**pstream_init (pstream **const &p, string *const &a, string *const &b) {
-	string mode = b ? *b : "w";
+static pstream **pstream_init(pstream **const &p, string *const &a, string *const &b) {
+  string mode = b ? *b : "w";
 
-	if (mode.length() == 0) {mode = "wr";}
+  if (mode.length( ) == 0) {
+    mode = "wr";
+  }
 
-	std::ios_base::openmode om = ios_base::in | ios_base::out;
-	if (mode == "r+") {om = ios_base::in | ios_base::out;} else if (mode == "w") {om = ios_base::out;} else if (mode == "r") {om = ios_base::in;} else {ExecError("Invalide mode pstream r,r+,w ");}
+  std::ios_base::openmode om = ios_base::in | ios_base::out;
+  if (mode == "r+") {
+    om = ios_base::in | ios_base::out;
+  } else if (mode == "w") {
+    om = ios_base::out;
+  } else if (mode == "r") {
+    om = ios_base::in;
+  } else {
+    ExecError("Invalide mode pstream r,r+,w ");
+  }
 
-	if (verbosity > 10) {
-		*ffapi::cout() << "pstream_init: om " << om << "(" << ios_base::in << ios_base::out << ") mode:"
-		               << mode << " '" << *a << "'" << endl;
-	}
+  if (verbosity > 10) {
+    *ffapi::cout( ) << "pstream_init: om " << om << "(" << ios_base::in << ios_base::out
+                    << ") mode:" << mode << " '" << *a << "'" << endl;
+  }
 
-	redi::basic_pstream<char> *pp = new redi::pstream(a->c_str(), om);
-	ffassert(pp);
-	*p = new pstream(pp, om);
+  redi::basic_pstream< char > *pp = new redi::pstream(a->c_str( ), om);
+  ffassert(pp);
+  *p = new pstream(pp, om);
 
-	if (!*p || !pp) {
-		cerr << " Error openning pipe  " << *a << endl;
-		ExecError("Error openning pipe");
-	}
+  if (!*p || !pp) {
+    cerr << " Error opening pipe  " << *a << endl;
+    ExecError("Error opening pipe");
+  }
 
-	return p;
+  return p;
 };
-static pstream**pstream_init (pstream **const &p, string *const &a) {
-	return pstream_init(p, a, 0);
+static pstream **pstream_init(pstream **const &p, string *const &a) {
+  return pstream_init(p, a, 0);
 };
 
 #else
 // VERSION GNU
 #include <ext/stdio_filebuf.h>
 
-typedef __gnu_cxx::stdio_filebuf<char> stdiofilebuf;
+typedef __gnu_cxx::stdio_filebuf< char > stdiofilebuf;
 struct pstream {
-	FILE *f;
-	stdiofilebuf *fb;
-	ostream *os;
-	istream *is;
-	pstream (FILE *ff, std::ios_base::openmode mode)
-		: f(ff), fb(new stdiofilebuf(f, mode)), os(0), is(0) {
-		if (verbosity > 10) {cout << " mode " << mode << endl;}
+  FILE *f;
+  stdiofilebuf *fb;
+  ostream *os;
+  istream *is;
+  pstream(FILE *ff, std::ios_base::openmode mode)
+    : f(ff), fb(new stdiofilebuf(f, mode)), os(0), is(0) {
+    if (verbosity > 10) {
+      cout << " mode " << mode << endl;
+    }
 
-		if (mode & ios_base::in) {is = new istream(fb);}
+    if (mode & ios_base::in) {
+      is = new istream(fb);
+    }
 
-		if (mode & ios_base::out) {os = new ostream(fb);}
+    if (mode & ios_base::out) {
+      os = new ostream(fb);
+    }
 
-		if (verbosity > 10) {cout << is << " " << os << " ******* " << endl;}
-	}
+    if (verbosity > 10) {
+      cout << is << " " << os << " ******* " << endl;
+    }
+  }
 
-	~pstream () {
-		if (f) {pclose(f);}
+  ~pstream( ) {
+    if (f) {
+      pclose(f);
+    }
 
-		if (os) {delete os;}
+    if (os) {
+      delete os;
+    }
 
-		if (is) {delete is;}
+    if (is) {
+      delete is;
+    }
 
-		if (fb) {delete (fb);}
+    if (fb) {
+      delete (fb);
+    }
 
-		f = 0;
-		os = 0;
-		is = 0;
-		fb = 0;
-	}
+    f = 0;
+    os = 0;
+    is = 0;
+    fb = 0;
+  }
 
-	void flush () {
-		if (os) {os->flush();}
+  void flush( ) {
+    if (os) {
+      os->flush( );
+    }
 
-		if (f) {fflush(f);}
-	}
+    if (f) {
+      fflush(f);
+    }
+  }
 };
 // typedef redi::pstream pstream;
 // typedef std::string string;
-static pstream**pstream_init (pstream **const &p, string *const &a, string *const &b) {
-	string mode = b ? *b : "w";
+static pstream **pstream_init(pstream **const &p, string *const &a, string *const &b) {
+  string mode = b ? *b : "w";
 
-	if (mode.length() == 0) {mode = "wr";}
+  if (mode.length( ) == 0) {
+    mode = "wr";
+  }
 
-	std::ios_base::openmode om = ios_base::in | ios_base::out;
-	if (mode == "r+") {om = ios_base::in | ios_base::out;} else if (mode == "w") {om = ios_base::out;} else if (mode == "r") {om = ios_base::in;} else {ExecError("Invalide mode pstream r,r+,w ");}
+  std::ios_base::openmode om = ios_base::in | ios_base::out;
+  if (mode == "r+") {
+    om = ios_base::in | ios_base::out;
+  } else if (mode == "w") {
+    om = ios_base::out;
+  } else if (mode == "r") {
+    om = ios_base::in;
+  } else {
+    ExecError("Invalide mode pstream r,r+,w ");
+  }
 
-	if (verbosity > 10) {
-		*ffapi::cout() << "pstream_init: om " << om << "(" << ios_base::in << ios_base::out << ") mode:"
-		               << mode << " '" << *a << "'" << endl;
-	}
+  if (verbosity > 10) {
+    *ffapi::cout( ) << "pstream_init: om " << om << "(" << ios_base::in << ios_base::out
+                    << ") mode:" << mode << " '" << *a << "'" << endl;
+  }
 
 #ifdef _WIN32
-	FILE *pp = _popen(a->c_str(), mode.c_str());
+  FILE *pp = _popen(a->c_str( ), mode.c_str( ));
 #else
-	FILE *pp = popen(a->c_str(), mode.c_str());
+  FILE *pp = popen(a->c_str( ), mode.c_str( ));
 #endif
-	*p = new pstream(pp, om);
+  *p = new pstream(pp, om);
 
-	if (!*p || !pp) {
-		cerr << " Error openning pipe  " << *a << endl;
-		ExecError("Error openning pipe");
-	}
+  if (!*p || !pp) {
+    cerr << " Error opening pipe  " << *a << endl;
+    ExecError("Error opening pipe");
+  }
 
-	return p;
+  return p;
 };
-static pstream**pstream_init (pstream **const &p, string *const &a) {
-	return pstream_init(p, a, 0);
+static pstream **pstream_init(pstream **const &p, string *const &a) {
+  return pstream_init(p, a, 0);
 };
 #endif
 
-AnyType pstream2o (Stack, const AnyType &a) {
-	pstream *p = *PGetAny<pstream *>(a);
+AnyType pstream2o(Stack, const AnyType &a) {
+  pstream *p = *PGetAny< pstream * >(a);
 
-	ffassert(p->os);
-	return SetAny<ostream *>(p->os);
+  ffassert(p->os);
+  return SetAny< ostream * >(p->os);
 }
 
-AnyType pstream2i (Stack, const AnyType &a) {
-	pstream *p = *PGetAny<pstream *>(a);
+AnyType pstream2i(Stack, const AnyType &a) {
+  pstream *p = *PGetAny< pstream * >(a);
 
-	ffassert(p->is);
-	return SetAny<istream *>(p->is);
+  ffassert(p->is);
+  return SetAny< istream * >(p->is);
 }
 
 class istream_good {
-	public:
-		istream_good (istream *ff): f(ff) {}
+ public:
+  istream_good(istream *ff) : f(ff) {}
 
-		istream *f;
-		operator bool () const {return f->good();}};
-
-long cflush (pstream **ppf) {
-	pstream &f = **ppf;
-
-	f.flush();
-	return 0;
+  istream *f;
+  operator bool( ) const { return f->good( ); }
 };
 
-inline istream_good to_istream_good (pstream **f) {ffassert((**f).is); return istream_good((**f).is);}
+long cflush(pstream **ppf) {
+  pstream &f = **ppf;
 
-inline bool get_eof (pstream **p) {return (**p).is ? (**p).is->eof() : EOF;}
+  f.flush( );
+  return 0;
+};
 
-static void inittt () {
-	Dcl_TypeandPtr<pstream *>(0, 0, ::InitializePtr<pstream *>, ::DeletePtr<pstream *> );
-	atype<istream *>()->AddCast(new E_F1_funcT<istream *, pstream **>(pstream2i));
-	atype<ostream *>()->AddCast(new E_F1_funcT<ostream *, pstream **>(pstream2o));
-	TheOperators->Add("<-", new OneOperator2_<pstream **, pstream **, string *>(pstream_init));
-	TheOperators->Add("<-", new OneOperator3_<pstream **, pstream **, string *, string *>(pstream_init));
-	zzzfff->Add("pstream", atype<pstream **>());
-	Add<pstream **>("good", ".", new OneOperator1<istream_good, pstream **>(to_istream_good));
-	Add<pstream **>("eof", ".", new OneOperator1<bool, pstream **>(get_eof));
-	Global.Add("flush", "(", new OneOperator1<long, pstream **>(cflush));
-	Global.Add("sleep", "(", new OneOperator1<long, long>(ffsleep));
-	Global.Add("usleep", "(", new OneOperator1<long, long>(ffusleep));
+inline istream_good to_istream_good(pstream **f) {
+  ffassert((**f).is);
+  return istream_good((**f).is);
+}
+
+inline bool get_eof(pstream **p) { return (**p).is ? (**p).is->eof( ) : EOF; }
+
+static void inittt( ) {
+  Dcl_TypeandPtr< pstream * >(0, 0, ::InitializePtr< pstream * >, ::DeletePtr< pstream * >);
+  atype< istream * >( )->AddCast(new E_F1_funcT< istream *, pstream ** >(pstream2i));
+  atype< ostream * >( )->AddCast(new E_F1_funcT< ostream *, pstream ** >(pstream2o));
+  TheOperators->Add("<-", new OneOperator2_< pstream **, pstream **, string * >(pstream_init));
+  TheOperators->Add("<-",
+                    new OneOperator3_< pstream **, pstream **, string *, string * >(pstream_init));
+  zzzfff->Add("pstream", atype< pstream ** >( ));
+  Add< pstream ** >("good", ".", new OneOperator1< istream_good, pstream ** >(to_istream_good));
+  Add< pstream ** >("eof", ".", new OneOperator1< bool, pstream ** >(get_eof));
+  Global.Add("flush", "(", new OneOperator1< long, pstream ** >(cflush));
+  Global.Add("sleep", "(", new OneOperator1< long, long >(ffsleep));
+  Global.Add("usleep", "(", new OneOperator1< long, long >(ffusleep));
 #ifdef _WIN32
-	Global.New("onWIN32", CConstant<bool>(true));
+  Global.New("onWIN32", CConstant< bool >(true));
 #else
-	Global.New("onWIN32", CConstant<bool>(false));
+  Global.New("onWIN32", CConstant< bool >(false));
 #endif
 }
 

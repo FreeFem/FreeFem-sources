@@ -2,29 +2,20 @@
 // NBPROC 4
 
 load "PETSc"                        // PETSc plugin
-macro trueRestrict()true// EOM
-macro removeZeros()true// EOM
 macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
-macro def(i)i// EOM                 // scalar field definition
-macro init(i)i// EOM                // scalar field initialization
 func Pk = P1;                       // finite element space
+macro def(u)u//
 func Pkdc = P1dc;                   // finite element space
 
-mesh Th;
+mesh Th = square(getARGV("-global", 40), getARGV("-global", 40));
+mesh ThBackup = Th;
+Mat A;
+buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
+
 fespace Vh(Th, Pk);
 fespace Ph(Th, Pkdc);
-int[int][int] intersection;   // local-to-neighbors renumbering
-real[int] D;                  // partition of unity
-mesh ThBackup;
-{
-    Th = square(getARGV("-global", 40), getARGV("-global", 40));
-    ThBackup = Th;
-    int s = getARGV("-split", 1);
-    build(Th, s, intersection, D, Pk, mpiCommWorld)
-}
-
 Vh b = 100;
 real a = 0.001;
 func real f(real u) { return u*a+u-log(1+u); }
@@ -36,30 +27,29 @@ Ph dfalpha;
 Ph ddfalpha;
 Vh u = 0;
 
-varf vdJ(uh, vh) = int2d(Th)(dfalpha*(dx(u)*dx(vh) + dy(u)*dy(vh)))
+varf vJ(uh, vh) = int2d(Th)(dfalpha*(dx(u)*dx(vh) + dy(u)*dy(vh)))
     + on(1, 2, uh = 0);
 varf vC(uh, vh) = int2d(Th)(b*vh)
     + on(1, 2, uh = 0);
 varf vhJ(uh, vh) = int2d(Th)(dfalpha*(dx(uh)*dx(vh) + dy(uh)*dy(vh)) + ddfalpha*(dx(u)*dx(vh) + dy(u)*dy(vh)) * (dx(u)*dx(uh) + dy(u)*dy(uh)))
     + on(1, 2, uh = 0);
 
-Mat dJ(Vh.ndof, intersection, D);
 matrix H;
 
 func real[int] funcRes(real[int]& inPETSc) {
-    changeNumbering(dJ, u[], inPETSc, inverse = true, exchange = true);
+    changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
     alpha = dx(u)*dx(u) + dy(u)*dy(u);
     dfalpha = df(alpha);
     ddfalpha = 2 * ddf(alpha);
-    real[int] v = vdJ(0, Vh, tgv = -1);
+    real[int] v = vJ(0, Vh, tgv = -1);
     real[int] outPETSc;
-    changeNumbering(dJ, v, outPETSc);
+    changeNumbering(A, v, outPETSc);
     return outPETSc;
 }
 func int funcJ(real[int]& inPETSc) {
-    changeNumbering(dJ, u[], inPETSc, inverse = true, exchange = true);
+    changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
     H = vhJ(Vh, Vh, tgv = -1);
-    dJ = H;
+    A = H;
     return 0;
 }
 
@@ -69,18 +59,18 @@ int step = 3;
 real[int] xPETSc;
 for(int i = 0; i < step; ++i) {
     xPETSc.resize(0);
-    changeNumbering(dJ, u[], xPETSc);
+    changeNumbering(A, u[], xPETSc);
     u[] = vC(0, Vh, tgv = -1);
     real[int] bPETSc, xuPETSc;
-    changeNumbering(dJ, u[], bPETSc);
+    changeNumbering(A, u[], bPETSc);
     {
         Vh xu = fu;
         plotMPI(Th, xu, Pk, def, real, cmm = "Upper bound")
-        changeNumbering(dJ, xu[], xuPETSc);
+        changeNumbering(A, xu[], xuPETSc);
     }
-    SNESSolve(dJ, funcJ, funcRes, bPETSc, xPETSc, xu = xuPETSc, sparams = "-snes_monitor -snes_max_it " + (i != step - 1 ? 4 : 40) + " -ksp_converged_reason -snes_view -snes_vi_monitor -snes_type vinewtonrsls -snes_rtol 1.0e-6 -pc_type lu");
+    SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, xu = xuPETSc, sparams = "-snes_monitor -snes_max_it " + (i != step - 1 ? 4 : 40) + " -ksp_converged_reason -snes_view -snes_vi_monitor -snes_type vinewtonrsls -snes_rtol 1.0e-6 -pc_type lu");
     if(i != step - 1) {
-        changeNumbering(dJ, u[], xPETSc, inverse = true, exchange = false);
+        changeNumbering(A, u[], xPETSc, inverse = true, exchange = false);
         fespace VhG(ThBackup, Pk);
         VhG uG, uReduce;
         uReduce = u;
@@ -94,16 +84,13 @@ for(int i = 0; i < step; ++i) {
         plot(uG, cmm = "Global solution", wait = 1, fill = 1, dim = 3);
         {
             Th = ThBackup;
-            intersection.resize(0);
-            D.resize(0);
-            int s = getARGV("-split", 1);
-            build(Th, s, intersection, D, Pk, mpiCommWorld)
-            Mat dAdapt(Vh.ndof, intersection, D);
-            dJ = dAdapt;
+            Mat Adapt;
+            buildMat(Th, getARGV("-split", 1), Adapt, Pk, mpiCommWorld)
+            A = Adapt;
         }
         u = uG;
         plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
     }
 }
-changeNumbering(dJ, u[], xPETSc, inverse = true, exchange = true);
+changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
 plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

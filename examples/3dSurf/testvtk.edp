@@ -1,0 +1,19 @@
+// basic example io vtk for meshS/meshL
+load "iovtk"
+load "msh3"
+
+mesh Th = square(10,10);
+savevtk("Th.vtk",Th,bin=1); 
+mesh Th2=vtkload("Th.vtk");
+meshS ThS = square3(10,10);
+
+savevtk("ThS.vtk",ThS,bin=0); 
+savevtk("ThS.vtu",ThS,bin=1);
+meshS ThS2=vtkloadS("ThS.vtk");
+plot(Th2);
+ThS=buildBdMesh(ThS);
+meshL ThL= ThS.Gamma;
+
+savevtk("ThL.vtk",ThL,bin=1); 
+savevtk("ThL.vtu",ThL,bin=1); 
+meshL ThL2=vtkloadL("ThL.vtk");

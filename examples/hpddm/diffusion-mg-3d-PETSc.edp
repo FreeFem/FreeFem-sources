@@ -1,0 +1,46 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"
+macro dimension()3// EOM            // 2D or 3D
+include "macro_ddm.idp"             // additional DDM functions
+macro grad(u)[dx(u), dy(u), dz(u)]// EOM
+
+func Pk = P1;                       // finite element space
+int level = getARGV("-level", 3);
+int[int] LL = [1,2, 1,2, 1,1];
+mesh3[int] ThTab(level);
+ThTab[level - 1] = cube(getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5), [x, y, z], label = LL);
+Mat[int] MG(level);
+matrix[int] P(level - 1);
+buildMatRecursive(ThTab, getARGV("-split", 2), level, P, MG, Pk, mpiCommWorld);
+real[int] rhs;
+for(int i = 0; i < level; ++i) {
+    varf vPb(u, v) = intN(ThTab[i])(grad(u)' * grad(v)) + intN(ThTab[i])(v) + on(1, u = 0.0);
+    fespace Wh(ThTab[i], Pk);
+    matrix<real> Loc = vPb(Wh, Wh, tgv = -2);
+    MG[i] = Loc;
+    if(i == 0) {
+        rhs.resize(Wh.ndof);
+        rhs = vPb(0, Wh);
+    }
+}
+set(MG, P, sparams = "-pc_type mg");
+fespace Wh(ThTab[0], Pk);
+Wh u;
+u[] = MG[0]^-1 * rhs;
+macro def(u)u//
+plotMPI(ThTab[0], u, Pk, def, real, cmm = "Global solution")
+real[int] tmp(Wh.ndof);
+tmp = u[];
+for(int i = 0; i < level; ++i) {
+    fespace Vh(ThTab[i], Pk);
+    Vh w;
+    w[] = tmp;
+    exchange(MG[i], w[], scaled = true);
+    savevtk("diffusion-mg-3d.vtu", ThTab[i], w, bin = 1, append = i ? true : false);
+    if(i == level - 1)
+        break;
+    tmp.resize(P[i].m);
+    tmp = P[i]' * w[];
+}

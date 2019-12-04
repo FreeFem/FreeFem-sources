@@ -691,7 +691,7 @@ void openPS(const char *filename )
     fprintf(psfile," 2 setlinewidth\n");
   }
   else 
-    cerr << " Err openning postscript file " << fps << endl;
+    cerr << " Err opening postscript file " << fps << endl;
 }
 void closePS(void)
 {

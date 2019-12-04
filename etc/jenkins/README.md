@@ -10,11 +10,11 @@ sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuit
 
 # Ubuntu 16.04 - VM2
 ```
-sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libopenmpi-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
+sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
 ```
 # Ubuntu 16.04 - VM2-2
 ```
-sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libopenmpi-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
+sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
 local Petsc 3.11.2 installed on /builds/Shared
 ```
 
@@ -30,11 +30,11 @@ sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuit
 
 # Ubuntu 18.04 - VM2
 ```
-sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libopenmpi-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
+sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
 ```
 # Ubuntu 18.04 - VM2-2
 ```
-sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libopenmpi-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
+sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
 local Petsc 3.11.2 installed on /builds/Shared
 ```
 # MacOS 10.10.5 - VM0 (Xcode 7.2.1, gcc g++ gfortran 5.1)
@@ -133,21 +133,23 @@ make -j4 all
 make check
 sudo make install
 #Ubuntu 16.04 - Ubuntu 18.04
-openmpi 2.1.1, installed whith apt installer
+openmpi 2.1.1, installed whith apt installer on vm1
+openmpi 4.0.2 compiled on vm2 and vm2-2
 
-
+--disable-mpi-threads
+--disable-progress-threads
 
 # MPICH
 
 ```
-curl -L http://www.mpich.org/static/downloads/3.3.1/mpich-3.3.1.tar.gz --output mpich-3.3.1.tar.gz
-tar xf mpich-3.3.1.tar.gz
-cd mpich-3.3.1/
+curl -L http://www.mpich.org/static/downloads/3.3.2/mpich-3.3.2.tar.gz --output mpich-3.3.2.tar.gz
+tar xf mpich-3.3.2.tar.gz
+cd mpich-3.3.2/
 #MacOS 10.10.5
-./configure CC=clang CXX=clang++ --prefix=/usr/local/mpich3  VM2 
+./configure CC=clang CXX=clang++ --prefix=/usr/local/mpich3 VM2   ()--with-device=ch3:sock (https://wiki.mpich.org/mpich/index.php/Frequently_Asked_Questions) in test)
 ./configure CC=gcc CXX=g++ --prefix=/usr/local/mpich3 (gcc g++ version5.1)  VM2-2
 #MacOS 10.13.5
-./configure CC=clang CXX=clang++ FC=gfortran-9 F77=gfortran-9 --prefix=/usr/local/mpich3  VM2
+./configure CC=clang CXX=clang++ FC=gfortran-9 F77=gfortran-9 --prefix=/usr/local/mpich3 VM2  (update v3.3.2)
 ./configure CC=gcc-9 CXX=g++-9 FC=gfortran-9 F77=gfortran-9 --prefix=/usr/local/mpich3 VM2-2
 make -j4 all
 make check

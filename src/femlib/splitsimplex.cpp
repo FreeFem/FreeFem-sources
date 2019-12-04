@@ -94,17 +94,24 @@ typedef int int4 [4] ;
 // InvIntFunc
 
 inline int NumSimplex2(int i) {return ((i)*(i+1))/2;}
+inline int NumSimplex2_1(int l) { return sqrt(l*2)+3;}
 inline int NumSimplex3(int i) {return ((i)*(i+1)*(i+2))/6;}
+inline int NumSimplex3_1(int l) { return pow(l*6,1./3)+4;}
+
 #define InvIntFunction  invNumSimplex2
 #define F(i) NumSimplex2(i)
+#define F_1(i) NumSimplex2_1(i)
 #include "InvIntFunc.cpp"
 #undef F
+#define F_1
 #undef InvIntFunction
 
 #define InvIntFunction invNumSimplex3
 #define F(i) NumSimplex3(i)
+#define F_1(i) NumSimplex3_1(i)
 #include "InvIntFunc.cpp"
 #undef F
+#define F_1
 #undef InvIntFunction
 
 inline int NumSimplex1(int i) { return i;}
@@ -124,6 +131,7 @@ inline void  invNumSimplex3(int n,int &i,int &j,int &k)
 {
   int l= invNumSimplex3(n); //=( i+j+k) 
   invNumSimplex2(n-NumSimplex3(l),j,k);
+  assert(j>=0 && k>=0);
   i=l-k-j; 
   // cout << n << "   " << l << "-> " << i << " " << j << " " << k <<endl;
   assert( n == NumSimplex3(i,j,k)) ;
@@ -224,6 +232,8 @@ void SplitSimplex(int N,R3 *P,int *tet,int op=0,R3* Khat=0)
     {
       int i,j,k;
       invNumSimplex3(l,i,j,k);
+     assert( i>=0&& j >=0  && k >= 0);
+     assert( i<=N && j <= N && k <= N);
       if(Khat)
 	P[l+op]= R3(i*h,j*h,k*h).Bary(Khat);
       else 

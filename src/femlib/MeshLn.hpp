@@ -49,7 +49,7 @@ namespace Fem2D {
 
 using namespace ::std;
 #include "GenericMesh.hpp"
-#include "MeshSn.hpp"
+//#include "MeshSn.hpp"
 
 namespace Fem2D {
     
@@ -72,7 +72,7 @@ namespace Fem2D {
     typedef Vertex3 V;
     typedef  V::Rd Rd;
     static R mesure(  V * pv[NbOfVertices]  ) {
-      return 1.;
+      return 0.;
     }
     typedef R0 RdHat;
     typedef R0 RdHatBord;   //hack no defined
@@ -80,6 +80,27 @@ namespace Fem2D {
         
         
   };
+    
+    
+    struct DataSeg3  {
+        static const int NbOfVertices =2;
+        static const int NbOfEdges =1;
+        static const int NbOfFaces =0;
+        static const int NT =0;
+        static const int NbOfAdjElem =NbOfVertices;
+        static const int NbOfVertexOnHyperFace =NbOfVertices-1;
+        typedef Vertex3 V;
+        typedef  V::Rd Rd;
+        static R mesure(  V *  pv[NbOfVertices]) {
+            return R3(*pv[0],*pv[1]).norme();
+        }
+        typedef R1 RdHat;
+        typedef R0 RdHatBord;
+        static RdHat PBord(const int * nvb,const RdHatBord &P)  { return RdHat(*nvb) ;}
+        
+        
+    };
+    
  
   class BoundaryPointL: public GenericElement<DataPoint3>
   {
@@ -118,12 +139,12 @@ namespace Fem2D {
     int *mapCurv2Surf;
     MeshL():mapSurf2Curv(0),mapCurv2Surf(0) {};
     MeshL(const string);
-    MeshL(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
+    MeshL(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7, double ridgeangledetection=8.*atan(1.)/9.);
       
     void read(istream &f);
     void readmsh(ifstream & f,int offset);
     MeshL(FILE *f,int offset=0);
-    MeshL(int nnv, int nnt, int nnbe, Vertex3 *vv, EdgeL *tt, BoundaryPointL *bb, bool cleanmesh=true, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7);
+    MeshL(int nnv, int nnt, int nnbe, Vertex3 *vv, EdgeL *tt, BoundaryPointL *bb, bool cleanmesh=false, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7, double ridgeangledetection=8.*atan(1.)/9.);
     //MeshL(const Serialize&);
 
     int load(const string & filename);
@@ -135,7 +156,8 @@ namespace Fem2D {
     double hmin() const;
     //int Save(const string & filename) const;
     //Serialize serialize_withBorderMesh() const;
-        
+    void BuildBorderPt(const double angle=8.*atan(1.)/9.);
+
     ~MeshL() {
       delete [] mapSurf2Curv ;
       delete [] mapCurv2Surf ;

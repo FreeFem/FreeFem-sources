@@ -50,32 +50,10 @@ namespace Fem2D
 
 namespace Fem2D
 {
-    //template<>
-   // void SameElement( Vertex3 *vertice, Vertex3 *new_vertice, TriangleS *list, int nelt, TriangleS *new_list, int *old2new, int &new_nelt, double &mes);
-    
-   // template<>
-  //  void SameElement( Vertex3 *vertice, Vertex3 *new_vertice, BoundaryEdgeS *list, int nelt, BoundaryEdgeS *new_list, int *old2new, int &new_nelt, double &mes);
-   
-     // definition of the reference segment 0 1
-     static const int  nvfaceSeg[1][3]  = {{-1,-1,1}};
-     static const int  nvedgeSeg[1][2] = { {0,1} };
-     static const int  nvadjSeg[2][1] = { {0},{1} };
-    
-    // geometry element for segment ( boundary elements in surface mesh, Rd=3 RdHat=1 )
-    template<> const int (* const GenericElement<DataSeg3>::nvface)[3] = 0 ;
-    template<> const int (* const GenericElement<DataSeg3>::nvedge)[2] = nvedgeSeg; //nvedgeTria ;
-    template<> const int (* const GenericElement<DataSeg3>::nvadj)[1] = nvadjSeg ;
-    
     
     template<> int   GenericMesh<TriangleS,BoundaryEdgeS,Vertex3>::kfind=0;
     template<> int   GenericMesh<TriangleS,BoundaryEdgeS,Vertex3>::kthrough=0;
-    
-  /*  void Add(int *p,int n,int o)
-    {
-        for(int i=0;i<n;++i)
-            p[i] += o;
-    }*/
-    
+  
     
     const string GsbeginS="MeshS::GSave v0",GsendS="end";
     void MeshS::GSave(FILE * ff,int offset) const
@@ -251,8 +229,8 @@ namespace Fem2D
     }
     
     
-    MeshS::MeshS(const string filename)
-    :mapSurf2Vol(0),mapVol2Surf(0)    {
+    MeshS::MeshS(const string filename, double ridgeangledetection)
+    :mapSurf2Vol(0),mapVol2Surf(0),meshL(0)  {
         int ok=load(filename);
         if(verbosity) {
             cout << "read meshS ok " << ok ;
@@ -262,7 +240,7 @@ namespace Fem2D
         if (ok) {
             ifstream f(filename.c_str());
             if(!f) {
-                cerr << "  --  MeshS::MeshS Erreur openning " << filename<<endl;ffassert(0);exit(1);}
+                cerr << "  --  MeshS::MeshS Erreur opening " << filename<<endl;ffassert(0);exit(1);}
             if(verbosity>2)
                 cout << "  -- MeshS:  Read On file \"" <<filename<<"\""<<  endl;
             if(filename.rfind(".msh")==filename.length()-4)
@@ -325,12 +303,25 @@ namespace Fem2D
             }
         }
         // data file is readed and the meshes are initilized
-        int nv=-1,nTet=-1,nTri=-1,nSeg=-1;
+        int nv=-1,nTet=-1,nTri=-1,nSeg=-1, nPt=-1;
         nv = GmfStatKwd(inm,GmfVertices);  // vertice
         nTri= GmfStatKwd(inm,GmfTriangles); // triangles in case of volume mesh -> boundary element / in case of surface mesh -> element
         nSeg=GmfStatKwd(inm,GmfEdges); // segment elements only present in surface mesh
+        nPt=0; //GmfStatKwd(inm,GmfEdges); // points border on border mesh, not available at this time
+        
+        if (nTri>0 && nSeg>0 && nPt==0)
+            if(verbosity>1)
+                cout << "data file "<< pfile <<  " contains only a MeshS, the MeshL associated is created (whitout border points)." << endl;
+        if (nTri>0 && nSeg>0 && nPt>0)
+            if(verbosity>1) cout << "data file "<< pfile <<  " contains a MeshS and MeshL" << endl;
+        if(verbosity && !nTri && !nTet)
+            cerr << " WARNING!!! The mesh file just contains a set of vertices" << endl;
+
+        
+        
         this->set(nv,nTri,nSeg);
-       
+        nPoints=nPt;
+        
         if(nTri == 0) {
             cerr << "  A meshS type must have elements  " << endl;
             ffassert(0);exit(1);}
@@ -404,10 +395,78 @@ namespace Fem2D
             mesb += this->borderelements[i].mesure();
         }
         
+        // the .mesh contains edges, Building the meshS
+        // for this, surface vertices must be extract of the original vertice list and a mapping must be created between surface and volume vertices
+        if (nPoints>0) {
+            meshL = new MeshL();
+            // Number of Vertex in the surface
+            meshL->mapSurf2Curv=new int[nv];
+            meshL->mapCurv2Surf=new int[nv]; // mapping to curve/surface vertices
+            for (int k=0; k<nv; k++) {
+                meshL->mapSurf2Curv[k]=-1;
+                meshL->mapCurv2Surf[k]=0;
+            }
+            // search Vertex on the surface
+            int nbv_curv=0;
+            for (int k=0; k<nbe; k++) {
+                const BorderElement & K(this->borderelements[k]);
+                for(int jj=0; jj<2; jj++) {
+                    int i0=this->operator()(K[jj]);
+                    if( meshL->mapSurf2Curv[i0] == -1 ) {
+                        // the mapping v_num_surf -> new numbering /  liste_v_num_surf[nbv_surf] -> the global num
+                        meshL->mapSurf2Curv[i0] = nbv_curv;
+                        meshL->mapCurv2Surf[nbv_curv]= i0;
+                        nbv_curv++;
+                    }
+                }
+            }
+            this->meshL->set(nbv_curv,nSeg,nPoints);
+            // save the surface vertices
+            for (int k=0; k<nbv_curv; k++) {
+                int k0 = meshL->mapCurv2Surf[k];
+                const  Vertex & P = this->vertices[k0];
+                meshL->vertices[k].lab=P.lab;
+                meshL->vertices[k].x=P.x;
+                meshL->vertices[k].y=P.y;
+                meshL->vertices[k].z=P.z;
+            }
+            // read triangles and change with the surface numbering
+            int kmv=0;
+            meshL->mes=0;
+            GmfGotoKwd(inm,GmfEdges);
+            for(int i=0;i<nSeg;++i) {
+                GmfGetLin(inm,GmfEdges,&iv[0],&iv[1],&lab);
+                for (int j=0;j<2;++j)
+                    iv[j]=meshL->mapSurf2Curv[iv[j]-1];
+                for(int j=0;j<2;++j)
+                    if(!meshL->vertices[iv[j]].lab) {
+                        meshL->vertices[iv[j]].lab=1;
+                        kmv++;
+                    }
+                meshL->elements[i].set(meshL->vertices,iv,lab);
+                meshL->mes += meshL->elements[i].mesure();
+            }
+            // reading border points with the curv numbering  not available at this moment
+            meshL->mesb=0;
+            /*GmfGotoKwd(inm,GmfEdges);
+            for(int i=0;i<nSeg;++i) {
+                GmfGetLin(inm,GmfEdges,&iv[0],&iv[1],&lab);
+                for (int j=0;j<2;++j) iv[j]=meshS->mapVol2Surf[iv[j]-1];
+                // assert( iv[0]>0 && iv[0]<=nbv_surf && iv[1]>0 && iv[1]<=nbv_surf);
+                meshS->borderelements[i].set(meshS->vertices,iv,lab);
+                meshS->mesb += meshS->borderelements[i].mesure();
+            }*/
+        }
+        else
+            if(verbosity>5) cout << " use Th = buildBdMesh(Th) to build the curve mesh associated" << endl;
+
         
         if(verbosity>1)
             cout << "  -- MeshS(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
             << ", Triangle elts:= " << nt << ", num vertice:= " << nv << ", num edges boundaries:= " << nbe << endl;
+        if(verbosity>1)
+            cout << "  -- MeshS::MeshL(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
+            << ", Edges elts:= " << meshL->nt << ", num vertice:= " << meshL->nv << ", num border points:= " << meshL->nbe << endl;
         
         GmfCloseMesh(inm);
         delete[] data;
@@ -415,8 +474,8 @@ namespace Fem2D
     }
     
     
-    MeshS::MeshS(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
-    :mapSurf2Vol(0),mapVol2Surf(0) {
+    MeshS::MeshS(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh, double ridgeangledetection)
+    :mapSurf2Vol(0),mapVol2Surf(0),meshL(0) {
         
         
         int ok=load(filename);
@@ -428,7 +487,7 @@ namespace Fem2D
         {
             ifstream f(filename.c_str());
             if(!f) {
-                cerr << "  --  MeshS: Erreur openning " << filename<<endl;ffassert(0);exit(1);}
+                cerr << "  --  MeshS: Erreur opening " << filename<<endl;ffassert(0);exit(1);}
             if(verbosity>2)
                 cout << "  -- MeshS:  Read On file \"" <<filename<<"\""<<  endl;
             if(filename.rfind(".msh")==filename.length()-4)
@@ -461,6 +520,7 @@ namespace Fem2D
             Buildbnormalv();
             BuildjElementConteningVertex();
         }
+        else BuildMeshL(ridgeangledetection);
         
         if(verbosity>2)
             cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
@@ -473,7 +533,7 @@ namespace Fem2D
  
     
     MeshS::MeshS(FILE *f,int offset)
-    :mapSurf2Vol(0),mapVol2Surf(0)
+    :mapSurf2Vol(0),mapVol2Surf(0),meshL(0)
     {
         GRead(f,offset);// remove 1
         assert( (nt >= 0 || nbe>=0)  && nv>0) ;
@@ -615,7 +675,7 @@ namespace Fem2D
     
     
     MeshS::MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
-    :mapVol2Surf(0),mapSurf2Vol(0)
+    :mapVol2Surf(0),mapSurf2Vol(0),meshL(0)
     {
         nv = nnv;
         nt = nnt;
@@ -667,7 +727,7 @@ namespace Fem2D
     
     MeshS::MeshS(const  Serialize &serialized)
     :GenericMesh<TriangleS,BoundaryEdgeS,Vertex3> (serialized),
-    mapVol2Surf(0), mapSurf2Vol(0)
+    mapVol2Surf(0), mapSurf2Vol(0), meshL(0)
     {
         BuildBound();
         if(verbosity>1)
@@ -776,7 +836,6 @@ namespace Fem2D
                 
                 int jt = j, it = ElementAdj(i, jt);
                 TriangleS &K(elements[i]);  // current element
-                TriangleS &K_adj(elements[it]); //adjacence element
                 
                 // True boundary edge -> no adjacence / on domain border
                 if ((it == i || it < 0)) {
@@ -785,14 +844,14 @@ namespace Fem2D
                         iv[ip] = this->operator () (K [TriangleS::nvedge[j][ip]]);
                     if(verbosity>15)
                         cout << " the edge " << iv[0] << " " << iv[1] << " is a boundary " << endl;
-                    int lab = min(K.lab, K_adj.lab);
-                    be(nbeS).set(vertices,iv,lab);
+                    be(nbeS).set(vertices,iv,K.lab);
                     mesb += be(nbeS).mesure();
                     nbeS++;
                     
                 }
                 // internal edge -- check angular and no manifold
                 else {
+                    TriangleS &K_adj(elements[it]); //adjacence element
                     int iv[2];
                     for(int ip=0;ip<2;ip++)
                         iv[ip] = this->operator () (K [TriangleS::nvedge[j][ip]]);
@@ -864,4 +923,83 @@ namespace Fem2D
     }
     
     
+    void MeshS::BuildMeshL(double angle)
+    {
+        
+        if (meshL) {
+            cout << "error, MeshS::meshL previously created " << endl;
+            return;
+        }
+        if (verbosity) cout << "Build meshL from meshS.... " << endl;
+        
+        
+        int mes = 0, mesb = 0;
+        
+        int *v_num_curve, *map_v_num_curve;
+        // Extraction of Vertex  belongs to the surface
+        v_num_curve=new int[nv];
+        map_v_num_curve=new int[nv];
+        for (int k=0; k<nv; k++){
+            v_num_curve[k]=-1;
+            map_v_num_curve[k]=0;
+        }
+        // Search Vertex on the surface
+        int nbv_curve=0;
+        for (int k=0; k<nbe; k++) {
+            const BoundaryEdgeS & K(borderelements[k]);
+            for(int jj=0; jj<2; jj++){
+                int i0=this->operator()(K[jj]);
+                if( v_num_curve[i0] == -1 ){
+                    v_num_curve[i0] = nbv_curve;
+                    map_v_num_curve[nbv_curve]= i0;
+                    nbv_curve++;
+                }
+            }
+        }
+        
+        // set the curve vertex in meshL
+        ffassert(nbv_curve);
+        
+        Vertex3 *vL = new Vertex3[nbv_curve];
+        EdgeL *tL = new EdgeL[nbe];
+        EdgeL *ttL = tL;
+        
+        
+        for (int iv=0; iv<nbv_curve; iv++) {
+            int k0 = map_v_num_curve[iv];
+            const Vertex3 & P = vertices[k0];
+            vL[iv].x=P.x;
+            vL[iv].y=P.y;
+            vL[iv].z=P.z;
+            vL[iv].lab=P.lab;
+        }
+        
+        ffassert(nbe);
+        
+        
+        for (int it=0; it<nbe; it++) {
+            int iv[2];
+            const BoundaryEdgeS & K(borderelements[it]);
+            for (int j=0;j<2;++j)
+                iv[j]=v_num_curve[this->operator()(K[j])];
+             int lab=K.lab;
+            (ttL)->set(vL,iv,lab);
+            mes += ttL++->mesure();
+        }
+        
+        // first building without list edges
+        
+        meshL = new MeshL(nbv_curve,nbe,0,vL,tL,0);
+        meshL->mapSurf2Curv = new int[nv];
+        meshL->mapCurv2Surf= new int[nv];
+        for(int i=0 ; i<nv ; i++) {
+            meshL->mapSurf2Curv[i] = v_num_curve[i];
+            meshL->mapCurv2Surf[i] = map_v_num_curve[i];
+        }
+        meshL->BuildBorderPt(angle);
+        meshL->BuildGTree();
+        delete [] v_num_curve;
+        delete [] map_v_num_curve;
+        
+    }
 }

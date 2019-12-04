@@ -560,10 +560,7 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 
 }
 
-
-
-
-void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot,GLint gllists,int * lok)
+void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & plot,GLint gllists,int * lok, OneWindow *win)
 {
     glDisable(GL_DEPTH_TEST);
 
@@ -571,8 +568,10 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
     glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
     R z1= plot.z0;
     R z2= plot.z0;
-
-
+    R coef = plot.coeff;
+    bool pNormalT=plot.pNormalT;
+    int nbN=plot.nbN;
+    
     double r=0,g=0,b=0;
     if((debug > 3)) cout<< " OnePlotMeshS::Draw " << plotmesh << " " << plotborder << " " <<  Th.nbBrdElmts() << " " << z1 << " "  << z2 << endl;
     // plot.SetColorTable(16) ;
@@ -651,6 +650,43 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
             glEndList();  // fin de la list
         }
     }
+    if (pNormalT) {
+       if (debug>5) cout << " plot Normal element at triangles " << pNormalT << endl;
+            R h = 8*win->hpixel;
+            glLineWidth(0.5);
+
+            for (int i=0;i<Th.nt; i = 0 ? i++ : i+=nbN) {
+                const MeshS::Element & K(Th[i]);
+                R3 NN=K.NormalS();
+                NN/=NN.norme(); // unit normal
+                NN*=coef/10.;
+                R2 PtHat = R2::diag(1. / 3.);
+                R3 A(K(PtHat));
+                NN+=A;
+                R3 uv(A,NN);
+                double l = Max(sqrt((uv,uv)),1e-20);
+                glBegin(GL_LINES);
+                win->Seg3(A,NN);
+                glEnd();
+                
+                // fleche ou cone / orientation ???
+                R3 nx(1.,0.,0.), ny(0.,1.,0.), nz(0.,0.,1.);
+                R3 dd = uv*(-h/l);
+                R3 dnx = (dd^nx)*0.5, dny = (dd^ny)*0.5, dnz = (dd^nz)*0.5;
+                glLineWidth(1);
+                glBegin(GL_LINES);
+                win->Seg3(NN,NN+dd+dnx);
+                win->Seg3(NN,NN+dd-dnx);
+                win->Seg3(NN,NN+dd+dny);
+                win->Seg3(NN,NN+dd-dny);
+                win->Seg3(NN,NN+dd+dnz);
+                win->Seg3(NN,NN+dd-dnz);
+                glEnd();
+            }
+            glLineWidth(1);
+        }
+  
+
     ShowGlerror("end MeshS plot");
 
 }
@@ -774,7 +810,7 @@ void OnePlotMeshS::Draw(OneWindow *win)
 {
     initlist();
     ThePlot & plot=*win->theplot;
-    Plot(*Th,plot.fill,true,true,plot,gllists,oklist);
+    Plot(*Th,plot.fill,true,true,plot,gllists,oklist,win);
     ShowGlerror("OnePlotMeshS::Draw");
 }
 
@@ -783,7 +819,7 @@ void OnePlotMeshL::Draw(OneWindow *win)
     initlist();
     ThePlot & plot=*win->theplot;
     Plot(*Th,plot.fill,true,true,plot,gllists,oklist);
-    ShowGlerror("OnePlotMeshS::Draw");
+    ShowGlerror("OnePlotMeshL::Draw");
 }
 
 void OnePlotFE3::Draw(OneWindow *win)
@@ -943,7 +979,7 @@ void OnePlotFES::Draw(OneWindow *win)
 }
     ShowGlerror("b mesh  OnePlotFES plot");
     win->unsetLighting();
-    Plot(Th,false,plot.drawmeshes,plot.drawborder,plot,gllists+2,&oklist[2]);
+    Plot(Th,false,plot.drawmeshes,plot.drawborder,plot,gllists+2,&oklist[2],win);
     ShowGlerror("OnePlotFES::Draw");
 }
 
@@ -1551,74 +1587,6 @@ void OnePlotBorder::Draw(OneWindow *win)
 
 }
 
-void OnePlotCurve3::Draw(OneWindow *win)
-{
-    initlist();
-    
-    glDisable(GL_DEPTH_TEST);
-    ThePlot & plot= *win->theplot;
-    R h = 8*win->hpixel;
-    
-    double z = plot.z0;
-    plot.SetColorTable(16) ;
-    
-    for(int i=0;i<data.size() ;++i)
-    {
-        vector<pair<long,R3> > & v=data[i];
-        ShowGlerror("end OnePlotBorder::Draw  1");
-        for(int j=1;j<v.size();++j)
-        {
-            plot.color(2+v[j].first);
-            R3 Po(v[j-1].second), Pn(v[j].second);
-            R3 uv(Po,Pn);
-            double l = Max(sqrt((uv,uv)),1e-20);
-            R3 nx(1.,0.,0.);
-            R3 ny(0.,1.,0.);
-            R3 nz(0.,0.,1.);
-            R3 dd = uv*(-h/l);
-            R3 dnx = (dd^nx)*0.5;//dd.perp()*0.5;
-            R3 dny = (dd^ny)*0.5;//dd.perp()*0.5;
-            R3 dnz = (dd^nz)*0.5;//dd.perp()*0.5;
-            
-            //cout << "test" << dny << " " <<dnz<<endl;
-
-            glLineWidth(2);
-            glBegin(GL_LINES);
-            win->Seg3(Po,Pn);
-            glEnd();
-            
-            glLineWidth(1);
-            glBegin(GL_LINES);
-            // to do direction
-            if(j!=1)
-            {
-                win->Seg3(Po,Po+dd+dnx);
-                win->Seg3(Po,Po+dd-dnx);
-                win->Seg3(Po,Po+dd+dny);
-                win->Seg3(Po,Po+dd-dny);
-                win->Seg3(Po,Po+dd+dnz);
-                win->Seg3(Po,Po+dd-dnz);
-                
-            }
-            glEnd();
-        }
-        
-        ShowGlerror("end OnePlotBorder::Draw  2");
-        
-        glPointSize(7);
-        glBegin(GL_POINTS);
-        int l= v.size()-1;
-        plot.color(2+v[0].first);
-        glVertex3d(v[0].second.x,v[0].second.y,v[0].second.z);
-        plot.color(2+v[l].first);
-        glVertex3d(v[l].second.x,v[l].second.y,v[l].second.z);
-        glEnd();
-        glPointSize(1);
-        ShowGlerror("end OnePlotBorder::Draw  3");
-    }
-    ShowGlerror("end OnePlotBorder::Draw");
-    
-}
 
 inline void plotquadx(float y, float iy, float z, float iz, float x1, bool outline = 0){
   glVertex3d(x1, y, z);
@@ -1829,6 +1797,8 @@ void OneWindow::set(ThePlot *p)
     if(p)
     {
         plotdim=p->plotdim;
+        keepPV=p->keepPV;
+        pNormalT=p->pNormalT;
         rapz0 = p->ZScale;
     }
     if(!init)
@@ -1843,6 +1813,7 @@ void OneWindow::set(ThePlot *p)
 void OneWindow::add(ThePlot *p)
 {
     if(p) {
+        keepPV=p->keepPV;
         lplots.push_back(p);
         lplotssize++;
         ++icurrentPlot;
@@ -1881,6 +1852,8 @@ void OneWindow::DefaultView(int state)
     {
         init =1;
         plotdim=theplot->plotdim;
+        keepPV=theplot->keepPV;
+        //plotNormalT=theplot->plotNormalT;
         R3 A(theplot->Pmin),B(theplot->Pmax);
         R3 D(A,B);
         R dxy= max(D.x,D.y);
@@ -2261,30 +2234,7 @@ OnePlotBorder::OnePlotBorder(PlotStream & f)
     ffassert(f.good());
 }
 
-OnePlotCurve3::OnePlotCurve3(PlotStream & f)
-:OnePlot(4,3,1)
-{
-    long nbd;
-    f>> nbd;
-    data.resize(nbd);
-    for(int i=0;i<nbd;++i)
-    {
-        long n;
-        f>> n;
-        data[i].resize(n+1);
-        for(int j=0;j<=n;++j)
-        {
-            long l;
-            double x,y,z;
-            f >> l>> x >> y >> z;
-            R3 P(x,y,z);
-            Pmin=Minc(Pmin,P);
-            Pmax=Maxc(Pmax,P);
-            data[i][j]=make_pair(l,P);
-        }
-    }
-    ffassert(f.good());
-}
+
 void OnePlot::GLDraw(OneWindow *win)
 {
     Draw(win);
@@ -2329,7 +2279,8 @@ void ThePlot::DrawHelp(OneWindow *win)
     win->Show("w)  window dump in file ffglutXXXX.ppm ",i++);
     win->Show("*)  keep/unkeep viewpoint for next plot",i++);
     win->Show("k)  complex data / change view type ",i++);
-
+    win->Show("T)  show normal at element surface (only meshS)",i++);
+    win->Show("q) Q) decrease or increase the number of Normal ploted at element surface (only meshS)",i++);
     win->Show("any other key : nothing ",++i);
 }
 
@@ -2419,7 +2370,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 changeViso(true),changeVarrow(true),changeColor(true),
 changeBorder(true),changeFill(true), withiso(false),witharrow(false),
 plotdim(2),theta(30.*M_PI/180.),phi(20.*M_PI/180.),dcoef(1),focal(20.*M_PI/180.),
-datadim(1), winnum(0)
+datadim(1), winnum(0), keepPV(0), pNormalT(0)
 
 {
 
@@ -2449,6 +2400,8 @@ datadim(1), winnum(0)
     drawmeshes=false;
     add=false;
     keepPV=false;
+    pNormalT=false;
+    nbN=1; // arbitrary initialisation
     echelle=1.;
 
     Pmin=R3(+dinfty,+dinfty,+dinfty);
@@ -2543,7 +2496,11 @@ case 20+index: {type dummy; fin >= dummy;} break;
                     READ_VTK_PARAM(17,KN<double>); // CameraClippingRange
                     READ_VTK_PARAM(18,KN<double>); // CutPlaneOrigin
                     READ_VTK_PARAM(19,KN<double>); // CutPlaneNormal
-                case 40: fin >= winnum; break;
+                    READ_VTK_PARAM(20,KN<long>); //WindowIndex
+                    READ_VTK_PARAM(21,KN<long>); //NbColorTicks
+                    READ_VTK_PARAM(22,KN<long>); //NbColors
+                //case 43: fin >= winnum; break;
+                case 43: fin >= pNormalT;break;
 
                 default:
                     static int nccc=0;
@@ -2556,6 +2513,8 @@ case 20+index: {type dummy; fin >= dummy;} break;
         ffassert(fin.good() && ! fin.eof());
     }
     if(dimpp) plotdim=dimpp;
+   // if(keepPV) blockwin=keepPV;
+   // if(pNormalT) plotNormalT=pNormalT;
     ffassert(cas==PlotStream::dt_endarg);
     if((debug > 2))
     {  cout << "    ***** get ::: ";
@@ -2805,8 +2764,6 @@ case 20+index: {type dummy; fin >= dummy;} break;
             p=new OnePlotCurve(fin,4,this);// add zz and color ..
         else if(what==4)
             p=new OnePlotBorder(fin);
-        else if(what==40)
-            p=new OnePlotCurve3(fin);
         
         // volume 3D meshes (mesh3 or mesh3 only in case with pointer on meshS or/and meshL
         else if (what == 5)
@@ -3571,6 +3528,8 @@ static void Key( unsigned char key, int x, int y )
     if(debug>1) cout << "Key winnum:  " <<win->theplot->winnum << endl;
     int ni=win->theplot->Viso.N();
     int na=win->theplot->Varrow.N();
+    int nbN=win->theplot->nbN;
+    
     win->help= false;
     switch (key)
     {
@@ -3726,6 +3685,19 @@ static void Key( unsigned char key, int x, int y )
                 SendForNextPlot();
             else
                 win->set(*++win->icurrentPlot);
+            break;
+        }
+        case 'T':
+            win->theplot->pNormalT = ! win->theplot->pNormalT  ;
+            break;
+        case 'Q':
+        {
+            win->theplot->nbN  /= win->theplot->nbN < 0  ? 0 : 2;
+            break;
+        }
+        case 'q':
+        {
+            win->theplot->nbN  *= win->theplot->nbN < 0  ? 0 : 2;
             break;
         }
         default:

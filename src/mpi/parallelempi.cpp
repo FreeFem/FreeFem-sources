@@ -2805,6 +2805,7 @@ void f_init_lgparallele()
       Global.New("mpisize",CConstant<long>(mpisize));
      static long mpiUndefined=MPI_UNDEFINED, mpiAnySource =  MPI_ANY_SOURCE,mpiAnyTag=MPI_ANY_TAG ;
      static fMPI_Comm fmpiWorld=MPI_COMM_WORLD;
+     static fMPI_Comm fmpiSelf=MPI_COMM_SELF;
 
      Global.New("mpiUndefined",CConstant<long>(mpiUndefined));
      Global.New("mpiAnySource",CConstant<long>(mpiAnySource));
@@ -2813,6 +2814,7 @@ void f_init_lgparallele()
 
 
       Global.New("mpiCommWorld",CConstant<fMPI_Comm*>(&fmpiWorld));
+      Global.New("mpiCommSelf",CConstant<fMPI_Comm*>(&fmpiSelf));
       // add FH
 
 

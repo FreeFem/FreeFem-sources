@@ -2063,7 +2063,6 @@ m4_map([AC_FF_WHERELIB],[
 	[[libseq],[-lmpiseq_seq],[${inc_usr_include}mumps_seq/mpi.h]],
 	[[mumps_ptscotch],[-lpord_ptscotch -lmumps_common_ptscotch -ldmumps_ptscotch -lzmumps_ptscotch -lpord_ptscotch],[dmumps_c.h]],
 	[[mumps_scotch],[-lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch],[dmumps_c.h]],
-	[[hypre],[-lHYPRE]],
 	[[fftw3],[-lfftw3],[${inc_usr_include}fftw3.h],[]],
 	[[superlu],[-lsuperlu],[${inc_usr_include}superlu/superlu_enum_consts.h],[]],
         [[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
@@ -2285,7 +2284,6 @@ AM_CONDITIONAL([GSL], [test "$ff_with_gsl" = yes])
 AM_CONDITIONAL([HDF5], [test "$with_hdf5" = yes])
 AM_CONDITIONAL([HTOOL], [test "$enable_htool" = yes])
 AM_CONDITIONAL([HPDDM], [test "$enable_hpddm" = yes])
-AM_CONDITIONAL([HYPRE], [test "$ff_hypre_ok" = yes])
 AM_CONDITIONAL([IPOPT], [test "$ff_ipopt_ok" = yes -o -n "$TOOL_COMPILE_ipopt"])
 AM_CONDITIONAL([LIBSEQ], [test "$ff_libseq_ok" = yes])
 AM_CONDITIONAL([METIS], [test "$ff_metis_ok" = yes -o -n "$TOOL_COMPILE_metis" ])
@@ -2470,7 +2468,6 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - HDF5: $with_hdf5])
   AC_MSG_NOTICE([ - HTOOL: $enable_htool])
   AC_MSG_NOTICE([ - HPDDM: $enable_hpddm])
-  AC_MSG_NOTICE([ - HYPRE: $ff_hypre_ok])
   AC_MSG_NOTICE([ - IPOPT: $ff_ipopt_ok])
   AC_MSG_NOTICE([ - LIBSEQ: $ff_libseq_ok])
   AC_MSG_NOTICE([ - METIS: $ff_metis_ok])

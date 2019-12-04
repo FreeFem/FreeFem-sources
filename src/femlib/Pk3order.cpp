@@ -16,36 +16,40 @@ typedef  R2 TR2[1000];
 
 using namespace std;
 
-int dump(int l,int *t, ostream & cc=cout) 
+int dump(int l,int *t, ostream & cc=cout)
 {
   cc.precision(20);
   cc << " { " ;
-  for (int i=0;i<l;i++)
-    cc << t[i] <<  " " << ( i < l-1 ? ',' : '}' ) ;
+  for (int i=0;i<l;i++) {
+    cc << t[i] <<  " " << ( i < l-1 ? ',' : '}' );
+  }
+  return 0;
 }
 
-int dump2(int l,Tab lx,Tab ly,int k, ostream & cc=cout) 
+int dump2(int l,Tab lx,Tab ly,int k, ostream & cc=cout)
 {
   cc << " { " ;
-  for (int i=0;i<l;i++)
-    cc << " \t R2( " <<  lx[i] <<"/" << k <<  ". , " <<  ly[i] <<"/" << k <<  ". ) " 
-       << ( i < l-1 ? ',' : '}' ) << " \n ";
+  for (int i=0;i<l;i++) {
+    cc << " \t R2( " << lx[i] << "/" << k << ". , " << ly[i] << "/" << k << ". ) " << ( i < l-1 ? ',' : '}' ) << " \n";
+  }
+  return 0;
 }
 
-int dump(int l,int ll,TTab t, ostream & cc=cout) 
+int dump(int l,int ll,TTab t, ostream & cc=cout)
 {
   cc << " { \n" ;
-  for (int i=0;i<l;i++)
-    { cc << "\t\t" ;
-      dump(ll,t[i],cc);
-      cc  <<  " " << ( i < l-1 ? ',' : '}' ) << endl;  ;
-    }
+  for (int i=0;i<l;i++) {
+    cc << "\t\t";
+    dump(ll, t[i], cc);
+    cc  <<  " " << ( i < l-1 ? ',' : '}' ) << endl;
+  }
+  return 0;
 }
 
 int f(int k,int *nn, int * aa, int l0,int l1,int l2)
 {
   int L[3]={l0,l1,l2};
-  
+
   int i=1;
   for (int j=0;j<k;j++)
     {
@@ -57,7 +61,7 @@ int f(int k,int *nn, int * aa, int l0,int l1,int l2)
 int main(int argc,const char ** argv)
 {
   if(argc<2) return  1;
-  
+
   int k=atoi(argv[1]);
   const char * prefix="";
   if(argc>2) prefix=argv[2];
@@ -76,15 +80,15 @@ int main(int argc,const char ** argv)
   int e1=e0+k-1;
   int e2=e1+k-1;
   int t =e2+k;
- 
+
   ostringstream si;
   for (int ii=0;ii<=k;ii++)
-    { 
+    {
       int cc=1;
       ostringstream sj;
       for (int jj=0;jj+ii<=k;jj++)
 	{
-	
+
 	  ostringstream sk;
 
           for(int kk=0;ii+jj+kk<k;kk++)
@@ -139,7 +143,7 @@ int main(int argc,const char ** argv)
   for (int l=0;l<i;l++)
     cout << num[l] << ",  ";
   cout << endl;
- 
+
   if(cf ==0) cf = & cout;
   *cf << prefix <<"nn[" << i << "][" << k << "] = " ;
   dump(i,k,nn,*cf);
@@ -164,6 +168,6 @@ int main(int argc,const char ** argv)
   *cf << ";\n";
 
 
-  if(ccf) delete ccf; // close file  
+  if(ccf) delete ccf; // close file
 
 }

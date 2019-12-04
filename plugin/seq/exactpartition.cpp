@@ -20,112 +20,129 @@
 // AUTHORS : Pierre Jolivet
 // E-MAIL  : pierre.jolivet@enseeiht.fr
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include "ff++.hpp"
-long exactpartition (int n, int m, double **v, long *J) {
-	int kkerr = 0;
-	long N = (1 << 30);
+long exactpartition(int n, int m, double **v, long *J) {
+  int kkerr = 0;
+  long N = (1 << 30);
 
-	cout << " exactpartition " << n << " " << m << " N =" << N << endl;
+  cout << " exactpartition " << n << " " << m << " N =" << N << endl;
 
-	for (int i = 0; i < m; ++i) {
-		long s = 0, j0 = N;
+  for (int i = 0; i < m; ++i) {
+    long s = 0, j0 = N;
 
-		for (int j = 0; j < n; ++j) {
-			if (v[j]) {
-				int jj = J[j];
-				double w = v[j][i];
-				long lw = lrint(w * N);
-				if (lw && jj < j0) {
-					j0 = j;	// prco le plus petit non nulle
-				}
+    for (int j = 0; j < n; ++j) {
+      if (v[j]) {
+        int jj = J[j];
+        double w = v[j][i];
+        long lw = lrint(w * N);
+        if (lw && jj < j0) {
+          j0 = j;    // prco le plus petit non nulle
+        }
 
-				v[j][i] = (double)lw;
-				s += lw;
-			}
-		}
+        v[j][i] = (double)lw;
+        s += lw;
+      }
+    }
 
-		ffassert(s && j0 < N);
-		double ss = 0;
+    ffassert(s && j0 < N);
+    double ss = 0;
 
-		for (int j = 0; j < n; ++j) {
-			if (v[j]) {
-				double w = v[j][i] / s;
-				long lw = lrint(w * N);
-				double we = (double)lw / (double)N;
-				v[j][i] = we;
-				ss += we;
-			}
-		}
+    for (int j = 0; j < n; ++j) {
+      if (v[j]) {
+        double w = v[j][i] / s;
+        long lw = lrint(w * N);
+        double we = (double)lw / (double)N;
+        v[j][i] = we;
+        ss += we;
+      }
+    }
 
-		double err = ss - 1.;
-		assert(fabs(err) * N < 10);	// bofbof ???? FH.
-		v[j0][i] -= err;
-		// verif ..
-		ss = 0;
+    double err = ss - 1.;
+    assert(fabs(err) * N < 10);    // bofbof ???? FH.
+    v[j0][i] -= err;
+    // verif ..
+    ss = 0;
 
-		for (int j = 0; j < n; ++j) {
-			if (v[j]) {ss += v[j][i];}}
+    for (int j = 0; j < n; ++j) {
+      if (v[j]) {
+        ss += v[j][i];
+      }
+    }
 
-		kkerr += (ss != 1.);
-	}
+    kkerr += (ss != 1.);
+  }
 
-	ffassert(kkerr == 0);
-	return 0;
+  ffassert(kkerr == 0);
+  return 0;
 }
 
-long exactpartition (FEbaseArrayKn<double> *const &p, KN<long> *const &pj) {
-	int n = p->N, m = 0;
-	double **v = new double *[n];
-	int kerr = 0;
+long exactpartition(FEbaseArrayKn< double > *const &p, KN< long > *const &pj) {
+  int n = p->N, m = 0;
+  double **v = new double *[n];
+  int kerr = 0;
 
-	for (int i = 0; i < n; ++i) {
-		KN<double> *vi = p->get(i);
-		int mi = vi ? vi->N() : 0;
-		if (m == 0) {m = mi;} else if (m != mi) {kerr++;}
+  for (int i = 0; i < n; ++i) {
+    KN< double > *vi = p->get(i);
+    int mi = vi ? vi->N( ) : 0;
+    if (m == 0) {
+      m = mi;
+    } else if (m != mi) {
+      kerr++;
+    }
 
-		//v[i] = *vi;
-		v[i] = vi ? *vi : NULL;
-	}
+    // v[i] = *vi;
+    v[i] = vi ? *vi : NULL;
+  }
 
-	ffassert(kerr == 0);
-	ffassert(pj->N() >= n);
-	exactpartition(n, m, v, *pj);
-	delete [] v;
-	return 0;
+  ffassert(kerr == 0);
+  ffassert(pj->N( ) >= n);
+  exactpartition(n, m, v, *pj);
+  delete[] v;
+  return 0;
 }
 
-long exactpartition (KN<KN<double> > *const &p, KN<long> *const &pj) {
-	int n = p->N(), m = 0;
-	double **v = new double *[n];
-	int kerr = 0;
+long exactpartition(KN< KN< double > > *const &p, KN< long > *const &pj) {
+  int n = p->N( ), m = 0;
+  double **v = new double *[n];
+  int kerr = 0;
 
-	for (int i = 0; i < n; ++i) {
-		KN_<double> vi = (*p)(i);
-		int mi = vi ? vi.N() : 0;
-		if (m == 0) {m = mi;} else if (m != mi) {kerr++;}
+  for (int i = 0; i < n; ++i) {
+    KN_< double > vi = (*p)(i);
+    int mi = vi ? vi.N( ) : 0;
+    if (m == 0) {
+      m = mi;
+    } else if (m != mi) {
+      kerr++;
+    }
 
-		if (mi == 0) {v[i] = 0;} else {v[i] = vi;}
-	}
+    if (mi == 0) {
+      v[i] = 0;
+    } else {
+      v[i] = vi;
+    }
+  }
 
-	ffassert(kerr == 0);
-	ffassert(pj->N() >= n);
-	exactpartition(n, m, v, *pj);
-	delete [] v;
-	return 0;
+  ffassert(kerr == 0);
+  ffassert(pj->N( ) >= n);
+  exactpartition(n, m, v, *pj);
+  delete[] v;
+  return 0;
 }
 
-static void Load_Init () {
-	// to be sure  to have unique  add
-	if (!Global.Find("exactpartition").NotNull()) {
-		Global.Add("exactpartition", "(", new OneOperator2_<long, FEbaseArrayKn<double> *, KN<long> *>(exactpartition));
-		// KN<KN<double> >
-		Global.Add("exactpartition", "(", new OneOperator2_<long, KN<KN<double> > *, KN<long> *>(exactpartition));
-	}
+static void Load_Init( ) {
+  // to be sure  to have unique  add
+  if (!Global.Find("exactpartition").NotNull( )) {
+    Global.Add("exactpartition", "(",
+               new OneOperator2_< long, FEbaseArrayKn< double > *, KN< long > * >(exactpartition));
+    // KN<KN<double> >
+    Global.Add("exactpartition", "(",
+               new OneOperator2_< long, KN< KN< double > > *, KN< long > * >(exactpartition));
+  }
 }
 
 LOADFUNC(Load_Init)

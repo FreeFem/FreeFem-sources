@@ -1,6 +1,6 @@
 load "msh3" 
  
-meshL ThL3=line3(40,[x,1,x*0.1]);
+meshL ThL3=Sline(40,[x,1,x*0.1]);
 
 fespace Vh(ThL3,P2);
 func f = 1 ;

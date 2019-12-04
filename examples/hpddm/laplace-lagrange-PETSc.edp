@@ -3,47 +3,37 @@
 
 load "PETSc"                        // PETSc plugin
 macro dimension()2// EOM            // 2D or 3D
-macro trueRestrict()true// EOM
-macro removeZeros()true// EOM
 include "macro_ddm.idp"             // additional DDM functions
 
-macro def(i)i// EOM                 // scalar field definition
-macro init(i)i// EOM                // scalar field initialization
 macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
 func Pk = P1;                       // finite element space
 
-int s = getARGV("-split", 1);                                   // refinement factor
-func f = 1 + x - y;
+meshN Th = square(getARGV("-global", 40), getARGV("-global", 40)); // global mesh
+Mat A;
+buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
 
-meshN Th = square(1, 1);
-fespace Wh(Th, Pk);           // local finite element space
-int[int][int] intersection;   // local-to-neighbors renumbering
-real[int] D;                  // partition of unity
-{
-    Th = square(getARGV("-global", 40), getARGV("-global", 40));    // global mesh
-    build(Th, s, intersection, D, Pk, mpiCommWorld)
-}
-
+fespace Wh(Th, Pk);                 // local finite element space
 varf vPb(u, v) = intN(Th)(grad(u)' * grad(v));
+func f = 1 + x - y;
 varf vL(u, v)  = intN(Th)(f * v);
 varf vb(u, v)  = intN(Th)(v);
 matrix<real> Loc = vPb(Wh, Wh);
 real[int] F = vL(0, Wh);
 real[int] B = vb(0, Wh);
 real[int] pB, pF, pSol;
-Mat A(Loc, intersection, D);
+A = Loc;
 changeNumbering(A, B, pB);
 changeNumbering(A, F, pF);
 
-Mat AA = [[ A, pB ],
-          [ pB', 0 ]];
+Mat N = [[ A  , pB ],
+         [ pB', 0  ]];
 if(mpirank == 0) {
     pF.resize(pF.n + 1);
     pF = [pF(0:pF.n - 2), 0];
 }
 {
     Mat C;
-    MatConvert(AA, C);
+    MatConvert(N, C);
     set(C, sparams = "-pc_type lu");
     KSPSolve(C, pF, pSol);
     if(mpirank == 0)
@@ -51,6 +41,7 @@ if(mpirank == 0) {
     Wh sol;
     changeNumbering(A, sol[], pSol, inverse = true, exchange = true);
     macro params()cmm = "Global solution #1", wait = 1, dim = 3// EOM
+    macro def(u)u//
     plotMPI(Th, sol, Pk, def, real, params)
 }
 {
@@ -58,12 +49,13 @@ if(mpirank == 0) {
     split = 1;
     if(mpirank == 0)
         split(pF.n - 1) = 2;
-    set(AA, sparams = "-ksp_view_pre -pc_type fieldsplit -fieldsplit_0_pc_type lu -fieldsplit_0_mat_mumps_cntl_3 1e-12 -fieldsplit_0_mat_mumps_icntl_24 1 -pc_fieldsplit_detect_saddle_point", fields = split);
-    KSPSolve(AA, pF, pSol);
+    set(N, sparams = "-ksp_view_pre -pc_type fieldsplit -fieldsplit_0_pc_type lu -fieldsplit_0_mat_mumps_cntl_3 1e-12 -fieldsplit_0_mat_mumps_icntl_24 1 -pc_fieldsplit_detect_saddle_point", fields = split);
+    KSPSolve(N, pF, pSol);
     if(mpirank == 0)
         pSol.resize(pSol.n - 1);
     Wh sol;
     changeNumbering(A, sol[], pSol, inverse = true, exchange = true);
     macro params()cmm = "Global solution #2", wait = 1, dim = 3// EOM
+    macro def(u)u//
     plotMPI(Th, sol, Pk, def, real, params)
 }

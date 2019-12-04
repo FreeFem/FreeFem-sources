@@ -231,7 +231,6 @@ void signalCPUHandler( int signum ) {
 %type <cexp>  ID_array_space
 %type <args> bornes;
 %type <args>   border_expr;
-%type <args>   curve3_expr;
 %type <type>   type_of_dcl;
 %type <str> id;
 %type <str> fespace123;
@@ -603,12 +602,6 @@ instruction:   ';' {$$=0;}
          |  BORDER  ID   '['  array ']' ';' {
                       $$=0;currentblock->NewID(atype<const E_Border *>(),$2,C_F0(TheOperators,"[border]",$4));}
 
-        |  CURVE3  ID   curve3_expr { /* <<BORDER_ID>> */
-                $$=0;currentblock->NewID(atype<const E_Curve3 *>(),$2,C_F0(TheOperators,"[curve3]",$3));}
-        |  CURVE3  ID   '['  array ']' ';' {
-                $$=0;currentblock->NewID(atype<const E_Curve3 *>(),$2,C_F0(TheOperators,"[curve3]",$4));}
-
-
          |  BREAK ';' {
                     if(inloopcount)
                       $$= C_F0(new E_throw(E_exception::e_break),atype<void>());
@@ -648,12 +641,6 @@ border_expr:   bornes instruction {
    $$ = ($1 += currentblock->close(currentblock,$2));
    }
  ;
-
-curve3_expr:   bornes instruction {
-    //currentblock->close(currentblock;);
-    $$ = ($1 += currentblock->close(currentblock,$2));
-}
-;
 
 Expr:
     no_comma_expr /*[[no_comma_expr:]]*/
@@ -995,7 +982,6 @@ int mainff (int  argc, char **argv)
    zzzfff->Add("continue",CONTINUE);
    zzzfff->Add("return",RETURN);
    zzzfff->Add("border",BORDER);
-   zzzfff->Add("curve3",CURVE3);
    zzzfff->Add("fespace",FESPACEID);
    zzzfff->Add("try",TRY);
    zzzfff->Add("catch",CATCH);

@@ -752,7 +752,6 @@ class IterativeMethod : public OneOperator {
                             Kn& x = *GetAny<Kn*>((*X)(stack));
                             int n = x.N();
                             Kn& b = *GetAny<Kn*>((*B)(stack));
-                            cout << C << endl;
                             MatF_O PP(n, stack, C);
                             if(c == 0) {
                                 MatF_O AA(n, stack, A);
@@ -806,7 +805,7 @@ basicAC_F0::name_and_type IterativeMethod<R, S>::E_LCG::name_param[] = {
     {"precon", &typeid(Polymorphic*)},
     {"prefix", &typeid(string*)},
     {"sparams", &typeid(string*)},
-    {"comm", &typeid(pcommworld)}
+    {"communicator", &typeid(pcommworld)}
 };
 
 template<class Type>

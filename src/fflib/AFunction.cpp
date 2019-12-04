@@ -203,21 +203,6 @@ class  OneOperator_border : public OneOperator {public:
     OneOperator_border(): OneOperator(atype<const E_Border *>(),true) {}
 };
 
-class  OneOperator_curve3 : public OneOperator {public:
-    E_F0 * code(const basicAC_F0 & a) const
-    { if (a.size()==1 && a[0].left()==atype<E_Array>() )
-    return new E_Curve3(dynamic_cast<const E_Array*>(a[0].LeftValue()));
-    else
-    return  new E_Curve3(a);
-        
-    }
-    OneOperator_curve3(): OneOperator(atype<const E_Curve3 *>(),true) {}
-};
-
-
-
-
-
 class  OneOperator_border_label : public OneOperator {public:
   class Op : public E_F0 {public:
    const  E_Border *b;
@@ -259,8 +244,8 @@ template<class R,class RR>
 struct Op2_set_pstring: public binary_function<R,string*,R> {
   static R  f(R const & p,string * const & a)  {*p =  new RR(a->c_str());
    if ( !*p || !**p) {
-       cerr << " Error openning file " << *a << endl;
-       ExecError("Error openning file");}
+       cerr << " Error opening file " << *a << endl;
+       ExecError("Error opening file");}
    return p;} };
 
 template<class R,class RR>
@@ -1081,8 +1066,6 @@ void Init_map_type()
     Dcl_Type<TransE_Array >();// add
     Dcl_Type<const E_Border *>();
     Dcl_Type<const E_BorderN *>();
-    Dcl_Type<const E_Curve3 *>();
-    Dcl_Type<const E_Curve3N *>();
     typedef MyMap<String,String> MyMapSS;
     map_type[typeid(MyMapSS*).name()] = new ForEachType<MyMapSS*>(Initialize<MyMapSS >,Delete<MyMapSS >) ;
     map_type_of_map[make_pair(atype<string*>(),atype<string*>())]=atype<MyMapSS*>();
@@ -1387,10 +1370,6 @@ void Init_map_type()
        new AddBorderOperator
        );
     
-     TheOperators->Add("+",
-       new AddCurve3Operator
-       );
-
       // add frev 2007
       TheOperators->Add("\'", new opTrans);
 
@@ -1531,7 +1510,6 @@ void Init_map_type()
 
      TheOperators->Add("[]",new OneOperator_array );
      TheOperators->Add("[border]",new OneOperator_border );
-     TheOperators->Add("[curve3]",new OneOperator_curve3 );
 
      Global.Add("cos","(",new OneOperator1<double>(cos));
     Global.Add("square","(",new OneOperator1<long,long,E_F_F0<long,const long &> >(Square));// add FH Mai 2011

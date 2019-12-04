@@ -51,7 +51,7 @@ else
 PETSC_DOWNLOAD := --download-scalapack --download-metis --download-ptscotch \
 		--download-mumps --download-hypre --download-parmetis \
 		--download-superlu --download-suitesparse --download-tetgen \
-		--download-hpddm --download-hpddm-commit=1686037 --download-slepc
+		--download-hpddm --download-hpddm-commit=1622afb --download-slepc
 PETSC_DOWNLOAD_C:= --download-hpddm --download-hpddm-commit=1686037 --download-slepc
 endif
 ifeq ($(FF_generic_petsc), yes)
@@ -63,26 +63,20 @@ ifeq ($(WIN32DLLTARGET),)
 ##   Not on windows....
   FFWINDOWS=false
   WITH_SLEPC=yes
-  FLAGS_CONF_PETSC_REAL= --with-debugging=no \
+  FLAGS_CONF_PETSC_REAL= --with-debugging=0 \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' --with-cxx-dialect=C++11 \
 		COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
-		CFLAGS=' $(FLAGS_MTUNE)' \
-		CXXFLAGS='$(FLAGS_MTUNE)' \
-		FFLAGS='$(FLAGS_MTUNE)' \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 		--with-scalar-type=real $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
 		$(PETSC_DOWNLOAD)
-FLAGS_CONF_PETSC_COMPLEX= --with-debugging=no \
+FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' --with-cxx-dialect=C++11 \
 		COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
-		CFLAGS=' $(FLAGS_MTUNE)' \
-		CXXFLAGS='$(FLAGS_MTUNE)' \
-		FFLAGS='$(FLAGS_MTUNE)' \
 		--with-scalar-type=complex \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
 		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
@@ -98,12 +92,10 @@ else
 ##   On  windows....
   FFWINDOWS=true
   WITH_SLEPC=no
-  FLAGS_CONF_PETSC_REAL= --with-python-exec=/usr/bin/python2 --with-shared-libraries=0 --with-debugging=no \
+  FLAGS_CONF_PETSC_REAL= --with-python-exec=/usr/bin/python2 --with-shared-libraries=0 --with-debugging=0 \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 \
 	COPTFLAGS='-O3 $(FLAGS_MTUNE) -D__int64=long\ long' \
 	CXXOPTFLAGS='-O3 $(FLAGS_MTUNE) -D__int64=long\ long' \
-	CFLAGS=' $(FLAGS_MTUNE) -D__int64=long\ long' \
-	CXXFLAGS='$(FLAGS_MTUNE) -D__int64=long\ long' \
 	--with-scalar-type=real \
 	--with-mpi-lib='$(MPI_LIB)' \
 	--with-mpi-include='$(MPI_INC_DIR)' \
@@ -116,12 +108,10 @@ else
   #--download-slepc
   #--with-blas-lapack-lib='/mingw64/lib/libopenblas.a' \
 
- FLAGS_CONF_PETSC_COMPLEX= --with-python-exec=/usr/bin/python2 	--with-shared-libraries=0	--with-debugging=no \
+ FLAGS_CONF_PETSC_COMPLEX= --with-python-exec=/usr/bin/python2 	--with-shared-libraries=0	--with-debugging=0 \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 \
 	COPTFLAGS='-O3 $(FLAGS_MTUNE) -D__int64=long\ long' \
 	CXXOPTFLAGS='-O3 $(FLAGS_MTUNE) -D__int64=long\ long' \
-	CFLAGS=' $(FLAGS_MTUNE) -D__int64=long\ long' \
-	CXXFLAGS='$(FLAGS_MTUNE) -D__int64=long\ long' \
 	--with-scalar-type=complex \
 	--with-mpi-lib='$(MPI_LIB)' \
 	--with-mpi-include='$(MPI_INC_DIR)' \
@@ -152,8 +142,8 @@ all-local:
 # -------------------------------
 
 DIRPKG=../pkg
-VERSION=3.12.0
-VERSION_SLEPC=3.011.2
+VERSION=3.12.2
+VERSION_SLEPC=3.12.0
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))

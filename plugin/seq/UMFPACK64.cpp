@@ -20,50 +20,43 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep: umfpack amd blas
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 // file to add UMFPACK solver with dynamic load.
 
-#include  <iostream>
+#include <iostream>
 using namespace std;
 #include "ff++.hpp"
 
-template<class K=double>
-class VirtualSolverUMFPACK64: public  VirtualSolver<int,K>
-{
-public:
-    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 1&8&16;
-    typedef HashMatrix<int,K>  HMat;
-    typedef HashMatrix<SuiteSparse_long,K>  HMat64;
-    HMat *pA;
-    HMat64 *pA64;
-    VirtualSolverUMFPACK<SuiteSparse_long,K> v64;
+template< class K = double >
+class VirtualSolverUMFPACK64 : public VirtualSolver< int, K > {
+ public:
+  //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+  static const int orTypeSol = 1 & 8 & 16;
+  typedef HashMatrix< int, K > HMat;
+  typedef HashMatrix< SuiteSparse_long, K > HMat64;
+  HMat *pA;
+  HMat64 *pA64;
+  VirtualSolverUMFPACK< SuiteSparse_long, K > v64;
 
-     VirtualSolverUMFPACK64(HMat  &AA, const Data_Sparse_Solver & ds,Stack stack )
-    : pA(&AA),
-      pA64(new HashMatrix<SuiteSparse_long,K>(AA)),
-      v64(*pA64,ds,stack) {}
-    void dosolver(K *x,K*b,int N,int trans){
-        return v64.dosolver(x,b,N,trans);
-    }
+  VirtualSolverUMFPACK64(HMat &AA, const Data_Sparse_Solver &ds, Stack stack)
+    : pA(&AA), pA64(new HashMatrix< SuiteSparse_long, K >(AA)), v64(*pA64, ds, stack) {}
+  void dosolver(K *x, K *b, int N, int trans) { return v64.dosolver(x, b, N, trans); }
 
-     void fac_init(){v64.fac_init();}  // n, nzz fixe
-     void fac_symbolic(){v64.fac_symbolic();}
-     void fac_numeric(){v64.fac_numeric();}
-     void UpdateState(){v64.UpdateState();}
+  void fac_init( ) { v64.fac_init( ); }    // n, nzz fixe
+  void fac_symbolic( ) { v64.fac_symbolic( ); }
+  void fac_numeric( ) { v64.fac_numeric( ); }
+  void UpdateState( ) { v64.UpdateState( ); }
 
-   ~VirtualSolverUMFPACK64()
-    { delete pA64;}
+  ~VirtualSolverUMFPACK64( ) { delete pA64; }
 };
 
-static void Load_Init()
-{
-    addsolver<VirtualSolverUMFPACK64<double>>("UMFPACK64",50,1);
-    addsolver<VirtualSolverUMFPACK64<Complex>>("UMFPACK64",50,1);
-    setptrstring(def_solver,"UMFPACK64");
+static void Load_Init( ) {
+  addsolver< VirtualSolverUMFPACK64< double > >("UMFPACK64", 50, 1);
+  addsolver< VirtualSolverUMFPACK64< Complex > >("UMFPACK64", 50, 1);
+  setptrstring(def_solver, "UMFPACK64");
 }
 LOADFUNC(Load_Init)

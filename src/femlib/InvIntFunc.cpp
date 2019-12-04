@@ -36,8 +36,9 @@ inline int InvIntFunction(int l)
 // calcul de inverse de la fonction F 
 {
   // inverse la function F 
-  int i=0,j,k=l;
+  int i=0,j,k=F_1(l);
   int Fi=F(i),Fj,Fk=F(k);
+  assert(l<=Fk); 
   while (1)
     {
       j = (i+k)/2;

@@ -1,0 +1,53 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"                        // PETSc plugin
+macro dimension()2// EOM            // 2D or 3D
+include "macro_ddm.idp"
+include "cube.idp"
+macro def(i)[i, i#y]// EOM // vector field definition
+macro init(i)[i, i]// EOM  // vector field initialization
+
+macro Curl(ux, uy)[dx(uy)-dy(ux)]// EOM
+func Pk = RT0Ortho;
+
+int Dirichlet = 1;
+
+int[int] chlab = [Dirichlet, Dirichlet, Dirichlet, Dirichlet];
+meshN Th = square(getARGV("-global", 10), getARGV("-global", 10), label = chlab);
+
+fespace Wh(Th, Pk);
+
+int[int][int] intersection;   // local-to-neighbors renumbering
+real[int] D;
+{
+    buildMinimalist(Th, intersection, D, Pk)
+    Wh def(u);
+    varf onG(def(u), def(v)) = on(-111111, u = 10 + x + y, uy = 100 + y - x);
+    u[] = onG(0, Wh);
+    D = u[];
+    for [j, dj : D] dj = abs(dj) > 1e-1 ? 0.0 : 1.0;
+}
+
+matrix Loc;
+real[int] rhs(Wh.ndof);
+{
+    varf vPb([Ex,Ey],[vx,vy]) =
+        intN(Th)(Curl(vx,vy)'*Curl(Ex,Ey))
+        + intN(Th)([vx,vy]'*[Ex,Ey])
+        + on(Dirichlet, Ex=0,Ey=0);
+    Loc = vPb(Wh, Wh, tgv = -1);
+    func f = exp(-8.0*((x-0.5)^2+(y-0.5)^2));
+    varf vPbRhs([Ex,Ey],[vx,vy]) =
+        - intN(Th)(100*[vx,vy]'*[0,f])
+        + on(Dirichlet, Ex=0,Ey=0);
+    rhs = vPbRhs(0, Wh, tgv = -1);
+}
+
+Mat A(Loc, intersection, D);
+set(A, sparams = "-pc_type lu");
+
+Wh def(sol);
+sol[] = A^-1 * rhs;
+macro params()cmm = "Global solution", wait = 1, fill = 1// EOM
+plotMPI(Th, def(sol), Pk, def, real, params)

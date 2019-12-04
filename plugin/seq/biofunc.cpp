@@ -20,30 +20,38 @@
 // AUTHORS : ...
 // E-MAIL  : ...
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include <ff++.hpp>
 #include <AFunction_ext.hpp>
 #include <cstdlib>
 using namespace Fem2D;
 typedef double R;
-double fmonod(const double &xx,const double &k,const double &kb)
-{double x=max(xx,0.); return (k*x)/(kb+x);}
-double dfmonod(const double &xx,const double& k,const double &kb)
-{double x = max(xx,0.), a= kb+x;return k/a - k*x/(a*a);}
-double fmonod(const double &xx,const double &kb)
-{double x=max(xx,0.); return (x)/(kb+x);}
-double dfmonod(const double &xx,const double &kb)
-{double x = max(xx,0.), a= kb+x;return 1./a - x/(a*a);}
+double fmonod(const double &xx, const double &k, const double &kb) {
+  double x = max(xx, 0.);
+  return (k * x) / (kb + x);
+}
+double dfmonod(const double &xx, const double &k, const double &kb) {
+  double x = max(xx, 0.), a = kb + x;
+  return k / a - k * x / (a * a);
+}
+double fmonod(const double &xx, const double &kb) {
+  double x = max(xx, 0.);
+  return (x) / (kb + x);
+}
+double dfmonod(const double &xx, const double &kb) {
+  double x = max(xx, 0.), a = kb + x;
+  return 1. / a - x / (a * a);
+}
 
-static void init () {
-    Global.Add("fmonod", "(", new OneOperator3_<R,R,R,R >(fmonod));
-    Global.Add("dfmonod", "(", new OneOperator3_<R,R,R,R>(dfmonod));
-    Global.Add("fmonod", "(", new OneOperator2_<R,R,R >(fmonod));
-    Global.Add("dfmonod", "(", new OneOperator2_<R,R,R>(dfmonod));
+static void init( ) {
+  Global.Add("fmonod", "(", new OneOperator3_< R, R, R, R >(fmonod));
+  Global.Add("dfmonod", "(", new OneOperator3_< R, R, R, R >(dfmonod));
+  Global.Add("fmonod", "(", new OneOperator2_< R, R, R >(fmonod));
+  Global.Add("dfmonod", "(", new OneOperator2_< R, R, R >(dfmonod));
 }
 
 LOADFUNC(init);

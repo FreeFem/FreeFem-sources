@@ -21,10 +21,10 @@
 // David Radice
 // E-MAIL  : ...
 
-// *INDENT-OFF* //
+/* clang-format off */
 //ff-c++-LIBRARY-dep: gmm
 //ff-c++-cpp-dep:
-// *INDENT-ON* //
+/* clang-format on */
 
 #include <cmath>
 #include <iostream>
@@ -42,122 +42,117 @@
 using namespace std;
 using namespace gmm;
 
-typedef ilut_precond<row_matrix<rsvector<double> > > my_ilut_precond;
+typedef ilut_precond< row_matrix< rsvector< double > > > my_ilut_precond;
 
 class ILUT;
 
 class ILUT_Matrix {
-	private:
-		long *_i;
-		long *_j;
-		double *_c;
-		long _nelem;
-		long _size;
+ private:
+  long *_i;
+  long *_j;
+  double *_c;
+  long _nelem;
+  long _size;
 
-	public:
-		ILUT_Matrix (KN<long> *const &i,
-		             KN<long> *const &j,
-		             KN<double> *const &c): _i(*i),
-			_j(*j),
-			_c(*c),
-			_nelem(c->N()) {
-			_size = max(i->max(), j->max());
-			++_size;
-		}
+ public:
+  ILUT_Matrix(KN< long > *const &i, KN< long > *const &j, KN< double > *const &c)
+    : _i(*i), _j(*j), _c(*c), _nelem(c->N( )) {
+    _size = max(i->max( ), j->max( ));
+    ++_size;
+  }
 
-		friend class ILUT;
+  friend class ILUT;
 };
 
 class ILUT_Vector {
-	private:
-		double *_v;
-		long _size;
+ private:
+  double *_v;
+  long _size;
 
-	public:
-		ILUT_Vector (KN<double> *const &c): _v(*c), _size(c->N()) {}
+ public:
+  ILUT_Vector(KN< double > *const &c) : _v(*c), _size(c->N( )) {}
 
-		friend class ILUT;
+  friend class ILUT;
 };
 
 class ILUT {
-	private:
-		static my_ilut_precond *p;
-		static long size;
+ private:
+  static my_ilut_precond *p;
+  static long size;
 
-	public:
-		static long make_ilut_precond (ILUT_Matrix const &m) {
-			row_matrix<rsvector<double> > A(m._size, m._size);
-			row_matrix<wsvector<double> > w_A(m._size, m._size);
+ public:
+  static long make_ilut_precond(ILUT_Matrix const &m) {
+    row_matrix< rsvector< double > > A(m._size, m._size);
+    row_matrix< wsvector< double > > w_A(m._size, m._size);
 
-			for (long k(0); k < m._nelem; ++k) {
-				w_A[m._i[k]][m._j[k]] = m._c[k];
-			}
+    for (long k(0); k < m._nelem; ++k) {
+      w_A[m._i[k]][m._j[k]] = m._c[k];
+    }
 
-			copy(w_A, A);	// A <-- w_A
-			delete p;
-			p = new my_ilut_precond(A, ILUT_K_FILLIN, ILUT_EPS);
+    copy(w_A, A);    // A <-- w_A
+    delete p;
+    p = new my_ilut_precond(A, ILUT_K_FILLIN, ILUT_EPS);
 
-			size = m._size;
+    size = m._size;
 
-			return 0;
-		}
+    return 0;
+  }
 
-		static void apply_ilut_precond (ILUT_Vector const &v,
-		                                KN<double> *const &x) {
-			vector<double> vv(size);
-			vector<double> xx(size);
+  static void apply_ilut_precond(ILUT_Vector const &v, KN< double > *const &x) {
+    vector< double > vv(size);
+    vector< double > xx(size);
 
-			for (long k = 0; k < size; ++k) {
-				vv[k] = v._v[k];
-			}
+    for (long k = 0; k < size; ++k) {
+      vv[k] = v._v[k];
+    }
 
-			mult(*p, vv, xx);	// xx <-- p.solve(vv)
+    mult(*p, vv, xx);    // xx <-- p.solve(vv)
 
-			for (long k = 0; k < size; ++k) {
-				(*x)[k] = xx[k];
-			}
+    for (long k = 0; k < size; ++k) {
+      (*x)[k] = xx[k];
+    }
 
-			// If used for the full vector fill the remaining components
-			for (long k = 0; k + size < x->N(); ++k) {
-				(*x)[k + size] = v._v[k + size];
-			}
-		}
+    // If used for the full vector fill the remaining components
+    for (long k = 0; k + size < x->N( ); ++k) {
+      (*x)[k + size] = v._v[k + size];
+    }
+  }
 };
 
 my_ilut_precond *ILUT::p = 0;
 long ILUT::size = 0;
 
-long*make_ilut_precond_eq (long *const &errorcode,
-                           ILUT_Matrix const &mat) {
-	*errorcode = ILUT::make_ilut_precond(mat);
-	return errorcode;
+long *make_ilut_precond_eq(long *const &errorcode, ILUT_Matrix const &mat) {
+  *errorcode = ILUT::make_ilut_precond(mat);
+  return errorcode;
 }
 
-KN<double>*apply_ilut_precond_eq (KN<double> *const &x,
-                                  ILUT_Vector const &vec) {
-	ILUT::apply_ilut_precond(vec, x);
-	return x;
+KN< double > *apply_ilut_precond_eq(KN< double > *const &x, ILUT_Vector const &vec) {
+  ILUT::apply_ilut_precond(vec, x);
+  return x;
 }
 
-ILUT_Matrix make_ilut_precond (KN<long> *const &i,
-                               KN<long> *const &j,
-                               KN<double> *const &v) {
-	return ILUT_Matrix(i, j, v);
+ILUT_Matrix make_ilut_precond(KN< long > *const &i, KN< long > *const &j, KN< double > *const &v) {
+  return ILUT_Matrix(i, j, v);
 }
 
-ILUT_Vector apply_ilut_precond (KN<double> *const &v) {
-	return ILUT_Vector(v);
-}
+ILUT_Vector apply_ilut_precond(KN< double > *const &v) { return ILUT_Vector(v); }
 
-static void Load_Init () {
-	if (verbosity) {cout << " -- load ilut init : " << endl;}
+static void Load_Init( ) {
+  if (verbosity) {
+    cout << " -- load ilut init : " << endl;
+  }
 
-	Dcl_Type<ILUT_Matrix>();
-	Dcl_Type<ILUT_Vector>();
-	Global.Add("applyIlutPrecond", "(", new OneOperator1_<ILUT_Vector, KN<double> *>(apply_ilut_precond));
-	Global.Add("makeIlutPrecond", "(", new OneOperator3_<ILUT_Matrix, KN<long> *, KN<long> *, KN<double> *>(make_ilut_precond));
-	TheOperators->Add("=", new OneOperator2_<long *, long *, ILUT_Matrix>(make_ilut_precond_eq));
-	TheOperators->Add("=", new OneOperator2_<KN<double> *, KN<double> *, ILUT_Vector>(apply_ilut_precond_eq));
+  Dcl_Type< ILUT_Matrix >( );
+  Dcl_Type< ILUT_Vector >( );
+  Global.Add("applyIlutPrecond", "(",
+             new OneOperator1_< ILUT_Vector, KN< double > * >(apply_ilut_precond));
+  Global.Add("makeIlutPrecond", "(",
+             new OneOperator3_< ILUT_Matrix, KN< long > *, KN< long > *, KN< double > * >(
+               make_ilut_precond));
+  TheOperators->Add("=", new OneOperator2_< long *, long *, ILUT_Matrix >(make_ilut_precond_eq));
+  TheOperators->Add(
+    "=", new OneOperator2_< KN< double > *, KN< double > *, ILUT_Vector >(apply_ilut_precond_eq));
 }
 
 LOADFUNC(Load_Init)

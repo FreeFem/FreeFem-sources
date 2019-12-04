@@ -1,0 +1,49 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc-complex"                // PETSc plugin
+macro dimension()2// EOM            // 2D or 3D
+include "macro_ddm.idp"             // additional DDM functions
+
+macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
+func Pk = P1;                       // finite element space
+
+meshN Th = square(getARGV("-global", 40), getARGV("-global", 40)); // global mesh
+Mat<complex> A;
+int s = getARGV("-split", 1);
+buildMat(Th, s, A, Pk, mpiCommWorld)
+
+fespace Wh(Th, Pk);                 // local finite element space
+
+func real wedge(real a, real b) {
+    if(y < 0.4 + 0.1 * 0.75 * x)
+        return 2;
+    else if(y < 0.8 - 0.2 * 0.75 * x)
+        return 1.5;
+    else
+        return 3;
+}
+real omega = 2 * pi * 5;
+func f = 80 * 100 * s * exp(-20 * 100 * s * ((x-0.5)^2 + (y-0.25)^2));
+complex[int] rhs(Wh.ndof);                  // local right-hand side
+matrix<complex> Loc;                        // local operator
+{                                           // local weak form
+    fespace Ph(Th, P0);
+    Ph val = wedge(x, y);
+    Ph k = omega / val;
+    varf vPb(u, v) = intN(Th)(-k^2 * u * v + (grad(u)' * grad(v))) + intN1(Th, -111111)(1i * k * u * v) + intN1(Th, 2)(1i * k * u * v) + intN(Th)(f * v) + on(1, u = 0.0);
+    Loc = vPb(Wh, Wh, tgv = -1);
+    rhs = vPb(0, Wh, tgv = -1);
+}
+
+A = Loc;
+if(usedARGV("-optimized_Schwarz") != -1)
+    set(A, sparams = "-ksp_view -sub_pc_type lu", O = Loc);
+else
+    set(A, sparams = "-ksp_view -pc_type lu");
+Wh<complex> u;                      // local solution
+
+u[] = A^-1 * rhs;
+
+macro def(u)u//
+plotMPI(Th, u, Pk, def, complex, cmm = "Global solution")
