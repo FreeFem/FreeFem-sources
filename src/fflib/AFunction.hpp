@@ -1809,7 +1809,7 @@ class E_Border  :public Polymorphic  {  public:
     //xindex( to<long*>(aa[3])  ),
     tab(0),
     label(++Count)
-    { cout << "eeeee"<<endl;
+    {
     Add("(",new OneOperator_borderN(this));
     Add("(",new OneOperator_borderN(this,1));
     Add("(",new OneOperator_borderN(this,1,1));

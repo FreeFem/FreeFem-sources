@@ -30,6 +30,19 @@ Mat N = [[ A  , pB ],
 if(mpirank == 0) {
     pF.resize(pF.n + 1);
     pF = [pF(0:pF.n - 2), 0];
+    F.resize(F.n + 1);
+    F = [F(0:F.n - 2), 0];
+}
+{
+    set(N, sparams = "-pc_type lu");
+    real[int] x = N^-1 * F;
+    if(mpirank == 0)
+        x.resize(x.n - 1);
+    Wh sol;
+    sol[] = x;
+    macro params()cmm = "Global solution #1", wait = 1, dim = 3// EOM
+    macro def(u)u//
+    plotMPI(Th, sol, Pk, def, real, params)
 }
 {
     Mat C;
@@ -40,7 +53,7 @@ if(mpirank == 0) {
         pSol.resize(pSol.n - 1);
     Wh sol;
     changeNumbering(A, sol[], pSol, inverse = true, exchange = true);
-    macro params()cmm = "Global solution #1", wait = 1, dim = 3// EOM
+    macro params()cmm = "Global solution #2", wait = 1, dim = 3// EOM
     macro def(u)u//
     plotMPI(Th, sol, Pk, def, real, params)
 }
@@ -55,7 +68,29 @@ if(mpirank == 0) {
         pSol.resize(pSol.n - 1);
     Wh sol;
     changeNumbering(A, sol[], pSol, inverse = true, exchange = true);
-    macro params()cmm = "Global solution #2", wait = 1, dim = 3// EOM
+    macro params()cmm = "Global solution #3", wait = 1, dim = 3// EOM
+    macro def(u)u//
+    plotMPI(Th, sol, Pk, def, real, params)
+}
+{
+    Mat M = [[ 0 , pB'],
+             [ pB, A  ]];
+    set(M, sparams = "-pc_type lu");
+    if(mpirank == 0) {
+        real[int] tmp = F(0:F.n - 2);
+        F(0) = 0;
+        F(1:F.n - 1) = tmp;
+    }
+    cout << F<<endl;
+    real[int] x = M^-1 * F;
+    if(mpirank == 0) {
+        real[int] tmp = x(1:F.n - 1);
+        x.resize(x.n - 1);
+        x = tmp;
+    }
+    Wh sol;
+    sol[] = x;
+    macro params()cmm = "Global solution #4", wait = 1, dim = 3// EOM
     macro def(u)u//
     plotMPI(Th, sol, Pk, def, real, params)
 }

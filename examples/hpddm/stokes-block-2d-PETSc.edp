@@ -56,6 +56,28 @@ int pPETSc;
 {
     matrix A = vPbA(VhV, VhV);
     matrix B = vPbB(VhP, VhV);
+    real[int] rhsV = vPbA(0, VhV);
+
+    Mat dA(A, intersectionV, DV, bs = 2);
+    Mat dC(DP.n, intersectionP, DP);
+    Mat dB(dA, dC, B);
+    Mat dS = [[dA , dB],
+              [dB', 0 ]];
+    view(dS);
+    set(dS, sparams = "-pc_type lu");
+    real[int] rhs(rhsV.n + VhP.ndof);
+    rhs(0:rhsV.n - 1) = rhsV;
+    real[int] sol = dS^-1 * rhs;
+    VhV def2(solV);
+    solV[] = sol(0:sol.n - VhP.ndof - 1);
+    VhP solP;
+    solP[] = sol(sol.n - VhP.ndof:sol.n - 1);
+    plotMPI(Th, def2(solV), PkV, def2, real, cmm = "Global velocity")
+    plotMPI(Th, solP, PkP, def1, real, cmm = "Global pressure")
+}
+{
+    matrix A = vPbA(VhV, VhV);
+    matrix B = vPbB(VhP, VhV);
     real[int] rhs = vPbA(0, VhV);
 
     Mat dA(A, intersectionV, DV, bs = 2);

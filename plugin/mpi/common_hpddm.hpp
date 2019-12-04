@@ -308,45 +308,34 @@ bool statistics(Type* const& Op) {
     return false;
 }
 
-template<class K>
-class distributedDot : public OneOperator {
-    public:
-        const int c;
-        class E_distributedDot : public E_F0mps {
-            public:
-                std::vector<std::tuple<Expression, Expression, Expression>> E;
-                const int c;
-                static const int n_name_param = 1;
-                static basicAC_F0::name_and_type name_param[];
-                Expression nargs[n_name_param];
-                E_distributedDot(const basicAC_F0& args, int d) : E(), c(d) {
-                    args.SetNameParam(n_name_param, name_param, nargs);
-                    if(c == 1) {
-                        const E_Array* EA = dynamic_cast<const E_Array*>(args[0].LeftValue());
-                        const E_Array* Ex = dynamic_cast<const E_Array*>(args[1].LeftValue());
-                        const E_Array* Ey = dynamic_cast<const E_Array*>(args[2].LeftValue());
-                        ffassert(EA->size() == Ex->size() && Ex->size() == Ey->size());
-                        E.reserve(EA->size());
-                        for(int i = 0; i < EA->size(); ++i)
-                            E.emplace_back(to<KN<double>*>((*EA)[i]), to<KN<K>*>((*Ex)[i]), to<KN<K>*>((*Ey)[i]));
-                    }
-                    else {
-                        E.reserve(1);
-                        E.emplace_back(to<KN<double>*>(args[0]), to<KN<K>*>(args[1]), to<KN<K>*>(args[2]));
-                    }
-                }
-
-                AnyType operator()(Stack stack) const;
-                operator aType() const { return atype<long>(); }
-        };
-        E_F0* code(const basicAC_F0 & args) const { return new E_distributedDot(args, c); }
-        distributedDot() : OneOperator(atype<K>(), atype<KN<double>*>(), atype<KN<K>*>(), atype<KN<K>*>()), c(0) { }
-        distributedDot(int) : OneOperator(atype<KN_<K>>(), atype<E_Array>(), atype<E_Array>(), atype<E_Array>()), c(1) { }
-};
-template<class K>
-basicAC_F0::name_and_type distributedDot<K>::E_distributedDot::name_param[] = {
-    {"communicator", &typeid(pcommworld)}
-};
+template<class K, class Type, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value == 1>::type* = nullptr>
+const K* getScaling(Type* const& pA) {
+    if(pA)
+        return pA->getScaling();
+    else
+        return nullptr;
+}
+template<class K, class Type, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value != 1>::type* = nullptr>
+const K* getScaling(Type* const& pA) {
+    if(pA)
+        return getScaling<K>(pA->_A);
+    else
+        return nullptr;
+}
+template<class Type, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value == 1>::type* = nullptr>
+MPI_Comm getCommunicator(Type* const& pA) {
+    if(pA)
+        return pA->getCommunicator();
+    else
+        return MPI_COMM_WORLD;
+}
+template<class Type, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value != 1>::type* = nullptr>
+MPI_Comm getCommunicator(Type* const& pA) {
+    if(pA)
+        return getCommunicator(pA->_A);
+    else
+        return MPI_COMM_WORLD;
+}
 template<class K, typename std::enable_if<!std::is_same<K, double>::value>::type* = nullptr>
 inline K prod(K u, double d, K v) {
     return std::conj(u) * d * v;
@@ -355,33 +344,23 @@ template<class K, typename std::enable_if<std::is_same<K, double>::value>::type*
 inline K prod(K u, double d, K v) {
     return u * d * v;
 }
-template<class K>
-AnyType distributedDot<K>::E_distributedDot::operator()(Stack stack) const {
-    MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0;
-    std::vector<K> dot(E.size(), K());
-    for(int j = 0; j < E.size(); ++j) {
-        KN<double>* pA = GetAny<KN<double>*>((*(std::get<0>(E[j])))(stack));
-        KN<K>* pin = GetAny<KN<K>*>((*(std::get<1>(E[j])))(stack));
-        KN<K>* pout = GetAny<KN<K>*>((*(std::get<2>(E[j])))(stack));
-        for(int i = 0; i < pin->n; ++i)
-            dot[j] += prod(pin->operator[](i), pA->operator[](i), pout->operator[](i));
+template<class Type, class K>
+K scalarProduct(Type* const& Op, KN<K>* const& u, KN<K>* const& v) {
+    const HPDDM::underlying_type<K>* const d = getScaling<HPDDM::underlying_type<K>>(Op);
+    MPI_Comm comm = getCommunicator(Op);
+    K val = 0;
+    if(d) {
+        for(int i = 0; i < u->n; ++i)
+            val += prod(u->operator[](i), d[i], v->operator[](i));
     }
-    MPI_Allreduce(MPI_IN_PLACE, dot.data(), dot.size(), HPDDM::Wrapper<K>::mpi_type(), MPI_SUM, comm ? *((MPI_Comm*)comm) : MPI_COMM_WORLD);
-    for(int j = 0; j < E.size(); ++j) {
-        if(std::abs(dot[j]) < std::numeric_limits<double>::epsilon())
-            dot[j] = K(std::numeric_limits<double>::epsilon());
-    }
-    if(c == 0) {
-        return SetAny<K>(dot[0]);
-    }
-    else {
-        KN<K>* ptab = new KN<K>(dot.size());
-        KN<K>& tab = *ptab;
-        for(int i = 0; i < dot.size(); ++i)
-            tab[i] = dot[i];
-        Add2StackOfPtr2Free(stack, ptab);
-        return SetAny<KN<K>>(tab);
-    }
+    else
+        val = (*u, *v);
+    MPI_Allreduce(MPI_IN_PLACE, &val, 1, HPDDM::Wrapper<K>::mpi_type(), MPI_SUM, comm);
+    return val;
+}
+template<class Op, class K>
+void addScalarProduct() {
+    atype<Op*>()->Add("(", "", new OneOperator3_<K, Op*, KN<K>*, KN<K>*>(scalarProduct<Op, K>));
 }
 
 template<class A>
@@ -481,10 +460,7 @@ void parallelIO(string*& name, MPI_Comm* const& comm, bool const& append) {
 #include "../seq/iovtk.cpp"
 
 static void Init_Common() {
-    if(!Global.Find("dscalprod").NotNull()) {
-        Global.Add("dscalprod", "(", new distributedDot<double>);
-        Global.Add("dscalprod", "(", new distributedDot<std::complex<double>>);
-        Global.Add("dscalprod", "(", new distributedDot<double>(1));
+    if(!Global.Find("savevtk").NotNull()) {
         Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMesh_Op> );
         Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMesh3_Op> );
     }

@@ -79,6 +79,8 @@ class DistributedCSR {
                     }
                 }
                 MatDestroy(&_petsc);
+                delete [] reinterpret_cast<decltype(this)*>(_exchange);
+                _exchange = nullptr;
             }
             if(_vS) {
                 for(int i = 0; i < _vS->size(); ++i)

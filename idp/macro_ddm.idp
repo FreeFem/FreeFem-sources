@@ -338,7 +338,7 @@ ENDIFMACRO
     }
 }// EOM
 
-macro buildOverlapEdgePeriodicRecursive(Th, ThBorder, fakeInterface, s, overlap, level, prolongation, intersection, D, P, comm, excluded, PkPart, defPart, initPart, labPeriodic, userPartitioning, bs) {
+macro buildOverlapEdgePeriodicRecursive(Th, ThBorder, fakeInterface, s, overlap, level, prolongation, intersection, DTab, P, comm, excluded, PkPart, defPart, initPart, labPeriodic, userPartitioning, bs) {
 IFMACRO(!def)
     NewMacro def(i)i EndMacro
 ENDIFMACRO
@@ -418,7 +418,7 @@ IFMACRO(!removeZeros)
 ENDIFMACRO
         mpiBarrier(comm);
         timerPartition = mpiWtime();
-        partition(Th, ThBorder, ThGlobal, PhGlobal, VhGlobal, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs)
+        partition(Th, ThBorder, ThGlobal, PhGlobal, VhGlobal, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, DTab, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs)
     }
     else if(mpiSize(comm) == 1) {
         for(int i = level - 1; i > 0; --i) {
@@ -426,14 +426,14 @@ ENDIFMACRO
             fespace WhLocalRefined(Th[i - 1], P);
             fespace WhLocalCoarse(Th[i], P);
             prolongation[i - 1] = interpolate(WhLocalRefined, WhLocalCoarse);
-            D[i].resize(WhLocalCoarse.ndof);
-            D[i] = 1.0;
+            DTab[i].resize(WhLocalCoarse.ndof);
+            DTab[i] = 1.0;
         }
         if(level == 1 && s > 1)
             Th[0] = trunc(Th[0], 1, split = s);
         fespace WhLocal(Th[0], P);
-        D[0].resize(WhLocal.ndof);
-        D[0] = 1.0;
+        DTab[0].resize(WhLocal.ndof);
+        DTab[0] = 1.0;
     }
     mpiBarrier(comm);
     if(verbosity > 0 && mpirank == 0) cout.scientific << " --- partition of unity built (in " << mpiWtime() - timerPartition << ")" << endl;
