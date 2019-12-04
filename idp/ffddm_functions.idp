@@ -479,29 +479,29 @@ func preffe#K[int] pr#PREC(preffe#K[int] &l)
       return pr#PREC2level(l);
 }
 
-func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, int nbiter, string sprec)
+func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, int maxit, string sprec)
 {	
   if (preffe#prmesh#isincomm) {
     preffe#prmesh#tic(pr#tgmresi)
     
     preffe#K[int] uni(x0.n);
     
-    int dim = min(nbiter,ffddmrestart);
+    int dim = min(maxit,ffddmrestart);
 
     IFMACRO(pr#withhpddmkrylov)
     load "hpddm"
     if (!preffe#prmesh#excluded) {
       uni = x0;
-      IterativeMethod(pr#A, rhs,uni, precon = pr#PREC, sparams = "-hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+nbiter+(mpirank == 0 ? " -hpddm_verbosity "+pr#verbosity : "")+" -hpddm_orthogonalization mgs",communicator = preffe#prmesh#mpicomm);
+      IterativeMethod(pr#A, rhs,uni, precon = pr#PREC, sparams = "-hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+maxit+(mpirank == 0 ? " -hpddm_verbosity "+pr#verbosity : "")+" -hpddm_orthogonalization mgs",communicator = preffe#prmesh#mpicomm);
     }
     else
-    IterativeMethod(pr#A, uni,uni, precon = pr#PREC, sparams = "-hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+nbiter+(mpirank == 0 ? " -hpddm_verbosity "+pr#verbosity : "")+" -hpddm_orthogonalization mgs",communicator = preffe#prmesh#mpicomm);
+    IterativeMethod(pr#A, uni,uni, precon = pr#PREC, sparams = "-hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+maxit+(mpirank == 0 ? " -hpddm_verbosity "+pr#verbosity : "")+" -hpddm_orthogonalization mgs",communicator = preffe#prmesh#mpicomm);
     ENDIFMACRO
     
     IFMACRO(pr#withhpddm)
     uni = x0;
     real[int] timings(0);
-    set(pr#hpddmOP, sparams = "-hpddm_schwarz_method "+pr#prec+" -hpddm_tol "+eps+" -hpddm_variant "+sprec+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+nbiter+" -hpddm_verbosity "+pr#verbosity+" -hpddm_orthogonalization mgs");
+    set(pr#hpddmOP, sparams = "-hpddm_schwarz_method "+pr#prec+" -hpddm_tol "+eps+" -hpddm_variant "+sprec+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+maxit+" -hpddm_verbosity "+pr#verbosity+" -hpddm_orthogonalization mgs");
     if (pr#corr == "AD")
       set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction additive");
     else if (pr#corr == "BNN")
@@ -559,11 +559,11 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
 
     real relres = 0;
     
-    int itg = 0;
+    pr#nbiter = 1;
     
     x0i = x0;
     
-    while (itg < nbiter) {
+    while (pr#nbiter <= maxit) {
       
       if (pr#corr=="ADEF2" || pr#corr=="RBNN1" || pr#corr=="RBNN2")
         /* TODO handle restart */
@@ -587,6 +587,7 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
             cout << "["+Stringification(pr)+"] GMRES has converged in 0 iteration " << endl;
             cout << "["+Stringification(pr)+"] The relative residual is " +  abs(g[0])/normb << endl;
           }
+          pr#nbiter = 0;
           uni = x0;
           break;
       }
@@ -668,32 +669,32 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
 
         if (pr#verbosity >= 3 && (mpiRank(preffe#prmesh#mpicomm)==0)) {
           if (pr#bdirect)
-            cout << "["+Stringification(pr)+"] It: "<< itg+1 << " Residual = " << relres << " Rel res = " << relres/normb <<  " Relative L2 Error =  "<< relerr <<  endl;
+            cout << "["+Stringification(pr)+"] It: "<< pr#nbiter << " Residual = " << relres << " Rel res = " << relres/normb <<  " Relative L2 Error =  "<< relerr <<  endl;
           else
-            cout << "["+Stringification(pr)+"] It: "<< itg+1 << " Residual = " << relres << " Rel res = " << relres/normb << endl;
+            cout << "["+Stringification(pr)+"] It: "<< pr#nbiter << " Residual = " << relres << " Rel res = " << relres/normb << endl;
         }
 
         if (pr#verbosity >= 10){
           IFMACRO(preffe#defplot)
           preffe#Vhi<preffe#K> def(unih);
           unih[] = uni;
-          preffe#plot(preffe#defplot(unih), "["+Stringification(pr)+"] Approximate solution at step " + itg)
+          preffe#plot(preffe#defplot(unih), "["+Stringification(pr)+"] Approximate solution at step " + pr#nbiter)
           ENDIFMACRO
           ;
         }
 
         if(relres/normb < abs(eps)) {
           if (pr#verbosity && (mpiRank(preffe#prmesh#mpicomm)==0)) {
-            cout << "["+Stringification(pr)+"] GMRES has converged in " + (itg+1) + " iterations " << endl;
+            cout << "["+Stringification(pr)+"] GMRES has converged in " + (pr#nbiter) + " iterations " << endl;
             cout << "["+Stringification(pr)+"] The relative residual is " +  relres/normb << endl;
           }
           break;
         }
-        itg++;
-        if (itg == nbiter)
+        pr#nbiter++;
+        if (pr#nbiter > maxit)
           break;
       }
-      if(relres/normb < abs(eps) || itg == nbiter)
+      if(relres/normb < abs(eps) || pr#nbiter > maxit)
         break;
 
       x0i = uni;
@@ -702,7 +703,7 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     }
     if(relres/normb >= abs(eps))
     if (pr#verbosity && (mpiRank(preffe#prmesh#mpicomm)==0)) {
-      cout << "["+Stringification(pr)+"] GMRES did not converge in " + nbiter + " iterations " << endl;
+      cout << "["+Stringification(pr)+"] GMRES did not converge in " + maxit + " iterations " << endl;
       cout << "["+Stringification(pr)+"] The relative residual is " +  relres/normb << endl;
     }
     ENDIFMACRO
