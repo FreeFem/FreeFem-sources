@@ -55,10 +55,12 @@ using Fem2D::Mesh;
 using Fem2D::Mesh3;
 using Fem2D::MeshL;
 using Fem2D::MeshS;
+class BemKernel;
 typedef const Mesh *pmesh;
 typedef const Mesh3 *pmesh3;
 typedef const MeshS *pmeshS;
 typedef const MeshL *pmeshL;
+typedef const BemKernel *pBemKernel;
 
 using Fem2D::FESpace;
 using Fem2D::R;
@@ -375,6 +377,16 @@ class v_fesL : public RefCounter {
   virtual FESpaceL *buildupdate(KN< int > &ndfe) { return 0; }
   virtual FESpaceL *buildupdate( ) { return 0; };
 };
+
+
+// BemKernel : be defined with bemtool
+class BemKernel : public RefCounter {
+public:
+    BemKernel();
+    virtual ~BemKernel() {}
+};
+
+
 
 // 2d
 class pfes_tef : public v_fes {

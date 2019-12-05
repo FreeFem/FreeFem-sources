@@ -68,6 +68,11 @@ typedef   LinearComb<MGauche,C_F0> Finconnue;
 typedef   LinearComb<MDroit,C_F0> Ftest;
 typedef   LinearComb<pair<MGauche,MDroit>,C_F0> Foperator;
 
+// new type for bem varf
+typedef pair<BemKernel,Finconnue> BemFinconnue;
+typedef pair<BemKernel,Ftest> BemFtest;
+typedef triplet<Finconnue,BemKernel,Ftest> BemFoperator;
+
 inline int intOp(const MGauche &i) {return i.second;}
 inline int intOp(const MDroit &i) {return i.second;}
 inline int intOp(pair<MGauche,MDroit> & p) {return Max(intOp(p.first),intOp(p.second));}

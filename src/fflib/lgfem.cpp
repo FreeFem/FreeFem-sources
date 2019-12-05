@@ -5553,6 +5553,9 @@ void init_lgfem( ) {
                            AddIncrement< pmeshS >, NotReturnOfthisType);
   Dcl_TypeandPtr< pmeshL >(0, 0, ::InitializePtr< pmeshL >, ::DestroyPtr< pmeshL >,
                            AddIncrement< pmeshL >, NotReturnOfthisType);
+  // pBemKernel initialize
+  Dcl_TypeandPtr< pBemKernel >(0, 0, ::InitializePtr< pBemKernel >, ::DestroyPtr< pBemKernel >,
+                           AddIncrement< pBemKernel >, NotReturnOfthisType);
 
   Dcl_Type< lgVertex >( );
   Dcl_Type< lgElement >( );
@@ -5858,8 +5861,7 @@ void init_lgfem( ) {
   Add< lgBoundaryEdge >("length", ".", new OneOperator1_< double, lgBoundaryEdge >(getlength));
   Add< lgBoundaryEdge >("label", ".", new OneOperator1_< long, lgBoundaryEdge >(getlab));
   Add< lgBoundaryEdge >("Element", ".", new OneOperator1_< lgElement, lgBoundaryEdge >(getElement));
-  Add< lgBoundaryEdge >("whoinElement", ".",
-                        new OneOperator1_< long, lgBoundaryEdge >(EdgeElement));
+  Add< lgBoundaryEdge >("whoinElement", ".", new OneOperator1_< long, lgBoundaryEdge >(EdgeElement));
 
   // New FF language types. zzzfff is defined at [[file:lex.hpp::zzzfff]] as a pointer to an object
   // of class mylex
@@ -5878,6 +5880,8 @@ void init_lgfem( ) {
   zzzfff->Add("meshS", atype< pmeshS * >( ));
   // pmeshL is a pointer to MeshL defined at [[file:lgfem.hpp::typedef MeshL pmeshL]]
   zzzfff->Add("meshL", atype< pmeshL * >( ));
+  // pBemKernel is a pointer to BemKernel defined at [[file:lgfem.hpp::typedef BemKernel pBemKernel]]
+  zzzfff->Add("BemKernel", atype< pBemKernel * >( ));
 
   zzzfff->Add("element", atype< lgElement >( ));
   zzzfff->Add("vertex", atype< lgVertex >( ));
