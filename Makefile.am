@@ -33,7 +33,6 @@ bin/save-in-files \
 bin/cleanregen.sh \
 bin/copysharedlibs.sh \
 bin/script/clean_all_installed_ffpp.sh \
-bin/script/remove-opemmpi-1.6.5-and-gfortran.sh \
 bin/script/PostInstall.m4 \
 bin/regtests.sh \
 bin/uninstall-ff++ \
