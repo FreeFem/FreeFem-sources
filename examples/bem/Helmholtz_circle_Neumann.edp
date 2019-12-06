@@ -17,8 +17,8 @@ func dyfinc = 1i*k*dir[1]*finc;
 
 //  Mesh
 int n = 1000;
-curve3 circle(t=0, 2*pi){x=cos(t); y=sin(t); z=0;}
-meshL Th = buildmesh(circle(n));
+border circle(t=0, 2*pi){x=cos(t); y=sin(t); z=0;}
+meshL Th = buildmeshL(circle(n));
 
 // Dof
 fespace Uh(Th,P1);
@@ -34,7 +34,7 @@ if (mpirank == 0) cout << HSecondKind.infos << endl;
 display(HSecondKind);
 
 // Hmatrix for combined formulation
-HMatrix<complex> HCombined = assemblecomplexHEcombinedHSDL(Uh,Uh,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000,alpha=-0.5,combinedcoef=-k*1i);
+HMatrix<complex> HCombined = assemblecomplexHEcombinedHSDL(Uh,Uh,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000,alpha=-0.5,combinedcoef=1./(1i*k));
 if (mpirank == 0) cout << HCombined.infos << endl;
 display(HCombined);
 
@@ -55,7 +55,7 @@ plot(uSecondKind,dim=2,nbiso=20,value=1,cmm="Second kind");
 
 // Solve combined formulation
 Uh<complex> uCombined, bCombined;
-bCombined[] = -k*1i*bFirstKind[]+bSecondKind[];
+bCombined[] = 1./(1i*k)*bFirstKind[]+bSecondKind[];
 uCombined[] = HCombined^-1*bCombined[];
 plot(uCombined,dim=2,nbiso=20,value=1,cmm="Combined");
 
@@ -63,15 +63,13 @@ plot(uCombined,dim=2,nbiso=20,value=1,cmm="Combined");
 // Mesh output
 int np = 200;
 int R = 4;
-real r = 1.01;
 
 border b1(t=-R, R){x=t; y=-R;}
 border b2(t=-R, R){x=R; y=t;}
 border b3(t=-R, R){x=-t; y=R;}
 border b4(t=-R, R){x=-R; y=-t;}
-border b5(t=0, -2*pi){x=r*cos(t); y=r*sin(t);z=0;}
 
-mesh ThOut = buildmesh(b1(np)+b2(np)+b3(np)+b4(np)+b5(np*pi/R));
+mesh ThOut = buildmesh(b1(np)+b2(np)+b3(np)+b4(np)+circle(-np*pi/R));
 
 // Incident wave in volume
 fespace UhOut(ThOut,P1);

@@ -49,7 +49,7 @@ int nloc = 10.*sec3/lambda;
 
 mesh3 Th3;
 buildcobramesh(Th3);
-Th3 = buildSurface(Th3);
+Th3 = buildBdMesh(Th3);
 
 meshS ThS = Th3.Gamma;
 ThS = trunc(ThS, region==labmetal);
