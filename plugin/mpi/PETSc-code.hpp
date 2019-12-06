@@ -158,8 +158,8 @@ namespace PETSc {
     if (verbosity > 0 && mpirank == 0)
       cout << " --- global CSR created (in " << MPI_Wtime( ) - timing << ")" << endl;
   }
-  template< class Type >
-  long globalNumbering(Type* const& A, KN< long >* const& numbering) {
+  template< class Type, class K >
+  long globalNumbering(Type* const& A, KN< K >* const& numbering) {
     if (A) {
       numbering->resize(A->_A->getMatrix( )->_n);
       if (A->_num)
@@ -1293,7 +1293,7 @@ namespace PETSc {
       Expression A;
       Expression P;
       const int c;
-      static const int n_name_param = 16;
+      static const int n_name_param = 17;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       setOptions_Op(const basicAC_F0& args, int d) : A(0), P(0), c(d) {
@@ -1338,7 +1338,8 @@ namespace PETSc {
     {"aux", &typeid(Matrice_Creuse< PetscScalar >*)},                          // 12
     {"coordinates", &typeid(KNM< double >*)},                                  // 13
     {"gradient", &typeid(Dmat*)},                                              // 14
-    {"O", &typeid(Matrice_Creuse< PetscScalar >*)}                             // 15
+    {"O", &typeid(Matrice_Creuse< PetscScalar >*)},                            // 15
+    {"bs", &typeid(long)},                                                     // 16
   };
   class ShellInjection;
   template< class Type, char >
@@ -1555,6 +1556,11 @@ namespace PETSc {
     long FS = nargs[9] ? GetAny< long >((*nargs[9])(stack)) : -1;
     KSP ksp = nullptr;
     if (ptA && ptA->_petsc) {
+      {
+        long bs = nargs[16] ? GetAny< long >((*nargs[16])(stack)) : -1;
+        if(bs >= 1)
+            MatSetBlockSize(ptA->_petsc, bs);
+      }
       PetscBool assembled;
       MatAssembled(ptA->_petsc, &assembled);
       if (!ptA->_ksp && c != 2) {
@@ -1836,7 +1842,7 @@ namespace PETSc {
   class view_Op : public E_F0mps {
    public:
     Expression A;
-    static const int n_name_param = 1;
+    static const int n_name_param = 2;
     static basicAC_F0::name_and_type name_param[];
     Expression nargs[n_name_param];
     view_Op(const basicAC_F0& args, Expression param1) : A(param1) {
@@ -1846,7 +1852,10 @@ namespace PETSc {
     AnyType operator( )(Stack stack) const;
   };
   template< class Type >
-  basicAC_F0::name_and_type view_Op< Type >::name_param[] = {{"object", &typeid(std::string*)}};
+  basicAC_F0::name_and_type view_Op< Type >::name_param[] = {
+    {"object", &typeid(std::string*)},
+    {"format", &typeid(std::string*)}
+  };
   template< class Type >
   class view : public OneOperator {
    public:
@@ -1860,8 +1869,23 @@ namespace PETSc {
   AnyType view_Op< Type >::operator( )(Stack stack) const {
     Type* ptA = GetAny< Type* >((*A)(stack));
     std::string* object = nargs[0] ? GetAny< std::string* >((*nargs[0])(stack)) : NULL;
-    if (!object || object->compare("mat") == 0)
+    if (!object || object->compare("mat") == 0) {
+      std::string* type = nargs[1] ? GetAny< std::string* >((*nargs[1])(stack)) : NULL;
+      bool pop = false;
+      if(type) {
+          if(type->compare("matlab") == 0) {
+              PetscViewerPushFormat(PETSC_VIEWER_STDOUT_WORLD, PETSC_VIEWER_ASCII_MATLAB);
+              pop = true;
+          }
+          else if(type->compare("info") == 0) {
+              PetscViewerPushFormat(PETSC_VIEWER_STDOUT_WORLD, PETSC_VIEWER_ASCII_INFO);
+              pop = true;
+          }
+      }
       MatView(ptA->_petsc, PETSC_VIEWER_STDOUT_WORLD);
+      if(pop)
+          PetscViewerPopFormat(PETSC_VIEWER_STDOUT_WORLD);
+    }
     else {
       if (ptA->_ksp) {
         if (object->compare("ksp") == 0)
@@ -3634,6 +3658,8 @@ static void Init_PETSc( ) {
   Global.Add("augmentation", "(", new PETSc::augmentation< Dmat >);
   Global.Add("globalNumbering", "(",
              new OneOperator2_< long, Dmat*, KN< long >* >(PETSc::globalNumbering< Dmat >));
+  Global.Add("globalNumbering", "(",
+             new OneOperator2_< long, Dmat*, KN< double >* >(PETSc::globalNumbering< Dmat >));
   Global.Add("globalNumbering", "(",
              new OneOperator2_< long, Dbddc*, KN< long >* >(PETSc::globalNumbering< Dbddc >));
   Global.Add("changeOperator", "(", new PETSc::changeOperator< Dmat >( ));

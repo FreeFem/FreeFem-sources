@@ -27,7 +27,6 @@ exit(1);
 ENDIFMACRO
 IFMACRO(dimension,2)
 macro meshN()mesh// EOM             // two-dimensional problem
-macro bbN()bb2// EOM                // two-dimensional bounding box
 macro intN()int2d// EOM             // two-dimensional integral
 macro intN1()int1d// EOM            // one-dimensional integral
 macro readmeshN()readmesh// EOM     // two-dimensional problem
@@ -35,7 +34,6 @@ ENDIFMACRO
 IFMACRO(dimension,3)
 load "msh3"
 macro meshN()mesh3// EOM            // three-dimensional problem
-macro bbN()bb3// EOM                // three-dimensional bounding box
 macro intN()int3d// EOM             // three-dimensional integral
 macro intN1()int2d// EOM            // two-dimensional integral
 macro readmeshN()readmesh3// EOM    // three-dimensional problem
@@ -43,37 +41,23 @@ ENDIFMACRO
 IFMACRO(dimension,3S)
 load "msh3"
 macro meshN()meshS// EOM            // three-dimensional surface problem
-macro bbN()bb3// EOM                // three-dimensional bounding box
 macro intN()int2d// EOM             // two-dimensional integral
 macro intN1()int1d// EOM            // one-dimensional integral
 ENDIFMACRO
 IFMACRO(!meshN)
-cout << "The macro 'dimension' must be set to '2', '3', or '3S'" << endl;
+cout << "The macro 'dimension' must be set to '2', '3' or '3S'" << endl;
 exit(1);
 ENDIFMACRO
 searchMethod = 1;
 
-macro bb2(boundingMesh, overshoot, ThGlobal)
-            real[int] bb(4);
-            boundingbox(bb, boundingMesh);
-            bb(0) -= overshoot;
-            bb(1) += overshoot;
-            bb(2) -= overshoot;
-            bb(3) += overshoot;
-
-            ThGlobal = trunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3)));// EOM
-
-macro bb3(boundingMesh, overshoot, ThGlobal)
-            real[int] bb(6);
-            boundingbox(bb, boundingMesh);
-            bb(0) -= overshoot;
-            bb(1) += overshoot;
-            bb(2) -= overshoot;
-            bb(3) += overshoot;
-            bb(4) -= overshoot;
-            bb(5) += overshoot;
-
-            ThGlobal = trunc(ThGlobal, (x >= bb(0) && x <= bb(1) && y >= bb(2) && y <= bb(3) && z >= bb(4) && z <= bb(5)));// EOM
+macro plotDmesh(Th, params)
+if(!NoGraphicWindow) {
+    fespace PhPlot(Th, P0);
+    PhPlot plt;
+    plt[] = mpirank;
+NewMacro defPlt#Th(u)u EndMacro
+    plotMPI(Th, plt, P0, defPlt#Th, real, params)
+}//
 
 macro plotMPI(Th, u, Pk, def, K, params)
 if(!NoGraphicWindow) {
@@ -110,6 +94,7 @@ if(!NoGraphicWindow) {
 
 macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank, size, s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs) {
     assert(level >= 1);
+IFMACRO(!privateAllocateMat)
     meshName[level - 1] = trunc(globalName, abs(part - rank) < 0.1, label = fakeInterface);
     intersection.resize(1);
     intersection[0].resize(0);
@@ -196,12 +181,37 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank
     if(numberIntersection != intersection[0].n)
         intersection[0].resize(numberIntersection);
     intersection.resize(1 + level * numberIntersection);
+ENDIFMACRO
+IFMACRO(privateAllocateMat)
+    assert(level == 1);
+    int numberIntersection = privateDmesh#meshName#intersectionDef.n - 1;
+    intersection.resize(1 + level * numberIntersection);
+    intersection[0].resize(numberIntersection);
+    fespace VhLocal(meshName[level - 1], P1);
+    VhLocal[int] partitionIntersection(numberIntersection);
+    for(int i = 0; i < numberIntersection; ++i) {
+        intersection[0][i] = privateDmesh#meshName#intersectionDef[0][i];
+        partitionIntersection[i][] = privateDmesh#meshName#intersectionDef[1 + i];
+    }
+ENDIFMACRO
+IFMACRO(privateBuildDmesh)
+    privateDmesh#meshName#intersectionDef.resize(1 + numberIntersection);
+    privateDmesh#meshName#intersectionDef[0].resize(numberIntersection);
+    for(int i = 0; i < numberIntersection; ++i) {
+        privateDmesh#meshName#intersectionDef[0][i] = intersection[0][i];
+        privateDmesh#meshName#intersectionDef[1 + i].resize(VhLocal.ndof);
+        privateDmesh#meshName#intersectionDef[1 + i] = partitionIntersection[i][];
+    }
+ENDIFMACRO
     meshN[int] meshIntersection(numberIntersection);
     for(int j = 0; j < (s == 1 ? 1 : level); ++j) {
         for(int i = 0; i < numberIntersection; ++i) {
             int[int] n2o;
             meshIntersection[i] = trunc(meshName[j], partitionIntersection[i] > 1.0e-6, new2old = n2o, label = 9999);
-            if(!removeZeros) {
+IFMACRO(!privateAllocateMat)
+            if(!removeZeros)
+ENDIFMACRO
+            {
 IFMACRO(vectorialfe)
                 fespace singleComponentWh(meshName[j], vectorialfe);
                 fespace WhIntersection(meshIntersection[i], vectorialfe);
@@ -214,6 +224,7 @@ ENDIFMACRO
             }
         }
     }
+IFMACRO(!privateAllocateMat)
     if(s == 1 && level > 1 && !removeZeros)
         for(int j = 1; j < level; ++j)
             for(int i = 0; i < numberIntersection; ++i) {
@@ -251,8 +262,10 @@ ENDIFMACRO
     }
     if(!trueRestrict)
         khi[] = khi[] ./= sum[];
+ENDIFMACRO
     fespace WhPart(meshName[level - 1], PkPart);
     WhPart defPart(func2vec);
+IFMACRO(!privateAllocateMat)
     if(trueRestrict && mpiSize(comm) == size && removeZeros) {
         assert(level == 1);
         meshN ThIntersection;
@@ -319,6 +332,7 @@ ENDIFMACRO
             borderName[0] = trunc(globalName, phi > 0.001 && phi < 0.501, label = (abs(fakeInterface) + 1) * 100);
         }
     }
+ENDIFMACRO
 IFMACRO(vectorialfe)
     if(bs > 1)
         for(int i = 0; i < intersection.n - 1; ++i) {
@@ -329,14 +343,73 @@ IFMACRO(vectorialfe)
                     intersection[1 + i][j * bs + k] = intersection[1 + i][j] * bs + k;
         }
 ENDIFMACRO
+IFMACRO(privateAllocateMat)
+    VhLocal khi;
+    khi[] = privateDmesh#meshName#khiDef;
+ENDIFMACRO
     defPart(func2vec) = initPart(khi);
     D[level - 1].resize(WhPart.ndof);
     D[level - 1] = func2vec[];
+IFMACRO(!privateAllocateMat)
     if(trueRestrict && ((WhPart.ndof % meshName[level - 1].nt) == 0)) {
         defPart(func2vec) = initPart(abs(part - rank) < 0.1);
         D[level - 1] = func2vec[];
     }
+ENDIFMACRO
 }// EOM
+
+macro buildDmesh(ThName)
+IFMACRO(!privateDmesh#ThName)
+NewMacro privateDmesh#ThName()privateDmesh#ThName EndMacro
+NewMacro privateDmesh#ThName#khi()privateDmesh#ThName#khiDef EndMacro
+NewMacro privateDmesh#ThName#intersection()privateDmesh#ThName#intersectionDef EndMacro
+real[int] privateDmesh#ThName#khi;
+real[int][int] privateDmesh#ThName#intersection;
+ENDIFMACRO
+{
+    NewMacro privateBuildDmesh()1 EndMacro
+    int[int][int] intersection;
+    NewMacro privateDmesh#ThTab()privateDmesh#ThName EndMacro
+    NewMacro privateDmesh#ThTab#khi()privateDmesh#ThName#khiDef EndMacro
+    NewMacro privateDmesh#ThTab#intersection()privateDmesh#ThName#intersectionDef EndMacro
+    buildMinimalist(ThName, intersection, privateDmesh#ThName#khi, P1);
+}
+EndMacro
+macro allocateMat(ThName, MatName, PkName)
+IFMACRO(privateDmesh#ThName)
+{
+    NewMacro privateAllocateMat()1 EndMacro
+    int[int][int] intersection;
+    real[int][int] DTab(1);
+    meshN[int] ThTab(1);
+    ThTab[0] = ThName;
+    NewMacro privateDmesh#ThTab()privateDmesh#ThName EndMacro
+    NewMacro privateDmesh#ThTab#khi()privateDmesh#ThName#khiDef EndMacro
+    NewMacro privateDmesh#ThTab#intersection()privateDmesh#ThName#intersectionDef EndMacro
+IFMACRO(!def)
+    NewMacro def(i)i EndMacro
+ENDIFMACRO
+IFMACRO(!init)
+    NewMacro init(i)i EndMacro
+ENDIFMACRO
+    if(mpisize > 1) {
+        partition(ThTab, privateAllocateMat, privateAllocateMat, privateAllocateMat, privateAllocateMat, privateAllocateMat, mpirank, mpisize, 1, 1, 1, privateAllocateMat, DTab, PkName, intersection, mpiCommWorld, -111111, PkName, def, init, 1)
+    }
+    else {
+        fespace Wh(ThName, PkName);
+        DTab[0].resize(Wh.ndof);
+        DTab[0] = 1;
+        intersection.resize(0);
+    }
+    constructor(MatName, DTab[0].n, intersection, DTab[0]);
+}
+ENDIFMACRO
+IFMACRO(!privateDmesh#ThName)
+{
+    cout << "Cannot allocate Mat " << Stringification(MatName) << " if the mesh " << Stringification(ThName) << " has not been partitioned first" << endl;
+}
+ENDIFMACRO
+EndMacro
 
 macro buildOverlapEdgePeriodicRecursive(Th, ThBorder, fakeInterface, s, overlap, level, prolongation, intersection, DTab, P, comm, excluded, PkPart, defPart, initPart, labPeriodic, userPartitioning, bs) {
 IFMACRO(!def)
@@ -418,7 +491,14 @@ IFMACRO(!removeZeros)
 ENDIFMACRO
         mpiBarrier(comm);
         timerPartition = mpiWtime();
+IFMACRO(privateBuildDmesh)
+        NewMacro defP1(i)i EndMacro
+        NewMacro initP1(i)i EndMacro
+        partition(Th, ThBorder, ThGlobal, PhGlobal, VhGlobal, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, DTab, P, intersection, comm, fakeInterface, PkPart, defP1, initP1, bs)
+ENDIFMACRO
+IFMACRO(!privateBuildDmesh)
         partition(Th, ThBorder, ThGlobal, PhGlobal, VhGlobal, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, DTab, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs)
+ENDIFMACRO
     }
     else if(mpiSize(comm) == 1) {
         for(int i = level - 1; i > 0; --i) {

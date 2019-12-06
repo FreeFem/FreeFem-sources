@@ -415,8 +415,8 @@ void parallelIO(string*& name, MPI_Comm* const& comm, bool const& append) {
     MPI_Comm_rank(comm ? *comm : MPI_COMM_WORLD, &rank);
     MPI_Comm_size(comm ? *comm : MPI_COMM_WORLD, &size);
     std::ostringstream str[3];
-    str[1] << std::setw(6) << std::setfill('0') << rank;
-    str[2] << std::setw(6) << std::setfill('0') << size;
+    str[1] << std::setw(5) << std::setfill('0') << rank;
+    str[2] << size;
     ofstream pvd;
     int T = 0;
     if(append) {
@@ -436,8 +436,8 @@ void parallelIO(string*& name, MPI_Comm* const& comm, bool const& append) {
         }
         MPI_Bcast(&T, 1, MPI_INT, 0, comm ? *comm : MPI_COMM_WORLD);
     }
-    str[0] << std::setw(6) << std::setfill('0') << T;
-    *name = file_without_extension + "_" + str[0].str() + "_" + str[1].str() + "_" + str[2].str() + "." + extension;
+    str[0] << std::setw(4) << std::setfill('0') << T;
+    *name = file_without_extension + "_" + str[2].str() + "_" + str[0].str() + "_" + str[1].str() + "." + extension;
     if(rank == 0) {
         pvd.open(file_without_extension + "_" + str[2].str() + ".pvd");
         pvd << "<?xml version=\"1.0\"?>\n";
@@ -449,7 +449,7 @@ void parallelIO(string*& name, MPI_Comm* const& comm, bool const& append) {
             for(int i = 0; i < size; ++i) {
                 pvd << "    <DataSet timestep=\"" << t << "\" group=\"\" part=\"" << i << "\"\n";
                 pvd << "             file=\"";
-                pvd << base_filename << "_" << std::setw(6) << std::setfill('0') << t << "_" << std::setw(6) << std::setfill('0') << i << "_" << str[2].str() << "." << std::setw(0) << extension << "\"/>\n";
+                pvd << base_filename << "_" << str[2].str() << "_" << std::setw(4) << std::setfill('0') << t << "_" << std::setw(5) << std::setfill('0') << i << "." << std::setw(0) << extension << "\"/>\n";
             }
         pvd << "  </Collection>\n";
         pvd << "</VTKFile>\n";
