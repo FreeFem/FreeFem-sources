@@ -415,14 +415,14 @@ void parallelIO(string*& name, MPI_Comm* const& comm, bool const& append) {
     MPI_Comm_rank(comm ? *comm : MPI_COMM_WORLD, &rank);
     MPI_Comm_size(comm ? *comm : MPI_COMM_WORLD, &size);
     std::ostringstream str[3];
-    str[1] << std::setw(5) << std::setfill('0') << rank;
     str[2] << size;
+    str[1] << std::setw(str[2].str().length()) << std::setfill('0') << rank;
     ofstream pvd;
     int T = 0;
     if(append) {
         if(rank == 0) {
             ifstream input;
-            input.open(file_without_extension + "_" + str[2].str() + ".pvd");
+            input.open(file_without_extension + (size > 1 ? "_" + str[2].str() : "") + ".pvd");
             if(input.peek() != std::ifstream::traits_type::eof()) {
                 std::string line;
                 std::getline(input, line);
@@ -437,9 +437,9 @@ void parallelIO(string*& name, MPI_Comm* const& comm, bool const& append) {
         MPI_Bcast(&T, 1, MPI_INT, 0, comm ? *comm : MPI_COMM_WORLD);
     }
     str[0] << std::setw(4) << std::setfill('0') << T;
-    *name = file_without_extension + "_" + str[2].str() + "_" + str[0].str() + "_" + str[1].str() + "." + extension;
+    *name = file_without_extension + "_" + (size > 1 ? str[2].str() + "_" : "") + str[0].str() + (size > 1 ? "_" + str[1].str() : "") + "." + extension;
     if(rank == 0) {
-        pvd.open(file_without_extension + "_" + str[2].str() + ".pvd");
+        pvd.open(file_without_extension + (size > 1 ? "_" + str[2].str() : "") + ".pvd");
         pvd << "<?xml version=\"1.0\"?>\n";
         pvd << "<VTKFile T=\"" << T << "\" type=\"Collection\" version=\"0.1\"\n";
         pvd << "         byte_order=\"LittleEndian\"\n";
@@ -449,7 +449,11 @@ void parallelIO(string*& name, MPI_Comm* const& comm, bool const& append) {
             for(int i = 0; i < size; ++i) {
                 pvd << "    <DataSet timestep=\"" << t << "\" group=\"\" part=\"" << i << "\"\n";
                 pvd << "             file=\"";
-                pvd << base_filename << "_" << str[2].str() << "_" << std::setw(4) << std::setfill('0') << t << "_" << std::setw(5) << std::setfill('0') << i << "." << std::setw(0) << extension << "\"/>\n";
+                pvd << base_filename << "_";
+                if(size > 1) pvd << str[2].str() + "_";
+                pvd << std::setw(4) << std::setfill('0') << t;
+                if(size > 1) pvd << "_" << std::setw(str[2].str().length()) << std::setfill('0') << i;
+                pvd << "." << std::setw(0) << extension << "\"/>\n";
             }
         pvd << "  </Collection>\n";
         pvd << "</VTKFile>\n";
