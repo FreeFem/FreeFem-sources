@@ -25,13 +25,13 @@ all-local: @LOAD_COMPILE@
 LIST_COMPILE=myfunction.$(DYLIB_SUFFIX) BernardiRaugel.$(DYLIB_SUFFIX) \
 	Morley.$(DYLIB_SUFFIX) funcTemplate.$(DYLIB_SUFFIX) addNewType.$(DYLIB_SUFFIX) \
 	qf11to25.$(DYLIB_SUFFIX) Element_P3.$(DYLIB_SUFFIX) Element_P4.$(DYLIB_SUFFIX) \
-	 Element_P3dc.$(DYLIB_SUFFIX) Element_P4dc.$(DYLIB_SUFFIX) 	\
-	 Element_PkEdge.$(DYLIB_SUFFIX) msh3.$(DYLIB_SUFFIX) \
+	Element_P3dc.$(DYLIB_SUFFIX) Element_P4dc.$(DYLIB_SUFFIX) \
+	Element_PkEdge.$(DYLIB_SUFFIX) msh3.$(DYLIB_SUFFIX) \
 	splitmesh3.$(DYLIB_SUFFIX) splitmesh6.$(DYLIB_SUFFIX) \
 	splitmesh4.$(DYLIB_SUFFIX) splitmesh12.$(DYLIB_SUFFIX) \
 	ffrandom.$(DYLIB_SUFFIX) \
 	medit.$(DYLIB_SUFFIX) \
-	mat_dervieux.$(DYLIB_SUFFIX) lgbmo.$(DYLIB_SUFFIX) mat_psi.$(DYLIB_SUFFIX)\
+	mat_dervieux.$(DYLIB_SUFFIX) lgbmo.$(DYLIB_SUFFIX) mat_psi.$(DYLIB_SUFFIX) \
 	ppm2rnm.$(DYLIB_SUFFIX) DxWriter.$(DYLIB_SUFFIX) \
 	pcm2rnm.$(DYLIB_SUFFIX) $(DYLIB_OTHER_COMPILE) \
 	iovtk.$(DYLIB_SUFFIX) gmsh.$(DYLIB_SUFFIX) MetricKuate.$(DYLIB_SUFFIX) \
@@ -42,22 +42,22 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX) BernardiRaugel.$(DYLIB_SUFFIX) \
 	myfunction2.$(DYLIB_SUFFIX) \
 	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) shell.$(DYLIB_SUFFIX) \
 	@TOOL_DYLIB_pipe@ symmetrizeCSR.$(DYLIB_SUFFIX) BEC.$(DYLIB_SUFFIX) \
-	bfstream.$(DYLIB_SUFFIX) @TOOL_DYLIB_iohdf5@ ff-AiryBiry.$(DYLIB_SUFFIX) \
+	bfstream.$(DYLIB_SUFFIX) ff-AiryBiry.$(DYLIB_SUFFIX) \
 	exactpartition.$(DYLIB_SUFFIX) ClosePoints.$(DYLIB_SUFFIX) \
 	Element_HCT.$(DYLIB_SUFFIX) Curvature.$(DYLIB_SUFFIX) Element_P1bl.$(DYLIB_SUFFIX) \
 	Element_QF.$(DYLIB_SUFFIX) distance.$(DYLIB_SUFFIX) Element_P1ncdc.$(DYLIB_SUFFIX) \
 	Element_P2bulle3.$(DYLIB_SUFFIX) \
 	Element_P2pnc.$(DYLIB_SUFFIX) SaveHB.$(DYLIB_SUFFIX) IncompleteCholesky.$(DYLIB_SUFFIX) \
 	Schur-Complement.$(DYLIB_SUFFIX) biofunc.$(DYLIB_SUFFIX) mat_edgeP1.$(DYLIB_SUFFIX) \
-	geophysics.$(DYLIB_SUFFIX) ff-mmap-semaphore.$(DYLIB_SUFFIX)
+	geophysics.$(DYLIB_SUFFIX)
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.
 
-LIST_COMPILE_PKG=@TOOL_DYLIB_tetgen@ @TOOL_DYLIB_superlu@ dfft.$(DYLIB_SUFFIX) 		\
-	@TOOL_DYLIB_umfpack@ NewSolver.$(DYLIB_SUFFIX) @TOOL_DYLIB_lapack@ 		\
-	ffnewuoa.$(DYLIB_SUFFIX) @TOOL_DYLIB_gmm@ @TOOL_DYLIB_yams@ @TOOL_DYLIB_mmg3d@ @TOOL_DYLIB_mshmet@	\
-	@TOOL_DYLIB_gsl@ @TOOL_DYLIB_mumps_seq@ @TOOL_DYLIB_ipopt@ @TOOL_DYLIB_nlopt@ ff-cmaes.$(DYLIB_SUFFIX)	\
-	@TOOL_DYLIB_scotch@ @TOOL_DYLIB_metis@ @TOOL_DYLIB_pardiso@ @TOOL_DYLIB_MMAP@
+LIST_COMPILE_PKG=@TOOL_DYLIB_tetgen@ @TOOL_DYLIB_superlu@ dfft.$(DYLIB_SUFFIX) \
+	@TOOL_DYLIB_umfpack@ NewSolver.$(DYLIB_SUFFIX) @TOOL_DYLIB_lapack@ \
+	ffnewuoa.$(DYLIB_SUFFIX) @TOOL_DYLIB_gmm@ @TOOL_DYLIB_yams@ @TOOL_DYLIB_mmg3d@ @TOOL_DYLIB_mshmet@ \
+	@TOOL_DYLIB_gsl@ @TOOL_DYLIB_mumps_seq@ @TOOL_DYLIB_ipopt@ @TOOL_DYLIB_nlopt@ ff-cmaes.$(DYLIB_SUFFIX) \
+	@TOOL_DYLIB_scotch@ @TOOL_DYLIB_metis@ @TOOL_DYLIB_pardiso@ @TOOL_DYLIB_MMAP@ @TOOL_DYLIB_iohdf5@
 
 EXTRA_PROGRAMS= ffmaster
 bin_PROGRAMS= @BIN_ffmaster@
