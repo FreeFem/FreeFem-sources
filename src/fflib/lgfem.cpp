@@ -3576,14 +3576,7 @@ int Send2d(PlotStream& theplot, Plot::ListWhat& lli, map<const typename v_fes::F
 	              Ksub[p] = numSubTriangle(nsb,sk,i);
 	      if(verbosity > 9)
 	      cout << " Send plot:what: " << what << " " << nsb << " " << V1.N() << " Max " << V1.max() << " min " << V1.min() << endl;
-        for (int i = 0; i < fe[0]->Vh[0].NbOfElements; ++i) {
-          //std::cout << "fe[0]->Vh[0].NbOfElements : " << fe[0]->Vh[0].NbOfElements << "\n";
-          //std::cout << "fe[0]->Vh[0][i].NbDoF() : " << fe[0]->Vh[0][i].NbDoF() << "\n";
-          for (int j = 0; j < fe[0]->Vh[0][i].NbDoF(); ++j) {
-            std::cout << "=====> " << fe[0]->Vh[0][i].DFOfNode(j) << "\n";
-          }
-        }
-	      ffFE<R2, K> fffe(Psub, Ksub, *fe[0]->x(), V1.max(), V1.min(), false);
+	      ffFE<R2, K> fffe(Psub, Ksub, V1, V1.max(), V1.min(), false);
         packet.Jsonify(fffe, mapth[&(fe[0]->Vh->Th)]);
         if (verbosity > 99) { cout << packet.Dump() << "\n"; }
         theplot << Psub;
@@ -3599,26 +3592,12 @@ int Send2d(PlotStream& theplot, Plot::ListWhat& lli, map<const typename v_fes::F
         int nsubV = NbOfSubInternalVertices(nsb);
         KN<R2> Psub(nsubV);
         KN<int> Ksub(nsubT * 3);
-        std::cout << nsubT << "\n";
         for(int i=0;i<nsubV;++i)
             Psub[i]=SubInternalVertex(nsb,i);
         for(int sk=0,p=0;sk<nsubT;++sk)
             for(int i=0;i<3;++i,++p)
                 Ksub[p] = numSubTriangle(nsb,sk,i);
-
-        // Use cmp[1] to know if the vectors are stored on 1 or 2 arrays and construct the right sized vector.
-        KN<K> tmp_V1(fe[0]->x()->N() + ((cmp[1] == 0) ? fe[1]->x()->N() : 0));
-
-        for (long int i = 0; i < fe[0]->x()->N() + ((cmp[1] == 0) ? fe[1]->x()->N() : 0); ++i) {
-            // Add value from first array
-            tmp_V1[i] = (*fe[0]->x())[i / ((cmp[1] == 0) ? 2 : 1)];
-            // If there is a 2 arrays
-            if (cmp[1] == 0) {
-              i += 1;
-              tmp_V1[i] = (*fe[1]->x())[i / 2];
-            }
-        }
-        ffFE<R2, K> fffe(Psub, Ksub, tmp_V1, V1.max(), V1.min(), true);
+        ffFE<R2, K> fffe(Psub, Ksub, V1, V1.max(), V1.min(), true);
         packet.Jsonify(fffe, mapth[&(fe[0]->Vh->Th)]);
         theplot << mapth[&(fe[0]->Vh->Th)]; // mesh's number
         theplot << Psub;

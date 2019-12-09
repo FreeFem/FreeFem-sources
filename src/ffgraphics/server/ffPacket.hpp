@@ -15,10 +15,10 @@ template <typename T, class K>
 struct ffFE {
 
     ffFE(KN<T> psub, KN<int> ksub, KN<K> v1, K max, K min, bool AsVector)
-        : Psub(psub), Ksub(ksub), V1(v1), Vector(AsVector) { }
+        : Psub(psub), Ksub(ksub), V1(v1), max(max), min(min), Vector(AsVector) { }
 
-    KN_<T> Psub;
-    KN_<int> Ksub;
+    KN<T> Psub;
+    KN<int> Ksub;
     KN<K> V1;
     K max;
     K min;
