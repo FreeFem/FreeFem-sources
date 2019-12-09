@@ -39,7 +39,8 @@ TESTS_HPDDM = diffusion-2d-thirdlevelgeneo.edp \
 	natural_convection_3D_obstacle.edp \
 	natural_convection.edp \
 	Richards-2d.edp \
-	heat-torus-3d-surf.edp
+	heat-torus-3d-surf.edp \
+	Helmholtz_Cobracavity_BEM.edp
 
 
 TESTS_METIS = Maxwell_Cobracavity.edp
