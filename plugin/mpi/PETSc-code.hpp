@@ -256,7 +256,7 @@ namespace PETSc {
               MatSetSizes(ptA->_petsc, ptA->_last - ptA->_first, ptA->_last - ptA->_first,
                           PETSC_DECIDE, PETSC_DECIDE);
             }
-            if (ptA->_A->getMatrix( )->_sym) {
+            if (ptA->_A && ptA->_A->getMatrix( )->_sym) {
               MatSetType(ptA->_petsc, MATMPISBAIJ);
               MatMPISBAIJSetPreallocationCSR(ptA->_petsc, 1, reinterpret_cast< PetscInt* >(ia),
                                              reinterpret_cast< PetscInt* >(ja), c);
@@ -406,6 +406,11 @@ namespace PETSc {
     Dmat* const null = nullptr;
     change(dA, A, null, nullptr, null);
     return dA;
+  }
+  long changeSchur(Dmat* const& dA, KN< Matrice_Creuse< PetscScalar > >* const& schurPreconditioner,
+                   KN< double >* const& schurList) {
+    setVectorSchur(dA, schurPreconditioner, schurList);
+    return 0L;
   }
   template< class Type, class K >
   long originalNumbering(Type* const& A, KN< K >* const& in, KN< long >* const& interface) {
@@ -1567,8 +1572,6 @@ namespace PETSc {
         KSPCreate(PETSC_COMM_WORLD, &ptA->_ksp);
         KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
       }
-      if (nargs[4] && c != 2)
-        KSPSetOptionsPrefix(ptA->_ksp, GetAny< std::string* >((*nargs[4])(stack))->c_str( ));
       if (c == 1) {
         KN< Matrice_Creuse< double > >* mP = GetAny< KN< Matrice_Creuse< double > >* >((*P)(stack));
         ksp = ptA->_ksp;
@@ -1631,6 +1634,8 @@ namespace PETSc {
           setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
       }
       else ksp = ptA->_ksp;
+      if (nargs[4] && c != 2)
+        KSPSetOptionsPrefix(ptA->_ksp, GetAny< std::string* >((*nargs[4])(stack))->c_str( ));
       KSPSetFromOptions(ksp);
       if (c != 1) {
         if (std::is_same< Type, Dmat >::value) {
@@ -3667,6 +3672,9 @@ static void Init_PETSc( ) {
   TheOperators->Add("=", new OneOperator2_< Dmat*, Dmat*, Matrice_Creuse< PetscScalar >* >(
                            PETSc::changeOperatorSimple));
   TheOperators->Add("=", new OneOperator2_< Dmat*, Dmat*, Dmat* >(PETSc::changeOperatorSimple));
+  Global.Add("changeSchur", "(",
+             new OneOperator3_< long, Dmat*, KN< Matrice_Creuse< PetscScalar > >*, KN< double >* >(
+               PETSc::changeSchur));
   Global.Add("view", "(", new PETSc::view< Dmat >);
   Global.Add(
     "originalNumbering", "(",
