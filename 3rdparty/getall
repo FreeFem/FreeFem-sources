@@ -196,10 +196,10 @@ download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/b3bac953
 	'bemtool.zip',
 	'60860dcc6eb9d31e7d5b17916d26bca8');
 
-download('Boost','https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.gz',
+download('Boost','https://www.ljll.math.upmc.fr/~tournier/boost_for_bemtool.tar.gz',
 	'https://www.boost.org',
 	'boost.tar.gz',
-	'fea771fe8176828fabf9c09242ee8c26');
+	'bb0e3ee1ad06174c80a69bc0756034e7');
 
 
 
