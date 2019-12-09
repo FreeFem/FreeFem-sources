@@ -555,14 +555,6 @@ class renumber : public OneOperator {
     return 0L;
 }
 
-template<class Type>
-long nbMult(Type* const& A) {
-    return A->getMult();
-}
-template<class Type>
-double nbDof(Type* const& A) {
-    return static_cast<double>(A->getAllDof());
-}
 template<class Type, class K>
 long originalNumbering(Type* const& A, KN<K>* const& in, KN<long>* const& interface) {
     A->originalNumbering(STL<long>(*interface), *in);
@@ -616,8 +608,6 @@ void add() {
     Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>);
     Global.Add("DDM", "(", new solveDDM<Type<K, S>, K>);
     Global.Add("renumber", "(", new renumber<Type<K, S>, K>);
-    Global.Add("nbDof", "(", new OneOperator1_<double, Type<K, S>*>(nbDof));
-    Global.Add("nbMult", "(", new OneOperator1_<long, Type<K, S>*>(nbMult));
     Global.Add("originalNumbering", "(", new OneOperator3_<long, Type<K, S>*, KN<K>*, KN<long>*>(originalNumbering));
     addInv<Type<K, S>, InvSubstructuring, KN<K>, K>();
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));

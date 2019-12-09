@@ -51,7 +51,7 @@ EVhi def(u), def(err);
 
 //macro Esuperwithhpddmkrylov()1//
 
-macro Edefplot(u)u//
+macro Edefmplot(u)u//
 
 EbinexactgeneoCS = 0;
 

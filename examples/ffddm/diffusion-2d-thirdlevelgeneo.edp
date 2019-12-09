@@ -36,7 +36,7 @@ real[int] rhs(1);
 real[int] x0(LapVhi.ndof);
 x0 = 0;
 LapVhi def(u), def(err);
-macro Lapdefplot(u)u//
+macro Lapdefmplot(u)u//
 
 LapbinexactgeneoCS = 0;
 

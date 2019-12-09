@@ -23,6 +23,44 @@ func string removespaces(string& str) {
 	return res;
 }
 
+macro ffddmsetupPrecondinit(pr)
+IFMACRO(!pr#setupprecondinit)
+
+IFMACRO(pr#localmacroaug,1)
+matrix<pr#prfe#K> pr#CSinterp;
+ENDIFMACRO
+
+matrix<pr#prfe#K> pr#AglobEprec;
+matrix<pr#prfe#K>[int] pr#aR(pr#prfe#prmesh#npart);       /* local (ras or Robin) matrices (for the preconditioner) */
+matrix<pr#prfe#K> pr#aRdEprec;
+
+string pr#prec = "none";
+
+int pr#bCM = 0;
+
+string pr#corr = "none";
+
+matrix<pr#prfe#K> pr#E;
+matrix<pr#prfe#K> pr#ZCM,pr#ZCMi,pr#ECM;
+
+int pr#si;
+
+int[int] pr#sizelg(pr#prfe#prmesh#npart), pr#offseti(pr#prfe#prmesh#npart);
+
+int[int] pr#sizelgworld(mpiSize(pr#prfe#prmesh#mpicomm)), pr#offsetiworld(mpiSize(pr#prfe#prmesh#mpicomm));
+
+int pr#ncoarsespace = 0;
+
+pr#prfe#K[int][int] pr#Z(0);
+
+int pr#nbiter = 0;
+
+ffddmgeneratePrecondfunctions(pr,pr#prfe)
+
+NewMacro pr#setupprecondinit()1 EndMacro
+ENDIFMACRO
+// EOM
+
 macro ffddmsetupOperatorinit(pr,preffe)
 IFMACRO(!pr#setupoperatorinit)
 
@@ -35,7 +73,7 @@ ENDIFMACRO
 
 NewMacro pr#localmacroaug preffe#prmesh#buildAug EndMacro
 
-NewMacro pr#prfe preffe EndMacro
+NewMacro pr#prfe()preffe EndMacro
 
 NewMacro pr#fromVhi(ui,VhName,res)
 if (preffe#prmesh#isincomm)
@@ -212,11 +250,12 @@ if (preffe#prmesh#inexactCSsplit == 1)
 ENDIFMACRO
 
 IFMACRO(pr#withpetsc)
-load "PETSc"
 IFMACRO(preffe#K,real)
+load "PETSc"
 Mat<preffe#K> pr#petscOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, preffe#Dk[mpiRank(preffe#prmesh#commddm)], communicator = preffe#prmesh#commddm);
 ENDIFMACRO
 IFMACRO(preffe#K,complex)
+load "PETSc-complex"
 real[int] pr#petscDk = preffe#Dk[mpiRank(preffe#prmesh#commddm)].re;
 Mat<preffe#K> pr#petscOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, pr#petscDk, scaled = false, communicator = preffe#prmesh#commddm);
 ENDIFMACRO
@@ -234,45 +273,12 @@ ENDIFMACRO
 
 ffddmgenerateOperatorfunctions(pr,preffe)
 
+ffddmsetupPrecondinit(pr)
+
 NewMacro pr#setupoperatorinit()1 EndMacro
 ENDIFMACRO
 // EOM
 
-macro ffddmsetupPrecondinit(pr)
-IFMACRO(!pr#setupprecondinit)
-
-IFMACRO(pr#localmacroaug,1)
-matrix<pr#prfe#K> pr#CSinterp;
-ENDIFMACRO
-
-matrix<pr#prfe#K> pr#AglobEprec;
-matrix<pr#prfe#K>[int] pr#aR(pr#prfe#prmesh#npart);       /* local (ras or Robin) matrices (for the preconditioner) */
-matrix<pr#prfe#K> pr#aRdEprec;
-
-string pr#prec = ffddmprecond;
-
-int pr#bCM = 0;
-
-string pr#corr = "none";
-
-matrix<pr#prfe#K> pr#E;
-matrix<pr#prfe#K> pr#ZCM,pr#ZCMi,pr#ECM;
-
-int pr#si;
-
-int[int] pr#sizelg(pr#prfe#prmesh#npart), pr#offseti(pr#prfe#prmesh#npart);
-
-int[int] pr#sizelgworld(mpiSize(pr#prfe#prmesh#mpicomm)), pr#offsetiworld(mpiSize(pr#prfe#prmesh#mpicomm));
-
-int pr#ncoarsespace = 0;
-
-pr#prfe#K[int][int] pr#Z(0);
-
-ffddmgeneratePrecondfunctions(pr,pr#prfe)
-
-NewMacro pr#setupprecondinit()1 EndMacro
-ENDIFMACRO
-// EOM
 
 macro ffddmsetupOperatorBeminit(pr,preffe)
 NewMacro pr#bem()1 EndMacro
@@ -281,7 +287,6 @@ ffddmsetupOperatorinit(pr,preffe)
 
 macro ffddmsetupinit(pr,preffe)
 ffddmsetupOperatorinit(pr,preffe)
-ffddmsetupPrecondinit(pr)
 // EOM
 
 macro ffddmsetupOperator(pr,preffe,Varf)
@@ -377,7 +382,7 @@ ffddmsetupOperator(pr,preffe,Varf)
 
 macro ffddmsetupPrecond(pr,VarfPrec)
 
-ffddmsetupPrecondinit(pr)
+pr#prec = ffddmprecond;
 
 if (pr#prfe#prmesh#isincomm)
 {	
@@ -499,5 +504,5 @@ pr#param = value;
 // EOM
 
 macro ffddmplot(pr,sol,msg)
-pr#plot(sol,msg)
+pr#mplot(sol,msg)
 // EOM

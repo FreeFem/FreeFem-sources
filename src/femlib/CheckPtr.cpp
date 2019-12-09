@@ -25,11 +25,8 @@
  void* operator new (std::size_t size, const std::nothrow_t& nothrow_value) noexcept;
  p
  */
-#if __APPLE__
-#include <malloc/malloc.h>
-#else
-#include <malloc.h>
-#endif
+
+#include <cstdlib>
 
 static long verbosity;
 

@@ -68,7 +68,7 @@ macro Varfrhs(varfName, meshName, PhName)
 
 ffddmbuildDmesh(Hmesh,Th,mpiCommWorld)
 
-macro HFEdefplot(u)real(u)//
+macro HFEdefmplot(u)real(u)//
 
 ffddmbuildDfespace(HFE,Hmesh,complex,def,init,Pk)
 

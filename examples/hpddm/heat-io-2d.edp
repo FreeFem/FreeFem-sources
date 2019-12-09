@@ -100,6 +100,6 @@ for(int i = 0; i < iMax; ++i) {
     else
         u[] = A^-1 * newRhs;
 
-    int[int] fforder(1);
-    savevtk("heat-io-2d.vtu", Th, u, append = i ? true : false);
+    int[int] fforder = [1];
+    savevtk("heat-io-2d.vtu", Th, u, order = fforder, append = i ? true : false);
 }

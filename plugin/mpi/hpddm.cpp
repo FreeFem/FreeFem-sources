@@ -846,6 +846,7 @@ void add() {
     Global.Add("set", "(", new set<Type<K, S>, K>);
     addProd<Type<K, S>, ProdSchwarz, KN<K>, K>();
     addInv<Type<K, S>, InvSchwarz, KN<K>, K>();
+    addScalarProduct< Type<K, S>, K >( );
 #if 0 // if you need this, please make sure you are using the master branch of HPDDM
     addArray<Type<K, S>>();
 #endif
