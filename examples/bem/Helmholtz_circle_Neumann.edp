@@ -90,10 +90,6 @@ UhOut vFirstKindabs = abs(vFirstKind);
 plot(vFirstKindabs, dim=1, fill=1, value=1, nbiso=20,cmm="First kind");
 
 // Solution for formulation of second kind
-HMatrix<complex> BSecondKind = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000);
-if (mpirank == 0) cout << BSecondKind.infos << endl;
-display(BSecondKind);
-
 UhOut<complex> vSecondKind;
 vSecondKind[] = HPot*uSecondKind[];
 vSecondKind[] += vinc[];
@@ -102,10 +98,6 @@ UhOut vSecondKindabs = abs(vSecondKind);
 plot(vSecondKindabs, dim=1, fill=1, value=1, nbiso=20,cmm="Second kind");
 
 // Solution for combined formulation
-HMatrix<complex> BCombined = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000);
-if (mpirank == 0) cout << BCombined.infos << endl;
-display(BCombined);
-
 UhOut<complex> vCombined;
 vCombined[] = HPot*uCombined[];
 vCombined[] += vinc[];
