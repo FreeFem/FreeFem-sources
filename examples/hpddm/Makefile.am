@@ -65,10 +65,10 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	laplace-lagrange-PETSc.edp \
 	natural-convection-fieldsplit-2d-PETSc.edp \
 	neo-Hookean-2d-PETSc.edp \
-	Newton-2d-PETSc.edp \
-	Newton-adaptmesh-2d-PETSc.edp \
-	Newton-vi-2d-PETSc.edp \
-	Newton-vi-adaptmesh-2d-PETSc.edp \
+	newton-2d-PETSc.edp \
+	newton-adaptmesh-2d-PETSc.edp \
+	newton-vi-2d-PETSc.edp \
+	newton-vi-adaptmesh-2d-PETSc.edp \
 	block-PETSc.edp \
 	laplace-RT-2d-PETSc.edp \
 	stokes-2d-PETSc.edp \
@@ -101,7 +101,8 @@ TESTS_PETSC_SLEPC = laplace-2d-SLEPc.edp \
 
 TESTS_PETSCCOMPLEX = diffusion-2d-PETSc-complex.edp \
 	helmholtz-2d-PETSc-complex.edp \
-	helmholtz-mg-2d-PETSc-complex.edp
+	helmholtz-mg-2d-PETSc-complex.edp \
+	maxwell-mg-3d-PETSc-complex.edp
 
 TESTS_PETSCCOMPLEX_SLEPCCOMPLEX = laplace-2d-SLEPc-complex.edp
 
@@ -158,4 +159,4 @@ freefem++.pref: Makefile
 	echo includepath = \"../../idp/\" >> freefem++.pref
 
 clean-local:
-	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_*
+	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_*

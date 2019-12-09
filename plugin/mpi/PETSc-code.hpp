@@ -1886,6 +1886,10 @@ namespace PETSc {
               PetscViewerPushFormat(PETSC_VIEWER_STDOUT_WORLD, PETSC_VIEWER_ASCII_INFO);
               pop = true;
           }
+          else if(type->compare("draw") == 0) {
+              MatView(ptA->_petsc, PETSC_VIEWER_DRAW_WORLD);
+              return 0L;
+          }
       }
       MatView(ptA->_petsc, PETSC_VIEWER_STDOUT_WORLD);
       if(pop)

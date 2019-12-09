@@ -63,7 +63,7 @@ macro plotD(Th, u, params)
 if(!NoGraphicWindow) {
     fespace PhPlot(Th, P1);
     PhPlot plt = u;
-NewMacro defPlt#Th(u)u EndMacro
+NewMacro defPlt#Th(v)v EndMacro
     plotMPI(Th, plt, P1, defPlt#Th, real, params)
 }//
 
