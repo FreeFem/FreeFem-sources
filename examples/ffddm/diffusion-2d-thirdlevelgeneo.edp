@@ -19,8 +19,8 @@ mesh ThGlobal = square(global,global);
 
 macro Varf(varfName, meshName, PhName)
 
-varf varfName(def(u), def(v)) = intN(meshName)(grad(u)' * grad(v))
-+ intN(meshName)(v)
+varf varfName(def(u), def(v)) = int2d(meshName)(grad(u)' * grad(v))
++ int2d(meshName)(v)
 + on(1, u = 0.0);
 // EOM
 

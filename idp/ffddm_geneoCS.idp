@@ -5,7 +5,6 @@ if (pr#prfe#prmesh#isincomm)
 pr#prfe#prmesh#tic(pr#tloc)
 
 if (!bpara) {
-  IFMACRO(!bem)
   pr#ncoarsespace=pr#si;
   if (mpiRank(pr#prfe#prmesh#mpicomm) == 0)
     cout << "["+Stringification(pr)+"] CS size = " << pr#ncoarsespace << endl;
@@ -25,8 +24,6 @@ if (!bpara) {
   matrix<pr#prfe#K> tmp = pr#Aglobal*Zms;
   pr#E = Zms'*tmp;
   set(pr#E,solver=sparsesolver,commworld=pr#prfe#prmesh#commself,factorize=3);
-  ENDIFMACRO
-  ;
 }
 else {
   pr#ncoarsespace = 0; /* coarse space dimension */

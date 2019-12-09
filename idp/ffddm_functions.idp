@@ -91,10 +91,17 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
     preffe#K[int] res(x.n);
     if (preffe#prmesh#isincomm) {
       IFMACRO(!pr#bem)
-      if (!bpara)
-      res = pr#AglobEprec*x;
-      else if (!preffe#prmesh#excluded){	
-        res = pr#aRdEprec*x;
+      if (!bpara) {
+        if (pr#AglobEprec.n > 0)
+          res = pr#AglobEprec*x;
+        else
+          res = pr#Aglobal*x;
+      }
+      else if (!preffe#prmesh#excluded){
+        if (pr#aRdEprec.n > 0)
+          res = pr#aRdEprec*x;
+        else
+          res = pr#aRd[mpiRank(preffe#prmesh#commddm)]*x;
         pr#prfe#update(res,true);
       }
       ENDIFMACRO

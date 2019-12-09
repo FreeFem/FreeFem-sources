@@ -257,44 +257,21 @@ if (pr#isincomm)
 macro ffddminitDmeshf(pr,Th,comm)
 IFMACRO(!pr#init)
 
-IFMACRO(!pr#dim)
-IFMACRO(dimension,2)
+IFMACRO(((!pr#dim)&(dimension,2))|(pr#dim,2))
 NewMacro pr#meshN()mesh EndMacro             /* two-dimensional problem  */
 NewMacro pr#intN()int2d EndMacro             /* two-dimensional integral */
 NewMacro pr#intbN()int1d EndMacro            /* one-dimensional integral */
 NewMacro pr#minimalMesh()square(1,1) EndMacro
 ENDIFMACRO
 
-IFMACRO(dimension,3)
+IFMACRO(((!pr#dim)&(dimension,3))|(pr#dim,3))
 NewMacro pr#meshN()mesh3 EndMacro            /* three-dimensional problem  */
 NewMacro pr#intN()int3d EndMacro             /* three-dimensional integral */
 NewMacro pr#intbN()int2d EndMacro            /* two-dimensional integral   */
 NewMacro pr#minimalMesh()cube(1,1,1) EndMacro
 ENDIFMACRO
 
-IFMACRO(dimension,3S)
-NewMacro pr#meshN()meshS EndMacro            /* three-dimensional surface problem */
-NewMacro pr#intN()int2d EndMacro
-NewMacro pr#intbN()int1d EndMacro
-NewMacro pr#minimalMesh()square3(1,1,[x,y,z]) EndMacro
-ENDIFMACRO
-ENDIFMACRO
-
-IFMACRO(pr#dim,2)
-NewMacro pr#meshN()mesh EndMacro             /* two-dimensional problem  */
-NewMacro pr#intN()int2d EndMacro             /* two-dimensional integral */
-NewMacro pr#intbN()int1d EndMacro            /* one-dimensional integral */
-NewMacro pr#minimalMesh()square(1,1) EndMacro
-ENDIFMACRO
-
-IFMACRO(pr#dim,3)
-NewMacro pr#meshN()mesh3 EndMacro            /* three-dimensional problem  */
-NewMacro pr#intN()int3d EndMacro             /* three-dimensional integral */
-NewMacro pr#intbN()int2d EndMacro            /* two-dimensional integral   */
-NewMacro pr#minimalMesh()cube(1,1,1) EndMacro
-ENDIFMACRO
-
-IFMACRO(pr#dim,3S)
+IFMACRO(((!pr#dim)&(dimension,3S))|(pr#dim,3S))
 NewMacro pr#meshN()meshS EndMacro            /* three-dimensional surface problem */
 NewMacro pr#intN()int2d EndMacro
 NewMacro pr#intbN()int1d EndMacro
