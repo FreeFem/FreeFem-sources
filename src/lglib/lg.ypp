@@ -321,7 +321,6 @@ void signalCPUHandler( int signum ) {
 %token GTGT
 %token ARROW
 %token BORDER
-%token CURVE3
 %token SOLVE
 
 %%

@@ -63,6 +63,40 @@ basicAC_F0::name_and_type  CDomainOfIntegration::name_param[]= {
 
 };
 
+basicAC_F0::name_and_type  CPartBemDI::name_param[]= {
+    { "qft", &typeid(const Fem2D::QuadratureFormular *)},    //0
+    { "qfe", &typeid(const Fem2D::QuadratureFormular1d *)},
+    { "qforder",&typeid(long)},     // 2
+    //{ "qfnbpT",&typeid(long)},
+    //{ "qfnbpE",&typeid(long)},
+    //{ "optimize",&typeid(long)},
+    //{ "binside",&typeid(double)},
+    //{ "mortar",&typeid(bool)},
+    { "qfV", &typeid(const Fem2D::GQuadratureFormular<R3> *)},    // 8 ->  3
+    //{ "levelset",&typeid(double)},
+    //{ "mapt",&typeid(E_Array)},
+    //{ "mapu",&typeid(E_Array)}
+    
+    
+};
+basicAC_F0::name_and_type  CBemDomainOfIntegration::name_param[]= {
+    { "qft", &typeid(const Fem2D::QuadratureFormular *)},    //0
+    { "qfe", &typeid(const Fem2D::QuadratureFormular1d *)},
+    { "qforder",&typeid(long)},     // 2
+    //{ "qfnbpT",&typeid(long)},
+    //{ "qfnbpE",&typeid(long)},
+    //{ "optimize",&typeid(long)},
+    //{ "binside",&typeid(double)},
+    //{ "mortar",&typeid(bool)},
+    { "qfV", &typeid(const Fem2D::GQuadratureFormular<R3> *)},    // 8 ->  3 
+    //{ "levelset",&typeid(double)},
+    //{ "mapt",&typeid(E_Array)},
+    //{ "mapu",&typeid(E_Array)}
+    
+    
+};
+
+
 
 basicAC_F0::name_and_type  Problem::name_param[]= {
     {  "save",&typeid(string* )},
@@ -9593,6 +9627,79 @@ void SetArgsFormLinear(const ListOfId *lid,int ordre)
         CompileError(" Sorry you mixte formulation with and without array ");
     }
 }
+
+
+void SetArgsBemFormLinear(const ListOfId *lid,int ordre)
+{
+    //  the local parameter are
+    //  ordre ==2 => bilinear form  unknown (newU_) and test function (newV_)
+    //  ordre ==1 =>   linear form just  test function (newV_)
+    // ---------------------
+    throwassert(ordre >0 && ordre <=3 && (lid || lid->size()>0 ) );
+    const ListOfId & l(*lid);
+    int nb=l.size();
+    int n=0;
+    C_F0 type,init;
+    int nbarray=0;
+    ListOfId * array[3];
+    aType uh=atype<const finconnue*>(),vh=atype<const ftest*>(), fk=atype<const fkernel*>();
+    
+    for (int i=0;i<nb;i++)
+        if (l[i].r == 0 &&  l[i].re == 0 && l[i].id  ) n++;
+        else if (l[i].array)
+            array[Min(nbarray++,2)] = l[i].array;
+    if (nbarray && n==0)
+    {  //
+        
+        if(nbarray!=ordre)
+        { cerr << " form " << ordre << " == " << nbarray << " Nb of Array "<<endl;
+            CompileError(" Must have 1 or 2 array, one for unknow functions, one for test functions");
+        }
+        for (int k=0;k<ordre;k++)
+            for  (int i=0,iend=array[k]->size();i<iend;i++)
+            {
+                const UnId & idi((*array[k])[i].id);
+                if (idi.r == 0 && idi.re  == 0 && idi.array==0 )
+                {
+                    if (k==ordre-2)  //  unknow function just in case of bilinear form
+                        currentblock->NewID(uh,idi.id,C_F0(newU_(i),uh));
+                    else   //  test function
+                        currentblock->NewID(vh,idi.id,C_F0(newV_(i),vh));
+                }
+                else
+                    CompileError(" Just Variable in array parameter ");
+            }
+    }
+    else if (nbarray==0)
+    {    // a supprimer  to remove   in case of bilinear
+        
+        SHOWVERB(cout << "SetArgs:: form  set parameter " << endl);
+        if( ! ( ordre==1 || n%3==0) )
+            CompileError(" Error in test or unkwon function (odd number of function ---------) ");
+        //ffassert( ordre==1 || n%2==0);
+        //int nn=ordre==1 ? 0 : n/2; // ordre == 1 => no unknown function just test function
+        
+        /*for (int i=0,j=0;i<nb;i++)
+            if (l[i].r == 0 && l[i].re  == 0 && l[i].array==0)
+            {
+                SHOWVERB(cout <<"  " <<  l[i].id  << " " << (j<nn) << endl);
+                if (j<nn)
+                    currentblock->NewID(uh,l[i].id,C_F0(newU_(j%nn),uh));
+                else
+                    currentblock->NewID(vh,l[i].id,C_F0(newV_(j%nn),vh));
+                j++;
+            }*/
+    }
+    else
+    {
+        CompileError(" Sorry you mixte formulation with and without array ");
+    }
+}
+
+
+
+
+
 
 const Fem2D::GQuadratureFormular<R3> & CDomainOfIntegration::FIV(Stack stack) const
 {

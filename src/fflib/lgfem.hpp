@@ -382,7 +382,22 @@ class v_fesL : public RefCounter {
 // BemKernel : be defined with bemtool
 class BemKernel : public RefCounter {
 public:
+
+    int typeKernel;
+    
     BemKernel();
+    
+    BemKernel(const string tkernel):typeKernel(-1) {
+        if(!tkernel.compare("Laplace"))
+            typeKernel = 1;
+        else if(!tkernel.compare("Helmholtz"))
+            typeKernel = 2;
+        else
+            ExecError("unknow BEM kernel type ");
+        if(verbosity>2) cout << "type BEM kernel " << typeKernel << " typeKernel " << tkernel << endl;
+        
+    }
+    
     virtual ~BemKernel() {}
 };
 

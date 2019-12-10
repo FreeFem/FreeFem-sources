@@ -89,8 +89,7 @@
      DOTDIVEQ = 305,
      ARROW = 306,
      BORDER = 307,
-     CURVE3 = 308,
-     SOLVE = 309
+     SOLVE = 308
    };
 #endif
 /* Tokens.  */
@@ -144,8 +143,7 @@
 #define DOTDIVEQ 305
 #define ARROW 306
 #define BORDER 307
-#define CURVE3 308
-#define SOLVE 309
+#define SOLVE 308
 
 
 
@@ -187,7 +185,7 @@ typedef union YYSTYPE
  vectorOfInst * endb;
 }
 /* Line 1529 of yacc.c.  */
-#line 191 "lg.tab.hpp"
+#line 189 "lg.tab.hpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

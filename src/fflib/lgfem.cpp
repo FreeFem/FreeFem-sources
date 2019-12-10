@@ -5706,8 +5706,10 @@ void init_lgfem( ) {
   Dcl_Type< MeshPoint * >( );
   Dcl_Type< finconnue * >( );
   Dcl_Type< ftest * >( );
+  Dcl_Type< fkernel * >( );  // a bem kernel
+    
   Dcl_Type< foperator * >( );
-  Dcl_Type< foperator * >( );
+  Dcl_Type< fbemoperator * >( );
   Dcl_Type< const BC_set * >( );                         // a set of boundary condition
   Dcl_Type< const Call_FormLinear< v_fes > * >( );       //   to set Vector
   Dcl_Type< const Call_FormBilinear< v_fes > * >( );     // to set Matrix
@@ -5721,7 +5723,9 @@ void init_lgfem( ) {
 
   map_type[typeid(const FormBilinear *).name( )] = new TypeFormBilinear;
   map_type[typeid(const FormLinear *).name( )] = new TypeFormLinear;
+  map_type[typeid(const BemFormBilinear *).name( )] = new BemTypeFormBilinear;
   aType t_C_args = map_type[typeid(const C_args *).name( )] = new TypeFormOperator;
+  aType t_BemC_args = map_type[typeid(const BemC_args *).name( )] = new TypeBemFormOperator;
   map_type[typeid(const Problem *).name( )] = new TypeSolve< false, Problem >;
   map_type[typeid(const Solve *).name( )] = new TypeSolve< true, Solve >;
   Dcl_Type< const IntFunction< double > * >( );
@@ -5729,14 +5733,19 @@ void init_lgfem( ) {
   basicForEachType *t_solve = atype< const Solve * >( );
   basicForEachType *t_problem = atype< const Problem * >( );
   basicForEachType *t_fbilin = atype< const FormBilinear * >( );
+  basicForEachType *t_fbembilin = atype< const BemFormBilinear * >( );
   basicForEachType *t_flin = atype< const FormLinear * >( );
   basicForEachType *t_BC = atype< const BC_set * >( );
-
+    
   /// Doxygen doc
   basicForEachType *t_form = atype< const C_args * >( );
-
+  basicForEachType *t_Bemform = atype< const BemC_args * >( );
+ //////// basicForEachType *t_BemKernel = atype< const BemC_args * >( );
+    
   Dcl_Type< const CDomainOfIntegration * >( );
-
+  Dcl_Type< const CBemDomainOfIntegration * >( );
+  Dcl_Type< const CPartBemDI * >( );
+  
   atype< pmesh >( )->AddCast(new E_F1_funcT< pmesh, pmesh * >(UnRef< pmesh >));
   atype< pfes >( )->AddCast(new E_F1_funcT< pfes, pfes * >(UnRef< pfes >));
 
@@ -5899,7 +5908,9 @@ void init_lgfem( ) {
   zzzfff->AddF("varf", t_form);    //  var. form ~  <<varf>>
   zzzfff->AddF("solve", t_solve);
   zzzfff->AddF("problem", t_problem);
-
+  zzzfff->AddF("varfbem", t_Bemform);
+  ////zzzfff->AddF("BemKernel", t_BemKernel);
+    
   Global.Add("jump", "(", new OneOperatorCode< Code_VF< Ftest, Code_Jump > >);
   Global.Add("jump", "(", new OneOperatorCode< Code_VF< Finconnue, Code_Jump > >);
   Global.Add("average", "(", new OneOperatorCode< Code_VF< Ftest, Code_Mean > >);
@@ -5941,23 +5952,28 @@ void init_lgfem( ) {
   TheOperators->Add("+", new OneOperatorCode< CODE_L_Add< Foperator > >,
                     new OneOperatorCode< CODE_L_Add< Ftest > >,
                     new OneOperatorCode< CODE_L_Add< Finconnue > >,
-                    new OneOperatorCode< C_args >(t_C_args, t_C_args, t_C_args)    // ,
+                    new OneOperatorCode< C_args >(t_C_args, t_C_args, t_C_args),    // ,t_BemC_args
+                    new OneOperatorCode< C_args >(t_BemC_args, t_BemC_args, t_BemC_args)
   );
-  TheOperators->Add(
-    "-", new OneOperatorCode< CODE_L_Minus< Foperator > >,
-    new OneOperatorCode< CODE_L_Minus< Ftest > >, new OneOperatorCode< CODE_L_Minus< Finconnue > >,
-    new OneOperatorCode< CODE_L_Sub< Foperator > >, new OneOperatorCode< CODE_L_Sub< Ftest > >,
+  TheOperators->Add("-", new OneOperatorCode< CODE_L_Minus< Foperator > >,
+    new OneOperatorCode< CODE_L_Minus< Ftest > >,
+    new OneOperatorCode< CODE_L_Minus< Finconnue > >,
+    new OneOperatorCode< CODE_L_Sub< Foperator > >,
+    new OneOperatorCode< CODE_L_Sub< Ftest > >,
     new OneOperatorCode< CODE_L_Sub< Finconnue > >,
     new OneOperatorCode< C_args_minus >(t_C_args, t_C_args, t_fbilin),
     new OneOperatorCode< C_args_minus >(t_C_args, t_C_args, t_flin),
     new OneOperatorCode< Minus_Form< FormBilinear > >,
+    new OneOperatorCode< Minus_Form< BemFormBilinear > >,
     new OneOperatorCode< Minus_Form< FormLinear > >
 
   );
 
   atype< const C_args * >( )->AddCast(new OneOperatorCode< C_args >(t_C_args, t_fbilin),
-                                      new OneOperatorCode< C_args >(t_C_args, t_flin),
-                                      new OneOperatorCode< C_args >(t_C_args, t_BC));
+    new OneOperatorCode< C_args >(t_C_args, t_flin),
+    new OneOperatorCode< C_args >(t_C_args, t_BC),
+    new OneOperatorCode< BemC_args >(t_C_args, t_fbembilin)
+  );
 
   atype< const C_args * >( )->AddCast(
     new OneOperatorCode< C_args >(t_C_args, atype< DotSlash_KN_< R > >( )),
@@ -6026,31 +6042,22 @@ void init_lgfem( ) {
     new OpMatrixtoBilinearForm< double, v_fes >);
 
   TheOperators->Add("=",
-                    new OpArraytoLinearForm< double, v_fes3 >(atype< KN_< double > >( ), false,
-                                                              false),    // 3D volume
+                    new OpArraytoLinearForm< double, v_fes3 >(atype< KN_< double > >( ), false, false),    // 3D volume
                     new OpMatrixtoBilinearForm< double, v_fes3 >,        // 3D volume
-                    new OpArraytoLinearForm< double, v_fesS >(atype< KN_< double > >( ), false,
-                                                              false),    // 3D surface
+                    new OpArraytoLinearForm< double, v_fesS >(atype< KN_< double > >( ), false, false),    // 3D surface
                     new OpMatrixtoBilinearForm< double, v_fesS >,        // 3D surface
-                    new OpArraytoLinearForm< double, v_fesL >(atype< KN_< double > >( ), false,
-                                                              false),    // 3D curve
+                    new OpArraytoLinearForm< double, v_fesL >(atype< KN_< double > >( ), false, false),    // 3D curve
                     new OpMatrixtoBilinearForm< double, v_fesL >);       // 3D curve
 
   TheOperators->Add(
     "<-", new OpArraytoLinearForm< double, v_fes >(atype< KN< double > * >( ), true, true),
     new OpArraytoLinearForm< Complex, v_fes >(atype< KN< Complex > * >( ), true, true),
-    new OpArraytoLinearForm< double, v_fes3 >(atype< KN< double > * >( ), true,
-                                              true),    // 3D volume
-    new OpArraytoLinearForm< Complex, v_fes3 >(atype< KN< Complex > * >( ), true,
-                                               true),    // 3D volume
-    new OpArraytoLinearForm< double, v_fesS >(atype< KN< double > * >( ), true,
-                                              true),    // 3D surface
-    new OpArraytoLinearForm< Complex, v_fesS >(atype< KN< Complex > * >( ), true,
-                                               true),    // 3D surface
-    new OpArraytoLinearForm< double, v_fesL >(atype< KN< double > * >( ), true,
-                                              true),    // 3D curve
-    new OpArraytoLinearForm< Complex, v_fesL >(atype< KN< Complex > * >( ), true,
-                                               true)    // 3D curve
+    new OpArraytoLinearForm< double, v_fes3 >(atype< KN< double > * >( ), true, true),    // 3D volume
+    new OpArraytoLinearForm< Complex, v_fes3 >(atype< KN< Complex > * >( ), true, true),    // 3D volume
+    new OpArraytoLinearForm< double, v_fesS >(atype< KN< double > * >( ), true, true),    // 3D surface
+    new OpArraytoLinearForm< Complex, v_fesS >(atype< KN< Complex > * >( ), true, true),    // 3D surface
+    new OpArraytoLinearForm< double, v_fesL >(atype< KN< double > * >( ), true, true),    // 3D curve
+    new OpArraytoLinearForm< Complex, v_fesL >(atype< KN< Complex > * >( ), true, true)    // 3D curve
   );
 
   TheOperators->Add(
@@ -6066,14 +6073,11 @@ void init_lgfem( ) {
     new OpMatrixtoBilinearForm< Complex, v_fes >);
 
   TheOperators->Add("=",
-                    new OpArraytoLinearForm< Complex, v_fes3 >(atype< KN_< Complex > >( ), false,
-                                                               false),    // 3D volume
+                    new OpArraytoLinearForm< Complex, v_fes3 >(atype< KN_< Complex > >( ), false, false),    // 3D volume
                     new OpMatrixtoBilinearForm< Complex, v_fes3 >,        // 3D volume
-                    new OpArraytoLinearForm< Complex, v_fesS >(atype< KN_< Complex > >( ), false,
-                                                               false),    // 3D surface
+                    new OpArraytoLinearForm< Complex, v_fesS >(atype< KN_< Complex > >( ), false, false),    // 3D surface
                     new OpMatrixtoBilinearForm< Complex, v_fesS >,        // 3D surface
-                    new OpArraytoLinearForm< Complex, v_fesL >(atype< KN_< Complex > >( ), false,
-                                                               false),    // 3D curve
+                    new OpArraytoLinearForm< Complex, v_fesL >(atype< KN_< Complex > >( ), false, false),    // 3D curve
                     new OpMatrixtoBilinearForm< Complex, v_fesL >);       // 3D surface
 
   // add august 2007
@@ -6195,29 +6199,34 @@ void init_lgfem( ) {
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fes >);
 
   Add< const FormLinear * >("(", "", new OpCall_FormLinear< FormLinear, v_fes3 >);    // 3D volume
-  Add< const FormBilinear * >("(", "",
-                              new OpCall_FormBilinear< FormBilinear, v_fes3 >);    // 3D volume
-  Add< const FormBilinear * >("(", "",
-                              new OpCall_FormLinear2< FormBilinear, v_fes3 >);    // 3D volume
+  Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, v_fes3 >); // 3D volume
+  Add< const FormBilinear * >("(", "", new OpCall_FormLinear2< FormBilinear, v_fes3 >);    // 3D volume
   Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, v_fes3 >);       // 3D volume
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fes3 >);      // 3D volume
 
   Add< const FormLinear * >("(", "", new OpCall_FormLinear< FormLinear, v_fesS >);    // 3D surface
-  Add< const FormBilinear * >("(", "",
-                              new OpCall_FormBilinear< FormBilinear, v_fesS >);    // 3D surface
-  Add< const FormBilinear * >("(", "",
-                              new OpCall_FormLinear2< FormBilinear, v_fesS >);    // 3D surface
+  Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, v_fesS >);    // 3D surface
+  Add< const FormBilinear * >("(", "", new OpCall_FormLinear2< FormBilinear, v_fesS >);    // 3D surface
   Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, v_fesS >);       // 3D surface
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesS >);      // 3D surface
 
   Add< const FormLinear * >("(", "", new OpCall_FormLinear< FormLinear, v_fesL >);    // 3D curve
-  Add< const FormBilinear * >("(", "",
-                              new OpCall_FormBilinear< FormBilinear, v_fesL >);    // 3D curve
-  Add< const FormBilinear * >("(", "",
-                              new OpCall_FormLinear2< FormBilinear, v_fesL >);    // 3D curve
+  Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, v_fesL >);    // 3D curve
+  Add< const FormBilinear * >("(", "", new OpCall_FormLinear2< FormBilinear, v_fesL >);    // 3D curve
   Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, v_fesL >);       // 3D curve
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesL >);      // 3D curve
 
+    
+  Add< const BemFormBilinear * >("(", "", new OpCall_FormBilinear< BemFormBilinear, v_fesS >);    // 2D BEM
+  Add< const BemFormBilinear * >("(", "", new OpCall_FormLinear2< BemFormBilinear, v_fesS >);    // 2D BEM
+  //Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, v_fesS >);       // 2D BEM
+  //Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesS >);      // 2D BEM
+    
+  Add< const BemFormBilinear * >("(", "", new OpCall_FormBilinear< BemFormBilinear, v_fesL >);    // 1D BEM
+  Add< const BemFormBilinear * >("(", "", new OpCall_FormLinear2< BemFormBilinear, v_fesL >);   // 1D BEM
+  //Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, v_fesL >);      // 1D BEM
+  //Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesL >);     // 1D BEM
+ 
   //  correction du bug morale
   //  Attention il y a moralement un bug
   //  les initialisation   x = y   ( passe par l'operateur binaire <-  dans TheOperators
@@ -6281,15 +6290,16 @@ void init_lgfem( ) {
   Global.Add("jump", "(", new OneUnaryOperator< JumpOp< Complex >, JumpOp< Complex > >);
   Global.Add("mean", "(", new OneUnaryOperator< MeanOp< Complex >, MeanOp< Complex > >);
   Global.Add("average", "(", new OneUnaryOperator< MeanOp< Complex >, MeanOp< Complex > >);
-  Global.Add("otherside", "(",
-             new OneUnaryOperator< OthersideOp< Complex >, OthersideOp< Complex > >);
+  Global.Add("otherside", "(",new OneUnaryOperator< OthersideOp< Complex >, OthersideOp< Complex > >);
 
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< FormBilinear >);
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< FormLinear >);
-
+  Add< const CPartBemDI * >("(", "", new OneOperatorCode< CBemDomainOfIntegration >);
+    
+  Add< const CBemDomainOfIntegration * >("(", "", new OneOperatorCode< BemFormBilinear >);
+    
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< IntFunction< double >, 1 >);
-  Add< const CDomainOfIntegration * >("(", "",
-                                      new OneOperatorCode< IntFunction< complex< double > >, 0 >);
+  Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< IntFunction< complex< double > >, 0 >);
 
   map_type[typeid(double).name( )]->AddCast(new E_F1_funcT< double, pfer >(pfer2R< R, 0 >));
 

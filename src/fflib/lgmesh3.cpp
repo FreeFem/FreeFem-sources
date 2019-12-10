@@ -1441,6 +1441,16 @@ inline pmeshL *  initMesh(pmeshL * const & p, string * const & s) {
 }
 
 
+inline pBemKernel *  initKernel(pBemKernel * const & p, string * const & s) {
+    BemKernel * m;
+    if(verbosity > 2)
+        cout << " initBemKernel " << *s << endl;
+    *p= m =new BemKernel(*s);
+    return p;
+}
+
+
+
 /*inline pmeshS *  initMesh(pmeshS * const & p, string * const & s) {
 Mesh3 * m;
     MeshS * mS;
@@ -2580,29 +2590,23 @@ void init_lgmesh3() {
     
 
   //3D volume
-  TheOperators->Add("<-",
-       new OneOperator2_<pmesh3*,pmesh3*,string* >(&initMesh));
+  TheOperators->Add("<-", new OneOperator2_<pmesh3*,pmesh3*,string* >(&initMesh));
   // use for :   mesh Th = readmesh ( ...);
-  TheOperators->Add("<-",
-       new OneOperator2_<pmesh3*,pmesh3*,pmesh3 >(&set_copy_incr));
-  TheOperators->Add("=",
-		    new OneOperator2<pmesh3*,pmesh3*,pmesh3 >(&set_eqdestroy_incr));
+  TheOperators->Add("<-", new OneOperator2_<pmesh3*,pmesh3*,pmesh3 >(&set_copy_incr));
+  TheOperators->Add("=", new OneOperator2<pmesh3*,pmesh3*,pmesh3 >(&set_eqdestroy_incr));
   //3D surface
-  TheOperators->Add("<-",
-                    new OneOperator2_<pmeshS*,pmeshS*,string* >(&initMesh));
+  TheOperators->Add("<-", new OneOperator2_<pmeshS*,pmeshS*,string* >(&initMesh));
   // use for :   mesh Th = readmesh ( ...);
-  TheOperators->Add("<-",
-                    new OneOperator2_<pmeshS*,pmeshS*,pmeshS >(&set_copy_incr));
-  TheOperators->Add("=",
-                    new OneOperator2<pmeshS*,pmeshS*,pmeshS >(&set_eqdestroy_incr));
+  TheOperators->Add("<-", new OneOperator2_<pmeshS*,pmeshS*,pmeshS >(&set_copy_incr));
+  TheOperators->Add("=", new OneOperator2<pmeshS*,pmeshS*,pmeshS >(&set_eqdestroy_incr));
   //3D line
-  TheOperators->Add("<-",
-                    new OneOperator2_<pmeshL*,pmeshL*,string* >(&initMesh));
+  TheOperators->Add("<-", new OneOperator2_<pmeshL*,pmeshL*,string* >(&initMesh));
   // use for :   mesh Th = readmesh ( ...);
-  TheOperators->Add("<-",
-                    new OneOperator2_<pmeshL*,pmeshL*,pmeshL >(&set_copy_incr));
-  TheOperators->Add("=",
-                    new OneOperator2<pmeshL*,pmeshL*,pmeshL >(&set_eqdestroy_incr));
+  TheOperators->Add("<-", new OneOperator2_<pmeshL*,pmeshL*,pmeshL >(&set_copy_incr));
+  TheOperators->Add("=", new OneOperator2<pmeshL*,pmeshL*,pmeshL >(&set_eqdestroy_incr));
+  //BemKernel
+  TheOperators->Add("<-", new OneOperator2_<pBemKernel*,pBemKernel*,string*>(&initKernel));
+    
     
 
   Global.Add("readmesh3","(",new OneOperatorCode<ReadMesh3>);
@@ -2946,11 +2950,14 @@ TheOperators->Add("=",
  Global.Add("int1d","(",new OneOperatorCode<CDomainOfIntegrationBorderS>);
  Global.Add("intalledges","(",new OneOperatorCode<CDomainOfIntegrationAllEdgesS>);
     
- // 3d surface
+ // 3d curve
  Global.Add("int1d","(",new OneOperatorCode<CDomainOfIntegrationL>);
- //Global.Add("int0d","(",new OneOperatorCode<CDomainOfIntegrationBorderL>);
- //Global.Add("intalledges","(",new OneOperatorCode<CDomainOfIntegrationAllEdgesS>);
+ 
+ // 2D / 1D Bem
+ Global.Add("int2dx2d","(",new OneOperatorCode<CPartBemDI2d>);
+ Global.Add("int1dx1d","(",new OneOperatorCode<CPartBemDI1d>);
 
+    
  /*decommente par J. Morice 14/01/09*/
 
  Add<pf3r>("refresh",".",new OneOperator1<bool,pf3r>(pfer_refresh3<R,v_fes3>));
