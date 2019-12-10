@@ -1,6 +1,6 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
-// PARAM -frequency 1e+9
+// PARAM -freq 1e+9
 
 load "iovtk"
 load "PETSc-complex"
@@ -49,18 +49,26 @@ meshS ThS, ThG;
     Th3 = buildBdMesh(Th3);
 
     ThS = Th3.Gamma;
-    ThS = trunc(ThS, region==labmetal);
+    ThS = trunc(ThS, region == labmetal);
     ThG = ThS;
 }
 
 fespace Uh(ThS, P1);
 HMatrix<complex> A = assemblecomplexHESL(Uh, Uh, k, eta=10, epsilon=1.0e-2, minclustersize=10, maxblocksize=1000000);
-Mat<complex> H;
+Mat<complex> H, M;
 createMat(ThS, H, P1);
 plotDmesh(ThS, cmm = "Partitioning");
+bool mass = usedARGV("-mass") != -1;
+if(mass) {
+    varf vM(u, v) = int2d(ThS)(u * v);
+    matrix<complex> Loc = vM(Uh, Uh, sym = 1);
+    Mat<complex> copy(H, Loc);
+    M = copy;
+    set(M, sparams = "-mass_ksp_converged_reason", prefix = "mass_");
+}
 int[int] perm;
 {
-    fespace UhG(ThG,P1);
+    fespace UhG(ThG, P1);
     UhG<complex> numbering;
     numbering[] = 0:UhG.ndof - 1;
     Uh<complex> loc2glob = numbering;
@@ -80,16 +88,22 @@ func complex[int] op(complex[int]& in) {
 }
 complex[int,int] dense(1, 1);
 func complex[int] prec(complex[int]& in) {
-    if(dense.n == 1 && dense.m == 1) {
-        HMatrix<complex> A = assemblecomplexHESL(Uh, Uh, k, eta=10, epsilon=1.0e-2, minclustersize=10, maxblocksize=1000000, comm=mpiCommSelf);
-        dense.resize(Uh.ndof, Uh.ndof);
-        dense = A;
-        dense = dense^-1;
+    complex[int] out(in.n);
+    if(!mass) {
+        if(dense.n == 1 && dense.m == 1) {
+            HMatrix<complex> A = assemblecomplexHESL(Uh, Uh, k, eta=10, epsilon=1.0e-2, minclustersize=10, maxblocksize=1000000, comm=mpiCommSelf);
+            dense.resize(Uh.ndof, Uh.ndof);
+            dense = A;
+            dense = dense^-1;
+        }
+        complex[int] u(Uh.ndof), v(Uh.ndof);
+        changeNumbering(H, u, in, inverse = true);
+        v = dense * u;
+        changeNumbering(H, v, out);
     }
-    complex[int] out(in.n), u(Uh.ndof), v(Uh.ndof);
-    changeNumbering(H, u, in, inverse = true);
-    v = dense * u;
-    changeNumbering(H, v, out);
+    else {
+        KSPSolve(M, in, out);
+    }
     return out;
 }
 
@@ -100,7 +114,7 @@ bf[] = vRHS(0, Uh);
 complex[int] b, u;
 changeNumbering(H, bf[], b);
 u.resize(b.n);
-KSPSolve(op, b, u, precon = prec, sparams = "-ksp_type gmres -ksp_view_singularvalues -ksp_converged_reason -ksp_gmres_restart 1000 -pc_type shell");
+KSPSolve(op, b, u, precon = prec, sparams = "-ksp_type fgmres -ksp_view_singularvalues -ksp_converged_reason -ksp_gmres_restart 1000 -pc_type shell");
 // visualization
 if(!NoGraphicWindow) {
     ThS = ThG;
@@ -119,7 +133,7 @@ if(!NoGraphicWindow) {
                           (height+disty-((radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty))*y
                           +(radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty,
                           width/2]);
-    fespace UhOut(ThOut,P1);
+    fespace UhOut(ThOut, P1);
     HMatrix<complex> B = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1.0e-2,minclustersize=10,maxblocksize=1000000);
     UhOut<complex> v, vinc;
     vinc = finc;
