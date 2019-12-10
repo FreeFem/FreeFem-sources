@@ -5637,26 +5637,50 @@ void init_lgfem( ) {
   Dcl_Type< pfLcarray >( );
 
   //  cast of eigen value  mai 2009 ...
-  map_type[typeid(FEbaseArrayKn< double > *).name( )]->AddCast(
-    new E_F1_funcT< FEbaseArrayKn< double > *, pferbasearray >(
-      Cast< FEbaseArrayKn< double > *, pferbasearray >),
-    new E_F1_funcT< FEbaseArrayKn< double > *, pferarray >(
-      First< FEbaseArrayKn< double > *, pferarray >),
-    new E_F1_funcT< FEbaseArrayKn< double > *, pf3rbasearray >(
-      Cast< FEbaseArrayKn< double > *, pf3rbasearray >),
-    new E_F1_funcT< FEbaseArrayKn< double > *, pf3rarray >(
-      First< FEbaseArrayKn< double > *, pf3rarray >)
+  map_type[typeid(FEbaseArrayKn< double > *).name( )]->AddCast
+  (
+    new E_F1_funcT< FEbaseArrayKn< double > *, pferbasearray >
+     ( Cast< FEbaseArrayKn< double > *, pferbasearray >),
+    new E_F1_funcT< FEbaseArrayKn< double > *, pferarray >
+     ( First< FEbaseArrayKn< double > *, pferarray >),
+   
+   new E_F1_funcT< FEbaseArrayKn< double > *, pfSrbasearray >
+   ( Cast< FEbaseArrayKn< double > *, pfSrbasearray >),
+   new E_F1_funcT< FEbaseArrayKn< double > *, pfSrarray >
+   ( First< FEbaseArrayKn< double > *, pfSrarray >),
+
+   new E_F1_funcT< FEbaseArrayKn< double > *, pfLrbasearray >
+   ( Cast< FEbaseArrayKn< double > *, pfLrbasearray >),
+   new E_F1_funcT< FEbaseArrayKn< double > *, pfLrarray >
+   ( First< FEbaseArrayKn< double > *, pfLrarray >),
+
+    new E_F1_funcT< FEbaseArrayKn< double > *, pf3rbasearray >
+     ( Cast< FEbaseArrayKn< double > *, pf3rbasearray >),
+    new E_F1_funcT< FEbaseArrayKn< double > *, pf3rarray >
+     ( First< FEbaseArrayKn< double > *, pf3rarray >)
 
   );
-  map_type[typeid(FEbaseArrayKn< Complex > *).name( )]->AddCast(
-    new E_F1_funcT< FEbaseArrayKn< Complex > *, pfecbasearray >(
-      Cast< FEbaseArrayKn< Complex > *, pfecbasearray >),
-    new E_F1_funcT< FEbaseArrayKn< Complex > *, pfecarray >(
-      First< FEbaseArrayKn< Complex > *, pfecarray >),
-    new E_F1_funcT< FEbaseArrayKn< Complex > *, pf3cbasearray >(
-      Cast< FEbaseArrayKn< Complex > *, pf3cbasearray >),
-    new E_F1_funcT< FEbaseArrayKn< Complex > *, pf3carray >(
-      First< FEbaseArrayKn< Complex > *, pf3carray >));
+  map_type[typeid(FEbaseArrayKn< Complex > *).name( )]->AddCast
+    (
+    new E_F1_funcT< FEbaseArrayKn< Complex > *, pfecbasearray >
+      (Cast< FEbaseArrayKn< Complex > *, pfecbasearray >),
+    new E_F1_funcT< FEbaseArrayKn< Complex > *, pfecarray >
+      (First< FEbaseArrayKn< Complex > *, pfecarray >),
+
+     new E_F1_funcT< FEbaseArrayKn< Complex > *, pfScbasearray >
+     (Cast< FEbaseArrayKn< Complex > *, pfScbasearray >),
+     new E_F1_funcT< FEbaseArrayKn< Complex > *, pfScarray >
+     (First< FEbaseArrayKn< Complex > *, pfScarray >),
+
+     new E_F1_funcT< FEbaseArrayKn< Complex > *, pfLcbasearray >
+     (Cast< FEbaseArrayKn< Complex > *, pfLcbasearray >),
+     new E_F1_funcT< FEbaseArrayKn< Complex > *, pfLcarray >
+     (First< FEbaseArrayKn< Complex > *, pfLcarray >),
+
+    new E_F1_funcT< FEbaseArrayKn< Complex > *, pf3cbasearray >
+      (Cast< FEbaseArrayKn< Complex > *, pf3cbasearray >),
+    new E_F1_funcT< FEbaseArrayKn< Complex > *, pf3carray >
+      (First< FEbaseArrayKn< Complex > *, pf3carray >));
 
   map_type[typeid(pfes3).name( )] = new ForEachType< pfes3 >( );                  // 3D volume
   map_type[typeid(pfes3 *).name( )] = new ForEachTypePtrfspace< pfes3, 3 >( );    // // 3D volume

@@ -62,6 +62,8 @@ for (int i=0;i<k;i++)
   cout << " ---- " <<  i<< " " << ev[i] << " == " << eev[i] << " err= " << err << " --- "<<endl;
 
   // FFCS: add 3D view capabilities
-  plot(eV[i],cmm="Eigen  Vector "+i+" valeur =" + ev[i]  ,wait=1,value=1,ps="eigen"+i+".eps",dim=3,fill=1,CutPlane=0,ShowAxes=0);
+  plot(eV[i],cmm="Eigen  Vector "+i+" valeur =" + ev[i]  ,wait=1,value=1,
+  //*ps="eigen"+i+".eps",
+  dim=3,fill=1,CutPlane=0,ShowAxes=0);
 }
 assert(nerr==0);

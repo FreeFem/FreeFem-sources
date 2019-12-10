@@ -1,0 +1,61 @@
+// test to validate the addition of surfacic finite elements in FreeFEM
+
+load "msh3"
+load "medit"
+
+
+/////variational form
+
+/////////////////////////////////
+// laplacian 2D
+real R = 3, r=1; 
+real h = 0.1; // 
+int nx = R*2*pi/h;
+int ny = r*2*pi/h;
+func torex= (R+r*cos(y*pi*2))*cos(x*pi*2);
+func torey= (R+r*cos(y*pi*2))*sin(x*pi*2);
+func torez= r*sin(y*pi*2);
+
+
+meshS Th=square3(nx,ny,[torex,torey,torez],removeduplicate=true) ;
+
+fespace Vh(Th,P1);
+
+/*(const R3 & P){
+    R theta = 3.14; //pi/2.;
+    R x=P.x;
+    R y=cos(theta)*P.y-sin(theta)*P.z;
+    R z=sin(theta)*P.y+cos(theta)*P.z;
+    return x*x+2*y*y;} // boundary condition
+*/
+
+macro Grad3(uSVar) [dx(uSVar),dy(uSVar),dz(uSVar)]  // EOM
+
+//with variational form
+real sigma = 1; 
+varf aS(u,v) = int2d(Th)(Grad3(u)'*Grad3(v)- sigma* u*v);
+varf mS(u,v) = int2d(Th)( u*v);
+Vh Nx,Ny,Nz;
+Vh Mx,My,Mz;
+solve Pn([Nx,Ny,Nz],[Mx,My,Mz]) = int2d(Th)( [Nx,Ny,Nz]'*[Mx,My,Mz])- int2d(Th)([Nt.x,Nt.y,Nt.z]'*[Mx,My,Mz]); 
+
+matrix A =aS(Vh,Vh);
+matrix B =mS(Vh,Vh,solver=CG);
+int nev=100;  // number of computed eigen valeu close to sigma
+
+real[int] ev(nev); // to store nev eigein value
+Vh[int] eV(nev);   // to store nev eigen vector
+
+
+int k=EigenValue(A,B,sym=true,sigma=sigma,value=ev,vector=eV,tol=1e-10,maxit=0,ncv=0,which="LM"); // which="LM" default 
+
+for (int i=0;i<k;i++)
+{
+
+  meshS Thm = movemesh(Th,[x+Nx*eV[i],y+Ny*eV[i],z+Nz*eV[i]]);
+  fespace Vhm(Thm,P1);
+  Vhm vm ;
+vm[]=eV[i][]; 
+  // FFCS: add 3D view capabilities
+  plot(vm,cmm="Eigen  Vector "+i+" valeur =" + ev[i]  ,wait=1,value=1,dim=3,fill=0,CutPlane=0,ShowAxes=0, nbiso=40);
+}
