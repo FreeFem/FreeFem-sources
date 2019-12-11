@@ -41,7 +41,7 @@ display(HCombined);
 
 // Solve formulation of first kind
 Uh<complex> uFirstKind, bFirstKind;
-varf vmassFirstKind(u,v) = int1d(Th)((dxfinc*x+dyfinc*y)*v);
+varf vmassFirstKind(u,v) = -int1d(Th)((dxfinc*Nt.x+dyfinc*Nt.y)*v);
 bFirstKind[] = vmassFirstKind(0,Uh);
 uFirstKind[] = HFirstKind^-1*bFirstKind[];
 plot(uFirstKind,dim=2,nbiso=20,value=1,cmm="First kind");
