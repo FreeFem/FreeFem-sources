@@ -8,7 +8,7 @@ set -e
 TOKEN=$1
 ORGANIZATION="FreeFem"
 REPOSITORY="FreeFem-sources"
-VERSION=`grep AC_INIT configure.ac | cut -d"," -f2 | tr - .`
+VERSION=`grep AC_INIT configure.ac | cut -d"," -f2`
 RELEASE_TAG_NAME="v$VERSION"
 APPIMAGE_NAME="FreeFEM-x86_64-${RELEASE_TAG_NAME}.AppImage"
 

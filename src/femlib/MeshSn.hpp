@@ -101,7 +101,10 @@ typedef GenericVertex<R3> Vertex3;
             ASSERTION(i>=0 && i <3);
             return R3( Edge(2)^Edge(1) );
         }
-        
+        R3 NormalSUnitaire() const {// Add FH. Dec. 2019 
+            R3 N(Edge(2)^Edge(1) );
+            return N/N.norme();
+        }
     };
     
     
