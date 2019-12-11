@@ -55,25 +55,24 @@ meshS ThS, ThG;
 
 fespace Uh(ThS, P1);
 HMatrix<complex> A = assemblecomplexHESL(Uh, Uh, k, eta=10, epsilon=1.0e-2, minclustersize=10, maxblocksize=1000000);
-Mat<complex> H, M;
+Mat<complex> H;
 createMat(ThS, H, P1);
 plotDmesh(ThS, cmm = "Partitioning");
 bool mass = usedARGV("-mass") != -1;
 if(mass) {
     varf vM(u, v) = int2d(ThS)(u * v);
     matrix<complex> Loc = vM(Uh, Uh, sym = 1);
-    Mat<complex> copy(H, Loc);
-    M = copy;
-    set(M, sparams = "-mass_ksp_converged_reason", prefix = "mass_");
+    H = Loc;
+    set(H, sparams = "-mass_ksp_converged_reason", prefix = "mass_");
 }
 int[int] perm;
 {
     fespace UhG(ThG, P1);
     UhG<complex> numbering;
     numbering[] = 0:UhG.ndof - 1;
-    Uh<complex> loc2glob = numbering;
+    Uh<complex> glob2loc = numbering;
     complex[int] permc;
-    changeNumbering(H, loc2glob[], permc);
+    changeNumbering(H, glob2loc[], permc);
     perm.resize(permc.n);
     for[i, p : permc] perm[i] = real(p);
 }
@@ -102,7 +101,7 @@ func complex[int] prec(complex[int]& in) {
         changeNumbering(H, v, out);
     }
     else {
-        KSPSolve(M, in, out);
+        KSPSolve(H, in, out);
     }
     return out;
 }
