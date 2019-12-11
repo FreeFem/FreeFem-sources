@@ -70,7 +70,8 @@ ifeq ($(WIN32DLLTARGET),)
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 		--with-scalar-type=real $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
-		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
+		--with-blaslapack-include='$(BLASINC)' \
+		--with-blaslapack-lib='$(BLAS_LAPACK_LIBS)' \
 		$(PETSC_DOWNLOAD)
 FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' --with-cxx-dialect=C++11 \
@@ -79,7 +80,8 @@ FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		--with-scalar-type=complex \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
-		--with-blas-lapack-lib='$(BLAS_LAPACK_LIBS)' \
+		--with-blaslapack-include='$(BLASINC)' \
+		--with-blaslapack-lib='$(BLAS_LAPACK_LIBS)' \
 		--with-scalapack-dir=$(DIR_INSTALL_REAL) \
 		--with-metis-dir=$(DIR_INSTALL_REAL) \
 		--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
@@ -106,7 +108,7 @@ else
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
 	--download-f2cblaslapack
   #--download-slepc
-  #--with-blas-lapack-lib='/mingw64/lib/libopenblas.a' \
+  #--with-blaslapack-lib='/mingw64/lib/libopenblas.a' \
 
  FLAGS_CONF_PETSC_COMPLEX= --with-python-exec=/usr/bin/python2 	--with-shared-libraries=0	--with-debugging=0 \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 \
