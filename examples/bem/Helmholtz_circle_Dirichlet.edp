@@ -20,6 +20,8 @@ int n = 1000;
 border circle(t=0, 2*pi){x=cos(t); y=sin(t); z=0;}
 meshL Th = buildmeshL(circle(n));
 
+Th = OrientNormal(Th,unbounded=1);
+
 // Dof
 fespace Uh(Th,P1);
 
@@ -48,7 +50,7 @@ plot(uFirstKind,dim=2,nbiso=20,value=1,cmm="First kind");
 
 // Solve formulation of second kind
 Uh<complex> uSecondKind, bSecondKind;
-varf vmassSecondKind(u,v) = int1d(Th)((dxfinc*x+dyfinc*y)*v);
+varf vmassSecondKind(u,v) = -int1d(Th)((dxfinc*Nt.x+dyfinc*Nt.y)*v);
 bSecondKind[] = vmassSecondKind(0,Uh);
 uSecondKind[] = HSecondKind^-1*bSecondKind[];
 plot(uSecondKind,dim=2,nbiso=20,value=1,cmm="Second kind");

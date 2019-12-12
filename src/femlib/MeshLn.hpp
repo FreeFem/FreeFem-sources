@@ -127,7 +127,7 @@ namespace Fem2D {
     }
 
     R3 NormalSUnitaire() const {
-        R3 V(at(1),at(0));
+        R3 V(at(0),at(1));
         R3 N = V^R3(0,0,1);
         return N/N.norme();
     }
