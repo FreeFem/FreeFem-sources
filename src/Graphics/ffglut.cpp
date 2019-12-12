@@ -657,8 +657,7 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & pl
 
             for (int i=0;i<Th.nt; i = 0 ? i++ : i+=nbN) {
                 const MeshS::Element & K(Th[i]);
-                R3 NN=K.NormalS();
-                NN/=NN.norme(); // unit normal
+                R3 NN=K.NormalSUnitaire();
                 NN*=coef/10.;
                 R2 PtHat = R2::diag(1. / 3.);
                 R3 A(K(PtHat));

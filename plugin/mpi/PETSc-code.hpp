@@ -2184,6 +2184,15 @@ namespace PETSc {
     return 0L;
   }
   template< class Type >
+  long convergedReason(Type* const& A) {
+    if (A->_ksp) {
+      KSPConvergedReason reason;
+      KSPGetConvergedReason(A->_ksp, &reason);
+      return static_cast<long>(reason);
+    }
+    return 0L;
+  }
+  template< class Type >
   long MatZeroRows(Type* const& A, KN< double >* const& ptRows) {
     if (A->_petsc) {
       PetscInt bs;
@@ -3659,6 +3668,7 @@ static void Init_PETSc( ) {
   Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >(1, 1));
   if (!std::is_same< PetscScalar, PetscReal >::value)
     Global.Add("KSPSolveHermitianTranspose", "(", new PETSc::LinearSolver< Dmat, 'H' >( ));
+  Global.Add("KSPGetConvergedReason", "(", new OneOperator1_< long, Dmat* >(PETSc::convergedReason< Dmat >));
   Global.Add("SNESSolve", "(", new PETSc::NonlinearSolver< Dmat >(1));
   Global.Add("SNESSolve", "(", new PETSc::NonlinearSolver< Dmat >( ));
   Global.Add("TSSolve", "(", new PETSc::NonlinearSolver< Dmat >(1, 1));

@@ -5,7 +5,8 @@ CC=@CC@
 CXX=@CXX@
 # FC : Fortran 90 compiler
 FC=@FC@
-BLASLIBS = @BLASLIBS@
+BLASINC=@BLASINC@
+BLASLIBS=@BLASLIBS@
 LAPACKLIBS=@LAPACKLIBS@
 #  Use:
 #    -DAdd_ if your Fortran compiler adds an underscore at the end
