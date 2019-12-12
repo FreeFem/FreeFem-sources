@@ -5710,9 +5710,10 @@ void init_lgfem( ) {
   Dcl_Type< finconnue * >( );
   Dcl_Type< ftest * >( );
   Dcl_Type< fkernel * >( );  // a bem kernel
+  Dcl_Type< fpotential * >( );
     
   Dcl_Type< foperator * >( );
-  Dcl_Type< fbemoperator * >( );
+  //Dcl_Type< fbemkoperator * >( );
   Dcl_Type< const BC_set * >( );                         // a set of boundary condition
   Dcl_Type< const Call_FormLinear< v_fes > * >( );       //   to set Vector
   Dcl_Type< const Call_FormBilinear< v_fes > * >( );     // to set Matrix
@@ -5726,9 +5727,11 @@ void init_lgfem( ) {
 
   map_type[typeid(const FormBilinear *).name( )] = new TypeFormBilinear;
   map_type[typeid(const FormLinear *).name( )] = new TypeFormLinear;
-  map_type[typeid(const BemFormBilinear *).name( )] = new BemTypeFormBilinear;
+  //map_type[typeid(const BemKFormBilinear *).name( )] = new BemKTypeFormBilinear;
+  //map_type[typeid(const BemPFormBilinear *).name( )] = new BemPTypeFormLinear;
+    
   aType t_C_args = map_type[typeid(const C_args *).name( )] = new TypeFormOperator;
-  aType t_BemC_args = map_type[typeid(const BemC_args *).name( )] = new TypeBemFormOperator;
+  //aType t_BemC_args = map_type[typeid(const BemC_args *).name( )] = new TypeBemFormOperator;
   map_type[typeid(const Problem *).name( )] = new TypeSolve< false, Problem >;
   map_type[typeid(const Solve *).name( )] = new TypeSolve< true, Solve >;
   Dcl_Type< const IntFunction< double > * >( );
@@ -5736,14 +5739,14 @@ void init_lgfem( ) {
   basicForEachType *t_solve = atype< const Solve * >( );
   basicForEachType *t_problem = atype< const Problem * >( );
   basicForEachType *t_fbilin = atype< const FormBilinear * >( );
-  basicForEachType *t_fbembilin = atype< const BemFormBilinear * >( );
+  //basicForEachType *t_fbembilin = atype< const BemKFormBilinear * >( );
   basicForEachType *t_flin = atype< const FormLinear * >( );
   basicForEachType *t_BC = atype< const BC_set * >( );
     
   /// Doxygen doc
   basicForEachType *t_form = atype< const C_args * >( );
-  basicForEachType *t_Bemform = atype< const BemC_args * >( );
- //////// basicForEachType *t_BemKernel = atype< const BemC_args * >( );
+ // basicForEachType *t_BemKform = atype< const BemC_args * >( );
+ // basicForEachType *t_BemPform = atype< const BemC_args * >( );    // rem BemC_args
     
   Dcl_Type< const CDomainOfIntegration * >( );
   Dcl_Type< const CBemDomainOfIntegration * >( );
@@ -5913,7 +5916,8 @@ void init_lgfem( ) {
   zzzfff->AddF("varf", t_form);    //  var. form ~  <<varf>>
   zzzfff->AddF("solve", t_solve);
   zzzfff->AddF("problem", t_problem);
-  zzzfff->AddF("varfbem", t_Bemform);
+  //zzzfff->AddF("varfbemker", t_BemKform);
+  //zzzfff->AddF("varfbempot", t_BemPform);
     
   Global.Add("jump", "(", new OneOperatorCode< Code_VF< Ftest, Code_Jump > >);
   Global.Add("jump", "(", new OneOperatorCode< Code_VF< Finconnue, Code_Jump > >);
@@ -5962,8 +5966,8 @@ void init_lgfem( ) {
   TheOperators->Add("+", new OneOperatorCode< CODE_L_Add< Foperator > >,
                     new OneOperatorCode< CODE_L_Add< Ftest > >,
                     new OneOperatorCode< CODE_L_Add< Finconnue > >,
-                    new OneOperatorCode< C_args >(t_C_args, t_C_args, t_C_args),
-                    new OneOperatorCode< C_args >(t_BemC_args, t_BemC_args, t_BemC_args)
+                    new OneOperatorCode< C_args >(t_C_args, t_C_args, t_C_args)//,
+                    //new OneOperatorCode< C_args >(t_BemC_args, t_BemC_args, t_C_args)
   );
   TheOperators->Add("-", new OneOperatorCode< CODE_L_Minus< Foperator > >,
     new OneOperatorCode< CODE_L_Minus< Ftest > >,
@@ -5974,15 +5978,15 @@ void init_lgfem( ) {
     new OneOperatorCode< C_args_minus >(t_C_args, t_C_args, t_fbilin),
     new OneOperatorCode< C_args_minus >(t_C_args, t_C_args, t_flin),
     new OneOperatorCode< Minus_Form< FormBilinear > >,
-    new OneOperatorCode< Minus_Form< BemFormBilinear > >,
+    //new OneOperatorCode< Minus_Form< BemKFormBilinear > >,
     new OneOperatorCode< Minus_Form< FormLinear > >
 
   );
 
   atype< const C_args * >( )->AddCast(new OneOperatorCode< C_args >(t_C_args, t_fbilin),
     new OneOperatorCode< C_args >(t_C_args, t_flin),
-    new OneOperatorCode< C_args >(t_C_args, t_BC),
-    new OneOperatorCode< BemC_args >(t_C_args, t_fbembilin)
+    new OneOperatorCode< C_args >(t_C_args, t_BC)//,
+    //new OneOperatorCode< BemC_args >(t_C_args, t_fbembilin)
   );
 
   atype< const C_args * >( )->AddCast(
@@ -6227,13 +6231,13 @@ void init_lgfem( ) {
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesL >);      // 3D curve
 
     
-  Add< const BemFormBilinear * >("(", "", new OpCall_FormBilinear< BemFormBilinear, v_fesS >);    // 2D BEM
-  Add< const BemFormBilinear * >("(", "", new OpCall_FormLinear2< BemFormBilinear, v_fesS >);    // 2D BEM
+ // Add< const BemKFormBilinear * >("(", "", new OpCall_FormBilinear< BemKFormBilinear, v_fesS >);    // 2D BEM
+ // Add< const BemKFormBilinear * >("(", "", new OpCall_FormLinear2< BemKFormBilinear, v_fesS >);    // 2D BEM
   //Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, v_fesS >);       // 2D BEM
   //Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesS >);      // 2D BEM
     
-  Add< const BemFormBilinear * >("(", "", new OpCall_FormBilinear< BemFormBilinear, v_fesL >);    // 1D BEM
-  Add< const BemFormBilinear * >("(", "", new OpCall_FormLinear2< BemFormBilinear, v_fesL >);   // 1D BEM
+ // Add< const BemKFormBilinear * >("(", "", new OpCall_FormBilinear< BemKFormBilinear, v_fesL >);    // 1D BEM
+ // Add< const BemKFormBilinear * >("(", "", new OpCall_FormLinear2< BemKFormBilinear, v_fesL >);   // 1D BEM
   //Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, v_fesL >);      // 1D BEM
   //Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesL >);     // 1D BEM
  
@@ -6306,7 +6310,8 @@ void init_lgfem( ) {
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< FormLinear >);
   Add< const CPartBemDI * >("(", "", new OneOperatorCode< CBemDomainOfIntegration >);
     
-  Add< const CBemDomainOfIntegration * >("(", "", new OneOperatorCode< BemFormBilinear >);
+//  Add< const CBemDomainOfIntegration * >("(", "", new OneOperatorCode< BemKFormBilinear >);
+//  Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< BemPFormBilinear >);
     
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< IntFunction< double >, 1 >);
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< IntFunction< complex< double > >, 0 >);
