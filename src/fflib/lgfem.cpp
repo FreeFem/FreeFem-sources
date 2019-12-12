@@ -5556,6 +5556,9 @@ void init_lgfem( ) {
   // pBemKernel initialize
   Dcl_TypeandPtr< pBemKernel >(0, 0, ::InitializePtr< pBemKernel >, ::DestroyPtr< pBemKernel >,
                            AddIncrement< pBemKernel >, NotReturnOfthisType);
+  // pBemPotential initialize
+  Dcl_TypeandPtr< pBemPotential >(0, 0, ::InitializePtr< pBemPotential >, ::DestroyPtr< pBemPotential >,
+                                 AddIncrement< pBemPotential >, NotReturnOfthisType);
 
   Dcl_Type< lgVertex >( );
   Dcl_Type< lgElement >( );
@@ -5891,7 +5894,9 @@ void init_lgfem( ) {
   zzzfff->Add("meshL", atype< pmeshL * >( ));
   // pBemKernel is a pointer to BemKernel defined at [[file:lgfem.hpp::typedef BemKernel pBemKernel]]
   zzzfff->Add("BemKernel", atype< pBemKernel * >( ));
-
+  // pBemKernel is a pointer to BemPotential defined at [[file:lgfem.hpp::typedef BemPotential pBemPotential]]
+  zzzfff->Add("BemPotential", atype< pBemPotential * >( ));
+    
   zzzfff->Add("element", atype< lgElement >( ));
   zzzfff->Add("vertex", atype< lgVertex >( ));
   zzzfff->Add("matrix", atype< Matrice_Creuse< R > * >( ));
@@ -5957,7 +5962,7 @@ void init_lgfem( ) {
   TheOperators->Add("+", new OneOperatorCode< CODE_L_Add< Foperator > >,
                     new OneOperatorCode< CODE_L_Add< Ftest > >,
                     new OneOperatorCode< CODE_L_Add< Finconnue > >,
-                    new OneOperatorCode< C_args >(t_C_args, t_C_args, t_C_args),    // ,t_BemC_args
+                    new OneOperatorCode< C_args >(t_C_args, t_C_args, t_C_args),
                     new OneOperatorCode< C_args >(t_BemC_args, t_BemC_args, t_BemC_args)
   );
   TheOperators->Add("-", new OneOperatorCode< CODE_L_Minus< Foperator > >,
@@ -6719,14 +6724,11 @@ BemKernel *combKernel (listBemKernel const &lbemker){
         if(kk>4) ExecError(" combined kernel: 4 max kernels  ");
         kk++;
     }
-    
+    // check the same wave number ?
     if( HelmholtzK== LaplaceK) ExecError(" combined kernel: must be same equation kernels Laplace or Helmholtz");
     if (verbosity>5)
         for (int i=0;i<kk;i++) cout << "combined type BEM kernel " << combBemKernel->typeKernel[i] << " coeff combi " <<
             combBemKernel->coeffcombi[i] << " wave number "<< combBemKernel->wavenum[i] << endl;
-
-    
-    
     
     return combBemKernel;
 }

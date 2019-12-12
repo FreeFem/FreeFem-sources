@@ -1440,6 +1440,7 @@ inline pmeshL *  initMesh(pmeshL * const & p, string * const & s) {
     return p;
 }
 
+//// begin type BEM kernel / potential
 
 inline pBemKernel *  initKernel_Helmholtz(pBemKernel * const & p, string * const & s,std::complex<double> const & alpha,std::complex<double> const & k) {
     BemKernel * m;
@@ -1458,6 +1459,23 @@ inline pBemKernel *  initKernel_default(pBemKernel * const & p, string * const &
     return initKernel_Helmholtz(p,s,1,0);
 
 }
+
+inline pBemPotential *  initPotential_Helmholtz(pBemPotential * const & p, string * const & s, std::complex<double> const & k) {
+    BemPotential * m;
+    if(verbosity > 5)
+        cout << " initPotential " << *s << endl;
+    *p= m =new BemPotential(*s,k);
+    return p;
+}
+
+inline pBemPotential *  initPotential_default(pBemPotential * const & p, string * const & s) {
+    return initPotential_Helmholtz(p,s,0);
+    
+}
+
+//// end type BEM kernel / potential
+
+
 
 
 /*inline pmeshS *  initMesh(pmeshS * const & p, string * const & s) {
@@ -2574,7 +2592,8 @@ void init_lgmesh3() {
   atype<pfLcbase>()->AddCast(  new E_F1_funcT<pfLcbase,pfLcbase>(UnRef<pfLcbase>));
   // BemKernel
   atype<pBemKernel>()->AddCast( new E_F1_funcT<pBemKernel,pBemKernel*>(UnRef<pBemKernel>));
- 
+  // BemPotential
+  atype<pBemPotential>()->AddCast( new E_F1_funcT<pBemPotential,pBemPotential*>(UnRef<pBemPotential>));
   //3D volume
   Add<pf3r>("[]",".",new OneOperator1<KN<double> *,pf3r>(pf3r2vect<R,v_fes3>));
   Add<pf3c>("[]",".",new OneOperator1<KN<Complex> *,pf3c>(pf3r2vect<Complex,v_fes3>));
@@ -2618,8 +2637,9 @@ void init_lgmesh3() {
   TheOperators->Add("<-", new OneOperator4_<pBemKernel*,pBemKernel*,string*,std::complex<double>,std::complex<double> >(&initKernel_Helmholtz));
   TheOperators->Add("<-", new OneOperator3_<pBemKernel*,pBemKernel*,string*,std::complex<double> >(&initKernel_Laplace));
   TheOperators->Add("<-", new OneOperator2_<pBemKernel*,pBemKernel*,string* >(&initKernel_default));
-
-    
+  //BemPotential
+  TheOperators->Add("<-", new OneOperator3_<pBemPotential*,pBemPotential*,string*,std::complex<double> >(&initPotential_Helmholtz));
+  TheOperators->Add("<-", new OneOperator2_<pBemPotential*,pBemPotential*,string* >(&initPotential_default));
 
   Global.Add("readmesh3","(",new OneOperatorCode<ReadMesh3>);
   Global.Add("readmeshS","(",new OneOperatorCode<ReadMeshS>);

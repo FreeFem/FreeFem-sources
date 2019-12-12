@@ -70,20 +70,12 @@ typedef   LinearComb<pair<MGauche,MDroit>,C_F0> Foperator;
 
 // new type for bem varf
 //typedef   BemOpertor(BemKernel,Finconnue,Ftest) BemFoperator;
-
-//typedef pair<BemKernel,Finconnue> BemFinconnue;
-//typedef pair<BemKernel,Ftest> BemFtest;
-//typedef triplet<Finconnue,BemKernel,Ftest> BemFoperator;   // ou tuple ?
-
-
 class BemOperator : public E_F0mps { public:
     
     Finconnue *fu;
     BemKernel *fk;
     Ftest *fv;
  
-    
-    
     BemOperator(): fu(0),fk(0),fv(0) {}
     
     BemOperator(BemKernel *ffk, Finconnue *ffu, Ftest *ffv): fu(ffu),fk(ffk),fv(ffv) {}
