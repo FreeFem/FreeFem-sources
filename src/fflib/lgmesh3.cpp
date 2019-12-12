@@ -1441,14 +1441,23 @@ inline pmeshL *  initMesh(pmeshL * const & p, string * const & s) {
 }
 
 
-inline pBemKernel *  initKernel(pBemKernel * const & p, string * const & s) {
+inline pBemKernel *  initKernel_Helmholtz(pBemKernel * const & p, string * const & s,std::complex<double> const & alpha,std::complex<double> const & k) {
     BemKernel * m;
-    if(verbosity > 2)
+    if(verbosity > 5)
         cout << " initBemKernel " << *s << endl;
-    *p= m =new BemKernel(*s);
+    *p= m =new BemKernel(*s,alpha,k);
     return p;
 }
 
+inline pBemKernel *  initKernel_Laplace(pBemKernel * const & p, string * const & s,std::complex<double> const & alpha) {
+    return initKernel_Helmholtz(p,s,alpha,0);
+    
+}
+
+inline pBemKernel *  initKernel_default(pBemKernel * const & p, string * const & s) {
+    return initKernel_Helmholtz(p,s,1,0);
+
+}
 
 
 /*inline pmeshS *  initMesh(pmeshS * const & p, string * const & s) {
@@ -2563,7 +2572,8 @@ void init_lgmesh3() {
   atype<pfesL >()->AddCast(  new E_F1_funcT<pfesL,pfesL*>(UnRef<pfesL>));
   atype<pfLrbase>()->AddCast(  new E_F1_funcT<pfLrbase,pfLrbase>(UnRef<pfLrbase>));
   atype<pfLcbase>()->AddCast(  new E_F1_funcT<pfLcbase,pfLcbase>(UnRef<pfLcbase>));
-    
+  // BemKernel
+  atype<pBemKernel>()->AddCast( new E_F1_funcT<pBemKernel,pBemKernel*>(UnRef<pBemKernel>));
  
   //3D volume
   Add<pf3r>("[]",".",new OneOperator1<KN<double> *,pf3r>(pf3r2vect<R,v_fes3>));
@@ -2605,8 +2615,10 @@ void init_lgmesh3() {
   TheOperators->Add("<-", new OneOperator2_<pmeshL*,pmeshL*,pmeshL >(&set_copy_incr));
   TheOperators->Add("=", new OneOperator2<pmeshL*,pmeshL*,pmeshL >(&set_eqdestroy_incr));
   //BemKernel
-  TheOperators->Add("<-", new OneOperator2_<pBemKernel*,pBemKernel*,string*>(&initKernel));
-    
+  TheOperators->Add("<-", new OneOperator4_<pBemKernel*,pBemKernel*,string*,std::complex<double>,std::complex<double> >(&initKernel_Helmholtz));
+  TheOperators->Add("<-", new OneOperator3_<pBemKernel*,pBemKernel*,string*,std::complex<double> >(&initKernel_Laplace));
+  TheOperators->Add("<-", new OneOperator2_<pBemKernel*,pBemKernel*,string* >(&initKernel_default));
+
     
 
   Global.Add("readmesh3","(",new OneOperatorCode<ReadMesh3>);

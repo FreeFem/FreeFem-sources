@@ -379,29 +379,78 @@ class v_fesL : public RefCounter {
 };
 
 
-// BemKernel : be defined with bemtool
 class BemKernel : public RefCounter {
 public:
-
-    int typeKernel;
     
-    BemKernel();
+    int typeKernel[4]={0,0,0,0};  // Laplace, Helmholtz
+    int typeEquation; // SL, DL, HS
+    std::complex<double> wavenum[4]={0,0,0,0}; // parameter to Helmholtz
+    std::complex<double> coeffcombi[4]={0,0,0,0};
+    BemKernel(){}
+    //enum typeofKern  { 0=SL, 1=DL, 2=HS } ;
+    // eq={SL,DL,HS) alpha= coeff combi lin k wave number
+    BemKernel(const string tkernel, Complex alpha=1 , Complex k=0) /*: typeKernel(-1), coeffcombi(alpha), wavenum(k)*/ {
+        //BemKernel(const string tkernel):typeKernel(-1) {
     
-    BemKernel(const string tkernel):typeKernel(-1) {
-        if(!tkernel.compare("Laplace"))
-            typeKernel = 1;
-        else if(!tkernel.compare("Helmholtz"))
-            typeKernel = 2;
+        coeffcombi[0]=alpha;
+        wavenum[0]=k;
+        
+        if(!tkernel.compare("SL"))
+            typeKernel[0] = 1;
+        else if(!tkernel.compare("DL"))
+            typeKernel[0] = 2;
+        else if(!tkernel.compare("HS"))
+            typeKernel[0] = 3;
         else
             ExecError("unknow BEM kernel type ");
-        if(verbosity>2) cout << "type BEM kernel " << typeKernel << " typeKernel " << tkernel << endl;
+        
+        if(verbosity>5)
+            cout << "type BEM kernel " << tkernel <<": " << typeKernel[0] << " coeff combi " << coeffcombi[0] << " wave number "<< wavenum[0] << endl;
         
     }
     
-    virtual ~BemKernel() {}
+    
+    ~BemKernel() {}
+    
+private:
+    BemKernel(const BemKernel &); // pas de construction par copie
+    void operator=(const BemKernel &);// pas affectation par copy
+};
+
+class listBemKernel {
+public:
+    list<BemKernel const  *> *lbk;
+    void init()  { lbk=new list<BemKernel const  *>;}
+    void destroy() { delete lbk;}
+    listBemKernel(Stack s,BemKernel const*bk) : lbk(Add2StackOfPtr2Free(s,new list<BemKernel const*>)) { lbk->push_back(bk);}
+    listBemKernel(Stack s,BemKernel const*const bka,BemKernel const* const bkb) : lbk(Add2StackOfPtr2Free(s,new list<BemKernel const*>)) { lbk->push_back(bka);lbk->push_back(bkb);}
+    listBemKernel(Stack s,const listBemKernel &l,BemKernel const*const bk) : lbk(Add2StackOfPtr2Free(s,new list<BemKernel const*>(*l.lbk))) { lbk->push_back(bk);}
+    listBemKernel(){};
 };
 
 
+
+template<class RR,class AA=RR,class BB=AA>
+struct Op_addBemKernel: public binary_function<AA,BB,RR> {
+    static RR f(Stack s,const AA & a,const BB & b) {
+        if (verbosity>10) cout << "test " <<typeid(RR).name() << " " << typeid(AA).name() << " " << typeid(BB).name() <<endl;
+        return RR(s,a,b);}
+};
+
+
+template<bool INIT,class RR,class AA=RR,class BB=AA>
+struct Op_setBemKernel: public binary_function<AA,BB,RR> {
+    static RR f(Stack stack, const AA & a,const BB & b)
+    {
+        ffassert(a);
+        const pBemKernel p=combKernel(b);
+        
+        if (!INIT && *a)
+            (**a).destroy( );
+        *a = p;
+        return a;
+    }
+};
 
 // 2d
 class pfes_tef : public v_fes {

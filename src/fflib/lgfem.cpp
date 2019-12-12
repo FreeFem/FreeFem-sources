@@ -5909,7 +5909,6 @@ void init_lgfem( ) {
   zzzfff->AddF("solve", t_solve);
   zzzfff->AddF("problem", t_problem);
   zzzfff->AddF("varfbem", t_Bemform);
-  ////zzzfff->AddF("BemKernel", t_BemKernel);
     
   Global.Add("jump", "(", new OneOperatorCode< Code_VF< Ftest, Code_Jump > >);
   Global.Add("jump", "(", new OneOperatorCode< Code_VF< Finconnue, Code_Jump > >);
@@ -5948,7 +5947,13 @@ void init_lgfem( ) {
   /// [[file:AFunction.hpp::Global]]
   Global.Add("plot", "(", new OneOperatorCode< Plot >);
   Global.Add("convect", "(", new OneOperatorCode< Convect >);
-
+  
+  Dcl_Type<listBemKernel> ();
+  TheOperators->Add("+",new OneBinaryOperator_st< Op_addBemKernel<listBemKernel,pBemKernel,pBemKernel> >);
+  TheOperators->Add("+",new OneBinaryOperator_st< Op_addBemKernel<listBemKernel,listBemKernel,pBemKernel> >);
+  TheOperators->Add("=",new OneBinaryOperator_st< Op_setBemKernel<false,pBemKernel*,pBemKernel*,listBemKernel> >);
+  TheOperators->Add("<-", new OneBinaryOperator_st< Op_setBemKernel<true,pBemKernel*,pBemKernel*,listBemKernel> >);
+    
   TheOperators->Add("+", new OneOperatorCode< CODE_L_Add< Foperator > >,
                     new OneOperatorCode< CODE_L_Add< Ftest > >,
                     new OneOperatorCode< CODE_L_Add< Finconnue > >,
@@ -6695,6 +6700,38 @@ C_F0 NewFEvariable(const char *id, Block *currentblock, C_F0 &fespacetype, CC_F0
   return NewFEvariable(lid, currentblock, fespacetype, init, cplx, dim);
 }
 
+// fusion of Bem Kernel in case combined kernels
+BemKernel *combKernel (listBemKernel const &lbemker){
+    int kk=0;
+    bool LaplaceK=false, HelmholtzK=false;
+    const list< const BemKernel * > lbk(*lbemker.lbk);
+    BemKernel *combBemKernel=new BemKernel();
+    for (list< const BemKernel * >::const_iterator i = lbk.begin( ); i != lbk.end( ); i++) {
+        if (!*i) continue;
+        const BemKernel &bkb(**i);
+        combBemKernel->typeKernel[kk] = bkb.typeKernel[0];
+        // test same equation kernel
+        (combBemKernel->wavenum[kk]!=0.) ? HelmholtzK=true : LaplaceK=true;
+            
+          //  ExecError(" combined kernel have to be the same type equation Laplace or Helmholtz");
+        combBemKernel->coeffcombi[kk] = bkb.coeffcombi[0];
+        combBemKernel->wavenum[kk] = bkb.wavenum[0];
+        if(kk>4) ExecError(" combined kernel: 4 max kernels  ");
+        kk++;
+    }
+    
+    if( HelmholtzK== LaplaceK) ExecError(" combined kernel: must be same equation kernels Laplace or Helmholtz");
+    if (verbosity>5)
+        for (int i=0;i<kk;i++) cout << "combined type BEM kernel " << combBemKernel->typeKernel[i] << " coeff combi " <<
+            combBemKernel->coeffcombi[i] << " wave number "<< combBemKernel->wavenum[i] << endl;
+
+    
+    
+    
+    return combBemKernel;
+}
+        
+      
 size_t dimFESpaceImage(const basicAC_F0 &args) {
   aType t_tfe = atype< TypeOfFE * >( );
   aType t_tfe3 = atype< TypeOfFE3 * >( );
