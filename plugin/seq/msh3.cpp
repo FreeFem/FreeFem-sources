@@ -8042,6 +8042,184 @@ class BuildMeshLFromMeshS : public OneOperator {
   }
 };
 
+class OrientNormal_Op : public E_F0mps {
+ public:
+  Expression eTh;
+  static const int n_name_param = 1;
+  static basicAC_F0::name_and_type name_param[];
+  Expression nargs[n_name_param];
+
+  bool arg(int i, Stack stack, bool a) const {
+    return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
+  }
+
+ public:
+  OrientNormal_Op(const basicAC_F0 &args, Expression tth) : eTh(tth) {
+    args.SetNameParam(n_name_param, name_param, nargs);
+  }
+  AnyType operator( )(Stack stack) const;
+};
+
+inline double SolidAngle(const Fem2D::R3& p, const TriangleS& e){
+  double M[3][3];
+  for(int j=0; j<3; j++)
+  for(int k=0;k<3;k++)
+    M[j][k] = e[k][j] - p[j];
+  return (-1.)*( M[0][0]*( M[1][1]*M[2][2]-M[2][1]*M[1][2] )
+               - M[0][1]*( M[1][0]*M[2][2]-M[2][0]*M[1][2] )
+               + M[0][2]*( M[1][0]*M[2][1]-M[2][0]*M[1][1] ) );
+}
+
+basicAC_F0::name_and_type OrientNormal_Op::name_param[] = {
+
+  {"unbounded", &typeid(bool)},
+};
+
+AnyType OrientNormal_Op::operator( )(Stack stack) const {
+
+  MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+  MeshS *pTh = GetAny< MeshS * >((*eTh)(stack));
+  MeshS &Th = *pTh;
+  ffassert(pTh);
+
+  bool unbounded(arg(0, stack, false));
+
+  if (verbosity > 5) cout << "Orienting surface normals ..." << endl;
+
+  int nv = Th.nv, nt = Th.nt, nbe = Th.nbe;
+
+  Vertex3 *v = new Vertex3[nv];
+  TriangleS *t = new TriangleS[nt];
+  TriangleS *tt = t;
+  BoundaryEdgeS *b = new BoundaryEdgeS[nbe];
+  BoundaryEdgeS *bb = b;
+  double mes = 0, mesb = 0;
+
+  if (verbosity > 5)
+    cout << "copy the original meshS... nv= " << nv << " nt= " << nt << " nbe= " << nbe << endl;
+  int i_som = 0, i_elem = 0, i_border = 0;
+
+  for (int i = 0; i < nv; i++) {
+    const Vertex3 &K(Th.vertices[i]);
+    v[i].x = K.x;
+    v[i].y = K.y;
+    v[i].z = K.z;
+    v[i].lab = K.lab;
+  }
+
+  int  nbelt = nt;
+  bool ok = true;
+  std::vector<bool> orientation(nbelt,ok);
+  std::vector<bool> visited(nbelt,false);
+
+  //====================================
+  // initialisation  de la recherche
+  // d'un point extremal du maillage
+  int  Iext = 0;
+  MeshS::RdHat bary = MeshS::RdHat::diag(1./3);
+  double Ext = Th[0](bary).norme2();
+
+  //===============================//
+  //     Breadth First Search      //
+  //===============================//
+
+  int nb_visited = 0;
+  std::queue<int> visit;
+
+  int j0 = 0;
+  visit.push(j0);
+  visited[j0]=true;
+
+  while(nb_visited < nt){
+
+    j0 = visit.front();
+    const TriangleS &K(Th[j0]);
+    visit.pop();
+    nb_visited++;
+
+    if( K(bary).norme2() > Ext){
+      Ext = K(bary).norme2();
+      Iext = 0;  // which connected component is the most extern ? only one for now
+    }
+
+    for(int k0=0; k0<MeshS::RdHat::d+1; k0++){
+      int k0a = k0;
+      const int& j1 = Th.ElementAdj(j0, k0a);
+      const TriangleS &K1(Th[j1]);
+      if(!visited[j1]){
+        bool same = (K.EdgeOrientation(k0) != K1.EdgeOrientation(k0a));
+        if(same){orientation[j1]=orientation[j0];}
+        else{orientation[j1]=!orientation[j0];}
+        visited[j1]=true;
+        visit.push(j1);
+      }
+    }
+  }
+
+  double global_orientation = 0.;
+  const R3& p = v[0];
+  for(int j=0; j<nt; j++){
+    const TriangleS &K1(Th[j]);
+    double r = SolidAngle(p,K1);
+    if(!orientation[j]){r = -r;}
+    global_orientation += r;
+  }
+
+  if(global_orientation > 0)
+  for(int j=0; j<nt; j++) {
+    orientation[j] = !orientation[j];
+    if (!unbounded)
+      orientation[j] = !orientation[j];
+  }
+
+  //=====================================
+  // Add elements, with correct orientation
+
+  for (int i = 0; i < nt; i++) {
+    const TriangleS &K(Th.elements[i]);
+    int iv[3];
+    int lab = K.lab;
+
+    for (int jj = 0; jj < 3; jj++) {
+      iv[jj] = Th.operator( )(K[jj]);
+      assert(iv[jj] >= 0 && iv[jj] < nv);
+    }
+    if (!orientation[i])
+        swap(iv[1], iv[2]);
+    (tt)->set(v, iv, lab);
+    mes += tt++->mesure();
+  }
+
+  for (int i = 0; i < nbe; i++) {
+    const BoundaryEdgeS &K(Th.be(i));
+    int iv[2];
+    int lab = K.lab;
+    for (int jj = 0; jj < 2; jj++) {
+      iv[jj] = Th.operator( )(K[jj]);
+      assert(iv[jj] >= 0 && iv[jj] < nv);
+    }
+    (bb)->set(v, iv, lab);
+    mesb += bb++->mesure( );
+  }
+
+  MeshS *Th_t = new MeshS(nv, nt, nbe, v, t, b);
+  Th_t->BuildGTree( );
+  // build the meshS and the edges list
+  Th_t->BuildMeshL( );
+  *mp = mps;
+  Add2StackOfPtr2FreeRC(stack, Th_t);
+  return Th_t;
+}
+
+class OrientNormal : public OneOperator {
+ public:
+  OrientNormal( ) : OneOperator(atype< pmeshS >( ), atype< pmeshS >( )) {}
+
+  E_F0 *code(const basicAC_F0 &args) const {
+    return new OrientNormal_Op(args, t[0]->CastTo(args[0]));
+  }
+};
+
 // movemesh
 template< class MMesh >
 class Movemesh_Op : public E_F0mps {
@@ -8742,6 +8920,9 @@ static void Load_Init( ) {
   Global.Add("Sline", "(", new Line(1));
 
   Global.Add("buildBdMesh", "(", new BuildMeshLFromMeshS);
+
+  Global.Add("OrientNormal", "(", new OrientNormal);
+
   Global.Add("extract", "(", new ExtractMesh< MeshS, MeshL >);    // take a Mesh3 in arg and return a part of MeshS
 }
 
