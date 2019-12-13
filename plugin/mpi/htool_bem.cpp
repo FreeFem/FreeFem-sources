@@ -668,6 +668,57 @@ void addPotential(const char* namec) {
 	Global.Add(namec,"(",new assembleHMatrix<v_fes1,v_fes2,K>);
 }
 
+// DSL BEM
+
+
+template<class VFES>
+class Call_BemKFormBilinear: public E_F0mps
+{
+public:
+    const int d;
+    Expression *nargs;
+    list<C_F0> largs;
+    typedef list<C_F0>::const_iterator const_iterator;
+    
+    const int N,M;
+    Expression euh,evh;
+    Call_BemKFormBilinear(int dd,Expression * na,Expression  LL, Expression fi,Expression fj) ;
+    AnyType operator()(Stack stack) const
+    { InternalError(" bug: no eval of Call_FormBilinear ");}
+    operator aType () const { return atype<void>();}
+    
+};
+
+
+struct OpCall_BemKFormBilinear_np {
+    static basicAC_F0::name_and_type name_param[] ;
+    static const int n_name_param =1+NB_NAME_PARM_MAT; // 9-> 11 FH 31/10/2005  11->12 nbiter 02/2007  // 12->22 MUMPS+ Autre Solveur 02/08
+};
+
+basicAC_F0::name_and_type OpCall_FormBilinear_np::name_param[] = {
+    {"bmat", &typeid(Matrice_Creuse< R > *)}, LIST_NAME_PARM_MAT};
+
+
+
+template<class T,class v_fes>
+struct OpCall_BemKFormBilinear
+: public OneOperator ,
+OpCall_BemKFormBilinear_np
+{
+    typedef v_fes *pfes;
+    static const int d=v_fes::dHat;
+    
+    E_F0 * code(const basicAC_F0 & args) const
+    { Expression * nargs = new Expression[n_name_param];
+        args.SetNameParam(n_name_param,name_param,nargs);
+        // cout << " OpCall_FormBilinear " << *args[0].left() << " " << args[0].LeftValue() << endl;
+        return  new Call_BemKFormBilinear<v_fes>(v_fes::dHat,nargs,to<const C_args*>(args[0]),to<pfes*>(args[1]),to<pfes*>(args[2]));}
+    OpCall_BemKFormBilinear() :
+    OneOperator(atype<const Call_BemKFormBilinear<v_fes>*>(),atype<const T *>(),atype<pfes*>(),atype<pfes*>()) {}
+};
+
+//
+
 static void Init_Schwarz() {
 	Dcl_Type<std::map<std::string, std::string>*>( );
 	TheOperators->Add("<<",new OneBinaryOperator<PrintPinfos<std::map<std::string, std::string>*>>);
@@ -711,6 +762,20 @@ static void Init_Schwarz() {
 	zzzfff->Add("HMatrix", atype<HMatrixVirt<std::complex<double> > **>());
 	//map_type_of_map[make_pair(atype<HMatrix<partialACA ,double>**>(), atype<double*>())] = atype<HMatrix<partialACA ,double>**>();
 	map_type_of_map[make_pair(atype<HMatrixVirt<std::complex<double> >**>(), atype<Complex*>())] = atype<HMatrixVirt<std::complex<double> >**>();
+    
+    
+    
+    
+    
+    
+      Add< const BemKFormBilinear * >("(", "", new OpCall_BemKFormBilinear< BemKFormBilinear, v_fesS >);
+  
+    
+    
+
+    
+    
+    
 }
 
 LOADFUNC(Init_Schwarz)
