@@ -69,8 +69,36 @@ typedef   LinearComb<MDroit,C_F0> Ftest;
 typedef   LinearComb<pair<MGauche,MDroit>,C_F0> Foperator;
 
 // new type for bem varf
+// version beta: call directly the assemble function
+
+class BemOperator : public E_F0mps { public:
+ 
+BemOperator(){}
+ 
+AnyType operator()(Stack )  const {
+ return SetAny<const BemOperator * >(this);}
+ 
+ operator aType () const { return atype<const BemOperator >();}
+ 
+ 
+ };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //typedef   BemOpertor(BemKernel,Finconnue,Ftest) BemFoperator;
-class BemKOperator : public E_F0mps { public:
+/*class BemKOperator : public E_F0mps { public:
     
     Finconnue *fu;
     BemKernel *fk;
@@ -116,7 +144,7 @@ class BemKOperator : public E_F0mps { public:
     operator aType () const { return atype<const BemKOperator >();}
     
     
-};
+};*/
 
 inline int intOp(const MGauche &i) {return i.second;}
 inline int intOp(const MDroit &i) {return i.second;}
@@ -143,9 +171,10 @@ inline unsigned int GetDiffOp(const  pair<MGauche,MDroit> &p, int& lastop)
 typedef  const Finconnue  finconnue;
 typedef  const Ftest ftest;
 typedef  const Foperator foperator;
-typedef  const BemKOperator fbemkoperator;
+//typedef  const BemKOperator fbemkoperator;
 typedef  const BemKernel fkernel;
 typedef  const BemPotential fpotential;
+typedef const FormBEM *pFormBEM;
 
 Expression IsFebaseArray(Expression f);
 
@@ -860,17 +889,75 @@ class FormLinear : public E_F0mps { public:
 
 };
 
+
 // define a bilinear form for BEM
-/*class BemKFormBilinear : public E_F0mps { public:
+class FormBEM : public E_F0mps { public:
+    typedef const FormBEM* Result;
+    
+    typedef finconnue * Fi;
+    typedef ftest * Ft;
+    typedef pBemKernel  KBem;
+    typedef pBemKernel * pKBem;
+    Fi fi;
+    Ft ft;
+    Expression kbem;
+    
+    FormBEM(const basicAC_F0 & args) :fi(0),ft(0),kbem(0) {
+        //di= dynamic_cast<A>(CastTo<A>(args[0]));
+        
+        kbem= CastTo<KBem>(args[0]);
+        if( args.size()==3)
+        {
+            fi= dynamic_cast<Fi>(CastTo<Fi>(args[1]));
+            ft= dynamic_cast<Ft>(CastTo<Ft>(args[2]));
+            ffassert(fi && ft);
+        }
+        
+    }
+    
+    AnyType operator()(Stack ) const { return SetAny<Result>(this);}
+    operator aType () const { return atype<Result>();}
+    
+    
+};
+
+// define a bilinear form for BEM
+class BemKFormBilinear : public E_F0mps { public:
     typedef const BemKFormBilinear* Result;
     typedef const CBemDomainOfIntegration * A;   // source et target
     
-    typedef const BemKOperator  *  B;
+   // typedef const BemKOperator  *  B;
+    typedef const FormBEM * B;
+    A  di;
+    B * b;
+    BemKFormBilinear(const basicAC_F0 & args) {
+        di= dynamic_cast<A>(CastTo<A>(args[0]));
+        B Kb= dynamic_cast<B>(CastTo<B>(args[1]));
+        
+        ffassert(di && Kb); }
     
+      static  E_F0 * f(const basicAC_F0 & args) { return new BemKFormBilinear(args);}
+    static ArrayOfaType  typeargs() { return ArrayOfaType(atype<A>(),atype<B>());}// all type
+    AnyType operator()(Stack ) const { return SetAny<Result>(this);}
+    operator aType () const { return atype<Result>();}
+    
+    
+};
+
+
+/*
+
+// define a bilinear form for BEM
+class BemKFormBilinear : public E_F0mps { public:
+    typedef const BemKFormBilinear* Result;
+    typedef const CBemDomainOfIntegration * A;   // source et target
+ 
+    typedef const BemKOperator  *  B;
+ 
     typedef Finconnue * Fi;
     typedef Ftest * Ft;
     typedef BemKernel * KBem;
-    
+ 
     A  di;
     BemKOperator * b;
     BemKFormBilinear(const basicAC_F0 & args) {
@@ -878,24 +965,18 @@ class FormLinear : public E_F0mps { public:
         KBem Kb= dynamic_cast<KBem>(CastTo<KBem>(args[1]));
         Fi Ffi= dynamic_cast<Fi>(CastTo<Fi>(args[2]));
         Ft Fft= dynamic_cast<Ft>(CastTo<Ft>(args[3]));
-        
+ 
         BemKOperator bb(Kb,Ffi,Fft);
        ffassert(di && bb); }
-    
+ 
     static ArrayOfaType  typeargs() { return ArrayOfaType(atype<A>(),atype<B>());}// all type
     AnyType operator()(Stack ) const { return SetAny<Result>(this);}
     operator aType () const { return atype<Result>();}
-    
-    static  E_F0 * f(const basicAC_F0 & args) { return new BemKFormBilinear(args);}
-    BemKFormBilinear(A a,Expression bb) : di(a), b(new BemKOperator(*dynamic_cast<B>(bb)))
-    {ffassert(b);}
-    BemKFormBilinear operator-() const { return  BemKFormBilinear(di,C_F0(TheOperators,"-",C_F0(b,atype<B>())));}
-    int dim() const {return di->d_s;}
-    int dimHat() const {return di->dHat_s;}
-    BemKFormBilinear(const BemKFormBilinear & fb) : di(fb.di),b(new BemKOperator(*fb.b) ) {}
+ 
+   
 };
-*/
 
+*/
 template<class VFES>
 class Call_FormLinear: public E_F0mps
 {
@@ -1143,7 +1224,7 @@ public:
 
 };
 
-/*class BemKTypeFormBilinear: public ForEachType<const BemKFormBilinear*> {
+class BemKTypeFormBilinear: public ForEachType<const BemKFormBilinear*> {
 public:
     BemKTypeFormBilinear() : ForEachType<const BemKFormBilinear*>(0,0,0) {}
     void SetArgs(const ListOfId *lid) const {
@@ -1161,7 +1242,7 @@ public:
     {
         return e; }
     
-};*/
+};
 
 /*class BemPTypeFormBilinear: public ForEachType<const BemPFormBilinear*> {
 public:

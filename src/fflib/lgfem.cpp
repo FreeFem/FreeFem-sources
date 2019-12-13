@@ -5533,6 +5533,31 @@ R3 *set_eqp(R3 *a, R3 *b) {
   return a;
 }
 
+class FormalBEMcode : public OneOperator{
+ public:
+   AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+   bool MeshIndependent() const { return false;}
+  
+   FormalBEMcode( ): OneOperator(atype<C_F0>(),atype<pBemKernel>(), atype<finconnue*>(), atype<ftest*>()) {}
+   FormalBEMcode(int  ): OneOperator(atype<C_F0>(),atype<pBemKernel>()) {}
+   E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
+   C_F0  code2(const basicAC_F0 &args) const {
+     
+     /* pBemKernel fk=0; const Finconnue *fu=0; const Ftest *fv=0;
+       
+       fk = dynamic_cast<const BemKernel*>((Expression) args[0]);
+       if(args.size()>1)
+       fu = dynamic_cast<const Finconnue*>((Expression) args[1]);
+           if(args.size()>2)
+       fv = dynamic_cast<const Ftest*>((Expression) args[2]);
+       */
+       
+       Expression e=new FormBEM(args/*fk,fu,fv*/); ;// *E_F0
+        aType r=atype<const FormBEM *>();
+   return C_F0(e,r) ;}
+};
+    
+        
 void init_lgfem( ) {
   if (verbosity && (mpirank == 0)) cout << "lg_fem ";
 #ifdef HAVE_CADNA
@@ -5727,7 +5752,7 @@ void init_lgfem( ) {
 
   map_type[typeid(const FormBilinear *).name( )] = new TypeFormBilinear;
   map_type[typeid(const FormLinear *).name( )] = new TypeFormLinear;
-  //map_type[typeid(const BemKFormBilinear *).name( )] = new BemKTypeFormBilinear;
+  map_type[typeid(const BemKFormBilinear *).name( )] = new BemKTypeFormBilinear;
   //map_type[typeid(const BemPFormBilinear *).name( )] = new BemPTypeFormLinear;
     
   aType t_C_args = map_type[typeid(const C_args *).name( )] = new TypeFormOperator;
@@ -5739,9 +5764,15 @@ void init_lgfem( ) {
   basicForEachType *t_solve = atype< const Solve * >( );
   basicForEachType *t_problem = atype< const Problem * >( );
   basicForEachType *t_fbilin = atype< const FormBilinear * >( );
-  //basicForEachType *t_fbembilin = atype< const BemKFormBilinear * >( );
+
   basicForEachType *t_flin = atype< const FormLinear * >( );
   basicForEachType *t_BC = atype< const BC_set * >( );
+    
+   
+  // simplified type/function to define varf bem
+  Dcl_Type< const FormBEM * >( );
+  basicForEachType *t_BEM = atype< const BemKFormBilinear * >( );
+  //basicForEachType *t_POT = atype< const FormPOT * >( );
     
   /// Doxygen doc
   basicForEachType *t_form = atype< const C_args * >( );
@@ -5751,7 +5782,7 @@ void init_lgfem( ) {
   Dcl_Type< const CDomainOfIntegration * >( );
   Dcl_Type< const CBemDomainOfIntegration * >( );
   Dcl_Type< const CPartBemDI * >( );
-  
+    
   atype< pmesh >( )->AddCast(new E_F1_funcT< pmesh, pmesh * >(UnRef< pmesh >));
   atype< pfes >( )->AddCast(new E_F1_funcT< pfes, pfes * >(UnRef< pfes >));
 
@@ -5916,9 +5947,7 @@ void init_lgfem( ) {
   zzzfff->AddF("varf", t_form);    //  var. form ~  <<varf>>
   zzzfff->AddF("solve", t_solve);
   zzzfff->AddF("problem", t_problem);
-  //zzzfff->AddF("varfbemker", t_BemKform);
-  //zzzfff->AddF("varfbempot", t_BemPform);
-    
+  
   Global.Add("jump", "(", new OneOperatorCode< Code_VF< Ftest, Code_Jump > >);
   Global.Add("jump", "(", new OneOperatorCode< Code_VF< Finconnue, Code_Jump > >);
   Global.Add("average", "(", new OneOperatorCode< Code_VF< Ftest, Code_Mean > >);
@@ -5985,7 +6014,9 @@ void init_lgfem( ) {
 
   atype< const C_args * >( )->AddCast(new OneOperatorCode< C_args >(t_C_args, t_fbilin),
     new OneOperatorCode< C_args >(t_C_args, t_flin),
-    new OneOperatorCode< C_args >(t_C_args, t_BC)//,
+    new OneOperatorCode< C_args >(t_C_args, t_BC),
+    new OneOperatorCode< C_args >(t_C_args, t_BEM)//,
+   // new OneOperatorCode< C_args >(t_C_args, t_POT)
     //new OneOperatorCode< BemC_args >(t_C_args, t_fbembilin)
   );
 
@@ -6231,16 +6262,6 @@ void init_lgfem( ) {
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesL >);      // 3D curve
 
     
- // Add< const BemKFormBilinear * >("(", "", new OpCall_FormBilinear< BemKFormBilinear, v_fesS >);    // 2D BEM
- // Add< const BemKFormBilinear * >("(", "", new OpCall_FormLinear2< BemKFormBilinear, v_fesS >);    // 2D BEM
-  //Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, v_fesS >);       // 2D BEM
-  //Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesS >);      // 2D BEM
-    
- // Add< const BemKFormBilinear * >("(", "", new OpCall_FormBilinear< BemKFormBilinear, v_fesL >);    // 1D BEM
- // Add< const BemKFormBilinear * >("(", "", new OpCall_FormLinear2< BemKFormBilinear, v_fesL >);   // 1D BEM
-  //Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, v_fesL >);      // 1D BEM
-  //Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesL >);     // 1D BEM
- 
   //  correction du bug morale
   //  Attention il y a moralement un bug
   //  les initialisation   x = y   ( passe par l'operateur binaire <-  dans TheOperators
@@ -6310,12 +6331,14 @@ void init_lgfem( ) {
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< FormLinear >);
   Add< const CPartBemDI * >("(", "", new OneOperatorCode< CBemDomainOfIntegration >);
     
-//  Add< const CBemDomainOfIntegration * >("(", "", new OneOperatorCode< BemKFormBilinear >);
+ Add< const CBemDomainOfIntegration * >("(", "", new OneOperatorCode< BemKFormBilinear >);
 //  Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< BemPFormBilinear >);
     
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< IntFunction< double >, 1 >);
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< IntFunction< complex< double > >, 0 >);
-
+  
+  Global.Add("BEM","(",new FormalBEMcode);// XXXX
+    
   map_type[typeid(double).name( )]->AddCast(new E_F1_funcT< double, pfer >(pfer2R< R, 0 >));
 
   map_type[typeid(Complex).name( )]->AddCast(new E_F1_funcT< Complex, pfec >(pfer2R< Complex, 0 >));

@@ -34,6 +34,7 @@
 #ifndef lgfem_hpp_
 #define lgfem_hpp_
 #include <array_resize.hpp>
+
 extern Block *currentblock;
 
 void init_lgmat( );    // initialisation for sparse mat functionnallity
@@ -57,13 +58,15 @@ using Fem2D::MeshL;
 using Fem2D::MeshS;
 class BemKernel;
 class BemPotential;
+class FormBEM;
 typedef const Mesh *pmesh;
 typedef const Mesh3 *pmesh3;
 typedef const MeshS *pmeshS;
 typedef const MeshL *pmeshL;
+// new type for bem
 typedef const BemKernel *pBemKernel;
 typedef const BemPotential *pBemPotential;
-
+typedef const FormBEM *pFormBEM;
 using Fem2D::FESpace;
 using Fem2D::R;
 using Fem2D::TypeOfFE;
@@ -428,7 +431,6 @@ public:
     listBemKernel(){};
 };
 
-//// end type BEM kernel / potential
 
 template<class RR,class AA=RR,class BB=AA>
 struct Op_addBemKernel: public binary_function<AA,BB,RR> {
@@ -483,6 +485,9 @@ private:
     BemPotential(const BemPotential &);
     void operator=(const BemPotential &);
 };
+
+
+//// end type BEM kernel / potential
 
 
 
