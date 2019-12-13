@@ -10,6 +10,8 @@
 
 macro dimension 3// EOM            // 2D or 3D
 
+load "msh3"
+
 include "ffddm.idp"
 
 macro def(i)i// EOM                         // scalar field definition
@@ -18,11 +20,11 @@ macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
 func Pk = P1;                               // finite element space
 
 int[int] LL = [2,2, 1,2, 2,2];
-meshN ThGlobal = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10),
+mesh3 ThGlobal = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10),
     [x, y, z], label = LL);      // global mesh
 
 macro Varf(varfName, meshName, PhName)
-    varf varfName(u,v) = intN(meshName)(grad(u)' * grad(v)) + intN(meshName)(v) + on(1, u = 1.0); // EOM
+    varf varfName(u,v) = int3d(meshName)(grad(u)' * grad(v)) + int3d(meshName)(v) + on(1, u = 1.0); // EOM
        
 // Domain decomposition
 ffddmbuildDmesh( Lap , ThGlobal , mpiCommWorld )

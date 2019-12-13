@@ -2,12 +2,6 @@ include "macro_ddm.idp"
 
 macro partitionSubstructuring(meshName, interfaceNb, globalName, PhGlobal, part, s, ndofSkeleton, BC, comm, fakeInterface, labDirichlet)
         meshName = trunc(globalName, abs(part - mpiRank(comm)) < 0.1, label = fakeInterface);
-        {
-            fespace PhLocal(meshName, P0);
-            PhLocal overshoot = hTriangle;
-            real max = 4.0 * overshoot[].max;
-            bbN(meshName, max, globalName)
-        }
         fespace VhGlobal(globalName, P1);
         PhGlobal supp = abs(part - mpiRank(comm)) < 0.1;
         VhGlobal suppSmooth;

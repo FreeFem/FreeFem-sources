@@ -8042,6 +8042,206 @@ class BuildMeshLFromMeshS : public OneOperator {
   }
 };
 
+template <class MMesh>
+class OrientNormal_Op : public E_F0mps {
+ public:
+  Expression eTh;
+  static const int n_name_param = 1;
+  static basicAC_F0::name_and_type name_param[];
+  Expression nargs[n_name_param];
+
+  bool arg(int i, Stack stack, bool a) const {
+    return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
+  }
+
+ public:
+  OrientNormal_Op(const basicAC_F0 &args, Expression tth) : eTh(tth) {
+    args.SetNameParam(n_name_param, name_param, nargs);
+  }
+  AnyType operator( )(Stack stack) const;
+};
+
+inline double SolidAngle(const Fem2D::R3& p, const EdgeL& e){
+  double M[2][2];
+  for(int j=0; j<2; j++)
+  for(int k=0;k<2;k++)
+    M[j][k] = e[k][j] - p[j];
+  return (1./2)*( M[0][0]*M[1][1]-M[1][0]*M[0][1] );
+}
+
+inline double SolidAngle(const Fem2D::R3& p, const TriangleS& e){
+  double M[3][3];
+  for(int j=0; j<3; j++)
+  for(int k=0;k<3;k++)
+    M[j][k] = e[k][j] - p[j];
+  return (-1./6)*( M[0][0]*( M[1][1]*M[2][2]-M[2][1]*M[1][2] )
+               - M[0][1]*( M[1][0]*M[2][2]-M[2][0]*M[1][2] )
+               + M[0][2]*( M[1][0]*M[2][1]-M[2][0]*M[1][1] ) );
+}
+
+template <class MMesh>
+basicAC_F0::name_and_type OrientNormal_Op<MMesh>::name_param[] = {
+
+  {"unbounded", &typeid(bool)},
+};
+
+template <class Mesh>
+void ComputeOrientation(const Mesh& Th, std::vector<bool>& orientation, bool unbounded) {
+  typedef typename Mesh::RdHat RdHat;
+  typedef typename Mesh::Element T;
+
+  int  nbelt = Th.nt;
+  int nt = Th.nt;
+  bool ok = true;
+  orientation.resize(nbelt,ok);
+  std::vector<bool> visited(nbelt,false);
+
+  //====================================
+  // initialisation  de la recherche
+  // d'un point extremal du maillage
+  int  Iext = 0;
+  RdHat bary = RdHat::diag(1./(RdHat::d+1));
+  double Ext = Th[0](bary).norme2();
+
+  //===============================//
+  //     Breadth First Search      //
+  //===============================//
+
+  int nb_visited = 0;
+  std::queue<int> visit;
+
+  int j0 = 0;
+  visit.push(j0);
+  visited[j0]=true;
+
+  while(nb_visited < nt){
+
+    j0 = visit.front();
+    const T &K(Th[j0]);
+    visit.pop();
+    nb_visited++;
+
+    if( K(bary).norme2() > Ext){
+      Ext = K(bary).norme2();
+      Iext = 0;  // which connected component is the most extern ? only one for now
+    }
+
+    for(int k0=0; k0<RdHat::d+1; k0++){
+      int k0a = k0;
+      const int& j1 = Th.ElementAdj(j0, k0a);
+      const T &K1(Th[j1]);
+      if(!visited[j1]){
+        bool same = RdHat::d == 2 ? (K.EdgeOrientation(k0) != K1.EdgeOrientation(k0a)) : (k0 != k0a);
+        if(same){orientation[j1]=orientation[j0];}
+        else{orientation[j1]=!orientation[j0];}
+        visited[j1]=true;
+        visit.push(j1);
+      }
+    }
+  }
+
+  double global_orientation = 0.;
+  const R3& p = Th.vertices[0];
+  for(int j=0; j<nt; j++){
+    const T &K1(Th[j]);
+    double r = SolidAngle(p,K1);
+    if(!orientation[j]){r = -r;}
+    global_orientation += r;
+  }
+
+  for(int j=0; j<nt; j++) {
+    if(global_orientation > 0)
+      orientation[j] = !orientation[j];
+    if (!unbounded)
+      orientation[j] = !orientation[j];
+  }
+}
+
+template <class MMesh>
+AnyType OrientNormal_Op<MMesh>::operator( )(Stack stack) const {
+  typedef typename MMesh::Element T;
+  typedef typename MMesh::BorderElement B;
+  typedef typename MMesh::Vertex V;
+
+  MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+  MMesh *pTh = GetAny< MMesh * >((*eTh)(stack));
+  MMesh &Th = *pTh;
+  ffassert(pTh);
+
+  bool unbounded(arg(0, stack, false));
+
+  if (verbosity > 5) cout << "Orienting surface normals ..." << endl;
+
+  int nv = Th.nv, nt = Th.nt, nbe = Th.nbe;
+
+  V *v = new V[nv];
+  T *t = new T[nt];
+  T *tt = t;
+  B *b = new B[nbe];
+  B *bb = b;
+  double mes = 0, mesb = 0;
+
+  if (verbosity > 5)
+    cout << "copy the original mesh ... nv= " << nv << " nt= " << nt << " nbe= " << nbe << endl;
+
+  for (int i = 0; i < nv; i++) {
+    const V &K(Th.vertices[i]);
+    v[i].x = K.x;
+    v[i].y = K.y;
+    v[i].z = K.z;
+    v[i].lab = K.lab;
+  }
+
+  std::vector<bool> orientation;
+  ComputeOrientation(Th, orientation, unbounded);
+  //=====================================
+  // Add elements, with correct orientation
+
+  for (int i = 0; i < nt; i++) {
+    const T &K(Th.elements[i]);
+    int iv[T::nea];
+    int lab = K.lab;
+
+    for (int jj = 0; jj < T::nea; jj++) {
+      iv[jj] = Th.operator( )(K[jj]);
+      assert(iv[jj] >= 0 && iv[jj] < nv);
+    }
+    if (!orientation[i])
+        swap(iv[0], iv[1]);
+    (tt)->set(v, iv, lab);
+    mes += tt++->mesure();
+  }
+
+  for (int i = 0; i < nbe; i++) {
+    const B &K(Th.be(i));
+    int iv[B::nea];
+    int lab = K.lab;
+    for (int jj = 0; jj < B::nea; jj++) {
+      iv[jj] = Th.operator( )(K[jj]);
+      assert(iv[jj] >= 0 && iv[jj] < nv);
+    }
+    (bb)->set(v, iv, lab);
+    mesb += bb++->mesure( );
+  }
+
+  MMesh *Th_t = new MMesh(nv, nt, nbe, v, t, b);
+  Th_t->BuildGTree( );
+  //Th_t->BuildMeshL( );
+  *mp = mps;
+  Add2StackOfPtr2FreeRC(stack, Th_t);
+  return Th_t;
+}
+
+template <class MMesh>
+class OrientNormal : public OneOperator {
+ public:
+  OrientNormal( ) : OneOperator(atype< const MMesh* >( ), atype< const MMesh* >( )) {}
+
+  E_F0 *code(const basicAC_F0 &args) const {
+    return new OrientNormal_Op<MMesh>(args, t[0]->CastTo(args[0]));
+  }
+};
+
 // movemesh
 template< class MMesh >
 class Movemesh_Op : public E_F0mps {
@@ -8742,6 +8942,10 @@ static void Load_Init( ) {
   Global.Add("Sline", "(", new Line(1));
 
   Global.Add("buildBdMesh", "(", new BuildMeshLFromMeshS);
+
+  Global.Add("OrientNormal", "(", new OrientNormal<MeshS>);
+  Global.Add("OrientNormal", "(", new OrientNormal<MeshL>);
+
   Global.Add("extract", "(", new ExtractMesh< MeshS, MeshL >);    // take a Mesh3 in arg and return a part of MeshS
 }
 

@@ -12,6 +12,8 @@ macro dimension()3// EOM            // 2D or 3D
 
 include "ffddm.idp"
 
+load "msh3"
+
 searchMethod = 1;
 
 macro def(i)[i, i#B, i#C, i#D, i#E]// EOM     // vector field definition
@@ -41,11 +43,11 @@ int np = getARGV("-global", 6);
 int mysplit = getARGV("-CSsplit", 3);
 
 // maillage grossier pour le precond 2 niveaux
-meshN Thc = cube(np/mysplit,np/mysplit,np/mysplit, [x, y, z]);
+mesh3 Thc = cube(np/mysplit,np/mysplit,np/mysplit, [x, y, z]);
 Thc = trunc(Thc,(((x>0.66|x<0.33) |(y>0.66|y<0.33)| (z>0.66|z<0.33))),label=20);
 
 // maillage fin defini en splittant le maillage grossier : on split les aretes du maillage grossier en 3 (parametre mysplit) -> les 2 maillages sont emboites
-meshN ThGlobal = trunc(Thc,1,split=mysplit);
+mesh3 ThGlobal = trunc(Thc,1,split=mysplit);
 
 //macro NCdefplot(u)u#E//
 
@@ -99,7 +101,7 @@ macro Varf(varfName, meshName, VhName)
 	NCfromVhi(ui[],VhName,uG[])
 	
     varf varfName([uw, uwB, uwC, pw, Tw], [v, vB, vC, q, W]) =
-     intN(meshName)(- div(uw)*q -div(v)*pw - eps*pw*q
+     int3d(meshName)(- div(uw)*q -div(v)*pw - eps*pw*q
          + UgradU(uG,uw)'*[v,vB,vC]
          + UgradU(uw,uG)'*[v,vB,vC]
          + ( Grad(uw,uwB,uwC)'*Grad(v,vB,vC))*IRe
@@ -115,7 +117,7 @@ macro Varf(varfName, meshName, VhName)
 // la formulation variationnelle pour le probleme grossier. On enleve les termes qui dependent de la solution precedente, et ca marche quand meme tres bien.
 macro VarfCS(varfName, meshName, VhName)
     varf varfName([uw, uwB, uwC, pw, Tw], [v, vB, vC, q, W]) =
-     intN(meshName)(- div(uw)*q -div(v)*pw - eps*pw*q
+     int3d(meshName)(- div(uw)*q -div(v)*pw - eps*pw*q
          /*+ UgradU(uG,uw)'*[v,vB,vC]
          + UgradU(uw,uG)'*[v,vB,vC]*/
          + ( Grad(uw,uwB,uwC)'*Grad(v,vB,vC))*IRe
@@ -131,7 +133,7 @@ macro VarfCS(varfName, meshName, VhName)
 // la formulation variationnelle pour le 1er niveau du preconditionneur (optimized schwarz). On integre sur les maillages locaux (NCThi), donc on peut utiliser directement la solution locale precedente ui. La condition optimisee sur les interfaces (bord 10) est un choix a faire, celle-ci semble bien marcher.
 macro VarfOpt(varfName, meshName, VhName)
     varf varfName([uw, uwB, uwC, pw, Tw], [v, vB, vC, q, W]) =
-     intN(meshName)(- div(uw)*q -div(v)*pw - eps*pw*q
+     int3d(meshName)(- div(uw)*q -div(v)*pw - eps*pw*q
          + UgradU(ui,uw)'*[v,vB,vC]
          + UgradU(uw,ui)'*[v,vB,vC]
          + ( Grad(uw,uwB,uwC)'*Grad(v,vB,vC))*IRe
@@ -139,7 +141,7 @@ macro VarfOpt(varfName, meshName, VhName)
          -[ui,uiB,uiC]'*grad(W)*Tw
          -[uw,uwB,uwC]'*grad(W)*Ti
          + grad(Tw)'*grad(W)*IPr)
-    + intbN(meshName,10)(20./hTriangle*IRe*[uw,uwB,uwC]'*[v,vB,vC]+20*1./hTriangle*[pw, Tw]'*[q, W])
+    + int2d(meshName,10)(20./hTriangle*IRe*[uw,uwB,uwC]'*[v,vB,vC]+20*1./hTriangle*[pw, Tw]'*[q, W])
     + on(1,2,3,4,5,6,20, uw=0,uwB=0,uwC=0)
     + on(2,Tw=Tcold) + on(4,Tw=Thot)
     +on(20,Tw=Tin);
@@ -147,7 +149,7 @@ macro VarfOpt(varfName, meshName, VhName)
 
 macro Varfrhs(varfName, meshName, VhName)
 	varf varfName([uw, uwB, uwC, pw, Tw], [v, vB, vC, q, W]) =
-     intN(meshName)(
+     int3d(meshName)(
          UgradU(ui,ui)'*[v,vB,vC]       
          - [ui,uiB,uiC]'*grad(W)*Ti       
      )

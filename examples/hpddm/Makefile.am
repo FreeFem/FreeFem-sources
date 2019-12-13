@@ -65,10 +65,10 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	laplace-lagrange-PETSc.edp \
 	natural-convection-fieldsplit-2d-PETSc.edp \
 	neo-Hookean-2d-PETSc.edp \
-	Newton-2d-PETSc.edp \
-	Newton-adaptmesh-2d-PETSc.edp \
-	Newton-vi-2d-PETSc.edp \
-	Newton-vi-adaptmesh-2d-PETSc.edp \
+	newton-2d-PETSc.edp \
+	newton-adaptmesh-2d-PETSc.edp \
+	newton-vi-2d-PETSc.edp \
+	newton-vi-adaptmesh-2d-PETSc.edp \
 	block-PETSc.edp \
 	laplace-RT-2d-PETSc.edp \
 	stokes-2d-PETSc.edp \
@@ -98,12 +98,14 @@ TESTS_PETSC_SLEPC = laplace-2d-SLEPc.edp \
 	schrodinger-axial-well-2d-SLEPc.edp \
 	schrodinger-harmonic-oscillator-2d-SLEPc.edp
 
-
 TESTS_PETSCCOMPLEX = diffusion-2d-PETSc-complex.edp \
 	helmholtz-2d-PETSc-complex.edp \
-	helmholtz-mg-2d-PETSc-complex.edp
+	helmholtz-mg-2d-PETSc-complex.edp \
+	maxwell-mg-3d-PETSc-complex.edp
 
 TESTS_PETSCCOMPLEX_SLEPCCOMPLEX = laplace-2d-SLEPc-complex.edp
+
+TESTS_PETSCCOMPLEX_BEMTOOL_BOOST_HTOOL = helmholtz-3d-surf-PETSc-complex.edp
 
 if MPI
 CONDITIONAL_MPI = $(TESTS_MPI)
@@ -114,7 +116,6 @@ if PETSC
 CONDITIONAL_HPDDM_PETSC = $(TESTS_HPDDM_PETSC)
 endif PETSC
 endif HPDDM
-
 
 if PETSC
 CONDITIONAL_PETSC = $(TESTS_PETSC)
@@ -128,6 +129,13 @@ CONDITIONAL_PETSCCOMPLEX = $(TESTS_PETSCCOMPLEX)
 if SLEPCCOMPLEX
 CONDITIONAL_PETSCCOMPLEX_SLEPCCOMPLEX = $(TESTS_PETSCCOMPLEX_SLEPCCOMPLEX)
 endif SLEPCCOMPLEX
+if BEMTOOL
+if BOOST
+if HTOOL
+CONDITIONAL_PETSCCOMPLEX_BEMTOOL_BOOST_HTOOL = $(TESTS_PETSCCOMPLEX_BEMTOOL_BOOST_HTOOL)
+endif HTOOL
+endif BOOST
+endif BEMTOOL
 endif PETSCCOMPLEX
 
 endif MPI
@@ -138,7 +146,8 @@ TESTS = $(TESTS_MPI) \
 	$(TESTS_PETSC) \
 	$(TESTS_PETSC_SLEPC) \
 	$(TESTS_PETSCCOMPLEX) \
-	$(TESTS_PETSCCOMPLEX_SLEPCCOMPLEX)
+	$(TESTS_PETSCCOMPLEX_SLEPCCOMPLEX) \
+	$(TESTS_PETSCCOMPLEX_BEMTOOL_BOOST_HTOOL)
 
 LIST_CONDITIONAL = $(CONDITIONAL_MPI) \
 	$(CONDITIONAL_HPDDM) \
@@ -146,7 +155,8 @@ LIST_CONDITIONAL = $(CONDITIONAL_MPI) \
 	$(CONDITIONAL_PETSC) \
 	$(CONDITIONAL_PETSC_SLEPC) \
 	$(CONDITIONAL_PETSCCOMPLEX) \
-	$(CONDITIONAL_PETSCCOMPLEX_SLEPCCOMPLEX)
+	$(CONDITIONAL_PETSCCOMPLEX_SLEPCCOMPLEX) \
+	$(CONDITIONAL_PETSCCOMPLEX_BEMTOOL_BOOST_HTOOL)
 
 XFAIL_TESTS = $(TESTS)
 
@@ -158,4 +168,4 @@ freefem++.pref: Makefile
 	echo includepath = \"../../idp/\" >> freefem++.pref
 
 clean-local:
-	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_*
+	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_*

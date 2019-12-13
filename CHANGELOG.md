@@ -33,7 +33,7 @@ All notable changes to this project will be documented in this file.
 - checkMesh() function, allow to remove multiple vertices, elements and border elements (argument: precisvertice(double),removeduplicate(bool))
 - possible to build a curve mesh from a surface, ThS = buildBdMesh(ThS) and define this new mesh by meshL ThL= ThS.Gamma
 - can extract a border part of a meshL (meshL ThL = extract(ThL,label=llabs))
-- Support for optimized boundary conditions with PETSc, see helmholtz-2d-PETSc.edp
+- Support for optimized boundary conditions with PETSc, see helmholtz-2d-PETSc-complex.edp
 - buildmeshL() function: build meshL from borders
 - `mpiCommSelf` keyword
 
@@ -46,6 +46,8 @@ All notable changes to this project will be documented in this file.
 - Spurious outputs in TetGen plugin
 - curve3 type -> border
 - hypre examples since it is not downloaded by FreeFEM for many months (use PETSc instead)
+- `dscalprod` routine from HPDDM and PETSc plugins, use `A(u, v)` with `A` a `Mat` or a `schwarz` object
+- `export` function for `macro_ddm.idp`, use `savevtk` as in the sequential iovtk plugin
 
 ### Fixed
 - plotMPI function for plotting 3D solutions, problem with serialize

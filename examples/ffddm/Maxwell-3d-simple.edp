@@ -10,6 +10,8 @@ macro dimension 3// EOM
 
 include "ffddm.idp"
 
+load "msh3"
+
 macro def(i)[i, i#y, i#z]// EOM             // vector field definition
 macro init(i)[i, i, i]// EOM                // vector field initialization
 macro defPart(u)u// EOM                     // partition of unity definition
@@ -27,14 +29,14 @@ int ng = getARGV("-global", 30);
 int[int] labs = [Robin, Robin, Robin, Robin, Robin, Robin];
 //int[int] labs = [Dirichlet, Dirichlet, Dirichlet, Dirichlet, Dirichlet, Dirichlet];
 
-meshN Th = cube(ng, ng, ng, [x,y,z], label = labs);
+mesh3 Th = cube(ng, ng, ng, [x,y,z], label = labs);
 func k = 6 * pi;
 
 func f = exp(-((x-0.5)^2+(y-0.5)^2+(z-0.5)^2)*60);
 
 int mysplit = 3;
 
-meshN Thc = cube(ng/mysplit, ng/mysplit, ng/mysplit, [x,y,z], label = labs);
+mesh3 Thc = cube(ng/mysplit, ng/mysplit, ng/mysplit, [x,y,z], label = labs);
 
 real epsilonprob = 0;//0 k k^2;                  // epsilon of the problem
 real be = getARGV("-betaEprec",1.); // beta for epsilonEprec  
@@ -51,32 +53,32 @@ ffddmbuildDfespaceEdge(M,M,complex,def,init,Pk,defPart,initPart,PkPart)
 
 macro Varf(varfName, meshName, PhName)
     varf varfName([Ex,Ey,Ez],[vx,vy,vz]) =
-  intN(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
-                + intN(meshName)(-(k^2-1i*epsilonprob)*[vx,vy,vz]'*[Ex,Ey,Ez])
-                + intbN(meshName,Robin)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+  int3d(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+                + int3d(meshName)(-(k^2-1i*epsilonprob)*[vx,vy,vz]'*[Ex,Ey,Ez])
+                + int2d(meshName,Robin)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
                 + on(Dirichlet,Ex=0,Ey=0,Ez=0);    // EOM
 
 // for the preconditioner
 macro VarfEprec(varfName, meshName, PhName)
     varf varfName([Ex,Ey,Ez],[vx,vy,vz]) =
-  intN(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
-                + intN(meshName)(-(k^2-1i*epsilonEprec)*[vx,vy,vz]'*[Ex,Ey,Ez])
-                + intbN(meshName,Robin)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+  int3d(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+                + int3d(meshName)(-(k^2-1i*epsilonEprec)*[vx,vy,vz]'*[Ex,Ey,Ez])
+                + int2d(meshName,Robin)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
                 + on(Dirichlet,Ex=0,Ey=0,Ez=0);    // EOM
                 
 // for the preconditioner
 macro VarfOpt(varfName, meshName, PhName)
 
     varf varfName([Ex,Ey,Ez],[vx,vy,vz]) =
-  intN(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
-                + intN(meshName)(-(k^2-1i*epsilonEprec)*[vx,vy,vz]'*[Ex,Ey,Ez])
-                + intbN(meshName,Robin)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
-                + intbN(meshName,10)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))                              
-                + on(Dirichlet,Ex=0,Ey=0,Ez=0);    // EOM                
+  int3d(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+                + int3d(meshName)(-(k^2-1i*epsilonEprec)*[vx,vy,vz]'*[Ex,Ey,Ez])
+                + int2d(meshName,Robin)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+                + int2d(meshName,10)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+                + on(Dirichlet,Ex=0,Ey=0,Ez=0);    // EOM
 
 macro Varfrhs(varfName, meshName, PhName)
     varf varfName([Ex,Ey,Ez],[vx,vy,vz]) =
-        -intN(meshName)([vx,vy,vz]'*[0,0,f])
+        -int3d(meshName)([vx,vy,vz]'*[0,0,f])
        + on(Dirichlet,Ex=0,Ey=0,Ez=0);  // EOM
 
 ffddmsetup(M,M,Varf,VarfOpt)

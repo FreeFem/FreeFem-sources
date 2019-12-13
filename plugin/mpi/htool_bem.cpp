@@ -162,8 +162,18 @@ void Mesh2Bemtool(const ffmesh &Th, Geometry &node, bemtoolmesh &mesh ) {
         I[j]=Th.operator () (K[j]);
       mesh.setOneElt(node,I);
     }
-    mesh = unbounded;
-    Orienting(mesh);
+
+    //mesh = unbounded;
+    //Orienting(mesh);
+    Normal<dHat> N(mesh);
+    for(int it=0; it<Th.nt; it++){
+      const E &K(Th[it]);
+      Fem2D::R3 nn = K.NormalSUnitaire();
+      bemtool::R3 mm; mm[0]=nn.x; mm[1]=nn.y; mm[2]=nn.z;
+      N.set(it, mm);
+    }
+    mesh.Orienting(N);
+
     if(verbosity>10) std::cout << "end creating geometry domain" << std::endl;
 }
 

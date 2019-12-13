@@ -8,6 +8,8 @@
 // NBPROC 4
 // PARAM -raspart -global 20
 
+load "msh3"
+
 macro dimension 3// EOM            // 2D or 3D
 
 include "ffddm.idp"
@@ -17,11 +19,11 @@ macro init(i)i// EOM                        // scalar field initialization
 macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
 
 int[int] LL = [2,2, 1,2, 2,2];
-meshN ThGlobal = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10),
+mesh3 ThGlobal = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10),
     [x, y, z], label = LL);      // global mesh
 
 macro Varf(varfName, meshName, PhName)
-    varf varfName(u,v) = intN(meshName)(grad(u)' * grad(v)) + intN(meshName)(v) + on(1, u = 1.0); // EOM
+    varf varfName(u,v) = int3d(meshName)(grad(u)' * grad(v)) + int3d(meshName)(v) + on(1, u = 1.0); // EOM
        
 // Domain decomposition
 ffddmbuildDmesh( Lap , ThGlobal , mpiCommWorld )

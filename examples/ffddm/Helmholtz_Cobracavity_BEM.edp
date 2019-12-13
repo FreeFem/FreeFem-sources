@@ -1,8 +1,8 @@
-//ff-mpirun -np 4 Helmholtz_Cobracavity.edp -wg
+//ff-mpirun -np 4 Helmholtz_Cobracavity_BEM.edp -wg
 
 // for the make check:
 // NBPROC 4
-// PARAM
+// PARAM -frequency 1e+9
 
 load "htool_bem"
 load "msh3"
@@ -10,6 +10,10 @@ load "msh3"
 include "getARGV.idp"
 
 include "cobrameshcavity.idp"
+
+macro dimension 3S//
+
+include "ffddm.idp"
 
 real sec1 = 0.01;
 real angle = 2*pi*35/360;
@@ -56,22 +60,45 @@ ThS = trunc(ThS, region==labmetal);
 
 plot(ThS);
 
+ffddmbuildDmesh(H, ThS, mpiCommWorld)
+
+macro def(i)i// EOM                         // scalar field definition
+macro init(i)i// EOM                        // scalar field initialization
+ffddmbuildDfespace(H, H, complex, def, init, P1)
+
+macro Varf(Uh, Vh)
+assemblecomplexHESL(Uh,Uh,k,eta=10,epsilon=1e-2,minclustersize=10,maxblocksize=1000000);
+//
+
+macro VarfPrec(Uh, Vh)
+assemblecomplexHESL(Uh,Uh,k,eta=10,epsilon=1e-2,minclustersize=10,maxblocksize=1000000,comm=Hcommself);
+//
+
+macro Varfrhs(varfName, meshName, PhName)
+varf varfName(u,v) =
+  -int2d(meshName)(finc*v);
+//
+
+ffddmsetupOperatorBem(H, H, Varf)
+
+if (mpirank == 0)
+  cout << HAglobal.infos << endl;
+display(HAglobal);
+
+ffddmsetupPrecond(H, VarfPrec)
+
+HVhi<complex> ui, bi;
+
+ffddmbuildrhs(H, Varfrhs, bi[])
+
+ui[] = HfGMRES(ui[], bi[], 1.e-6, 200, "right");
+
+Hwritesummary
+
 fespace Uh(ThS,P1);
+Uh<complex> u;
 
-cout << "ndof = " << Uh.ndof << endl;
-
-HMatrix<complex> H = assemblecomplexHESL(Uh,Uh,k,eta=10,epsilon=1e-2,minclustersize=10,maxblocksize=1000000);
-if (mpirank == 0) cout << H.infos << endl;
-display(H);
-
-Uh<complex> u, b, uinc = -finc;
-
-varf vmass(u,v) = int2d(ThS)(u*v);
-matrix<complex> M = vmass(Uh,Uh,solver=CG);
-
-b[] = M*uinc[];
-
-u[] = H^-1*b[];
+HfromVhi(ui[], Uh, u[])
 
 // output visu
 distx = 2*lambda;

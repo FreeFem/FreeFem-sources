@@ -79,6 +79,8 @@ class DistributedCSR {
                     }
                 }
                 MatDestroy(&_petsc);
+                delete [] reinterpret_cast<decltype(this)*>(_exchange);
+                _exchange = nullptr;
             }
             if(_vS) {
                 for(int i = 0; i < _vS->size(); ++i)
@@ -151,8 +153,10 @@ void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
         MatriceMorse<PetscScalar>* mS = (mT->operator[](k)).A ? static_cast<MatriceMorse<PetscScalar>*>(&(*(mT->operator[](k)).A)) : nullptr;
         int n = mS ? mS->n : 0;
         std::vector<std::vector<std::pair<int, PetscScalar>>> tmp(n);
-        if(mS)
+        if(mS) {
+            ffassert(!mS->half);
             mS->CSR();
+        }
         int nnz = mS ? mS->nnz : 0;
         for(int i = 0; i < n; ++i) {
             unsigned int row = re[i];
@@ -180,20 +184,45 @@ void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
         c = nullptr;
         HPDDM::MatrixCSR<PetscScalar>* dN = new_HPDDM_MatrixCSR<PetscScalar>(mS,true,s,is,js);//->n, mS->m, mS->nbcoef, s, is, js, mS->symetrique, true);
         bool free = dN ? ptA->_A->HPDDM::template Subdomain<PetscScalar>::distributedCSR(numSchur, start, end, ia, ja, c, dN) : false;
-        MatCreate(PETSC_COMM_WORLD, &(*ptA->_vS)[k]);
-        MatSetSizes((*ptA->_vS)[k], end - start, end - start, global, global);
-        MatSetType((*ptA->_vS)[k], MATMPIAIJ);
-        if(!ia && !ja && !c)
+        if(!ia && !ja && !c) {
             ia = new int[2]();
-        MatMPIAIJSetPreallocationCSR((*ptA->_vS)[k], reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
-        MatSetOption((*ptA->_vS)[k], MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
+            free = true;
+        }
+        if(!(*ptA->_vS)[k]) {
+            MatCreate(PETSC_COMM_WORLD, &(*ptA->_vS)[k]);
+            MatSetSizes((*ptA->_vS)[k], end - start, end - start, global, global);
+            MatSetType((*ptA->_vS)[k], MATMPIAIJ);
+            MatMPIAIJSetPreallocationCSR((*ptA->_vS)[k], reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
+            MatSetOption((*ptA->_vS)[k], MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
+        }
+        else {
+            PetscBool update = (mS ? PETSC_TRUE : PETSC_FALSE);
+            MPI_Allreduce(MPI_IN_PLACE, &update, 1, MPIU_BOOL, MPI_MAX, PETSC_COMM_WORLD);
+            if(update) {
+                Mat S;
+                MatCreate(PETSC_COMM_WORLD, &S);
+                MatSetSizes(S, end - start, end - start, global, global);
+                MatSetType(S, MATMPIAIJ);
+                MatMPIAIJSetPreallocationCSR(S, reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
+                MatDestroy(&((*ptA->_vS)[k]));
+                PetscInt nsplits;
+                KSP* subksp;
+                PC pc;
+                KSPGetPC(ptA->_ksp, &pc);
+                PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
+                PC pcS;
+                KSPGetPC(subksp[nsplits - 1], &pcS);
+                PC subpc;
+                PCCompositeGetPC(pcS, k, &subpc);
+                PCSetOperators(subpc, S, S);
+                (*ptA->_vS)[k] = S;
+            }
+        }
         if(free) {
             delete [] ia;
             delete [] ja;
             delete [] c;
         }
-        else if(!ja && !c)
-            delete [] ia;
         delete dN;
     }
     delete [] re;

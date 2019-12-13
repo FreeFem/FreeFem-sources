@@ -1,5 +1,5 @@
 SUBDIRS=seq mpi
-EXTRA_DIST=   \
+EXTRA_DIST= \
 mpi/MPICG.cpp \
 mpi/MUMPS.cpp \
 mpi/PETSc-code.hpp \
@@ -139,6 +139,7 @@ seq/symmetrizeCSR.cpp \
 seq/tetgen.cpp \
 seq/thresholdings.cpp \
 seq/newuoa.f \
-seq/ffmaster.c			seq/libff-mmap-semaphore.c \
-seq/ff-get-dep.in	seq/ff-pkg-download.in	seq/load.link.in \
-seq/ff-get-dep.awk	seq/gsl.awk
+seq/ffmaster.c \
+seq/libff-mmap-semaphore.c \
+seq/ff-get-dep.in seq/ff-pkg-download.in seq/load.link.in \
+seq/ff-get-dep.awk seq/gsl.awk

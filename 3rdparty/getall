@@ -186,20 +186,20 @@ download('htool','https://github.com/PierreMarchand20/htool/archive/0ba76eaca052
 		'1fc76ca089bb76f668a935d0d3678bf9');
 
 	
-download('hpddm','https://github.com/hpddm/hpddm/archive/1622afb31c2fcaa8c47f6193ce105a5b25c85ab9.zip',
+download('hpddm','https://github.com/hpddm/hpddm/archive/83c462a92cd3faf8f7518396caf6c7e5bbaf5e9e.zip',
 	'https://github.com/hpddm',
 	'hpddm.zip',
-	'a03e1673b893f1ab4afbf9f2ce6a68d7');
+	'9dad8a95d334b1342b662ce2faa7e680');
 
-download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/b3bac95331ef16ebf0defac7432edaf4fd957add.zip',
+download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/ef04bc6d1424e84153af4d778b6cf1574a0fa1b3.zip',
 	'https://github.com/PierreMarchand20/BemTool',
 	'bemtool.zip',
-	'60860dcc6eb9d31e7d5b17916d26bca8');
+	'e6195c939431c48b134eca6a9316b59c');
 
-download('Boost','https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.gz',
+download('Boost','https://www.ljll.math.upmc.fr/~tournier/boost_for_bemtool.tar.gz',
 	'https://www.boost.org',
 	'boost.tar.gz',
-	'fea771fe8176828fabf9c09242ee8c26');
+	'bb0e3ee1ad06174c80a69bc0756034e7');
 
 
 

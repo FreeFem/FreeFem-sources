@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFEM,4.4-2,frederic.hecht@sorbonne-universite.fr,FreeFEM)
+AC_INIT(FreeFEM,4.4-3,frederic.hecht@sorbonne-universite.fr,FreeFEM)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -2101,9 +2101,9 @@ TOOL_DISABLE(scotch,scotch.$DYLIB_SUFFIX)
 TOOL_DISABLE(superlu,SuperLu.$DYLIB_SUFFIX)
 TOOL_DISABLE(umfpack,UMFPACK64.$DYLIB_SUFFIX)
 TOOL_DISABLE(yams,freeyams.$DYLIB_SUFFIX)
-TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX,,nodowload)
+TOOL_DISABLE(pipe,pipe.$DYLIB_SUFFIX,,nodownload)
 AC_SUBST([BIN_ffmaster],"$BIN_ffmaster")
-TOOL_DISABLE(MMAP,ff-mmap-semaphore.$DYLIB_SUFFIX,,nodowload)
+TOOL_DISABLE(MMAP,ff-mmap-semaphore.$DYLIB_SUFFIX,,nodownload)
 
 # FFCS - MUMPS_seq has a different Win32 compiler setup from FFCS, so we need to add some extra parameters
 
@@ -2223,9 +2223,8 @@ else
   enable_gsl=no
 fi
 
-#TOOL_DISABLE(gsl,"gsl.$DYLIB_SUFFIX",,nodowload)
-TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX",,nodowload)
-TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX",,nodowload)
+TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX",,nodownload)
+TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX",,nodownload)
 
 # echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 test "$enable_download" != "yes" -a \( "$enable_hpddm" != yes -o "$ff_hpddm_ok" != "yes" \) && enable_hpddm=no

@@ -40,7 +40,8 @@ TESTS_ARPACK = BeamEigenValue.edp \
 	neuman.edp \
 	Stokes-eigen.edp \
 	VP-Steklov-Poincare.edp \
-	WGM-sphere.edp
+	WGM-sphere.edp \
+	LapEigenBeltrami.edp 
 
 if ARPACK
 CONDITIONAL_ARPACK = $(TESTS_ARPACK)

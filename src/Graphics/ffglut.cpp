@@ -653,26 +653,32 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & pl
     if (pNormalT) {
        if (debug>5) cout << " plot Normal element at triangles " << pNormalT << endl;
             R h = 8*win->hpixel;
+            coef = coef*sqrt(Th.mes/Th.nt);
             glLineWidth(0.5);
+            glColor3f(1,0,0);
 
             for (int i=0;i<Th.nt; i = 0 ? i++ : i+=nbN) {
                 const MeshS::Element & K(Th[i]);
-                R3 NN=K.NormalS();
-                NN/=NN.norme(); // unit normal
-                NN*=coef/10.;
+                R3 NN=K.NormalSUnitaire();
+                NN*=coef;
                 R2 PtHat = R2::diag(1. / 3.);
                 R3 A(K(PtHat));
                 NN+=A;
-                R3 uv(A,NN);
-                double l = Max(sqrt((uv,uv)),1e-20);
+                R3 dd(A,NN);
+                double l = Max(sqrt((dd,dd)),1e-20);
                 glBegin(GL_LINES);
                 win->Seg3(A,NN);
                 glEnd();
                 
                 // fleche ou cone / orientation ???
                 R3 nx(1.,0.,0.), ny(0.,1.,0.), nz(0.,0.,1.);
-                R3 dd = uv*(-h/l);
+                // R3 dd = uv*(-h/l);
                 R3 dnx = (dd^nx)*0.5, dny = (dd^ny)*0.5, dnz = (dd^nz)*0.5;
+                dd *= -coef/dd.norme()/5;
+                dnx *= -coef/dnx.norme()/5;
+                dny *= -coef/dny.norme()/5;
+                dnz *= -coef/dnz.norme()/5;
+
                 glLineWidth(1);
                 glBegin(GL_LINES);
                 win->Seg3(NN,NN+dd+dnx);

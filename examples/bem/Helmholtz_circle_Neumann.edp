@@ -17,8 +17,10 @@ func dyfinc = 1i*k*dir[1]*finc;
 
 //  Mesh
 int n = 1000;
-curve3 circle(t=0, 2*pi){x=cos(t); y=sin(t); z=0;}
-meshL Th = buildmesh(circle(n));
+border circle(t=0, 2*pi){x=cos(t); y=sin(t); z=0;}
+meshL Th = buildmeshL(circle(n));
+
+Th = OrientNormal(Th,unbounded=1);
 
 // Dof
 fespace Uh(Th,P1);
@@ -34,14 +36,14 @@ if (mpirank == 0) cout << HSecondKind.infos << endl;
 display(HSecondKind);
 
 // Hmatrix for combined formulation
-HMatrix<complex> HCombined = assemblecomplexHEcombinedHSDL(Uh,Uh,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000,alpha=-0.5,combinedcoef=-k*1i);
+HMatrix<complex> HCombined = assemblecomplexHEcombinedHSDL(Uh,Uh,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000,alpha=-0.5,combinedcoef=1./(1i*k));
 if (mpirank == 0) cout << HCombined.infos << endl;
 display(HCombined);
 
 
 // Solve formulation of first kind
 Uh<complex> uFirstKind, bFirstKind;
-varf vmassFirstKind(u,v) = int1d(Th)((dxfinc*x+dyfinc*y)*v);
+varf vmassFirstKind(u,v) = -int1d(Th)((dxfinc*Nt.x+dyfinc*Nt.y)*v);
 bFirstKind[] = vmassFirstKind(0,Uh);
 uFirstKind[] = HFirstKind^-1*bFirstKind[];
 plot(uFirstKind,dim=2,nbiso=20,value=1,cmm="First kind");
@@ -55,7 +57,7 @@ plot(uSecondKind,dim=2,nbiso=20,value=1,cmm="Second kind");
 
 // Solve combined formulation
 Uh<complex> uCombined, bCombined;
-bCombined[] = -k*1i*bFirstKind[]+bSecondKind[];
+bCombined[] = 1./(1i*k)*bFirstKind[]+bSecondKind[];
 uCombined[] = HCombined^-1*bCombined[];
 plot(uCombined,dim=2,nbiso=20,value=1,cmm="Combined");
 
@@ -63,15 +65,13 @@ plot(uCombined,dim=2,nbiso=20,value=1,cmm="Combined");
 // Mesh output
 int np = 200;
 int R = 4;
-real r = 1.01;
 
 border b1(t=-R, R){x=t; y=-R;}
 border b2(t=-R, R){x=R; y=t;}
 border b3(t=-R, R){x=-t; y=R;}
 border b4(t=-R, R){x=-R; y=-t;}
-border b5(t=0, -2*pi){x=r*cos(t); y=r*sin(t);z=0;}
 
-mesh ThOut = buildmesh(b1(np)+b2(np)+b3(np)+b4(np)+b5(np*pi/R));
+mesh ThOut = buildmesh(b1(np)+b2(np)+b3(np)+b4(np)+circle(-np*pi/R));
 
 // Incident wave in volume
 fespace UhOut(ThOut,P1);
@@ -92,10 +92,6 @@ UhOut vFirstKindabs = abs(vFirstKind);
 plot(vFirstKindabs, dim=1, fill=1, value=1, nbiso=20,cmm="First kind");
 
 // Solution for formulation of second kind
-HMatrix<complex> BSecondKind = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000);
-if (mpirank == 0) cout << BSecondKind.infos << endl;
-display(BSecondKind);
-
 UhOut<complex> vSecondKind;
 vSecondKind[] = HPot*uSecondKind[];
 vSecondKind[] += vinc[];
@@ -104,10 +100,6 @@ UhOut vSecondKindabs = abs(vSecondKind);
 plot(vSecondKindabs, dim=1, fill=1, value=1, nbiso=20,cmm="Second kind");
 
 // Solution for combined formulation
-HMatrix<complex> BCombined = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000);
-if (mpirank == 0) cout << BCombined.infos << endl;
-display(BCombined);
-
 UhOut<complex> vCombined;
 vCombined[] = HPot*uCombined[];
 vCombined[] += vinc[];
