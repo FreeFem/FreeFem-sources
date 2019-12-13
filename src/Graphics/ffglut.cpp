@@ -46,7 +46,7 @@ const R pi=M_PI;//4*atan(1.);
 using namespace std;
 
 static int   nbSendForNextPlot=0,nbTimerNextPlot=0;
-int debug=1;
+int debug=11;
 int casemouse=0,keyact=0;
 double gwait=0;//  no wait in second
 #include "ffglut.hpp"
@@ -2415,9 +2415,8 @@ case 20+index: {type dummy; fin >= dummy;} break;
                     READ_VTK_PARAM(17,KN<double>); // CameraClippingRange
                     READ_VTK_PARAM(18,KN<double>); // CutPlaneOrigin
                     READ_VTK_PARAM(19,KN<double>); // CutPlaneNormal
-                    READ_VTK_PARAM(20,KN<long>); //WindowIndex
-                    READ_VTK_PARAM(21,KN<long>); //NbColorTicks
-                    READ_VTK_PARAM(22,KN<long>); //NbColors
+                 case 40: fin >= winnum; break;
+      
                 //case 43: fin >= winnum; break;
                 case 43: fin >= pNormalT;break;
 
