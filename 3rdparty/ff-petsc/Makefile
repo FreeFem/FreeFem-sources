@@ -65,10 +65,9 @@ ifeq ($(WIN32DLLTARGET),)
   WITH_SLEPC=yes
   FLAGS_CONF_PETSC_REAL= --with-debugging=0 \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' --with-cxx-dialect=C++11 \
-		COPTFLAGS='-O3 $(FLAGS_MTUNE) $(BLASINC)' \
-		CXXOPTFLAGS='-O3 $(FLAGS_MTUNE) $(BLASINC)' \
+		COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
+		CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
-		--CXX_CXXFLAGS='$(BLASINC)' \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 		--with-scalar-type=real $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
 		--with-blaslapack-include='$(BLASINC)' \
@@ -76,10 +75,9 @@ ifeq ($(WIN32DLLTARGET),)
 		$(PETSC_DOWNLOAD)
 FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' --with-cxx-dialect=C++11 \
-		COPTFLAGS='-O3 $(FLAGS_MTUNE) $(BLASINC)' \
-		CXXOPTFLAGS='-O3 $(FLAGS_MTUNE) $(BLASINC)' \
+		COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
+		CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
-		--CXX_CXXFLAGS='$(BLASINC)' \
 		--with-scalar-type=complex \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
 		--with-blaslapack-include='$(BLASINC)' \
@@ -101,7 +99,6 @@ else
 	COPTFLAGS='-O3 $(FLAGS_MTUNE) -D__int64=long\ long' \
 	CXXOPTFLAGS='-O3 $(FLAGS_MTUNE) -D__int64=long\ long' \
 	--with-scalar-type=real \
-	--CXX_CXXFLAGS='$(BLASINC)' \
 	--with-mpi-lib='$(MPI_LIB)' \
 	--with-mpi-include='$(MPI_INC_DIR)' \
 	--with-metis-lib=$(dir3rdparty)/lib/parmetis/libmetis.a \
@@ -117,7 +114,6 @@ else
 	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 \
 	COPTFLAGS='-O3 $(FLAGS_MTUNE) -D__int64=long\ long' \
 	CXXOPTFLAGS='-O3 $(FLAGS_MTUNE) -D__int64=long\ long' \
-	--CXXFLAGS='$(BLASINC)' \
 	--with-scalar-type=complex \
 	--with-mpi-lib='$(MPI_LIB)' \
 	--with-mpi-include='$(MPI_INC_DIR)' \
