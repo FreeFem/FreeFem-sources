@@ -8,9 +8,10 @@ index 136526da05..2d1c4d3271 100644
      args.append('-DMATH_LIB="'+self.libraries.toStringNoDupes(self.mathlib.lib)+'"')
 +    mpicc = self.framework.getMakeMacro('MPICC_SHOW')
 +    mpicxx = self.framework.getMakeMacro('MPICXX_SHOW')
-+    args = self.rmArgsStartsWith(args,['-DCMAKE_CXX_COMPILER','-DCMAKE_C_COMPILER'])
-+    args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
-+    args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
++    if mpicc and mpicxx:
++        args = self.rmArgsStartsWith(args,['-DCMAKE_CXX_COMPILER','-DCMAKE_C_COMPILER'])
++        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
++        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
 
    def configureLibrary(self):
