@@ -665,7 +665,7 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & pl
                 R3 A(K(PtHat));
                 NN+=A;
                 R3 dd(A,NN);
-                double l = Max(sqrt((uv,uv)),1e-20);
+                double l = Max(sqrt((dd,dd)),1e-20);
                 glBegin(GL_LINES);
                 win->Seg3(A,NN);
                 glEnd();
