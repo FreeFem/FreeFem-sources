@@ -6612,18 +6612,18 @@ class ExtractMesh_Op : public E_F0mps {
 template<>
 basicAC_F0::name_and_type ExtractMesh_Op< Mesh3, MeshS >::name_param[] = {
   {"refface", &typeid(KN_< long >)},
-  {"reftet", &typeid(KN_< long >)},
+  //{"reftet", &typeid(KN_< long >)},
   {"label", &typeid(KN_< long >)},
-  {"region", &typeid(KN_< long >)},
+  //{"region", &typeid(KN_< long >)},
 };
 
 // instance arguments for meshS
 template<>
 basicAC_F0::name_and_type ExtractMesh_Op< MeshS, MeshL >::name_param[] = {
   {"refedge", &typeid(KN_< long >)},
-  {"reftri", &typeid(KN_< long >)},
+ // {"reftri", &typeid(KN_< long >)},
   {"label", &typeid(KN_< long >)},
-  {"region", &typeid(KN_< long >)},
+ // {"region", &typeid(KN_< long >)},
 };
 
 template< class MMesh, class MMeshO >
@@ -6658,7 +6658,7 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
 
   KN< long > zzempty(0);
   KN< long > labelface(arg(0, 2, stack, zzempty));
-  KN< long > labelelement(arg(1, 3, stack, zzempty));
+ // KN< long > labelelement(arg(1, 3, stack, zzempty));
 
   // a trier les tableaux d'entier
   int nv = 0, nt = 0, ns = 0;
