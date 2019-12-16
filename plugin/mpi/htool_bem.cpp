@@ -27,7 +27,293 @@ using namespace std;
 using namespace htool;
 using namespace bemtool;
 
+template <class MMesh>
+class OrientNormal_Op : public E_F0mps {
+ public:
+  Expression eTh;
+  static const int n_name_param = 1;
+  static basicAC_F0::name_and_type name_param[];
+  Expression nargs[n_name_param];
 
+  bool arg(int i, Stack stack, bool a) const {
+    return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
+  }
+
+ public:
+  OrientNormal_Op(const basicAC_F0 &args, Expression tth) : eTh(tth) {
+    args.SetNameParam(n_name_param, name_param, nargs);
+  }
+  AnyType operator( )(Stack stack) const;
+};
+
+inline double SolidAngle(const Fem2D::R3& p, const EdgeL& e){
+  double M[2][2];
+  for(int j=0; j<2; j++)
+  for(int k=0;k<2;k++)
+    M[j][k] = e[k][j] - p[j];
+  return (1./2)*( M[0][0]*M[1][1]-M[1][0]*M[0][1] );
+}
+
+inline double SolidAngle(const Fem2D::R3& p, const TriangleS& e){
+  double M[3][3];
+  for(int j=0; j<3; j++)
+  for(int k=0;k<3;k++)
+    M[j][k] = e[k][j] - p[j];
+  return (-1./6)*( M[0][0]*( M[1][1]*M[2][2]-M[2][1]*M[1][2] )
+               - M[0][1]*( M[1][0]*M[2][2]-M[2][0]*M[1][2] )
+               + M[0][2]*( M[1][0]*M[2][1]-M[2][0]*M[1][1] ) );
+}
+
+template <class MMesh>
+basicAC_F0::name_and_type OrientNormal_Op<MMesh>::name_param[] = {
+
+  {"unbounded", &typeid(bool)},
+};
+
+template <class Mesh>
+void ComputeOrientation(const Mesh& Th, std::vector<bool>& orientation, bool unbounded) {
+  typedef typename Mesh::RdHat RdHat;
+  typedef typename Mesh::Element T;
+
+  ////////////////// Compute connected component
+  // tableau  avec les no. des elements
+  // de chaque composante.
+  // num[j][k] est le no du k ieme elt du
+  // la composante no. j
+  std::vector< std::vector<int> >  num;
+  int nbc = 1;
+  num.resize(nbc);
+  int nb_visited = 0;
+  std::queue<int> visit;
+  int  nbelt = Th.nt;
+  std::vector<bool> visited(nbelt,false);
+
+  // Initialisation de l'algo
+  int j0 = 0;
+  visit.push(j0);
+  visited[j0]=true;
+  nb_visited++;
+  num[nbc-1].push_back(j0);
+
+  // Lancement de l'algo
+  while(nb_visited<nbelt){
+    // Reinitialisation dans le cas
+    // de plusieurs composantes connexes
+    if(visit.empty()){
+      nbc++; num.resize(nbc);
+      j0=0; while(visited[j0]){j0++;}
+      visit.push(j0);
+      if(!visited[j0]){
+        visited[j0]=true;
+        nb_visited++;
+        num[nbc-1].push_back(j0);
+      }
+    }
+    else{
+      j0 = visit.front();
+      visit.pop();
+    }
+
+    // Boucle sur les voisins de
+    // l'element courant
+    for(int k0=0; k0<RdHat::d+1; k0++){
+      int k0a = k0;
+      const int& j1 = Th.ElementAdj(j0, k0a);
+      const T &K1(Th[j1]);
+      if(!visited[j1]){
+        nb_visited++;
+        visit.push(j1);
+        visited[j1]=true;
+        num[nbc-1].push_back(j1);
+      }
+    }
+  }
+
+  ////////////////// Compute orientation
+  // int  nbelt = Th.nt;
+  int nt = Th.nt;
+  bool ok = true;
+  orientation.resize(nbelt,ok);
+  std::fill(visited.begin(),visited.end(),false);
+  std::vector<double> global_orientation(nbc);
+  // std::vector<bool> visited(nbelt,false);
+
+  //====================================
+  // initialisation  de la recherche
+  // d'un point extremal du maillage
+  int  Iext = 0;
+  RdHat bary = RdHat::diag(1./(RdHat::d+1));
+  double Ext = Th[0](bary).norme2();
+  //===============================//
+  //   Breadth First Search sur    //
+  //   chaque composante connexe   //
+  //===============================//
+
+  for(int I=0; I<nbc; I++){
+    int nbe = num[I].size();
+    int nb_visited = 0;
+    std::queue<int> visit;
+
+    int j0 = num[I][0];
+    visit.push(j0);
+    visited[j0]=true;
+
+    while(nb_visited < nbe){
+
+      j0 = visit.front();
+      const T &K(Th[j0]);
+      visit.pop();
+      nb_visited++;
+
+      if( K(bary).norme2() > Ext){
+        Ext = K(bary).norme2();
+        Iext = I;
+      }
+
+      for(int k0=0; k0<RdHat::d+1; k0++){
+        int k0a = k0;
+        const int& j1 = Th.ElementAdj(j0, k0a);
+        const T &K1(Th[j1]);
+        if(!visited[j1]){
+          bool same = RdHat::d == 2 ? (K.EdgeOrientation(k0) != K1.EdgeOrientation(k0a)) : (k0 != k0a);
+          if(same){orientation[j1]=orientation[j0];}
+          else{orientation[j1]=!orientation[j0];}
+          visited[j1]=true;
+          visit.push(j1);
+        }
+      }
+    }
+
+    global_orientation[I] = 0.;
+    const Fem2D::R3& p = Th.vertices[num[I][0]];
+    for(int j=0; j<nbe; j++){
+      j0 = num[I][j];
+      const T &K1(Th[j0]);
+      double r = SolidAngle(p,K1);
+      if(!orientation[j0]){r = -r;}
+      global_orientation[I] += r;
+    }
+
+    // for(int j=0; j<nt; j++) {
+    //   if(global_orientation > 0)
+    //     orientation[j] = !orientation[j];
+    //   if (!unbounded)
+    //     orientation[j] = !orientation[j];
+    // }
+
+    if(global_orientation[I] > 0){
+      for(int j=0; j<nbe; j++) {
+        j0 = num[I][j];
+        orientation[j0] = !orientation[j0];
+      }
+    }
+  }
+
+  // //=====================================
+  // // Calcul effectif des vecteurs normaux
+  // normal.resize(nbelt);
+  // for(int j=0; j<nbelt; j++){
+  //   normal[j]=NormalTo(mesh[j]);
+  //   normalize(normal[j]);
+  //   if(orientation[j]){normal[j] = (-1.)*normal[j];}
+  // }
+
+  //=====================================
+  // Si le domaine est borne la
+  // composante exterieure du bord
+  // doit etre orientee dans l'autre sens
+  if(!unbounded){
+    for(int j=0; j<num[Iext].size(); j++){
+      int jj = num[Iext][j];
+      orientation[j] = !orientation[j];
+    }
+  }
+}
+
+template <class MMesh>
+AnyType OrientNormal_Op<MMesh>::operator( )(Stack stack) const {
+  typedef typename MMesh::Element T;
+  typedef typename MMesh::BorderElement B;
+  typedef typename MMesh::Vertex V;
+
+  MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+  MMesh *pTh = GetAny< MMesh * >((*eTh)(stack));
+  MMesh &Th = *pTh;
+  ffassert(pTh);
+
+  bool unbounded(arg(0, stack, false));
+
+  if (verbosity > 5) cout << "Orienting surface normals ..." << endl;
+
+  int nv = Th.nv, nt = Th.nt, nbe = Th.nbe;
+
+  V *v = new V[nv];
+  T *t = new T[nt];
+  T *tt = t;
+  B *b = new B[nbe];
+  B *bb = b;
+  double mes = 0, mesb = 0;
+
+  if (verbosity > 5)
+    cout << "copy the original mesh ... nv= " << nv << " nt= " << nt << " nbe= " << nbe << endl;
+
+  for (int i = 0; i < nv; i++) {
+    const V &K(Th.vertices[i]);
+    v[i].x = K.x;
+    v[i].y = K.y;
+    v[i].z = K.z;
+    v[i].lab = K.lab;
+  }
+
+  std::vector<bool> orientation;
+  ComputeOrientation(Th, orientation, unbounded);
+  //=====================================
+  // Add elements, with correct orientation
+
+  for (int i = 0; i < nt; i++) {
+    const T &K(Th.elements[i]);
+    int iv[T::nea];
+    int lab = K.lab;
+
+    for (int jj = 0; jj < T::nea; jj++) {
+      iv[jj] = Th.operator( )(K[jj]);
+      assert(iv[jj] >= 0 && iv[jj] < nv);
+    }
+    if (!orientation[i])
+        swap(iv[0], iv[1]);
+    (tt)->set(v, iv, lab);
+    mes += tt++->mesure();
+  }
+
+  for (int i = 0; i < nbe; i++) {
+    const B &K(Th.be(i));
+    int iv[B::nea];
+    int lab = K.lab;
+    for (int jj = 0; jj < B::nea; jj++) {
+      iv[jj] = Th.operator( )(K[jj]);
+      assert(iv[jj] >= 0 && iv[jj] < nv);
+    }
+    (bb)->set(v, iv, lab);
+    mesb += bb++->mesure( );
+  }
+
+  MMesh *Th_t = new MMesh(nv, nt, nbe, v, t, b);
+  Th_t->BuildGTree( );
+  //Th_t->BuildMeshL( );
+  *mp = mps;
+  Add2StackOfPtr2FreeRC(stack, Th_t);
+  return Th_t;
+}
+
+template <class MMesh>
+class OrientNormal : public OneOperator {
+ public:
+  OrientNormal( ) : OneOperator(atype< const MMesh* >( ), atype< const MMesh* >( )) {}
+
+  E_F0 *code(const basicAC_F0 &args) const {
+    return new OrientNormal_Op<MMesh>(args, t[0]->CastTo(args[0]));
+  }
+};
 
 template<class K>
 class MyMatrix: public IMatrix<K>{
@@ -120,13 +406,13 @@ class assembleHMatrix : public OneOperator { public:
 
 template<class v_fes1, class v_fes2, class K>
 basicAC_F0::name_and_type  assembleHMatrix<v_fes1,v_fes2,K>::Op::name_param[]= {
-		{  "epsilon", &typeid(double)},
+		{  "eps", &typeid(double)},
 		{  "eta", &typeid(double)},
 		{  "minclustersize", &typeid(long)},
 		{  "maxblocksize", &typeid(long)},
 		{  "mintargetdepth", &typeid(long)},
 		{  "minsourcedepth", &typeid(long)},
-		{  "comm", &typeid(pcommworld)},
+		{  "commworld", &typeid(pcommworld)},
 		{  "alpha", &typeid(double)},
 		{  "compressor", &typeid(string*)},
 		{  "combinedcoef", &typeid(K)}
@@ -199,12 +485,12 @@ AnyType SetHMatrix(Stack stack,Expression emat,Expression einter,int init)
 	HMatrixVirt<K>** Hmat =GetAny<HMatrixVirt<K>** >((*emat)(stack));
 	const typename assembleHMatrix<v_fes1,v_fes2,K>::Op * mi(dynamic_cast<const typename assembleHMatrix<v_fes1,v_fes2,K>::Op *>(einter));
 
-	double epsilon=mi->arg(0,stack,htool::Parametres::epsilon);
-	double eta=mi->arg(1,stack,htool::Parametres::eta);
-	int minclustersize=mi->argl(2,stack,htool::Parametres::minclustersize);
-	int maxblocksize=mi->argl(3,stack,htool::Parametres::maxblocksize);
-	int mintargetdepth=mi->argl(4,stack,htool::Parametres::mintargetdepth);
-	int minsourcedepth=mi->argl(5,stack,htool::Parametres::minsourcedepth);
+	double epsilon=mi->arg(0,stack,1e-2);//htool::Parametres::epsilon);
+	double eta=mi->arg(1,stack,10.);//htool::Parametres::eta);
+	int minclustersize=mi->argl(2,stack,10);//htool::Parametres::minclustersize);
+	int maxblocksize=mi->argl(3,stack,1000000);//htool::Parametres::maxblocksize);
+	int mintargetdepth=mi->argl(4,stack,1);//htool::Parametres::mintargetdepth);
+	int minsourcedepth=mi->argl(5,stack,1);//htool::Parametres::minsourcedepth);
 	pcommworld pcomm=mi->arg(6,stack,nullptr);
 	double alpha=mi->arg(7,stack,0.5);
 	string* compressor=mi->args(8,stack,0);
@@ -678,7 +964,10 @@ void addPotential(const char* namec) {
 	Global.Add(namec,"(",new assembleHMatrix<v_fes1,v_fes2,K>);
 }
 
-static void Init_Schwarz() {
+static void Init_Bem() {
+	Global.Add("OrientNormal", "(", new OrientNormal<MeshS>);
+	Global.Add("OrientNormal", "(", new OrientNormal<MeshL>);
+
 	Dcl_Type<std::map<std::string, std::string>*>( );
 	TheOperators->Add("<<",new OneBinaryOperator<PrintPinfos<std::map<std::string, std::string>*>>);
 	Add<std::map<std::string, std::string>*>("[","",new OneOperator2_<string*, std::map<std::string, std::string>*, string*>(get_info));
@@ -723,4 +1012,4 @@ static void Init_Schwarz() {
 	map_type_of_map[make_pair(atype<HMatrixVirt<std::complex<double> >**>(), atype<Complex*>())] = atype<HMatrixVirt<std::complex<double> >**>();
 }
 
-LOADFUNC(Init_Schwarz)
+LOADFUNC(Init_Bem)

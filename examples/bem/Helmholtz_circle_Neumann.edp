@@ -26,17 +26,17 @@ Th = OrientNormal(Th,unbounded=1);
 fespace Uh(Th,P1);
 
 // Hmatrix for formulation of first kind
-HMatrix<complex> HFirstKind = assemblecomplexHEHS(Uh,Uh,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HFirstKind = assemblecomplexHEHS(Uh,Uh,k,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
 if (mpirank == 0) cout << HFirstKind.infos << endl;
 display(HFirstKind);
 
 // Hmatrix for formulation of second kind
-HMatrix<complex> HSecondKind = assemblecomplexHEDLwmass(Uh,Uh,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000,alpha=-0.5);
+HMatrix<complex> HSecondKind = assemblecomplexHEDLwmass(Uh,Uh,k,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000,alpha=-0.5);
 if (mpirank == 0) cout << HSecondKind.infos << endl;
 display(HSecondKind);
 
 // Hmatrix for combined formulation
-HMatrix<complex> HCombined = assemblecomplexHEcombinedHSDL(Uh,Uh,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000,alpha=-0.5,combinedcoef=1./(1i*k));
+HMatrix<complex> HCombined = assemblecomplexHEcombinedHSDL(Uh,Uh,k,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000,alpha=-0.5,combinedcoef=1./(1i*k));
 if (mpirank == 0) cout << HCombined.infos << endl;
 display(HCombined);
 
@@ -79,7 +79,7 @@ UhOut<complex> vinc;
 vinc = finc;
 
 // HMatrix for potential
-HMatrix<complex> HPot = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> HPot = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
 if (mpirank == 0) cout << HPot.infos << endl;
 display(HPot);
 
