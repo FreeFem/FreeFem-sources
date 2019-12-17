@@ -6569,7 +6569,7 @@ template< class MMesh, class MMeshO >
 class ExtractMesh_Op : public E_F0mps {
  public:
   Expression eTh;
-  static const int n_name_param = 4;    //
+  static const int n_name_param = 2;    //
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   KN_< long > arg(int i, Stack stack, KN_< long > a) const {
@@ -6612,18 +6612,18 @@ class ExtractMesh_Op : public E_F0mps {
 template<>
 basicAC_F0::name_and_type ExtractMesh_Op< Mesh3, MeshS >::name_param[] = {
   {"refface", &typeid(KN_< long >)},
-  //{"reftet", &typeid(KN_< long >)},
+  {"reftet", &typeid(KN_< long >)},
   {"label", &typeid(KN_< long >)},
-  //{"region", &typeid(KN_< long >)},
+  {"region", &typeid(KN_< long >)},
 };
 
 // instance arguments for meshS
 template<>
 basicAC_F0::name_and_type ExtractMesh_Op< MeshS, MeshL >::name_param[] = {
   {"refedge", &typeid(KN_< long >)},
- // {"reftri", &typeid(KN_< long >)},
+  {"reftri", &typeid(KN_< long >)},
   {"label", &typeid(KN_< long >)},
- // {"region", &typeid(KN_< long >)},
+  {"region", &typeid(KN_< long >)},
 };
 
 template< class MMesh, class MMeshO >
