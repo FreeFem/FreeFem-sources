@@ -17,7 +17,7 @@ func dyfinc = 1i*k*dir[1]*finc;
 
 //  Mesh
 int n = 1000;
-border circle(t=0, 2*pi){x=cos(t); y=sin(t); z=0;}
+border circle(t=0, 2*pi){x=cos(t); y=sin(t);}
 meshL Th = buildmeshL(circle(n));
 
 Th = OrientNormal(Th,unbounded=1);
