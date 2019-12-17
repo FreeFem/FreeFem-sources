@@ -49,8 +49,8 @@ real[int] Force=f(0,Uh);
 real[int] CL=cl(0,Uh);
 matrix T = a*mass + (beta*lambda1/dt)*stifness;  
 
-//1st iteration
-u[] = mk^-1*Force;
+//initial condition
+u[] = 0;
   
 meshL Thmv;
 real t=dt;
