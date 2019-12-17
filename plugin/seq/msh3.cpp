@@ -6569,7 +6569,7 @@ template< class MMesh, class MMeshO >
 class ExtractMesh_Op : public E_F0mps {
  public:
   Expression eTh;
-  static const int n_name_param = 2;    //
+  static const int n_name_param = 4;    //
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   KN_< long > arg(int i, Stack stack, KN_< long > a) const {
@@ -6658,7 +6658,7 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
 
   KN< long > zzempty(0);
   KN< long > labelface(arg(0, 2, stack, zzempty));
- // KN< long > labelelement(arg(1, 3, stack, zzempty));
+  KN< long > labelelement(arg(1, 3, stack, zzempty));
 
   // a trier les tableaux d'entier
   int nv = 0, nt = 0, ns = 0;
