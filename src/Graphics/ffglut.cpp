@@ -46,7 +46,7 @@ const R pi=M_PI;//4*atan(1.);
 using namespace std;
 
 static int   nbSendForNextPlot=0,nbTimerNextPlot=0;
-int debug=11;
+int debug=1;
 int casemouse=0,keyact=0;
 double gwait=0;//  no wait in second
 #include "ffglut.hpp"
