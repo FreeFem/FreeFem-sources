@@ -25,7 +25,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
--
+- Interface to `PetscLogStagePush()`/`PetscLogStagePop()`
 
 ### Changed
 -
