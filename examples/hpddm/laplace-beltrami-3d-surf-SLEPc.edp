@@ -1,0 +1,49 @@
+load "PETSc"
+load "msh3"
+load "medit"
+macro dimension()3S//
+include "macro_ddm.idp"
+
+real R  = 3.0, r = 1.0;
+real h  = 0.1;
+int nx  = R*2*pi/h;
+int ny  = r*2*pi/h;
+func tx = (R+r*cos(y*pi*2))*cos(x*pi*2);
+func ty = (R+r*cos(y*pi*2))*sin(x*pi*2);
+func tz = r*sin(y*pi*2);
+
+meshS Th = square3(nx, ny, [tx,ty,tz], removeduplicate=true);
+
+Mat A;
+createMat(Th,A,P1)
+fespace Vh(Th,P1);
+
+macro Grad3(uvw) [dx(uvw), dy(uvw), dz(uvw)]//
+
+real sigma = 1;
+varf aS(u,v) = int2d(Th)(Grad3(u)'*Grad3(v));
+varf mS(u,v) = int2d(Th)(u*v);
+
+matrix LocA = aS(Vh, Vh, sym = 1);
+A = LocA;
+matrix LocB = mS(Vh, Vh, sym = 1);
+Mat B(A, LocB);
+int nev = 10;
+real[int] ev(nev);
+Vh[int] eV(nev);
+
+string ssparams =
+  " -eps_nev " + nev       +
+  " -eps_type krylovschur" +
+  " -eps_target "+ sigma   +
+  " -st_type sinvert "     +
+  " -st_pc_type cholesky " +
+  " -st_pc_factor_mat_solver_type mumps" +
+  " -eps_view"             +
+  " -eps_gen_hermitian";
+int k = EPSSolve(A, B, values = ev, vectors = eV, sparams = ssparams);
+
+for(int i = 0; i < k; ++i) {
+    macro params()cmm = "Eigenvector #" + i + ", eigenvalue =" + ev[i], wait = 1, fill = 1, value = 1//
+    plotD(Th, eV[i], params);
+}
