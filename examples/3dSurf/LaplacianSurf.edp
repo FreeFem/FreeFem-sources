@@ -80,3 +80,6 @@ real[int] errPb = uPb[] - uSPb[];
 cout << "---> norm error l2 with problem " << errPb.l2;
 
 plot(uSPb,cmm=" USPd  ",wait=1);
+
+medit("uSPb",ThS, uSPb);
+

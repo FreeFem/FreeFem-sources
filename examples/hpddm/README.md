@@ -63,6 +63,7 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [schrodinger-harmonic-oscillator-2d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/schrodinger-harmonic-oscillator-2d-SLEPc.edp)   | &nbsp;                                        |
 | [schrodinger-square-well-1d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/schrodinger-square-well-1d-SLEPc.edp)                   | &nbsp;                                        |
 | [laplace-2d-SLEPc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-2d-SLEPc-complex.edp)                                   | &nbsp;                                        |
+| [laplace-beltrami-3d-surf-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-beltrami-3d-surf-SLEPc.edp)                       | Eigenvalue problem on a surface               |
 
 ### Miscellaneous
 | Filename                                                                                                                          | Comments (preconditioners, numerical schemes) |

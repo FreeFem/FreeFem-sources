@@ -464,7 +464,7 @@ namespace Fem2D
         if(verbosity>1)
             cout << "  -- MeshS(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
             << ", Triangle elts:= " << nt << ", num vertice:= " << nv << ", num edges boundaries:= " << nbe << endl;
-        if(verbosity>1)
+        if(verbosity>1 && meshL)
             cout << "  -- MeshS::MeshL(load): "<< (char *) data <<  ", MeshVersionFormatted:= " << ver << ", space dimension:= "<< dim
             << ", Edges elts:= " << meshL->nt << ", num vertice:= " << meshL->nv << ", num border points:= " << meshL->nbe << endl;
         

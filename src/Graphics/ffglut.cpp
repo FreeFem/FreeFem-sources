@@ -2543,9 +2543,8 @@ case 20+index: {type dummy; fin >= dummy;} break;
                     READ_VTK_PARAM(17,KN<double>); // CameraClippingRange
                     READ_VTK_PARAM(18,KN<double>); // CutPlaneOrigin
                     READ_VTK_PARAM(19,KN<double>); // CutPlaneNormal
-                    READ_VTK_PARAM(20,KN<long>); //WindowIndex
-                    READ_VTK_PARAM(21,KN<long>); //NbColorTicks
-                    READ_VTK_PARAM(22,KN<long>); //NbColors
+                 case 40: fin >= winnum; break;
+      
                 //case 43: fin >= winnum; break;
                 case 43: fin >= pNormalT;break;
 

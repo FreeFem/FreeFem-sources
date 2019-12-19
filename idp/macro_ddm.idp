@@ -51,7 +51,7 @@ ENDIFMACRO
 searchMethod = 1;
 
 macro plotDmesh(Th, params)
-if(!NoGraphicWindow) {
+if(!NoGraphicWindow || usedARGV("-fglut") != -1) {
     fespace PhPlot(Th, P0);
     PhPlot plt;
     plt[] = mpirank;
@@ -60,7 +60,7 @@ NewMacro defPlt#Th(u)u EndMacro
 }//
 
 macro plotD(Th, u, params)
-if(!NoGraphicWindow) {
+if(!NoGraphicWindow || usedARGV("-fglut") != -1) {
     fespace PhPlot(Th, P1);
     PhPlot plt = u;
 NewMacro defPlt#Th(v)v EndMacro
@@ -68,7 +68,7 @@ NewMacro defPlt#Th(v)v EndMacro
 }//
 
 macro plotMPI(Th, u, Pk, def, K, params)
-if(!NoGraphicWindow) {
+if(!NoGraphicWindow || usedARGV("-fglut") != -1) {
     meshN ThCurrent = Th;
     fespace Xh(ThCurrent, Pk);
     Xh<K> def(uSend);

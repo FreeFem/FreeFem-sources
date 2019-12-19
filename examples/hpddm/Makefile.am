@@ -96,7 +96,8 @@ TESTS_PETSC_SLEPC = laplace-2d-SLEPc.edp \
 	schrodinger-harmonic-oscillator-1d-SLEPc.edp \
 	schrodinger-square-well-1d-SLEPc.edp \
 	schrodinger-axial-well-2d-SLEPc.edp \
-	schrodinger-harmonic-oscillator-2d-SLEPc.edp
+	schrodinger-harmonic-oscillator-2d-SLEPc.edp \
+	laplace-beltrami-3d-surf-SLEPc.edp
 
 TESTS_PETSCCOMPLEX = diffusion-2d-PETSc-complex.edp \
 	helmholtz-2d-PETSc-complex.edp \

@@ -25,6 +25,25 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Interface to `PetscLogStagePush()`/`PetscLogStagePop()`
+
+### Changed
+-
+
+### Deprecated
+-
+
+### Removed
+-
+
+### Fixed
+-
+
+### Security
+-
+
+## [4.4-3]
+### Added
 - Preliminary support for symmetric distributed PETSc matrices (MATMPISBAIJ instead of MATMPIAIJ)
 - Interface to AMS, Hiptmair--Xu preconditioner for problems in H(curl), see maxwell-3d-PETSc.edp
 - FEM on curve 3D (in test)
@@ -207,7 +226,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-2...develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-3...develop
+[4.4-3]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-2...v4.4-3
 [4.4-2]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4...v4.4-2
 [4.4]: https://github.com/FreeFem/FreeFem-sources/compare/v4.2.1...v4.4
 [4.2.1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.0...v4.2.1
