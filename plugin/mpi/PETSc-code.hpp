@@ -446,6 +446,23 @@ namespace PETSc {
     VecDestroy(&y);
     return 0L;
   }
+  long stagePush(string* const& str) {
+#if defined(PETSC_USE_LOG)
+      PetscLogStage stage;
+      PetscLogStageGetId(str->c_str(), &stage);
+      if(stage == -1) {
+        PetscLogStageRegister(str->c_str(), &stage);
+      }
+      PetscLogStagePush(stage);
+#endif
+      return 0L;
+  }
+  long stagePop() {
+#if defined(PETSC_USE_LOG)
+      PetscLogStagePop();
+#endif
+      return 0L;
+  }
   void finalizePETSc( ) {
     PETSC_COMM_WORLD = MPI_COMM_WORLD;
     PetscBool isFinalized;
@@ -3698,6 +3715,8 @@ static void Init_PETSc( ) {
                PETSc::renumber));
   Global.Add("set", "(", new PETSc::setOptions< Dbddc >( ));
   addInv< Dbddc, PETSc::InvPETSc, KN< PetscScalar >, PetscScalar >( );
+  Global.Add("PetscLogStagePush", "(", new OneOperator1_< long, string* >(PETSc::stagePush));
+  Global.Add("PetscLogStagePop", "(", new OneOperator0< long >(PETSc::stagePop));
   Init_Common( );
 }
 #ifndef PETScandSLEPc
