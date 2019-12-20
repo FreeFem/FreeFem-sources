@@ -61,7 +61,6 @@ else
 endif
 ifeq ($(WIN32DLLTARGET),)
 ##   Not on windows....
-  BLASINC_NO_I="`echo $(BLASINC) | sed 's/-I//g'`"
   FFWINDOWS=false
   WITH_SLEPC=yes
   FLAGS_CONF_PETSC_REAL= --with-debugging=0 \
@@ -71,7 +70,7 @@ ifeq ($(WIN32DLLTARGET),)
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 		--with-scalar-type=real $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
-		--with-blaslapack-include='$(BLASINC_NO_I)' \
+		--with-blaslapack-include='$(shell echo $(BLASINC) | sed "s/-I//g")' \
 		--with-blaslapack-lib='$(BLAS_LAPACK_LIBS)' \
 		$(PETSC_DOWNLOAD)
 FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
@@ -81,7 +80,7 @@ FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		--with-scalar-type=complex \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
-		--with-blaslapack-include='$(BLASINC_NO_I)' \
+		--with-blaslapack-include='$(shell echo $(BLASINC) | sed "s/-I//g")' \
 		--with-blaslapack-lib='$(BLAS_LAPACK_LIBS)' \
 		--with-scalapack-dir=$(DIR_INSTALL_REAL) \
 		--with-metis-dir=$(DIR_INSTALL_REAL) \

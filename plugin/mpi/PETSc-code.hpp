@@ -1770,7 +1770,7 @@ namespace PETSc {
               Matrice_Creuse< PetscScalar >* ptK =
                 nargs[12] ? GetAny< Matrice_Creuse< PetscScalar >* >((*nargs[12])(stack)) : nullptr;
 #if PETSC_VERSION_GE(3, 13, 0)
-              if (ptK->A) {
+              if (ptK && ptK->A) {
                 MatriceMorse< PetscScalar >* mA =
                   static_cast< MatriceMorse< PetscScalar >* >(&(*ptK->A));
                 HPDDM::MatrixCSR< PetscScalar >* B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
