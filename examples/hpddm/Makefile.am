@@ -54,6 +54,7 @@ TESTS_HPDDM = diffusion-2d.edp \
 TESTS_HPDDM_PETSC = diffusion-substructuring-2d-PETSc.edp
 
 TESTS_PETSC = bratu-2d-PETSc.edp \
+	bratu-hpddm-2d-PETSc.edp \
 	diffusion-2d-PETSc.edp \
 	diffusion-3d-PETSc.edp \
 	diffusion-periodic-2d-PETSc.edp \

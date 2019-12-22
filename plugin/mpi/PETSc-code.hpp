@@ -233,7 +233,96 @@ namespace PETSc {
             delete dM;
             dM = nullptr;
           }
-          if (ptA->_A) ptA->_A->setMatrix(dN);
+          if (ptA->_A) {
+              ptA->_A->setMatrix(dN);
+#ifdef PCHPDDM
+              PC pc = nullptr;
+              if(ptParent) {
+                  PetscInt M, N;
+                  Mat** mat;
+                  MatNestGetSubMats(ptParent->_petsc, &M, &N, &mat);
+                  PetscInt i;
+                  for(i = 0; i < std::min(N, M); ++i) {
+                      if(mat[i][i] == ptA->_petsc)
+                          break;
+                  }
+                  if(i < std::min(N, M)) {
+                      PC parent;
+                      KSPGetPC(ptParent->_ksp, &parent);
+                      KSP *subksp;
+                      PetscInt nsplits;
+                      PCFieldSplitGetSubKSP(parent, &nsplits, &subksp);
+                      KSPGetPC(subksp[i], &pc);
+                      PetscFree(subksp);
+                  }
+              }
+              else if(ptA->_ksp) {
+                  KSPGetPC(ptA->_ksp, &pc);
+              }
+              if(pc) {
+                  PCType type;
+                  PCGetType(pc, &type);
+                  PetscBool isType;
+                  PetscStrcmp(type, PCHPDDM, &isType);
+                  if(isType) {
+                      std::function< Mat(const HPDDM::MatrixCSR< PetscScalar >* const) > func =
+                        [](const HPDDM::MatrixCSR< PetscScalar >* const A) {
+                          Mat aux;
+                          if (A->_sym) {
+                            std::vector< std::pair< int, int > >* transpose =
+                              new std::vector< std::pair< int, int > >[A->_n]( );
+                            for (int i = 0; i < A->_n; ++i)
+                              for (int j = A->_ia[i] - (HPDDM_NUMBERING == 'F');
+                                   j < A->_ia[i + 1] - (HPDDM_NUMBERING == 'F'); ++j)
+                                transpose[A->_ja[j] - (HPDDM_NUMBERING == 'F')].emplace_back(i, j);
+                            for (int i = 0; i < A->_n; ++i)
+                              std::sort(transpose[i].begin( ), transpose[i].end( ));
+                            PetscInt* ia = new PetscInt[A->_n + 1];
+                            PetscInt* ja = new PetscInt[A->_nnz];
+                            PetscScalar* c = new PetscScalar[A->_nnz];
+                            ia[0] = 0;
+                            for (int i = 0; i < A->_n; ++i) {
+                              for (int j = 0; j < transpose[i].size( ); ++j) {
+                                c[ia[i] + j] = A->_a[transpose[i][j].second];
+                                ja[ia[i] + j] = transpose[i][j].first;
+                              }
+                              ia[i + 1] = ia[i] + transpose[i].size( );
+                            }
+                            delete[] transpose;
+                            MatCreate(PETSC_COMM_SELF, &aux);
+                            MatSetSizes(aux, A->_n, A->_n, A->_n, A->_n);
+                            MatSetType(aux, MATSEQSBAIJ);
+                            MatSeqSBAIJSetPreallocationCSR(aux, 1, ia, ja, c);
+                            delete[] c;
+                            delete[] ja;
+                            delete[] ia;
+                          } else
+                            MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, A->_n, A->_m, A->_ia, A->_ja, A->_a,
+                                                      &aux);
+                          return aux;
+                        };
+                      const HPDDM::MatrixCSR<PetscScalar>* const A = ptA->_A->getMatrix();
+                      Mat aux = func(A);
+                      Mat N;
+                      PetscObjectQuery((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject*)&N);
+                      if(!N) {
+                          PetscInt* idx;
+                          PetscMalloc1(dN->_n, &idx);
+                          std::copy_n(ptA->_num, dN->_n, idx);
+                          IS is;
+                          ISCreateGeneral(PETSC_COMM_SELF, ptA->_A->getMatrix()->_n, idx, PETSC_OWN_POINTER, &is);
+                          PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_IS", (PetscObject)is);
+                          PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject)aux);
+                          ISDestroy(&is);
+                          MatDestroy(&aux);
+                      }
+                      else {
+                          MatHeaderReplace(N, &aux);
+                      }
+                  }
+              }
+#endif
+          }
           int* ia = nullptr;
           int* ja = nullptr;
           PetscScalar* c = nullptr;
