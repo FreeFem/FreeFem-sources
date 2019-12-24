@@ -404,8 +404,8 @@ ENDIFMACRO
         partition(ThTab, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, mpirank, mpisize, 1, 1, 1, privateCreateMat, DTab, PkName, intersection, mpiCommWorld, -111111, PkName, def, init, 1)
     }
     else {
-        fespace Wh(ThName, PkName);
-        DTab[0].resize(Wh.ndof);
+        fespace WhGlobal(ThName, PkName);
+        DTab[0].resize(WhGlobal.ndof);
         DTab[0] = 1;
         intersection.resize(0);
     }
