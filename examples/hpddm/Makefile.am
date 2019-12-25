@@ -25,7 +25,7 @@ TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" LIST_CONDIT
 
 all-local: freefem++.pref
 
-TESTS_MPI = withPartitioning.edp buildRecursive.edp
+TESTS_MPI = withPartitioning.edp buildRecursive.edp createPartition.edp
 
 TESTS_HPDDM = diffusion-2d.edp \
 	diffusion-mg-2d.edp \
@@ -161,4 +161,4 @@ freefem++.pref: Makefile
 	echo includepath = \"../../idp/\" >> freefem++.pref
 
 clean-local:
-	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_*
+	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_* createPartition_*

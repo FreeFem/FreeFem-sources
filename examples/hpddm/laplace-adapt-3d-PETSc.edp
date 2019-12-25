@@ -8,7 +8,7 @@ include "macro_ddm.idp"             // additional DDM functions
 
 int n = 12;
 int[int] L=[1,1,1,1], LU=[0,1], LD=[1,1];
-mesh3 Th3=buildlayers(square(n, n, region=0, label=L), n, zbound=[0,1], labelmid=LD, labelup = LU, labeldown = LU);
+mesh3 Th3 = buildlayers(square(n, n, region=0, label=L), n, zbound=[0,1], labelmid=LD, labelup=LU, labeldown=LU);
 Th3 = trunc(Th3, x < 0.5 || y < 0.5 || z < 0.5, label=1);
 
 macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
