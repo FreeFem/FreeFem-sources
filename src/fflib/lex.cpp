@@ -155,7 +155,7 @@ int mylex::EatCommentAndSpace(string *data)
         c = source().peek();
 
         // eat spaces
-        while (isspace(c) || c == 10 || c == 13 )
+        while (isspace(c) || c == 0 || c == 10 || c == 13 )
         {
             sep=space;
             c = source().get();
