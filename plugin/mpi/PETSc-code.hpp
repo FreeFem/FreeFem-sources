@@ -10,6 +10,81 @@ typedef PETSc::DistributedCSR< HpSchur< PetscReal > > DbddcR;
 typedef PETSc::DistributedCSR< HpSchur< PetscComplex > > DbddcC;
 
 namespace PETSc {
+  template<class K, class fes>
+  struct varfToMat : public OneOperator {
+    class Op : public E_F0mps {
+    public:
+      Call_FormBilinear<fes>* b;
+      Expression a;
+      AnyType operator()(Stack s) const;
+
+      Op(Expression x, Expression  y) : b(new Call_FormBilinear<fes>(*dynamic_cast<const Call_FormBilinear<fes>*>(y))), a(x) {
+          assert(b && b->nargs);
+          ffassert(FieldOfForm(b->largs,IsComplexType<K>::value) == IsComplexType<K>::value);
+      }
+      operator aType () const { return atype<Dmat*>(); }
+    };
+    E_F0* code(const basicAC_F0& args) const {
+        return new Op(to<Dmat*>(args[0]), args[1]);
+    }
+    varfToMat() : OneOperator(atype<Dmat*>(), atype<Dmat*>(), atype<const Call_FormBilinear<fes>*>()) {}
+  };
+  template<class K, class fes>
+  AnyType varfToMat<K, fes>::Op::operator()(Stack stack) const {
+    typedef typename fes::pfes pfes;
+    typedef typename fes::FESpace FESpace;
+    typedef typename FESpace::Mesh Mesh;
+
+    assert(b && b->nargs);
+    pfes* pUh = GetAny<pfes*>((*b->euh)(stack));
+    pfes* pVh = GetAny<pfes*>((*b->evh)(stack));
+    const FESpace* PUh = (FESpace*)**pUh;
+    const FESpace* PVh = (FESpace*)**pVh;
+    bool is_square = PUh == PVh || PUh->NbOfDF == PVh->NbOfDF;
+
+    bool VF = isVF(b->largs);
+    Data_Sparse_Solver ds;
+    ds.factorize = 0;
+    ds.initmat = true;
+    SetEnd_Data_Sparse_Solver<K>(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);
+
+    WhereStackOfPtr2Free(stack) = new StackOfPtr2Free(stack);
+
+    Dmat& B(*GetAny<Dmat*>((*a)(stack)));
+    Matrice_Creuse<K> A;
+    A.init();
+    if(!PUh || !PVh)
+      return SetAny<Dmat*>(&B);
+    const FESpace& Uh = *PUh;
+    const FESpace& Vh = *PVh;
+    const Mesh& Th = Uh.Th;
+    bool same = isSameMesh(b->largs, &Uh.Th, &Vh.Th, stack);
+    if(same) {
+      if(A.Uh != Uh || A.Vh != Vh) {
+        A.Uh = Uh;
+        A.Vh = Vh;
+        if(ds.sym) {
+          A.A.master(new MatriceMorse<K>(ds.sym, Vh.NbOfDF));
+          ffassert(&Uh == &Vh);
+        }
+        else
+          A.A.master(new MatriceMorse<K>(Vh.NbOfDF, Uh.NbOfDF, 2 * Vh.NbOfDF, 0));
+      }
+      if(AssembleVarForm<K, MatriceCreuse<K>, FESpace>(stack, Th, Uh, Vh, ds.sym, A.A, 0, b->largs))
+        AssembleBC<K, FESpace>(stack, Th, Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
+    }
+    else {
+      MatriceMorse<K> *pMA = new MatriceMorse<K>(Vh.NbOfDF, Uh.NbOfDF, 0, ds.sym);
+      MatriceMap<K>& D = *pMA;
+      bool bc = AssembleVarForm<K,MatriceMap<K>, FESpace>(stack, Th, Uh, Vh, ds.sym, &D, 0, b->largs);
+      A.A.master(pMA);
+      if(bc)
+        AssembleBC<K>(stack, Th, Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
+    }
+    changeOperatorSimple(&B, &A);
+    return SetAny<Dmat*>(&B);
+  }
+
   template< class Type >
   struct _n_User;
   template< class Type >
@@ -3740,7 +3815,10 @@ static void Init_PETSc( ) {
     TheOperators->Add(
       "<-", new OneOperatorCode< PETSc::initCSRfromBlockMatrix< HpSchwarz< PetscScalar > > >( ));
     TheOperators->Add(
-      "=", new OneOperatorCode< PETSc::assignBlockMatrix< HpSchwarz< PetscScalar > > >( ));
+      "=", new OneOperatorCode< PETSc::assignBlockMatrix< HpSchwarz< PetscScalar > > >( ),
+           new PETSc::varfToMat< PetscScalar, v_fes >,
+           new PETSc::varfToMat< PetscScalar, v_fes3 >,
+           new PETSc::varfToMat< PetscScalar, v_fesS >);
   }
   Global.Add("set", "(", new PETSc::setOptions< Dmat >( ));
   Global.Add("set", "(", new PETSc::setOptions< Dmat >(1));

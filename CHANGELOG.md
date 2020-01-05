@@ -26,9 +26,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - Interface to `PetscLogStagePush()`/`PetscLogStagePop()`
+- Ability to directly assemble a `Mat` using a `varf`
 
 ### Changed
--
+- PETSc version 3.12.3
 
 ### Deprecated
 -

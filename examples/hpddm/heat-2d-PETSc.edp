@@ -18,14 +18,13 @@ Mat A;
 buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
 
 fespace Wh(Th, Pk);                 // local finite element space
-matrix<real> Loc;                   // local operator
 real[int] rhs(Wh.ndof);             // local right-hand side
 matrix<real> M;                     // local mass matrix
 {                                   // local weak form
     fespace Ph(Th, P0);
     Ph f = x < 0.25 ? 1.0e+3 : 1.0e-3;
     varf vPb(u, v) = intN(Th)(u * v + dt * (grad(u)' * grad(v))) + intN(Th)(dt * f *  v) + on(1, u = 0.0);
-    Loc = vPb(Wh, Wh, tgv = -1);
+    A = vPb(Wh, Wh, tgv = -1);
     rhs = vPb(0, Wh, tgv = -1);
     varf vPbM(u, v) = intN(Th)(u * v);
     M = vPbM(Wh, Wh);
@@ -34,7 +33,6 @@ matrix<real> M;                     // local mass matrix
 set(A, sparams = "-ksp_view");
 Wh<real> u = 0.0;                   // local solution
 
-A = Loc;
 for(int i = 0; i < iMax; ++i) {
     real[int] newRhs(rhs.n);
     newRhs = M * u[];

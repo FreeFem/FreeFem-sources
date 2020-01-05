@@ -26,7 +26,6 @@ func BC = cos(pi*x)*cos(pi*y);
 varf vInit(w, v) = on(aa, bb, cc, dd, w = BC);
 varf vJ(w, v) = int2d(M)(dx(w)*dx(v) + dy(w)*dy(v) - c*exp(u)*w*v) + on(aa, bb, cc, dd, w = 0);
 varf vRes(w, v) = int2d(M)(dx(u)*dx(v) + dy(u)*dy(v) - c*exp(u)*v) + on(aa, bb, cc, dd, w = u);
-matrix J;
 func real[int] funcRes(real[int]& inPETSc) {
     changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
     real[int] out(Vh.ndof);
@@ -37,8 +36,7 @@ func real[int] funcRes(real[int]& inPETSc) {
 }
 func int funcJ(real[int]& inPETSc) {
     changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
-    J = vJ(Vh, Vh, tgv = -2);
-    A = J;
+    A = vJ(Vh, Vh, tgv = -2);
     return 0;
 }
 bool stage = usedARGV("-stage") != -1;

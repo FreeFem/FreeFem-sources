@@ -24,8 +24,7 @@ real err = 1e-2;
 
 int iMax = 4;
 for(int i = 0; i < iMax; ++i) {
-    matrix Loc = vPoisson(Vh, Vh, tgv = -2);
-    A = Loc;
+    A = vPoisson(Vh, Vh, tgv = -2);
     set(A, sparams = "-ksp_monitor -pc_type hypre");
     real[int] rhs = vPoisson(0, Vh, tgv = -1);
     u[] = A^-1 * rhs;
