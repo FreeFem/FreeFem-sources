@@ -1494,17 +1494,17 @@ namespace PETSc {
     typename LinearSolver< Type, 'N' >::MatF_O* ec;
     typename NonlinearSolver< Type >::VecF_O* ecJ;
   };
-  struct ModifierO {
-    Mat O;
-  };
-  PetscErrorCode Modifier(PC pc, PetscInt nsub, const IS row[], const IS col[], Mat submat[],
-                          void* ctx) {
-    ModifierO* user;
-    PetscFunctionBeginUser;
-    user = reinterpret_cast< ModifierO* >(ctx);
-    MatHeaderReplace(submat[0], &user->O);
+  static Mat* O;
+  PetscErrorCode CustomCreateSubMatrices(Mat,PetscInt,const IS*,const IS*,MatReuse scall,Mat *submat[]) {
+    PetscErrorCode ierr;
+
+    PetscFunctionBegin;
+    if (scall == MAT_INITIAL_MATRIX) {
+      ierr = PetscCalloc1(1,submat);CHKERRQ(ierr);
+    }
+    (*submat)[0] = *O;
     PetscFunctionReturn(0);
-  };
+  }
   template< class T, typename std::enable_if< std::is_same< T, KN< PetscScalar > >::value >::type* =
                        nullptr >
   void resize(T* v, int size) {
@@ -1610,6 +1610,15 @@ namespace PETSc {
     } else VecCopy(x, y);
     PetscFunctionReturn(0);
   }
+  static PetscErrorCode ShellDestroy(Mat A) {
+    User< ShellInjection > user;
+    PetscErrorCode ierr;
+
+    PetscFunctionBegin;
+    ierr = MatShellGetContext(A, &user);CHKERRQ(ierr);
+    ierr = PetscFree(user);CHKERRQ(ierr);
+    PetscFunctionReturn(0);
+  }
   template< class Type >
   AnyType setOptions< Type >::setOptions_Op::operator( )(Stack stack) const {
     Type *ptA, *ptParent;
@@ -1708,6 +1717,7 @@ namespace PETSc {
             MatCreateShell(PETSC_COMM_WORLD, mFine, mCoarse, MFine, MCoarse, user, &P);
             MatShellSetOperation(P, MATOP_MULT, (void (*)(void))ShellInjectionOp< false >);
             MatShellSetOperation(P, MATOP_MULT_TRANSPOSE, (void (*)(void))ShellInjectionOp< true >);
+            MatShellSetOperation(P, MATOP_DESTROY, (void (*)(void))ShellDestroy);
             PCMGSetInterpolation(pc, tabA->N( ) - i - 1, P);
             MatDestroy(&P);
           }
@@ -1884,23 +1894,26 @@ namespace PETSc {
               n -= first;
               ISCreateStride(PETSC_COMM_SELF, n, first, 1, &loc);
               PCASMSetLocalSubdomains(pc, 1, &is, &loc);
-              ModifierO* ctx = new ModifierO;
+              PetscErrorCode (*CreateSubMatrices)(Mat,PetscInt,const IS*,const IS*,MatReuse,Mat**);
+              MatGetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(**)(void))&CreateSubMatrices);
+              MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(*)(void))CustomCreateSubMatrices);
               Mat aux = func(&dO);
               IS perm;
               ISSortPermutation(is, PETSC_TRUE, &perm);
               if (dO._sym) MatConvert(aux, MATSEQAIJ, MAT_INPLACE_MATRIX, &aux);
-              MatPermute(aux, perm, perm, &ctx->O);
+              O = new Mat;
+              MatPermute(aux, perm, perm, O);
               if (dO._sym) {
-                MatSetOption(ctx->O, MAT_SYMMETRIC, PETSC_TRUE);
-                MatConvert(ctx->O, MATSEQSBAIJ, MAT_INPLACE_MATRIX, &ctx->O);
+                MatSetOption(*O, MAT_SYMMETRIC, PETSC_TRUE);
+                MatConvert(*O, MATSEQSBAIJ, MAT_INPLACE_MATRIX, O);
               }
               ISDestroy(&perm);
               MatDestroy(&aux);
-              PCSetModifySubMatrices(pc, Modifier, ctx);
               PCSetUp(pc);
-              PCSetModifySubMatrices(pc, NULL, NULL);
-              delete ctx;
               ISDestroy(&loc);
+              MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(*)(void))CreateSubMatrices);
+              delete O;
+              O = nullptr;
             }
             ISDestroy(&is);
           }
