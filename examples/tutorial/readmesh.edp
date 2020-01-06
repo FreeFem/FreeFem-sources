@@ -51,6 +51,7 @@ func ifstream skipcomment(ifstream &ff)
 
 {
   ifstream file("f.txt",binary); // for windows (pb CRNL EOL  translation ) 
+  int l = file.length;
   cout << " where " << file.seekg << endl; 
   file.seekg(where);
   file >> xx;
@@ -58,9 +59,15 @@ func ifstream skipcomment(ifstream &ff)
   assert(xx==0.1);
   skipcomment(file) >> xx;
   assert(xx==0.2);
+  where =file.tellg();
+  assert(!file.eatspace); 
+  cout << where << " < " << l << endl; 
+  assert(l>=where);
   file.seekg(0);
   cout << " where " << file.tellg() << " " << file.good() << endl; 
   file >> g[] ;
+  // nothing after only space
+  
 }
 fespace Vh2(th2,P1);
 Vh2 u,v;
