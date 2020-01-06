@@ -66,8 +66,7 @@ func real[int] funcRes(real[int]& inPETSc) {
 }
 func int funcJ(real[int]& inPETSc) {
     changeNumbering(dA, u1[], inPETSc, inverse = true, exchange = true);
-    matrix Loc = vPb(Wh, Wh, tgv = -2);
-    dA = Loc;
+    dA = vPb(Wh, Wh, tgv = -2);
     return 0;
 }
 while(nuCurrent > nuFinal) {

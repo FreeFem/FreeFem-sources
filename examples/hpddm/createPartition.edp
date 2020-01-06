@@ -1,0 +1,34 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+macro dimension()2// EOM
+include "macro_ddm.idp"
+
+border circle(t=0, 2*pi) { x=cos(t); y=sin(t); label=1; }
+mesh Th = buildmesh(circle(100));
+
+IFMACRO(paraview)
+load "hpddm"
+ENDIFMACRO
+
+real[int] D;
+createPartition(Th, D, P0)
+fespace Ph(Th, P0);
+fespace Vh(Th, P1);
+fespace Wh(Th, P2);
+Ph p;
+p[] = D;
+createPartition(Th, D, P1);
+Vh v;
+v[] = D;
+createPartition(Th, D, P2)
+Wh w;
+w[] = D;
+macro def(u)u// EOM
+plotMPI(Th, p, P0, def, real, cmm = "P_0 partition of unity")
+plotMPI(Th, v, P1, def, real, cmm = "P_1 partition of unity")
+plotMPI(Th, w, P2, def, real, cmm = "P_2 partition of unity")
+IFMACRO(paraview)
+int[int] fforder = [0, 1, 1];
+savevtk("createPartition.vtu", Th, p, v, w, dataname = "p v w", order = fforder);
+ENDIFMACRO

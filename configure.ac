@@ -1382,7 +1382,7 @@ dnl            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and L
     # Specific BLAS library location for FreeBSD
     ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
     ff_dll_blas=`which  libopenblas.dll`
-    if [ -z "$ff_dll_blas" ] ; then  ff_dll_blas="no"; fi
+    if test -z "$ff_dll_blas" ; then  ff_dll_blas="no"; fi
         #  zmach is in lapack
     # Trying  blas library
     # echo "LIBS =  $LIBS blas --- $ff_blas_ok"

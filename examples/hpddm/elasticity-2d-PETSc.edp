@@ -27,13 +27,12 @@ real mu = Young  / (2.0 * tmp);
 real lambda = Young * poisson / (tmp * (1.0 - 2.0 * poisson));
 varf vPb(def(u), def(v)) = intN(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsilon(u)' * epsilon(v))) + intN(Th)(f * vB) + on(1, u = 0.0, uB = 0.0);
 fespace Wh(Th, Pk);                 // local finite element space
-matrix<real> Loc = vPb(Wh, Wh);
 real[int] rhs = vPb(0, Wh);
 
 set(A, sparams = "-ksp_view");
 Wh<real> def(u);                    // local solution
 
-A = Loc;
+A = vPb(Wh, Wh);
 u[] = A^-1 * rhs;
 
 real[int] err = A * u[];            // global matrix-vector product

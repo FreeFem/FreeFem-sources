@@ -320,7 +320,6 @@ Vh<real> def(Rb)[3];
 [Rb[1], RbB[1]] = [0, 1];
 [Rb[2], RbB[2]] = [y, -x];
 set(A, sparams = "-ksp_converged_reason -pc_type gamg", nearnullspace = Rb);
-matrix Loc;
 func real[int] funcRes(real[int]& inPETSc) {
     changeNumbering(A, u1n[], inPETSc, inverse = true, exchange = true);
     real[int] out(Vh.ndof);
@@ -331,8 +330,7 @@ func real[int] funcRes(real[int]& inPETSc) {
 }
 func int funcJ(real[int]& inPETSc) {
     changeNumbering(A, u1n[], inPETSc, inverse = true, exchange = true);
-    Loc = neoHookeanInc(Vh, Vh, tgv = -2);
-    A = Loc;
+    A = neoHookeanInc(Vh, Vh, tgv = -2);
     return 0;
 }
 real[int] xPETSc;

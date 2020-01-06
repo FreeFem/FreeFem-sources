@@ -137,13 +137,12 @@ else {
 fespace Wh(Th, Pk);                 // local finite element space
 func f = (y+x+1) * (y+x-1) * (y-x+1) * (y-x-1);
 varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) - intN(Th)((0.39 - f) * v) + on(0, u = 0.0);
-matrix<real> Loc = vPb(Wh, Wh);
 real[int] rhs = vPb(0, Wh);
 
 set(A, sparams = "-ksp_view");
 Wh<real> u;                         // local solution
 
-A = Loc;
+A = vPb(Wh, Wh);
 u[] = A^-1 * rhs;
 
 macro def(u)u//

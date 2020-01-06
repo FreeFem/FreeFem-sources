@@ -52,8 +52,7 @@ func real[int] funcRes(real[int]& inPETSc) {
     return outPETSc;
 }
 func int funcJ(real[int]& inPETSc) {
-    matrix Loc = vPb(Wh, Wh, tgv = -2);
-    A = Loc;
+    A = vPb(Wh, Wh, tgv = -2);
     return 0;
 }
 real[int] xPETSc;

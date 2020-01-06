@@ -18,8 +18,7 @@ real[int] rhs;
 for(int i = 0; i < level; ++i) {
     varf vPb(u, v) = intN(ThTab[i])(grad(u)' * grad(v)) + intN(ThTab[i])(v) + on(1, u = 0.0);
     fespace Wh(ThTab[i], Pk);
-    matrix<real> Loc = vPb(Wh, Wh, tgv = -2);
-    MG[i] = Loc;
+    MG[i] = vPb(Wh, Wh, tgv = -2);
     if(i == 0) {
         rhs.resize(Wh.ndof);
         rhs = vPb(0, Wh);

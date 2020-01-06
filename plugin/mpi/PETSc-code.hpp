@@ -10,6 +10,81 @@ typedef PETSc::DistributedCSR< HpSchur< PetscReal > > DbddcR;
 typedef PETSc::DistributedCSR< HpSchur< PetscComplex > > DbddcC;
 
 namespace PETSc {
+  template<class K, class fes>
+  struct varfToMat : public OneOperator {
+    class Op : public E_F0mps {
+    public:
+      Call_FormBilinear<fes>* b;
+      Expression a;
+      AnyType operator()(Stack s) const;
+
+      Op(Expression x, Expression  y) : b(new Call_FormBilinear<fes>(*dynamic_cast<const Call_FormBilinear<fes>*>(y))), a(x) {
+          assert(b && b->nargs);
+          ffassert(FieldOfForm(b->largs,IsComplexType<K>::value) == IsComplexType<K>::value);
+      }
+      operator aType () const { return atype<Dmat*>(); }
+    };
+    E_F0* code(const basicAC_F0& args) const {
+        return new Op(to<Dmat*>(args[0]), args[1]);
+    }
+    varfToMat() : OneOperator(atype<Dmat*>(), atype<Dmat*>(), atype<const Call_FormBilinear<fes>*>()) {}
+  };
+  template<class K, class fes>
+  AnyType varfToMat<K, fes>::Op::operator()(Stack stack) const {
+    typedef typename fes::pfes pfes;
+    typedef typename fes::FESpace FESpace;
+    typedef typename FESpace::Mesh Mesh;
+
+    assert(b && b->nargs);
+    pfes* pUh = GetAny<pfes*>((*b->euh)(stack));
+    pfes* pVh = GetAny<pfes*>((*b->evh)(stack));
+    const FESpace* PUh = (FESpace*)**pUh;
+    const FESpace* PVh = (FESpace*)**pVh;
+    bool is_square = PUh == PVh || PUh->NbOfDF == PVh->NbOfDF;
+
+    bool VF = isVF(b->largs);
+    Data_Sparse_Solver ds;
+    ds.factorize = 0;
+    ds.initmat = true;
+    SetEnd_Data_Sparse_Solver<K>(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);
+
+    WhereStackOfPtr2Free(stack) = new StackOfPtr2Free(stack);
+
+    Dmat& B(*GetAny<Dmat*>((*a)(stack)));
+    Matrice_Creuse<K> A;
+    A.init();
+    if(!PUh || !PVh)
+      return SetAny<Dmat*>(&B);
+    const FESpace& Uh = *PUh;
+    const FESpace& Vh = *PVh;
+    const Mesh& Th = Uh.Th;
+    bool same = isSameMesh(b->largs, &Uh.Th, &Vh.Th, stack);
+    if(same) {
+      if(A.Uh != Uh || A.Vh != Vh) {
+        A.Uh = Uh;
+        A.Vh = Vh;
+        if(ds.sym) {
+          A.A.master(new MatriceMorse<K>(ds.sym, Vh.NbOfDF));
+          ffassert(&Uh == &Vh);
+        }
+        else
+          A.A.master(new MatriceMorse<K>(Vh.NbOfDF, Uh.NbOfDF, 2 * Vh.NbOfDF, 0));
+      }
+      if(AssembleVarForm<K, MatriceCreuse<K>, FESpace>(stack, Th, Uh, Vh, ds.sym, A.A, 0, b->largs))
+        AssembleBC<K, FESpace>(stack, Th, Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
+    }
+    else {
+      MatriceMorse<K> *pMA = new MatriceMorse<K>(Vh.NbOfDF, Uh.NbOfDF, 0, ds.sym);
+      MatriceMap<K>& D = *pMA;
+      bool bc = AssembleVarForm<K,MatriceMap<K>, FESpace>(stack, Th, Uh, Vh, ds.sym, &D, 0, b->largs);
+      A.A.master(pMA);
+      if(bc)
+        AssembleBC<K>(stack, Th, Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
+    }
+    changeOperatorSimple(&B, &A);
+    return SetAny<Dmat*>(&B);
+  }
+
   template< class Type >
   struct _n_User;
   template< class Type >
@@ -233,7 +308,96 @@ namespace PETSc {
             delete dM;
             dM = nullptr;
           }
-          if (ptA->_A) ptA->_A->setMatrix(dN);
+          if (ptA->_A) {
+              ptA->_A->setMatrix(dN);
+#ifdef PCHPDDM
+              PC pc = nullptr;
+              if(ptParent) {
+                  PetscInt M, N;
+                  Mat** mat;
+                  MatNestGetSubMats(ptParent->_petsc, &M, &N, &mat);
+                  PetscInt i;
+                  for(i = 0; i < std::min(N, M); ++i) {
+                      if(mat[i][i] == ptA->_petsc)
+                          break;
+                  }
+                  if(i < std::min(N, M)) {
+                      PC parent;
+                      KSPGetPC(ptParent->_ksp, &parent);
+                      KSP *subksp;
+                      PetscInt nsplits;
+                      PCFieldSplitGetSubKSP(parent, &nsplits, &subksp);
+                      KSPGetPC(subksp[i], &pc);
+                      PetscFree(subksp);
+                  }
+              }
+              else if(ptA->_ksp) {
+                  KSPGetPC(ptA->_ksp, &pc);
+              }
+              if(pc) {
+                  PCType type;
+                  PCGetType(pc, &type);
+                  PetscBool isType;
+                  PetscStrcmp(type, PCHPDDM, &isType);
+                  if(isType) {
+                      std::function< Mat(const HPDDM::MatrixCSR< PetscScalar >* const) > func =
+                        [](const HPDDM::MatrixCSR< PetscScalar >* const A) {
+                          Mat aux;
+                          if (A->_sym) {
+                            std::vector< std::pair< int, int > >* transpose =
+                              new std::vector< std::pair< int, int > >[A->_n]( );
+                            for (int i = 0; i < A->_n; ++i)
+                              for (int j = A->_ia[i] - (HPDDM_NUMBERING == 'F');
+                                   j < A->_ia[i + 1] - (HPDDM_NUMBERING == 'F'); ++j)
+                                transpose[A->_ja[j] - (HPDDM_NUMBERING == 'F')].emplace_back(i, j);
+                            for (int i = 0; i < A->_n; ++i)
+                              std::sort(transpose[i].begin( ), transpose[i].end( ));
+                            PetscInt* ia = new PetscInt[A->_n + 1];
+                            PetscInt* ja = new PetscInt[A->_nnz];
+                            PetscScalar* c = new PetscScalar[A->_nnz];
+                            ia[0] = 0;
+                            for (int i = 0; i < A->_n; ++i) {
+                              for (int j = 0; j < transpose[i].size( ); ++j) {
+                                c[ia[i] + j] = A->_a[transpose[i][j].second];
+                                ja[ia[i] + j] = transpose[i][j].first;
+                              }
+                              ia[i + 1] = ia[i] + transpose[i].size( );
+                            }
+                            delete[] transpose;
+                            MatCreate(PETSC_COMM_SELF, &aux);
+                            MatSetSizes(aux, A->_n, A->_n, A->_n, A->_n);
+                            MatSetType(aux, MATSEQSBAIJ);
+                            MatSeqSBAIJSetPreallocationCSR(aux, 1, ia, ja, c);
+                            delete[] c;
+                            delete[] ja;
+                            delete[] ia;
+                          } else
+                            MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, A->_n, A->_m, A->_ia, A->_ja, A->_a,
+                                                      &aux);
+                          return aux;
+                        };
+                      const HPDDM::MatrixCSR<PetscScalar>* const A = ptA->_A->getMatrix();
+                      Mat aux = func(A);
+                      Mat N;
+                      PetscObjectQuery((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject*)&N);
+                      if(!N) {
+                          PetscInt* idx;
+                          PetscMalloc1(dN->_n, &idx);
+                          std::copy_n(ptA->_num, dN->_n, idx);
+                          IS is;
+                          ISCreateGeneral(PETSC_COMM_SELF, ptA->_A->getMatrix()->_n, idx, PETSC_OWN_POINTER, &is);
+                          PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_IS", (PetscObject)is);
+                          PetscObjectCompose((PetscObject)pc, "_PCHPDDM_Neumann_Mat", (PetscObject)aux);
+                          ISDestroy(&is);
+                          MatDestroy(&aux);
+                      }
+                      else {
+                          MatHeaderReplace(N, &aux);
+                      }
+                  }
+              }
+#endif
+          }
           int* ia = nullptr;
           int* ja = nullptr;
           PetscScalar* c = nullptr;
@@ -1405,17 +1569,17 @@ namespace PETSc {
     typename LinearSolver< Type, 'N' >::MatF_O* ec;
     typename NonlinearSolver< Type >::VecF_O* ecJ;
   };
-  struct ModifierO {
-    Mat O;
-  };
-  PetscErrorCode Modifier(PC pc, PetscInt nsub, const IS row[], const IS col[], Mat submat[],
-                          void* ctx) {
-    ModifierO* user;
-    PetscFunctionBeginUser;
-    user = reinterpret_cast< ModifierO* >(ctx);
-    MatHeaderReplace(submat[0], &user->O);
+  static Mat* O;
+  PetscErrorCode CustomCreateSubMatrices(Mat,PetscInt,const IS*,const IS*,MatReuse scall,Mat *submat[]) {
+    PetscErrorCode ierr;
+
+    PetscFunctionBegin;
+    if (scall == MAT_INITIAL_MATRIX) {
+      ierr = PetscCalloc1(1,submat);CHKERRQ(ierr);
+    }
+    (*submat)[0] = *O;
     PetscFunctionReturn(0);
-  };
+  }
   template< class T, typename std::enable_if< std::is_same< T, KN< PetscScalar > >::value >::type* =
                        nullptr >
   void resize(T* v, int size) {
@@ -1521,6 +1685,15 @@ namespace PETSc {
     } else VecCopy(x, y);
     PetscFunctionReturn(0);
   }
+  static PetscErrorCode ShellDestroy(Mat A) {
+    User< ShellInjection > user;
+    PetscErrorCode ierr;
+
+    PetscFunctionBegin;
+    ierr = MatShellGetContext(A, &user);CHKERRQ(ierr);
+    ierr = PetscFree(user);CHKERRQ(ierr);
+    PetscFunctionReturn(0);
+  }
   template< class Type >
   AnyType setOptions< Type >::setOptions_Op::operator( )(Stack stack) const {
     Type *ptA, *ptParent;
@@ -1619,6 +1792,7 @@ namespace PETSc {
             MatCreateShell(PETSC_COMM_WORLD, mFine, mCoarse, MFine, MCoarse, user, &P);
             MatShellSetOperation(P, MATOP_MULT, (void (*)(void))ShellInjectionOp< false >);
             MatShellSetOperation(P, MATOP_MULT_TRANSPOSE, (void (*)(void))ShellInjectionOp< true >);
+            MatShellSetOperation(P, MATOP_DESTROY, (void (*)(void))ShellDestroy);
             PCMGSetInterpolation(pc, tabA->N( ) - i - 1, P);
             MatDestroy(&P);
           }
@@ -1795,23 +1969,26 @@ namespace PETSc {
               n -= first;
               ISCreateStride(PETSC_COMM_SELF, n, first, 1, &loc);
               PCASMSetLocalSubdomains(pc, 1, &is, &loc);
-              ModifierO* ctx = new ModifierO;
+              PetscErrorCode (*CreateSubMatrices)(Mat,PetscInt,const IS*,const IS*,MatReuse,Mat**);
+              MatGetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(**)(void))&CreateSubMatrices);
+              MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(*)(void))CustomCreateSubMatrices);
               Mat aux = func(&dO);
               IS perm;
               ISSortPermutation(is, PETSC_TRUE, &perm);
               if (dO._sym) MatConvert(aux, MATSEQAIJ, MAT_INPLACE_MATRIX, &aux);
-              MatPermute(aux, perm, perm, &ctx->O);
+              O = new Mat;
+              MatPermute(aux, perm, perm, O);
               if (dO._sym) {
-                MatSetOption(ctx->O, MAT_SYMMETRIC, PETSC_TRUE);
-                MatConvert(ctx->O, MATSEQSBAIJ, MAT_INPLACE_MATRIX, &ctx->O);
+                MatSetOption(*O, MAT_SYMMETRIC, PETSC_TRUE);
+                MatConvert(*O, MATSEQSBAIJ, MAT_INPLACE_MATRIX, O);
               }
               ISDestroy(&perm);
               MatDestroy(&aux);
-              PCSetModifySubMatrices(pc, Modifier, ctx);
               PCSetUp(pc);
-              PCSetModifySubMatrices(pc, NULL, NULL);
-              delete ctx;
               ISDestroy(&loc);
+              MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(*)(void))CreateSubMatrices);
+              delete O;
+              O = nullptr;
             }
             ISDestroy(&is);
           }
@@ -3638,7 +3815,10 @@ static void Init_PETSc( ) {
     TheOperators->Add(
       "<-", new OneOperatorCode< PETSc::initCSRfromBlockMatrix< HpSchwarz< PetscScalar > > >( ));
     TheOperators->Add(
-      "=", new OneOperatorCode< PETSc::assignBlockMatrix< HpSchwarz< PetscScalar > > >( ));
+      "=", new OneOperatorCode< PETSc::assignBlockMatrix< HpSchwarz< PetscScalar > > >( ),
+           new PETSc::varfToMat< PetscScalar, v_fes >,
+           new PETSc::varfToMat< PetscScalar, v_fes3 >,
+           new PETSc::varfToMat< PetscScalar, v_fesS >);
   }
   Global.Add("set", "(", new PETSc::setOptions< Dmat >( ));
   Global.Add("set", "(", new PETSc::setOptions< Dmat >(1));
