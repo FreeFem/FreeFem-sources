@@ -756,7 +756,10 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
 
 void E_BorderN::BoundingBox(Stack stack,double  &xmin,double & xmax, double & ymin,double & ymax, double & zmin,double & zmax) const
 {
-  Fem2D::MeshPoint & mp (*Fem2D::MeshPointStack(stack)), mps = mp;
+  Fem2D::MeshPoint &mp(*Fem2D::MeshPointStack(stack));
+  mp.set();
+  Fem2D::MeshPoint mps = mp;
+   
   for (E_BorderN const * k=this;k;k=k->next)
     {
         int nbd = k->NbBorder(stack);
