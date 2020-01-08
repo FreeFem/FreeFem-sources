@@ -82,6 +82,7 @@ namespace PETSc {
         AssembleBC<K>(stack, Th, Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
     }
     changeOperatorSimple(&B, &A);
+    B._A->setMatrix(nullptr);
     return SetAny<Dmat*>(&B);
   }
 
