@@ -27,7 +27,9 @@ GH_DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_amd64.deb"
 ## DEB build
 autoreconf -i
 ./configure --enable-download --enable-optim --enable-generic
-./3rdparty/getall -a
+./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,ARPACK,Gmm++,MMG3D,mshmet,MUMPS,htool \
+cd 3rdparty/ff-petsc && sudo make petsc-slepc && cd -
+./reconfigure
 make -j4
 echo "FreeFEM: Finite Element Language" > description-pak
 sudo checkinstall -D --install=no \
@@ -35,6 +37,7 @@ sudo checkinstall -D --install=no \
     --pkgversion "${VERSION}" --pkglicense "LGPL-2+" \
     --pkgsource "https://github.com/FreeFem/FreeFem-sources" \
     --pkgaltsource "https://freefem.org/" \
+    --include=/usr/local/ff-petsc/ \
     --maintainer "FreeFEM" --backup=no --default
 
 ## Rename DEB to include Ubuntu version
