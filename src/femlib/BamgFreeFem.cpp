@@ -757,6 +757,7 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
 void E_BorderN::BoundingBox(Stack stack,double  &xmin,double & xmax, double & ymin,double & ymax, double & zmin,double & zmax) const
 {
   Fem2D::MeshPoint & mp (*Fem2D::MeshPointStack(stack)), mps = mp;
+    
   for (E_BorderN const * k=this;k;k=k->next)
     {
         int nbd = k->NbBorder(stack);
@@ -775,6 +776,7 @@ void E_BorderN::BoundingBox(Stack stack,double  &xmin,double & xmax, double & ym
       for (int  nn=0;nn<=n;nn++, t += delta)
         {
           if (nn==n) t=b; // to remove roundoff error
+          mp.P=Fem2D::R3();// reset , x,y, z to 0 . Jan 2020 FH.
           mp.label = k->label();
           k->code(stack); // compute x,y, label
           xmin=Min(xmin,mp.P.x);

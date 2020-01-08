@@ -25,6 +25,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- function f.eatspace to reach eof on istream file  which return false in case of EOF. 
+- function f.length to get the istream file length
 - Interface to `PetscLogStagePush()`/`PetscLogStagePop()`
 - Ability to directly assemble a `Mat` using a `varf`
 

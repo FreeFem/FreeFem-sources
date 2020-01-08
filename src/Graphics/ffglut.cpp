@@ -4,6 +4,11 @@
 #else
 #include <GL/glut.h>
 #endif
+
+#if !defined(GLUT_WINDOW_SCALE)
+#    define GLUT_WINDOW_SCALE 199
+#endif
+
 //  FOR M_PI
 #ifdef __STRICT_ANSI__
 #undef __STRICT_ANSI__
@@ -34,7 +39,7 @@ using namespace std;
 #include "PlotStream.hpp"
 
 extern long verbosity;
-
+int glutscreenscale=1;//  High Resolution Explained: Features and Benefit
 // add for the gestion of the endianness of the file.
 //PlotStream::fBytes PlotStream::zott; //0123;
 //PlotStream::hBytes PlotStream::zottffss; //012345678;
@@ -3316,7 +3321,9 @@ static void Reshape( int width, int height )
 {
     OneWindow * win=CurrentWin();
     if(win)
+    {
         win->resize(width,height);
+    }
     glutPostRedisplay();
 }
 
@@ -3331,6 +3338,7 @@ void Display(void)
             if(debug>4) cout << "\n **** Hack Mojove :: glutReshapeWindow \n" << endl;
             win->width--;
             win->height--;
+            glutscreenscale= glutGet(GLUT_WINDOW_SCALE);
             glutReshapeWindow(win->width,win->height);
             win->resize(win->width,win->height);
             glutPostRedisplay();
@@ -3788,7 +3796,14 @@ int main(int argc,  char** argv)
     else
         glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH );
     int i1=1;
-    int Height = 512,Width = 512*3/2, iii0=100,jjj0=100;
+    int W = glutGet(GLUT_SCREEN_WIDTH);
+    int H = glutGet(GLUT_SCREEN_HEIGHT);
+    glutscreenscale= glutGet(GLUT_WINDOW_SCALE);
+    if(glutscreenscale < 0) // unsupported by original GLUT
+        glutscreenscale = 1;
+
+    int Height = glutscreenscale*2*W/3,Width = glutscreenscale*H*3/2, iii0=100,jjj0=100;
+    
     string titre = "W0/FreeFem++: type return key to proceed (or ? for help on other)";
     int eerr=0;
     if(argc>1)
@@ -3858,10 +3873,10 @@ int main(int argc,  char** argv)
     if(debug>1)
         cout << "on a lue le premier plot next plot: " << nextPlot << endl;
 
-
-
-    glutInitWindowSize(Width+1 , Height+1);
-    glutInitWindowPosition(iii0,jjj0);
+    
+  
+    glutInitWindowSize((Width+1) , (Height+1));
+    glutInitWindowPosition(iii0*glutscreenscale,jjj0*glutscreenscale);
 
     int iw0=glutCreateWindow(titre.c_str());
     Num2Windows[0]=iw0;
