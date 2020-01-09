@@ -3024,7 +3024,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                 mA->clear();
                 mA->resize(n,m,nnz);
                 MatriceMorse<T> &A = *mA;
-
+                A.half = true;
                 for(unsigned int i = 0; i < n; ++i) {
                     std::sort(tmp[i].begin(), tmp[i].end(),cmp<T>);
                     // c++11, [](const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; });
