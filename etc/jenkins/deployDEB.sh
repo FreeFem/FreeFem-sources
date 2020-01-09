@@ -28,7 +28,7 @@ GH_DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_amd64.deb"
 autoreconf -i
 ./configure --enable-download --enable-optim --enable-generic --prefix=/builds/workspace/freefem
 ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,ARPACK,Gmm++,MMG3D,mshmet,MUMPS,htool
-cd 3rdparty/ff-petsc && sudo make petsc-slepc && cd -
+cd 3rdparty/ff-petsc && make petsc-slepc && cd -
 ./reconfigure
 make -j4
 echo "FreeFEM: Finite Element Language" > description-pak
