@@ -26,7 +26,7 @@ GH_DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_amd64.deb"
 
 ## DEB build
 autoreconf -i
-./configure --enable-download --enable-optim --enable-generic
+./configure --enable-download --enable-optim --enable-generic --prefix=/builds/workspace/freefem
 ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,ARPACK,Gmm++,MMG3D,mshmet,MUMPS,htool
 cd 3rdparty/ff-petsc && sudo make petsc-slepc && cd -
 ./reconfigure
@@ -37,7 +37,7 @@ sudo checkinstall -D --install=no \
     --pkgversion "${VERSION}" --pkglicense "LGPL-2+" \
     --pkgsource "https://github.com/FreeFem/FreeFem-sources" \
     --pkgaltsource "https://freefem.org/" \
-    --include=/usr/local/ff-petsc/ \
+    --include=/builds/workspace/freefem/ff-petsc/ \
     --maintainer "FreeFEM" --backup=no --default
 
 ## Rename DEB to include Ubuntu version
