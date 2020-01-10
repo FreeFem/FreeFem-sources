@@ -628,12 +628,6 @@ namespace PETSc {
 #endif
       return 0L;
   }
-  void finalizePETSc( ) {
-    PETSC_COMM_WORLD = MPI_COMM_WORLD;
-    PetscBool isFinalized;
-    PetscFinalized(&isFinalized);
-    if (!isFinalized) PetscFinalize( );
-  }
   template< class Type >
   long initEmptyCSR(Type* const&) {
     return 0L;

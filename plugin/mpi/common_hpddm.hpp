@@ -463,6 +463,17 @@ void parallelIO(string*& name, MPI_Comm* const& comm, bool const& append) {
 #define COMMON_HPDDM_PARALLEL_IO
 #include "../seq/iovtk.cpp"
 
+#if defined(PETSCSUB) || HPDDM_PETSC
+namespace PETSc {
+  void finalizePETSc( ) {
+    PETSC_COMM_WORLD = MPI_COMM_WORLD;
+    PetscBool isFinalized;
+    PetscFinalized(&isFinalized);
+    if (!isFinalized) PetscFinalize( );
+  }
+}
+#endif
+
 static void Init_Common() {
     if(!Global.Find("savevtk").NotNull()) {
         Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMesh_Op> );
@@ -479,6 +490,10 @@ static void Init_Common() {
         for(int i = 0; i < argc; ++i)
             argv[i] = (*((*pkarg)[i].getap()))->data();
         HPDDM::Option::get()->parse(argc, argv, mpirank == 0);
+#ifdef PETSCSUB
+        PetscInitialize(&argc, const_cast<char***>(&argv), 0, "");
+        ff_atend(PETSc::finalizePETSc);
+#endif
         delete [] argv;
     }
 #endif

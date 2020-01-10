@@ -20,7 +20,7 @@ class initDDM : public OneOperator {
                 Expression R;
                 Expression D;
                 const int c;
-                static const int n_name_param = 2;
+                static const int n_name_param = 3;
                 static basicAC_F0::name_and_type name_param[];
                 Expression nargs[n_name_param];
                 E_initDDM(const basicAC_F0& args, int d) : A(0), Mat(0), R(0), D(0), c(d) {
@@ -48,7 +48,8 @@ class initDDM : public OneOperator {
 template<class Type, class K>
 basicAC_F0::name_and_type initDDM<Type, K>::E_initDDM::name_param[] = {
     {"communicator", &typeid(pcommworld)},
-    {"scaled", &typeid(bool)}
+    {"scaled", &typeid(bool)},
+    {"level", &typeid(long)}
 };
 template<class Type, class K>
 AnyType initDDM<Type, K>::E_initDDM::operator()(Stack stack) const {
@@ -64,9 +65,10 @@ AnyType initDDM<Type, K>::E_initDDM::operator()(Stack stack) const {
     }
     if(c == 0 || c == 1) {
         KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
+        int level = nargs[2] ? std::abs(GetAny< long >((*nargs[2])(stack))) : 0;
         KN<HPDDM::underlying_type<K>>* ptD = GetAny<KN<HPDDM::underlying_type<K>>*>((*D)(stack));
         if(ptR) {
-            KN_<KN<long>> sub(ptR->n > 0 && ptR->operator[](0).n > 0 ? (*ptR)(FromTo(1, ptR->n - 1)) : KN<KN<long>>());
+            KN_<KN<long>> sub(ptR->n > 0 && ptR->operator[](0).n > 0 ? (*ptR)(FromTo(1 + level * ptR->operator[](0).n, 1 + (level + 1) * ptR->operator[](0).n - 1)) : KN<KN<long>>());
             ptA->HPDDM::template Subdomain<K>::initialize(dA, STL<long>(ptR->n > 0 ? ptR->operator[](0) : KN<long>()), sub, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
         }
         if(ptD)
@@ -492,8 +494,12 @@ class set : public OneOperator {
 };
 template<class Type, class K>
 AnyType set_Op<Type, K>::operator()(Stack stack) const {
-    if(nargs[0])
+    if(nargs[0]) {
         HPDDM::Option::get()->parse(*(GetAny<string*>((*nargs[0])(stack))));
+#ifdef PETSCSUB
+        PetscOptionsInsertString(NULL, (GetAny<string*>((*nargs[0])(stack)))->c_str());
+#endif
+    }
     if(nargs[1]) {
         Type* ptA = GetAny<Type*>((*A)(stack));
         ptA->setPrefix(*(GetAny<string*>((*nargs[1])(stack))));
@@ -821,18 +827,22 @@ long globalNumbering(Type* const& A, KN<long>* const& numbering) {
 
 template<class Type, class K>
 Type* changeOperatorSimple(Type* const& A, Type* const& B) {
-#if 0 // if you need this, please make sure you are using the master branch of HPDDM
     *A = *B;
-#endif
     return A;
 }
 
 template<template<class, char> class Type, class K, char S, char U = S>
 void add() {
     Dcl_Type<Type<K, S>*>(Initialize<Type<K, S>>, Delete<Type<K, S>>);
+#ifndef PETSCSUB
     if(std::is_same<K, HPDDM::underlying_type<K>>::value)
+#endif
         zzzfff->Add("schwarz", atype<HpSchwarz<K, S>*>());
+#ifndef PETSCSUB
     map_type_of_map[make_pair(atype<Type<HPDDM::underlying_type<K>, U>*>(), atype<K*>())] = atype<Type<K, S>*>();
+#else
+    map_type_of_map[make_pair(atype<Type<K, U>*>(), atype<K*>())] = atype<Type<K, S>*>();
+#endif
 
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>);
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>(1));
@@ -847,9 +857,7 @@ void add() {
     addProd<Type<K, S>, ProdSchwarz, KN<K>, K>();
     addInv<Type<K, S>, InvSchwarz, KN<K>, K>();
     addScalarProduct< Type<K, S>, K >( );
-#if 0 // if you need this, please make sure you are using the master branch of HPDDM
     addArray<Type<K, S>>();
-#endif
     Global.Add("dmv", "(", new distributedMV<Type<K, S>, K>);
     Global.Add("destroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(destroyRecycling<Type<K, S>, K>));
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));
@@ -863,7 +871,11 @@ void add() {
 
     if(!exist_type<Pair<K>*>()) {
         Dcl_Type<Pair<K>*>(InitP<Pair<K>>, Destroy<Pair<K>>);
+#ifndef PETSCSUB
         map_type_of_map[make_pair(atype<Pair<HPDDM::underlying_type<K>>*>(), atype<K*>())] = atype<Pair<K>*>();
+#else
+        map_type_of_map[make_pair(atype<Pair<K>*>(), atype<K*>())] = atype<Pair<K>*>();
+#endif
     }
     aType t;
     int r;
@@ -874,17 +886,21 @@ void add() {
 
 static void Init_Schwarz() {
     Init_Common();
-#if defined(DSUITESPARSE) || defined(DHYPRE)
+#if defined(DSUITESPARSE) || defined(DHYPRE) || defined(PETSCSUB)
     constexpr char ds = 'G';
 #else
     constexpr char ds = 'S';
 #endif
     constexpr char zs = 'G';
+#ifndef PETSCSUB
     Schwarz::add<HpSchwarz, double, ds>();
 #ifndef DHYPRE
     Schwarz::add<HpSchwarz, std::complex<double>, zs, ds>();
     // Schwarz::add<HpSchwarz, float, ds>();
     // Schwarz::add<HpSchwarz, std::complex<float>, zs>();
+#endif
+#else
+    Schwarz::add<HpSchwarz, PetscScalar, ds>();
 #endif
 }
 
