@@ -119,7 +119,9 @@ IFMACRO(!privateCreateMat)
         suppSmooth = 0;
         AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
     }
+IFMACRO(!privateDmesh#N2O)
     globalName = trunc(globalName, suppSmooth > 0.001, label = 9999);
+ENDIFMACRO
     real eps = globalName.measure;
     real[int] epsTab(intersection[0].n);
     mpiRequest[int] rq(2 * intersection[0].n);
@@ -131,8 +133,15 @@ IFMACRO(!privateCreateMat)
     }
     else
         epsTab = 1.0e+30;
+IFMACRO(!privateDmesh#N2O)
     suppSmooth = suppSmooth;
     meshName[level - 1] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface);
+ENDIFMACRO
+IFMACRO(privateDmesh#N2O)
+    meshName[level - 1] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface, new2old = privateDmesh#N2O);
+    globalName = trunc(globalName, suppSmooth > 0.001, label = 9999);
+    suppSmooth = suppSmooth;
+ENDIFMACRO
     if(level > 1) {
         prolongation.resize(level - 1);
         if(s > 1) {
@@ -407,6 +416,9 @@ ENDIFMACRO
     NewMacro privateDmesh#ThTab()privateDmesh#ThName EndMacro
     NewMacro privateDmesh#ThTab#khi()privateDmesh#ThName#khiDef EndMacro
     NewMacro privateDmesh#ThTab#intersection()privateDmesh#ThName#intersectionDef EndMacro
+IFMACRO(ThName#N2O)
+    NewMacro privateDmesh#N2O()ThName#N2O EndMacro
+ENDIFMACRO
     buildMinimalist(ThName, intersection, privateDmesh#ThName#khi[0], P1);
 }
 EndMacro
