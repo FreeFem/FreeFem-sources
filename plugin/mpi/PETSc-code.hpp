@@ -2175,10 +2175,10 @@ namespace PETSc {
           PetscInt m;
           MatGetLocalSize(ptA->_petsc, &m, NULL);
           KN< PetscScalar >* ptIn = GetAny< KN< PetscScalar >* >((*(E[j].second))(stack));
-          if (!inverse) ffassert(ptIn->n == ptA->_A->getMatrix( )->_n);
+          if (!inverse) ffassert(ptIn->n == ptA->_A->getDof());
           if (c != 2) {
             if (inverse) ffassert(ptOut->n == bs * m);
-            changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getMatrix( )->_n,
+            changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getDof(),
                                  bs, ptIn, ptOut, inverse);
           } else {
             sum += bs * m;
@@ -2187,7 +2187,7 @@ namespace PETSc {
               pt = *ptOut + sum - bs * m;
             }
             KN_< PetscScalar > ptOutShift(pt, bs * m);
-            changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getMatrix( )->_n,
+            changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getDof(),
                                  bs, ptIn, &ptOutShift, inverse);
           }
           if (inverse && nargs[1]) {

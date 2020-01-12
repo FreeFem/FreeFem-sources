@@ -255,8 +255,8 @@ AnyType attachCoarseOperator<Type, K>::E_attachCoarseOperator::operator()(Stack 
                 ptA->setVectors(ev);
                 ptA->Type::super::initialize(deflation->N);
             }
-            MPI_Barrier(comm);
             if(timing) { // tic
+                MPI_Barrier(comm);
                 timing->resize(timing->n + 1);
                 (*timing)[timing->n - 1] = MPI_Wtime();
             }
@@ -277,7 +277,8 @@ AnyType attachCoarseOperator<Type, K>::E_attachCoarseOperator::operator()(Stack 
             }
         }
         else {
-            MPI_Barrier(comm);
+            if(timing)
+                MPI_Barrier(comm);
             if(!ptA->getVectors())
                 ret = ptA->template buildTwo<2>(comm);
             else if(ptA->exclusion(comm))
@@ -399,9 +400,10 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
         if(prefix.size() > 0)
             opt.remove(prefix + "verbosity");
     }
-    MPI_Barrier(comm);
-    double timer = MPI_Wtime();
+    double timer;
     if(timing) { // tic
+        MPI_Barrier(comm);
+        timer = MPI_Wtime();
         timing->resize(timing->n + 1);
         (*timing)[timing->n - 1] = timer;
     }
