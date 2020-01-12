@@ -1648,7 +1648,7 @@ namespace PETSc {
         KN< PetscScalar > coarse(user->C->_A->getDof( ));
         KN_< PetscScalar > coarseIn(const_cast< PetscScalar* >(in), nCoarse);
         changeNumbering_func(user->C->_num, user->C->_first, user->C->_last, nCoarse,
-                             user->C->_A->getMatrix( )->_n, 1, &coarse, &coarseIn, true);
+                             user->C->_A->getDof(), 1, &coarse, &coarseIn, true);
         KN< PetscScalar > fine(user->f->_A->getDof( ));
         fine = PetscScalar( );
         user->C->_A->HPDDM::template Subdomain< PetscScalar >::exchange(coarse);
@@ -1656,7 +1656,7 @@ namespace PETSc {
         KN_< PetscScalar > fineOut(out, mFine);
         fineOut = PetscScalar( );
         changeNumbering_func(user->f->_num, user->f->_first, user->f->_last, mFine,
-                             user->f->_A->getMatrix( )->_n, 1, &fine, &fineOut, false);
+                             user->f->_A->getDof(), 1, &fine, &fineOut, false);
       } else {
         PetscInt nFine, mCoarse;
         MatGetLocalSize(A, nullptr, &nFine);
@@ -1664,14 +1664,14 @@ namespace PETSc {
         KN< PetscScalar > fine(user->f->_A->getDof( ));
         KN_< PetscScalar > fineIn(const_cast< PetscScalar* >(in), nFine);
         changeNumbering_func(user->f->_num, user->f->_first, user->f->_last, nFine,
-                             user->f->_A->getMatrix( )->_n, 1, &fine, &fineIn, true);
+                             user->f->_A->getDof(), 1, &fine, &fineIn, true);
         KN< PetscScalar > coarse(user->C->_A->getDof( ));
         coarse = PetscScalar( );
         user->f->_A->HPDDM::template Subdomain< PetscScalar >::exchange(fine);
         MatMult<true>(mP, fine, coarse);
         KN_< PetscScalar > coarseOut(out, mCoarse);
         changeNumbering_func(user->C->_num, user->C->_first, user->C->_last, mCoarse,
-                             user->C->_A->getMatrix( )->_n, 1, &coarse, &coarseOut, false);
+                             user->C->_A->getDof(), 1, &coarse, &coarseOut, false);
       }
       ierr = VecRestoreArray(y, &out);
       CHKERRQ(ierr);

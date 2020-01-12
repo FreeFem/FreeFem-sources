@@ -580,8 +580,26 @@ ENDIFMACRO
             DTab[i].resize(WhLocalCoarse.ndof);
             DTab[i] = 1.0;
         }
-        if(level == 1 && s > 1)
-            Th[0] = trunc(Th[0], 1, split = s);
+        if(level == 1) {
+IFMACRO(privateBuildDmesh)
+IFMACRO(privateDmesh#N2O)
+            if(s > 1)
+                Th[0] = trunc(Th[0], 1, split = s, new2old = privateDmesh#N2O);
+            else {
+                privateDmesh#N2O.resize(Th[0].nt);
+                privateDmesh#N2O = 0:Th[0].nt-1;
+            }
+ENDIFMACRO
+IFMACRO(!privateDmesh#N2O)
+            if(s > 1)
+                Th[0] = trunc(Th[0], 1, split = s);
+ENDIFMACRO
+ENDIFMACRO
+IFMACRO(!privateBuildDmesh)
+            if(s > 1)
+                Th[0] = trunc(Th[0], 1, split = s);
+ENDIFMACRO
+        }
         fespace WhLocal(Th[0], P);
         DTab[0].resize(WhLocal.ndof);
         DTab[0] = 1.0;
