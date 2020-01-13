@@ -20,11 +20,14 @@ elif [ "$distrib" == "Linux-4.15.0-51-generic" ]; then
 DISTRIB="Ubuntu_18.04"
 fi
 
-
-DEB_NAME="freefem_${VERSION}-withPETSc_3.12.2_amd64.deb"
-GH_DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_withPETSc3.12.2_amd64.deb"
 #ff-petsc
-GH_ffPETSc_DEB_NAME="ff-petsc-3.12.2.deb"
+GH_ffPETSc_DEB_NAME="ff-petsc-3.12.3.deb"
+GH_ffPETSc_NAME="ff-petsc-3.12.3"
+
+#freefem
+DEB_NAME="freefem_${VERSION}-1_amd64.deb"
+GH_DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_${GH_ffPETSc_NAME}_amd64.deb"
+
 
 ## DEB build
 autoreconf -i
@@ -38,17 +41,17 @@ mkdir DEB_ff_petsc
 mkdir DEB_ff_petsc/DEBIAN
 touch DEB_ff_petsc/DEBIAN/control
 echo "Package: ff-petsc" >> DEB_ff_petsc/DEBIAN/control
-echo "Version: 3.12.2" >> DEB_ff_petsc/DEBIAN/control
+echo "Version: 3.12.3" >> DEB_ff_petsc/DEBIAN/control
 echo "Section: custom" >> DEB_ff_petsc/DEBIAN/control
 echo "Priority: extra" >> DEB_ff_petsc/DEBIAN/control
 echo "Architecture: amd64" >> DEB_ff_petsc/DEBIAN/control
 echo "Installed-Size: 204M" >> DEB_ff_petsc/DEBIAN/control
 echo "Maintainer: FreeFEM" >> DEB_ff_petsc/DEBIAN/control
-echo "Description: custum PETSc package for FreeFEM" >> DEB_ff_petsc/DEBIAN/control
+echo "Description: custum PETSc package for FreeFEM, real and complex" >> DEB_ff_petsc/DEBIAN/control
 mkdir -p DEB_ff_petsc/usr/local
 cp -r /usr/local/ff-petsc/ DEB_ff_petsc/usr/local/ff-petsc
 dpkg-deb --build DEB_ff_petsc/
-mv DEB_ff_petsc.deb ff-petsc-3.12.2.deb
+mv DEB_ff_petsc.deb GH_ffPETSc_DEB_NAME
 
 #build FreeFEM
 make -j4
@@ -61,8 +64,8 @@ sudo checkinstall -D --install=no \
     --maintainer "FreeFEM" --backup=no --default
 
 ## Rename DEB to include Ubuntu version
-Build_DEB_NAME="freefem_${VERSION}-1_amd64.deb"
-mv $Build_DEB_NAME $GH_DEB_NAME
+
+mv $DEB_NAME $GH_DEB_NAME
 
 ## Deploy in GitHub release
 RELEASE=`curl 'https://api.github.com/repos/'$ORGANIZATION'/'$REPOSITORY'/releases/tags/'$RELEASE_TAG_NAME`
@@ -74,5 +77,5 @@ then
     exit 1
 else
   RESPONSE=`curl --data-binary "@$GH_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_DEB_NAME"`
-  RESPONSE2=`curl --data-binary "@$GH_ffPETSc_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_ffPETSc_DEB_NAME"`
+  RESPONSE=`curl --data-binary "@$GH_ffPETSc_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_ffPETSc_DEB_NAME"`
 fi
