@@ -2813,6 +2813,8 @@ void ThePlot::SetDefIsoV(int niso,int narr,double fmn,double fmx,double vmn,doub
             Viso.resize(niso);
         Niso=Viso.N();
         Narrow=narr;
+		Varrow.resize(narr);
+		
         d =  (fmx-fmn)/(Niso-2) ;
         x =  (fmn+fmx)/2-d*0.5*(Niso-1);
     }
