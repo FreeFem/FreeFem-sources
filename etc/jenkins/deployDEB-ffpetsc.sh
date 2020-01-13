@@ -60,7 +60,8 @@ sudo checkinstall -D --install=no \
     --maintainer "FreeFEM" --backup=no --default
 
 ## Rename DEB to include Ubuntu version
-mv $DEB_NAME $GH_DEB_NAME
+Build_DEB_NAME="freefem_${VERSION}_amd64.deb"
+mv $Build_DEB_NAME $GH_DEB_NAME
 
 ## Deploy in GitHub release
 RELEASE=`curl 'https://api.github.com/repos/'$ORGANIZATION'/'$REPOSITORY'/releases/tags/'$RELEASE_TAG_NAME`
@@ -70,7 +71,7 @@ if [ -x $UPLOAD_URL ]
 then
     echo "Release does not exists"
     exit 1
-else 
+else
   RESPONSE=`curl --data-binary "@$GH_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_DEB_NAME"`
   RESPONSE2=`curl --data-binary "@$GH_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=ff-petsc-3.12.2.deb"`
 fi
