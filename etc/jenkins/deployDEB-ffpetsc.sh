@@ -70,6 +70,7 @@ if [ -x $UPLOAD_URL ]
 then
     echo "Release does not exists"
     exit 1
-else
+else 
   RESPONSE=`curl --data-binary "@$GH_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_DEB_NAME"`
+  RESPONSE2=`curl --data-binary "@$GH_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=ff-petsc-3.12.2.deb"`
 fi
