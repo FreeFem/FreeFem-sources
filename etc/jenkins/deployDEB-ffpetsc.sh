@@ -38,9 +38,8 @@ touch DEB_ff_petsc/DEBIAN/control
 echo "Package: ff-petsc" >> DEB_ff_petsc/DEBIAN/control
 echo "Version: 3.12.2" >> DEB_ff_petsc/DEBIAN/control
 echo "Section: custom" >> DEB_ff_petsc/DEBIAN/control
-echo "Priority: optional" >> DEB_ff_petsc/DEBIAN/control
-echo "Architecture: AMD64" >> DEB_ff_petsc/DEBIAN/control
-echo "Essential: no" >> DEB_ff_petsc/DEBIAN/control
+echo "Priority: extra" >> DEB_ff_petsc/DEBIAN/control
+echo "Architecture: amd64" >> DEB_ff_petsc/DEBIAN/control
 echo "Installed-Size: 204M" >> DEB_ff_petsc/DEBIAN/control
 echo "Maintainer: FreeFEM" >> DEB_ff_petsc/DEBIAN/control
 echo "Description: custum PETSc package for FreeFEM" >> DEB_ff_petsc/DEBIAN/control
@@ -57,10 +56,11 @@ sudo checkinstall -D --install=no \
     --pkgversion "${VERSION}" --pkglicense "LGPL-2+" \
     --pkgsource "https://github.com/FreeFem/FreeFem-sources" \
     --pkgaltsource "https://freefem.org/" \
+    --requires=libmpi, libgsl, libhdf5, libarpack
     --maintainer "FreeFEM" --backup=no --default
 
 ## Rename DEB to include Ubuntu version
-Build_DEB_NAME="freefem_${VERSION}_amd64.deb"
+Build_DEB_NAME="freefem_${VERSION}-1_amd64.deb"
 mv $Build_DEB_NAME $GH_DEB_NAME
 
 ## Deploy in GitHub release
