@@ -51,7 +51,7 @@ echo "Description: custum PETSc package for FreeFEM, real and complex" >> DEB_ff
 mkdir -p DEB_ff_petsc/usr/local
 cp -r /usr/local/ff-petsc/ DEB_ff_petsc/usr/local/ff-petsc
 dpkg-deb --build DEB_ff_petsc/
-mv DEB_ff_petsc.deb GH_ffPETSc_DEB_NAME
+mv DEB_ff_petsc.deb $GH_ffPETSc_DEB_NAME
 
 #build FreeFEM
 make -j4
@@ -79,3 +79,5 @@ else
   RESPONSE=`curl --data-binary "@$GH_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_DEB_NAME"`
   RESPONSE=`curl --data-binary "@$GH_ffPETSc_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_ffPETSc_DEB_NAME"`
 fi
+
+rm -rf DEB_ff_petsc
