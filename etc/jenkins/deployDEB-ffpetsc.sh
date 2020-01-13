@@ -23,6 +23,8 @@ fi
 
 DEB_NAME="freefem_${VERSION}-withPETSc_3.12.2_amd64.deb"
 GH_DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_withPETSc3.12.2_amd64.deb"
+#ff-petsc
+GH_ffPETSc_DEB_NAME="ff-petsc-3.12.2.deb"
 
 ## DEB build
 autoreconf -i
@@ -72,5 +74,5 @@ then
     exit 1
 else
   RESPONSE=`curl --data-binary "@$GH_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_DEB_NAME"`
-  RESPONSE2=`curl --data-binary "@$GH_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=ff-petsc-3.12.2.deb"`
+  RESPONSE2=`curl --data-binary "@$GH_ffPETSc_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=GH_ffPETSc_DEB_NAME"`
 fi
