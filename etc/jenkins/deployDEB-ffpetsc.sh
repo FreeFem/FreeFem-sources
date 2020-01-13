@@ -21,7 +21,7 @@ DISTRIB="Ubuntu_18.04"
 fi
 
 
-DEB_NAME="freefem_${VERSION}-1_amd64.deb"
+DEB_NAME="freefem_${VERSION}-withPETSc_3.12.2_amd64.deb"
 GH_DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_withPETSc3.12.2_amd64.deb"
 
 ## DEB build
@@ -57,7 +57,6 @@ sudo checkinstall -D --install=no \
     --pkgversion "${VERSION}" --pkglicense "LGPL-2+" \
     --pkgsource "https://github.com/FreeFem/FreeFem-sources" \
     --pkgaltsource "https://freefem.org/" \
-    --include=/builds/workspace/freefem/ff-petsc/ \
     --maintainer "FreeFEM" --backup=no --default
 
 ## Rename DEB to include Ubuntu version
