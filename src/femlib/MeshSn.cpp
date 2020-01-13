@@ -520,7 +520,7 @@ namespace Fem2D
             Buildbnormalv();
             BuildjElementConteningVertex();
         }
-        else BuildMeshL(ridgeangledetection);
+        // else BuildMeshL(ridgeangledetection);
         
         if(verbosity>2)
             cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
