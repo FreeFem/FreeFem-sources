@@ -56,7 +56,6 @@ sudo checkinstall -D --install=no \
     --pkgversion "${VERSION}" --pkglicense "LGPL-2+" \
     --pkgsource "https://github.com/FreeFem/FreeFem-sources" \
     --pkgaltsource "https://freefem.org/" \
-    --requires=libmpi, libgsl, libhdf5, libarpack
     --maintainer "FreeFEM" --backup=no --default
 
 ## Rename DEB to include Ubuntu version
