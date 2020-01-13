@@ -1672,7 +1672,7 @@ long pVh_ndofK(pfes *p) {
 
 long mp_nuTriangle(MeshPoint *p) {
   throwassert(p && p->Th && p->T);
-  long nu = 0;
+  long nu = -1;
   if (p->d == 2)
     nu = (*p->Th)(p->T);
   else if (p->d == 3 && p->dHat == 3)
@@ -6084,7 +6084,8 @@ void init_lgfem( ) {
     new OneBinaryOperator<
       set_eq_array< KN_< Complex >, RNM_VirtualMatrix< Complex >::solveAtxeqb > >,
 
-    new OpArraytoLinearForm< Complex, v_fes >(atype< KN< Complex > * >( ), true, false),
+    new OpArraytoLinearForm< Complex, v_fes >(atype< KN_< Complex >  >( ), false, false),
+        // KN* -> KN_ FH Jan 2015 (Thank  PJolivet)
     new OpMatrixtoBilinearForm< Complex, v_fes >);
 
   TheOperators->Add("=",
