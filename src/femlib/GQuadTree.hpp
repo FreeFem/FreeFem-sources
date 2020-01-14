@@ -129,7 +129,7 @@ namespace EF23 {
   template<>    struct Traits_Zd<R3> {  typedef Z3 Zd;};
   
   template<class Vertex>    
-  class GTree {
+      class GTree {
     typedef typename Vertex::Rd Rd;
     typedef typename Traits_Zd<Rd>::Zd Zd;
     
