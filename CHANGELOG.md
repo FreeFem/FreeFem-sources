@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file.
 - Ability to directly assemble a `Mat` using a `varf`
 
 ### Changed
+- correct ffglut (bug in case of changing number of nb isovalue)
 - PETSc version 3.12.3
 - Change the point search triangle algorithme  to be sure in any case (in test) 
 ### Deprecated

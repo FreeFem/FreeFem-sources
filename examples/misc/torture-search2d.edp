@@ -1,0 +1,13 @@
+
+mesh Th("torture.msh");
+plot(Th,wait=1);
+mesh Tb=square(200,40,[1-x*11,y]);
+fespace Vb(Tb,P1);
+fespace Pb(Tb,P0);
+Vb b=chi(Th);
+Pb xx=x, yy=y;
+plot(b,wait=1);
+searchMethod=1;
+Vb bb= chi(Th);
+bb[]-=b[];
+assert( bb[].linfty==0); 
