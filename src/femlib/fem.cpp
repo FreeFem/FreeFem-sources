@@ -1061,20 +1061,24 @@ int Walk(const Mesh & Th,int& it, R *l,
                     R2 AB=R2(K[j0],K[j1]),  AP( K[j0],PP), BP(K[j1],PP);
                     R la=  (AB,AP);
                     R lb= -(AB,BP);
-                    if( la >=0 && lb >=0 ) de[j]=la,ee[j]=jj,dn[j]=-l[jj]/(AB.norme2()); //
-                    else if( la <0) de[j]=0,ee[j]=jj, dn[j]= AP.norme2();
-                    else de[j]=1,ee[j]= jj, dn[j]= BP.norme2();
+                    R lab =AB.norme();
+                    if( la >=0 && lb >=0 ) de[j]=la/lab,ee[j]=jj,dn[j]=-l[jj]/lab; //
+                    else if( la <0) de[j]=0,ee[j]=jj, dn[j]= AP.norme();
+                    else de[j]=1,ee[j]= jj, dn[j]= BP.norme();
+                  //  cout << "   " << la << " " <<-l[jj]/(AB.norme()) << " " << AP.norme() << " " << BP.norme() << " ??? " ;
                 }
                 int j=0;
                 if( n==2 && dn[1]< dn[0]) j=1;
-                if( dnu < dn[j] ) {
+                if( dnu > dn[j] ) {
                     nu = k;
                     int jj= nl[j], j0=(jj+1)%3, j1=(jj+2)%3;
                     dnu=dn[j];
                     dl[jj]=0;
-                    dl[j0] = de[j];
-                    dl[j1] = 1- de[j];
+                    dl[j0] = 1-de[j];
+                    dl[j1] = de[j];
                 }
+              //  R2 Ph=K(dl),PQ(K(Ph));
+               // cout<< "     " <<dnu << " " << k << " " << dn[j] << " " << j << " n " << n << " " << de[j] << " " << PQ.norme() << endl;
             }
             
         }
@@ -1305,17 +1309,27 @@ RESTART:
 	    ffassert(ok);
 	}
 SECURESEARCH:
+    
      static long count =0;
     if(securesearch++==0){
     BuildDataFindBoundary();
     R l[3];
-    int it =dfb->Find(P,l,outside);
-    //    if(count++<500) cout << " new  method????"  << P << " " << searchMethod << " "<< outside << " " << it <<endl;
+    int itt =dfb->Find(P,l,outside);
+    if( it != itt && count++<7)
+    {
+        R2  Pnhat=R2(l[1],l[2]);
+        R2 Po =triangles[it](Phat);
+        R2 Pn =triangles[itt](Pnhat);
+        R dlt = R2(Po,Pn).norme2();
+        R ddn  = R2(P,Pn).norme2();
+        R ddo  = R2(P,Po).norme2();
+         cout << "  SECURESEARCH "  << P << ", " << ddn << " <" << ddo << ", " << searchMethod << " "<< outside << " " << it << " "<< itt << " delta" << dlt <<  endl;
+    }
     if( searchMethod==0 || !outside )
     {
         
         Phat=R2(l[1],l[2]);
-        return triangles+it;
+        return triangles+itt;
     }
     }
     
