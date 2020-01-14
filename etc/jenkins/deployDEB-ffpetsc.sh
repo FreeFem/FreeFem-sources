@@ -44,9 +44,9 @@ echo "Package: freefem" >> $DEB_NAME/DEBIAN/control
 echo "Version: "$VERSION >> $DEB_NAME/DEBIAN/control
 echo "Section: custom" >> $DEB_NAME/DEBIAN/control
 echo "Architecture: amd64" >> $DEB_NAME/DEBIAN/control
-echo "Depends: libc6 (>= 2.27), gcc-7-base (>=7), gfortran-7-base (>=7), libopenmpi3 (>= 2.1.1)">> $DEB_NAME/DEBIAN/control
+echo "Depends: libc6 (>= 2.27), g++-7 (>=7), gcc-7 (>=7), gfortran-7 (>=7), libgsl-dev (>=2.4), libhdf5-dev (>1.10.0), liblapack-dev(>= 3.7)  libopenmpi-dev (>=2.1.1)  ">> $DEB_NAME/DEBIAN/control
 echo "Maintainer: FreeFEM, Frédéric Hecht <frederic.hecht@sorbonne-universite.fr> " >> $DEB_NAME/DEBIAN/control
-echo "Description: FreeFEM, Finite Element Language" >> $DEB_NAME/DEBIAN/control
+echo "Description: FreeFEM, Finite Element Language software" >> $DEB_NAME/DEBIAN/control
 echo "Homepage: https://freefem.org" >> $DEB_NAME/DEBIAN/control
 mkdir -p $DEB_NAME/usr/local
 mkdir -p $DEB_NAME/usr/local/share/FreeFEM
