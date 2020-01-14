@@ -12,60 +12,68 @@ VERSION=`grep AC_INIT configure.ac | cut -d"," -f2`
 RELEASE_TAG_NAME="v$VERSION"
 distrib=`uname -s`-`uname -r`
 
-if [ "$distrib" == "Linux-4.4.0-166-generic" ]; then
+##if [ "$distrib" == "Linux-4.4.0-166-generic" ]; then
   # 16.04
-DISTRIB="Ubuntu_16.04"
-elif [ "$distrib" == "Linux-4.15.0-51-generic" ]; then
+DISTRIB="Ubuntu"
+##elif [ "$distrib" == "Linux-4.15.0-51-generic" ]; then
   # 18.04
-DISTRIB="Ubuntu_18.04"
-fi
+##DISTRIB="Ubuntu_18.04"
+##fi
 
-#ff-petsc
-GH_ffPETSc_DEB_NAME="ff-petsc-3.12.3.deb"
-GH_ffPETSc_NAME="ff-petsc-3.12.3"
 
-#freefem
-DEB_NAME="freefem_${VERSION}-1_amd64.deb"
-GH_DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_${GH_ffPETSc_NAME}_amd64.deb"
-
+DEB_NAME="freefem_${VERSION}_withPETSc_amd64"
+GH_DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_withPETSc_amd64.deb"
 
 ## DEB build
 autoreconf -i
 ./configure --enable-download --enable-optim --enable-generic
 ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,ARPACK,Gmm++,MMG3D,mshmet,MUMPS,htool
+## compil and install ff-petsc
 cd 3rdparty/ff-petsc && make petsc-slepc SUDO=sudo && cd -
 ./reconfigure
 
-#ceate Debian package for ff-petsc
-mkdir DEB_ff_petsc
-mkdir DEB_ff_petsc/DEBIAN
-touch DEB_ff_petsc/DEBIAN/control
-echo "Package: ff-petsc" >> DEB_ff_petsc/DEBIAN/control
-echo "Version: 3.12.3" >> DEB_ff_petsc/DEBIAN/control
-echo "Section: custom" >> DEB_ff_petsc/DEBIAN/control
-echo "Priority: extra" >> DEB_ff_petsc/DEBIAN/control
-echo "Architecture: amd64" >> DEB_ff_petsc/DEBIAN/control
-echo "Installed-Size: 204M" >> DEB_ff_petsc/DEBIAN/control
-echo "Maintainer: FreeFEM" >> DEB_ff_petsc/DEBIAN/control
-echo "Description: custum PETSc package for FreeFEM, real and complex" >> DEB_ff_petsc/DEBIAN/control
-mkdir -p DEB_ff_petsc/usr/local
-cp -r /usr/local/ff-petsc/ DEB_ff_petsc/usr/local/ff-petsc
-dpkg-deb --build DEB_ff_petsc/
-mv DEB_ff_petsc.deb $GH_ffPETSc_DEB_NAME
-
-#build FreeFEM
 make -j4
-echo "FreeFEM: Finite Element Language" > description-pak
-sudo checkinstall -D --install=no \
-    --pkgname "freefem" --pkgrelease "1" \
-    --pkgversion "${VERSION}" --pkglicense "LGPL-2+" \
-    --pkgsource "https://github.com/FreeFem/FreeFem-sources" \
-    --pkgaltsource "https://freefem.org/" \
-    --maintainer "FreeFEM" --backup=no --default
+make -j4 install
 
-## Rename DEB to include Ubuntu version
+#create FreeFEM Debian package  with ff-petsc
 
-mv $DEB_NAME $GH_DEB_NAME
+mkdir $DEB_NAME
+mkdir $DEB_NAME/DEBIAN
+touch $DEB_NAME/DEBIAN/control
+echo "Package: freefem" >> $DEB_NAME/DEBIAN/control
+echo "Version: "$VERSION >> $DEB_NAME/DEBIAN/control
+echo "Section: custom" >> $DEB_NAME/DEBIAN/control
+echo "Architecture: amd64" >> $DEB_NAME/DEBIAN/control
+echo "Depends: libc6 (>= 2.27), gcc-7-base (>=7), gfortran-7-base (>=7), libopenmpi3 (>= 2.1.1)">> $DEB_NAME/DEBIAN/control
+echo "Maintainer: FreeFEM, Frédéric Hecht <frederic.hecht@sorbonne-universite.fr> " >> $DEB_NAME/DEBIAN/control
+echo "Description: FreeFEM, Finite Element Language" >> $DEB_NAME/DEBIAN/control
+echo "Homepage: https://freefem.org" >> $DEB_NAME/DEBIAN/control
+mkdir -p $DEB_NAME/usr/local
+mkdir -p $DEB_NAME/usr/local/share/FreeFEM
+mkdir -p $DEB_NAME/usr/local/bin
+mkdir -p $DEB_NAME/usr/local/lib/ff++
+mkdir -p $DEB_NAME/usr/share/doc/freefem
+
+cp -r /usr/local/ff-petsc/ $DEB_NAME/usr/local/ff-petsc
+cp -r /usr/local/lib/ff++/$VERSION $DEB_NAME/usr/local/lib/ff++/$VERSION
+cp -r /usr/local/share/FreeFEM/$VERSION $DEB_NAME/usr/local/share/FreeFEM/$VERSION
+cp -r /usr/local/bin/FreeFem++ $DEB_NAME/usr/local/bin/FreeFem++
+cp -r /usr/local/bin/FreeFem++-mpi $DEB_NAME/usr/local/bin/FreeFem++-mpi
+cp -r /usr/local/bin/FreeFem++-nw $DEB_NAME/usr/local/bin/FreeFem++-nw
+cp -r /usr/local/bin/bamg $DEB_NAME/usr/local/bin/bamg
+cp -r /usr/local/bin/cvmsh2 $DEB_NAME/usr/local/bin/cvmsh2
+cp -r /usr/local/bin/ff-c++ $DEB_NAME/usr/local/bin/ff-c++
+cp -r /usr/local/bin/ff-get-dep $DEB_NAME/usr/local/bin/ff-get-dep
+cp -r /usr/local/bin/ff-mpirun $DEB_NAME/usr/local/bin/ff-mpirun
+cp -r /usr/local/bin/ff-pkg-download $DEB_NAME/usr/local/bin/ff-pkg-download
+cp -r /usr/local/bin/ffglut $DEB_NAME/usr/local/bin/ffglut
+cp -r /usr/local/bin/ffmaster $DEB_NAME/usr/local/bin/ffmaster
+cp -r /usr/local/bin/ffmedit $DEB_NAME/usr/local/bin/ffmedit
+cp  AUTHORS $DEB_NAME/usr/share/doc/freefem/AUTHOR
+cp  README.md $DEB_NAME/usr/share/doc/freefem/README.md
+
+dpkg-deb --build $DEB_NAME/
+mv $DEB_NAME.deb $GH_DEB_NAME
 
 ## Deploy in GitHub release
 RELEASE=`curl 'https://api.github.com/repos/'$ORGANIZATION'/'$REPOSITORY'/releases/tags/'$RELEASE_TAG_NAME`
@@ -77,7 +85,10 @@ then
     exit 1
 else
   RESPONSE=`curl --data-binary "@$GH_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_DEB_NAME"`
-  RESPONSE=`curl --data-binary "@$GH_ffPETSc_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_ffPETSc_DEB_NAME"`
 fi
 
-rm -rf DEB_ff_petsc
+# clean the VM
+rm -rf $DEB_NAME
+rm $GH_DEB_NAME
+
+. ./bin/uninstall-ff++
