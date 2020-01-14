@@ -219,7 +219,83 @@ Vertex *  FQuadTree::NearestVertex(long xi,long yj)
 
   return vn;
 }
+//  FH add to get the list for point close of point  xi,yi at distance less the dh
+// jan 2020
+int  FQuadTree::ListNearestVertex(Vertex **lnv,int nlvnx,long dh,long xi,long yj)
+{
+    int nlnv=0;
+    QuadTreeBox * pb[ MaxDeep ];
+    int  pi[ MaxDeep  ];
+    I2 pp[  MaxDeep ];
+    int l=0; // level
+    QuadTreeBox * b;
+    IntQuad  hunsed=MaxISize,h0;
+    IntQuad hb =  MaxISize;
+    I2   p0(0,0);
+    I2  plus( xi<MaxISize?(xi<0?0:xi):MaxISize-1,yj<MaxISize?(yj<0?0:yj):MaxISize-1);
+    
+    Vertex *vn=0;
+    
+    // init for optimisation ---
+ 
+    b = root;
+    long  n0;
+    if (!root->n)
+        return nlnv; // empty tree
+    
 
+    // general case -----
+    pb[0]= b;
+    pi[0]=b->n>0 ?(int)  b->n : 4  ;
+    pp[0]=p0;
+    //h=dh;
+    do {
+        b= pb[l];
+        while (pi[l]--)
+        {
+            int k = pi[l];
+            
+            if (b->n>0) // Vertex QuadTreeBox none empty
+            {
+                NbVerticesSearch++;
+                I2 i2 =  R2ToI2(b->v[k]);
+                h0 = I2(i2,plus).norm();//  NORM(iplus,i2.x,jplus,i2.y);
+                if (h0 <dh)
+                {
+                  //  h = h0;
+                    vn = b->v[k];
+                    if(nlnv<nlvnx)
+                        lnv[nlnv++]=vn;
+                }
+            }
+            else // Pointer QuadTreeBox
+            {
+                QuadTreeBox *b0=b;
+                NbQuadTreeBoxSearch++;
+                if ((b=b->b[k]))
+                {
+                    hb >>=1 ; // div by 2
+                    I2 ppp(pp[l],k,hb);
+                    
+                    if  ( ppp.interseg(plus,hb,dh) )//(INTER_SEG(iii,iii+hb,iplus-h,iplus+h) && INTER_SEG(jjj,jjj+hb,jplus-h,jplus+h))
+                    {
+                        pb[++l]=  b;
+                        pi[l]= b->n>0 ?(int)  b->n : 4  ;
+                        pp[l]=ppp;
+                    }
+                    else
+                        b=b0, hb <<=1 ;
+                }
+                else
+                    b=b0;
+            }
+        }
+        hb <<= 1; // mul by 2
+    } while (l--);
+    
+    return nlnv;
+}
+// end Add jan 2020 FH.
 
 
 Vertex *  FQuadTree::ToClose(const R2 & v,R seuil,long hx,long hy,bool nearest)

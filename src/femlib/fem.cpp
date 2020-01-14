@@ -692,6 +692,7 @@ public:
     }
 
 	    Mesh::Mesh(int nbv,int nbt,int nbeb,Vertex *v,Triangle *t,BoundaryEdge  *b)
+             :dfb(0)
 	    {
 		TriangleConteningVertex =0;
 		BoundaryAdjacencesHead=0;
@@ -929,9 +930,228 @@ int Walk(const Mesh & Th,int& it, R *l,
     }
     return it;
 }
+/*  essai
+ int Mesh::Contening(const Vertex * vv,R2 P) const  // Add FH trun aurond v
+    {
+        int k =TriangleConteningVertex[vv - vertices];
+        if(vv->onBoundary())
+        {
+            const Triangle & K=triangles[k];
+            // find the best triangle to start
+            int s=2;
+            if(&K[0]==vv) s=0;
+                if(&K[1]==vv) s=1;
+                    ffassert(&K[s]==vv );
+                    // turn around s
+                    // best choise ..
+                    int sens = 1;
+                    int k0=k,kf=-1 ,s0=s,kp;
+                    // who is the best ..
+                    while(1)
+                    {
+                        int n=0,nl[3]={};
+                        const Triangle & K=triangles[k];
+                        R2 & A(K[0]), & B(K[1]), & C(K[2]);
+                        R l[3]={0,0,0};
+                        R area2= K.area*2;
+                        R eps =  -area2*1e-10;
+                        l[0] = Area2(P,B,C);
+                        l[1] = Area2(A,P,C);
+                        l[2] = area2-l[0]-l[1];
+                        if (l[0] < eps) nl[n++]=0;
+                        if (l[1] < eps) nl[n++]=1;
+                        if (l[2] < eps) nl[n++]=2;
+                        if( n ==0 ) return k;
+                        if( l[s] <eps)
+                            if(n == 1) return k;
+                            else kf=k; // pas mal ???
+                        
+                        int e=(s+sens)%3, ee=e, kk= ElementAdj(k,ee);
+                        //  find the good one
+                        if( (kk<0 || k==kk)) { // on borber ..
+                            if(sens ==2) break;
+                            sens++; // restart other sens
+                            k=k0;
+                            s=s0;
+                            continue;
+                        }
+                        
+                        if( kk==k0) break; // we have do the all turn ..
+                        k =kk;
+                        s = (ee + sens)%3;
+                        ffassert(&triangles[k][s]==vv );
+                    }
+            if(kf>=0) k = kf;
+            else k =k0; //  pb point dehort  ??? pas mieux ..
+        }
+        return k;
+        
+    }
+*/
+// ADD FH   jan 2020
+      Mesh::DataFindBoundary::~DataFindBoundary()
+    {
+        delete tree;
+    }
+    void Mesh::DataFindBoundary::gnuplot(const string & fn)
+    { // for debugging ..
+        ofstream gp(fn.c_str());
+        ffassert(gp);
+        //
+        const Mesh &Th = *pTh;
+        for(int be=0; be<Th.neb; ++be)
+        {
+            const BorderElement &B=Th.be(be);
+            int e,k = Th.BoundaryElement(be,e);
+            {
+                int ee=e, kk=  Th.ElementAdj(k,ee);
+                if ( kk >=0 || k != kk)
+                    gp  << (R2) B[0] << endl;
+                gp  << (R2) B[1] << endl;
+                gp  << "\n\n";
+            }
+        }
+        for(int i=0; i<P.N(); ++i)
+        {
+            int N=100;
+            double dt = M_PI*2./N, r = delta[i];
+            for(int j=0;j<=N; ++j)
+            {
+                double x = P[i].x+r*cos(dt*j);
+                double y=  P[i].y+r*sin(dt*j);
+                gp << x << " " << y << endl;
+            }
+            gp << "\n\n";
+        }
+    }
+    
+    int Mesh::DataFindBoundary::Find(R2 PP,R *l,bool & outside) const
+    {
+        int nu=-1;
+        R dnu= 1e200;
+        R dl[3];
+         outside = false;
+        Vertex *p =tree->NearestVertex(PP);
+        int i = p-P;
+        long lvp=tree->ListNearestVertex(lp,lp.N(), delta[i],P[i]);
+        for(int j=0; j<lvp; ++j)
+        {
+            int k = lp[j]->lab;
+            const Triangle & K=(*pTh)[k];
+            int nl[3],n=0;
+            R2 & A(K[0]), & B(K[1]), & C(K[2]);
+            R l[3]={0,0,0};
+            R area2= K.area*2;
+            R eps =  -area2*1e-6;
+            l[0] = Area2(PP,B,C);
+            l[1] = Area2(A,PP,C);
+            l[2] = area2-l[0]-l[1];
+            if (l[0] < eps) nl[n++]=0;
+            if (l[1] < eps) nl[n++]=1;
+            if (l[2] < eps) nl[n++]=2;
+            if( n == 0) return k;
+            if(nu<0) nu=k;
+            { // calcul dist
+                R dn[3];
+                int ee[3];
+                R de[3];
+                for(int j=0; j< n;++j)
+                {
+                    int jj= nl[j], j0=(jj+1)%3, j1=(jj+2)%3;
+                    R2 AB=R2(K[j0],K[j1]),  AP( K[j0],PP), BP(K[j1],PP);
+                    R la=  (AB,AP);
+                    R lb= -(AB,BP);
+                    if( la >=0 && lb >=0 ) de[j]=la,ee[j]=jj,dn[j]=-l[jj]/(AB.norme2()); //
+                    else if( la <0) de[j]=0,ee[j]=jj, dn[j]= AP.norme2();
+                    else de[j]=1,ee[j]= jj, dn[j]= BP.norme2();
+                }
+                int j=0;
+                if( n==2 && dn[1]< dn[0]) j=1;
+                if( dnu < dn[j] ) {
+                    nu = k;
+                    int jj= nl[j], j0=(jj+1)%3, j1=(jj+2)%3;
+                    dnu=dn[j];
+                    dl[jj]=0;
+                    dl[j0] = de[j];
+                    dl[j1] = 1- de[j];
+                }
+            }
+            
+        }
+        outside = true;
+        l[0]=dl[0];
+        l[1]=dl[1];
+        l[2]=dl[2];
+        return nu;
+    }
+    Mesh::DataFindBoundary::DataFindBoundary(Mesh const * _pTh)
+    : pTh(_pTh),tree(0), P(pTh->neb),delta(pTh->neb),lp(0)
+    {
+        const Mesh &Th = *pTh;
+        
+        // extract true Border ...
+        int nv =0;
+        
+        for(int be=0; be<Th.neb; ++be)
+        {
+            const BorderElement &E=Th.be(be);
+            int e,k = Th.BoundaryElement(be,e);
+            {
+                int ee=e, kk=  Th.ElementAdj(k,ee);
+                if ( kk >=0 || k != kk)
+                {
+                    int i0=Th(E[0]);
+                    int i1=Th(E[1]);
+                    R2 A=E[0],B=E[1];
+                    R2 AB(A,B);
+                    R2 G= (A+B)*0.5;
+                    double l = AB.norme();
+                    delta[nv]=l;
+                    P[nv].lab= k;//  element
+                    (R2 &) P[nv++]=G;
+                    
+                    
+                }
+            }
+        }
+        P.resize(nv);
+        delta.resize(nv);
+        lp.resize(nv);
+        if(debug>7)  gnuplot("dfb0.gp");
+        Vertex * P0= &P[0];
+        KN<double> d0 =delta;
+        R2 Pn, Px;
+        Th.BoundingBox(Pn, Px);
+        double col=0;
+        tree=new FQuadTree(&P[0], Pn, Px,nv);// build quadtree
+        
+        for(int i=0;i<nv; ++i)
+        {
+            if(debug>9)   cout << i << " " << d0[i] << endl;
+            int lvp=tree->ListNearestVertex(lp,nv, d0[i],P[i]);
+            for(int j=0,k; j<lvp; ++j)
+            {
+                k= lp[j]-P0;
+                delta[k]=max(delta[k],d0[i]);
+                if(debug>9) cout << k << " "<< delta[k] << ", ";
+            }
+            if(debug>9) cout << endl;
+        }
+        if(debug>9)
+            for(int i=0;i<nv; ++i)
+                cout  << i << " " << d0[i] << " " <<delta[i] << endl;
+        if(debug>5)      gnuplot("dfb1.gp");
+    }
+    
+void Mesh::BuildDataFindBoundary() const
+    {
+        if( dfb ==0)
+        dfb=new Mesh::DataFindBoundary(this);
+    }
 const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * tstart) const
 {
     int CasePichon=0;
+    int securesearch=0;
     int it,j,it00;
     const Triangle *  rett=0;
     if ( tstart )
@@ -944,7 +1164,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 	    v=quadtree->NearestVertex(P);
 	    assert(v);
 	}
-	it00=it=Contening(v);
+	it00=it=Contening(v);// Non new jan 2020 FH.
     }
 RESTART:
     //     L1:
@@ -1017,7 +1237,7 @@ RESTART:
 		l[3-nl[0]-nl[1]]=1.; // correction april 2015 FH
 		Phat=R2(l[1],l[2]);
 	        rett=triangles +it;
-	        if(searchMethod && outside) goto PICHON;
+	        if( outside) goto SECURESEARCH;
 	      return rett;
 	    }
 	    //   on the border
@@ -1046,7 +1266,7 @@ RESTART:
 		if (dd >= dP ) {
 		    Phat=PPhat;
 		    rett=tt;
-		    if(searchMethod && outside) goto PICHON;
+		    if( outside) goto SECURESEARCH;
 		    return tt;
 		}
 		else
@@ -1067,7 +1287,7 @@ RESTART:
 		l[j1]= 1-l[j0];
 		Phat=R2(l[1],l[2]);
 		rett=triangles +it;
-		if(searchMethod && outside) goto PICHON;
+		if(outside) goto SECURESEARCH;
 		return rett;
 	    }
 	    bool ok=false;
@@ -1084,9 +1304,30 @@ RESTART:
 	    }
 	    ffassert(ok);
 	}
+SECURESEARCH:
+     static long count =0;
+    if(securesearch++==0){
+    BuildDataFindBoundary();
+    R l[3];
+    int it =dfb->Find(P,l,outside);
+    //    if(count++<500) cout << " new  method????"  << P << " " << searchMethod << " "<< outside << " " << it <<endl;
+    if( searchMethod==0 || !outside )
+    {
+        
+        Phat=R2(l[1],l[2]);
+        return triangles+it;
+    }
+    }
+    
+    
 PICHON:	// Add dec 2010 ...
+    //  secure part FH jan 2020
+    if(CasePichon==0){
+        
+        
+    }
     CasePichon++;
-    if(CasePichon==1) {// hack feb 2016  ..... ???????
+    if(CasePichon==1) {// hack feb 2016  ..... ??????? Ne marche pas
         // change starting triangle  ????
         R2 PF=(*rett)(Phat);
         R2 PP=P + (P-PF);
@@ -1122,6 +1363,7 @@ PICHON:	// Add dec 2010 ...
 	  {  // interior => return
 	      outside=false;
 	      Phat=R2(l[1]/area2,l[2]/area2);
+              if( verbosity>2 && count++< 100)  cout << " BUG in new search method????"  << endl;
 	      return &K;
 	  }
 	R2 GP(G,P);
@@ -1229,6 +1471,7 @@ Mesh::~Mesh()
     delete [] bnormalv;
 //    delete [] tet;
     delete [] edges;
+    delete dfb;
 }
 //  for the  mortar elements
  int NbOfSubTriangle(int k)
@@ -1250,6 +1493,7 @@ Mesh::~Mesh()
 }
 
 Mesh::Mesh(int nbv,R2 * P)
+    :dfb(0)
 {
 
     TheAdjacencesLink=0;
@@ -1387,6 +1631,7 @@ inline  double rho(const Triangle &K) {
     }
 
 Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
+    :dfb(0)
 { //  routine complique
   //  count the number of elements
     area=0; //Th.area;
@@ -1829,6 +2074,7 @@ int  Mesh::kthrough =0;
 int  Mesh::kfind=0;
 
 Mesh::Mesh(const  Serialize &serialized)
+    :dfb(0)
 {
     TriangleConteningVertex =0;
     BoundaryAdjacencesHead=0;

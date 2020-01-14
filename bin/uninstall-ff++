@@ -3,6 +3,7 @@ echo rm /usr/local/bin/FreeFem++-CoCoa	/usr/local/bin/cvmsh2			/usr/local/bin/ff
 echo rm /usr/local/bin/FreeFem++-mpi	/usr/local/bin/ff-c++				/usr/local/bin/ffglut
 echo rm /usr/local/bin/FreeFem++-nw	/usr/local/bin/ff-get-dep			/usr/local/bin/ffmedit
 echo rm -rf /usr/local/share/freefem++
+echo rm -rf /usr/local/share/FreeFEM
 echo rm -rf /usr/local/lib/ff++/
 echo rm -rf /usr/local/ff++
 echo rm /etc/paths.d/FreeFem++ 
@@ -14,8 +15,10 @@ rm /usr/local/bin/FreeFem++-CoCoa	/usr/local/bin/cvmsh2			/usr/local/bin/ff-pkg-
 rm /usr/local/bin/FreeFem++-mpi	/usr/local/bin/ff-c++				/usr/local/bin/ffglut
 rm /usr/local/bin/FreeFem++-nw	/usr/local/bin/ff-get-dep			/usr/local/bin/ffmedit
 rm -rf /usr/local/ff++
+rm -rf /usr/local/ff-petsc
 echo rm /etc/paths.d/FreeFem++ 
 rm -rf /usr/local/share/freefem++
+rm -rf /usr/local/share/FreeFEM
 rm -rf /usr/local/lib/ff++/
 if [ -d /Applications/FreeFem++.app ]; then
 rm -rf /Applications/FreeFem++.app

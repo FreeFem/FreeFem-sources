@@ -227,6 +227,7 @@ C_F0::C_F0(const Polymorphic * poly,const char *op,const basicAC_F0 & p)
 	if(mpirank==0){
 	    cerr << " const Polymorphic * poly,const char *op,const basicAC_F0 & p)   " << endl;
 	    cerr  << op << " " << at << endl;
+            
 	}
 	    CompileError();
 	}

@@ -225,7 +225,7 @@ public:
 		{
 		   
 			delete  (* (i) );
-		       // cout << "StackOfPtr2Free: clean " << (* (i) ) << " " << endl;
+		       if(verbosity>400)  cout << "StackOfPtr2Free: clean " << (* (i) ) << " " << endl;
 		}
 		stackptr.resize(ssize);// clean the
 		
