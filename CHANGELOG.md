@@ -32,7 +32,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - PETSc version 3.12.3
-
+- Change the point search triangle algorithme  to be sure in any case (in test) 
 ### Deprecated
 -
 
