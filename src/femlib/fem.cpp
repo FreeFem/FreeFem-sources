@@ -1058,14 +1058,25 @@ int Walk(const Mesh & Th,int& it, R *l,
                 for(int j=0; j< n;++j)
                 {
                     int jj= nl[j], j0=(jj+1)%3, j1=(jj+2)%3;
+                    
                     R2 AB=R2(K[j0],K[j1]),  AP( K[j0],PP), BP(K[j1],PP);
                     R la=  (AB,AP);
                     R lb= -(AB,BP);
-                    R lab =AB.norme();
-                    if( la >=0 && lb >=0 ) de[j]=la/lab,ee[j]=jj,dn[j]=-l[jj]/lab; //
-                    else if( la <0) de[j]=0,ee[j]=jj, dn[j]= AP.norme();
-                    else de[j]=1,ee[j]= jj, dn[j]= BP.norme();
-                  //  cout << "   " << la << " " <<-l[jj]/(AB.norme()) << " " << AP.norme() << " " << BP.norme() << " ??? " ;
+                    R lab2 =AB.norme2();
+                    ee[j]=jj;
+                    if( la <=0) de[j]=0, dn[j]= AP.norme();
+                    else if( lb <=0) de[j]=1, dn[j]= BP.norme();
+                    else de[j]=la/lab2,dn[j]=-l[jj]/sqrt(lab2); //
+                    
+                    if(debug) {
+                        R dl[3];
+                        dl[jj]=0;
+                        dl[j0] = 1-de[j];
+                        dl[j1] = de[j];
+                        R2 PQ(PP,K(R2(dl[1],dl[2])));
+                        R lp = PQ.norme();
+                        cout << " \t\t  " << jj<< " " << de[j] <<",  " << dn[j] << " : " <<-l[jj]/(AB.norme()) << " " << AP.norme() << " " << BP.norme() << " : " << lp  << " ??? \n" ;
+                    }
                 }
                 int j=0;
                 if( n==2 && dn[1]< dn[0]) j=1;
@@ -1077,8 +1088,11 @@ int Walk(const Mesh & Th,int& it, R *l,
                     dl[j0] = 1-de[j];
                     dl[j1] = de[j];
                 }
-              //  R2 Ph=K(dl),PQ(K(Ph));
-               // cout<< "     " <<dnu << " " << k << " " << dn[j] << " " << j << " n " << n << " " << de[j] << " " << PQ.norme() << endl;
+                if(debug) {
+                    R2 Ph=R2(dl),PQ(PP,(*pTh)[nu](Ph));
+                    cout<< "     " <<dnu << " (" << nu << " " << k << ") " << dn[j] << " : " << j <<" " << nl[j]
+                        <<  " n " << n << " " << de[j] << " |" << PQ.norme() << endl;
+                }
             }
             
         }
@@ -1089,7 +1103,7 @@ int Walk(const Mesh & Th,int& it, R *l,
         return nu;
     }
     Mesh::DataFindBoundary::DataFindBoundary(Mesh const * _pTh)
-    : pTh(_pTh),tree(0), P(pTh->neb),delta(pTh->neb),lp(0)
+    : pTh(_pTh),tree(0), P(pTh->neb),delta(pTh->neb),lp(0),debug(0)
     {
         const Mesh &Th = *pTh;
         
@@ -1315,15 +1329,25 @@ SECURESEARCH:
     BuildDataFindBoundary();
     R l[3];
     int itt =dfb->Find(P,l,outside);
-    if( it != itt && count++<7)
+    if( verbosity> 0 && it != itt ) // Verif algo 
     {
         R2  Pnhat=R2(l[1],l[2]);
         R2 Po =triangles[it](Phat);
         R2 Pn =triangles[itt](Pnhat);
-        R dlt = R2(Po,Pn).norme2();
-        R ddn  = R2(P,Pn).norme2();
-        R ddo  = R2(P,Po).norme2();
-         cout << "  SECURESEARCH "  << P << ", " << ddn << " <" << ddo << ", " << searchMethod << " "<< outside << " " << it << " "<< itt << " delta" << dlt <<  endl;
+        R dlt = R2(Po,Pn).norme();
+        R ddn  = R2(P,Pn).norme();
+        R ddo  = R2(P,Po).norme();
+        if(ddo<ddn)
+        {
+            cout << " bug  SECURESEARCH "  << P << ", " << ddn << " <" << ddo << ", " << searchMethod << " "<< outside << " it "
+            << itt << " "<< it << " delta" << dlt <<  endl;
+
+        dfb->debug=1;
+        int itt =dfb->Find(P,l,outside);
+        dfb->debug=0;
+        ffassert(0);
+        }
+
     }
     if( searchMethod==0 || !outside )
     {
