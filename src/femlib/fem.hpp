@@ -467,12 +467,13 @@ namespace Fem2D {
           typedef Mesh::Vertex Vertex;
           typedef Mesh::Element Element;
           typedef Mesh::BorderElement BorderElement;
-          static const long debug = 0;
+         
           const Mesh *pTh;
           FQuadTree *tree;
           KN<Vertex> P;
           KN<double> delta;
           KN<Vertex*> lp;
+          long debug ;
           DataFindBoundary(Mesh const * pTh);
           ~DataFindBoundary() ;//{delete tree;}
           int Find(R2 P,R *l,bool & outside) const ;
