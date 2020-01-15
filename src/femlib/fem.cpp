@@ -1025,18 +1025,21 @@ int Walk(const Mesh & Th,int& it, R *l,
         }
     }
     
-    int Mesh::DataFindBoundary::Find(R2 PP,R *l,bool & outside) const
+    int Mesh::DataFindBoundary::Find(R2 PP,R *l,int & outside) const
     {
+        // ousinf = 2 => fare
         int nu=-1;
         R dnu= 1e200;
         R dl[3];
          outside = false;
-        Vertex *p =tree->NearestVertex(PP);
+        Vertex *p =tree->TrueNearestVertex(PP);
         int i = p-P;
         long lvp=tree->ListNearestVertex(lp,lp.N(), delta[i],P[i]);
         for(int j=0; j<lvp; ++j)
         {
             int k = lp[j]->lab;
+            if(debug) cout << "    -- k = "<< k << " " << j << endl;
+
             const Triangle & K=(*pTh)[k];
             int nl[3],n=0;
             R2 & A(K[0]), & B(K[1]), & C(K[2]);
@@ -1049,7 +1052,14 @@ int Walk(const Mesh & Th,int& it, R *l,
             if (l[0] < eps) nl[n++]=0;
             if (l[1] < eps) nl[n++]=1;
             if (l[2] < eps) nl[n++]=2;
-            if( n == 0) return k;
+            if( n == 0) {
+                l[0] /=area2;
+                l[1] /=area2;
+                l[2] /=area2;
+                 if(debug) cout << "   -- in nu "<< nu << " , " << dnu << " :  " << l[1] << " " << l[2] << endl;
+              
+                return k;
+            }
             if(nu<0) nu=k;
             { // calcul dist
                 R dn[3];
@@ -1096,14 +1106,15 @@ int Walk(const Mesh & Th,int& it, R *l,
             }
             
         }
-        outside = true;
+        outside = (dnu<= delta[i] )? 1: 2;// fare point 
         l[0]=dl[0];
         l[1]=dl[1];
         l[2]=dl[2];
+        if(debug)   cout << "  -- out nu "<< nu << " , " << dnu << " :  " << l[1] << " " << l[2] << endl;
         return nu;
     }
-    Mesh::DataFindBoundary::DataFindBoundary(Mesh const * _pTh)
-    : pTh(_pTh),tree(0), P(pTh->neb),delta(pTh->neb),lp(0),debug(0)
+    Mesh::DataFindBoundary::DataFindBoundary(Mesh const * _pTh,int ddebug)
+    : pTh(_pTh),tree(0), P(pTh->neb),delta(pTh->neb),lp(0),debug(ddebug)
     {
         const Mesh &Th = *pTh;
         
@@ -1163,8 +1174,12 @@ int Walk(const Mesh & Th,int& it, R *l,
     
 void Mesh::BuildDataFindBoundary() const
     {
-        if( dfb ==0)
-        dfb=new Mesh::DataFindBoundary(this);
+        static int count =0;
+        if( dfb ==0) {
+            dfb=new Mesh::DataFindBoundary(this);//,count++==0?9:0);
+            dfb->debug=0;
+        }
+        
     }
 const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * tstart) const
 {
@@ -1176,12 +1191,9 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 	it =  (*this)(tstart);
     else
     {
-	const Vertex * v=quadtree->NearestVertexWithNormal(P);
-	if (!v)
-	{
-	    v=quadtree->NearestVertex(P);
-	    assert(v);
-	}
+	const Vertex * v=quadtree->TrueNearestVertex(P);
+        ffassert(v);
+	
 	it00=it=Contening(v);// Non new jan 2020 FH.
     }
 RESTART:
@@ -1328,8 +1340,10 @@ SECURESEARCH:
     if(securesearch++==0){
     BuildDataFindBoundary();
     R l[3];
-    int itt =dfb->Find(P,l,outside);
-    if( verbosity> 0 && it != itt ) // Verif algo 
+        int loutside;
+    int itt =dfb->Find(P,l,loutside);
+        outside =loutside;
+    if( loutside==1 && verbosity> 0 && it != itt  ) // Verif algo if not to fare ...
     {
         R2  Pnhat=R2(l[1],l[2]);
         R2 Po =triangles[it](Phat);
@@ -1337,13 +1351,13 @@ SECURESEARCH:
         R dlt = R2(Po,Pn).norme();
         R ddn  = R2(P,Pn).norme();
         R ddo  = R2(P,Po).norme();
-        if(ddo<ddn)
+        if(ddo<ddn && (ddn-ddo) > 1e-8*ddn)
         {
             cout << " bug  SECURESEARCH "  << P << ", " << ddn << " <" << ddo << ", " << searchMethod << " "<< outside << " it "
-            << itt << " "<< it << " delta" << dlt <<  endl;
+            << itt << " "<< it << " delta" << dlt << " Po  " << Po << " Pn " << Pn << endl;
 
         dfb->debug=1;
-        int itt =dfb->Find(P,l,outside);
+        int itt =dfb->Find(P,l,loutside);
         dfb->debug=0;
         ffassert(0);
         }

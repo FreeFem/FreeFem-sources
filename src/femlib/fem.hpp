@@ -474,9 +474,9 @@ namespace Fem2D {
           KN<double> delta;
           KN<Vertex*> lp;
           long debug ;
-          DataFindBoundary(Mesh const * pTh);
+          DataFindBoundary(Mesh const * pTh,int ddebug=0);
           ~DataFindBoundary() ;//{delete tree;}
-          int Find(R2 P,R *l,bool & outside) const ;
+          int Find(R2 P,R *l,int & outside) const ;
           void gnuplot(const string & fn);
       };
       static const char magicmesh[8];

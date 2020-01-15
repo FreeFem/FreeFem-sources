@@ -106,11 +106,14 @@ public:
 
   
   Vertex * NearestVertex(const R2 & P) { return NearestVertex(XtoI(P.x),YtoJ(P.y));}
+   Vertex * TrueNearestVertex(const R2 & P) { return TrueNearestVertex(XtoI(P.x),YtoJ(P.y));}
+    
   Vertex * NearestVertexWithNormal(const R2 & P);
   // { return NearestVertexWithNormal(XtoI(P.x),YtoJ(P.y));}
   
   Vertex * NearestVertex(long i,long j);
-    
+    Vertex * TrueNearestVertex(long i,long j);
+
  int  ListNearestVertex(Vertex **lnv,int nvn,long dh,long xi,long yj); // Add FH jan 2020
  int  ListNearestVertex(Vertex **lnv,int nvn,double delta,R2 P)
     {

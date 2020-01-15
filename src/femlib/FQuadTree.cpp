@@ -120,7 +120,76 @@ void  FQuadTree::Draw()
 }
 
 #endif
+Vertex *  FQuadTree::TrueNearestVertex(long xi,long yj)
+{
+    QuadTreeBox * pb[ MaxDeep ];
+    int  pi[ MaxDeep  ];
+    I2 pp[  MaxDeep ];
+    int l=0; // level
+    QuadTreeBox * b;
+    IntQuad  h=MaxISize,h0;
+    IntQuad hb =  MaxISize;
+    I2   p0(0,0);
+    I2  plus( xi<MaxISize?(xi<0?0:xi):MaxISize-1,yj<MaxISize?(yj<0?0:yj):MaxISize-1);
+    
+    Vertex *vn=0;
+    
+    // init for optimisation ---
+    b = root;
+    long  n0;
+    if (!root->n)
+        return vn; // empty tree
+    
 
+    // general case -----
+    pb[0]= b;
+    pi[0]=b->n>0 ?(int)  b->n : 4  ;
+    pp[0]=p0;
+    h=hb;
+    do {
+        b= pb[l];
+        while (pi[l]--)
+        {
+            int k = pi[l];
+            
+            if (b->n>0) // Vertex QuadTreeBox none empty
+            {
+                NbVerticesSearch++;
+                I2 i2 =  R2ToI2(b->v[k]);
+                h0 = I2(i2,plus).norm();//  NORM(iplus,i2.x,jplus,i2.y);
+                if (h0 <h)
+                {
+                    h = h0;
+                    vn = b->v[k];
+                }
+            }
+            else // Pointer QuadTreeBox
+            {
+                QuadTreeBox *b0=b;
+                NbQuadTreeBoxSearch++;
+                if ((b=b->b[k]))
+                {
+                    hb >>=1 ; // div by 2
+                    I2 ppp(pp[l],k,hb);
+                    
+                    if  ( ppp.interseg(plus,hb,h) )//(INTER_SEG(iii,iii+hb,iplus-h,iplus+h) && INTER_SEG(jjj,jjj+hb,jplus-h,jplus+h))
+                    {
+                        pb[++l]=  b;
+                        pi[l]= b->n>0 ?(int)  b->n : 4  ;
+                        pp[l]=ppp;
+                    }
+                    else
+                        b=b0, hb <<=1 ;
+                }
+                else
+                    b=b0;
+            }
+        }
+        hb <<= 1; // mul by 2
+    } while (l--);
+    
+    return vn;
+}
 Vertex *  FQuadTree::NearestVertex(long xi,long yj)
 {
   QuadTreeBox * pb[ MaxDeep ];
