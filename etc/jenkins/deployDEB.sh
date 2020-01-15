@@ -22,7 +22,7 @@ fi
 
 
 DEB_NAME="freefem_${VERSION}-1_amd64.deb"
-GH_DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_amd64.deb"
+GH_DEB_NAME="FreeFEM_${VERSION}_amd64.deb"
 
 ## DEB build
 autoreconf -i
