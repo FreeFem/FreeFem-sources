@@ -28,8 +28,8 @@ sudo checkinstall -D --install=no \
     --pkgversion "${VERSION}" --pkglicense "LGPL-2+" \
     --pkgsource "https://github.com/FreeFem/FreeFem-sources" \
     --pkgaltsource "https://freefem.org/" \
-    --maintainer "FreeFEM, Frédéric Hecht <frederic.hecht@sorbonne-universite.fr> "  --backup=no --default \
-    --requires= "libc6 \(\>= 2.27),g++ \(\>= 7), gcc \(\>= 7), gfortran \(\>= 7), libgsl-dev \(\>=2.4), libhdf5-dev \(\>=1.10.0), liblapack-dev \(\>= 3.7), libopenmpi-dev \(\>=2.1.1) ,libblas-dev \(\>= 3.7.1) "
+    --maintainer "FreeFEM, Frédéric Hecht <frederic.hecht@sorbonne-universite.fr> "  --backup=no --default 
+    #--requires= "libc6 \(\>= 2.27),g++ \(\>= 7), gcc \(\>= 7), gfortran \(\>= 7), libgsl-dev \(\>=2.4), libhdf5-dev \(\>=1.10.0), liblapack-dev \(\>= 3.7), libopenmpi-dev \(\>=2.1.1) ,libblas-dev \(\>= 3.7.1) "
 
 ## Rename DEB to include Ubuntu version
 mv $DEB_NAME $GH_DEB_NAME
