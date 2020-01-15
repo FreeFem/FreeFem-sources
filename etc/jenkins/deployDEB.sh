@@ -12,14 +12,7 @@ VERSION=`grep AC_INIT configure.ac | cut -d"," -f2`
 RELEASE_TAG_NAME="v$VERSION"
 distrib=`uname -s`-`uname -r`
 
-if [ "$distrib" == "Linux-4.4.0-166-generic" ]; then
-  # 16.04
-DISTRIB="Ubuntu_16.04"
-elif [ "$distrib" == "Linux-4.15.0-51-generic" ]; then
-  # 18.04
-DISTRIB="Ubuntu_18.04"
-fi
-
+DISTRIB="Ubuntu"
 
 DEB_NAME="freefem_${VERSION}-1_amd64.deb"
 GH_DEB_NAME="FreeFEM_${VERSION}_amd64.deb"
@@ -35,7 +28,8 @@ sudo checkinstall -D --install=no \
     --pkgversion "${VERSION}" --pkglicense "LGPL-2+" \
     --pkgsource "https://github.com/FreeFem/FreeFem-sources" \
     --pkgaltsource "https://freefem.org/" \
-    --maintainer "FreeFEM" --backup=no --default
+    --maintainer "FreeFEM, Frédéric Hecht <frederic.hecht@sorbonne-universite.fr> "  --backup=no --default
+    --requires= "libc6 \(\>= 2.27),g++ \(\>= 7), gcc \(\>= 7), gfortran \(\>= 7), libgsl-dev \(\>=2.4), libhdf5-dev \(\>=1.10.0), liblapack-dev \(\>= 3.7), libopenmpi-dev \(\>=2.1.1) ,libblas-dev \(\>= 3.7.1) "
 
 ## Rename DEB to include Ubuntu version
 mv $DEB_NAME $GH_DEB_NAME
