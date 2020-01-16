@@ -10,4 +10,4 @@ plot(b,wait=1);
 searchMethod=1;
 Vb bb= chi(Th);
 bb[]-=b[];
-assert( bb[].linfty==0); 
+assert( bb[].linfty==0); 	

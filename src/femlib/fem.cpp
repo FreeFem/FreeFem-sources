@@ -1026,19 +1026,19 @@ int Walk(const Mesh & Th,int& it, R *l,
     }
     
     int Mesh::DataFindBoundary::Find(R2 PP,R *l,int & outside) const
-    {
-        // ousinf = 2 => fare
-        int nu=-1;
+    {  // FH: outside : 0 inside, 1 out close, 2, out fare, , -1 inside
+        int nu=-1,ne=-1;
         R dnu= 1e200;
         R dl[3];
-         outside = false;
+        outside = 0;
         Vertex *p =tree->TrueNearestVertex(PP);
         int i = p-P;
         long lvp=tree->ListNearestVertex(lp,lp.N(), delta[i],P[i]);
         for(int j=0; j<lvp; ++j)
         {
-            int k = lp[j]->lab;
-            if(debug) cout << "    -- k = "<< k << " " << j << endl;
+            int k = lp[j]->lab/3;
+            int e = lp[j]->lab%3;
+            if(debug) cout << "    -- k = "<< k << " " << e << " " << j << endl;
 
             const Triangle & K=(*pTh)[k];
             int nl[3],n=0;
@@ -1092,6 +1092,7 @@ int Walk(const Mesh & Th,int& it, R *l,
                 if( n==2 && dn[1]< dn[0]) j=1;
                 if( dnu > dn[j] ) {
                     nu = k;
+                    ne= e;
                     int jj= nl[j], j0=(jj+1)%3, j1=(jj+2)%3;
                     dnu=dn[j];
                     dl[jj]=0;
@@ -1106,11 +1107,13 @@ int Walk(const Mesh & Th,int& it, R *l,
             }
             
         }
-        outside = (dnu<= delta[i] )? 1: 2;// fare point 
+        if (l[ne] > 0)  outside = -1 ; // restart  go to inside ...
+        else     outside = (dnu<= delta[i] )? 1: 2;// fare point
         l[0]=dl[0];
         l[1]=dl[1];
         l[2]=dl[2];
-        if(debug)   cout << "  -- out nu "<< nu << " , " << dnu << " :  " << l[1] << " " << l[2] << endl;
+        if(debug)   cout << "  -- out nu "<< nu << " "<< ne << " , " << dnu <<" d_i " << delta[i] << " :  "
+                     << l[1] << " " << l[2] << " "<< outside<<  endl;
         return nu;
     }
     Mesh::DataFindBoundary::DataFindBoundary(Mesh const * _pTh,int ddebug)
@@ -1134,9 +1137,9 @@ int Walk(const Mesh & Th,int& it, R *l,
                     R2 A=E[0],B=E[1];
                     R2 AB(A,B);
                     R2 G= (A+B)*0.5;
-                    double l = AB.norme();
+                    double l = AB.norme()*1.5;// 1.5 to be sure .. FH
                     delta[nv]=l;
-                    P[nv].lab= k;//  element
+                    P[nv].lab= 3*k+e;//  element and edge
                     (R2 &) P[nv++]=G;
                     
                     
@@ -1191,7 +1194,7 @@ const Triangle *  Mesh::Find( R2 P, R2 & Phat,bool & outside,const Triangle * ts
 	it =  (*this)(tstart);
     else
     {
-	const Vertex * v=quadtree->TrueNearestVertex(P);
+	const Vertex * v=quadtree->NearestVertex(P);
         ffassert(v);
 	
 	it00=it=Contening(v);// Non new jan 2020 FH.
@@ -1336,39 +1339,48 @@ RESTART:
 	}
 SECURESEARCH:
     
-     static long count =0;
+    static long count =0;
     if(securesearch++==0){
-    BuildDataFindBoundary();
-    R l[3];
+        BuildDataFindBoundary();
+        R l[3];
         int loutside;
-    int itt =dfb->Find(P,l,loutside);
-        outside =loutside;
-    if( loutside==1 && verbosity> 0 && it != itt  ) // Verif algo if not to fare ...
-    {
-        R2  Pnhat=R2(l[1],l[2]);
-        R2 Po =triangles[it](Phat);
-        R2 Pn =triangles[itt](Pnhat);
-        R dlt = R2(Po,Pn).norme();
-        R ddn  = R2(P,Pn).norme();
-        R ddo  = R2(P,Po).norme();
-        if(ddo<ddn && (ddn-ddo) > 1e-8*ddn)
-        {
-            cout << " bug  SECURESEARCH "  << P << ", " << ddn << " <" << ddo << ", " << searchMethod << " "<< outside << " it "
-            << itt << " "<< it << " delta" << dlt << " Po  " << Po << " Pn " << Pn << endl;
-
-        dfb->debug=1;
         int itt =dfb->Find(P,l,loutside);
-        dfb->debug=0;
-        ffassert(0);
+        outside =loutside;
+        if(loutside == -1) // point in interior direction ..
+        {
+            it=itt;
+            goto RESTART;
         }
-
-    }
-    if( searchMethod==0 || !outside )
-    {
-        
-        Phat=R2(l[1],l[2]);
-        return triangles+itt;
-    }
+        // to much wrong case
+        // remove the test ... FH
+        /*
+         //   please do not remove this peace of code, it can be usefull in case of debugging ..
+         if( verbosity> 0 && loutside==1 && it != itt  ) // Verif algo if not to fare ...
+         {
+         R2  Pnhat=R2(l[1],l[2]);
+         R2 Po =triangles[it](Phat);
+         R2 Pn =triangles[itt](Pnhat);
+         R dlt = R2(Po,Pn).norme();
+         R ddn  = R2(P,Pn).norme();
+         R ddo  = R2(P,Po).norme();
+         if(ddo<ddn && (ddn-ddo) > 1e-8*ddn)
+         {
+         cout <<mpirank<<  " bug  SECURESEARCH "  << P << ", " << ddn << " <" << ddo << ", " << searchMethod << " "<< outside << " it "
+         << itt << " "<< it << " delta" << dlt << " Po  " << Po << " Pn " << Pn << " / " << nv << " "<< nt << endl;
+         
+         dfb->debug=1;
+         int itt =dfb->Find(P,l,loutside);
+         dfb->debug=0;
+         ffassert(0);
+         }
+         }
+         */ 
+        if( searchMethod==0 || !outside )
+        {
+            
+            Phat=R2(l[1],l[2]);
+            return triangles+itt;
+        }
     }
     
     

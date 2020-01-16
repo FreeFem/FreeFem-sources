@@ -319,11 +319,11 @@ int  FQuadTree::ListNearestVertex(Vertex **lnv,int nlvnx,long dh,long xi,long yj
     pp[0]=p0;
     //h=dh;
     do {
-        b= pb[l];
+      
         while (pi[l]--)
         {
             int k = pi[l];
-            
+            b= pb[l];
             if (b->n>0) // Vertex QuadTreeBox none empty
             {
                 NbVerticesSearch++;
@@ -331,7 +331,6 @@ int  FQuadTree::ListNearestVertex(Vertex **lnv,int nlvnx,long dh,long xi,long yj
                 h0 = I2(i2,plus).norm();//  NORM(iplus,i2.x,jplus,i2.y);
                 if (h0 <dh)
                 {
-                  //  h = h0;
                     vn = b->v[k];
                     if(nlnv<nlvnx)
                         lnv[nlnv++]=vn;
@@ -339,24 +338,22 @@ int  FQuadTree::ListNearestVertex(Vertex **lnv,int nlvnx,long dh,long xi,long yj
             }
             else // Pointer QuadTreeBox
             {
-                QuadTreeBox *b0=b;
                 NbQuadTreeBoxSearch++;
-                if ((b=b->b[k]))
+                if ((b=b->b[k])) // new box
                 {
                     hb >>=1 ; // div by 2
                     I2 ppp(pp[l],k,hb);
                     
-                    if  ( ppp.interseg(plus,hb,dh) )//(INTER_SEG(iii,iii+hb,iplus-h,iplus+h) && INTER_SEG(jjj,jjj+hb,jplus-h,jplus+h))
+                    if  ( ppp.interseg(plus,hb,dh) )
                     {
                         pb[++l]=  b;
                         pi[l]= b->n>0 ?(int)  b->n : 4  ;
                         pp[l]=ppp;
                     }
                     else
-                        b=b0, hb <<=1 ;
+                        hb <<=1 ;
                 }
-                else
-                    b=b0;
+                
             }
         }
         hb <<= 1; // mul by 2
