@@ -1336,6 +1336,8 @@ RESTART:
 		}
 	    }
 	    ffassert(ok);
+
+
 	}
 SECURESEARCH:
     
@@ -1374,7 +1376,7 @@ SECURESEARCH:
          ffassert(0);
          }
          }
-         */ 
+         */
         if( searchMethod==0 || !outside )
         {
             

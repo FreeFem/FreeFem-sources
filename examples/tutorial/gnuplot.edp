@@ -21,6 +21,13 @@ for (int i=0;i<=n;i++)
   gnu <<  xx[i] << " " << yy[i] << endl;
  }
 }
+savegnuplot(Th,"Th.gp");
+exec("echo 'plot \"Th.gp\" w l, \"\" w labels offset 1.5 \
+pause 5 \
+set term postscript \
+set output \"gnuTh.eps\" \
+replot \
+quit' | gnuplot"); 
 //  to call gnuplot command and wait 5 second (tanks to unix command)
 //  and make postscipt plot 
 exec("echo 'plot \"plot.gp\" w l \
