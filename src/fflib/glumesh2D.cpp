@@ -47,7 +47,7 @@ public:
 };
 
 
-Mesh * GluMesh(list<Mesh const *> const & lth, long labtodel = -1)
+Mesh * GluMesh(list<Mesh const *> const & lth, long labtodel = -1,double eps=-1)
 {
   int nbt=0;
   int neb=0;
@@ -64,7 +64,7 @@ Mesh * GluMesh(list<Mesh const *> const & lth, long labtodel = -1)
         ++kk;
        const Mesh &Th(**i);
       th0=&Th;
-      if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
+      if(verbosity>1)  cout << " GluMesh  "<< kk << " + "<<  Th.nv << " " << Th.nt << endl;
       nbt+= Th.nt;
       nbvx += Th.nv;
       nebx += Th.neb;
@@ -92,36 +92,49 @@ Mesh * GluMesh(list<Mesh const *> const & lth, long labtodel = -1)
 
   ffassert(hmin>Norme2(Pn-Px)/1e9);
   double hseuil =hmin/10.;
+  if( eps >=0. ) hseuil= eps;
 
-
-  FQuadTree *quadtree=new Fem2D::FQuadTree(th0,Pn,Px,0);
+    FQuadTree *quadtree=hseuil ? new Fem2D::FQuadTree(th0,Pn,Px,0):0 ;
   {
     map<pair<int,int>,int> bbe;
+      kk=0;
     for(list<Mesh const  *>::const_iterator i=lth.begin();i != lth.end();++i)
       {
-          if(! *i ) continue;
+        if(! *i ) continue;
+        int offset= nbv;
 	const Mesh &Th(**i);
-	if(!*i) continue;
-	if(verbosity>1)  cout << " GluMesh + "<< Th.nv << " " << Th.nt << endl;
+	if(verbosity>1)  cout << "        GluMesh + "<< Th.nv << " " << Th.nt << " " << hseuil << " " << offset << endl;
 
 	for (int ii=0;ii<Th.nv;ii++)
 	{
 	  const Vertex &vi(Th(ii));
-	  Vertex * pvi=quadtree->ToClose(vi,hseuil);
-	  if(!pvi) {
+            Vertex * pvi=0;
+            if(quadtree) pvi = quadtree->ToClose(vi,hseuil);
+	    if(!pvi) {
 	    v[nbv].x = vi.x;
 	    v[nbv].y = vi.y;
 	    v[nbv].lab = vi.lab;
-	    quadtree->Add(v[nbv++]);
+	    if(quadtree)  quadtree->Add(v[nbv]);
+            ++nbv;
 	  }
 	}
 
 	for (int k=0;k<Th.nt;k++)
 	  {
 	    const Triangle  &K(Th[k]);
-	    int i0=quadtree->ToClose(K[0],hseuil)-v; //NearestVertex(K[0])-v;
-	    int i1=quadtree->ToClose(K[1],hseuil)-v; //NearestVertex(K[1])-v;
-	    int i2=quadtree->ToClose(K[2],hseuil)-v; //NearestVertex(K[2])-v;
+              int i0,i1,i2;
+             if(quadtree)
+             {
+	     i0=quadtree->ToClose(K[0],hseuil)-v; //NearestVertex(K[0])-v;
+	     i1=quadtree->ToClose(K[1],hseuil)-v; //NearestVertex(K[1])-v;
+	     i2=quadtree->ToClose(K[2],hseuil)-v; //NearestVertex(K[2])-v;
+             }
+             else
+             {
+                 i0 = offset + Th(K[0]);
+                 i1 = offset + Th(K[1]);
+                 i2 = offset + Th(K[2]);
+             }
 	    (*tt++).set(v,i0,i1,i2,K.lab);
 	  }
 
@@ -129,8 +142,11 @@ Mesh * GluMesh(list<Mesh const *> const & lth, long labtodel = -1)
 	for (int k=0;k<Th.neb;k++)
 	  {
 	    const BoundaryEdge & be(Th.bedges[k]);
-	    int i0=quadtree->ToClose(be[0],hseuil)-v;
-	    int i1=quadtree->ToClose(be[1],hseuil)-v;
+               int i0,i1;
+              if(quadtree)
+              {
+	     i0=quadtree->ToClose(be[0],hseuil)-v;
+	     i1=quadtree->ToClose(be[1],hseuil)-v;
 	    int ii0=i0,ii1=i1;
 	    if(ii1<ii0) Exchange(ii0,ii1);
 	    pair<int,int> i01(ii0,ii1);
@@ -139,9 +155,16 @@ Mesh * GluMesh(list<Mesh const *> const & lth, long labtodel = -1)
 	      (*bb++).set(v,i0,i1,be.lab);
 	      bbe[i01]=	  neb++;
 	    }
-
+              }
+              else
+              {
+                  i0 = offset + Th(be[0]);
+                  i1 = offset + Th(be[1]);
+                  (*bb++).set(v,i0,i1,be.lab);
+              }
 	  }
-
+          if(verbosity>9) cout << "               " << quadtree << " "<<offset + Th.nv << " " << nbv << endl;
+          ffassert( quadtree || ( offset + Th.nv == nbv));
       }
   }
 
@@ -150,6 +173,7 @@ Mesh * GluMesh(list<Mesh const *> const & lth, long labtodel = -1)
 
   if(verbosity>1)
     {
+      cout << "     eps for equal points "<< hseuil << " (0 => no equal points) "<< endl;
       cout << "     Nb points : "<< nbv << " , nb edges : " << neb << endl;
       cout << "     Nb of glu point " << nbvx -nbv;
       cout << "     Nb of glu  Boundary edge " << nebx-neb;
@@ -371,11 +395,11 @@ typedef Mesh const *pmesh;
   }
 };
 
-Mesh* GluMeshtab (KN<pmesh> *const &tab, long const &lab_delete) {
+Mesh* GluMeshtab (KN<pmesh> *const &tab, long const &lab_delete,double eps=-1) {
   list<Mesh const *> l;
   for (int i=0; i<tab->n; i++)
     l.push_back((*tab)[i]);
-  return GluMesh(l,lab_delete);
+  return GluMesh(l,lab_delete,eps);
 }
 
 struct Op_GluMeshtab: public OneOperator {
@@ -383,7 +407,7 @@ struct Op_GluMeshtab: public OneOperator {
     class Op: public E_F0mps   {
     public:
         static basicAC_F0::name_and_type name_param [];
-        static const int n_name_param = 1;
+        static const int n_name_param = 2;
         Expression nargs[n_name_param];
         Expression getmeshtab;
         long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
@@ -402,12 +426,14 @@ struct Op_GluMeshtab: public OneOperator {
 };
 basicAC_F0::name_and_type Op_GluMeshtab::Op::name_param[Op_GluMeshtab::Op::n_name_param] =
 {
-    {"labtodel", &typeid(long)}
+    {"labtodel", &typeid(long)},
+      {"eps", &typeid(double)}
 };
 AnyType Op_GluMeshtab::Op::operator () (Stack stack)  const {
     KN<const Mesh *> *tab = GetAny<KN<const Mesh *> *>((*getmeshtab)(stack));
     long labtodel = arg(0, stack, LONG_MIN);
-    Mesh *Tht = GluMeshtab(tab, labtodel);
+    double eps = arg(1, stack, -1.);
+    Mesh *Tht = GluMeshtab(tab, labtodel,eps);
 
     Add2StackOfPtr2FreeRC(stack, Tht);
     return Tht;
