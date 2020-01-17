@@ -410,19 +410,22 @@ struct Op_GluMeshtab: public OneOperator {
         static const int n_name_param = 2;
         Expression nargs[n_name_param];
         Expression getmeshtab;
+        aType tgetmeshtab;
         long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
 
-        Op (const basicAC_F0 &args, Expression t): getmeshtab(t)
+        Op (const basicAC_F0 &args, Expression t, aType tt): getmeshtab(t),tgetmeshtab(tt)
         {args.SetNameParam(n_name_param, name_param, nargs);}
 
         AnyType operator () (Stack s)  const;
     };
 
     E_F0*code (const basicAC_F0 &args) const
-    {return new Op(args, t[0]->CastTo(args[0]));}
+    {return new Op(args, t[0]->CastTo(args[0]),t[0]);}
 
     Op_GluMeshtab ():
     OneOperator(atype<const pmesh>(), atype<KN<pmesh> *>()) {};
+    Op_GluMeshtab (int i):
+    OneOperator(atype<const pmesh>(), atype<listMesh>()) {};
 };
 basicAC_F0::name_and_type Op_GluMeshtab::Op::name_param[Op_GluMeshtab::Op::n_name_param] =
 {
@@ -430,11 +433,22 @@ basicAC_F0::name_and_type Op_GluMeshtab::Op::name_param[Op_GluMeshtab::Op::n_nam
       {"eps", &typeid(double)}
 };
 AnyType Op_GluMeshtab::Op::operator () (Stack stack)  const {
-    KN<const Mesh *> *tab = GetAny<KN<const Mesh *> *>((*getmeshtab)(stack));
+    KN<const Mesh *> *tab=0;
+    list<Mesh const  *> *lth=0;
+    if (tgetmeshtab==(aType)atype<KN<pmesh> *>)
+     tab= GetAny<KN<const Mesh *> *>((*getmeshtab)(stack));
+    else if (tgetmeshtab==(aType) atype<listMesh>())
+     lth =  GetAny<listMesh>((*getmeshtab)(stack)).lth;
+    else
+        ffassert(0); // type inconnue
     long labtodel = arg(0, stack, LONG_MIN);
     double eps = arg(1, stack, -1.);
-    Mesh *Tht = GluMeshtab(tab, labtodel,eps);
-
+    Mesh *Tht =0;
+    if(tab)
+     Tht = GluMeshtab(tab, labtodel,eps);
+    else
+     Tht=GluMesh(*lth,labtodel,eps);
+    ffassert(Tht);
     Add2StackOfPtr2FreeRC(stack, Tht);
     return Tht;
 }
@@ -459,6 +473,7 @@ void init_glumesh2D()
   Global.Add("change","(",new SetMesh);
 
   Global.Add("gluemesh", "(", new Op_GluMeshtab);
+  Global.Add("gluemesh", "(", new Op_GluMeshtab(1));
 }
 #else
 class Init { public:
@@ -481,5 +496,6 @@ Init::Init(){  // le constructeur qui ajoute la fonction "splitmesh3"  a freefem
   Global.Add("change","(",new SetMesh);
 
   Global.Add("gluemesh", "(", new Op_GluMeshtab);
+  Global.Add("gluemesh", "(", new Op_GluMeshtab(1));
 }
 #endif
