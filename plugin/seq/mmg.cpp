@@ -490,7 +490,13 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
   if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_ls,            arg(i,stack,0.)); i++;   /*!< [val], Value of level-set */
   //if (nargs[i]) MMG3D_Set_dparameter(mesh,sol,MMG3D_DPARAM_rmc,           arg(i,stack,0.)); i++;   /*!< [-1/val], Remove small connex componants in level-set mode */
 
-  int ier = MMG3D_mmg3dls(mesh,sol);
+  bool bls = MMG3D_Get_iparameter(mesh,MMG3D_IPARAM_iso);
+
+  int ier;
+  if (!bls)
+    ier = MMG3D_mmg3dlib(mesh,sol);
+  else
+    ier = MMG3D_mmg3dls(mesh,sol);
   
   /*
   if ( MMG5_saveMesh_centralized(mesh,"test.mesh") != 1 ) { 
