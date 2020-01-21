@@ -13,7 +13,7 @@ int nn  = 6;
 int[int] lc=[1,2,2,1,1,2]; //  label numbering 
 
 mesh3 Th3=cube(nn,nn,nn,label=lc);
-//Th3 = trunc(Th3,(x<0.5) | (y < 0.5) | (z < 0.5) ,label=1);
+Th3 = trunc(Th3,(x<0.5) | (y < 0.5) | (z < 0.5) ,label=1);
 
 fespace Vh(Th3,P1);
 fespace Mh(Th3,[P1,P1,P1,P1,P1,P1]);
