@@ -410,11 +410,21 @@ struct Op_GluMeshtab: public OneOperator {
         static const int n_name_param = 2;
         Expression nargs[n_name_param];
         Expression getmeshtab;
+         KN<Expression> te;
         aType tgetmeshtab;
         long arg (int i, Stack stack, long a) const {return nargs[i] ? GetAny<long>((*nargs[i])(stack)) : a;}
 
-        Op (const basicAC_F0 &args, Expression t, aType tt): getmeshtab(t),tgetmeshtab(tt)
-        {args.SetNameParam(n_name_param, name_param, nargs);}
+        Op (const basicAC_F0 &args, Expression t, aType tt): getmeshtab(t),tgetmeshtab(tt),te(0)
+        {args.SetNameParam(n_name_param, name_param, nargs);
+            E_Array * at= dynamic_cast<E_Array*>(t);
+            if( at)
+            {
+                te.resize(at->size());
+                for(int i=0; i<at->size();++i)
+                    te[i]= CastTo<pmesh>((*at)[i]);
+                if(te.N()==0) CompileError("EMPTY MESH ARRAY",tt);
+            }
+        }
 
         AnyType operator () (Stack s)  const;
     };
@@ -426,6 +436,9 @@ struct Op_GluMeshtab: public OneOperator {
     OneOperator(atype<const pmesh>(), atype<KN<pmesh> *>()) {};
     Op_GluMeshtab (int i):
     OneOperator(atype<const pmesh>(), atype<listMesh>()) {};
+    Op_GluMeshtab (int i,int j):
+    OneOperator(atype<const pmesh>(), atype<E_Array>()) {};
+
 };
 basicAC_F0::name_and_type Op_GluMeshtab::Op::name_param[Op_GluMeshtab::Op::n_name_param] =
 {
@@ -434,11 +447,18 @@ basicAC_F0::name_and_type Op_GluMeshtab::Op::name_param[Op_GluMeshtab::Op::n_nam
 };
 AnyType Op_GluMeshtab::Op::operator () (Stack stack)  const {
     KN<const Mesh *> *tab=0;
+    KN<const Mesh *> ttab(te.N());
     list<Mesh const  *> *lth=0;
     if (tgetmeshtab==(aType)atype<KN<pmesh> *>)
      tab= GetAny<KN<const Mesh *> *>((*getmeshtab)(stack));
     else if (tgetmeshtab==(aType) atype<listMesh>())
      lth =  GetAny<listMesh>((*getmeshtab)(stack)).lth;
+    else if (tgetmeshtab==(aType) atype<E_Array>())
+    {
+        for(int i=0;i<te.N();++i)
+           ttab[i] =  GetAny<pmesh>((*te[i])(stack));
+        tab = & ttab; 
+    }
     else
         ffassert(0); // type inconnue
     long labtodel = arg(0, stack, LONG_MIN);
@@ -474,6 +494,7 @@ void init_glumesh2D()
 
   Global.Add("gluemesh", "(", new Op_GluMeshtab);
   Global.Add("gluemesh", "(", new Op_GluMeshtab(1));
+  Global.Add("gluemesh", "(", new Op_GluMeshtab(1,1));
 }
 #else
 class Init { public:
