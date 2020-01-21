@@ -3,7 +3,7 @@
 
 #include "ff++.hpp"
 #include "memory.h"
-#include "libmmg.h"
+#include "mmg/libmmg.h"
 #include "GenericMesh.hpp"
 
 using namespace Fem2D;

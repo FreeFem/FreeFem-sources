@@ -37,7 +37,7 @@ install:install.done WHERE.done
 # FFCS - keep simplest makefile structure for automatic recompilations
 WHERE.done: install.done
 	echo mmg  LD -L@DIR@/lib -lmmg  >../lib/WHERE.mmg ;
-	echo mmg INCLUDE -I@DIR@/include/mmg>> ../lib/WHERE.mmg ;
+	echo mmg INCLUDE -I@DIR@/include/>> ../lib/WHERE.mmg ;
 	echo build WHERE ./lib/WHERE.mmg ;
 	touch $@
 clean::
