@@ -50,7 +50,7 @@ FAIRE: FAIT.done install.done
 tag-tar: $(PACKAGE)
 	-rm -rf  mmg-*
 	unzip $(PACKAGE) && mv mmg-* mmg-sources
-	patch <patch-mmg.txt
+	patch -p1 <patch-mmg.txt
 	touch tag-tar
 
 $(PACKAGE):
