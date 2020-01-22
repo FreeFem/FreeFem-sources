@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFEM,4.4-3,frederic.hecht@sorbonne-universite.fr,FreeFEM)
+AC_INIT(FreeFEM,4.4-4,frederic.hecht@sorbonne-universite.fr,FreeFEM)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -2259,6 +2259,18 @@ if test "$ff_mkl_ok" == yes ; then
 fi
 
 ## Condtional for check
+test "$ff_fftw_ok" = yes -o -n "$ff_DOWNLOAD_FFTW" && ff_fftw_=yes
+test "$ff_ipopt_ok" = yes -o -n "$TOOL_COMPILE_ipopt" && ff_ipopt_=yes
+test "$ff_metis_ok" = yes -o -n "$TOOL_COMPILE_metis" && ff_metis_=yes
+test "$ff_mmg_ok" = yes -o -n "$TOOL_COMPILE_mmg" && ff_mmg_=yes
+test "$ff_mshmet_ok" = yes -o -n "$TOOL_COMPILE_mshmet" && ff_mshmet_=yes
+test "$ff_mumps_ok" = yes -o -n "$TOOL_COMPILE_mumps" && ff_mumps_=yes
+test "$ff_mumps_seq_ok" = yes -o -n "$TOOL_COMPILE_mumps_seq" && ff_mumps_seq_=yes
+test "$ff_parmetis_ok" = yes -o -n "$TOOL_COMPILE_parmetis" && ff_parmetis_=yes
+test "$ff_scotch_ok" = yes -o -n "$TOOL_COMPILE_scotch" && ff_scotch_=yes 
+test "$ff_tetgen_ok" = yes -o -n "$TOOL_COMPILE_tetgen" && ff_tetgen_=yes 
+test "$ff_umfpack_ok" = yes -o -n "$TOOL_COMPILE_umfpack"  && ff_umfpack_=yes 
+
 AM_CONDITIONAL([DOWNLOAD], [test "$enable_download" = yes ])
 AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = yes ])
 AM_CONDITIONAL([BLACS], [test "$ff_blacs_ok" = yes])
@@ -2442,7 +2454,7 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ Activated libraries ])
   AC_MSG_NOTICE([ - ARPACK: $ff_arpack_ok])
   AC_MSG_NOTICE([ - BLACS: $ff_blacs_ok])
-  AC_MSG_NOTICE([ - FFTW3: $ff_fftw_ok])
+  AC_MSG_NOTICE([ - FFTW3: $ff_fftw_])
   AC_MSG_NOTICE([ - FORTRAN: $enable_fortran])
   AC_MSG_NOTICE([ - FREEYAMS: $ff_freeyams_ok])
   AC_MSG_NOTICE([ - GMM: $enable_gmm])
@@ -2450,20 +2462,20 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - HDF5: $with_hdf5])
   AC_MSG_NOTICE([ - HTOOL: $enable_htool])
   AC_MSG_NOTICE([ - HPDDM: $enable_hpddm])
-  AC_MSG_NOTICE([ - IPOPT: $ff_ipopt_ok])
+  AC_MSG_NOTICE([ - IPOPT: $ff_ipopt_])
   AC_MSG_NOTICE([ - LIBSEQ: $ff_libseq_ok])
-  AC_MSG_NOTICE([ - METIS: $ff_metis_ok])
+  AC_MSG_NOTICE([ - METIS: $ff_metis_])
   AC_MSG_NOTICE([ - MKL: $ff_mkl])
   AC_MSG_NOTICE([ - MMG3D: $ff_mmg3d_ok])
-  AC_MSG_NOTICE([ - MMG: $ff_mmg_ok])
+  AC_MSG_NOTICE([ - MMG: $ff_mmg_])
   AC_MSG_NOTICE([ - MPI: $ff_mpi])
-  AC_MSG_NOTICE([ - MSHMET: $ff_mshmet_ok])
-  AC_MSG_NOTICE([ - MUMPS: $ff_mumps_ok])
+  AC_MSG_NOTICE([ - MSHMET: $ff_mshmet_])
+  AC_MSG_NOTICE([ - MUMPS: $ff_mumps_])
   AC_MSG_NOTICE([ - MUMPS_ptscotch: $ff_mumps_ptscotch_ok])
   AC_MSG_NOTICE([ - MUMPS_scotch: $ff_mumps_scotch_ok])
-  AC_MSG_NOTICE([ - MUMPS_seq: $ff_mumps_seq_ok])
+  AC_MSG_NOTICE([ - MUMPS_seq: $ff_mumps_seq_])
   AC_MSG_NOTICE([ - NLOPT: $ff_nlopt_ok])
-  AC_MSG_NOTICE([ - PARMETIS: $ff_parmetis_ok])
+  AC_MSG_NOTICE([ - PARMETIS: $ff_parmetis_])
   AC_MSG_NOTICE([ - PETSC: $ff_petsc_ok])
   AC_MSG_NOTICE([ - PETSCCOMPLEX: $ff_petsccomplex_ok])
   AC_MSG_NOTICE([ - PTHREAD: $ff_pthread_ok])
@@ -2473,8 +2485,8 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - SLEPC: $ff_slepc_ok])
   AC_MSG_NOTICE([ - SLEPCCOMPLEX: $ff_slepccomplex_ok])
   AC_MSG_NOTICE([ - SUPERLU: $ff_superlu_ok])
-  AC_MSG_NOTICE([ - TETGEN: $ff_tetgen_ok])
-  AC_MSG_NOTICE([ - UMFPACK: $ff_umfpack_ok])
+  AC_MSG_NOTICE([ - TETGEN: $ff_tetgen_])
+  AC_MSG_NOTICE([ - UMFPACK: $ff_umfpack_])
 fi
 if test "${prefix_petsc}" != no -a   ! \( -d "${prefix_petsc}/real/lib"  -o  -d "${prefix_petsc}/r/lib" \) ; then
   AC_MSG_NOTICE([ petsc dirs do no exist  , do build do:])

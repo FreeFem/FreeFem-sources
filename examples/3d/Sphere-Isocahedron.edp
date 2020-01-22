@@ -3,7 +3,7 @@
 load "msh3"
 load "medit" 
 load "tetgen"
-load "freeyams"
+load "mmg"
 
 
 func meshS Ellipsoide20 (real RX,real RY, real RZ,real hsize,int L,int orientation)
@@ -85,12 +85,13 @@ plot(cmm="Icosaedre",Ticosaedre,wait=1);
 real aa =RX, bb=RY, cc =RZ;
 func metric = sqrt(aa*x*x+bb*y*y+cc*z*z);
 meshS Th = movemeshS(Ticosaedre,transfo=[x/metric,y/metric,z/metric]);  plot (cmm="Th",Th,wait=1);
-meshS Thb=freeyams(Th,hmin=hsize,hmax=hsize,gradation=1.1);  plot (cmm="Thb",Thb,wait=1);
+meshS Thb=mmgs(Th,hmin=hsize,hmax=hsize,hgrad=1.1);  plot (cmm="Thb",Thb,wait=1);
+//mmgs(ThS,hausd=0.001);
 return Thb;
 }
 real hsize=0.1;
 meshS Thb=Ellipsoide20(1,1,1,hsize,1,1);
-// Thb=freeyams(Thb,hmin=hsize,hmax=hsize,gradation=1.1);
+Thb=mmgs(Thb,hmin=hsize,hmax=hsize,hgrad=1.1);
 plot(cmm="Thb",Thb,wait=1);
 
 //medit("spheresurface",Th);
