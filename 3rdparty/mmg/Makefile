@@ -20,6 +20,7 @@ FAIT.done:tag-tar
 	-mkdir build
 	cd build && cmake ../mmg-sources \
 	-DCMAKE_C_COMPILER=$(CC) \
+	-DCMAKE_C_FLAGS="-O3 -fPIC" \
 	-DCMAKE_BUILD_TYPE=Release && $(MAKE)
 	touch FAIT.done
 
