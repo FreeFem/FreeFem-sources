@@ -226,7 +226,7 @@ template<class ffmesh>
 class mmg_Op : public E_F0mps {
  public:
   Expression eTh, xx, yy, zz;
-  static const int n_name_param = 25;    //
+  static const int n_name_param = std::is_same<ffmesh,Mesh3>::value ? 25 : 19;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
 
@@ -348,68 +348,6 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
   int nt = Th.nt;
   int nbe = Th.nbe;
 
-  // default value for max nv,ntri,ntet  max
-  // division of tetrahedrons in the middle of edges
-  int defaultnvmax = 500000;
-  int defaultntrimax = 1000000;
-  int defaultntetmax = 3000000;
-
-  KN< long > defaultopt(9);
-  /*
-   * defaultopt(0)= 1;
-   * defaultopt(1)= 0;
-   * defaultopt(2)= 64;
-   * defaultopt(3)= 0;
-   * defaultopt(4)= 0;
-   * defaultopt(5)= 3;
-   */
-  defaultopt[0] = 4;      // splitting
-  defaultopt[1] = 0;      // debug
-  defaultopt[2] = 64;     // par default 64
-  defaultopt[3] = 0;      // noswap
-  defaultopt[4] = 0;      // noinsert
-  defaultopt[5] = 0;      // nomove
-  defaultopt[6] = 5;      // imprim
-  defaultopt[7] = 3;      // renum (not use scotch ..)
-  defaultopt[8] = 500;    // renum (not use scotch ..)
-
-  int nvmax;      // (arg(0,stack,-1L));
-  int ntrimax;    // (arg(1,stack,-1L));
-  int ntetmax;    // (arg(2,stack,-1L));
-  KN< int > opt(arg(0, stack, defaultopt));
-
-  int memory(arg(4, stack, -1L));
-
-  cout << "memory =" << memory << "Mb " << endl;
-  if (memory < 0) {
-    nvmax = max((int)1.5 * nv, defaultnvmax);
-    ntrimax = max((int)1.5 * nbe, defaultntrimax);
-    ntetmax = max((int)1.5 * nt, defaultntetmax);
-  } else {
-    int million = 1048576L;
-    int bytes = 0;/*sizeof(MMG_Point) + 0.2 * sizeof(MMG_Tria) + 6 * sizeof(MMG_Tetra) +
-                4 * sizeof(int) + sizeof(MMG_Sol) + sizeof(MMG_Displ) + sizeof(int) +
-                5 * sizeof(int);*/
-    int npask = (double)memory / bytes * million;
-    nvmax = max((int)1.5 * nv, npask);
-    ntetmax = max((int)1.5 * nt, 6 * npask);
-    ntrimax = max((int)1.5 * nbe, (int)(0.3 * npask));
-
-    if (verbosity > 10) {
-      cout << " mmg3d : npask=" << npask << endl;
-      cout << "      memory is given " << endl;
-      cout << "        nvmax " << nvmax << endl;
-      cout << "        ntrimax " << ntrimax << endl;
-      cout << "        ntetmax " << ntetmax << endl;
-    }
-  }
-
-  if (verbosity > 10) {
-    cout << " mmg3d: nvmax " << nvmax << endl;
-    cout << "        ntrimax " << ntrimax << endl;
-    cout << "        ntetmax " << ntetmax << endl;
-  }
-
   KN< double > *pmetric = 0;
 
   if (nargs[0]) {
@@ -453,12 +391,6 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
             exit(EXIT_FAILURE);
           }
         }
-        /*
-        const int ic = 6;
-        char newvalue[sizeof(int)];
-        sprintf(newvalue, "%s", (char *)&ic);
-        sol->offset = *newvalue;
-        */
       }
     }
 
@@ -515,13 +447,6 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
                  MMG5_ARG_end);
 
   Th_T->BuildGTree();
-  
-  /*
-  if (Th.meshS) {
-    if (verbosity > 3) cout << "building of the meshS after trunc on meshS" << endl;
-    Th_T->BuildMeshS( );
-  }
-  */
   
   Add2StackOfPtr2FreeRC(stack, Th_T);
   return Th_T;
@@ -626,18 +551,11 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
 
   Th_T->BuildGTree();
   
-  /*
-  if (Th.meshS) {
-    if (verbosity > 3) cout << "building of the meshS after trunc on meshS" << endl;
-    Th_T->BuildMeshS( );
-  }
-  */
-  
   Add2StackOfPtr2FreeRC(stack, Th_T);
   return Th_T;
 }
 
-static void Load_Init( ) {    // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
+static void Load_Init( ) {
   if (verbosity) {
     cout << " load: mmg3d  " << endl;
   }
