@@ -24,7 +24,14 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+
+## [4.4-4]
+
 ### Added
+- add true 3d anisotrope mesh adadtation  examples/3d/Laplace-Adapt-aniso-3d.edp
+- add examples/3dSurf/Pinochio.edp (extract surface mesh from isovalue)
+- new plugin mmg  with mmg library to replace mmg3.4 and freeyams (Thanks to P-H Tournier)
 - function f.eatspace to reach eof on istream file  which return false in case of EOF. 
 - function f.length to get the istream file length
 - Interface to `PetscLogStagePush()`/`PetscLogStagePop()`
@@ -35,7 +42,7 @@ All notable changes to this project will be documented in this file.
 - PETSc version 3.12.3
 - Change the point search triangle algorithme  to be sure in any case (in test) 
 ### Deprecated
--
+- freeyams plugin 
 
 ### Removed
 -
