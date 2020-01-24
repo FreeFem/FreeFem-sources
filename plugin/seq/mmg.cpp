@@ -356,9 +356,11 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
 
   MMG5_pMesh mesh;
   MMG5_pSol sol;
+  MMG5_pSol met;
 
   mesh = nullptr;
   sol = nullptr;
+  met = nullptr;
 
   MMG3D_Init_mesh(MMG5_ARG_start,
                   MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&sol,
@@ -428,7 +430,7 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
   if (!bls)
     ier = MMG3D_mmg3dlib(mesh,sol);
   else
-    ier = MMG3D_mmg3dls(mesh,sol);
+    ier = MMG3D_mmg3dls(mesh,sol,met);
   
   /*
   if ( MMG5_saveMesh_centralized(mesh,"test.mesh") != 1 ) { 
@@ -557,7 +559,7 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
 
 static void Load_Init( ) {
   if (verbosity) {
-    cout << " load: mmg3d  " << endl;
+    cout << " load: mmg " << endl;
   }
 
   Global.Add("mmg3d", "(", new mmg_ff<Mesh3>);
