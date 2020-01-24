@@ -78,8 +78,8 @@ ff-flags: ../Makefile Makefile
 	grep 'CNOFLAGS *=' ../Makefile >> ff-flags
 	grep 'FF_prefix_petsc *=' ../Makefile >> ff-flags
 	-awk '/^scotch LD /&&/petsc/ {print "scotch_dir=$$(FF_prefix_petsc)/real" }' ../../plugin/seq/WHERE_LIBRARY-config >> ff-flags
-	-awk '/^scotch LD /{print "scotch_dir=../../3rdparty/" }' ../lib/WHERE.scotch >> ff-flags
+	-awk '/^scotch LD /{print "scotch_dir=../../../3rdparty/" }' ../lib/WHERE.scotch >> ff-flags
 	-awk '/^metis LD /&&/petsc/ {print "metis_dir=$$(FF_prefix_petsc)/real" }' ../../plugin/seq/WHERE_LIBRARY-config >> ff-flags
-	-awk '/^metis LD /{print "metis_dir=../../3rdparty/" }' ../lib/WHERE.metis >> ff-flags
+	-awk '/^metis LD /{print "metis_dir=../../../3rdparty/" }' ../lib/WHERE.metis >> ff-flags
 	
 .PHONY:$(SRCDIR)/$(INSTALL)
