@@ -3258,7 +3258,7 @@ void ThePlot::DrawIsoEfill(const R3 Pt[2],const R ff[2],const R * Viso,int NbIso
             color(l+4);
             R3 P[10];
             for(int i=0;i<im;++i)
-                P[i]= R3(PQ[i].x,PQ[i].y,rapz*z[i]); //PQ[i].z);
+                P[i]= R3(PQ[i].x,PQ[i].y,PQ[i].z+rapz*z[i]);
             
             glLineWidth(3);
             glPolygonMode(GL_FRONT,GL_LINE);
