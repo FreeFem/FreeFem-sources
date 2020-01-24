@@ -2474,7 +2474,7 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - MKL: $ff_mkl])
   AC_MSG_NOTICE([ - MMG3D: $ff_mmg3d_ok])
   AC_MSG_NOTICE([ - MMG: $ff_mmg_])
-  AC_MSG_NOTICE([ - MMG: $ff_parmmg_])
+  AC_MSG_NOTICE([ - PARMMG: $ff_parmmg_])
   AC_MSG_NOTICE([ - MPI: $ff_mpi])
   AC_MSG_NOTICE([ - MSHMET: $ff_mshmet_])
   AC_MSG_NOTICE([ - MUMPS: $ff_mumps_])

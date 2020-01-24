@@ -74,7 +74,7 @@ ff-flags: ../Makefile Makefile
 	grep 'STD_LIBS *=' ../Makefile >> ff-flags
 	grep 'CNOFLAGS *=' ../Makefile >> ff-flags
 	grep 'FF_prefix_petsc *=' ../Makefile >> ff-flags
-	awk '/^scotch LD /&&/petsc/ {print "scotch_dir=$$(FF_prefix_petsc)/real" }' ../../plugin/seq/WHERE_LIBRARY-config >> ff-flags
-	awk '/^scotch LD /{print "scotch_dir=../../3rdparty/" }' ../../plugin/seq/WHERE_LIBRARY-download >> ff-flags
+	-awk '/^scotch LD /&&/petsc/ {print "scotch_dir=$$(FF_prefix_petsc)/real" }' ../../plugin/seq/WHERE_LIBRARY-config >> ff-flags
+	-awk '/^scotch LD /{print "scotch_dir=../../3rdparty/" }' ../lib/WHERE.scotch >> ff-flags
 
 .PHONY:$(SRCDIR)/$(INSTALL)
