@@ -1,5 +1,5 @@
---- ./mmg-sources/src/common/chrono.h	2019-10-30 09:56:28.000000000 +0100
-+++ ./mmg-sources-ok/src/common/chrono.h	2020-01-22 17:56:05.246908700 +0100
+--- ./mmg-sources/src/common/chrono.h
++++ ./mmg-sources-ok/src/common/chrono.h
 @@ -26,7 +26,9 @@
  
  #include <time.h>
@@ -11,3 +11,9 @@
  #ifndef POSIX
  #include <windows.h>
  #else
+--- ./mmg-sources/CMakeLists.txt
++++ ./mmg-sources-ok/CMakeLists.txt
+226c226
+< FIND_PACKAGE(VTK)
+---
+> #FIND_PACKAGE(VTK)

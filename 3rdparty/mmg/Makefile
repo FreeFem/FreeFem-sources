@@ -20,9 +20,9 @@ FAIT.done:tag-tar
 	-mkdir build
 	cd build && cmake ../mmg-sources \
 	-DCMAKE_C_COMPILER=$(CC) \
-	-DCMAKE_C_FLAGS="-O3 -fPIC" \
+	-DCMAKE_C_FLAGS="$(CFLAGS) -fPIC" \
 	-DCMAKE_CXX_COMPILER=$(CXX) \
-	-DCMAKE_CXX_FLAGS="-O3 -fPIC" \
+	-DCMAKE_CXX_FLAGS="$(CXXFLAGS) $(CXX11FLAGS) -fPIC" \
 	-DM_LIB="-lm" \
 	-DSCOTCH_DIR=$(scotch_dir) \
 	-DCMAKE_BUILD_TYPE=Release && $(MAKE)
@@ -55,20 +55,26 @@ tag-tar: $(PACKAGE)
 	patch -p1 <patch-mmg.txt
 	touch tag-tar
 
-$(PACKAGE):
+$(PACKAGE): FORCE
 	../getall -o mmg -a
+
+FORCE:
 
 clean::
 	-rm ff-flags
 	-rm FAIT* 
 	-rm -rf mmg-* build
 	-rm flags-* tag-tar*
+	-rm -rf ../include/mmg
+	-rm ../lib/libmmg.a
 
 ff-flags: ../Makefile Makefile
 	grep 'abs_top_builddir *=' ../Makefile > ff-flags
 	grep 'CC *=' ../Makefile >> ff-flags
-	grep 'CXX *=' ../Makefile >> ff-flags
 	grep 'CFLAGS *=' ../Makefile >> ff-flags
+	grep 'CXX *=' ../Makefile >> ff-flags
+	grep 'CXXFLAGS *=' ../Makefile >> ff-flags
+	grep 'CXX11FLAGS *=' ../Makefile >> ff-flags
 	grep 'LDFLAGS *=' ../Makefile >> ff-flags
 	grep 'AR *=' ../Makefile >> ff-flags
 	grep 'ARFLAGS *=' ../Makefile >> ff-flags
