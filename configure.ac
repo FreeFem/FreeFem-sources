@@ -2074,6 +2074,7 @@ m4_map([AC_FF_WHERELIB],[
 	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
 	[[mmg3d],[-lmmg3d-v4],[libmmg3d.h],[]],
         [[mmg],[-lmmg],[libmmg.h],[]],
+        [[parmmg],[-lparmmg],[libparmmg.h],[]],
 	[[mshmet],[-lmshmet],[mshmetlib.h],[]],
 dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 	[[tetgen],[-ltet],[tetgen.h],[]],
@@ -2090,6 +2091,7 @@ TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
 TOOL_DISABLE(parmetis,parmetis.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg,mmg.$DYLIB_SUFFIX)
+TOOL_DISABLE(parmmg,parmmg.$DYLIB_SUFFIX)
 TOOL_DISABLE(mshmet,"mshmet.$DYLIB_SUFFIX aniso.$DYLIB_SUFFIX")
 TOOL_DISABLE(gmm,ilut.$DYLIB_SUFFIX,,enable_gmm=no)
 TOOL_DISABLE(scalapack,"MUMPS.$DYLIB_SUFFIX")
@@ -2288,6 +2290,7 @@ AM_CONDITIONAL([METIS], [test "$ff_metis_ok" = yes -o -n "$TOOL_COMPILE_metis" ]
 AM_CONDITIONAL([MKL], [test "$ff_mkl" = yes])
 AM_CONDITIONAL([MMG3D], [test "$ff_mmg3d_ok" = yes -o -n "$TOOL_COMPILE_mmg3d"])
 AM_CONDITIONAL([MMG], [test "$ff_mmg_ok" = yes -o -n "$TOOL_COMPILE_mmg"])
+AM_CONDITIONAL([PARMMG], [test "$ff_parmmg_ok" = yes -o -n "$TOOL_COMPILE_parmmg"])
 AM_CONDITIONAL([MPI], [test "$ff_mpi" = yes])
 AM_CONDITIONAL([MSHMET], [test "$ff_mshmet_ok" = yes -o -n "$TOOL_COMPILE_mshmet"])
 AM_CONDITIONAL([MUMPS], [test "$ff_mumps_ok" = yes -o -n "$TOOL_COMPILE_mumps"])
@@ -2391,6 +2394,9 @@ if test "$enable_download" = yes; then
   if test -n "$TOOL_COMPILE_mmg"; then
     AC_MSG_NOTICE([      use of download mmg  ])
   fi
+  if test -n "$TOOL_COMPILE_parmmg"; then
+    AC_MSG_NOTICE([      use of download parmmg  ])
+  fi
   if test -n "$TOOL_COMPILE_parmetis"; then
     AC_MSG_NOTICE([      use of download parmetis])
   fi
@@ -2468,6 +2474,7 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - MKL: $ff_mkl])
   AC_MSG_NOTICE([ - MMG3D: $ff_mmg3d_ok])
   AC_MSG_NOTICE([ - MMG: $ff_mmg_])
+  AC_MSG_NOTICE([ - MMG: $ff_parmmg_])
   AC_MSG_NOTICE([ - MPI: $ff_mpi])
   AC_MSG_NOTICE([ - MSHMET: $ff_mshmet_])
   AC_MSG_NOTICE([ - MUMPS: $ff_mumps_])

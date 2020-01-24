@@ -1,46 +1,50 @@
 # Downloading and compiling extra libraries
 # -----------------------------------------
 
-all-local: mmg
+all-local: parmmg
 
 include ff-flags
 
-# Downloading and compiling mmg
+# Downloading and compiling parmmg
 # -------------------------------
 #
 DIRPKG= ../pkg
 SRCDIR= .
-PACKAGE=$(DIRPKG)/mmg.zip
+PACKAGE=$(DIRPKG)/parmmg.zip
 INSTALL=.
-mmg_VERSION=
+parmmg_VERSION=
 
-mmg:WHERE.done
+parmmg:WHERE.done
 
 FAIT.done:tag-tar
 	-mkdir build
-	cd build && cmake ../mmg-sources \
+	cd build && cmake ../parmmg-sources \
 	-DCMAKE_C_COMPILER=$(CC) \
 	-DCMAKE_C_FLAGS="-O3 -fPIC" \
-	-DM_LIB="-lm" \
+	-DDOWNLOAD_MMG=OFF \
+	-DDOWNLOAD_METIS=OFF \
+	-DMMG_DIR=../../mmg/mmg-sources \
+	-DMMG_BUILDDIR=../../mmg/build \
 	-DSCOTCH_DIR=$(scotch_dir) \
+	-DMETIS_DIR=$(metis_dir) \
 	-DCMAKE_BUILD_TYPE=Release && $(MAKE)
 	touch FAIT.done
 
 install.done:FAIT.done
-	cp -r build/include/mmg ../include/mmg
-	cp build/lib/libmmg.a ../lib
+	cp -r build/include/parmmg ../include/parmmg
+	cp build/lib/libparmmg.a ../lib
 	touch $@
 clean::
 	-rm install.done FAIT.done
 
-mmg:$(PACKAGE)
+parmmg:$(PACKAGE)
 
 install:install.done WHERE.done
 
 WHERE.done: install.done
-	echo mmg  LD -L@DIR@/lib -lmmg  >../lib/WHERE.mmg ;
-	echo mmg INCLUDE -I@DIR@/include/>> ../lib/WHERE.mmg ;
-	echo build WHERE ./lib/WHERE.mmg ;
+	echo parmmg  LD -L@DIR@/lib -lparmmg  >../lib/WHERE.parmmg ;
+	echo parmmg INCLUDE -I@DIR@/include/>> ../lib/WHERE.parmmg ;
+	echo build WHERE ./lib/WHERE.parmmg ;
 	touch $@
 clean::
 	-rm WHERE.done
@@ -48,18 +52,17 @@ clean::
 FAIRE: FAIT.done install.done
 
 tag-tar: $(PACKAGE)
-	-rm -rf  mmg-*
-	unzip $(PACKAGE) && mv mmg-* mmg-sources
-	patch -p1 <patch-mmg.txt
+	-rm -rf  ParMmg-*
+	unzip $(PACKAGE) && mv ParMmg-* parmmg-sources
 	touch tag-tar
 
 $(PACKAGE):
-	../getall -o mmg -a
+	../getall -o parmmg -a
 
 clean::
 	-rm ff-flags
 	-rm FAIT* 
-	-rm -rf mmg-* build
+	-rm -rf ParMmg-* parmmg-sources build
 	-rm flags-* tag-tar*
 
 ff-flags: ../Makefile Makefile
@@ -76,5 +79,7 @@ ff-flags: ../Makefile Makefile
 	grep 'FF_prefix_petsc *=' ../Makefile >> ff-flags
 	awk '/^scotch LD /&&/petsc/ {print "scotch_dir=$$(FF_prefix_petsc)/real" }' ../../plugin/seq/WHERE_LIBRARY-config >> ff-flags
 	awk '/^scotch LD /{print "scotch_dir=../../3rdparty/" }' ../../plugin/seq/WHERE_LIBRARY-download >> ff-flags
-
+	awk '/^metis LD /&&/petsc/ {print "metis_dir=$$(FF_prefix_petsc)/real" }' ../../plugin/seq/WHERE_LIBRARY-config >> ff-flags
+	awk '/^metis LD /{print "metis_dir=../../3rdparty/" }' ../../plugin/seq/WHERE_LIBRARY-download >> ff-flags
+	
 .PHONY:$(SRCDIR)/$(INSTALL)

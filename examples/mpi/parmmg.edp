@@ -1,0 +1,27 @@
+//ff-mpirun -np 4 parmmg.edp -wg 
+
+// for the make check:
+// NBPROC 4
+// PARAM
+
+load "msh3"
+load "medit"
+load "parmmg"
+
+int nn = 40;
+
+mesh3 Th3=cube(nn,nn,nn);
+
+func sphere = sqrt((x-0.5)^2+(y-0.5)^2+(z-0.5)^2)-0.3;
+real hmin = 0.02;
+real hmax = 0.1;
+
+fespace Uh(Th3,P1);
+Uh met = max(hmin,min(hmax,abs(sphere)));
+
+// centralized input ; input mesh is from rank 0
+Th3 = parmmg3d(Th3,metric=met[],comm=mpiCommWorld);
+// output mesh is broadcast to all processes in comm
+
+if (mpirank == 0)
+  medit("Th3",Th3);
