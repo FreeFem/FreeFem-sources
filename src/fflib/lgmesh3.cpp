@@ -2937,19 +2937,19 @@ TheOperators->Add("=",
  Global.Add("dxz","(",new E_F1_funcT<Complex,pf3c>(pf3r2R<Complex,op_dxz,v_fes3>));
  Global.Add("dyz","(",new E_F1_funcT<Complex,pf3c>(pf3r2R<Complex,op_dyz,v_fes3>));
  // surface 3D real
- Global.Add("dx","(",new E_F1_funcT<Complex,pfSr>(pfSr2R<Complex,op_dx,v_fesS>));
- Global.Add("dy","(",new E_F1_funcT<Complex,pfSr>(pfSr2R<Complex,op_dy,v_fesS>));
- Global.Add("dz","(",new E_F1_funcT<Complex,pfSr>(pfSr2R<Complex,op_dz,v_fesS>));
- Global.Add("dxx","(",new E_F1_funcT<Complex,pfSr>(pfSr2R<Complex,op_dxx,v_fesS>));
- Global.Add("dyy","(",new E_F1_funcT<Complex,pfSr>(pfSr2R<Complex,op_dyy,v_fesS>));
- Global.Add("dxy","(",new E_F1_funcT<Complex,pfSr>(pfSr2R<Complex,op_dxy,v_fesS>));
- Global.Add("dyx","(",new E_F1_funcT<Complex,pfSr>(pfSr2R<Complex,op_dyx,v_fesS>));
- Global.Add("dzx","(",new E_F1_funcT<Complex,pfSr>(pfSr2R<Complex,op_dzx,v_fesS>));
- Global.Add("dzy","(",new E_F1_funcT<Complex,pfSr>(pfSr2R<Complex,op_dzy,v_fesS>));
- Global.Add("dzz","(",new E_F1_funcT<Complex,pfSr>(pfSr2R<Complex,op_dzz,v_fesS>));
- Global.Add("dxz","(",new E_F1_funcT<Complex,pfSr>(pfSr2R<Complex,op_dxz,v_fesS>));
- Global.Add("dyz","(",new E_F1_funcT<Complex,pfSr>(pfSr2R<Complex,op_dyz,v_fesS>));
- // surface 3D
+ Global.Add("dx","(",new E_F1_funcT<double,pfSr>(pfSr2R<R,op_dx,v_fesS>));
+ Global.Add("dy","(",new E_F1_funcT<double,pfSr>(pfSr2R<R,op_dy,v_fesS>));
+ Global.Add("dz","(",new E_F1_funcT<double,pfSr>(pfSr2R<R,op_dz,v_fesS>));
+ Global.Add("dxx","(",new E_F1_funcT<double,pfSr>(pfSr2R<R,op_dxx,v_fesS>));
+ Global.Add("dyy","(",new E_F1_funcT<double,pfSr>(pfSr2R<R,op_dyy,v_fesS>));
+ Global.Add("dxy","(",new E_F1_funcT<double,pfSr>(pfSr2R<R,op_dxy,v_fesS>));
+ Global.Add("dyx","(",new E_F1_funcT<double,pfSr>(pfSr2R<R,op_dyx,v_fesS>));
+ Global.Add("dzx","(",new E_F1_funcT<double,pfSr>(pfSr2R<R,op_dzx,v_fesS>));
+ Global.Add("dzy","(",new E_F1_funcT<double,pfSr>(pfSr2R<R,op_dzy,v_fesS>));
+ Global.Add("dzz","(",new E_F1_funcT<double,pfSr>(pfSr2R<R,op_dzz,v_fesS>));
+ Global.Add("dxz","(",new E_F1_funcT<double,pfSr>(pfSr2R<R,op_dxz,v_fesS>));
+ Global.Add("dyz","(",new E_F1_funcT<double,pfSr>(pfSr2R<R,op_dyz,v_fesS>));
+ // surface 3D complex
  Global.Add("dx","(",new E_F1_funcT<Complex,pfSc>(pfSr2R<Complex,op_dx,v_fesS>));
  Global.Add("dy","(",new E_F1_funcT<Complex,pfSc>(pfSr2R<Complex,op_dy,v_fesS>));
  Global.Add("dz","(",new E_F1_funcT<Complex,pfSc>(pfSr2R<Complex,op_dz,v_fesS>));
@@ -2963,19 +2963,19 @@ TheOperators->Add("=",
  Global.Add("dxz","(",new E_F1_funcT<Complex,pfSc>(pfSr2R<Complex,op_dxz,v_fesS>));
  Global.Add("dyz","(",new E_F1_funcT<Complex,pfSc>(pfSr2R<Complex,op_dyz,v_fesS>));
  // curve 3D real
- Global.Add("dx","(",new E_F1_funcT<Complex,pfLr>(pfLr2R<Complex,op_dx,v_fesL>));
- Global.Add("dy","(",new E_F1_funcT<Complex,pfLr>(pfLr2R<Complex,op_dy,v_fesL>));
- Global.Add("dz","(",new E_F1_funcT<Complex,pfLr>(pfLr2R<Complex,op_dz,v_fesL>));
- Global.Add("dxx","(",new E_F1_funcT<Complex,pfLr>(pfLr2R<Complex,op_dxx,v_fesL>));
- Global.Add("dyy","(",new E_F1_funcT<Complex,pfLr>(pfLr2R<Complex,op_dyy,v_fesL>));
- Global.Add("dxy","(",new E_F1_funcT<Complex,pfLr>(pfLr2R<Complex,op_dxy,v_fesL>));
- Global.Add("dyx","(",new E_F1_funcT<Complex,pfLr>(pfLr2R<Complex,op_dyx,v_fesL>));
- Global.Add("dzx","(",new E_F1_funcT<Complex,pfLr>(pfLr2R<Complex,op_dzx,v_fesL>));
- Global.Add("dzy","(",new E_F1_funcT<Complex,pfLr>(pfLr2R<Complex,op_dzy,v_fesL>));
- Global.Add("dzz","(",new E_F1_funcT<Complex,pfLr>(pfLr2R<Complex,op_dzz,v_fesL>));
- Global.Add("dxz","(",new E_F1_funcT<Complex,pfLr>(pfLr2R<Complex,op_dxz,v_fesL>));
- Global.Add("dyz","(",new E_F1_funcT<Complex,pfLr>(pfLr2R<Complex,op_dyz,v_fesL>));
- // curve 3D
+ Global.Add("dx","(",new E_F1_funcT<double,pfLr>(pfLr2R<R,op_dx,v_fesL>));
+ Global.Add("dy","(",new E_F1_funcT<double,pfLr>(pfLr2R<R,op_dy,v_fesL>));
+ Global.Add("dz","(",new E_F1_funcT<double,pfLr>(pfLr2R<R,op_dz,v_fesL>));
+ Global.Add("dxx","(",new E_F1_funcT<double,pfLr>(pfLr2R<R,op_dxx,v_fesL>));
+ Global.Add("dyy","(",new E_F1_funcT<double,pfLr>(pfLr2R<R,op_dyy,v_fesL>));
+ Global.Add("dxy","(",new E_F1_funcT<double,pfLr>(pfLr2R<R,op_dxy,v_fesL>));
+ Global.Add("dyx","(",new E_F1_funcT<double,pfLr>(pfLr2R<R,op_dyx,v_fesL>));
+ Global.Add("dzx","(",new E_F1_funcT<double,pfLr>(pfLr2R<R,op_dzx,v_fesL>));
+ Global.Add("dzy","(",new E_F1_funcT<double,pfLr>(pfLr2R<R,op_dzy,v_fesL>));
+ Global.Add("dzz","(",new E_F1_funcT<double,pfLr>(pfLr2R<R,op_dzz,v_fesL>));
+ Global.Add("dxz","(",new E_F1_funcT<double,pfLr>(pfLr2R<R,op_dxz,v_fesL>));
+ Global.Add("dyz","(",new E_F1_funcT<double,pfLr>(pfLr2R<R,op_dyz,v_fesL>));
+ // curve 3D complex
  Global.Add("dx","(",new E_F1_funcT<Complex,pfLc>(pfLr2R<Complex,op_dx,v_fesL>));
  Global.Add("dy","(",new E_F1_funcT<Complex,pfLc>(pfLr2R<Complex,op_dy,v_fesL>));
  Global.Add("dz","(",new E_F1_funcT<Complex,pfLc>(pfLr2R<Complex,op_dz,v_fesL>));
