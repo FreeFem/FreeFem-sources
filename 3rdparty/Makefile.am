@@ -45,6 +45,7 @@ EXTRA_DIST= \
 ./tetgen/Makefile \
 ./tetgen/patches.win64 \
 ./mmg/Makefile \
+./parmmg/Makefile \
 ./yams/Makefile \
 ./yams/freeyams.2012.02.05.patch \
 ./yams/freeyams.2012.02.05-return-values.patch \
@@ -64,7 +65,7 @@ getall
 # FFCS: See [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be deactivated
 
 
-MPI_SOFT= @TOOL_COMPILE_scalapack@ @TOOL_COMPILE_parmetis@ @TOOL_COMPILE_mumps@ 
+MPI_SOFT= @TOOL_COMPILE_scalapack@ @TOOL_COMPILE_parmetis@ @TOOL_COMPILE_parmmg@ @TOOL_COMPILE_mumps@
 
 LIST_SOFT= @DOWNLOAD_FFTW@ @TOOL_COMPILE_tetgen@ @TOOL_COMPILE_metis@ @TOOL_COMPILE_superlu@ \
 	@TOOL_COMPILE_scotch@ @TOOL_COMPILE_mshmet@			\
