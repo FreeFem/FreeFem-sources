@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: mmg
+//ff-c++-LIBRARY-dep: scotch mmg
 //ff-c++-cpp-dep:
 
 #include "ff++.hpp"

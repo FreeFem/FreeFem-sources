@@ -1,6 +1,6 @@
 load "msh3"
-load "tetgen"
 load "mshmet"
+load "mmg"
 load "medit"
 load "PETSc"
 macro dimension()3// EOM            // 2D or 3D
@@ -17,12 +17,15 @@ varf vPoisson(u, v) = int3d(Th3)(grad(u)' * grad(v)) + int3d(Th3)(v) + on(1, u=0
 
 meshN ThBackup = Th3;
 Mat A;
-buildMatMinimalist(Th3, A, P1);
+int[int] n2o;
+NewMacro Th3N2O() n2o EndMacro
+buildDmesh(Th3);
+createMat(Th3, A, P1);
 fespace Vh(Th3, P1);
 Vh u;
 real err = 1e-2;
 
-int iMax = 4;
+int iMax = 5;
 for(int i = 0; i < iMax; ++i) {
     A = vPoisson(Vh, Vh, tgv = -2);
     set(A, sparams = "-ksp_monitor -pc_type hypre");
@@ -34,22 +37,21 @@ for(int i = 0; i < iMax; ++i) {
         fespace VhBackup(ThBackup, P1);
         VhBackup h, hReduced;
         u[] .*= A.D;
-        searchMethod = 0;
-        h = u;
-        searchMethod = 1;
+        int[int] rest = restrict(Vh, VhBackup, n2o);
+        for[i, v : rest] h[][v] = u[][i];
         mpiAllReduce(h[], hReduced[], mpiCommWorld, mpiSUM);
         if(mpirank == 0) {
-            h[] = mshmet(ThBackup, hReduced, normalization=1, aniso=0, nbregul=1, hmin=1e-3, hmax=0.3, err=err);
-            plot(hReduced, wait=1, fill=0, boundary=0, CutPlane=0, ShowMeshes=1, LabelColors=0);
-            Th3 = tetgreconstruction(ThBackup, switch="raAQ", sizeofvolume=h*h*h/6.0);
-            medit("U-adapt-iso-" + i, Th3, hReduced, wait=1);
+            real[int] met = mshmet(ThBackup, hReduced, aniso=1, hmin=1e-3, hmax=0.2, err=err);
+            plot(hReduced);
+            Th3 = mmg3d(ThBackup, metric = met, hgrad = 3.0);
+            medit("U-adapt-iso-" + i, Th3, hReduced);
         }
         broadcast(processor(0), Th3);
         ThBackup = Th3;
         Mat Adapt;
-        buildMatMinimalist(Th3, Adapt, P1);
+        createMat(Th3, Adapt, P1);
         A = Adapt;
         u = hReduced;
-        err *= 0.8;
+        err *= 0.5;
     }
 }

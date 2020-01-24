@@ -21,6 +21,7 @@ FAIT.done:tag-tar
 	cd build && cmake ../mmg-sources \
 	-DCMAKE_C_COMPILER=$(CC) \
 	-DCMAKE_C_FLAGS="-O3 -fPIC" \
+	-DM_LIB="-lm" \
 	-DCMAKE_BUILD_TYPE=Release && $(MAKE)
 	touch FAIT.done
 
@@ -49,6 +50,7 @@ FAIRE: FAIT.done install.done
 tag-tar: $(PACKAGE)
 	-rm -rf  mmg-*
 	unzip $(PACKAGE) && mv mmg-* mmg-sources
+	patch -p1 <patch-mmg.txt
 	touch tag-tar
 
 $(PACKAGE):
