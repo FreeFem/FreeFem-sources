@@ -29,15 +29,15 @@ $(SRCDIR)/FAIT-mpi:
 	touch $(SRCDIR)/FAIT-mpi
 
 install.done:$(SRCDIR)/tag-compile
-	-mkdir -p ../include/parmetis
-	-mkdir -p ../lib/parmetis
-	#test -z "$(MPIRUN)" || cp $(SRCDIR)/libparmetis.a ../lib/parmetis
-	cp $(SRCDIR)/libmetis.a ../lib/parmetis
-	cp $(SRCDIR)/include/*.h ../include/parmetis
-	cp $(SRCDIR)/metis/include/*.h ../include/parmetis
+	-mkdir -p ../include
+	-mkdir -p ../lib
+	#test -z "$(MPIRUN)" || cp $(SRCDIR)/libparmetis.a ../lib
+	cp $(SRCDIR)/libmetis.a ../lib
+	cp $(SRCDIR)/include/*.h ../include
+	cp $(SRCDIR)/metis/include/*.h ../include
 	touch $@
 install-mpi.done:$(SRCDIR)/tag-compile-mpi
-	cp $(SRCDIR)/libparmetis.a ../lib/parmetis
+	cp $(SRCDIR)/libparmetis.a ../lib
 	touch $@
 
 FAIRE: $(SRCDIR)/FAIT 
@@ -69,13 +69,13 @@ $(SRCDIR)/tag-compile-mpi: $(SRCDIR)/tags
 
 WHERE: install.done
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
-		echo metis LD -L@DIR@/lib/parmetis  -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
-		echo metis INCLUDE -I@DIR@/include/parmetis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+		echo metis LD -L@DIR@/lib  -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+		echo metis INCLUDE -I@DIR@/include   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
 	fi
 WHERE-mpi: install-mpi.done
 	-if [ -f $(SRCDIR)/FAIT-mpi ] ; then \
-		echo parmetis LD -L@DIR@/lib/parmetis -lparmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
-		echo parmetis INCLUDE -I@DIR@/include/parmetis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
+		echo parmetis LD -L@DIR@/lib -lparmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
+		echo parmetis INCLUDE -I@DIR@/include   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;\
 	fi
 
 
@@ -133,8 +133,8 @@ install.done-old:compile.done
 
 # FFCS - simpler makefile
 WHERE.done:install.done
-	echo parmetis LD -L@DIR@/lib/parmetis -lparmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;
-	echo parmetis INCLUDE -I@DIR@/include/parmetis   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;
+	echo parmetis LD -L@DIR@/lib -lparmetis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;
+	echo parmetis INCLUDE -I@DIR@/include   >> $(SRCDIR)/$(INSTALL)/lib/WHERE.parmetis ;
 	touch $@
 
 Makefile.in: ../../config.status Makefile-parmetis.in
@@ -173,6 +173,8 @@ clean:
 	-rm -rf ../lib/parmetis
 	-rm -rf ../include/parmetis
 #	-rm -rf ../include/metis
+	-rm lib/libmetis.* ib/libparmetis.*
+	-rm include/metis.h include/parmetis.h 
 	-rm -rf $(SRCDIR)
 	-rm *.done
 	-rm FAIRE* WHERE*

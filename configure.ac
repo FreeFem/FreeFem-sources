@@ -969,6 +969,8 @@ AC_ARG_WITH(petsc,[  --with-petsc=/usr/local/petsc/conf/petscvariables   --witho
 AC_ARG_WITH(prefix_petsc,[ --prefix_petsc=dirtory where all petsc/slepc  will be install if you download ])
 if test -z "${prefix_petsc}"  ; then   prefix_petsc="${prefix}/ff-petsc/"; fi
 AC_SUBST([FF_prefix_petsc],"$prefix_petsc")
+AC_SUBST([FF_prefix_petsc_real],"$prefix_petsc_real")
+AC_SUBST([FF_prefix_petsc_complex],"$prefix_petsc_complex")
 AC_SUBST([FF_generic_petsc],"$enable_generic")
 # /usr/local/petsc/conf/petscvariables
 #/usr/local/ff++/petsc/lib/petsc/conf/petscvariables
@@ -984,37 +986,40 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		 echo " petsc ... $ffconfpetsc"
 	    if test -f "$ffconfpetsc" ; then
 		if test  "$ff_petsc_ok" = no ; then
+		    PETSC_PREFIXDIR=`awk -F' *= *' '"PREFIXDIR"==$1 {print $2}' "$ffconfpetsc"`
 		    PETSC_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetsc"`
 		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
-				PETSC_MPIRUN=`echo "$PETSC_MPIRUN" | awk '{gsub(" --oversubscribe", ""); print}'`	#remove --oversubscribe
-			AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]);
-            WPETSC_MPIRUN=`which "$PETSC_MPIRUN"`
-            WMPIRUN=`which "$MPIRUN"` 
+		    PETSC_MPIRUN=`echo "$PETSC_MPIRUN" | awk '{gsub(" --oversubscribe", ""); print}'`	#remove --oversubscribe
+		    AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]);
+                    WPETSC_MPIRUN=`which "$PETSC_MPIRUN"`
+                    WMPIRUN=`which "$MPIRUN"` 
 		    test  "$PETSC_SCALAR" = "real" && test "$ff_win32" = yes -o  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s "$WPETSC_MPIRUN" "$WMPIRUN"
 		    if test "$?"  -eq 0 ; then
+	                AC_SUBST([FF_conf_petsc_real],"$ffconfpetsc")
+		        AC_SUBST([FF_prefix_petsc_real],"$PETSC_PREFIXDIR")
 		        AC_FF_PETSC_WHERELIB_BASIC(petsc,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetsc)
-                ff_SCOTCH_INCLUDE=$ff_PTSCOTCH_INCLUDE
-                ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*ptscotch@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*ptes@<:@^ @:>@*//g'`
-                if test -n "$ff_SCOTCH_LIB"; then
-                    ff_scotch_ok=yes;
-                    AC_FF_ADDWHERELIB(scotch,$ff_SCOTCH_LIB,$ff_SCOTCH_INCLUDE)
-                    AC_SUBST([TOOL_COMPILE_scotch],"")
-                fi
+                        ff_SCOTCH_INCLUDE=$ff_PTSCOTCH_INCLUDE
+                        ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*ptscotch@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*ptes@<:@^ @:>@*//g'`
+                        if test -n "$ff_SCOTCH_LIB"; then
+                          ff_scotch_ok=yes;
+                          AC_FF_ADDWHERELIB(scotch,$ff_SCOTCH_LIB,$ff_SCOTCH_INCLUDE)
+                          AC_SUBST([TOOL_COMPILE_scotch],"")
+                        fi
 		        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetsc)
-                AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetsc)
-                AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetsc)
-                AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetsc)
+                        AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetsc)
+                        AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetsc)
+                        AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetsc)
-  			    AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetsc)
-			    AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetsc)
-                if test -f $d/libslepc.$ff_suffix_dylib ; then
-				   ff_slepc_ok=yes
-                   ff_SLEPC_LIB="-Wl,-rpath,$d -L$d -lslepc"
-			       AC_FF_ADDWHERELIB(slepc,$ff_SLEPC_LIB,$ff_where_inc_petsc)
-				fi
+  		        AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetsc)
+			AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetsc)
+                        if test -f $d/libslepc.$ff_suffix_dylib ; then
+			   ff_slepc_ok=yes
+                           ff_SLEPC_LIB="-Wl,-rpath,$d -L$d -lslepc"
+			   AC_FF_ADDWHERELIB(slepc,$ff_SLEPC_LIB,$ff_where_inc_petsc)
+		        fi
 		    else
 			 AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN or $PETSC_SCALAR != real ." ]);
 		    fi
@@ -1046,10 +1051,15 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
 	    if test -f "$ffconfpetscc" -a  "$ff_petsccomplex_ok" = no ; then
 		    PETSC_COMPLEX_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetscc"`
 		    PETSC_COMPLEX_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetscc"`
+		    PETSC_COMPLEX_PREFIXDIR=`awk -F' *= *' '"PREFIXDIR"==$1 {print $2}' "$ffconfpetscc"`
+		    
 			PETSC_COMPLEX_MPIRUN=`echo "$PETSC_COMPLEX_MPIRUN" | awk '{print $1}'`	#remove --oversubscribe
 			AC_MSG_NOTICE([ find complex ($PETSC_COMPLEX_SCALAR) petsc in $ffconfpetscc]);
 		    test  "$PETSC_COMPLEX_SCALAR" = "complex" &&  test  "$ff_win32" = yes -o  "$PETSC_COMPLEX_MPIRUN" = "$MPIRUN" ||  cmp -s `which "$PETSC_COMPLEX_MPIRUN"` `which "$MPIRUN"`
 		   	if test "$?"  -eq 0 ; then
+            AC_SUBST([FF_prefix_petsc_complex],"$PETSC_COMPLEX_PREFIXDIR")
+            AC_SUBST([FF_conf_petsc_complex],"$ffconfpetscc")
+	    
             AC_FF_PETSC_WHERELIB_BASIC(petsccomplex,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetscc)
