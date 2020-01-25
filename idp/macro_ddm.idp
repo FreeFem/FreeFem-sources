@@ -329,12 +329,12 @@ IFMACRO(!vectorialfe)
                 fespace singleComponentWh(meshName[0], P);
                 fespace WhIntersection(meshIntersection[i], P);
 ENDIFMACRO
-                matrix R = interpolate(WhIntersection, singleComponentWh);
-                R.thresholding(1.0e-10);
-                real[int] C;
-                int[int] I;
-                [I, intersection[1 + i - j], C] = R;
-                intersection[1 + i - j].resize(R.nbcoef);
+                matrix meshName#R = interpolate(WhIntersection, singleComponentWh);
+                meshName#R.thresholding(1.0e-10);
+                real[int] meshName#C;
+                int[int] meshName#I;
+                [meshName#I, intersection[1 + i - j], meshName#C] = meshName#R;
+                intersection[1 + i - j].resize(meshName#R.nbcoef);
                 intersection[0][i - j] = intersection[0][i];
             }
         }
@@ -426,7 +426,7 @@ macro createMat(ThName, MatName, PkName)
 IFMACRO(privateDmesh#ThName)
 {
 IFMACRO(!privateCreateMatCheckDmesh)
-    if(ThName.nv != privateDmesh#ThName#khi[0].n) {
+    if(ThName.nv != privateDmesh#ThName#khi[0].n || ThName.nt != privateDmesh#ThName#khi[1].n) {
         buildDmesh(ThName)
     }
 ENDIFMACRO

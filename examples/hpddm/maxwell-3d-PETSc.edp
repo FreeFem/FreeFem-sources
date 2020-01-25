@@ -14,7 +14,6 @@ macro Curl(ux, uy, uz)[dy(uz)-dz(uy), dz(ux)-dx(uz), dx(uy)-dy(ux)]// EOM
 macro CrossN(ux, uy, uz)[uy*N.z-uz*N.y, uz*N.x-ux*N.z, ux*N.y-uy*N.x]// EOM
 func Pk = Edge03d;
 func PkNode = P1;
-func PkPart = Edge03ds0;
 
 int Dirichlet = 1;
 
@@ -24,53 +23,32 @@ Th = change(Th, refface = chlab);
 
 fespace Wh(Th, Pk);
 
-int[int][int] intersection;  // local-to-neighbors renumbering
-real[int] D;
-int[int][int] intersectionN; // local-to-neighbors renumbering
-real[int] DN;
+Mat A;
+int[int] n2o;
+macro ThN2O()n2o// EOM
+buildDmesh(Th)
 {
-    fespace Ph(Th, P0);
-    real[int] part(Ph.ndof);
-    if(mpirank == 0)
-        partitionerSeq(part, Th, mpisize);
-    partitionerPar(part, Th, mpiCommWorld, mpisize);
-    meshN ThBackup = Th;
-    {
-        macro def(i)[i, i#y, i#z]// EOM // vector field definition
-        macro init(i)[i, i, i]// EOM    // vector field initialization
-        meshN ThBorder;
-        buildOverlapEdgeWithPartitioning(Th, ThBorder, part, 10, getARGV("-split", 1), 1, intersection, D, Pk, mpiCommWorld, 0, PkPart, defPart, initPart)
-    }
-    Th = ThBackup;
-    {
-        macro def(i)i// EOM             // vector field definition
-        macro init(i)i// EOM            // vector field initialization
-        buildWithPartitioning(Th, part, getARGV("-split", 1), intersectionN, DN, PkNode, mpiCommWorld)
-    }
+    macro def(i)[i, i#y, i#z]// EOM // vector field definition
+    macro init(i)[i, i, i]// EOM    // vector field initialization
+    createMat(Th, A, Pk)
 }
-macro def(i)[i, i#y, i#z]// EOM         // vector field definition
-macro init(i)[i, i, i]// EOM            // vector field initialization
 
-matrix Loc;
 real[int] rhs(Wh.ndof);
-{
-    varf vPb([Ex,Ey,Ez],[vx,vy,vz]) =
-        intN(Th)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
-        + intN(Th)([vx,vy,vz]'*[Ex,Ey,Ez])
-        + on(Dirichlet, Ex=0, Ey=0, Ez=0);
-    Loc = vPb(Wh, Wh);
-    func f = exp(-2.0*((x-0.5)^2+(y-0.5)^2+(z-0.5)^2));
-    varf vPbRhs([Ex,Ey,Ez],[vx,vy,vz]) =
-        - intN(Th)([vx,vy,vz]'*[0,0,f])
-        + on(Dirichlet, Ex=0,Ey=0,Ez=0);
-    rhs = vPbRhs(0, Wh);
-}
+varf vPb([Ex,Ey,Ez],[vx,vy,vz]) =
+    intN(Th)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+    + intN(Th)([vx,vy,vz]'*[Ex,Ey,Ez])
+    + on(Dirichlet, Ex=0, Ey=0, Ez=0);
+A = vPb(Wh, Wh);
+func f = exp(-2.0*((x-0.5)^2+(y-0.5)^2+(z-0.5)^2));
+varf vPbRhs([Ex,Ey,Ez],[vx,vy,vz]) =
+    - intN(Th)([vx,vy,vz]'*[0,0,f])
+    + on(Dirichlet, Ex=0,Ey=0,Ez=0);
+rhs = vPbRhs(0, Wh);
 
-Mat A(Loc, intersection, D);
 {
+    Mat B;
+    createMat(Th, B, P1)
     fespace VhNode(Th, PkNode);
-    matrix test = DN;
-    Mat B(test, intersectionN, DN);
     matrix GLoc;
     MatrixEdgeP1(GLoc, Th);
     Mat G(A, B, GLoc);
@@ -89,6 +67,19 @@ Mat A(Loc, intersection, D);
     set(A, sparams = "-pc_type hypre -pc_hypre_type ams -ksp_monitor -ksp_view -ksp_max_it 40", coordinates = coordPETSc, gradient = G);
 }
 
-Wh def(sol);
-sol[] = A^-1 * rhs;
-medit("Global solution", Th, [real(sol), real(soly), real(solz)]);
+Wh [solx, soly, solz];
+solx[] = A^-1 * rhs;
+if(!NoGraphicWindow) {
+    real[int] sol;
+    changeNumbering(A, solx[], sol);
+    changeNumbering(A, solx[], sol, inverse = true);
+    meshN ThPlt = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10));
+    fespace WhPlt(ThPlt, Pk);
+    WhPlt [pltx, plty, pltz];
+    WhPlt [reducex, reducey, reducez];
+    int[int] rest = restrict(Wh, WhPlt, n2o);
+    for[i, v : rest] pltx[][v] = solx[][i];
+    mpiReduce(pltx[], reducex[], processor(0, mpiCommWorld), mpiSUM);
+    if(mpirank == 0)
+        medit("Global solution", ThPlt, [real(reducex), real(reducey), real(reducez)]);
+}
