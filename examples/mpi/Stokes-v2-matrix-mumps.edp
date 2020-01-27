@@ -1,16 +1,17 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
+// PARAM -n 5
 
 // other
 load "msh3"
 load "medit"
 load "MUMPS"
-
+include "getARGV.idp"
 
 real ttgv=1e10;
 //string ssparams="nprow=1, npcol="+mpisize;
 
-int nn=15;
+int nn=getARGV("-n",15);
 mesh Th2=square(nn,nn);
 fespace Vh2(Th2,P2);  Vh2 ux,uz,p2;
 int[int] rup=[0,2],  rdown=[0,1], rmid=[1,1,2,1,3,1,4,1];

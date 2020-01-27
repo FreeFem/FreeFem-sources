@@ -1,5 +1,6 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
+// PARAM -n 5
 
 /*
 to change locatation of daynamic lib. set   freefem++.pref   file like :

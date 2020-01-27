@@ -13,7 +13,7 @@ macro epsilon(u)[dx(u), dy(u#B), (dy(u) + dx(u#B)) / Sqrt]// EOM
 macro div(u)(dx(u) + dy(u#B))// EOM
 func Pk = [P2, P2, P1];             // finite element space
 
-string deflation = getARGV("-deflation", "geneo-2");            // coarse space construction
+string deflation = getARGV("-deflation", "geneo");            // coarse space construction
 int overlap = getARGV("-overlap", 1);                           // geometric overlap between subdomains
 int fakeInterface = getARGV("-interface", 10);                  // interface between subdomains
 int s = getARGV("-split", 1);                                   // refinement factor
