@@ -7,13 +7,13 @@ macro dimension()3// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
 int n = 12;
-int[int] L=[1,1,1,1], LU=[0,1], LD=[1,1];
-mesh3 Th3 = buildlayers(square(n, n, region=0, label=L), n, zbound=[0,1], labelmid=LD, labelup=LU, labeldown=LU);
+int[int] L=[1,1,1,1], LU=[0,2], LD=[1,1], LR=[0,1];
+mesh3 Th3 = buildlayers(square(n, n, region=0, label=L), n, zbound=[0,1], labelmid=LD, labelup=LU, labeldown=LR);
 Th3 = trunc(Th3, x < 0.5 || y < 0.5 || z < 0.5, label=1);
 
 macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
 
-varf vPoisson(u, v) = int3d(Th3)(grad(u)' * grad(v)) + int3d(Th3)(v) + on(1, u=0);
+varf vPoisson(u, v) = int3d(Th3)(grad(u)' * grad(v)) + int3d(Th3)(v) + on(1,2, u=0);
 
 meshN ThBackup = Th3;
 Mat A;
@@ -26,6 +26,8 @@ Vh u;
 real err = 1e-2;
 
 int iMax = 5;
+int[int] rt(1);
+rt = [2];
 for(int i = 0; i < iMax; ++i) {
     A = vPoisson(Vh, Vh, tgv = -2);
     set(A, sparams = "-ksp_monitor -pc_type hypre");
@@ -43,7 +45,7 @@ for(int i = 0; i < iMax; ++i) {
         if(mpirank == 0) {
             real[int] met = mshmet(ThBackup, hReduced, aniso=1, hmin=1e-3, hmax=0.2, err=err);
             plot(hReduced);
-            Th3 = mmg3d(ThBackup, metric = met, hgrad = 3.0);
+            Th3 = mmg3d(ThBackup, metric = met, hgrad = 3.0, requiredTriangle = rt);
             medit("U-adapt-iso-" + i, Th3, hReduced);
         }
         broadcast(processor(0), Th3);

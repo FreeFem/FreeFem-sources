@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: scotch mmg
+//ff-c++-LIBRARY-dep: mmg scotch
 //ff-c++-cpp-dep:
 
 #include "ff++.hpp"
@@ -226,7 +226,7 @@ template<class ffmesh>
 class mmg_Op : public E_F0mps {
  public:
   Expression eTh, xx, yy, zz;
-  static const int n_name_param = std::is_same<ffmesh,Mesh3>::value ? 25 : 19;
+  static const int n_name_param = std::is_same<ffmesh,Mesh3>::value ? 26 : 19;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
 
@@ -300,8 +300,9 @@ basicAC_F0::name_and_type mmg_Op<Mesh3>::name_param[] = {
 {"hsiz"              , &typeid(double)},/*!< [val], Constant mesh size */
 {"hausd"             , &typeid(double)},/*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
 {"hgrad"             , &typeid(double)},/*!< [val], Control gradation */
-{"ls"                , &typeid(double)}/*!< [val], Value of level-set */
+{"ls"                , &typeid(double)},/*!< [val], Value of level-set */
 //{"rmc"               , &typeid(double)},/*!< [-1/val], Remove small connex componants in level-set mode */
+{"requiredTriangle"  , &typeid(KN<long>*)}/*!< [val], Value of level-set */
 };
 
 template<>
@@ -349,9 +350,13 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
   int nbe = Th.nbe;
 
   KN< double > *pmetric = 0;
+  KN< long > *prequiredTriangle = 0;
 
   if (nargs[0]) {
     pmetric = GetAny< KN< double > * >((*nargs[0])(stack));
+  }
+  if (nargs[25]) {
+    prequiredTriangle = GetAny< KN< long > * >((*nargs[25])(stack));
   }
 
   MMG5_pMesh mesh;
@@ -390,6 +395,26 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
           if ( MMG3D_Set_tensorSol(sol, metric[6*k+perm[0]], metric[6*k+perm[1]], metric[6*k+perm[2]], 
                                   metric[6*k+perm[3]], metric[6*k+perm[4]], metric[6*k+perm[5]], k+1) != 1 ) { 
             printf("Unable to set metric.\n");
+            exit(EXIT_FAILURE);
+          }
+        }
+      }
+    }
+    if (prequiredTriangle && prequiredTriangle->N( ) > 0) {
+      const KN< long > &requiredTriangle = *prequiredTriangle;
+      std::sort(requiredTriangle + 0, requiredTriangle + requiredTriangle.N());
+      int nt;
+      if ( MMG3D_Get_meshSize(mesh,NULL,NULL,NULL,&nt,NULL,NULL) !=1 ) {
+        exit(EXIT_FAILURE);
+      }
+      for (int k=1; k<=nt; k++) {
+        int ref, dummy;
+        if ( MMG3D_Get_triangle(mesh,&dummy,&dummy,&dummy,
+                    &ref,NULL) != 1 ) {
+          exit(EXIT_FAILURE);
+        }
+        if (std::binary_search(requiredTriangle + 0, requiredTriangle + requiredTriangle.N(), ref)) {
+          if ( MMG3D_Set_requiredTriangle(mesh,k) != 1 ) {
             exit(EXIT_FAILURE);
           }
         }
