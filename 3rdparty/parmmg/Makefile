@@ -21,15 +21,18 @@ FAIT.done:tag-tar
 	cd build && cmake ../parmmg-sources \
 	-DCMAKE_C_COMPILER=$(CC) \
 	-DCMAKE_C_FLAGS="$(CFLAGS) -fPIC" \
-	-DCMAKE_CXX_COMPILER=$(CXX) \
+	-DCMAKE_CXX_COMPILER="$(CXX)" \
 	-DCMAKE_CXX_FLAGS="$(CXXFLAGS) $(CXX11FLAGS) -fPIC" \
+	-DMPI_C_COMPILER="$(MPICC)" \
+	-DMPI_CXX_COMPILER="$(MPICXX)" \
+	-DMPIEXEC_EXECUTABLE="$(MPIRUN)" \
 	-DDOWNLOAD_MMG=OFF \
 	-DDOWNLOAD_METIS=OFF \
 	-DMMG_DIR=../../mmg/mmg-sources \
 	-DMMG_BUILDDIR=../../mmg/build \
 	-DSCOTCH_DIR=$(scotch_dir) \
 	-DMETIS_DIR=$(metis_dir) \
-	-DCMAKE_BUILD_TYPE=Release && $(MAKE)
+	-DCMAKE_BUILD_TYPE=Release && $(MAKE) 
 	touch FAIT.done
 
 install.done:FAIT.done
@@ -75,6 +78,7 @@ clean::
 ff-flags: ../Makefile Makefile
 	grep 'abs_top_builddir *=' ../Makefile > ff-flags
 	grep 'CC *=' ../Makefile >> ff-flags
+	grep 'FC *=' ../Makefile >> ff-flags
 	grep 'CFLAGS *=' ../Makefile >> ff-flags
 	grep 'CXX *=' ../Makefile >> ff-flags
 	grep 'CXXFLAGS *=' ../Makefile >> ff-flags
@@ -87,6 +91,10 @@ ff-flags: ../Makefile Makefile
 	grep 'STD_LIBS *=' ../Makefile >> ff-flags
 	grep 'CNOFLAGS *=' ../Makefile >> ff-flags
 	grep 'FF_prefix_petsc_real *=' ../Makefile >> ff-flags
+	grep 'MPICC *=' ../Makefile >> ff-flags
+	grep 'MPICXX *=' ../Makefile >> ff-flags
+	grep 'MPIFC *=' ../Makefile >> ff-flags
+	grep 'MPIRUN *=' ../Makefile >> ff-flags
 	-awk '/^scotch LD /&&/petsc/ {print "scotch_dir=$$(FF_prefix_petsc_real)" }' ../../plugin/seq/WHERE_LIBRARY-config >> ff-flags
 	-awk '/^scotch LD /{print "scotch_dir=../../../3rdparty/" }' ../lib/WHERE.scotch >> ff-flags
 	-awk '/^metis LD /&&/petsc/ {print "metis_dir=$$(FF_prefix_petsc_real)" }' ../../plugin/seq/WHERE_LIBRARY-config >> ff-flags
