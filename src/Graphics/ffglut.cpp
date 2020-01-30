@@ -700,7 +700,7 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & pl
 
 
 
-void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot,GLint gllists,int * lok)
+void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot,GLint gllists,int * lok, OneWindow *win)
 {
     glDisable(GL_DEPTH_TEST);
     
@@ -708,8 +708,10 @@ void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
     glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
     R z1= plot.z0;
     R z2= plot.z0;
-    
-    
+    R coef = plot.coeff;
+    bool pNormalT=plot.pNormalT;
+    int nbN=plot.nbN;
+
     double r=0,g=0,b=0;
     if((debug > 3)) cout<< " OnePlotMeshL::Draw " << plotmesh << " " << plotborder << " " <<  Th.nbBrdElmts() << " " << z1 << " "  << z2 << endl;
     // plot.SetColorTable(16) ;
@@ -777,6 +779,45 @@ void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
             glEndList();  // fin de la list
         }
     }
+    if (pNormalT) {
+        coef = coef*(Th.mes/Th.nt);
+        glLineWidth(0.5);
+        glColor3f(1,0,0);
+
+        for (int i=0;i<Th.nt; i = 0 ? i++ : i+=nbN) {
+            const MeshL::Element & K(Th[i]);
+            R3 NN=K.NormalSUnitaire();
+            NN*=coef;
+            R1 PtHat = R1::diag(1. / 2.);
+            R3 A(K(PtHat));
+            NN+=A;
+            R3 dd(A,NN);
+            double l = Max(sqrt((dd,dd)),1e-20);
+            glBegin(GL_LINES);
+            win->Seg3(A,NN);
+            glEnd();
+
+            // fleche ou cone / orientation ???
+            R3 nx(1.,0.,0.), ny(0.,1.,0.), nz(0.,0.,1.);
+            // R3 dd = uv*(-h/l);
+            R3 dnx = (dd^nx)*0.5, dny = (dd^ny)*0.5, dnz = (dd^nz)*0.5;
+            dd *= -coef/dd.norme()/5;
+            dnx *= -coef/dnx.norme()/5;
+            dny *= -coef/dny.norme()/5;
+            dnz *= -coef/dnz.norme()/5;
+
+            glLineWidth(1);
+            glBegin(GL_LINES);
+            win->Seg3(NN,NN+dd+dnx);
+            win->Seg3(NN,NN+dd-dnx);
+            win->Seg3(NN,NN+dd+dny);
+            win->Seg3(NN,NN+dd-dny);
+            win->Seg3(NN,NN+dd+dnz);
+            win->Seg3(NN,NN+dd-dnz);
+            glEnd();
+        }
+        glLineWidth(1);
+    }
     ShowGlerror("end MeshL plot");
     
 }
@@ -824,7 +865,7 @@ void OnePlotMeshL::Draw(OneWindow *win)
 {
     initlist();
     ThePlot & plot=*win->theplot;
-    Plot(*Th,plot.fill,true,true,plot,gllists,oklist);
+    Plot(*Th,plot.fill,true,true,plot,gllists,oklist,win);
     ShowGlerror("OnePlotMeshL::Draw");
 }
 
@@ -2502,9 +2543,8 @@ case 20+index: {type dummy; fin >= dummy;} break;
                     READ_VTK_PARAM(17,KN<double>); // CameraClippingRange
                     READ_VTK_PARAM(18,KN<double>); // CutPlaneOrigin
                     READ_VTK_PARAM(19,KN<double>); // CutPlaneNormal
-                    READ_VTK_PARAM(20,KN<long>); //WindowIndex
-                    READ_VTK_PARAM(21,KN<long>); //NbColorTicks
-                    READ_VTK_PARAM(22,KN<long>); //NbColors
+                 case 40: fin >= winnum; break;
+      
                 //case 43: fin >= winnum; break;
                 case 43: fin >= pNormalT;break;
 

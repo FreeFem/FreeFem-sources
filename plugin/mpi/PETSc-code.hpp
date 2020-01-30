@@ -446,6 +446,23 @@ namespace PETSc {
     VecDestroy(&y);
     return 0L;
   }
+  long stagePush(string* const& str) {
+#if defined(PETSC_USE_LOG)
+      PetscLogStage stage;
+      PetscLogStageGetId(str->c_str(), &stage);
+      if(stage == -1) {
+        PetscLogStageRegister(str->c_str(), &stage);
+      }
+      PetscLogStagePush(stage);
+#endif
+      return 0L;
+  }
+  long stagePop() {
+#if defined(PETSC_USE_LOG)
+      PetscLogStagePop();
+#endif
+      return 0L;
+  }
   void finalizePETSc( ) {
     PETSC_COMM_WORLD = MPI_COMM_WORLD;
     PetscBool isFinalized;
@@ -2184,6 +2201,15 @@ namespace PETSc {
     return 0L;
   }
   template< class Type >
+  long convergedReason(Type* const& A) {
+    if (A->_ksp) {
+      KSPConvergedReason reason;
+      KSPGetConvergedReason(A->_ksp, &reason);
+      return static_cast<long>(reason);
+    }
+    return 0L;
+  }
+  template< class Type >
   long MatZeroRows(Type* const& A, KN< double >* const& ptRows) {
     if (A->_petsc) {
       PetscInt bs;
@@ -3659,6 +3685,7 @@ static void Init_PETSc( ) {
   Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >(1, 1));
   if (!std::is_same< PetscScalar, PetscReal >::value)
     Global.Add("KSPSolveHermitianTranspose", "(", new PETSc::LinearSolver< Dmat, 'H' >( ));
+  Global.Add("KSPGetConvergedReason", "(", new OneOperator1_< long, Dmat* >(PETSc::convergedReason< Dmat >));
   Global.Add("SNESSolve", "(", new PETSc::NonlinearSolver< Dmat >(1));
   Global.Add("SNESSolve", "(", new PETSc::NonlinearSolver< Dmat >( ));
   Global.Add("TSSolve", "(", new PETSc::NonlinearSolver< Dmat >(1, 1));
@@ -3688,6 +3715,8 @@ static void Init_PETSc( ) {
                PETSc::renumber));
   Global.Add("set", "(", new PETSc::setOptions< Dbddc >( ));
   addInv< Dbddc, PETSc::InvPETSc, KN< PetscScalar >, PetscScalar >( );
+  Global.Add("PetscLogStagePush", "(", new OneOperator1_< long, string* >(PETSc::stagePush));
+  Global.Add("PetscLogStagePop", "(", new OneOperator0< long >(PETSc::stagePop));
   Init_Common( );
 }
 #ifndef PETScandSLEPc

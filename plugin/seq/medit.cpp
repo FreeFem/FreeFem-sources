@@ -3107,7 +3107,7 @@ AnyType PopenMeditMeshT_Op< MMesh, v_fes >::operator( )(Stack stack) const {
           for (int it = 0; it < Th.nt; it++) {
             jojo1 = jojo + 1 + offset * numTht[it];
 
-            for (int iv = 0; iv < 3; iv++) {
+            for (int iv = 0; iv < T::nv; iv++) {
               int i = Th(it, iv);
 
               mp3->setP(&Th, it, iv);
@@ -3141,7 +3141,7 @@ AnyType PopenMeditMeshT_Op< MMesh, v_fes >::operator( )(Stack stack) const {
           for (int it = 0; it < Th.nt; ++it) {
             jojo1 = jojo + 1 + offset * numTht[it];
 
-            for (int iv = 0; iv < 3; ++iv) {
+            for (int iv = 0; iv < T::nv; ++iv) {
               int i = Th(it, iv);
 
               mp3->setP(&Th, it, iv);
@@ -3185,7 +3185,7 @@ AnyType PopenMeditMeshT_Op< MMesh, v_fes >::operator( )(Stack stack) const {
           for (int it = 0; it < Th.nt; ++it) {
             jojo1 = jojo + 1 + offset * numTht[it];
 
-            for (int iv = 0; iv < 3; ++iv) {
+            for (int iv = 0; iv < T::nv; ++iv) {
               int i = Th(it, iv);
 
               mp3->setP(&Th, it, iv);

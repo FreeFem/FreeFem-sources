@@ -1166,7 +1166,9 @@ const MeshL* BuildMeshCurve3(Stack stack, E_BorderN const * const & b)   //  ,bo
  
     int brefintp= -2000000000;
 
-    MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+    MeshPoint *mp(MeshPointStack(stack));
+    mp->set();
+    MeshPoint mps = *mp;
     
     int Gnbv=0,Gnbt=0,nbsd=0;    // vertice, edges, nb subdomains
     for (E_BorderN const *k=b;k;k=k->next) {

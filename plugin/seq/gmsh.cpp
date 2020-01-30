@@ -1062,7 +1062,9 @@ AnyType GMSH_LoadMesh3_Op::operator( )(Stack stack) const {
   return Th3_t;
 }
 
-class GMSH_LoadMeshS_Op : public E_F0mps {
+
+template <class MMesh>
+class GMSH_LoadMeshT_Op : public E_F0mps {
  public:
   Expression filename;
   static const int n_name_param = 6;    //
@@ -1079,7 +1081,7 @@ class GMSH_LoadMeshS_Op : public E_F0mps {
   }
 
  public:
-  GMSH_LoadMeshS_Op(const basicAC_F0 &args, Expression ffname) : filename(ffname) {
+  GMSH_LoadMeshT_Op(const basicAC_F0 &args, Expression ffname) : filename(ffname) {
     if (verbosity > 1) {
       cout << "Load mesh given by GMSH " << endl;
     }
@@ -1090,27 +1092,53 @@ class GMSH_LoadMeshS_Op : public E_F0mps {
   AnyType operator( )(Stack stack) const;
 };
 
-basicAC_F0::name_and_type GMSH_LoadMeshS_Op::name_param[] = {{"reftri", &typeid(long)},
-                                                             {"renum", &typeid(long)},
-                                                             {"cleanmesh", &typeid(bool)},
-                                                             {"removeduplicate", &typeid(bool)},
-                                                             {"precisvertice", &typeid(double)},
-														 	 {"ridgeangledetection", &typeid(double) }};
+template < >
+basicAC_F0::name_and_type GMSH_LoadMeshT_Op<MeshS>::name_param[] = {
+	{"reftri", &typeid(long)},
+    {"renum", &typeid(long)},
+	{"cleanmesh", &typeid(bool)},
+	{"removeduplicate", &typeid(bool)},
+	{"precisvertice", &typeid(double)},
+	{"ridgeangledetection", &typeid(double) }};
 
-class GMSH_LoadMeshS : public OneOperator {
+template < >
+basicAC_F0::name_and_type GMSH_LoadMeshT_Op<MeshL>::name_param[] = {
+	{"refedge", &typeid(long)},
+	{"renum", &typeid(long)},
+	{"cleanmesh", &typeid(bool)},
+	{"removeduplicate", &typeid(bool)},
+	{"precisvertice", &typeid(double)},
+	{"ridgeangledetection", &typeid(double) }};
+
+
+
+template<class MMesh>
+class GMSH_LoadMeshT : public OneOperator {
  public:
-  GMSH_LoadMeshS( ) : OneOperator(atype< pmeshS >( ), atype< string * >( )) {}
+  typedef const MMesh *ppmesh;
+  GMSH_LoadMeshT( ) : OneOperator(atype< ppmesh >( ), atype< string * >( )) {}
 
   E_F0 *code(const basicAC_F0 &args) const {
-    return new GMSH_LoadMeshS_Op(args, t[0]->CastTo(args[0]));
+    return new GMSH_LoadMeshT_Op<MMesh>(args, t[0]->CastTo(args[0]));
   }
 };
 
-MeshS *GMSH_LoadS(const string &filename, bool cleanmesh, bool removeduplicate,
+
+
+template<class MMesh>
+MMesh *GMSH_LoadT(const string &filename, bool cleanmesh, bool removeduplicate,
                   double precisvertice, double ridgeangledetection) {
-  // variable freefem++
+  
+  
+  typedef typename MMesh::Element T;
+  typedef typename MMesh::BorderElement B;
+  typedef typename MMesh::Vertex V;
+  typedef typename MMesh::Element::RdHat TRdHat;
+  typedef typename MMesh::BorderElement::RdHat BRdHat;
+					  
+					  
   int nv, nt = 0, nbe = 0;
-  Vertex3 *vff;
+  V *vff;
 
   map< int, int > mapnumv;
 
@@ -1180,7 +1208,7 @@ MeshS *GMSH_LoadS(const string &filename, bool cleanmesh, bool removeduplicate,
         }
 
         // local variables freefem++
-        vff = new Vertex3[nv];
+        vff = new V[nv];
         // map<int,int> mapnumv;
 
         int minVertex = nv + 1, maxVertex = -1;
@@ -1256,13 +1284,10 @@ MeshS *GMSH_LoadS(const string &filename, bool cleanmesh, bool removeduplicate,
               }
             }
 
-            if (type == 1) {
-              nbe++;
-            }
-
-            if (type == 2) {
-              nt++;
-            }
+            if(type == 1 && is_same< MMesh, MeshS >::value) nbe++;
+			else if(type == 1 && is_same< MMesh, MeshL >::value) nt++;
+            
+            if (type == 2 && is_same< MMesh, MeshS >::value) nt++;
 
             if (type == 4) {
               cout << "We are loading a three dimensionnal SURFACE mesh " << endl;
@@ -1316,13 +1341,10 @@ MeshS *GMSH_LoadS(const string &filename, bool cleanmesh, bool removeduplicate,
               int partition = (numTags > 2) ? data[4 - numTags + 2] : 0;
               int *indices = &data[numTags + 1];
 
-              if (type == 1) {
-                nbe++;
-              }
-
-              if (type == 2) {
-                nt++;
-              }
+              if(type == 1 && is_same< MMesh, MeshS >::value) nbe++;
+  			  else if(type == 1 && is_same< MMesh, MeshL >::value) nt++;
+            
+              if (type == 2 && is_same< MMesh, MeshS >::value) nt++;
 
               if (type == 4) {
                 cout << "We are loading a three dimensionnal SURFACE mesh " << endl;
@@ -1346,10 +1368,10 @@ MeshS *GMSH_LoadS(const string &filename, bool cleanmesh, bool removeduplicate,
     cout << "closing file " << nt << " " << nbe << endl;
   }
 
-  TriangleS *tff = new TriangleS[nt];
-  TriangleS *ttff = tff;
-  BoundaryEdgeS *bff = new BoundaryEdgeS[nbe];
-  BoundaryEdgeS *bbff = bff;
+  T *tff = new T[nt];
+  T *ttff = tff;
+  B *bff = new B[nbe];
+  B *bbff = bff;
 
   // second reading
   fp = fopen(filename.c_str( ), "rb");
@@ -1366,8 +1388,8 @@ MeshS *GMSH_LoadS(const string &filename, bool cleanmesh, bool removeduplicate,
         sscanf(str, "%d", &numElements);
 
         if (verbosity > 0) {
-          printf("%d triangle\n", nt);
-          printf("%d edge\n", nbe);
+          printf("%d elements\n", nt);
+          printf("%d border elements\n", nbe);
           printf("%d numElements\n", numElements);
         }
 
@@ -1418,11 +1440,18 @@ MeshS *GMSH_LoadS(const string &filename, bool cleanmesh, bool removeduplicate,
                 cout << "Elem " << ie + 1 << " " << iv[0] + 1 << " " << iv[1] + 1 << endl;
               }
 
-              (bbff++)->set(vff, iv, physical);
-              ie++;
+              if(is_same< MMesh, MeshS >::value) {
+			  	(bbff++)->set(vff, iv, physical);
+              	ie++;
+			  }
+              else if(is_same< MMesh, MeshL >::value) {
+			  	(ttff++)->set(vff, iv, physical);
+              	it++;
+			  }
+			
             }
 
-            if (type == 2) {
+            if (type == 2 && is_same< MMesh, MeshS >::value) {
               int iv[3];
               for (int i = 0; i < 3; i++) iv[i] = mapnumv[indices[i]];
               if (verbosity > 2) {
@@ -1479,9 +1508,9 @@ MeshS *GMSH_LoadS(const string &filename, bool cleanmesh, bool removeduplicate,
                 exit(1);
               }
 
-              if (swap) {
+              if (swap) 
                 SwapBytes((char *)data, sizeof(int), n);
-              }
+              
 
               int num = data[0];
               int physical = (numTags > 0) ? data[4 - numTags] : 0;
@@ -1492,19 +1521,26 @@ MeshS *GMSH_LoadS(const string &filename, bool cleanmesh, bool removeduplicate,
               if (type == 1) {
                 int iv[2];
                 for (int i = 0; i < 2; i++) iv[i] = mapnumv[indices[i]];
-                (bbff++)->set(vff, iv, physical);
-                ie++;
+                if(is_same< MMesh, MeshS >::value) {
+					(bbff++)->set(vff, iv, physical);
+                    ie++;
+				}
+				else if(is_same< MMesh, MeshL >::value) {
+					double mes = -1;
+	                (ttff++)->set(vff, iv, physical, mes);
+					it++;	
+				}
               }
 
               if (type == 2) {
                 double mes = -1;
                 int iv[3];
-                for (int i = 0; i < 2; i++) iv[i] = mapnumv[indices[i]];
-
-                (ttff++)->set(vff, iv, physical, mes);
-
-                it++;
-              }
+                for (int i = 0; i < 3; i++) iv[i] = mapnumv[indices[i]];
+				if(is_same< MMesh, MeshS >::value) {
+                	(ttff++)->set(vff, iv, physical, mes);
+					it++;
+				}
+			}
             }
 
             delete[] data;
@@ -1528,11 +1564,12 @@ MeshS *GMSH_LoadS(const string &filename, bool cleanmesh, bool removeduplicate,
 
   fclose(fp);
 
-  MeshS *ThS = new MeshS(nv, nt, nbe, vff, tff, bff, cleanmesh, removeduplicate, precisvertice, ridgeangledetection);
-  return ThS;
+  MMesh *Th = new MMesh(nv, nt, nbe, vff, tff, bff, cleanmesh, removeduplicate, precisvertice, ridgeangledetection);
+  return Th;
 }
 
-AnyType GMSH_LoadMeshS_Op::operator( )(Stack stack) const {
+template<class MMesh>
+AnyType GMSH_LoadMeshT_Op<MMesh>::operator( )(Stack stack) const {
   string *pffname = GetAny< string * >((*filename)(stack));
   int renumsurf = 0;
 
@@ -1544,12 +1581,12 @@ AnyType GMSH_LoadMeshS_Op::operator( )(Stack stack) const {
 
   assert(renumsurf <= 1 && renumsurf >= 0);
 
-  MeshS *ThS_t = GMSH_LoadS(*pffname, cleanmesh, removeduplicate, precisvertice, ridgeangledetection);
+  MMesh *Th_t = GMSH_LoadT<MMesh>(*pffname, cleanmesh, removeduplicate, precisvertice, ridgeangledetection);
 
-  ThS_t->BuildGTree( );
-  Add2StackOfPtr2FreeRC(stack, ThS_t);
+  Th_t->BuildGTree( );
+  Add2StackOfPtr2FreeRC(stack, Th_t);
 
-  return ThS_t;
+  return Th_t;
 }
 
 /*  class Init1 { public:
@@ -1706,6 +1743,51 @@ bool SaveGMSH(pmeshS pTh, string *filewoext) {
   return 0;    // OK ..
 }
 
+bool SaveGMSH(pmeshL pTh, string *filewoext) {
+
+  string file = *filewoext + ".msh";
+  ofstream f1(file.c_str( ));
+
+  if (!f1) {
+    ffassert(f1);
+    return 1;
+  }
+
+  f1.precision(15);
+  const MeshL &msh = *pTh;
+  long nbvertices = msh.nv;
+  f1 << "$MeshFormat" << endl;
+  f1 << "2.2 0 8" << endl;
+  f1 << "$EndMeshFormat" << endl;
+  f1 << "$Nodes" << endl;
+  f1 << nbvertices << endl;
+
+  for (int i = 0; i < nbvertices; ++i) {
+    f1 << (i + 1) << " " << msh(i).x << " " << msh(i).y << " " << msh(i).z << endl;
+  }
+
+  f1 << "$EndNodes" << endl;
+  f1 << "$Elements" << endl;
+  f1 << msh.nt << endl;
+
+
+  for (int i = 0; i < msh.nt; ++i) {
+    // 1 is an edge
+    f1 << (i + 1) << " 1 ";
+    // two tags: the label
+    f1 << "1 " << msh[i].lab << " ";
+    // list of nodes
+    f1 << msh(msh[i][0]) + 1 << " " << msh(msh[i][1]) + 1  << endl;
+  }
+
+  f1 << "$EndElements" << endl;
+  return 0;    // OK ..
+}
+
+
+
+
+
 static void Load_Init( ) {    // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
   // if (verbosity)
   if (verbosity > 1 && (mpirank == 0)) {
@@ -1713,10 +1795,13 @@ static void Load_Init( ) {    // le constructeur qui ajoute la fonction "splitme
   }
 
   Global.Add("gmshload3", "(", new GMSH_LoadMesh3);
-  Global.Add("gmshloadS", "(", new GMSH_LoadMeshS);
+  Global.Add("gmshloadS", "(", new GMSH_LoadMeshT<MeshS>);
+  Global.Add("gmshloadL", "(", new GMSH_LoadMeshT<MeshL>);
   Global.Add("gmshload", "(", new GMSH_LoadMesh);
   Global.Add("savegmsh", "(", new OneOperator2< bool, pmesh3, string * >(SaveGMSH));
   Global.Add("savegmsh", "(", new OneOperator2< bool, pmeshS, string * >(SaveGMSH));
+  Global.Add("savegmsh", "(", new OneOperator2< bool, pmeshL, string * >(SaveGMSH));
+  
 }
 
 LOADFUNC(Load_Init)

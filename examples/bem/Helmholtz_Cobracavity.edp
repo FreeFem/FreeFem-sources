@@ -60,7 +60,7 @@ fespace Uh(ThS,P1);
 
 cout << "ndof = " << Uh.ndof << endl;
 
-HMatrix<complex> H = assemblecomplexHESL(Uh,Uh,k,eta=10,epsilon=1e-2,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> H = assemblecomplexHESL(Uh,Uh,k,eta=10,eps=1e-2,minclustersize=10,maxblocksize=1000000);
 if (mpirank == 0) cout << H.infos << endl;
 display(H);
 
@@ -87,7 +87,7 @@ meshS ThOut = square3(np,np,[(sec1+(radius-height)*sin(angle)+sec2*cos(angle)+ra
 
 fespace UhOut(ThOut,P1);
 
-HMatrix<complex> B = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1e-2,minclustersize=10,maxblocksize=1000000);
+HMatrix<complex> B = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,eps=1e-2,minclustersize=10,maxblocksize=1000000);
 if (mpirank == 0) cout << B.infos << endl;
 display(B);
 
