@@ -5046,6 +5046,7 @@ class Op3_pfe2K : public ternary_function< pair< FEbase< K, v_fes > *, int >, R,
   };
 };
 
+
 // Add  FH 16032005
 class Op3_Mesh2mp : public ternary_function< pmesh *, R, R, MeshPoint * > {
  public:
@@ -6083,6 +6084,8 @@ void init_lgfem( ) {
                               new OpCall_FormLinear2< FormBilinear, v_fesL >);    // 3D curve
   Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, v_fesL >);       // 3D curve
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesL >);      // 3D curve
+    
+ 
 
   //  correction du bug morale
   //  Attention il y a moralement un bug

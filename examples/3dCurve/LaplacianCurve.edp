@@ -1,7 +1,9 @@
 load "msh3" 
  
 meshL ThL3=Sline(40,[x,1,x*0.1]);
-
+real[int] bb(6);
+boundingbox(ThL3,bb);
+cout << bb << endl; 
 fespace Vh(ThL3,P2);
 func f = 1 ;
 macro Grad3(uh) [dx(uh),dy(uh),dz(uh)]  // EOM
@@ -15,6 +17,12 @@ problem Lap3dL(uLPb,vLPb)  = int1d(ThL3)(Grad3(uLPb)'*Grad3(vLPb))
 Lap3dL;
 // verif.
 cout << " len ThL3 = "<< int1d(ThL3)(1.) << endl; 
+// P=[0.5,1,0.05]; to do
+
+real uP=uLPb(0.5,1,0.05);
+cout << nuTriangle<< endl; 
+cout << uP << " " << " ~ " << uLPb[][40]<< endl;
+// cout << uLPb(0.5,1,0.05) << endl; // to do also ..
 cout << ThL3.mesure << endl; 
 Vh u1=dx(uLPb),u2=dy(uLPb),u3=dz(uLPb);
 

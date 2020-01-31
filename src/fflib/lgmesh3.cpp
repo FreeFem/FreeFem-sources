@@ -2534,6 +2534,32 @@ KN_<long> listofregion(Stack s, Mesh  const * const  & pTh)
     return A;
 };
 
+// to see write u(x,y,z) 31 jan 2020 FH...
+// ZZZ
+template< class K,class v_fes >
+class Op4_pfeK : public quad_function< pair< FEbase< K, v_fesL > *, int >, R, R,R, K > {
+public:
+    class Op : public E_F0mps {
+    public:
+        Expression a, b, c,d;
+        Op(Expression aa, Expression bb, Expression cc,Expression dd)
+        : a(aa), b(bb), c(cc), d(dd) { /*cout << "Op3_pfe2K" << endl;*/
+        }
+        AnyType operator( )(Stack s) const {
+            R xx(GetAny< R >((*b)(s)));
+            R yy(GetAny< R >((*c)(s)));
+            R zz(GetAny< R >((*d)(s)));
+            MeshPoint &mp = *MeshPointStack(s), mps = mp;
+            mp.set(xx, yy, zz);
+            AnyType ret = std::is_same<v_fes, v_fesS>::value ?
+              pfSr2R< K, 0,v_fesS >(s, (*a)(s)) :pfLr2R< K, 0,v_fesL >(s, (*a)(s))  ;
+            mp = mps;
+            return ret;
+        }
+    };
+};
+
+
 void init_lgmesh3() {
   if(verbosity&&(mpirank==0))  cout <<"lg_mesh3 ";
 
@@ -2865,8 +2891,12 @@ TheOperators->Add("=",
                    new OneOperator2_<pfLr,pfLr,double,E_F_StackF0F0opt2<double> >(set_fe3<double,v_fesL>) ,   // modif/ use template
                     new OneOperator2_<pfLc,pfLc,Complex,E_F_StackF0F0opt2<Complex> >(set_fe3<Complex,v_fesL>) // modif/ use template
                    ) ;
-    
-    
+  // to write u(x,y,z) when u si FE function on Surface or Line .. FH. jan 2020. 
+    Add< pfSr >("(", "", new OneQuadOperator< Op4_pfeK< R, v_fesS>, Op4_pfeK< R,v_fesS >::Op >);
+    Add< pfSc >("(", "", new OneQuadOperator< Op4_pfeK< Complex,v_fesS >, Op4_pfeK< Complex,v_fesS >::Op >);
+    Add< pfLr >("(", "", new OneQuadOperator< Op4_pfeK< R,v_fesL >, Op4_pfeK< R,v_fesL >::Op >);
+    Add< pfLc >("(", "", new OneQuadOperator< Op4_pfeK< Complex, v_fesL>, Op4_pfeK< Complex,v_fesL >::Op >);
+
     
  map_type[typeid(double).name()]->AddCast(
    new E_F1_funcT<double,pf3r>(pf3r2R<R,0,v_fes3>)

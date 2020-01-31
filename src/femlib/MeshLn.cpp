@@ -544,20 +544,37 @@ namespace Fem2D
   const MeshL::Element * MeshL::Find( Rd P, R1 & Phat,bool & outside,const Element * tstart) const
     
   {
+      // rewritie FH 31 jan 2020 ..
+      static int count =0;
+      if( verbosity && count++< 5  )
+          cerr << " MeshL::Find warning brute force to day " << endl;
+      //  find the neast points ..
+      double dmin2 = 1e200;
+      R1 Phm;
+      bool out = true;
+      int n=-1;
       for (int i=0;i<nt;i++) {
           kthrough++;
           const EdgeL & K(this->elements[i]);
-          R3 A(K[0]),B(K[1]);
-          R3 AP(A,P), BP(B,P);
-          R a=AP.norme(), b=BP.norme();
-          R s=a+b;
-          R eps=s*1e-6;
-          if (a>-eps && b >-eps ) {
-              Phat=R(b/s);
-              return this->elements + i;
+          R3 A(K[0]),B(K[1]), AB(AB);
+          R3 AP(A,P);
+          double lab2 = AB.norme2();
+          double l = min(1.,max(0.,(AB,AP)/lab2));
+          R1 Ph(l);
+          R3 Pt=K(Ph);
+          double d2=R3(P,Pt).norme2();
+          if(dmin2>d2)
+          {
+              dmin2 = d2;
+              Phm=Ph;
+              n =i;
+              out = d2 < lab2*1e-2; // BofBof FH ...
           }
+   
       }
-      return 0; // outside
+      if( n<0) return  0; 
+      Phat=Phm;
+      return this->elements+n; // outside
   }
     
     

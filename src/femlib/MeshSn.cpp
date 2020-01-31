@@ -650,7 +650,13 @@ namespace Fem2D
     const MeshS::Element * MeshS::Find( Rd P, R2 & Phat,bool & outside,const Element * tstart) const //;
     
     {
-        
+        static int count =0;
+        if( verbosity && count++< 5  )
+            cerr << " MeshS::Find warning brute force to day " << endl;
+        double dmin2 = 1e200;
+        bool out = true;
+        int n =-1;
+        R2 Pha;
         for (int i=0;i<nt;i++)
         {
             kthrough++;
@@ -659,17 +665,74 @@ namespace Fem2D
             // the normal n
             R3 n = (B-A)^(C-A);
             // to build the vectorial area
-            R a=(Area3(P,B,C),n);
-            R b=(Area3(A,P,C),n);
-            R c=(Area3(A,B,P),n);
-            R s=a+b+c;
-            R eps=s*1e-6;
-            if (a>-eps && b >-eps && c >-eps && abs((P-A,n)) < eps) {
-                Phat=R2(b/s,c/s);
-                return this->elements + i;
+            R a[]={(Area3(P,B,C),n),(Area3(A,P,C),n),(Area3(A,B,P),n)};
+            //  PB de projection on
+            R s=a[0]+a[1]+a[2];
+              R eps=s*1e-6;
+            int na[3],nn=0;
+            if( a[0] < -eps) na[nn++]=0;
+            if( a[1] < -eps) na[nn++]=1;
+            if( a[2] < -eps) na[nn++]=2;
+            double l[3]={0,0,0};
+          
+            if (nn==0)
+            {
+                // ok inside
+                R2 Ph(a[1]/s,a[2]/s);
+                R3 Q = K(Ph);
+                double d2 =R3(P,Q).norme2() ;
+                if( d2 < s*1e-2)
+                {  // close
+                    Phat=Ph;
+                    outside=false;
+                   return this->elements + i;
+                }
+                else if( dmin2 > d2)
+                {
+                    dmin2 = d2;
+                    out = d2 < s*1e-2;
+                    Pha = Ph;
+                    continue;
+                }
+                
             }
+            else if(nn==1)
+            {
+                // distance to edge i=i0,i1
+                int i = na[0];
+                int i0=( i+1)%3;
+                int i1=( i+2)%3;
+                R3 E[]={K[i0],K[i1]};
+                R3 AB(E[0],E[1]);
+                double lab2 = AB.norme2();
+                double eps= lab2*1e-6;
+                double le= min(1.,max(0.,(AB,R3(E[0],P))/lab2));
+                l[i]=0;
+                l[i0]=le;
+                l[i1]=1-le;
+                
+            }
+            else
+            {
+                 int i = 3-na[0]-na[1];
+                 l[i]=1;
+            }
+            R2 Ph(l[1],l[2]);
+            R3 Q = K(Ph);
+            double d2 =R3(P,Q).norme2() ;
+            if( dmin2 > d2)
+            {
+                dmin2 = d2;
+                out = d2 < s*1e-2;
+                Pha = Ph;
+                continue;
+            }
+
         }
-        return 0; // outside
+        outside=out;
+        Phat=Pha; 
+        return n<0 ? 0: this->elements + n; // outside
+        
     }
     
     
