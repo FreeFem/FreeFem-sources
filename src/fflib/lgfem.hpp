@@ -56,17 +56,12 @@ using Fem2D::Mesh;
 using Fem2D::Mesh3;
 using Fem2D::MeshL;
 using Fem2D::MeshS;
-class BemKernel;
-class BemPotential;
-class FormBEM;
+
 typedef const Mesh *pmesh;
 typedef const Mesh3 *pmesh3;
 typedef const MeshS *pmeshS;
 typedef const MeshL *pmeshL;
-// new type for bem
-typedef const BemKernel *pBemKernel;
-typedef const BemPotential *pBemPotential;
-typedef const FormBEM *pFormBEM;
+
 using Fem2D::FESpace;
 using Fem2D::R;
 using Fem2D::TypeOfFE;
@@ -382,114 +377,6 @@ class v_fesL : public RefCounter {
   virtual FESpaceL *buildupdate(KN< int > &ndfe) { return 0; }
   virtual FESpaceL *buildupdate( ) { return 0; };
 };
-
-//// begin type BEM kernel / potential
-
-class BemKernel : public RefCounter {
-public:
-    
-    int typeKernel[4]={0,0,0,0};  // Laplace, Helmholtz
-    // typeKernel ={SL, DL, HS, TDL} and determine equation Laplace, Helmholtz if k==0 or not
-    std::complex<double> wavenum[4]={0,0,0,0}; // parameter to Helmholtz
-    std::complex<double> coeffcombi[4]={0,0,0,0};
-    BemKernel(){}
-    BemKernel(const string tkernel, Complex alpha=1 , Complex k=0) {
-    
-        coeffcombi[0]=alpha;
-        wavenum[0]=k;
-        
-        if(!tkernel.compare("SL"))
-            typeKernel[0] = 1;
-        else if(!tkernel.compare("DL"))
-            typeKernel[0] = 2;
-        else if(!tkernel.compare("HS"))
-            typeKernel[0] = 3;
-        else if(!tkernel.compare("TDL"))
-            typeKernel[0] = 4;
-        else
-            ExecError("unknow BEM kernel type ");
-        
-        if(verbosity>5)
-            cout << "type BEM kernel " << tkernel <<": " << typeKernel[0] << " coeff combi " << coeffcombi[0] << " wave number "<< wavenum[0] << endl;
-    }
-   ~BemKernel() {}
-    
-private:
-    BemKernel(const BemKernel &);
-    void operator=(const BemKernel &);
-};
-
-
-class listBemKernel {
-public:
-    list<BemKernel const  *> *lbk;
-    void init()  { lbk=new list<BemKernel const  *>;}
-    void destroy() { delete lbk;}
-    listBemKernel(Stack s,BemKernel const*bk) : lbk(Add2StackOfPtr2Free(s,new list<BemKernel const*>)) { lbk->push_back(bk);}
-    listBemKernel(Stack s,BemKernel const*const bka,BemKernel const* const bkb) : lbk(Add2StackOfPtr2Free(s,new list<BemKernel const*>)) { lbk->push_back(bka);lbk->push_back(bkb);}
-    listBemKernel(Stack s,const listBemKernel &l,BemKernel const*const bk) : lbk(Add2StackOfPtr2Free(s,new list<BemKernel const*>(*l.lbk))) { lbk->push_back(bk);}
-    listBemKernel(){};
-};
-
-
-template<class RR,class AA=RR,class BB=AA>
-struct Op_addBemKernel: public binary_function<AA,BB,RR> {
-    static RR f(Stack s,const AA & a,const BB & b) {
-        if (verbosity>10) cout << "test " <<typeid(RR).name() << " " << typeid(AA).name() << " " << typeid(BB).name() <<endl;
-        return RR(s,a,b);}
-};
-
-
-template<bool INIT,class RR,class AA=RR,class BB=AA>
-struct Op_setBemKernel: public binary_function<AA,BB,RR> {
-    static RR f(Stack stack, const AA & a,const BB & b)
-    {
-        ffassert(a);
-        const pBemKernel p=combKernel(b);
-        
-        if (!INIT && *a)
-            (**a).destroy( );
-        *a = p;
-        return a;
-    }
-};
-
-
-class BemPotential : public RefCounter {
-public:
-    
-    int typePotential;  // Laplace, Helmholtz
-    // typePotential ={SL=0, DL=1, HS=2, TDL=3} and determine equation Laplace, Helmholtz if k==0 or not
-std::complex<double> wavenum; // parameter to Helmholtz
-    BemPotential(){}
-    BemPotential(const string tpotential, Complex k=0) : typePotential(-1), wavenum(k) {
-        
-        if(!tpotential.compare("SL"))
-            typePotential = 1;
-        else if(!tpotential.compare("DL"))
-            typePotential = 2;
-        else if(!tpotential.compare("HS"))
-            typePotential = 3;
-        else if(!tpotential.compare("TDL"))
-            typePotential = 4;
-        else
-            ExecError("unknow BEM Potential type ");
-        
-        if(verbosity>5)
-            cout << "type BEM Potential " << tpotential <<": " << typePotential << " wave number "<< wavenum << endl;
-   }
-   
-   ~BemPotential() {}
-    
-private:
-    BemPotential(const BemPotential &);
-    void operator=(const BemPotential &);
-};
-
-
-//// end type BEM kernel / potential
-
-
 
 // 2d
 class pfes_tef : public v_fes {

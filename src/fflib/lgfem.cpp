@@ -5534,32 +5534,7 @@ R3 *set_eqp(R3 *a, R3 *b) {
   *a = *b;
   return a;
 }
-
-class FormalBEMcode : public OneOperator{
- public:
-   AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
-   bool MeshIndependent() const { return false;}
-  
-   FormalBEMcode( ): OneOperator(atype<C_F0>(),atype<pBemKernel>(), atype<finconnue*>(), atype<ftest*>()) {}
-   FormalBEMcode(int  ): OneOperator(atype<C_F0>(),atype<pBemKernel>()) {}
-   E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
-   C_F0  code2(const basicAC_F0 &args) const {
-     
-     /* pBemKernel fk=0; const Finconnue *fu=0; const Ftest *fv=0;
        
-       fk = dynamic_cast<const BemKernel*>((Expression) args[0]);
-       if(args.size()>1)
-       fu = dynamic_cast<const Finconnue*>((Expression) args[1]);
-           if(args.size()>2)
-       fv = dynamic_cast<const Ftest*>((Expression) args[2]);
-       */
-       
-       Expression e=new FormBEM(args/*fk,fu,fv*/); ;// *E_F0
-        aType r=atype<const FormBEM *>();
-   return C_F0(e,r) ;}
-};
-    
-        
 void init_lgfem( ) {
   if (verbosity && (mpirank == 0)) cout << "lg_fem ";
 #ifdef HAVE_CADNA
@@ -5580,13 +5555,6 @@ void init_lgfem( ) {
                            AddIncrement< pmeshS >, NotReturnOfthisType);
   Dcl_TypeandPtr< pmeshL >(0, 0, ::InitializePtr< pmeshL >, ::DestroyPtr< pmeshL >,
                            AddIncrement< pmeshL >, NotReturnOfthisType);
-  // pBemKernel initialize
-  Dcl_TypeandPtr< pBemKernel >(0, 0, ::InitializePtr< pBemKernel >, ::DestroyPtr< pBemKernel >,
-                           AddIncrement< pBemKernel >, NotReturnOfthisType);
-  // pBemPotential initialize
-  Dcl_TypeandPtr< pBemPotential >(0, 0, ::InitializePtr< pBemPotential >, ::DestroyPtr< pBemPotential >,
-                                 AddIncrement< pBemPotential >, NotReturnOfthisType);
-
   Dcl_Type< lgVertex >( );
   Dcl_Type< lgElement >( );
   Dcl_Type< lgElement::Adj >( );
@@ -5760,11 +5728,8 @@ void init_lgfem( ) {
   Dcl_Type< MeshPoint * >( );
   Dcl_Type< finconnue * >( );
   Dcl_Type< ftest * >( );
-  Dcl_Type< fkernel * >( );  // a bem kernel
-  Dcl_Type< fpotential * >( );
     
   Dcl_Type< foperator * >( );
-  //Dcl_Type< fbemkoperator * >( );
   Dcl_Type< const BC_set * >( );                         // a set of boundary condition
   Dcl_Type< const Call_FormLinear< v_fes > * >( );       //   to set Vector
   Dcl_Type< const Call_FormBilinear< v_fes > * >( );     // to set Matrix
@@ -5778,11 +5743,8 @@ void init_lgfem( ) {
 
   map_type[typeid(const FormBilinear *).name( )] = new TypeFormBilinear;
   map_type[typeid(const FormLinear *).name( )] = new TypeFormLinear;
-  map_type[typeid(const BemKFormBilinear *).name( )] = new BemKTypeFormBilinear;
-  //map_type[typeid(const BemPFormBilinear *).name( )] = new BemPTypeFormLinear;
     
   aType t_C_args = map_type[typeid(const C_args *).name( )] = new TypeFormOperator;
-  //aType t_BemC_args = map_type[typeid(const BemC_args *).name( )] = new TypeBemFormOperator;
   map_type[typeid(const Problem *).name( )] = new TypeSolve< false, Problem >;
   map_type[typeid(const Solve *).name( )] = new TypeSolve< true, Solve >;
   Dcl_Type< const IntFunction< double > * >( );
@@ -5793,22 +5755,12 @@ void init_lgfem( ) {
 
   basicForEachType *t_flin = atype< const FormLinear * >( );
   basicForEachType *t_BC = atype< const BC_set * >( );
-    
-   
-  // simplified type/function to define varf bem
-  Dcl_Type< const FormBEM * >( );
-  basicForEachType *t_BEM = atype< const BemKFormBilinear * >( );
-  //basicForEachType *t_POT = atype< const FormPOT * >( );
-    
+ 
   /// Doxygen doc
   basicForEachType *t_form = atype< const C_args * >( );
- // basicForEachType *t_BemKform = atype< const BemC_args * >( );
- // basicForEachType *t_BemPform = atype< const BemC_args * >( );    // rem BemC_args
-    
+   
   Dcl_Type< const CDomainOfIntegration * >( );
-  Dcl_Type< const CBemDomainOfIntegration * >( );
-  Dcl_Type< const CPartBemDI * >( );
-    
+ 
   atype< pmesh >( )->AddCast(new E_F1_funcT< pmesh, pmesh * >(UnRef< pmesh >));
   atype< pfes >( )->AddCast(new E_F1_funcT< pfes, pfes * >(UnRef< pfes >));
 
@@ -5952,11 +5904,7 @@ void init_lgfem( ) {
   zzzfff->Add("meshS", atype< pmeshS * >( ));
   // pmeshL is a pointer to MeshL defined at [[file:lgfem.hpp::typedef MeshL pmeshL]]
   zzzfff->Add("meshL", atype< pmeshL * >( ));
-  // pBemKernel is a pointer to BemKernel defined at [[file:lgfem.hpp::typedef BemKernel pBemKernel]]
-  zzzfff->Add("BemKernel", atype< pBemKernel * >( ));
-  // pBemKernel is a pointer to BemPotential defined at [[file:lgfem.hpp::typedef BemPotential pBemPotential]]
-  zzzfff->Add("BemPotential", atype< pBemPotential * >( ));
-    
+ 
   zzzfff->Add("element", atype< lgElement >( ));
   zzzfff->Add("vertex", atype< lgVertex >( ));
   zzzfff->Add("matrix", atype< Matrice_Creuse< R > * >( ));
@@ -6012,17 +5960,10 @@ void init_lgfem( ) {
   Global.Add("plot", "(", new OneOperatorCode< Plot >);
   Global.Add("convect", "(", new OneOperatorCode< Convect >);
   
-  Dcl_Type<listBemKernel> ();
-  TheOperators->Add("+",new OneBinaryOperator_st< Op_addBemKernel<listBemKernel,pBemKernel,pBemKernel> >);
-  TheOperators->Add("+",new OneBinaryOperator_st< Op_addBemKernel<listBemKernel,listBemKernel,pBemKernel> >);
-  TheOperators->Add("=",new OneBinaryOperator_st< Op_setBemKernel<false,pBemKernel*,pBemKernel*,listBemKernel> >);
-  TheOperators->Add("<-", new OneBinaryOperator_st< Op_setBemKernel<true,pBemKernel*,pBemKernel*,listBemKernel> >);
-    
   TheOperators->Add("+", new OneOperatorCode< CODE_L_Add< Foperator > >,
                     new OneOperatorCode< CODE_L_Add< Ftest > >,
                     new OneOperatorCode< CODE_L_Add< Finconnue > >,
-                    new OneOperatorCode< C_args >(t_C_args, t_C_args, t_C_args)//,
-                    //new OneOperatorCode< C_args >(t_BemC_args, t_BemC_args, t_C_args)
+                    new OneOperatorCode< C_args >(t_C_args, t_C_args, t_C_args)
   );
   TheOperators->Add("-", new OneOperatorCode< CODE_L_Minus< Foperator > >,
     new OneOperatorCode< CODE_L_Minus< Ftest > >,
@@ -6033,17 +5974,13 @@ void init_lgfem( ) {
     new OneOperatorCode< C_args_minus >(t_C_args, t_C_args, t_fbilin),
     new OneOperatorCode< C_args_minus >(t_C_args, t_C_args, t_flin),
     new OneOperatorCode< Minus_Form< FormBilinear > >,
-    //new OneOperatorCode< Minus_Form< BemKFormBilinear > >,
     new OneOperatorCode< Minus_Form< FormLinear > >
 
   );
 
   atype< const C_args * >( )->AddCast(new OneOperatorCode< C_args >(t_C_args, t_fbilin),
     new OneOperatorCode< C_args >(t_C_args, t_flin),
-    new OneOperatorCode< C_args >(t_C_args, t_BC),
-    new OneOperatorCode< C_args >(t_C_args, t_BEM)//,
-   // new OneOperatorCode< C_args >(t_C_args, t_POT)
-    //new OneOperatorCode< BemC_args >(t_C_args, t_fbembilin)
+    new OneOperatorCode< C_args >(t_C_args, t_BC)
   );
 
   atype< const C_args * >( )->AddCast(
@@ -6356,16 +6293,10 @@ void init_lgfem( ) {
 
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< FormBilinear >);
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< FormLinear >);
-  Add< const CPartBemDI * >("(", "", new OneOperatorCode< CBemDomainOfIntegration >);
-    
- Add< const CBemDomainOfIntegration * >("(", "", new OneOperatorCode< BemKFormBilinear >);
-//  Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< BemPFormBilinear >);
-    
+
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< IntFunction< double >, 1 >);
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< IntFunction< complex< double > >, 0 >);
-  
-  Global.Add("BEM","(",new FormalBEMcode);// XXXX
-    
+      
   map_type[typeid(double).name( )]->AddCast(new E_F1_funcT< double, pfer >(pfer2R< R, 0 >));
 
   map_type[typeid(Complex).name( )]->AddCast(new E_F1_funcT< Complex, pfec >(pfer2R< Complex, 0 >));
@@ -6759,35 +6690,6 @@ C_F0 NewFEvariable(const char *id, Block *currentblock, C_F0 &fespacetype, CC_F0
   lid->push_back(UnId(id));
   return NewFEvariable(lid, currentblock, fespacetype, init, cplx, dim);
 }
-
-// fusion of Bem Kernel in case combined kernels
-BemKernel *combKernel (listBemKernel const &lbemker){
-    int kk=0;
-    bool LaplaceK=false, HelmholtzK=false;
-    const list< const BemKernel * > lbk(*lbemker.lbk);
-    BemKernel *combBemKernel=new BemKernel();
-    for (list< const BemKernel * >::const_iterator i = lbk.begin( ); i != lbk.end( ); i++) {
-        if (!*i) continue;
-        const BemKernel &bkb(**i);
-        combBemKernel->typeKernel[kk] = bkb.typeKernel[0];
-        // test same equation kernel
-        (combBemKernel->wavenum[kk]!=0.) ? HelmholtzK=true : LaplaceK=true;
-            
-          //  ExecError(" combined kernel have to be the same type equation Laplace or Helmholtz");
-        combBemKernel->coeffcombi[kk] = bkb.coeffcombi[0];
-        combBemKernel->wavenum[kk] = bkb.wavenum[0];
-        if(kk>4) ExecError(" combined kernel: 4 max kernels  ");
-        kk++;
-    }
-    // check the same wave number ?
-    if( HelmholtzK== LaplaceK) ExecError(" combined kernel: must be same equation kernels Laplace or Helmholtz");
-    if (verbosity>5)
-        for (int i=0;i<kk;i++) cout << "combined type BEM kernel " << combBemKernel->typeKernel[i] << " coeff combi " <<
-            combBemKernel->coeffcombi[i] << " wave number "<< combBemKernel->wavenum[i] << endl;
-    
-    return combBemKernel;
-}
-        
       
 size_t dimFESpaceImage(const basicAC_F0 &args) {
   aType t_tfe = atype< TypeOfFE * >( );

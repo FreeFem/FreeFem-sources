@@ -1442,44 +1442,6 @@ inline pmeshL *  initMesh(pmeshL * const & p, string * const & s) {
     return p;
 }
 
-//// begin type BEM kernel / potential
-
-inline pBemKernel *  initKernel_Helmholtz(pBemKernel * const & p, string * const & s,std::complex<double> const & alpha,std::complex<double> const & k) {
-    BemKernel * m;
-    if(verbosity > 5)
-        cout << " initBemKernel " << *s << endl;
-    *p= m =new BemKernel(*s,alpha,k);
-    return p;
-}
-
-inline pBemKernel *  initKernel_Laplace(pBemKernel * const & p, string * const & s,std::complex<double> const & alpha) {
-    return initKernel_Helmholtz(p,s,alpha,0);
-    
-}
-
-inline pBemKernel *  initKernel_default(pBemKernel * const & p, string * const & s) {
-    return initKernel_Helmholtz(p,s,1,0);
-
-}
-
-inline pBemPotential *  initPotential_Helmholtz(pBemPotential * const & p, string * const & s, std::complex<double> const & k) {
-    BemPotential * m;
-    if(verbosity > 5)
-        cout << " initPotential " << *s << endl;
-    *p= m =new BemPotential(*s,k);
-    return p;
-}
-
-inline pBemPotential *  initPotential_default(pBemPotential * const & p, string * const & s) {
-    return initPotential_Helmholtz(p,s,0);
-    
-}
-
-//// end type BEM kernel / potential
-
-
-
-
 /*inline pmeshS *  initMesh(pmeshS * const & p, string * const & s) {
 Mesh3 * m;
     MeshS * mS;
@@ -2592,10 +2554,6 @@ void init_lgmesh3() {
   atype<pfesL >()->AddCast(  new E_F1_funcT<pfesL,pfesL*>(UnRef<pfesL>));
   atype<pfLrbase>()->AddCast(  new E_F1_funcT<pfLrbase,pfLrbase>(UnRef<pfLrbase>));
   atype<pfLcbase>()->AddCast(  new E_F1_funcT<pfLcbase,pfLcbase>(UnRef<pfLcbase>));
-  // BemKernel
-  atype<pBemKernel>()->AddCast( new E_F1_funcT<pBemKernel,pBemKernel*>(UnRef<pBemKernel>));
-  // BemPotential
-  atype<pBemPotential>()->AddCast( new E_F1_funcT<pBemPotential,pBemPotential*>(UnRef<pBemPotential>));
   //3D volume
   Add<pf3r>("[]",".",new OneOperator1<KN<double> *,pf3r>(pf3r2vect<R,v_fes3>));
   Add<pf3c>("[]",".",new OneOperator1<KN<Complex> *,pf3c>(pf3r2vect<Complex,v_fes3>));
@@ -2635,13 +2593,6 @@ void init_lgmesh3() {
   // use for :   mesh Th = readmesh ( ...);
   TheOperators->Add("<-", new OneOperator2_<pmeshL*,pmeshL*,pmeshL >(&set_copy_incr));
   TheOperators->Add("=", new OneOperator2<pmeshL*,pmeshL*,pmeshL >(&set_eqdestroy_incr));
-  //BemKernel
-  TheOperators->Add("<-", new OneOperator4_<pBemKernel*,pBemKernel*,string*,std::complex<double>,std::complex<double> >(&initKernel_Helmholtz));
-  TheOperators->Add("<-", new OneOperator3_<pBemKernel*,pBemKernel*,string*,std::complex<double> >(&initKernel_Laplace));
-  TheOperators->Add("<-", new OneOperator2_<pBemKernel*,pBemKernel*,string* >(&initKernel_default));
-  //BemPotential
-  TheOperators->Add("<-", new OneOperator3_<pBemPotential*,pBemPotential*,string*,std::complex<double> >(&initPotential_Helmholtz));
-  TheOperators->Add("<-", new OneOperator2_<pBemPotential*,pBemPotential*,string* >(&initPotential_default));
 
   Global.Add("readmesh3","(",new OneOperatorCode<ReadMesh3>);
   Global.Add("readmeshS","(",new OneOperatorCode<ReadMeshS>);
@@ -3047,12 +2998,7 @@ TheOperators->Add("=",
     
  // 3d curve
  Global.Add("int1d","(",new OneOperatorCode<CDomainOfIntegrationL>);
- 
- // 2D / 1D Bem
- Global.Add("int2dx2d","(",new OneOperatorCode<CPartBemDI2d>);
- Global.Add("int1dx1d","(",new OneOperatorCode<CPartBemDI1d>);
-
-    
+   
  /*decommente par J. Morice 14/01/09*/
 
  Add<pf3r>("refresh",".",new OneOperator1<bool,pf3r>(pfer_refresh3<R,v_fes3>));

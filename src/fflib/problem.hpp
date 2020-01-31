@@ -68,84 +68,6 @@ typedef   LinearComb<MGauche,C_F0> Finconnue;
 typedef   LinearComb<MDroit,C_F0> Ftest;
 typedef   LinearComb<pair<MGauche,MDroit>,C_F0> Foperator;
 
-// new type for bem varf
-// version beta: call directly the assemble function
-
-class BemOperator : public E_F0mps { public:
- 
-BemOperator(){}
- 
-AnyType operator()(Stack )  const {
- return SetAny<const BemOperator * >(this);}
- 
- operator aType () const { return atype<const BemOperator >();}
- 
- 
- };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//typedef   BemOpertor(BemKernel,Finconnue,Ftest) BemFoperator;
-/*class BemKOperator : public E_F0mps { public:
-    
-    Finconnue *fu;
-    BemKernel *fk;
-    Ftest *fv;
- 
-    BemKOperator(): fu(0),fk(0),fv(0) {}
-    
-    BemKOperator(BemKernel *ffk, Finconnue *ffu, Ftest *ffv): fu(ffu),fk(ffk),fv(ffv) {}
-    //BemOperator(const BemKernel *ffk, const Finconnue *ffu, const Ftest *ffv): fu(ffu),fk(ffk),fv(ffv) {}
-    
-    BemKOperator(const BemKOperator &beml): fu(beml.fu),fk(beml.fk),fv(beml.fv) {}
-    
-   
-    void operator=(const BemKOperator &beml) {
-        fu=beml.fu;
-        fk=beml.fk;
-        fv=beml.fv;
-    }
-        
-        
-    BemKOperator & operator *= (Finconnue * ff)
-    { ffassert(fu==0);
-        fu=ff;
-        return *this;
-    }
-    BemKOperator & operator *= (Ftest * ff)
-    { ffassert(fv==0);
-        fv=ff;
-        return *this;
-    }
-    BemKOperator & operator *= (BemKernel * ff)
-    { ffassert(fk==0);
-        fk=ff;
-        return *this;
-    }
-  
-    
-    
-    
-    AnyType operator()(Stack )  const {
-        return SetAny<const BemKOperator * >(this);}
-    
-    operator aType () const { return atype<const BemKOperator >();}
-    
-    
-};*/
-
 inline int intOp(const MGauche &i) {return i.second;}
 inline int intOp(const MDroit &i) {return i.second;}
 inline int intOp(pair<MGauche,MDroit> & p) {return Max(intOp(p.first),intOp(p.second));}
@@ -171,10 +93,6 @@ inline unsigned int GetDiffOp(const  pair<MGauche,MDroit> &p, int& lastop)
 typedef  const Finconnue  finconnue;
 typedef  const Ftest ftest;
 typedef  const Foperator foperator;
-//typedef  const BemKOperator fbemkoperator;
-typedef  const BemKernel fkernel;
-typedef  const BemPotential fpotential;
-typedef const FormBEM *pFormBEM;
 
 Expression IsFebaseArray(Expression f);
 
@@ -229,43 +147,6 @@ class C_args: public E_F0mps  {public:
   bool IsLinearOperator() const;
   bool IsBilinearOperator() const;
 };
-
-/*
-class BemC_args: public E_F0mps  {public:
-    typedef const BemC_args *  Result;
-    list<C_F0> largs;
-    typedef list<C_F0> ::const_iterator const_iterator ;
-    // il faut expendre
-    BemC_args() :largs(){}
-    BemC_args(C_F0 c) : largs() { if(!c.Zero() )largs.push_back(c);}
-    BemC_args(  const basicAC_F0 & args) :largs(){
-        int n=args.size();
-        for (int i=0;i< n;i++)
-        {
-            if(args[i].Zero()) ; //  skip zero term ...
-            else  if (args[i].left() == atype<const BemC_args *>())
-            {
-                const BemC_args * a = dynamic_cast<const BemC_args *>(args[i].LeftValue());
-                if (a == NULL) printf("dynamic_cast error\n");
-                for (list<C_F0>::const_iterator i=a->largs.begin();i!=a->largs.end();i++)
-                    if( ! i->Zero()) // skip Zero term
-                        largs.push_back(*i);
-            }
-            else
-                largs.push_back(args[i]);
-        };}
-    static ArrayOfaType  typeargs() { return ArrayOfaType(true);}
-    AnyType operator()(Stack ) const  { return SetAny<const BemC_args *>(this);}
-    operator aType () const { return atype<const BemC_args *>();}
-    
-    static  E_F0 * f(const basicAC_F0 & args) { return new BemC_args(args);}
-    bool Zero()  const { return largs.empty();} // BIG WARNING April and wrong functon FH v 3.60 .......
-    bool IsBemBilinearOperator() const;
-};
-
-*/
-
-
 
 class C_args_minus: public C_args  {public:
   C_args_minus(  const basicAC_F0 & args) {
@@ -473,143 +354,6 @@ public:
   bool withmap() const {return mapu[0] || mapt[0]; }
 };
 
-
-class CPartBemDI: public E_F0mps {
-public:
-    
-    static const int n_name_param =3; //12;
-    static basicAC_F0::name_and_type name_param[] ;
-    Expression nargs [n_name_param];
-    enum typeofkind  { int1dx1d=0, int2dx2d=1, int2dx1d=2, int1dx2d=3  } ;
-    typeofkind  kind; //  0
-    int d, dHat; // 3d
-    typedef const CPartBemDI* Result;
-    Expression Th;
-    vector<Expression> what;
-    vector<int> whatis; // 0 -> long , 1 -> array ???
-    
-    
-    CPartBemDI(const basicAC_F0 & args,typeofkind b=int1dx1d,int ddim=3, int ddimHat=1) // always ddim=3d
-    :kind(b),d(ddim),dHat(ddimHat),
-    Th(0), what(args.size()-1), whatis(args.size()-1)
-    
-    {
-        args.SetNameParam(n_name_param,name_param,nargs);
-
-        if(d==3 && dHat==1)
-            Th=CastTo<pmeshL>(args[0]);
-        else if(d==3 && dHat==2)
-            Th=CastTo<pmeshS>(args[0]);
-        else ffassert(0); // a faire
-        
-        int n=args.size();
-        for (int i=1;i<n;i++)
-            if(!BCastTo<KN_<long> >(args[i]) ) {
-                whatis[i-1]=0;
-                what[i-1]=CastTo<long>(args[i]);
-            }
-            else {
-                whatis[i-1]=1;
-                what[i-1]=CastTo<KN_<long> >(args[i]);
-            }
-        
-    }
-    static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmesh>(), true);} // all type
-    AnyType operator()(Stack ) const  { return SetAny<const CPartBemDI *>(this);}
-    
-    operator aType () const { return atype<const CPartBemDI *>();}
-    
-    static  E_F0 * f(const basicAC_F0 & args) { return new CPartBemDI(args);}
-    
-    const Fem2D::QuadratureFormular & FIT(Stack) const ;
-    const Fem2D::QuadratureFormular1d & FIE(Stack) const ;
-    const Fem2D::GQuadratureFormular<R3> & FIV(Stack) const ;  // 3d
-    
-};
-
-
-class CBemDomainOfIntegration: public E_F0mps {
-public:
-    
-   static const int n_name_param =3; //12;
-    static basicAC_F0::name_and_type name_param[] ;
-    Expression nargs_t [n_name_param];
-    // typeofkind  kind; //  0
-    int d_s, dHat_s, d_t, dHat_t; // 3d
-    typedef const CBemDomainOfIntegration* Result;
-    Expression Th_s, Th_t, BemPartDI;
-    vector<Expression> what_s, what_t;
-    vector<int> whatis_s, whatis_t;
-    //CBemDomainOfIntegration();
-    CBemDomainOfIntegration(const basicAC_F0 & args_t, int ddim=3, int ddimHat=1) // always ddim=3d
-    :d_s(0),dHat_s(0),d_t(ddim),dHat_t(ddimHat),
-     Th_s(0), what_s(0), whatis_s(0),
-     Th_t(0), what_t(args_t.size()-1), whatis_t(args_t.size()-1)
-    
-    {
-        args_t.SetNameParam(n_name_param,name_param,nargs_t);
-        // acces to the value of the fist di Th_s
-        const CPartBemDI * sourceDI(dynamic_cast<const CPartBemDI*>((Expression) args_t[0]));
-        
-        CPartBemDI::typeofkind kind_s= sourceDI->kind; // int1dx1d=0, int2dx2d=1, int2dx1d=2, int1dx2d=3
-        d_s=sourceDI->d;
-        dHat_s=sourceDI->dHat;
-        
-        // check the integral operator integral
-        if(kind_s==0 || kind_s==2)
-            Th_t=CastTo<pmeshL>(args_t[1]);
-        else if(kind_s==1 || kind_s==3)
-            Th_t=CastTo<pmeshS>(args_t[1]);
-        else if(kind_s==0 || kind_s==3)
-            Th_s=sourceDI->Th; //Th_s=CastTo<pmeshL>(sourceDI->Th);
-        else if(kind_s==1 || kind_s==2)
-          Th_s=sourceDI->Th;
-        else ffassert(0); // a faire
-        
-        if (verbosity >5)
-            cout << " CBemDomainOfIntegration " << kind_s << " Th_s: " << &Th_s << " d_s= " << d_s << " dHat_s= " << dHat_s << " " <<
-            " Th_t: " << &Th_t << " d_t= " << d_t << " dHat_t= " << dHat_t << " " << endl;
-            
-        // read the argument (Th_t,.....)
-        int n_t=args_t.size();
-         for (int i=2;i<n_t;i++)
-            if(!BCastTo<KN_<long> >(args_t[i]) ) {
-                whatis_t[i-1]=0;
-                what_t[i-1]=CastTo<long>(args_t[i]);
-            }
-            else {
-                whatis_t[i-1]=1;
-                what_t[i-1]=CastTo<KN_<long> >(args_t[i]);
-            }
-        int n_s=(sourceDI->what).size();
-        for (int i=1;i<n_s;i++) {
-            
-                whatis_s[i-1]=sourceDI->whatis[i-1];
-                what_s[i-1]=sourceDI->what[i-1];
-            }
-        
-        
-        
-        
-        
-        
-    }
-    static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<const CPartBemDI *>(), true);} // all type
-    AnyType operator()(Stack ) const  { return SetAny<const CBemDomainOfIntegration *>(this);}
-    
-    operator aType () const { return atype<const CBemDomainOfIntegration *>();}
-    
-    //static  E_F0 * f(const basicAC_F0 & args_s,const basicAC_F0 & args_t) { return new CBemDomainOfIntegration(args_s,args_t);}
-    static  E_F0 * f(const basicAC_F0 & args_s) { return new CBemDomainOfIntegration(args_s);}
-    
-    const Fem2D::QuadratureFormular & FIT(Stack) const ;
-    const Fem2D::QuadratureFormular1d & FIE(Stack) const ;
-    const Fem2D::GQuadratureFormular<R3> & FIV(Stack) const ;  // 3d
-  
-};
-
-
-
 class CDomainOfIntegrationBorder: public CDomainOfIntegration {
 public:
   CDomainOfIntegrationBorder( const basicAC_F0 & args) :CDomainOfIntegration(args,int1d) {}
@@ -682,38 +426,6 @@ public:
     static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int1d,3,false,true);}
     static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshL>(), true);} // all type
 };
-
-
-class CPartBemDI1d: public CPartBemDI {
-public:
-    CPartBemDI1d( const basicAC_F0 & args_s) :CPartBemDI(args_s,int1dx1d,3,1) {}
-    static  E_F0 * f(const basicAC_F0 & args_s) { return new CPartBemDI(args_s,int1dx1d,3,1);}
-    static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshL>(), true);} // all type
-};
-
-class CPartBemDI2d: public CPartBemDI {
-public:
-    CPartBemDI2d(const basicAC_F0 & args_s) :CPartBemDI(args_s,int2dx2d,3,2) {}
-    static  E_F0 * f(const basicAC_F0 & args_s) { return new CPartBemDI(args_s,int2dx2d,3,2);}
-    static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshS>(), true);} // all type
-};
-
-
-/*class CBemDomainOfIntegration1d1d: public CBemDomainOfIntegration {
-public:
-    CBemDomainOfIntegration1d1d( const basicAC_F0 & args_t) :CBemDomainOfIntegration(args_t,3,2) {}
-    static  E_F0 * f(const basicAC_F0 & args_t) { return new CBemDomainOfIntegration(args_t,3,1);}
-    static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype< const CPartBemDI1d *>(), true);} // all type
-   
-};*/
-
-/*class CBemDomainOfIntegration2d2d: public CBemDomainOfIntegration {
-public:
-    CBemDomainOfIntegration2d2d(const basicAC_F0 & args_t) :CBemDomainOfIntegration(args_t,3,2) {}
-    static  E_F0 * f(const basicAC_F0 & args_t) { return new CBemDomainOfIntegration(args_t,3,2);}
-    static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<const CPartBemDI2d *>(), true);} // all type
-};*/
-
 
 // hack build template
 template<class T> struct CadnaType{
@@ -889,94 +601,6 @@ class FormLinear : public E_F0mps { public:
 
 };
 
-
-// define a bilinear form for BEM
-class FormBEM : public E_F0mps { public:
-    typedef const FormBEM* Result;
-    
-    typedef finconnue * Fi;
-    typedef ftest * Ft;
-    typedef pBemKernel  KBem;
-    typedef pBemKernel * pKBem;
-    Fi fi;
-    Ft ft;
-    Expression kbem;
-    
-    FormBEM(const basicAC_F0 & args) :fi(0),ft(0),kbem(0) {
-        //di= dynamic_cast<A>(CastTo<A>(args[0]));
-        
-        kbem= CastTo<KBem>(args[0]);
-        if( args.size()==3)
-        {
-            fi= dynamic_cast<Fi>(CastTo<Fi>(args[1]));
-            ft= dynamic_cast<Ft>(CastTo<Ft>(args[2]));
-            ffassert(fi && ft);
-        }
-        
-    }
-    
-    AnyType operator()(Stack ) const { return SetAny<Result>(this);}
-    operator aType () const { return atype<Result>();}
-    
-    
-};
-
-// define a bilinear form for BEM
-class BemKFormBilinear : public E_F0mps { public:
-    typedef const BemKFormBilinear* Result;
-    typedef const CBemDomainOfIntegration * A;   // source et target
-    
-   // typedef const BemKOperator  *  B;
-    typedef const FormBEM * B;
-    A  di;
-    B * b;
-    BemKFormBilinear(const basicAC_F0 & args) {
-        di= dynamic_cast<A>(CastTo<A>(args[0]));
-        B Kb= dynamic_cast<B>(CastTo<B>(args[1]));
-        
-        ffassert(di && Kb); }
-    
-      static  E_F0 * f(const basicAC_F0 & args) { return new BemKFormBilinear(args);}
-    static ArrayOfaType  typeargs() { return ArrayOfaType(atype<A>(),atype<B>());}// all type
-    AnyType operator()(Stack ) const { return SetAny<Result>(this);}
-    operator aType () const { return atype<Result>();}
-    
-    
-};
-
-
-/*
-
-// define a bilinear form for BEM
-class BemKFormBilinear : public E_F0mps { public:
-    typedef const BemKFormBilinear* Result;
-    typedef const CBemDomainOfIntegration * A;   // source et target
- 
-    typedef const BemKOperator  *  B;
- 
-    typedef Finconnue * Fi;
-    typedef Ftest * Ft;
-    typedef BemKernel * KBem;
- 
-    A  di;
-    BemKOperator * b;
-    BemKFormBilinear(const basicAC_F0 & args) {
-        di= dynamic_cast<A>(CastTo<A>(args[0]));
-        KBem Kb= dynamic_cast<KBem>(CastTo<KBem>(args[1]));
-        Fi Ffi= dynamic_cast<Fi>(CastTo<Fi>(args[2]));
-        Ft Fft= dynamic_cast<Ft>(CastTo<Ft>(args[3]));
- 
-        BemKOperator bb(Kb,Ffi,Fft);
-       ffassert(di && bb); }
- 
-    static ArrayOfaType  typeargs() { return ArrayOfaType(atype<A>(),atype<B>());}// all type
-    AnyType operator()(Stack ) const { return SetAny<Result>(this);}
-    operator aType () const { return atype<Result>();}
- 
-   
-};
-
-*/
 template<class VFES>
 class Call_FormLinear: public E_F0mps
 {
@@ -1223,65 +847,6 @@ public:
     return e; }
 
 };
-
-class BemKTypeFormBilinear: public ForEachType<const BemKFormBilinear*> {
-public:
-    BemKTypeFormBilinear() : ForEachType<const BemKFormBilinear*>(0,0,0) {}
-    void SetArgs(const ListOfId *lid) const {
-        SetArgsBemKFormLinear(lid,3);
-    }
-    
-    Type_Expr SetParam(const C_F0 & c,const ListOfId *l,size_t & top) const
-    { return Type_Expr(this,CastTo(c));}
-    
-    
-    C_F0 Initialization(const Type_Expr & e) const
-    {
-        return C_F0(); }
-    Type_Expr construct(const Type_Expr & e) const
-    {
-        return e; }
-    
-};
-
-/*class BemPTypeFormBilinear: public ForEachType<const BemPFormBilinear*> {
-public:
-    BemPTypeFormBilinear() : ForEachType<const BemPFormBilinear*>(0,0,0) {}
-    void SetArgs(const ListOfId *lid) const {
-        SetArgsBemPFormLinear(lid,3);
-    }
-    
-    Type_Expr SetParam(const C_F0 & c,const ListOfId *l,size_t & top) const
-    { return Type_Expr(this,CastTo(c));}
-    
-    
-    C_F0 Initialization(const Type_Expr & e) const
-    {
-        return C_F0(); }
-    Type_Expr construct(const Type_Expr & e) const
-    {
-        return e; }
-    
-};*/
-
-class TypeBemKFormOperator: public ForEachType<const C_args*> {
-public:
-    TypeBemKFormOperator() : ForEachType<const C_args*>(0,0,0) {}
-    void SetArgs(const ListOfId *lid) const {
-        SetArgsBemKFormLinear(lid,3);    }
-    
-    Type_Expr SetParam(const C_F0 & c,const ListOfId *l,size_t & top) const
-    { return Type_Expr(this,CastTo(c));}
-    
-    inline  C_F0 Initialization(const Type_Expr & e) const {return C_F0();}
-    
-};
-
-
-
-
-
-
 
 template<bool exec_init,class Problem>
 class TypeSolve : public ForEachType<const Problem*>   {
@@ -1776,8 +1341,6 @@ namespace FreeFempp {
 template<class R>
 class TypeVarForm { public:
     aType tFB;
-   // aType tBemKFB;
-  //    aType tFB3;
     aType tMat;
     aType tMat3;
     aType tFL;
