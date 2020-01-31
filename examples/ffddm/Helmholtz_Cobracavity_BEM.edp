@@ -4,7 +4,7 @@
 // NBPROC 4
 // PARAM -frequency 1e+9
 
-load "htool_bem"
+load "bem"
 load "msh3"
 
 include "getARGV.idp"

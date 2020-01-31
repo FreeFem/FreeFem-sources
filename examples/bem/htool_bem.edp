@@ -1,4 +1,4 @@
-load "htool_bem"
+load "bem"
 load"msh3"
 load"gmsh"
 
