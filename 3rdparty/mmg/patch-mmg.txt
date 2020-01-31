@@ -1,0 +1,19 @@
+--- ./mmg-sources/src/common/chrono.h
++++ ./mmg-sources-ok/src/common/chrono.h
+@@ -26,7 +26,9 @@
+ 
+ #include <time.h>
+ #include "mmgcommon.h"
+-
++#ifdef __WIN32__
++#undef POSIX
++#endif
+ #ifndef POSIX
+ #include <windows.h>
+ #else
+--- ./mmg-sources/CMakeLists.txt
++++ ./mmg-sources-ok/CMakeLists.txt
+226c226
+< FIND_PACKAGE(VTK)
+---
+> #FIND_PACKAGE(VTK)

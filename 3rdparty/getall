@@ -174,11 +174,18 @@ download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
 	'http://www.tetgen.org/1.5/src/',
 	'tetgen1.5.1-beta1.tar.gz',
 	'3d55c197bcbfc611b7ced6f343643756');
-
-download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.12.2.tar.gz',
+download('mmg','https://github.com/MmgTools/mmg/archive/9bd9ac675c7fef52df46e2cabdd4e9119adad425.zip',
+        'https://github.com/MmgTools',
+        'mmg.zip',
+        'ef02d36fe939026db200ea02d12eaabf');
+download('parmmg','https://github.com/MmgTools/ParMmg/archive/fe0b497f872a216e24a0d1b96b7507d455a65711.zip',
+        'https://github.com/MmgTools',
+        'parmmg.zip',
+        '7a92a0007189fa5aa511e575836dea65');
+download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.12.3.tar.gz',
 	'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/',
-	'petsc-lite-3.12.2.tar.gz',
-	'fe2f989d87d8e140045a0874b3c65c31');
+	'petsc-lite-3.12.3.tar.gz',
+	'ca5c8f535ff93e22a0bd2e03ded4befe');
 	
 download('htool','https://github.com/PierreMarchand20/htool/archive/0ba76eaca05217fceabf3f0269548b354590eef3.zip',
 		'https://github.com/PierreMarchand20/',

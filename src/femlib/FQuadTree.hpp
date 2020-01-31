@@ -106,11 +106,22 @@ public:
 
   
   Vertex * NearestVertex(const R2 & P) { return NearestVertex(XtoI(P.x),YtoJ(P.y));}
+   Vertex * TrueNearestVertex(const R2 & P) { return TrueNearestVertex(XtoI(P.x),YtoJ(P.y));}
+    
   Vertex * NearestVertexWithNormal(const R2 & P);
   // { return NearestVertexWithNormal(XtoI(P.x),YtoJ(P.y));}
   
   Vertex * NearestVertex(long i,long j);
-  
+    Vertex * TrueNearestVertex(long i,long j);
+
+ int  ListNearestVertex(Vertex **lnv,int nvn,long dh,long xi,long yj); // Add FH jan 2020
+ int  ListNearestVertex(Vertex **lnv,int nvn,double delta,R2 P)
+    {
+        I2 IP=R2ToI2(P);
+    long hx = (long) (coef*delta);
+    hx = hx>0 ? hx:1; // bof bof ....
+    return ListNearestVertex(lnv,nvn,hx,IP.x,IP.y);
+    }
 //  Vertex *  NearestVertexWithNormal(long i,long j); // new version
   Vertex *  ToClose(const R2 & ,R ,long,long,bool nearest=false);
   Vertex *  ToClose(const R2 & P,R delta,bool nearest=false){

@@ -102,6 +102,7 @@ if(!NoGraphicWindow || usedARGV("-fglut") != -1) {
 
 macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank, size, s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs) {
     assert(level >= 1);
+IFMACRO(!privateCreatePartition)
 IFMACRO(!privateCreateMat)
     meshName[level - 1] = trunc(globalName, abs(part - rank) < 0.1, label = fakeInterface);
     intersection.resize(1);
@@ -118,7 +119,9 @@ IFMACRO(!privateCreateMat)
         suppSmooth = 0;
         AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
     }
+IFMACRO(!privateDmesh#N2O)
     globalName = trunc(globalName, suppSmooth > 0.001, label = 9999);
+ENDIFMACRO
     real eps = globalName.measure;
     real[int] epsTab(intersection[0].n);
     mpiRequest[int] rq(2 * intersection[0].n);
@@ -130,8 +133,15 @@ IFMACRO(!privateCreateMat)
     }
     else
         epsTab = 1.0e+30;
+IFMACRO(!privateDmesh#N2O)
     suppSmooth = suppSmooth;
     meshName[level - 1] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface);
+ENDIFMACRO
+IFMACRO(privateDmesh#N2O)
+    meshName[level - 1] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface, new2old = privateDmesh#N2O);
+    globalName = trunc(globalName, suppSmooth > 0.001, label = 9999);
+    suppSmooth = suppSmooth;
+ENDIFMACRO
     if(level > 1) {
         prolongation.resize(level - 1);
         if(s > 1) {
@@ -270,10 +280,6 @@ IFMACRO(!privateCreateMat)
     }
     if(!trueRestrict)
         khi[] = khi[] ./= sum[];
-ENDIFMACRO
-    fespace WhPart(meshName[level - 1], PkPart);
-    WhPart defPart(func2vec);
-IFMACRO(!privateCreateMat)
     if(trueRestrict && mpiSize(comm) == size && removeZeros) {
         assert(level == 1);
         meshN ThIntersection;
@@ -323,12 +329,12 @@ IFMACRO(!vectorialfe)
                 fespace singleComponentWh(meshName[0], P);
                 fespace WhIntersection(meshIntersection[i], P);
 ENDIFMACRO
-                matrix R = interpolate(WhIntersection, singleComponentWh);
-                R.thresholding(1.0e-10);
-                real[int] C;
-                int[int] I;
-                [I, intersection[1 + i - j], C] = R;
-                intersection[1 + i - j].resize(R.nbcoef);
+                matrix meshName#R = interpolate(WhIntersection, singleComponentWh);
+                meshName#R.thresholding(1.0e-10);
+                real[int] meshName#C;
+                int[int] meshName#I;
+                [meshName#I, intersection[1 + i - j], meshName#C] = meshName#R;
+                intersection[1 + i - j].resize(meshName#R.nbcoef);
                 intersection[0][i - j] = intersection[0][i];
             }
         }
@@ -351,18 +357,48 @@ IFMACRO(vectorialfe)
                     intersection[1 + i][j * bs + k] = intersection[1 + i][j] * bs + k;
         }
 ENDIFMACRO
+ENDIFMACRO
+IFMACRO(privateCreatePartition)
+    fespace VhLocal(meshName[level - 1], P1);
+IFMACRO(!privateCreateMat)
+    VhLocal khi;
+ENDIFMACRO
+ENDIFMACRO
 IFMACRO(privateCreateMat)
     VhLocal khi;
-    khi[] = privateDmesh#meshName#khiDef;
+    khi[] = privateDmesh#meshName#khiDef[0];
 ENDIFMACRO
-    defPart(func2vec) = initPart(khi);
+    fespace WhPart(meshName[level - 1], PkPart);
+    WhPart defPart(func2vec);
     D[level - 1].resize(WhPart.ndof);
-    D[level - 1] = func2vec[];
+    if((WhPart.ndof % meshName[level - 1].nt) == 0) {
+IFMACRO(privateCreateMat)
+        fespace PhLocal(meshName[level - 1], P0);
+        PhLocal partLocal;
+        partLocal[] = privateDmesh#meshName#khiDef[1];
+        defPart(func2vec) = initPart(abs(partLocal - rank) < 0.1);
+ENDIFMACRO
 IFMACRO(!privateCreateMat)
-    if(trueRestrict && ((WhPart.ndof % meshName[level - 1].nt) == 0)) {
         defPart(func2vec) = initPart(abs(part - rank) < 0.1);
-        D[level - 1] = func2vec[];
+ENDIFMACRO
     }
+    else if(WhPart.ndof == meshName[level - 1].nv) {
+        func2vec[] = khi[];
+    }
+    else {
+        defPart(func2vec) = initPart(khi);
+    }
+    D[level - 1] = func2vec[];
+IFMACRO(!privateCreatePartition)
+IFMACRO(!privateCreateMat)
+IFMACRO(privateBuildDmesh)
+    fespace PhLocal(meshName[level - 1], P0);
+    PhLocal partLocal;
+    partLocal = part;
+    privateDmesh#meshName#khiDef[1].resize(partLocal[].n);
+    privateDmesh#meshName#khiDef[1] = partLocal[];
+ENDIFMACRO
+ENDIFMACRO
 ENDIFMACRO
 }// EOM
 
@@ -371,7 +407,7 @@ IFMACRO(!privateDmesh#ThName)
 NewMacro privateDmesh#ThName()privateDmesh#ThName EndMacro
 NewMacro privateDmesh#ThName#khi()privateDmesh#ThName#khiDef EndMacro
 NewMacro privateDmesh#ThName#intersection()privateDmesh#ThName#intersectionDef EndMacro
-real[int] privateDmesh#ThName#khi;
+real[int][int] privateDmesh#ThName#khi(2);
 real[int][int] privateDmesh#ThName#intersection;
 ENDIFMACRO
 {
@@ -380,12 +416,20 @@ ENDIFMACRO
     NewMacro privateDmesh#ThTab()privateDmesh#ThName EndMacro
     NewMacro privateDmesh#ThTab#khi()privateDmesh#ThName#khiDef EndMacro
     NewMacro privateDmesh#ThTab#intersection()privateDmesh#ThName#intersectionDef EndMacro
-    buildMinimalist(ThName, intersection, privateDmesh#ThName#khi, P1);
+IFMACRO(ThName#N2O)
+    NewMacro privateDmesh#N2O()ThName#N2O EndMacro
+ENDIFMACRO
+    buildMinimalist(ThName, intersection, privateDmesh#ThName#khi[0], P1);
 }
 EndMacro
 macro createMat(ThName, MatName, PkName)
 IFMACRO(privateDmesh#ThName)
 {
+IFMACRO(!privateCreateMatCheckDmesh)
+    if(ThName.nv != privateDmesh#ThName#khi[0].n || ThName.nt != privateDmesh#ThName#khi[1].n) {
+        buildDmesh(ThName)
+    }
+ENDIFMACRO
     NewMacro privateCreateMat()1 EndMacro
     int[int][int] intersection;
     real[int][int] DTab(1);
@@ -404,18 +448,38 @@ ENDIFMACRO
         partition(ThTab, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, mpirank, mpisize, 1, 1, 1, privateCreateMat, DTab, PkName, intersection, mpiCommWorld, -111111, PkName, def, init, 1)
     }
     else {
-        fespace Wh(ThName, PkName);
-        DTab[0].resize(Wh.ndof);
+        fespace WhGlobal(ThName, PkName);
+        DTab[0].resize(WhGlobal.ndof);
         DTab[0] = 1;
         intersection.resize(0);
     }
+IFMACRO(!privateCreatePartition)
     constructor(MatName, DTab[0].n, intersection, DTab[0]);
+ENDIFMACRO
+IFMACRO(privateCreatePartition)
+    privateCreatePartition.resize(DTab[0].n);
+    privateCreatePartition = DTab[0];
+ENDIFMACRO
 }
 ENDIFMACRO
 IFMACRO(!privateDmesh#ThName)
 buildDmesh(ThName)
-createMat(ThName, MatName, PkName)
+{
+    NewMacro privateCreateMatCheckDmesh()1 EndMacro
+    createMat(ThName, MatName, PkName)
+}
 ENDIFMACRO
+EndMacro
+
+macro createPartition(ThName, PartName, PkName)
+IFMACRO(!privateDmesh#ThName)
+buildDmesh(ThName)
+ENDIFMACRO
+{
+    NewMacro privateCreateMatCheckDmesh()1 EndMacro
+    NewMacro privateCreatePartition()PartName EndMacro
+    createMat(ThName, privateCreatePartition, PkName)
+}
 EndMacro
 
 macro buildOverlapEdgePeriodicRecursive(Th, ThBorder, fakeInterface, s, overlap, level, prolongation, intersection, DTab, P, comm, excluded, PkPart, defPart, initPart, labPeriodic, userPartitioning, bs) {
@@ -516,8 +580,26 @@ ENDIFMACRO
             DTab[i].resize(WhLocalCoarse.ndof);
             DTab[i] = 1.0;
         }
-        if(level == 1 && s > 1)
-            Th[0] = trunc(Th[0], 1, split = s);
+        if(level == 1) {
+IFMACRO(privateBuildDmesh)
+IFMACRO(privateDmesh#N2O)
+            if(s > 1)
+                Th[0] = trunc(Th[0], 1, split = s, new2old = privateDmesh#N2O);
+            else {
+                privateDmesh#N2O.resize(Th[0].nt);
+                privateDmesh#N2O = 0:Th[0].nt-1;
+            }
+ENDIFMACRO
+IFMACRO(!privateDmesh#N2O)
+            if(s > 1)
+                Th[0] = trunc(Th[0], 1, split = s);
+ENDIFMACRO
+ENDIFMACRO
+IFMACRO(!privateBuildDmesh)
+            if(s > 1)
+                Th[0] = trunc(Th[0], 1, split = s);
+ENDIFMACRO
+        }
         fespace WhLocal(Th[0], P);
         DTab[0].resize(WhLocal.ndof);
         DTab[0] = 1.0;
@@ -609,6 +691,13 @@ macro buildMinimalist(Th, intersection, D, P, bs) {
     int overlap = 1;
     bool excluded = false;
     buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, 1, overlap, intersection, D, P, mpiCommWorld, excluded, P, def, init, emptyArray, emptyRealArray, bs)
+}// EOM
+macro buildRecursive(Th, s, level, prolongation, intersectionMat, DTab, P, comm, bsMat) {
+    int[int] emptyArray(0);
+    real[int] emptyRealArray(0);
+    meshN[int] ThBorderTab(level);
+    DTab.resize(level);
+    buildOverlapEdgePeriodicRecursive(Th, ThBorderTab, -111111, s, 1, level, prolongation, intersectionMat, DTab, P, comm, false, P, def, init, emptyArray, emptyRealArray, bsMat)
 }// EOM
 macro buildMatRecursive(Th, s, level, prolongation, A, P, comm, bsMat) {
     int[int] emptyArray(0);
@@ -731,6 +820,13 @@ macro buildMinimalist(Th, intersection, D, P) {
     int overlap = 1;
     bool excluded = false;
     buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, 1, overlap, intersection, D, P, mpiCommWorld, excluded, P, def, init, emptyArray, emptyRealArray, 1)
+}// EOM
+macro buildRecursive(Th, s, level, prolongation, intersectionMat, DTab, P, comm) {
+    int[int] emptyArray(0);
+    real[int] emptyRealArray(0);
+    meshN[int] ThBorderTab(level);
+    DTab.resize(level);
+    buildOverlapEdgePeriodicRecursive(Th, ThBorderTab, -111111, s, 1, level, prolongation, intersectionMat, DTab, P, comm, false, P, def, init, emptyArray, emptyRealArray, 1)
 }// EOM
 macro buildMatRecursive(Th, s, level, prolongation, A, P, comm) {
     int[int] emptyArray(0);

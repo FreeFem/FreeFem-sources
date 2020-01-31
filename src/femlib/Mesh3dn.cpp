@@ -183,7 +183,7 @@ namespace Fem2D
                 meshS->BuildjElementConteningVertex();
             }
         }
-        else BuildMeshS(ridgeangledetection);
+        // else BuildMeshS(ridgeangledetection);
         if(verbosity>2) {
             cout << "  -- End of read: Mesh3 mesure = " << mes << " border mesure " << mesb << endl;
             if(meshS ) cout << "  -- End of read: MeshS mesure = " << meshS->mes << " border mesure " << meshS->mesb << endl;
@@ -250,7 +250,7 @@ namespace Fem2D
                 meshS->BuildjElementConteningVertex();
             }
         }
-        else BuildMeshS(ridgeangledetection);
+        // else BuildMeshS(ridgeangledetection);
         
         /*
         if(change){

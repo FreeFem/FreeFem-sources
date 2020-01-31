@@ -470,6 +470,21 @@ long fftellg( istream_seekg  pf) { return pf.f->tellg() ;}
 
   inline long get_good( istream_good  pf) { return pf.f->good();}
   inline bool get_eof(istream ** p){ return (**p).eof();}
+  long filelength(istream ** p) {
+      istream *f = *p;
+      long where=f->tellg();
+      f->seekg (0, f->end);
+      long length =f->tellg();
+      f->seekg (where);
+      return length;
+  }
+  bool eatspace(istream ** p){
+    istream *f = *p;
+    int c;
+     while ( (c=f->peek())!=EOF)
+         if ( !isspace(c)) break;
+         else f->get();
+     return c != EOF;}
 
 typedef ios_base& ( * ostream_manipulateur )(ios_base&);
 
@@ -1480,6 +1495,9 @@ void Init_map_type()
      Add<istream_good>("(","",new OneOperator1<long,istream_good>(get_good));
 
      Add<istream**>("eof",".",new OneOperator1<bool,istream**>(get_eof));
+// add v 4.5 jan 2020 FH.
+        Add<istream**>("eatspace",".",new OneOperator1<bool,istream**>(eatspace));
+       Add<istream**>("length",".",new OneOperator1<long,istream**>(filelength));
 // add v 2.8
      Add<ostream**>("scientific",".",new OneOperator1<ostream**,ostream**>(set_os<scientific>));
      Add<ostream**>("fixed",".",new OneOperator1<ostream**,ostream**>(set_os<fixed>));

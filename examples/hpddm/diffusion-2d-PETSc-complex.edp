@@ -14,13 +14,12 @@ buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
 
 fespace Wh(Th, Pk);                 // local finite element space
 varf vPb(u, v) = intN(Th)(1i*grad(u)' * grad(v)) + intN(Th)(v) + on(1, u = 0.0);
-matrix<complex> Loc = vPb(Wh, Wh);
 complex[int] rhs = vPb(0, Wh);
 
 set(A, sparams = "-ksp_view");
 Wh<complex> u;                      // local solution
 
-A = Loc;
+A = vPb(Wh, Wh);
 u[] = A^-1 * rhs;
 
 complex[int] err = A * u[];         // global matrix-vector product

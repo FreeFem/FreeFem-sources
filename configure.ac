@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFEM,4.4-3,frederic.hecht@sorbonne-universite.fr,FreeFEM)
+AC_INIT(FreeFEM,4.4-4,frederic.hecht@sorbonne-universite.fr,FreeFEM)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -969,6 +969,8 @@ AC_ARG_WITH(petsc,[  --with-petsc=/usr/local/petsc/conf/petscvariables   --witho
 AC_ARG_WITH(prefix_petsc,[ --prefix_petsc=dirtory where all petsc/slepc  will be install if you download ])
 if test -z "${prefix_petsc}"  ; then   prefix_petsc="${prefix}/ff-petsc/"; fi
 AC_SUBST([FF_prefix_petsc],"$prefix_petsc")
+AC_SUBST([FF_prefix_petsc_real],"$prefix_petsc_real")
+AC_SUBST([FF_prefix_petsc_complex],"$prefix_petsc_complex")
 AC_SUBST([FF_generic_petsc],"$enable_generic")
 # /usr/local/petsc/conf/petscvariables
 #/usr/local/ff++/petsc/lib/petsc/conf/petscvariables
@@ -984,37 +986,40 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
 		 echo " petsc ... $ffconfpetsc"
 	    if test -f "$ffconfpetsc" ; then
 		if test  "$ff_petsc_ok" = no ; then
+		    PETSC_PREFIXDIR=`awk -F' *= *' '"PREFIXDIR"==$1 {print $2}' "$ffconfpetsc"`
 		    PETSC_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetsc"`
 		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
-				PETSC_MPIRUN=`echo "$PETSC_MPIRUN" | awk '{gsub(" --oversubscribe", ""); print}'`	#remove --oversubscribe
-			AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]);
-            WPETSC_MPIRUN=`which "$PETSC_MPIRUN"`
-            WMPIRUN=`which "$MPIRUN"` 
+		    PETSC_MPIRUN=`echo "$PETSC_MPIRUN" | awk '{gsub(" --oversubscribe", ""); print}'`	#remove --oversubscribe
+		    AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]);
+                    WPETSC_MPIRUN=`which "$PETSC_MPIRUN"`
+                    WMPIRUN=`which "$MPIRUN"` 
 		    test  "$PETSC_SCALAR" = "real" && test "$ff_win32" = yes -o  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s "$WPETSC_MPIRUN" "$WMPIRUN"
 		    if test "$?"  -eq 0 ; then
+	                AC_SUBST([FF_conf_petsc_real],"$ffconfpetsc")
+		        AC_SUBST([FF_prefix_petsc_real],"$PETSC_PREFIXDIR")
 		        AC_FF_PETSC_WHERELIB_BASIC(petsc,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(ptscotch,PTSCOTCH_LIB,PTSCOTCH_INCLUDE,$ffconfpetsc)
-                ff_SCOTCH_INCLUDE=$ff_PTSCOTCH_INCLUDE
-                ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*ptscotch@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*ptes@<:@^ @:>@*//g'`
-                if test -n "$ff_SCOTCH_LIB"; then
-                    ff_scotch_ok=yes;
-                    AC_FF_ADDWHERELIB(scotch,$ff_SCOTCH_LIB,$ff_SCOTCH_INCLUDE)
-                    AC_SUBST([TOOL_COMPILE_scotch],"")
-                fi
+                        ff_SCOTCH_INCLUDE=$ff_PTSCOTCH_INCLUDE
+                        ff_SCOTCH_LIB=`echo $ff_PTSCOTCH_LIB | sed -e 's/@<:@^ @:>@*ptscotch@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*ptes@<:@^ @:>@*//g'`
+                        if test -n "$ff_SCOTCH_LIB"; then
+                          ff_scotch_ok=yes;
+                          AC_FF_ADDWHERELIB(scotch,$ff_SCOTCH_LIB,$ff_SCOTCH_INCLUDE)
+                          AC_SUBST([TOOL_COMPILE_scotch],"")
+                        fi
 		        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetsc)
-                AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetsc)
-                AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetsc)
-                AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetsc)
+                        AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetsc)
+                        AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetsc)
+                        AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetsc)
-  			    AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetsc)
-			    AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetsc)
-                if test -f $d/libslepc.$ff_suffix_dylib ; then
-				   ff_slepc_ok=yes
-                   ff_SLEPC_LIB="-Wl,-rpath,$d -L$d -lslepc"
-			       AC_FF_ADDWHERELIB(slepc,$ff_SLEPC_LIB,$ff_where_inc_petsc)
-				fi
+  		        AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetsc)
+			AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetsc)
+                        if test -f $d/libslepc.$ff_suffix_dylib ; then
+			   ff_slepc_ok=yes
+                           ff_SLEPC_LIB="-Wl,-rpath,$d -L$d -lslepc"
+			   AC_FF_ADDWHERELIB(slepc,$ff_SLEPC_LIB,$ff_where_inc_petsc)
+		        fi
 		    else
 			 AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN or $PETSC_SCALAR != real ." ]);
 		    fi
@@ -1046,10 +1051,15 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
 	    if test -f "$ffconfpetscc" -a  "$ff_petsccomplex_ok" = no ; then
 		    PETSC_COMPLEX_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetscc"`
 		    PETSC_COMPLEX_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetscc"`
+		    PETSC_COMPLEX_PREFIXDIR=`awk -F' *= *' '"PREFIXDIR"==$1 {print $2}' "$ffconfpetscc"`
+		    
 			PETSC_COMPLEX_MPIRUN=`echo "$PETSC_COMPLEX_MPIRUN" | awk '{print $1}'`	#remove --oversubscribe
 			AC_MSG_NOTICE([ find complex ($PETSC_COMPLEX_SCALAR) petsc in $ffconfpetscc]);
 		    test  "$PETSC_COMPLEX_SCALAR" = "complex" &&  test  "$ff_win32" = yes -o  "$PETSC_COMPLEX_MPIRUN" = "$MPIRUN" ||  cmp -s `which "$PETSC_COMPLEX_MPIRUN"` `which "$MPIRUN"`
 		   	if test "$?"  -eq 0 ; then
+            AC_SUBST([FF_prefix_petsc_complex],"$PETSC_COMPLEX_PREFIXDIR")
+            AC_SUBST([FF_conf_petsc_complex],"$ffconfpetscc")
+	    
             AC_FF_PETSC_WHERELIB_BASIC(petsccomplex,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(parmetis,PARMETIS_LIB,PARMETIS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(metis,METIS_LIB,METIS_INCLUDE,$ffconfpetscc)
@@ -1383,7 +1393,7 @@ dnl            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and L
     # Specific BLAS library location for FreeBSD
     ff_freebsd_blas="-lf2c -lf77blas -latlas -lgslcblas"
     ff_dll_blas=`which  libopenblas.dll`
-    if [ -z "$ff_dll_blas" ] ; then  ff_dll_blas="no"; fi
+    if test -z "$ff_dll_blas" ; then  ff_dll_blas="no"; fi
         #  zmach is in lapack
     # Trying  blas library
     # echo "LIBS =  $LIBS blas --- $ff_blas_ok"
@@ -2074,6 +2084,8 @@ m4_map([AC_FF_WHERELIB],[
 	[[parmetis],[-lparmetis -lmetis],[],[]],
 	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
 	[[mmg3d],[-lmmg3d-v4],[libmmg3d.h],[]],
+        [[mmg],[-lmmg],[libmmg.h],[]],
+        [[parmmg],[-lparmmg],[libparmmg.h],[]],
 	[[mshmet],[-lmshmet],[mshmetlib.h],[]],
 dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 	[[tetgen],[-ltet],[tetgen.h],[]],
@@ -2089,6 +2101,8 @@ TOOL_DISABLE(lapack,"lapack.$DYLIB_SUFFIX fflapack.$DYLIB_SUFFIX")
 TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
 TOOL_DISABLE(parmetis,parmetis.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
+TOOL_DISABLE(mmg,mmg.$DYLIB_SUFFIX)
+TOOL_DISABLE(parmmg,parmmg.$DYLIB_SUFFIX)
 TOOL_DISABLE(mshmet,"mshmet.$DYLIB_SUFFIX aniso.$DYLIB_SUFFIX")
 TOOL_DISABLE(gmm,ilut.$DYLIB_SUFFIX,,enable_gmm=no)
 TOOL_DISABLE(scalapack,"MUMPS.$DYLIB_SUFFIX")
@@ -2270,6 +2284,18 @@ if test "$ff_mkl_ok" == yes ; then
 fi
 
 ## Condtional for check
+test "$ff_fftw_ok" = yes -o -n "$ff_DOWNLOAD_FFTW" && ff_fftw_=yes
+test "$ff_ipopt_ok" = yes -o -n "$TOOL_COMPILE_ipopt" && ff_ipopt_=yes
+test "$ff_metis_ok" = yes -o -n "$TOOL_COMPILE_metis" && ff_metis_=yes
+test "$ff_mmg_ok" = yes -o -n "$TOOL_COMPILE_mmg" && ff_mmg_=yes
+test "$ff_mshmet_ok" = yes -o -n "$TOOL_COMPILE_mshmet" && ff_mshmet_=yes
+test "$ff_mumps_ok" = yes -o -n "$TOOL_COMPILE_mumps" && ff_mumps_=yes
+test "$ff_mumps_seq_ok" = yes -o -n "$TOOL_COMPILE_mumps_seq" && ff_mumps_seq_=yes
+test "$ff_parmetis_ok" = yes -o -n "$TOOL_COMPILE_parmetis" && ff_parmetis_=yes
+test "$ff_scotch_ok" = yes -o -n "$TOOL_COMPILE_scotch" && ff_scotch_=yes 
+test "$ff_tetgen_ok" = yes -o -n "$TOOL_COMPILE_tetgen" && ff_tetgen_=yes 
+test "$ff_umfpack_ok" = yes -o -n "$TOOL_COMPILE_umfpack"  && ff_umfpack_=yes 
+
 AM_CONDITIONAL([DOWNLOAD], [test "$enable_download" = yes ])
 AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = yes ])
 AM_CONDITIONAL([BLACS], [test "$ff_blacs_ok" = yes])
@@ -2288,6 +2314,8 @@ AM_CONDITIONAL([LIBSEQ], [test "$ff_libseq_ok" = yes])
 AM_CONDITIONAL([METIS], [test "$ff_metis_ok" = yes -o -n "$TOOL_COMPILE_metis" ])
 AM_CONDITIONAL([MKL], [test "$ff_mkl" = yes])
 AM_CONDITIONAL([MMG3D], [test "$ff_mmg3d_ok" = yes -o -n "$TOOL_COMPILE_mmg3d"])
+AM_CONDITIONAL([MMG], [test "$ff_mmg_ok" = yes -o -n "$TOOL_COMPILE_mmg"])
+AM_CONDITIONAL([PARMMG], [test "$ff_parmmg_ok" = yes -o -n "$TOOL_COMPILE_parmmg"])
 AM_CONDITIONAL([MPI], [test "$ff_mpi" = yes])
 AM_CONDITIONAL([MSHMET], [test "$ff_mshmet_ok" = yes -o -n "$TOOL_COMPILE_mshmet"])
 AM_CONDITIONAL([MUMPS], [test "$ff_mumps_ok" = yes -o -n "$TOOL_COMPILE_mumps"])
@@ -2390,6 +2418,12 @@ if test "$enable_download" = yes; then
   if test -n "$TOOL_COMPILE_mmg3d"; then
     AC_MSG_NOTICE([      use of download mmg3d (v4)   see 3rdparty/mmg3d/mmg3d4/LICENCE.txt  ])
   fi
+  if test -n "$TOOL_COMPILE_mmg"; then
+    AC_MSG_NOTICE([      use of download mmg  ])
+  fi
+  if test -n "$TOOL_COMPILE_parmmg"; then
+    AC_MSG_NOTICE([      use of download parmmg  ])
+  fi
   if test -n "$TOOL_COMPILE_parmetis"; then
     AC_MSG_NOTICE([      use of download parmetis])
   fi
@@ -2459,7 +2493,7 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - BLACS: $ff_blacs_ok])
   AC_MSG_NOTICE([ - BEMTOOL: $enable_bemtool])
   AC_MSG_NOTICE([ - BOOST: $enable_boost])
-  AC_MSG_NOTICE([ - FFTW3: $ff_fftw_ok])
+  AC_MSG_NOTICE([ - FFTW3: $ff_fftw_])
   AC_MSG_NOTICE([ - FORTRAN: $enable_fortran])
   AC_MSG_NOTICE([ - FREEYAMS: $ff_freeyams_ok])
   AC_MSG_NOTICE([ - GMM: $enable_gmm])
@@ -2467,19 +2501,21 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - HDF5: $with_hdf5])
   AC_MSG_NOTICE([ - HTOOL: $enable_htool])
   AC_MSG_NOTICE([ - HPDDM: $enable_hpddm])
-  AC_MSG_NOTICE([ - IPOPT: $ff_ipopt_ok])
+  AC_MSG_NOTICE([ - IPOPT: $ff_ipopt_])
   AC_MSG_NOTICE([ - LIBSEQ: $ff_libseq_ok])
-  AC_MSG_NOTICE([ - METIS: $ff_metis_ok])
+  AC_MSG_NOTICE([ - METIS: $ff_metis_])
   AC_MSG_NOTICE([ - MKL: $ff_mkl])
   AC_MSG_NOTICE([ - MMG3D: $ff_mmg3d_ok])
+  AC_MSG_NOTICE([ - MMG: $ff_mmg_])
+  AC_MSG_NOTICE([ - PARMMG: $ff_parmmg_])
   AC_MSG_NOTICE([ - MPI: $ff_mpi])
-  AC_MSG_NOTICE([ - MSHMET: $ff_mshmet_ok])
-  AC_MSG_NOTICE([ - MUMPS: $ff_mumps_ok])
+  AC_MSG_NOTICE([ - MSHMET: $ff_mshmet_])
+  AC_MSG_NOTICE([ - MUMPS: $ff_mumps_])
   AC_MSG_NOTICE([ - MUMPS_ptscotch: $ff_mumps_ptscotch_ok])
   AC_MSG_NOTICE([ - MUMPS_scotch: $ff_mumps_scotch_ok])
-  AC_MSG_NOTICE([ - MUMPS_seq: $ff_mumps_seq_ok])
+  AC_MSG_NOTICE([ - MUMPS_seq: $ff_mumps_seq_])
   AC_MSG_NOTICE([ - NLOPT: $ff_nlopt_ok])
-  AC_MSG_NOTICE([ - PARMETIS: $ff_parmetis_ok])
+  AC_MSG_NOTICE([ - PARMETIS: $ff_parmetis_])
   AC_MSG_NOTICE([ - PETSC: $ff_petsc_ok])
   AC_MSG_NOTICE([ - PETSCCOMPLEX: $ff_petsccomplex_ok])
   AC_MSG_NOTICE([ - PTHREAD: $ff_pthread_ok])
@@ -2489,8 +2525,8 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - SLEPC: $ff_slepc_ok])
   AC_MSG_NOTICE([ - SLEPCCOMPLEX: $ff_slepccomplex_ok])
   AC_MSG_NOTICE([ - SUPERLU: $ff_superlu_ok])
-  AC_MSG_NOTICE([ - TETGEN: $ff_tetgen_ok])
-  AC_MSG_NOTICE([ - UMFPACK: $ff_umfpack_ok])
+  AC_MSG_NOTICE([ - TETGEN: $ff_tetgen_])
+  AC_MSG_NOTICE([ - UMFPACK: $ff_umfpack_])
 fi
 if test "${prefix_petsc}" != no -a   ! \( -d "${prefix_petsc}/real/lib"  -o  -d "${prefix_petsc}/r/lib" \) ; then
   AC_MSG_NOTICE([ petsc dirs do no exist  , do build do:])

@@ -1,0 +1,24 @@
+load "msh3"
+load "medit"
+load "mmg"
+
+int nn = 50;
+
+mesh3 Th3=cube(nn,2*nn,nn,[x,2*y,z]);
+
+func head = sqrt((x-0.5)^2+(y-0.5)^2+(z-0.5)^2)-0.3;
+func ear1 = sqrt((x-0.3)^2+(y-0.5)^2+0.5*(z-0.8)^2)-0.1;
+func ear2 = sqrt((x-0.7)^2+(y-0.5)^2+0.5*(z-0.8)^2)-0.1;
+func nose = sqrt((x-0.5)^2+0.006*(y-0.9)^2+(z-0.5)^2)-0.03;
+
+fespace Uh(Th3,P1);
+Uh Pinocchio = min(min(min(head,ear1),ear2),nose);
+
+Th3 = mmg3d(Th3,metric=Pinocchio[],iso=1,ls=0,hausd=0.002,verbose=10);
+Th3 = buildBdMesh(Th3);
+//medit("Th3",Th3);
+
+meshS ThS = Th3.Gamma;
+ThS = trunc(ThS,region==10);
+ThS = mmgs(ThS,hausd=0.001);
+medit("Pinocchio",ThS);

@@ -31,8 +31,9 @@ else
    exit 1;
 fi
 cd "$dirwhere"
-wherel=WHERE_LIBRARY-download
-test -f WHERE_LIBRARY-config && wherel="$wherel  WHERE_LIBRARY-config"
+wherel=''
 test -f WHERE_LIBRARY && wherel="$wherel WHERE_LIBRARY"
+test -f WHERE_LIBRARY-config && wherel="$wherel  WHERE_LIBRARY-config"
+test -f WHERE_LIBRARY-download && wherel="$wherel  WHERE_LIBRARY-download"
 awk -f ff-get-dep.awk -v libs="$libs"  -v cpp="$cpp" $wherel
 exit $?

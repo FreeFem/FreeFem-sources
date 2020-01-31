@@ -17,11 +17,10 @@ varf vPb(u, v) = intN(Th)(grad(u)' * grad(v));
 func f = 1 + x - y;
 varf vL(u, v)  = intN(Th)(f * v);
 varf vb(u, v)  = intN(Th)(v);
-matrix<real> Loc = vPb(Wh, Wh);
 real[int] F = vL(0, Wh);
 real[int] B = vb(0, Wh);
 real[int] pB, pF, pSol;
-A = Loc;
+A = vPb(Wh, Wh);
 changeNumbering(A, B, pB);
 changeNumbering(A, F, pF);
 

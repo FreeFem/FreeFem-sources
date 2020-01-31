@@ -2561,13 +2561,8 @@ class PopenMeditMeshT_Op : public E_F0mps {
   struct Expression2 {
     long what;       // 0 mesh, 1 scalar, 2 vector, 3 symtensor
     long nbfloat;    // 0 mesh(3D), 1 scalar, 2 vector (3D), 3 symtensor(3D)
-    Expression e[3];
-    Expression2( ) {
-      e[0] = 0;
-      e[1] = 0;
-      e[2] = 0;
-      what = 0;
-      nbfloat = 0;
+    Expression e[6];
+    Expression2( ) { e[0]=0 ; e[1]=0 ; e[2]=0; e[3]=0 ; e[4]=0; e[5]=0 ; what=0; nbfloat=0;
     };
     Expression &operator[](int i) { return e[i]; }
 

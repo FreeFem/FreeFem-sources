@@ -30,6 +30,14 @@ dir3rdparty := $(abspath $(dir $(mkfile_path))/..)
 
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(FF_prefix_petsc)" && test -w "$(DESTDIR)$(FF_prefix_petsc) || echo sudo)
 W_SUDO1=$(SHELL ls	)
+ifeq ($(COMPILE_OPENBLAS),openblas)
+PETSC_OPENBLAS := --download-openblas
+PETSC_OPENBLAS_C = --with-openblas-dir=$(DIR_INSTALL_REAL)
+else
+PETSC_OPENBLAS = --with-blaslapack-include='$(shell echo $(BLASINC) | sed "s/-I//g")' \
+		--with-blaslapack-lib='$(BLAS_LAPACK_LIBS)'
+PETSC_OPENBLAS_C = $(PETSC_OPENBLAS)
+endif
 ifeq ($(PETSC_PKG),yes)
 pkg_dir=$(abspath $(dir $(mkfile_path))/pkg)
 PETSC_DOWNLOAD := --download-scalapack=$(pkg_dir)/pkg-scalapack.tar.gz \
@@ -45,8 +53,6 @@ PETSC_DOWNLOAD := --download-scalapack=$(pkg_dir)/pkg-scalapack.tar.gz \
 		--download-slepc=$(pkg_dir)/slepc.tar.gz
 PETSC_DOWNLOAD_C := --download-hpddm=$(pkg_dir)/hpddm.tar.gz \
 		--download-slepc=$(pkg_dir)/slepc.tar.gz
-
-		
 else
 PETSC_DOWNLOAD := --download-scalapack --download-metis --download-ptscotch \
 		--download-mumps --download-hypre --download-parmetis \
@@ -70,8 +76,7 @@ ifeq ($(WIN32DLLTARGET),)
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 		--with-scalar-type=real $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
-		--with-blaslapack-include='$(BLASINC)' \
-		--with-blaslapack-lib='$(BLAS_LAPACK_LIBS)' \
+		$(PETSC_OPENBLAS) \
 		$(PETSC_DOWNLOAD)
 FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' --with-cxx-dialect=C++11 \
@@ -80,8 +85,7 @@ FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		--with-scalar-type=complex \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
-		--with-blaslapack-include='$(BLASINC)' \
-		--with-blaslapack-lib='$(BLAS_LAPACK_LIBS)' \
+		$(PETSC_OPENBLAS_C) \
 		--with-scalapack-dir=$(DIR_INSTALL_REAL) \
 		--with-metis-dir=$(DIR_INSTALL_REAL) \
 		--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
@@ -144,7 +148,7 @@ all-local:
 # -------------------------------
 
 DIRPKG=../pkg
-VERSION=3.12.2
+VERSION=3.12.3
 VERSION_SLEPC=3.12.0
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)

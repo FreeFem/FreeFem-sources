@@ -36,8 +36,6 @@ varf vC(uh, vh) = int2d(Th)(b*vh)
 varf vhJ(uh, vh) = int2d(Th)(dfalpha*(dx(uh)*dx(vh) + dy(uh)*dy(vh)) + ddfalpha*(dx(u)*dx(vh) + dy(u)*dy(vh)) * (dx(u)*dx(uh) + dy(u)*dy(uh)))
     + on(1, 2, 3, 4, uh = 0);
 
-matrix H;
-
 func real[int] funcRes(real[int]& inPETSc) {
     changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
     alpha = dx(u)*dx(u) + dy(u)*dy(u);
@@ -50,8 +48,7 @@ func real[int] funcRes(real[int]& inPETSc) {
 }
 func int funcJ(real[int]& inPETSc) {
     changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
-    H = vhJ(Vh, Vh, tgv = -1);
-    A = H;
+    A = vhJ(Vh, Vh, tgv = -1);
     return 0;
 }
 

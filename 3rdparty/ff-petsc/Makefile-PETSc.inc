@@ -8,6 +8,7 @@ FC=@FC@
 BLASINC=@BLASINC@
 BLASLIBS=@BLASLIBS@
 LAPACKLIBS=@LAPACKLIBS@
+COMPILE_OPENBLAS=@COMPILE_OPENBLAS@
 #  Use:
 #    -DAdd_ if your Fortran compiler adds an underscore at the end
 #              of symbols,

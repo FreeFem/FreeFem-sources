@@ -1,0 +1,72 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"
+macro dimension()2// EOM
+include "macro_ddm.idp"
+
+real c = 6.25;
+int N  = 80;
+
+// domain: unit square
+border aa(t=0,1) { x=t;   y=0;   };
+border bb(t=0,1) { x=1;   y=t;   };
+border cc(t=0,1) { x=1-t; y=1;   };
+border dd(t=0,1) { x=0;   y=1-t; };
+
+mesh M = buildmesh(aa(N)+bb(N)+cc(N)+dd(N));
+
+load "Element_P3"
+func Pk = P1;
+Mat A;
+buildMat(M, getARGV("-split", 1), A, Pk, mpiCommWorld)
+fespace Vh(M, Pk);
+Vh u;
+func BC = cos(pi*x)*cos(pi*y);
+varf vInit(w, v) = on(aa, bb, cc, dd, w = BC);
+varf vJ(w, v) = int2d(M)(dx(w)*dx(v) + dy(w)*dy(v) - c*exp(u)*w*v) + on(aa, bb, cc, dd, w = 0);
+varf vRes(w, v) = int2d(M)(dx(u)*dx(v) + dy(u)*dy(v) - c*exp(u)*v) + on(aa, bb, cc, dd, w = u);
+func real[int] funcRes(real[int]& inPETSc) {
+    changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
+    real[int] out(Vh.ndof);
+    out = vRes(0, Vh, tgv = -2);
+    real[int] outPETSc;
+    changeNumbering(A, out, outPETSc);
+    return outPETSc;
+}
+func int funcJ(real[int]& inPETSc) {
+    changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
+    A = vJ(Vh, Vh, tgv = -2);
+    return 0;
+}
+bool stage = usedARGV("-stage") != -1;
+for(int i = 0; i < 3; ++i) {
+    string params;
+    if(i == 0) {
+        params = "";
+        if(stage)
+            PetscLogStagePush("Everything");
+    }
+    else if(i == 1) {
+        params = "-pc_hpddm_coarse_ksp_reuse_preconditioner";
+        if(stage)
+            PetscLogStagePush("Fine level");
+    }
+    else if(i == 2) {
+        params = "-pc_hpddm_levels_1_ksp_reuse_preconditioner";
+        if(stage)
+            PetscLogStagePush("Nothing");
+    }
+    set(A, sparams = "-pc_type hpddm -pc_hpddm_levels_1_sub_pc_type lu -pc_hpddm_levels_1_eps_nev 10 -pc_hpddm_define_subdomains -pc_hpddm_has_neumann -ksp_converged_reason -pc_hpddm_levels_1_pc_type asm " + params);
+    real[int] bPETSc;
+    u[] = vInit(0, Vh, tgv = -2);
+    changeNumbering(A, u[], bPETSc);
+    real[int] xPETSc = bPETSc;
+    SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_type newtonls -snes_converged_reason -ksp_converged_reason -snes_view");
+    changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
+    macro def(u)u//
+    plotMPI(M, u, Pk, def, real, cmm = "Global solution")
+    set(A, sparams = "-pc_type none");
+    if(stage)
+        PetscLogStagePop();
+}

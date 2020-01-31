@@ -110,6 +110,6 @@ for(int n = 0; n < 200; n++) {
   cout << " iter " << n << " Err L2 = " << err << " - Outflow = " << outflux << endl;
   if (err < 1e-3) break;
 }
-assert(abs(outflux) < 2e-3); // verification
+assert(abs(outflux) < 5e-3); // verification
 plot(p, wait=1, ps="NSprojP.eps");
 plot(u, wait=1, ps="NSprojU.eps");

@@ -234,7 +234,8 @@ void metric_mshmet(MSHMET_pSol sol, MSHMET_Info *info, const KN< double > &metri
   static const int wrapperMetric[6] = {0, 1, 3, 2, 4, 5};
   int k, ia, i;
 
-  cout << " info->iso " << info->iso << endl;
+  if(verbosity > 1)
+      cout << " info->iso " << info->iso << endl;
   if (info->iso == 1) {
     cout << " info->iso 11 " << info->iso << endl;
     sol->met = (double *)M_calloc(sol->np + 1, sizeof(double), "sol->met");
@@ -264,8 +265,9 @@ void metric_mshmet_to_ff_metric(MSHMET_pSol sol, MSHMET_Info *info, KN< double >
   int k, ia, i;
 
   if (info->iso == 1) {
-    cout << " info->iso "
-         << " metric " << metric.N( ) << " " << sol->np << endl;
+    if (verbosity > 1)
+        cout << " info->iso "
+             << " metric " << metric.N( ) << " " << sol->np << endl;
 
     // isotrope
     for (k = 1; k <= sol->np; k++) {

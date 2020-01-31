@@ -4,6 +4,12 @@
 #else
 #include <GL/glut.h>
 #endif
+/*
+#if !defined(GLUT_WINDOW_SCALE)
+#    define NOTGLUT_WINDOW_SCALE
+#    define GLUT_WINDOW_SCALE 199
+#endif
+*/
 //  FOR M_PI
 #ifdef __STRICT_ANSI__
 #undef __STRICT_ANSI__
@@ -26,15 +32,18 @@ using namespace std;
 #include <unistd.h>
 
 #include "rgraph.hpp"
-#include "fem.hpp"
+#include "throwassert.hpp"
+
 #include "RNM.hpp"
+#include "fem.hpp"
+
 #include "Mesh2dn.hpp"
 #include "Mesh3dn.hpp"
 
 #include "PlotStream.hpp"
 
 extern long verbosity;
-
+int glutscreenscale=1;//  High Resolution Explained: Features and Benefit
 // add for the gestion of the endianness of the file.
 //PlotStream::fBytes PlotStream::zott; //0123;
 //PlotStream::hBytes PlotStream::zottffss; //012345678;
@@ -2336,14 +2345,15 @@ void ThePlot::dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn2,R & vmx2) const
     fmn=+1e100;
     fmx=-fmn;
     vmx2=0;
-    vmn2=fmin;
+    vmn2=+1e100;
     for (list<OnePlot *>::const_iterator i= plots.begin();i != plots.end(); ++i)
     {
         if(*i)  (*i)->dyn_bfv(win,fmn,fmx,vmn2,vmx2) ;
     }
     if(debug>4)
-        cout << "dyn_bfv  " << fmn << " " << fmx << endl;
+        cout << "dyn_bfv  " << fmn << " " << fmx << " " << vmn2 << " " << vmx2 <<endl;
     if(fmn>fmx) fmn=fmin,fmx=fmax;
+    if(vmn2<0) vmn2 = 0;
     if(vmn2>vmx2) vmn2=0,vmx2=vmax2;
 }
 
@@ -2921,21 +2931,27 @@ case 20+index: {type dummy; fin >= dummy;} break;
 
 void ThePlot::SetDefIsoV(int niso,int narr,double fmn,double fmx,double vmn,double vmx)
 {
-    bool dyn=false;
+    niso = max(niso,2);
+    narr = max(narr,2);
+
+    bool dyni=niso!=Viso.N() , dyna = narr != Varrow.N();
     R d,x;
     if(debug>3 && !(fmx>fmn) )
         cout << " SetDefIsoV  (not) " << endl;
+    if(debug>3)
+        cout << " SetDefIsoV  " << dyni << " " <<  fmn << " " << fmx << "pViso= " << pViso << " / "<< dyna << " "  << vmn << " " << vmx << endl;
+
+    // resize !!!
+    Viso.resize(niso);
+    Niso=Viso.N();
+   
+    Varrow.resize(narr);
+    Narrow=Varrow.N();
 
     if( fmx>fmn)
     {
-        if(debug>3)
-            cout << " SetDefIsoV  " << fmn << " " << fmx << "pViso= " << pViso << endl;
-        dyn = niso !=Viso.N() ;
-        pViso = pViso && niso ==Viso.N();
-        if(niso>2)
-            Viso.resize(niso);
-        Niso=Viso.N();
-        Narrow=narr;
+        dyni = niso !=Viso.N() ;
+        //       pViso = pViso && niso ==Viso.N(); FH:  debile !!!!!
         d =  (fmx-fmn)/(Niso-2) ;
         x =  (fmn+fmx)/2-d*0.5*(Niso-1);
     }
@@ -2944,19 +2960,16 @@ void ThePlot::SetDefIsoV(int niso,int narr,double fmn,double fmx,double vmn,doub
         d = 1 ? (fmaxT-fminT)/(Niso-2)  : (fmaxT-fminT)/(Niso-1);
         x = 1 ? (fminT+fmaxT)/2-d*0.5*(Niso-1) :fminT+d/2;
     }
-    if(!pViso || dyn)
+    if(!pViso || dyni)
     {
         for (int i = 0;i < Niso;i++)
         {Viso[i]=x;x +=d; }
     }
-    dyn=false;
+  
 
     if(vmx>vmn)
     {
-        if(narr>2)
-            Varrow.resize(niso);
-        Narrow=Varrow.N();
-        dyn=true;
+        dyna=true;
         x = sqrt(vmn);
         d = (sqrt(vmx)-x)/(Narrow-1.1);
     }
@@ -2967,7 +2980,7 @@ void ThePlot::SetDefIsoV(int niso,int narr,double fmn,double fmx,double vmn,doub
             cout << "vmax2=  " << vmax2 << endl;
         d= sqrt(vmax2)/(Narrow-1.1);
     }
-    if (!pVarrow || dyn)
+    if (!pVarrow || dyna)
         for (int i = 0;i < Narrow;i++)
         {
             Varrow[i]=x;
@@ -3373,7 +3386,7 @@ void ThePlot::DrawIsoEfill(const R3 Pt[2],const R ff[2],const R * Viso,int NbIso
             color(l+4);
             R3 P[10];
             for(int i=0;i<im;++i)
-                P[i]= R3(PQ[i].x,PQ[i].y,rapz*z[i]); //PQ[i].z);
+                P[i]= R3(PQ[i].x,PQ[i].y,PQ[i].z+rapz*z[i]);
             
             glLineWidth(3);
             glPolygonMode(GL_FRONT,GL_LINE);
@@ -3444,7 +3457,9 @@ static void Reshape( int width, int height )
 {
     OneWindow * win=CurrentWin();
     if(win)
+    {
         win->resize(width,height);
+    }
     glutPostRedisplay();
 }
 
@@ -3459,6 +3474,9 @@ void Display(void)
             if(debug>4) cout << "\n **** Hack Mojove :: glutReshapeWindow \n" << endl;
             win->width--;
             win->height--;
+#ifdef GLUT_WINDOW_SCALE
+            glutscreenscale= glutGet(GLUT_WINDOW_SCALE);
+#endif
             glutReshapeWindow(win->width,win->height);
             win->resize(win->width,win->height);
             glutPostRedisplay();
@@ -3916,7 +3934,16 @@ int main(int argc,  char** argv)
     else
         glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH );
     int i1=1;
-    int Height = 512,Width = 512*3/2, iii0=100,jjj0=100;
+    int W = glutGet(GLUT_SCREEN_WIDTH);
+    int H = glutGet(GLUT_SCREEN_HEIGHT);
+    glutscreenscale = 1;
+#ifdef GLUT_WINDOW_SCALE
+    glutscreenscale= glutGet(GLUT_WINDOW_SCALE);
+    if(glutscreenscale < 0) // unsupported by original GLUT
+        glutscreenscale = 1;
+#endif
+    int Height = glutscreenscale*2*H/3,Width = glutscreenscale*W*2/3, iii0=100,jjj0=100;
+    
     string titre = "W0/FreeFem++: type return key to proceed (or ? for help on other)";
     int eerr=0;
     if(argc>1)
@@ -3986,10 +4013,10 @@ int main(int argc,  char** argv)
     if(debug>1)
         cout << "on a lue le premier plot next plot: " << nextPlot << endl;
 
-
-
-    glutInitWindowSize(Width+1 , Height+1);
-    glutInitWindowPosition(iii0,jjj0);
+    
+  
+    glutInitWindowSize((Width+1) , (Height+1));
+    glutInitWindowPosition(iii0*glutscreenscale,jjj0*glutscreenscale);
 
     int iw0=glutCreateWindow(titre.c_str());
     Num2Windows[0]=iw0;

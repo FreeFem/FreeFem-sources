@@ -139,6 +139,7 @@ namespace Fem2D {
           *normal= NN/Norme2(NN);
         } else *(normal = n++) = N;
       }
+      bool onBoundary() const { return normal;}
       Rd Ne() const { return normal ? *normal: Rd(); }
   };
 
@@ -460,7 +461,24 @@ namespace Fem2D {
       typedef R2 RdHat;// for parametrization
       typedef Rd::R R;
       typedef FQuadTree GTree;
-
+      // Add Jan 2020
+      struct DataFindBoundary
+      {
+          typedef Mesh::Vertex Vertex;
+          typedef Mesh::Element Element;
+          typedef Mesh::BorderElement BorderElement;
+         
+          const Mesh *pTh;
+          FQuadTree *tree;
+          KN<Vertex> P;
+          KN<double> delta;
+          KN<Vertex*> lp;
+          long debug ;
+          DataFindBoundary(Mesh const * pTh,int ddebug=0);
+          ~DataFindBoundary() ;//{delete tree;}
+          int Find(R2 P,R *l,int & outside) const ;
+          void gnuplot(const string & fn);
+      };
       static const char magicmesh[8];
       int dim;
       int nt, nv, neb, ne, ntet;
@@ -473,6 +491,7 @@ namespace Fem2D {
       Triangle *triangles;
       BoundaryEdge *bedges;
       Edge *edges; // edge element
+      mutable DataFindBoundary  *dfb;// construct if need  jan 2020  FH
      // Tetraedre *tet; //
 
       int nbElmts() const { return nt; }
@@ -485,8 +504,8 @@ namespace Fem2D {
       R2 *bnormalv; // boundary vertex normal
       Triangle &operator[](int i) const { throwassert(i >= 0 && i < nt); return triangles[i]; }
       Vertex &operator()(int i) const { throwassert(i >= 0 && i < nv); return vertices[i]; }
-      Mesh(const char *filename) { read(filename); } // read on a file
-      Mesh(const string s) { read(s.c_str()); }
+      Mesh(const char *filename) :dfb(0) { read(filename); } // read on a file
+      Mesh(const string s):dfb(0) { read(s.c_str()); }
       Mesh( const Serialize &);
       Mesh(int nbv, R2 *P);
 
@@ -519,6 +538,8 @@ namespace Fem2D {
       void Draw(int init=2, bool fill=false) const;
       void DrawBoundary() const;
       int Contening(const Vertex * vv) const{ return TriangleConteningVertex[vv - vertices]; }
+      // int Contening(const Vertex * vv,R2 p) const ; // Add FH trun aurond vv to get better init..
+     
       int renum();
       int gibbsv (long* ptvoi, long* vois, long* lvois, long* w, long* v);
       int ElementAdj(int it, int &j) const {
@@ -584,7 +605,7 @@ namespace Fem2D {
 
       void destroy() const { RefCounter::destroy(); }
       void MakeQuadTree();
-
+      void BuildDataFindBoundary() const ; 
     private:
       void read(const char *filename);
       void read(ifstream &f, bool bin=false);

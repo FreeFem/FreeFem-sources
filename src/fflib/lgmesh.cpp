@@ -1739,13 +1739,37 @@ double Chi(Stack stack,pmesh3 const &pTh)
     else return 0.;
     return 1.;
 }
-
+long savegnuplot(pmesh pTh,string* pgp)
+    {
+        const  Mesh &Th(*pTh);
+        const string &gp=*pgp;
+        {
+            ofstream of(gp.c_str());
+            for(int k=0; k<Th.nt;++k)
+            {
+                R2 G= ((R2) Th[k][0] + Th[k][1] + Th[k][2])/3.;
+                of << G << " "<< k << "\n\n\n";
+                for(int ip=0; ip<=3;++ip)
+                {
+                    int i3=ip%3;
+                    int i = Th(k,i3);
+                    of << (R2) Th[k][i3] << " " << i << endl;
+                }
+                of << "\n\n";
+            }
+        }
+        if(verbosity>1)
+        {
+        cout << " to plot with gnuplot plot do under  gnuplot " <<endl;
+        cout << " plot '"<<gp<<"' w l,'' w labels offset 1."<< endl;
+        }
+        return 0;
+    }
 extern void init_glumesh2D();
 
 void init_lgmesh() {
   if(verbosity&&(mpirank==0) )  cout <<"lg_mesh ";
   bamg::MeshIstreamErrorHandler = MeshErrorIO;
-
   Global.Add("buildmesh","(",new OneOperatorCode<classBuildMesh>);
   Global.Add("buildmesh","(",new OneOperatorCode<classBuildMeshArray>);
   Global.Add("buildmesh","(",new OneOperatorCode<BuildMeshFile>);
@@ -1788,6 +1812,7 @@ void init_lgmesh() {
     Global.Add("boundingbox", "(", new OneOperator2_<long, pmeshL,KN<double>*>(Boundingbox));
     Global.Add("chi", "(", new OneOperator1s_<double,pmesh,E_F_F0s_<double,pmesh,E_F0mps> >(Chi)); // oct 2017 FH function characteristic
     Global.Add("chi", "(", new OneOperator1s_<double,pmesh3,E_F_F0s_<double,pmesh3,E_F0mps> >(Chi));// oct 2017 FH function characteristic
+    Global.Add("savegnuplot","(",new OneOperator2<long,pmesh,string*>(savegnuplot));
 
   TheOperators->Add("<-",
 		    new OneOperator2_<pmesh*,pmesh*,pmesh >(&set_copy_incr));

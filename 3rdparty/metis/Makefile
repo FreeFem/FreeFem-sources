@@ -29,10 +29,10 @@ $(SRCDIR)/FAIT:
 install:$(SRCDIR)/tag-compile
 #	cd $(SRCDIR)/Programs ;$(MAKE)
 #	cd $(SRCDIR) ;  $(MAKE)  -C  install
-	-mkdir -p ../include/metis
-	-mkdir -p ../lib/metis
-	cp $(SRCDIR)/libmetis.a ../lib/metis
-	cp $(SRCDIR)/include/*.h ../include/metis
+	-mkdir -p ../include
+	-mkdir -p ../lib
+	cp $(SRCDIR)/libmetis.a ../lib
+	cp $(SRCDIR)/include/*.h ../include
 
 
 FAIRE: $(SRCDIR)/FAIT
@@ -54,8 +54,8 @@ $(SRCDIR)/tag-compile: $(SRCDIR)/tags
 
 WHERE:
 	-if [ -f $(SRCDIR)/FAIT ] ; then \
-	echo metis LD -L@DIR@/lib/metis -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
-	echo metis INCLUDE -I@DIR@/include/metis >> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+	echo metis LD -L@DIR@/lib -lmetis  >$(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
+	echo metis INCLUDE -I@DIR@/include >> $(SRCDIR)/$(INSTALL)/lib/WHERE.metis ;\
 	fi
 
 
@@ -82,13 +82,12 @@ $(PACKAGE):
 clean-local:
 	-cd $(SRCDIR) && $(MAKE) realclean  -C $(SRCDIR)
 	-rm -rf config.log ../lib/metis ../lib/WHERE.metis
+# remove metis if no parmetis 
+	-test -f ../lib/libparmetis.a || rm ../lib/libmetis.a 
+	-test -f ../include/parmetis.h || rm ../include/metis.h
 	-rm -rf ../include/metis
 	-rm -rf $(SRCDIR)
 	-rm FAIRE FAIT
 
 # FFCS - 23/5/12 - $(SRCDIR)/$(INSTALL) is meaningless if $(SRCDIR) does not exist
 clean: clean-local
-	-rm ../lib/metis/libmetis.a
-	-rm ../lib/include/metis.h
-	-rm -rf $(SRCDIR)
-	-rm FAIRE FAIT

@@ -37,9 +37,9 @@ varf vMixedLaplace([u1, u2, p], [v1, v2, q]) = int2d(Th)(u1 * v1 + u2 * v2 + p*(
                                              - int1d(Th, 1, 2, 3)(v1*N.x + v2*N.y)
                                              + on(4, u1 = 1.0, u2 = 1.0);
 
-matrix Loc = vMixedLaplace(Wh, Wh,tgv = -1);
 real[int] rhs = vMixedLaplace(0, Wh, tgv = -1);
-Mat A(Loc, intersection, D);
+Mat A(Wh.ndof, intersection, D);
+A = vMixedLaplace(Wh, Wh, tgv = -1);
 set(A, sparams ="-pc_type lu");
 Wh def(u);
 u[] = A^-1 * rhs;

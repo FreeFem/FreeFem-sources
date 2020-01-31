@@ -1672,7 +1672,7 @@ long pVh_ndofK(pfes *p) {
 
 long mp_nuTriangle(MeshPoint *p) {
   throwassert(p && p->Th && p->T);
-  long nu = 0;
+  long nu = -1;
   if (p->d == 2)
     nu = (*p->Th)(p->T);
   else if (p->d == 3 && p->dHat == 3)
@@ -4555,8 +4555,8 @@ AnyType Plot::operator( )(Stack s) const {
     for (size_t ii = 0; ii < ll.size( ); ii++) {
       int i = ll[ii].i;
       long what = ll[ii].what;
-      R2 P1, P2;
-      R3 P11, P22;
+      R2 P1(1e100,1e100), P2(-1e100,-1e100);
+  //    R3 P11(1e100,1e100,1e100), P22(-1e100,-1e100,-1e100);
       if (what == 1 || what == 2) {
         if (!uaspectratio) aspectratio = true;
         ll[ii].eval(fe, cmp0, fe1, cmp1);
@@ -4584,7 +4584,9 @@ AnyType Plot::operator( )(Stack s) const {
       } else if (l[i].what == 4) {
         if (!uaspectratio) aspectratio = true;
         const E_BorderN *Bh = l[i].evalb(0, s);
-        Bh->BoundingBox(s, P11.x, P22.x, P11.y, P22.y, P11.z, P22.z);
+        double pminz=1e100,pmaxz=-1e100;
+        Bh->BoundingBox(s, P1.x, P2.x, P1.y, P2.y, pminz, pmaxz);
+      
       } else if (l[i].what == 3) {
         tab ttx = l[i].evalt(0, s);
         tab tty = l[i].evalt(1, s);
@@ -6138,7 +6140,8 @@ void init_lgfem( ) {
     new OneBinaryOperator<
       set_eq_array< KN_< Complex >, RNM_VirtualMatrix< Complex >::solveAtxeqb > >,
 
-    new OpArraytoLinearForm< Complex, v_fes >(atype< KN< Complex > * >( ), true, false),
+    new OpArraytoLinearForm< Complex, v_fes >(atype< KN_< Complex >  >( ), false, false),
+        // KN* -> KN_ FH Jan 2015 (Thank  PJolivet)
     new OpMatrixtoBilinearForm< Complex, v_fes >);
 
   TheOperators->Add("=",
