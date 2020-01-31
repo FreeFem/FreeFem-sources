@@ -859,7 +859,9 @@ void add() {
     addProd<Type<K, S>, ProdSchwarz, KN<K>, K>();
     addInv<Type<K, S>, InvSchwarz, KN<K>, K>();
     addScalarProduct< Type<K, S>, K >( );
+#if 0 // if you need this, please make sure you are using the master branch of HPDDM
     addArray<Type<K, S>>();
+#endif
     Global.Add("dmv", "(", new distributedMV<Type<K, S>, K>);
     Global.Add("destroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(destroyRecycling<Type<K, S>, K>));
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));

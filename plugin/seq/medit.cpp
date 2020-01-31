@@ -634,7 +634,7 @@ AnyType datasolMeshT_Op< MMesh, v_fes >::operator( )(Stack stack) const {
     for (int it = 0; it < nt; it++) {
       int h = 0;
       const T &K(Th.elements[it]);
-      mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab);
+      mp3->set(Th, K(Cdg_hat), Cdg_hat, K, K.lab );
 
       for (size_t i = 0; i < l.size( ); i++)
         for (size_t j = 0; j < l[i].nbfloat; j++) {

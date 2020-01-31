@@ -3615,12 +3615,14 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
     } else {
       InternalError("CDomainOfIntegration kind unkown");
     }
-  } else if (dim == 3 && !surface && curve) {
-    ffassert(0);
-    /*if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) &&
-    (CDomainOfIntegration::int2d!=kind) ) InternalError("So no levelset integration type  case (10
-    3d)"); const MeshS  & Th = * GetAny<pmeshS>(
-    (*di->Th)(stack) ); ffassert(&Th);
+  } else if (dim == 3 && !surface && curve)
+  {
+
+    if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) &&
+    (CDomainOfIntegration::int2d!=kind) )
+         InternalError("So no levelset integration type  case (103d)");
+    const MeshL  & Th = * GetAny<pmeshL>( (*di->Th)(stack) );
+    ffassert(&Th);
 
     if (verbosity >3)
     {
@@ -3632,196 +3634,37 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
         const QuadratureFormular1d & FI = FIE;
         if(di->islevelset())
         {
-            double llevelset = 0;
-            double uset = HUGE_VAL;
-            R2 Q[3];
-            KN<double> phi(Th.nv);phi=uset;
-            double f[3];
-            for(int t=0; t< Th.nt;++t)
-            {
-                double umx=-HUGE_VAL,umn=HUGE_VAL;
-                for(int i=0;i<3;++i)
-                {
-                    int j= Th(t,i);
-                    if( phi[j]==uset)
-                    {
-                        MeshPointStack(stack)->setP(&Th,t,i);
-                        phi[j]= di->levelset(stack);
-                    }
-                    f[i]=phi[j];
-                    umx = std::max(umx,phi[j]);
-                    umn = std::min(umn,phi[j]);
-
-                }
-                if( umn <=0 && umx >= 0)
-                {
-
-                    int np= IsoLineK(f,Q,1e-10);
-                    if(np==2)
-                    {
-                        const TriangleS & K(Th[t]);
-                        double epsmes3=K.mesure()*K.mesure()*1e-18;
-                        R3 PA(K(Q[0])),PB(K(Q[1])), PC(K(Q[2]));
-                        R3 NN= R3(PB,PA)^R3(PC,PA); //R3 NAB(PA,PB);
-
-                        double mes2 = (NN,NN);
-                        double mes = sqrt(mes2);
-
-                        if(mes2*mes <epsmes3) continue; //  too small
-                        NN /= mes;
-                        llevelset += mes;
-
-                        for (int npi=0;npi<FI.n;npi++) // loop on the integration point
-                        {
-                            QuadratureFormular1dPoint pi( FI[npi]);
-                            double sa=pi.x,sb=1.-sa;
-                            R2 Pt(Q[0]*sa+Q[1]*sb ); //
-                            MeshPointStack(stack)->set(Th,K(Pt),Pt,K,-1,NN,-1);
-                            r += mes*pi.a*GetAny<R>( (*fonc)(stack));
-
-                        }
-                    }
-
-                }
-                wsptr2free->clean(swsptr2free);// ADD FH 11/2017
-            }
-            if(verbosity > 5) cout << " Lenght level set = " << llevelset << endl;
-
+            ffassert(0); // Do do !!!
+ 
         }
 
         else
-            for( int e=0;e<Th.nbe;e++)
+            for( int k=0;k<Th.nt;k++)
             {
-                if (all || setoflab.find(Th.be(e).lab) != setoflab.end())
+                if (all || setoflab.find(Th[k].lab) != setoflab.end())
                 {
-
-                    int ie,i =Th.BoundaryElement(e,ie);
-                    const TriangleS & K(Th[i]);
-                    R3 E=K.Edge(ie);
-                    double le = sqrt((E,E));
-                    R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
-                    PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
-
+                    const EdgeL & K(Th[k]);
+                    double le = K.mesure();
+                   
                     for (int npi=0;npi<FI.n;npi++) // loop on the integration point
                     {
                         QuadratureFormular1dPoint pi( FI[npi]);
-                        double sa=pi.x,sb=1.-sa;
-                        R2 Pt(PA*sa+PB*sb ); //
-                        MeshPointStack(stack)->set(Th,K(Pt),Pt,K,Th.be(e).lab,R2(E.y,-E.x)/le,ie);
+                        R1 Ph(pi.x); //,sb=1.-sa;
+                        R3 Pt(K(Ph)); //
+                        // void set(const  MeshL &aTh, const R3 &P2,const R1 & P_Hat,const EdgeL & aK,const int ll=notalabel,bool coutside=false)
+                        MeshPointStack(stack)->set(Th,Pt,Ph,K,notalabel);
                         r += le*pi.a*GetAny<R>( (*fonc)(stack));
                     }
                 }
                 wsptr2free->clean(swsptr2free);// ADD FH 11/2017
             }
     }
-    else if (kind==CDomainOfIntegration::int2d)
-    {
-        const QuadratureFormular & FI =FIT;
-
-        if(di->islevelset())
-        { // add FH mars 2014 compute int2d  on phi < 0 ..
-            double llevelset = 0;
-            double uset = HUGE_VAL;
-            R2 Q[3];
-            KN<double> phi(Th.nv);phi=uset;
-            double f[3],umx,umn;
-            for(int t=0; t< Th.nt;++t)
-            {
-                if (all || setoflab.find(Th[t].lab) != setoflab.end())
-                {
-                    const TriangleS & K(Th[t]);
-
-                    double umx=-HUGE_VAL,umn=HUGE_VAL;
-                    for(int i=0;i<3;++i)
-                    {
-                        int j= Th(t,i);
-                        if( phi[j]==uset)
-                        {
-                            MeshPointStack(stack)->setP(&Th,t,i);
-                            phi[j]= di->levelset(stack);
-                        }
-                        f[i]=phi[j];
-                        umx = std::max(umx,phi[j]);
-                        umn = std::min(umn,phi[j]);
-
-                    }
-                    double area =K.mesure();
-                    if( umn >=0 ) continue; //  all positif => nothing
-                    if( umx >0 )
-                    { // coupe ..
-                        int i0 = 0, i1 = 1, i2 =2;
-
-                        if( f[i0] > f[i1] ) swap(i0,i1) ;
-                        if( f[i0] > f[i2] ) swap(i0,i2) ;
-                        if( f[i1] > f[i2] ) swap(i1,i2) ;
-
-                        double c = (f[i2]-f[i1])/(f[i2]-f[i0]); // coef Up Traing
-                        if( f[i1] < 0 ) {double y=f[i2]/(f[i2]-f[i1]); c *=y*y; }
-                        else {double y=f[i0]/(f[i0]-f[i1]) ; c = 1.- (1.-c)*y*y; };
-                        assert( c > 0 && c < 1);
-                        area *= 1-c;
-                    }
-                    //  warning  quadrature  wrong just ok for constante FH, we must also change the
-    quadaturer points
-    ..
-                    // just order 1  here ???
-                    for (int npi=0; npi<FI.n;npi++)
-                    {
-                        QuadraturePoint pi(FI[npi]);
-                        MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);
-                        r += area*pi.a*GetAny<R>( (*fonc)(stack));
-                    }
-
-                }
-                wsptr2free->clean(swsptr2free);// ADD FH 11/2017
-            }
-
-        }
-        else
-            for (int i=0;i< Th.nt; i++)
-            {
-                const TriangleS & K(Th[i]);
-                if (all || setoflab.find(Th[i].lab) != setoflab.end())
-                    for (int npi=0; npi<FI.n;npi++)
-                    {
-                        QuadraturePoint pi(FI[npi]);
-                        MeshPointStack(stack)->set(Th,K(pi),pi,K,K.lab);
-                        r += K.mesure()*pi.a*GetAny<R>( (*fonc)(stack));
-                    }
-                wsptr2free->clean(swsptr2free);// ADD FH 11/2017
-            }
-    }
-    else   if (kind==CDomainOfIntegration::intalledges)
-    {
-        const QuadratureFormular1d & FI = FIE;
-        int lab;
-        for (int i=0;i< Th.nt; i++)
-            if (all || setoflab.find(Th[i].lab) != setoflab.end())
-                for( int ie=0;ie<3;ie++)
-                {
-
-                    const MeshS::Element  & K(Th[i]);
-                    R3 NN=K.N(ie);
-                    double mes = NN.norme();
-                    NN /= mes;
-                    for (int npi=0;npi<FI.n;npi++) // loop on the integration point
-                    {
-                        QuadratureFormular1dPoint pi( FI[npi]);
-                        R2 Pt(K.PBord(ie,pi)); // cout
-                        MeshPointStack(stack)->set(Th,K(Pt),Pt,K,lab,NN,ie);
-                        r += mes*pi.a*GetAny<R>( (*fonc)(stack));
-                    }
-                }
-        wsptr2free->clean(swsptr2free);// ADD FH 11/2017
-    }
-    else   if (kind==CDomainOfIntegration::intallVFedges)
-    {
-        ffassert(0); //TODO AXEL
-    }
     else
     {
-        InternalError("CDomainOfIntegration kind unkown");
-    }*/
+        InternalError("int Curve CDomainOfIntegration kind unkown");
+    }
+      
+      
   } else {
     InternalError("CDomainOfIntegration dim unkown");
   }

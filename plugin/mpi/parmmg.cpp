@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: scotch metis mmg mpi parmmg
+//ff-c++-LIBRARY-dep: parmmg mmg mpi metis scotch
 //ff-c++-cpp-dep:
 
 #include "ff++.hpp"
