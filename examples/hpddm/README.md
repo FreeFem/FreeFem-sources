@@ -27,7 +27,8 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [stokes-fieldsplit-3d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/stokes-fieldsplit-3d-PETSc.edp)                       | &nbsp;                                                                        |
 | [maxwell-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/maxwell-2d-PETSc.edp)                                           | Direct LU/Cholesky                                                            |
 | [maxwell-3d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/maxwell-3d-PETSc.edp)                                           | Multigrid method                                                              |
-| [maxwell-mg-3d-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/maxwell-mg-3d-PETSc-complex.edp)                     | Two-grid preconditioner
+| [maxwell-mg-3d-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/maxwell-mg-3d-PETSc-complex.edp)                     | Two-grid preconditioner                                                       |
+| [helmholtz-3d-surf-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-3d-surf-PETSc-complex.edp)             | BEM with hierarchical matrices from Htool                                     |
 
 ### Nonlinear problems
 | Filename                                                                                                                                                          | Comments (preconditioners, numerical schemes)                                 |
