@@ -126,6 +126,12 @@ namespace Fem2D {
         GradL[0]= -GradL[1];
     }
 
+    R3 NormalSUnitaire() const {
+        R3 V(at(0),at(1));
+        R3 N = V^R3(0,0,1);
+        return N/N.norme();
+    }
+
   };
     
     

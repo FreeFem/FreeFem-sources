@@ -10,6 +10,8 @@ macro dimension 3S// EOM            // 2D or 3D
 
 include "ffddm.idp"
 
+load "msh3"
+
 macro def(i)i// EOM                         // scalar field definition
 macro init(i)i// EOM                        // scalar field initialization
 macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
@@ -24,7 +26,7 @@ meshS ThGlobal = square3(nx,ny,[(R+r*cos(2*pi*x))*cos(2*pi*y),(R+r*cos(2*pi*x))*
 func f = 100*exp(-20*((x-0)^2+(y-(R+r))^2+z^2));
 
 macro Varf(varfName, meshName, PhName)
-    varf varfName(u,v) = intN(meshName)(u*v + dt * grad(u)' * grad(v)) +intN(meshName)(un*v + f*v);
+    varf varfName(u,v) = int2d(meshName)(u*v + dt * grad(u)' * grad(v)) +int2d(meshName)(un*v + f*v);
 // EOM
 
 int nt = 50;

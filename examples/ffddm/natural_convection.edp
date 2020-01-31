@@ -37,8 +37,8 @@ int np = getARGV("-global", 40);
 
 int mysplit = 4;
 
-meshN Thc = square(np/mysplit, np/mysplit, [x, y]);
-meshN ThGlobal = trunc(Thc,1,split=mysplit);
+mesh Thc = square(np/mysplit, np/mysplit, [x, y]);
+mesh ThGlobal = trunc(Thc,1,split=mysplit);
 
 //macro NCFEdefplot(u)u#D//
 
@@ -81,7 +81,7 @@ macro Varf(varfName, meshName, VhName)
 	NCfromVhi(ui[],VhName,uG[])
 	
     varf varfName([uw, uwB, pw, Tw], [v, vB, q, W]) =
-     intN(meshName)(- div(uw)*q -div(v)*pw - eps*pw*q
+     int2d(meshName)(- div(uw)*q -div(v)*pw - eps*pw*q
          + UgradU(uG,uw)'*[v,vB]
          + UgradU(uw,uG)'*[v,vB]
          + ( Grad(uw,uwB)'*Grad(v,vB))*IRe
@@ -95,7 +95,7 @@ macro Varf(varfName, meshName, VhName)
 
 macro VarfCS(varfName, meshName, VhName)
     varf varfName([uw, uwB, pw, Tw], [v, vB, q, W]) =
-     intN(meshName,mpirank)(- div(uw)*q -div(v)*pw - eps*pw*q
+     int2d(meshName,mpirank)(- div(uw)*q -div(v)*pw - eps*pw*q
          + UgradU(uG,uw)'*[v,vB]
          + UgradU(uw,uG)'*[v,vB]
          + ( Grad(uw,uwB)'*Grad(v,vB))*IRe
@@ -109,7 +109,7 @@ macro VarfCS(varfName, meshName, VhName)
 
 macro VarfOpt(varfName, meshName, VhName)
     varf varfName([uw, uwB, pw, Tw], [v, vB, q, W]) =
-     intN(meshName)(- div(uw)*q -div(v)*pw - eps*pw*q
+     int2d(meshName)(- div(uw)*q -div(v)*pw - eps*pw*q
          + UgradU(ui,uw)'*[v,vB]
          + UgradU(uw,ui)'*[v,vB]
          + ( Grad(uw,uwB)'*Grad(v,vB))*IRe
@@ -117,14 +117,14 @@ macro VarfOpt(varfName, meshName, VhName)
          -[ui,uiB]'*grad(W)*Tw
          -[uw,uwB]'*grad(W)*Ti
          + grad(Tw)'*grad(W)*IPr)
-    + intbN(meshName,10)(20./hTriangle*IRe*[uw,uwB]'*[v,vB]+20*1./hTriangle*[pw, Tw]'*[q, W])
+    + int1d(meshName,10)(20./hTriangle*IRe*[uw,uwB]'*[v,vB]+20*1./hTriangle*[pw, Tw]'*[q, W])
     + on(1,2,3,4, uw=0,uwB=0)
     + on(2,Tw=Tcold) + on(4,Tw=Thot);
 // EOM
    
 macro Varfrhs(varfName, meshName, VhName)
 	varf varfName([uw, uwB, pw, Tw], [v, vB, q, W]) =
-     intN(meshName)(
+     int2d(meshName)(
          UgradU(ui,ui)'*[v,vB]       
          - [ui,uiB]'*grad(W)*Ti       
      )

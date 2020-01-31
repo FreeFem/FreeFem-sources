@@ -5378,7 +5378,7 @@ R3 *set_eqp(R3 *a, R3 *b) {
   *a = *b;
   return a;
 }
-
+       
 void init_lgfem( ) {
   if (verbosity && (mpirank == 0)) cout << "lg_fem ";
 #ifdef HAVE_CADNA
@@ -5399,7 +5399,6 @@ void init_lgfem( ) {
                            AddIncrement< pmeshS >, NotReturnOfthisType);
   Dcl_TypeandPtr< pmeshL >(0, 0, ::InitializePtr< pmeshL >, ::DestroyPtr< pmeshL >,
                            AddIncrement< pmeshL >, NotReturnOfthisType);
-
   Dcl_Type< lgVertex >( );
   Dcl_Type< lgElement >( );
   Dcl_Type< lgElement::Adj >( );
@@ -5573,7 +5572,7 @@ void init_lgfem( ) {
   Dcl_Type< MeshPoint * >( );
   Dcl_Type< finconnue * >( );
   Dcl_Type< ftest * >( );
-  Dcl_Type< foperator * >( );
+    
   Dcl_Type< foperator * >( );
   Dcl_Type< const BC_set * >( );                         // a set of boundary condition
   Dcl_Type< const Call_FormLinear< v_fes > * >( );       //   to set Vector
@@ -5588,6 +5587,7 @@ void init_lgfem( ) {
 
   map_type[typeid(const FormBilinear *).name( )] = new TypeFormBilinear;
   map_type[typeid(const FormLinear *).name( )] = new TypeFormLinear;
+    
   aType t_C_args = map_type[typeid(const C_args *).name( )] = new TypeFormOperator;
   map_type[typeid(const Problem *).name( )] = new TypeSolve< false, Problem >;
   map_type[typeid(const Solve *).name( )] = new TypeSolve< true, Solve >;
@@ -5596,14 +5596,15 @@ void init_lgfem( ) {
   basicForEachType *t_solve = atype< const Solve * >( );
   basicForEachType *t_problem = atype< const Problem * >( );
   basicForEachType *t_fbilin = atype< const FormBilinear * >( );
+
   basicForEachType *t_flin = atype< const FormLinear * >( );
   basicForEachType *t_BC = atype< const BC_set * >( );
-
+ 
   /// Doxygen doc
   basicForEachType *t_form = atype< const C_args * >( );
-
+   
   Dcl_Type< const CDomainOfIntegration * >( );
-
+ 
   atype< pmesh >( )->AddCast(new E_F1_funcT< pmesh, pmesh * >(UnRef< pmesh >));
   atype< pfes >( )->AddCast(new E_F1_funcT< pfes, pfes * >(UnRef< pfes >));
 
@@ -5728,8 +5729,7 @@ void init_lgfem( ) {
   Add< lgBoundaryEdge >("length", ".", new OneOperator1_< double, lgBoundaryEdge >(getlength));
   Add< lgBoundaryEdge >("label", ".", new OneOperator1_< long, lgBoundaryEdge >(getlab));
   Add< lgBoundaryEdge >("Element", ".", new OneOperator1_< lgElement, lgBoundaryEdge >(getElement));
-  Add< lgBoundaryEdge >("whoinElement", ".",
-                        new OneOperator1_< long, lgBoundaryEdge >(EdgeElement));
+  Add< lgBoundaryEdge >("whoinElement", ".", new OneOperator1_< long, lgBoundaryEdge >(EdgeElement));
 
   // New FF language types. zzzfff is defined at [[file:lex.hpp::zzzfff]] as a pointer to an object
   // of class mylex
@@ -5748,7 +5748,7 @@ void init_lgfem( ) {
   zzzfff->Add("meshS", atype< pmeshS * >( ));
   // pmeshL is a pointer to MeshL defined at [[file:lgfem.hpp::typedef MeshL pmeshL]]
   zzzfff->Add("meshL", atype< pmeshL * >( ));
-
+ 
   zzzfff->Add("element", atype< lgElement >( ));
   zzzfff->Add("vertex", atype< lgVertex >( ));
   zzzfff->Add("matrix", atype< Matrice_Creuse< R > * >( ));
@@ -5765,7 +5765,7 @@ void init_lgfem( ) {
   zzzfff->AddF("varf", t_form);    //  var. form ~  <<varf>>
   zzzfff->AddF("solve", t_solve);
   zzzfff->AddF("problem", t_problem);
-
+  
   Global.Add("jump", "(", new OneOperatorCode< Code_VF< Ftest, Code_Jump > >);
   Global.Add("jump", "(", new OneOperatorCode< Code_VF< Finconnue, Code_Jump > >);
   Global.Add("average", "(", new OneOperatorCode< Code_VF< Ftest, Code_Mean > >);
@@ -5803,16 +5803,17 @@ void init_lgfem( ) {
   /// [[file:AFunction.hpp::Global]]
   Global.Add("plot", "(", new OneOperatorCode< Plot >);
   Global.Add("convect", "(", new OneOperatorCode< Convect >);
-
+  
   TheOperators->Add("+", new OneOperatorCode< CODE_L_Add< Foperator > >,
                     new OneOperatorCode< CODE_L_Add< Ftest > >,
                     new OneOperatorCode< CODE_L_Add< Finconnue > >,
-                    new OneOperatorCode< C_args >(t_C_args, t_C_args, t_C_args)    // ,
+                    new OneOperatorCode< C_args >(t_C_args, t_C_args, t_C_args)
   );
-  TheOperators->Add(
-    "-", new OneOperatorCode< CODE_L_Minus< Foperator > >,
-    new OneOperatorCode< CODE_L_Minus< Ftest > >, new OneOperatorCode< CODE_L_Minus< Finconnue > >,
-    new OneOperatorCode< CODE_L_Sub< Foperator > >, new OneOperatorCode< CODE_L_Sub< Ftest > >,
+  TheOperators->Add("-", new OneOperatorCode< CODE_L_Minus< Foperator > >,
+    new OneOperatorCode< CODE_L_Minus< Ftest > >,
+    new OneOperatorCode< CODE_L_Minus< Finconnue > >,
+    new OneOperatorCode< CODE_L_Sub< Foperator > >,
+    new OneOperatorCode< CODE_L_Sub< Ftest > >,
     new OneOperatorCode< CODE_L_Sub< Finconnue > >,
     new OneOperatorCode< C_args_minus >(t_C_args, t_C_args, t_fbilin),
     new OneOperatorCode< C_args_minus >(t_C_args, t_C_args, t_flin),
@@ -5822,8 +5823,9 @@ void init_lgfem( ) {
   );
 
   atype< const C_args * >( )->AddCast(new OneOperatorCode< C_args >(t_C_args, t_fbilin),
-                                      new OneOperatorCode< C_args >(t_C_args, t_flin),
-                                      new OneOperatorCode< C_args >(t_C_args, t_BC));
+    new OneOperatorCode< C_args >(t_C_args, t_flin),
+    new OneOperatorCode< C_args >(t_C_args, t_BC)
+  );
 
   atype< const C_args * >( )->AddCast(
     new OneOperatorCode< C_args >(t_C_args, atype< DotSlash_KN_< R > >( )),
@@ -5892,31 +5894,22 @@ void init_lgfem( ) {
     new OpMatrixtoBilinearForm< double, v_fes >);
 
   TheOperators->Add("=",
-                    new OpArraytoLinearForm< double, v_fes3 >(atype< KN_< double > >( ), false,
-                                                              false),    // 3D volume
+                    new OpArraytoLinearForm< double, v_fes3 >(atype< KN_< double > >( ), false, false),    // 3D volume
                     new OpMatrixtoBilinearForm< double, v_fes3 >,        // 3D volume
-                    new OpArraytoLinearForm< double, v_fesS >(atype< KN_< double > >( ), false,
-                                                              false),    // 3D surface
+                    new OpArraytoLinearForm< double, v_fesS >(atype< KN_< double > >( ), false, false),    // 3D surface
                     new OpMatrixtoBilinearForm< double, v_fesS >,        // 3D surface
-                    new OpArraytoLinearForm< double, v_fesL >(atype< KN_< double > >( ), false,
-                                                              false),    // 3D curve
+                    new OpArraytoLinearForm< double, v_fesL >(atype< KN_< double > >( ), false, false),    // 3D curve
                     new OpMatrixtoBilinearForm< double, v_fesL >);       // 3D curve
 
   TheOperators->Add(
     "<-", new OpArraytoLinearForm< double, v_fes >(atype< KN< double > * >( ), true, true),
     new OpArraytoLinearForm< Complex, v_fes >(atype< KN< Complex > * >( ), true, true),
-    new OpArraytoLinearForm< double, v_fes3 >(atype< KN< double > * >( ), true,
-                                              true),    // 3D volume
-    new OpArraytoLinearForm< Complex, v_fes3 >(atype< KN< Complex > * >( ), true,
-                                               true),    // 3D volume
-    new OpArraytoLinearForm< double, v_fesS >(atype< KN< double > * >( ), true,
-                                              true),    // 3D surface
-    new OpArraytoLinearForm< Complex, v_fesS >(atype< KN< Complex > * >( ), true,
-                                               true),    // 3D surface
-    new OpArraytoLinearForm< double, v_fesL >(atype< KN< double > * >( ), true,
-                                              true),    // 3D curve
-    new OpArraytoLinearForm< Complex, v_fesL >(atype< KN< Complex > * >( ), true,
-                                               true)    // 3D curve
+    new OpArraytoLinearForm< double, v_fes3 >(atype< KN< double > * >( ), true, true),    // 3D volume
+    new OpArraytoLinearForm< Complex, v_fes3 >(atype< KN< Complex > * >( ), true, true),    // 3D volume
+    new OpArraytoLinearForm< double, v_fesS >(atype< KN< double > * >( ), true, true),    // 3D surface
+    new OpArraytoLinearForm< Complex, v_fesS >(atype< KN< Complex > * >( ), true, true),    // 3D surface
+    new OpArraytoLinearForm< double, v_fesL >(atype< KN< double > * >( ), true, true),    // 3D curve
+    new OpArraytoLinearForm< Complex, v_fesL >(atype< KN< Complex > * >( ), true, true)    // 3D curve
   );
 
   TheOperators->Add(
@@ -5933,14 +5926,11 @@ void init_lgfem( ) {
     new OpMatrixtoBilinearForm< Complex, v_fes >);
 
   TheOperators->Add("=",
-                    new OpArraytoLinearForm< Complex, v_fes3 >(atype< KN_< Complex > >( ), false,
-                                                               false),    // 3D volume
+                    new OpArraytoLinearForm< Complex, v_fes3 >(atype< KN_< Complex > >( ), false, false),    // 3D volume
                     new OpMatrixtoBilinearForm< Complex, v_fes3 >,        // 3D volume
-                    new OpArraytoLinearForm< Complex, v_fesS >(atype< KN_< Complex > >( ), false,
-                                                               false),    // 3D surface
+                    new OpArraytoLinearForm< Complex, v_fesS >(atype< KN_< Complex > >( ), false, false),    // 3D surface
                     new OpMatrixtoBilinearForm< Complex, v_fesS >,        // 3D surface
-                    new OpArraytoLinearForm< Complex, v_fesL >(atype< KN_< Complex > >( ), false,
-                                                               false),    // 3D curve
+                    new OpArraytoLinearForm< Complex, v_fesL >(atype< KN_< Complex > >( ), false, false),    // 3D curve
                     new OpMatrixtoBilinearForm< Complex, v_fesL >);       // 3D surface
 
   // add august 2007
@@ -6062,31 +6052,26 @@ void init_lgfem( ) {
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fes >);
 
   Add< const FormLinear * >("(", "", new OpCall_FormLinear< FormLinear, v_fes3 >);    // 3D volume
-  Add< const FormBilinear * >("(", "",
-                              new OpCall_FormBilinear< FormBilinear, v_fes3 >);    // 3D volume
-  Add< const FormBilinear * >("(", "",
-                              new OpCall_FormLinear2< FormBilinear, v_fes3 >);    // 3D volume
+  Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, v_fes3 >); // 3D volume
+  Add< const FormBilinear * >("(", "", new OpCall_FormLinear2< FormBilinear, v_fes3 >);    // 3D volume
   Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, v_fes3 >);       // 3D volume
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fes3 >);      // 3D volume
 
   Add< const FormLinear * >("(", "", new OpCall_FormLinear< FormLinear, v_fesS >);    // 3D surface
-  Add< const FormBilinear * >("(", "",
-                              new OpCall_FormBilinear< FormBilinear, v_fesS >);    // 3D surface
-  Add< const FormBilinear * >("(", "",
-                              new OpCall_FormLinear2< FormBilinear, v_fesS >);    // 3D surface
+  Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, v_fesS >);    // 3D surface
+  Add< const FormBilinear * >("(", "", new OpCall_FormLinear2< FormBilinear, v_fesS >);    // 3D surface
   Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, v_fesS >);       // 3D surface
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesS >);      // 3D surface
 
   Add< const FormLinear * >("(", "", new OpCall_FormLinear< FormLinear, v_fesL >);    // 3D curve
-  Add< const FormBilinear * >("(", "",
-                              new OpCall_FormBilinear< FormBilinear, v_fesL >);    // 3D curve
-  Add< const FormBilinear * >("(", "",
-                              new OpCall_FormLinear2< FormBilinear, v_fesL >);    // 3D curve
+  Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, v_fesL >);    // 3D curve
+  Add< const FormBilinear * >("(", "", new OpCall_FormLinear2< FormBilinear, v_fesL >);    // 3D curve
   Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, v_fesL >);       // 3D curve
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, v_fesL >);      // 3D curve
     
  
 
+    
   //  correction du bug morale
   //  Attention il y a moralement un bug
   //  les initialisation   x = y   ( passe par l'operateur binaire <-  dans TheOperators
@@ -6150,16 +6135,14 @@ void init_lgfem( ) {
   Global.Add("jump", "(", new OneUnaryOperator< JumpOp< Complex >, JumpOp< Complex > >);
   Global.Add("mean", "(", new OneUnaryOperator< MeanOp< Complex >, MeanOp< Complex > >);
   Global.Add("average", "(", new OneUnaryOperator< MeanOp< Complex >, MeanOp< Complex > >);
-  Global.Add("otherside", "(",
-             new OneUnaryOperator< OthersideOp< Complex >, OthersideOp< Complex > >);
+  Global.Add("otherside", "(",new OneUnaryOperator< OthersideOp< Complex >, OthersideOp< Complex > >);
 
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< FormBilinear >);
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< FormLinear >);
 
   Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< IntFunction< double >, 1 >);
-  Add< const CDomainOfIntegration * >("(", "",
-                                      new OneOperatorCode< IntFunction< complex< double > >, 0 >);
-
+  Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< IntFunction< complex< double > >, 0 >);
+      
   map_type[typeid(double).name( )]->AddCast(new E_F1_funcT< double, pfer >(pfer2R< R, 0 >));
 
   map_type[typeid(Complex).name( )]->AddCast(new E_F1_funcT< Complex, pfec >(pfer2R< Complex, 0 >));
@@ -6553,7 +6536,7 @@ C_F0 NewFEvariable(const char *id, Block *currentblock, C_F0 &fespacetype, CC_F0
   lid->push_back(UnId(id));
   return NewFEvariable(lid, currentblock, fespacetype, init, cplx, dim);
 }
-
+      
 size_t dimFESpaceImage(const basicAC_F0 &args) {
   aType t_tfe = atype< TypeOfFE * >( );
   aType t_tfe3 = atype< TypeOfFE3 * >( );

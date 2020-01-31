@@ -93,7 +93,7 @@ ffddmexclude = backexclude;
 ffddminitDfespacef(pr#super,pr#super,scalar,def,init,Pk,def,init,Pk)
 
 if (pr#issuper){
-  meshN Thsuper = trunc(Th,partsuper == pr#mysuperrank);
+  pr#super#meshN Thsuper = trunc(Th,partsuper == pr#mysuperrank);
   int[int] mylpart(Thsuper.nt);
   if (pr#superchunksize > 1 )
     metisdual(mylpart,Thsuper,pr#superchunksize);

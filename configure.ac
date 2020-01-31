@@ -1223,6 +1223,7 @@ fi
 
 AC_SUBST(DOWNLOAD_FFTW,$ff_DOWNLOAD_FFTW)
 
+
 dnl ---------------------------
 dnl   Looking for the tetgen
 dnl --------------------------
@@ -2243,10 +2244,19 @@ TOOL_DISABLE(pardiso,"PARDISO.$DYLIB_SUFFIX",,nodownload)
 test "$enable_download" != "yes" -a \( "$enable_hpddm" != yes -o "$ff_hpddm_ok" != "yes" \) && enable_hpddm=no
 test "$enable_download" != "yes" -a "$enable_htool" != yes && enable_htool=no
 
+test "$enable_download" != "yes" -a "$enable_bemtool" != yes && enable_bemtool=no
+test "$enable_download" != "yes" -a "$enable_boost" != yes && enable_boost=no
+
 test \( "$enable_download" = yes  -a "$enable_hpddm" != no \) -o "$ff_hpddm_ok" = "yes" && enable_hpddm=yes
 test "$enable_download" = yes -a "$enable_htool" != no && enable_htool=yes
+
+test "$enable_download" = yes  -a "$enable_bemtool" != no && enable_bemtool=yes
+test "$enable_download" = yes -a "$enable_boost" != no && enable_boost=yes
+
 test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o \( "$ff_umfpack_ok" != "yes" -a "$ff_mumps_ok" != "yes" \) &&  enable_hpddm=no
 test "$ff_cxx11" != yes -o  "$ff_mpi" != yes   &&  enable_htool=no
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o \( "$enable_bemtool" != "yes" -a "$enable_boost" != "yes" \) &&  enable_bemtool=no 
+
 FF_PETSC_DYLIB=""
 if test "$ff_petsc_ok" != no ;   then
 FF_PETSC_DYLIB="PETSc.$DYLIB_SUFFIX"
@@ -2264,6 +2274,9 @@ fi
 ##echo @@@@@@@@@@@@ $ff_petsc_ok @@ "hpddm.$DYLIB_SUFFIX $FF_PETCS_DYLIB"
 TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_PETSC_DYLIB"])
 TOOL_DISABLE(htool,["htool.$DYLIB_SUFFIX"])
+TOOL_DISABLE(bem,["bem.$DYLIB_SUFFIX"])
+TOOL_DISABLE(bemtool,["bemtool.$DYLIB_SUFFIX"])
+TOOL_DISABLE(boost,["boost.$DYLIB_SUFFIX"])
 
 ##
 if test "$ff_mkl_ok" == yes ; then
@@ -2286,6 +2299,8 @@ test "$ff_umfpack_ok" = yes -o -n "$TOOL_COMPILE_umfpack"  && ff_umfpack_=yes
 AM_CONDITIONAL([DOWNLOAD], [test "$enable_download" = yes ])
 AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = yes ])
 AM_CONDITIONAL([BLACS], [test "$ff_blacs_ok" = yes])
+AM_CONDITIONAL([BEMTOOL], [test "$enable_bemtool" = yes])
+AM_CONDITIONAL([BOOST], [test "$enable_boostl" = yes])
 AM_CONDITIONAL([FFTW3], [test "$ff_fftw_ok" = yes -o -n "$ff_DOWNLOAD_FFTW"])
 AM_CONDITIONAL([FORTRAN], [test "$enable_fortran" != no ])
 AM_CONDITIONAL([FREEYAMS], [test "$ff_freeyams_ok" = yes -o -n "$TOOL_COMPILE_yams"])
@@ -2348,9 +2363,9 @@ AC_OUTPUT(
     src/medit/Makefile
     src/bin-win32/Makefile
     plugin/Makefile
-	plugin/seq/Makefile
-	plugin/mpi/Makefile
-	examples/Makefile
+    plugin/seq/Makefile
+    plugin/mpi/Makefile
+    examples/Makefile
     examples/plugin/Makefile
     examples/tutorial/Makefile
     examples/misc/Makefile
@@ -2363,7 +2378,8 @@ AC_OUTPUT(
     examples/other/Makefile
     examples/3d/Makefile
     examples/3dSurf/Makefile
-	examples/3dCurve/Makefile
+    examples/bem/Makefile
+    examples/3dCurve/Makefile
 )
 
 AC_MSG_NOTICE([  freefem++ used download: $enable_download ])
@@ -2376,6 +2392,7 @@ AC_MSG_NOTICE([    --  with PETSC: $ff_petsc_ok / PETSC complex: $ff_petsccomple
 AC_MSG_NOTICE([    --  with SLEPC: $ff_slepc_ok / SLEPC complex: $ff_slepccomplex_ok ]);
 AC_MSG_NOTICE([    --  with hpddm: $enable_hpddm (need MPI & c++11: $ff_cxx11) ]);
 AC_MSG_NOTICE([    --  with htool: $enable_htool (need MPI & c++11: $ff_cxx11) ]);
+AC_MSG_NOTICE([    --  with bemtool: $enable_bemtool (need boost: $enable_boost and htool: $enable_htool ) ]);
 AC_MSG_NOTICE([  --  without libs: $ff_unlib_plugin ]);
 AC_MSG_NOTICE([  --  without plugin: $ff_uncompile_plugin ]);
 
@@ -2420,6 +2437,10 @@ if test "$enable_download" = yes; then
 
   if test -n "$MPICC"; then
     AC_MSG_NOTICE([      try to download: $ff_download_lib])
+  fi
+
+  if test "$enable_boost" = yes; then
+    AC_MSG_NOTICE([      use of download boost        see 3rdparty/boost/LICENSE_1_0.txt  ])
   fi
 
   if test "$ff_download_blas" = "generic"; then
@@ -2470,6 +2491,8 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ Activated libraries ])
   AC_MSG_NOTICE([ - ARPACK: $ff_arpack_ok])
   AC_MSG_NOTICE([ - BLACS: $ff_blacs_ok])
+  AC_MSG_NOTICE([ - BEMTOOL: $enable_bemtool])
+  AC_MSG_NOTICE([ - BOOST: $enable_boost])
   AC_MSG_NOTICE([ - FFTW3: $ff_fftw_])
   AC_MSG_NOTICE([ - FORTRAN: $enable_fortran])
   AC_MSG_NOTICE([ - FREEYAMS: $ff_freeyams_ok])

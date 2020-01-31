@@ -1,0 +1,114 @@
+//ff-mpirun -np 4 Helmholtz_Cobracavity.edp -wg
+
+// for the make check:
+// NBPROC 4
+// PARAM
+
+load "bem"
+load "msh3"
+
+include "getARGV.idp"
+
+include "cobrameshcavity.idp"
+
+real sec1 = 0.01;
+real angle = 2*pi*35/360;
+real radius = 0.186;
+real sec2 = 0.08;
+real sec3 = 0.1;
+real height = 0.084;
+real width = 0.11;
+
+int npangler = 4;
+int npangleR = radius/(radius-height)*npangler;
+
+real c0= 299792458;
+real f = getARGV("-frequency",3.e+9);
+complex k = 2*pi*f/c0;
+real lambda = c0/f;
+
+real distx = 0.2*lambda;
+real disty = distx;
+real distz = distx;
+
+int labextxm = 11, labextxM = 12, labextym = 13, labextyM = 14, labextzm = 15, labextzM = 16;
+int regint = 4, regext = 5;
+
+int labtomerge = 7;
+
+int labmetal = 1;
+int labi = 2; // label in : entrance (n=(-1,0,0))
+int labo = labmetal; // label out
+// Cavity: labo is also a metallic border
+
+// incident wave
+real[int] dir=[1,0,0];
+func finc = exp(1i*k*(x*dir[0]+y*dir[1]+z*dir[2]));
+
+int nloc = 10.*sec3/lambda;
+
+mesh3 Th3;
+buildcobramesh(Th3);
+Th3 = buildBdMesh(Th3);
+
+meshS ThS = Th3.Gamma;
+ThS = trunc(ThS, region==labmetal);
+
+plot(ThS);
+
+fespace Uh(ThS,P1);
+
+cout << "ndof = " << Uh.ndof << endl;
+
+BemKernel ker("SL",1,k);
+varfbem vk(u,v)=int2dx2d(ThS)(ThS)(BEM(ker,u,v)) ;  
+HMatrix<complex> H = vk(Uh,Uh,eta=10,eps=1e-2,minclustersize=10,maxblocksize=1000000);
+//HMatrix<complex> H = assemblecomplexHESL(Uh,Uh,k,eta=10,epsilon=1e-2,minclustersize=10,maxblocksize=1000000);
+
+if (mpirank == 0) cout << H.infos << endl;
+display(H);
+
+Uh<complex> u, b, uinc = -finc;
+
+varf vmass(u,v) = int2d(ThS)(u*v);
+matrix<complex> M = vmass(Uh,Uh,solver=CG);
+
+b[] = M*uinc[];
+
+u[] = H^-1*b[];
+
+// output visu
+distx = 2*lambda;
+disty = distx;
+distz = distx;
+
+int np = 100;
+meshS ThOut = square3(np,np,[(sec1+(radius-height)*sin(angle)+sec2*cos(angle)+radius*sin(angle)+sec3+2*distx)*x
+                               -distx,
+                               (height+disty-((radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty))*y
+                               +(radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty,
+                               width/2]);
+
+fespace UhOut(ThOut,P1);
+
+BemPotential Pot("SL",k);
+varfbem vp(u,v)=int2d(ThS)(POT(Pot,u,v)) ;  
+HMatrix<complex> B = vp(Uh,UhOut,eta=10,eps=1e-2,minclustersize=10,maxblocksize=1000000);
+
+//HMatrix<complex> B = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1e-2,minclustersize=10,maxblocksize=1000000);
+
+
+if (mpirank == 0) cout << B.infos << endl;
+display(B);
+
+UhOut<complex> v, vinc;
+
+vinc = finc;
+
+v[] = B*u[];
+
+v[] += vinc[];
+
+UhOut vr = real(v);
+
+plot(vr, dim=2, fill=1, value=1, nbiso=20);

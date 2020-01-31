@@ -102,12 +102,15 @@ install-other: tag-install-other
 tag-install-other:
 	if test -n "$(TOOL_COMPILE_hpddm)" ; then  $(MAKE) install-hpddm; else true; fi
 	if test -n "$(TOOL_COMPILE_htool)" ; then  $(MAKE) install-htool; else true; fi
+	if test -n "$(TOOL_COMPILE_bemtool)" ; then  $(MAKE) install-bemtool; else true; fi
+	if test -n "$(TOOL_COMPILE_boost)" ; then  $(MAKE) install-boost; else true; fi
 	touch tag-install-other
 
-WHERE-OTHER: lib/WHERE.hpddm lib/WHERE.htool
+WHERE-OTHER: lib/WHERE.hpddm lib/WHERE.htool lib/WHERE.bemtool lib/WHERE.boost
 WHERE-LD: tag-compile-pkg  WHERE-OTHER
 	touch ../plugin/seq/WHERE_LIBRARY-config ../plugin/seq/WHERE_LIBRARY
 	-grep LD ../plugin/seq/WHERE_LIBRARY ../plugin/seq/WHERE_LIBRARY-config >WHERE-LD
+
 # BEGIN HPDDM
 install-hpddm: ./getall
 	 if test -n "$(TOOL_COMPILE_hpddm)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm/done.tag  lib/WHERE.hpddm; else true;fi
@@ -129,6 +132,7 @@ lib/WHERE.hpddm: ./getall
 	echo hpddm  INCLUDE -I@DIR@/include/hpddm/src >> $@ ;\
 	else true; 	fi
 #end HPDDM
+
 # begin HTOOL
 install-htool: ./getall
 	 if test -n "$(TOOL_COMPILE_htool)"; then   ./getall -o htool -a;  $(MAKE) include/htool/done.tag  lib/WHERE.htool; else true;fi
@@ -146,7 +150,43 @@ lib/WHERE.htool: ./getall
 	echo htool LD -L@DIR@/lib > $@ ;\
 	echo htool  INCLUDE -I@DIR@/include/htool/include >> $@ ;\
 	else true; 	fi
-# end HTOOLL
+# end HTOOL
+# begin BEMTOOL
+install-bemtool: ./getall
+	 if test -n "$(TOOL_COMPILE_bemtool)"; then   ./getall -o bemtool -a;  $(MAKE) include/bemtool/done.tag  lib/WHERE.bemtool; else true;fi
+reinstall-bemtool:./getall
+	-rm lib/WHERE.bemtool
+	-rm ./pkg/bemtool.zip
+	-rm -rf include/BemTool
+	-test -n "$(TOOL_COMPILE_bemtool)" && $(MAKE) install-bemtool || true
+include/bemtool/done.tag:./pkg/bemtool.zip
+	-if test -f ./pkg/bemtool.zip ; then \
+          cd include;rm -rf BemTool BemTool-*;  unzip ../pkg/bemtool.zip ; mv BemTool-* BemTool ; touch BemTool/done.tag; \
+         else true;  fi
+lib/WHERE.bemtool: ./getall
+	if test -d include/BemTool/ ; then \
+	echo bemtool LD -L@DIR@/lib > $@ ;\
+	echo bemtool  INCLUDE -I@DIR@/include/BemTool/ >> $@ ;\
+	else true; 	fi
+# end BEMTOOL
+
+# begin BOOST
+install-boost: ./getall
+	 if test -n "$(TOOL_COMPILE_boost)"; then   ./getall -o boost -a;  $(MAKE) boost/done.tag  lib/WHERE.boost; else true;fi
+reinstall-boost:./getall
+	-rm lib/WHERE.boost
+	-rm ./pkg/boost.tar.gz
+	-rm -rf boost
+	-test -n "$(TOOL_COMPILE_boost)" && $(MAKE) install-boost || true
+boost/done.tag:./pkg/boost.tar.gz
+	if test -f ./pkg/boost.tar.gz ; then \
+	cd pkg ; rm -rf boost boost_* ; tar xvzf boost.tar.gz  ; mkdir -p ../boost/include/boost ; cp -r boost_*/boost/* ../boost/include/boost ; cp boost_*/boost/LICENSE_0_1.txt ../boost/ ; touch ../boost/done.tag; rm -rf boost_* \
+	else true;  fi	
+lib/WHERE.boost: ./getall
+	if test -d boost/include ; then \
+	echo boost  INCLUDE -I@DIR@/boost/include >> $@ ;\
+	else true; 	fi
+# end BOOST
 
 #  to reinstall mpi under window afer clean 
 reinstall-msmpi:
@@ -177,7 +217,7 @@ tag-compile-pkg: bin lib include pkg FORCE
 	if [ -n "$(MPICC)" ] ; then \
 	for d in $(MPI_SOFT) ; do 	$(MAKE) compile-dir COMPILEDIR=$$d || exit 1; done;\
 	fi;fi
-	$(MAKE) install-hpddm install-htool
+	$(MAKE) install-hpddm install-htool install-bemtool install-boost
 	touch tag-compile-pkg
 FORCE:
 
@@ -194,7 +234,7 @@ install-exec-local:
 	cp -rp bin  $(DESTDIR)$(ff_prefix_dir)
 
 clean-local:
-	-rm -rf	 tag-* include lib bin
+	-rm -rf	 tag-* include lib bin boost
 	-mkdir   include lib bin
 	-rm */FAIT */FAIRE
 # 	FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no

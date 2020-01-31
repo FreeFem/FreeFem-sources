@@ -10,6 +10,8 @@ macro dimension 3// EOM            // 2D or 3D
 
 include "ffddm.idp"
 
+load "msh3"
+
 macro def(i)i// EOM                         // scalar field definition
 macro init(i)i// EOM                        // scalar field initialization
 func Pk = P2;  
@@ -33,35 +35,35 @@ real npplo = 10./mysplit;
 //int[int] LL = [Dirichlet,Dirichlet, Dirichlet,Dirichlet, Dirichlet,Dirichlet];
 int[int] LL = [Robin,Robin, Robin,Robin, Robin,Robin];
 
-meshN Thc = cube(npplo*1./lambda,npplo*1./lambda,npplo*1./lambda, [x, y, z], label = LL);
+mesh3 Thc = cube(npplo*1./lambda,npplo*1./lambda,npplo*1./lambda, [x, y, z], label = LL);
 
-meshN Th = trunc(Thc,1,split=mysplit);
+mesh3 Th = trunc(Thc,1,split=mysplit);
 
 macro Grad(u) [dx(u),dy(u),dz(u)] // EOM
 
 macro Varf(varfName, meshName, PhName)
     varf varfName(u,v) =
-  intN(meshName)(-(k^2-1i*epsilonprob)*u*v+Grad(u)'*Grad(v))
-				+ intbN(meshName,Robin)(1i*k*u*v)
+  int3d(meshName)(-(k^2-1i*epsilonprob)*u*v+Grad(u)'*Grad(v))
+				+ int2d(meshName,Robin)(1i*k*u*v)
 				+ on(Dirichlet,u=0); // EOM
 
 // for the preconditioner
 macro VarfEprec(varfName, meshName, PhName)
     varf varfName(u,v) =
-  intN(meshName)(-(k^2-1i*epsilonEprec)*u*v+Grad(u)'*Grad(v))
-				+ intbN(meshName,Robin)(1i*k*u*v)
+  int3d(meshName)(-(k^2-1i*epsilonEprec)*u*v+Grad(u)'*Grad(v))
+				+ int2d(meshName,Robin)(1i*k*u*v)
 				+ on(Dirichlet,u=0); // EOM
 
 // for the preconditioner
 macro VarfOpt(varfName, meshName, PhName)
     varf varfName(u,v) =
-  intN(meshName)(-(k^2-1i*epsilonEprec)*u*v+Grad(u)'*Grad(v))
-				+ intbN(meshName,Robin,10)(1i*k*u*v)
+  int3d(meshName)(-(k^2-1i*epsilonEprec)*u*v+Grad(u)'*Grad(v))
+				+ int2d(meshName,Robin,10)(1i*k*u*v)
 				+ on(Dirichlet,u=0); // EOM
 
 macro Varfrhs(varfName, meshName, PhName)
     varf varfName(u,v) =
-                -intN(meshName)(f*v)
+                -int3d(meshName)(f*v)
                 + on(Dirichlet,u=0); // EOM
 
 macro Hdefmplot(u)real(u)//

@@ -21,54 +21,23 @@
 # E-MAIL  : ...
 .NOTPARALLEL:
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver-ff
-TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" LIST_CONDITIONAL="$(LIST_CONDITIONAL)"
+TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" SKIP=$(SKIP_TESTS_MPI)
 
 all-local: freefem++.pref
 
 
-TESTS_HPDDM = diffusion-2d-thirdlevelgeneo.edp \
-	diffusion-3d-minimal-ddm.edp\
-	diffusion-3d-minimal-direct.edp \
-	diffusion-3d-simple.edp \
-	elasticity-3d-simple.edp \
-	elasticity-3d-thirdlevelgeneo.edp \
-	Helmholtz-2d-HPDDM-BGMRES.edp \
-	Helmholtz-2d-simple.edp \
-	Helmholtz-3d-simple.edp \
-	Maxwell-3d-simple.edp \
-	natural_convection_3D_obstacle.edp \
-	natural_convection.edp \
-	Richards-2d.edp \
-	heat-torus-3d-surf.edp \
-	Helmholtz_Cobracavity_BEM.edp
-
-
-TESTS_METIS = Maxwell_Cobracavity.edp
-
-if MPI
-if HPDDM
-CONDITIONAL_HPDDM = $(TESTS_HPDDM)
-if METIS
-CONDITIONAL_METIS_HPDDM = $(TESTS_METIS_HPDDM)
-endif METIS
-endif HPDDM
-endif MPI
-
-TESTS = $(TESTS_HPDDM) \
-	$(TESTS_METIS_HPDDM)
-
-LIST_CONDITIONAL = $(CONDITIONAL_HPDDM) \
-	$(CONDITIONAL_METIS_HPDDM)
-
+TESTS = Helmholtz_Cobracavity.edp \
+	Helmholtz_circle_Dirichlet.edp\
+	Helmholtz_circle_Neumann.edp
 
 XFAIL_TESTS = $(TESTS)
 
 EXTRA_DIST = *.edp
 
-freefem++.pref: Makefile.am
-	echo loadpath = \"../../plugin/mpi/\" > freefem++.pref
+freefem++.pref:Makefile.am
+	echo includepath = \"../../idp/\" > freefem++.pref
+	echo loadpath = \"../../plugin/mpi/\" >> freefem++.pref
 	echo loadpath += \"../../plugin/seq/\" >> freefem++.pref
-	echo includepath = \"../../idp/\" >> freefem++.pref
 
 $(TESTS)::freefem++.pref
 

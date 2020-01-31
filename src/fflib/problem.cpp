@@ -63,7 +63,6 @@ basicAC_F0::name_and_type  CDomainOfIntegration::name_param[]= {
 
 };
 
-
 basicAC_F0::name_and_type  Problem::name_param[]= {
     {  "save",&typeid(string* )},
     {  "cadna",&typeid(KN<double>*)},
@@ -7470,6 +7469,8 @@ namespace Fem2D {
                     R3 E=K.T.Edge(ie);
                     double le = sqrt((E,E));
 
+                    R3 NNt=K.T.NormalSUnitaire();
+
                     for (int i=0;i<ipmat.ncoef;i++)
                         PtonB[ipmat.p[i]] +=  Element::onWhatBorder[ie][K.DFOnWhat(ipmat.dofe[i])] ;
 
@@ -7478,7 +7479,7 @@ namespace Fem2D {
                         if (PtonB[p]) // in on boundary
                         {
                             const RdHat & PtHat(ipmat.P[p]);
-                            mps->set(K.T(PtHat),PtHat,K,r,ie);
+                            mps->set(K.T(PtHat),PtHat,K,r,NNt,ie);
                             KN_<R> Vpp(Vp(p,'.'));
                             for (int j=0;j<dim;j++)
                                 if (tabexp[j])

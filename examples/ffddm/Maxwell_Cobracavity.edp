@@ -13,6 +13,8 @@ macro dimension 3// EOM
 
 include "ffddm.idp"
 
+load "msh3"
+
 include "cobrameshcavity.idp"
 
 /* COBRA cavity paper JCP: EM wave scattering problem from the COBRA cavity
@@ -137,37 +139,37 @@ func GzM3 = 0;
 
 macro Varf(varfName, meshName, PhName)
     varf varfName([Ex,Ey,Ez],[vx,vy,vz]) =
-  intN(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
-                + intN(meshName)(-(k^2-1i*epsilonprob)*[vx,vy,vz]'*[Ex,Ey,Ez])
-                + intbN(meshName,labsext)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+  int3d(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+                + int3d(meshName)(-(k^2-1i*epsilonprob)*[vx,vy,vz]'*[Ex,Ey,Ez])
+                + int2d(meshName,labsext)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
                 + on(labmetal,labo,Ex=0,Ey=0,Ez=0);    // EOM
 
 // for the preconditioner
 macro VarfEprec(varfName, meshName, PhName)
     varf varfName([Ex,Ey,Ez],[vx,vy,vz]) =
-  intN(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
-                + intN(meshName)(-(k^2-1i*epsilonEprec)*[vx,vy,vz]'*[Ex,Ey,Ez])
-                + intbN(meshName,labsext)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+  int3d(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+                + int3d(meshName)(-(k^2-1i*epsilonEprec)*[vx,vy,vz]'*[Ex,Ey,Ez])
+                + int2d(meshName,labsext)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
                 + on(labmetal,labo,Ex=0,Ey=0,Ez=0);    // EOM
                 
 // for the preconditioner
 macro VarfOpt(varfName, meshName, PhName)
 
     varf varfName([Ex,Ey,Ez],[vx,vy,vz]) =
-  intN(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
-                + intN(meshName)(-(k^2-1i*epsilonEprec)*[vx,vy,vz]'*[Ex,Ey,Ez])
-                + intbN(meshName,labsext)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
-                + intbN(meshName,10)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))                              
-                + on(labmetal,labo,Ex=0,Ey=0,Ez=0);    // EOM                
+  int3d(meshName)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+                + int3d(meshName)(-(k^2-1i*epsilonEprec)*[vx,vy,vz]'*[Ex,Ey,Ez])
+                + int2d(meshName,labsext)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+                + int2d(meshName,10)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+                + on(labmetal,labo,Ex=0,Ey=0,Ez=0);    // EOM
 
 macro Varfrhs(varfName, meshName, PhName)
     varf varfName([Ex,Ey,Ez],[vx,vy,vz]) =
-        intbN(meshName,labextxm)([vx,vy,vz]'*[Gxm1,Gxm2,Gxm3])
-       +intbN(meshName,labextxM)([vx,vy,vz]'*[GxM1,GxM2,GxM3])        
-       +intbN(meshName,labextym)([vx,vy,vz]'*[Gym1,Gym2,Gym3])
-       +intbN(meshName,labextyM)([vx,vy,vz]'*[GyM1,GyM2,GyM3])
-       +intbN(meshName,labextzm)([vx,vy,vz]'*[Gzm1,Gzm2,Gzm3])
-       +intbN(meshName,labextzM)([vx,vy,vz]'*[GzM1,GzM2,GzM3])
+        int2d(meshName,labextxm)([vx,vy,vz]'*[Gxm1,Gxm2,Gxm3])
+       +int2d(meshName,labextxM)([vx,vy,vz]'*[GxM1,GxM2,GxM3])
+       +int2d(meshName,labextym)([vx,vy,vz]'*[Gym1,Gym2,Gym3])
+       +int2d(meshName,labextyM)([vx,vy,vz]'*[GyM1,GyM2,GyM3])
+       +int2d(meshName,labextzm)([vx,vy,vz]'*[Gzm1,Gzm2,Gzm3])
+       +int2d(meshName,labextzM)([vx,vy,vz]'*[GzM1,GzM2,GzM3])
        + on(labmetal,labo,Ex=0,Ey=0,Ez=0);  // EOM
 
 //macro Mdefplot(u)sqrt(real(u)^2+real(u#y)^2+real(u#z)^2)//

@@ -187,16 +187,29 @@ download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-
 	'petsc-lite-3.12.3.tar.gz',
 	'ca5c8f535ff93e22a0bd2e03ded4befe');
 	
-download('htool','https://github.com/PierreMarchand20/htool/archive/84fb0d9bd429556e131c5447283514509d44ab73.zip',
+download('htool','https://github.com/PierreMarchand20/htool/archive/0ba76eaca05217fceabf3f0269548b354590eef3.zip',
 		'https://github.com/PierreMarchand20/',
 		'htool.zip',
-		'b8a8177c811ef6a232867d672ab416f3');
+		'1fc76ca089bb76f668a935d0d3678bf9');
 
 	
 download('hpddm','https://github.com/hpddm/hpddm/archive/83c462a92cd3faf8f7518396caf6c7e5bbaf5e9e.zip',
 	'https://github.com/hpddm',
 	'hpddm.zip',
 	'9dad8a95d334b1342b662ce2faa7e680');
+
+download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/ef04bc6d1424e84153af4d778b6cf1574a0fa1b3.zip',
+	'https://github.com/PierreMarchand20/BemTool',
+	'bemtool.zip',
+	'e6195c939431c48b134eca6a9316b59c');
+
+download('Boost','https://www.ljll.math.upmc.fr/~tournier/boost_for_bemtool.tar.gz',
+	'https://www.boost.org',
+	'boost.tar.gz',
+	'bb0e3ee1ad06174c80a69bc0756034e7');
+
+
+
 
 # run all downloads concurrently
 
@@ -248,7 +261,7 @@ sub download{
 
 sub downloadone{
 	##  correct rescue server for done load
-	my($url,$pkg,$md5,$opts)=split(/,/,$_[0]);# warning just $pkg without pkg/$pkg  
+	my($url,$pkg,$md5,$opts)=split(/,/,$_[0]);# warning just $pkg without pkg/$pkg
 	my $cmd="../bin/build/download $url pkg/$pkg $opts";
 	print "$cmd\n";
 	system $cmd;

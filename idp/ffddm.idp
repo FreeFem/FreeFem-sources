@@ -5,29 +5,6 @@ include "getARGV.idp"// to process command line options
 
 include "ffddm_parameters.idp"
 
-IFMACRO(dimension,2)
-macro meshN()mesh// EOM             // two-dimensional problem
-macro intN()int2d// EOM             // two-dimensional integral
-macro intbN()int1d// EOM            // one-dimensional integral
-macro minimalMesh()square(1,1)// EOM
-ENDIFMACRO
-
-IFMACRO(dimension,3)
-load "msh3"
-macro meshN()mesh3// EOM            // three-dimensional problem
-macro intN()int3d// EOM             // three-dimensional integral
-macro intbN()int2d// EOM            // two-dimensional integral
-macro minimalMesh()cube(1,1,1)// EOM
-ENDIFMACRO
-
-IFMACRO(dimension,3S)
-load "msh3"
-macro meshN()meshS// EOM            // three-dimensional surface problem
-macro intN()int2d// EOM
-macro intbN()int1d// EOM
-macro minimalMesh()square3(1,1,[x,y,z])// EOM
-ENDIFMACRO
-
 include "ffddm_partitioning.idp"
 
 include "ffddm_coarsemeshCS.idp"
@@ -86,6 +63,13 @@ ENDIFMACRO
 
 macro ffddmsetupOperatorinit(pr,preffe)
 IFMACRO(!pr#setupoperatorinit)
+
+IFMACRO(pr#bem,1)
+NewMacro pr#Tmatrix() HMatrix EndMacro
+ENDIFMACRO
+IFMACRO(!pr#bem)
+NewMacro pr#Tmatrix() matrix EndMacro
+ENDIFMACRO
 
 NewMacro pr#localmacroaug preffe#prmesh#buildAug EndMacro
 
@@ -227,7 +211,7 @@ int pr#verbosity = ffddmverbosity;
 
 int pr#bdirect = ffddmbdirect;
 
-matrix<preffe#K> pr#Aglobal;
+pr#Tmatrix<preffe#K> pr#Aglobal;
 matrix<preffe#K>[int] pr#aRd(preffe#prmesh#npart);      /* local Dirichlet matrices for parallel matrix vector product */
 matrix<preffe#K> pr#matN;
 
@@ -296,6 +280,11 @@ ENDIFMACRO
 // EOM
 
 
+macro ffddmsetupOperatorBeminit(pr,preffe)
+NewMacro pr#bem()1 EndMacro
+ffddmsetupOperatorinit(pr,preffe)
+// EOM
+
 macro ffddmsetupinit(pr,preffe)
 ffddmsetupOperatorinit(pr,preffe)
 // EOM
@@ -308,6 +297,12 @@ if (preffe#prmesh#isincomm)
 {	
 	preffe#prmesh#tic(pr#tfactoi)
 
+	IFMACRO(pr#bem,1)
+	if (!preffe#prmesh#excluded)
+	  pr#Aglobal = Varf(preffe#Vhglob,preffe#Vhglob);
+	ENDIFMACRO
+
+	IFMACRO(!pr#bem)
   if (pr#bdirect || bseq) {
     Varf(vaglobal,preffe#prmesh#Thglob,preffe#Vhglob)
     pr#Aglobal = vaglobal(preffe#Vhglob,preffe#Vhglob,solver = (vsym ? CG : GMRES),tgv=vtgvelim);
@@ -325,7 +320,7 @@ if (preffe#prmesh#isincomm)
   	preffe#prmesh#AugThi = preffe#prmesh#AugaTh[i];
   	ENDIFMACRO
   	IFMACRO(localmacroaug,0)
-    meshN preffe#prmesh#AugThi = preffe#prmesh#Thi + preffe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
+    preffe#prmesh#meshN preffe#prmesh#AugThi = preffe#prmesh#Thi + preffe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
     fespace preffe#AugVhi(preffe#prmesh#AugThi, preffe#fPk);
     int[int] n2o = (0:preffe#prmesh#Thi.nt-1);
     int[int] renum = restrict(preffe#Vhi, preffe#AugVhi,n2o);
@@ -374,9 +369,15 @@ if (preffe#prmesh#isincomm)
   }
   if (bseq)
     preffe#prmesh#Thi = preffe#prmesh#Thglob;
-		
+  ENDIFMACRO
+
   preffe#prmesh#toc(pr#tfactoi,"",pr#tfacto)
 }
+//EOM
+
+macro ffddmsetupOperatorBem(pr,preffe,Varf)
+ffddmsetupOperatorBeminit(pr,preffe)
+ffddmsetupOperator(pr,preffe,Varf)
 //EOM
 
 macro ffddmsetupPrecond(pr,VarfPrec)
@@ -407,7 +408,7 @@ if (pr#prfe#prmesh#isincomm)
   	pr#prfe#prmesh#AugThi = pr#prfe#prmesh#AugaTh[i];
   	ENDIFMACRO
   	IFMACRO(localmacroaug,0)
-    meshN pr#prfe#prmesh#AugThi = pr#prfe#prmesh#Thi + pr#prfe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
+    pr#prfe#prmesh#meshN pr#prfe#prmesh#AugThi = pr#prfe#prmesh#Thi + pr#prfe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
     fespace pr#prfe#AugVhi(pr#prfe#prmesh#AugThi, pr#prfe#fPk);
     int[int] n2o = (0:pr#prfe#prmesh#Thi.nt-1);
     int[int] renum = restrict(pr#prfe#Vhi, pr#prfe#AugVhi,n2o);
@@ -422,20 +423,34 @@ if (pr#prfe#prmesh#isincomm)
     rhs.resize(pr#prfe#Vhi.ndof);
 
     if (pr#prec == "oras" || pr#prec == "soras"){
-    	VarfPrec(RobinInt,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
-    	    	
-    	if (pr#prfe#prmesh#inexactCSsplit > 1)
-    	  pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgvelim);
-    	else
-    	
-    	pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgv);
+      IFMACRO(!pr#bem)
+      VarfPrec(RobinInt,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
+
+      if (pr#prfe#prmesh#inexactCSsplit > 1)
+        pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgvelim);
+      else
+        pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgv);
+      ENDIFMACRO
+      IFMACRO(pr#bem,1)
+      cout << "TODO" << endl;
+      assert(0);
+      ENDIFMACRO
     }
     else if (pr#prec == "ras" || pr#prec == "asm") {
+      IFMACRO(!pr#bem)
       VarfPrec(vPb, pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)
-			if (pr#prfe#prmesh#inexactCSsplit > 1)
+      if (pr#prfe#prmesh#inexactCSsplit > 1)
         pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgvelim);
-			else
-				pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgv);
+      else
+        pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgv);
+      ENDIFMACRO
+      IFMACRO(pr#bem,1)
+      pr#Tmatrix<pr#prfe#K> Hloc = VarfPrec(pr#prfe#AugVhi, pr#prfe#AugVhi);
+      pr#prfe#K[int,int] mdense(pr#prfe#AugVhi.ndof, pr#prfe#AugVhi.ndof);
+      mdense = Hloc;
+      pr#aR[i] = mdense;
+      ENDIFMACRO
+
       renumbering(pr#aR[i], pr#prfe#Auginterp, rhsFull, rhs, eps=-1);
     }
     else if (pr#prec != "none")

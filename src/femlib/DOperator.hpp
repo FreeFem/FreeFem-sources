@@ -422,9 +422,9 @@ int  MaxOp(const L *   u) {
     for (typename L::const_iterator i=u->v.begin();i!=u->v.end();i++)          
           op = maxop(op,i->first);
     return op;}
-    
-    
-    
+
+
+
 template<class L,class A,L* ff(const basicAC_F0 & args)>
 class CODE_L1 { public:
   typedef L* Result;

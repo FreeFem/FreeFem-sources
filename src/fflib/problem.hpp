@@ -97,7 +97,7 @@ typedef  const Foperator foperator;
 Expression IsFebaseArray(Expression f);
 
 void SetArgsFormLinear(const ListOfId *lid,int ordre);
-
+void SetArgsBemKFormLinear(const ListOfId *lid,int ordre);
 /*
 inline ostream & operator<<(ostream & f,const  TypeSolveMat & tm)
 {
@@ -1341,7 +1341,6 @@ namespace FreeFempp {
 template<class R>
 class TypeVarForm { public:
     aType tFB;
-  //    aType tFB3;
     aType tMat;
     aType tMat3;
     aType tFL;
@@ -1354,6 +1353,7 @@ class TypeVarForm { public:
   // aType tBC3 ;
 TypeVarForm() :
   tFB( atype<const  FormBilinear *>() ),
+ // tBemKFB( atype<const BemKFormBilinear *>() ),
   //tFB3( atype<const  FormBilinear<v_fes3> *>() ),
   tMat( atype<Matrice_Creuse<R>*>() ),
   //  tMat3( atype<Matrice_Creuse<R,v_fes3>*>() ),

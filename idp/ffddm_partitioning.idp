@@ -39,7 +39,7 @@ if (pr#isincomm)
       
       int numberIntersectioni = 0;
       
-      meshN overlapName=Th;
+      pr#meshN overlapName=Th;
       fespace VhGlobalff(overlapName, P1);
       fespace PhGlobalff(overlapName, P0);
       PhGlobalff part;
@@ -49,7 +49,7 @@ if (pr#isincomm)
       VhGlobalff suppSmooth;
       AddLayers(overlapName, supp[], (sizeoverlaps == 0) + sizeoverlaps * 2, suppSmooth[]);
       {   
-        meshN neighbors = trunc(overlapName, suppSmooth > 0.001 && (suppSmooth < 0.999));
+        pr#meshN neighbors = trunc(overlapName, suppSmooth > 0.001 && (suppSmooth < 0.999));
         fespace Oh(neighbors, P0);
         Oh partOverlap = part;
         
@@ -72,7 +72,7 @@ if (pr#isincomm)
       supp = supp;
       suppSmooth = suppSmooth;
 
-      meshN borderName;
+      pr#meshN borderName;
       if (sizeoverlaps > 0) {
         pr#Thi = trunc(pr#Thi, suppSmooth> 0.501, label = ffddminterfacelabel);
         borderName = trunc(overlapName, (suppSmooth > (sizeoverlaps - 0.999) / (2 * sizeoverlaps)) && (suppSmooth < 0.501), label = (abs(ffddminterfacelabel) + 1) * 100);
@@ -93,7 +93,7 @@ if (pr#isincomm)
         else if (usedARGV("-raspart") != -1) {
           VhGlobalff phir;
           PhGlobalff suppP0 = abs(ii - part) < 0.1;
-          varf vSuppi(u,v) = intN(overlapName,qforder=1)(suppP0*v);
+          varf vSuppi(u,v) = pr#intN(overlapName,qforder=1)(suppP0*v);
           phir[] = vSuppi(0,VhGlobalff);
           phir = phir > 0.;
           khi = phir;
@@ -107,7 +107,7 @@ if (pr#isincomm)
       VhGlobalff phi = 0, phibase = 0;
       
       /*real eps=int2d(overlapName)(1.);*/
-      real eps = intN(overlapName)(1.0);
+      real eps = pr#intN(overlapName)(1.0);
       real[int] epsn(arrayIntersectioni.n);
       if(bpara){ /* version for very ugly meshes, not implemented yet for bseq*/        
         mpiRequest[int] rqn(2*arrayIntersectioni.n);
@@ -133,7 +133,7 @@ if (pr#isincomm)
             phi = phi > 0.001 ? 1.0 : 0.0;
           else if (usedARGV("-raspart") != -1) {
             VhGlobalff phir;
-            varf vSuppi(u,v) = intN(overlapName,qforder=1)(suppP0*v);
+            varf vSuppi(u,v) = pr#intN(overlapName,qforder=1)(suppP0*v);
             phir[] = vSuppi(0,VhGlobalff);
             phir = phir > 0.;
             phi = phir;
@@ -141,14 +141,14 @@ if (pr#isincomm)
         }
         else {
           VhGlobalff phir;
-          varf vSuppi(u,v) = intN(overlapName,qforder=1)(suppP0*v);
+          varf vSuppi(u,v) = pr#intN(overlapName,qforder=1)(suppP0*v);
           phir[] = vSuppi(0,VhGlobalff);
           phir = phir > 0.;
           phi = phir;
           phibase[] = phi[];
         }
         
-        /*real intersection=intN(overlapName)(phibase)/eps;*/
+        /*real intersection=pr#intN(overlapName)(phibase)/eps;*/
         /*if(arrayIntersectioni[i] <=1)*/
         real epsi=0;
         if(bpara){ /* version for very ugly meshes, not implemented yet for bseq */
@@ -159,7 +159,7 @@ if (pr#isincomm)
         }   
         real intersection;
         if (pr#overlap > 0)
-          intersection = intN(overlapName)(phibase) / epsi;
+          intersection = pr#intN(overlapName)(phibase) / epsi;
         else {
           partitionIntersectioni[numberIntersectioni] = phi;
           intersection = partitionIntersectioni[numberIntersectioni][].max;
@@ -178,7 +178,7 @@ if (pr#isincomm)
       
       khi[] = khi[] ./= sum[];
       
-      overlapName = minimalMesh;
+      overlapName = pr#minimalMesh;
       if(numberIntersectioni != arrayIntersectioni.n)
       arrayIntersectioni.resize(numberIntersectioni);  
       
@@ -187,7 +187,7 @@ if (pr#isincomm)
         
         fespace Phi(pr#Thi,P0);
         Phi suppP0i = abs(ii - part) < 0.1;
-        varf vSuppii(u,v) = intN(pr#Thi,qforder=1)(suppP0i*v);
+        varf vSuppii(u,v) = pr#intN(pr#Thi,qforder=1)(suppP0i*v);
         pr#VhiP1 phiri;
         phiri[] = vSuppii(0,pr#VhiP1);
         phiri = phiri > 0.; 
@@ -196,7 +196,7 @@ if (pr#isincomm)
         
         for(int i = 0; i < arrayIntersectioni.n; ++i) {    
           Phi suppP0n = abs(arrayIntersectioni[i] - part) < 0.1;
-          varf vSuppin(u,v) = intN(pr#Thi,qforder=1)(suppP0n*v);
+          varf vSuppin(u,v) = pr#intN(pr#Thi,qforder=1)(suppP0n*v);
           pr#VhiP1 phirn;
           phirn[] = vSuppin(0,pr#VhiP1);
           phirn = phirn > 0.; 
@@ -256,6 +256,28 @@ if (pr#isincomm)
 
 macro ffddminitDmeshf(pr,Th,comm)
 IFMACRO(!pr#meshinit)
+
+IFMACRO(((!pr#dim)&(dimension,2))|(pr#dim,2))
+NewMacro pr#meshN()mesh EndMacro             /* two-dimensional problem  */
+NewMacro pr#intN()int2d EndMacro             /* two-dimensional integral */
+NewMacro pr#intbN()int1d EndMacro            /* one-dimensional integral */
+NewMacro pr#minimalMesh()square(1,1) EndMacro
+ENDIFMACRO
+
+IFMACRO(((!pr#dim)&(dimension,3))|(pr#dim,3))
+NewMacro pr#meshN()mesh3 EndMacro            /* three-dimensional problem  */
+NewMacro pr#intN()int3d EndMacro             /* three-dimensional integral */
+NewMacro pr#intbN()int2d EndMacro            /* two-dimensional integral   */
+NewMacro pr#minimalMesh()cube(1,1,1) EndMacro
+ENDIFMACRO
+
+IFMACRO(((!pr#dim)&(dimension,3S))|(pr#dim,3S))
+NewMacro pr#meshN()meshS EndMacro            /* three-dimensional surface problem */
+NewMacro pr#intN()int2d EndMacro
+NewMacro pr#intbN()int1d EndMacro
+NewMacro pr#minimalMesh()square3(1,1,[x,y,z]) EndMacro
+ENDIFMACRO
+
 int pr#npart = ffddmnpart;
 
 /*int pr#verbosity = ffddmverbosity;*/
@@ -294,7 +316,7 @@ if (pr#isincomm)
 }
 EndMacro
 
-meshN pr#Thi = minimalMesh;
+pr#meshN pr#Thi = pr#minimalMesh;
 
 fespace pr#VhiP1(pr#Thi,P1);
 
@@ -306,7 +328,7 @@ int pr#numberIntersection = 0;
 
 int[int] pr#arrayIntersection(0);
 
-meshN pr#Thglob = minimalMesh;
+pr#meshN pr#Thglob = pr#minimalMesh;
 
 matrix[int] pr#RihP1(pr#npart);
 pr#VhiP1[int] pr#DP1(pr#npart);
@@ -362,8 +384,8 @@ mpiGroup pr#grpself(pr#procself);
 mpiComm pr#commself(mpiCommWorld,pr#grpself);
 
 /*  Domain decomposition data structures */
-meshN[int] pr#aTh(pr#npart);        /* sequence of ovr. meshes */ 
-meshN[int] pr#aThborder(pr#npart);
+pr#meshN[int] pr#aTh(pr#npart);        /* sequence of ovr. meshes */
+pr#meshN[int] pr#aThborder(pr#npart);
 
 real[int] pr#partAug(1);
 
@@ -581,7 +603,7 @@ if (prmsh#isincomm && !prmsh#excluded)
           matrix R;
           int[int] n2o(1);
           if (prmsh#overlap > 0) {
-            meshN meshIntersection = trunc(prmsh#Thi, (prmsh#partitionIntersectionbasei[i] > 1.0e-6), new2old = n2o, label=9999);
+            prmsh#meshN meshIntersection = trunc(prmsh#Thi, (prmsh#partitionIntersectionbasei[i] > 1.0e-6), new2old = n2o, label=9999);
             fespace WhIntersection(meshIntersection, pr#fPk);
             int[int] renum = restrict(WhIntersection, pr#Vhi,n2o);
             int[int] Ic = (0:WhIntersection.ndof-1);
@@ -595,12 +617,12 @@ if (prmsh#isincomm && !prmsh#excluded)
             matrix RP1 = interpolate(prmsh#VhiP1,prmsh#AugVhiP1);
             prmsh#AugVhiP1 partaugP1;
             partaugP1[] = RP1'*prmsh#partitionIntersectionbasei[i][];
-            meshN meshIntersection = trunc(prmsh#AugThi, (partaugP1 > 1.0e-6), new2old = n2o);
+            pr#meshN meshIntersection = trunc(prmsh#AugThi, (partaugP1 > 1.0e-6), new2old = n2o);
             fespace pr#PhAugP0(prmsh#AugThi,P0);
             pr#PhAugP0 paug;
             paug[] = prmsh#partAug;
             paug = abs(paug-prmsh#arrayIntersection[i]) < 0.1;
-            meshN meshNeighbor = trunc(prmsh#AugThi, paug > 0.001, label=-10);
+            pr#meshN meshNeighbor = trunc(prmsh#AugThi, paug > 0.001, label=-10);
 
             fespace WhIntersection(meshIntersection, pr#fPkP0);
 
@@ -787,6 +809,7 @@ ffddmbuildDfespaceEdge(pr,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
 macro ffddmbuildDmesh(pr,Th,comm)
 if ((mpirank == 0) && ffddmverbosity)
 cout << "["+Stringification(pr)+"] Building decomposition from mesh of " << Th.nt << " elements" << endl;
+
 int pr#inexactCSsplit = 0;
 int pr#binexactCS = 0;
 int pr#binexactgeneoCS = 0;
