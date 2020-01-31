@@ -109,7 +109,7 @@ etc/jenkins/clean.sh \
 etc/jenkins/build_PETSc.sh \
 etc/ff/ff.xcodeproj \
 etc/ff/ff.xcodeproj/project.pbxproj  \
-readme/BUGS			readme/HISTORY_BEFORE_2005	readme/README_ARPACK.md		readme/README_MAC.md		readme/TODO \
+readme/BUGS			readme/HISTORY_BEFORE_2005	readme/README_MAC.md		readme/TODO \
 readme/COPYRIGHT		readme/INNOVATION		readme/README_COMPILATION.md	readme/README_WINDOWS.md \
 readme/HISTORY			readme/README			readme/README_GIT.md		readme/README_XCODE.md \
 idp/ffddm_geneoCS.idp \
