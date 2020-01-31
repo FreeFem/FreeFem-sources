@@ -14,7 +14,7 @@ mpi/generaldefs.h \
 mpi/hpddm.cpp \
 mpi/hpddm_substructuring.cpp \
 mpi/htool.cpp \
-mpi/htool_bem.cpp \
+mpi/bem.cpp \
 mpi/hypre_FreeFem.cpp \
 mpi/mpi-cmaes.cpp \
 mpi/parmetis.cpp \
