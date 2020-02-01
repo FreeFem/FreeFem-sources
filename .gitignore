@@ -113,8 +113,6 @@ AppDir/
 3rdparty/fftw/FAIT
 3rdparty/fftw/cxxflags
 3rdparty/fftw/fftw-
-3rdparty/fltk/fltk-1.1..
-3rdparty/fltk/fltk-1.1..-source.tar.bz2
 3rdparty/gmm/FAIRE
 3rdparty/gmm/FAIT
 3rdparty/gmm/cxxflags
