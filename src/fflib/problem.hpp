@@ -281,7 +281,7 @@ public:
   static const int n_name_param =12;
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
-  enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3, int3d = 4, intallfaces= 5,intallVFfaces=6 } ; //3d
+  enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3, int3d = 4, intallfaces= 5,intallVFfaces=6,int0d=7 } ; //3d
   typeofkind  kind; //  0
   int d; // 3d
   bool isMeshS,isMeshL;
@@ -424,6 +424,13 @@ class CDomainOfIntegrationL: public CDomainOfIntegration {
 public:
     CDomainOfIntegrationL( const basicAC_F0 & args) :CDomainOfIntegration(args,int1d,3,false,true) {}
     static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int1d,3,false,true);}
+    static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshL>(), true);} // all type
+};
+
+class CDomainOfIntegrationBorderL: public CDomainOfIntegration {
+public:
+    CDomainOfIntegrationBorderL( const basicAC_F0 & args) :CDomainOfIntegration(args,int0d,3,false,true) {}
+    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int0d,3,false,true);}
     static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshL>(), true);} // all type
 };
 

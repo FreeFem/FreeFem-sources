@@ -3028,7 +3028,7 @@ TheOperators->Add("=",
     
  // 3d curve
  Global.Add("int1d","(",new OneOperatorCode<CDomainOfIntegrationL>);
-   
+ Global.Add("int0d","(",new OneOperatorCode<CDomainOfIntegrationBorderL>); // point int0d??
  /*decommente par J. Morice 14/01/09*/
 
  Add<pf3r>("refresh",".",new OneOperator1<bool,pf3r>(pfer_refresh3<R,v_fes3>));

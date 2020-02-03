@@ -1450,56 +1450,25 @@ namespace Fem2D {
         Check(*mate.bilinearform,mate.Uh.N,mate.Vh.N);
         if(verbosity>9) cout << "  -- CPU init assemble mat " <<  CPUtime()-CPU0 << " s\n";
 
-        if (di.kind == CDomainOfIntegration::int1d )
-        {
-
-            if(di.islevelset()) cout << "totototototo"<<endl;
-            /*{
-                double uset = HUGE_VAL;
-                R1 Q[1][2];
-                double vol6[2];
-                KN<double> phi(Th.nv);phi=uset;
-                double f[2];
-                for(int t=0; t< Th.nt;++t)
-                {
-                    if ( all || setoflab.find(Th[t].lab) != setoflab.end())
-                    {
-                        double umx=-HUGE_VAL,umn=HUGE_VAL;
-                        for(int i=0;i<2;++i)
-                        {
-                            int j= ThI(t,i);
-                            if( phi[j]==uset)
-                            {
-                                MeshPointStack(stack)->setP(&ThI,t,i);
-                                phi[j]= di.levelset(stack);//zzzz
-                            }
-                            f[i]=phi[j];
-                            umx = std::max(umx,phi[j]);
-                            umn = std::min(umn,phi[j]);
-
-                        }
-                        int nt= UnderIso(f,Q, vol6,1e-14);
-                        setQF<R2>(FIT,FITo,QuadratureFormular_T_1, Q,vol6,nt);
-                        if(FIT.n)
-                            A += mate(t,-1,Th[t].lab,stack);
-                        if(sptrclean) sptrclean=sptr->clean();
-                    }
-                }
-                FIT =FITo;
-            }
-            else*/
-
-
-                for (int i=0;i< Th.nt; i++)
-                {
+        if (di.kind == CDomainOfIntegration::int1d ) {
+            for (int i=0;i< Th.nt; i++) {
                     if ( all || setoflab.find(Th[i].lab) != setoflab.end())
                         A += mate(i,-1,Th[i].lab,stack);
                     if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
-
-                    // AA += mate;
-                }
+            }
         }
 
+        else if (di.kind == CDomainOfIntegration::int0d ) {
+            for( int e=0;e<Th.nbe;e++) {
+                if (all || setoflab.find(Th.be(e).lab) != setoflab.end()) {
+                    int ie,i =Th.BoundaryElement(e,ie);
+                    A += mate(i,ie,Th.be(e).lab,stack);
+                    if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+                }
+            }
+        }
+        
+        
         else
             InternalError(" kind of CDomainOfIntegration unkown");
 
