@@ -8738,13 +8738,15 @@ void ComputeOrientation(const Mesh& Th, std::vector<bool>& orientation, bool unb
     // l'element courant
     for(int k0=0; k0<RdHat::d+1; k0++){
       int k0a = k0;
-      const int& j1 = Th.ElementAdj(j0, k0a);
-      const T &K1(Th[j1]);
-      if(!visited[j1]){
-        nb_visited++;
-        visit.push(j1);
-        visited[j1]=true;
-        num[nbc-1].push_back(j1);
+      int j1 = Th.ElementAdj(j0, k0a);
+      if (j1 >= 0) {
+        const T &K1(Th[j1]);
+        if(!visited[j1]){
+          nb_visited++;
+          visit.push(j1);
+          visited[j1]=true;
+          num[nbc-1].push_back(j1);
+        }
       }
     }
   }
@@ -8792,14 +8794,16 @@ void ComputeOrientation(const Mesh& Th, std::vector<bool>& orientation, bool unb
 
       for(int k0=0; k0<RdHat::d+1; k0++){
         int k0a = k0;
-        const int& j1 = Th.ElementAdj(j0, k0a);
-        const T &K1(Th[j1]);
-        if(!visited[j1]){
-          bool same = RdHat::d == 2 ? (K.EdgeOrientation(k0) != K1.EdgeOrientation(k0a)) : (k0 != k0a);
-          if(same){orientation[j1]=orientation[j0];}
-          else{orientation[j1]=!orientation[j0];}
-          visited[j1]=true;
-          visit.push(j1);
+        int j1 = Th.ElementAdj(j0, k0a);
+        if (j1 >= 0) {
+          const T &K1(Th[j1]);
+          if(!visited[j1]){
+            bool same = RdHat::d == 2 ? (K.EdgeOrientation(k0) != K1.EdgeOrientation(k0a)) : (k0 != k0a);
+            if(same){orientation[j1]=orientation[j0];}
+            else{orientation[j1]=!orientation[j0];}
+            visited[j1]=true;
+            visit.push(j1);
+          }
         }
       }
     }
