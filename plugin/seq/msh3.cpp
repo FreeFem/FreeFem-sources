@@ -8546,18 +8546,18 @@ class Line_Op : public E_F0mps {
   Line_Op(const basicAC_F0 &args, Expression nx, Expression transfo = 0)
     : enx(nx), xx(0), yy(0), zz(0) {
     args.SetNameParam(n_name_param, name_param, nargs);
-   /* if (transfo) {
+    if (transfo) {
       const E_Array *a1 = dynamic_cast< const E_Array * >(transfo);
       int err = 0;
 
       if (a1) {
-        if (a1->size( ) != 3 || xx || yy || zz) CompileError("line (nx,[X,Y,Z]) ");
-
+        if (xx || yy || zz) CompileError("line (nx,[X,Y,Z]) ");
+		int size = a1->size( ); 
         xx = to< double >((*a1)[0]);
-        yy = to< double >((*a1)[1]);
-        zz = to< double >((*a1)[2]);
+        if(size>1) yy = to< double >((*a1)[1]);
+        if(size>2) zz = to< double >((*a1)[2]);
       }
-    }*/
+    }
   }
 
   AnyType operator( )(Stack stack) const;
@@ -8738,15 +8738,13 @@ void ComputeOrientation(const Mesh& Th, std::vector<bool>& orientation, bool unb
     // l'element courant
     for(int k0=0; k0<RdHat::d+1; k0++){
       int k0a = k0;
-      int j1 = Th.ElementAdj(j0, k0a);
-      if (j1 >= 0) {
-        const T &K1(Th[j1]);
-        if(!visited[j1]){
-          nb_visited++;
-          visit.push(j1);
-          visited[j1]=true;
-          num[nbc-1].push_back(j1);
-        }
+      const int& j1 = Th.ElementAdj(j0, k0a);
+      const T &K1(Th[j1]);
+      if(!visited[j1]){
+        nb_visited++;
+        visit.push(j1);
+        visited[j1]=true;
+        num[nbc-1].push_back(j1);
       }
     }
   }
@@ -8794,16 +8792,14 @@ void ComputeOrientation(const Mesh& Th, std::vector<bool>& orientation, bool unb
 
       for(int k0=0; k0<RdHat::d+1; k0++){
         int k0a = k0;
-        int j1 = Th.ElementAdj(j0, k0a);
-        if (j1 >= 0) {
-          const T &K1(Th[j1]);
-          if(!visited[j1]){
-            bool same = RdHat::d == 2 ? (K.EdgeOrientation(k0) != K1.EdgeOrientation(k0a)) : (k0 != k0a);
-            if(same){orientation[j1]=orientation[j0];}
-            else{orientation[j1]=!orientation[j0];}
-            visited[j1]=true;
-            visit.push(j1);
-          }
+        const int& j1 = Th.ElementAdj(j0, k0a);
+        const T &K1(Th[j1]);
+        if(!visited[j1]){
+          bool same = RdHat::d == 2 ? (K.EdgeOrientation(k0) != K1.EdgeOrientation(k0a)) : (k0 != k0a);
+          if(same){orientation[j1]=orientation[j0];}
+          else{orientation[j1]=!orientation[j0];}
+          visited[j1]=true;
+          visit.push(j1);
         }
       }
     }
