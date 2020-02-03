@@ -8546,7 +8546,7 @@ class Line_Op : public E_F0mps {
   Line_Op(const basicAC_F0 &args, Expression nx, Expression transfo = 0)
     : enx(nx), xx(0), yy(0), zz(0) {
     args.SetNameParam(n_name_param, name_param, nargs);
-    if (transfo) {
+   /* if (transfo) {
       const E_Array *a1 = dynamic_cast< const E_Array * >(transfo);
       int err = 0;
 
@@ -8557,7 +8557,7 @@ class Line_Op : public E_F0mps {
         yy = to< double >((*a1)[1]);
         zz = to< double >((*a1)[2]);
       }
-    }
+    }*/
   }
 
   AnyType operator( )(Stack stack) const;

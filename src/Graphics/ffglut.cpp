@@ -1112,10 +1112,10 @@ void OnePlotFEL::Draw(OneWindow *win)
         glEndList();  // fin de la list
         
     }
-    ShowGlerror("b mesh  OnePlotFES plot");
+    ShowGlerror("b mesh  OnePlotFEL plot");
     win->unsetLighting();
-    Plot(Th,false,plot.drawmeshes,plot.drawborder,plot,gllists+2,&oklist[2]);
-    ShowGlerror("OnePlotFES::Draw");
+    Plot(Th,false,plot.drawmeshes,plot.drawborder,plot,gllists+2,&oklist[2],win);
+    ShowGlerror("OnePlotFEL::Draw");
 }
 
 
