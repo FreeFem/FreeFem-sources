@@ -59,11 +59,6 @@ pr#corr = ffddmcorrection;
 pr#prfe#prmesh#tic(pr#tloc)
 
 if(bseq) {
-  IFMACRO(!VarfA)
-  IFMACRO(!pr#bem)
-  pr#AglobEprec = pr#Aglobal;
-  ENDIFMACRO
-  ENDIFMACRO
   IFMACRO(VarfA)
   VarfA(vaglobalEprec,pr#prfe#prmesh#Thglob,pr#prfe#Vhglob)
   pr#AglobEprec = vaglobalEprec(pr#prfe#Vhglob,pr#prfe#Vhglob,solver=(vsym ? CG : GMRES),tgv=vtgvelim);
@@ -72,12 +67,6 @@ if(bseq) {
 }
 else if (!pr#prfe#prmesh#excluded) {
   int i = mpiRank(pr#prfe#prmesh#commddm);
-  
-  IFMACRO(!VarfA)
-  IFMACRO(!pr#bem)
-  pr#aRdEprec = pr#aRd[i];
-  ENDIFMACRO
-  ENDIFMACRO
   
   IFMACRO(VarfA)
   pr#prfe#prmesh#Thi = pr#prfe#prmesh#aTh[i];
@@ -118,17 +107,19 @@ if (!pr#prfe#prmesh#binexactCS) {
       /*pr#ECM.thresholding(1.e-10);*/
     }
     ENDIFMACRO
+    /*
     IFMACRO(pr#bem,1)
     pr#Tmatrix<pr#prfe#K> Hloc = VarfEprec(pr#VhCoarse, pr#VhCoarse);
     pr#prfe#K[int,int] mdense(pr#VhCoarse.ndof, pr#VhCoarse.ndof);
     mdense = Hloc;
     pr#ECM = mdense;
     ENDIFMACRO
+    */
   }
 
   if (bseq || mpirank < pr#prfe#prmesh#pCS) {
   	set(pr#ECM,solver=GMRES);
-    set(pr#ECM,solver=sparsesolver,commworld=pr#prfe#prmesh#commCS,master=-1,factorize=3); /* -1 */
+    set(pr#ECM,solver=sparsesolver,commworld=pr#prfe#prmesh#commCS,master=0,factorize=3); /* -1 */
   }
 }
 	

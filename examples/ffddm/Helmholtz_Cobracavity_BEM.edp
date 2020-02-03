@@ -66,12 +66,9 @@ macro def(i)i// EOM                         // scalar field definition
 macro init(i)i// EOM                        // scalar field initialization
 ffddmbuildDfespace(H, H, complex, def, init, P1)
 
-macro Varf(Uh, Vh)
-assemblecomplexHESL(Uh,Uh,k,eta=10,eps=1e-2,minclustersize=10,maxblocksize=1000000);
-//
-
-macro VarfPrec(Uh, Vh)
-assemblecomplexHESL(Uh,Uh,k,eta=10,eps=1e-2,minclustersize=10,maxblocksize=1000000,commworld=Hcommself);
+macro Varf(varfName, meshName, PhName)
+  BemKernel ker("SL",1,k);
+  varfbem varfName(u,v) = int2dx2d(meshName)(meshName)(BEM(ker,u,v));
 //
 
 macro Varfrhs(varfName, meshName, PhName)
@@ -85,7 +82,7 @@ if (mpirank == 0)
   cout << HAglobal.infos << endl;
 display(HAglobal);
 
-ffddmsetupPrecond(H, VarfPrec)
+ffddmsetupPrecond(H, Varf)
 
 HVhi<complex> ui, bi;
 
@@ -114,7 +111,9 @@ meshS ThOut = square3(np,np,[(sec1+(radius-height)*sin(angle)+sec2*cos(angle)+ra
 
 fespace UhOut(ThOut,P1);
 
-HMatrix<complex> B = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,eps=1e-2,minclustersize=10,maxblocksize=1000000);
+BemPotential Pot("SL",k);
+varfbem vp(u,v)=int2d(ThS)(POT(Pot,u,v));
+HMatrix<complex> B = vp(Uh,UhOut);
 if (mpirank == 0) cout << B.infos << endl;
 display(B);
 

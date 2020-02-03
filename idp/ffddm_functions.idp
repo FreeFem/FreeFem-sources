@@ -153,7 +153,7 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
         if (!preffe#prmesh#binexactCS) {
           if (!bpara || mpiRank(preffe#prmesh#mpicomm) < preffe#prmesh#pCS) {
             preffe#prmesh#tic(pr#tcsi)
-            if (mpiRank(preffe#prmesh#mpicomm) < preffe#prmesh#pCS)
+            if (mpiRank(preffe#prmesh#mpicomm) == 0)
             zaux = pr#ECM^-1*vaux;
             else {
               preffe#K[int] dumx(pr#ECM.n), dumb(pr#ECM.n);
@@ -202,37 +202,23 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
         if (!bpara) {
           int cpt = 0;
           for (int jj=0; jj<preffe#prmesh#npart; jj++) {
-            IFMACRO(!pr#Zglobal)
             preffe#K[int] tmp(preffe#Rih[jj].n);
             tmp = preffe#Rih[jj]*l;
             for (int ii=0; ii < pr#sizelg[jj]; ii++) {
               vaux[cpt]=pr#Z[cpt]'*tmp;
               cpt++;
             }
-            ENDIFMACRO
-            IFMACRO(pr#Zglobal,1)
-            for (int ii=0; ii < pr#sizelg[jj]; ii++) {
-              vaux[cpt]=pr#Z[cpt]'*l;
-              cpt++;
-            }
-            ENDIFMACRO
           }
           zaux=pr#E^-1*vaux;
           cpt = 0;
           /* the 2 fors loop over the columns of Z subdomainwise */
           for (int jj=0; jj<preffe#prmesh#npart; jj++)
           for (int ii=0; ii < pr#sizelg[jj]; ii++) {
-            IFMACRO(!pr#Zglobal)
             preffe#K[int] tmp(preffe#Rih[jj].m);
             tmp = preffe#Rih[jj]'*pr#Z[cpt];
             res += zaux[cpt]*tmp;
             cpt++; /* keeps track of the global numbering of the columns of Z */
             /* we multiply 'column by element' */
-            ENDIFMACRO
-            IFMACRO(pr#Zglobal,1)
-            res += zaux[cpt]*pr#Z[cpt];
-            cpt++;
-            ENDIFMACRO
           }
         }
         else {

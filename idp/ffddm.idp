@@ -298,8 +298,10 @@ if (preffe#prmesh#isincomm)
 	preffe#prmesh#tic(pr#tfactoi)
 
 	IFMACRO(pr#bem,1)
-	if (!preffe#prmesh#excluded)
-	  pr#Aglobal = Varf(preffe#Vhglob,preffe#Vhglob);
+	if (!preffe#prmesh#excluded) {
+	  Varf(vaglobal,preffe#prmesh#Thglob,preffe#Vhglob)
+	  pr#Aglobal = vaglobal(preffe#Vhglob,preffe#Vhglob,commworld=pr#prfe#prmesh#commddm);
+	}
 	ENDIFMACRO
 
 	IFMACRO(!pr#bem)
@@ -445,7 +447,8 @@ if (pr#prfe#prmesh#isincomm)
         pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgv);
       ENDIFMACRO
       IFMACRO(pr#bem,1)
-      pr#Tmatrix<pr#prfe#K> Hloc = VarfPrec(pr#prfe#AugVhi, pr#prfe#AugVhi);
+      VarfPrec(vPb, pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)
+      pr#Tmatrix<pr#prfe#K> Hloc = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi,commworld=pr#prfe#prmesh#commself);
       pr#prfe#K[int,int] mdense(pr#prfe#AugVhi.ndof, pr#prfe#AugVhi.ndof);
       mdense = Hloc;
       pr#aR[i] = mdense;
