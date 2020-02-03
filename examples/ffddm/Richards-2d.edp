@@ -4,11 +4,13 @@
 
 // for the make check:
 // NBPROC 4
-// PARAM -raspart -ffddm_disable_plots
+// PARAM -raspart -ffddm_disable_plots -nt 20
 
 macro dimension 2// EOM            // 2D or 3D
 
 include "ffddm.idp"
+
+int nt = getARGV("-nt", 100);
 
 searchMethod = 1; // safe search algo, use brute force in case of missing point
 
@@ -136,7 +138,7 @@ real[int] rhs;
 // Richard;
 // plot(hd,wait=1,cmm="hd ----");
 real temps=0;
-for(int ii=0;ii<100;ii++)
+for(int ii=0;ii<nt;ii++)
 {
   string scmm="h + temps "+int(temps)/3600+"h "+ ((temps)%3600/60.) + "mn ";
   for(int k=0;k<3;k++) 
