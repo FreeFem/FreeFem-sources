@@ -8073,6 +8073,13 @@ class Movemesh_Op : public E_F0mps {
   Movemesh_Op(const basicAC_F0 &args, Expression tth, Expression xxx = 0, Expression yyy = 0,
               Expression zzz = 0)
     : eTh(tth), xx(xxx), yy(yyy), zz(zzz) {
+	
+		int size;
+	if(is_same< MMesh, Mesh >::value) size=3;
+	else if(is_same< MMesh, Mesh3 >::value) size=3;	
+    else if(is_same< MMesh, MeshS >::value) size=2;
+	else if(is_same< MMesh, MeshL >::value) size=1;
+		
     args.SetNameParam(n_name_param, name_param, nargs);
     const E_Array *a1 = 0;
     if (nargs[0]) {
@@ -8088,14 +8095,14 @@ class Movemesh_Op : public E_F0mps {
       CompileError("uncompatible movemesh (Th, label= , refface=  ");
     }
 
-    if (a1) {
-      if (a1->size( ) != 3 || xx || yy || zz) {
+	if (a1) {
+      if (a1->size( ) < size || xx || yy || zz) {
         CompileError("movemesh (Th,transfo=[X,Y,Z],) ");
       }
 
       xx = to< double >((*a1)[0]);
-      yy = to< double >((*a1)[1]);
-      zz = to< double >((*a1)[2]);
+      if(size>1) yy = to< double >((*a1)[1]);
+      if(size>2) zz = to< double >((*a1)[2]);
     }
   }
 
@@ -8242,6 +8249,7 @@ AnyType Movemesh_Op< MMesh >::operator( )(Stack stack) const {
     int iv[T::nea];
     for (int i = 0; i < T::nea; i++) iv[i] = Th.operator( )(K[i]);
     // cp element
+	cout << "test tri" << iv[0] << " " << iv[1] << " " << iv[2] << endl;
     t[it].set(v, iv, K.lab);
   }
   // copy border elements
@@ -8392,8 +8400,9 @@ AnyType Movemesh_Op< Mesh >::operator( )(Stack stack) const {
   for (int it = 0; it < Th.nt; it++) {
     const T &K = (Th[it]);
     int iv[3];
-    for (int i = 0; i < 3; i++) iv[i] = Th.operator( )(K[i]);
+    for (int i = 0; i < 3; i++) iv[i] = Th.operator( )(K[i]); 	cout << "test tri" << iv[0] << " " << iv[1] << " " << iv[2] << endl;
     tS[it].set(vS, iv, K.lab);
+	cout << "test N" << tS[it].NormalS() << endl;
   }
 
   // copy border elements
