@@ -3364,22 +3364,27 @@ void ThePlot::DrawIsoEfill(const R3 Pt[2],const R ff[2],const R * Viso,int NbIso
         int sens = 0;
         if (fj<fi ) {Exchange(xxfb,xxfh); sens=1;}
         
-        if (Abs(fi-fj)>=0.1e-20)
-        if ((xxfh>=fi && xxfb<=fj) || (xxfh<=fi && xxfb>=fj)) {
-            PQ[im++] = Pt[0];
-            z[is++] = fi;
-            if ((!sens && (xxfb >= fi)) || (sens && (xxfb <= fi))) {
-                R  xlam=(fi-xxfb)/(fi-fj);
-                PQ[im-1] = Pt[0] * (1.F-xlam)  +  Pt[1]* xlam;
-                z[is-1] = fi * (1.F-xlam)  +  fj* xlam;
+        if (Abs(fi-fj)>=0.1e-20) {
+            if ((xxfh>=fi && xxfb<=fj) || (xxfh<=fi && xxfb>=fj)) {
+                PQ[im++] = Pt[0];
+                z[is++] = fi;
+                if ((!sens && (xxfb >= fi)) || (sens && (xxfb <= fi))) {
+                    R  xlam=(fi-xxfb)/(fi-fj);
+                    PQ[im-1] = Pt[0] * (1.F-xlam)  +  Pt[1]* xlam;
+                    z[is-1] = fi * (1.F-xlam)  +  fj* xlam;
+                }
+                PQ[im++] = Pt[1];
+                z[is++] = fj;
+                if ((!sens && (xxfh <= fj)) || (sens && (xxfh >= fj))) {
+                    R  xlam=(fi-xxfh)/(fi-fj);
+                    PQ[im-1] = Pt[0] * (1.F-xlam)  +  Pt[1]* xlam;
+                    z[is-1] = fi * (1.F-xlam)  +  fj* xlam;
+                }
             }
-            PQ[im++] = Pt[1];
-            z[is++] = fj;
-            if ((!sens && (xxfh <= fj)) || (sens && (xxfh >= fj))) {
-                R  xlam=(fi-xxfh)/(fi-fj);
-                PQ[im-1] = Pt[0] * (1.F-xlam)  +  Pt[1]* xlam;
-                z[is-1] = fi * (1.F-xlam)  +  fj* xlam;
-            }
+        }
+        else {
+            PQ[im++] = Pt[0]; PQ[im++] = Pt[1];
+            z[is++] =0.;z[is++] =0.;
         }
         
         if (im>1) {
@@ -3390,7 +3395,7 @@ void ThePlot::DrawIsoEfill(const R3 Pt[2],const R ff[2],const R * Viso,int NbIso
             
             glLineWidth(3);
             glPolygonMode(GL_FRONT,GL_LINE);
-
+            
             
             glBegin(GL_LINES);
             for (int i=0;i<im;i++) {
