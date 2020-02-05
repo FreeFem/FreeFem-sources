@@ -320,10 +320,11 @@ namespace Fem2D {
       if (verbosity > 9) {
         cout << "\n +++ Pdc" << k << " : ndof : " << n << endl;
       }
+	  cout << "tetetet" << endl;
 
       SetPtPkDC(this->PtInterpolation, k, this->NbDoF, cc);
       if (verbosity > 9) {
-        cout << this->PtInterpolation << endl;
+        cout << " ppppp " << this->PtInterpolation << endl;
       }
 
       {
@@ -437,6 +438,187 @@ namespace Fem2D {
   }
 
   const R3 TypeOfFE_LagrangeDC3d::G(1. / 4., 1. / 4., 1. / 4.);
+  
+  
+// 3d surf P1dc 
+  
+  static void SetPtPkDC(R2 *Pt, int kk, int nn, R cc = 1) {
+    const int dHat = 2;
+    int n = 0;
+    double dK = kk;
+    double cc1 = 1 - cc;                 
+    const R2 G = R2::diag(1. / (dHat + 1));    // barycenter
+
+    for (int i = 0; i <= kk; ++i) 
+      for (int j = 0; j <= kk - i; ++j)
+          Pt[n++] = R2(j / dK, i / dK) * cc + G * cc1;
+    ffassert(n == nn);
+    if (verbosity > 9) {
+      cout << " Pkdc = " << KN_< R2 >(Pt, nn) << "\n";
+    }
+  }
+  
+  
+  
+  
+  
+  
+  class TypeOfFE_LagrangeDC3dSurf : public GTypeOfFE< MeshS > {
+
+   public:
+    typedef MeshS Mesh;
+    typedef Mesh::Element Element;
+    typedef Element::Rd Rd;
+    typedef Element::RdHat RdHat;
+    static const int d = Rd::d;
+	static const int dHat = RdHat::d;
+    const R cshrink;
+    const R cshrink1;
+    static const RdHat G;
+
+    RdHat Shrink(const RdHat &P) const { return (P - G) * cshrink + G; }
+	RdHat Shrink1(const RdHat &P) const { return (P - G) * cshrink1 + G; }
+
+    const int k;
+    struct A4 {
+      int dfon[4];
+
+      A4(int k) {
+
+        int ndf = ((k + 2) * (k + 1) / 2); 
+		dfon[0] = dfon[1] = dfon[2] = dfon[3] = 0;
+        dfon[dHat] = ndf;
+
+	    if (verbosity > 9) 
+          cout << "A4 " << k << " " << dfon[0] << dfon[1] << dfon[2] << dfon[3] << endl;
+      }
+
+      operator const int *( ) const { return dfon; }
+    };
+    RdHat *Pt;
+    TypeOfFE_LagrangeDC3dSurf(int kk, R cc)
+      :    // dfon ,N,nsub(graphique) ,  const mat interpolation , discontinuous
+        GTypeOfFE< Mesh >(A4(kk), 1, Max(kk, 1), true, true), cshrink(cc), cshrink1(1. / cc),
+        k(kk) {
+      int n = this->NbDoF;
+
+      if (verbosity > 9) 
+        cout << "\n +++ Pdc" << k << " : ndof : " << n << endl;
+      
+      SetPtPkDC(this->PtInterpolation, k, this->NbDoF, cc);
+      if (verbosity > 9) 
+        cout << this->PtInterpolation << endl;
+      
+
+      {
+        for (int i = 0; i < n; i++) {
+          this->pInterpolation[i] = i;
+          this->cInterpolation[i] = 0;
+          this->dofInterpolation[i] = i;
+          this->coefInterpolation[i] = 1.;
+        }
+      }
+    }
+
+    ~TypeOfFE_LagrangeDC3dSurf( ) {}
+
+    void FB(const What_d whatd, const Mesh &Th, const Element &K, const RdHat &PHat,
+            RNMK_ &val) const;
+    virtual R operator( )(const FElement &K, const RdHat &PHat, const KN_< R > &u, int componante,
+                          int op) const;
+
+   private:
+    TypeOfFE_LagrangeDC3dSurf(const TypeOfFE_LagrangeDC3dSurf &);
+    void operator=(const TypeOfFE_LagrangeDC3dSurf &);
+  };
+
+  void TypeOfFE_LagrangeDC3dSurf::FB(const What_d whatd, const Mesh &Th, const Element &K,
+                                 const RdHat &PHat, RNMK_ &val) const {
+    R3 P = this->Shrink1(PHat);
+    R l[] = {1. - P.sum( ), P.x, P.y};
+
+    assert(val.N( ) >= Element::nv);
+    assert(val.M( ) == 1);
+
+    val = 0;
+    RN_ f0(val('.', 0, op_id));
+
+    if (whatd & Fop_D0) {
+      f0[0] = l[0];
+      f0[1] = l[1];
+      f0[2] = l[2];
+    }
+
+    if (whatd & Fop_D1) {
+      R3 Dl[3];
+      K.Gradlambda(Dl);
+
+      for (int i = 0; i < 3; ++i) {
+        Dl[i] *= cshrink1;
+      }
+
+      if (whatd & Fop_dx) {
+        RN_ f0x(val('.', 0, op_dx));
+        f0x[0] = Dl[0].x;
+        f0x[1] = Dl[1].x;
+        f0x[2] = Dl[2].x;
+      }
+
+      if (whatd & Fop_dy) {
+        RN_ f0y(val('.', 0, op_dy));
+        f0y[0] = Dl[0].y;
+        f0y[1] = Dl[1].y;
+        f0y[2] = Dl[2].y;
+      }
+
+      if (whatd & Fop_dz) {
+        RN_ f0z(val('.', 0, op_dz));
+        f0z[0] = Dl[0].z;
+        f0z[1] = Dl[1].z;
+        f0z[2] = Dl[2].z;
+      }
+    }
+  }
+
+  R TypeOfFE_LagrangeDC3dSurf::operator( )(const FElement &K, const R2 &PHat1, const KN_< R > &u,
+                                       int componante, int op) const {
+    R2 PHat = Shrink1(PHat1);
+    R r = 0;
+
+    if (k == 1) {
+      R u0(u(K(0))), u1(u(K(1))), u2(u(K(2)));
+
+      if (op == 0) {
+        R l[3];
+        PHat.toBary(l);
+        r = u0 * l[0] + u1 * l[1] + l[2] * u2 ;
+      } else if (op == op_dx || op == op_dy || op == op_dz) {
+        const Element &T = K.T;
+        R3 D[3];
+        T.Gradlambda(D);
+
+        for (int i = 0; i < 3; ++i) {
+          D[i] *= cshrink1;
+        }
+
+        if (op == op_dx) {
+          r = D[0].x * u0 + D[1].x * u1 + D[2].x * u2 ;
+        } else if (op == op_dy) {
+          r = D[0].y * u0 + D[1].y * u1 + D[2].y * u2 ;
+        } else {
+          r = D[0].z * u0 + D[1].z * u1 + D[2].z * u2 ;
+        }
+      }
+    } else {
+      ffassert(0);    // to do ..
+    }
+
+    return r;
+  }
+
+  const R2 TypeOfFE_LagrangeDC3dSurf::G(1. / 3., 1. / 3.);
+  
+  
 }    // namespace Fem2D
 
 static void finit( ) {
@@ -445,12 +627,19 @@ static void finit( ) {
   static TypeOfFE_P2ttdc1_ P2dc1LagrangeP2dc1;
   static TypeOfFE_LagrangeDC3d TypeOfFE_LagrangeDC3dtt(1, 0.999);
   static TypeOfFE_LagrangeDC3d TypeOfFE_LagrangeDC3dtt1(1, 1.);
-
+  
+  static TypeOfFE_LagrangeDC3dSurf TypeOfFE_LagrangeDC3dStt(1, 0.999);
+  static TypeOfFE_LagrangeDC3dSurf TypeOfFE_LagrangeDC3dStt1(1, 1.);
+  
   // a static variable to add the finite element to freefem++
   static AddNewFE P1dcLagrange("P1dc1", &P1dc1LagrangeP1dc1);
   static AddNewFE P2dcLagrange("P2dc1", &P2dc1LagrangeP2dc1);
+  
   static AddNewFE3 P1dttLagrange3d("P1dc3d", &TypeOfFE_LagrangeDC3dtt, "P1dc");
   static AddNewFE3 P1dttLagrange3d1("P1dc3d1", &TypeOfFE_LagrangeDC3dtt1);
+  
+  static AddNewFES P1dttLagrange3d_surf("P1dc3dS", &TypeOfFE_LagrangeDC3dStt, "P1dc");
+  static AddNewFES P1dttLagrange3d1_surf("P1dc3dS1", &TypeOfFE_LagrangeDC3dStt1);
 }
 
 LOADFUNC(finit)

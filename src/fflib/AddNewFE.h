@@ -134,6 +134,7 @@ public:
 */
 extern map<TypeOfFE *,TypeOfFE3 *> TEF2dto3d;
 TypeOfFE * FindFE2(const char * s);
+
 struct AddNewFE3 {  
     AddNewFE3 (const char * FEname,Fem2D::TypeOfFE3* tfe,const char * FEname2=0) 
     {
@@ -143,11 +144,13 @@ struct AddNewFE3 {
 	  TEF2dto3d[FindFE2(FEname2)]=tfe;
     }
 };
-// no use for the moment
-/*struct AddNewFES {
+extern map<TypeOfFE *,TypeOfFES *> TEF2dtoS;
+struct AddNewFES {
     AddNewFES (const char * FEname,Fem2D::TypeOfFES* tfe,const char * FEname2=0)
     {
         ffassert(tfe); // check
         Global.New(FEname, Type_Expr(atype<Fem2D::TypeOfFES*>() ,new  EConstantTypeOfFES(tfe)));
+        if(FEname2 && strlen(FEname2))
+        TEF2dtoS[FindFE2(FEname2)]=tfe;
     }
-};*/
+};
