@@ -391,7 +391,7 @@ private:
     static GTypeOfFE<mesh> & P0; 
     static GTypeOfFE<mesh> & P1; 
     static GTypeOfFE<mesh> & P2;
-    static GTypeOfFE<mesh> & RT0;  ///TODOCHECK
+    static GTypeOfFE<mesh> & RT0; 
   };
   
 

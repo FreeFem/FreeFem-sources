@@ -1227,8 +1227,8 @@ AnyType TypeOfFELto2(Stack, const AnyType &b) {
   if (i != TEF2dtoL.end( )) tL = i->second;
 
   if (tL == 0) {
-    cerr << " sorry no cast to this surface finite element " << endl;
-    ExecError(" sorry no cast to this surface finite element ");
+    cerr << " sorry no cast to this curve finite element " << endl;
+    ExecError(" sorry no cast to this curve finite element ");
   }
   return tL;
 }
@@ -6311,7 +6311,8 @@ void init_lgfem( ) {
   TEF2dtoS[FindFE2("P2")] = &DataFE< MeshS >::P2;
   TEF2dtoS[FindFE2("P1b")] = &P1bLagrange_surf;
   TEF2dtoS[FindFE2("RT0")] = &DataFE< MeshS >::RT0;
-
+  TEF2dtoS[FindFE2("P1dc")] = &DataFE< MeshS >::RT0;
+        
   TEF2dtoL[FindFE2("P0")] = &DataFE< MeshL >::P0;
   TEF2dtoL[FindFE2("P1")] = &DataFE< MeshL >::P1;
   TEF2dtoL[FindFE2("P2")] = &DataFE< MeshL >::P2;

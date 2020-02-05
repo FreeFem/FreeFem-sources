@@ -154,3 +154,13 @@ struct AddNewFES {
         TEF2dtoS[FindFE2(FEname2)]=tfe;
     }
 };
+extern map<TypeOfFE *,TypeOfFEL *> TEF2dtoL;
+struct AddNewFEL {
+    AddNewFEL (const char * FEname,Fem2D::TypeOfFEL* tfe,const char * FEname2=0)
+    {
+        ffassert(tfe); // check
+        Global.New(FEname, Type_Expr(atype<Fem2D::TypeOfFEL*>() ,new  EConstantTypeOfFEL(tfe)));
+        if(FEname2 && strlen(FEname2))
+        TEF2dtoL[FindFE2(FEname2)]=tfe;
+    }
+};
