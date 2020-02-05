@@ -1577,33 +1577,46 @@ namespace PETSc {
   }
   template< class T, typename std::enable_if< std::is_same< T, KN< PetscScalar > >::value >::type* =
                        nullptr >
-  void resize(T* v, int size) {
-    v->resize(size);
+  void resize(T* v, int n, int m) {
+    v->resize(n);
+  }
+  template< class T, typename std::enable_if< std::is_same< T, KNM< PetscScalar > >::value >::type* =
+                       nullptr >
+  void resize(T* v, int n, int m) {
+    v->resize(n, m);
   }
   template< class T, typename std::enable_if<
-                       !std::is_same< T, KN< PetscScalar > >::value >::type* = nullptr >
-  void resize(T* v, int size) {}
+                       !std::is_same< T, KN< PetscScalar > >::value && !std::is_same< T, KNM< PetscScalar > >::value>::type* = nullptr >
+  void resize(T* v, int n, int m) {}
   template< class T, class U >
   void changeNumbering_func(unsigned int* const num, unsigned int first, unsigned int last,
                             PetscInt m, PetscInt n, PetscInt bs, T* ptIn, U* ptOut, bool inverse) {
     PetscScalar* out;
     if (!inverse) {
-      resize(ptOut, m ? m * bs : n);
+      resize(ptOut, m ? m * bs : n, ptIn->M());
       out = static_cast< PetscScalar* >(*ptOut);
-      if (last - first)
-        HPDDM::Subdomain< PetscScalar >::template distributedVec< 0 >(
-          num, first, last, static_cast< PetscScalar* >(*ptIn), out, ptIn->n / bs, bs);
+      if (last - first) {
+        for(int i = 0; i < ptIn->M(); ++i) {
+          HPDDM::Subdomain< PetscScalar >::template distributedVec< 0 >(
+            num, first, last, static_cast< PetscScalar* >(*ptIn) + i * ptIn->N(), out, ptIn->N() / bs, bs);
+          out += last - first;
+        }
+      }
       else
-        std::copy_n(static_cast< PetscScalar* >(*ptIn), ptIn->n, out);
+        std::copy_n(static_cast< PetscScalar* >(*ptIn), ptIn->N() * ptOut->M(), out);
     } else {
-      resize(ptIn, n);
+      resize(ptIn, n, ptOut->M());
       *ptIn = PetscScalar( );
       out = static_cast< PetscScalar* >(*ptOut);
-      if (num)
-        HPDDM::Subdomain< PetscScalar >::template distributedVec< 1 >(
-          num, first, last, static_cast< PetscScalar* >(*ptIn), out, ptIn->n / bs, bs);
+      if (num) {
+        for(int i = 0; i < ptIn->M(); ++i) {
+          HPDDM::Subdomain< PetscScalar >::template distributedVec< 1 >(
+            num, first, last, static_cast< PetscScalar* >(*ptIn) + i * ptIn->N(), out, ptIn->N() / bs, bs);
+          out += last - first;
+        }
+      }
       else
-        std::copy_n(out, ptIn->n, static_cast< PetscScalar* >(*ptIn));
+        std::copy_n(out, ptIn->N() * ptOut->M(), static_cast< PetscScalar* >(*ptIn));
     }
   }
   template< bool T, class K, typename std::enable_if< std::is_same< K, PetscScalar >::value >::type* =
@@ -2098,7 +2111,7 @@ namespace PETSc {
     return 0L;
   }
 
-  template< class Type >
+  template< class Type, template<class> class Storage >
   class changeNumbering : public OneOperator {
    public:
     const int c;
@@ -2117,10 +2130,10 @@ namespace PETSc {
         if (c != 2) {
           if (c == 1) {
             A = to< KN< long >* >(args[0]);
-            in = to< KN< PetscScalar >* >(args[1]);
+            in = to< Storage< PetscScalar >* >(args[1]);
           } else {
             E.reserve(1);
-            E.emplace_back(to< Type* >(args[0]), to< KN< PetscScalar >* >(args[1]));
+            E.emplace_back(to< Type* >(args[0]), to< Storage< PetscScalar >* >(args[1]));
           }
         } else {
           const E_Array* EA = dynamic_cast< const E_Array* >(args[0].LeftValue( ));
@@ -2128,9 +2141,9 @@ namespace PETSc {
           ffassert(EA->size( ) == Ex->size( ) && EA->size( ));
           E.reserve(EA->size( ));
           for (int i = 0; i < EA->size( ); ++i)
-            E.emplace_back(to< Type* >((*EA)[i]), to< KN< PetscScalar >* >((*Ex)[i]));
+            E.emplace_back(to< Type* >((*EA)[i]), to< Storage< PetscScalar >* >((*Ex)[i]));
         }
-        out = to< KN< PetscScalar >* >(args[2]);
+        out = to< Storage< PetscScalar >* >(args[2]);
       }
 
       AnyType operator( )(Stack stack) const;
@@ -2138,24 +2151,24 @@ namespace PETSc {
     };
     E_F0* code(const basicAC_F0& args) const { return new changeNumbering_Op(args, c); }
     changeNumbering( )
-      : OneOperator(atype< long >( ), atype< Type* >( ), atype< KN< PetscScalar >* >( ),
-                    atype< KN< PetscScalar >* >( )),
+      : OneOperator(atype< long >( ), atype< Type* >( ), atype< Storage< PetscScalar >* >( ),
+                    atype< Storage< PetscScalar >* >( )),
         c(0) {}
     changeNumbering(int)
-      : OneOperator(atype< long >( ), atype< KN< long >* >( ), atype< KN< PetscScalar >* >( ),
-                    atype< KN< PetscScalar >* >( )),
+      : OneOperator(atype< long >( ), atype< KN< long >* >( ), atype< Storage< PetscScalar >* >( ),
+                    atype< Storage< PetscScalar >* >( )),
         c(1) {}
     changeNumbering(int, int)
       : OneOperator(atype< long >( ), atype< E_Array >( ), atype< E_Array >( ),
-                    atype< KN< PetscScalar >* >( )),
+                    atype< Storage< PetscScalar >* >( )),
         c(2) {}
   };
-  template< class Type >
-  basicAC_F0::name_and_type changeNumbering< Type >::changeNumbering_Op::name_param[] = {
+  template< class Type, template<class> class Storage >
+  basicAC_F0::name_and_type changeNumbering< Type, Storage >::changeNumbering_Op::name_param[] = {
     {"inverse", &typeid(bool)}, {"exchange", &typeid(bool)}};
-  template< class Type >
-  AnyType changeNumbering< Type >::changeNumbering_Op::operator( )(Stack stack) const {
-    KN< PetscScalar >* ptOut = GetAny< KN< PetscScalar >* >((*out)(stack));
+  template< class Type, template<class> class Storage >
+  AnyType changeNumbering< Type, Storage >::changeNumbering_Op::operator( )(Stack stack) const {
+    Storage< PetscScalar >* ptOut = GetAny< Storage< PetscScalar >* >((*out)(stack));
     bool inverse = nargs[0] && GetAny< bool >((*nargs[0])(stack));
     int sum = 0;
     if (c == 0 || c == 2) {
@@ -2174,38 +2187,42 @@ namespace PETSc {
             MatGetBlockSize(ptA->_petsc, &bs);
           PetscInt m;
           MatGetLocalSize(ptA->_petsc, &m, NULL);
-          KN< PetscScalar >* ptIn = GetAny< KN< PetscScalar >* >((*(E[j].second))(stack));
-          if (!inverse) ffassert(ptIn->n == ptA->_A->getDof());
+          Storage< PetscScalar >* ptIn = GetAny< Storage< PetscScalar >* >((*(E[j].second))(stack));
+          if (!inverse) ffassert(ptIn->N() == ptA->_A->getDof());
           if (c != 2) {
-            if (inverse) ffassert(ptOut->n == bs * m);
+            if (inverse) ffassert(ptOut->N() == bs * m);
             changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getDof(),
                                  bs, ptIn, ptOut, inverse);
           } else {
             sum += bs * m;
-            if (ptOut->n < sum && !inverse) {
-              ptOut->resize(sum);
+            if (ptOut->N() < sum && !inverse) {
+              ffassert(ptIn->M() == 1);
+              ffassert(ptOut->M() == 1);
+              PETSc::resize(ptOut, sum, ptIn->M());
               pt = *ptOut + sum - bs * m;
             }
             KN_< PetscScalar > ptOutShift(pt, bs * m);
             changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getDof(),
                                  bs, ptIn, &ptOutShift, inverse);
           }
-          if (inverse && nargs[1]) {
-            bool exchange = GetAny< bool >((*nargs[1])(stack));
-            if (exchange) ptA->_A->HPDDM::template Subdomain< PetscScalar >::exchange(*ptIn);
+          if (inverse && nargs[1] && GetAny< bool >((*nargs[1])(stack))) {
+            for(int i = 0; i < ptIn->M(); ++i)
+              ptA->_A->HPDDM::template Subdomain< PetscScalar >::exchange(*ptIn + i * ptIn->N());
           }
           if (c == 2) {
             pt += bs * m;
             if (j == E.size( ) - 1)
-              ffassert(ptOut->n == std::distance(static_cast< PetscScalar* >(*ptOut), pt) ||
-                       (!inverse && ptOut->n == sum));
+              ffassert(ptOut->N() == std::distance(static_cast< PetscScalar* >(*ptOut), pt) ||
+                       (!inverse && ptOut->N() == sum));
           }
         }
       }
     } else {
+      Storage< PetscScalar >* ptIn = GetAny< Storage< PetscScalar >* >((*in)(stack));
+      ffassert(ptIn->M() == 1);
+      ffassert(ptOut->M() == 1);
       KN< long >* ptA = GetAny< KN< long >* >((*A)(stack));
       unsigned int* num = reinterpret_cast< unsigned int* >(&((*ptA)[0]));
-      KN< PetscScalar >* ptIn = GetAny< KN< PetscScalar >* >((*in)(stack));
       changeNumbering_func(num + 2, num[0], num[1], num[1] - num[0], ptA->n - 2, 1, ptIn, ptOut,
                            inverse);
     }
@@ -3829,9 +3846,10 @@ static void Init_PETSc( ) {
 
   Global.Add("exchange", "(", new exchangeIn< Dmat, PetscScalar >);
   Global.Add("exchange", "(", new exchangeInOut< Dmat, PetscScalar >);
-  Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat >( ));
-  Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat >(1));
-  Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat >(1, 2));
+  Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >( ));
+  Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >(1));
+  Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >(1, 1));
+  Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat, KNM >( ));
   Global.Add("MatMult", "(",
              new OneOperator3_< long, Dmat*, KN< PetscScalar >*, KN< PetscScalar >* >(
                PETSc::MatMult< 'N' >));

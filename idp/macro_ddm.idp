@@ -188,7 +188,7 @@ ENDIFMACRO
         PhGlobal suppPartition = abs(part - intersection[0][i]) < 0.1;
         AddLayers(globalName, suppPartition[], overlap, phi[]);
         if(min(eps, epsTab[i]) > 0.0) {
-            if(intN(globalName)(phi) / min(eps, epsTab[i]) > 1.0e-6) {
+            if(intN(globalName)(phi) / min(eps, epsTab[i]) > 1.0e-10) {
                 partitionIntersection[numberIntersection] = phi;
                 if(!trueRestrict)
                     sum[] += partitionIntersection[numberIntersection][];

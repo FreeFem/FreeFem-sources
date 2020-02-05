@@ -39,7 +39,7 @@ macro partitionSubstructuring(meshName, interfaceNb, globalName, PhGlobal, part,
         for(int i = 0; i < ndofSkeleton[0].n; ++i) {
             PhGlobal suppPartition = abs(ndofSkeleton[0][i] - part) < 0.1;
             AddLayers(globalName, suppPartition[], 1, phi[]);
-            if(intN(globalName)(phi) / min(eps, epsTab[i]) > 1.0e-6) {
+            if(intN(globalName)(phi) / min(eps, epsTab[i]) > 1.0e-10) {
                 partitionIntersection[numberIntersection] = phi;
                 ndofSkeleton[0][numberIntersection++] = ndofSkeleton[0][i];
             }
