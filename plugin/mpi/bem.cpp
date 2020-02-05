@@ -1913,20 +1913,23 @@ static void Init_Bem() {
     
     Dcl_Type< fkernel * >( );  // a bem kernel
     Dcl_Type< fpotential * >( ); // a bem potential
+    Dcl_TypeandPtr< pBemKernel >(0, 0, ::InitializePtr< pBemKernel >, ::DestroyPtr< pBemKernel >,
+                                 AddIncrement< pBemKernel >, NotReturnOfthisType); 
+    // pBemPotential initialize
+    Dcl_TypeandPtr< pBemPotential >(0, 0, ::InitializePtr< pBemPotential >, ::DestroyPtr< pBemPotential >,
+                                    AddIncrement< pBemPotential >, NotReturnOfthisType); 
+ 
     
+    zzzfff->Add("BemKernel", atype< pBemKernel * >( ));
+    zzzfff->Add("BemPotential", atype< pBemPotential * >( ));
+	
+	 // pBemKernel initialize
     atype<pBemKernel>()->AddCast( new E_F1_funcT<pBemKernel,pBemKernel*>(UnRef<pBemKernel>));
     // BemPotential
     atype<pBemPotential>()->AddCast( new E_F1_funcT<pBemPotential,pBemPotential*>(UnRef<pBemPotential>));
-    // pBemKernel initialize
-    Dcl_TypeandPtr< pBemKernel >(0, 0, ::InitializePtr< pBemKernel >, ::DestroyPtr< pBemKernel >,
-                                 AddIncrement< pBemKernel >, NotReturnOfthisType);
-    // pBemPotential initialize
-    Dcl_TypeandPtr< pBemPotential >(0, 0, ::InitializePtr< pBemPotential >, ::DestroyPtr< pBemPotential >,
-                                    AddIncrement< pBemPotential >, NotReturnOfthisType);
-    zzzfff->Add("BemKernel", atype< pBemKernel * >( ));
-    zzzfff->Add("BemPotential", atype< pBemPotential * >( ));
-    
-    // simplified type/function to define varf bem
+   
+	
+	// simplified type/function to define varf bem
     Dcl_Type< const FoperatorKBEM * >( );
     Dcl_Type< const FoperatorPBEM * >( );
     Dcl_Type<std::map<std::string, std::string>*>( );
@@ -1988,13 +1991,7 @@ static void Init_Bem() {
     TheOperators->Add("+",new OneBinaryOperator_st< Op_addBemKernel<listBemKernel,listBemKernel,pBemKernel> >);
     TheOperators->Add("=",new OneBinaryOperator_st< Op_setBemKernel<false,pBemKernel*,pBemKernel*,listBemKernel> >);
     TheOperators->Add("<-", new OneBinaryOperator_st< Op_setBemKernel<true,pBemKernel*,pBemKernel*,listBemKernel> >);
-    
-    
-    // BemKernel
-    atype<pBemKernel>()->AddCast( new E_F1_funcT<pBemKernel,pBemKernel*>(UnRef<pBemKernel>));
-    // BemPotential
-    atype<pBemPotential>()->AddCast( new E_F1_funcT<pBemPotential,pBemPotential*>(UnRef<pBemPotential>));
-    
+      
     Dcl_Type< const CBemDomainOfIntegration * >( );
     Dcl_Type< const CPartBemDI * >( );
     
