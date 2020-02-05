@@ -251,7 +251,14 @@ namespace Fem2D {
   //
   // end ttdc1_
 
-  static void SetPtPkDC(R3 *Pt, int kk, int nn, R cc = 1) {    // P0 P1 et P2 , P1b
+
+
+  // 3d
+  template<class MMesh> 
+   void SetPtPkDC(typename MMesh::Element::RdHat *Pt, int kk, int nn, R cc = 1) ;
+  //volume
+  template<>
+   void SetPtPkDC<Mesh3>(R3 *Pt, int kk, int nn, R cc) {    // P0 P1 et P2 , P1b
     const int d = 3;
     int n = 0;
     double dK = kk;
@@ -273,35 +280,74 @@ namespace Fem2D {
       cout << " Pkdc = " << KN_< R3 >(Pt, nn) << "\n";
     }
   }
+  
+  //surface 
+  template<>
+   void SetPtPkDC<MeshS>(R2 *Pt, int kk, int nn, R cc) {
+    const int dHat = 2;
+    int n = 0;
+    double dK = kk;
+    double cc1 = 1 - cc;                 
+    const R2 G = R2::diag(1. / (dHat + 1));    // barycenter
 
-  class TypeOfFE_LagrangeDC3d : public GTypeOfFE< Mesh3 > {
+    for (int i = 0; i <= kk; ++i) 
+      for (int j = 0; j <= kk - i; ++j)
+          Pt[n++] = R2(j / dK, i / dK) * cc + G * cc1;
+    ffassert(n == nn);
+    if (verbosity > 9) {
+      cout << " Pkdc = " << KN_< R2 >(Pt, nn) << "\n";
+    }
+  }
+  
+ //curve
+  template<>
+   void SetPtPkDC<MeshL>(R1 *Pt, int kk, int nn, R cc) {
+    const int dHat = 2;
+    int n = 0;
+    double dK = kk;
+    double cc1 = 1 - cc;                 
+    const R G = R(1./2.);    // barycenter
+
+    for (int i = 0; i <= kk; ++i) 
+          Pt[n++] = R1(i / dK) * cc + G * cc1;
+    ffassert(n == nn);
+    if (verbosity > 9) {
+      cout << " Pkdc = " << KN_< R1 >(Pt, nn) << "\n";
+    }
+  }  
+  
+
+  
+  // 3d
+  template<class MMesh>
+  class TypeOfFE_LagrangeDC3d : public GTypeOfFE< MMesh > {
     // typedef typename  MMesh Mesh;
 
-   public:
-    typedef Mesh3 Mesh;
-    typedef Mesh::Element Element;
-    typedef Element::Rd Rd;
-    typedef Element::RdHat RdHat;
+   public: 
+	typedef GFElement<MMesh> FElement;
+    typedef typename MMesh::Element Element;
+    typedef typename Element::Rd Rd;
+    typedef typename Element::RdHat RdHat;
     static const int d = Rd::d;
+	static const int dHat = RdHat::d;
     const R cshrink;
     const R cshrink1;
-    static const Rd G;
+    static const RdHat G;
 
-    Rd Shrink(const Rd &P) const { return (P - G) * cshrink + G; }
+    RdHat Shrink(const RdHat &P) const { return (P - G) * cshrink + G; }
 
-    Rd Shrink1(const Rd &P) const { return (P - G) * cshrink1 + G; }
+    RdHat Shrink1(const RdHat &P) const { return (P - G) * cshrink1 + G; }
 
     const int k;
     struct A4 {
       int dfon[4];
 
       A4(int k) {
-
-        int ndf = (d == 3) ? ((k + 3) * (k + 2) * (k + 1) / 6)
-                           : ((d == 2) ? ((k + 2) * (k + 1) / 2) : k + 1);
+        int ndf = (dHat == 3) ? ((k + 3) * (k + 2) * (k + 1) / 6)
+                           : ((dHat == 2) ? ((k + 2) * (k + 1) / 2) : k + 1);
 
         dfon[0] = dfon[1] = dfon[2] = dfon[3] = 0;
-        dfon[d] = ndf;
+        dfon[dHat] = ndf;
 
         if (verbosity > 9) {
           cout << "A4 " << k << " " << dfon[0] << dfon[1] << dfon[2] << dfon[3] << endl;
@@ -313,19 +359,18 @@ namespace Fem2D {
     RdHat *Pt;
     TypeOfFE_LagrangeDC3d(int kk, R cc)
       :    // dfon ,N,nsub(graphique) ,  const mat interpolation , discontinuous
-        GTypeOfFE< Mesh >(A4(kk), 1, Max(kk, 1), true, true), cshrink(cc), cshrink1(1. / cc),
+        GTypeOfFE< MMesh >(A4(kk), 1, Max(kk, 1), true, true), cshrink(cc), cshrink1(1. / cc),
         k(kk) {
       int n = this->NbDoF;
 
       if (verbosity > 9) {
         cout << "\n +++ Pdc" << k << " : ndof : " << n << endl;
       }
-	  cout << "tetetet" << endl;
 
-      SetPtPkDC(this->PtInterpolation, k, this->NbDoF, cc);
-      if (verbosity > 9) {
-        cout << " ppppp " << this->PtInterpolation << endl;
-      }
+      SetPtPkDC<MMesh>(this->PtInterpolation, k, this->NbDoF, cc);
+      if (verbosity > 9) 
+         cout << " ppppp " << this->PtInterpolation << endl;
+      
 
       {
         for (int i = 0; i < n; i++) {
@@ -339,19 +384,21 @@ namespace Fem2D {
 
     ~TypeOfFE_LagrangeDC3d( ) {}
 
-    void FB(const What_d whatd, const Mesh &Th, const Element &K, const RdHat &PHat,
-            RNMK_ &val) const;
-    virtual R operator( )(const FElement &K, const RdHat &PHat, const KN_< R > &u, int componante,
-                          int op) const;
 
+    void FB(const What_d whatd, const MMesh &Th, const Element &K, const RdHat &PHat,RNMK_ &val) const;
+    R operator( )(const FElement &K, const RdHat &PHat, const KN_< R > &u, int componante,int op) const;
+	
    private:
     TypeOfFE_LagrangeDC3d(const TypeOfFE_LagrangeDC3d &);
     void operator=(const TypeOfFE_LagrangeDC3d &);
   };
-
-  void TypeOfFE_LagrangeDC3d::FB(const What_d whatd, const Mesh &Th, const Element &K,
-                                 const RdHat &PHat, RNMK_ &val) const {
-    R3 P = this->Shrink1(PHat);
+  
+  
+ 
+  template<>
+  void TypeOfFE_LagrangeDC3d<Mesh3>::FB(const What_d whatd, const Mesh3 &Th, const Mesh3::Element &K,const RdHat &PHat, RNMK_ &val) const {
+    
+	R3 P = this->Shrink1(PHat);
     R l[] = {1. - P.sum( ), P.x, P.y, P.z};
 
     assert(val.N( ) >= Element::nv);
@@ -401,14 +448,15 @@ namespace Fem2D {
     }
   }
 
-  R TypeOfFE_LagrangeDC3d::operator( )(const FElement &K, const R3 &PHat1, const KN_< R > &u,
-                                       int componante, int op) const {
+
+	  
+  template<>
+  R TypeOfFE_LagrangeDC3d<Mesh3>::operator( )(const FElement &K, const R3 &PHat1, const KN_< R > &u,int componante, int op) const {
     R3 PHat = Shrink1(PHat1);
     R r = 0;
 
     if (k == 1) {
       R u0(u(K(0))), u1(u(K(1))), u2(u(K(2))), u3(u(K(3)));
-
       if (op == 0) {
         R l[4];
         PHat.toBary(l);
@@ -437,103 +485,13 @@ namespace Fem2D {
     return r;
   }
 
-  const R3 TypeOfFE_LagrangeDC3d::G(1. / 4., 1. / 4., 1. / 4.);
+  template<>
+  const R3 TypeOfFE_LagrangeDC3d<Mesh3>::G(1. / 4., 1. / 4., 1. / 4.);    
   
   
-// 3d surf P1dc 
-  
-  static void SetPtPkDC(R2 *Pt, int kk, int nn, R cc = 1) {
-    const int dHat = 2;
-    int n = 0;
-    double dK = kk;
-    double cc1 = 1 - cc;                 
-    const R2 G = R2::diag(1. / (dHat + 1));    // barycenter
 
-    for (int i = 0; i <= kk; ++i) 
-      for (int j = 0; j <= kk - i; ++j)
-          Pt[n++] = R2(j / dK, i / dK) * cc + G * cc1;
-    ffassert(n == nn);
-    if (verbosity > 9) {
-      cout << " Pkdc = " << KN_< R2 >(Pt, nn) << "\n";
-    }
-  }
-  
-  
-  
-  
-  
-  
-  class TypeOfFE_LagrangeDC3dSurf : public GTypeOfFE< MeshS > {
-
-   public:
-    typedef MeshS Mesh;
-    typedef Mesh::Element Element;
-    typedef Element::Rd Rd;
-    typedef Element::RdHat RdHat;
-    static const int d = Rd::d;
-	static const int dHat = RdHat::d;
-    const R cshrink;
-    const R cshrink1;
-    static const RdHat G;
-
-    RdHat Shrink(const RdHat &P) const { return (P - G) * cshrink + G; }
-	RdHat Shrink1(const RdHat &P) const { return (P - G) * cshrink1 + G; }
-
-    const int k;
-    struct A4 {
-      int dfon[4];
-
-      A4(int k) {
-
-        int ndf = ((k + 2) * (k + 1) / 2); 
-		dfon[0] = dfon[1] = dfon[2] = dfon[3] = 0;
-        dfon[dHat] = ndf;
-
-	    if (verbosity > 9) 
-          cout << "A4 " << k << " " << dfon[0] << dfon[1] << dfon[2] << dfon[3] << endl;
-      }
-
-      operator const int *( ) const { return dfon; }
-    };
-    RdHat *Pt;
-    TypeOfFE_LagrangeDC3dSurf(int kk, R cc)
-      :    // dfon ,N,nsub(graphique) ,  const mat interpolation , discontinuous
-        GTypeOfFE< Mesh >(A4(kk), 1, Max(kk, 1), true, true), cshrink(cc), cshrink1(1. / cc),
-        k(kk) {
-      int n = this->NbDoF;
-
-      if (verbosity > 9) 
-        cout << "\n +++ Pdc" << k << " : ndof : " << n << endl;
-      
-      SetPtPkDC(this->PtInterpolation, k, this->NbDoF, cc);
-      if (verbosity > 9) 
-        cout << this->PtInterpolation << endl;
-      
-
-      {
-        for (int i = 0; i < n; i++) {
-          this->pInterpolation[i] = i;
-          this->cInterpolation[i] = 0;
-          this->dofInterpolation[i] = i;
-          this->coefInterpolation[i] = 1.;
-        }
-      }
-    }
-
-    ~TypeOfFE_LagrangeDC3dSurf( ) {}
-
-    void FB(const What_d whatd, const Mesh &Th, const Element &K, const RdHat &PHat,
-            RNMK_ &val) const;
-    virtual R operator( )(const FElement &K, const RdHat &PHat, const KN_< R > &u, int componante,
-                          int op) const;
-
-   private:
-    TypeOfFE_LagrangeDC3dSurf(const TypeOfFE_LagrangeDC3dSurf &);
-    void operator=(const TypeOfFE_LagrangeDC3dSurf &);
-  };
-
-  void TypeOfFE_LagrangeDC3dSurf::FB(const What_d whatd, const Mesh &Th, const Element &K,
-                                 const RdHat &PHat, RNMK_ &val) const {
+  template<>
+  void TypeOfFE_LagrangeDC3d<MeshS>::FB(const What_d whatd, const MeshS &Th, const MeshS::Element &K,const RdHat &PHat, RNMK_ &val) const {
     R2 P = this->Shrink1(PHat);
     R l[] = {1. - P.sum( ), P.x, P.y};
 
@@ -580,8 +538,8 @@ namespace Fem2D {
     }
   }
 
-  R TypeOfFE_LagrangeDC3dSurf::operator( )(const FElement &K, const R2 &PHat1, const KN_< R > &u,
-                                       int componante, int op) const {
+  template<>
+  R TypeOfFE_LagrangeDC3d<MeshS>::operator( )(const FElement &K, const R2 &PHat1, const KN_< R > &u,int componante, int op) const {
     R2 PHat = Shrink1(PHat1);
     R r = 0;
 
@@ -615,100 +573,12 @@ namespace Fem2D {
 
     return r;
   }
-  const R2 TypeOfFE_LagrangeDC3dSurf::G(1. / 3., 1. / 3.);
+  template<>
+  const R2 TypeOfFE_LagrangeDC3d<MeshS>::G(1. / 3., 1. / 3.);
   
-
-
-
-
-// 3d curve P1dc 
   
-  static void SetPtPkDC(R1 *Pt, int kk, int nn, R cc = 1) {
-    const int dHat = 2;
-    int n = 0;
-    double dK = kk;
-    double cc1 = 1 - cc;                 
-    const R G = R(1./2.);    // barycenter
-
-    for (int i = 0; i <= kk; ++i) 
-          Pt[n++] = R1(i / dK) * cc + G * cc1;
-    ffassert(n == nn);
-    if (verbosity > 9) {
-      cout << " Pkdc = " << KN_< R1 >(Pt, nn) << "\n";
-    }
-  }
-  
- class TypeOfFE_LagrangeDC3dCurve : public GTypeOfFE< MeshL > {
-
-   public:
-    typedef MeshL Mesh;
-    typedef Mesh::Element Element;
-    typedef Element::Rd Rd;
-    typedef Element::RdHat RdHat;
-    static const int d = Rd::d;
-	static const int dHat = RdHat::d;
-    const R cshrink;
-    const R cshrink1;
-    static const RdHat G;
-
-    RdHat Shrink(const RdHat &P) const { return (P - G) * cshrink + G; }
-	RdHat Shrink1(const RdHat &P) const { return (P - G) * cshrink1 + G; }
-
-    const int k;
-    struct A4 {
-      int dfon[4];
-
-      A4(int k) {
-
-        int ndf = k + 1; 
-		dfon[0] = dfon[1] = dfon[2] = dfon[3] = 0;
-        dfon[dHat] = ndf;
-
-	    if (verbosity > 9) 
-          cout << "A4 " << k << " " << dfon[0] << dfon[1] << dfon[2] << dfon[3] << endl;
-      }
-
-      operator const int *( ) const { return dfon; }
-    };
-    RdHat *Pt;
-    TypeOfFE_LagrangeDC3dCurve(int kk, R cc)
-      :    // dfon ,N,nsub(graphique) ,  const mat interpolation , discontinuous
-        GTypeOfFE< Mesh >(A4(kk), 1, Max(kk, 1), true, true), cshrink(cc), cshrink1(1. / cc),
-        k(kk) {
-      int n = this->NbDoF;
-
-      if (verbosity > 9) 
-        cout << "\n +++ Pdc" << k << " : ndof : " << n << endl;
-      
-      SetPtPkDC(this->PtInterpolation, k, this->NbDoF, cc);
-      if (verbosity > 9) 
-        cout << this->PtInterpolation << endl;
-      
-
-      {
-        for (int i = 0; i < n; i++) {
-          this->pInterpolation[i] = i;
-          this->cInterpolation[i] = 0;
-          this->dofInterpolation[i] = i;
-          this->coefInterpolation[i] = 1.;
-        }
-      }
-    }
-
-    ~TypeOfFE_LagrangeDC3dCurve( ) {}
-
-    void FB(const What_d whatd, const Mesh &Th, const Element &K, const RdHat &PHat,
-            RNMK_ &val) const;
-    virtual R operator( )(const FElement &K, const RdHat &PHat, const KN_< R > &u, int componante,
-                          int op) const;
-
-   private:
-    TypeOfFE_LagrangeDC3dCurve(const TypeOfFE_LagrangeDC3dCurve &);
-    void operator=(const TypeOfFE_LagrangeDC3dCurve &);
-  };
-
-  void TypeOfFE_LagrangeDC3dCurve::FB(const What_d whatd, const Mesh &Th, const Element &K,
-                                 const RdHat &PHat, RNMK_ &val) const {
+  template<>
+  void TypeOfFE_LagrangeDC3d<MeshL>::FB(const What_d whatd, const MeshL &Th, const MeshL::Element &K,const RdHat &PHat, RNMK_ &val) const {
     R1 P = this->Shrink1(PHat);
     R l[] = {1. - P.x, P.x};
 
@@ -751,8 +621,8 @@ namespace Fem2D {
     }
   }
 
-  R TypeOfFE_LagrangeDC3dCurve::operator( )(const FElement &K, const R1 &PHat1, const KN_< R > &u,
-                                       int componante, int op) const {
+  template<>
+  R TypeOfFE_LagrangeDC3d<MeshL>::operator( )(const FElement &K, const R1 &PHat1, const KN_< R > &u,int componante, int op) const {
     R1 PHat = Shrink1(PHat1);
     R r = 0;
 
@@ -786,7 +656,9 @@ namespace Fem2D {
 
     return r;
   }
-  const R1 TypeOfFE_LagrangeDC3dCurve::G(1. / 2.);
+  
+  template<>
+  const R1 TypeOfFE_LagrangeDC3d<MeshL>::G(1. / 2.);
   
   
 }    // namespace Fem2D
@@ -795,14 +667,15 @@ static void finit( ) {
   // link with FreeFem++
   static TypeOfFE_P1ttdc1_ P1dc1LagrangeP1dc1;
   static TypeOfFE_P2ttdc1_ P2dc1LagrangeP2dc1;
-  static TypeOfFE_LagrangeDC3d TypeOfFE_LagrangeDC3dtt(1, 0.999);
-  static TypeOfFE_LagrangeDC3d TypeOfFE_LagrangeDC3dtt1(1, 1.);
   
-  static TypeOfFE_LagrangeDC3dSurf TypeOfFE_LagrangeDC3dStt(1, 0.999);
-  static TypeOfFE_LagrangeDC3dSurf TypeOfFE_LagrangeDC3dStt1(1, 1.);
+  static TypeOfFE_LagrangeDC3d<Mesh3> TypeOfFE_LagrangeDC3dtt(1, 0.999);
+  static TypeOfFE_LagrangeDC3d<Mesh3> TypeOfFE_LagrangeDC3dtt1(1, 1.);
   
-  static TypeOfFE_LagrangeDC3dCurve TypeOfFE_LagrangeDC3dLtt(1, 0.999);
-  static TypeOfFE_LagrangeDC3dCurve TypeOfFE_LagrangeDC3dLtt1(1, 1.);
+  static TypeOfFE_LagrangeDC3d<MeshS> TypeOfFE_LagrangeDC3dStt(1, 0.999);
+  static TypeOfFE_LagrangeDC3d<MeshS> TypeOfFE_LagrangeDC3dStt1(1, 1.);
+ 
+  static TypeOfFE_LagrangeDC3d<MeshL> TypeOfFE_LagrangeDC3dLtt(1, 0.999);
+  static TypeOfFE_LagrangeDC3d<MeshL> TypeOfFE_LagrangeDC3dLtt1(1, 1.);
   
   // a static variable to add the finite element to freefem++
   static AddNewFE P1dcLagrange("P1dc1", &P1dc1LagrangeP1dc1);
@@ -811,12 +684,12 @@ static void finit( ) {
   static AddNewFE3 P1dttLagrange3d("P1dc3d", &TypeOfFE_LagrangeDC3dtt, "P1dc");
   static AddNewFE3 P1dttLagrange3d1("P1dc3d1", &TypeOfFE_LagrangeDC3dtt1);
   
-  static AddNewFES P1dttLagrange3d_surf("P1dc3dS", &TypeOfFE_LagrangeDC3dStt, "P1dc");
-  static AddNewFES P1dttLagrange3d1_surf("P1dc3dS1", &TypeOfFE_LagrangeDC3dStt1);
+  static AddNewFES P1dttLagrange3dS("P1dc3dS", &TypeOfFE_LagrangeDC3dStt, "P1dc");
+  static AddNewFES P1dttLagrange3dS1("P1dc3dS1", &TypeOfFE_LagrangeDC3dStt1);
   
-  static AddNewFEL P1dttLagrange3d_curv("P1dc3dL", &TypeOfFE_LagrangeDC3dLtt, "P1dc");
-  static AddNewFEL P1dttLagrange3d1_curv("P1dc3dL1", &TypeOfFE_LagrangeDC3dLtt1);
-  
+  static AddNewFEL P1dttLagrange3dL("P1dc3dL", &TypeOfFE_LagrangeDC3dLtt, "P1dc");
+  static AddNewFEL P1dttLagrange3dL1("P1dc3dL1", &TypeOfFE_LagrangeDC3dLtt1);
+   
 }
 
 LOADFUNC(finit)
