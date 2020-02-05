@@ -398,6 +398,7 @@ protected:
 public:
   typedef R K; // type of data
   long N() const {return n;}
+  long M() const {return 1;}
   bool unset() const { return !v;}
   void set(R * vv,int nn,int st=1,int nx=-1) {v=vv;n=nn;step=st;next=nx;}
   void set(KN_<R> t) {v=t.v;n=t.n;step=t.step;next=t.next;} //  FH Add Nov 2016
