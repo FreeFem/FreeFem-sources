@@ -8200,8 +8200,7 @@ AnyType Movemesh_Op< MMesh >::operator( )(Stack stack) const {
   B *b = new B[Th.nbe];
 
   // apply the geometric transfo and copy vertices
-  assert((xx) && (yy) && (zz));
-
+ 
   // loop over elements
   for (int it = 0; it < Th.nt; ++it) {
     const T &K(Th.elements[it]);
@@ -8297,19 +8296,26 @@ class Movemesh : public OneOperator {
     : OneOperator(atype< ppmesh >( ), atype< ppmesh >( ), atype< E_Array >( )), cas(1) {}
 
   E_F0 *code(const basicAC_F0 &args) const {
+	  
+	int size;
+	if(is_same< MMesh, Mesh >::value) size=3;
+	else if(is_same< MMesh, Mesh3 >::value) size=3;	
+	else if(is_same< MMesh, MeshS >::value) size=2;
+	else if(is_same< MMesh, MeshL >::value) size=1;
+	
     if (cas == 0) {
       return new Movemesh_Op< MMesh >(args, t[0]->CastTo(args[0]));
     } else if (cas == 1) {
       const E_Array *a = dynamic_cast< const E_Array * >(args[1].LeftValue( ));
 
       ffassert(a);
-      if (a->size( ) != 3) {
-        CompileError("movemesh(Th,[X,Y,Z],...) need 3 componates in array ", atype< ppmesh >( ));
+      if (a->size( ) < size) {
+        CompileError("movemesh(Th,[ ],...) bad reequired componatenumber in array ", atype< ppmesh >( ));
       }
 
-      Expression X = to< double >((*a)[0]);
-      Expression Y = to< double >((*a)[1]);
-      Expression Z = to< double >((*a)[2]);
+      Expression X = to< double >((*a)[0]); 
+      Expression Y=0 ; if(size>1) Y=to< double >((*a)[1]); 
+      Expression Z=0 ; if(size>2) Z= to< double >((*a)[2]);
       return new Movemesh_Op< MMesh >(args, t[0]->CastTo(args[0]), X, Y, Z);
     } else {
       return 0;
