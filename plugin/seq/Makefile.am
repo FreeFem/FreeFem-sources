@@ -57,7 +57,7 @@ LIST_COMPILE_PKG=@TOOL_DYLIB_tetgen@ @TOOL_DYLIB_superlu@ dfft.$(DYLIB_SUFFIX) \
 	@TOOL_DYLIB_umfpack@ NewSolver.$(DYLIB_SUFFIX) @TOOL_DYLIB_lapack@ \
 	ffnewuoa.$(DYLIB_SUFFIX) @TOOL_DYLIB_gmm@ @TOOL_DYLIB_yams@ @TOOL_DYLIB_mmg3d@ @TOOL_DYLIB_mmg@ @TOOL_DYLIB_mshmet@ \
 	@TOOL_DYLIB_gsl@ @TOOL_DYLIB_mumps_seq@ @TOOL_DYLIB_ipopt@ @TOOL_DYLIB_nlopt@ ff-cmaes.$(DYLIB_SUFFIX) \
-	@TOOL_DYLIB_scotch@ @TOOL_DYLIB_metis@ @TOOL_DYLIB_pardiso@ @TOOL_DYLIB_MMAP@ @TOOL_DYLIB_iohdf5@ 
+	@TOOL_DYLIB_scotch@ @TOOL_DYLIB_metis@ @TOOL_DYLIB_mkl@ @TOOL_DYLIB_MMAP@ @TOOL_DYLIB_iohdf5@
 	
 
 EXTRA_PROGRAMS= ffmaster
