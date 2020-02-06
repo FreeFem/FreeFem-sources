@@ -20,7 +20,7 @@ class OneWindow;
 
 struct OnePlot
 {
-    int dim;
+    int dim,dimHat;
     R3 Pmin,Pmax;
     double fmin,fmax;
     double vmax2;
@@ -49,8 +49,9 @@ struct OnePlot
     {//  compute the function bound and arrow bound view ....
     }
     
-    OnePlot(long w,int ddim=2,int nbgllist=0) :
+    OnePlot(long w,int ddim=2,int ddimHat=2,int nbgllist=0) :
     dim(ddim),
+	dimHat(ddimHat),
     Pmin(dinfty,dinfty,dinfty),Pmax(-dinfty,-dinfty,-dinfty),
     fmin(dinfty),fmax(-dinfty),vmax2(0),
     what(w),ngllists(nbgllist),gllists(0),
@@ -83,7 +84,7 @@ struct OnePlotMesh : public OnePlot
 {
     const Mesh *Th;
     OnePlotMesh(const Mesh *T)
-    : OnePlot(0,2,3),Th(T)
+    : OnePlot(0,2,2,3),Th(T)
     {
         R2 P0,P1;
         Th->BoundingBox(P0,P1);
@@ -98,7 +99,7 @@ struct OnePlotMesh3 : public OnePlot
 {
     const Mesh3 *Th;
     OnePlotMesh3(const Mesh3 *T)
-    : OnePlot(0,3,3),Th(T)
+    : OnePlot(0,3,3,3),Th(T)
     {
         Pmin=Th->Pmin;
         Pmax=Th->Pmax;
@@ -111,7 +112,7 @@ struct OnePlotMeshS : public OnePlot
 {
     const MeshS *Th;
     OnePlotMeshS(const MeshS *T)
-    : OnePlot(0,3,3),Th(T)
+    : OnePlot(0,3,2,3),Th(T)
     {
         Pmin=Th->Pmin;
         Pmax=Th->Pmax;
@@ -124,7 +125,7 @@ struct OnePlotMeshL : public OnePlot
 {
     const MeshL *Th;
     OnePlotMeshL(const MeshL *T)
-    : OnePlot(0,3,3),Th(T)
+    : OnePlot(0,3,1,3),Th(T)
     {
         Pmin=Th->Pmin;
         Pmax=Th->Pmax;
@@ -161,7 +162,7 @@ struct OnePlotFE3: public OnePlot
     int cas; // in cas of complex  chaage interpertation of complex value
     
     OnePlotFE3(const Mesh3 *T,long w,PlotStream & f)
-    :OnePlot(w,3,5),Th(T),cas(2)
+    :OnePlot(w,3,3,5),Th(T),cas(2)
     {
         Pmin=Th->Pmin;
         Pmax=Th->Pmax;
@@ -195,7 +196,7 @@ struct OnePlotFES: public OnePlot
     int cas; // in cas of complex  chaage interpertation of complex value
     
     OnePlotFES(const MeshS *T,long w,PlotStream & f)
-    :OnePlot(w,3,5),Th(T),cas(2)
+    :OnePlot(w,3,2,5),Th(T),cas(2)
     {
         Pmin=Th->Pmin;
         Pmax=Th->Pmax;
@@ -228,7 +229,7 @@ struct OnePlotFEL: public OnePlot
     int cas; // in cas of complex  chaage interpertation of complex value
     
     OnePlotFEL(const MeshL *T,long w,PlotStream & f)
-    :OnePlot(w,3,5),Th(T),cas(2)
+    :OnePlot(w,3,1,5),Th(T),cas(2)
     {
         Pmin=Th->Pmin;
         Pmax=Th->Pmax;
@@ -391,10 +392,10 @@ public:
     R z0; //  z pour les objets 2d.
     R ZScale;
     //  for 3d plot jan 2009
-    int  plotdim;
+    int  plotdim, plotdimHat;
     bool blockwin, plotNormalT;
     R theta, phi, dcoef, focal;
-    int datadim;
+    int datadim, datadimHat;
     // 2D
     long winnum;
     bool NextCase();
@@ -472,7 +473,7 @@ public:
     GLdouble projMatrix[16];
     GLint viewport[4];
     
-    int  plotdim;
+    int  plotdim, plotdimHat;
     R theta, phi, coef_dist, focal, dtheta;
     R  rapz,rapz0;
     R3 Bmin3,Bmax3,Pvue3;

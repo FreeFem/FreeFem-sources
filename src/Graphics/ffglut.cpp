@@ -55,7 +55,7 @@ const R pi=M_PI;//4*atan(1.);
 using namespace std;
 
 static int   nbSendForNextPlot=0,nbTimerNextPlot=0;
-int debug=1;
+int debug=11;
 int casemouse=0,keyact=0;
 double gwait=0;//  no wait in second
 #include "ffglut.hpp"
@@ -1121,7 +1121,7 @@ void OnePlotFEL::Draw(OneWindow *win)
 
 template<class Mesh>
 OnePlotFE<Mesh>::OnePlotFE(const Mesh *T,long w,PlotStream & f)
-:OnePlot(w,2,5),Th(T)
+:OnePlot(w,2,2,5),Th(T)
 {
     R2 P0,P1;
     Th->BoundingBox(P0,P1);
@@ -1918,7 +1918,7 @@ void OneWindow::DefaultView(int state)
         theta=theplot->theta;
         phi=theplot->phi;
         if(theplot->ZScale>0) rapz0=theplot->ZScale;
-        if(theplot->datadim==3) rapz0=1;
+        if(theplot->datadimHat==3) rapz0=1;
         else   if(rapz0<=0)
         {
             rapz0  =  0.4* dxy/(zmax-zmin) ;
@@ -1933,7 +1933,7 @@ void OneWindow::DefaultView(int state)
         coef_dist=theplot->dcoef;
         focal=theplot->focal;
 
-        if(theplot->datadim==3)
+        if(theplot->datadimHat==3)
         {
             Bmin3=A;
             Bmax3=B;
@@ -2427,7 +2427,7 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 changeViso(true),changeVarrow(true),changeColor(true),
 changeBorder(true),changeFill(true), withiso(false),witharrow(false),
 plotdim(2),theta(30.*M_PI/180.),phi(20.*M_PI/180.),dcoef(1),focal(20.*M_PI/180.),
-datadim(1), winnum(0), keepPV(0), pNormalT(0)
+datadim(1),datadimHat(1), winnum(0), keepPV(0), pNormalT(0)
 
 {
 
@@ -2886,6 +2886,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
         plotdim=max(plotdim,p->dim);
         ffassert(fin.good());
         datadim=max(datadim,p->dim);
+        datadimHat=max(datadimHat,p->dimHat);
     }
     if(dimpp) plotdim=dimpp;
     if(Niso==0)
