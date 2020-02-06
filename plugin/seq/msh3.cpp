@@ -9034,9 +9034,12 @@ static void Load_Init( ) {
   Global.Add("checkmesh", "(", new CheckMesh< MeshS >);
   Global.Add("checkmesh", "(", new CheckMesh< Mesh3 >);
 
+  Global.Add("segment", "(", new Line);
+  Global.Add("segment", "(", new Line(1));
+
   Global.Add("Sline", "(", new Line);
   Global.Add("Sline", "(", new Line(1));
-
+  
   Global.Add("buildBdMesh", "(", new BuildMeshLFromMeshS);
 
   Global.Add("extract", "(", new ExtractMesh< MeshS, MeshL >);    // take a Mesh3 in arg and return a part of MeshS

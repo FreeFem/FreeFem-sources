@@ -2315,8 +2315,8 @@ void ThePlot::DrawHelp(OneWindow *win)
     win->Show("r)   refresh plot ",i++);
     win->Show("up, down, left, right) special keys  to  tanslate   ",i++);
     win->Show("3)   switch 3d/2d plot (in test)  keys : ",i++);
-    win->Show("        z) Z) (focal zoom unzoom)  ",i++);
-    win->Show("        H) h) switch increase or decrease the Z scale of the plot ",i++);
+    win->Show(" z) Z) (focal zoom unzoom)  ",i++);
+    win->Show(" H) h) switch increase or decrease the Z scale of the plot ",i++);
     win->Show("mouse motion)    ",i++);
     win->Show("   - left button)  rotate    ",i++);
     win->Show("   - right button)       zoom        (ctrl+button on mac) ",i++);
@@ -2778,7 +2778,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
     }
   
     long nbplot;
-    int iso3d=0;
+    int iso3d=0, iso3dB=0;
     fin >>nbplot;
     if((debug > 2)) cout << " nb item plot " << nbplot << endl;
     for(int i=0;i<nbplot;++i)
@@ -2851,7 +2851,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
         }
         else if (what==8  || what==9 || what==18  || what==19)
         {
-            iso3d++;
+            iso3dB++;
             fin >> imsh;
             if(what==8||what==18 ) withiso=true;
             else if (what%10==9) witharrow=true;
@@ -2862,7 +2862,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
         }
         else if (what==14  || what==15 || what==20  || what==21)
         {
-            iso3d++;
+            iso3dB++;
             fin >> imsh;
             if(what==14||what==20 ) withiso=true;
             else if (what==15||what==21 ) witharrow=true;
@@ -2890,7 +2890,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
     if(dimpp) plotdim=dimpp;
     if(Niso==0)
         Niso = iso3d ? 5 : 20;
-
+    if(iso3dB) Niso=20;
     double ref_f = abs(fmax)+abs(fmin) ;
     if(fmax < fmin)
     {
