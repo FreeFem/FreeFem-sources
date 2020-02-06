@@ -2390,7 +2390,7 @@ AC_MSG_NOTICE([    --  with hpddm: $enable_hpddm (need MPI & c++11: $ff_cxx11) ]
 AC_MSG_NOTICE([    --  with htool: $enable_htool (need MPI & c++11: $ff_cxx11) ]);
 AC_MSG_NOTICE([    --  with bemtool: $enable_bemtool (need boost: $enable_boost and htool: $enable_htool ) ]);
 AC_MSG_NOTICE([  --  without libs: $ff_unlib_plugin ]);
-AC_MSG_NOTICE([  --  without plugin: $ff_uncompile_plugin ]);
+AC_MSG_NOTICE([  --  without plugins: $ff_uncompile_plugin ]);
 
 
 AC_MSG_NOTICE([    progs: $ff_progs ])

@@ -148,7 +148,7 @@ all-local:
 # -------------------------------
 
 DIRPKG=../pkg
-VERSION=3.12.3
+VERSION=3.12.4
 VERSION_SLEPC=3.12.0
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
