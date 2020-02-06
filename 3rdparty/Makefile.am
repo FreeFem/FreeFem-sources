@@ -235,7 +235,7 @@ install-exec-local:
 	cp -rp bin  $(DESTDIR)$(ff_prefix_dir)
 
 clean-local:
-	-rm -rf	 tag-* include lib bin boost
+	-rm -rf	 tag-* include lib bin WHERE-LD
 	-mkdir   include lib bin
 	-rm */FAIT */FAIRE
 # 	FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no
