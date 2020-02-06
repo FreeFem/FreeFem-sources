@@ -3195,8 +3195,8 @@ void ThePlot::DrawIsoT(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso, R 
             if(((fi<=xf)&&(fj>=xf))||((fi>=xf)&&(fj<=xf))) {
                 if (Abs(fi-fj)<=0.1e-10) {    /* one side must be drawn */
                     color(l+4);
-                    glVertex3f(Pt[i].x, Pt[i].y, Pt[i].z);
-                    glVertex3f(Pt[j].x, Pt[j].y, Pt[j].z);
+                    glVertex3f(Pt[i].x, Pt[i].y, Pt[i].z+xf*rapz);
+                    glVertex3f(Pt[j].x, Pt[j].y, Pt[j].z+xf*rapz);
                 }
                 else
                 {
@@ -3210,8 +3210,8 @@ void ThePlot::DrawIsoT(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso, R 
         {
             color(l+4);
             if( R3(PQ[0],PQ[1]).norme2() > eps2 ) {
-                glVertex3f(PQ[0].x, PQ[0].y, PQ[0].z);
-                glVertex3f(PQ[1].x, PQ[1].y, PQ[1].z);
+                glVertex3f(PQ[0].x, PQ[0].y, PQ[0].z+xf*rapz);
+                glVertex3f(PQ[1].x, PQ[1].y, PQ[1].z+xf*rapz);
             }
         }
     }
