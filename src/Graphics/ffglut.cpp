@@ -3293,7 +3293,7 @@ void ThePlot::DrawIsoTfill(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso
 void ThePlot::DrawIsoTfill(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz)
 {
     R3 PQ[10];
-
+    R z[10];
     R eps= (Viso[NbIso-1]-Viso[0])*1e-6;
     for(int l=1;l< NbIso;l++)  //   loop on the level curves
     {
@@ -3314,6 +3314,7 @@ void ThePlot::DrawIsoTfill(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso
             {
                 if (Abs(fi-fj)>=0.1e-20) {
                     R  xlam=(fi-xf)/(fi-fj);
+                    z[im] =  fi * (1.F-xlam)  +  fj* xlam;
                     PQ[im++]   = Pt[i] * (1.F-xlam)  +  Pt[j]* xlam;
                     
                 }
@@ -3322,17 +3323,18 @@ void ThePlot::DrawIsoTfill(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso
             if(((fi<=xf)&&(fj>=xf))||((fi>=xf)&&(fj<=xf)))  {
                 if (Abs(fi-fj)>=0.1e-20) {
                     R  xlam=(fi-xf)/(fi-fj);
+                    z[im] =  fi * (1.F-xlam)  +  fj* xlam;
                     PQ[im++]   = Pt[i] * (1.F-xlam)  +  Pt[j]* xlam;
                 }
             }
             if (  xfb-eps <=fj  && fj <= xfh+eps)
-                PQ[im++] = Pt[j];
+                z[im]=fj,PQ[im++] = Pt[j];
         }
         if (im>2) {
             color(l+4);
             R3 P[10];
             for(int i=0;i<im;++i)
-                P[i]= R3(PQ[i].x,PQ[i].y,PQ[i].z);
+                P[i]= R3(PQ[i].x,PQ[i].y,PQ[i].z+z[i]*rapz);
             R3 N(R3(P[0],P[1])^R3(P[0],P[2]));
             N /= N.norme();
             if(N.z<0) N = -N;
