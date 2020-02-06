@@ -7434,10 +7434,6 @@ namespace Fem2D {
                     int nbdf=K.NbDoF() ;
                     //ipmat.set(it);
                     PtonB = 0;
-
-                    R3 E=K.T.Edge(ie);
-                    double le = sqrt((E,E));
-
                     R3 NNt=K.T.NormalSUnitaire();
 
                     for (int i=0;i<ipmat.ncoef;i++)
