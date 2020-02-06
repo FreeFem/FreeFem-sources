@@ -8249,7 +8249,6 @@ AnyType Movemesh_Op< MMesh >::operator( )(Stack stack) const {
     int iv[T::nea];
     for (int i = 0; i < T::nea; i++) iv[i] = Th.operator( )(K[i]);
     // cp element
-	cout << "test tri" << iv[0] << " " << iv[1] << " " << iv[2] << endl;
     t[it].set(v, iv, K.lab);
   }
   // copy border elements
@@ -8400,7 +8399,7 @@ AnyType Movemesh_Op< Mesh >::operator( )(Stack stack) const {
   for (int it = 0; it < Th.nt; it++) {
     const T &K = (Th[it]);
     int iv[3];
-    for (int i = 0; i < 3; i++) iv[i] = Th.operator( )(K[i]); 	cout << "test tri" << iv[0] << " " << iv[1] << " " << iv[2] << endl;
+    for (int i = 0; i < 3; i++) iv[i] = Th.operator( )(K[i]);
     tS[it].set(vS, iv, K.lab);
 	cout << "test N" << tS[it].NormalS() << endl;
   }
