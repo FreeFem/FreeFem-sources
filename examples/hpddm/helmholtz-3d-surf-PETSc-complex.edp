@@ -54,7 +54,9 @@ meshS ThS, ThG;
 }
 
 fespace Uh(ThS, P1);
-HMatrix<complex> A = assemblecomplexHESL(Uh, Uh, k, eta=10, epsilon=1.0e-2, minclustersize=10, maxblocksize=1000000);
+BemKernel ker("SL", 1, k);
+varfbem vk(u, v) = int2dx2d(ThS)(ThS)(BEM(ker, u, v));
+HMatrix<complex> A = vk(Uh, Uh, k, eta=10, epsilon=1.0e-2, minclustersize=10, maxblocksize=1000000);
 Mat<complex> H;
 createMat(ThS, H, P1);
 plotDmesh(ThS, cmm = "Partitioning");
