@@ -40,27 +40,23 @@ All notable changes to this project will be documented in this file.
 - New DSL for BEM (varfbem see examples/bem)
 - add int0d to apply Neumann BC (curve FE), differential operators (dx,dy,...), compute an 1d integral
 - add P1dc FE for Border FEM (possible to define a new FE with plugin)
+- PETSc as a subdomain solver for HPDDM
 
 ### Changed
 - correct ffglut (bug in case of changing number of nb isovalue)
-- PETSc version 3.12.3
+- PETSc version 3.12.4
 - Change the point search triangle algorithm  to be sure in any case (in test)
 - Sline operator renamed to segment
 - In square3, segment, movemesh functions: geometry transformation can now be [X] or [X,Y] or [X,Y,Z] according to the minimal shape element dim
+- PETSc now download OpenBLAS if there is no BLAS found by FreeFEM configure
 
 ### Deprecated
-- freeyams plugin 
+- freeyams plugin
 - mmg3d-v4.0 plugin
-
-### Removed
--
 
 ### Fixed
 - fix plot for curve mesh
 
-
-### Security
--
 
 ## [4.4-3]
 ### Added
