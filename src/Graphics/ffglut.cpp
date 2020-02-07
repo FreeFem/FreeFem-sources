@@ -1918,7 +1918,7 @@ void OneWindow::DefaultView(int state)
         theta=theplot->theta;
         phi=theplot->phi;
         if(theplot->ZScale>0) rapz0=theplot->ZScale;
-        if(theplot->datadimHat==3) rapz0=1;
+        if(theplot->datadim==3) rapz0=1;
         else   if(rapz0<=0)
         {
             rapz0  =  0.4* dxy/(zmax-zmin) ;
@@ -1933,7 +1933,7 @@ void OneWindow::DefaultView(int state)
         coef_dist=theplot->dcoef;
         focal=theplot->focal;
 
-        if(theplot->datadimHat==3)
+        if(theplot->datadim==3)
         {
             Bmin3=A;
             Bmax3=B;
@@ -2953,12 +2953,12 @@ void ThePlot::SetDefIsoV(int niso,int narr,double fmn,double fmx,double vmn,doub
     {
         dyni = niso !=Viso.N() ;
         //       pViso = pViso && niso ==Viso.N(); FH:  debile !!!!!
-        d =  (fmx-fmn)/(Niso-2) ;
+        d =  (fmx-fmn)/(max(Niso-2,1L))  ;
         x =  (fmn+fmx)/2-d*0.5*(Niso-1);
     }
     else
     {
-        d = 1 ? (fmaxT-fminT)/(Niso-2)  : (fmaxT-fminT)/(Niso-1);
+        d = 1 ? (fmaxT-fminT)/(max(Niso-2,1L))  : (fmaxT-fminT)/(Niso-1);
         x = 1 ? (fminT+fmaxT)/2-d*0.5*(Niso-1) :fminT+d/2;
     }
     if(!pViso || dyni)
@@ -3211,8 +3211,8 @@ void ThePlot::DrawIsoT(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso, R 
         {
             color(l+4);
             if( R3(PQ[0],PQ[1]).norme2() > eps2 ) {
-                glVertex3f(PQ[0].x, PQ[0].y, PQ[0].z+xf*rapz);
-                glVertex3f(PQ[1].x, PQ[1].y, PQ[1].z+xf*rapz);
+                glVertex3f(PQ[0].x, PQ[0].y, PQ[0].z);
+                glVertex3f(PQ[1].x, PQ[1].y, PQ[1].z);
             }
         }
     }
@@ -3335,7 +3335,7 @@ void ThePlot::DrawIsoTfill(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso
             color(l+4);
             R3 P[10];
             for(int i=0;i<im;++i)
-                P[i]= R3(PQ[i].x,PQ[i].y,PQ[i].z+z[i]*rapz);
+                P[i]= R3(PQ[i].x,PQ[i].y,PQ[i].z);
             R3 N(R3(P[0],P[1])^R3(P[0],P[2]));
             N /= N.norme();
             if(N.z<0) N = -N;
