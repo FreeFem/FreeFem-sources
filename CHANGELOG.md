@@ -26,21 +26,28 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 
-## [4.4-4]
+## [4.5]
 
 ### Added
 - a true 3d anisotrope mesh adadtation  `examples/3d/Laplace-Adapt-aniso-3d.edp`
 - an example to extract surface mesh from isovalue in `examples/3dSurf/Pinochio.edp`
-- a new plugin `mmg`  with mmg5 library to replace `mmg3d-v4.0` and `freeyams` (Thanks to P-H Tournier)
+- new `mmg` and `parmmg` (parallel mmg) plugins interfacing mmg5 and parmmg libraries, to replace `mmg3d-v4.0` and `freeyams` (Thanks to P-H Tournier)
 - function `f.eatspace` to reach eof on istream file  which return false in case of EOF. 
 - function `f.length` to get the istream file length
 - Interface to `PetscLogStagePush()`/`PetscLogStagePop()`
 - Ability to directly assemble a `Mat` using a `varf`
+- New `bem` plugin for the Boundary Element Method (using htool and BemTool libraries)
+- New DSL for BEM (varfbem see examples/bem)
+- add int0d to apply Neumann BC (curve FE), differential operators (dx,dy,...), compute an 1d integral
+- add P1dc FE for Border FEM (possible to define a new FE with plugin)
 
 ### Changed
 - correct ffglut (bug in case of changing number of nb isovalue)
 - PETSc version 3.12.3
 - Change the point search triangle algorithme  to be sure in any case (in test) 
+- Sline operator renamed in segment
+- In square3, segment, movemesh functions: geometry transformation can now be [X] or [X,Y] or [X,Y,Z] according to the minimal shape element dim
+
 ### Deprecated
 - freeyams plugin 
 
@@ -48,7 +55,8 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
--
+- fix plot for curve mesh
+
 
 ### Security
 -
