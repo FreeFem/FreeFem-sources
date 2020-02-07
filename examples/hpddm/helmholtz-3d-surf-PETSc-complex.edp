@@ -56,7 +56,7 @@ meshS ThS, ThG;
 fespace Uh(ThS, P1);
 BemKernel ker("SL", 1, k);
 varfbem vk(u, v) = int2dx2d(ThS)(ThS)(BEM(ker, u, v));
-HMatrix<complex> A = vk(Uh, Uh, k, eta=10, epsilon=1.0e-2, minclustersize=10, maxblocksize=1000000);
+HMatrix<complex> A = vk(Uh, Uh, eta=10, eps=1.0e-2, minclustersize=10, maxblocksize=1000000);
 Mat<complex> H;
 createMat(ThS, H, P1);
 plotDmesh(ThS, cmm = "Partitioning");
@@ -92,7 +92,7 @@ func complex[int] prec(complex[int]& in) {
     complex[int] out(in.n);
     if(!mass) {
         if(dense.n == 1 && dense.m == 1) {
-            HMatrix<complex> A = assemblecomplexHESL(Uh, Uh, k, eta=10, epsilon=1.0e-2, minclustersize=10, maxblocksize=1000000, comm=mpiCommSelf);
+            HMatrix<complex> A = vk(Uh, Uh, eta=10, eps=1.0e-2, minclustersize=10, maxblocksize=1000000, commworld=mpiCommSelf);
             dense.resize(Uh.ndof, Uh.ndof);
             dense = A;
             dense = dense^-1;
@@ -135,7 +135,9 @@ if(!NoGraphicWindow) {
                           +(radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty,
                           width/2]);
     fespace UhOut(ThOut, P1);
-    HMatrix<complex> B = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1.0e-2,minclustersize=10,maxblocksize=1000000);
+    BemPotential Pot("SL",k);
+    varfbem vp(u,v)=int2d(ThS)(POT(Pot,u,v)) ;
+    HMatrix<complex> B = vp(Uh,UhOut,eta=10,eps=1e-2,minclustersize=10,maxblocksize=1000000);
     UhOut<complex> v, vinc;
     vinc = finc;
     v[] = B*uf[];

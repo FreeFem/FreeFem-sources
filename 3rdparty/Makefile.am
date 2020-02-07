@@ -101,9 +101,7 @@ install-other: tag-install-other
 
 tag-install-other:
 	if test -n "$(TOOL_COMPILE_hpddm)" ; then  $(MAKE) install-hpddm; else true; fi
-	if test -n "$(TOOL_COMPILE_htool)" ; then  $(MAKE) install-htool; else true; fi
-	if test -n "$(TOOL_COMPILE_bemtool)" ; then  $(MAKE) install-bemtool; else true; fi
-	if test -n "$(TOOL_COMPILE_boost)" ; then  $(MAKE) install-boost; else true; fi
+	if test -n "$(TOOL_COMPILE_bem)" ; then  $(MAKE) install-htool install-boost install-bemtool; else true; fi
 	touch tag-install-other
 
 WHERE-OTHER: lib/WHERE.hpddm lib/WHERE.htool lib/WHERE.bemtool lib/WHERE.boost
@@ -135,12 +133,12 @@ lib/WHERE.hpddm: ./getall
 
 # begin HTOOL
 install-htool: ./getall
-	 if test -n "$(TOOL_COMPILE_htool)"; then   ./getall -o htool -a;  $(MAKE) include/htool/done.tag  lib/WHERE.htool; else true;fi
+	 if test -n "$(TOOL_COMPILE_bem)"; then   ./getall -o htool -a;  $(MAKE) include/htool/done.tag  lib/WHERE.htool; else true;fi
 reinstall-htool:./getall
 	-rm lib/WHERE.htool
 	-rm ./pkg/htool.zip
 	-rm -rf include/htool
-	-test -n "$(TOOL_COMPILE_htool)" && $(MAKE) install-htool || true
+	-test -n "$(TOOL_COMPILE_bem)" && $(MAKE) install-htool || true
 include/htool/done.tag:./pkg/htool.zip
 	-if test -f ./pkg/htool.zip ; then \
           cd include;rm -rf htool htool-*;  unzip ../pkg/htool.zip ; mv  htool-* htool ; touch htool/done.tag; \
@@ -153,12 +151,12 @@ lib/WHERE.htool: ./getall
 # end HTOOL
 # begin BEMTOOL
 install-bemtool: ./getall
-	 if test -n "$(TOOL_COMPILE_bemtool)"; then   ./getall -o bemtool -a;  $(MAKE) include/bemtool/done.tag  lib/WHERE.bemtool; else true;fi
+	 if test -n "$(TOOL_COMPILE_bem)"; then   ./getall -o bemtool -a;  $(MAKE) include/bemtool/done.tag  lib/WHERE.bemtool; else true;fi
 reinstall-bemtool:./getall
 	-rm lib/WHERE.bemtool
 	-rm ./pkg/bemtool.zip
 	-rm -rf include/BemTool
-	-test -n "$(TOOL_COMPILE_bemtool)" && $(MAKE) install-bemtool || true
+	-test -n "$(TOOL_COMPILE_bem)" && $(MAKE) install-bemtool || true
 include/bemtool/done.tag:./pkg/bemtool.zip
 	-if test -f ./pkg/bemtool.zip ; then \
           cd include;rm -rf BemTool BemTool-*;  unzip ../pkg/bemtool.zip ; mv BemTool-* BemTool ; touch BemTool/done.tag; \
@@ -172,15 +170,15 @@ lib/WHERE.bemtool: ./getall
 
 # begin BOOST
 install-boost: ./getall
-	 if test -n "$(TOOL_COMPILE_boost)"; then   ./getall -o Boost -a;  $(MAKE) boost/done.tag  lib/WHERE.boost; else true;fi
+	 if test -n "$(TOOL_COMPILE_bem)"; then   ./getall -o Boost -a;  $(MAKE) boost/done.tag  lib/WHERE.boost; else true;fi
 reinstall-boost:./getall
 	-rm lib/WHERE.boost
-	-rm ./pkg/boost.tar.gz
+	-rm ./pkg/boost_for_bemtool.tar.gz
 	-rm -rf boost
-	-test -n "$(TOOL_COMPILE_boost)" && $(MAKE) install-boost || true
-boost/done.tag:./pkg/boost.tar.gz
-	if test -f ./pkg/boost.tar.gz ; then \
-	rm -rf boost boost_*;   tar xvzf   pkg/boost.tar.gz  ; mv boost_for_bemtool boost; \
+	-test -n "$(TOOL_COMPILE_bem)" && $(MAKE) install-boost || true
+boost/done.tag:./pkg/boost_for_bemtool.tar.gz
+	if test -f ./pkg/boost_for_bemtool.tar.gz ; then \
+	rm -rf boost boost_*;   tar xvzf   pkg/boost_for_bemtool.tar.gz  ; mv boost_for_bemtool boost; \
 	else true;  fi	
 	touch boost/done.tag
 lib/WHERE.boost: ./getall

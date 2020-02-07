@@ -223,7 +223,7 @@ AC_CHECK_PROG(ff_unzip,unzip,yes,no)
 AC_CHECK_PROG(ff_m4,m4,yes,no)
 AC_CHECK_PROG(ff_bison,bison,yes,no)
 AC_CHECK_PROG(ff_flex,flex,yes,no)
-dnl AC_CHECK_PROG(ff_cmake,cmake,yes,no)
+AC_CHECK_PROG(ff_cmake,cmake,yes,no)
 AC_CHECK_PROG(ff_patch,patch,yes,no)
 case "$ff_m4 $ff_bison $ff_patch $ff_flex $ff_unzip"  in
 *no*)
@@ -2099,8 +2099,10 @@ TOOL_DISABLE(lapack,"lapack.$DYLIB_SUFFIX fflapack.$DYLIB_SUFFIX")
 TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
 TOOL_DISABLE(parmetis,parmetis.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
-TOOL_DISABLE(mmg,mmg.$DYLIB_SUFFIX)
-TOOL_DISABLE(parmmg,parmmg.$DYLIB_SUFFIX)
+if test "$ff_cmake" = yes; then
+     TOOL_DISABLE(mmg,mmg.$DYLIB_SUFFIX)
+     TOOL_DISABLE(parmmg,parmmg.$DYLIB_SUFFIX)
+fi
 TOOL_DISABLE(mshmet,"mshmet.$DYLIB_SUFFIX aniso.$DYLIB_SUFFIX")
 TOOL_DISABLE(gmm,ilut.$DYLIB_SUFFIX,,enable_gmm=no)
 TOOL_DISABLE(scalapack,MUMPS.$DYLIB_SUFFIX)
@@ -2269,10 +2271,7 @@ fi
 
 ##echo @@@@@@@@@@@@ $ff_petsc_ok @@ "hpddm.$DYLIB_SUFFIX $FF_PETCS_DYLIB"
 TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_PETSC_DYLIB"])
-TOOL_DISABLE(htool,["htool.$DYLIB_SUFFIX"])
 TOOL_DISABLE(bem,["bem.$DYLIB_SUFFIX"])
-TOOL_DISABLE(bemtool,["bemtool.$DYLIB_SUFFIX"])
-TOOL_DISABLE(boost,["boost.$DYLIB_SUFFIX"])
 
 ##
 if test "$ff_mkl_ok" = yes ; then
@@ -2415,10 +2414,10 @@ if test "$enable_download" = yes; then
     AC_MSG_NOTICE([      use of download mmg3d (v4)   see 3rdparty/mmg3d/mmg3d4/LICENCE.txt  ])
   fi
   if test -n "$TOOL_COMPILE_mmg"; then
-    AC_MSG_NOTICE([      use of download mmg  ])
+    AC_MSG_NOTICE([      use of download mmg  see 3rdparty/mmg/mmg-sources/LICENSE ])
   fi
   if test -n "$TOOL_COMPILE_parmmg"; then
-    AC_MSG_NOTICE([      use of download parmmg  ])
+    AC_MSG_NOTICE([      use of download parmmg  see 3rdparty/parmmg/parmmg-sources/LICENSE ])
   fi
   if test -n "$TOOL_COMPILE_parmetis"; then
     AC_MSG_NOTICE([      use of download parmetis])

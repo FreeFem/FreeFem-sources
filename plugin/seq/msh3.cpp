@@ -6144,14 +6144,21 @@ Mesh3 *truncmesh(const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
   // first build old point to keep the numbering order for DDM ...
   for (int i = 0, k = 0; i < Th.nv; i++) {
     if (takevertex[i] >= 0) {
-      Vertex3 *pvi = gtree->ToClose(Th(i), hseuil);
-      if (!pvi) {
-        (R3 &)v[np] = Th(i);
-        v[np].lab = Th(i).lab;
-        gtree->Add(v[np]);
-        np++;
-      } else {
-        ffassert(0);
+      double heps = hseuil;
+      for (int j = 0; j < 3; ++j) {
+        Vertex3 *pvi = gtree->ToClose(Th(i), heps);
+        if (!pvi) {
+          (R3 &)v[np] = Th(i);
+          v[np].lab = Th(i).lab;
+          gtree->Add(v[np]);
+          np++;
+          break;
+        } else if(j == 2) {
+          ffassert(0);
+        } else if(verbosity > 1) {
+          heps /= 10.0;
+          cout << " Problem with vertex #" << i << ", need to refine h to " << heps << endl;
+        }
       }
     }
   }

@@ -174,10 +174,10 @@ download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
 	'http://www.tetgen.org/1.5/src/',
 	'tetgen1.5.1-beta1.tar.gz',
 	'3d55c197bcbfc611b7ced6f343643756');
-download('mmg','https://github.com/MmgTools/mmg/archive/9bd9ac675c7fef52df46e2cabdd4e9119adad425.zip',
+download('mmg','https://github.com/MmgTools/mmg/archive/5c48ee5b0471c9f4315836bddfb223ba17f2d153.zip',
         'https://github.com/MmgTools',
         'mmg.zip',
-        'ef02d36fe939026db200ea02d12eaabf');
+        '7d51fa46a17529346445783dbf8970d1');
 download('parmmg','https://github.com/MmgTools/ParMmg/archive/fe0b497f872a216e24a0d1b96b7507d455a65711.zip',
         'https://github.com/MmgTools',
         'parmmg.zip',
@@ -205,7 +205,7 @@ download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/9c648415
 
 download('Boost','https://www.ljll.math.upmc.fr/~tournier/boost_for_bemtool.tar.gz',
 	'https://www.boost.org',
-	'boost.tar.gz',
+	'boost_for_bemtool.tar.gz',
 	'bb0e3ee1ad06174c80a69bc0756034e7');
 
 
