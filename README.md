@@ -133,6 +133,12 @@ Configuration:
 ./configure --enable-download --enable-optim
 ```
 
+If you do not have administrator rights or do not want FreeFEM files scattered around on your machine, please use the `--prefix` option, e.g.:
+
+```bash
+./configure --enable-download --enable-optim --prefix=${HOME}/FreeFem-install
+```
+
 Download:
 
 ```bash
