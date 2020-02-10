@@ -119,7 +119,7 @@ FLAGS_CONF_PETSC_COMPLEX= --with-python-exec=/usr/bin/python3 --with-shared-libr
 	--with-ssl=0 --with-x=0 --with-debugging=0 \
 	--with-metis-dir=$(DIR_INSTALL_REAL) \
 	--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
-	--with-blaslapack-dir=$(DIR_INSTALL_REAL) \
+	--with-f2cblaslapack-dir=$(DIR_INSTALL_REAL) \
 	--with-suitesparse-include='$(SUITESPARSE_INCLUDE)' --with-suitesparse-lib='$(SUITESPARSE_LIB)' \
 	--with-parmetis-dir=$(DIR_INSTALL_REAL) \
 	--with-tetgen-dir=$(DIR_INSTALL_REAL) \
