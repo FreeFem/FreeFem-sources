@@ -115,18 +115,17 @@ if (pr#isincomm)
         Isend(processor(arrayIntersectioni[j],pr#commddm,rqn[j*2]),eps);
         for(int j=0;j<arrayIntersectioni.n;++j)
         Irecv(processor(arrayIntersectioni[j],pr#commddm,rqn[j*2+1]),epsn[j]);
-        for(int j=0;j<2*arrayIntersectioni.n;++j)
-        int k = mpiWaitAny(rqn);
+        for(int j=0;j<2*arrayIntersectioni.n;++j) {
+          int k = mpiWaitAny(rqn);
+        }
       }    
       for(int i = 0; i < arrayIntersectioni.n; ++i) {
         PhGlobalff suppPartition = abs(arrayIntersectioni[i] - part) < 0.1;
         
         PhGlobalff suppP0;
         suppP0[] = suppPartition[];
-        
         if (sizeoverlaps > 0) {
           AddLayers(overlapName, suppPartition[], sizeoverlaps, phi[]);
-
           phibase[] = phi[];
 
           if(usedARGV("-steep") != -1)
