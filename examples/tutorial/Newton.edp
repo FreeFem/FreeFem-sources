@@ -65,6 +65,6 @@ int iter=0;
    }
 
 load "medit" load "msh3"  
-    mesh3 Th3= movemesh23(Th,transfo=[x,y,u*1.5]);
+    meshS Th3= movemesh23(Th,transfo=[x,y,u*1.5]);
     medit("N",Th3);
 }

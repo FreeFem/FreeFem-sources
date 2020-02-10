@@ -33,7 +33,7 @@ Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
 load "msh3" load "medit" 
 //savemesh(Th,"sphere-a",[f1,f2,f3]);
 plot(Th,wait=1);
-mesh3 Th3= movemesh23(Th,transfo=[f1,f2,f3]);
+meshS Th3= movemesh23(Th,transfo=[f1,f2,f3]);
 plot(Th3,wait=1); 
 medit("sphere-a",Th3);// bug un color of u ... FH 
 
