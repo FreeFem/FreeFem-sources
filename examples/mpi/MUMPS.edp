@@ -1,7 +1,7 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
 
-load "MUMPS"
+load "MUMPS_mpi" // add _mpi for windows do day
 // load "symmetrizeCSR"
 int[int] l = [1, 1, 2, 2];
 mesh Th = square(150, 150, label = l);

@@ -12,14 +12,7 @@ VERSION=`grep AC_INIT configure.ac | cut -d"," -f2`
 RELEASE_TAG_NAME="v$VERSION"
 distrib=`uname -s`-`uname -r`
 
-##if [ "$distrib" == "Linux-4.4.0-166-generic" ]; then
-  # 16.04
 DISTRIB="Ubuntu"
-##elif [ "$distrib" == "Linux-4.15.0-51-generic" ]; then
-  # 18.04
-##DISTRIB="Ubuntu_18.04"
-##fi
-
 
 DEB_NAME="freefem_${VERSION}_withPETSc_amd64"
 GH_DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_withPETSc_amd64.deb"
@@ -89,6 +82,6 @@ fi
 
 # clean the VM
 rm -rf $DEB_NAME
-rm -rf $GH_DEB_NAME
+rm $GH_DEB_NAME
 
 . ./bin/uninstall-ff++

@@ -14,7 +14,7 @@ distrib=`uname -s`-`uname -r`
 
 DISTRIB="Ubuntu"
 
-DEB_NAME="freefem_${VERSION}-1_amd64.deb"
+DEB_NAME="freefem_${VERSION}-1_amd64"
 GH_DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_amd64.deb"
 
 ## DEB build
@@ -79,6 +79,6 @@ fi
 
 # clean the VM
 rm -rf $DEB_NAME
-rm -rf $GH_DEB_NAME
+rm $GH_DEB_NAME
 
 . ./bin/uninstall-ff++

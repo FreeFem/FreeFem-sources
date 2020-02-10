@@ -37,6 +37,7 @@ All notable changes to this project will be documented in this file.
 ## [4.5]
 
 ### Added
+- correct link edition with fortran mpi under windows juste use the msmpi 
 - new `mmg` and `parmmg` (parallel mmg) plugins interfacing mmg5 and parmmg libraries, to replace `mmg3d-v4.0` and `freeyams` (Thanks to P-H Tournier)
 - a true 3d anisotropic mesh adaptation  `examples/3d/Laplace-Adapt-aniso-3d.edp`
 - an example to extract surface mesh from isovalue in `examples/3dSurf/Pinochio.edp`
