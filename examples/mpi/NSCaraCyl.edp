@@ -24,7 +24,7 @@
 // --------------------------------------------------
 include "getARGV.idp"
 include "getARGV.idp"
-load "MUMPS"
+load "MUMPS_mpi"
 load "shell"
 load "scotch"
 load "pipe"

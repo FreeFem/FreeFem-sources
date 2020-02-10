@@ -2,7 +2,7 @@
 // NBPROC 4
 
 load "msh3"
-load "MUMPS"
+load "MUMPS_mpi"
 ////////////////////
 //  parameters
 

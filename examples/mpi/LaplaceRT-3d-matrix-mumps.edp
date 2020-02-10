@@ -24,7 +24,7 @@ and $ u.n = (g1n,g2n).n$ on $\Gamma_2$
 
 // brochet
 load "medit"
-load "MUMPS"
+load "MUMPS_mpi"
 include "cube.idp"
 
 

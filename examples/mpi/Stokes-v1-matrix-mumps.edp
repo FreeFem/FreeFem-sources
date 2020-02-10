@@ -11,7 +11,7 @@ loadpath += "./"
 
 load "msh3"
 //load "medit"
-load "MUMPS"
+load "MUMPS_mpi"
 include "getARGV.idp"
 
 verbosity=0;

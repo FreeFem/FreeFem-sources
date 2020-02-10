@@ -1,5 +1,5 @@
 load "medit"
-load "MUMPS"
+load "MUMPS_mpi"
 
 include "getARGV.idp"// to process command line options
 
