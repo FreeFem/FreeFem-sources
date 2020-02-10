@@ -250,7 +250,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-3...develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.5..develop
+[4.5]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-3...v4.5
 [4.4-3]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-2...v4.4-3
 [4.4-2]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4...v4.4-2
 [4.4]: https://github.com/FreeFem/FreeFem-sources/compare/v4.2.1...v4.4
