@@ -275,6 +275,7 @@ static const float ColorTable[30][3] = {
   {0.0, 0.0, 0.8}, /*  ???    */
 };                 // a voir F.Hecht
 
+namespace FreeFEM {
 void SwapBytes(char *array, int size, int n) {
   char *x = new char[size];
 
@@ -288,6 +289,7 @@ void SwapBytes(char *array, int size, int n) {
   }
 
   delete[] x;
+}
 }
 
 //= =============================================
@@ -1377,7 +1379,7 @@ Mesh *VTK_Load(const string &filename, bool bigEndian) {
         }
 
         if (!bigEndian) {
-          SwapBytes((char *)f, sizeof(float), 3);
+          FreeFEM::SwapBytes((char *)f, sizeof(float), 3);
         }
 
         for (int j = 0; j < 3; j++) {
@@ -1390,7 +1392,7 @@ Mesh *VTK_Load(const string &filename, bool bigEndian) {
         }
 
         if (!bigEndian) {
-          SwapBytes((char *)xyz, sizeof(double), 3);
+          FreeFEM::SwapBytes((char *)xyz, sizeof(double), 3);
         }
       }
     } else {
@@ -1444,7 +1446,7 @@ Mesh *VTK_Load(const string &filename, bool bigEndian) {
       }
 
       if (!bigEndian) {
-        SwapBytes((char *)&numVerts, sizeof(int), 1);
+        FreeFEM::SwapBytes((char *)&numVerts, sizeof(int), 1);
       }
 
       if ((int)fread(n, sizeof(int), numVerts, fp) != numVerts) {
@@ -1453,7 +1455,7 @@ Mesh *VTK_Load(const string &filename, bool bigEndian) {
       }
 
       if (!bigEndian) {
-        SwapBytes((char *)n, sizeof(int), numVerts);
+        FreeFEM::SwapBytes((char *)n, sizeof(int), numVerts);
       }
     } else {
       if (fscanf(fp, "%d", &numVerts) != 1) {
@@ -1505,7 +1507,7 @@ Mesh *VTK_Load(const string &filename, bool bigEndian) {
       }
 
       if (!bigEndian) {
-        SwapBytes((char *)&type, sizeof(int), 1);
+        FreeFEM::SwapBytes((char *)&type, sizeof(int), 1);
       }
     } else {
       if (fscanf(fp, "%d", &type) != 1) {
@@ -1677,7 +1679,7 @@ class VTK_WriteMesh_Op : public E_F0mps {
           float value = eval(j, stack);
 
           if (!bigEndian) {
-            SwapBytes((char *)&value, sizeof(float), 1);
+            FreeFEM::SwapBytes((char *)&value, sizeof(float), 1);
           }
 
           fwrite(&value, sizeof(float), 1, fp);
@@ -1696,7 +1698,7 @@ class VTK_WriteMesh_Op : public E_F0mps {
             float value = eval(j, stack);
 
             if (!bigEndian) {
-              SwapBytes((char *)&value, sizeof(float), 1);
+              FreeFEM::SwapBytes((char *)&value, sizeof(float), 1);
             }
 
             fwrite(&value, sizeof(float), 1, fp);
@@ -1820,7 +1822,7 @@ class VTK_WriteMesh_Op : public E_F0mps {
           double value = (*this).eval(j, stack);
 
           if (!bigEndian) {
-            SwapBytes((char *)&value, sizeof(double), 1);
+            FreeFEM::SwapBytes((char *)&value, sizeof(double), 1);
           }
 
           fwrite(&value, sizeof(double), 1, fp);
@@ -1839,7 +1841,7 @@ class VTK_WriteMesh_Op : public E_F0mps {
             double value = (*this).eval(j, stack);
 
             if (!bigEndian) {
-              SwapBytes((char *)&value, sizeof(double), 1);
+              FreeFEM::SwapBytes((char *)&value, sizeof(double), 1);
             }
 
             fwrite(&value, sizeof(double), 1, fp);
@@ -1983,7 +1985,7 @@ class VTK_WriteMesh_Op : public E_F0mps {
                 valsol[iv * (*this).nbfloat + j] = valsol[iv * (*this).nbfloat + j] / takemesh[iv];
                 float value = valsol[iv * (*this).nbfloat + j];
 
-                SwapBytes((char *)&value, sizeof(float), 1);
+                FreeFEM::SwapBytes((char *)&value, sizeof(float), 1);
                 fwrite(&value, sizeof(float), 1, fp);
               }
             }
@@ -2066,7 +2068,7 @@ class VTK_WriteMesh_Op : public E_F0mps {
                 valsol[iv * (*this).nbfloat + j] = valsol[iv * (*this).nbfloat + j] / takemesh[iv];
                 double value = valsol[iv * (*this).nbfloat + j];
 
-                SwapBytes((char *)&value, sizeof(double), 1);
+                FreeFEM::SwapBytes((char *)&value, sizeof(double), 1);
                 fwrite(&value, sizeof(double), 1, fp);
               }
             }
@@ -2260,7 +2262,7 @@ void VTK_WRITE_MESH(const string &filename, FILE *fp, const Mesh &Th, bool binar
       f[2] = 0.;    // P.z; 3D case
       if (binary) {
         if (!bigEndian) {
-          SwapBytes((char *)&f, sizeof(float), 3);
+          FreeFEM::SwapBytes((char *)&f, sizeof(float), 3);
         }
 
         fwrite(&f, sizeof(float), 3, fp);
@@ -2279,7 +2281,7 @@ void VTK_WRITE_MESH(const string &filename, FILE *fp, const Mesh &Th, bool binar
       f[2] = 0.;    // P.z; 3D case
       if (binary) {
         if (!bigEndian) {
-          SwapBytes((char *)&f, sizeof(double), 3);
+          FreeFEM::SwapBytes((char *)&f, sizeof(double), 3);
         }
 
         fwrite((unsigned char *)&f, sizeof(double), 3, fp);
@@ -2335,7 +2337,7 @@ void VTK_WRITE_MESH(const string &filename, FILE *fp, const Mesh &Th, bool binar
       }
 
       if (!bigEndian) {
-        SwapBytes((char *)&iv, sizeof(int), IntType + 1);
+        FreeFEM::SwapBytes((char *)&iv, sizeof(int), IntType + 1);
       }
 
       fwrite(&iv, sizeof(int), IntType + 1, fp);
@@ -2358,7 +2360,7 @@ void VTK_WRITE_MESH(const string &filename, FILE *fp, const Mesh &Th, bool binar
         }
 
         if (!bigEndian) {
-          SwapBytes((char *)&iv, sizeof(int), IntType + 1);
+          FreeFEM::SwapBytes((char *)&iv, sizeof(int), IntType + 1);
         }
 
         fwrite(&iv, sizeof(int), IntType + 1, fp);
@@ -2415,7 +2417,7 @@ void VTK_WRITE_MESH(const string &filename, FILE *fp, const Mesh &Th, bool binar
     for (int it = 0; it < Th.nt; it++) {
       type = VTK_TRI;
       if (!bigEndian) {
-        SwapBytes((char *)&type, sizeof(int), 1);
+        FreeFEM::SwapBytes((char *)&type, sizeof(int), 1);
       }
 
       fwrite(&type, sizeof(int), 1, fp);
@@ -2425,7 +2427,7 @@ void VTK_WRITE_MESH(const string &filename, FILE *fp, const Mesh &Th, bool binar
       for (int ibe = 0; ibe < Th.neb; ibe++) {
         type = VTK_EDGE;
         if (!bigEndian) {
-          SwapBytes((char *)&type, sizeof(int), 1);
+          FreeFEM::SwapBytes((char *)&type, sizeof(int), 1);
         }
 
         fwrite(&type, sizeof(int), 1, fp);
@@ -2514,7 +2516,7 @@ void VTK_WRITE_MESH(const string &filename, FILE *fp, const Mesh &Th, bool binar
       const Mesh::Triangle &K(Th.t(it));
       label = K.lab;
       if (!bigEndian) {
-        SwapBytes((char *)&label, sizeof(int), 1);
+        FreeFEM::SwapBytes((char *)&label, sizeof(int), 1);
       }
 
       fwrite(&label, sizeof(int), 1, fp);
@@ -2525,7 +2527,7 @@ void VTK_WRITE_MESH(const string &filename, FILE *fp, const Mesh &Th, bool binar
         const Mesh::BorderElement &K(Th.be(ibe));
         label = K.lab;
         if (!bigEndian) {
-          SwapBytes((char *)&label, sizeof(int), 1);
+          FreeFEM::SwapBytes((char *)&label, sizeof(int), 1);
         }
 
         fwrite(&label, sizeof(int), 1, fp);
@@ -3044,7 +3046,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
         }
 
         if (!bigEndian) {
-          SwapBytes((char *)f, sizeof(float), 3);
+          FreeFEM::SwapBytes((char *)f, sizeof(float), 3);
         }
 
         for (int j = 0; j < 3; j++) {
@@ -3057,7 +3059,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
         }
 
         if (!bigEndian) {
-          SwapBytes((char *)xyz, sizeof(double), 3);
+          FreeFEM::SwapBytes((char *)xyz, sizeof(double), 3);
         }
       }
     } else {
@@ -3126,7 +3128,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
       }
 
       if (!bigEndian) {
-        SwapBytes((char *)&numVerts, sizeof(int), 1);
+        FreeFEM::SwapBytes((char *)&numVerts, sizeof(int), 1);
       }
 
       if ((int)fread(n, sizeof(int), numVerts, fp) != numVerts) {
@@ -3135,7 +3137,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
       }
 
       if (!bigEndian) {
-        SwapBytes((char *)n, sizeof(int), numVerts);
+        FreeFEM::SwapBytes((char *)n, sizeof(int), numVerts);
       }
     } else {
       if (fscanf(fp, "%d", &numVerts) != 1) {
@@ -3197,7 +3199,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
       }
 
       if (!bigEndian) {
-        SwapBytes((char *)&type, sizeof(int), 1);
+        FreeFEM::SwapBytes((char *)&type, sizeof(int), 1);
       }
     } else {
       if (fscanf(fp, "%d", &type) != 1) {
@@ -3418,7 +3420,7 @@ class VTK_WriteMesh3_Op : public E_F0mps {
           for (int j = 0; j < nbfloat; j++) {
             float value = eval(j, stack);
 
-            SwapBytes((char *)&value, sizeof(float), 1);
+            FreeFEM::SwapBytes((char *)&value, sizeof(float), 1);
             fwrite(&value, sizeof(float), 1, fp);
           }
         }
@@ -3434,7 +3436,7 @@ class VTK_WriteMesh3_Op : public E_F0mps {
             for (int j = 0; j < nbfloat; j++) {
               float value = eval(j, stack);
 
-              SwapBytes((char *)&value, sizeof(float), 1);
+              FreeFEM::SwapBytes((char *)&value, sizeof(float), 1);
               fwrite(&value, sizeof(float), 1, fp);
             }
           }
@@ -3531,7 +3533,7 @@ class VTK_WriteMesh3_Op : public E_F0mps {
           for (int j = 0; j < (*this).nbfloat; j++) {
             double value = (*this).eval(j, stack);
 
-            SwapBytes((char *)&value, sizeof(double), 1);
+            FreeFEM::SwapBytes((char *)&value, sizeof(double), 1);
             fwrite(&value, sizeof(double), 1, fp);
           }
         }
@@ -3547,7 +3549,7 @@ class VTK_WriteMesh3_Op : public E_F0mps {
             for (int j = 0; j < (*this).nbfloat; j++) {
               double value = (*this).eval(j, stack);
 
-              SwapBytes((char *)&value, sizeof(double), 1);
+              FreeFEM::SwapBytes((char *)&value, sizeof(double), 1);
               fwrite(&value, sizeof(double), 1, fp);
             }
           }
@@ -3716,7 +3718,7 @@ class VTK_WriteMesh3_Op : public E_F0mps {
                 float value = valsol[iv * (*this).nbfloat + j];
 
                 if (!bigEndian) {
-                  SwapBytes((char *)&value, sizeof(float), 1);
+                  FreeFEM::SwapBytes((char *)&value, sizeof(float), 1);
                 }
 
                 fwrite(&value, sizeof(float), 1, fp);
@@ -3801,7 +3803,7 @@ class VTK_WriteMesh3_Op : public E_F0mps {
                 valsol[iv * (*this).nbfloat + j] = valsol[iv * (*this).nbfloat + j] / takemesh[iv];
                 double value = valsol[iv * (*this).nbfloat + j];
 
-                SwapBytes((char *)&value, sizeof(double), 1);
+                FreeFEM::SwapBytes((char *)&value, sizeof(double), 1);
                 fwrite(&value, sizeof(double), 1, fp);
               }
             }
@@ -4000,7 +4002,7 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
       f[2] = P.z;
       if (binary) {
         if (!bigEndian) {
-          SwapBytes((char *)&f, sizeof(float), 3);
+          FreeFEM::SwapBytes((char *)&f, sizeof(float), 3);
         }
 
         fwrite(&f, sizeof(float), 3, fp);
@@ -4017,7 +4019,7 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
       f[2] = P.z;    // 3D case
       if (binary) {
         if (!bigEndian) {
-          SwapBytes((char *)&f, sizeof(float), 3);
+          FreeFEM::SwapBytes((char *)&f, sizeof(float), 3);
         }
 
         fwrite(&f, sizeof(float), 3, fp);
@@ -4073,7 +4075,7 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
       }
 
       if (!bigEndian) {
-        SwapBytes((char *)&iv, sizeof(int), IntType + 1);
+        FreeFEM::SwapBytes((char *)&iv, sizeof(int), IntType + 1);
       }
 
       fwrite(&iv, sizeof(int), IntType + 1, fp);
@@ -4096,7 +4098,7 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
         }
 
         if (!bigEndian) {
-          SwapBytes((char *)&iv, sizeof(int), IntType + 1);
+          FreeFEM::SwapBytes((char *)&iv, sizeof(int), IntType + 1);
         }
 
         fwrite(&iv, sizeof(int), IntType + 1, fp);
@@ -4153,7 +4155,7 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
     for (int it = 0; it < Th.nt; it++) {
       type = VTK_TET;
       if (!bigEndian) {
-        SwapBytes((char *)&type, sizeof(int), 1);
+        FreeFEM::SwapBytes((char *)&type, sizeof(int), 1);
       }
 
       fwrite(&type, sizeof(int), 1, fp);
@@ -4163,7 +4165,7 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
       for (int ibe = 0; ibe < Th.nbe; ibe++) {
         type = VTK_TRI;
         if (!bigEndian) {
-          SwapBytes((char *)&type, sizeof(int), 1);
+          FreeFEM::SwapBytes((char *)&type, sizeof(int), 1);
         }
 
         fwrite(&type, sizeof(int), 1, fp);
@@ -4249,7 +4251,7 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
       const Tet &K(Th.elements[it]);
       label = K.lab;
       if (!bigEndian) {
-        SwapBytes((char *)&label, sizeof(int), 1);
+        FreeFEM::SwapBytes((char *)&label, sizeof(int), 1);
       }
 
       fwrite(&label, sizeof(int), 1, fp);
@@ -4260,7 +4262,7 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
         const Triangle3 &K(Th.be(ibe));
         label = K.lab;
         if (!bigEndian) {
-          SwapBytes((char *)&label, sizeof(int), 1);
+          FreeFEM::SwapBytes((char *)&label, sizeof(int), 1);
         }
 
         fwrite(&label, sizeof(int), 1, fp);
@@ -4668,7 +4670,7 @@ class VTK_WriteMeshT_Op : public E_F0mps {
 
           for (int j = 0; j < nbfloat; j++) {
             float value = eval(j, stack);
-            SwapBytes((char *)&value, sizeof(float), 1);
+            FreeFEM::SwapBytes((char *)&value, sizeof(float), 1);
             fwrite(&value, sizeof(float), 1, fp);
           }
         }
@@ -4684,7 +4686,7 @@ class VTK_WriteMeshT_Op : public E_F0mps {
             for (int j = 0; j < nbfloat; j++) {
               float value = eval(j, stack);
 
-              SwapBytes((char *)&value, sizeof(float), 1);
+              FreeFEM::SwapBytes((char *)&value, sizeof(float), 1);
               fwrite(&value, sizeof(float), 1, fp);
             }
           }
@@ -4841,7 +4843,7 @@ class VTK_WriteMeshT_Op : public E_F0mps {
           for (int j = 0; j < (*this).nbfloat; j++) {
             double value = (*this).eval(j, stack);
 
-            SwapBytes((char *)&value, sizeof(double), 1);
+            FreeFEM::SwapBytes((char *)&value, sizeof(double), 1);
             fwrite(&value, sizeof(double), 1, fp);
           }
         }
@@ -4857,7 +4859,7 @@ class VTK_WriteMeshT_Op : public E_F0mps {
             for (int j = 0; j < (*this).nbfloat; j++) {
               double value = (*this).eval(j, stack);
 
-              SwapBytes((char *)&value, sizeof(double), 1);
+              FreeFEM::SwapBytes((char *)&value, sizeof(double), 1);
               fwrite(&value, sizeof(double), 1, fp);
             }
           }
@@ -5024,7 +5026,7 @@ class VTK_WriteMeshT_Op : public E_F0mps {
               for (int j = 0; j < (*this).nbfloat; j++) {
                 valsol[iv * (*this).nbfloat + j] = valsol[iv * (*this).nbfloat + j] / takemesh[iv];
                 float value = valsol[iv * (*this).nbfloat + j];
-                SwapBytes((char *)&value, sizeof(float), 1);
+                FreeFEM::SwapBytes((char *)&value, sizeof(float), 1);
                 fwrite(&value, sizeof(float), 1, fp);
               }
             }
@@ -5102,7 +5104,7 @@ class VTK_WriteMeshT_Op : public E_F0mps {
                 valsol[iv * (*this).nbfloat + j] = valsol[iv * (*this).nbfloat + j] / takemesh[iv];
                 double value = valsol[iv * (*this).nbfloat + j];
 
-                SwapBytes((char *)&value, sizeof(double), 1);
+                FreeFEM::SwapBytes((char *)&value, sizeof(double), 1);
                 fwrite(&value, sizeof(double), 1, fp);
               }
 
@@ -5306,7 +5308,7 @@ void VTK_WRITE_MESHT(const string &filename, FILE *fp, const MMesh &Th, bool bin
       f[1] = P.y;
       f[2] = P.z;
       if (binary) {
-        if (!bigEndian) SwapBytes((char *)&f, sizeof(float), 3);
+        if (!bigEndian) FreeFEM::SwapBytes((char *)&f, sizeof(float), 3);
         fwrite(&f, sizeof(float), 3, fp);
       } else
         fprintf(fp, "%.8g %.8g %.8g\n", P.x, P.y, P.z);
@@ -5321,7 +5323,7 @@ void VTK_WRITE_MESHT(const string &filename, FILE *fp, const MMesh &Th, bool bin
       f[1] = P.y;
       f[2] = P.z;
       if (binary) {
-        if (!bigEndian) SwapBytes((char *)&f, sizeof(double), 3);
+        if (!bigEndian) FreeFEM::SwapBytes((char *)&f, sizeof(double), 3);
         fwrite((unsigned char *)&f, sizeof(double), 3, fp);
       } else
         fprintf(fp, "%.15lg %.15lg %.15lg\n", f[0], f[1], f[2]);
@@ -5352,7 +5354,7 @@ void VTK_WRITE_MESHT(const string &filename, FILE *fp, const MMesh &Th, bool bin
       iv[0] = (T::nv);
 
       for (int ii = 0; ii < (T::nv); ii++) iv[ii + 1] = Th.operator( )(K[ii]);
-      if (!bigEndian) SwapBytes((char *)&iv, sizeof(int), (T::nv) + 1);
+      if (!bigEndian) FreeFEM::SwapBytes((char *)&iv, sizeof(int), (T::nv) + 1);
       fwrite(&iv, sizeof(int), (T::nv) + 1, fp);
     }
 
@@ -5366,7 +5368,7 @@ void VTK_WRITE_MESHT(const string &filename, FILE *fp, const MMesh &Th, bool bin
         iv[0] = (B::nv);
 
         for (int ii = 0; ii < (B::nv); ii++) iv[ii + 1] = Th.operator( )(K[ii]);
-        if (!bigEndian) SwapBytes((char *)&iv, sizeof(int), (B::nv) + 1);
+        if (!bigEndian) FreeFEM::SwapBytes((char *)&iv, sizeof(int), (B::nv) + 1);
         fwrite(&iv, sizeof(int), (B::nv) + 1, fp);
       }
     }
@@ -5410,7 +5412,7 @@ void VTK_WRITE_MESHT(const string &filename, FILE *fp, const MMesh &Th, bool bin
         type = VTK_TRI;
       else if (std::is_same< MMesh, MeshL >::value)
         type = VTK_EDGE;
-      if (!bigEndian) SwapBytes((char *)&type, sizeof(int), 1);
+      if (!bigEndian) FreeFEM::SwapBytes((char *)&type, sizeof(int), 1);
       fwrite(&type, sizeof(int), 1, fp);
     }
 
@@ -5420,7 +5422,7 @@ void VTK_WRITE_MESHT(const string &filename, FILE *fp, const MMesh &Th, bool bin
           type = VTK_EDGE;
         else if (std::is_same< MMesh, MeshL >::value)
           type = VTK_VERTEX;
-        if (!bigEndian) SwapBytes((char *)&type, sizeof(int), 1);
+        if (!bigEndian) FreeFEM::SwapBytes((char *)&type, sizeof(int), 1);
         fwrite(&type, sizeof(int), 1, fp);
       }
     }
@@ -5494,14 +5496,14 @@ void VTK_WRITE_MESHT(const string &filename, FILE *fp, const MMesh &Th, bool bin
     for (int it = 0; it < Th.nt; it++) {
       const T &K(Th.t(it));
       label = K.lab;
-      if (!bigEndian) SwapBytes((char *)&label, sizeof(int), 1);
+      if (!bigEndian) FreeFEM::SwapBytes((char *)&label, sizeof(int), 1);
       fwrite(&label, sizeof(int), 1, fp);
     }
     if (surface) {
       for (int ibe = 0; ibe < Th.nbe; ibe++) {
         const B &K(Th.be(ibe));
         label = K.lab;
-        if (!bigEndian) SwapBytes((char *)&label, sizeof(int), 1);
+        if (!bigEndian) FreeFEM::SwapBytes((char *)&label, sizeof(int), 1);
         fwrite(&label, sizeof(int), 1, fp);
       }
     }
@@ -5947,7 +5949,7 @@ MMesh *VTK_LoadT(const string &filename, bool bigEndian, bool cleanmesh, bool re
           ExecError("error in reading vtk file");
         }
 
-        if (!bigEndian) SwapBytes((char *)f, sizeof(float), 3);
+        if (!bigEndian) FreeFEM::SwapBytes((char *)f, sizeof(float), 3);
 
         for (int j = 0; j < 3; j++) xyz[j] = f[j];
 
@@ -5956,7 +5958,7 @@ MMesh *VTK_LoadT(const string &filename, bool bigEndian, bool cleanmesh, bool re
         ExecError("error in reading vtk file");
       }
 
-      if (!bigEndian) SwapBytes((char *)xyz, sizeof(double), 3);
+      if (!bigEndian) FreeFEM::SwapBytes((char *)xyz, sizeof(double), 3);
 
     } else {
       if (verbosity > 10) cout << datasize << " " << sizeof(float) << endl;
@@ -6016,14 +6018,14 @@ MMesh *VTK_LoadT(const string &filename, bool bigEndian, bool cleanmesh, bool re
         ExecError("error in reading vtk file");
       }
 
-      if (!bigEndian) SwapBytes((char *)&numVerts, sizeof(int), 1);
+      if (!bigEndian) FreeFEM::SwapBytes((char *)&numVerts, sizeof(int), 1);
 
       if ((int)fread(n, sizeof(int), numVerts, fp) != numVerts) {
         cout << "error in reading VTK files " << endl;
         ExecError("error in reading vtk file");
       }
 
-      if (!bigEndian) SwapBytes((char *)n, sizeof(int), numVerts);
+      if (!bigEndian) FreeFEM::SwapBytes((char *)n, sizeof(int), numVerts);
     } else {
       if (fscanf(fp, "%d", &numVerts) != 1) {
         cout << "error in reading VTK files " << endl;
@@ -6076,7 +6078,7 @@ MMesh *VTK_LoadT(const string &filename, bool bigEndian, bool cleanmesh, bool re
       }
 
       if (!bigEndian) {
-        SwapBytes((char *)&type, sizeof(int), 1);
+        FreeFEM::SwapBytes((char *)&type, sizeof(int), 1);
       }
     } else {
       if (fscanf(fp, "%d", &type) != 1) {
