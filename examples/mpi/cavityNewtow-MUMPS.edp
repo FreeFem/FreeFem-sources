@@ -3,7 +3,7 @@
 // time on 1 proc times: compile 0.012316s, execution 4.92302s,  mpirank:0
 // NBPROC 4
 
-load "MUMPS"
+load "MUMPS_mpi"
 
 verbosity=0; 
 real ttgv=1e30;

@@ -5,7 +5,7 @@
 // other
 load "msh3"
 load "medit"
-load "MUMPS"
+load "MUMPS_mpi"
 include "getARGV.idp"
 
 real ttgv=1e10;

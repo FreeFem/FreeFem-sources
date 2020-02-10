@@ -130,7 +130,6 @@ m4_define([TOOL_PARAMETERS],
 
 m4_define([TOOL_DISABLE],
     [AC_ARG_ENABLE($1,AC_HELP_STRING([--disable-$1],[Do not use $1]))
-
     if test "$enable_$1" = "no"
     then
         AC_SUBST([TOOL_COMPILE_$1],"")
@@ -2105,8 +2104,8 @@ if test "$ff_cmake" = yes; then
 fi
 TOOL_DISABLE(mshmet,"mshmet.$DYLIB_SUFFIX aniso.$DYLIB_SUFFIX")
 TOOL_DISABLE(gmm,ilut.$DYLIB_SUFFIX,,enable_gmm=no)
-TOOL_DISABLE(scalapack,MUMPS.$DYLIB_SUFFIX MUMPS_mpi.$DYLIB_SUFFIX)
-TOOL_DISABLE(mumps,MUMPS.$DYLIB_SUFFIX MUMPS_mpi.$DYLIB_SUFFIX)
+TOOL_DISABLE(scalapack,"MUMPS.$DYLIB_SUFFIX MUMPS_mpi.$DYLIB_SUFFIX")
+TOOL_DISABLE(mumps,"MUMPS.$DYLIB_SUFFIX MUMPS_mpi.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps_seq,"MUMPS_seq.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX",mumps-seq)
 TOOL_DISABLE(nlopt,ff-NLopt.$DYLIB_SUFFIX)
 

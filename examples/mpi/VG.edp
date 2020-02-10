@@ -3,7 +3,7 @@
 
 // other
 //load "medit"
-load "MUMPS"
+load "MUMPS_mpi"
 include "cube.idp"
 
 real ttgv=1e10;

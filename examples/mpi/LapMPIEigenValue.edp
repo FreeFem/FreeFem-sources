@@ -8,7 +8,7 @@
 // -------------------------------------
 //  find $\lamda$ such that:
 // $$  \int_{\omega}  \nabla u_ \nabla v = \lamba \int_{\omega} u \nabla v  $$
-load "MUMPS"
+load "MUMPS_mpi"
 verbosity=7;
 mesh Th=square(20,20,[pi*y,pi*x]);
 Th=change(Th,fregion= (mpisize*nuTriangle)/Th.nt);

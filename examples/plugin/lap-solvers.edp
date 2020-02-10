@@ -1,5 +1,5 @@
 load "SuperLu"
-load "MUMPS"
+load "MUMPS_seq"
 verbosity=3;
 //  a example to test the level of optimisation
 // --------------------------------------------
