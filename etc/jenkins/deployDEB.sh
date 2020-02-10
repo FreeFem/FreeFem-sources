@@ -79,6 +79,6 @@ fi
 
 # clean the VM
 rm -rf $DEB_NAME
-rm $GH_DEB_NAME
+rm -rf $GH_DEB_NAME
 
 . ./bin/uninstall-ff++
