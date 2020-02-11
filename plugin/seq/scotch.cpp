@@ -152,9 +152,11 @@ static void Init_Scotch( ) {
   Global.Add("scotch", "(", new SCOTCH< const Mesh, pmesh, long >);
   Global.Add("scotch", "(", new SCOTCH< const Mesh3, pmesh3, long >);
   Global.Add("scotch", "(", new SCOTCH< const MeshS, pmeshS, long >);
+  Global.Add("scotch", "(", new SCOTCH< const MeshL, pmeshL, long >);
   Global.Add("scotch", "(", new SCOTCH< const Mesh, pmesh, double >);
   Global.Add("scotch", "(", new SCOTCH< const Mesh3, pmesh3, double >);
   Global.Add("scotch", "(", new SCOTCH< const MeshS, pmeshS, double >);
+  Global.Add("scotch", "(", new SCOTCH< const MeshL, pmeshL, double >);
 }
 
 LOADFUNC(Init_Scotch)

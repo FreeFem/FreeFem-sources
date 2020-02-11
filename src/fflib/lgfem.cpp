@@ -6246,6 +6246,25 @@ void init_lgfem( ) {
   Add< Resize1< pfScarray > >("(", "",
                               new OneOperator2_< pfScarray, Resize1< pfScarray >, long >(feresize));
 
+  Dcl_Type< Resize1< pfLrbasearray * > >( );
+  Dcl_Type< Resize1< pfLrarray > >( );
+  Dcl_Type< Resize1< pfLcbasearray * > >( );
+  Dcl_Type< Resize1< pfLcarray > >( );
+  Add< pfLrbasearray * >(
+    "resize", ".", new OneOperator1< Resize1< pfLrbasearray * >, pfLrbasearray * >(to_Resize1));
+  Add< pfLrarray >("resize", ".", new OneOperator1< Resize1< pfLrarray >, pfLrarray >(to_Resize1));
+  Add< pfLcbasearray * >(
+    "resize", ".", new OneOperator1< Resize1< pfLcbasearray * >, pfLcbasearray * >(to_Resize1));
+  Add< pfLcarray >("resize", ".", new OneOperator1< Resize1< pfLcarray >, pfLcarray >(to_Resize1));
+
+  Add< Resize1< pfLrbasearray * > >(
+    "(", "", new OneOperator2_< pfLrbasearray *, Resize1< pfLrbasearray * >, long >(fepresize));
+  Add< Resize1< pfLrarray > >("(", "",
+                              new OneOperator2_< pfLrarray, Resize1< pfLrarray >, long >(feresize));
+  Add< Resize1< pfLcbasearray * > >(
+    "(", "", new OneOperator2_< pfLcbasearray *, Resize1< pfLcbasearray * >, long >(fepresize));
+  Add< Resize1< pfLcarray > >("(", "",
+                              new OneOperator2_< pfLcarray, Resize1< pfLcarray >, long >(feresize));
   // end of resize ...
 
   Add< pfecbasearray * >("n", ".",
@@ -6688,8 +6707,8 @@ C_F0 NewFEarray(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F0 si
     return NewFEarrayT< v_fes3, 3 >(pids, currentblock, fespacetype, sizeofarray, cplx, dim);
   else if (dim == 4)
     return NewFEarrayT< v_fesS, 4 >(pids, currentblock, fespacetype, sizeofarray, cplx, dim);
-  // else if  (dim==5)
-  //     return NewFEarrayT<v_fesL,5>(pids,currentblock,fespacetype,sizeofarray,cplx,dim);
+  else if  (dim==5)
+    return NewFEarrayT<v_fesL, 5 >(pids,currentblock,fespacetype,sizeofarray,cplx,dim);
   else
     CompileError("Invalid vectorial fespace on Rd  ( d != 2 or 3) ");
   return C_F0( );
