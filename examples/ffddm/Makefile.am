@@ -39,11 +39,11 @@ TESTS_HPDDM = diffusion-2d-thirdlevelgeneo.edp \
 	natural_convection_3D_obstacle.edp \
 	natural_convection.edp \
 	Richards-2d.edp \
-	heat-torus-3d-surf.edp \
-	Helmholtz_Cobracavity_BEM.edp
-
+	heat-torus-3d-surf.edp
 
 TESTS_METIS = Maxwell_Cobracavity.edp
+
+TESTS_BEM_HPDDM = Helmholtz_Cobracavity_BEM.edp Helmholtz_circle_BEM.edp
 
 if MPI
 if HPDDM
@@ -51,14 +51,23 @@ CONDITIONAL_HPDDM = $(TESTS_HPDDM)
 if METIS
 CONDITIONAL_METIS_HPDDM = $(TESTS_METIS_HPDDM)
 endif METIS
+if BOOST
+if BEMTOOL
+if HTOOL
+CONDITIONAL_BEM_HPDDM = $(TESTS_BEM_HPDDM)
+endif HTOOL
+endif BEMTOOL
+endif BOOST
 endif HPDDM
 endif MPI
 
 TESTS = $(TESTS_HPDDM) \
-	$(TESTS_METIS_HPDDM)
+	$(TESTS_METIS_HPDDM) \
+	$(TESTS_BEM_HPDDM)
 
 LIST_CONDITIONAL = $(CONDITIONAL_HPDDM) \
-	$(CONDITIONAL_METIS_HPDDM)
+	$(CONDITIONAL_METIS_HPDDM) \
+	$(CONDITIONAL_BEM_HPDDM)
 
 
 XFAIL_TESTS = $(TESTS)

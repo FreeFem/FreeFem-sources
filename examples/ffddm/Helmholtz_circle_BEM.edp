@@ -1,0 +1,102 @@
+//ff-mpirun -np 4 Helmholtz_circle_BEM.edp -wg
+
+// for the make check:
+// NBPROC 4
+// PARAM
+
+load "bem"
+load "msh3"
+
+include "getARGV.idp"
+
+include "cobrameshcavity.idp"
+
+macro dimension 3L//
+
+include "ffddm.idp"
+load "bem"
+load "msh3"
+
+complex k = 10;
+
+// incident wave
+real[int] dir=[1,0];
+func finc = exp(1i*k*(x*dir[0]+y*dir[1]));
+func dxfinc = 1i*k*dir[0]*finc;
+func dyfinc = 1i*k*dir[1]*finc;
+
+//  Mesh
+int n = 1000;
+border circle(t=0, 2*pi){x=cos(t); y=sin(t); z=0;}
+meshL Th = buildmeshL(circle(n));
+
+Th = OrientNormal(Th,unbounded=1);
+
+ffddmbuildDmesh(H, Th, mpiCommWorld)
+
+macro def(i)i// EOM                         // scalar field definition
+macro init(i)i// EOM                        // scalar field initialization
+ffddmbuildDfespace(H, H, complex, def, init, P1)
+
+macro Varf(varfName, meshName, PhName)
+  BemKernel ker("SL",1,k);
+  varfbem varfName(u,v) = int1dx1d(meshName)(meshName)(BEM(ker,u,v));
+//
+
+macro Varfrhs(varfName, meshName, PhName)
+varf varfName(u,v) =
+  -int1d(meshName)(finc*v);
+//
+
+ffddmsetupOperatorBem(H, H, Varf)
+
+if (mpirank == 0)
+  cout << HAglobal.infos << endl;
+display(HAglobal);
+
+ffddmsetupPrecond(H, Varf)
+
+HVhi<complex> ui, bi;
+
+ffddmbuildrhs(H, Varfrhs, bi[])
+
+ui[] = HfGMRES(ui[], bi[], 1.e-6, 200, "right");
+
+Hwritesummary
+
+fespace Uh(Th,P1);
+Uh<complex> u;
+
+HfromVhi(ui[], Uh, u[])
+
+// Mesh output
+int np = 200;
+int R = 4;
+
+border b1(t=-R, R){x=t; y=-R;}
+border b2(t=-R, R){x=R; y=t;}
+border b3(t=-R, R){x=-t; y=R;}
+border b4(t=-R, R){x=-R; y=-t;}
+
+mesh ThOut = buildmesh(b1(np)+b2(np)+b3(np)+b4(np)+circle(-np*pi/R));
+
+fespace UhOut(ThOut,P1);
+
+BemPotential Pot("SL",k);
+varfbem vp(u,v)=int1d(Th)(POT(Pot,u,v));
+HMatrix<complex> B = vp(Uh,UhOut);
+if (mpirank == 0) cout << B.infos << endl;
+display(B);
+
+UhOut<complex> v, vinc;
+
+vinc = finc;
+
+v[] = B*u[];
+
+v[] += vinc[];
+
+UhOut vr = abs(v);
+
+plot(vr, dim=2, fill=1, value=1, nbiso=20);
+
