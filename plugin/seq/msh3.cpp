@@ -7418,10 +7418,10 @@ class Square_Op : public E_F0mps {
       const E_Array *a2 = dynamic_cast< const E_Array * >(transfo);
       int err = 0;
       if (a2) {
-        if (a2->size( ) != 3) CompileError("Square (n1,n2, [X,Y,Z]) ");
+        if (a2->size( )>1) CompileError("Square (n1,n2, [X,Y,Z]) ");
         xx = to< double >((*a2)[0]);
         yy = to< double >((*a2)[1]);
-        zz = to< double >((*a2)[2]);
+        if(a2->size()>2) zz = to< double >((*a2)[2]);
       }
     }
   }
@@ -8108,8 +8108,8 @@ class Movemesh_Op : public E_F0mps {
       }
 
       xx = to< double >((*a1)[0]);
-      if(size>1) yy = to< double >((*a1)[1]);
-      if(size>2) zz = to< double >((*a1)[2]);
+      if(a1->size()>1) yy = to< double >((*a1)[1]);
+      if(a1->size()>2) zz = to< double >((*a1)[2]);
     }
   }
 
@@ -8321,8 +8321,8 @@ class Movemesh : public OneOperator {
       }
 
       Expression X = to< double >((*a)[0]); 
-      Expression Y=0 ; if(size>1) Y=to< double >((*a)[1]); 
-      Expression Z=0 ; if(size>2) Z= to< double >((*a)[2]);
+      Expression Y=0 ; if(a->size( )>1) Y=to< double >((*a)[1]); 
+      Expression Z=0 ; if(a->size( )>2) Z= to< double >((*a)[2]);
       return new Movemesh_Op< MMesh >(args, t[0]->CastTo(args[0]), X, Y, Z);
     } else {
       return 0;
