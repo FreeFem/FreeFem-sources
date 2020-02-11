@@ -94,35 +94,41 @@ else
 ##   On  windows....
 PYTHON2=
 FLAGS_CONF_PETSC_REAL= --with-python-exec=/usr/bin/python3 --with-shared-libraries=0 --with-debugging=0 \
-	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 --with-cxx-dialect=C++11 \
+	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' --with-cxx-dialect=C++11 \
 	COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 	CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
+	FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 	--with-scalar-type=real \
 	--with-mpi-lib='$(MPI_LIB)' \
 	--with-mpi-include='$(MPI_INC_DIR)' \
-	--with-ssl=0 --with-x=0 --with-debugging=0 \
+	--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
-	--download-f2cblaslapack \
+	$(PETSC_OPENBLAS) \
 	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu' \
 	--download-metis --download-ptscotch \
 	--download-hypre --download-parmetis \
-	--download-superlu_dist --download-superlu --download-suitesparse --download-tetgen \
+	--download-scalapack --download-mumps \
+	--download-superlu --download-suitesparse --download-tetgen \
 	--download-slepc
 
 FLAGS_CONF_PETSC_COMPLEX= --with-python-exec=/usr/bin/python3 --with-shared-libraries=0 --with-debugging=0 \
-	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 --with-cxx-dialect=C++11 \
+	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' --with-cxx-dialect=C++11 \
 	COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 	CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
+	FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 	--with-scalar-type=complex \
 	--with-mpi-lib='$(MPI_LIB)' \
 	--with-mpi-include='$(MPI_INC_DIR)' \
-	--with-ssl=0 --with-x=0 --with-debugging=0 \
+	--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
+	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
 	--with-metis-dir=$(DIR_INSTALL_REAL) \
 	--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
-	--with-f2cblaslapack-dir=$(DIR_INSTALL_REAL) \
+	$(PETSC_OPENBLAS_C) \
 	--with-suitesparse-include='$(SUITESPARSE_INCLUDE)' --with-suitesparse-lib='$(SUITESPARSE_LIB)' \
 	--with-parmetis-dir=$(DIR_INSTALL_REAL) \
 	--with-tetgen-dir=$(DIR_INSTALL_REAL) \
+	--with-mumps-dir=$(DIR_INSTALL_REAL) \
+	--with-scalapack-dir=$(DIR_INSTALL_REAL) \
 	--download-slepc
 endif
 
