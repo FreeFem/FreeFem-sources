@@ -20,8 +20,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 # ======================================================================
 # headeralh default=0 freefem make multipleauthors start=19/03/10 upmc
-PETSC_ADDCONF?=
-SPELC_ADDCONF?=
 
 PYTHON2?=python2.7
 include Makefile.inc
@@ -67,15 +65,13 @@ else
 endif
 ifeq ($(WIN32DLLTARGET),)
 ##   Not on windows....
-  FFWINDOWS=false
-  WITH_SLEPC=yes
-  FLAGS_CONF_PETSC_REAL= --with-debugging=0 \
+FLAGS_CONF_PETSC_REAL= --with-debugging=0 \
 		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' --with-cxx-dialect=C++11 \
 		COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
-		--with-scalar-type=real $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
+		--with-scalar-type=real \
 		$(PETSC_OPENBLAS) \
 		$(PETSC_DOWNLOAD)
 FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
@@ -84,7 +80,7 @@ FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
 		CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		--with-scalar-type=complex \
-		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 $(WITH_MPI_DIR) $(PETSC_ADDCONF) \
+		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 		$(PETSC_OPENBLAS_C) \
 		--with-scalapack-dir=$(DIR_INSTALL_REAL) \
 		--with-metis-dir=$(DIR_INSTALL_REAL) \
@@ -96,42 +92,40 @@ FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
 		$(PETSC_DOWNLOAD_C)
 else
 ##   On  windows....
-  FFWINDOWS=true
-  WITH_SLEPC=no
-  FLAGS_CONF_PETSC_REAL= --with-python-exec=/usr/bin/python2 --with-shared-libraries=0 --with-debugging=0 \
-	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 \
-	COPTFLAGS='-O3 $(FLAGS_MTUNE) -D__int64=long\ long' \
-	CXXOPTFLAGS='-O3 $(FLAGS_MTUNE) -D__int64=long\ long' \
+PYTHON2=
+FLAGS_CONF_PETSC_REAL= --with-python-exec=/usr/bin/python3 --with-shared-libraries=0 --with-debugging=0 \
+	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 --with-cxx-dialect=C++11 \
+	COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
+	CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 	--with-scalar-type=real \
 	--with-mpi-lib='$(MPI_LIB)' \
 	--with-mpi-include='$(MPI_INC_DIR)' \
-	--with-metis-lib=$(dir3rdparty)/lib/parmetis/libmetis.a \
-	--with-metis-include=$(dir3rdparty)/include/parmetis \
-	--download-suitesparse \
 	--with-ssl=0 --with-x=0 --with-debugging=0 \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
-	--download-f2cblaslapack
-  #--download-slepc
-  #--with-blaslapack-lib='/mingw64/lib/libopenblas.a' \
+	--download-f2cblaslapack \
+	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu' \
+	--download-metis --download-ptscotch \
+	--download-hypre --download-parmetis \
+	--download-superlu_dist --download-superlu --download-suitesparse --download-tetgen \
+	--download-slepc
 
- FLAGS_CONF_PETSC_COMPLEX= --with-python-exec=/usr/bin/python2 	--with-shared-libraries=0	--with-debugging=0 \
-	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 \
-	COPTFLAGS='-O3 $(FLAGS_MTUNE) -D__int64=long\ long' \
-	CXXOPTFLAGS='-O3 $(FLAGS_MTUNE) -D__int64=long\ long' \
+FLAGS_CONF_PETSC_COMPLEX= --with-python-exec=/usr/bin/python3 --with-shared-libraries=0 --with-debugging=0 \
+	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc=0 --with-cxx-dialect=C++11 \
+	COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
+	CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 	--with-scalar-type=complex \
 	--with-mpi-lib='$(MPI_LIB)' \
 	--with-mpi-include='$(MPI_INC_DIR)' \
-	--with-metis-lib=$(dir3rdparty)/lib/parmetis/libmetis.a \
-	--with-metis-include=$(dir3rdparty)/include/parmetis \
-	--download-suitesparse \
 	--with-ssl=0 --with-x=0 --with-debugging=0 \
-	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
-	--download-f2cblaslapack
-#	--download-slepc
-#	--with-suitesparse-include=$(dir3rdparty)/include \
-#	--with-suitesparse-lib='[$(dir3rdparty)/lib/libumfpack.a,$(dir3rdparty)/lib/libcholmod.a,$(dir3rdparty)/lib/libcolamd.a,$(dir3rdparty)/lib/libamd.a,$(dir3rdparty)/lib/libsuitesparseconfig.a]' \	--with-suitesparse-lib='[$(dir3rdparty)/lib/libumfpack.a,$(dir3rdparty)/lib/libcolmod.a,$(dir3rdparty)/lib/libcholamd.a,$(dir3rdparty)/lib/libamd.a,$(dir3rdparty)/lib/libsuitesparseconfig.a]' \
-
+	--with-metis-dir=$(DIR_INSTALL_REAL) \
+	--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
+	--with-f2cblaslapack-dir=$(DIR_INSTALL_REAL) \
+	--with-suitesparse-include='$(SUITESPARSE_INCLUDE)' --with-suitesparse-lib='$(SUITESPARSE_LIB)' \
+	--with-parmetis-dir=$(DIR_INSTALL_REAL) \
+	--with-tetgen-dir=$(DIR_INSTALL_REAL) \
+	--download-slepc
 endif
+
 all-local:
 	@echo make ..
 	@echo " # To build petsc and slepc do $ make petsc-slepc"
@@ -160,25 +154,9 @@ ifeq ($(LAPACKLIBS), $(BLASLIBS))
 else
   BLAS_LAPACK_LIBS=$(LAPACKLIBS) $(BLASLIBS)
 endif
-WITH_MPI_DIR=
 
-ifeq ($(MPICC),$(W_MPICC))
-  WITH_MPI_DIR=
-else
- # WITH_MPI_DIR=--with-mpi-dir='$(MPI_DIR)'
-endif
-
-ifeq ($(WIN32DLLTARGET),)
-##   Not on windows....
-DIR_INSTALL_REAL:=$(FF_prefix_petsc)/real
-DIR_INSTALL_COMPLEX:=$(FF_prefix_petsc)/complex
-else
-##   On windows....
 DIR_INSTALL_REAL:=$(FF_prefix_petsc)/r
 DIR_INSTALL_COMPLEX:=$(FF_prefix_petsc)/c
-endif
-
-
 
 PETSC_DIR:=$(shell pwd)/$(SRCDIR)
 petsc-slepc: Makefile.inc dir-install WHERE-all
@@ -273,16 +251,12 @@ WHERE-complex:../lib/WHERE.PETSc-complex ../lib/WHERE.SLEPc-complex
 	echo 'petsccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"' >> $@
 	echo done $@
 ../lib/WHERE.SLEPc-complex:
-ifeq ($(WITH_SLEPC),yes)	
 	test -e $(DIR_INSTALL_COMPLEX)/include/slepc.h
 	-mkdir ../lib
 	echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lslepc' > $@
 	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"' >> $@
 	echo done $@
-else
-	echo no slepc sorry $@
-endif
-##  need include include Make-petsc-download.mk
+
 WHERE-all:Makefile WHERE WHERE-complex
 	echo >$@
 	test -z '$(SCALAPACK_LIB)' || echo scalapack LD $(SCALAPACK_LIB) >>$@
@@ -305,10 +279,10 @@ WHERE-all:Makefile WHERE WHERE-complex
 	echo 'petsc INCLUDE -I"$(DIR_INSTALL_REAL)/include"' >>$@
 	echo 'petsccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lpetsc' >>$@
 	echo 'petsccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"' >> $@
-	test '$(WITH_SLEPC)' = yes || echo 'slepc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lslepc' >>$@
-	test '$(WITH_SLEPC)' = yes || echo 'slepc INCLUDE -I"$(DIR_INSTALL_REAL)/include"' >>$@
-	test '$(WITH_SLEPC)' = yes || echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lslepc' >>$@
-	test '$(WITH_SLEPC)' = yes || echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"' >>$@
+	echo 'slepc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lslepc' >>$@
+	echo 'slepc INCLUDE -I"$(DIR_INSTALL_REAL)/include"' >>$@
+	echo 'slepccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lslepc' >>$@
+	echo 'slepccomplex INCLUDE -I"$(DIR_INSTALL_COMPLEX)/include"' >>$@
 
 #
 else
@@ -321,8 +295,10 @@ WHERE-all:Makefile Make-petsc-download.mk
 	 $(MAKE) -f Makefile.complex $@
 endif
 $(SRCDIR)/tag-tar:$(PACKAGE)
-	tar xvzf $(PACKAGE)
+	-tar xzf $(PACKAGE)
+ifeq ($(WIN32DLLTARGET),)
 	patch -p1 < petsc-metis.patch
+endif
 	touch $@
 $(PACKAGE):
 	../getall -o PETSc -a
@@ -347,14 +323,10 @@ changer:
 	otool -L $$libpp | awk '/libpetsc/ {print "**",$$1}'
 
 ../lib/WHERE.SLEPc:
-ifeq ($(WITH_SLEPC),yes)	
 	-mkdir ../lib
 	test -e $(DIR_INSTALL_REAL)/include/slepc.h
 	echo 'slepc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lslepc' > $@
 	echo 'slepc INCLUDE -I"$(DIR_INSTALL_REAL)/include"' >> $@
-else
-	echo "sorry no SLEPC"
-endif
 
 clean:clean-local
 clean-local:
@@ -368,7 +340,6 @@ clean-local:
 	-if test -d $(FF_prefix_petsc) ; then echo " try of remove of $(FF_prefix_petsc) under sudo .."; sudo rm -rf $(FF_prefix_petsc) ; fi
 	-rm do-sudo
 echo:
-	@echo " with_dir_mpi #$(W_MPICC)# #$(MPICC)# ::: #$(WITH_MPI_DIR)# "
 	@echo SUDO: $(SUDO)
 	@echo MTUNE: $(FLAGS_MTUNE)
 	@echo "sudo using user env: $(SUDO_WITH_ENV)"
@@ -378,7 +349,6 @@ echo:
 	@echo " do-sudo auto ???:" $(SHELL cat do-sudo)
 	@echo " BLAS_LAPACK_LIBS: $(BLAS_LAPACK_LIBS)"
 	@echo " # need sudo if '$(W_SUDO)' == 'sudo' .." $(W_SUDO1)
-	@echo " on WINDOWS: $(FFWINDOWS)"
 	@echo " dir3rdparty: $(dir3rdparty)"
 	-@otool -L $(DIR_INSTALL_COMPLEX)/lib/libslepc.$(VERSION_SLEPC).dylib | awk '/3rdparty/ {print $$1}'
 	-@otool -L $(DIR_INSTALL_REAL)/lib/libslepc.$(VERSION_SLEPC).dylib | awk '/3rdparty/ {print $$1}'

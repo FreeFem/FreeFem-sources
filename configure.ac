@@ -1077,7 +1077,7 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
             AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetscc)
-            if test -f $d/libslepc.$ff_suffix_dylib ; then
+            if test -f $d/libslepc.$ff_suffix_dylib -o $d/libslepc.a ; then
 				   ff_slepccomplex_ok=yes
                    ff_SLEPCCOMPLEX_LIB="-Wl,-rpath,$d -L$d -lslepc"
 			       AC_FF_ADDWHERELIB(slepccomplex,$ff_SLEPCCOMPLEX_LIB,$ff_where_inc_petsccomplex)
