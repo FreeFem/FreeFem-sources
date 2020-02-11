@@ -29,8 +29,13 @@ dir3rdparty := $(abspath $(dir $(mkfile_path))/..)
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(FF_prefix_petsc)" && test -w "$(DESTDIR)$(FF_prefix_petsc) || echo sudo)
 W_SUDO1=$(SHELL ls	)
 ifeq ($(COMPILE_OPENBLAS),openblas)
+ifeq ($(WIN32DLLTARGET),)
 PETSC_OPENBLAS := --download-openblas
 PETSC_OPENBLAS_C = --with-openblas-dir=$(DIR_INSTALL_REAL)
+else
+PETSC_OPENBLAS := --download-f2cblaslapack
+PETSC_OPENBLAS_C = --with-f2cblaslapack-dir=$(DIR_INSTALL_REAL)
+endif
 else
 PETSC_OPENBLAS = --with-blaslapack-include='$(shell echo $(BLASINC) | sed "s/-I//g")' \
 		--with-blaslapack-lib='$(BLAS_LAPACK_LIBS)'
