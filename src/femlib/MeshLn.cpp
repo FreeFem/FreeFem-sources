@@ -556,7 +556,7 @@ namespace Fem2D
       for (int i=0;i<nt;i++) {
           kthrough++;
           const EdgeL & K(this->elements[i]);
-          R3 A(K[0]),B(K[1]), AB(AB);
+          R3 A(K[0]),B(K[1]), AB(A,B);
           R3 AP(A,P);
           double lab2 = AB.norme2();
           double l = min(1.,max(0.,(AB,AP)/lab2));
