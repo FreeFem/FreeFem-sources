@@ -29,6 +29,7 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [maxwell-3d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/maxwell-3d-PETSc.edp)                                           | Multigrid method                                                              |
 | [maxwell-mg-3d-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/maxwell-mg-3d-PETSc-complex.edp)                     | Two-grid preconditioner                                                       |
 | [helmholtz-3d-surf-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-3d-surf-PETSc-complex.edp)             | BEM with hierarchical matrices from Htool                                     |
+| [helmholtz-3d-line-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-3d-line-PETSc-complex.edp)             |                                                                               |
 
 ### Nonlinear problems
 | Filename                                                                                                                                                          | Comments (preconditioners, numerical schemes)                                 |

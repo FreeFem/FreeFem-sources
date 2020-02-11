@@ -44,8 +44,14 @@ macro meshN()meshS// EOM            // three-dimensional surface problem
 macro intN()int2d// EOM             // two-dimensional integral
 macro intN1()int1d// EOM            // one-dimensional integral
 ENDIFMACRO
+IFMACRO(dimension,3L)
+load "msh3"
+macro meshN()meshL// EOM            // three-dimensional line problem
+macro intN()int1d// EOM             // one-dimensional integral
+macro intN1()int0d// EOM            // zero-dimensional integral
+ENDIFMACRO
 IFMACRO(!meshN)
-cout << "The macro 'dimension' must be set to '2', '3' or '3S'" << endl;
+cout << "The macro 'dimension' must be set to '2', '3', '3S' or '3L'" << endl;
 exit(1);
 ENDIFMACRO
 searchMethod = 1;
