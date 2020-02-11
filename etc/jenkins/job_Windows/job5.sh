@@ -8,9 +8,8 @@ autoreconf -i \
         CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
         --prefix=/builds/workspace/freefem \
         --disable-parmmg \
-  && cd 3rdparty/ \
-  && ./getall -a -o PETSc \
-  && make petsc-slepc \
+  && ./3rdparty/getall -a -o PETSc \
+  && cd 3rdparty/ff-petsc && make petsc-slepc \
   && cd ../.. \
   && ./reconfigure \
   && make
