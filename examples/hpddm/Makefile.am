@@ -107,7 +107,7 @@ TESTS_PETSCCOMPLEX = diffusion-2d-PETSc-complex.edp \
 
 TESTS_PETSCCOMPLEX_SLEPCCOMPLEX = laplace-2d-SLEPc-complex.edp
 
-TESTS_PETSCCOMPLEX_BEMTOOL_BOOST_HTOOL = helmholtz-3d-surf-PETSc-complex.edp
+TESTS_PETSCCOMPLEX_BEMTOOL_BOOST_HTOOL = helmholtz-3d-surf-PETSc-complex.edp helmholtz-3d-line-PETSc-complex.edp
 
 if MPI
 CONDITIONAL_MPI = $(TESTS_MPI)
@@ -170,4 +170,4 @@ freefem++.pref: Makefile
 	echo includepath = \"../../idp/\" >> freefem++.pref
 
 clean-local:
-	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_* createPartition_*
+	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_* createPartition_* helmholtz-3d-surf.vtu helmholtz-3d-line.vtu
