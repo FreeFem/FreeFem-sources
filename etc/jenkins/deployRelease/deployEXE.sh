@@ -16,7 +16,7 @@ GH_EXE_NAME="FreeFEM-${VERSION}-win7-64.exe"
 
 ## EXE build
 autoreconf -i
-./configure --enable-download --enable-optim --enable-generic
+./configure --enable-download --enable-optim --enable-generic --disable-parmmg
 ./3rdparty/getall -a
 make
 cp AUTHORS readme/AUTHORS

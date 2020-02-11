@@ -63,7 +63,7 @@ cp  README.md $DEB_NAME/usr/share/doc/freefem/README.md
 dpkg-deb --build $DEB_NAME/
 
 ## Rename DEB to include Ubuntu version
-mv $DEB_NAME $GH_DEB_NAME
+mv $DEB_NAME.deb $GH_DEB_NAME
 
 ## Deploy in GitHub release
 RELEASE=`curl 'https://api.github.com/repos/'$ORGANIZATION'/'$REPOSITORY'/releases/tags/'$RELEASE_TAG_NAME`
