@@ -3336,7 +3336,8 @@ void  init_lgmat()
  TheOperators->Add("<-",
 		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfes>::Op*,E_F_StackF0F0>(SetMatrixInterpolation<0>),
 		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfes3>::Op*,E_F_StackF0F0>(SetMatrixInterpolation3<0>),
-		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesS>::Op*,E_F_StackF0F0>(SetMatrixInterpolationS<0>)
+		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesS>::Op*,E_F_StackF0F0>(SetMatrixInterpolationS<0>),
+		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesL>::Op*,E_F_StackF0F0>(SetMatrixInterpolationL<0>)
 		   );
  // construction of complex matrix form a double matrix
  TheOperators->Add("=", new OneOperator2_<Matrice_Creuse<Complex>*,Matrice_Creuse<Complex>*,Matrice_Creuse<double>*,E_F_StackF0F0>(CopyMat<R,Complex,1>)

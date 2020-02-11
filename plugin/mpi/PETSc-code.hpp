@@ -311,7 +311,7 @@ namespace PETSc {
           }
           if (ptA->_A) {
               ptA->_A->setMatrix(dN);
-#ifdef PCHPDDM && defined(PETSC_USE_SHARED_LIBRARIES)
+#if defined(PCHPDDM) && defined(PETSC_USE_SHARED_LIBRARIES)
               PC pc = nullptr;
               if(ptParent) {
                   PetscInt M, N;
@@ -1943,7 +1943,7 @@ namespace PETSc {
             IS is;
             ISCreateGeneral(PETSC_COMM_SELF, ptA->_A->getMatrix( )->_n, idx, PETSC_OWN_POINTER,
                             &is);
-#ifdef PCHPDDM && defined(PETSC_USE_SHARED_LIBRARIES)
+#if defined(PCHPDDM) && defined(PETSC_USE_SHARED_LIBRARIES)
             PetscStrcmp(type, PCHPDDM, &isType);
             if (isType) {
               Mat aux = func(A);
