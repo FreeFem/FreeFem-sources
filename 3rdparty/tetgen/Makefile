@@ -54,7 +54,6 @@ clean-local::
 $(SRCDIR)/tags: $(PACKAGE)
 	gunzip -c  $(PACKAGE)|tar zxvf - 
 #       FFCS: needs to patch tetgen because mingw64 has 4-byte longs
-#	cd tetgen1.4.3 && patch -u -p1 < ../patches.win64
 	touch $(SRCDIR)/tags
 #	cd tetgen1.4.2;patch -p1 <../tetgen1.4.2.patch 
 

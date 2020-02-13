@@ -43,7 +43,6 @@ EXTRA_DIST= \
 ./superlu/Makefile \
 ./superlu/make.inc \
 ./tetgen/Makefile \
-./tetgen/patches.win64 \
 ./mmg/Makefile \
 ./parmmg/Makefile \
 ./yams/Makefile \
