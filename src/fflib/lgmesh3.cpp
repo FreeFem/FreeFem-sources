@@ -554,17 +554,16 @@ pmeshS pmesh3_gamma(Stack stack, pmesh3 * const & p)
 { throwassert(p && *p) ;
   const Mesh3 & Th = **p;
   const MeshS *ThS = Th.meshS;
-    if(ThS==NULL) cout << "The meshS member is empty!, use <meshS>=<mesh3>.BuildMeshS()" << endl;
+  if(ThS==NULL) cout << "The meshS member is empty!, use before <mesh3>=buildBdMesh(<mesh3>)" << endl;
   return (ThS);
 }
 
 pmeshL pmeshS_gamma(Stack stack, pmeshS * const & p)
 { throwassert(p && *p) ;
     const MeshS & Th = **p;
-    const MeshL *ThS = Th.meshL;
-    if(ThS==NULL)
-        cout << "The input meshL member is empty, build it " << endl;
-    return (ThS);
+    const MeshL *ThL = Th.meshL;
+    if(ThL==NULL) cout << "The meshS member is empty!, use before <meshL>=buildBdMesh(<meshL>)" << endl;
+    return (ThL);
 }
 
 

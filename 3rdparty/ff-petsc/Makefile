@@ -21,7 +21,6 @@
 # ======================================================================
 # headeralh default=0 freefem make multipleauthors start=19/03/10 upmc
 
-PYTHON2?=python2.7
 include Makefile.inc
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 dir3rdparty := $(abspath $(dir $(mkfile_path))/..)
@@ -75,8 +74,9 @@ FLAGS_CONF_PETSC_REAL= --with-debugging=0 \
 		COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
-		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 		--with-scalar-type=real \
+		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
+		--known-64-bit-blas-indices=0 \
 		$(PETSC_OPENBLAS) \
 		$(PETSC_DOWNLOAD)
 FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
@@ -86,6 +86,7 @@ FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		--with-scalar-type=complex \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
+		--known-64-bit-blas-indices=0 \
 		$(PETSC_OPENBLAS_C) \
 		--with-scalapack-dir=$(DIR_INSTALL_REAL) \
 		--with-metis-dir=$(DIR_INSTALL_REAL) \
@@ -97,8 +98,7 @@ FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
 		$(PETSC_DOWNLOAD_C)
 else
 ##   On  windows....
-PYTHON2=
-FLAGS_CONF_PETSC_REAL= --with-python-exec=/usr/bin/python3 --with-shared-libraries=0 --with-debugging=0 \
+FLAGS_CONF_PETSC_REAL= --with-shared-libraries=0 --with-debugging=0 \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' --with-cxx-dialect=C++11 \
 	COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 	CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
@@ -116,7 +116,7 @@ FLAGS_CONF_PETSC_REAL= --with-python-exec=/usr/bin/python3 --with-shared-librari
 	--download-superlu --download-suitesparse --download-tetgen \
 	--download-slepc
 
-FLAGS_CONF_PETSC_COMPLEX= --with-python-exec=/usr/bin/python3 --with-shared-libraries=0 --with-debugging=0 \
+FLAGS_CONF_PETSC_COMPLEX= --with-shared-libraries=0 --with-debugging=0 \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' --with-cxx-dialect=C++11 \
 	COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 	CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
@@ -227,7 +227,7 @@ Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
 	../../config.status --file="Makefile.inc:Makefile-PETSc.inc"
 
 $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
-	cd $(SRCDIR) && $(PYTHON2) ./configure MAKEFLAGS='' \
+	cd $(SRCDIR) && ./configure MAKEFLAGS='' \
 		--prefix=$(DIR_INSTALL_REAL) \
 		$(FLAGS_CONF_PETSC_REAL) PETSC_ARCH=fr
 	test -f $(SRCDIR)/fr/lib/petsc/conf/petscvariables
@@ -238,7 +238,7 @@ Make-petsc-download.mk:$(SRCDIR)/tag-install-real
 ifdef 	COMPLEX_CASE
 #  version COMPLEX.....
 $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
-	cd $(SRCDIR) && $(PYTHON2) ./configure MAKEFLAGS='' \
+	cd $(SRCDIR) && ./configure MAKEFLAGS='' \
 		--prefix=$(DIR_INSTALL_COMPLEX) \
 		$(FLAGS_CONF_PETSC_COMPLEX) PETSC_ARCH=fc
 	test -f $(SRCDIR)/fc/lib/petsc/conf/petscvariables
