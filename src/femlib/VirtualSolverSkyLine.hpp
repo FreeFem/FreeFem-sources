@@ -131,7 +131,7 @@ Z order_CutHill_McKee(Z n, Z *Ap, Z* Ai,Z*p)
     class VirtualSolverSkyLine: public VirtualSolver<Z,K> {
     public:
         //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-        static const int orTypeSol = 1&2&4&8&16;
+        static const int orTypeSol = 1|2|4|8|16;
 
         
         typedef HashMatrix<Z,K>  HMat;

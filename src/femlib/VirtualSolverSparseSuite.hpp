@@ -44,7 +44,7 @@ template<class Z=int,class K=double>
 class VirtualSolverUMFPACK: public VirtualSolver<Z,K> {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 1&8&16;
+    static const int orTypeSol = 1|8|16;
     typedef HashMatrix<Z,K>  HMat;
     HMat *A;
     void *Symbolic, *Numeric ;
@@ -66,7 +66,7 @@ template<>
 class  VirtualSolverUMFPACK<int,double> : public VirtualSolver<int,double> {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 1&8&16;
+    static const int orTypeSol = 1|8|16;
 
     typedef double K;
     typedef int Z;
@@ -145,7 +145,7 @@ template<>
 class  VirtualSolverUMFPACK<int,std::complex<double> > : public VirtualSolver<int,std::complex<double> > {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 1&8&16;
+    static const int orTypeSol = 1|8|16;
 
     typedef std::complex<double> K;
     typedef int Z;
@@ -226,7 +226,7 @@ template<class Z=int,class K=double>
 class VirtualSolverCHOLMOD: public VirtualSolver<Z,K> {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 2&4&8&16;
+    static const int orTypeSol = 2|4|8|16;
 
     typedef HashMatrix<Z,K>  HMat;
     HMat *HA;
@@ -250,7 +250,7 @@ template<>
 class  VirtualSolverCHOLMOD<int,double> : public VirtualSolver<int,double> {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 2&4&8&16;
+    static const int orTypeSol = 2|4|8|16;
 
     typedef double K;
     typedef int Z;
@@ -357,7 +357,7 @@ class  VirtualSolverCHOLMOD<int,std::complex<double> > : public VirtualSolver<in
 {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 2&4&8&16;
+    static const int orTypeSol = 2|4|8|16;
     typedef std::complex<double>  K;
     typedef int Z;
     typedef HashMatrix<Z,K>  HMat;
@@ -455,7 +455,7 @@ template<>
 class  VirtualSolverUMFPACK< SuiteSparse_long,double> : public VirtualSolver< SuiteSparse_long,double> {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 1&8&16;
+    static const int orTypeSol = 1|8|16;
     typedef double K;
     typedef  SuiteSparse_long Z;
     typedef HashMatrix<Z,K>  HMat;
@@ -531,7 +531,7 @@ template<>
 class  VirtualSolverUMFPACK<SuiteSparse_long,std::complex<double> > : public VirtualSolver< SuiteSparse_long,std::complex<double> > {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 1&8&16;
+    static const int orTypeSol = 1|8|16;
 
     typedef std::complex<double> K;
     typedef  SuiteSparse_long Z;
@@ -613,7 +613,7 @@ template<>
 class  VirtualSolverCHOLMOD< SuiteSparse_long,double> : public VirtualSolver< SuiteSparse_long,double> {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 2&4&8&16;
+    static const int orTypeSol = 2|4|8|16;
     typedef double K;
     typedef  SuiteSparse_long Z;
     typedef HashMatrix<Z,K>  HMat;
@@ -716,7 +716,7 @@ class  VirtualSolverCHOLMOD< SuiteSparse_long,std::complex<double> > : public Vi
 {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 2&4&8&16;
+    static const int orTypeSol = 2|4|8|16;
     typedef std::complex<double>  K;
     typedef  SuiteSparse_long Z;
     typedef HashMatrix<Z,K>  HMat;

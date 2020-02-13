@@ -1345,12 +1345,12 @@ void HashMatrix<I,R>::UnHalf()
     HM();
     size_t nnz0=nnz,err=0;
     for(int k=0; k<nnz0; ++k)
-      if( i[k] < j[k] )
+      if( i[k] > j[k] )
        {
         size_t ki=insert(j[k],i[k],aij[k]);
         err += ki < nnz0;
         }
-    else if ( i[k] > j[k] )
+    else if ( i[k] < j[k] )
         err++;
     if( err )
         cerr << " Try of unsymmetrize no half matrix (Bug) ... ????" <<endl;

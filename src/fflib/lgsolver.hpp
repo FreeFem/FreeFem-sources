@@ -595,7 +595,7 @@ const int NB_NAME_PARM_MAT =  24 +6+3  ;
     
     
 template<class R>
-inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expression const *nargs ,int n_name_param)
+inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expression const *nargs ,int n_name_param,int syma=-1)
     {
         bool unset_eps=true;
         ds.initmat=true;
@@ -603,7 +603,7 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
 	int kk = n_name_param-NB_NAME_PARM_MAT-1;
         if (nargs[++kk]) ds.initmat= ! GetAny<bool>((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.solver= * GetAny<string*>((*nargs[kk])(stack));
-        ds.Init_sym_positive_var<R>();//  set def value of sym and posi
+        ds.Init_sym_positive_var<R>(syma);//  set def value of sym and posi
 	if (nargs[++kk]) ds.epsilon= GetAny<double>((*nargs[kk])(stack)),unset_eps=false;
 	if (nargs[++kk])
 	{// modif FH fev 2010 ...

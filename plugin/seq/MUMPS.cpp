@@ -73,7 +73,7 @@ template< class R = double >
 class SolveMUMPS_seq : public VirtualSolver< int, R > {
  public:
   //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-  static const int orTypeSol = 1 & 2 & 4 & 8 & 16;
+  static const int orTypeSol = 1 | 2 | 4 | 8 | 16;
   typedef HashMatrix< int, R > HMat;
   typedef R K;    //
   HMat &A;
