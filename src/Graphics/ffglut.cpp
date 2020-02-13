@@ -3375,7 +3375,7 @@ void ThePlot::DrawIsoTfill(const R3 Pt[3],const R ff[3],const R3 Nt[3],const R *
                 }
             }
             if (  xfb-eps <=fj  && fj <= xfh+eps)
-                z[im]=fj,NQ[im]=Nt[j], PQ[im++] = Pt[j];
+            {z[im]=fj,NQ[im]=Nt[j]; PQ[im++] = Pt[j];}
         }
         if (im>2) {
             color(l+4);
