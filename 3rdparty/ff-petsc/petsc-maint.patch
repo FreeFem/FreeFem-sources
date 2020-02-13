@@ -1,0 +1,139 @@
+diff --git a/config/BuildSystem/config/functions.py b/config/BuildSystem/config/functions.py
+index 6969ee13c9..1384566510 100644
+--- a/config/BuildSystem/config/functions.py
++++ b/config/BuildSystem/config/functions.py
+@@ -182,6 +182,17 @@ builtin and then its argument prototype would still apply. */
+       self.addDefine('HAVE_MMAP', 1)
+     return
+ 
++  def checkPipe(self):
++    '''Check for functional pipe() and define HAVE_PIPE or HAVE__PIPE'''
++    self.underscorePipe = None
++    if self.checkLink('#if defined(PETSC_HAVE_UNISTD_H)\n#include <unistd.h>\n#endif\nint pipefd[2];\npipe(pipefd);\n'):
++      self.underscorePipe = False
++    elif self.checkLink('#if defined(PETSC_HAVE_WINDOWS_H)\n#include <io.h>\n#endif\nint pipefd[2];\n_pipe(pipefd,1024,0x8000)\n'):
++      self.underscorePipe = False
++    else:
++      self.logPrint('Warning: No pipe function found')
++    return
++
+   def configure(self):
+     self.executeTest(self.checkSysinfo)
+     self.executeTest(self.checkVPrintf)
+@@ -195,4 +206,5 @@ builtin and then its argument prototype would still apply. */
+     self.executeTest(self.checkVariableArgumentLists)
+     self.executeTest(self.checkClassify, set(self.functions))
+     self.executeTest(self.checkMmap)
++    self.executeTest(self.checkPipe)
+     return
+diff --git a/config/BuildSystem/config/libraries.py b/config/BuildSystem/config/libraries.py
+index 8b228de6bd..51565178e6 100644
+--- a/config/BuildSystem/config/libraries.py
++++ b/config/BuildSystem/config/libraries.py
+@@ -331,6 +331,22 @@ extern "C" {
+       self.logPrint('Warning: No realtime library found')
+     return
+ 
++  def checkRegex(self):
++    '''Check for presence of regexec(), regcomp(), and regfree() in regex library (POSIX Regex extensions)'''
++    self.regex = None
++    funcs = ['regexec', 'regcomp', 'regfree']
++    prototypes = ['#include <regex.h>', '', '']
++    calls = ['regex_t reg; char* c; regcomp(&reg,c,0);', 'regex_t reg; char* c; regmatch_t match[1]; regexec(&reg,c,0,match,0);', 'regex_t reg; regfree(&reg);']
++    if self.check('', funcs, prototype=prototypes, call=calls):
++      self.logPrint('regex functions are linked in by default')
++      self.regex = []
++    elif self.check('regex', funcs, prototype=prototypes, call=calls):
++      self.logPrint('Using libregex for the regex library')
++      self.regex = ['libregex.a']
++    else:
++      self.logPrint('Warning: No regex library found')
++    return
++
+   def checkDynamic(self):
+     '''Check for the header and libraries necessary for dynamic library manipulation'''
+     if 'with-dynamic-loading' in self.argDB and not self.argDB['with-dynamic-loading']: return
+@@ -501,5 +517,6 @@ int checkInit(void) {
+     self.executeTest(self.checkMathFenv)
+     self.executeTest(self.checkMathLog2)
+     self.executeTest(self.checkRealtime)
++    self.executeTest(self.checkRegex)
+     self.executeTest(self.checkDynamic)
+     return
+diff --git a/config/BuildSystem/config/packages/PTScotch.py b/config/BuildSystem/config/packages/PTScotch.py
+index 8c6b872e01..6f9d9c0581 100644
+--- a/config/BuildSystem/config/packages/PTScotch.py
++++ b/config/BuildSystem/config/packages/PTScotch.py
+@@ -55,12 +55,19 @@ class Configure(config.package.Package):
+ 
+     # Building cflags/ldflags
+     self.cflags = self.removeWarningFlags(self.setCompilers.getCompilerFlags())+' '+self.headers.toString(self.mpi.include)
+-    ldflags = self.libraries.toString(self.dlib)
++    if self.libraries.regex is None:
++      raise RuntimeError('Error building PTScotch: no regex library')
++    functions = self.framework.require('config.functions', self)
++    if not functions.haveFunction('FORK') and not functions.haveFunction('_PIPE'):
++      raise RuntimeError('Error building PTScotch: no pipe function')
++    ldflags = self.libraries.toString(self.dlib) + ' ' + self.libraries.toString(self.libraries.regex)
+     if self.zlib.found:
+       self.cflags = self.cflags + ' -DCOMMON_FILE_COMPRESS_GZ'
+     # OSX does not have pthread_barrier_destroy
+     if self.pthread.found and self.pthread.pthread_barrier:
+       self.cflags = self.cflags + ' -DCOMMON_PTHREAD'
++    if functions.haveFunction('_PIPE'):
++      self.cflags = self.cflags + ' -D\'pipe(pfds)=_pipe(pfds,1024,0x8000)\''
+     if self.libraries.add('-lrt','timer_create'): ldflags += ' -lrt'
+     self.cflags = self.cflags + ' -DCOMMON_RANDOM_FIXED_SEED'
+     # do not use -DSCOTCH_PTHREAD because requires MPI built for threads.
+diff --git a/config/BuildSystem/config/packages/metis.py b/config/BuildSystem/config/packages/metis.py
+index 63854604a0..e92599f517 100644
+--- a/config/BuildSystem/config/packages/metis.py
++++ b/config/BuildSystem/config/packages/metis.py
+@@ -4,8 +4,8 @@ class Configure(config.package.CMakePackage):
+   def __init__(self, framework):
+     config.package.CMakePackage.__init__(self, framework)
+     self.versionname       = 'METIS_VER_MAJOR.METIS_VER_MINOR.METIS_VER_SUBMINOR'
+-    self.gitcommit         = 'v5.1.0-p7'
+-    self.download          = ['git://https://bitbucket.org/petsc/pkg-metis.git','https://bitbucket.org/petsc/pkg-metis/get/'+self.gitcommit+'.tar.gz']
++    self.gitcommit         = 'ca7a59e'
++    self.download          = ['git://https://bitbucket.org/prj-/pkg-metis.git','https://bitbucket.org/petsc/pkg-metis/get/'+self.gitcommit+'.tar.gz']
+     self.downloaddirnames  = ['petsc-pkg-metis']
+     self.functions         = ['METIS_PartGraphKway']
+     self.includes          = ['metis.h']
+@@ -23,7 +23,7 @@ class Configure(config.package.CMakePackage):
+   def setupDependencies(self, framework):
+     config.package.CMakePackage.setupDependencies(self, framework)
+     self.compilerFlags = framework.require('config.compilerFlags', self)
+-    self.mathlib       = framework.require('config.packages.mathlib',self)
++    self.mathlib       = framework.require('config.packages.mathlib', self)
+     self.deps          = [self.mathlib]
+     return
+ 
+diff --git a/config/BuildSystem/config/packages/parmetis.py b/config/BuildSystem/config/packages/parmetis.py
+index 98dc9cc0af..a199ebd570 100644
+--- a/config/BuildSystem/config/packages/parmetis.py
++++ b/config/BuildSystem/config/packages/parmetis.py
+@@ -5,8 +5,8 @@ class Configure(config.package.CMakePackage):
+     config.package.CMakePackage.__init__(self, framework)
+     self.version          = '4.0.3'
+     self.versionname      = 'PARMETIS_MAJOR_VERSION.PARMETIS_MINOR_VERSION.PARMETIS_SUBMINOR_VERSION'
+-    self.gitcommit         = 'v'+self.version+'-p5'
+-    self.download          = ['git://https://bitbucket.org/petsc/pkg-parmetis.git','https://bitbucket.org/petsc/pkg-parmetis/get/'+self.gitcommit+'.tar.gz']
++    self.gitcommit         = '475d8fa'
++    self.download          = ['git://https://bitbucket.org/prj-/pkg-parmetis.git','https://bitbucket.org/petsc/pkg-parmetis/get/'+self.gitcommit+'.tar.gz']
+     self.functions         = ['ParMETIS_V3_PartKway']
+     self.includes          = ['parmetis.h']
+     self.liblist           = [['libparmetis.a']]
+diff --git a/config/PETSc/Configure.py b/config/PETSc/Configure.py
+index 363c5d6550..571439054a 100644
+--- a/config/PETSc/Configure.py
++++ b/config/PETSc/Configure.py
+@@ -132,7 +132,7 @@ class Configure(config.base.Configure):
+                  'readlink', 'realpath',  'usleep', 'sleep', '_sleep',
+                  'uname','snprintf','_snprintf','lseek','_lseek','time','fork','stricmp',
+                  'strcasecmp', 'bzero', 'dlopen', 'dlsym', 'dlclose', 'dlerror',
+-                 '_set_output_format','_mkdir','socket','gethostbyname']
++                 '_set_output_format','_mkdir','socket','gethostbyname', '_pipe']
+     libraries = [(['fpe'], 'handle_sigfpes')]
+     librariessock = [(['socket', 'nsl'], 'socket')]
+     self.headers.headers.extend(headersC)

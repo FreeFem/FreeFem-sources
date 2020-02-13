@@ -109,7 +109,6 @@ FLAGS_CONF_PETSC_REAL= --with-shared-libraries=0 --with-debugging=0 \
 	--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
 	$(PETSC_OPENBLAS) \
-	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu' \
 	--download-metis --download-ptscotch \
 	--download-hypre --download-parmetis \
 	--download-scalapack --download-mumps \
@@ -309,6 +308,8 @@ $(SRCDIR)/tag-tar:$(PACKAGE)
 	-tar xzf $(PACKAGE)
 ifeq ($(WIN32DLLTARGET),)
 	patch -p1 < petsc-metis.patch
+else
+	cd petsc-3.12.4 && patch -p1 < ../petsc-maint.patch && cd -
 endif
 	touch $@
 $(PACKAGE):
