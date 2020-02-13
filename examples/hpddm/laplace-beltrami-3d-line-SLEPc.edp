@@ -1,7 +1,7 @@
 load "PETSc"
 load "msh3"
 load "medit"
-macro dimension()3S//
+macro dimension()3L//
 include "macro_ddm.idp"
 
 real R  = 3.0, r = 1.0;
@@ -12,21 +12,23 @@ func tx = (R+r*cos(y*pi*2))*cos(x*pi*2);
 func ty = (R+r*cos(y*pi*2))*sin(x*pi*2);
 func tz = r*sin(y*pi*2);
 
-meshS Th = square3(nx, ny, [tx,ty,tz], removeduplicate=true);
+meshL Th = segment(nx, [tx,ty,tz], removeduplicate=true);
 
 Mat A;
+int[int] n2o;
+macro ThN2O()n2o//
 createMat(Th,A,P1)
 fespace Vh(Th,P1);
 
 macro Grad3(uvw) [dx(uvw), dy(uvw), dz(uvw)]//
 
 real sigma = 1;
-varf aS(u,v) = int2d(Th)(Grad3(u)'*Grad3(v));
-varf mS(u,v) = int2d(Th)(u*v);
+varf aS(u,v) = int1d(Th)(Grad3(u)'*Grad3(v));
+varf mS(u,v) = int1d(Th)(u*v);
 
-matrix LocA = aS(Vh, Vh, sym = 1);
+matrix LocA = aS(Vh, Vh);
 A = LocA;
-matrix LocB = mS(Vh, Vh, sym = 1);
+matrix LocB = mS(Vh, Vh);
 Mat B(A, LocB);
 int nev = 10;
 real[int] ev(nev);
@@ -44,5 +46,16 @@ int k = EPSSolve(A, B, values = ev, vectors = eV, sparams = ssparams);
 
 for(int i = 0; i < k; ++i) {
     macro params()cmm = "Eigenvector #" + i + ", eigenvalue =" + ev[i], wait = 1, fill = 1, value = 1//
-    plotD(Th, eV[i], params);
+    real[int] sol;
+    changeNumbering(A, eV[i][], sol);
+    changeNumbering(A, eV[i][], sol, inverse = true);
+    meshL ThPlt = segment(nx, [tx,ty,tz], removeduplicate=true);
+    fespace VhPlt(ThPlt, P1);
+    int[int] rest = restrict(Vh, VhPlt, n2o);
+    VhPlt plt, reduce;
+    for[j, v : rest] plt[][v] = eV[i][][j];
+    mpiReduce(plt[], reduce[], processor(0, mpiCommWorld), mpiSUM);
+    if(mpirank == 0)
+        plot(plt, params);
+    // plotD(Th, eV[i], params);
 }

@@ -111,6 +111,7 @@ FLAGS_CONF_PETSC_REAL= --with-shared-libraries=0 --with-debugging=0 \
 	$(PETSC_OPENBLAS) \
 	--download-metis --download-ptscotch \
 	--download-hypre --download-parmetis \
+	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu' \
 	--download-scalapack --download-mumps \
 	--download-superlu --download-suitesparse --download-tetgen \
 	--download-slepc
