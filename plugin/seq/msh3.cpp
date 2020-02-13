@@ -8585,8 +8585,10 @@ class Line_Op : public E_F0mps {
 };
 
 basicAC_F0::name_and_type Line_Op::name_param[] = {
-  {"orientation", &typeid(long)}, {"region", &typeid(long)}, {"label", &typeid(KN_< long >)}
-
+  {"orientation", &typeid(long)},
+  {"cleanmesh", &typeid(bool)},
+  {"removeduplicate", &typeid(bool)}
+ 
 };
 
 class Line : public OneOperator {
@@ -8618,7 +8620,8 @@ AnyType Line_Op::operator( )(Stack stack) const {
 
   int nv = nt + 1, nbe = 2;
   long orientation(arg(0, stack, 1L));
-
+  long cleanmesh(arg(1, stack, true));
+  
   V *v = new V[nv];
   T *t = new T[nt];
   B *b = new B[nbe];
@@ -8659,7 +8662,7 @@ AnyType Line_Op::operator( )(Stack stack) const {
   (bb++)->set(v, ibeg, lab1);
   (bb++)->set(v, iend, lab2);
 
-  MeshL *ThL = new MeshL(nv, nt, nbe, v, t, b);
+  MeshL *ThL = new MeshL(nv, nt, nbe, v, t, b, cleanmesh);
   ThL->BuildGTree( );
 
   Add2StackOfPtr2FreeRC(stack, ThL);

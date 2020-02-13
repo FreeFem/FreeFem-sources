@@ -969,9 +969,26 @@ void OnePlotFES::Draw(OneWindow *win)
     ffassert(v.N()== Th.nt*nK);
     int o=0;
     KN<R3> Pn(Psub.N());
+    KN<R3> Nn(Psub.N());
+    
     if((debug > 10)) cout << " " <<nsubV  << " " << nsubT << endl;
 
-    if(plot.fill && what%10==8)
+    // compute Normal at vertice
+    KN<R3> Nv(Th.nv);
+    for (int it=0 ; it<Th.nv; it++) //
+        Nv[it]=R3(0.,0.,0.); //
+    for (int it=0 ; it<Th.nt; it++) {
+        const MeshS::Element &K = (Th[it]);
+           int iv;
+        for (int i = 0; i < 3; i++) {
+            iv = Th.operator( )(K[i]);
+        Nv[iv]+=K.mesure()*K.NormalS();
+        }
+    }
+    for (int i=0 ; i<Th.nv; i++)
+        Nv[i]/=Nv[i].norme();
+            
+  if(plot.fill && what%10==8)
         glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     else
         glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
@@ -1010,21 +1027,29 @@ void OnePlotFES::Draw(OneWindow *win)
         for(int k=0;k<Th.nt;++k, o+= nK)
         {
             const typename MeshS::Element & K=Th[k];
-            for(int i=0;i<nsubV;++i)
+            int iv[3];
+            for (int i = 0; i < 3; i++)
+            iv[i] = Th.operator( )(K[i]);
+                
+            for(int i=0;i<nsubV;++i) {
                 Pn[i]=K(Psub[i]);// local to global coord.
+                Nn[i]=Nv[i];
+            }
+           
             if(what%10==8)
                 for(int sk=0;sk<nsubT;++sk)
                 {
                     int i0= Ksub[sk*3+0];//numSubTriangle(nsub,sk,0);
                     int i1= Ksub[sk*3+1];//numSubTriangle(nsub,sk,1);
                     int i2= Ksub[sk*3+2];//numSubTriangle(nsub,sk,2);
-
+               
                     R ff[3]={v[o+i0],v[o+i1],v[o+i2]};
                     R3 Pt[3]={Pn[i0],Pn[i1],Pn[i2]};
+                    R3 Nt[3]={Nv[iv[0]],Nv[iv[1]],Nv[iv[2]]};
                     if(plot.fill)
-                       plot.DrawIsoTfill( Pt, ff, plot.Viso,plot.Viso.N());
+                       plot.DrawIsoTfill( Pt, ff, Nt, plot.Viso,plot.Viso.N(),win->changePlotdim,win->viewdim);
                     else
-                       plot.DrawIsoT( Pt, ff, plot.Viso,plot.Viso.N());
+                       plot.DrawIsoT( Pt, ff, Nt, plot.Viso,plot.Viso.N(),win->changePlotdim,win->viewdim);
                 }
             else // what ==9
                 ffassert(0);
@@ -1121,7 +1146,7 @@ void OnePlotFEL::Draw(OneWindow *win)
 
 template<class Mesh>
 OnePlotFE<Mesh>::OnePlotFE(const Mesh *T,long w,PlotStream & f)
-:OnePlot(w,2,2,5),Th(T)
+:OnePlot(w,2,5),Th(T)
 {
     R2 P0,P1;
     Th->BoundingBox(P0,P1);
@@ -1909,7 +1934,6 @@ void OneWindow::DefaultView(int state)
         init =1;
         plotdim=theplot->plotdim;
         keepPV=theplot->keepPV;
-        //plotNormalT=theplot->plotNormalT;
         R3 A(theplot->Pmin),B(theplot->Pmax);
         R3 D(A,B);
         R dxy= max(D.x,D.y);
@@ -2036,8 +2060,7 @@ void  OneWindow::SetView()
         ShowGlerror(" Get MV");
         glGetIntegerv(GL_VIEWPORT,viewport);
         ShowGlerror(" Get VP");
-
-
+        viewdim=3;
 
     }
     else
@@ -2062,6 +2085,7 @@ void  OneWindow::SetView()
             dz = max(dz,(Bmax.y-Bmin.y)*0.1);
             dz0=-dz;
             dz1 = dz;
+            viewdim=2;
         }
 
         if((debug>3 )) cout << "\t\t\t   SetView " << this << " " << Bmin  << " "
@@ -2426,8 +2450,8 @@ ThePlot::ThePlot(PlotStream & fin,ThePlot *old,int kcount)
 :  count(kcount), state(0),
 changeViso(true),changeVarrow(true),changeColor(true),
 changeBorder(true),changeFill(true), withiso(false),witharrow(false),
-plotdim(2),theta(30.*M_PI/180.),phi(20.*M_PI/180.),dcoef(1),focal(20.*M_PI/180.),
-datadim(1),datadimHat(1), winnum(0), keepPV(0), pNormalT(0)
+plotdim(2),changePlotdim(false),theta(30.*M_PI/180.),phi(20.*M_PI/180.),dcoef(1),focal(20.*M_PI/180.),
+datadim(1), winnum(0), keepPV(0), pNormalT(0)
 
 {
 
@@ -2468,7 +2492,7 @@ datadim(1),datadimHat(1), winnum(0), keepPV(0), pNormalT(0)
     vmax2=0;
 
     coefr=1;
-    long dimpp=0;
+    long dimpp=0, dimHatpp=0;
     long cas;
 #define READ_VTK_PARAM(index,type)                    \
 case 20+index: {type dummy; fin >= dummy;} break;
@@ -2569,8 +2593,6 @@ case 20+index: {type dummy; fin >= dummy;} break;
         ffassert(fin.good() && ! fin.eof());
     }
     if(dimpp) plotdim=dimpp;
-   // if(keepPV) blockwin=keepPV;
-   // if(pNormalT) plotNormalT=pNormalT;
     ffassert(cas==PlotStream::dt_endarg);
     if((debug > 2))
     {  cout << "    ***** get ::: ";
@@ -2886,9 +2908,9 @@ case 20+index: {type dummy; fin >= dummy;} break;
         plotdim=max(plotdim,p->dim);
         ffassert(fin.good());
         datadim=max(datadim,p->dim);
-        datadimHat=max(datadimHat,p->dimHat);
     }
     if(dimpp) plotdim=dimpp;
+   
     if(Niso==0)
         Niso = iso3d ? 5 : 20;
     if(iso3dB) Niso=20;
@@ -3180,10 +3202,11 @@ void ThePlot::DrawIsoT(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R 
 }
 
 // draw iso values for FE surface
-void ThePlot::DrawIsoT(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz)
+void ThePlot::DrawIsoT(const R3 Pt[3],const R ff[3],const R3 Nt[3],const R * Viso,int NbIso,bool changePlotdim,int viewdim,R rapz)
 {
     glBegin(GL_LINES);
     R3 PQ[5];
+    R3 NQ[5];
     R  eps2= Min(R3(Pt[0],Pt[1]).norme2(),R3(Pt[0],Pt[2]).norme2(),R3(Pt[1],Pt[2]).norme2() )*1e-8;
     for(int l=0;l< NbIso;l++) { /*    loop on the level curves */
         R xf = Viso[l];
@@ -3196,23 +3219,35 @@ void ThePlot::DrawIsoT(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso, R 
             if(((fi<=xf)&&(fj>=xf))||((fi>=xf)&&(fj<=xf))) {
                 if (Abs(fi-fj)<=0.1e-10) {    /* one side must be drawn */
                     color(l+4);
-                    glVertex3f(Pt[i].x, Pt[i].y, Pt[i].z+xf*rapz);
-                    glVertex3f(Pt[j].x, Pt[j].y, Pt[j].z+xf*rapz);
+                     if(changePlotdim){
+                    glVertex3f(Pt[i].x+NQ[i].x*xf*rapz, Pt[i].y+NQ[i].y*xf*rapz, Pt[i].z+NQ[i].z*xf*rapz);
+                    glVertex3f(Pt[j].x+NQ[j].x*xf*rapz, Pt[j].y+NQ[j].y*xf*rapz, Pt[j].z+NQ[j].z*xf*rapz);
+                     }
+                     else {
+                         glVertex3f(Pt[i].x, Pt[i].y, Pt[i].z);
+                         glVertex3f(Pt[j].x, Pt[j].y, Pt[j].z);
+                     }
                 }
-                else
-                {
+                else {
                     R  xlam=(fi-xf)/(fi-fj);
+                    NQ[im]   = Nt[i] * (1.F-xlam)  +  Nt[j]* xlam;
                     PQ[im++]   = Pt[i] * (1.F-xlam)  +  Pt[j]* xlam;
                 }
             }
         }
 
-        if (im>=2) /*    draw one segment */
+        if (im>2)
         {
             color(l+4);
             if( R3(PQ[0],PQ[1]).norme2() > eps2 ) {
-                glVertex3f(PQ[0].x, PQ[0].y, PQ[0].z);
-                glVertex3f(PQ[1].x, PQ[1].y, PQ[1].z);
+                if(changePlotdim){
+                    glVertex3f(PQ[0].x+NQ[0].x*xf*rapz, PQ[0].y+NQ[0].y*xf*rapz, PQ[0].z+NQ[0].z*xf*rapz);
+                    glVertex3f(PQ[1].x+NQ[1].x*xf*rapz, PQ[1].y+NQ[1].y*xf*rapz, PQ[1].z+NQ[1].z*xf*rapz);
+                }
+                else {
+                    glVertex3f(PQ[0].x, PQ[0].y, PQ[0].z);
+                    glVertex3f(PQ[1].x, PQ[1].y, PQ[1].z);
+                }
             }
         }
     }
@@ -3291,9 +3326,10 @@ void ThePlot::DrawIsoTfill(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso
 }
 
 // draw filling values for 3d FE surface
-void ThePlot::DrawIsoTfill(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz)
+void ThePlot::DrawIsoTfill(const R3 Pt[3],const R ff[3],const R3 Nt[3],const R * Viso,int NbIso,bool changePlotdim,int viewdim,R rapz)
 {
     R3 PQ[10];
+    R3 NQ[10];
     R z[10];
     R eps= (Viso[NbIso-1]-Viso[0])*1e-6;
     for(int l=1;l< NbIso;l++)  //   loop on the level curves
@@ -3311,31 +3347,38 @@ void ThePlot::DrawIsoTfill(const R3 Pt[3],const R ff[3],const R * Viso,int NbIso
             R xxfh =  xfh;
             if (fj<fi ) Exchange(xxfb,xxfh);
             R xf  = xxfb;
-            if(((fi<=xf)&&(fj>=xf))||((fi>=xf)&&(fj<=xf)))
-            {
+            if(((fi<=xf)&&(fj>=xf))||((fi>=xf)&&(fj<=xf))) {
                 if (Abs(fi-fj)>=0.1e-20) {
                     R  xlam=(fi-xf)/(fi-fj);
                     z[im] =  fi * (1.F-xlam)  +  fj* xlam;
+                    NQ[im] =  Nt[i] * (1.F-xlam)  +  Nt[j] * xlam;
                     PQ[im++]   = Pt[i] * (1.F-xlam)  +  Pt[j]* xlam;
-                    
-                }
+               }
             }
             xf = xxfh;
             if(((fi<=xf)&&(fj>=xf))||((fi>=xf)&&(fj<=xf)))  {
                 if (Abs(fi-fj)>=0.1e-20) {
                     R  xlam=(fi-xf)/(fi-fj);
                     z[im] =  fi * (1.F-xlam)  +  fj* xlam;
+                    NQ[im] =  Nt[i] * (1.F-xlam)  +  Nt[j] * xlam;
                     PQ[im++]   = Pt[i] * (1.F-xlam)  +  Pt[j]* xlam;
                 }
             }
             if (  xfb-eps <=fj  && fj <= xfh+eps)
-                z[im]=fj,PQ[im++] = Pt[j];
+                z[im]=fj,NQ[im]=Nt[j], PQ[im++] = Pt[j];
         }
         if (im>2) {
             color(l+4);
             R3 P[10];
             for(int i=0;i<im;++i)
-                P[i]= R3(PQ[i].x,PQ[i].y,PQ[i].z);
+             if(viewdim==3)
+                 if(changePlotdim)
+                    P[i]= R3(PQ[i].x+rapz*z[i]*NQ[i].x,PQ[i].y+rapz*z[i]*NQ[i].y,PQ[i].z+rapz*z[i]*NQ[i].z);
+                 else
+                     P[i]= R3(PQ[i].x,PQ[i].y,PQ[i].z);
+               else if(viewdim==2)
+                P[i]= R3(PQ[i].x,PQ[i].y,rapz*z[i]);
+            
             R3 N(R3(P[0],P[1])^R3(P[0],P[2]));
             N /= N.norme();
             if(N.z<0) N = -N;
@@ -3362,32 +3405,32 @@ void ThePlot::DrawIsoEfill(const R3 Pt[2],const R ff[2],const R * Viso,int NbIso
         R xfb = Viso[l-1];
         R xfh = Viso[l];
         assert(xfb < xfh);
-        int im=0, is=0;
+        int im=0;
         R fi=(ff[0]), fj=(ff[1]), xxfb=xfb, xxfh=xfh;
         int sens = 0;
         if (fj<fi ) {Exchange(xxfb,xxfh); sens=1;}
         
         if (Abs(fi-fj)>=0.1e-20) {
             if ((xxfh>=fi && xxfb<=fj) || (xxfh<=fi && xxfb>=fj)) {
-                PQ[im++] = Pt[0];
-                z[is++] = fi;
+                PQ[im] = Pt[0];
+                z[im++] = fi;
                 if ((!sens && (xxfb >= fi)) || (sens && (xxfb <= fi))) {
                     R  xlam=(fi-xxfb)/(fi-fj);
                     PQ[im-1] = Pt[0] * (1.F-xlam)  +  Pt[1]* xlam;
-                    z[is-1] = fi * (1.F-xlam)  +  fj* xlam;
+                    z[im-1] = fi * (1.F-xlam)  +  fj* xlam;
                 }
-                PQ[im++] = Pt[1];
-                z[is++] = fj;
+                PQ[im] = Pt[1];
+                z[im++] = fj;
                 if ((!sens && (xxfh <= fj)) || (sens && (xxfh >= fj))) {
                     R  xlam=(fi-xxfh)/(fi-fj);
                     PQ[im-1] = Pt[0] * (1.F-xlam)  +  Pt[1]* xlam;
-                    z[is-1] = fi * (1.F-xlam)  +  fj* xlam;
+                    z[im-1] = fi * (1.F-xlam)  +  fj* xlam;
                 }
             }
         }
         else {
-            PQ[im++] = Pt[0]; PQ[im++] = Pt[1];
-            z[is++] =0.;z[is++] =0.;
+            PQ[im] = Pt[0]; z[im++] =fi;
+            PQ[im] = Pt[1]; z[im++] =fj;
         }
         
         if (im>1) {
@@ -3631,8 +3674,10 @@ static void Key( unsigned char key, int x, int y )
             win->coef_dist *= 1.2;
             break;
         case '3':
-
             win->plotdim=win->plotdim==2?3:2;
+            break;
+        case '2':
+            win->changePlotdim=win->changePlotdim==0 ? 1 : 0;
             break;
         case '=':
             win->DefaultView(1);
