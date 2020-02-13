@@ -49,13 +49,12 @@ Vh[int] eV(nev);   // to store nev eigen vector
 
 int k=EigenValue(A,B,sym=true,sigma=sigma,value=ev,vector=eV,tol=1e-10,maxit=0,ncv=0,which="LM"); // which="LM" default 
 
-for (int i=0;i<k;i++)
-{
+for (int i=0;i<k;i++) {
 
-  meshS Thm = movemesh(Th,[x+Nx*eV[i],y+Ny*eV[i],z+Nz*eV[i]]);
-  fespace Vhm(Thm,P1);
+  //meshS Thm = movemesh(Th,[x+Nx*eV[i],y+Ny*eV[i],z+Nz*eV[i]]);  // equivalent to touch 2 in 3d view in ffglut
+  fespace Vhm(Th,P1);
   Vhm vm ;
-vm[]=eV[i][]; 
+  vm[]=eV[i][]; 
   // FFCS: add 3D view capabilities
   plot(vm,cmm="Eigen  Vector "+i+" valeur =" + ev[i]  ,wait=1,value=1,dim=3,fill=0,CutPlane=0,ShowAxes=0, nbiso=40);
 }
