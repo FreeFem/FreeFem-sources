@@ -113,7 +113,7 @@ template<class I=int,class K=double>
 class SolverCG: public VirtualSolver<I,K> {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 1&2&4&16;
+    static const int orTypeSol = 1|2|4|16;
 
     typedef HashMatrix<I,K>  HMat;
     HMat *A;
@@ -186,7 +186,7 @@ template<class I=int,class K=double>
 class SolverGMRES: public VirtualSolver<I,K> {
 public:
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 1&2&4&8&16;
+    static const int orTypeSol = 1|2|4|8|16;
 
     typedef HashMatrix<I,K>  HMat;
     HMat *A;

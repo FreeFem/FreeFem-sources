@@ -83,16 +83,16 @@ WHERE:$(SRCDIR)/FAIT
 	$(MAKE) install
 	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	echo scotch LD -L@DIR@/lib  -lesmumps -lscotch -lscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	echo scotchmetis LD -L@DIR@/lib  -lscotchmetis >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+#	echo scotchmetis LD -L@DIR@/lib  -lscotchmetis >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	echo scotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 WHERE-mpi:$(SRCDIR)/FAIT-mpi
 	$(MAKE) install-mpi
 	-rm $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	echo ptscotch LD -L@DIR@/lib  -lesmumps -lptscotch -lptscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	echo ptscotchparmetis  LD -L@DIR@/lib  -lesmumps -lptscotchparmetis >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+#	echo ptscotchparmetis  LD -L@DIR@/lib  -lesmumps -lptscotchparmetis >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	echo ptscotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	echo scotch LD -L@DIR@/lib  -lesmumps -lscotch -lscotcherr >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
-	echo scotchmetis LD -L@DIR@/lib  -lscotchmetis >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
+#	echo scotchmetis LD -L@DIR@/lib  -lscotchmetis >>$(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 	echo scotch INCLUDE -I@DIR@/include/scotch >> $(SRCDIR)/$(INSTALL)/lib/WHERE.scotch
 
 $(SRCDIR): $(PACKAGE)
@@ -109,6 +109,8 @@ $(PACKAGE):
 clean-local:
 	-cd $(SRCDIR)/src && $(MAKE)  realclean  -C $(SRCDIR)/src
 	-rm config.log
+	-rm -rf ../include/scotch/
+	-rm -rf ../lib/*scotch*
 # FH 	-rm $(PACKAGE) 
 
 clean: clean-local

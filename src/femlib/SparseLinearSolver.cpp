@@ -9,7 +9,7 @@ template<class I,class R> typename TheFFSolver<I,R>::MAPSF TheFFSolver<I,R>::ffs
     ds = new string(s);
 }
 template<class R>
-void Data_Sparse_Solver::Init_sym_positive_var()
+void Data_Sparse_Solver::Init_sym_positive_var(int syma)
 {
     //  put the solver name in UPPER CASE
    std::transform(solver.begin(), solver.end(), solver.begin(), static_cast<int(*)(int)>(std::toupper));
@@ -18,10 +18,12 @@ void Data_Sparse_Solver::Init_sym_positive_var()
     {
         //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
         int ts = i->second->orTypeSol ;
-        if ( (ts & 2) && (( ts & 1 ) ==0)) sym=0; //
-        if ( (ts & 4) && (( ts & 8 ) ==0)) positive=0; //
+        if ( (ts & 3) == 3 ) sym= syma <0 ? 0 : syma ; //  both sym/unsym -> prev. value
+        else sym =  (ts & 2) == 2 ;
+        positive = (ts & (4+8)) == 4;
         if(verbosity>4)
-            cout <<  "  The solver "<< solver << " need sym "<< sym << " and  positif def "<< positive << " matrix \n";
+            cout <<  "  The solver "<< solver << " need sym "<< sym << " and  positif def "
+                  << positive << " matrix ( prev sym"<< syma <<" ts " << ts << " )  \n";
     }
     else
     {
@@ -52,14 +54,16 @@ template<class Z,class K>
 {
     //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
     //    static const int  TS_unsym=1, TS_sym=2, TS_def_positif=4,  TS_not_def_positif=8, TS_sequental = 16, TS_mpi = 32;
-    if(verbosity>2) cout << " ** Find solver "<< ds.solver << endl;
     typedef  VirtualMatrix<Z,K> VM;
     int sym=ds.sym, pos = ds.positive;
+    if(verbosity>3) cout << " ** Search solver "<< ds.solver << " sym = " << sym << " pos.  " << pos << " half "<< A.half <<endl;
+
     string sn = ds.solver;
     std::transform(sn.begin(), sn.end(), sn.begin(), static_cast<int(*)(int)>(std::toupper));
 
     int typesolve = (sym ? VM::TS_sym: VM::TS_unsym ) + (pos ? VM::TS_def_positif : VM::TS_not_def_positif );
     auto i=  ffsolver.find(sn);
+    auto ii=i;
     int pp=-1;
     if( i == ffsolver.end()) // choose the best ???
         for ( auto j  = ffsolver.begin() ; j != ffsolver.end() ; ++j)
@@ -86,7 +90,12 @@ template<class Z,class K>
         }
 
     if( i != ffsolver.end())
+    {
+        if(verbosity>2) cout << " ** Find solver "<< i->first << " ts: "<< i->second->orTypeSol
+                             << " sym = " << sym << " pos.  " << pos << " half "<< A.half <<endl;
+
         return i->second->create(A,ds,stack);
+    }
     else
     {
         cerr << " TheFFSolver<Z,K>::FATAL ERROR  impossible to find solver  \n"
@@ -163,8 +172,8 @@ template class TheFFSolver<int,C>;
 template int TypeOfMat<int,R>( Data_Sparse_Solver & ds);
 template  int TypeOfMat<int,C>( Data_Sparse_Solver & ds);
 
-template void Data_Sparse_Solver::Init_sym_positive_var<R>();
-template void Data_Sparse_Solver::Init_sym_positive_var<C>();
+template void Data_Sparse_Solver::Init_sym_positive_var<R>(int );
+template void Data_Sparse_Solver::Init_sym_positive_var<C>(int );
 
 template void SetSolver(Stack stack,bool VF,VirtualMatrix<int,R> & A, const Data_Sparse_Solver & ds);
 template void SetSolver(Stack stack,bool VF,VirtualMatrix<int,C> & A, const     Data_Sparse_Solver & ds);

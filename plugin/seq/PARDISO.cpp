@@ -100,7 +100,7 @@ class SolverPardiso : public VirtualSolver< int, R > {
   MKL_INT pmtype, mtype, nrhs;
 
  public:
-  static const int orTypeSol = 1 & 2 & 8 & 16;    // Do all
+  static const int orTypeSol = 1 | 2 | 8 | 16;    // Do all
   static const MKL_INT pmtype_unset = -1000000000;
   typedef typename PARDISO_STRUC_TRAIT< R >::R MR;
   SolverPardiso(HMat &AH, const Data_Sparse_Solver &ds, Stack stack)

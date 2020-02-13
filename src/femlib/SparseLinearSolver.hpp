@@ -44,7 +44,9 @@ struct TheFFSolver {
     
     template<class VS>
     struct OneFFSlverVS:public OneFFSlver  {
-        OneFFSlverVS(int pp) :OneFFSlver(pp,VS::orTypeSol) {}
+        OneFFSlverVS(int pp) :OneFFSlver(pp,VS::orTypeSol) {
+           if(verbosity>9 ) cout << " OneFFSlverVS " << this-> orTypeSol << " " << VS::orTypeSol<< endl;
+             ffassert(this->orTypeSol);}
         virtual VirtualSolver<Z,K> * create(HashMatrix<Z,K> &A, const Data_Sparse_Solver & ds,Stack stack )
         { return new VS(A,ds,stack);}
         OneFFSlver *clone(){ return new OneFFSlverVS(*this); }

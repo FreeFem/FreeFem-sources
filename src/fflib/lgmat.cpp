@@ -564,12 +564,20 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
    Matrice_Creuse<R> *  A= GetAny<Matrice_Creuse<R> *>((*a)(stack));
 
     ffassert(A);
-    if( !A->A) A->A.master(new MatriceMorse<R>(0,0));//  set to empty matrix .. mars 2014 FH ..
     Data_Sparse_Solver ds;
     bool VF=false;
     ds.factorize=0;
+  // get previous value of sym ??? FH & PHT fev 2020
+    int syma=-1;
+    if( A->A)
+    {  HashMatrix<int,R> * phm= A->pHM();
+        if(phm)
+        syma=phm->half;
+    }
 
-    SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
+    if( !A->A) A->A.master(new MatriceMorse<R>(0,0));//  set to empty matrix .. mars 2014 FH ..
+    SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param,syma);
+    if( verbosity >4) cout <<" SetMatrix_Op " << ds.sym << " "<< ds.positive << " " << syma << endl;
     VirtualMatrix<int,R> *pvm =A->pMC();
     ffassert(pvm);
     pvm->setsdp(ds.sym,ds.positive); // put the matrix in rigth format

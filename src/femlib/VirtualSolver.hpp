@@ -100,7 +100,7 @@ struct Data_Sparse_Solver {
             initmat= GetAny<bool>((*einitmat)(s));
     }
     template<class R> 
-    void Init_sym_positive_var();
+    void Init_sym_positive_var(int syma);
 
     
     static   std::map<std::string,int> * Set_mds()
