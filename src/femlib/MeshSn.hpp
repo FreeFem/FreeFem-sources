@@ -128,7 +128,7 @@ typedef GenericVertex<R3> Vertex3;
         //MeshS(const string);
         MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb, bool cleanmesh=false, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-6);
         MeshS(const Serialize&);
-
+        MeshS(const Serialize &serialized, int withSurface);
         int load(const string & filename);
         const Element * Find( Rd P, R2 & Phat,bool & outside,const Element * tstart=0) const;
         int Save(const string & filename);

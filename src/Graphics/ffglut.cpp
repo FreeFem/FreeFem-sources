@@ -1084,7 +1084,7 @@ void OnePlotFEL::Draw(OneWindow *win)
     KN<R3> Pn(Psub.N());
     if((debug > 10)) cout << " " <<nsubV  << " " << nsubT << endl;
     
-    if(plot.fill && (what==14 || what==20))
+    if(plot.fill && (what == 14 || what == 20 || what == 114 || what == 120))
         glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     else
         glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
@@ -1102,7 +1102,7 @@ void OnePlotFEL::Draw(OneWindow *win)
     
     int klist=0;
     bool  change=false;
-    if(what==14 || what==20) {
+    if(what == 14 || what == 20 || what == 114 || what == 120) {
         if ( plot.fill) klist=1;
         change = win->changeiso ;
     }
@@ -1122,7 +1122,7 @@ void OnePlotFEL::Draw(OneWindow *win)
             const typename MeshL::Element & K=Th[k];
             for(int i=0;i<nsubV;++i)
                 Pn[i]=K(Psub[i]);// local to global coord.
-            if(what==14 || what==20) {
+            if(what == 14 || what == 20 || what == 114 || what == 120) {
                 for(int sk=0;sk<nsubT;++sk) {
                     int i0= Ksub[sk*2+0], i1=Ksub[sk*2+1];
                     R ff[2]={v[o+i0],v[o+i1]};
@@ -1320,7 +1320,7 @@ bool  OnePlotFEL::vc2v()
     }
     
     
-    if(what==14 || what==20)
+    if(what == 14 || what == 20 || what == 114 || what == 120)
     {
         fmin = min(fmin,v.min());
         fmax = max(fmax,v.max());

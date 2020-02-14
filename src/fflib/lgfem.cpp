@@ -2786,11 +2786,11 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
         l[i][0] = CastTo< pfScarray >(args[i]);
       } else if (BCastTo< pfLrarray >(args[i])) {    // [[file:lgmesh3.hpp::pfSrarray]]
         l[i].composant = false;
-        l[i].what = 109;    // arry iso value array iso value 3d
+        l[i].what = 114;    // arry iso value array iso value 3d
         l[i][0] = CastTo< pfLrarray >(args[i]);
       } else if (BCastTo< pfLcarray >(args[i])) {    // [[file:lgmesh3.hpp::pfScarray]]
         l[i].composant = false;
-        l[i].what = 119;    // arry iso value array iso value 3d
+        l[i].what = 120;    // arry iso value array iso value 3d
         l[i][0] = CastTo< pfLcarray >(args[i]);
       } else if (BCastTo< pmesh >(args[i])) {
         l[i].composant = true;
@@ -2821,6 +2821,7 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
       else {
         CompileError("Sorry no way to plot this kind of data");
       }
+        
   }
 
   static ArrayOfaType typeargs( ) { return ArrayOfaType(true); }    // all type
@@ -3841,7 +3842,7 @@ int SendL(PlotStream &theplot, Plot::ListWhat &lli, map< const MeshL *, long > &
   int lg, nsb = 0;
   lli.eval(feL, cmp);
 
-  if (what == 14 || what == 20) {
+  if( what == 14 || what == 20 || what == 114 || what == 120) {
     err = 0;
     theplot << what;
     theplot << mapthS[&(feL[0]->Vh->Th)];    // numero du maillage
@@ -3856,7 +3857,7 @@ int SendL(PlotStream &theplot, Plot::ListWhat &lli, map< const MeshL *, long > &
     theplot << Ksub;
     theplot << V1;
 
-  } else if (what == 15 || what == 21) {
+  } else if (what == 15 || what == 21 ) {
     ffassert(0);
   }
   return err;
@@ -3962,7 +3963,7 @@ AnyType Plot::operator( )(Stack s) const {
       case 108:
         l[i].AEvalandPush< asolS, solS >(s, i, ll);
         break;
-      case 109:
+      case 114:
         l[i].AEvalandPush< asolL, solL >(s, i, ll);
         break;
       case 111:
@@ -3977,7 +3978,7 @@ AnyType Plot::operator( )(Stack s) const {
       case 118:
         l[i].AEvalandPush< asolcS, solcS >(s, i, ll);
         break;
-      case 119:
+      case 120:
         l[i].AEvalandPush< asolcL, solcL >(s, i, ll);
         break;
 
@@ -4013,8 +4014,8 @@ AnyType Plot::operator( )(Stack s) const {
      what = 21 -> complex 3d vector field (tree FE function  3d) curve
      what = 50 -> 3D surface mesh
      what = 55 -> 3D line mesh
-     what = 100,101,106,109 ->   remap with real ... 2d, 3D volume, 3D surface, 3D curve
-     what = 111, 116, 117 ,118,119 ->  remap with complex ... 2d, 3D volume, 3D surface, 3D curve
+     what = 100,101,106,109,114 ->   remap with real ... 2d, 3D volume, 3D surface, 3D curve
+     what = 111, 116, 117 ,120 ->  remap with complex ... 2d, 3D volume, 3D surface, 3D curve
      what = -1 -> error, item empty
      */
     PlotStream theplot(ThePlotStream);

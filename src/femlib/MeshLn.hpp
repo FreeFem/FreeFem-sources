@@ -151,7 +151,7 @@ namespace Fem2D {
     void readmsh(ifstream & f,int offset);
     MeshL(FILE *f,int offset=0);
     MeshL(int nnv, int nnt, int nnbe, Vertex3 *vv, EdgeL *tt, BoundaryPointL *bb, bool cleanmesh=false, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7, double ridgeangledetection=8.*atan(1.)/9.);
-    //MeshL(const Serialize&);
+    MeshL(const Serialize&);
 
     int load(const string & filename);
     const Element * Find( Rd P, R1 & Phat,bool & outside,const Element * tstart=0) const;

@@ -847,12 +847,12 @@ namespace Fem2D
     }
     
     
-    Serialize MeshS::serialize_withBorderMesh() const {
+   /* Serialize MeshS::serialize_withBorderMesh() const {
         
         // structure here for MeshL...but not use now
         ffassert(0);
     }
-    
+    */
     
     
     
@@ -1064,4 +1064,237 @@ namespace Fem2D
         delete [] map_v_num_curve;
         
     }
+
+
+
+   MeshS::MeshS(const Serialize &serialized, int withSurface)
+   {
+       
+       nt=0;nv=0;nbe=0;
+       mes=0.;mesb=0.;
+       vertices=0;elements=0;
+       borderelements=0;bnormalv=0;
+       TheAdjacencesLink=0;BoundaryElementHeadLink=0;
+       ElementConteningVertex=0; gtree=0;
+      
+       ffassert(withSurface==1);
+       //const int nvTet = Tet::nv;
+       const int nvTriangle = TriangleS::nv;
+       const int nvEdge = BoundaryEdgeS::nv;
+       const int nvPoint = BoundaryPointL::nv;
+       
+       const int d = Rd::d;
+       int havebordermesh(0);
+       int dd,nnvTriangle,nnvEdge,nnvPoint,nnvL,nnbeL,nnv,nnt,nnbe;
+       long long  l=0;
+       size_t pp=0;
+       serialized.get(pp, l);
+       serialized.get(pp,dd);
+       serialized.get(pp,havebordermesh);
+       serialized.get(pp,nnvTriangle);
+       serialized.get(pp,nnvEdge);
+       serialized.get(pp,nnvPoint);
+       serialized.get(pp,nnt);
+       serialized.get(pp,nnv);
+       serialized.get(pp,nnbe);
+       serialized.get(pp,nnvL);
+       serialized.get(pp,nnbeL);
+       
+       ffassert(d==dd && nvTriangle == nnvTriangle && nvEdge == nnvEdge && nvPoint == nnvPoint && havebordermesh==1);
+
+       set(nnv,nnt,nnbe);
+       for (int i=0;i<nv;++i)
+       {
+           for(int j=0;j<d;++j)
+               serialized.get(pp,vertices[i][j]);
+           serialized.get(pp,vertices[i].lab);
+       }
+       mes=0.;
+       for (int i=0;i<nt;++i)
+       {
+           int ii[nvTriangle],lab;
+           for(int j=0;j<nvTriangle;++j)
+               serialized.get(pp,ii[j]);
+           serialized.get(pp,lab);
+           mes += elements[i].set(vertices,ii,lab).mesure();
+           
+       }
+       mesb=0;
+       for (int i=0;i<nbe;++i)
+       {
+           int ii[nvEdge],lab;
+           for(int j=0;j<nvEdge;++j)
+               serialized.get(pp,ii[j]);
+           serialized.get(pp, lab);
+           mesb += borderelements[i].set(vertices,ii,lab).mesure();
+       }
+        // build the meshS
+       meshL = new MeshL();
+       meshL->nt=0;meshL->nv=0;meshL->nbe=0;
+       meshL->mes=0.;meshL->mesb=0.;
+       meshL->vertices=0;meshL->elements=0;
+       meshL->borderelements=0;meshL->bnormalv=0;
+       meshL->TheAdjacencesLink=0;meshL->BoundaryElementHeadLink=0;
+       meshL->ElementConteningVertex=0; meshL->gtree=0;
+       
+       meshL->set(nnvL,nbe,nnbeL);
+       
+       // Number of Vertex in the surface
+       meshL->mapSurf2Curv=new int[nv];
+       meshL->mapCurv2Surf=new int[nv];
+       for (int k=0; k<nv; ++k) {
+           serialized.get(pp,meshL->mapCurv2Surf);
+           serialized.get(pp,meshL->mapSurf2Curv[k]);
+       }
+       
+       for (int k=0; k<nnvL; ++k) {
+           int k0 = meshL->mapSurf2Curv[k];
+           const  Vertex & P = this->vertices[k0];
+           meshL->vertices[k].lab=P.lab;
+           meshL->vertices[k].x=P.x;
+           meshL->vertices[k].y=P.y;
+           meshL->vertices[k].z=P.z;
+       }
+       int iv[nvEdge];
+       for(int i=0;i<nbe;++i) {
+              const BorderElement & K(borderelements[i]);
+           for (int j=0;j<nvEdge;++j)
+               iv[j]=meshL->mapSurf2Curv[this->operator()(K[j])];
+           
+           meshL->elements[i].set(meshL->vertices,iv,K.lab);
+           meshL->mes += meshL->elements[i].mesure();
+       }
+
+       for (int i=0;i<nnbeL;++i) {
+           int iv[nvPoint],lab;
+           for(int j=0;j<nvPoint;++j)
+               serialized.get(pp,iv[j]);
+           serialized.get(pp, lab);
+           meshL->borderelements[i].set(meshL->vertices,iv,lab);
+           meshL->mesb += meshL->borderelements[i].mesure();
+       }
+       // check pp reading
+       assert(pp==serialized.size());
+
+       // end building for mesh3
+       BuildBound();
+       if(verbosity>1)
+           cout << "  -- End of serialized: mesure = " << mes << " border mesure " << mesb << endl;
+       
+       if(nt > 0){
+           BuildAdj();
+           Buildbnormalv();
+           BuildjElementConteningVertex();
+       }
+       
+       if(verbosity>1)
+           cout << "  -- MeshS  (serialized), d "<< 3  << ", n Tri " << nt << ", n Vtx "
+           << nv << " n Bord " << nbe << endl;
+       ffassert(mes>=0);
+      // end building meshS
+       meshL->BuildBound();
+       if(verbosity>1)
+           cout << "  -- End of serialized MeshS:MeshL: mesure = " << meshL->mes << " border mesure " << meshL->mesb << endl;
+       
+      meshL->BuildAdj();
+       meshL->Buildbnormalv();
+       meshL->BuildjElementConteningVertex();
+       
+       if(verbosity>1)
+           cout << "  -- MeshS:MeshL  (serialized), d "<< 3  << ", n Edge " << nt << ", n Vtx "
+           << nv << " n Bord " << nbe << endl;
+       ffassert(meshL->mes>=0);
+       
+   }
+
+// this function merges serialize2 in serialize1
+   Serialize MeshS::serialize_withBorderMesh() const {
+       
+       ffassert(meshL);
+       
+       const int nvTriangle = TriangleS::nv;
+       const int nvEdge = BoundaryEdgeS::nv;
+       const int nvPoint = BoundaryPointL::nv;
+       const int d = Rd::d;
+       long long  l=0;
+       int nvL=meshL->nv;
+       int nbeL=meshL->nbe;
+       int havebordermesh(1);
+       
+       l += sizeof(long long);
+       l += 10*sizeof(int); //( +nv nt nbe bordermesh(=1))
+       l += nt*(sizeof(int)*(nvTriangle + 1));
+       l += nv*( sizeof(int) + sizeof(double)*d);
+       l += nbe*(sizeof(int)*(nvEdge+1));
+       // add new2old mapping
+       l += nv*(sizeof(int)); // mapSurf2Vol
+       l += nv*(sizeof(int)); // mapVol2Surf
+       l += nbeL*(sizeof(int)*(nvPoint+1));
+       
+       if(verbosity>3)
+           cout << "Serialize gmesh " << l << " " << nvTriangle << " " << nvEdge << " " << nvPoint << endl;
+       Serialize  serialized(l,GenericMesh_magicmesh);
+       // cout << l << magicmesh << endl;
+       size_t pp=0;
+       serialized.put(pp, l);
+       serialized.put(pp,d);
+       serialized.put(pp,havebordermesh);
+       serialized.put(pp,nvTriangle);
+       serialized.put(pp,nvEdge);
+       serialized.put(pp,nvPoint);
+       serialized.put(pp,nt);
+       serialized.put(pp,nv);
+       serialized.put(pp,nbe);
+       serialized.put(pp,nvL);
+       serialized.put(pp,nbeL);
+       
+       
+       if (verbosity>9)
+           cout << " GenericMesh Serialized : " << l << " "  << nt << " " << nv << " " << nbe << endl;
+       for (int i=0;i<nv;i++)
+       {
+           for(int j=0;j<d;++j)
+               serialized.put(pp,vertices[i][j]);
+           serialized.put(pp,vertices[i].lab);
+       }
+       for (int i=0;i<nt;i++)
+       {
+           
+           const Element & K(elements[i]);
+           for(int j=0;j<nvTriangle;++j)
+               serialized.put(pp,(int) operator()(K[j]));
+           serialized.put(pp, K.lab);
+       }
+       for (int i=0;i<nbe;i++)
+       {
+           const BorderElement & K(borderelements[i]);
+           for(int j=0;j<nvEdge;++j)
+               serialized.put(pp,(int) operator()(K[j]));
+           serialized.put(pp, K.lab);
+       }
+       // copy mappings to the vertice of the surface
+       int vp;
+       for (int i=0;i<nv;i++) {
+           vp=meshL->mapCurv2Surf[i];
+           serialized.put(pp,vp);
+           vp=meshL->mapSurf2Curv[i];
+           serialized.put(pp,vp);
+       }
+       for (int i=0;i<nbeL;i++)
+       {
+           const BoundaryPointL & K(meshL->borderelements[i]);
+           for(int j=0;j<nvPoint;++j)
+               serialized.put(pp,(int) meshL->operator()(K[j]));
+           serialized.put(pp, K.lab);
+       }
+       assert(pp==serialized.size());
+       return serialized;
+   }
+
+   
+
+
+
+
+
 }

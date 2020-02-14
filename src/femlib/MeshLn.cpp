@@ -651,89 +651,99 @@ namespace Fem2D
   
     
     // determine the bounder points list for meshL
-    void MeshL::BuildBorderPt(double angle) {
+   void MeshL::BuildBorderPt(double angle) {
       
         
-        delete [] borderelements; // to remove the previous pointers
-        borderelements = new BoundaryPointL[2 * nt]; // 2 * nt upper evaluated
-        
-        HashTable<SortArray<int, 1>, int> pointI(2 * nt, nt);
-        int* AdjLink = new int[2 * nt];
-        
-        int nbeL=0,nbiL=0,nk=0;
-        // Build border points from the edge list
-        for (int i = 0; i < nt; i++)
-            for (int j = 0; j < 2; j++) {
-                int jt = j, it = ElementAdj(i, jt);
-                EdgeL &K(elements[i]);  // current element
-                // True border point -> no adjacence / on domain border
-                if ((it == i || it < 0)) {
-                    int iv[1];
-                        iv[0] = this->operator () (K [EdgeL::nvedge[0][j]]);
-                    if(verbosity>15)
-                        cout << " the edge " << iv[0] << " is a boundary " << endl;
-                    be(nbeL++).set(vertices,iv,K.lab);
-                    
-                }
-                // internal point -- check angular and no manifold
-                else {
-                    EdgeL &K_adj(elements[it]); // adjacence element
-                    int iv[1];
-                    iv[0] = this->operator () (K [EdgeL::nvedge[0][j]]);
-                    SortArray<int, 1> key(iv[0]);
-                    typename HashTable<SortArray<int,1>,int>::iterator p= pointI.find(key);
-                    if (!p) {
-                        //edge element
-                        R3 A(K[0]),B(K[1]);
-                        R3 E(B-A);
-                        E/=E.norme();
-                        // adj edge element
-                        R3 A_adj(K_adj[0]),B_adj(K_adj[1]);
-                        R3 E_adj(B_adj-A_adj);
-                           E_adj/=E_adj.norme();
+       delete [] borderelements; // to remove the previous pointers
+       borderelements = new BoundaryPointL[2 * nt]; // 2 * nt upper evaluated
+       
+       HashTable<SortArray<int, 1>, int> pointI(2 * nt, nt);
+       int* AdjLink = new int[2 * nt];
+       
+       int nbeL=0,nbiL=0,nk=0;
+       // Build border points from the edge list
+       for (int i = 0; i < nt; i++)
+           for (int j = 0; j < 2; j++) {
+               int jt = j, it = ElementAdj(i, jt);
+               EdgeL &K(elements[i]);  // current element
+               // True border point -> no adjacence / on domain border
+               if ((it == i || it < 0)) {
+                   int iv[1];
+                       iv[0] = this->operator () (K [EdgeL::nvedge[0][j]]);
+                   if(verbosity>15)
+                       cout << " the edge " << iv[0] << " is a boundary " << endl;
+                   be(nbeL++).set(vertices,iv,K.lab);
+                   
+               }
+               // internal point -- check angular and no manifold
+               else {
+                   EdgeL &K_adj(elements[it]); // adjacence element
+                   int iv[1];
+                   iv[0] = this->operator () (K [EdgeL::nvedge[0][j]]);
+                   SortArray<int, 1> key(iv[0]);
+                   typename HashTable<SortArray<int,1>,int>::iterator p= pointI.find(key);
+                   if (!p) {
+                       //edge element
+                       R3 A(K[0]),B(K[1]);
+                       R3 E(B-A);
+                       E/=E.norme();
+                       // adj edge element
+                       R3 A_adj(K_adj[0]),B_adj(K_adj[1]);
+                       R3 E_adj(B_adj-A_adj);
+                          E_adj/=E_adj.norme();
+                       
+                       R pdt = (E,E_adj); // scalar product
+                       pdt = acos(pdt); // radian angle (Normal,Normal_adj)
+                       if(verbosity>15)
+                           cout << "Element num: " << i << " N " << E << " Element adjacent num: " << it << " E_adj " << E_adj << " angle between N N_adj = " << pdt <<endl;
                         
-                        R pdt = (E,E_adj); // scalar product
-                        pdt = acos(pdt); // radian angle (Normal,Normal_adj)
-                        if(verbosity>15)
-                            cout << "Element num: " << i << " N " << E << " Element adjacent num: " << it << " E_adj " << E_adj << " angle between N N_adj = " << pdt <<endl;
-                        
-                        if(pdt >= angle) {
-                            if(verbosity>15)
-                                cout << " the edge " <<nbeL <<": [" << iv[0] << " " << iv[1] << "] is a boundary with the angular criteria" << endl;
-                            int lab = min(K.lab, K_adj.lab);                            
-                            be(nbeL).set(vertices,iv,lab);
-                            pointI.add(key, nbeL++);
-                        }
-                    }
-                }
-                nk++;  // increment the total edge jump --- nt * 2
+                       if(pdt >= angle) {
+                           if(verbosity>15)
+                               cout << " the edge " <<nbeL <<": [" << iv[0] << " " << iv[1] << "] is a boundary with the angular criteria" << endl;
+                           int lab = min(K.lab, K_adj.lab);
+                           be(nbeL).set(vertices,iv,lab);
+                           pointI.add(key, nbeL++);
+                       }
+                   }
+               }
+               nk++;  // increment the total edge jump --- nt * 2
                 
-            }
-        assert(nt*2==nk);
-        delete [] AdjLink;
-        // update the number of border points
-        nbe = nbeL;
-        if (verbosity>5)
-            cout << " Building border point from meshS nbe: "<< nbeL << " nbi: " << nbiL << endl;
+           }
+       assert(nt*2==nk);
+       delete [] AdjLink;
+       // update the number of border points
+       nbe = nbeL;
+       if (verbosity>5)
+           cout << " Building border point from meshS nbe: "<< nbeL << " nbi: " << nbiL << endl;
         
-        BuildBound();
-        delete []TheAdjacencesLink;
-        delete [] BoundaryElementHeadLink;
-        TheAdjacencesLink=0;
-        BoundaryElementHeadLink=0;
-        BuildAdj();
-        //Buildbnormalv();
-        BuildjElementConteningVertex();
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    }
+       BuildBound();
+       delete []TheAdjacencesLink;
+       delete [] BoundaryElementHeadLink;
+       TheAdjacencesLink=0;
+       BoundaryElementHeadLink=0;
+       BuildAdj();
+       //Buildbnormalv();
+       BuildjElementConteningVertex();
+       
+   }
+
+  MeshL::MeshL(const  Serialize &serialized)
+  :GenericMesh<EdgeL,BoundaryPointL,Vertex3> (serialized) {
+   BuildBound();
+   if(verbosity>1)
+       cout << "  -- End of serialized: mesure = " << mes << " border mesure " << mesb << endl;
+ 
+   if(nt > 0){
+       BuildAdj();
+       //Buildbnormalv();
+       BuildjElementConteningVertex();
+   }
+  if(verbosity>1)
+       cout << "  -- MeshL  (serialized), d "<< 3  << ", n Edges " << nt << ", n Vtx "
+       << nv << " n Bord " << nbe << endl;
+   ffassert(mes>=0);
+  }
+
     
     
 }
