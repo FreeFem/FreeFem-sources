@@ -1165,7 +1165,7 @@ void HashMatrix<I,R>::SetBC(char *wbc,double ttgv)
                 {
                     for (I k=p[ii];k<p[ii+1]; ++k)
                         if( j[k]==ii )
-                            aij[k] = 1.;
+                            aij[k] = (std::abs(ttgv+10.0) < 1.0e-10 ? 0.0 : 1.0);
                         else
                             aij[k]=0;// put the line to Zero.
                 }
@@ -1174,15 +1174,13 @@ void HashMatrix<I,R>::SetBC(char *wbc,double ttgv)
             else
                 operator()(ii,ii)=ttgv;
         }
-    if(ttgv < -1.999) //  remove also columm tgv == -2 .....
+    if(std::abs(ttgv+2.0) < 1.0e-10 || std::abs(ttgv+20.0) < 1.0e-10) //  remove also columm tgv == -2 .....
     {
         CSC();
         for(I jj=0; jj< this->n; ++jj)
             if( wbc[jj] ) {
                 for (I k=p[jj];k<p[jj+1]; ++k)
-                    if( i[k]==jj)
-                        aij[k] = 1.;
-                    else
+                    if( i[k]!=jj || std::abs(ttgv+20.0) < 1.0e-10)
                         aij[k]=0;//
             }
     }
