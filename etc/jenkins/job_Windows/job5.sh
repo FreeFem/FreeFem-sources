@@ -22,6 +22,17 @@ else
   exit 1
 fi
 
+# check
+make check
+
+if [ $? -eq 0 ]
+then
+  echo "Check process complete"
+else
+  echo "Check process failed"
+  exit 1
+fi
+
 # install
 make install
 
@@ -38,9 +49,9 @@ make uninstall
 
 if [ $? -eq 0 ]
 then
-echo "Uninstall process complete"
+  echo "Uninstall process complete"
 else
-echo "Uninstall process failed"
+  echo "Uninstall process failed"
 exit 1
 fi
 

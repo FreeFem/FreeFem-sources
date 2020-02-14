@@ -628,6 +628,27 @@ namespace PETSc {
 #endif
       return 0L;
   }
+  long hasType(string* const& obj, string* const& type) {
+      if (obj->size() > 0 && type->size() > 0) {
+          std::string o(*obj);
+          std::transform(o.begin(), o.end(), o.begin(), ::toupper);
+          std::string t(*type);
+          std::transform(t.begin(), t.end(), t.begin(), ::tolower);
+          if (o.compare("PC") == 0) {
+              PetscErrorCode (*pc)(PC*);
+              PetscFunctionListFind(PCList, t.c_str(), &pc);
+              if(pc)
+                  return 1L;
+          }
+          else if (o.compare("KSP") == 0) {
+              PetscErrorCode (*ksp)(KSP*);
+              PetscFunctionListFind(KSPList, t.c_str(), &ksp);
+              if(ksp)
+                  return 1L;
+          }
+      }
+      return 0L;
+  }
   template< class Type >
   long initEmptyCSR(Type* const&) {
     return 0L;
@@ -3910,6 +3931,7 @@ static void Init_PETSc( ) {
   addInv< Dbddc, PETSc::InvPETSc, KN< PetscScalar >, PetscScalar >( );
   Global.Add("PetscLogStagePush", "(", new OneOperator1_< long, string* >(PETSc::stagePush));
   Global.Add("PetscLogStagePop", "(", new OneOperator0< long >(PETSc::stagePop));
+  Global.Add("hasType", "(", new OneOperator2_< long, string*, string* >(PETSc::hasType));
   Init_Common( );
 }
 #ifndef PETScandSLEPc

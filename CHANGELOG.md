@@ -26,13 +26,17 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- new function `hasType` to know if a PETSc component has been installed, e.g., `hasType("PC", "hypre");`
+- eigenvalue problems on linear elements, cf. `eigen/LapEigen1DBeltrami.edp` or `laplace-beltrami-3d-line-SLEPc.edp`
 
 ### Changed
+- new `tgv` values: -10 => zero row, -20 => zero row/column
 
 ### Deprecated
 
-
 ### Fixed
+- compilation of PETSc under Windows
+- compilation of plugins when using static libraries
 
 ## [4.5]
 

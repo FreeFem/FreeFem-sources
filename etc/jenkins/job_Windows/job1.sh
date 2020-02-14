@@ -47,13 +47,11 @@ make uninstall
 
 if [ $? -eq 0 ]
 then
-echo "Uninstall process complete"
+  echo "Uninstall process complete"
 else
-echo "Uninstall process failed"
+  echo "Uninstall process failed"
 exit 1
 fi
 
-
 # visu for jenkins tests results analyser
 ./etc/jenkins/resultForJenkins/resultForJenkins.sh
-
