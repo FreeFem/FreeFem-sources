@@ -1053,7 +1053,7 @@ basicAC_F0::name_and_type OpCall_FormBEM_np::name_param[] = {
     {  "precon",&typeid(Polymorphic*)}, \
     {  "dimKrylov",&typeid(long)}, \
     {  "tgv",&typeid(double )}, \
-    {  "factorize",&typeid(long)}, \  
+    {  "factorize",&typeid(long)}, \
     {  "strategy",&typeid(long )}, \
     {  "tolpivot",&typeid(double )}, \
     {  "tolpivotsym",&typeid(double )}, \
@@ -1066,7 +1066,7 @@ basicAC_F0::name_and_type OpCall_FormBEM_np::name_param[] = {
     { "permc", &typeid(KN_<long>)}, \
     { "scaler", &typeid(KN_<double>)}, \
     { "scalec", &typeid(KN_<double>)}, \
-    { "sparams", &typeid(string*)}, \  
+    { "sparams", &typeid(string*)}, \
     { "commworld", &typeid(pcommworld)}, \
     { "master", &typeid(long)}, \
     { "rinfo", &typeid(KN<double>*)}, \
@@ -1076,15 +1076,15 @@ basicAC_F0::name_and_type OpCall_FormBEM_np::name_param[] = {
     { "kerneldim", &typeid(long*)}, \
     { "verb", &typeid(long)}, \
     { "x0", &typeid(bool)}, \
-    { "veps", &typeid(double*)  }, \ 
+    { "veps", &typeid(double*)  }, \
     { "rightprecon", &typeid(bool)  }, \
     { "sym", &typeid(bool)  }, \
     { "positive", &typeid(bool)  }, \
-    {  "eta", &typeid(double)}, \  
+    {  "eta", &typeid(double)}, \
     {  "minclustersize", &typeid(long)}, \
     {  "maxblocksize", &typeid(long)}, \
     {  "mintargetdepth", &typeid(long)}, \
-    {  "minsourcedepth", &typeid(long)}, \ 
+    {  "minsourcedepth", &typeid(long)}, \
     {  "compressor",&typeid(string*)}
 };
 

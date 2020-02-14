@@ -102,6 +102,8 @@ FLAGS_CONF_PETSC_REAL= --with-shared-libraries=0 --with-debugging=0 \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' --with-cxx-dialect=C++11 \
 	COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 	CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
+	CXXFLAGS='-fno-stack-protector' \
+	CFLAGS='-fno-stack-protector' \
 	FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 	--with-scalar-type=real \
 	--with-mpi-lib='$(MPI_LIB)' \

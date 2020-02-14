@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: cxx11 slepccomplex [mkl|blas] hpddm mpi
+//ff-c++-LIBRARY-dep: cxx11 slepccomplex petsccomplex [mkl|blas] hpddm mpi
 //ff-c++-cpp-dep:
 
 #define WITH_slepccomplex

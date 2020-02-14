@@ -1,52 +1,25 @@
-diff --git a/config/BuildSystem/config/libraries.py b/config/BuildSystem/config/libraries.py
-index 8b228de6bd..51565178e6 100644
---- a/config/BuildSystem/config/libraries.py
-+++ b/config/BuildSystem/config/libraries.py
-@@ -331,6 +331,22 @@ extern "C" {
-       self.logPrint('Warning: No realtime library found')
-     return
- 
-+  def checkRegex(self):
-+    '''Check for presence of regexec(), regcomp(), and regfree() in regex library (POSIX Regex extensions)'''
-+    self.regex = None
-+    funcs = ['regexec', 'regcomp', 'regfree']
-+    prototypes = ['#include <regex.h>', '', '']
-+    calls = ['regex_t reg; char* c; regcomp(&reg,c,0);', 'regex_t reg; char* c; regmatch_t match[1]; regexec(&reg,c,0,match,0);', 'regex_t reg; regfree(&reg);']
-+    if self.check('', funcs, prototype=prototypes, call=calls):
-+      self.logPrint('regex functions are linked in by default')
-+      self.regex = []
-+    elif self.check('regex', funcs, prototype=prototypes, call=calls):
-+      self.logPrint('Using libregex for the regex library')
-+      self.regex = ['libregex.a']
-+    else:
-+      self.logPrint('Warning: No regex library found')
-+    return
-+
-   def checkDynamic(self):
-     '''Check for the header and libraries necessary for dynamic library manipulation'''
-     if 'with-dynamic-loading' in self.argDB and not self.argDB['with-dynamic-loading']: return
-@@ -501,5 +517,6 @@ int checkInit(void) {
-     self.executeTest(self.checkMathFenv)
-     self.executeTest(self.checkMathLog2)
-     self.executeTest(self.checkRealtime)
-+    self.executeTest(self.checkRegex)
-     self.executeTest(self.checkDynamic)
-     return
 diff --git a/config/BuildSystem/config/packages/PTScotch.py b/config/BuildSystem/config/packages/PTScotch.py
-index 8c6b872e01..6f9d9c0581 100644
+index 8c6b872e01..e1e71f371d 100644
 --- a/config/BuildSystem/config/packages/PTScotch.py
 +++ b/config/BuildSystem/config/packages/PTScotch.py
-@@ -55,12 +55,19 @@ class Configure(config.package.Package):
+@@ -23,7 +23,8 @@ class Configure(config.package.Package):
+     self.mathlib        = framework.require('config.packages.mathlib',self)
+     self.pthread        = framework.require('config.packages.pthread',self)
+     self.zlib           = framework.require('config.packages.zlib',self)
+-    self.deps           = [self.mpi, self.mathlib]
++    self.regex          = framework.require('config.packages.regex',self)
++    self.deps           = [self.mpi,self.mathlib,self.regex]
+     self.odeps          = [self.pthread,self.zlib]
+     return
+ 
+@@ -55,12 +56,17 @@ class Configure(config.package.Package):
  
      # Building cflags/ldflags
      self.cflags = self.removeWarningFlags(self.setCompilers.getCompilerFlags())+' '+self.headers.toString(self.mpi.include)
--    ldflags = self.libraries.toString(self.dlib)
-+    if self.libraries.regex is None:
-+      raise RuntimeError('Error building PTScotch: no regex library')
 +    functions = self.framework.require('config.functions', self)
 +    if not functions.haveFunction('FORK') and not functions.haveFunction('_PIPE'):
 +      raise RuntimeError('Error building PTScotch: no pipe function')
-+    ldflags = self.libraries.toString(self.dlib) + ' ' + self.libraries.toString(self.libraries.regex)
+     ldflags = self.libraries.toString(self.dlib)
      if self.zlib.found:
        self.cflags = self.cflags + ' -DCOMMON_FILE_COMPRESS_GZ'
      # OSX does not have pthread_barrier_destroy
@@ -57,6 +30,9 @@ index 8c6b872e01..6f9d9c0581 100644
      if self.libraries.add('-lrt','timer_create'): ldflags += ' -lrt'
      self.cflags = self.cflags + ' -DCOMMON_RANDOM_FIXED_SEED'
      # do not use -DSCOTCH_PTHREAD because requires MPI built for threads.
+diff --git a/config/BuildSystem/config/packages/cgns.py b/config/BuildSystem/config/packages/cgns.py
+old mode 100755
+new mode 100644
 diff --git a/config/BuildSystem/config/packages/metis.py b/config/BuildSystem/config/packages/metis.py
 index 63854604a0..e92599f517 100644
 --- a/config/BuildSystem/config/packages/metis.py
@@ -96,16 +72,55 @@ index 98dc9cc0af..a199ebd570 100644
      self.functions         = ['ParMETIS_V3_PartKway']
      self.includes          = ['parmetis.h']
      self.liblist           = [['libparmetis.a']]
+diff --git a/config/BuildSystem/config/packages/regex.py b/config/BuildSystem/config/packages/regex.py
+new file mode 100644
+index 0000000000..1c13617c1a
+--- /dev/null
++++ b/config/BuildSystem/config/packages/regex.py
+@@ -0,0 +1,11 @@
++import config.package
++import os
++
++class Configure(config.package.Package):
++  def __init__(self, framework):
++    config.package.Package.__init__(self, framework)
++    self.functions        = ['regexec', 'regcomp', 'regfree']
++    self.includes         = ['regex.h']
++    self.liblist          = [['libregex.a']]
++    self.lookforbydefault = 1
++    return
 diff --git a/config/PETSc/Configure.py b/config/PETSc/Configure.py
-index 363c5d6550..571439054a 100644
+index 363c5d6550..933082e977 100644
 --- a/config/PETSc/Configure.py
 +++ b/config/PETSc/Configure.py
-@@ -132,7 +132,7 @@ class Configure(config.base.Configure):
-                  'readlink', 'realpath',  'usleep', 'sleep', '_sleep',
+@@ -122,19 +122,19 @@ class Configure(config.base.Configure):
+         self.registerPythonFile(fname,'')
+ 
+     # test for a variety of basic headers and functions
+-    headersC = map(lambda name: name+'.h', ['setjmp','dos', 'fcntl', 'float', 'io',  'malloc', 'pwd',  'strings',
+-                                            'unistd', 'sys/sysinfo', 'machine/endian', 'sys/param', 'sys/procfs', 'sys/resource',
+-                                            'sys/systeminfo', 'sys/times', 'sys/utsname',
++    headersC = map(lambda name: name+'.h',['setjmp','dos','fcntl','float','io','malloc','pwd','strings',
++                                            'unistd','sys/sysinfo','machine/endian','sys/param','sys/procfs','sys/resource',
++                                            'sys/systeminfo','sys/times','sys/utsname',
+                                             'sys/socket','sys/wait','netinet/in','netdb','Direct','time','Ws2tcpip','sys/types',
+-                                            'WindowsX', 'float','ieeefp','stdint','pthread','inttypes','immintrin','zmmintrin'])
+-    functions = ['access', '_access', 'clock', 'drand48', 'getcwd', '_getcwd', 'getdomainname', 'gethostname',
+-                 'getwd', 'memalign', 'popen', 'PXFGETARG', 'rand', 'getpagesize',
+-                 'readlink', 'realpath',  'usleep', 'sleep', '_sleep',
++                                            'WindowsX','float','ieeefp','stdint','pthread','inttypes','immintrin','zmmintrin'])
++    functions = ['access','_access','clock','drand48','getcwd','_getcwd','getdomainname','gethostname',
++                 'getwd','memalign','popen','PXFGETARG','rand','getpagesize',
++                 'readlink','realpath','usleep','sleep','_sleep',
                   'uname','snprintf','_snprintf','lseek','_lseek','time','fork','stricmp',
-                  'strcasecmp', 'bzero', 'dlopen', 'dlsym', 'dlclose', 'dlerror',
+-                 'strcasecmp', 'bzero', 'dlopen', 'dlsym', 'dlclose', 'dlerror',
 -                 '_set_output_format','_mkdir','socket','gethostbyname']
-+                 '_set_output_format','_mkdir','socket','gethostbyname', '_pipe']
-     libraries = [(['fpe'], 'handle_sigfpes')]
-     librariessock = [(['socket', 'nsl'], 'socket')]
+-    libraries = [(['fpe'], 'handle_sigfpes')]
+-    librariessock = [(['socket', 'nsl'], 'socket')]
++                 'strcasecmp','bzero','dlopen','dlsym','dlclose','dlerror',
++                 '_set_output_format','_mkdir','socket','gethostbyname','_pipe']
++    libraries = [(['fpe'],'handle_sigfpes')]
++    librariessock = [(['socket','nsl'],'socket')]
      self.headers.headers.extend(headersC)
+     self.functions.functions.extend(functions)
+     self.libraries.libraries.extend(libraries)

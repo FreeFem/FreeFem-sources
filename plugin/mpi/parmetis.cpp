@@ -22,7 +22,7 @@
 // E-MAIL  :  P. Jolivet <pierre.jolivet@enseeiht.fr>
 
 // *INDENT-OFF* //
-//ff-c++-LIBRARY-dep: parmetis mpi
+//ff-c++-LIBRARY-dep: parmetis metis mpi
 //ff-c++-cpp-dep:
 // *INDENT-ON* //
 

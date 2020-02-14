@@ -51,8 +51,6 @@ TESTS_HPDDM = diffusion-2d.edp \
 	stokes-io-3d.edp \
 	heat-torus-3d-surf.edp
 
-TESTS_HPDDM_PETSC = diffusion-substructuring-2d-PETSc.edp
-
 TESTS_PETSC = bratu-2d-PETSc.edp \
 	diffusion-2d-PETSc.edp \
 	diffusion-3d-PETSc.edp \
@@ -90,6 +88,7 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	laplace-adapt-3d-PETSc.edp \
 	diffusion-mg-3d-PETSc.edp
 # bratu-hpddm-2d-PETSc.edp needs PETSc 3.13
+# diffusion-substructuring-2d-PETSc.edp <- problem with BDDC
 
 TESTS_PETSC_SLEPC = laplace-2d-SLEPc.edp \
 	laplace-spherical-harmonics-2d-SLEPc.edp \
@@ -115,9 +114,6 @@ CONDITIONAL_MPI = $(TESTS_MPI)
 
 if HPDDM
 CONDITIONAL_HPDDM = $(TESTS_HPDDM)
-if PETSC
-CONDITIONAL_HPDDM_PETSC = $(TESTS_HPDDM_PETSC)
-endif PETSC
 endif HPDDM
 
 if PETSC
@@ -145,7 +141,6 @@ endif MPI
 
 TESTS = $(TESTS_MPI) \
 	$(TESTS_HPDDM) \
-	$(TESTS_HPDDM_PETSC) \
 	$(TESTS_PETSC) \
 	$(TESTS_PETSC_SLEPC) \
 	$(TESTS_PETSCCOMPLEX) \
@@ -154,7 +149,6 @@ TESTS = $(TESTS_MPI) \
 
 LIST_CONDITIONAL = $(CONDITIONAL_MPI) \
 	$(CONDITIONAL_HPDDM) \
-	$(CONDITIONAL_HPDDM_PETSC) \
 	$(CONDITIONAL_PETSC) \
 	$(CONDITIONAL_PETSC_SLEPC) \
 	$(CONDITIONAL_PETSCCOMPLEX) \
