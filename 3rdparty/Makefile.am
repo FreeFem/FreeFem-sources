@@ -79,7 +79,7 @@ lib:
 bin:
 	mkdir bin
 include:
-	mkdir  include
+	mkdir include
 pkg:
 	mkdir pkg
 # ALH - /3rdparty/yams and /3rdparty/mshmet need /src/libMesh/libmesh.a but /src is compiled after /download, so we

@@ -67,6 +67,9 @@ ifeq ($(FF_generic_petsc), yes)
 else
   FLAGS_MTUNE := -mtune=native
 endif
+ifeq ($(FFCMAKE),no)
+  PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
+endif
 ifeq ($(WIN32DLLTARGET),)
 ##   Not on windows....
 FLAGS_CONF_PETSC_REAL= --with-debugging=0 \
@@ -76,7 +79,6 @@ FLAGS_CONF_PETSC_REAL= --with-debugging=0 \
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		--with-scalar-type=real \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
-		--known-64-bit-blas-indices=0 \
 		$(PETSC_OPENBLAS) \
 		$(PETSC_DOWNLOAD)
 FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
@@ -86,7 +88,6 @@ FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
 		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 		--with-scalar-type=complex \
 		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
-		--known-64-bit-blas-indices=0 \
 		$(PETSC_OPENBLAS_C) \
 		--with-scalapack-dir=$(DIR_INSTALL_REAL) \
 		--with-metis-dir=$(DIR_INSTALL_REAL) \

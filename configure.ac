@@ -140,12 +140,15 @@ m4_define([TOOL_DISABLE],
         AC_SUBST([TOOL_DYLIB_$1],$2)
         enable_$1_download=no
     else
-	   if test "$enable_download"  != "yes" ; then
+	   if test "$enable_download" != "yes" -a "$enable_download_$1" != "yes" ; then
 	    AC_SUBST([TOOL_COMPILE_$1],"")
 		ff_uncompile_plugin+=" "$2
 		ff_unlib_plugin+=" $1"
         AC_SUBST([TOOL_DYLIB_$1],"")
 	   else
+        if test "$ff_wget" = yes -a "$enable_download_$1" = "yes" -a "$DOWNLOADCOMPILE" = "" ; then
+            DOWNLOADCOMPILE="compile-pkg install-other"
+        fi
         AC_SUBST([TOOL_COMPILE_$1],ifelse($3,,$1,$3))
         AC_SUBST([TOOL_DYLIB_$1],$2)
 		ifelse($4,,[ff_download_lib="$1 $ff_download_lib"])
@@ -1154,7 +1157,6 @@ if test "$enable_download"  = "yes"  ; then
 fi
 
 AC_SUBST(WGET,$ff_wget_command)
-AC_SUBST(DOWNLOADCOMPILE,$DOWNLOADCOMPILE)
 
 #  modif FH -----
 #  -- looking for cadna
@@ -2238,13 +2240,13 @@ TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX",,nodownload)
 TOOL_DISABLE(mkl,"PARDISO.$DYLIB_SUFFIX",,nodownload)
 
 # echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
-test "$enable_download" != "yes" -a \( "$enable_hpddm" != yes -o "$ff_hpddm_ok" != "yes" \) && enable_hpddm=no
+test "$enable_download" != "yes" -a "$enable_download_hpddm" != "yes" -a \( "$enable_hpddm" != "yes" -o "$ff_hpddm_ok" != "yes" \) && enable_hpddm=no
 test "$enable_download" != "yes" -a "$enable_htool" != yes && enable_htool=no
 
 test "$enable_download" != "yes" -a "$enable_bemtool" != yes && enable_bemtool=no
 test "$enable_download" != "yes" -a "$enable_boost" != yes && enable_boost=no
 
-test \( "$enable_download" = yes  -a "$enable_hpddm" != no \) -o "$ff_hpddm_ok" = "yes" && enable_hpddm=yes
+test \( \( "$enable_download" = "yes" -o "$enable_download_hpddm" = "yes" \) -a "$enable_hpddm" != "no" \) -o "$ff_hpddm_ok" = "yes" && enable_hpddm=yes
 test "$enable_download" = yes -a "$enable_htool" != no && enable_htool=yes
 
 test "$enable_download" = yes  -a "$enable_bemtool" != no && enable_bemtool=yes
@@ -2278,24 +2280,26 @@ if test "$ff_mkl_ok" = yes ; then
 fi
 
 ## Condtional for check
-test "$ff_fftw_ok" = yes -o -n "$ff_DOWNLOAD_FFTW" && ff_fftw_=yes
-test "$ff_ipopt_ok" = yes -o -n "$TOOL_COMPILE_ipopt" && ff_ipopt_=yes
-test "$ff_metis_ok" = yes -o -n "$TOOL_COMPILE_metis" && ff_metis_=yes
-test "$ff_mmg_ok" = yes -o -n "$TOOL_COMPILE_mmg" && ff_mmg_=yes
-test "$ff_mshmet_ok" = yes -o -n "$TOOL_COMPILE_mshmet" && ff_mshmet_=yes
-test "$ff_mumps_ok" = yes -o -n "$TOOL_COMPILE_mumps" && ff_mumps_=yes
-test "$ff_mumps_seq_ok" = yes -o -n "$TOOL_COMPILE_mumps_seq" && ff_mumps_seq_=yes
-test "$ff_parmetis_ok" = yes -o -n "$TOOL_COMPILE_parmetis" && ff_parmetis_=yes
-test "$ff_scotch_ok" = yes -o -n "$TOOL_COMPILE_scotch" && ff_scotch_=yes 
-test "$ff_tetgen_ok" = yes -o -n "$TOOL_COMPILE_tetgen" && ff_tetgen_=yes 
-test "$ff_umfpack_ok" = yes -o -n "$TOOL_COMPILE_umfpack"  && ff_umfpack_=yes 
+test "$ff_fftw_ok" = yes -o -n "$ff_DOWNLOAD_FFTW" && ff_fftw_=yes || ff_fftw_=no
+test "$ff_ipopt_ok" = yes -o -n "$TOOL_COMPILE_ipopt" && ff_ipopt_=yes || ff_ipopt_=no
+test "$ff_metis_ok" = yes -o -n "$TOOL_COMPILE_metis" && ff_metis_=yes || ff_metis_=no
+test "$ff_mmg_ok" = yes -o -n "$TOOL_COMPILE_mmg" && ff_mmg_=yes || ff_mmg_=no
+test "$ff_mshmet_ok" = yes -o -n "$TOOL_COMPILE_mshmet" && ff_mshmet_=yes || ff_mshmet_=no
+test "$ff_mumps_ok" = yes -o -n "$TOOL_COMPILE_mumps" && ff_mumps_=yes || ff_mumps_=no
+test "$ff_mumps_seq_ok" = yes -o -n "$TOOL_COMPILE_mumps_seq" && ff_mumps_seq_=yes || ff_mumps_seq_=no
+test "$ff_parmetis_ok" = yes -o -n "$TOOL_COMPILE_parmetis" && ff_parmetis_=yes || ff_parmetis_=no
+test "$ff_scotch_ok" = yes -o -n "$TOOL_COMPILE_scotch" && ff_scotch_=yes || ff_scotch_=no
+test "$ff_tetgen_ok" = yes -o -n "$TOOL_COMPILE_tetgen" && ff_tetgen_=yes || ff_tetgen_=no
+test "$ff_umfpack_ok" = yes -o -n "$TOOL_COMPILE_umfpack"  && ff_umfpack_=yes || ff_umfpack_=no
+test "$ff_parmmg_ok" = yes -o -n "$TOOL_COMPILE_parmmg"  && ff_parmmg_=yes || ff_parmmg_=no
 
-AM_CONDITIONAL([DOWNLOAD], [test "$enable_download" = yes ])
-AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = yes ])
+AC_SUBST(DOWNLOADCOMPILE,$DOWNLOADCOMPILE)
+AM_CONDITIONAL([DOWNLOAD], [test "$enable_download" = yes])
+AM_CONDITIONAL([ARPACK], [test "$ff_arpack_ok" = yes])
 AM_CONDITIONAL([BLACS], [test "$ff_blacs_ok" = yes])
 AM_CONDITIONAL([BEMTOOL], [test "$enable_bemtool" = yes])
 AM_CONDITIONAL([BOOST], [test "$enable_boost" = yes])
-AM_CONDITIONAL([FFTW3], [test "$ff_fftw_ok" = yes -o -n "$ff_DOWNLOAD_FFTW"])
+AM_CONDITIONAL([FFTW3], [test "$ff_fftw_" = yes])
 AM_CONDITIONAL([FORTRAN], [test "$enable_fortran" != no ])
 AM_CONDITIONAL([FREEYAMS], [test "$ff_freeyams_ok" = yes -o -n "$TOOL_COMPILE_yams"])
 AM_CONDITIONAL([GMM], [test "$enable_gmm" = yes -o -n "$TOOL_COMPILE_gmm"])
@@ -2303,33 +2307,33 @@ AM_CONDITIONAL([GSL], [test "$ff_with_gsl" = yes])
 AM_CONDITIONAL([HDF5], [test "$with_hdf5" = yes])
 AM_CONDITIONAL([HTOOL], [test "$enable_htool" = yes])
 AM_CONDITIONAL([HPDDM], [test "$enable_hpddm" = yes])
-AM_CONDITIONAL([IPOPT], [test "$ff_ipopt_ok" = yes -o -n "$TOOL_COMPILE_ipopt"])
+AM_CONDITIONAL([IPOPT], [test "$ff_ipopt_" = yes])
 AM_CONDITIONAL([LIBSEQ], [test "$ff_libseq_ok" = yes])
-AM_CONDITIONAL([METIS], [test "$ff_metis_ok" = yes -o -n "$TOOL_COMPILE_metis" ])
+AM_CONDITIONAL([METIS], [test "$ff_metis_" = yes])
 AM_CONDITIONAL([MKL], [test "$ff_mkl" = yes])
 AM_CONDITIONAL([MMG3D], [test "$ff_mmg3d_ok" = yes -o -n "$TOOL_COMPILE_mmg3d"])
-AM_CONDITIONAL([MMG], [test "$ff_mmg_ok" = yes -o -n "$TOOL_COMPILE_mmg"])
-AM_CONDITIONAL([PARMMG], [test "$ff_parmmg_ok" = yes -o -n "$TOOL_COMPILE_parmmg"])
+AM_CONDITIONAL([MMG], [test "$ff_mmg_" = yes])
+AM_CONDITIONAL([PARMMG], [test "$ff_parmmg_" = yes])
 AM_CONDITIONAL([MPI], [test "$ff_mpi" = yes])
-AM_CONDITIONAL([MSHMET], [test "$ff_mshmet_ok" = yes -o -n "$TOOL_COMPILE_mshmet"])
-AM_CONDITIONAL([MUMPS], [test "$ff_mumps_ok" = yes -o -n "$TOOL_COMPILE_mumps"])
+AM_CONDITIONAL([MSHMET], [test "$ff_mshmet_" = yes])
+AM_CONDITIONAL([MUMPS], [test "$ff_mumps_" = yes])
 AM_CONDITIONAL([MUMPS_ptscotch], [test "$ff_mumps_ptscotch_ok" = yes])
 AM_CONDITIONAL([MUMPS_scotch], [test "$ff_mumps_scotch_ok" = yes])
-AM_CONDITIONAL([MUMPS_seq], [test "$ff_mumps_seq_ok" = yes -o -n "$TOOL_COMPILE_mumps_seq"])
+AM_CONDITIONAL([MUMPS_seq], [test "$ff_mumps_seq_" = yes])
 AM_CONDITIONAL([NLOPT], [test "$ff_nlopt_ok" = yes -o -n "$TOOL_COMPILE_nlopt"])
-AM_CONDITIONAL([PARMETIS], [test "$ff_parmetis_ok" = yes -o -n "$TOOL_COMPILE_parmetis"])
+AM_CONDITIONAL([PARMETIS], [test "$ff_parmetis_" = yes])
 AM_CONDITIONAL([PETSC], [test "$ff_petsc_ok" = yes])
 AM_CONDITIONAL([PETSCCOMPLEX], [test "$ff_petsccomplex_ok" = yes])
 AM_CONDITIONAL([PIPE], [test -n "$TOOL_COMPILE_pipe"])
 AM_CONDITIONAL([PTHREAD], [test -n "$ff_pthread"])
 AM_CONDITIONAL([PTSCOTCH], [test "$ff_ptscotch_ok" = yes])
 AM_CONDITIONAL([SCALAPACK], [test "$ff_scalapack_ok" = yes])
-AM_CONDITIONAL([SCOTCH], [test "$ff_scotch_ok" = yes -o -n "$TOOL_COMPILE_scotch"])
+AM_CONDITIONAL([SCOTCH], [test "$ff_scotch_" = yes])
 AM_CONDITIONAL([SLEPC], [test "$ff_slepc_ok" = yes])
 AM_CONDITIONAL([SLEPCCOMPLEX], [test "$ff_slepccomplex_ok" = yes])
 AM_CONDITIONAL([SUPERLU], [test "$ff_superlu_ok" = yes])
-AM_CONDITIONAL([TETGEN], [test "$ff_tetgen_ok" = yes -o -n "$TOOL_COMPILE_tetgen"])
-AM_CONDITIONAL([UMFPACK], [test "$ff_umfpack_ok" = yes -o -n "$TOOL_COMPILE_umfpack"])
+AM_CONDITIONAL([TETGEN], [test "$ff_tetgen_" = yes])
+AM_CONDITIONAL([UMFPACK], [test "$ff_umfpack_" = yes])
 
 ##
 # All makefiles
@@ -2515,7 +2519,7 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - PTHREAD: $ff_pthread_ok])
   AC_MSG_NOTICE([ - PTSCOTCH: $ff_ptscotch_ok])
   AC_MSG_NOTICE([ - SCALAPACK: $ff_scalapack_ok])
-  AC_MSG_NOTICE([ - SCOTCH: $ff_scotch_ok])
+  AC_MSG_NOTICE([ - SCOTCH: $ff_scotch_])
   AC_MSG_NOTICE([ - SLEPC: $ff_slepc_ok])
   AC_MSG_NOTICE([ - SLEPCCOMPLEX: $ff_slepccomplex_ok])
   AC_MSG_NOTICE([ - SUPERLU: $ff_superlu_ok])
