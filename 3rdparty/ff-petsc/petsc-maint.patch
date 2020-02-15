@@ -34,20 +34,18 @@ diff --git a/config/BuildSystem/config/packages/cgns.py b/config/BuildSystem/con
 old mode 100755
 new mode 100644
 diff --git a/config/BuildSystem/config/packages/metis.py b/config/BuildSystem/config/packages/metis.py
-index 63854604a0..e92599f517 100644
+index 63854604a0..c60ca3f138 100644
 --- a/config/BuildSystem/config/packages/metis.py
 +++ b/config/BuildSystem/config/packages/metis.py
-@@ -4,8 +4,8 @@ class Configure(config.package.CMakePackage):
+@@ -4,7 +4,7 @@ class Configure(config.package.CMakePackage):
    def __init__(self, framework):
      config.package.CMakePackage.__init__(self, framework)
      self.versionname       = 'METIS_VER_MAJOR.METIS_VER_MINOR.METIS_VER_SUBMINOR'
 -    self.gitcommit         = 'v5.1.0-p7'
--    self.download          = ['git://https://bitbucket.org/petsc/pkg-metis.git','https://bitbucket.org/petsc/pkg-metis/get/'+self.gitcommit+'.tar.gz']
-+    self.gitcommit         = 'ca7a59e'
-+    self.download          = ['git://https://bitbucket.org/prj-/pkg-metis.git','https://bitbucket.org/petsc/pkg-metis/get/'+self.gitcommit+'.tar.gz']
++    self.gitcommit         = 'v5.1.0-p8'
+     self.download          = ['git://https://bitbucket.org/petsc/pkg-metis.git','https://bitbucket.org/petsc/pkg-metis/get/'+self.gitcommit+'.tar.gz']
      self.downloaddirnames  = ['petsc-pkg-metis']
      self.functions         = ['METIS_PartGraphKway']
-     self.includes          = ['metis.h']
 @@ -23,7 +23,7 @@ class Configure(config.package.CMakePackage):
    def setupDependencies(self, framework):
      config.package.CMakePackage.setupDependencies(self, framework)
@@ -58,20 +56,18 @@ index 63854604a0..e92599f517 100644
      return
  
 diff --git a/config/BuildSystem/config/packages/parmetis.py b/config/BuildSystem/config/packages/parmetis.py
-index 98dc9cc0af..a199ebd570 100644
+index 98dc9cc0af..0e784f2d45 100644
 --- a/config/BuildSystem/config/packages/parmetis.py
 +++ b/config/BuildSystem/config/packages/parmetis.py
-@@ -5,8 +5,8 @@ class Configure(config.package.CMakePackage):
+@@ -5,7 +5,7 @@ class Configure(config.package.CMakePackage):
      config.package.CMakePackage.__init__(self, framework)
      self.version          = '4.0.3'
      self.versionname      = 'PARMETIS_MAJOR_VERSION.PARMETIS_MINOR_VERSION.PARMETIS_SUBMINOR_VERSION'
 -    self.gitcommit         = 'v'+self.version+'-p5'
--    self.download          = ['git://https://bitbucket.org/petsc/pkg-parmetis.git','https://bitbucket.org/petsc/pkg-parmetis/get/'+self.gitcommit+'.tar.gz']
-+    self.gitcommit         = '475d8fa'
-+    self.download          = ['git://https://bitbucket.org/prj-/pkg-parmetis.git','https://bitbucket.org/petsc/pkg-parmetis/get/'+self.gitcommit+'.tar.gz']
++    self.gitcommit         = 'v'+self.version+'-p6'
+     self.download          = ['git://https://bitbucket.org/petsc/pkg-parmetis.git','https://bitbucket.org/petsc/pkg-parmetis/get/'+self.gitcommit+'.tar.gz']
      self.functions         = ['ParMETIS_V3_PartKway']
      self.includes          = ['parmetis.h']
-     self.liblist           = [['libparmetis.a']]
 diff --git a/config/BuildSystem/config/packages/regex.py b/config/BuildSystem/config/packages/regex.py
 new file mode 100644
 index 0000000000..1c13617c1a
@@ -124,3 +120,16 @@ index 363c5d6550..933082e977 100644
      self.headers.headers.extend(headersC)
      self.functions.functions.extend(functions)
      self.libraries.libraries.extend(libraries)
+diff --git a/src/sys/error/adebug.c b/src/sys/error/adebug.c
+index 4f06531f40..85fcea8860 100644
+--- a/src/sys/error/adebug.c
++++ b/src/sys/error/adebug.c
+@@ -176,7 +176,7 @@ PetscErrorCode  PetscSetDebuggerFromString(const char *string)
+ @*/
+ PetscErrorCode  PetscAttachDebugger(void)
+ {
+-#if !defined(PETSC_CANNOT_START_DEBUGGER)
++#if !defined(PETSC_CANNOT_START_DEBUGGER) && defined(PETSC_HAVE_FORK)
+   int            child    =0;
+   PetscReal      sleeptime=0;
+   PetscErrorCode ierr;
