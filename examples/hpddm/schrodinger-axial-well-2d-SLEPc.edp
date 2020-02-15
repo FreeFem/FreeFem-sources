@@ -51,7 +51,7 @@ func Pk = P1;                    // Finite-element space
 /***************************************/
 int s      = getARGV("-split", 1)   ; // Refinement factor
 //
-int Npts   = getARGV("-npts" , 800) ; // Number of points on the perimeter
+int Npts   = getARGV("-npts" , 600) ; // Number of points on the perimeter
 real Lx    = getARGV("-lx"   , 80.0); // Dimension of the domain
 real Ly    = getARGV("-ly"   , 80.0); // Dimension of the domain
 //
@@ -157,8 +157,7 @@ string ssparams =            // Parameters for the distributed EigenValue solver
   " -eps_type krylovschur" +
   " -eps_target "+ sigma   + // Shift value
   " -st_type sinvert "     +
-  " -st_pc_type lu "       +
-  " -st_pc_factor_mat_solver_type mumps" +
+  " -st_pc_type cholesky " +
   " -eps_view"             +
   " -eps_gen_hermitian"      // The problem is symmetric
   ;

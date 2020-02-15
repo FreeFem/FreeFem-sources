@@ -74,6 +74,7 @@ FAIRE: mmg3d4/FAIT-4.done install-4.done
 tag-tar-$(SIZEPKG): $(PACKAGE) patch-mmg3dv4.diff
 	-rm -rf  mmg3d4
 	tar xvzf $(PACKAGE)
+	-rm mmg3d4/build/libexamples/main.
 	touch mmg3d4/build/sources/dataff.h
 #
 #	ALH - clean-up all CR/LF to make patching more successful

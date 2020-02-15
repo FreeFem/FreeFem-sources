@@ -232,8 +232,8 @@ examples/plugin/pippo.dx
 examples/plugin/tetgenholeregion.edp
 examples/mpi/cube.idp
 examples/mpi/machinefile
-examples/other/gmon.out
-examples/other/speedtest.out
+examples/misc/gmon.out
+examples/misc/speedtest.out
 examples/tutorial/.*.ps
 examples/tutorial/A.matrix
 examples/tutorial/f.txt

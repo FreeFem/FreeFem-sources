@@ -22,7 +22,7 @@ meshN[int] Th(level);
 matrix[int] P(level - 1);
 int Robin = 2;
 int[int] LL = [Robin, Robin, Robin, Robin, Robin, Robin];
-real n = getARGV("-n", 30) / s;
+real n = getARGV("-n", 21) / s;
 Th[level - 1] = cube(n, n, n, [x, y, z], label = LL);
 func Pk = Edge03d;
 func PkPart = Edge03ds0;

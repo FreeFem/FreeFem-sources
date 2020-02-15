@@ -11,7 +11,7 @@ macro trueRestrict()true// EOM
 macro removeZeros()true// EOM
 include "macro_ddm.idp"             // additional DDM functions
 
-mesh Th = square(getARGV("-global", 40), getARGV("-global", 40));
+mesh Th = square(getARGV("-global", 30), getARGV("-global", 30));
 bool adaptation = usedARGV("-adaptation") != -1;
 real gammaAL = 0.3;
 

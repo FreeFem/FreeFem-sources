@@ -2373,7 +2373,6 @@ AC_OUTPUT(
     examples/eigen/Makefile
     examples/examples/Makefile
     examples/bug/Makefile
-    examples/other/Makefile
     examples/3d/Makefile
     examples/3dSurf/Makefile
     examples/bem/Makefile

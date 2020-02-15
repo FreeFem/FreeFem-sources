@@ -10,7 +10,7 @@ macro init(i)i// EOM
 func Pk = P2;
 macro grad(u)[dx(u), dy(u)]// EOM
 
-mesh ThNo, Th = square(getARGV("-global", 30), getARGV("-global", 30), [1 + x, y]);
+mesh ThNo, Th = square(getARGV("-global", 20), getARGV("-global", 20), [1 + x, y]);
 real[int] D;
 int[int][int] restriction;
 {
@@ -69,7 +69,7 @@ real[int] lbPETSc, ubPETSc;
     Vh u = onG != 0 ? g : 0;
     real[int] uPETSc;
     changeNumbering(H, u[], uPETSc);
-    TaoSolve(H, J, DJ, uPETSc, xl = lbPETSc, xu = ubPETSc, sparams = "-tao_monitor -tao_view -tao_type bqnls -tao_max_it 100 -tao_gatol 1e-4");
+    TaoSolve(H, J, DJ, uPETSc, xl = lbPETSc, xu = ubPETSc, sparams = "-tao_monitor -tao_view -tao_type bqnls -tao_max_it 40 -tao_gatol 1e-4");
     changeNumbering(H, u[], uPETSc, inverse = true, exchange = true);
     real Ju = J(uPETSc);
     plotMPI(Th, u, Pk, def, real, cmm = "Global solution, J(u) = " + Ju)
@@ -78,7 +78,7 @@ real[int] lbPETSc, ubPETSc;
     Vh u = onG != 0 ? g : 0;
     real[int] uPETSc;
     changeNumbering(H, u[], uPETSc);
-    TaoSolve(H, J, DJ, uPETSc, xl = lbPETSc, xu = ubPETSc, sparams = "-tao_monitor -tao_view -tao_type bnls -tao_max_it 100 -tao_gatol 1e-4", HessianRoutine = HJ);
+    TaoSolve(H, J, DJ, uPETSc, xl = lbPETSc, xu = ubPETSc, sparams = "-tao_monitor -tao_view -tao_type bnls -tao_max_it 40 -tao_gatol 1e-4", HessianRoutine = HJ);
     changeNumbering(H, u[], uPETSc, inverse = true, exchange = true);
     real Ju = J(uPETSc);
     plotMPI(Th, u, Pk, def, real, cmm = "Global solution, J(u) = " + Ju)

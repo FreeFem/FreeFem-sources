@@ -151,7 +151,7 @@ FF_EXAMPLES_FILES=examples/tutorial/aile.msh \
 	examples/load/fig.pgm	\
 	examples/plugin/lg.pgm \
 	examples/mpi/regtests.sh \
-	examples/other/speedtest.sh \
+	examples/misc/speedtest.sh \
 	examples/*/*.edp \
 	examples/CheckAllEdp \
 	examples/plugin/ch.pts \
@@ -212,9 +212,6 @@ clean-gen:
 
 visualcheck: all
 	$(MAKE) $(AM_MAKEFLAGS) check VISUALCHECK=yes
-
-speedtest: all
-	cd examples/other && $(MAKE) $(AM_MAKEFLAGS) check
 
 # Windows package
 # ---------------
@@ -423,7 +420,6 @@ LIST_GENERATE_FILE= configure config.h.in \
     examples/eigen/Makefile.in \
     examples/examples/Makefile.in \
     examples/bug/Makefile.in \
-    examples/other/Makefile.in \
     examples/3d/Makefile.in \
     examples/bem/Makefile.in \
     examples/3dSurf/Makefile.in \
@@ -465,7 +461,6 @@ LIST_GENERATE_FILE_AM= \
     examples/eigen/Makefile.am \
     examples/examples/Makefile.am \
     examples/bug/Makefile.am \
-    examples/other/Makefile.am \
     examples/3d/Makefile.am \
     examples/bem/Makefile.am \
     examples/3dSurf/Makefile.am \

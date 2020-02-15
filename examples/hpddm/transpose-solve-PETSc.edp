@@ -30,9 +30,7 @@ matrix<real> LocT = vPbT(Wh, Wh);
 real[int] rhs = vPb(0, Wh);
 
 Mat A(Loc, intersection, D);
-set(A, sparams = "");
-Mat AT(LocT, intersection, D);
-set(AT, sparams = "");
+Mat AT(A, LocT);
 Wh<real> def(u);  // local solution
 Wh<real> def(v);  // local solution
 
