@@ -17,7 +17,11 @@ GH_EXE_NAME="FreeFEM-${VERSION}-win7-64.exe"
 ## EXE build
 autoreconf -i
 ./configure --enable-download --enable-optim --enable-generic --disable-parmmg
-./3rdparty/getall -a
+./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,ARPACK,Gmm++,MMG3D,mshmet,MUMPS,htool
+## compile and install ff-petsc
+cd 3rdparty/ff-petsc && make petsc-slepc && cd -
+./reconfigure
+
 make
 cp AUTHORS readme/AUTHORS
 touch readme/COPYING
@@ -29,9 +33,9 @@ UPLOAD_URL=`printf "%s" "$RELEASE" | jq -r '.upload_url'`
 
 if [ -x $UPLOAD_URL ]
 then
-	echo "Release does not exists"
-	exit 1
+    echo "Release does not exists"
+    exit 1
 else
-	mv Output/$EXE_NAME $GH_EXE_NAME
-  RESPONSE=`curl --data-binary "@$GH_EXE_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_EXE_NAME"`
+    mv Output/$EXE_NAME $GH_EXE_NAME
+    RESPONSE=`curl --data-binary "@$GH_EXE_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_EXE_NAME"`
 fi

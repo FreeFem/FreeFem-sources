@@ -26,20 +26,21 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 dir3rdparty := $(abspath $(dir $(mkfile_path))/..)
 
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(FF_prefix_petsc)" && test -w "$(DESTDIR)$(FF_prefix_petsc) || echo sudo)
-W_SUDO1=$(SHELL ls	)
 ifeq ($(COMPILE_OPENBLAS),openblas)
-ifeq ($(WIN32DLLTARGET),)
 PETSC_OPENBLAS := --download-openblas
-PETSC_OPENBLAS_C = --with-openblas-dir=$(DIR_INSTALL_REAL)
-else
-PETSC_OPENBLAS := --download-f2cblaslapack
-PETSC_OPENBLAS_C = --with-f2cblaslapack-dir=$(DIR_INSTALL_REAL)
-endif
+PETSC_OPENBLAS_C := --with-openblas-dir=$(DIR_INSTALL_REAL)
 else
 PETSC_OPENBLAS = --with-blaslapack-include='$(shell echo $(BLASINC) | sed "s/-I//g")' \
 		--with-blaslapack-lib='$(BLAS_LAPACK_LIBS)'
 PETSC_OPENBLAS_C = $(PETSC_OPENBLAS)
 endif
+PETSC_DOWNLOAD_C := --with-scalapack-dir=$(DIR_INSTALL_REAL) \
+		--with-metis-dir=$(DIR_INSTALL_REAL) \
+		--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
+		--with-suitesparse-include='$(SUITESPARSE_INCLUDE)' --with-suitesparse-lib='$(SUITESPARSE_LIB)' \
+		--with-mumps-dir=$(DIR_INSTALL_REAL) \
+		--with-parmetis-dir=$(DIR_INSTALL_REAL) \
+		--with-tetgen-dir=$(DIR_INSTALL_REAL)
 ifeq ($(PETSC_PKG),yes)
 pkg_dir=$(abspath $(dir $(mkfile_path))/pkg)
 PETSC_DOWNLOAD := --download-scalapack=$(pkg_dir)/pkg-scalapack.tar.gz \
@@ -51,100 +52,73 @@ PETSC_DOWNLOAD := --download-scalapack=$(pkg_dir)/pkg-scalapack.tar.gz \
 		--download-superlu=$(pkg_dir)/superlu.tar.gz \
 		--download-suitesparse=$(pkg_dir)/SuiteSparse-4.4.3.tar.gz \
 		--download-tetgen=$(pkg_dir)/tetgen1.5.1.tar.gz \
-		--download-hpddm=$(pkg_dir)/hpddm.tar.gz \
 		--download-slepc=$(pkg_dir)/slepc.tar.gz
-PETSC_DOWNLOAD_C := --download-hpddm=$(pkg_dir)/hpddm.tar.gz \
-		--download-slepc=$(pkg_dir)/slepc.tar.gz
+ifeq ($(FFCMAKE),no)
+PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake=$(pkg_dir)/cmake.tar.gz
+endif
+PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-slepc=$(pkg_dir)/slepc.tar.gz
+ifeq ($(WIN32DLLTARGET),)
+PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-hpddm=$(pkg_dir)/hpddm.tar.gz
+PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-hpddm=$(pkg_dir)/hpddm.tar.gz
+endif
 else
 PETSC_DOWNLOAD := --download-scalapack --download-metis --download-ptscotch \
 		--download-mumps --download-hypre --download-parmetis \
 		--download-superlu --download-suitesparse --download-tetgen \
-		--download-hpddm --download-hpddm-commit=83c462a --download-slepc
-PETSC_DOWNLOAD_C:= --download-hpddm --download-hpddm-commit=83c462a --download-slepc
+		--download-slepc
+ifeq ($(FFCMAKE),no)
+PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
+endif
+PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-slepc
+ifeq ($(WIN32DLLTARGET),)
+PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-hpddm --download-hpddm-commit=83c462a
+PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-hpddm --download-hpddm-commit=83c462a
+endif
 endif
 ifeq ($(FF_generic_petsc), yes)
-  FLAGS_MTUNE := -mtune=generic
+FLAGS_MTUNE := -mtune=generic
 else
-  FLAGS_MTUNE := -mtune=native
+FLAGS_MTUNE := -mtune=native
 endif
-ifeq ($(FFCMAKE),no)
-  PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
-endif
+COMMON_FLAGS := --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-cxx-dialect=C++11 --with-ssl=0 --with-x=0 --with-fortran-bindings=0
 ifeq ($(WIN32DLLTARGET),)
 ##   Not on windows....
-FLAGS_CONF_PETSC_REAL= --with-debugging=0 \
-		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' --with-cxx-dialect=C++11 \
-		COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
-		CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
-		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
+FLAGS_CONF_PETSC_REAL = $(COMMON_FLAGS) --with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
 		--with-scalar-type=real \
-		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 		$(PETSC_OPENBLAS) \
 		$(PETSC_DOWNLOAD)
-FLAGS_CONF_PETSC_COMPLEX= --with-debugging=0 \
-		--with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' --with-cxx-dialect=C++11 \
-		COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
-		CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
-		FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
+FLAGS_CONF_PETSC_COMPLEX = $(COMMON_FLAGS) --with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
 		--with-scalar-type=complex \
-		--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 		$(PETSC_OPENBLAS_C) \
-		--with-scalapack-dir=$(DIR_INSTALL_REAL) \
-		--with-metis-dir=$(DIR_INSTALL_REAL) \
-		--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
-		--with-suitesparse-include='$(SUITESPARSE_INCLUDE)' --with-suitesparse-lib='$(SUITESPARSE_LIB)' \
-		--with-mumps-dir=$(DIR_INSTALL_REAL) \
-		--with-parmetis-dir=$(DIR_INSTALL_REAL) \
-		--with-tetgen-dir=$(DIR_INSTALL_REAL) \
 		$(PETSC_DOWNLOAD_C)
 else
-##   On  windows....
-FLAGS_CONF_PETSC_REAL= --with-shared-libraries=0 --with-debugging=0 \
-	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' --with-cxx-dialect=C++11 \
-	COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
-	CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
+##   On windows....
+FLAGS_CONF_PETSC_REAL = $(COMMON_FLAGS) --with-shared-libraries=0 \
+	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' \
 	CXXFLAGS='-fno-stack-protector' \
 	CFLAGS='-fno-stack-protector' \
-	FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
 	--with-scalar-type=real \
 	--with-mpi-lib='$(MPI_LIB)' \
 	--with-mpi-include='$(MPI_INC_DIR)' \
-	--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
 	$(PETSC_OPENBLAS) \
-	--download-metis --download-ptscotch \
-	--download-hypre --download-parmetis \
-	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu' \
-	--download-scalapack --download-mumps \
-	--download-superlu --download-suitesparse --download-tetgen \
-	--download-slepc
-
-FLAGS_CONF_PETSC_COMPLEX= --with-shared-libraries=0 --with-debugging=0 \
-	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' --with-cxx-dialect=C++11 \
-	COPTFLAGS='-O3 $(FLAGS_MTUNE)' \
-	CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
-	FOPTFLAGS='-O3 $(FLAGS_MTUNE)' \
+	$(PETSC_DOWNLOAD) \
+	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu'
+FLAGS_CONF_PETSC_COMPLEX = $(COMMON_FLAGS) --with-shared-libraries=0 \
+	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' \
 	--with-scalar-type=complex \
 	--with-mpi-lib='$(MPI_LIB)' \
 	--with-mpi-include='$(MPI_INC_DIR)' \
-	--with-ssl=0 --with-x=0 --with-fortran-bindings=0 \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
-	--with-metis-dir=$(DIR_INSTALL_REAL) \
-	--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
 	$(PETSC_OPENBLAS_C) \
-	--with-suitesparse-include='$(SUITESPARSE_INCLUDE)' --with-suitesparse-lib='$(SUITESPARSE_LIB)' \
-	--with-parmetis-dir=$(DIR_INSTALL_REAL) \
-	--with-tetgen-dir=$(DIR_INSTALL_REAL) \
-	--with-mumps-dir=$(DIR_INSTALL_REAL) \
-	--with-scalapack-dir=$(DIR_INSTALL_REAL) \
-	--download-slepc
+	$(PETSC_DOWNLOAD_C)
 endif
 
 all-local:
 	@echo make ..
 	@echo " # To build petsc and slepc do $ make petsc-slepc"
 	@echo " # warning you have no write acces in $(DESTDIR)$(FF_prefix_petsc)"
-	@echo " # need sudo if '$(W_SUDO)' == 'sudo' .." $(W_SUDO1)
+	@echo " # need sudo if '$(W_SUDO)' == 'sudo' .."
 	@echo " # run under root "
 	@echo " # or create / add access to $(DESTDIR)$(FF_prefix_petsc) "
 	@echo " # do for examples:"
@@ -364,7 +338,7 @@ echo:
 	@echo " dir install complex :" $(DIR_INSTALL_COMPLEX)
 	@echo " do-sudo auto ???:" $(SHELL cat do-sudo)
 	@echo " BLAS_LAPACK_LIBS: $(BLAS_LAPACK_LIBS)"
-	@echo " # need sudo if '$(W_SUDO)' == 'sudo' .." $(W_SUDO1)
+	@echo " # need sudo if '$(W_SUDO)' == 'sudo' .."
 	@echo " dir3rdparty: $(dir3rdparty)"
 	-@otool -L $(DIR_INSTALL_COMPLEX)/lib/libslepc.$(VERSION_SLEPC).dylib | awk '/3rdparty/ {print $$1}'
 	-@otool -L $(DIR_INSTALL_REAL)/lib/libslepc.$(VERSION_SLEPC).dylib | awk '/3rdparty/ {print $$1}'
