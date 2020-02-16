@@ -5876,7 +5876,7 @@ AnyType Op_trunc_meshL::Op::operator( )(Stack stack) const {
 
   // *mp=mps;
   if (verbosity > 1) {
-    cout << "  -- Trunc mesh: Nb of Surface Edges = " << kk << " label=" << label << endl;
+    cout << "  -- Trunc mesh: Nb of line Edges = " << kk << " label=" << label << endl;
   }
 
   if (pn2o) {

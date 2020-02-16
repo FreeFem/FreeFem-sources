@@ -2496,6 +2496,33 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
       } else
         return 0;
     }
+    solS evalS(int i, Stack s, int &cmp) const {
+        cmp = -1;
+        if (e[i]) {
+          if (!composant) {
+            pfSr p = GetAny< pfSr >((*e[i])(s));
+            cmp = p.second;
+            return p.first;
+          } else {
+            return GetAny< pfSrbase >((*e[i])(s));
+          }
+        } else
+          return 0;
+    }
+    solL evalL(int i, Stack s, int &cmp) const {
+        cmp = -1;
+        if (e[i]) {
+          if (!composant) {
+            pfLr p = GetAny< pfLr >((*e[i])(s));
+            cmp = p.second;
+            return p.first;
+          } else {
+            return GetAny< pfLrbase >((*e[i])(s));
+          }
+        } else
+          return 0;
+    }
+    
     // add FH Japon 2010 ..	for complex visu ...  to complex ....  try to uniformize ...
     solc evalc(int i, Stack s, int &cmp) const {
       cmp = -1;
@@ -2523,7 +2550,32 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
       } else
         return 0;
     }
-
+    solcS evalcS(int i, Stack s, int &cmp) const {
+      cmp = -1;
+      if (e[i]) {
+        if (!composant) {
+          pfSc p = GetAny< pfSc >((*e[i])(s));
+          cmp = p.second;
+          return p.first;
+        } else {
+          return GetAny< pfScbase >((*e[i])(s));
+        }
+      } else
+        return 0;
+    }
+    solcL evalcL(int i, Stack s, int &cmp) const {
+      cmp = -1;
+      if (e[i]) {
+        if (!composant) {
+          pfLc p = GetAny< pfLc >((*e[i])(s));
+          cmp = p.second;
+          return p.first;
+        } else {
+          return GetAny< pfLcbase >((*e[i])(s));
+        }
+      } else
+        return 0;
+    }
     asol evala(int i, Stack s, int &cmp) const {
       cmp = -1;
       if (e[i]) {
@@ -2551,7 +2603,15 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
       } else
         return 0;
     }
-
+    asolL evalaL(int i, Stack s, int &cmp) const {
+      cmp = -1;
+      if (e[i]) {
+         pfLrarray p = GetAny< pfLrarray >((*e[i])(s));
+         cmp = p.second;
+         return p.first;
+       } else
+         return 0;
+    }
     asolc evalca(int i, Stack s, int &cmp) const {
       cmp = -1;
       if (e[i]) {
@@ -2579,7 +2639,15 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
       } else
         return 0;
     }
-
+    asolcL evalcaL(int i, Stack s, int &cmp) const {
+        cmp = -1;
+        if (e[i]) {
+          pfLcarray p = GetAny< pfLcarray >((*e[i])(s));
+          cmp = p.second;
+          return p.first;
+        } else
+          return 0;
+     }
     const Mesh &evalm(int i, Stack s) const {
       throwassert(e[i]);
       return *GetAny< pmesh >((*e[i])(s));
