@@ -158,7 +158,7 @@ macro Varfrhs(varfName, meshName, VhName)
     +on(20,Tw=Tin);
 // EOM
 
-int nstep= max((int(log10(Ra)-4)^2), 3)*max(log10(Ra)-7.,1.);
+int nstep= max((int(log10(Ra)-4)^2), 2)*max(log10(Ra)-7.,1.);
 
 [ui,uiB,uiC,pi,Ti]=[0,0,0,0,Thot+x*(Tcold-Thot)];
 
