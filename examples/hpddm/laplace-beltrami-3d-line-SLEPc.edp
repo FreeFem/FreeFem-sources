@@ -52,7 +52,7 @@ for(int i = 0; i < k; ++i) {
     VhPlt plt, reduce;
     for[j, v : rest] plt[][v] = eV[i][][j];
     mpiReduce(plt[], reduce[], processor(0, mpiCommWorld), mpiSUM);
-    if(mpirank == 0)
-        plot(plt, params);
-    // plotD(Th, eV[i], params);
+    //if(mpirank == 0)
+    //    plot(plt, params);
+     plotD(Th, eV[i], params);
 }

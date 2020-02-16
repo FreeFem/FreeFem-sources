@@ -728,7 +728,7 @@ namespace Fem2D
    }
 
   MeshL::MeshL(const  Serialize &serialized)
-  :GenericMesh<EdgeL,BoundaryPointL,Vertex3> (serialized) {
+  :GenericMesh<EdgeL,BoundaryPointL,Vertex3> (serialized),mapSurf2Curv(0),mapCurv2Surf(0) {
    BuildBound();
    if(verbosity>1)
        cout << "  -- End of serialized: mesure = " << mes << " border mesure " << mesb << endl;
