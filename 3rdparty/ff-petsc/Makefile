@@ -25,6 +25,9 @@ include Makefile.inc
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 dir3rdparty := $(abspath $(dir $(mkfile_path))/..)
 
+DIR_INSTALL_REAL:=$(FF_prefix_petsc)/r
+DIR_INSTALL_COMPLEX:=$(FF_prefix_petsc)/c
+
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(FF_prefix_petsc)" && test -w "$(DESTDIR)$(FF_prefix_petsc) || echo sudo)
 ifeq ($(COMPILE_OPENBLAS),openblas)
 PETSC_OPENBLAS := --download-openblas
@@ -142,9 +145,6 @@ ifeq ($(LAPACKLIBS), $(BLASLIBS))
 else
   BLAS_LAPACK_LIBS=$(LAPACKLIBS) $(BLASLIBS)
 endif
-
-DIR_INSTALL_REAL:=$(FF_prefix_petsc)/r
-DIR_INSTALL_COMPLEX:=$(FF_prefix_petsc)/c
 
 PETSC_DIR:=$(shell pwd)/$(SRCDIR)
 petsc-slepc: Makefile.inc dir-install WHERE-all

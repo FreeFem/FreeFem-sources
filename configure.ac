@@ -967,9 +967,9 @@ AC_ARG_ENABLE(summary,AC_HELP_STRING([--enable-summary],[Display activated libra
 
 AC_ARG_ENABLE(download,AC_HELP_STRING([--enable-download],[Download missing libraries (BLAS,ARPACK,UMFPACK,...)]))
 ## PETSc
-AC_ARG_WITH(petsc,[  --with-petsc=/usr/local/petsc/conf/petscvariables   --without-petsc  ])
-AC_ARG_WITH(prefix_petsc,[ --prefix_petsc=dirtory where all petsc/slepc  will be install if you download ])
-if test -z "${prefix_petsc}"  ; then   prefix_petsc="${prefix}/ff-petsc/"; fi
+AC_ARG_WITH(petsc,[ --with-petsc=/usr/local/petsc/conf/petscvariables --without-petsc])
+AC_ARG_WITH(prefix_petsc,[ --prefix_petsc=directory where all PETSc/SLEPc will be installed if you download ])
+if test -z "${prefix_petsc}"; then prefix_petsc="${prefix}/ff-petsc/"; fi
 AC_SUBST([FF_prefix_petsc],"$prefix_petsc")
 AC_SUBST([FF_prefix_petsc_real],"$prefix_petsc_real")
 AC_SUBST([FF_prefix_petsc_complex],"$prefix_petsc_complex")
@@ -978,8 +978,7 @@ AC_SUBST([FF_generic_petsc],"$enable_generic")
 #/usr/local/ff++/petsc/lib/petsc/conf/petscvariables
 ff_petsc_ok=no
 ff_slepc_ok=no
-echo --$with_petsc-- $ff_mpi
-if test "$with_petsc" != no -a  $ff_mpi = yes; then
+if test "$with_petsc" != no -a $ff_mpi = yes; then
     for d in "$with_petsc" "${prefix_petsc}/real/lib" "${prefix_petsc}/r/lib" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
 	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
 	    ffconfpetsc="$d$dd"
@@ -1022,19 +1021,26 @@ if test "$with_petsc" != no -a  $ff_mpi = yes; then
                            ff_SLEPC_LIB="-Wl,-rpath,$d -L$d -lslepc"
 			   AC_FF_ADDWHERELIB(slepc,$ff_SLEPC_LIB,$ff_where_inc_petsc)
 		        fi
+            if test "$ff_slepc_ok" != yes ;   then
+                AC_ARG_WITH(slepc_include,AC_HELP_STRING([--with-slepc-include=],[Include directives for slepc instead of automatic download]))
+                AC_ARG_WITH(slepc_ldflags,AC_HELP_STRING([--with-slepc-ldflags=],[Link-time directives for slepc instead of automatic download]))
+                if test "$with_slepc_include" != "" || test "$with_slepc_ldflags" != ""
+                then
+                    # some directives have been specified, use them instead of downloading
+                    AC_FF_ADDWHERELIB(slepc,$with_slepc_ldflags,$with_slepc_include)
+                    ff_slepc_ok=yes
+                fi
+            fi
 		    else
 			 AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN or $PETSC_SCALAR != real ." ]);
 		    fi
 		fi
 	    else
-		# test  "$ff_petsc_ok" = no && echo "  *** try $ffconfpetsc"
 		ffconfpetsc="";
-
 	    fi
 	done
     done
 fi
-
 
 if test "$ff_petsc_ok" != no ;   then
     AC_MSG_NOTICE([ with petsc  $ff_petsc_ok,  with slepc $ff_slepc_ok ])
@@ -1085,7 +1091,16 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
                    ff_SLEPCCOMPLEX_LIB="-Wl,-rpath,$d -L$d -lslepc"
 			       AC_FF_ADDWHERELIB(slepccomplex,$ff_SLEPCCOMPLEX_LIB,$ff_where_inc_petsccomplex)
 			fi
-
+            if test "$ff_slepccomplex_ok" != yes ;   then
+                AC_ARG_WITH(slepccomplex_include,AC_HELP_STRING([--with-slepccomplex-include=],[Include directives for slepccomplex instead of automatic download]))
+                AC_ARG_WITH(slepccomplex_ldflags,AC_HELP_STRING([--with-slepccomplex-ldflags=],[Link-time directives for slepccomplex instead of automatic download]))
+                if test "$with_slepccomplex_include" != "" || test "$with_slepccomplex_ldflags" != ""
+                then
+                    # some directives have been specified, use them instead of downloading
+                    AC_FF_ADDWHERELIB(slepccomplex,$with_slepccomplex_ldflags,$with_slepccomplex_include)
+                    ff_slepccomplex_ok=yes
+                fi
+            fi
 			else
 			 AC_MSG_NOTICE([" Warning PETSC complex MPI and FF++ MPI not the same: $PETSC_COMPLEX_MPIRUN != $MPIRUN or $PETSC_COMPLEX_SCALAR != complex ." ]);
 		    fi
@@ -2375,7 +2390,6 @@ AC_OUTPUT(
     examples/bug/Makefile
     examples/3d/Makefile
     examples/3dSurf/Makefile
-    examples/bem/Makefile
     examples/3dCurve/Makefile
 )
 
@@ -2385,8 +2399,8 @@ AC_MSG_NOTICE([  --  ARPACK (eigen value): $ff_arpack_ok ])
 AC_MSG_NOTICE([  --  UMFPACK (sparse solver): $ff_umfpack_ok ])
 AC_MSG_NOTICE([  --  BLAS: $ff_blas_ok ])
 AC_MSG_NOTICE([  --  with MPI:     $ff_mpi])
-AC_MSG_NOTICE([    --  with PETSC: $ff_petsc_ok / PETSC complex: $ff_petsccomplex_ok ]);
-AC_MSG_NOTICE([    --  with SLEPC: $ff_slepc_ok / SLEPC complex: $ff_slepccomplex_ok ]);
+AC_MSG_NOTICE([    --  with PETSc: $ff_petsc_ok / PETSc complex: $ff_petsccomplex_ok ]);
+AC_MSG_NOTICE([    --  with SLEPc: $ff_slepc_ok / SLEPc complex: $ff_slepccomplex_ok ]);
 AC_MSG_NOTICE([    --  with hpddm: $enable_hpddm (need MPI & c++11: $ff_cxx11) ]);
 AC_MSG_NOTICE([    --  with htool: $enable_htool (need MPI & c++11: $ff_cxx11) ]);
 AC_MSG_NOTICE([    --  with bemtool: $enable_bemtool (need boost: $enable_boost and htool: $enable_htool ) ]);
@@ -2526,6 +2540,6 @@ if test "$enable_summary" = yes; then
   AC_MSG_NOTICE([ - UMFPACK: $ff_umfpack_])
 fi
 if test "${prefix_petsc}" != no -a   ! \( -d "${prefix_petsc}/real/lib"  -o  -d "${prefix_petsc}/r/lib" \) ; then
-  AC_MSG_NOTICE([ petsc dirs do no exist  , do build do:])
-  AC_MSG_NOTICE([cd 3rdparty/ff-petsc/;  make   ])
+  AC_MSG_NOTICE([ PETSc directories do not exist, to build do:])
+  AC_MSG_NOTICE([cd 3rdparty/ff-petsc && make])
 fi
