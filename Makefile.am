@@ -421,7 +421,6 @@ LIST_GENERATE_FILE= configure config.h.in \
     examples/examples/Makefile.in \
     examples/bug/Makefile.in \
     examples/3d/Makefile.in \
-    examples/bem/Makefile.in \
     examples/3dSurf/Makefile.in \
     examples/3dCurve/Makefile.in
 
@@ -462,7 +461,6 @@ LIST_GENERATE_FILE_AM= \
     examples/examples/Makefile.am \
     examples/bug/Makefile.am \
     examples/3d/Makefile.am \
-    examples/bem/Makefile.am \
     examples/3dSurf/Makefile.am \
     examples/3dCurve/Makefile.am
 

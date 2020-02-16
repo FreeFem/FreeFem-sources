@@ -37,7 +37,6 @@ Name: "{app}\examples\tutorial"; Permissions: everyone-full
 Name: "{app}\examples\3d"; Permissions: everyone-full
 Name: "{app}\examples\3dSurf"; Permissions: everyone-full
 Name: "{app}\examples\3dCurve"; Permissions: everyone-full
-Name: "{app}\examples\bem"; Permissions: everyone-full
 Name: "{app}\examples\examples"; Permissions: everyone-full
 Name: "{app}\examples\eigen"; Permissions: everyone-full
 Name: "{app}\idp"; Permissions: everyone-full
@@ -137,7 +136,6 @@ Source: "examples\3d\dodecaedre01.mesh"; DestDir: "{app}\examples\3d"
 Source: "examples\3d\lac-leman-v4.msh"; DestDir: "{app}\examples\3d"
 Source: "examples\3dSurf\*.edp"; DestDir: "{app}\examples\3dSurf"
 Source: "examples\3dCurve\*.edp"; DestDir: "{app}\examples\3dCurve"
-Source: "examples\bem\*.edp"; DestDir: "{app}\examples\bem"
 IFMPI Source: "examples\mpi\ff*.txt"; DestDir: "{app}\examples\mpi"
 IFMPI Source: "examples\mpi\*.edp"; DestDir: "{app}\examples\mpi"
 IFMPI Source: "examples\hpddm\*.edp"; DestDir: "{app}\examples\hpddm"
@@ -174,7 +172,6 @@ Name: "{group}\Examples\Eigenvalues"; Filename: "{app}\examples\eigen"
 Name: "{group}\Examples\3d"; Filename: "{app}\examples\3d"
 Name: "{group}\Examples\3dSurf"; Filename: "{app}\examples\3dSurf"
 Name: "{group}\Examples\3dCurve"; Filename: "{app}\examples\3dCurve"
-Name: "{group}\Examples\bem"; Filename: "{app}\examples\bem"
 IFMPI Name: "{group}\Examples\mpi"; Filename: "{app}\examples\mpi"
 IFMPI Name: "{group}\Examples\hpddm"; Filename: "{app}\examples\hpddm"
 Name: "{group}\Uninstall FreeFem++ VERSION"; Filename: "{uninstallexe}"

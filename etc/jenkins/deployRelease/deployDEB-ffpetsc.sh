@@ -21,8 +21,8 @@ GH_DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_withPETSc_amd64.deb"
 autoreconf -i
 ./configure --enable-download --enable-optim --enable-generic
 ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,ARPACK,Gmm++,MMG3D,mshmet,MUMPS,htool
-## compil and install ff-petsc
-cd 3rdparty/ff-petsc && make petsc-slepc SUDO=sudo && cd -
+## compile and install ff-petsc
+cd 3rdparty/ff-petsc && make petsc-slepc && cd -
 ./reconfigure
 
 make -j4
@@ -77,7 +77,7 @@ then
     echo "Release does not exists"
     exit 1
 else
-  RESPONSE=`curl --data-binary "@$GH_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_DEB_NAME"`
+    RESPONSE=`curl --data-binary "@$GH_DEB_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_DEB_NAME"`
 fi
 
 # clean the VM

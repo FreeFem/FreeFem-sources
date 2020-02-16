@@ -124,7 +124,7 @@ TESTS_METIS = metis.edp \
 
 TESTS_METIS_SCOTCH = scotch.edp
 
-TESTS_MKL = PARDISO.edp 
+TESTS_MKL = PARDISO.edp
 
 TESTS_MSHMET = aniso.edp
 
