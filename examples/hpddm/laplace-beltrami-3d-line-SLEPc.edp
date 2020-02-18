@@ -46,13 +46,5 @@ int k = EPSSolve(A, B, values = ev, vectors = eV, sparams = ssparams);
 
 for(int i = 0; i < k; ++i) {
     macro params()cmm = "Eigenvector #" + i + ", eigenvalue =" + ev[i], wait = 1, fill = 1, value = 1//
-    meshL ThPlt = segment(nx, [tx,ty,tz], removeduplicate=true);
-    fespace VhPlt(ThPlt, P1);
-    int[int] rest = restrict(Vh, VhPlt, n2o);
-    VhPlt plt, reduce;
-    for[j, v : rest] plt[][v] = eV[i][][j];
-    mpiReduce(plt[], reduce[], processor(0, mpiCommWorld), mpiSUM);
-    //if(mpirank == 0)
-    //    plot(plt, params);
-     plotD(Th, eV[i], params);
+    plotD(Th, eV[i], params);
 }

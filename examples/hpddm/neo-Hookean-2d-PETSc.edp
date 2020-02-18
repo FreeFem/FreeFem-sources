@@ -300,10 +300,10 @@ int2d(Th, qforder=1)
 //  Choose one of the following two boundary conditions involving Pa:
 
 // Load vectors normal to the boundary:
- - int1d(Th,1)( Pa * (w1*N.x + w2*N.y) )
+ + int1d(Th,1)( Pa * (w1*N.x + w2*N.y) )
 
 //  Load vectors tangential to the boundary:
-// - int1d(Th,1)( Pa * (w1*N.y - w2*N.x) )
+// + int1d(Th,1)( Pa * (w1*N.y - w2*N.x) )
 
    + on(2, varu1 = 0, varu2 = 0);
 
@@ -343,4 +343,4 @@ real alpha = 1.0;
 meshN ThMoved = movemesh(Th, [x + alpha * u1n, y + alpha * u2n]);
 u1n[] = mpirank;
 macro def1(u)u// EOM
-plotMPI(Th, u1n, P1, def1, real, cmm = "Global moved solution")
+plotMPI(ThMoved, u1n, P1, def1, real, cmm = "Global moved solution")
