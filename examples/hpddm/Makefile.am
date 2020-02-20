@@ -87,7 +87,8 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	maxwell-3d-PETSc.edp \
 	laplace-adapt-3d-PETSc.edp \
 	diffusion-mg-3d-PETSc.edp \
-	save-load-Dmesh.edp
+	save-load-Dmesh.edp \
+	navier-stokes-2d-PETSc.edp
 # bratu-hpddm-2d-PETSc.edp needs PETSc 3.13
 # diffusion-substructuring-2d-PETSc.edp <- problem with BDDC
 
@@ -106,7 +107,8 @@ TESTS_PETSCCOMPLEX = diffusion-2d-PETSc-complex.edp \
 	helmholtz-mg-2d-PETSc-complex.edp \
 	maxwell-mg-3d-PETSc-complex.edp
 
-TESTS_PETSCCOMPLEX_SLEPCCOMPLEX = laplace-2d-SLEPc-complex.edp
+TESTS_PETSCCOMPLEX_SLEPCCOMPLEX = laplace-2d-SLEPc-complex.edp \
+	navier-stokes-2d-SLEPc-complex.edp
 
 TESTS_PETSCCOMPLEX_BEMTOOL_BOOST_HTOOL = helmholtz-3d-surf-PETSc-complex.edp helmholtz-3d-line-PETSc-complex.edp
 
@@ -166,4 +168,4 @@ freefem++.pref: Makefile
 	echo includepath = \"../../idp/\" >> freefem++.pref
 
 clean-local:
-	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_* createPartition_* helmholtz-3d-surf.vtu helmholtz-3d-line.vtu dump-2d_* dump-3d_*
+	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_* createPartition_* helmholtz-3d-surf.vtu helmholtz-3d-line.vtu dump-2d_* dump-3d_* navier-stokes-2d_*

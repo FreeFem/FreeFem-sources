@@ -42,6 +42,7 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [newton-vi-adaptmesh-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/newton-vi-adaptmesh-2d-PETSc.edp)                       | Newton method, *h* adaptivity, and a variational inequality                   |
 | [elasticity-SNES-3d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/elasticity-SNES-3d-PETSc.edp)                               | Linear elasiticty with a Newton method                                        |
 | [neo-Hookean-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/neo-Hookean-2d-PETSc.edp)                                       | Nonlinear elasticity                                                          |
+| [navier-stokes-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/navier-stokes-2d-PETSc.edp)                                   | Steady-state Navier--Stokes equation for linear stability analysis            |
 | [natural-convection-fieldsplit-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/natural-convection-fieldsplit-2d-PETSc.edp)   | Newton method and *h* adaptivity                                              |
 | [vi-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/vi-2d-PETSc.edp)                                                         | Variational inequalities                                                      |
 
@@ -57,17 +58,18 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 
 ### Eigenvalue problems
 | Filename                                                                                                                                                              | Comments (preconditioners, numerical schemes) |
-|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
-| [laplace-2d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-2d-SLEPc.edp)                                                   | &nbsp;                                        |
-| [laplace-spherical-harmonics-2d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-spherical-harmonics-2d-SLEPc.edp)           | &nbsp;                                        |
-| [laplace-torus-2d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-torus-2d-SLEPc.edp)                                       | &nbsp;                                        |
-| [schrodinger-axial-well-2d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/schrodinger-axial-well-2d-SLEPc.edp)                     | &nbsp;                                        |
-| [schrodinger-harmonic-oscillator-1d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/schrodinger-harmonic-oscillator-1d-SLEPc.edp)   | &nbsp;                                        |
-| [schrodinger-harmonic-oscillator-2d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/schrodinger-harmonic-oscillator-2d-SLEPc.edp)   | &nbsp;                                        |
-| [schrodinger-square-well-1d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/schrodinger-square-well-1d-SLEPc.edp)                   | &nbsp;                                        |
-| [laplace-2d-SLEPc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-2d-SLEPc-complex.edp)                                   | &nbsp;                                        |
-| [laplace-beltrami-3d-surf-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-beltrami-3d-surf-SLEPc.edp)                       | Eigenvalue problem on a surface               |
-| [laplace-beltrami-3d-line-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-beltrami-3d-line-SLEPc.edp)                       | Eigenvalue problem on a curve                 |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|
+| [laplace-2d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-2d-SLEPc.edp)                                                   | &nbsp;                                                |
+| [laplace-spherical-harmonics-2d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-spherical-harmonics-2d-SLEPc.edp)           | &nbsp;                                                |
+| [laplace-torus-2d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-torus-2d-SLEPc.edp)                                       | &nbsp;                                                |
+| [schrodinger-axial-well-2d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/schrodinger-axial-well-2d-SLEPc.edp)                     | &nbsp;                                                |
+| [schrodinger-harmonic-oscillator-1d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/schrodinger-harmonic-oscillator-1d-SLEPc.edp)   | &nbsp;                                                |
+| [schrodinger-harmonic-oscillator-2d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/schrodinger-harmonic-oscillator-2d-SLEPc.edp)   | &nbsp;                                                |
+| [schrodinger-square-well-1d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/schrodinger-square-well-1d-SLEPc.edp)                   | &nbsp;                                                |
+| [laplace-2d-SLEPc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-2d-SLEPc-complex.edp)                                   | &nbsp;                                                |
+| [laplace-beltrami-3d-surf-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-beltrami-3d-surf-SLEPc.edp)                       | Eigenvalue problem on a surface                       |
+| [laplace-beltrami-3d-line-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-beltrami-3d-line-SLEPc.edp)                       | Eigenvalue problem on a curve                         |
+| [navier-stokes-2d-SLEPc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/navier-stokes-2d-SLEPc-complex.edp)                       | Linear stability analysis of Navier--Stokes equations |
 
 ### Miscellaneous
 | Filename                                                                                                                          | Comments (preconditioners, numerical schemes) |

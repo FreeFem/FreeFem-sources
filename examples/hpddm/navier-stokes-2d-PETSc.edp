@@ -1,0 +1,85 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"
+
+mesh Th;
+{
+    real R = 5, L = 35;
+    border a(t=0, 2*pi) {x=2.0+cos(t)/2; y=sin(t)/2; label=1;}
+    border b(t=pi/2, 3*pi/2) {x=cos(t)*R; y=sin(t)*R; label=2;}
+    border c(t=0, 1) {x=t^0.9*L; y=-R; label=3;}
+    border d(t=1, 0) {x=t^0.9*L; y=R; label=3;}
+    border e(t=-R, R) {x=L; y=t; label=0;}
+    real ratio = 1.0;
+    Th = buildmesh(a(-70*ratio) + b(30*ratio) + c(80*ratio) + d(80*ratio) + e(20*ratio));
+    plot(Th);
+}
+
+macro dimension()2//
+include "macro_ddm.idp"
+
+macro def(i)[i, i#B, i#C]//
+macro init(i)[i, i, i]//
+func Pk = [P2, P2, P1];
+macro grad(u)[dx(u), dy(u)]//
+macro div(u)(dx(u#1) + dy(u#2))//
+macro UgradV(u, v)[[u#1, u#2]' * [dx(v#1), dy(v#1)],
+                   [u#1, u#2]' * [dx(v#2), dy(v#2)]]//
+real Re = getARGV("-Re", 50.0);
+real nu;
+fespace Wh(Th, Pk); // complete space [u, v, p]
+fespace Qh(Th, P1); // pressure space for Schur complement
+
+Mat J;
+createMat(Th, J, Pk);
+Wh [uc1, uc2, pc] = [1, 0, 0];
+varf vRes([u1, u2, p], [v1, v2, q]) = int2d(Th)(
+      nu * (grad(uc1)' * grad(v1) +
+            grad(uc2)' * grad(v2))
+    + UgradV(uc, uc)' * [v1, v2]
+    - pc * div(v) - div(uc) * q)
+    + on(3, u1 = uc1-1)
+    + on(1, u1 = uc1-0, u2 = uc2-0)
+    + on(2, u1 = uc1-1, u2 = uc2-0);
+varf vJ([u1, u2, p], [v1, v2, q]) = int2d(Th)(
+      (UgradV(uc, u) + UgradV(u, uc))' * [v1, v2] +
+      nu * (grad(u1)' * grad(v1) +
+            grad(u2)' * grad(v2))
+    - p * div(v) - div(u) * q)
+    + on(3, u1 = uc1-1)
+    + on(1, u1 = uc1-0, u2 = uc2-0)
+    + on(2, u1 = uc1-1, u2 = uc2-0);
+set(J, sparams = "-pc_type lu");
+func real[int] funcRes(real[int]& inPETSc) {
+    changeNumbering(J, uc1[], inPETSc, inverse = true, exchange = true);
+    real[int] out(Wh.ndof);
+    out = vRes(0, Wh, tgv = -1);
+    changeNumbering(J, out, inPETSc);
+    return inPETSc;
+}
+func int funcJ(real[int]& inPETSc) {
+    changeNumbering(J, uc1[], inPETSc, inverse = true, exchange = true);
+    J = vJ(Wh, Wh, tgv = -1);
+    return 0;
+}
+for(int i = 0; i < 50 && Re < 100.0; ++i) {
+    real[int] xPETSc;
+    changeNumbering(J, uc1[], xPETSc);
+    nu = 1.0/Re;
+    SNESSolve(J, funcJ, funcRes, xPETSc, sparams = "-snes_monitor ");
+    changeNumbering(J, uc1[], xPETSc, inverse = true, exchange = true);
+    if(!NoGraphicWindow) {
+        Qh only = pc;
+        macro def1(i)i//
+        plotMPI(Th, only, P1, def1, real, cmm = "Pressure for Re = " + Re)
+        fespace Zh(Th, [P2, P2]);
+        Zh [onlyU, onlyV] = [uc1, uc2];
+        macro def2(i)[i, i#B]//
+        plotMPI(Th, [onlyU, onlyV], [P2, P2], def2, real, cmm = "Velocity for Re = " + Re)
+    }
+    Re *= 1.5;
+}
+saveDmesh(Th, "navier-stokes-2d")
+ofstream sol("navier-stokes-2d_" + mpirank + "_" + mpisize + ".sol");
+sol << uc1[];

@@ -1,0 +1,61 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "SLEPc-complex"
+
+macro dimension()2//
+include "macro_ddm.idp"
+
+macro def(i)[i, i#B, i#C]//
+macro init(i)[i, i, i]//
+func Pk = [P2, P2, P1];
+macro grad(u)[dx(u), dy(u)]//
+macro div(u)(dx(u#1) + dy(u#2))//
+macro UgradV(u, v)[[u#1, u#2]' * [dx(v#1), dy(v#1)],
+                   [u#1, u#2]' * [dx(v#2), dy(v#2)]]//
+real Re = getARGV("-Re", 75.0);
+real nu = 1.0/Re;
+
+mesh Th;
+fespace Wh(Th, Pk); // complete space [u, v, p]
+loadDmesh(Th, "name")
+Wh<complex> [uc1, uc2, pc];
+ifstream sol("name_" + mpirank + "_" + mpisize + ".sol");
+sol >> uc1[];
+Mat<complex> J;
+createMat(Th, J, Pk)
+varf vJ([u1, u2, p], [v1, v2, q]) = int2d(Th)(
+      (UgradV(uc, u) + UgradV(u, uc))' * [v1, v2]
+    + nu * (grad(u1)' * grad(v1) +
+            grad(u2)' * grad(v2))
+    - p * div(v)
+    - div(u) * q)
+    + on(3, u1 = 0)
+    + on(1, 2, u1 = 0, u2 = 0);
+{
+    matrix<complex> Loc = vJ(Wh, Wh);
+    Loc = -Loc; // opposite of the Jacobian because SLEPc solves J*q=sigma*M*q
+    J = Loc;
+}
+varf vM([u1, u2, p], [v1, v2, q]) = int2d(Th)(u1 * v1 + u2 * v2);
+matrix<complex> Loc = vM(Wh, Wh);
+Mat<complex> M(J, Loc, clean = true);
+
+int nev = 1;
+complex[int]     val(nev);      // array to store eigenvalues
+Wh<complex>[int] def(vec)(nev); // array to store eigenvectors
+complex s = getARGV("-shift_real", 1.0e-6) + getARGV("-shift_imag", 0.6) * 1i;
+string params = "-eps_tol 1.0e-6 -eps_nev " + nev + " " +
+    "-eps_type krylovschur -st_type sinvert -eps_monitor_all " +
+    "-eps_target " + real(s) + "+" + imag(s) + "i";
+int k = EPSSolve(J, M, vectors = vec, values  = val, sparams = params);
+if(!NoGraphicWindow) {
+    fespace Zh(Th, [P2, P2]);
+    fespace Qh(Th, P1); // pressure space
+    macro def1(i)i//
+    Qh only = real(vecC[0]);
+    plotMPI(Th, only, P1, def1, real, cmm = "Leading pressure eigenmode for Re = " + Re + ", eigenvalue = " + val[0])
+    macro def2(i)[i, i#B]//
+    Zh [onlyU, onlyV] = [real(vec[0]), real(vecB[0])];
+    plotMPI(Th, [onlyU, onlyV], [P2, P2], def2, real, cmm = "Leading velocity eigenmode for Re = " + Re + ", eigenvalue = " + val[0])
+}
