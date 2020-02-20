@@ -504,7 +504,7 @@ class MyMatrix: public IMatrix<K>{
 public:
         MyMatrix(const KNM<K> &mat):IMatrix<K>(mat.N(),mat.M()),M(mat) {}
 
-        K get_coef(const int& i, const int& j)const {return 1./max(1e-2,1.*abs(i-j));}
+        K get_coef(const int& i, const int& j)const {return M(i,j);}
 };
 
 template<class K, int init>
