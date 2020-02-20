@@ -408,6 +408,61 @@ ENDIFMACRO
 ENDIFMACRO
 }// EOM
 
+macro saveDmesh(ThName, name)
+IFMACRO(privateDmesh#ThName)
+{
+IFMACRO(dimension,3)
+    savemesh(ThName, name + "_" + mpirank + "_" + mpisize + ".meshb");
+ENDIFMACRO
+IFMACRO(dimension,2)
+    savemesh(ThName, name + "_" + mpirank + "_" + mpisize + ".msh");
+ENDIFMACRO
+    ofstream khi(name + "_" + mpirank + "_" + mpisize + ".khi");
+    khi << privateDmesh#ThName#khi << endl;
+    khi << privateDmesh#ThName#intersection << endl;
+}
+ENDIFMACRO
+IFMACRO(!privateDmesh#ThName)
+assert(0);
+ENDIFMACRO
+EndMacro
+
+macro loadDmesh(ThName, name)
+IFMACRO(!privateDmesh#ThName)
+NewMacro privateDmesh#ThName()privateDmesh#ThName EndMacro
+NewMacro privateDmesh#ThName#khi()privateDmesh#ThName#khiDef EndMacro
+NewMacro privateDmesh#ThName#intersection()privateDmesh#ThName#intersectionDef EndMacro
+real[int][int] privateDmesh#ThName#khi(2);
+real[int][int] privateDmesh#ThName#intersection;
+ENDIFMACRO
+{
+IFMACRO(dimension,3)
+    ThName = readmesh3(name + "_" + mpirank + "_" + mpisize + ".meshb");
+ENDIFMACRO
+IFMACRO(dimension,2)
+    ThName = readmesh(name + "_" + mpirank + "_" + mpisize + ".msh");
+ENDIFMACRO
+    ifstream khi(name + "_" + mpirank + "_" + mpisize + ".khi");
+    int m;
+    khi >> m;
+    privateDmesh#ThName#khi.resize(m);
+    privateDmesh#ThName#khi[0].resize(ThName.nv);
+    khi >> privateDmesh#ThName#khi[0];
+    privateDmesh#ThName#khi[1].resize(ThName.nt);
+    khi >> privateDmesh#ThName#khi[1];
+    khi >> m;
+    privateDmesh#ThName#intersection.resize(m);
+    for(int j = 0; j < m; ++j) {
+        int n;
+        khi >> n;
+        real[int] test;
+        privateDmesh#ThName#intersection[j].resize(n);
+        for[i, v : privateDmesh#ThName#intersection[j]]
+            khi >> v;
+    }
+}
+EndMacro
+
 macro buildDmesh(ThName)
 IFMACRO(!privateDmesh#ThName)
 NewMacro privateDmesh#ThName()privateDmesh#ThName EndMacro
