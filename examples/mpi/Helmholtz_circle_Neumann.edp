@@ -42,8 +42,8 @@ if (mpirank == 0) cout << HSecondKind.infos << endl;
 display(HSecondKind);
 
 // Hmatrix for combined formulation
-BemKernel ker3("HS",1,k);
-BemKernel ker4("DL",1./(1i*k),k);
+BemKernel ker3("HS",1./(1i*k),k);
+BemKernel ker4("DL",1,k);
 BemKernel ker5=ker3+ker4;
 varfbem vk3(u,v)=int1dx1d(Th)(Th)(BEM(ker5,u,v,withmass=-0.5)) ;  
 HMatrix<complex> HCombined = vk3(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
