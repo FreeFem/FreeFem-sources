@@ -2411,11 +2411,27 @@ namespace PETSc {
     return 0L;
   }
   template< class Type >
-  long convergedReason(Type* const& A) {
+  long GetConvergedReason(Type* const& A) {
+    if (A->_ksp) {
+      PetscInt its;
+      KSPGetIterationNumber(A->_ksp, &its);
+      return static_cast<long>(its);
+    }
+    return 0L;
+  }
+  template< class Type >
+  long GetIterationNumber(Type* const& A) {
     if (A->_ksp) {
       KSPConvergedReason reason;
       KSPGetConvergedReason(A->_ksp, &reason);
       return static_cast<long>(reason);
+    }
+    return 0L;
+  }
+  template< class Type >
+  long SetResidualHistory(Type* const& A, KN< double >* const& hist) {
+    if (A->_ksp) {
+      KSPSetResidualHistory(A->_ksp, hist->operator double*(), hist->n, PETSC_TRUE);
     }
     return 0L;
   }
@@ -3899,7 +3915,9 @@ static void Init_PETSc( ) {
   Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >(1, 1));
   if (!std::is_same< PetscScalar, PetscReal >::value)
     Global.Add("KSPSolveHermitianTranspose", "(", new PETSc::LinearSolver< Dmat, 'H' >( ));
-  Global.Add("KSPGetConvergedReason", "(", new OneOperator1_< long, Dmat* >(PETSc::convergedReason< Dmat >));
+  Global.Add("KSPGetConvergedReason", "(", new OneOperator1_< long, Dmat* >(PETSc::GetConvergedReason< Dmat >));
+  Global.Add("KSPGetIterationNumber", "(", new OneOperator1_< long, Dmat* >(PETSc::GetIterationNumber< Dmat >));
+  Global.Add("KSPSetResidualHistory", "(", new OneOperator2_< long, Dmat*, KN< double >* >(PETSc::SetResidualHistory< Dmat >));
   Global.Add("SNESSolve", "(", new PETSc::NonlinearSolver< Dmat >(1));
   Global.Add("SNESSolve", "(", new PETSc::NonlinearSolver< Dmat >( ));
   Global.Add("TSSolve", "(", new PETSc::NonlinearSolver< Dmat >(1, 1));
