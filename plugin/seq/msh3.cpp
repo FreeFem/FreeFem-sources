@@ -8414,7 +8414,6 @@ AnyType Movemesh_Op< Mesh >::operator( )(Stack stack) const {
     int iv[3];
     for (int i = 0; i < 3; i++) iv[i] = Th.operator( )(K[i]);
     tS[it].set(vS, iv, K.lab);
-	cout << "test N" << tS[it].NormalS() << endl;
   }
 
   // copy border elements
