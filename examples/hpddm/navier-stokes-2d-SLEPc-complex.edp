@@ -18,9 +18,9 @@ real nu = 1.0/Re;
 
 mesh Th;
 fespace Wh(Th, Pk); // complete space [u, v, p]
-loadDmesh(Th, "name")
+loadDmesh(Th, "navier-stokes-2d")
 Wh<complex> [uc1, uc2, pc];
-ifstream sol("name_" + mpirank + "_" + mpisize + ".sol");
+ifstream sol("navier-stokes-2d_" + mpirank + "_" + mpisize + ".sol");
 sol >> uc1[];
 Mat<complex> J;
 createMat(Th, J, Pk)
