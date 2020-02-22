@@ -35,6 +35,8 @@ Wh<real> def(u);                    // local solution
 
 A = Loc;
 u[] = A^-1 * rhs;
+if(mpirank == 0)
+    cout << "KSPGetIterationNumber = " << KSPGetIterationNumber(A) << endl;
 
 real[int] err = A * u[];            // global matrix-vector product
 exchange(A, rhs, scaled = true);
@@ -51,7 +53,11 @@ Wh<real> def(Rb)[3];
 [Rb[2], RbB[2]] = [y, -x];
 set(A, sparams = "-pc_type gamg -ksp_type gmres -ksp_max_it 200", nearnullspace = Rb);
 u[] = 0.0;
+real[int] residuals(200);
+KSPSetResidualHistory(A, residuals);
 u[] = A^-1 * rhs;
+if(mpirank == 0)
+    cout << "KSPResidualHistory = " << residuals(0:KSPGetIterationNumber(A)) << endl;
 plotMPI(Th, def(u), Pk, def, real, cmm = "Global solution")
 real alpha = 1.0e+1;
 meshN ThMoved = movemesh(Th, [x + alpha * u, y + alpha * uB]);

@@ -2413,18 +2413,18 @@ namespace PETSc {
   template< class Type >
   long GetConvergedReason(Type* const& A) {
     if (A->_ksp) {
-      PetscInt its;
-      KSPGetIterationNumber(A->_ksp, &its);
-      return static_cast<long>(its);
+      KSPConvergedReason reason;
+      KSPGetConvergedReason(A->_ksp, &reason);
+      return static_cast<long>(reason);
     }
     return 0L;
   }
   template< class Type >
   long GetIterationNumber(Type* const& A) {
     if (A->_ksp) {
-      KSPConvergedReason reason;
-      KSPGetConvergedReason(A->_ksp, &reason);
-      return static_cast<long>(reason);
+      PetscInt its;
+      KSPGetIterationNumber(A->_ksp, &its);
+      return static_cast<long>(its);
     }
     return 0L;
   }
