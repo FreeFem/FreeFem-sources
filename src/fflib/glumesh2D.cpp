@@ -174,9 +174,9 @@ Mesh * GluMesh(list<Mesh const *> const & lth, long labtodel = -1,double eps=-1)
   if(verbosity>1)
     {
       cout << "     eps for equal points "<< hseuil << " (0 => no equal points) "<< endl;
-      cout << "     Nb points : "<< nbv << " , nb edges : " << neb << endl;
-      cout << "     Nb of glu point " << nbvx -nbv;
-      cout << "     Nb of glu  Boundary edge " << nebx-neb;
+      cout << "     Nb points :  "<< nbv << " , nb edges : " << neb << endl;
+      cout << "     Nb of glue point         " << nbvx -nbv;
+      cout << "     Nb of glue Boundary edge " << nebx-neb;
     }
 
   {
@@ -449,7 +449,7 @@ AnyType Op_GluMeshtab::Op::operator () (Stack stack)  const {
     KN<const Mesh *> *tab=0;
     KN<const Mesh *> ttab(te.N());
     list<Mesh const  *> *lth=0;
-    if (tgetmeshtab==(aType)atype<KN<pmesh> *>)
+    if (tgetmeshtab==(aType)atype<KN<pmesh> *>() )
      tab= GetAny<KN<const Mesh *> *>((*getmeshtab)(stack));
     else if (tgetmeshtab==(aType) atype<listMesh>())
      lth =  GetAny<listMesh>((*getmeshtab)(stack)).lth;
