@@ -34,11 +34,6 @@ Vh[int] eV(nev);   // to store nev eigen vector
 
 int k=EigenValue(A,B,sym=true,sigma=sigma,value=ev,vector=eV,tol=1e-10,maxit=0,ncv=0,which="LM"); // which="LM" default 
 
-for (int i=0;i<k;i++) {
- fespace Vhm1(Th,P1);
- Vhm1 vm1 ;
- vm1[]=eV[i][]; 
- // FFCS: add 3D view capabilities
- plot(vm1,cmm=" (new plot in test) Eigen  Vector "+i+" valeur =" + ev[i]  ,wait=1,value=1,dim=3,fill=1,CutPlane=0,ShowAxes=1, nbiso=40);  
+for (int i=0;i<k;i++) 
+	plot(eV[i],cmm=" (new plot in test) Eigen  Vector "+i+" valeur =" + ev[i]  ,wait=1,value=1,dim=3,fill=1,CutPlane=0,ShowAxes=1, nbiso=40);  
 
- }

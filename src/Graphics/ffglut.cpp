@@ -969,8 +969,7 @@ void OnePlotFES::Draw(OneWindow *win)
     ffassert(v.N()== Th.nt*nK);
     int o=0;
     KN<R3> Pn(Psub.N());
-    KN<R3> Nn(Psub.N());
-    
+   
     if((debug > 10)) cout << " " <<nsubV  << " " << nsubT << endl;
 
     // compute Normal at vertice
@@ -1031,11 +1030,9 @@ void OnePlotFES::Draw(OneWindow *win)
             for (int i = 0; i < 3; i++)
             iv[i] = Th.operator( )(K[i]);
                 
-            for(int i=0;i<nsubV;++i) {
+            for(int i=0;i<nsubV;++i)
                 Pn[i]=K(Psub[i]);// local to global coord.
-                Nn[i]=Nv[i];
-            }
-           
+             
             if(what%10==8)
                 for(int sk=0;sk<nsubT;++sk)
                 {
@@ -1082,7 +1079,6 @@ void OnePlotFEL::Draw(OneWindow *win)
     ffassert(v.N()== Th.nt*nK);
     int o=0;
     KN<R3> Pn(Psub.N());
-    KN<R3> Nn(Psub.N());
     if((debug > 10)) cout << " " <<nsubV  << " " << nsubT << endl;
     
     // compute Normal at vertice
@@ -1139,10 +1135,8 @@ void OnePlotFEL::Draw(OneWindow *win)
             int iv[2];
             for (int i = 0; i < 2; i++)
                 iv[i] = Th.operator( )(K[i]);
-           for(int i=0;i<nsubV;++i){
+           for(int i=0;i<nsubV;++i)
                 Pn[i]=K(Psub[i]);// local to global coord.
-                Nn[i]=Nv[i];
-            }
             if(what == 14 || what == 20 || what == 114 || what == 120) {
                 for(int sk=0;sk<nsubT;++sk) {
                     int i0= Ksub[sk*2+0], i1=Ksub[sk*2+1];
@@ -3465,7 +3459,7 @@ void ThePlot::DrawIsoEfill(const R3 Pt[2],const R ff[2],const R3 Nt[2],const R *
         }
         else {
             PQ[im] = Pt[0]; NQ[im] = Nt[0]; z[im++] =fi;
-            PQ[im] = Pt[1]; NQ[im] = Nt[0]; z[im++] =fj;
+            PQ[im] = Pt[1]; NQ[im] = Nt[1]; z[im++] =fj;
         }
         
         if (im>1) {
@@ -3473,19 +3467,16 @@ void ThePlot::DrawIsoEfill(const R3 Pt[2],const R ff[2],const R3 Nt[2],const R *
             R3 P[10];
             for(int i=0;i<im;++i)
                 if(viewdim==3)
-                            if(changePlotdim)
-                               P[i]= R3(PQ[i].x+rapz*z[i]*NQ[i].x,PQ[i].y+rapz*z[i]*NQ[i].y,PQ[i].z+rapz*z[i]*NQ[i].z);
-                            else
-                                P[i]= R3(PQ[i].x,PQ[i].y,PQ[i].z);
-                          else if(viewdim==2)
-                           P[i]= R3(PQ[i].x,PQ[i].y,rapz*z[i]);
-                       
-                //P[i]= R3(PQ[i].x,PQ[i].y,PQ[i].z+rapz*z[i]);
-            
+                    if(changePlotdim)
+                        P[i]= R3(PQ[i].x+rapz*z[i]*NQ[i].x,PQ[i].y+rapz*z[i]*NQ[i].y,PQ[i].z+rapz*z[i]*NQ[i].z);
+                    else
+                        P[i]= R3(PQ[i].x,PQ[i].y,PQ[i].z);
+                else if(viewdim==2)
+                    P[i]= R3(PQ[i].x,PQ[i].y,rapz*z[i]);
+      
             glLineWidth(3);
             glPolygonMode(GL_FRONT,GL_LINE);
-            
-            
+           
             glBegin(GL_LINES);
             for (int i=0;i<im;i++) {
                 if((debug > 100)) cout << i << " \t : " << Pt[i].x << " " <<  Pt[i].y << " " << Pt[i].z << endl;

@@ -128,6 +128,7 @@ namespace Fem2D {
     R3 NormalL() const {
         R3 V(at(0),at(1));
         R3 N = (V.x!=0. && V.y!=0. && V.z!=1.) ? V^R3(0.,0.,1.) : V^R3(0.,1.,0.) ;
+        return N;
     }
 
     R3 NormalLUnitaire() const {
