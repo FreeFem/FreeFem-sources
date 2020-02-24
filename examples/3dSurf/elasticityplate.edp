@@ -9,7 +9,7 @@ load "msh3"
 
  
 // parameters
-real density = 1.1, young = 0.75e6, poisson = 0.5, thickness = 0.1;
+real density = 0.9, young = 0.9e5, poisson = 0.4, thickness = 0.1;
 real alpha = 0., beta = 0; //(coeff rayleigh)
 real dt = 0.0001, iMax = 500.;
 //real tgv = 1e30; // a hude value of exact penalisation of boundary condition
@@ -26,25 +26,25 @@ real b = density*thickness/dt;
 macro Grad(u) [dx(u),dy(u),dz(u)]  // EOM
 
 // string mesh 
-meshL Th=Sline(100,[2.*x,y,z]);
+meshS Th=square3(20,50,[x,3.*y,z]);
 savemesh(Th,"ThL.mesh");
 // FE space
 fespace Uh(Th,P1);
 Uh u, v, V, uold ;
 V=0;uold=0;
 
-func g=1000.; //x^2;//; //10000.
+func g=10000.; //x^2;//; //10000.
 // c0 * mass matrix + c1 stifness matrix
-varf m(u,v) = int1d(Th) (u*v);
-varf k(u,v) = int1d(Th) (Grad(u)'*Grad(v));
-varf mmkk(u,v) = int1d(Th) (c0*u*v + c1*Grad(u)'*Grad(v)) + on(1,u=0);
-varf cl(u,v) = on(1,u=0);
+varf m(u,v) = int2d(Th) (u*v);
+varf k(u,v) = int2d(Th) (Grad(u)'*Grad(v));
+varf mmkk(u,v) = int2d(Th) (c0*u*v + c1*Grad(u)'*Grad(v)) + on(2,u=0);
+varf cl(u,v) = on(2,u=0);
 
 matrix mass=m(Uh,Uh);
 matrix stifness=k(Uh,Uh);
 matrix mk = mmkk(Uh,Uh); //,tgv=tgv,solver="SPARSESOLVER");
 
-varf f(u,v) = int1d(Th)(g*v);
+varf f(u,v) = int2d(Th)(g*v);
 real[int] Force=f(0,Uh);
 real[int] CL=cl(0,Uh);
 matrix T = a*mass + (beta*lambda1/dt)*stifness;  
@@ -52,7 +52,7 @@ matrix T = a*mass + (beta*lambda1/dt)*stifness;
 //initial condition
 u[] = 0;
   
-meshL Thmv;
+meshS Thmv;
 real t=dt;
 
 for (int i=0; i<=iMax; i++) {
@@ -65,7 +65,7 @@ for (int i=0; i<=iMax; i++) {
 	   rhs += CL;
 	   rhs += T*uold[];
 	   // apply the external force
-	   if( ( t> 0.004 && t<0.008 ) || (t>0.02 && t<0.03)) 
+	   if(i==1 || i==100)
 	   		rhs+=Force;
 	   u[] = mk^-1*rhs;
 	   t+=dt;
