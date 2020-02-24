@@ -791,11 +791,11 @@ public:
       return true; // continue ..
     } else resize(lsz);
     // we have the all buffer => DeSerialize
-    DeSerialize(this, ppTh);
+    if(lsz)
+        DeSerialize(this, ppTh);
     if (verbosity > 100)
       cout << "    " << mpirank << " recived from " << who << " serialized " << what << ", l="
            << lsz << ", tag=" << tag << " rq = " << rq << " " << *ppTh << endl;
-
     return false; // OK
   }
 
@@ -876,29 +876,9 @@ public:
 template<class R>
   long MPIrank::Send(Matrice_Creuse<R> * const &  a) const
   {
-    if(0)
-      {
-	  cout << " MPI << (Matrice_Creuse *) " << a << endl;
-	ffassert(rq==0 || rq == Syncro_block) ; //
-	int tag = MPI_TAG<Matrice_Creuse<R>* >::TAG;
-	MatriceMorse<R> *mA=a->A->toMatriceMorse();
-	int ldata[4];
-	ldata[0]=mA->n;
-	ldata[1]=mA->m;
-	ldata[2]=mA->nnz;
-	ldata[3]=mA->half;
-
-	if(verbosity>100)
-	  cout << " ldata " << ldata[0] << " " << ldata[1] <<" " << ldata[2] << " " <<ldata[3] << endl;
-	int ll=0;
-	return ll;
-      }
-    else
-      {
 	SendWMatd<R> *rwm= new SendWMatd<R>(this,a);
 	if( rwm->DoSR() ) delete rwm;
 	return MPI_SUCCESS;
-      }
   }
 
   template<class R>
@@ -915,10 +895,13 @@ template<class R>
 long MPIrank::Send(const Fem2D::Mesh *  a) const {
     if(verbosity>100)
       cout << " MPI << (mesh *) " << a << endl;
-    ffassert(a);
-    SendWMeshd<Mesh> *rwm= new SendWMeshd<Mesh>(this,&a);
-    //cout << " ... "<< endl;
-    if( rwm->DoSR() ) delete rwm;
+    if(a) {
+        SendWMeshd<Mesh> *rwm= new SendWMeshd<Mesh>(this,&a);
+        if( rwm->DoSR() ) delete rwm;
+    }
+    else {
+        WSend((char*)NULL, 0, who, MPI_TAG<Fem2D::Mesh* >::TAG, comm, rq);
+    }
     return MPI_SUCCESS;
   }
 
@@ -926,9 +909,13 @@ long MPIrank::Send(const Fem2D::Mesh *  a) const {
 long MPIrank::Send (const Fem2D::Mesh3 *  a) const {
     if(verbosity>100)
       cout << " MPI << (mesh3 *) " << a << endl;
-    ffassert(a);
-    SendWMeshd<Mesh3> *rwm= new SendWMeshd<Mesh3>(this,&a);
-    if( rwm->DoSR() ) delete rwm;
+    if(a) {
+        SendWMeshd<Mesh3> *rwm= new SendWMeshd<Mesh3>(this,&a);
+        if( rwm->DoSR() ) delete rwm;
+    }
+    else {
+        WSend((char*)NULL, 0, who, MPI_TAG<Fem2D::Mesh* >::TAG, comm, rq);
+    }
     return MPI_SUCCESS;
   }
 

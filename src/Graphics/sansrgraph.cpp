@@ -34,13 +34,13 @@
 #endif // FFJS
 
 #define FF_GRAPH_SET_PTR
-using namespace std;
 #include <ctime>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <cassert>
+using namespace std;
 #include "rgraph.hpp"
 
 #include "error.hpp"

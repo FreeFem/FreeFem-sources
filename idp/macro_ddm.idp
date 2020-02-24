@@ -56,7 +56,6 @@ IFMACRO(!meshN)
 cout << "The macro 'dimension' must be set to '2', '3', '3S' or '3L'" << endl;
 exit(1);
 ENDIFMACRO
-searchMethod = 1;
 
 macro plotDmesh(Th, params)
 if(!NoGraphicWindow || usedARGV("-fglut") != -1) {
@@ -109,6 +108,8 @@ if(!NoGraphicWindow || usedARGV("-fglut") != -1) {
 }// EOM
 
 macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank, size, s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs) {
+    int backupSM = searchMethod;
+    searchMethod = 0;
     assert(level >= 1);
 IFMACRO(!privateCreatePartition)
 IFMACRO(!privateCreateMat)
@@ -408,6 +409,7 @@ IFMACRO(privateBuildDmesh)
 ENDIFMACRO
 ENDIFMACRO
 ENDIFMACRO
+    searchMethod = backupSM;
 }// EOM
 
 macro saveDmesh(ThName, name)
@@ -942,3 +944,160 @@ macro buildMatMinimalist(Th, A, P) {
     constructor(A, DMat.n, intersectionMat, DMat);
 }// EOM
 ENDIFMACRO
+
+macro transfer(Th, Pk, u, ThNew, PkNew, uNew)
+IFMACRO(privateDmesh#Th)
+{
+    int backupSM = searchMethod;
+    searchMethod = 0;
+    fespace VhLocalOld(Th, Pk);
+    assert(u[].n == VhLocalOld.ndof);
+    fespace VhLocalNew(ThNew, PkNew);
+    assert(uNew[].n == VhLocalNew.ndof);
+    real[int] bb(4 * dimension);
+    {
+        real[int] tmp(2 * dimension);
+        boundingbox(Th, tmp);
+        bb(0:2 * dimension - 1) = tmp;
+        boundingbox(ThNew, tmp);
+        bb(2 * dimension:4 * dimension - 1) = tmp;
+    }
+    real[int] bbAll(4 * dimension * mpisize);
+    mpiAllgather(bb, bbAll, mpiCommWorld);
+    int[int] rankSend(0);
+    int[int] rankRecv(0);
+    for(int i = 0; i < mpisize; ++i) {
+IFMACRO(dimension, 2)
+        if(!(bbAll[1 + 8 * i] < bb[4]
+          || bbAll[0 + 8 * i] > bb[5]
+          || bbAll[3 + 8 * i] < bb[6]
+          || bbAll[2 + 8 * i] > bb[7])) {
+ENDIFMACRO
+IFMACRO(dimension, 3)
+        if(!(bbAll[1 + 12 * i] < bb[6]
+          || bbAll[0 + 12 * i] > bb[7]
+          || bbAll[3 + 12 * i] < bb[8]
+          || bbAll[2 + 12 * i] > bb[9]
+          || bbAll[5 + 12 * i] < bb[10]
+          || bbAll[4 + 12 * i] > bb[11])) {
+ENDIFMACRO
+            rankRecv.resize(rankRecv.n + 1);
+            rankRecv[rankRecv.n - 1] = i;
+        }
+IFMACRO(dimension, 2)
+        if(!(bbAll[5 + 8 * i] < bb[0]
+          || bbAll[4 + 8 * i] > bb[1]
+          || bbAll[7 + 8 * i] < bb[2]
+          || bbAll[6 + 8 * i] > bb[3])) {
+ENDIFMACRO
+IFMACRO(dimension, 3)
+        if(!(bbAll[7 + 12 * i] < bb[0]
+          || bbAll[6 + 12 * i] > bb[1]
+          || bbAll[9 + 12 * i] < bb[2]
+          || bbAll[8 + 12 * i] > bb[3]
+          || bbAll[11 + 12 * i] < bb[4]
+          || bbAll[10 + 12 * i] > bb[5])) {
+ENDIFMACRO
+            rankSend.resize(rankSend.n + 1);
+            rankSend[rankSend.n - 1] = i;
+        }
+    }
+    real[int] D;
+    createPartition(Th, D, Pk)
+    VhLocalOld scaledU;
+    scaledU[] = u[];
+    scaledU[] .*= D;
+    fespace PhPart(Th, P0);
+    meshN[int] recvTh(rankRecv.n);
+    meshN[int] sendTh(rankSend.n);
+    real[int][int] exchangeU(rankSend.n + rankRecv.n);
+    mpiRequest[int] rqSendTh(rankSend.n);
+    mpiRequest[int] rqSendU(rankSend.n);
+    mpiRequest[int] rqRecvTh(rankRecv.n);
+    mpiRequest[int] rqRecvU(rankRecv.n);
+    for[i, v : rankRecv]
+        Irecv(processor(v, rqRecvTh[i]), recvTh[i]);
+    real hmax = Th.hmax;
+    for[i, v : rankSend] {
+        PhPart part;
+        part[] = privateDmesh#Th#khiDef[1];
+IFMACRO(dimension, 2)
+        part = (bbAll[4 + 8 * v] < x + hmax
+             && bbAll[5 + 8 * v] > x - hmax
+             && bbAll[6 + 8 * v] < y + hmax
+             && bbAll[7 + 8 * v] > y - hmax) ? 1.0 : 0.0;
+ENDIFMACRO
+IFMACRO(dimension, 3)
+        part = (bbAll[6 + 12 * v] < x + hmax
+             && bbAll[7 + 12 * v] > x - hmax
+             && bbAll[8 + 12 * v] < y + hmax
+             && bbAll[9 + 12 * v] > y - hmax
+             && bbAll[10 + 12 * v] < z + hmax
+             && bbAll[11 + 12 * v] > z - hmax) ? 1.0 : 0.0;
+ENDIFMACRO
+        if(part[].linfty > 1.0e-2) {
+            int[int] n2o;
+            sendTh[i] = trunc(Th, part > 1.0e-2, new2old = n2o);
+            fespace VhRestriction(sendTh[i], Pk);
+            int[int] map;
+            map = restrict(VhRestriction, VhLocalOld, n2o);
+            exchangeU[rankRecv.n + i].resize(VhRestriction.ndof);
+            for[j, w : map] exchangeU[rankRecv.n + i][j] = scaledU[][w];
+        }
+        Isend(processor(v, rqSendTh[i]), sendTh[i]);
+        Isend(processor(v, rqSendU[i]), exchangeU[rankRecv.n + i]);
+    }
+    for[i, v : rankRecv] {
+        int index = mpiWaitAny(rqRecvTh);
+        if(index != mpiUndefined && recvTh[index].nt) {
+            fespace VhRestriction(recvTh[index], Pk);
+            exchangeU[index].resize(VhRestriction.ndof);
+        }
+        Irecv(processor(rankRecv[index], rqRecvU[index]), exchangeU[index]);
+    }
+    meshN gluedExchange;
+    searchMethod = 1;
+    for[i, v : rankRecv] {
+        if(recvTh[i].nt) {
+            if(gluedExchange.nt == 0)
+                gluedExchange = recvTh[i];
+            else {
+                fespace PhGluedExchange(recvTh[i], P0);
+                PhGluedExchange khi = chi(gluedExchange);
+                if(khi[].min < 1.0e-2) {
+                    meshN duplicate = trunc(recvTh[i], khi < 1.0e-2);
+                    gluedExchange = gluedExchange + duplicate;
+                }
+            }
+        }
+    }
+    searchMethod = 0;
+    meshN interpolateExchange;
+    fespace VhExchange(gluedExchange, Pk);
+    VhExchange uExchange;
+    for[i, v : rankRecv] {
+        int index = mpiWaitAny(rqRecvU);
+        if(index != mpiUndefined && recvTh[index].nt) {
+            fespace VhRestriction(recvTh[index], Pk);
+            VhRestriction uRestriction;
+            uRestriction[] = exchangeU[index];
+            int[int] n2o;
+            meshN restriction = trunc(gluedExchange, chi(recvTh[index]) > 1.0e-2, new2old = n2o);
+            fespace VhRestrictionRenum(restriction, Pk);
+            VhRestrictionRenum renum;
+            matrix R = interpolate(VhRestrictionRenum, VhRestriction, inside = 1);
+            renum[] = R * uRestriction[];
+            int[int] map;
+            map = restrict(VhRestrictionRenum, VhExchange, n2o);
+            for[j, w : map] uExchange[][w] += renum[][j];
+        }
+    }
+    searchMethod = backupSM;
+    uNew = uExchange;
+    for[i, v : rankSend]
+        mpiWaitAny(rqSendTh);
+    for[i, v : rankSend]
+        mpiWaitAny(rqSendU);
+}
+ENDIFMACRO
+// EOM

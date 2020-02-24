@@ -88,7 +88,8 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	laplace-adapt-3d-PETSc.edp \
 	diffusion-mg-3d-PETSc.edp \
 	save-load-Dmesh.edp \
-	navier-stokes-2d-PETSc.edp
+	navier-stokes-2d-PETSc.edp \
+	transfer.edp
 # bratu-hpddm-2d-PETSc.edp needs PETSc 3.13
 # diffusion-substructuring-2d-PETSc.edp <- problem with BDDC
 

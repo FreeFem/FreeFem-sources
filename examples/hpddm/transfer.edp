@@ -1,0 +1,86 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"
+load "mmg"
+load "Element_P4"
+load "Element_P3"
+
+{
+    func Pk = P4;                       // finite element space
+    func PkNew = P3;                    // finite element space
+
+    macro dimension()2// EOM            // 2D or 3D
+    include "macro_ddm.idp"             // additional DDM functions
+    meshN ThNew, Th = square(getARGV("-global_2d", 20), getARGV("-global_2d", 20)); // global mesh
+    {
+        real c = 6.25;
+        int N  = 80;
+        border aa(t=0,1) { x=t;   y=0;   };
+        border bb(t=0,1) { x=1;   y=t;   };
+        border cc(t=0,1) { x=1-t; y=1;   };
+        border dd(t=0,1) { x=0;   y=1-t; };
+        ThNew = buildmesh(aa(N)+bb(N)+cc(N)+dd(N));
+    }
+    meshN ThGlobalNew = ThNew;
+    meshN ThGlobal = Th;
+    Mat A, B;
+    buildDmesh(Th)
+    buildDmesh(ThNew)
+    fespace Vh(Th, Pk);
+    fespace VhNew(ThNew, PkNew);
+    Vh u = cos(8*pi*x) * sin(8*pi*y);
+    fespace VhGlobalNew(ThGlobalNew, PkNew);
+    VhGlobalNew uGlobalNew;
+    {
+        fespace VhGlobal(ThGlobal, Pk);
+        VhGlobal uGlobal = cos(8*pi*x) * sin(8*pi*y);
+        uGlobalNew = uGlobal;
+    }
+    VhNew uNew;
+    transfer(Th, Pk, u, ThNew, PkNew, uNew)
+    plotD(Th, u, cmm = "Old FE function")
+    plotD(ThNew, uNew, cmm = "New FE function")
+    uNew = uNew - uGlobalNew;
+    createMat(ThNew, B, PkNew)
+    real err = sqrt(B(uNew[], uNew[]));
+    if(mpirank == 0)
+        cout << "L_2 interpolation error = " << err << endl;
+    plotD(ThNew, uNew, cmm = "L_2 interpolation error = " + err)
+}
+{
+    func Pk = P2;                       // finite element space
+    func PkNew = P1;                    // finite element space
+
+    macro dimension()3// EOM            // 2D or 3D
+    include "macro_ddm.idp"             // additional DDM functions
+    meshN ThNew, Th = cube(getARGV("-global_3d", 5), getARGV("-global_3d", 5), getARGV("-global_3d", 5)); // global mesh
+    if(mpirank == 0)
+        ThNew = mmg3d(Th, hmax = 8.0e-2);
+    broadcast(processor(0), ThNew);
+    meshN ThGlobalNew = ThNew;
+    meshN ThGlobal = Th;
+    Mat A, B;
+    buildDmesh(Th)
+    buildDmesh(ThNew)
+    fespace Vh(Th, Pk);
+    fespace VhNew(ThNew, PkNew);
+    Vh u = cos(2*pi*x) * sin(2*pi*y) * cos(2*pi*z);
+    fespace VhGlobalNew(ThGlobalNew, PkNew);
+    VhGlobalNew uGlobalNew;
+    {
+        fespace VhGlobal(ThGlobal, Pk);
+        VhGlobal uGlobal = cos(2*pi*x) * sin(2*pi*y) * cos(2*pi*z);
+        uGlobalNew = uGlobal;
+    }
+    VhNew uNew;
+    transfer(Th, Pk, u, ThNew, PkNew, uNew)
+    plotD(Th, u, cmm = "Old FE function")
+    plotD(ThNew, uNew, cmm = "New FE function")
+    uNew = uNew - uGlobalNew;
+    createMat(ThNew, B, PkNew)
+    real err = sqrt(B(uNew[], uNew[]));
+    if(mpirank == 0)
+        cout << "L_2 interpolation error = " << err << endl;
+    plotD(ThNew, uNew, cmm = "L_2 interpolation error = " + err)
+}

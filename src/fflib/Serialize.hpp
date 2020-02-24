@@ -38,7 +38,7 @@ class Serialize {
     Serialize(size_t lgg, const char *wht):
       lg(lgg),
       what(wht),
-      p((new char[lg + sizeof(long)]) + sizeof(long))
+      p((new char[lg + sizeof(long)]()) + sizeof(long))
       { count() = 0; }
     void resize(size_t lgn) { // Add nov 2010 FH of asyncrone recv MPI ...
       if (lgn > lg) {
