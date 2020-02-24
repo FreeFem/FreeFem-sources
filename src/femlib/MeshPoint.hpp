@@ -648,7 +648,7 @@ class MeshPointBase { public:
         v=f=-1;
         e=ipoint;
         t=(*ThL)(TL);
-        Nt = TL->NormalSUnitaire();
+        Nt = TL->NormalLUnitaire();
         VF=0;
         d=3;
         dHat=1;
@@ -684,7 +684,7 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         v=f=-1;
         t=(*Th)(T);
         e=ipoint;
-        Nt = TL->NormalSUnitaire();
+        Nt = TL->NormalLUnitaire();
         VF=VFF;
         d=3;
         dHat=1;
@@ -701,7 +701,7 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         t=(*ThL)(TL);
         v=f=e=-1;
         VF=0;
-        Nt = TL->NormalSUnitaire();
+        Nt = TL->NormalLUnitaire();
         d=3;
         dHat=1;
     }
@@ -714,7 +714,7 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         ThL=&K.Vh.Th;
         region = TL->lab;
         v=f=e=-1;
-        Nt = TL->NormalSUnitaire();
+        Nt = TL->NormalLUnitaire();
         VF=0;
         int ll[3],kk(0);
         if ( P_Hat.x<1.e-6) label=0;
@@ -736,7 +736,7 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         label = ll;
         t=(*ThL)(TL);
         v=f=e=-1;
-        Nt = TL->NormalSUnitaire();
+        Nt = TL->NormalLUnitaire();
         outside=coutside;
         VF=0;
         d=3;

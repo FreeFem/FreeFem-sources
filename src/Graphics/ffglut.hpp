@@ -447,7 +447,7 @@ public:
     void DrawIsoTfill(const R2 Pt[3],const R ff[3],const R * Viso,int NbIso, R rapz=1);
     void DrawIsoT(const R3 Pt[3],const R ff[3],const R3 Nt[3],const R * Viso,int NbIso,bool changePlotdim, int viewdim,R rapz=1);
     void DrawIsoTfill(const R3 Pt[3],const R ff[3],const R3 Nt[3],const R * Viso,int NbIso,bool changePlotdim,int viewdim, R rapz=1);
-    void DrawIsoEfill(const R3 Pt[2],const R ff[2],const R * Viso,int NbIso, R rapz=1);
+    void DrawIsoEfill(const R3 Pt[2],const R ff[2],const R3 Nt[2],const R * Viso,int NbIso,bool changePlotdim,int viewdim, R rapz=1);
     void dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn,R & vmx) const ;
     
 };

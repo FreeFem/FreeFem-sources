@@ -7434,7 +7434,7 @@ namespace Fem2D {
                     int nbdf=K.NbDoF() ;
                     //ipmat.set(it);
                     PtonB = 0;
-                    R3 NNt=K.T.NormalSUnitaire();
+                    R3 NNt=K.T.NormalLUnitaire();
 
                     for (int i=0;i<ipmat.ncoef;i++)
                         PtonB[ipmat.p[i]] +=  Element::onWhatBorder[ie][K.DFOnWhat(ipmat.dofe[i])] ;

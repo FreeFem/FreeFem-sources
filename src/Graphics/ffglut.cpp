@@ -795,7 +795,7 @@ void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 
         for (int i=0;i<Th.nt; i = 0 ? i++ : i+=nbN) {
             const MeshL::Element & K(Th[i]);
-            R3 NN=K.NormalSUnitaire();
+            R3 NN=K.NormalLUnitaire();
             NN*=coef;
             R1 PtHat = R1::diag(1. / 2.);
             R3 A(K(PtHat));
@@ -1082,7 +1082,23 @@ void OnePlotFEL::Draw(OneWindow *win)
     ffassert(v.N()== Th.nt*nK);
     int o=0;
     KN<R3> Pn(Psub.N());
+    KN<R3> Nn(Psub.N());
     if((debug > 10)) cout << " " <<nsubV  << " " << nsubT << endl;
+    
+    // compute Normal at vertice
+    KN<R3> Nv(Th.nv);
+    for (int it=0 ; it<Th.nv; it++) //
+        Nv[it]=R3(0.,0.,0.); //
+    for (int it=0 ; it<Th.nt; it++) {
+        const MeshL::Element &K = (Th[it]);
+           int iv;
+        for (int i = 0; i < 2; i++) {
+            iv = Th.operator( )(K[i]);
+        Nv[iv]+=K.mesure()*K.NormalL();
+        }
+    }
+    for (int i=0 ; i<Th.nv; i++)
+        Nv[i]/=Nv[i].norme();
     
     if(plot.fill && (what == 14 || what == 20 || what == 114 || what == 120))
         glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
@@ -1120,14 +1136,20 @@ void OnePlotFEL::Draw(OneWindow *win)
             cout << win->Bmin << ", Bmax:   " << win->Bmax << " Viso: "<< plot.Viso << endl;
         for(int k=0;k<Th.nt;++k, o+= nK) {
             const typename MeshL::Element & K=Th[k];
-            for(int i=0;i<nsubV;++i)
+            int iv[2];
+            for (int i = 0; i < 2; i++)
+                iv[i] = Th.operator( )(K[i]);
+           for(int i=0;i<nsubV;++i){
                 Pn[i]=K(Psub[i]);// local to global coord.
+                Nn[i]=Nv[i];
+            }
             if(what == 14 || what == 20 || what == 114 || what == 120) {
                 for(int sk=0;sk<nsubT;++sk) {
                     int i0= Ksub[sk*2+0], i1=Ksub[sk*2+1];
                     R ff[2]={v[o+i0],v[o+i1]};
                     R3 Pt[2]={Pn[i0],Pn[i1]};
-                    plot.DrawIsoEfill( Pt, ff, plot.Viso,plot.Viso.N());
+                    R3 Nt[2]={Nv[iv[0]],Nv[iv[1]]};
+                    plot.DrawIsoEfill( Pt, ff, Nt, plot.Viso,plot.Viso.N(),win->changePlotdim,win->viewdim);
                 }
             }
             else
@@ -3403,11 +3425,10 @@ void ThePlot::DrawIsoTfill(const R3 Pt[3],const R ff[3],const R3 Nt[3],const R *
         }
     }
 }
-
 // draw filling values for 3d FE curve
-void ThePlot::DrawIsoEfill(const R3 Pt[2],const R ff[2],const R * Viso,int NbIso, R rapz)
+void ThePlot::DrawIsoEfill(const R3 Pt[2],const R ff[2],const R3 Nt[2],const R * Viso,int NbIso,bool changePlotdim,int viewdim, R rapz)
 {
-    R3 PQ[10];
+    R3 PQ[10], NQ[10];
     R z[10];
     R eps= (Viso[NbIso-1]-Viso[0])*1e-6;
     for(int l=1;l< NbIso;l++)  //   loop on the level curves
@@ -3423,31 +3444,43 @@ void ThePlot::DrawIsoEfill(const R3 Pt[2],const R ff[2],const R * Viso,int NbIso
         if (Abs(fi-fj)>=0.1e-20) {
             if ((xxfh>=fi && xxfb<=fj) || (xxfh<=fi && xxfb>=fj)) {
                 PQ[im] = Pt[0];
+                NQ[im] = Nt[0];
                 z[im++] = fi;
                 if ((!sens && (xxfb >= fi)) || (sens && (xxfb <= fi))) {
                     R  xlam=(fi-xxfb)/(fi-fj);
                     PQ[im-1] = Pt[0] * (1.F-xlam)  +  Pt[1]* xlam;
+                    NQ[im-1] = Nt[0] * (1.F-xlam)  +  Nt[1]* xlam;
                     z[im-1] = fi * (1.F-xlam)  +  fj* xlam;
                 }
                 PQ[im] = Pt[1];
+                NQ[im] = Nt[1];
                 z[im++] = fj;
                 if ((!sens && (xxfh <= fj)) || (sens && (xxfh >= fj))) {
                     R  xlam=(fi-xxfh)/(fi-fj);
                     PQ[im-1] = Pt[0] * (1.F-xlam)  +  Pt[1]* xlam;
+                    NQ[im-1] = Nt[0] * (1.F-xlam)  +  Nt[1]* xlam;
                     z[im-1] = fi * (1.F-xlam)  +  fj* xlam;
                 }
             }
         }
         else {
-            PQ[im] = Pt[0]; z[im++] =fi;
-            PQ[im] = Pt[1]; z[im++] =fj;
+            PQ[im] = Pt[0]; NQ[im] = Nt[0]; z[im++] =fi;
+            PQ[im] = Pt[1]; NQ[im] = Nt[0]; z[im++] =fj;
         }
         
         if (im>1) {
             color(l+4);
             R3 P[10];
             for(int i=0;i<im;++i)
-                P[i]= R3(PQ[i].x,PQ[i].y,PQ[i].z+rapz*z[i]);
+                if(viewdim==3)
+                            if(changePlotdim)
+                               P[i]= R3(PQ[i].x+rapz*z[i]*NQ[i].x,PQ[i].y+rapz*z[i]*NQ[i].y,PQ[i].z+rapz*z[i]*NQ[i].z);
+                            else
+                                P[i]= R3(PQ[i].x,PQ[i].y,PQ[i].z);
+                          else if(viewdim==2)
+                           P[i]= R3(PQ[i].x,PQ[i].y,rapz*z[i]);
+                       
+                //P[i]= R3(PQ[i].x,PQ[i].y,PQ[i].z+rapz*z[i]);
             
             glLineWidth(3);
             glPolygonMode(GL_FRONT,GL_LINE);
