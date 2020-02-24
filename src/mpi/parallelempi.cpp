@@ -2229,18 +2229,28 @@ long mpiBarrier(fMPI_Comm * comm)
   return MPI_Barrier(*comm);
 }
 
-
-
 long mpiWaitAny(KN<MPI_Request>* rq)
 {
   MPI_Status status;
   int index;
   do {
       MPI_Waitany(rq->N(),*rq,&index,&status);
-      DoOnWaitMPIRequest(&(*rq)[index]);
-  }  while( (MPI_UNDEFINED!= index) &&  ((*rq)[index]!=MPI_REQUEST_NULL));
+      if(index != MPI_UNDEFINED)
+          DoOnWaitMPIRequest(&(*rq)[index]);
+  }  while (MPI_UNDEFINED != index && (*rq)[index] != MPI_REQUEST_NULL);
+  return max(index, index);
+}
 
-  return index;
+long mpiWaitAll(KN<MPI_Request>* rq)
+{
+  MPI_Status* statuses = new MPI_Status[rq->N()];
+  MPI_Waitall(rq->N(),*rq,statuses);
+  for(int i = 0; i < rq->N(); ++i) {
+      if(statuses[i].MPI_TAG != MPI_ANY_TAG && statuses[i].MPI_SOURCE != MPI_ANY_SOURCE)
+          DoOnWaitMPIRequest(&(*rq)[i]);
+  }
+  delete [] statuses;
+  return 0L;
 }
 
 MPIrank * set_copympi( MPIrank* const & a,const MPIrank & b){ *a=b;return a;}
@@ -2878,14 +2888,15 @@ void f_init_lgparallele()
       // add FH
 
 
-     Global.Add("mpiWtime","(",new OneOperator0<double>(ffMPI_Wtime));
-     Global.Add("mpiWtick","(",new OneOperator0<double>(ffMPI_Wtick));
-     Global.Add("processor","(",new OneOperator3_<MPIrank,long,fMPI_Comm,fMPI_Request*>(mpiwho_));
-     Global.Add("processor","(",new OneOperator2_<MPIrank,long,fMPI_Request*>(mpiwho_));
-     Global.Add("mpiWait","(",new OneOperator1<long,fMPI_Request*>(mpiWait));
-     Global.Add("mpiWaitAny","(",new OneOperator1<long,KN<MPI_Request>*>(mpiWaitAny));
-     Global.Add("mpiSize","(",new OneOperator1<long,fMPI_Comm>(mpiSize));
-     Global.Add("mpiRank","(",new OneOperator1<long,fMPI_Comm>(mpiRank));
+      Global.Add("mpiWtime","(",new OneOperator0<double>(ffMPI_Wtime));
+      Global.Add("mpiWtick","(",new OneOperator0<double>(ffMPI_Wtick));
+      Global.Add("processor","(",new OneOperator3_<MPIrank,long,fMPI_Comm,fMPI_Request*>(mpiwho_));
+      Global.Add("processor","(",new OneOperator2_<MPIrank,long,fMPI_Request*>(mpiwho_));
+      Global.Add("mpiWait","(",new OneOperator1<long,fMPI_Request*>(mpiWait));
+      Global.Add("mpiWaitAny","(",new OneOperator1<long,KN<MPI_Request>*>(mpiWaitAny));
+      Global.Add("mpiWaitAll","(",new OneOperator1<long,KN<MPI_Request>*>(mpiWaitAll));
+      Global.Add("mpiSize","(",new OneOperator1<long,fMPI_Comm>(mpiSize));
+      Global.Add("mpiRank","(",new OneOperator1<long,fMPI_Comm>(mpiRank));
       Global.Add("mpiBarrier","(",new OneOperator1<long,fMPI_Comm*>(mpiBarrier));
 
       static   fMPI_Op op_max(MPI_MAX);

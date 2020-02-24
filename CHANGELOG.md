@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file.
 - `--download-cmake` in PETSc configure if there is no CMake available
 - flags `--with-[slepc|slepccomplex]-include` and `--with-[slepc|slepccomplex]-ldflags` for when SLEPc has been built outside of FreeFEM or PETSc
 - interface to `KSPSetResidualHistory` and `KSPGetIterationNumber`
+- interface to `mpiWaitAll`
 
 ### Changed
 - new `tgv` values: -10 => zero row, -20 => zero row/column

@@ -49,10 +49,13 @@ load "Element_P3"
     plotD(ThNew, uNew, cmm = "L_2 interpolation error = " + err)
 }
 {
-    func Pk = P2;                       // finite element space
-    func PkNew = P1;                    // finite element space
+    func Pk = [P2, P2];                       // finite element space
+    func PkNewSingle = P1;
+    func PkNew = [PkNewSingle, PkNewSingle];  // finite element space
 
     macro dimension()3// EOM            // 2D or 3D
+    macro def(u)[u, u#B]//
+    macro init(u)[u, u]//
     include "macro_ddm.idp"             // additional DDM functions
     meshN ThNew, Th = cube(getARGV("-global_3d", 5), getARGV("-global_3d", 5), getARGV("-global_3d", 5)); // global mesh
     if(mpirank == 0)
@@ -65,22 +68,25 @@ load "Element_P3"
     buildDmesh(ThNew)
     fespace Vh(Th, Pk);
     fespace VhNew(ThNew, PkNew);
-    Vh u = cos(2*pi*x) * sin(2*pi*y) * cos(2*pi*z);
+    Vh def(u);
+    [u, uB] = [cos(2*pi*x) * sin(2*pi*y) * cos(2*pi*z), cos(2*pi*z)];
     fespace VhGlobalNew(ThGlobalNew, PkNew);
-    VhGlobalNew uGlobalNew;
+    VhGlobalNew def(uGlobalNew);
     {
         fespace VhGlobal(ThGlobal, Pk);
-        VhGlobal uGlobal = cos(2*pi*x) * sin(2*pi*y) * cos(2*pi*z);
-        uGlobalNew = uGlobal;
+        VhGlobal def(uGlobal);
+        def(uGlobal) = [cos(2*pi*x) * sin(2*pi*y) * cos(2*pi*z), cos(2*pi*z)];
+        def(uGlobalNew) = def(uGlobal);
     }
-    VhNew uNew;
+    VhNew def(uNew);
     transfer(Th, Pk, u, ThNew, PkNew, uNew)
     plotD(Th, u, cmm = "Old FE function")
     plotD(ThNew, uNew, cmm = "New FE function")
-    uNew = uNew - uGlobalNew;
+    def(uNew) = [uNew - uGlobalNew, uNewB - uGlobalNewB];
     createMat(ThNew, B, PkNew)
     real err = sqrt(B(uNew[], uNew[]));
     if(mpirank == 0)
         cout << "L_2 interpolation error = " << err << endl;
-    plotD(ThNew, uNew, cmm = "L_2 interpolation error = " + err)
+    macro def1(u)u//
+    plotMPI(ThNew, def1(uNew), PkNewSingle, def1, real, cmm = "L_2 interpolation error = " + err)
 }

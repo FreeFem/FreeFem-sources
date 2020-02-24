@@ -948,6 +948,13 @@ ENDIFMACRO
 macro transfer(Th, Pk, u, ThNew, PkNew, uNew)
 IFMACRO(privateDmesh#Th)
 {
+IFMACRO(!def)
+NewMacro def(i)i EndMacro
+ENDIFMACRO
+if(mpisize == 1) {
+    def(uNew) = def(u);
+}
+else {
     int backupSM = searchMethod;
     searchMethod = 0;
     fespace VhLocalOld(Th, Pk);
@@ -1004,7 +1011,7 @@ ENDIFMACRO
     }
     real[int] D;
     createPartition(Th, D, Pk)
-    VhLocalOld scaledU;
+    VhLocalOld def(scaledU);
     scaledU[] = u[];
     scaledU[] .*= D;
     fespace PhPart(Th, P0);
@@ -1043,17 +1050,19 @@ ENDIFMACRO
             map = restrict(VhRestriction, VhLocalOld, n2o);
             exchangeU[rankRecv.n + i].resize(VhRestriction.ndof);
             for[j, w : map] exchangeU[rankRecv.n + i][j] = scaledU[][w];
+            Isend(processor(v, rqSendTh[i]), sendTh[i]);
+            Isend(processor(v, rqSendU[i]), exchangeU[rankRecv.n + i]);
         }
-        Isend(processor(v, rqSendTh[i]), sendTh[i]);
-        Isend(processor(v, rqSendU[i]), exchangeU[rankRecv.n + i]);
+        else
+            Isend(processor(v, rqSendTh[i]), sendTh[i]);
     }
     for[i, v : rankRecv] {
         int index = mpiWaitAny(rqRecvTh);
-        if(index != mpiUndefined && recvTh[index].nt) {
+        if(recvTh[index].nt) {
             fespace VhRestriction(recvTh[index], Pk);
             exchangeU[index].resize(VhRestriction.ndof);
+            Irecv(processor(rankRecv[index], rqRecvU[index]), exchangeU[index]);
         }
-        Irecv(processor(rankRecv[index], rqRecvU[index]), exchangeU[index]);
     }
     meshN gluedExchange;
     searchMethod = 1;
@@ -1074,30 +1083,31 @@ ENDIFMACRO
     searchMethod = 0;
     meshN interpolateExchange;
     fespace VhExchange(gluedExchange, Pk);
-    VhExchange uExchange;
+    VhExchange def(uExchange);
     for[i, v : rankRecv] {
         int index = mpiWaitAny(rqRecvU);
-        if(index != mpiUndefined && recvTh[index].nt) {
-            fespace VhRestriction(recvTh[index], Pk);
-            VhRestriction uRestriction;
-            uRestriction[] = exchangeU[index];
-            int[int] n2o;
-            meshN restriction = trunc(gluedExchange, chi(recvTh[index]) > 1.0e-2, new2old = n2o);
-            fespace VhRestrictionRenum(restriction, Pk);
-            VhRestrictionRenum renum;
-            matrix R = interpolate(VhRestrictionRenum, VhRestriction, inside = 1);
-            renum[] = R * uRestriction[];
-            int[int] map;
-            map = restrict(VhRestrictionRenum, VhExchange, n2o);
-            for[j, w : map] uExchange[][w] += renum[][j];
+        if(index != mpiUndefined) {
+            if(recvTh[index].nt) {
+                fespace VhRestriction(recvTh[index], Pk);
+                VhRestriction def(uRestriction);
+                uRestriction[] = exchangeU[index];
+                int[int] n2o;
+                meshN restriction = trunc(gluedExchange, chi(recvTh[index]) > 1.0e-2, new2old = n2o);
+                fespace VhRestrictionRenum(restriction, Pk);
+                VhRestrictionRenum def(renum);
+                matrix R = interpolate(VhRestrictionRenum, VhRestriction, inside = 1);
+                renum[] = R * uRestriction[];
+                int[int] map;
+                map = restrict(VhRestrictionRenum, VhExchange, n2o);
+                for[j, w : map] uExchange[][w] += renum[][j];
+            }
         }
     }
     searchMethod = backupSM;
-    uNew = uExchange;
-    for[i, v : rankSend]
-        mpiWaitAny(rqSendTh);
-    for[i, v : rankSend]
-        mpiWaitAny(rqSendU);
+    def(uNew) = def(uExchange);
+    mpiWaitAll(rqSendTh);
+    mpiWaitAll(rqSendU);
+}
 }
 ENDIFMACRO
 // EOM
