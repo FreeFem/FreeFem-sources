@@ -7299,7 +7299,7 @@ namespace Fem2D {
                     R3 E=K.T.Edge(ie);
                     double le = sqrt((E,E));
                     // surface normal
-                    Rd NNt=K.T.NormalS();
+                    Rd NNt=K.T.NFrenet();
                     NNt /= NNt.norme();
                     // exterior normal (flux)
                     Rd NN=K.T.N(ie);
@@ -7434,7 +7434,7 @@ namespace Fem2D {
                     int nbdf=K.NbDoF() ;
                     //ipmat.set(it);
                     PtonB = 0;
-                    R3 NNt=K.T.NormalLUnitaire();
+                    R3 NNt=K.T.NFrenetUnitaire();
 
                     for (int i=0;i<ipmat.ncoef;i++)
                         PtonB[ipmat.p[i]] +=  Element::onWhatBorder[ie][K.DFOnWhat(ipmat.dofe[i])] ;

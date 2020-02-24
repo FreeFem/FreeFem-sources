@@ -130,7 +130,7 @@ void Mesh2Bemtool(const ffmesh &Th, Geometry &node, bemtoolmesh &mesh ) {
     Normal<dHat> N(mesh);
     for(int it=0; it<Th.nt; it++){
         const E &K(Th[it]);
-        Fem2D::R3 nn = K.NormalSUnitaire();
+        Fem2D::R3 nn = K.NFrenetUnitaire();
         bemtool::R3 mm; mm[0]=nn.x; mm[1]=nn.y; mm[2]=nn.z;
         N.set(it, mm);
     }

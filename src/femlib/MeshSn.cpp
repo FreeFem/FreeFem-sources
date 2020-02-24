@@ -923,8 +923,8 @@ namespace Fem2D
                     typename HashTable<SortArray<int,2>,int>::iterator p= edgesI.find(key);
                     if (!p) {    // 1st time the edge is seen
                         // unit normal
-                        R3 Normal = K.NormalSUnitaire();
-                        R3 Normal_adj = K_adj.NormalS();
+                        R3 Normal = K.NFrenetUnitaire();
+                        R3 Normal_adj = K_adj.NFrenet();
                         Normal_adj /= Normal_adj.norme();
                         R pdt = (Normal,Normal_adj); // scalar product
                         pdt = acos(pdt); // radian angle (Normal,Normal_adj)

@@ -3550,8 +3550,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
               if (mes2 * mes < epsmes3) continue;    //  too small
               NN /= mes;
               llevelset += mes;
-              R3 NNt=K.NormalS();
-              NNt/=NNt.norme();
+              R3 NNt=K.NFrenetUnitaire();
               for (int npi = 0; npi < FI.n; npi++)    // loop on the integration point
               {
                 QuadratureFormular1dPoint pi(FI[npi]);
@@ -3602,7 +3601,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
         for (int t = 0; t < Th.nt; ++t) {
           if (all || setoflab.find(Th[t].lab) != setoflab.end( )) {
             const TriangleS &K(Th[t]);
-            R3 NNt=K.NormalS();
+            R3 NNt=K.NFrenet();
             NNt/=NNt.norme();
             double umx = -HUGE_VAL, umn = HUGE_VAL;
             for (int i = 0; i < 3; ++i) {
@@ -3650,8 +3649,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
       } else
         for (int i = 0; i < Th.nt; i++) {
           const TriangleS &K(Th[i]);
-          R3 NNt=K.NormalS();
-          NNt/=NNt.norme();
+          R3 NNt=K.NFrenetUnitaire();
           if (all || setoflab.find(Th[i].lab) != setoflab.end( ))
             for (int npi = 0; npi < FI.n; npi++) {
               QuadraturePoint pi(FI[npi]);
