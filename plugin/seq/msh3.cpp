@@ -7409,7 +7409,9 @@ class Square_Op : public E_F0mps {
   bool arg(int i, Stack stack, bool a) const {
     return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
   }
-
+  double arg(int i, Stack stack, double a) const {
+    return nargs[i] ? GetAny< double >((*nargs[i])(stack)) : a;
+  }
  public:
   Square_Op(const basicAC_F0 &args, Expression nx, Expression ny, Expression transfo = 0)
     : enx(nx), eny(ny), xx(0), yy(0), zz(0) {
@@ -7433,8 +7435,8 @@ basicAC_F0::name_and_type Square_Op::name_param[] = {
   {"region", &typeid(long)},         {"label", &typeid(KN_< long >)},
   {"flags", &typeid(long)},          {"orientation", &typeid(long)},
   {"cleanmesh", &typeid(bool)},      {"removeduplicate", &typeid(bool)},
-  {"rebuildboundary", &typeid(bool)}
-
+  {"precismesh", &typeid(double)}
+  //{"rebuildboundary", &typeid(bool)},
 };
 
 class Square : public OneOperator {
@@ -7773,8 +7775,9 @@ AnyType Square_Op::operator( )(Stack stack) const {
   long orientation(arg(3, stack, 1L));
   long cleanmesh(arg(4, stack, true));
   long removeduplicate(arg(5, stack, false));
-  bool rebuildboundary(arg(6, stack, false));
-
+  bool rebuildboundary=false;//(arg(7, stack, false));
+  double precis_mesh(arg(6, stack, 1e-7));
+      
   Mesh *pTh = Carre_(nx, ny, 0, 0, stack, region, label, 0L);
   Mesh &Th = *pTh;
 
@@ -7826,7 +7829,7 @@ AnyType Square_Op::operator( )(Stack stack) const {
   }
   // build the moved mesh and apply option
   MeshS *T_Th = new MeshS(Th.nv, Th.nt, Th.neb, v, t, b, cleanmesh, removeduplicate,
-                          rebuildboundary, orientation);
+                          rebuildboundary, orientation, precis_mesh);
   T_Th->BuildGTree( );
 
   delete pTh;
@@ -8055,7 +8058,7 @@ class Movemesh_Op : public E_F0mps {
   Expression eTh;
   Expression xx, yy, zz;
   // Expression  lab,reg;
-  static const int n_name_param = 10;
+  static const int n_name_param = 9;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   KN_< long > arg(int i, int ii, Stack stack, KN_< long > a) const {
@@ -8127,8 +8130,8 @@ basicAC_F0::name_and_type Movemesh_Op< Mesh3 >::name_param[] = {
   {"region", &typeid(KN_< long >)},      // 5
   {"label", &typeid(KN_< long >)},       // 6
   {"cleanmesh", &typeid(bool)},          // 7
-  {"removeduplicate", &typeid(bool)},    // 8
-  {"rebuildboundary", &typeid(bool)}     // 9
+  {"removeduplicate", &typeid(bool)}    // 8
+  //{"rebuildboundary", &typeid(bool)}     // 9
 };
 
 // instance arguments for meshS
@@ -8142,8 +8145,8 @@ basicAC_F0::name_and_type Movemesh_Op< MeshS >::name_param[] = {
   {"region", &typeid(KN_< long >)},      // 5
   {"label", &typeid(KN_< long >)},       // 6
   {"cleanmesh", &typeid(bool)},          // 7
-  {"removeduplicate", &typeid(bool)},    // 8
-  {"rebuildboundary", &typeid(bool)}     // 9
+  {"removeduplicate", &typeid(bool)}    // 8
+  //{"rebuildboundary", &typeid(bool)}     // 9
 };
 
       // instance arguments for meshS
@@ -8157,8 +8160,8 @@ basicAC_F0::name_and_type Movemesh_Op< MeshL >::name_param[] = {
     {"region", &typeid(KN_< long >)},      // 5
     {"label", &typeid(KN_< long >)},       // 6
     {"cleanmesh", &typeid(bool)},          // 7
-    {"removeduplicate", &typeid(bool)},    // 8
-    {"rebuildboundary", &typeid(bool)}     // 9
+    {"removeduplicate", &typeid(bool)}    // 8
+    //{"rebuildboundary", &typeid(bool)}     // 9
 };
       
 template< class MMesh >
@@ -8181,7 +8184,7 @@ AnyType Movemesh_Op< MMesh >::operator( )(Stack stack) const {
   long orientation(arg(4, stack, 1L));
   bool cleanmesh(arg(7, stack, true));
   bool removeduplicate(arg(8, stack, false));
-  bool rebuildboundary(arg(9, stack, false));
+  bool rebuildboundary=false;//(arg(9, stack, false));
 
   KN< int > takemesh(Th.nv);
   takemesh = 0;
@@ -8267,7 +8270,7 @@ AnyType Movemesh_Op< MMesh >::operator( )(Stack stack) const {
   }
   // build the moved mesh and apply option
   MMesh *T_Th = new MMesh(Th.nv, Th.nt, Th.nbe, v, t, b, cleanmesh, removeduplicate,
-                          rebuildboundary, orientation);
+                          rebuildboundary, orientation, precis_mesh);
 
   // apply the change of elements and borderelements references
   if (nrT.N( ) > 0)
@@ -8335,13 +8338,14 @@ template<>
 basicAC_F0::name_and_type Movemesh_Op< Mesh >::name_param[] = {
   {"transfo", &typeid(E_Array)},       // 0
   {"reftri", &typeid(KN_< long >)},    // 1
-  {"refedge", &typeid(KN_< long >)},  {"precismesh", &typeid(double)},
+  {"refedge", &typeid(KN_< long >)},
+  {"precismesh", &typeid(double)},
   {"orientation", &typeid(long)},        // 4
   {"region", &typeid(KN_< long >)},      // 5
   {"label", &typeid(KN_< long >)},       // 6
   {"cleanmesh", &typeid(bool)},          // 7
-  {"removeduplicate", &typeid(bool)},    // 8
-  {"rebuildboundary", &typeid(bool)}     // 9
+  {"removeduplicate", &typeid(bool)}    // 8
+  //{"rebuildboundary", &typeid(bool)}     // 9
 };
 
 template<>
@@ -8363,11 +8367,11 @@ AnyType Movemesh_Op< Mesh >::operator( )(Stack stack) const {
   KN< long > zzempty;
   KN< long > nrT(arg(1, 5, stack, zzempty));
   KN< long > nrB(arg(2, 6, stack, zzempty));
-  double precis_mesh(arg(3, stack, -1.));
+  double precis_mesh(arg(3, stack, 1e-7));
   long orientation(arg(4, stack, 1L));
   bool cleanmesh(arg(7, stack, true));
   bool removeduplicate(arg(8, stack, false));
-  bool rebuildboundary(arg(9, stack, false));
+  bool rebuildboundary=false;//(arg(9, stack, false));
 
   if (verbosity > 5)
     cout << "before movemesh: Vertex " << Th.nv << " Triangles " << Th.nt << " Edges " << Th.neb
@@ -8426,7 +8430,7 @@ AnyType Movemesh_Op< Mesh >::operator( )(Stack stack) const {
 
   // build the moved mesh and apply option
   MeshS *T_Th = new MeshS(Th.nv, Th.nt, Th.neb, vS, tS, bS, cleanmesh, removeduplicate,
-                          rebuildboundary, orientation);
+                          rebuildboundary, orientation, precis_mesh);
 
   // apply the change of elements and borderelements references
   if (nrT.N( ) > 0)
@@ -8486,7 +8490,7 @@ template< class MMesh >
 class CheckMesh_Op : public E_F0mps {
  public:
   Expression eTh;
-  static const int n_name_param = 3;
+  static const int n_name_param = 2;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   bool arg(int i, Stack stack, bool a) const {
@@ -8506,18 +8510,27 @@ class CheckMesh_Op : public E_F0mps {
 
 template<>
 basicAC_F0::name_and_type CheckMesh_Op< Mesh3 >::name_param[] = {
-  {"precisvertice", &typeid(double)}, {"removeduplicate", &typeid(bool)}
+  {"precisvertice", &typeid(double)},
+  {"removeduplicate", &typeid(bool)}
   //{"rebuildboundary", &typeid(bool)}
 
 };
 
 template<>
 basicAC_F0::name_and_type CheckMesh_Op< MeshS >::name_param[] = {
-  {"precisvertice", &typeid(double)}, {"removeduplicate", &typeid(bool)}
+  {"precisvertice", &typeid(double)},
+  {"removeduplicate", &typeid(bool)}
   //{"rebuildboundary", &typeid(bool)}
 
 };
 
+template<>
+basicAC_F0::name_and_type CheckMesh_Op< MeshL >::name_param[] = {
+   {"precisvertice", &typeid(double)},
+   {"removeduplicate", &typeid(bool)}
+        //{"rebuildboundary", &typeid(bool)}
+ };
+      
 template< class MMesh >
 AnyType CheckMesh_Op< MMesh >::operator( )(Stack stack) const {
   MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
@@ -8532,8 +8545,7 @@ AnyType CheckMesh_Op< MMesh >::operator( )(Stack stack) const {
   int orientation = 1;
   if (verbosity > 10)
     cout << "call cleanmesh function, precis_mesh:" << precis_mesh
-         << " removeduplicate:" << removeduplicate << " rebuildboundary:" << rebuildboundary
-         << endl;
+         << " removeduplicate:" << removeduplicate << endl;
 
   Th.clean_mesh(precis_mesh, Th.nv, Th.nt, Th.nbe, Th.vertices, Th.elements, Th.borderelements,
                 removeduplicate, rebuildboundary, orientation);
@@ -8555,13 +8567,19 @@ class CheckMesh : public OneOperator {
 
 class Line_Op : public E_F0mps {
  public:
-  static const int n_name_param = 3;    //
+  static const int n_name_param = 4;    //
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param], enx, xx, yy, zz;
   long arg(int i, Stack stack, long a) const {
     return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a;
   }
-
+  double arg(int i, Stack stack, double a) const {
+    return nargs[i] ? GetAny< double >((*nargs[i])(stack)) : a;
+  }
+  bool arg(int i, Stack stack, bool a) const {
+    return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
+  }
+      
  public:
   Line_Op(const basicAC_F0 &args, Expression nx, Expression transfo = 0)
     : enx(nx), xx(0), yy(0), zz(0) {
@@ -8586,8 +8604,9 @@ class Line_Op : public E_F0mps {
 basicAC_F0::name_and_type Line_Op::name_param[] = {
   {"orientation", &typeid(long)},
   {"cleanmesh", &typeid(bool)},
-  {"removeduplicate", &typeid(bool)}
- 
+  {"removeduplicate", &typeid(bool)},
+  {"precismesh", &typeid(double)}
+  // {"rebuildboundary", &typeid(double)}
 };
 
 class Line : public OneOperator {
@@ -8620,7 +8639,10 @@ AnyType Line_Op::operator( )(Stack stack) const {
   int nv = nt + 1, nbe = 2;
   long orientation(arg(0, stack, 1L));
   long cleanmesh(arg(1, stack, true));
-  
+  long removeduplicate(arg(2, stack, false));
+  double precis_mesh(arg(3, stack, 1e-7));
+  bool rebuildboundary=false; //(arg(4, stack, false));
+      
   V *v = new V[nv];
   T *t = new T[nt];
   B *b = new B[nbe];
@@ -8661,7 +8683,8 @@ AnyType Line_Op::operator( )(Stack stack) const {
   (bb++)->set(v, ibeg, lab1);
   (bb++)->set(v, iend, lab2);
 
-  MeshL *ThL = new MeshL(nv, nt, nbe, v, t, b, cleanmesh);
+  MeshL *ThL = new MeshL(nv, nt, nbe, v, t, b, cleanmesh,  removeduplicate,
+                         rebuildboundary, orientation, precis_mesh);
   ThL->BuildGTree( );
 
   Add2StackOfPtr2FreeRC(stack, ThL);
@@ -9047,6 +9070,7 @@ static void Load_Init( ) {
 
   Global.Add("checkmesh", "(", new CheckMesh< MeshS >);
   Global.Add("checkmesh", "(", new CheckMesh< Mesh3 >);
+  Global.Add("checkmesh", "(", new CheckMesh< MeshL >);
 
   Global.Add("segment", "(", new Line);
   Global.Add("segment", "(", new Line(1));
