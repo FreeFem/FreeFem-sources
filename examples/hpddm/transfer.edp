@@ -24,7 +24,6 @@ load "Element_P3"
     }
     meshN ThGlobalNew = ThNew;
     meshN ThGlobal = Th;
-    Mat A, B;
     buildDmesh(Th)
     buildDmesh(ThNew)
     fespace Vh(Th, Pk);
@@ -42,11 +41,12 @@ load "Element_P3"
     plotD(Th, u, cmm = "Old FE function")
     plotD(ThNew, uNew, cmm = "New FE function")
     uNew = uNew - uGlobalNew;
-    createMat(ThNew, B, PkNew)
-    real err = sqrt(B(uNew[], uNew[]));
+    real tmp = uNew[].linfty;
+    real err;
+    mpiAllReduce(tmp, err, mpiCommWorld, mpiMAX);
     if(mpirank == 0)
-        cout << "L_2 interpolation error = " << err << endl;
-    plotD(ThNew, uNew, cmm = "L_2 interpolation error = " + err)
+        cout << "L_\\infty interpolation error = " << err << endl;
+    plotD(ThNew, uNew, cmm = "L_\\infty interpolation error = " + err)
 }
 {
     func Pk = [P2, P2];                       // finite element space
@@ -63,7 +63,6 @@ load "Element_P3"
     broadcast(processor(0), ThNew);
     meshN ThGlobalNew = ThNew;
     meshN ThGlobal = Th;
-    Mat A, B;
     buildDmesh(Th)
     buildDmesh(ThNew)
     fespace Vh(Th, Pk);
@@ -82,11 +81,14 @@ load "Element_P3"
     transfer(Th, Pk, u, ThNew, PkNew, uNew)
     plotD(Th, u, cmm = "Old FE function")
     plotD(ThNew, uNew, cmm = "New FE function")
-    def(uNew) = [uNew - uGlobalNew, uNewB - uGlobalNewB];
-    createMat(ThNew, B, PkNew)
-    real err = sqrt(B(uNew[], uNew[]));
+    VhNew def(uGlobalNewInterpolated);
+    def(uGlobalNewInterpolated) = def(uGlobalNew);
+    uNew[] -= uGlobalNewInterpolated[];
+    real tmp = uNew[].linfty;
+    real err;
+    mpiAllReduce(tmp, err, mpiCommWorld, mpiMAX);
     if(mpirank == 0)
-        cout << "L_2 interpolation error = " << err << endl;
+        cout << "L_\\infty interpolation error = " << err << endl;
     macro def1(u)u//
-    plotMPI(ThNew, def1(uNew), PkNewSingle, def1, real, cmm = "L_2 interpolation error = " + err)
+    plotMPI(ThNew, def1(uNew), PkNewSingle, def1, real, cmm = "L_\\infty interpolation error = " + err)
 }
