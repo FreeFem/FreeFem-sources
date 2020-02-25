@@ -5136,7 +5136,7 @@ void Renumb(MMesh *&pTh) {
 
 // trunc for surface meshS
 MeshS *truncmesh(const MeshS &Th, const long &kksplit, int *split, bool WithMortar,
-                 const int newbelabel);
+                 const int newbelabel,double precis_mesh, long orientation, bool cleanmesh, bool removeduplicate);
 
 struct Op_trunc_meshS : public OneOperator {
   typedef const MeshS *pmeshS;
@@ -5146,17 +5146,10 @@ struct Op_trunc_meshS : public OneOperator {
     static const int n_name_param = 9;
     Expression nargs[n_name_param];
     Expression getmesh, bbb;
-    long arg(int i, Stack stack, long a) const {
-      return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a;
-    }
-
-    bool arg(int i, Stack stack, bool a) const {
-      return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
-    }
-
-    KN< long > *arg(int i, Stack stack) const {
-      return nargs[i] ? GetAny< KN< long > * >((*nargs[i])(stack)) : 0;
-    }
+    long arg(int i, Stack stack, long a) const { return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a; }
+    bool arg(int i, Stack stack, bool a) const { return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a; }
+    KN< long > *arg(int i, Stack stack) const { return nargs[i] ? GetAny< KN< long > * >((*nargs[i])(stack)) : 0; }
+    double arg(int i, Stack stack, double a) const {return nargs[i] ? GetAny< double >((*nargs[i])(stack)) : a;  }
 
     Op(const basicAC_F0 &args, Expression t, Expression b) : getmesh(t), bbb(b) {
       args.SetNameParam(n_name_param, name_param, nargs);
@@ -5175,14 +5168,14 @@ struct Op_trunc_meshS : public OneOperator {
 basicAC_F0::name_and_type Op_trunc_meshS::Op::name_param[Op_trunc_meshS::Op::n_name_param] = {
   {"split", &typeid(long)},           {"label", &typeid(long)},
   {"new2old", &typeid(KN< long > *)}, {"old2new", &typeid(KN< long > *)},
-  {"renum", &typeid(bool)},           {"labels", &typeid(KN_< long >)},
-  {"region", &typeid(KN_< long >)},   {"flabel", &typeid(long)},
-  {"fregion", &typeid(long)}
+  {"renum", &typeid(bool)},           {"precis_mesh", &typeid(double)},
+  {"orientation", &typeid(long)},     {"cleanmesh", &typeid(bool)},
+  {"removeduplicate", &typeid(bool)}
 
 };
 
 MeshS *truncmesh(const MeshS &Th, const long &kksplit, int *split, bool WithMortar,
-                 const int newbelabel) {
+                 const int newbelabel, double precis_mesh, long orientation, bool cleanmesh, bool removeduplicate) {
   // computation of number of border elements and vertex without split
   int nbe = 0;
   int nbei = 0;
@@ -5523,7 +5516,7 @@ MeshS *truncmesh(const MeshS &Th, const long &kksplit, int *split, bool WithMort
     cout << "  - Nb of boundary edges " << nbe << endl;
   }
 
-  MeshS *Tht = new MeshS(nv, itt, nbe, vertices, triangles, bbedges);
+  MeshS *Tht = new MeshS(nv, itt, nbe, vertices, triangles, bbedges, precis_mesh, orientation, cleanmesh, removeduplicate);
   Tht->BuildGTree( );    // Add JM. Oct 2010
 
   delete gtree;
@@ -5544,10 +5537,10 @@ AnyType Op_trunc_meshS::Op::operator( )(Stack stack) const {
     KN< long > *po2n = arg(3, stack);
     bool renum = arg(4, stack, false);
     KN< long > kempty;
-    KN< long > nre = arg(5, stack, kempty);
-    KN< long > nrt = arg(6, stack, kempty);
-    Expression flab = nargs[7];
-    Expression freg = nargs[8];
+    double precis_mesh(arg(5, stack, 1e-7));
+    long orientation(arg(6, stack, 1L));
+    bool cleanmesh(arg(7, stack, true));
+    bool removeduplicate(arg(8, stack, false));
     KN< int > split(Th.nt);
     split = kkksplit;
     MeshPoint *mp = MeshPointStack(stack), mps = *mp;
@@ -5600,7 +5593,7 @@ AnyType Op_trunc_meshS::Op::operator( )(Stack stack) const {
     }
           
     *mp = mps;
-    MeshS *Tht = truncmesh(Th, kkksplit, split, false, label);
+    MeshS *Tht = truncmesh(Th, kkksplit, split, false, label, precis_mesh, orientation, cleanmesh, removeduplicate);
         
     if (renum) {
         Renumb<MeshS>(Tht);
@@ -5613,7 +5606,7 @@ AnyType Op_trunc_meshS::Op::operator( )(Stack stack) const {
 
 // trunc for surface meshL
 MeshL *truncmesh(const MeshL &Th, const long &kksplit, int *split, bool WithMortar,
-                 const int newbelabel);
+                 const int newbelabel, double precis_mesh, long orientation, bool cleanmesh, bool removeduplicate);
 
 struct Op_trunc_meshL : public OneOperator {
   typedef const MeshL *pmeshL;
@@ -5626,7 +5619,7 @@ struct Op_trunc_meshL : public OneOperator {
     long arg(int i, Stack stack, long a) const { return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a; }
 	bool arg(int i, Stack stack, bool a) const { return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a; }
 	KN< long > *arg(int i, Stack stack) const { return nargs[i] ? GetAny< KN< long > * >((*nargs[i])(stack)) : 0; }
-
+    double arg(int i, Stack stack, double a) const {return nargs[i] ? GetAny< double >((*nargs[i])(stack)) : a;  }
     Op(const basicAC_F0 &args, Expression t, Expression b) : getmesh(t), bbb(b) {
       args.SetNameParam(n_name_param, name_param, nargs);
     }
@@ -5642,20 +5635,16 @@ struct Op_trunc_meshL : public OneOperator {
 };
 
 basicAC_F0::name_and_type Op_trunc_meshL::Op::name_param[Op_trunc_meshL::Op::n_name_param] = {
-  {"split", &typeid(long)},           
-  {"label", &typeid(long)},
-  {"new2old", &typeid(KN< long > *)}, 
-  {"old2new", &typeid(KN< long > *)},
-  {"renum", &typeid(bool)},           
-  {"labels", &typeid(KN_< long >)},
-  {"region", &typeid(KN_< long >)},   
-  {"flabel", &typeid(long)},
-  {"fregion", &typeid(long)}
+  {"split", &typeid(long)},           {"label", &typeid(long)},
+  {"new2old", &typeid(KN< long > *)}, {"old2new", &typeid(KN< long > *)},
+  {"renum", &typeid(bool)},           {"precis_mesh", &typeid(double)},
+  {"orientation", &typeid(long)},     {"cleanmesh", &typeid(bool)},
+  {"removeduplicate", &typeid(bool)}
 
 };
 
 MeshL *truncmesh(const MeshL &Th, const long &kksplit, int *split, bool WithMortar,
-                 const int newbelabel) {
+                 const int newbelabel, double precis_mesh, long orientation, bool cleanmesh, bool removeduplicate) {
   
   typedef typename MeshL::Element T;
   typedef typename MeshL::BorderElement B;
@@ -5828,7 +5817,7 @@ MeshL *truncmesh(const MeshL &Th, const long &kksplit, int *split, bool WithMort
   delete[] vertexsub;
   delete[] edgesub;
 
-  MeshL *Tht = new MeshL(nv, itt, 0, vertices, edges, 0);
+  MeshL *Tht = new MeshL(nv, itt, 0, vertices, edges, 0, precis_mesh, orientation, cleanmesh, removeduplicate);
   Tht->BuildBorderPt();
   Tht->BuildGTree( );
     
@@ -5853,10 +5842,14 @@ AnyType Op_trunc_meshL::Op::operator( )(Stack stack) const {
   KN< long > *po2n = arg(3, stack);
   bool renum = arg(4, stack, false);
   KN< long > kempty;
-  KN< long > nre = arg(5, stack, kempty);
-  KN< long > nrt = arg(6, stack, kempty);
-  Expression flab = nargs[7];
-  Expression freg = nargs[8];
+  //KN< long > nre = arg(5, stack, kempty);
+  //KN< long > nrt = arg(6, stack, kempty);
+  //Expression flab = nargs[7];
+  //Expression freg = nargs[8];
+  double precis_mesh(arg(5, stack, 1e-7));
+  long orientation(arg(6, stack, 1L));
+  bool cleanmesh(arg(7, stack, true));
+  bool removeduplicate(arg(8, stack, false));
   KN< int > split(Th.nt);
   split = kkksplit;
   MeshPoint *mp = MeshPointStack(stack), mps = *mp;
@@ -5909,7 +5902,7 @@ AnyType Op_trunc_meshL::Op::operator( )(Stack stack) const {
   }
 
   *mp = mps;
-  MeshL *Tht = truncmesh(Th, kkksplit, split, false, label);
+  MeshL *Tht = truncmesh(Th, kkksplit, split, false, label,  precis_mesh, orientation, cleanmesh, removeduplicate);
 
   if (renum) {
     Renumb<MeshL>(Tht);
@@ -5930,20 +5923,13 @@ struct Op_trunc_mesh3 : public OneOperator {
   class Op : public E_F0mps {
    public:
     static basicAC_F0::name_and_type name_param[];
-    static const int n_name_param = 5;
+    static const int n_name_param = 9;
     Expression nargs[n_name_param];
     Expression getmesh, bbb;
-    long arg(int i, Stack stack, long a) const {
-      return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a;
-    }
-
-    bool arg(int i, Stack stack, bool a) const {
-      return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
-    }
-
-    KN< long > *arg(int i, Stack stack) const {
-      return nargs[i] ? GetAny< KN< long > * >((*nargs[i])(stack)) : 0;
-    }
+    long arg(int i, Stack stack, long a) const { return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a; }
+    bool arg(int i, Stack stack, bool a) const { return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a; }
+    KN< long > *arg(int i, Stack stack) const { return nargs[i] ? GetAny< KN< long > * >((*nargs[i])(stack)) : 0; }
+    double arg(int i, Stack stack, double a) const {return nargs[i] ? GetAny< double >((*nargs[i])(stack)) : a;  }
 
     Op(const basicAC_F0 &args, Expression t, Expression b) : getmesh(t), bbb(b) {
       args.SetNameParam(n_name_param, name_param, nargs);
@@ -5959,13 +5945,13 @@ struct Op_trunc_mesh3 : public OneOperator {
   Op_trunc_mesh3( ) : OneOperator(atype< pmesh3 >( ), atype< pmesh3 >( ), atype< bool >( )){};
 };
 basicAC_F0::name_and_type Op_trunc_mesh3::Op::name_param[Op_trunc_mesh3::Op::n_name_param] = {
-  {"split", &typeid(long)},
-  {"label", &typeid(long)},
-  {"new2old", &typeid(KN< long > *)},    // ajout FH pour P. Jovilet jan 2014
-  {"old2new", &typeid(KN< long > *)},    // ajout FH pour P. Jovilet jan 2014
-  {"renum", &typeid(bool)}};
+  {"split", &typeid(long)},             {"label", &typeid(long)},
+  {"new2old", &typeid(KN< long > *)},   {"old2new", &typeid(KN< long > *)},   // ajout FH pour P. Jovilet jan 2014
+  {"renum", &typeid(bool)},             {"precis_mesh", &typeid(double)},
+  {"orientation", &typeid(long)},       {"cleanmesh", &typeid(bool)},
+  {"removeduplicate", &typeid(bool)}};
 
-Mesh3 *truncmesh(const Mesh3 &Th, const long &kksplit, int *split, bool kk, const int newbelabel) {
+Mesh3 *truncmesh(const Mesh3 &Th, const long &kksplit, int *split, bool kk, const int newbelabel, double precis_mesh, long orientation, bool cleanmesh, bool removeduplicate) {
   static const int FaceTriangle[4] = {3, 0, 1, 2};    //= {{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}}
 
   // computation of number of border elements and vertex without split
@@ -6340,7 +6326,7 @@ Mesh3 *truncmesh(const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
 
   // delete gtree;
 
-  Mesh3 *Tht = new Mesh3(nv, nt, nbe, v, t, b);
+  Mesh3 *Tht = new Mesh3(nv, nt, nbe, v, t, b, precis_mesh, orientation, cleanmesh, removeduplicate);
   Tht->BuildGTree( );    // Add JM. Oct 2010
   delete gtree;
 
@@ -6471,7 +6457,11 @@ AnyType Op_trunc_mesh3::Op::operator( )(Stack stack) const {
   KN< long > *pn2o = arg(2, stack);
   KN< long > *po2n = arg(3, stack);
   bool renum = arg(4, stack, false);
-
+  double precis_mesh(arg(5, stack, 1e-7));
+  long orientation(arg(6, stack, 1L));
+  bool cleanmesh(arg(7, stack, true));
+  bool removeduplicate(arg(8, stack, false));
+      
   KN< int > split(Th.nt);
   split = kkksplit;
   MeshPoint *mp = MeshPointStack(stack), mps = *mp;
@@ -6494,8 +6484,7 @@ AnyType Op_trunc_mesh3::Op::operator( )(Stack stack) const {
     cout << "  -- Trunc mesh: Nb of Tetrahedrons = " << kk << " label=" << label << endl;
   }
 
-  Mesh3 *Tht = truncmesh(Th, kkksplit, split, false, label);
-  // Tht->getTypeMesh3()= Th.getTypeMesh3();
+  Mesh3 *Tht = truncmesh(Th, kkksplit, split, false, label, precis_mesh, orientation, cleanmesh, removeduplicate);
 
   if (pn2o) {
     pn2o->resize(kk * ks);
