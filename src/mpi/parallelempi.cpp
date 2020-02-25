@@ -900,7 +900,7 @@ long MPIrank::Send(const Fem2D::Mesh *  a) const {
         if( rwm->DoSR() ) delete rwm;
     }
     else {
-        WSend((char*)NULL, 0, who, MPI_TAG<Fem2D::Mesh* >::TAG, comm, rq);
+        WSend((char*)NULL, 0, who, MPI_TAG<Fem2D::Mesh*>::TAG, comm, rq);
     }
     return MPI_SUCCESS;
   }
@@ -914,7 +914,7 @@ long MPIrank::Send (const Fem2D::Mesh3 *  a) const {
         if( rwm->DoSR() ) delete rwm;
     }
     else {
-        WSend((char*)NULL, 0, who, MPI_TAG<Fem2D::Mesh* >::TAG, comm, rq);
+        WSend((char*)NULL, 0, who, MPI_TAG<Fem2D::Mesh3*>::TAG, comm, rq);
     }
     return MPI_SUCCESS;
   }
