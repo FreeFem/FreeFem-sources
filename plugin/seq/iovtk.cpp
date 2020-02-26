@@ -1425,7 +1425,7 @@ Mesh *VTK_Load(const string &filename, bool bigEndian) {
     ExecError("error in reading vtk file");
   }
 
-  cout << "Reading cells" << numElements << endl;
+  if(verbosity>2) cout << "Reading cells" << numElements << endl;
 
   int *IntCells = new int[totalNumInt - numElements];
   int *firstCell = new int[numElements + 1];
