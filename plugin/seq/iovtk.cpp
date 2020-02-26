@@ -3988,11 +3988,11 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
   if (datasize == sizeof(float)) {
     fprintf(fp, "POINTS %d float\n", Th.nv);
   }
-
-  if (datasize == sizeof(double)) {
+  else if (datasize == sizeof(double)) {
     fprintf(fp, "POINTS %d double\n", Th.nv);
   }
-
+  else
+      ffassert(0); 
   if (datasize == sizeof(float)) {
     for (unsigned int i = 0; i < Th.nv; i++) {
       const Vertex3 &P = Th.vertices[i];
