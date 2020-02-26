@@ -2992,7 +2992,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
   if (!strcmp(buffer, "BINARY")) {
     binary = true;
   }
-    cout << " binary = " <<binary <<endl;
+  if(verbosity>9)  cout << " binary = " <<binary <<endl;
   if (fscanf(fp, "%s %s", buffer, buffer2) != 2) {
     cout << "error in reading vtk files" << endl;
     ExecError("error in reading vtk file");
@@ -3264,7 +3264,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
       case 3:    // Edge/line
         break;
       case 5:    // Triangle
-        cout << i << " " << firstCell[i + 1] << " " << firstCell[i] << endl;
+        if(verbosity>9) cout << i << " " << firstCell[i + 1] << " " << firstCell[i] << endl;
         assert((firstCell[i + 1] - firstCell[i]) == 3);
 
         for (int j = firstCell[i]; j < firstCell[i + 1]; j++) {
