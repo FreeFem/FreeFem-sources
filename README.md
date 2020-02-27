@@ -39,7 +39,7 @@ Jenkins ([FreeFEM](https://ci.inria.fr/freefem/)):
 *Master branch*
 
 | Release | .pkg | AppImage | .deb | .exe | Docker |
-|:-------:|:---:|:--------:|:---:|:---:|
+|:-------:|:----:|:--------:|:----:|:----:|:------:|
 | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-sources-createRelease)](https://ci.inria.fr/freefem/view/Master/job/FreeFEM-sources-createRelease/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-sources-deployPKG)](https://ci.inria.fr/freefem/view/Master/job/FreeFEM-sources-deployPKG/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-sources-deployAppImage)](https://ci.inria.fr/freefem/view/Master/job/FreeFEM-sources-deployAppImage/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-sources-deployDEB)](https://ci.inria.fr/freefem/view/Master/job/FreeFEM-sources-deployDEB/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-sources-deployEXE)](https://ci.inria.fr/freefem/view/Master/job/FreeFEM-sources-deployEXE/) | [![Build Status](https://ci.inria.fr/freefem/buildStatus/icon?job=FreeFEM-docker)](https://ci.inria.fr/freefem/view/Docker/job/FreeFEM-docker/) |
 
 See [CI/CD Tools](#cicd-tools)
