@@ -1383,8 +1383,10 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
             iv[j] =  old2new[ &(K[j]) - v];
             assert(iv[j] >= 0 && iv[j] < nv);
         }
-        if (orientation<0)
+        if (orientation<0 && T::nv>3 )
             swap(iv[1], iv[2]);
+        else if (orientation<0 && T::nv==2 )
+            swap(iv[0], iv[1]);
         
         tt[i].set(vv, iv, K.lab);
         mes+=tt[i].mesure();
@@ -1400,7 +1402,7 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
             iv[j] =  old2new[ &(K[j]) - v];
             assert(iv[j] >= 0 && iv[j] < nv);
         }
-        if (orientation<0)
+        if (orientation<0 && T::nv>3 )
             swap(iv[(B::nv)-2], iv[(B::nv)-1]);
         bb[i].set(vv, iv, K.lab);
         mesb+=bb[i].mesure();
