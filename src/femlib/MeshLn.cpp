@@ -258,9 +258,21 @@ namespace Fem2D
         
     BuildBound();
     BuildAdj();
-    //Buildbnormalv();
+    Buildbnormalv();
     BuildjElementConteningVertex();
-        
+    if (nbe==0) {
+        if(verbosity>5)
+        cout << " building of boundary " << endl;
+        BuildBdElem();
+        delete [] TheAdjacencesLink;
+        delete [] BoundaryElementHeadLink;
+        TheAdjacencesLink=0;
+        BoundaryElementHeadLink=0;
+        BuildBound();
+        BuildAdj();
+        Buildbnormalv();
+        BuildjElementConteningVertex();
+    }
         
     if(verbosity>2) cout << "  -- End of read: MeshL mesure = " << mes << endl;
         
@@ -431,7 +443,20 @@ namespace Fem2D
     BuildAdj();
     //Buildbnormalv();
     BuildjElementConteningVertex();
-        
+    
+    if (nbe==0) {
+        if(verbosity>5)
+        cout << " building of boundary " << endl;
+        BuildBdElem();
+        delete [] TheAdjacencesLink;
+        delete [] BoundaryElementHeadLink;
+        TheAdjacencesLink=0;
+        BoundaryElementHeadLink=0;
+        BuildBound();
+        BuildAdj();
+        Buildbnormalv();
+        BuildjElementConteningVertex();
+    }
     if(verbosity>2)
       cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
     if(verbosity)
@@ -453,7 +478,20 @@ namespace Fem2D
     BuildAdj();
     Buildbnormalv();
     BuildjElementConteningVertex();
-      
+    
+    if (nbe==0) {
+        if(verbosity>5)
+               cout << " building of boundary " << endl;
+        BuildBdElem();
+        delete [] TheAdjacencesLink;
+        delete [] BoundaryElementHeadLink;
+        TheAdjacencesLink=0;
+        BoundaryElementHeadLink=0;
+        BuildBound();
+        BuildAdj();
+        Buildbnormalv();
+        BuildjElementConteningVertex();
+    }
     if(verbosity>2)
         cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
         
@@ -604,8 +642,21 @@ namespace Fem2D
     }
     BuildBound();
     BuildAdj();
-    //Buildbnormalv();
+    Buildbnormalv();
     BuildjElementConteningVertex();
+    if (nbe==0) {
+        if(verbosity>5)
+               cout << " building of boundary " << endl;
+        BuildBdElem();
+        delete [] TheAdjacencesLink;
+        delete [] BoundaryElementHeadLink;
+        TheAdjacencesLink=0;
+        BoundaryElementHeadLink=0;
+        BuildBound();
+        BuildAdj();
+        Buildbnormalv();
+        BuildjElementConteningVertex();
+    }
         
     if(verbosity>1)
       cout << "  -- End of read meshL: mesure = " << mes << " border mesure " << mesb << endl;
@@ -722,7 +773,7 @@ namespace Fem2D
        TheAdjacencesLink=0;
        BoundaryElementHeadLink=0;
        BuildAdj();
-       //Buildbnormalv();
+       Buildbnormalv();
        BuildjElementConteningVertex();
        
    }
@@ -735,7 +786,7 @@ namespace Fem2D
  
    if(nt > 0){
        BuildAdj();
-       //Buildbnormalv();
+       Buildbnormalv();
        BuildjElementConteningVertex();
    }
   if(verbosity>1)
