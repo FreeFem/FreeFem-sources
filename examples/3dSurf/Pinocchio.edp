@@ -2,7 +2,7 @@ load "msh3"
 load "medit"
 load "mmg"
 
-int nn = 50;
+int nn = 15;
 
 mesh3 Th3=cube(nn,2*nn,nn,[x,2*y,z]);
 

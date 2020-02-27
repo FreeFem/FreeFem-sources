@@ -32,23 +32,28 @@ TESTS_OTHER = buildMeshSfromMesh3.edp \
 	operatorsOnMeshS.edp \
 	extractSurfFromMesh3.edp \
 	testvtk.edp \
-	LapP1withflux.edp \
-	Pinocchio.edp
+	LapP1withflux.edp
 
 
 TESTS_TETGEN = HeatTorus.edp
+
+TESTS_MMG = Pinocchio.edp
 
 if TETGEN
 CONDITIONAL_TETGEN = $(TESTS_TETGEN)
 endif
 
+if MMG
+CONDITIONAL_MMG = $(TESTS_MMG)
+endif
 
 TESTS = $(TESTS_OTHER) \
-	$(TESTS_TETGEN)
+	$(TESTS_TETGEN) \
+	$(TESTS_MMG)
 
 LIST_CONDITIONAL = $(TESTS_OTHER) \
-	$(CONDITIONAL_TETGEN)
-
+	$(CONDITIONAL_TETGEN) \
+	$(CONDITIONAL_MMG)
 
 XFAIL_TESTS = buildMeshSfromMesh3.edp \
 	Laplace3dSP2.edp
