@@ -79,14 +79,12 @@ if(mpisize > 1) {
                     }
                 }
                 if(ThLocalMoved.nt > 0) {
+                    real[int] backup = partExtended[];
                     ThLocalMoved = trunc(ThLocalMoved, y <= 1-x+ThLocalMoved.hmax && y >= -1-x-ThLocalMoved.hmax && y <= 1+x+ThLocalMoved.hmax && y >= -1+x-ThLocalMoved.hmax);
                     ThExtended = ThExtended + ThLocalMoved;
-                    partExtended = partExtended;
-                    fespace PhMoved(ThLocalMoved, P0);
-                    PhMoved p = i;
-                    PhExtended interp;
-                    interp = p;
-                    partExtended[] += interp[];
+                    partExtended = 0;
+                    partExtended[](0:ThExtended.nt - ThLocalMoved.nt - 1) = backup;
+                    partExtended[](ThExtended.nt - ThLocalMoved.nt:ThExtended.nt - 1) = i;
                 }
             }
         }
