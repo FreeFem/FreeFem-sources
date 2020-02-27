@@ -137,7 +137,7 @@ typedef GenericVertex<R3> Vertex3;
         void GRead(FILE * f,int offset);
         double hmin() const;
         int Save(const string & filename) const;
-        void BuildEdges(double angle=8.*atan(1.)/9.);  // default angle = 40 deg);
+        void BuildBdElem(double angle=8.*atan(1.)/9.);  // default angle = 40 deg);
         Serialize serialize_withBorderMesh() const;
         void BuildMeshL(double angle=8.*atan(1.)/9.);  // default angle = 40 deg);
         ~MeshS() {

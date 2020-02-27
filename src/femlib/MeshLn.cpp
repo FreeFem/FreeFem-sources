@@ -651,7 +651,7 @@ namespace Fem2D
   
     
     // determine the bounder points list for meshL
-   void MeshL::BuildBorderPt(double angle) {
+   void MeshL::BuildBdElem(double angle) {
       
         
        delete [] borderelements; // to remove the previous pointers

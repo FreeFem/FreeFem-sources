@@ -2001,7 +2001,7 @@ namespace Fem2D
         delete [] v_num_surf;
         delete [] map_v_num_surf;
         // build the edge list
-        meshS->BuildEdges(angle);
+        meshS->BuildBdElem(angle);
         meshS->BuildGTree();
         
     }

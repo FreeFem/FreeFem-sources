@@ -510,7 +510,7 @@ namespace Fem2D
         
         // if not edges then build the edges - need access to the old adjacensce to build eges and rebuild the new adj
         if (nbe==0) {
-            BuildEdges();
+            BuildBdElem();
             delete [] TheAdjacencesLink;
             delete [] BoundaryElementHeadLink;
             TheAdjacencesLink=0;
@@ -547,7 +547,7 @@ namespace Fem2D
         
         // if not edges then build the edges - need access to the old adjacensce to build eges and rebuild the new adj
         if (nbe==0) {
-            BuildEdges();
+            BuildBdElem();
             delete [] TheAdjacencesLink;
             delete [] BoundaryElementHeadLink;
             TheAdjacencesLink=0;
@@ -769,7 +769,7 @@ namespace Fem2D
         if (nbe==0) {
             if(verbosity>3)
                 cout << " building of boundary " << endl;
-            BuildEdges();
+            BuildBdElem();
             delete [] TheAdjacencesLink;
             delete [] BoundaryElementHeadLink;
             TheAdjacencesLink=0;
@@ -884,7 +884,7 @@ namespace Fem2D
     
     
     // determine the boundary edge list for meshS
-    void MeshS::BuildEdges(const double angle) {
+    void MeshS::BuildBdElem(const double angle) {
         
         delete [] borderelements; // to remove the previous pointers
         borderelements = new BoundaryEdgeS[3 * nt]; // 3 * nt upper evaluated
@@ -1058,7 +1058,7 @@ namespace Fem2D
             meshL->mapSurf2Curv[i] = v_num_curve[i];
             meshL->mapCurv2Surf[i] = map_v_num_curve[i];
         }
-        meshL->BuildBorderPt(angle);
+        meshL->BuildBdElem(angle);
         meshL->BuildGTree();
         delete [] v_num_curve;
         delete [] map_v_num_curve;

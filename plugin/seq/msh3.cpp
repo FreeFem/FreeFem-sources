@@ -5840,7 +5840,7 @@ MeshL *truncmesh(const MeshL &Th, const long &kksplit, int *split, bool WithMort
   delete[] edgesub;
 
   MeshL *Tht = new MeshL(nv, itt, 0, vertices, edges, 0, precis_mesh, orientation, cleanmesh, removeduplicate);
-  Tht->BuildBorderPt();
+  Tht->BuildBdElem();
   Tht->BuildGTree( );
     
   if (verbosity > 3) {
@@ -8576,6 +8576,62 @@ class CheckMesh : public OneOperator {
   }
 };
 
+template< class MMesh >
+class RebuildBorder_Op : public E_F0mps {
+ public:
+   Expression eTh;
+   static const int n_name_param = 1;
+   static basicAC_F0::name_and_type name_param[];
+   Expression nargs[n_name_param];
+      
+   double arg(int i, Stack stack, double a) const {return nargs[i] ? GetAny< double >((*nargs[i])(stack)) : a; }
+      
+   public:
+      RebuildBorder_Op(const basicAC_F0 &args, Expression tth) : eTh(tth) {
+      args.SetNameParam(n_name_param, name_param, nargs);
+    }
+   AnyType operator( )(Stack stack) const;
+};
+      
+template<>
+basicAC_F0::name_and_type RebuildBorder_Op< MeshS >::name_param[] = {
+   {"ridgeangledetection", &typeid(double)}
+};
+      
+template<>
+basicAC_F0::name_and_type RebuildBorder_Op< MeshL >::name_param[] = {
+      {"ridgeangledetection", &typeid(double)}
+};
+      
+template< class MMesh >
+AnyType RebuildBorder_Op< MMesh >::operator( )(Stack stack) const {
+  MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+      
+  MMesh *pTh = GetAny< MMesh * >((*eTh)(stack));
+  MMesh &Th = *pTh;
+  ffassert(pTh);
+  double angle(arg(0, stack, 8.*atan(1.)/9.));
+  int nbe_back= Th.nbe;Th.nbe=0;
+  Th.BuildBdElem(angle);
+  Th.BuildGTree();
+  if (verbosity > 10)
+      cout << "RebuildBorder function, before nbe: " <<nbe_back << " after: " << Th.nbe << " with the angular criteria ridgeangledetection=" << angle << endl;
+      
+  *mp = mps;
+  return pTh;
+}
+      
+template< class MMesh >
+class RebuildBorder : public OneOperator {
+ public:
+  typedef const MMesh *ppmesh;
+  RebuildBorder( ) : OneOperator(atype< ppmesh >( ), atype< ppmesh >( )) {}
+      
+   E_F0 *code(const basicAC_F0 &args) const {
+      return new RebuildBorder_Op< MMesh >(args, t[0]->CastTo(args[0]));
+   }
+};
+       
 class Line_Op : public E_F0mps {
  public:
   static const int n_name_param = 4;    //
@@ -9096,7 +9152,11 @@ static void Load_Init( ) {
   Global.Add("extract", "(", new ExtractMesh< MeshS, MeshL >);    // take a Mesh3 in arg and return a part of MeshS
 
   Global.Add("OrientNormal", "(", new OrientNormal<MeshS>);
-	Global.Add("OrientNormal", "(", new OrientNormal<MeshL>);
+  Global.Add("OrientNormal", "(", new OrientNormal<MeshL>);
+   
+  Global.Add("rebuildBorder", "(", new RebuildBorder<MeshS>);
+  Global.Add("rebuildBorder", "(", new RebuildBorder<MeshL>);
+      
 }
 
 // <<msh3_load_init>> static loading: calling Load_Init() from a function which is accessible from
