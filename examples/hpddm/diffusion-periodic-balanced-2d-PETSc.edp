@@ -32,7 +32,7 @@ if(mpisize > 1) {
         PhExtended partExtended;
         partExtended = part;
         for(int i = 0; i < mpisize; ++i) {
-            mesh ThLocal = trunc(Th, abs(part - i) < 1e-6, label = 0);
+            mesh ThLocal = trunc(Th, abs(part - i) < 1e-6 && (y > 1-x-Th.hmax || y < -1-x+Th.hmax || y > 1+x-Th.hmax || y < -1+x+Th.hmax), label = 0);
             int j = 0;
             varf vOn(u, v) = on(labPeriodic[j], u = 1);
             fespace Vh(ThLocal, P1);
@@ -79,6 +79,7 @@ if(mpisize > 1) {
                     }
                 }
                 if(ThLocalMoved.nt > 0) {
+                    ThLocalMoved = trunc(ThLocalMoved, y <= 1-x+ThLocalMoved.hmax && y >= -1-x-ThLocalMoved.hmax && y <= 1+x+ThLocalMoved.hmax && y >= -1+x-ThLocalMoved.hmax);
                     ThExtended = ThExtended + ThLocalMoved;
                     partExtended = partExtended;
                     fespace PhMoved(ThLocalMoved, P0);
@@ -103,14 +104,13 @@ if(mpisize > 1) {
     matrix R = interpolate(Wh, WhExtended);
     real[int] D;
     D.resize(Wh.ndof);
-    int[int] I, J;
-    real[int] C;
-    [J, I, C] = R;
-    for(int i = 0; i < C.n; ++i) {
-        if(abs(C[i]) > 1e-12)
-            D[J[i]] = DExtended[I[i]];
-    }
-    if(intersection.n > 0)
+    for[j, i, v : R]
+        if(abs(v) > 1e-12)
+            D[j] = DExtended[i];
+    if(intersection.n > 0) {
+        int[int] I, J;
+        real[int] C;
+        [J, I, C] = R;
         for(int i = 0; i < intersection[0].n; ++i) {
             int nnz = 0;
             for(int j = 0; j < intersection[1 + i].n; ++j) {
@@ -125,6 +125,7 @@ if(mpisize > 1) {
             }
             intersection[1 + i].resize(nnz);
         }
+    }
     constructor(A, D.n, intersection, D);
 }
 else {
