@@ -2522,7 +2522,7 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
   long rmlabfaces(arg(6, stack, 0L));
   bool rm_i_faces(arg(7, stack, false));
 
-  if (rm_i_faces && is_same< MMesh, MeshS >::value)
+  if (rm_i_faces && (is_same< MMesh, MeshS >::value || is_same< MMesh, MeshL >::value) )
     cout << " Warning: remove internal border isn't implemented " << endl;
 
   if (nrB.N( ) <= 0 && nrT.N( ) <= 0 && (!freg) && (!flab) && !rmlabfaces && !rm_i_faces)
