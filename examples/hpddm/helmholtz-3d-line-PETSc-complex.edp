@@ -30,7 +30,7 @@ createMat(ThL, H, P1);
 bool mass = usedARGV("-mass") != -1;
 if(mass) {
     varf vM(u, v) = int1d(ThL)(u * v);
-    matrix<complex> Loc = vM(Uh, Uh, sym = 1);
+    matrix<complex> Loc = vM(Uh, Uh);
     H = Loc;
     set(H, sparams = "-mass_ksp_converged_reason", prefix = "mass_");
 }
