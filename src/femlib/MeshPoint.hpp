@@ -106,8 +106,8 @@ class MeshPointBase { public:
      label = ll;
      t=(*Th)(T);
      v=f=e=-1;
-       Nt=R3(0.,0.,1.);
-       N=R3();
+     Nt=R3(0.,0.,1.);
+     N=R3();
      VF=0;
      d=2;
      dHat=2;
@@ -125,8 +125,8 @@ class MeshPointBase { public:
      Th=&K.Vh.Th;
      region = T->lab;
      v=f=e=-1;
-       Nt=R3(0.,0.,1.);
-       N=R3();
+     Nt=R3(0.,0.,1.);
+     N=R3();
      VF=0;
      int ll[3]={0,0,0},kk(0);
      if ( P_Hat.x<1.e-6) ll[kk++]=1;
@@ -169,14 +169,14 @@ class MeshPointBase { public:
      Th=&aTh;
      region = T->lab;
      label = ll;
-       t= aTh(aK); // Miss correct Nov. 2012 ...
-      v=f=e=-1;
+     t= aTh(aK); // Miss correct Nov. 2012 ...
+     v=f=e=-1;
      outside=coutside;
      VF=0;
      d=2;
      dHat=2;
-       Nt=R3(0.,0.,1.);
-       N=R3();
+     Nt=R3(0.,0.,1.);
+     N=R3();
 
    }
 
@@ -197,8 +197,8 @@ class MeshPointBase { public:
      VF=0;
      d=2;
      dHat=2;
-       Nt=R3(0,0,1.);
-       N=R3();
+     Nt=R3(0,0,1.);
+     N=R3();
 
    }
 
@@ -215,8 +215,8 @@ class MeshPointBase { public:
      VF=0;
      d=2;  
      dHat=2;
-       Nt=R3(0,0,1.);
-       N=R3();
+     Nt=R3(0,0,1.);
+     N=R3();
 
    }
     void change(const R3 & PH,const Tet & tt,int ll)
@@ -231,8 +231,8 @@ class MeshPointBase { public:
 	VF=0;
     d=3;// Bug correct v4
     dHat=3;
-        Nt=R3();
-        N=R3();
+    Nt=R3();
+    N=R3();
 
     }
 
@@ -335,8 +335,8 @@ class MeshPointBase { public:
      Th3=&K.Vh.Th;
      region = T3->lab;
      v=f=e=-1;
-       N=R3();
-       Nt=R3();
+     N=R3();
+     Nt=R3();
      VF=0;
      int ll[4],kk(0);
      if ( P_Hat.x<1.e-6) ll[kk++]=1;
@@ -378,8 +378,8 @@ class MeshPointBase { public:
      label = ll;
      t=(*Th3)(T3);
      v=f=e=-1;
-       N=R3();
-       Nt=R3();
+     N=R3();
+     Nt=R3();
     // area=mes;
      outside=coutside;
      VF=0;
@@ -402,8 +402,8 @@ class MeshPointBase { public:
      VF=0;
      d=3;
      dHat=3;
-       N=R3();
-       Nt=R3();
+     N=R3();
+     Nt=R3();
    }
 
 // --------3D surface
@@ -422,10 +422,8 @@ class MeshPointBase { public:
         e=iedge;
         t=(*ThS)(TS);
         throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
-        N.x=NN.x;
-        N.y=NN.y;
-        N.z=NN.z;
-        Nt = TS->NFrenetUnitaire();
+        N=NN;
+        Nt=TS->NFrenetUnitaire();
         VF=0;
         d=3;
         dHat=2;
@@ -445,12 +443,10 @@ class MeshPointBase { public:
         e=iedge;
         t=(*ThS)(TS);
         throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
-        N.x=NN.x;
-        N.y=NN.y;
-        N.z=NN.z;
-        Nt.x=NNt.x;
-        Nt.y=NNt.y;
-        Nt.z=NNt.z;
+        N=NN;
+        throwassert( Abs( (NNt,NNt) -1.0) < 1e-5 );
+        Nt=NNt;
+        
         VF=0;
         d=3;
         dHat=2;
@@ -469,13 +465,9 @@ class MeshPointBase { public:
         t=(*Th)(T);
         e=iedge;
         throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
-        N.x=NN.x;
-        N.y=NN.y;
-        N.z=NN.z;
+        N=NN;
         throwassert( Abs( (NNt,NNt) -1.0) < 1e-5 );
-        Nt.x=NNt.x;
-        Nt.y=NNt.y;
-        Nt.z=NNt.z;
+        Nt=NNt;
         VF=VFF;
         d=3;
         dHat=2;
@@ -494,9 +486,7 @@ class MeshPointBase { public:
         t=(*Th)(T);
         e=iedge;
         throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
-        N.x=NN.x;
-        N.y=NN.y;
-        N.z=NN.z;
+        N=NN;
         Nt = TS->NFrenetUnitaire();
         VF=VFF;
         d=3;
@@ -505,7 +495,7 @@ class MeshPointBase { public:
     void set(const R3 &P2, const R2 & P_Hat,const baseFElementS & K,int ll)
     {
         P=P2;
-        PHat.x=P_Hat.x;
+        PHat=P_Hat;
         PHat.y=P_Hat.y;
         PHat.z=0;
         TS=&K.T;
@@ -514,9 +504,7 @@ class MeshPointBase { public:
         label = ll;
         t=(*ThS)(TS);
         v=f=e=-1;
-        N.x=0;
-        N.y=0;
-        N.z=0;
+        N=R3();
         Nt = TS->NFrenetUnitaire();
         VF=0;
         d=3;
@@ -534,9 +522,7 @@ class MeshPointBase { public:
         ThS=&K.Vh.Th;
         region = TS->lab;
         v=f=e=-1;
-        N.x=0;
-        N.y=0;
-        N.z=0;
+        N=R3();
         Nt= TS->NFrenetUnitaire();
         VF=0;
         int ll[3],kk(0);
@@ -578,12 +564,8 @@ class MeshPointBase { public:
         label = ll;
         t=(*ThS)(TS);
         v=f=e=-1;
-        N.x=0;
-        N.y=0;
-        N.z=0;
+        N=R3();
         Nt= TS->NFrenetUnitaire();
-
-
         outside=coutside;
         VF=0;
         d=3;
@@ -600,13 +582,11 @@ class MeshPointBase { public:
         label = ll;
         t=(*ThS)(TS);
         v=f=e=-1;
-        N.x=0;
-        N.y=0;
-        N.z=0;
+        N=R3();
+        throwassert( Abs( (NNt,NNt) -1.0) < 1e-5 );
         Nt.x=NNt.x;
         Nt.y=NNt.y;
         Nt.z=NNt.z;
-        
         outside=coutside;
         VF=0;
         d=3;
@@ -628,6 +608,8 @@ class MeshPointBase { public:
         v=f=e=-1;
         v=ss;
         VF=0;
+        N=R3();
+        Nt= TS->NFrenetUnitaire();
         d=3;
         dHat=2;
     }
@@ -637,7 +619,7 @@ class MeshPointBase { public:
     
     
  // --------3D line
- void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,int ipoint)
+ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &NN,int ipoint)
  {
         P=P2;
         PHat=P_Hat;
@@ -648,13 +630,15 @@ class MeshPointBase { public:
         v=f=-1;
         e=ipoint;
         t=(*ThL)(TL);
+        throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
+        N=NN;
         Nt = TL->NFrenetUnitaire();
         VF=0;
         d=3;
         dHat=1;
     }
 
-void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &NNt,int ipoint)
+void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &NN,const R3 &NNt,int ipoint)
 {
        P=P2;
        PHat=P_Hat;
@@ -665,15 +649,35 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
        v=f=-1;
        e=ipoint;
        t=(*ThL)(TL);
+       throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
+       N=NN;
+       throwassert( Abs( (NNt,NNt) -1.0) < 1e-5 );
+       Nt=NNt;
        VF=0;
        d=3;
        dHat=1;
-       Nt.x=NNt.x;
-       Nt.y=NNt.y;
-       Nt.z=NNt.z;
    }
+  
+   void set(const MeshL & aTh,const R3 &P2,const R1 & P_Hat,const EdgeL & aK,int ll,const R3 &NN,int ipoint,int VFF=0)
+   {
+        P=P2;
+        PHat=P_Hat;
+        TL=&aK;
+        ThL=&aTh;
+        region = TS->lab;
+        label = ll;
+        v=f=-1;
+        t=(*Th)(T);
+        e=ipoint;
+        throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
+        N=NN;
+        Nt = TL->NFrenetUnitaire();
+        VF=VFF;
+        d=3;
+        dHat=1;
+    }
     
-    void set(const MeshL & aTh,const R3 &P2,const R1 & P_Hat,const EdgeL & aK,int ll,int ipoint,int VFF=0)
+    void set(const MeshL & aTh,const R3 &P2,const R1 & P_Hat,const EdgeL & aK,int ll,const R3 &NN,const R3 &NNt,int ipoint,int VFF=0)
     {
         P=P2;
         PHat=P_Hat;
@@ -684,7 +688,10 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         v=f=-1;
         t=(*Th)(T);
         e=ipoint;
-        Nt = TL->NFrenetUnitaire();
+        throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
+        N=NN;
+        throwassert( Abs( (NNt,NNt) -1.0) < 1e-5 );
+        Nt=NNt;
         VF=VFF;
         d=3;
         dHat=1;
@@ -700,8 +707,9 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         label = ll;
         t=(*ThL)(TL);
         v=f=e=-1;
-        VF=0;
+        N=R3();
         Nt = TL->NFrenetUnitaire();
+        VF=0;
         d=3;
         dHat=1;
     }
@@ -714,6 +722,7 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         ThL=&K.Vh.Th;
         region = TL->lab;
         v=f=e=-1;
+        N=R3();
         Nt = TL->NFrenetUnitaire();
         VF=0;
         int ll[3],kk(0);
@@ -736,12 +745,34 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         label = ll;
         t=(*ThL)(TL);
         v=f=e=-1;
+        N=R3();
         Nt = TL->NFrenetUnitaire();
         outside=coutside;
         VF=0;
         d=3;
         dHat=1;
     }
+    
+    void set(const  MeshL &aTh, const R3 &P2,const R1 & P_Hat,const EdgeL & aK,const R3 &NNt,const int ll,bool coutside=false)
+     {
+         P=P2;
+         PHat=P_Hat;
+         TL=&aK;
+         ThL=&aTh;
+         region = TL->lab;
+         label = ll;
+         t=(*ThL)(TL);
+         v=f=e=-1;
+         N=R3();
+         throwassert( Abs( (NNt,NNt) -1.0) < 1e-5 );
+         Nt.x=NNt.x;
+         Nt.y=NNt.y;
+         Nt.z=NNt.z;
+         outside=coutside;
+         VF=0;
+         d=3;
+         dHat=1;
+     }
     
     void setP(const MeshL * pTh,int tt,int ss)
     {
@@ -756,6 +787,8 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         v=f=e=-1;
         v=ss;
         VF=0;
+        N=R3();
+        Nt = TL->NFrenetUnitaire();
         d=3;
         dHat=1;
     }
@@ -824,6 +857,7 @@ class MeshPoint : public MeshPointBase { public:
   void set(const MeshS & aTh,const R3 &P2,const R2 & P_Hat,const TriangleS &aK,int ll,const R3 &NN,const R3 &NNt,int iedge,int VFF) {
       MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,NNt,iedge,VFF);
       other.unset();}
+    
   void set(const R3 &P2,const R2 & P_Hat,const  baseFElementS & K) {
       MeshPointBase::set(P2,P_Hat,K);
       other.unset();
@@ -838,17 +872,17 @@ class MeshPoint : public MeshPointBase { public:
   }
     
   // 3D curve
-  void set(const R3 &P2,const R1 & P_Hat,const  baseFElementL & K,int ll,int ipoint) {
-      MeshPointBase::set(P2,P_Hat,K,ll,/*NN,*/ipoint);
+  void set(const R3 &P2,const R1 & P_Hat,const  baseFElementL & K,int ll,const R3 &NN,int ipoint) {
+      MeshPointBase::set(P2,P_Hat,K,ll,NN,ipoint);
       other.unset();}
-  void set(const R3 &P2,const R1 & P_Hat,const  baseFElementL & K,int ll,const R3 &NNt,int ipoint) {
-      MeshPointBase::set(P2,P_Hat,K,ll,/*NN,*/NNt,ipoint);
+  void set(const R3 &P2,const R1 & P_Hat,const  baseFElementL & K,int ll,const R3 &NN,const R3 &NNt,int ipoint) {
+      MeshPointBase::set(P2,P_Hat,K,ll,NN,NNt,ipoint);
       other.unset();}
-  void set(const MeshL & aTh,const R3 &P2,const R1 & P_Hat,const EdgeL &aK,int ll,int ipoint) {
-      MeshPointBase::set(aTh,P2,P_Hat,aK,ll,ipoint);
+  void set(const MeshL & aTh,const R3 &P2,const R1 & P_Hat,const EdgeL &aK,int ll,const R3 &NN,int ipoint) {
+      MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,ipoint);
       other.unset();}
-  void set(const MeshL & aTh,const R3 &P2,const R1 & P_Hat,const EdgeL &aK,int ll,int ipoint,int VFF) {
-      MeshPointBase::set(aTh,P2,P_Hat,aK,ll,ipoint,VFF);
+  void set(const MeshL & aTh,const R3 &P2,const R1 & P_Hat,const EdgeL &aK,int ll,const R3 &NN,const R3 &NNt,int ipoint,int VFF) {
+      MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,NNt,ipoint,VFF);
       other.unset();}
   void set(const R3 &P2,const R1 & P_Hat,const  baseFElementL & K) {
       MeshPointBase::set(P2,P_Hat,K);
@@ -858,6 +892,10 @@ class MeshPoint : public MeshPointBase { public:
       MeshPointBase::set(aTh,P2,P_Hat,aK,ll,coutside);
       other.unset();
    }
+  void set(const MeshL &aTh, const R3 &P2,const R1 & P_Hat,const EdgeL &aK,const R3 &NNt, const int ll,bool coutside=false) {
+      MeshPointBase::set(aTh,P2,P_Hat,aK,NNt,ll,coutside);
+      other.unset();
+  }
 //fin 3d
  
     

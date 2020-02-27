@@ -265,12 +265,12 @@ private: // pas de copie pour ne pas prendre l'adresse
     // correct signe N in 3d mai 2009 (FH)
   template<int d> inline  R3 ExtNormal( GenericVertex<R3> *const v[4],int const f[3])  {  static_assert ( d== 3 ,"dim=3"); return R3(*v[f[0]],*v[f[2]])^R3(*v[f[0]],*v[f[1]]) ;  }
   template<> // pour axel exterior  Normal of surface ..
-    inline  R3 ExtNormal<2>( GenericVertex<R3> *const v[3],int const f[2])  {   return R3(*v[f[0]],*v[f[1]])   ^(R3(*v[0],*v[1])^R3(*v[0],*v[2])) ;
-       // R3(*v[0],*v[2])^R3(*v[0],*v[1])  ^ R3(*v[f[0]],*v[f[1]]) ;
-
-    }// module 2 aire*l
-
-
+  inline  R3 ExtNormal<2>( GenericVertex<R3> *const v[3],int const f[2])  {return R3(*v[f[0]],*v[f[1]])^(R3(*v[0],*v[1])^R3(*v[0],*v[2])); }// module 2 aire*l
+  template<>
+  inline  R3 ExtNormal<1>( GenericVertex<R3> *const v[2],int const f[1])  {
+      if(f[0]==0) return R3(*v[1],*v[0])-R3(*v[0]);
+      else if(f[0]==1) return R3(*v[0],*v[1])+R3(*v[1]);
+  }
     // Clever the orientation in case of only 1 vertex april 2019 (Hard to find !!!!! FH and PHT)
     template<int NN,typename V> struct  SwapOrient { static void SwapO(V  **w){swap(w[0],w[1]);}} ;
     template<typename V> struct  SwapOrient<1,V> { static void SwapO(V **){}} ;

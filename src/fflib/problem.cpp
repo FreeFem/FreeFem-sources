@@ -4227,9 +4227,14 @@ namespace Fem2D {
             PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
             R2 Pt(PA*sa+PB*sb ); //
             Ku.BF(Dop,Pt,fu);
+            // surface normal
+            R3 NNt=T.NFrenetUnitaire();
+            // exterior normal (flux)
+            R3 NN=T.N(ie);
+            NN /= NN.norme();
             if (!same) Kv.BF(Dop,Pt,fv);
             // int label=-999999; // a passer en argument
-            MeshPointStack(stack)->set(T(Pt),Pt,Kv,label,R2(E.y,-E.x)/le,ie);
+            MeshPointStack(stack)->set(T(Pt),Pt,Kv,label,NN,NNt,ie);
             if (classoptm) (*Op.optiexpK)(stack); // call optim version
             int il=0;
             for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
@@ -6164,9 +6169,14 @@ namespace Fem2D {
             double sa=pi.x,sb=1-sa;
             R2 PA(TriangleHat[VerticesOfTriangularEdge[ie][0]]),
             PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
-            R2 Pt(PA*sa+PB*sb ); //
+            R2 Pt(PA*sa+PB*sb );
             Kv.BF(Dop,Pt,fu);
-            MeshPointStack(stack)->set(T(Pt),Pt,Kv,label,R2(E.y,-E.x)/le,ie);
+            // surface normal
+            R3 NNt=T.NFrenetUnitaire();
+            // exterior normal (flux)
+            R3 NN=T.N(ie);
+            NN /= NN.norme();
+            MeshPointStack(stack)->set(T(Pt),Pt,Kv,label,NN,NNt,ie);
             if (classoptm) (*Op.optiexpK)(stack); // call optim version
 
             for ( i=0;  i<n;   i++ )
@@ -7299,8 +7309,7 @@ namespace Fem2D {
                     R3 E=K.T.Edge(ie);
                     double le = sqrt((E,E));
                     // surface normal
-                    Rd NNt=K.T.NFrenet();
-                    NNt /= NNt.norme();
+                    Rd NNt=K.T.NFrenetUnitaire();
                     // exterior normal (flux)
                     Rd NN=K.T.N(ie);
                     NN /= NN.norme();
@@ -7435,7 +7444,10 @@ namespace Fem2D {
                     //ipmat.set(it);
                     PtonB = 0;
                     R3 NNt=K.T.NFrenetUnitaire();
-
+                    // exterior normal (flux)
+                    Rd NN=K.T.N(ie);
+                    NN /= NN.norme();
+                    
                     for (int i=0;i<ipmat.ncoef;i++)
                         PtonB[ipmat.p[i]] +=  Element::onWhatBorder[ie][K.DFOnWhat(ipmat.dofe[i])] ;
 
@@ -7444,7 +7456,7 @@ namespace Fem2D {
                         if (PtonB[p]) // in on boundary
                         {
                             const RdHat & PtHat(ipmat.P[p]);
-                            mps->set(K.T(PtHat),PtHat,K,r,NNt,ie);
+                            mps->set(K.T(PtHat),PtHat,K,r,NN,NNt,ie);
                             KN_<R> Vpp(Vp(p,'.'));
                             for (int j=0;j<dim;j++)
                                 if (tabexp[j])

@@ -1,0 +1,51 @@
+load "msh3"
+int nn=100;
+
+mesh Th2=square(nn,nn);
+real theta = pi/2;
+meshS Th = movemesh23(Th2, transfo=[x, cos(theta)*y-sin(theta)*z, sin(theta)*y+cos(theta)*z]);
+
+func uex=x; func uey=6.*x; func uez=0.;
+func uSex=x; func uSey=6.*(cos(theta)*y-sin(theta)*z)-9*x; func uSez=0.;
+func f= -18. ;
+
+fespace Vh(Th,P1);
+Vh u,v;
+
+macro Grad3(u) [dx(u),dy(u),dz(u)]  // EOM
+macro Grad2(u) [dx(u),dy(u)]  // EOM
+
+problem Lap3dS(u,v)  =
+  int2d(Th)(Grad3(v)' *Grad3(u))
+  + int1d(Th,2)(u*v)  
+  - int2d(Th)(f*v) 
+  - int1d(Th,2) ((uSex*N.x +uSey*N.y +uSex*N.z)*v )
+  + on(1,u=0);
+Lap3dS;
+
+plot(u,wait=1);
+
+fespace Vh2(Th2,P1);
+Vh2 u2,v2;
+
+problem Lap2d(u2,v2)  =
+  int2d(Th2)(Grad2(v2)' *Grad2(u2))
+  + int1d(Th2,2)(u2*v2)  
+  - int2d(Th2)(f*v2) 
+  - int1d(Th2,2) ((uex*N.x +uey*N.y)*v2 )
+  + on(1,u2=0);
+Lap2d;
+
+cout << " u min::   " << u[]. min << "  max: " << u[].max << endl;
+cout << " u2 min::   " << u2[]. min << "  max: " << u2[].max << endl;
+
+real[int] err = u[] - u2[];
+
+assert( abs(err.l2) < 1e-6);
+plot(u2,wait=1);
+
+
+
+
+
+

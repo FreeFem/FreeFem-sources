@@ -2462,6 +2462,14 @@ basicAC_F0::name_and_type SetMesh_Op< MeshS >::name_param[] = {
   {"fregion", &typeid(long)},       {"flabel", &typeid(long)},
   {"rmledge", &typeid(long)},       {"rmInternalEdges", &typeid(bool)}};
 
+// special instance, list arguments for meshL
+template<>
+basicAC_F0::name_and_type SetMesh_Op< MeshL >::name_param[] = {
+  {"refedge", &typeid(KN_< long >)}, {"refpoint", &typeid(KN_< long >)},
+  {"region", &typeid(KN_< long >)}, {"label", &typeid(KN_< long >)},
+  {"fregion", &typeid(long)},       {"flabel", &typeid(long)},
+  {"rmlpoint", &typeid(long)},       {"rmInternalPoints", &typeid(bool)}};
+
 // function to apply the change of label with the map
 int ChangeLab(const map< int, int > &m, int lab) {
   map< int, int >::const_iterator i = m.find(lab);
@@ -2469,6 +2477,18 @@ int ChangeLab(const map< int, int > &m, int lab) {
     lab = i->second;
   }
   return lab;
+}
+
+template< class MMesh >
+typename MMesh::BorderElement::RdHat setBaryBorder(){
+    int k = MMesh::BorderElement::nv;
+    return MMesh::BorderElement::RdHat::diag(1. / k);
+}
+
+template< >
+typename MeshL::BorderElement::RdHat setBaryBorder<MeshL>(){
+    
+    return R0();
 }
 
 template< class MMesh >
@@ -2569,7 +2589,7 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
   B *b = new B[nben];
   B *bb = b;
   k = B::nv;
-  BRdHat PtHat2 = BRdHat::diag(1. / k);
+  BRdHat PtHat2 = setBaryBorder<MMesh>(); //BRdHat::diag(1. / k);  const V &vi(Th(Th.operator( )(K[0]) ));
   int nrmf = 0;
 
   for (int i = 0; i < nbe; i++) {
@@ -2578,6 +2598,8 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
     int fkk, kke = Th.ElementAdj(ke, fkk = fk);
     bool onborder = (kke == ke) || (kke < 0);
     const T &KE(Th[ke]);
+  
+      
     TRdHat B = KE.PBord(fk, PtHat2);
     int iv[B::nv];
     for (int j = 0; j < k; j++) iv[j] = Th.operator( )(K[j]);
@@ -9054,6 +9076,8 @@ static void Load_Init( ) {
   Global.Add("movemesh23", "(", new Movemesh< Mesh >);
   // Global.Add("movemesh", "(", new Movemesh<Mesh>(1));
 
+      
+  Global.Add("change", "(", new SetMesh< MeshL >);
   Global.Add("change", "(", new SetMesh< MeshS >);
   Global.Add("change", "(", new SetMesh< Mesh3 >);
 
