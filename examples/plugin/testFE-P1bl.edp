@@ -6,16 +6,29 @@ load "msh3"
 {
 mesh Th=square(1,1);
 fespace Vh(Th,P1bl);
+cout << Vh.ndofK << " "<< Vh.ndof << endl;
 func f=x+2*y+x*(1-x)*y*(1-y)*30;
 Vh u=f;
 mesh Th2=splitmesh3(Th);
-fespace Vh2(Th2,P1);
+fespace Vh2(Th2,P1dc);
 Vh2 u2=u;
 Vh2 u2e=f;
 
 plot(u2,u2e,wait=1);
-u2[] =- u2e;
+u2[] =- u2e[];
 cout << " diff = " << u2[].linfty << endl; 
+
+for(int i=0; i<  Vh.ndof ; ++i)
+{
+	u[]=0;
+	u[][i] = 1;
+	u2=u;
+	real err1 = int2d(Th2)((dx(u2)-dx(u))^2); 
+	real err2 = int2d(Th2)((dy(u2)-dy(u))^2); 
+	cout << err1 << " " << err2 << endl; 
+	plot(u2,wait=1,cmm="i="+i+" err="+err1+err2 );
+	assert(err1+err2< 1e-5); 
+}
 }
 
 // 3d 
@@ -31,6 +44,6 @@ Wh u2=u;
 Vh u2e=f;
 
 plot(u,u2e,wait=1);
-u2[] =- u2e;
+u2[] =- u2e[];
 cout << " diff = " << u2[].linfty << endl; 
 }

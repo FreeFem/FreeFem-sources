@@ -1425,7 +1425,7 @@ Mesh *VTK_Load(const string &filename, bool bigEndian) {
     ExecError("error in reading vtk file");
   }
 
-  cout << "Reading cells" << numElements << endl;
+  if(verbosity>2) cout << "Reading cells" << numElements << endl;
 
   int *IntCells = new int[totalNumInt - numElements];
   int *firstCell = new int[numElements + 1];
@@ -2992,7 +2992,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
   if (!strcmp(buffer, "BINARY")) {
     binary = true;
   }
-
+  if(verbosity>9)  cout << " binary = " <<binary <<endl;
   if (fscanf(fp, "%s %s", buffer, buffer2) != 2) {
     cout << "error in reading vtk files" << endl;
     ExecError("error in reading vtk file");
@@ -3030,7 +3030,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
   }
 
   Vertex3 *vff = new Vertex3[nv];
-
+  
   for (int i = 0; i < nv; i++) {
     if (verbosity > 9) {
       cout << " i=" << i << endl;
@@ -3082,19 +3082,19 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
     vff[i].z = xyz[2];
     vff[i].lab = 1;
     if (verbosity > 9) {
-      printf("xyz = %f %f %f\n", xyz[0], xyz[1], xyz[2]);
+      printf("xyz %d = %f %f %f\n", i , xyz[0], xyz[1], xyz[2]);
     }
   }
 
   // read mesh elements
-  int numElements, numElements2, totalNumInt;
-  if (fscanf(fp, "%s %d %d\n", buffer, &numElements, &totalNumInt) != 3) {
-    cout << "error in reading vtk files" << endl;
+  int numElements, numElements2, totalNumInt,kk,fpos=ftell(fp);
+  if ((kk=fscanf(fp, "%s %d %d\n", buffer, &numElements, &totalNumInt)) != 3) {
+    cout << "error in " << fpos<< " " <<  buffer << " reading vtk files" << numElements << " " << totalNumInt << " " << kk<< endl;
     ExecError("error in reading vtk file");
   }
 
   if (verbosity > 3) {
-    printf("reading parameter %s %d %d\n", buffer, numElements, totalNumInt);
+      printf("reading %d parameter %s %d %d\n",fpos, buffer, numElements, totalNumInt);
   }
 
   if (strncmp(buffer, "CELLS", 5) || !numElements) {
@@ -3264,7 +3264,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
       case 3:    // Edge/line
         break;
       case 5:    // Triangle
-        cout << i << " " << firstCell[i + 1] << " " << firstCell[i] << endl;
+        if(verbosity>9) cout << i << " " << firstCell[i + 1] << " " << firstCell[i] << endl;
         assert((firstCell[i + 1] - firstCell[i]) == 3);
 
         for (int j = firstCell[i]; j < firstCell[i + 1]; j++) {
@@ -3988,11 +3988,11 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
   if (datasize == sizeof(float)) {
     fprintf(fp, "POINTS %d float\n", Th.nv);
   }
-
-  if (datasize == sizeof(double)) {
+  else if (datasize == sizeof(double)) {
     fprintf(fp, "POINTS %d double\n", Th.nv);
   }
-
+  else
+      ffassert(0); 
   if (datasize == sizeof(float)) {
     for (unsigned int i = 0; i < Th.nv; i++) {
       const Vertex3 &P = Th.vertices[i];
@@ -4017,12 +4017,11 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
       f[0] = P.x;
       f[1] = P.y;
       f[2] = P.z;    // 3D case
-      if (binary) {
+       if (binary) {
         if (!bigEndian) {
           FreeFEM::SwapBytes((char *)&f, sizeof(float), 3);
         }
-
-        fwrite(&f, sizeof(float), 3, fp);
+        fwrite(&f, sizeof(double), 3, fp);
       } else {
         fprintf(fp, "%lf %lf %lf\n", f[0], f[1], f[2]);
       }
@@ -4031,7 +4030,7 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
 
   fprintf(fp, "\n");
   if (verbosity > 1) {
-    printf("writing vertices is finish\n");
+    printf("writing vertices is finish %ld \n",ftell(fp));
   }
 
   if (verbosity > 1) {

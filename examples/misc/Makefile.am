@@ -33,7 +33,7 @@ TESTS=aaa-adp.edp aadaptation.edp \
 	demo1.edp FE-medit.edp \
 	funct.edp include.edp \
 	lap_mat.edp lapacienprecon.edp \
-	NSP1P1.edp NSP1P1b.edp \
+	NSP1P1.edp NSP1P1b.edp NSP1P1bl.edp \
 	NSP1P2.edp parareal.edp \
 	renumbering.edp Richard.edp \
 	Stokes-P1nc-P0+P1.edp testadp.edp \

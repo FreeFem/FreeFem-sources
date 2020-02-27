@@ -24,6 +24,14 @@
 //ff-c++-LIBRARY-dep:
 //ff-c++-cpp-dep:
 //  the 3D quadratrure comme from MoFEM (Mesh Oriented Finite Element Method)
+// come from
+/*
+ Journal of Computational Mathematics, Vol.27, No.1, 2009, 89–96.
+ A SET OF SYMMETRIC QUADRATURE RULES ON TRIANGLES AND TETRAHEDRA*
+ Linbo Zhang, Tao Cui and Hui Liu
+ LSEC, ICMSEC, Academy of Mathematics and Systems Science, Chinese Academy of Sciences, Beijing 100190, China Email: zlb@lsec.cc.ac.cn, tcui@lsec.cc.ac.cn, liuhui@lsec.cc.ac.cn
+ */
+// https://www.researchgate.net/publication/228667586_A_set_of_symmetric_quadrature_rules_on_triangles_and_tetrahedra
 // see https://likask.bitbucket.io/index.html
 // or https://likask.bitbucket.io/quad_8c.html
 /* clang-format on */

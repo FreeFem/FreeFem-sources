@@ -87,6 +87,7 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	Stokes-surface-tension-axi.edp \
 	test-ElementMixte.edp \
 	testdist.edp \
+	testFE-P1bl.edp \
 	testFE_P2BR.edp \
 	testFE-P2Bulle3.edp \
 	testFE-P2pnc.edp \

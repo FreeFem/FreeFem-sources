@@ -7492,7 +7492,7 @@ struct MovePoint {
 Mesh3 *BuildCube(long nx, long ny, long nz, long region, long *label, long kind,
                  MovePoint *tf = 0) {
   const int(*const nvface)[3] = Tet::nvface;
-  int debug = verbosity != 0 + verbosity / 10;
+  int debug =  verbosity / 10;
   int codesb[64], kcode[20];
   int kstable = 0;
   if (debug) {
@@ -7619,8 +7619,8 @@ Mesh3 *BuildCube(long nx, long ny, long nz, long region, long *label, long kind,
     code6 = kcode[abs(kind) % kstable];
   }
 
-  if (verbosity) {
-    cout << "    kind = " << kind << " n tet Cube = " << ntetcube << " / n slip 6 " << code6
+  if (verbosity>1) {
+      cout << "   Cube:  kind = " << kind << " n tet Cube = " << ntetcube << " / n slip 6 " << code6
          << endl;
   }
 
@@ -7723,7 +7723,7 @@ Mesh3 *BuildCube(long nx, long ny, long nz, long region, long *label, long kind,
   }
 
   if (verbosity) {
-    cout << "  Cube  nv=" << nv << " nt=" << nt << " nbe=" << nbe << endl;
+    cout << "  -- Cube  nv=" << nv << " nt=" << nt << " nbe=" << nbe << " kind= " << kind << endl;
   }
 
   assert(nbe == kf);
