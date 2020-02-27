@@ -31,7 +31,9 @@ TESTS_OTHER = buildMeshSfromMesh3.edp \
 	LaplacianSurf.edp \
 	operatorsOnMeshS.edp \
 	extractSurfFromMesh3.edp \
-	testvtk.edp
+	testvtk.edp \
+	LapP1withflux.edp \
+	Pinocchio.edp
 
 
 TESTS_TETGEN = HeatTorus.edp
