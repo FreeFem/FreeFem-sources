@@ -15,7 +15,7 @@ sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuit
 # Ubuntu 16.04 - VM2-2
 ```
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
-local Petsc 3.11.2 installed on /builds/Shared
+local Petsc 3.12.4 installed on /Users/Shared (mpich and openmpi version)
 ```
 
 # Ubuntu 18.04 - VM0
@@ -35,7 +35,7 @@ sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuit
 # Ubuntu 18.04 - VM2-2
 ```
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
-local Petsc 3.11.2 installed on /builds/Shared
+local Petsc 3.12.4 installed on /Users/Shared (mpich and openmpi version)
 ```
 # MacOS 10.10.5 - VM0 (Xcode 7.2.1, gcc g++ gfortran 5.1)
 ```
@@ -56,7 +56,7 @@ brew install gcc@4.9 m4 git flex bison suitesparse-4.5.4 hdf5 cmake wget autocon
 # MacOS 10.10.5 - VM2-2 (Xcode 7.2.1, gcc g++ gfortran 5.1)
 ```
 brew install gcc@4.9 m4 git flex bison suitesparse-4.5.4 hdf5 cmake wget autoconf automake
-local Petsc 3.11.2 installed on /Users/Shared
+local Petsc 3.12.4 installed on /Users/Shared (mpich and openmpi version)
 ```
 
 [OpenMPI compilation](#openmpi) 2.1.6
@@ -80,7 +80,7 @@ brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake
 # MacOS 10.13 - VM2-2
 ```
 brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake
-local Petsc 3.11.2 installed on /Users/Shared
+local Petsc 3.12.4 installed on /Users/Shared (mpich and openmpi version)
 ```
 
 [OpenMPI compilation](#openmpi)
@@ -96,8 +96,24 @@ pacman -S autoconf automake-wrapper bash bash-completion \
     mingw-w64-x86_64-arpack mingw-w64-x86_64-openblas mintty msys2-keyring msys2-launcher-git \
     msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
     perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
-    mingw-w64-x86_64-libmicroutils  
+    mingw-w64-x86_64-libmicroutils  --ignore mingw-w64-x86_64-gcc-ada --ignore mingw-w64-x86_64-gcc-objc \
+     --ignore mingw-w64-x86_64-gdb  --ignore mingw-w64-x86_64-python --noconfirm 
 ```
+
+
+# Windows 7 - VM2-2
+```
+pacman -S autoconf automake-wrapper bash bash-completion \
+    bison bsdcpio bsdtar bzip2 coreutils curl dash file filesystem \
+    findutils flex gawk gcc gcc-fortran gcc-libs grep gzip inetutils info less lndir \
+    make man-db git mingw-w64-x86_64-freeglut mingw-w64-x86_64-toolchain mingw-w64-x86_64-gsl mingw-w64-x86_64-hdf5 \
+    mingw-w64-x86_64-openblas mintty msys2-keyring msys2-launcher-git \
+    msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
+    perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
+    mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-arpack  --ignore mingw-w64-x86_64-gcc-ada --ignore mingw-w64-x86_64-gcc-objc \
+     --ignore mingw-w64-x86_64-gdb --ignore mingw-w64-x86_64-python --noconfirm
+```
+[MSMPI 10.1.2](https://www.microsoft.com/en-us/download/details.aspx?id=100593)
 
 
 # Windows 7 - VM3
@@ -105,14 +121,16 @@ pacman -S autoconf automake-wrapper bash bash-completion \
 pacman -S autoconf automake-wrapper bash bash-completion \
     bison bsdcpio bsdtar bzip2 coreutils curl dash file filesystem \
     findutils flex gawk gcc gcc-fortran gcc-libs grep gzip inetutils info less lndir \
-    make man-db git mingw-w64-x86_64-freeglut mingw-w64-x86_64-tool-chain mingw-w64-x86_64-gsl mingw-w64-x86_64-hdf5 \
+    make man-db git mingw-w64-x86_64-freeglut mingw-w64-x86_64-toolchain mingw-w64-x86_64-gsl mingw-w64-x86_64-hdf5 \
     mingw-w64-x86_64-openblas mintty msys2-keyring msys2-launcher-git \
     msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
     perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
-    mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-arpack 
+    mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-arpack  --ignore mingw-w64-x86_64-gcc-ada --ignore mingw-w64-x86_64-gcc-objc \
+     --ignore mingw-w64-x86_64-gdb --ignore mingw-w64-x86_64-python --noconfirm
 ```
+[MSMPI 10.1.2](https://www.microsoft.com/en-us/download/details.aspx?id=100593)
 
-[MSMPI 7](https://www.microsoft.com/en-us/download/details.aspx?id=49926)
+
 
 # OpenMPI
 
@@ -133,12 +151,12 @@ make -j4 all
 make check
 sudo make install
 #Ubuntu 16.04 - Ubuntu 18.04
-openmpi 2.1.1, installed whith apt installer on vm1
-openmpi 4.0.2 compiled on vm2 and vm2-2
+openmpi 4.0.2 installed
 
 --disable-mpi-threads
 --disable-progress-threads
 
+```
 # MPICH
 
 ```
@@ -163,12 +181,10 @@ cd mpich-3.3.1/
 make -j4
 make -j4 install
 
-
-
-
-
-
 ```
+
+Jenkins projet is [here](https://ci.inria.fr/freefem-dev/) 
+
 
 # Job 1
 without mpi  (for macOS, compiled with gcc)
@@ -180,18 +196,17 @@ runs on VM1
 with 3dparty, without-mpi  (for macOS, compiled with clang)
 runs on VM2
 # Job 4_openmpi Full version of FreeFEM compiled in release mode
-with 3dparty, compilation in release mode (for macOS, compiled with gcc), PETSc installed (curent version 3.11.2) 
+with 3dparty, compilation in release mode (for macOS, compiled with gcc), uses a PETSc installed (curent version 3.12.4) 
 runs on VM2-2
 # Job 4_mpich Full version of FreeFEM compiled in release mode
-with 3dparty, compilation in release mode (for macOS, compiled with gcc), PETSc installed (curent version 3.11.2) 
+with 3dparty, compilation in release mode (for macOS, compiled with gcc), uses a PETSc installed (curent version 3.12.42) 
 runs on VM2-2
 # Job 5_openmpi Full version of FreeFEM compiled in debug mode
 with mpi with 3dparty,, compilation in debug mode (for macOS, compiled with clang) download and install PETSc at each build
-runs on VM2 every night
+runs on VM2
 # Job 5_mpich Full version of FreeFEM compiled in debug mode
 with mpi with 3dparty,, compilation in debug mode (for macOS, compiled with clang) download and install PETSc at each build
-runs on VM2 every night
-
+runs on VM2
 
 
 
