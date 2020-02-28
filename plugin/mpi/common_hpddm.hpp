@@ -6,6 +6,7 @@
 #include <ff++.hpp>
 #include <AFunction_ext.hpp>
 #include <array_tlp.hpp>
+#include <unordered_map>
 
 #ifdef WITH_mkl
 #define HPDDM_MKL 1
@@ -462,6 +463,38 @@ void parallelIO(string*& name, MPI_Comm* const& comm, bool const& append) {
     }
 }
 
+long periodicity(Matrice_Creuse<double>* const& R, KN< KN< long > >* const& interaction, KN< double >* const& D) {
+    if(R->A) {
+        MatriceMorse< double >* mR = static_cast< MatriceMorse< double >* >(&*(R->A));
+        mR->COO();
+        KN< double > restriction(mR->n);
+        std::unordered_map<int, int> map;
+        map.reserve(mR->nnz);
+        for(int k = 0; k < mR->nnz; ++k) {
+            if(std::abs(mR->aij[k]) > 1e-12) {
+                restriction[mR->i[k]] = D->operator[](mR->j[k]);
+                map[mR->j[k]] = mR->i[k];
+            }
+        }
+        D->resize(mR->n);
+        *D = restriction;
+        if(interaction->N() > 0) {
+            for(int i = 0; i < interaction->operator[](0).N(); ++i) {
+                int nnz = 0;
+                for(int j = 0; j < interaction->operator[](1 + i).N(); ++j) {
+                    std::unordered_map<int, int>::iterator it = map.find(interaction->operator[](1 + i)[j]);
+                    if(it != map.end()) {
+                        interaction->operator[](1 + i)[nnz] = it->second;
+                        ++nnz;
+                    }
+                }
+                interaction->operator[](1 + i).resize(nnz);
+            }
+        }
+    }
+    return 0L;
+}
+
 #define COMMON_HPDDM_PARALLEL_IO
 #include "../seq/iovtk.cpp"
 
@@ -480,6 +513,9 @@ static void Init_Common() {
     if(!Global.Find("savevtk").NotNull()) {
         Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMesh_Op> );
         Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMesh3_Op> );
+    }
+    if(!Global.Find("periodicity").NotNull()) {
+        Global.Add("periodicity", "(", new OneOperator3_<long, Matrice_Creuse<double>*, KN< KN< long > >*, KN< double >*>(periodicity));
     }
 #if HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD
     aType t;
