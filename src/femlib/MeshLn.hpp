@@ -168,7 +168,8 @@ namespace Fem2D {
     //int Save(const string & filename) const;
     //Serialize serialize_withBorderMesh() const;
     void BuildBdElem(const double angle=8.*atan(1.)/9.);
-
+    void buildCovBasis();
+      
     ~MeshL() {
       delete [] mapSurf2Curv ;
       delete [] mapCurv2Surf ;

@@ -640,6 +640,7 @@ namespace Fem2D
         if(verbosity>3)
             cout << "after clean meshL, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
     }
+      buildCovBasis();
     BuildBound();
     BuildAdj();
     Buildbnormalv();
@@ -795,6 +796,34 @@ namespace Fem2D
    ffassert(mes>=0);
   }
 
+ 
+void MeshL::buildCovBasis(){
+    KN<R3> gx(nv), gy(nv), gz(nv);
+    for (int i=0 ; i<nv; i++) {
+        gx[i]=R3(0.,0.,0.);
+        gy[i]=R3(0.,0.,0.);
+        gz[i]=R3(0.,0.,0.);
+    }
+    
+    for (int it=0 ; it<nt; it++) {
+        const EdgeL &K = elements[it];
+        R3 ie1, ie2;
+        ie1 = vertices[this->operator()(K[0])];
+        ie2 = vertices[this->operator()(K[1])];
+        for (int i = 0; i < EdgeL::nv; i++) {
+            int iiv = this->operator()(K[i]);
+            gx[iiv]+= K.mesure()*K.Edge(0);
+            gz[iiv]+=K.mesure()*K.NFrenet();
+            gy[iiv]+=K.mesure()*( K.NFrenet()^K.Edge(0) );  // sens ???
+       }
+    }
+    for (int i=0 ; i<nv; i++) {
+        gx[i]/=gx[i].norme();
+        gy[i]/=gy[i].norme();
+        gz[i]/=gz[i].norme();
+   if (verbosity>5)
+       cout << "NORMALIZE test covariant basis i: "<<i << " gx= " << gx[i] << " gy= " << gy[i] << " gz= " << gz[i] << endl;}
+}
     
     
 }
