@@ -5,7 +5,7 @@ macro dimension()3S//
 include "macro_ddm.idp"
 
 real R  = 3.0, r = 1.0;
-real h  = 0.1;
+real h  = 0.2;
 int nx  = R*2*pi/h;
 int ny  = r*2*pi/h;
 func tx = (R+r*cos(y*pi*2))*cos(x*pi*2);

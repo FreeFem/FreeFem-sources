@@ -3828,15 +3828,15 @@ static void Init_PETSc( ) {
   delete[] argv;
   ff_atend(PETSc::finalizePETSc);
   if (!exist_type< DmatR* >( )) {
-    Dcl_Type< DmatR* >(Initialize< DmatR >, Delete< DmatR >);
+    Dcl_Type< DmatR* >(Initialize< DmatR >, DeleteDTOR< DmatR >);
     zzzfff->Add("Mat", atype< DmatR* >( ));
   }
-  if (!exist_type< DmatC* >( )) Dcl_Type< DmatC* >(Initialize< DmatC >, Delete< DmatC >);
+  if (!exist_type< DmatC* >( )) Dcl_Type< DmatC* >(Initialize< DmatC >, DeleteDTOR< DmatC >);
   if (!exist_type< DbddcR* >( )) {
-    Dcl_Type< DbddcR* >(Initialize< DbddcR >, Delete< DbddcR >);
+    Dcl_Type< DbddcR* >(Initialize< DbddcR >, DeleteDTOR< DbddcR >);
     zzzfff->Add("MatIS", atype< DbddcR* >( ));
   }
-  if (!exist_type< DbddcC* >( )) Dcl_Type< DbddcC* >(Initialize< DbddcC >, Delete< DbddcC >);
+  if (!exist_type< DbddcC* >( )) Dcl_Type< DbddcC* >(Initialize< DbddcC >, DeleteDTOR< DbddcC >);
   map_type_of_map[make_pair(atype< DmatR* >( ), atype< Complex* >( ))] = atype< DmatC* >( );
   map_type_of_map[make_pair(atype< DmatR* >( ), atype< double* >( ))] = atype< DmatR* >( );
   map_type_of_map[make_pair(atype< DbddcR* >( ), atype< Complex* >( ))] = atype< DbddcC* >( );
