@@ -469,6 +469,7 @@ private:
 	assert(I[2]==J[3-S[0]-S[1]]);
     }
 
+    
 template<typename T,typename B,typename V>
 class GenericMesh : public RefCounter
 {

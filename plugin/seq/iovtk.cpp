@@ -3145,7 +3145,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
         ExecError("error in reading vtk file");
       }
 
-      cout << "numVerts" << numVerts << endl;
+     // cout << "numVerts" << numVerts << endl;
 
       for (int j = 0; j < numVerts; j++) {
         if (fscanf(fp, "%d", &n[j]) != 1) {
@@ -4518,7 +4518,7 @@ AnyType VTK_WriteMesh3_Op::operator( )(Stack stack) const {
               nsol = Th.nt;
             }
 
-            fprintf(fp, "%s %ld %d float\n", nameofuser[ii], l[ii].nbfloat, nsol);
+            fprintf(fp, "%s %ld %d double\n", nameofuser[ii], l[ii].nbfloat, nsol);
             if (verbosity > 5) {
               cout << "   iovtk writeMesh3:name of data(" << ii << ")=" << nameofuser[ii] << endl;
             }
@@ -4535,7 +4535,7 @@ AnyType VTK_WriteMesh3_Op::operator( )(Stack stack) const {
 
         for (int ii = 0; ii < nbofsol; ii++) {
           if (order[ii] == 1) {
-            fprintf(fp, "%s %ld %d float\n", nameofuser[ii], l[ii].nbfloat, Th.nv);
+            fprintf(fp, "%s %ld %d double\n", nameofuser[ii], l[ii].nbfloat, Th.nv);
             if (verbosity > 5) {
               cout << "   iovtk writeMesh3:name of data(" << ii << ")=" << nameofuser[ii] << endl;
             }
@@ -6030,7 +6030,7 @@ MMesh *VTK_LoadT(const string &filename, bool bigEndian, bool cleanmesh, bool re
         cout << "error in reading VTK files " << endl;
         ExecError("error in reading vtk file");
       }
-      if (verbosity > 9) cout << "numVerts" << numVerts << endl;
+      if (verbosity > 9) cout << "numVerts " << numVerts << endl;
 
       for (int j = 0; j < numVerts; j++) {
         if (fscanf(fp, "%d", &n[j]) != 1) {

@@ -1412,6 +1412,9 @@ long get_mat_m(Matrice_Creuse<R> * p)
 template<class R>
 long get_mat_nbcoef(Matrice_Creuse<R> * p)
  { ffassert(p ) ;  return p->A ?p->A->NbCoef(): 0  ;}
+template<class R>
+long get_mat_half(Matrice_Creuse<R> * p)
+{   return  p && p->pHM() ? p->pHM()->half: -1  ;}
 
 template<class R>
 pair<long,long> get_NM(const list<tuple<R,MatriceCreuse<R> *,bool> > & lM)
@@ -2770,6 +2773,7 @@ TheOperators->Add("+",
  Add<Matrice_Creuse<R> *>("m",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_m<R>) );
  Add<Matrice_Creuse<R> *>("nbcoef",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_nbcoef<R>) );
  Add<Matrice_Creuse<R> *>("nnz",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_nbcoef<R>) );
+ Add<Matrice_Creuse<R> *>("half",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_half<R>) );
  Add<Matrice_Creuse<R> *>("size",".",new OneOperator1<long,Matrice_Creuse<R> *>(get_mat_nbcoef<R>) );
  Add<Matrice_Creuse<R> *>("trace",".",new OneOperator1<R,Matrice_Creuse<R>* >(get_trace_mat<R>) );
  Add<Matrice_Creuse<R> *>("clear",".",new OneOperator1<bool,Matrice_Creuse<R>* >(clear_mat<R>) );

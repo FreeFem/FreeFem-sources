@@ -351,8 +351,12 @@ inline    R   *HashMatrix<I,R>::npij(I ii,I jj)   // with add if no term ii,jj
 template<class I,class RA,class RB=RA,class RAB=RA>
 void AddMul(HashMatrix<I,RAB> &AB,HashMatrix<I,RA> &A, HashMatrix<I,RB> &B,bool ta=false,bool tb=false,R c=R(1))
 {
+    AB.half=false;
     int An= A.n, Am =A.m;
      int Bn= B.n, Bm =B.m;
+    bool halfA = A.half;
+    bool halfB = B.half;
+    
     if(ta) swap(An,Am);
     if(tb) swap(Bn,Bm);
     bool tcb = (std::is_same<RB,complex<double> >::value|| std::is_same<RB,complex<float> >::value ) && tb;
@@ -366,6 +370,7 @@ void AddMul(HashMatrix<I,RAB> &AB,HashMatrix<I,RA> &A, HashMatrix<I,RB> &B,bool 
       B.CSR(); // sort by row... and build p.
     int * Bj = tb ? B.i : B.j;
     int * Bi = tb ? B.j : B.i;
+    //  first Half
     for(size_t l=0; l< A.nnz;++l)
     {
         I i=A.i[l],j=A.j[l];
@@ -384,6 +389,81 @@ void AddMul(HashMatrix<I,RAB> &AB,HashMatrix<I,RA> &A, HashMatrix<I,RB> &B,bool 
             AB(i,k) += c* aij*bjk;
         }
     }
+    // second Half of A
+    if( halfA )
+    {
+        if(verbosity>10) cout<< " ** halfA "<< endl;
+    for(size_t l=0; l< A.nnz;++l)
+    {
+        I i=A.i[l],j=A.j[l];
+        if( i==j) continue;
+        RA aij=A.aij[l];
+        if(!ta)  swap(i,j);
+        //if(!tca) aij=HashMatrix<I,RA>::conj(aij);
+        
+        for(size_t ll=B.p[j]; ll<  B.p[j+1] ;++ll)
+        {
+            I k = Bj[ll];
+            if(verbosity>1000000000) cout << " *** " << i<< " " << " " << k << " : " << j << " : "
+                << ll << " " << B.i[ll] <<" " << B.j[ll]<< " ::  " << A.aij[l]*B.aij[ll] <<endl;
+            assert(j == Bi[ll]);
+            RB bjk = tcb ? HashMatrix<I,RB>::conj(B.aij[ll]) : B.aij[ll];
+            
+            AB(i,k) += c* aij*bjk;
+        }
+    }
+    }
+  if( halfB)
+  {
+      if( !tb)
+          B.CSC(); // sort by COL nd build p.
+      else
+          B.CSR(); // sort by row... and build p.
+      //  first Half miss ..
+      for(size_t l=0; l< A.nnz;++l)
+      {
+          I i=A.i[l],j=A.j[l];
+          RA aij=A.aij[l];
+          if(ta)  swap(i,j);
+          if(tca) aij=HashMatrix<I,RA>::conj(aij);
+          
+          for(size_t ll=B.p[j]; ll<  B.p[j+1] ;++ll)
+          {
+              if( Bi[ll]== Bj[ll]) continue;
+              I k = Bi[ll];
+
+              assert(j == Bj[ll]);
+              RB bjk = B.aij[ll];
+              if(tb)  bjk = HashMatrix<I,RB>::conj(bjk);
+              AB(i,k) += c* aij*bjk;
+          }
+      }
+      // second Half of A
+      if( halfA )
+          for(size_t l=0; l< A.nnz;++l)
+          {
+              I i=A.i[l],j=A.j[l];
+              if( i==j) continue;
+              RA aij=A.aij[l];
+              if(!ta)  swap(i,j);
+              //if(!tca) aij=HashMatrix<I,RA>::conj(aij);
+              
+              for(size_t ll=B.p[j]; ll<  B.p[j+1] ;++ll)
+              {
+                  if( Bi[ll]== Bj[ll]) continue;
+                  I k = Bi[ll];
+                  if(verbosity>1000000000) cout << " *** " << i<< " " << " " << k << " : " << j << " : "
+                      << ll << " " << B.i[ll] <<" " << B.j[ll]<< " ::  " << A.aij[l]*B.aij[ll] <<endl;
+                  assert(j == Bj[ll]);
+                  RB bjk = tcb ? HashMatrix<I,RB>::conj(B.aij[ll]) : B.aij[ll];
+                  
+                  AB(i,k) += c* aij*bjk;
+              }
+          }
+
+
+  }
+    
 }
 
 template<class I,class R>
