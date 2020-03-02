@@ -50,6 +50,7 @@ namespace Fem2D {
 using namespace ::std;
 #include "GenericMesh.hpp"
 //#include "MeshSn.hpp"
+#include "AFunction.hpp"
 
 namespace Fem2D {
     
@@ -127,14 +128,16 @@ namespace Fem2D {
     }
     R3 NFrenet() const {
         R3 V(at(0),at(1));
-        R3 N = (V.x!=0. && V.y!=0. && V.z!=1.) ? V^R3(0.,0.,1.) : V^R3(0.,1.,0.) ;
-        return N;
+	if (V.x == 0 && V.y == 0) ExecError("Normal vector for meshL is defined only in 2d (x,y plane)");
+        R3 N = V^R3(0,0,1);
+	return N;
     }
 
     R3 NFrenetUnitaire() const {
         R3 V(at(0),at(1));
-        R3 N = (V.x!=0. && V.y!=0. && V.z!=1.) ? V^R3(0.,0.,1.) : V^R3(0.,1.,0.) ;
-        return N/N.norme();
+	if (V.x == 0 && V.y == 0) ExecError("Normal vector for meshL is defined only in 2d (x,y plane)");
+	R3 N = V^R3(0,0,1);
+	return N/N.norme();
     }
 
   };
