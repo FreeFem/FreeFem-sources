@@ -2827,9 +2827,9 @@ void init_lgmesh3() {
  Add<GlgElement<MeshL> >("[","",new OneOperator2_<GlgVertex<MeshL> ,GlgElement<MeshL> ,long>(get_element));
  Add<GlgBoundaryElement<MeshL> >("[","",new OneOperator2_<GlgVertex<MeshL>,GlgBoundaryElement<MeshL>,long>(get_element));
  
- Add<GlgVertex<MeshL> >("x",".",new OneOperator1_<R,GlgVertex<MeshS> >(getx));
- Add<GlgVertex<MeshL> >("y",".",new OneOperator1_<R,GlgVertex<MeshS> >(gety));
- Add<GlgVertex<MeshL> >("z",".",new OneOperator1_<R,GlgVertex<MeshS> >(getz));
+ Add<GlgVertex<MeshL> >("x",".",new OneOperator1_<R,GlgVertex<MeshL> >(getx));
+ Add<GlgVertex<MeshL> >("y",".",new OneOperator1_<R,GlgVertex<MeshL> >(gety));
+ Add<GlgVertex<MeshL> >("z",".",new OneOperator1_<R,GlgVertex<MeshL> >(getz));
  Add<GlgVertex<MeshL> >("label",".",new OneOperator1_<long,GlgVertex<MeshL> >(getlab));
  Add<GlgElement<MeshL> >("label",".",new OneOperator1_<long,GlgElement<MeshL> >(getlab));
  Add<GlgElement<MeshL> >("region",".",new OneOperator1_<long,GlgElement<MeshL> >(getlab));
