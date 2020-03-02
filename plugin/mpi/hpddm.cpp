@@ -239,7 +239,8 @@ AnyType attachCoarseOperator<Type, K>::E_attachCoarseOperator::operator()(Stack 
                 }
                 else
                     ptA->template solveGEVP<EIGENSOLVER>(&dA, nullptr, dP);
-                set_ff_matrix(mA,dA);
+                if(mP)
+                    set_ff_matrix(mA, dA);
                 delete dP;
                 if(timing) { // toc
                     (*timing)[timing->n - 1] = MPI_Wtime() - (*timing)[timing->n - 1];
@@ -835,7 +836,7 @@ Type* changeOperatorSimple(Type* const& A, Type* const& B) {
 
 template<template<class, char> class Type, class K, char S, char U = S>
 void add() {
-    Dcl_Type<Type<K, S>*>(Initialize<Type<K, S>>, Delete<Type<K, S>>);
+    Dcl_Type<Type<K, S>*>(Initialize<Type<K, S>>, DeleteDTOR<Type<K, S>>);
 #ifndef PETSCSUB
     if(std::is_same<K, HPDDM::underlying_type<K>>::value)
 #endif

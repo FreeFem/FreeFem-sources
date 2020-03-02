@@ -140,6 +140,13 @@ class Pair {
         }
 };
 
+template<class A> inline AnyType DeleteDTOR(Stack, const AnyType& x) {
+    A* a = PGetAny<A>(x);
+    a->dtor();
+    a = NULL;
+    return Nothing;
+};
+
 extern KN<String>* pkarg;
 
 template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value == 1>::type* = nullptr>

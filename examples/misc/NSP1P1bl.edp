@@ -61,7 +61,7 @@ for (iter=1;iter<=nbiter;iter++)
 {
   cout << " dt = " << dt << " ------------------------ " << endl;
   alpha=1/dt;
-  for (i=0;i<=50;i++)
+  for (i=0;i<=20;i++)
    {
      up1=u1;
      up2=u2;
