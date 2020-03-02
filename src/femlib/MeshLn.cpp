@@ -640,7 +640,7 @@ namespace Fem2D
         if(verbosity>3)
             cout << "after clean meshL, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
     }
-      buildCovBasis();
+    // BuildCurvBasis();
     BuildBound();
     BuildAdj();
     Buildbnormalv();
@@ -797,7 +797,7 @@ namespace Fem2D
   }
 
  
-void MeshL::buildCovBasis(){
+void MeshL::BuildCurvBasis(){
     KN<R3> gx(nv), gy(nv), gz(nv);
     for (int i=0 ; i<nv; i++) {
         gx[i]=R3(0.,0.,0.);
