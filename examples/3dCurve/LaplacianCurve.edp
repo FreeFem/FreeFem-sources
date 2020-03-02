@@ -20,6 +20,10 @@ cout << " len ThL3 = "<< int1d(ThL3)(1.) << endl;
 // P=[0.5,1,0.05]; to do
 
 real uP=uLPb(0.5,1,0.05);
+
+Vh uex = cos(x) * cosh(y) + sin(x) * sinh(y);
+Vh vn = (1 - x) * uex(0,1,0) + x * uex(1,1,0);
+
 cout << nuTriangle<< endl; 
 cout << uP << " " << " ~ " << uLPb[][40]<< endl;
 // cout << uLPb(0.5,1,0.05) << endl; // to do also ..

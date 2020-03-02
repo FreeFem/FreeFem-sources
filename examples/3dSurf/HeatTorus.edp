@@ -23,3 +23,8 @@ macro grad3(u) [dx(u),dy(u),dz(u)]  // EOM
 solve Lap(u,v) = int2d(ThS)( u*v+grad3(u)'*grad3(v)) -int2d(ThS)((x+y)*v);
 
 plot(u,wait=1,nbiso=20,fill=1);
+
+real uP=u(0.5,1,0.05);
+
+//Vh uex = cos(x) * cosh(y) + sin(x) * sinh(y);
+//Vh vn = (1 - x) * uex(0,1,0) + x * uex(1,1,0);
