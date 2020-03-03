@@ -257,6 +257,8 @@ public:
                 theplot <= wait;
                 theplot << 17L;
                 theplot <= dim;
+                theplot << 4L;
+                theplot <= true;
                 theplot.SendEndArgPlot();
                 theplot.SendMeshes();
                 theplot << 0L;
