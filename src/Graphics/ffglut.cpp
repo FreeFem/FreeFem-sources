@@ -1771,7 +1771,12 @@ void OnePlotHMatrix::Draw(OneWindow *win)
     z1 = scalez*(1-compression[i]);
     if (size.first > 1 || size.second > 1) {
       glColor3f((20+compression[i]*80)/255,(80+compression[i]*170)/255,(20+compression[i]*80)/255);
-      plotquadz((float)offset.second/sj, (float)size.second/sj, 1.-(float)offset.first/si, -(float)size.first/si, z1);
+      if (win->theplot->fill || win->plotdim==3)
+        plotquadz((float)offset.second/sj, (float)size.second/sj, 1.-(float)offset.first/si, -(float)size.first/si, z1);
+      else {
+        plotquadz((float)offset.second/sj, (float)rankslr[i]/sj, 1.-(float)offset.first/si, -(float)size.first/si, z1);
+        plotquadz((float)offset.second/sj, (float)size.second/sj, 1.-(float)offset.first/si, -(float)rankslr[i]/si, z1);
+      }
 
       if (win->plotdim==3) {
         plotquadx(1.-(float)offset.first/si, -(float)size.first/si, 0, z1, (float)offset.second/sj);
@@ -1785,18 +1790,38 @@ void OnePlotHMatrix::Draw(OneWindow *win)
   glEnd();
 
   // For sparse matrices
-  glPointSize(1);
+  double vmax = -1e+30;
+  for (int i=0;i<nblr;i++)
+  if (abs(compression[i]) > vmax && abs(compression[i]) < 1e10)
+    vmax = abs(compression[i]);
+  glPointSize(2);
   glBegin(GL_POINTS);
-  for (int i=0;i < nbdense; i++) {
-    std::pair<int,int>& offset = offsetsdense[i];
-    std::pair<int,int>& size = sizesdense[i];
+  for (int i=0;i < nblr; i++) {
+    std::pair<int,int>& offset = offsetslr[i];
+    std::pair<int,int>& size = sizeslr[i];
     z1 = 0;
     if (size.first == 1 && size.second == 1) {
-      glColor3f(1,0,0);
+      float val = compression[i]/vmax;
+      glColor3f((20+val*80)/255,(80+val*170)/255,(20+val*80)/255);
       glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
     }
   }
   glEnd();
+  if (win->plotdim==3) {
+    glBegin(GL_LINES);
+    for (int i=0;i < nblr; i++) {
+      std::pair<int,int>& offset = offsetslr[i];
+      std::pair<int,int>& size = sizeslr[i];
+      z1 = 0;
+      if (size.first == 1 && size.second == 1) {
+        float val = compression[i]/vmax;
+        glColor3f((20+val*80)/255,(80+val*170)/255,(20+val*80)/255);
+        glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1);
+        glVertex3d((float)offset.second/sj, 1.-(float)offset.first/si ,z1+(float)val);
+      }
+    }
+    glEnd();
+  }
 
   glLineWidth(1);
   glColor3f(0,0,0);
@@ -1823,6 +1848,8 @@ void OnePlotHMatrix::Draw(OneWindow *win)
     z1 = scalez*(1-compression[i]);
     if (size.first > 1 || size.second > 1) {
       plotquadz((float)offset.second/sj+dx, (float)size.second/sj, 1.-(float)offset.first/si+dy, -(float)size.first/si, dz,1);
+      if (!win->theplot->fill && win->plotdim==2)
+        plotquadz((float)(offset.second+rankslr[i])/sj+dx, (float)(size.second-rankslr[i])/sj, 1.-(float)(offset.first+rankslr[i])/si+dy, -(float)(size.first-rankslr[i])/si, dz,1);
 
       if (win->plotdim==3) {
         plotquadx(1.-(float)offset.first/si+dy, -(float)size.first/si, dz, z1+dz, (float)offset.second/sj+dx,1);
@@ -1838,35 +1865,37 @@ void OnePlotHMatrix::Draw(OneWindow *win)
     std::pair<int,int>& offset = offsetslr[i];
     std::pair<int,int>& size = sizeslr[i];
     z1 = scalez*(1-compression[i]);
-    string s = win->theplot->value ? std::to_string(int(100*compression[i])) : std::to_string(rankslr[i]);
-    float scale = 0.005*std::min((float)size.first/si,(float)size.second/sj)/**std::min(mSize.x(),mSize.y())*/;
-    if (win->theplot->value)
-      scale *= 0.9;
+    if (size.first > 1 || size.second > 1) {
+      string s = win->theplot->value ? std::to_string(int(100*compression[i])) : std::to_string(rankslr[i]);
+      float scale = 0.005*std::min((float)size.first/si,(float)size.second/sj)/**std::min(mSize.x(),mSize.y())*/;
+      if (win->theplot->value)
+        scale *= 0.9;
 
-    R textx = -36*scale*s.length()+(float)(offset.second+size.second*0.5)/sj;
-    R texty = -48*scale+1.-float(offset.first+size.first*0.5)/si;
-    R textz = z1+zeps;
+      R textx = -36*scale*s.length()+(float)(offset.second+size.second*0.5)/sj;
+      R texty = -48*scale+1.-float(offset.first+size.first*0.5)/si;
+      R textz = z1+zeps;
 
-    if (win->theplot->value)
-      textx -= 10*scale*s.length();
+      if (win->theplot->value)
+        textx -= 10*scale*s.length();
 
-    bool ptext = 0;
-    if (win->plotdim==2 && scale > 0.028/std::min(win->height,win->width)*win->hpixel*win->width)
-      ptext = 1;
-    if (win->plotdim==3)// && sqrt((win->Pvue3.x-textx)*(win->Pvue3.x-textx)+(win->Pvue3.y-texty)*(win->Pvue3.y-texty)+(win->Pvue3.z-textz)*(win->Pvue3.z-textz)) < 0.1)
-      ptext = 1;
+      bool ptext = 0;
+      if (win->plotdim==2 && scale > 0.028/std::min(win->height,win->width)*win->hpixel*win->width)
+        ptext = 1;
+      if (win->plotdim==3)// && sqrt((win->Pvue3.x-textx)*(win->Pvue3.x-textx)+(win->Pvue3.y-texty)*(win->Pvue3.y-texty)+(win->Pvue3.z-textz)*(win->Pvue3.z-textz)) < 0.1)
+        ptext = 1;
 
-    if (ptext) {
-      glPushMatrix();
-      glTranslatef(textx, texty, textz);
-      glScalef(scale,scale,scale);
-      for(char& c : s)
-        glutStrokeCharacter(GLUT_STROKE_ROMAN,c);
-      if (win->theplot->value) {
-        glScalef(0.3,0.3,0.3);
-        glutStrokeCharacter(GLUT_STROKE_ROMAN,'%');
+      if (ptext) {
+        glPushMatrix();
+        glTranslatef(textx, texty, textz);
+        glScalef(scale,scale,scale);
+        for(char& c : s)
+          glutStrokeCharacter(GLUT_STROKE_ROMAN,c);
+        if (win->theplot->value) {
+          glScalef(0.3,0.3,0.3);
+          glutStrokeCharacter(GLUT_STROKE_ROMAN,'%');
+        }
+        glPopMatrix();
       }
-      glPopMatrix();
     }
   }
 

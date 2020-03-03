@@ -3233,14 +3233,16 @@ public:
                     else {
                         theplot << (int)ph->n;
                         theplot << (int)ph->m;
-                        theplot << (long)ph->nnz;
                         theplot << 0L;
+                        theplot << (long)ph->nnz;
 
                         for (int i=0;i<ph->nnz;i++) {
                             theplot << ph->i[i];
                             theplot << ph->j[i];
                             theplot << 1;
                             theplot << 1;
+                            theplot << 1;
+                            theplot << abs(ph->aij[i]);
                         }
                     }
 
