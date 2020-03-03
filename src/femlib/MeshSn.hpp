@@ -94,7 +94,7 @@ typedef GenericVertex<R3> Vertex3;
             R3 Normal = Edge(2)^Edge(1);
             R N = Normal.norme2();
             for(int i=0 ; i<3 ; i++)
-                GradL[i]= (Normal^Edge(i)) / N;
+                GradL[i]= (Edge(i)^Normal) / N;
         }
         
         R3 NFrenet() const {
