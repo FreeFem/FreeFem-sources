@@ -3,11 +3,14 @@
 
 load "PETSc"
 
+int[int] n2oSaved;
+int[int] n2oLoaded;
 {
     macro dimension()3//
     include "macro_ddm.idp"
     mesh3 Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10), [x, y, z]);
     Mat A;
+    macro ThN2O()n2oSaved//
     createMat(Th, A, P1)
     saveDmesh(Th, "dump-3d")
 }
@@ -24,6 +27,7 @@ load "PETSc"
     include "macro_ddm.idp"
     mesh3 Th;
     Mat A;
+    macro ThN2O()n2oLoaded//
     loadDmesh(Th, "dump-3d")
     createMat(Th, A, P2)
 }
@@ -34,4 +38,8 @@ load "PETSc"
     Mat A;
     loadDmesh(Th, "dump-2d")
     createMat(Th, A, P0)
+}
+if(mpisize > 1) {
+    n2oLoaded -= n2oSaved;
+    assert(n2oLoaded.linfty < 1.0e-12);
 }

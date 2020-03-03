@@ -424,6 +424,9 @@ ENDIFMACRO
     ofstream khi(name + "_" + mpirank + "_" + mpisize + ".khi");
     khi << privateDmesh#ThName#khi << endl;
     khi << privateDmesh#ThName#intersection << endl;
+IFMACRO(ThName#N2O)
+    khi << ThName#N2O << endl;
+ENDIFMACRO
 }
 ENDIFMACRO
 IFMACRO(!privateDmesh#ThName)
@@ -446,23 +449,34 @@ ENDIFMACRO
 IFMACRO(dimension,2)
     ThName = readmesh(name + "_" + mpirank + "_" + mpisize + ".msh");
 ENDIFMACRO
-    ifstream khi(name + "_" + mpirank + "_" + mpisize + ".khi");
-    int m;
-    khi >> m;
-    privateDmesh#ThName#khi.resize(m);
+    privateDmesh#ThName#khi.resize(2);
     privateDmesh#ThName#khi[0].resize(ThName.nv);
-    khi >> privateDmesh#ThName#khi[0];
     privateDmesh#ThName#khi[1].resize(ThName.nt);
-    khi >> privateDmesh#ThName#khi[1];
-    khi >> m;
-    privateDmesh#ThName#intersection.resize(m);
-    for(int j = 0; j < m; ++j) {
-        int n;
-        khi >> n;
-        real[int] test;
-        privateDmesh#ThName#intersection[j].resize(n);
-        for[i, v : privateDmesh#ThName#intersection[j]]
-            khi >> v;
+    if(mpisize > 1) {
+        ifstream khi(name + "_" + mpirank + "_" + mpisize + ".khi");
+        int m;
+        khi >> m;
+        assert(m == 2);
+        khi >> privateDmesh#ThName#khi[0];
+        khi >> privateDmesh#ThName#khi[1];
+        khi >> m;
+        privateDmesh#ThName#intersection.resize(m);
+        for(int j = 0; j < m; ++j) {
+            int n;
+            khi >> n;
+            real[int] test;
+            privateDmesh#ThName#intersection[j].resize(n);
+            for[i, v : privateDmesh#ThName#intersection[j]]
+                khi >> v;
+        }
+IFMACRO(ThName#N2O)
+        ThName#N2O.resize(ThName.nt);
+        khi >> ThName#N2O;
+ENDIFMACRO
+    }
+    else {
+        privateDmesh#ThName#khi[0] = 1.0;
+        privateDmesh#ThName#khi[1] = 1.0;
     }
 }
 EndMacro
