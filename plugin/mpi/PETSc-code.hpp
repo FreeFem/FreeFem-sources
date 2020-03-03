@@ -99,7 +99,9 @@ namespace PETSc {
     KN< PetscScalar >* rhs, bool restrict = true) {
     double timing = MPI_Wtime( );
     PetscInt global;
-    if (ptD || mpisize == 1) {
+    int size;
+    MPI_Comm_size(ptA->_A->getCommunicator(), &size);
+    if (ptD || size == 1) {
       if (ptD) {
         if (restrict) ptA->_A->restriction(*ptD);
         if (!C) ptA->_A->initialize(*ptD);
@@ -1062,11 +1064,15 @@ namespace PETSc {
       delete[] dims;
       MatCreate(comm, &ptA->_petsc);
       if (bs > 1) MatSetBlockSize(ptA->_petsc, bs);
-      if (!ptJ && (mpisize / ptK->n > 1))
-        MatSetSizes(ptA->_petsc, n, n, PETSC_DECIDE, PETSC_DECIDE);
-      else
-        MatSetSizes(ptA->_petsc, n, ptK->operator[](ptJ ? it->second : rank).M( ), PETSC_DECIDE,
-                    PETSC_DECIDE);
+      {
+        int size;
+        MPI_Comm_size(comm, &size);
+        if (!ptJ && (size / ptK->n > 1))
+          MatSetSizes(ptA->_petsc, n, n, PETSC_DECIDE, PETSC_DECIDE);
+        else
+          MatSetSizes(ptA->_petsc, n, ptK->operator[](ptJ ? it->second : rank).M( ), PETSC_DECIDE,
+                      PETSC_DECIDE);
+      }
       ptA->_first = 0;
       ptA->_last = n;
       if (nargs[4] && GetAny< bool >((*nargs[4])(stack))) {
@@ -2101,11 +2107,11 @@ namespace PETSc {
       bool pop = false;
       if(type) {
           if(type->compare("matlab") == 0) {
-              PetscViewerPushFormat(PETSC_VIEWER_STDOUT_WORLD, PETSC_VIEWER_ASCII_MATLAB);
+              PetscViewerPushFormat(PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_petsc)), PETSC_VIEWER_ASCII_MATLAB);
               pop = true;
           }
           else if(type->compare("info") == 0) {
-              PetscViewerPushFormat(PETSC_VIEWER_STDOUT_WORLD, PETSC_VIEWER_ASCII_INFO);
+              PetscViewerPushFormat(PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_petsc)), PETSC_VIEWER_ASCII_INFO);
               pop = true;
           }
           else if(type->compare("draw") == 0) {
@@ -2113,18 +2119,18 @@ namespace PETSc {
               return 0L;
           }
       }
-      MatView(ptA->_petsc, PETSC_VIEWER_STDOUT_WORLD);
+      MatView(ptA->_petsc, PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_petsc)));
       if(pop)
-          PetscViewerPopFormat(PETSC_VIEWER_STDOUT_WORLD);
+          PetscViewerPopFormat(PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_petsc)));
     }
     else {
       if (ptA->_ksp) {
         if (object->compare("ksp") == 0)
-          KSPView(ptA->_ksp, PETSC_VIEWER_STDOUT_WORLD);
+          KSPView(ptA->_ksp, PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_ksp)));
         else if (object->compare("pc") == 0) {
           PC pc;
           KSPGetPC(ptA->_ksp, &pc);
-          PCView(pc, PETSC_VIEWER_STDOUT_WORLD);
+          PCView(pc, PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_ksp)));
         }
       }
     }
@@ -2291,7 +2297,9 @@ namespace PETSc {
       MatGetType(A->_petsc, &type);
       PetscBool isType;
       PetscStrcmp(type, MATMPIAIJ, &isType);
-      if (mpisize == 1 && isType)
+      int size;
+      MPI_Comm_size(PetscObjectComm((PetscObject)A->_petsc), &size);
+      if (size == 1 && isType)
         MatMPIAIJGetLocalMat(A->_petsc, MAT_INITIAL_MATRIX, &C);
       else
         C = A->_petsc;
@@ -2310,10 +2318,14 @@ namespace PETSc {
       MatSetSizes(x, P == 'T' || P == 'H' ? bs * n : bs * m, PETSC_DECIDE,
                   P == 'T' || P == 'H' ? N : M, in->M( ));
       MatSetType(x, MATDENSE);
-      if (mpisize == 1)
-        MatSeqDenseSetPreallocation(x, &(in->operator( )(0, 0)));
-      else
-        MatMPIDenseSetPreallocation(x, &(in->operator( )(0, 0)));
+      {
+        int size;
+        MPI_Comm_size(PetscObjectComm((PetscObject)A->_petsc), &size);
+        if (size == 1)
+          MatSeqDenseSetPreallocation(x, &(in->operator( )(0, 0)));
+        else
+          MatMPIDenseSetPreallocation(x, &(in->operator( )(0, 0)));
+      }
       MatAssemblyBegin(x, MAT_FINAL_ASSEMBLY);
       MatAssemblyEnd(x, MAT_FINAL_ASSEMBLY);
       if (P == 'T' || P == 'H') {
@@ -2340,7 +2352,9 @@ namespace PETSc {
         MatSetSizes(y, P == 'T' || P == 'H' ? bs * m : bs * n, PETSC_DECIDE,
                     P == 'T' || P == 'H' ? M : N, in->M( ));
         MatSetType(y, MATDENSE);
-        if (mpisize == 1)
+        int size;
+        MPI_Comm_size(PetscObjectComm((PetscObject)A->_petsc), &size);
+        if (size == 1)
           MatSeqDenseSetPreallocation(y, &(out->operator( )(0, 0)));
         else
           MatMPIDenseSetPreallocation(y, &(out->operator( )(0, 0)));
