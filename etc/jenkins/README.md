@@ -164,7 +164,7 @@ curl -L http://www.mpich.org/static/downloads/3.3.2/mpich-3.3.2.tar.gz --output 
 tar xf mpich-3.3.2.tar.gz
 cd mpich-3.3.2/
 #MacOS 10.10.5
-./configure CC=clang CXX=clang++ --prefix=/usr/local/mpich3 VM2   ()--with-device=ch3:sock (https://wiki.mpich.org/mpich/index.php/Frequently_Asked_Questions) in test)
+./configure CC=clang CXX=clang++ --prefix=/usr/local/mpich3 VM2
 ./configure CC=gcc CXX=g++ --prefix=/usr/local/mpich3 (gcc g++ version5.1)  VM2-2
 #MacOS 10.13.5
 ./configure CC=clang CXX=clang++ FC=gfortran-9 F77=gfortran-9 --prefix=/usr/local/mpich3 VM2  (update v3.3.2)
