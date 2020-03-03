@@ -1,0 +1,157 @@
+/*
+Cauchy problem
+| Delta u = 0 in Omega
+| u = f on Gamma_1 
+| du/dn = g on Gamma_1
+| u = f on Gamma_2
+
+with  Gamma_0=]0;1]x{1}
+Gamma_1=]0;1]x{0}
+Gamma_2=d Omega \ (Gamma_0 U Gamma_1)
+
+-->
+alternatively solve two problems with well-defined limits, (PC)2n and (PC)2n+1
+
+(PC)2n   | Delta u(2n) = 0 in Omega
+		 | u(2n) = v(n) on Gamma_0 
+		 | du/dn(2n) = g on Gamma_1
+		 | u(2n) = f on Gamma_2
+(PC)2n+1 | Delta u(2n+1) = 0 in Omega
+		 | du/dn(2n+1) = w(n) on Gamma_0 
+		 | u(2n+1) = f on Gamma_1
+		 | u(2n+1) = f on Gamma_2
+where 
+􏰂 v(n) = a(n) (u)2n−1 + (1 − a(n)) v(n−1)
+ w(n) = (b)n (du/dn)2n + (1 − b(n)) w(n−1)
+    with a(n) and b(n) can be chosen constant or dynamic
+
+*/
+
+load "msh3"
+macro lap (u,v) (dx(u)*dx(v) + dy(u)*dy(v) + dz(u)*dz(v))//
+macro gradn (u) (dx(u)*N.x + dy(u)*N.y + dz(u)*N.z)//
+
+
+int[int] r=[4,2];
+meshS Th = square3(10,10);
+Th=change(Th,refedge=r);
+
+fespace Vh(Th,P1);
+
+Vh u, v, w, wn, uprec, uprec2, vprec, vprec2;
+Vh uex = cos(x) * cosh(y) + sin(x) * sinh(y);
+Vh vn = (1 - x) * uex(0,1,0) + x * uex(1,1,0);
+func f = 0.;
+real err, eps = 1.e-6;
+real erru = 0., errgradv = 0.;
+int ii = 0;
+real theta = 1.;
+real delta = 1.;
+
+
+problem pair (u,w) = 
+	int2d(Th) (lap(u,w))
+	- int2d(Th) (f*w)
+	- int1d (Th, 1) (gradn(uex)*w)
+	+ on (2, u = uex)
+	+ on (3, u = vn);
+
+problem impair (v,w) = 
+	int2d(Th) (lap(v,w))
+	- int2d(Th) (f*w)
+	- int1d (Th, 3) (wn*w)
+	+ on (1, v = uex)
+	+ on (2, v = uex);
+
+err = eps + 1.;
+
+// iterations 1 et 2
+
+pair;
+
+ii++;
+wn = dy(u);
+
+impair;
+
+err = sqrt (int1d (Th, 3) ((v-u)^2));
+
+vn = theta*v + (1-theta)*vn;
+
+uprec = u;
+uprec2 = u;
+vprec = v;
+vprec2 = v;
+
+// iterations 3 et 4
+
+pair;
+
+ii++;
+wn = delta*dy(u) + (1-delta)*wn;
+
+impair;
+
+err = sqrt (int1d (Th, 3) ((v-u)^2));
+theta = ( int1d (Th, 3) ((u-uprec)*(u-uprec-v+vprec)) ) / ( int1d (Th, 3) ((u-uprec-v+vprec)^2) );
+vn = theta*v + (1-theta)*vn;
+
+uprec = u;
+vprec = v;
+
+// next iterations 
+
+while (err > eps) {
+	
+	pair;
+
+	erru = sqrt (int1d (Th, 3) ((u-uex)^2));
+	errgradv = sqrt (int1d (Th, 3) ((gradn(u)-gradn(uex))^2));
+	ii++;
+
+	delta = ( int1d (Th, 3) ((dy(vprec)-dy(vprec2))*(dy(vprec)-dy(vprec2)-dy(uprec)+dy(uprec2))) ) 
+	/ ( int1d (Th, 3) ((dy(vprec)-dy(vprec2)-dy(uprec)+dy(uprec2))^2) );
+
+	wn = delta*dy(u) + (1-delta)*wn;
+	impair;	
+
+	err = sqrt (int1d (Th, 3) ((v-u)^2));
+	theta = ( int1d (Th, 3) ((u-uprec)*(u-uprec-v+vprec)) ) / ( int1d (Th, 3) ((u-uprec-v+vprec)^2) );
+	vn = theta*v + (1-theta)*vn;
+
+	uprec2 = uprec;
+	uprec = u;
+	vprec2 = vprec;
+	vprec = v;
+
+}
+
+assert(err < 1e-6);
+// écriture à l'écran de l'erreur et du nombre d'itérations
+
+cout << "\n";
+cout << "\n";
+cout << ii << " iterations pour un ecart de " << err << ".\n";
+cout << "Erreur sur u de " << erru << ".\n";
+cout << "Erreur sur grad u de " << errgradv << ".\n";
+
+plot (v, cmm = "impair (verification)", value = true);
+plot (uex, cmm = "solution exacte", value = true);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

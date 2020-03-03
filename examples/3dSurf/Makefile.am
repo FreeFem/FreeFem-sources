@@ -32,7 +32,8 @@ TESTS_OTHER = buildMeshSfromMesh3.edp \
 	operatorsOnMeshS.edp \
 	extractSurfFromMesh3.edp \
 	testvtk.edp \
-	LapP1withflux.edp
+	LapP1withflux.edp \
+	cauchyproblem.edp
 
 
 TESTS_TETGEN = HeatTorus.edp
