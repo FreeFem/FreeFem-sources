@@ -123,7 +123,7 @@ namespace PETSc {
     bool free = ptA->_A->getMatrix( )->_ia
                   ? ptA->_A->distributedCSR(ptA->_num, ptA->_first, ptA->_last, ia, ja, c)
                   : false;
-    MatCreate(PETSC_COMM_WORLD, &ptA->_petsc);
+    MatCreate(ptA->_A->getCommunicator(), &ptA->_petsc);
     if (bs > 1) MatSetBlockSize(ptA->_petsc, bs);
     MatSetSizes(ptA->_petsc, ptA->_last - ptA->_first, ptA->_last - ptA->_first, global, global);
     bool sym = ptA->_A->getMatrix( )->_sym;
@@ -172,9 +172,9 @@ namespace PETSc {
     PetscMalloc(sizeof(PetscInt) * M->_n / bs, &indices);
     for (unsigned int i = 0; i < M->_n; i += bs) indices[i / bs] = ptA->_num[i] / bs;
     ISLocalToGlobalMapping rmap;
-    ISLocalToGlobalMappingCreate(PETSC_COMM_WORLD, bs, M->_n / bs, indices, PETSC_OWN_POINTER,
+    ISLocalToGlobalMappingCreate(ptA->_A->getCommunicator(), bs, M->_n / bs, indices, PETSC_OWN_POINTER,
                                  &rmap);
-    MatCreateIS(PETSC_COMM_WORLD, bs, PETSC_DECIDE, PETSC_DECIDE, global, global, rmap, NULL,
+    MatCreateIS(ptA->_A->getCommunicator(), bs, PETSC_DECIDE, PETSC_DECIDE, global, global, rmap, NULL,
                 &ptA->_petsc);
     Mat local;
     MatISGetLocalMat(ptA->_petsc, &local);
@@ -606,7 +606,6 @@ namespace PETSc {
     ISDestroy(&to);
     ISDestroy(&from);
     delete[] idx;
-
     VecDestroy(&x);
     VecDestroy(&y);
     return 0L;
@@ -785,7 +784,7 @@ namespace PETSc {
       PetscInt bsB, bsC;
       MatGetBlockSize(ptB->_petsc, &bsB);
       MatGetBlockSize(ptC->_petsc, &bsC);
-      MatCreate(PETSC_COMM_WORLD, &ptA->_petsc);
+      MatCreate(PetscObjectComm((PetscObject)ptB->_petsc), &ptA->_petsc);
       if (bsB == bsC && bsB > 1) MatSetBlockSize(ptA->_petsc, bsB);
       MatSetSizes(ptA->_petsc, ptB->_last - ptB->_first, ptC->_last - ptC->_first, PETSC_DECIDE,
                   PETSC_DECIDE);
@@ -872,14 +871,12 @@ namespace PETSc {
   };
   template< class HpddmType >
   AnyType initCSRfromMatrix_Op< HpddmType >::operator( )(Stack stack) const {
-    if (nargs[0])
-      PETSC_COMM_WORLD = *static_cast< MPI_Comm* >(GetAny< pcommworld >((*nargs[0])(stack)));
     DistributedCSR< HpddmType >* ptA = GetAny< DistributedCSR< HpddmType >* >((*A)(stack));
     Matrice_Creuse< PetscScalar >* ptK = GetAny< Matrice_Creuse< PetscScalar >* >((*K)(stack));
     KN< long >* ptSize = GetAny< KN< long >* >((*size)(stack));
     MatriceMorse< PetscScalar >* mK = static_cast< MatriceMorse< PetscScalar >* >(&(*(ptK->A)));
     PetscInt bs = nargs[1] ? GetAny< long >((*nargs[1])(stack)) : 1;
-    MatCreate(PETSC_COMM_WORLD, &ptA->_petsc);
+    MatCreate(nargs[0] ? *static_cast< MPI_Comm* >(GetAny< pcommworld >((*nargs[0])(stack))) : PETSC_COMM_WORLD, &ptA->_petsc);
     if (bs > 1) MatSetBlockSize(ptA->_petsc, bs);
     bool bsr = nargs[4] && GetAny< bool >((*nargs[4])(stack));
     bool prune = bsr ? (nargs[5] && GetAny< bool >((*nargs[5])(stack))) : false;
@@ -966,10 +963,9 @@ namespace PETSc {
   };
   template< class HpddmType >
   AnyType initCSRfromArray_Op< HpddmType >::operator( )(Stack stack) const {
-    if (nargs[1])
-      PETSC_COMM_WORLD = *static_cast< MPI_Comm* >(GetAny< pcommworld >((*nargs[1])(stack)));
+    MPI_Comm comm = nargs[1] ? *static_cast< MPI_Comm* >(GetAny< pcommworld >((*nargs[1])(stack))) : PETSC_COMM_WORLD;
     int size;
-    MPI_Comm_size(PETSC_COMM_WORLD, &size);
+    MPI_Comm_size(comm, &size);
     DistributedCSR< HpddmType >* ptA = GetAny< DistributedCSR< HpddmType >* >((*A)(stack));
     KN< Matrice_Creuse< PetscScalar > >* ptK =
       GetAny< KN< Matrice_Creuse< PetscScalar > >* >((*K)(stack));
@@ -984,7 +980,7 @@ namespace PETSc {
       }
       PetscInt bs = nargs[2] ? GetAny< long >((*nargs[2])(stack)) : 1;
       int rank;
-      MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
+      MPI_Comm_rank(comm, &rank);
       int* dims = new int[size]( );
       std::vector< std::pair< int, int > >::const_iterator it =
         std::lower_bound(v.cbegin( ), v.cend( ), std::make_pair(rank, 0),
@@ -999,7 +995,7 @@ namespace PETSc {
         dims[rank] = ptK->operator[](it->second).M( );
         n = ptK->operator[](it->second).N( );
       }
-      MPI_Allgather(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, dims, 1, MPI_INT, PETSC_COMM_WORLD);
+      MPI_Allgather(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, dims, 1, MPI_INT, comm);
       if (ptJ)
         size = v.size( );
       else
@@ -1064,7 +1060,7 @@ namespace PETSc {
 
 #endif
       delete[] dims;
-      MatCreate(PETSC_COMM_WORLD, &ptA->_petsc);
+      MatCreate(comm, &ptA->_petsc);
       if (bs > 1) MatSetBlockSize(ptA->_petsc, bs);
       if (!ptJ && (mpisize / ptK->n > 1))
         MatSetSizes(ptA->_petsc, n, n, PETSC_DECIDE, PETSC_DECIDE);
@@ -1210,8 +1206,12 @@ namespace PETSc {
       dof = GetAny< long >((*K)(stack));
     MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny< pcommworld >((*nargs[0])(stack)) : 0;
     KN< PetscScalar >* rhs = nargs[2] ? GetAny< KN< PetscScalar >* >((*nargs[2])(stack)) : 0;
+    if(c == 2 || c == 3) {
+        static MPI_Comm self = MPI_COMM_SELF;
+        MPI_Comm& rval = self;
+        comm = &rval;
+    }
     ptA->_A = new HpddmType;
-    if (comm) PETSC_COMM_WORLD = *comm;
     if ((ptR || c == 2 || c == 3) && (mA || (c != 0 && c != 2))) {
       HPDDM::MatrixCSR< PetscScalar >* dA;
       if (mA)
@@ -1788,7 +1788,7 @@ namespace PETSc {
       PetscBool assembled;
       MatAssembled(ptA->_petsc, &assembled);
       if (!ptA->_ksp && c != 2) {
-        KSPCreate(PETSC_COMM_WORLD, &ptA->_ksp);
+        KSPCreate(PetscObjectComm((PetscObject)ptA->_petsc), &ptA->_ksp);
         KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
       }
       if (c == 1) {
@@ -1818,7 +1818,7 @@ namespace PETSc {
             MatGetSize(tabA->operator[](i)._petsc, &MFine, nullptr);
             MatGetLocalSize(tabA->operator[](i + 1)._petsc, &mCoarse, nullptr);
             MatGetSize(tabA->operator[](i + 1)._petsc, &MCoarse, nullptr);
-            MatCreateShell(PETSC_COMM_WORLD, mFine, mCoarse, MFine, MCoarse, user, &P);
+            MatCreateShell(PetscObjectComm((PetscObject)tabA->operator[](i + 1)._petsc), mFine, mCoarse, MFine, MCoarse, user, &P);
             MatShellSetOperation(P, MATOP_MULT, (void (*)(void))ShellInjectionOp< false >);
             MatShellSetOperation(P, MATOP_MULT_TRANSPOSE, (void (*)(void))ShellInjectionOp< true >);
             MatShellSetOperation(P, MATOP_DESTROY, (void (*)(void))ShellDestroy);
@@ -1900,7 +1900,7 @@ namespace PETSc {
             }
             delete[] dots;
             MatNullSpace sp;
-            MatNullSpaceCreate(PETSC_COMM_WORLD, PETSC_FALSE, std::max(dim, dimPETSc), ns, &sp);
+            MatNullSpaceCreate(PetscObjectComm((PetscObject)ptA->_petsc), PETSC_FALSE, std::max(dim, dimPETSc), ns, &sp);
             MatSetNearNullSpace(ptA->_petsc, sp);
             MatNullSpaceDestroy(&sp);
             VecDestroyVecs(std::max(dim, dimPETSc), &ns);
@@ -2037,9 +2037,8 @@ namespace PETSc {
             KN< double >* pL = GetAny< KN< double >* >((*nargs[6])(stack));
             idx.reserve(pL->n);
             KNM< PetscScalar >* pS = GetAny< KNM< PetscScalar >* >((*nargs[10])(stack));
-            for (int i = 0; i < pL->n; ++i) {
+            for (int i = 0; i < pL->n; ++i)
               if (std::abs((*pL)[i]) > 1.0e-12) idx.emplace_back(i);
-            }
             ISCreateGeneral(PETSC_COMM_WORLD, idx.size( ), idx.data( ), PETSC_COPY_VALUES, &is);
             PC pc;
             KSPGetPC(ptA->_ksp, &pc);
@@ -2307,7 +2306,7 @@ namespace PETSc {
         N *= bs;
         M *= bs;
       }
-      MatCreate(PETSC_COMM_WORLD, &x);
+      MatCreate(PetscObjectComm((PetscObject)A->_petsc), &x);
       MatSetSizes(x, P == 'T' || P == 'H' ? bs * n : bs * m, PETSC_DECIDE,
                   P == 'T' || P == 'H' ? N : M, in->M( ));
       MatSetType(x, MATDENSE);
@@ -2337,7 +2336,7 @@ namespace PETSc {
       } else {
         ffassert(in->N( ) == bs * m);
         out->resize(bs * n, in->M( ));
-        MatCreate(PETSC_COMM_WORLD, &y);
+        MatCreate(PetscObjectComm((PetscObject)A->_petsc), &y);
         MatSetSizes(y, P == 'T' || P == 'H' ? bs * m : bs * n, PETSC_DECIDE,
                     P == 'T' || P == 'H' ? M : N, in->M( ));
         MatSetType(y, MATDENSE);
@@ -2569,7 +2568,7 @@ namespace PETSc {
         VecPlaceArray(x, *in);
         VecPlaceArray(y, *out);
         if (!ptA->_ksp) {
-          KSPCreate(PETSC_COMM_WORLD, &ptA->_ksp);
+          KSPCreate(PetscObjectComm((PetscObject)ptA->_petsc), &ptA->_ksp);
           KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
         }
         if (N == 'N')
@@ -2647,7 +2646,7 @@ namespace PETSc {
         ffassert(in->N( ) == bs * m);
         out->resize(bs * m, in->M( ));
         if (!ptA->_ksp) {
-          KSPCreate(PETSC_COMM_WORLD, &ptA->_ksp);
+          KSPCreate(PetscObjectComm((PetscObject)ptA->_petsc), &ptA->_ksp);
           KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
         }
         HPDDM::PETScOperator op(ptA->_ksp, m, bs);
@@ -3208,7 +3207,7 @@ namespace PETSc {
       {
         PetscInt n;
         VecGetSize(r, &n);
-        VecCreateMPIWithArray(PETSC_COMM_WORLD, 1, in->n, n, static_cast< PetscScalar* >(*in), &x);
+        VecCreateMPIWithArray(PetscObjectComm((PetscObject)ptA->_petsc), 1, in->n, n, static_cast< PetscScalar* >(*in), &x);
       }
       KSP ksp;
       if (c < 2 || c == 4) {
@@ -3393,7 +3392,7 @@ namespace PETSc {
                             : nullptr);
         user->mon = nullptr;
         TS ts;
-        TSCreate(PETSC_COMM_WORLD, &ts);
+        TSCreate(PetscObjectComm((PetscObject)ptA->_petsc), &ts);
         TSSetIJacobian(ts, ptA->_petsc, ptA->_petsc, FormIJacobian< TimeStepper< Type > >, &user);
         if (user->r) TSSetIFunction(ts, r, FormIFunction< TimeStepper< Type > >, &user);
         if (user->rhs) TSSetRHSFunction(ts, NULL, FormRHSFunction< TimeStepper< Type > >, &user);
@@ -3646,7 +3645,7 @@ namespace PETSc {
         }
         timing = MPI_Wtime( );
         if (!(*t)._ksp) {
-          KSPCreate(PETSC_COMM_WORLD, &(*t)._ksp);
+          KSPCreate(PetscObjectComm((PetscObject)(*t)._petsc), &(*t)._ksp);
           KSPSetOperators((*t)._ksp, (*t)._petsc, (*t)._petsc);
           KSPSetFromOptions((*t)._ksp);
         }

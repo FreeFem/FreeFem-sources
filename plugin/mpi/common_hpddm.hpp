@@ -508,7 +508,6 @@ long periodicity(Matrice_Creuse<double>* const& R, KN< KN< long > >* const& inte
 #if defined(PETSCSUB) || HPDDM_PETSC
 namespace PETSc {
   void finalizePETSc( ) {
-    PETSC_COMM_WORLD = MPI_COMM_WORLD;
     PetscBool isFinalized;
     PetscFinalized(&isFinalized);
     if (!isFinalized) PetscFinalize( );

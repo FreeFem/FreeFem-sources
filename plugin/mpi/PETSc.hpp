@@ -189,7 +189,7 @@ void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
             free = true;
         }
         if(!(*ptA->_vS)[k]) {
-            MatCreate(PETSC_COMM_WORLD, &(*ptA->_vS)[k]);
+            MatCreate(PetscObjectComm((PetscObject)ptA->_ksp), &(*ptA->_vS)[k]);
             MatSetSizes((*ptA->_vS)[k], end - start, end - start, global, global);
             MatSetType((*ptA->_vS)[k], MATMPIAIJ);
             MatMPIAIJSetPreallocationCSR((*ptA->_vS)[k], reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
@@ -197,10 +197,10 @@ void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
         }
         else {
             PetscBool update = (mS ? PETSC_TRUE : PETSC_FALSE);
-            MPI_Allreduce(MPI_IN_PLACE, &update, 1, MPIU_BOOL, MPI_MAX, PETSC_COMM_WORLD);
+            MPI_Allreduce(MPI_IN_PLACE, &update, 1, MPIU_BOOL, MPI_MAX, PetscObjectComm((PetscObject)ptA->_ksp));
             if(update) {
                 Mat S;
-                MatCreate(PETSC_COMM_WORLD, &S);
+                MatCreate(PetscObjectComm((PetscObject)ptA->_ksp), &S);
                 MatSetSizes(S, end - start, end - start, global, global);
                 MatSetType(S, MATMPIAIJ);
                 MatMPIAIJSetPreallocationCSR(S, reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
@@ -253,7 +253,7 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
         for(int i = 0; i < fields->n; ++i)
             local[i] = std::lround(fields->operator[](i));
         unsigned short nb = fields->n > 0 ? *std::max_element(local, local + fields->n) : 0;
-        MPI_Allreduce(MPI_IN_PLACE, &nb, 1, MPI_UNSIGNED_SHORT, MPI_MAX, PETSC_COMM_WORLD);
+        MPI_Allreduce(MPI_IN_PLACE, &nb, 1, MPI_UNSIGNED_SHORT, MPI_MAX, PetscObjectComm((PetscObject)ksp));
         local += fields->n;
         if(fields->n) {
             if(ptA->_num)
@@ -271,7 +271,7 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
         }
         unsigned int firstFS = 0;
         if(ptA->_ksp != ksp) {
-            MPI_Exscan(&remove, &firstFS, 1, MPI_UNSIGNED, MPI_SUM, PETSC_COMM_WORLD);
+            MPI_Exscan(&remove, &firstFS, 1, MPI_UNSIGNED, MPI_SUM, PetscObjectComm((PetscObject)ksp));
             if(mpirank == 0)
                 firstFS = 0;
         }
@@ -286,7 +286,7 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
                 else if(*pt == 0)
                     ++remove;
             }
-            ISCreateGeneral(PETSC_COMM_WORLD, counts[j], idx, PETSC_COPY_VALUES, &is);
+            ISCreateGeneral(PetscObjectComm((PetscObject)ksp), counts[j], idx, PETSC_COPY_VALUES, &is);
             PCFieldSplitSetIS(pc, names && j < names->size() ? (*(names->operator[](j))).c_str() : NULL, is);
             ISDestroy(&is);
         }

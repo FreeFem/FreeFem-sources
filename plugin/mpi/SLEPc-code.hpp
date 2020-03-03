@@ -122,7 +122,7 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
         Type* ptA = GetAny<Type*>((*A)(stack));
         if(ptA->_petsc) {
             EPS eps;
-            EPSCreate(PETSC_COMM_WORLD, &eps);
+            EPSCreate(PetscObjectComm((PetscObject)ptA->_petsc), &eps);
             Mat S;
             User<Type, K> user = nullptr;
             MatType type;
@@ -146,7 +146,7 @@ AnyType eigensolver<Type, K>::E_eigensolver::operator()(Stack stack) const {
                 MatGetSize(ptA->_petsc, &M, NULL);
                 PetscNew(&user);
                 user->mat = new eigensolver<Type, K>::MatF_O(m * bs, stack, codeA);
-                MatCreateShell(PETSC_COMM_WORLD, m, m, M, M, user, &S);
+                MatCreateShell(PetscObjectComm((PetscObject)ptA->_petsc), m, m, M, M, user, &S);
                 MatShellSetOperation(S, MATOP_MULT, (void (*)(void))MatMult_User<Type, K>);
                 EPSSetOperators(eps, S, NULL);
             }
@@ -303,7 +303,6 @@ static PetscErrorCode MatMult_User(Mat A, Vec x, Vec y) {
     PetscFunctionReturn(0);
 }
 void finalizeSLEPc() {
-    PETSC_COMM_WORLD = MPI_COMM_WORLD;
     SlepcFinalize();
 }
 template<class K, typename std::enable_if<std::is_same<K, double>::value>::type* = nullptr>

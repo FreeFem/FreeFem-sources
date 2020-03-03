@@ -82,7 +82,7 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [buildRecursive.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/buildRecursive.edp)                   | Recursive mesh partitioning (for geometric multigrid)               |
 | [withPartitioning.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/withPartitioning.edp)               | Connectivity construction with a user-supplied partitioning         |
 | [createPartition.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/createPartition.edp)                 | Creation of different partitions of unity using the same DD         |
-| [dump-load-Dmesh.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/dump-load-Dmesh.edp)                 | Dumping and loading a distributed mesh for restarting a computation |
+| [save-load-Dmesh.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/save-load-Dmesh.edp)                 | Saving and loading a distributed mesh for restarting a computation  |
 | [transfer.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/transfer.edp)                               | Parallel interpolation of finite element functions                  |
 
 ### Reproducible science
