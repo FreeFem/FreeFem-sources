@@ -95,8 +95,7 @@ namespace PETSc {
   void initPETScStructure(
     HpddmType* ptA, PetscInt bs, PetscBool symmetric,
     KN< typename std::conditional< std::is_same< HpddmType, Dmat >::value, double, long >::type >*
-      ptD,
-    KN< PetscScalar >* rhs, bool restrict = true) {
+      ptD, bool restrict = true) {
     double timing = MPI_Wtime( );
     PetscInt global;
     int size;
@@ -152,15 +151,13 @@ namespace PETSc {
     ptA->_A->setBuffer( );
     if (verbosity > 0 && mpirank == 0)
       cout << " --- global CSR created (in " << MPI_Wtime( ) - timing << ")" << endl;
-    if (rhs) ptA->_A->exchange(*rhs);
   }
   template< bool C, class HpddmType,
             typename std::enable_if< !std::is_same< HpddmType, Dmat >::value >::type* = nullptr >
   void initPETScStructure(
     HpddmType* ptA, PetscInt& bs, PetscBool symmetric,
     KN< typename std::conditional< std::is_same< HpddmType, Dmat >::value, double, long >::type >*
-      ptD,
-    KN< PetscScalar >* rhs, bool) {
+      ptD, bool) {
     const HPDDM::MatrixCSR< PetscScalar >* M = ptA->_A->getMatrix( );
     if (!M->_sym) cout << "Please assemble a symmetric CSR" << endl;
     double timing = MPI_Wtime( );
@@ -661,7 +658,7 @@ namespace PETSc {
     Expression A;
     Expression B;
     Expression K;
-    static const int n_name_param = 3;
+    static const int n_name_param = 2;
     static basicAC_F0::name_and_type name_param[];
     Expression nargs[n_name_param];
     initCSRfromDMatrix_Op(const basicAC_F0& args, Expression param1, Expression param2,
@@ -674,9 +671,8 @@ namespace PETSc {
   };
   template< class HpddmType >
   basicAC_F0::name_and_type initCSRfromDMatrix_Op< HpddmType >::name_param[] = {
-    {"rhs", &typeid(KN< PetscScalar >*)},
     {"clean", &typeid(bool)},
-    {"symmetric", &typeid(bool)},
+    {"symmetric", &typeid(bool)}
   };
   template< class HpddmType >
   class initCSRfromDMatrix : public OneOperator {
@@ -714,14 +710,12 @@ namespace PETSc {
       ptA->_last = ptB->_last;
       PetscInt bs;
       MatGetBlockSize(ptB->_petsc, &bs);
-      KN< PetscScalar >* rhs =
-        nargs[0] ? GetAny< KN< PetscScalar >* >((*nargs[0])(stack)) : nullptr;
       initPETScStructure<false>(
         ptA, bs,
-        nargs[2] ? (GetAny< bool >((*nargs[2])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE,
-        static_cast< KN< double >* >(nullptr), rhs);
+        nargs[1] ? (GetAny< bool >((*nargs[1])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE,
+        static_cast< KN< double >* >(nullptr));
     }
-    if (nargs[1] && GetAny< bool >((*nargs[1])(stack))) ptK->destroy( );
+    if (nargs[0] && GetAny< bool >((*nargs[0])(stack))) ptK->destroy( );
     return ptA;
   }
 
@@ -1134,7 +1128,7 @@ namespace PETSc {
       Expression R;
       Expression D;
       const int c;
-      static const int n_name_param = 7;
+      static const int n_name_param = 6;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       E_initCSR(const basicAC_F0& args, int d) : A(0), K(0), R(0), D(0), c(d) {
@@ -1186,7 +1180,6 @@ namespace PETSc {
   basicAC_F0::name_and_type initCSR< HpddmType, C >::E_initCSR::name_param[] = {
     {"communicator", &typeid(pcommworld)},
     {"bs", &typeid(long)},
-    {"rhs", &typeid(KN< PetscScalar >*)},
     {"clean", &typeid(bool)},
     {"symmetric", &typeid(bool)},
     {"restriction", &typeid(Matrice_Creuse< double >*)},
@@ -1211,7 +1204,6 @@ namespace PETSc {
     else
       dof = GetAny< long >((*K)(stack));
     MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny< pcommworld >((*nargs[0])(stack)) : 0;
-    KN< PetscScalar >* rhs = nargs[2] ? GetAny< KN< PetscScalar >* >((*nargs[2])(stack)) : 0;
     if(c == 2 || c == 3) {
         static MPI_Comm self = MPI_COMM_SELF;
         MPI_Comm& rval = self;
@@ -1226,9 +1218,9 @@ namespace PETSc {
       else
         dA = new HPDDM::MatrixCSR< PetscScalar >(dof, dof, 0, nullptr, nullptr, nullptr, false);
       Matrice_Creuse< double >* pList =
-        nargs[5] ? GetAny< Matrice_Creuse< double >* >((*nargs[5])(stack)) : 0;
+        nargs[4] ? GetAny< Matrice_Creuse< double >* >((*nargs[4])(stack)) : 0;
       HPDDM::MatrixCSR< void >* dL = nullptr;
-      int level = nargs[6] ? std::abs(GetAny< long >((*nargs[6])(stack))) : 0;
+      int level = nargs[5] ? std::abs(GetAny< long >((*nargs[5])(stack))) : 0;
       KN_< KN< long > > sub((c == 0 || c == 1) && ptR->n > 0 && ptR->operator[](0).n > 0
                               ? (*ptR)(FromTo(1 + level * ptR->operator[](0).n,
                                               1 + (level + 1) * ptR->operator[](0).n - 1))
@@ -1268,8 +1260,8 @@ namespace PETSc {
       ptA->_num = new unsigned int[ptA->_A->getMatrix( )->_n];
       initPETScStructure<C>(
         ptA, bs,
-        nargs[4] ? (GetAny< bool >((*nargs[4])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE,
-        ptD, rhs, restrict);
+        nargs[3] ? (GetAny< bool >((*nargs[3])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE,
+        ptD, restrict);
       if (!std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value) {
 #ifndef VERSION_MATRICE_CREUSE
         mA->lg = ptA->_A->getMatrix( )->_ia;
@@ -1277,7 +1269,7 @@ namespace PETSc {
         mA->p = ptA->_A->getMatrix( )->_ia;
 #endif
       }
-      if (nargs[3] && GetAny< bool >((*nargs[3])(stack))) {
+      if (nargs[2] && GetAny< bool >((*nargs[2])(stack))) {
         if (ptR) ptR->resize(0);
         if (c == 0 || c == 2) GetAny< Matrice_Creuse< PetscScalar >* >((*K)(stack))->destroy( );
       }
