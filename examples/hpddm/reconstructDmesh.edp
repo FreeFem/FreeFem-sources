@@ -1,0 +1,42 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+func Pk = P2;
+
+macro def(u)u//
+{
+    macro dimension()2// EOM
+    include "macro_ddm.idp"
+
+    mesh ThGlobal = square(getARGV("-global_2d", 40), getARGV("-global_2d", 40));
+    fespace Ph(ThGlobal, P0);
+    Ph part;
+    if(mpirank == 0) {
+        partitionerSeq(part[], ThGlobal, mpisize);
+    }
+    partitionerPar(part[], ThGlobal, mpiCommWorld, mpisize);
+    mesh Th = trunc(ThGlobal, abs(part - mpirank) < 1.0e-2, renum = 1);
+    reconstructDmesh(Th)
+    fespace Wh(Th, Pk);
+    Wh<real> u;
+    createPartition(Th, u[], Pk)
+    plotMPI(Th, u, Pk, def, real, cmm = "Partition of unity")
+}
+{
+    macro dimension()3// EOM
+    include "macro_ddm.idp"
+
+    mesh3 ThGlobal = cube(getARGV("-global_3d", 10), getARGV("-global_3d", 10), getARGV("-global_3d", 10));
+    fespace Ph(ThGlobal, P0);
+    Ph part;
+    if(mpirank == 0) {
+        partitionerSeq(part[], ThGlobal, mpisize);
+    }
+    partitionerPar(part[], ThGlobal, mpiCommWorld, mpisize);
+    mesh3 Th = trunc(ThGlobal, abs(part - mpirank) < 1.0e-2, renum = 1);
+    reconstructDmesh(Th)
+    fespace Wh(Th, Pk);
+    Wh<real> u;
+    createPartition(Th, u[], Pk)
+    plotMPI(Th, u, Pk, def, real, cmm = "Partition of unity")
+}

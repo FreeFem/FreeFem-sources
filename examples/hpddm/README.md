@@ -73,17 +73,16 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 
 ### Miscellaneous
 | Filename                                                                                                                          | Comments (preconditioners, numerical schemes) |
-|-----------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
-| [transpose-solve-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/transpose-solve-PETSc.edp)     | Solving a transposed system                                         |
-| [Schur-complement-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/Schur-complement-PETSc.edp)   | Computing an exact Schur complement                                 |
-| [block-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/block-PETSc.edp)                         | &nbsp;                                                              |
-| [heat-io-2d.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/heat-io-2d.edp)                           | Automatic ParaView animation output                                 |
-| [stokes-io-3d.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/stokes-io-3d.edp)                       | &nbsp;                                                              |
-| [buildRecursive.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/buildRecursive.edp)                   | Recursive mesh partitioning (for geometric multigrid)               |
-| [withPartitioning.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/withPartitioning.edp)               | Connectivity construction with a user-supplied partitioning         |
-| [createPartition.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/createPartition.edp)                 | Creation of different partitions of unity using the same DD         |
-| [save-load-Dmesh.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/save-load-Dmesh.edp)                 | Saving and loading a distributed mesh for restarting a computation  |
-| [transfer.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/transfer.edp)                               | Parallel interpolation of finite element functions                  |
+|-----------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
+| [transpose-solve-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/transpose-solve-PETSc.edp)     | Solving a transposed system                                              |
+| [Schur-complement-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/Schur-complement-PETSc.edp)   | Computing an exact Schur complement                                      |
+| [block-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/block-PETSc.edp)                         | &nbsp;                                                                   |
+| [buildRecursive.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/buildRecursive.edp)                   | Recursive mesh partitioning (for geometric multigrid)                    |
+| [withPartitioning.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/withPartitioning.edp)               | Connectivity construction with a user-supplied partitioning              |
+| [createPartition.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/createPartition.edp)                 | Creation of different partitions of unity using the same DD              |
+| [save-load-Dmesh.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/save-load-Dmesh.edp)                 | Saving and loading a distributed mesh for restarting a computation       |
+| [transfer.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/transfer.edp)                               | Parallel interpolation of finite element functions                       |
+| [reconstructDmesh.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/reconstructDmesh.edp)               | Construction of a distributed mesh from sequential nonoverlapping meshes |
 
 ### Reproducible science
 | Article                                                                                                                                                       | Source code                                                   |

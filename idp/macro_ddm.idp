@@ -501,6 +501,126 @@ ENDIFMACRO
     buildMinimalist(ThName, intersection, privateDmesh#ThName#khi[0], P1);
 }
 EndMacro
+macro reconstructDmesh(ThName)
+IFMACRO(!privateDmesh#ThName)
+NewMacro privateDmesh#ThName()privateDmesh#ThName EndMacro
+NewMacro privateDmesh#ThName#khi()privateDmesh#ThName#khiDef EndMacro
+NewMacro privateDmesh#ThName#intersection()privateDmesh#ThName#intersectionDef EndMacro
+real[int][int] privateDmesh#ThName#khi(2);
+real[int][int] privateDmesh#ThName#intersection;
+ENDIFMACRO
+{
+    mpiBarrier(mpiCommWorld);
+    real timerReconstruction = mpiWtime();
+    real[int] bb(2 * dimension);
+    meshN ThLocalInit = ThName; /* TODO FIXME: only work on one layer of elements */
+    boundingbox(ThLocalInit, bb);
+    real[int] bbAll(2 * dimension * mpisize);
+    mpiAllgather(bb, bbAll, mpiCommWorld);
+    real hmax;
+    {
+        real tmp = ThGlobal.hmax;
+        mpiAllReduce(tmp, hmax, mpiCommWorld, mpiMAX);
+    }
+    int[int] neighbors;
+    int between;
+    for(int i = 0; i < mpisize; ++i) {
+        if(i != mpirank && (i == mpirank - 1 || i == mpirank + 1 ||
+    IFMACRO(dimension, 2)
+        !(bbAll[1 + 4 * i] < bb[0] - hmax
+          || bbAll[0 + 4 * i] > bb[1] + hmax
+          || bbAll[3 + 4 * i] < bb[2] - hmax
+          || bbAll[2 + 4 * i] > bb[3] + hmax)
+    ENDIFMACRO
+    IFMACRO(dimension, 3)
+        !(bbAll[1 + 6 * i] < bb[0] - hmax
+          || bbAll[0 + 6 * i] > bb[1] + hmax
+          || bbAll[3 + 6 * i] < bb[2] - hmax
+          || bbAll[2 + 6 * i] > bb[3] + hmax
+          || bbAll[5 + 6 * i] < bb[4] - hmax
+          || bbAll[4 + 6 * i] > bb[5] + hmax)
+    ENDIFMACRO
+                                             )) {
+            if(i == mpirank + 1)
+                between = neighbors.n;
+            else if(i == mpirank - 1)
+                between = neighbors.n + 1;
+            neighbors.resize(neighbors.n + 1);
+            neighbors[neighbors.n - 1] = i;
+        }
+    }
+    meshN[int] ThRecv(max(neighbors.n - between, between));
+    mpiRequest[int] rqRecv(max(neighbors.n - between, between));
+    mpiRequest[int] rqSendFirst(neighbors.n - between);
+    mpiRequest[int] rqSendSecond(between);
+    real[int] part;
+    for(int i = 0; i < between; ++i)
+        Irecv(processor(neighbors[i], mpiCommWorld, rqRecv[i]), ThRecv[i]);
+    meshN ThLocalNew;
+    for(int i = 0; i < between; ++i) {
+        mpiWait(rqRecv[i]);
+        if(i == 0) {
+            ThLocalNew = ThRecv[0];
+            part.resize(ThLocalNew.nt);
+            part = neighbors[i];
+        }
+        else {
+            real[int] backup = part;
+            ThLocalNew = ThLocalNew + ThRecv[i];
+            part.resize(ThLocalNew.nt);
+            part(0:backup.n-1) = backup;
+            part(backup.n:ThLocalNew.nt-1) = neighbors[i];
+        }
+    }
+    for(int i = between; i < neighbors.n; ++i)
+        Irecv(processor(neighbors[i], mpiCommWorld, rqRecv[i - between]), ThRecv[i - between]);
+    if(mpirank == 0) {
+        ThLocalNew = ThLocalInit;
+        part.resize(ThLocalNew.nt);
+        part = 0;
+    }
+    else {
+        real[int] backup = part;
+        ThLocalNew = ThLocalNew + ThLocalInit;
+        part.resize(ThLocalNew.nt);
+        part(0:backup.n-1) = backup;
+        part(backup.n:ThLocalNew.nt-1) = mpirank;
+    }
+    meshN ThLocalReconstructed;
+    if(mpirank == 0)
+        ThLocalReconstructed = ThLocalInit;
+    else
+        ThLocalReconstructed = trunc(ThLocalNew, chi(ThLocalInit) > 1.0e-2, label = -111111);
+    for(int i = between; i < neighbors.n; ++i)
+        Isend(processor(neighbors[i], mpiCommWorld, rqSendFirst[i - between]), ThLocalReconstructed);
+    ThLocalReconstructed = trunc(ThLocalNew, chi(ThLocalInit) > 1.0e-2, label = -111111);
+    mpiWaitAll(rqSendFirst);
+    for(int i = 0; i < between; ++i)
+        Isend(processor(neighbors[i], mpiCommWorld, rqSendSecond[i]), ThLocalReconstructed);
+    for(int i = between; i < neighbors.n; ++i) {
+        real[int] backup = part;
+        mpiWait(rqRecv[i - between]);
+        ThLocalNew = ThLocalNew + ThRecv[i - between];
+        part.resize(ThLocalNew.nt);
+        part(0:backup.n-1) = backup;
+        part(backup.n:ThLocalNew.nt-1) = neighbors[i];
+    }
+    mpiWaitAll(rqSendSecond);
+    ThName = ThLocalNew;
+    mpiBarrier(mpiCommWorld);
+    if(verbosity > 0 && mpirank == 0) cout.scientific << " --- distributed mesh reconstructed (in " << mpiWtime() - timerReconstruction << ")" << endl;
+    NewMacro privateBuildDmesh()1 EndMacro
+    NewMacro privateReconstructDmesh()1 EndMacro
+    int[int][int] intersection;
+    NewMacro privateDmesh#ThTab()privateDmesh#ThName EndMacro
+    NewMacro privateDmesh#ThTab#khi()privateDmesh#ThName#khiDef EndMacro
+    NewMacro privateDmesh#ThTab#intersection()privateDmesh#ThName#intersectionDef EndMacro
+IFMACRO(ThName#N2O)
+    NewMacro privateDmesh#N2O()ThName#N2O EndMacro
+ENDIFMACRO
+    buildWithPartitioning(ThName, part, 1, intersection, privateDmesh#ThName#khi[0], P1, mpiCommWorld)
+}
+EndMacro
 macro createMat(ThName, MatName, PkName)
 IFMACRO(privateDmesh#ThName)
 {
@@ -577,6 +697,7 @@ ENDIFMACRO
         fespace PhGlobal(ThGlobal, P0);
         fespace VhGlobal(ThGlobal, P1);
         PhGlobal partGlobal;
+IFMACRO(!privateReconstructDmesh)
         if(userPartitioning.n != PhGlobal.ndof || labPeriodic.n > 0) {
             timerPartition = mpiWtime();
             meshN ThGlobalPeriodic;
@@ -633,6 +754,10 @@ ENDIFMACRO
         else {
             partGlobal[] = userPartitioning;
         }
+ENDIFMACRO
+IFMACRO(privateReconstructDmesh)
+        partGlobal[] = userPartitioning;
+ENDIFMACRO
 IFMACRO(!trueRestrict)
         bool trueRestrict = usedARGV("-true_restrict") != -1;
 ENDIFMACRO
@@ -999,7 +1124,7 @@ IFMACRO(dimension, 2)
         if(!(bbAll[1 + 8 * i] < bb[4] - hmax[1]
           || bbAll[0 + 8 * i] > bb[5] + hmax[1]
           || bbAll[3 + 8 * i] < bb[6] - hmax[1]
-          || bbAll[2 + 8 * i] > bb[7] + hmax[1])) {
+          || bbAll[2 + 8 * i] > bb[7] + hmax[1]))
 ENDIFMACRO
 IFMACRO(dimension, 3)
         if(!(bbAll[1 + 12 * i] < bb[6] - hmax[1]
@@ -1007,8 +1132,9 @@ IFMACRO(dimension, 3)
           || bbAll[3 + 12 * i] < bb[8] - hmax[1]
           || bbAll[2 + 12 * i] > bb[9] + hmax[1]
           || bbAll[5 + 12 * i] < bb[10] - hmax[1]
-          || bbAll[4 + 12 * i] > bb[11] + hmax[1])) {
+          || bbAll[4 + 12 * i] > bb[11] + hmax[1]))
 ENDIFMACRO
+                                                    {
             rankRecv.resize(rankRecv.n + 1);
             rankRecv[rankRecv.n - 1] = i;
         }
@@ -1016,7 +1142,7 @@ IFMACRO(dimension, 2)
         if(!(bbAll[5 + 8 * i] < bb[0] - hmax[0]
           || bbAll[4 + 8 * i] > bb[1] + hmax[0]
           || bbAll[7 + 8 * i] < bb[2] - hmax[0]
-          || bbAll[6 + 8 * i] > bb[3] + hmax[0])) {
+          || bbAll[6 + 8 * i] > bb[3] + hmax[0]))
 ENDIFMACRO
 IFMACRO(dimension, 3)
         if(!(bbAll[7 + 12 * i] < bb[0] - hmax[0]
@@ -1024,8 +1150,9 @@ IFMACRO(dimension, 3)
           || bbAll[9 + 12 * i] < bb[2] - hmax[0]
           || bbAll[8 + 12 * i] > bb[3] + hmax[0]
           || bbAll[11 + 12 * i] < bb[4] - hmax[0]
-          || bbAll[10 + 12 * i] > bb[5] + hmax[0])) {
+          || bbAll[10 + 12 * i] > bb[5] + hmax[0]))
 ENDIFMACRO
+                                                    {
             rankSend.resize(rankSend.n + 1);
             rankSend[rankSend.n - 1] = i;
         }
