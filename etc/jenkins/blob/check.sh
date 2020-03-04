@@ -1,3 +1,3 @@
 #!/bin/bash
 
-make -j check
+make check
