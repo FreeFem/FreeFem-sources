@@ -590,7 +590,7 @@ namespace Fem2D
       double dmin2 = 1e200;
       R1 Phm;
       bool out = true;
-      int n=-1;
+      int nopt=-1;
       for (int i=0;i<nt;i++) {
           kthrough++;
           const EdgeL & K(this->elements[i]);
@@ -605,14 +605,14 @@ namespace Fem2D
           {
               dmin2 = d2;
               Phm=Ph;
-              n =i;
+              nopt =i;
               out = d2 < lab2*1e-2; // BofBof FH ...
           }
    
       }
-      if( n<0) return  0; 
+      if( nopt<0) return  0;
       Phat=Phm;
-      return this->elements+n; // outside
+      return this->elements+nopt; // outside
   }
     
     

@@ -655,7 +655,7 @@ namespace Fem2D
             cerr << " MeshS::Find warning brute force to day " << endl;
         double dmin2 = 1e200;
         bool out = true;
-        int n =-1;
+        int nopt =-1;// best triangle number
         R2 Pha;
         for (int i=0;i<nt;i++)
         {
@@ -692,6 +692,7 @@ namespace Fem2D
                     dmin2 = d2;
                     out = d2 < s*1e-2;
                     Pha = Ph;
+                    nopt= i;
                     continue;
                 }
                 
@@ -722,6 +723,7 @@ namespace Fem2D
             double d2 =R3(P,Q).norme2() ;
             if( dmin2 > d2)
             {
+                nopt= i;
                 dmin2 = d2;
                 out = d2 < s*1e-2;
                 Pha = Ph;
@@ -730,8 +732,8 @@ namespace Fem2D
 
         }
         outside=out;
-        Phat=Pha; 
-        return n<0 ? 0: this->elements + n; // outside
+        Phat=Pha;
+        return nopt<0 ? 0: this->elements + nopt; // outside
         
     }
     
