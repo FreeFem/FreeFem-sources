@@ -6,9 +6,13 @@
 #include "parmmg/libparmmg.h"
 #include "GenericMesh.hpp"
 
+#if 0
+extern "C" int PMMG_grp_to_saveMesh(PMMG_pParMesh, int, char*);
+#endif
+
 using namespace Fem2D;
 
-int ffmesh_to_PMMG_pParMesh(const Mesh3 &Th, PMMG_pParMesh& mesh) {
+int ffmesh_to_PMMG_pParMesh(const Mesh3 &Th, PMMG_pParMesh& mesh, bool distributed) {
   int nVertices       = Th.nv;
   int nTetrahedra     = Th.nt;
   int nPrisms         = 0;
@@ -16,7 +20,7 @@ int ffmesh_to_PMMG_pParMesh(const Mesh3 &Th, PMMG_pParMesh& mesh) {
   int nQuadrilaterals = 0;
   int nEdges          = 0;
 
-  if(mesh->myrank == mesh->info.root){
+  if(mesh->myrank == mesh->info.root || distributed) {
     if ( PMMG_Set_meshSize(mesh,nVertices,nTetrahedra,nPrisms,nTriangles,
                            nQuadrilaterals,nEdges) != 1 ) {
       exit(EXIT_FAILURE);
@@ -24,7 +28,7 @@ int ffmesh_to_PMMG_pParMesh(const Mesh3 &Th, PMMG_pParMesh& mesh) {
 
     for (int k = 0; k < Th.nv; k++) {
       if ( PMMG_Set_vertex(mesh,Th.vertices[k].x,Th.vertices[k].y,
-                           Th.vertices[k].z, Th.vertices[k].lab, k+1) != 1 ) { 
+                           Th.vertices[k].z, Th.vertices[k].lab, k+1) != 1 ) {
         exit(EXIT_FAILURE);
       }
     }
@@ -48,7 +52,7 @@ int ffmesh_to_PMMG_pParMesh(const Mesh3 &Th, PMMG_pParMesh& mesh) {
   return 0;
 }
 
-int PMMG_pParMesh_to_ffmesh(const PMMG_pParMesh& mesh, Mesh3 *&T_TH3) {
+int PMMG_pParMesh_to_ffmesh(const PMMG_pParMesh& mesh, Mesh3 *&T_TH3, bool distributed) {
     int ier;
 
     int nVertices   = 0;
@@ -56,9 +60,9 @@ int PMMG_pParMesh_to_ffmesh(const PMMG_pParMesh& mesh, Mesh3 *&T_TH3) {
     int nTriangles  = 0;
     int nEdges      = 0;
 
-    if(mesh->myrank == mesh->info.root){
+    if(mesh->myrank == mesh->info.root || distributed) {
       if ( PMMG_Get_meshSize(mesh,&nVertices,&nTetrahedra,NULL,&nTriangles,NULL,
-                         &nEdges) !=1 ) { 
+                         &nEdges) !=1 ) {
         ier = MMG5_STRONGFAILURE;
       }
 
@@ -122,7 +126,7 @@ int PMMG_pParMesh_to_ffmesh(const PMMG_pParMesh& mesh, Mesh3 *&T_TH3) {
 class parmmg_Op : public E_F0mps {
  public:
   Expression eTh, xx, yy, zz;
-  static const int n_name_param = 31;
+  static const int n_name_param = 32;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
 
@@ -185,7 +189,8 @@ basicAC_F0::name_and_type parmmg_Op::name_param[] = {
 {"hsiz"              , &typeid(double)},/*!< [val], Constant mesh size */
 {"hausd"             , &typeid(double)},/*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
 {"hgrad"             , &typeid(double)},/*!< [val], Control gradation */
-{"ls"                , &typeid(double)}/*!< [val], Value of level-set */
+{"ls"                , &typeid(double)},/*!< [val], Value of level-set */
+{"nodeCommunicators" , &typeid(KN<KN<long>>*)}
 };
 
 class parmmg_ff : public OneOperator {
@@ -211,13 +216,13 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
   if (nargs[0]) {
     pmetric = GetAny< KN< double > * >((*nargs[0])(stack));
   }
-  
+
   pcommworld pcomm = 0;
-  
+
   if (nargs[1]) {
     pcomm = GetAny<pcommworld>((*nargs[1])(stack));
   }
-  
+
   MPI_Comm comm = pcomm ? *(MPI_Comm*)pcomm : MPI_COMM_WORLD;
 
   PMMG_pParMesh mesh;
@@ -234,33 +239,34 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
                     PMMG_ARG_dim,3,PMMG_ARG_MPIComm,comm,
                     PMMG_ARG_end);
 
-  ffmesh_to_PMMG_pParMesh(Th, mesh);
-  
+  KN< KN< long > >* communicators = nargs[31] ? GetAny< KN< KN< long > >* >((*nargs[31])(stack)) : 0;
+  ffmesh_to_PMMG_pParMesh(Th, mesh, communicators != NULL);
+
   int root = mesh->info.root;
   int myrank = mesh->myrank;
-  
-  if(myrank == root){
+
+  if(myrank == root || communicators != NULL) {
     if (pmetric && pmetric->N( ) > 0) {
       const KN< double > &metric = *pmetric;
       if (metric.N( ) == Th.nv) {
-        if ( PMMG_Set_metSize(mesh,MMG5_Vertex,Th.nv,MMG5_Scalar) != 1 ) { 
+        if ( PMMG_Set_metSize(mesh,MMG5_Vertex,Th.nv,MMG5_Scalar) != 1 ) {
           printf("Unable to allocate the metric array.\n");
           exit(EXIT_FAILURE);
         }
-        if ( PMMG_Set_scalarMets(mesh,metric) != 1 ) { 
+        if ( PMMG_Set_scalarMets(mesh,metric) != 1 ) {
           printf("Unable to set metric.\n");
           exit(EXIT_FAILURE);
         }
       }
       else {
-        if ( PMMG_Set_metSize(mesh,MMG5_Vertex,Th.nv,MMG5_Tensor) != 1 ) { 
+        if ( PMMG_Set_metSize(mesh,MMG5_Vertex,Th.nv,MMG5_Tensor) != 1 ) {
           printf("Unable to allocate the metric array.\n");
           exit(EXIT_FAILURE);
         }
         static const int perm[6] = {0, 1, 3, 2, 4, 5};
         for (int k=0; k<Th.nv; k++) {
-          if ( PMMG_Set_tensorMet(mesh, metric[6*k+perm[0]], metric[6*k+perm[1]], metric[6*k+perm[2]], 
-                                  metric[6*k+perm[3]], metric[6*k+perm[4]], metric[6*k+perm[5]], k+1) != 1 ) { 
+          if ( PMMG_Set_tensorMet(mesh, metric[6*k+perm[0]], metric[6*k+perm[1]], metric[6*k+perm[2]],
+                                  metric[6*k+perm[3]], metric[6*k+perm[4]], metric[6*k+perm[5]], k+1) != 1 ) {
             printf("Unable to set metric.\n");
             exit(EXIT_FAILURE);
           }
@@ -270,7 +276,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
   }
 
   int i=2;
-  
+
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_verbose,       arg(i,stack,0L)); i++;   /*!< [-10..10], Tune level of verbosity */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_mmgVerbose,    arg(i,stack,0L)); i++;   /*!< [-10..10], Tune level of verbosity of Mmg */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_mem,           arg(i,stack,0L)); i++;   /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
@@ -301,33 +307,66 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
   if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hgrad,         arg(i,stack,0.)); i++;   /*!< [val], Control gradation */
   if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_ls,            arg(i,stack,0.)); i++;   /*!< [val], Value of level-set */
 
-  int ier = PMMG_parmmglib_centralized(mesh);
+  if(communicators != NULL) {
+    /* Set API mode */
+    if( !PMMG_Set_iparameter( mesh, PMMG_IPARAM_APImode, PMMG_APIDISTRIB_nodes ) ) {
+      exit(EXIT_FAILURE);
+    }
+
+    /* Set the number of interfaces */
+    PMMG_Set_numberOfNodeCommunicators(mesh, communicators->operator[](0).N());
+
+    /* Loop on each interface (proc pair) seen by the current rank) */
+    for(int icomm=0; icomm<communicators->operator[](0).N(); icomm++ ) {
+
+      /* Set nb. of entities on interface and rank of the outward proc */
+      PMMG_Set_ithNodeCommunicatorSize(mesh, icomm,
+                                       communicators->operator[](0)[icomm],
+                                       communicators->operator[](1 + 2 * icomm).N());
+
+      /* Set local and global index for each entity on the interface */
+      KN<int> local = communicators->operator[](1 + 2 * icomm);
+      local += 1;
+      KN<int> global = communicators->operator[](2 + 2 * icomm);
+      global += 1;
+      PMMG_Set_ithNodeCommunicator_nodes(mesh, icomm,
+                                         local.operator int*(),
+                                         global.operator int*(), 1);
+    }
+  }
+#if 0
+  char filemesh[48];
+  sprintf(filemesh,"cube_in.%d.mesh",mpirank);
+  // PMMG_grp_to_saveMesh(mesh, mpirank, filemesh);
+#endif
+  int ier = communicators == NULL ? PMMG_parmmglib_centralized(mesh) : PMMG_parmmglib_distributed(mesh);
 
   Mesh3 *Th_T = nullptr;
-  
-  PMMG_pParMesh_to_ffmesh(mesh,Th_T);
+
+  PMMG_pParMesh_to_ffmesh(mesh, Th_T, communicators != NULL);
 
   PMMG_Free_all(PMMG_ARG_start,
-              PMMG_ARG_ppParMesh,&mesh,
+              PMMG_ARG_ppParMesh, &mesh,
               PMMG_ARG_end);
+  if(communicators == NULL) {
+    Serialize *buf = 0;
+    long nbsize = 0;
+    if (myrank == root) {
+      buf = new Serialize((*Th_T).serialize());
+      nbsize = buf->size();
+    }
 
-  Serialize *buf = 0; 
-  long nbsize = 0;
-  if (myrank == root) {
-    buf = new Serialize((*Th_T).serialize());
-    nbsize = buf->size();
+    MPI_Bcast(reinterpret_cast<void*>(&nbsize), 1, MPI_LONG, root, comm);
+    if (myrank != root)
+      buf = new Serialize(nbsize, Fem2D::GenericMesh_magicmesh);
+    MPI_Bcast(reinterpret_cast<void*>((char *)(*buf)), nbsize, MPI_BYTE, root, comm);
+    if (myrank != root)
+      Th_T = new Fem2D::Mesh3(*buf);
+    delete buf;
   }
 
-  MPI_Bcast(reinterpret_cast<void*>(&nbsize), 1, MPI_LONG, root, comm);
-  if (myrank != root)
-    buf = new Serialize(nbsize, Fem2D::GenericMesh_magicmesh);
-  MPI_Bcast(reinterpret_cast<void*>((char *)(*buf)), nbsize, MPI_BYTE, root, comm);
-  if (myrank != root)
-    Th_T = new Fem2D::Mesh3(*buf);
-  delete buf;
-
   Th_T->BuildGTree();
-  
+
   Add2StackOfPtr2FreeRC(stack, Th_T);
   return Th_T;
 }
