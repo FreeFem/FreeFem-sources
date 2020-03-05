@@ -243,6 +243,35 @@ namespace PETSc {
     return 0L;
   }
   template< class Type >
+  long ParMmgCommunicators(Type* const& A, KN< double >* const& gamma, KN< long >* const& rest, KN< KN< long >>* const& communicators) {
+    if (A && A->_petsc && A->_A) {
+      std::unordered_map<int, std::pair<int, PetscInt>> map;
+      for(int i = 0; i < rest->n; ++i) {
+        if(std::abs(gamma->operator[](i) - 1.0) < 1.0e-6)
+          map[rest->operator[](i)] = std::make_pair(i, A->_num[rest->operator[](i)]);
+      }
+      const HPDDM::vectorNeighbor& neighbors = A->_A->getMap();
+      communicators->resize(2 * neighbors.size() + 1);
+      communicators->operator[](0).resize(neighbors.size());
+      for(unsigned short i = 0; i < neighbors.size(); ++i) {
+          communicators->operator[](0)[i] = neighbors[i].first;
+          communicators->operator[](2 * i + 1).resize(neighbors[i].second.size());
+          communicators->operator[](2 * i + 2).resize(neighbors[i].second.size());
+          int m = 0;
+          for(unsigned int j = 0; j < neighbors[i].second.size(); ++j) {
+            std::unordered_map<int, std::pair<int, PetscInt>>::const_iterator it = map.find(neighbors[i].second[j]);
+            if(it != map.cend()) {
+              communicators->operator[](2 * i + 1)[m] = it->second.first;
+              communicators->operator[](2 * i + 2)[m++] = it->second.second;
+            }
+          }
+          communicators->operator[](2 * i + 1).resize(m);
+          communicators->operator[](2 * i + 2).resize(m);
+      }
+    }
+    return 0L;
+  }
+  template< class Type >
   class changeOperator : public OneOperator {
    public:
     const int c;
@@ -3935,6 +3964,8 @@ static void Init_PETSc( ) {
              new OneOperator2_< long, Dmat*, KN< double >* >(PETSc::globalNumbering< Dmat >));
   Global.Add("globalNumbering", "(",
              new OneOperator2_< long, Dbddc*, KN< long >* >(PETSc::globalNumbering< Dbddc >));
+  Global.Add("ParMmgCommunicators", "(",
+             new OneOperator4_< long, Dmat*, KN< double >*, KN< long >*, KN< KN< long >>* >(PETSc::ParMmgCommunicators< Dmat >));
   Global.Add("changeOperator", "(", new PETSc::changeOperator< Dmat >( ));
   Global.Add("changeOperator", "(", new PETSc::changeOperator< Dmat >(1));
   TheOperators->Add("=", new OneOperator2_< Dmat*, Dmat*, Matrice_Creuse< PetscScalar >* >(
