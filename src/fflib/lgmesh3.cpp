@@ -532,22 +532,24 @@ long pmesh_nv(pmesh3 * p) { ffassert(p) ;  return *p ? (**p).nv : 0;}
 long pmesh_nbe(pmesh3 * p) { ffassert(p) ;  return *p ? (**p).nbe : 0;}
 
 double pmesh_hmax(pmesh3 * p)
-{ ffassert(p && *p) ;
+{ if(p && *p) {
     double hmax2 =0;
     const Mesh3 & Th = **p;
     for(int k=0; k< Th.nt; ++k)
         for(int e=0; e<6; ++e)
             hmax2=max(hmax2,Th[k].Edge(e).norme2());
-    return sqrt(hmax2);}
+    return sqrt(hmax2); }
+  else return 0.0; }
 
 double pmesh_hmin(pmesh3 * p)
-{ throwassert(p && *p) ;
+{ if(p && *p) {
     double hmin2 =1e100;
     const Mesh3 & Th = **p;
     for(int k=0; k< Th.nt; ++k)
         for(int e=0; e<6; ++e)
             hmin2=min(hmin2,Th[k].Edge(e).norme2());
-    return sqrt(hmin2);}
+    return sqrt(hmin2); }
+  else return 0.0; }
 
 
 pmeshS pmesh3_gamma(Stack stack, pmesh3 * const & p)

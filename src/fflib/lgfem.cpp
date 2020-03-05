@@ -1628,21 +1628,23 @@ long pmesh_nv(pmesh *p) {
 }
 
 double pmesh_hmax(pmesh *p) {
-  throwassert(p && *p);
-  double hmax2 = 0;
-  const Mesh &Th = **p;
-  for (int k = 0; k < Th.nt; ++k)
-    for (int e = 0; e < 3; ++e) hmax2 = max(hmax2, Th[k].lenEdge2(e));
-  return sqrt(hmax2);
+  if(p && *p) {
+    double hmax2 = 0;
+    const Mesh &Th = **p;
+    for (int k = 0; k < Th.nt; ++k)
+      for (int e = 0; e < 3; ++e) hmax2 = max(hmax2, Th[k].lenEdge2(e));
+    return sqrt(hmax2);
+  } else return 0.0;
 }
 
 double pmesh_hmin(pmesh *p) {
-  throwassert(p && *p);
-  double hmin2 = 1e100;
-  const Mesh &Th = **p;
-  for (int k = 0; k < Th.nt; ++k)
-    for (int e = 0; e < 3; ++e) hmin2 = min(hmin2, Th[k].lenEdge2(e));
-  return sqrt(hmin2);
+  if(p && *p) {
+    double hmin2 = 1e100;
+    const Mesh &Th = **p;
+    for (int k = 0; k < Th.nt; ++k)
+      for (int e = 0; e < 3; ++e) hmin2 = min(hmin2, Th[k].lenEdge2(e));
+    return sqrt(hmin2);
+  } else return 0.0;
 }
 
 long pVh_ndof(pfes *p) {
