@@ -1,0 +1,69 @@
+load "msh3"
+//
+// Problem definition
+//
+//1d pde on the boundary term       u_t=e*u_{xx}   0<x<1
+//                                  u(0,x)=1-2*(t-1/2)*sign(t-1/2)
+//                                  u(t,0)=0,u(t,1)=0
+
+// Technical data to recreate OX and OY axis
+//
+border OX(t=0,1){x=t;y=0;} 
+border OY(t=-1,1){x=0;y=t;}
+
+int m=100; // grid points on x-interval [0,1]
+real h=1./m;
+
+meshL Th=segment(m);
+
+plot(Th, cmm="NO ADAPTED MESH ",wait=0);//,ps="reactiondiffusionnoadapted2dmesh.eps");
+fespace Uh(Th,P1);
+ 
+// Initial data
+func real u0(real t) 
+{
+return sin(4*pi*t);
+}
+
+ 
+Uh S, uold0,uold1,unew;
+
+uold0=u0(x);// Step cero
+uold1=uold0; // Step one
+
+real dt=0.01;
+real T=10; // tempo di uscita
+real t=0;  // velocita iniziale
+real c=1400; // Speed of propagation
+real L=1000; // Speed of propagation
+
+
+real ratio = 0.5*dt^2*c^2/L^2;
+
+varf mat(u,v)= int1d(Th)(u*v+ratio*dx(u)*dx(v))+on(1,2,u=0); 
+
+varf rhs(u,v)= int1d(Th)((2*uold1-uold0)*v
+                          -ratio*dx(uold0)*dx(v)+0*v)+on(1,2,u=0);
+
+
+matrix A=mat(Uh,Uh);
+real[int] b=rhs(0,Uh);
+
+real maximum=0.0;
+
+// time loop
+for (t=0;t<T; t+=dt) { 
+
+S[]=A^-1*b;
+meshL Thmv=movemesh(Th,[x,y+S]);
+plot(Thmv,OX(1),OY(1),wait=0,prev=1,dim=2, cmm="Time "+t+" max "+S[].max);
+
+//
+//update
+
+uold0[] = uold1[]; 
+uold1[] = S[]; 
+A=mat(Uh,Uh);
+b=rhs(0,Uh);
+
+}; // end of time loop

@@ -1,0 +1,26 @@
+load "msh3"
+int n = 100;
+meshL Th = segment(n,[10.*(2.*x-1.),1.*y]);	
+fespace Vh(Th,P1); 	
+Vh psi, chi; // unknown and testfunction
+
+int nev = 6; // number of eigensolutions
+real e = 1.; // energy parameter (eigenvalue)
+Vh[int] EigenPsi(nev); // array to store eigenvectors
+real[int] EigenVal(nev); // array to store eigenvalues									
+
+varf Schrodinger(psi,chi) = // variational form of the schrodinger equation
+	int1d(Th)(dx(psi)*dx(chi) + x^2*psi*chi) 
+	- int1d(Th)(e*psi*chi) + on(2,4,psi=0);
+varf RHS(psi,chi) = int1d(Th)(psi*chi);
+matrix A = Schrodinger(Vh,Vh);
+matrix B = RHS(Vh,Vh);
+
+// solve the eigenvalue problem:
+int num = EigenValue(A,B,sym=true,sigma=e,value=EigenVal,
+vector=EigenPsi,tol=1e-10,maxit=1000,ncv=0);
+
+for(int i = 0; i < nev; i++){
+	cout << "Eigenvalue["+i+"] = " << EigenVal[i] << endl;
+	plot(EigenPsi[i],dim=3,fill=1,cmm="("+i+")");
+	}
