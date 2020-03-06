@@ -513,13 +513,20 @@ ENDIFMACRO
     mpiBarrier(mpiCommWorld);
     real timerReconstruction = mpiWtime();
     real[int] bb(2 * dimension);
-    meshN ThLocalInit = ThName; /* TODO FIXME: only work on one layer of elements */
+    varf vG(u, v) = on(labels(Th), u = 1.0);
+    fespace VhGamma(ThName, P1);
+    fespace PhGamma(ThName, P0);
+    VhGamma gamma;
+    gamma[] = vG(0, VhGamma, tgv = -1);
+    PhGamma gammaElt = gamma > 0.1;
+    meshN ThLocalInit = trunc(ThName, gammaElt > 0.1, label = -111112);
+    meshN ThLocalInitInterior = trunc(ThName, gammaElt < 0.1, label = -111112);
     boundingbox(ThLocalInit, bb);
     real[int] bbAll(2 * dimension * mpisize);
     mpiAllgather(bb, bbAll, mpiCommWorld);
     real hmax;
     {
-        real tmp = ThGlobal.hmax;
+        real tmp = ThName.hmax;
         mpiAllReduce(tmp, hmax, mpiCommWorld, mpiMAX);
     }
     int[int] neighbors;
@@ -605,8 +612,14 @@ ENDIFMACRO
         part(0:backup.n-1) = backup;
         part(backup.n:ThLocalNew.nt-1) = neighbors[i];
     }
+    {
+        real[int] backup = part;
+        ThName = ThLocalInitInterior + ThLocalNew;
+        part.resize(ThName.nt);
+        part(0:ThName.nt-backup.n-1) = mpirank;
+        part(ThName.nt-backup.n:ThName.nt-1) = backup;
+    }
     mpiWaitAll(rqSendSecond);
-    ThName = ThLocalNew;
     mpiBarrier(mpiCommWorld);
     if(verbosity > 0 && mpirank == 0) cout.scientific << " --- distributed mesh reconstructed (in " << mpiWtime() - timerReconstruction << ")" << endl;
     NewMacro privateBuildDmesh()1 EndMacro
