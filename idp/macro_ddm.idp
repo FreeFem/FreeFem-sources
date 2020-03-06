@@ -109,7 +109,7 @@ if(!NoGraphicWindow || usedARGV("-fglut") != -1) {
 
 macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank, size, s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs) {
     int backupSM = searchMethod;
-    searchMethod = 0;
+    searchMethod = 1;
     assert(level >= 1);
 IFMACRO(!privateCreatePartition)
 IFMACRO(!privateCreateMat)
@@ -530,9 +530,9 @@ ENDIFMACRO
         mpiAllReduce(tmp, hmax, mpiCommWorld, mpiMAX);
     }
     int[int] neighbors;
-    int between;
+    int between = 0;
     for(int i = 0; i < mpisize; ++i) {
-        if(i != mpirank && (i == mpirank - 1 || i == mpirank + 1 ||
+        if(i != mpirank &&
     IFMACRO(dimension, 2)
         !(bbAll[1 + 4 * i] < bb[0] - hmax
           || bbAll[0 + 4 * i] > bb[1] + hmax
@@ -547,15 +547,16 @@ ENDIFMACRO
           || bbAll[5 + 6 * i] < bb[4] - hmax
           || bbAll[4 + 6 * i] > bb[5] + hmax)
     ENDIFMACRO
-                                             )) {
-            if(i == mpirank + 1)
-                between = neighbors.n;
-            else if(i == mpirank - 1)
-                between = neighbors.n + 1;
+                                             ) {
             neighbors.resize(neighbors.n + 1);
             neighbors[neighbors.n - 1] = i;
         }
     }
+    for(int i = 0; i < neighbors.n; ++i)
+        if(neighbors[i] > mpirank) {
+            between = i;
+            break;
+        }
     meshN[int] ThRecv(max(neighbors.n - between, between));
     mpiRequest[int] rqRecv(max(neighbors.n - between, between));
     mpiRequest[int] rqSendFirst(neighbors.n - between);
