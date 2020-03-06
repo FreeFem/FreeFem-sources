@@ -28,5 +28,7 @@ border E1(t=0, 10.*pi){x=(1.)*t*cos(t); y=-(1.)*t*sin(t); z=t;}
 meshL ThL2=buildmeshL(E1(1000));
 plot(ThL2);
 
-
+mesh Th=square(10,10);
+int[int] ll=[4];
+meshL ThL = extract(Th,[x+2,y*5],refedge=ll);
 
