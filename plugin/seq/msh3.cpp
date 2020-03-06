@@ -6740,13 +6740,6 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
 
   MMeshO *pThnew = new MMeshO(nv, ns, 0, v, b, 0);
 
-  /*pThnew->mapVol2Surf = new int[nv];
-pThnew->mapSurf2Vol= new int[nv];
-for(int i=0 ; i<nv ; i++) {
-  pThnew->mapVol2Surf[i]= mapVol2Surf[i];
-  pThnew->mapSurf2Vol[i]= mapSurf2Vol[i];
-}*/
-
   copyMapping(pThnew, mapVol2Surf, mapSurf2Vol);
 
   // pThnew->BuildEdges(); call in MMeshO constructor if nbe=0
@@ -6757,6 +6750,185 @@ for(int i=0 ; i<nv ; i++) {
   Add2StackOfPtr2FreeRC(stack, pThnew);
   return pThnew;
 }
+
+      
+
+class ExtractMeshLfromMesh_Op : public E_F0mps {
+public:
+	Expression eTh;
+	static const int n_name_param = 7;    //
+	static basicAC_F0::name_and_type name_param[];
+	Expression nargs[n_name_param], xx, yy, zz;
+      
+	KN_< long > arg(int i, int ii, Stack stack, KN_< long > a) const {
+		ffassert(!(nargs[i] && nargs[ii]));
+		i = nargs[i] ? i : ii;
+		return nargs[i] ? GetAny< KN_< long > >((*nargs[i])(stack)) : a;
+	}
+	double arg(int i, Stack stack, double a) const { return nargs[i] ? GetAny< double >((*nargs[i])(stack)) : a; }
+
+	long arg(int i, Stack stack, long a) const { return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a; }
+
+	bool arg(int i, Stack stack, bool a) const { return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a; }
+		
+public:
+	ExtractMeshLfromMesh_Op(const basicAC_F0 &args, Expression tth, Expression xxx = 0, Expression yyy = 0,
+	Expression zzz = 0) 
+	: eTh(tth),xx(xxx), yy(yyy), zz(zzz)  {
+
+		args.SetNameParam(n_name_param, name_param, nargs);
+		const E_Array *a1 = 0;
+		if (nargs[0]) 
+			a1 = dynamic_cast< const E_Array * >(nargs[0]);
+		
+		if (a1) {  
+		xx = to< double >((*a1)[0]);
+		if(a1->size()>1) yy = to< double >((*a1)[1]);
+		if(a1->size()>2) zz = to< double >((*a1)[2]);
+	}
+}
+
+AnyType operator( )(Stack stack) const;
+};
+     
+
+basicAC_F0::name_and_type ExtractMeshLfromMesh_Op::name_param[] = {
+{"transfo", &typeid(E_Array)},       // 0
+{"refedge", &typeid(KN_< long >)},
+{"label", &typeid(KN_< long >)},
+{"cleanmesh", &typeid(bool)}, 
+{"removeduplicate", &typeid(bool)},
+{"precismesh", &typeid(double)},
+{"orientation", &typeid(long)}
+};
+            
+ 
+class ExtractMeshLfromMesh : public OneOperator {
+public:
+	int cas;
+		
+	ExtractMeshLfromMesh( ) : OneOperator(atype< pmeshL >( ), atype< pmesh >( )) , cas(0) {}
+		
+	ExtractMeshLfromMesh(int) : OneOperator(atype< pmeshL >( ), atype< pmesh >( ) , atype< E_Array >( )), cas(1) {}
+
+	E_F0 *code(const basicAC_F0 &args) const {
+		if (cas == 0) {
+			return new ExtractMeshLfromMesh_Op(args, t[0]->CastTo(args[0]));
+		} else if (cas == 1) {
+			const E_Array *a = dynamic_cast< const E_Array * >(args[1].LeftValue( ));
+			ffassert(a);
+			Expression X = to< double >((*a)[0]); 
+			Expression Y=0 ; if(a->size( )>1) Y=to< double >((*a)[1]); 
+			Expression Z=0 ; if(a->size( )>2) Z= to< double >((*a)[2]);
+			return new ExtractMeshLfromMesh_Op(args, t[0]->CastTo(args[0]), X, Y, Z);
+		} 
+	}
+};
+
+    
+AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
+	MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
+	Mesh *pTh = GetAny< Mesh * >((*eTh)(stack));
+	Mesh &Th = *pTh;
+	MeshPoint *mpp(MeshPointStack(stack));
+	ffassert(pTh);
+
+	typedef typename Mesh::Element T;
+	typedef typename Mesh::BorderElement B;
+	typedef typename Mesh::Vertex V;
+
+	typedef typename MeshL::Element TL;
+	typedef typename MeshL::BorderElement BL;
+	typedef typename MeshL::Vertex VL;
+
+	int nbv = Th.nv;    // nombre de sommet
+	int nbe = Th.neb;
+
+	KN< long > zzempty(0);
+	KN< long > labelface(arg(1, 2, stack, zzempty));
+	long cleanmesh(arg(3, stack, true));
+	long removeduplicate(arg(4, stack, false));
+	bool rebuildboundary=false;//(arg(7, stack, false));
+	double precis_mesh(arg(5, stack, 1e-7));
+	long orientation(arg(6, stack, 1L));
+		  
+	// a trier les tableaux d'entier
+	if (verbosity > 9) {
+		cout << " labelface.N()  " << labelface.N( ) << endl;
+		for (int ii = 0; ii < labelface.N( ); ii++) 
+			cout << ii << " " << labelface[ii] << endl;
+	}
+		
+
+	KN< int > takevertex(Th.nv, -1);
+	KN< int > takebe(Th.neb, -1);
+
+	int nbeLab = 0, nvL=0;
+	for (int ibe = 0; ibe < Th.neb; ++ibe) {
+		const B &K(Th.be(ibe));
+			
+		if(labelface.N( )) 
+			for (int ii = 0; ii < labelface.N( ); ++ii) {
+				if (K.lab == labelface[ii]) {
+					nbeLab++;
+					takebe[ibe] = 1;
+
+					for (int jj = 0; jj < 2; ++jj) {
+						if (takevertex[Th.operator( )(K[jj])] != -1) continue;
+						takevertex[Th.operator( )(K[jj])] = nvL;
+						nvL++;
+					}
+				}
+			}
+		else {
+			nbeLab++;
+			takebe[ibe] = 1;
+			for (int jj = 0; jj < 2; ++jj) {
+				if (takevertex[Th.operator( )(K[jj])] != -1) continue;
+				takevertex[Th.operator( )(K[jj])] = nvL;
+				nvL++;
+			}	
+		}
+	}
+	VL *v = new VL[nvL];
+	TL *b = new TL[nbeLab];
+	TL *bb = b;
+
+	for (int ii = 0; ii < Th.nv; ++ii) {
+		if (takevertex[ii] == -1) {
+			continue;
+		}
+		int iv = takevertex[ii];
+			
+		mpp->set(Th.vertices[ii].x, Th.vertices[ii].y);
+		if (xx) v[iv].x = GetAny< double >((*xx)(stack)); 
+		else v[iv].x = mpp->P.x;
+		if (yy) v[iv].y = GetAny< double >((*yy)(stack)); 
+		else v[iv].y = mpp->P.y;
+		if (zz) v[iv].z = GetAny< double >((*zz)(stack));
+		else v[iv].z = 0.;			
+			
+		v[iv].lab = Th.vertices[ii].lab;
+	}
+
+	for (int ibe = 0; ibe < Th.neb; ibe++) {
+		if (takebe[ibe] != 1) continue;
+		const B &K(Th.be(ibe));
+		int ivv[2];
+		for (int jj = 0; jj < 2; jj++) ivv[jj] = takevertex[Th.operator( )(K[jj])];
+		(bb++)->set(v, ivv, K.lab);
+	}
+     
+	// build the moved mesh and apply option
+	MeshL *T_Th = new MeshL(nvL, nbeLab, 0, v, b, 0, cleanmesh, removeduplicate, rebuildboundary, orientation, precis_mesh);
+
+
+	T_Th->BuildGTree( );
+	Add2StackOfPtr2FreeRC(stack, T_Th);
+	*mp = mps;
+	return T_Th;
+}
+
 
 bool AddLayers(Mesh3 const *const &pTh, KN< double > *const &psupp, long const &nlayer,
                KN< double > *const &pphi) {
@@ -7409,9 +7581,7 @@ class Cube : public OneOperator {
 };
 
 class Square_Op : public E_F0mps {
- public:
-  Expression filename;
-  static const int n_name_param = 7;    //
+ public:  static const int n_name_param = 7;    //
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param], enx, eny, xx, yy, zz;
   long arg(int i, Stack stack, long a) const {
@@ -8255,8 +8425,11 @@ AnyType Movemesh_Op< MMesh >::operator( )(Stack stack) const {
       if (takemesh[i] == 0) {
         mpp->set(Th.vertices[i].x, Th.vertices[i].y, Th.vertices[i].z);
         if (xx) v[i].x = GetAny< double >((*xx)(stack));
+        else v[i].x = mpp->P.x;
         if (yy) v[i].y = GetAny< double >((*yy)(stack));
+        else v[i].y = mpp->P.y;
         if (zz) v[i].z = GetAny< double >((*zz)(stack));
+        else v[i].z = mpp->P.z;
         v[i].lab = Th.vertices[i].lab;
         takemesh[i] = takemesh[i] + 1;
       }
@@ -9080,9 +9253,8 @@ static void Load_Init( ) {
 
   Global.Add("trunc", "(", new Op_trunc_mesh3);
   Global.Add("gluemesh", "(", new Op_GluMesh3tab);
-  Global.Add("extract", "(", new ExtractMesh2D);    // obselete function -> use trunc function
-  Global.Add("extract", "(",
-             new ExtractMesh< Mesh3, MeshS >);    // take a Mesh3 in arg and return a part of MeshS
+  //Global.Add("extract", "(", new ExtractMesh2D);    // obselete function -> use trunc function
+  Global.Add("extract", "(",new ExtractMesh< Mesh3, MeshS >);    // take a Mesh3 in arg and return a part of MeshS
 
   // for a mesh3 Th3, if Th3->meshS=NULL, build the meshS associated
   Global.Add("buildBdMesh", "(", new BuildMeshSFromMesh3);
@@ -9149,8 +9321,10 @@ static void Load_Init( ) {
   
   Global.Add("buildBdMesh", "(", new BuildMeshLFromMeshS);
 
-  Global.Add("extract", "(", new ExtractMesh< MeshS, MeshL >);    // take a Mesh3 in arg and return a part of MeshS
-
+  Global.Add("extract", "(", new ExtractMesh< MeshS, MeshL >);    // take a MeshS in arg and return a part of MeshL
+  Global.Add("extract", "(", new ExtractMeshLfromMesh);    // take a Mesh in arg and return a part of MeshL
+  Global.Add("extract", "(", new ExtractMeshLfromMesh(1));    
+  
   Global.Add("OrientNormal", "(", new OrientNormal<MeshS>);
   Global.Add("OrientNormal", "(", new OrientNormal<MeshL>);
    
