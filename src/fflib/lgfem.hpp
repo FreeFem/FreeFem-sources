@@ -972,7 +972,7 @@ class Op4_K2R : public quad_function< K, R, R, R, K > {
   };
 };
 
-// 3D volume
+// 3D
 template< class K, class v_fes >
 class E_set_fev3 : public E_F0mps {
  public:
@@ -993,58 +993,6 @@ class E_set_fev3 : public E_F0mps {
   Expression optiexp0, optiexpK;
 
   E_set_fev3(const E_Array *a, Expression pp);
-
-  AnyType operator( )(Stack) const;
-  operator aType( ) const { return atype< void >( ); }
-};
-
-// 3D surface
-template< class K, class v_fes >
-class E_set_fevS : public E_F0mps {
- public:
-  typedef typename v_fes::pfes pfes;
-  typedef typename v_fes::FESpace FESpace;
-  typedef typename FESpace::Mesh Mesh;
-  typedef typename FESpace::FElement FElement;
-  typedef typename Mesh::Element Element;
-  typedef typename Mesh::Vertex Vertex;
-  typedef typename Mesh::RdHat RdHat;
-  typedef typename Mesh::Rd Rd;
-
-  E_Array aa;
-  Expression ppfe;
-  bool optimize, optimizecheck;
-
-  vector< size_t > where_in_stack_opt;
-  Expression optiexp0, optiexpK;
-
-  E_set_fevS(const E_Array *a, Expression pp);
-
-  AnyType operator( )(Stack) const;
-  operator aType( ) const { return atype< void >( ); }
-};
-
-// 3D curve
-template< class K, class v_fes >
-class E_set_fevL : public E_F0mps {
- public:
-  typedef typename v_fes::pfes pfes;
-  typedef typename v_fes::FESpace FESpace;
-  typedef typename FESpace::Mesh Mesh;
-  typedef typename FESpace::FElement FElement;
-  typedef typename Mesh::Element Element;
-  typedef typename Mesh::Vertex Vertex;
-  typedef typename Mesh::RdHat RdHat;
-  typedef typename Mesh::Rd Rd;
-
-  E_Array aa;
-  Expression ppfe;
-  bool optimize, optimizecheck;
-
-  vector< size_t > where_in_stack_opt;
-  Expression optiexp0, optiexpK;
-
-  E_set_fevL(const E_Array *a, Expression pp);
 
   AnyType operator( )(Stack) const;
   operator aType( ) const { return atype< void >( ); }

@@ -6480,9 +6480,9 @@ Expression Op_CopyArrayT(const E_Array &a, const E_Array &b) {
     else if (v_fes::dHat == 3 && v_fes::d == 3)
       r = new E_set_fev3< K, v_fes3 >(&b, rr);
     else if (v_fes::dHat == 2 && v_fes::d == 3)
-      r = new E_set_fevS< K, v_fesS >(&b, rr);
+      r = new E_set_fev3< K, v_fesS >(&b, rr);
     else if (v_fes::dHat == 1 && v_fes::d == 3)
-      r = new E_set_fevL< K, v_fesL >(&b, rr);
+      r = new E_set_fev3< K, v_fesL >(&b, rr);
   }
   //  try complex vector value FE interpolation
   return r;
@@ -6535,12 +6535,58 @@ E_F0 *Op_CopyArray::code(const basicAC_F0 &args) const {
       ;
       return new E_set_fev3< Complex, v_fes3 >(&b, rr);
     }
-  } else {
+      
+        rr = IsFEcomp< double, v_fesS >(a[0], 0, rrr, iii);
+        if (rr != 0) {
+        for (int i = 1; i < nb; i++)
+        if (!IsFEcomp< double, v_fesS >(a[i], i, rrr, iii))
+        CompileError("Copy of Array with incompatible real vector value FE function () !");
+        ;
+        return new E_set_fev3< double, v_fesS >(&b, rr);
+        }
+        //  try complex vector value FE interpolation
+        
+        rr = IsFEcomp< Complex, v_fesS >(a[0], 0, rrr, iii);
+        if (rr != 0) {
+        for (int i = 1; i < nb; i++)
+        if (!IsFEcomp< Complex, v_fesS >(a[i], i, rrr, iii))
+        CompileError("Copy of Array with incompatible complex vector value FE function () !");
+        ;
+        return new E_set_fev3< Complex, v_fesS >(&b, rr);
+        }
+     
+        rr = IsFEcomp< double, v_fesL >(a[0], 0, rrr, iii);
+        if (rr != 0) {
+        for (int i = 1; i < nb; i++)
+        if (!IsFEcomp< double, v_fesL >(a[i], i, rrr, iii))
+        CompileError("Copy of Array with incompatible real vector value FE function () !");
+        ;
+        return new E_set_fev3< double, v_fesL >(&b, rr);
+        }
+        //  try complex vector value FE interpolation
+        
+        rr = IsFEcomp< Complex, v_fesL >(a[0], 0, rrr, iii);
+        if (rr != 0) {
+        for (int i = 1; i < nb; i++)
+        if (!IsFEcomp< Complex, v_fesL >(a[i], i, rrr, iii))
+        CompileError("Copy of Array with incompatible complex vector value FE function () !");
+        ;
+        return new E_set_fev3< Complex, v_fesL >(&b, rr);
+        }
+        }
+        
+        
+        
+        else {
     Expression r = 0;    // new code FH sep 2009.
     if (!r) r = Op_CopyArrayT< double, v_fes >(a, b);
     if (!r) r = Op_CopyArrayT< Complex, v_fes >(a, b);
     if (!r) r = Op_CopyArrayT< double, v_fes3 >(a, b);
     if (!r) r = Op_CopyArrayT< Complex, v_fes3 >(a, b);
+    if (!r) r = Op_CopyArrayT< double, v_fesS >(a, b);
+    if (!r) r = Op_CopyArrayT< Complex, v_fesS >(a, b);
+    if (!r) r = Op_CopyArrayT< double, v_fesL >(a, b);
+    if (!r) r = Op_CopyArrayT< Complex, v_fesL >(a, b);
     if (r) return r;
   }
   CompileError("Internal Error: General Copy of Array : to do ");
