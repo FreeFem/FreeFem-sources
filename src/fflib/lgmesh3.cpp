@@ -3159,3 +3159,7 @@ Add<pfesL*>("ndofK",".",new OneOperator1<long,pfesL*>(pVhL_ndofK));
 //static addingInitFunct TheaddingInitFunct(-10,init_lgmesh3);
 template E_set_fev3<double,v_fes3>::E_set_fev3(const E_Array * a,Expression pp) ;
 template E_set_fev3<Complex,v_fes3>::E_set_fev3(const E_Array * a,Expression pp) ;
+template E_set_fev3<double,v_fesS>::E_set_fev3(const E_Array * a,Expression pp) ;
+template E_set_fev3<Complex,v_fesS>::E_set_fev3(const E_Array * a,Expression pp) ;
+template E_set_fev3<double,v_fesL>::E_set_fev3(const E_Array * a,Expression pp) ;
+template E_set_fev3<Complex,v_fesL>::E_set_fev3(const E_Array * a,Expression pp) ;
