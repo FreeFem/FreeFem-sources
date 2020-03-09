@@ -632,6 +632,27 @@ ENDIFMACRO
     buildWithPartitioning(ThName, part, 1, intersection, privateDmesh#ThName#khi[0], P1, mpiCommWorld)
 }
 EndMacro
+macro copyDmesh(OldName, NewName)
+IFMACRO(!privateDmesh#NewName)
+NewMacro privateDmesh#NewName()privateDmesh#NewName EndMacro
+NewMacro privateDmesh#NewName#khi()privateDmesh#NewName#khiDef EndMacro
+NewMacro privateDmesh#NewName#intersection()privateDmesh#NewName#intersectionDef EndMacro
+real[int][int] privateDmesh#NewName#khi(2);
+real[int][int] privateDmesh#NewName#intersection;
+ENDIFMACRO
+IFMACRO(privateDmesh#OldName)
+NewName = OldName;
+privateDmesh#NewName#khi[0].resize(privateDmesh#OldName#khi[0].n);
+privateDmesh#NewName#khi[0] = privateDmesh#OldName#khi[0];
+privateDmesh#NewName#khi[1].resize(privateDmesh#OldName#khi[1].n);
+privateDmesh#NewName#khi[1] = privateDmesh#OldName#khi[1];
+privateDmesh#NewName#intersection.resize(privateDmesh#OldName#intersection.n);
+for(int i = 0; i < privateDmesh#NewName#intersection.n; ++i) {
+    privateDmesh#NewName#intersection[i].resize(privateDmesh#OldName#intersection[i].n);
+    privateDmesh#NewName#intersection[i] = privateDmesh#OldName#intersection[i];
+}
+ENDIFMACRO
+EndMacro
 macro createMat(ThName, MatName, PkName)
 IFMACRO(privateDmesh#ThName)
 {
@@ -1282,7 +1303,7 @@ macro createParMmgCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators) {
     varf vG(u, v) = on(-111111, u = 1.0);
     real[int] gamma(ThParMmgName.nv);
     gamma = vG(0, VhWithoutOverlap, tgv = -1);
-    fespace Vh(ThName, P1);
-    int[int] rest = restrict(VhWithoutOverlap, Vh, ThN2O);
+    fespace VhParMmg(ThName, P1);
+    int[int] rest = restrict(VhWithoutOverlap, VhParMmg, ThN2O);
     ParMmgCommunicators(A, gamma, rest, ThCommunicators);
 }// EOM

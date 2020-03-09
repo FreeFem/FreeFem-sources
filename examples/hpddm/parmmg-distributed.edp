@@ -9,19 +9,20 @@ include "macro_ddm.idp"             // additional DDM functions
 
 meshN Th = cube(getARGV("-global", 40), getARGV("-global", 40), getARGV("-global", 40));
 buildDmesh(Th)
-mesh3 ThParMmg;
-int[int] n2o;
-int[int][int] communicators;
-createParMmgCommunicators(Th, ThParMmg, n2o, communicators)
-fespace VhParMmg(ThParMmg, P1);
-VhParMmg met = sqrt((x-0.5)^2+(y-0.5)^2+(z-0.5)^2)-0.3;
-real hmin = 1.0e-1;
-real hmax = 4.0e-1;
-met = max(hmin,min(hmax,abs(met)));
-// medit("no", ThParMmg, met);
-cout << ThParMmg.nt << endl;
-medit("Th", ThParMmg);
-meshN ThNew = parmmg3d(ThParMmg, metric = met[], nodeCommunicators = communicators, debug = 0, mmgDebug = 0, verbose = 00, mmgVerbose = 00, niter = 2, mem = 2000);
-cout << ThNew.nt << endl;
-medit("Th", ThNew);
-// reconstructDmesh(Th)
+fespace Vh(Th, P1);
+{
+    mesh3 ThParMmg;
+    int[int] n2o;
+    int[int][int] communicators;
+    createParMmgCommunicators(Th, ThParMmg, n2o, communicators)
+    fespace VhParMmg(ThParMmg, P1);
+    VhParMmg met = sqrt((x-0.5)^2 + (y-0.5)^2 + (z-0.5)^2) - 0.3;
+    real hmin = 1.0e-2;
+    real hmax = 3.0e-2;
+    met = max(hmin, min(hmax, abs(met)));
+    meshN ThNew = parmmg3d(ThParMmg, metric = met[], nodeCommunicators = communicators);
+    reconstructDmesh(ThNew)
+    copyDmesh(ThNew, Th)
+}
+Vh u = sqrt((x-0.5)^2 + (y-0.5)^2 + (z-0.5)^2) - 0.3;
+medit("Th", Th, u);

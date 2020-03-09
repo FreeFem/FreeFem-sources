@@ -261,8 +261,8 @@ namespace PETSc {
           for(unsigned int j = 0; j < neighbors[i].second.size(); ++j) {
             std::unordered_map<int, std::pair<int, PetscInt>>::const_iterator it = map.find(neighbors[i].second[j]);
             if(it != map.cend()) {
-              communicators->operator[](2 * i + 1)[m] = it->second.first;
-              communicators->operator[](2 * i + 2)[m++] = it->second.second;
+              communicators->operator[](2 * i + 1)[m] = it->second.first + 1;
+              communicators->operator[](2 * i + 2)[m++] = it->second.second + 1;
             }
           }
           communicators->operator[](2 * i + 1).resize(m);

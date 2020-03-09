@@ -712,15 +712,6 @@ bool mylex::SetMacro(int &ret)
         macroparm.d.push_back(def);
         if (nbparam)
             if(echo) cout << " )  " ;
-        if(0)//  stupide ..
-        for (size_t i=0; i<def.size(); i++)
-            if (def[i] == 10 || (def[i] == 13 ) )
-            {
-                def[i]='\n';
-                linenumber++;
-                if(echo) cout << '\n' << setw(5) <<linenumber << " @ " ;
-            }
-            else if(echo) cout << def[i]   ;
         MapMacroDef & MacroDef =listMacroDef->back();
         MapMacroDef::const_iterator i=MacroDef.find(macroname);
         if ( i == MacroDef.end() )
@@ -1164,8 +1155,12 @@ bool mylex::CallMacro(int &ret)
                     	}
                         if (isconc) {
 							MapMacroParam::const_iterator j=lp.find(buf);
-                        	if ( j !=  lp.end())
+                        	if ( j !=  lp.end()) {
                             	rightexpand=j->second;
+
+								if (rightexpand[0] == ' ')
+									rightexpand.erase(0, 1);
+                            }
                         	else
                             	rightexpand=token();
 
