@@ -246,10 +246,16 @@ namespace PETSc {
   long ParMmgCommunicators(Type* const& A, KN< double >* const& gamma, KN< long >* const& rest, KN< KN< long >>* const& communicators) {
     if (A && A->_petsc && A->_A) {
       std::unordered_map<int, std::pair<int, PetscInt>> map;
+      PetscScalar* val = new PetscScalar[A->_A->getDof()]();
       for(int i = 0; i < rest->n; ++i) {
-        if(std::abs(gamma->operator[](i) - 1.0) < 1.0e-6)
+        if(std::abs(gamma->operator[](i) - 1.0) < 1.0e-6) {
           map[rest->operator[](i)] = std::make_pair(i, A->_num[rest->operator[](i)]);
+          val[rest->operator[](i)] = HPDDM::Wrapper<PetscScalar>::d__1;
+        }
       }
+      A->_A->recvBuffer(val);
+      delete [] val;
+      PetscScalar** const buffer = A->_A->getBuffer();
       const HPDDM::vectorNeighbor& neighbors = A->_A->getMap();
       communicators->resize(2 * neighbors.size() + 1);
       communicators->operator[](0).resize(neighbors.size());
@@ -259,11 +265,13 @@ namespace PETSc {
           communicators->operator[](2 * i + 2).resize(neighbors[i].second.size());
           int m = 0;
           for(unsigned int j = 0; j < neighbors[i].second.size(); ++j) {
-            std::unordered_map<int, std::pair<int, PetscInt>>::const_iterator it = map.find(neighbors[i].second[j]);
-            if(it != map.cend()) {
-              communicators->operator[](2 * i + 1)[m] = it->second.first + 1;
-              communicators->operator[](2 * i + 2)[m++] = it->second.second + 1;
-            }
+              if(std::abs(buffer[i][j] - HPDDM::Wrapper<PetscScalar>::d__1) < 1.0e-6) {
+                  std::unordered_map<int, std::pair<int, PetscInt>>::const_iterator it = map.find(neighbors[i].second[j]);
+                  if(it != map.cend()) {
+                      communicators->operator[](2 * i + 1)[m] = it->second.first + 1;
+                      communicators->operator[](2 * i + 2)[m++] = it->second.second + 1;
+                  }
+              }
           }
           communicators->operator[](2 * i + 1).resize(m);
           communicators->operator[](2 * i + 2).resize(m);
@@ -1712,7 +1720,7 @@ namespace PETSc {
                              user->C->_A->getDof(), 1, &coarse, &coarseIn, true);
         KN< PetscScalar > fine(user->f->_A->getDof( ));
         fine = PetscScalar( );
-        user->C->_A->HPDDM::template Subdomain< PetscScalar >::exchange(coarse);
+        user->C->_A->exchange(coarse);
         MatMult<false>(mP, coarse, fine);
         KN_< PetscScalar > fineOut(out, mFine);
         fineOut = PetscScalar( );
@@ -1728,7 +1736,7 @@ namespace PETSc {
                              user->f->_A->getDof(), 1, &fine, &fineIn, true);
         KN< PetscScalar > coarse(user->C->_A->getDof( ));
         coarse = PetscScalar( );
-        user->f->_A->HPDDM::template Subdomain< PetscScalar >::exchange(fine);
+        user->f->_A->exchange(fine);
         MatMult<true>(mP, fine, coarse);
         KN_< PetscScalar > coarseOut(out, mCoarse);
         changeNumbering_func(user->C->_num, user->C->_first, user->C->_last, mCoarse,
@@ -2254,7 +2262,7 @@ namespace PETSc {
           }
           if (inverse && nargs[1] && GetAny< bool >((*nargs[1])(stack))) {
             for(int i = 0; i < ptIn->M(); ++i)
-              ptA->_A->HPDDM::template Subdomain< PetscScalar >::exchange(*ptIn + i * ptIn->N());
+              ptA->_A->exchange(*ptIn + i * ptIn->N());
           }
           if (c == 2) {
             pt += bs * m;
@@ -3605,7 +3613,7 @@ namespace PETSc {
                           if(num) {
                               HPDDM::Subdomain< K >::template distributedVec< U >(num, first, last, ptr, out, n, 1);
                               if (U && A)
-                                  A->HPDDM::template Subdomain< PetscScalar >::exchange(ptr);
+                                  A->exchange(ptr);
                               ptr += n;
                               out += last - first;
                               break;
@@ -3731,7 +3739,7 @@ namespace PETSc {
         if (std::is_same< typename std::remove_reference< decltype(*t.A->_A) >::type,
                           HpSchwarz< PetscScalar > >::value &&
             t.A->_A)
-          (*t)._A->HPDDM::template Subdomain< PetscScalar >::exchange(*out);
+          (*t)._A->exchange(*out);
       }
     };
     static U inv(U Ax, InvPETSc< T, U, K, trans > A) {
@@ -3809,7 +3817,7 @@ namespace PETSc {
                                                                   static_cast< PetscScalar* >(*out),
                                                                   ptr, out->n / bs, bs);
             if (t->_A)
-              (*t)._A->HPDDM::template Subdomain< PetscScalar >::exchange(*out);
+              (*t)._A->exchange(*out);
             else if (t->_exchange) {
               if (N == 'N')
                 (*t)._exchange[0]->exchange(*out);

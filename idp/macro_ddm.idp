@@ -518,7 +518,7 @@ ENDIFMACRO
         mpiAllgather(bb, bbAll, mpiCommWorld);
         real hmax;
         {
-            real tmp = Th.hmax;
+            real tmp = ThName.hmax;
             mpiAllReduce(tmp, hmax, mpiCommWorld, mpiMAX);
         }
         int between = 0;
@@ -1293,9 +1293,9 @@ ENDIFMACRO
 macro createParMmgCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators) {
     Mat A;
     createMat(ThName, A, P1);
-    real[int] D(Th.nt);
+    real[int] D(ThName.nt);
     createPartition(ThName, D, P0);
-    fespace Ph(Th, P0);
+    fespace Ph(ThName, P0);
     Ph d;
     d[] = D;
     ThParMmgName = trunc(ThName, abs(d) > 1.0e-2, label = -111111, new2old = ThN2O);
@@ -1303,7 +1303,7 @@ macro createParMmgCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators) {
     varf vG(u, v) = on(-111111, u = 1.0);
     real[int] gamma(ThParMmgName.nv);
     gamma = vG(0, VhWithoutOverlap, tgv = -1);
-    fespace VhParMmg(ThName, P1);
-    int[int] rest = restrict(VhWithoutOverlap, VhParMmg, ThN2O);
+    fespace VhWithOverlap(ThName, P1);
+    int[int] rest = restrict(VhWithoutOverlap, VhWithOverlap, ThN2O);
     ParMmgCommunicators(A, gamma, rest, ThCommunicators);
 }// EOM

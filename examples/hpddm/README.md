@@ -83,6 +83,7 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [save-load-Dmesh.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/save-load-Dmesh.edp)                 | Saving and loading a distributed mesh for restarting a computation       |
 | [transfer.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/transfer.edp)                               | Parallel interpolation of finite element functions                       |
 | [reconstructDmesh.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/reconstructDmesh.edp)               | Construction of a distributed mesh from sequential nonoverlapping meshes |
+| [distributed-parmmg.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/distributed-parmmg.edp)           | Distributed ParMmg interface for mesh adaptation                         |
 
 ### Reproducible science
 | Article                                                                                                                                                       | Source code                                                   |

@@ -1160,6 +1160,7 @@ if test "$enable_download"  = "yes" ; then
 DOWNLOADCOMPILE="compile-pkg install-other"
 else
 DOWNLOADCOMPILE=
+enable_download=no
 fi
 if test "$enable_download"  = "yes"  ; then
  AC_CHECK_PROG(ff_git,git,yes,no)
@@ -2401,9 +2402,9 @@ AC_MSG_NOTICE([  --  BLAS: $ff_blas_ok ])
 AC_MSG_NOTICE([  --  with MPI:     $ff_mpi])
 AC_MSG_NOTICE([    --  with PETSc: $ff_petsc_ok / PETSc complex: $ff_petsccomplex_ok ]);
 AC_MSG_NOTICE([    --  with SLEPc: $ff_slepc_ok / SLEPc complex: $ff_slepccomplex_ok ]);
-AC_MSG_NOTICE([    --  with hpddm: $enable_hpddm (need MPI and C++11: $ff_cxx11) ]);
-AC_MSG_NOTICE([    --  with htool: $enable_htool (need MPI and C++11: $ff_cxx11) ]);
-AC_MSG_NOTICE([    --  with bemtool: $enable_bemtool (need boost: $enable_boost and htool: $enable_htool ) ]);
+AC_MSG_NOTICE([    --  with hpddm: $enable_hpddm ]);
+AC_MSG_NOTICE([    --  with htool: $enable_htool ]);
+AC_MSG_NOTICE([    --  with bemtool: $enable_bemtool (need boost: $enable_boost and htool: $enable_htool) ]);
 AC_MSG_NOTICE([  --  without libs: $ff_unlib_plugin ]);
 AC_MSG_NOTICE([  --  without plugins: $ff_uncompile_plugin ]);
 
