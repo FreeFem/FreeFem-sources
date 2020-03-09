@@ -476,7 +476,7 @@ public:
   }
   
   
-  int NbDoF() const { return this->tfe->NbDoF;}
+  int NbDoF() const {return this->tfe->NbDoF;}
   int DFOnWhat(int i) const { return this->tfe->DFOnWhat[i];}
   int FromDF(int i) const { return this->tfe->fromDF[i];}
   int FromFE(int i) const { return this->tfe->fromFE[i];}
