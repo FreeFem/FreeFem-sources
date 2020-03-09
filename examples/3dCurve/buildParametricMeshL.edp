@@ -30,5 +30,5 @@ plot(ThL2);
 
 mesh Th=square(10,10);
 int[int] ll=[4];
-meshL ThL = extract(Th,[x+2,y*5],refedge=ll);
+meshL ThL3 = extract(Th,[x+2,y*5],refedge=ll);
 
