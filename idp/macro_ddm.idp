@@ -581,7 +581,7 @@ ENDIFMACRO
     mpiRequest[int] rqSend(neighborsName.n);
     real[int] part;
     for(int i = 0; i < neighborsName.n; ++i)
-        Isend(processor(neighborsName[i], mpiCommWorld, rqSend[i]), ThName);
+        Isend(processor(neighborsName[i], mpiCommWorld, rqSend[i]), ThLocalInit);
     for(int i = 0; i < between; ++i)
         Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i]);
     for(int i = between; i < neighborsName.n; ++i)
