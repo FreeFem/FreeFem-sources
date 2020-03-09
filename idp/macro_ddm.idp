@@ -1223,15 +1223,14 @@ ENDIFMACRO
         }
     }
     meshN gluedExchange;
+    searchMethod = 1;
     for[i, v : rankRecv] {
         if(recvTh[i].nt) {
             if(gluedExchange.nt == 0)
                 gluedExchange = recvTh[i];
             else {
-                searchMethod = 1;
                 fespace PhGluedExchange(recvTh[i], P0);
                 PhGluedExchange khi = chi(gluedExchange);
-                searchMethod = 0;
                 if(khi[].min < 1.0e-2) {
                     meshN duplicate = trunc(recvTh[i], khi < 1.0e-2);
                     gluedExchange = gluedExchange + duplicate;
@@ -1247,17 +1246,17 @@ ENDIFMACRO
         if(index != mpiUndefined) {
             if(recvTh[index].nt) {
                 fespace VhRestriction(recvTh[index], Pk);
-                VhRestriction def(uRestriction);
-                uRestriction[] = exchangeU[index];
                 int[int] n2o;
                 meshN restriction = trunc(gluedExchange, chi(recvTh[index]) > 1.0e-2, new2old = n2o);
                 fespace VhRestrictionRenum(restriction, Pk);
                 VhRestrictionRenum def(renum);
                 matrix R = interpolate(VhRestrictionRenum, VhRestriction, inside = 1);
-                renum[] = R * uRestriction[];
+                int[int] I, J;
+                real[int] C;
+                [I, J, C] = R;
                 int[int] map;
                 map = restrict(VhRestrictionRenum, VhExchange, n2o);
-                for[j, w : map] uExchange[][w] += renum[][j];
+                for[j, w : map] uExchange[][w] += exchangeU[index][J[j]];
             }
         }
     }
