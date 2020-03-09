@@ -109,7 +109,7 @@ if(!NoGraphicWindow || usedARGV("-fglut") != -1) {
 
 macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank, size, s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs) {
     int backupSM = searchMethod;
-    searchMethod = 0;
+    searchMethod = 1;
     assert(level >= 1);
 IFMACRO(!privateCreatePartition)
 IFMACRO(!privateCreateMat)
@@ -510,10 +510,55 @@ real[int][int] privateDmesh#ThName#khi(2);
 real[int][int] privateDmesh#ThName#intersection;
 ENDIFMACRO
 {
+    int[int] neighbors;
+    {
+        real[int] bb(2 * dimension);
+        boundingbox(ThName, bb);
+        real[int] bbAll(2 * dimension * mpisize);
+        mpiAllgather(bb, bbAll, mpiCommWorld);
+        real hmax;
+        {
+            real tmp = Th.hmax;
+            mpiAllReduce(tmp, hmax, mpiCommWorld, mpiMAX);
+        }
+        int between = 0;
+        for(int i = 0; i < mpisize; ++i) {
+            if(i != mpirank &&
+IFMACRO(dimension, 2)
+            !(bbAll[1 + 4 * i] < bb[0] - hmax
+              || bbAll[0 + 4 * i] > bb[1] + hmax
+              || bbAll[3 + 4 * i] < bb[2] - hmax
+              || bbAll[2 + 4 * i] > bb[3] + hmax)
+ENDIFMACRO
+IFMACRO(dimension, 3)
+            !(bbAll[1 + 6 * i] < bb[0] - hmax
+              || bbAll[0 + 6 * i] > bb[1] + hmax
+              || bbAll[3 + 6 * i] < bb[2] - hmax
+              || bbAll[2 + 6 * i] > bb[3] + hmax
+              || bbAll[5 + 6 * i] < bb[4] - hmax
+              || bbAll[4 + 6 * i] > bb[5] + hmax)
+ENDIFMACRO
+                                                 ) {
+                neighbors.resize(neighbors.n + 1);
+                neighbors[neighbors.n - 1] = i;
+            }
+        }
+    }
+    reconstructDmeshWithNeighbors(ThName, neighbors)
+}
+EndMacro
+macro reconstructDmeshWithNeighbors(ThName, neighborsName)
+IFMACRO(!privateDmesh#ThName)
+NewMacro privateDmesh#ThName()privateDmesh#ThName EndMacro
+NewMacro privateDmesh#ThName#khi()privateDmesh#ThName#khiDef EndMacro
+NewMacro privateDmesh#ThName#intersection()privateDmesh#ThName#intersectionDef EndMacro
+real[int][int] privateDmesh#ThName#khi(2);
+real[int][int] privateDmesh#ThName#intersection;
+ENDIFMACRO
+{
     mpiBarrier(mpiCommWorld);
     real timerReconstruction = mpiWtime();
-    real[int] bb(2 * dimension);
-    varf vG(u, v) = on(labels(Th), u = 1.0);
+    varf vG(u, v) = on(labels(ThName), u = 1.0);
     fespace VhGamma(ThName, P1);
     fespace PhGamma(ThName, P0);
     VhGamma gamma;
@@ -521,105 +566,58 @@ ENDIFMACRO
     PhGamma gammaElt = gamma > 0.1;
     meshN ThLocalInit = trunc(ThName, gammaElt > 0.1, label = -111112);
     meshN ThLocalInitInterior = trunc(ThName, gammaElt < 0.1, label = -111112);
-    boundingbox(ThLocalInit, bb);
-    real[int] bbAll(2 * dimension * mpisize);
-    mpiAllgather(bb, bbAll, mpiCommWorld);
-    real hmax;
-    {
-        real tmp = ThName.hmax;
-        mpiAllReduce(tmp, hmax, mpiCommWorld, mpiMAX);
-    }
-    int[int] neighbors;
-    int between;
-    for(int i = 0; i < mpisize; ++i) {
-        if(i != mpirank && (i == mpirank - 1 || i == mpirank + 1 ||
-    IFMACRO(dimension, 2)
-        !(bbAll[1 + 4 * i] < bb[0] - hmax
-          || bbAll[0 + 4 * i] > bb[1] + hmax
-          || bbAll[3 + 4 * i] < bb[2] - hmax
-          || bbAll[2 + 4 * i] > bb[3] + hmax)
-    ENDIFMACRO
-    IFMACRO(dimension, 3)
-        !(bbAll[1 + 6 * i] < bb[0] - hmax
-          || bbAll[0 + 6 * i] > bb[1] + hmax
-          || bbAll[3 + 6 * i] < bb[2] - hmax
-          || bbAll[2 + 6 * i] > bb[3] + hmax
-          || bbAll[5 + 6 * i] < bb[4] - hmax
-          || bbAll[4 + 6 * i] > bb[5] + hmax)
-    ENDIFMACRO
-                                             )) {
-            if(i == mpirank + 1)
-                between = neighbors.n;
-            else if(i == mpirank - 1)
-                between = neighbors.n + 1;
-            neighbors.resize(neighbors.n + 1);
-            neighbors[neighbors.n - 1] = i;
+    neighborsName.sort;
+    int between = 0;
+    for(int i = 0; i < neighborsName.n; ++i)
+        if(neighborsName[i] > mpirank) {
+            between = i;
+            break;
         }
-    }
-    meshN[int] ThRecv(max(neighbors.n - between, between));
-    mpiRequest[int] rqRecv(max(neighbors.n - between, between));
-    mpiRequest[int] rqSendFirst(neighbors.n - between);
-    mpiRequest[int] rqSendSecond(between);
+    if(neighborsName[neighborsName.n - 1] < mpirank)
+        between = neighborsName.n;
+    meshN[int] ThTab(neighborsName.n + 1);
+    ThTab[between] = ThLocalInit;
+    mpiRequest[int] rqRecv(neighborsName.n);
+    mpiRequest[int] rqSend(neighborsName.n);
     real[int] part;
+    for(int i = 0; i < neighborsName.n; ++i)
+        Isend(processor(neighborsName[i], mpiCommWorld, rqSend[i]), ThLocalInit);
     for(int i = 0; i < between; ++i)
-        Irecv(processor(neighbors[i], mpiCommWorld, rqRecv[i]), ThRecv[i]);
-    meshN ThLocalNew;
-    for(int i = 0; i < between; ++i) {
-        mpiWait(rqRecv[i]);
-        if(i == 0) {
-            ThLocalNew = ThRecv[0];
-            part.resize(ThLocalNew.nt);
-            part = neighbors[i];
-        }
-        else {
-            real[int] backup = part;
-            ThLocalNew = ThLocalNew + ThRecv[i];
-            part.resize(ThLocalNew.nt);
-            part(0:backup.n-1) = backup;
-            part(backup.n:ThLocalNew.nt-1) = neighbors[i];
-        }
-    }
-    for(int i = between; i < neighbors.n; ++i)
-        Irecv(processor(neighbors[i], mpiCommWorld, rqRecv[i - between]), ThRecv[i - between]);
-    if(mpirank == 0) {
-        ThLocalNew = ThLocalInit;
-        part.resize(ThLocalNew.nt);
-        part = 0;
-    }
-    else {
-        real[int] backup = part;
-        ThLocalNew = ThLocalNew + ThLocalInit;
-        part.resize(ThLocalNew.nt);
-        part(0:backup.n-1) = backup;
-        part(backup.n:ThLocalNew.nt-1) = mpirank;
-    }
-    meshN ThLocalReconstructed;
-    if(mpirank == 0)
-        ThLocalReconstructed = ThLocalInit;
-    else
-        ThLocalReconstructed = trunc(ThLocalNew, chi(ThLocalInit) > 1.0e-2, label = -111111);
-    for(int i = between; i < neighbors.n; ++i)
-        Isend(processor(neighbors[i], mpiCommWorld, rqSendFirst[i - between]), ThLocalReconstructed);
-    ThLocalReconstructed = trunc(ThLocalNew, chi(ThLocalInit) > 1.0e-2, label = -111111);
-    mpiWaitAll(rqSendFirst);
+        Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i]);
+    for(int i = between; i < neighborsName.n; ++i)
+        Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i + 1]);
+    mpiWaitAll(rqRecv);
+    meshN ThLocalNew = gluemesh(ThTab);
+    int m = 0;
     for(int i = 0; i < between; ++i)
-        Isend(processor(neighbors[i], mpiCommWorld, rqSendSecond[i]), ThLocalReconstructed);
-    for(int i = between; i < neighbors.n; ++i) {
-        real[int] backup = part;
-        mpiWait(rqRecv[i - between]);
-        ThLocalNew = ThLocalNew + ThRecv[i - between];
-        part.resize(ThLocalNew.nt);
-        part(0:backup.n-1) = backup;
-        part(backup.n:ThLocalNew.nt-1) = neighbors[i];
-    }
+        m += ThTab[i].nt;
+    ThTab[between] = trunc(ThLocalNew, nuTriangle >= m && nuTriangle < m + ThTab[between].nt, label = -111111);
+    mpiWaitAll(rqSend);
+    for(int i = 0; i < neighborsName.n; ++i)
+        Isend(processor(neighborsName[i], mpiCommWorld, rqSend[i]), ThTab[between]);
+    for(int i = 0; i < between; ++i)
+        Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i]);
+    for(int i = between; i < neighborsName.n; ++i)
+        Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i + 1]);
+    mpiWaitAll(rqRecv);
+    ThLocalNew = gluemesh(ThTab);
     {
-        real[int] backup = part;
-        ThName = ThLocalInitInterior + ThLocalNew;
+        ThName = ThLocalNew + ThLocalInitInterior;
         part.resize(ThName.nt);
-        part(0:ThName.nt-backup.n-1) = mpirank;
-        part(ThName.nt-backup.n:ThName.nt-1) = backup;
+        m = 0;
+        for(int i = 0; i < between; ++i) {
+            part(m:m + ThTab[i].nt - 1) = neighborsName[i];
+            m += ThTab[i].nt;
+        }
+        part(m:m + ThTab[between].nt - 1) = mpirank;
+        m += ThTab[between].nt;
+        for(int i = between; i < neighborsName.n; ++i) {
+            part(m:m + ThTab[i + 1].nt - 1) = neighborsName[i];
+            m += ThTab[i + 1].nt;
+        }
+        part(part.n - ThLocalInitInterior.nt:ThName.nt - 1) = mpirank;
     }
-    mpiWaitAll(rqSendSecond);
+    mpiWaitAll(rqSend);
     mpiBarrier(mpiCommWorld);
     if(verbosity > 0 && mpirank == 0) cout.scientific << " --- distributed mesh reconstructed (in " << mpiWtime() - timerReconstruction << ")" << endl;
     NewMacro privateBuildDmesh()1 EndMacro
@@ -1225,15 +1223,14 @@ ENDIFMACRO
         }
     }
     meshN gluedExchange;
+    searchMethod = 1;
     for[i, v : rankRecv] {
         if(recvTh[i].nt) {
             if(gluedExchange.nt == 0)
                 gluedExchange = recvTh[i];
             else {
-                searchMethod = 1;
                 fespace PhGluedExchange(recvTh[i], P0);
                 PhGluedExchange khi = chi(gluedExchange);
-                searchMethod = 0;
                 if(khi[].min < 1.0e-2) {
                     meshN duplicate = trunc(recvTh[i], khi < 1.0e-2);
                     gluedExchange = gluedExchange + duplicate;
@@ -1249,17 +1246,17 @@ ENDIFMACRO
         if(index != mpiUndefined) {
             if(recvTh[index].nt) {
                 fespace VhRestriction(recvTh[index], Pk);
-                VhRestriction def(uRestriction);
-                uRestriction[] = exchangeU[index];
                 int[int] n2o;
                 meshN restriction = trunc(gluedExchange, chi(recvTh[index]) > 1.0e-2, new2old = n2o);
                 fespace VhRestrictionRenum(restriction, Pk);
                 VhRestrictionRenum def(renum);
                 matrix R = interpolate(VhRestrictionRenum, VhRestriction, inside = 1);
-                renum[] = R * uRestriction[];
+                int[int] I, J;
+                real[int] C;
+                [I, J, C] = R;
                 int[int] map;
                 map = restrict(VhRestrictionRenum, VhExchange, n2o);
-                for[j, w : map] uExchange[][w] += renum[][j];
+                for[j, w : map] uExchange[][w] += exchangeU[index][J[j]];
             }
         }
     }
