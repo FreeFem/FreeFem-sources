@@ -36,7 +36,7 @@
 
 
 #include <cstdio>
-
+#include "RNM.hpp"
 // definition R
 #include <cstdlib>
 namespace Fem2D {
@@ -140,7 +140,7 @@ typedef GenericVertex<R3> Vertex3;
         void BuildBdElem(double angle=8.*atan(1.)/9.);  // default angle = 40 deg);
         Serialize serialize_withBorderMesh() const;
         void BuildMeshL(double angle=8.*atan(1.)/9.);  // default angle = 40 deg);
-        void BuildCurvBasis();
+        KNM<R3> BuildCurvBasis();
         ~MeshS() {
             if (verbosity>4) cout << "destroy meshS" << this << " " << this->mapSurf2Vol << " " << this->mapVol2Surf << " destroy meshL " << this->meshL << endl;
             delete [] mapSurf2Vol ;

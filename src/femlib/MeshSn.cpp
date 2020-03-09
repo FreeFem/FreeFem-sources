@@ -1294,12 +1294,12 @@ namespace Fem2D
    }
 
    
-void MeshS::BuildCurvBasis(){
-    KN<R3> gx(nv), gy(nv), gz(nv);
+KNM<R3> MeshS::BuildCurvBasis(){
+    KNM<R3> g(3,nv); // gx(0,:) gy(1,:) gz(2,:);
     for (int i=0 ; i<nv; i++) {
-        gx[i]=R3(0.,0.,0.);
-        gy[i]=R3(0.,0.,0.);
-        gz[i]=R3(0.,0.,0.);
+        g(0,i)=R3(0.,0.,0.);
+        g(1,i)=R3(0.,0.,0.);
+        g(2,i)=R3(0.,0.,0.);
     }
     
     for (int it=0 ; it<nt; it++) {
@@ -1311,17 +1311,18 @@ void MeshS::BuildCurvBasis(){
         
         for (int i = 0; i < TriangleS::nv; i++) {
             int iiv = this->operator()(K[i]);
-            gx[iiv]+= K.mesure()*K.Edge(2);
-            gz[iiv]+=K.mesure()*K.NFrenet();
-            gy[iiv]+=K.mesure()*K.Edge(1);  // sens ???
+            g(0,iiv)+= K.mesure()*K.Edge(2);
+            g(2,iiv)+=K.mesure()*K.NFrenet();
+            g(1,iiv)+=K.mesure()*K.Edge(1);  // sens ???
        }
     }
     for (int i=0 ; i<nv; i++) {
-        gx[i]/=gx[i].norme();
-        gy[i]/=gy[i].norme();
-        gz[i]/=gz[i].norme();
+        g(0,i)/=g(0,i).norme();
+        g(1,i)/=g(1,i).norme();
+        g(2,i)/=g(2,i).norme();
    if (verbosity>5)
-       cout << "NORMALIZE test covariant basis i: "<<i << " gx= " << gx[i] << " gy= " << gy[i] << " gz= " << gz[i] << endl;}
+       cout << "NORMALIZE test covariant basis i: "<<i << " gx= " << g(0,i) << " gy= " << g(1,i) << " gz= " << g(2,i) << endl;}
+    return g;
 }
 
 

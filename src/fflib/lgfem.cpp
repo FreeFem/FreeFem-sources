@@ -3898,10 +3898,33 @@ int SendS(PlotStream &theplot, Plot::ListWhat &lli, map< const MeshS *, long > &
     theplot << Psub;
     theplot << Ksub;
     theplot << V1;
-
-  } else if (what % 10 == 9) {
-    ffassert(0);
   }
+  else if (what % 10 == 9) {
+    int lg, nsb;
+    lli.eval(feS, cmp);
+    // FFCS is able to display 3d complex data
+    
+    if (feS[0]->x( ) && feS[1]->x( ) && feS[2]->x( )) {
+      err = 0;
+      theplot << what;
+      theplot << mapthS[&(feS[0]->Vh->Th)];
+      KN< R2 > Psub1, Psub2, Psub3;
+      KN< int > Ksub1, Ksub2, Ksub3;
+      KN< K > V1 = feS[0]->Vh->newSaveDraw(*feS[0]->x( ), cmp[0], lg, Psub1, Ksub1, 0);
+      KN< K > V2 = feS[1]->Vh->newSaveDraw(*feS[1]->x( ), cmp[1], lg, Psub2, Ksub2, 0);
+      KN< K > V3 = feS[2]->Vh->newSaveDraw(*feS[2]->x( ), cmp[2], lg, Psub3, Ksub3, 0);
+      if (verbosity > 9)
+        cout << " Send plot:what: " << what << " " << nsb << " " << V1.N( ) << " " << V1.max( )<< " " << V1.min( ) << endl;
+      theplot << Psub1;
+      theplot << Ksub1;
+      ffassert(V1.N( ) == V2.N( ) && V1.N( ) == V3.N( ));
+      KNM< K > V123(3, V1.N( ));    // warning fortran numbering ...
+      V123(0, '.') = V1;
+      V123(1, '.') = V2;
+      V123(2, '.') = V3;
+      theplot << (KN_< K > &)V123;
+    }
+ }
   return err;
 }
 

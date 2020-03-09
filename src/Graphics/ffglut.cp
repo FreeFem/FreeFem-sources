@@ -1000,7 +1000,6 @@ void OnePlotFES::Draw(OneWindow *win)
     R coef = plot.coeff;
     double xmin,xmax,ymin,ymax;
     win->getcadre(xmin,xmax,ymin,ymax);
-    R cc = win->hpixel*40;
     R kk = 4*win->hpixel;
     if(plot.ArrowSize>0) kk=win->hpixel*max(win->width*plot.ArrowSize/100.,1.);
 
@@ -1049,52 +1048,43 @@ void OnePlotFES::Draw(OneWindow *win)
                     else
                        plot.DrawIsoT( Pt, ff, Nt, plot.Viso,plot.Viso.N(),win->changePlotdim,win->viewdim);
                 }
-            else if (what%10==9)
-                for (int i=0,j=0;i<nsubV;++i) {
-                    R3 P=Pn[i];
-                    R3 uv(v[o+j],v[o+j+1],v[o+j+2]);
-                    j+=3;
-                    R l = Max(sqrt((uv,uv)),1e-20) ;
-                    int col = 2+dichotomie(plot.Varrow,l);
-                    if(debug>100)
-                        cout << uv << " l= " << l << " " << coef << " " <<col <<  endl;
-                    plot.color(2+col);
-                    uv *=coef;
-                    
-                    l *=coef;
-                    R3 dd=uv*(-kk/l);
-                    R ndd=dd.norme();
-                    dd/=ndd;
-                    R3 nx(1.,0.,0.), ny(0.,1.,0.), nz(0.,0.,1.);
-                    R3 dnx = (dd^nx)*0.5, dny = (dd^ny)*0.5, dnz = (dd^nz)*0.5;
-                   
-               
-                   dnx *= -coef*ndd/dnx.norme();
-                   dny *= -coef*ndd/dny.norme();
-                   dnz *= -coef*ndd/dnz.norme();
-                    
-                    if (l*10000.< kk) continue;
-                    if (l < kk)
-                        uv *= (kk/l)*coef;
-                    else if (l> cc)
-                        uv *= (cc/l)*coef;
-                   
-                    dd*=ndd*coef; // denormalize
-                    
-                    
-                    glBegin(GL_LINES);
-                    win->Seg3(P,P+uv);
+            else // what ==9
+                //ffassert(0);
+                           for (int i=0,j=0;i<nsubV;++i)
+                {
+                                  R3 P=Pn[i];
+                                  R3 uv(v[o+j],v[o+j+1]);
+                                  j+=2;
+                                  R  l = Max(sqrt((uv,uv)),1e-30) ;
+                                  int col = 2+dichotomie(plot.Varrow,l);
+                                  if(debug>100)
+                                      cout << uv << " l= " << l << " " << coef << " " <<col <<  endl;
 
-                    if (10*l>kk) {
-                        win->Seg3(P+uv,P+uv+dd+dnx);
-                        win->Seg3(P+uv,P+uv+dd-dnx);
-                        win->Seg3(P+uv,P+uv+dd+dny);
-                        win->Seg3(P+uv,P+uv+dd-dny);
-                        win->Seg3(P+uv,P+uv+dd+dnz);
-                        win->Seg3(P+uv,P+uv+dd-dnz);
-                    }
-                    glEnd();
-                }
+                                  plot.color(2+col);
+                                  uv = coef*uv;
+                                  l *= coef;
+                                  //R2 dd = uv*(-kk/l);
+                                  //R2 dn = dd.perp()*0.5;
+                                  if (l*10000.< kk) continue;
+                                  if (l < kk)
+                                      uv = uv*(kk/l);
+                                  else if (l> cc)
+                                      uv = uv*(cc/l);
+                                  glBegin(GL_LINES);
+
+                                  win->Seg(P,P+uv);
+
+                                  if (10*l>kk) {
+                                      win->Seg3(P+uv,P+uv+dd+dn);
+                                      win->Seg3(P+uv,P+uv+dd-dn);
+                                  }
+                                  glEnd();
+                              }
+                
+                
+                
+                
+
         }
         glEndList();  // fin de la list
 
