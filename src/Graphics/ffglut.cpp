@@ -1693,9 +1693,12 @@ void OnePlotBorder::Draw(OneWindow *win)
             R3 Po(v[j-1].second), Pn(v[j].second);
             R3 uv(Po,Pn);
             double l = Max(sqrt((uv,uv)),1e-20);
-
-            //R2 dd = uv*(-h/l);
-            //R2 dn = dd.perp()*0.5;
+            R3 nx(1.,0.,0.), ny(0.,1.,0.), nz(0.,0.,1.);
+            R3 dnx = (uv^nx)*0.5, dny = (uv^ny)*0.5, dnz = (uv^nz)*0.5;
+            double nuv=uv.norme();
+            dnx *= -nuv/dnx.norme()/5;
+            dny *= -nuv/dny.norme()/5;
+            dnz *= -nuv/dnz.norme()/5;
             glLineWidth(2);
             glBegin(GL_LINES);
             win->Seg3(Po,Pn);
@@ -1703,11 +1706,14 @@ void OnePlotBorder::Draw(OneWindow *win)
 
             glLineWidth(1);
             glBegin(GL_LINES);
-            /*if(j!=1)
-            {
-                win->Seg(Po,Po+dd+dn);
-                win->Seg(Po,Po+dd-dn);
-            }*/
+            if(j!=1) {
+              win->Seg3(Po,Po+uv+dnx);
+              win->Seg3(Po,Po+uv-dnx);
+              win->Seg3(Po,Po+uv+dny);
+              win->Seg3(Po,Po+uv-dny);
+              win->Seg3(Po,Po+uv+dnz);
+              win->Seg3(Po,Po+uv-dnz);
+            }
             glEnd();
         }
 

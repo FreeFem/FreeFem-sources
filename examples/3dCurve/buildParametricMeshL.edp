@@ -1,11 +1,11 @@
 load "msh3" 
-/*
+
 int upper = 1;
 int others = 2;
 int inner = 3;
 int n = 10;
 
-border D01(t=0, 1) {x=0; y=-1+t; }
+border D01(t=0, 1) {x=0; y=-1+t;z=3; }
 border D02(t=0, 1){x=1.5-1.5*t; y=-1; z=3;label=upper;}
 border D03(t=0, 1){x=1.5; y=-t; z=3;label=upper;}
 border D04(t=0, 1){x=1+0.5*t; y=0; z=3;label=others;}
@@ -22,14 +22,12 @@ meshL ThL=buildmeshL(D01(-n) + D02(-n) + D03(-n) + D04(-n) + D05(-n)
     + D06(-n) + D11(n) + D12(n) + D13(n));
 
 savemesh(ThL,"toto.mesh");
-*/	
+	
 //helice conique
-border E1(t=0, 10.*pi){x=(1.)*t*cos(t); y=-(1.)*t*sin(t);}
+border E1(t=0, 10.*pi){x=(1.)*t*cos(t); y=-(1.)*t*sin(t); z=t;}
 meshL ThL2=buildmeshL(E1(1000));
-plot(E1(1000),wait=1);
-/*
+plot(ThL2);
+
 mesh Th=square(10,10);
 int[int] ll=[4];
 meshL ThL3 = extract(Th,[x+2,y*5],refedge=ll);
-
-*/
