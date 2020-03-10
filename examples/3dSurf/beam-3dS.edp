@@ -1,0 +1,44 @@
+load "msh3"
+
+int bottombeam = 2;
+border a(t=2, 0){x=0; y=t ;label=1;}	// left beam
+border b(t=0, 10){x=t; y=0 ;label=bottombeam;}	// bottom of beam
+border c(t=0, 2){x=10; y=t ;label=1;}	// rigth beam
+border d(t=0, 10){x=10-t; y=2; label=3;}	// top beam
+mesh th1 = buildmesh(b(20) + c(5) + d(20) + a(5));
+meshS Th=movemesh23(th1,transfo=[x,y,z]);
+
+real E = 21.5e4;
+real sigma = 0.29;
+real mu = E/(2.*(1.+sigma));
+real lambda = E*sigma/((1.+sigma)*(1.-2.*sigma));
+real gravity = -0.05;
+
+cout << "Lambda = " << lambda << endl;
+cout << "Mu = " << mu << endl;
+cout << "Gravity = " << gravity << endl;
+
+fespace Vh(Th,[P1,P1,P1]);
+Vh [u1,u2,u3], [v1,v2,v3];
+
+real sqrt2=sqrt(2.);
+macro epsilon(u1,u2,u3)  [dx(u1),dy(u2),dz(u3),(dz(u2)+dy(u3))/sqrt2,(dz(u1)+dx(u3))/sqrt2,(dy(u1)+dx(u2))/sqrt2] // EOM
+macro div(u1,u2,u3) ( dx(u1)+dy(u2)+dz(u3) ) // EOM
+  
+solve Lame([u1,u2,u3],[v1,v2,v3])=
+  int2d(Th)( lambda*div(u1,u2,u3)*div(v1,v2,v3)	
+	    +2.*mu*( epsilon(u1,u2,u3)'*epsilon(v1,v2,v3) ) )
+  - int2d(Th) (gravity*v3)
+  + on(1,u1=0,u2=0,u3=0);
+
+real dmax=  u1[].linfty, coef= 1./dmax;
+
+assert(dmax<7.6e-06);
+cout << " max deplacement = " << dmax << " " <<coef<<endl;
+
+plot(Th,[u1,u2,u3], wait=1);
+
+// Move mesh
+meshS thm = movemesh(Th, [x+coef*u1, y+coef*u2, z+coef*u3]);
+plot(Th,thm, wait=1);
+

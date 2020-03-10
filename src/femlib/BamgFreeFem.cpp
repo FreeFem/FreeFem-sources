@@ -890,7 +890,9 @@ void E_BorderN::SavePlot(Stack stack,PlotStream & plot ) const
 		mp.P.z=0;
 		k->code(stack); // compute x,y, label
 		P=mp.P.p2();
-		plot << (long) mp.label <<P.x << P.y;
+            Fem2D::R3 P3=mp.P;
+            //cout << "test P3 " << P3 << endl;
+		plot << (long) mp.label <<P3.x << P3.y << P3.z;
 	    }
 
           }}

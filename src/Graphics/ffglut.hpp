@@ -260,7 +260,7 @@ struct OnePlotCurve: public OnePlot {
 };
 
 struct OnePlotBorder: public OnePlot {
-    vector<vector<pair<long,R2> > > data;
+    vector<vector<pair<long,R3> > > data;
     OnePlotBorder(PlotStream & f);
     void Draw(OneWindow *win);
 };

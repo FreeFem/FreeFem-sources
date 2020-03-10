@@ -3111,12 +3111,9 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
       else
         cout << "  --  int 3d surface  (nQP: " << FIT.n << " ) in ";
     } else if (dim == 3 && !surface && curve) {
-      // if (CDomainOfIntegration::int0d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n
-      // << ") levelset: "<< di->islevelset() << " ,"  ; else  if
-      // (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<<
-      // FIE.n << "),"  ; else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  --
-      // boundary int all VF edges nQP: ("<< FIE.n << ")," ;
-      cout << "  --  int 3d curve  (nQP: " << FIT.n << " ) in ";
+      if (CDomainOfIntegration::int0d==kind)
+        cout << "  -- boundary int border ( nQP: "<< FIE.n << ") levelset: "<< di->islevelset() << " ,"  ;
+      else  cout << "  --  int 3d curve  (nQP: " << FIT.n << " ) in ";
     }
   }
 

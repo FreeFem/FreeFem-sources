@@ -1684,30 +1684,30 @@ void OnePlotBorder::Draw(OneWindow *win)
 
     for(int i=0;i<data.size() ;++i)
     {
-        vector<pair<long,R2> > & v=data[i];
+        vector<pair<long,R3> > & v=data[i];
         ShowGlerror("end OnePlotBorder::Draw  1");
 
         for(int j=1;j<v.size();++j)
         {
             plot.color(2+v[j].first);
-            R2 Po(v[j-1].second), Pn(v[j].second);
-            R2 uv(Po,Pn);
+            R3 Po(v[j-1].second), Pn(v[j].second);
+            R3 uv(Po,Pn);
             double l = Max(sqrt((uv,uv)),1e-20);
 
-            R2 dd = uv*(-h/l);
-            R2 dn = dd.perp()*0.5;
+            //R2 dd = uv*(-h/l);
+            //R2 dn = dd.perp()*0.5;
             glLineWidth(2);
             glBegin(GL_LINES);
-            win->Seg(Po,Pn);
+            win->Seg3(Po,Pn);
             glEnd();
 
             glLineWidth(1);
             glBegin(GL_LINES);
-            if(j!=1)
+            /*if(j!=1)
             {
                 win->Seg(Po,Po+dd+dn);
                 win->Seg(Po,Po+dd-dn);
-            }
+            }*/
             glEnd();
         }
 
@@ -1717,9 +1717,9 @@ void OnePlotBorder::Draw(OneWindow *win)
         glBegin(GL_POINTS);
         int l= v.size()-1;
         plot.color(2+v[0].first);
-        glVertex3d(v[0].second.x,v[0].second.y,z);
+        glVertex3d(v[0].second.x,v[0].second.y,v[0].second.z);
         plot.color(2+v[l].first);
-        glVertex3d(v[l].second.x,v[l].second.y,z);
+        glVertex3d(v[l].second.x,v[l].second.y,v[l].second.z);
         glEnd();
         glPointSize(1);
         ShowGlerror("end OnePlotBorder::Draw  3");
@@ -2379,7 +2379,7 @@ void OneWindow::unsetLighting()
 }
 
 OnePlotBorder::OnePlotBorder(PlotStream & f)
-:OnePlot(4,2,1)
+:OnePlot(4,3,1)
 {
     long nbd;
     f>> nbd;
@@ -2392,9 +2392,9 @@ OnePlotBorder::OnePlotBorder(PlotStream & f)
         for(int j=0;j<=n;++j)
         {
             long l;
-            double x,y;
-            f >> l>> x >> y;
-            R2 P(x,y);
+            double x,y,z;
+            f >> l>> x >> y >> z;
+            R3 P(x,y,z);
             Pmin=Minc(Pmin,P);
             Pmax=Maxc(Pmax,P);
             data[i][j]=make_pair(l,P);
