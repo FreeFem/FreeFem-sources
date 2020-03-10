@@ -8878,7 +8878,8 @@ AnyType Line_Op::operator( )(Stack stack) const {
 
   int nv = nt + 1, nbe = 2;
   long orientation(arg(0, stack, 1L));
-  long cleanmesh(arg(1, stack, true));
+  bool cleanmesh(arg(1, stack, true));
+  if(nt==1) cleanmesh=false;
   long removeduplicate(arg(2, stack, false));
   double precis_mesh(arg(3, stack, 1e-7));
   bool rebuildboundary=false; //(arg(4, stack, false));
