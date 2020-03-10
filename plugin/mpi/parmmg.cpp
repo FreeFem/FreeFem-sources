@@ -126,7 +126,7 @@ int PMMG_pParMesh_to_ffmesh(const PMMG_pParMesh& mesh, Mesh3 *&T_TH3, bool distr
 class parmmg_Op : public E_F0mps {
  public:
   Expression eTh, xx, yy, zz;
-  static const int n_name_param = 32;
+  static const int n_name_param = 31;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
 
@@ -181,7 +181,6 @@ basicAC_F0::name_and_type parmmg_Op::name_param[] = {
 {"metisRatio"        , &typeid(long)},/*!< [n], wanted ratio # mesh / # metis super nodes (advanced use) */
 {"ifcLayers"         , &typeid(long)},/*!< [n], Number of layers of interface displacement */
 {"groupsRatio"       , &typeid(double)},/*!< [val], Allowed imbalance between current and desired groups size */
-{"APImode"           , &typeid(bool)},/*!< [0/1], Initialize parallel library through interface faces or nodes */
 {"niter"             , &typeid(long)},/*!< [n], Set the number of remeshing iterations */
 {"angleDetection"    , &typeid(double)},/*!< [val], Value for angle detection */
 {"hmin"              , &typeid(double)},/*!< [val], Minimal mesh size */
@@ -239,7 +238,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
                     PMMG_ARG_dim,3,PMMG_ARG_MPIComm,comm,
                     PMMG_ARG_end);
 
-  KN< KN< long > >* communicators = nargs[31] ? GetAny< KN< KN< long > >* >((*nargs[31])(stack)) : 0;
+  KN< KN< long > >* communicators = nargs[30] ? GetAny< KN< KN< long > >* >((*nargs[30])(stack)) : 0;
   ffmesh_to_PMMG_pParMesh(Th, mesh, communicators != NULL);
 
   int root = mesh->info.root;
@@ -297,7 +296,6 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_metisRatio,    arg(i,stack,0L)); i++;   /*!< [n], wanted ratio # mesh / # metis super nodes (advanced use) */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_ifcLayers,     arg(i,stack,0L)); i++;   /*!< [n], Number of layers of interface displacement */
   if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_groupsRatio,   arg(i,stack,0.)); i++;   /*!< [val], Allowed imbalance between current and desired groups size */
-  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_APImode,       arg(i,stack,0L)); i++;   /*!< [0/1], Initialize parallel library through interface faces or nodes */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_niter,         arg(i,stack,0L)); i++;   /*!< [n], Set the number of remeshing iterations */
   if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_angleDetection,arg(i,stack,0.)); i++;   /*!< [val], Value for angle detection */
   if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hmin,          arg(i,stack,0.)); i++;   /*!< [val], Minimal mesh size */
@@ -326,9 +324,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
 
       /* Set local and global index for each entity on the interface */
       KN<int> local = communicators->operator[](1 + 2 * icomm);
-      local += 1;
       KN<int> global = communicators->operator[](2 + 2 * icomm);
-      global += 1;
       PMMG_Set_ithNodeCommunicator_nodes(mesh, icomm,
                                          local.operator int*(),
                                          global.operator int*(), 1);

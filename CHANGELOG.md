@@ -27,13 +27,14 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - new function `hasType` to know if a PETSc component has been installed, e.g., `hasType("PC", "hypre")`
-- eigenvalue problems on linear elements, cf. `eigen/LapEigen1DBeltrami.edp` or `laplace-beltrami-3d-line-SLEPc.edp`
+- eigenvalue problems on linear elements, cf. `examples/eigen/LapEigen1DBeltrami.edp` or `examples/hpddm/laplace-beltrami-3d-line-SLEPc.edp`
 - `--download-cmake` in PETSc configure if there is no CMake available
 - flags `--with-[slepc|slepccomplex]-include` and `--with-[slepc|slepccomplex]-ldflags` for when SLEPc has been built outside of FreeFEM or PETSc
 - interface to `KSPSetResidualHistory` and `KSPGetIterationNumber`
 - interface to `mpiWaitAll`
 - new function extract, allows to build a curve mesh from a 2d mesh (can extract a labeled boundary, apply a geometric transformation)
 - ffglut can plot a vectorial FE function in surface 3d
+- distributed ParMmg interface, cf. `examples/hpddm/distributed-parmmg.edp`
 
 ### Changed
 - new `tgv` values: -10 => zero row, -20 => zero row/column
@@ -48,6 +49,7 @@ All notable changes to this project will be documented in this file.
 - compilation of PETSc under Windows
 - compilation of plugins when using static libraries
 - correct detection problem in FE type when use a vectorial FE
+- macro concatenation with spaces in arguments
 
 ## [4.5]
 

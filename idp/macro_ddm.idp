@@ -518,7 +518,7 @@ ENDIFMACRO
         mpiAllgather(bb, bbAll, mpiCommWorld);
         real hmax;
         {
-            real tmp = Th.hmax;
+            real tmp = ThName.hmax;
             mpiAllReduce(tmp, hmax, mpiCommWorld, mpiMAX);
         }
         int between = 0;
@@ -586,20 +586,23 @@ ENDIFMACRO
         Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i]);
     for(int i = between; i < neighborsName.n; ++i)
         Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i + 1]);
-    mpiWaitAll(rqRecv);
+    for(int i = 0; i < neighborsName.n; ++i)
+        mpiWaitAny(rqRecv);
     meshN ThLocalNew = gluemesh(ThTab);
     int m = 0;
     for(int i = 0; i < between; ++i)
         m += ThTab[i].nt;
     ThTab[between] = trunc(ThLocalNew, nuTriangle >= m && nuTriangle < m + ThTab[between].nt, label = -111111);
-    mpiWaitAll(rqSend);
+    for(int i = 0; i < neighborsName.n; ++i)
+        mpiWaitAny(rqSend);
     for(int i = 0; i < neighborsName.n; ++i)
         Isend(processor(neighborsName[i], mpiCommWorld, rqSend[i]), ThTab[between]);
     for(int i = 0; i < between; ++i)
         Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i]);
     for(int i = between; i < neighborsName.n; ++i)
         Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i + 1]);
-    mpiWaitAll(rqRecv);
+    for(int i = 0; i < neighborsName.n; ++i)
+        mpiWaitAny(rqRecv);
     ThLocalNew = gluemesh(ThTab);
     {
         ThName = ThLocalNew + ThLocalInitInterior;
@@ -631,6 +634,27 @@ IFMACRO(ThName#N2O)
 ENDIFMACRO
     buildWithPartitioning(ThName, part, 1, intersection, privateDmesh#ThName#khi[0], P1, mpiCommWorld)
 }
+EndMacro
+macro copyDmesh(OldName, NewName)
+IFMACRO(!privateDmesh#NewName)
+NewMacro privateDmesh#NewName()privateDmesh#NewName EndMacro
+NewMacro privateDmesh#NewName#khi()privateDmesh#NewName#khiDef EndMacro
+NewMacro privateDmesh#NewName#intersection()privateDmesh#NewName#intersectionDef EndMacro
+real[int][int] privateDmesh#NewName#khi(2);
+real[int][int] privateDmesh#NewName#intersection;
+ENDIFMACRO
+IFMACRO(privateDmesh#OldName)
+NewName = OldName;
+privateDmesh#NewName#khi[0].resize(privateDmesh#OldName#khi[0].n);
+privateDmesh#NewName#khi[0] = privateDmesh#OldName#khi[0];
+privateDmesh#NewName#khi[1].resize(privateDmesh#OldName#khi[1].n);
+privateDmesh#NewName#khi[1] = privateDmesh#OldName#khi[1];
+privateDmesh#NewName#intersection.resize(privateDmesh#OldName#intersection.n);
+for(int i = 0; i < privateDmesh#NewName#intersection.n; ++i) {
+    privateDmesh#NewName#intersection[i].resize(privateDmesh#OldName#intersection[i].n);
+    privateDmesh#NewName#intersection[i] = privateDmesh#OldName#intersection[i];
+}
+ENDIFMACRO
 EndMacro
 macro createMat(ThName, MatName, PkName)
 IFMACRO(privateDmesh#ThName)
@@ -1272,9 +1296,9 @@ ENDIFMACRO
 macro createParMmgCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators) {
     Mat A;
     createMat(ThName, A, P1);
-    real[int] D(Th.nt);
+    real[int] D(ThName.nt);
     createPartition(ThName, D, P0);
-    fespace Ph(Th, P0);
+    fespace Ph(ThName, P0);
     Ph d;
     d[] = D;
     ThParMmgName = trunc(ThName, abs(d) > 1.0e-2, label = -111111, new2old = ThN2O);
@@ -1282,7 +1306,7 @@ macro createParMmgCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators) {
     varf vG(u, v) = on(-111111, u = 1.0);
     real[int] gamma(ThParMmgName.nv);
     gamma = vG(0, VhWithoutOverlap, tgv = -1);
-    fespace Vh(ThName, P1);
-    int[int] rest = restrict(VhWithoutOverlap, Vh, ThN2O);
+    fespace VhWithOverlap(ThName, P1);
+    int[int] rest = restrict(VhWithoutOverlap, VhWithOverlap, ThN2O);
     ParMmgCommunicators(A, gamma, rest, ThCommunicators);
 }// EOM
