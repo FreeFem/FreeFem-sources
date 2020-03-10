@@ -20,7 +20,7 @@ fespace Vh(Th, P1);
     real hmin = 2.0e-2;
     real hmax = 1.0e-0;
     met = max(hmin, min(hmax, abs(met)));
-    meshN ThNew = parmmg3d(ThParMmg, metric = met[], hausd = 5.0, nodeCommunicators = communicators, mem = 1000);
+    meshN ThNew = parmmg3d(ThParMmg, metric = met[], hausd = 5.0, nodeCommunicators = communicators);
     reconstructDmesh(ThNew)
     copyDmesh(ThNew, Th)
 }
