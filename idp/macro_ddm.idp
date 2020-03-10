@@ -586,20 +586,23 @@ ENDIFMACRO
         Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i]);
     for(int i = between; i < neighborsName.n; ++i)
         Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i + 1]);
-    mpiWaitAll(rqRecv);
+    for(int i = 0; i < neighborsName.n; ++i)
+        mpiWaitAny(rqRecv);
     meshN ThLocalNew = gluemesh(ThTab);
     int m = 0;
     for(int i = 0; i < between; ++i)
         m += ThTab[i].nt;
     ThTab[between] = trunc(ThLocalNew, nuTriangle >= m && nuTriangle < m + ThTab[between].nt, label = -111111);
-    mpiWaitAll(rqSend);
+    for(int i = 0; i < neighborsName.n; ++i)
+        mpiWaitAny(rqSend);
     for(int i = 0; i < neighborsName.n; ++i)
         Isend(processor(neighborsName[i], mpiCommWorld, rqSend[i]), ThTab[between]);
     for(int i = 0; i < between; ++i)
         Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i]);
     for(int i = between; i < neighborsName.n; ++i)
         Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i + 1]);
-    mpiWaitAll(rqRecv);
+    for(int i = 0; i < neighborsName.n; ++i)
+        mpiWaitAny(rqRecv);
     ThLocalNew = gluemesh(ThTab);
     {
         ThName = ThLocalNew + ThLocalInitInterior;

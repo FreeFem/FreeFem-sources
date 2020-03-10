@@ -17,10 +17,10 @@ fespace Vh(Th, P1);
     createParMmgCommunicators(Th, ThParMmg, n2o, communicators)
     fespace VhParMmg(ThParMmg, P1);
     VhParMmg met = sqrt((x-0.5)^2 + (y-0.5)^2 + (z-0.5)^2) - 0.3;
-    real hmin = 8.0e-2;
-    real hmax = 8.0e-1;
+    real hmin = 2.0e-2;
+    real hmax = 1.0e-0;
     met = max(hmin, min(hmax, abs(met)));
-    meshN ThNew = parmmg3d(ThParMmg, metric = met[], hausd = 5.0, nodeCommunicators = communicators);
+    meshN ThNew = parmmg3d(ThParMmg, metric = met[], hausd = 5.0, nodeCommunicators = communicators, mem = 1000);
     reconstructDmesh(ThNew)
     copyDmesh(ThNew, Th)
 }

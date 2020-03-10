@@ -806,11 +806,11 @@ template<class Mesh>
 class SendWMeshd : public DoOnWaitMPI_Request, Serialize {
 public:
   const Mesh **ppTh;
-  int state;
+  MPI_Request rqSecond;
 
   SendWMeshd(const MPIrank *mpirank, const Mesh ** ppThh)
     : DoOnWaitMPI_Request(*mpirank), Serialize((**ppThh).serialize()),
-    ppTh(ppThh), state(0) {
+    ppTh(ppThh) {
     {
       long long lsz;
       size_t kk = 0;
@@ -827,12 +827,20 @@ public:
       WSend(p, lg, who, tag, comm, rq);
     else
       WSend(p, sizempibuf, who, tag, comm, rq);
+    long l1 = lg-sizempibuf;
+    if (l1 > 0) { // send the second part
+      if (verbosity > 100)
+        cout << mpirank << " Do SendWMeshd " << lg << " cont : " << (l1 > 0) << " " << rq << " " << comm << endl;
+      WSend(p+sizempibuf, l1, who, tag+1, comm, &rqSecond);
+    }
+    else
+      rqSecond = MPI_REQUEST_NULL;
   }
 
     
   SendWMeshd(const MPIrank *mpirank, const Mesh ** ppThh, bool havebordermesh)
   : DoOnWaitMPI_Request(*mpirank), Serialize((**ppThh).serialize_withBorderMesh()),
-  ppTh(ppThh), state(0) {
+  ppTh(ppThh) {
       {
           long long lsz;
           size_t kk = 0;
@@ -854,19 +862,20 @@ public:
           WSend(p, lg, who, tag, comm, rq);
       else
           WSend(p, sizempibuf, who, tag, comm, rq);
+      long l1 = lg-sizempibuf;
+      if (l1 > 0) { // send the second part
+        if (verbosity > 100)
+          cout << mpirank << " Do SendWMeshd " << lg << " cont : " << (l1 > 0) << " " << rq << " " << comm << endl;
+        WSend(p+sizempibuf, l1, who, tag+1, comm, &rqSecond);
+      }
+      else
+        rqSecond = MPI_REQUEST_NULL;
   }
   
   bool Do(MPI_Request *rrq) {
-    int tag = MPI_TAG<Mesh *>::TAG;
-    long l1 = lg -sizempibuf;
-    if (verbosity > 100)
-      cout << mpirank << " Do SendWMeshd " << lg << " " << state << " cont : " << (l1 > 0) << " " << rq << " " << comm << endl;
-
-    if (0 == state++ && l1 > 0) { // send the second part
-      int ll = WSend(p+sizempibuf, l1, who, tag+state, comm, rq);
+      if(rqSecond != MPI_REQUEST_NULL)
+        MPI_Wait(&rqSecond, MPI_STATUS_IGNORE);
       return true;// Fini
-    }
-    return false; // OK
   }
 
   ~SendWMeshd() {count()=0;}
