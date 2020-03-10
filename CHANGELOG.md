@@ -32,11 +32,14 @@ All notable changes to this project will be documented in this file.
 - flags `--with-[slepc|slepccomplex]-include` and `--with-[slepc|slepccomplex]-ldflags` for when SLEPc has been built outside of FreeFEM or PETSc
 - interface to `KSPSetResidualHistory` and `KSPGetIterationNumber`
 - interface to `mpiWaitAll`
+- new function extract, allows to build a curve mesh from a 2d mesh (can extract a labeled boundary, apply a geometric transformation)
+- ffglut can plot a vectorial FE function in surface 3d
 
 ### Changed
 - new `tgv` values: -10 => zero row, -20 => zero row/column
 - Windows binary now shipped with PETSc/SLEPc
 - BEM examples are now in `examples/mpi`
+- plot border type is now in 3d (border 2d and 3d)
 
 ### Deprecated
 
@@ -44,6 +47,7 @@ All notable changes to this project will be documented in this file.
 - `--enable-download_package` may now be used to download a single package, e.g., `--enable-download_metis`
 - compilation of PETSc under Windows
 - compilation of plugins when using static libraries
+- correct detection problem in FE type when use a vectorial FE
 
 ## [4.5]
 
