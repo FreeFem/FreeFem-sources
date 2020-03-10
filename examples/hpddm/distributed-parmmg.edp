@@ -7,7 +7,7 @@ load "parmmg"
 macro dimension()3// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
-meshN Th = cube(getARGV("-global", 40), getARGV("-global", 40), getARGV("-global", 40));
+meshN Th = cube(getARGV("-global", 30), getARGV("-global", 30), getARGV("-global", 30));
 buildDmesh(Th)
 fespace Vh(Th, P1);
 {
@@ -17,7 +17,7 @@ fespace Vh(Th, P1);
     createParMmgCommunicators(Th, ThParMmg, n2o, communicators)
     fespace VhParMmg(ThParMmg, P1);
     VhParMmg met = sqrt((x-0.5)^2 + (y-0.5)^2 + (z-0.5)^2) - 0.3;
-    real hmin = 2.5e-2;
+    real hmin = 8.0e-2;
     real hmax = 8.0e-1;
     met = max(hmin, min(hmax, abs(met)));
     meshN ThNew = parmmg3d(ThParMmg, metric = met[], hausd = 5.0, nodeCommunicators = communicators);
