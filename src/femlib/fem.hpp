@@ -275,6 +275,7 @@ namespace Fem2D {
       static const int NbV = 3; // 3+3+1
       static const int NbE = 3; //
       R area;
+      typedef R2 RdHat;
       TTriangle(){};  // constructor empty for array
 
       Vertex & operator[](int i) const { // to see triangle as a array of vertex

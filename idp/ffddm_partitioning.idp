@@ -281,7 +281,7 @@ IFMACRO(((!pr#dim)&(dimension,3L))|(pr#dim,3L))
 NewMacro pr#meshN()meshL EndMacro            /* three-dimensional line problem */
 NewMacro pr#intN()int1d EndMacro
 NewMacro pr#intbN()int0d EndMacro
-NewMacro pr#minimalMesh()Sline(1,[2.*x,y,z]) EndMacro
+NewMacro pr#minimalMesh()Sline(2,[x,y,z]) EndMacro
 ENDIFMACRO
 
 int pr#npart = ffddmnpart;
