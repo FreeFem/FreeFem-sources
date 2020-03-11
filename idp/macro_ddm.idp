@@ -88,22 +88,19 @@ if(!NoGraphicWindow || usedARGV("-fglut") != -1) {
         mpiRequest[int] rq(mpisize - 1);
         for(int i = 1; i < mpisize; ++i)
             Irecv(processor(i, mpiCommWorld, rq[i - 1]), meshTab[i]);
-        for(int i = 1; i < mpisize; ++i)
-            mpiWaitAny(rq);
+        mpiWaitAll(rq);
         for(int i = 1; i < mpisize; ++i) {
             ThCurrent = meshTab[i];
             Irecv(processor(i, mpiCommWorld, rq[i - 1]), uTab[i][]);
         }
-        for(int i = 1; i < mpisize; ++i)
-            mpiWaitAny(rq);
+        mpiWaitAll(rq);
         plot(def(uTab), params);
     }
     else {
         mpiRequest[int] rq(2);
         Isend(processor(0, rq[0]), ThCurrent);
         Isend(processor(0, rq[1]), uSend[]);
-        mpiWait(rq[0]);
-        mpiWait(rq[1]);
+        mpiWaitAll(rq);
     }
 }// EOM
 
@@ -191,8 +188,7 @@ ENDIFMACRO
     VhGlobal phi;
     part = part;
     int numberIntersection = 0;
-    for(int k = 0; k < 2 * intersection[0].n; ++k)
-        mpiWaitAny(rq);
+    mpiWaitAll(rq);
     for(int i = 0; i < intersection[0].n; ++i) {
         PhGlobal suppPartition = abs(part - intersection[0][i]) < 0.1;
         AddLayers(globalName, suppPartition[], overlap, phi[]);
@@ -573,8 +569,9 @@ ENDIFMACRO
             between = i;
             break;
         }
-    if(neighborsName[neighborsName.n - 1] < mpirank)
-        between = neighborsName.n;
+    if(neighborsName.n)
+        if(neighborsName[neighborsName.n - 1] < mpirank)
+            between = neighborsName.n;
     meshN[int] ThTab(neighborsName.n + 1);
     ThTab[between] = ThLocalInit;
     mpiRequest[int] rqRecv(neighborsName.n);
@@ -586,23 +583,20 @@ ENDIFMACRO
         Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i]);
     for(int i = between; i < neighborsName.n; ++i)
         Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i + 1]);
-    for(int i = 0; i < neighborsName.n; ++i)
-        mpiWaitAny(rqRecv);
+    mpiWaitAll(rqRecv);
     meshN ThLocalNew = gluemesh(ThTab);
     int m = 0;
     for(int i = 0; i < between; ++i)
         m += ThTab[i].nt;
     ThTab[between] = trunc(ThLocalNew, nuTriangle >= m && nuTriangle < m + ThTab[between].nt, label = -111111);
-    for(int i = 0; i < neighborsName.n; ++i)
-        mpiWaitAny(rqSend);
+    mpiWaitAll(rqSend);
     for(int i = 0; i < neighborsName.n; ++i)
         Isend(processor(neighborsName[i], mpiCommWorld, rqSend[i]), ThTab[between]);
     for(int i = 0; i < between; ++i)
         Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i]);
     for(int i = between; i < neighborsName.n; ++i)
         Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i + 1]);
-    for(int i = 0; i < neighborsName.n; ++i)
-        mpiWaitAny(rqRecv);
+    mpiWaitAll(rqRecv);
     ThLocalNew = gluemesh(ThTab);
     {
         ThName = ThLocalNew + ThLocalInitInterior;

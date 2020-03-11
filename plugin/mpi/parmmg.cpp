@@ -6,10 +6,6 @@
 #include "parmmg/libparmmg.h"
 #include "GenericMesh.hpp"
 
-#if 0
-extern "C" int PMMG_grp_to_saveMesh(PMMG_pParMesh, int, char*);
-#endif
-
 using namespace Fem2D;
 
 int ffmesh_to_PMMG_pParMesh(const Mesh3 &Th, PMMG_pParMesh& mesh, bool distributed) {
@@ -330,11 +326,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
                                          global.operator int*(), 1);
     }
   }
-#if 0
-  char filemesh[48];
-  sprintf(filemesh,"cube_in.%d.mesh",mpirank);
-  // PMMG_grp_to_saveMesh(mesh, mpirank, filemesh);
-#endif
+
   int ier = communicators == NULL ? PMMG_parmmglib_centralized(mesh) : PMMG_parmmglib_distributed(mesh);
 
   Mesh3 *Th_T = nullptr;
@@ -368,7 +360,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
 }
 
 static void Load_Init( ) {
-  if (verbosity) {
+  if (verbosity && !mpirank) {
     cout << " load: parmmg  " << endl;
   }
 

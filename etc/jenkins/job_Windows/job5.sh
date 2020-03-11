@@ -7,7 +7,6 @@ autoreconf -i \
 && ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
         CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
         --prefix=/builds/workspace/freefem \
-        --disable-parmmg \
   && ./3rdparty/getall -a -o PETSc \
   && cd 3rdparty/ff-petsc && make petsc-slepc \
   && cd ../.. \

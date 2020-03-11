@@ -2247,12 +2247,17 @@ long mpiWaitAny(KN<MPI_Request>* rq)
       if(index != MPI_UNDEFINED)
           DoOnWaitMPIRequest(&(*rq)[index]);
   }  while (MPI_UNDEFINED != index && (*rq)[index] != MPI_REQUEST_NULL);
-  return max(index, index);
+  return index;
 }
 
 long mpiWaitAll(KN<MPI_Request>* rq)
 {
   MPI_Status* statuses = new MPI_Status[rq->N()];
+  MPI_Waitall(rq->N(),*rq,statuses);
+  for(int i = 0; i < rq->N(); ++i) {
+      if(statuses[i].MPI_TAG != MPI_ANY_TAG && statuses[i].MPI_SOURCE != MPI_ANY_SOURCE)
+          DoOnWaitMPIRequest(&(*rq)[i]);
+  }
   MPI_Waitall(rq->N(),*rq,statuses);
   for(int i = 0; i < rq->N(); ++i) {
       if(statuses[i].MPI_TAG != MPI_ANY_TAG && statuses[i].MPI_SOURCE != MPI_ANY_SOURCE)

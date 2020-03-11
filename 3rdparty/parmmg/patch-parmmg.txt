@@ -1,6 +1,14 @@
 --- ./parmmg-sources/CMakeLists.txt
 +++ ./parmmg-sources-ok/CMakeLists.txt
-181c181
+186c186
 < FIND_PACKAGE(VTK)
 ---
 > #FIND_PACKAGE(VTK)
+421c421
+< IF (NOT WIN32)
+---
+> IF (NOT WIN32 OR MINGW)
+560c560
+< IF (NOT WIN32)
+---
+> IF (NOT WIN32 OR MINGW)

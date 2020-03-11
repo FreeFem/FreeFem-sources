@@ -16,6 +16,12 @@ mmg_VERSION=
 
 mmg:WHERE.done
 
+ifeq ($(WIN32DLLTARGET),)
+CMAKE_GENERATOR := 
+else
+CMAKE_GENERATOR := -G "MSYS Makefiles"
+endif
+
 FAIT.done:tag-tar
 	-mkdir build
 	cd build && cmake ../mmg-sources \
@@ -25,7 +31,7 @@ FAIT.done:tag-tar
 	-DCMAKE_CXX_FLAGS="$(CXXFLAGS) $(CXX11FLAGS) -fPIC" \
 	-DM_LIB="-lm" \
 	-DSCOTCH_DIR=$(scotch_dir) \
-	-DCMAKE_BUILD_TYPE=Release && $(MAKE)
+	-DCMAKE_BUILD_TYPE=Release $(CMAKE_GENERATOR) && $(MAKE)
 	touch FAIT.done
 
 install.done:FAIT.done
@@ -82,6 +88,7 @@ ff-flags: ../Makefile Makefile
 	grep 'WGET *=' ../Makefile >> ff-flags
 	grep 'STD_LIBS *=' ../Makefile >> ff-flags
 	grep 'CNOFLAGS *=' ../Makefile >> ff-flags
+	grep 'WIN32DLLTARGET *=' ../Makefile >> ff-flags
 	grep 'FF_prefix_petsc_real *=' ../Makefile >> ff-flags
 	-awk '/^scotch LD /&&/petsc/ {print "scotch_dir=$$(FF_prefix_petsc_real)" }' ../../plugin/seq/WHERE_LIBRARY-config >> ff-flags
 	-awk '/^scotch LD /{print "scotch_dir=../../../3rdparty/" }' ../lib/WHERE.scotch >> ff-flags

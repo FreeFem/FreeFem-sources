@@ -16,6 +16,12 @@ parmmg_VERSION=
 
 parmmg:WHERE.done
 
+ifeq ($(WIN32DLLTARGET),)
+CMAKE_GUESS := 
+else
+CMAKE_GUESS := -DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles"
+endif
+
 FAIT.done:tag-tar
 	-mkdir build
 	cd build && cmake ../parmmg-sources \
@@ -33,7 +39,7 @@ FAIT.done:tag-tar
 	-DMMG_BUILDDIR=../../mmg/build \
 	-DSCOTCH_DIR=$(scotch_dir) \
 	-DMETIS_DIR=$(metis_dir) \
-	-DCMAKE_BUILD_TYPE=Release && $(MAKE) 
+	-DCMAKE_BUILD_TYPE=Release $(CMAKE_GUESS) && $(MAKE)
 	touch FAIT.done
 
 install.done:FAIT.done
@@ -96,6 +102,7 @@ ff-flags: ../Makefile Makefile
 	grep 'MPICXX *=' ../Makefile >> ff-flags
 	grep 'MPIFC *=' ../Makefile >> ff-flags
 	grep 'MPIRUN *=' ../Makefile >> ff-flags
+	grep 'WIN32DLLTARGET *=' ../Makefile >> ff-flags
 	-awk '/^scotch LD /&&/petsc/ {print "scotch_dir=$$(FF_prefix_petsc_real)" }' ../../plugin/seq/WHERE_LIBRARY-config >> ff-flags
 	-awk '/^scotch LD /{print "scotch_dir=../../../3rdparty/" }' ../lib/WHERE.scotch >> ff-flags
 	-awk '/^metis LD /&&/petsc/ {print "metis_dir=$$(FF_prefix_petsc_real)" }' ../../plugin/seq/WHERE_LIBRARY-config >> ff-flags

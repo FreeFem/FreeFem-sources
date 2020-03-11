@@ -106,6 +106,9 @@ FLAGS_CONF_PETSC_REAL = $(COMMON_FLAGS) --with-shared-libraries=0 \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
 	$(PETSC_OPENBLAS) \
 	$(PETSC_DOWNLOAD) \
+	'--download-metis-cmake-arguments=-G "MSYS Makefiles"' \
+	'--download-parmetis-cmake-arguments=-G "MSYS Makefiles"' \
+	'--download-superlu-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu'
 FLAGS_CONF_PETSC_COMPLEX = $(COMMON_FLAGS) --with-shared-libraries=0 \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' \
