@@ -6691,18 +6691,27 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
 
   for (int ibe = 0; ibe < Th.nbe; ++ibe) {
     const B &K(Th.be(ibe));
-    for (int ii = 0; ii < labelface.N( ); ++ii) {
-      if (K.lab == labelface[ii]) {
+    if(labelface.N( ))
+      for (int ii = 0; ii < labelface.N( ); ++ii) {
+        if (K.lab == labelface[ii]) {
+          nbeLab++;
+          takebe[ibe] = 1;
+          for (int jj = 0; jj < B::nv; ++jj) {
+            if (takevertex[Th.operator( )(K[jj])] != -1) continue;
+            takevertex[Th.operator( )(K[jj])] = nv;
+            nv++;
+          }
+        }
+      }
+      else {
         nbeLab++;
         takebe[ibe] = 1;
-
         for (int jj = 0; jj < B::nv; ++jj) {
           if (takevertex[Th.operator( )(K[jj])] != -1) continue;
           takevertex[Th.operator( )(K[jj])] = nv;
           nv++;
         }
-      }
-    }
+     }     
   }
 
   ns = nbeLab;
