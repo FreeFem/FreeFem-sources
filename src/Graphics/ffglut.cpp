@@ -1687,18 +1687,15 @@ void OnePlotBorder::Draw(OneWindow *win)
         vector<pair<long,R3> > & v=data[i];
         ShowGlerror("end OnePlotBorder::Draw  1");
 
-        for(int j=1;j<v.size();++j)
-        {
+        for(int j=1;j<v.size();++j) {
             plot.color(2+v[j].first);
             R3 Po(v[j-1].second), Pn(v[j].second);
             R3 uv(Po,Pn);
             double l = Max(sqrt((uv,uv)),1e-20);
             R3 nx(1.,0.,0.), ny(0.,1.,0.), nz(0.,0.,1.);
-            R3 dnx = (uv^nx)*0.5, dny = (uv^ny)*0.5, dnz = (uv^nz)*0.5;
-            double nuv=uv.norme();
-            dnx *= -nuv/dnx.norme()/5;
-            dny *= -nuv/dny.norme()/5;
-            dnz *= -nuv/dnz.norme()/5;
+            R3 dd = uv*(-h/l);
+            R3 dnx = (dd^nx)*0.5, dny = (dd^ny)*0.5, dnz = (dd^nz)*0.5;
+            
             glLineWidth(2);
             glBegin(GL_LINES);
             win->Seg3(Po,Pn);
@@ -1707,12 +1704,12 @@ void OnePlotBorder::Draw(OneWindow *win)
             glLineWidth(1);
             glBegin(GL_LINES);
             if(j!=1) {
-              win->Seg3(Po,Po+uv+dnx);
-              win->Seg3(Po,Po+uv-dnx);
-              win->Seg3(Po,Po+uv+dny);
-              win->Seg3(Po,Po+uv-dny);
-              win->Seg3(Po,Po+uv+dnz);
-              win->Seg3(Po,Po+uv-dnz);
+              win->Seg3(Po,Po+dd+dnx);
+              win->Seg3(Po,Po+dd-dnx);
+              win->Seg3(Po,Po+dd+dny);
+              win->Seg3(Po,Po+dd-dny);
+              win->Seg3(Po,Po+dd+dnz);
+              win->Seg3(Po,Po+dd-dnz);
             }
             glEnd();
         }
