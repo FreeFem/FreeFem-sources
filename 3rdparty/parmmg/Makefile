@@ -64,7 +64,7 @@ clean::
 FAIRE: FAIT.done install.done
 
 tag-tar: $(PACKAGE)
-	-rm -rf  ParMmg-*
+	-rm -rf  ParMmg-* parmmg-sources
 	unzip $(PACKAGE) && mv ParMmg-* parmmg-sources
 	patch -p1 <patch-parmmg.txt
 	touch tag-tar

@@ -5472,7 +5472,81 @@ R3 *set_eqp(R3 *a, R3 *b) {
   *a = *b;
   return a;
 }
-       
+        class opDotR3 : public OneOperator{
+        public:
+            AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+            bool MeshIndependent() const { return false;}
+            
+            opDotR3(aType A, aType B): OneOperator(atype<C_F0>(),A,B) {}
+            opDotR3(): OneOperator(atype<C_F0>(),atype<TransE_Array >(),atype<R3 *>()  ) {}
+            
+            E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
+            C_F0  code2(const basicAC_F0 &args) const;
+        };
+        C_F0  opDotR3::code2(const basicAC_F0 &args) const
+        {
+            bool ta =args[0].left()==atype<TransE_Array>();
+            bool tb =args[1].left()==atype<E_Array>();
+            ffassert(ta == !tb);
+            const TransE_Array * tea=0;
+            const E_Array * ea=0;
+            C_F0 b= ta ? args[1] : args[0] ; // N
+            if( ta)  tea = dynamic_cast<const TransE_Array*>((Expression) args[0]);
+            if( tb)  ea = dynamic_cast<const E_Array*>((Expression) args[1]);
+            
+            ffassert( ea || tea );
+            const E_Array & a=  ta ? *tea->v : *ea;
+            int na=a.size();
+            int nb=na;
+            if(na <1 || na > 3 ) CompileError(" bad array  [ ...]'  ");
+            
+            KN<CC_F0> A(na), B(nb);
+            
+            
+            for (int i=0;i<na;++i)
+                if(!ta)  A(i) = a[i];
+                else     A(i) = TryConj(a[i]);
+            
+            const char * xyz[] = { "x","y","z"};
+            for (int i=0;i<nb;++i)
+                B[i] = C_F0(b,xyz[i]);
+            
+            
+            CC_F0 ab;
+            ab = C_F0(TheOperators,"*",A[0],B[0]);
+            for (int i=1;i<na;++i)
+                ab = C_F0(TheOperators,"+",ab,C_F0(TheOperators,"*",A(i),B(i)));
+            
+            return ab;
+            
+            
+        }
+        // Add FH ...  mars 2020 for N'.x
+        
+template< class Result, class A >
+        class E_F_trans_A_Ptr_o_R : public E_F0 {
+        public:
+            typedef Result A::*ptr;
+            Expression a0;
+            ptr p;
+            E_F_trans_A_Ptr_o_R(Expression aa0, ptr pp) : a0(aa0), p(pp) {}
+            AnyType operator( )(Stack s) const {
+                return SetAny< Result * >(&(GetAny< Transpose<A * > >((*a0)(s)).t->*p)); }
+            bool MeshIndependent( ) const { return a0->MeshIndependent( ); }
+        };
+template<  class A >
+        class OneOperator_trans_Ptr_o_R : public OneOperator {
+            typedef double Result ;
+            typedef double A::*ptr;
+            ptr p;
+            
+        public:
+            E_F0 *code(const basicAC_F0 &args) const {
+                return new E_F_trans_A_Ptr_o_R< Result , A >(t[0]->CastTo(args[0]), p);
+            }
+            OneOperator_trans_Ptr_o_R(ptr pp) : OneOperator(atype< Result * >( ), atype< Transpose<A *> >( )), p(pp) {}
+        };
+        
 void init_lgfem( ) {
   if (verbosity && (mpirank == 0)) cout << "lg_fem ";
 #ifdef HAVE_CADNA
@@ -5483,6 +5557,7 @@ void init_lgfem( ) {
   Dcl_Type< MeshPoint * >( );
   Dcl_Type< R3 * >(::Initialize< R3 >);
   Dcl_Type< R2 * >(::Initialize< R2 >);
+  Dcl_Type< Transpose<R3 *> >();
 
   map_type[typeid(R3 *).name( )] = new ForEachType< R3 * >(Initialize< R3 >);
   Dcl_TypeandPtr< pmesh >(0, 0, ::InitializePtr< pmesh >, ::DestroyPtr< pmesh >,
@@ -5634,6 +5709,9 @@ void init_lgfem( ) {
   Dcl_Type< const QuadratureFormular * >( );
   Dcl_Type< const QuadratureFormular1d * >( );
   Dcl_Type< const GQuadratureFormular< R3 > * >( );
+  TheOperators->Add("\'",   new OneOperator1<Transpose<R3* >,R3* >(&Build<Transpose<R3* >,R3* >));
+  TheOperators->Add("*",new opDotR3(atype<TransE_Array >(),atype< R3* >() )   );  // "N" a faire mais dur
+  TheOperators->Add("*",new opDotR3(atype< Transpose<R3* > >(),atype<E_Array >() )   );  // "N" a faire mais dur
 
   Global.New("qf1pT", CConstant< const QuadratureFormular * >(&QuadratureFormular_T_1));
   Global.New("qf1pTlump", CConstant< const QuadratureFormular * >(&QuadratureFormular_T_1lump));
@@ -5789,6 +5867,10 @@ void init_lgfem( ) {
   Add< R3 * >("x", ".", new OneOperator_Ptr_o_R< R, R3 >(&R3::x));
   Add< R3 * >("y", ".", new OneOperator_Ptr_o_R< R, R3 >(&R3::y));
   Add< R3 * >("z", ".", new OneOperator_Ptr_o_R< R, R3 >(&R3::z));
+  Add< Transpose<R3 *> >("x", ".", new OneOperator_trans_Ptr_o_R< R3 >(&R3::x));
+  Add< Transpose<R3 *> >("y", ".", new OneOperator_trans_Ptr_o_R< R3 >(&R3::y));
+  Add< Transpose<R3 *> >("z", ".", new OneOperator_trans_Ptr_o_R< R3 >(&R3::z));
+
   Add< R2 * >("x", ".", new OneOperator_Ptr_o_R< R, R2 >(&R2::x));
   Add< R2 * >("y", ".", new OneOperator_Ptr_o_R< R, R2 >(&R2::y));
 
