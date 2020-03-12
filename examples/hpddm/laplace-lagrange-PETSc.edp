@@ -80,7 +80,6 @@ if(mpirank == 0) {
         F(0) = 0;
         F(1:F.n - 1) = tmp;
     }
-    cout << F<<endl;
     real[int] x = M^-1 * F;
     if(mpirank == 0) {
         real[int] tmp = x(1:F.n - 1);

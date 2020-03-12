@@ -3577,8 +3577,18 @@ namespace PETSc {
                   if(mat[i][j]) {
                       MatGetType(mat[i][j], &type);
                       PetscStrcmp(type, MATMPIDENSE, &isType);
-                      PetscInt n, m;
-                      MatGetSize(mat[i][j], &n, &m);
+                      PetscInt n = 0, m = 0;
+                      if(!isType) {
+                          PetscStrcmp(type, MATTRANSPOSEMAT, &isType);
+                          if(isType) {
+                              Mat C;
+                              if (std::is_same< PetscScalar, PetscReal >::value) MatTransposeGetMat(mat[i][j], &C);
+                              else MatHermitianTransposeGetMat(mat[i][j], &C);
+                              MatGetType(C, &type);
+                              PetscStrcmp(type, MATMPIDENSE, &isType);
+                              if(isType) MatGetSize(C, &m, &n);
+                          }
+                      } else MatGetSize(mat[i][j], &n, &m);
                       if(isType && (m > 1 || n == 1)) {
                           if(mpirank == 0) {
                               if(U)
