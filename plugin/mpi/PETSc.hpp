@@ -53,6 +53,12 @@ class DistributedCSR {
                                 PetscStrcmp(type, MATTRANSPOSEMAT, &isType);
                                 if(isType) {
                                     Mat B = mat[i][j];
+                                    Mat C;
+                                    if (std::is_same< PetscScalar, PetscReal >::value) MatTransposeGetMat(B, &C);
+                                    else MatHermitianTransposeGetMat(B, &C);
+                                    MatGetType(C, &type);
+                                    PetscStrcmp(type, MATMPIDENSE, &isType);
+                                    if(isType) MatDestroy(&C);
                                     MatDestroy(&B);
                                 }
                                 else {

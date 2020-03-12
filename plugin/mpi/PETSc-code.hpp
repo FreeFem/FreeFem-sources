@@ -1446,13 +1446,9 @@ namespace PETSc {
               KN< PetscScalar > x;
               Mat B;
               MatCreate(PETSC_COMM_WORLD, &B);
-              if (t == 4) {
-                x = GetAny< KN_< PetscScalar > >(e_ij);
-                MatSetSizes(B, PETSC_DECIDE, x.n, 1, PETSC_DECIDE);
-              } else {
-                x = GetAny< Transpose< KN_< PetscScalar > > >(e_ij);
-                MatSetSizes(B, x.n, PETSC_DECIDE, PETSC_DECIDE, 1);
-              }
+              if (t == 3) x = GetAny< KN_< PetscScalar > >(e_ij);
+              else x = GetAny< Transpose< KN_< PetscScalar > > >(e_ij);
+              MatSetSizes(B, x.n, PETSC_DECIDE, PETSC_DECIDE, 1);
               MatSetType(B, MATMPIDENSE);
               MatMPIDenseSetPreallocation(B, PETSC_NULL);
               PetscScalar* array;
@@ -1461,7 +1457,15 @@ namespace PETSc {
               MatDenseRestoreArray(B, &array);
               MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
               MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
-              a[i * M + j] = B;
+              if (t == 3) {
+                a[i * M + j] = B;
+              }
+              else {
+                Mat C;
+                if (std::is_same< PetscScalar, PetscReal >::value) MatCreateTranspose(B, &C);
+                else MatCreateHermitianTranspose(B, &C);
+                a[i * M + j] = C;
+              }
             } else {
               ExecError("Unknown type in submatrix");
             }
@@ -3848,7 +3852,7 @@ namespace PETSc {
     KN_<double> D(const_cast<double*>(p->_A->getScaling()), p->_A->getDof());
     return D;
   }
-}    // namespace PETSc
+} // namespace PETSc
 
 static void Init_PETSc( ) {
   if (verbosity > 1 && mpirank == 0)
