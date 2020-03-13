@@ -61,7 +61,7 @@ pr#prfe#prmesh#tic(pr#tloc)
 if(bseq) {
   IFMACRO(VarfA)
   VarfA(vaglobalEprec,pr#prfe#prmesh#Thglob,pr#prfe#Vhglob)
-  pr#AglobEprec = vaglobalEprec(pr#prfe#Vhglob,pr#prfe#Vhglob,solver=(vsym ? CG : GMRES),tgv=vtgvelim);
+  pr#AglobEprec = vaglobalEprec(pr#prfe#Vhglob,pr#prfe#Vhglob,sym=vsym,tgv=vtgvelim);
   ENDIFMACRO
   ;
 }
@@ -88,7 +88,7 @@ else if (!pr#prfe#prmesh#excluded) {
   ENDIFMACRO   
 
   VarfA(vPb, pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)
-  pr#aRdEprec = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgvelim);
+  pr#aRdEprec = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi, sym=vsym,tgv=vtgvelim);
   
   pr#prfe#K[int] rhsFull(pr#prfe#AugVhi.ndof);
   pr#prfe#K[int] rhs(pr#prfe#Vhi.ndof);

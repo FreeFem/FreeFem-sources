@@ -13,6 +13,8 @@ include "ffddm.idp"
 
 load "geophysics"
 
+include "cube.idp"
+
 macro def(i)i// EOM                         // scalar field definition
 macro init(i)i// EOM                        // scalar field initialization
 func Pk = P2;  
@@ -57,34 +59,34 @@ macro Grad(u) [dx(u),dy(u),dz(u)] // EOM
 
 macro Varf(varfName, meshName, PhName)
     varf varfName(u,v) =
-  intN(meshName)(-(k^2-1i*epsilonprob)*u*v+Grad(u)'*Grad(v))
-				+ intbN(meshName,Robin)(1i*k*u*v)
+  int3d(meshName)(-(k^2-1i*epsilonprob)*u*v+Grad(u)'*Grad(v))
+				+ int2d(meshName,Robin)(1i*k*u*v)
 				+ on(Dirichlet,u=0); // EOM
 
 // for the preconditioner
 macro VarfEprec(varfName, meshName, PhName)
     varf varfName(u,v) =
-  intN(meshName)(-(k^2-1i*epsilonEprec)*u*v+Grad(u)'*Grad(v))
-				+ intbN(meshName,Robin)(1i*k*u*v)
+  int3d(meshName)(-(k^2-1i*epsilonEprec)*u*v+Grad(u)'*Grad(v))
+				+ int2d(meshName,Robin)(1i*k*u*v)
 				+ on(Dirichlet,u=0); // EOM
 
 // for the preconditioner
 macro VarfOpt(varfName, meshName, PhName)
     varf varfName(u,v) =
-  intN(meshName)(-(k^2-1i*epsilonEprec)*u*v+Grad(u)'*Grad(v))
-				+ intbN(meshName,Robin,10)(1i*k*u*v)
+  int3d(meshName)(-(k^2-1i*epsilonEprec)*u*v+Grad(u)'*Grad(v))
+				+ int2d(meshName,Robin,10)(1i*k*u*v)
 				+ on(Dirichlet,u=0); // EOM
 
 macro Varfrhs(varfName, meshName, PhName)
     varf varfName(u,v) =
-                intN(meshName)(source*v)
+                int3d(meshName)(source*v)
                 + on(Dirichlet,u=0); // EOM
 
 macro Hdefplot(u)real(u)//
 
 macro Hwithhpddm()1//
 
-vsym = 1;
+vsym = 2; // symmetric, not hermitian
 vtgv = 1.e+30;
 vtgvelim = 1.e+30;
 

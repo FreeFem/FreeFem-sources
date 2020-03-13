@@ -92,11 +92,11 @@ R HashMatrix<I,R>::pscal(R *x,R *y,I sx,I sy)
         x -= fortran;
         y -= fortran;
     }
-    if(half)
+    if(half > 0)
         for (size_t k=0; k<nnz;++i)
         {
             if(i[k] != j[k] )
-                s += conj(x[i[k]*sx])*aij[k]*y[j[k]*sy] + conj(x[j[k]*sx]*aij[k]) *y[i[k]*sy] ;
+                s += conj(x[i[k]*sx])*aij[k]*y[j[k]*sy] + conj(x[j[k]*sx])* (half == 1?conj(aij[k]):aij[k]) *y[i[k]*sy] ;
             else
                 s += conj(x[i[k]*sx])*aij[k]*y[j[k]*sy];
         }
@@ -122,7 +122,7 @@ typename   HashMatrix<I,R>::uniquecodeInt HashMatrix<I,R>::CodeIJ() const  {
 }
 
 template<class I,class R>
-HashMatrix<I,R>::HashMatrix(I nn,I mm,I nnnz,bool halff)
+HashMatrix<I,R>::HashMatrix(I nn,I mm,I nnnz,int halff)
 :  VirtualMatrix<I,R>(nn,mm),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),matmulcpu(0.),i(0),j(0),p(0),aij(0),
 head(0), next(0),
 // trans(false),
@@ -164,7 +164,8 @@ re_do_numerics(0),re_do_symbolic(0)
     }
     if(cas== 2)
     {
-        I rn,rm,rsymetrique;
+        I rn,rm;
+        int rsymetrique;
         size_t rnbcoef;
         ffassert(f.good() );
         f >> rn >> rm >> rsymetrique >>rnbcoef;
@@ -187,7 +188,8 @@ re_do_numerics(0),re_do_symbolic(0)
     }
     else if(cas== 3)
     {
-        I nn,mm,hhalf,f77, sstate, tstate;
+        I nn,mm,f77, sstate, tstate;
+        int hhalf;
         size_t nnnz;
         f >> nn >> mm >> nnnz >> hhalf >> f77 >> sstate >> tstate ;
         ffassert(f.good() && nn>0 && mm>0 && nnnz>0  );
@@ -215,7 +217,7 @@ template<class I,class R>
 HashMatrix<I,R>::HashMatrix(KNM_<R> F,double  threshold)
 : VirtualMatrix<I,R>(F.N(),F.M()),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),matmulcpu(0.),i(0),j(0),p(0),aij(0),
 head(0), next(0),
-half(false), state(unsorted),type_state(type_HM),
+half(0), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
 re_do_numerics(0),re_do_symbolic(0),tgv(0), ntgv(0)
 
@@ -231,7 +233,7 @@ re_do_numerics(0),re_do_symbolic(0),tgv(0), ntgv(0)
 }
 
 template<class I,class R>
-HashMatrix<I,R>::HashMatrix(bool Half,I nn)
+HashMatrix<I,R>::HashMatrix(int Half,I nn)
 : VirtualMatrix<I,R>(nn,nn),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),matmulcpu(0.),i(0),j(0),p(0),aij(0),
 head(0), next(0),
 half(Half), state(unsorted),type_state(type_HM),
@@ -355,7 +357,7 @@ void  HashMatrix<I,R>::RemoveHalf(int cas,double tol)
 }
 
 template<class I,class R>
-void  HashMatrix<I,R>::resize(I nn, I mm,size_t nnnz, double tol , bool sym )
+void  HashMatrix<I,R>::resize(I nn, I mm,size_t nnnz, double tol , int sym )
 {
     
     mm= mm ? mm : nn;
@@ -379,7 +381,7 @@ void  HashMatrix<I,R>::resize(I nn, I mm,size_t nnnz, double tol , bool sym )
         }
     }
     if(verbosity>9 ) cout << "HashMatrix<I,R>::resize: new nnz  = " << kk << " " << nnz << " " << " sym " << sym << " "<< tol << " " << nn << " " << mm << endl;
-    half = half || sym;
+    half = (half ? half : sym);
     nnnz = max(nnnz,kk);
     bool rresize = (nnnz < 0.8*nnz) || ((nnnz > 1.2*nnz)) ;
     nnz = kk; // forget after value ... 
@@ -403,7 +405,7 @@ void HashMatrix<I,R>::clear()
     nbsort=0;
     re_do_numerics=1;
     re_do_symbolic=1;
-    half=false;
+    half=0;
     lock=0;
     fortran = 0;
     state=unsorted;
@@ -687,7 +689,7 @@ void HashMatrix<I,R>::Sortji()
 }
 
 template<class I,class R>
-void HashMatrix<I,R>::set(I nn,I mm,bool hhalf,size_t nnnz, I *ii, I*jj, R *aa,int f77,int tcsr)
+void HashMatrix<I,R>::set(I nn,I mm,int hhalf,size_t nnnz, I *ii, I*jj, R *aa,int f77,int tcsr)
 {
 //    tcsr >0 => CSR ii pointer size nn+1, jj col size nnnz
 //    tcrs <0 = CSC  jj pointer size mm+1, ii row size nnnz
@@ -759,7 +761,7 @@ void HashMatrix<I,R>::Add(const HashMatrix<I,R> *PA,R coef,bool trans, I ii00,I 
             aij[k] += coef*aij[k];
     else
     {   ffassert((const void*) this != (const void*) & A); // not the same matrix
-        if ( this->half!= this->half ) MATERROR(1,"+= on diff type of mat of type HashMatrix ");
+        if ( this->half!= A.half ) MATERROR(1,"+= on diff type of mat of type HashMatrix ");
         
         for(size_t k=0;k<Annz;++k)
             operator()(ii[k]+ii00,jj[k]+jj00) += coef*A.aij[k];
@@ -786,7 +788,7 @@ void Addto(HashMatrix<I,R> *P0, const HashMatrix<I,K> *PA,R (*f)(K) ,bool trans,
                 P0->aij[k] += f(A.aij[k]);
         else
         {   ffassert((const void*) P0 != (const void*) & A); // not the same matrix
-            if ( P0->half!= P0->half ) MATERROR(1,"+= on diff type of mat of type HashMatrix ");
+            if ( P0->half!= A.half ) MATERROR(1,"+= on diff type of mat of type HashMatrix ");
             
             for(size_t k=0;k<Annz;++k)
                 P0->operator()(ii[k]+ii00,jj[k]+jj00) += f(A.aij[k]);
@@ -1089,7 +1091,7 @@ R* HashMatrix<I,R>::addMatMul(R *x,R*Ax,bool Transpose,I sx,I sAx) const {
             for(int k=0; k<nnz;++k)
             {
                 Ax[ii[k]] += aa[k]*x[jj[k]];
-                if( ii[k] != jj[k]) Ax[jj[k]] += conj(aa[k])*x[ii[k]];
+                if( ii[k] != jj[k]) Ax[jj[k]] += (half == 1?conj(aa[k]):aa[k]) *x[ii[k]];
             }
         else
             for(int k=0; k<nnz;++k)
@@ -1100,7 +1102,7 @@ R* HashMatrix<I,R>::addMatMul(R *x,R*Ax,bool Transpose,I sx,I sAx) const {
         for(int k=0; k<nnz;++k)
         {
             Ax[ii[k]*sAx] += aa[k]*x[jj[k]*sx];
-            if( ii[k] != jj[k]) Ax[jj[k]*sAx] += conj(aa[k])*x[ii[k]*sx];
+            if( ii[k] != jj[k]) Ax[jj[k]*sAx] += (half == 1?conj(aa[k]):aa[k])*x[ii[k]*sx];
         }
     else
         for(int k=0; k<nnz;++k)
@@ -1322,16 +1324,19 @@ double HashMatrix<I,R>::gettgv(I * pntgv,double ratio) const
 }
 
 template<class I,class R>
-void HashMatrix<I,R>::setsdp(bool sym,bool dp) // sym dpos para 
+void HashMatrix<I,R>::setsdp(int sym,bool dp) // sym dpos para
 {
-    this->symetric=sym;
+    this->symetric=(sym > 0);
     this->positive_definite=dp;
-    if( half != sym)
+    if( (half>0) != sym)
     {
         if( sym)
-            Half();//  remove half part
+            Half(sym);//  remove half part
         else
             UnHalf();
+    }
+    else {
+      half = sym;
     }
 }
 
@@ -1339,17 +1344,18 @@ template<class I,class R>
 void HashMatrix<I,R>::UnHalf()
 {
     
-    if( !half) return;
+    if (half==0) return;
     HM();
     size_t nnz0=nnz,err=0;
     for(int k=0; k<nnz0; ++k)
       if( i[k] > j[k] )
        {
-        size_t ki=insert(j[k],i[k],aij[k]);
+        size_t ki=insert(j[k],i[k],(half == 1?conj(aij[k]):aij[k]));
         err += ki < nnz0;
         }
     else if ( i[k] < j[k] )
         err++;
+    half = 0;
     if( err )
         cerr << " Try of unsymmetrize no half matrix (Bug) ... ????" <<endl;
     ffassert(err==0);
@@ -1384,11 +1390,11 @@ template HashMatrix<int,R>::HashMatrix(const HashMatrix<int,C> & , R(*ff)(C));
 template  void Addto<int,R,C>(HashMatrix<int,R> *P0, const HashMatrix<int,C> *PA,R (*f)(C) ,bool trans, int ii00,int jj00);
 template  void Addto<int,C,R>(HashMatrix<int,C> *P0, const HashMatrix<int,R> *PA,C (*f)(R) ,bool trans, int ii00,int jj00);
 
-template void HashMatrix<int,R>::set<int64>(int64 nn,int64 mm,bool hhalf,size_t nnnz, int64 *ii, int64*jj, R *aa,int f77);
+template void HashMatrix<int,R>::set<int64>(int64 nn,int64 mm,int hhalf,size_t nnnz, int64 *ii, int64*jj, R *aa,int f77);
 //template void HashMatrix<int,R>::set<int,R>(int nn,int mm,bool hhalf,size_t nnnz, int *ii, int*jj, R *aa,int f77,R(*ff)(R));
 //template void HashMatrix<int,R>::set<long,R>(long nn,long mm,bool hhalf,size_t nnnz, long *ii, long *jj, R *aa,int f77,R(*ff)(R));
-template void HashMatrix<int,C>::set<int,C>(int nn,int mm,bool hhalf,size_t nnnz, int *ii, int*jj, C *aa,int f77,C(*ff)(C));
-template void HashMatrix<int,R>::set<int,C>(int nn,int mm,bool hhalf,size_t nnnz, int *ii, int*jj, C *aa,int f77,R(*ff)(C));
+template void HashMatrix<int,C>::set<int,C>(int nn,int mm,int hhalf,size_t nnnz, int *ii, int*jj, C *aa,int f77,C(*ff)(C));
+template void HashMatrix<int,R>::set<int,C>(int nn,int mm,int hhalf,size_t nnnz, int *ii, int*jj, C *aa,int f77,R(*ff)(C));
 
 //template void HashMatrix<int,C>::set<int,R>(int nn,int mm,bool hhalf,size_t nnnz, int *ii, int*jj, R *aa,int f77,C(*ff)(R));
 //template void HashMatrix<int,C>::set<long,C>(long nn,long mm,bool hhalf,size_t nnnz, long *ii, long *jj, C *aa,int f77,C(*ff)(C));

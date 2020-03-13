@@ -2117,7 +2117,8 @@ static void Init_Bem() {
 
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fes > (1) );
     TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fes >);
-	
+    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fesS > (1) );
+    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fesS >);
 
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesS, v_fes > (1) );
     TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesS, v_fes >);

@@ -112,8 +112,8 @@ struct HMatVirtPrecon: CGMatVirt<I,K> {
 template<class I=int,class K=double>
 class SolverCG: public VirtualSolver<I,K> {
 public:
-    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 1|2|4|16;
+    // 1 unsym , 2 herm, 4 sym, 8 pos , 16 nopos, 32  seq, 64  ompi, 128 mpi
+    static const int orTypeSol = 1|2|4|8|32;
 
     typedef HashMatrix<I,K>  HMat;
     HMat *A;
@@ -185,8 +185,8 @@ public:
 template<class I=int,class K=double>
 class SolverGMRES: public VirtualSolver<I,K> {
 public:
-    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 1|2|4|8|16;
+    // 1 unsym , 2 herm, 4 sym, 8 pos , 16 nopos, 32  seq, 64  ompi, 128 mpi
+    static const int orTypeSol = 1|2|4|8|16|32;
 
     typedef HashMatrix<I,K>  HMat;
     HMat *A;

@@ -68,7 +68,7 @@ struct Data_Sparse_Solver {
     bool x0; //  init by 0 the inital data the solution
     double * veps; //    to get and set value of eps
     bool rightprecon;
-    bool sym;// know is set or not
+    int sym;// know is set or not
     bool positive;
     
     Data_Sparse_Solver()

@@ -98,7 +98,7 @@ AnyType MatrixEdgeP1< Mesh >::operator( )(Stack stack) const {
       }
     if (verbosity > 2 && mpirank == 0)
       cout << " ne = " << ne << " " << nbedgeE << " " << Th.nv << endl;
-    MatriceMorse< R > *pAij = new MatriceMorse< R >(ne, Th.nv), &Aij = *pAij;
+    MatriceMorse< R > *pAij = new MatriceMorse< R >(ne, Th.nv, 0, 0), &Aij = *pAij;
     // ffassert(Th.ne==ne);
     for (int k = 0; k < ne; k++) {
 

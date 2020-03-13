@@ -605,7 +605,7 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
         syma=phm->half;
     }
 
-    if( !A->A) A->A.master(new MatriceMorse<R>(0,0));//  set to empty matrix .. mars 2014 FH ..
+    if( !A->A) A->A.master(new MatriceMorse<R>(0,0,0,0));//  set to empty matrix .. mars 2014 FH ..
     SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param,syma);
     if( verbosity >4) cout <<" SetMatrix_Op " << ds.sym << " "<< ds.positive << " " << syma << endl;
     VirtualMatrix<int,R> *pvm =A->pMC();
@@ -668,7 +668,7 @@ MatriceMorse<R> * buildInterpolationMatrix(const FESpace & Uh,const FESpace & Vh
     int n=Uh.NbOfDF;
     int mm=Vh.NbOfDF;
  if(transpose) Exchange(n,mm);
-  m = new MatriceMorse<R>(n,mm);
+  m = new MatriceMorse<R>(n,mm,0,0);
   const  Mesh & ThU =Uh.Th; // line
   const  Mesh & ThV =Vh.Th; // colunm
   bool samemesh =  &Uh.Th == &Vh.Th;  // same Mesh
@@ -855,7 +855,7 @@ MatriceMorse<R> * buildInterpolationMatrixT(const FESpaceT1 & Uh,const FESpaceT2
   int n=Uh.NbOfDF;
   int mm=Vh.NbOfDF;
   if(transpose) Exchange(n,mm);
-  m = new MatriceMorse<R>(n,mm);
+  m = new MatriceMorse<R>(n,mm,0,0);
     
   RdHat1 Gh= RdHat1::diag(1./(RdHat1::d+1));
   RdHat2 G;
@@ -1037,7 +1037,7 @@ MatriceMorse<R> *  buildInterpolationMatrix1(const FESpace & Uh,const KN_<double
    fait=false;
    R2 Phat;
    bool outside;
-    MatriceMorse<R> * m = new MatriceMorse<R>(n,mm);
+    MatriceMorse<R> * m = new MatriceMorse<R>(n,mm,0,0);
    for(int ii=0;ii<nbxx;ii++)
    {
      const Triangle *ts=ThU.Find(R2(xx[ii],yy[ii]),Phat,outside);
@@ -1113,7 +1113,7 @@ MatriceMorse<R> *  buildInterpolationMatrixT1(const FESpaceT & Uh,const KN_<doub
   KN<bool> fait(Uh.NbOfDF);
   fait=false;
   // map< pair<int,int> , double > sij;
-  MatriceMorse<R> * m = new MatriceMorse<R>(n,mm);
+  MatriceMorse<R> * m = new MatriceMorse<R>(n,mm,0,0);
   RdHatT Phat;
   bool outside;
 
@@ -1311,7 +1311,7 @@ AnyType ProdMat(Stack stack,Expression emat,Expression prodmat)
     cerr << "  --MatProd " << mA->n<< " "<< mA->m << " x " << mB->n<< " "<< mB->m <<  endl;
     ExecError(" Wrong mat dim in MatProd");
   }
-   MatriceMorse<RAB> *mAB=new MatriceMorse<RAB>(An,Bm);
+   MatriceMorse<RAB> *mAB=new MatriceMorse<RAB>(An,Bm,0,0);
    AddMul(*mAB,*mA,*mB,ta,tb);
 
   if(!init) sparse_mat->init();
@@ -1400,7 +1400,7 @@ AnyType CopyMat_tt(Stack stack,Expression emat,Expression eA,bool transp)
 
     Matrice_Creuse<RR> * sparse_mat =GetAny<Matrice_Creuse<RR>* >((*emat)(stack));
     if(mr) {
-        MatriceMorse<RR> * mrr = new MatriceMorse<RR>(mr->n,mr->m);
+        MatriceMorse<RR> * mrr = new MatriceMorse<RR>(mr->n,mr->m,0,0);
         *mrr = *mr;
         if(transp) mrr->dotranspose();
 
@@ -1880,7 +1880,7 @@ newpMatrice_Creuse<R> Matrixfull2mapIJ_inv (Stack s,KNM<R>   * const & pa,const 
    long m= jj(SubArray(M)).max()+1;
 
 
-    HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int) n,(int) m);
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int) n,(int) m,0,0);
     HashMatrix<int,R> & A =*pA;
 
    for (long i=0;i<N;++i)
@@ -1900,7 +1900,7 @@ newpMatrice_Creuse<R>  Matrixfull2mapIJ (Stack s, KNM<R>   * const & pa,const KN
    int N=a.N(),M=a.M();
    long n = ii.N();
    long m= jj.N();
-    HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m);
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m,0,0);
     HashMatrix<int,R> & A =*pA;
 
    for (long il=0;il<n;++il)// correct juil 2017 FH N --> n
@@ -1931,7 +1931,7 @@ AnyType Matrixfull2map (Stack s , const AnyType & pp)
    int N=a.N(),M=a.M();
    int n = N;
    int m= M;
-    HashMatrix<int,R> *pA= new  HashMatrix<int,R>(n,m);
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>(n,m,0,0);
     HashMatrix<int,R> & A =*pA;
 
    A(n-1,m-1) = R(); // Hack to be sure that the last term existe
@@ -1955,7 +1955,7 @@ newpMatrice_Creuse<R>  Matrixoutp2mapIJ_inv (Stack s,outProduct_KN_<R>   * const
    long  N=op.a.N(),M=op.b.N();
    long  n = ii(SubArray(N)).max()+1;
    long m= jj(SubArray(M)).max()+1;
-    HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m);
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m,0,0);
     HashMatrix<int,R> & A =*pA;
 
    for (int i=0;i<N;++i)
@@ -1984,7 +1984,7 @@ Matrixmapp2mapIJ1 (Stack s,Matrice_Creuse<R> *const &  mcB,const Inv_KN_long & i
 
     int N=ii.N(),M=jj.N();
     int nn = ii.max(), mm= jj.max();
-    HashMatrix<int,R> *pA= new  HashMatrix<int,R>(nn,mm);
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>(nn,mm,0,0);
     HashMatrix<int,R> & A =*pA;
 
     for (int k=0;k<B->nnz;++k)
@@ -2029,7 +2029,7 @@ typedef typename multimap< int,int>::iterator  MI;
 	if(jj[j]>=0)
 	    J.insert(make_pair(jj[j],j));
     int n=N-1,m=M-1;// change FH  sep 2009 to have the correct size..
-    HashMatrix<int,R> *pA= new  HashMatrix<int,R>(N,M);
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>(N,M,0,0);
     HashMatrix<int,R> & A =*pA;
 
     for (int k=0;k!=B->nnz;++k)
@@ -2067,7 +2067,7 @@ Matrixoutp2mapIJ (Stack s,outProduct_KN_<R>   * const & pop,const KN_<long> & ii
    const outProduct_KN_<R> & op(*pop);
    long N=op.a.N(),M=op.b.N();
    long n=ii.N(),m=jj.N();
-    HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m);
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m,0,0);
     HashMatrix<int,R> & A =*pA;
 
    for (long il=0;il<n;++il)
@@ -2100,7 +2100,7 @@ AnyType Matrixoutp2map (Stack s, const AnyType & pp)
    long n = N;
    long m= M;
 //   A[make_pair(n-1,m-1)] = R(); // Hack to be sure that the last term existe
-    HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m);
+    HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m,0,0);
     HashMatrix<int,R> & A =*pA;
 
    for (long i=0;i<N;++i)
@@ -2361,7 +2361,7 @@ template<typename R>  AnyType RawMatrix<R>::operator()(Stack stack) const
 	n = lg.max()+1;
 	m = cl.max()+1;
 	ffassert( lg.N()==k && cl.N()==k && lg.min()>=0 && lg.max()>=0);
-        amorse = new MatriceMorse<R>(n,m,k);
+        amorse = new MatriceMorse<R>(n,m,k,0);
 	sym=false;
 	for(int i=0;i<k;++i)
 	    (*amorse)[make_pair<int,int>((int)lg[i],(int)cl[i])]+=cc[i];
@@ -2488,7 +2488,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
   }
   MatriceMorse<R> * amorse =0;
 {
-    HashMatrix<int,R>  *Aij = new  HashMatrix<int,R>( n, m,0);
+    HashMatrix<int,R>  *Aij = new  HashMatrix<int,R>( n, m,0,0);
     for (int i=0;i<N;++i)
      for (int j=0;j<M;++j)
        if (Bij(i,j))
@@ -2702,7 +2702,7 @@ template<class R>
 Matrice_Creuse<R> * InitMatrice_Creuse_nm(Matrice_Creuse<R> * const & p,const long &n,const long &m)
 {
     p->init() ;
-    HashMatrix<int,R> *phm= new HashMatrix<int,R>((int) n,(int) m);
+    HashMatrix<int,R> *phm= new HashMatrix<int,R>((int) n,(int) m,0,0);
     MatriceCreuse<R> *pmc(phm);
     p->A.master(pmc);
     return p;
@@ -2711,7 +2711,7 @@ template<class R>
 Matrice_Creuse<R> * InitMatrice_Creuse_n(Matrice_Creuse<R> * const & p,const long &n)
 {
     p->init() ;
-    HashMatrix<int,R> *phm= new HashMatrix<int,R>((int)n,(int) n);
+    HashMatrix<int,R> *phm= new HashMatrix<int,R>((int)n,(int) n,0,0);
     MatriceCreuse<R> *pmc(phm);
     p->A.master(pmc);
     return p;
@@ -3099,10 +3099,11 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
                     if(rhs)
                         *(*pOut + i) = *(*pX + mC->j[i]);
                 }
+                int Half = mA->half;
                 mA->clear();
                 mA->resize(n,m,nnz);
                 MatriceMorse<T> &A = *mA;
-                A.half = true;
+                A.half = Half;
                 for(unsigned int i = 0; i < n; ++i) {
                     std::sort(tmp[i].begin(), tmp[i].end(),cmp<T>);
                     // c++11, [](const std::pair<unsigned int, T>& lhs, const std::pair<unsigned int, T>& rhs) { return lhs.first < rhs.first; });
@@ -3164,7 +3165,7 @@ AnyType removeDOF_Op<T>::operator()(Stack stack)  const {
 
             mA->clear();
             mA->resize(n,n);
-            MatriceMorse<T> &mR = *new MatriceMorse<T>(n,m,tmpBoundary.size());
+            MatriceMorse<T> &mR = *new MatriceMorse<T>(n,m,tmpBoundary.size(),0);
             for(unsigned int i = 0; i < tmpBoundary.size(); ++i) {
                 mR(i, tmpBoundary[i].first)= tmpBoundary[i].second;
             }

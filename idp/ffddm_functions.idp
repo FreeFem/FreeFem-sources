@@ -118,14 +118,15 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
     res=0.;
     if (preffe#prmesh#isincomm) {
       if(pr#bCM){
-        preffe#K[int] vaux(pr#ncoarsespace), tmp(pr#ncoarsespace), zaux(pr#ncoarsespace);
+        preffe#K[int] vaux(1), tmp(1), zaux(1);
         
         /* Z^T l */
         if (!bpara) {
-          
+          vaux.resize(pr#ncoarsespace); tmp.resize(pr#ncoarsespace); zaux.resize(pr#ncoarsespace);
           vaux = pr#ZCM'*l;
         }
         else if (!preffe#prmesh#binexactCS){
+          vaux.resize(pr#ncoarsespace); tmp.resize(pr#ncoarsespace); zaux.resize(pr#ncoarsespace);
           if (!preffe#prmesh#excluded) {
             preffe#K[int] ls = l .* preffe#Dk[mpiRank(preffe#prmesh#commddm)]; /* Z = sum_i D_i Z_i */
             tmp = pr#ZCMi'*ls;
@@ -138,8 +139,8 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
         else {
           NewMacro localmacroinexact preffe#prmesh#minexactCS EndMacro
           IFMACRO (localmacroinexact,1)
+          vaux.resize(mrhs*preffe#CoarseVhi.ndof); tmp.resize(mrhs*preffe#CoarseVhi.ndof); zaux.resize(mrhs*preffe#CoarseVhi.ndof);
           if (!preffe#prmesh#excluded) {
-            tmp.resize(mrhs*preffe#CoarseVhi.ndof);
             for (int m=0; m<mrhs; m++)
               tmp(m*preffe#CoarseVhi.ndof:(m+1)*preffe#CoarseVhi.ndof-1) = pr#ZCMi'*l(m*preffe#Vhi.ndof:(m+1)*preffe#Vhi.ndof-1);
           }
@@ -534,7 +535,7 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     IFMACRO(pr#withhpddm)
     uni = x0;
     real[int] timings(0);
-    set(pr#hpddmOP, sparams = "-hpddm_schwarz_method "+pr#prec+" -hpddm_tol "+eps+" -hpddm_variant "+sprec+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+maxit+" -hpddm_verbosity "+pr#verbosity+" -hpddm_orthogonalization mgs");
+    set(pr#hpddmOP, sparams = "-hpddm_schwarz_method "+pr#prec+" -hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+maxit+" -hpddm_verbosity "+pr#verbosity+" -hpddm_orthogonalization mgs");
     if (pr#corr == "AD")
       set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction additive");
     else if (pr#corr == "BNN")

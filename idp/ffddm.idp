@@ -307,7 +307,7 @@ if (preffe#prmesh#isincomm)
 	IFMACRO(!pr#bem)
   if (pr#bdirect || bseq) {
     Varf(vaglobal,preffe#prmesh#Thglob,preffe#Vhglob)
-    pr#Aglobal = vaglobal(preffe#Vhglob,preffe#Vhglob,solver = (vsym ? CG : GMRES),tgv=vtgvelim);
+    pr#Aglobal = vaglobal(preffe#Vhglob,preffe#Vhglob,sym=vsym,tgv=vtgvelim);
   }
   
   preffe#K[int] rhsFull(1), rhs(1);
@@ -343,9 +343,9 @@ if (preffe#prmesh#isincomm)
         Varf(vPb, preffe#prmesh#AugThi, preffe#AugVhi)
 
         if (preffe#prmesh#inexactCSsplit > 1)
-          pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgvelim);
+          pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi,sym=vsym,tgv=vtgvelim);
         else
-          pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgv);
+          pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi,sym=vsym,tgv=vtgv);
         renumbering(pr#aRd[i], preffe#Auginterp, rhsFull, rhs, eps=-1);
 
         IFMACRO(pr#withhpddm)
@@ -364,7 +364,7 @@ if (preffe#prmesh#isincomm)
       }
       else {
         Varf(vN,preffe#prmesh#Thi,preffe#Vhi)
-        pr#matN = vN(preffe#Vhi,preffe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgv);
+        pr#matN = vN(preffe#Vhi,preffe#Vhi,sym=vsym,tgv=vtgv);
       }
     }
     
@@ -429,9 +429,9 @@ if (pr#prfe#prmesh#isincomm)
       VarfPrec(RobinInt,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
 
       if (pr#prfe#prmesh#inexactCSsplit > 1)
-        pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgvelim);
+        pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,sym=vsym,tgv=vtgvelim);
       else
-        pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgv);
+        pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,sym=vsym,tgv=vtgv);
       ENDIFMACRO
       IFMACRO(pr#bem,1)
       cout << "TODO" << endl;
@@ -442,9 +442,9 @@ if (pr#prfe#prmesh#isincomm)
       IFMACRO(!pr#bem)
       VarfPrec(vPb, pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)
       if (pr#prfe#prmesh#inexactCSsplit > 1)
-        pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgvelim);
+        pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi,sym=vsym,tgv=vtgvelim);
       else
-        pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi, solver=(vsym ? CG : GMRES),tgv=vtgv);
+        pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi,sym=vsym,tgv=vtgv);
       ENDIFMACRO
       IFMACRO(pr#bem,1)
       VarfPrec(vPb, pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)
