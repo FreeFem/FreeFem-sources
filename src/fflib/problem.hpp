@@ -981,7 +981,7 @@ public:
   void resize(int n,int m) {
       if(A) A->resize(n,m);
       else {//  matrice vide a cree
-          HashMatrix<int,K> *phm= new HashMatrix<int,K>(n,m);
+          HashMatrix<int,K> *phm= new HashMatrix<int,K>(n,m,0,0);
           MatriceCreuse<K> *pmc(phm);
           A.master(pmc);
       }
@@ -1297,7 +1297,7 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
 	 A.A=0; // to delete  old  matrix ADD FH 16112005
 	 A.Uh=Uh;
 	 A.Vh=Vh;
-         if (ds.sym )
+	 if (ds.sym )
 	   {  A.A.master( new  MatriceMorse<R>(ds.sym,Vh.NbOfDF) );
 	     ffassert( &Uh == & Vh);}
 	 else
@@ -1306,26 +1306,26 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
        }
      *A.A=R(); // reset value of the matrix
 
-     if ( AssembleVarForm<R,MatriceCreuse<R>,FESpace >( stack,Th,Uh,Vh,ds.sym,A.A,0,b->largs) )
-       AssembleBC<R,FESpace>( stack,Th,Uh,Vh,ds.sym,A.A,0,0,b->largs,ds.tgv);
+     if ( AssembleVarForm<R,MatriceCreuse<R>,FESpace >( stack,Th,Uh,Vh,ds.sym>0,A.A,0,b->largs) )
+       AssembleBC<R,FESpace>( stack,Th,Uh,Vh,ds.sym>0,A.A,0,0,b->largs,ds.tgv);
    }
   else
    { // add FH 17 06 2005  int on different meshes.
 #ifdef V3__CODE
      MatriceMap<R>   AAA;
-     MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA.size(),ds.sym);
-     bool bc=AssembleVarForm<R,MatriceMap<R>,FESpace  >( stack,Th,Uh,Vh,ds.sym,&AAA,0,b->largs);
+     MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA.size(),ds.sym>0);
+     bool bc=AssembleVarForm<R,MatriceMap<R>,FESpace  >( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs);
      pMA->addMap(1.,AAA);
 #else
        MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,0,ds.sym);
        MatriceMap<R>  &  AAA = *pMA;
-       bool bc=AssembleVarForm<R,MatriceMap<R>,FESpace  >( stack,Th,Uh,Vh,ds.sym,&AAA,0,b->largs);
+       bool bc=AssembleVarForm<R,MatriceMap<R>,FESpace  >( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs);
 
 #endif
        A.A.master(pMA ) ;
 
        if (bc)
-           AssembleBC<R>( stack,Th,Uh,Vh,ds.sym,A.A,0,0,b->largs,ds.tgv);
+           AssembleBC<R>( stack,Th,Uh,Vh,ds.sym>0,A.A,0,0,b->largs,ds.tgv);
 
    }
    if (A_is_square)

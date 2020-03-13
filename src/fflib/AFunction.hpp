@@ -1662,6 +1662,33 @@ class E_Array  :public E_F0 {  public:
   operator aType () const { return atype<void>();} 
  
 };
+
+// add frev 2007
+class TransE_Array:  public E_F0 {  public:
+    const E_Array * v;
+    int size() const {return v->size();}
+    size_t nbitem() const {return v->size();}
+    bool MeshIndependent(){return v->MeshIndependent();}
+    TransE_Array(const E_Array * e): v(e) {ffassert(e);}
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+};
+
+// fin nov 2007
+//  add 2010 feb.  FH
+inline C_F0 TryConj(const C_F0 & c) {
+    //   here put the conj   operator ...
+    ArrayOfaType at(c.left());
+    basicAC_F0_wa p(c);
+    const  OneOperator *  ff=TheOperators->Find("\'",at);
+    if (ff) {
+        if(verbosity>10)
+            cout << " ( do Conj) "  ;
+        return ff->code2(p);
+    }
+    
+    return c; }
+// fin add 2010 feb.
+// avril 2007
 class PlotStream;  
 class E_Border ;
 class E_BorderN :public E_F0mps { public: 

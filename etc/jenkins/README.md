@@ -111,7 +111,8 @@ pacman -S autoconf automake-wrapper bash bash-completion \
     msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
     perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
     mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-arpack  --ignore mingw-w64-x86_64-gcc-ada --ignore mingw-w64-x86_64-gcc-objc \
-     --ignore mingw-w64-x86_64-gdb --ignore mingw-w64-x86_64-python --noconfirm
+    --ignore mingw-w64-x86_64-gdb --ignore mingw-w64-x86_64-python mingw-w64-x86_64-cmake \
+    --noconfirm
 ```
 [MSMPI 10.1.2](https://www.microsoft.com/en-us/download/details.aspx?id=100593)
 
@@ -126,7 +127,8 @@ pacman -S autoconf automake-wrapper bash bash-completion \
     msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
     perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
     mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-arpack  --ignore mingw-w64-x86_64-gcc-ada --ignore mingw-w64-x86_64-gcc-objc \
-     --ignore mingw-w64-x86_64-gdb --ignore mingw-w64-x86_64-python --noconfirm
+    --ignore mingw-w64-x86_64-gdb --ignore mingw-w64-x86_64-python mingw-w64-x86_64-cmake \
+    --noconfirm
 ```
 [MSMPI 10.1.2](https://www.microsoft.com/en-us/download/details.aspx?id=100593)
 

@@ -174,7 +174,7 @@ macro Varfrhs(varfName, meshName, PhName)
 
 //macro Mdefplot(u)sqrt(real(u)^2+real(u#y)^2+real(u#z)^2)//
 
-vsym = 1;
+vsym = 2; // symmetric, not hermitian
 vtgv = 1.e+30;
 vtgvelim = -2;
 

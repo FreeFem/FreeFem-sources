@@ -107,7 +107,7 @@ AnyType MatrixUpWind0::operator( )(Stack stack) const {
   ffassert(pTh);
   const Mesh &Th(*pTh);
   {
-    MatriceMorse< R > *pAij = new MatriceMorse< R >(Th.nv), &Aij = *pAij;
+    MatriceMorse< R > *pAij = new MatriceMorse< R >(Th.nv,-1,0,0), &Aij = *pAij;
 
     KN< double > cc(Th.nv);
     double infini = DBL_MAX;

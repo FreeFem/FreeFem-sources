@@ -12,10 +12,10 @@ template<class Z,class R> class HashMatrix ;
 template<class TypeIndex,class TypeScalar>
 class VirtualMatrix: public RefCounter, public RNM_VirtualMatrix<TypeScalar,TypeIndex> {
 public:
-     typedef TypeIndex I;
+    typedef TypeIndex I;
     typedef TypeScalar R;
-    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int  TS_unsym=1, TS_sym=2, TS_def_positif=4,  TS_not_def_positif=8, TS_sequental = 16, TS_mpi = 32;// for verification
+    // 1 unsym , 2 herm, 4 sym, 8 pos , 16 nopos, 32  seq, 64  ompi, 128 mpi
+    static const int  TS_unsym=1, TS_herm=2, TS_sym=4, TS_def_positif=8,  TS_not_def_positif=16, TS_sequental = 32, TS_mpi = 64;// for verification
     static const int TS_SYM=1,TS_DEF_POS=2,TS_PARA=4;
     typedef VirtualMatrix<I,R> VMat ;
     typedef void (*ERRORFunc)(int i,const char *cmm);
@@ -46,7 +46,7 @@ public:
     VirtualMatrix(I NN,I MM=-1,bool sym=false,bool dp=false) : RNM_VirtualMatrix<R,I> (NN,MM),
     n(NN),m(this->M),symetric(sym),positive_definite(dp),vsolver(0),delvsolver(false)
     {}
-   virtual void setsdp(bool sym,bool dp) { symetric=sym; positive_definite=dp;}
+   virtual void setsdp(int sym,bool dp) { symetric=(sym>0); positive_definite=dp;}
    static R *Set2Const(I n,R *x,R c=R()) { std::fill(x,x+n,c); return x;}
     
    R* solve(R *x,R*b,int N=1,int transpo=0) const

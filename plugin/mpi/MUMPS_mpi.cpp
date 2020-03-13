@@ -73,8 +73,7 @@ template<class R=double>
 class SolveMUMPS_mpi: public  VirtualSolver<int,R>
 {
 public:
-    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    static const int orTypeSol = 1|2|4|8|16;
+    static const int orTypeSol;
     typedef HashMatrix<int,R>  HMat;
     typedef R K; //
     HMat &A;
@@ -180,7 +179,7 @@ public:
                 
             }
             id.rhs = 0;
-            ffassert( A.half == (id.sym != 0) );//
+            ffassert( A.half == id.sym );//
             ICNTL(5) = 0;    // input matrix type
             ICNTL(7) = 7;    // NUMBERING ...
             
@@ -367,6 +366,9 @@ public:
     
 };
 
+// 1 unsym , 2 herm, 4 sym, 8 pos , 16 nopos, 32  seq, 64  ompi, 128 mpi
+template<> const int SolveMUMPS_mpi<double>::orTypeSol = 1|2|4|8|16|32;
+template<> const int SolveMUMPS_mpi<std::complex<double>>::orTypeSol = 1|4|8|16|32;
 
 static void Load_Init()
 {

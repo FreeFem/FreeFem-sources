@@ -72,7 +72,7 @@ macro HFEdefmplot(u)real(u)//
 
 ffddmbuildDfespace(HFE,Hmesh,complex,def,init,Pk)
 
-vsym = 1;
+vsym = 2; // symmetric, not hermitian
 vtgv = 1.e+30;
 vtgvelim = 1.e+30;
 

@@ -68,7 +68,7 @@ macro Varfrhs(varfName, meshName, PhName)
 
 macro Hdefmplot(u)real(u)//
 
-vsym = 1;
+vsym = 2; // symmetric, not hermitian
 vtgv = 1.e+30;
 vtgvelim = 1.e+30;
 

@@ -72,8 +72,7 @@ void mumps_c(ZMUMPS_STRUC_C *id) { zmumps_c(id); }
 template< class R = double >
 class SolveMUMPS_seq : public VirtualSolver< int, R > {
  public:
-  //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-  static const int orTypeSol = 1 | 2 | 4 | 8 | 16;
+  static const int orTypeSol;
   typedef HashMatrix< int, R > HMat;
   typedef R K;    //
   HMat &A;
@@ -146,7 +145,7 @@ class SolveMUMPS_seq : public VirtualSolver< int, R > {
     id.jcn = jcn;
     id.a = (MR *)(void *)a;
     id.rhs = 0;
-    ffassert(A.half == (id.sym != 0));    //
+    ffassert(A.half == id.sym);    //
     ICNTL(5) = 0;                         // input matrix type
     ICNTL(7) = 7;                         // NUMBERING ...
 
@@ -285,6 +284,10 @@ struct InitEnd {
   }
 };
 static InitEnd global;    // To init SEQ MPI ????
+
+// 1 unsym , 2 herm, 4 sym, 8 pos , 16 nopos, 32  seq, 64  ompi, 128 mpi
+template<> const int SolveMUMPS_seq<double>::orTypeSol = 1|2|4|8|16|32;
+template<> const int SolveMUMPS_seq<std::complex<double>>::orTypeSol = 1|4|8|16|32;
 
 static void Load_Init( ) {
   addsolver< SolveMUMPS_seq< double > >("MUMPS", 50, 1);

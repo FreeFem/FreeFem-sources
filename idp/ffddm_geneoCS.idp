@@ -519,7 +519,7 @@ pr#prfe#prmesh#tic(pr#tloc)
 IFMACRO(!pr#algebraic)
 {
   Varf(vN,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
-  pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,solver=CG,tgv=vtgv);
+  pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,sym=vsym,tgv=vtgv);
 }
 ENDIFMACRO
 attachCoarseOperator(pr#prfe#prmesh#commddm, pr#hpddmOP, A = pr#matN);
@@ -570,7 +570,7 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
   {
     if (pr#prfe#prmesh#overlap > 0) {
       Varf(vN,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
-      pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgv);
+      pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,sym=vsym,tgv=vtgv);
     }
   }
   ENDIFMACRO
@@ -622,7 +622,7 @@ pr#prfe#prmesh#tic(pr#tloc)
 IFMACRO(!pr#algebraic)
 {
   Varf(vN,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
-  pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,solver=CG,tgv=vtgv);
+  pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,sym=vsym,tgv=vtgv);
 }
 ENDIFMACRO
 
@@ -696,7 +696,7 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
   {
     if (pr#prfe#prmesh#overlap > 0) {
       Varf(vN,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
-      pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,solver=(vsym ? CG : GMRES),tgv=vtgv);
+      pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,sym=vsym,tgv=vtgv);
     }
   }
   ENDIFMACRO

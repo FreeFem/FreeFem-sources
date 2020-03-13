@@ -53,7 +53,7 @@ template<class K>
 struct ff_HPDDM_MatrixCSR : public HPDDM::MatrixCSR<K>
 {
     ff_HPDDM_MatrixCSR(MatriceMorse<K>* mA) :
-    HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nnz, mA->aij, mA->p, mA->j, mA->half) {
+    HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nnz, mA->aij, mA->p, mA->j, mA->half > 0) {
         mA->CSR();
         this->_ia=mA->p;
         // PB delete FH?????
@@ -70,7 +70,7 @@ HPDDM::MatrixCSR<K> * new_HPDDM_MatrixCSR(MatriceMorse<K   >* mA,bool mfree=fals
         if(!is) is=newCopy(mfree,mA->p,n+1);
         if(!js) js=newCopy(mfree,mA->j,nnz);
 
-        return new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nnz, s, is, js , mA->half,mfree);
+        return new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nnz, s, is, js , mA->half > 0,mfree);
     }
     else
         return 0;
@@ -82,7 +82,7 @@ HPDDM::MatrixCSR<void> * new_HPDDM_MatrixCSRvoid(MatriceMorse<K   >* mA,bool mfr
     mA->CSR();
     if(!js) js=mA->j;
     if(!is) is=mA->p;
-    return new HPDDM::MatrixCSR<void>(mA->n, mA->m, mA->nnz, is, js , mA->half,mfree);
+    return new HPDDM::MatrixCSR<void>(mA->n, mA->m, mA->nnz, is, js , mA->half > 0,mfree);
 }
 else
     return 0;
@@ -91,7 +91,7 @@ else
 template<class K>
 void set_ff_matrix(MatriceMorse<K>* mA,const HPDDM::MatrixCSR<K> &dA)
 {
-    //void HashMatrix<I,R>::set(I nn,I mm,bool hhalf,size_t nnnz, I *ii, I*jj, R *aa,,int f77,int tcsr)
+    //void HashMatrix<I,R>::set(I nn,I mm,int hhalf,size_t nnnz, I *ii, I*jj, R *aa,,int f77,int tcsr)
     if(verbosity>99) cout << " set_ff_matrix " <<endl;
     // Warning this pointeur a change or not in hpddm => not del in HashMatrix
     mA->j=0;

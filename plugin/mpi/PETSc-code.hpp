@@ -1446,13 +1446,9 @@ namespace PETSc {
               KN< PetscScalar > x;
               Mat B;
               MatCreate(PETSC_COMM_WORLD, &B);
-              if (t == 4) {
-                x = GetAny< KN_< PetscScalar > >(e_ij);
-                MatSetSizes(B, PETSC_DECIDE, x.n, 1, PETSC_DECIDE);
-              } else {
-                x = GetAny< Transpose< KN_< PetscScalar > > >(e_ij);
-                MatSetSizes(B, x.n, PETSC_DECIDE, PETSC_DECIDE, 1);
-              }
+              if (t == 3) x = GetAny< KN_< PetscScalar > >(e_ij);
+              else x = GetAny< Transpose< KN_< PetscScalar > > >(e_ij);
+              MatSetSizes(B, x.n, PETSC_DECIDE, PETSC_DECIDE, 1);
               MatSetType(B, MATMPIDENSE);
               MatMPIDenseSetPreallocation(B, PETSC_NULL);
               PetscScalar* array;
@@ -1461,7 +1457,15 @@ namespace PETSc {
               MatDenseRestoreArray(B, &array);
               MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
               MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
-              a[i * M + j] = B;
+              if (t == 3) {
+                a[i * M + j] = B;
+              }
+              else {
+                Mat C;
+                if (std::is_same< PetscScalar, PetscReal >::value) MatCreateTranspose(B, &C);
+                else MatCreateHermitianTranspose(B, &C);
+                a[i * M + j] = C;
+              }
             } else {
               ExecError("Unknown type in submatrix");
             }
@@ -3573,8 +3577,19 @@ namespace PETSc {
                   if(mat[i][j]) {
                       MatGetType(mat[i][j], &type);
                       PetscStrcmp(type, MATMPIDENSE, &isType);
-                      PetscInt n, m;
-                      MatGetSize(mat[i][j], &n, &m);
+                      PetscInt n = 0, m = 0;
+                      if(!isType) {
+                          PetscStrcmp(type, MATTRANSPOSEMAT, &isType);
+                          if(isType) {
+                              Mat C;
+                              if (std::is_same< PetscScalar, PetscReal >::value) MatTransposeGetMat(mat[i][j], &C);
+                              else MatHermitianTransposeGetMat(mat[i][j], &C);
+                              MatGetType(C, &type);
+                              PetscStrcmp(type, MATMPIDENSE, &isType);
+                              if(isType) MatGetSize(C, &m, &n);
+                              type = MATTRANSPOSEMAT;
+                          }
+                      } else MatGetSize(mat[i][j], &n, &m);
                       if(isType && (m > 1 || n == 1)) {
                           if(mpirank == 0) {
                               if(U)
@@ -3848,7 +3863,7 @@ namespace PETSc {
     KN_<double> D(const_cast<double*>(p->_A->getScaling()), p->_A->getDof());
     return D;
   }
-}    // namespace PETSc
+} // namespace PETSc
 
 static void Init_PETSc( ) {
   if (verbosity > 1 && mpirank == 0)

@@ -72,7 +72,7 @@ public:
     R * aij;
     size_t * head;
     size_t * next;
-    bool half;
+    int half;
     int state,type_state;
     size_t nbsort;
     I sizep;
@@ -96,11 +96,11 @@ public:
     void SetMorse();
     void UnSetMorse();
     uniquecodeInt CodeIJ() const ;
-    void init(I nn,I mm=-1,size_t nnnz=0,bool halff=false);
-    HashMatrix(I nn,I mm=-1,I nnnz=0,bool halff=false);
+    void init(I nn,I mm,size_t nnnz,int halff);
+    HashMatrix(I nn,I mm,I nnnz,int halff);
     HashMatrix(istream & f,int cas=-1);
     HashMatrix(KNM_<R> F,double  threshold=1e-30);
-    HashMatrix(bool Half,I nn);
+    HashMatrix(int Half,I nn);
     HashMatrix(const HashMatrix& A);
     HashMatrix(I nn,const R *diag);
     void RenumberingInv(KN_<I> II,KN_<I> JJ);
@@ -136,7 +136,7 @@ public:
     void setp(I sp);
     void resize(I nn, I mm=0)  {resize(nn,mm,nnz); }
 
-    void resize(I nn, I mm,size_t nnnz, double tol = -1., bool sym=false );
+    void resize(I nn, I mm,size_t nnnz, double tol = -1., int sym=0 );
     void SymmetrizePattern(); // To do for Suzuki , Paradiso
     void clear();
     Hash hash(size_t ii,size_t jj) const{ return ( (ii-fortran)+ (jj-fortran)*this->n )%nhash; }
@@ -205,9 +205,9 @@ public:
     void Sortij();
     void Sortji();
 
-    void set(I  nn,I  mm,bool hhalf,size_t nnnz, I  *ii, I *jj, R  *aa,int f77=0,int tcsr=0);
-    template<class II>          void set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, R  *aa,int f77);
-    template<class II,class RR> void set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, RR *aa,int f77,R (*ff)(RR));
+    void set(I  nn,I  mm,int hhalf,size_t nnnz, I  *ii, I *jj, R  *aa,int f77=0,int tcsr=0);
+    template<class II>          void set(II nn,II mm,int hhalf,size_t nnnz, II *ii, II*jj, R  *aa,int f77);
+    template<class II,class RR> void set(II nn,II mm,int hhalf,size_t nnnz, II *ii, II*jj, RR *aa,int f77,R (*ff)(RR));
 
     void Add(const HashMatrix<I,R> *PA,R coef=R(1),bool trans=false, I ii00=0,I jj00=0);
 
@@ -244,9 +244,9 @@ public:
     double FrobeniusNorm() const;
     double norm1() const;
     double norminfty() const;
-    bool sym() const {return half;}
+    bool sym() const {return (half > 0);}
 
-    int typemat() const { return int(half)*VirtualMatrix<int,R>::TS_SYM ;}
+    int typemat() const { return int(half > 0)*VirtualMatrix<int,R>::TS_SYM ;}
     void SetBC(char *wbc,double ttgv);
 
 
@@ -267,10 +267,10 @@ public:
     double psor(KN_<R> & x,const  KN_<R> & gmin,const  KN_<R> & gmax , double omega) {ffassert(0); };
 
     void UnHalf();
-    void Half() {resize(this->n,this->m,nnz,-1,true);}
+    void Half(int wsym) {resize(this->n,this->m,nnz,-1,wsym);}
     void RemoveHalf(int cas,double tol=-1) ;
 
-    void setsdp(bool sym,bool dp); // set of unset to sym / defpos or not
+    void setsdp(int sym,bool dp); // set of unset to sym / defpos or not
 
     virtual bool ChecknbLine  (I n) const {return this->n==n;}
     virtual bool ChecknbColumn  (I m) const {return this->m==m;}
@@ -353,9 +353,9 @@ void AddMul(HashMatrix<I,RAB> &AB,HashMatrix<I,RA> &A, HashMatrix<I,RB> &B,bool 
 {
     AB.half=false;
     int An= A.n, Am =A.m;
-     int Bn= B.n, Bm =B.m;
-    bool halfA = A.half;
-    bool halfB = B.half;
+    int Bn= B.n, Bm =B.m;
+    int halfA = A.half;
+    int halfB = B.half;
     
     if(ta) swap(An,Am);
     if(tb) swap(Bn,Bm);
@@ -596,7 +596,7 @@ HashMatrix<int,R>* BuildCombMat(const list<tuple<R,VirtualMatrix<int,R>*,bool> >
     auto nmsym=nmCombMat(lM,trans,ii00,jj00);
     int n = std::get<0>(nmsym), m =std::get<1>(nmsym);
     bool half= std::get<2>(nmsym);
-    HashMatrix<int,R> *  mij= new HashMatrix<int,R>(n,m,0,half);
+    HashMatrix<int,R> *  mij= new HashMatrix<int,R>(n,m,0,int(half));
     nmsym=BuildCombMat(*mij,lM,trans,ii00,jj00,trans);// remember trans => conj
 
     return mij; // V4 mij;
@@ -631,7 +631,7 @@ HashMatrix<I,R>::operator+=(const HashMatrix<II,RR>& A )
 
 
 template<class I,class R> template<class II,class RR>
-void HashMatrix<I,R>::set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, RR *aa,int f77,R(*ff)(RR))
+void HashMatrix<I,R>::set(II nn,II mm,int hhalf,size_t nnnz, II *ii, II*jj, RR *aa,int f77,R(*ff)(RR))
 {
     clear();
     this->n=nn;
@@ -649,7 +649,7 @@ void HashMatrix<I,R>::set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, RR 
     ReHash();
 }
 template<class I,class R> template<class II>
-void HashMatrix<I,R>::set(II nn,II mm,bool hhalf,size_t nnnz, II *ii, II*jj, R *aa,int f77)
+void HashMatrix<I,R>::set(II nn,II mm,int hhalf,size_t nnnz, II *ii, II*jj, R *aa,int f77)
 {
     clear();
     this->n=nn;

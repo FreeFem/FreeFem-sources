@@ -16,22 +16,44 @@ void Data_Sparse_Solver::Init_sym_positive_var(int syma)
     auto i=  TheFFSolver<int,R>::ffsolver.find(solver);
     if ( i != TheFFSolver<int,R>::ffsolver.end())
     {
-        //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
+        // sym = 0:unsym, sym = 1:herm, sym = 2:sym
+        //  1 unsym , 2 herm, 4 sym, 8 pos , 16 nopos, 32  seq, 64  ompi, 128 mpi ,
         int ts = i->second->orTypeSol ;
-        if ( (ts & 3) == 3 ) sym= syma <0 ? 0 : syma ; //  both sym/unsym -> prev. value
-        else sym =  (ts & 2) == 2 ;
-        positive = (ts & (4+8)) == 4;
+        sym = syma;
+        // first verification: is the solver compatible with previous syma value ?
+        if ((syma == 0) && ((ts & 1) != 1)) // unsym
+          sym = -1;
+        else if ((syma == 1) && ((ts & 2) != 2)) // herm
+          sym = -1;
+        else if ((syma == 2) && ((ts & 4) != 4)) // sym
+          sym = -1;
+        // if not, choose default value:
+        if (sym == -1) {
+          if ((ts & 1) == 1)
+            sym = 0;
+          else if ((ts & 2) == 2) {
+            sym = 1;
+          }
+          else if ((ts & 4) == 4) {
+            sym = 2;
+          }
+          else {
+            cerr << " bug in orTypeSol for solver " << solver << endl;
+            ffassert(0);
+          }
+        }
+        positive = (ts & (8+16)) == 8;
         if(verbosity>4)
             cout <<  "  The solver "<< solver << " need sym "<< sym << " and  positif def "
                   << positive << " matrix ( prev sym"<< syma <<" ts " << ts << " )  \n";
     }
     else
     {
-        if( solver == "CHOLESKY") {sym = true; positive = true;}
-        if( solver == "CROUT") {sym = true;}
-        if( solver == "CG") {sym = true;positive=true;}
-        if( solver == "SPARSESOLVERSYM") {sym=true;}
-        if( solver == "CHOLMOD") {sym=true;}
+        if( solver == "CHOLESKY") {sym = 1; positive = true;}
+        if( solver == "CROUT") {sym = 1;}
+        if( solver == "CG") {sym = 1;positive=true;}
+        if( solver == "SPARSESOLVERSYM") {sym=1;}
+        if( solver == "CHOLMOD") {sym=1;}
     }
 }
 
@@ -52,8 +74,8 @@ template<class Z,class K>
 template<class Z,class K>
  typename VirtualMatrix<Z,K>::VSolver * TheFFSolver<Z,K>::Find(HashMatrix<Z,K> &A, const Data_Sparse_Solver & ds,Stack stack )
 {
-    //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-    //    static const int  TS_unsym=1, TS_sym=2, TS_def_positif=4,  TS_not_def_positif=8, TS_sequental = 16, TS_mpi = 32;
+    // 1 unsym , 2 herm, 4 sym, 8 pos , 16 nopos, 32  seq, 64  ompi, 128 mpi
+    // static const int  TS_unsym=1, TS_herm=2, TS_sym=4, TS_def_positif=8,  TS_not_def_positif=16, TS_sequental = 32, TS_mpi = 64;
     typedef  VirtualMatrix<Z,K> VM;
     int sym=ds.sym, pos = ds.positive;
     if(verbosity>3) cout << " ** Search solver "<< ds.solver << " sym = " << sym << " pos.  " << pos << " half "<< A.half <<endl;

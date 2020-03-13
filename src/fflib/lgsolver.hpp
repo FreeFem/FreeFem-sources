@@ -585,7 +585,7 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
     { "x0", &typeid(bool)}, \
     { "veps", &typeid(double*)  }, \
     { "rightprecon", &typeid(bool)  }, \
-    { "sym", &typeid(bool)  }, \
+    { "sym", &typeid(long)  }, \
     { "positive", &typeid(bool)  }
 
 
@@ -649,7 +649,7 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
         if (nargs[++kk]) ds.veps= GetAny<double*>((*nargs[kk])(stack));
         if( unset_eps && ds.veps) ds.epsilon = *ds.veps;//  if veps  and no def value  => veps def value of epsilon.
         if (nargs[++kk]) ds.rightprecon= GetAny<bool>((*nargs[kk])(stack));
-        if (nargs[++kk]) ds.sym= GetAny<bool>((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.sym= GetAny<long>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.positive= GetAny<bool>((*nargs[kk])(stack));
         if(ds.solver == "")
         { // SET DEFAULT SOLVER TO HRE ... 
