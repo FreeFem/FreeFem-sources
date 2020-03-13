@@ -3587,6 +3587,7 @@ namespace PETSc {
                               MatGetType(C, &type);
                               PetscStrcmp(type, MATMPIDENSE, &isType);
                               if(isType) MatGetSize(C, &m, &n);
+                              type = MATTRANSPOSEMAT;
                           }
                       } else MatGetSize(mat[i][j], &n, &m);
                       if(isType && (m > 1 || n == 1)) {
