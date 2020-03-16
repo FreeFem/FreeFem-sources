@@ -1025,7 +1025,7 @@ MatriceMorse<R> * buildInterpolationMatrixT<FESpaceL,FESpace>(const FESpaceL & U
   int n=Uh.NbOfDF;
   int mm=Vh.NbOfDF;
   if(transpose) Exchange(n,mm);
-  m = new MatriceMorse<R>(n,mm);
+  m = new MatriceMorse<R>(n,mm,0,0);
     
   RdHat1 Gh= RdHat1::diag(1./(RdHat1::d+1));
   RdHat2 G;
@@ -1076,6 +1076,7 @@ MatriceMorse<R> * buildInterpolationMatrixT<FESpaceL,FESpace>(const FESpaceL & U
     
   KN<bool> fait(Uh.NbOfDF);
   fait=false;
+  double epsP=0.; // must be choose
   {
 
     for (int it=0;it<ThU.nt;it++)
@@ -1094,14 +1095,20 @@ MatriceMorse<R> * buildInterpolationMatrixT<FESpaceL,FESpace>(const FESpaceL & U
         bool outside;
         R3 P1(TU(Gh));
         R2 P12(P1.p2());
-        if(P1.z) {outside=true;ts0=0;}
+        if(abs(P1.z)>epsP) {outside=true;ts0=0;}
         else
             ts0=ThV.Find(P12,G,outside,ts0);
         if(outside) ts0=0; // bad starting tet
         for (int i=0;i<nbp;i++) {
             R3 P1(TU(ipmat.P[i]));
             R2 P12(P1.p2());
-            if(P1.z) {outside=true;ts=0;}
+            if(abs(P1.z)>epsP
+               
+               
+               
+               
+               
+               ) {outside=true;ts=0;}
             else
                 ts=ThV.Find(P12,PV[i],outside,ts0);
           if( ts0 ==0 && !outside) ts0=ts;
