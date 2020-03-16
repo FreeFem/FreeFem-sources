@@ -1678,12 +1678,11 @@ void OnePlotBorder::Draw(OneWindow *win)
     glDisable(GL_DEPTH_TEST);
     ThePlot & plot= *win->theplot;
     R h = 8*win->hpixel;
-
     double z = plot.z0;
     plot.SetColorTable(16) ;
 
-    for(int i=0;i<data.size() ;++i)
-    {
+    if(win->plotdim==3)
+    for(int i=0;i<data.size() ;++i) {
         vector<pair<long,R3> > & v=data[i];
         ShowGlerror("end OnePlotBorder::Draw  1");
 
@@ -1694,7 +1693,7 @@ void OnePlotBorder::Draw(OneWindow *win)
             double l = Max(sqrt((uv,uv)),1e-20);
             R3 nx(1.,0.,0.), ny(0.,1.,0.), nz(0.,0.,1.);
             R3 dd = uv*(-h/l);
-            R3 dnx = (dd^nx)*0.5, dny = (dd^ny)*0.5, dnz = (dd^nz)*0.5;
+            R3 dnx = (dd^nx)*0.7, dny = (dd^ny)*0.7, dnz = (dd^nz)*0.7;
             
             glLineWidth(2);
             glBegin(GL_LINES);
@@ -1713,7 +1712,6 @@ void OnePlotBorder::Draw(OneWindow *win)
             }
             glEnd();
         }
-
         ShowGlerror("end OnePlotBorder::Draw  2");
 
         glPointSize(7);
@@ -1727,6 +1725,54 @@ void OnePlotBorder::Draw(OneWindow *win)
         glPointSize(1);
         ShowGlerror("end OnePlotBorder::Draw  3");
     }
+    
+    else if(win->plotdim==2)
+    for(int i=0;i<data.size() ;++i) {
+        vector<pair<long,R3> > & v=data[i];
+        ShowGlerror("end OnePlotBorder::Draw  1");
+
+        for(int j=1;j<v.size();++j) {
+            plot.color(2+v[j].first);
+            R2 Po(v[j-1].second.p2()), Pn(v[j].second.p2());
+            R2 uv(Po,Pn);
+            double l = Max(sqrt((uv,uv)),1e-20);
+
+            R2 dd = uv*(-h/l);
+            R2 dn = dd.perp()*0.5;
+            glLineWidth(2);
+            glBegin(GL_LINES);
+            win->Seg(Po,Pn);
+            glEnd();
+
+            glLineWidth(1);
+            glBegin(GL_LINES);
+            if(j!=1)
+            {
+                win->Seg(Po,Po+dd+dn);
+                win->Seg(Po,Po+dd-dn);
+            }
+            glEnd();
+        }
+
+        ShowGlerror("end OnePlotBorder::Draw  2");
+
+        glPointSize(7);
+        glBegin(GL_POINTS);
+        int l= v.size()-1;
+        plot.color(2+v[0].first);
+        glVertex3d(v[0].second.x,v[0].second.y,z);
+        plot.color(2+v[l].first);
+        glVertex3d(v[l].second.x,v[l].second.y,z);
+        glEnd();
+        glPointSize(1);
+        ShowGlerror("end OnePlotBorder::Draw  3");
+    }
+    
+    
+    
+    
+    
+    
     ShowGlerror("end OnePlotBorder::Draw");
 
 }
