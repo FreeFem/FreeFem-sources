@@ -5537,8 +5537,9 @@ MeshS *truncmesh(const MeshS &Th, const long &kksplit, int *split, bool WithMort
     cout << "  - Nb of triangle       " << nt << endl;
     cout << "  - Nb of boundary edges " << nbe << endl;
   }
-
-  MeshS *Tht = new MeshS(nv, itt, nbe, vertices, triangles, bbedges, precis_mesh, orientation, cleanmesh, removeduplicate);
+  bool rebuildboundary=false;
+  MeshS *Tht = new MeshS(nv, itt, nbe, vertices, triangles, bbedges, cleanmesh, removeduplicate, rebuildboundary, orientation, precis_mesh);
+      
   Tht->BuildGTree( );    // Add JM. Oct 2010
 
   delete gtree;
@@ -5838,8 +5839,9 @@ MeshL *truncmesh(const MeshL &Th, const long &kksplit, int *split, bool WithMort
 
   delete[] vertexsub;
   delete[] edgesub;
-
-  MeshL *Tht = new MeshL(nv, itt, 0, vertices, edges, 0, precis_mesh, orientation, cleanmesh, removeduplicate);
+  bool rebuildboundary=false;
+  MeshL *Tht = new MeshL(nv, itt, 0, vertices, edges, 0, cleanmesh, removeduplicate, rebuildboundary, orientation, precis_mesh);
+      
   Tht->BuildBdElem();
   Tht->BuildGTree( );
     
@@ -6347,8 +6349,8 @@ Mesh3 *truncmesh(const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
   ffassert(itt == nt);
 
   // delete gtree;
-
-  Mesh3 *Tht = new Mesh3(nv, nt, nbe, v, t, b, precis_mesh, orientation, cleanmesh, removeduplicate);
+  bool rebuildboundary=false;
+  Mesh3 *Tht = new Mesh3(nv, nt, nbe, v, t, b, cleanmesh, removeduplicate, rebuildboundary, orientation, precis_mesh);
   Tht->BuildGTree( );    // Add JM. Oct 2010
   delete gtree;
 
