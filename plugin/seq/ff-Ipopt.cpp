@@ -1472,7 +1472,7 @@ class OptimIpopt : public OneOperator {
 
       if (nargs[17]) {
         app->Options( )->SetNumericValue("derivative_test_tol",
-                                         GetAny< double >((*nargs[16])(stack)));
+                                         GetAny< double >((*nargs[17])(stack)));
       }
 
       if (nargs[18]) {

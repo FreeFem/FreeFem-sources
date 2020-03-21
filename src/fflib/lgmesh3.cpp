@@ -625,7 +625,33 @@ double pmesh_hmin(pmeshS * p)
             hmin2=min(hmin2,Th[k].Edge(e).norme2());
     return sqrt(hmin2);}
 
-
+template<class MMesh>
+class Op3_MeshDmp : public quad_function< const MMesh* *, R, R, R, MeshPoint * > {
+ public:
+  class Op : public E_F0mps {
+   public:
+    typedef const MMesh *ppmesh;
+    typedef typename MMesh::RdHat RdHat;
+    typedef typename MMesh::Element T;
+    Expression a, b, c, d;
+    Op(Expression aa, Expression bb, Expression cc, Expression dd) : a(aa), b(bb), c(cc), d(dd) {}
+    AnyType operator( )(Stack s) const {
+      R xx(GetAny< R >((*b)(s)));
+      R yy(GetAny< R >((*c)(s)));
+      R zz(GetAny< R >((*d)(s)));
+      ppmesh *ppTh(GetAny< ppmesh * >((*a)(s)));
+      if (!ppTh || !*ppTh) ExecError("Op3_Mesh3mp unset mesh ??");
+      ppmesh pTh(*ppTh);
+      MeshPoint *mp = new MeshPoint( );
+      mp->set(xx, yy, zz);
+      RdHat PHat;
+      bool outside;
+      const T *K = pTh->Find(mp->P, PHat, outside);
+      mp->set(*pTh, mp->P, PHat, *K, 0, outside);
+      return mp;
+    }
+  };
+};
 
 GlgBoundaryElement<MeshL> get_element(GlgBoundaryElement<MeshL>::BE const & a, long const & n){  return GlgBoundaryElement<MeshL>(a,n);}
 GlgVertex<MeshL> get_element(GlgBoundaryElement<MeshL> const & a, long const & n){  return a[n];}
@@ -2698,7 +2724,8 @@ void init_lgmesh3() {
  Add<pmesh3*>("[","",new OneOperator2_<GlgElement<Mesh3>,pmesh3*,long>(get_element));
  Add<pmesh3>("(","",new OneOperator2_<GlgVertex<Mesh3>,pmesh3,long>(get_vertex));
  Add<pmesh3*>("(","",new OneOperator2_<GlgVertex<Mesh3>,pmesh3*,long>(get_vertex));
-
+ Add<pmesh3* >("(", "", new OneQuadOperator< Op3_MeshDmp<Mesh3>, Op3_MeshDmp<Mesh3>::Op >);
+    
  Add<pmesh3*>("be",".",new OneOperator1_<GlgBoundaryElement<Mesh3>::BE,pmesh3*>(Build));
  Add<GlgElement<Mesh3> >("adj",".",new OneOperator1_<GlgElement<Mesh3>::Adj,GlgElement<Mesh3> >(Build));
  Add<GlgBoundaryElement<Mesh3>::BE>("(","",new OneOperator2_<GlgBoundaryElement<Mesh3>,GlgBoundaryElement<Mesh3>::BE,long>(get_element));
@@ -2757,6 +2784,7 @@ void init_lgmesh3() {
  Add<pmeshS*>("[","",new OneOperator2_<GlgElement<MeshS>,pmeshS*,long>(get_element));
  Add<pmeshS>("(","",new OneOperator2_<GlgVertex<MeshS>,pmeshS,long>(get_vertex));
  Add<pmeshS*>("(","",new OneOperator2_<GlgVertex<MeshS>,pmeshS*,long>(get_vertex));
+ Add<pmeshS* >("(", "", new OneQuadOperator< Op3_MeshDmp<MeshS>, Op3_MeshDmp<MeshS>::Op >);
     
  Add<pmeshS*>("be",".",new OneOperator1_<GlgBoundaryElement<MeshS>::BE,pmeshS*>(Build));
  Add<GlgElement<MeshS> >("adj",".",new OneOperator1_<GlgElement<MeshS>::Adj,GlgElement<MeshS> >(Build));
@@ -2812,7 +2840,8 @@ void init_lgmesh3() {
  Add<pmeshL*>("[","",new OneOperator2_<GlgElement<MeshL>,pmeshL*,long>(get_element));
  Add<pmeshL>("(","",new OneOperator2_<GlgVertex<MeshL>,pmeshL,long>(get_vertex));
  Add<pmeshL*>("(","",new OneOperator2_<GlgVertex<MeshL>,pmeshL*,long>(get_vertex));
- 
+ Add<pmeshL* >("(", "", new OneQuadOperator< Op3_MeshDmp<MeshL>, Op3_MeshDmp<MeshL>::Op >);
+    
  Add<pmeshL*>("be",".",new OneOperator1_<GlgBoundaryElement<MeshL>::BE,pmeshL*>(Build));
  Add<GlgElement<MeshL> >("adj",".",new OneOperator1_<GlgElement<MeshL>::Adj,GlgElement<MeshL> >(Build));
  Add<GlgBoundaryElement<MeshL>::BE>("(","",new OneOperator2_<GlgBoundaryElement<MeshL>,GlgBoundaryElement<MeshL>::BE,long>(get_element));

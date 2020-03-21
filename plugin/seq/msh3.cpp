@@ -5165,7 +5165,7 @@ struct Op_trunc_meshS : public OneOperator {
   class Op : public E_F0mps {
    public:
     static basicAC_F0::name_and_type name_param[];
-    static const int n_name_param = 9;
+    static const int n_name_param = 13;
     Expression nargs[n_name_param];
     Expression getmesh, bbb;
     long arg(int i, Stack stack, long a) const { return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a; }
@@ -5192,8 +5192,9 @@ basicAC_F0::name_and_type Op_trunc_meshS::Op::name_param[Op_trunc_meshS::Op::n_n
   {"new2old", &typeid(KN< long > *)}, {"old2new", &typeid(KN< long > *)},
   {"renum", &typeid(bool)},           {"precis_mesh", &typeid(double)},
   {"orientation", &typeid(long)},     {"cleanmesh", &typeid(bool)},
-  {"removeduplicate", &typeid(bool)}
-
+  {"removeduplicate", &typeid(bool)}, {"labels", &typeid(KN_<long> )},
+  {"region", &typeid(KN_<long> )},    {"flabel", &typeid(long)},
+  {"fregion", &typeid(long)}
 };
 
 MeshS *truncmesh(const MeshS &Th, const long &kksplit, int *split, bool WithMortar,
@@ -5564,6 +5565,14 @@ AnyType Op_trunc_meshS::Op::operator( )(Stack stack) const {
     long orientation(arg(6, stack, 1L));
     bool cleanmesh(arg(7, stack, true));
     bool removeduplicate(arg(8, stack, false));
+
+    KN<long> nrB = arg(9,stack,kempty);
+    KN<long> nrT = arg(10,stack,kempty);
+    Expression flab = nargs[11] ;
+    Expression freg = nargs[12] ;
+    ffassert(nrT.N( ) % 2 == 0);
+    ffassert(nrB.N( ) % 2 == 0);
+      
     KN< int > split(Th.nt);
     split = kkksplit;
     MeshPoint *mp = MeshPointStack(stack), mps = *mp;
@@ -5618,10 +5627,40 @@ AnyType Op_trunc_meshS::Op::operator( )(Stack stack) const {
     *mp = mps;
     MeshS *Tht = truncmesh(Th, kkksplit, split, false, label, precis_mesh, orientation, cleanmesh, removeduplicate);
         
-    if (renum) {
+    if (renum)
         Renumb<MeshS>(Tht);
+    
+    MeshS &pTht=*Tht;
+    map<int,int> mapB,mapT;
+    for(int i=0;i<nrB.N();i+=2)
+        mapB[nrB[i]]=nrB[i+1];
+    for(int i=0;i<nrT.N();i+=2)
+        mapT[nrT[i]]=nrT[i+1];
+    R2 PtHat(1./3.,1./3.);
+    for (int i=0;i<pTht.nt;i++) {
+        int lab=ChangeLab(mapT,pTht[i].lab);
+        if(freg) {
+            mp->set(pTht,pTht[i](PtHat),PtHat,pTht[i],lab);
+            pTht.elements[i].lab =GetAny<long>( (* freg)(stack)) ;
+            if(verbosity>5) cout << " freg "<<pTht[i].lab  << endl;
+        }
     }
-          
+      R1 PtHat2(1./2.);
+    for (int i=0;i<pTht.nbe;i++) {
+        const BoundaryEdgeS &K(pTht.be(i));
+        int fk, ke = pTht.BoundaryElement(i, fk);
+        int fkk, kke = pTht.ElementAdj(ke, fkk = fk);
+        const TriangleS &KE(pTht[ke]);
+        R2 B = KE.PBord(fk, PtHat2);
+        int lab = ChangeLab(mapB, K.lab);
+        if(flab){
+            R3 NN = KE.N(fk);
+            double mes = NN.norme( );
+            NN /= mes;
+            mp->set(pTht, KE(B), B, KE, lab, NN, fk);
+            pTht.borderelements[i].lab = GetAny< long >((*flab)(stack));
+        }
+    }
     Add2StackOfPtr2FreeRC(stack, Tht);    // 07/2008 FH
           
     return Tht;
@@ -5636,7 +5675,7 @@ struct Op_trunc_meshL : public OneOperator {
   class Op : public E_F0mps {
    public:
     static basicAC_F0::name_and_type name_param[];
-    static const int n_name_param = 9;
+    static const int n_name_param = 13;
     Expression nargs[n_name_param];
     Expression getmesh, bbb;
     long arg(int i, Stack stack, long a) const { return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a; }
@@ -5662,8 +5701,9 @@ basicAC_F0::name_and_type Op_trunc_meshL::Op::name_param[Op_trunc_meshL::Op::n_n
   {"new2old", &typeid(KN< long > *)}, {"old2new", &typeid(KN< long > *)},
   {"renum", &typeid(bool)},           {"precis_mesh", &typeid(double)},
   {"orientation", &typeid(long)},     {"cleanmesh", &typeid(bool)},
-  {"removeduplicate", &typeid(bool)}
-
+  {"removeduplicate", &typeid(bool)}, {"labels", &typeid(KN_<long> )},
+  {"region", &typeid(KN_<long> )},    {"flabel", &typeid(long)},
+  {"fregion", &typeid(long)}
 };
 
 MeshL *truncmesh(const MeshL &Th, const long &kksplit, int *split, bool WithMortar,
@@ -5866,14 +5906,17 @@ AnyType Op_trunc_meshL::Op::operator( )(Stack stack) const {
   KN< long > *po2n = arg(3, stack);
   bool renum = arg(4, stack, false);
   KN< long > kempty;
-  //KN< long > nre = arg(5, stack, kempty);
-  //KN< long > nrt = arg(6, stack, kempty);
-  //Expression flab = nargs[7];
-  //Expression freg = nargs[8];
   double precis_mesh(arg(5, stack, 1e-7));
   long orientation(arg(6, stack, 1L));
   bool cleanmesh(arg(7, stack, true));
   bool removeduplicate(arg(8, stack, false));
+
+  KN<long> nrB = arg(9,stack,kempty);
+  KN<long> nrT = arg(10,stack,kempty);
+  Expression flab = nargs[11] ;
+  Expression freg = nargs[12] ;
+  ffassert(nrT.N( ) % 2 == 0);
+  ffassert(nrB.N( ) % 2 == 0);
   KN< int > split(Th.nt);
   split = kkksplit;
   MeshPoint *mp = MeshPointStack(stack), mps = *mp;
@@ -5928,9 +5971,40 @@ AnyType Op_trunc_meshL::Op::operator( )(Stack stack) const {
   *mp = mps;
   MeshL *Tht = truncmesh(Th, kkksplit, split, false, label,  precis_mesh, orientation, cleanmesh, removeduplicate);
 
-  if (renum) {
-    Renumb<MeshL>(Tht);
+  if (renum)
+      Renumb<MeshL>(Tht);
+    
+  MeshL &pTht=*Tht;
+  map<int,int> mapB,mapT;
+  for(int i=0;i<nrB.N();i+=2)
+      mapB[nrB[i]]=nrB[i+1];
+  for(int i=0;i<nrT.N();i+=2)
+      mapT[nrT[i]]=nrT[i+1];
+  R1 PtHat(1./2.);
+  for (int i=0;i<pTht.nt;i++) {
+      int lab=ChangeLab(mapT,pTht[i].lab);
+      if(freg) {
+          mp->set(pTht,pTht[i](PtHat),PtHat,pTht[i],lab);
+          pTht.elements[i].lab =GetAny<long>( (* freg)(stack)) ;
+          if(verbosity>5) cout << " freg "<<pTht[i].lab  << endl;
+      }
   }
+  R0 PtHat2;
+  for (int i=0;i<pTht.nbe;i++) {
+        const BoundaryPointL &K(pTht.be(i));
+        int fk, ke = pTht.BoundaryElement(i, fk);
+        int fkk, kke = pTht.ElementAdj(ke, fkk = fk);
+        const EdgeL &KE(pTht[ke]);
+        R1 B = KE.PBord(fk, PtHat2);
+        int lab = ChangeLab(mapB, K.lab);
+        if(flab){
+            R3 NN = KE.N(fk);
+            double mes = NN.norme( );
+            NN /= mes;
+            mp->set(pTht, KE(B), B, KE, lab, NN, fk);
+            pTht.borderelements[i].lab = GetAny< long >((*flab)(stack));
+        }
+    }
 
   Add2StackOfPtr2FreeRC(stack, Tht);    // 07/2008 FH
 
@@ -5947,7 +6021,7 @@ struct Op_trunc_mesh3 : public OneOperator {
   class Op : public E_F0mps {
    public:
     static basicAC_F0::name_and_type name_param[];
-    static const int n_name_param = 9;
+    static const int n_name_param = 13;
     Expression nargs[n_name_param];
     Expression getmesh, bbb;
     long arg(int i, Stack stack, long a) const { return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a; }
@@ -5973,8 +6047,11 @@ basicAC_F0::name_and_type Op_trunc_mesh3::Op::name_param[Op_trunc_mesh3::Op::n_n
   {"new2old", &typeid(KN< long > *)},   {"old2new", &typeid(KN< long > *)},   // ajout FH pour P. Jovilet jan 2014
   {"renum", &typeid(bool)},             {"precis_mesh", &typeid(double)},
   {"orientation", &typeid(long)},       {"cleanmesh", &typeid(bool)},
-  {"removeduplicate", &typeid(bool)}};
-
+  {"removeduplicate", &typeid(bool)},  {"labels", &typeid(KN_<long> )},
+  {"region", &typeid(KN_<long> )},      {"flabel", &typeid(long)},
+  {"fregion", &typeid(long)}
+};
+      
 Mesh3 *truncmesh(const Mesh3 &Th, const long &kksplit, int *split, bool kk, const int newbelabel, double precis_mesh, long orientation, bool cleanmesh, bool removeduplicate) {
   static const int FaceTriangle[4] = {3, 0, 1, 2};    //= {{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}}
 
@@ -6485,6 +6562,13 @@ AnyType Op_trunc_mesh3::Op::operator( )(Stack stack) const {
   long orientation(arg(6, stack, 1L));
   bool cleanmesh(arg(7, stack, true));
   bool removeduplicate(arg(8, stack, false));
+  KN<long> kempty;
+  KN<long> nrB = arg(9,stack,kempty);
+  KN<long> nrT = arg(10,stack,kempty);
+  Expression flab = nargs[11] ;
+  Expression freg = nargs[12] ;
+  ffassert(nrT.N( ) % 2 == 0);
+  ffassert(nrB.N( ) % 2 == 0);
       
   KN< int > split(Th.nt);
   split = kkksplit;
@@ -6539,14 +6623,51 @@ AnyType Op_trunc_mesh3::Op::operator( )(Stack stack) const {
     }
   }
 
-  if (renum) {
+  if (renum)
     Renumb(Tht);
-  }
+  
 
-  if (renum && Tht->meshS) {
+  if (renum && Tht->meshS)
     Renumb(Tht->meshS);
-  }
+  
 
+      
+  Mesh3 &pTht=*Tht;
+  map<int,int> mapB,mapT;
+  for(int i=0;i<nrB.N();i+=2)
+      mapB[nrB[i]]=nrB[i+1];
+  for(int i=0;i<nrT.N();i+=2)
+      mapT[nrT[i]]=nrT[i+1];
+  R3 PtHat(1./4.,1./4.,1./4.);
+  for (int i=0;i<pTht.nt;i++) {
+      int lab=ChangeLab(mapT,pTht[i].lab);
+      if(freg) {
+          mp->set(pTht,pTht[i](PtHat),PtHat,pTht[i],lab);
+          pTht.elements[i].lab =GetAny<long>( (* freg)(stack)) ;
+          if(verbosity>5) cout << " freg "<<pTht[i].lab  << endl;
+      }
+  }
+  R2 PtHat2(1./3.,1./3.);
+  for (int i=0;i<pTht.nbe;i++) {
+        const Triangle3 &K(pTht.be(i));
+        int fk, ke = pTht.BoundaryElement(i, fk);
+        int fkk, kke = pTht.ElementAdj(ke, fkk = fk);
+        const Tet &KE(pTht[ke]);
+        R3 B = KE.PBord(fk, PtHat2);
+        int lab = ChangeLab(mapB, K.lab);
+        if(flab){
+            R3 NN = KE.N(fk);
+            double mes = NN.norme( );
+            NN /= mes;
+            mp->set(pTht, KE(B), B, KE, lab, NN, fk);
+            pTht.borderelements[i].lab = GetAny< long >((*flab)(stack));
+        }
+    }
+      
+      
+      
+      
+      
   Add2StackOfPtr2FreeRC(stack, Tht);    // 07/2008 FH
 
   *mp = mps;

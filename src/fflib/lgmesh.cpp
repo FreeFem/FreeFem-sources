@@ -543,7 +543,7 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
         Mesh &Th=*pmsh;
         map<int,int> mape,mapt;
         for(int i=0;i<nre.N();i+=2)
-            mape[nre[i]]=nrt[i+1];
+            mape[nre[i]]=nre[i+1];
         for(int i=0;i<nrt.N();i+=2)
             mapt[nrt[i]]=nrt[i+1];
         R2 PtHat(1./3,1./3.);
