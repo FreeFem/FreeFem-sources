@@ -6655,13 +6655,13 @@ AnyType Op_trunc_mesh3::Op::operator( )(Stack stack) const {
         const Tet &KE(pTht[ke]);
         R3 B = KE.PBord(fk, PtHat2);
         int lab = ChangeLab(mapB, K.lab);
-        /*if(flab){
+        if(flab){
             R3 NN = KE.N(fk);
             double mes = NN.norme( );
             NN /= mes;
-            //mp->set(pTht, KE(B), B, KE, lab, NN, fk);
-            //pTht.borderelements[i].lab = GetAny< long >((*flab)(stack));
-        }*/
+            mp->set(pTht, KE(B), B, KE, lab, NN, fk);
+            pTht.borderelements[i].lab = GetAny< long >((*flab)(stack));
+        }
     }
       
       
