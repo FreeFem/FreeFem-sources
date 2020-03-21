@@ -70,7 +70,7 @@ struct Data_Sparse_Solver {
     bool rightprecon;
     int sym;// know is set or not
     bool positive;
-    
+    long *getnbiter;
     Data_Sparse_Solver()
     :
     einitmat(0),
@@ -92,7 +92,8 @@ struct Data_Sparse_Solver {
     kerneln(0), kernelt(0), kerneldim(0),verb(verbosity) ,x0(true),veps(0),
     rightprecon(true),
     sym(false),
-    positive(false)
+    positive(false),
+    getnbiter(0) // add Mars 201
     {}
     void Update(Stack s)
     {

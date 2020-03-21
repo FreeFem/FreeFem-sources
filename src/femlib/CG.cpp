@@ -197,8 +197,8 @@ int ConjugueGradient(CGMatVirt<TypeIndex,TypeScalar> &A, // fonction et pointeur
                      CGMatVirt<TypeIndex,TypeScalar>  &C, // fonction et pointeur data pour C
                      TypeScalar * b, // second membre
                      TypeScalar * x, // solution qui contient une initialisation
-                     int nbitermax,
-                     double eps,
+                     int &nbitermax,// change FH mars 2020 add &
+                     double &eps,// change FH mars 2020 add &
                      int niveauimpression)
 
 {
@@ -223,13 +223,15 @@ int ConjugueGradient(CGMatVirt<TypeIndex,TypeScalar> &A, // fonction et pointeur
     mysaxpy(n,minus1,b,A.matmul(x,G));// G = Ax -b
     gCg = real(mysdot(n,G,C.matmul(G,CG))) ;
     myscal(n,minus1,myscopy(n,CG,H)); // H =- CG;
-    if( eps >0 ) eps2 *=gCg ;
+    if( eps >0 ) { eps2 *=gCg ; eps = sqrt(eps2); }
     
     assert( !(gCg != gCg) ); //  verif if NaN => bad Matrix..
     if(gCg < 1e-30)
     {   if(niveauimpression)
         std::cout << " GC: on a converge on 0 iteration ||g||_C^2" << gCg  << std::endl;
-        nret = 2;}
+        nret = 2;
+        nbitermax=0;
+    }
     else
         for(int iter=1; iter <= nbitermax; ++iter)
         {
@@ -248,6 +250,7 @@ int ConjugueGradient(CGMatVirt<TypeIndex,TypeScalar> &A, // fonction et pointeur
                     std::cout << " GC:  converge in  " <<iter
                     << " g=" << gCg << " rho= " << rho << " gamma= " <<gamma<<std::endl;;
                 nret= 1;
+                nbitermax= iter;
                 break;
             }
             else
@@ -266,8 +269,8 @@ int ConjugueGradient<int,double> (CGMatVirt<int,double> &A, // fonction et point
                                   CGMatVirt<int,double>  &C, // fonction et pointeur data pour C
                                   double * b, // second membre
                                   double * x, // solution qui contient une initialisation
-                                  int nbitermax,
-                                  double eps,
+                                  int &nbitermax,
+                                  double &eps,
                                   int niveauimpression)
 ;
 
@@ -276,8 +279,8 @@ int ConjugueGradient<int,Complex> (CGMatVirt<int,Complex> &A, // fonction et poi
                                    CGMatVirt<int,Complex>  &C, // fonction et pointeur data pour C
                                    Complex * b, // second membre
                                    Complex * x, // solution qui contient une initialisation
-                                   int nbitermax,
-                                   double eps,
+                                   int &nbitermax,
+                                   double &eps,
                                    int niveauimpression)
 ;
 
@@ -286,8 +289,8 @@ int ConjugueGradient<long,double> (CGMatVirt<long,double> &A, // fonction et poi
                                   CGMatVirt<long,double>  &C, // fonction et pointeur data pour C
                                   double * b, // second membre
                                   double * x, // solution qui contient une initialisation
-                                  int nbitermax,
-                                  double eps,
+                                  int &nbitermax,
+                                  double &eps,
                                   int niveauimpression)
 ;
 
@@ -296,8 +299,8 @@ int ConjugueGradient<long,Complex> (CGMatVirt<long,Complex> &A, // fonction et p
                                    CGMatVirt<long,Complex>  &C, // fonction et pointeur data pour C
                                    Complex * b, // second membre
                                    Complex * x, // solution qui contient une initialisation
-                                   int nbitermax,
-                                   double eps,
+                                   int &nbitermax,
+                                   double &eps,
                                    int niveauimpression)
 ;
 
@@ -346,8 +349,8 @@ bool fgmres(CGMatVirt<Z,K> &A, // fonction et pointeur data pour A
             CGMatVirt<Z,K> &CC,int leftC,
             K *prhs,
             K *px,
-            double eps,
-            int nbitermx,
+            double &eps,
+            int &nbitermx,
             int nbkrylov,
             int verbo,
             int *wbc)
@@ -505,7 +508,7 @@ bool fgmres(CGMatVirt<Z,K> &A, // fonction et pointeur data pour A
         cout << " !!!!!!!! fgmres has not  converged in " << iter << " iterations "
         << "The relative residual is " <<  relres/normb << endl;
     }
-    
+    nbitermx=iter; //  to
     delete [] g1;
     delete [] g;
     delete [] rot1;
@@ -518,8 +521,8 @@ bool fgmres(CGMatVirt<int,double> &A, // fonction et pointeur data pour A
             CGMatVirt<int,double> &C,int leftC,
             double *y,
             double *x,
-            double tol,
-            int maxits,
+            double &tol,
+            int &maxits,
             int restart,
             int verb,
             int *wbc);
@@ -528,8 +531,8 @@ bool fgmres(CGMatVirt<int,std::complex<double> > &A, // fonction et pointeur dat
             CGMatVirt<int,std::complex<double> > &C,int leftC,
             std::complex<double>  *y,
             std::complex<double>  *x,
-            double tol,
-            int maxits,
+            double &tol,
+            int &maxits,
             int restart,
             int verb,
             int *wbc);
@@ -538,8 +541,8 @@ bool fgmres(CGMatVirt<long,double> &A, // fonction et pointeur data pour A
             CGMatVirt<long,double> &C,int leftC,
             double *y,
             double *x,
-            double tol,
-            int maxits,
+            double &tol,
+            int &maxits,
             int restart,
             int verb,
             int *wbc );
@@ -548,8 +551,8 @@ bool fgmres(CGMatVirt<long,std::complex<double> > &A, // fonction et pointeur da
             CGMatVirt<long,std::complex<double> > &C,int leftC,
             std::complex<double>  *y,
             std::complex<double>  *x,
-            double tol,
-            int maxits,
+            double &tol,
+            int &maxits,
             int restart,
             int verb,
             int *wbc );

@@ -582,6 +582,7 @@ namespace Fem2D
   const MeshL::Element * MeshL::Find( Rd P, R1 & Phat,bool & outside,const Element * tstart) const
     
   {
+      this->Buildgdfb(); 
       // rewritie FH 31 jan 2020 ..
       static int count =0;
       if( verbosity && count++< 5  )

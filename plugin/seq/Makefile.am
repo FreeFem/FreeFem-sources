@@ -119,7 +119,8 @@ allheaders=../../src/fflib/AddNewFE.h ../../src/fflib/AFunction_ext.hpp ../../sr
 	../../src/femlib/VirtualSolverSkyLine.hpp \
 	../../src/femlib/VirtualSolverSparseSuite.hpp \
 	../../src/femlib/HashMatrix.hpp \
-	../../src/femlib/MatriceElementaire.hpp
+	../../src/femlib/MatriceElementaire.hpp \
+	../../src/femlib/DataFIndBoundary.hpp
 
 if ENABLE_FFCS
 

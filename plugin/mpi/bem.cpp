@@ -440,7 +440,9 @@ public:
     void solve(U out) const {
         HMatVirt A(t);
         HMatVirtPrec P(t);
-        bool res=fgmres(A,P,1,(K*)*u,(K*)*out,1.e-6,2000,200,(mpirank==0)*verbosity);
+        double eps =1e-6;
+        int niterx=2000;
+        bool res=fgmres(A,P,1,(K*)*u,(K*)*out,eps,niterx,200,(mpirank==0)*verbosity);
     }
     
     static U inv(U Ax, HMatrixInv<T, U, K, trans> A) {

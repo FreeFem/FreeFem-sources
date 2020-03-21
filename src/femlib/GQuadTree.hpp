@@ -40,6 +40,7 @@ namespace EF23 {
 
   static const int MaxDeep = 30;
   typedef  int  IntQuad;
+  typedef  long long Int8;
   static const IntQuad MaxISize = ( 1L << MaxDeep);
   static const IntQuad MaxISize1 =   MaxISize-1;  
   class Z1 { public:
@@ -54,6 +55,7 @@ namespace EF23 {
 	
     int Case(int l) const  { return  ( x & l)? 1 : 0 ;}
     int norm() const { return abs(x);}
+    Int8 norm2() const { return (Int8) x* (Int8) x;}
     void Bound() {   x = max(min(x,MaxISize1),0);}
     
     bool less(Z1 h) const  { return abs(x) <h.x ;}
@@ -79,6 +81,7 @@ namespace EF23 {
 	
     int Case(int l) const  { return ( ( y & l) ? (( x & l) ? 3 : 2 ) : ( ( x & l)? 1 : 0 )  ) ;}
     int norm() const { return Max(abs(x),abs(y));}
+    Int8 norm2() const { return (Int8) x*(Int8) x + (Int8) y*(Int8)y;}
     void Bound() {   x = max(min(x,MaxISize1),0);
       y = max(min(y,MaxISize1),0);}
     
@@ -108,6 +111,7 @@ namespace EF23 {
     int Case(int l) const  {// cout << " case = "<< int((x&l)!=0)+(int((y&l)!=0)<<1) + (int((z&l)!=0)<<2);
       return int( (x&l)!=0) + ( int((y&l)!=0)<<1 ) + ( int( (z&l)!=0) <<2 ) ;}
     int norm() const { return Max(abs(x),abs(y),abs(z));}
+    Int8 norm2() const { return (Int8) x*(Int8) x + (Int8) y*(Int8)y + (Int8) z*(Int8)z; }
     bool less(Z3 h) const  { return abs(x) <h.x && abs(y) <h.y && abs(z) < h.z ;}
     bool interseg(Z3 pp,int hb,int h) const { 
       return INTER_SEG1d(x,x+hb,pp.x-h,pp.x+h) && INTER_SEG1d(y,y+hb,pp.y-h,pp.y+h) && INTER_SEG1d(z,z+hb,pp.z-h,pp.z+h) ;
@@ -186,10 +190,10 @@ namespace EF23 {
     
     Rd  ZdtoRd(const Zd &I) const { return ( (Rd) I )/coef+cMin;}
     
-    Vertex * NearestVertex(const Rd & P) {
-      return NearestVertex(RdtoZd(P));} //XtoI(P.x),YtoJ(P.y));}
+    Vertex * NearestVertex(const Rd & P,bool trueNearest=false) {
+      return NearestVertex(RdtoZd(P),trueNearest);} //XtoI(P.x),YtoJ(P.y));}
     Vertex * NearestVertexWithNormal(const Rd & P);
-    Vertex * NearestVertex(Zd i2);
+    Vertex * NearestVertex(Zd i2,bool trueNearest=false);
     
     Vertex *  ToClose(const Rd & ,R ,Zd, bool nearest=false );
     Vertex *  ToClose(const Rd & P,R delta,bool nearest=false){
@@ -218,9 +222,18 @@ namespace EF23 {
     GTree();
     template<class V>     
     friend ostream& operator <<(ostream& f, const  GTree<V> & qt);
-    
-    
-    
+  // add FH mars 2020 , for new search .. FH...
+    int  ListNearestVertex(Vertex **lnv,int nvn,double delta,Rd P)
+          {     int hx = (int) (coef*delta);
+              hx = hx>0 ? hx:1; // bof bof ....
+              return ListNearestVertex(lnv,nvn,hx,RdtoZd(P));}
+          Vertex * TrueNearestVertex(Zd i2) {return NearestVertex(i2,true);}
+    int ListNearestVertex(Vertex **lnv,int nlvnx,int dh,Zd xyi);
+          
+
+    Vertex * TrueNearestVertex(const Rd & P) {
+        return TrueNearestVertex(RdtoZd(P));}
+
   };
   
   template<class Mesh>

@@ -61,8 +61,8 @@ int ConjugueGradient(CGMatVirt<TypeIndex, TypeScalar> &A, // fonction et pointeu
                      CGMatVirt<TypeIndex,TypeScalar> &C, // fonction et pointeur data pour C
                      TypeScalar *b, // second membre
                      TypeScalar *x, // solution qui contient une initialisation
-                     int nbitermax,
-                     double eps,
+                     int &nbitermax,
+                     double &eps,
                      int niveauimpression);
 
 template<typename K, typename Z>
@@ -70,8 +70,8 @@ bool fgmres(CGMatVirt<Z, K> &A, // fonction et pointeur data pour A
             CGMatVirt<Z, K> &C, int leftC,
             K *y,
             K *x,
-            double tol,
-            int maxits,
+            double &tol,
+            int &maxits,
             int restart=50,
             int verbo=3,
             int *perm=0);
