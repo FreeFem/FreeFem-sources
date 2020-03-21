@@ -5794,7 +5794,6 @@ void init_lgfem( ) {
 
   Add< MeshPoint * >("nuTriangle", ".", new OneOperator1< long, MeshPoint * >(mp_nuTriangle));
   Add< MeshPoint * >("region", ".", new OneOperator1< long, MeshPoint * >(mp_region));
-Add< MeshPoint * >("label", ".", new OneOperator1< long, MeshPoint * >(mp_label));
         
   Add< pfer >("refresh", ".", new OneOperator1< bool, pfer >(pfer_refresh< R, v_fes >));
   Add< pfec >("refresh", ".", new OneOperator1< bool, pfec >(pfer_refresh< Complex, v_fes >));
