@@ -2460,7 +2460,7 @@ class pVhL_ndf : public ternary_function<pfesL *,long,long,long> { public:
 
 
 /*  no trivial ....   FH jan 2009..  */
-class Op4_Mesh32mp : public quad_function<pmesh3*,R,R,R,MeshPoint *> { public:
+/*class Op4_Mesh32mp : public quad_function<pmesh3*,R,R,R,MeshPoint *> { public:
     class Op : public E_F0mps { public:
 	Expression a,b,c,d;
 	Op(Expression aa,Expression bb,Expression cc,Expression dd) : a(aa),b(bb),c(cc),d(dd) {}       
@@ -2484,7 +2484,7 @@ class Op4_Mesh32mp : public quad_function<pmesh3*,R,R,R,MeshPoint *> { public:
 	return mp;}
 	
     };
-};
+};*/
 
 
 // FH
@@ -2674,7 +2674,7 @@ void init_lgmesh3() {
   Add<double>("(","",new OneQuadOperator<Op4_K2R<R>,Op4_K2R<R>::Op> );
   // Add<long>("(","",new OneTernaryOperator<Op3_K2R<long>,Op3_K2R<long>::Op> ); // FH stupide
   Add<Complex>("(","",new OneQuadOperator<Op4_K2R<Complex>,Op4_K2R<Complex>::Op> );
-  Add<pmesh3 *>("(","",new OneQuadOperator<Op4_Mesh32mp,Op4_Mesh32mp::Op> );
+  //Add<pmesh3 *>("(","",new OneQuadOperator<Op4_Mesh32mp,Op4_Mesh32mp::Op> );
     
     
 
