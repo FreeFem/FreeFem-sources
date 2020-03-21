@@ -2674,6 +2674,7 @@ void init_lgmesh3() {
   Add<double>("(","",new OneQuadOperator<Op4_K2R<R>,Op4_K2R<R>::Op> );
   // Add<long>("(","",new OneTernaryOperator<Op3_K2R<long>,Op3_K2R<long>::Op> ); // FH stupide
   Add<Complex>("(","",new OneQuadOperator<Op4_K2R<Complex>,Op4_K2R<Complex>::Op> );
+ // Th(x,y,z)  first
   Add<pmesh3 *>("(","",new OneQuadOperator<Op4_Mesh32mp,Op4_Mesh32mp::Op> );
     
     
@@ -2724,7 +2725,8 @@ void init_lgmesh3() {
  Add<pmesh3*>("[","",new OneOperator2_<GlgElement<Mesh3>,pmesh3*,long>(get_element));
  Add<pmesh3>("(","",new OneOperator2_<GlgVertex<Mesh3>,pmesh3,long>(get_vertex));
  Add<pmesh3*>("(","",new OneOperator2_<GlgVertex<Mesh3>,pmesh3*,long>(get_vertex));
- Add<pmesh3* >("(", "", new OneQuadOperator< Op3_MeshDmp<Mesh3>, Op3_MeshDmp<Mesh3>::Op >);
+    //   second case of Th(x,y,z) ???? FH  attention deja fait dans Op4_Mesh32mp
+ //Add<pmesh3* >("(", "", new OneQuadOperator< Op3_MeshDmp<Mesh3>, Op3_MeshDmp<Mesh3>::Op >);
     
  Add<pmesh3*>("be",".",new OneOperator1_<GlgBoundaryElement<Mesh3>::BE,pmesh3*>(Build));
  Add<GlgElement<Mesh3> >("adj",".",new OneOperator1_<GlgElement<Mesh3>::Adj,GlgElement<Mesh3> >(Build));
