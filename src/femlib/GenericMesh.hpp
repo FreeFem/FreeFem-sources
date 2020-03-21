@@ -53,6 +53,7 @@ using namespace ::std;
 #include "Serialize.hpp"
 
 #include "GQuadTree.hpp"
+#include "DataFIndBoundary.hpp"
 // definition R
 namespace Fem2D  {
 #include "R3.hpp"
@@ -498,6 +499,7 @@ public:
   int *BoundaryElementHeadLink; //
   int *ElementConteningVertex;
   GTree *gtree;
+  mutable GenericDataFindBoundary<GMesh> *gdfb;
 public:
     int nbElmts() const {return nt;}
     int nbBrdElmts() const {return nbe;}
@@ -517,7 +519,7 @@ public:
     : nt(0),nv(0),nbe(0),nadjnomanifold(0), mes(0.),mesb(0.) ,
       vertices(0),elements(0),borderelements(0),bnormalv(0),
       TheAdjacencesLink(0),BoundaryElementHeadLink(0),
-      ElementConteningVertex(0), gtree(0)
+      ElementConteningVertex(0), gtree(0),gdfb(0)
   {
       
   }
@@ -567,6 +569,7 @@ public:
   void BuildBound();
   void BuildjElementConteningVertex();
   void BuildGTree() {if(gtree==0)  gtree=new GTree(vertices,Pmin,Pmax,nv);}
+  GenericDataFindBoundary<GMesh> * Buildgdfb() const {if(gdfb==0) gdfb=new GenericDataFindBoundary<GMesh>(this) ; return gdfb;}
   DataFENodeDF BuildDFNumbering(int dfon[NbTypeItemElement],int nbequibe=0,int *equibe=0) const ;
     DataFENodeDF BuildDFNumbering(int ndfv,int ndfe,int ndff,int ndft,int nbequibe=0,int *equibe=0) const
   { int dfon[NbTypeItemElement]={ndfv,ndfe,ndff,ndft};
@@ -1974,7 +1977,7 @@ Serialize GenericMesh<T,B,V>::serialize() const
     : nt(0),nv(0),nbe(0),  mes(0.),mesb(0.) ,
     vertices(0),elements(0),borderelements(0),bnormalv(0),
     TheAdjacencesLink(0),BoundaryElementHeadLink(0),
-    ElementConteningVertex(0), gtree(0)
+    ElementConteningVertex(0), gtree(0),gdfb(0)
     {
 	const int nve = T::nv;
 	const int nvbe = B::nv;
@@ -1985,7 +1988,7 @@ Serialize GenericMesh<T,B,V>::serialize() const
 	size_t pp=0;
 	serialized.get(pp, l);
 	serialized.get( pp,dd);
-    serialized.get( pp,havebordermesh);
+        serialized.get( pp,havebordermesh);
 	serialized.get( pp,nnve);
 	serialized.get( pp,nnvbe);
 	serialized.get( pp,nnt);

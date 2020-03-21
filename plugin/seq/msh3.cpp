@@ -8402,7 +8402,30 @@ AnyType Movemesh_Op< MMesh >::operator( )(Stack stack) const {
   B *b = new B[Th.nbe];
 
   // apply the geometric transfo and copy vertices
- 
+  if( Th.nt ==0 && Th.nbe==0)
+  { // mesh with only vertex
+      for (int iv = 0; iv < Th.nv; ++iv)
+      {
+    
+          R3 P;
+          P = Th(iv);
+          mpp->set(P.x,P.y,P.z);
+          if (xx)
+              v[iv].x = GetAny< double >((*xx)(stack));
+          else
+              v[iv].x = mpp->P.x;
+          if (yy)
+              v[iv].y = GetAny< double >((*yy)(stack));
+          else
+              v[iv].y = mpp->P.y;
+          if (zz)
+              v[iv].z = GetAny< double >((*zz)(stack));
+          else
+              v[iv].z = mpp->P.z;
+      }
+  }
+  else
+  {
   // loop over elements
   for (int it = 0; it < Th.nt; ++it) {
     const T &K(Th.elements[it]);
@@ -8426,6 +8449,7 @@ AnyType Movemesh_Op< MMesh >::operator( )(Stack stack) const {
         takemesh[i] = takemesh[i] + 1;
       }
     }
+  }
   }
 
   // loop over border elements
@@ -8484,7 +8508,7 @@ AnyType Movemesh_Op< MMesh >::operator( )(Stack stack) const {
   // case MeshS: T_Th->mapSurf2Vol=0;_Th->mapVol2Surf=0;
   // case Mesh3: if(Th.meshS) T_Th->BuildMeshS();
   finalize(T_Th);
-
+    if(verbosity>5) cout << " bb box "<< T_Th->Pmin << " ; " << T_Th->Pmax <<endl; 
   Add2StackOfPtr2FreeRC(stack, T_Th);
   *mp = mps;
   return T_Th;

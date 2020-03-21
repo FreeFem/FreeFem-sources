@@ -55,5 +55,6 @@ CG.cpp \
 SparseLinearSolver.cpp \
 SolverSkyLine.hpp \
 VirtualSolverSparseSuite.hpp \
-VirtualSolverSkyLine.hpp 
+VirtualSolverSkyLine.hpp \
+DataFIndBoundary.hpp 
 

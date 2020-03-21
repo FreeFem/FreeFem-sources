@@ -559,39 +559,49 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
     {  "eps", &typeid(double)  }, \
     {  "precon",&typeid(Polymorphic*)}, \
     {  "dimKrylov",&typeid(long)}, \
+\
     {  "tgv",&typeid(double )}, \
     {  "factorize",&typeid(long)}, \
     {  "strategy",&typeid(long )}, \
     {  "tolpivot",&typeid(double )}, \
     {  "tolpivotsym",&typeid(double )}, \
+ \
+ \
     {  "nbiter", &typeid(long)}, \
     { "datafilename", &typeid(string*)} , \
     { "lparams",&typeid(KN_<long>)} , \
     { "dparams", &typeid(KN_<double>)},  \
     { "smap", &typeid(map<string,string>*)}, \
+ \
     { "permr", &typeid(KN_<long>)}, \
     { "permc", &typeid(KN_<long>)}, \
     { "scaler", &typeid(KN_<double>)}, \
     { "scalec", &typeid(KN_<double>)}, \
     { "sparams", &typeid(string*)}, \
+ \
+ \
     { "commworld", &typeid(pcommworld)}, \
     { "master", &typeid(long)}, \
     { "rinfo", &typeid(KN<double>*)}, \
     { "info", &typeid(KN<long>*)}, \
     { "kerneln", &typeid(  KNM<double> *)}, \
+ \
     { "kernelt", &typeid(  KNM<double> *)}, \
     { "kerneldim", &typeid(long*)}, \
     { "verb", &typeid(long)}, \
     { "x0", &typeid(bool)}, \
     { "veps", &typeid(double*)  }, \
+  \
+  \
     { "rightprecon", &typeid(bool)  }, \
     { "sym", &typeid(long)  }, \
-    { "positive", &typeid(bool)  }
+    { "positive", &typeid(bool)  } ,\
+    { "getnbiteration", &typeid(long*)  }
 
 
 
 
-const int NB_NAME_PARM_MAT =  24 +6+3  ;
+const int NB_NAME_PARM_MAT =  24 +6+4  ;
     
     
 template<class R>
@@ -651,6 +661,9 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
         if (nargs[++kk]) ds.rightprecon= GetAny<bool>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.sym= GetAny<long>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.positive= GetAny<bool>((*nargs[kk])(stack));
+        if (nargs[++kk])  { ds.getnbiter= GetAny<long*>((*nargs[kk])(stack));
+            if( ds.getnbiter) *ds.getnbiter=-1; //undef 
+        }
         if(ds.solver == "")
         { // SET DEFAULT SOLVER TO HRE ... 
             if( ds.sym && ds.positive ) ds.solver=*def_solver_sym_dp;

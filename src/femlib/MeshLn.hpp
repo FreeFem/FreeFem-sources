@@ -106,7 +106,7 @@ namespace Fem2D {
   {
   public: 
     BoundaryPointL() {}; // constructor empty for array
-      
+    Rd operator()(R0 P) const  {return this->at(0); }
       
   };
 
@@ -138,7 +138,7 @@ namespace Fem2D {
 	R3 N = V^R3(0,0,1);
 	return N/N.norme();
     }
-
+   
   };
     
     

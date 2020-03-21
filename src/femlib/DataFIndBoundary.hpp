@@ -41,7 +41,7 @@ void GenericDataFindBoundary<Mesh>::gnuplot(const string & fn)
     ffassert(gp);
     //
     const Mesh &Th = *pTh;
-    for(int be=0; be<Th.neb; ++be)
+    for(int be=0; be<Th.nbe; ++be)
     {
         const BorderElement &B=Th.be(be);
         int e,k = Th.BoundaryElement(be,e);
@@ -49,7 +49,7 @@ void GenericDataFindBoundary<Mesh>::gnuplot(const string & fn)
             int ee=e, kk=  Th.ElementAdj(k,ee);
             if ( kk >=0 || k != kk)
             {
-                for(int j=0; j< BorderElement::NbOfVertices;++j)
+                for(int j=0; j< BorderElement::nv;++j)
                  gp  << (Rd) B[j] << endl;
                gp  << "\n\n";
             }
@@ -164,6 +164,44 @@ int GenericDataFindBoundary<Mesh>::Find(typename Mesh::Rd PP,double *l,int & out
         << l[1] << " " << l[2] << " "<< outside<<  endl;
     return nu;
 }
+template<typename Mesh>
+int  TrueBorder(const Mesh &Th,typename Mesh::Vertex *P,double *delta)
+{
+    typedef typename Mesh::Vertex Vertex;
+    
+    typedef typename Mesh::Element Element;
+    typedef typename Mesh::BorderElement BorderElement;
+    typedef  typename Mesh::Rd Rd;
+    typedef  typename Mesh::BorderElement::RdHat RdHat;
+    static const int d = Rd::d;
+    static const int dHat = RdHat::d;
+  
+    int nv =0;
+    RdHat GHat(RdHat::diag(1./(dHat+1)));
+
+for(int be=0; be<Th.nbe; ++be)
+{
+    const BorderElement &E=Th.be(be);
+    int e,k = Th.BoundaryElement(be,e);
+    {
+        int ee=e, kk=  Th.ElementAdj(k,ee);
+        if ( kk >=0 || k != kk)
+        {
+            E(GHat);
+            Rd G(E(GHat));
+            double l = 0;// 1.5 to be sure .. FH
+            for(int i=0; i< BorderElement::nv ;++i)
+                l = max(l, Rd(G,E[i]).norme2()) ;
+                delta[nv]=l;
+                P[nv].lab= Element::ne*k+e;//  element and edge
+                (Rd &) P[nv++]=G;
+                
+                
+                }
+    }
+}
+    return nv;
+}
 
 template<typename Mesh>
 GenericDataFindBoundary<Mesh>::GenericDataFindBoundary(Mesh const * _pTh,int ddebug)
@@ -173,31 +211,14 @@ GenericDataFindBoundary<Mesh>::GenericDataFindBoundary(Mesh const * _pTh,int dde
     const int nvB = BorderElement::nv;
     const int nvK = bborder ? nvB : nvE;
     const Mesh &Th = *pTh;
-    RdHat GHat(RdHat::diag(1./(dHat+1)));
     // extract true Border if d != dHat
     // othesize keep all mesh
+    RdHat GHat(RdHat::diag(1./(dHat+1)));
+
     int nv =0;
+    //  warning in case of meshL ,  bord is points  => code bborder stupide..
     if(bborder)
-    for(int be=0; be<Th.nbe; ++be)
-    {
-        const BorderElement &E=Th.be(be);
-        int e,k = Th.BoundaryElement(be,e);
-        {
-            int ee=e, kk=  Th.ElementAdj(k,ee);
-            if ( kk >=0 || k != kk)
-            {
-                Rd G(E(GHat));
-                double l = 0;// 1.5 to be sure .. FH
-                for(int i=0; i< BorderElement::nv ;++i)
-                    l = max(l, Rd(G,E[i]).norme2()) ;
-                delta[nv]=l;
-                P[nv].lab= Element::ne*k+e;//  element and edge
-                (Rd &) P[nv++]=G;
-                
-                
-            }
-        }
-    }
+       nv =  TrueBorder(Th,P,delta);
     else
     { //
         for(int k=0; k<Th.nt; ++k)
@@ -217,7 +238,7 @@ GenericDataFindBoundary<Mesh>::GenericDataFindBoundary(Mesh const * _pTh,int dde
             }
         }
     
-    P.resize(nv);
+    //P.resize(nv); no resize because no copy of vertices ...
     delta.resize(nv);
     lp.resize(nv);
     if(debug>7)  gnuplot("dfb0.gp");

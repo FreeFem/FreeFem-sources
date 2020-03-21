@@ -120,8 +120,10 @@ public:
     CGMatVirt<I,K> *pC;
     int verb,itermax,erronerr;
     double eps;
-    SolverCG(HMat  &AA,double eeps=1e-6,int eoe=1,int v=1,int itx=0)
-    :A(&AA),pC(0),verb(v),itermax(itx>0?itx:A->n/2),erronerr(eoe),eps(eeps)
+    double *veps;
+    long *getnbiter;
+    SolverCG(HMat  &AA,double eeps=1e-6,int eoe=1,int v=1,int itx=0,double *vveps=0, long * git=0)
+    :A(&AA),pC(0),verb(v),itermax(itx>0?itx:A->n/2),erronerr(eoe),eps(eeps), veps(vveps), getnbiter(git)
     {
         if(verb>4)
             cout << " ## SolverCG  " << A->n << " "<<  A->m <<" eps " << eps << " eoe " << eoe << " v " << verb << " " << itermax <<endl;
@@ -130,7 +132,8 @@ public:
     }
     
     SolverCG(HMat  &AA,const Data_Sparse_Solver & ds,Stack stack)
-    :A(&AA),pC(0),verb(ds.verb),itermax(ds.itmax>0 ?ds.itmax:A->n),erronerr(1),eps(ds.epsilon)
+    :A(&AA),pC(0),verb(ds.verb),itermax(ds.itmax>0 ?ds.itmax:A->n),erronerr(1),eps(ds.epsilon),
+     veps(ds.veps), getnbiter(ds.getnbiter)
     {
         if(verb>4)
             std::cout << " ## SolverCG  " << A->n << "x"<<  A->m <<" eps " << eps << " eoe " << erronerr
@@ -170,13 +173,20 @@ public:
         HMatVirt AA(A,trans);
         //HMatVirtPreconDiag CC(A);
         int err=0;
+        if(getnbiter) *getnbiter=0;
         for(int k=0,oo=0; k<N; ++k, oo+= A->n )
         {
+            int itermx = itermax;
+            double epss =eps;
             pC->SetInitWithBC(b+oo,x+oo);
-            int res=ConjugueGradient(AA,*pC,b+oo,x+oo,itermax,eps,verb);
+            int res=ConjugueGradient(AA,*pC,b+oo,x+oo,itermx,epss,verb);
+            
             if ( res==0 ) err++;
+            else if(getnbiter) *getnbiter+=itermx;
+            if(veps) *veps= epss;
         }
-        if(err && erronerr) {  std::cerr << "Error: ConjugueGradient do not converge nb end ="<< err << std::endl; assert(0); }
+        if(err && erronerr) {  std::cerr << "Error: ConjugueGradient do not converge nb end ="<< err << std::endl;
+            ffassert(0); }
     }
     ~SolverCG() {delete pC;}
 };
@@ -193,15 +203,18 @@ public:
     CGMatVirt<I,K> *pC;
     long verb,itermax,restart,erronerr;
     double eps;
+    double *peps;
+    long *piter;
     SolverGMRES(HMat  &AA,double eeps=1e-6,int eoe=1,int v=1,int rrestart=50,int itx=0)
     :A(&AA),pC(0), verb(v),itermax(itx>0?itx:A->n/2),restart(rrestart),
-    erronerr(eoe),eps(eeps)
+    erronerr(eoe),eps(eeps),peps(0),piter(0)
     {assert(A->n == A->m);
         pC = new HMatVirtPrecon<I,K>(A);
     }
     
     SolverGMRES(HMat  &AA,const Data_Sparse_Solver & ds,Stack stack)
-    :A(&AA),pC(0),verb(ds.verb),itermax(ds.itmax>0 ?ds.itmax:A->n),restart(ds.NbSpace),erronerr(1),eps(ds.epsilon)
+    :A(&AA),pC(0),verb(ds.verb),itermax(ds.itmax>0 ?ds.itmax:A->n),restart(ds.NbSpace),erronerr(1),eps(ds.epsilon),
+     peps(ds.veps), piter(ds.getnbiter)
     {
         if(verb>4)
             std::cout << " ## SolverGMRES  " << A->n << "x"<<  A->m <<" eps " << eps << " eoe " << erronerr
@@ -230,9 +243,11 @@ public:
         for(int k=0,oo=0; k<N; ++k, oo+= A->n )
         {
             pC->SetInitWithBC(b+oo,x+oo);
-            
-            bool res=fgmres(AA,*pC,1,b+oo,x+oo,eps,itermax,restart,verb,pC->pwcl());
-            
+            int itermx=itermax;
+            double veps=eps;
+            bool res=fgmres(AA,*pC,1,b+oo,x+oo,veps,itermx,restart,verb,pC->pwcl());
+            if(peps) *peps=eps;
+            if(piter) *piter=itermx;
             if ( ! res ) err++;
         }
         if(err && erronerr) {  std::cerr << "Error: fgmres do not converge nb end ="<< err << std::endl; assert(0); }

@@ -90,9 +90,89 @@ namespace EF23 {
   //  
   //     
   }
-  
+    
+template<class Vertex>
+    int  GTree<Vertex>::ListNearestVertex(Vertex **lnv,int nlvnx,int dh,Zd xyi)
+    {
+        // warning this function return the NearestVertex in the first
+        // none empty box contening the point xyi.
+        //   They do not return the true nearest point in classical norm.
+        int nlnv =0;
+        QuadTreeBox * pb[ MaxDeep ];
+        int  pi[ MaxDeep  ];
+        Zd pp[  MaxDeep ];
+        int l=0; // level
+        QuadTreeBox * b;
+        Int8  h2=(Int8)dh*dh,h0;
+        IntQuad h=dh,hb =  MaxISize;
+        Zd   p0(0,0,0);
+        Zd  plus(xyi) ; plus.Bound();
+        
+        // xi<MaxISize?(xi<0?0:xi):MaxISize-1,yj<MaxISize?(yj<0?0:yj):MaxISize-1);
+        
+        Vertex *vn=0;
+        
+        // init for optimisation ---
+        b = root;
+        long  n0=0;
+        if (!root->n)
+            return 0; // empty tree
+      
+        if(verbosity>2000)
+            cout << "        general case : NearVertex" << endl;
+        // general case -----
+        pb[0]= b;
+        pi[0]=b->n>0 ?(int)  b->n : N  ;
+        pp[0]=p0;
+        h=hb;
+        do {
+            b= pb[l];
+            while (pi[l]--)
+            {
+                int k = pi[l];
+                
+                if (b->n>0) // Vertex QuadTreeBox none empty
+                {
+                    NbVerticesSearch++;
+                    Zd i2 =  VtoZd(b->v[k]);
+                    h0 = Zd(i2,plus).norm2();//  NORM(iplus,i2.x,jplus,i2.y);
+                    if (h0 <h2)
+                    {// on stock ..
+                        if( nlnv < nlvnx)
+                          lnv[nlnv++] = b->v[k];
+                    }
+                }
+                else // Pointer QuadTreeBox
+                {
+                    QuadTreeBox *b0=b;
+                    NbQuadTreeBoxSearch++;
+                    if ((b=b->b[k]))
+                    {
+                        hb >>=1 ; // div by 2
+                        Zd ppp(pp[l],k,hb);
+                        
+                        if  ( ppp.interseg(plus,hb,h) )//(INTER_SEG(iii,iii+hb,iplus-h,iplus+h) && INTER_SEG(jjj,jjj+hb,jplus-h,jplus+h))
+                        {
+                            pb[++l]=  b;
+                            pi[l]= b->n>0 ?(int)  b->n : N  ;
+                            pp[l]=ppp;
+                        }
+                        else
+                            b=b0, hb <<=1 ;
+                    }
+                    else
+                        b=b0;
+                }
+            }
+            hb <<= 1; // mul by 2
+        } while (l--);
+        
+        return nlnv;
+    }
+    
+
   template<class Vertex>    
-  Vertex *  GTree<Vertex>::NearestVertex(Zd xyi)//long xi,long yj)
+  Vertex *  GTree<Vertex>::NearestVertex(Zd xyi,bool trueNearest)//long xi,long yj)
   {
     // warning this function return the NearestVertex in the first
     // none empty box contening the point xyi.
@@ -103,8 +183,8 @@ namespace EF23 {
     Zd pp[  MaxDeep ];
     int l=0; // level
     QuadTreeBox * b;
-    IntQuad  h=MaxISize,h0;
-    IntQuad hb =  MaxISize;
+    Int8  h2=(Int8) MaxISize*(Int8)MaxISize*3,h0;
+    IntQuad h=MaxISize,hb =  MaxISize;
     Zd   p0(0,0,0);
     Zd  plus(xyi) ; plus.Bound();
     
@@ -114,10 +194,10 @@ namespace EF23 {
     
     // init for optimisation ---
     b = root;
-    long  n0;
+    long  n0=0;
     if (!root->n)
       return vn; // empty tree 
-    
+    if( ! trueNearest )
     while( (n0 = b->n) < 0) 
       {
 		// search the non empty 
@@ -138,21 +218,24 @@ namespace EF23 {
       }
       // n0 number of boxes of in b ("b0")
     if(verbosity>2000)
-    cout << "        n0=" << n0 << endl;
+    cout << "        n0=" << n0 << " " << trueNearest <<endl;
     
     if ( n0 > 0) 
     {  
       for( int k=0;k<n0;k++)
 	{
 	  Zd i2 =  VtoZd(b->v[k]);
-	  h0 = Zd(i2,plus).norm();  //NORM(iplus,i2.x,jplus,i2.y);
-	  if (h0 <h) {
-	    h = h0;
+	  h0 = Zd(i2,plus).norm2();  //warning ..  norm sup and  not norm 2 ...
+	  if (h0 <h2) {
+	    h2 = h0;
 	    vn = b->v[k];
+              ffassert(vn);
 	  }
 	  NbVerticesSearch++;
 	}
-      
+        if(verbosity>2000)
+            cout << "        find " << vn << " " << h0 << " " << h2 << " " << endl;
+
       return vn;
     }
     
@@ -173,11 +256,15 @@ if(verbosity>2000)
 	  { 
 	    NbVerticesSearch++;
 	    Zd i2 =  VtoZd(b->v[k]);
-	    h0 = Zd(i2,plus).norm();//  NORM(iplus,i2.x,jplus,i2.y);
-	    if (h0 <h) 
+	    h0 = Zd(i2,plus).norm2();//  NORM(iplus,i2.x,jplus,i2.y);
+	    if (h0 <h2)
 	      {
-		h = h0;
+		h2 = h0;
+                h =Zd(i2,plus).norm();
 		vn = b->v[k];
+                  if(verbosity>2000)
+                      cout << "        find   " << vn << " " << h0 << " " << h2 << " " << h << endl;
+
 	      }
 	  }
 	else // Pointer QuadTreeBox 
@@ -643,6 +730,11 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
 	  v=quadtree->NearestVertex(P);
 	  assert(v);
 	}*/
+        if( !v) {
+            verbosity = 10000000;
+            cout << "Bug search  " << P << endl;
+            v=quadtree->NearestVertex(P);
+        }
         ffassert(v); // bug !!!!
       it00=it=Th.Contening(v);
       nddd=  Norme2(P-*v);
