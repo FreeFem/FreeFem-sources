@@ -1,0 +1,59 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "msh3"
+load "mshmet"
+load "parmmg"
+load "PETSc"
+macro dimension()3// EOM            // 2D or 3D
+include "macro_ddm.idp"             // additional DDM functions
+
+int n = 12;
+int[int] L=[1,1,1,1], LU=[0,2], LD=[1,1], LR=[0,1];
+mesh3 Th3 = buildlayers(square(n, n, region=0, label=L), n, zbound=[0,1], labelmid=LD, labelup=LU, labeldown=LR);
+Th3 = trunc(Th3, x < 0.5 || y < 0.5 || z < 0.5, label=1);
+
+macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
+
+varf vPoisson(u, v) = int3d(Th3)(grad(u)' * grad(v)) + int3d(Th3)(v) + on(1,2, u=0);
+
+Mat A;
+buildDmesh(Th3);
+createMat(Th3, A, P1);
+fespace Vh(Th3, P1);
+Vh u;
+real err = 8.0e-3;
+
+int iMax = 3;
+int[int] rt(2);
+rt = [1, 2];
+for(int i = 0; i < iMax; ++i) {
+    A = vPoisson(Vh, Vh, tgv = -2);
+    set(A, sparams = "-ksp_monitor -pc_type hypre");
+    real[int] rhs = vPoisson(0, Vh, tgv = -1);
+    u[] = A^-1 * rhs;
+    real[int] met = mshmet(Th3, u, aniso = 1, hmin = 1.0e-3, hmax = 1.0e-1, err = err);
+    mesh3 ThParMmg;
+    int[int] n2o;
+    int[int][int] communicators;
+    createParMmgCommunicators(Th3, ThParMmg, n2o, communicators)
+    fespace VhMet(Th3, [P1, P1, P1, P1, P1, P1]);
+    fespace VhParMmg(ThParMmg, [P1, P1, P1, P1, P1, P1]);
+    real[int] metParMmg(VhParMmg.ndof);
+    int[int] rest = restrict(VhParMmg, VhMet, n2o);
+    for[i, v : rest] metParMmg[i] = met[v];
+    ThParMmg = parmmg3d(ThParMmg, metric = metParMmg, hausd = 4.0/*, requiredTriangle = rt*/, nodeCommunicators = communicators);
+    reconstructDmesh(ThParMmg)
+    fespace VhAdapt(ThParMmg, P1);
+    VhAdapt uAdapt;
+    transfer(Th3, P1, u, ThParMmg, P1, uAdapt)
+    int[int] fforder = [1];
+    savevtk("laplace-adapt-dist-3d.vtu", Th3, u, bin = 1, order = fforder, append = i ? true : false);
+    savevtk("laplace-adapt-dist-3d.vtu", ThParMmg, uAdapt, bin = 1, order = fforder, append = true);
+    copyDmesh(ThParMmg, Th3)
+    Mat Adapt;
+    createMat(Th3, Adapt, P1);
+    A = Adapt;
+    u = 0.0;
+    err *= 0.5;
+}

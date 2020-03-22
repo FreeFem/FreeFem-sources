@@ -752,7 +752,7 @@ namespace Fem2D
                         
                        if(pdt >= angle) {
                            if(verbosity>15)
-                               cout << " the edge " <<nbeL <<": [" << iv[0] << " " << iv[1] << "] is a boundary with the angular criteria" << endl;
+                               cout << " the border point " <<nbeL <<": [" << iv[0] << " " << "] is a boundary with the angular criteria" << endl;
                            int lab = min(K.lab, K_adj.lab);
                            be(nbeL).set(vertices,iv,lab);
                            pointI.add(key, nbeL++);

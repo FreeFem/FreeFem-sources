@@ -93,7 +93,7 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 # bratu-hpddm-2d-PETSc.edp needs PETSc 3.13
 # diffusion-substructuring-2d-PETSc.edp <- problem with BDDC
 
-TESTS_PETSC_PARMMG = distributed-parmmg.edp
+TESTS_PETSC_PARMMG = distributed-parmmg.edp laplace-adapt-dist-3d-PETSc.edp
 
 TESTS_PETSC_SLEPC = laplace-2d-SLEPc.edp \
 	laplace-spherical-harmonics-2d-SLEPc.edp \
@@ -176,4 +176,4 @@ freefem++.pref: Makefile
 	echo includepath = \"../../idp/\" >> freefem++.pref
 
 clean-local:
-	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_* createPartition_* helmholtz-3d-surf.vtu helmholtz-3d-line.vtu dump-2d_* dump-3d_* navier-stokes-2d_*
+	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_* createPartition_* helmholtz-3d-surf.vtu helmholtz-3d-line.vtu dump-2d_* dump-3d_* navier-stokes-2d_* laplace-adapt-dist-3d_*
