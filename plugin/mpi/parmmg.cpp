@@ -271,7 +271,10 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
   }
 
   int i=2;
-
+  if (!verbosity) {
+    PMMG_Set_iparameter(mesh,PMMG_IPARAM_verbose,       -1);
+    PMMG_Set_iparameter(mesh,PMMG_IPARAM_mmgVerbose,    -1);
+  }
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_verbose,       arg(i,stack,0L)); i++;   /*!< [-10..10], Tune level of verbosity */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_mmgVerbose,    arg(i,stack,0L)); i++;   /*!< [-10..10], Tune level of verbosity of Mmg */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_mem,           arg(i,stack,0L)); i++;   /*!< [n/-1], Set memory size to n Mbytes or keep the default value */

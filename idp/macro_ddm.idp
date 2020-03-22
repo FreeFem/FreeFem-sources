@@ -654,7 +654,7 @@ macro createMat(ThName, MatName, PkName)
 IFMACRO(privateDmesh#ThName)
 {
 IFMACRO(!privateCreateMatCheckDmesh)
-    if(ThName.nv != privateDmesh#ThName#khi[0].n || ThName.nt != privateDmesh#ThName#khi[1].n) {
+    if(ThName.nv != privateDmesh#ThName#khi[0].n || (privateDmesh#ThName#khi[1].n && ThName.nt != privateDmesh#ThName#khi[1].n)) {
         buildDmesh(ThName)
     }
 ENDIFMACRO
@@ -1186,12 +1186,19 @@ ENDIFMACRO
             rankSend[rankSend.n - 1] = i;
         }
     }
-    real[int] D;
+    real[int] D, backupRegion(Th.nt);
     createPartition(Th, D, Pk)
     VhLocalOld def(scaledU);
     scaledU[] = u[];
     scaledU[] .*= D;
     fespace PhPart(Th, P0);
+    {
+        PhPart backup = region;
+        backupRegion = backup[];
+        int[int] newRegion(Th.nt);
+        for[i, v : privateDmesh#Th#khiDef[1]] newRegion[i] = abs(v - mpirank) < 1.0e-2 ? 1 : 0;
+        Th = change(Th, fregion = newRegion[nuTriangle]);
+    }
     meshN[int] recvTh(rankRecv.n);
     meshN[int] sendTh(rankSend.n);
     real[int][int] exchangeU(rankSend.n + rankRecv.n);
@@ -1232,29 +1239,26 @@ ENDIFMACRO
         else
             Isend(processor(v, rqSendTh[i]), sendTh[i]);
     }
-    for[i, v : rankRecv] {
-        int index = mpiWaitAny(rqRecvTh);
-        if(recvTh[index].nt) {
-            fespace VhRestriction(recvTh[index], Pk);
-            exchangeU[index].resize(VhRestriction.ndof);
-            Irecv(processor(rankRecv[index], rqRecvU[index]), exchangeU[index]);
-        }
-    }
     meshN gluedExchange;
-    searchMethod = 1;
-    for[i, v : rankRecv] {
-        if(recvTh[i].nt) {
-            if(gluedExchange.nt == 0)
-                gluedExchange = recvTh[i];
-            else {
-                fespace PhGluedExchange(recvTh[i], P0);
-                PhGluedExchange khi = chi(gluedExchange);
-                if(khi[].min < 1.0e-2) {
-                    meshN duplicate = trunc(recvTh[i], khi < 1.0e-2);
-                    gluedExchange = gluedExchange + duplicate;
+    {
+        meshN[int] toGlue(rankRecv.n);
+        int j = 0;
+        for[i, v : rankRecv] {
+            int index = mpiWaitAny(rqRecvTh);
+            if(recvTh[index].nt) {
+                fespace VhRestriction(recvTh[index], Pk);
+                exchangeU[index].resize(VhRestriction.ndof);
+                Irecv(processor(rankRecv[index], rqRecvU[index]), exchangeU[index]);
+                fespace PhRestriction(recvTh[index], P0);
+                PhRestriction ind = region;
+                if(abs(ind[].max - 1.0) < 1.0e-2) {
+                    toGlue[j] = trunc(recvTh[index], ind > 1.0e-2);
+                    ++j;
                 }
             }
         }
+        toGlue.resize(j);
+        gluedExchange = gluemesh(toGlue);
     }
     meshN interpolateExchange;
     fespace VhExchange(gluedExchange, Pk);
@@ -1280,6 +1284,7 @@ ENDIFMACRO
     }
     searchMethod = backupSM;
     def(uNew) = def(uExchange);
+    Th = change(Th, fregion = backupRegion[nuTriangle]);
     mpiWaitAll(rqSendTh);
     mpiWaitAll(rqSendU);
 }
