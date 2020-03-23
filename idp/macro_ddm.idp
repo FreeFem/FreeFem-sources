@@ -552,54 +552,61 @@ real[int][int] privateDmesh#ThName#khi(2);
 real[int][int] privateDmesh#ThName#intersection;
 ENDIFMACRO
 {
-    mpiBarrier(mpiCommWorld);
-    real timerReconstruction = mpiWtime();
-    varf vG(u, v) = on(labels(ThName), u = 1.0);
-    fespace VhGamma(ThName, P1);
-    fespace PhGamma(ThName, P0);
-    VhGamma gamma;
-    gamma[] = vG(0, VhGamma, tgv = -1);
-    PhGamma gammaElt = gamma > 0.1;
-    meshN ThLocalInit = trunc(ThName, gammaElt > 0.1, label = -111112);
-    meshN ThLocalInitInterior = trunc(ThName, gammaElt < 0.1, label = -111112);
-    neighborsName.sort;
-    int between = 0;
-    for(int i = 0; i < neighborsName.n; ++i)
-        if(neighborsName[i] > mpirank) {
-            between = i;
-            break;
-        }
-    if(neighborsName.n)
-        if(neighborsName[neighborsName.n - 1] < mpirank)
-            between = neighborsName.n;
-    meshN[int] ThTab(neighborsName.n + 1);
-    ThTab[between] = ThLocalInit;
-    mpiRequest[int] rqRecv(neighborsName.n);
-    mpiRequest[int] rqSend(neighborsName.n);
     real[int] part;
-    for(int i = 0; i < neighborsName.n; ++i)
-        Isend(processor(neighborsName[i], mpiCommWorld, rqSend[i]), ThLocalInit);
-    for(int i = 0; i < between; ++i)
-        Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i]);
-    for(int i = between; i < neighborsName.n; ++i)
-        Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i + 1]);
-    mpiWaitAll(rqRecv);
-    meshN ThLocalNew = gluemesh(ThTab);
-    int m = 0;
-    for(int i = 0; i < between; ++i)
-        m += ThTab[i].nt;
-    ThTab[between] = trunc(ThLocalNew, nuTriangle >= m && nuTriangle < m + ThTab[between].nt, label = -111111);
-    mpiWaitAll(rqSend);
-    for(int i = 0; i < neighborsName.n; ++i)
-        Isend(processor(neighborsName[i], mpiCommWorld, rqSend[i]), ThTab[between]);
-    for(int i = 0; i < between; ++i)
-        Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i]);
-    for(int i = between; i < neighborsName.n; ++i)
-        Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i + 1]);
-    mpiWaitAll(rqRecv);
-    ThLocalNew = gluemesh(ThTab);
     {
-        ThName = ThLocalNew + ThLocalInitInterior;
+        mpiBarrier(mpiCommWorld);
+        real timerReconstruction = mpiWtime();
+        varf vG(u, v) = on(labels(ThName), u = 1.0);
+        fespace VhGamma(ThName, P1);
+        fespace PhGamma(ThName, P0);
+        VhGamma gamma;
+        gamma[] = vG(0, VhGamma, tgv = -1);
+        PhGamma gammaElt = gamma > 0.1;
+        meshN ThLocalInit = trunc(ThName, gammaElt > 0.1, label = -111112);
+        meshN ThLocalInitInterior = trunc(ThName, gammaElt < 0.1, label = -111112);
+        neighborsName.sort;
+        int between = 0;
+        for(int i = 0; i < neighborsName.n; ++i)
+            if(neighborsName[i] > mpirank) {
+                between = i;
+                break;
+            }
+        if(neighborsName.n)
+            if(neighborsName[neighborsName.n - 1] < mpirank)
+                between = neighborsName.n;
+        meshN[int] ThTab(neighborsName.n + 1);
+        ThTab[between] = ThLocalInit;
+        mpiRequest[int] rqRecv(neighborsName.n);
+        mpiRequest[int] rqSend(neighborsName.n);
+        for(int i = 0; i < neighborsName.n; ++i)
+            Isend(processor(neighborsName[i], mpiCommWorld, rqSend[i]), ThLocalInit);
+        for(int i = 0; i < between; ++i)
+            Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i]);
+        for(int i = between; i < neighborsName.n; ++i)
+            Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i + 1]);
+        mpiWaitAll(rqRecv);
+        meshN ThLocalNew = gluemesh(ThTab);
+        int m = 0;
+        for(int i = 0; i < between; ++i)
+            m += ThTab[i].nt;
+        ThTab[between] = trunc(ThLocalNew, nuTriangle >= m && nuTriangle < m + ThTab[between].nt, label = -111111);
+        mpiWaitAll(rqSend);
+        for(int i = 0; i < neighborsName.n; ++i)
+            Isend(processor(neighborsName[i], mpiCommWorld, rqSend[i]), ThTab[between]);
+        for(int i = 0; i < between; ++i)
+            Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i]);
+        for(int i = between; i < neighborsName.n; ++i)
+            Irecv(processor(neighborsName[i], mpiCommWorld, rqRecv[i]), ThTab[i + 1]);
+        mpiWaitAll(rqRecv);
+        ThTab.resize(neighborsName.n + 2);
+        ThTab[neighborsName.n + 1] = ThLocalInitInterior;
+        ThName = gluemesh(ThTab);
+IFMACRO(dimension, 3)
+        ThName = change(ThName, rmlfaces = -111112);
+ENDIFMACRO
+IFMACRO(dimension, 2)
+        ThName = change(ThName, rmledges = -111112);
+ENDIFMACRO
         part.resize(ThName.nt);
         m = 0;
         for(int i = 0; i < between; ++i) {
@@ -613,10 +620,10 @@ ENDIFMACRO
             m += ThTab[i + 1].nt;
         }
         part(part.n - ThLocalInitInterior.nt:ThName.nt - 1) = mpirank;
+        mpiWaitAll(rqSend);
+        mpiBarrier(mpiCommWorld);
+        if(verbosity > 0 && mpirank == 0) cout.scientific << " --- distributed mesh reconstructed (in " << mpiWtime() - timerReconstruction << ")" << endl;
     }
-    mpiWaitAll(rqSend);
-    mpiBarrier(mpiCommWorld);
-    if(verbosity > 0 && mpirank == 0) cout.scientific << " --- distributed mesh reconstructed (in " << mpiWtime() - timerReconstruction << ")" << endl;
     NewMacro privateBuildDmesh()1 EndMacro
     NewMacro privateReconstructDmesh()1 EndMacro
     int[int][int] intersection;
