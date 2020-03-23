@@ -14,10 +14,10 @@ test -f "$change_compiler" && source "$change_compiler"
 
 if [ "$(uname)" == "Darwin" ]; then
   # in case where the OS type is Darwin
-  PETSC_INSTALLDIR='/Users/Shared/mpich/ff-petsc'
+  PETSC_INSTALLDIR='/Users/Shared/mpich'
 elif [ "$(uname)" == "Linux" ]; then
   # in case where the OS type is Linux
-PETSC_INSTALLDIR='/builds/Shared/mpich/ff-petsc'
+PETSC_INSTALLDIR='/builds/Shared/mpich'
 fi
 
 # configuration & build

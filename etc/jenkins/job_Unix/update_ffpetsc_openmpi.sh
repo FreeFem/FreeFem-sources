@@ -14,10 +14,10 @@ test -f "$change_compiler" && source "$change_compiler"
 
 if [ "$(uname)" == "Darwin" ]; then
   # in case where the OS type is Darwin
-  PETSC_INSTALLDIR='/Users/Shared/openmpi/ff-petsc'
+  PETSC_INSTALLDIR='/Users/Shared/openmpi'
 elif [ "$(uname)" == "Linux" ]; then
   # in case where the OS type is Linux
-PETSC_INSTALLDIR='/builds/Shared/openmpi/ff-petsc'
+PETSC_INSTALLDIR='/builds/Shared/openmpi/'
 fi
 
 # configuration & build
