@@ -715,7 +715,7 @@ AnyType mshmet2d_Op::operator( )(Stack stack) const {
   defaultintopt(1) = 1;
   defaultintopt(2) = 0;
   defaultintopt(3) = 1;
-  defaultintopt(4) = 10;
+  defaultintopt(4) = verbosity;
   defaultintopt(5) = 0;
   defaultintopt(6) = 0;
 

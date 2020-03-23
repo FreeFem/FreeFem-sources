@@ -224,9 +224,11 @@ void MSHMET_setfunc(pMesh mesh) {
 
 int MSHMET_mshmet(int intopt[7], double fopt[4], pMesh mesh, pSol sol){
   Info *info;
-  fprintf(stdout,"  -- MSHMET, Release %s (%s) \n",MS_VER,MS_REL);
-  fprintf(stdout,"     %s\n",MS_CPY);
-  fprintf(stdout,"    %s\n",COMPIL);
+  if ( intopt[4] ) {
+    fprintf(stdout,"  -- MSHMET, Release %s (%s) \n",MS_VER,MS_REL);
+    fprintf(stdout,"     %s\n",MS_CPY);
+    fprintf(stdout,"    %s\n",COMPIL);
+  }
 
   /* trap exceptions */
   signal(SIGABRT,mshmet_excfun);
@@ -260,11 +262,13 @@ int MSHMET_mshmet(int intopt[7], double fopt[4], pMesh mesh, pSol sol){
  
   MSHMET_setfunc(mesh);
   chrono(OFF,&mshmet_ctim[1]);
-  if ( mesh->info.imprim )  mshmet_stats(mesh,sol);
-  fprintf(stdout,"  -- DATA READING COMPLETED.     %.2f sec.\n",gttime(mshmet_ctim[1]));
+  if ( mesh->info.imprim ) {
+    mshmet_stats(mesh,sol);
+    fprintf(stdout,"  -- DATA READING COMPLETED.     %.2f sec.\n",gttime(mshmet_ctim[1]));
 
-  fprintf(stdout,"\n  %s\n   MODULE MSHMET-LJLL : %s (%s)\n  %s\n",
-          MS_STR,MS_VER,MS_REL,MS_STR);
+    fprintf(stdout,"\n  %s\n   MODULE MSHMET-LJLL : %s (%s)\n  %s\n",
+            MS_STR,MS_VER,MS_REL,MS_STR);
+  }
 
   /* analysis */
   chrono(ON,&mshmet_ctim[2]);
@@ -288,15 +292,17 @@ int MSHMET_mshmet(int intopt[7], double fopt[4], pMesh mesh, pSol sol){
   if ( mesh->info.imprim )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %.2f sec.\n",gttime(mshmet_ctim[3]));
   
-  fprintf(stdout,"\n  %s\n   END OF MODULE MSHMET \n  %s\n",MS_STR,MS_STR);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"\n  %s\n   END OF MODULE MSHMET \n  %s\n",MS_STR,MS_STR);
   /*
   sol->outn="zzzz";
   if ( !saveMet(sol,&mesh->info,sol->outn) )  exit(1);
   */
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim ) {
     mshmet_endcod();
 
-  fprintf(stdout,"\n  %s\n   END OF MODULE MSHMET \n  %s\n",MS_STR,MS_STR);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MSHMET \n  %s\n",MS_STR,MS_STR);
+  }
   if ( mesh->info.imprim < -4 || mesh->info.ddebug )  M_memDump();
 
   return(0);

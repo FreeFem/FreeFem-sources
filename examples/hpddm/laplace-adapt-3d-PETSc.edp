@@ -1,3 +1,6 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
 load "msh3"
 load "mshmet"
 load "mmg"
@@ -23,7 +26,7 @@ buildDmesh(Th3);
 createMat(Th3, A, P1);
 fespace Vh(Th3, P1);
 Vh u;
-real err = 1e-2;
+real err = 1.0e-2;
 
 int iMax = 5;
 int[int] rt(1);
@@ -43,7 +46,7 @@ for(int i = 0; i < iMax; ++i) {
         for[i, v : rest] h[][v] = u[][i];
         mpiAllReduce(h[], hReduced[], mpiCommWorld, mpiSUM);
         if(mpirank == 0) {
-            real[int] met = mshmet(ThBackup, hReduced, aniso=1, hmin=1e-3, hmax=0.2, err=err);
+            real[int] met = mshmet(ThBackup, hReduced, aniso = 1, hmin = 1.0e-3, hmax = 2.0e-1, err = err);
             plot(hReduced);
             Th3 = mmg3d(ThBackup, metric = met, hgrad = 3.0, requiredTriangle = rt);
             medit("U-adapt-iso-" + i, Th3, hReduced);
@@ -53,7 +56,7 @@ for(int i = 0; i < iMax; ++i) {
         Mat Adapt;
         createMat(Th3, Adapt, P1);
         A = Adapt;
-        u = hReduced;
+        u = 0.0;
         err *= 0.5;
     }
 }
