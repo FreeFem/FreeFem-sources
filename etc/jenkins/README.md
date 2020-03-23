@@ -152,11 +152,10 @@ cd openmpi-4.0.1/
 make -j4 all
 make check
 sudo make install
-#Ubuntu 16.04 - Ubuntu 18.04
+#Ubuntu 16.04 - Ubuntu 18.04 
 openmpi 4.0.2 installed
-
---disable-mpi-threads
---disable-progress-threads
+# Ubuntu 19.10
+openmpi 4.0.3 installed
 
 ```
 # MPICH
@@ -175,7 +174,7 @@ make -j4 all
 make check
 sudo make install
 
-#Ubuntu 16.04 - Ubuntu 18.04
+#Ubuntu 16.04 - Ubuntu 18.04 - Ubuntu 19.10
 wget http://www.mpich.org/static/downloads/3.3.1/mpich-3.3.1.tar.gz
 tar xf mpich-3.3.1.tar.gz
 cd mpich-3.3.1/
