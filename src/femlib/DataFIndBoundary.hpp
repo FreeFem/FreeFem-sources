@@ -3,12 +3,6 @@
 
 #include <RNM.hpp>
 #include <fstream>
-// for M_PI 
-#ifdef __STRICT_ANSI__
-#undef __STRICT_ANSI__
-#endif
-
-#include <cmath>
 
 template<typename Mesh>
 struct GenericDataFindBoundary
@@ -69,7 +63,8 @@ void GenericDataFindBoundary<Mesh>::gnuplot(const string & fn)
     for(int i=0; i<P.N(); ++i)
     {
         int N=100;
-        double dt = M_PI*2./N, r = delta[i];
+        const double pi=3.14159265358979323846264338327950288 ;
+        double dt = pi*2./N, r = delta[i];
         for(int j=0;j<=N; ++j)
         {
             double x = P[i].x+r*cos(dt*j);
@@ -227,7 +222,7 @@ GenericDataFindBoundary<Mesh>::GenericDataFindBoundary(Mesh const * _pTh,int dde
     int nv =0;
     //  warning in case of meshL ,  bord is points  => code bborder stupide..
     if(bborder)
-       nv =  TrueBorder(Th,P,delta);
+       nv =  TrueBorder(Th,(Vertex *)P,delta);
     else
     { //
         for(int k=0; k<Th.nt; ++k)
