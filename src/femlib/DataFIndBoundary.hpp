@@ -3,7 +3,7 @@
 
 #include <RNM.hpp>
 #include <fstream>
-# for M_PI 
+// for M_PI 
 #ifdef __STRICT_ANSI__
 #undef __STRICT_ANSI__
 #endif
