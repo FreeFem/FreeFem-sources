@@ -22,14 +22,14 @@ fi
 
 # configuration & build
 autoreconf -i \
-  && ./configure --enable-download --prefix=$PETSC_INSTALLDIR --enable-bemtool=no \
+  && ./configure --enable-download --prefix=$PETSC_INSTALLDIR \
   && ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,ARPACK,Gmm++,MMG3D,mshmet,MUMPS,htool \
-  && ./etc/jenkins/blob/build_PETSc.sh \
+  && ./etc/jenkins/blob/build_PETSc.sh
   
 if [ $? -eq 0 ]
 then
   echo "ffpetsc update complete"
 else
-  echo "ffpetsc update complete"
+  echo "ffpetsc update fail"
   exit 1
 fi

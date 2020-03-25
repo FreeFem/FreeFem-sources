@@ -7,7 +7,7 @@ echo "update ffPETSc(openmpi)"
 set -e
 
 # change default  compiler
-change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-4_openmi.sh
+change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-4_openmpi.sh
 test -f "$change_compiler" && echo  source file "$change_compiler"
 test -f "$change_compiler" && cat  "$change_compiler"
 test -f "$change_compiler" && source "$change_compiler"
@@ -17,20 +17,20 @@ if [ "$(uname)" == "Darwin" ]; then
   PETSC_INSTALLDIR='/Users/Shared/openmpi'
 elif [ "$(uname)" == "Linux" ]; then
   # in case where the OS type is Linux
-PETSC_INSTALLDIR='/builds/Shared/openmpi/'
+PETSC_INSTALLDIR='/builds/Shared/openmpi'
 fi
 
 # configuration & build
 autoreconf -i \
-  && ./configure --enable-download --prefix=$PETSC_INSTALLDIR --enable-bemtool=no \
+  && ./configure --enable-download --prefix=$PETSC_INSTALLDIR \
   && ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,ARPACK,Gmm++,MMG3D,mshmet,MUMPS,htool \
-  && ./etc/jenkins/blob/build_PETSc.sh \
+  && ./etc/jenkins/blob/build_PETSc.sh
   
 if [ $? -eq 0 ]
 then
   echo "ffpetsc update complete"
 else
-  echo "ffpetsc update complete"
+  echo "ffpetsc update fail"
   exit 1
 fi
 
