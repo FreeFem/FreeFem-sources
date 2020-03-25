@@ -1270,6 +1270,7 @@ ENDIFMACRO
     meshN interpolateExchange;
     fespace VhExchange(gluedExchange, Pk);
     VhExchange def(uExchange);
+    searchMethod = 1;
     for[i, v : rankRecv] {
         int index = mpiWaitAny(rqRecvU);
         if(index != mpiUndefined) {
