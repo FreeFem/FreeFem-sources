@@ -5,6 +5,7 @@ load "PETSc"
 load "mmg"
 load "Element_P4"
 load "Element_P3"
+macro def1(u)u//
 
 {
     func Pk = P4;                       // finite element space
@@ -22,36 +23,21 @@ load "Element_P3"
         border dd(t=0,1) { x=0;   y=1-t; };
         ThNew = buildmesh(aa(N)+bb(N)+cc(N)+dd(N));
     }
-    meshN ThGlobalNew = ThNew;
-    meshN ThGlobal = Th;
     buildDmesh(Th)
     buildDmesh(ThNew)
     fespace Vh(Th, Pk);
     fespace VhNew(ThNew, PkNew);
     Vh u = cos(8*pi*x) * sin(8*pi*y);
-    fespace VhGlobalNew(ThGlobalNew, PkNew);
-    VhGlobalNew uGlobalNew;
-    {
-        fespace VhGlobal(ThGlobal, Pk);
-        VhGlobal uGlobal = cos(8*pi*x) * sin(8*pi*y);
-        uGlobalNew = uGlobal;
-    }
     VhNew uNew;
     transfer(Th, Pk, u, ThNew, PkNew, uNew)
-    plotD(Th, u, cmm = "Old FE function")
-    plotD(ThNew, uNew, cmm = "New FE function")
-    uNew = uNew - uGlobalNew;
-    real tmp = uNew[].linfty;
-    real err;
-    mpiAllReduce(tmp, err, mpiCommWorld, mpiMAX);
-    if(mpirank == 0)
-        cout << "L_\\infty interpolation error = " << err << endl;
-    plotD(ThNew, uNew, cmm = "L_\\infty interpolation error = " + err)
+    plotMPI(Th, u, Pk, def1, real, cmm = "Old FE function")
+    plotMPI(ThNew, uNew, PkNew, def1, real, cmm = "New FE function")
 }
 {
-    func Pk = [P2, P2];                       // finite element space
-    func PkNewSingle = P1;
-    func PkNew = [PkNewSingle, PkNewSingle];  // finite element space
+    func PkSingle = P3;
+    func Pk = [PkSingle, PkSingle];          // finite element space
+    func PkNewSingle = P2;
+    func PkNew = [PkNewSingle, PkNewSingle]; // finite element space
 
     macro dimension()3// EOM            // 2D or 3D
     macro def(u)[u, u#B]//
@@ -61,34 +47,13 @@ load "Element_P3"
     if(mpirank == 0)
         ThNew = mmg3d(Th, hmax = 8.0e-2);
     broadcast(processor(0), ThNew);
-    meshN ThGlobalNew = ThNew;
-    meshN ThGlobal = Th;
     buildDmesh(Th)
     buildDmesh(ThNew)
     fespace Vh(Th, Pk);
     fespace VhNew(ThNew, PkNew);
-    Vh def(u);
-    [u, uB] = [cos(2*pi*x) * sin(2*pi*y) * cos(2*pi*z), cos(2*pi*z)];
-    fespace VhGlobalNew(ThGlobalNew, PkNew);
-    VhGlobalNew def(uGlobalNew);
-    {
-        fespace VhGlobal(ThGlobal, Pk);
-        VhGlobal def(uGlobal);
-        def(uGlobal) = [cos(2*pi*x) * sin(2*pi*y) * cos(2*pi*z), cos(2*pi*z)];
-        def(uGlobalNew) = def(uGlobal);
-    }
+    Vh def(u) = [cos(2*pi*x) * sin(2*pi*y) * cos(2*pi*z), cos(2*pi*z)];
     VhNew def(uNew);
     transfer(Th, Pk, u, ThNew, PkNew, uNew)
-    plotD(Th, u, cmm = "Old FE function")
-    plotD(ThNew, uNew, cmm = "New FE function")
-    VhNew def(uGlobalNewInterpolated);
-    def(uGlobalNewInterpolated) = def(uGlobalNew);
-    uNew[] -= uGlobalNewInterpolated[];
-    real tmp = uNew[].linfty;
-    real err;
-    mpiAllReduce(tmp, err, mpiCommWorld, mpiMAX);
-    if(mpirank == 0)
-        cout << "L_\\infty interpolation error = " << err << endl;
-    macro def1(u)u//
-    plotMPI(ThNew, def1(uNew), PkNewSingle, def1, real, cmm = "L_\\infty interpolation error = " + err)
+    plotMPI(Th, def1(u), PkSingle, def1, real, cmm = "Old FE function")
+    plotMPI(ThNew, def1(uNew), PkNewSingle, def1, real, cmm = "New FE function")
 }
