@@ -7,18 +7,20 @@ echo "update ffPETSc(openmpi)"
 set -e
 
 # change default  compiler
-change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-4_openmpi.sh
+if [ "$(uname)" == "Darwin" ]; then
+  # in case where the OS type is Darwin
+  PETSC_INSTALLDIR='/Users/Shared/mpich'
+  change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-$casejob.sh
+elif [ "$(uname)" == "Linux" ]; then
+  # in case where the OS type is Linux
+  PETSC_INSTALLDIR='/builds/Shared/mpich'
+  change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-$casejob.sh
+fi
+
 test -f "$change_compiler" && echo  source file "$change_compiler"
 test -f "$change_compiler" && cat  "$change_compiler"
 test -f "$change_compiler" && source "$change_compiler"
 
-if [ "$(uname)" == "Darwin" ]; then
-  # in case where the OS type is Darwin
-  PETSC_INSTALLDIR='/Users/Shared/openmpi'
-elif [ "$(uname)" == "Linux" ]; then
-  # in case where the OS type is Linux
-PETSC_INSTALLDIR='/builds/Shared/openmpi'
-fi
 
 # configuration & build
 autoreconf -i \

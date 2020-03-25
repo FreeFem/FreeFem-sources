@@ -9,7 +9,6 @@ set -e
 casejob=4_openmpi
 
 # change default  compiler
-# change default  compiler
 if [ "$(uname)" == "Darwin" ]; then
   # in case where the OS type is Darwin
   PETSC_DIR='/Users/Shared/mpich/ff-petsc'
