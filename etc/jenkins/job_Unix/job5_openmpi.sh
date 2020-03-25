@@ -11,7 +11,14 @@ set -e
 casejob=5_openmpi
 
 # change default  compiler
-change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-$casejob.sh
+if [ "$(uname)" == "Darwin" ]; then
+  # in case where the OS type is Darwin
+  change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-$casejob.sh
+elif [ "$(uname)" == "Linux" ]; then
+  # in case where the OS type is Linux
+  change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-$casejob.sh
+fi
+
 echo try to source file  "$change_compiler"
 test -f "$change_compiler" && echo  source file "$change_compiler"
 test -f "$change_compiler" && cat  "$change_compiler"
