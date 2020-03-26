@@ -795,7 +795,7 @@ AnyType ListOfInst::operator()(Stack s) const {
 	    sptr->clean(); // modif FH mars 2006  clean Ptr
 	    s1=CPUtime();
 	    if (showCPU)
-             cout << " CPU: "<< i <<" " << linenumber[i] <<  ": " << s1-s0 << "s" << " " << s1-ss0 << "s" << " / " << " " <<lsldel[i] <<endl;
+             cout << " CPU: "<< i <<" " << linenumber[i] <<  ": " << s1-s0 << "s" << " " << s1-ss0 << "s" << " / " << " " <<lsldel[i] << " " << mpirank << endl;
 	    s0=CPUtime();
 	}
         if(atclose && atclose->n) {

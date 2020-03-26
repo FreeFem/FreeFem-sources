@@ -1306,6 +1306,7 @@ MatriceMorse<R> *  buildInterpolationMatrixT1(const FESpaceT & Uh,const KN_<doub
   bool outside;
 
   for(int ii=0;ii<nbxx;ii++){
+      if(verbosity>9) cout << " Find ThU " <<ii << ":" <<  RdT(xx[ii],yy[ii],zz[ii]) << endl;
     const ElementT *ts=ThU.Find(RdT(xx[ii],yy[ii],zz[ii]),Phat,outside);
     if(outside && !inside) continue;
     int it = ThU(ts);
@@ -2769,7 +2770,7 @@ class E_ForAllLoopMatrix
         ffassert(i && v);
         MatriceCreuse<R> *m=t->A;
         MatriceMorse<R> *mm = dynamic_cast<MatriceMorse<R>*>(m);
-        if(!mm) ExecError(" Matrix sparce of bad type ( not HMatrix ) , sorry.. ");
+        if(!mm) ExecError(" Matrix sparse of bad type ( not HMatrix ) , sorry.. ");
         if(mm)
         for (long  kk=0;kk< mm->nnz; ++kk)
             {

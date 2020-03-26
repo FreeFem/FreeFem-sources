@@ -730,6 +730,7 @@ public:
     delete [] vertices;
     delete [] bnormalv;
     if(gtree) delete gtree;
+    if(gdfb) delete gdfb;
       ElementConteningVertex=0;
       TheAdjacencesLink=0;
       BoundaryElementHeadLink=0;
@@ -738,6 +739,7 @@ public:
       vertices=0;
       bnormalv=0;
       gtree=0;
+      gdfb=0; 
       nt=(0);
       nv=(0);
       nbe=(0);

@@ -8637,8 +8637,11 @@ bool isVF(const list<C_F0> & largs)  // true => VF type of Matrix
     ie=largs.end();
 
     bool VVF =false;
+    int kk=0,err=0;
+    
     for (ii=ib;ii != ie;ii++)
     {
+        kk++;
         Expression e=ii->LeftValue();
         aType r = ii->left();
         if (r==atype<const  FormBilinear *>())
@@ -8647,9 +8650,18 @@ bool isVF(const list<C_F0> & largs)  // true => VF type of Matrix
             bool vvf  = bb->VF();
             if( vvf &&  (bb->di->kind != CDomainOfIntegration::intalledges && bb->di->kind != CDomainOfIntegration::intallVFedges  )
                &&  (bb->di->kind != CDomainOfIntegration::intallfaces ))
-            CompileError("Sorry, no  jump or moy in bilinear form no of type intalledges or intallVFedges ");
+            {
+                if(err==0) cerr << "\n\n"; 
+                cerr << " ** Fatal error in term "<< kk << " of the varf form (integral, on , ... ) " << endl;
+                err++;
+            }
             VVF = vvf || VVF;
         }
+    }
+    if(err)
+    {
+        cerr << " ** number  " << err << " of  error the varf form, with " << kk << " terms "<< endl;
+        CompileError("Sorry, no  jump, mean, otherside in bilinear term must be in integral of type  intalledges,  intallVFedges or intallfaces");
     }
     return VVF;
 }

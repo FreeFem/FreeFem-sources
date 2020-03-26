@@ -582,7 +582,24 @@ namespace Fem2D
   const MeshL::Element * MeshL::Find( Rd P, R1 & Phat,bool & outside,const Element * tstart) const
     
   {
-      this->Buildgdfb(); 
+      if(searchMethod != 2)
+      {
+          GenericDataFindBoundary<GMesh> * gdfb=Buildgdfb();
+          if(gdfb )
+          {
+              double l[2];
+              int loutside;// 0 inside, 1 out close, 2, out fare, , -1 inside
+              int itt =gdfb->Find(P,l,loutside);
+              outside=loutside ==0;
+              Phat=R1(l[1]);
+              Element &K=(this->elements)[itt];
+              if( verbosity > 9)
+                  cout << " - Find "<< P << " -> " << K(Phat) << " " << loutside << " k= " << itt
+                  << " dist =" << (P-K(Phat)).norme() << " :: " << Phat << endl;
+              return itt<0 ? 0: this->elements + itt; // outside
+              
+          }
+      }
       // rewritie FH 31 jan 2020 ..
       static int count =0;
       if( verbosity && count++< 5  )
@@ -607,11 +624,11 @@ namespace Fem2D
               dmin2 = d2;
               Phm=Ph;
               nopt =i;
-              out = d2 < lab2*1e-2; // BofBof FH ...
+              out = d2 < lab2*1e-5; // BofBof FH ...
           }
    
       }
-      if( nopt<0) return  0;
+      ffassert( nopt>=0);
       Phat=Phm;
       return this->elements+nopt; // outside
   }

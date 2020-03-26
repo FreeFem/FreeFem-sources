@@ -650,6 +650,24 @@ namespace Fem2D
     const MeshS::Element * MeshS::Find( Rd P, R2 & Phat,bool & outside,const Element * tstart) const //;
     
     {
+        if(searchMethod != 2)
+        {
+        GenericDataFindBoundary<GMesh> * gdfb=Buildgdfb();
+        if(gdfb )
+        {
+            double l[3];
+            int loutside;// 0 inside, 1 out close, 2, out fare, , -1 inside
+            int itt =gdfb->Find(P,l,loutside);
+            outside=loutside ==0;
+            Phat=R2(l+1);
+            Element &K=(this->elements)[itt];
+            if( verbosity > 9)
+                cout << " - Find "<< P << " -> " << K(Phat) << " " << loutside << " k= " << itt
+                << " dist =" << (P-K(Phat)).norme() << " :: " << Phat << endl;
+            return itt<0 ? 0: this->elements + itt; // outside
+            
+        }
+        }
         static int count =0;
         if( verbosity && count++< 5  )
             cerr << " MeshS::Find warning brute force to day " << endl;
@@ -662,44 +680,39 @@ namespace Fem2D
             kthrough++;
             const TriangleS & K(this->elements[i]);
             R3 A(K[0]),B(K[1]),C(K[2]);
-            // the normal n
-            R3 n = (B-A)^(C-A);
+           
+            R3 n = Area3(A,B,C); // the normal n toA,B,C
             // to build the vectorial area
             R a[]={(Area3(P,B,C),n),(Area3(A,P,C),n),(Area3(A,B,P),n)};
             //  PB de projection on
-            R s=a[0]+a[1]+a[2];
-              R eps=s*1e-6;
+            R s=(a[0]+a[1]+a[2]);
+            ffassert( s>0);
+            R eps=(s)*1e-8;
             int na[3],nn=0;
             if( a[0] < -eps) na[nn++]=0;
             if( a[1] < -eps) na[nn++]=1;
             if( a[2] < -eps) na[nn++]=2;
-            double l[3]={0,0,0};
+            double l[3]={a[0]/s,a[1]/s,a[2]/s};
           
             if (nn==0)
             {
                 // ok inside
-                R2 Ph(a[1]/s,a[2]/s);
+                
+                R2 Ph(l+1);
                 R3 Q = K(Ph);
                 double d2 =R3(P,Q).norme2() ;
-                if( d2 < s*1e-2)
-                {  // close
-                    Phat=Ph;
-                    outside=false;
-                   return this->elements + i;
-                }
-                else if( dmin2 > d2)
+                if( dmin2 > d2)
                 {
                     dmin2 = d2;
                     out = d2 < s*1e-2;
                     Pha = Ph;
                     nopt= i;
-                    continue;
                 }
                 
             }
-            else if(nn==1)
+            else // on border of K
             {
-                // distance to edge i=i0,i1
+                // Project on  edge i=i0,i1
                 int i = na[0];
                 int i0=( i+1)%3;
                 int i1=( i+2)%3;
@@ -709,31 +722,32 @@ namespace Fem2D
                 double eps= lab2*1e-6;
                 double le= min(1.,max(0.,(AB,R3(E[0],P))/lab2));
                 l[i]=0;
-                l[i0]=le;
-                l[i1]=1-le;
-                
-            }
-            else
-            {
-                 int i = 3-na[0]-na[1];
-                 l[i]=1;
-            }
-            R2 Ph(l[1],l[2]);
-            R3 Q = K(Ph);
-            double d2 =R3(P,Q).norme2() ;
-            if( dmin2 > d2)
-            {
+                l[i1]=le;
+                l[i0]=1-le;
+                R2 Ph(l+1);
+                R3 Q = K(Ph);
+               double d2 =R3(P,Q).norme2() ;
+               if( dmin2 > d2)
+                {
                 nopt= i;
                 dmin2 = d2;
-                out = d2 < s*1e-2;
+                out = d2 < s*1e-6;
                 Pha = Ph;
-                continue;
+               }
             }
 
         }
         outside=out;
         Phat=Pha;
-        return nopt<0 ? 0: this->elements + nopt; // outside
+        ffassert(nopt>=0);
+        if( verbosity > 9 )
+        {
+             Element &K =(this->elements)[nopt];
+            cout << "  - Find B "<< P << " -> " << K(Phat) << " , " << outside << " k= " << nopt
+            << " dist =" << (P-K(Phat)).norme() << " :: " << Phat << " " << sqrt(dmin2) <<endl;
+        }
+       
+        return this->elements + nopt; // outside
         
     }
     

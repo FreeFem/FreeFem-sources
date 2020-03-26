@@ -124,13 +124,13 @@ template<class Vertex>
         pb[0]= b;
         pi[0]=b->n>0 ?(int)  b->n : N  ;
         pp[0]=p0;
-        h=hb;
+        
         do {
             b= pb[l];
             while (pi[l]--)
             {
                 int k = pi[l];
-                
+               
                 if (b->n>0) // Vertex QuadTreeBox none empty
                 {
                     NbVerticesSearch++;
@@ -145,7 +145,6 @@ template<class Vertex>
                 else // Pointer QuadTreeBox
                 {
                     QuadTreeBox *b0=b;
-                    NbQuadTreeBoxSearch++;
                     if ((b=b->b[k]))
                     {
                         hb >>=1 ; // div by 2
@@ -153,6 +152,7 @@ template<class Vertex>
                         
                         if  ( ppp.interseg(plus,hb,h) )//(INTER_SEG(iii,iii+hb,iplus-h,iplus+h) && INTER_SEG(jjj,jjj+hb,jplus-h,jplus+h))
                         {
+                            NbQuadTreeBoxSearch++;// add box search 
                             pb[++l]=  b;
                             pi[l]= b->n>0 ?(int)  b->n : N  ;
                             pp[l]=ppp;
@@ -187,7 +187,7 @@ template<class Vertex>
     IntQuad h=MaxISize,hb =  MaxISize;
     Zd   p0(0,0,0);
     Zd  plus(xyi) ; plus.Bound();
-    
+      int c2infty = 1+trueNearest;// 2 if trueNearest
     // xi<MaxISize?(xi<0?0:xi):MaxISize-1,yj<MaxISize?(yj<0?0:yj):MaxISize-1);
     
     Vertex *vn=0;
@@ -256,11 +256,11 @@ if(verbosity>2000)
 	  { 
 	    NbVerticesSearch++;
 	    Zd i2 =  VtoZd(b->v[k]);
-	    h0 = Zd(i2,plus).norm2();//  NORM(iplus,i2.x,jplus,i2.y);
+	    h0 = Zd(i2,plus).norm2();// norme 2 ^2
 	    if (h0 <h2)
 	      {
 		h2 = h0;
-                h =Zd(i2,plus).norm();
+                h =Zd(i2,plus).norm()*c2infty;// norm infty -> norm 2 big enought
 		vn = b->v[k];
                   if(verbosity>2000)
                       cout << "        find   " << vn << " " << h0 << " " << h2 << " " << h << endl;
@@ -1027,3 +1027,406 @@ const   GMesh2::Element * Find<GMesh2>(const GMesh2 & Th,
 				       const   GMesh1::Element * tstart);
 */
 }
+
+template<typename Mesh>
+GenericDataFindBoundary<Mesh>::~GenericDataFindBoundary()
+{
+    if(verbosity>1) cout << "\n -- ~GenericDataFindBoundary: Nb find " << nbfind << " nb element  "
+    << nbelement << " ratio " << (double) nbelement/std::max(nbfind,1L)
+    << " mpirank " << mpirank << endl;
+    delete tree;
+}
+template<typename Mesh>
+void GenericDataFindBoundary<Mesh>::gnuplot(const string & fn)
+{ // for debugging ..
+    if(dHat < 3)
+    {
+        ofstream gp(fn.c_str());
+        ffassert(gp);
+        
+        const Mesh &Th = *pTh;
+        if( bborder )
+            for(int be=0; be<Th.nbe; ++be)
+            {
+                const BorderElement &B=Th.be(be);
+                int e,k = Th.BoundaryElement(be,e);
+                {
+                    int ee=e, kk=  Th.ElementAdj(k,ee);
+                    if ( kk >=0 || k != kk)
+                    {
+                        for(int j=0; j< BorderElement::nv;++j)
+                            gp  << (Rd) B[j] << endl;
+                        gp  << "\n\n";
+                    }
+                }
+            }
+        else
+            for(int k=0; k<Th.nt; ++k)
+            {
+                const Element &K=Th[k];
+                for(int j=0; j<= Element::nv;++j)
+                    gp  << (Rd) K[j%Element::nv] << endl;
+                gp  << "\n\n";
+            }
+        if( dHat==2)
+        {
+            ofstream gp((fn+"c").c_str());
+            for(int i=0; i<P.N(); ++i)
+            {
+                int N=100;
+                const double pi=3.14159265358979323846264338327950288 ;
+                double dt = pi*2./N, r = delta[i];
+                for(int j=0;j<=N; ++j)
+                {
+                    Fem2D::R3 Q=P[i];
+                    double x = Q.x+r*cos(dt*j);
+                    double y=  Q.y+r*sin(dt*j);
+                    double z=  Q.z;
+                    gp << x << " " << y << " " << z << endl;
+                }
+                gp << "\n\n";
+            }}
+    }
+}
+inline void Plambla(int dhat,const Fem2D::R2 *Q,Fem2D::R2 &P,double *l)
+{
+    ffassert(0); //  to do
+}
+inline void Plambla(int dhat,const Fem2D::R1 *Q,Fem2D::R1 &P,double *l)
+{
+    ffassert(0); //  to do
+}
+
+inline void Plambla(int dhat,const Fem2D::R3 *Q,Fem2D::R3 &P,double *l)
+{
+    using Fem2D::R3 ;
+    if(dhat==1)
+    {
+        R3 AB(Q[0],Q[1]), AP(Q[0],P);
+        l[1] = (AP,AB)/(AB,AB);
+        l[0] = 1- l[1];
+    }
+    else if(dhat==2)
+    {
+        R3 AB(Q[0],Q[1]), AC(Q[0],Q[2]);
+        R3 N = AB^AC ;
+        double N2 = (N,N);
+        l[0] = det(Q[1]-P   ,Q[2]-P   ,N)/N2;
+        l[1] = det(P   -Q[0],Q[2]-Q[0],N)/N2;
+        l[2] = 1-l[0]-l[1];
+    }
+    else if( dhat==3)
+    {
+        double d=det(Q[0],Q[1],Q[2],Q[3]);
+        l[0]=det(P,Q[1],Q[2],Q[3])/d;
+        l[1]=det(Q[0],P,Q[2],Q[3])/d;
+        l[2]=det(Q[0],Q[1],P,Q[3])/d;
+        l[3]= 1- l[0]-l[1]-l[2];
+    }
+    else assert(0);
+}
+inline double dist2(int dhat,const Fem2D::R2 *Q,Fem2D::R2 &P,double *l,double *dl)
+{
+    ffassert(0);
+    return  0;
+}
+inline double dist2(int dhat,const Fem2D::R1 *Q,Fem2D::R1 &P,double *l,double *dl)
+{
+    ffassert(0);
+    return  0;
+
+}
+inline double dist2(int dhat,const Fem2D::R3 *Q,Fem2D::R3 &P,double *l,double *dl)
+{
+    using Fem2D::R3 ;
+    double d2=0;
+    if(dhat==1)
+    {
+        dl[0]=min(1.,max(l[0],0.));
+        dl[1]=1.-dl[0];
+        R3 Pj = dl[0]*Q[0]+dl[1]*Q[1];
+        d2 = R3(Pj,P).norme2();
+        
+    }
+    else if(dhat==2)
+    {
+        int i=-1;
+        if(l[0]<0) i=0;
+        else if(l[1]<0) i=1;
+        else if(l[2]<0) i=2;
+        
+        if( i>=0)
+        {
+            // project on edge i
+            int i1= (i+1)%3,i2=(i+2)%3;
+            R3 AB(Q[i1],Q[i2]), AP(Q[i1],P);
+            dl[i2] = (AP,AB)/(AB,AB);
+            dl[i2]=min(1.,max(dl[i2],0.));// proj on AB ..
+            dl[i1] = 1- dl[i2];
+            dl[i]=0;
+        }
+        else
+        {
+            dl[0]=l[0];
+            dl[1]=l[1];
+            dl[2]=l[2];
+        }
+        R3 Pj = dl[0]*Q[0]+dl[1]*Q[1]+dl[2]*Q[2];
+        d2 = R3(Pj,P).norme2();
+        
+    }
+    else if( dhat==3)
+    {
+        ffassert(0); // to do FH... non ...
+    }
+    else assert(0);
+    return d2;
+}
+template<typename Mesh>
+int GenericDataFindBoundary<Mesh>::Find(typename Mesh::Rd PP,double *l,int & outside) const
+{  // FH: outside : 0 inside, 1 out close, 2, out fare, , -1 inside
+    nbfind++;
+    typedef double R;
+    int nu=-1,ne=-1;
+    R dnu= 1e200,deps=0;
+    R dl[dHat+1];
+    outside = 0;
+    Vertex *p0= &P[0];
+    Vertex *p =tree->TrueNearestVertex(PP);
+    int ip = p-P;
+    Rd Q[dHat+1];
+    R ll[dHat+1],lpj[dHat+1];
+//#define DEBUGGING
+#ifdef DEBUGGING
+    int err=0;
+    double dispp=Rd(PP,*p).norme();
+    for(int i=0; i<P.N(); ++i)
+    {
+        double l=Rd(PP,P[i]).norme();
+        if( l < dispp*(1-1e-14) ) err++,cout << " bug "<< l << " " << dispp << " i "<< i << " ip" << ip << " " <<dispp-l << endl;
+    }
+    if(err)
+    {// relay for debug
+        p =tree->TrueNearestVertex(PP);
+       ffassert(err==0);
+    }
+#endif
+    Vertex  **plp = &lp[0];
+    long lvp=tree->ListNearestVertex(plp,lp.N(), delta[ip],P[ip]);
+    std::sort( plp,plp+lvp );
+//  verif ListNearestVertex
+    
+#ifdef DEBUGGING
+    {
+        int err=0;
+        set<int> lst;
+        int nnnm=0,nnnp=0;
+        double unp =(1+1e-14),unm=(1-1e-14);
+        for(int j=0; j<lvp; ++j)
+            lst.insert(lp[j]-p0);
+        for(int i=0; i<P.N(); ++i)
+        {
+            double l=Rd(P[ip],P[i]).norme();
+            if (l < delta[ip]*unp) nnnp++;
+            if (l < delta[ip]*unm) nnnm++;
+               
+            if ( (l < delta[ip]*unp)   && (lst.find(i) == lst.end() ))
+                {
+                    err++;
+                    cout << " bug "<< i << " not in set " << endl;
+                }
+        }
+        ffassert(lvp<=nnnp && lvp >= nnnm);
+        ffassert(err==0);
+    }
+#endif
+    if( verbosity>19)
+    {
+        cout << ip << " , " << delta[ip] << " | " << lvp << " : ";
+        for(int j=0; j<lvp; ++j)
+        {
+            int i = lp[j]-p0;
+            int k = lp[j]->lab/Element::ne;
+            int e = lp[j]->lab%Element::ne;
+            cout << " "<< k << " ";
+           // ffassert(i == k || );
+        }
+        cout << endl;
+    }
+    for(int j=0; j<lvp; ++j)
+    {
+        nbelement++;
+        int k = lp[j]->lab/Element::ne;
+        int e = lp[j]->lab%Element::ne;
+        if(debug) cout << "    -- k = "<< k << " " << e << " " << j << endl;
+        
+        const Element & K=(*pTh)[k];
+        
+        for(int i=0; i<= dHat;++i)
+            Q[i]=K[i];
+        Plambla(dHat,Q,PP,ll);
+        R d2 = dist2(dHat,Q,PP,ll,lpj);
+        if( dnu > d2)
+        {
+            deps = K.mesure()/100.;
+            nu = k;
+            ne= e;
+            dnu=d2;
+            for(int i=0;i<=dHat;++i)
+                dl[i]=lpj[i];
+        }
+        if(verbosity>99) cout << "    Find " << k << " " << e << " / " << dnu  << endl;
+    }
+    ffassert(nu>=0);
+    outside = dnu < deps ? 0
+    : ((dnu< delta[ip]*delta[ip])? 1: 2) ;// 0 in, 1 near, 2 fare ..BofBof ..
+    for(int i=0; i<= dHat;++i)
+      l[i]=dl[i];
+
+    if(debug)   cout << "  -- out nu "<< nu << " "<< ne << " , " << dnu <<" d_i " << delta[ip] << " :  "
+        << l[1] << " " << l[2] << " "<< outside<<  endl;
+    return nu;
+}
+template<typename Mesh>
+int  TrueBorder(const Mesh &Th,typename Mesh::Vertex *P,double *delta)
+{
+    typedef typename Mesh::Vertex Vertex;
+    
+    typedef typename Mesh::Element Element;
+    typedef typename Mesh::BorderElement BorderElement;
+    typedef  typename Mesh::Rd Rd;
+    typedef  typename Mesh::BorderElement::RdHat RdHat;
+    static const int d = Rd::d;
+    static const int dHat = RdHat::d;
+    
+    int nv =0;
+    RdHat GHat(RdHat::diag(1./(dHat+1)));
+    
+    for(int be=0; be<Th.nbe; ++be)
+    {
+        const BorderElement &E=Th.be(be);
+        int e,k = Th.BoundaryElement(be,e);
+        {
+            int ee=e, kk=  Th.ElementAdj(k,ee);
+            if ( kk >=0 || k != kk)
+            {
+                E(GHat);
+                Rd G(E(GHat));
+                double l = 0;// 1.5 to be sure .. FH
+                for(int i=0; i< BorderElement::nv ;++i)
+                    l = max(l, Rd(G,E[i]).norme2()) ;
+                delta[nv]=l;
+                P[nv].lab= Element::ne*k+e;//  element and edge
+                (Rd &) P[nv++]=G;
+                
+                
+            }
+        }
+    }
+    return nv;
+}
+
+template<typename Mesh>
+GenericDataFindBoundary<Mesh>::GenericDataFindBoundary(Mesh const * _pTh,int ddebug)
+: pTh(_pTh),tree(0),nbfind(0), nbelement(0), P(bborder ? pTh->nbe: pTh->nt),delta(P.N()),lp(0),debug(ddebug)
+{
+    //cout << " enter in GenericDataFindBoundary"<< endl;
+    const int nvE= Element::nv;
+    const int nvB = BorderElement::nv;
+    const int nvK = bborder ? nvB : nvE;
+    const Mesh &Th = *pTh;
+    // extract true Border if d != dHat
+    // othesize keep all mesh
+    RdHat GHat(RdHat::diag(1./(dHat+1)));
+    long ncount=0, mcount=0;
+    int nv =0;
+    //  warning in case of meshL ,  bord is points  => code bborder stupide..
+    if(bborder)
+        nv =  TrueBorder(Th,(Vertex *)P,delta);
+    else
+    { //
+        for(int k=0; k<Th.nt; ++k)
+        {
+            const Element& K= Th[k];
+            {
+                Rd G(K(GHat));
+                double l = 0;// 1.5 to be sur .. FH
+                for(int i=0; i< Element::nv ;++i)
+                    l = max(l, Rd(G,K[i]).norme2()) ;
+                delta[nv]=l;
+                P[nv].lab= Element::ne*k;//  element and edge
+                (Rd &) P[nv++]=G;
+                
+                
+            }
+        }
+    }
+    
+    //P.resize(nv); no resize because no copy of vertices ...
+    delta.resize(nv);
+    lp.resize(nv);
+    if(debug>7)  gnuplot("dfb0.gp");
+    Vertex * P0= &P[0];
+    KN<double> d0(delta);
+    for(int i=0; i< nv;++i)
+        d0[i]=sqrt(d0[i]);
+    delta= 0.;
+    Rd Pn, Px;
+    Th.BoundingBox(Pn, Px);
+    double col=0;
+    tree=new EF23::GTree<Vertex> (&P[0], Pn, Px,nv);// build quadtre
+    int lvpx=0;
+   // cout << " next step in GenericDataFindBoundary"<< endl;
+    long  NbQuadTreeBoxSearch=tree->NbQuadTreeBoxSearch,NbVerticesSearch=tree->NbVerticesSearch;
+    for(int i=0;i<nv; ++i)
+    {
+        ncount++;
+        if(debug>9)   cout << i << " " << d0[i] << endl;
+        long  nbsg=tree->NbQuadTreeBoxSearch,nvsg=tree->NbVerticesSearch;
+        int lvp=tree->ListNearestVertex(lp,nv, d0[i]*2.1,P[i]);
+        if(debug>9) cout <<i << " " << tree->NbVerticesSearch-nvsg << " " << tree->NbQuadTreeBoxSearch-nbsg << " / " << lvp << " " << d0[i] << endl;
+        lvpx=max(lvp,lvpx);
+        for(int j=0,k; j<lvp; ++j)
+        {
+            mcount++;
+            k= lp[j]-P0;
+            // double dij = Rd(P[i],*lp[j]).norme();
+            // warning must be Proof FH.
+            delta[k]=max(delta[k],d0[i]+d0[k]);
+            delta[i]=max(delta[i],d0[i]+d0[k]);
+            
+            if(debug>9) cout << k << " "<< delta[k] << ", ";
+        }
+    }
+    if(debug>9)
+        for(int i=0;i<nv; ++i)
+            cout  << i << " " << d0[i] << " " <<delta[i] << endl;
+    if(debug>5)
+        gnuplot("dfb1.gp");
+    if(verbosity>4)
+    {
+    cout << " ** BuildDataFindBoundary " << nv << " " << delta.max() << " " << delta.sum()/nv <<  " " << delta.min()  << endl;
+    cout << "    count  "<< mcount << " / " <<ncount<< " ratio "
+    << (double) mcount / max(ncount,1L) << " max lvp " << lvpx
+    << " gtree search box " << tree->NbQuadTreeBoxSearch - NbQuadTreeBoxSearch
+    << " v " << tree->NbVerticesSearch-NbVerticesSearch << endl;
+    }
+}
+// Bof Bof pas sur du tout.
+/*
+ template<typename Mesh>
+ void BuildDataFindBoundary<Mesh>() const
+ {
+ static int count =0;
+ if( dfb ==0) {
+ dfb=new DataFindBoundary(this);//,count++==0?9:0);
+ dfb->debug=0;
+ }
+ 
+ }
+ */
+template class GenericDataFindBoundary<Fem2D::MeshS::GMesh>;
+template class GenericDataFindBoundary<Fem2D::Mesh3::GMesh>;
+template class GenericDataFindBoundary<Fem2D::Mesh2::GMesh>;
+template class GenericDataFindBoundary<Fem2D::Mesh1::GMesh>;
+template class GenericDataFindBoundary<Fem2D::MeshL::GMesh>;

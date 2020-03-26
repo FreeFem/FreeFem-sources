@@ -46,7 +46,9 @@ public:
   typedef double R;
   static const int d=0;
   R0(){}
-static  R0 diag(R a){ return R0();}
+ static  R0 diag(R a){ return R0();}
+ R sum() const { return 0.;}
+ R  operator[](int ) const { return 0.;}
 };
 class R2;
 class R3;

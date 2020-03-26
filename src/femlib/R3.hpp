@@ -49,6 +49,8 @@ public:
   R3 (const R * a):x(a[0]),y(a[1]) ,z(a[2]) {}
 
   R3 (R2 P2):x(P2.x),y(P2.y),z(0)  {}
+  R3 (R1 P2):x(P2.x),y(0),z(0)  {}
+  R3 (R0 ): x(0),y(0),z(0) {}
   R3 (R2 P2,R zz):x(P2.x),y(P2.y),z(zz)  {}
   R3 (const R3 & A,const R3 & B) :x(B.x-A.x),y(B.y-A.y),z(B.z-A.z)  {}
   static  R3 diag(R a){ return R3(a,a,a);}
