@@ -24,7 +24,8 @@ fespace Vh(Th3, P1);
 Vh u;
 real err = 8.0e-3;
 
-int iMax = 2;
+int iMax = getARGV("-iMax", 2);
+int noTransfer = (getARGV("-transfer", 1) == 0);
 int[int] rt(2);
 rt = [1, 2];
 for(int i = 0; i < iMax; ++i) {
@@ -44,12 +45,14 @@ for(int i = 0; i < iMax; ++i) {
     for[i, v : rest] metParMmg[i] = met[v];
     ThParMmg = parmmg3d(ThParMmg, metric = metParMmg, hausd = 4.0/*, requiredTriangle = rt*/, nodeCommunicators = communicators);
     reconstructDmesh(ThParMmg)
-    fespace VhAdapt(ThParMmg, P1);
-    VhAdapt uAdapt;
-    transfer(Th3, P1, u, ThParMmg, P1, uAdapt)
     int[int] fforder = [1];
     savevtk("laplace-adapt-dist-3d.vtu", Th3, u, bin = 1, order = fforder, append = i ? true : false);
-    savevtk("laplace-adapt-dist-3d.vtu", ThParMmg, uAdapt, bin = 1, order = fforder, append = true);
+    if(!noTransfer) {
+        fespace VhAdapt(ThParMmg, P1);
+        VhAdapt uAdapt;
+        transfer(Th3, P1, u, ThParMmg, P1, uAdapt)
+        savevtk("laplace-adapt-dist-3d.vtu", ThParMmg, uAdapt, bin = 1, order = fforder, append = true);
+    }
     copyDmesh(ThParMmg, Th3)
     Mat Adapt;
     createMat(Th3, Adapt, P1);

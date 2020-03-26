@@ -1146,47 +1146,40 @@ else {
     }
     real[int] bbAll(4 * dimension * mpisize);
     mpiAllgather(bb, bbAll, mpiCommWorld);
-    real[int] hmax(2);
-    {
-        real[int] tmp(2);
-        tmp(0) = Th.hmax;
-        tmp(1) = ThNew.hmax;
-        mpiAllReduce(tmp, hmax, mpiCommWorld, mpiMAX);
-    }
     int[int] rankSend(0);
     int[int] rankRecv(0);
     for(int i = 0; i < mpisize; ++i) {
 IFMACRO(dimension, 2)
-        if(!(bbAll[1 + 8 * i] < bb[4] - hmax[1]
-          || bbAll[0 + 8 * i] > bb[5] + hmax[1]
-          || bbAll[3 + 8 * i] < bb[6] - hmax[1]
-          || bbAll[2 + 8 * i] > bb[7] + hmax[1]))
+        if(!(bbAll[1 + 8 * i] < bb[4]
+          || bbAll[0 + 8 * i] > bb[5]
+          || bbAll[3 + 8 * i] < bb[6]
+          || bbAll[2 + 8 * i] > bb[7]))
 ENDIFMACRO
 IFMACRO(dimension, 3)
-        if(!(bbAll[1 + 12 * i] < bb[6] - hmax[1]
-          || bbAll[0 + 12 * i] > bb[7] + hmax[1]
-          || bbAll[3 + 12 * i] < bb[8] - hmax[1]
-          || bbAll[2 + 12 * i] > bb[9] + hmax[1]
-          || bbAll[5 + 12 * i] < bb[10] - hmax[1]
-          || bbAll[4 + 12 * i] > bb[11] + hmax[1]))
+        if(!(bbAll[1 + 12 * i] < bb[6]
+          || bbAll[0 + 12 * i] > bb[7]
+          || bbAll[3 + 12 * i] < bb[8]
+          || bbAll[2 + 12 * i] > bb[9]
+          || bbAll[5 + 12 * i] < bb[10]
+          || bbAll[4 + 12 * i] > bb[11]))
 ENDIFMACRO
                                                     {
             rankRecv.resize(rankRecv.n + 1);
             rankRecv[rankRecv.n - 1] = i;
         }
 IFMACRO(dimension, 2)
-        if(!(bbAll[5 + 8 * i] < bb[0] - hmax[0]
-          || bbAll[4 + 8 * i] > bb[1] + hmax[0]
-          || bbAll[7 + 8 * i] < bb[2] - hmax[0]
-          || bbAll[6 + 8 * i] > bb[3] + hmax[0]))
+        if(!(bbAll[5 + 8 * i] < bb[0]
+          || bbAll[4 + 8 * i] > bb[1]
+          || bbAll[7 + 8 * i] < bb[2]
+          || bbAll[6 + 8 * i] > bb[3]))
 ENDIFMACRO
 IFMACRO(dimension, 3)
-        if(!(bbAll[7 + 12 * i] < bb[0] - hmax[0]
-          || bbAll[6 + 12 * i] > bb[1] + hmax[0]
-          || bbAll[9 + 12 * i] < bb[2] - hmax[0]
-          || bbAll[8 + 12 * i] > bb[3] + hmax[0]
-          || bbAll[11 + 12 * i] < bb[4] - hmax[0]
-          || bbAll[10 + 12 * i] > bb[5] + hmax[0]))
+        if(!(bbAll[7 + 12 * i] < bb[0]
+          || bbAll[6 + 12 * i] > bb[1]
+          || bbAll[9 + 12 * i] < bb[2]
+          || bbAll[8 + 12 * i] > bb[3]
+          || bbAll[11 + 12 * i] < bb[4]
+          || bbAll[10 + 12 * i] > bb[5]))
 ENDIFMACRO
                                                     {
             rankSend.resize(rankSend.n + 1);
@@ -1219,18 +1212,18 @@ ENDIFMACRO
         PhPart part;
         part[] = privateDmesh#Th#khiDef[1];
 IFMACRO(dimension, 2)
-        part = (bbAll[4 + 8 * v] < x + hmax[0]
-             && bbAll[5 + 8 * v] > x - hmax[0]
-             && bbAll[6 + 8 * v] < y + hmax[0]
-             && bbAll[7 + 8 * v] > y - hmax[0]) ? 1.0 : 0.0;
+        part = (bbAll[4 + 8 * v] < x
+             && bbAll[5 + 8 * v] > x
+             && bbAll[6 + 8 * v] < y
+             && bbAll[7 + 8 * v] > y) ? 1.0 : 0.0;
 ENDIFMACRO
 IFMACRO(dimension, 3)
-        part = (bbAll[6 + 12 * v] < x + hmax[0]
-             && bbAll[7 + 12 * v] > x - hmax[0]
-             && bbAll[8 + 12 * v] < y + hmax[0]
-             && bbAll[9 + 12 * v] > y - hmax[0]
-             && bbAll[10 + 12 * v] < z + hmax[0]
-             && bbAll[11 + 12 * v] > z - hmax[0]) ? 1.0 : 0.0;
+        part = (bbAll[6 + 12 * v] < x
+             && bbAll[7 + 12 * v] > x
+             && bbAll[8 + 12 * v] < y
+             && bbAll[9 + 12 * v] > y
+             && bbAll[10 + 12 * v] < z
+             && bbAll[11 + 12 * v] > z) ? 1.0 : 0.0;
 ENDIFMACRO
         if(part[].linfty > 1.0e-2) {
             int[int] n2o;
@@ -1270,7 +1263,6 @@ ENDIFMACRO
     meshN interpolateExchange;
     fespace VhExchange(gluedExchange, Pk);
     VhExchange def(uExchange);
-    searchMethod = 1;
     for[i, v : rankRecv] {
         int index = mpiWaitAny(rqRecvU);
         if(index != mpiUndefined) {
