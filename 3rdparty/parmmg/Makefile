@@ -38,7 +38,7 @@ FAIT.done:tag-tar
 	-DMMG_DIR=../../mmg/mmg-sources \
 	-DMMG_BUILDDIR=../../mmg/build \
 	-DSCOTCH_DIR=$(scotch_dir) \
-	-DMETIS_DIR=$(metis_dir) \
+	-DMETIS_DIR=$(metis_dir) -DUSE_VTK=OFF \
 	-DCMAKE_BUILD_TYPE=Release $(CMAKE_GUESS) && $(MAKE)
 	touch FAIT.done
 
@@ -54,7 +54,7 @@ parmmg:$(PACKAGE)
 install:install.done WHERE.done
 
 WHERE.done: install.done
-	echo parmmg  LD -L@DIR@/lib -lparmmg  >../lib/WHERE.parmmg ;
+	echo parmmg LD -L@DIR@/lib -lparmmg >../lib/WHERE.parmmg ;
 	echo parmmg INCLUDE -I@DIR@/include/>> ../lib/WHERE.parmmg ;
 	echo build WHERE ./lib/WHERE.parmmg ;
 	touch $@
@@ -64,9 +64,8 @@ clean::
 FAIRE: FAIT.done install.done
 
 tag-tar: $(PACKAGE)
-	-rm -rf  ParMmg-* parmmg-sources
+	-rm -rf ParMmg-* parmmg-sources
 	unzip $(PACKAGE) && mv ParMmg-* parmmg-sources
-	patch -p1 <patch-parmmg.txt
 	touch tag-tar
 
 $(PACKAGE): FORCE

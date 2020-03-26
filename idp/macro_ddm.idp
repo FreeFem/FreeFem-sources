@@ -554,7 +554,8 @@ ENDIFMACRO
 {
     real[int] part;
     {
-        mpiBarrier(mpiCommWorld);
+        if(verbosity > 0)
+            mpiBarrier(mpiCommWorld);
         real timerReconstruction = mpiWtime();
         varf vG(u, v) = on(labels(ThName), u = 1.0);
         fespace VhGamma(ThName, P1);
@@ -621,8 +622,11 @@ ENDIFMACRO
         }
         part(part.n - ThLocalInitInterior.nt:ThName.nt - 1) = mpirank;
         mpiWaitAll(rqSend);
-        mpiBarrier(mpiCommWorld);
-        if(verbosity > 0 && mpirank == 0) cout.scientific << " --- distributed mesh reconstructed (in " << mpiWtime() - timerReconstruction << ")" << endl;
+        if(verbosity > 0) {
+            mpiBarrier(mpiCommWorld);
+            if(mpirank == 0)
+                cout.scientific << " --- distributed mesh reconstructed (in " << mpiWtime() - timerReconstruction << ")" << endl;
+        }
     }
     NewMacro privateBuildDmesh()1 EndMacro
     NewMacro privateReconstructDmesh()1 EndMacro
@@ -800,8 +804,10 @@ ENDIFMACRO
 IFMACRO(!removeZeros)
         bool removeZeros = trueRestrict && overlap == 1 && usedARGV("-remove_zeros") != -1;
 ENDIFMACRO
-        mpiBarrier(comm);
-        timerPartition = mpiWtime();
+        if(verbosity > 0) {
+            mpiBarrier(comm);
+            timerPartition = mpiWtime();
+        }
 IFMACRO(privateBuildDmesh)
         NewMacro defP1(i)i EndMacro
         NewMacro initP1(i)i EndMacro
@@ -844,8 +850,11 @@ ENDIFMACRO
         DTab[0].resize(WhLocal.ndof);
         DTab[0] = 1.0;
     }
-    mpiBarrier(comm);
-    if(verbosity > 0 && mpirank == 0) cout.scientific << " --- partition of unity built (in " << mpiWtime() - timerPartition << ")" << endl;
+    if(verbosity > 0) {
+        mpiBarrier(comm);
+        if(mpirank == 0)
+            cout.scientific << " --- partition of unity built (in " << mpiWtime() - timerPartition << ")" << endl;
+    }
 }// EOM
 
 macro buildOverlapEdgePeriodic(Th, ThBorder, fakeInterface, s, overlap, intersection, D, P, comm, excluded, PkPart, defPart, initPart, labPeriodic, userPartitioning, bs) {
@@ -1123,6 +1132,9 @@ ENDIFMACRO
 macro transfer(Th, Pk, u, ThNew, PkNew, uNew)
 IFMACRO(privateDmesh#Th)
 {
+if(verbosity > 0)
+    mpiBarrier(mpiCommWorld);
+real timerTransfer = mpiWtime();
 IFMACRO(!def)
 NewMacro def(i)i EndMacro
 ENDIFMACRO
@@ -1272,7 +1284,7 @@ ENDIFMACRO
                 meshN restriction = trunc(gluedExchange, chi(recvTh[index]) > 1.0e-2, new2old = n2o);
                 fespace VhRestrictionRenum(restriction, Pk);
                 VhRestrictionRenum def(renum);
-                matrix R = interpolate(VhRestrictionRenum, VhRestriction, inside = 1);
+                matrix R = interpolate(VhRestrictionRenum, VhRestriction);
                 int[int] I, J;
                 real[int] C;
                 [I, J, C] = R;
@@ -1287,6 +1299,11 @@ ENDIFMACRO
     Th = change(Th, fregion = backupRegion[nuTriangle]);
     mpiWaitAll(rqSendTh);
     mpiWaitAll(rqSendU);
+}
+if(verbosity > 0) {
+    mpiBarrier(mpiCommWorld);
+    if(mpirank == 0)
+        cout.scientific << " --- distributed solution transferred (in " << mpiWtime() - timerTransfer << ")" << endl;
 }
 }
 ENDIFMACRO

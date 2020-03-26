@@ -29,7 +29,7 @@ FAIT.done:tag-tar
 	-DCMAKE_C_FLAGS="$(CFLAGS) -fPIC" \
 	-DCMAKE_CXX_COMPILER=$(CXX) \
 	-DCMAKE_CXX_FLAGS="$(CXXFLAGS) $(CXX11FLAGS) -fPIC" \
-	-DM_LIB="-lm" \
+	-DM_LIB="-lm" -DUSE_VTK=OFF \
 	-DSCOTCH_DIR=$(scotch_dir) \
 	-DCMAKE_BUILD_TYPE=Release $(CMAKE_GENERATOR) && $(MAKE)
 	touch FAIT.done
@@ -46,7 +46,7 @@ mmg:$(PACKAGE)
 install:install.done WHERE.done
 
 WHERE.done: install.done
-	echo mmg  LD -L@DIR@/lib -lmmg  >../lib/WHERE.mmg ;
+	echo mmg LD -L@DIR@/lib -lmmg >../lib/WHERE.mmg ;
 	echo mmg INCLUDE -I@DIR@/include/>> ../lib/WHERE.mmg ;
 	echo build WHERE ./lib/WHERE.mmg ;
 	touch $@
@@ -56,9 +56,8 @@ clean::
 FAIRE: FAIT.done install.done
 
 tag-tar: $(PACKAGE)
-	-rm -rf  mmg-*
+	-rm -rf mmg-*
 	unzip $(PACKAGE) && mv mmg-* mmg-sources
-	patch -p1 <patch-mmg.txt
 	touch tag-tar
 
 $(PACKAGE): FORCE

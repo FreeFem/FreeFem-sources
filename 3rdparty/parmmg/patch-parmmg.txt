@@ -1,6 +1,0 @@
---- ./parmmg-sources/CMakeLists.txt
-+++ ./parmmg-sources-ok/CMakeLists.txt
-186c186
-< FIND_PACKAGE(VTK)
----
-> #FIND_PACKAGE(VTK)
