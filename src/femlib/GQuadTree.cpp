@@ -1213,7 +1213,7 @@ int GenericDataFindBoundary<Mesh>::Find(typename Mesh::Rd PP,double *l,int & out
 #endif
     Vertex  **plp = &lp[0];
     long lvp=tree->ListNearestVertex(plp,lp.N(), delta[ip],P[ip]);
-    std::sort( plp,plp+lvp );
+    HeapSort(plp,lvp );
 //  verif ListNearestVertex
     
 #ifdef DEBUGGING
