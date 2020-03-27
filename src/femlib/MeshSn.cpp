@@ -1092,7 +1092,7 @@ namespace Fem2D
        borderelements=0;bnormalv=0;
        TheAdjacencesLink=0;BoundaryElementHeadLink=0;
        ElementConteningVertex=0; gtree=0;
-      
+       gdfb=0; 
        ffassert(withSurface==1);
        //const int nvTet = Tet::nv;
        const int nvTriangle = TriangleS::nv;
@@ -1113,6 +1113,7 @@ namespace Fem2D
        serialized.get(pp,nnt);
        serialized.get(pp,nnv);
        serialized.get(pp,nnbe);
+        // miss    serialized.get(pp,nadjnomanifold);
        serialized.get(pp,nnvL);
        serialized.get(pp,nnbeL);
        
@@ -1261,6 +1262,7 @@ namespace Fem2D
        serialized.put(pp,nt);
        serialized.put(pp,nv);
        serialized.put(pp,nbe);
+      // serialized.put(pp,nadjnomanifold);
        serialized.put(pp,nvL);
        serialized.put(pp,nbeL);
        

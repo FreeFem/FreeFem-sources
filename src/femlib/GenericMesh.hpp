@@ -1976,10 +1976,11 @@ Serialize GenericMesh<T,B,V>::serialize() const
  */
     template<typename T,typename B,typename V>
     GenericMesh<T,B,V>::GenericMesh(const  Serialize &serialized)
-    : nt(0),nv(0),nbe(0),  mes(0.),mesb(0.) ,
+    : nt(0),nv(0),nbe(0),nadjnomanifold(0), mes(0.),mesb(0.) ,
     vertices(0),elements(0),borderelements(0),bnormalv(0),
     TheAdjacencesLink(0),BoundaryElementHeadLink(0),
     ElementConteningVertex(0), gtree(0),gdfb(0)
+
     {
 	const int nve = T::nv;
 	const int nvbe = B::nv;

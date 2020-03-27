@@ -241,6 +241,8 @@
                }
                assert(k==3);
            }
+           if( whatd & Fop_D2)
+               ffassert(0); // to DO FH. sorry
        }
        
    }
