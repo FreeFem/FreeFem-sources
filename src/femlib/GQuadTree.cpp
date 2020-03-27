@@ -874,6 +874,54 @@ RESTART:
 	    cout << "   s=" << ss <<" " << s <<" exit by bord " << it << " "  << Phat << endl;;
           }
 	outside=true;
+// New Methode mars 2020
+          {
+          GenericDataFindBoundary<Mesh> * gdfb=Th.Buildgdfb();
+          if(gdfb )
+          {
+              double l[4];
+              int na[4],nna=0,mma=0;
+              int loutside;// 0 inside, 1 out close, 2, out fare, , -1 inside
+              int itt =gdfb->Find(P,l,loutside);
+             
+              
+              const double eps = 1e-10;
+              for (int i=0; i<= Rd::d;++i )
+                  if(l[i] < -eps) na[nna++]=i;
+              for( int k=0; k<nna;++k)
+              {
+                  int ii=na[k],ittt=Th.ElementAdj(itt,ii);
+                  if( ittt<0 || ittt == itt) mma++;
+              }
+              it = itt;
+          
+              if( mma < nna)
+              {
+               if( nReStart < 2)
+              {
+                  nReStart++;
+                  bool same=false;
+                  
+                  for(int j=0;j<kstart ; ++j)
+                      if( it == itstart[j]) {same=true; break;}
+                  if( verbosity>199)
+                      cout << "   loop Search "<<nReStart << P << " Delta" <<  Delta << " it " << it << " same "<< same << endl;
+                  if(!same) goto RESTART;
+              }
+              else
+                  if(searchMethod) goto PICHON;
+              }
+              outside=nna>0;
+              Phat=Rd(l+1);
+              const Element &K=Th[it];
+              if( verbosity > 9)
+                  cout << " - Find "<< P << " -> " << K(Phat) << " " << loutside << " k= " << itt
+                  << " dist =" << (P-K(Phat)).norme() << " :: " << Phat << endl;
+              return  Th.elements + it; // outside
+              
+          }
+          }
+// end New Methode
         // on retest with a other stating point??????
           // Mod.  23/02/2016 F. H
        itout[kstart-1]= it;
@@ -1261,19 +1309,40 @@ int GenericDataFindBoundary<Mesh>::Find(typename Mesh::Rd PP,double *l,int & out
         if(debug) cout << "    -- k = "<< k << " " << e << " " << j << endl;
         
         const Element & K=(*pTh)[k];
+        int I[4]={0,1,2,3};
+        int nI =dHat+1;
+        if( bborder)
+        {  // take just of part of Element ..
+            nI= Element::nva;
+            ffassert(nI==dBHat+1);
+            for(int i=0; i< nI;++i)
+                I[i]=Element::nvadj[e][i];
+        }
+        for(int i=0; i< nI;++i)
+            Q[i]=K[I[i]];
         
-        for(int i=0; i<= dHat;++i)
-            Q[i]=K[i];
-        Plambla(dHat,Q,PP,ll);
-        R d2 = dist2(dHat,Q,PP,ll,lpj);
-        if( dnu > d2)
+        Plambla(nI-1,Q,PP,ll);
+        R d2 = dist2(nI-1,Q,PP,ll,lpj);
+         if( dnu > d2)
         {
             deps = K.mesure()/100.;
             nu = k;
             ne= e;
             dnu=d2;
+           
+           
+            if( ! bborder)
+            {  //  
+                for(int i=0;i<=dHat;++i)
+                    dl[i]=0;
+                for(int i=0;i<nI;++i)
+                    dl[I[i]]=lpj[i];
+            }
+            else
+            {
             for(int i=0;i<=dHat;++i)
                 dl[i]=lpj[i];
+            }
         }
         if(verbosity>99) cout << "    Find " << k << " " << e << " / " << dnu  << endl;
     }

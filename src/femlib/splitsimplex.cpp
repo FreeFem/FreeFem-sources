@@ -103,7 +103,7 @@ inline int NumSimplex3_1(int l) { return pow(l*6,1./3)+4;}
 #define F_1(i) NumSimplex2_1(i)
 #include "InvIntFunc.cpp"
 #undef F
-#define F_1
+#undef F_1
 #undef InvIntFunction
 
 #define InvIntFunction invNumSimplex3
@@ -111,7 +111,7 @@ inline int NumSimplex3_1(int l) { return pow(l*6,1./3)+4;}
 #define F_1(i) NumSimplex3_1(i)
 #include "InvIntFunc.cpp"
 #undef F
-#define F_1
+#undef F_1
 #undef InvIntFunction
 
 inline int NumSimplex1(int i) { return i;}

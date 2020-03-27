@@ -2171,6 +2171,7 @@ Mesh::Mesh(const  Serialize &serialized)
     area=0;
     lenbord=0;
     bnormalv=0;
+    dfb=0; 
     //  ---  assert(serialized.samewhat(magicmesh));
     size_t  pp=0;;
     long long l;
