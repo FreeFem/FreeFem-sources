@@ -1314,7 +1314,7 @@ int GenericDataFindBoundary<Mesh>::Find(typename Mesh::Rd PP,double *l,int & out
         if( bborder)
         {  // take just of part of Element ..
             nI= Element::nva;
-            ffassert(nI==dHat+1);
+            ffassert(nI==dBHat+1);
             for(int i=0; i< nI;++i)
                 I[i]=Element::nvadj[e][i];
         }

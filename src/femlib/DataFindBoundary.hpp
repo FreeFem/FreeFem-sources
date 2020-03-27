@@ -13,10 +13,12 @@ struct GenericDataFindBoundary
     typedef typename Mesh::BorderElement BorderElement;
     typedef  typename Mesh::Rd Rd;
     typedef  typename Mesh::RdHat RdHat;
+    typedef typename Mesh::BorderElement::RdHat RdBHat;
     //using   EF23::GTree;
 
     static const int d = Rd::d;
     static const int dHat = RdHat::d;
+    static const int dBHat = RdBHat::d;
     static const bool bborder = d == dHat; //  build border .??
     const Mesh *pTh;
     EF23::GTree<Vertex> *tree;
