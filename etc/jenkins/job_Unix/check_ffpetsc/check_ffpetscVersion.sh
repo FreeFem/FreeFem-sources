@@ -1,5 +1,5 @@
 releaseVersionffpetsc=$(grep VERSION= 3rdparty/ff-petsc/Makefile) | cut -c9-15
-installedVersionffpetsc=$(grep VERSION= /usr/local/ff-petsc/c/include/petscversion.h) | | cut -c36-42 | cut -f1 -d "\""    #if version X.X.XX
+installedVersionffpetsc=$(grep VERSION=  ~/Shared/openmpi/ff-petsc/c/include/petscversion.h) | | cut -c36-42 | cut -f1 -d "\""    #if version X.X.XX
 
 if [ "$releaseVersionffpetsc" == "$installedVersionffpetsc" ]; then
 	echo "installed release version PETSc is up to date"
