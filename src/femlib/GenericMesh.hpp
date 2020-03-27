@@ -53,7 +53,7 @@ using namespace ::std;
 #include "Serialize.hpp"
 
 #include "GQuadTree.hpp"
-#include "DataFIndBoundary.hpp"
+#include "DataFindBoundary.hpp"
 // definition R
 namespace Fem2D  {
 #include "R3.hpp"

@@ -342,7 +342,7 @@ namespace bamg {
   */
   int Triangles::SplitElement(int choice) {
     Direction NoDirOfSearch;
-    const int withBackground = &BTh != this && &BTh;
+    const int withBackground = &BTh != this;
     if (verbosity > 2)
       cout << "  -- SplitElement " << (choice ? " Q->4Q and T->4T " : " Q->4Q or T->3Q ") << endl;
     ;

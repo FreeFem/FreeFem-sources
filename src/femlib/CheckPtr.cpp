@@ -1,5 +1,7 @@
 //#define SHOWALLOC
-#define NCHECKPTR // BUg with MPI ??? FH
+#ifndef NCHECKPTR
+#define NCHECKPTR // Bug with MPI ??? FH
+#endif
 /*
 #if __cplusplus >= 201103L
 #define PARAM_THROW(i) (i)

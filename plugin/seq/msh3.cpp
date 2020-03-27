@@ -4661,59 +4661,6 @@ AnyType BuildLayeMesh_Op::operator( )(Stack stack) const {
   }
 }
 
-// function nouveau nom de fonction
-/*
- class Movemesh2D_3D_surf_cout_Op: public E_F0mps
- {
- public:
- Movemesh2D_3D_surf_cout_Op (const basicAC_F0 &args, Expression tth) {
- CompileError("The keyword movemesh2D3Dsurf is remplaced now by the keyword movemesh23 (see Manual)
- ::: Moreover, the parameter mesuremesh are denoted now orientation ");
- }
-
- AnyType operator () (Stack stack) const {return 0L;}
- };
-
- class Movemesh2D_3D_surf_cout: public OneOperator {
- public:
- typedef const Mesh *pmesh;
- typedef const Mesh3 *pmesh3;
-
- Movemesh2D_3D_surf_cout (): OneOperator(atype<pmesh3>(), atype<pmesh>()) {}
-
- E_F0*code (const basicAC_F0 &args) const {
- return new Movemesh2D_3D_surf_cout_Op(args, t[0]->CastTo(args[0]));    // CastTo(args[]); // plus
- tard
- }
- };
-
- /***********************************************/
-
-/*class Movemesh3D_cout_Op: public E_F0mps
- {
- public:
- Movemesh3D_cout_Op (const basicAC_F0 &args, Expression tth) {
- CompileError("The keyword movemesh3D is remplaced in this new version of freefem++ by the keyword
- movemesh3 (see manual)");
- }
-
- AnyType operator () (Stack stack)  const {return 0L;}
- };
-
- class Movemesh3D_cout: public OneOperator {
- public:
- typedef const Mesh *pmesh;
- typedef const Mesh3 *pmesh3;
-
- Movemesh3D_cout (): OneOperator(atype<pmesh3>(), atype<pmesh>()) {}
-
- E_F0*code (const basicAC_F0 &args) const {
- return new Movemesh3D_cout_Op(args, t[0]->CastTo(args[0]));    // CastTo(args[]); // plus tard
- }
- };
- */
-//
-
 class DeplacementTab_Op : public E_F0mps {
  public:
   Expression eTh;
@@ -6676,31 +6623,8 @@ AnyType Op_trunc_mesh3::Op::operator( )(Stack stack) const {
 
 /////////////////
 // new functions added by J. Morice 05/10
-// --  extractmesh2D
 // --  extractmesh
 // --  movemesh32       // projection
-
-// Obselete function, operation possible with truncpossible
-// extraction on 2D mesh (part mesh+region or boundary+label)
-class ExtractMesh2D_Op : public E_F0mps {
- public:
-  ExtractMesh2D_Op(const basicAC_F0 &args, Expression tth) {
-    CompileError("obselete function, use trunc operator");    // uncompatible extractmesh (Th,
-                                                              // region= , reft=  ");
-  }
-  AnyType operator( )(Stack stack) const;
-};
-
-class ExtractMesh2D : public OneOperator {
- public:
-  ExtractMesh2D( ) : OneOperator(atype< pmesh >( ), atype< pmesh >( )) {}
-
-  E_F0 *code(const basicAC_F0 &args) const {
-    return new ExtractMesh2D_Op(args, t[0]->CastTo(args[0]));
-  }
-};
-
-AnyType ExtractMesh2D_Op::operator( )(Stack stack) const {}
 
 // mesh3 case: extraction of border 3D mesh (surface) return a meshS (part boundary+label)
 // meshS case: extraction of border 3D surface mesh (curve) return a meshL (part boundary+label)
@@ -9410,7 +9334,6 @@ static void Load_Init( ) {
 
   Global.Add("trunc", "(", new Op_trunc_mesh3);
   Global.Add("gluemesh", "(", new Op_GluMesh3tab);
-  //Global.Add("extract", "(", new ExtractMesh2D);    // obselete function -> use trunc function
   Global.Add("extract", "(",new ExtractMesh< Mesh3, MeshS >);    // take a Mesh3 in arg and return a part of MeshS
 
   // for a mesh3 Th3, if Th3->meshS=NULL, build the meshS associated

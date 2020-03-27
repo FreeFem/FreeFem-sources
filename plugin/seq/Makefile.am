@@ -120,7 +120,7 @@ allheaders=../../src/fflib/AddNewFE.h ../../src/fflib/AFunction_ext.hpp ../../sr
 	../../src/femlib/VirtualSolverSparseSuite.hpp \
 	../../src/femlib/HashMatrix.hpp \
 	../../src/femlib/MatriceElementaire.hpp \
-	../../src/femlib/DataFIndBoundary.hpp
+	../../src/femlib/DataFindBoundary.hpp
 
 if ENABLE_FFCS
 

@@ -23,6 +23,7 @@
 #ifndef _MEDIT_H_
 #define _MEDIT_H_
 
+#define GL_SILENCE_DEPRECATION
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
