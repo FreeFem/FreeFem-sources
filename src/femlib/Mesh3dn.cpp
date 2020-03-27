@@ -843,9 +843,10 @@ namespace Fem2D
             }
             else
                 GmfGetLin(inm,GmfVertices,&vertices[i].x,&vertices[i].y,&vertices[i].z,&lab);
-                vertices[i].lab=lab;
-                mxlab= max(mxlab,lab);
-                mnlab= min(mnlab,lab);
+            if(verbosity>19) cout << vertices[i] << endl;
+            vertices[i].lab=lab;
+            mxlab= max(mxlab,lab);
+            mnlab= min(mnlab,lab);
             }
         // read tetrahedrons (element mesh3)
        

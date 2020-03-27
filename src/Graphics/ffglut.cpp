@@ -2185,6 +2185,7 @@ void  OneWindow::SetView()
         gluPerspective(focal*180./M_PI,aspect,znear,zfare);
         if(debug>2)
         {
+            cout << " BB " << Bmin3 << " , " << Bmax3 << " rapz " << rapz << " dmax: "<< dmax << endl;
             cout <<" setview 3d: rapz " <<  rapz << " cam: ";
             cout << cam << " Pvue:" ;
             cout << Pvue3  << " theta " << theta << "  phi = "<<  phi << endl;

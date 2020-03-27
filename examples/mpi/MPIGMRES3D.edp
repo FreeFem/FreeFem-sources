@@ -1,4 +1,4 @@
-// NBPROC 10
+// NBPROC 4
 // ff-mpirun -np 4 MPIGMRES2D.edp -glut ffglut  -n 11 -k 1  -d 1 -ns -gmres 1
 /*
   a first true parallele example fisrt freefem++ 
@@ -28,7 +28,7 @@ include "MPIGMRESmacro.idp"
 include  "cube.idp"
 
 
-searchMethod=1; // more safe seach algo (warning can be very expensive in case lot of ouside point) 
+searchMethod=0; // more safe seach algo (warning can be very expensive in case lot of ouside point) 
 assert(version >3.11);
 real[int] ttt(10);int ittt=0;
 macro settt {ttt[ittt++]=mpiWtime();}//

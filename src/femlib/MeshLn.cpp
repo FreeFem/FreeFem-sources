@@ -590,7 +590,7 @@ namespace Fem2D
               double l[2];
               int loutside;// 0 inside, 1 out close, 2, out fare, , -1 inside
               int itt =gdfb->Find(P,l,loutside);
-              outside=loutside ==0;
+              outside=loutside;
               Phat=R1(l[1]);
               Element &K=(this->elements)[itt];
               if( verbosity > 9)

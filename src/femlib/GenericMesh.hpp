@@ -535,7 +535,7 @@ public:
     vertices=new V[nv];
     if(nt) elements= new T[nt];
     if(nbe>0) borderelements = new B[nbe];
-    assert( nt >=0 && elements);
+    assert( (nt >=0 && elements) || !nt);
     assert( nv >0 && vertices);
 
   }
