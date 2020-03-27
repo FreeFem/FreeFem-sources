@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## This job must be executed on VM2 machines
+## This job must be executed on VM2-2 machines
 ## See ./README.md
 
 echo "Job 4 (openmpi)"
