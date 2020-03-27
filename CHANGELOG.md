@@ -34,7 +34,8 @@ All notable changes to this project will be documented in this file.
 - interface to `mpiWaitAll`
 - new function extract, allows to build a curve mesh from a 2d mesh (can extract a labeled boundary, apply a geometric transformation)
 - ffglut can plot a vectorial FE function in surface 3d
-- distributed ParMmg interface, cf. `examples/hpddm/distributed-parmmg.edp`
+- distributed ParMmg interface, cf. `examples/hpddm/distributed-parmmg.edp` or `examples/hpddm/laplace-adapt-dist-3d-PETSc.edp`
+- new parallel interpolator on non-matching meshes, cf. `examples/hpddm/transfer.edp`
 
 ### Changed
 - new `tgv` values: -10 => zero row, -20 => zero row/column
@@ -54,13 +55,12 @@ All notable changes to this project will be documented in this file.
 ## [4.5]
 
 ### Added
--  for  windows version: rename  under mpi `MUMPS` in `MUMPS_mpi` and in sequentiel in `MUMPS_seq` 
-    due to confict between seq. and mpi version so all MUMPS load become `MUMPS_seq` or `MUMPS_mpi`in all examples  
+- for windows version: rename under mpi `MUMPS` in `MUMPS_mpi` and in sequentiel in `MUMPS_seq` due to confict between seq. and mpi version so all MUMPS load become `MUMPS_seq` or `MUMPS_mpi`in all examples
 - correct link edition with fortran mpi under windows juste use the msmpi (just use `libmsmpi.dll` )
 - new `mmg` and `parmmg` (parallel mmg) plugins interfacing mmg5 and parmmg libraries, to replace `mmg3d-v4.0` and `freeyams` (Thanks to P-H Tournier)
-- a true 3d anisotropic mesh adaptation  `examples/3d/Laplace-Adapt-aniso-3d.edp`
+- a true 3d anisotropic mesh adaptation `examples/3d/Laplace-Adapt-aniso-3d.edp`
 - an example to extract surface mesh from isovalue in `examples/3dSurf/Pinochio.edp`
-- function `f.eatspace` to reach eof on istream file  which return false in case of EOF. 
+- function `f.eatspace` to reach eof on istream file which return false in case of EOF.
 - function `f.length` to get the istream file length
 - Interface to `PetscLogStagePush()`/`PetscLogStagePop()`
 - Ability to directly assemble a `Mat` using a `varf`
@@ -73,7 +73,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - correct ffglut (bug in case of changing number of nb isovalue)
 - PETSc version 3.12.4
-- Change the point search triangle algorithm  to be sure in any case (in test)
+- Change the point search triangle algorithm to be sure in any case (in test)
 - Sline operator renamed to segment
 - In square3, segment, movemesh functions: geometry transformation can now be [X] or [X,Y] or [X,Y,Z] according to the minimal shape element dim
 - PETSc now download OpenBLAS if there is no BLAS found by FreeFEM configure

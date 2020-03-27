@@ -15,7 +15,6 @@ func tz = r*sin(y*pi*2);
 meshS Th = square3(nx, ny, [tx,ty,tz], removeduplicate=true);
 
 Mat A;
-showCPU=1;
 createMat(Th,A,P1)
 fespace Vh(Th,P1);
 
