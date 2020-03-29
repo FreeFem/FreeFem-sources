@@ -521,45 +521,45 @@ NewMacro privateDmesh#ThName#intersection()privateDmesh#ThName#intersectionDef E
 real[int][int] privateDmesh#ThName#khi(2);
 real[int][int] privateDmesh#ThName#intersection;
 ENDIFMACRO
-{
 IFMACRO(!ThName#Comm)
 NewMacro ThName#Comm()mpiCommWorld EndMacro
 ENDIFMACRO
-int[int] neighbors;
-{
-    real[int] bb(2 * dimension);
-    boundingbox(ThName, bb);
-    real[int] bbAll(2 * dimension * mpiSize(ThName#Comm));
-    mpiAllgather(bb, bbAll, ThName#Comm);
-    real hmax;
+if(ThName#Comm) {
+    int[int] neighbors;
     {
-        real tmp = ThName.hmax;
-        mpiAllReduce(tmp, hmax, ThName#Comm, mpiMAX);
-    }
-    int between = 0;
-    for(int i = 0; i < mpiSize(ThName#Comm); ++i) {
-        if(i != mpiRank(ThName#Comm) &&
+        real[int] bb(2 * dimension);
+        boundingbox(ThName, bb);
+        real[int] bbAll(2 * dimension * mpiSize(ThName#Comm));
+        mpiAllgather(bb, bbAll, ThName#Comm);
+        real hmax;
+        {
+            real tmp = ThName.hmax;
+            mpiAllReduce(tmp, hmax, ThName#Comm, mpiMAX);
+        }
+        int between = 0;
+        for(int i = 0; i < mpiSize(ThName#Comm); ++i) {
+            if(i != mpiRank(ThName#Comm) &&
 IFMACRO(dimension, 2)
-        !(bbAll[1 + 4 * i] < bb[0] - hmax
-          || bbAll[0 + 4 * i] > bb[1] + hmax
-          || bbAll[3 + 4 * i] < bb[2] - hmax
-          || bbAll[2 + 4 * i] > bb[3] + hmax)
+            !(bbAll[1 + 4 * i] < bb[0] - hmax
+              || bbAll[0 + 4 * i] > bb[1] + hmax
+              || bbAll[3 + 4 * i] < bb[2] - hmax
+              || bbAll[2 + 4 * i] > bb[3] + hmax)
 ENDIFMACRO
 IFMACRO(dimension, 3)
-        !(bbAll[1 + 6 * i] < bb[0] - hmax
-          || bbAll[0 + 6 * i] > bb[1] + hmax
-          || bbAll[3 + 6 * i] < bb[2] - hmax
-          || bbAll[2 + 6 * i] > bb[3] + hmax
-          || bbAll[5 + 6 * i] < bb[4] - hmax
-          || bbAll[4 + 6 * i] > bb[5] + hmax)
+            !(bbAll[1 + 6 * i] < bb[0] - hmax
+              || bbAll[0 + 6 * i] > bb[1] + hmax
+              || bbAll[3 + 6 * i] < bb[2] - hmax
+              || bbAll[2 + 6 * i] > bb[3] + hmax
+              || bbAll[5 + 6 * i] < bb[4] - hmax
+              || bbAll[4 + 6 * i] > bb[5] + hmax)
 ENDIFMACRO
-                                             ) {
-            neighbors.resize(neighbors.n + 1);
-            neighbors[neighbors.n - 1] = i;
+                                                 ) {
+                neighbors.resize(neighbors.n + 1);
+                neighbors[neighbors.n - 1] = i;
+            }
         }
     }
-}
-reconstructDmeshWithNeighbors(ThName, neighbors)
+    reconstructDmeshWithNeighbors(ThName, neighbors)
 }
 EndMacro
 macro reconstructDmeshWithNeighbors(ThName, neighborsName)
@@ -1345,3 +1345,215 @@ ENDIFMACRO
     int[int] rest = restrict(VhWithoutOverlap, VhWithOverlap, ThN2O);
     ParMmgCommunicators(A, gamma, rest, ThCommunicators);
 }// EOM
+
+macro gatherDmesh(ThName, comm, ThGatherName) {
+IFMACRO(!privateDmesh#ThName)
+assert(0);
+ENDIFMACRO
+IFMACRO(!ThName#Comm)
+NewMacro ThName#Comm()mpiCommWorld EndMacro
+ENDIFMACRO
+IFMACRO(!ThGatherName#Comm)
+NewMacro ThGatherName#Comm()mpiCommWorld EndMacro
+ENDIFMACRO
+    if(verbosity > 0 && ThName#Comm)
+        mpiBarrier(ThName#Comm);
+    real timerGather = mpiWtime();
+    int size;
+    if(ThGatherName#Comm)
+        size = mpiSize(comm);
+    else
+        size = 0;
+    int reduce;
+    mpiAllReduce(size, reduce, ThName#Comm, mpiSUM);
+    assert(reduce == mpiSize(ThName#Comm));
+    fespace PhPart(ThName, P0);
+    meshN ThNoOverlap = trunc(ThName, abs(privateDmesh#ThName#khiDef[1][nuTriangle] - mpiRank(ThName#Comm)) < 1.0e-2, label = -111112);
+    if(ThGatherName#Comm) {
+        meshN[int] recvTh(size);
+        mpiRequest[int] rqRecv(size - 1);
+        for(int i = 1; i < size; ++i)
+            Irecv(processor(i, comm, rqRecv[i - 1]), recvTh[i]);
+        recvTh[0] = ThNoOverlap;
+        mpiWaitAll(rqRecv);
+        ThGatherName = gluemesh(recvTh);
+    }
+    else {
+        mpiRequest rqSend;
+        Isend(processor(0, comm, rqSend), ThNoOverlap);
+        mpiWait(rqSend);
+    }
+    if(verbosity > 0 && ThName#Comm) {
+        mpiBarrier(ThName#Comm);
+        if(mpiRank(ThName#Comm) == 0)
+            cout.scientific << " --- distributed mesh gathered (in " << mpiWtime() - timerGather << ")" << endl;
+    }
+}
+reconstructDmesh(ThGatherName)
+// EOM
+
+macro scatterDmesh(ThName, comm, ThScatterName) {
+IFMACRO(!privateDmesh#ThName)
+assert(0);
+ENDIFMACRO
+IFMACRO(!ThName#Comm)
+NewMacro ThName#Comm()mpiCommWorld EndMacro
+ENDIFMACRO
+IFMACRO(!ThScatterName#Comm)
+NewMacro ThScatterName#Comm()mpiCommWorld EndMacro
+ENDIFMACRO
+    if(verbosity > 0 && ThScatterName#Comm)
+        mpiBarrier(ThScatterName#Comm);
+    real timerScatter = mpiWtime();
+    int size;
+    if(ThName#Comm) {
+        size = mpiSize(comm);
+    }
+    else
+        size = 0;
+    int reduce;
+    mpiAllReduce(size, reduce, ThScatterName#Comm, mpiSUM);
+    assert(reduce == mpiSize(ThScatterName#Comm));
+    if(ThName#Comm) {
+        meshN ThNoOverlap;
+        if(mpiSize(ThName#Comm) == 1)
+            ThNoOverlap = ThName;
+        else
+            ThNoOverlap = trunc(ThName, abs(privateDmesh#ThName#khiDef[1][nuTriangle] - mpiRank(ThName#Comm)) < 1.0e-2, label = -111112);
+        fespace PhPart(ThNoOverlap, P0);
+        PhPart part;
+        partitionerSeq(part[], ThNoOverlap, mpiSize(comm));
+        partitionerPar(part[], ThNoOverlap, mpiCommSelf, mpiSize(comm));
+        meshN[int] sendTh(mpiSize(comm) - 1);
+        mpiRequest[int] rqSend(mpiSize(comm) - 1);
+        for(int i = 1; i < mpiSize(comm); ++i) {
+            sendTh[i - 1] = trunc(ThNoOverlap, abs(part - i) < 1.0e-2, label = -111112);
+            Isend(processor(i, comm, rqSend[i - 1]), sendTh[i - 1]);
+        }
+        ThScatterName = trunc(ThNoOverlap, abs(part) < 1.0e-2, label = -111112);
+        mpiWaitAll(rqSend);
+    }
+    else if(ThScatterName#Comm) {
+        mpiRequest rqRecv;
+        Irecv(processor(0, comm, rqRecv), ThScatterName);
+        mpiWait(rqRecv);
+    }
+    if(verbosity > 0 && ThScatterName#Comm) {
+        mpiBarrier(ThScatterName#Comm);
+        if(mpiRank(ThScatterName#Comm) == 0)
+            cout.scientific << " --- distributed mesh scattered (in " << mpiWtime() - timerScatter << ")" << endl;
+    }
+}
+reconstructDmesh(ThScatterName)
+// EOM
+
+macro gatherSolution(ThName, comm, ThGatherName, Pk, u, uNew) {
+IFMACRO(!privateDmesh#ThName)
+assert(0);
+ENDIFMACRO
+IFMACRO(!privateDmesh#ThGatherName)
+assert(0);
+ENDIFMACRO
+IFMACRO(!ThName#Comm)
+NewMacro ThName#Comm()mpiCommWorld EndMacro
+ENDIFMACRO
+IFMACRO(!ThGatherName#Comm)
+NewMacro ThGatherName#Comm()mpiCommWorld EndMacro
+ENDIFMACRO
+    if(verbosity > 0 && ThName#Comm)
+        mpiBarrier(ThName#Comm);
+    real timerGather = mpiWtime();
+    if(ThGatherName#Comm) {
+        meshN[int] recvTh(mpiSize(comm) - 1);
+        real[int][int] recvU(mpiSize(comm) - 1);
+        mpiRequest[int] rqRecvTh(mpiSize(comm) - 1);
+        mpiRequest[int] rqRecvU(mpiSize(comm) - 1);
+        for(int i = 0; i < mpiSize(comm) - 1; ++i)
+            Irecv(processor(i + 1, comm, rqRecvTh[i]), recvTh[i]);
+        for(int i = 0; i < mpiSize(comm) - 1; ++i) {
+            int index = mpiWaitAny(rqRecvTh);
+            fespace VhRecv(recvTh[index], Pk);
+            recvU[index].resize(VhRecv.ndof);
+            Irecv(processor(index + 1, comm, rqRecvU[index]), recvU[index]);
+        }
+        fespace VhGlobalGather(ThGatherName, Pk);
+        real[int] visited(VhGlobalGather.ndof);
+        visited = 1.0;
+        {
+            fespace VhRestriction(ThName, Pk);
+            matrix R = interpolate(VhRestriction, VhGlobalGather);
+            real[int] buffer = R' * u[];
+            buffer .*= visited;
+            real[int] ones(VhRestriction.ndof);
+            ones = -1.0;
+            visited += R' * ones;
+            for[j, v : visited] v = max(v, 0.0);
+            uNew[] += buffer;
+        }
+        for(int i = 0; i < mpiSize(comm) - 1; ++i) {
+            int index = mpiWaitAny(rqRecvU);
+            fespace VhRestriction(recvTh[index], Pk);
+            matrix R = interpolate(VhRestriction, VhGlobalGather);
+            real[int] buffer = R' * recvU[index];
+            buffer .*= visited;
+            real[int] ones(VhRestriction.ndof);
+            ones = -1.0;
+            visited += R' * ones;
+            for[j, v : visited] v = max(v, 0.0);
+            uNew[] += buffer;
+        }
+    }
+    else {
+        mpiRequest[int] rqSend(2);
+        Isend(processor(0, comm, rqSend[0]), ThName);
+        fespace VhLocalGather(ThName, Pk);
+        assert(u[].n == VhLocalGather.ndof);
+        Isend(processor(0, comm, rqSend[1]), u[]);
+        mpiWaitAll(rqSend);
+    }
+    if(verbosity > 0 && ThName#Comm) {
+        mpiBarrier(ThName#Comm);
+        if(mpiRank(ThName#Comm) == 0)
+            cout.scientific << " --- distributed solution gathered (in " << mpiWtime() - timerGather << ")" << endl;
+    }
+} // EOM
+
+macro scatterSolution(ThName, comm, ThScatterName, Pk, u, uNew) {
+IFMACRO(!privateDmesh#ThName)
+assert(0);
+ENDIFMACRO
+IFMACRO(!privateDmesh#ThScatterName)
+assert(0);
+ENDIFMACRO
+IFMACRO(!def)
+NewMacro def(i)i EndMacro
+ENDIFMACRO
+IFMACRO(!ThName#Comm)
+NewMacro ThName#Comm()mpiCommWorld EndMacro
+ENDIFMACRO
+IFMACRO(!ThScatterName#Comm)
+NewMacro ThScatterName#Comm()mpiCommWorld EndMacro
+ENDIFMACRO
+    if(verbosity > 0 && ThScatterName#Comm)
+        mpiBarrier(ThScatterName#Comm);
+    real timerScatter = mpiWtime();
+    if(mpiRank(comm) == 0) {
+        broadcast(processor(0, comm), ThName);
+        broadcast(processor(0, comm), u[]);
+        def(uNew) = def(u);
+    }
+    else {
+        meshN ThGlobalScatter;
+        broadcast(processor(0, comm), ThGlobalScatter);
+        fespace VhGlobalScatter(ThGlobalScatter, Pk);
+        VhGlobalScatter uGlobalScatter;
+        broadcast(processor(0, comm), uGlobalScatter[]);
+        def(uNew) = def(uGlobalScatter);
+    }
+    if(verbosity > 0 && ThScatterName#Comm) {
+        mpiBarrier(ThScatterName#Comm);
+        if(mpiRank(ThScatterName#Comm) == 0)
+            cout.scientific << " --- distributed solution scattered (in " << mpiWtime() - timerScatter << ")" << endl;
+    }
+}
+// EOM
