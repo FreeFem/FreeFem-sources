@@ -1,5 +1,9 @@
 #ifndef FF___HPP_
 #define FF___HPP_
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundefined-var-template"
+#endif
 // a not to bad list of freefem++ include 
 // to simplify like of programmer.
 // FH. 
@@ -51,4 +55,7 @@ using namespace std;
 #include "Mesh2.h"
 #include "BamgFreeFem.hpp"
 #include "ffapi.hpp" 
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 #endif

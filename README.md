@@ -18,9 +18,9 @@
 <details>
 <summary> CI / CD tools </summary>
 
-| Codacy | Travis | LGTM | Coverity |
-|:------:|:------:|:----:|:--------:|
-| [![Codacy Badge](https://api.codacy.com/project/badge/Grade/710d25bb3c6040c19c3ff7c0f3201835)](https://www.codacy.com/app/sgarnotel/FreeFem-sources?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=FreeFem/FreeFem-sources&amp;utm_campaign=Badge_Grade) | [![Build Status](https://travis-ci.org/FreeFem/FreeFem-sources.svg?branch=master)](https://travis-ci.org/FreeFem/FreeFem-sources) | [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/FreeFem/FreeFem-sources.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/FreeFem/FreeFem-sources/context:cpp) | <a href="https://scan.coverity.com/projects/freefem-freefem-sources"><img alt="Coverity Scan Build Status" src="https://scan.coverity.com/projects/15433/badge.svg"/></a> |
+| Codacy | LGTM | Coverity |
+|:------:|:----:|:--------:|
+| [![Codacy Badge](https://api.codacy.com/project/badge/Grade/710d25bb3c6040c19c3ff7c0f3201835)](https://www.codacy.com/app/sgarnotel/FreeFem-sources?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=FreeFem/FreeFem-sources&amp;utm_campaign=Badge_Grade) | [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/FreeFem/FreeFem-sources.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/FreeFem/FreeFem-sources/context:cpp) | <a href="https://scan.coverity.com/projects/freefem-freefem-sources"><img alt="Coverity Scan Build Status" src="https://scan.coverity.com/projects/15433/badge.svg"/></a> |
 
 Jenkins ([FreeFEM-dev](https://ci.inria.fr/freefem-dev/)):
 
