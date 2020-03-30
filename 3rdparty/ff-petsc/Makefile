@@ -74,8 +74,8 @@ PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
 endif
 PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-slepc
 ifeq ($(WIN32DLLTARGET),)
-PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-hpddm --download-hpddm-commit=83c462a
-PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-hpddm --download-hpddm-commit=83c462a
+PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-hpddm --download-hpddm-commit=e8639ff
+PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-hpddm --download-hpddm-commit=e8639ff
 endif
 endif
 ifeq ($(FF_generic_petsc), yes)
@@ -136,8 +136,8 @@ all-local:
 # -------------------------------
 
 DIRPKG=../pkg
-VERSION=3.12.4
-VERSION_SLEPC=3.12.0
+VERSION=3.13.0
+VERSION_SLEPC=3.012.2
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
@@ -290,7 +290,7 @@ $(SRCDIR)/tag-tar:$(PACKAGE)
 ifeq ($(WIN32DLLTARGET),)
 	patch -p1 < petsc-metis.patch
 else
-	cd petsc-3.12.4 && patch -p1 < ../petsc-maint.patch && cd -
+	cp SuiteSparse.py petsc-3.13.0/config/BuildSystem/config/packages
 endif
 	touch $@
 $(PACKAGE):

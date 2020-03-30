@@ -1,10 +1,16 @@
 //ff-c++-LIBRARY-dep: cxx11 hpddm [mumps parmetis metis ptscotch scotch scalapack|umfpack] [mkl|blas] mpi pthread mpifc fc
 //ff-c++-cpp-dep:
 
+#define HPDDM_PRECISION                 2
+
 #define HPDDM_SCHWARZ                   1
 #define HPDDM_FETI                      0
 #define HPDDM_BDD                       0
+#if PRECISION == 2
 #define HPDDM_INEXACT_COARSE_OPERATOR   1
+#else
+#define HPDDM_INEXACT_COARSE_OPERATOR   0
+#endif
 
 #include "common_hpddm.hpp"
 
@@ -27,12 +33,12 @@ class initDDM : public OneOperator {
                     args.SetNameParam(n_name_param, name_param, nargs);
                     A = to<Type*>(args[0]);
                     if(c == 0 || c == 2)
-                        Mat = to<Matrice_Creuse<K>*>(args[1]);
+                        Mat = to<Matrice_Creuse<HPDDM::upscaled_type<K>>*>(args[1]);
                     else
                         Mat = to<long>(args[1]);
                     if(c == 0 || c == 1) {
                         R = to<KN<KN<long>>*>(args[2]);
-                        D = to<KN<HPDDM::underlying_type<K>>*>(args[3]);
+                        D = to<KN<HPDDM::underlying_type<HPDDM::upscaled_type<K>>>*>(args[3]);
                     }
                 }
 
@@ -40,9 +46,9 @@ class initDDM : public OneOperator {
                 operator aType() const { return atype<Type*>(); }
         };
         E_F0* code(const basicAC_F0 & args) const { return new E_initDDM(args, c); }
-        initDDM() : OneOperator(atype<Type*>(), atype<Type*>(), atype<Matrice_Creuse<K>*>(), atype<KN<KN<long>>*>(), atype<KN<HPDDM::underlying_type<K>>*>()), c(0) { }
-        initDDM(int) : OneOperator(atype<Type*>(), atype<Type*>(), atype<long>(), atype<KN<KN<long>>*>(), atype<KN<HPDDM::underlying_type<K>>*>()), c(1) { }
-        initDDM(int, int) : OneOperator(atype<Type*>(), atype<Type*>(), atype<Matrice_Creuse<K>*>()), c(2) { }
+        initDDM() : OneOperator(atype<Type*>(), atype<Type*>(), atype<Matrice_Creuse<HPDDM::upscaled_type<K>>*>(), atype<KN<KN<long>>*>(), atype<KN<HPDDM::underlying_type<HPDDM::upscaled_type<K>>>*>()), c(0) { }
+        initDDM(int) : OneOperator(atype<Type*>(), atype<Type*>(), atype<long>(), atype<KN<KN<long>>*>(), atype<KN<HPDDM::underlying_type<HPDDM::upscaled_type<K>>>*>()), c(1) { }
+        initDDM(int, int) : OneOperator(atype<Type*>(), atype<Type*>(), atype<Matrice_Creuse<HPDDM::upscaled_type<K>>*>()), c(2) { }
         initDDM(int, int, int) : OneOperator(atype<Type*>(), atype<Type*>(), atype<long>()), c(3) { }
 };
 template<class Type, class K>
@@ -56,8 +62,8 @@ AnyType initDDM<Type, K>::E_initDDM::operator()(Stack stack) const {
     Type* ptA = GetAny<Type*>((*A)(stack));
     HPDDM::MatrixCSR<K>* dA;
     if(c == 0 || c == 2) {
-        MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*Mat)(stack))->A));
-        dA = new_HPDDM_MatrixCSR<K>(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+        MatriceMorse<HPDDM::upscaled_type<K>>* mA = static_cast<MatriceMorse<HPDDM::upscaled_type<K>>*>(&(*GetAny<Matrice_Creuse<HPDDM::upscaled_type<K>>*>((*Mat)(stack))->A));
+        dA = new_HPDDM_MatrixCSR<K>(mA);
     }
     else {
         int dof = GetAny<long>((*Mat)(stack));
@@ -66,13 +72,19 @@ AnyType initDDM<Type, K>::E_initDDM::operator()(Stack stack) const {
     if(c == 0 || c == 1) {
         KN<KN<long>>* ptR = GetAny<KN<KN<long>>*>((*R)(stack));
         int level = nargs[2] ? std::abs(GetAny< long >((*nargs[2])(stack))) : 0;
-        KN<HPDDM::underlying_type<K>>* ptD = GetAny<KN<HPDDM::underlying_type<K>>*>((*D)(stack));
+        KN<HPDDM::underlying_type<HPDDM::upscaled_type<K>>>* ptD = GetAny<KN<HPDDM::underlying_type<HPDDM::upscaled_type<K>>>*>((*D)(stack));
         if(ptR) {
             KN_<KN<long>> sub(ptR->n > 0 && ptR->operator[](0).n > 0 ? (*ptR)(FromTo(1 + level * ptR->operator[](0).n, 1 + (level + 1) * ptR->operator[](0).n - 1)) : KN<KN<long>>());
             ptA->HPDDM::template Subdomain<K>::initialize(dA, STL<long>(ptR->n > 0 ? ptR->operator[](0) : KN<long>()), sub, nargs[0] ? (MPI_Comm*)GetAny<pcommworld>((*nargs[0])(stack)) : 0);
         }
-        if(ptD)
-            ptA->initialize(*ptD);
+        if(ptD) {
+            HPDDM::underlying_type<K>* d = reinterpret_cast<HPDDM::underlying_type<K>*>(ptD->operator HPDDM::upscaled_type<HPDDM::underlying_type<K>>*());
+            if(!std::is_same<HPDDM::upscaled_type<K>, K>::value) {
+                for(int i = 0; i < ptD->n; ++i)
+                    d[i] = ptD->operator[](i);
+            }
+            ptA->initialize(d);
+        }
         else
             std::cerr << "Something is really wrong here!" << std::endl;
         if(c == 0 && (!nargs[1] || GetAny<bool>((*nargs[1])(stack))))
@@ -88,18 +100,18 @@ AnyType initDDM<Type, K>::E_initDDM::operator()(Stack stack) const {
 template<class Type, class K>
 class attachCoarseOperator : public OneOperator {
     public:
-        typedef KN<K> Kn;
-        typedef KN_<K> Kn_;
-        class MatF_O : public RNM_VirtualMatrix<K>, public Type::super::CoarseCorrection {
+        typedef KN<HPDDM::upscaled_type<K>> Kn;
+        typedef KN_<HPDDM::upscaled_type<K>> Kn_;
+        class MatF_O : public RNM_VirtualMatrix<HPDDM::upscaled_type<K>>, public Type::super::CoarseCorrection {
             public:
                 typedef typename Type::super::CoarseCorrection super;
                 Stack stack;
                 mutable Kn x;
                 C_F0 c_x;
                 Expression mat;
-                typedef typename RNM_VirtualMatrix<K>::plusAx plusAx;
+                typedef typename RNM_VirtualMatrix<HPDDM::upscaled_type<K>>::plusAx plusAx;
                 MatF_O(int n, Stack stk, const OneOperator* op) :
-                    RNM_VirtualMatrix<K>(n), stack(stk), x(n), c_x(CPValue(x)),
+                    RNM_VirtualMatrix<HPDDM::upscaled_type<K>>(n), stack(stk), x(n), c_x(CPValue(x)),
                     mat(op ? CastTo<Kn_>(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : 0) { }
                 ~MatF_O() {
                     delete mat;
@@ -117,11 +129,23 @@ class attachCoarseOperator : public OneOperator {
                     Ax = GetAny<Kn_>((*mat)(stack));
                     WhereStackOfPtr2Free(stack)->clean();
                 }
+                template<class T, typename std::enable_if<!std::is_same<T, HPDDM::upscaled_type<T>>::value>::type* = nullptr>
+                void addMatMul(const KN_<T>& xx, KN_<T>& Ax) const {
+                    ffassert(xx.N() == this->N && Ax.N() == this->M);
+                    x = xx;
+                    {
+                        KN<HPDDM::upscaled_type<K>> res(this->M, 0.0);
+                        res = GetAny<Kn_>((*mat)(stack));
+                        for(int i = 0; i < this->M; ++i)
+                            Ax[i] = res[i];
+                    }
+                    WhereStackOfPtr2Free(stack)->clean();
+                }
                 plusAx operator*(const Kn& x) const { return plusAx(this, x); }
                 bool ChecknbLine(int) const { return true; }
                 bool ChecknbColumn(int) const { return true; }
         };
-        class MatMatF_O : public RNM_VirtualMatrix<K>, public Type::super::CoarseCorrection {
+        class MatMatF_O : public RNM_VirtualMatrix<HPDDM::upscaled_type<K>>, public Type::super::CoarseCorrection {
             public:
                 typedef typename Type::super::CoarseCorrection super;
                 Stack stack;
@@ -130,9 +154,9 @@ class attachCoarseOperator : public OneOperator {
                 mutable long mu;
                 C_F0 c_mu;
                 Expression mat;
-                typedef typename RNM_VirtualMatrix<K>::plusAx plusAx;
+                typedef typename RNM_VirtualMatrix<HPDDM::upscaled_type<K>>::plusAx plusAx;
                 MatMatF_O(int n, Stack stk, const OneOperator* op) :
-                    RNM_VirtualMatrix<K>(n), stack(stk), x(0), c_x(CPValue(x)), mu(1), c_mu(CPValue(mu)),
+                    RNM_VirtualMatrix<HPDDM::upscaled_type<K>>(n), stack(stk), x(0), c_x(CPValue(x)), mu(1), c_mu(CPValue(mu)),
                     mat(op ? CastTo<Kn_>(C_F0(op->code(basicAC_F0_wa({ c_x, c_mu })), (aType)*op)) : 0) { }
                 ~MatMatF_O() {
                     delete mat;
@@ -142,6 +166,7 @@ class attachCoarseOperator : public OneOperator {
                     delete zzz;
                 }
                 virtual void operator()(const K* const in, K* const out) {
+                    mu = 1;
                     KN_<K> xx(const_cast<K*>(in), this->N);
                     KN_<K> yy(out, this->N);
                     addMatMul(xx, yy);
@@ -154,10 +179,27 @@ class attachCoarseOperator : public OneOperator {
                 }
                 void addMatMul(const Kn_& xx, Kn_& Ax) const {
                     ffassert(xx.N() == this->N * mu && Ax.N() == this->M * mu);
-                    K* backup = x;
+                    HPDDM::upscaled_type<K>* backup = x;
                     x.set(xx, this->N * mu);
                     Ax = GetAny<Kn_>((*mat)(stack));
                     x.set(backup, 0);
+                    WhereStackOfPtr2Free(stack)->clean();
+                }
+                template<class T, typename std::enable_if<!std::is_same<T, HPDDM::upscaled_type<T>>::value>::type* = nullptr>
+                void addMatMul(const KN_<T>& xx, KN_<T>& Ax) const {
+                    ffassert(xx.N() == this->N * mu && Ax.N() == this->M * mu);
+                    HPDDM::upscaled_type<K>* backup = x;
+                    {
+                        KN<HPDDM::upscaled_type<K>> in(this->N * mu, 0.0);
+                        KN<HPDDM::upscaled_type<K>> res(this->M * mu, 0.0);
+                        x.set(in, this->N * mu);
+                        for(int i = 0; i < this->N * mu; ++i)
+                            x[i] = xx[i];
+                        res = GetAny<Kn_>((*mat)(stack));
+                        for(int i = 0; i < this->M * mu; ++i)
+                            Ax[i] = res[i];
+                        x.set(backup, 0);
+                    }
                     WhereStackOfPtr2Free(stack)->clean();
                 }
                 plusAx operator*(const Kn& x) const { return plusAx(this, x); }
@@ -182,9 +224,9 @@ class attachCoarseOperator : public OneOperator {
                     if(c == 1) {
                         const Polymorphic* op = dynamic_cast<const Polymorphic*>(args[2].LeftValue());
                         ffassert(op);
-                        codeMatC = op->Find("(", ArrayOfaType(atype<KN<K>*>(), atype<long>(), false));
+                        codeMatC = op->Find("(", ArrayOfaType(atype<KN<HPDDM::upscaled_type<K>>*>(), atype<long>(), false));
                         if(!codeMatC)
-                            codeC = op->Find("(", ArrayOfaType(atype<KN<K>*>(), false));
+                            codeC = op->Find("(", ArrayOfaType(atype<KN<HPDDM::upscaled_type<K>>*>(), false));
                     }
                 }
 
@@ -197,13 +239,13 @@ class attachCoarseOperator : public OneOperator {
 };
 template<class Type, class K>
 basicAC_F0::name_and_type attachCoarseOperator<Type, K>::E_attachCoarseOperator::name_param[] = {
-    {"A", &typeid(Matrice_Creuse<K>*)},
-    {"B", &typeid(Matrice_Creuse<K>*)},
-    {"pattern", &typeid(Matrice_Creuse<K>*)},
-    {"threshold", &typeid(HPDDM::underlying_type<K>)},
+    {"A", &typeid(Matrice_Creuse<HPDDM::upscaled_type<K>>*)},
+    {"B", &typeid(Matrice_Creuse<HPDDM::upscaled_type<K>>*)},
+    {"pattern", &typeid(Matrice_Creuse<HPDDM::upscaled_type<K>>*)},
+    {"threshold", &typeid(HPDDM::underlying_type<HPDDM::upscaled_type<K>>)},
     {"timing", &typeid(KN<double>*)},
     {"ret", &typeid(Pair<K>*)},
-    {"deflation", &typeid(FEbaseArrayKn<K>*)}
+    {"deflation", &typeid(FEbaseArrayKn<HPDDM::upscaled_type<K>>*)}
 };
 template<class Type, class K>
 AnyType attachCoarseOperator<Type, K>::E_attachCoarseOperator::operator()(Stack stack) const {
@@ -215,30 +257,30 @@ AnyType attachCoarseOperator<Type, K>::E_attachCoarseOperator::operator()(Stack 
         ptA->_cc = nullptr;
     }
     if(c == 0) {
-        MatriceMorse<K>* mA = nargs[0] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[0])(stack))->A)) : 0;
+        MatriceMorse<HPDDM::upscaled_type<K>>* mA = nargs[0] ? static_cast<MatriceMorse<HPDDM::upscaled_type<K>>*>(&(*GetAny<Matrice_Creuse<HPDDM::upscaled_type<K>>*>((*nargs[0])(stack))->A)) : 0;
         Pair<K>* pair = nargs[5] ? GetAny<Pair<K>*>((*nargs[5])(stack)) : 0;
-        FEbaseArrayKn<K>* deflation = nargs[6] ? GetAny<FEbaseArrayKn<K>*>((*nargs[6])(stack)) : 0;
+        FEbaseArrayKn<HPDDM::upscaled_type<K>>* deflation = nargs[6] ? GetAny<FEbaseArrayKn<HPDDM::upscaled_type<K>>*>((*nargs[6])(stack)) : 0;
         HPDDM::Option& opt = *HPDDM::Option::get();
         KN<double>* timing = nargs[4] ? GetAny<KN<double>*>((*nargs[4])(stack)) : 0;
         std::pair<MPI_Request, const K*>* ret = nullptr;
         if(mA) {
             ff_HPDDM_MatrixCSR<K> dA(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
-            MatriceMorse<K>* mB = nargs[1] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[1])(stack))->A)) : nullptr;
-            MatriceMorse<K>* mP = nargs[2] && opt.any_of("schwarz_method", { 1, 2, 4 }) ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[2])(stack))->A)) : nullptr;
+            MatriceMorse<HPDDM::upscaled_type<K>>* mB = nargs[1] ? static_cast<MatriceMorse<HPDDM::upscaled_type<K>>*>(&(*GetAny<Matrice_Creuse<HPDDM::upscaled_type<K>>*>((*nargs[1])(stack))->A)) : nullptr;
+            MatriceMorse<HPDDM::upscaled_type<K>>* mP = nargs[2] && opt.any_of("schwarz_method", { 1, 2, 4 }) ? static_cast<MatriceMorse<HPDDM::upscaled_type<K>>*>(&(*GetAny<Matrice_Creuse<HPDDM::upscaled_type<K>>*>((*nargs[2])(stack))->A)) : nullptr;
             if(dA._n == dA._m && !deflation) {
                 if(timing) { // tic
                     timing->resize(timing->n + 1);
                     (*timing)[timing->n - 1] = MPI_Wtime();
                 }
                 const HPDDM::MatrixCSR<K>* const dP = new_HPDDM_MatrixCSR<K>(mP);
-                //mP ? new HPDDM::MatrixCSR<K>(mP->n, mP->m, mP->nbcoef, mP->a, mP->lg, mP->cl, mP->symetrique) : nullptr;
+#ifdef EIGENSOLVER
                 if(mB) {
-       //                 HPDDM::MatrixCSR<K> dB(mB->n, mB->m, mB->nbcoef, mB->a, mB->lg, mB->cl, mB->symetrique);
                     ff_HPDDM_MatrixCSR<K> dB(mB);
                     ptA->template solveGEVP<EIGENSOLVER>(&dA, &dB, dP);
                 }
                 else
                     ptA->template solveGEVP<EIGENSOLVER>(&dA, nullptr, dP);
+#endif
                 if(mP)
                     set_ff_matrix(mA, dA);
                 delete dP;
@@ -322,13 +364,13 @@ basicAC_F0::name_and_type solveDDM_Op<Type, K>::name_param[] = {
     {"timing", &typeid(KN<double>*)},
     {"excluded", &typeid(bool)},
     {"ret", &typeid(Pair<K>*)},
-    {"O", &typeid(Matrice_Creuse<K>*)},
+    {"O", &typeid(Matrice_Creuse<HPDDM::upscaled_type<K>>*)},
     {"communicator", &typeid(pcommworld)}
 };
 template<class Type, class K>
 class solveDDM : public OneOperator {
     public:
-        solveDDM() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<K>*>(), atype<KN<K>*>()) { }
+        solveDDM() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<HPDDM::upscaled_type<K>>*>(), atype<KN<HPDDM::upscaled_type<K>>*>()) { }
 
         E_F0* code(const basicAC_F0& args) const {
             return new solveDDM_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
@@ -336,8 +378,8 @@ class solveDDM : public OneOperator {
 };
 template<class Type, class K>
 AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
-    KN<K>* ptRHS = GetAny<KN<K>*>((*rhs)(stack));
-    KN<K>* ptX = GetAny<KN<K>*>((*x)(stack));
+    KN<HPDDM::upscaled_type<K>>* ptRHS = GetAny<KN<HPDDM::upscaled_type<K>>*>((*rhs)(stack));
+    KN<HPDDM::upscaled_type<K>>* ptX = GetAny<KN<HPDDM::upscaled_type<K>>*>((*x)(stack));
     Type* ptA = GetAny<Type*>((*A)(stack));
     if(ptX->n != ptRHS->n || ptRHS->n < ptA->getDof())
         return 0L;
@@ -350,7 +392,7 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
             int flag;
             MPI_Test(&(pair->p->first), &flag, MPI_STATUS_IGNORE);
         }
-    MatriceMorse<K>* mA = nargs[3] ? static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*nargs[3])(stack))->A)) : 0;
+    MatriceMorse<HPDDM::upscaled_type<K>>* mA = nargs[3] ? static_cast<MatriceMorse<HPDDM::upscaled_type<K>>*>(&(*GetAny<Matrice_Creuse<HPDDM::upscaled_type<K>>*>((*nargs[3])(stack))->A)) : 0;
     unsigned short mu = ptX->n / ptA->getDof();
     MPI_Allreduce(MPI_IN_PLACE, &mu, 1, MPI_UNSIGNED_SHORT, MPI_MAX, ptA->getCommunicator());
     const HPDDM::MatrixCSR<K>* A = ptA->getMatrix();
@@ -411,9 +453,23 @@ AnyType solveDDM_Op<Type, K>::operator()(Stack stack) const {
     if(!excluded) {
         const auto& map = ptA->getMap();
         bool allocate = map.size() > 0 && ptA->getBuffer()[0] == nullptr ? ptA->setBuffer() : false;
-        ptA->exchange(static_cast<K*>(*ptRHS), mu);
+        K* rhs = reinterpret_cast<K*>(ptRHS->operator HPDDM::upscaled_type<K>*());
+        K* x = reinterpret_cast<K*>(ptX->operator HPDDM::upscaled_type<K>*());
+        if(!std::is_same<HPDDM::upscaled_type<K>, K>::value) {
+            for(int i = 0; i < ptRHS->n; ++i) {
+                rhs[i] = ptRHS->operator[](i);
+                x[i] = ptX->operator[](i);
+            }
+        }
+        ptA->exchange(rhs, mu);
         ptA->clearBuffer(allocate);
-        HPDDM::IterativeMethod::solve(*ptA, (K*)*ptRHS, (K*)*ptX, mu, comm);
+        HPDDM::IterativeMethod::solve(*ptA, rhs, x, mu, comm);
+        if(!std::is_same<HPDDM::upscaled_type<K>, K>::value) {
+            for(int i = ptRHS->n - 1; i >= 0; --i) {
+                ptRHS->operator[](i) = rhs[i];
+                ptX->operator[](i) = x[i];
+            }
+        }
     }
     else
         HPDDM::IterativeMethod::solve<true>(*ptA, (K*)nullptr, (K*)nullptr, mu, comm);
@@ -451,7 +507,7 @@ basicAC_F0::name_and_type changeOperator_Op<Type, K>::name_param[] = {
 template<class Type, class K>
 class changeOperator : public OneOperator {
     public:
-        changeOperator() : OneOperator(atype<long>(), atype<Type*>(), atype<Matrice_Creuse<K>*>()) { }
+        changeOperator() : OneOperator(atype<long>(), atype<Type*>(), atype<Matrice_Creuse<HPDDM::upscaled_type<K>>*>()) { }
 
         E_F0* code(const basicAC_F0& args) const {
             return new changeOperator_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
@@ -459,8 +515,8 @@ class changeOperator : public OneOperator {
 };
 template<class Type, class K>
 AnyType changeOperator_Op<Type, K>::operator()(Stack stack) const {
-    MatriceMorse<K>* mN = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*mat)(stack))->A));
-    HPDDM::MatrixCSR<K>* dN = new_HPDDM_MatrixCSR<K>(mN);//mN->n, mN->m, mN->nbcoef, mN->a, mN->lg, mN->cl, mN->symetrique);
+    MatriceMorse<HPDDM::upscaled_type<K>>* mN = static_cast<MatriceMorse<HPDDM::upscaled_type<K>>*>(&(*GetAny<Matrice_Creuse<HPDDM::upscaled_type<K>>*>((*mat)(stack))->A));
+    HPDDM::MatrixCSR<K>* dN = new_HPDDM_MatrixCSR<K>(mN);
     Type* ptA = GetAny<Type*>((*A)(stack));
     ptA->setMatrix(dN);
     if(!nargs[0] || GetAny<bool>((*nargs[0])(stack)))
@@ -527,7 +583,7 @@ class distributedMV_Op : public E_F0mps {
 template<class Type, class K>
 class distributedMV : public OneOperator {
     public:
-        distributedMV() : OneOperator(atype<long>(), atype<Type*>(), atype<Matrice_Creuse<K>*>(), atype<KN<K>*>(), atype<KN<K>*>()) { }
+        distributedMV() : OneOperator(atype<long>(), atype<Type*>(), atype<Matrice_Creuse<HPDDM::upscaled_type<K>>*>(), atype<KN<HPDDM::upscaled_type<K>>*>(), atype<KN<HPDDM::upscaled_type<K>>*>()) { }
 
         E_F0* code(const basicAC_F0& args) const {
             return new distributedMV_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]), t[3]->CastTo(args[3]));
@@ -536,14 +592,28 @@ class distributedMV : public OneOperator {
 template<class Type, class K>
 AnyType distributedMV_Op<Type, K>::operator()(Stack stack) const {
     Type* pA = GetAny<Type*>((*A)(stack));
-    KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
-    KN<K>* pout = GetAny<KN<K>*>((*out)(stack));
+    KN<HPDDM::upscaled_type<K>>* pin = GetAny<KN<HPDDM::upscaled_type<K>>*>((*in)(stack));
+    KN<HPDDM::upscaled_type<K>>* pout = GetAny<KN<HPDDM::upscaled_type<K>>*>((*out)(stack));
     pout->resize(pin->n);
     unsigned short mu = pin->n / pA->getDof();
-    MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*GetAny<Matrice_Creuse<K>*>((*Mat)(stack))->A));
-    ff_HPDDM_MatrixCSR<K> dA(mA);//->n, mA->m, mA->nbcoef, mA->a, mA->lg, mA->cl, mA->symetrique);
+    MatriceMorse<HPDDM::upscaled_type<K>>* mA = static_cast<MatriceMorse<HPDDM::upscaled_type<K>>*>(&(*GetAny<Matrice_Creuse<HPDDM::upscaled_type<K>>*>((*Mat)(stack))->A));
+    ff_HPDDM_MatrixCSR<K> dA(mA);
     bool allocate = pA->setBuffer();
-    pA->GMV((K*)*pin, (K*)*pout, mu, &dA);
+    K* in = reinterpret_cast<K*>(pin->operator HPDDM::upscaled_type<K>*());
+    K* out = reinterpret_cast<K*>(pout->operator HPDDM::upscaled_type<K>*());
+    if(!std::is_same<HPDDM::upscaled_type<K>, K>::value) {
+        for(int i = 0; i < pin->n; ++i) {
+            in[i] = pin->operator[](i);
+            out[i] = pout->operator[](i);
+        }
+    }
+    pA->GMV(in, out, mu, &dA);
+    if(!std::is_same<HPDDM::upscaled_type<K>, K>::value) {
+        for(int i = pin->n - 1; i >= 0; --i) {
+            pin->operator[](i) = in[i];
+            pout->operator[](i) = out[i];
+        }
+    }
     pA->clearBuffer(allocate);
     return 0L;
 }
@@ -554,7 +624,25 @@ class ProdSchwarz {
         const T t;
         const U u;
         ProdSchwarz(T v, U w) : t(v), u(w) {}
-        void prod(U x) const { bool allocate = t->setBuffer(); t->GMV(*(this->u), *x); t->clearBuffer(allocate); };
+        void prod(U x) const {
+            bool allocate = t->setBuffer();
+            K* in = reinterpret_cast<K*>(u->operator HPDDM::upscaled_type<K>*());
+            K* out = reinterpret_cast<K*>(x->operator HPDDM::upscaled_type<K>*());
+            if(!std::is_same<HPDDM::upscaled_type<K>, K>::value) {
+                for(int i = 0; i < x->n; ++i) {
+                    in[i] = this->u->operator[](i);
+                    out[i] = x->operator[](i);
+                }
+            }
+            t->GMV(in, out);
+            if(!std::is_same<HPDDM::upscaled_type<K>, K>::value) {
+                for(int i = x->n - 1; i >= 0; --i) {
+                    this->u->operator[](i) = in[i];
+                    x->operator[](i) = out[i];
+                }
+            }
+            t->clearBuffer(allocate);
+        };
         static U mv(U Ax, ProdSchwarz<T, U, K, N> A) {
             *Ax = K();
             A.prod(Ax);
@@ -598,9 +686,23 @@ class InvSchwarz {
                 HPDDM::Option::get()->remove((*t).prefix("verbosity"));
             const auto& map = (*t).getMap();
             bool allocate = map.size() > 0 && (*t).getBuffer()[0] == nullptr ? (*t).setBuffer() : false;
-            (*t).exchange(static_cast<K*>(*u), mu);
+            K* rhs = reinterpret_cast<K*>(u->operator HPDDM::upscaled_type<K>*());
+            K* x = reinterpret_cast<K*>(out->operator HPDDM::upscaled_type<K>*());
+            if(!std::is_same<HPDDM::upscaled_type<K>, K>::value) {
+                for(int i = 0; i < u->n; ++i) {
+                    rhs[i] = u->operator[](i);
+                    x[i] = out->operator[](i);
+                }
+            }
+            (*t).exchange(rhs, mu);
             (*t).clearBuffer(allocate);
-            HPDDM::IterativeMethod::solve(*t, (K*)*u, (K*)*out, mu, MPI_COMM_WORLD);
+            HPDDM::IterativeMethod::solve(*t, rhs, x, mu, MPI_COMM_WORLD);
+            if(!std::is_same<HPDDM::upscaled_type<K>, K>::value) {
+                for(int i = u->n - 1; i >= 0; --i) {
+                    u->operator[](i) = rhs[i];
+                    out->operator[](i) = x[i];
+                }
+            }
             if(HPDDM::Wrapper<K>::I == 'F' && mu > 1) {
                 std::for_each(A->_ja, A->_ja + A->_nnz, [](int& i) { --i; });
                 std::for_each(A->_ia, A->_ia + A->_n + 1, [](int& i) { --i; });
@@ -645,7 +747,7 @@ class IterativeMethod : public OneOperator {
                 }
                 void mv(const R* const in, const int& n, const int& m, R* const out) const {
                     ffassert(m == 1);
-                    KN_<R> xx((R*)in, n);
+                    KN_<R> xx(const_cast<R*>(in), n);
                     KN_<R> yy(out, n);
                     yy = R();
                     addMatMul(xx,yy);
@@ -678,7 +780,7 @@ class IterativeMethod : public OneOperator {
                     WhereStackOfPtr2Free(stack)->clean();
                 }
                 void mv(const R* const in, const int& n, const int& m, R* const out) const {
-                    KNM_<R> xx((R*)in, n, m);
+                    KNM_<R> xx(const_cast<R*>(in), n, m);
                     KNM_<R> yy(out, n, m);
                     yy = R();
                     addMatMul(xx,yy);
@@ -767,12 +869,12 @@ class IterativeMethod : public OneOperator {
                                 Operator<MatF_O> Op(AA, PP);
                                 if(nargs[1])
                                     Op.setPrefix(*(GetAny<string*>((*nargs[1])(stack))));
-                                ret = HPDDM::IterativeMethod::solve(Op, (R*)b, (R*)x, 1, comm);
+                                ret = HPDDM::IterativeMethod::solve(Op, b.operator R*(), x.operator R*(), 1, comm);
                             }
                             else {
                                 HpSchwarz<R, S>* op = GetAny<HpSchwarz<R, S>*>((*Op)(stack));
                                 SchwarzOperator<MatF_O> SchwarzOp(op, PP);
-                                ret = HPDDM::IterativeMethod::solve(SchwarzOp, (R*)b, (R*)x, 1, comm);
+                                ret = HPDDM::IterativeMethod::solve(SchwarzOp, b.operator R*(), x.operator R*(), 1, comm);
                             }
                         }
                         else {
@@ -786,12 +888,12 @@ class IterativeMethod : public OneOperator {
                                 Operator<MatMatF_O> Op(AA, PP);
                                 if(nargs[1])
                                     Op.setPrefix(*(GetAny<string*>((*nargs[1])(stack))));
-                                ret = HPDDM::IterativeMethod::solve(Op, (R*)b, (R*)x, m, comm);
+                                ret = HPDDM::IterativeMethod::solve(Op, b.operator R*(), x.operator R*(), m, comm);
                             }
                             else {
                                 HpSchwarz<R, S>* op = GetAny<HpSchwarz<R, S>*>((*Op)(stack));
                                 SchwarzOperator<MatMatF_O> SchwarzOp(op, PP);
-                                ret = HPDDM::IterativeMethod::solve(SchwarzOp, (R*)b, (R*)x, m, comm);
+                                ret = HPDDM::IterativeMethod::solve(SchwarzOp, b.operator R*(), x.operator R*(), m, comm);
                             }
                         }
                     }
@@ -821,8 +923,8 @@ template<class Type>
 long globalNumbering(Type* const& A, KN<long>* const& numbering) {
     if(A) {
         numbering->resize(2 + A->getMatrix()->_n);
-        unsigned int g;
-        unsigned int* num = reinterpret_cast<unsigned int*>(&((*numbering)[0]));
+        long long g;
+        long* num = numbering->operator long*();
         A->distributedNumbering(num + 2, num[0], num[1], g);
     }
     return 0L;
@@ -842,44 +944,48 @@ void add() {
 #endif
         zzzfff->Add("schwarz", atype<HpSchwarz<K, S>*>());
 #ifndef PETSCSUB
-    map_type_of_map[make_pair(atype<Type<HPDDM::underlying_type<K>, U>*>(), atype<K*>())] = atype<Type<K, S>*>();
+    map_type_of_map[make_pair(atype<Type<HPDDM::underlying_type<K>, U>*>(), atype<HPDDM::upscaled_type<K>*>())] = atype<Type<K, S>*>();
 #else
-    map_type_of_map[make_pair(atype<Type<K, U>*>(), atype<K*>())] = atype<Type<K, S>*>();
+    map_type_of_map[make_pair(atype<Type<K, U>*>(), atype<HPDDM::upscaled_type<K>*>())] = atype<Type<K, S>*>();
 #endif
 
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>);
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>(1));
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>(1, 1));
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>(1, 1, 1));
+    Global.Add("constructor", "(", new initDDM< Type< K, S >, K >);
+    Global.Add("constructor", "(", new initDDM< Type< K, S >, K >(1));
+    Global.Add("constructor", "(", new initDDM< Type< K, S >, K >(1, 1));
+    Global.Add("constructor", "(", new initDDM< Type< K, S >, K >(1, 1, 1));
     TheOperators->Add("=", new OneOperator2_<Type<K, S>*, Type<K, S>*, Type<K, S>*>(Schwarz::changeOperatorSimple<Type<K, S>, K>));
     Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>);
     Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>(1));
     Global.Add("DDM", "(", new solveDDM<Type<K, S>, K>);
     Global.Add("changeOperator", "(", new changeOperator<Type<K, S>, K>);
     Global.Add("set", "(", new set<Type<K, S>, K>);
-    addProd<Type<K, S>, ProdSchwarz, KN<K>, K>();
-    addInv<Type<K, S>, InvSchwarz, KN<K>, K>();
-    addScalarProduct< Type<K, S>, K >( );
-#if 0 // if you need this, please make sure you are using the master branch of HPDDM
+    addProd<Type<K, S>, ProdSchwarz, KN<HPDDM::upscaled_type<K>>, K>();
+    addInv<Type<K, S>, InvSchwarz, KN<HPDDM::upscaled_type<K>>, K>();
     addArray<Type<K, S>>();
-#endif
     Global.Add("dmv", "(", new distributedMV<Type<K, S>, K>);
     Global.Add("destroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(destroyRecycling<Type<K, S>, K>));
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));
     Global.Add("exchange", "(", new exchangeIn<Type<K, S>, K>);
     Global.Add("exchange", "(", new exchangeInOut<Type<K, S>, K>);
-    Global.Add("IterativeMethod","(",new IterativeMethod<K, S>());
-    Global.Add("IterativeMethod","(",new IterativeMethod<K, S>(1));
-    Global.Add("IterativeMethod","(",new IterativeMethod<K, S>(1, 1));
-    Global.Add("IterativeMethod","(",new IterativeMethod<K, S>(1, 1, 1));
+    Global.Add("IterativeMethod","(",new IterativeMethod<HPDDM::upscaled_type<K>, S>());
+    Global.Add("IterativeMethod","(",new IterativeMethod<HPDDM::upscaled_type<K>, S>(1, 1));
+    if(std::is_same<K, HPDDM::upscaled_type<K>>::value) {
+        addScalarProduct< Type<K, S>, K >( );
+        Global.Add("IterativeMethod","(",new IterativeMethod<HPDDM::upscaled_type<K>, S>(1));
+        Global.Add("IterativeMethod","(",new IterativeMethod<HPDDM::upscaled_type<K>, S>(1, 1, 1));
+    }
     Global.Add("globalNumbering", "(", new OneOperator2_<long, Type<K, S>*, KN<long>*>(globalNumbering<Type<K, S>>));
 
     if(!exist_type<Pair<K>*>()) {
         Dcl_Type<Pair<K>*>(InitP<Pair<K>>, Destroy<Pair<K>>);
 #ifndef PETSCSUB
-        map_type_of_map[make_pair(atype<Pair<HPDDM::underlying_type<K>>*>(), atype<K*>())] = atype<Pair<K>*>();
+        map_type_of_map[make_pair(atype<Pair<HPDDM::underlying_type<K>>*>(), atype<HPDDM::upscaled_type<K>*>())] = atype<Pair<K>*>();
 #else
-        map_type_of_map[make_pair(atype<Pair<K>*>(), atype<K*>())] = atype<Pair<K>*>();
+        map_type_of_map[make_pair(atype<Pair<K>*>(), atype<HPDDM::upscaled_type<K>*>())] = atype<Pair<K>*>();
 #endif
     }
     aType t;
@@ -897,10 +1003,15 @@ static void Init_Schwarz() {
     constexpr char ds = 'S';
 #endif
     constexpr char zs = 'G';
+#if HPDDM_PRECISION == 2
+    typedef double real;
+#else
+    typedef float real;
+#endif
 #ifndef PETSCSUB
-    Schwarz::add<HpSchwarz, double, ds>();
+    Schwarz::add<HpSchwarz, real, ds>();
 #ifndef DHYPRE
-    Schwarz::add<HpSchwarz, std::complex<double>, zs, ds>();
+    Schwarz::add<HpSchwarz, std::complex<real>, zs, ds>();
     // Schwarz::add<HpSchwarz, float, ds>();
     // Schwarz::add<HpSchwarz, std::complex<float>, zs>();
 #endif

@@ -31,7 +31,9 @@
 #undef HPDDM_INEXACT_COARSE_OPERATOR
 #define HPDDM_INEXACT_COARSE_OPERATOR 0
 #endif
+#if HPDDM_PRECISION == 2
 #define MU_ARPACK
+#endif
 #endif
 
 #define HPDDM_NUMBERING 'C'
@@ -52,28 +54,38 @@ template<class K>  using MatriceMorse=HashMatrix<int,K>;
 template<class K>
 struct ff_HPDDM_MatrixCSR : public HPDDM::MatrixCSR<K>
 {
-    ff_HPDDM_MatrixCSR(MatriceMorse<K>* mA) :
-    HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nnz, mA->aij, mA->p, mA->j, mA->half > 0) {
+    ff_HPDDM_MatrixCSR(MatriceMorse<HPDDM::upscaled_type<K>>* mA) :
+    HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nnz, nullptr, mA->p, mA->j, mA->half > 0) {
         mA->CSR();
-        this->_ia=mA->p;
-        // PB delete FH?????
+        HPDDM::MatrixCSR<K>::_ia=mA->p;
+        K* a = reinterpret_cast<K*>(mA->aij);
+        HPDDM::MatrixCSR<K>::_a=a;
+        if(!std::is_same<HPDDM::upscaled_type<K>, K>::value) {
+            for(int i = 0; i < mA->nnz; ++i)
+                a[i] = mA->aij[i];
+        }
     }
 };
 
 template<class K>
-HPDDM::MatrixCSR<K> * new_HPDDM_MatrixCSR(MatriceMorse<K   >* mA,bool mfree=false,K *s=0,int *is=0,int *js=0)
-{ if(mA)
-    {
+HPDDM::MatrixCSR<K> * new_HPDDM_MatrixCSR(MatriceMorse<HPDDM::upscaled_type<K>>* mA, bool mfree = false, K* s = nullptr, int* is = nullptr, int* js = nullptr) {
+    if(mA) {
         int nnz = mA->nnz, n = mA->n;
         mA->CSR();
-        if(!s) s=newCopy(mfree,mA->aij,nnz);
-        if(!is) is=newCopy(mfree,mA->p,n+1);
-        if(!js) js=newCopy(mfree,mA->j,nnz);
+        K* a;
+        if(!s) a = reinterpret_cast<K*>(newCopy(mfree, mA->aij, nnz));
+        else a = reinterpret_cast<K*>(s);
+        if(!std::is_same<HPDDM::upscaled_type<K>, K>::value) {
+            for(int i = 0; i < nnz; ++i)
+                a[i] = mA->aij[i];
+        }
+        if(!is) is = newCopy(mfree, mA->p, n+1);
+        if(!js) js = newCopy(mfree, mA->j, nnz);
 
-        return new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nnz, s, is, js , mA->half > 0,mfree);
+        return new HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nnz, a, is, js, mA->half > 0, false);
     }
     else
-        return 0;
+        return nullptr;
 }
 template<class K>
 HPDDM::MatrixCSR<void> * new_HPDDM_MatrixCSRvoid(MatriceMorse<K   >* mA,bool mfree=false,int *is=0,int *js=0)
@@ -89,7 +101,7 @@ else
 }
 
 template<class K>
-void set_ff_matrix(MatriceMorse<K>* mA,const HPDDM::MatrixCSR<K> &dA)
+void set_ff_matrix(MatriceMorse<HPDDM::upscaled_type<K>>* mA,const HPDDM::MatrixCSR<K> &dA)
 {
     //void HashMatrix<I,R>::set(I nn,I mm,int hhalf,size_t nnnz, I *ii, I*jj, R *aa,,int f77,int tcsr)
     if(verbosity>99) cout << " set_ff_matrix " <<endl;
@@ -98,7 +110,7 @@ void set_ff_matrix(MatriceMorse<K>* mA,const HPDDM::MatrixCSR<K> &dA)
     mA->p=0;
     mA->aij=0;
     
-    mA->set(dA._n,dA._m,dA._sym,dA._nnz,dA._ia,dA._ja,dA._a,0,1);
+    mA->set(dA._n,dA._m,dA._sym,dA._nnz,dA._ia,dA._ja,reinterpret_cast<HPDDM::upscaled_type<K>*>(dA._a),0,1);
 }
 
 template<typename T>
@@ -158,35 +170,44 @@ void exchange(Type* const& pA, K* pin, unsigned short mu, bool allocate) {
 }
 template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value != 1>::type* = nullptr>
 void exchange(Type* const& pA, K* pin, unsigned short mu, bool allocate) { }
-template<class Type, class K>
+template<class U, class Type, class K>
 void exchange_dispatched(Type* const& pA, KN<K>* pin, bool scaled) {
     if(pA) {
         unsigned short mu = pA->getDof() ? pin->n / pA->getDof() : 1;
         const auto& map = pA->getMap();
         bool allocate = map.size() > 0 && pA->getBuffer()[0] == nullptr ? pA->setBuffer() : false;
+        U* x = reinterpret_cast<U*>((HPDDM::upscaled_type<U>*)*pin);
+        if(!std::is_same<HPDDM::upscaled_type<U>, U>::value) {
+            for(int i = 0; i < pin->n; ++i)
+                x[i] = pin->operator[](i);
+        }
         if(scaled)
-            exchange(pA, static_cast<K*>(*pin), mu, false);
+            exchange(pA, x, mu, false);
         else
-            pA->HPDDM::template Subdomain<K>::exchange(static_cast<K*>(*pin), mu);
+            pA->HPDDM::template Subdomain<U>::exchange(x, mu);
         pA->clearBuffer(allocate);
+        if(!std::is_same<HPDDM::upscaled_type<U>, U>::value) {
+            for(int i = pin->n - 1; i >= 0; --i)
+                pin->operator[](i) = x[i];
+        }
     }
 }
-template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value != 0>::type* = nullptr>
+template<class U, class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value != 0>::type* = nullptr>
 void exchange(Type* const& pA, KN<K>* pin, bool scaled) {
-    exchange_dispatched(pA, pin, scaled);
+    exchange_dispatched<U>(pA, pin, scaled);
 }
-template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value == 0>::type* = nullptr>
+template<class U, class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value == 0>::type* = nullptr>
 void exchange(Type* const& pA, KN<K>* pin, bool scaled) {
     if(pA)
-        exchange_dispatched(pA->_A, pin, scaled);
+        exchange_dispatched<U>(pA->_A, pin, scaled);
 }
-template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value != 0>::type* = nullptr>
+template<class U, class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value != 0>::type* = nullptr>
 void exchange_restriction(Type* const&, KN<K>*, KN<K>*, MatriceMorse<double>*) { }
 namespace PETSc {
 template<class Type, class K>
-    void changeNumbering_func(Type*, KN<K>*, KN<K>*, bool){ ffassert(0);} // Modif FH. Missing function Do Day
+    void changeNumbering_func(Type*, KN<K>*, KN<K>*, bool){ ffassert(0); }
 }
-template<class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value == 0>::type* = nullptr>
+template<class U, class Type, class K, typename std::enable_if<HPDDM::hpddm_method_id<Type>::value == 0>::type* = nullptr>
 void exchange_restriction(Type* const& pA, KN<K>* pin, KN<K>* pout, MatriceMorse<double>* mR) {
     if(pA->_exchange && !pA->_exchange[1]) {
         ffassert((!mR && pA->_exchange[0]->getDof() == pout->n) || (mR && mR->n == pin->n && mR->m == pout->n));
@@ -196,20 +217,11 @@ void exchange_restriction(Type* const& pA, KN<K>* pin, KN<K>* pout, MatriceMorse
         *pout = K();
 
         if(mR) {
-  //          mR->addMatTransMul(*pin,*pout);;
-  //  out += A^t in
-#ifndef VERSION_MATRICE_CREUSE
-            for(int i = 0; i < mR->n; ++i) {
-                for(int j = mR->lg[i]; j < mR->lg[i + 1]; ++j)
-                    pout->operator[](mR->cl[j]) += mR->a[j] * pin->operator[](i);
-            }
-#else
+            // out += A^t in
             for(int k = 0; k < mR->nnz; ++k)
-                    pout->operator[](mR->j[k]) += mR->aij[k] * pin->operator[](mR->i[k]);
-#endif
+                pout->operator[](mR->j[k]) += mR->aij[k] * pin->operator[](mR->i[k]);
         }
-    
-        exchange_dispatched(pA->_exchange[0], pout, false);
+        exchange_dispatched<U>(pA->_exchange[0], pout, false);
     }
 }
 template<class Type, class K>
@@ -233,7 +245,7 @@ basicAC_F0::name_and_type exchangeIn_Op<Type, K>::name_param[] = {
 template<class Type, class K>
 class exchangeIn : public OneOperator {
     public:
-        exchangeIn() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<K>*>()) { }
+        exchangeIn() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<HPDDM::upscaled_type<K>>*>()) { }
 
         E_F0* code(const basicAC_F0& args) const {
             return new exchangeIn_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
@@ -242,9 +254,9 @@ class exchangeIn : public OneOperator {
 template<class Type, class K>
 AnyType exchangeIn_Op<Type, K>::operator()(Stack stack) const {
     Type* pA = GetAny<Type*>((*A)(stack));
-    KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
+    KN<HPDDM::upscaled_type<K>>* pin = GetAny<KN<HPDDM::upscaled_type<K>>*>((*in)(stack));
     const bool scaled = mpisize > 1 && nargs[0] && GetAny<bool>((*nargs[0])(stack));
-    exchange(pA, pin, scaled);
+    exchange<K>(pA, pin, scaled);
     return 0L;
 }
 template<class Type, class K>
@@ -270,7 +282,7 @@ basicAC_F0::name_and_type exchangeInOut_Op<Type, K>::name_param[] = {
 template<class Type, class K>
 class exchangeInOut : public OneOperator {
     public:
-        exchangeInOut() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<K>*>(), atype<KN<K>*>()) { }
+        exchangeInOut() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<HPDDM::upscaled_type<K>>*>(), atype<KN<HPDDM::upscaled_type<K>>*>()) { }
 
         E_F0* code(const basicAC_F0& args) const {
             return new exchangeInOut_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
@@ -279,18 +291,18 @@ class exchangeInOut : public OneOperator {
 template<class Type, class K>
 AnyType exchangeInOut_Op<Type, K>::operator()(Stack stack) const {
     Type* pA = GetAny<Type*>((*A)(stack));
-    KN<K>* pin = GetAny<KN<K>*>((*in)(stack));
-    KN<K>* pout = GetAny<KN<K>*>((*out)(stack));
+    KN<HPDDM::upscaled_type<K>>* pin = GetAny<KN<HPDDM::upscaled_type<K>>*>((*in)(stack));
+    KN<HPDDM::upscaled_type<K>>* pout = GetAny<KN<HPDDM::upscaled_type<K>>*>((*out)(stack));
     const bool scaled = mpisize > 1 && nargs[0] && GetAny<bool>((*nargs[0])(stack));
     Matrice_Creuse<double>* pR = nargs[1] ? GetAny<Matrice_Creuse<double>*>((*nargs[1])(stack)) : nullptr;
     MatriceMorse<double>* mR = pR ? static_cast<MatriceMorse<double>*>(&(*pR->A)) : nullptr;
     if(pR) {
         ffassert(!scaled);
-        exchange_restriction(pA, pin, pout, mR);
+        exchange_restriction<K>(pA, pin, pout, mR);
     }
     else if(pin->n == pout->n) {
         *pout = *pin;
-        exchange(pA, pout, scaled);
+        exchange<K>(pA, pout, scaled);
     }
     return 0L;
 }
@@ -346,12 +358,12 @@ MPI_Comm getCommunicator(Type* const& pA) {
     else
         return MPI_COMM_WORLD;
 }
-template<class K, typename std::enable_if<!std::is_same<K, double>::value>::type* = nullptr>
-inline K prod(K u, double d, K v) {
+template<class K, typename std::enable_if<!std::is_same<K, HPDDM::underlying_type<K>>::value>::type* = nullptr>
+inline K prod(K u, HPDDM::underlying_type<K> d, K v) {
     return std::conj(u) * d * v;
 }
-template<class K, typename std::enable_if<std::is_same<K, double>::value>::type* = nullptr>
-inline K prod(K u, double d, K v) {
+template<class K, typename std::enable_if<std::is_same<K, HPDDM::underlying_type<K>>::value>::type* = nullptr>
+inline K prod(K u, HPDDM::underlying_type<K> d, K v) {
     return u * d * v;
 }
 template<class Type, class K>

@@ -658,11 +658,11 @@ namespace Fem2D
             double l[3];
             int loutside;// 0 inside, 1 out close, 2, out fare, , -1 inside
             int itt =gdfb->Find(P,l,loutside);
-            outside=loutside ==0;
+            outside=loutside;
             Phat=R2(l+1);
             Element &K=(this->elements)[itt];
             if( verbosity > 9)
-                cout << " - Find "<< P << " -> " << K(Phat) << " " << loutside << " k= " << itt
+                cout << " - Find "<< P << " -> " << K(Phat) << " outside " << loutside << " k= " << itt
                 << " dist =" << (P-K(Phat)).norme() << " :: " << Phat << endl;
             return itt<0 ? 0: this->elements + itt; // outside
             

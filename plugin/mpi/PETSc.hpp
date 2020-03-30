@@ -20,18 +20,18 @@ template<class HpddmType>
 class DistributedCSR {
     public:
         HpddmType*                             _A;
-        KN<double>*                            _D;
+        KN<PetscReal>*                         _D;
         Mat                                _petsc;
         std::vector<Mat>*                     _vS;
         VecScatter                       _scatter;
         KSP                                  _ksp;
         HPDDM::Subdomain<PetscScalar>** _exchange;
-        unsigned int*                        _num;
-        unsigned int                       _first;
-        unsigned int                        _last;
-        unsigned int*                       _cnum;
-        unsigned int                      _cfirst;
-        unsigned int                       _clast;
+        PetscInt*                            _num;
+        PetscInt                           _first;
+        PetscInt                            _last;
+        PetscInt*                           _cnum;
+        PetscInt                          _cfirst;
+        PetscInt                           _clast;
         DistributedCSR() : _A(), _D(), _petsc(), _vS(), _ksp(), _exchange(), _num(), _first(), _last(), _cnum(), _cfirst(), _clast() { }
         ~DistributedCSR() {
             dtor();
@@ -125,28 +125,29 @@ class DistributedCSR {
 };
 
 template<class HpddmType, typename std::enable_if<std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value>::type* = nullptr>
-void globalMapping(HpddmType* const& A, unsigned int*& num, unsigned int& start, unsigned int& end, unsigned int& global, unsigned int* const list) {
-    num = new unsigned int[A->getDof()];
+void globalMapping(HpddmType* const& A, PetscInt*& num, PetscInt& start, PetscInt& end, long long& global, PetscInt* const list) {
+    num = new PetscInt[A->getDof()];
     A->template globalMapping<'C'>(num, num + A->getDof(), start, end, global, A->getScaling(), list);
 }
 template<class HpddmType, typename std::enable_if<!std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value>::type* = nullptr>
-void globalMapping(HpddmType* const& A, unsigned int* const& num, unsigned int& start, unsigned int& end, unsigned int& global, unsigned int* const list) { }
+void globalMapping(HpddmType* const& A, PetscInt* const& num, PetscInt& start, PetscInt& end, long long& global, PetscInt* const list) { }
 template<class Type, class Tab, typename std::enable_if<!std::is_same<Tab, PETSc::DistributedCSR<HpSchwarz<PetscScalar>>>::value>::type* = nullptr>
 void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
     int *is, *js;
     PetscScalar *s;
-    unsigned int* re = new unsigned int[pL->n];
-    unsigned int nbSchur = 1;
+    PetscInt* re = new PetscInt[pL->n];
+    PetscInt nbSchur = 1;
     for(int i = 0; i < pL->n; ++i)
         re[i] = std::abs((*pL)[i]) > 1.0e-12 ? nbSchur++ : 0;
     nbSchur--;
-    unsigned int* num;
-    unsigned int start, end, global;
+    PetscInt* num;
+    PetscInt start, end;
+    long long global;
     ptA->_A->clearBuffer();
     globalMapping(ptA->_A, num, start, end, global, re);
     delete [] re;
-    re = new unsigned int[2 * nbSchur];
-    unsigned int* numSchur = re + nbSchur;
+    re = new PetscInt[2 * nbSchur];
+    PetscInt* numSchur = re + nbSchur;
     for(int i = 0, j = 0; i < pL->n; ++i) {
         if(std::abs((*pL)[i]) > 1.0e-12) {
             *numSchur++ = num[i];
@@ -156,7 +157,7 @@ void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
     numSchur -= nbSchur;
     delete [] num;
     for(int k = 0; k < mT->n; ++k) {
-        MatriceMorse<PetscScalar>* mS = (mT->operator[](k)).A ? static_cast<MatriceMorse<PetscScalar>*>(&(*(mT->operator[](k)).A)) : nullptr;
+        MatriceMorse<HPDDM::upscaled_type<PetscScalar>>* mS = (mT->operator[](k)).A ? static_cast<MatriceMorse<HPDDM::upscaled_type<PetscScalar>>*>(&(*(mT->operator[](k)).A)) : nullptr;
         int n = mS ? mS->n : 0;
         std::vector<std::vector<std::pair<int, PetscScalar>>> tmp(n);
         if(mS) {
@@ -165,7 +166,7 @@ void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
         }
         int nnz = mS ? mS->nnz : 0;
         for(int i = 0; i < n; ++i) {
-            unsigned int row = re[i];
+            PetscInt row = re[i];
             tmp[row].reserve(mS->p[i + 1] - mS->p[i]);
             for(int j = mS->p[i]; j < mS->p[i + 1]; ++j)
                 tmp[row].emplace_back(re[mS->j[j]], mS->aij[j]);
@@ -184,14 +185,14 @@ void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
         }
         js -= nnz;
         s -= nnz;
-        int* ia, *ja;
+        PetscInt *ia, *ja;
         PetscScalar* c;
         ia = ja = nullptr;
         c = nullptr;
-        HPDDM::MatrixCSR<PetscScalar>* dN = new_HPDDM_MatrixCSR<PetscScalar>(mS,true,s,is,js);//->n, mS->m, mS->nbcoef, s, is, js, mS->symetrique, true);
+        HPDDM::MatrixCSR<PetscScalar>* dN = new_HPDDM_MatrixCSR<PetscScalar>(mS, true, s, is, js);
         bool free = dN ? ptA->_A->HPDDM::template Subdomain<PetscScalar>::distributedCSR(numSchur, start, end, ia, ja, c, dN) : false;
         if(!ia && !ja && !c) {
-            ia = new int[2]();
+            ia = new PetscInt[2]();
             free = true;
         }
         if(!(*ptA->_vS)[k]) {
@@ -263,7 +264,7 @@ void setFieldSplitPC(Type* ptA, KSP ksp, KN<double>* const& fields, KN<String>* 
         local += fields->n;
         if(fields->n) {
             if(ptA->_num)
-                HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, first, last, local - fields->n, local, fields->n);
+                HPDDM::Subdomain<PetscScalar>::template distributedVec<0>(ptA->_num, first, last, local - fields->n, local, static_cast<PetscInt>(fields->n));
             else
                 std::copy_n(local - fields->n, fields->n, local);
         }

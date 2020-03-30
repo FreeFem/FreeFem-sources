@@ -1637,7 +1637,7 @@ void OnePlotCurve::dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn2,R & vmx2) cons
 {
     if( cc.N() == xx.N())
     {
-        0; // afaire ????
+        ; // afaire ????
     }
 }
 void OnePlotCurve::Draw(OneWindow *win)
@@ -2185,6 +2185,7 @@ void  OneWindow::SetView()
         gluPerspective(focal*180./M_PI,aspect,znear,zfare);
         if(debug>2)
         {
+            cout << " BB " << Bmin3 << " , " << Bmax3 << " rapz " << rapz << " dmax: "<< dmax << endl;
             cout <<" setview 3d: rapz " <<  rapz << " cam: ";
             cout << cam << " Pvue:" ;
             cout << Pvue3  << " theta " << theta << "  phi = "<<  phi << endl;
@@ -2341,7 +2342,6 @@ void OneWindow::getcadre(double &xmin,double &xmax,double &ymin,double &ymax)
 void OneWindow::Display()
 {
     if(!theplot) return;
-    ffassert(this && theplot);
     SetScreenView() ;
     glColor3d(0.,0.,0.);
 

@@ -594,7 +594,7 @@ template<class K, char S>
 using HpFetiPrec = HpFeti<HPDDM::FetiPrcndtnr::DIRICHLET, K, S>;
 template<template<class, char> class Type, class K, char S, char U = S>
 void add() {
-    Dcl_Type<Type<K, S>*>(Initialize<Type<K, S>>, Delete<Type<K, S>>);
+    Dcl_Type<Type<K, S>*>(Initialize<Type<K, S>>, DeleteDTOR<Type<K, S>>);
     if(std::is_same<K, HPDDM::underlying_type<K>>::value) {
         static_assert(std::is_same<Type<K, S>, HpBdd<K, S>>::value || std::is_same<Type<K, S>, HpFetiPrec<K, S>>::value, "What are you trying to do?");
         if(std::is_same<Type<K, S>, HpBdd<K, S>>::value)
