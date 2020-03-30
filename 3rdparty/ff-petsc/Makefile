@@ -290,7 +290,7 @@ $(SRCDIR)/tag-tar:$(PACKAGE)
 ifeq ($(WIN32DLLTARGET),)
 	patch -p1 < petsc-metis.patch
 else
-	cp SuiteSparse.py petsc-3.13.0/config/BuildSystem/config/packages
+	patch -p1 < petsc-suitesparse.patch
 endif
 	touch $@
 $(PACKAGE):
