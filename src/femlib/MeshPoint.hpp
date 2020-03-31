@@ -799,127 +799,125 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
 };
 class MeshPoint : public MeshPointBase { public:
   MeshPointBase other;
-  void unset() {  MeshPointBase::unset(); other.unset();}
+  void unset() {  MeshPointBase::unset(); }
   void set(const R2 &P2,const R2 & P_Hat,const  baseFElement & K,int ll,const R2 &NN,int iedge) {
      MeshPointBase::set(P2,P_Hat,K,ll,NN,iedge);
-     other.unset();}
+     }
   void set(const Mesh & aTh,const R2 &P2,const R2 & P_Hat,const  Triangle & aK,int ll,const R2 &NN,int iedge) {
     MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,iedge);
-    other.unset();}
+    }
   void set(const Mesh & aTh,const R2 &P2,const R2 & P_Hat,const  Triangle & aK,int ll,const R2 &NN,int iedge,int VFF) {
     MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,iedge,VFF);
-    other.unset();}
+    }
   void set(const R2 &P2,const R2 & P_Hat,const  baseFElement & K) {
      MeshPointBase::set(P2,P_Hat,K);
-     other.unset();
+     
     }
   void set(const  Mesh &aTh, const R2 &P2,const R2 & P_Hat,const  Triangle & aK,
            const int ll,bool coutside=false) {
       MeshPointBase::set(aTh,P2,P_Hat,aK,ll,coutside);
-      other.unset();
+    
            }
 
   // 3D volume
   void set(const R3 &P2,const R3 & P_Hat,const  baseFElement3 & K,int ll,const R3 &NN,int iedge) {
      MeshPointBase::set(P2,P_Hat,K,ll,NN,iedge);
-     other.unset();}
+     }
   void set(const Mesh3 & aTh,const R3 &P2,const R3 & P_Hat,const  Tet & aK,int ll,const R3 &NN,int iedge) {
     MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,iedge);
-    other.unset();}
+    }
   void set(const Mesh3 & aTh,const R3 &P2,const R3 & P_Hat,const  Tet & aK,int ll,const R3 &NN,int iedge,int VFF) {
     MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,iedge,VFF);
-    other.unset();}
+    }
   void set(const R3 &P2,const R3 & P_Hat,const  baseFElement3 & K) {
      MeshPointBase::set(P2,P_Hat,K);
-     other.unset();
+     
     }
   void set(const  Mesh3 &aTh, const R3 &P2,const R3 & P_Hat,const  Tet & aK,
            const int ll,bool coutside=false) {
     MeshPointBase::set(aTh,P2,P_Hat,aK,ll,coutside);
-    other.unset();
+    
   }
 
   // 3D surface
   void set(const R3 &P2,const R2 & P_Hat,const  baseFElementS & K,int ll,const R3 &NN,int iedge) {
       MeshPointBase::set(P2,P_Hat,K,ll,NN,iedge);
-      other.unset();}
+    }
   void set(const R3 &P2,const R2 & P_Hat,const  baseFElementS & K,int ll,const R3 &NN,const R3 &NNt,int iedge) {
       MeshPointBase::set(P2,P_Hat,K,ll,NN,NNt,iedge);
-      other.unset();}
+      }
   void set(const MeshS & aTh,const R3 &P2,const R2 & P_Hat,const TriangleS &aK,int ll,const R3 &NN,int iedge) {
       MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,iedge);
-      other.unset();}
+      }
     
   void set(const MeshS & aTh,const R3 &P2,const R2 & P_Hat,const TriangleS &aK,int ll,const R3 &NN,const R3 &NNt,int iedge) {
       MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,NNt,iedge);
-      other.unset();}
+    }
  
   void set(const MeshS & aTh,const R3 &P2,const R2 & P_Hat,const TriangleS &aK,int ll,const R3 &NN,const R3 &NNt,int iedge,int VFF) {
       MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,NNt,iedge,VFF);
-      other.unset();}
+      }
     
   void set(const R3 &P2,const R2 & P_Hat,const  baseFElementS & K) {
       MeshPointBase::set(P2,P_Hat,K);
-      other.unset();
+    
   }
   void set(const MeshS &aTh, const R3 &P2,const R2 & P_Hat,const TriangleS &aK, const int ll,bool coutside=false) {
       MeshPointBase::set(aTh,P2,P_Hat,aK,ll,coutside);
-      other.unset();
+      
     }
   void set(const MeshS &aTh, const R3 &P2,const R2 & P_Hat,const TriangleS &aK,const R3 &NNt, const int ll,bool coutside=false) {
       MeshPointBase::set(aTh,P2,P_Hat,aK,NNt,ll,coutside);
-      other.unset();
+      
   }
     
   // 3D curve
   void set(const R3 &P2,const R1 & P_Hat,const  baseFElementL & K,int ll,const R3 &NN,int ipoint) {
       MeshPointBase::set(P2,P_Hat,K,ll,NN,ipoint);
-      other.unset();}
+      }
   void set(const R3 &P2,const R1 & P_Hat,const  baseFElementL & K,int ll,const R3 &NN,const R3 &NNt,int ipoint) {
       MeshPointBase::set(P2,P_Hat,K,ll,NN,NNt,ipoint);
-      other.unset();}
+      }
   void set(const MeshL & aTh,const R3 &P2,const R1 & P_Hat,const EdgeL &aK,int ll,const R3 &NN,int ipoint) {
       MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,ipoint);
-      other.unset();}
+      }
   void set(const MeshL & aTh,const R3 &P2,const R1 & P_Hat,const EdgeL &aK,int ll,const R3 &NN,const R3 &NNt,int ipoint,int VFF) {
       MeshPointBase::set(aTh,P2,P_Hat,aK,ll,NN,NNt,ipoint,VFF);
-      other.unset();}
+      }
   void set(const R3 &P2,const R1 & P_Hat,const  baseFElementL & K) {
       MeshPointBase::set(P2,P_Hat,K);
-      other.unset();
+      
    }
   void set(const MeshL &aTh, const R3 &P2,const R1 & P_Hat,const EdgeL &aK, const int ll,bool coutside=false) {
       MeshPointBase::set(aTh,P2,P_Hat,aK,ll,coutside);
-      other.unset();
    }
   void set(const MeshL &aTh, const R3 &P2,const R1 & P_Hat,const EdgeL &aK,const R3 &NNt, const int ll,bool coutside=false) {
       MeshPointBase::set(aTh,P2,P_Hat,aK,NNt,ll,coutside);
-      other.unset();
   }
 //fin 3d
  
     
   void set(R x=0.0,R y=0.0,R z=0.0) {
      MeshPointBase::set(x,y,z);
-     other.unset();}
+     }
   void change(const R2 & PH,const Triangle & tt,int ll) {
      MeshPointBase::change(PH,tt,ll);
-     other.unset(); }
+      }
     void change(const R3 & PH,const Tet & tt,int ll) {
 	MeshPointBase::change(PH,tt,ll);
-    other.unset(); }
+     }
   void setP(const Mesh * pTh,int tt,int ss) {
       MeshPointBase::setP(pTh,tt,ss);
-      other.unset(); }
+       }
   void setP(const Mesh3 * pTh,int tt,int ss) {  // 3D volume
       MeshPointBase::setP(pTh,tt,ss);
-      other.unset(); }
+       }
   void setP(const MeshS * pTh,int tt,int ss) {  // 3D surface
       MeshPointBase::setP(pTh,tt,ss);
-      other.unset(); }
+       }
   void setP(const MeshL * pTh,int tt,int ss) {  // 3D line
       MeshPointBase::setP(pTh,tt,ss);
-      other.unset(); }
+       }
 
    bool operator==(const MeshPoint & mp) const {
       return T == mp.T &&  P.x == mp.P.x && P.y == mp.P.y

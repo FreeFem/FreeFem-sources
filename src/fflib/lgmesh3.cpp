@@ -2112,8 +2112,14 @@ AnyType pf3r2R(Stack s,const AnyType &a)
   if (!outside) 
     {
       if ( Norme2_2( (*K)(PHat) - mp.P ) > 1e-12 )
+      {
         cout << "bug ??  " << Norme2_2( (*K)(PHat) - mp.P ) << " " << mp.P << " " << (*K)(PHat) << endl;
-    } 
+          verbosity=100000;
+        K=Th.Find(mp.P,PHat,outside);
+        ffassert(0 );
+      }
+    }
+    
 #endif
 /*  int nbdf=KK.NbDoF();
   

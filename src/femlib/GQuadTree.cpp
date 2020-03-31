@@ -654,6 +654,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
     l[0]=1-l[1]-l[2];
   }
   
+    
 
   inline void CoorBary(const Tet & K,const  R3  & P, R *l)
   {
@@ -663,7 +664,67 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
     l[3]=det(K[0],K[1],K[2],P)/detK;
     l[0]=1-l[1]-l[2]-l[3];
   }
-  
+    
+    
+  inline int  CoorBaryPos(const Triangle2 & K,const  R2  & P, R *l)
+    {
+        CoorBary(K,P,l);
+        int n=0,m=-1;
+        int nl[Tet::nv+1];
+        R eps = -1e-10;
+        for(int i=0;i<=Triangle2::nv;++i)
+            if( l[i] < eps){
+                nl[n++]=i;
+            }
+            else m = i;
+        if( m>=0)
+        { // proj P on face .. m
+            int i0=Triangle2::nvadj[m][0];
+            int i1=Triangle2::nvadj[m][1];
+            R2 A(K[i0]),B(K[i1]);
+            R2 AB(A,B),AP(A,P);
+            double l2= AB.norme2();
+            // L = (AB,AP)/l2
+           
+            l[i0] = max(0.,min(1.,(AB,AP)/l2));
+            l[i1] = 1-l[i0];
+            l[m]=0;
+        }
+        return n;
+        
+        
+        
+    }
+    inline int  CoorBaryPos(const Tet & K,const  R3  & P, R *l)
+    {
+        CoorBary(K,P,l);
+        int n=0,m=-1;
+        int nl[Tet::nv+1];
+        R eps = -1e-10;
+        for(int i=0;i<=Tet::nv;++i)
+            if( l[i] < eps){
+                nl[n++]=i;
+            }
+            else m = i;
+        if( m>=0)
+        { // proj P on face .. m
+            int i0=Tet::nvadj[m][0];
+            int i1=Tet::nvadj[m][1];
+            int i2=Tet::nvadj[m][2];
+            R3 A(K[i0]),B(K[i1]),C(K[i2]);
+            R3 AB(A,B), AC(A,C);
+            R3 N = AB^AC ;
+            double N2 = (N,N);
+            l[i0] = max(0.,min(1.,det(P,B,C,N)/N2));
+            l[i1] = max(0.,min(1.,det(A,P,C,N)/N2));
+            l[i2] = 1-l[i0]-l[i1];
+            l[m]=0;
+        }
+        return n;
+        
+
+        
+    }
   
 //  inline    int nRand(int n) {
 //    return  rand()%n; //avant random()%n;
@@ -747,7 +808,7 @@ RESTART:
   ffassert(kstart<100);
   itstart[kstart++]=it;
   if(verbosity>199)
-    cout << "    " << nReStart << " tstart= " << tstart << " , it=" << it << " P="<< P << endl;
+    cout << "    " << nReStart << " tstart= " << tstart << " , it=" << it << " P="<< P << " " << kstart << endl;
   outside=true; 
   Mesh::kfind++;
   while (1)
@@ -875,20 +936,20 @@ RESTART:
           }
 	outside=true;
 // New Methode mars 2020
-          if(0)
+        if(1)
           {
           GenericDataFindBoundary<Mesh> * gdfb=Th.Buildgdfb();
           if(gdfb )
           {
-              double l[4];
+              double l[4],lK[4];
               int na[4],nna=0,mma=0;
-              int loutside;// 0 inside, 1 out close, 2, out fare, , -1 inside
+              int loutside;// of border ??? 0 inside, 1 out close, 2, out fare, , -1 inside
               int itt =gdfb->Find(P,l,loutside);
-             
-              
+             // warning l is projecton on boundary ????
+              CoorBary(Th[itt],P,lK);
               const double eps = 1e-10;
               for (int i=0; i<= Rd::d;++i )
-                  if(l[i] < -eps) na[nna++]=i;
+                  if(lK[i] < -eps) na[nna++]=i;
               for( int k=0; k<nna;++k)
               {
                   int ii=na[k],ittt=Th.ElementAdj(itt,ii);
@@ -896,28 +957,18 @@ RESTART:
               }
               it = itt;
           
-              if( mma < nna)
+              if( nna) //
               {
-               if( nReStart < 2)
-              {
-                  nReStart++;
-                  bool same=false;
-                  
-                  for(int j=0;j<kstart ; ++j)
-                      if( it == itstart[j]) {same=true; break;}
-                  if( verbosity>199)
-                      cout << "   loop Search "<<nReStart << P << " Delta" <<  Delta << " it " << it << " same "<< same << endl;
-                  if(!same) goto RESTART;
-              }
-              else
+               if( nReStart++ < 1) goto RESTART;
+               else
                   if(searchMethod) goto PICHON;
               }
               outside=nna>0;
               Phat=Rd(l+1);
               const Element &K=Th[it];
               if( verbosity > 9)
-                  cout << " - Find "<< P << " -> " << K(Phat) << " " << loutside << " k= " << itt
-                  << " dist =" << (P-K(Phat)).norme() << " :: " << Phat << endl;
+                  cout << "   - Find "<< P << " -> " << K(Phat) << " " << loutside << " k= " << itt
+                  << " dist =" << (P-K(Phat)).norme() << " :: " << Phat << " nddd= " << nddd <<" " << nReStart <<  " " << nna <<  endl;
               return  Th.elements + it; // outside
               
           }
@@ -1019,7 +1070,7 @@ RESTART:
   
   const Element & K(Th[closestTet]);
   outside=true;
-  CoorBary(K,P,l);
+  CoorBaryPos(K,P,l);
   
   Phat=Rd(l+1);
   if(verbosity>2)
@@ -1234,6 +1285,7 @@ inline double dist2(int dhat,const Fem2D::R3 *Q,Fem2D::R3 &P,double *l,double *d
 template<typename Mesh>
 int GenericDataFindBoundary<Mesh>::Find(typename Mesh::Rd PP,double *l,int & outside) const
 {  // FH: outside : 0 inside, 1 out close, 2, out fare, , -1 inside
+    // warning l
     nbfind++;
     typedef double R;
     int nu=-1,ne=-1;
@@ -1332,7 +1384,7 @@ int GenericDataFindBoundary<Mesh>::Find(typename Mesh::Rd PP,double *l,int & out
             dnu=d2;
            
            
-            if( ! bborder)
+            if(  bborder)
             {  //  
                 for(int i=0;i<=dHat;++i)
                     dl[i]=0;
