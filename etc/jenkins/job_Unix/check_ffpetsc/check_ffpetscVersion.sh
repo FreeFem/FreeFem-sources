@@ -13,9 +13,9 @@ if [ "$(uname)" == "Darwin" ]; then
   ffpetscDirectory=/Users/Shared/openmpi/
 elif [ "$(uname)" == "Linux" ]; then
   # in case where the OS type is Linux
-  MAJOR=$(grep "#define PETSC_VERSION_MAJOR" /Users/Shared/openmpi/ff-petsc/c/include/petscversion.h | cut -c34-35 )
-  MINOR=$(grep "#define PETSC_VERSION_MINOR" /Users/Shared/openmpi/ff-petsc/c/include/petscversion.h | cut -c34-36 )
-  SUBMINOR=$(grep "#define PETSC_VERSION_SUBMINOR" /Users/Shared/openmpi/ff-petsc/c/include/petscversion.h | cut -c34-35 )
+  MAJOR=$(grep "#define PETSC_VERSION_MAJOR" /builds/Shared/openmpi/ff-petsc/c/include/petscversion.h | cut -c34-35 )
+  MINOR=$(grep "#define PETSC_VERSION_MINOR" /builds/Shared/openmpi/ff-petsc/c/include/petscversion.h | cut -c34-36 )
+  SUBMINOR=$(grep "#define PETSC_VERSION_SUBMINOR" /builds/Shared/openmpi/ff-petsc/c/include/petscversion.h | cut -c34-35 )
   installedVersionffpetscO=$MAJOR.$MINOR.$SUBMINOR
   ffpetscDirectory=/builds/Shared/openmpi/
 fi
@@ -28,8 +28,8 @@ else
   # change default  compiler load in update_ffpetsc_*.sh
   echo "installed release version PETSc will be upgrated"
   rm -rf $ffpetscDirectory
-  ./etc/jenkins/job_Unix/check_ffpetsc/update_ffpetsc_openmpi.sh
-  echo " ************* upgrading openmpi ffpetsc success *************" \
+  ./etc/jenkins/job_Unix/check_ffpetsc/update_ffpetsc_openmpi.sh \
+  && echo " ************* upgrading openmpi ffpetsc success *************"
   cd 3rdparty/ff-petsc/ && rm -rf petsc-$releaseVersionffpetsc && cd ../.. && make clean
 fi
 
@@ -44,9 +44,9 @@ if [ "$(uname)" == "Darwin" ]; then
   ffpetscDirectory=/Users/Shared/openmpi/
 elif [ "$(uname)" == "Linux" ]; then
   # in case where the OS type is Linux
-  MAJOR=$(grep "#define PETSC_VERSION_MAJOR" /Users/Shared/mpich/ff-petsc/c/include/petscversion.h | cut -c34-35 )
-  MINOR=$(grep    "#define PETSC_VERSION_MINOR" /Users/Shared/mpich/ff-petsc/c/include/petscversion.h | cut -c34-36 )
-  SUBMINOR=$(grep "#define PETSC_VERSION_SUBMINOR" /Users/Shared/mpich/ff-petsc/c/include/petscversion.h | cut -c34-35 )
+  MAJOR=$(grep "#define PETSC_VERSION_MAJOR" /builds/Shared/mpich/ff-petsc/c/include/petscversion.h | cut -c34-35 )
+  MINOR=$(grep    "#define PETSC_VERSION_MINOR" /builds/Shared/mpich/ff-petsc/c/include/petscversion.h | cut -c34-36 )
+  SUBMINOR=$(grep "#define PETSC_VERSION_SUBMINOR" /builds/Shared/mpich/ff-petsc/c/include/petscversion.h | cut -c34-35 )
   installedVersionffpetscM=$MAJOR.$MINOR.$SUBMINOR
   ffpetscDirectory=/builds/Shared/mpich/
 fi
@@ -57,8 +57,8 @@ if [ "$releaseVersionffpetsc" == "$installedVersionffpetscM" ]; then
   echo "installed release version PETSc is up to date"
 else
   # change default  compiler load in update_ffpetsc_*.sh
-  echo "installed release version PETSc will be upgrated" \
-  rm -rf $ffpetscDirectory \
-  && ./etc/jenkins/job_Unix/check_ffpetsc/update_ffpetsc_mpich.sh \
-  echo " ************* upgrading mpich ffpetsc success *************"
+  echo "installed release version PETSc will be upgrated"
+  rm -rf $ffpetscDirectory
+  ./etc/jenkins/job_Unix/check_ffpetsc/update_ffpetsc_mpich.sh \
+  && echo " ************* upgrading mpich ffpetsc success *************"
 fi

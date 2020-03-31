@@ -16,7 +16,7 @@ elif [ "$(uname)" == "Linux" ]; then
   PETSC_INSTALLDIR='/builds/Shared/openmpi'
   change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-$casejob.sh
 fi
-
+echo try to source file  "$change_compiler"
 test -f "$change_compiler" && echo  source file "$change_compiler"
 test -f "$change_compiler" && cat  "$change_compiler"
 test -f "$change_compiler" && source "$change_compiler"
