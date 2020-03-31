@@ -149,16 +149,16 @@ macro VarfFOpt(varfName, meshName, PhName)
     varf varfName(u,v) =
   int2d(meshName)(-ind*k^2*u*v+Grad(u)'*Grad(v))
 				+ int1d(meshName,10)(1i*k*u*v)
-        + on(2,u=0); // EOM
+        + on(waveguide,u=0); // EOM
 
 macro VarfFrhs(varfName, meshName, PhName)
     varf varfName(u,v) =
                 int2d(meshName)(finc*v)
-                + on(2,u=0); // EOM
+                + on(waveguide,u=0); // EOM
 
 macro VarfFmass(varfName, meshName, PhName)
     varf varfName(u,v) =
-  int1d(meshName,1)(u*v); // EOM
+  int1d(meshName,interface)(u*v); // EOM
 
 // assemble FEM blocks :
 ffddmsetup(F, F, VarfF, VarfFOpt)
