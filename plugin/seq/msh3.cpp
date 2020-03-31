@@ -9228,6 +9228,9 @@ AnyType OrientNormal_Op<MMesh>::operator( )(Stack stack) const {
   MMesh &Th = *pTh;
   ffassert(pTh);
 
+  if (pTh->nt == 0)
+    return pTh;
+
   bool unbounded(arg(0, stack, false));
 
   if (verbosity > 5) cout << "Orienting surface normals ..." << endl;
