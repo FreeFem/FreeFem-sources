@@ -31,7 +31,10 @@
  */
 #ifndef GENERICMESH_HPP_
 #define GENERICMESH_HPP_
-
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundefined-var-template"
+#endif
 // la regle de programmation 3
 extern long verbosity;
 extern bool lockOrientation;
@@ -2102,4 +2105,7 @@ Serialize GenericMesh<T,B,V>::serialize() const
     }
     
 }
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 #endif

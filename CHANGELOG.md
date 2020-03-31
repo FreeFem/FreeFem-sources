@@ -36,12 +36,14 @@ All notable changes to this project will be documented in this file.
 - ffglut can plot a vectorial FE function in surface 3d
 - distributed ParMmg interface, cf. `examples/hpddm/distributed-parmmg.edp` or `examples/hpddm/laplace-adapt-dist-3d-PETSc.edp`
 - new parallel interpolator on non-matching meshes, cf. `examples/hpddm/transfer.edp`
+- ability to solve problems in single precision or with 64 bit integers
 
 ### Changed
 - new `tgv` values: -10 => zero row, -20 => zero row/column
 - Windows binary now shipped with PETSc/SLEPc
 - BEM examples are now in `examples/mpi`
 - plot border type is now in 3d (border 2d and 3d)
+- PETSc version 3.13.0
 
 ### Deprecated
 

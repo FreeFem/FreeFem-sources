@@ -24,7 +24,7 @@ fespace Vh(Th3, P1);
 Vh u;
 real err = 8.0e-3;
 
-int iMax = getARGV("-iMax", 2);
+int iMax = getARGV("-iMax", 1);
 int noTransfer = (getARGV("-transfer", 1) == 0);
 int[int] rt(2);
 rt = [1, 2];

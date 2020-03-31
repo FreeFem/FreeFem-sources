@@ -1637,7 +1637,7 @@ void OnePlotCurve::dyn_bfv(OneWindow *win,R & fmn,R &fmx,R & vmn2,R & vmx2) cons
 {
     if( cc.N() == xx.N())
     {
-        0; // afaire ????
+        ; // afaire ????
     }
 }
 void OnePlotCurve::Draw(OneWindow *win)
@@ -2342,7 +2342,6 @@ void OneWindow::getcadre(double &xmin,double &xmax,double &ymin,double &ymax)
 void OneWindow::Display()
 {
     if(!theplot) return;
-    ffassert(this && theplot);
     SetScreenView() ;
     glColor3d(0.,0.,0.);
 
