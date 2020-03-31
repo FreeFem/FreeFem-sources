@@ -300,7 +300,7 @@ if (pr#isincomm)
   real ttimeg = 0;
   mpiAllReduce(tim,ttimeg,pr#mpicomm,mpiMAX); 
   if ((mpiRank(pr#mpicomm) == 0) /*&& (pr#verbosity > 0)*/ && (msg != ""))
-  cout << "timings - " << msg << " : " << ttimeg << " s" << endl;
+  cout << "["+Stringification(pr)+"] timings - " << msg << " : " << ttimeg << " s" << endl;
   totaltime += ttimeg;
   
   /*totaltime += tim;*/
@@ -315,7 +315,7 @@ if (pr#isincomm)
   real ttimeg = 0;
   mpiAllReduce(tim,ttimeg,comm,mpiMAX);
   if ((mpiRank(comm) == 0) && (msg != ""))
-  cout << "timings - " << msg << " : " << ttimeg << " s" << endl;
+  cout << "["+Stringification(pr)+"] timings - " << msg << " : " << ttimeg << " s" << endl;
   totaltime += ttimeg;
   
   /*totaltime += tim;*/
@@ -443,7 +443,7 @@ macro ffddmpartf(pr,Th,res)
       assert(0);
       ENDIFMACRO
       IFMACRO (pr#simple)
-      pr#simple(pr#Ph0, upart, comm)
+      pr#simple(pr#Ph0, upart, pr#commddm)
       ENDIFMACRO
     }    	
     

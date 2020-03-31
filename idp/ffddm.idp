@@ -192,16 +192,16 @@ if (preffe#prmesh#isincomm)
   timingsg = 0;
   mpiAllReduce(timings,timingsg,preffe#prmesh#mpicomm,mpiMAX);
   if (mpiRank(preffe#prmesh#mpicomm) == 0) {
-    cout << "timings - decomp and partition : " << timingsg[0] << endl;
-    cout << "timings - assembly and factorization local matrices : " << timingsg[1] << endl;
-    cout << "timings - assembly and factorization coarse problem : " << timingsg[2] << endl;
-    cout << "timings - GMRES : " << timingsg[3] << endl;
-    cout << "timings - MV : " << timingsg[4] << endl;
-    cout << "timings - PREC : " << timingsg[5] << endl;
-    cout << "timings - COARSE SOLVE : " << timingsg[6] << endl;
+    cout << "["+Stringification(pr)+"] timings - decomp and partition : " << timingsg[0] << endl;
+    cout << "["+Stringification(pr)+"] timings - assembly and factorization local matrices : " << timingsg[1] << endl;
+    cout << "["+Stringification(pr)+"] timings - assembly and factorization coarse problem : " << timingsg[2] << endl;
+    cout << "["+Stringification(pr)+"] timings - GMRES : " << timingsg[3] << endl;
+    cout << "["+Stringification(pr)+"] timings - MV : " << timingsg[4] << endl;
+    cout << "["+Stringification(pr)+"] timings - PREC : " << timingsg[5] << endl;
+    cout << "["+Stringification(pr)+"] timings - COARSE SOLVE : " << timingsg[6] << endl;
     /*cout << "timings - scalprod : " << timingsg[7] << endl;*/
-    cout << "timings - total_sum : " << timingsg[3]+timingsg[0]+timingsg[1]+timingsg[2]+timingsg[7] << endl;
-    cout << "timings - total elapsed wall time : " << mpiWtime()-pr#ttotalelapsed << endl;
+    cout << "["+Stringification(pr)+"] timings - total_sum : " << timingsg[3]+timingsg[0]+timingsg[1]+timingsg[2]+timingsg[7] << endl;
+    cout << "["+Stringification(pr)+"] timings - total elapsed wall time : " << mpiWtime()-pr#ttotalelapsed << endl;
   }
   pr#tgmres = 0; pr#tmv = 0; pr#tprec = 0; pr#tcs = 0; pr#tscalprod = 0;
 }
@@ -404,60 +404,62 @@ if (pr#prfe#prmesh#isincomm)
 		ENDIFMACRO
 		IFMACRO(VarfPrec)
 		pr#prfe#prmesh#Thi = pr#prfe#prmesh#aTh[i];
-  
-	  NewMacro localmacroaug pr#prfe#prmesh#buildAug EndMacro
-  	IFMACRO(localmacroaug,1)
-  	pr#prfe#prmesh#AugThi = pr#prfe#prmesh#AugaTh[i];
-  	ENDIFMACRO
-  	IFMACRO(localmacroaug,0)
-    pr#prfe#prmesh#meshN pr#prfe#prmesh#AugThi = pr#prfe#prmesh#Thi + pr#prfe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
-    fespace pr#prfe#AugVhi(pr#prfe#prmesh#AugThi, pr#prfe#fPk);
-    int[int] n2o = (0:pr#prfe#prmesh#Thi.nt-1);
-    int[int] renum = restrict(pr#prfe#Vhi, pr#prfe#AugVhi,n2o);
-    int[int] Ic = (0:pr#prfe#Vhi.ndof-1);
-    real[int] Kc(pr#prfe#Vhi.ndof);
-    Kc = 1;
-    matrix pr#prfe#Auginterp = [Ic,renum,Kc];
-    pr#prfe#Auginterp.resize(pr#prfe#Vhi.ndof, pr#prfe#AugVhi.ndof);
-    ENDIFMACRO
-    
-    rhsFull.resize(pr#prfe#AugVhi.ndof);
-    rhs.resize(pr#prfe#Vhi.ndof);
 
-    if (pr#prec == "oras" || pr#prec == "soras"){
-      IFMACRO(!pr#bem)
-      VarfPrec(RobinInt,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
+		if (pr#prfe#prmesh#Thi.nt > 0) {
+		  NewMacro localmacroaug pr#prfe#prmesh#buildAug EndMacro
+		  IFMACRO(localmacroaug,1)
+		  pr#prfe#prmesh#AugThi = pr#prfe#prmesh#AugaTh[i];
+		  ENDIFMACRO
+		  IFMACRO(localmacroaug,0)
+		  pr#prfe#prmesh#meshN pr#prfe#prmesh#AugThi = pr#prfe#prmesh#Thi + pr#prfe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
+		  fespace pr#prfe#AugVhi(pr#prfe#prmesh#AugThi, pr#prfe#fPk);
+		  int[int] n2o = (0:pr#prfe#prmesh#Thi.nt-1);
+		  int[int] renum = restrict(pr#prfe#Vhi, pr#prfe#AugVhi,n2o);
+		  int[int] Ic = (0:pr#prfe#Vhi.ndof-1);
+		  real[int] Kc(pr#prfe#Vhi.ndof);
+		  Kc = 1;
+		  matrix pr#prfe#Auginterp = [Ic,renum,Kc];
+		  pr#prfe#Auginterp.resize(pr#prfe#Vhi.ndof, pr#prfe#AugVhi.ndof);
+		  ENDIFMACRO
 
-      if (pr#prfe#prmesh#inexactCSsplit > 1)
-        pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,sym=vsym,tgv=vtgvelim);
-      else
-        pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,sym=vsym,tgv=vtgv);
-      ENDIFMACRO
-      IFMACRO(pr#bem,1)
-      cout << "TODO" << endl;
-      assert(0);
-      ENDIFMACRO
-    }
-    else if (pr#prec == "ras" || pr#prec == "asm") {
-      IFMACRO(!pr#bem)
-      VarfPrec(vPb, pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)
-      if (pr#prfe#prmesh#inexactCSsplit > 1)
-        pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi,sym=vsym,tgv=vtgvelim);
-      else
-        pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi,sym=vsym,tgv=vtgv);
-      ENDIFMACRO
-      IFMACRO(pr#bem,1)
-      VarfPrec(vPb, pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)
-      pr#Tmatrix<pr#prfe#K> Hloc = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi,commworld=pr#prfe#prmesh#commself);
-      pr#prfe#K[int,int] mdense(pr#prfe#AugVhi.ndof, pr#prfe#AugVhi.ndof);
-      mdense = Hloc;
-      pr#aR[i] = mdense;
-      ENDIFMACRO
+		  rhsFull.resize(pr#prfe#AugVhi.ndof);
+		  rhs.resize(pr#prfe#Vhi.ndof);
 
-      renumbering(pr#aR[i], pr#prfe#Auginterp, rhsFull, rhs, eps=-1);
-    }
-    else if (pr#prec != "none")
-      assert(0);
+		  if (pr#prec == "oras" || pr#prec == "soras"){
+		    IFMACRO(!pr#bem)
+		    VarfPrec(RobinInt,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
+
+		    if (pr#prfe#prmesh#inexactCSsplit > 1)
+		      pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,sym=vsym,tgv=vtgvelim);
+		    else
+		      pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,sym=vsym,tgv=vtgv);
+		    ENDIFMACRO
+		    IFMACRO(pr#bem,1)
+		    cout << "TODO" << endl;
+		    assert(0);
+		    ENDIFMACRO
+		  }
+		  else if (pr#prec == "ras" || pr#prec == "asm") {
+		    IFMACRO(!pr#bem)
+		    VarfPrec(vPb, pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)
+		    if (pr#prfe#prmesh#inexactCSsplit > 1)
+		      pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi,sym=vsym,tgv=vtgvelim);
+		    else
+		      pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi,sym=vsym,tgv=vtgv);
+		    ENDIFMACRO
+		    IFMACRO(pr#bem,1)
+		    VarfPrec(vPb, pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)
+		    pr#Tmatrix<pr#prfe#K> Hloc = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi,commworld=pr#prfe#prmesh#commself);
+		    pr#prfe#K[int,int] mdense(pr#prfe#AugVhi.ndof, pr#prfe#AugVhi.ndof);
+		    mdense = Hloc;
+		    pr#aR[i] = mdense;
+		    ENDIFMACRO
+
+		    renumbering(pr#aR[i], pr#prfe#Auginterp, rhsFull, rhs, eps=-1);
+		  }
+		  else if (pr#prec != "none")
+		    assert(0);
+		}
 		ENDIFMACRO
 		IFMACRO((!pr#withhpddm)&(!pr#withpetsc))
 		set(pr#aR[i],solver = sparsesolver,commworld=pr#prfe#prmesh#commself,factorize=3);
