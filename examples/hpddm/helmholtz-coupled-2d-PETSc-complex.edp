@@ -1,4 +1,8 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
 load "PETSc-complex"
+load "lapack"
 macro dimension()2//
 include "macro_ddm.idp"
 load "bem"
@@ -135,6 +139,15 @@ func complex[int] opSurf(complex[int]& in) {
     for[i, p : perm] in[i] = -u[p];
     return in;
 }
+complex[int,int] dense(1, 1);
+{
+    BemKernel kerSL("SL",1,k);
+    varfbem varfSL(u,v) = int1dx1d(ThL)(ThL)(BEM(kerSL,u,v));
+    HMatrix<complex> A = varfSL(VhS, VhS, commworld=mpiCommSelf);
+    dense.resize(VhS.ndof, VhS.ndof);
+    dense = A;
+    dense = dense^-1;
+}
 func complex[int] opStoV(complex[int]& in) {
     complex[int] out(in.n), u(ThG.nt), v(ThG.nt);
     for[i, p : perm] u[p] = in[i];
@@ -149,6 +162,13 @@ func complex[int] opStoV(complex[int]& in) {
 }
 Mat<complex> VtoS(ASurf, A, Mass);
 Mat<complex> B(ASurf, opSurf);
+func complex[int] precondSurf(complex[int]& in) {
+    complex[int] u, out(in.n);
+    changeNumbering(B, u, in, inverse = true);
+    complex[int] v = dense * u;
+    changeNumbering(B, v, out);
+    return out;
+}
 Mat<complex> StoV(A, ASurf, opStoV);
 Mat<complex> N = [[A,    StoV],
                   [VtoS, B   ]];
@@ -165,7 +185,8 @@ changeNumbering([A, B], [rhsV, rhsS], rhs);
     list(0:nV.n-1) = 1.0;
     list(nV.n:list.n-1) = 2.0;
     complex[int] test(list.n - nV.n);
-    set(N, sparams = "-ksp_view -ksp_monitor -ksp_type fgmres -ksp_view_final_residual -fieldsplit_1_ksp_max_it 20 -ksp_gmres_restart 200 -pc_type fieldsplit "+" -fieldsplit_0_pc_type asm -fieldsplit_0_sub_pc_type lu -fieldsplit_0_ksp_type gmres -fieldsplit_1_ksp_type gmres -fieldsplit_1_pc_type none", fields = list);
+    set(N, sparams = "-ksp_view -ksp_monitor -ksp_type fgmres -ksp_view_final_residual -fieldsplit_1_ksp_max_it 2000 -ksp_gmres_restart 200 -pc_type fieldsplit "+" -fieldsplit_0_pc_type asm -fieldsplit_0_sub_pc_type lu -fieldsplit_0_ksp_type gmres -fieldsplit_1_ksp_type gmres -fieldsplit_1_ksp_gmres_restart 2000 "+" -fieldsplit_1_pc_type none", fields = list);
+    set(B, parent = N, sparams = "-prefix_push fieldsplit_1_ -pc_type shell -ksp_pc_side right -ksp_max_it 20 -prefix_pop", precon = precondSurf);
 }
 x.resize(rhs.n);
 KSPSolve(N, rhs, x);
