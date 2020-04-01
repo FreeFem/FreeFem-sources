@@ -483,7 +483,9 @@ AnyType Op_trunc_mesh::Op::operator()(Stack stack)  const {
     // WARNING for DDM
     // trunc(trunc(Th,op1),op2) =trunc(trunc(Th,op2),op1) => no renumbering ....
     using namespace    Fem2D;
-    const Mesh & Th = *GetAny<pmesh>((*getmesh)(stack));
+    const pmesh  pTh = GetAny<pmesh>((*getmesh)(stack));
+    if( !pTh) return pTh;
+    const Mesh & Th = *pTh;
     long kkksplit =std::max(1L, arg(0,stack,1L));
     long label =arg(1,stack,2L);
     KN<long> * pn2o =  arg(2,stack);

@@ -5846,6 +5846,7 @@ MeshL *truncmesh(const MeshL &Th, const long &kksplit, int *split, bool WithMort
 AnyType Op_trunc_meshL::Op::operator( )(Stack stack) const {
   MeshL *pTh = GetAny< MeshL * >((*getmesh)(stack));
   MeshL &Th = *pTh;
+    if(!pTh) return pTh;
   long kkksplit = std::max(1L, arg(0, stack, 1L));
   long label = arg(1, stack, 2L);
 
@@ -6730,6 +6731,9 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
     cout << " labelface.N()  " << labelface.N( ) << endl;
     for (int ii = 0; ii < labelface.N( ); ii++) cout << ii << " " << labelface[ii] << endl;
   }
+    map<int,int> slf;
+    for (int ii = 0; ii < labelface.N( ); ii++)
+        slf[labelface[ii]]=ii;
 
   KN< int > takevertex(Th.nv, -1);
   KN< int > takebe(Th.nbe, -1);
@@ -6739,8 +6743,13 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
   for (int ibe = 0; ibe < Th.nbe; ++ibe) {
     const B &K(Th.be(ibe));
     if(labelface.N( ))
-      for (int ii = 0; ii < labelface.N( ); ++ii) {
-        if (K.lab == labelface[ii]) {
+    {    map<int,int>::iterator mi =slf.find(K.lab) ;
+        if( mi != slf.end())
+        {
+            int ii = mi->second;
+
+      //for (int ii = 0; ii < labelface.N( ); ++ii) {
+      //  if (K.lab == labelface[ii]) {
           nbeLab++;
           takebe[ibe] = 1;
           for (int jj = 0; jj < B::nv; ++jj) {
@@ -6793,7 +6802,8 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
     for (int jj = 0; jj < B::nv; jj++) ivv[jj] = takevertex[Th.operator( )(K[jj])];
     (bb++)->set(v, ivv, K.lab);
   }
-
+  if( nv>0)
+  {
   MMeshO *pThnew = new MMeshO(nv, ns, 0, v, b, 0);
 
   copyMapping(pThnew, mapVol2Surf, mapSurf2Vol);
@@ -6805,6 +6815,14 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
 
   Add2StackOfPtr2FreeRC(stack, pThnew);
   return pThnew;
+  }
+    else
+    {
+        if(verbosity) cerr << " error in ExtractMesh form "<<pTh  << " : no vertices " << endl;
+        //ErrorExec(" ExtractMesh_Op  (no vertices)", 1);
+        return (MMeshO *)0;
+    }
+    
 }
 
       
@@ -6909,6 +6927,9 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 	long orientation(arg(6, stack, 1L));
 		  
 	// a trier les tableaux d'entier
+        map<int,int> slf;
+         for (int ii = 0; ii < labelface.N( ); ii++)
+             slf[labelface[ii]]=ii;
 	if (verbosity > 9) {
 		cout << " labelface.N()  " << labelface.N( ) << endl;
 		for (int ii = 0; ii < labelface.N( ); ii++) 
@@ -6923,9 +6944,14 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 	for (int ibe = 0; ibe < Th.neb; ++ibe) {
 		const B &K(Th.be(ibe));
 			
-		if(labelface.N( )) 
-			for (int ii = 0; ii < labelface.N( ); ++ii) {
-				if (K.lab == labelface[ii]) {
+		if(labelface.N( ))
+                    
+                {    map<int,int>::iterator mi =slf.find(K.lab) ;
+                      if( mi != slf.end())
+                            {
+                                int ii = mi->second;
+			//for (int ii = 0; ii < labelface.N( ); ++ii) {
+			//	if (K.lab == labelface[ii]) {
 					nbeLab++;
 					takebe[ibe] = 1;
 
@@ -6974,7 +7000,8 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 		for (int jj = 0; jj < 2; jj++) ivv[jj] = takevertex[Th.operator( )(K[jj])];
 		(bb++)->set(v, ivv, K.lab);
 	}
-     
+        if( nvL>0)
+        {
 	// build the moved mesh and apply option
 	MeshL *T_Th = new MeshL(nvL, nbeLab, 0, v, b, 0, cleanmesh, removeduplicate, rebuildboundary, orientation, precis_mesh);
 
@@ -6983,6 +7010,13 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 	Add2StackOfPtr2FreeRC(stack, T_Th);
 	*mp = mps;
 	return T_Th;
+        }
+        else
+        {
+            if(verbosity) cerr << "  Error in extract form mesh " << pTh << " , no vertices " <<  endl;
+           //  ErrorExec(" ExtractMeshLfromMesh_Op (no vertices) ", 1);
+            return (MeshL *) 0;
+        }
 }
 
 
@@ -9225,11 +9259,9 @@ AnyType OrientNormal_Op<MMesh>::operator( )(Stack stack) const {
 
   MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
   MMesh *pTh = GetAny< MMesh * >((*eTh)(stack));
+  if( !pTh) return pTh; // 
   MMesh &Th = *pTh;
   ffassert(pTh);
-
-  if (pTh->nt == 0)
-    return pTh;
 
   bool unbounded(arg(0, stack, false));
 
