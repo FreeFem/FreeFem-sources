@@ -100,8 +100,7 @@ matrix<complex> Mass = varfMass(Vh, Vh, tgv = -10);
 macro Grad(u) [dx(u),dy(u)] // EOM
 Mat<complex> A(Vh.ndof, R, D);
 varf varfA(u,v) = int2d(Th)(-ind*k^2*u*v+Grad(u)'*Grad(v)) + on(waveguide,u=0);
-matrix<complex> Loc = varfA(Vh, Vh, tgv = -1);
-A = Loc;
+A = varfA(Vh, Vh, tgv = -1);
 {
     matrix IdV = eye(Vh.ndof);
     renumbering(Mass, RVtoS, R = IdV);

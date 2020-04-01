@@ -2687,10 +2687,17 @@ namespace PETSc {
         }
         MatSetUp(ptA->_petsc);
         MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
-        ptA->_num = new PetscInt[ptB->_A->getMatrix( )->_n + ptC->_A->getMatrix( )->_m];
-        ptA->_cnum = ptA->_num + ptB->_A->getMatrix( )->_n;
-        std::copy_n(ptB->_num, ptB->_A->getMatrix( )->_n, ptA->_num);
-        std::copy_n(ptC->_num, ptC->_A->getMatrix( )->_m, ptA->_cnum);
+        if(ptB->_A->getMatrix() && ptC->_A->getMatrix()) {
+          ptA->_num = new PetscInt[ptB->_A->getMatrix( )->_n + ptC->_A->getMatrix( )->_m];
+          ptA->_cnum = ptA->_num + ptB->_A->getMatrix( )->_n;
+          std::copy_n(ptB->_num, ptB->_A->getMatrix( )->_n, ptA->_num);
+          std::copy_n(ptC->_num, ptC->_A->getMatrix( )->_m, ptA->_cnum);
+        } else {
+          ptA->_num = new PetscInt[ptB->_A->getDof() + ptC->_A->getDof()];
+          ptA->_cnum = ptA->_num + ptB->_A->getDof();
+          std::copy_n(ptB->_num, ptB->_A->getDof(), ptA->_num);
+          std::copy_n(ptC->_num, ptC->_A->getDof(), ptA->_cnum);
+        }
       }
       ptA->_exchange = new HPDDM::template Subdomain< PetscScalar >*[2];
       ptA->_exchange[0] = new HPDDM::template Subdomain< PetscScalar >(*ptB->_A);
