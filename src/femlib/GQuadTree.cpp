@@ -962,9 +962,12 @@ RESTART:
                if( nReStart++ < 1) goto RESTART;
                else
                   if(searchMethod) goto PICHON;
+               Phat=Rd(l+1);
               }
+              else // in itt
+                Phat=Rd(lK+1);// correction FH 1/0>4/2020
               outside=nna>0;
-              Phat=Rd(l+1);
+              
               const Element &K=Th[it];
               if( verbosity > 9)
                   cout << "   - Find "<< P << " -> " << K(Phat) << " " << loutside << " k= " << itt
