@@ -75,6 +75,7 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	stokes-3d-PETSc.edp \
 	stokes-fieldsplit-3d-PETSc.edp \
 	transpose-solve-PETSc.edp \
+	bratu-hpddm-2d-PETSc.edp \
 	vi-2d-PETSc.edp \
 	orego-Tao-PETSc.edp \
 	heat-TS-2d-PETSc.edp \
@@ -90,7 +91,6 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	save-load-Dmesh.edp \
 	navier-stokes-2d-PETSc.edp \
 	transfer.edp
-# bratu-hpddm-2d-PETSc.edp needs PETSc 3.13
 # diffusion-substructuring-2d-PETSc.edp <- problem with BDDC
 
 TESTS_PETSC_PARMMG = distributed-parmmg.edp laplace-adapt-dist-3d-PETSc.edp

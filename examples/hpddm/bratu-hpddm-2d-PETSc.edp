@@ -39,34 +39,36 @@ func int funcJ(real[int]& inPETSc) {
     A = vJ(Vh, Vh, tgv = -2);
     return 0;
 }
-bool stage = usedARGV("-stage") != -1;
-for(int i = 0; i < 3; ++i) {
-    string params;
-    if(i == 0) {
-        params = "";
+if(hasType("PC", "hpddm")) {
+    bool stage = usedARGV("-stage") != -1;
+    for(int i = 0; i < 3; ++i) {
+        string params;
+        if(i == 0) {
+            params = "";
+            if(stage)
+                PetscLogStagePush("Everything");
+        }
+        else if(i == 1) {
+            params = "-pc_hpddm_coarse_ksp_reuse_preconditioner";
+            if(stage)
+                PetscLogStagePush("Fine level");
+        }
+        else if(i == 2) {
+            params = "-pc_hpddm_levels_1_ksp_reuse_preconditioner";
+            if(stage)
+                PetscLogStagePush("Nothing");
+        }
+        set(A, sparams = "-pc_type hpddm -pc_hpddm_levels_1_sub_pc_type lu -pc_hpddm_levels_1_eps_nev 10 -pc_hpddm_define_subdomains -pc_hpddm_has_neumann -ksp_converged_reason -pc_hpddm_levels_1_pc_type asm " + params);
+        real[int] bPETSc;
+        u[] = vInit(0, Vh, tgv = -2);
+        changeNumbering(A, u[], bPETSc);
+        real[int] xPETSc = bPETSc;
+        SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_type newtonls -snes_converged_reason -ksp_converged_reason -snes_view");
+        changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
+        macro def(u)u//
+        plotMPI(M, u, Pk, def, real, cmm = "Global solution")
+        set(A, sparams = "-pc_type none");
         if(stage)
-            PetscLogStagePush("Everything");
+            PetscLogStagePop();
     }
-    else if(i == 1) {
-        params = "-pc_hpddm_coarse_ksp_reuse_preconditioner";
-        if(stage)
-            PetscLogStagePush("Fine level");
-    }
-    else if(i == 2) {
-        params = "-pc_hpddm_levels_1_ksp_reuse_preconditioner";
-        if(stage)
-            PetscLogStagePush("Nothing");
-    }
-    set(A, sparams = "-pc_type hpddm -pc_hpddm_levels_1_sub_pc_type lu -pc_hpddm_levels_1_eps_nev 10 -pc_hpddm_define_subdomains -pc_hpddm_has_neumann -ksp_converged_reason -pc_hpddm_levels_1_pc_type asm " + params);
-    real[int] bPETSc;
-    u[] = vInit(0, Vh, tgv = -2);
-    changeNumbering(A, u[], bPETSc);
-    real[int] xPETSc = bPETSc;
-    SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_type newtonls -snes_converged_reason -ksp_converged_reason -snes_view");
-    changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
-    macro def(u)u//
-    plotMPI(M, u, Pk, def, real, cmm = "Global solution")
-    set(A, sparams = "-pc_type none");
-    if(stage)
-        PetscLogStagePop();
 }
