@@ -30,6 +30,7 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [maxwell-mg-3d-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/maxwell-mg-3d-PETSc-complex.edp)                     | Two-grid preconditioner                                                       |
 | [helmholtz-3d-surf-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-3d-surf-PETSc-complex.edp)             | BEM with hierarchical matrices from Htool                                     |
 | [helmholtz-3d-line-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-3d-line-PETSc-complex.edp)             |                                                                               |
+| [helmholtz-coupled-2d-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-coupled-2d-PETSc-complex.edp)       | FEM coupled with BEM                                                          |
 
 ### Nonlinear problems
 | Filename                                                                                                                                                          | Comments (preconditioners, numerical schemes)                                 |

@@ -1614,7 +1614,7 @@ int typeVFBEM(const list<C_F0> & largs, Stack stack)
     list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end();
     
     int VVFBEM =-1, ik=-1;;
-    for (ii=ib;ii != ie;ii++,ik) {
+    for (ii=ib;ii != ie;ii++) {
         Expression e=ii->LeftValue();
         aType r = ii->left(); 
         

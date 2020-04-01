@@ -701,70 +701,54 @@ namespace PETSc {
   }
 
   template< class HpddmType >
-  class initCSRfromDMatrix_Op : public E_F0mps {
-   public:
-    Expression A;
-    Expression B;
-    Expression K;
-    static const int n_name_param = 2;
-    static basicAC_F0::name_and_type name_param[];
-    Expression nargs[n_name_param];
-    initCSRfromDMatrix_Op(const basicAC_F0& args, Expression param1, Expression param2,
-                          Expression param3)
-      : A(param1), B(param2), K(param3) {
-      args.SetNameParam(n_name_param, name_param, nargs);
-    }
-
-    AnyType operator( )(Stack stack) const;
-  };
-  template< class HpddmType >
-  basicAC_F0::name_and_type initCSRfromDMatrix_Op< HpddmType >::name_param[] = {
-    {"clean", &typeid(bool)},
-    {"symmetric", &typeid(bool)}
-  };
-  template< class HpddmType >
   class initCSRfromDMatrix : public OneOperator {
    public:
+    const int c;
+    class initCSRfromDMatrix_Op : public E_F0mps {
+     public:
+      Expression A;
+      Expression B;
+      Expression K;
+      const OneOperator *codeA;
+      const int c;
+      static const int n_name_param = 2;
+      static basicAC_F0::name_and_type name_param[];
+      Expression nargs[n_name_param];
+      initCSRfromDMatrix_Op(const basicAC_F0& args, int d)
+        : A(0), B(0), K(0), codeA(nullptr), c(d) {
+        args.SetNameParam(n_name_param, name_param, nargs);
+        A = to< DistributedCSR< HpddmType >* >(args[0]);
+        B = to< DistributedCSR< HpddmType >* >(args[1]);
+        if (c != 1) K = to< Matrice_Creuse< PetscScalar >* >(args[2]);
+        else {
+          const Polymorphic* op = dynamic_cast< const Polymorphic* >(args[2].LeftValue( ));
+          ffassert(op);
+          codeA = op->Find("(", ArrayOfaType(atype< KN< PetscScalar >* >( ), false));
+        }
+      }
+
+      AnyType operator( )(Stack stack) const;
+      operator aType( ) const { return atype< DistributedCSR< HpddmType >* >( ); }
+    };
+    E_F0* code(const basicAC_F0& args) const {
+      return new initCSRfromDMatrix_Op(args, c);
+    }
     initCSRfromDMatrix( )
       : OneOperator(
           atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
-          atype< DistributedCSR< HpddmType >* >( ), atype< Matrice_Creuse< PetscScalar >* >( )) {}
-
-    E_F0* code(const basicAC_F0& args) const {
-      return new initCSRfromDMatrix_Op< HpddmType >(args, t[0]->CastTo(args[0]),
-                                                    t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
-    }
+          atype< DistributedCSR< HpddmType >* >( ), atype< Matrice_Creuse< PetscScalar >* >( )),
+        c(0) {}
+    initCSRfromDMatrix(int)
+      : OneOperator(
+          atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
+          atype< DistributedCSR< HpddmType >* >( ), atype< Polymorphic* >( )),
+        c(1) {}
   };
   template< class HpddmType >
-  AnyType initCSRfromDMatrix_Op< HpddmType >::operator( )(Stack stack) const {
-    DistributedCSR< HpddmType >* ptA = GetAny< DistributedCSR< HpddmType >* >((*A)(stack));
-    DistributedCSR< HpddmType >* ptB = GetAny< DistributedCSR< HpddmType >* >((*B)(stack));
-    Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK = GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*K)(stack));
-    if (ptB->_A) {
-      ptA->_A = new HpddmType(static_cast< const HPDDM::Subdomain< PetscScalar >& >(*ptB->_A));
-      HPDDM::MatrixCSR< PetscScalar >* dA;
-      if (ptK->A) {
-        MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA = static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
-        dA = new_HPDDM_MatrixCSR< PetscScalar >(mA);
-      } else {
-        int* ia = new int[1]( );
-        dA = new HPDDM::MatrixCSR< PetscScalar >(0, 0, 0, nullptr, ia, nullptr, false, true);
-      }
-      ptA->_A->setMatrix(dA);
-      ptA->_num = new PetscInt[dA->_n];
-      std::copy_n(ptB->_num, dA->_n, ptA->_num);
-      ptA->_first = ptB->_first;
-      ptA->_last = ptB->_last;
-      PetscInt bs;
-      MatGetBlockSize(ptB->_petsc, &bs);
-      initPETScStructure<false>(
-        ptA, bs,
-        nargs[1] ? (GetAny< bool >((*nargs[1])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE,
-        static_cast< KN< double >* >(nullptr));
-    }
-    if (nargs[0] && GetAny< bool >((*nargs[0])(stack))) ptK->destroy( );
-    return ptA;
-  }
+  basicAC_F0::name_and_type
+    initCSRfromDMatrix< HpddmType >::initCSRfromDMatrix_Op::name_param[] = {
+      {"clean", &typeid(bool)},
+      {"symmetric", &typeid(bool)}};
 
   template< class HpddmType >
   class initRectangularCSRfromDMatrix : public OneOperator {
@@ -776,17 +760,23 @@ namespace PETSc {
       Expression B;
       Expression C;
       Expression K;
+      const OneOperator *codeA;
       const int c;
       static const int n_name_param = 1;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       initRectangularCSRfromDMatrix_Op(const basicAC_F0& args, int d)
-        : A(0), B(0), C(0), K(0), c(d) {
+        : A(0), B(0), C(0), K(0), codeA(nullptr), c(d) {
         args.SetNameParam(n_name_param, name_param, nargs);
         A = to< DistributedCSR< HpddmType >* >(args[0]);
         B = to< DistributedCSR< HpddmType >* >(args[1]);
         C = to< DistributedCSR< HpddmType >* >(args[2]);
-        if (c != 1) K = to< Matrice_Creuse< PetscScalar >* >(args[3]);
+        if (c == 0) K = to< Matrice_Creuse< PetscScalar >* >(args[3]);
+        if (c == 2) {
+          const Polymorphic* op = dynamic_cast< const Polymorphic* >(args[3].LeftValue( ));
+          ffassert(op);
+          codeA = op->Find("(", ArrayOfaType(atype< KN< PetscScalar >* >( ), false));
+        }
       }
 
       AnyType operator( )(Stack stack) const;
@@ -806,70 +796,17 @@ namespace PETSc {
           atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
           atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( )),
         c(1) {}
+    initRectangularCSRfromDMatrix(int, int)
+      : OneOperator(
+          atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
+          atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
+          atype< Polymorphic* >( )),
+        c(2) {}
   };
   template< class HpddmType >
   basicAC_F0::name_and_type
     initRectangularCSRfromDMatrix< HpddmType >::initRectangularCSRfromDMatrix_Op::name_param[] = {
       {"clean", &typeid(bool)}};
-  template< class HpddmType >
-  AnyType initRectangularCSRfromDMatrix< HpddmType >::initRectangularCSRfromDMatrix_Op::operator( )(
-    Stack stack) const {
-    DistributedCSR< HpddmType >* ptA = GetAny< DistributedCSR< HpddmType >* >((*A)(stack));
-    DistributedCSR< HpddmType >* ptB = GetAny< DistributedCSR< HpddmType >* >((*B)(stack));
-    DistributedCSR< HpddmType >* ptC = GetAny< DistributedCSR< HpddmType >* >((*C)(stack));
-    Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK =
-      (c != 1 ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*K)(stack)) : nullptr);
-    if (ptB->_A && ptC->_A) {
-      ptA->_first = ptB->_first;
-      ptA->_last = ptB->_last;
-      ptA->_cfirst = ptC->_first;
-      ptA->_clast = ptC->_last;
-      PetscInt bsB, bsC;
-      MatGetBlockSize(ptB->_petsc, &bsB);
-      MatGetBlockSize(ptC->_petsc, &bsC);
-      MatCreate(PetscObjectComm((PetscObject)ptB->_petsc), &ptA->_petsc);
-      if (bsB == bsC && bsB > 1) MatSetBlockSize(ptA->_petsc, bsB);
-      MatSetSizes(ptA->_petsc, ptB->_last - ptB->_first, ptC->_last - ptC->_first, PETSC_DECIDE, PETSC_DECIDE);
-      MatSetType(ptA->_petsc, MATMPIAIJ);
-      if (c != 1) {
-        PetscInt* ia = nullptr;
-        PetscInt* ja = nullptr;
-        PetscScalar* a = nullptr;
-        bool free = true;
-        if (ptK->A) {
-          MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA = static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
-          ff_HPDDM_MatrixCSR< PetscScalar > dA(mA);
-          ptA->_num = new PetscInt[mA->n + mA->m];
-          ptA->_cnum = ptA->_num + mA->n;
-          std::copy_n(ptB->_num, mA->n, ptA->_num);
-          std::copy_n(ptC->_num, mA->m, ptA->_cnum);
-          free = HPDDM::template Subdomain< PetscScalar >::distributedCSR(
-            ptA->_num, ptA->_first, ptA->_last, ia, ja, a, &dA, ptA->_num + mA->n);
-        } else
-          ia = new PetscInt[ptB->_last - ptB->_first + 1]( );
-        MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, ja, a);
-        if (free) {
-          delete[] ia;
-          delete[] ja;
-          delete[] a;
-        }
-      } else {
-        MatSetUp(ptA->_petsc);
-        MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
-        ptA->_num = new PetscInt[ptB->_A->getMatrix( )->_n + ptC->_A->getMatrix( )->_m];
-        ptA->_cnum = ptA->_num + ptB->_A->getMatrix( )->_n;
-        std::copy_n(ptB->_num, ptB->_A->getMatrix( )->_n, ptA->_num);
-        std::copy_n(ptC->_num, ptC->_A->getMatrix( )->_m, ptA->_cnum);
-      }
-      ptA->_exchange = new HPDDM::template Subdomain< PetscScalar >*[2];
-      ptA->_exchange[0] = new HPDDM::template Subdomain< PetscScalar >(*ptB->_A);
-      ptA->_exchange[0]->setBuffer( );
-      ptA->_exchange[1] = new HPDDM::template Subdomain< PetscScalar >(*ptC->_A);
-      ptA->_exchange[1]->setBuffer( );
-    }
-    if (c != 1 && nargs[0] && GetAny< bool >((*nargs[0])(stack))) ptK->destroy( );
-    return ptA;
-  }
 
   template< class HpddmType >
   class initCSRfromMatrix_Op : public E_F0mps {
@@ -1724,8 +1661,9 @@ namespace PETSc {
     } else VecCopy(x, y);
     PetscFunctionReturn(0);
   }
+  template< class Type >
   static PetscErrorCode ShellDestroy(Mat A) {
-    User< ShellInjection > user;
+    User< Type > user;
     PetscErrorCode ierr;
 
     PetscFunctionBegin;
@@ -1831,7 +1769,7 @@ namespace PETSc {
             MatCreateShell(PetscObjectComm((PetscObject)tabA->operator[](i + 1)._petsc), mFine, mCoarse, MFine, MCoarse, user, &P);
             MatShellSetOperation(P, MATOP_MULT, (void (*)(void))ShellInjectionOp< false >);
             MatShellSetOperation(P, MATOP_MULT_TRANSPOSE, (void (*)(void))ShellInjectionOp< true >);
-            MatShellSetOperation(P, MATOP_DESTROY, (void (*)(void))ShellDestroy);
+            MatShellSetOperation(P, MATOP_DESTROY, (void (*)(void))ShellDestroy< ShellInjection >);
             PCMGSetInterpolation(pc, tabA->N( ) - i - 1, P);
             MatDestroy(&P);
           }
@@ -2170,6 +2108,8 @@ namespace PETSc {
   AnyType changeNumbering< Type, Storage >::changeNumbering_Op::operator( )(Stack stack) const {
     Storage< PetscScalar >* ptOut = GetAny< Storage< PetscScalar >* >((*out)(stack));
     bool inverse = nargs[0] && GetAny< bool >((*nargs[0])(stack));
+    if(inverse)
+        ffassert(ptOut->operator PetscScalar*());
     int sum = 0;
     if (c == 0 || c == 2) {
       PetscScalar* pt = *ptOut;
@@ -2642,6 +2582,124 @@ namespace PETSc {
       }
     }
     return 0L;
+  }
+  template< class HpddmType >
+  AnyType initCSRfromDMatrix< HpddmType >::initCSRfromDMatrix_Op::operator( )(
+    Stack stack) const {
+    DistributedCSR< HpddmType >* ptA = GetAny< DistributedCSR< HpddmType >* >((*A)(stack));
+    DistributedCSR< HpddmType >* ptB = GetAny< DistributedCSR< HpddmType >* >((*B)(stack));
+    Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK = (c == 0 ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*K)(stack)) : nullptr);
+    if (ptB->_A) {
+      ptA->_A = new HpddmType(static_cast< const HPDDM::Subdomain< PetscScalar >& >(*ptB->_A));
+      HPDDM::MatrixCSR< PetscScalar >* dA;
+      if (c == 0 && ptK->A) {
+        MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA = static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
+        dA = new_HPDDM_MatrixCSR< PetscScalar >(mA);
+      } else {
+        if (c == 0) {
+          int* ia = new int[1]( );
+          dA = new HPDDM::MatrixCSR< PetscScalar >(0, 0, 0, nullptr, ia, nullptr, false, true);
+        } else {
+          ffassert(ptB->_A->getMatrix());
+          int m = ptB->_A->getMatrix()->_n;
+          int* ia = new int[m + 1]( );
+          dA = new HPDDM::MatrixCSR< PetscScalar >(m, m, 0, nullptr, ia, nullptr, false, true);
+        }
+      }
+      ptA->_A->setMatrix(dA);
+      ptA->_num = new PetscInt[dA->_n];
+      std::copy_n(ptB->_num, dA->_n, ptA->_num);
+      ptA->_first = ptB->_first;
+      ptA->_last = ptB->_last;
+      PetscInt bs;
+      MatGetBlockSize(ptB->_petsc, &bs);
+      initPETScStructure<false>(
+        ptA, bs,
+        nargs[1] ? (GetAny< bool >((*nargs[1])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE,
+        static_cast< KN< double >* >(nullptr));
+      if (c == 1) {
+        MatSetType(ptA->_petsc, MATSHELL);
+        User< LinearSolver< Dmat, 'N' > > user = nullptr;
+        PetscNew(&user);
+        user->op = new LinearSolver< Dmat, 'N' >::MatF_O(ptB->_last - ptB->_first, stack, codeA);
+        MatShellSetContext(ptA->_petsc, user);
+        MatShellSetOperation(ptA->_petsc, MATOP_MULT,
+                             (void (*)(void))Op_User< LinearSolver< Mat, 'N' >, Mat >);
+        MatShellSetOperation(ptA->_petsc, MATOP_DESTROY, (void (*)(void))ShellDestroy< LinearSolver< Dmat, 'N' >  >);
+        MatSetUp(ptA->_petsc);
+      }
+    }
+    if (c == 0 && nargs[0] && GetAny< bool >((*nargs[0])(stack))) ptK->destroy( );
+    return ptA;
+  }
+  template< class HpddmType >
+  AnyType initRectangularCSRfromDMatrix< HpddmType >::initRectangularCSRfromDMatrix_Op::operator( )(
+    Stack stack) const {
+    DistributedCSR< HpddmType >* ptA = GetAny< DistributedCSR< HpddmType >* >((*A)(stack));
+    DistributedCSR< HpddmType >* ptB = GetAny< DistributedCSR< HpddmType >* >((*B)(stack));
+    DistributedCSR< HpddmType >* ptC = GetAny< DistributedCSR< HpddmType >* >((*C)(stack));
+    Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK =
+      (c == 0 ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*K)(stack)) : nullptr);
+    if (ptB->_A && ptC->_A) {
+      ptA->_first = ptB->_first;
+      ptA->_last = ptB->_last;
+      ptA->_cfirst = ptC->_first;
+      ptA->_clast = ptC->_last;
+      PetscInt bsB, bsC;
+      MatGetBlockSize(ptB->_petsc, &bsB);
+      MatGetBlockSize(ptC->_petsc, &bsC);
+      MatCreate(PetscObjectComm((PetscObject)ptB->_petsc), &ptA->_petsc);
+      if (bsB == bsC && bsB > 1) MatSetBlockSize(ptA->_petsc, bsB);
+      MatSetSizes(ptA->_petsc, ptB->_last - ptB->_first, ptC->_last - ptC->_first, PETSC_DECIDE, PETSC_DECIDE);
+      MatSetType(ptA->_petsc, MATMPIAIJ);
+      if (c == 0) {
+        PetscInt* ia = nullptr;
+        PetscInt* ja = nullptr;
+        PetscScalar* a = nullptr;
+        bool free = true;
+        if (ptK->A) {
+          MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA = static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
+          ff_HPDDM_MatrixCSR< PetscScalar > dA(mA);
+          ptA->_num = new PetscInt[mA->n + mA->m];
+          ptA->_cnum = ptA->_num + mA->n;
+          std::copy_n(ptB->_num, mA->n, ptA->_num);
+          std::copy_n(ptC->_num, mA->m, ptA->_cnum);
+          free = HPDDM::template Subdomain< PetscScalar >::distributedCSR(
+            ptA->_num, ptA->_first, ptA->_last, ia, ja, a, &dA, ptA->_num + mA->n);
+        } else
+          ia = new PetscInt[ptB->_last - ptB->_first + 1]( );
+        MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, ja, a);
+        if (free) {
+          delete[] ia;
+          delete[] ja;
+          delete[] a;
+        }
+      } else {
+        if (c == 2) {
+          MatSetType(ptA->_petsc, MATSHELL);
+          User< LinearSolver< Dmat, 'N' > > user = nullptr;
+          PetscNew(&user);
+          user->op = new LinearSolver< Dmat, 'N' >::MatF_O(ptC->_last - ptC->_first, stack, codeA, ptB->_last - ptB->_first);
+          MatShellSetContext(ptA->_petsc, user);
+          MatShellSetOperation(ptA->_petsc, MATOP_MULT,
+                               (void (*)(void))Op_User< LinearSolver< Mat, 'N' >, Mat >);
+          MatShellSetOperation(ptA->_petsc, MATOP_DESTROY, (void (*)(void))ShellDestroy< LinearSolver< Dmat, 'N' >  >);
+        }
+        MatSetUp(ptA->_petsc);
+        MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
+        ptA->_num = new PetscInt[ptB->_A->getMatrix( )->_n + ptC->_A->getMatrix( )->_m];
+        ptA->_cnum = ptA->_num + ptB->_A->getMatrix( )->_n;
+        std::copy_n(ptB->_num, ptB->_A->getMatrix( )->_n, ptA->_num);
+        std::copy_n(ptC->_num, ptC->_A->getMatrix( )->_m, ptA->_cnum);
+      }
+      ptA->_exchange = new HPDDM::template Subdomain< PetscScalar >*[2];
+      ptA->_exchange[0] = new HPDDM::template Subdomain< PetscScalar >(*ptB->_A);
+      ptA->_exchange[0]->setBuffer( );
+      ptA->_exchange[1] = new HPDDM::template Subdomain< PetscScalar >(*ptC->_A);
+      ptA->_exchange[1]->setBuffer( );
+    }
+    if (c == 0 && nargs[0] && GetAny< bool >((*nargs[0])(stack))) ptK->destroy( );
+    return ptA;
   }
   template< class Type >
   class NonlinearSolver : public OneOperator {
@@ -3442,7 +3500,7 @@ namespace PETSc {
     VecGetArrayRead(x, &in);
     VecGetArray(y, &out);
     KN_< PetscScalar > xx(const_cast< PetscScalar* >(in), mat->N);
-    KN_< PetscScalar > yy(out, mat->N);
+    KN_< PetscScalar > yy(out, mat->M);
     yy = *mat * xx;
     VecRestoreArray(y, &out);
     VecRestoreArrayRead(x, &in);
@@ -3940,9 +3998,10 @@ static void Init_PETSc( ) {
   Add< Dmat* >("D", ".", new OneOperator1< KN_<double>, Dmat* >(PETSc::Dmat_D));
   TheOperators->Add("<-", new PETSc::initCSRfromArray< HpSchwarz< PetscScalar > >);
   TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar > >);
+  TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar > >(1));
   TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar > >);
-  TheOperators->Add("<-",
-                    new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar > >(1));
+  TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar > >(1));
+  TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar > >(1, 1));
   TheOperators->Add(
     "<-", new OneOperatorCode< PETSc::initCSRfromBlockMatrix< HpSchwarz< PetscScalar > > >( ));
   TheOperators->Add(
