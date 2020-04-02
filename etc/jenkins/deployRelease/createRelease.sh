@@ -21,7 +21,7 @@ RESPONSE=`curl 'https://api.github.com/repos/'$ORGANIZATION'/'$REPOSITORY'/relea
 RESPONSE_URL=`printf "%s" "$RESPONSE" | jq -r '.url'`
 
 ## Create release
-if [ -z "$RESPONSE_URL" ]
+if [ "$RESPONSE_URL" = "null" ]
 then
 	RELEASE_PARAMETERS=$(printf '{"tag_name": "%s", "target_commitish": "%s", "name": "%s", "body": "%s.", "draft": %s, "prerelease": %s}' "$RELEASE_TAG_NAME" "$RELEASE_TARGET_COMMITISH" "$RELEASE_NAME" "$RELEASE_BODY" "$RELEASE_DRAFT" "$RELEASE_PRERELEASE")
 	RELEASE=`curl -H "Authorization: token $TOKEN" --data "$RELEASE_PARAMETERS" 'https://api.github.com/repos/'$ORGANIZATION'/'$REPOSITORY'/releases'`
