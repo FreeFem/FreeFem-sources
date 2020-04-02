@@ -8588,12 +8588,8 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
                         if(np==2)
                         {
                             if ( sameMesh )
-                            {/*
-                              void  Element_rhs(const FElement & Kv,const LOperaD &Op,double * p,void * stack,KN_<R> & B,
-                              const QuadratureFormular1d & FI ,const R2 & PA,const R2 &PB)
-
-                              */
-                           /*     Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIE,Q[0],Q[1],useopt);
+                            {
+                           Element_rhs<R>(Vh[t],*l->l,buf,stack,*B,FIE,Q[0],Q[1],useopt);
                             }
                             else if(!mapt)
                                 Element_rhs<R>(ThI,ThI[t],Vh,0,ThI[t].lab,*l->l,buf,stack,*B,FIE,false,intmortar,Q,useopt);
