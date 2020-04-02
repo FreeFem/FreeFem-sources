@@ -26,6 +26,15 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Deprecated
+
+## [4.6]
+
+### Added
+- new algorithm for searching element contening a point (more safe) in mesh of type mesh3, meshS, or meshL. 
 - new function `hasType` to know if a PETSc component has been installed, e.g., `hasType("PC", "hypre")`
 - eigenvalue problems on linear elements, cf. `examples/eigen/LapEigen1DBeltrami.edp` or `examples/hpddm/laplace-beltrami-3d-line-SLEPc.edp`
 - `--download-cmake` in PETSc configure if there is no CMake available

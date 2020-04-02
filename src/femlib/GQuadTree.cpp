@@ -769,16 +769,18 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
   const int d=Rd::d;
   R dP=DBL_MAX, nddd=0;
   Rd PPhat,Delta;
+  R eps = -1e-10;// def test in tet ..
+
   int k=0;
     const int nReStartMax = 1 << Rd::d; //  Nb vertex of the d-cube/
     int nReStart = 0;
     int itstart[100],itout[100],kstart=0;
     Rd Pout[100];
-  int it,j,it00;
+  int it,j,it00,nbdeja=0,nbdejax=0;
   const int mxbord=1000;
   int kbord[mxbord+1];
   int nbord=0;
-
+  map<int,int> deja;
   if(searchMethod>1) goto PICHON;
   if ( tstart )
     it00=it =  Th(tstart);
@@ -816,7 +818,20 @@ RESTART:
       //if(verbosity>199) cout << "it " << it <<endl;
       const Element & K(Th[it]);
       Mesh::kthrough++;
-      assert(k++<1000);
+      ffassert(k++<2000);
+      if( k> 500)
+      { // boucle ????  change eps
+          nbdeja=++deja[it];// we stocke le deja view in map
+        
+          nbdejax = max(nbdeja,nbdeja);
+          if( nbdejax )
+          if(nbdejax> 5) eps=1e-7;
+          else if(nbdejax> 4) eps=1e-8;
+          else if(nbdejax> 3) eps=1e-9;
+          
+          ffassert(nbdeja<15);
+      }
+    
       int kk,n=0,nl[nkv];
       R l[nkv];
       for(int iii=0; iii<nkv; iii++)
@@ -829,12 +844,22 @@ RESTART:
       
       // avant:
       // R eps =  -K.mesure()*1e-10;
-      R eps = -1e-10;
+        if( nbdeja>3) eps=-1e-8;
+        
+        
       for(int i=0;i<nkv;++i)
 	if( l[i] < eps){
 	  nl[n++]=i;
 	}
-      if(verbosity>200){
+        if(verbosity>19 && nbdeja >1) {
+           cout << " Bizzare loop in search "<< nbdeja << "       tet it=" << it ;
+           cout << "  K.mesure=" << K.mesure() ;
+           cout << " eps=" << eps << " : " ;
+           for(int i=0;i<nkv;++i)
+              cout<< "  l["<< i <<"]=" <<  l[i] ;
+           cout << " n=" << n << endl;
+        }
+      else if(verbosity>200){
 	cout << "       tet it=" << it ;
 	cout << "  K.mesure=" << K.mesure() ;
 	cout << " eps=" << eps << " : " ;
