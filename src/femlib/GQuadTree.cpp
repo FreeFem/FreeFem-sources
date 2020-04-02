@@ -672,7 +672,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
         int n=0,m=-1;
         int nl[Tet::nv+1];
         R eps = -1e-10;
-        for(int i=0;i<=Triangle2::nv;++i)
+        for(int i=0;i<Triangle2::nv;++i)// correction FH 2/04/20
             if( l[i] < eps){
                 nl[n++]=i;
             }
@@ -701,7 +701,7 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
         int n=0,m=-1;
         int nl[Tet::nv+1];
         R eps = -1e-10;
-        for(int i=0;i<=Tet::nv;++i)
+        for(int i=0;i<Tet::nv;++i)// correction FH 2/04/20 
             if( l[i] < eps){
                 nl[n++]=i;
             }
@@ -935,8 +935,8 @@ RESTART:
 	    cout << "   s=" << ss <<" " << s <<" exit by bord " << it << " "  << Phat << endl;;
           }
 	outside=true;
-// New Methode mars 2020
-        if(searchMethod==0)
+// New Method mars 2020
+        if(1) // searchMethod==0)
           {
           GenericDataFindBoundary<Mesh> * gdfb=Th.Buildgdfb();
           if(gdfb )
