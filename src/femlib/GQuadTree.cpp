@@ -936,7 +936,7 @@ RESTART:
           }
 	outside=true;
 // New Methode mars 2020
-        if(1)
+        if(searchMethod==0)
           {
           GenericDataFindBoundary<Mesh> * gdfb=Th.Buildgdfb();
           if(gdfb )
