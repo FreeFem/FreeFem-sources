@@ -19,7 +19,8 @@ mmg:WHERE.done
 ifeq ($(WIN32DLLTARGET),)
 CMAKE_GENERATOR := 
 else
-CMAKE_GENERATOR := -G "MSYS Makefiles"
+CMAKE_GENERATOR :=
+# -G "MSYS Makefiles"
 endif
 
 FAIT.done:tag-tar
@@ -58,6 +59,7 @@ FAIRE: FAIT.done install.done
 tag-tar: $(PACKAGE)
 	-rm -rf mmg-*
 	unzip $(PACKAGE) && mv mmg-* mmg-sources
+#	patch -p1 <patch-mmg 
 	touch tag-tar
 
 $(PACKAGE): FORCE
