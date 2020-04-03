@@ -19,8 +19,7 @@ mmg:WHERE.done
 ifeq ($(WIN32DLLTARGET),)
 CMAKE_GENERATOR := 
 else
-CMAKE_GENERATOR :=
-# -G "MSYS Makefiles"
+CMAKE_GENERATOR := -G "MSYS Makefiles"
 endif
 
 FAIT.done:tag-tar
