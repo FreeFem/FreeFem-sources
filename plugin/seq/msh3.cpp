@@ -6896,6 +6896,8 @@ public:
 			Expression Z=0 ; if(a->size( )>2) Z= to< double >((*a)[2]);
 			return new ExtractMeshLfromMesh_Op(args, t[0]->CastTo(args[0]), X, Y, Z);
 		} 
+		CompileError("ExtractMeshLfromMesh case unknow  ");		
+		return 0; 
 	}
 };
 

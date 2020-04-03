@@ -10,11 +10,11 @@ set -e
 if [ "$(uname)" == "Darwin" ]; then
   # in case where the OS type is Darwin
   PETSC_INSTALLDIR='/Users/Shared/mpich'
-  change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-$casejob.sh
+  change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-4_mpich.sh
 elif [ "$(uname)" == "Linux" ]; then
   # in case where the OS type is Linux
   PETSC_INSTALLDIR='/builds/Shared/mpich'
-  change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-$casejob.sh
+  change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-4_mpich.sh
 fi
 echo try to source file  "$change_compiler"
 test -f "$change_compiler" && echo  source file "$change_compiler"

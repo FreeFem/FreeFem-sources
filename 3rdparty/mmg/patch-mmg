@@ -1,0 +1,10 @@
+--- ./mmg-sources/src/common/mmgcommon.h.in-origine	2020-04-03 09:59:45.000000000 +0200
++++ ./mmg-sources/src/common/mmgcommon.h.in	2020-04-03 10:00:23.000000000 +0200
+@@ -43,6 +43,7 @@
+ #elif defined(__unix__) || defined(__unix) || defined(unix)
+ #include <unistd.h>
+ #elif defined(_WIN16) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
++#undef POSIX 
+ #ifndef GNU
+ #define _WIN32_WINNT 0x0500
+ #endif

@@ -1434,7 +1434,7 @@ namespace PETSc {
       Expression A;
       Expression P;
       const int c;
-      static const int n_name_param = 17;
+      static const int n_name_param = 18;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       setOptions_Op(const basicAC_F0& args, int d) : A(0), P(0), c(d) {
@@ -1464,23 +1464,24 @@ namespace PETSc {
   };
   template< class Type >
   basicAC_F0::name_and_type setOptions< Type >::setOptions_Op::name_param[] = {
-    {"sparams", &typeid(std::string*)},                                        // 0
-    {"nearnullspace", &typeid(FEbaseArrayKn< HPDDM::upscaled_type<PetscScalar> >*)},                 // 1
-    {"fields", &typeid(KN< double >*)},                                        // 2
-    {"names", &typeid(KN< String >*)},                                         // 3
-    {"prefix", &typeid(std::string*)},                                         // 4
-    {"schurPreconditioner", &typeid(KN< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> > >*)},    // 5
-    {"schurList", &typeid(KN< double >*)},                                     // 6
-    {"parent", &typeid(Type*)},                                                // 7
-    {"MatNullSpace", &typeid(KNM< HPDDM::upscaled_type<PetscScalar> >*)},                            // 8
-    {"fieldsplit", &typeid(long)},                                             // 9
-    {"schurComplement", &typeid(KNM< HPDDM::upscaled_type<PetscScalar> >*)},                         // 10
-    {"schur", &typeid(KN< Dmat >*)},                                           // 11
-    {"aux", &typeid(Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >*)},                          // 12
-    {"coordinates", &typeid(KNM< double >*)},                                  // 13
-    {"gradient", &typeid(Dmat*)},                                              // 14
-    {"O", &typeid(Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >*)},                            // 15
-    {"bs", &typeid(long)},                                                     // 16
+    {"sparams", &typeid(std::string*)},                                                           // 0
+    {"nearnullspace", &typeid(FEbaseArrayKn< HPDDM::upscaled_type<PetscScalar> >*)},              // 1
+    {"fields", &typeid(KN< double >*)},                                                           // 2
+    {"names", &typeid(KN< String >*)},                                                            // 3
+    {"prefix", &typeid(std::string*)},                                                            // 4
+    {"schurPreconditioner", &typeid(KN< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> > >*)}, // 5
+    {"schurList", &typeid(KN< double >*)},                                                        // 6
+    {"parent", &typeid(Type*)},                                                                   // 7
+    {"MatNullSpace", &typeid(KNM< HPDDM::upscaled_type<PetscScalar> >*)},                         // 8
+    {"fieldsplit", &typeid(long)},                                                                // 9
+    {"schurComplement", &typeid(KNM< HPDDM::upscaled_type<PetscScalar> >*)},                      // 10
+    {"schur", &typeid(KN< Dmat >*)},                                                              // 11
+    {"aux", &typeid(Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >*)},                       // 12
+    {"coordinates", &typeid(KNM< double >*)},                                                     // 13
+    {"gradient", &typeid(Dmat*)},                                                                 // 14
+    {"O", &typeid(Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >*)},                         // 15
+    {"bs", &typeid(long)},                                                                        // 16
+    {"precon", &typeid(Polymorphic*)}                                                             // 17
   };
   class ShellInjection;
   template< class Type, char >
@@ -1671,6 +1672,18 @@ namespace PETSc {
     ierr = PetscFree(user);CHKERRQ(ierr);
     PetscFunctionReturn(0);
   }
+  template< class Type >
+  static PetscErrorCode PCShellDestroy(PC pc) {
+    User< Type > user;
+    PetscErrorCode ierr;
+
+    PetscFunctionBegin;
+    ierr = PCShellGetContext(pc, (void**)&user);CHKERRQ(ierr);
+    ierr = PetscFree(user);CHKERRQ(ierr);
+    PetscFunctionReturn(0);
+  }
+  template< class Type, class Container >
+  static PetscErrorCode Op_User(Container A, Vec x, Vec y);
   template< class Type >
   AnyType setOptions< Type >::setOptions_Op::operator( )(Stack stack) const {
     Type *ptA, *ptParent;
@@ -1977,6 +1990,20 @@ namespace PETSc {
             MatFactorRestoreSchurComplement(F, &S, status);
             ISDestroy(&is);
           }
+        }
+        if (std::is_same< Type, Dmat >::value && ptA->_A && nargs[17]) {
+            PC pc;
+            KSPGetPC(ksp, &pc);
+            const Polymorphic* op = dynamic_cast< const Polymorphic* >(nargs[17]);
+            ffassert(op);
+            const OneOperator* codeA = op->Find("(", ArrayOfaType(atype< KN< PetscScalar >* >( ), false));
+            PCSetType(pc, PCSHELL);
+            User< LinearSolver< Type, 'N' > > userPC = nullptr;
+            PetscNew(&userPC);
+            userPC->op = new typename LinearSolver< Type, 'N' >::MatF_O(ptA->_last - ptA->_first, stack, codeA);
+            PCShellSetContext(pc, userPC);
+            PCShellSetApply(pc, Op_User< LinearSolver< Type, 'N' >, PC >);
+            PCShellSetDestroy(pc, PCShellDestroy< LinearSolver< Dmat, 'N' >  >);
         }
       }
     }
@@ -2475,8 +2502,6 @@ namespace PETSc {
   template< class Type, char N >
   basicAC_F0::name_and_type LinearSolver< Type, N >::E_LinearSolver::name_param[] = {
     {"precon", &typeid(Polymorphic*)}, {"sparams", &typeid(std::string*)}};
-  template< class Type, class Container >
-  static PetscErrorCode Op_User(Container A, Vec x, Vec y);
   template< class Type, char N >
   AnyType LinearSolver< Type, N >::E_LinearSolver::operator( )(Stack stack) const {
     if (c != 2) {
@@ -2687,10 +2712,17 @@ namespace PETSc {
         }
         MatSetUp(ptA->_petsc);
         MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
-        ptA->_num = new PetscInt[ptB->_A->getMatrix( )->_n + ptC->_A->getMatrix( )->_m];
-        ptA->_cnum = ptA->_num + ptB->_A->getMatrix( )->_n;
-        std::copy_n(ptB->_num, ptB->_A->getMatrix( )->_n, ptA->_num);
-        std::copy_n(ptC->_num, ptC->_A->getMatrix( )->_m, ptA->_cnum);
+        if(ptB->_A->getMatrix() && ptC->_A->getMatrix()) {
+          ptA->_num = new PetscInt[ptB->_A->getMatrix( )->_n + ptC->_A->getMatrix( )->_m];
+          ptA->_cnum = ptA->_num + ptB->_A->getMatrix( )->_n;
+          std::copy_n(ptB->_num, ptB->_A->getMatrix( )->_n, ptA->_num);
+          std::copy_n(ptC->_num, ptC->_A->getMatrix( )->_m, ptA->_cnum);
+        } else {
+          ptA->_num = new PetscInt[ptB->_A->getDof() + ptC->_A->getDof()];
+          ptA->_cnum = ptA->_num + ptB->_A->getDof();
+          std::copy_n(ptB->_num, ptB->_A->getDof(), ptA->_num);
+          std::copy_n(ptC->_num, ptC->_A->getDof(), ptA->_cnum);
+        }
       }
       ptA->_exchange = new HPDDM::template Subdomain< PetscScalar >*[2];
       ptA->_exchange[0] = new HPDDM::template Subdomain< PetscScalar >(*ptB->_A);

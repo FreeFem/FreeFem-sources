@@ -13,12 +13,12 @@ if [ "$(uname)" == "Darwin" ]; then
   # in case where the OS type is Darwin
   PETSC_DIR='/Users/Shared/mpich/ff-petsc'
   change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-`uname -r`-$casejob.sh
-  installedVersionffpetsc=$(grep "VERSION_GIT" /Users/Shared/openmpi/ff-petsc/c/include/petscversion.h | cut -c36-42 | cut -f1 -d "\"" )   #if version X.X.XX
+  installedVersionffpetsc=$(grep "VERSION_GIT" /Users/Shared/mpich/ff-petsc/c/include/petscversion.h | cut -c36-42 | cut -f1 -d "\"" )   #if version X.X.XX
 elif [ "$(uname)" == "Linux" ]; then
   # in case where the OS type is Linux
 PETSC_DIR='/builds/Shared/mpich/ff-petsc'
 change_compiler=etc/jenkins/change_compiler/change_compiler-`uname -s`-$casejob.sh
-installedVersionffpetsc=$(grep "VERSION_GIT" /builds/Shared/openmpi/ff-petsc/c/include/petscversion.h | cut -c36-42 | cut -f1 -d "\"" )   #if version X.X.XX
+installedVersionffpetsc=$(grep "VERSION_GIT" /builds/Shared/mpich/ff-petsc/c/include/petscversion.h | cut -c36-42 | cut -f1 -d "\"" )   #if version X.X.XX
 fi
 echo installed Versionff petsc "$installedVersionffpetsc"
 echo try to source file  "$change_compiler"

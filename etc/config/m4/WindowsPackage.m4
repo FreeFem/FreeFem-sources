@@ -104,6 +104,7 @@ IFMGW64 Source: "C:\msys64\mingw64\bin\libwinpthread-1.dll"; DestDir: "{app}"
 IFMGW64 Source: "C:\msys64\mingw64\bin\libgfortran-*.dll"; DestDir: "{app}"
 IFMGW64 Source: "C:\msys64\mingw64\bin\libquadmath-*.dll"; DestDir: "{app}"
 IFMGW64 Source: "C:\msys64\mingw64\bin\libfreeglut.dll"; DestDir: "{app}"
+IFMGW64 Source: "C:\msys64\mingw64\bin\libgsl*.dll"; DestDir: "{app}"
 
 
 IFMGW64 ; mingw64 ....   FH. I have put all dll in bin-win32 dir ....

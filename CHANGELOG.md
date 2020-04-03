@@ -26,6 +26,15 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Deprecated
+
+## [4.6]
+
+### Added
+- new algorithm for searching element contening a point (more safe) in mesh of type mesh3, meshS, or meshL. 
 - new function `hasType` to know if a PETSc component has been installed, e.g., `hasType("PC", "hypre")`
 - eigenvalue problems on linear elements, cf. `examples/eigen/LapEigen1DBeltrami.edp` or `examples/hpddm/laplace-beltrami-3d-line-SLEPc.edp`
 - `--download-cmake` in PETSc configure if there is no CMake available
@@ -272,7 +281,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.5..develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.6..develop
+[4.6]: https://github.com/FreeFem/FreeFem-sources/compare/v4.5...v4.6
 [4.5]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-3...v4.5
 [4.4-3]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-2...v4.4-3
 [4.4-2]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4...v4.4-2
