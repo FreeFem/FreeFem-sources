@@ -145,21 +145,7 @@ local Petsc 3.12.4 installed on /Users/Shared (mpich and openmpi version)
 [OpenMPI compilation](#openmpi)4.0.3
 [MPICH compilation](#mpich)3.3.2
 
-# Windows 7 - VM1
-```
-pacman -S autoconf automake-wrapper bash bash-completion \
-    bison bsdcpio bsdtar bzip2 coreutils curl dash file filesystem \
-    findutils flex gawk gcc gcc-fortran gcc-libs grep gzip inetutils info less lndir \
-    make man-db git  mingw-w64-x86_64-toolchain mingw-w64-x86_64-hdf5 \
-    mingw-w64-x86_64-arpack mingw-w64-x86_64-openblas mintty msys2-keyring msys2-launcher-git \
-    msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
-    perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
-    mingw-w64-x86_64-libmicroutils  --ignore mingw-w64-x86_64-gcc-ada --ignore mingw-w64-x86_64-gcc-objc \
-     --ignore mingw-w64-x86_64-gdb  --ignore mingw-w64-x86_64-python --noconfirm 
-```
-
-
-# Windows 7 - VM2-2
+# Windows 7 and 10 - all VM
 ```
 pacman -S autoconf automake-wrapper bash bash-completion \
     bison bsdcpio bsdtar bzip2 coreutils curl dash file filesystem \
@@ -168,65 +154,7 @@ pacman -S autoconf automake-wrapper bash bash-completion \
     mingw-w64-x86_64-openblas mintty msys2-keyring msys2-launcher-git \
     msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
     perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
-    mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-arpack mingw-w64-x86_64-cmake   
-pacman -R mingw-w64-x86_64-gcc-ada mingw-w64-x86_64-gcc-objc mingw-w64-x86_64-gdb mingw-w64-x86_64-python
-```
-[MSMPI 10.1.2](https://www.microsoft.com/en-us/download/details.aspx?id=100593)
-
-
-# Windows 7 - VM3
-```
-pacman -S autoconf automake-wrapper bash bash-completion \
-    bison bsdcpio bsdtar bzip2 coreutils curl dash file filesystem \
-    findutils flex gawk gcc gcc-fortran gcc-libs grep gzip inetutils info less lndir \
-    make man-db git mingw-w64-x86_64-freeglut mingw-w64-x86_64-toolchain mingw-w64-x86_64-gsl mingw-w64-x86_64-hdf5 \
-    mingw-w64-x86_64-openblas mintty msys2-keyring msys2-launcher-git \
-    msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
-    perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
-    mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-arpack mingw-w64-x86_64-cmake   
-pacman -R mingw-w64-x86_64-gcc-ada mingw-w64-x86_64-gcc-objc mingw-w64-x86_64-gdb mingw-w64-x86_64-python
-```
-[MSMPI 10.1.2](https://www.microsoft.com/en-us/download/details.aspx?id=100593)
-
-# Windows 10 - VM1
-```
-pacman -S autoconf automake-wrapper bash bash-completion \
-    bison bsdcpio bsdtar bzip2 coreutils curl dash file filesystem \
-    findutils flex gawk gcc gcc-fortran gcc-libs grep gzip inetutils info less lndir \
-    make man-db git  mingw-w64-x86_64-toolchain mingw-w64-x86_64-hdf5 \
-    mingw-w64-x86_64-arpack mingw-w64-x86_64-openblas mintty msys2-keyring msys2-launcher-git \
-    msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
-    perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
-    mingw-w64-x86_64-libmicroutils  --ignore mingw-w64-x86_64-gcc-ada --ignore mingw-w64-x86_64-gcc-objc \
-     --ignore mingw-w64-x86_64-gdb  --ignore mingw-w64-x86_64-python --noconfirm 
-```
-
-
-# Windows 10 - VM2
-```
-pacman -S autoconf automake-wrapper bash bash-completion \
-    bison bsdcpio bsdtar bzip2 coreutils curl dash file filesystem \
-    findutils flex gawk gcc gcc-fortran gcc-libs grep gzip inetutils info less lndir \
-    make man-db git mingw-w64-x86_64-freeglut mingw-w64-x86_64-toolchain mingw-w64-x86_64-gsl mingw-w64-x86_64-hdf5 \
-    mingw-w64-x86_64-openblas mintty msys2-keyring msys2-launcher-git \
-    msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
-    perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
-    mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-arpack mingw-w64-x86_64-cmake   
-pacman -R mingw-w64-x86_64-gcc-ada mingw-w64-x86_64-gcc-objc mingw-w64-x86_64-gdb mingw-w64-x86_64-python   
-```
-[MSMPI 10.1.2](https://www.microsoft.com/en-us/download/details.aspx?id=100593)
-
-
-# Windows 10 - VM2-2
-```
-pacman -S autoconf automake-wrapper bash bash-completion \
-    bison bsdcpio bsdtar bzip2 coreutils curl dash file filesystem \
-    findutils flex gawk gcc gcc-fortran gcc-libs grep gzip inetutils info less lndir \
-    make man-db git mingw-w64-x86_64-freeglut mingw-w64-x86_64-toolchain mingw-w64-x86_64-gsl mingw-w64-x86_64-hdf5 \
-    mingw-w64-x86_64-openblas mintty msys2-keyring msys2-launcher-git \
-    msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
-    perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
-    mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-arpack mingw-w64-x86_64-cmake 
+    mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-arpack mingw-w64-x86_64-cmake
 pacman -R mingw-w64-x86_64-gcc-ada mingw-w64-x86_64-gcc-objc mingw-w64-x86_64-gdb mingw-w64-x86_64-python
 ```
 [MSMPI 10.1.2](https://www.microsoft.com/en-us/download/details.aspx?id=100593)
