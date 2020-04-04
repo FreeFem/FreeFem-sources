@@ -16,7 +16,6 @@ LIST(REMOVE_ITEM CPPFILES ${CMAKE_SOURCE_DIR}/examples++-load/Element_Mixte.cpp 
                           ${CMAKE_SOURCE_DIR}/examples++-load/ilut.cpp                                  # ok (avec gmm++)
                           ${CMAKE_SOURCE_DIR}/examples++-load/iohdf5.cpp                                # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/metis.cpp                                 # ok
-                          ${CMAKE_SOURCE_DIR}/examples++-load/mmg3d.cpp                                 # ok
                           ${CMAKE_SOURCE_DIR}/examples++-load/mmg3d-v4.0.cpp                            # dataff.h
                           ${CMAKE_SOURCE_DIR}/examples++-load/mshmet.cpp                                # mshmet (probleme acces)
                           ${CMAKE_SOURCE_DIR}/examples++-load/MUMPS.cpp                                 # ok
@@ -155,14 +154,6 @@ IF(MPI_FOUND AND MUMPS_FOUND)
   TARGET_LINK_LIBRARIES(mumps lglib libff ${MPI_C_LIBRARIES})
   SET_TARGET_PROPERTIES(mumps PROPERTIES PREFIX "")
 ENDIF(MPI_FOUND AND MUMPS_FOUND)
-
-# mmg3d.cpp
-IF(FREEFEM_MMG3D_INSTALLED)
-  ADD_LIBRARY(mmg3d MODULE mmg3d.cpp)
-  ADD_DEPENDENCIES(mmg3d mmg3d)
-  INCLUDE_DIRECTORIES(${FF_DOWNLOAD_DIR}/mmg3d/install/include)
-  SET_TARGET_PROPERTIES(mmg3d PROPERTIES PREFIX "")
-ENDIF(FREEFEM_MMG3D_INSTALLED)
 
 # mmg3d-v4.0.cpp
 IF(FREEFEM_MMG3D_INSTALLED)

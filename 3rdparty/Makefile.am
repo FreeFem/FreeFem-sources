@@ -118,7 +118,7 @@ reinstall-hpddm:./getall
 	-test -n "$(TOOL_COMPILE_hpddm)" && $(MAKE) install-hpddm || true
 include/hpddm/done.tag:./pkg/hpddm.zip
 	-if test -f ./pkg/hpddm.zip ; then \
-          cd include;rm -rf hpddm hpddm-*;  unzip ../pkg/hpddm.zip ; mv  hpddm-* hpddm ; touch hpddm/done.tag; \
+          cd include;rm -rf hpddm hpddm-*;  unzip -q ../pkg/hpddm.zip ; mv  hpddm-* hpddm ; touch hpddm/done.tag; \
          else true;  fi
 lib/WHERE.hpddm: ./getall
 	if test -d include/hpddm/include ; then \
@@ -140,7 +140,7 @@ reinstall-htool:./getall
 	-test -n "$(TOOL_COMPILE_bem)" && $(MAKE) install-htool || true
 include/htool/done.tag:./pkg/htool.zip
 	-if test -f ./pkg/htool.zip ; then \
-          cd include;rm -rf htool htool-*;  unzip ../pkg/htool.zip ; mv  htool-* htool ; touch htool/done.tag; \
+          cd include;rm -rf htool htool-*;  unzip -q ../pkg/htool.zip ; mv  htool-* htool ; touch htool/done.tag; \
          else true;  fi
 lib/WHERE.htool: ./getall
 	if test -d include/htool/include ; then \
@@ -158,7 +158,7 @@ reinstall-bemtool:./getall
 	-test -n "$(TOOL_COMPILE_bem)" && $(MAKE) install-bemtool || true
 include/bemtool/done.tag:./pkg/bemtool.zip
 	-if test -f ./pkg/bemtool.zip ; then \
-          cd include;rm -rf BemTool BemTool-*;  unzip ../pkg/bemtool.zip ; mv BemTool-* BemTool ; touch BemTool/done.tag; \
+          cd include;rm -rf BemTool BemTool-*;  unzip -q ../pkg/bemtool.zip ; mv BemTool-* BemTool ; touch BemTool/done.tag; \
          else true;  fi
 lib/WHERE.bemtool: ./getall
 	if test -d include/BemTool/ ; then \

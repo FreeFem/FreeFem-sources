@@ -110,7 +110,6 @@ seq/mat_edgeP1.cpp \
 seq/medit.cpp \
 seq/metis.cpp \
 seq/mmg3d-v4.0.cpp \
-seq/mmg3d.cpp \
 seq/mmg3d_defines.h \
 seq/msh3.cpp \
 seq/msh3.hpp \
