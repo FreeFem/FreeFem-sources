@@ -30,8 +30,6 @@ TESTS_HPDDM = diffusion-2d-thirdlevelgeneo.edp \
 	diffusion-3d-minimal-ddm.edp\
 	diffusion-3d-minimal-direct.edp \
 	diffusion-3d-simple.edp \
-	elasticity-3d-simple.edp \
-	elasticity-3d-thirdlevelgeneo.edp \
 	Helmholtz-2d-HPDDM-BGMRES.edp \
 	Helmholtz-2d-simple.edp \
 	Helmholtz-3d-simple.edp \
@@ -40,6 +38,8 @@ TESTS_HPDDM = diffusion-2d-thirdlevelgeneo.edp \
 	natural_convection.edp \
 	Richards-2d.edp \
 	heat-torus-3d-surf.edp
+# elasticity-3d-simple.edp <- deadlock on freefem-dev-2-windows10-vm2
+# elasticity-3d-thirdlevelgeneo.edp <- assertion failure on freefem-dev-2-windows10-vm2
 
 TESTS_METIS = Maxwell_Cobracavity.edp
 

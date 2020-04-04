@@ -1,6 +1,6 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
-// PARAM -sizeComm 2
+// PARAM -sizeComm 2 -Dpartitioner=scotch
 
 include "getARGV.idp"
 
@@ -39,7 +39,9 @@ macro init(u)[u, u]//
     transfer(Th, Pk, u, ThScatter, Pk, uTransfer)
     plotD(ThScatter, uTransfer, cmm = "Transferred solution")
     uTransfer[] -= uScatter[];
-    assert(uTransfer[].linfty < 1.0e-6);
+    real max, tmp = uTransfer[].linfty;
+    mpiAllReduce(tmp, max, mpiCommWorld, mpiMAX);
+    assert(max < 1.0e-6);
 }
 {
     macro dimension()3// EOM            // 2D or 3D
@@ -68,5 +70,7 @@ macro init(u)[u, u]//
     transfer(Th, Pk, u, ThScatter, Pk, uTransfer)
     plotD(ThScatter, uTransfer, cmm = "Transferred solution")
     uTransfer[] -= uScatter[];
-    assert(uTransfer[].linfty < 1.0e-6);
+    real max, tmp = uTransfer[].linfty;
+    mpiAllReduce(tmp, max, mpiCommWorld, mpiMAX);
+    assert(max < 1.0e-6);
 }

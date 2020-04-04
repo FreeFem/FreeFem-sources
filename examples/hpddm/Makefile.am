@@ -91,7 +91,7 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	save-load-Dmesh.edp \
 	navier-stokes-2d-PETSc.edp \
 	transfer.edp
-# diffusion-substructuring-2d-PETSc.edp <- problem with BDDC
+# diffusion-substructuring-2d-PETSc.edp <- broken, problem with BDDC
 
 TESTS_PETSC_PARMMG = distributed-parmmg.edp laplace-adapt-dist-3d-PETSc.edp
 

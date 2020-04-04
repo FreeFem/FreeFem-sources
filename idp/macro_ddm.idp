@@ -9,7 +9,7 @@ macro partitionerPar(part, Th, comm, size)broadcast(processor(0, comm), part)// 
 ENDIFMACRO
 IFMACRO(partitioner,scotch)
 load "scotch"
-macro partitionerSeq(part, Th, size)scotch(part, Th, size)// EOM
+macro partitionerSeq(part, Th, size){ if(size <= 1) part = 0; else scotch(part, Th, size); }// EOM
 macro partitionerPar(part, Th, comm, size)broadcast(processor(0, comm), part)// EOM
 ENDIFMACRO
 IFMACRO(partitioner,parmetis)
@@ -1392,7 +1392,11 @@ ENDIFMACRO
     mpiAllReduce(size, reduce, ThName#Comm, mpiSUM);
     assert(reduce == mpiSize(ThName#Comm));
     fespace PhPart(ThName, P0);
-    meshN ThNoOverlap = trunc(ThName, abs(privateDmesh#ThName#khiDef[1][nuTriangle] - mpiRank(ThName#Comm)) < 1.0e-2, label = -111112);
+    meshN ThNoOverlap;
+    if(mpiSize(ThName#Comm) == 1)
+        ThNoOverlap = ThName;
+    else
+        ThNoOverlap = trunc(ThName, abs(privateDmesh#ThName#khiDef[1][nuTriangle] - mpiRank(ThName#Comm)) < 1.0e-2, label = -111112);
     if(ThGatherName#Comm) {
         meshN[int] recvTh(size);
         mpiRequest[int] rqRecv(size - 1);
