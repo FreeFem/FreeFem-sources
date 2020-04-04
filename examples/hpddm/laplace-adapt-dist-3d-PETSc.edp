@@ -43,7 +43,9 @@ for(int i = 0; i < iMax; ++i) {
     real[int] metParMmg(VhParMmg.ndof);
     int[int] rest = restrict(VhParMmg, VhMet, n2o);
     for[i, v : rest] metParMmg[i] = met[v];
+    verbosity = 1;
     ThParMmg = parmmg3d(ThParMmg, metric = metParMmg, hausd = 4.0/*, requiredTriangle = rt*/, nodeCommunicators = communicators);
+    verbosity = 0;
     reconstructDmesh(ThParMmg)
     int[int] fforder = [1];
     savevtk("laplace-adapt-dist-3d.vtu", Th3, u, bin = 1, order = fforder, append = i ? true : false);

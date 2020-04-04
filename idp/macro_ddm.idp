@@ -1180,6 +1180,30 @@ else {
         bb(0:2 * dimension - 1) = tmp;
         boundingbox(ThNew, tmp);
         bb(2 * dimension:4 * dimension - 1) = tmp;
+IFMACRO(dimension, 2)
+        bb(0) -= max(ThName.hmax, ThNew.hmax);
+        bb(1) += max(ThName.hmax, ThNew.hmax);
+        bb(2) -= max(ThName.hmax, ThNew.hmax);
+        bb(3) += max(ThName.hmax, ThNew.hmax);
+        bb(4) -= max(ThName.hmax, ThNew.hmax);
+        bb(5) += max(ThName.hmax, ThNew.hmax);
+        bb(6) -= max(ThName.hmax, ThNew.hmax);
+        bb(7) += max(ThName.hmax, ThNew.hmax);
+ENDIFMACRO
+IFMACRO(dimension, 3)
+        bb(0) -= max(ThName.hmax, ThNew.hmax);
+        bb(1) += max(ThName.hmax, ThNew.hmax);
+        bb(2) -= max(ThName.hmax, ThNew.hmax);
+        bb(3) += max(ThName.hmax, ThNew.hmax);
+        bb(4) -= max(ThName.hmax, ThNew.hmax);
+        bb(5) += max(ThName.hmax, ThNew.hmax);
+        bb(6) -= max(ThName.hmax, ThNew.hmax);
+        bb(7) += max(ThName.hmax, ThNew.hmax);
+        bb(8) -= max(ThName.hmax, ThNew.hmax);
+        bb(9) += max(ThName.hmax, ThNew.hmax);
+        bb(10) -= max(ThName.hmax, ThNew.hmax);
+        bb(11) += max(ThName.hmax, ThNew.hmax);
+ENDIFMACRO
     }
     real[int] bbAll(4 * dimension * mpiSize(ThName#Comm));
     mpiAllgather(bb, bbAll, ThName#Comm);
@@ -1546,7 +1570,7 @@ ENDIFMACRO
         meshN ThGlobalScatter;
         broadcast(processor(0, comm), ThGlobalScatter);
         fespace VhGlobalScatter(ThGlobalScatter, Pk);
-        VhGlobalScatter uGlobalScatter;
+        VhGlobalScatter def(uGlobalScatter);
         broadcast(processor(0, comm), uGlobalScatter[]);
         def(uNew) = def(uGlobalScatter);
     }
