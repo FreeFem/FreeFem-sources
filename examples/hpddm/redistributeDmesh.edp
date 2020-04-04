@@ -1,0 +1,76 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+// PARAM -sizeComm 2 -Dpartitioner=scotch
+
+include "getARGV.idp"
+
+int sizeComm = max(1, min(mpisize, getARGV("-sizeComm", mpisize)));
+int div = mpisize / sizeComm;
+mpiComm commThGather(mpiCommWorld, (mpirank % div == 0 && mpirank / div < sizeComm) ? 0 : mpiUndefined, mpirank / div);
+mpiComm comm(mpiCommWorld, min(mpirank / div, sizeComm - 1), mpirank - div * min(mpirank / div, sizeComm - 1));
+macro ThGatherComm()commThGather//
+func Pk = [P2, P2];
+macro def(u)[u, u#B]//
+macro init(u)[u, u]//
+{
+    macro dimension()2// EOM            // 2D or 3D
+    include "macro_ddm.idp"             // additional DDM functions
+    meshN Th = square(getARGV("-global_2d", 20), getARGV("-global_2d", 20)); // global mesh
+    buildDmesh(Th)
+    meshN ThGather, ThScatter;
+    gatherDmesh(Th, comm, ThGather)
+    plotDmesh(Th, cmm = "Original Dmesh")
+    plotDmesh(ThGather, cmm = "Gathered Dmesh")
+    scatterDmesh(ThGather, comm, ThScatter)
+    plotDmesh(ThScatter, cmm = "Scattered Dmesh")
+    fespace Vh(Th, Pk);
+    fespace VhGather(ThGather, Pk);
+    fespace VhScatter(ThScatter, Pk);
+    Vh def(u);
+    VhGather def(uGather);
+    VhScatter def(uScatter);
+    VhScatter def(uTransfer);
+    def(u) = [cos(2*pi*x)*sin(pi*y), sin(2*pi*y)];
+    plotD(Th, u, cmm = "Original solution")
+    gatherSolution(Th, comm, ThGather, Pk, u, uGather)
+    plotD(ThGather, uGather, cmm = "Gathered solution")
+    scatterSolution(ThGather, comm, ThScatter, Pk, uGather, uScatter)
+    plotD(ThScatter, uScatter, cmm = "Scattered solution")
+    transfer(Th, Pk, u, ThScatter, Pk, uTransfer)
+    plotD(ThScatter, uTransfer, cmm = "Transferred solution")
+    uTransfer[] -= uScatter[];
+    real max, tmp = uTransfer[].linfty;
+    mpiAllReduce(tmp, max, mpiCommWorld, mpiMAX);
+    assert(max < 1.0e-6);
+}
+{
+    macro dimension()3// EOM            // 2D or 3D
+    include "macro_ddm.idp"             // additional DDM functions
+    meshN Th = cube(getARGV("-global_3d", 10), getARGV("-global_3d", 10), getARGV("-global_3d", 10)); // global mesh
+    buildDmesh(Th)
+    meshN ThGather, ThScatter;
+    gatherDmesh(Th, comm, ThGather)
+    plotDmesh(Th, cmm = "Original Dmesh")
+    plotDmesh(ThGather, cmm = "Gathered Dmesh")
+    scatterDmesh(ThGather, comm, ThScatter)
+    plotDmesh(ThScatter, cmm = "Scattered Dmesh")
+    fespace Vh(Th, Pk);
+    fespace VhGather(ThGather, Pk);
+    fespace VhScatter(ThScatter, Pk);
+    Vh def(u);
+    VhGather def(uGather);
+    VhScatter def(uScatter);
+    VhScatter def(uTransfer);
+    def(u) = [cos(2*pi*x)*sin(2*pi*y), sin(2*pi*y)*cos(2*pi*z)];
+    plotD(Th, u, cmm = "Original solution")
+    gatherSolution(Th, comm, ThGather, Pk, u, uGather)
+    plotD(ThGather, uGather, cmm = "Gathered solution")
+    scatterSolution(ThGather, comm, ThScatter, Pk, uGather, uScatter)
+    plotD(ThScatter, uScatter, cmm = "Scattered solution")
+    transfer(Th, Pk, u, ThScatter, Pk, uTransfer)
+    plotD(ThScatter, uTransfer, cmm = "Transferred solution")
+    uTransfer[] -= uScatter[];
+    real max, tmp = uTransfer[].linfty;
+    mpiAllReduce(tmp, max, mpiCommWorld, mpiMAX);
+    assert(max < 1.0e-6);
+}

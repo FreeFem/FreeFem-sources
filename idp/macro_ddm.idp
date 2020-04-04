@@ -9,7 +9,7 @@ macro partitionerPar(part, Th, comm, size)broadcast(processor(0, comm), part)// 
 ENDIFMACRO
 IFMACRO(partitioner,scotch)
 load "scotch"
-macro partitionerSeq(part, Th, size)scotch(part, Th, size)// EOM
+macro partitionerSeq(part, Th, size){ if(size <= 1) part = 0; else scotch(part, Th, size); }// EOM
 macro partitionerPar(part, Th, comm, size)broadcast(processor(0, comm), part)// EOM
 ENDIFMACRO
 IFMACRO(partitioner,parmetis)
@@ -1180,6 +1180,30 @@ else {
         bb(0:2 * dimension - 1) = tmp;
         boundingbox(ThNew, tmp);
         bb(2 * dimension:4 * dimension - 1) = tmp;
+IFMACRO(dimension, 2)
+        bb(0) -= max(ThName.hmax, ThNew.hmax);
+        bb(1) += max(ThName.hmax, ThNew.hmax);
+        bb(2) -= max(ThName.hmax, ThNew.hmax);
+        bb(3) += max(ThName.hmax, ThNew.hmax);
+        bb(4) -= max(ThName.hmax, ThNew.hmax);
+        bb(5) += max(ThName.hmax, ThNew.hmax);
+        bb(6) -= max(ThName.hmax, ThNew.hmax);
+        bb(7) += max(ThName.hmax, ThNew.hmax);
+ENDIFMACRO
+IFMACRO(dimension, 3)
+        bb(0) -= max(ThName.hmax, ThNew.hmax);
+        bb(1) += max(ThName.hmax, ThNew.hmax);
+        bb(2) -= max(ThName.hmax, ThNew.hmax);
+        bb(3) += max(ThName.hmax, ThNew.hmax);
+        bb(4) -= max(ThName.hmax, ThNew.hmax);
+        bb(5) += max(ThName.hmax, ThNew.hmax);
+        bb(6) -= max(ThName.hmax, ThNew.hmax);
+        bb(7) += max(ThName.hmax, ThNew.hmax);
+        bb(8) -= max(ThName.hmax, ThNew.hmax);
+        bb(9) += max(ThName.hmax, ThNew.hmax);
+        bb(10) -= max(ThName.hmax, ThNew.hmax);
+        bb(11) += max(ThName.hmax, ThNew.hmax);
+ENDIFMACRO
     }
     real[int] bbAll(4 * dimension * mpiSize(ThName#Comm));
     mpiAllgather(bb, bbAll, ThName#Comm);
@@ -1368,7 +1392,11 @@ ENDIFMACRO
     mpiAllReduce(size, reduce, ThName#Comm, mpiSUM);
     assert(reduce == mpiSize(ThName#Comm));
     fespace PhPart(ThName, P0);
-    meshN ThNoOverlap = trunc(ThName, abs(privateDmesh#ThName#khiDef[1][nuTriangle] - mpiRank(ThName#Comm)) < 1.0e-2, label = -111112);
+    meshN ThNoOverlap;
+    if(mpiSize(ThName#Comm) == 1)
+        ThNoOverlap = ThName;
+    else
+        ThNoOverlap = trunc(ThName, abs(privateDmesh#ThName#khiDef[1][nuTriangle] - mpiRank(ThName#Comm)) < 1.0e-2, label = -111112);
     if(ThGatherName#Comm) {
         meshN[int] recvTh(size);
         mpiRequest[int] rqRecv(size - 1);
@@ -1546,7 +1574,7 @@ ENDIFMACRO
         meshN ThGlobalScatter;
         broadcast(processor(0, comm), ThGlobalScatter);
         fespace VhGlobalScatter(ThGlobalScatter, Pk);
-        VhGlobalScatter uGlobalScatter;
+        VhGlobalScatter def(uGlobalScatter);
         broadcast(processor(0, comm), uGlobalScatter[]);
         def(uNew) = def(uGlobalScatter);
     }

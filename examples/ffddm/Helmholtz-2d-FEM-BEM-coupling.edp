@@ -237,7 +237,7 @@ Cprec = "ras";
 
 complex[int] uC(Cn);
 
-uC = CfGMRES(uC, bC, 1.e-6, 2000, "right");
+uC = CfGMRES(uC, bC, 1.e-4, 2000, "right");
 
 Fwritesummary
 

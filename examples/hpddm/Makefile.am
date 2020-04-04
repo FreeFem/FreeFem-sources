@@ -25,7 +25,7 @@ TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" LIST_CONDIT
 
 all-local: freefem++.pref
 
-TESTS_MPI = withPartitioning.edp buildRecursive.edp createPartition.edp reconstructDmesh.edp
+TESTS_MPI = withPartitioning.edp buildRecursive.edp createPartition.edp reconstructDmesh.edp redistributeDmesh.edp
 
 TESTS_HPDDM = diffusion-2d.edp \
 	diffusion-mg-2d.edp \
@@ -91,7 +91,7 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	save-load-Dmesh.edp \
 	navier-stokes-2d-PETSc.edp \
 	transfer.edp
-# diffusion-substructuring-2d-PETSc.edp <- problem with BDDC
+# diffusion-substructuring-2d-PETSc.edp <- broken, problem with BDDC
 
 TESTS_PETSC_PARMMG = distributed-parmmg.edp laplace-adapt-dist-3d-PETSc.edp
 

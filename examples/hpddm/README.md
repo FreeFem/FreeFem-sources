@@ -28,9 +28,9 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [maxwell-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/maxwell-2d-PETSc.edp)                                           | Direct LU/Cholesky                                                            |
 | [maxwell-3d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/maxwell-3d-PETSc.edp)                                           | Multigrid method                                                              |
 | [maxwell-mg-3d-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/maxwell-mg-3d-PETSc-complex.edp)                     | Two-grid preconditioner                                                       |
-| [helmholtz-3d-surf-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-3d-surf-PETSc-complex.edp)             | BEM with hierarchical matrices from Htool                                     |
-| [helmholtz-3d-line-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-3d-line-PETSc-complex.edp)             |                                                                               |
-| [helmholtz-coupled-2d-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-coupled-2d-PETSc-complex.edp)       | FEM coupled with BEM                                                          |
+| [helmholtz-3d-surf-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-3d-surf-PETSc-complex.edp)             | BEM with hierarchical matrices from Htool on surfaces                         |
+| [helmholtz-3d-line-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-3d-line-PETSc-complex.edp)             | BEM with hierarchical matrices from Htool on lines                            |
+| [helmholtz-coupled-2d-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-coupled-2d-PETSc-complex.edp)       | FEM coupled with BEM in a MatNest using a block preconditioner (fieldsplit)   |
 
 ### Nonlinear problems
 | Filename                                                                                                                                                          | Comments (preconditioners, numerical schemes)                                 |
@@ -85,6 +85,7 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [transfer.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/transfer.edp)                               | Parallel interpolation of finite element functions                       |
 | [reconstructDmesh.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/reconstructDmesh.edp)               | Construction of a distributed mesh from sequential nonoverlapping meshes |
 | [distributed-parmmg.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/distributed-parmmg.edp)           | Distributed ParMmg interface for mesh adaptation                         |
+| [redistributeDmesh.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/redistributeDmesh.edp)             | Gather and scatter a Dmesh on different MPI communicators                |
 
 ### Reproducible science
 | Article                                                                                                                                                       | Source code                                                   |

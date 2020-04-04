@@ -1,10 +1,10 @@
-//ff-mpirun  -np 4 Richards-2d.edp -wg -raspart -ns -ffddm_disable_plots
+//ff-mpirun  -np 4 Richards-2d.edp -wg -ns -ffddm_disable_plots
 
 // If you have openmpi you may need to add the option --oversubscribe to allow more processes than the number of cores available on your computer
 
 // for the make check:
 // NBPROC 4
-// PARAM -raspart -ffddm_disable_plots -nt 20
+// PARAM -ffddm_disable_plots -nt 20
 
 macro dimension 2// EOM            // 2D or 3D
 
