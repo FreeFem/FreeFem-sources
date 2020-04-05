@@ -23,7 +23,7 @@ $(SRCDIR)/FAIT:$(SRCDIR)/FAIT-1
 	touch $(SRCDIR)/FAIT
 
 $(SRCDIR)/FAIT-1:../pkg/$(PACKAGE)
-	tar xvzf ../pkg/$(PACKAGE)
+	tar xzf ../pkg/$(PACKAGE)
 	touch $(SRCDIR)/FAIT-1
 
 ../pkg/$(PACKAGE):

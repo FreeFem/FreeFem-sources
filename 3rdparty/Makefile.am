@@ -177,8 +177,8 @@ reinstall-boost:./getall
 	-test -n "$(TOOL_COMPILE_bem)" && $(MAKE) install-boost || true
 boost/done.tag:./pkg/boost_for_bemtool.tar.gz
 	if test -f ./pkg/boost_for_bemtool.tar.gz ; then \
-	rm -rf boost boost_*;   tar xvzf   pkg/boost_for_bemtool.tar.gz  ; mv boost_for_bemtool boost; \
-	else true;  fi	
+	rm -rf boost boost_*; tar xzf pkg/boost_for_bemtool.tar.gz ; mv boost_for_bemtool boost; \
+	else true; fi	
 	touch boost/done.tag
 lib/WHERE.boost: ./getall
 	if test -d boost/include ; then \

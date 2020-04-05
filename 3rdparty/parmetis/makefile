@@ -100,7 +100,7 @@ debug.o		initmsection.o	mmetis.o		remap.o		util.o
 
 # FFCS: patch is necessary for metis 4.0, but not for 4.0.3
 $(SRCDIR)/tags: $(PACKAGE)
-	tar xvzf $(PACKAGE)
+	tar xzf $(PACKAGE)
 	patch -p1  <parmetis-4.0.3.patch
 	touch $(SRCDIR)/tags
 
@@ -143,7 +143,7 @@ Makefile.in: ../../config.status Makefile-parmetis.in
 
 
 $(SRCDIR)/tags-old: $(PACKAGE)
-	tar xvzf $(PACKAGE)
+	tar xzf $(PACKAGE)
 	mv  $(SRCDIR)/Programs/Makefile $(SRCDIR)/Programs/Makefile-orig
 	sed -e 's;BINDIR = .*$$;BINDIR = ../$(INSTALL)/bin;' \
             -e 's;../libparmetis.a;../$(INSTALL)/lib/parmetis/libparmetis.a;' \

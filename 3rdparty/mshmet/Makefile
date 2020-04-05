@@ -48,7 +48,7 @@ WHERE:install
 
 $(SRCDIR)/tag-tar: $(PACKAGE) mshmetlib-internal.h mshmetlib.c mshmetlib.h 
 	-mkdir mshmet$(mshmet_VERSION)
-	cd mshmet$(mshmet_VERSION); tar xvzf ../$(PACKAGE)
+	cd mshmet$(mshmet_VERSION); tar xzf ../$(PACKAGE)
 	-mkdir $(MSHMET_SRCDIR)
 	cp $(MSHMET_SRCDIRNOLIB)/*.c $(MSHMET_SRCDIRNOLIB)/*.h $(MSHMET_SRCDIR)
 	cp $(MSHMET_SRCDIRNOLIB)/compil.date $(MSHMET_SRCDIR)

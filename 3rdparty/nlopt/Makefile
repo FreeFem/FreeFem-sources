@@ -8,7 +8,7 @@ all: FAIRE
 FAIRE: ../pkg $(SRCDIR)/FAIT 
 
 $(SRCDIR)/FAIT: $(TARGZ)
-	tar zxvf $(TARGZ)
+	tar zxf $(TARGZ)
 #
 #	FFCS - 30/11/11 - "--disable-dependency-tracking": dependencies pose problem on mixed Cygwin/MinGW setups
 #	because of slashes and backslashes

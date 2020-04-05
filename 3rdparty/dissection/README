@@ -34,7 +34,7 @@ How to compile:
   qd-2.3.17.tar.gz will be obtained from
   http://crd-legacy.lbl.gov/~dhbailey/mpdist/qd-2.3.17.tar.gz
   to extract tar ball and apply patches
-  % tar xvzf qd-2.3.17.tar.gz
+  % tar xzf qd-2.3.17.tar.gz
   % cd qd-2.3.17
   % patch -p1 < qd-2.3.17-for-LLVM.patch
   configure needs to be done with specifying install directory $(PROJ_DIR)
