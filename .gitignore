@@ -225,7 +225,6 @@ examples/plugin/ff-pkg-download
 examples/plugin/include
 examples/plugin/include.done
 examples/plugin/ipopt.out
-examples/plugin/load.link
 examples/plugin/machinefile
 examples/plugin/pippo.data
 examples/plugin/pippo.dx

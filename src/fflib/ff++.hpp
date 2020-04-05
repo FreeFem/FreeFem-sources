@@ -1,6 +1,6 @@
 #ifndef FF___HPP_
 #define FF___HPP_
-#if defined(__clang__)
+#if defined(__clang__) && defined(__has_warning) && __has_warning("-Wundefined-var-template")
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundefined-var-template"
 #endif
@@ -55,7 +55,7 @@ using namespace std;
 #include "Mesh2.h"
 #include "BamgFreeFem.hpp"
 #include "ffapi.hpp" 
-#if defined(__clang__)
+#if defined(__clang__) && defined(__has_warning) && __has_warning("-Wundefined-var-template")
 #pragma clang diagnostic pop
 #endif
 #endif

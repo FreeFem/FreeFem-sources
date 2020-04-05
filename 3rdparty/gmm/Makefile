@@ -34,7 +34,7 @@ install: FAIRE
 
 
 $(SRCDIR): $(PKGDIR)/$(PACKAGE)
-	gunzip -c   $^ | tar xvf - 
+	gunzip -c   $^ | tar xf - 
 
 $(PKGDIR)/$(PACKAGE):
 	../getall -o Gmm++ -a
