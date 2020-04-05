@@ -31,9 +31,11 @@
  */
 #ifndef GENERICMESH_HPP_
 #define GENERICMESH_HPP_
-#if defined(__clang__) && defined(__has_warning) && __has_warning("-Wundefined-var-template")
+#if defined(__clang__) && defined(__has_warning)
+#if __has_warning("-Wundefined-var-template")
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundefined-var-template"
+#endif
 #endif
 // la regle de programmation 3
 extern long verbosity;
@@ -2105,7 +2107,9 @@ Serialize GenericMesh<T,B,V>::serialize() const
     }
     
 }
-#if defined(__clang__) && defined(__has_warning) && __has_warning("-Wundefined-var-template")
+#if defined(__clang__) && defined(__has_warning)
+#if __has_warning("-Wundefined-var-template")
 #pragma clang diagnostic pop
+#endif
 #endif
 #endif
