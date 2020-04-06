@@ -313,22 +313,28 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
     }
 
     /* Set the number of interfaces */
-    PMMG_Set_numberOfNodeCommunicators(mesh, communicators->operator[](0).N());
+    if( !PMMG_Set_numberOfNodeCommunicators(mesh, communicators->operator[](0).N()) ) {
+      exit(EXIT_FAILURE);
+    }
 
     /* Loop on each interface (proc pair) seen by the current rank) */
     for(int icomm=0; icomm<communicators->operator[](0).N(); icomm++ ) {
 
       /* Set nb. of entities on interface and rank of the outward proc */
-      PMMG_Set_ithNodeCommunicatorSize(mesh, icomm,
-                                       communicators->operator[](0)[icomm],
-                                       communicators->operator[](1 + 2 * icomm).N());
+      if( !PMMG_Set_ithNodeCommunicatorSize(mesh, icomm,
+                                            communicators->operator[](0)[icomm],
+                                            communicators->operator[](1 + 2 * icomm).N()) ) {
+        exit(EXIT_FAILURE);
+      }
 
       /* Set local and global index for each entity on the interface */
       KN<int> local = communicators->operator[](1 + 2 * icomm);
       KN<int> global = communicators->operator[](2 + 2 * icomm);
-      PMMG_Set_ithNodeCommunicator_nodes(mesh, icomm,
-                                         local.operator int*(),
-                                         global.operator int*(), 1);
+      if( !PMMG_Set_ithNodeCommunicator_nodes(mesh, icomm,
+                                              local.operator int*(),
+                                              global.operator int*(), 1) ) {
+        exit(EXIT_FAILURE);
+      }
     }
   }
 
