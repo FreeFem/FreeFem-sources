@@ -310,23 +310,30 @@ namespace PETSc {
       const HPDDM::vectorNeighbor& neighbors = A->_A->getMap();
       communicators->resize(2 * neighbors.size() + 1);
       communicators->operator[](0).resize(neighbors.size());
+      unsigned short k = 0;
       for(unsigned short i = 0; i < neighbors.size(); ++i) {
-          communicators->operator[](0)[i] = neighbors[i].first;
-          communicators->operator[](2 * i + 1).resize(neighbors[i].second.size());
-          communicators->operator[](2 * i + 2).resize(neighbors[i].second.size());
+          communicators->operator[](0)[k] = neighbors[i].first;
+          communicators->operator[](2 * k + 1).resize(neighbors[i].second.size());
+          communicators->operator[](2 * k + 2).resize(neighbors[i].second.size());
           int m = 0;
           for(unsigned int j = 0; j < neighbors[i].second.size(); ++j) {
               if(std::abs(buffer[i][j] - HPDDM::Wrapper<PetscScalar>::d__1) < 1.0e-6) {
                   std::unordered_map<int, std::pair<int, PetscInt>>::const_iterator it = map.find(neighbors[i].second[j]);
                   if(it != map.cend()) {
-                      communicators->operator[](2 * i + 1)[m] = it->second.first + 1;
-                      communicators->operator[](2 * i + 2)[m++] = it->second.second + 1;
+                      communicators->operator[](2 * k + 1)[m] = it->second.first + 1;
+                      communicators->operator[](2 * k + 2)[m++] = it->second.second + 1;
                   }
               }
           }
-          communicators->operator[](2 * i + 1).resize(m);
-          communicators->operator[](2 * i + 2).resize(m);
+          if(m > 0) {
+              communicators->operator[](2 * k + 1).resize(m);
+              communicators->operator[](2 * k + 2).resize(m);
+              ++k;
+          }
       }
+      assert(k);
+      communicators->operator[](0).resize(k);
+      communicators->resize(2 * k + 1);
     }
     return 0L;
   }
