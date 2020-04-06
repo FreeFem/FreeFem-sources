@@ -111,9 +111,9 @@ BLAS/fait:$(BLAS_TGZ)
 	pxerbla=`tar tf $(BLAS_TGZ) | grep xerbla.f`; \
 	dirblas=`dirname $$pxerbla` ;\
 	case $$dirblas in \
-	BLAS) tar xvzf $(BLAS_TGZ) ;; \
-	BLAS-*) tar xvzf $(BLAS_TGZ) ; mv $$dirblas BLAS ;; \
-	.) mkdir -p BLAS; tar xvzf $(BLAS_TGZ) -c BLAS;; \
+	BLAS) tar xzf $(BLAS_TGZ) ;; \
+	BLAS-*) tar xzf $(BLAS_TGZ) ; mv $$dirblas BLAS ;; \
+	.) mkdir -p BLAS; tar xzf $(BLAS_TGZ) -c BLAS;; \
 	esac
 	cp BLAS/xerbla.f blas_xerbla.f
 	touch BLAS/fait
@@ -122,7 +122,7 @@ $(F77BLAS_SRC): BLAS
 CBLAS:CBLAS/fait
 
 CBLAS/fait: $(CBLAS_TGZ)
-	tar xvzf $(CBLAS_TGZ)
+	tar xzf $(CBLAS_TGZ)
 	cp CBLAS/include/*.h  CBLAS/src
 	touch CBLAS/fait
 $(CBLAS_SRC): CBLAS/fait
@@ -182,7 +182,7 @@ openblas.done:openpatches.done
 # The OpenBLAS directory is updated during the compilation, so the patching step should not depend on the directory date
 
 openpatches.done:opendownload.done
-	tar xvzf ../pkg/OpenBLAS.tar.gz
+	tar xzf ../pkg/OpenBLAS.tar.gz
 #
 # ALH - 7/1/14 - The tar directory has changed names
 #

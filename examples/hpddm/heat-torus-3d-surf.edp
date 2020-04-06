@@ -33,7 +33,7 @@ Wh<real> u = 0;
 Wh<real> w = 0;
 func f = 100 * exp(-20*(x^2 + (y-(R+r))^2 + z^2));
 varf vPb(u, v) = intN(Th)(u * v + dt * grad(u)' * grad(v)) + intN(Th)(w * v + f * v);
-mat = vPb(Wh, Wh);
+mat = vPb(Wh, Wh, solver = GMRES);
 matrix Neumann = mat;
 schwarz A(mat, intersection, D);
 if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) { // two-level Schwarz methods
@@ -46,6 +46,6 @@ for(int i = 0; i < iMax; ++i) {
     macro myplot()cmm = "Global solution at iteration " + i, fill = 1, value = 1//
     plotMPI(Th, u, Pk, def, real, myplot)
     w[] = u[];
-    mat = vPb(Wh, Wh);
+    mat = vPb(Wh, Wh, solver = GMRES);
     changeOperator(A, mat);
 }

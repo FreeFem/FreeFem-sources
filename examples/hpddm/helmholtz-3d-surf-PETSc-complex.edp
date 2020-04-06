@@ -63,8 +63,7 @@ plotDmesh(ThS, cmm = "Partitioning");
 bool mass = usedARGV("-mass") != -1;
 if(mass) {
     varf vM(u, v) = int2d(ThS)(u * v);
-    matrix<complex> Loc = vM(Uh, Uh);
-    H = Loc;
+    H = vM(Uh, Uh);
     set(H, sparams = "-mass_ksp_converged_reason", prefix = "mass_");
 }
 int[int] perm;

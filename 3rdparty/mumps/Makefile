@@ -74,7 +74,7 @@ Makefile.inc:../../config.status Makefile Makefile-mumps-$(VERSION).inc
 	../../config.status --file="Makefile.inc:Makefile-mumps-$(VERSION).inc"
 
 $(SRCDIR)/tag-tar:$(PACKAGE1)
-	tar xvzf $(PACKAGE1)
+	tar xzf $(PACKAGE1)
 	#patch -d MUMPS_$(VERSION) -p 1 < MUMPS_$(VERSION).patch
 	touch $(SRCDIR)/tag-tar
 

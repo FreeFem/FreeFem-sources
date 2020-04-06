@@ -167,7 +167,7 @@ for(int ii=0;ii<nt;ii++)
 //  hhh = h <0;
   }
   if(ii%10==1) {
-  Th=adaptmesh(Th,h,ratio=1.1);
+  Th=adaptmesh(Th,h,ratio=1.1,err=2e-2);
   broadcast(processor(0),Th);
   
   // the mesh has changed ; we create a new decomposition and obtain new local meshes

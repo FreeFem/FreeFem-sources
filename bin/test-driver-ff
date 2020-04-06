@@ -111,25 +111,24 @@ trap "st=143; $do_exit" 15
 
 # Test script is run here.
 
-FFnp=`awk  '$1=="//" && $2=="NBPROC" { if( vv == ""){ print $3;}; vv=1}' "$@"`
-FLAGS_FFPP_A=`awk  '$1=="//" && $2=="PARAM" { if( vv == ""){ for(i=3;i<=NF;++i)print $i;}; vv=1}' "$@"`
-if [  "0$FFnp" -gt 0 ]  ; then
+FFnp=`awk '$1=="//" && $2=="NBPROC" { if( vv == ""){ print $3;}; vv=1}' "$@"`
+FLAGS_FFPP_A=`awk '$1=="//" && $2=="PARAM" { if( vv == ""){ for(i=3;i<=NF;++i)print $i;}; vv=1}' "$@"`
+if [ "0$FFnp" -gt 0 ] ; then
 	FLAGS_FFPP_B="-np $FFnp -nw"
 else
 	FLAGS_FFPP_B="${FLAGS_FFPP}"
 fi
-## echo "  test ${TEST_FFPP} ${FLAGS_FFPP_B}  "$@" ${FLAGS_FFPP_A}"
 export MPIEXEC_TIMEOUT=300
 test -z "${COMMONPROGRAMFILES+x}" -a -z "${WINDIR+x}" && ulimit -t 60
 ${TEST_FFPP} ${FLAGS_FFPP_B}  "$@" ${FLAGS_FFPP_A}>$log_file 2>&1
 estatus=$?
-FAIL_CPU_LIMIT=`tail -100 $log_file|egrep -i  'Cputime limit exceeded|MPIEXEC_TIMEOUT'|wc -l`
+FAIL_CPU_LIMIT=`tail -100 $log_file|egrep -i 'Cputime limit exceeded|MPIEXEC_TIMEOUT|Timeout after'|wc -l`
 fi
 
 ## Add an error suffix in order to extract errored tests only
 if [ $estatus -ne 0 ] && [ $estatus -ne 77 ]
 then
-  cp  $log_file "${log_file}.err"
+  cp $log_file "${log_file}.err"
 fi
 
 if test $enable_hard_errors = no && test $estatus -eq 99; then
@@ -139,7 +138,7 @@ if test "${FAIL_CPU_LIMIT:-0}" -ge 1  ; then
 	expect_failure=cpu;
 fi 
 case $estatus:$expect_failure in
-  0:yes) col=$grn res=PASS recheck=yes gcopy=yes;;
+  0:yes) col=$grn res=PASS  recheck=yes gcopy=yes;;
   0:*)   col=$grn res=PASS  recheck=no  gcopy=no;;
   77:*)  col=$blu res=SKIP  recheck=no  gcopy=yes;;
   99:*)  col=$mgn res=ERROR recheck=yes gcopy=yes;;

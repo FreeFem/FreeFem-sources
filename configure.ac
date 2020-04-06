@@ -1780,6 +1780,7 @@ then
         # ALH - 30/9/13 - other libraries required by Umfpack
 
 	AC_CHECK_LIB(cholmod,cholmod_add,ff_umfpack_libs="$ff_umfpack_libs -lcholmod")
+	AC_CHECK_LIB(cholmod,cholmod_metis,ff_umfpack_libs="$ff_umfpack_libs -lmetis")
 	AC_CHECK_LIB(colamd,colamd_set_defaults,ff_umfpack_libs="$ff_umfpack_libs -lcolamd")
 
 	AC_CHECK_LIB(umfpack,umf_i_malloc,

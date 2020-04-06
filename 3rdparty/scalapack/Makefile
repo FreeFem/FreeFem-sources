@@ -61,7 +61,7 @@ SLmake.inc: ../../config.status	Makefile SLmake-scalapack.inc
 	../../config.status  --file="SLmake.inc:SLmake-scalapack.inc"
 
 $(SRCDIR)/tag-tar: $(PACKAGE1)
-	gunzip -c $(PACKAGE1) | tar xvf -
+	gunzip -c $(PACKAGE1) | tar xf -
 	#  fto pach 
 	patch -p0 <scalapack.patch
 	touch $(SRCDIR)/tag-tar

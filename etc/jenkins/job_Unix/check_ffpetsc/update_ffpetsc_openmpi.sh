@@ -21,7 +21,6 @@ test -f "$change_compiler" && echo  source file "$change_compiler"
 test -f "$change_compiler" && cat  "$change_compiler"
 test -f "$change_compiler" && source "$change_compiler"
 
-
 # configuration & build
 autoreconf -i \
   && ./configure --enable-download --prefix=$PETSC_INSTALLDIR \
@@ -35,4 +34,3 @@ else
   echo "ffpetsc update fail"
   exit 1
 fi
-

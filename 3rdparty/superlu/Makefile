@@ -132,7 +132,7 @@ $(SRCDIR)/$(INSTALL):
 
 
 $(SRCDIR): $(PACKAGE_PATH)
-	tar xvzf $(PACKAGE_PATH)
+	tar xzf $(PACKAGE_PATH)
 	touch $(SRCDIR)
 
 $(PACKAGE_PATH):

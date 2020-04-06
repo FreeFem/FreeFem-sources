@@ -103,6 +103,8 @@ int PMMG_pParMesh_to_ffmesh(const PMMG_pParMesh& mesh, Mesh3 *&T_TH3, bool distr
         }
         for (int i=0; i<3; i++)
           iv[i]--;
+        if(lab == 0 && distributed)
+            lab = -111111;
         bb++->set(v, iv, lab);
       }
 

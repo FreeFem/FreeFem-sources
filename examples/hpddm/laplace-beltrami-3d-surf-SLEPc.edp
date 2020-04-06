@@ -24,9 +24,8 @@ real sigma = 1;
 varf aS(u,v) = int2d(Th)(Grad3(u)'*Grad3(v));
 varf mS(u,v) = int2d(Th)(u*v);
 
-matrix LocA = aS(Vh, Vh, sym = 1);
-A = LocA;
-matrix LocB = mS(Vh, Vh, sym = 1);
+A = aS(Vh, Vh, sym = 1);
+matrix LocB = mS(Vh, Vh, sym = 1, solver = CG);
 Mat B(A, LocB);
 int nev = 10;
 real[int] ev(nev);

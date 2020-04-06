@@ -126,7 +126,7 @@ UMFPACKv4.4/AMD/Makefile2 UMFPACKv4.4/UMFPACK/Makefile2: UMFPACKv4.4
 	sed 's/lib:/libb:/' < UMFPACKv4.4/UMFPACK/`basename $@ 2`  >$@
 
 SuiteSparse/DATE:$(SUITESPARSE_TGZ)
-	tar zxvf $(SUITESPARSE_TGZ)
+	tar zxf $(SUITESPARSE_TGZ)
 	touch SuiteSparse/DATE
 
 SuiteSparse/FF:SuiteSparse/DATE  SuiteSparse/SuiteSparse_config/SuiteSparse_config.mk

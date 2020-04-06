@@ -29,7 +29,7 @@ FAIT.done:tag-tar
 	-DCMAKE_C_FLAGS="$(CFLAGS) -fPIC" \
 	-DCMAKE_CXX_COMPILER=$(CXX) \
 	-DCMAKE_CXX_FLAGS="$(CXXFLAGS) $(CXX11FLAGS) -fPIC" \
-	-DM_LIB="-lm" -DUSE_VTK=OFF \
+	-DM_LIB="-lm" -DUSE_ELAS=OFF -DUSE_VTK=OFF \
 	-DSCOTCH_DIR=$(scotch_dir) \
 	-DUSE_ELAS=OFF \
 	-DCMAKE_BUILD_TYPE=Release $(CMAKE_GENERATOR) && $(MAKE)
@@ -58,7 +58,7 @@ FAIRE: FAIT.done install.done
 
 tag-tar: $(PACKAGE)
 	-rm -rf mmg-*
-	unzip $(PACKAGE) && mv mmg-* mmg-sources
+	unzip -q $(PACKAGE) && mv mmg-* mmg-sources
 #	patch -p1 <patch-mmg 
 	touch tag-tar
 

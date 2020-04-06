@@ -65,7 +65,7 @@ FAIRE: FAIT.done install.done
 
 tag-tar: $(PACKAGE)
 	-rm -rf ParMmg-* parmmg-sources
-	unzip $(PACKAGE) && mv ParMmg-* parmmg-sources
+	unzip -q $(PACKAGE) && mv ParMmg-* parmmg-sources
 	touch tag-tar
 
 $(PACKAGE): FORCE

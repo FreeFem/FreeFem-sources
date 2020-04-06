@@ -72,7 +72,7 @@ csr.o		fkvkselect.o	gkregex.o	io.o		memory.o	pqueue.o	seq.o		timers.o
 
 # FFCS: patch is necessary for metis 4.0, but not for 4.0.3
 $(SRCDIR)/tags: $(PACKAGE)
-	tar xvzf $(PACKAGE)
+	tar xzf $(PACKAGE)
 	patch -p0  <metis-5.1.patch
 	touch $(SRCDIR)/tags
 

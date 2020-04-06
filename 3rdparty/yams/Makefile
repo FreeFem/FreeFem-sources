@@ -56,7 +56,7 @@ WHERE: $(SRCDIR)/FAIT
 
 $(SRCDIR)/PATCH: $(PACKAGE) 
 	-mkdir -p $(SRCDIR)
-	cd $(SRCDIR); tar xvzf ../$(PACKAGE)
+	cd $(SRCDIR); tar xzf ../$(PACKAGE)
 	-mkdir $(YAMS_SRCDIR)
 	cp $(YAMS_SRCDIRNOLIB)/*.c $(YAMS_SRCDIRNOLIB)/*.h $(YAMS_SRCDIR)
 	rm $(YAMS_SRCDIR)/memory.c 

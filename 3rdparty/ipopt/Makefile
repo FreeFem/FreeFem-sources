@@ -78,7 +78,7 @@ $(SRCDIR)/FAIRE: install.done WHERE.done
 $(SRCDIR)/$(INSTALL): $(SRCDIR)/tag-tar
 
 $(SRCDIR)/tag-tar:$(PACKAGE) $(FHSL) 
-	tar xvzf $(PACKAGE)
+	tar xzf $(PACKAGE)
 #	patch -p0 <patch-IpBlas
 	touch $(SRCDIR)/tag-tar
 

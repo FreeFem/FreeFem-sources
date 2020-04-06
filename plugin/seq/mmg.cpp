@@ -225,7 +225,7 @@ int MMG5_pMesh_to_ffmesh<MeshS>(const MMG5_pMesh& mesh, MeshS *&T_TH3) {
 template<class ffmesh>
 class mmg_Op : public E_F0mps {
  public:
-  Expression eTh, xx, yy, zz;
+  Expression eTh;
   static const int n_name_param = std::is_same<ffmesh,Mesh3>::value ? 27 : 19;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
@@ -254,20 +254,6 @@ class mmg_Op : public E_F0mps {
 
     args.SetNameParam(n_name_param, name_param, nargs);
 
-    const E_Array *a1 = 0;
-    if (nargs[2]) {
-      a1 = dynamic_cast< const E_Array * >(nargs[2]);
-    }
-
-    if (a1) {
-      if (a1->size( ) != 3) {
-        CompileError("mmg3d(Th,displacement=[X,Y,Z],) ");
-      }
-
-      xx = to< double >((*a1)[0]);
-      yy = to< double >((*a1)[1]);
-      zz = to< double >((*a1)[2]);
-    }
   }
 
   AnyType operator( )(Stack stack) const;
@@ -474,14 +460,6 @@ AnyType mmg_Op<Mesh3>::operator( )(Stack stack) const {
   else
     ier = MMG3D_mmg3dls(mesh,sol,met);
   
-  /*
-  if ( MMG5_saveMesh_centralized(mesh,"test.mesh") != 1 ) { 
-    fprintf(stdout,"UNABLE TO SAVE MESH\n");
-    ier = MMG5_STRONGFAILURE;
-  }
-  MMG5_saveMet_centralized(mesh,"test.meshb");
-  */  
-
   Mesh3 *Th_T = nullptr;
   
   MMG5_pMesh_to_ffmesh(mesh,Th_T);
@@ -577,14 +555,6 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
 
   int ier = MMGS_mmgslib(mesh,sol);
   
-  /*
-  if ( MMG5_saveMesh_centralized(mesh,"test.mesh") != 1 ) { 
-    fprintf(stdout,"UNABLE TO SAVE MESH\n");
-    ier = MMG5_STRONGFAILURE;
-  }
-  MMG5_saveMet_centralized(mesh,"test.meshb");
-  */  
-
   MeshS *Th_T = nullptr;
   
   MMG5_pMesh_to_ffmesh(mesh,Th_T);

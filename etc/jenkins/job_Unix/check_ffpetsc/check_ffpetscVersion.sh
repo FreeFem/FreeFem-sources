@@ -41,7 +41,7 @@ if [ "$(uname)" == "Darwin" ]; then
   MINOR=$(grep    "#define PETSC_VERSION_MINOR" /Users/Shared/mpich/ff-petsc/c/include/petscversion.h | cut -c34-36 )
   SUBMINOR=$(grep "#define PETSC_VERSION_SUBMINOR" /Users/Shared/mpich/ff-petsc/c/include/petscversion.h | cut -c34-35 )
   installedVersionffpetscM=$MAJOR.$MINOR.$SUBMINOR
-  ffpetscDirectory=/Users/Shared/openmpi/
+  ffpetscDirectory=/Users/Shared/mpich/
 elif [ "$(uname)" == "Linux" ]; then
   # in case where the OS type is Linux
   MAJOR=$(grep "#define PETSC_VERSION_MAJOR" /builds/Shared/mpich/ff-petsc/c/include/petscversion.h | cut -c34-35 )

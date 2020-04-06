@@ -146,9 +146,9 @@ FF_EXAMPLES_FILES=examples/tutorial/aile.msh \
 	examples/tutorial/xyf \
 	examples/3d/dodecaedre01.mesh \
 	examples/3d/lac-leman-v4.msh \
-	examples/load/load.link \
-	examples/load/cube.msh \
-	examples/load/fig.pgm	\
+	plugin/seq/load.link \
+	examples/plugin/cube.msh \
+	examples/plugin/fig.pgm \
 	examples/plugin/lg.pgm \
 	examples/mpi/regtests.sh \
 	examples/misc/speedtest.sh \
