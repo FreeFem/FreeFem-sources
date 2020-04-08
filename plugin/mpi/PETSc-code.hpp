@@ -331,7 +331,9 @@ namespace PETSc {
               ++k;
           }
       }
-      assert(k);
+      int size;
+      MPI_Comm_size(A->_A->getCommunicator(), &size);
+      assert(size == 1 || k);
       communicators->operator[](0).resize(k);
       communicators->resize(2 * k + 1);
     }
