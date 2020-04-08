@@ -16,7 +16,7 @@ mesh Th=Wh.Th;
 fespace VhExtractDofsonBorder(Th,P1);
 VhExtractDofsonBorder abslabs,onlon,atest;
 if(orient)
-solve Pbabciss(abslabs,atest) 
+solve Pbabciss(abslabs,atest,solver=GMRES) 
 = int2d(Th,qft=qf1pTlump)(abslabs*atest*1e-8/area)
   +  int1d(Th,labs,qfe=qf1pElump)([dx(abslabs),dy(abslabs)]'*[-N.y,+N.x]*atest)
   -  int1d(Th,labs,qfe=qf1pElump)(orient*atest);

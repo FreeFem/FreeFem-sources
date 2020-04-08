@@ -72,6 +72,7 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [laplace-beltrami-3d-surf-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-beltrami-3d-surf-SLEPc.edp)                       | Eigenvalue problem on a surface                       |
 | [laplace-beltrami-3d-line-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/laplace-beltrami-3d-line-SLEPc.edp)                       | Eigenvalue problem on a curve                         |
 | [navier-stokes-2d-SLEPc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/navier-stokes-2d-SLEPc-complex.edp)                       | Linear stability analysis of Navier--Stokes equations |
+| [stokes-2d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/stokes-2d-SLEPc.edp)                                                     | Inf-sup constant of Stokes equations                  |
 
 ### Miscellaneous
 | Filename                                                                                                                          | Comments (preconditioners, numerical schemes) |

@@ -117,15 +117,18 @@ macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank
     assert(level >= 1);
 IFMACRO(!privateCreatePartition)
 IFMACRO(!privateCreateMat)
-    meshName[level - 1] = trunc(globalName, abs(part - rank) < 0.1, label = fakeInterface);
     intersection.resize(1);
     intersection[0].resize(0);
     PhGlobal supp = abs(part - rank) < 0.1;
     VhGlobal suppSmooth;
     AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
-    Unique(part[], intersection[0], remove = rank);
-    fespace VhLocal(meshName[level - 1], P1);
-    VhLocal[int] partitionIntersection(intersection[0].n);
+    {
+        int[int] n2o;
+        meshN neighbors = trunc(globalName, suppSmooth > 0.001 && suppSmooth < 0.999, new2old = n2o);
+        int[int] partOverlap(n2o.n);
+        for[i, v : n2o] partOverlap[i] = part[][v];
+        Unique(partOverlap, intersection[0], remove = rank);
+    }
     if(s > 1 && level <= 1) {
         globalName = trunc(globalName, suppSmooth > 0.001, split = s);
         supp = abs(part - rank) < 0.1;
@@ -190,6 +193,8 @@ ENDIFMACRO
                     borderName[i] = borderName[i + 1];
         }
     }
+    fespace VhLocal(meshName[level - 1], P1);
+    VhLocal[int] partitionIntersection(intersection[0].n);
     VhLocal khi = max(2 * suppSmooth - 1.0, 0.0);
     VhLocal sum = khi;
     VhGlobal phi;
