@@ -44,7 +44,7 @@ for(int i = 0; i < iMax; ++i) {
     int[int] rest = restrict(VhParMmg, VhMet, n2o);
     for[i, v : rest] metParMmg[i] = met[v];
     verbosity = 1;
-    ThParMmg = parmmg3d(ThParMmg, metric = metParMmg, hausd = 4.0/*, requiredTriangle = rt*/, nodeCommunicators = communicators);
+    ThParMmg = parmmg3d(ThParMmg, metric = metParMmg, hausd = 4.0/*, requiredTriangle = rt*/, nodeCommunicators = communicators, verbose = 6, niter = 3);
     verbosity = 0;
     reconstructDmesh(ThParMmg)
     int[int] fforder = [1];
