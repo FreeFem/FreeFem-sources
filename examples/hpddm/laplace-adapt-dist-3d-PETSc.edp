@@ -26,6 +26,7 @@ real err = 8.0e-3;
 
 int iMax = getARGV("-iMax", 1);
 int noTransfer = (getARGV("-transfer", 1) == 0);
+bool isotropic = (usedARGV("-isotropic") != -1);
 int[int] rt(2);
 rt = [1, 2];
 for(int i = 0; i < iMax; ++i) {
@@ -33,15 +34,27 @@ for(int i = 0; i < iMax; ++i) {
     set(A, sparams = "-ksp_monitor -pc_type hypre");
     real[int] rhs = vPoisson(0, Vh, tgv = -1);
     u[] = A^-1 * rhs;
-    real[int] met = mshmet(Th3, u, aniso = 1, hmin = 1.0e-3, hmax = 1.0e-1, err = err);
+    real[int] met = mshmet(Th3, u, aniso = !isotropic, hmin = 1.0e-3, hmax = 1.0e-1, err = err);
     mesh3 ThParMmg;
     int[int] n2o;
     int[int][int] communicators;
     createParMmgCommunicators(Th3, ThParMmg, n2o, communicators)
-    fespace VhMet(Th3, [P1, P1, P1, P1, P1, P1]);
-    fespace VhParMmg(ThParMmg, [P1, P1, P1, P1, P1, P1]);
-    real[int] metParMmg(VhParMmg.ndof);
-    int[int] rest = restrict(VhParMmg, VhMet, n2o);
+    real[int] metParMmg;
+    int[int] rest;
+    if(!isotropic) {
+        fespace VhMet(Th3, [P1, P1, P1, P1, P1, P1]);
+        fespace VhParMmg(ThParMmg, [P1, P1, P1, P1, P1, P1]);
+        metParMmg.resize(VhParMmg.ndof);
+        rest.resize(VhParMmg.ndof);
+        rest = restrict(VhParMmg, VhMet, n2o);
+    }
+    else {
+        fespace VhMet(Th3, P1);
+        fespace VhParMmg(ThParMmg, P1);
+        metParMmg.resize(VhParMmg.ndof);
+        rest.resize(VhParMmg.ndof);
+        rest = restrict(VhParMmg, VhMet, n2o);
+    }
     for[i, v : rest] metParMmg[i] = met[v];
     verbosity = 1;
     ThParMmg = parmmg3d(ThParMmg, metric = metParMmg, hausd = 4.0/*, requiredTriangle = rt*/, nodeCommunicators = communicators, verbose = 6, niter = 3);

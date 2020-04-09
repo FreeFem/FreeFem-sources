@@ -535,13 +535,14 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     IFMACRO(pr#withhpddm)
     uni = x0;
     real[int] timings(0);
-    set(pr#hpddmOP, sparams = "-hpddm_schwarz_method "+pr#prec+" -hpddm_tol "+eps+" -hpddm_variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_gmres_restart "+dim+" -hpddm_max_it "+maxit+" -hpddm_verbosity "+pr#verbosity+" -hpddm_orthogonalization mgs");
+    string prefix = Stringification(pr)+"_";
+    set(pr#hpddmOP, sparams = "-hpddm_"+prefix+"schwarz_method "+pr#prec+" -hpddm_"+prefix+"tol "+eps+" -hpddm_"+prefix+"variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_"+prefix+"gmres_restart "+dim+" -hpddm_"+prefix+"max_it "+maxit+" -hpddm_"+prefix+"verbosity "+pr#verbosity+" -hpddm_"+prefix+"orthogonalization mgs", prefix=prefix);
     if (pr#corr == "AD")
-      set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction additive");
+      set(pr#hpddmOP, sparams = "-hpddm_"+prefix+"schwarz_coarse_correction additive", prefix=prefix);
     else if (pr#corr == "BNN")
-      set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction balanced");
+      set(pr#hpddmOP, sparams = "-hpddm_"+prefix+"schwarz_coarse_correction balanced", prefix=prefix);
     else if (pr#corr == "ADEF1")
-      set(pr#hpddmOP, sparams = "-hpddm_schwarz_coarse_correction deflated");
+      set(pr#hpddmOP, sparams = "-hpddm_"+prefix+"schwarz_coarse_correction deflated", prefix=prefix);
     
     if (pr#prec == "oras" || pr#prec == "soras")
       DDM(pr#hpddmOP,rhs,uni,O=pr#aR[mpiRank(preffe#prmesh#commddm)],timing=timings);
@@ -564,6 +565,18 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     IFMACRO((!pr#withhpddm)&(!pr#withhpddmkrylov)&(!pr#withpetsc))
     preffe#K[int,int] Hn(dim+2,dim+1);     /* Hessenberg matrix */
     Hn = 0.;
+
+    IFMACRO(pr#withritz)
+    preffe#K[int,int] Hessenberg(dim+2,dim+1);     /* copy of Hessenberg matrix for Ritz values/harmonics */
+    Hessenberg=0.;
+    pr#RitzValues.resize(dim+1);
+    for (int i=0;i<dim+1;i++)
+      pr#RitzValues[i].resize(i+1);
+    pr#RitzHarmonicValues.resize(dim+1);
+    for (int i=0;i<dim+1;i++)
+      pr#RitzHarmonicValues[i].resize(i+1);
+    ENDIFMACRO
+
     preffe#K[int,int] rot(2,dim+2);
     rot = 0.;
     preffe#K[int] g(dim+1),g1(dim+1);
@@ -575,7 +588,7 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
       Vi[i].resize(x0.n);
       Vpi[i].resize(x0.n);
     }
-    
+
     real normb = 0;
     
     if (!preffe#prmesh#excluded) {
@@ -641,11 +654,47 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
 
         for(int i=0; i<it+1; i++) {
           Hn(i,it) = pr#prfe#scalprod(wi,Vi[i]);
+          IFMACRO(pr#withritz)
+          Hessenberg(i,it)=Hn(i,it);
+          ENDIFMACRO
           wi -=  conj(Hn(i,it))*Vi[i];
         }
         Hn(it+1,it) = sqrt(real(pr#prfe#scalprod(wi,wi)));
+        IFMACRO(pr#withritz)
+        Hessenberg(it+1,it)=Hn(it+1,it);
+        ENDIFMACRO
         preffe#K aux = Hn(it+1,it);
         Vi[it+1]=1/aux*wi;
+
+        IFMACRO(pr#withritz)
+        load "lapack"
+        preffe#K[int,int] Hnb1=Hessenberg(0:it,0:it);
+        preffe#K[int,int] subHn=Hessenberg(0:it+1,0:it);
+        preffe#K[int,int] Hnb1trans=Hnb1';
+        preffe#K[int,int] subHntrans=subHn';
+        preffe#K[int,int] Hnprod = subHntrans*subHn;
+        preffe#K[int,int] Hnbinv = Hnb1trans^-1;
+        preffe#K[int,int] S = Hnbinv*Hnprod;
+        preffe#K[int] ritzharmonicvalues(it+1);
+        preffe#K[int,int] ritzharmonicvectors(it+1,it+1);
+        IFMACRO(preffe#K,complex)
+        zgeev(S,pr#RitzHarmonicValues[it],ritzharmonicvectors);
+        ENDIFMACRO
+        IFMACRO(preffe#K,real)
+        dgeev(S,pr#RitzHarmonicValues[it],ritzharmonicvectors);
+        ENDIFMACRO
+        pr#RitzHarmonicValues[it].im *= -1;
+        preffe#K[int,int] Hnb2=Hessenberg(0:it,0:it);
+        preffe#K[int] ritzvalues(it+1);
+        preffe#K[int,int] ritzvectors(it+1,it+1);
+        IFMACRO(preffe#K,complex)
+        zgeev(Hnb2,pr#RitzValues[it],ritzvectors);
+        ENDIFMACRO
+        IFMACRO(preffe#K,real)
+        dgeev(Hnb2,pr#RitzValues[it],ritzvectors);
+        ENDIFMACRO
+        pr#RitzValues[it].im *= -1;
+        ENDIFMACRO
 
         for(int i=0; i<it; i++){ 	 /* QR decomposition of Hn */
           preffe#K aa = conj(rot(0,i))*Hn(i,it)+conj(rot(1,i))*Hn(i+1,it);

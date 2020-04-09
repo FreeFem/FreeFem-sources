@@ -331,7 +331,9 @@ namespace PETSc {
               ++k;
           }
       }
-      assert(k);
+      int size;
+      MPI_Comm_size(A->_A->getCommunicator(), &size);
+      assert(size == 1 || k);
       communicators->operator[](0).resize(k);
       communicators->resize(2 * k + 1);
     }
@@ -455,6 +457,7 @@ namespace PETSc {
               }
 #endif
           }
+          ffassert(ptA->_num);
           PetscInt* ia = nullptr;
           PetscInt* ja = nullptr;
           PetscScalar* c = nullptr;
@@ -726,8 +729,8 @@ namespace PETSc {
         args.SetNameParam(n_name_param, name_param, nargs);
         A = to< DistributedCSR< HpddmType >* >(args[0]);
         B = to< DistributedCSR< HpddmType >* >(args[1]);
-        if (c != 1) K = to< Matrice_Creuse< PetscScalar >* >(args[2]);
-        else {
+        if (c == 0) K = to< Matrice_Creuse< PetscScalar >* >(args[2]);
+        else if (c == 1) {
           const Polymorphic* op = dynamic_cast< const Polymorphic* >(args[2].LeftValue( ));
           ffassert(op);
           codeA = op->Find("(", ArrayOfaType(atype< KN< PetscScalar >* >( ), false));
@@ -750,6 +753,11 @@ namespace PETSc {
           atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
           atype< DistributedCSR< HpddmType >* >( ), atype< Polymorphic* >( )),
         c(1) {}
+    initCSRfromDMatrix(int, int)
+      : OneOperator(
+          atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
+          atype< DistributedCSR< HpddmType >* >( )),
+        c(2) {}
   };
   template< class HpddmType >
   basicAC_F0::name_and_type
@@ -2632,9 +2640,8 @@ namespace PETSc {
           int* ia = new int[1]( );
           dA = new HPDDM::MatrixCSR< PetscScalar >(0, 0, 0, nullptr, ia, nullptr, false, true);
         } else {
-          ffassert(ptB->_A->getMatrix());
-          int m = ptB->_A->getMatrix()->_n;
-          int* ia = new int[m + 1]( );
+          int m = ptB->_A->getDof();
+          int* ia = (c == 1 ? new int[m + 1]( ) : nullptr);
           dA = new HPDDM::MatrixCSR< PetscScalar >(m, m, 0, nullptr, ia, nullptr, false, true);
         }
       }
@@ -4038,6 +4045,7 @@ static void Init_PETSc( ) {
   TheOperators->Add("<-", new PETSc::initCSRfromArray< HpSchwarz< PetscScalar > >);
   TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar > >);
   TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar > >(1));
+  TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar > >(1, 1));
   TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar > >);
   TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar > >(1));
   TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar > >(1, 1));

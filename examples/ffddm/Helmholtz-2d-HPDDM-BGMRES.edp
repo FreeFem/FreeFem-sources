@@ -94,7 +94,7 @@ Hwritesummary
 
 if (mpirank == 0) cout << endl << "Block GMRES :" << endl;
 
-set(HhpddmOP,sparams="-hpddm_krylov_method bgmres");
+set(HhpddmOP,sparams="-hpddm_H_krylov_method bgmres");
 
 bu = HfGMRES(x0, brhs, 1.e-6, 200, "right");
 

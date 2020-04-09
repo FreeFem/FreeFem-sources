@@ -9,12 +9,12 @@ macro partitionSubstructuring(meshName, interfaceNb, globalName, PhGlobal, part,
         ndofSkeleton.resize(1);
         ndofSkeleton[0].resize(0);
         {
-            meshN neighbors = trunc(globalName, suppSmooth > 0.001);
-            fespace Oh(neighbors, P0);
-            Oh partOverlap = part;
-            Unique(partOverlap[], ndofSkeleton[0], remove = mpiRank(comm));
+            int[int] n2o;
+            meshN neighbors = trunc(globalName, suppSmooth > 0.001, new2old = n2o);
+            int[int] partOverlap(n2o.n);
+            for[i, v : n2o] partOverlap[i] = part[][v];
+            Unique(partOverlap, ndofSkeleton[0], remove = mpiRank(comm));
         }
-
         VhGlobal[int] partitionIntersection(ndofSkeleton[0].n);
         if(s > 1) {
             globalName = trunc(globalName, suppSmooth > 0.001, split = s, label = fakeInterface);
