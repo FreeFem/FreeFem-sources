@@ -1015,6 +1015,9 @@ if test "$with_petsc" != no -a $ff_mpi = yes; then
                         AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetsc)
   		        AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetsc)
+                if test -n "$ff_SUITESPARSE_LIB" -a -n "$ff_METIS_LIB"; then
+                    ff_where_lib_suitesparse="$ff_METIS_LIB $ff_SUITESPARSE_LIB"
+                fi
 			AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetsc)
                         if test -f $d/libslepc.$ff_suffix_dylib -o -f $d/libslepc.a ; then
 			   ff_slepc_ok=yes
@@ -1780,7 +1783,6 @@ then
         # ALH - 30/9/13 - other libraries required by Umfpack
 
 	AC_CHECK_LIB(cholmod,cholmod_add,ff_umfpack_libs="$ff_umfpack_libs -lcholmod")
-#  	AC_CHECK_LIB(cholmod,cholmod_metis,ff_umfpack_libs="$ff_umfpack_libs -lmetis")
 	AC_CHECK_LIB(colamd,colamd_set_defaults,ff_umfpack_libs="$ff_umfpack_libs -lcolamd")
 
 	AC_CHECK_LIB(umfpack,umf_i_malloc,
