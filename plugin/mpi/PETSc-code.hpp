@@ -102,17 +102,23 @@ namespace PETSc {
     MPI_Comm_size(ptA->_A->getCommunicator(), &size);
     if (ptD || size == 1) {
       if (ptD) {
-        PetscReal* d = reinterpret_cast<PetscReal*>(ptD->operator double*());
-        if(!std::is_same<HPDDM::upscaled_type<PetscReal>, PetscReal>::value) {
+        if(!ptA->_D) {
+          PetscReal* d = reinterpret_cast<PetscReal*>(ptD->operator double*());
+          if(!std::is_same<HPDDM::upscaled_type<PetscReal>, PetscReal>::value) {
+              for(int i = 0; i < ptD->n; ++i)
+                  d[i] = ptD->operator[](i);
+          }
+          if (restrict) ptA->_A->restriction(d);
+          if (!C) ptA->_A->initialize(d);
+          else {
+            ptA->_D = new KN<PetscReal>(ptD->n);
             for(int i = 0; i < ptD->n; ++i)
-                d[i] = ptD->operator[](i);
+                ptA->_D->operator[](i) = d[i];
+            ptA->_A->initialize(*ptA->_D);
+          }
         }
-        if (restrict) ptA->_A->restriction(d);
-        if (!C) ptA->_A->initialize(d);
         else {
-          ptA->_D = new KN<PetscReal>(ptD->n);
-          for(int i = 0; i < ptD->n; ++i)
-              ptA->_D->operator[](i) = d[i];
+          if (restrict) ptA->_A->restriction(*ptA->_D);
           ptA->_A->initialize(*ptA->_D);
         }
       }
@@ -1199,11 +1205,8 @@ namespace PETSc {
           ffassert(mList->m == (mA ? mA->n : dof));
           n = mList->n;
           dL = new HPDDM::MatrixCSR< void >(n, mA ? mA->n : dof, n, mList->p, mList->j, false);
-          double* D = new double[n];
-          for (int i = 0; i < n; ++i) D[i] = ptD->operator[](mList->j[i]);
-          ptD->resize(n);
-          for (int i = 0; i < n; ++i) ptD->operator[](i) = D[i];
-          delete[] D;
+          ptA->_D = new KN<PetscReal>(n);
+          for (int i = 0; i < n; ++i) ptA->_D->operator[](i) = ptD->operator[](mList->j[i]);
         } else {
           dL = new HPDDM::MatrixCSR< void >(0, mA ? mA->n : dof, 0, nullptr, nullptr, false);
           ptD->destroy( );
