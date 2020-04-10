@@ -1321,6 +1321,8 @@ namespace PETSc {
       Mat* a = new Mat[N * M]( );
       std::vector< int > zeros;
       zeros.reserve(std::min(N, M));
+      std::vector<std::pair<int, int>> destroy;
+      destroy.reserve(N * M);
       for (int i = 0; i < N; ++i) {
         for (int j = 0; j < M; ++j) {
           Expression e = e_M[i][j];
@@ -1339,6 +1341,7 @@ namespace PETSc {
               else
                 MatCreateHermitianTranspose(pt->_petsc, &B);
               a[i * M + j] = B;
+              destroy.emplace_back(i, j);
               exchange[i * M + j] = pt;
             } else if (t == 7) {
               PetscScalar r = GetAny< PetscScalar >(e_ij);
@@ -1355,6 +1358,7 @@ namespace PETSc {
                 MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
                 MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
                 a[i * M + j] = B;
+                destroy.emplace_back(i, j);
               } else if (i == j)
                 zeros.emplace_back(i);
             } else if (t == 3 || t == 4) {
@@ -1379,8 +1383,10 @@ namespace PETSc {
                 Mat C;
                 if (std::is_same< PetscScalar, PetscReal >::value) MatCreateTranspose(B, &C);
                 else MatCreateHermitianTranspose(B, &C);
+                MatDestroy(&B);
                 a[i * M + j] = C;
               }
+              destroy.emplace_back(i, j);
             } else {
               ExecError("Unknown type in submatrix");
             }
@@ -1421,11 +1427,14 @@ namespace PETSc {
           MatMPIAIJSetPreallocation(a[zeros[i] * M + zeros[i]], 0, NULL, 0, NULL);
           MatAssemblyBegin(a[zeros[i] * M + zeros[i]], MAT_FINAL_ASSEMBLY);
           MatAssemblyEnd(a[zeros[i] * M + zeros[i]], MAT_FINAL_ASSEMBLY);
+          destroy.emplace_back(zeros[i], zeros[i]);
         }
       }
       Result sparse_mat = GetAny< Result >((*emat)(s));
       if (sparse_mat->_petsc) sparse_mat->dtor( );
       MatCreateNest(PETSC_COMM_WORLD, N, NULL, M, NULL, a, &sparse_mat->_petsc);
+      for(std::pair<int, int> p : destroy)
+          MatDestroy(a + p.first * M + p.second);
       sparse_mat->_exchange = reinterpret_cast<HPDDM::Subdomain<PetscScalar>**>(exchange);
       delete[] a;
       return sparse_mat;
@@ -2348,21 +2357,23 @@ namespace PETSc {
               MatHermitianTransposeGetMat(D, &b.back( ).second);
               MatHermitianTranspose(b.back( ).second, MAT_INITIAL_MATRIX, &C);
             }
-            MatDestroy(&D);
+            PetscObjectReference((PetscObject)b.back().second);
             MatNestSetSubMat(A, i, j, C);
+            MatDestroy(&C);
           }
         }
       }
     }
     MatConvert(A, MATMPIAIJ, MAT_INITIAL_MATRIX, B);
     for (std::pair< std::pair< PetscInt, PetscInt >, Mat > p : b) {
-      Mat C = mat[p.first.first][p.first.second];
-      MatDestroy(&C);
+      Mat C;
       if (std::is_same< PetscScalar, PetscReal >::value)
         MatCreateTranspose(p.second, &C);
       else
         MatCreateHermitianTranspose(p.second, &C);
+      MatDestroy(&p.second);
       MatNestSetSubMat(A, p.first.first, p.first.second, C);
+      MatDestroy(&C);
     }
   }
   template< class Type >
