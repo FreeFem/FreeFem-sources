@@ -86,6 +86,8 @@ m4_define([AC_FF_PETSC_WHERELIB],
 	    ff_$3=`AC_FF_PETSC_AWK($3,$4)`
 	   if test -n "[$]ff_$2"; then
 			    ff_$1_ok=yes;
+			    m4_ifval($5,ff_$2="$ff_$2 $5";
+			    echo " **** add $5 to ff_$2 ******", ) 
 			    AC_FF_ADDWHERELIB($1,[$]ff_$2,[$]ff_$3)
 			    AC_SUBST([TOOL_COMPILE_$1],"")
 	  fi
@@ -1014,10 +1016,10 @@ if test "$with_petsc" != no -a $ff_mpi = yes; then
                         AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetsc)
-  		        AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetsc)
-                if test -n "$ff_SUITESPARSE_LIB" -a -n "$ff_METIS_LIB"; then
-                    ff_where_lib_suitesparse="$ff_METIS_LIB $ff_SUITESPARSE_LIB"
-                fi
+  		        AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetsc,$ff_METIS_LIB)
+ dnl               if test -n "$ff_SUITESPARSE_LIB" -a -n "$ff_METIS_LIB"; then
+ dnl                   ff_where_lib_suitesparse="$ff_METIS_LIB $ff_SUITESPARSE_LIB"
+ dnl               fi
 			AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetsc)
                         if test -f $d/libslepc.$ff_suffix_dylib -o -f $d/libslepc.a ; then
 			   ff_slepc_ok=yes
