@@ -711,10 +711,6 @@ namespace PETSc {
       }
       return 0L;
   }
-  template< class Type >
-  long initEmptyCSR(Type* const&) {
-    return 0L;
-  }
 
   template< class HpddmType >
   class initCSRfromDMatrix : public OneOperator {
@@ -1642,14 +1638,11 @@ namespace PETSc {
     PetscErrorCode ierr;
 
     PetscFunctionBegin;
-    ierr = MatShellGetContext(A, &user);
-    CHKERRQ(ierr);
+    ierr = MatShellGetContext(A, &user);CHKERRQ(ierr);
     MatriceMorse< double >* mP = user->P->A ? static_cast< MatriceMorse< double >* >(&(*user->P->A)) : nullptr;
     if (mP) {
-      ierr = VecGetArrayRead(x, &in);
-      CHKERRQ(ierr);
-      ierr = VecGetArray(y, &out);
-      CHKERRQ(ierr);
+      ierr = VecGetArrayRead(x, &in);CHKERRQ(ierr);
+      ierr = VecGetArray(y, &out);CHKERRQ(ierr);
       if (!T) {
         PetscInt mFine, nCoarse;
         MatGetLocalSize(A, &mFine, nullptr);
@@ -1682,10 +1675,8 @@ namespace PETSc {
         changeNumbering_func(user->C->_num, user->C->_first, user->C->_last, mCoarse,
                              user->C->_A->getDof(), 1, &coarse, &coarseOut, false);
       }
-      ierr = VecRestoreArray(y, &out);
-      CHKERRQ(ierr);
-      ierr = VecRestoreArrayRead(x, &in);
-      CHKERRQ(ierr);
+      ierr = VecRestoreArray(y, &out);CHKERRQ(ierr);
+      ierr = VecRestoreArrayRead(x, &in);CHKERRQ(ierr);
     } else VecCopy(x, y);
     PetscFunctionReturn(0);
   }
@@ -3553,8 +3544,7 @@ namespace PETSc {
     PetscErrorCode ierr;
 
     PetscFunctionBegin;
-    ierr = ContainerGetContext(A, user);
-    CHKERRQ(ierr);
+    ierr = ContainerGetContext(A, user);CHKERRQ(ierr);
     typename LinearSolver< Type, 'N' >::MatF_O* mat =
       reinterpret_cast< typename LinearSolver< Type, 'N' >::MatF_O* >(user->op);
     VecGetArrayRead(x, &in);
@@ -3941,7 +3931,6 @@ namespace PETSc {
     }
     addScalarProduct< Dmat, PetscScalar >( );
 
-    TheOperators->Add("<-", new OneOperator1_< long, Dbddc* >(PETSc::initEmptyCSR< Dbddc >));
     TheOperators->Add("<-", new PETSc::initCSR< HpSchur< PetscScalar > >);
 
     Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >( ));
@@ -4008,6 +3997,366 @@ namespace PETSc {
   }
   template<class K, typename std::enable_if<!std::is_same<K, HPDDM::upscaled_type<K>>::value>::type* = nullptr>
   static void init() { }
+  class initDM_Op : public E_F0mps {
+      public:
+          Expression A;
+          Expression B;
+          static const int n_name_param = 6;
+          static basicAC_F0::name_and_type name_param[];
+          Expression nargs[n_name_param];
+          initDM_Op(const basicAC_F0& args, Expression param1, Expression param2) : A(param1), B(param2) {
+              args.SetNameParam(n_name_param, name_param, nargs);
+          }
+
+          AnyType operator()(Stack stack) const;
+  };
+  basicAC_F0::name_and_type initDM_Op::name_param[] = {
+      {"communicator", &typeid(pcommworld)},
+      {"overlap", &typeid(long)},
+      {"neighbors", &typeid(KN<long>*)},
+      {"sparams", &typeid(string*)},
+      {"partition", &typeid(KN<long>*)},
+      {"prefix", &typeid(string*)}
+  };
+  class initDM : public OneOperator {
+      public:
+          initDM() : OneOperator(atype<DMPlex*>(), atype<DMPlex*>(), atype<string*>()) { }
+
+          E_F0* code(const basicAC_F0& args) const {
+              return new initDM_Op(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
+          }
+  };
+  AnyType initDM_Op::operator()(Stack stack) const {
+      DMPlex* pA = GetAny<DMPlex*>((*A)(stack));
+      std::string* pB = GetAny<std::string*>((*B)(stack));
+      std::string* options = nargs[3] ? GetAny< std::string* >((*nargs[3])(stack)) : NULL;
+      std::string* prefix = nargs[5] ? GetAny< std::string* >((*nargs[5])(stack)) : NULL;
+      KN<long>* part = nargs[4] ? GetAny< KN<long>* >((*nargs[4])(stack)) : NULL;
+      KN<long>* neighbors = nargs[2] ? GetAny< KN<long>* >((*nargs[2])(stack)) : NULL;
+      if(options)
+          insertOptions(options);
+      PetscInt overlap = nargs[1] ? GetAny< long >((*nargs[1])(stack)) : 0;
+      MPI_Comm comm = nargs[0] ? *static_cast< MPI_Comm* >(GetAny< pcommworld >((*nargs[0])(stack))) : PETSC_COMM_WORLD;
+      int size;
+      MPI_Comm_size(comm, &size);
+      DMPlexCreateFromFile(comm, pB->c_str(), overlap > 0 || size == 1 ? PETSC_TRUE : PETSC_FALSE, &pA->_dm);
+      if(prefix)
+          DMSetOptionsPrefix(pA->_dm, prefix->c_str());
+      DMSetFromOptions(pA->_dm);
+      PetscPartitioner partitioner;
+      DMPlexGetPartitioner(pA->_dm, &partitioner);
+      PetscPartitionerSetFromOptions(partitioner);
+      DM pdm;
+      DMPlexDistribute(pA->_dm, overlap, NULL, &pdm);
+      if (pdm) {
+          if(overlap == 0) {
+              DM idm;
+              DMPlexInterpolate(pdm, &idm);
+              DMDestroy(&pdm);
+              pdm = idm;
+          }
+          DMLabel label;
+          DMGetLabel(pdm, "Face Sets", &label);
+          if (!label) {
+              DMCreateLabel(pdm, "Face Sets");
+              DMGetLabel(pdm, "Face Sets", &label);
+          }
+          DMPlexMarkBoundaryFaces(pdm, 111111, label);
+          DMDestroy(&pA->_dm);
+          pA->_dm = pdm;
+          if(neighbors) {
+              PetscInt nranks;
+              const PetscMPIInt *ranks;
+              DMGetNeighbors(pA->_dm, &nranks, &ranks);
+              neighbors->resize(nranks);
+              std::copy_n(ranks, nranks, neighbors->operator long*());
+          }
+      } else if(neighbors) neighbors->resize(0);
+      if(part) {
+          PetscSection rootSection, leafSection;
+          PetscSectionCreate(comm, &rootSection);
+          PetscSectionCreate(comm, &leafSection);
+          {
+              PetscInt pStart, pEnd, cStart, cEnd;
+              DMPlexGetChart(pA->_dm, &pStart, &pEnd);
+              DMPlexGetHeightStratum(pA->_dm, 0, &cStart, &cEnd);
+              PetscSectionSetChart(rootSection, pStart, pEnd);
+              for(PetscInt c = cStart; c < cEnd; ++c)
+                  PetscSectionSetDof(rootSection, c, 1);
+              PetscSectionSetUp(rootSection);
+              PetscSectionCopy(rootSection, leafSection);
+              DMSetLocalSection(pA->_dm, rootSection);
+              DMSetLocalSection(pA->_dm, leafSection);
+          }
+          Vec ranks, local;
+          DMPlexCreateRankField(pA->_dm, &ranks);
+          DMCreateLocalVector(pA->_dm, &local);
+          DMGlobalToLocal(pA->_dm, ranks, INSERT_VALUES, local);
+          const PetscScalar* val;
+          VecGetArrayRead(local, &val);
+          PetscInt n;
+          VecGetLocalSize(local, &n);
+          part->resize(n);
+          for(PetscInt i = 0; i < n; ++i)
+              part->operator[](i) = PetscRealPart(val[i]);
+          VecRestoreArrayRead(local, &val);
+          VecDestroy(&ranks);
+          VecDestroy(&local);
+          PetscSectionDestroy(&rootSection);
+          PetscSectionDestroy(&leafSection);
+      }
+      return pA;
+  }
+  static void findPerm(int *ivt, int *pivt, Vertex3 *v) {
+    std::copy(ivt, ivt + 4, pivt);
+    R3 AB(v[ivt[0]], v[ivt[1]]);
+    R3 AC(v[ivt[0]], v[ivt[2]]);
+    R3 AD(v[ivt[0]], v[ivt[3]]);
+    if (det(AB, AC, AD) > 0) {
+      return;
+    } else if (det(AB, AD, AC) > 0) {
+      std::swap(pivt[2], pivt[3]);
+    } else if (det(AC, AB, AD) > 0) {
+      std::swap(pivt[1], pivt[2]);
+    }
+  }
+  static void findPerm(int *ivt, int *pivt, Vertex *v) {
+    std::copy(ivt, ivt + 3, pivt);
+    R2 A(v[ivt[0]]);
+    R2 B(v[ivt[1]]);
+    R2 C(v[ivt[2]]);
+    if (((B-A)^(C-A)) < 0)
+      std::swap(pivt[1], pivt[2]);
+  }
+  class DMPlexToFF : public OneOperator {
+   public:
+    const int c;
+    class DMPlexToFF_Op : public E_F0mps {
+     public:
+      Expression A;
+      Expression B;
+      const int c;
+      static const int n_name_param = 0;
+      static basicAC_F0::name_and_type name_param[];
+      Expression nargs[n_name_param];
+      DMPlexToFF_Op(const basicAC_F0& args, int d) : A(0), B(0), c(d) {
+        args.SetNameParam(n_name_param, name_param, nargs);
+        B = to<DMPlex*>(args[1]);
+        if(c == 0)
+            A = to< Mesh const** >(args[0]);
+        else
+            A = to< Mesh3 const** >(args[0]);
+      }
+
+      AnyType operator( )(Stack stack) const;
+      operator aType( ) const { return c == 0 ? atype< Mesh const** >( ) : atype < Mesh3 const** >( ); }
+    };
+    E_F0* code(const basicAC_F0& args) const { return new DMPlexToFF_Op(args, c); }
+    DMPlexToFF( )
+      : OneOperator(atype< Mesh const** >( ), atype< Mesh const** >( ), atype< DMPlex* >( )), c(0) {}
+    DMPlexToFF(int)
+      : OneOperator(atype< Mesh3 const** >( ), atype< Mesh3 const** >( ), atype< DMPlex* >( )), c(1) {}
+  };
+  basicAC_F0::name_and_type DMPlexToFF::DMPlexToFF_Op::name_param[] = { };
+  AnyType DMPlexToFF::DMPlexToFF_Op::operator( )(Stack stack) const {
+      DMPlex* p = GetAny<DMPlex*>((*B)(stack));
+      PetscSection      coordSection;
+      Vec               coordinates;
+      DMLabel           label;
+      const PetscScalar *a;
+      PetscInt          dim, pStart, pEnd, cStart, cEnd, vStart, vEnd, depth, numValues;
+      IS                valueIS;
+      const PetscInt    *values;
+      DMGetDimension(p->_dm, &dim);
+      DMGetCoordinatesLocal(p->_dm, &coordinates);
+      DMGetCoordinateSection(p->_dm, &coordSection);
+      DMPlexGetDepth(p->_dm, &depth);
+      DMPlexGetHeightStratum(p->_dm, depth, &vStart, &vEnd);
+      DMPlexGetHeightStratum(p->_dm, 0, &cStart, &cEnd);
+      PetscSectionGetChart(coordSection, &pStart, &pEnd);
+      VecGetArrayRead(coordinates, &a);
+      if(c == 1) {
+          Mesh3** pA = GetAny<Mesh3**>((*A)(stack));
+          (*pA)->destroy();
+          if(!p->_dm) return pA;
+          ffassert(dim == 3);
+          Vertex3 *v = new Vertex3[vEnd - vStart];
+          Tet *t = new Tet[cEnd - cStart];
+          Tet *tt = t;
+          for (PetscInt i = 0; i < vEnd - vStart; ++i) {
+              v[i].x = PetscRealPart(a[3 * i + 0]);
+              v[i].y = PetscRealPart(a[3 * i + 1]);
+              v[i].z = PetscRealPart(a[3 * i + 2]);
+              v[i].lab = 0;
+          }
+          VecRestoreArrayRead(coordinates, &a);
+          DMGetLabel(p->_dm, "Face Sets", &label);
+          DMLabelGetNumValues(label, &numValues);
+          DMLabelGetValueIS(label, &valueIS);
+          ISGetIndices(valueIS, &values);
+          int nt = 0;
+          for (PetscInt v = 0; v < numValues; ++v) {
+              IS face;
+              PetscInt size;
+              const PetscInt* indices;
+
+              DMLabelGetStratumIS(label, values[v], &face);
+              ISGetLocalSize(face, &size);
+              ISGetIndices(face, &indices);
+              ISDestroy(&face);
+              nt += size;
+          }
+          Triangle3 *b = new Triangle3[nt];
+          Triangle3 *bb = b;
+          for (PetscInt j = numValues - 1; j >= 0; --j) {
+              IS face;
+              PetscInt size;
+              const PetscInt* indices;
+
+              DMLabelGetStratumIS(label, values[j], &face);
+              ISGetLocalSize(face, &size);
+              ISGetIndices(face, &indices);
+              for (PetscInt c = 0; c < size; ++c) {
+                  const PetscInt *points, *orientations;
+                  PetscInt       size, i;
+
+                  DMPlexGetConeSize(p->_dm, indices[c], &size);
+                  DMPlexGetCone(p->_dm, indices[c], &points);
+                  std::set<PetscInt> set;
+                  for (PetscInt j = 0; j < size; ++j) {
+                      const PetscInt *vertex;
+                      PetscInt       size, i;
+
+                      DMPlexGetConeSize(p->_dm, points[j], &size);
+                      DMPlexGetCone(p->_dm, points[j], &vertex);
+                      for (PetscInt w = 0; w < size; ++w)
+                          set.insert(vertex[w]);
+                  }
+                  std::vector<PetscInt> conv(set.begin(), set.end());
+                  ffassert(conv.size() == 3);
+                  int iv[3];
+                  for (PetscInt j = 0; j < conv.size(); ++j)
+                      iv[j] = conv[j] - vStart;
+                  int lab = values[j] == 111111 ? -111111 : values[j];
+                  bb++->set(v, iv, lab);
+              }
+              ISRestoreIndices(face, &indices);
+              ISDestroy(&face);
+          }
+          ISRestoreIndices(valueIS, &values);
+          ISDestroy(&valueIS);
+          for (PetscInt c = cStart; c < cEnd; ++c) {
+              PetscInt *closure = NULL;
+              PetscInt  closureSize, cl;
+              DMPlexGetTransitiveClosure(p->_dm, c, PETSC_TRUE, &closureSize, &closure);
+              int iv[4], lab = 0;
+              int* ivv = iv;
+              for (cl = 0; cl < 2 * closureSize; cl += 2) {
+                  PetscInt point = closure[cl], dof, off, d, p;
+
+                  if ((point < pStart) || (point >= pEnd)) continue;
+                  PetscSectionGetDof(coordSection, point, &dof);
+                  if (!dof) continue;
+                  PetscSectionGetOffset(coordSection, point, &off);
+                  *ivv++ = point - cEnd;
+              }
+              ffassert(ivv - iv == 4);
+              int pivt[4];
+              findPerm(iv, pivt, v);
+              tt++->set(v, pivt, lab);
+              DMPlexRestoreTransitiveClosure(p->_dm, c, PETSC_TRUE, &closureSize, &closure);
+          }
+          *pA = new Mesh3(vEnd - vStart, cEnd - cStart, nt, v, t, b);
+          (*pA)->BuildGTree();
+          return pA;
+      }
+      else {
+          Mesh const** pA = GetAny<Mesh const**>((*A)(stack));
+          (*pA)->destroy();
+          if(!p->_dm) return pA;
+          ffassert(dim == 2);
+          Vertex *v = new Vertex[vEnd - vStart];
+          Triangle *t = new Triangle[cEnd - cStart];
+          Triangle *tt = t;
+          for (PetscInt i = 0; i < vEnd - vStart; ++i) {
+              v[i].x = PetscRealPart(a[2 * i + 0]);
+              v[i].y = PetscRealPart(a[2 * i + 1]);
+              v[i].lab = 0;
+          }
+          VecRestoreArrayRead(coordinates, &a);
+          DMGetLabel(p->_dm, "Face Sets", &label);
+          DMLabelGetNumValues(label, &numValues);
+          DMLabelGetValueIS(label, &valueIS);
+          ISGetIndices(valueIS, &values);
+          int nt = 0;
+          for (PetscInt v = 0; v < numValues; ++v) {
+              IS face;
+              PetscInt size;
+              const PetscInt* indices;
+
+              DMLabelGetStratumIS(label, values[v], &face);
+              ISGetLocalSize(face, &size);
+              ISGetIndices(face, &indices);
+              ISDestroy(&face);
+              nt += size;
+          }
+          BoundaryEdge *b = new BoundaryEdge[nt];
+          BoundaryEdge *bb = b;
+          for (PetscInt j = numValues - 1; j >= 0; --j) {
+              IS face;
+              PetscInt size;
+              const PetscInt* indices;
+
+              DMLabelGetStratumIS(label, values[j], &face);
+              ISGetLocalSize(face, &size);
+              ISGetIndices(face, &indices);
+              for (PetscInt c = 0; c < size; ++c) {
+                  const PetscInt *points, *orientations;
+                  PetscInt       size, i;
+
+                  DMPlexGetConeSize(p->_dm, indices[c], &size);
+                  DMPlexGetCone(p->_dm, indices[c], &points);
+                  ffassert(size == 2);
+                  int iv[2];
+                  for (PetscInt j = 0; j < size; ++j)
+                      iv[j] = points[j] - vStart;
+                  int lab = values[j] == 111111 ? -111111 : values[j];
+                  *bb++ = BoundaryEdge(v, iv[0], iv[1], lab);
+              }
+              ISRestoreIndices(face, &indices);
+              ISDestroy(&face);
+          }
+          ISRestoreIndices(valueIS, &values);
+          ISDestroy(&valueIS);
+          for (PetscInt c = cStart; c < cEnd; ++c) {
+              PetscInt *closure = NULL;
+              PetscInt  closureSize, cl;
+              DMPlexGetTransitiveClosure(p->_dm, c, PETSC_TRUE, &closureSize, &closure);
+              int iv[3], lab = 0;
+              int* ivv = iv;
+              for (cl = 0; cl < 2 * closureSize; cl += 2) {
+                  PetscInt point = closure[cl], dof, off, d, p;
+
+                  if ((point < pStart) || (point >= pEnd)) continue;
+                  PetscSectionGetDof(coordSection, point, &dof);
+                  if (!dof) continue;
+                  PetscSectionGetOffset(coordSection, point, &off);
+                  *ivv++ = point - cEnd;
+              }
+              ffassert(ivv - iv == 3);
+              int pivt[3];
+              findPerm(iv, pivt, v);
+              tt++->set(v, pivt[0], pivt[1], pivt[2], lab);
+              DMPlexRestoreTransitiveClosure(p->_dm, c, PETSC_TRUE, &closureSize, &closure);
+          }
+          Mesh* m = new Mesh(vEnd - vStart, cEnd - cStart, nt, v, t, b);
+          R2 Pn, Px;
+          m->BoundingBox(Pn, Px);
+          m->quadtree = new Fem2D::FQuadTree(m, Pn, Px, m->nv);
+          *pA = m;
+          return pA;
+      }
+  }
 } // namespace PETSc
 
 static void Init_PETSc( ) {
@@ -4046,7 +4395,6 @@ static void Init_PETSc( ) {
 
   addArray< Dmat >( );
 
-  TheOperators->Add("<-", new OneOperator1_< long, Dmat* >(PETSc::initEmptyCSR< Dmat >));
   TheOperators->Add("<-", new PETSc::initCSR< HpSchwarz< PetscScalar > >);
   TheOperators->Add("<-", new PETSc::initCSR< HpSchwarz< PetscScalar > >(1));
   TheOperators->Add("<-", new PETSc::initCSR< HpSchwarz< PetscScalar > >(1, 1));
@@ -4091,6 +4439,13 @@ static void Init_PETSc( ) {
   Global.Add("PetscLogStagePop", "(", new OneOperator0< long >(PETSc::stagePop));
   Global.Add("hasType", "(", new OneOperator2_< long, string*, string* >(PETSc::hasType));
   Init_Common( );
+  Dcl_Type< PETSc::DMPlex* >(Initialize< PETSc::DMPlex >, DeleteDTOR< PETSc::DMPlex >);
+  zzzfff->Add("DM", atype< PETSc::DMPlex* >( ));
+  TheOperators->Add("<-", new PETSc::initDM);
+  TheOperators->Add("<-", new PETSc::DMPlexToFF);
+  TheOperators->Add("=", new PETSc::DMPlexToFF);
+  TheOperators->Add("<-", new PETSc::DMPlexToFF(1));
+  TheOperators->Add("=", new PETSc::DMPlexToFF(1));
 }
 #ifndef PETScandSLEPc
 LOADFUNC(Init_PETSc)

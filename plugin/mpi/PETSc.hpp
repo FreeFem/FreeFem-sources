@@ -78,6 +78,18 @@ class DistributedCSR {
         }
 };
 
+class DMPlex {
+    public:
+        DM _dm;
+        DMPlex() : _dm() { }
+        ~DMPlex() {
+            dtor();
+        }
+        void dtor() {
+            DMDestroy(&_dm);
+        }
+};
+
 template<class HpddmType, typename std::enable_if<std::is_same<HpddmType, HpSchwarz<PetscScalar>>::value>::type* = nullptr>
 void globalMapping(HpddmType* const& A, PetscInt*& num, PetscInt& start, PetscInt& end, long long& global, PetscInt* const list) {
     num = new PetscInt[A->getDof()];
