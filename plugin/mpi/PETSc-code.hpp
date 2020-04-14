@@ -4097,7 +4097,8 @@ namespace PETSc {
           PetscInt n;
           VecGetLocalSize(local, &n);
           part->resize(n);
-          std::copy_n(val, n, part->operator long*());
+          for(PetscInt i = 0; i < n; ++i)
+              part->operator[](i) = PetscRealPart(val[i]);
           VecRestoreArrayRead(local, &val);
           VecDestroy(&ranks);
           VecDestroy(&local);
