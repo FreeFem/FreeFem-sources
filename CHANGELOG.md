@@ -26,15 +26,20 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- interface to PETSc DMPlex, see `examples/hpddm/DMPlex-PETSc.edp`
 
 ### Changed
+- moved Htool to its new GitHub location
 
 ### Deprecated
+
+### Fixed
+- missing METIS library when using SuiteSparse compiled by PETSc
 
 ## [4.6]
 
 ### Added
-- new algorithm for searching element contening a point (more safe) in mesh of type mesh3, meshS, or meshL. 
+- new algorithm for searching element contening a point (more safe) in mesh of type mesh3, meshS, or meshL.
 - new function `hasType` to know if a PETSc component has been installed, e.g., `hasType("PC", "hypre")`
 - eigenvalue problems on linear elements, cf. `examples/eigen/LapEigen1DBeltrami.edp` or `examples/hpddm/laplace-beltrami-3d-line-SLEPc.edp`
 - `--download-cmake` in PETSc configure if there is no CMake available
@@ -158,7 +163,7 @@ All notable changes to this project will be documented in this file.
 - correct mistake in mpirank in case of broadcast with comm (thank tp PHT)
 - update fftw to v3.3.8 and openblas v0.3.6
 - in movemesh23 correct the argument label -> region to change label
-- new implementation for the moving mesh functions, new arguments: boolean cleanmesh, removemultiple, rebuildborder 
+- new implementation for the moving mesh functions, new arguments: boolean cleanmesh, removemultiple, rebuildborder
 - new PETSc version 3.12
 - templatize movemesh, setMesh functions
 - add conditional tests in make check
@@ -170,7 +175,7 @@ All notable changes to this project will be documented in this file.
 
 ### Security
 
-## [4.4] 
+## [4.4]
 ### Added
 - interface to `TSSolve`, DAE/ODE solvers from PETSc
 - interface to `TaoSolve`, Toolkit for Advance Optimization from PETSc
