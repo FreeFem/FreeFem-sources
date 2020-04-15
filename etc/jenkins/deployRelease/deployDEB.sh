@@ -19,7 +19,7 @@ GH_DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_amd64.deb"
 
 ## DEB build
 autoreconf -i
-./configure --enable-download --enable-optim --enable-generic
+./configure --enable-download --enable-optim --enable-generic --without-hdf5
 ./3rdparty/getall -a
 make -j4
 make -j4 install
@@ -33,7 +33,7 @@ echo "Package: freefem" >> $DEB_NAME/DEBIAN/control
 echo "Version: "$VERSION >> $DEB_NAME/DEBIAN/control
 echo "Section: custom" >> $DEB_NAME/DEBIAN/control
 echo "Architecture: amd64" >> $DEB_NAME/DEBIAN/control
-echo "Depends: libc6 (>= 2.23), g++ (>= 7), gcc (>= 7), gfortran (>= 7), libgsl-dev (>=2.4), libhdf5-dev (>=1.10.0), liblapack-dev (>= 3.7), libopenmpi-dev (>=2.1.1) ,freeglut3-dev (>= 2.8.1) ">> $DEB_NAME/DEBIAN/control
+echo "Depends: libc6 (>= 2.23), g++ (>= 7), gcc (>= 7), gfortran (>= 7), libgsl-dev (>=2.4), liblapack-dev (>= 3.7), libopenmpi-dev (>=2.1.1) ,freeglut3-dev (>= 2.8.1) ">> $DEB_NAME/DEBIAN/control
 echo "Maintainer: FreeFEM, Frédéric Hecht <frederic.hecht@sorbonne-universite.fr> " >> $DEB_NAME/DEBIAN/control
 echo "Description: FreeFEM, Finite Element Language software" >> $DEB_NAME/DEBIAN/control
 echo "Homepage: https://freefem.org" >> $DEB_NAME/DEBIAN/control
