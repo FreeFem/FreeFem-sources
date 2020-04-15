@@ -2009,7 +2009,7 @@ namespace PETSc {
             ISDestroy(&is);
           }
         }
-        if (std::is_same< Type, Dmat >::value && ptA->_A && nargs[17]) {
+        if (std::is_same< Type, Dmat >::value && ptA->_petsc && nargs[17]) {
             PC pc;
             KSPGetPC(ksp, &pc);
             const Polymorphic* op = dynamic_cast< const Polymorphic* >(nargs[17]);
@@ -2018,7 +2018,9 @@ namespace PETSc {
             PCSetType(pc, PCSHELL);
             User< LinearSolver< Type, 'N' > > userPC = nullptr;
             PetscNew(&userPC);
-            userPC->op = new typename LinearSolver< Type, 'N' >::MatF_O(ptA->_last - ptA->_first, stack, codeA);
+            PetscInt n;
+            MatGetLocalSize(ptA->_petsc, &n, NULL);
+            userPC->op = new typename LinearSolver< Type, 'N' >::MatF_O(n, stack, codeA);
             PCShellSetContext(pc, userPC);
             PCShellSetApply(pc, Op_User< LinearSolver< Type, 'N' >, PC >);
             PCShellSetDestroy(pc, PCShellDestroy< LinearSolver< Dmat, 'N' >  >);
@@ -4039,7 +4041,7 @@ namespace PETSc {
       MPI_Comm comm = nargs[0] ? *static_cast< MPI_Comm* >(GetAny< pcommworld >((*nargs[0])(stack))) : PETSC_COMM_WORLD;
       int size;
       MPI_Comm_size(comm, &size);
-      DMPlexCreateFromFile(comm, pB->c_str(), overlap > 0 || size == 1 ? PETSC_TRUE : PETSC_FALSE, &pA->_dm);
+      DMPlexCreateFromFile(comm, pB->c_str(), PETSC_TRUE, &pA->_dm);
       if(prefix)
           DMSetOptionsPrefix(pA->_dm, prefix->c_str());
       DMSetFromOptions(pA->_dm);
@@ -4049,12 +4051,6 @@ namespace PETSc {
       DM pdm;
       DMPlexDistribute(pA->_dm, overlap, NULL, &pdm);
       if (pdm) {
-          if(overlap == 0) {
-              DM idm;
-              DMPlexInterpolate(pdm, &idm);
-              DMDestroy(&pdm);
-              pdm = idm;
-          }
           DMLabel label;
           DMGetLabel(pdm, "Face Sets", &label);
           if (!label) {
@@ -4067,6 +4063,9 @@ namespace PETSc {
           if(neighbors) {
               PetscInt nranks;
               const PetscMPIInt *ranks;
+              PetscSF sf;
+              DMGetPointSF(pA->_dm, &sf);
+              PetscSFSetUp(sf);
               DMGetNeighbors(pA->_dm, &nranks, &ranks);
               neighbors->resize(nranks);
               std::copy_n(ranks, nranks, neighbors->operator long*());
