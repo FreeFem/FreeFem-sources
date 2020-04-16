@@ -512,7 +512,10 @@ pr#corr = ffddmcorrection;
 int nev = ffddmnu;
 
 IFMACRO(pr#withhpddm)
-set(pr#hpddmOP,sparams="-hpddm_geneo_nu "+nev);
+string prefix = Stringification(pr)+"_";
+set(pr#hpddmOP,sparams="-hpddm_"+prefix+"geneo_nu "+nev, prefix=prefix);
+if (ffddmtau != 0)
+  set(pr#hpddmOP,sparams="-hpddm_"+prefix+"geneo_threshold "+ffddmtau, prefix=prefix);
 
 pr#prfe#prmesh#tic(pr#tloc)
 
@@ -615,7 +618,10 @@ pr#corr = ffddmcorrection; /* Correction scheme used */
 int nev = ffddmnu; /* Maximum number of eigenvectors per subdomain */
 
 IFMACRO(pr#withhpddm)
-set(pr#hpddmOP,sparams="-hpddm_geneo_nu "+nev);
+string prefix = Stringification(pr)+"_";
+set(pr#hpddmOP,sparams="-hpddm_"+prefix+"geneo_nu "+nev, prefix=prefix);
+if (ffddmtau != 0)
+  set(pr#hpddmOP,sparams="-hpddm_"+prefix+"geneo_threshold "+ffddmtau, prefix=prefix);
 
 pr#prfe#prmesh#tic(pr#tloc)
 

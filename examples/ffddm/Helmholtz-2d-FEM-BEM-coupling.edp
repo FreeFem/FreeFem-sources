@@ -123,6 +123,7 @@ macro VarfTDL(varfName, meshName, PhName)
 //
 
 // assemble BEM blocks :
+ffddmprecond = "ras";
 ffddmsetupOperatorBem(B, B, VarfSL)
 
 ffddmsetupPrecond(B, VarfSL)
@@ -142,7 +143,7 @@ macro Grad(u) [dx(u),dy(u)] // EOM
 macro VarfF(varfName, meshName, PhName)
     varf varfName(u,v) =
   int2d(meshName)(-ind*k^2*u*v+Grad(u)'*Grad(v))
-  + on(2,u=0); // EOM
+  + on(waveguide,u=0); // EOM
 
 // for the preconditioner
 macro VarfFOpt(varfName, meshName, PhName)
@@ -161,6 +162,7 @@ macro VarfFmass(varfName, meshName, PhName)
   int1d(meshName,interface)(u*v); // EOM
 
 // assemble FEM blocks :
+ffddmprecond = "oras";
 ffddmsetup(F, F, VarfF, VarfFOpt)
 
 ffddmsetupOperator(Fmass, F, VarfFmass)
@@ -232,8 +234,6 @@ func complex[int] CPREC1(complex[int] &u)
 macro Cwithhpddmkrylov()1//
 
 ffddmsetupinit(C,C);
-
-Cprec = "ras";
 
 complex[int] uC(Cn);
 
