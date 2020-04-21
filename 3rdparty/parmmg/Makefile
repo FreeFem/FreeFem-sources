@@ -33,10 +33,8 @@ FAIT.done:tag-tar
 	-DMPI_CXX_COMPILER="$(MPICXX)" \
 	-DMPI_Fortran_COMPILER="$(MPIFC)" \
 	-DMPIEXEC_EXECUTABLE="$(MPIRUN)" \
-	-DDOWNLOAD_MMG=OFF \
+	-DDOWNLOAD_MMG=ON \
 	-DDOWNLOAD_METIS=OFF \
-	-DMMG_DIR=../../mmg/mmg-sources \
-	-DMMG_BUILDDIR=../../mmg/build \
 	-DSCOTCH_DIR=$(scotch_dir) \
 	-DMETIS_DIR=$(metis_dir) -DUSE_VTK=OFF \
 	-DCMAKE_BUILD_TYPE=Release $(CMAKE_GUESS) && $(MAKE)
