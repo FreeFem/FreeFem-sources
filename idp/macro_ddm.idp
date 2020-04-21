@@ -119,25 +119,30 @@ IFMACRO(!privateCreatePartition)
 IFMACRO(!privateCreateMat)
     intersection.resize(1);
     intersection[0].resize(0);
-    PhGlobal supp = abs(part - rank) < 0.1;
+    PhGlobal supp;
     VhGlobal suppSmooth;
-    AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
     {
+        int constant = rank;
+        for[i, v : supp[]] v = abs(part[][i] - constant) < 0.1;
+        AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
         int[int] n2o;
         meshN neighbors = trunc(globalName, suppSmooth > 0.001 && suppSmooth < 0.999, new2old = n2o);
         int[int] partOverlap(n2o.n);
         for[i, v : n2o] partOverlap[i] = part[][v];
-        Unique(partOverlap, intersection[0], remove = rank);
+        Unique(partOverlap, intersection[0], remove = constant);
+        if(s > 1 && level <= 1) {
+            globalName = trunc(globalName, suppSmooth > 0.001, split = s);
+            supp = abs(part - constant) < 0.1;
+            suppSmooth = 0;
+            AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
+        }
     }
-    if(s > 1 && level <= 1) {
-        globalName = trunc(globalName, suppSmooth > 0.001, split = s);
-        supp = abs(part - rank) < 0.1;
-        suppSmooth = 0;
-        AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
-    }
-IFMACRO(!privateDmesh#N2O)
-    globalName = trunc(globalName, suppSmooth > 0.001, label = 9999);
+    int[int] n2oNeighbor;
+    globalName = trunc(globalName, suppSmooth > 0.001, label = 9999
+IFMACRO(privateDmesh#N2O)
+            , new2old = n2oNeighbor
 ENDIFMACRO
+                           );
     real eps = globalName.measure;
     real[int] epsTab(intersection[0].n);
     mpiRequest[int] rq(2 * intersection[0].n);
@@ -149,14 +154,20 @@ ENDIFMACRO
     }
     else
         epsTab = 1.0e+30;
-IFMACRO(!privateDmesh#N2O)
     suppSmooth = suppSmooth;
-    meshName[level - 1] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface);
+IFMACRO(!privateDmesh#N2O)
+    meshName[level - 1] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface, new2old = n2oNeighbor);
 ENDIFMACRO
 IFMACRO(privateDmesh#N2O)
     meshName[level - 1] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface, new2old = privateDmesh#N2O);
-    globalName = trunc(globalName, suppSmooth > 0.001, label = 9999);
-    suppSmooth = suppSmooth;
+    {
+        int[int] backup = privateDmesh#N2O;
+        int[int] new = n2oNeighbor(privateDmesh#N2O);
+        privateDmesh#N2O.resize(new.n);
+        privateDmesh#N2O = new;
+        n2oNeighbor.resize(backup.n);
+        n2oNeighbor = backup;
+    }
 ENDIFMACRO
     if(level > 1) {
         prolongation.resize(level - 1);
@@ -200,16 +211,20 @@ ENDIFMACRO
     VhGlobal phi;
     part = part;
     int numberIntersection = 0;
-    mpiWaitAll(rq);
-    for(int i = 0; i < intersection[0].n; ++i) {
-        PhGlobal suppPartition = abs(part - intersection[0][i]) < 0.1;
-        AddLayers(globalName, suppPartition[], overlap, phi[]);
-        if(min(eps, epsTab[i]) > 0.0) {
-            if(intN(globalName)(phi) / min(eps, epsTab[i]) > 1.0e-10) {
-                partitionIntersection[numberIntersection] = phi;
-                if(!trueRestrict)
-                    sum[] += partitionIntersection[numberIntersection][];
-                intersection[0][numberIntersection++] = intersection[0][i];
+    {
+        int[int] rest = restrict(VhLocal, VhGlobal, n2oNeighbor);
+        n2oNeighbor.resize(0);
+        mpiWaitAll(rq);
+        for(int i = 0; i < intersection[0].n; ++i) {
+            PhGlobal suppPartition = abs(part - intersection[0][i]) < 0.1;
+            AddLayers(globalName, suppPartition[], overlap, phi[]);
+            if(min(eps, epsTab[i]) > 0.0) {
+                if(intN(globalName)(phi) / min(eps, epsTab[i]) > 1.0e-10) {
+                    partitionIntersection[numberIntersection][] = phi[](rest);
+                    if(!trueRestrict)
+                        sum[] += partitionIntersection[numberIntersection][];
+                    intersection[0][numberIntersection++] = intersection[0][i];
+                }
             }
         }
     }
@@ -389,14 +404,15 @@ ENDIFMACRO
     WhPart defPart(func2vec);
     D[level - 1].resize(WhPart.ndof);
     if((WhPart.ndof % meshName[level - 1].nt) == 0) {
+        int constant = rank;
 IFMACRO(privateCreateMat)
         fespace PhLocal(meshName[level - 1], P0);
         PhLocal partLocal;
         partLocal[] = privateDmesh#meshName#khiDef[1];
-        defPart(func2vec) = initPart(abs(partLocal - rank) < 0.1);
+        defPart(func2vec) = initPart(abs(partLocal - constant) < 0.1);
 ENDIFMACRO
 IFMACRO(!privateCreateMat)
-        defPart(func2vec) = initPart(abs(part - rank) < 0.1);
+        defPart(func2vec) = initPart(abs(part - constant) < 0.1);
 ENDIFMACRO
     }
     else if(WhPart.ndof == meshName[level - 1].nv) {
@@ -1210,11 +1226,12 @@ IFMACRO(dimension, 3)
         bb(11) += max(ThName.hmax, ThNew.hmax);
 ENDIFMACRO
     }
-    real[int] bbAll(4 * dimension * mpiSize(ThName#Comm));
+    int size = mpiSize(ThName#Comm);
+    real[int] bbAll(4 * dimension * size);
     mpiAllgather(bb, bbAll, ThName#Comm);
     int[int] rankSend(0);
     int[int] rankRecv(0);
-    for(int i = 0; i < mpiSize(ThName#Comm); ++i) {
+    for(int i = 0; i < size; ++i) {
 IFMACRO(dimension, 2)
         if(!(bbAll[1 + 8 * i] < bb[4]
           || bbAll[0 + 8 * i] > bb[5]
@@ -1262,7 +1279,8 @@ ENDIFMACRO
         PhPart backup = region;
         backupRegion = backup[];
         int[int] newRegion(ThName.nt);
-        for[i, v : privateDmesh#ThName#khiDef[1]] newRegion[i] = abs(v - mpiRank(ThName#Comm)) < 1.0e-2 ? 1 : 0;
+        int rank = mpiRank(ThName#Comm);
+        for[i, v : privateDmesh#ThName#khiDef[1]] newRegion[i] = abs(v - rank) < 1.0e-2 ? 1 : 0;
         ThName = change(ThName, fregion = newRegion[nuTriangle]);
     }
     meshN[int] recvTh(rankRecv.n);

@@ -352,13 +352,13 @@ namespace Fem2D {
         dof += 2;
       }
     }
-    static int ddd = 100;
-    ddd++;
+//    static int ddd = 100;
+//    ddd++;
     val = 0.;
     RN_ f0(val('.', 0, op_id));
-    if (ddd < 20) {
-      cout << ld[0] << " " << ld[1] << " " << ld[2] << " " << ld[3] << " ::";
-    }
+  //  if (ddd < 20) {
+ //     cout << ld[0] << " " << ld[1] << " " << ld[2] << " " << ld[3] << " ::";
+  //  }
 
     if (whatd & Fop_D0) {
       for (int i = 0; i < 20; ++i) {
@@ -368,16 +368,16 @@ namespace Fem2D {
           fi *= ld[nl[i][l]] - cl[i][l];
         }
 
-        if (ddd < 20) {
-          cout << " " << fi;
-        }
+  //      if (ddd < 20) {
+   //       cout << " " << fi;
+    //    }
 
         f0[p[i]] = fi;
       }
 
-      if (ddd < 20) {
-        cout << endl;
-      }
+///      if (ddd < 20) {
+ ///       cout << endl;
+ ///     }
     }
 
     if (whatd & (Fop_D1 | Fop_D2)) {

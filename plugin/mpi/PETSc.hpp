@@ -38,55 +38,6 @@ class DistributedCSR {
         }
         void dtor() {
             if(_petsc) {
-                MatType type;
-                PetscBool isType;
-                MatGetType(_petsc, &type);
-                PetscStrcmp(type, MATNEST, &isType);
-                if(isType) {
-                    Mat** mat;
-                    PetscInt M, N;
-                    MatNestGetSubMats(_petsc, &M, &N, &mat);
-                    for(PetscInt i = 0; i < M; ++i) {
-                        for(PetscInt j = 0; j < N; ++j) {
-                            if(mat[i][j]) {
-                                MatGetType(mat[i][j], &type);
-                                PetscStrcmp(type, MATTRANSPOSEMAT, &isType);
-                                if(isType) {
-                                    Mat B = mat[i][j];
-                                    Mat C;
-                                    if (std::is_same< PetscScalar, PetscReal >::value) MatTransposeGetMat(B, &C);
-                                    else MatHermitianTransposeGetMat(B, &C);
-                                    MatGetType(C, &type);
-                                    PetscStrcmp(type, MATMPIDENSE, &isType);
-                                    if(isType) MatDestroy(&C);
-                                    MatDestroy(&B);
-                                }
-                                else {
-                                    PetscStrcmp(type, MATMPIDENSE, &isType);
-                                    if(isType) {
-                                        Mat B = mat[i][j];
-                                        MatDestroy(&B);
-                                    }
-                                    else if(i == j) {
-                                        PetscBool assembled;
-                                        MatAssembled(mat[i][j], &assembled);
-                                        if(assembled) {
-                                            MatInfo info;
-                                            PetscStrcmp(type, MATSHELL, &isType);
-                                            if(!isType) {
-                                              MatGetInfo(mat[i][j], MAT_GLOBAL_SUM, &info);
-                                              if(std::abs(info.nz_used) < 1.0e-12) {
-                                                  Mat B = mat[i][j];
-                                                  MatDestroy(&B);
-                                              }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
                 MatDestroy(&_petsc);
                 delete [] reinterpret_cast<decltype(this)*>(_exchange);
                 _exchange = nullptr;
@@ -124,6 +75,18 @@ class DistributedCSR {
                 delete _D;
                 _D = nullptr;
             }
+        }
+};
+
+class DMPlex {
+    public:
+        DM _dm;
+        DMPlex() : _dm() { }
+        ~DMPlex() {
+            dtor();
+        }
+        void dtor() {
+            DMDestroy(&_dm);
         }
 };
 

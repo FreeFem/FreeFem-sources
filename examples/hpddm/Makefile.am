@@ -90,7 +90,8 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	diffusion-mg-3d-PETSc.edp \
 	save-load-Dmesh.edp \
 	navier-stokes-2d-PETSc.edp \
-	transfer.edp
+	transfer.edp \
+	DMPlex-PETSc.edp
 # diffusion-substructuring-2d-PETSc.edp <- broken, problem with BDDC
 
 TESTS_PETSC_PARMMG = distributed-parmmg.edp laplace-adapt-dist-3d-PETSc.edp
@@ -169,7 +170,7 @@ LIST_CONDITIONAL = $(CONDITIONAL_MPI) \
 
 XFAIL_TESTS = $(TESTS)
 
-EXTRA_DIST = *.edp
+EXTRA_DIST = *.edp cube.msh rectangle.msh
 
 freefem++.pref: Makefile
 	echo loadpath = \"../../plugin/mpi/\" > freefem++.pref

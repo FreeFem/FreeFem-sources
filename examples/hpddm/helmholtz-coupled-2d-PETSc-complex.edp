@@ -109,9 +109,7 @@ A = varfA(Vh, Vh, tgv = -1);
     matrix IdV = eye(Vh.ndof);
     renumbering(Mass, RVtoS, R = IdV);
 }
-real[int] DSurf(D.n);
-DSurf = D;
-Mat<complex> ASurf(Mass.m, R, DSurf, restriction = RVtoS);
+Mat<complex> ASurf(Mass.m, R, D, restriction = RVtoS);
 HMatrix<complex> TDL, SL;
 {
     fespace UhG(ThG, P1);
