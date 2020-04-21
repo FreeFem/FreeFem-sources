@@ -341,6 +341,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
   }
 
   int ier = communicators == NULL ? PMMG_parmmglib_centralized(mesh) : PMMG_parmmglib_distributed(mesh);
+  if( ier == PMMG_STRONGFAILURE ) exit(EXIT_FAILURE);
 
   Mesh3 *Th_T = nullptr;
 
