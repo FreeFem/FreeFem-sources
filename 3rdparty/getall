@@ -178,10 +178,10 @@ download('mmg','https://github.com/MmgTools/mmg/archive/cb8dfe0f6794ae839f415d77
         'https://github.com/MmgTools',
         'mmg.zip',
         'cf56025ee05721795d4bc4e610cb2019');
-download('parmmg','https://github.com/MmgTools/ParMmg/archive/ca99325cd238bcd7a3ce5344ae3331e85594ed84.zip',
+download('parmmg','https://github.com/MmgTools/ParMmg/archive/bf9f46fdf0e9078061b2b7fd44bf7aff83db7dcf.zip',
         'https://github.com/MmgTools',
         'parmmg.zip',
-        '6949a48720ffa8fae9d676fe68dd77c9');
+        'a97faeb563092a37edf516cca325d53a');
 download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.13.0.tar.gz',
 	'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/',
 	'petsc-lite-3.13.0.tar.gz',
