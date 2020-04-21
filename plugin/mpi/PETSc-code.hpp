@@ -94,8 +94,7 @@ namespace PETSc {
             typename std::enable_if< std::is_same< HpddmType, Dmat >::value >::type* = nullptr >
   void initPETScStructure(
     HpddmType* ptA, PetscInt bs, PetscBool symmetric,
-    KN< typename std::conditional< std::is_same< HpddmType, Dmat >::value, double, long >::type >*
-      ptD, bool restrict = true) {
+    KN< typename std::conditional< std::is_same< HpddmType, Dmat >::value, double, long >::type >* ptD) {
     double timing = MPI_Wtime( );
     long long global;
     int size;
@@ -108,7 +107,7 @@ namespace PETSc {
               for(int i = 0; i < ptD->n; ++i)
                   d[i] = ptD->operator[](i);
           }
-          if (restrict) ptA->_A->restriction(d);
+          ptA->_A->restriction(d);
           if (!C) ptA->_A->initialize(d);
           else {
             ptA->_D = new KN<PetscReal>(ptD->n);
@@ -118,7 +117,6 @@ namespace PETSc {
           }
         }
         else {
-          if (restrict) ptA->_A->restriction(*ptA->_D);
           ptA->_A->initialize(*ptA->_D);
         }
       }
@@ -164,8 +162,7 @@ namespace PETSc {
             typename std::enable_if< !std::is_same< HpddmType, Dmat >::value >::type* = nullptr >
   void initPETScStructure(
     HpddmType* ptA, PetscInt& bs, PetscBool symmetric,
-    KN< typename std::conditional< std::is_same< HpddmType, Dmat >::value, double, long >::type >*
-      ptD, bool) {
+    KN< typename std::conditional< std::is_same< HpddmType, Dmat >::value, double, long >::type >* ptD) {
     const HPDDM::MatrixCSR< PetscScalar >* M = ptA->_A->getMatrix( );
     if (!M->_sym) cout << "Please assemble a symmetric CSR" << endl;
     double timing = MPI_Wtime( );
@@ -1183,7 +1180,6 @@ namespace PETSc {
                               ? (*ptR)(FromTo(1 + level * ptR->operator[](0).n,
                                               1 + (level + 1) * ptR->operator[](0).n - 1))
                               : KN< KN< long > >( ));
-      bool restrict = true;
       if (std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value && pList &&
           (mA || (c != 0 && c != 2))) {
         int n = 0;
@@ -1194,7 +1190,6 @@ namespace PETSc {
           sub, comm);
         ptA->_exchange[0]->setBuffer( );
         if (pList->A) {
-          restrict = false;
           MatriceMorse< double >* mList = static_cast< MatriceMorse< double >* >(&*(pList->A));
           mList->CSR( );
           ffassert(mList->n == mList->nnz);
@@ -1215,8 +1210,7 @@ namespace PETSc {
       ptA->_num = new PetscInt[ptA->_A->getMatrix( )->_n];
       initPETScStructure<C>(
         ptA, bs,
-        nargs[3] ? (GetAny< bool >((*nargs[3])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE,
-        ptD, restrict);
+        nargs[3] ? (GetAny< bool >((*nargs[3])(stack)) ? PETSC_TRUE : PETSC_FALSE) : PETSC_FALSE, ptD);
       if (!std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value) {
         mA->p = ptA->_A->getMatrix( )->_ia;
       }
@@ -3920,6 +3914,11 @@ namespace PETSc {
       return mv(Ax, A);
     }
   };
+  long destroyCSR(Dmat* p) {
+    ffassert(p);
+    p->dtor();
+    return 0L;
+  }
   template<class K, typename std::enable_if<std::is_same<K, HPDDM::upscaled_type<K>>::value>::type* = nullptr>
   KN_<K> Dmat_D(Dmat* p) {
     throwassert(p && p->_A);
@@ -4405,6 +4404,7 @@ static void Init_PETSc( ) {
   Global.Add("constructor", "(", new PETSc::initCSR< HpSchwarz< PetscScalar >, true >(1));
   Global.Add("constructor", "(", new PETSc::initCSR< HpSchwarz< PetscScalar >, true >(1, 1));
   Global.Add("constructor", "(", new PETSc::initCSR< HpSchwarz< PetscScalar >, true >(1, 1, 1));
+  Global.Add("MatDestroy", "(", new OneOperator1< long, Dmat* >(PETSc::destroyCSR));
   Add< Dmat* >("D", ".", new OneOperator1< KN_<double>, Dmat* >(PETSc::Dmat_D));
   TheOperators->Add("<-", new PETSc::initCSRfromArray< HpSchwarz< PetscScalar > >);
   TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar > >);

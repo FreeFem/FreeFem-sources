@@ -27,6 +27,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - interface to PETSc DMPlex, see `examples/hpddm/DMPlex-PETSc.edp`
+- function `MatDestroy`
 
 ### Changed
 - moved Htool to its new GitHub location
