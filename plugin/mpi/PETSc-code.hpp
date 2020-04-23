@@ -2602,13 +2602,13 @@ namespace PETSc {
       KNM< PetscScalar >* out = GetAny< KNM< PetscScalar >* >((*y)(stack));
       if (A) {
         Type* ptA = GetAny< Type* >((*A)(stack));
-        PetscInt m, bs;
+        PetscInt m, bs, M;
         MatGetLocalSize(ptA->_petsc, &m, NULL);
         MatType type;
         MatGetType(ptA->_petsc, &type);
-        PetscBool isNotBlock;
-        PetscStrcmp(type, MATMPIAIJ, &isNotBlock);
-        if (isNotBlock)
+        PetscBool isType;
+        PetscStrcmp(type, MATMPIAIJ, &isType);
+        if (isType)
           bs = 1;
         else
           MatGetBlockSize(ptA->_petsc, &bs);
@@ -2617,9 +2617,29 @@ namespace PETSc {
         if (!ptA->_ksp) {
           KSPCreate(PetscObjectComm((PetscObject)ptA->_petsc), &ptA->_ksp);
           KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
+          isType = PETSC_FALSE;
         }
-        HPDDM::PETScOperator op(ptA->_ksp, m, bs);
-        op.apply(&in->operator( )(0, 0), &out->operator( )(0, 0), in->M( ));
+        else {
+          KSPType type;
+          KSPGetType(ptA->_ksp, &type);
+          PetscStrcmp(type, KSPHPDDM, &isType);
+        }
+#if PETSC_VERSION_GT(3,13,0) && defined(PETSC_HAVE_HPDDM)
+        if(isType) {
+          MatGetSize(ptA->_petsc, &M, NULL);
+          Mat B, C;
+          MatCreateDense(PetscObjectComm((PetscObject)ptA->_ksp), in->N( ), PETSC_DECIDE, bs * M, in->M(), &in->operator( )(0, 0), &B);
+          MatCreateDense(PetscObjectComm((PetscObject)ptA->_ksp), out->N( ), PETSC_DECIDE, bs * M, out->M(), &out->operator( )(0, 0), &C);
+          KSPHPDDMMatMatSolve(ptA->_ksp, B, C);
+          MatDestroy(&C);
+          MatDestroy(&B);
+        }
+        else
+#endif
+        {
+          HPDDM::PETScOperator op(ptA->_ksp, m, bs);
+          op.apply(&in->operator( )(0, 0), &out->operator( )(0, 0), in->M( ));
+        }
       }
     }
     return 0L;

@@ -45,7 +45,6 @@ template<class R,class DJ,class P>
 int NLCG(const DJ & dJ,const P & C,KN_<R> &x,const int nbitermax, double &eps,long kprint,MPI_Comm * )
 {
     //  -------------
-    assert(&x && &dJ && &C);
     typedef KN<R> Rn;
     int n=x.N();
     
@@ -106,7 +105,6 @@ int ConjuguedGradient2(const M & A,const P & C,KN_<R> &x,const KN_<R> &b,const i
 {
     //  ConjuguedGradient2 affine A*x = 0 est toujours appele avec les condition aux limites 
     //  -------------
-    throwassert(&x  && &A && &C);
     typedef KN<R> Rn;
     int n=x.N();
    // if (verbosity>99) kprint=1;
