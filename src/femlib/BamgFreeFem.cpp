@@ -398,7 +398,7 @@ double NormalDistrib(double sigma)
     const double TWOPI = 3.14159265358979323846264338328*2.;
     return  sigma*sqrt(-2.0*log(rand))*cos(TWOPI*rand);
 }    // (stack,b,true,0,true); bool Requiredboundary=true, KNM<double> *pintern=0, double alea=0)
-const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax,bool Requiredboundary,KNM<double> *pintern,double alea)
+const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax,bool Requiredboundary,KNM<double> *pintern,double alea,bool SplitEdgeWith2Boundary)
 {
     if(alea) Requiredboundary=1;
     int nbvinter=0;
@@ -694,6 +694,9 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
       Triangles *Th = 0;
       try {
 	  Th =new Triangles( nbtx ,*Gh);
+          if(SplitEdgeWith2Boundary)
+              Th->SplitInternalEdgeWithBorderVertices();
+
           if(alea) //  Add F. Hecht Juin 2018 for J-M Sac Epee:  jean-marc.sac-epee@univ-lorraine.fr
           {
               Th->SetVertexFieldOn();
@@ -710,6 +713,7 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
               }
 
           }
+
 	  if(0)
 	    {
 

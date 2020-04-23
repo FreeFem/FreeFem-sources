@@ -55,14 +55,14 @@ plot(Thwithtinyhole,wait=1,ps="Thwithtinyhole.eps");
 
 }
 // ------------------------------------------------------------
-{ //  square with border 
+{ //  square with border and no edge with two vextices on border 
 border a(t=0,2){x=t; y=0;label=1;};
 border b(t=0,1){x=2; y=t;label=1;};
 border c(t=2,0){x=t; y=1;label=1;};
 border d(t=1,0){x=0; y=t;label=1;};
 int n = 20;
 plot(a(2*n)+b(n)+c(2*n)+d(n),wait=1,ps="squarebb.eps");
-mesh th= buildmesh(a(2*n)+b(n)+c(2*n)+d(n)); 
+mesh th= buildmesh(a(2*n)+b(n)+c(2*n)+d(n),splitpbedge=1); 
 plot(th,ps="squareb.eps");
 }
 // ------------------------------------------------------------

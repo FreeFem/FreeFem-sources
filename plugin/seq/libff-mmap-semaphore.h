@@ -26,8 +26,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#if defined ( _WIN32 )
+#  include <windows.h>
+#else
 #include <sys/mman.h>
 #include <unistd.h>
+#endif
+
 #include <semaphore.h>
 
 #ifdef __cplusplus
@@ -43,7 +48,11 @@ struct FF_P_sem {
 struct FF_P_mmap {
   size_t len;
   const char *nm;
+#if defined( _WIN32 )
+  HANDLE fd;
+#else
   int fd;
+#endif
   void *map;
   int isnew;
 };

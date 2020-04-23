@@ -208,14 +208,24 @@ void ffmmap_destroy(ff_Pmmap p) {
     printf("  ** ffmmap_destroy %s len: %lu new: %d\n", p->nm, (unsigned long)p->len, p->isnew);
   }
 
-  if (p->map && munmap(p->map, p->len) == -1) {
-    printf(" **Error munmap %s %zu\n", p->nm, p->len);
-    perror("munmap");
-    ffDoError("munmap", 1005);
+  if (p->map) {
+#if defined( _WIN32 )
+      if (UnmapViewOfFile(p->map) == 0) {
+#else
+      if (munmap(p->map, p->len) == -1) {
+#endif
+          printf(" **Error munmap %s %zu\n", p->nm, p->len);
+          perror("munmap");
+          ffDoError("munmap", 1005);
+      }
   }
 
   if (p->fd > 0) {
+#if defined ( _WIN32 )
+    CloseHandle(p->fd);
+#else
     close(p->fd);
+#endif
   }
 
   if (p->isnew) {
@@ -248,7 +258,11 @@ long ffmmap_msync(ff_Pmmap p, long off, long ln) {
     ln = p->len - off;
   }
 
+#if defined ( _WIN32 )
+  return FlushViewOfFile((char *)p->map + off, ln);
+#else
   return msync((char *)p->map + off, ln, MS_SYNC);
+#endif
 }
 
 void ffmmap_msync_(long *p, int *off, int *ln, long *ret) {
@@ -261,14 +275,34 @@ void ffmmap_init(ff_Pmmap p, const char *nm, long len) {
   p->len = len;
   p->nm = newstringcpy(nm);    // shm_unlink
   p->map = 0;
+#if defined ( _WIN32 )
+  p->fd = CreateFileMapping(
+      INVALID_HANDLE_VALUE,
+      NULL,
+      PAGE_READWRITE,
+      0,
+      len,
+      nm );
+  if (p->fd == NULL) {
+#else
   p->fd = open(p->nm, O_RDWR | O_CREAT, (mode_t)0666);
   if (p->fd == -1) {
+#endif
     printf(" Error opening file mmap  %s  len =  %zu \n", p->nm, p->len);
     perror("open");
     ffmmap_destroy(p);
     ffDoError("opening mmap", 2001);
   }
 
+#if defined ( _WIN32 )
+  p->map = MapViewOfFile(
+      p->fd,
+      FILE_MAP_ALL_ACCESS,
+      0,
+      0,
+      p->len );
+  if (p->map == NULL) {
+#else
   off_t size = lseek(p->fd, 0, SEEK_END);    // seek to end of file
   p->isnew = (size == 0);
   printf(" len %ld size %ld \n", len, size);
@@ -285,6 +319,7 @@ void ffmmap_init(ff_Pmmap p, const char *nm, long len) {
 
   p->map = mmap(addr, p->len, PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, p->fd, 0);
   if (p->map == MAP_FAILED) {
+#endif
     p->map = 0;
     printf("Error mmapping the file %s len = %zu\n", p->nm, p->len);
     ffDoError("Error mmapping ", 2003);

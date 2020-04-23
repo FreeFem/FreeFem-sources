@@ -3293,7 +3293,7 @@ inline    int E_F0::find(const MapOfE_F0 & m)  {  //  exp
      if( (verbosity / 100)% 10 == 1) 
        cout << "  --  insert opt " << n << " " << *this << endl;     
        n += sizeof(AnyType);         
-       l.push_back(make_pair<Expression,int>((Expression)opt,(int)rr)); 
+       l.push_back(make_pair((Expression)opt,(int)rr)); 
        m.insert(p); 
        return rr;
      }

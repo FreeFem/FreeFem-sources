@@ -45,13 +45,13 @@ class classBuildMesh :  public E_F0mps { public:
    typedef pmesh  Result;
 
    static basicAC_F0::name_and_type name_param[] ;
-   static const int n_name_param =5;
+   static const int n_name_param =6;
 
     Expression nargs[n_name_param];
 
    Expression getborders;
 
-   long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+    long arg(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
    bool arg(int i,Stack stack,bool a) const{ return nargs[i] ? GetAny<bool>( (*nargs[i])(stack) ): a;}
    double arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
    KNM<double>* arg(int i,Stack stack,KNM<double>* p) const{ return nargs[i] ? GetAny<KNM<double>*>( (*nargs[i])(stack) ): p;}
@@ -162,7 +162,8 @@ basicAC_F0::name_and_type  classBuildMesh::name_param[]= {
     {"fixeborder", &typeid(bool)},// obsolete
     {"points", &typeid(KNM<double>*)},
     {"fixedborder", &typeid(bool)},
-     {"alea", &typeid(double)}
+     {"alea", &typeid(double)},
+    {"splitpbedge", &typeid(bool)} // add april 20 FH 
 };
 // modif aout 2007
 class BuildMeshFile :  public E_F0mps { public:
@@ -455,9 +456,9 @@ AnyType classBuildMesh::operator()(Stack stack)  const {
    bool  requireborder= arg(3,stack,arg(1,stack,false));
     KNM<double> * p=0;  p=arg(2,stack,p);
     double alea = arg(4,stack,0.);
-
+    bool SplitEdgeWith2Boundary=arg(5,stack,false);
    ffassert(   nbvx >= 0);
-   return SetAny<pmesh>(Add2StackOfPtr2FreeRC(stack,BuildMesh(stack,borders,false,nbvx,requireborder,p,alea)));
+   return SetAny<pmesh>(Add2StackOfPtr2FreeRC(stack,BuildMesh(stack,borders,false,nbvx,requireborder,p,alea,SplitEdgeWith2Boundary)));
 
 }
 
