@@ -209,6 +209,10 @@ download('Boost','https://www.ljll.math.upmc.fr/~tournier/boost_for_bemtool.tar.
 	'bb0e3ee1ad06174c80a69bc0756034e7');
 
 
+download('libpthread-google','http://pkgs.freefem.org/libpthread-google.tar.gz',
+		'http://pkgs.freefem.org/',
+		'libpthread-google.tar.gz',
+		'945c006d898983d1a710aabf52a32d9c');
 
 
 # run all downloads concurrently
