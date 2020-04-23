@@ -203,7 +203,8 @@ install-exec-local:: load_compile WHERE_LIBRARY
 	fi
 
 ffmaster$(EXEEXT): libff-mmap-semaphore.o ffmaster.c libff-mmap-semaphore.h
-	$(CC) $(CFLAGS) ffmaster.c libff-mmap-semaphore.o -o ffmaster $(LIBSPTHREAD)
+	$(CC) $(CFLAGS) ffmaster.c libff-mmap-semaphore.o -o ffmaster \
+	`awk -f ff-get-dep.awk -v libs="[pthread-google|pthread]" WHERE_LIBRARY-download  WHERE_LIBRARY-config`
 
 clean-local::
 	-rm *.fg *.eps *~ *.ps  *.mesh *.mesh.gmsh ListOfAllocPtr-8.bin ffglut*.ppm Th.o.meshb	Th3.d.meshb	dep.sol.meshbgh \

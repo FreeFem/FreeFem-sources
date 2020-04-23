@@ -70,7 +70,7 @@ LIST_SOFT= @DOWNLOAD_FFTW@ @TOOL_COMPILE_tetgen@ @TOOL_COMPILE_metis@ @TOOL_COMP
 	@TOOL_COMPILE_scotch@ @TOOL_COMPILE_mshmet@			\
 	@TOOL_COMPILE_yams@ @TOOL_COMPILE_mmg3d@ @TOOL_COMPILE_mmg@ @TOOL_COMPILE_gmm@	\
 	@TOOL_COMPILE_nlopt@ @TOOL_COMPILE_mumps_seq@			\
-	@TOOL_COMPILE_ipopt@
+	@TOOL_COMPILE_ipopt@ @TOOL_COMPILE_libpthread_google@
 
 all-recursive: bin lib include pkg
 

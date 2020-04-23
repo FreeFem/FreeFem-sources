@@ -8,7 +8,11 @@
  * the compile step is
  *
  * cc -c libff-mmap-semaphore.c
+ # on linux, unix, 
  * cc ffmaster.c -o ffmaster  libff-mmap-semaphore.o -g
+ # on win32 
+ * cc ffmaster.c -o ffmaster  libff-mmap-semaphore.o -g  ../../3rdparty/lib/libpthread-google.a
+
  #build the freefem++ plugin
  * ff-c++ -auto ff-mmap-semaphore.cpp
  # launch

@@ -21,7 +21,7 @@
 // E-MAIL  : ...
 
 /* clang-format off */
-//ff-c++-LIBRARY-dep: pthread
+//ff-c++-LIBRARY-dep: [pthread-google|pthread]
 //ff-c++-cpp-dep: libff-mmap-semaphore.c
 /* clang-format on */
 
