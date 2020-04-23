@@ -26,6 +26,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+
+- compile ffmaster / ffslave example under windows (Thanks to johann@ifado.de)
 - add in buildmesh function the boolean  parameter `spiltpbedge=`, to split in to edge with two boundary vertices.
 - interface to PETSc DMPlex, see `examples/hpddm/DMPlex-PETSc.edp`
 - function `MatDestroy`
