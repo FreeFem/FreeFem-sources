@@ -124,7 +124,7 @@ int PMMG_pParMesh_to_ffmesh(const PMMG_pParMesh& mesh, Mesh3 *&T_TH3, bool distr
 class parmmg_Op : public E_F0mps {
  public:
   Expression eTh, xx, yy, zz;
-  static const int n_name_param = 31;
+  static const int n_name_param = 32;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
 
@@ -186,6 +186,7 @@ basicAC_F0::name_and_type parmmg_Op::name_param[] = {
 {"hsiz"              , &typeid(double)},/*!< [val], Constant mesh size */
 {"hausd"             , &typeid(double)},/*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
 {"hgrad"             , &typeid(double)},/*!< [val], Control gradation */
+{"hgradreq"          , &typeid(double)},/*!< [val], Control gradation from required entities */
 {"ls"                , &typeid(double)},/*!< [val], Value of level-set */
 {"nodeCommunicators" , &typeid(KN<KN<long>>*)}
 };
@@ -236,7 +237,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
                     PMMG_ARG_dim,3,PMMG_ARG_MPIComm,comm,
                     PMMG_ARG_end);
 
-  KN< KN< long > >* communicators = nargs[30] ? GetAny< KN< KN< long > >* >((*nargs[30])(stack)) : 0;
+  KN< KN< long > >* communicators = nargs[31] ? GetAny< KN< KN< long > >* >((*nargs[31])(stack)) : 0;
   ffmesh_to_PMMG_pParMesh(Th, mesh, communicators != NULL);
 
   int root = mesh->info.root;
@@ -304,6 +305,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
   if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hsiz,          arg(i,stack,0.)); i++;   /*!< [val], Constant mesh size */
   if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hausd,         arg(i,stack,0.)); i++;   /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
   if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hgrad,         arg(i,stack,0.)); i++;   /*!< [val], Control gradation */
+  if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_hgradreq,      arg(i,stack,0.)); i++;   /*!< [val], Control gradation from required entities */
   if (nargs[i]) PMMG_Set_dparameter(mesh,PMMG_DPARAM_ls,            arg(i,stack,0.)); i++;   /*!< [val], Value of level-set */
 
   if(communicators != NULL) {
@@ -313,26 +315,33 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
     }
 
     /* Set the number of interfaces */
-    PMMG_Set_numberOfNodeCommunicators(mesh, communicators->operator[](0).N());
+    if( !PMMG_Set_numberOfNodeCommunicators(mesh, communicators->operator[](0).N()) ) {
+      exit(EXIT_FAILURE);
+    }
 
     /* Loop on each interface (proc pair) seen by the current rank) */
     for(int icomm=0; icomm<communicators->operator[](0).N(); icomm++ ) {
 
       /* Set nb. of entities on interface and rank of the outward proc */
-      PMMG_Set_ithNodeCommunicatorSize(mesh, icomm,
-                                       communicators->operator[](0)[icomm],
-                                       communicators->operator[](1 + 2 * icomm).N());
+      if( !PMMG_Set_ithNodeCommunicatorSize(mesh, icomm,
+                                            communicators->operator[](0)[icomm],
+                                            communicators->operator[](1 + 2 * icomm).N()) ) {
+        exit(EXIT_FAILURE);
+      }
 
       /* Set local and global index for each entity on the interface */
       KN<int> local = communicators->operator[](1 + 2 * icomm);
       KN<int> global = communicators->operator[](2 + 2 * icomm);
-      PMMG_Set_ithNodeCommunicator_nodes(mesh, icomm,
-                                         local.operator int*(),
-                                         global.operator int*(), 1);
+      if( !PMMG_Set_ithNodeCommunicator_nodes(mesh, icomm,
+                                              local.operator int*(),
+                                              global.operator int*(), 1) ) {
+        exit(EXIT_FAILURE);
+      }
     }
   }
 
   int ier = communicators == NULL ? PMMG_parmmglib_centralized(mesh) : PMMG_parmmglib_distributed(mesh);
+  if( ier == PMMG_STRONGFAILURE ) exit(EXIT_FAILURE);
 
   Mesh3 *Th_T = nullptr;
 
