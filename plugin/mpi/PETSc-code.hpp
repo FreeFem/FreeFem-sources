@@ -2624,12 +2624,22 @@ namespace PETSc {
           KSPGetType(ptA->_ksp, &type);
           PetscStrcmp(type, KSPHPDDM, &isType);
         }
-#if PETSC_VERSION_GT(3,13,0) && defined(PETSC_HAVE_HPDDM)
+#if PETSC_VERSION_GT(3, 13, 0) && defined(PETSC_HAVE_HPDDM)
         if(isType) {
           MatGetSize(ptA->_petsc, &M, NULL);
           Mat B, C;
           MatCreateDense(PetscObjectComm((PetscObject)ptA->_ksp), in->N( ), PETSC_DECIDE, bs * M, in->M(), &in->operator( )(0, 0), &B);
           MatCreateDense(PetscObjectComm((PetscObject)ptA->_ksp), out->N( ), PETSC_DECIDE, bs * M, out->M(), &out->operator( )(0, 0), &C);
+          int size;
+          MPI_Comm_size(PetscObjectComm((PetscObject)ptA->_ksp), &size);
+          if(size == 1) {
+              PetscStrcmp(type, MATMPIAIJ, &isType);
+              if(isType)
+                  MatConvert(ptA->_petsc, MATSEQAIJ, MAT_INPLACE_MATRIX, &ptA->_petsc);
+              PetscStrcmp(type, MATMPISBAIJ, &isType);
+              if(isType)
+                  MatConvert(ptA->_petsc, MATSEQSBAIJ, MAT_INPLACE_MATRIX, &ptA->_petsc);
+          }
           KSPHPDDMMatMatSolve(ptA->_ksp, B, C);
           MatDestroy(&C);
           MatDestroy(&B);
@@ -2637,7 +2647,11 @@ namespace PETSc {
         else
 #endif
         {
-          HPDDM::PETScOperator op(ptA->_ksp, m, bs);
+          HPDDM::PETScOperator op(ptA->_ksp, m * bs
+#if PETSC_VERSION_LT(3, 13, 1)
+                                                   , 1
+#endif
+                                                      );
           op.apply(&in->operator( )(0, 0), &out->operator( )(0, 0), in->M( ));
         }
       }
