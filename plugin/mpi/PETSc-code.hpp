@@ -2645,15 +2645,15 @@ namespace PETSc {
           MatDestroy(&B);
         }
         else
-#endif
-        {
-          HPDDM::PETScOperator op(ptA->_ksp, m * bs
+            ffassert(0);
+#else
+        HPDDM::PETScOperator op(ptA->_ksp, m * bs
 #if PETSC_VERSION_LT(3, 13, 1)
-                                                   , 1
+                                                 , 1
 #endif
                                                       );
-          op.apply(&in->operator( )(0, 0), &out->operator( )(0, 0), in->M( ));
-        }
+        op.apply(&in->operator( )(0, 0), &out->operator( )(0, 0), in->M( ));
+#endif
       }
     }
     return 0L;
@@ -3959,6 +3959,13 @@ namespace PETSc {
     KN_<K> D(const_cast<K*>(p->_A->getScaling()), p->_A->getDof());
     return D;
   }
+  long Dmat_n(Dmat* p) {
+    throwassert(p);
+    PetscInt n = 0;
+    if(p->_petsc)
+        MatGetLocalSize(p->_petsc, &n, NULL);
+    return static_cast<long>(n);
+  }
   template<class K, typename std::enable_if<std::is_same<K, HPDDM::upscaled_type<K>>::value>::type* = nullptr>
   static void init() {
     if (std::is_same< PetscInt, int >::value) {
@@ -4440,6 +4447,7 @@ static void Init_PETSc( ) {
   Global.Add("constructor", "(", new PETSc::initCSR< HpSchwarz< PetscScalar >, true >(1, 1, 1));
   Global.Add("MatDestroy", "(", new OneOperator1< long, Dmat* >(PETSc::destroyCSR));
   Add< Dmat* >("D", ".", new OneOperator1< KN_<double>, Dmat* >(PETSc::Dmat_D));
+  Add< Dmat* >("n", ".", new OneOperator1< long, Dmat* >(PETSc::Dmat_n));
   TheOperators->Add("<-", new PETSc::initCSRfromArray< HpSchwarz< PetscScalar > >);
   TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar > >);
   TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar > >(1));
