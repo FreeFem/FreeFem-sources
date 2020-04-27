@@ -112,6 +112,8 @@ FLAGS_CONF_PETSC_REAL = $(COMMON_FLAGS) --with-shared-libraries=0 \
 	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu'
 FLAGS_CONF_PETSC_COMPLEX = $(COMMON_FLAGS) --with-shared-libraries=0 \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' \
+	CXXFLAGS='-fno-stack-protector' \
+	CFLAGS='-fno-stack-protector' \
 	--with-scalar-type=complex \
 	--with-mpi-lib='$(MPI_LIB)' \
 	--with-mpi-include='$(MPI_INC_DIR)' \
