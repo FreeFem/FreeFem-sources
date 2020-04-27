@@ -202,7 +202,7 @@ install-exec-local:: load_compile WHERE_LIBRARY
 	        done ; \
 	fi
 
-ffmaster$(EXEEXT): libff-mmap-semaphore.o ffmaster.c libff-mmap-semaphore.h
+ffmaster$(EXEEXT): libff-mmap-semaphore.o ffmaster.c libff-mmap-semaphore.h WHERE_LIBRARY-download 
 	$(CC) $(CFLAGS) ffmaster.c libff-mmap-semaphore.o -o ffmaster \
 	`awk -f ff-get-dep.awk -v libs="[pthread-google|pthread]" WHERE_LIBRARY-download  WHERE_LIBRARY-config`
 
