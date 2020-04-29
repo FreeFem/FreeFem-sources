@@ -6135,7 +6135,8 @@ MMesh *VTK_LoadT(const string &filename, bool bigEndian, bool cleanmesh, bool re
   if (nbe > 0)
     bff = new B[nbe];
   else
-    ExecError("error in reading vtk file: Not border element");
+    if (!std::is_same< MMesh, Mesh3 >::value) bff=NULL;
+    else ExecError("error in reading vtk file: Not border element");
   B *bbff = bff;
 
   for (unsigned int i = 0; i < numElements; i++) {
