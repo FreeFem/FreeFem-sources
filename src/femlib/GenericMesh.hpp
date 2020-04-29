@@ -1404,9 +1404,50 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
         tt[i].set(vv, iv, K.lab);
         mes+=tt[i].mesure();
     }
-    
+    B *bb=0;
+    if( new_nbe ==0 || rebuildboundary)
+    {
+        if(verbosity) cout << "clean_mesh:  rebuild  boundary mesh from adjacent "<< endl;
+        
+        
+        typedef SortArray<int,B::nv> IB;
+        map<IB,long> adj;
+        int nben =0;
+        for(int k=0; k<nt ; ++k)
+         for (int j = 0; j < T::nea ; j++)
+          {
+            int nn[B::nv];
+            for(int i=0; i<B::nv;++i)
+                nn[i]=&(tt[k][T::nvadj[j][i]])-vv;
+            
+            IB ib(nn);
+              if( adj.find(ib) == adj.end()) // do not exist => new
+              { adj[ib]= k*T::nea+j;
+                  ++nben;}
+              else // exits => internal..
+              { adj[ib]=-1; --nben;}
+          }
+        if(verbosity) cout << " nb of boundary element " << nben << endl;
+         bb=new B[nben];
+        int ii=0;
+        for(typename map<IB,long>::iterator i=adj.begin(); i != adj.end(); ++i )
+        {
+            if( i->second >=0 )
+            {
+                int k =i->second /T::nea, j = i->second %T::nea;
+                int nn[B::nv];
+                for(int i=0; i<B::nv;++i)
+                    nn[i]=&(tt[k][T::nvadj[j][i]])-vv;
+                 bb[ii++].set(vv, nn, 1);
+            }
+        }
+        ffassert(ii== nben);
+        nbe=nben;
+    }
+    else
+    {
     nbe=new_nbe;
-    B *bb=new B[nbe];
+    bb=new B[nbe];
     for(int i=0;i<nbe;i++) {
         int &ie=ind_nbe[i];
         const B &K(b[ie]);
@@ -1420,8 +1461,7 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
         bb[i].set(vv, iv, K.lab);
         mesb+=bb[i].mesure();
     }
- 
-  
+    }
     if(verbosity>2)
         cout << "after clean mesh, nv = " << nv << " nt = " << nt << " nbe = " << nbe << endl;
    

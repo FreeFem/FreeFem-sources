@@ -2927,7 +2927,7 @@ AnyType VTK_WriteMesh_Op::operator( )(Stack stack) const {
 class VTK_LoadMesh3_Op : public E_F0mps {
  public:
   Expression filename;
-  static const int n_name_param = 7;    //
+  static const int n_name_param = 8;    //
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   int arg(int i, Stack stack, int a) const {
@@ -2939,6 +2939,9 @@ class VTK_LoadMesh3_Op : public E_F0mps {
   double arg(int i, Stack stack, double a) const {
     return nargs[i] ? GetAny< double >((*nargs[i])(stack)) : a;
   }
+   KN<KN<double> >* arg(int i, Stack stack,KN<KN<double> >*p) const {
+        return nargs[i] ? GetAny< KN<KN<double> >* >((*nargs[i])(stack)) : p;
+    }
 
  public:
   VTK_LoadMesh3_Op(const basicAC_F0 &args, Expression ffname) : filename(ffname) {
@@ -2956,7 +2959,10 @@ basicAC_F0::name_and_type VTK_LoadMesh3_Op::name_param[] = {
   {"reftet", &typeid(long)},         {"swap", &typeid(bool)},
   {"refface", &typeid(long)},        {"namelabel", &typeid(string)},
   {"cleanmesh", &typeid(bool)},      {"removeduplicate", &typeid(bool)},
-  {"precisvertice", &typeid(double)}};
+  {"precisvertice", &typeid(double)},
+  {"fields", &typeid( KN<KN<double> >*)}
+    
+};
 
 class VTK_LoadMesh3 : public OneOperator {
  public:
@@ -2968,7 +2974,7 @@ class VTK_LoadMesh3 : public OneOperator {
 };
 
 Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool removeduplicate,
-                 double precisvertice) {
+                 double precisvertice,KN<KN<double> >* pfields) {
   // swap = bigEndian or not bigEndian
   // variable freefem++
   int nv, nt = 0, nbe = 0;
@@ -3233,7 +3239,101 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
         break;
     }
   }
+  if(pfields)
+    {
+     if(verbosity>1)   cout << " try  reading POINT_DATA  " << endl;
+        /*
+      POINT_DATA 32436
+      FIELD FieldData 2
+      Velocity 3 32436 float
+      
+      */
+        int nbp=0,nbf=0,err=0;
+        if (fscanf(fp, "%s %d", buffer, &nbp) != 2) {
+            cout << "error in reading vtk files pfields" << endl;
+            err++;
+        }
+        
+        if (strcmp(buffer, "POINT_DATA"))  {
+            cout << "VTK reader can only read POINT_DATA datasets:  not " << buffer<<  endl;
+            err++;
+        }
+        if ((!err) &&(fscanf(fp, "%s %s %d", buffer, buffer2,&nbf) != 3)) {
+                cout << "error in reading vtk files FIELD FieldData" << endl;
+                err++;
+        }
+        
+        if( err) nbf=0;
+        else pfields->resize(nbf);
+        for(int nf=0 ; nf < nbf; nf++)
+            {
+                
+                int m,nv;
+                // read mesh vertices
+                if (fscanf(fp, "%s %d %d %s\n", buffer,&m, &nv, buffer2) != 4) {
+                    cout << "error in reading vtk files " << endl;
+                    err++;
+                    break;
+                }
+                int n = m*nv;
+                if(verbosity) cout << " reading "<< buffer << " "<< m << " " << nv << " "<< buffer2 << endl;
+                int datasize;
+                if (!strncmp(buffer2, "double", 6)) {
+                    datasize = sizeof(double);
+                } else if (!strncmp(buffer2, "float", 5)) {
+                    datasize = sizeof(float);
+                } else {
+                    cout << "VTK reader only accepts float or double datasets" << endl;
+                    err++;
+                    break;
+                }
+                //  read data ..
+                if(err) break;
+                (*pfields)[nf].resize(n);
+                double* pv=&(*pfields)[nf][0];
+                for(int i=0; i<n; ++i)
+                {
+                   if (binary) {
+                     if (datasize == sizeof(float)) {
+                       float f[1];
+                       if (fread(f, sizeof(float), 1, fp) != 1) {
+                           cout << "error in reading  vtk fields float at " << nf << " / " << i << endl;
+                           err++;
+                           break;
+                       }
+                       
+                       if (!bigEndian) {
+                           FreeFEM::SwapBytes((char *)f, sizeof(float), 1);
+                       }
+                         *pv++=*f;
+                     }
+                    else
+                    {
+                       if (fread(pv++, sizeof(double), 1, fp) != 1) {
+                           cout << "error in reading  vtk fields double at " << nf << " / " << i << endl;
+                           err++;
+                           break;
+                       }
+                       
+                       if (!bigEndian) {
+                           FreeFEM::SwapBytes((char *)pv, sizeof(double), 1);
+                       }
 
+                    }
+                   }
+                  else
+                  {
+                  if (fscanf(fp, "%lf", pv++) != 1) {
+                        cout << "error in reading vtk files ascii fields" << nf << " / " << i <<endl;
+                        err++;
+                    }
+                  }
+                    if(err) break;
+                }
+                if(err) break;
+            }
+            if( err ) (*pfields).resize(0);
+    } // end if(pfields)
   fclose(fp);
 
   // 3D versions
@@ -3290,8 +3390,12 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
   delete[] IntCells;
   delete[] firstCell;
   delete[] TypeCells;
-
-  Mesh3 *pTh = new Mesh3(nv, nt, nbe, vff, tff, bff, cleanmesh, removeduplicate, precisvertice);
+/*
+ Mesh3::Mesh3(int nnv, int nnt, int nnbe, Vertex3 *vv, Tet *tt, Triangle3 *bb, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
+ 
+ */
+    
+  Mesh3 *pTh = new Mesh3(nv, nt, nbe, vff, tff, bff, cleanmesh || (nbe==0), removeduplicate, (nbe==0) ,precisvertice);
   return pTh;
 }
 
@@ -3310,8 +3414,9 @@ AnyType VTK_LoadMesh3_Op::operator( )(Stack stack) const {
   bool cleanmesh(arg(4, stack, false));
   bool removeduplicate(arg(5, stack, false));
   double precisvertice(arg(6, stack, 1e-6));
-
-  Mesh3 *Th = VTK_Load3(*pffname, swap, cleanmesh, removeduplicate, precisvertice);
+    KN<KN<double> > * pfields=0;
+    pfields=arg(7, stack,pfields);
+  Mesh3 *Th = VTK_Load3(*pffname, swap, cleanmesh, removeduplicate, precisvertice,pfields);
 
   // A faire fonction pour changer le label
 
