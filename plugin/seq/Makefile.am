@@ -33,7 +33,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX) BernardiRaugel.$(DYLIB_SUFFIX) \
 	medit.$(DYLIB_SUFFIX) \
 	mat_dervieux.$(DYLIB_SUFFIX) lgbmo.$(DYLIB_SUFFIX) mat_psi.$(DYLIB_SUFFIX) \
 	ppm2rnm.$(DYLIB_SUFFIX) DxWriter.$(DYLIB_SUFFIX) \
-	pcm2rnm.$(DYLIB_SUFFIX) $(DYLIB_OTHER_COMPILE) \
+	pcm2rnm.$(DYLIB_SUFFIX) $(DYLIB_OTHER_COMPILE) ioply.$(DYLIB_SUFFIX) \
 	iovtk.$(DYLIB_SUFFIX) gmsh.$(DYLIB_SUFFIX) MetricKuate.$(DYLIB_SUFFIX) \
 	Element_P1dc1.$(DYLIB_SUFFIX) BinaryIO.$(DYLIB_SUFFIX) \
 	isoline.$(DYLIB_SUFFIX) thresholdings.$(DYLIB_SUFFIX) \

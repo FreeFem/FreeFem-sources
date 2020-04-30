@@ -1,5 +1,6 @@
 load "msh3" 
 load "medit"
+load "ioply"
 
 // Parameters
 int nn = 10; // Mesh quality
@@ -21,8 +22,12 @@ medit("buildFromMesh3Splited",Th3splitG);
 medit("buildFromMesh3Initial",ThSsplit);
 
 mesh3 Th3mv = movemesh(Th3,[x+1,y/2,z+y]);
+Th3mv=buildBdMesh(Th3mv);
 meshS Th3mvG = Th3mv.Gamma;
 meshS ThSmv = movemesh(ThS,[x+1,y/2,z+y]);
 
 medit("Th3mvG",Th3mvG);
-medit("ThSmv",ThSmv);
+medit("ThSmv",ThSmv); 
+
+meshS ThS2=plyloadS("plane.ply");
+plot(ThS2);

@@ -97,6 +97,7 @@ seq/gmsh.cpp \
 seq/gsl.cpp \
 seq/ilut.cpp \
 seq/iohdf5.cpp \
+seq/ioply.cpp \
 seq/iovtk.cpp \
 seq/isoline.cpp \
 seq/lapack.cpp \
