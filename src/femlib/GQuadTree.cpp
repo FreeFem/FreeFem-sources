@@ -829,7 +829,7 @@ RESTART:
           else if(nbdejax> 4) eps=1e-8;
           else if(nbdejax> 3) eps=1e-9;
           
-          ffassert(nbdeja<15);
+          ffassert(nbdeja<100);
       }
     
       int kk,n=0,nl[nkv];

@@ -3348,7 +3348,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
   Tet *ttff = tff;
   Triangle3 *bff = new Triangle3[nbe];
   Triangle3 *bbff = bff;
-
+  int   badorient=0;
   for (unsigned int i = 0; i < numElements; i++) {
     int type = TypeCells[i];
     int ivb[3], ivt[4];
@@ -3380,13 +3380,25 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
           ivt[j - firstCell[i]] = IntCells[j];
         }
 
-        (ttff++)->set(vff, ivt, label);
+        (ttff)->set(vff, ivt, label);
+            if(ttff->mesure() < 0) {
+                badorient ++;
+               
+                if( verbosity && badorient <11 )
+                    cout << "   ** " <<  badorient << "  bad Tet "<< (ttff-tff) << " : "
+                    << ivt[0]<< " " <<ivt[1] << " " <<ivt[2]<<" " << ivt[3] << " Vol="<<ttff->mesure()<< endl;
+             (ttff)->set(vff, ivt, label);
+            }
+        ++ttff;
         break;
       default:
         break;
     }
   }
-
+    if( badorient ) {
+        cout << "  iovtk:loadmesh3:  Fatal error some  Tet with bad oriantation (vol <0) :   nb = " <<badorient << endl;
+        ffassert(0);
+    }
   delete[] IntCells;
   delete[] firstCell;
   delete[] TypeCells;
@@ -5480,24 +5492,24 @@ void VTK_WRITE_MESHT(const string &filename, FILE *fp, const MMesh &Th, bool bin
     if (verbosity > 1) printf("writing  elements \n");
     for (int it = 0; it < Th.nt; it++) {
       const T &K(Th.t(it));
-      int iv[(T::nv) + 1];
+      int iv[(T::nv) + 2];
       iv[0] = (T::nv);
       for (int ii = 0; ii < (T::nv); ii++) iv[ii + 1] = Th.operator( )(K[ii]);
-      if (std::is_same< MMesh, MeshS >::value)
+        if (T::nv==3)
         fprintf(fp, "%d %d %d %d\n", iv[0], iv[1], iv[2], iv[3]);
-      else if (std::is_same< MMesh, MeshL >::value)
+      else if (T::nv==2)
         fprintf(fp, "%d %d %d\n", iv[0], iv[1], iv[2]);
     }
     if (surface) {
       if (verbosity > 1) printf("writing border elements \n");
       for (int ibe = 0; ibe < Th.nbe; ibe++) {
         const B &K(Th.be(ibe));
-        int iv[(B::nv) + 1];
+        int iv[(B::nv) + 2];
         iv[0] = (B::nv);
         for (int ii = 0; ii < (B::nv); ii++) iv[ii + 1] = Th.operator( )(K[ii]);
-        if (std::is_same< MMesh, MeshS >::value)
+        if (B::nv==2)
           fprintf(fp, "%d %d %d\n", iv[0], iv[1], iv[2]);
-        else if (std::is_same< MMesh, MeshL >::value)
+        else if (B::nv==1)
           fprintf(fp, "%d %d\n", iv[0], iv[1]);
       }
     }

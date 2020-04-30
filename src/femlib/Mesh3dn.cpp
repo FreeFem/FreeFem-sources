@@ -248,6 +248,7 @@ namespace Fem2D
                 meshS->BuildAdj();
                 meshS->Buildbnormalv();
                 meshS->BuildjElementConteningVertex();
+               // meshS->BuildGTree();
             }
         }
         // else BuildMeshS(ridgeangledetection);
@@ -388,6 +389,7 @@ namespace Fem2D
             BuildAdj();
             Buildbnormalv();
             BuildjElementConteningVertex();
+            BuildGTree();
         }
         
         if(verbosity>2)
@@ -413,6 +415,7 @@ namespace Fem2D
             BuildAdj();
             Buildbnormalv();
             BuildjElementConteningVertex();
+            BuildGTree();
         }
         
         if(verbosity>1)
@@ -1450,6 +1453,7 @@ namespace Fem2D
             BuildAdj();
             Buildbnormalv();
             BuildjElementConteningVertex();
+            BuildGTree();
         }
         //  end add
         if(verbosity>1)
