@@ -1172,7 +1172,7 @@ macro buildMatMinimalist(Th, A, P) {
 }// EOM
 ENDIFMACRO
 
-macro transfer(ThName, Pk, u, ThNew, PkNew, uNew)
+macro transferBase(ThName, Pk, uA, ThNew, PkNew, uANew, P)
 IFMACRO(privateDmesh#ThName)
 {
 IFMACRO(!ThName#Comm)
@@ -1185,15 +1185,28 @@ IFMACRO(!def)
 NewMacro def(i)i EndMacro
 ENDIFMACRO
 if(mpiSize(ThName#Comm) == 1) {
-    def(uNew) = def(u);
+IFMACRO(!transfer#P)
+    def(uANew) = def(uA);
+ENDIFMACRO
+IFMACRO(transfer#P)
+    fespace VhLocalOld(ThName, Pk);
+    fespace VhLocalNew(ThNew, PkNew);
+    matrix loc = interpolate(VhLocalNew, VhLocalOld);
+    loc.CSR;
+    cout << uA.n << endl;
+    cout << uANew.n << endl;
+    constructor(P, uANew, uA, loc);
+ENDIFMACRO
 }
 else {
     int backupSM = searchMethod;
     searchMethod = 0;
     fespace VhLocalOld(ThName, Pk);
-    assert(u[].n == VhLocalOld.ndof);
     fespace VhLocalNew(ThNew, PkNew);
-    assert(uNew[].n == VhLocalNew.ndof);
+IFMACRO(!transfer#P)
+    assert(uA[].n == VhLocalOld.ndof);
+    assert(uANew[].n == VhLocalNew.ndof);
+ENDIFMACRO
     real[int] bb(4 * dimension);
     {
         real[int] tmp(2 * dimension);
@@ -1270,9 +1283,16 @@ ENDIFMACRO
         }
     }
     real[int] D, backupRegion(ThName.nt);
-    createPartition(ThName, D, Pk)
     VhLocalOld def(scaledU);
-    scaledU[] = u[];
+IFMACRO(!transfer#P)
+    createPartition(ThName, D, Pk)
+    scaledU[] = uA[];
+ENDIFMACRO
+IFMACRO(transfer#P)
+    globalNumbering(uA, scaledU[]);
+    D.resize(scaledU[].n);
+    D = uA.D;
+ENDIFMACRO
     scaledU[] .*= D;
     fespace PhPart(ThName, P0);
     {
@@ -1353,12 +1373,22 @@ ENDIFMACRO
             if(recvTh[index].nt) {
                 fespace VhRestriction(recvTh[index], Pk);
                 matrix R = interpolate(VhRestriction, VhExchange);
-                uExchange[] += R' * exchangeU[index];
+                if(R.nnz != R.n) {
+                    R.thresholding(1.0e-2);
+                    assert(R.nnz == R.n);
+                }
+                for[i, j, v : R] uExchange[][j] += exchangeU[index][i];
             }
         }
     }
     searchMethod = backupSM;
+IFMACRO(!transfer#P)
     def(uNew) = def(uExchange);
+ENDIFMACRO
+IFMACRO(transfer#P)
+    matrix loc = interpolate(VhLocalNew, VhExchange);
+    constructor(P, uANew, uA, loc, numbering = uExchange[]);
+ENDIFMACRO
     ThName = change(ThName, fregion = backupRegion[nuTriangle]);
     mpiWaitAll(rqSendTh);
     mpiWaitAll(rqSendU);
@@ -1370,6 +1400,17 @@ if(verbosity > 0) {
 }
 }
 ENDIFMACRO
+// EOM
+
+macro transferMat(ThName, Pk, A, ThNew, PkNew, ANew, P) {
+NewMacro transfer#P()P EndMacro
+transferBase(ThName, Pk, A, ThNew, PkNew, ANew, P)
+}
+// EOM
+
+macro transfer(ThName, Pk, u, ThNew, PkNew, uNew) {
+transferBase(ThName, Pk, u, ThNew, PkNew, uNew, 1)
+}
 // EOM
 
 macro createParMmgCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators) {

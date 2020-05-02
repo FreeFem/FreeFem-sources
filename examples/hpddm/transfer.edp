@@ -16,13 +16,12 @@ int[int] fforder = [1];
     include "macro_ddm.idp"             // additional DDM functions
     meshN ThNew, Th = square(getARGV("-global_2d", 20), getARGV("-global_2d", 20)); // global mesh
     {
-        real c = 6.25;
-        int N  = 80;
-        border aa(t=0,1) { x=t;   y=0;   };
-        border bb(t=0,1) { x=1;   y=t;   };
-        border cc(t=0,1) { x=1-t; y=1;   };
-        border dd(t=0,1) { x=0;   y=1-t; };
-        ThNew = buildmesh(aa(N)+bb(N)+cc(N)+dd(N));
+        int N = 80;
+        border a(t=0,1) { x=t;   y=0;   };
+        border b(t=0,1) { x=1;   y=t;   };
+        border c(t=0,1) { x=1-t; y=1;   };
+        border d(t=0,1) { x=0;   y=1-t; };
+        ThNew = buildmesh(a(N)+b(N)+c(N)+d(N));
     }
     buildDmesh(Th)
     buildDmesh(ThNew)
