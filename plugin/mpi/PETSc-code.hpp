@@ -2761,7 +2761,7 @@ namespace PETSc {
               KN<PetscInt> col(mA->m);
               ffassert(mA->m == numbering->N());
               for(int i = 0; i < col.N(); ++i)
-                  col[i] = std::lround(numbering->operator[](i));
+                  col[i] = std::lround(std::real(numbering->operator[](i)));
               free = HPDDM::template Subdomain< PetscScalar >::distributedCSR(
                 ptA->_num, ptA->_first, ptA->_last, ia, ja, a, &dA, col.operator PetscInt*());
           }
