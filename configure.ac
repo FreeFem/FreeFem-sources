@@ -2145,6 +2145,12 @@ else
 TOOL_DISABLE(MMAP,ff-mmap-semaphore.$DYLIB_SUFFIX,,nodownload)
 fi
 
+ff_pthread_google=$ff_pthread
+if test "$enable_libpthread_google_download" = "yes" ; then
+    ff_pthread_google="-I${curdir}/3rdparty/include -L${curdir}/3rdparty/lib -lpthread-google"
+fi
+AC_SUBST(LIB_PTHREAD_GOOGLE,$ff_pthread_google)
+
 # FFCS - MUMPS_seq has a different Win32 compiler setup from FFCS, so we need to add some extra parameters
 
 if test "$OS" = Windows_NT

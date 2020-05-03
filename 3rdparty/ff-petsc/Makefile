@@ -74,8 +74,8 @@ PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
 endif
 PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-slepc
 ifeq ($(WIN32DLLTARGET),)
-PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-hpddm --download-hpddm-commit=29388f9
-PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-hpddm --download-hpddm-commit=29388f9
+PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-hpddm --download-hpddm-commit=90c799d
+PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-hpddm --download-hpddm-commit=90c799d
 endif
 endif
 ifeq ($(FF_generic_petsc), yes)
@@ -112,6 +112,8 @@ FLAGS_CONF_PETSC_REAL = $(COMMON_FLAGS) --with-shared-libraries=0 \
 	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu'
 FLAGS_CONF_PETSC_COMPLEX = $(COMMON_FLAGS) --with-shared-libraries=0 \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' \
+	CXXFLAGS='-fno-stack-protector' \
+	CFLAGS='-fno-stack-protector' \
 	--with-scalar-type=complex \
 	--with-mpi-lib='$(MPI_LIB)' \
 	--with-mpi-include='$(MPI_INC_DIR)' \

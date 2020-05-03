@@ -27,15 +27,19 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- compile ffmaster / ffslave example under windows (Thanks to johann@ifado.de)
-- add in buildmesh function the boolean  parameter `spiltpbedge=`, to split in to edge with two boundary vertices.
+- compile ffmaster / ffslave example under windows (thanks to johann@ifado.de)
+- Boolean parameter `spiltpbedge` in `buildmesh` to split in to edge with two boundary vertices
 - interface to PETSc DMPlex, see `examples/hpddm/DMPlex-PETSc.edp`
 - function `MatDestroy`
+- function `MatPtAP` and `transferMat` for parallel interpolation between non-matching grids, see `examples/hpddm/PtAP-2d-PETSc.edp`
 
 ### Changed
 - moved Htool to its new GitHub location
 
 ### Deprecated
+
+### Removed
+- `augmentation` routine from the PETSc plugin
 
 ### Fixed
 - missing METIS library when using SuiteSparse compiled by PETSc

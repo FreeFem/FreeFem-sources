@@ -227,7 +227,7 @@ namespace Fem2D
         
         if (cleanmesh) {
             if(verbosity>3)
-                cout << "before clean mesh3, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+                cout << "before clean mesh3, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << " " << rebuildboundary <<endl;
             clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
             if(verbosity>3)
                 cout << "after clean mesh3, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
@@ -248,6 +248,7 @@ namespace Fem2D
                 meshS->BuildAdj();
                 meshS->Buildbnormalv();
                 meshS->BuildjElementConteningVertex();
+               // meshS->BuildGTree();
             }
         }
         // else BuildMeshS(ridgeangledetection);
@@ -388,6 +389,7 @@ namespace Fem2D
             BuildAdj();
             Buildbnormalv();
             BuildjElementConteningVertex();
+            BuildGTree();
         }
         
         if(verbosity>2)
@@ -413,6 +415,7 @@ namespace Fem2D
             BuildAdj();
             Buildbnormalv();
             BuildjElementConteningVertex();
+            BuildGTree();
         }
         
         if(verbosity>1)
@@ -1450,6 +1453,7 @@ namespace Fem2D
             BuildAdj();
             Buildbnormalv();
             BuildjElementConteningVertex();
+            BuildGTree();
         }
         //  end add
         if(verbosity>1)

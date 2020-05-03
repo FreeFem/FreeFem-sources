@@ -32,6 +32,7 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [helmholtz-3d-surf-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-3d-surf-PETSc-complex.edp)             | BEM with hierarchical matrices from Htool on surfaces                         |
 | [helmholtz-3d-line-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-3d-line-PETSc-complex.edp)             | BEM with hierarchical matrices from Htool on lines                            |
 | [helmholtz-coupled-2d-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-coupled-2d-PETSc-complex.edp)       | FEM coupled with BEM in a MatNest using a block preconditioner (fieldsplit)   |
+| [PtAP-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/PtAP-2d-PETSc.edp)                                                 | Parallel interpolation on non-matching grids + interface, P' A P operation    |
 
 ### Nonlinear problems
 | Filename                                                                                                                                                          | Comments (preconditioners, numerical schemes)                                 |

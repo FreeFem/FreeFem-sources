@@ -1035,8 +1035,9 @@ Mesh3 *GMSH_Load3(const string &filename, bool cleanmesh, bool removeduplicate,
   if (nt == 0) {
     cout << " Return type false, your mesh is MeshS type, use gmshloadS function" << endl;
     ffassert(0);
+    
   } else {
-    Mesh3 *Th3 = new Mesh3(nv, nt, nbe, vff, tff, bff, cleanmesh, removeduplicate, precisvertice);
+    Mesh3 *Th3 = new Mesh3(nv, nt, nbe, vff, tff, bff, cleanmesh|| (nbe==0), removeduplicate,(nbe==0), precisvertice);
     return Th3;
   }
 }
