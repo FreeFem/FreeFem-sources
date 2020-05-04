@@ -2639,7 +2639,7 @@ namespace PETSc {
           KSPGetType(ptA->_ksp, &type);
           PetscStrcmp(type, KSPHPDDM, &isType);
         }
-#if PETSC_VERSION_GT(3, 13, 0) && defined(PETSC_HAVE_HPDDM)
+#if PETSC_VERSION_GT(3, 13, 1) && defined(PETSC_HAVE_HPDDM)
         if(isType) {
           MatGetSize(ptA->_petsc, &M, NULL);
           Mat B, C;
@@ -2663,7 +2663,7 @@ namespace PETSc {
             ffassert(0);
 #else
         HPDDM::PETScOperator op(ptA->_ksp, m * bs
-#if PETSC_VERSION_LT(3, 13, 1)
+#if PETSC_VERSION_LT(3, 13, 2)
                                                  , 1
 #endif
                                                       );

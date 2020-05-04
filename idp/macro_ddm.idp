@@ -1383,7 +1383,7 @@ ENDIFMACRO
     }
     searchMethod = backupSM;
 IFMACRO(!transfer#P)
-    def(uNew) = def(uExchange);
+    def(uANew) = def(uExchange);
 ENDIFMACRO
 IFMACRO(transfer#P)
     matrix loc = interpolate(VhLocalNew, VhExchange);
