@@ -298,27 +298,46 @@ namespace Fem2D {
 
   void TypeOfFE_P3_3d::set(const Mesh &Th, const Element &K, InterpolationMatrix< RdHat > &M,
                            int ocoef, int odf, int *nump) const {
+      //  faux nump don la numerotation des p -> local
+      // ne marche que le cas scalaire ??? FH...
+      /*
+       for (int k=0;k<M.ncoef;++k)
+       vdf[M.dofe[k]] += M.coef[k]*vpt(M.p[k],M.comp[k]);
+       */
+    int Np=M.p.N();
     int n = this->NbDoF;
     int *p = M.p;
-
-    for (int i = 0; i < n; ++i) {
-      M.p[i] = i;
-    }
+    
+  //  for (int i = 0; i < n; ++i) {
+  //    M.p[i] = i;
+  //  }
 
     if (verbosity > 9) {
-      cout << " P3  set:";
+        cout << " P3  set:" << odf << " : ";
     }
 
-    int dof = 4;
+    int dof = 4+odf;
 
     for (int e = 0; e < 6; ++e) {
       int oe = K.EdgeOrientation(e);
-      if (oe < 0) {
-        swap(p[dof], p[dof + 1]);
+        int i1=dof;
+        int i2=dof+1;
+        //cout << e <<"  "<< i1 << " " << i2 << "  , " << oe <<"  p: " <<  p[i1] << " " <<  p[i2] <<" " << Np << endl;
+        ffassert( i1>=0 && i2 >=0);
+        ffassert( i1<Np && i2 <Np );
+        
+      if ((oe < 0) && (p[i1] < p[i2])) {
+        swap(p[i1], p[i2]);
+      } else if ((oe > 0) && (p[i1] > p[i2])) {
+          swap(p[i1], p[i2]);
       }
 
       dof += 2;
     }
+      if (verbosity > 99) {
+          cout << " " << M.p << endl;  ;
+      }
+
   }
 
   void TypeOfFE_P3_3d::FB(const What_d whatd, const Mesh &Th, const Mesh3::Element &K,

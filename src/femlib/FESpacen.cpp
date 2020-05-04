@@ -494,7 +494,12 @@ void GTypeOfFESum<Mesh>::Build()
       odof += ti.NbDoF; 
     }
     if(verbosity>100)
-    cout << " **GTypeOfFESum<Mesh>::Build() " <<this->pInterpolation <<endl;
+    {
+        cout << " **GTypeOfFESum<Mesh>::Build() p:" <<this->pInterpolation <<endl;
+        cout << " ** c     :" <<this->cInterpolation <<endl;
+        cout << " ** dof   :" <<this->dofInterpolation <<endl;
+        cout << " **G coef :" <<this->coefInterpolation <<endl;
+    }
   assert(c==this->N);
 }
 
@@ -514,7 +519,12 @@ template<class Mesh> void GTypeOfFESum<Mesh>::set(const Mesh & Th,const Element 
 	       op += ti.NbPtforInterpolation;
 	       
 	   }
-         if( verbosity > 100) cout << " GTypeOfFESum set "<< this->coefInterpolation << endl;
+         if( verbosity > 100)
+         {
+             cout << " GTypeOfFESum set "<< this->coefInterpolation << endl;
+             cout << " GTypeOfFESum set M.p "<< M.p << endl;
+             cout << " \t numPtInterpolation:"<< this->numPtInterpolation << endl;
+         }
      }
      
 template<class MMesh> 
