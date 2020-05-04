@@ -111,15 +111,16 @@ namespace Fem2D {
   void TypeOfFE_P2_bulle3_3d::set(const Mesh &Th, const Element &K, InterpolationMatrix< RdHat > &M,
                                   int ocoef, int odf, int *nump) const {
     int n = this->NbDoF;
-    int *p = M.p;
+    int *p = M.p+odf;// correction FH mai 2020 ...
 
     for (int i = 0; i < n; ++i) {
       M.p[i] = i;
     }
-
+      
+    ffassert(M.p.N() >= odf+n);
     int k = 10;
     if (verbosity > 9) {
-      cout << " P2 3 bulle set:";
+        cout << " P2 3 bulle set: "<< odf << endl; ;
     }
 
     for (int ff = 0; ff < Element::nf; ff++, k += 3) {

@@ -470,8 +470,11 @@ public:
       M.set( (const GFElement &) *this); 
     
     for (int k=0;k<M.ncoef;++k)
-      vdf[M.dofe[k]] += M.coef[k]*vpt(M.p[k],M.comp[k]);            	
-    
+    {
+      vdf[M.dofe[k]] += M.coef[k]*vpt(M.p[k],M.comp[k]);
+      if(verbosity>99) cout << " ...    " <<  vdf[M.dofe[k]] << " " << k <<" " <<M.dofe[k] << " +=  " <<  M.coef[k] << " " <<  M.p[k] << " " << M.comp[k] <<" " << vpt(M.p[k],M.comp[k]) << endl;
+
+    }
     return  vdf;     
   }
   
