@@ -6,7 +6,7 @@ IFMACRO (!pr#myA)
 func preffe#K[int] pr#A(preffe#K[int] &u)
 {
   /* Matrix vector product with the global matrix */
-  preffe#K[int] res(u.n);
+  preffe#K[int] res(pr#isrect ? pr#prfe2#Vhi.ndof : u.n);
   if (preffe#prmesh#isincomm) {
     preffe#prmesh#tic(pr#tmvi)
     if (!bpara)
@@ -26,17 +26,45 @@ func preffe#K[int] pr#A(preffe#K[int] &u)
       IFMACRO(!pr#bem)
       if (preffe#prmesh#overlap > 0) {
         res = pr#aRd[mpiRank(preffe#prmesh#commddm)]*u;
-        pr#prfe#update(res,true);
+        pr#prfe2#update(res,true);
       }
       else {
         res = pr#matN*u;
-        pr#prfe#update(res,false);
+        pr#prfe2#update(res,false);
       }
       ENDIFMACRO
     }
-    /*res = B*u;*/
     preffe#prmesh#toc(pr#tmvi,"",pr#tmv)
   }
+  return res;
+}
+
+func preffe#K[int] pr#AT(preffe#K[int] &u)
+{
+  /* Matrix vector product with the transpose of the global matrix */
+  preffe#K[int] res(pr#isrect ? pr#prfe#Vhi.ndof : u.n);
+  IFMACRO(!pr#bem)
+  if (preffe#prmesh#isincomm) {
+    preffe#prmesh#tic(pr#tmvi)
+    if (!bpara)
+    res = pr#Aglobal'*u;
+    else if (!preffe#prmesh#excluded){
+      if (preffe#prmesh#overlap > 0) {
+        res = pr#aRd[mpiRank(preffe#prmesh#commddm)]'*u;
+        pr#prfe#update(res,true);
+      }
+      else {
+        res = pr#matN'*u;
+        pr#prfe#update(res,false);
+      }
+    }
+    preffe#prmesh#toc(pr#tmvi,"",pr#tmv)
+  }
+  ENDIFMACRO
+  IFMACRO(pr#bem,1)
+  if (mpirank == 0) cout << "TODO" << endl;
+  assert(0);
+  ENDIFMACRO
   return res;
 }
 ENDIFMACRO
@@ -503,6 +531,10 @@ func pr#K[int] pr#PRECTEST(pr#K[int] &l)
 }
 */
 
+IFMACRO (pr#myPREC)
+pr#myPREC
+ENDIFMACRO
+IFMACRO (!pr#myPREC)
 func preffe#K[int] pr#PREC(preffe#K[int] &l)
 {
 	if (pr#corr == "test")
@@ -512,6 +544,7 @@ func preffe#K[int] pr#PREC(preffe#K[int] &l)
     else
       return pr#PREC2level(l);
 }
+ENDIFMACRO
 
 func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, int maxit, string sprec)
 {	

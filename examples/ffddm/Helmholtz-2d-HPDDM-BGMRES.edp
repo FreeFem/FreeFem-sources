@@ -86,8 +86,6 @@ x0 = 0;
 
 if (mpirank == 0) cout << "Pseudo-Block GMRES :" << endl;
 
-set(HhpddmOP,sparams="-hpddm_gmres_restart 200");
-
 bu = HfGMRES(x0, brhs, 1.e-6, 200, "right");
 
 Hwritesummary

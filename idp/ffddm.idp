@@ -63,7 +63,7 @@ NewMacro pr#setupprecondinit()1 EndMacro
 ENDIFMACRO
 // EOM
 
-macro ffddmsetupOperatorinit(pr,preffe)
+macro ffddmsetupOperatorinit(pr,preffe,preffe2)
 IFMACRO(!pr#setupoperatorinit)
 
 IFMACRO(pr#bem,1)
@@ -76,6 +76,8 @@ ENDIFMACRO
 NewMacro pr#localmacroaug preffe#prmesh#buildAug EndMacro
 
 NewMacro pr#prfe()preffe EndMacro
+NewMacro pr#prfe2()preffe2 EndMacro
+int pr#isrect = Stringification(preffe) != Stringification(preffe2);
 
 NewMacro pr#fromVhi(ui,VhName,res)
 if (preffe#prmesh#isincomm)
@@ -285,16 +287,16 @@ ENDIFMACRO
 
 macro ffddmsetupOperatorBeminit(pr,preffe)
 NewMacro pr#bem()1 EndMacro
-ffddmsetupOperatorinit(pr,preffe)
+ffddmsetupOperatorinit(pr,preffe,preffe)
 // EOM
 
 macro ffddmsetupinit(pr,preffe)
-ffddmsetupOperatorinit(pr,preffe)
+ffddmsetupOperatorinit(pr,preffe,preffe)
 // EOM
 
-macro ffddmsetupOperator(pr,preffe,Varf)
+macro ffddmsetupOperatorRect(pr,preffe,preffe2,Varf)
 
-ffddmsetupOperatorinit(pr,preffe)
+ffddmsetupOperatorinit(pr,preffe,preffe2)
 
 if (preffe#prmesh#isincomm)
 {	
@@ -310,7 +312,7 @@ if (preffe#prmesh#isincomm)
 	IFMACRO(!pr#bem)
   if (pr#bdirect || bseq) {
     Varf(vaglobal,preffe#prmesh#Thglob,preffe#Vhglob)
-    pr#Aglobal = vaglobal(preffe#Vhglob,preffe#Vhglob,sym=vsym,tgv=vtgvelim);
+    pr#Aglobal = vaglobal(preffe#Vhglob,preffe2#Vhglob,sym=vsym*(!pr#isrect),tgv=vtgvelim);
   }
   
   preffe#K[int] rhsFull(1), rhs(1);
@@ -335,9 +337,6 @@ if (preffe#prmesh#isincomm)
     matrix preffe#Auginterp = [Ic,renum,Kc];
     preffe#Auginterp.resize(preffe#Vhi.ndof, preffe#AugVhi.ndof);
     ENDIFMACRO
-    
-    rhsFull.resize(preffe#AugVhi.ndof);
-    rhs.resize(preffe#Vhi.ndof);    
 
     if (bpara)
     {
@@ -345,11 +344,30 @@ if (preffe#prmesh#isincomm)
 
         Varf(vPb, preffe#prmesh#AugThi, preffe#AugVhi)
 
-        if (preffe#prmesh#inexactCSsplit > 1)
-          pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi,sym=vsym,tgv=vtgvelim);
-        else
-          pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi,sym=vsym,tgv=vtgv);
-        renumbering(pr#aRd[i], preffe#Auginterp, rhsFull, rhs, eps=-1);
+        if (!pr#isrect) {
+          if (preffe#prmesh#inexactCSsplit > 1)
+            pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi,sym=vsym,tgv=vtgvelim);
+          else
+            pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi,sym=vsym,tgv=vtgv);
+          renumbering(pr#aRd[i], preffe#Auginterp, eps=-1);
+        }
+        else {
+          matrix<preffe#K> Auginterp2;
+          fespace AugVhi2(preffe2#prmesh#AugThi, preffe2#fPk);
+          int[int] n2o = (0:preffe2#prmesh#Thi.nt-1);
+          int[int] renum = restrict(preffe2#Vhi, AugVhi2,n2o);
+          int[int] Ic = (0:preffe2#Vhi.ndof-1);
+          preffe#K[int] Kc(preffe2#Vhi.ndof);
+          Kc = 1;
+          Auginterp2 = [Ic,renum,Kc];
+          Auginterp2.resize(preffe2#Vhi.ndof, AugVhi2.ndof);
+          matrix<preffe#K> Auginterp1 = preffe#Auginterp;
+
+          pr#aRd[i] = vPb(preffe#AugVhi, AugVhi2,sym=0,tgv=vtgv);
+
+          matrix<preffe#K> tmp = pr#aRd[i]*Auginterp1';
+          pr#aRd[i] = Auginterp2*tmp;
+        }
 
         IFMACRO(pr#withhpddm)
         changeOperator(pr#hpddmOP,pr#aRd[mpiRank(preffe#prmesh#commddm)]);
@@ -367,7 +385,7 @@ if (preffe#prmesh#isincomm)
       }
       else {
         Varf(vN,preffe#prmesh#Thi,preffe#Vhi)
-        pr#matN = vN(preffe#Vhi,preffe#Vhi,sym=vsym,tgv=vtgv);
+        pr#matN = vN(preffe#Vhi,preffe2#Vhi,sym=vsym*(!pr#isrect),tgv=vtgv);
       }
     }
     
@@ -378,6 +396,10 @@ if (preffe#prmesh#isincomm)
 
   preffe#prmesh#toc(pr#tfactoi,"",pr#tfacto)
 }
+//EOM
+
+macro ffddmsetupOperator(pr,preffe,Varf)
+ffddmsetupOperatorRect(pr,preffe,preffe,Varf)
 //EOM
 
 macro ffddmsetupOperatorBem(pr,preffe,Varf)
