@@ -1658,7 +1658,9 @@ then
 	fi
     fi
     # If all else fails, download!
-    if test "$ff_arpack_ok" = no -a "$enable_download" = yes -o "$enable_download_arpack" = yes  -a "$enable_fortran" != no
+    if "$enable_fortran" != no
+    then
+    if test "$ff_arpack_ok" = no -a "$enable_download" = yes -o "$enable_download_arpack" = yes
     then
 	ff_arpack_download=yes
 	AC_MSG_NOTICE(using downloaded Arpack)
@@ -1681,6 +1683,7 @@ then
 
 	ff_arpack_libs="${curdir}/3rdparty/lib/libarpack.a $ff_lapack_lib"
 	ff_arpack_ok=yes
+    fi
     fi
 fi
 if test  "$ff_arpack_ok" != yes

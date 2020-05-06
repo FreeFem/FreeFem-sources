@@ -37,11 +37,9 @@ PETSC_OPENBLAS = --with-blaslapack-include='$(shell echo $(BLASINC) | sed "s/-I/
 		--with-blaslapack-lib='$(BLAS_LAPACK_LIBS)'
 PETSC_OPENBLAS_C = $(PETSC_OPENBLAS)
 endif
-PETSC_DOWNLOAD_C := --with-scalapack-dir=$(DIR_INSTALL_REAL) \
-		--with-metis-dir=$(DIR_INSTALL_REAL) \
+PETSC_DOWNLOAD_C := --with-metis-dir=$(DIR_INSTALL_REAL) \
 		--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
 		--with-suitesparse-include='$(SUITESPARSE_INCLUDE)' --with-suitesparse-lib='$(SUITESPARSE_LIB)' \
-		--with-mumps-dir=$(DIR_INSTALL_REAL) \
 		--with-parmetis-dir=$(DIR_INSTALL_REAL) \
 		--with-tetgen-dir=$(DIR_INSTALL_REAL)
 ifeq ($(PETSC_PKG),yes)
@@ -65,8 +63,8 @@ PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-hpddm=$(pkg_dir)/hpddm.tar.gz
 PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-hpddm=$(pkg_dir)/hpddm.tar.gz
 endif
 else
-PETSC_DOWNLOAD := --download-scalapack --download-metis --download-ptscotch \
-		--download-mumps --download-hypre --download-parmetis \
+PETSC_DOWNLOAD := --download-metis --download-ptscotch \
+		--download-hypre --download-parmetis \
 		--download-superlu --download-suitesparse --download-tetgen \
 		--download-slepc
 ifeq ($(FFCMAKE),no)
@@ -86,14 +84,21 @@ endif
 COMMON_FLAGS := --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-cxx-dialect=C++11 --with-ssl=0 --with-x=0 --with-fortran-bindings=0
 ifeq ($(WIN32DLLTARGET),)
 ##   Not on windows....
-FLAGS_CONF_PETSC_REAL = $(COMMON_FLAGS) --with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
+FLAGS_CONF_PETSC_REAL = $(COMMON_FLAGS) --with-cc='$(MPICC)' --with-cxx='$(MPICXX)' \
 		--with-scalar-type=real \
 		$(PETSC_OPENBLAS) \
 		$(PETSC_DOWNLOAD)
-FLAGS_CONF_PETSC_COMPLEX = $(COMMON_FLAGS) --with-cc='$(MPICC)' --with-cxx='$(MPICXX)' --with-fc='$(MPIFC)' \
+FLAGS_CONF_PETSC_COMPLEX = $(COMMON_FLAGS) --with-cc='$(MPICC)' --with-cxx='$(MPICXX)' \
 		--with-scalar-type=complex \
 		$(PETSC_OPENBLAS_C) \
 		$(PETSC_DOWNLOAD_C)
+ifneq ($(FC),)
+FLAGS_CONF_PETSC_REAL += --with-fc='$(MPIFC)' --download-scalapack --download-mumps
+FLAGS_CONF_PETSC_COMPLEX += --with-fc='$(MPIFC)' --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL)
+else
+FLAGS_CONF_PETSC_REAL += --with-fc=0
+FLAGS_CONF_PETSC_COMPLEX += --with-fc=0
+endif
 else
 ##   On windows....
 FLAGS_CONF_PETSC_REAL = $(COMMON_FLAGS) --with-shared-libraries=0 \
@@ -120,6 +125,13 @@ FLAGS_CONF_PETSC_COMPLEX = $(COMMON_FLAGS) --with-shared-libraries=0 \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
 	$(PETSC_OPENBLAS_C) \
 	$(PETSC_DOWNLOAD_C)
+ifneq ($(FC),)
+FLAGS_CONF_PETSC_REAL += --with-fc='$(FC)' --download-scalapack --download-mumps
+FLAGS_CONF_PETSC_COMPLEX += --with-fc='$(FC)' --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL)
+else
+FLAGS_CONF_PETSC_REAL += --with-fc=0
+FLAGS_CONF_PETSC_COMPLEX += --with-fc=0
+endif
 endif
 
 all-local:
@@ -134,8 +146,6 @@ all-local:
 	@echo "	sudo mkdir $(DESTDIR)$(FF_prefix_petsc)"
 	@echo "	sudo chown -R $(LOGNAME) $(DESTDIR)$(FF_prefix_petsc)"
 	@echo "	make petsc-slepc "
-# Downloading and compiling mumps
-# -------------------------------
 
 DIRPKG=../pkg
 VERSION=3.13.0
