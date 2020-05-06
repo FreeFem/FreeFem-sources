@@ -1658,7 +1658,7 @@ then
 	fi
     fi
     # If all else fails, download!
-    if "$enable_fortran" != no
+    if test "$enable_fortran" != no -o -z "$enable_fortran"
     then
     if test "$ff_arpack_ok" = no -a "$enable_download" = yes -o "$enable_download_arpack" = yes
     then
