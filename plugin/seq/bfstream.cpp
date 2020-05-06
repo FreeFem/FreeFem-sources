@@ -149,7 +149,7 @@ void initK( ) {
   typedef Stream_b< ostream > OB;
   typedef Stream_b< istream > IB;
   Add< IB >("(", "", new OneOperator2_< istream *, IB, K * >(Read));
-  Add< OB >("(", "", new OneOperator2_< ostream *, OB, K * >(Write));
+  Add< OB >("(", "", new OneOperator2_< ostream *, OB, K * >(10,Write));
   Add< OB >("(", "", new OneOperator2_< ostream *, OB, K >(Write));
   Add< IB >("(", "", new OneOperator2_< istream *, IB, KN< K > * >(Read));
   Add< OB >("(", "", new OneOperator2_< ostream *, OB, KN< K > * >(Write));
