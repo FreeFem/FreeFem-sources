@@ -2637,7 +2637,11 @@ namespace PETSc {
         else {
           KSPType type;
           KSPGetType(ptA->_ksp, &type);
+#if defined(KSPHPDDM)
           PetscStrcmp(type, KSPHPDDM, &isType);
+#else
+          isType = PETSC_FALSE;
+#endif
         }
 #if PETSC_VERSION_GT(3, 13, 1) && defined(PETSC_HAVE_HPDDM)
         if(isType) {
@@ -4111,8 +4115,13 @@ namespace PETSc {
                   PetscSectionSetDof(rootSection, c, 1);
               PetscSectionSetUp(rootSection);
               PetscSectionCopy(rootSection, leafSection);
+#if PETSC_VERSION_GE(3, 12, 0)
               DMSetLocalSection(pA->_dm, rootSection);
               DMSetLocalSection(pA->_dm, leafSection);
+#else
+              DMLocalSection(pA->_dm, rootSection);
+              DMLocalSection(pA->_dm, leafSection);
+#endif
           }
           Vec ranks, local;
           DMPlexCreateRankField(pA->_dm, &ranks);
