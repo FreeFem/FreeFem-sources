@@ -193,10 +193,10 @@ download('htool','https://github.com/htool-ddm/htool/archive/0ba76eaca05217fceab
 		'1fc76ca089bb76f668a935d0d3678bf9');
 
 	
-download('hpddm','https://github.com/hpddm/hpddm/archive/1ff6b2325bc033d0371805078394c47a7fc694a2.zip',
+download('hpddm','https://github.com/hpddm/hpddm/archive/26c64bfc9018d40e98fe1df232c1240853ad3ceb.zip',
 	'https://github.com/hpddm',
 	'hpddm.zip',
-	'241d7b108de17cf85854cf22f0673fe1');
+	'6d042c90b33de296c2ad490ec4dbdb14');
 
 download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/c608875aca175b3bb424c50a9c13131aa7e2b257.zip',
 	'https://github.com/PierreMarchand20/BemTool',
