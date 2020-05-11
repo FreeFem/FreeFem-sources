@@ -2134,6 +2134,12 @@ TOOL_DISABLE(scalapack,"MUMPS.$DYLIB_SUFFIX MUMPS_mpi.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps,"MUMPS.$DYLIB_SUFFIX MUMPS_mpi.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps_seq,"MUMPS_seq.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX",mumps-seq)
 TOOL_DISABLE(nlopt,ff-NLopt.$DYLIB_SUFFIX)
+if test "$enable_fortran" != no -o -z "$enable_fortran"; then
+    AC_SUBST([TOOL_DYLIB_ffnewuoa],ffnewuoa.$DYLIB_SUFFIX)
+else
+    AC_SUBST([TOOL_DYLIB_ffnewuoa],"")
+    ff_uncompile_plugin+=" ffnewuoa"
+fi
 
 TOOL_DISABLE(scotch,scotch.$DYLIB_SUFFIX)
 TOOL_DISABLE(superlu,SuperLu.$DYLIB_SUFFIX)

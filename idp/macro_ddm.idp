@@ -1192,9 +1192,6 @@ IFMACRO(transfer#P)
     fespace VhLocalOld(ThName, Pk);
     fespace VhLocalNew(ThNew, PkNew);
     matrix loc = interpolate(VhLocalNew, VhLocalOld);
-    loc.CSR;
-    cout << uA.n << endl;
-    cout << uANew.n << endl;
     constructor(P, uANew, uA, loc);
 ENDIFMACRO
 }
@@ -1314,7 +1311,6 @@ ENDIFMACRO
         Irecv(processor(v, rqRecvTh[i]), recvTh[i]);
     for[i, v : rankSend] {
         PhPart part;
-        part[] = privateDmesh#ThName#khiDef[1];
 IFMACRO(dimension, 2)
         part = (bbAll[4 + 8 * v] < x
              && bbAll[5 + 8 * v] > x

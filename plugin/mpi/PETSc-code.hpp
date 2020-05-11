@@ -2637,7 +2637,11 @@ namespace PETSc {
         else {
           KSPType type;
           KSPGetType(ptA->_ksp, &type);
+#if defined(KSPHPDDM)
           PetscStrcmp(type, KSPHPDDM, &isType);
+#else
+          isType = PETSC_FALSE;
+#endif
         }
 #if PETSC_VERSION_GT(3, 13, 1) && defined(PETSC_HAVE_HPDDM)
         if(isType) {
@@ -3058,7 +3062,7 @@ namespace PETSc {
       Expression x;
       const OneOperator *codeJ, *codeR, *codeRHS;
       const int c;
-      static const int n_name_param = 11;
+      static const int n_name_param = 12;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       E_NonlinearSolver(const basicAC_F0& args, int d)
@@ -3134,7 +3138,8 @@ namespace PETSc {
     {"JacobianInequality", &typeid(Polymorphic*)},
     {"JacobianEquality", &typeid(Polymorphic*)},
     {"JI", &typeid(Type*)},
-    {"JE", &typeid(Type*)}};
+    {"JE", &typeid(Type*)},
+    {"reason", &typeid(long*)}};
   template< class Type >
   PetscErrorCode FormJacobian(SNES snes, Vec x, Mat J, Mat B, void* ctx) {
     User< Type >* user;
@@ -3526,6 +3531,12 @@ namespace PETSc {
           if (ptA->_ksp) {
             SNESSetKSP(snes, ksp);
             KSPDestroy(&ksp);
+          }
+          if(nargs[11]) {
+            SNESConvergedReason reason;
+            SNESGetConvergedReason(snes, &reason);
+            long* ret = GetAny< long* >((*nargs[11])(stack));
+            *ret = static_cast<long>(reason);
           }
           SNESDestroy(&snes);
           delete user->conv;
@@ -4104,8 +4115,13 @@ namespace PETSc {
                   PetscSectionSetDof(rootSection, c, 1);
               PetscSectionSetUp(rootSection);
               PetscSectionCopy(rootSection, leafSection);
+#if PETSC_VERSION_GE(3, 12, 0)
               DMSetLocalSection(pA->_dm, rootSection);
               DMSetLocalSection(pA->_dm, leafSection);
+#else
+              DMLocalSection(pA->_dm, rootSection);
+              DMLocalSection(pA->_dm, leafSection);
+#endif
           }
           Vec ranks, local;
           DMPlexCreateRankField(pA->_dm, &ranks);
