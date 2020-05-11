@@ -2119,7 +2119,6 @@ dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 ## before try
 
 TOOL_DISABLE(tetgen,tetgen.$DYLIB_SUFFIX)
-TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(lapack,"lapack.$DYLIB_SUFFIX fflapack.$DYLIB_SUFFIX")
 TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
 TOOL_DISABLE(parmetis,parmetis.$DYLIB_SUFFIX)
@@ -2130,9 +2129,17 @@ if test "$ff_cmake" = yes; then
 fi
 TOOL_DISABLE(mshmet,"mshmet.$DYLIB_SUFFIX aniso.$DYLIB_SUFFIX")
 TOOL_DISABLE(gmm,ilut.$DYLIB_SUFFIX,,enable_gmm=no)
+if test "$enable_fortran" != no -o -z "$enable_fortran"; then
+TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(scalapack,"MUMPS.$DYLIB_SUFFIX MUMPS_mpi.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps,"MUMPS.$DYLIB_SUFFIX MUMPS_mpi.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps_seq,"MUMPS_seq.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX",mumps-seq)
+else
+TOOL_DISABLE_NO(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
+TOOL_DISABLE_NO(scalapack,"MUMPS.$DYLIB_SUFFIX MUMPS_mpi.$DYLIB_SUFFIX")
+TOOL_DISABLE_NO(mumps,"MUMPS.$DYLIB_SUFFIX MUMPS_mpi.$DYLIB_SUFFIX")
+TOOL_DISABLE_NO(mumps_seq,"MUMPS_seq.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX",mumps-seq)	
+fi
 TOOL_DISABLE(nlopt,ff-NLopt.$DYLIB_SUFFIX)
 if test "$enable_fortran" != no -o -z "$enable_fortran"; then
     AC_SUBST([TOOL_DYLIB_ffnewuoa],ffnewuoa.$DYLIB_SUFFIX)
