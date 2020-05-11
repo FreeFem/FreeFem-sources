@@ -2150,7 +2150,7 @@ newpMatrice_Creuse<R>  Matrixoutp2mapIJ_inv (Stack s,outProduct_KN_<R>   * const
    for (int i=0;i<N;++i)
     for (int j=0;j<M;++j)
      {
-       R aij=op.a[i]*RNM::conj(op.b[j]);
+       R aij=op.a[i]*RNM::conj(op.b[j])*op.c;
        if(ii[i]>=0 && jj[j]>=0 && std::norm(aij)>1e-40)
           A(ii[i],jj[j]) += aij;
      }
@@ -2256,6 +2256,7 @@ Matrixoutp2mapIJ (Stack s,outProduct_KN_<R>   * const & pop,const KN_<long> & ii
    const outProduct_KN_<R> & op(*pop);
    long N=op.a.N(),M=op.b.N();
    long n=ii.N(),m=jj.N();
+    R c = op.c;
     HashMatrix<int,R> *pA= new  HashMatrix<int,R>((int)n,(int)m,0,0);
     HashMatrix<int,R> & A =*pA;
 
@@ -2271,7 +2272,7 @@ Matrixoutp2mapIJ (Stack s,outProduct_KN_<R>   * const & pop,const KN_<long> & ii
                     cerr << " Out of Bound  in (a*b')(I,J) : " << i << " " << j << " not in " << "[0,"<<N<<"[x[0," << M << "[ \n";
                     ExecError("Out of Bound Error");
                 }
-               R aij=op.a[i]*RNM::conj(op.b[j]);
+               R aij=op.a[i]*RNM::conj(op.b[j])*c;
                if (std::norm(aij)>1e-40)
                   A(il,jl) += aij;
                }
@@ -2295,7 +2296,7 @@ AnyType Matrixoutp2map (Stack s, const AnyType & pp)
    for (long i=0;i<N;++i)
     for (long j=0;j<M;++j)
      {
-      R aij=op.a[i]*RNM::conj(op.b[j]);
+      R aij=op.a[i]*RNM::conj(op.b[j])*op.c;
       if (std::norm(aij)>1e-40)
         A(i,j) += aij;
      }
