@@ -35,6 +35,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - moved Htool to its new GitHub location
+- ScaLAPACK and MUMPS are not compiled by PETSc anymore if there is no Fortran compiler
 
 ### Deprecated
 

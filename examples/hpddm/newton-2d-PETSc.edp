@@ -57,7 +57,9 @@ u[] = vC(0, Vh);
 changeNumbering(A, u[], bPETSc);
 xPETSc.resize(bPETSc.n);
 xPETSc = 0;
-SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -ksp_monitor_true_residual -snes_converged_reason -ksp_converged_reason -pc_type lu -snes_view");
+int ret;
+SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -ksp_monitor_true_residual -snes_converged_reason -ksp_converged_reason -pc_type lu -snes_view", reason = ret);
+assert(ret == 3);
 changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
 plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
 
@@ -77,6 +79,7 @@ func int funcMonitor(int it, real xnorm, real gnorm, real f, real[int]& u, real[
     mpiAllReduce(abs, red, mpiCommWorld, mpiMAX);
     return it > 0 && red < absTol ? 2 : 0; // reasons defined there https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/SNES/SNESConvergedReason.html
 }
-SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_converged_reason", monitor = funcMonitor);
+SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_converged_reason", monitor = funcMonitor, reason = ret);
+assert(ret == 2);
 changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
 plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

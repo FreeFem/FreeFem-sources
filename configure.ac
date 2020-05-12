@@ -1658,7 +1658,9 @@ then
 	fi
     fi
     # If all else fails, download!
-    if test "$ff_arpack_ok" = no -a "$enable_download" = yes -o "$enable_download_arpack" = yes  -a "$enable_fortran" != no
+    if test "$enable_fortran" != no -o -z "$enable_fortran"
+    then
+    if test "$ff_arpack_ok" = no -a "$enable_download" = yes -o "$enable_download_arpack" = yes
     then
 	ff_arpack_download=yes
 	AC_MSG_NOTICE(using downloaded Arpack)
@@ -1681,6 +1683,7 @@ then
 
 	ff_arpack_libs="${curdir}/3rdparty/lib/libarpack.a $ff_lapack_lib"
 	ff_arpack_ok=yes
+    fi
     fi
 fi
 if test  "$ff_arpack_ok" != yes
@@ -2116,7 +2119,6 @@ dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 ## before try
 
 TOOL_DISABLE(tetgen,tetgen.$DYLIB_SUFFIX)
-TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(lapack,"lapack.$DYLIB_SUFFIX fflapack.$DYLIB_SUFFIX")
 TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
 TOOL_DISABLE(parmetis,parmetis.$DYLIB_SUFFIX)
@@ -2127,10 +2129,24 @@ if test "$ff_cmake" = yes; then
 fi
 TOOL_DISABLE(mshmet,"mshmet.$DYLIB_SUFFIX aniso.$DYLIB_SUFFIX")
 TOOL_DISABLE(gmm,ilut.$DYLIB_SUFFIX,,enable_gmm=no)
+if test "$enable_fortran" != no -o -z "$enable_fortran"; then
+TOOL_DISABLE(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
 TOOL_DISABLE(scalapack,"MUMPS.$DYLIB_SUFFIX MUMPS_mpi.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps,"MUMPS.$DYLIB_SUFFIX MUMPS_mpi.$DYLIB_SUFFIX")
 TOOL_DISABLE(mumps_seq,"MUMPS_seq.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX",mumps-seq)
+else
+TOOL_DISABLE_NO(ipopt,ff-Ipopt.$DYLIB_SUFFIX)
+TOOL_DISABLE_NO(scalapack,"MUMPS.$DYLIB_SUFFIX MUMPS_mpi.$DYLIB_SUFFIX")
+TOOL_DISABLE_NO(mumps,"MUMPS.$DYLIB_SUFFIX MUMPS_mpi.$DYLIB_SUFFIX")
+TOOL_DISABLE_NO(mumps_seq,"MUMPS_seq.$DYLIB_SUFFIX MUMPS.$DYLIB_SUFFIX",mumps-seq)	
+fi
 TOOL_DISABLE(nlopt,ff-NLopt.$DYLIB_SUFFIX)
+if test "$enable_fortran" != no -o -z "$enable_fortran"; then
+    AC_SUBST([TOOL_DYLIB_ffnewuoa],ffnewuoa.$DYLIB_SUFFIX)
+else
+    AC_SUBST([TOOL_DYLIB_ffnewuoa],"")
+    ff_uncompile_plugin+=" ffnewuoa"
+fi
 
 TOOL_DISABLE(scotch,scotch.$DYLIB_SUFFIX)
 TOOL_DISABLE(superlu,SuperLu.$DYLIB_SUFFIX)
