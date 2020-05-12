@@ -396,7 +396,7 @@ MMesh *PLY_LoadT(const string &filename, bool bigEndian, bool cleanmesh, bool re
                 printf("xyz %d = %f %f %f\n", i , xyz[0], xyz[1], xyz[2]);
         }
         
-        int label[nt], ivt[T::nt], ivb[B::nv], color[3];
+        int label[nt], ivt[T::nv], ivb[B::nv], color[3];
         
         for (int it = 0; it < nt; ++it) {
             label[it]=0;
@@ -460,7 +460,7 @@ MMesh *PLY_LoadT(const string &filename, bool bigEndian, bool cleanmesh, bool re
                 }
                 if(verbosity>5)
                     cout << " numVerts test " << numVerts << endl;
-                ffassert(numVerts==T::nv);   /////// pb
+                ffassert(numVerts==T::nv);
                 
                 for (int j = 0; j < numVerts; ++j) {
                     if (fscanf(fp, "%d", &ivt[j]) != 1) {

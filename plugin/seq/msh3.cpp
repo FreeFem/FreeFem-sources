@@ -6772,7 +6772,7 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
 
       
       
-  /*for (int ibe = 0; ibe < Th.nbe; ++ibe) {
+  for (int ibe = 0; ibe < Th.nbe; ++ibe) {
     const B &K(Th.be(ibe));
     map<int,int>::iterator mi =slf.find(K.lab) ;
     if( mi != slf.end()) {
@@ -6786,37 +6786,8 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
       }
     }
       // else empty mesh
-  }*/
+  }
   
-      for (int ibe = 0; ibe < Th.nbe; ++ibe) {
-        const B &K(Th.be(ibe));
-        if(labelface.N( ))
-        {    map<int,int>::iterator mi =slf.find(K.lab) ;
-            if( mi != slf.end())
-            {
-                int ii = mi->second;
-
-          //for (int ii = 0; ii < labelface.N( ); ++ii) {
-          //  if (K.lab == labelface[ii]) {
-              nbeLab++;
-              takebe[ibe] = 1;
-              for (int jj = 0; jj < B::nv; ++jj) {
-                if (takevertex[Th.operator( )(K[jj])] != -1) continue;
-                takevertex[Th.operator( )(K[jj])] = nv;
-                nv++;
-              }
-            }
-          }
-          else {
-            nbeLab++;
-            takebe[ibe] = 1;
-            for (int jj = 0; jj < B::nv; ++jj) {
-              if (takevertex[Th.operator( )(K[jj])] != -1) continue;
-              takevertex[Th.operator( )(K[jj])] = nv;
-              nv++;
-            }
-         }
-      }
       
  
   ns = nbeLab;
@@ -6852,7 +6823,7 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
     (bb++)->set(v, ivv, K.lab);
   }
 
-      MMeshO *pThnew = new MMeshO(nv, ns, 0, v, b, 0, cleanmesh, removeduplicate, rebuildboundary, orientation, precis_mesh, labeledBoundary, angle);
+  MMeshO *pThnew = new MMeshO(nv, ns, 0, v, b, 0, cleanmesh, removeduplicate, rebuildboundary, orientation, precis_mesh, labeledBoundary, angle);
 
   copyMapping(pThnew, mapVol2Surf, mapSurf2Vol);
 

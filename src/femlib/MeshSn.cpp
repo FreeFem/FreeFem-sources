@@ -904,7 +904,6 @@ namespace Fem2D
         
         delete [] borderelements; // to remove the previous pointers
         borderelements = new BoundaryEdgeS[3 * nt]; // 3 * nt upper evaluated
-        cout << "******************** test *****************" << labeledBoundary << endl;
         HashTable<SortArray<int, 2>, int> edgesI(3 * nt, nt);
         int* AdjLink = new int[3 * nt];
         
