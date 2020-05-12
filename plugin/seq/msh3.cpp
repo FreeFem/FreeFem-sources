@@ -6751,10 +6751,8 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
   // a trier les tableaux d'entier
   int nv = 0, nt = 0, ns = 0;
       
-  if(!labelface.N( )) {
-    if(verbosity) cerr << " error in ExtractMesh form "<<pTh  << " : no labeled part " << endl;
-    return (MMeshO *)0;
-  }
+  if(!labelface.N( ) && verbosity)
+    cout << " empty list label, extract all boundaries" << endl;
       
   if (verbosity > 9) {
     cout << " labelface.N()  " << labelface.N( ) << endl;
@@ -6785,11 +6783,17 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
         nv++;
       }
     }
-      // else empty mesh
+    else {
+         nbeLab++;
+         takebe[ibe] = 1;
+         for (int jj = 0; jj < B::nv; ++jj) {
+           if (takevertex[Th.operator( )(K[jj])] != -1) continue;
+           takevertex[Th.operator( )(K[jj])] = nv;
+           nv++;
+         }
+      }
   }
-  
-      
- 
+
   ns = nbeLab;
   int nbv_surf = 0;
   VO *v = new VO[nv];
@@ -6942,10 +6946,9 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 	double precis_mesh(arg(5, stack, 1e-7));
 	long orientation(arg(6, stack, 1L));
 	
-    if(!labelface.N( )) {
-      if(verbosity) cerr << " error in ExtractMesh form "<<pTh  << " : no labeled part " << endl;
-      return (MeshL *)0;
-    }
+    if(!labelface.N( ) && verbosity)
+      cout << " empty list label, extract all boundaries" << endl;
+      
       
 	// a trier les tableaux d'entier
         map<int,int> slf;
@@ -6976,7 +6979,15 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 		  nvL++;
 		}
       }
-		// else empty mesh
+	  else {
+        nbeLab++;
+        takebe[ibe] = 1;
+        for (int jj = 0; jj < 2; ++jj) {
+          if (takevertex[Th.operator( )(K[jj])] != -1) continue;
+          takevertex[Th.operator( )(K[jj])] = nvL;
+          nvL++;
+        }
+      }
 	}
 	VL *v = new VL[nvL];
 	TL *b = new TL[nbeLab];
