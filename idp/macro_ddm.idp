@@ -531,7 +531,12 @@ NewMacro privateDmesh#ThTab#intersection()privateDmesh#ThName#intersectionDef En
 IFMACRO(ThName#N2O)
 NewMacro privateDmesh#N2O()ThName#N2O EndMacro
 ENDIFMACRO
+IFMACRO(ThName#UserPartitioning)
+buildWithPartitioning(ThName, ThName#UserPartitioning, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm);
+ENDIFMACRO
+IFMACRO(!ThName#UserPartitioning)
 build(ThName, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm);
+ENDIFMACRO
 }
 EndMacro
 macro reconstructDmesh(ThName)
