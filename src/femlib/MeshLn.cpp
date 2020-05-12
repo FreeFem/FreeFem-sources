@@ -410,7 +410,7 @@ namespace Fem2D
   }
     
     
-  MeshL::MeshL(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh, double ridgeangledetection)
+  MeshL::MeshL(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh, bool labeledBoundary, double ridgeangledetection)
     :mapSurf2Curv(0),mapCurv2Surf(0)  {
         
         
@@ -447,7 +447,7 @@ namespace Fem2D
     if (nbe==0) {
         if(verbosity>5)
         cout << " building of boundary " << endl;
-        BuildBdElem();
+        BuildBdElem(labeledBoundary,ridgeangledetection);
         delete [] TheAdjacencesLink;
         delete [] BoundaryElementHeadLink;
         TheAdjacencesLink=0;
@@ -634,7 +634,7 @@ namespace Fem2D
   }
     
     
-  MeshL::MeshL(int nnv, int nnt, int nnbe, Vertex3 *vv, EdgeL *tt, BoundaryPointL *bb, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh, double ridgeangledetection)
+  MeshL::MeshL(int nnv, int nnt, int nnbe, Vertex3 *vv, EdgeL *tt, BoundaryPointL *bb, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh, bool labeledBoundary, double ridgeangledetection)
     :mapSurf2Curv(0),mapCurv2Surf(0)
   {
     nv = nnv;
@@ -666,7 +666,7 @@ namespace Fem2D
     if (nbe==0) {
         if(verbosity>5)
                cout << " building of boundary " << endl;
-        BuildBdElem();
+        BuildBdElem(labeledBoundary, ridgeangledetection);
         delete [] TheAdjacencesLink;
         delete [] BoundaryElementHeadLink;
         TheAdjacencesLink=0;
@@ -721,7 +721,7 @@ namespace Fem2D
   
     
     // determine the bounder points list for meshL
-   void MeshL::BuildBdElem(double angle) {
+   void MeshL::BuildBdElem(bool labeledBoundary, double angle){
       
         
        delete [] borderelements; // to remove the previous pointers
@@ -769,9 +769,16 @@ namespace Fem2D
                         
                        if(pdt >= angle) {
                            if(verbosity>15)
-                               cout << " the border point " <<nbeL <<": [" << iv[0] << " " << "] is a boundary with the angular criteria" << endl;
+                               cout << " the border point " <<nbeL <<": [" << iv[0] << " " << "] is a boundary with the angular criteria " << angle << endl;
                            int lab = min(K.lab, K_adj.lab);
                            be(nbeL).set(vertices,iv,lab);
+                           pointI.add(key, nbeL++);
+                       }
+                       else if(labeledBoundary && K.lab != K_adj.lab ) {
+                           if(verbosity>15)
+                             cout << " the border point " <<nbeL <<": [" << iv[0] << " " << "] is a boundary with labeled boundary criteria" << endl;
+            
+                           be(nbeL).set(vertices,iv,K.lab);
                            pointI.add(key, nbeL++);
                        }
                    }

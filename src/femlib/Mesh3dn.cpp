@@ -1929,7 +1929,7 @@ namespace Fem2D
     }
     
     
-    void Mesh3::BuildMeshS(double angle)
+    void Mesh3::BuildMeshS(bool labeledBoundary,double angle)
     {
         
         if (meshS) {
@@ -2006,7 +2006,7 @@ namespace Fem2D
         delete [] v_num_surf;
         delete [] map_v_num_surf;
         // build the edge list
-        meshS->BuildBdElem(angle);
+        meshS->BuildBdElem(labeledBoundary, angle);
         meshS->BuildGTree();
         
     }

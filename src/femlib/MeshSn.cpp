@@ -474,7 +474,7 @@ namespace Fem2D
     }
     
     
-    MeshS::MeshS(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh, double ridgeangledetection)
+    MeshS::MeshS(const string filename, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh, bool labeledBoundary, double ridgeangledetection)
     :mapSurf2Vol(0),mapVol2Surf(0),meshL(0) {
         
         
@@ -510,7 +510,7 @@ namespace Fem2D
         
         // if not edges then build the edges - need access to the old adjacensce to build eges and rebuild the new adj
         if (nbe==0) {
-            BuildBdElem();
+            BuildBdElem(labeledBoundary, ridgeangledetection);
             delete [] TheAdjacencesLink;
             delete [] BoundaryElementHeadLink;
             TheAdjacencesLink=0;
@@ -753,7 +753,7 @@ namespace Fem2D
     
     
     
-    MeshS::MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh)
+    MeshS::MeshS(int nnv, int nnt, int nnbe, Vertex3 *vv, TriangleS *tt, BoundaryEdgeS *bb, bool cleanmesh, bool removeduplicate, bool rebuildboundary, int orientation, double precis_mesh, bool labeledBoundary, double ridgeangledetection)
     :mapVol2Surf(0),mapSurf2Vol(0),meshL(0)
     {
         nv = nnv;
@@ -785,7 +785,7 @@ namespace Fem2D
         if (nbe==0) {
             if(verbosity>3)
                 cout << " building of boundary " << endl;
-            BuildBdElem();
+            BuildBdElem(labeledBoundary,ridgeangledetection);
             delete [] TheAdjacencesLink;
             delete [] BoundaryElementHeadLink;
             TheAdjacencesLink=0;
@@ -900,11 +900,11 @@ namespace Fem2D
     
     
     // determine the boundary edge list for meshS
-    void MeshS::BuildBdElem(const double angle) {
+    void MeshS::BuildBdElem(bool labeledBoundary,const double angle) {
         
         delete [] borderelements; // to remove the previous pointers
         borderelements = new BoundaryEdgeS[3 * nt]; // 3 * nt upper evaluated
-        
+        cout << "******************** test *****************" << labeledBoundary << endl;
         HashTable<SortArray<int, 2>, int> edgesI(3 * nt, nt);
         int* AdjLink = new int[3 * nt];
         
@@ -957,6 +957,13 @@ namespace Fem2D
                             mesb += be(nbeS).mesure();
                             edgesI.add(key, nbeS++);
                         }
+                        else if(labeledBoundary && K.lab!=K_adj.lab ) {
+                            if(verbosity>15)
+                                cout << " the edge " <<nbeS <<": [" << iv[0] << " " << iv[1] << "] is a boundary with labeled boundary criteria" << endl;
+                            be(nbeS).set(vertices,iv,K.lab);
+                            mesb += be(nbeS).mesure();
+                            edgesI.add(key, nbeS++);
+                        }
                     }
                     // the edge is internal --- manifold or no?
                     else {
@@ -1001,7 +1008,7 @@ namespace Fem2D
     }
     
     
-    void MeshS::BuildMeshL(double angle)
+    void MeshS::BuildMeshL(bool labeledBoundary, double angle)
     {
         
         if (meshL) {
@@ -1074,7 +1081,7 @@ namespace Fem2D
             meshL->mapSurf2Curv[i] = v_num_curve[i];
             meshL->mapCurv2Surf[i] = map_v_num_curve[i];
         }
-        meshL->BuildBdElem(angle);
+        meshL->BuildBdElem(labeledBoundary,angle);  // default angle = 40 deg and only true boundaries;);
         meshL->BuildGTree();
         delete [] v_num_curve;
         delete [] map_v_num_curve;

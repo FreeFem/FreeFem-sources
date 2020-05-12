@@ -165,7 +165,7 @@ public:
   void readmsh(ifstream & f,int offset);
   void TrueVertex();
   Serialize serialize_withBorderMesh() const;
-  void BuildMeshS(double angle=8.*atan(1.)/9.);  // default angle = 40 deg
+  void BuildMeshS(bool labeledBoundary=false, double angle=8.*atan(1.)/9.);  // default angle = 40 deg and true boundaries 
     ~Mesh3() {
         if (verbosity>4) cout << "destroy mesh3" << this << " destroy meshS " << this->meshS << endl;
         if (meshS)

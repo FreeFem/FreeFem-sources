@@ -152,12 +152,12 @@ namespace Fem2D {
     int *mapCurv2Surf;
     MeshL():mapSurf2Curv(0),mapCurv2Surf(0) {};
     MeshL(const string);
-    MeshL(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7, double ridgeangledetection=8.*atan(1.)/9.);
+    MeshL(const string filename, bool cleanmesh, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7, bool labeledBoundary=false, double ridgeangledetection=8.*atan(1.)/9.);
       
     void read(istream &f);
     void readmsh(ifstream & f,int offset);
     MeshL(FILE *f,int offset=0);
-    MeshL(int nnv, int nnt, int nnbe, Vertex3 *vv, EdgeL *tt, BoundaryPointL *bb, bool cleanmesh=false, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7, double ridgeangledetection=8.*atan(1.)/9.);
+    MeshL(int nnv, int nnt, int nnbe, Vertex3 *vv, EdgeL *tt, BoundaryPointL *bb, bool cleanmesh=false, bool removeduplicate=false, bool rebuildboundary=false, int orientation=1, double precis_mesh=1e-7, bool labeledBoundary=false, double ridgeangledetection=8.*atan(1.)/9.);
     MeshL(const Serialize&);
 
     int load(const string & filename);
@@ -169,7 +169,7 @@ namespace Fem2D {
     double hmin() const;
     //int Save(const string & filename) const;
     //Serialize serialize_withBorderMesh() const;
-    void BuildBdElem(const double angle=8.*atan(1.)/9.);
+    void BuildBdElem(bool labeledBoundary=false, const double angle=8.*atan(1.)/9.);  // default angle = 40 deg and only true boundaries;
     void BuildCurvBasis();
       
     ~MeshL() {

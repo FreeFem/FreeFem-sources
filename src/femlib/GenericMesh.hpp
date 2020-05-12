@@ -1405,7 +1405,7 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
         mes+=tt[i].mesure();
     }
     B *bb=0;
-    if( new_nbe ==0 || rebuildboundary)
+    if( new_nbe ==0 && rebuildboundary)
     {
         if(verbosity) cout << "clean_mesh:  rebuild  boundary mesh from adjacent "<< endl;
         

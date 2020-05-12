@@ -6634,7 +6634,7 @@ template< class MMesh, class MMeshO >
 class ExtractMesh_Op : public E_F0mps {
  public:
   Expression eTh;
-  static const int n_name_param = 4;    //
+  static const int n_name_param = 10;    //
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   KN_< long > arg(int i, Stack stack, KN_< long > a) const {
@@ -6656,7 +6656,11 @@ class ExtractMesh_Op : public E_F0mps {
   long arg(int i, Stack stack, long a) const {
     return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a;
   }
-
+  
+  bool arg(int i, Stack stack, bool a) const {
+    return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
+  }
+      
  public:
   ExtractMesh_Op(const basicAC_F0 &args, Expression tth) : eTh(tth) {
     if (verbosity > 1) cout << "construction par ExtractMesh_Op" << endl;
@@ -6680,6 +6684,12 @@ basicAC_F0::name_and_type ExtractMesh_Op< Mesh3, MeshS >::name_param[] = {
   {"reftet", &typeid(KN_< long >)},
   {"label", &typeid(KN_< long >)},
   {"region", &typeid(KN_< long >)},
+  {"cleanmesh", &typeid(bool)},
+  {"removeduplicate", &typeid(bool)},
+  {"precismesh", &typeid(double)},
+  {"orientation", &typeid(long)},
+  {"labeledBoundary", &typeid(bool)},
+  {"angle", &typeid(double)}
 };
 
 // instance arguments for meshS
@@ -6689,6 +6699,12 @@ basicAC_F0::name_and_type ExtractMesh_Op< MeshS, MeshL >::name_param[] = {
   {"reftri", &typeid(KN_< long >)},
   {"label", &typeid(KN_< long >)},
   {"region", &typeid(KN_< long >)},
+  {"cleanmesh", &typeid(bool)},
+  {"removeduplicate", &typeid(bool)},
+  {"precismesh", &typeid(double)},
+  {"orientation", &typeid(long)},
+  {"labeledBoundary", &typeid(bool)},
+  {"angle", &typeid(double)}
 };
 
 template< class MMesh, class MMeshO >
@@ -6724,52 +6740,85 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
   KN< long > zzempty(0);
   KN< long > labelface(arg(0, 2, stack, zzempty));
   KN< long > labelelement(arg(1, 3, stack, zzempty));
-
+  long cleanmesh(arg(4, stack, true));
+  long removeduplicate(arg(5, stack, false));
+  bool rebuildboundary=false;//(arg(7, stack, false));
+  double precis_mesh(arg(6, stack, 1e-7));
+  long orientation(arg(7, stack, 1L));
+  bool labeledBoundary(arg(8, stack,false));
+  double angle(arg(9, stack, 9.*atan(1.)/9.));
+      
   // a trier les tableaux d'entier
   int nv = 0, nt = 0, ns = 0;
+      
+  if(!labelface.N( )) {
+    if(verbosity) cerr << " error in ExtractMesh form "<<pTh  << " : no labeled part " << endl;
+    return (MMeshO *)0;
+  }
+      
   if (verbosity > 9) {
     cout << " labelface.N()  " << labelface.N( ) << endl;
     for (int ii = 0; ii < labelface.N( ); ii++) cout << ii << " " << labelface[ii] << endl;
   }
-    map<int,int> slf;
-    for (int ii = 0; ii < labelface.N( ); ii++)
-        slf[labelface[ii]]=ii;
+   
+  map<int,int> slf;
+  for (int ii = 0; ii < labelface.N( ); ii++)
+    slf[labelface[ii]]=ii;
 
   KN< int > takevertex(Th.nv, -1);
   KN< int > takebe(Th.nbe, -1);
 
   int nbeLab = 0;
 
-  for (int ibe = 0; ibe < Th.nbe; ++ibe) {
+      
+      
+  /*for (int ibe = 0; ibe < Th.nbe; ++ibe) {
     const B &K(Th.be(ibe));
-    if(labelface.N( ))
-    {    map<int,int>::iterator mi =slf.find(K.lab) ;
-        if( mi != slf.end())
-        {
-            int ii = mi->second;
-
-      //for (int ii = 0; ii < labelface.N( ); ++ii) {
-      //  if (K.lab == labelface[ii]) {
-          nbeLab++;
-          takebe[ibe] = 1;
-          for (int jj = 0; jj < B::nv; ++jj) {
-            if (takevertex[Th.operator( )(K[jj])] != -1) continue;
-            takevertex[Th.operator( )(K[jj])] = nv;
-            nv++;
-          }
-        }
+    map<int,int>::iterator mi =slf.find(K.lab) ;
+    if( mi != slf.end()) {
+      int ii = mi->second;
+      nbeLab++;
+      takebe[ibe] = 1;
+      for (int jj = 0; jj < B::nv; ++jj) {
+        if (takevertex[Th.operator( )(K[jj])] != -1) continue;
+        takevertex[Th.operator( )(K[jj])] = nv;
+        nv++;
       }
-      else {
-        nbeLab++;
-        takebe[ibe] = 1;
-        for (int jj = 0; jj < B::nv; ++jj) {
-          if (takevertex[Th.operator( )(K[jj])] != -1) continue;
-          takevertex[Th.operator( )(K[jj])] = nv;
-          nv++;
-        }
-     }     
-  }
+    }
+      // else empty mesh
+  }*/
+  
+      for (int ibe = 0; ibe < Th.nbe; ++ibe) {
+        const B &K(Th.be(ibe));
+        if(labelface.N( ))
+        {    map<int,int>::iterator mi =slf.find(K.lab) ;
+            if( mi != slf.end())
+            {
+                int ii = mi->second;
 
+          //for (int ii = 0; ii < labelface.N( ); ++ii) {
+          //  if (K.lab == labelface[ii]) {
+              nbeLab++;
+              takebe[ibe] = 1;
+              for (int jj = 0; jj < B::nv; ++jj) {
+                if (takevertex[Th.operator( )(K[jj])] != -1) continue;
+                takevertex[Th.operator( )(K[jj])] = nv;
+                nv++;
+              }
+            }
+          }
+          else {
+            nbeLab++;
+            takebe[ibe] = 1;
+            for (int jj = 0; jj < B::nv; ++jj) {
+              if (takevertex[Th.operator( )(K[jj])] != -1) continue;
+              takevertex[Th.operator( )(K[jj])] = nv;
+              nv++;
+            }
+         }
+      }
+      
+ 
   ns = nbeLab;
   int nbv_surf = 0;
   VO *v = new VO[nv];
@@ -6802,9 +6851,8 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
     for (int jj = 0; jj < B::nv; jj++) ivv[jj] = takevertex[Th.operator( )(K[jj])];
     (bb++)->set(v, ivv, K.lab);
   }
-  if( nv>0)
-  {
-  MMeshO *pThnew = new MMeshO(nv, ns, 0, v, b, 0);
+
+      MMeshO *pThnew = new MMeshO(nv, ns, 0, v, b, 0, cleanmesh, removeduplicate, rebuildboundary, orientation, precis_mesh, labeledBoundary, angle);
 
   copyMapping(pThnew, mapVol2Surf, mapSurf2Vol);
 
@@ -6815,16 +6863,11 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
 
   Add2StackOfPtr2FreeRC(stack, pThnew);
   return pThnew;
-  }
-    else
-    {
-        if(verbosity) cerr << " error in ExtractMesh form "<<pTh  << " : no vertices " << endl;
-        //ErrorExec(" ExtractMesh_Op  (no vertices)", 1);
-        return (MMeshO *)0;
-    }
     
 }
 
+
+            
       
 
 class ExtractMeshLfromMesh_Op : public E_F0mps {
@@ -6927,7 +6970,12 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 	bool rebuildboundary=false;//(arg(7, stack, false));
 	double precis_mesh(arg(5, stack, 1e-7));
 	long orientation(arg(6, stack, 1L));
-		  
+	
+    if(!labelface.N( )) {
+      if(verbosity) cerr << " error in ExtractMesh form "<<pTh  << " : no labeled part " << endl;
+      return (MeshL *)0;
+    }
+      
 	// a trier les tableaux d'entier
         map<int,int> slf;
          for (int ii = 0; ii < labelface.N( ); ii++)
@@ -6944,35 +6992,20 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 
 	int nbeLab = 0, nvL=0;
 	for (int ibe = 0; ibe < Th.neb; ++ibe) {
-		const B &K(Th.be(ibe));
-			
-		if(labelface.N( ))
-                    
-                {    map<int,int>::iterator mi =slf.find(K.lab) ;
-                      if( mi != slf.end())
-                            {
-                                int ii = mi->second;
-			//for (int ii = 0; ii < labelface.N( ); ++ii) {
-			//	if (K.lab == labelface[ii]) {
-					nbeLab++;
-					takebe[ibe] = 1;
+      const B &K(Th.be(ibe));
 
-					for (int jj = 0; jj < 2; ++jj) {
-						if (takevertex[Th.operator( )(K[jj])] != -1) continue;
-						takevertex[Th.operator( )(K[jj])] = nvL;
-						nvL++;
-					}
-				}
-			}
-		else {
-			nbeLab++;
-			takebe[ibe] = 1;
-			for (int jj = 0; jj < 2; ++jj) {
-				if (takevertex[Th.operator( )(K[jj])] != -1) continue;
-				takevertex[Th.operator( )(K[jj])] = nvL;
-				nvL++;
-			}	
+      map<int,int>::iterator mi =slf.find(K.lab) ;
+      if( mi != slf.end()) {
+        int ii = mi->second;
+		nbeLab++;
+		takebe[ibe] = 1;
+        for (int jj = 0; jj < 2; ++jj) {
+		  if (takevertex[Th.operator( )(K[jj])] != -1) continue;
+		  takevertex[Th.operator( )(K[jj])] = nvL;
+		  nvL++;
 		}
+      }
+		// else empty mesh
 	}
 	VL *v = new VL[nvL];
 	TL *b = new TL[nbeLab];
@@ -7002,8 +7035,8 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 		for (int jj = 0; jj < 2; jj++) ivv[jj] = takevertex[Th.operator( )(K[jj])];
 		(bb++)->set(v, ivv, K.lab);
 	}
-        if( nvL>0)
-        {
+      ffassert(nvL>0);
+    
 	// build the moved mesh and apply option
 	MeshL *T_Th = new MeshL(nvL, nbeLab, 0, v, b, 0, cleanmesh, removeduplicate, rebuildboundary, orientation, precis_mesh);
 
@@ -7012,13 +7045,7 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 	Add2StackOfPtr2FreeRC(stack, T_Th);
 	*mp = mps;
 	return T_Th;
-        }
-        else
-        {
-            if(verbosity) cerr << "  Error in extract form mesh " << pTh << " , no vertices " <<  endl;
-           //  ErrorExec(" ExtractMeshLfromMesh_Op (no vertices) ", 1);
-            return (MeshL *) 0;
-        }
+    
 }
 
 
@@ -8116,21 +8143,16 @@ AnyType Square_Op::operator( )(Stack stack) const {
 class BuildMeshS_Op : public E_F0mps {
  public:
   Expression eTh;
-  static const int n_name_param = 1;
+  static const int n_name_param = 2;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
-  KN_< long > arg(int i, int ii, Stack stack, KN_< long > a) const {
-    ffassert(!(nargs[i] && nargs[ii]));
-    i = nargs[i] ? i : ii;
-    return nargs[i] ? GetAny< KN_< long > >((*nargs[i])(stack)) : a;
-  }
 
   double arg(int i, Stack stack, double a) const {
     return nargs[i] ? GetAny< double >((*nargs[i])(stack)) : a;
   }
-  long arg(int i, Stack stack, long a) const {
-    return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a;
-  }    ////*****
+  bool arg(int i, Stack stack, bool a) const {
+    return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
+  }
 
  public:
   BuildMeshS_Op(const basicAC_F0 &args, Expression tth) : eTh(tth) {
@@ -8142,6 +8164,7 @@ class BuildMeshS_Op : public E_F0mps {
 basicAC_F0::name_and_type BuildMeshS_Op::name_param[] = {
 
   {"angle", &typeid(double)},
+  {"sublabBd", &typeid(bool)}
 };
 
 AnyType BuildMeshS_Op::operator( )(Stack stack) const {
@@ -8151,15 +8174,16 @@ AnyType BuildMeshS_Op::operator( )(Stack stack) const {
   Mesh3 &Th = *pTh;
   ffassert(pTh);
 
-  if (verbosity > 5) cout << "Enter in BuilMesh_Op.... " << endl;
+  if (verbosity > 5) cout << "Enter in BuildMesh_Op.... " << endl;
 
   // angle minimal between 2 triangles to determine if the edge is a boundary
   // default value is based on isocaedrom Dietary angle alpha = pi - arcsin(2/3) --> minimal angle
   // criteria = arcsin(2/3) = 42 deg
   const double angle(arg(0, stack, 8. * atan(1.) / 9.));    // default angle = 40 deg));
   if (atan(1) * 4 <= angle) ExecError(" the criteria angle must be inferior to pi alpha");
-
-  double tolerance = cos(angle);
+  bool labeledBoundary(arg(1, stack,false));
+      
+  //double tolerance = cos(angle);
 
   if (verbosity > 5) cout << "Angle criteria to determine an edge:" << angle << endl;
 
@@ -8220,7 +8244,7 @@ AnyType BuildMeshS_Op::operator( )(Stack stack) const {
     Mesh3 *Th_t = new Mesh3(nv, nt, nbe, v, t, b);
     Th_t->BuildGTree( );
     // build the meshS and the edges list
-    Th_t->BuildMeshS(angle);
+    Th_t->BuildMeshS(labeledBoundary, angle);
     *mp = mps;
     Add2StackOfPtr2FreeRC(stack, Th_t);
     return Th_t;
@@ -8236,15 +8260,35 @@ class BuildMeshSFromMesh3 : public OneOperator {
   }
 };
 
+      
 class BuildMeshL_Op : public E_F0mps {
  public:
   Expression eTh;
+  static const int n_name_param = 2;
+  static basicAC_F0::name_and_type name_param[];
+  Expression nargs[n_name_param];
+
+  double arg(int i, Stack stack, double a) const {
+    return nargs[i] ? GetAny< double >((*nargs[i])(stack)) : a;
+  }
+  bool arg(int i, Stack stack, bool a) const {
+    return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
+  }
 
  public:
-  BuildMeshL_Op(const basicAC_F0 &args, Expression tth) : eTh(tth) {}
+  BuildMeshL_Op(const basicAC_F0 &args, Expression tth) : eTh(tth) {
+    args.SetNameParam(n_name_param, name_param, nargs);
+  }
   AnyType operator( )(Stack stack) const;
 };
 
+basicAC_F0::name_and_type BuildMeshL_Op::name_param[] = {
+
+  {"angle", &typeid(double)},
+  {"labeledBoundary", &typeid(bool)}
+};
+
+      
 AnyType BuildMeshL_Op::operator( )(Stack stack) const {
 
   MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
@@ -8252,7 +8296,11 @@ AnyType BuildMeshL_Op::operator( )(Stack stack) const {
   MeshS &Th = *pTh;
   ffassert(pTh);
 
-  if (verbosity > 5) cout << "Enter in BuilMesh_Op.... " << endl;
+  double angle(arg(0, stack, 8.*atan(1.)/9.));    // default angle = 40 deg));
+  if (atan(1) * 4 <= angle) ExecError(" the criteria angle must be inferior to pi alpha");
+  bool labeledBoundary(arg(1, stack,false));
+        
+  if (verbosity > 5) cout << "Enter in BuildMesh_Op.... " << endl;
 
   if (Th.meshL) {
     cout << "Caution, MeshS::meshL previously created, don't use builBdMesh operator " << endl;
@@ -8309,7 +8357,7 @@ AnyType BuildMeshL_Op::operator( )(Stack stack) const {
     MeshS *Th_t = new MeshS(nv, nt, nbe, v, t, b);
     Th_t->BuildGTree( );
     // build the meshS and the edges list
-    Th_t->BuildMeshL( );
+    Th_t->BuildMeshL(labeledBoundary,angle);
     *mp = mps;
     Add2StackOfPtr2FreeRC(stack, Th_t);
     return Th_t;
@@ -8869,11 +8917,12 @@ template< class MMesh >
 class RebuildBorder_Op : public E_F0mps {
  public:
    Expression eTh;
-   static const int n_name_param = 1;
+   static const int n_name_param = 2;
    static basicAC_F0::name_and_type name_param[];
    Expression nargs[n_name_param];
       
    double arg(int i, Stack stack, double a) const {return nargs[i] ? GetAny< double >((*nargs[i])(stack)) : a; }
+   bool arg(int i, Stack stack, bool a) const {return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a; }
       
    public:
       RebuildBorder_Op(const basicAC_F0 &args, Expression tth) : eTh(tth) {
@@ -8884,12 +8933,14 @@ class RebuildBorder_Op : public E_F0mps {
       
 template<>
 basicAC_F0::name_and_type RebuildBorder_Op< MeshS >::name_param[] = {
-   {"ridgeangledetection", &typeid(double)}
+   {"angle", &typeid(double)},
+   {"labeledBoundary", &typeid(bool)}
 };
       
 template<>
 basicAC_F0::name_and_type RebuildBorder_Op< MeshL >::name_param[] = {
-      {"ridgeangledetection", &typeid(double)}
+    {"angle", &typeid(double)},
+    {"labeledBoundary", &typeid(bool)}
 };
       
 template< class MMesh >
@@ -8900,8 +8951,9 @@ AnyType RebuildBorder_Op< MMesh >::operator( )(Stack stack) const {
   MMesh &Th = *pTh;
   ffassert(pTh);
   double angle(arg(0, stack, 8.*atan(1.)/9.));
+  bool labeledBoundary(arg(1, stack,false));
   int nbe_back= Th.nbe;Th.nbe=0;
-  Th.BuildBdElem(angle);
+  Th.BuildBdElem(labeledBoundary, angle);
   Th.BuildGTree();
   if (verbosity > 10)
       cout << "RebuildBorder function, before nbe: " <<nbe_back << " after: " << Th.nbe << " with the angular criteria ridgeangledetection=" << angle << endl;
