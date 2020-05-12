@@ -6772,15 +6772,17 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
       
   for (int ibe = 0; ibe < Th.nbe; ++ibe) {
     const B &K(Th.be(ibe));
-    map<int,int>::iterator mi =slf.find(K.lab) ;
-    if( mi != slf.end()) {
-      int ii = mi->second;
-      nbeLab++;
-      takebe[ibe] = 1;
-      for (int jj = 0; jj < B::nv; ++jj) {
-        if (takevertex[Th.operator( )(K[jj])] != -1) continue;
-        takevertex[Th.operator( )(K[jj])] = nv;
-        nv++;
+    if(labelface.N()) {
+      map<int,int>::iterator mi =slf.find(K.lab) ;
+      if( mi != slf.end()) {
+        int ii = mi->second;
+        nbeLab++;
+        takebe[ibe] = 1;
+        for (int jj = 0; jj < B::nv; ++jj) {
+          if (takevertex[Th.operator( )(K[jj])] != -1) continue;
+          takevertex[Th.operator( )(K[jj])] = nv;
+          nv++;
+        }
       }
     }
     else {
@@ -6967,17 +6969,18 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 	int nbeLab = 0, nvL=0;
 	for (int ibe = 0; ibe < Th.neb; ++ibe) {
       const B &K(Th.be(ibe));
-
-      map<int,int>::iterator mi =slf.find(K.lab) ;
-      if( mi != slf.end()) {
-        int ii = mi->second;
-		nbeLab++;
-		takebe[ibe] = 1;
-        for (int jj = 0; jj < 2; ++jj) {
-		  if (takevertex[Th.operator( )(K[jj])] != -1) continue;
-		  takevertex[Th.operator( )(K[jj])] = nvL;
-		  nvL++;
-		}
+      if(labelface.N()) {
+        map<int,int>::iterator mi =slf.find(K.lab) ;
+        if( mi != slf.end()) {
+          int ii = mi->second;
+		  nbeLab++;
+		  takebe[ibe] = 1;
+          for (int jj = 0; jj < 2; ++jj) {
+		    if (takevertex[Th.operator( )(K[jj])] != -1) continue;
+		    takevertex[Th.operator( )(K[jj])] = nvL;
+		    nvL++;
+		  }
+        }
       }
 	  else {
         nbeLab++;
