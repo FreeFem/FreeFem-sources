@@ -1,0 +1,7 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"
+load "function-PETSc"
+int isInitialized = PetscInitialized();
+assert(isInitialized == 1);

@@ -2303,7 +2303,7 @@ test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o \( "$enable_bemtool" != "yes" -
 
 FF_PETSC_DYLIB=""
 if test "$ff_petsc_ok" != no ;   then
-FF_PETSC_DYLIB="PETSc.$DYLIB_SUFFIX"
+FF_PETSC_DYLIB="PETSc.$DYLIB_SUFFIX function-PETSc.$DYLIB_SUFFIX"
 fi
 if test "$ff_petsccomplex_ok" != no ;   then
 FF_PETSC_DYLIB="$FF_PETSC_DYLIB PETSc-complex.$DYLIB_SUFFIX"

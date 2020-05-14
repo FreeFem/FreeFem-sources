@@ -90,7 +90,8 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [reconstructDmesh.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/reconstructDmesh.edp)               | Construction of a distributed mesh from sequential nonoverlapping meshes |
 | [distributed-parmmg.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/distributed-parmmg.edp)           | Distributed ParMmg interface for mesh adaptation                         |
 | [redistributeDmesh.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/redistributeDmesh.edp)             | Gather and scatter a Dmesh on different MPI communicators                |
-| [DMPlex-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/DMPlex-PETSc.edp)                       | Load and partition a mesh using a DM in two and three dimensions                                   |
+| [DMPlex-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/DMPlex-PETSc.edp)                       | Load and partition a mesh using a DM in two and three dimensions         |
+| [function-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/function-PETSc.edp)                   | Custom plugin showing how to directly access PETSc in C++                |
 
 ### Reproducible science
 | Article                                                                                                                                                       | Source code                                                   |
