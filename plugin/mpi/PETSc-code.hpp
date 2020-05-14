@@ -2659,9 +2659,6 @@ namespace PETSc {
                   MatConvert(Ad, MATSAME, MAT_INITIAL_MATRIX, &Ac);
                   MatHeaderReplace(ptA->_petsc, &Ac);
               }
-              PetscStrcmp(type, MATMPISBAIJ, &isType);
-              if(isType)
-                  MatConvert(ptA->_petsc, MATSEQSBAIJ, MAT_INPLACE_MATRIX, &ptA->_petsc);
           }
           KSPHPDDMMatSolve(ptA->_ksp, B, C);
           MatDestroy(&C);

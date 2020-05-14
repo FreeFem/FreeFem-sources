@@ -1,0 +1,89 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"
+macro dimension()2//
+include "macro_ddm.idp"
+mesh Th = square(80, 80);
+
+Mat A;
+func Pk = P2;
+
+{
+    fespace Ph(Th, P0);
+    Ph reg = (x-0.5)^2 + (y-0.5)^2 < 0.1 ? 2 : 1;
+    plot(reg, wait = 1, value = 1, fill = 1);
+    Th = change(Th, fregion = reg[][nuTriangle]);
+    real[int] part(Ph.ndof);
+    {
+        Ph cond = region == 1;
+
+        int[int] new2oldCond(1), new2oldNoCond(1);
+
+        mesh ThCond = trunc(Th, abs(cond) > 0.01, new2old = new2oldCond);
+        mesh ThNoCond = trunc(Th, abs(cond) < 0.01, new2old = new2oldNoCond);
+
+        fespace PhCond(ThCond, P0);
+        fespace PhNoCond(ThNoCond, P0);
+
+        real[int] partCond(PhCond.ndof);
+        real[int] partNoCond(PhNoCond.ndof);
+
+        if(mpirank == 0) {
+            partitionerSeq(partCond, ThCond, mpisize);
+            partitionerSeq(partNoCond, ThNoCond, mpisize);
+        }
+        partitionerPar(partCond, ThGlCond, mpiCommWorld, mpisize);
+        partitionerPar(partNoCond, ThGlNoCond, mpiCommWorld, mpisize);
+
+        for[i, v : partCond]   part[new2oldCond[i]] = v;
+        for[i, v : partNoCond] part[new2oldNoCond[i]] = v;
+
+    }
+    macro ThUserPartitioning()part// EOM
+    buildDmesh(Th)
+    createMat(Th, A, Pk)
+}
+
+fespace Ph(Th, P0);
+Ph cond = region == 2;
+int[int] n2o;
+mesh ThCond = trunc(Th, abs(cond), new2old = n2o, label = 5);
+fespace Vh(Th, Pk);
+fespace VhCond(ThCond, Pk);
+matrix R;
+int[int] restCond = restrict(VhCond, Vh, n2o);
+{
+    int[int] I = 0:restCond.n - 1;
+    real[int] C(I.n);
+    C = 1;
+    R = [I, restCond, C];
+    R.resize(VhCond.ndof, Vh.ndof);
+}
+Mat B(A, restriction = R);
+varf vPb(u, v) = int2d(Th)(dx(u)*dx(v) + dy(u)*dy(v)) + int2d(Th)(v) + on(1,2,3,4, u=0);
+VhCond g;
+varf vPbCond(u, v) = int2d(ThCond)(dx(u)*dx(v) + dy(u)*dy(v)) + int2d(ThCond)(10*v) + on(5, u=10*g);
+A = vPb(Vh, Vh, tgv = -2);
+B = vPbCond(VhCond, VhCond, tgv = -1);
+set(A, sparams = "-pc_type hypre -ksp_converged_reason");
+set(B, sparams = "-pc_type hypre -ksp_converged_reason");
+Vh u;
+real[int] rhs = vPb(0, Vh, tgv = -2);
+u[] = A^-1 * rhs;
+g[] = u[](restCond);
+// g[] = R * u[];
+// the two lines above are strictly equivalent! I prefer line 71 because you can see that it's just
+// a matter of picking up the correct indices to restrict u into g
+real[int] rhsCond = vPbCond(0, VhCond, tgv = -1);
+VhCond uCond;
+uCond[] = B^-1 * rhsCond;
+macro params()cmm = "Solution", wait = 1, dim = 3, value = 1//
+plotD(Th, u, params)
+plotD(ThCond, uCond, params)
+u[] = 0;
+u[](restCond) = uCond[];
+// u[] = R' * uCond[];
+// the two lines above are strictly equivalent! I prefer line 82 because you can see that it's just
+// a matter of picking up the correct indices to prolong uCond into u
+plotD(Th, u, params)
