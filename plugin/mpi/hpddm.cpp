@@ -794,15 +794,17 @@ class IterativeMethod : public OneOperator {
                 Op& mat;
                 Op& prec;
                 Operator(Op& m, Op& p) : HPDDM::EmptyOperator<R>(m.x.N()), mat(m), prec(p) { }
-                void GMV(const R* const in, R* const out, const int& mu = 1) const {
+                int GMV(const R* const in, R* const out, const int& mu = 1) const {
                     mat.mv(in, HPDDM::EmptyOperator<R>::_n, mu, out);
+                    return 0;
                 }
                 template<bool>
-                void apply(const R* const in, R* const out, const unsigned short& mu = 1, R* = nullptr, const unsigned short& = 0) const {
+                int apply(const R* const in, R* const out, const unsigned short& mu = 1, R* = nullptr, const unsigned short& = 0) const {
                     if(prec.mat)
                         prec.mv(in, HPDDM::EmptyOperator<R>::_n, mu, out);
                     else
                         std::copy_n(in, HPDDM::EmptyOperator<R>::_n * mu, out);
+                    return 0;
                 }
         };
         template<class Op>
@@ -811,11 +813,12 @@ class IterativeMethod : public OneOperator {
                 Op& prec;
                 SchwarzOperator(HpSchwarz<R, S>* m, Op& p) : prec(p) { *reinterpret_cast<HpSchwarz<R, S>*>(this) = *m; }
                 template<bool>
-                void apply(const R* const in, R* const out, const unsigned short& mu = 1, R* = nullptr, const unsigned short& = 0) const {
+                int apply(const R* const in, R* const out, const unsigned short& mu = 1, R* = nullptr, const unsigned short& = 0) const {
                     if(prec.mat)
                         prec.mv(in, HPDDM::Subdomain<R>::_dof, mu, out);
                     else
                         std::copy_n(in, HPDDM::Subdomain<R>::_dof * mu, out);
+                    return 0;
                 }
         };
         class E_LCG : public E_F0mps {
