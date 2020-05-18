@@ -602,7 +602,7 @@ CYGWIN*|MINGW*|MSYS_NT*)
 		then
 		    export PATH="$PATH:`cygpath $MSMPI_BIN`"
 		    test -z "$MPIRUN" &&  MPIRUN=`which mpiexe.exe`
-		    if test "$enable_fortran" != no  -o  "$with_flib" != no ;   then
+		    if test "$enable_fortran" != no -a "$with_flib" != no ;   then
 			case "$F77" in
 	 		    *gfortran) FLIBS="$ff_nocygwin -lgfortran -lquadmath";;
 	 		    *g77) FLIBS="$ff_nocygwin -lg2c";;

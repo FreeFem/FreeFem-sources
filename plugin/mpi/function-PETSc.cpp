@@ -6,6 +6,12 @@
 long initialized() {
     PetscBool isInitialized;
     PetscInitialized(&isInitialized);
+#ifdef _WIN32
+    if(!isInitialized) {
+        PetscInitializeNoArguments();
+        PetscInitialized(&isInitialized);
+    }
+#endif
     return static_cast<long>(isInitialized);
 }
 

@@ -102,7 +102,7 @@ endif
 else
 ##   On windows....
 FLAGS_CONF_PETSC_REAL = $(COMMON_FLAGS) --with-shared-libraries=0 \
-	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' \
+	--with-cc='$(CC)' --with-cxx='$(CXX)' \
 	CXXFLAGS='-fno-stack-protector' \
 	CFLAGS='-fno-stack-protector' \
 	--with-scalar-type=real \
@@ -116,7 +116,7 @@ FLAGS_CONF_PETSC_REAL = $(COMMON_FLAGS) --with-shared-libraries=0 \
 	'--download-superlu-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu'
 FLAGS_CONF_PETSC_COMPLEX = $(COMMON_FLAGS) --with-shared-libraries=0 \
-	--with-cc='$(CC)' --with-cxx='$(CXX)' --with-fc='$(FC)' \
+	--with-cc='$(CC)' --with-cxx='$(CXX)' \
 	CXXFLAGS='-fno-stack-protector' \
 	CFLAGS='-fno-stack-protector' \
 	--with-scalar-type=complex \

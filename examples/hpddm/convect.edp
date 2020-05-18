@@ -1,0 +1,66 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+int[int] n2o;
+macro ThN2O()n2o//
+{
+    macro dimension()2//
+    include "macro_ddm.idp"
+    mesh Th = square(60, 60);
+    fespace Vh(Th, [P1, P1]);
+    fespace Ph(Th, P1);
+    Ph u = (x-0.5)^2 + (y-0.5)^2 - 0.1;
+    Vh [vx, vy] = [cos(x), sin(y)];
+    real dt = 0.2;
+    u = convect([vx, vy], dt, u);
+    mesh ThG = Th;
+    fespace PhG(ThG, P1);
+    PhG w;
+    w[] = u[];
+    buildDmesh(Th)
+    u = (x-0.5)^2 + (y-0.5)^2 - 0.1;
+    convectParallel(Th, [vx, vy], dt, u, 20)
+    plotD(Th, u, cmm = "Global 2D solution");
+    if(mpisize > 1) {
+        real[int] D;
+        createPartition(Th, D, P1)
+        u[] .*= D;
+        int[int] map = restrict(Ph, PhG, n2o);
+        PhG uG, v;
+        uG[](map) = u[];
+        mpiAllReduce(uG[], v[], mpiCommWorld, mpiSUM);
+        w[] -= v[];
+        assert(w[].l2 < 1.0e-2);
+    }
+}
+{
+    macro dimension()3//
+    include "macro_ddm.idp"
+    mesh3 Th = cube(10, 10, 10);
+    fespace Vh(Th, [P1, P1, P1]);
+    fespace Ph(Th, P1);
+    Ph u = (x-0.5)^2 + (y-0.5)^2 + (z-0.5)^2 - 0.1;
+    Vh [vx, vy, vz] = [0.5, 0.5, z/2.0];
+    real dt = 0.05;
+    u = convect([vx, vy, vz], -dt, u);
+    mesh3 ThG = Th;
+    fespace PhG(ThG, P1);
+    PhG w;
+    w[] = u[];
+    buildDmesh(Th)
+    u = (x-0.5)^2 + (y-0.5)^2 + (z-0.5)^2 - 0.1;
+    [vx, vy, vz] = [0.5, 0.5, z/2.0];
+    convectParallel(Th, [vx, vy, vz], -dt, u, 20)
+    plotD(Th, u, cmm = "Global 3D solution");
+    if(0 && mpisize > 1) {
+        real[int] D;
+        createPartition(Th, D, P1)
+        u[] .*= D;
+        int[int] map = restrict(Ph, PhG, n2o);
+        PhG uG, v;
+        uG[](map) = u[];
+        mpiAllReduce(uG[], v[], mpiCommWorld, mpiSUM);
+        w[] -= v[];
+        assert(w[].l2 < 1.0e-2);
+    }
+}

@@ -92,6 +92,7 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [redistributeDmesh.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/redistributeDmesh.edp)             | Gather and scatter a Dmesh on different MPI communicators                |
 | [DMPlex-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/DMPlex-PETSc.edp)                       | Load and partition a mesh using a DM in two and three dimensions         |
 | [function-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/function-PETSc.edp)                   | Custom plugin showing how to directly access PETSc in C++                |
+| [convect.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/convect.edp)                                 | Calling the convert FreeFEM function on a distributed mesh               |
 
 ### Reproducible science
 | Article                                                                                                                                                       | Source code                                                   |
