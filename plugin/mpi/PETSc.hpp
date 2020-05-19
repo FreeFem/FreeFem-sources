@@ -162,15 +162,15 @@ void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
             free = true;
         }
         if(!(*ptA->_vS)[k]) {
-            MatCreate(PetscObjectComm((PetscObject)ptA->_ksp), &(*ptA->_vS)[k]);
+            MatCreate(ptA->_A->getCommunicator(), &(*ptA->_vS)[k]);
             MatSetSizes((*ptA->_vS)[k], end - start, end - start, global, global);
             MatSetType((*ptA->_vS)[k], MATMPIAIJ);
             MatMPIAIJSetPreallocationCSR((*ptA->_vS)[k], reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
             MatSetOption((*ptA->_vS)[k], MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
         }
         else {
-            PetscBool update = (mS ? PETSC_TRUE : PETSC_FALSE);
-            MPI_Allreduce(MPI_IN_PLACE, &update, 1, MPIU_BOOL, MPI_MAX, PetscObjectComm((PetscObject)ptA->_ksp));
+            PetscBool update = (mS && ptA->_ksp ? PETSC_TRUE : PETSC_FALSE);
+            MPI_Allreduce(MPI_IN_PLACE, &update, 1, MPIU_BOOL, MPI_MAX, ptA->_A->getCommunicator());
             if(update) {
                 Mat S;
                 MatCreate(PetscObjectComm((PetscObject)ptA->_ksp), &S);
