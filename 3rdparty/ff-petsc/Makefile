@@ -83,56 +83,39 @@ FLAGS_MTUNE := -mtune=native
 endif
 COMMON_FLAGS := --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-cxx-dialect=C++11 --with-ssl=0 --with-x=0 --with-fortran-bindings=0
 ifeq ($(WIN32DLLTARGET),)
-##   Not on windows....
-FLAGS_CONF_PETSC_REAL = $(COMMON_FLAGS) --with-cc='$(MPICC)' --with-cxx='$(MPICXX)' \
-		--with-scalar-type=real \
-		$(PETSC_OPENBLAS) \
-		$(PETSC_DOWNLOAD)
-FLAGS_CONF_PETSC_COMPLEX = $(COMMON_FLAGS) --with-cc='$(MPICC)' --with-cxx='$(MPICXX)' \
-		--with-scalar-type=complex \
-		$(PETSC_OPENBLAS_C) \
-		$(PETSC_DOWNLOAD_C)
-ifneq ($(FC),)
-FLAGS_CONF_PETSC_REAL += --with-fc='$(MPIFC)' --download-scalapack --download-mumps
-FLAGS_CONF_PETSC_COMPLEX += --with-fc='$(MPIFC)' --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL)
+##  Not on windows....
+COMMON_FLAGS += --with-cc='$(MPICC)' --with-cxx='$(MPICXX)'
+ifneq ($(MPIFC),)
+COMMON_FLAGS += --with-fc='$(MPIFC)'
+PETSC_DOWNLOAD += --download-scalapack --download-mumps
+PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL)
 else
-FLAGS_CONF_PETSC_REAL += --with-fc=0
-FLAGS_CONF_PETSC_COMPLEX += --with-fc=0
+COMMON_FLAGS += --with-fc=0
 endif
 else
 ##   On windows....
-FLAGS_CONF_PETSC_REAL = $(COMMON_FLAGS) --with-shared-libraries=0 \
+COMMON_FLAGS += --with-shared-libraries=0 \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' \
 	CXXFLAGS='-fno-stack-protector' \
 	CFLAGS='-fno-stack-protector' \
-	--with-scalar-type=real \
 	--with-mpi-lib='$(MPI_LIB)' \
 	--with-mpi-include='$(MPI_INC_DIR)' \
-	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
-	$(PETSC_OPENBLAS) \
-	$(PETSC_DOWNLOAD) \
-	'--download-metis-cmake-arguments=-G "MSYS Makefiles"' \
+	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'
+PETSC_DOWNLOAD += '--download-metis-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-parmetis-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-superlu-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu'
-FLAGS_CONF_PETSC_COMPLEX = $(COMMON_FLAGS) --with-shared-libraries=0 \
-	--with-cc='$(CC)' --with-cxx='$(CXX)' \
-	CXXFLAGS='-fno-stack-protector' \
-	CFLAGS='-fno-stack-protector' \
-	--with-scalar-type=complex \
-	--with-mpi-lib='$(MPI_LIB)' \
-	--with-mpi-include='$(MPI_INC_DIR)' \
-	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec' \
-	$(PETSC_OPENBLAS_C) \
-	$(PETSC_DOWNLOAD_C)
 ifneq ($(FC),)
-FLAGS_CONF_PETSC_REAL += --with-fc='$(FC)' --download-scalapack --download-mumps
-FLAGS_CONF_PETSC_COMPLEX += --with-fc='$(FC)' --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL)
+COMMON_FLAGS += --with-fc='$(FC)'
+PETSC_DOWNLOAD += --download-scalapack --download-mumps
+PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL)
 else
-FLAGS_CONF_PETSC_REAL += --with-fc=0
-FLAGS_CONF_PETSC_COMPLEX += --with-fc=0
+COMMON_FLAGS += --with-fc=0
 endif
 endif
+
+FLAGS_CONF_PETSC_REAL = $(COMMON_FLAGS) --with-scalar-type=real $(PETSC_OPENBLAS) $(PETSC_DOWNLOAD)
+FLAGS_CONF_PETSC_COMPLEX = $(COMMON_FLAGS) --with-scalar-type=complex $(PETSC_OPENBLAS_C) $(PETSC_DOWNLOAD_C)
 
 all-local:
 	@echo make ..
@@ -219,8 +202,7 @@ Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
 	../../config.status --file="Makefile.inc:Makefile-PETSc.inc"
 
 $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
-	cd $(SRCDIR) && ./configure MAKEFLAGS='' \
-		--prefix=$(DIR_INSTALL_REAL) \
+	cd $(SRCDIR) && ./configure --prefix=$(DIR_INSTALL_REAL) \
 		$(FLAGS_CONF_PETSC_REAL) PETSC_ARCH=fr
 	test -f $(SRCDIR)/fr/lib/petsc/conf/petscvariables
 	touch $@
@@ -230,8 +212,7 @@ Make-petsc-download.mk:$(SRCDIR)/tag-install-real
 ifdef 	COMPLEX_CASE
 #  version COMPLEX.....
 $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
-	cd $(SRCDIR) && ./configure MAKEFLAGS='' \
-		--prefix=$(DIR_INSTALL_COMPLEX) \
+	cd $(SRCDIR) && ./configure --prefix=$(DIR_INSTALL_COMPLEX) \
 		$(FLAGS_CONF_PETSC_COMPLEX) PETSC_ARCH=fc
 	test -f $(SRCDIR)/fc/lib/petsc/conf/petscvariables
 	touch $@
