@@ -32,6 +32,7 @@ All notable changes to this project will be documented in this file.
 - interface to PETSc DMPlex, see `examples/hpddm/DMPlex-PETSc.edp`
 - function `MatDestroy`
 - function `MatPtAP` and `transferMat` for parallel interpolation between non-matching grids, see `examples/hpddm/PtAP-2d-PETSc.edp`
+- preliminary interface to `SVDSolve` from SLEPc to compute singular value decompositions
 
 ### Changed
 - moved Htool to its new GitHub location
