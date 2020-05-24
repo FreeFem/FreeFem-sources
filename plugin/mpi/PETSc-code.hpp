@@ -2660,7 +2660,11 @@ namespace PETSc {
                   MatHeaderReplace(ptA->_petsc, &Ac);
               }
           }
+#if PETSC_VERSION_GE(3, 14, 0)
+          KSPMatSolve(ptA->_ksp, B, C);
+#else
           KSPHPDDMMatSolve(ptA->_ksp, B, C);
+#endif
           MatDestroy(&C);
           MatDestroy(&B);
         }
