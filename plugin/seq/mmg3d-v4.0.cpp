@@ -447,6 +447,7 @@ static void Load_Init( ) {    // le constructeur qui ajoute la fonction "splitme
   }
 
   Global.Add("mmg3d", "(", new mmg3d_ff);
+  Global.Add("mmg3dv4", "(", new mmg3d_ff);
 }
 
 #define WITH_NO_INIT

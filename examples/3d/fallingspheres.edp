@@ -46,5 +46,5 @@ for(int it=0; it<29; it++){
   cout<<"  ITERATION       "<<it<<endl;
   Lap;
   plot(Th,uh);
-  Th=mmg3d(Th,opt="-O 9",displacement=[zero,zero,uh]); 
+  Th=mmg3dv4(Th,opt="-O 9",displacement=[zero,zero,uh]); 
  }

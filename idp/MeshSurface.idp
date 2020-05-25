@@ -1,6 +1,6 @@
 load "msh3"
 load "medit"
-load "freeyams"
+load "mmg"
 // 2 basic functions to build surface mesh 
 /*  Usage:
   meshS   SurfaceHex(N,B,L,orient);
@@ -75,7 +75,7 @@ func meshS Ellipsoide (real RX,real RY,real RZ,real h,int L,real Ox,real Oy,real
   int[int] ref=[0,L];  
   
   meshS  ThS= movemesh23(Th,transfo=[f1,f2,f3],orientation=orientation,reftri=ref);
-  ThS=freeyams(ThS,hmin=h,hmax=h,gradation=2.,verbosity=-10,mem=100,option=0);
+  ThS=mmgs(ThS,hmin=h,hmax=h,hgrad=2.);
   return ThS;
 }
  

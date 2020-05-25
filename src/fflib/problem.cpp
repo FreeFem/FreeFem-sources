@@ -6956,7 +6956,6 @@ namespace Fem2D {
 
         KN<double>   Aipj(ipj.N());
         KNM<R>  Vp(dim,PtHat.N());
-
         double tgv1=tgv <0? 1: tgv; // change 21 dec 2010 FH (Hack of ILU)
         for (int ib=0;ib<Th.neb;ib++)
         {

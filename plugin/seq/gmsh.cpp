@@ -1701,7 +1701,8 @@ bool SaveGMSH(pmeshS pTh, string *filewoext) {
   ofstream f1(file.c_str( ));
 
   if (!f1) {
-    ffassert(f1);
+      cout << " Error Opening file " << file << endl;
+      ExecError("Error Opening file");
     return 1;
   }
 

@@ -319,7 +319,8 @@ basicAC_F0::name_and_type mmg_Op<MeshS>::name_param[] = {
 template<class ffmesh>
 class mmg_ff : public OneOperator {
  public:
-  mmg_ff( ) : OneOperator(atype< const ffmesh* >( ), atype< const ffmesh* >( )) {}
+    mmg_ff( ) : OneOperator(atype< const ffmesh* >( ), atype< const ffmesh* >( )) {pref=10;}
+    // to remove ambiguity with mmg3-v4
 
   E_F0 *code(const basicAC_F0 &args) const { return new mmg_Op<ffmesh>(args, t[0]->CastTo(args[0])); }
 };
