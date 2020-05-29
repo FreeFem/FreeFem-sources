@@ -959,9 +959,6 @@ else
     fi
 fi
 
-# FFCS needs to change some of the FF makefiles to compile without MPI
-AM_CONDITIONAL([FFCS_MPIOK],[test $ff_mpi = yes])
-
 # Looking for useful configuration utilities
 # ------------------------------------------
 
@@ -971,7 +968,7 @@ AC_ARG_ENABLE(download,AC_HELP_STRING([--enable-download],[Download missing libr
 ## PETSc
 AC_ARG_WITH(petsc,[ --with-petsc=/usr/local/petsc/conf/petscvariables --without-petsc])
 AC_ARG_WITH(prefix_petsc,[ --prefix_petsc=directory where all PETSc/SLEPc will be installed if you download ])
-if test -z "${prefix_petsc}"; then prefix_petsc="${prefix}/ff-petsc/"; fi
+if test -z "${prefix_petsc}"; then prefix_petsc="${prefix}/ff-petsc"; fi
 AC_SUBST([FF_prefix_petsc],"$prefix_petsc")
 AC_SUBST([FF_prefix_petsc_real],"$prefix_petsc_real")
 AC_SUBST([FF_prefix_petsc_complex],"$prefix_petsc_complex")
@@ -980,9 +977,9 @@ AC_SUBST([FF_generic_petsc],"$enable_generic")
 #/usr/local/ff++/petsc/lib/petsc/conf/petscvariables
 ff_petsc_ok=no
 ff_slepc_ok=no
-if test "$with_petsc" != no -a $ff_mpi = yes; then
-    for d in "$with_petsc" "${prefix_petsc}/real/lib" "${prefix_petsc}/r/lib" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
-	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
+if test "$with_petsc" != no; then
+    for d in "$with_petsc" "${prefix_petsc}/r/lib" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
+	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc/conf/petscvariables" ; do
 	    ffconfpetsc="$d$dd"
 		ffconfslepc="$d/slepc/conf/slepcvariables"
 
@@ -994,6 +991,11 @@ if test "$with_petsc" != no -a $ff_mpi = yes; then
 		    PETSC_MPIRUN=`awk -F' *= *' '"MPIEXEC"==$1 {print $2}' "$ffconfpetsc"`
 		    PETSC_MPIRUN=`echo "$PETSC_MPIRUN" | awk '{gsub(" --oversubscribe", ""); print}'`	#remove --oversubscribe
 		    AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]);
+            if test "$ff_mpi" != yes; then
+                MPIRUN=`echo $PETSC_MPIRUN`
+                m4_include(etc/config/m4/acmpi.m4)
+            fi
+            if test "$ff_mpi" = yes; then
                     WPETSC_MPIRUN=`which "$PETSC_MPIRUN"`
                     WMPIRUN=`which "$MPIRUN"` 
 		    test  "$PETSC_SCALAR" = "real" && test "$ff_win32" = yes -o  "$PETSC_MPIRUN" = "$MPIRUN" ||  cmp -s "$WPETSC_MPIRUN" "$WMPIRUN"
@@ -1039,6 +1041,7 @@ if test "$with_petsc" != no -a $ff_mpi = yes; then
 		    else
 			 AC_MSG_NOTICE([" Warning PETSC MPI and FF++ MPI not the same: $PETSC_MPIRUN != $MPIRUN or $PETSC_SCALAR != real ." ]);
 		    fi
+        fi
 		fi
 	    else
 		ffconfpetsc="";
@@ -1057,9 +1060,9 @@ fi
 AC_ARG_WITH(petsc_complex,[  --with-petsc_complex=/usr/local/petsc/conf/petscvariables   --without-petsc_complex  ])
 ff_petsccomplex_ok=no
 ff_slepccomplex_ok=no
-if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
-    for d in "$with_petsc_complex" "${prefix_petsc}/complex/lib" "${prefix_petsc}/c/lib" /usr/local/ff++/petsc-complex/lib ;do
-	for dd in ""  "/petsc/conf/petscvariables" "/lib/petsc-conf/petscvariables" ; do
+if test "$with_petsc_complex" != no; then
+    for d in "$with_petsc_complex" "${prefix_petsc}/c/lib" /usr/local/ff++/petsc/c/lib ;do
+	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc/conf/petscvariables" ; do
 	    ffconfpetscc="$d$dd"
 	    if test -f "$ffconfpetscc" -a  "$ff_petsccomplex_ok" = no ; then
 		    PETSC_COMPLEX_SCALAR=`awk -F' *= *' '"PETSC_SCALAR"==$1 {print $2}' "$ffconfpetscc"`
@@ -1068,6 +1071,11 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
 		    
 			PETSC_COMPLEX_MPIRUN=`echo "$PETSC_COMPLEX_MPIRUN" | awk '{print $1}'`	#remove --oversubscribe
 			AC_MSG_NOTICE([ find complex ($PETSC_COMPLEX_SCALAR) petsc in $ffconfpetscc]);
+            if test "$ff_mpi" != yes; then
+                MPIRUN=`echo $PETSC_COMPLEX_MPIRUN`
+                m4_include(etc/config/m4/acmpi.m4)
+            fi
+            if test "$ff_mpi" = yes; then
 		    test  "$PETSC_COMPLEX_SCALAR" = "complex" &&  test  "$ff_win32" = yes -o  "$PETSC_COMPLEX_MPIRUN" = "$MPIRUN" ||  cmp -s `which "$PETSC_COMPLEX_MPIRUN"` `which "$MPIRUN"`
 		   	if test "$?"  -eq 0 ; then
             AC_SUBST([FF_prefix_petsc_complex],"$PETSC_COMPLEX_PREFIXDIR")
@@ -1109,6 +1117,7 @@ if test "$with_petsc_complex" != no -a  $ff_mpi = yes; then
 			else
 			 AC_MSG_NOTICE([" Warning PETSC complex MPI and FF++ MPI not the same: $PETSC_COMPLEX_MPIRUN != $MPIRUN or $PETSC_COMPLEX_SCALAR != complex ." ]);
 		    fi
+            fi
 		fi
 	done
     done
@@ -1123,6 +1132,9 @@ fi
 ##  slepc
 
 ### end petsc ....
+
+# FFCS needs to change some of the FF makefiles to compile without MPI
+AM_CONDITIONAL([FFCS_MPIOK],[test $ff_mpi = yes])
 
 #replacing wget with another command
 ff_wget_command="wget --no-check-certificate"

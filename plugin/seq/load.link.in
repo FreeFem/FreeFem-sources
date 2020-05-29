@@ -271,9 +271,9 @@ if [ -n "$ffiles$files$fileso" ] ; then
 	exit 1;
     fi
     if [ "$files" ] ;then
-	echo $CXX -c $FLAGS $CXXFLAGS $FFCXXFLAGS $INC $PIC $files
+	echo $CXX -c $FLAGS $CXXFLAGS $INC $PIC $FFCXXFLAGS $files
 	if [  $do = yes ] ; then
-	    eval $CXX -c $INC $FLAGS $CXXFLAGS $FFCXXFLAGS  $PIC  $files
+	    eval $CXX -c $INC $FLAGS $CXXFLAGS $PIC $FFCXXFLAGS $files
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
 	fi
 	echo

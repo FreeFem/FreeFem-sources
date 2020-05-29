@@ -30,8 +30,8 @@ DIR_INSTALL_COMPLEX:=$(FF_prefix_petsc)/c
 
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(FF_prefix_petsc)" && test -w "$(DESTDIR)$(FF_prefix_petsc) || echo sudo)
 ifeq ($(COMPILE_OPENBLAS),openblas)
-PETSC_OPENBLAS := --download-openblas
-PETSC_OPENBLAS_C := --with-openblas-dir=$(DIR_INSTALL_REAL)
+PETSC_OPENBLAS := --download-f2cblaslapack
+PETSC_OPENBLAS_C := --with-blaslapack-dir=$(DIR_INSTALL_REAL)
 else
 PETSC_OPENBLAS = --with-blaslapack-include='$(shell echo $(BLASINC) | sed "s/-I//g")' \
 		--with-blaslapack-lib='$(BLAS_LAPACK_LIBS)'
@@ -81,9 +81,19 @@ FLAGS_MTUNE := -mtune=generic
 else
 FLAGS_MTUNE := -mtune=native
 endif
-COMMON_FLAGS := --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-cxx-dialect=C++11 --with-ssl=0 --with-x=0 --with-fortran-bindings=0
+COMMON_FLAGS := MAKEFLAGS='' --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-cxx-dialect=C++11 --with-ssl=0 --with-x=0 --with-fortran-bindings=0
 ifeq ($(WIN32DLLTARGET),)
 ##  Not on windows....
+ifeq ($(MPICC)$(MPICXX)$(MPIFC),)
+PETSC_DOWNLOAD += --with-cc='$(CC)' --with-cxx='$(CXX)' --download-mpich
+PETSC_DOWNLOAD_C += --with-mpi-dir=$(DIR_INSTALL_REAL)
+ifneq ($(FC),)
+PETSC_DOWNLOAD += --with-fc='$(FC)' --download-scalapack --download-mumps
+PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL)
+else
+COMMON_FLAGS += --with-fc=0
+endif
+else
 COMMON_FLAGS += --with-cc='$(MPICC)' --with-cxx='$(MPICXX)'
 ifneq ($(MPIFC),)
 COMMON_FLAGS += --with-fc='$(MPIFC)'
@@ -91,6 +101,7 @@ PETSC_DOWNLOAD += --download-scalapack --download-mumps
 PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL)
 else
 COMMON_FLAGS += --with-fc=0
+endif
 endif
 else
 ##   On windows....

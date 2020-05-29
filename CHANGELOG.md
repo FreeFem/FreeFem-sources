@@ -26,7 +26,6 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
-
 - compile ffmaster / ffslave example under windows (thanks to johann@ifado.de)
 - Boolean parameter `spiltpbedge` in `buildmesh` to split in to edge with two boundary vertices
 - interface to PETSc DMPlex, see `examples/hpddm/DMPlex-PETSc.edp`
@@ -37,6 +36,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - moved Htool to its new GitHub location
 - ScaLAPACK and MUMPS are not compiled by PETSc anymore if there is no Fortran compiler
+- MPICH is compiled by PETSc if no MPI is detected during configure
 
 ### Deprecated
 
