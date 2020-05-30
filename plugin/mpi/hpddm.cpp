@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: cxx11 hpddm [mumps parmetis metis ptscotch scotch scalapack mpifc fc|umfpack] [mkl|blas] mpi pthread
+//ff-c++-LIBRARY-dep: cxx11 hpddm [mumps parmetis metis ptscotch scotch scalapack mpifc fc|umfpack] [mkl|blas] mpi
 //ff-c++-cpp-dep:
 
 #define HPDDM_PRECISION                 2
