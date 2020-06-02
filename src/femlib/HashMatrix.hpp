@@ -100,7 +100,7 @@ public:
     HashMatrix(I nn,I mm,I nnnz,int halff);
     HashMatrix(istream & f,int cas=-1);
     HashMatrix(KNM_<R> F,double  threshold=1e-30);
-    HashMatrix(int Half,I nn);
+    explicit HashMatrix(I nn,I mm,bool Half); // too dangerous 
     HashMatrix(const HashMatrix& A);
     HashMatrix(I nn,const R *diag);
     void RenumberingInv(KN_<I> II,KN_<I> JJ);

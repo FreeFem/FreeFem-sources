@@ -9014,9 +9014,9 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
      {
        {
           if ( &Uh == & Vh )
-            dataA.master(new MatriceMorse<R>( sym,Vh.NbOfDF));
+            dataA.master(new MatriceMorse<R>( Vh.NbOfDF,Vh.NbOfDF,sym));
           else
-            dataA.master(new MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF));
+            dataA.master(new MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,false));
         }
         MatriceCreuse<R>  & AA(dataA);
        if(verbosity>1) cout <<  "   -- size of Matrix " << AA.size()<< " Bytes" <</* " skyline =" <<ds.typemat->profile <<*/ endl;

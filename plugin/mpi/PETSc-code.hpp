@@ -64,7 +64,7 @@ namespace PETSc {
         A.Uh = Uh;
         A.Vh = Vh;
         if(ds.sym) {
-          A.A.master(new MatriceMorse<HPDDM::upscaled_type<K>>(ds.sym, Vh.NbOfDF));
+          A.A.master(new MatriceMorse<HPDDM::upscaled_type<K>>(Vh.NbOfDF,Vh.NbOfDF,0,ds.sym));
           ffassert(&Uh == &Vh);
         }
         else

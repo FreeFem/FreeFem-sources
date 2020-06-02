@@ -250,7 +250,8 @@ public:
             if(piter) *piter=itermx;
             if ( ! res ) err++;
         }
-        if(err && erronerr) {  std::cerr << "Error: fgmres do not converge nb end ="<< err << std::endl; assert(0); }
+        if(err && erronerr) {  std::cerr << "Error: fgmres do not converge nb end ="<< err << std::endl;
+            /*assert(0);*/ }
     }
     
 };

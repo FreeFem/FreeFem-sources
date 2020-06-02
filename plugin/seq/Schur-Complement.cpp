@@ -223,7 +223,7 @@ long ff_SchurComplement(Stack stack, KNM< R > *pS, Matrice_Creuse< R > *pmcA, KN
   //    if (mark[i] <-1) J[-mark[i]-2]= i;
   // I, J partionne in 2 set ..
   // the 4 matrix
-  MatriceMorse< R > AII(ni, ni), AIJ(ni, nj), AJI(nj, ni), AJJ(nj, nj);
+    MatriceMorse< R > AII(ni, ni,0,false), AIJ(ni, nj,0,false), AJI(nj, ni,0,false), AJJ(nj, nj,0,false);
   int nstep = A.half;
   ffassert(nstep == 0 || nstep == 1);
   for (int step = 0; step <= nstep; ++step)

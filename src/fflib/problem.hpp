@@ -1298,7 +1298,7 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
 	 A.Uh=Uh;
 	 A.Vh=Vh;
 	 if (ds.sym )
-	   {  A.A.master( new  MatriceMorse<R>(ds.sym,Vh.NbOfDF) );
+	   {  A.A.master( new  MatriceMorse<R>(Vh.NbOfDF,Vh.NbOfDF,ds.sym) );
 	     ffassert( &Uh == & Vh);}
 	 else
 	     A.A.master( new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,Vh.NbOfDF*2,0) ); // lines corresponding to test functions

@@ -231,17 +231,17 @@ re_do_numerics(0),re_do_symbolic(0),tgv(0), ntgv(0)
                 operator()(ii,jj)=Fiijj;
         }
 }
-
+//  PB ....
 template<class I,class R>
-HashMatrix<I,R>::HashMatrix(int Half,I nn)
-: VirtualMatrix<I,R>(nn,nn),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),matmulcpu(0.),i(0),j(0),p(0),aij(0),
+HashMatrix<I,R>::HashMatrix(I nn,I mm,bool Half)
+: VirtualMatrix<I,R>(nn,mm),  nnz(0),nnzmax(0),nhash(0),nbcollision(0),nbfind(0),matmulcpu(0.),i(0),j(0),p(0),aij(0),
 head(0), next(0),
 half(Half), state(unsorted),type_state(type_HM),
 nbsort(0),sizep(0),lock(0), fortran(0) ,
 re_do_numerics(0),re_do_symbolic(0)
 
 {
-    Increaze(nn*4);
+    Increaze(max(nn,mm)*4);
 }
 
 template<class I,class R>
