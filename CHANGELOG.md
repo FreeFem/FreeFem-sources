@@ -37,6 +37,7 @@ All notable changes to this project will be documented in this file.
 - moved Htool to its new GitHub location
 - ScaLAPACK and MUMPS are not compiled by PETSc anymore if there is no Fortran compiler
 - MPICH is compiled by PETSc if no MPI is detected during configure
+- PETSc version 3.13.2
 
 ### Deprecated
 

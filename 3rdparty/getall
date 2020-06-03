@@ -182,10 +182,10 @@ download('parmmg','https://github.com/MmgTools/ParMmg/archive/a1dec3f6a8d8ace368
         'https://github.com/MmgTools',
         'parmmg.zip',
         '890d3847d8ea148227ba31dac1db8787');
-download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.13.0.tar.gz',
+download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.13.2.tar.gz',
 	'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/',
-	'petsc-lite-3.13.0.tar.gz',
-	'8ea59cc9e329611d73eb1be56cc32fda');
+	'petsc-lite-3.13.2.tar.gz',
+	'57fa285df610f1df7a5f1218e63853fd');
 	
 download('htool','https://github.com/htool-ddm/htool/archive/0ba76eaca05217fceabf3f0269548b354590eef3.zip',
 		'https://github.com/htool-ddm/',
@@ -193,10 +193,10 @@ download('htool','https://github.com/htool-ddm/htool/archive/0ba76eaca05217fceab
 		'1fc76ca089bb76f668a935d0d3678bf9');
 
 	
-download('hpddm','https://github.com/hpddm/hpddm/archive/21c972f2488edbbd4948c937d7c929b38de9def7.zip',
+download('hpddm','https://github.com/hpddm/hpddm/archive/ce6ce80b62e9bc71efedf8b9cb6ffb00dfd6e44e.zip',
 	'https://github.com/hpddm',
 	'hpddm.zip',
-	'e4fad1234fdf51d34cda4d0461dc11a6');
+	'340f81270d5e16faa86a0372d10ce417');
 
 download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/c608875aca175b3bb424c50a9c13131aa7e2b257.zip',
 	'https://github.com/PierreMarchand20/BemTool',

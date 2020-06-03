@@ -1,0 +1,13 @@
+diff --git a/petsc-3.13.2/src/ksp/ksp/impls/hpddm/hpddm.cxx b/petsc-3.13.2/src/ksp/ksp/impls/hpddm/hpddm.cxx
+index ba91ba30f8..a6a1403689 100644
+--- a/petsc-3.13.2/src/ksp/ksp/impls/hpddm/hpddm.cxx
++++ b/petsc-3.13.2/src/ksp/ksp/impls/hpddm/hpddm.cxx
+@@ -325,7 +325,7 @@ static PetscErrorCode KSPHPDDMGetDeflationSpace_HPDDM(KSP ksp, Mat *U)
+     op = data->op;
+   }
+   array = op->storage();
+-  N2 = op->k();
++  N2 = op->k().second;
+   if (!array) *U = NULL;
+   else {
+     ierr = KSPGetOperators(ksp, &A, NULL);CHKERRQ(ierr);

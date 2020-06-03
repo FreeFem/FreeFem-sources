@@ -72,8 +72,8 @@ PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
 endif
 PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-slepc
 ifeq ($(WIN32DLLTARGET),)
-PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-hpddm --download-hpddm-commit=21c972f
-PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-hpddm --download-hpddm-commit=21c972f
+PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-hpddm --download-hpddm-commit=ce6ce80
+PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-hpddm --download-hpddm-commit=ce6ce80
 endif
 endif
 ifeq ($(FF_generic_petsc), yes)
@@ -142,8 +142,8 @@ all-local:
 	@echo "	make petsc-slepc "
 
 DIRPKG=../pkg
-VERSION=3.13.0
-VERSION_SLEPC=3.012.2
+VERSION=3.13.2
+VERSION_SLEPC=3.13.2
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
@@ -291,10 +291,9 @@ WHERE-all:Makefile Make-petsc-download.mk
 endif
 $(SRCDIR)/tag-tar:$(PACKAGE)
 	-tar xzf $(PACKAGE)
+	patch -p1 < petsc-hpddm.patch
 ifeq ($(WIN32DLLTARGET),)
 	patch -p1 < petsc-metis.patch
-else
-	patch -p1 < petsc-suitesparse.patch
 endif
 	touch $@
 $(PACKAGE):
