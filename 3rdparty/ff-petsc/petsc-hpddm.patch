@@ -1,3 +1,20 @@
+diff --git a/petsc-3.13.2/configure b/petsc-3.13.2/configure
+index 5c373ad99f..5aa85c8c42 100755
+--- a/petsc-3.13.2/configure
++++ b/petsc-3.13.2/configure
+@@ -1,10 +1,10 @@
+ #!/bin/sh
+
+ "true" '''\'
+-for pyimpl in python3 python python2; do
++for pyimpl in python python3 python2; do
+   which $pyimpl > /dev/null 2>&1  && echo "Using $pyimpl for Python" && exec $pyimpl "$0" "$@"
+ done
+-echo "Error! Could not locate python! Please install and have python3, python, or python2 in PATH."
++echo "Error! Could not locate python! Please install and have python, python3, or python2 in PATH."
+ echo "Or use: /path/to/valid/python configure $@"
+ exit 127
+ '''
 diff --git a/petsc-3.13.2/src/ksp/ksp/impls/hpddm/hpddm.cxx b/petsc-3.13.2/src/ksp/ksp/impls/hpddm/hpddm.cxx
 index ba91ba30f8..a6a1403689 100644
 --- a/petsc-3.13.2/src/ksp/ksp/impls/hpddm/hpddm.cxx
