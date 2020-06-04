@@ -38,6 +38,19 @@ index 5c373ad99f0b9ad4d2c9e328e3245434d79b7a8c..4ec437ed3c3e30c06430eccf4f136008
  sys.path.insert(0, os.path.abspath('config'))
  import configure
  configure.petsc_configure([])
+diff --git a/petsc-3.13.2/config/BuildSystem/config/packages/slepc.py b/petsc-3.13.2/config/BuildSystem/config/packages/slepc.py
+index 124cfb7aa7..bad077718c 100644
+--- a/petsc-3.13.2/config/BuildSystem/config/packages/slepc.py
++++ b/petsc-3.13.2/config/BuildSystem/config/packages/slepc.py
+@@ -38,7 +38,7 @@ class Configure(config.package.Package):
+ 
+     # if installing prefix location then need to set new value for PETSC_DIR/PETSC_ARCH
+     if self.argDB['prefix'] and not 'package-prefix-hash' in self.argDB:
+-       iarch = 'installed-'+self.parch.nativeArch
++       iarch = 'installed-'+self.parch.nativeArch.replace('linux-','linux2-')
+        if self.scalartypes.scalartype != 'real':
+          iarch += '-' + self.scalartypes.scalartype
+        carg = 'SLEPC_DIR='+self.packageDir+' PETSC_DIR='+os.path.abspath(os.path.expanduser(self.argDB['prefix']))+' PETSC_ARCH="" '
 diff --git a/petsc-3.13.2/src/ksp/ksp/impls/hpddm/hpddm.cxx b/petsc-3.13.2/src/ksp/ksp/impls/hpddm/hpddm.cxx
 index ba91ba30f8..a6a1403689 100644
 --- a/petsc-3.13.2/src/ksp/ksp/impls/hpddm/hpddm.cxx
