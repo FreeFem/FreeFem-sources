@@ -2661,7 +2661,7 @@ namespace PETSc {
               }
           }
 #if PETSC_VERSION_GE(3, 14, 0)
-          KSPHPDDMMatSolve(ptA->_ksp, B, C);
+          KSPMatSolve(ptA->_ksp, B, C);
 #else
           KSPHPDDMMatSolve(ptA->_ksp, B, C);
 #endif
