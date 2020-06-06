@@ -39,6 +39,7 @@ func int funcJ(real[int]& inPETSc) {
     A = vJ(Vh, Vh, tgv = -2);
     return 0;
 }
+set(A);
 if(hasType("PC", "hpddm")) {
     bool stage = usedARGV("-stage") != -1;
     for(int i = 0; i < 3; ++i) {
@@ -50,11 +51,15 @@ if(hasType("PC", "hpddm")) {
         }
         else if(i == 1) {
             params = "-pc_hpddm_coarse_ksp_reuse_preconditioner";
+            Mat B = A;
+            A = B;
             if(stage)
                 PetscLogStagePush("Fine level");
         }
         else if(i == 2) {
             params = "-pc_hpddm_levels_1_ksp_reuse_preconditioner";
+            Mat B = A;
+            A = B;
             if(stage)
                 PetscLogStagePush("Nothing");
         }
