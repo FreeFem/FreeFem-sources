@@ -81,7 +81,7 @@ FLAGS_MTUNE := -mtune=generic
 else
 FLAGS_MTUNE := -mtune=native
 endif
-COMMON_FLAGS := MAKEFLAGS='' --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-cxx-dialect=C++11 --with-ssl=0 --with-x=0 --with-fortran-bindings=0
+COMMON_FLAGS := MAKEFLAGS='' --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-cxx-dialect=C++11 --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-cudac=0
 ifeq ($(WIN32DLLTARGET),)
 ##  Not on windows....
 ifeq ($(MPICC)$(MPICXX)$(MPIFC),)
