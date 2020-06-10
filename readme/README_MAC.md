@@ -127,7 +127,7 @@ Under Mavericks (10.9, xcode 5.0.2 form scratch)
  9) Compile FreeFem++
 	```bash
 	cd FreeFem-sources
-	./configure '-with-suffix=macos-10.9' '-without-fltk' '--enable-download' '--enable-optim' 'MPIRUN=/usr/local/bin/mpirun' '--enable-m64' '--without-x' 'CC=clang' 'CXXFLAGS=-std=c++11' 'CXX=clang++' 'F77=/usr/local/bin/gfortran' 'FC=/usr/local/bin/gfortran' 'MPICXX=/usr/local/bin/mpic++' 'MPICC=/usr/local/bin/mpicc' 'MPIFC=/usr/local/bin/mpif90' 'MPIF77=/usr/local/bin/mpif90' '--enable-maintainer-mode'
+	./configure '-with-suffix=macos-10.9' '-without-fltk' '--enable-download' '--enable-optim' 'MPIRUN=/usr/local/bin/mpirun' '--enable-m64' '--without-x' 'CC=clang' 'CXXFLAGS=-std=c++11' 'CXX=clang++' 'F77=/usr/local/bin/gfortran' 'FC=/usr/local/bin/gfortran' 'MPICXX=/usr/local/bin/mpic++' 'MPICC=/usr/local/bin/mpicc' 'MPIFC=/usr/local/bin/mpif90' '--enable-maintainer-mode'
 	make
 	sudo make install
 	```

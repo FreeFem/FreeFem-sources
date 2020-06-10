@@ -36,10 +36,9 @@ if test -n "$with_mpilibs" -a "$with_mpilibs" != no ; then
     ff_MPI_LIBC="$with_mpilibs"
     ff_MPI_LIBFC="$with_mpilibs"
     MPICXX="$CXX $ff_MPI_INCLUDE"
-    MPIF77="$F77 $ff_MPI_INCLUDE"
     MPIFC="$FC  $ff_MPI_INCLUDE"
     MPICC="$CC  $ff_MPI_INCLUDE"
-    AC_MSG_NOTICE([   ---  set  all MPI compile to compiler:   $MPICC , $MPIF77, $MPIFC, $MPICC  ])
+    AC_MSG_NOTICE([   ---  set  all MPI compile to compiler:   $MPICC, $MPIFC, $MPICC ])
 fi
 
 if test -n "$with_mpilibsc" -a "$with_mpilibsc" != no ; then
@@ -99,7 +98,6 @@ case "$MPIRUN" in
             ff_MPI_LIBFC="-L'$ff_MPI_LIB_DIR'  -lmpi"
 	    ff_mpitype=sgi
             test -z "$MPICXX" && MPICXX="$CXX $ff_MPI_INCLUDE"
-            test -z "$MPIF77" && MPIF77="$F77 $ff_MPI_INCLUDE"
             test -z "$MPIFC"  && MPIFC="$FC  $ff_MPI_INCLUDE"
             test -z "$MPICC"  && MPICC="$CC  $ff_MPI_INCLUDE"
 #	    echo " *** MPI sgi ..... "
@@ -145,7 +143,6 @@ esac
 	ff_mpiexec_win="C:\Program Files\Microsoft MPI\Bin\mpiexec.exe"
 	test -z "$ff_mpiexec_win" && MPIRUN="$ff_mpiexec_win"
 	test -z "$MPICXX" && MPICXX="$CXX $ff_MPI_INCLUDE"
-	test -z "$MPIF77" && MPIF77="$F77 $ff_MPI_INCLUDE"
 	test -z "$MPIFC"  && MPIFC="$FC  $ff_MPI_INCLUDE"
 	test -z "$MPICC"  && MPICC="$CC  $ff_MPI_INCLUDE"
 	ff_mpitype=MSMPI
@@ -162,7 +159,6 @@ elif test  -d "$with_mpipath" -a "$ff_win32" = yes  ; then
 #    ff_pwd=`pwd`
  #   with_mpi="$ff_pwd"/mpic++
  #   MPICXX="$ff_pwd/mpic++"
- #   MPIF77="$ff_pwd/mpif77"
  #   MPIFC="$ff_pwd/mpif90"
  #   MPICC="$ff_pwd/mpicc" zzzzzzzzzzz
     if  with_mpilibs=`which msmpi.dll`
@@ -185,7 +181,6 @@ elif test  -d "$with_mpipath" -a "$ff_win32" = yes  ; then
 	ff_MPI_LIB="$with_mpilibs"
 	ff_MPI_LIBFC="$with_mpilibs"
 	test -z "$MPICXX" && MPICXX="$CXX $ff_MPI_INCLUDE"
-	test -z "$MPIF77" && MPIF77="$F77 $ff_MPI_INCLUDE"
 	test -z "$MPIFC"  && MPIFC="$FC  $ff_MPI_INCLUDE"
 	test -z "$MPICC"  && MPICC="$CC  $ff_MPI_INCLUDE"
     else
@@ -286,11 +281,6 @@ fi
 	  if test "$enable_fortran" != no
 	  then
 
-	      AC_ARG_VAR(MPIF77,[MPI Fortran 77 compiler command])
-	      if test -z "$MPIF77" ; then
-		  AC_PATH_PROGS(MPIF77, mpif90$ff_mpi_suffix mpif77$ff_mpi_suffix hf77 mpxlf mpf77 mpif90 mpf90 mpxlf90 mpxlf95 mpxlf_r cmpifc cmpif90c, "",$ff_mpi_path)
-	      fi
-	      AC_SUBST(MPIF77)
 	      AC_ARG_VAR(MPIFC,[MPI Fortran 90  compiler command])
 	      if test -z "$MPIFC" ; then
 		  AC_PATH_PROGS(MPIFC, mpif90$ff_mpi_suffix mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, "",$ff_mpi_path)
@@ -372,7 +362,6 @@ if test "$ff_mpi" != yes ; then
 	  AC_SUBST(MPIRUN,"")
 	  AC_SUBST(MPICC,"")
 	  AC_SUBST(MPICXX,"")
-	  AC_SUBST(MPIF77,"")
 	  AC_SUBST(MPIFC,"")
 	  AC_SUBST(MPI_INCLUDE,"")
 	  AC_SUBST(MPI_LIB_DIRS,"")

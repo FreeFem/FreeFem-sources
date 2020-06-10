@@ -43,6 +43,7 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 - `augmentation` routine from the PETSc plugin
+- `MPIF77` variable
 
 ### Fixed
 - missing METIS library when using SuiteSparse compiled by PETSc
