@@ -62,6 +62,7 @@ fi
 AC_MSG_RESULT($MPIRUN)
 if test "ff_mpi" != "no" ; then 
  AC_MSG_CHECKING(for MPIRUN option: )
+ ff_mpi_option=""
  ff_okkk=`"$MPIRUN"  -np 2 --oversubscribe echo ff__okkk| grep ff__okkk |wc -l`
  if test "$ff_okkk" -eq 2 ; then ff_mpi_option="--oversubscribe" ; fi 
  AC_MSG_RESULT($ff_mpi_option)
