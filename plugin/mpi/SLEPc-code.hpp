@@ -259,7 +259,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                     MatCreateVecs(ptA->_petsc, &xr, PETSC_NULL);
                     MatCreateVecs(ptA->_petsc, PETSC_NULL, &xi);
                     VecGetLocalSize(xr, &n);
-                }
+                } else xr = xi = NULL;
                 for(PetscInt i = 0; i < nconv; ++i) {
                     PetscScalar kr, ki = 0;
                     PetscReal sigma;

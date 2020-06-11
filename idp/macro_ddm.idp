@@ -21,10 +21,6 @@ IFMACRO(!partitionerSeq)
 cout << "The macro 'partitioner' must be set to 'metis', 'scotch', or 'parmetis'" << endl;
 exit(1);
 ENDIFMACRO
-IFMACRO(!dimension)
-cout << "The macro 'dimension' must be defined" << endl;
-exit(1);
-ENDIFMACRO
 IFMACRO(dimension,2)
 macro meshN()mesh// EOM             // two-dimensional problem
 macro intN()int2d// EOM             // two-dimensional integral
@@ -53,10 +49,6 @@ macro meshN()meshL// EOM            // three-dimensional line problem
 macro intN()int1d// EOM             // one-dimensional integral
 macro intN1()int0d// EOM            // zero-dimensional integral
 macro intNxN()int1dx1d// EOM        // one-dimensional integral for BEM
-ENDIFMACRO
-IFMACRO(!meshN)
-cout << "The macro 'dimension' must be set to '2', '3', '3S' or '3L'" << endl;
-exit(1);
 ENDIFMACRO
 
 macro plotDmesh(Th, params)
@@ -522,6 +514,10 @@ real[int][int] privateDmesh#ThName#khi(2);
 real[int][int] privateDmesh#ThName#intersection;
 ENDIFMACRO
 {
+IFMACRO(!meshN)
+NewMacro meshN()mesh EndMacro
+NewMacro intN()int2d EndMacro
+ENDIFMACRO
 IFMACRO(!ThName#Comm)
 NewMacro ThName#Comm()mpiCommWorld EndMacro
 ENDIFMACRO
@@ -541,6 +537,7 @@ build(ThName, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm);
 ENDIFMACRO
 }
 EndMacro
+
 macro reconstructDmesh(ThName)
 IFMACRO(!privateDmesh#ThName)
 NewMacro privateDmesh#ThName()privateDmesh#ThName EndMacro
@@ -711,6 +708,10 @@ EndMacro
 macro createMat(ThName, MatName, PkName)
 IFMACRO(privateDmesh#ThName)
 {
+IFMACRO(!meshN)
+NewMacro meshN()mesh EndMacro
+NewMacro intN()int2d EndMacro
+ENDIFMACRO
 IFMACRO(!ThName#Comm)
 NewMacro ThName#Comm()mpiCommWorld EndMacro
 ENDIFMACRO
@@ -754,6 +755,9 @@ ENDIFMACRO
 IFMACRO(!privateDmesh#ThName)
 buildDmesh(ThName)
 {
+IFMACRO(!meshN)
+    NewMacro meshN()mesh EndMacro
+ENDIFMACRO
     NewMacro privateCreateMatCheckDmesh()1 EndMacro
     createMat(ThName, MatName, PkName)
 }
