@@ -8505,7 +8505,7 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
         bool all=true;
         bool VF=l->VF();  // finite Volume or discontinous Galerkin
 
-        if (verbosity>2) cout << "  -- AssembleLinearForm S, discontinous Galerkin  =" << VF << " binside = "<< binside
+        if (verbosity>2) cout << "  -- AssembleLinearForm L, discontinous Galerkin  =" << VF << " binside = "<< binside
             << " levelset integration " <<di.islevelset()<< " withmap: "<<  di.withmap() << "\n";
         //  if( di.withmap()) { ExecError(" no map  in the case (6)??");}
         Expression  const * const mapt=di.mapt[0] ? di.mapt:0;
