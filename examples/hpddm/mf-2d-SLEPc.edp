@@ -1,0 +1,38 @@
+//  run with MPI:  ff-mpirun -np 1 script.edp
+// NBPROC 1
+
+assert(mpisize == 1);
+load "SLEPc"
+
+mesh Th = square(10, 10);
+fespace Vh(Th, P1);
+varf vPb(u, v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v)) + on(1, 2, 3, 4, u = 0.0);
+Mat A(Vh.ndof);
+matrix Loc = vPb(Vh, Vh, tgv = -2);
+int[int] n2o;
+mesh ThTrunc = trunc(Th, x < 0.5, new2old = n2o);
+fespace VhTrunc(ThTrunc, P1);
+Mat B(VhTrunc.ndof);
+int[int] rest = restrict(VhTrunc, Vh, n2o);
+real[int] V(VhTrunc.ndof);
+V = 1;
+int[int] I = 1:VhTrunc.ndof;
+matrix R = [I, rest, V];
+R.resize(VhTrunc.ndof, Vh.ndof);
+matrix prod = Loc * R';
+Mat C(A, B, prod);
+SVDSolve(C, sparams = "-svd_largest -svd_view_values -svd_type cyclic -svd_nsv 10");
+func real[int] prodFunc(real[int]& u) {
+    real[int] v = R' * u;
+    u.resize(Loc.n);
+    u = Loc * v;
+    return u;
+}
+func real[int] prodFuncTranspose(real[int]& ut) {
+    real[int] v = Loc' * ut;
+    ut.resize(R.n);
+    ut = R * v;
+    return ut;
+}
+Mat MF(A, B, prodFunc, transpose = prodFuncTranspose);
+SVDSolve(MF, sparams = "-svd_largest -svd_view_values -svd_type cyclic -svd_nsv 10");

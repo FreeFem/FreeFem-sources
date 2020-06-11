@@ -31,13 +31,15 @@ All notable changes to this project will be documented in this file.
 - interface to PETSc DMPlex, see `examples/hpddm/DMPlex-PETSc.edp`
 - function `MatDestroy`
 - function `MatPtAP` and `transferMat` for parallel interpolation between non-matching grids, see `examples/hpddm/PtAP-2d-PETSc.edp`
-- preliminary interface to `SVDSolve` from SLEPc to compute singular value decompositions
+- preliminary interface to `SVDSolve` from SLEPc to compute singular value decompositions, see `examples/hpddm/mf-2d-SLEPc.edp` or `examples/hpddm/helmholtz-2d-SLEPc-complex.edp`
+- `transpose` parameter when constructing a `Mat` for defining a matrix-free transposed operation
 
 ### Changed
 - moved Htool to its new GitHub location
 - ScaLAPACK and MUMPS are not compiled by PETSc anymore if there is no Fortran compiler
 - MPICH is compiled by PETSc if no MPI is detected during configure
 - PETSc version 3.13.2
+- force `--with-cudac=0` in `make petsc-slepc`
 
 ### Deprecated
 
