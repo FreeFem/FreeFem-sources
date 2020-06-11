@@ -38,7 +38,7 @@ LapVhi def(u) ;
 
 // Two-level Schwarz solve
 ffddmsetupPrecond(Lap,Varf)
-ffddmgeneosetup(Lap,Varf)
+//ffddmgeneosetup(Lap,Varf)
 
 real[int] x0(LapVhi.ndof);
 x0 = 0;

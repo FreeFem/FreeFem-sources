@@ -44,8 +44,15 @@ catch (...) {
 }
 fespace Vh3(Th3,P1);     // P1 FE space
 func gg2=x+y;
-int[int] fforder2=[0,0,1,1];
-verbosity=6;
+int[int] fforder2=[1,1,1,1];
+verbosity=2;
 savevtk("bidule.vtu",Th3,gg2,[gg2,gg2,gg2],gg2,[gg2,gg2,gg2],order=fforder2,dataname="kkdjd jyqql bidule45",bin=1); // The fourth solution Have no name. This name is vector4 (4 ==> fourth solution and vector ==> vector solution).
+savevtk("bidule.vtk",Th3,gg2,[gg2,gg2,gg2],gg2,[gg2,gg2,gg2],order=fforder2,dataname="kkdjd jyqql bidule45",bin=1);
+{ // restore mesh and data
+real[int][int] data;	
+
+mesh3 Th=vtkload3("bidule.vtk",fields=data);//  work only with order =1 and vgk file
+cout << " " << data.n << " == 4 "<< endl;
+}
 
 savegmsh(Th3,"Th3");

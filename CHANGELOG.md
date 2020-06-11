@@ -65,6 +65,9 @@ All notable changes to this project will be documented in this file.
 - distributed ParMmg interface, cf. `examples/hpddm/distributed-parmmg.edp` or `examples/hpddm/laplace-adapt-dist-3d-PETSc.edp`
 - new parallel interpolator on non-matching meshes, cf. `examples/hpddm/transfer.edp`
 - ability to solve problems in single precision or with 64 bit integers
+- tool to read data form vtk file only in 3d (cf. plugin iovtk a first example `examples/plugin/iovtk.edp`)
+- tool to read/wrile ply file of meshL, mesh3, MeshS : Polygon File Format / Stanford Triangle Format do  `load "ioply"`
+     see `examples//3dSurf/operatorsOnMeshS.edp`
 
 ### Changed
 - new `tgv` values: -10 => zero row, -20 => zero row/column
@@ -81,6 +84,9 @@ All notable changes to this project will be documented in this file.
 - compilation of plugins when using static libraries
 - correct detection problem in FE type when use a vectorial FE
 - macro concatenation with spaces in arguments
+- correct bug in `plugin/seq/Schur-Complement.cpp`
+- correct ambigity bug in `plugin/seq/bfstream.cpp` (reading real or integer)
+- compilation fo  plugin libff-mmap-semaphore.c under windows
 
 ## [4.5]
 

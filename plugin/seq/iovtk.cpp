@@ -1368,7 +1368,7 @@ Mesh *VTK_Load(const string &filename, bool bigEndian, KN<KN<double> >* pfields)
   }
 
   if (verbosity > 1) {
-    cout << "   vtkio: Reading %d points" << nv << endl;
+    cout << "   vtkio: Reading points " << nv << endl;
   }
 
   Mesh::Vertex *vff = new Mesh::Vertex[nv];
@@ -3075,7 +3075,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
     ExecError("error in reading vtk file");
   }
 
-  char buffer[256], buffer2[256];
+  char buffer[256], buffer2[256],buffer3[256];
 
   res = fgets(buffer, sizeof(buffer), fp);    // version line
   res = fgets(buffer, sizeof(buffer), fp);    // title
@@ -3085,7 +3085,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
   if (!strcmp(buffer, "BINARY")) {
     binary = true;
   }
-  if(verbosity>9)  cout << " binary = " <<binary <<endl;
+    if(verbosity>9)  cout << " binary = " <<binary << " bigEndian: " << bigEndian  <<endl;
   if (fscanf(fp, "%s %s", buffer, buffer2) != 2) {
     cout << "error in reading vtk files" << endl;
     ExecError("error in reading vtk file");
@@ -3118,14 +3118,14 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
   }
 
   if (verbosity > 3) {
-    cout << "Reading %d points" << nv << " buffer2" << buffer2 << "binary" << binary << " "
+    cout << "Reading points" << nv << " buffer2 " << buffer2 << " binary " << binary << " datasize "
          << datasize << " " << sizeof(float) << endl;
   }
 
   Vertex3 *vff = new Vertex3[nv];
   
   for (int i = 0; i < nv; i++) {
-    if (verbosity > 9) {
+    if (verbosity > 19) {
       cout << " i=" << i << endl;
     }
 
@@ -3134,7 +3134,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
       if (datasize == sizeof(float)) {
         float f[3];
         if (fread(f, sizeof(float), 3, fp) != 3) {
-          cout << "error in reading vtk files" << endl;
+            cout << "error in reading vtk files item: " << i << endl;
           ExecError("error in reading vtk file");
         }
 
@@ -3147,12 +3147,13 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
         }
       } else {
         if (fread(xyz, sizeof(double), 3, fp) != 3) {
-          cout << "error in reading vtk files" << endl;
+          cout << "error in reading vtk files item " <<i<<  endl;
           ExecError("error in reading vtk file");
         }
-
+        //     cout <<  i << " : " << xyz[0] << " " <<  xyz[1] << " " <<  xyz[2] << endl;
         if (!bigEndian) {
           FreeFEM::SwapBytes((char *)xyz, sizeof(double), 3);
+        //     cout <<  i << " : " << xyz[0] << " " <<  xyz[1] << " " <<  xyz[2] << endl;
         }
       }
     } else {
@@ -3175,7 +3176,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
     vff[i].z = xyz[2];
     vff[i].lab = 1;
     if (verbosity > 9) {
-      printf("xyz %d = %f %f %f\n", i , xyz[0], xyz[1], xyz[2]);
+        cout <<  i << " : " << xyz[0] << " " <<  xyz[1] << " " <<  xyz[2] << endl;
     }
   }
 
@@ -3326,26 +3327,103 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
         break;
     }
   }
-  if(pfields)
+
+    int nbp=0,nbf=0, err=0;
+    if (fscanf(fp, "%s %d", buffer, &nbp) != 2)
+        {   cout << "error in reading vtk files pfields" << endl;
+            err++;}
+    int startdatapoint=0;
+    if(err==0)
     {
-     if(verbosity>1)   cout << " try  reading POINT_DATA  " << endl;
+        int nf=-1;
+        /*
+         CELL_DATA 209726
+         Scalars  Label int 1
+         LOOKUP_TABLE FreeFempp_table
+         ....
+         LOOKUP_TABLE FreeFempp_table 7
+         4*7 value
+         */
+        
+        if (strcmp(buffer, "CELL_DATA"))  { //  read region number if exist
+            if (strcmp(buffer, "POINT_DATA"))  {
+                cout << "VTK reader can only read CELL_DATA or POINT_DATA datasets:  not " << buffer<< " " << nbp<<  endl;
+                err=1;
+            }
+            else startdatapoint=1;
+        }
+        else {
+            if ((!err) &&(fscanf(fp, "%s %s %s %d\n", buffer, buffer2,buffer3,&nbf) != 4)) {
+                cout << "error in reading vtk files FIELD FieldData" << endl;
+                err++;
+            }}
+        
+        if( strcmp(buffer3, "int") !=0)// not integer
+            err++;
+        if ((!err) &&(fscanf(fp, "%s %s\n", buffer, buffer2) != 2))
+            err++;
+        // read nbf
+        cout << " err= " << err << " read nbp "<< nbp << endl;
+        if(err==0)
+            for( nf=0 ; nf < nbp; nf++)
+            {
+                int ii[1];
+                if (binary)
+                { if (fread(ii, sizeof(int), 1, fp) != 1) err++;}
+                else
+                {      if (fscanf(fp, "%d", ii) != 1) err++;}
+                if(err) break;
+            }
+        if(err) cout << " err reading CELL_DATA  at " << nf << endl;
+        if ((!err) &&(fscanf(fp, "%s %s %d\n", buffer, buffer2,&nbf) != 3 ) ) err++;
+        nf =-1;
+        if(err==0)
+            for( nf=0 ; nf < nbf; nf++)
+            {
+                float f[4];
+                char cc[4];
+                if (binary)
+                { if (fread(cc, sizeof(char), 4, fp) != 4) err++;}
+                else
+                {      if (fscanf(fp, "%f %f %f %fa",f+0,f+1,f+2,f+3) != 4) err++;}
+                if(err) break;
+            }
+        if(err&& nf>=0) cout << " err LOOKUP_TABLE FreeFempp_table at " << nf << " " << err << endl;
+        
+        startdatapoint=0;
+    }
+           
+           
+
+  if(pfields && err==0)
+    {
+     if(verbosity>1)   cout << " try  reading POINT_DATA  " << startdatapoint << endl;
         /*
       POINT_DATA 32436
       FIELD FieldData 2
       Velocity 3 32436 float
       
       */
-        int nbp=0,nbf=0,err=0;
-        if (fscanf(fp, "%s %d", buffer, &nbp) != 2) {
+        nbp =0;//  no POINT_DATA
+        nbf=0;
+        if (startdatapoint==0)
+            if (fscanf(fp, "%s", buffer) != 1) {
             cout << "error in reading vtk files pfields" << endl;
+            err++;
+           }
+        
+        if (strcmp(buffer, "POINT_DATA")==0)
+        {
+            if (fscanf(fp, "%d", &nbp) != 1) err++;
+            if (fscanf(fp, "%s", buffer) != 1) err++;
+        }
+        if(err == 0 && strcmp(buffer, "FIELD")!=0)
+        {
+            cout << "VTK reader can only read FIELD/POINT_DATA datasets:  not " << buffer<<  endl;
             err++;
         }
         
-        if (strcmp(buffer, "POINT_DATA"))  {
-            cout << "VTK reader can only read POINT_DATA datasets:  not " << buffer<<  endl;
-            err++;
-        }
-        if ((!err) &&(fscanf(fp, "%s %s %d", buffer, buffer2,&nbf) != 3)) {
+        if ((!err) &&(fscanf(fp, "%s %d", buffer2,&nbf) != 2)) {
                 cout << "error in reading vtk files FIELD FieldData" << endl;
                 err++;
         }
@@ -4223,7 +4301,7 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
       f[2] = P.z;    // 3D case
        if (binary) {
         if (!bigEndian) {
-          FreeFEM::SwapBytes((char *)&f, sizeof(float), 3);
+          FreeFEM::SwapBytes((char *)&f, sizeof(double), 3);
         }
         fwrite(&f, sizeof(double), 3, fp);
       } else {
@@ -4444,7 +4522,7 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
   fprintf(fp, "CELL_DATA %d\n", numElements);
   int cell_fd = 1;
   int cell_lab = 1;
-  fprintf(fp, "Scalars  Label int%d\n", cell_fd);
+  fprintf(fp, "Scalars  Label int %d\n", cell_fd);
   fprintf(fp, "LOOKUP_TABLE FreeFempp_table\n");
   // Determination des labels
   if (binary) {
@@ -6140,7 +6218,7 @@ MMesh *VTK_LoadT(const string &filename, bool bigEndian, bool cleanmesh, bool re
   }
 
   if (verbosity > 3)
-    cout << "Reading %d points" << nv << " buffer2" << buffer2 << "binary" << binary << " "
+    cout << "Reading points" << nv << ", buffer2 " << buffer2 << ", binary " << binary << " "
          << datasize << " " << sizeof(float) << endl;
 
   V *vff = new V[nv];
