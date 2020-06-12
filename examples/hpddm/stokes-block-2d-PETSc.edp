@@ -21,31 +21,22 @@ int s = getARGV("-split", 1); // refinement factor
 meshN Th = square(1, 1);
 fespace VhV(Th, PkV);         // local finite element space for the velocities
 fespace VhP(Th, PkP);         // local finite element space for the pressure
-int[int][int] intersectionV;  // local-to-neighbors renumbering for the velocities
-real[int] DV;                 // partition of unity for the velocities
-int[int][int] intersectionP;  // local-to-neighbors renumbering for the pressure
-real[int] DP;                 // partition of unity for the pressure
+Mat dA, dC;
 {
     meshN ThGlobal = square(getARGV("-global", 40), getARGV("-global", 40), [x, y]);
     ThGlobal = trunc(ThGlobal, (x < 0.5) || (y < 0.5), label = 5);
     Th = movemesh(ThGlobal, [-x, y]);
     Th = ThGlobal + Th;
-    ThGlobal = Th;
-    fespace Ph(ThGlobal, P0);
-    real[int] part(Ph.ndof);
-    if(mpirank == 0)
-        partitionerSeq(part, ThGlobal, mpisize);
-    partitionerPar(part, ThGlobal, mpiCommWorld, mpisize);
+    buildDmesh(Th)
     {
         macro def(u)def2(u)//
         macro init(u)init2(u)//
-        buildWithPartitioning(Th, part, s, intersectionV, DV, PkV, mpiCommWorld);
+        createMat(Th, dA, PkV);
     }
-    Th = ThGlobal;
     {
         macro def(u)def1(u)//
         macro init(u)init1(u)//
-        buildWithPartitioning(Th, part, s, intersectionP, DP, PkP, mpiCommWorld);
+        createMat(Th, dC, PkP);
     }
 }
 
@@ -54,12 +45,10 @@ varf vPbB([q], [u, uB]) = intN(Th)(-div(u) * q);
 int vPETSc;
 int pPETSc;
 {
-    matrix A = vPbA(VhV, VhV);
     matrix B = vPbB(VhP, VhV);
     real[int] rhsV = vPbA(0, VhV);
 
-    Mat dA(A, intersectionV, DV, bs = 2);
-    Mat dC(DP.n, intersectionP, DP);
+    dA = vPbA(VhV, VhV);
     Mat dB(dA, dC, B);
     Mat dS = [[dA , dB],
               [dB', 0 ]];
@@ -76,12 +65,9 @@ int pPETSc;
     plotMPI(Th, solP, PkP, def1, real, cmm = "Global pressure")
 }
 {
-    matrix A = vPbA(VhV, VhV);
     matrix B = vPbB(VhP, VhV);
     real[int] rhs = vPbA(0, VhV);
 
-    Mat dA(A, intersectionV, DV, bs = 2);
-    Mat dC(DP.n, intersectionP, DP);
     Mat dB(dA, dC, B);
     Mat dS = [[dA , dB],
               [dB', 0 ]];
@@ -103,11 +89,9 @@ int pPETSc;
     plotMPI(Th, def2(solV), PkV, def2, real, cmm = "Global velocity")
     plotMPI(Th, solP, PkP, def1, real, cmm = "Global pressure")
 }
-matrix<real> A = vPbA(VhV, VhV, tgv = -1);
 matrix<real> B = vPbB(VhP, VhV);
 
-Mat dA(A, intersectionV, DV);
-Mat dC(DP.n, intersectionP, DP);
+dA = vPbA(VhV, VhV, tgv = -1);
 Mat dB(dA, dC, B);
 {
     varf onGamma([u, uB], [v, vB]) = on(1, 3, 5, u = 1, uB = 1) + on(2, u = 1, uB = 1);

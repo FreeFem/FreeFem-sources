@@ -11,21 +11,16 @@ func Pk = P2;
 macro grad(u)[dx(u), dy(u)]// EOM
 
 mesh ThNo, Th = square(getARGV("-global", 20), getARGV("-global", 20), [1 + x, y]);
-real[int] D;
-int[int][int] restriction;
+fespace Vh(Th, Pk);
+Mat H;
+createMat(Th, H, Pk)
 {
     fespace Ph(Th, P0);
     Ph part;
-    if(mpirank == 0)
-        partitionerSeq(part[], Th, mpisize);
-    partitionerPar(part[], Th, mpiCommWorld, size);
-    buildWithPartitioning(Th, part[], 1, restriction, D, Pk, mpiCommWorld);
-    part = part;
-    ThNo = trunc(Th, abs(part - mpirank) < 1e-1);
+    createPartition(Th, part[], P0)
+    ThNo = trunc(Th, abs(part) < 1e-1);
 }
-fespace Vh(Th, Pk);
 func g = cos(pi*x)*cos(pi*y);
-Mat H(Vh.ndof, restriction, D);
 func real J(real[int]& X) {
     Vh u;
     changeNumbering(H, u[], X, inverse = true, exchange = true);
