@@ -4164,7 +4164,115 @@ namespace Fem2D {
     }
   }    // end basis functions declaration
 
-  // add new FEs for DDM to build the partition of unity
+ 
+ // RT1 surf
+
+   class TypeOfFE_RT1_surf : public GTypeOfFE<MeshS>  {
+      public:
+          typedef MeshS Mesh;
+          typedef MeshS::Element  Element;
+          
+          typedef GFElement<MeshS> FElement;
+          static int dfon[];
+          static const int d=Mesh::Rd::d;
+          //static const int d=Mesh::RdHat::d;
+          TypeOfFE_RT1_surf();
+          void FB(const What_d whatd,const Mesh & Th,const Element & K,const RdHat &PHat, RNMK_ & val) const;
+          void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump) const;
+      } ;
+      
+      
+      
+      int TypeOfFE_RT1_surf::dfon[]={0,1,0,0};   // dofs per vertice, edge, face, volume
+      
+      TypeOfFE_RT1_surf::TypeOfFE_RT1_surf(): GTypeOfFE<MeshS>(dfon,d,1,3*4,3,false,true)
+      {
+        
+          R2 Pt[]={ R2(0.5,0.5), R2(0.0,0.5), R2(0.5,0.0) };
+         
+          for (int i=0;i<3;++i)
+              this->PtInterpolation[i]=Pt[i];
+       
+          
+              int i=0;
+              for (int e=0;e<3;e++) //loop on edge
+                      for (int c=0;c<3;c++,i++) {
+                        this->pInterpolation[i]=e;
+                        this->cInterpolation[i]=c;
+                        this->dofInterpolation[i]=e;
+                        this->coefInterpolation[i]=0.;
+                      }
+             
+      }
+      
+      
+      
+      
+      void TypeOfFE_RT1_surf::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M ,int ocoef,int odf,int *nump) const
+      {
+         
+          //   compute de coef d'interpolation
+          int i=ocoef;
+          for (int e=0;e<3;e++) {
+              R signe = K.EdgeOrientation(e) ;
+              R a=signe/(2.*K.mesure());
+              R3 N=K.N(e)*a;//  exterior and  ||N|| = 2* area f
+              for (int c=0;c<3;c++,i++)
+                  M.coef[i]=N[c];
+                    
+              }
+      }
+  
+      
+      void  TypeOfFE_RT1_surf::FB(const What_d whatd,const Mesh & Th,const MeshS::Element & K,const RdHat &PHat, RNMK_ & val) const
+      {
+          assert(val.N()>=Element::ne);
+          assert(val.M()==3 );
+        
+          val=0;
+          R3 P=K(PHat);
+          R3 A[3]={(K[0]), (K[1]), (K[2])};
+          
+          R cc =1./(2.*K.mesure());
+          
+          R ci[3]={cc*K.EdgeOrientation(0),cc*K.EdgeOrientation(1),cc*K.EdgeOrientation(2)};
+          
+          if (whatd & Fop_D0)
+          {
+              
+              for(int i=0;i<3;++i)
+              {
+                  val(i,0,op_id) = (P.x-A[i].x)*ci[i] ;
+                  val(i,1,op_id) = (P.y-A[i].y)*ci[i] ;
+                  val(i,2,op_id) = (P.z-A[i].z)*ci[i] ;
+              }
+          }
+          
+          if (whatd & Fop_D1) {
+              //RN_ Ci(ci,3);
+              if (whatd & Fop_dx) {
+                  RN_ f0x(val('.',0,op_dx));
+                  for(int i=0;i<3;++i)
+                      f0x[i] = ci[i]*2.;  // TODO check
+              }
+              if (whatd & Fop_dy) {
+                  RN_ f0y(val('.',0,op_dy));
+                  for(int i=0;i<3;++i)
+                      f0y[i] = ci[i]*2.;
+              }
+              if (whatd & Fop_dz) {
+                  RN_ f0z(val('.',0,op_dz));
+                  for(int i=0;i<3;++i)
+                      f0z[i] = ci[i]*2.;
+
+              }
+            
+          }
+          
+      }
+ 
+ 
+ // add new FEs for DDM to build the partition of unity
   static TypeOfFE_P2Edge3ds0 Elm_P2Edge3ds0;
   // a static variable to add the finite element to freefem++
   static AddNewFE3 P2Edge3ds0("Edge23ds0", &Elm_P2Edge3ds0);
@@ -4186,6 +4294,13 @@ namespace Fem2D {
   static TypeOfFE_RT1_3d RT1_3d;
   GTypeOfFE< Mesh3 > &RT13d(RT1_3d);
   static AddNewFE3 TypeOfFE_RT1_3d("RT13d", &RT13d);
+
+  static TypeOfFE_RT1_surf RT1_S;
+  GTypeOfFE< MeshS > &RT1S(RT1_S);
+  static AddNewFES TypeOfFE_RT1_surf("RT1S", &RT1S);
+
+
+
 }    // namespace Fem2D
 
 // --- fin --
