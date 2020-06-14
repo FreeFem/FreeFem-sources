@@ -1,0 +1,45 @@
+load "msh3"
+int errT=0; 
+
+macro Test(Th,FE,nFE)
+{
+int err=0; 	
+fespace Wh(Th,FE);
+Wh u=x,v,w;
+
+for(int i=0; i< Wh.ndof;++i)
+{
+	u=0;
+	u[][i]=1;
+	v=u;
+	v[]-=u[];
+	err += v[].linfty>1e-7;
+}
+cout << " ** " << nFE << " Nb err = "<< err<< endl; 
+errT += err;
+} 
+//
+
+
+meshS ThS=square3(1,1);
+
+Test(ThS,P0,"P0")
+Test(ThS,P1,"P1")
+Test(ThS,P2,"P2")
+
+//Test(ThS,RT0S,"RT0S");
+fespace VhS(ThS,RT0S);
+VhS [u1,u2,u3]=[x,y,z], [v1,v2,v3];
+
+for(int i=0; i< VhS.ndof;++i) {
+	u1[]=0;
+	u1[][i]=1;
+plot([u1,u2,u3],wait=1,cmm="3d surf dof="+i,fill=1);
+
+	v1[]=u1[];
+	v1[]-=u1[];
+	errT += v1[].linfty>1e-7;
+}
+
+
+assert(errT==0);
