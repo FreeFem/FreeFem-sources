@@ -37,9 +37,9 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - moved Htool to its new GitHub location
 - ScaLAPACK and MUMPS are not compiled by PETSc anymore if there is no Fortran compiler
-- MPICH is compiled by PETSc if no MPI is detected during configure
+- MPICH is compiled by PETSc if no MPI is detected during configure, see https://community.freefem.org/t/feature-request-use-download-mpich-on-ubuntu/407
 - PETSc version 3.13.2
-- force `--with-cudac=0` in `make petsc-slepc`
+- force `--with-cudac=0` in `make petsc-slepc`, see https://github.com/FreeFem/FreeFem-sources/issues/141
 
 ### Deprecated
 
@@ -49,6 +49,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - missing METIS library when using SuiteSparse compiled by PETSc
+- missing `-fno-stack-protector` when building PETSc on Windows, see https://community.freefem.org/t/error-loading-complex-petsc-slepc-library/370
 
 ## [4.6]
 
