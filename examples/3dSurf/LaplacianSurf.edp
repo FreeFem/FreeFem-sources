@@ -20,7 +20,7 @@ macro Grad2(uVar) [dx(uVar),dy(uVar)]  // EOM
 
 //with variational form
 varf a(uVar,vVar) = int2d(Th)(Grad2(uVar)'*Grad2(vVar))
- - int2d ( Th ) ( f * vVar )
+ + int2d ( Th ) ( f * vVar )
   + on(1,uVar=g);
 
 matrix AVar =a(Vh,Vh);
@@ -56,7 +56,7 @@ macro Grad3(uSVar) [dx(uSVar),dy(uSVar),dz(uSVar)]  // EOM
 
 //with variational form
 varf aS(uSVar,vSVar) = int2d(ThS)(Grad3(uSVar)'*Grad3(vSVar))
- - int2d ( ThS ) ( f * vSVar )
+ + int2d ( ThS ) ( f * vSVar )
   + on(1,uSVar=g);
 matrix ASVar =aS(VhS,VhS);
 real[int] bSVar = aS(0,VhS);
@@ -78,8 +78,6 @@ cout << "---> norm error l2 for variationnal form " << errVar.l2 << endl;
 // check solution with problem
 real[int] errPb = uPb[] - uSPb[];
 cout << "---> norm error l2 with problem " << errPb.l2;
-
-plot(uSPb,cmm=" USPd  ",wait=1);
 
 medit("uSPb",ThS, uSPb);
 
