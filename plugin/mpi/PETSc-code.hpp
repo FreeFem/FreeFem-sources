@@ -687,6 +687,11 @@ namespace PETSc {
 #endif
       return 0L;
   }
+  double memoryGetCurrentUsage() {
+      PetscLogDouble mem;
+      PetscMemoryGetCurrentUsage(&mem);
+      return mem;
+  }
   long hasType(string* const& obj, string* const& type) {
       if (obj->size() > 0 && type->size() > 0) {
           std::string o(*obj);
@@ -4547,6 +4552,7 @@ static void Init_PETSc( ) {
   TheOperators->Add("=", new OneOperator2_< Dmat*, Dmat*, Dmat* >(PETSc::changeOperatorSimple));
   Global.Add("PetscLogStagePush", "(", new OneOperator1_< long, string* >(PETSc::stagePush));
   Global.Add("PetscLogStagePop", "(", new OneOperator0< long >(PETSc::stagePop));
+  Global.Add("PetscMemoryGetCurrentUsage", "(", new OneOperator0< double >(PETSc::memoryGetCurrentUsage));
   Global.Add("hasType", "(", new OneOperator2_< long, string*, string* >(PETSc::hasType));
   Init_Common( );
   Dcl_Type< PETSc::DMPlex* >(Initialize< PETSc::DMPlex >, DeleteDTOR< PETSc::DMPlex >);

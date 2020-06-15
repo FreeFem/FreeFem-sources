@@ -20,7 +20,11 @@ set(A, sparams = "-ksp_view");
 Wh<real> u;                         // local solution
 
 A = vPb(Wh, Wh);
+real memory = PetscMemoryGetCurrentUsage();
 u[] = A^-1 * rhs;
+memory = PetscMemoryGetCurrentUsage() - memory;
+if(mpirank == 0)
+    cout << memory << " bytes of memory in usage" << endl;
 
 real[int] err = A * u[];            // global matrix-vector product
 real[int] transpose = A' * u[];

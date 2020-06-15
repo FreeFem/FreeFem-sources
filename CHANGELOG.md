@@ -33,6 +33,7 @@ All notable changes to this project will be documented in this file.
 - function `MatPtAP` and `transferMat` for parallel interpolation between non-matching grids, see `examples/hpddm/PtAP-2d-PETSc.edp`
 - preliminary interface to `SVDSolve` from SLEPc to compute singular value decompositions, see `examples/hpddm/mf-2d-SLEPc.edp` or `examples/hpddm/helmholtz-2d-SLEPc-complex.edp`
 - `transpose` parameter when constructing a `Mat` for defining a matrix-free transposed operation
+- interface to `PetscMemoryGetCurrentUsage`
 
 ### Changed
 - moved Htool to its new GitHub location
