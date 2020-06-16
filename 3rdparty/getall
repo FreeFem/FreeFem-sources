@@ -166,10 +166,10 @@ download('SuiteSparse','http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSpars
 	'http://faculty.cse.tamu.edu/davis/SuiteSparse/',
 	'SuiteSparse-4.4.4.tar.gz',
 	'e0af74476935c9ff6d971df8bb6b82fc') ;
-download('SuperLU','http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_5.2.1.tar.gz',
-	'http://crd-legacy.lbl.gov/~xiaoye/SuperLU/',
-	'superlu_5.2.1.tar.gz',
-	'3a1a9bff20cb06b7d97c46d337504447');
+download('SuperLU','https://github.com/xiaoyeli/superlu/archive/4f2da83a24c52641c1f7ab06f57c00b8954cf215.zip',
+	'https://github.com/xiaoyeli/superlu',
+	'superlu.zip',
+	'596927f39d28a7d6eb396764f46455b2');
 download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
 	'http://www.tetgen.org/1.5/src/',
 	'tetgen1.5.1-beta1.tar.gz',
