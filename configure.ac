@@ -65,7 +65,7 @@ m4_define([AC_FF_WHERELIB],
         AC_MSG_CHECKING(check $1)
 	ff_save_libs=$LIBS
 	LIBS="$LIBS $2 $4"
-	AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>])],[])], [ff_WHERE=yes],[ff_WHERE=no])
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([m4_if($3,,,[#include <$3>],[#include <stdint.h>],[#include <stdio.h>])],[])], [ff_WHERE=yes],[ff_WHERE=no])
 	if test "$ff_WHERE" = "yes" ; then
 	    echo "$1 LD $2"  >>$ff_where_lib_conf
 	    ff_WHERE_INC=`AS_DIRNAME(["$3"])`
@@ -2084,7 +2084,7 @@ fi
 
 m4_map([AC_FF_WHERELIB],[
 	[[mumps],[-ldmumps -lzmumps  -lmumps_common  -lpord],[dmumps_c.h],[]],
-	[[mumps_seq],[-ldmumps_seq -lzmumps_seq  -lmumps_common_seq  -lpord_seq -lmpiseq_seq],[dmumps_c.h],[]],
+	[[mumps_seq],[$ff_blas_libs $ff_lapack_lib -ldmumps_seq -lzmumps_seq  -lmumps_common_seq  -lpord_seq -lmpiseq_seq],[dmumps_c.h],[]],
 	[[libseq],[-lmpiseq_seq],[${inc_usr_include}mumps_seq/mpi.h]],
 	[[mumps_ptscotch],[-lpord_ptscotch -lmumps_common_ptscotch -ldmumps_ptscotch -lzmumps_ptscotch -lpord_ptscotch],[dmumps_c.h]],
 	[[mumps_scotch],[-lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch],[dmumps_c.h]],
