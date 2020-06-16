@@ -53,6 +53,13 @@ struct SuperLUDriver< double > {
            p19, p20, p21);
   }
 
+  static void gsisx(superlu_options_t * p1, SuperMatrix * p2, int * p3, int * p4, int * p5,
+       char * p6, double * p7, double * p8, SuperMatrix * p9, SuperMatrix * p10,
+       void * p11, int p12, SuperMatrix * p13, SuperMatrix * p14,
+       double * p15, double * p16, GlobalLU_t *pGlu, mem_usage_t * p17, SuperLUStat_t * p18, int * p19) {
+         dgsisx( p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,pGlu,p17,p18,p19);
+  }
+
   /* Supernodal LU factor related */
   static void Create_CompCol_Matrix(SuperMatrix *p1, int p2, int p3, int p4, double *p5, int *p6,
                                     int *p7, Stype_t p8, Dtype_t p9, Mtype_t p10) {
@@ -102,6 +109,13 @@ struct SuperLUDriver< Complex > {
                     double *p18, GlobalLU_t *pGlu, mem_usage_t *p19, SuperLUStat_t *p20, int *p21) {
     zgssvx(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, pGlu,
            p19, p20, p21);
+  }
+
+  static void gsisx(superlu_options_t * p1, SuperMatrix * p2, int * p3, int * p4, int * p5,
+  char * p6, double * p7, double * p8, SuperMatrix * p9, SuperMatrix * p10,
+  void * p11, int p12, SuperMatrix * p13, SuperMatrix * p14,
+  double * p15, double * p16, GlobalLU_t *pGlu, mem_usage_t * p17, SuperLUStat_t * p18, int * p19) {
+    zgsisx( p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,pGlu,p17,p18,p19);
   }
 
   /* Supernodal LU factor related */
@@ -285,7 +299,197 @@ void read_options_freefem(string string_option, superlu_options_t *options) {
   // #endif
 }
 
-template< typename R >
+void read_options_freefem_ilu(string string_option, superlu_options_t *options){
+  static const yes_no_t  enumyes_no_t[2] = {NO, YES};
+  static const fact_t  enumfact_t[4] = {DOFACT, SamePattern, SamePattern_SameRowPerm, FACTORED};
+  static const colperm_t  enumcolperm_t[5] = {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD, MY_PERMC};
+  static const rowperm_t  enumrowperm_t[3] = {NOROWPERM, LargeDiag_MC64, MY_PERMR};
+  static const trans_t  enumtrans_t[3] = {NOTRANS, TRANS, CONJ};
+  static const  IterRefine_t enumIterRefine_t[4] = {NOREFINE, SLU_SINGLE, SLU_DOUBLE, SLU_EXTRA};
+  static const milu_t  enummilu_t[4] = {SILU, SMILU_1,SMILU_2 ,SMILU_3};
+  static const norm_t  enumnorm_t[3] = {ONE_NORM, TWO_NORM, INF_NORM};
+
+  static const char*  compyes_no_t[] = {"NO", "YES",0};
+  static const char* compfact_t[] = {"DOFACT", "SamePattern", "SamePattern_SameRowPerm", "FACTORED",0};
+  static const char* compcolperm_t[] = {"NATURAL", "MMD_ATA", "MMD_AT_PLUS_A", "COLAMD", "MY_PERMC",0};
+  static const char* comprowperm_t[] = {"NOROWPERM", "LargeDiag_MC64", "MY_PERMR",0};
+  static const char* comptrans_t[] = {"NOTRANS", "TRANS", "CONJ",0};
+  static const char* compIterRefine_t[] = {"NOREFINE", "SINGLE", "DOUBLE", "EXTRA",0};
+  static const char* compmilu_t[] = {"SILU", "SMILU_1", "SMILU_2", "SMILU_3",0};
+  static const char* compnorm_t[] = {"ONE_NORM", "TWO_NORM", "INF_NORM",0};
+
+  static const char* comp[] = {"Fact", "Equil","ColPerm",
+  "DiagPivotThresh","Trans","IterRefine",
+  "SymmetricMode","PivotGrowth","ConditionNumber",
+  "PrintStat","RowPerm","ILU_DropTol","ILU_FillTol","ILU_FillFactor","ILU_DropRule","ILU_Norm","ILU_MILU",0};
+
+  /* Set the default values for options argument:
+  options.Fact = DOFACT;
+  options.Equil = YES;
+  options.ColPerm = COLAMD;
+  options.DiagPivotThresh = 1.0;
+  options.Trans = NOTRANS;
+  options.IterRefine = NOREFINE;
+  options.SymmetricMode = NO;
+  options.PivotGrowth = NO;
+  options.ConditionNumber = NO;
+  options.PrintStat = YES;
+  options.RowPerm = NOROWPERM;
+  options.ILU_DropTol = 1e-4;
+  options.ILU_FillTol = 1e-2;
+  options.ILU_FillFactor = 10.0;
+  options.ILU_DropRule = DROP_BASIC | DROP_AREA;
+  options.ILU_Norm = INF_NORM;
+  options.ILU_MILU = SILU;
+  */
+
+  //cout << "string_option" <<  *string_option << endl;
+  KN<char> kdata(string_option.size()+1);
+
+  char * data=kdata;
+  strcpy( data, string_option.c_str());
+  //cout << "data=" << data << endl;
+  char * tictac;
+  tictac = strtok(data," =,\t\n");
+  //cout << "tictac=" << data << endl;
+  while(tictac != NULL){
+    //char* comp[] = {"Fact", "Equil","ColPerm",
+    //"DiagPivotThresh","Trans","IterRefine",
+    //"SymmetricMode","PivotGrowth","ConditionNumber",
+    //"PrintStat",0 };
+    int id_option = s_(tictac, comp);
+    tictac = strtok(NULL," =,\t\n");
+    int val_options;
+
+    switch (id_option)
+    {
+      case 1 : // Fact
+        //char* comp1[] = {"DOFACT", "SamePattern", "SamePattern_SameRowPerm", "FACTORED",0};
+        val_options= s_(tictac,compfact_t);
+        if( val_options == 0){
+          printf("value given for SuperLU for options %s is not correct\n","Fact");
+          exit(1);
+        }
+        options->Fact = enumfact_t[val_options-1];
+        break;
+      case 2:  // Equil
+        //char* comp2[] = {"NO", "YES", 0};
+        val_options= s_(tictac,compyes_no_t);
+        if( val_options == 0){
+          printf("value given for SuperLU for options %s is not correct\n","Equil");
+          exit(1);
+        }
+        options->Equil = enumyes_no_t[val_options-1];
+        break;
+      case 3:  // ColPerm
+        //char* comp3[] = {"NATURAL", "MMD_ATA", "MMD_AT_PLUS_A", "COLAMD", "MY_PERMC", 0};
+        val_options= s_(tictac,compcolperm_t);
+        if( val_options == 0){
+          printf("value given for SuperLU for options %s is not correct\n","ColPerm");
+          exit(1);
+        }
+        options->ColPerm = enumcolperm_t[val_options-1];
+        break;
+      case 4:  // DiagPivotThresh
+        options->DiagPivotThresh= strtod(tictac,&tictac);
+        break;
+      case 5:  // Trans
+        //char* comp5[] = {"NOTRANS", "TRANS", "CONJ", 0};
+        val_options= s_(tictac, comptrans_t);
+        if( val_options == 0){
+          printf("value given for SuperLU for options %s is not correct\n","Trans");
+          exit(1);
+        }
+        options->Trans = enumtrans_t[val_options-1];
+        break;
+      case 6:  // IterRefine
+        //char* comp6[] = {"NOREFINE", "SINGLE", "DOUBLE", "EXTRA", 0};
+        val_options= s_(tictac, compIterRefine_t);
+        if( val_options == 0){
+          printf("value given for SuperLU for options %s is not correct\n","IterRefine");
+          exit(1);
+        }
+        options->IterRefine = enumIterRefine_t[val_options-1];
+        break;
+      case 7:  // SymmetricMode
+        //char* comp7[] = {"NO","YES", 0};
+        val_options= s_(tictac, compyes_no_t);
+        if( val_options == 0){
+          printf("value given for SuperLU for options %s is not correct\n","SymmetricMode");
+          exit(1);
+        }
+        options->SymmetricMode= enumyes_no_t[val_options-1];
+        break;
+      case 8:  // PivotGrowth
+        //char* comp8[] = {"NO","YES", 0};
+        val_options= s_(tictac,compyes_no_t);
+        if( val_options == 0){
+          printf("value given for SuperLU for options %s is not correct\n","PivotGrowth");
+          exit(1);
+        }
+        options->PivotGrowth = enumyes_no_t[val_options-1];
+        break;
+      case 9:  // ConditionNumber
+        //char* comp9[] = {"NO","YES", 0};
+        val_options= s_(tictac, compyes_no_t);
+        if( val_options == 0){
+          printf("value given for SuperLU for options %s is not correct\n","ConditionNumber");
+          exit(1);
+        }
+        options->ConditionNumber = enumyes_no_t[val_options-1];
+        break;
+      case 10: // PrintStat
+        val_options= s_(tictac, compyes_no_t);
+        if( val_options == 0){
+          printf("value given for SuperLU for options %s is not correct\n","PrintStat");
+          exit(1);
+        }
+        options->PrintStat = enumyes_no_t[val_options-1];
+        break;
+      case 11: // RowPerm
+        val_options= s_(tictac, comprowperm_t);
+        if( val_options == 0){
+          printf("value given for SuperLU for options %s is not correct\n","RowPerm");
+          exit(1);
+        }
+        options->RowPerm = enumrowperm_t[val_options-1];
+        break;
+      case 12:  // ILU_DropTol
+        options->ILU_DropTol= strtod(tictac,&tictac);
+        break;
+      case 13:  // ILU_FillTol
+        options->ILU_FillTol= strtod(tictac,&tictac);
+        break;
+      case 14:  // ILU_FillFactor
+        options->ILU_FillFactor= strtod(tictac,&tictac);
+        break;
+      case 15 : // ILU_DropRule
+        options->ILU_DropRule = strtol(tictac,&tictac,0);
+        break;
+      case 16 : // ILU_Norm
+        val_options= s_(tictac,compnorm_t);
+        if( val_options == 0){
+          printf("value given for SuperLU for options %s is not correct\n","ILU_Norm");
+          exit(1);
+        }
+        options->ILU_Norm = enumnorm_t[val_options-1];
+        break;
+      case 17 : // ILU_MILU
+        val_options= s_(tictac,compmilu_t);
+        if( val_options == 0){
+          printf("value given for SuperLU for options %s is not correct\n","ILU_MILU");
+          exit(1);
+        }
+        options->ILU_MILU = enummilu_t[val_options-1];
+        break;
+      case 0: // Equivalent of case default
+        break;
+    }
+    tictac = strtok(NULL," =,\t\n");
+  }
+}
+
+template< typename R , int t >
 class VirtualSolverSuperLU : public VirtualSolver< int, R >, public SuperLUDriver< R > {
  public:
   //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
@@ -325,6 +529,12 @@ class VirtualSolverSuperLU : public VirtualSolver< int, R >, public SuperLUDrive
     U.Store = 0;
 
     set_default_options(&options);
+    if (t == 1) { // ILU
+      ilu_set_default_options(&options);
+      //options.RowPerm = NOROWPERM;
+      if(!string_option.empty()) read_options_freefem_ilu(string_option, &options);
+    }
+
     if (AH->half) {
       cerr << " Sorry SUPERLU need a no symmetric matrix " << endl;
       cerr << " bug in choose Solver " << endl;
@@ -349,9 +559,14 @@ class VirtualSolverSuperLU : public VirtualSolver< int, R >, public SuperLUDrive
     this->Create_Dense_Matrix(&B, m, N, b, m, SLU_DN, R_SLU, SLU_GE);
     this->Create_Dense_Matrix(&X, m, N, x, m, SLU_DN, R_SLU, SLU_GE);
 
-    SuperLUDriver< R >::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC, &L, &U, work,
-                              lwork, &B, &X, &rpg, &rcond, ferr, berr, &Glu, &mem_usage, &stat,
-                              &info);
+    if (t==0) // LU
+      SuperLUDriver< R >::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC, &L, &U, work,
+                                lwork, &B, &X, &rpg, &rcond, ferr, berr, &Glu, &mem_usage, &stat,
+                                &info);
+    else // ILU
+      SuperLUDriver<R>::gsisx(&options, &A, perm_c, perm_r, etree, equed, RR, CC,
+                              &L, &U, work, lwork, &B, &X, &rpg, &rcond, &Glu, &mem_usage, &stat, &info);
+
     if (verbosity > 2) printf("Triangular solve: dgssvx() returns info %d\n", info);
     if (verbosity > 3) {
       if (info == 0 || info == n + 1) {
@@ -428,9 +643,14 @@ class VirtualSolverSuperLU : public VirtualSolver< int, R >, public SuperLUDrive
     this->Create_Dense_Matrix(&X, m, 0, 0, m, SLU_DN, R_SLU, SLU_GE);
     B.ncol = 0;
     options.Fact = DOFACT;
-    SuperLUDriver< R >::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC, &L, &U, work,
-                              lwork, &B, &X, &rpg, &rcond, ferr, berr, &Glu, &mem_usage, &stat,
-                              &info);
+    if (t == 0) // LU
+      SuperLUDriver< R >::gssvx(&options, &A, perm_c, perm_r, etree, equed, RR, CC, &L, &U, work,
+                                lwork, &B, &X, &rpg, &rcond, ferr, berr, &Glu, &mem_usage, &stat,
+                                &info);
+    else // ILU
+      SuperLUDriver<R>::gsisx(&options, &A, perm_c, perm_r, etree, equed, RR, CC,
+                              &L, &U, work, lwork, &B, &X, &rpg, &rcond, &Glu, &mem_usage, &stat, &info);
+
     options.Fact = FACTORED;
     if (B.Store) Destroy_SuperMatrix_Store(&B);
     if (X.Store) Destroy_SuperMatrix_Store(&X);
@@ -446,8 +666,11 @@ class VirtualSolverSuperLU : public VirtualSolver< int, R >, public SuperLUDrive
 };
 
 static void Load_Init( ) {
-  addsolver< VirtualSolverSuperLU< double > >("SuperLU", 50, 1);
-  addsolver< VirtualSolverSuperLU< Complex > >("SuperLU", 50, 1);
+  addsolver< VirtualSolverSuperLU< double , 0 > >("SuperLU", 50, 1);
+  addsolver< VirtualSolverSuperLU< Complex , 0 > >("SuperLU", 50, 1);
   setptrstring(def_solver, "SuperLU");
+  addsolver< VirtualSolverSuperLU< double , 1 > >("SuperILU", 50, 1);
+  addsolver< VirtualSolverSuperLU< Complex , 1 > >("SuperILU", 50, 1);
+  setptrstring(def_solver, "SuperILU");
 }
 LOADFUNC(Load_Init)
