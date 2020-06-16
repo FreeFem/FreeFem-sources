@@ -62,3 +62,11 @@ else
   ./etc/jenkins/job_Unix/check_ffpetsc/update_ffpetsc_mpich.sh \
   && echo " ************* upgrading mpich ffpetsc success *************"
 fi
+
+if [ $? -eq 0 ]
+then
+  echo " ************* upgrading mpich ffpetsc success *************"
+else
+  echo " ************* upgrading mpich ffpetsc FAIL *************"
+  exit 1
+fi
