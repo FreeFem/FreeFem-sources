@@ -119,41 +119,37 @@
      val=0;
      RN_ f0(val('.',0,op_id));
          
-     if (whatd & Fop_D0)
-       {
-	 f0[0] = l[0];
-	 f0[1] = l[1];
-	 f0[2] = l[2];
-       }
+     if (whatd & Fop_D0) {
+	   f0[0] = l[0];
+	   f0[1] = l[1];
+	   f0[2] = l[2];
+     }
          
-     if (whatd & Fop_D1)
-       {
-	 R3 Dl[3];
-	 K.Gradlambda(Dl);
+     if (whatd & Fop_D1) {
+	   R3 Dl[3];
+	   K.Gradlambda(Dl);
              
-	 if (whatd & Fop_dx)
-	   {
-	     RN_ f0x(val('.',0,op_dx));
-	     f0x[0] = Dl[0].x;
-	     f0x[1] = Dl[1].x;
-	     f0x[2] = Dl[2].x;
-                 
-	   }
-             
+	 if (whatd & Fop_dx) {
+	   RN_ f0x(val('.',0,op_dx));
+	   f0x[0] = Dl[0].x;
+	   f0x[1] = Dl[1].x;
+	   f0x[2] = Dl[2].x;
+	 }
 	 if (whatd & Fop_dy) {
 	   RN_ f0y(val('.',0,op_dy));
 	   f0y[0] = Dl[0].y;
 	   f0y[1] = Dl[1].y;
 	   f0y[2] = Dl[2].y;
 	 }
-             
 	 if (whatd & Fop_dz) {
 	   RN_ f0z(val('.',0,op_dz));
 	   f0z[0] = Dl[0].z;
 	   f0z[1] = Dl[1].z;
 	   f0z[2] = Dl[2].z;
 	 }
-       }
+   }
+   else if (whatd & Fop_D2)
+     ffassert(0);
          
    }
      
@@ -192,8 +188,7 @@
 	 assert(k==6);
        }
          
-     if (whatd & (Fop_D1|Fop_D2))
-       {
+     if (whatd & Fop_D1) {
              
 	 R3 Dl[3];
 	 R l4[3]={ (4*l[0]-1),(4*l[1]-1),(4*l[2]-1)};
@@ -250,8 +245,9 @@
 	       }
 	     assert(k==6);
 	   }
-       }
-         
+     }
+    else if (whatd & Fop_D2)
+       ffassert(0);
    }
      
 // RT0 surface
@@ -371,6 +367,8 @@
          }
                
      }
+     else if (whatd & Fop_D2)
+       ffassert(0);
           
    }
 
@@ -442,10 +440,84 @@
  	       }
  	   }
  	 else if (whatd & Fop_D2)
- 	     ffassert(0); // a faire ...
- 	 //  cout << val << endl;
+ 	     ffassert(0);
       }
 
+  
+  class TypeOfFE_P2bLagrange_surf : public TypeOfFE_Lagrange<MeshS>  {
+          public:
+         typedef MeshS Mesh;
+         typedef GFElement<MeshS> FElement;
+         TypeOfFE_P2bLagrange_surf(): TypeOfFE_Lagrange<MeshS>(-2) {  }
+         void FB(const What_d whatd,const Mesh & Th,const MeshS::Element & K,const RdHat &PHat, RNMK_ & val) const;
+      } ;
+
+
+
+  void TypeOfFE_P2bLagrange_surf::FB(const What_d whatd,const Mesh & Th,const Element & K,const RdHat & PHat,RNMK_ & val) const
+  {
+        
+    assert(val.N() >=Element::nv+Element::ne+1);
+    assert(val.M()==1 );
+       
+    val=0;
+    
+    R l[]={1.-PHat.sum(),PHat.x,PHat.y};
+    R lb=l[0]*l[1]*l[2]*3.;
+    R l4_0=(4*l[0]-1),l4_1=(4*l[1]-1),l4_2=(4*l[2]-1);
+
+     
+
+    if (whatd & Fop_D0) {
+      R lb4=lb*4;
+      val(0,0,op_id) = l[0]*(2.*l[0]-1.)+lb;
+      val(1,0,op_id) = l[1]*(2.*l[1]-1.)+lb;
+      val(2,0,op_id) = l[2]*(2.*l[2]-1.)+lb;
+      val(3,0,op_id) = 4.*l[1]*l[2]-lb4;
+      val(4,0,op_id) = 4.*l[0]*l[2]-lb4;
+      val(5,0,op_id) = 4.*l[1]*l[0]-lb4;
+      val(6,0,op_id) = 9.*lb;
+    }
+      
+    if (whatd & Fop_D1) {
+      R3 Dl[3];
+      K.Gradlambda(Dl);
+      R3 Dlb((Dl[0]*l[1]*l[2]+Dl[1]*l[0]*l[2]+Dl[2]*l[0]*l[1])*3.), Dlb4(Dlb*4.);
+         
+      if (whatd & Fop_dx) {
+        val(0,0,op_dx) = Dl[0].x*l4_0 +Dlb.x;
+        val(1,0,op_dx) = Dl[1].x*l4_1 +Dlb.x;
+        val(2,0,op_dx) = Dl[2].x*l4_2 +Dlb.x;
+        val(3,0,op_dx) = 4.*(Dl[1].x*l[2] + Dl[2].x*l[1]) -Dlb4.x;
+        val(4,0,op_dx) = 4.*(Dl[2].x*l[0] + Dl[0].x*l[2]) -Dlb4.x;
+        val(5,0,op_dx) = 4.*(Dl[0].x*l[1] + Dl[1].x*l[0]) -Dlb4.x;
+        val(6,0,op_dx) = 9.*Dlb.x;
+      }
+      if (whatd & Fop_dy) {
+        val(0,0,op_dy) = Dl[0].y*l4_0 +Dlb.y;
+        val(1,0,op_dy) = Dl[1].y*l4_1 +Dlb.y;
+        val(2,0,op_dy) = Dl[2].y*l4_2 +Dlb.y;
+        val(3,0,op_dy) = 4.*(Dl[1].y*l[2] + Dl[2].y*l[1]) -Dlb4.y;
+        val(4,0,op_dy) = 4.*(Dl[2].y*l[0] + Dl[0].y*l[2]) -Dlb4.y;
+        val(5,0,op_dy) = 4.*(Dl[0].y*l[1] + Dl[1].y*l[0]) -Dlb4.y;
+        val(6,0,op_dy) = 9.*Dlb.y;
+      }
+      if (whatd & Fop_dz) {
+        val(0,0,op_dz) = Dl[0].z*l4_0 +Dlb.z;
+        val(1,0,op_dz) = Dl[1].z*l4_1 +Dlb.z;
+        val(2,0,op_dz) = Dl[2].z*l4_2 +Dlb.z;
+        val(3,0,op_dz) = 4.*(Dl[1].z*l[2] + Dl[2].z*l[1]) -Dlb4.z;
+        val(4,0,op_dz) = 4.*(Dl[2].z*l[0] + Dl[0].z*l[2]) -Dlb4.z;
+        val(5,0,op_dz) = 4.*(Dl[0].z*l[1] + Dl[1].z*l[0]) -Dlb4.z;
+        val(6,0,op_dz) = 9.*Dlb.z;
+      }
+
+    }
+    else if (whatd & Fop_D2)
+      ffassert(0);
+        
+  }
+  
    static TypeOfFE_P0Lagrange_surf P0_surf;
    GTypeOfFE<MeshS> & P0Lagrange_surf(P0_surf);
    static TypeOfFE_P1Lagrange_surf P1_surf;
@@ -456,8 +528,9 @@
    GTypeOfFE<MeshS> & RT0surf(RT0_surf);
    static TypeOfFE_P1bLagrange_surf P1b_surf;
    GTypeOfFE<MeshS> & P1bLagrange_surf(P1b_surf);
-   
-   	  
+   static TypeOfFE_P2bLagrange_surf P2b_surf;
+   GTypeOfFE<MeshS> & P2bLagrange_surf(P2b_surf);
+  
    template<> GTypeOfFE<MeshS> & DataFE<MeshS>::P0=P0_surf;
    template<> GTypeOfFE<MeshS> & DataFE<MeshS>::P1=P1_surf;
    template<> GTypeOfFE<MeshS> & DataFE<MeshS>::P2=P2_surf;

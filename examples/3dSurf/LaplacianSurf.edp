@@ -3,7 +3,6 @@
 load "msh3"
 load "medit"
 
-
 /////variational form
 
 /////////////////////////////////
@@ -74,10 +73,35 @@ savemesh (ThS, "ThS.mesh");
 // check solution for variational forms
 real[int] errVar = solVar - solSVar;
 cout << "---> norm error l2 for variationnal form " << errVar.l2 << endl;
+assert(errVar.l2 < 1e-10);
 
 // check solution with problem
 real[int] errPb = uPb[] - uSPb[];
 cout << "---> norm error l2 with problem " << errPb.l2;
+assert(errPb.l2 < 1e-10);
 
 medit("uSPb",ThS, uSPb);
+
+// test P2b and interpolate 2d->3d surface
+
+fespace Vh2(Th,P2b);
+Vh2 u2Var,v2Var;
+
+matrix A2Var =a(Vh2,Vh2);
+Vh2 b2Var; b2Var[] = a(0,Vh2);
+Vh2 sol2Var; sol2Var[] = A2Var^-1*b2Var[];
+
+
+ThS=square3(10,10);
+fespace Vh2S(ThS,P2b);
+Vh2S u2SVar,v2SVar;
+matrix A2SVar =aS(Vh2S,Vh2S);
+Vh2S b2SVar; b2SVar[] = aS(0,Vh2S);
+Vh2S sol2SVar; sol2SVar[] = A2SVar^-1*b2SVar[];
+
+matrix inter=interpolate(Vh2S,Vh2);
+Vh2S err2b; err2b[] = inter*sol2Var[];err2b[]-= sol2SVar[];
+
+cout << "---> norm error l2 for variationnal form with P2b" << err2b[].l2 << endl;
+assert(err2b[].l2 < 1e-10);
 

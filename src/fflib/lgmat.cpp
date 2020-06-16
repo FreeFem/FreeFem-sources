@@ -1062,7 +1062,7 @@ MatriceMorse<R> * funcBuildInterpolationMatrixT(const FESpaceT & Uh,const FESpac
   KNM<R> aaa(nbp,nbdfVK);
 
 
-  const R eps = 1.0e-10;
+  const R eps = 1.0e-6;
   const int sfb1=Vh0.N*last_operatortype*Vh0.NbDoF();
   KN<R> kv(sfb1*nbp);
   R * v = kv;
@@ -1092,14 +1092,14 @@ MatriceMorse<R> * funcBuildInterpolationMatrixT(const FESpaceT & Uh,const FESpac
         bool outside;
         R3 P1(TU(Gh));
         R2 P12(P1.p2());
-        if(abs(P1.z)<epsP) {outside=true;ts0=0;}
+          if(abs(P1.z)>epsP) {outside=true;ts0=0;}
         else
             ts0=ThV.Find(P12,G,outside,ts0);
         if(outside) ts0=0; // bad starting tet
         for (int i=0;i<nbp;i++) {
             R3 P1(TU(ipmat.P[i]));
             R2 P12(P1.p2());
-            if(abs(P1.z)<epsP) {outside=true;ts=0;}
+            if(abs(P1.z)>epsP) {outside=true;ts=0;}
             else ts=ThV.Find(P12,PV[i],outside,ts0);
           if( ts0 ==0 && !outside) ts0=ts;
           if(outside && verbosity>9 )
@@ -3587,13 +3587,13 @@ void  init_lgmat()
   Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfesL>(1,1));
     
   Global.Add("interpolate","(",new MatrixInterpolation<pfesS,pfes3>);
- // Global.Add("interpolate","(",new MatrixInterpolation<pfesS,pfes3>(1,1));
+  Global.Add("interpolate","(",new MatrixInterpolation<pfesS,pfes3>(1,1));
   Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfes>);
- // Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfes>(1,1));
+  Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfes>(1,1));
   Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfesS>);
- // Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfesS>(1,1));
+  Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfesS>(1,1));
   Global.Add("interpolate","(",new MatrixInterpolation<pfesS,pfes>);
-  // Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfes>(1,1));
+  Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfes>(1,1));
     
   Global.Add("interplotematrix","(",new  OneOperatorCode<PrintErrorCompileIM>);
   zzzfff->Add("mapmatrix",atype<map< pair<int,int>, double> *>());

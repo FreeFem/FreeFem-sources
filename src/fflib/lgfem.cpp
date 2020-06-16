@@ -79,6 +79,7 @@ namespace Fem2D {
   extern GTypeOfFE< Mesh3 > &RT03d;
   extern GTypeOfFE< Mesh3 > &Edge03d;
   extern GTypeOfFE< MeshS > &P1bLagrange_surf;
+  extern GTypeOfFE< MeshS > &P2bLagrange_surf;
   extern GTypeOfFE< MeshS > &RT0surf;
   void Expandsetoflab(Stack stack, const CDomainOfIntegration &di, set< int > &setoflab, bool &all);
 }    // namespace Fem2D
@@ -6497,7 +6498,8 @@ void init_lgfem( ) {
   Global.New("P1S", CConstantTFES(&DataFE< MeshS >::P1));
   Global.New("P0S", CConstantTFES(&DataFE< MeshS >::P0));
   Global.New("P1bS", CConstantTFES(&P1bLagrange_surf));
-
+  Global.New("P2bS", CConstantTFES(&P2bLagrange_surf));
+        
   Global.New("P2L", CConstantTFEL(&DataFE< MeshL >::P2));
   Global.New("P1L", CConstantTFEL(&DataFE< MeshL >::P1));
   Global.New("P0L", CConstantTFEL(&DataFE< MeshL >::P0));
@@ -6506,6 +6508,7 @@ void init_lgfem( ) {
   TEF2dtoS[FindFE2("P1")] = &DataFE< MeshS >::P1;
   TEF2dtoS[FindFE2("P2")] = &DataFE< MeshS >::P2;
   TEF2dtoS[FindFE2("P1b")] = &P1bLagrange_surf;
+  TEF2dtoS[FindFE2("P2b")] = &P2bLagrange_surf;
   TEF2dtoS[FindFE2("RT0")] = &RT0surf;
  // TEF2dtoS[FindFE2("P1dc")] = &DataFE< MeshS >::RT0;
         

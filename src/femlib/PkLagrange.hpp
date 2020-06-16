@@ -81,6 +81,12 @@ namespace Fem2D {
             dfon[1] = dfon[2] = dfon[3] = 0;
             dfon[dHat] = 1;
           }
+          else if (k == -2 && dHat==2) { // P2b
+              dfon[0] = 1;
+              dfon[1] = 1;
+              dfon[2] = dfon[3] = 0;
+              dfon[dHat] = 1;
+            }
           else {
             dfon[0] = 1;
             dfon[1] = max(k - 1, 0);
