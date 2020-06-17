@@ -112,7 +112,7 @@ fespace Vh(Th, Pk);      // local finite element space
 /*              The det(J) = r^2*sin(theta) --> r^2*sin(x)             */
 /*                                                                     */
 macro Jac()( radius^2*sin(x) )             // End Of Macro /*          */
-  ;; /*  The Jacobian                                                  */
+     /*  The Jacobian                                                  */
 /*                                                                     */
 /*        The gradiant operator in spherical coordinates               */
 /*                                                                     */
@@ -122,9 +122,9 @@ macro Jac()( radius^2*sin(x) )             // End Of Macro /*          */
 /*                                   1/(radius*sin(x)*d/dy             */
 /*                                                                     */
 macro Grad(u) [dx(u)/radius,dy(u)/(radius*sin(x))] // End Of Macro /*  */
-  ;; /*  The Gradient operator                                         */
+     /*  The Gradient operator                                         */
 macro Lap(u,v) ( Grad(u)'*Grad(v)) //')      // End Of Macro /*        */
-  ;; /*  The Laplace operator                                          */
+     /*  The Laplace operator                                          */
 /*                                                                     */
 /*                                                                     */
 /***********************************************************************/

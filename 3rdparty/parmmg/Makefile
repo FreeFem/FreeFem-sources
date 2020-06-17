@@ -66,6 +66,7 @@ FAIRE: FAIT.done install.done
 tag-tar: $(PACKAGE)
 	-rm -rf ParMmg-* parmmg-sources
 	unzip -q $(PACKAGE) && mv ParMmg-* parmmg-sources
+	awk '{sub(/FIND_PACKAGE\(MMG\)/,"FIND_PACKAGE(Mmg)")}1' parmmg-sources/CMakeLists.txt > CMakeLists.txt && mv CMakeLists.txt parmmg-sources/CMakeLists.txt
 	touch tag-tar
 
 $(PACKAGE): FORCE
