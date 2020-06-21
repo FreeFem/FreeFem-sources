@@ -46,14 +46,15 @@ ifeq ($(PETSC_PKG),yes)
 pkg_dir=$(abspath $(dir $(mkfile_path))/pkg)
 PETSC_DOWNLOAD := --download-scalapack=$(pkg_dir)/pkg-scalapack.tar.gz \
 		--download-metis=$(pkg_dir)/pkg-metis.tar.gz \
-		--download-ptscotch=$(pkg_dir)/scotch-v6.0.8.tar.gz \
+		--download-ptscotch=$(pkg_dir)/scotch-v6.0.9.tar.gz \
 		--download-mumps=$(pkg_dir)/pkg-mumps.tar.gz \
 		--download-hypre=$(pkg_dir)/hypre.tar.gz \
 		--download-parmetis=$(pkg_dir)/pkg-parmetis.tar.gz \
 		--download-superlu=$(pkg_dir)/superlu.tar.gz \
-		--download-suitesparse=$(pkg_dir)/SuiteSparse-4.4.3.tar.gz \
+		--download-suitesparse=$(pkg_dir)/SuiteSparse-5.7.1.tar.gz \
 		--download-tetgen=$(pkg_dir)/tetgen1.5.1.tar.gz \
-		--download-slepc=$(pkg_dir)/slepc.tar.gz
+		--download-slepc=$(pkg_dir)/slepc.tar.gz \
+		--download-hpddm=$(pkg_dir)/hpddm.tar.gz
 ifeq ($(FFCMAKE),no)
 PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake=$(pkg_dir)/cmake.tar.gz
 endif
@@ -81,7 +82,7 @@ FLAGS_MTUNE := -mtune=generic
 else
 FLAGS_MTUNE := -mtune=native
 endif
-COMMON_FLAGS := MAKEFLAGS='' --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-cxx-dialect=C++11 --with-ssl=0 --with-x=0 --with-fortran-bindings=0
+COMMON_FLAGS := MAKEFLAGS='' --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-cxx-dialect=C++11 --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-cudac=0
 ifeq ($(WIN32DLLTARGET),)
 ##  Not on windows....
 ifeq ($(MPICC)$(MPICXX)$(MPIFC),)

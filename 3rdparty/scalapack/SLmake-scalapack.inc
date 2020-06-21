@@ -26,7 +26,7 @@ CDEFS         = @CFLAGSF77@ -DNO_IEEE $(USEMPI)
 #  The fortran and C compilers, loaders, and their flags
 #
 
-FC            = @MPIF77@
+FC            = @MPIFC@
 CC            = @MPICC@
 NOOPT         = -O0 @CNOFLAGS@
 

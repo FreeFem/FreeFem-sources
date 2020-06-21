@@ -99,7 +99,8 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	testFEHCT.edp \
 	testFEMorley.edp \
 	testp1dcnc.edp \
-	thresholdings.edp 
+	thresholdings.edp \
+	iovtk.edp 
     
 
 TESTS_FFTW3 = dfft.edp

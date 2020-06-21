@@ -256,10 +256,9 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 Vec xr, xi;
                 PetscInt n;
                 if(eigenvectors || array || rvectors || rarray) {
-                    MatCreateVecs(ptA->_petsc, &xr, PETSC_NULL);
-                    MatCreateVecs(ptA->_petsc, PETSC_NULL, &xi);
+                    MatCreateVecs(ptA->_petsc, &xi, &xr);
                     VecGetLocalSize(xr, &n);
-                }
+                } else xr = xi = NULL;
                 for(PetscInt i = 0; i < nconv; ++i) {
                     PetscScalar kr, ki = 0;
                     PetscReal sigma;

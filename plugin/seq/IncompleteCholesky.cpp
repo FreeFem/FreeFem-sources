@@ -413,7 +413,7 @@ void LU_solve(MatriceMorse< R > &T, int cas, KN< double > &b, bool trans) {
   ffassert(n == b.N( ));
   if (trans == (cas < 0))    // (cas <0 et trans) or (not et  cas >0)
   {                          // U = L'
-    if (verbosity > 9) cout << " LU_solve:: Remonte:  " << cas << " " << trans << endl;
+    if (verbosity > 9) cout << " LU_solve:: U Backward subtitution :  " << cas << " " << trans << endl;
     for (int i = n - 1; i >= 0; --i) {
       k0 = T.p[i];
       k1 = T.p[i + 1] - 1;
@@ -428,7 +428,7 @@ void LU_solve(MatriceMorse< R > &T, int cas, KN< double > &b, bool trans) {
     }
   } else    // cas >0 et not trans
   {
-    if (verbosity > 9) cout << " LU_solve:: Descente:  " << cas << " " << trans << endl;
+    if (verbosity > 9) cout << " LU_solve::  L Forward elimination :  " << cas << " " << trans << endl;
     for (int i = 0; i < n; ++i) {
       R bi = b[i];
       for (k = T.p[i]; k < T.p[i + 1] - 1; k++) {

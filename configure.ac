@@ -907,7 +907,6 @@ else
 	ff_mpi=yes
 	AC_SUBST(MPICXX,$MPICXX)
 	AC_SUBST(MPICC,$MPICC)
-	AC_SUBST(MPIF77,$MPIF77)
 	AC_SUBST(MPIFC,$MPIFC)
 	AC_SUBST(MPIPROG,"FreeFem++-mpi${EXEEXT}")
 	AC_SUBST(MPI_INCLUDE,"-I $MPI_INC_DIR")
@@ -993,6 +992,9 @@ if test "$with_petsc" != no; then
 		    AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]);
             if test "$ff_mpi" != yes; then
                 MPIRUN=`echo $PETSC_MPIRUN`
+                MPICC=`awk -F' *= *' '"CC"==$1 {print $2}' "$ffconfpetsc"`
+                MPICXX=`awk -F' *= *' '"CXX"==$1 {print $2}' "$ffconfpetsc"`
+                MPIFC=`awk -F' *= *' '"FC"==$1 {print $2}' "$ffconfpetsc"`
                 m4_include(etc/config/m4/acmpi.m4)
             fi
             if test "$ff_mpi" = yes; then
@@ -1073,6 +1075,9 @@ if test "$with_petsc_complex" != no; then
 			AC_MSG_NOTICE([ find complex ($PETSC_COMPLEX_SCALAR) petsc in $ffconfpetscc]);
             if test "$ff_mpi" != yes; then
                 MPIRUN=`echo $PETSC_COMPLEX_MPIRUN`
+                MPICC=`awk -F' *= *' '"CC"==$1 {print $2}' "$ffconfpetscc"`
+                MPICXX=`awk -F' *= *' '"CXX"==$1 {print $2}' "$ffconfpetscc"`
+                MPIFC=`awk -F' *= *' '"FC"==$1 {print $2}' "$ffconfpetscc"`
                 m4_include(etc/config/m4/acmpi.m4)
             fi
             if test "$ff_mpi" = yes; then

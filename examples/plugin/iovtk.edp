@@ -1,0 +1,15 @@
+load "msh3"
+load "iovtk"
+mesh3 Th = cube(1,1,1,region=11);
+fespace Vh(Th,P1);
+Vh g=x+y*y+z*z*z;
+int[int] fforder2=[1,1];
+savevtk("bidule.vtk",Th,g,[g,g,g],/*order=fforder2,*/dataname=" b c",bin=1);
+
+
+{ // restore mesh and data ???
+real[int][int] data;	
+
+mesh3 Th=vtkload3("bidule.vtk",fields=data);//  work only with order =1 and vgk file
+cout << " " << data.n << " == 2 "<< endl;
+}

@@ -117,7 +117,7 @@ fespace Vh(Th, Pk);      // local finite element space
 /*        The det(J) = r2*(r1+r2*cos(u)) --> r2(r1+r2*cos(x))          */
 /*                                                                     */
 macro Jac()( r2*(r1+r2*cos(x)) )            // End Of Macro /*         */
-  ;; /*  The Jacobian                                                  */
+     /*  The Jacobian                                                  */
 /*                                                                     */
 /*       The gradiant operator on the induced toroidal surface         */
 /*                                                                     */
@@ -125,9 +125,9 @@ macro Jac()( r2*(r1+r2*cos(x)) )            // End Of Macro /*         */
 /*                1/(r1+r2*cos(u))*d/dv  ->  1/(r1+r2*cos(x)*d/dy      */
 /*                                                                     */
 macro Grad(u) [dx(u)/r2,dy(u)/(r1+r2*cos(x))]      // End Of Macro /*  */
-  ;; /*  The Gradient operator                                         */
+     /*  The Gradient operator                                         */
 macro Lap(u,v) ( Grad(u)'*Grad(v)) //')      // End Of Macro /*        */
-  ;; /*  The Laplace-Beltrami operator on the induced surface          */ 
+     /*  The Laplace-Beltrami operator on the induced surface          */ 
 /*                                                                     */
 /***********************************************************************/
 /***************************************/

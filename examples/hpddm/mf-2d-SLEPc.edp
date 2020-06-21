@@ -1,0 +1,60 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+include "macro_ddm.idp"
+load "SLEPc"
+
+mesh Th = square(40, 40);
+func Pk = P1;
+fespace Vh(Th, Pk);
+varf vPb(u, v) = int2d(Th)(dx(u) * dx(v) + dy(u) * dy(v)) + on(1, 2, 3, 4, u = 0.0);
+buildDmesh(Th)
+Mat A;
+createMat(Th, A, Pk)
+matrix Loc = vPb(Vh, Vh, tgv = -2);
+A = Loc;
+mesh ThTrunc;
+matrix R;
+real[int] bb(4);
+boundingbox(Th, bb);
+fespace VhTrunc(ThTrunc, Pk);
+matrix prod;
+if(bb[0] < 0.5) { // careful because some subdomains may not satisfy this condition!
+    int[int] n2o;
+    ThTrunc = trunc(Th, x < 0.5, new2old = n2o);
+    int[int] rest = restrict(VhTrunc, Vh, n2o);
+    real[int] V(VhTrunc.ndof);
+    V = 1;
+    int[int] I = 0:VhTrunc.ndof-1;
+    R = [I, rest, V];
+    R.resize(VhTrunc.ndof, Vh.ndof);
+    prod = Loc * R';
+}
+Mat B(A, restriction = R); // if the above condition is not met,
+Mat C(A, B, prod);         // these two distributed matrices won't have any local unknowns
+real[int] values;
+SVDSolve(C, sparams = "-svd_largest -svd_view_values -svd_type cyclic -svd_nsv 10", values = values);
+func real[int] prodFunc(real[int]& up) {
+    real[int] u;
+    changeNumbering(B, u, up, inverse = true, exchange = true); // from PETSc to FreeFEM numbering + need to exchange ghost values
+    real[int] v = R' * u;
+    u.resize(Loc.n);
+    u = A * v;
+    changeNumbering(A, u, up); // from FreeFEM to PETSc numbering
+    return up;
+}
+func real[int] prodFuncTranspose(real[int]& utp) {
+    real[int] ut;
+    changeNumbering(A, ut, utp, inverse = true, exchange = true); // from PETSc to FreeFEM numbering + need to exchange ghost values
+    real[int] v = A' * ut;
+    ut.resize(R.n);
+    ut = R * v;
+    changeNumbering(B, ut, utp); // from FreeFEM to PETSc numbering
+    return utp;
+}
+Mat MF(A, B, prodFunc, transpose = prodFuncTranspose);
+view(MF, format = "info");
+real[int] valuesMF;
+SVDSolve(MF, sparams = "-svd_largest -svd_view_values -svd_type cyclic -svd_nsv 10", values = valuesMF);
+values -= valuesMF;
+assert(values.linfty < 1.0e-6);

@@ -31,7 +31,6 @@ FAIT.done:tag-tar
 	-DCMAKE_CXX_FLAGS="$(CXXFLAGS) $(CXX11FLAGS) -fPIC" \
 	-DM_LIB="-lm" -DUSE_ELAS=OFF -DUSE_VTK=OFF \
 	-DSCOTCH_DIR=$(scotch_dir) \
-	-DUSE_ELAS=OFF \
 	-DCMAKE_BUILD_TYPE=Release $(CMAKE_GENERATOR) && $(MAKE)
 	touch FAIT.done
 

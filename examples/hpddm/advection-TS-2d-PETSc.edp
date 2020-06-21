@@ -12,9 +12,8 @@ mesh Th = buildmesh(C(getARGV("-global", 100)));
 
 func Pk = P1dc;
 fespace Vh(Th, Pk);
-real[int] D;
-int[int][int] intersection;
-build(Th, 1, intersection, D, Pk, mpiCommWorld);
+Mat dK;
+createMat(Th, dK, Pk);
 Vh v1 = y, v2 = -x;
 
 macro diff(n)(abs(n) - (n))//
@@ -24,10 +23,10 @@ varf vM(c, w) = int2d(Th)(c * w);
 matrix M = vM(Vh, Vh);
 matrix K = vK(Vh, Vh);
 
-Mat dK(K, intersection, D);
+dK = K;
 Mat dM(dK, M);
-set(M, sparams = "-pc_type jacobi");
-Mat dT(Vh.ndof, intersection, D);
+set(dM, sparams = "-pc_type jacobi");
+Mat dT(dM);
 
 func real[int] funcExplicit(real t, real[int]& in) {
     real[int] temp(in.n), out(in.n);

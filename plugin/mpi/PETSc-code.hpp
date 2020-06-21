@@ -687,6 +687,11 @@ namespace PETSc {
 #endif
       return 0L;
   }
+  double memoryGetCurrentUsage() {
+      PetscLogDouble mem;
+      PetscMemoryGetCurrentUsage(&mem);
+      return mem;
+  }
   long hasType(string* const& obj, string* const& type) {
       if (obj->size() > 0 && type->size() > 0) {
           std::string o(*obj);
@@ -709,7 +714,7 @@ namespace PETSc {
       return 0L;
   }
 
-  template< class HpddmType >
+  template< class HpddmType, int C >
   class initCSRfromDMatrix : public OneOperator {
    public:
     const int c;
@@ -745,27 +750,22 @@ namespace PETSc {
     initCSRfromDMatrix( )
       : OneOperator(
           atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
-          atype< DistributedCSR< HpddmType >* >( ), atype< Matrice_Creuse< PetscScalar >* >( )),
-        c(0) {}
+          atype< DistributedCSR< HpddmType >* >( ), atype< typename std::conditional<C == 0, Matrice_Creuse< PetscScalar >*, Polymorphic*>::type >( )),
+        c(C) {}
     initCSRfromDMatrix(int)
-      : OneOperator(
-          atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
-          atype< DistributedCSR< HpddmType >* >( ), atype< Polymorphic* >( )),
-        c(1) {}
-    initCSRfromDMatrix(int, int)
       : OneOperator(
           atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
           atype< DistributedCSR< HpddmType >* >( )),
         c(2) {}
   };
-  template< class HpddmType >
+  template< class HpddmType, int C >
   basicAC_F0::name_and_type
-    initCSRfromDMatrix< HpddmType >::initCSRfromDMatrix_Op::name_param[] = {
-      {"clean", &typeid(bool)},
+    initCSRfromDMatrix< HpddmType, C >::initCSRfromDMatrix_Op::name_param[] = {
+      {C == 1 ? "transpose" : "clean", C == 1 ? &typeid(Polymorphic*) : &typeid(bool)},
       {"symmetric", &typeid(bool)},
       {"restriction", &typeid(Matrice_Creuse< double >*)}};
 
-  template< class HpddmType >
+  template< class HpddmType, int D >
   class initRectangularCSRfromDMatrix : public OneOperator {
    public:
     const int c;
@@ -804,8 +804,8 @@ namespace PETSc {
       : OneOperator(
           atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
           atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
-          atype< Matrice_Creuse< PetscScalar >* >( )),
-        c(0) {}
+          atype< typename std::conditional<D == 0, Matrice_Creuse< PetscScalar >*, Polymorphic* >::type >( )),
+        c(D ? 2 : 0) {}
     initRectangularCSRfromDMatrix(int)
       : OneOperator(
           atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
@@ -813,21 +813,15 @@ namespace PETSc {
         c(1) {}
     initRectangularCSRfromDMatrix(int, int)
       : OneOperator(
-          atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
-          atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
-          atype< Polymorphic* >( )),
-        c(2) {}
-    initRectangularCSRfromDMatrix(int, int, int)
-      : OneOperator(
           atype< long >( ), atype< DistributedCSR< HpddmType >* >( ),
           atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
           atype< Matrice_Creuse< PetscScalar >* >( )),
         c(3) {}
   };
-  template< class HpddmType >
+  template< class HpddmType, int D >
   basicAC_F0::name_and_type
-    initRectangularCSRfromDMatrix< HpddmType >::initRectangularCSRfromDMatrix_Op::name_param[] = {
-      {"clean", &typeid(bool)},
+    initRectangularCSRfromDMatrix< HpddmType, D >::initRectangularCSRfromDMatrix_Op::name_param[] = {
+      {D == 1 ? "transpose" : "clean", D == 1 ? &typeid(Polymorphic*) : &typeid(bool)},
       {"numbering", &typeid(KN<PetscScalar>*)}};
 
   template< class HpddmType >
@@ -1508,7 +1502,7 @@ namespace PETSc {
     {"precon", &typeid(Polymorphic*)}                                                             // 17
   };
   class ShellInjection;
-  template< class Type, char >
+  template< class Type >
   class LinearSolver;
   template< class Type >
   class NonlinearSolver;
@@ -1529,7 +1523,7 @@ namespace PETSc {
   template< class Type >
   struct _n_User< NonlinearSolver< Type > > {
     typename NonlinearSolver< Type >::VecF_O* op;
-    typename LinearSolver< Type, 'N' >::MatF_O* r;
+    typename LinearSolver< Type >::MatF_O* r;
     typename NonlinearSolver< Type >::IConvF_O* conv;
   };
   template< class Type >
@@ -1542,11 +1536,11 @@ namespace PETSc {
   template< class Type >
   struct _n_User< TaoSolver< Type > > {
     typename NonlinearSolver< Type >::VecF_O* J;
-    typename LinearSolver< Type, 'N' >::MatF_O* r;
+    typename LinearSolver< Type >::MatF_O* r;
     typename NonlinearSolver< Type >::VecF_O* op;
-    typename LinearSolver< Type, 'N' >::MatF_O* ic;
+    typename LinearSolver< Type >::MatF_O* ic;
     typename NonlinearSolver< Type >::VecF_O* icJ;
-    typename LinearSolver< Type, 'N' >::MatF_O* ec;
+    typename LinearSolver< Type >::MatF_O* ec;
     typename NonlinearSolver< Type >::VecF_O* ecJ;
   };
   static Mat* O;
@@ -1701,8 +1695,8 @@ namespace PETSc {
     ierr = PetscFree(user);CHKERRQ(ierr);
     PetscFunctionReturn(0);
   }
-  template< class Type, class Container >
-  static PetscErrorCode Op_User(Container A, Vec x, Vec y);
+  template< class, class Container, char N = 'N' >
+  static PetscErrorCode Op_User(Container, Vec, Vec);
   template< class Type >
   AnyType setOptions< Type >::setOptions_Op::operator( )(Stack stack) const {
     Type *ptA, *ptParent;
@@ -2017,14 +2011,14 @@ namespace PETSc {
             ffassert(op);
             const OneOperator* codeA = op->Find("(", ArrayOfaType(atype< KN< PetscScalar >* >( ), false));
             PCSetType(pc, PCSHELL);
-            User< LinearSolver< Type, 'N' > > userPC = nullptr;
+            User< LinearSolver< Type > > userPC = nullptr;
             PetscNew(&userPC);
             PetscInt n;
             MatGetLocalSize(ptA->_petsc, &n, NULL);
-            userPC->op = new typename LinearSolver< Type, 'N' >::MatF_O(n, stack, codeA);
+            userPC->op = new typename LinearSolver< Type >::MatF_O(n, stack, codeA);
             PCShellSetContext(pc, userPC);
-            PCShellSetApply(pc, Op_User< LinearSolver< Type, 'N' >, PC >);
-            PCShellSetDestroy(pc, PCShellDestroy< LinearSolver< Dmat, 'N' >  >);
+            PCShellSetApply(pc, Op_User< LinearSolver< Type >, PC >);
+            PCShellSetDestroy(pc, PCShellDestroy< LinearSolver< Dmat >  >);
         }
       }
     }
@@ -2448,7 +2442,7 @@ namespace PETSc {
     }
     return 0L;
   }
-  template< class Type, char N = 'N' >
+  template< class Type >
   class LinearSolver : public OneOperator {
    public:
     typedef KN< PetscScalar > Kn;
@@ -2458,25 +2452,32 @@ namespace PETSc {
       Stack stack;
       mutable Kn x;
       C_F0 c_x;
-      Expression mat;
-      typedef typename RNM_VirtualMatrix< PetscScalar >::plusAx plusAx;
-      MatF_O(int n, Stack stk, const OneOperator* op, int m = -1)
+      Expression mat, matT;
+      MatF_O(int n, Stack stk, const OneOperator* op, int m = -1, const OneOperator* opT = nullptr)
         : RNM_VirtualMatrix< PetscScalar >(n, m), stack(stk), x(n), c_x(CPValue(x)),
-          mat(op ? CastTo< Kn_ >(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : 0) {}
+          mat(op ? CastTo< Kn_ >(C_F0(op->code(basicAC_F0_wa(c_x)), (aType)*op)) : 0), matT(opT ? CastTo< Kn_ >(C_F0(opT->code(basicAC_F0_wa(c_x)), (aType)*opT)) : 0) {}
       ~MatF_O( ) {
+        delete matT;
         delete mat;
         Expression zzz = c_x;
         delete zzz;
       }
       void addMatMul(const Kn_& xx, Kn_& Ax) const {
-        ffassert(xx.N( ) == this->N && Ax.N( ) == this->M);
+        if(x.N( ) != xx.N( ))
+            x.resize(xx.N( ));
         x = xx;
+        ffassert(mat);
         Ax += GetAny< Kn_ >((*mat)(stack));
         WhereStackOfPtr2Free(stack)->clean( );
       }
-      plusAx operator*(const Kn& x) const { return plusAx(this, x); }
-      bool ChecknbLine(int) const { return true; }
-      bool ChecknbColumn(int) const { return true; }
+      void addMatTransMul(const Kn_& xx, Kn_& Ax) const {
+        if(x.N( ) != xx.N( ))
+            x.resize(xx.N( ));
+        x = xx;
+        ffassert(matT);
+        Ax += GetAny< Kn_ >((*matT)(stack));
+        WhereStackOfPtr2Free(stack)->clean( );
+      }
     };
     const int c;
     class E_LinearSolver : public E_F0mps {
@@ -2529,12 +2530,16 @@ namespace PETSc {
       : OneOperator(atype< long >( ), atype< Type* >( ), atype< KNM< PetscScalar >* >( ),
                     atype< KNM< PetscScalar >* >( )),
         c(2) {}
+    LinearSolver(int, int, int)
+      : OneOperator(atype< long >( ), atype< Type* >( ), atype< KN< PetscScalar >* >( ),
+                    atype< KN< PetscScalar >* >( )),
+        c(3) {}
   };
-  template< class Type, char N >
-  basicAC_F0::name_and_type LinearSolver< Type, N >::E_LinearSolver::name_param[] = {
+  template< class Type >
+  basicAC_F0::name_and_type LinearSolver< Type >::E_LinearSolver::name_param[] = {
     {"precon", &typeid(Polymorphic*)}, {"sparams", &typeid(std::string*)}};
-  template< class Type, char N >
-  AnyType LinearSolver< Type, N >::E_LinearSolver::operator( )(Stack stack) const {
+  template< class Type >
+  AnyType LinearSolver< Type >::E_LinearSolver::operator( )(Stack stack) const {
     if (c != 2) {
       KN< PetscScalar >* in = GetAny< KN< PetscScalar >* >((*x)(stack));
       KN< PetscScalar >* out = GetAny< KN< PetscScalar >* >((*y)(stack));
@@ -2555,9 +2560,9 @@ namespace PETSc {
           KSPCreate(PetscObjectComm((PetscObject)ptA->_petsc), &ptA->_ksp);
           KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
         }
-        if (N == 'N')
+        if (c != 3)
           KSPSolve(ptA->_ksp, x, y);
-        else if (N == 'H') {
+        else {
           VecConjugate(x);
           KSPSolveTranspose(ptA->_ksp, x, y);
           VecConjugate(y);
@@ -2567,13 +2572,13 @@ namespace PETSc {
         VecDestroy(&y);
         VecDestroy(&x);
       } else {
-        User< LinearSolver< Type, N > > user = nullptr;
+        User< LinearSolver< Type > > user = nullptr;
         PetscNew(&user);
-        user->op = new LinearSolver< Type, N >::MatF_O(in->n, stack, codeA);
+        user->op = new LinearSolver< Type >::MatF_O(in->n, stack, codeA);
         Mat S;
         MatCreateShell(PETSC_COMM_WORLD, in->n, in->n, PETSC_DECIDE, PETSC_DECIDE, user, &S);
         MatShellSetOperation(S, MATOP_MULT,
-                             (void (*)(void))Op_User< LinearSolver< Type, N >, Mat >);
+                             (void (*)(void))Op_User< LinearSolver< Type >, Mat >);
         Vec x, y;
         MatCreateVecs(S, &x, &y);
         if (out->n != in->n) {
@@ -2589,13 +2594,13 @@ namespace PETSc {
         insertOptions(options);
         PC pc;
         KSPGetPC(ksp, &pc);
-        User< LinearSolver< Type, N > > userPC = nullptr;
+        User< LinearSolver< Type > > userPC = nullptr;
         if (codeC) {
           PCSetType(pc, PCSHELL);
           PetscNew(&userPC);
-          userPC->op = new LinearSolver< Type, N >::MatF_O(in->n, stack, codeC);
+          userPC->op = new LinearSolver< Type >::MatF_O(in->n, stack, codeC);
           PCShellSetContext(pc, userPC);
-          PCShellSetApply(pc, Op_User< LinearSolver< Type, N >, PC >);
+          PCShellSetApply(pc, Op_User< LinearSolver< Type >, PC >);
         }
         KSPSetFromOptions(ksp);
         KSPSolve(ksp, x, y);
@@ -2682,9 +2687,10 @@ namespace PETSc {
     }
     return 0L;
   }
-  template< class HpddmType >
-  AnyType initCSRfromDMatrix< HpddmType >::initCSRfromDMatrix_Op::operator( )(
+  template< class HpddmType, int C >
+  AnyType initCSRfromDMatrix< HpddmType, C >::initCSRfromDMatrix_Op::operator( )(
     Stack stack) const {
+    ffassert((C == 0 && (c == 0 || c == 2)) || (C == c && C == 1));
     DistributedCSR< HpddmType >* ptA = GetAny< DistributedCSR< HpddmType >* >((*A)(stack));
     DistributedCSR< HpddmType >* ptB = GetAny< DistributedCSR< HpddmType >* >((*B)(stack));
     Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK = (c == 0 ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*K)(stack)) : nullptr);
@@ -2746,22 +2752,33 @@ namespace PETSc {
       }
       if (c == 1) {
         MatSetType(ptA->_petsc, MATSHELL);
-        User< LinearSolver< Dmat, 'N' > > user = nullptr;
+        User< LinearSolver< Dmat > > user = nullptr;
         PetscNew(&user);
-        user->op = new LinearSolver< Dmat, 'N' >::MatF_O(ptB->_last - ptB->_first, stack, codeA);
+        user->op = nullptr;
+        const Polymorphic* op = nargs[0] ? dynamic_cast< const Polymorphic* >(nargs[0]) : nullptr;
+        if(op) {
+            const OneOperator* codeAt = op->Find("(", ArrayOfaType(atype< KN< PetscScalar >* >( ), false));
+            if (codeAt) {
+              user->op = new LinearSolver< Dmat >::MatF_O(ptB->_last - ptB->_first, stack, codeA, -1, codeAt);
+              MatShellSetOperation(ptA->_petsc, MATOP_MULT_TRANSPOSE,
+                      (void (*)(void))Op_User< LinearSolver< Mat >, Mat, 'T' >);
+            }
+        }
+        if(!user->op) user->op = new LinearSolver< Dmat >::MatF_O(ptB->_last - ptB->_first, stack, codeA);
         MatShellSetContext(ptA->_petsc, user);
         MatShellSetOperation(ptA->_petsc, MATOP_MULT,
-                             (void (*)(void))Op_User< LinearSolver< Mat, 'N' >, Mat >);
-        MatShellSetOperation(ptA->_petsc, MATOP_DESTROY, (void (*)(void))ShellDestroy< LinearSolver< Dmat, 'N' >  >);
+                             (void (*)(void))Op_User< LinearSolver< Mat >, Mat >);
+        MatShellSetOperation(ptA->_petsc, MATOP_DESTROY, (void (*)(void))ShellDestroy< LinearSolver< Dmat >  >);
         MatSetUp(ptA->_petsc);
       }
     }
     if (c == 0 && nargs[0] && GetAny< bool >((*nargs[0])(stack))) ptK->destroy( );
     return ptA;
   }
-  template< class HpddmType >
-  AnyType initRectangularCSRfromDMatrix< HpddmType >::initRectangularCSRfromDMatrix_Op::operator( )(
+  template< class HpddmType, int D >
+  AnyType initRectangularCSRfromDMatrix< HpddmType, D >::initRectangularCSRfromDMatrix_Op::operator( )(
     Stack stack) const {
+    ffassert((D == 0 && (c == 0 || c == 1 || c == 3)) || (c == 2 && D == 1));
     DistributedCSR< HpddmType >* ptA = GetAny< DistributedCSR< HpddmType >* >((*A)(stack));
     DistributedCSR< HpddmType >* ptB = GetAny< DistributedCSR< HpddmType >* >((*B)(stack));
     DistributedCSR< HpddmType >* ptC = GetAny< DistributedCSR< HpddmType >* >((*C)(stack));
@@ -2814,13 +2831,23 @@ namespace PETSc {
       } else {
         if (c == 2) {
           MatSetType(ptA->_petsc, MATSHELL);
-          User< LinearSolver< Dmat, 'N' > > user = nullptr;
+          User< LinearSolver< Dmat > > user = nullptr;
           PetscNew(&user);
-          user->op = new LinearSolver< Dmat, 'N' >::MatF_O(ptC->_last - ptC->_first, stack, codeA, ptB->_last - ptB->_first);
+          user->op = nullptr;
+          const Polymorphic* op = nargs[0] ? dynamic_cast< const Polymorphic* >(nargs[0]) : nullptr;
+          if(op) {
+              const OneOperator* codeAt = op->Find("(", ArrayOfaType(atype< KN< PetscScalar >* >( ), false));
+              if (codeAt) {
+                  user->op = new LinearSolver< Dmat >::MatF_O(ptC->_last - ptC->_first, stack, codeA, ptB->_last - ptB->_first, codeAt);
+                  MatShellSetOperation(ptA->_petsc, MATOP_MULT_TRANSPOSE,
+                          (void (*)(void))Op_User< LinearSolver< Mat >, Mat, 'T' >);
+              }
+          }
+          if(!user->op) user->op = new LinearSolver< Dmat >::MatF_O(ptC->_last - ptC->_first, stack, codeA, ptB->_last - ptB->_first);
           MatShellSetContext(ptA->_petsc, user);
           MatShellSetOperation(ptA->_petsc, MATOP_MULT,
-                               (void (*)(void))Op_User< LinearSolver< Mat, 'N' >, Mat >);
-          MatShellSetOperation(ptA->_petsc, MATOP_DESTROY, (void (*)(void))ShellDestroy< LinearSolver< Dmat, 'N' >  >);
+                               (void (*)(void))Op_User< LinearSolver< Mat >, Mat >);
+          MatShellSetOperation(ptA->_petsc, MATOP_DESTROY, (void (*)(void))ShellDestroy< LinearSolver< Dmat >  >);
         }
         MatSetUp(ptA->_petsc);
         MatSetOption(ptA->_petsc, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
@@ -2894,6 +2921,7 @@ namespace PETSc {
       }
       long apply(const Kn_& xx) const {
         x = xx;
+        ffassert(mat);
         long ret = GetAny< long >((*mat)(stack));
         WhereStackOfPtr2Free(stack)->clean( );
         return ret;
@@ -2902,6 +2930,7 @@ namespace PETSc {
         x = xx;
         x_e = xx_e;
         x_i = xx_i;
+        ffassert(mat);
         long ret = GetAny< long >((*mat)(stack));
         WhereStackOfPtr2Free(stack)->clean( );
         return ret;
@@ -2913,12 +2942,14 @@ namespace PETSc {
           x_e = xx_d;
         else
           x_i = xx_d;
+        ffassert(mat);
         long ret = GetAny< long >((*mat)(stack));
         WhereStackOfPtr2Free(stack)->clean( );
         return ret;
       }
       long apply(const Kn_& xx, PetscReal* f) const {
         x = xx;
+        ffassert(mat);
         double ret = GetAny< double >((*mat)(stack));
         *f = ret;
         WhereStackOfPtr2Free(stack)->clean( );
@@ -2993,12 +3024,14 @@ namespace PETSc {
         t = tt;
         x = xx;
         x_t = xx_t;
+        ffassert(mat);
         res = GetAny< Kn_ >((*mat)(stack));
         WhereStackOfPtr2Free(stack)->clean( );
       }
       void apply(const double& tt, const Kn_& xx, Kn_& res) const {
         t = tt;
         x = xx;
+        ffassert(mat);
         res = GetAny< Kn_ >((*mat)(stack));
         WhereStackOfPtr2Free(stack)->clean( );
       }
@@ -3030,6 +3063,7 @@ namespace PETSc {
         s = ss;
         t = tt;
         x = xx;
+        ffassert(mat);
         long ret = GetAny< long >((*mat)(stack));
         WhereStackOfPtr2Free(stack)->clean( );
         return ret;
@@ -3081,6 +3115,7 @@ namespace PETSc {
         f = iff;
         x = ix;
         dx = idx;
+        ffassert(mat);
         long ret = GetAny< long >((*mat)(stack));
         WhereStackOfPtr2Free(stack)->clean( );
         return ret;
@@ -3262,8 +3297,8 @@ namespace PETSc {
 
     PetscFunctionBeginUser;
     user = reinterpret_cast< User< Type >* >(ctx);
-    typename LinearSolver< Type, 'N' >::MatF_O* mat =
-      reinterpret_cast< typename LinearSolver< Type, 'N' >::MatF_O* >(I == 0 ? (*user)->ic
+    typename LinearSolver< Type >::MatF_O* mat =
+      reinterpret_cast< typename LinearSolver< Type >::MatF_O* >(I == 0 ? (*user)->ic
                                                                              : (*user)->ec);
     VecGetArrayRead(x, &in);
     VecGetArray(c, &out);
@@ -3282,8 +3317,8 @@ namespace PETSc {
 
     PetscFunctionBeginUser;
     user = reinterpret_cast< User< Type >* >(ctx);
-    typename LinearSolver< Type, 'N' >::MatF_O* mat =
-      reinterpret_cast< typename LinearSolver< Type, 'N' >::MatF_O* >((*user)->r);
+    typename LinearSolver< Type >::MatF_O* mat =
+      reinterpret_cast< typename LinearSolver< Type >::MatF_O* >((*user)->r);
     VecGetArrayRead(x, &in);
     VecGetArray(f, &out);
     KN_< PetscScalar > xx(const_cast< PetscScalar* >(in), mat->N);
@@ -3432,7 +3467,7 @@ namespace PETSc {
           User< TaoSolver< Type > > user = nullptr;
           PetscNew(&user);
           user->J = new NonlinearSolver< Type >::VecF_O(in->n, stack, codeJ, 1);
-          user->r = new typename LinearSolver< Type, 'N' >::MatF_O(in->n, stack, codeR);
+          user->r = new typename LinearSolver< Type >::MatF_O(in->n, stack, codeR);
           Tao tao;
           TaoCreate(PETSC_COMM_WORLD, &tao);
           TaoSetObjectiveRoutine(tao, FormObjectiveRoutine< TaoSolver< Type > >, &user);
@@ -3447,7 +3482,7 @@ namespace PETSc {
             MatGetLocalSize(pt->_petsc, &sizeI, NULL);
             if (op) {
               const OneOperator* code = op->Find("(", ArrayOfaType(atype< Kn* >( ), false));
-              user->ic = new typename LinearSolver< Type, 'N' >::MatF_O(in->n, stack, code, sizeI);
+              user->ic = new typename LinearSolver< Type >::MatF_O(in->n, stack, code, sizeI);
               VecCreateMPI(PETSC_COMM_WORLD, sizeI, PETSC_DECIDE, &ci);
               TaoSetInequalityConstraintsRoutine(tao, ci,
                                                  FormConstraintsTao< TaoSolver< Type >, 0 >, &user);
@@ -3468,7 +3503,7 @@ namespace PETSc {
             op = nargs[6] ? dynamic_cast< const Polymorphic* >(nargs[6]) : nullptr;
             if (op) {
               const OneOperator* code = op->Find("(", ArrayOfaType(atype< Kn* >( ), false));
-              user->ec = new typename LinearSolver< Type, 'N' >::MatF_O(in->n, stack, code, sizeE);
+              user->ec = new typename LinearSolver< Type >::MatF_O(in->n, stack, code, sizeE);
               VecCreateMPI(PETSC_COMM_WORLD, sizeE, PETSC_DECIDE, &ce);
               TaoSetEqualityConstraintsRoutine(tao, ce, FormConstraintsTao< TaoSolver< Type >, 1 >,
                                                &user);
@@ -3527,7 +3562,7 @@ namespace PETSc {
           User< NonlinearSolver< Type > > user = nullptr;
           PetscNew(&user);
           user->op = new NonlinearSolver< Type >::VecF_O(in->n, stack, codeJ);
-          user->r = new typename LinearSolver< Type, 'N' >::MatF_O(in->n, stack, codeR);
+          user->r = new typename LinearSolver< Type >::MatF_O(in->n, stack, codeR);
           user->conv = nullptr;
           SNES snes;
           SNESCreate(PETSC_COMM_WORLD, &snes);
@@ -3639,8 +3674,9 @@ namespace PETSc {
   static PetscErrorCode ContainerGetContext(Container A, Type& user) {
     return PCShellGetContext(A, (void**)&user);
   }
-  template< class Type, class Container >
+  template< class Type, class Container, char N >
   static PetscErrorCode Op_User(Container A, Vec x, Vec y) {
+    static_assert(std::is_same<Container, Mat>::value || N == 'N', "Wrong types");
     User< Type > user;
     const PetscScalar* in;
     PetscScalar* out;
@@ -3648,13 +3684,20 @@ namespace PETSc {
 
     PetscFunctionBegin;
     ierr = ContainerGetContext(A, user);CHKERRQ(ierr);
-    typename LinearSolver< Type, 'N' >::MatF_O* mat =
-      reinterpret_cast< typename LinearSolver< Type, 'N' >::MatF_O* >(user->op);
+    typename LinearSolver< Type >::MatF_O* mat =
+      reinterpret_cast< typename LinearSolver< Type >::MatF_O* >(user->op);
     VecGetArrayRead(x, &in);
     VecGetArray(y, &out);
-    KN_< PetscScalar > xx(const_cast< PetscScalar* >(in), mat->N);
-    KN_< PetscScalar > yy(out, mat->M);
-    yy = *mat * xx;
+    if(N == 'N') {
+        KN_< PetscScalar > xx(const_cast< PetscScalar* >(in), mat->N);
+        KN_< PetscScalar > yy(out, mat->M);
+        yy = *mat * xx;
+    } else {
+        KN_< PetscScalar > xx(const_cast< PetscScalar* >(in), mat->M);
+        KN_< PetscScalar > yy(out, mat->N);
+        typename LinearSolver< Type >::MatF_O::plusAtx Atxx(mat, xx);
+        yy = Atxx;
+    }
     VecRestoreArray(y, &out);
     VecRestoreArrayRead(x, &in);
     PetscFunctionReturn(0);
@@ -4029,7 +4072,7 @@ namespace PETSc {
     Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >(1));
     Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >(1, 1));
     if (!std::is_same< PetscScalar, PetscReal >::value)
-      Global.Add("KSPSolveHermitianTranspose", "(", new PETSc::LinearSolver< Dmat, 'H' >( ));
+      Global.Add("KSPSolveHermitianTranspose", "(", new PETSc::LinearSolver< Dmat >(1, 1, 1));
     Global.Add("KSPGetConvergedReason", "(", new OneOperator1_< long, Dmat* >(PETSc::GetConvergedReason< Dmat >));
     Global.Add("KSPGetIterationNumber", "(", new OneOperator1_< long, Dmat* >(PETSc::GetIterationNumber< Dmat >));
     Global.Add("KSPSetResidualHistory", "(", new OneOperator2_< long, Dmat*, KN< double >* >(PETSc::SetResidualHistory< Dmat >));
@@ -4476,13 +4519,13 @@ static void Init_PETSc( ) {
   Add< Dmat* >("D", ".", new OneOperator1< KN_<double>, Dmat* >(PETSc::Dmat_D));
   Add< Dmat* >("n", ".", new OneOperator1< long, Dmat* >(PETSc::Dmat_n));
   TheOperators->Add("<-", new PETSc::initCSRfromArray< HpSchwarz< PetscScalar > >);
-  TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar > >);
-  TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar > >(1));
-  TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar > >(1, 1));
-  TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar > >);
-  TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar > >(1));
-  TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar > >(1, 1));
-  Global.Add("constructor", "(", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar > >(1, 1, 1));
+  TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >);
+  TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar >, 1 >);
+  TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >(1));
+  TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >);
+  TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >(1));
+  TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar >, 1 >());
+  Global.Add("constructor", "(", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >(1, 1));
   TheOperators->Add(
     "<-", new OneOperatorCode< PETSc::initCSRfromBlockMatrix< HpSchwarz< PetscScalar > > >( ));
   TheOperators->Add(
@@ -4509,6 +4552,7 @@ static void Init_PETSc( ) {
   TheOperators->Add("=", new OneOperator2_< Dmat*, Dmat*, Dmat* >(PETSc::changeOperatorSimple));
   Global.Add("PetscLogStagePush", "(", new OneOperator1_< long, string* >(PETSc::stagePush));
   Global.Add("PetscLogStagePop", "(", new OneOperator0< long >(PETSc::stagePop));
+  Global.Add("PetscMemoryGetCurrentUsage", "(", new OneOperator0< double >(PETSc::memoryGetCurrentUsage));
   Global.Add("hasType", "(", new OneOperator2_< long, string*, string* >(PETSc::hasType));
   Init_Common( );
   Dcl_Type< PETSc::DMPlex* >(Initialize< PETSc::DMPlex >, DeleteDTOR< PETSc::DMPlex >);

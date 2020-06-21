@@ -31,21 +31,26 @@ All notable changes to this project will be documented in this file.
 - interface to PETSc DMPlex, see `examples/hpddm/DMPlex-PETSc.edp`
 - function `MatDestroy`
 - function `MatPtAP` and `transferMat` for parallel interpolation between non-matching grids, see `examples/hpddm/PtAP-2d-PETSc.edp`
-- preliminary interface to `SVDSolve` from SLEPc to compute singular value decompositions
+- preliminary interface to `SVDSolve` from SLEPc to compute singular value decompositions, see `examples/hpddm/mf-2d-SLEPc.edp` or `examples/hpddm/helmholtz-2d-SLEPc-complex.edp`
+- `transpose` parameter when constructing a `Mat` for defining a matrix-free transposed operation
+- interface to `PetscMemoryGetCurrentUsage`
 
 ### Changed
 - moved Htool to its new GitHub location
 - ScaLAPACK and MUMPS are not compiled by PETSc anymore if there is no Fortran compiler
-- MPICH is compiled by PETSc if no MPI is detected during configure
+- MPICH is compiled by PETSc if no MPI is detected during configure, see https://community.freefem.org/t/feature-request-use-download-mpich-on-ubuntu/407
 - PETSc version 3.13.2
+- force `--with-cudac=0` in `make petsc-slepc`, see https://github.com/FreeFem/FreeFem-sources/issues/141
 
 ### Deprecated
 
 ### Removed
 - `augmentation` routine from the PETSc plugin
+- `MPIF77` variable
 
 ### Fixed
 - missing METIS library when using SuiteSparse compiled by PETSc
+- missing `-fno-stack-protector` when building PETSc on Windows, see https://community.freefem.org/t/error-loading-complex-petsc-slepc-library/370
 
 ## [4.6]
 
@@ -62,6 +67,9 @@ All notable changes to this project will be documented in this file.
 - distributed ParMmg interface, cf. `examples/hpddm/distributed-parmmg.edp` or `examples/hpddm/laplace-adapt-dist-3d-PETSc.edp`
 - new parallel interpolator on non-matching meshes, cf. `examples/hpddm/transfer.edp`
 - ability to solve problems in single precision or with 64 bit integers
+- tool to read data form vtk file only in 3d (cf. plugin iovtk a first example `examples/plugin/iovtk.edp`)
+- tool to read/wrile ply file of meshL, mesh3, MeshS : Polygon File Format / Stanford Triangle Format do  `load "ioply"`
+     see `examples//3dSurf/operatorsOnMeshS.edp`
 
 ### Changed
 - new `tgv` values: -10 => zero row, -20 => zero row/column
@@ -78,6 +86,9 @@ All notable changes to this project will be documented in this file.
 - compilation of plugins when using static libraries
 - correct detection problem in FE type when use a vectorial FE
 - macro concatenation with spaces in arguments
+- correct bug in `plugin/seq/Schur-Complement.cpp`
+- correct ambigity bug in `plugin/seq/bfstream.cpp` (reading real or integer)
+- compilation fo  plugin libff-mmap-semaphore.c under windows
 
 ## [4.5]
 
