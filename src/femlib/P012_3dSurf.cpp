@@ -323,20 +323,8 @@
      f[0] = AB*(lb*c[0]) + AC*(lc*c[0]);
      f[1] = BA*(la*c[1]) + BC*(lc*c[1]);
      f[2] = CA*(la*c[2]) + CB*(lb*c[2]);
-          
-     R3 fx[3];
-     fx[0] = AB*(D[1].x*c[0]) + AC*(D[2].x*c[0]);
-     fx[1] = BA*(D[0].x*c[1]) + BC*(D[2].x*c[1]);
-     fx[2] = CA*(D[0].x*c[2]) + CB*(D[1].x*c[2]);
-     R3 fy[3];
-     fy[0] = AB*(D[1].y*c[0]) + AC*(D[2].y*c[0]);
-     fy[1] = BA*(D[0].y*c[1]) + BC*(D[2].y*c[1]);
-     fy[2] = CA*(D[0].y*c[2]) + CB*(D[1].y*c[2]);
-     R3 fz[3];
-     fz[0] = AB*(D[1].z*c[0]) + AC*(D[2].z*c[0]);
-     fz[1] = BA*(D[0].z*c[1]) + BC*(D[2].z*c[1]);
-     fz[2] = CA*(D[0].z*c[2]) + CB*(D[1].z*c[2]);
-          
+ 
+       
      if (whatd & Fop_D0)
        for(int i=0;i<3;i++){
          val(i,0,op_id) = f[i].x;
@@ -345,27 +333,39 @@
        }
 
      if (whatd & Fop_D1) {
-       if (whatd & Fop_dx)
+       if (whatd & Fop_dx){
+         R3 fx[3];
+         fx[0] = AB*(D[1].x*c[0]) + AC*(D[2].x*c[0]);
+         fx[1] = BA*(D[0].x*c[1]) + BC*(D[2].x*c[1]);
+         fx[2] = CA*(D[0].x*c[2]) + CB*(D[1].x*c[2]);
          for(int i=0;i<3;i++){
            val(i,0,op_dx) = fx[i].x;
            val(i,1,op_dx) = fx[i].y;
            val(i,2,op_dx) = fx[i].z;
          }
-              
-       if (whatd & Fop_dy)
+       }
+       if (whatd & Fop_dy) {
+         R3 fy[3];
+         fy[0] = AB*(D[1].y*c[0]) + AC*(D[2].y*c[0]);
+         fy[1] = BA*(D[0].y*c[1]) + BC*(D[2].y*c[1]);
+         fy[2] = CA*(D[0].y*c[2]) + CB*(D[1].y*c[2]);
          for(int i=0;i<3;i++){
            val(i,0,op_dy) = fy[i].x;
            val(i,1,op_dy) = fy[i].y;
            val(i,2,op_dy) = fy[i].z;
          }
-           
-       if (whatd & Fop_dz)
-         for(int i=0;i<3;i++){
-           val(i,0,op_dz) = fz[i].x;
-           val(i,1,op_dz) = fz[i].y;
-           val(i,2,op_dz) = fz[i].z;
+       }
+         if (whatd & Fop_dz) {
+           R3 fz[3];
+           fz[0] = AB*(D[1].z*c[0]) + AC*(D[2].z*c[0]);
+           fz[1] = BA*(D[0].z*c[1]) + BC*(D[2].z*c[1]);
+           fz[2] = CA*(D[0].z*c[2]) + CB*(D[1].z*c[2]);
+           for(int i=0;i<3;i++){
+             val(i,0,op_dz) = fz[i].x;
+             val(i,1,op_dz) = fz[i].y;
+             val(i,2,op_dz) = fz[i].z;
+           }
          }
-               
      }
      else if (whatd & Fop_D2)
        ffassert(0);
