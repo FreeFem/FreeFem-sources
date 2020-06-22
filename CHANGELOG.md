@@ -34,14 +34,15 @@ All notable changes to this project will be documented in this file.
 - preliminary interface to `SVDSolve` from SLEPc to compute singular value decompositions, see `examples/hpddm/mf-2d-SLEPc.edp` or `examples/hpddm/helmholtz-2d-SLEPc-complex.edp`
 - `transpose` parameter when constructing a `Mat` for defining a matrix-free transposed operation
 - interface to `PetscMemoryGetCurrentUsage`
-
+- add P2b, RT0, RT1 surface FE (P2bS, RT0S, RT1S))
+- add operator interpolate (2d->3d surface)
 ### Changed
 - moved Htool to its new GitHub location
 - ScaLAPACK and MUMPS are not compiled by PETSc anymore if there is no Fortran compiler
 - MPICH is compiled by PETSc if no MPI is detected during configure, see https://community.freefem.org/t/feature-request-use-download-mpich-on-ubuntu/407
 - PETSc version 3.13.2
 - force `--with-cudac=0` in `make petsc-slepc`, see https://github.com/FreeFem/FreeFem-sources/issues/141
-
+- change DSL keyword P1dc3dL->P1dcL and P1dc3dS->P1dcS
 ### Deprecated
 
 ### Removed
