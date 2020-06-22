@@ -25,9 +25,10 @@ and $ u.n = (g1n,g2n,g3n).n$ on $\Gamma_4$
 
 macro divS(u1,u2,u3) (dx(u1)+dy(u2)+dz(u3)) //EOM
 
-meshS ThS=square3(10,10);
+real theta = pi/2;
+meshS ThS = square3(10,10, [x, cos(theta)*y-sin(theta)*z, sin(theta)*y+cos(theta)*z]);
 fespace VhS(ThS,[RT1S,P1dc]);
-///fespace PhS(ThS,P1dc);
+
 
 func gd = 1.;
 func g1n = 1.;
