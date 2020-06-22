@@ -52,7 +52,7 @@ Test(Th3,P1dc3d1,"P1dc3d1")
 
 
 meshS ThS=square3(1,1);
-fespace VhS(ThS,P1dc3dS);
+fespace VhS(ThS,P1dcS);
 VhS uS=x;
 
 for(int i=0; i< VhS.ndof;++i) {
@@ -60,13 +60,13 @@ for(int i=0; i< VhS.ndof;++i) {
 	uS[][i]=1;
 plot(uS,wait=1,cmm="3d surf dof="+i,fill=1);
 }
-Test(ThS,P1dc3dS,"P1dc3dS")
-Test(ThS,P1dc3dS1,"P1dc3d1S")
+Test(ThS,P1dcS,"P1dcS")
+Test(ThS,P1dcS1,"P1dc1S")
 
 
 meshL ThL=Sline(10);
-Test(ThL,P1dc3dL,"P1dc3dL")
-Test(ThL,P1dc3dL1,"P1dc3d1L")
+Test(ThL,P1dcL,"P1dcL")
+Test(ThL,P1dcL1,"P1dc1L")
 
 
 

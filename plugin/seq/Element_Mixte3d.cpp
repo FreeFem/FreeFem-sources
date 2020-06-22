@@ -4181,43 +4181,48 @@ namespace Fem2D {
     static const GQuadratureFormular< R2 > QFK;
     //static const GQuadratureFormular< R3 > QFtetra;
     TypeOfFE_RT1_surf( );
-    void FB(const What_d whatd, const Mesh &Th, const MeshS::Element &K, const RdHat &PHat,
+    void FB(const What_d whatd, const Mesh &Th, const Element &K, const RdHat &PHat,
             RNMK_ &val) const;
     void set(const Mesh &Th, const Element &K, InterpolationMatrix< RdHat > &M, int ocoef, int odf,
              int *nump) const;
     };
 
     int TypeOfFE_RT1_surf::dfon[] = {0, 2, 2, 0};    // dofs per vertice, edge, face, volume
-    // Quadrature formula on a face,
-    const QuadratureFormular1d TypeOfFE_RT1_surf::QFE(QF_GaussLegendre2);
-    // Quadrature formula on the tetraedron
-    const GQuadratureFormular< R2 > TypeOfFE_RT1_surf::QFK(QuadratureFormular_T_1);
+    // Quadrature formula on a edge,
+    const QuadratureFormular1d TypeOfFE_RT1_surf::QFE(3, 2, GaussLegendre(2), true); // (QF_GaussLegendre2);
+    // Quadrature formula on the triangle
+    const GQuadratureFormular< R2 > TypeOfFE_RT1_surf::QFK(QuadratureFormular_T_5);
     TypeOfFE_RT1_surf::TypeOfFE_RT1_surf( )
-        : GTypeOfFE< MeshS >(dfon, d, 1, 3 * QFE.n * 2 * Element::nf + 2 * QFK.n * 3,
-                                 Element::nf * QFE.n + QFK.n, false, true) {
+        : GTypeOfFE< MeshS >(dfon, d, 1, 3 * QFE.n * 2 * Element::ne + 2 * QFK.n * 3,
+                                 Element::ne * QFE.n + QFK.n, false, true) {
+             
         assert(QFK.n);
         assert(QFE.n);
-         // the interpolation pts on the faces
+        // 3 ref triangle vertices
+        R2 Pt[] = {R2(0., 0.), R2(1., 0.), R2(0., 1.)};
+            
+        // the interpolation pts on the faces
         int p = 0;
-        for (int e = 0; e < Element::nf; ++e) {
+        for (int e = 0; e < Element::ne; ++e) {
           for (int q = 0; q < QFE.n; ++q,++p) {
             RdHat A(TriangleHat[VerticesOfTriangularEdge[e][0]]);   // a remplacer
             RdHat B(TriangleHat[VerticesOfTriangularEdge[e][1]]);   // a remplacer
-
-            this->PtInterpolation[p] = B * (QFE[p].x) + A * (1. - QFE[p].x);    // X=0 => A  X=1 => B;
+                 
+            this->PtInterpolation[p] = Pt[Element::nvedge[e][0]] * (1. - QFE[q].x) +
+                 Pt[Element::nvedge[e][1]] * QFE[q].x;
           }
         }
         // the interpolation bubble pts
-        for (int q = 0; q < QFK.n; ++q, ++p)
-          this->PtInterpolation[p] = QFK[p];
-            
+            for (int q = 0; q < QFK.n; ++q, ++p)
+                this->PtInterpolation[p] = QFK[q];
+           
         int i = 0;
         p = 0;
 
-        for (int f = 0; f < Element::nf; f++) {        // loop on the 3 edges dofs
+        for (int e = 0; e < Element::ne; e++) {        // loop on the 3 edges
           for (int q = 0; q < QFE.n; ++q, p++) {    // loop on the face quadrature pts
-            for (int df = 0; df < 2; df++) {           // 3 dof par face
-              int dof = 2 * f + df;                    // numero  du dof  3 dof / face
+            for (int df = 0; df < 2; df++) {           // 2 dof per edge
+              int dof = 2 * e + df;                    // numero  du dof  2 dof / edge
 
               for (int c = 0; c < 3; c++, i++) {    // loop on the 3 components
                 this->pInterpolation[i] = p;        // pk
@@ -4229,76 +4234,54 @@ namespace Fem2D {
           }
         }
 
-        {
-          p = Element::nf * QFE.n;
+        p = Element::ne * QFE.n;
 
-          for (int q = 0; q < QFK.n; ++q, ++p) {    // loop on the volume quadrature pts
-            for (int v = 6; v < 8; v++) {             // loop on the 2 volume dofs
-              for (int c = 0; c < 3; c++, i++) {        // loop on the 3 components
-                this->pInterpolation[i] = p;            // pk
-                this->cInterpolation[i] = c;            // jk
-                this->dofInterpolation[i] = v;          // ik
-                this->coefInterpolation[i] = 0.;
-              }
+        for (int q = 0; q < QFK.n; ++q, ++p) {    // loop on the volume quadrature pts
+          for (int v = 6; v < 8; v++) {             // loop on the 2 volume dofs
+            for (int c = 0; c < 3; c++, i++) {        // loop on the 3 components
+              this->pInterpolation[i] = p;            // pk
+              this->cInterpolation[i] = c;            // jk
+              this->dofInterpolation[i] = v;          // ik
+              this->coefInterpolation[i] = 0.;
             }
           }
         }
-
         ffassert(p == this->PtInterpolation.N( ));
       }
 
       
       void TypeOfFE_RT1_surf::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M ,int ocoef,int odf,int *nump) const
       {
-         int i = ocoef;
+          int i = ocoef;
 
-         // *******************************************
-         // DOFs on the 4 faces --- 3 DOFs per face //
-         // *******************************************
-
-         // inv of int(F) lamda_i lambda_j = Area(K) * (d! (1+delta ij) / (d+max n)! = 0.5 * 2(1+delta
-         // ij) /(2+2)!
-         double c1[][3] = {{9, -18, 3},
-                           {-18, 84, -18},
-                           {3, -18, 9}};
-
-          for (int i = 0; i < 3; i++) {
-              R3 N=K.N(i);
-            R s = K.EdgeOrientation(i) ;
+         
+          // 2dofs per edges
+          for (int e = 0; e < 3; e++) {
+              R3 N=K.N(e);
+            R s = K.EdgeOrientation(e) ;
             for (int q = 0; q < QFE.n; ++q) {
-              R l1 = QFE[q].x, l2 = 1 - QFE[q].x;
-              R l11 = l1 * l1, l22 = l2 * l2, l21 = l2 * l1;
-              R sa = s * QFE[q].a;
-              R cp[3] = { (c1[0][0] * l11 + c1[0][1] * l21 + c1[0][2] * l22) * sa,
-                          (c1[1][0] * l11 + c1[1][1] * l21 + c1[1][2] * l22) * sa,
-                          (c1[2][0] * l11 + c1[2][1] * l21 + c1[2][2] * l22) *sa};
+                R l0 = QFE[q].x, l1 = 1 - QFE[q].x;
+                R p[2] = { (2 * l0 - l1) * 2, (2 * l1 - l0) * 2 } ;     // poly othogonaux to \lambda_1, to \lambda_0
+                R cp[2] = { s * p[0] * QFE[q].a, s * p[1] * QFE[q].a};
            
               if (s < 0)
-                swap(cp[0], cp[2]);
-              for (int idof = 0; idof < 3; idof++) {    // loop sur 3 dof de la face
-                for (int c = 0; c < 3; c++, i++)       // loop on the 3 components
-                  M.coef[i] = N[c] * cp[idof];
-              }
+                swap(cp[0], cp[1]);
+              for (int idof = 0; idof < 2; idof++) {
+                for (int c = 0; c < 3; c++, i++)
+                M.coef[i] = N[c] * cp[idof];
+                   }
             }
           }
 
-         // DOFs on the triangle --- 2 DOFs
+         // 2 dofs on the triangle
          double CK = -K.mesure( );    // dof U= [u1,u2,u3] > |K| int_K ( B_i.U )
-          R ll[3];
-          R3 N0=K.N(0), N1=K.N(1);
+          R3 N[2] = {K.N(1), K.N(2)};
          for (int q = 0; q < QFK.n; ++q) {
            double w = QFK[q].a * CK;
-           QFK[q].toBary(ll);
-           ll[0] *= w;
-           ll[1] *= w;
-           ll[2] *= w;
-           for (int l = 0; l < 3; ++l) {
-             M.coef[i++] = ll[l] * N0.x;
-             M.coef[i++] = ll[l] * N0.y;
-             M.coef[i++] = ll[l] * N0.z;
-             M.coef[i++] = ll[l] * N1.x;
-             M.coef[i++] = ll[l] * N1.y;
-             M.coef[i++] = ll[l] * N1.z;
+           for (int l = 0; l < 2; ++l) {
+             M.coef[i++] = w * N[l].x;
+             M.coef[i++] = w * N[l].y;
+             M.coef[i++] = w * N[l].z;
            }
          }
           
@@ -4310,26 +4293,19 @@ namespace Fem2D {
           assert(val.N( ) >= 8);
           assert(val.M() == 3);
         
-          
-          cout << " RT1 surf ONGOING " << endl;
-          ffassert(0);
-          
           val = 0;
-          // RT0 function basis
-          //  R3 phi[3] = {X - Q[0], X - Q[1], X - Q[2]};    // phi * area *2
-          // RT0 surf    // phi ((* area *2))
-          
           R3 A(K[0]),B(K[1]),C(K[2]);
           R l[]={1.-PHat.sum(),PHat.x,PHat.y};
           R3 D[3];
           K.Gradlambda(D);
+          
           //loc basis
           R3 AB(A,B),AC(A,C),BA(B,A),BC(B,C),CA(C,A),CB(C,B);
           int eo[3] = {K.EdgeOrientation(0), K.EdgeOrientation(1), K.EdgeOrientation(2)};
           R c[3];
-          c[0] = 1./(((AB,D[1]) + (AC,D[2])) *K.mesure()) ; c[0]*= eo[0] ;
-          c[1] = 1./(((BA,D[0]) + (BC,D[2])) *K.mesure()) ; c[1]*= eo[1];
-          c[2] = 1./(((CA,D[0]) + (CB,D[1])) *K.mesure()) ; c[2]*= eo[2];
+          c[0] = 1./(((AB,D[1]) + (AC,D[2])) *K.mesure()) ; //c[0]*= eo[0] ;
+          c[1] = 1./(((BA,D[0]) + (BC,D[2])) *K.mesure()) ; //c[1]*= eo[1];
+          c[2] = 1./(((CA,D[0]) + (CB,D[1])) *K.mesure()) ; //c[2]*= eo[2];
 
           R3 phi[3];
           phi[0] = AB*(l[1]*c[0]) + AC*(l[2]*c[0]);
@@ -4345,9 +4321,9 @@ namespace Fem2D {
           for (int e = 0; e < 3; ++e) {
             int i = e;
             int ii[2] = {(e + 1) % 3, (e + 2) % 3};
-            R s = eo[e] ; /// CKK;
+            R s = eo[e] / CKK;
             if (s < 0)
-              Exchange(ii[0], ii[1]);
+              swap(ii[0], ii[1]);
 
             for (int k = 0; k < 2; ++k, df++) {
               pI[df][0] = i;
@@ -4363,16 +4339,15 @@ namespace Fem2D {
               cI[df][2] = s / 3.;
             }
           }
-      
-          // FB  (x-Q_i) l_i l_j  =
-          R s8 = 8 /*/ CKK*/, s01 = s8;
+
+          R s8 = 8 / CKK, s01 = s8;
           R cbb[] = {s8, 2 * s01, -s01, s8};    // { [ 8, 16], [ -8, 8] }
 
           // the 2 bubbles
-          for (int k = 0; k < 2; ++k, df++) {    // k: ligne
-            pI[df][0] = 0;                       // i
+          for (int k = 0; k < 2; ++k, df++) {
+            pI[df][0] = 0;
             lI[df][0] = 0;
-            cI[df][0] = cbb[k];    //
+            cI[df][0] = cbb[k];
 
             pI[df][1] = 1;    // i
             lI[df][1] = 1;
@@ -4390,25 +4365,24 @@ namespace Fem2D {
               R3 fd(0., 0., 0.);
               for (int k = 0; k < 3; ++k)
                 fd += (cI[df][k] * l[lI[df][k]]) * phi[pI[df][k]];
-                 
               val(df, 0, op_id) = fd.x;
               val(df, 1, op_id) = fd.y;
-              val(df, 2, op_id) = fd.y;
+              val(df, 2, op_id) = fd.z;
             }
           }
 
           if (whatd & Fop_D1) {
             R3 D[3];
             K.Gradlambda(D);
-            R3 Dphix(1., 0., 0.), Dphiy(0., 1., 0.), Dphiz(0., 0., 1.);
-                 
             if (whatd & Fop_dx) {
+              R3 Dphix[3] = { AB*(D[1].x*c[0]) + AC*(D[2].x*c[0]),
+                              BA*(D[0].x*c[1]) + BC*(D[2].x*c[1]),
+                              CA*(D[0].x*c[2]) + CB*(D[1].x*c[2])};
               for (int df = 0; df < 8; ++df) {
                 R3 fd(0., 0.,0.);
 
                 for (int k = 0; k < 3; ++k)
-                  fd += cI[df][k] * (D[lI[df][k]].x * phi[pI[df][k]] + l[lI[df][k]] * Dphix);
-                   
+                  fd += cI[df][k] * (D[lI[df][k]].x * phi[pI[df][k]] + l[lI[df][k]] * Dphix[k]);
                 val(df, 0, op_dx) = fd.x;
                 val(df, 1, op_dx) = fd.y;
                 val(df, 2, op_dx) = fd.z;
@@ -4416,12 +4390,14 @@ namespace Fem2D {
             }
 
             if (whatd & Fop_dy) {
+              R3 Dphiy[3] = { AB*(D[1].y*c[0]) + AC*(D[2].y*c[0]),
+                              BA*(D[0].y*c[1]) + BC*(D[2].y*c[1]),
+                              CA*(D[0].y*c[2]) + CB*(D[1].y*c[2])};
               for (int df = 0; df < 8; ++df) {
                 R3 fd(0., 0.,0.);
 
                 for (int k = 0; k < 3; ++k)
-                  fd += cI[df][k] * (D[lI[df][k]].y * phi[pI[df][k]] + l[lI[df][k]] * Dphiy);
-                   
+                  fd += cI[df][k] * (D[lI[df][k]].y * phi[pI[df][k]] + l[lI[df][k]] * Dphiy[k]);
                 val(df, 0, op_dy) = fd.x;
                 val(df, 1, op_dy) = fd.y;
                 val(df, 2, op_dy) = fd.z;
@@ -4429,15 +4405,18 @@ namespace Fem2D {
             }
 
             if (whatd & Fop_dz) {
+              R3 Dphiz[3] = { AB*(D[1].z*c[0]) + AC*(D[2].z*c[0]),
+                              BA*(D[0].z*c[1]) + BC*(D[2].z*c[1]),
+                              CA*(D[0].z*c[2]) + CB*(D[1].z*c[2])};
               for (int df = 0; df < 8; ++df) {
                 R3 fd(0., 0.,0.);
 
               for (int k = 0; k < 3; ++k)
-                fd += cI[df][k] * (D[lI[df][k]].y * phi[pI[df][k]] + l[lI[df][k]] * Dphiy);
-                                   
+                  fd += cI[df][k] * (D[lI[df][k]].z * phi[pI[df][k]] + l[lI[df][k]] * Dphiz[k]);
+              
               val(df, 0, op_dz) = fd.x;
               val(df, 1, op_dz) = fd.y;
-              val(df, 2, op_dz) = fd.y;
+              val(df, 2, op_dz) = fd.z;
             }
           }
         }

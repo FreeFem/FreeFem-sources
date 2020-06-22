@@ -1,0 +1,54 @@
+load "Element_Mixte3d"
+load "msh3"
+load "Element_P1dc1"
+
+/*
+   Solving the following Poisson problem
+   Find $p$, such that;
+   $ - \Delta p = f $   on $\Omega$,
+   $ dp / dn = (g1d,g2d,g3d). n  $ on $\Gamma_{123}$
+   $ p = gd  $ on $\Gamma_{1}$
+  with de Mixte finite element formulation
+   Find $p\in L^2(\Omega)   and $u\in H(div) $ such than
+    u - Grad p = 0
+    - div u =  f
+   $  u. n = (g1d,g2d,g3d). n  $ on $\Gamma_{123}$
+   $ p = gd  $ on $\Gamma_{1}$
+
+   the variationnel form is:
+ $\forall v\in H(div)$;  $v.n = 0$ on $\Gamma_{4}\} $:    $ \int_\Omega  u v + p div v -\int_{\Gamma_{123}} gd* v.n  = 0 $
+
+ $\forall q\in L^2$:   $  -\int_\Omega q div u = \int_Omega f q  $
+and $ u.n = (g1n,g2n,g3n).n$ on $\Gamma_4$
+
+*/
+
+macro divS(u1,u2,u3) (dx(u1)+dy(u2)+dz(u3)) //EOM
+
+meshS ThS=square3(10,10);
+fespace VhS(ThS,[RT1S,P1dc]);
+///fespace PhS(ThS,P1dc);
+
+func gd = 1.;
+func g1n = 1.;
+func g2n = 1.;
+func g3n = 0.;
+func f = 1.;
+
+VhS [uS1,uS2,uS3,pS], [bS1,bS2,bS3,cS];
+
+varf a([u1,u2,u3,p],[v1,v2,v3,q]) =
+   int2d(ThS)( p*q*0e-10+ u1*v1 + u2*v2 + u3*v3 + p*divS(v1,v2,v3) + divS(u1,u2,u3)*q )
+ - int2d(ThS) ( f*q)
+ + int1d(ThS,1,2,3)( gd*(v1*N.x + v2*N.y + v3*N.z))
+ + on(4,u1=g1n,u2=g2n,u3=g3n);
+
+
+matrix AS=a(VhS,VhS);
+
+set(AS,solver=sparsesolver,eps=1.0e-10,tgv=1e30,dimKrylov=150);
+bS1[] = a(0,VhS);
+uS1[] = AS^-1*bS1[];
+
+plot([uS1,uS2,uS3], coef=0.1,cmm="u", value=true, wait=1);
+plot(pS,fill=1,wait=1,value=true);   

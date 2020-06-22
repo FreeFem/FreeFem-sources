@@ -684,11 +684,11 @@ static void finit( ) {
   static AddNewFE3 P1dttLagrange3d("P1dc3d", &TypeOfFE_LagrangeDC3dtt, "P1dc");
   static AddNewFE3 P1dttLagrange3d1("P1dc3d1", &TypeOfFE_LagrangeDC3dtt1);
   
-  static AddNewFES P1dttLagrange3dS("P1dc3dS", &TypeOfFE_LagrangeDC3dStt, "P1dc");
-  static AddNewFES P1dttLagrange3dS1("P1dc3dS1", &TypeOfFE_LagrangeDC3dStt1);
+  static AddNewFES P1dttLagrange3dS("P1dcS", &TypeOfFE_LagrangeDC3dStt, "P1dc");
+  static AddNewFES P1dttLagrange3dS1("P1dcS1", &TypeOfFE_LagrangeDC3dStt1);
   
-  static AddNewFEL P1dttLagrange3dL("P1dc3dL", &TypeOfFE_LagrangeDC3dLtt, "P1dc");
-  static AddNewFEL P1dttLagrange3dL1("P1dc3dL1", &TypeOfFE_LagrangeDC3dLtt1);
+  static AddNewFEL P1dttLagrange3dL("P1dcL", &TypeOfFE_LagrangeDC3dLtt, "P1dc");
+  static AddNewFEL P1dttLagrange3dL1("P1dcL1", &TypeOfFE_LagrangeDC3dLtt1);
    
 }
 
