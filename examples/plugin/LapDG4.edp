@@ -24,11 +24,11 @@ real pena=0; // a paramater to add penalisation
 varf Ans(u,v)= 
    int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v)  )
  + intalledges(Th)(//  loop on all  edge of all triangle 
-       // the edge are see nTonEdge times so we / nTonEdge
-       // remark: nTonEdge =1 on border edge and =2 on internal 
-       // we are in a triange th normal is the exterior normal
-       // def: jump = external - internal value; on border exter value =0
-       //      average = (external + internal value)/2, on border just internal value
+         // the edge are see nTonEdge times so we / nTonEdge
+         // remark: nTonEdge =1 on border edge and =2 on internal 
+         // we are in a triange th normal is the exterior normal
+         // def: jump = external - internal value,     on border extern - internal value
+         //      average = (external + internal value)/2, on border just internal value
             ( jump(v)*average(dn(u)) -  jump(u)*average(dn(v)) 
           + pena*jump(u)*jump(v) ) / nTonEdge 
 )

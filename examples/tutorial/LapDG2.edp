@@ -26,10 +26,10 @@ varf Ans(u,v)=
  + intalledges(Th)(//  loop on all  edge of all triangle 
        // the edge are see nTonEdge times so we / nTonEdge
        // remark: nTonEdge =1 on border edge and =2 on internal 
-       // we are in a triange th normal is the exterior normal
-       // def: jump = external - internal value; on border exter value =0
-       //      mean = (external + internal value)/2, on border just internal value
-            ( jump(v)*mean(dn(u)) -  jump(u)*mean(dn(v)) 
+       // we are in a triangle normal is the exterior normal
+       // def: jump = external - internal value,     on border extern  - internal value
+       //      mean = (external + internal value)/2, on border just mean internal value
+          ( jump(v)*mean(dn(u)) -  jump(u)*mean(dn(v)) 
           + pena*jump(u)*jump(v) ) / nTonEdge 
 )
  + int1d(Th,3)(pena*0.*v)

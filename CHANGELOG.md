@@ -36,6 +36,8 @@ All notable changes to this project will be documented in this file.
 - interface to `PetscMemoryGetCurrentUsage`
 - add P2b, RT0, RT1 surface FE (P2bS, RT0S, RT1S))
 - add operator interpolate (2d->3d surface)
+- add operator  x = A'*b; where x, b are array and A 2 dim array (full matrix)
+-      and genere a error  in case off b'*A  or b'*A expression
 ### Changed
 - moved Htool to its new GitHub location
 - ScaLAPACK and MUMPS are not compiled by PETSc anymore if there is no Fortran compiler

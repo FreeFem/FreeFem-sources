@@ -99,6 +99,7 @@ struct Op2_dotproduct_: public binary_function<Transpose<KN_<K> >,KN_<K> ,K> {
   static K f( Transpose<KN_<K> > const & a, KN_<K>  const& b)
    { return (conj(a.t),b);} };
 
+
 template<class T>
 void  HeapSort(T *c,long n,long o)
 { // trie un tableau c de n valeur avec un decalage de o.
@@ -1502,7 +1503,7 @@ void ArrayOperator()
     Add<KN<KNM<K> > * >("resize",".",new OneOperator1< Resize<KN<KNM<K> > >,KN<KNM<K> > *>(to_Resize));
     Add<Resize<KN<KN<K> > > >("(","",new OneOperator2_<KN<KN<K> >  *,Resize<KN<KN<K> > > , long   >(resize1));
     Add<Resize<KN<KNM<K> > > >("(","",new OneOperator2_<KN<KNM<K> >  *,Resize<KN<KNM<K> > > , long   >(resize1));
-
+    Dcl_Type<Mul_KNMh_KN_<K> >();
 
 //     AddOpeqarray<set_eqarray,KN,K>("=");
 
@@ -1712,15 +1713,22 @@ void ArrayOperator()
        new OneBinaryOperator<Op2_mulc<Mulc_KN_<K>,KN_<K>,K> >,
        new OneBinaryOperator<Op2_mulc<Mulc_KN_<K>,K,KN_<K> > >,
        new OneBinaryOperator<Op2_mulpcp<Mul_KNM_KN_<K>,KNM<K>*,KN<K>*> >,// A*b zzzzzzz
-
+       
       // new OneBinaryOperator<Op2_mulp<Mul_KNM_KN_<K>,KNM_<K>,KN_<K>> >, // - add #1 mqi 2009
       // new OneBinaryOperator<Op2_dotproduct<K> >,
        new OneBinaryOperator<Op2_dotproduct_<K> >
      //-  ,new OneBinaryOperator<Op2_pbuild<outProduct_KN_<K>,KN<K>*,Transpose<KN_<K> > > >
+       // ,new OneBinaryOperatorBug<Transpose<KN_<K> >,KNM<K>*  >
+        ,new OneBinaryOperatorBug<Transpose<KN_<K> >,KNM_<K> >
+        ,new OneBinaryOperatorBug<Transpose<KN_<K> >,Transpose<KNM<K>* >  >
+
        ,new OneBinaryOperator<Op2_pbuild<outProduct_KN_<K>,KN_<K>,Transpose<KN_<K> > > >
        ,new OneBinaryOperator<Op2_pbuild<outProduct_KN_<K>,Mulc_KN_<K>,Transpose<KN_<K> > > >
 
        );
+    TheOperators->Add("*", new OneBinaryOperator<Op2_2p_<Mul_KNMh_KN_<K>, Transpose<KNM<K>*>, KN<K>*> >); // A'*b
+    TheOperators->Add("=", new OneBinaryOperator<init_eqarray<KN<K>, Mul_KNMh_KN_<K> > >);
+    TheOperators->Add("<-", new OneBinaryOperator<init_eqarray<KN<K>, Mul_KNMh_KN_<K> > >);
 
     TheOperators->Add("/",
                       new OneBinaryOperator<Op2_divc<Divc_KN_<K>,K,KN_<K> > >,

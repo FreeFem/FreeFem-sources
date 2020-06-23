@@ -96,10 +96,10 @@ template<class R>
 
 template<class R>
 KN_<R>& KN_<R>::operator oper (const Mul_KNMh_KN_<R> & u)  {
-    K_throwassert (SameShape(u.A.shapei) && !constant());
-    R * l(v); KN_<const_R>  li(u.A(0,'.')); //  first line
-    for (long i=0;i<n;i++,l += step,++li)
-        *l oper (conj(li),u.b);
+    K_throwassert (SameShape(u.A.shapej) && !constant());
+    R * l(v); KN_<const_R>  lj(u.A('.',0)); //  first line
+    for (long i=0;i<n;i++,l += step,++lj)
+        *l oper (conj(lj),u.b);
     return *this;}
 
 

@@ -1464,9 +1464,9 @@ class Mul_KNMh_KN_ { public:
     const KNM_<const_R> &A;
     const KN_<const_R> &b;
     Mul_KNMh_KN_(const  KNM_<const_R>  &aa,const KN_<const_R>  &bb)
-      : A(aa),b(bb) {K_throwassert(SameShape(A.shapej,b));}
+      : A(aa),b(bb) {K_throwassert(SameShape(A.shapei,b));}
     Mul_KNMh_KN_(const  KNM<const_R>  &aa,const KN_<const_R>  &bb)
-    : A(aa),b(bb) {K_throwassert(SameShape(A.shapej,b));}
+    : A(aa),b(bb) {K_throwassert(SameShape(A.shapei,b));}
 
 };
 

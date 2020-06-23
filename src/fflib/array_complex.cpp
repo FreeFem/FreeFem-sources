@@ -72,7 +72,7 @@ KN_<Complex> rmeps(KN_rmeps<Complex> p,double eps)
     return p.v;}//
 void initArrayDCLComplex() {
   ArrayDCL<Complex>();
-  Dcl_Type<Mul_KNMh_KN_<Complex> >();
+
 }
 
 Complex square(const Complex &x){ return x*x; }
@@ -105,9 +105,6 @@ void initArrayOperatorComplex() {
   Global.Add("conj", "(", new OneOperator1F_KN_<F_KN_<K, K, K, KK>,K, KK, KN_<K> >(conj));
   // Global.Add("imag", "(", new OneOperator1F_KN_<F_KN_<R, R, K, KK>, R, KK, KN_<K> >(imagc));
   // Add<KN_<double> >("<--", "(", new OneOperator1F_KN_<F_KN_<R, R, K, KK>, R, KK, KN_<K> >(realc));
-  TheOperators->Add("*", new OneBinaryOperator<Op2_2p_<Mul_KNMh_KN_<K>, Transpose<KNM<K>*>, KN<K>*> >); // A'*b
-  TheOperators->Add("=", new OneBinaryOperator<init_eqarray<KN<K>, Mul_KNMh_KN_<K> > >);
-  TheOperators->Add("<-", new OneBinaryOperator<init_eqarray<KN<K>, Mul_KNMh_KN_<K> > >);
   map_type[typeid(SetArray<K>).name()]->AddCast(
     new E_F1_funcT<SetArray<K>, SetArray<long> >(Cast<SetArray<K>, SetArray<long> >),
     new E_F1_funcT<SetArray<K>, SetArray<double> >(Cast<SetArray<K>, SetArray<double> >)

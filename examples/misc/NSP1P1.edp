@@ -1,7 +1,7 @@
 // correct pressure sign 
 // correct for LU solver a -1r6*p*q term  FH. mars/2018  Thank to armand.favrot@yahoo.fr
 real s0=clock();
-mesh Th=square(10,10);
+mesh Th=square(50,50);
 fespace Vh2(Th,P1);
 fespace Vh(Th,P1);
 Vh2 u2,v2,up1,up2;
@@ -23,7 +23,7 @@ solve NS ([u1,u2,p],[v1,v2,q],init=i) =
              alpha*( u1*v1 + u2*v2) 
             + nu * ( dx(u1)*dx(v1) + dy(u1)*dy(v1)
             +  dx(u2)*dx(v2) + dy(u2)*dy(v2) )
-            + (dx(p)*dx(q)+dy(p)*dy(q))*(0.00001) // stabilization term
+            - (dx(p)*dx(q)+dy(p)*dy(q))*(area/nu) // stabilization term (Change signe and value  jun 2020 FH.)
             - p*dx(v1) - p*dy(v2)
             - dx(u1)*q - dy(u2)*q
             - 1e-6*p*q
@@ -38,7 +38,7 @@ dt = 0.1;
 int nbiter = 3;
 real coefdt = 0.25^(1./nbiter);
 real coefcut = 0.25^(1./nbiter) , cut=0.4;
-real tol=0.5,coeftol = 0.5^(1./nbiter);
+real tol=0.05,coeftol = 0.5^(1./nbiter);
 nu=0.01;   
 
 for (iter=0;iter<nbiter;iter++)
