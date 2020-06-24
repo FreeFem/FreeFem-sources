@@ -1054,7 +1054,7 @@ void OnePlotFES::Draw(OneWindow *win)
                     R3 P=Pn[i];
                     R3 uv(v[o+j],v[o+j+1],v[o+j+2]);
                     j+=3;
-                    R l = Max(sqrt((uv,uv)),1e-20) ;
+                    R l = Max(sqrt((uv,uv)),1e-30) ;
                     int col = 2+dichotomie(plot.Varrow,l);
                     if(debug>100)
                         cout << uv << " l= " << l << " " << coef << " " <<col <<  endl;
@@ -1315,7 +1315,7 @@ bool  OnePlotFE3::vc2v()
     {
 
         int n= v.N()/3;
-        for (int i=0,j=0;i<n;i++, j+=2)
+        for (int i=0,j=0;i<n;i++, j+=3)
         {
             R3 u(v[j],v[j+1],v[j+2]);
             vmax2 = max(vmax2,u.norme2());
@@ -1353,7 +1353,7 @@ bool  OnePlotFES::vc2v()
     {
 
         int n= v.N()/3;
-        for (int i=0,j=0;i<n;i++, j+=2)
+        for (int i=0,j=0;i<n;i++, j+=3)
         {
             R3 u(v[j],v[j+1],v[j+2]);
             vmax2 = max(vmax2,u.norme2());
@@ -1389,7 +1389,7 @@ bool  OnePlotFEL::vc2v()
     {
         
         int n= v.N()/3;
-        for (int i=0,j=0;i<n;i++, j+=2)
+        for (int i=0,j=0;i<n;i++, j+=3)
         {
             R3 u(v[j],v[j+1],v[j+2]);
             vmax2 = max(vmax2,u.norme2());

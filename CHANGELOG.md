@@ -54,6 +54,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - missing METIS library when using SuiteSparse compiled by PETSc
 - missing `-fno-stack-protector` when building PETSc on Windows, see https://community.freefem.org/t/error-loading-complex-petsc-slepc-library/370
+- correct ffglut for the plotting of FE array solution
 
 ## [4.6]
 

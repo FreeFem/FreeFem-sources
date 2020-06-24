@@ -4193,7 +4193,7 @@ namespace Fem2D {
     // Quadrature formula on the triangle
     const GQuadratureFormular< R2 > TypeOfFE_RT1_surf::QFK(QuadratureFormular_T_5);
     TypeOfFE_RT1_surf::TypeOfFE_RT1_surf( )
-        : GTypeOfFE< MeshS >(dfon, d, 1, 3 * QFE.n * 2 * Element::ne + 2 * QFK.n * 3,
+        : GTypeOfFE< MeshS >(dfon, d, 2, 3 * QFE.n * 2 * Element::ne + 2 * QFK.n * 3,
                                  Element::ne * QFE.n + QFK.n, false, true) {
              
         assert(QFK.n);
