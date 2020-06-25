@@ -117,7 +117,8 @@ TESTS_PETSCCOMPLEX = diffusion-2d-PETSc-complex.edp \
 	maxwell-mg-3d-PETSc-complex.edp
 
 TESTS_PETSCCOMPLEX_SLEPCCOMPLEX = laplace-2d-SLEPc-complex.edp \
-	navier-stokes-2d-SLEPc-complex.edp helmholtz-2d-SLEPc-complex.edp
+	navier-stokes-2d-SLEPc-complex.edp helmholtz-2d-SLEPc-complex.edp \
+	nonlinear-2d-SLEPc-complex.edp
 
 TESTS_PETSCCOMPLEX_BEMTOOL_BOOST_HTOOL = helmholtz-3d-surf-PETSc-complex.edp helmholtz-3d-line-PETSc-complex.edp helmholtz-coupled-2d-PETSc-complex.edp
 

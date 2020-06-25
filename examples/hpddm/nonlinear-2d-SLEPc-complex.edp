@@ -1,0 +1,37 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "SLEPc-complex"                // SLEPc plugin
+macro dimension()2// EOM            // 2D or 3D
+include "macro_ddm.idp"             // additional DDM functions
+
+macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
+func Pk = P1;                       // finite element space
+
+mesh Th = square(40, 40);
+fespace Vh(Th, Pk);
+complex lambda;
+varf vPb(u, v) = int2d(Th)(grad(u)' * grad(v) + lambda^0.5 * u * v);
+Mat<complex> A, B;
+createMat(Th, A, Pk);
+func int FormFunction(complex mu) {
+    lambda = mu;
+    A = vPb(Vh, Vh);
+    return 0;
+}
+func int FormJacobian(complex mu) {
+    matrix<complex> Id = eye(Vh.ndof);
+    Id = 0.5/mu^0.5 * Id;
+    Mat<complex> C(A, Id);
+    B = C;
+    return 0;
+}
+FormFunction(1.0);
+FormJacobian(1.0);
+Vh<complex>[int] vec(1);
+NEPSolve(A, FormFunction, B, FormJacobian, vectors = vec);
+vec.resize(5);
+for(int i = 0; i < vec.n; ++i) {
+    macro def(u)u//
+    plotMPI(Th, vec[i], Pk, def, complex, cmm = "Eigenvector #" + i)
+}
