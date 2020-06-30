@@ -108,7 +108,6 @@ else
 ##   On windows....
 COMMON_FLAGS += --with-shared-libraries=0 \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' \
-	FFLAGS='-fallow-invalid-boz' \
 	CXXFLAGS='-fno-stack-protector' \
 	CFLAGS='-fno-stack-protector' \
 	--with-mpi-lib='$(MPI_LIB)' \
