@@ -2,44 +2,39 @@ load "scotch"
 load "metis"
 
 /*# beginPartition #*/
-macro ffddmbuildDmeshf(pr, Th, partdof, sizeoverlaps)
-if (pr#isincomm)
+macro ffddmbuildDmeshf(prmesh, Th, partdof, sizeoverlaps)
+if (prmesh#isincomm)
 {	
-  pr#tic(pr#tdecompi)
-  if (!pr#excluded) {
+  prmesh#tic(prmesh#tdecompi)
+  if (!prmesh#excluded) {
     int backup = searchMethod;
     searchMethod = 1;
 
-    pr#overlap = sizeoverlaps;
-        
-    int ssplit = max(pr#inexactCSsplit,1);
-    
-    if (pr#npart == 1) {
-      if (ffddmsplit*ssplit == 1)
-        pr#Thi = Th;
-      else
-        pr#Thi=trunc(Th,1,split=ssplit*ffddmsplit);                 /* freefem's trick, formal definition*/
+    int ssplit = max(prmesh#inexactCSsplit,1);
 
-      pr#aTh[0]=pr#Thi;
-      real[int] one(pr#VhiP1.ndof);
+    prmesh#overlap = sizeoverlaps*ssplit;
+    
+    if (prmesh#npart == 1) {
+      if (ffddmsplit*ssplit == 1)
+        prmesh#Thi = Th;
+      else
+        prmesh#Thi=trunc(Th,1,split=ssplit*ffddmsplit);                 /* freefem's trick, formal definition*/
+
+      prmesh#aTh[0]=prmesh#Thi;
+      real[int] one(prmesh#VhiP1.ndof);
       one=1.;
-      pr#RihP1[0]=one;
-      pr#DP1[0]=1.;
-      
-      /*
-      if (pr#verbosity && mpiRank(pr#commddm) == 0)
-      cout << "prefix \"" << Stringification(pr) << "\", ndof = " << pr#Vhi.ndof << endl;
-      */
+      prmesh#RihP1[0]=one;
+      prmesh#DP1[0]=1.;
     }
     else 
-    for(int ii=0;ii<pr#npart;++ii)
-    if ((!bpara) || (ii == mpiRank(pr#commddm))) {
+    for(int ii=0;ii<prmesh#npart;++ii)
+    if ((!bpara) || (ii == mpiRank(prmesh#commddm))) {
       
       int[int] arrayIntersectioni;
       
       int numberIntersectioni = 0;
       
-      pr#meshN overlapName=Th;
+      prmesh#meshN overlapName=Th;
       fespace VhGlobalff(overlapName, P1);
       fespace PhGlobalff(overlapName, P0);
       PhGlobalff part;
@@ -49,7 +44,7 @@ if (pr#isincomm)
       VhGlobalff suppSmooth;
       AddLayers(overlapName, supp[], (sizeoverlaps == 0) + sizeoverlaps * 2, suppSmooth[]);
       {   
-        pr#meshN neighbors = trunc(overlapName, suppSmooth > 0.001 && (suppSmooth < 0.999));
+        prmesh#meshN neighbors = trunc(overlapName, suppSmooth > 0.001 && (suppSmooth < 0.999));
         fespace Oh(neighbors, P0);
         Oh partOverlap = part;
         
@@ -57,34 +52,141 @@ if (pr#isincomm)
         
       }
       
-      pr#VhiP1[int] partitionIntersectioni(arrayIntersectioni.n);
-      pr#partitionIntersectionbasei.resize(arrayIntersectioni.n);
-      
+      prmesh#VhiP1[int] partitionIntersectioni(arrayIntersectioni.n);
+      prmesh#partitionIntersectionbasei.resize(arrayIntersectioni.n);
+
+      IFMACRO(!prmesh#partcubes)
       if(ffddmsplit>1) {
         overlapName = trunc(overlapName, suppSmooth > 0.001, split = ffddmsplit, label=9999);
         supp = abs(part - ii) < 0.1;
         suppSmooth = 0;
         AddLayers(overlapName, supp[], (sizeoverlaps == 0) + 2 * sizeoverlaps, suppSmooth[]);
       }
-      
-      pr#Thi = trunc(overlapName, suppSmooth > 0.001, split=ssplit);
+      ENDIFMACRO
+
+      prmesh#Thi = trunc(overlapName, suppSmooth > 0.001, split=ssplit);
       overlapName = trunc(overlapName, suppSmooth > 0.001, label=9999);
+
       supp = supp;
       suppSmooth = suppSmooth;
 
-      pr#meshN borderName;
+      prmesh#meshN borderName;
       if (sizeoverlaps > 0) {
-        pr#Thi = trunc(pr#Thi, suppSmooth> 0.501, label = ffddminterfacelabel);
+
+        IFMACRO(prmesh#partcubes,1)
+        prmesh#Thi=trunc(overlapName, abs(part - ii) < 0.1, label = 9999);
+        real lx, ly, lz, ux, uy, uz;
+        lx = ly = lz = 1e+30;
+        ux = uy = uz = -1.e+30;
+        int[int] labs(6), labsi(6);
+        labs = 0;
+
+        int samex, samey, samez;
+        for (int ii=0; ii<prmesh#Thi.nbe; ii++) {
+          IFMACRO(dimension,2)
+          samex = (prmesh#Thi.be(ii)[0].x == prmesh#Thi.be(ii)[1].x);
+          samey = (prmesh#Thi.be(ii)[0].y == prmesh#Thi.be(ii)[1].y);
+          ENDIFMACRO
+          IFMACRO(dimension,3)
+          samex = (prmesh#Thi.be(ii)[0].x == prmesh#Thi.be(ii)[1].x) && (prmesh#Thi.be(ii)[1].x == prmesh#Thi.be(ii)[2].x);
+          samey = (prmesh#Thi.be(ii)[0].y == prmesh#Thi.be(ii)[1].y) && (prmesh#Thi.be(ii)[1].y == prmesh#Thi.be(ii)[2].y);
+          samez = (prmesh#Thi.be(ii)[0].z == prmesh#Thi.be(ii)[1].z) && (prmesh#Thi.be(ii)[1].z == prmesh#Thi.be(ii)[2].z);
+          ENDIFMACRO
+          for (int jj=0; jj < dimension; jj++){
+            lx = min(lx,prmesh#Thi.be(ii)[jj].x); ux = max(ux,prmesh#Thi.be(ii)[jj].x);
+            ly = min(ly,prmesh#Thi.be(ii)[jj].y); uy = max(uy,prmesh#Thi.be(ii)[jj].y);
+            IFMACRO(dimension,3)
+            lz = min(lz,prmesh#Thi.be(ii)[jj].z); uz = max(uz,prmesh#Thi.be(ii)[jj].z);
+            ENDIFMACRO
+          }
+          if (prmesh#Thi.be(ii).label != 9999) {
+                 if (samex && prmesh#Thi.be(ii)[0].x == lx) labs[0] = prmesh#Thi.be(ii).label;
+            else if (samex && prmesh#Thi.be(ii)[0].x == ux) labs[1] = prmesh#Thi.be(ii).label;
+            else if (samey && prmesh#Thi.be(ii)[0].y == ly) labs[2] = prmesh#Thi.be(ii).label;
+            else if (samey && prmesh#Thi.be(ii)[0].y == uy) labs[3] = prmesh#Thi.be(ii).label;
+            IFMACRO(dimension,3)
+            else if (samez && prmesh#Thi.be(ii)[0].z == lz) labs[4] = prmesh#Thi.be(ii).label;
+            else if (samez && prmesh#Thi.be(ii)[0].z == uz) labs[5] = prmesh#Thi.be(ii).label;
+            ENDIFMACRO
+          }
+        }
+        IFMACRO(dimension,2)
+        real p0x = prmesh#Thi(prmesh#Thi.be(0)[0]).x, p0y = prmesh#Thi(prmesh#Thi.be(0)[0]).y;
+        real p1x = prmesh#Thi(prmesh#Thi.be(0)[1]).x, p1y = prmesh#Thi(prmesh#Thi.be(0)[1]).y;
+        real h = sqrt((p1x-p0x)^2+(p1y-p0y)^2);
+        ENDIFMACRO
+        IFMACRO(dimension,3)
+        real p0x = prmesh#Thi(prmesh#Thi.be(0)[0]).x, p0y = prmesh#Thi(prmesh#Thi.be(0)[0]).y, p0z = prmesh#Thi(prmesh#Thi.be(0)[0]).z;
+        real p1x = prmesh#Thi(prmesh#Thi.be(0)[1]).x, p1y = prmesh#Thi(prmesh#Thi.be(0)[1]).y, p1z = prmesh#Thi(prmesh#Thi.be(0)[1]).z;
+        real p2x = prmesh#Thi(prmesh#Thi.be(0)[2]).x, p2y = prmesh#Thi(prmesh#Thi.be(0)[2]).y, p2z = prmesh#Thi(prmesh#Thi.be(0)[2]).z;
+        real h = min(sqrt((p1x-p0x)^2+(p1y-p0y)^2+(p1z-p0z)^2), sqrt((p2x-p0x)^2+(p2y-p0y)^2+(p2z-p0z)^2));
+        ENDIFMACRO
+
+        h /= ffddmsplit;
+
+        lx -= h*sizeoverlaps*(!labs[0]); ly -= h*sizeoverlaps*(!labs[2]); lz -= h*sizeoverlaps*(!labs[4]);
+        ux += h*sizeoverlaps*(!labs[1]); uy += h*sizeoverlaps*(!labs[3]); uz += h*sizeoverlaps*(!labs[5]);
+
+        labsi = labs ? labs : ffddminterfacelabel;
+
+        IFMACRO(dimension,2)
+        int[int] L = [labsi[2],labsi[1],labsi[3],labsi[0]];
+        prmesh#Thi = square(rint((ux-lx)/h),rint((uy-ly)/h),[x*(ux-lx)+lx,y*(uy-ly)+ly],label=L);
+        ENDIFMACRO
+        IFMACRO(dimension,3)
+        include "cube.idp"
+        int[int] NN=[rint((ux-lx)/h), rint((uy-ly)/h), rint((uz-lz)/h)];
+        real [int,int] BB=[[lx,ux],[ly,uy],[lz,uz]];
+        int [int,int] L=[[labsi[0],labsi[1]],[labsi[2],labsi[3]],[labsi[4],labsi[5]]];
+        prmesh#Thi = Cube(NN,BB,L);
+        ENDIFMACRO
+
+        lx -= h*(!labs[0]); ly -= h*(!labs[2]); lz -= h*(!labs[4]);
+        ux += h*(!labs[1]); uy += h*(!labs[3]); uz += h*(!labs[5]);
+
+        labsi = labs ? labs : (abs(ffddminterfacelabel) + 1) * 100;
+
+        IFMACRO(dimension,2)
+        int[int] Lb = [labsi[2],labsi[1],labsi[3],labsi[0]];
+        borderName = square(rint((ux-lx)/h),rint((uy-ly)/h),[x*(ux-lx)+lx,y*(uy-ly)+ly],label=Lb);
+        ENDIFMACRO
+        IFMACRO(dimension,3)
+        int[int] NNb=[rint((ux-lx)/h), rint((uy-ly)/h), rint((uz-lz)/h)];
+        real [int,int] BBb=[[lx,ux],[ly,uy],[lz,uz]];
+        int [int,int] Lb=[[labsi[0],labsi[1]],[labsi[2],labsi[3]],[labsi[4],labsi[5]]];
+        borderName = Cube(NNb,BBb,Lb);
+        ENDIFMACRO
+
+        fespace PhborderName(borderName,P0);
+        fespace Phii(prmesh#Thi,P0);
+        matrix Riiborder = interpolate(Phii, PhborderName);
+        Phii parti = 1;
+        PhborderName partborder;
+        partborder[] = Riiborder'*parti[];
+        borderName = trunc(borderName, partborder==0, label = (abs(ffddminterfacelabel) + 1) * 100);
+
+        overlapName = prmesh#Thi;
+        supp = abs(part - ii) < 0.1;
+        suppSmooth = 0;
+
+        parti = part;
+        prmesh#partloc.resize(Phii.ndof);
+        prmesh#partloc = parti[];
+        ENDIFMACRO
+
+        IFMACRO(!prmesh#partcubes)
+        prmesh#Thi = trunc(prmesh#Thi, suppSmooth> 0.501, label = ffddminterfacelabel);
         borderName = trunc(overlapName, (suppSmooth > (sizeoverlaps - 0.999) / (2 * sizeoverlaps)) && (suppSmooth < 0.501), label = (abs(ffddminterfacelabel) + 1) * 100);
+        ENDIFMACRO
       }
       else {
-        fespace fP0(pr#Thi,P0);
+        fespace fP0(prmesh#Thi,P0);
         fP0 part0 = part;
-        pr#Thi = trunc(pr#Thi, abs(part - ii) < 0.1, label = ffddminterfacelabel);
+        prmesh#Thi = trunc(prmesh#Thi, abs(part - ii) < 0.1, label = ffddminterfacelabel);
         borderName = trunc(overlapName, suppSmooth < 0.999, label = (abs(ffddminterfacelabel) + 1) * 100);
       }
       
-      pr#VhiP1 khi;
+      prmesh#VhiP1 khi;
       if (sizeoverlaps > 0) {
         khi = max(suppSmooth*2 - 1.0, 0.) ;
         if(usedARGV("-steep") != -1)
@@ -93,7 +195,7 @@ if (pr#isincomm)
         else if (usedARGV("-raspart") != -1) {
           VhGlobalff phir;
           PhGlobalff suppP0 = abs(ii - part) < 0.1;
-          varf vSuppi(u,v) = pr#intN(overlapName,qforder=1)(suppP0*v);
+          varf vSuppi(u,v) = prmesh#intN(overlapName,qforder=1)(suppP0*v);
           phir[] = vSuppi(0,VhGlobalff);
           phir = phir > 0.;
           khi = phir;
@@ -103,18 +205,18 @@ if (pr#isincomm)
         khi[] = 1.;
       }
       
-      pr#VhiP1 sum = khi;
+      prmesh#VhiP1 sum = khi;
       VhGlobalff phi = 0, phibase = 0;
       
       /*real eps=int2d(overlapName)(1.);*/
-      real eps = pr#intN(overlapName)(1.0);
+      real eps = prmesh#intN(overlapName)(1.0);
       real[int] epsn(arrayIntersectioni.n);
       if(bpara){ /* version for very ugly meshes, not implemented yet for bseq*/        
         mpiRequest[int] rqn(2*arrayIntersectioni.n);
         for(int j=0;j<arrayIntersectioni.n;++j)
-        Isend(processor(arrayIntersectioni[j],pr#commddm,rqn[j*2]),eps);
+        Isend(processor(arrayIntersectioni[j],prmesh#commddm,rqn[j*2]),eps);
         for(int j=0;j<arrayIntersectioni.n;++j)
-        Irecv(processor(arrayIntersectioni[j],pr#commddm,rqn[j*2+1]),epsn[j]);
+        Irecv(processor(arrayIntersectioni[j],prmesh#commddm,rqn[j*2+1]),epsn[j]);
         for(int j=0;j<2*arrayIntersectioni.n;++j) {
           int k = mpiWaitAny(rqn);
         }
@@ -132,7 +234,7 @@ if (pr#isincomm)
             phi = phi > 0.001 ? 1.0 : 0.0;
           else if (usedARGV("-raspart") != -1) {
             VhGlobalff phir;
-            varf vSuppi(u,v) = pr#intN(overlapName,qforder=1)(suppP0*v);
+            varf vSuppi(u,v) = prmesh#intN(overlapName,qforder=1)(suppP0*v);
             phir[] = vSuppi(0,VhGlobalff);
             phir = phir > 0.;
             phi = phir;
@@ -140,14 +242,14 @@ if (pr#isincomm)
         }
         else {
           VhGlobalff phir;
-          varf vSuppi(u,v) = pr#intN(overlapName,qforder=1)(suppP0*v);
+          varf vSuppi(u,v) = prmesh#intN(overlapName,qforder=1)(suppP0*v);
           phir[] = vSuppi(0,VhGlobalff);
           phir = phir > 0.;
           phi = phir;
           phibase[] = phi[];
         }
         
-        /*real intersection=pr#intN(overlapName)(phibase)/eps;*/
+        /*real intersection=prmesh#intN(overlapName)(phibase)/eps;*/
         /*if(arrayIntersectioni[i] <=1)*/
         real epsi=0;
         if(bpara){ /* version for very ugly meshes, not implemented yet for bseq */
@@ -157,8 +259,8 @@ if (pr#isincomm)
           epsi = eps;	
         }   
         real intersection;
-        if (pr#overlap > 0)
-          intersection = pr#intN(overlapName)(phibase) / epsi;
+        if (prmesh#overlap > 0)
+          intersection = prmesh#intN(overlapName)(phibase) / epsi;
         else {
           partitionIntersectioni[numberIntersectioni] = phi;
           intersection = partitionIntersectioni[numberIntersectioni][].max;
@@ -167,7 +269,7 @@ if (pr#isincomm)
         {
           partitionIntersectioni[numberIntersectioni] = phi;
           
-          pr#partitionIntersectionbasei[numberIntersectioni] = phibase;              
+          prmesh#partitionIntersectionbasei[numberIntersectioni] = phibase;
           
           sum[] += partitionIntersectioni[numberIntersectioni][];
           arrayIntersectioni[numberIntersectioni++] = arrayIntersectioni[i];
@@ -176,28 +278,28 @@ if (pr#isincomm)
       }
       
       khi[] = khi[] ./= sum[];
-      
-      overlapName = pr#minimalMesh;
+
+      overlapName = prmesh#minimalMesh;
       if(numberIntersectioni != arrayIntersectioni.n)
       arrayIntersectioni.resize(numberIntersectioni);  
       
       /* PoU for inexactsplit > 1 */
-      if (pr#inexactCSsplit > 1) {
+      if (prmesh#inexactCSsplit > 1) {
         
-        fespace Phi(pr#Thi,P0);
+        fespace Phi(prmesh#Thi,P0);
         Phi suppP0i = abs(ii - part) < 0.1;
-        varf vSuppii(u,v) = pr#intN(pr#Thi,qforder=1)(suppP0i*v);
-        pr#VhiP1 phiri;
-        phiri[] = vSuppii(0,pr#VhiP1);
+        varf vSuppii(u,v) = prmesh#intN(prmesh#Thi,qforder=1)(suppP0i*v);
+        prmesh#VhiP1 phiri;
+        phiri[] = vSuppii(0,prmesh#VhiP1);
         phiri = phiri > 0.; 
         
-        pr#VhiP1 sumi = phiri;
+        prmesh#VhiP1 sumi = phiri;
         
         for(int i = 0; i < arrayIntersectioni.n; ++i) {    
           Phi suppP0n = abs(arrayIntersectioni[i] - part) < 0.1;
-          varf vSuppin(u,v) = pr#intN(pr#Thi,qforder=1)(suppP0n*v);
-          pr#VhiP1 phirn;
-          phirn[] = vSuppin(0,pr#VhiP1);
+          varf vSuppin(u,v) = prmesh#intN(prmesh#Thi,qforder=1)(suppP0n*v);
+          prmesh#VhiP1 phirn;
+          phirn[] = vSuppin(0,prmesh#VhiP1);
           phirn = phirn > 0.; 
           sumi[] += phirn[];  
         }   
@@ -206,248 +308,249 @@ if (pr#isincomm)
       }
       
       if (bpara) {
-        pr#numberIntersection = numberIntersectioni;	
-        pr#arrayIntersection.resize(pr#numberIntersection);
-        pr#arrayIntersection = arrayIntersectioni;
+        prmesh#numberIntersection = numberIntersectioni;
+        prmesh#arrayIntersection.resize(prmesh#numberIntersection);
+        prmesh#arrayIntersection = arrayIntersectioni;
       }
       
       if(!bnoGlob)
       {
-        fespace pr#VhglobP1(pr#Thglob,P1);
-        pr#RihP1[ii]=interpolate(pr#VhiP1,pr#VhglobP1);
+        fespace prmesh#VhglobP1(prmesh#Thglob,P1);
+        prmesh#RihP1[ii]=interpolate(prmesh#VhiP1,prmesh#VhglobP1);
         
         
         int[int] I(1),J(1);
         real[int] Kc(1);
-        [I,J,Kc] = pr#RihP1[ii];
+        [I,J,Kc] = prmesh#RihP1[ii];
         for (int i=0;i<Kc.n;i++)
         if (Kc[i] > 0.99)
         Kc[i] = 1.;
-        pr#RihP1[ii] = [I,J,Kc];
+        prmesh#RihP1[ii] = [I,J,Kc];
         
-        pr#RihP1[ii].thresholding(1e-10);
-        pr#RihP1[ii].resize(pr#VhiP1.ndof,pr#VhglobP1.ndof);
+        prmesh#RihP1[ii].thresholding(1e-10);
+        prmesh#RihP1[ii].resize(prmesh#VhiP1.ndof,prmesh#VhglobP1.ndof);
       }	
       
-      pr#aTh[ii]=pr#Thi;
-      pr#aThborder[ii]=trunc(borderName,1,split=ssplit);
+      prmesh#aTh[ii]=prmesh#Thi;
+      prmesh#aThborder[ii]=trunc(borderName,1,split=ssplit);
 
-      if (bpara && pr#overlap == 0) {
-        IFMACRO(pr#mminoverlap,1)
-        fespace pr#PhAugP0(pr#AugThi,P0);
-        pr#PhAugP0 phaug = part;
-        pr#partAug.resize(pr#PhAugP0.ndof);
-        pr#partAug = phaug[];
+      if (bpara && prmesh#overlap == 0) {
+        IFMACRO(prmesh#mminoverlap,1)
+        fespace prmesh#PhAugP0(prmesh#AugThi,P0);
+        prmesh#PhAugP0 phaug = part;
+        prmesh#partAug.resize(prmesh#PhAugP0.ndof);
+        prmesh#partAug = phaug[];
         ENDIFMACRO
         ;
       }
 
-      pr#DP1[ii] = khi;
+      prmesh#DP1[ii] = khi;
     }
     searchMethod = backup;
   }
   if (bseq)
-  pr#Thi = pr#Thglob;
+  prmesh#Thi = prmesh#Thglob;
   
-  pr#toc(pr#tdecompi,"",pr#tdecomp)
+  prmesh#toc(prmesh#tdecompi,"",prmesh#tdecomp)
 } 
 //EOM
 
-macro ffddminitDmeshf(pr,Th,comm)
-IFMACRO(!pr#meshinit)
+macro ffddminitDmeshf(prmesh,Th,comm)
+IFMACRO(!prmesh#meshinit)
 
-IFMACRO(((!pr#dim)&(dimension,2))|(pr#dim,2))
-NewMacro pr#meshN()mesh EndMacro             /* two-dimensional problem  */
-NewMacro pr#intN()int2d EndMacro             /* two-dimensional integral */
-NewMacro pr#intbN()int1d EndMacro            /* one-dimensional integral */
-NewMacro pr#minimalMesh()square(1,1) EndMacro
+IFMACRO(((!prmesh#dim)&(dimension,2))|(prmesh#dim,2))
+NewMacro prmesh#meshN()mesh EndMacro             /* two-dimensional problem  */
+NewMacro prmesh#intN()int2d EndMacro             /* two-dimensional integral */
+NewMacro prmesh#intbN()int1d EndMacro            /* one-dimensional integral */
+NewMacro prmesh#minimalMesh()square(1,1) EndMacro
 ENDIFMACRO
 
-IFMACRO(((!pr#dim)&(dimension,3))|(pr#dim,3))
-NewMacro pr#meshN()mesh3 EndMacro            /* three-dimensional problem  */
-NewMacro pr#intN()int3d EndMacro             /* three-dimensional integral */
-NewMacro pr#intbN()int2d EndMacro            /* two-dimensional integral   */
-NewMacro pr#minimalMesh()cube(1,1,1) EndMacro
+IFMACRO(((!prmesh#dim)&(dimension,3))|(prmesh#dim,3))
+NewMacro prmesh#meshN()mesh3 EndMacro            /* three-dimensional problem  */
+NewMacro prmesh#intN()int3d EndMacro             /* three-dimensional integral */
+NewMacro prmesh#intbN()int2d EndMacro            /* two-dimensional integral   */
+NewMacro prmesh#minimalMesh()cube(1,1,1) EndMacro
 ENDIFMACRO
 
-IFMACRO(((!pr#dim)&(dimension,3S))|(pr#dim,3S))
-NewMacro pr#meshN()meshS EndMacro            /* three-dimensional surface problem */
-NewMacro pr#intN()int2d EndMacro
-NewMacro pr#intbN()int1d EndMacro
-NewMacro pr#minimalMesh()square3(1,1,[x,y,z]) EndMacro
+IFMACRO(((!prmesh#dim)&(dimension,3S))|(prmesh#dim,3S))
+NewMacro prmesh#meshN()meshS EndMacro            /* three-dimensional surface problem */
+NewMacro prmesh#intN()int2d EndMacro
+NewMacro prmesh#intbN()int1d EndMacro
+NewMacro prmesh#minimalMesh()square3(1,1,[x,y,z]) EndMacro
 ENDIFMACRO
 
-IFMACRO(((!pr#dim)&(dimension,3L))|(pr#dim,3L))
-NewMacro pr#meshN()meshL EndMacro            /* three-dimensional line problem */
-NewMacro pr#intN()int1d EndMacro
-NewMacro pr#intbN()int0d EndMacro
-NewMacro pr#minimalMesh()Sline(2,[x,y,z]) EndMacro
+IFMACRO(((!prmesh#dim)&(dimension,3L))|(prmesh#dim,3L))
+NewMacro prmesh#meshN()meshL EndMacro            /* three-dimensional line problem */
+NewMacro prmesh#intN()int1d EndMacro
+NewMacro prmesh#intbN()int0d EndMacro
+NewMacro prmesh#minimalMesh()Sline(2,[x,y,z]) EndMacro
 ENDIFMACRO
 
-int pr#npart = ffddmnpart;
+int prmesh#npart = ffddmnpart;
 
-/*int pr#verbosity = ffddmverbosity;*/
+/*int prmesh#verbosity = ffddmverbosity;*/
 
-real pr#tdecompi;
-real pr#tdecomp = 0;
+real prmesh#tdecompi;
+real prmesh#tdecomp = 0;
 
-NewMacro pr#tic(tim) tim = mpiWtime(); EndMacro
-NewMacro pr#toc(tim,msg,totaltime)
-if (pr#isincomm)
+NewMacro prmesh#tic(tim) tim = mpiWtime(); EndMacro
+NewMacro prmesh#toc(tim,msg,totaltime)
+if (prmesh#isincomm)
 {
   tim = mpiWtime() - tim;
   
   real ttimeg = 0;
-  mpiAllReduce(tim,ttimeg,pr#mpicomm,mpiMAX); 
-  if ((mpiRank(pr#mpicomm) == 0) /*&& (pr#verbosity > 0)*/ && (msg != ""))
-  cout << "["+Stringification(pr)+"] timings - " << msg << " : " << ttimeg << " s" << endl;
+  mpiAllReduce(tim,ttimeg,prmesh#mpicomm,mpiMAX);
+  if ((mpiRank(prmesh#mpicomm) == 0) /*&& (prmesh#verbosity > 0)*/ && (msg != ""))
+  cout << "["+Stringification(prmesh)+"] timings - " << msg << " : " << ttimeg << " s" << endl;
   totaltime += ttimeg;
   
   /*totaltime += tim;*/
 }
 EndMacro
 
-NewMacro pr#toccomm(tim,msg,totaltime,comm)
-if (pr#isincomm)
+NewMacro prmesh#toccomm(tim,msg,totaltime,comm)
+if (prmesh#isincomm)
 {
   tim = mpiWtime() - tim;
   
   real ttimeg = 0;
   mpiAllReduce(tim,ttimeg,comm,mpiMAX);
   if ((mpiRank(comm) == 0) && (msg != ""))
-  cout << "["+Stringification(pr)+"] timings - " << msg << " : " << ttimeg << " s" << endl;
+  cout << "["+Stringification(prmesh)+"] timings - " << msg << " : " << ttimeg << " s" << endl;
   totaltime += ttimeg;
   
   /*totaltime += tim;*/
 }
 EndMacro
 
-pr#meshN pr#Thi = pr#minimalMesh;
+prmesh#meshN prmesh#Thi = prmesh#minimalMesh;
 
-fespace pr#VhiP1(pr#Thi,P1);
+fespace prmesh#VhiP1(prmesh#Thi,P1);
 
-pr#VhiP1[int] pr#partitionIntersectionbasei(0);
+prmesh#VhiP1[int] prmesh#partitionIntersectionbasei(0);
 
-int pr#overlap = 0;
+int prmesh#overlap = 0;
 
-int pr#numberIntersection = 0;
+int prmesh#numberIntersection = 0;
 
-int[int] pr#arrayIntersection(0);
+int[int] prmesh#arrayIntersection(0);
 
-pr#meshN pr#Thglob = pr#minimalMesh;
+prmesh#meshN prmesh#Thglob = prmesh#minimalMesh;
 
-matrix[int] pr#RihP1(pr#npart);
-pr#VhiP1[int] pr#DP1(pr#npart);
+matrix[int] prmesh#RihP1(prmesh#npart);
+prmesh#VhiP1[int] prmesh#DP1(prmesh#npart);
 
-NewMacro pr#mpicomm()comm EndMacro
+NewMacro prmesh#mpicomm()comm EndMacro
 
-int[int] pr#procddm = [mpirank];
-int[int] pr#procCS = [mpirank];
+int[int] prmesh#procddm = [mpirank];
+int[int] prmesh#procCS = [mpirank];
 
-int pr#isincomm = (mpiRank(comm) >= 0);
+int prmesh#isincomm = (mpiRank(comm) >= 0);
 
-int pr#excluded = !pr#isincomm;
+int prmesh#excluded = !prmesh#isincomm;
 
-if (pr#isincomm) {
+if (prmesh#isincomm) {
   int[int] globranks(mpiSize(comm));
   int myglobrank = mpirank;
   
   mpiAllgather(myglobrank,globranks,comm);
   
-  if ((pr#pCS > 1) && (mpiRank(comm) < pr#pCS)) {
-    pr#procCS.resize(pr#pCS);
-    for (int i=0; i<pr#pCS;i++)
-    pr#procCS[i] = globranks[i];
+  if ((prmesh#pCS > 1) && (mpiRank(comm) < prmesh#pCS)) {
+    prmesh#procCS.resize(prmesh#pCS);
+    for (int i=0; i<prmesh#pCS;i++)
+    prmesh#procCS[i] = globranks[i];
   }
   
-  if (!pr#exclude) {
-    pr#procddm.resize(mpiSize(comm));
+  if (!prmesh#exclude) {
+    prmesh#procddm.resize(mpiSize(comm));
     if (mpiSize(comm) > 1)
     for (int i=0; i<mpiSize(comm);i++)
-    pr#procddm[i] = globranks[i];
+    prmesh#procddm[i] = globranks[i];
     else
-    pr#procddm = [mpirank];
+    prmesh#procddm = [mpirank];
   }
   else {
-    pr#procddm.resize(mpiSize(comm)-pr#pCS);
+    prmesh#procddm.resize(mpiSize(comm)-prmesh#pCS);
     if (mpiSize(comm) > 1)
-    for (int i=0; i<mpiSize(comm)-pr#pCS;i++)
-    pr#procddm[i] = globranks[i+pr#pCS];
+    for (int i=0; i<mpiSize(comm)-prmesh#pCS;i++)
+    prmesh#procddm[i] = globranks[i+prmesh#pCS];
     else
-    pr#procddm = [mpirank];
-    if (mpiRank(comm) < pr#pCS)
-    pr#excluded = 1;	
+    prmesh#procddm = [mpirank];
+    if (mpiRank(comm) < prmesh#pCS)
+    prmesh#excluded = 1;
   }
 }
 
-mpiGroup pr#grpddm(pr#procddm);
-mpiComm pr#commddm(mpiCommWorld,pr#grpddm);
-mpiGroup pr#grpCS(pr#procCS);
-mpiComm pr#commCS(mpiCommWorld,pr#grpCS);
+mpiGroup prmesh#grpddm(prmesh#procddm);
+mpiComm prmesh#commddm(mpiCommWorld,prmesh#grpddm);
+mpiGroup prmesh#grpCS(prmesh#procCS);
+mpiComm prmesh#commCS(mpiCommWorld,prmesh#grpCS);
 
-int[int] pr#procself = [mpiRank(mpiCommWorld)];
-mpiGroup pr#grpself(pr#procself);
-mpiComm pr#commself(mpiCommWorld,pr#grpself);
+int[int] prmesh#procself = [mpiRank(mpiCommWorld)];
+mpiGroup prmesh#grpself(prmesh#procself);
+mpiComm prmesh#commself(mpiCommWorld,prmesh#grpself);
 
 /*  Domain decomposition data structures */
-pr#meshN[int] pr#aTh(pr#npart);        /* sequence of ovr. meshes */
-pr#meshN[int] pr#aThborder(pr#npart);
+prmesh#meshN[int] prmesh#aTh(prmesh#npart);        /* sequence of ovr. meshes */
+prmesh#meshN[int] prmesh#aThborder(prmesh#npart);
 
-real[int] pr#partAug(1);
+real[int] prmesh#partAug(1);
+real[int] prmesh#partloc(1);
 
-NewMacro pr#meshinit()1 EndMacro
+NewMacro prmesh#meshinit()1 EndMacro
 ENDIFMACRO
 // EOM
 
-macro ffddmpartf(pr,Th,res)
+macro ffddmpartf(prmesh,Th,res)
 {
-  pr#tic(pr#tdecompi)
+  prmesh#tic(prmesh#tdecompi)
   
-  fespace pr#Ph0(Th,P0);
-  pr#Ph0 upart;                                  /* piecewise constant function */
-  int[int] lpart(pr#Ph0.ndof);                       /* giving the decomposition */
+  fespace prmesh#Ph0(Th,P0);
+  prmesh#Ph0 upart;                                  /* piecewise constant function */
+  int[int] lpart(prmesh#Ph0.ndof);                       /* giving the decomposition */
   
   if (bpara){
-    if (!pr#excluded && mpiRank(pr#commddm)==0 && (pr#npart != mpiSize(pr#commddm))) {
-      cout << "bpara option PB: npart==" << pr#npart << " != mpiSize(commddm)==" << mpiSize(pr#commddm) << endl;
-      assert(pr#npart == mpiSize(pr#commddm));
+    if (!prmesh#excluded && mpiRank(prmesh#commddm)==0 && (prmesh#npart != mpiSize(prmesh#commddm))) {
+      cout << "bpara option PB: npart==" << prmesh#npart << " != mpiSize(commddm)==" << mpiSize(prmesh#commddm) << endl;
+      assert(prmesh#npart == mpiSize(prmesh#commddm));
     }
   }
   
-  if(!pr#excluded) {
-    if (pr#npart == 1) {
+  if(!prmesh#excluded) {
+    if (prmesh#npart == 1) {
       upart[] = 0.; 
     }
     else if(ffddmpartitioner != 0) {
       if(ffddmpartitioner == 2) {
-        if (mpiRank(pr#commddm) == 0) {
-          scotch(lpart,Th,pr#npart);
+        if (mpiRank(prmesh#commddm) == 0) {
+          scotch(lpart,Th,prmesh#npart);
           for(int i=0;i<lpart.n;++i)
           upart[][i]=lpart[i];    
         }   
-        broadcast(processor(0, pr#commddm), upart[]); 
+        broadcast(processor(0, prmesh#commddm), upart[]);
       }
       else {
-        if (mpiRank(pr#commddm) == 0) {
-          metisdual(lpart,Th,pr#npart); 
+        if (mpiRank(prmesh#commddm) == 0) {
+          metisdual(lpart,Th,prmesh#npart);
           for(int i=0;i<lpart.n;++i)
           upart[][i]=lpart[i];
         }   
-        broadcast(processor(0, pr#commddm), upart[]); 
+        broadcast(processor(0, prmesh#commddm), upart[]);
       }
     }
     else {
-      IFMACRO (!pr#simple)
-      if (mpiRank(pr#commddm) == 0)
-      cout << "["+Stringification(pr)+"] partitioner option PB: you must declare a \'"+Stringification(pr)+"simple\' partitioning macro when using ffddmpartitioner = 0" << endl;
+      IFMACRO (!prmesh#simple)
+      if (mpiRank(prmesh#commddm) == 0)
+      cout << "["+Stringification(prmesh)+"] partitioner option PB: you must declare a \'"+Stringification(prmesh)+"simple\' partitioning macro when using ffddmpartitioner = 0" << endl;
       assert(0);
       ENDIFMACRO
-      IFMACRO (pr#simple)
-      pr#simple(pr#Ph0, upart, pr#commddm)
+      IFMACRO (prmesh#simple)
+      prmesh#simple(prmesh#Ph0, upart, prmesh#commddm)
       ENDIFMACRO
     }    	
     
-    if (ffddmbplot && (mpiRank(pr#commddm) == 0 && ffddmverbosity >= 5)) {
+    if (ffddmbplot && (mpiRank(prmesh#commddm) == 0 && ffddmverbosity >= 5)) {
       if (ffddmbffplot)
       plot(upart,wait=0,cmm="partition",value=1,fill=1);
       if (ffddmbmedit)
@@ -458,94 +561,126 @@ macro ffddmpartf(pr,Th,res)
     res = upart[];
   }
   
-  pr#toc(pr#tdecompi,"",pr#tdecomp)
+  prmesh#toc(prmesh#tdecompi,"",prmesh#tdecomp)
 }
 // EOM
 
-macro ffddminitDfespacef(pr,prmsh,scalar,udef,uinit,mPk,udefpart,uinitpart,mPkP0)
-IFMACRO(!pr#feinit)
-NewMacro pr#prmesh()prmsh EndMacro
+macro ffddminitDfespacef(prfe,prmsh,scalar,udef,uinit,mPk,udefpart,uinitpart,mPkP0)
+IFMACRO(!prfe#feinit)
+NewMacro prfe#prmesh()prmsh EndMacro
 
-NewMacro pr#K scalar EndMacro
-NewMacro pr#mdef udef EndMacro
-NewMacro pr#minit uinit EndMacro
+NewMacro prfe#K scalar EndMacro
+NewMacro prfe#mdef udef EndMacro
+NewMacro prfe#minit uinit EndMacro
 
-NewMacro pr#mdefpart udefpart EndMacro
-NewMacro pr#minitpart uinitpart EndMacro
+NewMacro prfe#mdefpart udefpart EndMacro
+NewMacro prfe#minitpart uinitpart EndMacro
 
-NewMacro pr#fPk mPk EndMacro
-NewMacro pr#fPkP0 mPkP0 EndMacro
+NewMacro prfe#fPk mPk EndMacro
+NewMacro prfe#fPkP0 mPkP0 EndMacro
 
-fespace pr#Vhi(prmsh#Thi,pr#fPk);
+fespace prfe#Vhi(prmsh#Thi,prfe#fPk);
 
-fespace pr#Vhglob(prmsh#Thglob,pr#fPk);
+fespace prfe#Vhglob(prmsh#Thglob,prfe#fPk);
 
-pr#K[int][int] pr#Dk(prmsh#npart);
+prfe#K[int][int] prfe#Dk(prmsh#npart);
 
-matrix<pr#K>[int] pr#Rih(prmsh#npart);               /* local restriction operators  */
-matrix<pr#K>[int] pr#Dih(prmsh#npart);               /* partition of unity operators */
+matrix<prfe#K>[int] prfe#Rih(prmsh#npart);               /* local restriction operators  */
+matrix<prfe#K>[int] prfe#Dih(prmsh#npart);               /* partition of unity operators */
 
-matrix<pr#K>[int] pr#restrictionIntersection(0);
+matrix<prfe#K>[int] prfe#restrictionIntersection(0);
 
 /* communication buffers */
-pr#K[int][int] pr#rcv(0);
-pr#K[int][int] pr#snd(0);
+prfe#K[int][int] prfe#rcv(0);
+prfe#K[int][int] prfe#snd(0);
 
-int pr#Ndofglobal = 0;
+int prfe#Ndofglobal = 0;
 
 IFMACRO(prmsh#buildAug,1)
-matrix<scalar> pr#Auginterp;
+matrix prfe#Auginterp;
 ENDIFMACRO
 
 /* Update u_i = R_i sum_j (R_j' u_j)
    if (scale) u_i = R_i sum_j (R_j' D_j u_j)
    using communication buffers in the overlap */
-func int pr#update(scalar[int] vv, bool scale)
+func int prfe#update(scalar[int]& vv, bool scale)
 {
   if (!prmsh#excluded)
   {
     if (scale)
-      vv = vv .* pr#Dk[mpiRank(prmsh#commddm)];
+      vv = vv .* prfe#Dk[mpiRank(prmsh#commddm)];
     mpiRequest[int] rq(prmsh#numberIntersection*2);
     for(int j=0;j<prmsh#numberIntersection;++j)
-      pr#snd[j] = pr#restrictionIntersection[j]*vv;
+      prfe#snd[j] = prfe#restrictionIntersection[j]*vv;
     for(int j=0;j<prmsh#numberIntersection;++j)
-      Isend(processor(prmsh#arrayIntersection[j],prmsh#commddm,rq[j*2]),pr#snd[j]);
+      Isend(processor(prmsh#arrayIntersection[j],prmsh#commddm,rq[j*2]),prfe#snd[j]);
     for(int j=0;j<prmsh#numberIntersection;++j)
-      Irecv(processor(prmsh#arrayIntersection[j],prmsh#commddm,rq[j*2+1]),pr#rcv[j]);
+      Irecv(processor(prmsh#arrayIntersection[j],prmsh#commddm,rq[j*2+1]),prfe#rcv[j]);
     for(int j=0;j<prmsh#numberIntersection*2;++j)
       int k = mpiWaitAny(rq);
     for(int j=0;j<prmsh#numberIntersection;++j)
-      vv += pr#restrictionIntersection[j]'*pr#rcv[j];
+      vv += prfe#restrictionIntersection[j]'*prfe#rcv[j];
   }
   return 0;
 }
 
-IFMACRO (pr#myscalprod)
-pr#myscalprod
+func int prfe#updatematrix(matrix<scalar>& m, bool scale)
+{
+  if (!prmsh#excluded)
+  {
+    matrix<scalar>[int] rest(prmsh#arrayIntersection.n);
+    matrix<scalar>[int] restSend(prmsh#arrayIntersection.n);
+
+    mpiRequest[int] rq(prmsh#numberIntersection*2);
+    for(int j=0;j<prmsh#numberIntersection;++j) {
+      restSend[j] = m;
+      IFMACRO(prfe#K,real)
+      renumbering(restSend[j],prfe#restrictionIntersection[j],eps=-1);
+      ENDIFMACRO
+      IFMACRO(prfe#K,complex)
+      matrix restreal = prfe#restrictionIntersection[j].re;
+      renumbering(restSend[j],restreal,eps=-1);
+      ENDIFMACRO
+      Isend(processor(prmsh#arrayIntersection[j],prmsh#commddm,rq[j*2]),restSend[j]);
+    }
+    for(int j=0;j<prmsh#numberIntersection;++j)
+      Irecv(processor(prmsh#arrayIntersection[j],prmsh#commddm,rq[j*2+1]),rest[j]);
+    for(int j=0;j<prmsh#numberIntersection*2;++j)
+      int k = mpiWaitAny(rq);
+    for(int j=0;j<prmsh#numberIntersection;++j) {
+      matrix<scalar> extens = prfe#restrictionIntersection[j]'*rest[j];
+      extens = extens*prfe#restrictionIntersection[j];
+      m = m + extens;
+    }
+  }
+  return 0;
+}
+
+IFMACRO (prfe#myscalprod)
+prfe#myscalprod
 ENDIFMACRO
-IFMACRO (!pr#myscalprod)
-func scalar pr#scalprod(scalar[int] va, scalar[int] vb)
+IFMACRO (!prfe#myscalprod)
+func scalar prfe#scalprod(scalar[int] va, scalar[int] vb)
 {
   scalar res = 0;
   if(prmsh#isincomm) {
-    /*prmsh#tic(pr#tloc)*/
+    /*prmsh#tic(prfe#tloc)*/
     scalar resi = 0;
     if (!bpara) {
       resi = va '* vb;
     }
     else if (!prmsh#excluded){
-      scalar[int] sa = va .* pr#Dk[mpiRank(prmsh#commddm)];
+      scalar[int] sa = va .* prfe#Dk[mpiRank(prmsh#commddm)];
       resi = sa '* vb;
     }
     mpiAllReduce(resi,res,prmsh#mpicomm,mpiSUM);
-    /*prmsh#toc(pr#tloc,"",pr#tscalprod)*/
+    /*prmsh#toc(prfe#tloc,"",prfe#tscalprod)*/
   }
   return res;
 }
 ENDIFMACRO
 
-NewMacro pr#mplot(u,s)
+NewMacro prfe#mplot(u,s)
   if (prmsh#isincomm) {
     if (ffddmbplot) {	
       fespace VhP1(prmsh#Thglob,P1);
@@ -572,25 +707,25 @@ NewMacro pr#mplot(u,s)
   }
 EndMacro
 
-NewMacro pr#feinit()1 EndMacro
+NewMacro prfe#feinit()1 EndMacro
 ENDIFMACRO
 // EOM
 
-macro ffddmbuildDfespacef(pr,prmsh,scalar,udef,uinit,mPk,udefpart,uinitpart,mPkP0)
+macro ffddmbuildDfespacef(prfe,prmsh,scalar,udef,uinit,mPk,udefpart,uinitpart,mPkP0)
 
-ffddminitDfespacef(pr,prmsh,scalar,udef,uinit,mPk,udefpart,uinitpart,mPkP0)
+ffddminitDfespacef(prfe,prmsh,scalar,udef,uinit,mPk,udefpart,uinitpart,mPkP0)
 
-pr#Ndofglobal = pr#Vhglob.ndof;
+prfe#Ndofglobal = prfe#Vhglob.ndof;
 
 if (!bpara && ffddmverbosity)
-cout << "["+Stringification(pr)+"] (seqddm) ndof = " << pr#Ndofglobal << endl;
+cout << "["+Stringification(prfe)+"] (seqddm) ndof = " << prfe#Ndofglobal << endl;
 
 if (prmsh#isincomm && !prmsh#excluded)
 {	
   for(int ii=0;ii<prmsh#npart;++ii)
   if ((!bpara) || (ii == mpiRank(prmsh#commddm))) {
     prmsh#Thi = prmsh#aTh[ii];
-    fespace Vhipart(prmsh#Thi,pr#fPkP0);
+    fespace Vhipart(prmsh#Thi,prfe#fPkP0);
     Vhipart udefpart(utmp) = uinitpart(prmsh#DP1[ii]);
 
     Vhipart udefpart(usum);
@@ -602,52 +737,93 @@ if (prmsh#isincomm && !prmsh#excluded)
     if (bpara) {
       int backup = searchMethod;
       searchMethod = 1;
-      pr#rcv.resize(prmsh#numberIntersection);
-      pr#snd.resize(prmsh#numberIntersection);
-      pr#restrictionIntersection.resize(prmsh#numberIntersection);
+      prfe#rcv.resize(prmsh#numberIntersection);
+      prfe#snd.resize(prmsh#numberIntersection);
+      prfe#restrictionIntersection.resize(prmsh#numberIntersection);
       for(int i=0;i<prmsh#numberIntersection;++i) {
           matrix R;
           int[int] n2o(1);
           if (prmsh#overlap > 0) {
+
+            IFMACRO(prmsh#partcubes,1)
+            fespace Phii(prmsh#Thi,P0);
+            Phii parti;
+            parti[] = prmsh#partloc;
+            prmsh#meshN meshIntersection = trunc(prmsh#Thi, abs(parti - prmsh#arrayIntersection[i]) < 0.1);
+            real lx, ly, lz, ux, uy, uz;
+            lx = ly = lz = 1e+30;
+            ux = uy = uz = -1.e+30;
+            for (int ii=0; ii < meshIntersection.nbe; ii++)
+            for (int jj=0; jj < dimension; jj++){
+              lx = min(lx,meshIntersection.be(ii)[jj].x); ux = max(ux,meshIntersection.be(ii)[jj].x);
+              ly = min(ly,meshIntersection.be(ii)[jj].y); uy = max(uy,meshIntersection.be(ii)[jj].y);
+              IFMACRO(dimension,3)
+              lz = min(lz,meshIntersection.be(ii)[jj].z); uz = max(uz,meshIntersection.be(ii)[jj].z);
+              ENDIFMACRO
+            }
+
+            IFMACRO(dimension,2)
+            real p0x = prmsh#Thi(prmsh#Thi.be(0)[0]).x, p0y = prmsh#Thi(prmsh#Thi.be(0)[0]).y;
+            real p1x = prmsh#Thi(prmsh#Thi.be(0)[1]).x, p1y = prmsh#Thi(prmsh#Thi.be(0)[1]).y;
+            real h = sqrt((p1x-p0x)^2+(p1y-p0y)^2);
+            lx -= h*prmsh#overlap; ly -= h*prmsh#overlap;
+            ux += h*prmsh#overlap; uy += h*prmsh#overlap;
+            meshIntersection = trunc(prmsh#Thi, (x>=lx)&&(x<=ux)&&(y>=ly)&&(y<=uy), new2old = n2o, label=9999);
+            ENDIFMACRO
+            IFMACRO(dimension,3)
+            real p0x = prmsh#Thi(prmsh#Thi.be(0)[0]).x, p0y = prmsh#Thi(prmsh#Thi.be(0)[0]).y, p0z = prmsh#Thi(prmsh#Thi.be(0)[0]).z;
+            real p1x = prmsh#Thi(prmsh#Thi.be(0)[1]).x, p1y = prmsh#Thi(prmsh#Thi.be(0)[1]).y, p1z = prmsh#Thi(prmsh#Thi.be(0)[1]).z;
+            real p2x = prmsh#Thi(prmsh#Thi.be(0)[2]).x, p2y = prmsh#Thi(prmsh#Thi.be(0)[2]).y, p2z = prmsh#Thi(prmsh#Thi.be(0)[2]).z;
+            real h = min(sqrt((p1x-p0x)^2+(p1y-p0y)^2+(p1z-p0z)^2), sqrt((p2x-p0x)^2+(p2y-p0y)^2+(p2z-p0z)^2));
+            lx -= h*prmsh#overlap; ly -= h*prmsh#overlap; lz -= h*prmsh#overlap;
+            ux += h*prmsh#overlap; uy += h*prmsh#overlap; uz += h*prmsh#overlap;
+            meshIntersection = trunc(prmsh#Thi, (x>=lx)&&(x<=ux)&&(y>=ly)&&(y<=uy)&&(z>=lz)&&(z<=uz), new2old = n2o, label=9999);
+            ENDIFMACRO
+
+            ENDIFMACRO
+
+            IFMACRO(!prmsh#partcubes)
             prmsh#meshN meshIntersection = trunc(prmsh#Thi, (prmsh#partitionIntersectionbasei[i] > 1.0e-6), new2old = n2o, label=9999);
-            fespace WhIntersection(meshIntersection, pr#fPk);
-            int[int] renum = restrict(WhIntersection, pr#Vhi,n2o);
+            ENDIFMACRO
+
+            fespace WhIntersection(meshIntersection, prfe#fPk);
+            int[int] renum = restrict(WhIntersection, prfe#Vhi,n2o);
             int[int] Ic = (0:WhIntersection.ndof-1);
             real[int] Kc(WhIntersection.ndof);
             Kc = 1;
             R = [Ic,renum,Kc];
-            R.resize(WhIntersection.ndof, pr#Vhi.ndof);
+            R.resize(WhIntersection.ndof, prfe#Vhi.ndof);
           }
           else {
             IFMACRO(prmsh#mminoverlap,1)
             matrix RP1 = interpolate(prmsh#VhiP1,prmsh#AugVhiP1);
             prmsh#AugVhiP1 partaugP1;
             partaugP1[] = RP1'*prmsh#partitionIntersectionbasei[i][];
-            pr#meshN meshIntersection = trunc(prmsh#AugThi, (partaugP1 > 1.0e-6), new2old = n2o);
-            fespace pr#PhAugP0(prmsh#AugThi,P0);
-            pr#PhAugP0 paug;
+            prmsh#meshN meshIntersection = trunc(prmsh#AugThi, (partaugP1 > 1.0e-6), new2old = n2o);
+            fespace prfe#PhAugP0(prmsh#AugThi,P0);
+            prfe#PhAugP0 paug;
             paug[] = prmsh#partAug;
             paug = abs(paug-prmsh#arrayIntersection[i]) < 0.1;
-            pr#meshN meshNeighbor = trunc(prmsh#AugThi, paug > 0.001, label=-10);
+            prmsh#meshN meshNeighbor = trunc(prmsh#AugThi, paug > 0.001, label=-10);
 
-            fespace WhIntersection(meshIntersection, pr#fPkP0);
+            fespace WhIntersection(meshIntersection, prfe#fPkP0);
 
-            fespace WhNeighbor(meshNeighbor, pr#fPkP0);
+            fespace WhNeighbor(meshNeighbor, prfe#fPkP0);
 
-            matrix Rn = interpolate(WhNeighbor,pr#AugVhi,inside=true);
+            matrix Rn = interpolate(WhNeighbor,prfe#AugVhi,inside=true);
 
             varf vneighbor(udef(u),udef(v)) = on(-10, udef(u) = uinit(1));
             real[int] bbord = vneighbor(0,WhNeighbor,tgv=1);
             real[int] bbordaug = Rn'*bbord;
 
-            int[int] renum = restrict(WhIntersection, pr#AugVhi, n2o);
+            int[int] renum = restrict(WhIntersection, prfe#AugVhi, n2o);
 
             WhIntersection udefpart(utmpi);
 
-            matrix RR = interpolate(pr#Vhi,pr#AugVhi);
+            matrix RR = interpolate(prfe#Vhi,prfe#AugVhi);
 
             varf vbord(udef(u),udef(v)) = on(ffddminterfacelabel, udef(u) = uinit(1));
-            real[int] bmybord = vbord(0,pr#Vhi,tgv=1);
+            real[int] bmybord = vbord(0,prfe#Vhi,tgv=1);
             real[int] bmybordaug = RR'*bmybord;
 
             for [i,bi: utmpi[]] bi = (bbordaug[renum[i]] > 0.999 && bmybordaug[renum[i]] > 0.999 ? 1 : 0);
@@ -665,21 +841,21 @@ if (prmsh#isincomm && !prmsh#excluded)
             real[int] Kc(ninter);
             Kc = 1;
             matrix Raug = [Ic,rest,Kc];
-            Raug.resize(ninter, pr#AugVhi.ndof);
+            Raug.resize(ninter, prfe#AugVhi.ndof);
             R = Raug*RR';
             usum[] += R'*Kc;
             }
             else {
-              R.resize(0, pr#AugVhi.ndof);
+              R.resize(0, prfe#AugVhi.ndof);
             }
             ENDIFMACRO
             ;
           }
 
         /*cout << mpirank << " " << prmsh#arrayIntersection[i] << " " << R.n << " " << R.m << endl;*/
-        pr#restrictionIntersection[i] = R;
-        pr#rcv[i].resize(pr#restrictionIntersection[i].n);
-        pr#snd[i].resize(pr#restrictionIntersection[i].n);
+        prfe#restrictionIntersection[i] = R;
+        prfe#rcv[i].resize(prfe#restrictionIntersection[i].n);
+        prfe#snd[i].resize(prfe#restrictionIntersection[i].n);
       }
       searchMethod = backup;
     }
@@ -687,19 +863,19 @@ if (prmsh#isincomm && !prmsh#excluded)
     if (prmsh#overlap == 0)
       utmp[] = utmp[] ./= usum[];
 
-    pr#Dk[ii].resize(Vhipart.ndof);
-    IFMACRO(pr#K,complex)
-    pr#Dk[ii].re = utmp[];
+    prfe#Dk[ii].resize(Vhipart.ndof);
+    IFMACRO(prfe#K,complex)
+    prfe#Dk[ii].re = utmp[];
     ENDIFMACRO
-    IFMACRO(pr#K,real)
-    pr#Dk[ii] = utmp[];
+    IFMACRO(prfe#K,real)
+    prfe#Dk[ii] = utmp[];
     ENDIFMACRO
     matrix Dihreal = utmp[];
     Dihreal.thresholding(1e-10);
-    pr#Dih[ii] = Dihreal;
+    prfe#Dih[ii] = Dihreal;
 
     if(!bnoGlob) {
-      matrix Rihreal=interpolate(pr#Vhi,pr#Vhglob);        
+      matrix Rihreal=interpolate(prfe#Vhi,prfe#Vhglob);
       int[int] I(1),J(1);
       real[int] Kc(1);
       [I,J,Kc] = Rihreal;
@@ -708,8 +884,8 @@ if (prmsh#isincomm && !prmsh#excluded)
       Kc[i] = 1.;
       Rihreal = [I,J,Kc];    
       Rihreal.thresholding(1e-10);
-      pr#Rih[ii] = Rihreal;
-      pr#Rih[ii].resize(pr#Vhi.ndof, pr#Vhglob.ndof);
+      prfe#Rih[ii] = Rihreal;
+      prfe#Rih[ii].resize(prfe#Vhi.ndof, prfe#Vhglob.ndof);
     }
     
     if (bseq)
@@ -718,23 +894,23 @@ if (prmsh#isincomm && !prmsh#excluded)
     if (bpara)
     {
       func ftest = x+y;
-      pr#Vhi<pr#K> pr#mdef(uu), pr#mdef(vv) = pr#minit(0.);
+      prfe#Vhi<prfe#K> prfe#mdef(uu), prfe#mdef(vv) = prfe#minit(0.);
       
       uu[] = 1.;
       
-      vv[] = pr#Dk[ii];
+      vv[] = prfe#Dk[ii];
       
-      pr#K[int][int] rcv(prmsh#numberIntersection);
-      pr#K[int][int] snd(prmsh#numberIntersection);
+      prfe#K[int][int] rcv(prmsh#numberIntersection);
+      prfe#K[int][int] snd(prmsh#numberIntersection);
       
       mpiRequest[int] rq(prmsh#numberIntersection*2);
       
       
       for(int j=0;j<prmsh#numberIntersection;++j)
       {
-        rcv[j].resize(pr#restrictionIntersection[j].n);
-        snd[j].resize(pr#restrictionIntersection[j].n);
-        snd[j] = pr#restrictionIntersection[j]*vv[];
+        rcv[j].resize(prfe#restrictionIntersection[j].n);
+        snd[j].resize(prfe#restrictionIntersection[j].n);
+        snd[j] = prfe#restrictionIntersection[j]*vv[];
       }
       
       for(int j=0;j<prmsh#numberIntersection;++j)
@@ -746,24 +922,24 @@ if (prmsh#isincomm && !prmsh#excluded)
       int k = mpiWaitAny(rq);
       
       for(int j=0;j<prmsh#numberIntersection;++j)
-      vv[] += pr#restrictionIntersection[j]'*rcv[j];
+      vv[] += prfe#restrictionIntersection[j]'*rcv[j];
       
       uu[] -= vv[];
       
       if (uu[].linfty > 1.e-8)
-      cout << "["+Stringification(pr)+"] Probleme partition de l'unite : uu[].linfty = " << uu[].linfty << endl;
+      cout << "["+Stringification(prfe)+"] Probleme partition de l'unite : uu[].linfty = " << uu[].linfty << endl;
     }    
     
     if (bpara){
       /* To count the total number of dofs (inspired from statistics hpddm) */
       int ndofglobi=0;
-      int[int] table(pr#Vhi.ndof);
+      int[int] table(prfe#Vhi.ndof);
       /* table to label dofs */
       table = ii;
       for(int j=0;j<prmsh#numberIntersection;++j){ /* loop on the neighbors */
-        pr#K[int] C(1);
+        prfe#K[int] C(1);
         int[int] I(1), J(1);
-        [I, J, C] = pr#restrictionIntersection[j]; /* now J is the restrictionIntersection[j] of hpddm */
+        [I, J, C] = prfe#restrictionIntersection[j]; /* now J is the restrictionIntersection[j] of hpddm */
         if (C[C.n-1] == 0) {
           I.resize(C.n-1);
           J.resize(C.n-1);
@@ -776,172 +952,179 @@ if (prmsh#isincomm && !prmsh#excluded)
       for[i,tablei: table]{ /* syntax for c++ loops */
         if(tablei<=ii) ndofglobi++;
       }
-      pr#Ndofglobal = 0;
-      mpiReduce(ndofglobi, pr#Ndofglobal, processor(0,prmsh#commddm), mpiSUM);
+      prfe#Ndofglobal = 0;
+      mpiReduce(ndofglobi, prfe#Ndofglobal, processor(0,prmsh#commddm), mpiSUM);
       
       if (ffddmverbosity && mpiRank(prmsh#commddm) == 0)
-      cout << "["+Stringification(pr)+"] (paraddm) ndof = " << pr#Ndofglobal << endl;     	
+      cout << "["+Stringification(prfe)+"] (paraddm) ndof = " << prfe#Ndofglobal << endl;
     }	
     
   }
 }
 // EOM
 
-macro ffddmbuildDfespaceEdge(pr,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
+macro ffddmbuildDfespaceEdge(prfe,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
 IFMACRO(prmesh#buildAug,1)
-ffddmbuildDfespacef(pr#Aug,prmesh#Aug,scalar,def,init,Pk,defpart,initpart,Pkpart)
+ffddmbuildDfespacef(prfe#Aug,prmesh#Aug,scalar,def,init,Pk,defpart,initpart,Pkpart)
 ENDIFMACRO
-ffddmbuildDfespacef(pr,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
+ffddmbuildDfespacef(prfe,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
 IFMACRO(prmesh#buildAug,1)
 if (bseq)
-  pr#Auginterp = interpolate(pr#AugVhi,pr#Vhglob);
+  prfe#Auginterp = interpolate(prfe#AugVhi,prfe#Vhglob);
 else if (bpara)
-  pr#Auginterp = interpolate(pr#Vhi,pr#AugVhi);
+  prfe#Auginterp = interpolate(prfe#Vhi,prfe#AugVhi);
 ENDIFMACRO
 // EOM
 
-macro ffddmbuildDfespace(pr,prmesh,scalar,def,init,Pk)
-ffddmbuildDfespaceEdge(pr,prmesh,scalar,def,init,Pk,def,init,Pk)
+macro ffddmbuildDfespace(prfe,prmesh,scalar,def,init,Pk)
+ffddmbuildDfespaceEdge(prfe,prmesh,scalar,def,init,Pk,def,init,Pk)
 // EOM
 
-macro ffddmbuildDfespaceAug(pr,prmesh,scalar,def,init,Pk)
-ffddmbuildDfespaceEdge(pr,prmesh,scalar,def,init,Pk,def,init,Pk)
+macro ffddmbuildDfespaceAug(prfe,prmesh,scalar,def,init,Pk)
+ffddmbuildDfespaceEdge(prfe,prmesh,scalar,def,init,Pk,def,init,Pk)
 // EOM
 
-macro ffddmbuildDfespaceEdgeAug(pr,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
-ffddmbuildDfespaceEdge(pr,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
+macro ffddmbuildDfespaceEdgeAug(prfe,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
+ffddmbuildDfespaceEdge(prfe,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
 // EOM
 
-macro ffddmbuildDmesh(pr,Th,comm)
+macro ffddmbuildDmesh(prmesh,Th,comm)
 if ((mpirank == 0) && ffddmverbosity)
-cout << "["+Stringification(pr)+"] Building decomposition from mesh of " << Th.nt << " elements" << endl;
+cout << "["+Stringification(prmesh)+"] Building decomposition from mesh of " << Th.nt << " elements" << endl;
 
-int pr#inexactCSsplit = 0;
-int pr#binexactCS = 0;
-int pr#binexactgeneoCS = 0;
-int pr#pCS = ffddmpCS;
-int pr#exclude = ffddmexclude;
-ffddminitDmeshf(pr,Th,comm)
+int prmesh#inexactCSsplit = 0;
+int prmesh#binexactCS = 0;
+int prmesh#binexactgeneoCS = 0;
+int prmesh#pCS = ffddmpCS;
+int prmesh#exclude = ffddmexclude;
+ffddminitDmeshf(prmesh,Th,comm)
 
 if (!bnoGlob)
-if  (pr#inexactCSsplit <= 1) {
+if  (prmesh#inexactCSsplit <= 1) {
   if (ffddmsplit == 1)
-    pr#Thglob = Th;
+    prmesh#Thglob = Th;
   else
-    pr#Thglob = trunc(Th,1,split=ffddmsplit);
+    prmesh#Thglob = trunc(Th,1,split=ffddmsplit);
 }
 else 
-  pr#Thglob = trunc(Th,1,split=pr#inexactCSsplit*ffddmsplit);
+  prmesh#Thglob = trunc(Th,1,split=prmesh#inexactCSsplit*ffddmsplit);
 
-IFMACRO(!pr#mminoverlap)
-NewMacro pr#mminoverlap()0 EndMacro
+IFMACRO(!prmesh#mminoverlap)
+NewMacro prmesh#mminoverlap()0 EndMacro
 ENDIFMACRO
 
-IFMACRO(!pr#buildAug)
-IFMACRO(pr#mminoverlap,1)
-NewMacro pr#buildAug()1 EndMacro
+IFMACRO(!prmesh#buildAug)
+IFMACRO(prmesh#mminoverlap,1)
+NewMacro prmesh#buildAug()1 EndMacro
 ENDIFMACRO
 ENDIFMACRO
 
-IFMACRO(!pr#buildAug)
-NewMacro pr#buildAug()0 EndMacro
+IFMACRO(!prmesh#buildAug)
+NewMacro prmesh#buildAug()0 EndMacro
 ENDIFMACRO
 
-IFMACRO(pr#buildAug,1)
-int pr#AuginexactCSsplit = 0;
-int pr#AugbinexactCS = 0;
-int pr#AugbinexactgeneoCS = 0;
-int pr#AugpCS = ffddmpCS;
-int pr#Augexclude = ffddmexclude;
-ffddminitDmeshf(pr#Aug,Th,comm)
-IFMACRO (!pr#AugbuildAug)
-NewMacro pr#AugbuildAug()0 EndMacro
+IFMACRO(prmesh#buildAug,1)
+int prmesh#AuginexactCSsplit = 0;
+int prmesh#AugbinexactCS = 0;
+int prmesh#AugbinexactgeneoCS = 0;
+int prmesh#AugpCS = ffddmpCS;
+int prmesh#Augexclude = ffddmexclude;
+ffddminitDmeshf(prmesh#Aug,Th,comm)
+IFMACRO (!prmesh#AugbuildAug)
+NewMacro prmesh#AugbuildAug()0 EndMacro
 ENDIFMACRO
 ENDIFMACRO
 
 {
   real[int] locpartition;
-  ffddmpartf(pr,Th,locpartition)
+  ffddmpartf(prmesh,Th,locpartition)
   
-  IFMACRO(pr#buildAug,1)
-  ffddmbuildDmeshf(pr#Aug,Th,locpartition,(ffddmoverlap+1))
+  IFMACRO(prmesh#buildAug,1)
+  ffddmbuildDmeshf(prmesh#Aug,Th,locpartition,(ffddmoverlap+1))
   ENDIFMACRO
 
-  ffddmbuildDmeshf(pr,Th,locpartition,ffddmoverlap)
+  ffddmbuildDmeshf(prmesh,Th,locpartition,ffddmoverlap)
 }
 // EOM
 
-macro ffddmbuildDmeshNested(pr,Thc,sp,comm)
+macro ffddmbuildDmeshNested(prmesh,Thc,sp,comm)
 if ((mpirank == 0) && !bpara)
-cout << "["+Stringification(pr)+"] ffddmbuildDmeshNested PB: two-level nested mesh decomposition is to be used only in parallel mode" << endl;
+cout << "["+Stringification(prmesh)+"] ffddmbuildDmeshNested PB: two-level nested mesh decomposition is to be used only in parallel mode" << endl;
 assert(bpara);
 if ((mpirank == 0) && ffddmverbosity)
-cout << "["+Stringification(pr)+ "] Building two-level decomposition from coarse mesh of " << Thc.nt << " elements, with splitting parameter " << sp << endl << "["+Stringification(pr)+"] Setting binexactCS = 1, pCS = mpisize, exclude = 0" << endl;
+cout << "["+Stringification(prmesh)+ "] Building two-level decomposition from coarse mesh of " << Thc.nt << " elements, with splitting parameter " << sp << endl << "["+Stringification(prmesh)+"] Setting binexactCS = 1, pCS = mpisize, exclude = 0" << endl;
 
-int pr#inexactCSsplit = sp;
-int pr#binexactCS = 1;
-int pr#binexactgeneoCS = 0;
-NewMacro pr#minexactCS 1 EndMacro
-int pr#pCS = ffddmpCS;
-int pr#exclude = ffddmexclude;
+int prmesh#inexactCSsplit = sp;
+int prmesh#binexactCS = 1;
+int prmesh#binexactgeneoCS = 0;
+NewMacro prmesh#minexactCS 1 EndMacro
+int prmesh#pCS = ffddmpCS;
+int prmesh#exclude = ffddmexclude;
 
-int pr#CoarseinexactCSsplit = 1;
-int pr#CoarsebinexactCS = 0;
-int pr#CoarsebinexactgeneoCS = 0;
-int pr#CoarsepCS = ffddmpCS;
-int pr#Coarseexclude = ffddmexclude;
+int prmesh#CoarseinexactCSsplit = 1;
+int prmesh#CoarsebinexactCS = 0;
+int prmesh#CoarsebinexactgeneoCS = 0;
+int prmesh#CoarsepCS = ffddmpCS;
+int prmesh#Coarseexclude = ffddmexclude;
 
-ffddminitDmeshf(pr,Thc,comm)
+ffddminitDmeshf(prmesh,Thc,comm)
 
 if (!bnoGlob)
-if  (pr#inexactCSsplit <= 1) {
+if  (prmesh#inexactCSsplit <= 1) {
   if (ffddmsplit == 1)
-    pr#Thglob = Thc;
+    prmesh#Thglob = Thc;
   else
-    pr#Thglob = trunc(Thc,1,split=ffddmsplit);
+    prmesh#Thglob = trunc(Thc,1,split=ffddmsplit);
 }
 else 
-  pr#Thglob = trunc(Thc,1,split=pr#inexactCSsplit*ffddmsplit);
+  prmesh#Thglob = trunc(Thc,1,split=prmesh#inexactCSsplit*ffddmsplit);
 
-ffddminitDmeshf(pr#Coarse,Thc,comm)
+ffddminitDmeshf(prmesh#Coarse,Thc,comm)
 
-IFMACRO(!pr#mminoverlap)
-NewMacro pr#mminoverlap()0 EndMacro
+IFMACRO(!prmesh#mminoverlap)
+NewMacro prmesh#mminoverlap()0 EndMacro
 ENDIFMACRO
 
-IFMACRO(!pr#Coarsemminoverlap)
-NewMacro pr#Coarsemminoverlap()0 EndMacro
+IFMACRO(!prmesh#Coarsemminoverlap)
+NewMacro prmesh#Coarsemminoverlap()0 EndMacro
 ENDIFMACRO
 
-IFMACRO(!pr#buildAug)
-NewMacro pr#buildAug()0 EndMacro
+IFMACRO(!prmesh#buildAug)
+NewMacro prmesh#buildAug()0 EndMacro
 ENDIFMACRO
-IFMACRO(!pr#CoarsebuildAug)
-NewMacro pr#CoarsebuildAug()0 EndMacro
+IFMACRO(!prmesh#CoarsebuildAug)
+NewMacro prmesh#CoarsebuildAug()0 EndMacro
 ENDIFMACRO
 
 {
   real[int] partition;
-  ffddmpartf(pr,Thc,partition)
-  ffddmbuildDmeshf(pr#Coarse,Thc,partition,ffddmoverlap)
-  ffddmbuildDmeshf(pr,Thc,partition,ffddmoverlap)
+  ffddmpartf(prmesh,Thc,partition)
+  ffddmbuildDmeshf(prmesh#Coarse,Thc,partition,ffddmoverlap)
+  ffddmbuildDmeshf(prmesh,Thc,partition,ffddmoverlap)
 }
 // EOM
 
-macro ffddmbuildDmeshAug(pr,Th,comm)
-IFMACRO(!pr#buildAug)
-NewMacro pr#buildAug()1 EndMacro
+macro ffddmbuildDmeshAug(prmesh,Th,comm)
+IFMACRO(!prmesh#buildAug)
+NewMacro prmesh#buildAug()1 EndMacro
 ENDIFMACRO
-ffddmbuildDmesh(pr,Th,comm)
+ffddmbuildDmesh(prmesh,Th,comm)
 // EOM
 
-macro ffddmbuildDfespaceEdgeNested(pr,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
-ffddmbuildDfespaceEdge(pr#Coarse,prmesh#Coarse,scalar,def,init,Pk,defpart,initpart,Pkpart)
-ffddmbuildDfespaceEdge(pr,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
+macro ffddmbuildDmeshpartcubes(prmesh,Th,comm)
+IFMACRO(!prmesh#buildAug)
+NewMacro prmesh#partcubes()1 EndMacro
+ENDIFMACRO
+ffddmbuildDmesh(prmesh,Th,comm)
 // EOM
 
-macro ffddmbuildDfespaceNested(pr,prmesh,scalar,def,init,Pk)
-ffddmbuildDfespaceEdgeNested(pr,prmesh,scalar,def,init,Pk,def,init,Pk)
+macro ffddmbuildDfespaceEdgeNested(prfe,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
+ffddmbuildDfespaceEdge(prfe#Coarse,prmesh#Coarse,scalar,def,init,Pk,defpart,initpart,Pkpart)
+ffddmbuildDfespaceEdge(prfe,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
+// EOM
+
+macro ffddmbuildDfespaceNested(prfe,prmesh,scalar,def,init,Pk)
+ffddmbuildDfespaceEdgeNested(prfe,prmesh,scalar,def,init,Pk,def,init,Pk)
 // EOM
 
 macro ffddmbuild(pr,Th,scalar,def,init,Pk,comm)
