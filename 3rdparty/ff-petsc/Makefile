@@ -67,11 +67,13 @@ else
 PETSC_DOWNLOAD := --download-metis --download-ptscotch \
 		--download-hypre --download-parmetis \
 		--download-superlu --download-suitesparse --download-tetgen \
-		--download-slepc --download-slepc-commit=d3f7cd4a
+		--download-slepc
+# --download-slepc-commit=d3f7cd4a
 ifeq ($(FFCMAKE),no)
 PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
 endif
-PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-slepc --download-slepc-commit=d3f7cd4a
+PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-slepc
+# --download-slepc-commit=d3f7cd4a
 ifeq ($(WIN32DLLTARGET),)
 PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-hpddm --download-hpddm-commit=ce6ce80
 PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-hpddm --download-hpddm-commit=ce6ce80
@@ -143,8 +145,8 @@ all-local:
 	@echo "	make petsc-slepc "
 
 DIRPKG=../pkg
-VERSION=3.13.2
-VERSION_SLEPC=3.13.2
+VERSION=3.13.3
+VERSION_SLEPC=3.13.3
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
