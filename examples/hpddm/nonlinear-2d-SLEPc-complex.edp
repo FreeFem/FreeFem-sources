@@ -29,7 +29,7 @@ func int FormJacobian(complex mu) {
 FormFunction(1.0);
 FormJacobian(1.0);
 Vh<complex>[int] vec(1);
-NEPSolve(A, FormFunction, B, FormJacobian, vectors = vec, sparams = "-nep_type ciss -rg_type ellipse -rg_ellipse_center 8.0 -rg_ellipse_radius 0.7 -rg_ellipse_vscale 0.1 -nep_monitor -nep_view -nep_view_values");
+NEPSolve(A, FormFunction, B, FormJacobian, vectors = vec, sparams = "-nep_type ciss -rg_type ellipse -rg_ellipse_center -2.0 -rg_ellipse_radius 0.1 -rg_ellipse_vscale 0.1 -nep_monitor -nep_view -nep_view_values");
 vec.resize(5);
 for(int i = 0; i < vec.n; ++i) {
     macro def(u)u//

@@ -154,8 +154,8 @@ struct _n_User {
 };
 template<class Type, class K>
 struct _m_User {
-    typename eigensolver<Type, K, NEP>::ScalarF_O* J;
     typename eigensolver<Type, K, NEP>::ScalarF_O* F;
+    typename eigensolver<Type, K, NEP>::ScalarF_O* J;
 };
 PetscErrorCode FormFun(NEP nep, PetscScalar lambda, Mat F, Mat P, void* ctx) {
     User<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, PetscScalar, NEP>* user;
@@ -231,8 +231,8 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 else {
                     Type* ptB = GetAny<Type*>((*B)(stack));
                     PetscNew(&func);
-                    func->J = new typename eigensolver<Type, K, NEP>::ScalarF_O(stack, codeA);
-                    func->F = new typename eigensolver<Type, K, NEP>::ScalarF_O(stack, codeB);
+                    func->F = new typename eigensolver<Type, K, NEP>::ScalarF_O(stack, codeA);
+                    func->J = new typename eigensolver<Type, K, NEP>::ScalarF_O(stack, codeB);
                     NEPSetFunction(nep, ptA->_petsc, ptA->_petsc, FormFun, &func);
                     NEPSetJacobian(nep, ptB->_petsc, FormJac, &func);
                 }

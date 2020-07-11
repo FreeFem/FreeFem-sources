@@ -1452,7 +1452,7 @@ namespace PETSc {
       Expression A;
       Expression P;
       const int c;
-      static const int n_name_param = 18;
+      static const int n_name_param = 19;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       setOptions_Op(const basicAC_F0& args, int d) : A(0), P(0), c(d) {
@@ -1499,7 +1499,8 @@ namespace PETSc {
     {"gradient", &typeid(Dmat*)},                                                                 // 14
     {"O", &typeid(Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >*)},                         // 15
     {"bs", &typeid(long)},                                                                        // 16
-    {"precon", &typeid(Polymorphic*)}                                                             // 17
+    {"precon", &typeid(Polymorphic*)},                                                            // 17
+    {"setup", &typeid(bool)}                                                                      // 18
   };
   class ShellInjection;
   template< class Type >
@@ -2022,6 +2023,8 @@ namespace PETSc {
         }
       }
     }
+    if(nargs[18] && GetAny< bool >((*nargs[18])(stack)))
+        KSPSetUp(ksp);
     return 0L;
   }
 
