@@ -2101,6 +2101,7 @@ namespace PETSc {
     class changeNumbering_Op : public E_F0mps {
      public:
       std::vector< std::pair< Expression, Expression > > E;
+      std::vector< Expression > v;
       Expression A;
       Expression in;
       Expression out;
@@ -2123,8 +2124,11 @@ namespace PETSc {
           const E_Array* Ex = dynamic_cast< const E_Array* >(args[1].LeftValue( ));
           ffassert(EA->size( ) == Ex->size( ) && EA->size( ));
           E.reserve(EA->size( ));
-          for (int i = 0; i < EA->size( ); ++i)
+          v.reserve(EA->size( ));
+          for (int i = 0; i < EA->size( ); ++i) {
             E.emplace_back(to< Type* >((*EA)[i]), to< Storage< PetscScalar >* >((*Ex)[i]));
+            v.emplace_back(CastTo< KN_< PetscScalar > >((*Ex)[i]));
+          }
         }
         out = to< Storage< PetscScalar >* >(args[2]);
       }
@@ -2199,6 +2203,11 @@ namespace PETSc {
             if (j == E.size( ) - 1)
               ffassert(ptOut->N() == std::distance(static_cast< PetscScalar* >(*ptOut), pt) ||
                        (!inverse && ptOut->N() == sum));
+          }
+          if(c == 2) {
+            KN_<PetscScalar> view = GetAny<KN_<PetscScalar>>((*(v[j]))(stack));
+            if(view.operator PetscScalar*() != ptIn->operator PetscScalar*())
+              view = *ptIn;
           }
         }
       }
