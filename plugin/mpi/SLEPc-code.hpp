@@ -200,7 +200,6 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
             PetscBool isType;
             MatGetType(ptA->_petsc, &type);
             PetscStrcmp(type, MATNEST, &isType);
-            PetscInt bs;
             PetscInt m;
             if(!codeA) {
                 Type* ptB = (c == 0 ? GetAny<Type*>((*B)(stack)) : NULL);
@@ -208,19 +207,16 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                     EPSSetOperators(eps, ptA->_petsc, c == 0 && ptB ? ptB->_petsc : NULL);
                 else if(std::is_same<SType, SVD>::value)
                     SVDSetOperator(svd, ptA->_petsc);
-                if(!ptA->_A) {
-                    MatGetBlockSize(ptA->_petsc, &bs);
+                if(!ptA->_A)
                     MatGetLocalSize(ptA->_petsc, &m, NULL);
-                }
             }
             else {
-                MatGetBlockSize(ptA->_petsc, &bs);
                 MatGetLocalSize(ptA->_petsc, &m, NULL);
                 PetscInt M;
                 MatGetSize(ptA->_petsc, &M, NULL);
                 if(!std::is_same<SType, NEP>::value) {
                     PetscNew(&user);
-                    user->mat = new typename eigensolver<Type, K, typename std::conditional<std::is_same<SType, NEP>::value, EPS, SType>::type>::MatF_O(m * bs, stack, codeA);
+                    user->mat = new typename eigensolver<Type, K, typename std::conditional<std::is_same<SType, NEP>::value, EPS, SType>::type>::MatF_O(m, stack, codeA);
                     MatCreateShell(PetscObjectComm((PetscObject)ptA->_petsc), m, m, M, M, user, &S);
                     MatShellSetOperation(S, MATOP_MULT, (void (*)(void))MatMult_User<Type, K, typename std::conditional<std::is_same<SType, NEP>::value, EPS, SType>::type>);
                     if(std::is_same<SType, EPS>::value)
@@ -337,9 +333,9 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 if(rvectors && !isType)
                     rvectors->resize(nconv);
                 if(array)
-                    array->resize(!codeA && !isType && ptA->_A ? ptA->_A->getDof() : m * bs, nconv);
+                    array->resize(!codeA && !isType && ptA->_A ? ptA->_A->getDof() : m, nconv);
                 if(rarray)
-                    rarray->resize(!codeA && !isType && ptA->_A ? ptA->_A->getDof() : m * bs, nconv);
+                    rarray->resize(!codeA && !isType && ptA->_A ? ptA->_A->getDof() : m, nconv);
                 Vec xr, xi;
                 PetscInt n;
                 if(eigenvectors || array || rvectors || rarray) {
@@ -394,11 +390,11 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         }
                         if(codeA || isType || !ptA->_A) {
                             if(array) {
-                                KN<K> cpy(m * bs, pt);
+                                KN<K> cpy(m, pt);
                                 (*array)(':', i) = cpy;
                             }
                             if(rarray) {
-                                KN<K> cpy(m * bs, pti);
+                                KN<K> cpy(m, pti);
                                 (*array)(':', i) = cpy;
                             }
                         }

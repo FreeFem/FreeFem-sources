@@ -1573,7 +1573,7 @@ namespace PETSc {
                             PetscInt m, PetscInt n, PetscInt bs, T* ptIn, U* ptOut, bool inverse) {
     PetscScalar* out;
     if (!inverse) {
-      resize(ptOut, m ? m * bs : n, ptIn->M());
+      resize(ptOut, m ? m : n, ptIn->M());
       out = ptOut->operator PetscScalar*();
       if (last - first) {
         for(int i = 0; i < ptIn->M(); ++i) {
@@ -2165,41 +2165,32 @@ namespace PETSc {
       for (int j = 0; j < E.size( ); ++j) {
         Type* ptA = GetAny< Type* >((*(E[j].first))(stack));
         if (ptA && (ptA->_last - ptA->_first || (inverse && ptA->_num))) {
-          PetscInt bs;
-          MatType type;
-          MatGetType(ptA->_petsc, &type);
-          PetscBool isNotBlock;
-          PetscStrcmp(type, MATMPIAIJ, &isNotBlock);
-          if (isNotBlock)
-            bs = 1;
-          else
-            MatGetBlockSize(ptA->_petsc, &bs);
           PetscInt m;
           MatGetLocalSize(ptA->_petsc, &m, NULL);
           Storage< PetscScalar >* ptIn = GetAny< Storage< PetscScalar >* >((*(E[j].second))(stack));
           if (!inverse) ffassert(ptIn->N() == ptA->_A->getDof());
           if (c != 2) {
-            if (inverse) ffassert(ptOut->N() == bs * m);
+            if (inverse) ffassert(ptOut->N() == m);
             changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getDof(),
-                                 bs, ptIn, ptOut, inverse);
+                                 1, ptIn, ptOut, inverse);
           } else {
-            sum += bs * m;
+            sum += m;
             if (ptOut->N() < sum && !inverse) {
               ffassert(ptIn->M() == 1);
               ffassert(ptOut->M() == 1);
               PETSc::resize(ptOut, sum, ptIn->M());
-              pt = *ptOut + sum - bs * m;
+              pt = *ptOut + sum - m;
             }
-            KN_< PetscScalar > ptOutShift(pt, bs * m);
+            KN_< PetscScalar > ptOutShift(pt, m);
             changeNumbering_func(ptA->_num, ptA->_first, ptA->_last, m, ptA->_A->getDof(),
-                                 bs, ptIn, &ptOutShift, inverse);
+                                 1, ptIn, &ptOutShift, inverse);
           }
           if (inverse && nargs[1] && GetAny< bool >((*nargs[1])(stack))) {
             for(int i = 0; i < ptIn->M(); ++i)
               ptA->_A->exchange(*ptIn + i * ptIn->N());
           }
           if (c == 2) {
-            pt += bs * m;
+            pt += m;
             if (j == E.size( ) - 1)
               ffassert(ptOut->N() == std::distance(static_cast< PetscScalar* >(*ptOut), pt) ||
                        (!inverse && ptOut->N() == sum));
@@ -2272,18 +2263,11 @@ namespace PETSc {
       else
         C = A->_petsc;
       Mat x, y;
-      PetscInt n, m, bs, N, M;
+      PetscInt n, m, N, M;
       MatGetLocalSize(A->_petsc, &n, &m);
       MatGetSize(A->_petsc, &N, &M);
-      if (isType)
-        bs = 1;
-      else {
-        MatGetBlockSize(A->_petsc, &bs);
-        N *= bs;
-        M *= bs;
-      }
       MatCreate(PetscObjectComm((PetscObject)A->_petsc), &x);
-      MatSetSizes(x, P == 'T' || P == 'H' ? bs * n : bs * m, PETSC_DECIDE,
+      MatSetSizes(x, P == 'T' || P == 'H' ? n : m, PETSC_DECIDE,
                   P == 'T' || P == 'H' ? N : M, in->M( ));
       MatSetType(x, MATDENSE);
       {
@@ -2297,8 +2281,8 @@ namespace PETSc {
       MatAssemblyBegin(x, MAT_FINAL_ASSEMBLY);
       MatAssemblyEnd(x, MAT_FINAL_ASSEMBLY);
       if (P == 'T' || P == 'H') {
-        ffassert(in->N( ) == bs * n);
-        out->resize(bs * m, in->M( ));
+        ffassert(in->N( ) == n);
+        out->resize(m, in->M( ));
         if (P == 'T')
           MatTransposeMatMult(C, x, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &y);
         else {
@@ -2311,13 +2295,13 @@ namespace PETSc {
         }
         PetscScalar* array;
         MatDenseGetArray(y, &array);
-        if (array) std::copy_n(array, bs * m * in->M( ), &(out->operator( )(0, 0)));
+        if (array) std::copy_n(array, m * in->M( ), &(out->operator( )(0, 0)));
         MatDenseRestoreArray(y, &array);
       } else {
-        ffassert(in->N( ) == bs * m);
-        out->resize(bs * n, in->M( ));
+        ffassert(in->N( ) == m);
+        out->resize(n, in->M( ));
         MatCreate(PetscObjectComm((PetscObject)A->_petsc), &y);
-        MatSetSizes(y, P == 'T' || P == 'H' ? bs * m : bs * n, PETSC_DECIDE,
+        MatSetSizes(y, P == 'T' || P == 'H' ? m : n, PETSC_DECIDE,
                     P == 'T' || P == 'H' ? M : N, in->M( ));
         MatSetType(y, MATDENSE);
         int size;
@@ -2429,23 +2413,14 @@ namespace PETSc {
   template< class Type >
   long MatZeroRows(Type* const& A, KN< double >* const& ptRows) {
     if (A->_petsc) {
-      PetscInt bs;
-      MatType type;
-      MatGetType(A->_petsc, &type);
-      PetscBool isNotBlock;
-      PetscStrcmp(type, MATMPIAIJ, &isNotBlock);
-      if (isNotBlock)
-        bs = 1;
-      else
-        MatGetBlockSize(A->_petsc, &bs);
       PetscInt m;
       MatGetLocalSize(A->_petsc, &m, NULL);
-      ffassert(ptRows->n == bs * m);
+      ffassert(ptRows->n == m);
       std::vector< PetscInt > rows;
-      rows.reserve(bs * m);
+      rows.reserve(m);
       PetscInt start;
       MatGetOwnershipRange(A->_petsc, &start, NULL);
-      for (int i = 0; i < bs * m; ++i) {
+      for (int i = 0; i < m; ++i) {
         if (std::abs(ptRows->operator[](i)) > 1.0e-12) rows.emplace_back(start + i);
       }
       MatSetOption(A->_petsc, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
@@ -2634,18 +2609,11 @@ namespace PETSc {
       KNM< PetscScalar >* out = GetAny< KNM< PetscScalar >* >((*y)(stack));
       if (A) {
         Type* ptA = GetAny< Type* >((*A)(stack));
-        PetscInt m, bs, M;
-        MatGetLocalSize(ptA->_petsc, &m, NULL);
-        MatType type;
-        MatGetType(ptA->_petsc, &type);
         PetscBool isType;
-        PetscStrcmp(type, MATMPIAIJ, &isType);
-        if (isType)
-          bs = 1;
-        else
-          MatGetBlockSize(ptA->_petsc, &bs);
-        ffassert(in->N( ) == bs * m);
-        out->resize(bs * m, in->M( ));
+        PetscInt m, M;
+        MatGetLocalSize(ptA->_petsc, &m, NULL);
+        ffassert(in->N( ) == m);
+        out->resize(m, in->M( ));
         if (!ptA->_ksp) {
           KSPCreate(PetscObjectComm((PetscObject)ptA->_petsc), &ptA->_ksp);
           KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
@@ -2664,11 +2632,13 @@ namespace PETSc {
         if(isType) {
           MatGetSize(ptA->_petsc, &M, NULL);
           Mat B, C;
-          MatCreateDense(PetscObjectComm((PetscObject)ptA->_ksp), in->N( ), PETSC_DECIDE, bs * M, in->M(), &in->operator( )(0, 0), &B);
-          MatCreateDense(PetscObjectComm((PetscObject)ptA->_ksp), out->N( ), PETSC_DECIDE, bs * M, out->M(), &out->operator( )(0, 0), &C);
+          MatCreateDense(PetscObjectComm((PetscObject)ptA->_ksp), in->N( ), PETSC_DECIDE, M, in->M(), &in->operator( )(0, 0), &B);
+          MatCreateDense(PetscObjectComm((PetscObject)ptA->_ksp), out->N( ), PETSC_DECIDE, M, out->M(), &out->operator( )(0, 0), &C);
           int size;
           MPI_Comm_size(PetscObjectComm((PetscObject)ptA->_ksp), &size);
           if(size == 1) {
+              MatType type;
+              MatGetType(ptA->_petsc, &type);
               PetscStrcmp(type, MATMPIAIJ, &isType);
               if(isType) {
                   Mat Ad, Ac;
@@ -2688,7 +2658,7 @@ namespace PETSc {
         else
             ffassert(0);
 #else
-        HPDDM::PETScOperator op(ptA->_ksp, m * bs
+        HPDDM::PETScOperator op(ptA->_ksp, m
 #if PETSC_VERSION_LT(3, 13, 2)
                                                  , 1
 #endif
@@ -3811,15 +3781,9 @@ namespace PETSc {
         double timing = MPI_Wtime( );
         MatCreateVecs((*t)._petsc, &x, &y);
         PetscScalar* ptr;
-        PetscInt bs;
         MatType type;
-        MatGetType((*t)._petsc, &type);
         PetscBool isType;
-        PetscStrcmp(type, MATMPIAIJ, &isType);
-        if (isType)
-          bs = 1;
-        else
-          MatGetBlockSize((*t)._petsc, &bs);
+        MatGetType((*t)._petsc, &type);
         PetscStrcmp(type, MATNEST, &isType);
         PetscScalar* p = reinterpret_cast<PetscScalar*>(u->operator HPDDM::upscaled_type<PetscScalar>*());
         if (std::is_same< typename std::remove_reference< decltype(*t.A->_A) >::type,
@@ -3834,7 +3798,7 @@ namespace PETSc {
           else
             HPDDM::Subdomain< K >::template distributedVec< 0 >((*t)._num, (*t)._first, (*t)._last,
                                                                 p, ptr,
-                                                                static_cast<PetscInt>(u->n / bs), bs);
+                                                                static_cast<PetscInt>(u->n), 1);
           VecRestoreArray(x, &ptr);
           if ((*t)._ksp) {
             PetscBool nonZero;
@@ -3849,7 +3813,7 @@ namespace PETSc {
               else
                 HPDDM::Subdomain< K >::template distributedVec< 0 >(
                   (*t)._num, (*t)._first, (*t)._last, p, ptr,
-                  static_cast<PetscInt>(out->n / bs), bs);
+                  static_cast<PetscInt>(out->n), 1);
               VecRestoreArray(y, &ptr);
             }
           }
@@ -3857,7 +3821,7 @@ namespace PETSc {
         } else {
           VecSet(x, PetscScalar( ));
           Vec isVec;
-          VecCreateMPIWithArray(PETSC_COMM_SELF, bs, (*t)._A->getMatrix( )->_n,
+          VecCreateMPIWithArray(PETSC_COMM_SELF, 1, (*t)._A->getMatrix( )->_n,
                                 (*t)._A->getMatrix( )->_n, p, &isVec);
           VecScatterBegin((*t)._scatter, isVec, x, ADD_VALUES, SCATTER_REVERSE);
           VecScatterEnd((*t)._scatter, isVec, x, ADD_VALUES, SCATTER_REVERSE);
@@ -3900,11 +3864,11 @@ namespace PETSc {
             loopDistributedVec<1, 'N'>((*t)._petsc, (*t)._exchange, out, ptr);
           else
             HPDDM::Subdomain< K >::template distributedVec< 1 >((*t)._num, (*t)._first, (*t)._last, p,
-                                                                ptr, static_cast<PetscInt>(out->n / bs), bs);
+                                                                ptr, static_cast<PetscInt>(out->n), 1);
           VecRestoreArray(y, &ptr);
         } else {
           Vec isVec;
-          VecCreateMPIWithArray(PETSC_COMM_SELF, bs, (*t)._A->getMatrix( )->_n,
+          VecCreateMPIWithArray(PETSC_COMM_SELF, 1, (*t)._A->getMatrix( )->_n,
                                 (*t)._A->getMatrix( )->_n, p, &isVec);
           VecScatterBegin((*t)._scatter, y, isVec, INSERT_VALUES, SCATTER_FORWARD);
           VecScatterEnd((*t)._scatter, y, isVec, INSERT_VALUES, SCATTER_FORWARD);
@@ -3951,15 +3915,9 @@ namespace PETSc {
           else
             MatCreateVecs((*t)._petsc, &y, &x);
           VecGetArray(x, &ptr);
-          PetscInt bs;
           MatType type;
           MatGetType((*t)._petsc, &type);
           PetscBool isType;
-          PetscStrcmp(type, MATMPIAIJ, &isType);
-          if (isType)
-            bs = 1;
-          else
-            MatGetBlockSize((*t)._petsc, &bs);
           PetscScalar* p = reinterpret_cast<PetscScalar*>(u->operator HPDDM::upscaled_type<PetscScalar>*());
           PetscStrcmp(type, MATNEST, &isType);
           if (isType) {
@@ -3971,10 +3929,10 @@ namespace PETSc {
             if (!t->_cnum || N == 'T') {
               if (t->_num)
                 HPDDM::Subdomain< K >::template distributedVec< 0 >(
-                  t->_num, t->_first, t->_last, p, ptr, static_cast<PetscInt>(u->n / bs), bs);
+                  t->_num, t->_first, t->_last, p, ptr, static_cast<PetscInt>(u->n), 1);
             } else
               HPDDM::Subdomain< K >::template distributedVec< 0 >(
-                t->_cnum, t->_cfirst, t->_clast, p, ptr, static_cast<PetscInt>(u->n / bs), bs);
+                t->_cnum, t->_cfirst, t->_clast, p, ptr, static_cast<PetscInt>(u->n), 1);
           }
           VecRestoreArray(x, &ptr);
           if (N == 'T')
@@ -3991,10 +3949,10 @@ namespace PETSc {
             if (!t->_cnum || N == 'N') {
               if (t->_num)
                 HPDDM::Subdomain< K >::template distributedVec< 1 >(t->_num, t->_first, t->_last, p,
-                                                                    ptr, static_cast<PetscInt>(out->n / bs), bs);
+                                                                    ptr, static_cast<PetscInt>(out->n), 1);
             } else
               HPDDM::Subdomain< K >::template distributedVec< 1 >(t->_cnum, t->_cfirst, t->_clast, p,
-                                                                  ptr, static_cast<PetscInt>(out->n / bs), bs);
+                                                                  ptr, static_cast<PetscInt>(out->n), 1);
             if (t->_A)
               (*t)._A->exchange(p);
             else if (t->_exchange) {
