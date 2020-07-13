@@ -105,7 +105,7 @@ if(!NoGraphicWindow || usedARGV("-fglut") != -1) {
     }
 }// EOM
 
-macro partition(meshName, borderName, globalName, PhGlobal, VhGlobal, part, rank, size, s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs) {
+macro partition(meshName, borderName, globalName, PhGlobalPrivate, VhGlobalPrivate, part, rank, size, s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs) {
     int backupSM = searchMethod;
     searchMethod = 1;
     assert(level >= 1);
@@ -113,8 +113,8 @@ IFMACRO(!privateCreatePartition)
 IFMACRO(!privateCreateMat)
     intersection.resize(1);
     intersection[0].resize(0);
-    PhGlobal supp;
-    VhGlobal suppSmooth;
+    PhGlobalPrivate supp;
+    VhGlobalPrivate suppSmooth;
     {
         int constant = rank;
         for[i, v : supp[]] v = abs(part[][i] - constant) < 0.1;
@@ -198,19 +198,19 @@ ENDIFMACRO
                     borderName[i] = borderName[i + 1];
         }
     }
-    fespace VhLocal(meshName[level - 1], P1);
-    VhLocal[int] partitionIntersection(intersection[0].n);
-    VhLocal khi = max(2 * suppSmooth - 1.0, 0.0);
-    VhLocal sum = khi;
-    VhGlobal phi;
+    fespace VhLocalPrivate(meshName[level - 1], P1);
+    VhLocalPrivate[int] partitionIntersection(intersection[0].n);
+    VhLocalPrivate khi = max(2 * suppSmooth - 1.0, 0.0);
+    VhLocalPrivate sum = khi;
+    VhGlobalPrivate phi;
     part = part;
     int numberIntersection = 0;
     {
-        int[int] rest = restrict(VhLocal, VhGlobal, n2oNeighbor);
+        int[int] rest = restrict(VhLocalPrivate, VhGlobalPrivate, n2oNeighbor);
         n2oNeighbor.resize(0);
         mpiWaitAll(rq);
         for(int i = 0; i < intersection[0].n; ++i) {
-            PhGlobal suppPartition = abs(part - intersection[0][i]) < 0.1;
+            PhGlobalPrivate suppPartition = abs(part - intersection[0][i]) < 0.1;
             AddLayers(globalName, suppPartition[], overlap, phi[]);
             if(min(eps, epsTab[i]) > 0.0) {
                 if(intN(globalName)(phi) / min(eps, epsTab[i]) > 1.0e-10) {
@@ -231,8 +231,8 @@ IFMACRO(privateCreateMat)
     int numberIntersection = privateDmesh#meshName#intersectionDef.n - 1;
     intersection.resize(1 + level * numberIntersection);
     intersection[0].resize(numberIntersection);
-    fespace VhLocal(meshName[level - 1], P1);
-    VhLocal[int] partitionIntersection(numberIntersection);
+    fespace VhLocalPrivate(meshName[level - 1], P1);
+    VhLocalPrivate[int] partitionIntersection(numberIntersection);
     for(int i = 0; i < numberIntersection; ++i) {
         intersection[0][i] = privateDmesh#meshName#intersectionDef[0][i];
         partitionIntersection[i][] = privateDmesh#meshName#intersectionDef[1 + i];
@@ -243,7 +243,7 @@ IFMACRO(privateBuildDmesh)
     privateDmesh#meshName#intersectionDef[0].resize(numberIntersection);
     for(int i = 0; i < numberIntersection; ++i) {
         privateDmesh#meshName#intersectionDef[0][i] = intersection[0][i];
-        privateDmesh#meshName#intersectionDef[1 + i].resize(VhLocal.ndof);
+        privateDmesh#meshName#intersectionDef[1 + i].resize(VhLocalPrivate.ndof);
         privateDmesh#meshName#intersectionDef[1 + i] = partitionIntersection[i][];
     }
 ENDIFMACRO
@@ -367,7 +367,7 @@ ENDIFMACRO
         numberIntersection -= skip.n;
         intersection[0].resize(numberIntersection);
         if(fakeInterface != -111111 || overlap != 1) {
-            PhGlobal suppPartition = khi > 0.1;
+            PhGlobalPrivate suppPartition = khi > 0.1;
             AddLayers(globalName, suppPartition[], 1, phi[]);
             borderName[0] = trunc(globalName, phi > 0.001 && phi < 0.501, label = (abs(fakeInterface) + 1) * 100);
         }
@@ -385,13 +385,13 @@ IFMACRO(vectorialfe)
 ENDIFMACRO
 ENDIFMACRO
 IFMACRO(privateCreatePartition)
-    fespace VhLocal(meshName[level - 1], P1);
+    fespace VhLocalPrivate(meshName[level - 1], P1);
 IFMACRO(!privateCreateMat)
-    VhLocal khi;
+    VhLocalPrivate khi;
 ENDIFMACRO
 ENDIFMACRO
 IFMACRO(privateCreateMat)
-    VhLocal khi;
+    VhLocalPrivate khi;
     khi[] = privateDmesh#meshName#khiDef[0];
 ENDIFMACRO
     fespace WhPart(meshName[level - 1], PkPart);
@@ -400,8 +400,8 @@ ENDIFMACRO
     if((WhPart.ndof % meshName[level - 1].nt) == 0) {
         int constant = rank;
 IFMACRO(privateCreateMat)
-        fespace PhLocal(meshName[level - 1], P0);
-        PhLocal partLocal;
+        fespace PhLocalPrivate(meshName[level - 1], P0);
+        PhLocalPrivate partLocal;
         partLocal[] = privateDmesh#meshName#khiDef[1];
         defPart(func2vec) = initPart(abs(partLocal - constant) < 0.1);
 ENDIFMACRO
@@ -419,8 +419,8 @@ ENDIFMACRO
 IFMACRO(!privateCreatePartition)
 IFMACRO(!privateCreateMat)
 IFMACRO(privateBuildDmesh)
-    fespace PhLocal(meshName[level - 1], P0);
-    PhLocal partLocal;
+    fespace PhLocalPrivate(meshName[level - 1], P0);
+    PhLocalPrivate partLocal;
     partLocal = part;
     privateDmesh#meshName#khiDef[1].resize(partLocal[].n);
     privateDmesh#meshName#khiDef[1] = partLocal[];
@@ -787,20 +787,20 @@ ENDIFMACRO
     real timerPartition = mpiWtime();
     if(mpiSize(comm) > 1 && !excluded) {
         meshN ThGlobal = Th[level - 1];
-        fespace PhGlobal(ThGlobal, P0);
-        fespace VhGlobal(ThGlobal, P1);
-        PhGlobal partGlobal;
+        fespace PhGlobalPrivate(ThGlobal, P0);
+        fespace VhGlobalPrivate(ThGlobal, P1);
+        PhGlobalPrivate partGlobal;
 IFMACRO(!privateReconstructDmesh)
-        if(userPartitioning.n != PhGlobal.ndof || labPeriodic.n > 0) {
+        if(userPartitioning.n != PhGlobalPrivate.ndof || labPeriodic.n > 0) {
             timerPartition = mpiWtime();
             meshN ThGlobalPeriodic;
             if(labPeriodic.n > 0) {
-                VhGlobal marker;
+                VhGlobalPrivate marker;
                 for(int i = 0; i < labPeriodic.n; ++i) {
                     varf vMarker(u, v) = on(labPeriodic[i], u = 1.0);
-                    marker[] += vMarker(0, VhGlobal, tgv = -1);
+                    marker[] += vMarker(0, VhGlobalPrivate, tgv = -1);
                 }
-                PhGlobal partPeriodic = marker > 0.1;
+                PhGlobalPrivate partPeriodic = marker > 0.1;
                 while(1) {
                     AddLayers(ThGlobal, partPeriodic[], 1 + overlap, marker[]);
                     partPeriodic = marker > 0.001;
@@ -864,10 +864,10 @@ ENDIFMACRO
 IFMACRO(privateBuildDmesh)
         NewMacro defP1(i)i EndMacro
         NewMacro initP1(i)i EndMacro
-        partition(Th, ThBorder, ThGlobal, PhGlobal, VhGlobal, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, DTab, P, intersection, comm, fakeInterface, PkPart, defP1, initP1, bs)
+        partition(Th, ThBorder, ThGlobal, PhGlobalPrivate, VhGlobalPrivate, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, DTab, P, intersection, comm, fakeInterface, PkPart, defP1, initP1, bs)
 ENDIFMACRO
 IFMACRO(!privateBuildDmesh)
-        partition(Th, ThBorder, ThGlobal, PhGlobal, VhGlobal, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, DTab, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs)
+        partition(Th, ThBorder, ThGlobal, PhGlobalPrivate, VhGlobalPrivate, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, DTab, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs)
 ENDIFMACRO
     }
     else if(mpiSize(comm) == 1) {

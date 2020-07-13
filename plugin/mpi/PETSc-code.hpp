@@ -2628,6 +2628,9 @@ namespace PETSc {
           isType = PETSC_FALSE;
 #endif
         }
+#if PETSC_VERSION_GE(3, 14, 0)
+        isType = PETSC_TRUE;
+#endif
 #if PETSC_VERSION_GT(3, 13, 1) && defined(PETSC_HAVE_HPDDM)
         if(isType) {
           MatGetSize(ptA->_petsc, &M, NULL);
