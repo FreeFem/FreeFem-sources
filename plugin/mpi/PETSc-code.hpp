@@ -2028,11 +2028,11 @@ namespace PETSc {
     return 0L;
   }
 
-  template< class Type >
+  template< class Type, unsigned short O >
   class view_Op : public E_F0mps {
    public:
     Expression A;
-    static const int n_name_param = 2;
+    static const int n_name_param = 3;
     static basicAC_F0::name_and_type name_param[];
     Expression nargs[n_name_param];
     view_Op(const basicAC_F0& args, Expression param1) : A(param1) {
@@ -2041,50 +2041,72 @@ namespace PETSc {
 
     AnyType operator( )(Stack stack) const;
   };
-  template< class Type >
-  basicAC_F0::name_and_type view_Op< Type >::name_param[] = {
-    {"object", &typeid(std::string*)},
-    {"format", &typeid(std::string*)}
+  template< class Type, unsigned short O >
+  basicAC_F0::name_and_type view_Op< Type, O >::name_param[] = {
+    {!std::is_same<Type, KNM<PetscScalar>>::value && !O ? "object" : "communicator", !std::is_same<Type, KNM<PetscScalar>>::value && !O ? &typeid(std::string*) : &typeid(pcommworld)},
+    {"format", &typeid(std::string*)},
+    {"name", &typeid(std::string*)}
   };
-  template< class Type >
+  template< class Type, unsigned short O >
   class view : public OneOperator {
    public:
     view( ) : OneOperator(atype< long >( ), atype< Type* >( )) {}
 
     E_F0* code(const basicAC_F0& args) const {
-      return new view_Op< Type >(args, t[0]->CastTo(args[0]));
+      return new view_Op< Type, O >(args, t[0]->CastTo(args[0]));
     }
   };
-  template< class Type >
-  AnyType view_Op< Type >::operator( )(Stack stack) const {
-    Type* ptA = GetAny< Type* >((*A)(stack));
-    std::string* object = nargs[0] ? GetAny< std::string* >((*nargs[0])(stack)) : NULL;
-    if (!object || object->compare("mat") == 0) {
-      std::string* type = nargs[1] ? GetAny< std::string* >((*nargs[1])(stack)) : NULL;
+  template< class Type, unsigned short O, typename std::enable_if<!std::is_same<Type, KNM<PetscScalar>>::value>::type* = nullptr >
+  AnyType view_dispatched(Type* const& ptA, std::string const& o, std::string* const& type, std::string* const& name, MPI_Comm const& comm) {
+    if (o.size() == 0 || o.compare("MAT") == 0) {
       bool pop = false;
+      PetscViewer viewer = NULL;
       if(type) {
           if(type->compare("matlab") == 0) {
-              PetscViewerPushFormat(PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_petsc)), PETSC_VIEWER_ASCII_MATLAB);
+              if(name) PetscViewerASCIIOpen(!O ? PetscObjectComm((PetscObject)ptA->_petsc) : comm, name->c_str(), &viewer);
+              else viewer = PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_petsc));
+              PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
               pop = true;
           }
           else if(type->compare("info") == 0) {
-              PetscViewerPushFormat(PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_petsc)), PETSC_VIEWER_ASCII_INFO);
+              ffassert(!O);
+              if(name) PetscViewerASCIIOpen(!O ? PetscObjectComm((PetscObject)ptA->_petsc) : comm, name->c_str(), &viewer);
+              else viewer = PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_petsc));
+              PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_INFO);
+              pop = true;
+          }
+          else if(type->compare("binary") == 0) {
+              if(name) PetscViewerBinaryOpen(!O ? PetscObjectComm((PetscObject)ptA->_petsc) : comm, name->c_str(), O ? FILE_MODE_READ : FILE_MODE_WRITE, &viewer);
+              else viewer = PETSC_VIEWER_BINARY_(PetscObjectComm((PetscObject)ptA->_petsc));
+              PetscViewerPushFormat(viewer, PETSC_VIEWER_NATIVE);
               pop = true;
           }
           else if(type->compare("draw") == 0) {
+              ffassert(!O);
               MatView(ptA->_petsc, PETSC_VIEWER_DRAW_WORLD);
               return 0L;
           }
       }
-      MatView(ptA->_petsc, PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_petsc)));
+      if(!viewer && name) PetscViewerASCIIOpen(PetscObjectComm((PetscObject)ptA->_petsc), name->c_str(), &viewer);
+      if(!O)
+          MatView(ptA->_petsc, viewer ? viewer : PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_petsc)));
+      else {
+          ffassert(viewer);
+          ptA->dtor( );
+          MatCreate(comm, &ptA->_petsc);
+          MatLoad(ptA->_petsc, viewer);
+      }
       if(pop)
           PetscViewerPopFormat(PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_petsc)));
+      if(name)
+          PetscViewerDestroy(&viewer);
     }
     else {
+      ffassert(!O);
       if (ptA->_ksp) {
-        if (object->compare("ksp") == 0)
+        if (o.compare("KSP") == 0)
           KSPView(ptA->_ksp, PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_ksp)));
-        else if (object->compare("pc") == 0) {
+        else if (o.compare("PC") == 0) {
           PC pc;
           KSPGetPC(ptA->_ksp, &pc);
           PCView(pc, PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_ksp)));
@@ -2092,6 +2114,76 @@ namespace PETSc {
       }
     }
     return 0L;
+  }
+  template< class Type, unsigned short O, typename std::enable_if<std::is_same<Type, KNM<PetscScalar>>::value>::type* = nullptr >
+  AnyType view_dispatched(Type* const& ptA, std::string const& o, std::string* const& type, std::string* const& name, MPI_Comm const& comm) {
+    bool pop = false;
+    PetscViewer viewer = NULL;
+    Mat A;
+    if(!O)
+        MatCreateDense(comm, ptA->N( ), PETSC_DECIDE, PETSC_DECIDE, ptA->M(), &ptA->operator( )(0, 0), &A);
+    else
+        MatCreate(comm, &A);
+    if(type) {
+        if(type->compare("matlab") == 0) {
+            if(name) PetscViewerASCIIOpen(PetscObjectComm((PetscObject)A), name->c_str(), &viewer);
+            else viewer = PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)A));
+            PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
+            pop = true;
+        }
+        else if(type->compare("info") == 0) {
+            ffassert(!O);
+            if(name) PetscViewerASCIIOpen(PetscObjectComm((PetscObject)A), name->c_str(), &viewer);
+            else viewer = PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)A));
+            PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_INFO);
+            pop = true;
+        }
+        else if(type->compare("binary") == 0) {
+            if(name) PetscViewerBinaryOpen(PetscObjectComm((PetscObject)A), name->c_str(), O ? FILE_MODE_READ : FILE_MODE_WRITE, &viewer);
+            else viewer = PETSC_VIEWER_BINARY_(PetscObjectComm((PetscObject)A));
+            PetscViewerPushFormat(viewer, PETSC_VIEWER_NATIVE);
+            pop = true;
+        }
+        else if(type->compare("draw") == 0) {
+            ffassert(!O);
+            MatView(A, PETSC_VIEWER_DRAW_WORLD);
+            MatDestroy(&A);
+            return 0L;
+        }
+    }
+    if(!viewer && name) PetscViewerASCIIOpen(PetscObjectComm((PetscObject)A), name->c_str(), &viewer);
+    if(!O)
+        MatView(A, viewer ? viewer : PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)A)));
+    else {
+        ffassert(viewer);
+        MatSetType(A, MATDENSE);
+        MatLoad(A, viewer);
+        PetscInt m, N;
+        MatGetLocalSize(A, &m, NULL);
+        MatGetSize(A, NULL, &N);
+        ptA->resize(m, N);
+        PetscScalar* array;
+        MatDenseGetArray(A, &array);
+        if (array) std::copy_n(array, m * N, &(ptA->operator( )(0, 0)));
+        MatDenseRestoreArray(A, &array);
+    }
+    if(pop)
+        PetscViewerPopFormat(PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)A)));
+    if(name)
+        PetscViewerDestroy(&viewer);
+    MatDestroy(&A);
+    return 0L;
+  }
+  template< class Type, unsigned short O >
+  AnyType view_Op< Type, O >::operator( )(Stack stack) const {
+    Type* ptA = GetAny< Type* >((*A)(stack));
+    std::string* object = !std::is_same<Type, KNM<PetscScalar>>::value && !O && nargs[0] ? GetAny< std::string* >((*nargs[0])(stack)) : NULL;
+    MPI_Comm comm = (std::is_same<Type, KNM<PetscScalar>>::value || O) && nargs[0] ? *static_cast< MPI_Comm* >(GetAny< pcommworld >((*nargs[0])(stack))) : PETSC_COMM_WORLD;
+    std::string o(object ? *object : "");
+    std::transform(o.begin(), o.end(), o.begin(), ::toupper);
+    std::string* type = nargs[1] ? GetAny< std::string* >((*nargs[1])(stack)) : NULL;
+    std::string* name = nargs[2] ? GetAny< std::string* >((*nargs[2])(stack)) : NULL;
+    return view_dispatched<Type, O>(ptA, o, type, name, comm);
   }
 
   template< class Type, template<class> class Storage >
@@ -4012,10 +4104,10 @@ namespace PETSc {
 
     TheOperators->Add("<-", new PETSc::initCSR< HpSchur< PetscScalar > >);
 
-    Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >( ));
-    Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >(1));
-    Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >(1, 1));
-    Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat, KNM >( ));
+    Global.Add("ChangeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >( ));
+    Global.Add("ChangeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >(1));
+    Global.Add("ChangeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >(1, 1));
+    Global.Add("ChangeNumbering", "(", new PETSc::changeNumbering< Dmat, KNM >( ));
     Global.Add("MatMult", "(",
                new OneOperator3_< long, Dmat*, KN< PetscScalar >*, KN< PetscScalar >* >(
                  PETSc::MatMult< 'N' >));
@@ -4054,26 +4146,44 @@ namespace PETSc {
     Global.Add("TSSolve", "(", new PETSc::NonlinearSolver< Dmat >(1, 1));
     Global.Add("TSSolve", "(", new PETSc::NonlinearSolver< Dmat >(1, 1, 1));
     Global.Add("TaoSolve", "(", new PETSc::NonlinearSolver< Dmat >(4));
-    Global.Add("globalNumbering", "(",
+    Global.Add("GlobalNumbering", "(",
                new OneOperator2_< long, Dmat*, KN< long >* >(PETSc::globalNumbering< Dmat >));
-    Global.Add("globalNumbering", "(",
+    Global.Add("GlobalNumbering", "(",
                new OneOperator2_< long, Dmat*, KN< double >* >(PETSc::globalNumbering< Dmat >));
-    Global.Add("globalNumbering", "(",
+    Global.Add("GlobalNumbering", "(",
                new OneOperator2_< long, Dbddc*, KN< long >* >(PETSc::globalNumbering< Dbddc >));
     Global.Add("ParMmgCommunicators", "(",
                new OneOperator4_< long, Dmat*, KN< double >*, KN< long >*, KN< KN< long >>*>(PETSc::ParMmgCommunicators< Dmat >));
-    Global.Add("changeSchur", "(",
+    Global.Add("ChangeSchur", "(",
                new OneOperator3_< long, Dmat*, KN< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> > >*, KN< double >* >(
                  PETSc::changeSchur));
-    Global.Add("view", "(", new PETSc::view< Dmat >);
+    Global.Add("ObjectView", "(", new PETSc::view< Dmat, 0 >);
+    Global.Add("ObjectView", "(", new PETSc::view< KNM<PetscScalar>, 0 >);
+    Global.Add("MatLoad", "(", new PETSc::view< Dmat, 1 >);
+    Global.Add("MatLoad", "(", new PETSc::view< KNM<PetscScalar>, 1 >);
     Global.Add(
-      "originalNumbering", "(",
+      "OriginalNumbering", "(",
       new OneOperator3_< long, Dbddc*, KN< PetscScalar >*, KN< long >* >(PETSc::originalNumbering));
     Global.Add("renumber", "(",
                new OneOperator3_< long, KN< PetscScalar >*, KN< long >*, KN< PetscScalar >* >(
                  PETSc::renumber));
     Global.Add("set", "(", new PETSc::setOptions< Dbddc >( ));
     addInv< Dbddc, PETSc::InvPETSc, KN< PetscScalar >, PetscScalar >( );
+#ifdef GENERATE_DEPRECATED_FUNCTIONS
+    Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >( ));
+    Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >(1));
+    Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat, KN >(1, 1));
+    Global.Add("changeNumbering", "(", new PETSc::changeNumbering< Dmat, KNM >( ));
+    Global.Add("globalNumbering", "(",
+               new OneOperator2_< long, Dmat*, KN< long >* >(PETSc::globalNumbering< Dmat >));
+    Global.Add("globalNumbering", "(",
+               new OneOperator2_< long, Dmat*, KN< double >* >(PETSc::globalNumbering< Dmat >));
+    Global.Add("globalNumbering", "(",
+               new OneOperator2_< long, Dbddc*, KN< long >* >(PETSc::globalNumbering< Dbddc >));
+    Global.Add(
+      "originalNumbering", "(",
+      new OneOperator3_< long, Dbddc*, KN< PetscScalar >*, KN< long >* >(PETSc::originalNumbering));
+#endif
   }
   template<class K, typename std::enable_if<!std::is_same<K, HPDDM::upscaled_type<K>>::value>::type* = nullptr>
   static void init() { }
@@ -4519,14 +4629,14 @@ static void Init_PETSc( ) {
   Global.Add("exchange", "(", new exchangeIn< Dmat, PetscScalar >);
   Global.Add("exchange", "(", new exchangeInOut< Dmat, PetscScalar >);
   PETSc::init<PetscReal>();
-  Global.Add("changeOperator", "(", new PETSc::changeOperator< Dmat >( ));
-  Global.Add("changeOperator", "(", new PETSc::changeOperator< Dmat >(1));
+  Global.Add("ChangeOperator", "(", new PETSc::changeOperator< Dmat >( ));
+  Global.Add("ChangeOperator", "(", new PETSc::changeOperator< Dmat >(1));
   TheOperators->Add("=", new OneOperator2_< Dmat*, Dmat*, Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >(PETSc::changeOperatorSimple));
   TheOperators->Add("=", new OneOperator2_< Dmat*, Dmat*, Dmat* >(PETSc::changeOperatorSimple));
   Global.Add("PetscLogStagePush", "(", new OneOperator1_< long, string* >(PETSc::stagePush));
   Global.Add("PetscLogStagePop", "(", new OneOperator0< long >(PETSc::stagePop));
   Global.Add("PetscMemoryGetCurrentUsage", "(", new OneOperator0< double >(PETSc::memoryGetCurrentUsage));
-  Global.Add("hasType", "(", new OneOperator2_< long, string*, string* >(PETSc::hasType));
+  Global.Add("HasType", "(", new OneOperator2_< long, string*, string* >(PETSc::hasType));
   Init_Common( );
   Dcl_Type< PETSc::DMPlex* >(Initialize< PETSc::DMPlex >, DeleteDTOR< PETSc::DMPlex >);
   zzzfff->Add("DM", atype< PETSc::DMPlex* >( ));
@@ -4535,6 +4645,10 @@ static void Init_PETSc( ) {
   TheOperators->Add("=", new PETSc::DMPlexToFF);
   TheOperators->Add("<-", new PETSc::DMPlexToFF(1));
   TheOperators->Add("=", new PETSc::DMPlexToFF(1));
+#ifdef GENERATE_DEPRECATE_FUNCTIONS
+  Global.Add("changeOperator", "(", new PETSc::changeOperator< Dmat >( ));
+  Global.Add("changeOperator", "(", new PETSc::changeOperator< Dmat >(1));
+#endif
 }
 #ifndef PETScandSLEPc
 LOADFUNC(Init_PETSc)

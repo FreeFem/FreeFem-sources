@@ -53,7 +53,7 @@ func real[int] prodFuncTranspose(real[int]& utp) {
     return utp;
 }
 Mat MF(A, B, prodFunc, transpose = prodFuncTranspose);
-view(MF, format = "info");
+ObjectView(MF, format = "info");
 real[int] valuesMF;
 SVDSolve(MF, sparams = "-svd_largest -svd_view_values -svd_type cyclic -svd_nsv 10", values = valuesMF);
 values -= valuesMF;

@@ -40,7 +40,7 @@ func int funcJ(real[int]& inPETSc) {
     return 0;
 }
 set(A);
-if(hasType("PC", "hpddm")) {
+if(HasType("PC", "hpddm")) {
     bool stage = usedARGV("-stage") != -1;
     for(int i = 0; i < 3; ++i) {
         string params;

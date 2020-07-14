@@ -7,6 +7,7 @@
 #include <AFunction_ext.hpp>
 #include <array_tlp.hpp>
 #include <unordered_map>
+#define GENERATE_DEPRECATED_FUNCTIONS
 
 #ifdef WITH_mkl
 #define HPDDM_MKL 1

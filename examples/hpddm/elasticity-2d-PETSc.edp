@@ -63,14 +63,14 @@ real alpha = 1.0e+1;
 meshN ThMoved = movemesh(Th, [x + alpha * u, y + alpha * uB]);
 u[] = mpirank;
 plotMPI(ThMoved, u, vectorialfe, def1, real, cmm = "Global moved solution")
-if(hasType("PC", "hpddm")) {
+if(HasType("PC", "hpddm")) {
     u[] = 0;
     set(A, sparams = "-pc_type hpddm -pc_hpddm_coarse_p 2 -pc_hpddm_levels_1_eps_nev 20 -pc_hpddm_levels_1_sub_pc_type lu -pc_hpddm_define_subdomains -pc_hpddm_has_neumann -pc_hpddm_levels_1_pc_type asm -ksp_monitor");
     u[] = A^-1 * rhs;
 }
-if(hasType("PC", "fancy_bug")) {
+if(HasType("PC", "fancy_bug")) {
     exit(1);
 }
-if(hasType("KSP", "fancy_bug_bis")) {
+if(HasType("KSP", "fancy_bug_bis")) {
     exit(2);
 }

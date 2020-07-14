@@ -52,7 +52,7 @@ int pPETSc;
     Mat dB(dA, dC, B);
     Mat dS = [[dA , dB],
               [dB', 0 ]];
-    view(dS);
+    ObjectView(dS);
     set(dS, sparams = "-pc_type lu");
     real[int] rhs(rhsV.n + VhP.ndof);
     rhs(0:rhsV.n - 1) = rhsV;
@@ -84,6 +84,18 @@ int pPETSc;
     pPETSc = rhsPETScP.n;
     real[int] rhsPETSc = [rhsPETScV,
                           rhsPETScP];
+    {
+        ObjectView(dF, format = "binary", name = "stokes-mat-binary");
+        real[int, int] rhsView(rhsPETSc.n, 1);
+        rhsView(:, 0) = rhsPETSc;
+        ObjectView(rhsView, format = "binary", name = "stokes-rhs-binary");
+        if(0) { // very costly
+            ObjectView(dF, format = "ascii", name = "stokes-mat-ascii");
+            ObjectView(dF, format = "matlab", name = "stokes-mat-matlab");
+            ObjectView(rhsView, format = "ascii", name = "stokes-rhs-ascii");
+            ObjectView(rhsView, format = "matlab", name = "stokes-rhs-matlab");
+        }
+    }
     KSPSolve(dF, rhsPETSc, sol);
     changeNumbering([dA, dC], [solV[], solP[]], sol, inverse = true, exchange = true);
     plotMPI(Th, def2(solV), PkV, def2, real, cmm = "Global velocity")
@@ -138,7 +150,7 @@ for(int i = 0; i < 2; ++i) {
     plotMPI(Th, solP, PkP, def1, real, cmm = "Global pressure with tgv = -1" + plus)
 }
 {
-    view(dS);
+    ObjectView(dS);
     real c = 20.0;
     real[int] v, vPETSc;
     v.resize(VhV.ndof);
@@ -148,11 +160,11 @@ for(int i = 0; i < 2; ++i) {
         Mat dSC = [[dA     , dB, vPETSc],
                    [dBT    , 0 , 0     ],
                    [vPETSc', 0 , c     ]];
-        view(dSC);
+        ObjectView(dSC);
     }
     {
         Mat dSC = [[dA     , vPETSc],
                    [vPETSc', c     ]];
-        view(dSC);
+        ObjectView(dSC);
     }
 }

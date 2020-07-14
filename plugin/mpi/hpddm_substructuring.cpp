@@ -605,10 +605,10 @@ void add() {
     map_type_of_map[make_pair(atype<Type<HPDDM::underlying_type<K>, U>*>(), atype<K*>())] = atype<Type<K, S>*>();
 
     TheOperators->Add("<-", new initDDM<Type<K, S>, K>);
-    Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>);
+    Global.Add("AttachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>);
     Global.Add("DDM", "(", new solveDDM<Type<K, S>, K>);
     Global.Add("renumber", "(", new renumber<Type<K, S>, K>);
-    Global.Add("originalNumbering", "(", new OneOperator3_<long, Type<K, S>*, KN<K>*, KN<long>*>(originalNumbering));
+    Global.Add("OriginalNumbering", "(", new OneOperator3_<long, Type<K, S>*, KN<K>*, KN<long>*>(originalNumbering));
     addInv<Type<K, S>, InvSubstructuring, KN<K>, K>();
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));
     Global.Add("exchange", "(", new exchangeInOut<Type<K, S>, K>);
@@ -621,6 +621,10 @@ void add() {
     int r;
     if(!zzzfff->InMotClef("pair", t, r) && std::is_same<K, HPDDM::underlying_type<K>>::value)
         zzzfff->Add("pair", atype<Pair<K>*>());
+#ifdef GENERATE_DEPRECATED_FUNCTIONS
+    Global.Add("originalNumbering", "(", new OneOperator3_<long, Type<K, S>*, KN<K>*, KN<long>*>(originalNumbering));
+    Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>);
+#endif
 }
 }
 

@@ -1,0 +1,15 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"
+
+Mat A;
+MatLoad(A, format = "binary", name = "stokes-mat-binary");
+ObjectView(A, format = "info");
+real[int, int] rhsView(1, 1);
+MatLoad(rhsView, format = "binary", name = "stokes-rhs-binary");
+real[int] rhs = rhsView.asarray;
+real[int] x(rhs.n);
+set(A, sparams = "-pc_type lu");
+KSPSolve(A, rhs, x);
+ObjectView(A, object = "ksp");

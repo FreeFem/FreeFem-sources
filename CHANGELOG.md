@@ -38,6 +38,7 @@ All notable changes to this project will be documented in this file.
 - add P2b, RT0, RT1 surface FE (P2bS, RT0S, RT1S))
 - add operator interpolate (2d->3d surface)
 - add operator x = A'\*b; where x, b are array and A 2 dim array (full matrix) and generate an error in case of b'\*A or b'\*A expression
+- function `MatLoad` to load a PETSc `Mat` from disk, see `examples/hpddm/MatLoad-PETSc.edp`
 
 ### Changed
 - moved Htool to its new GitHub location
@@ -46,8 +47,10 @@ All notable changes to this project will be documented in this file.
 - PETSc version 3.13.3
 - force `--with-cudac=0` in `make petsc-slepc`, see https://github.com/FreeFem/FreeFem-sources/issues/141
 - change DSL keyword P1dc3dL->P1dcL and P1dc3dS->P1dcS
+- rename `view`, `hasType`, `changeSchur` to respectively `ObjectView`, `HasType`, and `ChangeSchur`
 
 ### Deprecated
+- rename `changeNumbering`, `globalNumbering`, `originalNumbering`, `changeOperator`, `destroyRecycling`, and `attachCoarseOperator` to respectively `ChangeNumbering`, `GlobalNumbering`, `OriginalNumbering`, `ChangeOperator`, `DestroyRecycling`, and `AttachCoarseOperator`
 
 ### Removed
 - `augmentation` routine from the PETSc plugin

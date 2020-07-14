@@ -961,16 +961,16 @@ void add() {
     Global.Add("constructor", "(", new initDDM< Type< K, S >, K >(1, 1));
     Global.Add("constructor", "(", new initDDM< Type< K, S >, K >(1, 1, 1));
     TheOperators->Add("=", new OneOperator2_<Type<K, S>*, Type<K, S>*, Type<K, S>*>(Schwarz::changeOperatorSimple<Type<K, S>, K>));
-    Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>);
-    Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>(1));
+    Global.Add("AttachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>);
+    Global.Add("AttachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>(1));
     Global.Add("DDM", "(", new solveDDM<Type<K, S>, K>);
-    Global.Add("changeOperator", "(", new changeOperator<Type<K, S>, K>);
+    Global.Add("ChangeOperator", "(", new changeOperator<Type<K, S>, K>);
     Global.Add("set", "(", new set<Type<K, S>, K>);
     addProd<Type<K, S>, ProdSchwarz, KN<HPDDM::upscaled_type<K>>, K>();
     addInv<Type<K, S>, InvSchwarz, KN<HPDDM::upscaled_type<K>>, K>();
     addArray<Type<K, S>>();
     Global.Add("dmv", "(", new distributedMV<Type<K, S>, K>);
-    Global.Add("destroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(destroyRecycling<Type<K, S>, K>));
+    Global.Add("DestroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(destroyRecycling<Type<K, S>, K>));
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));
     Global.Add("exchange", "(", new exchangeIn<Type<K, S>, K>);
     Global.Add("exchange", "(", new exchangeInOut<Type<K, S>, K>);
@@ -981,7 +981,7 @@ void add() {
         Global.Add("IterativeMethod","(",new IterativeMethod<HPDDM::upscaled_type<K>, S>(1));
         Global.Add("IterativeMethod","(",new IterativeMethod<HPDDM::upscaled_type<K>, S>(1, 1, 1));
     }
-    Global.Add("globalNumbering", "(", new OneOperator2_<long, Type<K, S>*, KN<long>*>(globalNumbering<Type<K, S>>));
+    Global.Add("GlobalNumbering", "(", new OneOperator2_<long, Type<K, S>*, KN<long>*>(globalNumbering<Type<K, S>>));
 
     if(!exist_type<Pair<K>*>()) {
         Dcl_Type<Pair<K>*>(InitP<Pair<K>>, Destroy<Pair<K>>);
@@ -995,6 +995,13 @@ void add() {
     int r;
     if(!zzzfff->InMotClef("pair", t, r) && std::is_same<K, HPDDM::underlying_type<K>>::value)
         zzzfff->Add("pair", atype<Pair<K>*>());
+#ifdef GENERATE_DEPRECATED_FUNCTIONS
+    Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>);
+    Global.Add("attachCoarseOperator", "(", new attachCoarseOperator<Type<K, S>, K>(1));
+    Global.Add("changeOperator", "(", new changeOperator<Type<K, S>, K>);
+    Global.Add("destroyRecycling", "(", new OneOperator1_<bool, Type<K, S>*>(destroyRecycling<Type<K, S>, K>));
+    Global.Add("globalNumbering", "(", new OneOperator2_<long, Type<K, S>*, KN<long>*>(globalNumbering<Type<K, S>>));
+#endif
 }
 }
 

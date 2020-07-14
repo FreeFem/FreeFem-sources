@@ -30,5 +30,5 @@ fespace Vh(Th, Pk);
 A = vPb(Vh, Vh);
 Mat ANew;
 MatPtAP(A, P, ANew);
-view(A, format = "info");
-view(ANew, format = "info");
+ObjectView(A, format = "info");
+ObjectView(ANew, format = "info");
