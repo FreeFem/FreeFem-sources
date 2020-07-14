@@ -241,6 +241,7 @@ check_plugin=0; // no pluging to check ..
     if (i > 0) {
       char *dir = new char[l + 1];
       strcpy(dir, edpfilenamearg);
+      strcpy(fn,  edpfilenamearg+i+1);
       dir[i] = 0;
       int err = 0;
       if (verbosity > 1)
