@@ -21,8 +21,8 @@ real[int] F = vL(0, Wh);
 real[int] B = vb(0, Wh);
 real[int] pB, pF, pSol;
 A = vPb(Wh, Wh);
-changeNumbering(A, B, pB);
-changeNumbering(A, F, pF);
+ChangeNumbering(A, B, pB);
+ChangeNumbering(A, F, pF);
 
 Mat N = [[ A  , pB ],
          [ pB', 0  ]];
@@ -51,7 +51,7 @@ if(mpirank == 0) {
     if(mpirank == 0)
         pSol.resize(pSol.n - 1);
     Wh sol;
-    changeNumbering(A, sol[], pSol, inverse = true, exchange = true);
+    ChangeNumbering(A, sol[], pSol, inverse = true, exchange = true);
     macro params()cmm = "Global solution #2", wait = 1, dim = 3// EOM
     macro def(u)u//
     plotMPI(Th, sol, Pk, def, real, params)
@@ -66,7 +66,7 @@ if(mpirank == 0) {
     if(mpirank == 0)
         pSol.resize(pSol.n - 1);
     Wh sol;
-    changeNumbering(A, sol[], pSol, inverse = true, exchange = true);
+    ChangeNumbering(A, sol[], pSol, inverse = true, exchange = true);
     macro params()cmm = "Global solution #3", wait = 1, dim = 3// EOM
     macro def(u)u//
     plotMPI(Th, sol, Pk, def, real, params)

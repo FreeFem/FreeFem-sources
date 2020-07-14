@@ -35,17 +35,17 @@ varf vhJ(uh, vh) = int2d(Th)(dfalpha*(dx(uh)*dx(vh) + dy(uh)*dy(vh)) + ddfalpha*
     + on(1, 2, uh = 0);
 
 func real[int] funcRes(real[int]& inPETSc) {
-    changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
+    ChangeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
     alpha = dx(u)*dx(u) + dy(u)*dy(u);
     dfalpha = df(alpha);
     ddfalpha = 2 * ddf(alpha);
     real[int] v = vJ(0, Vh, tgv = -1);
     real[int] outPETSc;
-    changeNumbering(A, v, outPETSc);
+    ChangeNumbering(A, v, outPETSc);
     return outPETSc;
 }
 func int funcJ(real[int]& inPETSc) {
-    changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
+    ChangeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
     A = vhJ(Vh, Vh, tgv = -1);
     return 0;
 }
@@ -56,18 +56,18 @@ int step = 3;
 real[int] xPETSc;
 for(int i = 0; i < step; ++i) {
     xPETSc.resize(0);
-    changeNumbering(A, u[], xPETSc);
+    ChangeNumbering(A, u[], xPETSc);
     u[] = vC(0, Vh, tgv = -1);
     real[int] bPETSc, xuPETSc;
-    changeNumbering(A, u[], bPETSc);
+    ChangeNumbering(A, u[], bPETSc);
     {
         Vh xu = fu;
         plotMPI(Th, xu, Pk, def, real, cmm = "Upper bound")
-        changeNumbering(A, xu[], xuPETSc);
+        ChangeNumbering(A, xu[], xuPETSc);
     }
     SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, xu = xuPETSc, sparams = "-snes_monitor -snes_max_it " + (i != step - 1 ? 4 : 40) + " -ksp_converged_reason -snes_view -snes_vi_monitor -snes_type vinewtonrsls -snes_rtol 1.0e-6 -pc_type lu");
     if(i != step - 1) {
-        changeNumbering(A, u[], xPETSc, inverse = true, exchange = false);
+        ChangeNumbering(A, u[], xPETSc, inverse = true, exchange = false);
         fespace VhG(ThBackup, Pk);
         VhG uG, uReduce;
         uReduce = u;
@@ -89,5 +89,5 @@ for(int i = 0; i < step; ++i) {
         plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
     }
 }
-changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
+ChangeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
 plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

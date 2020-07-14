@@ -88,7 +88,7 @@ func complex[int] correctionExact(complex[int]& in) {
     return out;
 }
 if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) // two-level Schwarz methods
-    attachCoarseOperator(mpiCommWorld, A, correctionExact);
+    AttachCoarseOperator(mpiCommWorld, A, correctionExact);
 
 u[] = 0;
 u[] = A^-1 * rhs;
@@ -131,7 +131,7 @@ func complex[int] correctionInexact(complex[int]& in) {
     return out;
 }
 if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) // two-level Schwarz methods
-    attachCoarseOperator(mpiCommWorld, A, correctionInexact);
+    AttachCoarseOperator(mpiCommWorld, A, correctionInexact);
 else
     exit(0);
 

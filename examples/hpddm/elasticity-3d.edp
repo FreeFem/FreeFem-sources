@@ -76,19 +76,19 @@ pair ret;
     if(mpisize > 1 &&
        isSetOption("schwarz_coarse_correction")) { // two-level Schwarz methods
         if(excluded)
-            attachCoarseOperator(mpiCommWorld, A/*, A = noPen, B = overlapRestriction, threshold = 2. * h[].max / diam*/);
+            AttachCoarseOperator(mpiCommWorld, A/*, A = noPen, B = overlapRestriction, threshold = 2. * h[].max / diam*/);
         else {
             varf vPbNoPen(def(u), def(v)) = intN(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsilon(u)' * epsilon(v))) + on(1, u = 0.0, uB = 0.0, uC = 0.0);
             matrix<real> noPen = vPbNoPen(Wh, Wh, sym = 1);
             if(deflation == "geneo") // standard GenEO, no need for RHS -> deduced from LHS (Neumann matrix)
-                attachCoarseOperator(mpiCommWorld, A, A = noPen/*, threshold = 2. * h[].max / diam,*/, ret = ret);
+                AttachCoarseOperator(mpiCommWorld, A, A = noPen/*, threshold = 2. * h[].max / diam,*/, ret = ret);
             else if(deflation == "dtn") {
                 varf vMass(def(u), def(v)) = intN1(Th, fakeInterface)(u * v);
                 matrix<real> massMatrix = vMass(Wh, Wh, sym = 1);
-                attachCoarseOperator(mpiCommWorld, A, A = noPen, B = massMatrix, pattern = Opt/*, threshold = k,*/, ret = ret);
+                AttachCoarseOperator(mpiCommWorld, A, A = noPen, B = massMatrix, pattern = Opt/*, threshold = k,*/, ret = ret);
             }
             else if(deflation == "geneo-2") // GenEO-2 for optimized Schwarz methods, need for RHS (LHS is still Neumann matrix)
-                attachCoarseOperator(mpiCommWorld, A, A = noPen, B = Opt, pattern = Opt/*, threshold = 2. * h[].max / diam,*/, ret = ret);
+                AttachCoarseOperator(mpiCommWorld, A, A = noPen, B = Opt, pattern = Opt/*, threshold = 2. * h[].max / diam,*/, ret = ret);
         }
     }
 }

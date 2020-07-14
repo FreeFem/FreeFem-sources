@@ -23,7 +23,7 @@ createMat(Th, H, Pk)
 func g = cos(pi*x)*cos(pi*y);
 func real J(real[int]& X) {
     Vh u;
-    changeNumbering(H, u[], X, inverse = true, exchange = true);
+    ChangeNumbering(H, u[], X, inverse = true, exchange = true);
     real glob, loc = int2d(ThNo)(sqrt(1 + grad(u)'*grad(u)));
     mpiAllReduce(loc, glob, mpiCommWorld, mpiSUM);
     return glob;
@@ -31,17 +31,17 @@ func real J(real[int]& X) {
 
 func real[int] DJ(real[int]& X) {
     Vh u;
-    changeNumbering(H, u[], X, inverse = true, exchange = true);
+    ChangeNumbering(H, u[], X, inverse = true, exchange = true);
     varf vG(w, v) = int2d(Th)((grad(u)'*grad(v)) / sqrt(1 + grad(u)'*grad(u)));
     real[int] out = vG(0, Vh);
     real[int] outPETSc;
-    changeNumbering(H, out, outPETSc);
+    ChangeNumbering(H, out, outPETSc);
     return outPETSc;
 }
 
 func int HJ(real[int]& X) {
     Vh u;
-    changeNumbering(H, u[], X, inverse = true, exchange = true);
+    ChangeNumbering(H, u[], X, inverse = true, exchange = true);
     varf vH(v, w) = int2d(Th)((grad(w)'*grad(v)) / sqrt(1 + grad(u)'*grad(u))
             - (grad(w)'*grad(u)) * (grad(v)'*grad(u)) *(1 + grad(u)'*grad(u))^-1.5);
     matrix Loc = vH(Vh, Vh);
@@ -56,25 +56,25 @@ real[int] lbPETSc, ubPETSc;
     Vh lb = onG != 0 ? g : -1e19;
     Vh ub = onG != 0 ? g :  1e19;
     lb = max(lb, 3-100*(((x-1.5)^2 + (y-0.5)^2))^2);
-    changeNumbering(H, lb[], lbPETSc);
-    changeNumbering(H, ub[], ubPETSc);
+    ChangeNumbering(H, lb[], lbPETSc);
+    ChangeNumbering(H, ub[], ubPETSc);
 }
 
 {
     Vh u = onG != 0 ? g : 0;
     real[int] uPETSc;
-    changeNumbering(H, u[], uPETSc);
+    ChangeNumbering(H, u[], uPETSc);
     TaoSolve(H, J, DJ, uPETSc, xl = lbPETSc, xu = ubPETSc, sparams = "-tao_monitor -tao_view -tao_type bqnls -tao_max_it 40 -tao_gatol 1e-4");
-    changeNumbering(H, u[], uPETSc, inverse = true, exchange = true);
+    ChangeNumbering(H, u[], uPETSc, inverse = true, exchange = true);
     real Ju = J(uPETSc);
     plotMPI(Th, u, Pk, def, real, cmm = "Global solution, J(u) = " + Ju)
 }
 {
     Vh u = onG != 0 ? g : 0;
     real[int] uPETSc;
-    changeNumbering(H, u[], uPETSc);
+    ChangeNumbering(H, u[], uPETSc);
     TaoSolve(H, J, DJ, uPETSc, xl = lbPETSc, xu = ubPETSc, sparams = "-tao_monitor -tao_view -tao_type bnls -tao_max_it 40 -tao_gatol 1e-4", HessianRoutine = HJ);
-    changeNumbering(H, u[], uPETSc, inverse = true, exchange = true);
+    ChangeNumbering(H, u[], uPETSc, inverse = true, exchange = true);
     real Ju = J(uPETSc);
     plotMPI(Th, u, Pk, def, real, cmm = "Global solution, J(u) = " + Ju)
 }

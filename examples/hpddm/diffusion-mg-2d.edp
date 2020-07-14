@@ -61,7 +61,7 @@ func real[int] correctionExact(real[int]& in) {
     return out;
 }
 if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) { // two-level Schwarz methods
-    attachCoarseOperator(mpiCommWorld, A, correctionExact);
+    AttachCoarseOperator(mpiCommWorld, A, correctionExact);
 }
 
 Wh<real> def(u);    // local solution
@@ -105,7 +105,7 @@ func real[int] correctionInexact(real[int]& in) {
     return out;
 }
 if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) // two-level Schwarz methods
-    attachCoarseOperator(mpiCommWorld, A, correctionInexact);
+    AttachCoarseOperator(mpiCommWorld, A, correctionInexact);
 else
     exit(0);
 
@@ -114,7 +114,7 @@ u[] = A^-1 * rhs;
 plotMPI(Th, u, Pk, def, real, cmm = "Global solution with a one-level inner coarse correction (two levels in total)")
 
 set(ACoarse, sparams = "-hpddm_level_2_verbosity " + (!mpirank ? "4" : "0") + " -hpddm_level_2_schwarz_coarse_correction deflated -hpddm_level_2_geneo_nu 10");
-attachCoarseOperator(mpiCommWorld, ACoarse, A = NeumannCoarse);
+AttachCoarseOperator(mpiCommWorld, ACoarse, A = NeumannCoarse);
 set(ACoarse, sparams = "-hpddm_level_2_verbosity " + (!mpirank ? "1" : "0") + " -hpddm_level_3_verbosity 0");
 
 ijk = 0;

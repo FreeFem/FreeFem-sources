@@ -51,7 +51,7 @@ Mat Z(A);
     VhV def2(g);
     g[] = onGamma(0, VhV, tgv = -1);
     real[int] gPETSc;
-    changeNumbering(A, g[], gPETSc);
+    ChangeNumbering(A, g[], gPETSc);
     MatZeroRows(B, gPETSc);
 }
 Mat LHS = [[A , B],
@@ -61,10 +61,10 @@ Mat RHS = [[Z, 0],
 int nV, nP;
 {
     real[int] in(VhV.ndof), out;
-    changeNumbering(A, in, out);
+    ChangeNumbering(A, in, out);
     nV = out.n;
     in.resize(VhP.ndof);
-    changeNumbering(M, in, out);
+    ChangeNumbering(M, in, out);
     nP = out.n;
 }
 real[int] list(nV + nP);

@@ -42,13 +42,13 @@ Wh<real> def(Rb)[6];
 [Rb[5], RbB[5], RbC[5]] = [0, z, -y];
 set(A, sparams = "-pc_type gamg -ksp_type gmres -ksp_pc_side right -ksp_max_it 200 -pc_gamg_threshold 0.01", nearnullspace = Rb);
 func real[int] funcRes(real[int]& inPETSc) {
-    changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
+    ChangeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
     real[int] out(Wh.ndof);
     out = A * u[];
     real[int] rhs = vPb(0, Wh, tgv = -2);
     out -= rhs;
     real[int] outPETSc;
-    changeNumbering(A, out, outPETSc);
+    ChangeNumbering(A, out, outPETSc);
     return outPETSc;
 }
 func int funcJ(real[int]& inPETSc) {
@@ -57,9 +57,9 @@ func int funcJ(real[int]& inPETSc) {
 }
 real[int] xPETSc;
 u[] = 0;
-changeNumbering(A, u[], xPETSc);
+ChangeNumbering(A, u[], xPETSc);
 SNESSolve(A, funcJ, funcRes, xPETSc, sparams = "-snes_monitor -snes_linesearch_monitor -snes_type newtonls");
-changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
+ChangeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
 macro def1(u)u// EOM
 plotMPI(Th, u, P1, def1, real, cmm = "Global solution")
 real alpha = 1.0;

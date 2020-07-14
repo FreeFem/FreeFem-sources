@@ -118,7 +118,7 @@ HMatrix<complex> TDL, SL;
         numbering[] = 0:UhG.ndof - 1;
         VhS<complex> glob2loc = numbering;
         complex[int] permc(glob2loc.n);
-        changeNumbering(ASurf, glob2loc[], permc);
+        ChangeNumbering(ASurf, glob2loc[], permc);
         perm.resize(permc.n);
         for[i, p : permc] perm[i] = real(p);
     }
@@ -153,18 +153,18 @@ func complex[int] opStoV(complex[int]& in) {
     u = TDL * v;
     for[i, p : perm] out[i] = u[p];
     complex[int] outS, outV(RVtoS.m);
-    changeNumbering(ASurf, outS, out, inverse = true, exchange = true);
+    ChangeNumbering(ASurf, outS, out, inverse = true, exchange = true);
     renumbering(RVtoS', outS, outV);
-    changeNumbering(A, outV, out);
+    ChangeNumbering(A, outV, out);
     return out;
 }
 Mat<complex> VtoS(ASurf, A, Mass);
 Mat<complex> B(ASurf, opSurf);
 func complex[int] precondSurf(complex[int]& in) {
     complex[int] u, out(in.n);
-    changeNumbering(B, u, in, inverse = true);
+    ChangeNumbering(B, u, in, inverse = true);
     complex[int] v = dense * u;
-    changeNumbering(B, v, out);
+    ChangeNumbering(B, v, out);
     return out;
 }
 Mat<complex> StoV(A, ASurf, opStoV);
@@ -175,11 +175,11 @@ complex[int] xV(Vh.ndof), xS(VhS.ndof);
 varf varfRHS(u,v) = int2d(Th)(finc*v) + on(waveguide,u=0);
 rhsV = varfRHS(0, Vh, tgv = -1);
 complex[int] rhs, x;
-changeNumbering([A, B], [rhsV, rhsS], rhs);
+ChangeNumbering([A, B], [rhsV, rhsS], rhs);
 {
     real[int] list(rhs.n);
     complex[int] nV;
-    changeNumbering(A, rhsV, nV);
+    ChangeNumbering(A, rhsV, nV);
     list(0:nV.n-1) = 1.0;
     list(nV.n:list.n-1) = 2.0;
     complex[int] test(list.n - nV.n);
@@ -188,7 +188,7 @@ changeNumbering([A, B], [rhsV, rhsS], rhs);
 }
 x.resize(rhs.n);
 KSPSolve(N, rhs, x);
-changeNumbering([A, B], [xV, xS], x, inverse = true, exchange = true);
+ChangeNumbering([A, B], [xV, xS], x, inverse = true, exchange = true);
 Vh<complex> plt;
 plt[] = xV;
 macro def(u)u//

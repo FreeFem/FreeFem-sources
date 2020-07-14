@@ -73,7 +73,7 @@ int[int] perm;
     numbering[] = 0:UhG.ndof - 1;
     Uh<complex> glob2loc = numbering;
     complex[int] permc;
-    changeNumbering(H, glob2loc[], permc);
+    ChangeNumbering(H, glob2loc[], permc);
     perm.resize(permc.n);
     for[i, p : permc] perm[i] = real(p);
 }
@@ -97,9 +97,9 @@ func complex[int] prec(complex[int]& in) {
             dense = dense^-1;
         }
         complex[int] u(Uh.ndof), v(Uh.ndof);
-        changeNumbering(H, u, in, inverse = true);
+        ChangeNumbering(H, u, in, inverse = true);
         v = dense * u;
-        changeNumbering(H, v, out);
+        ChangeNumbering(H, v, out);
     }
     else {
         KSPSolve(H, in, out);
@@ -112,7 +112,7 @@ varf vRHS(u, v) = -int2d(ThS)(finc*v);
 Uh<complex> bf;
 bf[] = vRHS(0, Uh);
 complex[int] b, u;
-changeNumbering(H, bf[], b);
+ChangeNumbering(H, bf[], b);
 u.resize(b.n);
 KSPSolve(op, b, u, precon = prec, sparams = "-ksp_type fgmres -ksp_view_singularvalues -ksp_converged_reason -ksp_gmres_restart 1000 -pc_type shell");
 // visualization

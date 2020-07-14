@@ -55,23 +55,23 @@ varf vJ([u1, u2, p], [v1, v2, q]) = int2d(Th)(
     + on(2, u1 = uc1-1, u2 = uc2-0);
 set(J, sparams = "-pc_type lu");
 func real[int] funcRes(real[int]& inPETSc) {
-    changeNumbering(J, uc1[], inPETSc, inverse = true, exchange = true);
+    ChangeNumbering(J, uc1[], inPETSc, inverse = true, exchange = true);
     real[int] out(Wh.ndof);
     out = vRes(0, Wh, tgv = -1);
-    changeNumbering(J, out, inPETSc);
+    ChangeNumbering(J, out, inPETSc);
     return inPETSc;
 }
 func int funcJ(real[int]& inPETSc) {
-    changeNumbering(J, uc1[], inPETSc, inverse = true, exchange = true);
+    ChangeNumbering(J, uc1[], inPETSc, inverse = true, exchange = true);
     J = vJ(Wh, Wh, tgv = -1);
     return 0;
 }
 for(int i = 0; i < 50 && Re < 100.0; ++i) {
     real[int] xPETSc;
-    changeNumbering(J, uc1[], xPETSc);
+    ChangeNumbering(J, uc1[], xPETSc);
     nu = 1.0/Re;
     SNESSolve(J, funcJ, funcRes, xPETSc, sparams = "-snes_monitor ");
-    changeNumbering(J, uc1[], xPETSc, inverse = true, exchange = true);
+    ChangeNumbering(J, uc1[], xPETSc, inverse = true, exchange = true);
     if(!NoGraphicWindow) {
         Qh only = pc;
         macro def1(i)i//

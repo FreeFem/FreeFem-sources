@@ -370,7 +370,7 @@ if (preffe#prmesh#isincomm)
         }
 
         IFMACRO(pr#withhpddm)
-        changeOperator(pr#hpddmOP,pr#aRd[mpiRank(preffe#prmesh#commddm)]);
+        ChangeOperator(pr#hpddmOP,pr#aRd[mpiRank(preffe#prmesh#commddm)]);
         ENDIFMACRO
         IFMACRO(pr#withpetsc)
         IFMACRO(preffe#K,real)

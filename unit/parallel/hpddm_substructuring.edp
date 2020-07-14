@@ -54,9 +54,9 @@ include "test.idp"
   renumber(A, Mat, interfaceNb, effort = rhs);
   else {
     if(excluded) {
-      cout << functionDEFINITION << "attachCoarseOperator" << endl;
+      cout << functionDEFINITION << "AttachCoarseOperator" << endl;
       t = mpiWtime();
-      attachCoarseOperator(mpiCommWorld, A);
+      AttachCoarseOperator(mpiCommWorld, A);
       t = mpiWtime() - t;
       cout << timeELAPSED << t << endl;
       } else {
@@ -82,9 +82,9 @@ include "test.idp"
             t = mpiWtime() - t;
             cout << timeELAPSED << t << endl;
           }
-          cout << functionDEFINITION << "attachCoarseOperator" << endl;
+          cout << functionDEFINITION << "AttachCoarseOperator" << endl;
           t = mpiWtime();
-          attachCoarseOperator(mpiCommWorld, A, R = Rb, ret = ret);
+          AttachCoarseOperator(mpiCommWorld, A, R = Rb, ret = ret);
           t = mpiWtime() - t;
           cout << timeELAPSED << t << endl;
         }
@@ -103,9 +103,9 @@ include "test.idp"
       }
 
       if(!excluded) {
-        cout << functionDEFINITION << "originalNumbering" << endl;
+        cout << functionDEFINITION << "OriginalNumbering" << endl;
         t = mpiWtime();
-        originalNumbering(A, u[], interfaceNb);
+        OriginalNumbering(A, u[], interfaceNb);
         t = mpiWtime() - t;
         cout << timeELAPSED << t << endl;
       }
@@ -116,7 +116,7 @@ include "test.idp"
       cout << timeELAPSED << t << endl;
 }
 
-cout << functionDEFINITION << "changeNumbering" << endl;
+cout << functionDEFINITION << "ChangeNumbering" << endl;
 {
   load "PETSc"
   macro trueRestrict()true// EOM
@@ -157,21 +157,21 @@ cout << functionDEFINITION << "changeNumbering" << endl;
   matrix J;
   func real[int] funcRes(real[int]& inPETSc) {
       t = mpiWtime();
-      changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
+      ChangeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
       t = mpiWtime() - t;
       cout << timeELAPSED << t << endl;
       real[int] out(Vh.ndof);
       out = vRes(0, Vh, tgv = -2);
       real[int] outPETSc;
       t = mpiWtime();
-      changeNumbering(A, out, outPETSc);
+      ChangeNumbering(A, out, outPETSc);
       t = mpiWtime() - t;
       cout << timeELAPSED << t << endl;
       return outPETSc;
   }
   func int funcJ(real[int]& inPETSc) {
       t = mpiWtime();
-      changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
+      ChangeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
       t = mpiWtime() - t;
       cout << timeELAPSED << t << endl;
       J = vJ(Vh, Vh, tgv = -2);
@@ -181,13 +181,13 @@ cout << functionDEFINITION << "changeNumbering" << endl;
   real[int] bPETSc;
   u[] = vInit(0, Vh, tgv = -2);
   t = mpiWtime();
-  changeNumbering(A, u[], bPETSc);
+  ChangeNumbering(A, u[], bPETSc);
   t = mpiWtime() - t;
   cout << timeELAPSED << t << endl;
   real[int] xPETSc = bPETSc;
   SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_linesearch_monitor -snes_type newtontr -snes_converged_reason -snes_view");
   t = mpiWtime();
-  changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
+  ChangeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
   t = mpiWtime() - t;
   cout << timeELAPSED << t << endl;
   plotMPI(M, u, Pk, def, real, cmm = "Global solution")

@@ -36,14 +36,14 @@ MatIS A(Loc, intersection, interfaceNb, communicator = mpiCommWorld);
 Wh<real> def(u) = 0.0;    // local solution
 
 int[int] numbering;
-globalNumbering(A, numbering);
+GlobalNumbering(A, numbering);
 for(int i = 0; i < u[].n; ++i)
     u[][i] = numbering[i];
-originalNumbering(A, u[], interfaceNb);
+OriginalNumbering(A, u[], interfaceNb);
 plotMPI(Th, u, Pk, def, real, cmm = "Global numbering")
 
 set(A, sparams = "-pc_type bddc -ksp_monitor");
 u[] = A^-1 * rhs;
 
-originalNumbering(A, u[], interfaceNb);
+OriginalNumbering(A, u[], interfaceNb);
 plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

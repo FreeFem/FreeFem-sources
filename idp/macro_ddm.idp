@@ -1503,7 +1503,7 @@ IFMACRO(!transfer#P)
     scaledU[] = uA[];
 ENDIFMACRO
 IFMACRO(transfer#P)
-    globalNumbering(uA, scaledU[]);
+    GlobalNumbering(uA, scaledU[]);
     D.resize(scaledU[].n);
     D = uA.D;
 ENDIFMACRO

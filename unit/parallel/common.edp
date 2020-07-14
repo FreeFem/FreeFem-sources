@@ -97,7 +97,7 @@ cout << functionDEFINITION << "getOption" << endl;
   int solver = getOption("schwarz_method");
   if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) { // two-level Schwarz methods
       matrix<real> noPen = vPb(Wh, Wh, sym = 1);
-      attachCoarseOperator(mpiCommWorld, A, A = noPen);
+      AttachCoarseOperator(mpiCommWorld, A, A = noPen);
   }
 
   Wh<real> def(u);    // local solution

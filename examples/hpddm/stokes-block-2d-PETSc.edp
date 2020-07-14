@@ -78,8 +78,8 @@ int pPETSc;
     real[int] rhsPETScV, rhsPETScP;
     VhV def2(solV);
     VhP solP;
-    changeNumbering(dA, rhs, rhsPETScV);
-    changeNumbering(dC, solP[], rhsPETScP);
+    ChangeNumbering(dA, rhs, rhsPETScV);
+    ChangeNumbering(dC, solP[], rhsPETScP);
     vPETSc = rhsPETScV.n;
     pPETSc = rhsPETScP.n;
     real[int] rhsPETSc = [rhsPETScV,
@@ -97,7 +97,7 @@ int pPETSc;
         }
     }
     KSPSolve(dF, rhsPETSc, sol);
-    changeNumbering([dA, dC], [solV[], solP[]], sol, inverse = true, exchange = true);
+    ChangeNumbering([dA, dC], [solV[], solP[]], sol, inverse = true, exchange = true);
     plotMPI(Th, def2(solV), PkV, def2, real, cmm = "Global velocity")
     plotMPI(Th, solP, PkP, def1, real, cmm = "Global pressure")
 }
@@ -110,7 +110,7 @@ Mat dB(dA, dC, B);
     VhV def2(g);
     g[] = onGamma(0, VhV, tgv = -1);
     real[int] gPETSc;
-    changeNumbering(dA, g[], gPETSc);
+    ChangeNumbering(dA, g[], gPETSc);
     MatZeroRows(dB, gPETSc);
 }
 matrix BT = B';
@@ -122,7 +122,7 @@ VhV def2(solV);
 VhP solP;
 {
     real[int] rhs = vPbA(0, VhV, tgv = -1);
-    changeNumbering([dA, dC], [rhs, solP[]], rhsPETSc);
+    ChangeNumbering([dA, dC], [rhs, solP[]], rhsPETSc);
 }
 for(int i = 0; i < 2; ++i) {
     real[int] sol;
@@ -144,7 +144,7 @@ for(int i = 0; i < 2; ++i) {
         set(dS, sparams = "-pc_type fieldsplit -ksp_type fgmres -ksp_view -ksp_monitor -fieldsplit_0_pc_type hypre -fieldsplit_0_ksp_type gmres -fieldsplit_0_ksp_rtol 1e-2 " + " -fieldsplit_0_ksp_monitor -fieldsplit_1_pc_type jacobi -fieldsplit_1_ksp_type cg -fieldsplit_1_ksp_max_it 5", fields = list, schur = tab);
         KSPSolve(dS, rhsPETSc, sol);
     }
-    changeNumbering([dA, dC], [solV[], solP[]], sol, inverse = true, exchange = true);
+    ChangeNumbering([dA, dC], [solV[], solP[]], sol, inverse = true, exchange = true);
     string plus = (i == 1 ? " + mAL preconditioning" : "");
     plotMPI(Th, def2(solV), PkV, def2, real, cmm = "Global velocity with tgv = -1" + plus)
     plotMPI(Th, solP, PkP, def1, real, cmm = "Global pressure with tgv = -1" + plus)
@@ -155,7 +155,7 @@ for(int i = 0; i < 2; ++i) {
     real[int] v, vPETSc;
     v.resize(VhV.ndof);
     v = mpirank;
-    changeNumbering(dA, v, vPETSc);
+    ChangeNumbering(dA, v, vPETSc);
     {
         Mat dSC = [[dA     , dB, vPETSc],
                    [dBT    , 0 , 0     ],

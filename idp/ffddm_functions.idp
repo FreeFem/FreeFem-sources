@@ -208,7 +208,7 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
           solc = 0;
           preffe#prmesh#tic(pr#tcsi)
           /*
-          destroyRecycling(Addmc);
+          DestroyRecycling(Addmc);
           DDM(Addmc, tmp, solc, O=Optc);
           solc = 0;
           */

@@ -321,23 +321,23 @@ Vh<real> def(Rb)[3];
 [Rb[2], RbB[2]] = [y, -x];
 set(A, sparams = "-ksp_converged_reason -pc_type gamg", nearnullspace = Rb);
 func real[int] funcRes(real[int]& inPETSc) {
-    changeNumbering(A, u1n[], inPETSc, inverse = true, exchange = true);
+    ChangeNumbering(A, u1n[], inPETSc, inverse = true, exchange = true);
     real[int] out(Vh.ndof);
     out = neoHookeanInc(0, Vh, tgv = -2);
     real[int] outPETSc;
-    changeNumbering(A, out, outPETSc);
+    ChangeNumbering(A, out, outPETSc);
     return outPETSc;
 }
 func int funcJ(real[int]& inPETSc) {
-    changeNumbering(A, u1n[], inPETSc, inverse = true, exchange = true);
+    ChangeNumbering(A, u1n[], inPETSc, inverse = true, exchange = true);
     A = neoHookeanInc(Vh, Vh, tgv = -2);
     return 0;
 }
 real[int] xPETSc;
 [u1n, u2n] = [0.0, 0.0];
-changeNumbering(A, u1n[], xPETSc);
+ChangeNumbering(A, u1n[], xPETSc);
 SNESSolve(A, funcJ, funcRes, xPETSc, sparams = "-snes_monitor -snes_linesearch_monitor -snes_type newtonls -snes_converged_reason -snes_view -snes_rtol 1e-4");
-changeNumbering(A, u1n[], xPETSc, inverse = true, exchange = true);
+ChangeNumbering(A, u1n[], xPETSc, inverse = true, exchange = true);
 plotMPI(Th, [u1n, u2n], Pk, def, real, cmm = "Global solution")
 real alpha = 1.0;
 meshN ThMoved = movemesh(Th, [x + alpha * u1n, y + alpha * u2n]);

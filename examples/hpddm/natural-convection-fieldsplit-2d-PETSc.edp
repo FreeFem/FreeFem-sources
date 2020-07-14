@@ -57,15 +57,15 @@ varf vS(p, q) = int2d(Th, qforder = 3)(-1/(gammaAL + nuCurrent) * p * q);
 
 Mat dA(Wh.ndof, intersection, D);
 func real[int] funcRes(real[int]& inPETSc) {
-    changeNumbering(dA, u1[], inPETSc, inverse = true, exchange = true);
+    ChangeNumbering(dA, u1[], inPETSc, inverse = true, exchange = true);
     real[int] out(Wh.ndof);
     out = vPb(0, Wh, tgv = -2);
     real[int] outPETSc;
-    changeNumbering(dA, out, outPETSc);
+    ChangeNumbering(dA, out, outPETSc);
     return outPETSc;
 }
 func int funcJ(real[int]& inPETSc) {
-    changeNumbering(dA, u1[], inPETSc, inverse = true, exchange = true);
+    ChangeNumbering(dA, u1[], inPETSc, inverse = true, exchange = true);
     dA = vPb(Wh, Wh, tgv = -2);
     return 0;
 }
@@ -88,9 +88,9 @@ while(nuCurrent > nuFinal) {
     }
     c = -1/(nuCurrent * Pr);
     real[int] xPETSc;
-    changeNumbering(dA, u1[], xPETSc);
+    ChangeNumbering(dA, u1[], xPETSc);
     SNESSolve(dA, funcJ, funcRes, xPETSc, sparams = "-snes_monitor -snes_type newtonls -snes_rtol 1.0e-4");
-    changeNumbering(dA, u1[], xPETSc, inverse = true, exchange = !adaptation);
+    ChangeNumbering(dA, u1[], xPETSc, inverse = true, exchange = !adaptation);
     if(adaptation) {
         fespace VhG(ThBackup, Pk);
         VhG def(uG), def(uReduce);

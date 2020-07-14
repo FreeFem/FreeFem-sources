@@ -54,7 +54,7 @@ rhs = vPbRhs(0, Wh);
     Mat G(A, B, GLoc);
     VhNode coord = x;
     real[int] tmp;
-    changeNumbering(B, coord[], tmp);
+    ChangeNumbering(B, coord[], tmp);
     real[int, int] coordPETSc(3, tmp.n);
     for(int j = 0; j < 3; ++j) {
         for[i, ui : tmp] coordPETSc(j, i) = ui;
@@ -62,7 +62,7 @@ rhs = vPbRhs(0, Wh);
             coord = y;
         else if(j == 1)
             coord = z;
-        changeNumbering(B, coord[], tmp);
+        ChangeNumbering(B, coord[], tmp);
     }
     set(A, sparams = "-pc_type hypre -pc_hypre_type ams -ksp_monitor -ksp_view -ksp_max_it 40", coordinates = coordPETSc, gradient = G);
 }
@@ -71,8 +71,8 @@ Wh [solx, soly, solz];
 solx[] = A^-1 * rhs;
 if(!NoGraphicWindow) {
     real[int] sol;
-    changeNumbering(A, solx[], sol);
-    changeNumbering(A, solx[], sol, inverse = true);
+    ChangeNumbering(A, solx[], sol);
+    ChangeNumbering(A, solx[], sol, inverse = true);
     meshN ThPlt = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10));
     fespace WhPlt(ThPlt, Pk);
     WhPlt [pltx, plty, pltz];

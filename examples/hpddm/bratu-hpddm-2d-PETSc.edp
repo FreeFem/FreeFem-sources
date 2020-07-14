@@ -27,15 +27,15 @@ varf vInit(w, v) = on(aa, bb, cc, dd, w = BC);
 varf vJ(w, v) = int2d(M)(dx(w)*dx(v) + dy(w)*dy(v) - c*exp(u)*w*v) + on(aa, bb, cc, dd, w = 0);
 varf vRes(w, v) = int2d(M)(dx(u)*dx(v) + dy(u)*dy(v) - c*exp(u)*v) + on(aa, bb, cc, dd, w = u);
 func real[int] funcRes(real[int]& inPETSc) {
-    changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
+    ChangeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
     real[int] out(Vh.ndof);
     out = vRes(0, Vh, tgv = -2);
     real[int] outPETSc;
-    changeNumbering(A, out, outPETSc);
+    ChangeNumbering(A, out, outPETSc);
     return outPETSc;
 }
 func int funcJ(real[int]& inPETSc) {
-    changeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
+    ChangeNumbering(A, u[], inPETSc, inverse = true, exchange = true);
     A = vJ(Vh, Vh, tgv = -2);
     return 0;
 }
@@ -66,10 +66,10 @@ if(HasType("PC", "hpddm")) {
         set(A, sparams = "-pc_type hpddm -pc_hpddm_levels_1_sub_pc_type lu -pc_hpddm_levels_1_eps_nev 10 -pc_hpddm_define_subdomains -pc_hpddm_has_neumann -ksp_converged_reason -pc_hpddm_levels_1_pc_type asm " + params);
         real[int] bPETSc;
         u[] = vInit(0, Vh, tgv = -2);
-        changeNumbering(A, u[], bPETSc);
+        ChangeNumbering(A, u[], bPETSc);
         real[int] xPETSc = bPETSc;
         SNESSolve(A, funcJ, funcRes, bPETSc, xPETSc, sparams = "-snes_monitor -snes_type newtonls -snes_converged_reason -ksp_converged_reason -snes_view");
-        changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
+        ChangeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
         macro def(u)u//
         plotMPI(M, u, Pk, def, real, cmm = "Global solution")
         set(A, sparams = "-pc_type none");

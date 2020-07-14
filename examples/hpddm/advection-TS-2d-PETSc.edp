@@ -54,13 +54,13 @@ func int funcJ(real t, real[int]& in, real[int]& inT, real a) {
 Vh w;
 string type;
 func int funcM(int s, real t, real[int]& u) {
-    changeNumbering(dT, w[], u, inverse = true, exchange = true);
+    ChangeNumbering(dT, w[], u, inverse = true, exchange = true);
     plotMPI(Th, w, Pk, def, real, cmm = "Global solution at step " + s + " (time " + t + ") with " + type + " method")
 }
 for(int j = 0; j < 3; ++j) {
     Vh c = exp(-10 * ((x - 0.3)^2 + (y - 0.3)^2));
     real[int] cPETSc;
-    changeNumbering(dT, c[], cPETSc);
+    ChangeNumbering(dT, c[], cPETSc);
     real T = 3 * pi;
     string deflt = "-ts_view -ts_max_snes_failures -1 -ts_exact_final_time interpolate -ts_adapt_type basic -ts_max_time " + string(T);
     if(j == 0) {
@@ -75,7 +75,7 @@ for(int j = 0; j < 3; ++j) {
         type = "semi-implicit";
         TSSolve(dT, funcJ, funcRes, cPETSc, sparams = "-ts_type arkimex -ts_arkimex_type 5 " + deflt, monitor = funcM);
     }
-    changeNumbering(dT, c[], cPETSc, inverse = true, exchange = true);
+    ChangeNumbering(dT, c[], cPETSc, inverse = true, exchange = true);
     macro params()cmm = "Global solution with " + type + " method", wait = 1, dim = 3, fill = 1// EOM
     plotMPI(Th, c, Pk, def, real, params)
 }

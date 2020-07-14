@@ -36,20 +36,20 @@ real[int] values;
 SVDSolve(C, sparams = "-svd_largest -svd_view_values -svd_type cyclic -svd_nsv 10", values = values);
 func real[int] prodFunc(real[int]& up) {
     real[int] u;
-    changeNumbering(B, u, up, inverse = true, exchange = true); // from PETSc to FreeFEM numbering + need to exchange ghost values
+    ChangeNumbering(B, u, up, inverse = true, exchange = true); // from PETSc to FreeFEM numbering + need to exchange ghost values
     real[int] v = R' * u;
     u.resize(Loc.n);
     u = A * v;
-    changeNumbering(A, u, up); // from FreeFEM to PETSc numbering
+    ChangeNumbering(A, u, up); // from FreeFEM to PETSc numbering
     return up;
 }
 func real[int] prodFuncTranspose(real[int]& utp) {
     real[int] ut;
-    changeNumbering(A, ut, utp, inverse = true, exchange = true); // from PETSc to FreeFEM numbering + need to exchange ghost values
+    ChangeNumbering(A, ut, utp, inverse = true, exchange = true); // from PETSc to FreeFEM numbering + need to exchange ghost values
     real[int] v = A' * ut;
     ut.resize(R.n);
     ut = R * v;
-    changeNumbering(B, ut, utp); // from FreeFEM to PETSc numbering
+    ChangeNumbering(B, ut, utp); // from FreeFEM to PETSc numbering
     return utp;
 }
 Mat MF(A, B, prodFunc, transpose = prodFuncTranspose);

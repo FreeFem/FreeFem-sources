@@ -525,7 +525,7 @@ IFMACRO(!pr#algebraic)
   pr#matN = vN(pr#prfe#Vhi,pr#prfe#Vhi,sym=vsym,tgv=vtgv);
 }
 ENDIFMACRO
-attachCoarseOperator(pr#prfe#prmesh#commddm, pr#hpddmOP, A = pr#matN);
+AttachCoarseOperator(pr#prfe#prmesh#commddm, pr#hpddmOP, A = pr#matN);
 
 pr#prfe#prmesh#toc(pr#tloc,"building E",pr#tbuildE)
 
@@ -635,7 +635,7 @@ ENDIFMACRO
 varf vmass(def(u),def(v)) = pr#prfe#prmesh#intbN(pr#prfe#prmesh#Thi,ffddminterfacelabel)(pr#prfe#mdef(u)'*pr#prfe#mdef(v));
 matrix<pr#prfe#K> mmass = vmass(pr#prfe#Vhi,pr#prfe#Vhi);
 
-attachCoarseOperator(pr#prfe#prmesh#commddm, pr#hpddmOP, A = pr#matN, B = mmass, pattern = pr#aRd[mpiRank(pr#prfe#prmesh#commddm)]);
+AttachCoarseOperator(pr#prfe#prmesh#commddm, pr#hpddmOP, A = pr#matN, B = mmass, pattern = pr#aRd[mpiRank(pr#prfe#prmesh#commddm)]);
 
 pr#prfe#prmesh#toc(pr#tloc,"building E",pr#tbuildE)
 

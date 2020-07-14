@@ -52,7 +52,7 @@ if(mpisize == 1)
     renumber(A, Mat, interfaceNb, effort = rhs);
 else {
     if(excluded)
-        attachCoarseOperator(mpiCommWorld, A);
+        AttachCoarseOperator(mpiCommWorld, A);
     else {
         Wh[int] def(Rb)(0);
         real[int] float(Wh.ndof);
@@ -68,7 +68,7 @@ else {
             Wh def(mu) = 1.0;
             renumber(A, Mat, interfaceNb, R = Rb, effort = rhs, rho = mu[]);
         }
-        attachCoarseOperator(mpiCommWorld, A, R = Rb, ret = ret);
+        AttachCoarseOperator(mpiCommWorld, A, R = Rb, ret = ret);
     }
 }
 
@@ -80,7 +80,7 @@ else
     DDM(A, rhs, u[], excluded = excluded);
 
 if(!excluded)
-    originalNumbering(A, u[], interfaceNb);
+    OriginalNumbering(A, u[], interfaceNb);
 plotMPI(Th, u, Pk, def, real, cmm = "Global solution")
 
 statistics(A);

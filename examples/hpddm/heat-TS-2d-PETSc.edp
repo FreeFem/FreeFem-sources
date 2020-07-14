@@ -55,10 +55,10 @@ func int funcJ(real t, real[int]& in, real[int]& inT, real a) {
 }
 Wh w;
 func int funcM(int s, real t, real[int]& u) {
-    changeNumbering(T, w[], u, exchange = true, inverse = true);
+    ChangeNumbering(T, w[], u, exchange = true, inverse = true);
     plotMPI(Th, w, Pk, def, real, cmm = "Global solution at step " + s + " (time " + t + ")")
 }
 w = (0.5 - x)^2 + (0.5 - y)^2 < 0.2 ? 1.0 : 0.0;
 real[int] wPETSc;
-changeNumbering(T, w[], wPETSc);
+ChangeNumbering(T, w[], wPETSc);
 TSSolve(T, funcJ, funcRes, wPETSc, sparams = "-ts_type beuler -ts_dt 0.1 -ts_max_time 100 -ts_exact_final_time interpolate -ts_max_snes_failures -1 -ts_view -pc_type lu -ts_adapt_type basic -ts_rtol 1e-3", monitor = funcM);

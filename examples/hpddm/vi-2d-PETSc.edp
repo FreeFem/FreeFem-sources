@@ -32,7 +32,7 @@ Wh<real> def(u);    // local solution
 set(A, sparams = "-pc_type lu -ksp_type gmres");
 real[int] rhs = vPb(0, Wh, tgv = -2);
 real[int] rhsPETSc;
-changeNumbering(A, rhs, rhsPETSc);
+ChangeNumbering(A, rhs, rhsPETSc);
 func real[int] funcRes(real[int]& inPETSc) {
     real[int] outPETSc(inPETSc.n);
     MatMult(A, inPETSc, outPETSc);
@@ -47,8 +47,8 @@ xu = sqrt((x - 0.5)^2 + (y - 0.5)^2) < 0.4 ? 0.1 : 1.0;
 plotMPI(Th, xu, Pk, def, real, cmm = "Upper bound")
 real[int] xPETSc, xuPETSc;
 u[] = 0;
-changeNumbering(A, u[], xPETSc);
-changeNumbering(A, xu[], xuPETSc);
+ChangeNumbering(A, u[], xPETSc);
+ChangeNumbering(A, xu[], xuPETSc);
 SNESSolve(A, funcJ, funcRes, xPETSc, sparams = "-snes_monitor -snes_view -snes_vi_monitor -snes_type vinewtonrsls", xu = xuPETSc);
-changeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
+ChangeNumbering(A, u[], xPETSc, inverse = true, exchange = true);
 plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

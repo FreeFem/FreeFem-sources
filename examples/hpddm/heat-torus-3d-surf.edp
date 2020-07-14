@@ -37,7 +37,7 @@ mat = vPb(Wh, Wh, solver = GMRES);
 matrix Neumann = mat;
 schwarz A(mat, intersection, D);
 if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) { // two-level Schwarz methods
-    attachCoarseOperator(mpiCommWorld, A, A = Neumann);
+    AttachCoarseOperator(mpiCommWorld, A, A = Neumann);
 }
 
 for(int i = 0; i < iMax; ++i) {
@@ -47,5 +47,5 @@ for(int i = 0; i < iMax; ++i) {
     plotMPI(Th, u, Pk, def, real, myplot)
     w[] = u[];
     mat = vPb(Wh, Wh, solver = GMRES);
-    changeOperator(A, mat);
+    ChangeOperator(A, mat);
 }
