@@ -237,6 +237,18 @@ IFMACRO(privateCreateMat)
         intersection[0][i] = privateDmesh#meshName#intersectionDef[0][i];
         partitionIntersection[i][] = privateDmesh#meshName#intersectionDef[1 + i];
     }
+IFMACRO(privateDmesh#N2O)
+IFMACRO(privateDmesh#Original)
+IFMACRO(privateDmesh#Restriction)
+    {
+        fespace WhLocalPrivate(meshName[level - 1], P);
+        fespace WhOriginalPrivate(privateDmesh#Original, P);
+        privateDmesh#Restriction.resize(WhOriginalPrivate.ndof);
+        privateDmesh#Restriction = restrict(WhLocalPrivate, WhOriginalPrivate, privateDmesh#N2O);
+    }
+ENDIFMACRO
+ENDIFMACRO
+ENDIFMACRO
 ENDIFMACRO
 IFMACRO(privateBuildDmesh)
     privateDmesh#meshName#intersectionDef.resize(1 + numberIntersection);
@@ -734,13 +746,30 @@ IFMACRO(!init)
 NewMacro init(i)i EndMacro
 ENDIFMACRO
 if(mpiSize(ThName#Comm) > 1) {
+IFMACRO(ThName#N2O)
+IFMACRO(ThName#Original)
+IFMACRO(ThName#Restriction)
+    NewMacro privateDmesh#N2O()ThName#N2O EndMacro
+    NewMacro privateDmesh#Original()ThName#Original EndMacro
+    NewMacro privateDmesh#Restriction()ThName#Restriction EndMacro
+ENDIFMACRO
+ENDIFMACRO
+ENDIFMACRO
     partition(ThTab, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, mpiRank(ThName#Comm), mpiSize(ThName#Comm), 1, 1, 1, privateCreateMat, DTab, PkName, intersection, ThName#Comm, -111111, PkName, def, init, 1)
 }
 else {
-    fespace WhGlobal(ThName, PkName);
-    DTab[0].resize(WhGlobal.ndof);
+    fespace WhGlobalPrivate(ThName, PkName);
+    DTab[0].resize(WhGlobalPrivate.ndof);
     DTab[0] = 1;
     intersection.resize(0);
+IFMACRO(ThName#N2O)
+IFMACRO(ThName#Original)
+IFMACRO(ThName#Restriction)
+    ThName#Restriction.resize(WhGlobalPrivate.ndof);
+    ThName#Restriction = 0:WhGlobalPrivate.ndof - 1;
+ENDIFMACRO
+ENDIFMACRO
+ENDIFMACRO
 }
 IFMACRO(!privateCreatePartition)
 constructor(MatName, DTab[0].n, intersection, DTab[0], communicator = ThName#Comm);
