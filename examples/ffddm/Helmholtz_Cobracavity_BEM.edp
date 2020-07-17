@@ -68,7 +68,7 @@ ffddmbuildDfespace(H, H, complex, def, init, P1)
 
 macro Varf(varfName, meshName, PhName)
   BemKernel ker("SL",1,k);
-  varfbem varfName(u,v) = int2dx2d(meshName)(meshName)(BEM(ker,u,v));
+  varf varfName(u,v) = int2dx2d(meshName)(meshName)(BEM(ker,u,v));
 //
 
 macro Varfrhs(varfName, meshName, PhName)
@@ -112,7 +112,7 @@ meshS ThOut = square3(np,np,[(sec1+(radius-height)*sin(angle)+sec2*cos(angle)+ra
 fespace UhOut(ThOut,P1);
 
 BemPotential Pot("SL",k);
-varfbem vp(u,v)=int2d(ThS)(POT(Pot,u,v));
+varf vp(u,v)=int2d(ThS)(POT(Pot,u,v));
 HMatrix<complex> B = vp(Uh,UhOut);
 if (mpirank == 0) cout << B.infos << endl;
 display(B);

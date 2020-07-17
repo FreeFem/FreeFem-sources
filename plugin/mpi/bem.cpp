@@ -584,9 +584,10 @@ AnyType SetCompressMat(Stack stack,Expression emat,Expression einter,int init)
 template<class K>
 void addHmat() {
     Dcl_Type<HMatrixVirt<K>**>(Initialize<HMatrixVirt<K>*>, Delete<HMatrixVirt<K>*>);
-    Dcl_TypeandPtr<HMatrixVirt<K>*>(0,0,::InitializePtr<HMatrixVirt<K>*>,::DeletePtr<HMatrixVirt<K>*>);
+	Dcl_TypeandPtr<HMatrixVirt<K>*>(0,0,::InitializePtr<HMatrixVirt<K>*>,::DeletePtr<HMatrixVirt<K>*>);
     //atype<HMatrix<LR ,K>**>()->Add("(","",new OneOperator2_<string*, HMatrix<LR ,K>**, string*>(get_infos<LR,K>));
-    Add<HMatrixVirt<K>**>("infos",".",new OneOperator1_<std::map<std::string, std::string>*, HMatrixVirt<K>**>(get_infos));
+    
+	Add<HMatrixVirt<K>**>("infos",".",new OneOperator1_<std::map<std::string, std::string>*, HMatrixVirt<K>**>(get_infos));
     
     Dcl_Type<Prod<KN<K>*, K>>();
     TheOperators->Add("*", new OneOperator2<Prod<KN<K>*, K>, HMatrixVirt<K>**, KN<K>*>(Build));
@@ -1177,139 +1178,57 @@ public:
 //// end type BEM kernel / potential
 
 
-const int NB_NAME_PARM_HMAT =  39;
 
-struct OpCall_FormBEM_np {
-    static basicAC_F0::name_and_type name_param[] ;
-    static const int n_name_param =1+NB_NAME_PARM_HMAT;
-};
-
-
-basicAC_F0::name_and_type OpCall_FormBEM_np::name_param[] = {
-    {"bmat", &typeid(Matrice_Creuse< R > *)}, 
-    {  "init", &typeid(bool)}, \
-    {  "solver", &typeid(string*)}, \
-    {  "eps", &typeid(double)  }, \
-    {  "precon",&typeid(Polymorphic*)}, \
-    {  "dimKrylov",&typeid(long)}, \
-    {  "tgv",&typeid(double )}, \
-    {  "factorize",&typeid(long)}, \
-    {  "strategy",&typeid(long )}, \
-    {  "tolpivot",&typeid(double )}, \
-    {  "tolpivotsym",&typeid(double )}, \
-    {  "nbiter", &typeid(long)}, \
-    { "datafilename", &typeid(string*)} , \
-    { "lparams",&typeid(KN_<long>)} , \
-    { "dparams", &typeid(KN_<double>)},  \
-    { "smap", &typeid(map<string,string>*)}, \
-    { "permr", &typeid(KN_<long>)}, \
-    { "permc", &typeid(KN_<long>)}, \
-    { "scaler", &typeid(KN_<double>)}, \
-    { "scalec", &typeid(KN_<double>)}, \
-    { "sparams", &typeid(string*)}, \
-    { "commworld", &typeid(pcommworld)}, \
-    { "master", &typeid(long)}, \
-    { "rinfo", &typeid(KN<double>*)}, \
-    { "info", &typeid(KN<long>*)}, \
-    { "kerneln", &typeid(  KNM<double> *)}, \
-    { "kernelt", &typeid(  KNM<double> *)}, \
-    { "kerneldim", &typeid(long*)}, \
-    { "verb", &typeid(long)}, \
-    { "x0", &typeid(bool)}, \
-    { "veps", &typeid(double*)  }, \
-    { "rightprecon", &typeid(bool)  }, \
-    { "sym", &typeid(bool)  }, \
-    { "positive", &typeid(bool)  }, \
-    {  "eta", &typeid(double)}, \
-    {  "minclustersize", &typeid(long)}, \
-    {  "maxblocksize", &typeid(long)}, \
-    {  "mintargetdepth", &typeid(long)}, \
-    {  "minsourcedepth", &typeid(long)}, \
-    {  "compressor",&typeid(string*)}
-};
-
-
-
-
-
-template<class VFES1, class VFES2>
-class Call_FormBEM: public E_F0mps
-{
-public:
-    const int d1,d2;
-    Expression *nargs;
-    list<C_F0> largs;
-    typedef list<C_F0>::const_iterator const_iterator;
-    
-    const int N,M;
-    Expression euh,evh;
-    Call_FormBEM(int dd1,int dd2,Expression * na,Expression  LL, Expression fi,Expression fj) ;
-    AnyType operator()(Stack stack) const
-    { InternalError(" bug: no eval of Call_FormBEM ");}
-    operator aType () const { return atype<void>();}
-    
-};
-
-template<class VFES1, class VFES2>
-Call_FormBEM<VFES1,VFES2>::Call_FormBEM(int dd1,int dd2,Expression * na,Expression  BB,Expression fi, Expression fj)
-: d1(dd1),d2(dd2),nargs(na),largs(),N(fi->nbitem()),M(fj->nbitem()),
-euh(fi), evh(fj)
-{
-    assert(nargs );
-    const C_args * LLL=dynamic_cast<const C_args *>(BB);
-    if (!LLL)
-        CompileError("Sorry the variationnal form (varf)  is not a the variationnal form (type const BemFormBilinear *)");
-    largs=LLL->largs;
+bool C_args::IsBemBilinearOperator() const {
+for (const_iterator i=largs.begin(); i != largs.end();i++) {
+    C_F0  c= *i;
+    aType r=c.left();
+    if  ( r!= atype<const class BemFormBilinear *>() )
+         return false;
 }
+return true;}
 
-
-
-template<class T,class v_fes1,class v_fes2>
-struct OpCall_FormBEM
-: public OneOperator,
-public OpCall_FormBEM_np
-{
-    typedef v_fes1 *pfes1;
-    typedef v_fes2 *pfes2;
-    static const int d1=v_fes1::dHat;
-    static const int d2=v_fes2::dHat;
+// bem + fem
+bool C_args::IsMixedBilinearOperator() const {
+if ( this->IsBilinearOperator() && this->IsBemBilinearOperator()  ) return true;
     
-    E_F0 * code(const basicAC_F0 & args) const
-    { Expression * nargs = new Expression[n_name_param];
-        args.SetNameParam(n_name_param,name_param,nargs);
-        return  new Call_FormBEM<v_fes1,v_fes2>(d1,d2,nargs,to<const C_args*>(args[0]),to<pfes1*>(args[1]),to<pfes2*>(args[2]));}
-    OpCall_FormBEM() :
-    OneOperator(atype<const Call_FormBEM<v_fes1,v_fes2>*>(),atype<const T *>(),atype<pfes1*>(),atype<pfes2*>()) {}
-};
+return false;}
 
 
-
+//const int NB_NAME_PARM_HMAT =  NB_NAME_PARM_MAT + 6; //40;
 
 template<class R, class v_fes1, class v_fes2>
 struct OpHMatrixtoBEMForm
-: public OneOperator
+: /*public OpMatrixtoBilinearForm<R, v_fes1, v_fes2>//,*/ public OneOperator
 {
-    typedef typename Call_FormBEM<v_fes1,v_fes2>::const_iterator const_iterator;  
+    typedef typename Call_FormBilinear<v_fes1,v_fes2>::const_iterator const_iterator;
     int init;
     class Op : public E_F0mps {
     public:
-        Call_FormBEM<v_fes1,v_fes2> *b; 
-        Expression a;
+        Call_FormBilinear<v_fes1,v_fes2> *b;
+		Expression a;
         int init;
         AnyType operator()(Stack s)  const ;
         
         Op(Expression aa,Expression  bb,int initt)
-        : b(new Call_FormBEM<v_fes1,v_fes2>(* dynamic_cast<const Call_FormBEM<v_fes1,v_fes2> *>(bb))),a(aa),init(initt)
-        { assert(b && b->nargs); }
+        : b(new Call_FormBilinear<v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<v_fes1,v_fes2> *>(bb))),a(aa),init(initt)
+        { assert(b && b->nargs);  
+		}
         operator aType () const { return atype<HMatrixVirt<R> **>();}
         
     };
+    
     E_F0 * code(const basicAC_F0 & args) const
-    { 	return  new Op(to<HMatrixVirt<R> **>(args[0]),args[1],init);}
-    OpHMatrixtoBEMForm(int initt=0) :
-    OneOperator(atype<HMatrixVirt<R> **>(),atype<HMatrixVirt<R> **>(),atype<const Call_FormBEM<v_fes1,v_fes2> *>()),
-    init(initt)
-    {}
+    { 	
+	    Expression p=args[1];
+	    Call_FormBilinear<v_fes1,v_fes2> *t( new Call_FormBilinear<v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<v_fes1,v_fes2> *>(p))) ;
+		return  new Op(to<HMatrixVirt<R> **>(args[0]),args[1],init);}
+  
+     OpHMatrixtoBEMForm(int initt=0) : //OpMatrixtoBilinearForm<R, v_fes1, v_fes2> (initt, ttype) {}
+	 OneOperator(atype<HMatrixVirt<R> **>(),atype<HMatrixVirt<R> **>(),atype<const Call_FormBilinear<v_fes1,v_fes2>*>()),
+	    init(initt)
+	    {}
+    
 };
 
 
@@ -1371,119 +1290,39 @@ BemPotential* getBemPotential(Stack stack, const list<C_F0> & largs)  {
     return P;
 }
 
-struct Data_Bem_Solver {
-    
-    static std::map<std::string,int> *  mds;
-    typedef std::map<std::string,int>::const_iterator IMDS;
-    
-    Expression einitmat;
-    bool initmat;
-    string  solver;
-    double epsilon;
-    const void * precon;
-    int NbSpace;
-    int strategy;
-    double tgv;
-    int factorize;
-    double tol_pivot;
-    double tol_pivot_sym;
-    int itmax ;
-    string data_filename;
-    KN<long> lparams;  //  copy arry more secure ...
-    KN<double> dparams;
-    
-    MyMap<String,String> * smap;
-    
-    KN<long> perm_r;
-    KN<long> perm_c;
-    KN<double> scale_r;
-    KN<double> scale_c;
-    string sparams;
-    pcommworld commworld;  // pointeur sur le commworld
-    int master; //  master rank in comm add FH 02/2013 for MUMPS ... => VDATASPARSESOLVER exist
-    // array for return information for mumps ...
-    KN<double> * rinfo;
-    KN<long> * info;
-    
-    KNM<double>* kerneln;
-    KNM<double> * kernelt;
-    long *kerneldim;
-    long  verb;
-    bool x0; //  init by 0 the inital data the solution
-    double * veps; //    to get and set value of eps
-    bool rightprecon;
-    bool sym;// know is set or not
-    bool positive;
-    
-    
+struct Data_Bem_Solver
+: public Data_Sparse_Solver {
     double eta;
-    int minclustersize,maxblocksize,mintargetdepth,minsourcedepth;
-    string compressor;
+       int minclustersize,maxblocksize,mintargetdepth,minsourcedepth;
+       string compressor;
+       
+       Data_Bem_Solver()
+       : Data_Sparse_Solver(),
+       eta(10.),
+       minclustersize(10),
+       maxblocksize(1000000),
+       mintargetdepth(htool::Parametres::mintargetdepth),
+       minsourcedepth(htool::Parametres::minsourcedepth),
+       compressor("partialACA")
     
-    Data_Bem_Solver()
-    :
-    einitmat(0),
-    solver(""),
-    epsilon(1e-3),
-    eta(10.),
-    minclustersize(10),
-    maxblocksize(1000000),
-    mintargetdepth(htool::Parametres::mintargetdepth),
-    minsourcedepth(htool::Parametres::minsourcedepth),
-    compressor("partialACA"),
-    precon(0),
-    NbSpace(1000),
-    strategy(0),
-    tgv(ff_tgv),
-    factorize(0),
-    tol_pivot(-1),
-    tol_pivot_sym(-1),
-    itmax(0),
-    smap(0) ,
-    commworld(0),
-    master(0),
-    rinfo(0),
-    info(0),
-    kerneln(0), kernelt(0), kerneldim(0),verb(0) ,x0(true),veps(0),
-    rightprecon(true),
-    sym(false),
-    positive(false)
-    
-    {}
-    
+      {epsilon=1e-3;}
+     
     template<class R>
-    void Init_sym_positive_var();
+       void Init_sym_positive_var();
     
-private:
-    Data_Bem_Solver(const Data_Bem_Solver& ); // pas de copie
-    
-};
+    private:
+        Data_Bem_Solver(const Data_Bem_Solver& ); // pas de copie
+        
+    };
+
 
 template<class R>
 void Data_Bem_Solver::Init_sym_positive_var()
 {
-    //  put the solver name in UPPER CASE
-    std::transform(solver.begin(), solver.end(), solver.begin(), static_cast<int(*)(int)>(std::toupper));
-    auto i=  TheFFSolver<int,R>::ffsolver.find(solver);
-    if ( i != TheFFSolver<int,R>::ffsolver.end())
-    {
-        //  1 unsym , 2 sym, 4 pos , 8 nopos, 16  seq, 32  ompi, 64 mpi ,
-        int ts = i->second->orTypeSol ;
-        if ( (ts & 2) && (( ts & 1 ) ==0)) sym=0; //
-        if ( (ts & 4) && (( ts & 8 ) ==0)) positive=0; //
-        if(mpirank==0 && verbosity>4)
-            cout <<  "  The solver "<< solver << " need sym "<< sym << " and  positif def "<< positive << " matrix \n";
-    }
-    else
-    {
-        if( solver == "CHOLESKY") {sym = true; positive = true;}
-        if( solver == "CROUT") {sym = true;}
-        if( solver == "CG") {sym = true;positive=true;}
-        if( solver == "SPARSESOLVERSYM") {sym=true;}
-        if( solver == "CHOLMOD") {sym=true;}
-    }
+    
+    Data_Sparse_Solver::Init_sym_positive_var<R>(-1);
+    
 }
-
 
 
 template<class R>
@@ -1494,7 +1333,7 @@ inline void SetEnd_Data_Bem_Solver(Stack stack,Data_Bem_Solver & ds,Expression c
         bool unset_eps=true;
         ds.initmat=true;
         ds.factorize=0;
-        int kk = n_name_param-NB_NAME_PARM_HMAT; 
+        int kk = n_name_param-(NB_NAME_PARM_MAT+NB_NAME_PARM_HMAT)-1; cout << "test kk " << kk << " " << NB_NAME_PARM_MAT << endl;
         if (nargs[++kk]) ds.initmat= ! GetAny<bool>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.solver= * GetAny<string*>((*nargs[kk])(stack));
         ds.Init_sym_positive_var<R>();//  set def value of sym and posi
@@ -1543,6 +1382,9 @@ inline void SetEnd_Data_Bem_Solver(Stack stack,Data_Bem_Solver & ds,Expression c
         if (nargs[++kk]) ds.rightprecon= GetAny<bool>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.sym= GetAny<bool>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.positive= GetAny<bool>((*nargs[kk])(stack));
+	    if (nargs[++kk])  { ds.getnbiter= GetAny<long*>((*nargs[kk])(stack));
+	               if( ds.getnbiter) *ds.getnbiter=-1; //undef 
+	           }
         if(ds.solver == "") { // SET DEFAULT SOLVER TO HRE ...
             if( ds.sym && ds.positive ) ds.solver=*def_solver_sym_dp;
             else if( ds.sym ) ds.solver=*def_solver_sym;
@@ -1553,10 +1395,9 @@ inline void SetEnd_Data_Bem_Solver(Stack stack,Data_Bem_Solver & ds,Expression c
         if (nargs[++kk]) ds.minclustersize = GetAny<int>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.maxblocksize = GetAny<int>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.mintargetdepth = GetAny<int>((*nargs[kk])(stack));
-        if (nargs[++kk]) ds.minsourcedepth = GetAny<int>((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.minsourcedepth = GetAny<int>((*nargs[kk])(stack)); 
         if (nargs[++kk]) ds.compressor = *GetAny<string*>((*nargs[kk])(stack));
-        
-		ffassert(kk == n_name_param);
+		ffassert(++kk == n_name_param);
     }
     
     
@@ -1627,6 +1468,35 @@ int typeVFBEM(const list<C_F0> & largs, Stack stack)
     }
     return VVFBEM;
 }
+
+
+int typeVarf(const list<C_F0> & largs, Stack stack) 
+{
+    list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end();
+    
+    int typeVf =-1, ik=-1;
+	bool haveBemBilinearOperator=false, IsMixedBilinearOperator=false, haveBilinearOperator=false;
+    for (ii=ib;ii != ie;ii++) {
+        Expression e=ii->LeftValue();
+        aType r = ii->left(); 
+        
+        if (r==atype<const  BemFormBilinear *>()) 
+            haveBemBilinearOperator=true;
+            //BemFormBilinear * bb= GetAny<BemFormBilinear *>((*e)(0));
+          //  VVFBEM = bb->type;
+        else if (r==atype<const  FormBilinear *>()) 
+            haveBilinearOperator=true;
+		
+        ffassert(ik);        
+    }
+	
+	//typeVf =( haveBilinearOperator?0):((haveBemBilinearOperator )?1:-1);
+		typeVf=(  haveBilinearOperator )?0:(( haveBemBilinearOperator )?1:-1);
+	
+    return typeVf;
+}
+
+
 
 
 
@@ -1908,8 +1778,7 @@ void ff_POT_Generator(HMatrixVirt<R>** Hmat,BemPotential *typePot, Dof<P> &dof, 
     }
 }	
 
-
-
+// the operator
 template<class R,class v_fes1,class v_fes2>
 AnyType OpHMatrixtoBEMForm<R,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
 {
@@ -1945,16 +1814,19 @@ AnyType OpHMatrixtoBEMForm<R,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
     if (mpirank == 0 && verbosity>5) 
         cout << "test VFBEM type (1 kernel / 2 potential) "  << VFBEM << endl;
     
+	int type = typeVarf(largs,stack);
+	if (mpirank == 0 && verbosity>5) 
+		cout << "test type " << type << endl;
     HMatrixVirt<R>** Hmat =GetAny<HMatrixVirt<R>** >((*a)(stack));
     
     // info about HMatrix and type solver
     Data_Bem_Solver ds;
     ds.factorize=0;
     ds.initmat=true;
-    SetEnd_Data_Bem_Solver<R>(stack,ds, b->nargs,NB_NAME_PARM_HMAT);  // LIST_NAME_PARM_HMAT
+    SetEnd_Data_Bem_Solver<R>(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);  // LIST_NAME_PARM_HMAT 
     WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);
     
-    // compression info
+    // compression infogfg
     SetMaxBlockSize(ds.maxblocksize);
     SetMinClusterSize(ds.minclustersize);
     SetEpsilon(ds.epsilon);
@@ -1968,15 +1840,17 @@ AnyType OpHMatrixtoBEMForm<R,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
     const SMesh & ThU =Uh->Th; // line
     const TMesh & ThV =Vh->Th; // colunm
     bool samemesh = (void*)&Uh->Th == (void*)&Vh->Th;  // same Fem2D::Mesh     +++ pot or kernel
-    
+ 
     if (VFBEM==1) 
-        ffassert (samemesh);        
-    if(init) 
+        ffassert (samemesh);      
+	 if(init) 
         *Hmat =0;
+      *Hmat =0; 
     if( *Hmat)
-        delete *Hmat;
-    *Hmat =0;
-    
+		    delete *Hmat; 
+	
+    *Hmat =0; 
+	
     Geometry node; MeshBemtool mesh;
     Mesh2Bemtool(ThU, node, mesh);
     if(mpirank == 0 && verbosity>5)
@@ -2019,18 +1893,10 @@ AnyType OpHMatrixtoBEMForm<R,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
         Mesh2Bemtool(ThV,node_output);
         ff_POT_Generator<R,P1,MeshBemtool,SMesh>(Hmat,Pot,dof,mesh,node_output, ds.compressor, p1,p2,comm);
     }	
-    
     return Hmat;
     
 }
 
-template class Call_FormBEM<v_fesS, v_fesS>;
-template class Call_FormBEM<v_fesS, v_fesL>;
-template class Call_FormBEM<v_fesL, v_fesS>;
-template class Call_FormBEM<v_fesL, v_fesL>;
-
-template class Call_FormBEM<v_fesL, v_fes>;
-//template class Call_FormBEM<v_fesL, v_fesL>;
 
 static void Init_Bem() {
     
@@ -2039,9 +1905,11 @@ static void Init_Bem() {
     map_type[typeid(const BemKFormBilinear *).name( )] = new ForEachType< BemKFormBilinear >;  
     map_type[typeid(const BemPFormBilinear *).name( )] = new ForEachType< BemPFormBilinear >; 
     
-    basicForEachType *t_BEM = atype< const BemFormBilinear * >( );
+    basicForEachType *t_BEM = atype< const C_args * >( ); //atype< const BemFormBilinear * >( );
+    basicForEachType *t_fbem = atype< const BemFormBilinear * >( );
+    
     aType t_C_args = map_type[typeid(const C_args *).name( )];
-    atype< const C_args * >( )->AddCast(new OneOperatorCode< C_args >(t_C_args, t_BEM) );    // bad
+    atype< const C_args * >( )->AddCast(new OneOperatorCode< C_args >(t_C_args, t_fbem) );    // bad
     
     
     typedef  const BemKernel fkernel;
@@ -2073,26 +1941,7 @@ static void Init_Bem() {
     Dcl_Type< const FoperatorKBEM * >( );
     Dcl_Type< const FoperatorPBEM * >( );
     Dcl_Type<std::map<std::string, std::string>*>( );
-    
-    Dcl_Type< const Call_FormBEM< v_fesS, v_fesS> * >( );
-    Dcl_Type< const Call_FormBEM< v_fesS, v_fesL> * >( );
-    Dcl_Type< const Call_FormBEM< v_fesL, v_fesS> * >( );
-    Dcl_Type< const Call_FormBEM< v_fesL, v_fesL> * >( );
-    
-    Dcl_Type< const Call_FormBEM< v_fesL, v_fes> * >( );
-    Dcl_Type< const Call_FormBEM< v_fesS, v_fes> * >( );
-	
-	
-    Add< const BemFormBilinear * >("(", "", new OpCall_FormBEM< BemFormBilinear, v_fesS, v_fesS >);
-    Add< const BemFormBilinear * >("(", "", new OpCall_FormBEM< BemFormBilinear, v_fesS, v_fesL >);
-    Add< const BemFormBilinear * >("(", "", new OpCall_FormBEM< BemFormBilinear, v_fesL, v_fesS >);
-    Add< const BemFormBilinear * >("(", "", new OpCall_FormBEM< BemFormBilinear, v_fesL, v_fesL >);
-	
-
-    Add< const BemFormBilinear * >("(", "", new OpCall_FormBEM< BemFormBilinear, v_fesL, v_fes >);
-    Add< const BemFormBilinear * >("(", "", new OpCall_FormBEM< BemFormBilinear, v_fesS, v_fes >);
-	
-    
+        
     TheOperators->Add("<<",new OneBinaryOperator<PrintPinfos<std::map<std::string, std::string>*>>);
     Add<std::map<std::string, std::string>*>("[","",new OneOperator2_<string*, std::map<std::string, std::string>*, string*>(get_info));
 
@@ -2107,27 +1956,25 @@ static void Init_Bem() {
     TheOperators->Add("<-", new OneOperator3_<pBemPotential*,pBemPotential*,string*,std::complex<double> >(&initPotential_Helmholtz));
     TheOperators->Add("<-", new OneOperator2_<pBemPotential*,pBemPotential*,string* >(&initPotential_default));
     
-    zzzfff->Add("HMatrix", atype<HMatrixVirt<double> **>());
-    map_type_of_map[make_pair(atype<HMatrixVirt<double>**>(), atype<double*>())] = atype<HMatrixVirt<double>**>();
-    map_type_of_map[make_pair(atype<HMatrixVirt<double>**>(), atype<Complex*>())] = atype<HMatrixVirt<std::complex<double> >**>();
-    
+	zzzfff->Add("HMatrix", atype<HMatrixVirt<double> **>());
+	map_type_of_map[make_pair(atype<HMatrixVirt<double>**>(), atype<double*>())] = atype<HMatrixVirt<double>**>();
+	map_type_of_map[make_pair(atype<HMatrixVirt<double>**>(), atype<Complex*>())] = atype<HMatrixVirt<std::complex<double> >**>();
+		
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesS, v_fesS > (1) );
-    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesS, v_fesS >);
+    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesS, v_fesS > );
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fesL > (1) );
-    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fesL >);
-	
+    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fesL > );
+       
 
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fes > (1) );
-    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fes >);
+    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fes > );
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fesS > (1) );
-    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fesS >);
+    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fesS > );
 
-    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesS, v_fes > (1) );
-    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesS, v_fes >);
-	
-    
+    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesS, v_fes > (1));
+    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesS, v_fes > );
+
     // BemKernel
-    
     
     Dcl_Type<listBemKernel> ();
     TheOperators->Add("+",new OneBinaryOperator_st< Op_addBemKernel<listBemKernel,pBemKernel,pBemKernel> >);
@@ -2143,7 +1990,7 @@ static void Init_Bem() {
     Add< const CBemDomainOfIntegration * >("(", "", new OneOperatorCode< BemKFormBilinear >);
     Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< BemPFormBilinear >);
     
-    zzzfff->AddF("varfbem", t_BEM);
+   // zzzfff->AddF("varfbem", t_BEM);
     
     Global.Add("BEM","(",new FormalKBEMcode);
     Global.Add("POT","(",new FormalPBEMcode);

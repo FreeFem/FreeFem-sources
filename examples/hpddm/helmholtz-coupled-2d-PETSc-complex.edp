@@ -123,10 +123,10 @@ HMatrix<complex> TDL, SL;
         for[i, p : permc] perm[i] = real(p);
     }
     BemKernel kerTDL("TDL",1,k);
-    varfbem varfTDL(u,v) = int1dx1d(ThG)(ThG)(BEM(kerTDL,u,v,withmass=0.5));
+    varf varfTDL(u,v) = int1dx1d(ThG)(ThG)(BEM(kerTDL,u,v,withmass=0.5));
     TDL = varfTDL(UhG, UhG);
     BemKernel kerSL("SL",1,k);
-    varfbem varfSL(u,v) = int1dx1d(ThG)(ThG)(BEM(kerSL,u,v));
+    varf varfSL(u,v) = int1dx1d(ThG)(ThG)(BEM(kerSL,u,v));
     SL = varfSL(UhG, UhG);
 }
 func complex[int] opSurf(complex[int]& in) {
@@ -140,7 +140,7 @@ func complex[int] opSurf(complex[int]& in) {
 complex[int,int] dense(1, 1);
 {
     BemKernel kerSL("SL",1,k);
-    varfbem varfSL(u,v) = int1dx1d(ThL)(ThL)(BEM(kerSL,u,v));
+    varf varfSL(u,v) = int1dx1d(ThL)(ThL)(BEM(kerSL,u,v));
     HMatrix<complex> A = varfSL(VhS, VhS, commworld=mpiCommSelf);
     dense.resize(VhS.ndof, VhS.ndof);
     dense = A;

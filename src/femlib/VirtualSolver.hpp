@@ -75,7 +75,6 @@ struct Data_Sparse_Solver {
     :
     einitmat(0),
     solver(""),
-    epsilon(1e-6),
     precon(0),
     NbSpace(1000),
     strategy(0),
@@ -94,7 +93,7 @@ struct Data_Sparse_Solver {
     sym(false),
     positive(false),
     getnbiter(0) // add Mars 201
-    {}
+    {epsilon=1e-6;}
     void Update(Stack s)
     {
         if(einitmat)

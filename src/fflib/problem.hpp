@@ -146,6 +146,8 @@ class C_args: public E_F0mps  {public:
   bool Zero()  const { return largs.empty();} // BIG WARNING April and wrong functon FH v 3.60 .......
   bool IsLinearOperator() const;
   bool IsBilinearOperator() const;
+  bool IsBemBilinearOperator() const;
+  bool IsMixedBilinearOperator() const;
 };
 
 class C_args_minus: public C_args  {public:
@@ -626,7 +628,7 @@ public:
 
 };
 
-template<class VFES>
+template<class VFES1,class VFES2>
 class Call_FormBilinear: public E_F0mps
 {
 public:
@@ -653,7 +655,7 @@ struct OpCall_FormLinear_np {
 
 struct OpCall_FormBilinear_np {
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =1+NB_NAME_PARM_MAT; // 9-> 11 FH 31/10/2005  11->12 nbiter 02/2007  // 12->22 MUMPS+ Autre Solveur 02/08
+    static const int n_name_param =1+NB_NAME_PARM_MAT+NB_NAME_PARM_HMAT; // 9-> 11 FH 31/10/2005  11->12 nbiter 02/2007  // 12->22 MUMPS+ Autre Solveur 02/08  // 34->40 param bem solver
 };
 
 template<class T,class v_fes>
@@ -696,21 +698,21 @@ struct OpCall_FormLinear2
     OneOperator(atype<const Call_FormLinear<v_fes>*>(),atype<const T*>(),atype<long>(),atype<pfes*>()) {}
 };
 
-template<class T,class v_fes>
+template<class T,class v_fes1, class v_fes2>
 struct OpCall_FormBilinear
   : public OneOperator ,
   OpCall_FormBilinear_np
 {
-  typedef v_fes *pfes;
-  static const int d=v_fes::dHat;
+  typedef v_fes1 *pfes1; typedef v_fes2 *pfes2;
+  static const int d1=v_fes1::dHat, d2=v_fes2::dHat;
 
   E_F0 * code(const basicAC_F0 & args) const
   { Expression * nargs = new Expression[n_name_param];
     args.SetNameParam(n_name_param,name_param,nargs);
     // cout << " OpCall_FormBilinear " << *args[0].left() << " " << args[0].LeftValue() << endl;
-    return  new Call_FormBilinear<v_fes>(v_fes::dHat,nargs,to<const C_args*>(args[0]),to<pfes*>(args[1]),to<pfes*>(args[2]));}
+    return  new Call_FormBilinear<v_fes1, v_fes2>(d1,nargs,to<const C_args*>(args[0]),to<pfes1*>(args[1]),to<pfes2*>(args[2]));}
   OpCall_FormBilinear() :
-    OneOperator(atype<const Call_FormBilinear<v_fes>*>(),atype<const T *>(),atype<pfes*>(),atype<pfes*>()) {}
+    OneOperator(atype<const Call_FormBilinear<v_fes1,v_fes2>*>(),atype<const T *>(),atype<pfes1*>(),atype<pfes2*>()) {}
 };
 
 
@@ -766,21 +768,21 @@ struct OpArraytoLinearForm
 };
 
 
-template<class R,class v_fes>  //  to make   A=linearform(x)
+template<class R,class v_fes1,class v_fes2>  //  to make   A=linearform(x)
 struct OpMatrixtoBilinearForm
   : public OneOperator
 {
-  typedef typename Call_FormBilinear<v_fes>::const_iterator const_iterator;
+  typedef typename Call_FormBilinear<v_fes1,v_fes2>::const_iterator const_iterator;
   int init;
   class Op : public E_F0mps {
   public:
-    Call_FormBilinear<v_fes> *b;
+    Call_FormBilinear<v_fes1,v_fes2> *b;
     Expression a;
     int init;
     AnyType operator()(Stack s)  const ;
 
     Op(Expression aa,Expression  bb,int initt)
-      : b(new Call_FormBilinear<v_fes>(* dynamic_cast<const Call_FormBilinear<v_fes> *>(bb))),a(aa),init(initt)
+      : b(new Call_FormBilinear<v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<v_fes1,v_fes2> *>(bb))),a(aa),init(initt)
   { assert(b && b->nargs);
     bool iscmplx=FieldOfForm(b->largs,IsComplexType<R>::value)  ;
      // cout<< "FieldOfForm:iscmplx " << iscmplx << " " << IsComplexType<R>::value << " " << ((iscmplx) == IsComplexType<R>::value) << endl;
@@ -792,7 +794,7 @@ struct OpMatrixtoBilinearForm
   E_F0 * code(const basicAC_F0 & args) const
   { return  new Op(to<Matrice_Creuse<R>*>(args[0]),args[1],init);}
   OpMatrixtoBilinearForm(int initt=0) :
-    OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_FormBilinear<v_fes>*>()),
+    OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_FormBilinear<v_fes1,v_fes2>*>()),
     init(initt)
  {}
 };
@@ -1249,31 +1251,40 @@ struct CGMatVirtPreco : CGMatVirt<int,R>
     }
 };
 
-
-template<class R,class v_fes>
-AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
+template<class R,class v_fes1,class v_fes2>
+AnyType OpMatrixtoBilinearForm<R,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
 {
-  typedef typename  v_fes::pfes pfes;
-  typedef typename  v_fes::FESpace FESpace;
-  typedef typename  FESpace::Mesh Mesh;
-  typedef typename  FESpace::FElement FElement;
-  typedef typename  Mesh::Element Element;
-  typedef typename  Mesh::Vertex Vertex;
-  typedef typename  Mesh::RdHat RdHat;
-  typedef typename  Mesh::Rd Rd;
-
+  typedef typename  v_fes1::pfes pfes1;
+  typedef typename  v_fes1::FESpace FESpace1;
+  typedef typename  FESpace1::Mesh Mesh1;
+  typedef typename  FESpace1::FElement FElement1;
+  typedef typename  Mesh1::Element Element1;
+  typedef typename  Mesh1::Vertex Vertex1;
+  typedef typename  Mesh1::RdHat RdHat1;
+  typedef typename  Mesh1::Rd Rd1;
+    
+  typedef typename  v_fes2::pfes pfes2;
+  typedef typename  v_fes2::FESpace FESpace2;
+  typedef typename  FESpace2::Mesh Mesh2;
+  typedef typename  FESpace2::FElement FElement2;
+  typedef typename  Mesh2::Element Element2;
+  typedef typename  Mesh2::Vertex Vertex2;
+  typedef typename  Mesh2::RdHat RdHat2;
+  typedef typename  Mesh2::Rd Rd2;
+ 
   assert(b && b->nargs);// *GetAny<pfes * >
-  pfes  * pUh= GetAny<pfes *>((*b->euh)(stack));
-  pfes  * pVh= GetAny<pfes *>((*b->evh)(stack));
-  const FESpace * PUh =  (FESpace*) **pUh ;
-  const FESpace * PVh =  (FESpace*) **pVh ;
+  pfes1  * pUh= GetAny<pfes1 *>((*b->euh)(stack));
+  pfes2  * pVh= GetAny<pfes2 *>((*b->evh)(stack));
+  const FESpace1 * PUh =  (FESpace1*) **pUh ;
+  const FESpace2 * PVh =  (FESpace2*) **pVh ;
   bool A_is_square= PUh == PVh || PUh->NbOfDF == PVh->NbOfDF ;
 
   bool VF=isVF(b->largs);
   Data_Sparse_Solver ds;
   ds.factorize=0;
   ds.initmat=true;
-  SetEnd_Data_Sparse_Solver<R>(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);
+  int np = OpCall_FormBilinear_np::n_name_param - NB_NAME_PARM_HMAT;
+  SetEnd_Data_Sparse_Solver<R>(stack,ds, b->nargs,np);
 
   if (! A_is_square )
    {
@@ -1284,11 +1295,11 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   Matrice_Creuse<R> & A( * GetAny<Matrice_Creuse<R>*>((*a)(stack)));
   if(init) A.init(); //
   if( ! PUh || ! PVh) return SetAny<Matrice_Creuse<R>  *>(&A);
-    const FESpace & Uh =  *PUh ;
-    const FESpace & Vh =  *PVh ;
+    const FESpace1 & Uh =  *PUh ;
+    const FESpace2 & Vh =  *PVh ;
 
 
-  const Mesh & Th = Uh.Th;
+  const Mesh1 & Th = Uh.Th;
   bool same=isSameMesh(b->largs,&Uh.Th,&Vh.Th,stack);
   if ( same)
    {
@@ -1306,20 +1317,20 @@ AnyType OpMatrixtoBilinearForm<R,v_fes>::Op::operator()(Stack stack)  const
        }
      *A.A=R(); // reset value of the matrix
 
-     if ( AssembleVarForm<R,MatriceCreuse<R>,FESpace >( stack,Th,Uh,Vh,ds.sym>0,A.A,0,b->largs) )
-       AssembleBC<R,FESpace>( stack,Th,Uh,Vh,ds.sym>0,A.A,0,0,b->largs,ds.tgv);
+     if ( AssembleVarForm<R,MatriceCreuse<R>,FESpace1 >( stack,Th,Uh,Vh,ds.sym>0,A.A,0,b->largs) )         // FESpace2 axel TODO
+       AssembleBC<R,FESpace1>( stack,Th,Uh,Vh,ds.sym>0,A.A,0,0,b->largs,ds.tgv);
    }
   else
    { // add FH 17 06 2005  int on different meshes.
 #ifdef V3__CODE
      MatriceMap<R>   AAA;
      MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA.size(),ds.sym>0);
-     bool bc=AssembleVarForm<R,MatriceMap<R>,FESpace  >( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs);
+     bool bc=AssembleVarForm<R,MatriceMap<R>,FESpace1  >( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs); // FESpace2 axel TODO
      pMA->addMap(1.,AAA);
 #else
        MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,0,ds.sym);
        MatriceMap<R>  &  AAA = *pMA;
-       bool bc=AssembleVarForm<R,MatriceMap<R>,FESpace  >( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs);
+       bool bc=AssembleVarForm<R,MatriceMap<R>,FESpace1  >( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs); // FESpace2 axel TODO
 
 #endif
        A.A.master(pMA ) ;

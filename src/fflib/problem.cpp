@@ -9453,8 +9453,8 @@ Expression IsFebaseArray(Expression f)
     }
     return febase;
 }
-template<class VFES>
-Call_FormBilinear<VFES>::Call_FormBilinear(int dd,Expression * na,Expression  BB,Expression fi, Expression fj)
+template<class VFES1, class VFES2>
+Call_FormBilinear<VFES1, VFES2>::Call_FormBilinear(int dd,Expression * na,Expression  BB,Expression fi, Expression fj)
 : d(dd),nargs(na),largs(),N(fi->nbitem()),M(fj->nbitem()),
 euh(fi), evh(fj)
 {
@@ -9769,7 +9769,12 @@ template class Call_FormLinear<v_fes>;
 template class Call_FormLinear<v_fes3>;
 template class Call_FormLinear<v_fesS>;
 template class Call_FormLinear<v_fesL>;
-template class Call_FormBilinear<v_fes>;
-template class Call_FormBilinear<v_fes3>;
-template class Call_FormBilinear<v_fesS>;
-template class Call_FormBilinear<v_fesL>;
+template class Call_FormBilinear<v_fes,v_fes>;
+template class Call_FormBilinear<v_fes3,v_fes3>;
+template class Call_FormBilinear<v_fesS,v_fesS>;
+template class Call_FormBilinear<v_fesL,v_fesL>;
+// bem
+template class Call_FormBilinear<v_fesS, v_fesL>;
+template class Call_FormBilinear<v_fesL, v_fesS>;
+template class Call_FormBilinear<v_fesL, v_fes>;
+template class Call_FormBilinear<v_fesS, v_fes>;

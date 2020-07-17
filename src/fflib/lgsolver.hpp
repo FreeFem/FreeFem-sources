@@ -598,19 +598,28 @@ plusAx operator*(const KN_<Complex> &  x) const {return plusAx(this,x);}
     { "positive", &typeid(bool)  } ,\
     { "getnbiteration", &typeid(long*)  }
 
-
-
-
 const int NB_NAME_PARM_MAT =  24 +6+4  ;
-    
-    
+
+// declaration for HMat bem
+
+#define LIST_NAME_PARM_HMAT \
+    {  "eta", &typeid(double)}, \
+    {  "minclustersize", &typeid(long)}, \
+    {  "maxblocksize", &typeid(long)}, \
+    {  "mintargetdepth", &typeid(long)}, \
+    {  "minsourcedepth", &typeid(long)}, \
+    {  "compressor",&typeid(string*)}
+
+const int NB_NAME_PARM_HMAT = 6;
+
+
 template<class R>
 inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expression const *nargs ,int n_name_param,int syma=-1)
     {
         bool unset_eps=true;
         ds.initmat=true;
         ds.factorize=0;
-	int kk = n_name_param-NB_NAME_PARM_MAT-1;
+        int kk = n_name_param-NB_NAME_PARM_MAT-1;
         if (nargs[++kk]) ds.initmat= ! GetAny<bool>((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.solver= * GetAny<string*>((*nargs[kk])(stack));
         ds.Init_sym_positive_var<R>(syma);//  set def value of sym and posi
