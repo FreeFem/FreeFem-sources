@@ -2848,6 +2848,8 @@ namespace PETSc {
         MatShellSetOperation(ptA->_petsc, MATOP_DESTROY, (void (*)(void))ShellDestroy< LinearSolver< Dmat >  >);
         MatSetUp(ptA->_petsc);
       }
+    } else if(ptB->_petsc) {
+      MatDuplicate(ptB->_petsc, MAT_COPY_VALUES, &ptA->_petsc);
     }
     if (c == 0 && nargs[0] && GetAny< bool >((*nargs[0])(stack))) ptK->destroy( );
     return ptA;
