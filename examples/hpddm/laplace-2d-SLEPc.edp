@@ -94,12 +94,7 @@ int[int] Labels=[1,2,3,4]; // labels : bottom, right, top, left sides
 /*          Problem definition         */
 /***************************************/
 varf vA(uh,vh)= intN(Th)        //  Definion of  the problem
-( dx(uh)*dx(vh)+dy(uh)*dy(vh)
-    -sigma*uh*vh               )//  Bilinear form
-    +on(Labels[3], uh = 0.0)    //  Boundary Conditions
-    +on(Labels[2], uh = 0.0)    //  Boundary Conditions
-    +on(Labels[1], uh = 0.0)    //  Boundary Conditions
-    +on(Labels[0], uh = 0.0)    //  Boundary Conditions
+( dx(uh)*dx(vh)+dy(uh)*dy(vh)  )//  Bilinear form
 ;
 
 varf vB(uh,vh)= intN(Th)  //  Definion of  the problem
@@ -113,6 +108,10 @@ matrix<real> B = vB(Vh,Vh);
 /***************************************/
 Mat DistA(A, intersection, D, clean = true);
 Mat DistB(DistA, B, clean = true);
+
+real[int, int] space(DistA.n, 1);
+space = 1;
+
 /***************************************/
 /*          Problem resolution         */
 /***************************************/
@@ -134,7 +133,8 @@ int k = EPSSolve
  DistB,              //
  vectors = EigenVEC, // Array to store the FEM-EigenFunctions
  values  = EigenVAL, // Array to store the EigenValues
- sparams = ssparams  // Parameters for the distributed EigenValue solver
+ sparams = ssparams, // Parameters for the distributed EigenValue solver
+ deflation = space
 );
 
 k=min(k,nEV); // some time the number of converged eigen value

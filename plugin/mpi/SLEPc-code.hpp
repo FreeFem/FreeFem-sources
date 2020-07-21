@@ -101,7 +101,7 @@ class eigensolver : public OneOperator {
                 Expression B;
                 const OneOperator* codeA, *codeB;
                 const int c;
-                static const int n_name_param = 9;
+                static const int n_name_param = 10;
                 static basicAC_F0::name_and_type name_param[];
                 Expression nargs[n_name_param];
                 E_eigensolver(const basicAC_F0& args, int d) : A(0), B(0), codeA(0), codeB(0), c(d) {
@@ -146,7 +146,8 @@ basicAC_F0::name_and_type eigensolver<Type, K, SType>::E_eigensolver::name_param
     {"fields", &typeid(KN<double>*)},
     {"names", &typeid(KN<String>*)},
     {!std::is_same<SType, SVD>::value ? "schurPreconditioner" : "rvectors", !std::is_same<SType, SVD>::value ? &typeid(KN<Matrice_Creuse<HPDDM::upscaled_type<PetscScalar>>>*) : &typeid(FEbaseArrayKn<K>*)},
-    {!std::is_same<SType, SVD>::value ? "schurList" : "rarray", !std::is_same<SType, SVD>::value ? &typeid(KN<double>*) : &typeid(KNM<K>*)}
+    {!std::is_same<SType, SVD>::value ? "schurList" : "rarray", !std::is_same<SType, SVD>::value ? &typeid(KN<double>*) : &typeid(KNM<K>*)},
+    {"deflation", &typeid(KNM<PetscScalar>*)},
 };
 template<class Type, class K, class SType>
 struct _n_User {
@@ -299,6 +300,19 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
             if(std::is_same<SType, EPS>::value) {
                 if(n)
                     EPSSetInitialSpace(eps, n, basis);
+                KNM<PetscScalar>* ptDeflation = nargs[9] ? GetAny<KNM<PetscScalar>*>((*nargs[9])(stack)) : NULL;
+                if(ptDeflation && ptDeflation->M()) {
+                    PetscInt m;
+                    MatGetLocalSize(ptA->_petsc, &m, NULL);
+                    ffassert(m == ptDeflation->N());
+                    Vec* deflation = new Vec[ptDeflation->M()];
+                    for(int i = 0; i < ptDeflation->M(); ++i)
+                        VecCreateMPIWithArray(PetscObjectComm((PetscObject)ptA->_petsc), 1, ptDeflation->N(), PETSC_DECIDE, &ptDeflation->operator( )(0, i), deflation + i);
+                    EPSSetDeflationSpace(eps, ptDeflation->M(), deflation);
+                    for(int i = 0; i < ptDeflation->M(); ++i)
+                        VecDestroy(deflation + i);
+                    delete [] deflation;
+                }
                 EPSSolve(eps);
             }
             else if(std::is_same<SType, SVD>::value) {
@@ -487,7 +501,6 @@ static void Init() {
             argv[i] = const_cast<char*>((*(*pkarg)[i].getap())->c_str());
         PetscBool isInitialized;
         PetscInitialized(&isInitialized);
-        ffassert(MAT_CLASSID);
         if(!isInitialized && mpirank == 0)
             std::cout << "PetscInitialize has not been called, do not forget to load PETSc before loading SLEPc" << std::endl;
         SlepcInitialize(&argc, &argv, 0, "");
