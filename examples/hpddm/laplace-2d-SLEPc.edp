@@ -125,14 +125,15 @@ string ssparams =            // Parameters for the distributed EigenValue solver
   " -st_pc_type lu "       +
   " -st_pc_factor_mat_solver_type mumps" +
   " -eps_view"             +
-  " -eps_gen_hermitian"      // The problem is symmetric
+  " -eps_view_values"             +
+  " -eps_gen_nonhermitian"      // The problem is symmetric
   ;
 
 int k = EPSSolve
 (DistA,              // matrix OP = A − sigma*B
  DistB,              //
  vectors = EigenVEC, // Array to store the FEM-EigenFunctions
- values  = EigenVAL, // Array to store the EigenValues
+ // values  = EigenVAL, // Array to store the EigenValues
  sparams = ssparams, // Parameters for the distributed EigenValue solver
  deflation = space
 );
@@ -144,6 +145,7 @@ k=min(k,nEV); // some time the number of converged eigen value
 /***************************************/
 Vh<real> Temp;
 
+if(0)
 for(int i=0;i<k;i++){
     if(!mpirank) cout << " Eigenvalue #"+i+" = "+EigenVAL[i]<<endl;
     Temp = EigenVEC[i];
