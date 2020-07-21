@@ -18,7 +18,7 @@ createMat(Th, H, Pk)
     fespace Ph(Th, P0);
     Ph part;
     createPartition(Th, part[], P0)
-    ThNo = trunc(Th, abs(part) < 1e-1);
+    ThNo = trunc(Th, abs(part - 1.0) < 1e-1);
 }
 func g = cos(pi*x)*cos(pi*y);
 func real J(real[int]& X) {
