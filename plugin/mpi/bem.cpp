@@ -14,7 +14,7 @@
 #include <htool/types/hmatrix.hpp>
 
 // include the bemtool library .... path define in where library
-//#include <bemtool/operator/block_op.hpp>  
+//#include <bemtool/operator/block_op.hpp>
 #include <bemtool/tools.hpp>
 #include <bemtool/fem/dof.hpp>
 #include <bemtool/operator/operator.hpp>
@@ -311,7 +311,7 @@ public:
                 
                 for (int i=0; i<sizeworld; i++) {
                     recvcounts[i] = 4*nbdenseworld[i];
-                    if (i > 0)	displs[i] = displs[i-1] + recvcounts[i-1];
+                    if (i > 0)    displs[i] = displs[i-1] + recvcounts[i-1];
                 }
                 MPI_Gatherv(rankworld==0?MPI_IN_PLACE:buf, recvcounts[rankworld], MPI_INT, buf, recvcounts, displs, MPI_INT, 0, (*H)->get_comm());
                 
@@ -330,14 +330,14 @@ public:
                 
                 for (int i=0; i<sizeworld; i++) {
                     recvcounts[i] = 5*nblrworld[i];
-                    if (i > 0)	displs[i] = displs[i-1] + recvcounts[i-1];
+                    if (i > 0)    displs[i] = displs[i-1] + recvcounts[i-1];
                 }
                 
                 MPI_Gatherv(rankworld==0?MPI_IN_PLACE:buflr, recvcounts[rankworld], MPI_INT, buflr, recvcounts, displs, MPI_INT, 0, (*H)->get_comm());
                 
                 for (int i=0; i<sizeworld; i++) {
                     recvcounts[i] = nblrworld[i];
-                    if (i > 0)	displs[i] = displs[i-1] + recvcounts[i-1];
+                    if (i > 0)    displs[i] = displs[i-1] + recvcounts[i-1];
                 }
                 
                 MPI_Gatherv(rankworld==0?MPI_IN_PLACE:bufcomp, recvcounts[rankworld], MPI_DOUBLE, bufcomp, recvcounts, displs, MPI_DOUBLE, 0, (*H)->get_comm());
@@ -584,10 +584,10 @@ AnyType SetCompressMat(Stack stack,Expression emat,Expression einter,int init)
 template<class K>
 void addHmat() {
     Dcl_Type<HMatrixVirt<K>**>(Initialize<HMatrixVirt<K>*>, Delete<HMatrixVirt<K>*>);
-	Dcl_TypeandPtr<HMatrixVirt<K>*>(0,0,::InitializePtr<HMatrixVirt<K>*>,::DeletePtr<HMatrixVirt<K>*>);
+    Dcl_TypeandPtr<HMatrixVirt<K>*>(0,0,::InitializePtr<HMatrixVirt<K>*>,::DeletePtr<HMatrixVirt<K>*>);
     //atype<HMatrix<LR ,K>**>()->Add("(","",new OneOperator2_<string*, HMatrix<LR ,K>**, string*>(get_infos<LR,K>));
     
-	Add<HMatrixVirt<K>**>("infos",".",new OneOperator1_<std::map<std::string, std::string>*, HMatrixVirt<K>**>(get_infos));
+    Add<HMatrixVirt<K>**>("infos",".",new OneOperator1_<std::map<std::string, std::string>*, HMatrixVirt<K>**>(get_infos));
     
     Dcl_Type<Prod<KN<K>*, K>>();
     TheOperators->Add("*", new OneOperator2<Prod<KN<K>*, K>, HMatrixVirt<K>**, KN<K>*>(Build));
@@ -994,26 +994,20 @@ class FoperatorKBEM : public E_F0mps { public:
     
     Fi fi;
     Ft ft;
-    Expression kbem,coeffmass;
+    Expression kbem;
     
-    FoperatorKBEM(const basicAC_F0 & args) :fi(0),ft(0),kbem(0),coeffmass(0) {
-        ffassert(args.size()==3); 
-        static basicAC_F0::name_and_type name_param []=  
-        {
-            {"withmass", &typeid(double)}
-        }; 
-        Expression nargs[n_name_param];
-        args.SetNameParam(n_name_param, name_param, nargs);
+    FoperatorKBEM(const basicAC_F0 & args) :fi(0),ft(0),kbem(0) {
+        ffassert(args.size()==3);
+ 
         kbem= CastTo<KBem>(args[0]);
         fi= dynamic_cast<Fi>(CastTo<Fi>(args[1]));
         ft= dynamic_cast<Ft>(CastTo<Ft>(args[2]));
-        coeffmass = nargs[0]; 
         ffassert(kbem && fi && ft);
     }
     
     AnyType operator()(Stack ) const { return SetAny<Result>(this);}
     operator aType () const { return atype<Result>();}
-    FoperatorKBEM(const FoperatorKBEM & fk) : kbem(fk.kbem),fi(fk.fi),ft(fk.ft),coeffmass(fk.coeffmass) {}
+    FoperatorKBEM(const FoperatorKBEM & fk) : kbem(fk.kbem),fi(fk.fi),ft(fk.ft) {}
     
 };
 
@@ -1023,7 +1017,7 @@ class FoperatorKBEM : public E_F0mps { public:
 
 class BemFormBilinear : virtual public E_F0mps { public:
     int type=-1;
-    static  E_F0 * f(const basicAC_F0 & args); 
+    static  E_F0 * f(const basicAC_F0 & args);
 };
 
 
@@ -1035,10 +1029,10 @@ class BemKFormBilinear : public BemFormBilinear { public:
     FoperatorKBEM * b;
     
     BemKFormBilinear(const basicAC_F0 & args) {
-        di= dynamic_cast<A>(CastTo<A>(args[0])); 
+        di= dynamic_cast<A>(CastTo<A>(args[0]));
         B Kb= dynamic_cast<B>(CastTo<B>(args[1]));
         b= new FoperatorKBEM(*Kb);
-        ffassert(di && Kb); 
+        ffassert(di && Kb);
         type=1;
         
         
@@ -1082,22 +1076,16 @@ public:
 class FormalKBEMcode : public OneOperator{
 public:
     
-    static basicAC_F0::name_and_type name_param [];
-    
     FormalKBEMcode( ): OneOperator(atype<C_F0>(),atype<pBemKernel>(), atype<finconnue*>(), atype<ftest*>()) {}
     FormalKBEMcode(int  ): OneOperator(atype<C_F0>(),atype<pBemKernel>()) {}
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
-    C_F0  code2(const basicAC_F0 &args) const {	
+    C_F0  code2(const basicAC_F0 &args) const {
         Expression e=new FoperatorKBEM(args);
         aType r=atype<const FoperatorKBEM *>();
         return C_F0(e,r) ;}
     
-    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}	
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
     
-};
-
-basicAC_F0::name_and_type FormalKBEMcode::name_param[] = {
-    {"withmass", &typeid(double)}
 };
 
 
@@ -1139,9 +1127,9 @@ class BemPFormBilinear : public BemFormBilinear { public:
     FoperatorPBEM * b;
     BemPFormBilinear(const basicAC_F0 & args) {
         di= dynamic_cast<A>(CastTo<A>(args[0]));
-        B Kb= dynamic_cast<B>(CastTo<B>(args[1])); 
+        B Kb= dynamic_cast<B>(CastTo<B>(args[1]));
         b= new FoperatorPBEM(*Kb);
-        ffassert(di && Kb); 
+        ffassert(di && Kb);
         type=2;
     }
     
@@ -1165,12 +1153,12 @@ public:
     FormalPBEMcode( ): OneOperator(atype<C_F0>(),atype<pBemPotential>(), atype<finconnue*>(), atype<ftest*>()) {}
     FormalPBEMcode(int  ): OneOperator(atype<C_F0>(),atype<pBemPotential>()) {}
     E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
-    C_F0  code2(const basicAC_F0 &args) const {	
+    C_F0  code2(const basicAC_F0 &args) const {
         Expression e=new FoperatorPBEM(args);
         aType r=atype<const FoperatorPBEM *>();
         return C_F0(e,r) ;}
     
-    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}	
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
     
 };
 
@@ -1195,80 +1183,99 @@ if ( this->IsBilinearOperator() && this->IsBemBilinearOperator()  ) return true;
 return false;}
 
 
-//const int NB_NAME_PARM_HMAT =  NB_NAME_PARM_MAT + 6; //40;
-
 template<class R, class v_fes1, class v_fes2>
 struct OpHMatrixtoBEMForm
-: /*public OpMatrixtoBilinearForm<R, v_fes1, v_fes2>//,*/ public OneOperator
+: public OneOperator
 {
     typedef typename Call_FormBilinear<v_fes1,v_fes2>::const_iterator const_iterator;
     int init;
     class Op : public E_F0mps {
     public:
         Call_FormBilinear<v_fes1,v_fes2> *b;
-		Expression a;
+        Expression a;
         int init;
         AnyType operator()(Stack s)  const ;
         
         Op(Expression aa,Expression  bb,int initt)
         : b(new Call_FormBilinear<v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<v_fes1,v_fes2> *>(bb))),a(aa),init(initt)
-        { assert(b && b->nargs);  
-		}
+        { assert(b && b->nargs);
+        }
         operator aType () const { return atype<HMatrixVirt<R> **>();}
         
     };
     
     E_F0 * code(const basicAC_F0 & args) const
-    { 	
-	    Expression p=args[1];
-	    Call_FormBilinear<v_fes1,v_fes2> *t( new Call_FormBilinear<v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<v_fes1,v_fes2> *>(p))) ;
-		return  new Op(to<HMatrixVirt<R> **>(args[0]),args[1],init);}
+    {
+        Expression p=args[1];
+        Call_FormBilinear<v_fes1,v_fes2> *t( new Call_FormBilinear<v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<v_fes1,v_fes2> *>(p))) ;
+        return  new Op(to<HMatrixVirt<R> **>(args[0]),args[1],init);}
   
-     OpHMatrixtoBEMForm(int initt=0) : //OpMatrixtoBilinearForm<R, v_fes1, v_fes2> (initt, ttype) {}
-	 OneOperator(atype<HMatrixVirt<R> **>(),atype<HMatrixVirt<R> **>(),atype<const Call_FormBilinear<v_fes1,v_fes2>*>()),
-	    init(initt)
-	    {}
+     OpHMatrixtoBEMForm(int initt=0) :
+     OneOperator(atype<HMatrixVirt<R> **>(),atype<HMatrixVirt<R> **>(),atype<const Call_FormBilinear<v_fes1,v_fes2>*>()),
+        init(initt)
+        {}
     
 };
 
 
 
-BemKernel* getBemKernel(Stack stack, const list<C_F0> & largs)  {
+pair<BemKernel*,double> getBemKernel(Stack stack, const list<C_F0> & largs)  {
     list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end();
     
     BemKernel* K;
+    double alpha=0.;
+    
+    bool haveBemBilinearOperator=false, haveBilinearOperator=false;
     
     for (ii=ib;ii != ie;ii++) {
         Expression e=ii->LeftValue();
         aType r = ii->left();
-        ffassert (r==atype<const  BemFormBilinear *>());
         
-        BemKFormBilinear * bb=new BemKFormBilinear(*dynamic_cast<const BemKFormBilinear *>(e));
-        FoperatorKBEM * b=const_cast<  FoperatorKBEM *>(bb->b);
-        if (b == NULL) {
-            if(mpirank == 0) cout << "dynamic_cast error" << endl; }
+        if (r==atype<const  BemFormBilinear *>() && !haveBemBilinearOperator) {
+            BemKFormBilinear * bb=new BemKFormBilinear(*dynamic_cast<const BemKFormBilinear *>(e));
+            FoperatorKBEM * b=const_cast<  FoperatorKBEM *>(bb->b);
+            if (b == NULL) {
+                if(mpirank == 0) cout << "dynamic_cast error" << endl; }
+            else
+                K=GetAny<BemKernel*>((*b->kbem)(stack));
+            haveBemBilinearOperator=true;
+        }
+        
+        else if (r==atype<const  FormBilinear *>() && !haveBilinearOperator) {
+            
+            const  FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
+            const CDomainOfIntegration & di= *bb->di;
+            // check the integration (keyword)
+            ffassert( (di.kind == CDomainOfIntegration::int1d && di.isMeshL) || (di.kind == CDomainOfIntegration::int2d && di.isMeshS) );  //check only necessary in surface case
+            
+            BilinearOperator * Op=const_cast<  BilinearOperator *>(bb->b);
+            if (Op == NULL) {
+                if(mpirank == 0) cout << "dynamic_cast error" << endl; }
+            
+            
+            
+            BilinearOperator::const_iterator l=Op->v.begin();
+            
+            BilinearOperator::K ll(*l);   //  LinearComb<pair<MGauche,MDroit>,C_F0> BilinearOperator;
+            pair<int,int> finc(ll.first.first),ftest(ll.first.second);
+                                   
+            alpha = GetAny<double>(ll.second.eval(stack));
+            if(mpirank == 0 && verbosity>5) cout << " test coeff mass matrix " << alpha << endl;
+          
+            if(mpirank == 0 && verbosity>5) {
+                cout << "FormBilinear: number of unknow finc=" << finc.first << " ,ftest= " << ftest.first << endl;
+                cout << "FormBilinear: operator order finc=" << finc.second << " ,ftest= " << ftest.second << endl;      // ordre   only op_id=0
+            }
+            ffassert(finc.first==0 && ftest.first==0);
+            ffassert(finc.second==0 && ftest.second==0);
+            haveBilinearOperator=true; // or ffassert(Op->v.size()==1); // check size 1
+        }
         else
-            K=GetAny<BemKernel*>((*b->kbem)(stack));
+            ffassert(0);
     }
-    return K;
+    return std::make_pair(K, alpha); //K;
 }
 
-double getcoeffmass(Stack stack, const list<C_F0> & largs)  {
-    list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end();
-    
-    double alpha=0.; 
-    
-    for (ii=ib;ii != ie;ii++) {
-        Expression e=ii->LeftValue();
-        aType r = ii->left();
-        ffassert (r==atype<const  BemFormBilinear *>());
-        
-        BemKFormBilinear * bb=new BemKFormBilinear(*dynamic_cast<const BemKFormBilinear *>(e));
-        FoperatorKBEM * b=const_cast<  FoperatorKBEM *>(bb->b);
-        alpha = b->coeffmass ? GetAny< double >((*b->coeffmass)(stack)) : 0.;
-    }
-    return alpha;
-}
 
 BemPotential* getBemPotential(Stack stack, const list<C_F0> & largs)  {
     list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end();
@@ -1329,18 +1336,18 @@ template<class R>
 inline void SetEnd_Data_Bem_Solver(Stack stack,Data_Bem_Solver & ds,Expression const *nargs ,int n_name_param)
 {
     
-    {   
+    {
         bool unset_eps=true;
         ds.initmat=true;
         ds.factorize=0;
-        int kk = n_name_param-(NB_NAME_PARM_MAT+NB_NAME_PARM_HMAT)-1; cout << "test kk " << kk << " " << NB_NAME_PARM_MAT << endl;
+        int kk = n_name_param-(NB_NAME_PARM_MAT+NB_NAME_PARM_HMAT)-1;
         if (nargs[++kk]) ds.initmat= ! GetAny<bool>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.solver= * GetAny<string*>((*nargs[kk])(stack));
         ds.Init_sym_positive_var<R>();//  set def value of sym and posi
-        if (nargs[++kk]) ds.epsilon= GetAny<double>((*nargs[kk])(stack)),unset_eps=false; 
+        if (nargs[++kk]) ds.epsilon= GetAny<double>((*nargs[kk])(stack)),unset_eps=false;
         if (nargs[++kk])
         {// modif FH fev 2010 ...
-            const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[kk]); 
+            const  Polymorphic * op=  dynamic_cast<const  Polymorphic *>(nargs[kk]);
             if(op)
             {
                 ds.precon = op->Find("(",ArrayOfaType(atype<KN<R>* >(),false)); // strange bug in g++ is R become a double
@@ -1348,7 +1355,7 @@ inline void SetEnd_Data_Bem_Solver(Stack stack,Data_Bem_Solver & ds,Expression c
             } // add miss
         }
         
-        if (nargs[++kk]) ds.NbSpace= GetAny<long>((*nargs[kk])(stack)); 
+        if (nargs[++kk]) ds.NbSpace= GetAny<long>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.tgv= GetAny<double>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.factorize= GetAny<long>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.strategy = GetAny<long>((*nargs[kk])(stack));
@@ -1382,22 +1389,22 @@ inline void SetEnd_Data_Bem_Solver(Stack stack,Data_Bem_Solver & ds,Expression c
         if (nargs[++kk]) ds.rightprecon= GetAny<bool>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.sym= GetAny<bool>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.positive= GetAny<bool>((*nargs[kk])(stack));
-	    if (nargs[++kk])  { ds.getnbiter= GetAny<long*>((*nargs[kk])(stack));
-	               if( ds.getnbiter) *ds.getnbiter=-1; //undef 
-	           }
+        if (nargs[++kk])  { ds.getnbiter= GetAny<long*>((*nargs[kk])(stack));
+                   if( ds.getnbiter) *ds.getnbiter=-1; //undef
+               }
         if(ds.solver == "") { // SET DEFAULT SOLVER TO HRE ...
             if( ds.sym && ds.positive ) ds.solver=*def_solver_sym_dp;
             else if( ds.sym ) ds.solver=*def_solver_sym;
             else  ds.solver=*def_solver;
             if(mpirank==0 && verbosity>4) cout << "  **Warning: set default solver to " << ds.solver << endl;
         }
-		if (nargs[++kk]) ds.eta = GetAny<double>((*nargs[kk])(stack));
+        if (nargs[++kk]) ds.eta = GetAny<double>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.minclustersize = GetAny<int>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.maxblocksize = GetAny<int>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.mintargetdepth = GetAny<int>((*nargs[kk])(stack));
-        if (nargs[++kk]) ds.minsourcedepth = GetAny<int>((*nargs[kk])(stack)); 
+        if (nargs[++kk]) ds.minsourcedepth = GetAny<int>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.compressor = *GetAny<string*>((*nargs[kk])(stack));
-		ffassert(++kk == n_name_param);
+        ffassert(++kk == n_name_param);
     }
     
     
@@ -1424,7 +1431,7 @@ const EquationEnum whatEquationEnum(BemKernel *K,int i) {
     
 }
 
-BIOpKernelEnum whatTypeEnum(BemKernel *K,int i) { 
+BIOpKernelEnum whatTypeEnum(BemKernel *K,int i) {
     BIOpKernelEnum pKernel;
     switch(K->typeKernel[i]) {
         case 1: pKernel=SL_OP ; break;
@@ -1437,7 +1444,7 @@ BIOpKernelEnum whatTypeEnum(BemKernel *K,int i) {
 }
 
 
-PotKernelEnum whatTypeEnum(BemPotential *P) { 
+PotKernelEnum whatTypeEnum(BemPotential *P) {
     PotKernelEnum pPotential;
     switch(P->typePotential) {
         case 1: pPotential=SL_POT ; break;
@@ -1450,54 +1457,24 @@ PotKernelEnum whatTypeEnum(BemPotential *P) {
 }
 
 
-int typeVFBEM(const list<C_F0> & largs, Stack stack) 
+int typeVFBEM(const list<C_F0> & largs, Stack stack)
 {
     list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end();
     
     int VVFBEM =-1, ik=-1;;
     for (ii=ib;ii != ie;ii++) {
         Expression e=ii->LeftValue();
-        aType r = ii->left(); 
+        aType r = ii->left();
         
         if (r==atype<const  BemFormBilinear *>()) {
             
             BemFormBilinear * bb= GetAny<BemFormBilinear *>((*e)(0));
             VVFBEM = bb->type;
         }
-        ffassert(ik);        
+        ffassert(ik);
     }
     return VVFBEM;
 }
-
-
-int typeVarf(const list<C_F0> & largs, Stack stack) 
-{
-    list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end();
-    
-    int typeVf =-1, ik=-1;
-	bool haveBemBilinearOperator=false, IsMixedBilinearOperator=false, haveBilinearOperator=false;
-    for (ii=ib;ii != ie;ii++) {
-        Expression e=ii->LeftValue();
-        aType r = ii->left(); 
-        
-        if (r==atype<const  BemFormBilinear *>()) 
-            haveBemBilinearOperator=true;
-            //BemFormBilinear * bb= GetAny<BemFormBilinear *>((*e)(0));
-          //  VVFBEM = bb->type;
-        else if (r==atype<const  FormBilinear *>()) 
-            haveBilinearOperator=true;
-		
-        ffassert(ik);        
-    }
-	
-	//typeVf =( haveBilinearOperator?0):((haveBemBilinearOperator )?1:-1);
-		typeVf=(  haveBilinearOperator )?0:(( haveBemBilinearOperator )?1:-1);
-	
-    return typeVf;
-}
-
-
-
 
 
 template <class R, typename P, class MMesh>
@@ -1515,26 +1492,26 @@ void ff_BIO_Generator(HMatrixVirt<R>** Hmat, BemKernel *typeKernel, Dof<P>& dof,
     // Ker= SL_OP DL_OP HS_OP TDL_OP
     if (kappa1 && !iscombined && !kappa2 && !alpha) {
         switch (ker1) {
-            case SL_OP : generator=new BIO_Generator<BIOpKernel<HE,SL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1); 
+            case SL_OP : generator=new BIO_Generator<BIOpKernel<HE,SL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1);
                 if(mpirank == 0 && verbosity>5) cout << " call bemtool func BIOpKernel<HE,SL_OP ..." << endl; break;
-            case DL_OP : generator=new BIO_Generator<BIOpKernel<HE,DL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1); 
+            case DL_OP : generator=new BIO_Generator<BIOpKernel<HE,DL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1);
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func BIOpKernel<HE,DL_OP ..." << endl; break;
-            case HS_OP : generator=new BIO_Generator<BIOpKernel<HE,HS_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1); 
+            case HS_OP : generator=new BIO_Generator<BIOpKernel<HE,HS_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1);
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func BIOpKernel<HE,HS_OP ..." << endl; break;
-            case TDL_OP : generator=new BIO_Generator<BIOpKernel<HE,TDL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1); 
+            case TDL_OP : generator=new BIO_Generator<BIOpKernel<HE,TDL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1);
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func BIOpKernel<HE,TDL_OP ..." << endl; break;
             case CST_OP :  if(verbosity>5) cout << " no tested BIOpKernel<HE,CST_OP" << endl; ffassert(0); break;
         }
     }
     else if (!kappa1 && !iscombined && !kappa2 && !alpha ){
         switch (ker1) {
-            case SL_OP : generator=new BIO_Generator<BIOpKernel<LA,SL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1); 
+            case SL_OP : generator=new BIO_Generator<BIOpKernel<LA,SL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1);
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func BIOpKernel<LA,SL_OP ..." << endl; break;
-            case DL_OP : generator=new BIO_Generator<BIOpKernel<LA,DL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1); 
+            case DL_OP : generator=new BIO_Generator<BIOpKernel<LA,DL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1);
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func BIOpKernel<LA,TDL_OP ..." << endl; break;
-            case HS_OP : generator=new BIO_Generator<BIOpKernel<LA,HS_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1); 
+            case HS_OP : generator=new BIO_Generator<BIOpKernel<LA,HS_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1);
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func BIOpKernel<LA,HS_OP ..." << endl; break;
-            case TDL_OP : generator=new BIO_Generator<BIOpKernel<LA,TDL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1); 
+            case TDL_OP : generator=new BIO_Generator<BIOpKernel<LA,TDL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1);
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func BIOpKernel<LA,TDL_OP ..." << endl; break;
             case CST_OP : if(mpirank == 0 && verbosity>5) cout << " no tested BIOpKernel<LA,CST_OP" << endl; ffassert(0); break;
         }
@@ -1545,26 +1522,26 @@ void ff_BIO_Generator(HMatrixVirt<R>** Hmat, BemKernel *typeKernel, Dof<P>& dof,
     
     else if (kappa1 && !iscombined && !kappa2 && alpha) {
         switch (ker1) {
-            case SL_OP : generator=new BIO_Generator_w_mass<BIOpKernel<HE,SL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha); 
+            case SL_OP : generator=new BIO_Generator_w_mass<BIOpKernel<HE,SL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha);
                 if(mpirank == 0 && verbosity>5) cout << " call bemtool func BIO_Generator_w_mass<HE,SL_OP ...alpha coeff mass matrix=" << alpha << endl; break;
-            case DL_OP : generator=new BIO_Generator_w_mass<BIOpKernel<HE,DL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha); 
+            case DL_OP : generator=new BIO_Generator_w_mass<BIOpKernel<HE,DL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha);
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func BIO_Generator_w_mass<HE,DL_OP ...alpha coeff mass matrix=" << alpha << endl; break;
-            case HS_OP : generator=new BIO_Generator_w_mass<BIOpKernel<HE,HS_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha); 
+            case HS_OP : generator=new BIO_Generator_w_mass<BIOpKernel<HE,HS_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha);
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func BIO_Generator_w_mass<HE,HS_OP ...alpha coeff mass matrix=" << alpha << endl; break;
-            case TDL_OP : generator=new BIO_Generator_w_mass<BIOpKernel<HE,TDL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha); 
+            case TDL_OP : generator=new BIO_Generator_w_mass<BIOpKernel<HE,TDL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha);
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func BIO_Generator_w_mass<HE,TDL_OP ...alpha coeff mass matrix=" << alpha << endl; break;
             case CST_OP :  if(mpirank == 0 && verbosity>5) cout << " no tested BIO_Generator_w_mass<HE,CST_OP" << endl; ffassert(0); break;
         }
     }
     else if (!kappa1 && !iscombined && !kappa2 && alpha){
         switch (ker1) {
-            case SL_OP : generator=new BIO_Generator_w_mass<BIOpKernel<LA,SL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha); 
+            case SL_OP : generator=new BIO_Generator_w_mass<BIOpKernel<LA,SL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha);
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func BIO_Generator_w_mass<LA,SL_OP ...alpha coeff mass matrix=" << alpha << endl; break;
-            case DL_OP : generator=new BIO_Generator_w_mass<BIOpKernel<LA,DL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha); 
+            case DL_OP : generator=new BIO_Generator_w_mass<BIOpKernel<LA,DL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha);
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func BIO_Generator_w_mass<LA,TDL_OP ...alpha coeff mass matrix=" << alpha << endl; break;
-            case HS_OP : generator=new BIO_Generator_w_mass<BIOpKernel<LA,HS_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha); 
+            case HS_OP : generator=new BIO_Generator_w_mass<BIOpKernel<LA,HS_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha);
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func BIO_Generator_w_mass<LA,HS_OP ...alpha coeff mass matrix=" << alpha << endl; break;
-            case TDL_OP : generator=new BIO_Generator_w_mass<BIOpKernel<LA,TDL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha); 
+            case TDL_OP : generator=new BIO_Generator_w_mass<BIOpKernel<LA,TDL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,alpha);
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func BIO_Generator_w_mass<LA,TDL_OP ...alpha coeff mass matrix=" << alpha << endl; break;
             case CST_OP : if(mpirank == 0 && verbosity>5) cout << " no tested BIOpKernel<LA,CST_OP" << endl; ffassert(0); break;
         }
@@ -1590,7 +1567,7 @@ void ff_BIO_Generator(HMatrixVirt<R>** Hmat, BemKernel *typeKernel, Dof<P>& dof,
                         if(mpirank == 0 && verbosity>5) cout << "call bemtool func Combined_BIO_Generator<HE,SL_OP ... HE,TDL_OP" << endl; break;
                     case CST_OP : if(mpirank == 0 && verbosity>5) cout << " no tested Combined_BIO_Generator<HE,SL_OP ... HE,CST_OP" << endl; ffassert(0); break;
                 }
-				break;
+                break;
             case DL_OP :
                 switch (ker2) {
                     case SL_OP : generator= new Combined_BIO_Generator<BIOpKernel<HE,DL_OP,MMesh::RdHat::d+1,P,P>,BIOpKernel<HE,SL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,coeff1,coeff2,alpha);
@@ -1603,7 +1580,7 @@ void ff_BIO_Generator(HMatrixVirt<R>** Hmat, BemKernel *typeKernel, Dof<P>& dof,
                         if(mpirank == 0 && verbosity>5) cout << "call bemtool func Combined_BIO_Generator<HE,DL_OP ... HE,TDL_OP" << endl; break;
                     case CST_OP : if(mpirank == 0 && verbosity>5) cout << " no tested Combined_BIO_Generator<HE,DL_OP ... HE,CST_OP" << endl; ffassert(0); break;
                 }
-					break;
+                    break;
             case HS_OP :
                 switch (ker2) {
                     case SL_OP : generator= new Combined_BIO_Generator<BIOpKernel<HE,HS_OP,MMesh::RdHat::d+1,P,P>,BIOpKernel<HE,SL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,coeff1,coeff2,alpha);
@@ -1616,7 +1593,7 @@ void ff_BIO_Generator(HMatrixVirt<R>** Hmat, BemKernel *typeKernel, Dof<P>& dof,
                         if(mpirank == 0 && verbosity>5) cout << "call bemtool func Combined_BIO_Generator<HE,HS_OP ... HE,TDL_OP" << endl; break;
                     case CST_OP : if(mpirank == 0 && verbosity>5) cout << " no tested Combined_BIO_Generator<HE,HS_OP ... HE,CST_OP" << endl; ffassert(0); break;
                 }
-					break;
+                    break;
             case TDL_OP :
                 switch (ker2) {
                     case SL_OP : generator= new Combined_BIO_Generator<BIOpKernel<HE,TDL_OP,MMesh::RdHat::d+1,P,P>,BIOpKernel<HE,SL_OP,MMesh::RdHat::d+1,P,P>,P>(dof,kappa1,coeff1,coeff2,alpha);
@@ -1629,7 +1606,7 @@ void ff_BIO_Generator(HMatrixVirt<R>** Hmat, BemKernel *typeKernel, Dof<P>& dof,
                         if(mpirank == 0 && verbosity>5) cout << "call bemtool func Combined_BIO_Generator<HE,TDL_OP ... HE,TDL_OP" << endl; break;
                     case CST_OP : if(mpirank == 0 && verbosity>5) cout << " no tested Combined_BIO_Generator<HE,TDL_OP ... CST_OP" << endl; ffassert(0); break;
                 }
-					break;
+                    break;
             case CST_OP : if(mpirank == 0 && verbosity>5) cout << " no tested BIOpKernel<HE,CST_OP" << endl; ffassert(0); break;
                 
         }
@@ -1693,9 +1670,9 @@ void ff_BIO_Generator(HMatrixVirt<R>** Hmat, BemKernel *typeKernel, Dof<P>& dof,
             case CST_OP : if(mpirank == 0 && verbosity>5) cout << " no testedCombined_BIO_Generator<LA,CST_OP ... LA,CST_OP" << endl; ffassert(0); break;
         }
     }
-    else { 
+    else {
         if(mpirank == 0) cout << "kernel definition error" << endl; ffassert(0);}
-   // build the Hmat 
+   // build the Hmat
    if ( compressor == "" || compressor == "partialACA")
         *Hmat = new HMatrixImpl<partialACA,R>(*generator,p1,-1,comm);
     
@@ -1725,7 +1702,7 @@ void builHmat(HMatrixVirt<R>** Hmat, IMatrix<R>* generatorP,string compressor,ve
     else {
         cerr << "Error: unknown htool compressor \""+compressor+"\"" << endl;
         ffassert(0);
-    }	
+    }
     
 }
 
@@ -1739,44 +1716,44 @@ void ff_POT_Generator(HMatrixVirt<R>** Hmat,BemPotential *typePot, Dof<P> &dof, 
     
     switch (pot) {
         case SL_POT :
-            if (kappa) { 
+            if (kappa) {
                 Potential<PotKernel<HE,SL_POT,MMesh::RdHat::d+1,P>> t(mesh,kappa);
-                POT_Generator<PotKernel<HE,SL_POT,MMesh::RdHat::d+1,P>,P> generator(t,dof,node_output); 
-                if(mpirank == 0 && verbosity>5) cout << "call bemtool func POT_Generator<HE,SL_POT ..." << endl; 
+                POT_Generator<PotKernel<HE,SL_POT,MMesh::RdHat::d+1,P>,P> generator(t,dof,node_output);
+                if(mpirank == 0 && verbosity>5) cout << "call bemtool func POT_Generator<HE,SL_POT ..." << endl;
                 builHmat<R>(Hmat,&generator,compressor,p1,p2,comm);
             }
-            else { 
+            else {
                 Potential<PotKernel<LA,SL_POT,MMesh::RdHat::d+1,P>> t(mesh,kappa);
-                POT_Generator<PotKernel<LA,SL_POT,MMesh::RdHat::d+1,P>,P> generator(t,dof,node_output); 
-                if(mpirank == 0 && verbosity>5) cout << "call bemtool func POT_Generator<LA,SL_POT ..." << endl; 
+                POT_Generator<PotKernel<LA,SL_POT,MMesh::RdHat::d+1,P>,P> generator(t,dof,node_output);
+                if(mpirank == 0 && verbosity>5) cout << "call bemtool func POT_Generator<LA,SL_POT ..." << endl;
                 builHmat<R>(Hmat,&generator,compressor,p1,p2,comm);
             }
             break;
             
-        case DL_POT : 
-            if (kappa) { 
+        case DL_POT :
+            if (kappa) {
                 Potential<PotKernel<HE,DL_POT,MMesh::RdHat::d+1,P>> t(mesh,kappa);
-                POT_Generator<PotKernel<HE,DL_POT,MMesh::RdHat::d+1,P>,P> generator(t,dof,node_output); 
-                if(mpirank == 0 && verbosity>5) cout << "call bemtool func POT_Generator<HE,DL_POT ..." << endl; 
+                POT_Generator<PotKernel<HE,DL_POT,MMesh::RdHat::d+1,P>,P> generator(t,dof,node_output);
+                if(mpirank == 0 && verbosity>5) cout << "call bemtool func POT_Generator<HE,DL_POT ..." << endl;
                 builHmat<R>(Hmat,&generator,compressor,p1,p2,comm);
             }
             
-            else { 
+            else {
                 Potential<PotKernel<LA,DL_POT,MMesh::RdHat::d+1,P>> t(mesh,kappa);
-                POT_Generator<PotKernel<LA,DL_POT,MMesh::RdHat::d+1,P>,P> generator(t,dof,node_output); 
-                if(mpirank == 0 && verbosity>5) cout << "call bemtool func POT_Generator<LA,DL_POT ..." << endl; 
+                POT_Generator<PotKernel<LA,DL_POT,MMesh::RdHat::d+1,P>,P> generator(t,dof,node_output);
+                if(mpirank == 0 && verbosity>5) cout << "call bemtool func POT_Generator<LA,DL_POT ..." << endl;
                 builHmat<R>(Hmat,&generator,compressor,p1,p2,comm);
             }
             break;
             
-        case CST_POT :  
-            if (kappa) { 
+        case CST_POT :
+            if (kappa) {
                 if(mpirank == 0 && verbosity>5) cout << " no POT_Generator<HE,CST_POT ... LA" << endl; ffassert(0); break; }
             else {
                 if(mpirank == 0 && verbosity>5) cout << " no POT_Generator<LA,CST_POT ... LA" << endl; ffassert(0); break; }
             
     }
-}	
+}
 
 // the operator
 template<class R,class v_fes1,class v_fes2>
@@ -1809,21 +1786,19 @@ AnyType OpHMatrixtoBEMForm<R,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
     int n=Uh->NbOfDF;
     int m=Vh->NbOfDF;
     
-    // VFBEM =1 kernel VF   =2 Potential VF  
+    // VFBEM =1 kernel VF   =2 Potential VF
     int VFBEM = typeVFBEM(largs,stack);
-    if (mpirank == 0 && verbosity>5) 
+    if (mpirank == 0 && verbosity>5)
         cout << "test VFBEM type (1 kernel / 2 potential) "  << VFBEM << endl;
     
-	int type = typeVarf(largs,stack);
-	if (mpirank == 0 && verbosity>5) 
-		cout << "test type " << type << endl;
+ 
     HMatrixVirt<R>** Hmat =GetAny<HMatrixVirt<R>** >((*a)(stack));
     
     // info about HMatrix and type solver
     Data_Bem_Solver ds;
     ds.factorize=0;
     ds.initmat=true;
-    SetEnd_Data_Bem_Solver<R>(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);  // LIST_NAME_PARM_HMAT 
+    SetEnd_Data_Bem_Solver<R>(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);  // LIST_NAME_PARM_HMAT
     WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);
     
     // compression infogfg
@@ -1841,16 +1816,16 @@ AnyType OpHMatrixtoBEMForm<R,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
     const TMesh & ThV =Vh->Th; // colunm
     bool samemesh = (void*)&Uh->Th == (void*)&Vh->Th;  // same Fem2D::Mesh     +++ pot or kernel
  
-    if (VFBEM==1) 
-        ffassert (samemesh);      
-	 if(init) 
+    if (VFBEM==1)
+        ffassert (samemesh);
+     if(init)
         *Hmat =0;
-      *Hmat =0; 
+      *Hmat =0;
     if( *Hmat)
-		    delete *Hmat; 
-	
-    *Hmat =0; 
-	
+            delete *Hmat;
+    
+    *Hmat =0;
+    
     Geometry node; MeshBemtool mesh;
     Mesh2Bemtool(ThU, node, mesh);
     if(mpirank == 0 && verbosity>5)
@@ -1878,8 +1853,10 @@ AnyType OpHMatrixtoBEMForm<R,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
     
     if (VFBEM==1) {
         // info kernel
-        BemKernel *Ker = getBemKernel(stack,largs);
-        double alpha = getcoeffmass(stack,largs); 
+        pair<BemKernel*,double> kernel = getBemKernel(stack,largs);
+        BemKernel *Ker = kernel.first;
+        double alpha = kernel.second;
+        
         if(mpirank == 0 && verbosity >5) {
             int nk=2;
             for(int i=0;i<nk;i++)
@@ -1887,12 +1864,12 @@ AnyType OpHMatrixtoBEMForm<R,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
         }
         ff_BIO_Generator<R,P1,SMesh>(Hmat,Ker,dof,alpha,ds.compressor,p1,comm);
     }
-    else if (VFBEM==2) {	
+    else if (VFBEM==2) {
         BemPotential *Pot = getBemPotential(stack,largs);
         Geometry node_output;
         Mesh2Bemtool(ThV,node_output);
         ff_POT_Generator<R,P1,MeshBemtool,SMesh>(Hmat,Pot,dof,mesh,node_output, ds.compressor, p1,p2,comm);
-    }	
+    }
     return Hmat;
     
 }
@@ -1902,8 +1879,8 @@ static void Init_Bem() {
     
     map_type[typeid(const BemFormBilinear *).name( )] = new TypeFormBEM;
     
-    map_type[typeid(const BemKFormBilinear *).name( )] = new ForEachType< BemKFormBilinear >;  
-    map_type[typeid(const BemPFormBilinear *).name( )] = new ForEachType< BemPFormBilinear >; 
+    map_type[typeid(const BemKFormBilinear *).name( )] = new ForEachType< BemKFormBilinear >;
+    map_type[typeid(const BemPFormBilinear *).name( )] = new ForEachType< BemPFormBilinear >;
     
     basicForEachType *t_BEM = atype< const C_args * >( ); //atype< const BemFormBilinear * >( );
     basicForEachType *t_fbem = atype< const BemFormBilinear * >( );
@@ -1922,22 +1899,22 @@ static void Init_Bem() {
     Dcl_Type< fkernel * >( );  // a bem kernel
     Dcl_Type< fpotential * >( ); // a bem potential
     Dcl_TypeandPtr< pBemKernel >(0, 0, ::InitializePtr< pBemKernel >, ::DestroyPtr< pBemKernel >,
-                                 AddIncrement< pBemKernel >, NotReturnOfthisType); 
+                                 AddIncrement< pBemKernel >, NotReturnOfthisType);
     // pBemPotential initialize
     Dcl_TypeandPtr< pBemPotential >(0, 0, ::InitializePtr< pBemPotential >, ::DestroyPtr< pBemPotential >,
-                                    AddIncrement< pBemPotential >, NotReturnOfthisType); 
+                                    AddIncrement< pBemPotential >, NotReturnOfthisType);
  
     
     zzzfff->Add("BemKernel", atype< pBemKernel * >( ));
     zzzfff->Add("BemPotential", atype< pBemPotential * >( ));
-	
-	 // pBemKernel initialize
+    
+     // pBemKernel initialize
     atype<pBemKernel>()->AddCast( new E_F1_funcT<pBemKernel,pBemKernel*>(UnRef<pBemKernel>));
     // BemPotential
     atype<pBemPotential>()->AddCast( new E_F1_funcT<pBemPotential,pBemPotential*>(UnRef<pBemPotential>));
    
-	
-	// simplified type/function to define varf bem
+    
+    // simplified type/function to define varf bem
     Dcl_Type< const FoperatorKBEM * >( );
     Dcl_Type< const FoperatorPBEM * >( );
     Dcl_Type<std::map<std::string, std::string>*>( );
@@ -1956,10 +1933,10 @@ static void Init_Bem() {
     TheOperators->Add("<-", new OneOperator3_<pBemPotential*,pBemPotential*,string*,std::complex<double> >(&initPotential_Helmholtz));
     TheOperators->Add("<-", new OneOperator2_<pBemPotential*,pBemPotential*,string* >(&initPotential_default));
     
-	zzzfff->Add("HMatrix", atype<HMatrixVirt<double> **>());
-	map_type_of_map[make_pair(atype<HMatrixVirt<double>**>(), atype<double*>())] = atype<HMatrixVirt<double>**>();
-	map_type_of_map[make_pair(atype<HMatrixVirt<double>**>(), atype<Complex*>())] = atype<HMatrixVirt<std::complex<double> >**>();
-		
+    zzzfff->Add("HMatrix", atype<HMatrixVirt<double> **>());
+    map_type_of_map[make_pair(atype<HMatrixVirt<double>**>(), atype<double*>())] = atype<HMatrixVirt<double>**>();
+    map_type_of_map[make_pair(atype<HMatrixVirt<double>**>(), atype<Complex*>())] = atype<HMatrixVirt<std::complex<double> >**>();
+        
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesS, v_fesS > (1) );
     TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesS, v_fesS > );
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fesL > (1) );
@@ -2003,3 +1980,4 @@ static void Init_Bem() {
 }
 
 LOADFUNC(Init_Bem)
+

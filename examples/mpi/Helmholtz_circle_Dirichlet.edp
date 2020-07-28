@@ -29,15 +29,14 @@ fespace Uh(Th,P1);
 BemKernel ker1("SL",1,k);
 varf vk1(u,v)=int1dx1d(Th)(Th)(BEM(ker1,u,v)) ;  
 HMatrix<complex> HFirstKind = vk1(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
-//HMatrix<complex> HFirstKind = assemblecomplexHESL(Uh,Uh,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000);
 if (mpirank == 0) cout << HFirstKind.infos << endl;
 display(HFirstKind);
 
 // Hmatrix for formulation of second kind
 BemKernel ker2("TDL",1,k);
-varf vk2(u,v)=int1dx1d(Th)(Th)(BEM(ker2,u,v,withmass=-0.5)) ;  
+varf vk2(u,v)=int1dx1d(Th)(Th)(BEM(ker2,u,v)) - int1d(Th)(0.5*u*v);  
+
 HMatrix<complex> HSecondKind = vk2(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
-//HMatrix<complex> HSecondKind = assemblecomplexHETDLwmass(Uh,Uh,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000,alpha=-0.5);
 if (mpirank == 0) cout << HSecondKind.infos << endl;
 display(HSecondKind);
 
@@ -45,10 +44,10 @@ display(HSecondKind);
 BemKernel ker3("SL",k*1i,k);
 BemKernel ker4("TDL",1,k);
 BemKernel ker5=ker3+ker4;
-varf vk3(u,v)=int1dx1d(Th)(Th)(BEM(ker5,u,v,withmass=-0.5)) ;  
+varf vk3(u,v)=int1dx1d(Th)(Th)(BEM(ker5,u,v)) - int1d(Th)(0.5*u*v); 
+
 HMatrix<complex> HCombined = vk3(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
 
-//HMatrix<complex> HCombined = assemblecomplexHEcombinedSLTDL(Uh,Uh,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000,alpha=-0.5,combinedcoef=k*1i);
 if (mpirank == 0) cout << HCombined.infos << endl;
 display(HCombined);
 
@@ -94,8 +93,6 @@ vinc = finc;
 BemPotential Pot("SL",k);
 varf vp(u,v)=int1d(Th)(POT(Pot,u,v)) ;  
 HMatrix<complex> HPot = vp(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
-//HMatrix<complex> HPot = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000);
-
 
 
 if (mpirank == 0) cout << HPot.infos << endl;

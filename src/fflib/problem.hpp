@@ -97,7 +97,6 @@ typedef  const Foperator foperator;
 Expression IsFebaseArray(Expression f);
 
 void SetArgsFormLinear(const ListOfId *lid,int ordre);
-void SetArgsBemKFormLinear(const ListOfId *lid,int ordre);
 /*
 inline ostream & operator<<(ostream & f,const  TypeSolveMat & tm)
 {

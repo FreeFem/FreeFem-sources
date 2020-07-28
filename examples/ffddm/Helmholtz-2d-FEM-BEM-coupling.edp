@@ -17,13 +17,13 @@ real lambda = 2*pi/real(k);
 real nloc = 10./lambda;
 real n = nloc*2*pi;
 
-int[int] nsl(10); // number of lenses
+int[int] nsl(1); // number of lenses
 nsl = n;
 
 real theta = 10*2*pi/360; // angular shift between lenses
 
 real[int] nsx(nsl.n), nsy(nsl.n);
-nsx[0] = 3.2;
+nsx[0] = 4.2; //3.2;
 nsy[0] = 0;
 
 for (int i=1; i< nsl.n; i++) {
@@ -119,8 +119,8 @@ macro VarfSL(varfName, meshName, PhName)
 
 macro VarfTDL(varfName, meshName, PhName)
   BemKernel ker("TDL",1,k);
-  varf varfName(u,v) = int1dx1d(meshName)(meshName)(BEM(ker,u,v,withmass=0.5));
-//
+
+varf varfName(u,v) = int1dx1d(meshName)(meshName)(BEM(ker,u,v)) + int1d(meshName)(0.5*u*v);  
 
 // assemble BEM blocks :
 ffddmprecond = "ras";
