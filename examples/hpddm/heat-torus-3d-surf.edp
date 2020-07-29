@@ -32,7 +32,7 @@ matrix<real> mat;                           // local operator
 Wh<real> u = 0;
 Wh<real> w = 0;
 func f = 100 * exp(-20*(x^2 + (y-(R+r))^2 + z^2));
-varf vPb(u, v) = int3d(Th)(u * v + dt * grad(u)' * grad(v)) + int3d(Th)(w * v + f * v);
+varf vPb(u, v) = int2d(Th)(u * v + dt * grad(u)' * grad(v)) + int2d(Th)(w * v + f * v);
 mat = vPb(Wh, Wh, solver = GMRES);
 matrix Neumann = mat;
 schwarz A(mat, intersection, D);
