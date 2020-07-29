@@ -93,11 +93,11 @@ int[int] Labels=[1,2,3,4]; // labels : bottom, right, top, left sides
 /***************************************/
 /*          Problem definition         */
 /***************************************/
-varf vA(uh,vh)= intN(Th)        //  Definion of  the problem
+varf vA(uh,vh)= int2d(Th)        //  Definion of  the problem
 ( dx(uh)*dx(vh)+dy(uh)*dy(vh)  )//  Bilinear form
 ;
 
-varf vB(uh,vh)= intN(Th)  //  Definion of  the problem
+varf vB(uh,vh)= int2d(Th)  //  Definion of  the problem
 ( uh*vh )               //  Bilinear form
 ;
 

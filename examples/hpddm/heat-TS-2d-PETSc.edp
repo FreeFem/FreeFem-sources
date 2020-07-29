@@ -27,7 +27,7 @@ matrix<real> Loc;                           // local operator
 {                                           // local weak form
     fespace Ph(Th, P0);
     Ph kappa = x < 0.25 ? 10.0 : 1.0;
-    varf vPb(u, v) = intN(Th)(-1.0 * kappa * grad(u)' * grad(v)) + on(1, u = 0.0);
+    varf vPb(u, v) = int2d(Th)(-1.0 * kappa * grad(u)' * grad(v)) + on(1, u = 0.0);
     Loc = vPb(Wh, Wh, tgv = -2);
     rhs = vPb(0, Wh, tgv = -2);
 }

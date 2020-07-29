@@ -42,7 +42,7 @@ real poisson = 0.45;
 real tmp = 1.0 + poisson;
 real mu = Young  / (2.0 * tmp);
 real lambda = Young * poisson / (tmp * (1.0 - 2.0 * poisson));
-varf vPb(def(u), def(v)) = intN(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsilon(u)' * epsilon(v))) + intN(Th)(f * vB) + on(1, u = 0.0, uB = 0.0);
+varf vPb(def(u), def(v)) = int2d(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsilon(u)' * epsilon(v))) + int2d(Th)(f * vB) + on(1, u = 0.0, uB = 0.0);
 matrix<real> Mat = vPb(Wh, Wh, sym = 1); // local operator
 real[int] rhs = vPb(0, Wh);                  // local right-hand side
 

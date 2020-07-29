@@ -35,7 +35,7 @@ real[int] D;                  // partition of unity
     buildWithPartitioning(Th, part[], 1, intersection, D, Pk, mpiCommWorld);
 }
 
-varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(v) + on(1, u = 1.0);
+varf vPb(u, v) = int2d(Th)(grad(u)' * grad(v)) + int2d(Th)(v) + on(1, u = 1.0);
 matrix<real> Mat = vPb(Wh, Wh, sym = 1);
 fespace WhCoarse(ThCoarse, Pk);
 matrix MatCoarse;

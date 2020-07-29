@@ -24,7 +24,7 @@ Mat A;
 buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
 
 fespace Wh(Th, Pk);
-varf vPb([u, uB, p], [v, vB, q]) = intN(Th)(grad(u)' * grad(v) + grad(uB)' * grad(vB) - div(u) * q - div(v) * p + 1e-10 * p * q) + on(1, 3, 5, u = 0, uB = 0) + on(2, u = y*(0.5-y), uB = 0);
+varf vPb([u, uB, p], [v, vB, q]) = int2d(Th)(grad(u)' * grad(v) + grad(uB)' * grad(vB) - div(u) * q - div(v) * p + 1e-10 * p * q) + on(1, 3, 5, u = 0, uB = 0) + on(2, u = y*(0.5-y), uB = 0);
 real[int] rhs = vPb(0, Wh, tgv = -1);
 Wh<real> def(u) = [1.0, 1.0, 2.0];
 string[int] names(2);

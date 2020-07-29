@@ -13,7 +13,7 @@ Mat A;
 buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
 
 fespace Wh(Th, Pk);                 // local finite element space
-varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(v) + on(1, u = 0.0);
+varf vPb(u, v) = int2d(Th)(grad(u)' * grad(v)) + int2d(Th)(v) + on(1, u = 0.0);
 real[int] rhs = vPb(0, Wh);
 
 set(A, sparams = "-ksp_view");

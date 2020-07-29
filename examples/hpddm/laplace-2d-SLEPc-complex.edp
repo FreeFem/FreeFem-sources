@@ -93,7 +93,7 @@ int[int] Labels=[1,2,3,4]; // labels : bottom, right, top, left sides
 /***************************************/
 complex sigma = 1.0 + 1i;
 complex nu = 1.0 + 1i;
-varf vA(uh,vh)= intN(Th)        //  Definion of  the problem
+varf vA(uh,vh)= int2d(Th)        //  Definion of  the problem
 ( nu*(dx(uh)*dx(vh)+dy(uh)*dy(vh))
     -sigma*uh*vh               )//  Bilinear form
     +on(Labels[3], uh = 0.0)    //  Boundary Conditions
@@ -102,7 +102,7 @@ varf vA(uh,vh)= intN(Th)        //  Definion of  the problem
     +on(Labels[0], uh = 0.0)    //  Boundary Conditions
 ;
 
-varf vB(uh,vh)= intN(Th)  //  Definion of  the problem
+varf vB(uh,vh)= int2d(Th)  //  Definion of  the problem
 ( uh*vh )               //  Bilinear form
 ;
 

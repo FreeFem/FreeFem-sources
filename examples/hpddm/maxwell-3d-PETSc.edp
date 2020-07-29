@@ -17,7 +17,7 @@ func PkNode = P1;
 
 int Dirichlet = 1;
 
-meshN Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10));
+mesh3 Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10));
 int[int] chlab = [1, Dirichlet, 2, Dirichlet, 3, Dirichlet, 4, Dirichlet, 5, Dirichlet, 6, Dirichlet];
 Th = change(Th, refface = chlab);
 
@@ -35,13 +35,13 @@ buildDmesh(Th)
 
 real[int] rhs(Wh.ndof);
 varf vPb([Ex,Ey,Ez],[vx,vy,vz]) =
-    intN(Th)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
-    + intN(Th)([vx,vy,vz]'*[Ex,Ey,Ez])
+    int3d(Th)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+    + int3d(Th)([vx,vy,vz]'*[Ex,Ey,Ez])
     + on(Dirichlet, Ex=0, Ey=0, Ez=0);
 A = vPb(Wh, Wh);
 func f = exp(-2.0*((x-0.5)^2+(y-0.5)^2+(z-0.5)^2));
 varf vPbRhs([Ex,Ey,Ez],[vx,vy,vz]) =
-    - intN(Th)([vx,vy,vz]'*[0,0,f])
+    - int3d(Th)([vx,vy,vz]'*[0,0,f])
     + on(Dirichlet, Ex=0,Ey=0,Ez=0);
 rhs = vPbRhs(0, Wh);
 
@@ -73,7 +73,7 @@ if(!NoGraphicWindow) {
     real[int] sol;
     ChangeNumbering(A, solx[], sol);
     ChangeNumbering(A, solx[], sol, inverse = true);
-    meshN ThPlt = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10));
+    mesh3 ThPlt = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10));
     fespace WhPlt(ThPlt, Pk);
     WhPlt [pltx, plty, pltz];
     WhPlt [reducex, reducey, reducez];

@@ -49,9 +49,9 @@ real[int] D;                  // partition of unity
 }
 
 real epsilon = epsilonA;
-varf vPb(u, v) = intN(Th)(-(k^2 - 1i*epsilon)*u*v + grad(u)'*grad(v))
-               + intN1(Th, Robin)(1i*k*u*v)
-               - intN(Th)(f*v)
+varf vPb(u, v) = int2d(Th)(-(k^2 - 1i*epsilon)*u*v + grad(u)'*grad(v))
+               + int1d(Th, Robin)(1i*k*u*v)
+               - int2d(Th)(f*v)
                + on(Dirichlet, u = 0);
 matrix<complex> Mat = vPb(Wh, Wh, sym = 1);
 fespace WhCoarse(ThCoarse, Pk);

@@ -32,14 +32,14 @@ int [int,int] LL = [[1,2], [3,4], [5,6]];
 real[int, int] BB = [[0,1], [0,1], [0,1]];
 int[int] NN = [getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10)];
 int[int] CC = [1, 1, 1];
-meshN Th = Cube(NN, BB, LL);
+mesh3 Th = Cube(NN, BB, LL);
 func k = 6 * pi;
 int[int] chlab = [1, Robin, 2, Robin, 3, Robin, 4, Robin, 5, Robin, 6, Robin];
 Th = change(Th, refface = chlab);
 
 fespace Wh(Th, Pk);
 
-meshN ThBorder;
+mesh3 ThBorder;
 int[int][int] intersection;   // local-to-neighbors renumbering
 real[int] D;
 {
@@ -50,18 +50,18 @@ matrix<complex> Mat;
 matrix<complex> Opt;
 complex[int] rhs(Wh.ndof);
 {
-    meshN ThAugmented = Th + ThBorder;
+    mesh3 ThAugmented = Th + ThBorder;
     ThBorder = Cube(CC, BB, LL);
     fespace WhAugmented(ThAugmented, Pk);
     varf vPb([Ex,Ey,Ez],[vx,vy,vz]) =
-        intN(ThAugmented)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
-        - intN(ThAugmented)(k^2*[vx,vy,vz]'*[Ex,Ey,Ez])
-        - intN1(ThAugmented, Robin)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+        int3d(ThAugmented)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+        - int3d(ThAugmented)(k^2*[vx,vy,vz]'*[Ex,Ey,Ez])
+        - int2d(ThAugmented, Robin)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
         + on(Dirichlet, Ex=0, Ey=0, Ez=0);
     Mat = vPb(WhAugmented, WhAugmented, solver=GMRES);
     func f = exp(-((x-0.5)^2+(y-0.5)^2+(z-0.5)^2)*60);
     varf vPbRhs([Ex,Ey,Ez],[vx,vy,vz]) =
-        - intN(ThAugmented)([vx,vy,vz]'*[0,0,f])
+        - int3d(ThAugmented)([vx,vy,vz]'*[0,0,f])
         + on(Dirichlet, Ex=0,Ey=0,Ez=0);
     if(mpisize > 1) {
         complex[int] rhsFull(WhAugmented.ndof);
@@ -83,10 +83,10 @@ nEx = 0.0;
 int solver = getOption("schwarz_method");
 if(solver == 1 || solver == 2 || solver == 4) { // optimized Schwarz methods
     varf vPbOpt([Ex,Ey,Ez],[vx,vy,vz]) =
-        intN(Th)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
-        - intN(Th)(k^2*[vx,vy,vz]'*[Ex,Ey,Ez])
-        - intN1(Th, Robin)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
-        - intN1(Th, fakeInterface)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+        int3d(Th)(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+        - int3d(Th)(k^2*[vx,vy,vz]'*[Ex,Ey,Ez])
+        - int2d(Th, Robin)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+        - int2d(Th, fakeInterface)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
         + on(Dirichlet, Ex=0, Ey=0, Ez=0);
     Opt = vPbOpt(Wh, Wh);
 }

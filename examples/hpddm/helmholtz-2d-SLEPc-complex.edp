@@ -23,7 +23,7 @@ mesh Th = square(getARGV("-global", 30), getARGV("-global", 30));
 fespace Ph(Th, P0);
 Ph val = wedge(x, y);
 Ph k = omega / val;
-varf vPb(u, v) = intN(Th)(-k^2 * u * v + (grad(u)' * grad(v))) + intN1(Th, 2)(1i * k * u * v) + on(1, u = 0.0);
+varf vPb(u, v) = int2d(Th)(-k^2 * u * v + (grad(u)' * grad(v))) + int1d(Th, 2)(1i * k * u * v) + on(1, u = 0.0);
 
 fespace Vh(Th, Pk);
 Mat<complex> A(Vh.ndof);

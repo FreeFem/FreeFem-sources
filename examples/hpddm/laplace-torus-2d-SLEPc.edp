@@ -137,11 +137,11 @@ macro Lap(u,v) ( Grad(u)'*Grad(v)) //')      // End Of Macro /*        */
 /***************************************/
 /*          Problem definition         */
 /***************************************/
-varf vA(uh,vh)= intN(Th)        //  Definion of  the problem
+varf vA(uh,vh)= int2d(Th)        //  Definion of  the problem
   (Jac*(Lap(uh,vh)))//  Bilinear form
   ;
 
-varf vB(uh,vh)= intN(Th)  //  Definion of  the problem
+varf vB(uh,vh)= int2d(Th)  //  Definion of  the problem
   ( Jac*uh*vh )           //  Bilinear form
   ;
 

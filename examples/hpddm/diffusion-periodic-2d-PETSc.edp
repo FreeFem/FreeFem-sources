@@ -24,7 +24,7 @@ buildMatPeriodic(Th, s, A, Pk, mpiCommWorld, labPeriodic)
 
 fespace Wh(Th, Pk);                 // local finite element space
 func f = (y+x+1) * (y+x-1) * (y-x+1) * (y-x-1);
-varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) - intN(Th)((0.39 - f) * v) + on(0, u = 0.0);
+varf vPb(u, v) = int2d(Th)(grad(u)' * grad(v)) - int2d(Th)((0.39 - f) * v) + on(0, u = 0.0);
 real[int] rhs = vPb(0, Wh);
 
 set(A, sparams = "-ksp_view");

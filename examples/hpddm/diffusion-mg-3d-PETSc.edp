@@ -16,7 +16,7 @@ matrix[int] P(level - 1);
 buildMatRecursive(ThTab, getARGV("-split", 2), level, P, MG, Pk, mpiCommWorld);
 real[int] rhs;
 for(int i = 0; i < level; ++i) {
-    varf vPb(u, v) = intN(ThTab[i])(grad(u)' * grad(v)) + intN(ThTab[i])(v) + on(1, u = 0.0);
+    varf vPb(u, v) = int3d(ThTab[i])(grad(u)' * grad(v)) + int3d(ThTab[i])(v) + on(1, u = 0.0);
     fespace Wh(ThTab[i], Pk);
     MG[i] = vPb(Wh, Wh, tgv = -2);
     if(i == 0) {

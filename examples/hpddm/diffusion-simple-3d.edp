@@ -13,7 +13,7 @@ func Pk = P1;                               // finite element space
 int s = getARGV("-split", 1);                                   // refinement factor
 
 int[int] LL = [2,2, 1,2, 2,2];
-meshN Th = cube(1, 1, 1, [x, y, z]);
+mesh3 Th = cube(1, 1, 1, [x, y, z]);
 fespace Wh(Th, Pk);           // local finite element space
 int[int][int] intersection;   // local-to-neighbors renumbering
 real[int] D;                  // partition of unity
@@ -22,7 +22,7 @@ real[int] D;                  // partition of unity
     build(Th, s, intersection, D, Pk, mpiCommWorld)
 }
 
-varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(v) + on(1, u = 1.0);
+varf vPb(u, v) = int3d(Th)(grad(u)' * grad(v)) + int3d(Th)(v) + on(1, u = 1.0);
 matrix<real> Mat = vPb(Wh, Wh, tgv = -1);
 real[int] rhs = vPb(0, Wh, tgv = -1);
 

@@ -20,7 +20,7 @@ real R = 3, r = 1;
 int nx = r*2*pi*getARGV("-global", 5);
 int ny = R*2*pi*getARGV("-global", 5);
 
-meshN Th = square3(nx, ny, [(R+r*cos(2*pi*x))*cos(2*pi*y), (R+r*cos(2*pi*x))*sin(2*pi*y), r*sin(2*pi*x)]);
+meshS Th = square3(nx, ny, [(R+r*cos(2*pi*x))*cos(2*pi*y), (R+r*cos(2*pi*x))*sin(2*pi*y), r*sin(2*pi*x)]);
 fespace Wh(Th, Pk);           // local finite element space
 int[int][int] intersection;   // local-to-neighbors renumbering
 real[int] D;                  // partition of unity
@@ -32,7 +32,7 @@ matrix<real> mat;                           // local operator
 Wh<real> u = 0;
 Wh<real> w = 0;
 func f = 100 * exp(-20*(x^2 + (y-(R+r))^2 + z^2));
-varf vPb(u, v) = intN(Th)(u * v + dt * grad(u)' * grad(v)) + intN(Th)(w * v + f * v);
+varf vPb(u, v) = int3d(Th)(u * v + dt * grad(u)' * grad(v)) + int3d(Th)(w * v + f * v);
 mat = vPb(Wh, Wh, solver = GMRES);
 matrix Neumann = mat;
 schwarz A(mat, intersection, D);

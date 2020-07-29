@@ -32,13 +32,13 @@ if(verbosity > 0 && mpirank == 0) {
 }
 
 int[int] LL = [2,3, 2,1, 2,2];
-meshN Th = cube(1, 1, 1, [x, y, z]);
+mesh3 Th = cube(1, 1, 1, [x, y, z]);
 fespace Wh(Th, Pk);           // local finite element space
 /*# SchwarzMethod #*/
 int[int][int] intersection;   // local-to-neighbors renumbering
 real[int] D;                  // partition of unity
 {
-    meshN ThBorder;
+    mesh3 ThBorder;
     Th = cube(10 * getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5), [10 * x, y, z], label = LL);      // global mesh
     buildOverlap(Th, ThBorder, fakeInterface, s, overlap, intersection, D, Pk, comm, excluded, 3)
 }
@@ -51,7 +51,7 @@ real tmp = 1.0 + poisson;
 real mu = Young  / (2.0 * tmp);
 real lambda = Young * poisson / (tmp * (1.0 - 2.0 * poisson));
 matrix<real> Mat;                           // local operator
-varf vPb(def(u), def(v)) = intN(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsilon(u)' * epsilon(v))) + intN(Th)(f * vC) + on(1, u = 0.0, uB = 0.0, uC = 0.0);
+varf vPb(def(u), def(v)) = int3d(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsilon(u)' * epsilon(v))) + int3d(Th)(f * vC) + on(1, u = 0.0, uB = 0.0, uC = 0.0);
 Mat = vPb(Wh, Wh, tgv = -1);
 real[int] rhs = vPb(0, Wh, tgv = -1);
 
@@ -70,7 +70,7 @@ pair ret;
         fespace Ph(Th, P0);
         real kZero = getARGV("-kZero", 10.0);
         Ph transmission = 2 * kZero * mu * (2 * mu + lambda) / (lambda + 3 * mu);
-        varf vOptimized(def(u), def(v)) = intN(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsilon(u)' * epsilon(v))) + intN1(Th, fakeInterface)(transmission * (def(u)' * def(v))) + on(1, u = 0.0, uB = 0.0, uC = 0.0);
+        varf vOptimized(def(u), def(v)) = int3d(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsilon(u)' * epsilon(v))) + int2d(Th, fakeInterface)(transmission * (def(u)' * def(v))) + on(1, u = 0.0, uB = 0.0, uC = 0.0);
         Opt = vOptimized(Wh, Wh, tgv = -1);
     }
     if(mpisize > 1 &&
@@ -78,12 +78,12 @@ pair ret;
         if(excluded)
             AttachCoarseOperator(mpiCommWorld, A/*, A = noPen, B = overlapRestriction, threshold = 2. * h[].max / diam*/);
         else {
-            varf vPbNoPen(def(u), def(v)) = intN(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsilon(u)' * epsilon(v))) + on(1, u = 0.0, uB = 0.0, uC = 0.0);
+            varf vPbNoPen(def(u), def(v)) = int3d(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsilon(u)' * epsilon(v))) + on(1, u = 0.0, uB = 0.0, uC = 0.0);
             matrix<real> noPen = vPbNoPen(Wh, Wh, sym = 1);
             if(deflation == "geneo") // standard GenEO, no need for RHS -> deduced from LHS (Neumann matrix)
                 AttachCoarseOperator(mpiCommWorld, A, A = noPen/*, threshold = 2. * h[].max / diam,*/, ret = ret);
             else if(deflation == "dtn") {
-                varf vMass(def(u), def(v)) = intN1(Th, fakeInterface)(u * v);
+                varf vMass(def(u), def(v)) = int2d(Th, fakeInterface)(u * v);
                 matrix<real> massMatrix = vMass(Wh, Wh, sym = 1);
                 AttachCoarseOperator(mpiCommWorld, A, A = noPen, B = massMatrix, pattern = Opt/*, threshold = k,*/, ret = ret);
             }
@@ -110,7 +110,7 @@ mpiBarrier(mpiCommWorld);
 macro def1(u)u// EOM
 plotMPI(Th, u, vectorialfe, def1, real, cmm = "Global solution")
 real alpha = 2000.0;
-meshN ThMoved = movemesh3(Th, transfo = [x + alpha * u, y + alpha * uB, z + alpha * uC]);
+mesh3 ThMoved = movemesh3(Th, transfo = [x + alpha * u, y + alpha * uB, z + alpha * uC]);
 u[] = err;
 plotMPI(Th, u, vectorialfe, def1, real, cmm = "Global residual")
 u[] = mpirank;

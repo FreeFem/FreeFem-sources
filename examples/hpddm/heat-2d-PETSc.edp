@@ -23,10 +23,10 @@ matrix<real> M;                     // local mass matrix
 {                                   // local weak form
     fespace Ph(Th, P0);
     Ph f = x < 0.25 ? 1.0e+3 : 1.0e-3;
-    varf vPb(u, v) = intN(Th)(u * v + dt * (grad(u)' * grad(v))) + intN(Th)(dt * f *  v) + on(1, u = 0.0);
+    varf vPb(u, v) = int2d(Th)(u * v + dt * (grad(u)' * grad(v))) + int2d(Th)(dt * f *  v) + on(1, u = 0.0);
     A = vPb(Wh, Wh, tgv = -1);
     rhs = vPb(0, Wh, tgv = -1);
-    varf vPbM(u, v) = intN(Th)(u * v);
+    varf vPbM(u, v) = int2d(Th)(u * v);
     M = vPbM(Wh, Wh);
 }
 

@@ -25,7 +25,7 @@ createMat(ThNew, B, Pk)
 transferMat(ThNew, Pk, B, Th, Pk, A, P)
 
 macro grad(u)[dx(u), dy(u)]// EOM
-varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(v) + on(1, u = 0.0);
+varf vPb(u, v) = int2d(Th)(grad(u)' * grad(v)) + int2d(Th)(v) + on(1, u = 0.0);
 fespace Vh(Th, Pk);
 A = vPb(Vh, Vh);
 Mat ANew;

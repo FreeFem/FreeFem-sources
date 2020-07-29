@@ -25,7 +25,7 @@ if(verbosity > 0 && mpirank == 0) {
 }
 
 int[int] LL = [1,2, 1,2, 1,1];
-meshN ThBorder, Th = cube(1, 1, 1, [x, y, z]);
+mesh3 ThBorder, Th = cube(1, 1, 1, [x, y, z]);
 fespace Wh(Th, Pk);           // local finite element space
 int[int][int] intersection;   // local-to-neighbors renumbering
 real[int] D;                  // partition of unity
@@ -37,8 +37,8 @@ real[int] D;                  // partition of unity
 real[int] rhs;                              // local right-hand side
 matrix<real> Mat;                           // local operator
 {                                           // local weak form
-    meshN ThAugmented = Th + ThBorder;
-    varf vPb(u, v) = intN(ThAugmented)(grad(u)' * grad(v)) + intN(ThAugmented)(v) + on(1, u = 1.0);
+    mesh3 ThAugmented = Th + ThBorder;
+    varf vPb(u, v) = int3d(ThAugmented)(grad(u)' * grad(v)) + int3d(ThAugmented)(v) + on(1, u = 1.0);
     fespace WhAugmented(ThAugmented, Pk);
     Mat = vPb(WhAugmented, WhAugmented, tgv = -1);
     real[int] rhsFull = vPb(0, WhAugmented, tgv = -1);
@@ -58,19 +58,19 @@ pair ret;
         fespace Ph(Th, P0);
         real kZero = getARGV("-kZero", 10.0);
         Ph transmission = kZero;
-        varf vOptimized(u, v) = intN(Th)(grad(u)' * grad(v)) + intN1(Th, fakeInterface)(transmission * (u * v)) + on(1, u = 1.0);
+        varf vOptimized(u, v) = int3d(Th)(grad(u)' * grad(v)) + int2d(Th, fakeInterface)(transmission * (u * v)) + on(1, u = 1.0);
         Opt = vOptimized(Wh, Wh, tgv = -1);
     }
     if(mpisize > 1 && isSetOption("schwarz_coarse_correction")) { // two-level Schwarz methods
         if(excluded)
             AttachCoarseOperator(mpiCommWorld, A/*, A = noPen, B = overlapRestriction, threshold = 2. * h[].max / diam*/);
         else {
-            varf vPbNoPen(u, v) = intN(Th)(grad(u)' * grad(v)) + on(1, u = 0.0);
+            varf vPbNoPen(u, v) = int3d(Th)(grad(u)' * grad(v)) + on(1, u = 0.0);
             matrix<real> noPen = vPbNoPen(Wh, Wh, sym = 1);
             if(deflation == "geneo") // standard GenEO, no need for RHS -> deduced from LHS (Neumann matrix)
                 AttachCoarseOperator(mpiCommWorld, A, A = noPen/*, threshold = 2. * h[].max / diam,*/, ret = ret);
             else if(deflation == "dtn") {
-                varf vMass(def(u), def(v)) = intN1(Th, fakeInterface)(u * v);
+                varf vMass(def(u), def(v)) = int2d(Th, fakeInterface)(u * v);
                 matrix<real> massMatrix = vMass(Wh, Wh, sym = 1);
                 AttachCoarseOperator(mpiCommWorld, A, A = noPen, B = massMatrix, pattern = Opt/*, threshold = k,*/, ret = ret);
             }

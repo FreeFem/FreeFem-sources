@@ -9,12 +9,12 @@ macro grad(u)[dx(u), dy(u), dz(u)]// // three-dimensional gradient
 func Pk = P1;                       // finite element space
 
 int[int] LL = [1,2, 1,2, 1,1];
-meshN Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10), [x, y, z], label = LL);    // global mesh
+mesh3 Th = cube(getARGV("-global", 10), getARGV("-global", 10), getARGV("-global", 10), [x, y, z], label = LL);    // global mesh
 Mat A;
 buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
 
 fespace Wh(Th, Pk);                 // local finite element space
-varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(v) + on(1, u = 0.0);
+varf vPb(u, v) = int3d(Th)(grad(u)' * grad(v)) + int3d(Th)(v) + on(1, u = 0.0);
 real[int] rhs = vPb(0, Wh);
 
 set(A, sparams = "-ksp_view");

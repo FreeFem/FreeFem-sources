@@ -36,9 +36,9 @@ complex[int] rhs;
 matrix<complex>[int] Opt(level);
 for(int i = 0; i < level; ++i) {
     real epsilon = (i == level - 1 ? k : 0);
-    varf vPb(u, v) = intN(ThTab[i])(-(k^2 - 1i*epsilon)*u*v + grad(u)'*grad(v))
-                   + intN1(ThTab[i], Robin)(1i*k*u*v)
-                   - intN(ThTab[i])(f*v)
+    varf vPb(u, v) = int2d(ThTab[i])(-(k^2 - 1i*epsilon)*u*v + grad(u)'*grad(v))
+                   + int1d(ThTab[i], Robin)(1i*k*u*v)
+                   - int2d(ThTab[i])(f*v)
                    + on(Dirichlet, u = 0);
     fespace Wh(ThTab[i], Pk);
     matrix<complex> Loc = vPb(Wh, Wh, tgv = -2, sym = 1);

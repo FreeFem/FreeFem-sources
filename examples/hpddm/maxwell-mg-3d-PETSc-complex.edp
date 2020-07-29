@@ -18,7 +18,7 @@ int level = 2;
 int s = 3;
 
 Mat<complex>[int] MG(level);
-meshN[int] Th(level);
+mesh3[int] Th(level);
 matrix[int] P(level - 1);
 int Robin = 2;
 int[int] LL = [Robin, Robin, Robin, Robin, Robin, Robin];
@@ -36,14 +36,14 @@ matrix<complex>[int] Opt(level);
 for(int i = 0; i < level; ++i) {
     fespace Vh(Th[i], Pk);
     varf vPb([Ex,Ey,Ez], [vx,vy,vz]) =
-        intN(Th[i])(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
-      + intN(Th[i])(-k^2*[vx,vy,vz]'*[Ex,Ey,Ez])
-      + intN1(Th[i],Robin)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
-      + intN1(Th[i],-111111)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez));
+        int3d(Th[i])(Curl(vx,vy,vz)'*Curl(Ex,Ey,Ez))
+      + int3d(Th[i])(-k^2*[vx,vy,vz]'*[Ex,Ey,Ez])
+      + int2d(Th[i],Robin)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez))
+      + int2d(Th[i],-111111)(1i*k*CrossN(vx,vy,vz)'*CrossN(Ex,Ey,Ez));
     Opt[i] = vPb(Vh, Vh, sym = 1);
     MG[i] = Opt[i];
     if(i == 0) {
-        varf vRHS([Ex,Ey,Ez],[vx,vy,vz]) = -intN(Th[i])([vx,vy,vz]'*[0,0,f]);
+        varf vRHS([Ex,Ey,Ez],[vx,vy,vz]) = -int3d(Th[i])([vx,vy,vz]'*[0,0,f]);
         rhs.resize(Vh.ndof);
         rhs = vRHS(0, Vh);
     }

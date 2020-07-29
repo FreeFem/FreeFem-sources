@@ -28,7 +28,7 @@ int[int] interfaceNb;         //
 }
 
 func f = 10;
-varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(f * v) + on(1, u = 0.0);
+varf vPb(u, v) = int2d(Th)(grad(u)' * grad(v)) + int2d(Th)(f * v) + on(1, u = 0.0);
 matrix<real> Loc = vPb(Wh, Wh, sym = 1, tgv = -2); // local operator
 real[int] rhs = vPb(0, Wh, tgv = -2);              // local right-hand side
 

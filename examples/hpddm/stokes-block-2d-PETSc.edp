@@ -40,8 +40,8 @@ Mat dA, dC;
     }
 }
 
-varf vPbA([u, uB], [v, vB]) = intN(Th)(grad(u)' * grad(v) + grad(uB)' * grad(vB)) + on(1, 3, 5, u = 0, uB = 0) + on(2, u = y*(0.5-y), uB = 0);
-varf vPbB([q], [u, uB]) = intN(Th)(-div(u) * q);
+varf vPbA([u, uB], [v, vB]) = int2d(Th)(grad(u)' * grad(v) + grad(uB)' * grad(vB)) + on(1, 3, 5, u = 0, uB = 0) + on(2, u = y*(0.5-y), uB = 0);
+varf vPbB([q], [u, uB]) = int2d(Th)(-div(u) * q);
 int vPETSc;
 int pPETSc;
 {
@@ -133,7 +133,7 @@ for(int i = 0; i < 2; ++i) {
         KSPSolve(dF, rhsPETSc, sol);
     }
     else {
-        varf vSAL(p, q) = intN(Th)(p * q);
+        varf vSAL(p, q) = int2d(Th)(p * q);
         matrix SAL = vSAL(VhP, VhP);
         Mat[int] tab(1);
         Mat dSAL(dC, SAL);

@@ -15,7 +15,7 @@ func Pk = [P1, P1, P1];             // finite element space
 int s = getARGV("-split", 1);                                   // refinement factor
 
 int[int] LL = [2,3, 2,1, 2,2];
-meshN Th = cube(1, 1, 1, [x, y, z]);
+mesh3 Th = cube(1, 1, 1, [x, y, z]);
 fespace Wh(Th, Pk);           // local finite element space
 int[int][int] intersection;   // local-to-neighbors renumbering
 real[int] D;                  // partition of unity
@@ -32,7 +32,7 @@ real tmp = 1.0 + poisson;
 real mu = Young  / (2.0 * tmp);
 real lambda = Young * poisson / (tmp * (1.0 - 2.0 * poisson));
 int dirichlet = 1;
-varf vPb(def(u), def(v)) = intN(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsilon(u)' * epsilon(v))) + intN(Th)(f * vC) + on(dirichlet, u = 0.0, uB = 0.0, uC = 0.0);
+varf vPb(def(u), def(v)) = int3d(Th)(lambda * div(u) * div(v) + 2.0 * mu * (epsilon(u)' * epsilon(v))) + int3d(Th)(f * vC) + on(dirichlet, u = 0.0, uB = 0.0, uC = 0.0);
 matrix<real> Mat = vPb(Wh, Wh, tgv = -1);
 real[int] rhs = vPb(0, Wh, tgv = -1);
 
@@ -58,7 +58,7 @@ mpiBarrier(mpiCommWorld);
 macro def1(u)u// EOM
 plotMPI(Th, u, P1, def1, real, cmm = "Global solution")
 real alpha = 20000.0;
-meshN ThMoved = movemesh3(Th, transfo = [x + alpha * u, y + alpha * uB, z + alpha * uC]);
+mesh3 ThMoved = movemesh3(Th, transfo = [x + alpha * u, y + alpha * uB, z + alpha * uC]);
 u[] = err;
 plotMPI(Th, u, P1, def1, real, cmm = "Global residual")
 u[] = mpirank;

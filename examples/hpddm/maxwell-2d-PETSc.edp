@@ -33,13 +33,13 @@ matrix Loc;
 real[int] rhs(Wh.ndof);
 {
     varf vPb([Ex,Ey],[vx,vy]) =
-        intN(Th)(Curl(vx,vy)'*Curl(Ex,Ey))
-        + intN(Th)([vx,vy]'*[Ex,Ey])
+        int2d(Th)(Curl(vx,vy)'*Curl(Ex,Ey))
+        + int2d(Th)([vx,vy]'*[Ex,Ey])
         + on(Dirichlet, Ex=0,Ey=0);
     Loc = vPb(Wh, Wh, tgv = -1);
     func f = exp(-8.0*((x-0.5)^2+(y-0.5)^2));
     varf vPbRhs([Ex,Ey],[vx,vy]) =
-        - intN(Th)(100*[vx,vy]'*[0,f])
+        - int2d(Th)(100*[vx,vy]'*[0,f])
         + on(Dirichlet, Ex=0,Ey=0);
     rhs = vPbRhs(0, Wh, tgv = -1);
 }

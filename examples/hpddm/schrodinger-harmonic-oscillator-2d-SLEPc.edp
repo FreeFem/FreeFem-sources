@@ -109,7 +109,7 @@ fespace Vh(Th, Pk);      // local finite element space
 /***************************************/
 /*          Problem definition         */
 /***************************************/
-varf vA(uh,vh)= intN(Th)        //  Definion of  the problem
+varf vA(uh,vh)= int2d(Th)        //  Definion of  the problem
 ( 0.5*(dx(uh)*dx(vh)+dy(uh)*dy(vh))
 +( 0.5*(x^2+y^2)-sigma)*uh*vh)//  Bilinear form
 //  +on(Labels[3], uh = 0.0)      //  Boundary Conditions bottom
@@ -118,7 +118,7 @@ varf vA(uh,vh)= intN(Th)        //  Definion of  the problem
 //  +on(Labels[0], uh = 0.0)      //  Boundary Conditions left
 ;
 
-varf vB(uh,vh)= intN(Th)  //  Definion of  the problem
+varf vB(uh,vh)= int2d(Th)  //  Definion of  the problem
 ( uh*vh )               //  Bilinear form
 ;
 

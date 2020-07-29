@@ -23,7 +23,7 @@ real[int] D;                  // partition of unity
     build(Th, s, intersection, D, Pk, mpiCommWorld)
 }
 
-varf vPb(u, v) = intN(Th)(grad(u)' * grad(v)) + intN(Th)(v) + on(1, u = 0.0);
+varf vPb(u, v) = int2d(Th)(grad(u)' * grad(v)) + int2d(Th)(v) + on(1, u = 0.0);
 
 matrix Loc = vPb(Wh, Wh, tgv = -2);
 Mat A(Loc, intersection, D);

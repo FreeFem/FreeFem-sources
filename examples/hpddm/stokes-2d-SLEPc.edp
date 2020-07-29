@@ -34,9 +34,9 @@ Mat A, M;
     createMat(Th, M, PkP);
 }
 
-varf vPbA([u, uB], [v, vB]) = intN(Th)(grad(u)' * grad(v) + grad(uB)' * grad(vB)) + on(1, 2, 4, u = 0, uB = 0) + on(3, u = 1.0, uB = 0);
-varf vPbB([q], [u, uB]) = intN(Th)(-div(u) * q);
-varf vPbM(p, q) = intN(Th)(-p * q);
+varf vPbA([u, uB], [v, vB]) = int2d(Th)(grad(u)' * grad(v) + grad(uB)' * grad(vB)) + on(1, 2, 4, u = 0, uB = 0) + on(3, u = 1.0, uB = 0);
+varf vPbB([q], [u, uB]) = int2d(Th)(-div(u) * q);
+varf vPbM(p, q) = int2d(Th)(-p * q);
 A = vPbA(VhV, VhV, tgv = -2);
 M = vPbM(VhP, VhP);
 Mat B(A, M);
