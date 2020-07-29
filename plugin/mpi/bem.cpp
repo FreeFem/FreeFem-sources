@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: cxx11 [mkl|blas] mpi pthread htool bemtool boost
+//ff-c++-LIBRARY-dep: cxx11 [mkl|blas] [petsccomplex] mpi pthread htool bemtool boost
 //ff-c++-cpp-dep:
 // for def  M_PI under windows in <cmath>
 #define _USE_MATH_DEFINES
@@ -7,6 +7,7 @@
 #include <lgfem.hpp>
 #include <R3.hpp>
 
+#include <htool/clustering/DDM_cluster.hpp>
 #include <htool/lrmat/partialACA.hpp>
 #include <htool/lrmat/fullACA.hpp>
 #include <htool/lrmat/SVD.hpp>
@@ -20,6 +21,12 @@
 #include <bemtool/operator/operator.hpp>
 #include <bemtool/miscellaneous/htool_wrap.hpp>
 #include "PlotStream.hpp"
+
+#ifdef WITH_petsccomplex
+#include <petsc.h>
+#include "PETSc.hpp"
+typedef PETSc::DistributedCSR< HpSchwarz< PetscScalar > > Dmat;
+#endif
 
 #include "common.hpp"
 
@@ -57,39 +64,45 @@ public:
     virtual int nb_rows() const = 0;
     virtual int nb_cols() const = 0;
     virtual void cluster_to_target_permutation(const K* const in, K* const out) const = 0;
+    virtual void source_to_cluster_permutation(const K* const in, K* const out) const = 0;
     virtual const MPI_Comm& get_comm() const = 0;
     virtual int get_rankworld() const = 0;
     virtual int get_sizeworld() const = 0;
+    virtual int get_local_size() const = 0;
     virtual const std::vector<SubMatrix<K>*>& get_MyNearFieldMats() const = 0;
-    virtual const LowRankMatrix<K>& get_MyFarFieldMats(int i) const = 0;
+    virtual const LowRankMatrix<K,GeometricClusteringDDM>& get_MyFarFieldMats(int i) const = 0;
     virtual int get_MyFarFieldMats_size() const = 0;
     virtual const std::vector<SubMatrix<K>*>& get_MyStrictlyDiagNearFieldMats() const = 0;
     virtual Matrix<K> to_dense_perm() const = 0;
-    
+    virtual Matrix<K> to_local_dense() const = 0;
+
     virtual ~HMatrixVirt() {};
 };
 
 
-template<template<class> class LR, class K>
+template<class K, template<class,class> class LR>
 class HMatrixImpl : public HMatrixVirt<K> {
 private:
-    HMatrix<LR,K> H;
+    HMatrix<K,LR,GeometricClusteringDDM> H;
 public:
-    HMatrixImpl(IMatrix<K>& I, const std::vector<htool::R3>& xt, const int& reqrank=-1, MPI_Comm comm=MPI_COMM_WORLD) : H(I,xt,reqrank,comm){}
+    HMatrixImpl(IMatrix<K>& I, const std::vector<htool::R3>& xt, bool symmetry=false,const int& reqrank=-1, MPI_Comm comm=MPI_COMM_WORLD) : H(I,xt,symmetry,reqrank,comm){}
     HMatrixImpl(IMatrix<K>& I, const std::vector<htool::R3>& xt, const std::vector<htool::R3>& xs, const int& reqrank=-1, MPI_Comm comm=MPI_COMM_WORLD) : H(I,xt,xs,reqrank,comm){}
     const std::map<std::string, std::string>& get_infos() const {return H.get_infos();}
     void mvprod_global(const K* const in, K* const out,const int& mu=1) const {return H.mvprod_global(in,out,mu);}
     int nb_rows() const { return H.nb_rows();}
     int nb_cols() const { return H.nb_cols();}
     void cluster_to_target_permutation(const K* const in, K* const out) const {return H.cluster_to_target_permutation(in,out);}
+    void source_to_cluster_permutation(const K* const in, K* const out) const {return H.source_to_cluster_permutation(in,out);}
     const MPI_Comm& get_comm() const {return H.get_comm();}
     int get_rankworld() const {return H.get_rankworld();}
     int get_sizeworld() const {return H.get_sizeworld();}
+    int get_local_size() const {return H.get_local_size();}
     const std::vector<SubMatrix<K>*>& get_MyNearFieldMats() const {return H.get_MyNearFieldMats();}
-    const LowRankMatrix<K>& get_MyFarFieldMats(int i) const {return *(H.get_MyFarFieldMats()[i]);}
+    const LowRankMatrix<K,GeometricClusteringDDM>& get_MyFarFieldMats(int i) const {return *(H.get_MyFarFieldMats()[i]);}
     int get_MyFarFieldMats_size() const {return H.get_MyFarFieldMats().size();}
     const std::vector<SubMatrix<K>*>& get_MyStrictlyDiagNearFieldMats() const {return H.get_MyStrictlyDiagNearFieldMats();}
     Matrix<K> to_dense_perm() const {return H.to_dense_perm();}
+    Matrix<K> to_local_dense() const {return H.to_local_dense();}
 };
 
 
@@ -151,28 +164,87 @@ void Mesh2Bemtool(const ffmesh &Th, Geometry &node) {
     }
 }
 
-template<class K>
-AnyType ToDense(Stack stack,Expression emat,Expression einter,int init)
-{
-    ffassert(einter);
-    HMatrixVirt<K>** Hmat =GetAny<HMatrixVirt<K>** >((*einter)(stack));
-    ffassert(Hmat && *Hmat);
-    HMatrixVirt<K>& H = **Hmat;
-    Matrix<K> mdense = H.to_dense_perm();
-    const std::vector<K>& vdense = mdense.get_mat();
-    
-    KNM<K>* M =GetAny<KNM<K>*>((*emat)(stack));
-    
-    for (int i=0; i< mdense.nb_rows(); i++)
-        for (int j=0; j< mdense.nb_cols(); j++)
-            (*M)(i,j) = mdense(i,j);
-    
-    return M;
+static PetscErrorCode s2c(PetscContainer ctx, PetscScalar* in, PetscScalar* out) {
+    HMatrixVirt<PetscScalar>** Hmat;
+
+    PetscFunctionBegin;
+    PetscContainerGetPointer(ctx, (void**)&Hmat);
+    (*Hmat)->source_to_cluster_permutation(in, out);
+    PetscFunctionReturn(0);
 }
 
-template<class K, int init>
-AnyType ToDense(Stack stack,Expression emat,Expression einter)
-{ return ToDense<K>(stack,emat,einter,init);}
+static PetscErrorCode c2s(PetscContainer ctx, PetscScalar* in, PetscScalar* out) {
+    HMatrixVirt<PetscScalar>** Hmat;
+
+    PetscFunctionBegin;
+    PetscContainerGetPointer(ctx, (void**)&Hmat);
+    (*Hmat)->cluster_to_target_permutation(in, out);
+    PetscFunctionReturn(0);
+}
+
+template<class Type, class K>
+AnyType To(Stack stack,Expression emat,Expression einter,int init)
+{
+    ffassert(einter);
+    HMatrixVirt<K>** Hmat = GetAny<HMatrixVirt<K>** >((*einter)(stack));
+    ffassert(Hmat && *Hmat);
+    HMatrixVirt<K>& H = **Hmat;
+    if(std::is_same<Type, KNM<K>>::value) {
+        Matrix<K> mdense = H.to_dense_perm();
+        const std::vector<K>& vdense = mdense.get_mat();
+        KNM<K>* M = GetAny<KNM<K>*>((*emat)(stack));
+        for (int i=0; i< mdense.nb_rows(); i++)
+            for (int j=0; j< mdense.nb_cols(); j++)
+                (*M)(i,j) = mdense(i,j);
+        return M;
+    }
+    else {
+#ifndef WITH_petsccomplex
+        ffassert(0);
+#else
+        Matrix<K> mdense = H.to_local_dense();
+        Dmat* dense = GetAny<Dmat*>((*emat)(stack));
+        dense->dtor();
+        MatCreate(H.get_comm(), &dense->_petsc);
+        MatSetType(dense->_petsc, MATMPIDENSE);
+        MatSetSizes(dense->_petsc, H.get_local_size(), PETSC_DECIDE, H.nb_rows(), H.nb_cols());
+        MatMPIDenseSetPreallocation(dense->_petsc, PETSC_NULL);
+        PetscScalar* array;
+        MatDenseGetArray(dense->_petsc, &array);
+        if (array) {
+           for (int i = 0; i < mdense.nb_rows(); ++i)
+               for (int j = 0; j < mdense.nb_cols(); ++j)
+                   array[i + j * mdense.nb_rows()] = mdense(i,j);
+        }
+        MatDenseRestoreArray(dense->_petsc, &array);
+        MatAssemblyBegin(dense->_petsc, MAT_FINAL_ASSEMBLY);
+        MatAssemblyEnd(dense->_petsc, MAT_FINAL_ASSEMBLY);
+        Mat M;
+        MatCreate(H.get_comm(), &M);
+        MatSetSizes(M, H.get_local_size(), H.get_local_size(), H.nb_rows(), H.nb_cols());
+        MatSetType(M, MATMPIAIJ);
+        MatMPIAIJSetPreallocation(M, H.get_local_size(), NULL, H.nb_cols() - H.get_local_size(), NULL);
+        MatSetUp(M);
+
+        MatSetOption(M, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
+        MatSetOption(M, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
+        MatConvert(dense->_petsc, MATMPIAIJ, MAT_REUSE_MATRIX, &M);
+        MatHeaderReplace(dense->_petsc, &M);
+        PetscContainer ptr;
+        PetscContainerCreate(H.get_comm(), &ptr);
+        PetscContainerSetPointer(ptr, Hmat);
+        PetscObjectComposeFunction((PetscObject)ptr, "s2c_C", s2c);
+        PetscObjectComposeFunction((PetscObject)ptr, "c2s_C", c2s);
+        PetscObjectCompose((PetscObject)dense->_petsc, "Hmat", (PetscObject)ptr);
+        PetscContainerDestroy(&ptr);
+        return dense;
+#endif
+    }
+}
+
+template<class Type, class K, int init>
+AnyType To(Stack stack,Expression emat,Expression einter)
+{ return To<Type, K>(stack,emat,einter,init);}
 
 template<class V, class K>
 class Prod {
@@ -319,7 +391,7 @@ public:
                 double* bufcomp = new double[mpirank==0?nblrg:nblr];
                 
                 for (int i=0;i<nblr;i++) {
-                    const LowRankMatrix<K>& l = (*H)->get_MyFarFieldMats(i);
+                    const LowRankMatrix<K,GeometricClusteringDDM>& l = (*H)->get_MyFarFieldMats(i);
                     buflr[5*i] = l.get_offset_i();
                     buflr[5*i+1] = l.get_offset_j();
                     buflr[5*i+2] = l.nb_rows();
@@ -568,11 +640,11 @@ AnyType SetCompressMat(Stack stack,Expression emat,Expression einter,int init)
   if (init) delete *Hmat;
 
   if ( compressor == "" || compressor == "partialACA")
-       *Hmat = new HMatrixImpl<partialACA,K>(A,p);
+       *Hmat = new HMatrixImpl<K,partialACA>(A,p);
    else if (compressor == "fullACA")
-       *Hmat = new HMatrixImpl<fullACA,K>(A,p);
+       *Hmat = new HMatrixImpl<K,fullACA>(A,p);
    else if (compressor == "SVD")
-       *Hmat = new HMatrixImpl<SVD,K>(A,p);
+       *Hmat = new HMatrixImpl<K,SVD>(A,p);
    else {
        cerr << "Error: unknown htool compressor \""+compressor+"\"" << endl;
        ffassert(0);
@@ -600,10 +672,17 @@ void addHmat() {
     
     // to dense:
     TheOperators->Add("=",
-                      new OneOperator2_<KNM<K>*, KNM<K>*, HMatrixVirt<K>**,E_F_StackF0F0>(ToDense<K, 1>));
+                      new OneOperator2_<KNM<K>*, KNM<K>*, HMatrixVirt<K>**,E_F_StackF0F0>(To<KNM<K>, K, 1>));
     TheOperators->Add("<-",
-                      new OneOperator2_<KNM<K>*, KNM<K>*, HMatrixVirt<K>**,E_F_StackF0F0>(ToDense<K, 0>));
-
+                      new OneOperator2_<KNM<K>*, KNM<K>*, HMatrixVirt<K>**,E_F_StackF0F0>(To<KNM<K>, K, 0>));
+#ifdef WITH_petsccomplex
+    if(std::is_same<K, PetscScalar>::value) {
+        TheOperators->Add("=",
+                new OneOperator2_<Dmat*, Dmat*, HMatrixVirt<K>**,E_F_StackF0F0>(To<Dmat, K, 1>));
+        TheOperators->Add("<-",
+                new OneOperator2_<Dmat*, Dmat*, HMatrixVirt<K>**,E_F_StackF0F0>(To<Dmat, K, 0>));
+    }
+#endif
     Dcl_Type<const typename CompressMat<K>::Op *>();
     //Add<const typename assembleHMatrix<LR, K>::Op *>("<-","(", new assembleHMatrix<LR, K>);
 
@@ -1674,12 +1753,12 @@ void ff_BIO_Generator(HMatrixVirt<R>** Hmat, BemKernel *typeKernel, Dof<P>& dof,
         if(mpirank == 0) cout << "kernel definition error" << endl; ffassert(0);}
    // build the Hmat
    if ( compressor == "" || compressor == "partialACA")
-        *Hmat = new HMatrixImpl<partialACA,R>(*generator,p1,-1,comm);
+        *Hmat = new HMatrixImpl<R,partialACA>(*generator,p1,false,-1,comm);
     
     else if (compressor == "fullACA")
-        *Hmat = new HMatrixImpl<fullACA,R>(*generator,p1,-1,comm);
+        *Hmat = new HMatrixImpl<R,fullACA>(*generator,p1,false,-1,comm);
     else if (compressor == "SVD")
-        *Hmat = new HMatrixImpl<SVD,R>(*generator,p1,-1,comm);
+        *Hmat = new HMatrixImpl<R,SVD>(*generator,p1,false,-1,comm);
     else {
         cerr << "Error: unknown htool compressor \""+compressor+"\"" << endl;
         ffassert(0);
@@ -1694,11 +1773,11 @@ template <class R>
 void builHmat(HMatrixVirt<R>** Hmat, IMatrix<R>* generatorP,string compressor,vector<htool::R3> &p1,vector<htool::R3> &p2,MPI_Comm comm)  {
     
     if (compressor=="" || compressor == "partialACA")
-        *Hmat = new HMatrixImpl<partialACA,R>(*generatorP,p2,p1,-1,comm);
+        *Hmat = new HMatrixImpl<R,partialACA>(*generatorP,p2,p1,-1,comm);
     else if (compressor == "fullACA")
-        *Hmat = new HMatrixImpl<fullACA,R>(*generatorP,p2,p1,-1,comm);
+        *Hmat = new HMatrixImpl<R,fullACA>(*generatorP,p2,p1,-1,comm);
     else if (compressor == "SVD")
-        *Hmat = new HMatrixImpl<SVD,R>(*generatorP,p2,p1,-1,comm);
+        *Hmat = new HMatrixImpl<R,SVD>(*generatorP,p2,p1,-1,comm);
     else {
         cerr << "Error: unknown htool compressor \""+compressor+"\"" << endl;
         ffassert(0);
