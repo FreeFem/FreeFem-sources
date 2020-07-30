@@ -2785,7 +2785,7 @@ AnyType PopenMeditMeshT_Op< MMesh, v_fes >::operator( )(Stack stack) const {
 
   assert(it == nt);
   assert(iv == nv);
-  assert(ibe = nbe);
+  assert(ibe == nbe);
   if (verbosity > 2) {
     cout << "meditff :: Value of elements: vertex " << nv << " surface Triangle " << nt
          << " boundary edge " << nbe << endl;
