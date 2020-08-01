@@ -44,7 +44,7 @@ All notable changes to this project will be documented in this file.
 - moved Htool to its new GitHub location
 - ScaLAPACK and MUMPS are not compiled by PETSc anymore if there is no Fortran compiler
 - MPICH is compiled by PETSc if no MPI is detected during configure, see https://community.freefem.org/t/feature-request-use-download-mpich-on-ubuntu/407
-- PETSc version 3.13.3
+- PETSc version 3.13.4
 - force `--with-cudac=0` in `make petsc-slepc`, see https://github.com/FreeFem/FreeFem-sources/issues/141
 - change DSL keyword P1dc3dL->P1dcL and P1dc3dS->P1dcS
 - rename `view`, `hasType`, `changeSchur` to respectively `ObjectView`, `HasType`, and `ChangeSchur`
