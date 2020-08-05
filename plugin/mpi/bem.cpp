@@ -164,6 +164,7 @@ void Mesh2Bemtool(const ffmesh &Th, Geometry &node) {
     }
 }
 
+#ifdef WITH_petsccomplex
 static PetscErrorCode s2c(PetscContainer ctx, PetscScalar* in, PetscScalar* out) {
     HMatrixVirt<PetscScalar>** Hmat;
 
@@ -181,6 +182,7 @@ static PetscErrorCode c2s(PetscContainer ctx, PetscScalar* in, PetscScalar* out)
     (*Hmat)->cluster_to_target_permutation(in, out);
     PetscFunctionReturn(0);
 }
+#endif
 
 template<class Type, class K>
 AnyType To(Stack stack,Expression emat,Expression einter,int init)
