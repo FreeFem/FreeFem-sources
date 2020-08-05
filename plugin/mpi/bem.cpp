@@ -676,7 +676,7 @@ void addHmat() {
     TheOperators->Add("<-",
                       new OneOperator2_<KNM<K>*, KNM<K>*, HMatrixVirt<K>**,E_F_StackF0F0>(To<KNM<K>, K, 0>));
 #ifdef WITH_petsccomplex
-    if(std::is_same<K, PetscScalar>::value) {
+    if(std::is_same<K, PetscScalar>::value && Global.Find("MatDestroy").NotNull()) {
         TheOperators->Add("=",
                 new OneOperator2_<Dmat*, Dmat*, HMatrixVirt<K>**,E_F_StackF0F0>(To<Dmat, K, 1>));
         TheOperators->Add("<-",
