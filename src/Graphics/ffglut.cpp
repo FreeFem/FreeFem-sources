@@ -1,8 +1,13 @@
+#ifdef FREEGLUT__
+#define GL_SILENCE_DEPRECATION
+#include <GL/glut.h>
+#else
 #ifdef __APPLE__
 #define GL_SILENCE_DEPRECATION
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
+#endif
 #endif
 /*
 #if !defined(GLUT_WINDOW_SCALE)
@@ -41,7 +46,7 @@ using namespace std;
 #include "Mesh3dn.hpp"
 
 #include "PlotStream.hpp"
-
+double kccc = 1; // to solve  bug on MacOS Catalina , wrong value in resize
 extern long verbosity;
 int glutscreenscale=1;//  High Resolution Explained: Features and Benefit
 // add for the gestion of the endianness of the file.
@@ -133,7 +138,7 @@ int   ReadOnePlot(FILE *fp)
         else if( strcmp(magicxx,magic3_1)==0)  version=3;
         else if( strcmp(magicxx,magic3_2)==0)  version=3;
         else if( strcmp(magicxx,magic4_0)==0)  version=4;
-        else if( strcmp(magicxx,magic4_1)==0)  version=4.1;
+        else if( strcmp(magicxx,magic4_1)==0)  version=4;
         else err =1;
 
         if(err) {
@@ -2375,7 +2380,8 @@ void OneWindow::cadreortho(R2 A, R2 B)
     Bmin= M - D2;
     Bmax= M + D2;
     hpixel = (Bmax.x-Bmin.x)/width;
-    if((debug > 10)) cout << " cadreortho: "<< " :: " << Bmin << " " << Bmax <<" oB " << oBmin << " " << oBmax << endl;
+    if((debug > 10)) cout << " cadreortho: "<< " :: " << Bmin << " " << Bmax <<" oB " << oBmin << " " << oBmax << " w: " <<width
+                        << " h: " << height << endl;
 
 }
 void OneWindow::setLighting()
@@ -3662,10 +3668,18 @@ void Clean()
 
 static void Reshape( int width, int height )
 {
+     GLint pView[4];
+ 
+    width*= kccc;
+    height*= kccc;
+  //  cout << " width " << width << " "<<height << endl;
     OneWindow * win=CurrentWin();
     if(win)
     {
         win->resize(width,height);
+    //    glGetIntegerv(GL_VIEWPORT, pView);
+    //     cout << "pView " << pView[0]<< " "<< pView[1]<< " "<< pView[2]<< " "<< pView[3]<< endl;
+
     }
     glutPostRedisplay();
 }
@@ -3677,8 +3691,8 @@ void Display(void)
     OneWindow * win=CurrentWin();
     if(win)
     {
-        if (win->countdisplay++<1) { // HAsh for MAC OS Mojave ???? FH oct 2018 ...
-            if(debug>4) cout << "\n **** Hack Mojove :: glutReshapeWindow \n" << endl;
+        if (win->countdisplay++<0) { // HAsh for MAC OS Mojave ???? FH oct 2018 ...
+            if(debug>4  || 1) cout << "\n **** Hack Mojove :: glutReshapeWindow " << win->width << " " << win->height <<" \n" << endl;
             win->width--;
             win->height--;
 #ifdef GLUT_WINDOW_SCALE
@@ -4146,7 +4160,7 @@ int main(int argc,  char** argv)
     int W = glutGet(GLUT_SCREEN_WIDTH);
     int H = glutGet(GLUT_SCREEN_HEIGHT);
     glutscreenscale = 1;
-#ifdef GLUT_WINDOW_SCALE
+ #ifdef GLUT_WINDOW_SCALE
     glutscreenscale= glutGet(GLUT_WINDOW_SCALE);
     if(glutscreenscale < 0) // unsupported by original GLUT
         glutscreenscale = 1;
@@ -4181,6 +4195,10 @@ int main(int argc,  char** argv)
             eerr = 1;
             cout << " error ming args " << i1 -  argc  << endl;
         }
+    }
+    if(debug)
+    {
+        cout << " glutscreenscale " << glutscreenscale << " " << Width << " " << Height <<  " " << W << " " << H << endl;
     }
     datafile =0;
     if(debug>1)
@@ -4228,6 +4246,15 @@ int main(int argc,  char** argv)
     glutInitWindowPosition(iii0*glutscreenscale,jjj0*glutscreenscale);
 
     int iw0=glutCreateWindow(titre.c_str());
+    GLint pView[4];
+    glGetIntegerv(GL_VIEWPORT, pView);
+ // hack to correct bug in Catalina , incompatibility Width and pView (glutscreenscale???)
+    kccc = (double) ( pView[2]- pView[0])/ (double) (Width+1) ;
+    if (kccc < 0.1) kccc= 1;
+    if(kccc > 10.) kccc=1;
+    if( debug )
+    cout << "pView " << pView[0]<< " "<< pView[1]<< " "<< pView[2]<< " "<< pView[3]<< " kccc=  " << kccc << endl;
+    
     Num2Windows[0]=iw0;
     glDisable(GL_DEPTH_TEST);
     glutReshapeFunc( Reshape ); // pour changement de fenetre

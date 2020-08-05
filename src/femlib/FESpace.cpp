@@ -466,7 +466,7 @@ double TypeOfFE_P0VF::Pi_h_coef[]={1.,1.,1.}; //  bofbof a verifier ...
       R l0=0,l1=PHat.x,l2=PHat.y;
       l1 = l1 * 3. < 1;
       l2 = l2 * 3. < 1;
-      l0 = 1 - l0 -l2;
+      l0 = 1 - l1 -l2;// // FH & AS july 2020 
 
       r = u0*l0+u1*l1+l2*u2;
     }
@@ -487,7 +487,7 @@ void TypeOfFE_P0VF::FB(const bool *whatd,const Mesh & ,const Triangle & K,const 
   R l0=1-PHat.x-PHat.y,l1=PHat.x,l2=PHat.y;
   l1 = l1 * 3. < 1;
   l2 = l2 * 3. < 1;
-  l0 = 1 - l0 -l2;
+  l0 = 1 - l1 -l2;// FH & AS july 2020
 
   if (val.N() <3)
    throwassert(val.N() >=3);

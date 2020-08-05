@@ -1005,7 +1005,7 @@ class E_ForAllLoopMapSS
     }
 
 };
-double projection(const double & aa, const double & bb, const double & x )
+        double projection(const double & aa, const double & bb, const double & x )
 { double a=aa,b=bb; if(a>b) std::swap(a,b); return min(max(a,x),b);}
 double dist(const double & aa, const double & bb) { return sqrt( aa*aa+bb*bb);}
 double dist(const double & aa, const double & bb,const double & cc) { return sqrt(aa*aa+bb*bb+cc*cc);}
