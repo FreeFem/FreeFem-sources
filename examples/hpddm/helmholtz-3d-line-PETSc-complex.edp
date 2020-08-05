@@ -109,7 +109,7 @@ if(!NoGraphicWindow) {
     v[] = B*uf[];
     v[] += vinc[];
     UhOut vr = abs(v);
-    plot(vr, dim=2, fill=1, nbiso=20, cmm = "Solution");
+    plot(vr, dim = 2, fill = 1, nbiso = 20, cmm = "Solution");
     if(mpirank == 0) {
         int[int] fforder = [1, 1];
         savevtk("helmholtz-3d-line.vtu", ThOut, real(v), imag(v), dataname = "u.re u.im", order = fforder, bin = 1);
