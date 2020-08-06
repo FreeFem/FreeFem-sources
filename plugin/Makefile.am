@@ -13,7 +13,6 @@ mpi/common.hpp \
 mpi/generaldefs.h \
 mpi/hpddm.cpp \
 mpi/hpddm_substructuring.cpp \
-mpi/htool.cpp \
 mpi/bem.cpp \
 mpi/mpi-cmaes.cpp \
 mpi/parmetis.cpp \

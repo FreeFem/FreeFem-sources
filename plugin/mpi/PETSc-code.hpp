@@ -2644,12 +2644,39 @@ namespace PETSc {
           KSPCreate(PetscObjectComm((PetscObject)ptA->_petsc), &ptA->_ksp);
           KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
         }
+        PetscInt N, rbegin;
+        PetscScalar* tmpIn, *tmpOut;
+        PetscContainer ctx;
+        PetscErrorCode (*s2c)(PetscContainer, PetscScalar*, PetscScalar*), (*c2s)(PetscContainer, PetscScalar*, PetscScalar*);
+        PetscObjectQuery((PetscObject)ptA->_petsc, "Hmat", (PetscObject*)&ctx);
+        if(ctx) {
+            PetscObjectQueryFunction((PetscObject)ctx, "s2c_C", &s2c);
+            PetscObjectQueryFunction((PetscObject)ctx, "c2s_C", &c2s);
+            MatGetSize(ptA->_petsc, &N, nullptr);
+            MatGetOwnershipRange(ptA->_petsc, &rbegin, nullptr);
+            tmpIn = new PetscScalar[N]();
+            tmpOut = new PetscScalar[N]();
+            std::copy_n(in->operator PetscScalar*(), in->n, tmpIn + rbegin);
+            MPI_Allreduce(MPI_IN_PLACE, tmpIn, N, HPDDM::Wrapper<PetscScalar>::mpi_type(), MPI_SUM, PetscObjectComm((PetscObject)ptA->_petsc));
+            (*s2c)(ctx, tmpIn, tmpOut);
+            std::copy_n(tmpOut + rbegin, in->n, in->operator PetscScalar*());
+        }
         if (c != 3)
           KSPSolve(ptA->_ksp, x, y);
         else {
           VecConjugate(x);
           KSPSolveTranspose(ptA->_ksp, x, y);
           VecConjugate(y);
+        }
+        if(ctx) {
+            std::fill_n(tmpIn, N, PetscScalar());
+            std::fill_n(tmpOut, N, PetscScalar());
+            std::copy_n(out->operator PetscScalar*(), out->n, tmpIn + rbegin);
+            MPI_Allreduce(MPI_IN_PLACE, tmpIn, N, HPDDM::Wrapper<PetscScalar>::mpi_type(), MPI_SUM, PetscObjectComm((PetscObject)ptA->_petsc));
+            (*c2s)(ctx, tmpIn, tmpOut);
+            std::copy_n(tmpOut + rbegin, out->n, out->operator PetscScalar*());
+            delete [] tmpIn;
+            delete [] tmpOut;
         }
         VecResetArray(y);
         VecResetArray(x);
@@ -4102,6 +4129,18 @@ namespace PETSc {
         MatGetLocalSize(p->_petsc, &n, NULL);
     return static_cast<long>(n);
   }
+  KN_<long> Dmat_range(Stack stack, Dmat* const& p) {
+    throwassert(p);
+    PetscInt m, n;
+    long* ptr = Add2StackOfPtr2FreeA<long>(stack, new long[2]);
+    KN_<long> ret(ptr, 2);
+    if(p->_petsc) {
+        MatGetOwnershipRange(p->_petsc, &m, &n);
+        ptr[0] = m;
+        ptr[1] = n;
+    }
+    return ret;
+  }
   template<class K, typename std::enable_if<std::is_same<K, HPDDM::upscaled_type<K>>::value>::type* = nullptr>
   static void init() {
     if (std::is_same< PetscInt, int >::value) {
@@ -4608,6 +4647,7 @@ static void Init_PETSc( ) {
   Global.Add("MatDestroy", "(", new OneOperator1< long, Dmat* >(PETSc::destroyCSR));
   Add< Dmat* >("D", ".", new OneOperator1< KN_<double>, Dmat* >(PETSc::Dmat_D));
   Add< Dmat* >("n", ".", new OneOperator1< long, Dmat* >(PETSc::Dmat_n));
+  Add< Dmat* >("range", ".", new OneOperator1s_< KN_<long>, Dmat* >(PETSc::Dmat_range));
   TheOperators->Add("<-", new PETSc::initCSRfromArray< HpSchwarz< PetscScalar > >);
   TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >);
   TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar >, 1 >);
