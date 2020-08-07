@@ -994,6 +994,7 @@ namespace Fem2D
         delete [] AdjLink;
         // update the number of edges
         nbe = nbeS;
+        if(!nbe) delete [] borderelements;  // no border
         if (verbosity>5) cout << " Building edges from mesh3 nbe: "<< nbeS << " nbi: " << nbiS << endl;
         
         BuildBound();

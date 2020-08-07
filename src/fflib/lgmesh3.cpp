@@ -1367,27 +1367,28 @@ const MeshL* BuildMeshCurve3(Stack stack, E_BorderN const * const & b)   //  ,bo
                iv[0]=old2new[nnn];
                iv[1]=old2new[++nnn];
                Th->elements[i].set(Th->vertices,iv,mp->label);
-            }
-            nnn++;
-        }
-   }
-    Th->nt=i;
+           }
+           nnn++;
+       }
+  }
+  Th->nt=i;
+  Th->nbe=0;  //Th->borderelements = new BoundaryPointL[0];
+  
+  delete [] vv;
+  delete []vertices;
+  delete gtree;
+  delete [] old2new;
     
-    delete [] vv;
-    delete []vertices;
-    delete gtree;
-    delete [] old2new;
+  Th->BuildBound();
+  Th->BuildAdj();
+  // Th->Buildbnormalv(); // no normal with 3d curve
+  Th->BuildjElementConteningVertex();
+  Th->BuildBdElem();
     
-    Th->BuildBound();
-    Th->BuildAdj();
-   // Th->Buildbnormalv(); // no normal with 3d curve
-    Th->BuildjElementConteningVertex();
-    
-    
-    Add2StackOfPtr2FreeRC(stack, Th); 
-    *mp=mps;
-    
-    return Th;
+  Add2StackOfPtr2FreeRC(stack, Th);
+  *mp=mps;
+   
+  return Th;
 }
 
 

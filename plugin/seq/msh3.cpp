@@ -5829,7 +5829,7 @@ MeshL *truncmesh(const MeshL &Th, const long &kksplit, int *split, bool WithMort
   bool rebuildboundary=false;
   MeshL *Tht = new MeshL(nv, itt, 0, vertices, edges, 0, cleanmesh, removeduplicate, rebuildboundary, orientation, precis_mesh);
       
-  Tht->BuildBdElem();
+  //Tht->BuildBdElem(); done in the constructor
   Tht->BuildGTree( );
     
   if (verbosity > 3) {

@@ -790,6 +790,7 @@ namespace Fem2D
        delete [] AdjLink;
        // update the number of border points
        nbe = nbeL;
+       if(!nbe) delete [] borderelements;  // no border
        if (verbosity>5)
            cout << " Building border point from meshS nbe: "<< nbeL << " nbi: " << nbiL << endl;
         
