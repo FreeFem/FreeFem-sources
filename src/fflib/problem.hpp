@@ -609,7 +609,7 @@ class FormLinear : public E_F0mps { public:
 
 };
 
-template<class VFES>
+template<class MMesh,class VFES>
 class Call_FormLinear: public E_F0mps
 {
 public:
@@ -657,7 +657,7 @@ struct OpCall_FormBilinear_np {
     static const int n_name_param =1+NB_NAME_PARM_MAT+NB_NAME_PARM_HMAT; // 9-> 11 FH 31/10/2005  11->12 nbiter 02/2007  // 12->22 MUMPS+ Autre Solveur 02/08  // 34->40 param bem solver
 };
 
-template<class T,class v_fes>
+template<class T,class MMesh,class v_fes>
 struct OpCall_FormLinear
   : public OneOperator,
     public OpCall_FormLinear_np
@@ -668,18 +668,18 @@ struct OpCall_FormLinear
     Expression * nargs = new Expression[n_name_param];
     args.SetNameParam(n_name_param,name_param,nargs);
 
-    return  new Call_FormLinear<v_fes>(v_fes::dHat,nargs,to<const C_args*>(args[0]),to<pfes*>(args[1]));}
+    return  new Call_FormLinear<MMesh,v_fes>(v_fes::dHat,nargs,to<const C_args*>(args[0]),to<pfes*>(args[1]));}
   OpCall_FormLinear() :
-    OneOperator(atype<const Call_FormLinear<v_fes>*>(),atype<const T*>(),atype<pfes*>()) {}
+    OneOperator(atype<const Call_FormLinear<MMesh,v_fes>*>(),atype<const T*>(),atype<pfes*>()) {}
 };
 
 
-template<class T,class v_fes>
+template<class T,class MMesh,class v_fes>
 struct OpCall_FormLinear2
   : public OneOperator,
     public OpCall_FormLinear_np
 {
-  static const int d=v_fes::dHat;
+  static const int d=MMesh::RdHat::d;
   typedef v_fes *pfes;
   E_F0 * code(const basicAC_F0 & args) const
   {
@@ -692,9 +692,9 @@ struct OpCall_FormLinear2
     long pv = GetAny<long>((*p)(NullStack));
     if ( pv )
       { CompileError("  a(long,Vh) , The long  must be a constant == 0, sorry");}
-    return  new Call_FormLinear<v_fes>(v_fes::dHat,nargs,to<const C_args*>(args[0]),to<pfes*>(args[2]));}
+    return  new Call_FormLinear<MMesh,v_fes>(d,nargs,to<const C_args*>(args[0]),to<pfes*>(args[2]));}
   OpCall_FormLinear2() :
-    OneOperator(atype<const Call_FormLinear<v_fes>*>(),atype<const T*>(),atype<long>(),atype<pfes*>()) {}
+    OneOperator(atype<const Call_FormLinear<MMesh,v_fes>*>(),atype<const T*>(),atype<long>(),atype<pfes*>()) {}
 };
 
 template<class T,class MMesh,class v_fes1, class v_fes2>
@@ -703,13 +703,13 @@ struct OpCall_FormBilinear
   OpCall_FormBilinear_np
 {
   typedef v_fes1 *pfes1; typedef v_fes2 *pfes2;
-  static const int d1=v_fes1::dHat, d2=v_fes2::dHat;
+  static const int d=MMesh::RdHat::d;
 
   E_F0 * code(const basicAC_F0 & args) const
   { Expression * nargs = new Expression[n_name_param];
     args.SetNameParam(n_name_param,name_param,nargs);
     // cout << " OpCall_FormBilinear " << *args[0].left() << " " << args[0].LeftValue() << endl;
-    return  new Call_FormBilinear<MMesh, v_fes1, v_fes2>(d1,nargs,to<const C_args*>(args[0]),to<pfes1*>(args[1]),to<pfes2*>(args[2]));}
+    return  new Call_FormBilinear<MMesh, v_fes1, v_fes2>(d,nargs,to<const C_args*>(args[0]),to<pfes1*>(args[1]),to<pfes2*>(args[2]));}
   OpCall_FormBilinear() :
     OneOperator(atype<const Call_FormBilinear<MMesh, v_fes1,v_fes2>*>(),atype<const T *>(),atype<pfes1*>(),atype<pfes2*>()) {}
 };
@@ -722,25 +722,25 @@ bool FieldOfForm( list<C_F0> & largs ,bool complextype);
 template<class A>  struct IsComplexType { static const bool value=false;};
 template<>  struct IsComplexType<Complex> { static const bool value=true;};
 
-template<class R,class v_fes>  //  to make   x=linearform(x)
+template<class R,class MMesh,class v_fes>  //  to make   x=linearform(x)
 struct OpArraytoLinearForm
   : public OneOperator
 {
-  typedef typename Call_FormLinear<v_fes>::const_iterator const_iterator;
+  typedef typename Call_FormLinear<MMesh,v_fes>::const_iterator const_iterator;
   const bool isptr;
   const bool init;
   const bool zero;
   class Op : public E_F0mps
   {
   public:
-    Call_FormLinear<v_fes> *l;
+    Call_FormLinear<MMesh,v_fes> *l;
     Expression x;
     const  bool isptr;
     const  bool init;
     const  bool zero;
     AnyType operator()(Stack s)  const ;
     Op(Expression xx,Expression  ll,bool isptrr,bool initt,bool zzero)
-      : l(new Call_FormLinear<v_fes>(*dynamic_cast<const Call_FormLinear<v_fes> *>(ll))),
+      : l(new Call_FormLinear<MMesh,v_fes>(*dynamic_cast<const Call_FormLinear<MMesh,v_fes> *>(ll))),
         x(xx),
         isptr(isptrr),init(initt),zero(zzero)
         {assert(l);
@@ -761,7 +761,7 @@ struct OpArraytoLinearForm
   //    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()),init(false),isptr(false) {}
 
   OpArraytoLinearForm(const basicForEachType * tt,bool isptrr, bool initt,bool zzero=1) :
-    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear<v_fes>*>()),
+    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear<MMesh,v_fes>*>()),
     isptr(isptrr), init(initt),zero(zzero) {}
 
 };
@@ -1173,17 +1173,16 @@ template<class R>   void  Element_Op(MatriceElementaireSymetrique<R,FESpaceL> & 
 }
 
 
-template<class R,class v_fes>
-AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
+template<class R,class MMesh,class v_fes>
+AnyType OpArraytoLinearForm<R,MMesh,v_fes>::Op::operator()(Stack stack)  const
 {
   typedef v_fes *pfes;
   typedef typename  v_fes::FESpace FESpaceT;
-  typedef typename  FESpaceT::Mesh MeshT;
   typedef typename  FESpaceT::FElement FElementT;
-  typedef typename  MeshT::Element ElementT;
-  typedef typename  MeshT::Vertex VertexT;
-  typedef typename  MeshT::RdHat RdHatT;
-  typedef typename  MeshT::Rd RdT;
+  /*typedef typename  MMesh::Element ElementT;
+  typedef typename  MMesh::Vertex VertexT;
+  typedef typename  MMesh::RdHat RdHatT;
+  typedef typename  MMesh::Rd RdT;*/
 
   pfes  &  pp= *GetAny<pfes * >((*l->ppfes)(stack));
   FESpaceT * pVh = *pp ;
@@ -1209,7 +1208,7 @@ AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   if(zero && NbOfDF )
    xx=R();
 
-  if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,MeshT,FESpaceT,FESpaceT>(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
+  if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpaceT,FESpaceT>(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
     AssembleBC<R,FESpaceT>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
   return SetAny<KN_<R> >(xx);
 }

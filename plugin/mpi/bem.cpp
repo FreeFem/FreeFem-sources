@@ -1264,21 +1264,21 @@ if ( this->IsBilinearOperator() && this->IsBemBilinearOperator()  ) return true;
 return false;}
 
 
-template<class R, class v_fes1, class v_fes2>
+template<class R, class MMesh, class v_fes1, class v_fes2>
 struct OpHMatrixtoBEMForm
 : public OneOperator
 {
-    typedef typename Call_FormBilinear<v_fes1,v_fes2>::const_iterator const_iterator;
+    typedef typename Call_FormBilinear<MMesh,v_fes1,v_fes2>::const_iterator const_iterator;
     int init;
     class Op : public E_F0mps {
     public:
-        Call_FormBilinear<v_fes1,v_fes2> *b;
+        Call_FormBilinear<MMesh,v_fes1,v_fes2> *b;
         Expression a;
         int init;
         AnyType operator()(Stack s)  const ;
         
         Op(Expression aa,Expression  bb,int initt)
-        : b(new Call_FormBilinear<v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<v_fes1,v_fes2> *>(bb))),a(aa),init(initt)
+        : b(new Call_FormBilinear<MMesh,v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<MMesh,v_fes1,v_fes2> *>(bb))),a(aa),init(initt)
         { assert(b && b->nargs);
         }
         operator aType () const { return atype<HMatrixVirt<R> **>();}
@@ -1288,11 +1288,11 @@ struct OpHMatrixtoBEMForm
     E_F0 * code(const basicAC_F0 & args) const
     {
         Expression p=args[1];
-        Call_FormBilinear<v_fes1,v_fes2> *t( new Call_FormBilinear<v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<v_fes1,v_fes2> *>(p))) ;
+        Call_FormBilinear<MMesh,v_fes1,v_fes2> *t( new Call_FormBilinear<MMesh,v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<MMesh,v_fes1,v_fes2> *>(p))) ;
         return  new Op(to<HMatrixVirt<R> **>(args[0]),args[1],init);}
   
      OpHMatrixtoBEMForm(int initt=0) :
-     OneOperator(atype<HMatrixVirt<R> **>(),atype<HMatrixVirt<R> **>(),atype<const Call_FormBilinear<v_fes1,v_fes2>*>()),
+     OneOperator(atype<HMatrixVirt<R> **>(),atype<HMatrixVirt<R> **>(),atype<const Call_FormBilinear<MMesh,v_fes1,v_fes2>*>()),
         init(initt)
         {}
     
@@ -1837,8 +1837,8 @@ void ff_POT_Generator(HMatrixVirt<R>** Hmat,BemPotential *typePot, Dof<P> &dof, 
 }
 
 // the operator
-template<class R,class v_fes1,class v_fes2>
-AnyType OpHMatrixtoBEMForm<R,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
+template<class R,class MMesh, class v_fes1,class v_fes2>
+AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
 {
     typedef typename v_fes1::pfes pfes1;
     typedef typename v_fes2::pfes pfes2;
@@ -2017,20 +2017,20 @@ static void Init_Bem() {
     zzzfff->Add("HMatrix", atype<HMatrixVirt<double> **>());
     map_type_of_map[make_pair(atype<HMatrixVirt<double>**>(), atype<double*>())] = atype<HMatrixVirt<double>**>();
     map_type_of_map[make_pair(atype<HMatrixVirt<double>**>(), atype<Complex*>())] = atype<HMatrixVirt<std::complex<double> >**>();
-        
-    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesS, v_fesS > (1) );
-    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesS, v_fesS > );
-    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fesL > (1) );
-    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fesL > );
+    // bem integration space/target space must be review Axel 08/2020    
+    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fesS > (1) );
+    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fesS > );
+    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fesL > (1) );
+    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fesL > );
        
 
-    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fes > (1) );
-    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fes > );
-    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fesS > (1) );
-    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesL, v_fesS > );
+    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fes > (1) );
+    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fes > );
+    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fesS > (1) );
+    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fesS > );
 
-    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, v_fesS, v_fes > (1));
-    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, v_fesS, v_fes > );
+    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fes > (1));
+    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fes > );
 
     // BemKernel
     

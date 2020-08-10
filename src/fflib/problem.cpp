@@ -9460,8 +9460,8 @@ euh(fi), evh(fj)
     CompileError("Sorry the variationnal form (varf)  is not a the variationnal form (type const C_args *)");
     largs=LLL->largs;
 }
-template<class VFES>
-Call_FormLinear<VFES>::Call_FormLinear(int dd,Expression *na,Expression  LL, Expression ft)
+template<class MMesh,class VFES>
+Call_FormLinear<MMesh,VFES>::Call_FormLinear(int dd,Expression *na,Expression  LL, Expression ft)
 : d(dd),largs(),nargs(na),N(ft->nbitem()),
 ppfes(ft)//IsFebaseArray(ft))
 {
@@ -9761,10 +9761,10 @@ namespace Fem2D {
 
 }
 
-template class Call_FormLinear<v_fes>;
-template class Call_FormLinear<v_fes3>;
-template class Call_FormLinear<v_fesS>;
-template class Call_FormLinear<v_fesL>;
+template class Call_FormLinear<Mesh,v_fes>;
+template class Call_FormLinear<Mesh3,v_fes3>;
+template class Call_FormLinear<MeshS,v_fesS>;
+template class Call_FormLinear<MeshL,v_fesL>;
 template class Call_FormBilinear<Mesh,v_fes,v_fes>;
 template class Call_FormBilinear<Mesh3,v_fes3,v_fes3>;
 template class Call_FormBilinear<MeshS,v_fesS,v_fesS>;
