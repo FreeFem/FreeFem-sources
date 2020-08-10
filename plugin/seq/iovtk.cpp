@@ -3395,110 +3395,95 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
            
            
 
-  if(pfields && err==0)
-    {
-     if(verbosity>1)   cout << " try  reading POINT_DATA  " << startdatapoint << endl;
-        /*
-      POINT_DATA 32436
-      FIELD FieldData 2
-      Velocity 3 32436 float
+  if(pfields && err==0) {
+    if(verbosity>1)   cout << " try  reading POINT_DATA  " << startdatapoint << endl;
+    /*
+    POINT_DATA 32436
+    FIELD FieldData 2
+    Velocity 3 32436 float
       
-      */
-        nbp =0;//  no POINT_DATA
-        nbf=0;
-        if (startdatapoint==0)
-            if (fscanf(fp, "%s", buffer) != 1) {
-            cout << "error in reading vtk files pfields" << endl;
-            err++;
-           }
+    */
+    nbp =0;//  no POINT_DATA
+    nbf=0;
+    if (startdatapoint==0)
+      if (fscanf(fp, "%s", buffer) != 1) {
+        cout << "error in reading vtk files pfields" << endl;
+        err++;
+      }
         
-        if (strcmp(buffer, "POINT_DATA")==0)
-        {
-            if (fscanf(fp, "%d", &nbp) != 1) err++;
-            if (fscanf(fp, "%s", buffer) != 1) err++;
-        }
-        if(err == 0 && strcmp(buffer, "FIELD")!=0)
-        {
-            cout << "VTK reader can only read FIELD/POINT_DATA datasets:  not " << buffer<<  endl;
-            err++;
-        }
+      if (strcmp(buffer, "POINT_DATA")==0) {
+        if (fscanf(fp, "%d", &nbp) != 1) err++;
+        if (fscanf(fp, "%s", buffer) != 1) err++;
+      }
+      if(err == 0 && strcmp(buffer, "FIELD")!=0) {
+        cout << "VTK reader can only read FIELD/POINT_DATA datasets:  not " << buffer<<  endl;
+        err++;
+      }
         
-        if ((!err) &&(fscanf(fp, "%s %d", buffer2,&nbf) != 2)) {
-                cout << "error in reading vtk files FIELD FieldData" << endl;
-                err++;
-        }
+      if ((!err) &&(fscanf(fp, "%s %d", buffer2,&nbf) != 2)) {
+        cout << "error in reading vtk files FIELD FieldData" << endl;
+        err++;
+      }
         
-        if( err) nbf=0;
-        else pfields->resize(nbf);
-        for(int nf=0 ; nf < nbf; nf++)
-            {
+      if( err) nbf=0;
+      else pfields->resize(nbf);
+      for(int nf=0 ; nf < nbf; nf++) {
                 
-                int m,nv;
-                // read mesh vertices
-                if (fscanf(fp, "%s %d %d %s\n", buffer,&m, &nv, buffer2) != 4) {
-                    cout << "error in reading vtk files " << endl;
-                    err++;
-                    break;
-                }
-                int n = m*nv;
-                if(verbosity) cout << " reading "<< buffer << " "<< m << " " << nv << " "<< buffer2 << endl;
-                int datasize;
-                if (!strncmp(buffer2, "double", 6)) {
-                    datasize = sizeof(double);
-                } else if (!strncmp(buffer2, "float", 5)) {
-                    datasize = sizeof(float);
-                } else {
-                    cout << "VTK reader only accepts float or double datasets" << endl;
-                    err++;
-                    break;
-                }
-                //  read data ..
-                if(err) break;
-                (*pfields)[nf].resize(n);
-                double* pv=&(*pfields)[nf][0];
-                for(int i=0; i<n; ++i)
-                {
-                   if (binary) {
-                     if (datasize == sizeof(float)) {
-                       float f[1];
-                       if (fread(f, sizeof(float), 1, fp) != 1) {
-                           cout << "error in reading  vtk fields float at " << nf << " / " << i << endl;
-                           err++;
-                           break;
-                       }
-                       
-                       if (!bigEndian) {
-                           FreeFEM::SwapBytes((char *)f, sizeof(float), 1);
-                       }
-                         *pv++=*f;
-                     }
-                    else
-                    {
-                       if (fread(pv++, sizeof(double), 1, fp) != 1) {
-                           cout << "error in reading  vtk fields double at " << nf << " / " << i << endl;
-                           err++;
-                           break;
-                       }
-                       
-                       if (!bigEndian) {
-                           FreeFEM::SwapBytes((char *)pv, sizeof(double), 1);
-                       }
-
-                    }
-                   }
-                  else
-                  {
-                  if (fscanf(fp, "%lf", pv++) != 1) {
-                        cout << "error in reading vtk files ascii fields" << nf << " / " << i <<endl;
-                        err++;
-                    }
-                  }
-                    if(err) break;
-                }
-                if(err) break;
+        int m,nv;
+        // read mesh vertices
+        if (fscanf(fp, "%s %d %d %s\n", buffer,&m, &nv, buffer2) != 4) {
+          cout << "error in reading vtk files " << endl;
+          err++;
+          break;
+        }
+        int n = m*nv;
+        if(verbosity) cout << " reading "<< buffer << " "<< m << " " << nv << " "<< buffer2 << endl;
+        int datasize;
+        if (!strncmp(buffer2, "double", 6))
+          datasize = sizeof(double);
+        else if (!strncmp(buffer2, "float", 5))
+           datasize = sizeof(float);
+        else {
+          cout << "VTK reader only accepts float or double datasets" << endl;
+          err++;
+          break;
+        }
+        //  read data ..
+        if(err) break;
+        (*pfields)[nf].resize(n);
+        double* pv=&(*pfields)[nf][0];
+        for(int i=0; i<n; ++i) {
+          if (binary) {
+            float f[1];
+            if (datasize == sizeof(float)) {
+              if (fread(f, sizeof(float), 1, fp) != 1) {
+                cout << "error in reading  vtk fields float at " << nf << " / " << i << endl;
+                err++;
+                break;
+              }
             }
-            if( err ) (*pfields).resize(0);
-    } // end if(pfields)
+            else {
+              if (fread(f, sizeof(double), 1, fp) != 1) {
+                cout << "error in reading  vtk fields double at " << nf << " / " << i << endl;
+                err++;
+                break;
+              }
+            }
+            if (!bigEndian)
+              FreeFEM::SwapBytes((char *)f, sizeof(float), 1);
+            *pv++=*f;
+          }
+          else
+            if (fscanf(fp, "%lf", pv++) != 1) {
+              cout << "error in reading vtk files ascii fields" << nf << " / " << i <<endl;
+              err++;
+            }
+          if(err) break;
+        }
+        if(err) break;
+      }
+    if( err ) (*pfields).resize(0);
+  } // end if(pfields)
   fclose(fp);
 
   // 3D versions
@@ -6173,7 +6158,7 @@ MMesh *VTK_LoadT(const string &filename, bool bigEndian, bool cleanmesh, bool re
     exit(1);
   }
 
-  char buffer[256], buffer2[256];
+  char buffer[256], buffer2[256], buffer3[256];;
 
   res = fgets(buffer, sizeof(buffer), fp);    // version line
   res = fgets(buffer, sizeof(buffer), fp);    // title
@@ -6408,28 +6393,106 @@ MMesh *VTK_LoadT(const string &filename, bool bigEndian, bool cleanmesh, bool re
     }
   }
 
+  int nbp=0,nbf=0, err=0;
+    if (fscanf(fp, "%s %d", buffer, &nbp) != 2)
+        {   cout << "error in reading vtk files pfields" << endl;
+            err++;}
+    int startdatapoint=0;
+    if(err==0)
+    {
+        int nf=-1;
+        /*
+         CELL_DATA 209726
+         Scalars  Label int 1
+         LOOKUP_TABLE FreeFempp_table
+         ....
+         LOOKUP_TABLE FreeFempp_table 7
+         4*7 value
+         */
         
-  if(pfields) {
-    if(verbosity>1)   cout << " try  reading POINT_DATA  " << endl;
-               
-    int nbp=0,nbf=0,err=0;
-    if (fscanf(fp, "%s %d", buffer, &nbp) != 2) {
-      cout << "error in reading vtk files pfields" << endl;
-      err++;
+        if (strcmp(buffer, "CELL_DATA"))  { //  read region number if exist
+            if (strcmp(buffer, "POINT_DATA"))  {
+                cout << "VTK reader can only read CELL_DATA or POINT_DATA datasets:  not " << buffer<< " " << nbp<<  endl;
+                err=1;
+            }
+            else startdatapoint=1;
+        }
+        else {
+            if ((!err) &&(fscanf(fp, "%s %s %s %d\n", buffer, buffer2,buffer3,&nbf) != 4)) {
+                cout << "error in reading vtk files FIELD FieldData" << endl;
+                err++;
+            }}
+        
+        if( strcmp(buffer3, "int") !=0)// not integer
+            err++;
+        if ((!err) &&(fscanf(fp, "%s %s\n", buffer, buffer2) != 2))
+            err++;
+        // read nbf
+        cout << " err= " << err << " read nbp "<< nbp << endl;
+        if(err==0)
+            for( nf=0 ; nf < nbp; nf++)
+            {
+                int ii[1];
+                if (binary)
+                { if (fread(ii, sizeof(int), 1, fp) != 1) err++;}
+                else
+                {      if (fscanf(fp, "%d", ii) != 1) err++;}
+                if(err) break;
+            }
+        if(err) cout << " err reading CELL_DATA  at " << nf << endl;
+        if ((!err) &&(fscanf(fp, "%s %s %d\n", buffer, buffer2,&nbf) != 3 ) ) err++;
+        nf =-1;
+        if(err==0)
+            for( nf=0 ; nf < nbf; nf++)
+            {
+                float f[4];
+                char cc[4];
+                if (binary)
+                { if (fread(cc, sizeof(char), 4, fp) != 4) err++;}
+                else
+                {      if (fscanf(fp, "%f %f %f %fa",f+0,f+1,f+2,f+3) != 4) err++;}
+                if(err) break;
+            }
+        if(err&& nf>=0) cout << " err LOOKUP_TABLE FreeFempp_table at " << nf << " " << err << endl;
+        
+        startdatapoint=0;
     }
-
-    if (strcmp(buffer, "POINT_DATA"))  {
-      cout << "VTK reader can only read POINT_DATA datasets:  not " << buffer<<  endl;
-      err++;
-    }
-    if ((!err) &&(fscanf(fp, "%s %s %d", buffer, buffer2,&nbf) != 3)) {
-      cout << "error in reading vtk files FIELD FieldData" << endl;
-      err++;
-    }
-
-    if(err) nbf=0;
+           
+    
+  if(pfields && err==0) {
+    if(verbosity>1)   cout << " try  reading POINT_DATA  " << startdatapoint << endl;
+    /*
+    POINT_DATA 32436
+    FIELD FieldData 2
+    Velocity 3 32436 float
+      
+    */
+    nbp =0;//  no POINT_DATA
+    nbf=0;
+    if (startdatapoint==0)
+      if (fscanf(fp, "%s", buffer) != 1) {
+        cout << "error in reading vtk files pfields" << endl;
+        err++;
+      }
+        
+      if (strcmp(buffer, "POINT_DATA")==0) {
+        if (fscanf(fp, "%d", &nbp) != 1) err++;
+        if (fscanf(fp, "%s", buffer) != 1) err++;
+      }
+      if(err == 0 && strcmp(buffer, "FIELD")!=0) {
+        cout << "VTK reader can only read FIELD/POINT_DATA datasets:  not " << buffer<<  endl;
+        err++;
+      }
+        
+      if ((!err) &&(fscanf(fp, "%s %d", buffer2,&nbf) != 2)) {
+        cout << "error in reading vtk files FIELD FieldData" << endl;
+        err++;
+      }
+        
+      if( err) nbf=0;
       else pfields->resize(nbf);
       for(int nf=0 ; nf < nbf; nf++) {
+                
         int m,nv;
         // read mesh vertices
         if (fscanf(fp, "%s %d %d %s\n", buffer,&m, &nv, buffer2) != 4) {
@@ -6443,7 +6506,7 @@ MMesh *VTK_LoadT(const string &filename, bool bigEndian, bool cleanmesh, bool re
         if (!strncmp(buffer2, "double", 6))
           datasize = sizeof(double);
         else if (!strncmp(buffer2, "float", 5))
-          datasize = sizeof(float);
+           datasize = sizeof(float);
         else {
           cout << "VTK reader only accepts float or double datasets" << endl;
           err++;
@@ -6455,42 +6518,40 @@ MMesh *VTK_LoadT(const string &filename, bool bigEndian, bool cleanmesh, bool re
         double* pv=&(*pfields)[nf][0];
         for(int i=0; i<n; ++i) {
           if (binary) {
-            if (datasize == sizeof(float)) {
-              float f[1];
+            float f[1];
+            if (datasize == sizeof(float)){
               if (fread(f, sizeof(float), 1, fp) != 1) {
                 cout << "error in reading  vtk fields float at " << nf << " / " << i << endl;
                 err++;
                 break;
               }
-              if (!bigEndian)
-                FreeFEM::SwapBytes((char *)f, sizeof(float), 1);
-                *pv++=*f;
             }
             else {
-              if (fread(pv++, sizeof(double), 1, fp) != 1) {
+              if (fread(f, sizeof(double), 1, fp) != 1) {
                 cout << "error in reading  vtk fields double at " << nf << " / " << i << endl;
                 err++;
                 break;
               }
-              if (!bigEndian)
-                FreeFEM::SwapBytes((char *)pv, sizeof(double), 1);
             }
+            if (!bigEndian)
+              FreeFEM::SwapBytes((char *)f, sizeof(float), 1);
+            *pv++=*f;
+        
           }
-          else {
+          else
             if (fscanf(fp, "%lf", pv++) != 1) {
               cout << "error in reading vtk files ascii fields" << nf << " / " << i <<endl;
               err++;
             }
-          }
-          if(err) break;
+        if(err) break;
         }
         if(err) break;
       }
     if( err ) (*pfields).resize(0);
   } // end if(pfields)
- 
   fclose(fp);
 
+        
   T *tff;
   if (nt > 0)
     tff = new T[nt];
