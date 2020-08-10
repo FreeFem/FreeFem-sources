@@ -10,15 +10,15 @@ typedef PETSc::DistributedCSR< HpSchur< PetscReal > > DbddcR;
 typedef PETSc::DistributedCSR< HpSchur< PetscComplex > > DbddcC;
 
 namespace PETSc {
-  template<class K, class fes1, class fes2 >
+  template<class K, class MMesh, class fes1, class fes2 >
   struct varfToMat : public OneOperator {
     class Op : public E_F0mps {
     public:
-      Call_FormBilinear<fes1,fes2>* b;
+      Call_FormBilinear<MMesh,fes1,fes2>* b;
       Expression a;
       AnyType operator()(Stack s) const;
 
-      Op(Expression x, Expression  y) : b(new Call_FormBilinear<fes1,fes2>(*dynamic_cast<const Call_FormBilinear<fes1,fes2>*>(y))), a(x) {
+      Op(Expression x, Expression  y) : b(new Call_FormBilinear<MMesh,fes1,fes2>(*dynamic_cast<const Call_FormBilinear<MMesh,fes1,fes2>*>(y))), a(x) {
           assert(b && b->nargs);
           ffassert(FieldOfForm(b->largs, IsComplexType<HPDDM::upscaled_type<K>>::value) == IsComplexType<HPDDM::upscaled_type<K>>::value);
       }
@@ -27,10 +27,10 @@ namespace PETSc {
     E_F0* code(const basicAC_F0& args) const {
         return new Op(to<Dmat*>(args[0]), args[1]);
     }
-    varfToMat() : OneOperator(atype<Dmat*>(), atype<Dmat*>(), atype<const Call_FormBilinear<fes1,fes2>*>()) {}
+    varfToMat() : OneOperator(atype<Dmat*>(), atype<Dmat*>(), atype<const Call_FormBilinear<MMesh,fes1,fes2>*>()) {}
   };
-  template<class K, class fes1, class fes2>
-  AnyType varfToMat<K, fes1, fes2>::Op::operator()(Stack stack) const {
+  template<class K, class MMesh, class fes1, class fes2>
+  AnyType varfToMat<K, MMesh, fes1, fes2>::Op::operator()(Stack stack) const {
     typedef typename fes1::pfes pfes1;
     typedef typename fes1::FESpace FESpace1;
     typedef typename FESpace1::Mesh Mesh1;
@@ -75,13 +75,13 @@ namespace PETSc {
         else
           A.A.master(new MatriceMorse<HPDDM::upscaled_type<K>>(Vh.NbOfDF, Uh.NbOfDF, 2 * Vh.NbOfDF, 0));
       }
-      if(AssembleVarForm<HPDDM::upscaled_type<K>, MatriceCreuse<HPDDM::upscaled_type<K>>, FESpace1>(stack, Th, Uh, Vh, ds.sym, A.A, 0, b->largs))   // TODO FESpace2 axel
+      if(AssembleVarForm<HPDDM::upscaled_type<K>, MatriceCreuse<HPDDM::upscaled_type<K>>, MMesh, FESpace1,FESpace2>(stack, Th, Uh, Vh, ds.sym, A.A, 0, b->largs))
         AssembleBC<HPDDM::upscaled_type<K>, FESpace1>(stack, Th, Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv); // TODO FESpace2 axel
     }
     else {
       MatriceMorse<HPDDM::upscaled_type<K>> *pMA = new MatriceMorse<HPDDM::upscaled_type<K>>(Vh.NbOfDF, Uh.NbOfDF, 0, ds.sym);
       MatriceMap<HPDDM::upscaled_type<K>>& D = *pMA;
-      bool bc = AssembleVarForm<HPDDM::upscaled_type<K>, MatriceMap<HPDDM::upscaled_type<K>>, FESpace1>(stack, Th, Uh, Vh, ds.sym, &D, 0, b->largs);   // TODO FESpace2 axel
+      bool bc = AssembleVarForm<HPDDM::upscaled_type<K>, MatriceMap<HPDDM::upscaled_type<K>>, MMesh, FESpace1,FESpace2>(stack, Th, Uh, Vh, ds.sym, &D, 0, b->largs);
       A.A.master(pMA);
       if(bc)
         AssembleBC<HPDDM::upscaled_type<K>>(stack, Th, Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
@@ -4660,9 +4660,9 @@ static void Init_PETSc( ) {
     "<-", new OneOperatorCode< PETSc::initCSRfromBlockMatrix< HpSchwarz< PetscScalar > > >( ));
   TheOperators->Add(
     "=", new OneOperatorCode< PETSc::assignBlockMatrix< HpSchwarz< PetscScalar > > >( ),
-         new PETSc::varfToMat< PetscScalar, v_fes, v_fes >,
-         new PETSc::varfToMat< PetscScalar, v_fes3, v_fes3 >,
-         new PETSc::varfToMat< PetscScalar, v_fesS, v_fesS >);
+         new PETSc::varfToMat< PetscScalar, Mesh, v_fes, v_fes >,
+         new PETSc::varfToMat< PetscScalar, Mesh3, v_fes3, v_fes3 >,
+         new PETSc::varfToMat< PetscScalar, MeshS, v_fesS, v_fesS >);
   if (std::is_same< PetscInt, int >::value) {
     TheOperators->Add("<-", new PETSc::initCSRfromMatrix< HpSchwarz< PetscScalar > >);
   }

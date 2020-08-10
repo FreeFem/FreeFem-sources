@@ -627,7 +627,7 @@ public:
 
 };
 
-template<class VFES1,class VFES2>
+template<class MMesh,class VFES1,class VFES2>
 class Call_FormBilinear: public E_F0mps
 {
 public:
@@ -697,7 +697,7 @@ struct OpCall_FormLinear2
     OneOperator(atype<const Call_FormLinear<v_fes>*>(),atype<const T*>(),atype<long>(),atype<pfes*>()) {}
 };
 
-template<class T,class v_fes1, class v_fes2>
+template<class T,class MMesh,class v_fes1, class v_fes2>
 struct OpCall_FormBilinear
   : public OneOperator ,
   OpCall_FormBilinear_np
@@ -709,9 +709,9 @@ struct OpCall_FormBilinear
   { Expression * nargs = new Expression[n_name_param];
     args.SetNameParam(n_name_param,name_param,nargs);
     // cout << " OpCall_FormBilinear " << *args[0].left() << " " << args[0].LeftValue() << endl;
-    return  new Call_FormBilinear<v_fes1, v_fes2>(d1,nargs,to<const C_args*>(args[0]),to<pfes1*>(args[1]),to<pfes2*>(args[2]));}
+    return  new Call_FormBilinear<MMesh, v_fes1, v_fes2>(d1,nargs,to<const C_args*>(args[0]),to<pfes1*>(args[1]),to<pfes2*>(args[2]));}
   OpCall_FormBilinear() :
-    OneOperator(atype<const Call_FormBilinear<v_fes1,v_fes2>*>(),atype<const T *>(),atype<pfes1*>(),atype<pfes2*>()) {}
+    OneOperator(atype<const Call_FormBilinear<MMesh, v_fes1,v_fes2>*>(),atype<const T *>(),atype<pfes1*>(),atype<pfes2*>()) {}
 };
 
 
@@ -767,21 +767,21 @@ struct OpArraytoLinearForm
 };
 
 
-template<class R,class v_fes1,class v_fes2>  //  to make   A=linearform(x)
+template<class R,class MMesh,class v_fes1,class v_fes2>  //  to make   A=linearform(x)
 struct OpMatrixtoBilinearForm
   : public OneOperator
 {
-  typedef typename Call_FormBilinear<v_fes1,v_fes2>::const_iterator const_iterator;
+  typedef typename Call_FormBilinear<MMesh,v_fes1,v_fes2>::const_iterator const_iterator;
   int init;
   class Op : public E_F0mps {
   public:
-    Call_FormBilinear<v_fes1,v_fes2> *b;
+    Call_FormBilinear<MMesh,v_fes1,v_fes2> *b;
     Expression a;
     int init;
     AnyType operator()(Stack s)  const ;
 
     Op(Expression aa,Expression  bb,int initt)
-      : b(new Call_FormBilinear<v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<v_fes1,v_fes2> *>(bb))),a(aa),init(initt)
+      : b(new Call_FormBilinear<MMesh,v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<MMesh,v_fes1,v_fes2> *>(bb))),a(aa),init(initt)
   { assert(b && b->nargs);
     bool iscmplx=FieldOfForm(b->largs,IsComplexType<R>::value)  ;
      // cout<< "FieldOfForm:iscmplx " << iscmplx << " " << IsComplexType<R>::value << " " << ((iscmplx) == IsComplexType<R>::value) << endl;
@@ -793,7 +793,7 @@ struct OpMatrixtoBilinearForm
   E_F0 * code(const basicAC_F0 & args) const
   { return  new Op(to<Matrice_Creuse<R>*>(args[0]),args[1],init);}
   OpMatrixtoBilinearForm(int initt=0) :
-    OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_FormBilinear<v_fes1,v_fes2>*>()),
+    OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_FormBilinear<MMesh,v_fes1,v_fes2>*>()),
     init(initt)
  {}
 };
@@ -1118,8 +1118,8 @@ namespace Fem2D {
   }
 
 //general templates for 2d and 3d volume // for Surf version ...
-template<class R,typename MC,class FESpace >  bool AssembleVarForm(Stack stack,const typename FESpace::Mesh & Th,
-                                                                   const FESpace & Uh,const FESpace & Vh,bool sym,
+template<class R,typename MC,class MMesh,class FESpace1,class FESpace2>  bool AssembleVarForm(Stack stack,const MMesh & Th,
+                                                                   const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
                                                                    MC  * A,KN_<R> * B,const list<C_F0> &largs );
 
 template<class R,class FESpace>   void AssembleBC(Stack stack,const typename FESpace::Mesh & Th,
@@ -1177,17 +1177,17 @@ template<class R,class v_fes>
 AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
 {
   typedef v_fes *pfes;
-  typedef typename  v_fes::FESpace FESpace;
-  typedef typename  FESpace::Mesh Mesh;
-  typedef typename  FESpace::FElement FElement;
-  typedef typename  Mesh::Element Element;
-  typedef typename  Mesh::Vertex Vertex;
-  typedef typename  Mesh::RdHat RdHat;
-  typedef typename  Mesh::Rd Rd;
+  typedef typename  v_fes::FESpace FESpaceT;
+  typedef typename  FESpaceT::Mesh MeshT;
+  typedef typename  FESpaceT::FElement FElementT;
+  typedef typename  MeshT::Element ElementT;
+  typedef typename  MeshT::Vertex VertexT;
+  typedef typename  MeshT::RdHat RdHatT;
+  typedef typename  MeshT::Rd RdT;
 
   pfes  &  pp= *GetAny<pfes * >((*l->ppfes)(stack));
-  FESpace * pVh = *pp ;
-  FESpace & Vh = *pVh ;
+  FESpaceT * pVh = *pp ;
+  FESpaceT & Vh = *pVh ;
   double tgv= ff_tgv;
   if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));
   long NbOfDF =  pVh ? Vh.NbOfDF: 0;
@@ -1209,8 +1209,8 @@ AnyType OpArraytoLinearForm<R,v_fes>::Op::operator()(Stack stack)  const
   if(zero && NbOfDF )
    xx=R();
 
-  if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,FESpace >(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
-    AssembleBC<R,FESpace>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
+  if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,MeshT,FESpaceT,FESpaceT>(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
+    AssembleBC<R,FESpaceT>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
   return SetAny<KN_<R> >(xx);
 }
 
@@ -1219,7 +1219,8 @@ struct FF_L_args {
     typedef  KK K;
     typedef vv_fes v_fes;
     typedef v_fes *pfes;
-    typedef typename  v_fes::FESpace FESpace;
+    typedef typename  v_fes::FESpace FESpaceT;
+    typedef typename  FESpaceT::Mesh MeshT;
     typedef FEbase<K,v_fes> ** R;
     typedef R  A;
     typedef pfes* B;
@@ -1232,10 +1233,10 @@ struct FF_L_args {
         ffassert(l);
         double tgv=ff_tgv;
         if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));
-        FESpace * pVh= (*pp)->newVh();
+        FESpaceT * pVh= (*pp)->newVh();
         KN_<K>  xx=*x;
-        if (  pVh && AssembleVarForm<K,MatriceCreuse<K>,FESpace >(stack,pVh->Th,*pVh,*pVh,false,0,&xx,l->largs) )
-            AssembleBC<K,FESpace>(stack,pVh->Th,*pVh,*pVh,false,0,&xx,0,l->largs,tgv);
+        if (  pVh && AssembleVarForm<K,MatriceCreuse<K>,MeshT,FESpaceT,FESpaceT>(stack,pVh->Th,*pVh,*pVh,false,0,&xx,l->largs) )
+            AssembleBC<K,FESpaceT>(stack,pVh->Th,*pVh,*pVh,false,0,&xx,0,l->largs,tgv);
     }
 };
 template<class R=double>
@@ -1250,9 +1251,15 @@ struct CGMatVirtPreco : CGMatVirt<int,R>
     }
 };
 
-template<class R,class v_fes1,class v_fes2>
-AnyType OpMatrixtoBilinearForm<R,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
+template<class R,class MMesh,class v_fes1,class v_fes2>
+AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
 {
+    
+  typedef typename  MMesh::Element Element;
+  typedef typename  MMesh::Vertex Vertex;
+  typedef typename  MMesh::RdHat RdHat;
+  typedef typename  MMesh::Rd Rd;
+    
   typedef typename  v_fes1::pfes pfes1;
   typedef typename  v_fes1::FESpace FESpace1;
   typedef typename  FESpace1::Mesh Mesh1;
@@ -1316,7 +1323,7 @@ AnyType OpMatrixtoBilinearForm<R,v_fes1,v_fes2>::Op::operator()(Stack stack)  co
        }
      *A.A=R(); // reset value of the matrix
 
-     if ( AssembleVarForm<R,MatriceCreuse<R>,FESpace1 >( stack,Th,Uh,Vh,ds.sym>0,A.A,0,b->largs) )         // FESpace2 axel TODO
+     if ( AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpace1,FESpace2 >( stack,Th,Uh,Vh,ds.sym>0,A.A,0,b->largs) )         // FESpace2 axel TODO
        AssembleBC<R,FESpace1>( stack,Th,Uh,Vh,ds.sym>0,A.A,0,0,b->largs,ds.tgv);
    }
   else
@@ -1324,12 +1331,12 @@ AnyType OpMatrixtoBilinearForm<R,v_fes1,v_fes2>::Op::operator()(Stack stack)  co
 #ifdef V3__CODE
      MatriceMap<R>   AAA;
      MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA.size(),ds.sym>0);
-     bool bc=AssembleVarForm<R,MatriceMap<R>,FESpace1  >( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs); // FESpace2 axel TODO
+       bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs); // FESpace2 axel TODO
      pMA->addMap(1.,AAA);
 #else
        MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,0,ds.sym);
        MatriceMap<R>  &  AAA = *pMA;
-       bool bc=AssembleVarForm<R,MatriceMap<R>,FESpace1  >( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs); // FESpace2 axel TODO
+       bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs); // FESpace2 axel TODO
 
 #endif
        A.A.master(pMA ) ;

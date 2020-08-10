@@ -6803,13 +6803,12 @@ namespace Fem2D {
     }
 
     // generic template for AssembleVarForm
-    template<class R,typename MC,class FESpace >
-    bool AssembleVarForm(Stack stack,const typename FESpace::Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
+    template<class R,typename MC,class MMesh,class FESpace1,class FESpace2>
+    bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
                          MC  * A,KN_<R> * B,const list<C_F0> &largs)
     { // return true if BC
-        typedef typename FESpace::Mesh Mesh ;
-        typedef Mesh * pmesh;
-        ///typedef typename Trait_MESHO<FESpace>::MeshO * pmeshO;
+        
+        typedef MMesh * pmesh; // integration mesh type
         bool ret=false;
         typedef DotStar_KN_<R> DotStar;
         typedef DotSlash_KN_<R> DotSlash;
@@ -6827,9 +6826,7 @@ namespace Fem2D {
             { if (A)
                 {
                     const  FormBilinear * bf =dynamic_cast<const  FormBilinear *>(e);
-                    // integration mesh type
-                    ///pmeshO  ThbfO = GetAny<pmeshO>((*bf->di->Th)(stack)); // case 3D surface ThbfO =
-                    pmesh  Thbf= GetAny<pmesh>((*bf->di->Th)(stack));///Trait_MESHO<FESpace>::topmesh(ThbfO);  //
+                    pmesh  Thbf= GetAny<pmesh>((*bf->di->Th)(stack));
                     if(Thbf) AssembleBilinearForm<R>( stack,*Thbf,Uh,Vh,sym,*A,bf);
                 }
             }
@@ -6842,8 +6839,7 @@ namespace Fem2D {
             {
                 if (B) {
                     const  FormLinear * bf =dynamic_cast<const  FormLinear *>(e);
-                    ///pmeshO  ThbfO = GetAny<pmeshO>((*bf->di->Th)(stack)); // case 3D surface ThbfO =
-                    pmesh  Thbf= GetAny<pmesh>((*bf->di->Th)(stack)); //Trait_MESHO<FESpace>::topmesh(ThbfO);  //
+                    pmesh  Thbf= GetAny<pmesh>((*bf->di->Th)(stack));
                     if(Thbf) AssembleLinearForm<R>( stack,*Thbf, Vh, B,bf);
                 }
             }
@@ -8870,7 +8866,7 @@ TypeSolveMat::TSolveMat  TypeSolveMat::defaultvalue=TypeSolveMat::LU;
 #endif
 */
 
-template<class R,class FESpace,class v_fes>
+template<class R,class FESpace,class v_fes>    // TODO axel
 AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<R> > & dataA,
                       MatriceCreuse< typename CadnaType<R>::Scalaire >   * & cadnamat ) const
 {
@@ -9453,8 +9449,8 @@ Expression IsFebaseArray(Expression f)
     }
     return febase;
 }
-template<class VFES1, class VFES2>
-Call_FormBilinear<VFES1, VFES2>::Call_FormBilinear(int dd,Expression * na,Expression  BB,Expression fi, Expression fj)
+template<class MMesh, class VFES1, class VFES2>
+Call_FormBilinear<MMesh, VFES1, VFES2>::Call_FormBilinear(int dd,Expression * na,Expression  BB,Expression fi, Expression fj)
 : d(dd),nargs(na),largs(),N(fi->nbitem()),M(fj->nbitem()),
 euh(fi), evh(fj)
 {
@@ -9669,20 +9665,20 @@ namespace Fem2D {
 
     /////// 2d case
     // instantation for type double
-    template  bool AssembleVarForm<double,MatriceCreuse<double>,FESpace >(Stack stack,const FESpace::Mesh & Th,
+    template  bool AssembleVarForm<double,MatriceCreuse<double>,Mesh,FESpace,FESpace >(Stack stack,const Mesh & Th,
                                                                           const FESpace & Uh,const FESpace & Vh,bool sym,
                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
-    template  bool AssembleVarForm<double,MatriceMap<double>,FESpace >(Stack stack,const  FESpace::Mesh & Th,
+    template  bool AssembleVarForm<double,MatriceMap<double>,Mesh,FESpace,FESpace>(Stack stack,const Mesh & Th,
                                                                                 const FESpace & Uh,const FESpace & Vh,bool sym,
                                                                                 MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
     template   void AssembleBC<double,FESpace>(Stack stack,const Mesh & Th,const FESpace & Uh,const FESpace & Vh,bool sym,
                                                MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
     // instantation for type complex
-    template  bool AssembleVarForm<Complex,MatriceCreuse<Complex>,FESpace >(Stack stack,const FESpace::Mesh & Th,
+    template  bool AssembleVarForm<Complex,MatriceCreuse<Complex>,Mesh,FESpace,FESpace>(Stack stack,const Mesh & Th,
                                                                             const FESpace & Uh,const FESpace & Vh,bool sym,
                                                                             MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
 
-    template  bool AssembleVarForm<Complex,MatriceMap<Complex>,FESpace >(Stack stack,const FESpace::Mesh & Th,
+    template  bool AssembleVarForm<Complex,MatriceMap<Complex>,Mesh,FESpace,FESpace >(Stack stack,const Mesh & Th,
                                                                                   const FESpace & Uh,const FESpace & Vh,bool sym,
                                                                                   MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
 
@@ -9692,20 +9688,20 @@ namespace Fem2D {
 
     /////// 3D volume case
     // instantation for type double
-    template  bool AssembleVarForm<double,MatriceCreuse<double>,FESpace3 >(Stack stack,const  FESpace3::Mesh & Th,
+    template  bool AssembleVarForm<double,MatriceCreuse<double>,Mesh3,FESpace3,FESpace3>(Stack stack,const Mesh3 & Th,
                                                                            const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
                                                                            MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
-    template  bool AssembleVarForm<double,MatriceMap<double>,FESpace3 >(Stack stack,const  FESpace3::Mesh & Th,
+    template  bool AssembleVarForm<double,MatriceMap<double>,Mesh3,FESpace3,FESpace3 >(Stack stack,const Mesh3 & Th,
                                                                                  const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
                                                                                  MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
     template   void AssembleBC<double,FESpace3>(Stack stack,const Mesh3 & Th,const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
                                                 MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
 
     // instantation for type complex
-    template  bool AssembleVarForm<Complex,MatriceCreuse<Complex>,FESpace3 >(Stack stack,const FESpace3::Mesh & Th,
+    template  bool AssembleVarForm<Complex,MatriceCreuse<Complex>,Mesh3,FESpace3,FESpace3>(Stack stack,const Mesh3 & Th,
                                                                              const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
                                                                              MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
-    template  bool AssembleVarForm<Complex,MatriceMap<Complex>,FESpace3 >(Stack stack,const FESpace3::Mesh & Th,
+    template  bool AssembleVarForm<Complex,MatriceMap<Complex>,Mesh3,FESpace3,FESpace3>(Stack stack,const Mesh3 & Th,
                                                                                    const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
                                                                                    MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
     template   void AssembleBC<Complex,FESpace3>(Stack stack,const Mesh3 & Th,const FESpace3 & Uh,const FESpace3 & Vh,bool sym,
@@ -9719,20 +9715,20 @@ namespace Fem2D {
     /////// 3D surface case
     // instantation for type double
 
-    template  bool AssembleVarForm<double,MatriceCreuse<double>,FESpaceS >(Stack stack,const  FESpaceS::Mesh & Th,
+    template  bool AssembleVarForm<double,MatriceCreuse<double>,MeshS,FESpaceS,FESpaceS>(Stack stack,const MeshS & Th,
                                                                            const FESpaceS & Uh,const FESpaceS & Vh,bool sym,
                                                                            MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
-    template  bool AssembleVarForm<double,MatriceMap<double>,FESpaceS >(Stack stack,const  FESpaceS::Mesh & Th,
+    template  bool AssembleVarForm<double,MatriceMap<double>,MeshS,FESpaceS,FESpaceS>(Stack stack,const MeshS & Th,
                                                                                  const FESpaceS & Uh,const FESpaceS & Vh,bool sym,
                                                                                  MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
     template   void AssembleBC<double,FESpaceS>(Stack stack,const MeshS & Th,const FESpaceS & Uh,const FESpaceS & Vh,bool sym,
                                                 MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
 
     // instantation for type complex
-    template  bool AssembleVarForm<Complex,MatriceCreuse<Complex>,FESpaceS >(Stack stack,const FESpaceS::Mesh & Th,
+    template  bool AssembleVarForm<Complex,MatriceCreuse<Complex>,MeshS,FESpaceS,FESpaceS>(Stack stack,const MeshS & Th,
                                                                              const FESpaceS & Uh,const FESpaceS & Vh,bool sym,
                                                                              MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
-    template  bool AssembleVarForm<Complex,MatriceMap<Complex>,FESpaceS >(Stack stack,const FESpaceS::Mesh & Th,
+    template  bool AssembleVarForm<Complex,MatriceMap<Complex>,MeshS,FESpaceS,FESpaceS>(Stack stack,const MeshS & Th,
                                                                                    const FESpaceS & Uh,const FESpaceS & Vh,bool sym,
                                                                                    MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
     template   void AssembleBC<Complex,FESpaceS>(Stack stack,const MeshS & Th,const FESpaceS & Uh,const FESpaceS & Vh,bool sym,
@@ -9743,20 +9739,20 @@ namespace Fem2D {
     /////// 3D  curve
     // instantation for type double
 
-    template  bool AssembleVarForm<double,MatriceCreuse<double>,FESpaceL >(Stack stack,const  FESpaceL::Mesh & Th,
+    template  bool AssembleVarForm<double,MatriceCreuse<double>,MeshL,FESpaceL,FESpaceL>(Stack stack,const MeshL & Th,
                                                                            const FESpaceL & Uh,const FESpaceL & Vh,bool sym,
                                                                            MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
-    template  bool AssembleVarForm<double,MatriceMap<double>,FESpaceL >(Stack stack,const  FESpaceL::Mesh & Th,
+    template  bool AssembleVarForm<double,MatriceMap<double>,MeshL,FESpaceL,FESpaceL>(Stack stack,const  FESpaceL::Mesh & Th,
                                                                         const FESpaceL & Uh,const FESpaceL & Vh,bool sym,
                                                                         MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
     template   void AssembleBC<double,FESpaceL>(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpaceL & Vh,bool sym,
                                                 MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
 
     // instantation for type complex
-    template  bool AssembleVarForm<Complex,MatriceCreuse<Complex>,FESpaceL >(Stack stack,const FESpaceL::Mesh & Th,
+    template  bool AssembleVarForm<Complex,MatriceCreuse<Complex>,MeshL,FESpaceL,FESpaceL>(Stack stack,const MeshL & Th,
                                                                              const FESpaceL & Uh,const FESpaceL & Vh,bool sym,
                                                                              MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
-    template  bool AssembleVarForm<Complex,MatriceMap<Complex>,FESpaceL >(Stack stack,const FESpaceL::Mesh & Th,
+    template  bool AssembleVarForm<Complex,MatriceMap<Complex>,MeshL,FESpaceL,FESpaceL>(Stack stack,const MeshL & Th,
                                                                           const FESpaceL & Uh,const FESpaceL & Vh,bool sym,
                                                                           MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
     template   void AssembleBC<Complex,FESpaceL>(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpaceL & Vh,bool sym,
@@ -9769,12 +9765,12 @@ template class Call_FormLinear<v_fes>;
 template class Call_FormLinear<v_fes3>;
 template class Call_FormLinear<v_fesS>;
 template class Call_FormLinear<v_fesL>;
-template class Call_FormBilinear<v_fes,v_fes>;
-template class Call_FormBilinear<v_fes3,v_fes3>;
-template class Call_FormBilinear<v_fesS,v_fesS>;
-template class Call_FormBilinear<v_fesL,v_fesL>;
-// bem
-template class Call_FormBilinear<v_fesS, v_fesL>;
-template class Call_FormBilinear<v_fesL, v_fesS>;
-template class Call_FormBilinear<v_fesL, v_fes>;
-template class Call_FormBilinear<v_fesS, v_fes>;
+template class Call_FormBilinear<Mesh,v_fes,v_fes>;
+template class Call_FormBilinear<Mesh3,v_fes3,v_fes3>;
+template class Call_FormBilinear<MeshS,v_fesS,v_fesS>;
+template class Call_FormBilinear<MeshL,v_fesL,v_fesL>;
+// bem integration space/target space must be review Axel 08/2020
+template class Call_FormBilinear<MeshS, v_fesS, v_fesL>;
+template class Call_FormBilinear<MeshL, v_fesL, v_fesS>;
+template class Call_FormBilinear<MeshL, v_fesL, v_fes>;
+template class Call_FormBilinear<MeshS, v_fesS, v_fes>;
