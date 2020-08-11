@@ -1122,12 +1122,12 @@ template<class R,typename MC,class MMesh,class FESpace1,class FESpace2>  bool As
                                                                    const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
                                                                    MC  * A,KN_<R> * B,const list<C_F0> &largs );
 
-template<class R,class FESpace>   void AssembleBC(Stack stack,const typename FESpace::Mesh & Th,
-                                                  const FESpace & Uh,const FESpace & Vh,bool sym,
+template<class R,class MMesh,class FESpace1,class FESpace2>   void AssembleBC(Stack stack,const MMesh & Th,
+                                                  const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
                                                   MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X,
                                                   const list<C_F0> &largs , double tgv  );
-template<class R,class FESpace>   void AssembleBC(Stack stack,const typename FESpace::Mesh & Th,const FESpace & Uh,
-                                                  const FESpace & Vh,bool sym, MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X,
+template<class R,class MMesh,class FESpace1,class FESpace2>  void AssembleBC(Stack stack,const MMesh & Th,const FESpace1 & Uh,
+                                                  const FESpace2 & Vh,bool sym, MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X,
                                                   const list<C_F0> &largs , double tgv  );
 
 
@@ -1209,7 +1209,7 @@ AnyType OpArraytoLinearForm<R,MMesh,v_fes>::Op::operator()(Stack stack)  const
    xx=R();
 
   if (  pVh && AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpaceT,FESpaceT>(stack,Vh.Th,Vh,Vh,false,0,&xx,l->largs) )
-    AssembleBC<R,FESpaceT>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
+    AssembleBC<R,MMesh,FESpaceT,FESpaceT>(stack,Vh.Th,Vh,Vh,false,0,&xx,0,l->largs,tgv);
   return SetAny<KN_<R> >(xx);
 }
 
@@ -1235,7 +1235,7 @@ struct FF_L_args {
         FESpaceT * pVh= (*pp)->newVh();
         KN_<K>  xx=*x;
         if (  pVh && AssembleVarForm<K,MatriceCreuse<K>,MeshT,FESpaceT,FESpaceT>(stack,pVh->Th,*pVh,*pVh,false,0,&xx,l->largs) )
-            AssembleBC<K,FESpaceT>(stack,pVh->Th,*pVh,*pVh,false,0,&xx,0,l->largs,tgv);
+            AssembleBC<K,MeshT,FESpaceT,FESpaceT>(stack,pVh->Th,*pVh,*pVh,false,0,&xx,0,l->largs,tgv);
     }
 };
 template<class R=double>
@@ -1322,20 +1322,20 @@ AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stac
        }
      *A.A=R(); // reset value of the matrix
 
-     if ( AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpace1,FESpace2 >( stack,Th,Uh,Vh,ds.sym>0,A.A,0,b->largs) )         // FESpace2 axel TODO
-       AssembleBC<R,FESpace1>( stack,Th,Uh,Vh,ds.sym>0,A.A,0,0,b->largs,ds.tgv);
+     if ( AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpace1,FESpace2 >( stack,Th,Uh,Vh,ds.sym>0,A.A,0,b->largs) )
+       AssembleBC<R,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,ds.sym>0,A.A,0,0,b->largs,ds.tgv);
    }
   else
    { // add FH 17 06 2005  int on different meshes.
 #ifdef V3__CODE
      MatriceMap<R>   AAA;
      MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA.size(),ds.sym>0);
-       bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs); // FESpace2 axel TODO
+       bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs);
      pMA->addMap(1.,AAA);
 #else
        MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,0,ds.sym);
        MatriceMap<R>  &  AAA = *pMA;
-       bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs); // FESpace2 axel TODO
+       bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,ds.sym>0,&AAA,0,b->largs);
 
 #endif
        A.A.master(pMA ) ;
