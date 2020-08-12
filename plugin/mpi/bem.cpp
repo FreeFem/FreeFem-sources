@@ -65,11 +65,11 @@ public:
     virtual int nb_cols() const = 0;
     virtual void cluster_to_target_permutation(const K* const in, K* const out) const = 0;
     virtual void source_to_cluster_permutation(const K* const in, K* const out) const = 0;
-    virtual const MPI_Comm& get_comm() const = 0;
+    virtual const MPI_Comm get_comm() const = 0;
     virtual int get_rankworld() const = 0;
     virtual int get_sizeworld() const = 0;
     virtual int get_local_size() const = 0;
-    virtual const std::vector<SubMatrix<K>*>& get_MyNearFieldMats() const = 0;
+    virtual const std::vector<std::unique_ptr<SubMatrix<K>>>& get_MyNearFieldMats() const = 0;
     virtual const LowRankMatrix<K,GeometricClusteringDDM>& get_MyFarFieldMats(int i) const = 0;
     virtual int get_MyFarFieldMats_size() const = 0;
     virtual const std::vector<SubMatrix<K>*>& get_MyStrictlyDiagNearFieldMats() const = 0;
@@ -83,9 +83,9 @@ public:
 template<class K, template<class,class> class LR>
 class HMatrixImpl : public HMatrixVirt<K> {
 private:
-    HMatrix<K,LR,GeometricClusteringDDM> H;
+    HMatrix<K,LR,GeometricClusteringDDM,RjasanowSteinbach> H;
 public:
-    HMatrixImpl(IMatrix<K>& I, const std::vector<htool::R3>& xt, bool symmetry=false,const int& reqrank=-1, MPI_Comm comm=MPI_COMM_WORLD) : H(I,xt,symmetry,reqrank,comm){}
+    HMatrixImpl(IMatrix<K>& I, const std::vector<htool::R3>& xt, char symmetry='N', char UPLO='U',const int& reqrank=-1, MPI_Comm comm=MPI_COMM_WORLD) : H(I,xt,symmetry,UPLO,reqrank,comm){}
     HMatrixImpl(IMatrix<K>& I, const std::vector<htool::R3>& xt, const std::vector<htool::R3>& xs, const int& reqrank=-1, MPI_Comm comm=MPI_COMM_WORLD) : H(I,xt,xs,reqrank,comm){}
     const std::map<std::string, std::string>& get_infos() const {return H.get_infos();}
     void mvprod_global(const K* const in, K* const out,const int& mu=1) const {return H.mvprod_global(in,out,mu);}
@@ -93,11 +93,11 @@ public:
     int nb_cols() const { return H.nb_cols();}
     void cluster_to_target_permutation(const K* const in, K* const out) const {return H.cluster_to_target_permutation(in,out);}
     void source_to_cluster_permutation(const K* const in, K* const out) const {return H.source_to_cluster_permutation(in,out);}
-    const MPI_Comm& get_comm() const {return H.get_comm();}
+    const MPI_Comm get_comm() const {return H.get_comm();}
     int get_rankworld() const {return H.get_rankworld();}
     int get_sizeworld() const {return H.get_sizeworld();}
     int get_local_size() const {return H.get_local_size();}
-    const std::vector<SubMatrix<K>*>& get_MyNearFieldMats() const {return H.get_MyNearFieldMats();}
+    const std::vector<std::unique_ptr<SubMatrix<K>>>& get_MyNearFieldMats() const {return H.get_MyNearFieldMats();}
     const LowRankMatrix<K,GeometricClusteringDDM>& get_MyFarFieldMats(int i) const {return *(H.get_MyFarFieldMats()[i]);}
     int get_MyFarFieldMats_size() const {return H.get_MyFarFieldMats().size();}
     const std::vector<SubMatrix<K>*>& get_MyStrictlyDiagNearFieldMats() const {return H.get_MyStrictlyDiagNearFieldMats();}
@@ -350,7 +350,7 @@ public:
                 }
             }
             else {
-                const std::vector<SubMatrix<K>*>& dmats = (*H)->get_MyNearFieldMats();
+                const std::vector<std::unique_ptr<SubMatrix<K>>>& dmats = (*H)->get_MyNearFieldMats();
                 
                 int nbdense = dmats.size();
                 int nblr = (*H)->get_MyFarFieldMats_size();
@@ -1755,12 +1755,12 @@ void ff_BIO_Generator(HMatrixVirt<R>** Hmat, BemKernel *typeKernel, Dof<P>& dof,
         if(mpirank == 0) cout << "kernel definition error" << endl; ffassert(0);}
    // build the Hmat
    if ( compressor == "" || compressor == "partialACA")
-        *Hmat = new HMatrixImpl<R,partialACA>(*generator,p1,false,-1,comm);
+        *Hmat = new HMatrixImpl<R,partialACA>(*generator,p1,'N','N',-1,comm);
     
     else if (compressor == "fullACA")
-        *Hmat = new HMatrixImpl<R,fullACA>(*generator,p1,false,-1,comm);
+        *Hmat = new HMatrixImpl<R,fullACA>(*generator,p1,'N','N',-1,comm);
     else if (compressor == "SVD")
-        *Hmat = new HMatrixImpl<R,SVD>(*generator,p1,false,-1,comm);
+        *Hmat = new HMatrixImpl<R,SVD>(*generator,p1,'N','N',-1,comm);
     else {
         cerr << "Error: unknown htool compressor \""+compressor+"\"" << endl;
         ffassert(0);
