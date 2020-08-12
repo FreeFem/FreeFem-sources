@@ -104,6 +104,8 @@ PETSC_DOWNLOAD += --download-scalapack --download-mumps
 PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL)
 else
 COMMON_FLAGS += --with-fc=0
+PETSC_DOWNLOAD += --download-superlu_dist
+PETSC_DOWNLOAD_C += --with-superlu_dist-dir=$(DIR_INSTALL_REAL)
 endif
 endif
 else

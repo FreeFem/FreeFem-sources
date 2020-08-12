@@ -22,7 +22,7 @@ ThL = OrientNormal(ThL, unbounded = 1);
 fespace Uh(ThL, P1);
 BemKernel ker("SL", 1, k);
 varf vk(u, v) = int1dx1d(ThL)(ThL)(BEM(ker, u, v));
-HMatrix<complex> A = vk(Uh, Uh);
+HMatrix<complex> A = vk(Uh, Uh, sym = 1);
 Mat<complex> H = A;
 
 varf vRHS(u, v) = -int1d(ThL)(finc*v);
@@ -31,7 +31,7 @@ b[] = vRHS(0, Uh);
 u[] = 0;
 {
     int[int] range = H.range;
-    set(H, sparams = "-ksp_view -ksp_monitor -pc_type lu");
+    set(H, sparams = "-ksp_view -ksp_monitor -pc_type cholesky");
     complex[int] tmp(range[1] - range[0]);
     KSPSolve(H, b[](range[0]:range[1] - 1), tmp);
     u[](range[0]:range[1] - 1) = tmp;

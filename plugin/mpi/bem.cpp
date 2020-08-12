@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: cxx11 [mkl|blas] [petsccomplex] mpi pthread htool bemtool boost
+//ff-c++-LIBRARY-dep: cxx11 [mkl|blas] [petsccomplex hpddm] mpi pthread htool bemtool boost
 //ff-c++-cpp-dep:
 // for def  M_PI under windows in <cmath>
 #define _USE_MATH_DEFINES
@@ -75,6 +75,7 @@ public:
     virtual const std::vector<SubMatrix<K>*>& get_MyStrictlyDiagNearFieldMats() const = 0;
     virtual Matrix<K> to_dense_perm() const = 0;
     virtual Matrix<K> to_local_dense() const = 0;
+    virtual char get_symmetry_type() const = 0;
 
     virtual ~HMatrixVirt() {};
 };
@@ -103,6 +104,7 @@ public:
     const std::vector<SubMatrix<K>*>& get_MyStrictlyDiagNearFieldMats() const {return H.get_MyStrictlyDiagNearFieldMats();}
     Matrix<K> to_dense_perm() const {return H.to_dense_perm();}
     Matrix<K> to_local_dense() const {return H.to_local_dense();}
+    char get_symmetry_type() const {return H.get_symmetry_type();}
 };
 
 
@@ -213,9 +215,11 @@ AnyType To(Stack stack,Expression emat,Expression einter,int init)
         MatMPIDenseSetPreallocation(dense->_petsc, PETSC_NULL);
         PetscScalar* array;
         MatDenseGetArray(dense->_petsc, &array);
+        const bool sym = H.get_symmetry_type() != 'N';
+        std::fill_n(array, mdense.nb_rows() * mdense.nb_cols(), PetscScalar());
         if (array) {
            for (int i = 0; i < mdense.nb_rows(); ++i)
-               for (int j = 0; j < mdense.nb_cols(); ++j)
+               for (int j = (sym ? i : 0); j < mdense.nb_cols(); ++j)
                    array[i + j * mdense.nb_rows()] = mdense(i,j);
         }
         MatDenseRestoreArray(dense->_petsc, &array);
@@ -232,6 +236,10 @@ AnyType To(Stack stack,Expression emat,Expression einter,int init)
         MatSetOption(M, MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
         MatConvert(dense->_petsc, MATMPIAIJ, MAT_REUSE_MATRIX, &M);
         MatHeaderReplace(dense->_petsc, &M);
+        if(sym) {
+            MatSetOption(dense->_petsc, MAT_SYMMETRIC, PETSC_TRUE);
+            MatConvert(dense->_petsc, MATMPISBAIJ, MAT_INPLACE_MATRIX, &dense->_petsc);
+        }
         PetscContainer ptr;
         PetscContainerCreate(H.get_comm(), &ptr);
         PetscContainerSetPointer(ptr, Hmat);
@@ -1559,7 +1567,7 @@ int typeVFBEM(const list<C_F0> & largs, Stack stack)
 
 
 template <class R, typename P, class MMesh>
-void ff_BIO_Generator(HMatrixVirt<R>** Hmat, BemKernel *typeKernel, Dof<P>& dof, double alpha,string &compressor,vector<htool::R3> &p1,MPI_Comm &comm) {
+void ff_BIO_Generator(HMatrixVirt<R>** Hmat, BemKernel *typeKernel, Dof<P>& dof, double alpha, bool sym, string &compressor,vector<htool::R3> &p1,MPI_Comm &comm) {
     IMatrix<R>* generator;
     
     BIOpKernelEnum ker1 = whatTypeEnum(typeKernel,0), ker2 = whatTypeEnum(typeKernel,1);;
@@ -1755,12 +1763,12 @@ void ff_BIO_Generator(HMatrixVirt<R>** Hmat, BemKernel *typeKernel, Dof<P>& dof,
         if(mpirank == 0) cout << "kernel definition error" << endl; ffassert(0);}
    // build the Hmat
    if ( compressor == "" || compressor == "partialACA")
-        *Hmat = new HMatrixImpl<R,partialACA>(*generator,p1,'N','N',-1,comm);
+        *Hmat = new HMatrixImpl<R,partialACA>(*generator,p1,sym?'S':'N',sym?'U':'N',-1,comm);
     
     else if (compressor == "fullACA")
-        *Hmat = new HMatrixImpl<R,fullACA>(*generator,p1,'N','N',-1,comm);
+        *Hmat = new HMatrixImpl<R,fullACA>(*generator,p1,sym?'S':'N',sym?'U':'N',-1,comm);
     else if (compressor == "SVD")
-        *Hmat = new HMatrixImpl<R,SVD>(*generator,p1,'N','N',-1,comm);
+        *Hmat = new HMatrixImpl<R,SVD>(*generator,p1,sym?'S':'N',sym?'U':'N',-1,comm);
     else {
         cerr << "Error: unknown htool compressor \""+compressor+"\"" << endl;
         ffassert(0);
@@ -1943,13 +1951,13 @@ AnyType OpHMatrixtoBEMForm<R,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
             for(int i=0;i<nk;i++)
                 cout << " kernel info... i: " << i << " typeKernel: " << Ker->typeKernel[i] << " wave number: " << Ker->wavenum[i]  << " coeffcombi: " << Ker->coeffcombi[i] <<endl;
         }
-        ff_BIO_Generator<R,P1,SMesh>(Hmat,Ker,dof,alpha,ds.compressor,p1,comm);
+        ff_BIO_Generator<R,P1,SMesh>(Hmat,Ker,dof,alpha,ds.sym,ds.compressor,p1,comm);
     }
     else if (VFBEM==2) {
         BemPotential *Pot = getBemPotential(stack,largs);
         Geometry node_output;
         Mesh2Bemtool(ThV,node_output);
-        ff_POT_Generator<R,P1,MeshBemtool,SMesh>(Hmat,Pot,dof,mesh,node_output, ds.compressor, p1,p2,comm);
+        ff_POT_Generator<R,P1,MeshBemtool,SMesh>(Hmat,Pot,dof,mesh,node_output,ds.compressor,p1,p2,comm);
     }
     return Hmat;
     

@@ -39,6 +39,7 @@ All notable changes to this project will be documented in this file.
 - add operator interpolate (2d->3d surface)
 - add operator x = A'\*b; where x, b are array and A 2 dim array (full matrix) and generate an error in case of b'\*A or b'\*A expression
 - function `MatLoad` to load a PETSc `Mat` from disk, see `examples/hpddm/MatLoad-PETSc.edp`
+- possibility to assemble a symmetric `HMatrix<complex>` and to densify a `HMatrix<complex>` into a `Mat<complex>`
 
 ### Changed
 - moved Htool to its new GitHub location
