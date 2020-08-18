@@ -2913,8 +2913,19 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
         l[i].composant = true;
         l[i].what = 100;    //  mesh 2d array
         l[i][0] = CastTo< KN< pmesh > * >(args[i]);
+      } else if (BCastTo< KN< pmesh3 > * >(args[i])) {
+        l[i].composant = true;
+        l[i].what = 105;    //  mesh 3d array
+        l[i][0] = CastTo< KN< pmesh3 > * >(args[i]);
+      } else if (BCastTo< KN< pmeshS > * >(args[i])) {
+        l[i].composant = true;
+        l[i].what = 150;    //  mesh 3d surface array
+        l[i][0] = CastTo< KN< pmeshS > * >(args[i]);
+      } else if (BCastTo< KN< pmeshL > * >(args[i])) {
+        l[i].composant = true;
+        l[i].what = 155;    //  mesh 3d curve array
+        l[i][0] = CastTo< KN< pmeshL > * >(args[i]);
       }
-
       else {
         CompileError("Sorry no way to plot this kind of data");
       }
@@ -3992,7 +4003,7 @@ AnyType Plot::operator( )(Stack s) const {
   vector< AnyType > lat;
   ll.reserve(l.size( ));
   // generation de la list de plot ...
-  for (size_t i = 0; i < l.size( ); i++) {
+        for (size_t i = 0; i < l.size( ); i++) { cout << "test " << l[i].what << endl;
     switch (l[i].what) {
       case 0:
         l[i].EvalandPush< void * >(s, i, ll);
@@ -4071,6 +4082,12 @@ AnyType Plot::operator( )(Stack s) const {
         break;
       case 105:
         l[i].MEvalandPush< pmesh3 >(s, i, ll);
+        break;
+      case 150:
+        l[i].MEvalandPush< pmeshS >(s, i, ll);
+        break;
+      case 155:
+        l[i].MEvalandPush< pmeshL >(s, i, ll);
         break;
       case 106:
         l[i].AEvalandPush< asol3, sol3 >(s, i, ll);
@@ -4223,8 +4240,8 @@ AnyType Plot::operator( )(Stack s) const {
     long kth = 0, kth3 = 0, kthS = 0, kthL = 0;
     //  send all the mesh:
     for (size_t ii = 0; ii < ll.size( ); ii++) {
-      int i = ll[ii].i;
-      long what = ll[i].what;
+      int i= ll[ii].i;
+      long what = ll[ii].what;
       const Mesh *th = 0;
       const Mesh3 *th3 = 0;
       const MeshS *thS = 0;
@@ -4233,11 +4250,10 @@ AnyType Plot::operator( )(Stack s) const {
       if (what == 0) th = ll[ii].th( );
       // Prepare for the sending mesh 3d with differenciation 3D line / surface / volumuic /
       // volum+surfac / line+volum+surfac
-      if (what == 5)
-        th3 = &(l[i].evalm3(0, s));    // 3d mesh3 -> if contains a meshS or meshL pointer, send
-                                       // only the principal mesh: the mesh3
-      if (what == 50) thS = (&(l[i].evalmS(0, s)));    // 3d meshS
-      if (what == 55) thL = (&(l[i].evalmL(0, s)));    // 3d  meshL
+      if (what == 5) th3 = ll[ii].th3( ); //&(l[i].evalm3(0, s));
+      // 3d mesh3 -> if contains a meshS or meshL pointer, send only the principal mesh: the mesh3
+      if (what == 50) thS = ll[ii].thS( ); //(&(l[i].evalmS(0, s)));    // 3d meshS
+      if (what == 55) thL = ll[ii].thL( );//(&(l[ii].evalmL(0, s)));    // 3d  meshL
       // Prepare for the sending 2d iso values for ffglut
       else if (what == 1 || what == 2 || what == 11 || what == 12) {
         ll[ii].eval(fe, cmp);
@@ -4354,26 +4370,26 @@ AnyType Plot::operator( )(Stack s) const {
       }
       // send volume 3d meshes for ffglut
       else if (what == 5) {
-        pTh3 = &l[i].evalm3(0, s);
+        pTh3 = ll[ii].th3();;
         if (pTh3) {
           err = 0;
           theplot << what;
-          theplot << mapth3[&l[i].evalm3(0, s)];    // numero du maillage 3D volume
+          theplot << mapth3[ll[ii].th3()];    // numero du maillage 3D volume
         }
       }
       else if (what == 50) {
-        pThS = &(l[i].evalmS(0, s));
+        pThS = ll[ii].thS();
         if (pThS) {
           err = 0;
           theplot << what;
-          theplot << mapthS[&(l[i].evalmS(0, s))];    // numero du maillage 3D surface
+          theplot << mapthS[ll[ii].thS()];     // numero du maillage 3D surface
         }
       } else if (what == 55) {
-        pThL = &(l[i].evalmL(0, s));
+        pThL = ll[ii].thL();
         if (pThL) {
           err = 0;
           theplot << what;
-          theplot << mapthL[&(l[i].evalmL(0, s))];    // numero du maillage 3D line
+          theplot << mapthL[ll[ii].thL()];    // numero du maillage 3D curve
         }
       }
 
