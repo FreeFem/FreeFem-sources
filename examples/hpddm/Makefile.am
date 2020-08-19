@@ -88,6 +88,7 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	maxwell-2d-PETSc.edp \
 	maxwell-3d-PETSc.edp \
 	laplace-adapt-3d-PETSc.edp \
+	diffusion-mg-2d-PETSc.edp \
 	diffusion-mg-3d-PETSc.edp \
 	save-load-Dmesh.edp \
 	navier-stokes-2d-PETSc.edp \

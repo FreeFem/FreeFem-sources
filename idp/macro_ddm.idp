@@ -1437,10 +1437,10 @@ IFMACRO(!def)
 NewMacro def(i)i EndMacro
 ENDIFMACRO
 if(mpiSize(ThName#Comm) == 1) {
-IFMACRO(!transfer#P)
+IFMACRO(!transfer#Q)
     def(uANew) = def(uA);
 ENDIFMACRO
-IFMACRO(transfer#P)
+IFMACRO(transfer#Q)
     fespace VhLocalOldPrivate(ThName, Pk);
     fespace VhLocalNewPrivate(ThNew, PkNew);
     matrix loc = interpolate(VhLocalNewPrivate, VhLocalOldPrivate);
@@ -1452,7 +1452,7 @@ else {
     searchMethod = 0;
     fespace VhLocalOldPrivate(ThName, Pk);
     fespace VhLocalNewPrivate(ThNew, PkNew);
-IFMACRO(!transfer#P)
+IFMACRO(!transfer#Q)
     assert(uA[].n == VhLocalOldPrivate.ndof);
     assert(uANew[].n == VhLocalNewPrivate.ndof);
 ENDIFMACRO
@@ -1533,11 +1533,11 @@ ENDIFMACRO
     }
     real[int] D, backupRegion(ThName.nt);
     VhLocalOldPrivate def(scaledU);
-IFMACRO(!transfer#P)
+IFMACRO(!transfer#Q)
     createPartition(ThName, D, Pk)
     scaledU[] = uA[];
 ENDIFMACRO
-IFMACRO(transfer#P)
+IFMACRO(transfer#Q)
     GlobalNumbering(uA, scaledU[]);
     D.resize(scaledU[].n);
     D = uA.D;
@@ -1630,10 +1630,10 @@ ENDIFMACRO
         }
     }
     searchMethod = backupSM;
-IFMACRO(!transfer#P)
+IFMACRO(!transfer#Q)
     def(uANew) = def(uExchange);
 ENDIFMACRO
-IFMACRO(transfer#P)
+IFMACRO(transfer#Q)
     matrix loc = interpolate(VhLocalNewPrivate, VhExchangePrivate);
     constructor(P, uANew, uA, loc, numbering = uExchange[]);
 ENDIFMACRO
@@ -1651,7 +1651,7 @@ ENDIFMACRO
 // EOM
 
 macro transferMat(ThName, Pk, A, ThNew, PkNew, ANew, P) {
-NewMacro transfer#P()P EndMacro
+NewMacro transfer#Q() EndMacro
 transferBase(ThName, Pk, A, ThNew, PkNew, ANew, P)
 }
 // EOM

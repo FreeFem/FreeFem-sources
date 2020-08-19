@@ -38,7 +38,7 @@ namespace PETSc {
     typedef typename fes2::pfes pfes2;
     typedef typename fes2::FESpace FESpace2;
     typedef typename FESpace2::Mesh Mesh2;
-	
+
     assert(b && b->nargs);
     pfes1* pUh = GetAny<pfes1*>((*b->euh)(stack));
     pfes2* pVh = GetAny<pfes2*>((*b->evh)(stack));
@@ -50,7 +50,7 @@ namespace PETSc {
     Data_Sparse_Solver ds;
     ds.factorize = 0;
     ds.initmat = true;
-	int np = OpCall_FormBilinear_np::n_name_param - 6;
+    int np = OpCall_FormBilinear_np::n_name_param - 6;
     SetEnd_Data_Sparse_Solver<HPDDM::upscaled_type<K>>(stack, ds, b->nargs, np);
 
     WhereStackOfPtr2Free(stack) = new StackOfPtr2Free(stack);
@@ -1468,8 +1468,10 @@ namespace PETSc {
           A = to< KN< Dmat >* >(args[0]);
           if (c == 1)
             P = to< KN< Matrice_Creuse< double > >* >(args[1]);
-          else
+          else if (c == 2)
             P = to< long >(args[1]);
+          else
+            P = to< KN< Dmat >* >(args[1]);
         }
       }
 
@@ -1484,6 +1486,8 @@ namespace PETSc {
         c(1) {}
     setOptions(int, int)
       : OneOperator(atype< long >( ), atype< KN< Dmat >* >( ), atype< long >( )), c(2) {}
+    setOptions(int, int, int)
+      : OneOperator(atype< long >( ), atype< KN< Dmat >* >( ), atype< KN< Dmat >* >( )), c(3) {}
   };
   template< class Type >
   basicAC_F0::name_and_type setOptions< Type >::setOptions_Op::name_param[] = {
@@ -1771,8 +1775,10 @@ namespace PETSc {
         KSPCreate(PetscObjectComm((PetscObject)ptA->_petsc), &ptA->_ksp);
         KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
       }
-      if (c == 1) {
-        KN< Matrice_Creuse< double > >* mP = GetAny< KN< Matrice_Creuse< double > >* >((*P)(stack));
+      if (c == 1 || c == 3) {
+        KN< Matrice_Creuse< double > >* mP = (c == 1 ? GetAny< KN< Matrice_Creuse< double > >* >((*P)(stack)) : nullptr);
+        KN< Dmat >* mD = (c == 3 ? GetAny< KN< Dmat >* >((*P)(stack)) : nullptr);
+        ffassert((c == 1 && mP->N( ) + 1 == tabA->N( )) || (c == 3 && mD->N( ) + 1 == tabA->N( )));
         ksp = ptA->_ksp;
         PC pc;
         KSPSetFromOptions(ksp);
@@ -1787,23 +1793,28 @@ namespace PETSc {
           KSPSetOperators(smoother, tabA->operator[](i)._petsc,
                           tabA->operator[](i)._petsc);
           if (i < tabA->N( ) - 1) {
-            User< ShellInjection > user = nullptr;
-            PetscNew(&user);
-            user->P = &mP->operator[](i);
-            user->f = &tabA->operator[](i);
-            user->C = &tabA->operator[](i + 1);
-            Mat P;
-            PetscInt mFine, MFine, mCoarse, MCoarse;
-            MatGetLocalSize(tabA->operator[](i)._petsc, &mFine, nullptr);
-            MatGetSize(tabA->operator[](i)._petsc, &MFine, nullptr);
-            MatGetLocalSize(tabA->operator[](i + 1)._petsc, &mCoarse, nullptr);
-            MatGetSize(tabA->operator[](i + 1)._petsc, &MCoarse, nullptr);
-            MatCreateShell(PetscObjectComm((PetscObject)tabA->operator[](i + 1)._petsc), mFine, mCoarse, MFine, MCoarse, user, &P);
-            MatShellSetOperation(P, MATOP_MULT, (void (*)(void))ShellInjectionOp< false >);
-            MatShellSetOperation(P, MATOP_MULT_TRANSPOSE, (void (*)(void))ShellInjectionOp< true >);
-            MatShellSetOperation(P, MATOP_DESTROY, (void (*)(void))ShellDestroy< ShellInjection >);
-            PCMGSetInterpolation(pc, tabA->N( ) - i - 1, P);
-            MatDestroy(&P);
+            if (c == 1) {
+                User< ShellInjection > user = nullptr;
+                PetscNew(&user);
+                user->P = &mP->operator[](i);
+                user->f = &tabA->operator[](i);
+                user->C = &tabA->operator[](i + 1);
+                Mat P;
+                PetscInt mFine, MFine, mCoarse, MCoarse;
+                MatGetLocalSize(tabA->operator[](i)._petsc, &mFine, nullptr);
+                MatGetSize(tabA->operator[](i)._petsc, &MFine, nullptr);
+                MatGetLocalSize(tabA->operator[](i + 1)._petsc, &mCoarse, nullptr);
+                MatGetSize(tabA->operator[](i + 1)._petsc, &MCoarse, nullptr);
+                MatCreateShell(PetscObjectComm((PetscObject)tabA->operator[](i + 1)._petsc), mFine, mCoarse, MFine, MCoarse, user, &P);
+                MatShellSetOperation(P, MATOP_MULT, (void (*)(void))ShellInjectionOp< false >);
+                MatShellSetOperation(P, MATOP_MULT_TRANSPOSE, (void (*)(void))ShellInjectionOp< true >);
+                MatShellSetOperation(P, MATOP_DESTROY, (void (*)(void))ShellDestroy< ShellInjection >);
+                PCMGSetInterpolation(pc, tabA->N( ) - i - 1, P);
+                MatDestroy(&P);
+            } else {
+                PCMGSetInterpolation(pc, tabA->N( ) - i - 1, mD->operator[](i)._petsc);
+                MatDestroy(&(mD->operator[](i)._petsc));
+            }
           }
         }
       } else if (c == 2) {
@@ -4673,6 +4684,7 @@ static void Init_PETSc( ) {
   Global.Add("set", "(", new PETSc::setOptions< Dmat >( ));
   Global.Add("set", "(", new PETSc::setOptions< Dmat >(1));
   Global.Add("set", "(", new PETSc::setOptions< Dmat >(1, 1));
+  Global.Add("set", "(", new PETSc::setOptions< Dmat >(1, 1, 1));
   Global.Add("exchange", "(", new exchangeIn< Dmat, PetscScalar >);
   Global.Add("exchange", "(", new exchangeInOut< Dmat, PetscScalar >);
   PETSc::init<PetscReal>();

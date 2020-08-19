@@ -1,0 +1,84 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "PETSc"
+macro dimension()2// EOM            // 2D or 3D
+include "macro_ddm.idp"             // additional DDM functions
+macro grad(u)[dx(u), dy(u)]// EOM
+
+func Pk = P1;                       // finite element space
+
+real r = 0.25;
+real f = 5.0;
+border a(t=0,1)    { x = -t+1; y = t;             label = 1; };
+border b(t=0,1)    { x = -t; y = 1-t;             label = 2; };
+border c(t=0,1)    { x = t-1; y = -t;             label = 3; };
+border d(t=0,1)    { x = t; y = -1+t;             label = 4; };
+border e(t=0,2*pi) { x = r*cos(t); y = -r*sin(t); label = 0; };
+
+mesh Th0, Th1, Th2;
+macro buildMesh(Th, i) {
+    Th#i = buildmesh(a(getARGV("-global", 60) / (f^i)) + b(getARGV("-global", 60) / (f^i)) + c(getARGV("-global", 60) / (f^i)) + d(getARGV("-global", 60) / (f^i)) + e(getARGV("-global", 60)));
+} //
+
+for(int i = 0; i < 2; ++i) {
+    Mat[int] A(3), P(2);
+    buildMesh(Th, 0)
+    buildMesh(Th, 1)
+    buildMesh(Th, 2)
+    if(i == 0) { // naive partitioning
+        createMat(Th0, A[0], Pk)
+        createMat(Th1, A[1], Pk)
+        createMat(Th2, A[2], Pk)
+        transferMat(Th1, Pk, A[1], Th0, Pk, A[0], P[0])
+        transferMat(Th2, Pk, A[2], Th1, Pk, A[1], P[1])
+    }
+    else { // efficient (nested) partitioning
+        mesh[int] ThGlobal(3);
+        ThGlobal[2] = Th2;
+        ThGlobal[1] = Th1;
+        ThGlobal[0] = Th0;
+        fespace Ph2(Th2, P0);
+        fespace Ph1(Th1, P0);
+        fespace Ph0(Th0, P0);
+        Ph2 part2;
+        if(mpirank == 0) {
+            partitionerSeq(part2[], Th2, mpisize);
+        }
+        partitionerPar(part2[], Th2, mpiCommWorld, mpisize);
+        Ph1 part1 = part2;
+        Ph0 part0 = part1;
+        macro Th2UserPartitioning()part2[]// EOM
+        macro Th1UserPartitioning()part1[]// EOM
+        macro Th0UserPartitioning()part0[]// EOM
+        createMat(Th2, A[2], Pk)
+        createMat(Th1, A[1], Pk)
+        createMat(Th0, A[0], Pk)
+        transferMat(Th1, Pk, A[1], Th0, Pk, A[0], P[0])
+        transferMat(Th2, Pk, A[2], Th1, Pk, A[1], P[1])
+    }
+
+    real[int] rhs;
+    for(int i = 0; i < 3; ++i) {
+        mesh Th;
+        if(i == 0) Th = Th0;
+        else if(i == 1) Th = Th1;
+        else Th = Th2;
+        varf vPb(u, v) = int2d(Th)(grad(u)' * grad(v)) + int2d(Th)(v) + on(1, u = 0.0);
+        fespace Wh(Th, Pk);
+        A[i] = vPb(Wh, Wh, tgv = -2);
+        if(i == 0) {
+            rhs.resize(Wh.ndof);
+            rhs = vPb(0, Wh);
+        }
+    }
+    set(A, P, sparams = "-pc_type mg");
+    fespace Wh(Th0, Pk);
+    Wh u;
+    u[] = A[0]^-1 * rhs;
+    plotDmesh(Th0, cmm = "Mesh #0 with " + (i == 0 ? "naive" : "efficient") + " partitioning")
+    plotDmesh(Th1, cmm = "Mesh #1 with " + (i == 0 ? "naive" : "efficient") + " partitioning")
+    plotDmesh(Th2, cmm = "Mesh #2 with " + (i == 0 ? "naive" : "efficient") + " partitioning")
+    macro def(u)u//
+    plotMPI(Th0, u, Pk, def, real, cmm = "Global solution with " + (i == 0 ? "naive" : "efficient") + " partitioning")
+}

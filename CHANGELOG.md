@@ -30,7 +30,7 @@ All notable changes to this project will be documented in this file.
 - Boolean parameter `spiltpbedge` in `buildmesh` to split in to edge with two boundary vertices
 - interface to PETSc DMPlex, see `examples/hpddm/DMPlex-PETSc.edp`
 - function `MatDestroy`
-- function `MatPtAP` and `transferMat` for parallel interpolation between non-matching grids, see `examples/hpddm/PtAP-2d-PETSc.edp`
+- function `MatPtAP` and `transferMat` for parallel interpolation between non-matching grids, see `examples/hpddm/PtAP-2d-PETSc.edp` or `examples/hpddm/diffusion-mg-2d-PETSc.edp`
 - preliminary interface to `SVDSolve` from SLEPc to compute singular value decompositions, see `examples/hpddm/mf-2d-SLEPc.edp` or `examples/hpddm/helmholtz-2d-SLEPc-complex.edp`
 - preliminary interface to `NEPSolve` from SLEPc to solve nonlinear eigenvalue problems, see `examples/hpddm/nonlinear-2d-SLEPc-complex.edp`
 - `transpose` parameter when constructing a `Mat` for defining a matrix-free transposed operation
