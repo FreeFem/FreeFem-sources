@@ -17,7 +17,7 @@ macro init(u)[u, u]//
     include "macro_ddm.idp"             // additional DDM functions
     mesh Th = square(getARGV("-global_2d", 20), getARGV("-global_2d", 20)); // global mesh
     buildDmesh(Th)
-    mesh3 ThGather, ThScatter;
+    mesh ThGather, ThScatter;
     gatherDmesh(Th, comm, ThGather)
     plotDmesh(Th, cmm = "Original Dmesh")
     plotDmesh(ThGather, cmm = "Gathered Dmesh")
