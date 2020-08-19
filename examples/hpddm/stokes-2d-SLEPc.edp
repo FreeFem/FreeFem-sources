@@ -18,7 +18,7 @@ func PkP = P1;                // finite element space for the pressure
 
 int s = getARGV("-split", 1); // refinement factor
 
-meshN Th = square(getARGV("-global", 40), getARGV("-global", 40), [x, y]);
+mesh Th = square(getARGV("-global", 40), getARGV("-global", 40), [x, y]);
 fespace VhV(Th, PkV);         // local finite element space for the velocities
 fespace VhP(Th, PkP);         // local finite element space for the pressure
 buildDmesh(Th)

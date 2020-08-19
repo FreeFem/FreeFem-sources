@@ -12,7 +12,7 @@ func Pk = P1;                               // finite element space
 
 int s = getARGV("-split", 1);                                   // refinement factor
 
-meshN Th = square(1, 1);
+mesh Th = square(1, 1);
 fespace Wh(Th, Pk);           // local finite element space
 int[int][int] intersection;   // local-to-neighbors renumbering
 real[int] D;                  // partition of unity

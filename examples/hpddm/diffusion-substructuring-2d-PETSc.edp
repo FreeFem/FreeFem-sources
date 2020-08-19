@@ -17,7 +17,7 @@ if(verbosity > 0 && mpirank == 0) {
     cout << " - diffusion-2d-substructuring-PETSc.edp - input parameters: refinement factor = " << s << endl;
 }
 
-meshN Th = square(1, 1);
+mesh Th = square(1, 1);
 fespace Wh(Th, Pk);           // local finite element space
 int[int][int] intersection;   // local-to-neighbors renumbering
 int[int] interfaceNb;         //

@@ -32,7 +32,7 @@ border c(t=0,1)    { x = t-1; y = -t;             label = 3; };
 border d(t=0,1)    { x = t; y = -1+t;             label = 4; };
 border e(t=0,2*pi) { x = r*cos(t); y = -r*sin(t); label = 0; };
 
-meshN ThBorder, Th = buildmesh(a(getARGV("-global", 40)) + b(getARGV("-global", 40)) + c(getARGV("-global", 40)) + d(getARGV("-global", 40)) + e(getARGV("-global", 40)));
+mesh ThBorder, Th = buildmesh(a(getARGV("-global", 40)) + b(getARGV("-global", 40)) + c(getARGV("-global", 40)) + d(getARGV("-global", 40)) + e(getARGV("-global", 40)));
 fespace Wh(Th, Pk);           // local finite element space
 int[int][int] intersection;   // local-to-neighbors renumbering
 real[int] D;                  // partition of unity
@@ -44,7 +44,7 @@ func f = (y+x+1) * (y+x-1) * (y-x+1) * (y-x-1);
 real[int] rhs;                              // local right-hand side
 matrix<real> Mat;                           // local operator
 {                                           // local weak form
-    meshN ThAugmented = Th + ThBorder;
+    mesh ThAugmented = Th + ThBorder;
     varf vPb(u, v) = int2d(ThAugmented)(grad(u)' * grad(v)) - int2d(ThAugmented)((0.39 - f) * v) + on(0, u = 0.0);
     fespace WhAugmented(ThAugmented, Pk);
     Mat = vPb(WhAugmented, WhAugmented, tgv = -1);

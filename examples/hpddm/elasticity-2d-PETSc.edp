@@ -14,7 +14,7 @@ macro div(u)(dx(u) + dy(u#B))// EOM
 func Pk = [vectorialfe, vectorialfe]; // finite element space
 
 int[int] l = [2, 1, 2, 2];
-meshN Th = square(2 * getARGV("-global", 10), getARGV("-global", 10), [2 * x, y], label = l); // global mesh
+mesh Th = square(2 * getARGV("-global", 10), getARGV("-global", 10), [2 * x, y], label = l); // global mesh
 Mat A;
 buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld, 2)
 
@@ -60,7 +60,7 @@ if(mpirank == 0)
     cout << "KSPResidualHistory = " << residuals(0:KSPGetIterationNumber(A)) << endl;
 plotMPI(Th, def(u), Pk, def, real, cmm = "Global solution")
 real alpha = 1.0e+1;
-meshN ThMoved = movemesh(Th, [x + alpha * u, y + alpha * uB]);
+mesh ThMoved = movemesh(Th, [x + alpha * u, y + alpha * uB]);
 u[] = mpirank;
 plotMPI(ThMoved, u, vectorialfe, def1, real, cmm = "Global moved solution")
 if(HasType("PC", "hpddm")) {

@@ -14,7 +14,7 @@ int[int] fforder = [1];
 
     macro dimension()2// EOM            // 2D or 3D
     include "macro_ddm.idp"             // additional DDM functions
-    meshN ThNew, Th = square(getARGV("-global_2d", 20), getARGV("-global_2d", 20)); // global mesh
+    mesh ThNew, Th = square(getARGV("-global_2d", 20), getARGV("-global_2d", 20)); // global mesh
     {
         int N = 80;
         border a(t=0,1) { x=t;   y=0;   };
@@ -45,7 +45,7 @@ int[int] fforder = [1];
     macro def(u)[u, u#B]//
     macro init(u)[u, u]//
     include "macro_ddm.idp"             // additional DDM functions
-    meshN ThNew, Th = cube(getARGV("-global_3d", 5), getARGV("-global_3d", 5), getARGV("-global_3d", 5)); // global mesh
+    mesh3 ThNew, Th = cube(getARGV("-global_3d", 5), getARGV("-global_3d", 5), getARGV("-global_3d", 5)); // global mesh
     if(mpirank == 0)
         ThNew = mmg3d(Th, hmax = 8.0e-2);
     broadcast(processor(0), ThNew);

@@ -27,13 +27,13 @@ if(verbosity > 0 && mpirank == 0) {
     cout << " - elasticity-2d.edp - input parameters: refinement factor = " << s << " - overlap = " << overlap << endl;
 }
 
-meshN Th = square(1, 1);
+mesh Th = square(1, 1);
 fespace Wh(Th, Pk);              // local finite element space
 int[int][int] intersection(0);   // local-to-neighbors renumbering
 real[int] D;                     // partition of unity
 {
     int[int] l = [2, 1, 2, 2];
-    meshN ThBorder;
+    mesh ThBorder;
     Th = square(2 * getARGV("-global", 10), getARGV("-global", 10), [2 * x, y], label = l);    // global mesh
     buildOverlap(Th, ThBorder, fakeInterface, s, overlap, intersection, D, Pk, comm, excluded, 2)
 }
@@ -98,6 +98,6 @@ u[] = err;
 macro def1(u)u// EOM
 plotMPI(Th, u, vectorialfe, def1, real, cmm = "Global residual")
 real alpha = 1.0e+1;
-meshN ThMoved = movemesh(Th, [x + alpha * u, y + alpha * uB]);
+mesh ThMoved = movemesh(Th, [x + alpha * u, y + alpha * uB]);
 u[] = mpirank;
 plotMPI(ThMoved, u, vectorialfe, def1, real, cmm = "Global moved solution")

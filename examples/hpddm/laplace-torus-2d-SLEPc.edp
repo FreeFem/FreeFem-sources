@@ -76,7 +76,7 @@ if(verbosity > 0 && mpirank == 0) {
 /***************************************/
 /*   ###############################   */
 /***************************************/
-meshN Th = square(1, 1);      // Local mesh
+mesh Th = square(1, 1);      // Local mesh
 int[int][int] intersection;   // Local-to-neighbors renumbering
 real[int] D;                  // Partition of unity
 

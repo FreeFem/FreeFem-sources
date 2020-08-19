@@ -27,7 +27,7 @@ if(verbosity > 0 && mpirank == 0) {
     cout << " - heat-2d.edp - input parameters: refinement factor = " << s << " - overlap = " << overlap << endl;
 }
 
-meshN ThBorder, Th = square(1, 1);
+mesh ThBorder, Th = square(1, 1);
 fespace Wh(Th, Pk);           // local finite element space
 int[int][int] intersection;   // local-to-neighbors renumbering
 real[int] D;                  // partition of unity
@@ -41,7 +41,7 @@ real[int] rhs;                              // local right-hand side
 matrix<real> Mat;                           // local operator
 matrix<real> M;                             // local mass matrix
 {                                           // local weak form
-    meshN ThAugmented = Th + ThBorder;
+    mesh ThAugmented = Th + ThBorder;
     fespace Ph(ThAugmented, P0);
     Ph f = x < 0.25 ? 1.0e+3 : 1.0e-3;
     varf vPb(u, v) = int2d(ThAugmented)(u * v + dt * (grad(u)' * grad(v))) + int2d(ThAugmented)(dt * f *  v) + on(1, u = 0.0);

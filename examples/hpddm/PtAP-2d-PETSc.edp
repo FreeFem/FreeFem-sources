@@ -5,7 +5,7 @@ load "PETSc"
 macro dimension()2// EOM
 include "macro_ddm.idp"
 
-meshN ThNew, Th = square(getARGV("-global", 20), getARGV("-global", 20));
+mesh ThNew, Th = square(getARGV("-global", 20), getARGV("-global", 20));
 {
     int N = getARGV("-global", 20) / 2.0;
     border a(t=0,1) { x=t;   y=0;   };
