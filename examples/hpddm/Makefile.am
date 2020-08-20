@@ -27,17 +27,11 @@ all-local: freefem++.pref
 
 TESTS_MPI = withPartitioning.edp buildRecursive.edp createPartition.edp reconstructDmesh.edp redistributeDmesh.edp convect.edp
 
-TESTS_HPDDM = diffusion-2d.edp \
-	diffusion-mg-2d.edp \
+TESTS_HPDDM =
 	diffusion-substructuring-2d.edp \
 	diffusion-substructuring-withPartitioning-2d.edp \
-	diffusion-3d.edp \
-	diffusion-simple-3d.edp \
-	diffusion-periodic-2d.edp \
 	elasticity-2d.edp \
 	elasticity-substructuring-2d.edp \
-	elasticity-3d.edp \
-	elasticity-simple-3d.edp \
 	elasticity-block.edp \
 	heat-2d.edp \
 	heat-io-2d.edp \
@@ -46,10 +40,18 @@ TESTS_HPDDM = diffusion-2d.edp \
 	helmholtz-mg-2d.edp \
 	iterative.edp \
 	maxwell-3d.edp \
+	heat-torus-3d-surf.edp
+
+TESTS_HPDDM_ARPACK = diffusion-2d.edp \
+	diffusion-mg-2d.edp \
+	diffusion-3d.edp \
+	diffusion-simple-3d.edp \
+	diffusion-periodic-2d.edp \
+	elasticity-3d.edp \
+	elasticity-simple-3d.edp \
 	stokes-2d.edp \
 	stokes-3d.edp \
 	stokes-io-3d.edp \
-	heat-torus-3d-surf.edp
 
 TESTS_PETSC = bratu-2d-PETSc.edp \
 	diffusion-2d-PETSc.edp \
@@ -129,6 +131,9 @@ CONDITIONAL_MPI = $(TESTS_MPI)
 
 if HPDDM
 CONDITIONAL_HPDDM = $(TESTS_HPDDM)
+if ARPACK
+CONDITIONAL_HPDDM_ARPACK = $(TESTS_HPDDM_ARPACK)
+endif ARPACK
 endif HPDDM
 
 if PETSC
@@ -159,6 +164,7 @@ endif MPI
 
 TESTS = $(TESTS_MPI) \
 	$(TESTS_HPDDM) \
+	$(TESTS_HPDDM_ARPACK) \
 	$(TESTS_PETSC) \
 	$(TESTS_PETSC_PARMMG) \
 	$(TESTS_PETSC_SLEPC) \

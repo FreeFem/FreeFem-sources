@@ -19,6 +19,7 @@ border d(t=0,1)    { x = t; y = -1+t;             label = 4; };
 border e(t=0,2*pi) { x = r*cos(t); y = -r*sin(t); label = 0; };
 
 mesh Th = buildmesh(a(getARGV("-global", 40)) + b(getARGV("-global", 40)) + c(getARGV("-global", 40)) + d(getARGV("-global", 40)) + e(getARGV("-global", 40)));
+broadcast(processor(0), Th);
 Mat A;
 buildMatPeriodic(Th, s, A, Pk, mpiCommWorld, labPeriodic)
 
