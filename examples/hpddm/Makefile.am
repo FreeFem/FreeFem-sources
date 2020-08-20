@@ -27,8 +27,7 @@ all-local: freefem++.pref
 
 TESTS_MPI = withPartitioning.edp buildRecursive.edp createPartition.edp reconstructDmesh.edp redistributeDmesh.edp convect.edp
 
-TESTS_HPDDM =
-	diffusion-substructuring-2d.edp \
+TESTS_HPDDM = diffusion-substructuring-2d.edp \
 	diffusion-substructuring-withPartitioning-2d.edp \
 	elasticity-2d.edp \
 	elasticity-substructuring-2d.edp \
@@ -51,7 +50,7 @@ TESTS_HPDDM_ARPACK = diffusion-2d.edp \
 	elasticity-simple-3d.edp \
 	stokes-2d.edp \
 	stokes-3d.edp \
-	stokes-io-3d.edp \
+	stokes-io-3d.edp
 
 TESTS_PETSC = bratu-2d-PETSc.edp \
 	diffusion-2d-PETSc.edp \
