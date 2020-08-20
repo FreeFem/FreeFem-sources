@@ -2252,7 +2252,7 @@ long mpiWaitAny(KN<MPI_Request>* rq)
 
 long mpiWaitAll(KN<MPI_Request>* rq)
 {
-  MPI_Status* statuses = new MPI_Status[rq->N()];
+  MPI_Status* statuses = new MPI_Status[rq->N()]();
   MPI_Waitall(rq->N(),*rq,statuses);
   for(int i = 0; i < rq->N(); ++i) {
       if(statuses[i].MPI_TAG != MPI_ANY_TAG && statuses[i].MPI_SOURCE != MPI_ANY_SOURCE)

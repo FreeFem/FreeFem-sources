@@ -2926,10 +2926,10 @@ namespace PETSc {
         if (ptK->A) {
           MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA = static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
           ff_HPDDM_MatrixCSR< PetscScalar > dA(mA);
-          ptA->_num = new PetscInt[mA->n + mA->m];
+          ptA->_num = new PetscInt[mA->n + (ptC->_A && ptC->_A->getMatrix() ? ptC->_A->getMatrix()->_m : mA->m)];
           ptA->_cnum = ptA->_num + mA->n;
           std::copy_n(ptB->_num, mA->n, ptA->_num);
-          std::copy_n(ptC->_num, mA->m, ptA->_cnum);
+          std::copy_n(ptC->_num, (ptC->_A && ptC->_A->getMatrix() ? ptC->_A->getMatrix()->_m : mA->m), ptA->_cnum);
           KN<PetscScalar>* numbering = nargs[1] ? GetAny< KN<PetscScalar>* >((*nargs[1])(stack)) : NULL;
           if (c == 0 || !numbering)
             free = HPDDM::template Subdomain< PetscScalar >::distributedCSR(
