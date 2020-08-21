@@ -1230,11 +1230,11 @@ MatriceMorse<R> * funcBuildInterpolationMatrix2T(const FESpace & Uh,const FESpac
     else {
       const ElementT *ts=0,*ts0=0;
       bool outside;
-      RdHat1 P1(TU(Gh));  // R2
-      RdHatT P12;  // R1
+      RdHat1 P1(TU(Gh));
+      RdHatT P12;
           
       copyPt<RdHat1,RdHatT>(P1,P12);
-      if(abs(P1.y)>epsP) {outside=true;ts0=0;}
+      if(is_same< MeshT, MeshL >::value && abs(P1.y)>epsP) {outside=true;ts0=0;}
        else
       ts0=ThV.Find(P12,G,outside,ts0);
       if(outside) ts0=0; // bad starting tet
