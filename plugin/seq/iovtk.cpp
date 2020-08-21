@@ -3454,7 +3454,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
         double* pv=&(*pfields)[nf][0];
         for(int i=0; i<n; ++i) {
           if (binary) {
-            float f[1];
+            double f[1];
             if (datasize == sizeof(float)) {
               if (fread(f, sizeof(float), 1, fp) != 1) {
                 cout << "error in reading  vtk fields float at " << nf << " / " << i << endl;
