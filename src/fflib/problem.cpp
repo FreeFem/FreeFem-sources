@@ -2682,7 +2682,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
     const MeshL & Thu(Uh.Th);
     const Mesh & Thv(Vh.Th);
 
-    bool same = false; //&Uh == & Vh;
+    bool same = false;
     const EdgeL &T = Th[it];
     long npi;
     long i,j;

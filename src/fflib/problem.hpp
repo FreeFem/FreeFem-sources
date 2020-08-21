@@ -1282,7 +1282,7 @@ AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stac
   pfes2  * pVh= GetAny<pfes2 *>((*b->evh)(stack));
   const FESpace1 * PUh =  (FESpace1*) **pUh ;
   const FESpace2 * PVh =  (FESpace2*) **pVh ;
-  bool A_is_square= (void*)PUh == (void*)PVh || (void*)(PUh->NbOfDF) == (void*)(PVh->NbOfDF) ;
+  bool A_is_square= (void*)PUh == (void*)PVh || (PUh->NbOfDF) == (PVh->NbOfDF) ;
 
   bool VF=isVF(b->largs);
   Data_Sparse_Solver ds;
