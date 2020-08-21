@@ -125,14 +125,14 @@ namespace Fem2D {
         GradL[1]= V/(V.norme2());
         GradL[0]= -GradL[1];
     }
-    R3 NFrenet() const {
+    R3 NormalT() const {
         R3 V(at(0),at(1));
 	ffassert(V.x != 0 || V.y != 0);
         R3 N = V^R3(0,0,1);
 	return N;
     }
 
-    R3 NFrenetUnitaire() const {
+    R3 NormalTUnitaire() const {
         R3 V(at(0),at(1));
 	ffassert(V.x != 0 || V.y != 0);
 	R3 N = V^R3(0,0,1);

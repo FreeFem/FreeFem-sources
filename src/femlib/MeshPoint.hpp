@@ -41,7 +41,7 @@ class MeshPointBase { public:
   int VF;
   int d;
   int dHat;
-  R3 Nt; //  surface normal
+  R3 Nt; //  surface/curve normal
     
   void set(const R2 &P2,const R2 & P_Hat,const  baseFElement & K,int ll,const R2 &NN,int iedge)
    {
@@ -423,7 +423,7 @@ class MeshPointBase { public:
         t=(*ThS)(TS);
         throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
         N=NN;
-        Nt=TS->NFrenetUnitaire();
+        Nt=TS->NormalTUnitaire();
         VF=0;
         d=3;
         dHat=2;
@@ -487,7 +487,7 @@ class MeshPointBase { public:
         e=iedge;
         throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
         N=NN;
-        Nt = TS->NFrenetUnitaire();
+        Nt = TS->NormalTUnitaire();
         VF=VFF;
         d=3;
         dHat=2;
@@ -505,7 +505,7 @@ class MeshPointBase { public:
         t=(*ThS)(TS);
         v=f=e=-1;
         N=R3();
-        Nt = TS->NFrenetUnitaire();
+        Nt = TS->NormalTUnitaire();
         VF=0;
         d=3;
         dHat=2;
@@ -523,7 +523,7 @@ class MeshPointBase { public:
         region = TS->lab;
         v=f=e=-1;
         N=R3();
-        Nt= TS->NFrenetUnitaire();
+        Nt= TS->NormalTUnitaire();
         VF=0;
         int ll[3],kk(0);
         if ( P_Hat.x<1.e-6) ll[kk++]=1;
@@ -565,7 +565,7 @@ class MeshPointBase { public:
         t=(*ThS)(TS);
         v=f=e=-1;
         N=R3();
-        Nt= TS->NFrenetUnitaire();
+        Nt= TS->NormalTUnitaire();
         outside=coutside;
         VF=0;
         d=3;
@@ -609,7 +609,7 @@ class MeshPointBase { public:
         v=ss;
         VF=0;
         N=R3();
-        Nt= TS->NFrenetUnitaire();
+        Nt= TS->NormalTUnitaire();
         d=3;
         dHat=2;
     }
@@ -632,7 +632,7 @@ class MeshPointBase { public:
         t=(*ThL)(TL);
         throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
         N=NN;
-        Nt = TL->NFrenetUnitaire();
+        Nt = TL->NormalTUnitaire();
         VF=0;
         d=3;
         dHat=1;
@@ -671,7 +671,7 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         e=ipoint;
         throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
         N=NN;
-        Nt = TL->NFrenetUnitaire();
+        Nt = TL->NormalTUnitaire();
         VF=VFF;
         d=3;
         dHat=1;
@@ -708,7 +708,7 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         t=(*ThL)(TL);
         v=f=e=-1;
         N=R3();
-        Nt = TL->NFrenetUnitaire();
+        Nt = TL->NormalTUnitaire();
         VF=0;
         d=3;
         dHat=1;
@@ -723,7 +723,7 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         region = TL->lab;
         v=f=e=-1;
         N=R3();
-        Nt = TL->NFrenetUnitaire();
+        Nt = TL->NormalTUnitaire();
         VF=0;
         int ll[3],kk(0);
         if ( P_Hat.x<1.e-6) label=0;
@@ -746,7 +746,7 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         t=(*ThL)(TL);
         v=f=e=-1;
         N=R3();
-        Nt = TL->NFrenetUnitaire();
+        Nt = TL->NormalTUnitaire();
         outside=coutside;
         VF=0;
         d=3;
@@ -788,7 +788,7 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         v=ss;
         VF=0;
         N=R3();
-        Nt = TL->NFrenetUnitaire();
+        Nt = TL->NormalTUnitaire();
         d=3;
         dHat=1;
     }

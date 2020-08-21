@@ -3587,7 +3587,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
               if (mes2 * mes < epsmes3) continue;    //  too small
               NN /= mes;
               llevelset += mes;
-              R3 NNt=K.NFrenetUnitaire();
+              R3 NNt=K.NormalTUnitaire();
               for (int npi = 0; npi < FI.n; npi++)    // loop on the integration point
               {
                 QuadratureFormular1dPoint pi(FI[npi]);
@@ -3638,8 +3638,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
         for (int t = 0; t < Th.nt; ++t) {
           if (all || setoflab.find(Th[t].lab) != setoflab.end( )) {
             const TriangleS &K(Th[t]);
-            R3 NNt=K.NFrenet();
-            NNt/=NNt.norme();
+            R3 NNt=K.NormalTUnitaire();
             double umx = -HUGE_VAL, umn = HUGE_VAL;
             for (int i = 0; i < 3; ++i) {
               int j = Th(t, i);
@@ -3686,7 +3685,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
       } else
         for (int i = 0; i < Th.nt; i++) {
           const TriangleS &K(Th[i]);
-          R3 NNt=K.NFrenetUnitaire();
+          R3 NNt=K.NormalTUnitaire();
           if (all || setoflab.find(Th[i].lab) != setoflab.end( ))
             for (int npi = 0; npi < FI.n; npi++) {
               QuadraturePoint pi(FI[npi]);
@@ -3723,7 +3722,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
   {
 
     if(di->islevelset() && (CDomainOfIntegration::int1d!=kind) &&
-    (CDomainOfIntegration::int2d!=kind) )
+    (CDomainOfIntegration::int0d!=kind) )
          InternalError("So no levelset integration type  case (103d)");
     const MeshL  & Th = * GetAny<pmeshL>( (*di->Th)(stack) );
     ffassert(&Th);
@@ -3743,12 +3742,12 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
         }
 
         else
-            for( int k=0;k<Th.nt;k++)
-            {
-                if (all || setoflab.find(Th[k].lab) != setoflab.end())
-                {
-                    const EdgeL & K(Th[k]);
-                    double le = K.mesure();
+            for( int k=0;k<Th.nt;k++) {
+                const EdgeL &K(Th[k]);
+                R3 NNt=K.NormalTUnitaire();
+                if (all || setoflab.find(Th[k].lab) != setoflab.end()) {
+                   // const EdgeL & K(Th[k]);
+                   // double le = K.mesure();
                    
                     for (int npi=0;npi<FI.n;npi++) // loop on the integration point
                     {
@@ -3756,8 +3755,8 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
                         R1 Ph(pi.x); //,sb=1.-sa;
                         R3 Pt(K(Ph)); //
                         // void set(const  MeshL &aTh, const R3 &P2,const R1 & P_Hat,const EdgeL & aK,const int ll=notalabel,bool coutside=false)
-                        MeshPointStack(stack)->set(Th,Pt,Ph,K,notalabel);
-                        r += le*pi.a*GetAny<R>( (*fonc)(stack));
+                        MeshPointStack(stack)->set(Th,Pt,Ph,K,NNt, K.lab);
+                        r += K.mesure()*pi.a*GetAny<R>( (*fonc)(stack));
                     }
                 }
                 wsptr2free->clean(swsptr2free);// ADD FH 11/2017
@@ -4003,7 +4002,7 @@ AnyType Plot::operator( )(Stack s) const {
   vector< AnyType > lat;
   ll.reserve(l.size( ));
   // generation de la list de plot ...
-        for (size_t i = 0; i < l.size( ); i++) { cout << "test " << l[i].what << endl;
+  for (size_t i = 0; i < l.size( ); i++) {
     switch (l[i].what) {
       case 0:
         l[i].EvalandPush< void * >(s, i, ll);

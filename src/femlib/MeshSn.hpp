@@ -97,11 +97,11 @@ typedef GenericVertex<R3> Vertex3;
                 GradL[i]= (Edge(i)^Normal) / N;
         }
         
-        R3 NFrenet() const {
+        R3 NormalT() const {
             ASSERTION(i>=0 && i <3);
             return R3( Edge(2)^Edge(1) );
         }
-        R3 NFrenetUnitaire() const {// Add FH. Dec. 2019 
+        R3 NormalTUnitaire() const {// Add FH. Dec. 2019 
             R3 N(Edge(2)^Edge(1) );
             return N/N.norme();
         }

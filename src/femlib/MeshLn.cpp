@@ -839,8 +839,8 @@ void MeshL::BuildCurvBasis(){
         for (int i = 0; i < EdgeL::nv; i++) {
             int iiv = this->operator()(K[i]);
             gx[iiv]+= K.mesure()*K.Edge(0);
-            gz[iiv]+=K.mesure()*K.NFrenet();
-            gy[iiv]+=K.mesure()*( K.NFrenet()^K.Edge(0) );  // sens ???
+            gz[iiv]+=K.mesure()*K.NormalT();
+            gy[iiv]+=K.mesure()*( K.NormalT()^K.Edge(0) );  // sens ???
        }
     }
     for (int i=0 ; i<nv; i++) {

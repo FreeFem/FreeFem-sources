@@ -673,7 +673,7 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & pl
 
             for (int i=0;i<Th.nt; i = 0 ? i++ : i+=nbN) {
                 const MeshS::Element & K(Th[i]);
-                R3 NN=K.NFrenetUnitaire();
+                R3 NN=K.NormalTUnitaire();
                 NN*=coef;
                 R2 PtHat = R2::diag(1. / 3.);
                 R3 A(K(PtHat));
@@ -800,7 +800,7 @@ void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
 
         for (int i=0;i<Th.nt; i = 0 ? i++ : i+=nbN) {
             const MeshL::Element & K(Th[i]);
-            R3 NN=K.NFrenetUnitaire();
+            R3 NN=K.NormalTUnitaire();
             NN*=coef;
             R1 PtHat = R1::diag(1. / 2.);
             R3 A(K(PtHat));
@@ -986,7 +986,7 @@ void OnePlotFES::Draw(OneWindow *win)
            int iv;
         for (int i = 0; i < 3; i++) {
             iv = Th.operator( )(K[i]);
-        Nv[iv]+=K.mesure()*K.NFrenet();
+        Nv[iv]+=K.mesure()*K.NormalT();
         }
     }
     for (int i=0 ; i<Th.nv; i++)
@@ -1139,7 +1139,7 @@ void OnePlotFEL::Draw(OneWindow *win)
            int iv;
         for (int i = 0; i < 2; i++) {
             iv = Th.operator( )(K[i]);
-        Nv[iv]+=K.mesure()*K.NFrenet();
+        Nv[iv]+=K.mesure()*K.NormalT();
         }
     }
     for (int i=0 ; i<Th.nv; i++)

@@ -938,8 +938,8 @@ namespace Fem2D
                     typename HashTable<SortArray<int,2>,int>::iterator p= edgesI.find(key);
                     if (!p) {    // 1st time the edge is seen
                         // unit normal
-                        R3 Normal = K.NFrenetUnitaire();
-                        R3 Normal_adj = K_adj.NFrenet();
+                        R3 Normal = K.NormalTUnitaire();
+                        R3 Normal_adj = K_adj.NormalT();
                         Normal_adj /= Normal_adj.norme();
                         R pdt = (Normal,Normal_adj); // scalar product
                         pdt = acos(pdt); // radian angle (Normal,Normal_adj)
@@ -1335,7 +1335,7 @@ KNM<R3> MeshS::BuildCurvBasis(){
         for (int i = 0; i < TriangleS::nv; i++) {
             int iiv = this->operator()(K[i]);
             g(0,iiv)+= K.mesure()*K.Edge(2);
-            g(2,iiv)+=K.mesure()*K.NFrenet();
+            g(2,iiv)+=K.mesure()*K.NormalT();
             g(1,iiv)+=K.mesure()*K.Edge(1);  // sens ???
        }
     }

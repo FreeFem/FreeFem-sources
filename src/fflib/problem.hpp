@@ -1282,7 +1282,7 @@ AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stac
   pfes2  * pVh= GetAny<pfes2 *>((*b->evh)(stack));
   const FESpace1 * PUh =  (FESpace1*) **pUh ;
   const FESpace2 * PVh =  (FESpace2*) **pVh ;
-  bool A_is_square= PUh == PVh || PUh->NbOfDF == PVh->NbOfDF ;
+  bool A_is_square= (void*)PUh == (void*)PVh || (void*)(PUh->NbOfDF) == (void*)(PVh->NbOfDF) ;
 
   bool VF=isVF(b->largs);
   Data_Sparse_Solver ds;
@@ -1315,7 +1315,7 @@ AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stac
 	 A.Vh=Vh;
 	 if (ds.sym )
 	   {  A.A.master( new  MatriceMorse<R>(Vh.NbOfDF,Vh.NbOfDF,ds.sym) );
-	     ffassert( &Uh == & Vh);}
+	     ffassert( (void*)&Uh == (void*)&Vh);}
 	 else
 	     A.A.master( new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,Vh.NbOfDF*2,0) ); // lines corresponding to test functions
            // reset the solver ...

@@ -756,6 +756,20 @@ void copyKNPt<R3,R2>( KN<R3> &A, KN<R2> B) {
     }
 }
 
+template<>
+void copyKNPt<R1,R2>( KN<R1> &A, KN<R2> B) {
+for( int ik=0;ik<A.N();ik++)
+    A[ik].x = B[ik].x;
+}
+template<>
+void copyKNPt<R1,R3>( KN<R1> &A, KN<R3> B) {
+    for( int ik=0;ik<A.N();ik++){
+        A[ik].x = B[ik].x;
+    }
+}
+
+
+
 template<typename RdHatT1,typename RdHatT2>
 void copyPt( RdHatT1 &A, RdHatT2 B) {
     int d1=RdHatT1::d, d2=RdHatT2::d;
@@ -1118,7 +1132,7 @@ MatriceMorse<R> * funcBuildInterpolationMatrix2T(const FESpace & Uh,const FESpac
   MatriceMorse<R> * m=0;
   typedef typename FESpace::Mesh Mesh1;
   typedef typename FESpace::FElement FElement1;
-  typedef typename Mesh::Element Element1;
+  typedef typename Mesh1::Element Element1;
   typedef typename FESpace::Rd Rd1;
   typedef typename Element1::RdHat RdHat1;
     
@@ -1154,7 +1168,7 @@ MatriceMorse<R> * funcBuildInterpolationMatrix2T(const FESpace & Uh,const FESpac
   if(transpose) Exchange(n,mm);
   m = new MatriceMorse<R>(n,mm,0,0);
     
-    RdHat1 Gh(1./3,1./3);
+  RdHat1 Gh(1./3,1./3);
   RdHatT G;
     
   int n1=n+1;
@@ -1203,64 +1217,60 @@ MatriceMorse<R> * funcBuildInterpolationMatrix2T(const FESpace & Uh,const FESpac
   fait=false;
   double epsP=1e-6; // must be choose
 
-    for (int it=0;it<ThU.nt;it++) {
-      thecolor++; //  change the current color
-      const Element1 & TU(ThU[it]);
-      FElement1 KU(Uh[it]);
-      KU.Pi_h(AipjU);
-      if (samemesh) {
-        //copyPt<RdHatT,RdHat1>(PV,ipmat.P);
-        itV = it;
-        intV= false;// add July 2009 (unset varaible FH)
+  for (int it=0;it<ThU.nt;it++) {
+    thecolor++; //  change the current color
+    const Element1 & TU(ThU[it]);
+    FElement1 KU(Uh[it]);
+    KU.Pi_h(AipjU);
+      if (samemesh) {copyKNPt(PV,PtHatU);
+        //PV = PtHatU.x;   // R1 = R2
+      itV = it;
+      intV= false;// add July 2009 (unset varaible FH)
+    }
+    else {
+      const ElementT *ts=0,*ts0=0;
+      bool outside;
+      RdHat1 P1(TU(Gh));  // R2
+      RdHatT P12;  // R1
+          
+      copyPt<RdHat1,RdHatT>(P1,P12);
+      if(abs(P1.y)>epsP) {outside=true;ts0=0;}
+       else
+      ts0=ThV.Find(P12,G,outside,ts0);
+      if(outside) ts0=0; // bad starting tet
+      
+      for (int i=0;i<nbp;i++) {
+        ts=ThV.Find(TU(PtHatU[i]),PV[i],outside,ts0);
+        if(!outside && ts0==0) ts0=ts;
+        if(outside && verbosity>9 )
+          cout << it << " " << i << " :: " << TU(PtHatU[i]) << "  -- "<< outside << PV[i] << " " << ThV(ts) << " ->  " <<  (*ts)(PV[i]) <<endl;
+        itV[i]= ThV(ts);
+        intV[i]=outside && inside; //  ouside and inside flag
       }
-      else {
-        const ElementT *ts=0,*ts0=0;
-        bool outside;
-        RdHat1 P1(TU(Gh));  // R2
-        RdHatT P12;  // R1
-          
-        copyPt<RdHat1,RdHatT>(P1,P12);
-       // if(abs(P1.y)>epsP) {outside=true;ts0=0;}
-       // else
-        ts0=ThV.Find(P12,G,outside,ts0);
-        if(outside) ts0=0; // bad starting tet
-        
-          
-          
-          for (int i=0;i<nbp;i++) {
-            ts=ThV.Find(TU(PtHatU[i]),PV[i],outside,ts0);
-            if(!outside && ts0==0) ts0=ts;
-            if(outside && verbosity>9 )
-              cout << it << " " << i << " :: " << TU(PtHatU[i]) << "  -- "<< outside << PV[i] << " " << ThV(ts) << " ->  " <<  (*ts)(PV[i]) <<endl;
-            itV[i]= ThV(ts);
-            intV[i]=outside && inside; //  ouside and inside flag
-          }
-      }
-      for (int p=0;p<nbp;p++) {
-        KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype); // valeur de fonction de base de Vh
-        // ou:   fb(idf,j,0) valeur de la j composante de la fonction idf
-        Vh0.tfe->FB(whatd,ThV,ThV[itV[p]],PV[p],fb);
-      }
+    }
+    for (int p=0;p<nbp;p++) {
+      KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype); // valeur de fonction de base de Vh
+      // ou:   fb(idf,j,0) valeur de la j composante de la fonction idf
+      Vh0.tfe->FB(whatd,ThV,ThV[itV[p]],PV[p],fb);
+    }
 
-        for (int i=0;i<ipjU.N();i++) { // pour tous le terme
-       
-          
-        const FElement1::IPJ &ipj_i(ipjU[i]);
-        int dfu = KU(ipj_i.i); // le numero de df global
-        if(fait[dfu]) continue;
-        int jU = ipj_i.j; // la composante dans U
-        int p=ipj_i.p;  //  le points
-        if (intV[p]) continue; //  ouside and inside flag => next
-        R aipj = AipjU[i];
-        FElementT KV(Vh[itV[p]]);
-        int jV=jU;
-        if(iU2V) jV=iU2V[jU];
+    for (int i=0;i<ipjU.N();i++) { // pour tous le terme
+      const FElement1::IPJ &ipj_i(ipjU[i]);
+      int dfu = KU(ipj_i.i); // le numero de df global
+      if(fait[dfu]) continue;
+      int jU = ipj_i.j; // la composante dans U
+      int p=ipj_i.p;  //  le points
+      if (intV[p]) continue; //  ouside and inside flag => next
+      R aipj = AipjU[i];
+      FElementT KV(Vh[itV[p]]);
+      int jV=jU;
+      if(iU2V) jV=iU2V[jU];
 
-        if(jV>=0 && jV<NVh) {
-          KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype);
-          KN_<R> fbj(fb('.',jV,op));
+      if(jV>=0 && jV<NVh) {
+        KNMK_<R> fb(v+p*sfb1,nbdfVK,NVh,last_operatortype);
+        KN_<R> fbj(fb('.',jV,op));
 
-          for (int idfv=0;idfv<nbdfVK;idfv++)
+        for (int idfv=0;idfv<nbdfVK;idfv++)
           if (Abs(fbj[idfv])>eps) {
             int dfv=KV(idfv);
             int ii=dfu, jj=dfv;
@@ -1270,12 +1280,12 @@ MatriceMorse<R> * funcBuildInterpolationMatrix2T(const FESpace & Uh,const FESpac
             if(Abs(c)>eps)
               (*m)(ii,jj) += c;
           }
-        }
       }
-      for (int df=0;df<KU.NbDoF();df++){
-        int dfu = KU(df); // le numero de df global
-        fait[dfu]=true;
-      }
+    }
+    for (int df=0;df<KU.NbDoF();df++){
+      int dfu = KU(df); // le numero de df global
+      fait[dfu]=true;
+    }
   }
   return m;
 }
