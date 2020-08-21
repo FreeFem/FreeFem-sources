@@ -269,6 +269,7 @@ border InnerEdge(t = 0, 2.0*pi) {x = (1.0 + InnerEllipseExtension) * InnerRadius
 border OuterEdge(t = 0, 2.0*pi) {x = (1.0 + 0.0 * InnerEllipseExtension) * OuterRadius * cos(t); y = OuterRadius * sin(t); label = 2;}
 
 mesh Th = buildmesh(InnerEdge(-m) + OuterEdge(n));
+broadcast(processor(0), Th);
 
 plot(Th);
 fespace Vh(Th, Pk);
@@ -340,7 +341,7 @@ SNESSolve(A, funcJ, funcRes, xPETSc, sparams = "-snes_monitor -snes_linesearch_m
 ChangeNumbering(A, u1n[], xPETSc, inverse = true, exchange = true);
 plotMPI(Th, [u1n, u2n], Pk, def, real, cmm = "Global solution")
 real alpha = 1.0;
-meshN ThMoved = movemesh(Th, [x + alpha * u1n, y + alpha * u2n]);
+mesh ThMoved = movemesh(Th, [x + alpha * u1n, y + alpha * u2n]);
 u1n[] = mpirank;
 macro def1(u)u// EOM
 plotMPI(ThMoved, u1n, P1, def1, real, cmm = "Global moved solution")

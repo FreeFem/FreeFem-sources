@@ -24,12 +24,12 @@ if(verbosity > 0 && mpirank == 0) {
     cout << " - diffusion-2d.edp - input parameters: refinement factor = " << s << " - overlap = " << overlap << endl;
 }
 
-meshN Th = square(1, 1);
+mesh Th = square(1, 1);
 fespace Wh(Th, Pk);              // local finite element space
 int[int][int] intersection(0);   // local-to-neighbors renumbering
 real[int] D;                     // partition of unity
 {
-    meshN ThBorder;
+    mesh ThBorder;
     Th = square(getARGV("-global", 40), getARGV("-global", 40));    // global mesh
     buildOverlap(Th, ThBorder, fakeInterface, s, overlap, intersection, D, Pk, comm, excluded)
 }

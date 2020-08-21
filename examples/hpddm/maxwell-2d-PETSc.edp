@@ -14,7 +14,7 @@ func Pk = RT0Ortho;
 int Dirichlet = 1;
 
 int[int] chlab = [Dirichlet, Dirichlet, Dirichlet, Dirichlet];
-meshN Th = square(getARGV("-global", 10), getARGV("-global", 10), label = chlab);
+mesh Th = square(getARGV("-global", 10), getARGV("-global", 10), label = chlab);
 
 fespace Wh(Th, Pk);
 

@@ -17,7 +17,8 @@ border bb(t=0,1) { x=1;   y=t;   label=2; };
 border cc(t=0,1) { x=1-t; y=1;   label=3; };
 border dd(t=0,1) { x=0;   y=1-t; label=4; };
 
-meshN Th, ThCoarse = buildmesh(aa(getARGV("-global", 20)) + bb(getARGV("-global", 20)) + cc(getARGV("-global", 20)) + dd(getARGV("-global", 20)));
+mesh Th, ThCoarse = buildmesh(aa(getARGV("-global", 20)) + bb(getARGV("-global", 20)) + cc(getARGV("-global", 20)) + dd(getARGV("-global", 20)));
+broadcast(processor(0), ThCoarse);
 fespace Wh(Th, Pk);                 // local finite element space
 real[int] part;
 fespace PhCoarse(ThCoarse, P0);
@@ -40,7 +41,7 @@ matrix<real> Mat = vPb(Wh, Wh, sym = 1);
 fespace WhCoarse(ThCoarse, Pk);
 matrix MatCoarse;
 {
-    meshN ThBackup = Th;
+    mesh ThBackup = Th;
     Th = ThCoarse;
     MatCoarse = vPb(Wh, Wh, sym = 1);
     Th = ThBackup;
@@ -72,7 +73,7 @@ int[int][int] intersectionCoarse;
 real[int] DCoarse;
 {
     buildWithPartitioning(ThCoarse, partCoarse[], 1, intersectionCoarse, DCoarse, Pk, mpiCommWorld);
-    meshN ThBackup = Th;
+    mesh ThBackup = Th;
     Th = ThCoarse;
     MatCoarse = vPb(Wh, Wh, sym = 1);
     Th = ThBackup;

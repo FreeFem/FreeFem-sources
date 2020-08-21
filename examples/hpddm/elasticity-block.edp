@@ -19,13 +19,13 @@ func Pk = [P1, P1, P1];             // finite element space
 int s = getARGV("-split", 1);                                   // refinement factor
 
 int[int] LL = [2,3, 2,1, 2,2];
-meshN Th = cube(1, 1, 1, [x, y, z]);
+mesh3 Th = cube(1, 1, 1, [x, y, z]);
 fespace Wh(Th, Pk);           // local finite element space
 /*# SchwarzMethod #*/
 int[int][int] intersection;   // local-to-neighbors renumbering
 real[int] D;                  // partition of unity
 {
-    meshN ThBorder;
+    mesh3 ThBorder;
     Th = cube(10 * getARGV("-global", 5), getARGV("-global", 5), getARGV("-global", 5), [10 * x, y, z], label = LL);      // global mesh
     buildOverlap(Th, ThBorder, 10, s, 1, intersection, D, Pk, mpiCommWorld, false)
 }
@@ -69,8 +69,8 @@ uBlock = A^-1 * rhsBlock;
 
 u[] = uBlock(0 * u[].n:1 * u[].n - 1);
 d[] = uBlock(1 * u[].n:2 * u[].n - 1);
-meshN ThMoved1 = movemesh3(Th, transfo = [x + alpha * u, y + alpha * uB, z + alpha * uC]);
-meshN ThMoved2 = movemesh3(Th, transfo = [x + alpha * d, y + alpha * dB, z + alpha * dC]);
+mesh3 ThMoved1 = movemesh3(Th, transfo = [x + alpha * u, y + alpha * uB, z + alpha * uC]);
+mesh3 ThMoved2 = movemesh3(Th, transfo = [x + alpha * d, y + alpha * dB, z + alpha * dC]);
 macro def1(u)u// EOM
 plotMPI(ThMoved1, u, P1, def1, real, cmm = "Global moved solution")
 plotMPI(ThMoved2, u, P1, def1, real, cmm = "Global moved solution")

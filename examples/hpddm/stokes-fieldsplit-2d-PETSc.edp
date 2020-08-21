@@ -13,9 +13,9 @@ macro epsilon(u)[dx(u), dy(u#B), (dy(u) + dx(u#B)) / Sqrt]// EOM
 macro div(u)(dx(u) + dy(u#B))// EOM
 func Pk = [P2, P2, P1];             // finite element space
 
-meshN Th;
+mesh Th;
 {
-    meshN ThGlobal = square(getARGV("-global", 40), getARGV("-global", 40), [x, y]); // global mesh
+    mesh ThGlobal = square(getARGV("-global", 40), getARGV("-global", 40), [x, y]); // global mesh
     ThGlobal = trunc(ThGlobal, (x < 0.5) || (y < 0.5), label = 5);
     Th = movemesh(ThGlobal, [-x, y]);
     Th = ThGlobal + Th;

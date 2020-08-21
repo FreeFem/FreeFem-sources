@@ -13,7 +13,7 @@ real mu = 0.01;
 int iMax = getARGV("-iMax", 10);                                // number of iterations
 
 int[int] l = [1, 1, 1, 1];
-meshN Th = square(getARGV("-global", 40), getARGV("-global", 40), label = l); // global mesh
+mesh Th = square(getARGV("-global", 40), getARGV("-global", 40), label = l); // global mesh
 Mat A;
 buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
 

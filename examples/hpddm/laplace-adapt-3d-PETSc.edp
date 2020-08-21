@@ -18,7 +18,7 @@ macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
 
 varf vPoisson(u, v) = int3d(Th3)(grad(u)' * grad(v)) + int3d(Th3)(v) + on(1,2, u=0);
 
-meshN ThBackup = Th3;
+mesh3 ThBackup = Th3;
 Mat A;
 int[int] n2o;
 NewMacro Th3N2O() n2o EndMacro

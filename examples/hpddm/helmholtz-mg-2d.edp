@@ -23,14 +23,14 @@ int Robin = 2;
 
 int s = getARGV("-split", 3);
 real nw = 15.0 / s;
-meshN ThCoarse = square(nw * 1/lambda, nw * 1/lambda);
+mesh ThCoarse = square(nw * 1/lambda, nw * 1/lambda);
 
 {
     int[int] chlab = [1, Dirichlet, 2, Dirichlet, 3, Dirichlet, 4, Dirichlet];
     ThCoarse = change(ThCoarse, refe = chlab);
 }
 
-meshN Th;
+mesh Th;
 fespace Wh(Th, Pk);
 real[int] part;
 fespace PhCoarse(ThCoarse, P0);
@@ -57,7 +57,7 @@ matrix<complex> Mat = vPb(Wh, Wh, sym = 1);
 fespace WhCoarse(ThCoarse, Pk);
 matrix<complex> MatCoarse;
 {
-    meshN ThBackup = Th;
+    mesh ThBackup = Th;
     Th = ThCoarse;
     epsilon = epsilonE;
     MatCoarse = vPb(Wh, Wh, sym = 1);
@@ -98,7 +98,7 @@ int[int][int] intersectionCoarse;
 real[int] DCoarse;
 {
     buildWithPartitioning(ThCoarse, partCoarse[], 1, intersectionCoarse, DCoarse, Pk, mpiCommWorld);
-    meshN ThBackup = Th;
+    mesh ThBackup = Th;
     Th = ThCoarse;
     epsilon = epsilonE;
     MatCoarse = vPb(Wh, Wh, sym = 1);

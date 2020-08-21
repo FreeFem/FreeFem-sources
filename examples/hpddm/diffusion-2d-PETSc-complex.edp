@@ -8,7 +8,7 @@ include "macro_ddm.idp"             // additional DDM functions
 macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
 func Pk = P1;                       // finite element space
 
-meshN Th = square(getARGV("-global", 40), getARGV("-global", 40)); // global mesh
+mesh Th = square(getARGV("-global", 40), getARGV("-global", 40)); // global mesh
 Mat<complex> A;
 buildMat(Th, getARGV("-split", 1), A, Pk, mpiCommWorld)
 
