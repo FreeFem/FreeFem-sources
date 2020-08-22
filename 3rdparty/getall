@@ -182,8 +182,8 @@ download('parmmg','https://github.com/MmgTools/ParMmg/archive/59abed535c15560b2b
         'https://github.com/MmgTools',
         'parmmg.zip',
         '8b720611167c8b45ce40746849bdbad7');
-download('PETSc','http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.13.4.tar.gz',
-	'http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/',
+download('PETSc','https://www.mcs.anl.gov/petsc/mirror/release-snapshots/petsc-lite-3.13.4.tar.gz',
+	'https://www.mcs.anl.gov/petsc/mirror/release-snapshots',
 	'petsc-lite-3.13.4.tar.gz',
 	'83bac0d95c487d264cdfc4940e0c41dd');
 
