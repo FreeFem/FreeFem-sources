@@ -26,7 +26,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
-- compile ffmaster / ffslave example under windows (thanks to johann@ifado.de)
+- new way to build matrix beetween 2d Finite element 2d and Curve finite element to do mortar (Thank to Axel ) , see first example `examples/tutorial/mortar-DN-4-v4.5.edp`
+- compile ffmaster / ffslave example under windows (Thanks to johann@ifado.de)
 - Boolean parameter `spiltpbedge` in `buildmesh` to split in to edge with two boundary vertices
 - interface to PETSc DMPlex, see `examples/hpddm/DMPlex-PETSc.edp`
 - function `MatDestroy`
