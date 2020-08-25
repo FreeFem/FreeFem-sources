@@ -83,8 +83,8 @@ border b1(t=-R, R){x=t; y=-R;}
 border b2(t=-R, R){x=R; y=t;}
 border b3(t=-R, R){x=-t; y=R;}
 border b4(t=-R, R){x=-R; y=-t;}
-
-mesh ThOut = buildmesh(b1(np)+b2(np)+b3(np)+b4(np)+circle(-np*pi/R));
+border circleout(t=0, 2*pi){x=1.1*cos(t); y=1.1*sin(t); z=0;}
+mesh ThOut = buildmesh(b1(np)+b2(np)+b3(np)+b4(np)+circleout(-np*pi/R));
 
 // Incident wave in volume
 fespace UhOut(ThOut,P1);
@@ -92,7 +92,7 @@ UhOut<complex> vinc;
 vinc = finc;
 
 // HMatrix for potential
-BemPotential Pot("SL",k);
+BemPotential Pot("DL",k);
 varf vp(u,v)=int1d(Th)(POT(Pot,u,v)) ;  
 HMatrix<complex> HPot = vp(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
 //HMatrix<complex> HPot = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1e-3,minclustersize=10,maxblocksize=1000000);
