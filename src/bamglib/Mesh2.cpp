@@ -58,7 +58,7 @@ namespace bamg {
   static unsigned long myrand_next = 1;
 
   /* RAND_MAX assumed to be 32767 */
-  int myrand(void) {
+  int myrand(void) {//  in 0:2^31
 
     //  myrand_next = myrand_next * 1103515245 + 12345;
     // return((unsigned)(myrand_next/65536) % 32768);
