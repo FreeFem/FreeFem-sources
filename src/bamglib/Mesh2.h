@@ -62,14 +62,17 @@ namespace bamg {
   extern int hinterpole;
 
   typedef P2< Icoor1, Icoor2 > I2;
-
+int myrand(void);
   inline int BinaryRand( ) {
+      return myrand() < (1<<30) ;
+      /*
 #ifdef RAND_MAX
     const long HalfRandMax = RAND_MAX / 2;
     return rand( ) < HalfRandMax;
 #else
     return rand( ) & 16384;    // 2^14 (for sun because RAND_MAX is not def in stdlib.h)
 #endif
+       */
   }
 
   typedef P2< Real8, Real8 > R2;
@@ -914,11 +917,11 @@ namespace bamg {
     void WriteElements(ostream &f, Int4 *reft, Int4 nbInT) const;
 
     Int4 Number(const Triangle &t) const { return &t - triangles; }
-    Int4 Number(const Triangle *t) const { return t - triangles; }
+    Int4 Number(const Triangle *t) const { return t ?t - triangles:-1; }
     Int4 Number(const Vertex &t) const { return &t - vertices; }
-    Int4 Number(const Vertex *t) const { return t - vertices; }
+    Int4 Number(const Vertex *t) const { return t ? t - vertices:-1; }
     Int4 Number(const Edge &t) const { return &t - edges; }
-    Int4 Number(const Edge *t) const { return t - edges; }
+    Int4 Number(const Edge *t) const { return t ? t - edges:-1; }
     Int4 Number2(const Triangle *t) const {
       //   if(t>= triangles && t < triangles + nbt )
       return t - triangles;
