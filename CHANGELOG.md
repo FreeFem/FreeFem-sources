@@ -58,6 +58,7 @@ All notable changes to this project will be documented in this file.
 - `MPIF77` variable
 
 ### Fixed
+- fixed problem of change of mesh when rebuild 2d mesh with builmesh, .... (Thank to P. Jovilet to points this problem)
 - missing METIS library when using SuiteSparse compiled by PETSc
 - missing `-fno-stack-protector` when building PETSc on Windows, see https://community.freefem.org/t/error-loading-complex-petsc-slepc-library/370
 - fixed ffglut for the plotting of FE array solution
