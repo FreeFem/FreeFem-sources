@@ -26,6 +26,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- add `Ns` normal vector  in R^3 on meshS (normal of the surface) of current point (to day Ns of [x,y,0] plan  is [0,0,-1])  no be compatibe to exterior normal. 
+- add `Tl` tangent vector in R^3 on meshL (tangent vector of the line/curve) of current point 
 - compile ffmaster / ffslave example under windows (thanks to johann@ifado.de)
 - Boolean parameter `spiltpbedge` in `buildmesh` to split in to edge with two boundary vertices
 - interface to PETSc DMPlex, see `examples/hpddm/DMPlex-PETSc.edp`
@@ -52,7 +54,7 @@ All notable changes to this project will be documented in this file.
 
 ### Deprecated
 - rename `changeNumbering`, `globalNumbering`, `originalNumbering`, `changeOperator`, `destroyRecycling`, and `attachCoarseOperator` to respectively `ChangeNumbering`, `GlobalNumbering`, `OriginalNumbering`, `ChangeOperator`, `DestroyRecycling`, and `AttachCoarseOperator`
-
+- `Nt` the normal vector of the current (wrong on meshL) use `Ns` pr `Tl` 
 ### Removed
 - `augmentation` routine from the PETSc plugin
 - `MPIF77` variable
@@ -64,6 +66,7 @@ All notable changes to this project will be documented in this file.
 - fixed ffglut for the plotting of FE array solution
 - fixed  ffglut bug on MacOS Catalina , draw inn only half windows screen (Apple Bug ???)
 - correct P0VF  finite element 
+- `abs` function of array
 
 ## [4.6]
 

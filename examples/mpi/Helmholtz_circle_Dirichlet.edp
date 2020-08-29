@@ -59,9 +59,9 @@ bFirstKind[] = vmassFirstKind(0,Uh);
 uFirstKind[] = HFirstKind^-1*bFirstKind[];
 plot(uFirstKind,dim=2,nbiso=20,value=1,cmm="First kind");
 
-// Solve formulation of second kind
+// Solve formulation of second kind 
 Uh<complex> uSecondKind, bSecondKind;
-varf vmassSecondKind(u,v) = -int1d(Th)((dxfinc*Nt.x+dyfinc*Nt.y)*v);
+varf vmassSecondKind(u,v) = -int1d(Th)((dxfinc*Tl.y-dyfinc*Tl.x)*v);// change New Df 
 bSecondKind[] = vmassSecondKind(0,Uh);
 uSecondKind[] = HSecondKind^-1*bSecondKind[];
 plot(uSecondKind,dim=2,nbiso=20,value=1,cmm="Second kind");

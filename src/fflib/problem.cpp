@@ -2524,7 +2524,7 @@ namespace Fem2D {
 
 
                 Ku.BF(Dop,Ptu,fu);
-                R3 NNt=T.NormalTUnitaire();
+                R3 NNt=T.TangenteUnitaire();
                 MeshPointStack(stack)->set(Th,P,Pt,T,NNt,label);
                 if (classoptm) (*Op.optiexpK)(stack); // call optim version
                 if (!same) Kv.BF(Dop,Ptv,fv);
