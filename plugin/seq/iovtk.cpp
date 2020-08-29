@@ -3357,7 +3357,8 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
                 cout << "error in reading vtk files FIELD FieldData" << endl;
                 err++;
             }}
-        
+        if(startdatapoint==0)
+        {
         if( strcmp(buffer3, "int") !=0)// not integer
             err++;
         if ((!err) &&(fscanf(fp, "%s %s\n", buffer, buffer2) != 2))
@@ -3375,6 +3376,7 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
                 if(err) break;
             }
         if(err) cout << " err reading CELL_DATA  at " << nf << endl;
+        
         if ((!err) &&(fscanf(fp, "%s %s %d\n", buffer, buffer2,&nbf) != 3 ) ) err++;
         nf =-1;
         if(err==0)
@@ -3391,7 +3393,8 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
         if(err&& nf>=0) cout << " err LOOKUP_TABLE FreeFempp_table at " << nf << " " << err << endl;
         
         startdatapoint=0;
-    }
+        }
+        }
            
            
 
@@ -3410,9 +3413,11 @@ Mesh3 *VTK_Load3(const string &filename, bool bigEndian, bool cleanmesh, bool re
         cout << "error in reading vtk files pfields" << endl;
         err++;
       }
+        else cout << " buff: "<< buffer << nbp << endl;
         
       if (strcmp(buffer, "POINT_DATA")==0) {
-        if (fscanf(fp, "%d", &nbp) != 1) err++;
+        if(startdatapoint==0)
+         if (fscanf(fp, "%d", &nbp) != 1) err++;
         if (fscanf(fp, "%s", buffer) != 1) err++;
       }
       if(err == 0 && strcmp(buffer, "FIELD")!=0) {
