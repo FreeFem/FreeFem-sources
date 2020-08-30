@@ -1,7 +1,7 @@
 load "gmsh"
 load "iovtk"
 load "medit"
-verbosity = 1;
+//verbosity = 1;
 
 // example gmsh
 
@@ -45,7 +45,7 @@ catch (...) {
 fespace Vh3(Th3,P1);     // P1 FE space
 func gg2=x+y;
 int[int] fforder2=[1,1,1,1];
-verbosity=2;
+if(verbosity) verbosity=2;
 savevtk("bidule.vtu",Th3,gg2,[gg2,gg2,gg2],gg2,[gg2,gg2,gg2],order=fforder2,dataname="kkdjd jyqql bidule45",bin=1); // The fourth solution Have no name. This name is vector4 (4 ==> fourth solution and vector ==> vector solution).
 savevtk("bidule.vtk",Th3,gg2,[gg2,gg2,gg2],gg2,[gg2,gg2,gg2],order=fforder2,dataname="kkdjd jyqql bidule45",bin=1);
 if(0) { // restore mesh and data, does not work on Windows
