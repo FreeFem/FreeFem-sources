@@ -37,7 +37,7 @@ varf aS(u,v) = int2d(Th)(Grad3(u)'*Grad3(v)- sigma* u*v);
 varf mS(u,v) = int2d(Th)( u*v);
 Vh Nx,Ny,Nz;
 Vh Mx,My,Mz;
-solve Pn([Nx,Ny,Nz],[Mx,My,Mz]) = int2d(Th)( [Nx,Ny,Nz]'*[Mx,My,Mz])- int2d(Th)([Nt.x,Nt.y,Nt.z]'*[Mx,My,Mz]); 
+solve Pn([Nx,Ny,Nz],[Mx,My,Mz]) = int2d(Th)( [Nx,Ny,Nz]'*[Mx,My,Mz])- int2d(Th)([Ns.x,Ns.y,Ns.z]'*[Mx,My,Mz]); 
 
 matrix A =aS(Vh,Vh);
 matrix B =mS(Vh,Vh,solver=CG);
