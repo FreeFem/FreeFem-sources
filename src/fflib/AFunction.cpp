@@ -1023,7 +1023,8 @@ bool ffsignbit(long x){return signbit(x);}
 bool ffsignbit(double x){return signbit(x);}
 template<typename T>
 bool  pswap(T *a,T *b) {swap(*a,*b);return 0; }
-
+long lrintc(Complex x) { return lrint(real(x));}
+long lroundc(Complex x) { return lround(real(x));}
 void Init_map_type()
 {
    TheOperators=new Polymorphic(),
@@ -1519,6 +1520,8 @@ void Init_map_type()
      Global.Add("ceil","(",new OneOperator1<double>(ceil));  // add march 2006
     Global.Add("rint","(",new OneOperator1<double>(rint));  // add june 2006
      Global.Add("lrint","(",new OneOperator1<long,double>(lrint));  // add mars  2014
+    Global.Add("lrint","(",new OneOperator1<long,Complex>(lrintc));  // add aout   2020
+    Global.Add("lround","(",new OneOperator1<long,Complex>(lroundc));  // add aout   2020
 
      Global.Add("sin","(",new OneOperator1<double>(sin,2));
      Global.Add("tan","(",new OneOperator1<double>(tan,2));

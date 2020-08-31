@@ -43,7 +43,7 @@ int[int] perm;
     complex[int] permc;
     ChangeNumbering(H, glob2loc[], permc);
     perm.resize(permc.n);
-    for[i, p : permc] perm[i] = real(p);
+    for[i, p : permc] perm[i] = lrint(p);
 }
 
 func complex[int] op(complex[int]& in) {

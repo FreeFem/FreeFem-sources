@@ -120,7 +120,7 @@ HMatrix<complex> TDL, SL;
         complex[int] permc(glob2loc.n);
         ChangeNumbering(ASurf, glob2loc[], permc);
         perm.resize(permc.n);
-        for[i, p : permc] perm[i] = real(p);
+        for[i, p : permc] perm[i] = lrint(p);
     }
     BemKernel kerTDL("TDL",1,k);
 
