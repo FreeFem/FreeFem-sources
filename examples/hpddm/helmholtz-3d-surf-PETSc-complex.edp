@@ -72,10 +72,7 @@ int[int] perm;
     UhG<complex> numbering;
     numbering[] = 0:UhG.ndof - 1;
     Uh<complex> glob2loc = numbering;
-    complex[int] permc;
-    ChangeNumbering(H, glob2loc[], permc);
-    perm.resize(permc.n);
-    for[i, p : permc] perm[i] = lrint(p);//  modif F.H aout 2020 (Pb round off)
+    ChangeNumbering(H, glob2loc[], perm);
 }
 
 func complex[int] op(complex[int]& in) {
