@@ -45,6 +45,9 @@ typedef const BemPotential *pBemPotential;
 
 typedef  const BemKernel fkernel;
 typedef  const BemPotential fpotential;
+  
+double ff_htoolEta=10., ff_htoolEpsilon=1e-3;
+long ff_htoolMinclustersize=10, ff_htoolMaxblocksize=1000000, ff_htoolMintargetdepth=htool::Parametres::mintargetdepth, ff_htoolMinsourcedepth=htool::Parametres::minsourcedepth;
 
 template< class K >
 AnyType AddIncrement(Stack stack, const AnyType &a) {
@@ -603,13 +606,13 @@ AnyType SetCompressMat(Stack stack,Expression emat,Expression einter,int init)
   HMatrixVirt<K>** Hmat =GetAny<HMatrixVirt<K>** >((*emat)(stack));
   const typename CompressMat<K>::Op * mi(dynamic_cast<const typename CompressMat<K>::Op *>(einter));
 
-  double epsilon=mi->arg(0,stack,1e-3);
+  double epsilon=mi->arg(0,stack,ff_htoolEpsilon);
   pcommworld pcomm=mi->argc(1,stack,nullptr);
-  double eta=mi->arg(2,stack,10.);
-  int minclustersize=mi->argl(3,stack,10);
-  int maxblocksize=mi->argl(4,stack,1000000);
-  int mintargetdepth=mi->argl(5,stack,htool::Parametres::mintargetdepth);
-  int minsourcedepth=mi->argl(6,stack,htool::Parametres::minsourcedepth);
+  double eta=mi->arg(2,stack,ff_htoolEta);
+  int minclustersize=mi->argl(3,stack,ff_htoolMinclustersize);
+  int maxblocksize=mi->argl(4,stack,ff_htoolMaxblocksize);
+  int mintargetdepth=mi->argl(5,stack,ff_htoolMintargetdepth);
+  int minsourcedepth=mi->argl(6,stack,ff_htoolMinsourcedepth);
   string* pcompressor=mi->args(7,stack,0);
 
   SetMaxBlockSize(maxblocksize);
@@ -1394,14 +1397,14 @@ struct Data_Bem_Solver
        
        Data_Bem_Solver()
        : Data_Sparse_Solver(),
-       eta(10.),
-       minclustersize(10),
-       maxblocksize(1000000),
-       mintargetdepth(htool::Parametres::mintargetdepth),
-       minsourcedepth(htool::Parametres::minsourcedepth),
+       eta(ff_htoolEta),
+       minclustersize(ff_htoolMinclustersize),
+       maxblocksize(ff_htoolMaxblocksize),
+       mintargetdepth(ff_htoolMintargetdepth),
+       minsourcedepth(ff_htoolMinsourcedepth),
        compressor("partialACA")
     
-      {epsilon=1e-3;}
+    {epsilon=ff_htoolEpsilon;}
      
     template<class R>
        void Init_sym_positive_var();
@@ -2178,6 +2181,13 @@ static void Init_Bem() {
     Global.Add("int1dx1d","(",new OneOperatorCode<CPartBemDI1d1d>);
     Global.Add("int1dx2d","(",new OneOperatorCode<CPartBemDI1d2d>);
     Global.Add("int2dx1d","(",new OneOperatorCode<CPartBemDI2d1d>);
+
+    Global.New("htoolEta",CPValue<double>(ff_htoolEta));
+    Global.New("htoolEpsilon",CPValue<double>(ff_htoolEpsilon));
+    Global.New("htoolMinclustersize",CPValue<long>(ff_htoolMinclustersize));
+    Global.New("htoolMaxblocksize",CPValue<long>(ff_htoolMaxblocksize));
+    Global.New("htoolMintargetdepth",CPValue<long>(ff_htoolMintargetdepth));
+    Global.New("htoolMinsourcedepth",CPValue<long>(ff_htoolMinsourcedepth));
     
 }
 
