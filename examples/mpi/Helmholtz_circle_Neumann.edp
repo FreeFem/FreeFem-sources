@@ -56,7 +56,7 @@ display(HCombined);
 
 // Solve formulation of first kind
 Uh<complex> uFirstKind, bFirstKind;
-varf vmassFirstKind(u,v) = -int1d(Th)((dxfinc*Nt.x+dyfinc*Nt.y)*v);
+varf vmassFirstKind(u,v) = -int1d(Th)((dxfinc*Tl.y-dyfinc*Tl.x)*v);// change New Nt -> Tl (the tangent to Curve Nt^ortho == Tl )
 bFirstKind[] = vmassFirstKind(0,Uh);
 uFirstKind[] = HFirstKind^-1*bFirstKind[];
 plot(uFirstKind,dim=2,nbiso=20,value=1,cmm="First kind");

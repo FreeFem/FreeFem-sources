@@ -269,7 +269,7 @@ class E_P_Stack_N : public E_F0mps {
 class E_P_Stack_Nt : public E_F0mps {
  public:
     AnyType operator( )(Stack s) const {
-        throwassert(*((long *)s));
+        ExecError("Remove name Nt, now use Ns on surface and Tl on Curve");
         return SetAny< R3 * >(&MeshPointStack(s)->Nt);
     }
         

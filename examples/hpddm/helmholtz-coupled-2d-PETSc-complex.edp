@@ -117,10 +117,7 @@ HMatrix<complex> TDL, SL;
         UhG<complex> numbering;
         numbering[] = 0:UhG.ndof - 1;
         VhS<complex> glob2loc = numbering;
-        complex[int] permc(glob2loc.n);
-        ChangeNumbering(ASurf, glob2loc[], permc);
-        perm.resize(permc.n);
-        for[i, p : permc] perm[i] = real(p);
+        ChangeNumbering(ASurf, glob2loc[], perm);
     }
     BemKernel kerTDL("TDL",1,k);
 
