@@ -60,6 +60,7 @@ All notable changes to this project will be documented in this file.
 - `MPIF77` variable
 
 ### Fixed
+- lot of mistake in MeshL element add a example o ckeck lot of thing `tutomesh1d.edp`
 - fixed problem of change of mesh when rebuild 2d mesh with builmesh, .... (Thank to P. Jovilet to points this problem)
 - missing METIS library when using SuiteSparse compiled by PETSc
 - missing `-fno-stack-protector` when building PETSc on Windows, see https://community.freefem.org/t/error-loading-complex-petsc-slepc-library/370

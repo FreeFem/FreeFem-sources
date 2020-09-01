@@ -1,0 +1,37 @@
+load "msh3" // bizarre
+int nn= 4; 
+int[int] ll=[10,11]; 
+meshL Th= Sline(nn,[x*nn,0,0]); //  pas code ????,label=ll);// 
+//  print information of Th
+// bug label corrige ??
+cout << " Element : "<<endl;
+for(int k=0; k< Th.nt; ++k)
+{
+	cout << Th[k][0] << " "<< Th[k][1]  << ":  " 
+	     << Th[k][0].x << " " << Th[k][0].label << " , " 
+	     << Th[k][1].x << " " << Th[k][1].label <<  endl;
+	
+}
+for(int i=0; i< Th.nv; ++i)
+{
+	cout << Th(i).x << " " << Th(i).y  << " " << Th(i).y  << " " << Th(i).label << endl; 
+}
+for(int i=0; i< Th.nbe; ++i)
+{
+	cout << " be " << i << " " << Th.be(i) << " " <<  Th.be(i).label  <<endl;
+}
+
+//  verif integration ..
+func real track() { cout << " Track " << x << " N " << N << " Tl= " << Tl << endl; return 1.;}
+fespace Vh(Th,P1);
+varf va(u,v) = int1d(Th)(track()*dx(u)*dx(v)) + int0d(Th)(track()*u*v) - int0d(Th)(track()*v);
+matrix A = va(Vh,Vh);
+verbosity= 10; 
+real[int] b= va(0,Vh);
+
+cout << " A = " << A << endl;
+cout << " b = " << b << endl;
+
+assert(abs(b.sum+2)< 1e-7);
+assert(abs(A(0,0)-2)<1e-7);
+assert(abs(A(nn,nn)-2)<1e-7);

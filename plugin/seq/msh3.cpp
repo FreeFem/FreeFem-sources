@@ -8960,7 +8960,7 @@ class RebuildBorder : public OneOperator {
        
 class Line_Op : public E_F0mps {
  public:
-  static const int n_name_param = 4;    //
+  static const int n_name_param = 6;    //
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param], enx, xx, yy, zz;
   long arg(int i, Stack stack, long a) const {
@@ -8972,6 +8972,9 @@ class Line_Op : public E_F0mps {
   bool arg(int i, Stack stack, bool a) const {
     return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
   }
+  KN<long>  arg(int i, Stack stack,KN_<long> a) const {
+      return nargs[i] ? GetAny< KN_<long>  >((*nargs[i])(stack)) : a;
+      }
       
  public:
   Line_Op(const basicAC_F0 &args, Expression nx, Expression transfo = 0)
@@ -8998,7 +9001,11 @@ basicAC_F0::name_and_type Line_Op::name_param[] = {
   {"orientation", &typeid(long)},
   {"cleanmesh", &typeid(bool)},
   {"removeduplicate", &typeid(bool)},
-  {"precismesh", &typeid(double)}
+  {"precismesh", &typeid(double)},
+  {"label", &typeid(KN_<long>)},
+  {"region", &typeid(long)}
+
+
   // {"rebuildboundary", &typeid(double)}
 };
 
@@ -9035,6 +9042,13 @@ AnyType Line_Op::operator( )(Stack stack) const {
   if(nt==1) cleanmesh=false;
   long removeduplicate(arg(2, stack, false));
   double precis_mesh(arg(3, stack, 1e-7));
+  KN<long> lab(2);
+  lab[0]=1; lab[1]=2;
+  long reg = arg(5,stack,0L);
+  lab=arg(4,stack,lab);
+
+  //    cout << " lab =" << lab << endl;
+  ffassert(lab.N()==2) ;// erif 2 lab ..
   bool rebuildboundary=false; //(arg(4, stack, false));
       
   V *v = new V[nv];
@@ -9047,6 +9061,9 @@ AnyType Line_Op::operator( )(Stack stack) const {
     vv[i].y = P.y;
     vv[i].z = P.z;
     vv[i].lab = 0;
+    
+    
+      
 
     mpp->set(vv[i].x, vv[i].y, vv[i].z);
     if (xx)
@@ -9062,6 +9079,8 @@ AnyType Line_Op::operator( )(Stack stack) const {
     else
       vv[i].z = mpp->P.z;
   }
+      vv[0].lab = lab[0];
+      vv[nv-1].lab = lab[1];
 
   T *tt = t;
   for (int i = 0; i < nt; ++i) {
@@ -9073,7 +9092,7 @@ AnyType Line_Op::operator( )(Stack stack) const {
   B *bb = b;
   int ibeg[1], iend[1];
   ibeg[0] = 0, iend[0] = nv - 1;
-  int lab1 = 1, lab2 = 2;
+  int lab1 = lab[0], lab2 = lab[1];
   (bb++)->set(v, ibeg, lab1);
   (bb++)->set(v, iend, lab2);
 
