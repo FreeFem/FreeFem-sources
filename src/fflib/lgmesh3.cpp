@@ -1813,6 +1813,7 @@ AnyType E_set_fev3<K,v_fes>::operator()(Stack s)  const
 		   else Vp(p,j)=0;
 	       
 	     }
+             if(verbosity>10000) cout << " E_set_fev3: " << ipmat << endl;
 	   Kt.Pi_h(Vp,Vdf,ipmat);  
 	   //  cout << "Vp --- "<< Vp  << "  Vdf;; " << Vdf[0] << endl;
 	   for (int df=0;df<nbdf;df++)         

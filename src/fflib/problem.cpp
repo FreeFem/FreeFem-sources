@@ -6450,7 +6450,12 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
         // assert(lastop<=3);
 
         RNMK_ fu(p,n,N,lastop); //  the value for basic fonction
-
+        // surface normal
+         R3 NNt=T.NormalTUnitaire();
+         // exterior normal (flux)
+         R3 NN=T.N(ie);
+         NN /= NN.norme();
+        //cout << " NN= " << NN << endl; 
         for (npi=0;npi<FI.n;npi++) // loop on the integration point
         {
             QuadratureFormular1dPoint pi( FI[npi]);
@@ -6462,12 +6467,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
             PB(TriangleHat[VerticesOfTriangularEdge[ie][1]]);
             R2 Pt(PA*sa+PB*sb );
             Kv.BF(Dop,Pt,fu);
-            // surface normal
-            R3 NNt=T.NormalTUnitaire();
-            // exterior normal (flux)
-            R3 NN=T.N(ie);
-            NN /= NN.norme();
-            MeshPointStack(stack)->set(T(Pt),Pt,Kv,label,NN,NNt,ie);
+             MeshPointStack(stack)->set(T(Pt),Pt,Kv,label,NN,NNt,ie);
             if (classoptm) (*Op.optiexpK)(stack); // call optim version
 
             for ( i=0;  i<n;   i++ )
