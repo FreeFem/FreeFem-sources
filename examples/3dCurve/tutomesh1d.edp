@@ -1,7 +1,7 @@
 load "msh3" // bizarre
 int nn= 4; 
 int[int] ll=[10,11]; 
-meshL Th= Sline(nn,[x*nn,0,0]); //  pas code ????,label=ll);// 
+meshL Th= Sline(nn,[x*nn,0,0],label=ll); // 
 //  print information of Th
 // bug label corrige ??
 cout << " Element : "<<endl;
@@ -24,7 +24,7 @@ for(int i=0; i< Th.nbe; ++i)
 //  verif integration ..
 func real track() { cout << " Track " << x << " N " << N << " Tl= " << Tl << endl; return 1.;}
 fespace Vh(Th,P1);
-varf va(u,v) = int1d(Th)(track()*dx(u)*dx(v)) + int0d(Th)(track()*u*v) - int0d(Th)(track()*v);
+varf va(u,v) = int1d(Th)(track()*dx(u)*dx(v)) + int0d(Th,10)(track()*u*v) - int0d(Th,10)(track()*v);
 matrix A = va(Vh,Vh);
 verbosity= 10; 
 real[int] b= va(0,Vh);
@@ -32,6 +32,6 @@ real[int] b= va(0,Vh);
 cout << " A = " << A << endl;
 cout << " b = " << b << endl;
 
-assert(abs(b.sum+2)< 1e-7);
+assert(abs(b.sum+1)< 1e-7);
 assert(abs(A(0,0)-2)<1e-7);
-assert(abs(A(nn,nn)-2)<1e-7);
+assert(abs(A(nn,nn)-1)<1e-7);

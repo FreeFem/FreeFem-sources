@@ -60,7 +60,7 @@ const R pi=M_PI;//4*atan(1.);
 using namespace std;
 
 static int   nbSendForNextPlot=0,nbTimerNextPlot=0;
-int debug=1;
+int debug=0;
 int casemouse=0,keyact=0;
 double gwait=0;//  no wait in second
 #include "ffglut.hpp"
@@ -4196,7 +4196,7 @@ int main(int argc,  char** argv)
             cout << " error ming args " << i1 -  argc  << endl;
         }
     }
-    if(debug)
+    if(debug>1)
     {
         cout << " glutscreenscale " << glutscreenscale << " " << Width << " " << Height <<  " " << W << " " << H << endl;
     }
@@ -4252,7 +4252,7 @@ int main(int argc,  char** argv)
     kccc = (double) ( pView[2]- pView[0])/ (double) (Width+1) ;
     if (kccc < 0.1) kccc= 1;
     if(kccc > 10.) kccc=1;
-    if( debug )
+    if( debug>1 )
     cout << "pView " << pView[0]<< " "<< pView[1]<< " "<< pView[2]<< " "<< pView[3]<< " kccc=  " << kccc << endl;
     
     Num2Windows[0]=iw0;
