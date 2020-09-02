@@ -1,7 +1,7 @@
-diff --git a/petsc-3.13.4/src/ksp/ksp/impls/hpddm/hpddm.cxx b/petsc-3.13.4/src/ksp/ksp/impls/hpddm/hpddm.cxx
+diff --git a/petsc-3.13.5/src/ksp/ksp/impls/hpddm/hpddm.cxx b/petsc-3.13.5/src/ksp/ksp/impls/hpddm/hpddm.cxx
 index ba91ba30f8..a6a1403689 100644
---- a/petsc-3.13.4/src/ksp/ksp/impls/hpddm/hpddm.cxx
-+++ b/petsc-3.13.4/src/ksp/ksp/impls/hpddm/hpddm.cxx
+--- a/petsc-3.13.5/src/ksp/ksp/impls/hpddm/hpddm.cxx
++++ b/petsc-3.13.5/src/ksp/ksp/impls/hpddm/hpddm.cxx
 @@ -325,7 +325,7 @@ static PetscErrorCode KSPHPDDMGetDeflationSpace_HPDDM(KSP ksp, Mat *U)
      op = data->op;
    }
@@ -11,10 +11,10 @@ index ba91ba30f8..a6a1403689 100644
    if (!array) *U = NULL;
    else {
      ierr = KSPGetOperators(ksp, &A, NULL);CHKERRQ(ierr);
-diff --git a/petsc-3.13.4/config/BuildSystem/config/package.py b/petsc-3.13.4/config/BuildSystem/config/package.py
+diff --git a/petsc-3.13.5/config/BuildSystem/config/package.py b/petsc-3.13.5/config/BuildSystem/config/package.py
 index 802626e4ded02dd1f46d0077ef5a331d8df8ca9e..bd8c3800ea8b3c188dfde49bfdbb0798c2d90f06 100644
---- a/petsc-3.13.4/config/BuildSystem/config/package.py
-+++ b/petsc-3.13.4/config/BuildSystem/config/package.py
+--- a/petsc-3.13.5/config/BuildSystem/config/package.py
++++ b/petsc-3.13.5/config/BuildSystem/config/package.py
 @@ -1085,6 +1085,8 @@ If its a remote branch, use: origin/'+self.gitcommit+' for commit.')
    def configure(self):
      if hasattr(self, 'download_solaris') and config.setCompilers.Configure.isSolaris(self.log):
@@ -24,10 +24,10 @@ index 802626e4ded02dd1f46d0077ef5a331d8df8ca9e..bd8c3800ea8b3c188dfde49bfdbb0798
      if self.download and self.argDB['download-'+self.downloadname.lower()] and (not self.framework.batchBodies or self.installwithbatch):
        self.argDB['with-'+self.package] = 1
        downloadPackageVal = self.argDB['download-'+self.downloadname.lower()]
-diff --git a/petsc-3.13.4/config/BuildSystem/config/packages/MUMPS.py b/petsc-3.13.4/config/BuildSystem/config/packages/MUMPS.py
+diff --git a/petsc-3.13.5/config/BuildSystem/config/packages/MUMPS.py b/petsc-3.13.5/config/BuildSystem/config/packages/MUMPS.py
 index 15e6d8d1db27caf23b7d22a1d536011ddcc7b8de..f106cd3b93628534e0f8d5f14e4825775497d086 100644
---- a/petsc-3.13.4/config/BuildSystem/config/packages/MUMPS.py
-+++ b/petsc-3.13.4/config/BuildSystem/config/packages/MUMPS.py
+--- a/petsc-3.13.5/config/BuildSystem/config/packages/MUMPS.py
++++ b/petsc-3.13.5/config/BuildSystem/config/packages/MUMPS.py
 @@ -3,11 +3,12 @@ import config.package
  class Configure(config.package.Package):
    def __init__(self, framework):
@@ -54,10 +54,10 @@ index 15e6d8d1db27caf23b7d22a1d536011ddcc7b8de..f106cd3b93628534e0f8d5f14e482577
      g.write('OUTF = -o \n')
      self.setCompilers.popLanguage()
  
-diff --git a/petsc-3.13.4/config/BuildSystem/config/packages/hypre.py b/petsc-3.13.4/config/BuildSystem/config/packages/hypre.py
+diff --git a/petsc-3.13.5/config/BuildSystem/config/packages/hypre.py b/petsc-3.13.5/config/BuildSystem/config/packages/hypre.py
 index 4d915c312f633bf7c15bac1b2b6d6380c53c963d..c3fb82d7fbaca713382b45ba1efc2a0fffdab16b 100644
---- a/petsc-3.13.4/config/BuildSystem/config/packages/hypre.py
-+++ b/petsc-3.13.4/config/BuildSystem/config/packages/hypre.py
+--- a/petsc-3.13.5/config/BuildSystem/config/packages/hypre.py
++++ b/petsc-3.13.5/config/BuildSystem/config/packages/hypre.py
 @@ -4,13 +4,12 @@ import os
  class Configure(config.package.GNUPackage):
    def __init__(self, framework):
@@ -83,10 +83,10 @@ index 4d915c312f633bf7c15bac1b2b6d6380c53c963d..c3fb82d7fbaca713382b45ba1efc2a0f
  
    def formGNUConfigureArgs(self):
      self.packageDir = os.path.join(self.packageDir,'src')
-diff --git a/petsc-3.13.4/src/mat/impls/hypre/mhypre.c b/petsc-3.13.4/src/mat/impls/hypre/mhypre.c
+diff --git a/petsc-3.13.5/src/mat/impls/hypre/mhypre.c b/petsc-3.13.5/src/mat/impls/hypre/mhypre.c
 index 6da65e43ccf24aec346e7b46cce174bfcb3c2a59..7c7eed0306ae84cdbbdc4cb0b88e583252809df0 100644
---- a/petsc-3.13.4/src/mat/impls/hypre/mhypre.c
-+++ b/petsc-3.13.4/src/mat/impls/hypre/mhypre.c
+--- a/petsc-3.13.5/src/mat/impls/hypre/mhypre.c
++++ b/petsc-3.13.5/src/mat/impls/hypre/mhypre.c
 @@ -58,10 +58,7 @@ static PetscErrorCode MatHYPRE_IJMatrixPreallocate(Mat A_d, Mat A_o, HYPRE_IJMat
    }
    if (done_d) {    /* set number of nonzeros in HYPRE IJ matrix */
