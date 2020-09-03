@@ -24,7 +24,19 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+
+### Fixed
+
+
+## [4.7] - 2020-09-03
 ### Added
 - add `Ns` normal vector  in R^3 on meshS (normal of the surface) of current point (to day Ns of [x,y,0] plan  is [0,0,-1])  no be compatibe to exterior normal. 
 - add `Tl` tangent vector in R^3 on meshL (tangent vector of the line/curve) of current point 
