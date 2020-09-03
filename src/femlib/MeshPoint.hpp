@@ -652,7 +652,7 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
        v=f=-1;
        e=ipoint;
        t=(*ThL)(TL);
-       throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
+       throwassert( ipoint <0 ||  Abs( (NN,NN) -1.0) < 1e-5 );
        N=NN;
        throwassert( Abs( (NNt,NNt) -1.0) < 1e-5 );
        Nt=NNt;
@@ -691,7 +691,7 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         v=f=-1;
         t=(*Th)(T);
         e=ipoint;
-        throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
+        throwassert( ipoint <0 || Abs( (NN,NN) -1.0) < 1e-5 );
         N=NN;
         throwassert( Abs( (NNt,NNt) -1.0) < 1e-5 );
         Nt=NNt;
