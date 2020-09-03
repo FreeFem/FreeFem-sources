@@ -1531,7 +1531,7 @@ AC_SUBST(BLASINC,$ff_blas_inc)
 
 #looking for cblas.h  FH
 
-if test "$ff_blas_ok" = yes -a -z "$ff_download_blas"; then
+if test "$ff_blas_ok" = yes -a -z "$ff_download_blas" -a "$ff_mkl_ok" != yes; then
   AC_CHECK_HEADERS(cblas.h,
     ff_cblas_h=yes,
     ff_cblas_h=no)
