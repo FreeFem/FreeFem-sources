@@ -36,7 +36,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 
-## [4.7] - 2020-09-03
+## [4.7]
 ### Added
 - add `Ns` normal vector  in R^3 on meshS (normal of the surface) of current point (to day Ns of [x,y,0] plan  is [0,0,-1])  no be compatibe to exterior normal. 
 - add `Tl` tangent vector in R^3 on meshL (tangent vector of the line/curve) of current point 
@@ -337,7 +337,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.6..develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7..develop
+[4.7]: https://github.com/FreeFem/FreeFem-sources/compare/v4.6...v4.7
 [4.6]: https://github.com/FreeFem/FreeFem-sources/compare/v4.5...v4.6
 [4.5]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-3...v4.5
 [4.4-3]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-2...v4.4-3
