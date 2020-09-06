@@ -1,7 +1,7 @@
-diff --git a/petsc-3.13.5/config/BuildSystem/config/packages/metis.py b/petsc-3.13.5/config/BuildSystem/config/packages/metis.py
+diff --git a/config/BuildSystem/config/packages/metis.py b/config/BuildSystem/config/packages/metis.py
 index 136526da05..2d1c4d3271 100644
---- a/petsc-3.13.5/config/BuildSystem/config/packages/metis.py
-+++ b/petsc-3.13.5/config/BuildSystem/config/packages/metis.py
+--- a/config/BuildSystem/config/packages/metis.py
++++ b/config/BuildSystem/config/packages/metis.py
 @@ -44,6 +44,12 @@ class Configure(config.package.CMakePackage):
      if self.framework.argDB['download-metis-use-doubleprecision']:
        args.append('-DMETIS_USE_DOUBLEPRECISION=1')

@@ -28,7 +28,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - change the language definition to use tyep as a construction function with named arguments for bem plugin
-  
+- PETSc version 3.14.0
+- ARPACK compiled by SLEPc
 
 ### Deprecated
 

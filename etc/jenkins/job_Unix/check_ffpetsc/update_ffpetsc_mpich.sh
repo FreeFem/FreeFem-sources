@@ -24,7 +24,7 @@ test -f "$change_compiler" && source "$change_compiler"
 # configuration & build
 autoreconf -i \
   && ./configure --enable-download --prefix=$PETSC_INSTALLDIR \
-  && ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,ARPACK,Gmm++,MMG3D,mshmet,MUMPS,htool \
+  && ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS,htool \
   && ./etc/jenkins/blob/build_PETSc.sh
   
 if [ $? -eq 0 ]
