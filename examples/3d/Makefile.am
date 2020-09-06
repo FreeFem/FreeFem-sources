@@ -25,8 +25,6 @@ TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw LIST_CONDITIONAL="$(LI
 
 all-local: all.edp regtests.edp freefem++.pref
 
-
-
 TESTS_OTHER = 3d-Leman.edp \
 	ArrayFE-3d.edp \
 	beam-3d.edp \
@@ -52,31 +50,27 @@ TESTS_OTHER = 3d-Leman.edp \
 	sphere6.edp \
 	Stokes.edp \
 	TruncLac.edp \
-	crack-3d.edp 
+	crack-3d.edp
 
 TESTS_METIS = schwarz-nm-3d.edp
 
 TESTS_TETGEN = cylinder.edp \
-	Period-Poisson-cube-ballon.edp \
 	Poisson3d.edp \
 	Poisson-cube-ballon.edp \
 	refinesphere.edp \
-	sphereincube.edp \
 	tetgencube.edp \
 	tetgenholeregion.edp
 
-TESTS_TETGEN_MMG = Sphere-Isocahedron.edp  
+TESTS_TETGEN_MMG = Sphere-Isocahedron.edp Period-Poisson-cube-ballon.edp \
+	sphereincube.edp
 
-TESTS_TETGEN_MMG_MSHMET = Laplace-Adapt-aniso-3d.edp 
+TESTS_TETGEN_MMG_MSHMET = Laplace-Adapt-aniso-3d.edp
 
 TESTS_TETGEN_GSL = bottle.edp
 
 TESTS_TETGEN_MMG3D = fallingspheres.edp
 
-TESTS_TETGEN_MSHMET = Laplace-Adapt-3d.edp 
-
-
-
+TESTS_TETGEN_MSHMET = Laplace-Adapt-3d.edp
 
 if METIS
 CONDITIONAL_METIS = $(TESTS_METIS)
@@ -87,7 +81,7 @@ CONDITIONAL_TETGEN = $(TESTS_TETGEN)
 if MMG
 CONDITIONAL_TETGEN_MMG = $(TESTS_TETGEN_MMG)
 if MSHMET
-CONDITIONAL_TETGEN_MMG_MSHMET = $(TESTS_TETGEN_MMG_MSHMET) 
+CONDITIONAL_TETGEN_MMG_MSHMET = $(TESTS_TETGEN_MMG_MSHMET)
 endif MSHMET
 endif MMG
 
@@ -102,8 +96,6 @@ CONDITIONAL_TETGEN_MSHMET = $(TESTS_TETGEN_MSHMET)
 endif MSHMET
 
 endif TETGEN
-
-
 
 TESTS = $(TESTS_OTHER) \
 	$(TESTS_METIS) \
