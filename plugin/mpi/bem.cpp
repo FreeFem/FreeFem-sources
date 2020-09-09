@@ -987,15 +987,6 @@ struct Op_setBemKernel: public binary_function<AA,BB,RR> {
     }
 };
 
-template<class RR,class AA=RR,class BB=AA>
-struct Op_coeffBemKernel: public binary_function<AA,BB,RR> {
-    static RR f(Stack s,const AA & a,const BB & b) {
-        if (mpirank==0 && verbosity>10) cout << "test " <<typeid(RR).name() << " " << typeid(AA).name() << " " << typeid(BB).name() <<endl;
-        
-        pBemKernel kk=new BemKernel(s,*(*b),a);
-        RR ker; *ker=kk;
-        return ker;}
-};
 
 template<class RR,class AA=RR,class BB=AA>
 struct Op_coeffBemKernel1: public binary_function<AA,BB,RR> {
@@ -1003,7 +994,7 @@ struct Op_coeffBemKernel1: public binary_function<AA,BB,RR> {
         if (mpirank==0 && verbosity>10) cout << "test " <<typeid(RR).name() << " " << typeid(AA).name() << " " << typeid(BB).name() <<endl;
         
         RR ker=new BemKernel(s,*b,a);
-      
+        Add2StackOfPtr2Free(s,ker);
         return ker;}
 };
 // version ok
