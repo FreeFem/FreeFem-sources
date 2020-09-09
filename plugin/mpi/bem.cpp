@@ -1177,7 +1177,7 @@ class OP_MakeBemPotentialFunc {
 
     AnyType operator( )(Stack s) const {
       B type = GetAny< B >((*b)(s));
-      Complex k(arg(1, s, 0));
+      Complex k(arg(0, s, 0));
       A bempot = new BemPotential(type,k);
       return SetAny< A >(bempot);
     }

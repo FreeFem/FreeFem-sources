@@ -76,8 +76,9 @@ border b1(t=-R, R){x=t; y=-R;}
 border b2(t=-R, R){x=R; y=t;}
 border b3(t=-R, R){x=-t; y=R;}
 border b4(t=-R, R){x=-R; y=-t;}
+border circleout(t=0, 2*pi){x=1.1*cos(t); y=1.1*sin(t); z=0;}
 
-mesh ThOut = buildmesh(b1(np)+b2(np)+b3(np)+b4(np)+circle(-np*pi/R));
+mesh ThOut = buildmesh(b1(np)+b2(np)+b3(np)+b4(np)+circleout(-np*pi/R));
 
 fespace UhOut(ThOut,P1);
 
