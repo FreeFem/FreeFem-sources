@@ -917,32 +917,35 @@ public:
     std::complex<double> wavenum[2]={0,0}; // parameter to Helmholtz
     std::complex<double> coeffcombi[2]={0,0};
     BemKernel(){}
-    BemKernel(const string tkernel, Complex alpha=1 , Complex k=0) {
+    BemKernel(string *tkernel, Complex alpha , Complex k) {
         
         coeffcombi[0]=alpha;
         wavenum[0]=k;
         
-        if(!tkernel.compare("SL"))
+        if(!tkernel->compare("SL"))
             typeKernel[0] = 1;
-        else if(!tkernel.compare("DL"))
+        else if(!tkernel->compare("DL"))
             typeKernel[0] = 2;
-        else if(!tkernel.compare("HS"))
+        else if(!tkernel->compare("HS"))
             typeKernel[0] = 3;
-        else if(!tkernel.compare("TDL"))
+        else if(!tkernel->compare("TDL"))
             typeKernel[0] = 4;
-        else if(!tkernel.compare("CST"))
+        else if(!tkernel->compare("CST"))
             typeKernel[0] = 5;
         else
             ExecError("unknow BEM kernel type ");
         
         if(mpirank==0 && verbosity>5)
-            cout << "type BEM kernel " << tkernel <<": " << typeKernel[0] << " coeff combi " << coeffcombi[0] << " wave number "<< wavenum[0] << endl;
+            cout << "type BEM kernel " << *tkernel <<": " << typeKernel[0] << " coeff combi " << coeffcombi[0] << " wave number "<< wavenum[0] << endl;
     }
     ~BemKernel() {}
     
     BemKernel(const BemKernel &Bk) {
         for(int i=0;i<2;i++) {typeKernel[i]=Bk.typeKernel[i]; wavenum[i]=Bk.wavenum[i]; coeffcombi[i]=Bk.coeffcombi[i]; } } ;
-    
+    // alpha * ker
+    BemKernel(Stack s,const BemKernel &Bk, Complex alpha) {
+           typeKernel[0]=Bk.typeKernel[0]; wavenum[0]=Bk.wavenum[0]; coeffcombi[0]=alpha; } ;
+       
     
 private:
     //BemKernel(const BemKernel &);
@@ -984,6 +987,120 @@ struct Op_setBemKernel: public binary_function<AA,BB,RR> {
     }
 };
 
+template<class RR,class AA=RR,class BB=AA>
+struct Op_coeffBemKernel: public binary_function<AA,BB,RR> {
+    static RR f(Stack s,const AA & a,const BB & b) {
+        if (mpirank==0 && verbosity>10) cout << "test " <<typeid(RR).name() << " " << typeid(AA).name() << " " << typeid(BB).name() <<endl;
+        
+        pBemKernel kk=new BemKernel(s,*(*b),a);
+        RR ker; *ker=kk;
+        return ker;}
+};
+
+template<class RR,class AA=RR,class BB=AA>
+struct Op_coeffBemKernel1: public binary_function<AA,BB,RR> {
+    static RR f(Stack s,const AA & a,const BB & b) {
+        if (mpirank==0 && verbosity>10) cout << "test " <<typeid(RR).name() << " " << typeid(AA).name() << " " << typeid(BB).name() <<endl;
+        
+        RR ker=new BemKernel(s,*b,a);
+      
+        return ker;}
+};
+// version ok
+class OP_MakeBemKernel {
+ public:
+  
+  class Op : public E_F0mps {
+   public:
+    static const int n_name_param = 1;
+    static basicAC_F0::name_and_type name_param[];
+    Expression nargs[n_name_param];
+    Complex arg(int i, Stack stack, Complex a) const { return nargs[i] ? GetAny< Complex >((*nargs[i])(stack)) : a; }
+    typedef pBemKernel *R;
+    typedef pBemKernel *A;
+    typedef string *B;
+    Expression a, b;
+      
+    Op(const basicAC_F0 &args);
+
+    AnyType operator( )(Stack s) const {
+      A bemker = GetAny< A >((*a)(s));
+      B type = GetAny< B >((*b)(s));
+      Complex alpha=1.;//(arg(0, s, 1));
+      Complex k(arg(0, s, 0));
+      *bemker = new BemKernel(type,alpha,k);
+      return SetAny< R >(bemker);
+    }
+  };
+
+  typedef Op::R Result;
+  static E_F0 *f(const basicAC_F0 &args) { return new Op(args); }
+  static ArrayOfaType typeargs( ) {
+    return ArrayOfaType(atype< Op::A >( ), atype< Op::B >( ), false);
+  }
+};
+
+
+
+OP_MakeBemKernel::Op::Op(const basicAC_F0 &args)
+  : a(to< A >(args[0])), b(to< B >(args[1])) {
+  args.SetNameParam(n_name_param, name_param, nargs);
+}
+
+basicAC_F0::name_and_type OP_MakeBemKernel::Op::name_param[] = { {"k", &typeid(Complex)} };
+
+class OP_MakeBemKernelFunc {
+ public:
+  
+  class Op : public E_F0mps {
+   public:
+    static const int n_name_param = 1;
+    static basicAC_F0::name_and_type name_param[];
+    Expression nargs[n_name_param];
+    Complex arg(int i, Stack stack, Complex a) const { return nargs[i] ? GetAny< Complex >((*nargs[i])(stack)) : a; }
+    typedef pBemKernel A;
+    typedef string *B;
+    Expression b;
+      
+    Op(const basicAC_F0 &args);
+
+    AnyType operator( )(Stack s) const {
+      B type = GetAny< B >((*b)(s));
+      Complex alpha=1.;//(arg(0, s, 1));
+      Complex k(arg(0, s, 0));
+      A bemker = new BemKernel(type,alpha,k);
+      return SetAny< A >(bemker);
+    }
+  };
+
+  typedef Op::A Result;
+  static E_F0 *f(const basicAC_F0 &args) { return new Op(args); }
+  static ArrayOfaType typeargs( ) {
+    return ArrayOfaType(atype< Op::B >( ), false);
+  }
+};
+
+OP_MakeBemKernelFunc::Op::Op(const basicAC_F0 &args)
+  : b(to< B >(args[0])) {
+  args.SetNameParam(n_name_param, name_param, nargs);
+}
+
+basicAC_F0::name_and_type OP_MakeBemKernelFunc::Op::name_param[] = { {"k", &typeid(Complex)} };
+
+
+class FormalBemKernel : public OneOperator{
+public:
+    
+    FormalBemKernel( ): OneOperator(atype<C_F0>(),atype<string*>()) {}
+    E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
+    C_F0  code2(const basicAC_F0 &args) const {
+        Expression e=new OP_MakeBemKernelFunc::Op(args);
+        aType r=atype<const BemKernel *>();
+        return C_F0(e,r) ;}
+    
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+
+};
 
 class BemPotential : public RefCounter {
 public:
@@ -992,19 +1109,19 @@ public:
     // typePotential ={SL=0, DL=1, HS=2, TDL=3} and determine equation Laplace, Helmholtz if k==0 or not
     std::complex<double> wavenum; // parameter to Helmholtz
     BemPotential(){}
-    BemPotential(const string tpotential, Complex k=0) : typePotential(-1), wavenum(k) {
+    BemPotential(string *tpotential, Complex k) : typePotential(-1), wavenum(k) {
         
-        if(!tpotential.compare("SL"))
+        if(!tpotential->compare("SL"))
             typePotential = 1;
-        else if(!tpotential.compare("DL"))
+        else if(!tpotential->compare("DL"))
             typePotential = 2;
-        else if(!tpotential.compare("CST"))
+        else if(!tpotential->compare("CST"))
             typePotential = 3;
         else
             ExecError("unknow BEM Potential type ");
         
         if(mpirank==0 && verbosity>5)
-            cout << "type BEM Potential " << tpotential <<": " << typePotential << " wave number "<< wavenum << endl;
+            cout << "type BEM Potential " << *tpotential <<": "<< tpotential <<": " << typePotential << " wave number "<< wavenum << endl;
     }
     
     ~BemPotential() {}
@@ -1013,6 +1130,97 @@ private:
     BemPotential(const BemPotential &);
     void operator=(const BemPotential &);
 };
+
+
+class OP_MakeBemPotential {
+ public:
+  class Op : public E_F0mps {
+   public:
+    static const int n_name_param = 1;
+    static basicAC_F0::name_and_type name_param[];
+    Expression nargs[n_name_param];
+    Complex arg(int i, Stack stack, Complex a) const { return nargs[i] ? GetAny< Complex >((*nargs[i])(stack)) : a; }
+    typedef pBemPotential *R;
+    typedef pBemPotential *A;
+    typedef string *B;
+    Expression a, b;
+    Op(const basicAC_F0 &args);
+
+    AnyType operator( )(Stack s) const {
+      A bempot = GetAny< A >((*a)(s));
+      B type = GetAny< B >((*b)(s));
+      Complex k(arg(0, s, 0));
+      *bempot = new BemPotential(type,k);
+      return SetAny< R >(bempot);
+    }
+  };    // end Op class
+
+  typedef Op::R Result;
+  static E_F0 *f(const basicAC_F0 &args) { return new Op(args); }
+  static ArrayOfaType typeargs( ) {
+    return ArrayOfaType(atype< Op::A >( ), atype< Op::B >( ), false);
+  }
+};
+
+OP_MakeBemPotential::Op::Op(const basicAC_F0 &args)
+  : a(to< A >(args[0])), b(to< B >(args[1])) {
+  args.SetNameParam(n_name_param, name_param, nargs);
+}
+
+basicAC_F0::name_and_type OP_MakeBemPotential::Op::name_param[] = { {"k", &typeid(Complex)} };
+
+class OP_MakeBemPotentialFunc {
+ public:
+  
+  class Op : public E_F0mps {
+   public:
+    static const int n_name_param = 1;
+    static basicAC_F0::name_and_type name_param[];
+    Expression nargs[n_name_param];
+    Complex arg(int i, Stack stack, Complex a) const { return nargs[i] ? GetAny< Complex >((*nargs[i])(stack)) : a; }
+    typedef pBemPotential A;
+    typedef string *B;
+    Expression b;
+      
+    Op(const basicAC_F0 &args);
+
+    AnyType operator( )(Stack s) const {
+      B type = GetAny< B >((*b)(s));
+      Complex k(arg(1, s, 0));
+      A bempot = new BemPotential(type,k);
+      return SetAny< A >(bempot);
+    }
+  };
+
+  typedef Op::A Result;
+  static E_F0 *f(const basicAC_F0 &args) { return new Op(args); }
+  static ArrayOfaType typeargs( ) {
+    return ArrayOfaType(atype< Op::B >( ), false);
+  }
+};
+
+OP_MakeBemPotentialFunc::Op::Op(const basicAC_F0 &args)
+  : b(to< B >(args[0])) {
+  args.SetNameParam(n_name_param, name_param, nargs);
+}
+
+basicAC_F0::name_and_type OP_MakeBemPotentialFunc::Op::name_param[] = { {"k", &typeid(Complex)} };
+
+
+class FormalBemPotential : public OneOperator{
+public:
+    
+    FormalBemPotential( ): OneOperator(atype<C_F0>(),atype<string*>()) {}
+    E_F0 *  code(const basicAC_F0 & ) const {ffassert(0);}
+    C_F0  code2(const basicAC_F0 &args) const {
+        Expression e=new OP_MakeBemPotentialFunc::Op(args);
+        aType r=atype<const BemPotential *>();
+        return C_F0(e,r) ;}
+    
+    AnyType operator()(Stack s)  const {ffassert(0);return 0L;}
+
+};
+
 
 // fusion of Bem Kernel in case combined kernels
 BemKernel *combKernel (listBemKernel const &lbemker){
@@ -1042,44 +1250,12 @@ BemKernel *combKernel (listBemKernel const &lbemker){
     return combBemKernel;
 }
 
-inline pBemKernel *  initKernel_Helmholtz(pBemKernel * const & p, string * const & s,std::complex<double> const & alpha,std::complex<double> const & k) {
-    BemKernel * m;
-    if(mpirank==0 && verbosity > 5)
-        cout << " initBemKernel " << *s << endl;
-    *p= m =new BemKernel(*s,alpha,k);
-    return p;
-}
-
-inline pBemKernel *  initKernel_Laplace(pBemKernel * const & p, string * const & s,std::complex<double> const & alpha) {
-    return initKernel_Helmholtz(p,s,alpha,0);
-    
-}
-
-inline pBemKernel *  initKernel_default(pBemKernel * const & p, string * const & s) {
-    return initKernel_Helmholtz(p,s,1,0);
-    
-}
-
-inline pBemPotential *  initPotential_Helmholtz(pBemPotential * const & p, string * const & s, std::complex<double> const & k) {
-    BemPotential * m;
-    if(mpirank==0 && verbosity > 5)
-        cout << " initPotential " << *s << endl;
-    *p= m =new BemPotential(*s,k);
-    return p;
-}
-
-inline pBemPotential *  initPotential_default(pBemPotential * const & p, string * const & s) {
-    return initPotential_Helmholtz(p,s,0);
-    
-}
-
 
 // BEM variational form
 
 // define a bilinear form for BEM
 class FoperatorKBEM : public E_F0mps { public:
     typedef const FoperatorKBEM* Result;
-    static const int n_name_param = 1;
     typedef finconnue * Fi;
     typedef ftest * Ft;
     typedef fkernel * KBem;
@@ -2063,7 +2239,8 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
         double alpha = kernel.second;
         
         if(mpirank == 0 && verbosity >5) {
-            int nk=2;
+            int nk=-1;
+            iscombinedKernel(Ker) ? nk=2 : nk=1;
             for(int i=0;i<nk;i++)
                 cout << " kernel info... i: " << i << " typeKernel: " << Ker->typeKernel[i] << " wave number: " << Ker->wavenum[i]  << " coeffcombi: " << Ker->coeffcombi[i] <<endl;
         }
@@ -2103,6 +2280,9 @@ static void Init_Bem() {
     
     Dcl_Type< fkernel * >( );  // a bem kernel
     Dcl_Type< fpotential * >( ); // a bem potential
+    Dcl_Type< const OP_MakeBemKernelFunc::Op * >( );
+    Dcl_Type< const OP_MakeBemPotentialFunc::Op * >( );
+    
     Dcl_TypeandPtr< pBemKernel >(0, 0, ::InitializePtr< pBemKernel >, ::DestroyPtr< pBemKernel >,
                                  AddIncrement< pBemKernel >, NotReturnOfthisType);
     // pBemPotential initialize
@@ -2131,13 +2311,10 @@ static void Init_Bem() {
     addHmat<std::complex<double>>();
 
     //BemKernel
-    TheOperators->Add("<-", new OneOperator4_<pBemKernel*,pBemKernel*,string*,std::complex<double>,std::complex<double> >(&initKernel_Helmholtz));
-    TheOperators->Add("<-", new OneOperator3_<pBemKernel*,pBemKernel*,string*,std::complex<double> >(&initKernel_Laplace));
-    TheOperators->Add("<-", new OneOperator2_<pBemKernel*,pBemKernel*,string* >(&initKernel_default));
+    TheOperators->Add("<-", new OneOperatorCode< OP_MakeBemKernel >);
     //BemPotential
-    TheOperators->Add("<-", new OneOperator3_<pBemPotential*,pBemPotential*,string*,std::complex<double> >(&initPotential_Helmholtz));
-    TheOperators->Add("<-", new OneOperator2_<pBemPotential*,pBemPotential*,string* >(&initPotential_default));
-    
+    TheOperators->Add("<-", new OneOperatorCode< OP_MakeBemPotential >);
+   
     zzzfff->Add("HMatrix", atype<HMatrixVirt<double> **>());
     map_type_of_map[make_pair(atype<HMatrixVirt<double>**>(), atype<double*>())] = atype<HMatrixVirt<double>**>();
     map_type_of_map[make_pair(atype<HMatrixVirt<double>**>(), atype<Complex*>())] = atype<HMatrixVirt<std::complex<double> >**>();
@@ -2147,7 +2324,6 @@ static void Init_Bem() {
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fesL > (1) );
     TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fesL > );
        
-
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fes > (1) );
     TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fes > );
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fesS > (1) );
@@ -2156,14 +2332,17 @@ static void Init_Bem() {
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fes > (1));
     TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fes > );
 
-    // BemKernel
-    
+    // operation on BemKernel
     Dcl_Type<listBemKernel> ();
     TheOperators->Add("+",new OneBinaryOperator_st< Op_addBemKernel<listBemKernel,pBemKernel,pBemKernel> >);
-    TheOperators->Add("+",new OneBinaryOperator_st< Op_addBemKernel<listBemKernel,listBemKernel,pBemKernel> >);
+    //TheOperators->Add("+",new OneBinaryOperator_st< Op_addBemKernel<listBemKernel,listBemKernel,pBemKernel> >); // no need is the combinaison is only with 2 kernels
     TheOperators->Add("=",new OneBinaryOperator_st< Op_setBemKernel<false,pBemKernel*,pBemKernel*,listBemKernel> >);
     TheOperators->Add("<-", new OneBinaryOperator_st< Op_setBemKernel<true,pBemKernel*,pBemKernel*,listBemKernel> >);
-      
+
+    TheOperators->Add("<-", new OneOperator2_<pBemKernel*,pBemKernel*,pBemKernel >(&set_copy_incr));
+    TheOperators->Add("=", new OneOperator2<pBemKernel*,pBemKernel*,pBemKernel >(&set_eqdestroy_incr));
+    TheOperators->Add("*",new OneBinaryOperator_st< Op_coeffBemKernel1<pBemKernel,Complex,pBemKernel> >);
+    
     Dcl_Type< const CBemDomainOfIntegration * >( );
     Dcl_Type< const CPartBemDI * >( );
     
@@ -2171,12 +2350,12 @@ static void Init_Bem() {
     
     Add< const CBemDomainOfIntegration * >("(", "", new OneOperatorCode< BemKFormBilinear >);
     Add< const CDomainOfIntegration * >("(", "", new OneOperatorCode< BemPFormBilinear >);
-    
-   // zzzfff->AddF("varfbem", t_BEM);
-    
+        
     Global.Add("BEM","(",new FormalKBEMcode);
     Global.Add("POT","(",new FormalPBEMcode);
-    // 2D / 1D Bem
+    Global.Add("Kernel","(",new FormalBemKernel);
+    Global.Add("Potential","(",new FormalBemPotential);
+    
     Global.Add("int2dx2d","(",new OneOperatorCode<CPartBemDI2d2d>);
     Global.Add("int1dx1d","(",new OneOperatorCode<CPartBemDI1d1d>);
     Global.Add("int1dx2d","(",new OneOperatorCode<CPartBemDI1d2d>);

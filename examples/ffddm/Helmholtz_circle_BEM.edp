@@ -39,8 +39,7 @@ macro init(i)i// EOM                        // scalar field initialization
 ffddmbuildDfespace(H, H, complex, def, init, P1)
 
 macro Varf(varfName, meshName, PhName)
-  BemKernel ker("SL",1,k);
-  varf varfName(u,v) = int1dx1d(meshName)(meshName)(BEM(ker,u,v));
+  varf varfName(u,v) = int1dx1d(meshName)(meshName)(BEM(Kernel("SL",k=k),u,v));
 //
 
 macro Varfrhs(varfName, meshName, PhName)
@@ -82,8 +81,8 @@ mesh ThOut = buildmesh(b1(np)+b2(np)+b3(np)+b4(np)+circle(-np*pi/R));
 
 fespace UhOut(ThOut,P1);
 
-BemPotential Pot("SL",k);
-varf vp(u,v)=int1d(Th)(POT(Pot,u,v));
+//BemPotential Pot("SL",k=k);
+varf vp(u,v)=int1d(Th)(POT(Potential("SL",k=k),u,v));
 HMatrix<complex> B = vp(Uh,UhOut);
 if (mpirank == 0) cout << B.infos << endl;
 display(B);

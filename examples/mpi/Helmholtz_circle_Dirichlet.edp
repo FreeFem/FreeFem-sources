@@ -26,14 +26,14 @@ Th = OrientNormal(Th,unbounded=1);
 fespace Uh(Th,P1);
 
 // Hmatrix for formulation of first kind
-BemKernel ker1("SL",1,k);
+BemKernel ker1("SL",k=k);
 varf vk1(u,v)=int1dx1d(Th)(Th)(BEM(ker1,u,v)) ;  
 HMatrix<complex> HFirstKind = vk1(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
 if (mpirank == 0) cout << HFirstKind.infos << endl;
 display(HFirstKind);
 
 // Hmatrix for formulation of second kind
-BemKernel ker2("TDL",1,k);
+BemKernel ker2("TDL",k=k);
 varf vk2(u,v)=int1dx1d(Th)(Th)(BEM(ker2,u,v)) - int1d(Th)(0.5*u*v);  
 
 HMatrix<complex> HSecondKind = vk2(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
@@ -41,9 +41,9 @@ if (mpirank == 0) cout << HSecondKind.infos << endl;
 display(HSecondKind);
 
 // Hmatrix for combined formulation
-BemKernel ker3("SL",k*1i,k);
-BemKernel ker4("TDL",1,k);
-BemKernel ker5=ker3+ker4;
+BemKernel ker3("SL",k=k);
+BemKernel ker4("TDL",k=k);
+BemKernel ker5=(k*1i)*ker3+ker4;
 varf vk3(u,v)=int1dx1d(Th)(Th)(BEM(ker5,u,v)) - int1d(Th)(0.5*u*v); 
 
 HMatrix<complex> HCombined = vk3(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
@@ -91,7 +91,7 @@ UhOut<complex> vinc;
 vinc = finc;
 
 // HMatrix for potential
-BemPotential Pot("SL",k);
+BemPotential Pot("SL",k=k);
 varf vp(u,v)=int1d(Th)(POT(Pot,u,v)) ;  
 HMatrix<complex> HPot = vp(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
 
