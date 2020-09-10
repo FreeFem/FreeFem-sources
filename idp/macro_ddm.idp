@@ -1456,6 +1456,12 @@ IFMACRO(!transfer#Q)
     assert(uA[].n == VhLocalOldPrivate.ndof);
     assert(uANew[].n == VhLocalNewPrivate.ndof);
 ENDIFMACRO
+IFMACRO(!dimension)
+NewMacro dimension()2 EndMacro
+ENDIFMACRO
+IFMACRO(!meshN)
+NewMacro meshN()mesh EndMacro
+ENDIFMACRO
     real[int] bb(4 * dimension);
     {
         real[int] tmp(2 * dimension);
