@@ -31,10 +31,9 @@ All notable changes to this project will be documented in this file.
 ### Deprecated
 
 ### Removed
-
+- plugins thresholdings, symmetrizeCSR, and fflapack
 
 ### Fixed
-
 
 ## [4.7]
 ### Added
