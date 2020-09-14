@@ -824,7 +824,6 @@ RESTART:
           nbdeja=++deja[it];// we stocke le deja view in map
         
           nbdejax = max(nbdeja,nbdeja);
-          if( nbdejax )
           if(nbdejax> 5) eps=1e-7;
           else if(nbdejax> 4) eps=1e-8;
           else if(nbdejax> 3) eps=1e-9;

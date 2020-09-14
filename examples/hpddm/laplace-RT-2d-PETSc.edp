@@ -18,7 +18,6 @@ border b(t=0,1) { x = -t; y = 1-t; label = 2; };
 border c(t=0,1) { x = t-1; y = -t; label = 3; };
 border d(t=0,1) { x = t; y = -1+t; label = 4; };
 mesh Th = buildmesh(a(getARGV("-global", 20)) + b(getARGV("-global", 20)) + c(getARGV("-global", 20)) + d(getARGV("-global", 20)));
-broadcast(processor(0), Th);
 int s = getARGV("-split", 1); // refinement factor
 fespace Wh(Th, Pk);           // local finite element space
 int[int][int] intersection;   // local-to-neighbors renumbering

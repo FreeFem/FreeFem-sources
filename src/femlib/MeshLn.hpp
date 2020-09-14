@@ -138,7 +138,13 @@ namespace Fem2D {
 	R3 N = V^R3(0,0,1);
 	return N/N.norme();
     }
-   
+   R3 TangenteUnitaire() const {
+       R3 V(at(0),at(1));
+       //ffassert(V.x != 0 || V.y != 0);
+       R3 N = V;
+       return N/N.norme();
+   }
+
   };
     
     

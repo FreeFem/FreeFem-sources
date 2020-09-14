@@ -60,8 +60,8 @@ fespace Uh(ThS,P1);
 
 cout << "ndof = " << Uh.ndof << endl;
 
-BemKernel ker("SL",1,k);
-varf vk(u,v)=int2dx2d(ThS)(ThS)(BEM(ker,u,v)) ;  
+//BemKernel ker("SL",k=k);
+varf vk(u,v)=int2dx2d(ThS)(ThS)(BEM(Kernel("SL",k=k),u,v)) ;  
 HMatrix<complex> H = vk(Uh,Uh,eta=10,eps=1e-2,minclustersize=10,maxblocksize=1000000);
 //HMatrix<complex> H = assemblecomplexHESL(Uh,Uh,k,eta=10,epsilon=1e-2,minclustersize=10,maxblocksize=1000000);
 
@@ -91,8 +91,8 @@ meshS ThOut = square3(np,np,[(sec1+(radius-height)*sin(angle)+sec2*cos(angle)+ra
 
 fespace UhOut(ThOut,P1);
 
-BemPotential Pot("SL",k);
-varf vp(u,v)=int2d(ThS)(POT(Pot,u,v)) ;  
+//BemPotential Pot("SL",k=k);
+varf vp(u,v)=int2d(ThS)(POT(Potential("SL",k=k),u,v)) ;  
 HMatrix<complex> B = vp(Uh,UhOut,eta=10,eps=1e-2,minclustersize=10,maxblocksize=1000000);
 
 //HMatrix<complex> B = assemblecomplexHESLPot(Uh,UhOut,k,eta=10,epsilon=1e-2,minclustersize=10,maxblocksize=1000000);

@@ -183,6 +183,8 @@ class LinkToInterpreter {
   Type_Expr P;
   Type_Expr N;
   Type_Expr Nt;
+  Type_Expr Ns;
+  Type_Expr Tl;
   Type_Expr x;
   Type_Expr y;
   Type_Expr z;
@@ -262,67 +264,37 @@ class E_P_Stack_N : public E_F0mps {
 
   operator aType( ) const { return atype< R3 * >( ); }
 };
-class E_P_Stack_Nx : public E_F0mps {
- public:
-  AnyType operator( )(Stack s) const {
-    throwassert(*((long *)s));
-    return SetAny< R * >(&MeshPointStack(s)->N.x);
-  }
 
-  operator aType( ) const { return atype< R * >( ); }
-};
-class E_P_Stack_Ny : public E_F0mps {
- public:
-  AnyType operator( )(Stack s) const {
-    throwassert(*((long *)s));
-    return SetAny< R * >(&MeshPointStack(s)->N.y);
-  }
-
-  operator aType( ) const { return atype< R * >( ); }
-};
-class E_P_Stack_Nz : public E_F0mps {
- public:
-  AnyType operator( )(Stack s) const {
-    throwassert(*((long *)s));
-    return SetAny< R * >(&MeshPointStack(s)->N.z);
-  }
-    operator aType( ) const { return atype< R * >( ); }
-};
 
 class E_P_Stack_Nt : public E_F0mps {
  public:
     AnyType operator( )(Stack s) const {
-        throwassert(*((long *)s));
+        ExecError("Remove name Nt, now use Ns on surface and Tl on Curve");
         return SetAny< R3 * >(&MeshPointStack(s)->Nt);
     }
         
     operator aType( ) const { return atype< R3 * >( ); }
 };
-class E_P_Stack_Ntx : public E_F0mps {
+
+class E_P_Stack_Ns : public E_F0mps {
  public:
     AnyType operator( )(Stack s) const {
         throwassert(*((long *)s));
-        return SetAny< R * >(&MeshPointStack(s)->Nt.x);
+        assert(MeshPointStack(s)->dHat==2);
+        return SetAny< R3 * >(&MeshPointStack(s)->Nt);
     }
         
-    operator aType( ) const { return atype< R * >( ); }
+    operator aType( ) const { return atype< R3 * >( ); }
 };
-class E_P_Stack_Nty : public E_F0mps {
+class E_P_Stack_Tl : public E_F0mps {
  public:
     AnyType operator( )(Stack s) const {
         throwassert(*((long *)s));
-        return SetAny< R * >(&MeshPointStack(s)->Nt.y);
+        assert(MeshPointStack(s)->dHat==1);
+        return SetAny< R3 * >(&MeshPointStack(s)->Nt);
     }
         
-    operator aType( ) const { return atype< R * >( ); }
-};
-class E_P_Stack_Ntz : public E_F0mps {
- public:
-    AnyType operator( )(Stack s) const {
-        throwassert(*((long *)s));
-        return SetAny< R * >(&MeshPointStack(s)->Nt.z);
-    }
-    operator aType( ) const { return atype< R * >( ); }
+    operator aType( ) const { return atype< R3 * >( ); }
 };
 
 class E_P_Stack_Region : public E_F0mps {
@@ -3032,6 +3004,8 @@ LinkToInterpreter::LinkToInterpreter( ) {
   z = make_Type_Expr(atype< R * >( ), new E_P_Stack_Pz);
   N = make_Type_Expr(atype< R3 * >( ), new E_P_Stack_N);
   Nt = make_Type_Expr(atype< R3 * >( ), new E_P_Stack_Nt);
+  Ns = make_Type_Expr(atype< R3 * >( ), new E_P_Stack_Ns);
+  Tl = make_Type_Expr(atype< R3 * >( ), new E_P_Stack_Tl);
   region = make_Type_Expr(new E_P_Stack_Region, atype< long * >( ));
   label = make_Type_Expr(new E_P_Stack_Label, atype< long * >( ));
   nu_triangle = make_Type_Expr(atype< long >( ), new E_P_Stack_Nu_Triangle);
@@ -3055,6 +3029,8 @@ LinkToInterpreter::LinkToInterpreter( ) {
   Global.New("P", P);
   Global.New("N", N);
   Global.New("Nt", Nt);
+  Global.New("Ns", Ns);// add FH 
+  Global.New("Tl", Tl);
   Global.New("lenEdge", lenEdge);
   Global.New("area", area);
   Global.New("volume", volume);
@@ -3573,6 +3549,30 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
             umx = std::max(umx, phi[j]);
             umn = std::min(umn, phi[j]);
           }
+        if (umn <= 0 && umx >= 0) {
+           int np = IsoLineK(f, Q, 1e-10);
+           if (np == 2) {
+             const TriangleS &K(Th[t]);
+             R3 Ns=K.NormalTUnitaire();
+             R3 PA(K(Q[0])), PB(K(Q[1]));
+             R3 NAB(PA, PB);
+             double lAB = sqrt((NAB, NAB));
+             NAB = Ns^NAB / lAB;
+             llevelset += lAB;
+             for (int npi = 0; npi < FI.n; npi++)    // loop on the integration point
+             {
+               QuadratureFormular1dPoint pi(FI[npi]);
+               double sa = pi.x, sb = 1. - sa;
+               R2 Pt(Q[0] * sa + Q[1] * sb);    //
+               MeshPointStack(stack)->set(Th, K(Pt), Pt, K, -1, NAB,Ns, -1);
+               r += lAB * pi.a * GetAny< R >((*fonc)(stack));
+             }
+           }
+         }
+
+/*
+        
+        
           if (umn <= 0 && umx >= 0) {
             int np = IsoLineK(f, Q, 1e-10);
             if (np == 2) {
@@ -3597,7 +3597,8 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
                 r += mes * pi.a * GetAny< R >((*fonc)(stack));
               }
             }
-          }
+          }*/
+ 
           wsptr2free->clean(swsptr2free);    // ADD FH 11/2017
         }
         if (verbosity > 5) cout << " Lenght level set = " << llevelset << endl;
@@ -3619,7 +3620,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
               QuadratureFormular1dPoint pi(FI[npi]);
               double sa = pi.x, sb = 1. - sa;
               R2 Pt(PA * sa + PB * sb);    //
-              MeshPointStack(stack)->set(Th, K(Pt), Pt, K, Th.be(e).lab, R2(E.y, -E.x) / le, ie);
+              MeshPointStack(stack)->set(Th, K(Pt), Pt, K, Th.be(e).lab, E , ie);// Border surface
               r += le * pi.a * GetAny< R >((*fonc)(stack));
             }
           }
@@ -3744,7 +3745,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
         else
             for( int k=0;k<Th.nt;k++) {
                 const EdgeL &K(Th[k]);
-                R3 NNt=K.NormalTUnitaire();
+                R3 NNt=K.TangenteUnitaire();
                 if (all || setoflab.find(Th[k].lab) != setoflab.end()) {
                    // const EdgeL & K(Th[k]);
                    // double le = K.mesure();

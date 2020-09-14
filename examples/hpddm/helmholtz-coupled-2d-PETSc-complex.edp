@@ -117,18 +117,13 @@ HMatrix<complex> TDL, SL;
         UhG<complex> numbering;
         numbering[] = 0:UhG.ndof - 1;
         VhS<complex> glob2loc = numbering;
-        complex[int] permc(glob2loc.n);
-        ChangeNumbering(ASurf, glob2loc[], permc);
-        perm.resize(permc.n);
-        for[i, p : permc] perm[i] = real(p);
+        ChangeNumbering(ASurf, glob2loc[], perm);
     }
-    BemKernel kerTDL("TDL",1,k);
 
-    varf varfTDL(u,v) = int1dx1d(ThG)(ThG)(BEM(kerTDL,u,v)) + int1d(ThG)(0.5*u*v);  
+    varf varfTDL(u,v) = int1dx1d(ThG)(ThG)(BEM(Kernel("TDL",k=k),u,v)) + int1d(ThG)(0.5*u*v);  
 
     TDL = varfTDL(UhG, UhG);
-    BemKernel kerSL("SL",1,k);
-    varf varfSL(u,v) = int1dx1d(ThG)(ThG)(BEM(kerSL,u,v));
+    varf varfSL(u,v) = int1dx1d(ThG)(ThG)(BEM(Kernel("SL",k=k),u,v));
     SL = varfSL(UhG, UhG);
 }
 func complex[int] opSurf(complex[int]& in) {
@@ -141,8 +136,7 @@ func complex[int] opSurf(complex[int]& in) {
 }
 complex[int,int] dense(1, 1);
 {
-    BemKernel kerSL("SL",1,k);
-    varf varfSL(u,v) = int1dx1d(ThL)(ThL)(BEM(kerSL,u,v));
+    varf varfSL(u,v) = int1dx1d(ThL)(ThL)(BEM(Kernel("SL",k=k),u,v));
     HMatrix<complex> A = varfSL(VhS, VhS, commworld=mpiCommSelf);
     dense.resize(VhS.ndof, VhS.ndof);
     dense = A;

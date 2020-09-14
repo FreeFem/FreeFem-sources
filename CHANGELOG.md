@@ -24,10 +24,25 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
-
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+- plugins thresholdings, symmetrizeCSR, and fflapack
+
+### Fixed
+
+## [4.7]
+### Added
+
 - new way to build matrix beetween 2d Finite element 2d and Curve finite element to do mortar (Thank to Axel ) , see first example `examples/tutorial/mortar-DN-4-v4.5.edp`
 - compile ffmaster / ffslave example under windows (Thanks to johann@ifado.de)
+- add `Ns` normal vector  in R^3 on meshS (normal of the surface) of current point (to day Ns of [x,y,0] plan  is [0,0,-1])  no be compatibe to exterior normal. 
+- add `Tl` tangent vector in R^3 on meshL (tangent vector of the line/curve) of current point 
+- compile ffmaster / ffslave example under windows (thanks to johann@ifado.de)
 - Boolean parameter `spiltpbedge` in `buildmesh` to split in to edge with two boundary vertices
 - interface to PETSc DMPlex, see `examples/hpddm/DMPlex-PETSc.edp`
 - function `MatDestroy`
@@ -46,25 +61,27 @@ All notable changes to this project will be documented in this file.
 - moved Htool to its new GitHub location
 - ScaLAPACK and MUMPS are not compiled by PETSc anymore if there is no Fortran compiler
 - MPICH is compiled by PETSc if no MPI is detected during configure, see https://community.freefem.org/t/feature-request-use-download-mpich-on-ubuntu/407
-- PETSc version 3.13.4
+- PETSc version 3.13.5
 - force `--with-cudac=0` in `make petsc-slepc`, see https://github.com/FreeFem/FreeFem-sources/issues/141
 - change DSL keyword P1dc3dL->P1dcL and P1dc3dS->P1dcS
 - rename `view`, `hasType`, `changeSchur` to respectively `ObjectView`, `HasType`, and `ChangeSchur`
 
 ### Deprecated
 - rename `changeNumbering`, `globalNumbering`, `originalNumbering`, `changeOperator`, `destroyRecycling`, and `attachCoarseOperator` to respectively `ChangeNumbering`, `GlobalNumbering`, `OriginalNumbering`, `ChangeOperator`, `DestroyRecycling`, and `AttachCoarseOperator`
-
+- `Nt` the normal vector of the current (wrong on meshL) use `Ns` pr `Tl` 
 ### Removed
 - `augmentation` routine from the PETSc plugin
 - `MPIF77` variable
 
 ### Fixed
+- lot of mistake in MeshL element add a example o ckeck lot of thing `tutomesh1d.edp`
 - fixed problem of change of mesh when rebuild 2d mesh with builmesh, .... (Thank to P. Jovilet to points this problem)
 - missing METIS library when using SuiteSparse compiled by PETSc
 - missing `-fno-stack-protector` when building PETSc on Windows, see https://community.freefem.org/t/error-loading-complex-petsc-slepc-library/370
 - fixed ffglut for the plotting of FE array solution
 - fixed  ffglut bug on MacOS Catalina , draw inn only half windows screen (Apple Bug ???)
 - correct P0VF  finite element 
+- `abs` function of array
 
 ## [4.6]
 
@@ -322,7 +339,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.6..develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7..develop
+[4.7]: https://github.com/FreeFem/FreeFem-sources/compare/v4.6...v4.7
 [4.6]: https://github.com/FreeFem/FreeFem-sources/compare/v4.5...v4.6
 [4.5]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-3...v4.5
 [4.4-3]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-2...v4.4-3

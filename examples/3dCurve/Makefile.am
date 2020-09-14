@@ -28,7 +28,8 @@ all-local: all.edp freefem++.pref
 TESTS_OTHER = buildParametricMeshL.edp \
 	LaplacianCurve.edp \
 	extractMeshes.edp \
-	elasticstring.edp
+	elasticstring.edp \
+	tutomesh1d.edp 
 
 
 

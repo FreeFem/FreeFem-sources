@@ -54,8 +54,7 @@ meshS ThS, ThG;
 }
 
 fespace Uh(ThS, P1);
-BemKernel ker("SL", 1, k);
-varf vk(u, v) = int2dx2d(ThS)(ThS)(BEM(ker, u, v));
+varf vk(u, v) = int2dx2d(ThS)(ThS)(BEM(Kernel("SL", k=k), u, v));
 HMatrix<complex> A = vk(Uh, Uh);
 Mat<complex> H;
 createMat(ThS, H, P1);
@@ -72,10 +71,7 @@ int[int] perm;
     UhG<complex> numbering;
     numbering[] = 0:UhG.ndof - 1;
     Uh<complex> glob2loc = numbering;
-    complex[int] permc;
-    ChangeNumbering(H, glob2loc[], permc);
-    perm.resize(permc.n);
-    for[i, p : permc] perm[i] = real(p);
+    ChangeNumbering(H, glob2loc[], perm);
 }
 
 func complex[int] op(complex[int]& in) {
@@ -134,8 +130,7 @@ if(!NoGraphicWindow) {
                           +(radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty,
                           width/2]);
     fespace UhOut(ThOut, P1);
-    BemPotential Pot("SL", k);
-    varf vp(u, v) = int2d(ThS)(POT(Pot, u, v));
+    varf vp(u, v) = int2d(ThS)(POT(Potential("SL", k=k), u, v));
     HMatrix<complex> B = vp(Uh, UhOut);
     UhOut<complex> v, vinc;
     vinc = finc;

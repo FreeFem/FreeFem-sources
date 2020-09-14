@@ -1023,7 +1023,8 @@ bool ffsignbit(long x){return signbit(x);}
 bool ffsignbit(double x){return signbit(x);}
 template<typename T>
 bool  pswap(T *a,T *b) {swap(*a,*b);return 0; }
-
+long lrintc(Complex x) { return lrint(real(x));}
+long lroundc(Complex x) { return lround(real(x));}
 void Init_map_type()
 {
    TheOperators=new Polymorphic(),
@@ -1504,7 +1505,7 @@ void Init_map_type()
      TheOperators->Add("[]",new OneOperator_array );
      TheOperators->Add("[border]",new OneOperator_border );
 
-     Global.Add("cos","(",new OneOperator1<double>(cos));
+    Global.Add("cos","(",new OneOperator1<double>(cos,2));
     Global.Add("square","(",new OneOperator1<long,long,E_F_F0<long,const long &> >(Square));// add FH Mai 2011
     Global.Add("square","(",new OneOperator1<double,double,E_F_F0<double,const double &> >(Square));
     Global.Add("square","(",new OneOperator1<Complex,Complex,E_F_F0<Complex,const Complex &> >(Square));// add FH Mai 2011
@@ -1519,13 +1520,15 @@ void Init_map_type()
      Global.Add("ceil","(",new OneOperator1<double>(ceil));  // add march 2006
     Global.Add("rint","(",new OneOperator1<double>(rint));  // add june 2006
      Global.Add("lrint","(",new OneOperator1<long,double>(lrint));  // add mars  2014
+    Global.Add("lrint","(",new OneOperator1<long,Complex>(lrintc));  // add aout   2020
+    Global.Add("lround","(",new OneOperator1<long,Complex>(lroundc));  // add aout   2020
 
-     Global.Add("sin","(",new OneOperator1<double>(sin));
-     Global.Add("tan","(",new OneOperator1<double>(tan));
-     Global.Add("atan","(",new OneOperator1<double>(atan));
-     Global.Add("sinh","(",new OneOperator1<double>(sinh));
-     Global.Add("cosh","(",new OneOperator1<double>(cosh));
-     Global.Add("tanh","(",new OneOperator1<double>(tanh));
+     Global.Add("sin","(",new OneOperator1<double>(sin,2));
+     Global.Add("tan","(",new OneOperator1<double>(tan,2));
+     Global.Add("atan","(",new OneOperator1<double>(atan,2));
+     Global.Add("sinh","(",new OneOperator1<double>(sinh,2));
+     Global.Add("cosh","(",new OneOperator1<double>(cosh,2));
+     Global.Add("tanh","(",new OneOperator1<double>(tanh,2));
 
     Global.Add("atoi","(",new OneOperator1<long,string*>(atoi));// add march 2010
     Global.Add("atol","(",new OneOperator1<long,string*>(atoi));// add march 2010

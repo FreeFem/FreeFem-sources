@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFEM,4.6,frederic.hecht@sorbonne-universite.fr,FreeFEM)
+AC_INIT(FreeFEM,4.7,frederic.hecht@sorbonne-universite.fr,FreeFEM)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -392,13 +392,13 @@ then
     if test "$ff_err" = "ok" ; then  AC_MSG_ERROR([ Fatal FLIBS: $FLIBS is incorrect. ],1); fi
     LIBS="$ff_libs"
     echo "F77 LD $ff_libs" >config_LIB_INFO
-
+  AC_LANG_PUSH([Fortran 77])
+  
+  
     AC_MSG_CHECKING([ Size of fortran 77 integer ])
-
-
-
-##   AC_LANG(fortran);
-    AC_LANG_PUSH([Fortran 77])
+   
+     
+    
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
 		program test
 		integer  p,i
@@ -431,6 +431,7 @@ then
 	"upper case, underscore, extra underscore")           ff_cfagsf77="-DUPPER -DAdd__";;
 	*) ;;
     esac
+    ff_cfagsf77="$ff_cfagsf77 $ff_allow_mismatch"
     AC_SUBST(CFLAGSF77,$ff_cfagsf77)
     if test $ff_f77intsize -ne  4
     then
@@ -727,6 +728,7 @@ m4_include(etc/config/m4/ax_lib_gsl.m4)
 # do not compile all with c++11 version to much
 # probleme to day (frev 2015) with g++ 4.8.1
 ff_cxx_save=$CXXFLAGS
+
 CHECK_COMPILE_FLAG(C++,[-std=c++11],CXXFLAGS,ff_cxx11)
 dnl CXXFLAGS="$CXX11FLAGS $CXXFLAGS"
 dnlff_cxx11="no"
@@ -1531,7 +1533,7 @@ AC_SUBST(BLASINC,$ff_blas_inc)
 
 #looking for cblas.h  FH
 
-if test "$ff_blas_ok" = yes -a -z "$ff_download_blas"; then
+if test "$ff_blas_ok" = yes -a -z "$ff_download_blas" -a "$ff_mkl_ok" != yes; then
   AC_CHECK_HEADERS(cblas.h,
     ff_cblas_h=yes,
     ff_cblas_h=no)
@@ -2034,6 +2036,9 @@ AC_SUBST(DYLIB_SUFFIX,$ff_suffix_dylib)
 #  the doc is now in https://github.com/FreeFem/FreeFem-doc-pdf/blob/master/freefem%2B%2Bdoc.pdf
 # Checking wether we can generate some documentation
 # --------------------------------------------------
+CHECK_COMPILE_FLAG(Fortran 77,[-fallow-argument-mismatch],FFLAGS)
+CHECK_COMPILE_FLAG(Fortran,[-fallow-argument-mismatch],FCFLAGS)
+
 dnl
 dnl AC_CHECK_PROG(ff_latex,latex,yes,no)
 dnl AC_CHECK_PROG(ff_makeindex,makeindex,yes,no)

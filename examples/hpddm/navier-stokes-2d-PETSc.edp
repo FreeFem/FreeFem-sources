@@ -13,7 +13,6 @@ mesh Th;
     border e(t=-R, R) {x=L; y=t; label=0;}
     real ratio = 1.0;
     Th = buildmesh(a(-70*ratio) + b(30*ratio) + c(80*ratio) + d(80*ratio) + e(20*ratio));
-    broadcast(processor(0), Th);
     plot(Th);
 }
 

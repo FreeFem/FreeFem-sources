@@ -36,12 +36,12 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX) BernardiRaugel.$(DYLIB_SUFFIX) \
 	pcm2rnm.$(DYLIB_SUFFIX) $(DYLIB_OTHER_COMPILE) ioply.$(DYLIB_SUFFIX) \
 	iovtk.$(DYLIB_SUFFIX) gmsh.$(DYLIB_SUFFIX) MetricKuate.$(DYLIB_SUFFIX) \
 	Element_P1dc1.$(DYLIB_SUFFIX) BinaryIO.$(DYLIB_SUFFIX) \
-	isoline.$(DYLIB_SUFFIX) thresholdings.$(DYLIB_SUFFIX) \
+	isoline.$(DYLIB_SUFFIX) \
 	VTK_writer_3d.$(DYLIB_SUFFIX) VTK_writer.$(DYLIB_SUFFIX) \
 	splitedges.$(DYLIB_SUFFIX) Element_Mixte.$(DYLIB_SUFFIX) Element_Mixte3d.$(DYLIB_SUFFIX) \
 	myfunction2.$(DYLIB_SUFFIX) \
 	MetricPk.$(DYLIB_SUFFIX) FreeFemQA.$(DYLIB_SUFFIX) shell.$(DYLIB_SUFFIX) \
-	@TOOL_DYLIB_pipe@ symmetrizeCSR.$(DYLIB_SUFFIX) BEC.$(DYLIB_SUFFIX) \
+	@TOOL_DYLIB_pipe@ BEC.$(DYLIB_SUFFIX) \
 	bfstream.$(DYLIB_SUFFIX) ff-AiryBiry.$(DYLIB_SUFFIX) \
 	exactpartition.$(DYLIB_SUFFIX) ClosePoints.$(DYLIB_SUFFIX) \
 	Element_HCT.$(DYLIB_SUFFIX) Curvature.$(DYLIB_SUFFIX) Element_P1bl.$(DYLIB_SUFFIX) \
