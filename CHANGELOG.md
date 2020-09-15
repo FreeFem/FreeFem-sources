@@ -34,12 +34,12 @@ All notable changes to this project will be documented in this file.
 - plugins thresholdings, symmetrizeCSR, and fflapack
 
 ### Fixed
+- problem compilation with gfortran-10 of arpack and mumps (add -fallow-argument-mismatch flags- 
 
 ## [4.7]
 ### Added
 
 - new way to build matrix beetween 2d Finite element 2d and Curve finite element to do mortar (Thank to Axel ) , see first example `examples/tutorial/mortar-DN-4-v4.5.edp`
-- compile ffmaster / ffslave example under windows (Thanks to johann@ifado.de)
 - add `Ns` normal vector  in R^3 on meshS (normal of the surface) of current point (to day Ns of [x,y,0] plan  is [0,0,-1])  no be compatibe to exterior normal. 
 - add `Tl` tangent vector in R^3 on meshL (tangent vector of the line/curve) of current point 
 - compile ffmaster / ffslave example under windows (thanks to johann@ifado.de)
