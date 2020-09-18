@@ -187,10 +187,10 @@ download('PETSc','https://www.mcs.anl.gov/petsc/mirror/release-snapshots/petsc-l
 	'petsc-lite-3.13.5.tar.gz',
 	'41ef2cfbf21a755105ab81cacd0f7124');
 
-download('htool','https://github.com/htool-ddm/htool/archive/71818cbf11b109c0c5a9bd3cdbcde76225a2e0b7.zip',
+download('htool','https://github.com/htool-ddm/htool/archive/e008e87bded5626d73fa7655487aee48268e2149.zip',
 		'https://github.com/htool-ddm/',
 		'htool.zip',
-		'9b349a67632d6110143ce174bd18d8b4');
+		'7db381bed51b2afd011f3edbbceeff25');
 
 	
 download('hpddm','https://github.com/hpddm/hpddm/archive/ce6ce80b62e9bc71efedf8b9cb6ffb00dfd6e44e.zip',
@@ -198,10 +198,10 @@ download('hpddm','https://github.com/hpddm/hpddm/archive/ce6ce80b62e9bc71efedf8b
 	'hpddm.zip',
 	'340f81270d5e16faa86a0372d10ce417');
 
-download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/c608875aca175b3bb424c50a9c13131aa7e2b257.zip',
+download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/d327ef63c5abe88b13197c433a019e0db10eb426.zip',
 	'https://github.com/PierreMarchand20/BemTool',
 	'bemtool.zip',
-	'55b1890ce0d688c8694550857f2670da');
+	'cb697ca08fe4cd91e28e91fa5acd2d7a');
 
 download('Boost','https://www.ljll.math.upmc.fr/~tournier/boost_for_bemtool.tar.gz',
 	'https://www.boost.org',
