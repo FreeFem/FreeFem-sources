@@ -150,7 +150,7 @@ namespace bamg {
               strcpy(Gh.name + lll - ls, gsuffix + 1);
             else
               strcpy(Gh.name + lll - ls, gsuffix);
-            cout << " write geo in " << Gh.name << endl;
+            if(verbosity > 1) cout << " write geo in " << Gh.name << endl;
             ofstream f(Gh.name);
             f << Gh;
             Gh.OnDisk = true;
