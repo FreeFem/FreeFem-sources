@@ -190,7 +190,7 @@ download('PETSc','https://www.mcs.anl.gov/petsc/mirror/release-snapshots/petsc-l
 download('htool','https://github.com/htool-ddm/htool/archive/e008e87bded5626d73fa7655487aee48268e2149.zip',
 		'https://github.com/htool-ddm/',
 		'htool.zip',
-		'7db381bed51b2afd011f3edbbceeff25');
+		'7ee614df188cf501c03c5f27d1569b1c');
 
 	
 download('hpddm','https://github.com/hpddm/hpddm/archive/ce6ce80b62e9bc71efedf8b9cb6ffb00dfd6e44e.zip',
@@ -201,7 +201,7 @@ download('hpddm','https://github.com/hpddm/hpddm/archive/ce6ce80b62e9bc71efedf8b
 download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/d327ef63c5abe88b13197c433a019e0db10eb426.zip',
 	'https://github.com/PierreMarchand20/BemTool',
 	'bemtool.zip',
-	'cb697ca08fe4cd91e28e91fa5acd2d7a');
+	'70fcbea1f1bd2e8c8d9c44f59626f934');
 
 download('Boost','https://www.ljll.math.upmc.fr/~tournier/boost_for_bemtool.tar.gz',
 	'https://www.boost.org',
