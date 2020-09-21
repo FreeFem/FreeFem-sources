@@ -2436,7 +2436,13 @@ class SetMesh_Op : public E_F0mps {
   bool arg(int i, Stack stack, bool a) const {
     return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
   }
-
+  KN_< long > arg(int i, int j, Stack stack, KN_< long > a) const {
+    if (nargs[i]) {
+      return GetAny< KN_< long > >((*nargs[i])(stack));
+    } else {
+      return nargs[j] ? GetAny< KN_< long > >((*nargs[j])(stack)) : a;
+    }
+  }
  public:
   SetMesh_Op(const basicAC_F0 &args, Expression aa) : a(aa) {
     args.SetNameParam(n_name_param, name_param, nargs);
@@ -2512,9 +2518,10 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
   int nbe = Th.nbe;
 
   KN< long > zz;
-  KN< long > nrT(arg(0, stack, zz));
-  KN< long > nrB(arg(1, stack, zz));
 
+  KN< long > nrT(arg(0, 2, stack, zz));
+  KN< long > nrB(arg(1, 3, stack, zz));
+  
   // arguments
   Expression freg = nargs[4];
   Expression flab = nargs[5];
@@ -2609,8 +2616,8 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
     if (flab) {
       R3 NN = KE.N(fk);
       double mes = NN.norme( );
-      NN /= mes;
-      mp->set(Th, KE(B), B, KE, K.lab, NN, fk);
+      NN /= mes;		  
+      mp->set(Th, KE(B), B, KE, K.lab, NN, fk);    // problem
       l1 = GetAny< long >((*flab)(stack));
       lmn = min(lmn, bb->lab);
       lmx = max(lmx, bb->lab);
