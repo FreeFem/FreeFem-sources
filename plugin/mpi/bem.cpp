@@ -1059,7 +1059,6 @@ class OP_MakeBemKernelFunc {
       B type = GetAny< B >((*b)(s));
       Complex alpha=1.;//(arg(0, s, 1));
       Complex k(arg(0, s, Complex(0.,0.)));
-        cout << "OP_MakeBemKernelFunc: k = "<< k << " " <<  nargs[0] << endl;
       A bemker = new BemKernel(type,alpha,k);
       return SetAny< A >(bemker);
     }
