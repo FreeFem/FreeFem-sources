@@ -120,10 +120,10 @@ HMatrix<complex> TDL, SL;
         ChangeNumbering(ASurf, glob2loc[], perm);
     }
 
-    varf varfTDL(u,v) = int1dx1d(ThG)(ThG)(BEM(Kernel("TDL",k=k),u,v)) + int1d(ThG)(0.5*u*v);  
+    varf varfTDL(u,v) = int1dx1d(ThG)(ThG)(BEM(BemKernel("TDL",k=k),u,v)) + int1d(ThG)(0.5*u*v);  
 
     TDL = varfTDL(UhG, UhG);
-    varf varfSL(u,v) = int1dx1d(ThG)(ThG)(BEM(Kernel("SL",k=k),u,v));
+    varf varfSL(u,v) = int1dx1d(ThG)(ThG)(BEM(BemKernel("SL",k=k),u,v));
     SL = varfSL(UhG, UhG);
 }
 func complex[int] opSurf(complex[int]& in) {
@@ -136,7 +136,7 @@ func complex[int] opSurf(complex[int]& in) {
 }
 complex[int,int] dense(1, 1);
 {
-    varf varfSL(u,v) = int1dx1d(ThL)(ThL)(BEM(Kernel("SL",k=k),u,v));
+    varf varfSL(u,v) = int1dx1d(ThL)(ThL)(BEM(BemKernel("SL",k=k),u,v));
     HMatrix<complex> A = varfSL(VhS, VhS, commworld=mpiCommSelf);
     dense.resize(VhS.ndof, VhS.ndof);
     dense = A;

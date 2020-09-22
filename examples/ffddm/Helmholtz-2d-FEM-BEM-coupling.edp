@@ -113,11 +113,11 @@ ffddmbuildDfespace(F, F, complex, def, init, P1)
 ffddmbuildDfespace(B, B, complex, def, init, P1)
 
 macro VarfSL(varfName, meshName, PhName)
-  varf varfName(u,v) = int1dx1d(meshName)(meshName)(BEM(Kernel("SL",k=k),u,v));
+  varf varfName(u,v) = int1dx1d(meshName)(meshName)(BEM(BemKernel("SL",k=k),u,v));
 //
 
 macro VarfTDL(varfName, meshName, PhName)
-varf varfName(u,v) = int1dx1d(meshName)(meshName)(BEM(Kernel("TDL",k=k),u,v)) + int1d(meshName)(0.5*u*v);  
+varf varfName(u,v) = int1dx1d(meshName)(meshName)(BEM(BemKernel("TDL",k=k),u,v)) + int1d(meshName)(0.5*u*v);  
 
 // assemble BEM blocks :
 ffddmprecond = "ras";
@@ -273,7 +273,7 @@ broadcast(processor(0),ThOut);
 
 fespace UhOut(ThOut,P1);
 
-varf vp(u,v)=int1d(ThL)(POT(Potential("SL",k=k),u,v));
+varf vp(u,v)=int1d(ThL)(POT(BemPotential("SL",k=k),u,v));
 HMatrix<complex> B = vp(BVhglob,UhOut);
 if (mpirank == 0) cout << B.infos << endl;
 //display(B);

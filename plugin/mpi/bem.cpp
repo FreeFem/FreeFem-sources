@@ -1058,7 +1058,8 @@ class OP_MakeBemKernelFunc {
     AnyType operator( )(Stack s) const {
       B type = GetAny< B >((*b)(s));
       Complex alpha=1.;//(arg(0, s, 1));
-      Complex k(arg(0, s, 0));
+      Complex k(arg(0, s, Complex(0.,0.)));
+        cout << "OP_MakeBemKernelFunc: k = "<< k << " " <<  nargs[0] << endl;
       A bemker = new BemKernel(type,alpha,k);
       return SetAny< A >(bemker);
     }
@@ -1073,6 +1074,7 @@ class OP_MakeBemKernelFunc {
 
 OP_MakeBemKernelFunc::Op::Op(const basicAC_F0 &args)
   : b(to< B >(args[0])) {
+   //   cout << "\n\n ****  OP_MakeBemKernelFunc::Op::Op() \n\n" << endl;
   args.SetNameParam(n_name_param, name_param, nargs);
 }
 
@@ -2344,9 +2346,11 @@ static void Init_Bem() {
         
     Global.Add("BEM","(",new FormalKBEMcode);
     Global.Add("POT","(",new FormalPBEMcode);
-    Global.Add("Kernel","(",new FormalBemKernel);
-    Global.Add("Potential","(",new FormalBemPotential);
-    
+ //   Global.Add("Kernel","(",new FormalBemKernel);
+    Add< pBemKernel >("<--","(",new FormalBemKernel);
+//    Global.Add("Potential","(",new FormalBemPotential);
+    Add< pBemPotential >("<--","(",new FormalBemPotential);
+
     Global.Add("int2dx2d","(",new OneOperatorCode<CPartBemDI2d2d>);
     Global.Add("int1dx1d","(",new OneOperatorCode<CPartBemDI1d1d>);
     Global.Add("int1dx2d","(",new OneOperatorCode<CPartBemDI1d2d>);

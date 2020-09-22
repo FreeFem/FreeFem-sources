@@ -1576,6 +1576,17 @@ class AC_F0: public basicAC_F0 { //  a Array of [[C_F0]]
        if ( ! (a&& nb<MaxSize))
          CompileError("Sorry  number of parameters > 1024");
        a[nb++]=c;return *this;} 
+  AC_F0 & operator+=(const AC_F0& c) {
+         if ( ! (a&& nb<MaxSize-c.size()))
+           CompileError("Sorry  number of parameters > 1024");
+        for(int j=0; j<c.size();++j)
+         a[nb++]=c[j];
+      // add named parameter ..
+      ffassert( named_parameter==0);
+      if(c.named_parameter)
+      named_parameter=new maptype(*c.named_parameter);// copy la map   !!!!!
+     
+        return *this;}
   AC_F0 & Add(const char * nm,const C_F0 &c)  {
      if (!named_parameter) named_parameter=new maptype();
     iterator i=named_parameter->find(nm);
