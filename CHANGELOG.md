@@ -27,11 +27,13 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 ### Changed
+- change the language definition to use tyep as a construction function with named arguments for bem plugin
+  
 
 ### Deprecated
 
 ### Removed
-- plugins thresholdings, symmetrizeCSR, and fflapack
+- plugins thresholdings, symmetrizeCSR, and fflapack and associed example
 
 ### Fixed
 - problem compilation with gfortran-10 of arpack and mumps (add -fallow-argument-mismatch flags- 
