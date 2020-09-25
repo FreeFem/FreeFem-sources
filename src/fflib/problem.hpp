@@ -1250,10 +1250,45 @@ struct CGMatVirtPreco : CGMatVirt<int,R>
     }
 };
 
+/*template<class MMesh>
+const MMesh* integrationMesh(const list<C_F0> & largs,Stack stack)
+{
+    list<C_F0>::const_iterator ii,ib=largs.begin(),
+    ie=largs.end();
+    //Mesh Thbf;
+    // bool VVF =false;
+    for (ii=ib;ii != ie;ii++)
+    {
+        Expression e=ii->LeftValue();
+        aType r = ii->left();
+        if (r==atype<const  FormBilinear *>())
+        {
+            const  FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
+            const MMesh* Thbf = GetAny<const Mesh *>((*bb->di->Th)(stack));
+            //if (Thbf != Thu) return false;
+            cout << " ************* test axel " << endl;return Thbf;
+        }
+        else if (r==atype<const  FormLinear *>())
+        {
+            const  FormLinear * bb=dynamic_cast<const  FormLinear *>(e);
+            const MMesh* Thbf = GetAny<const Mesh *>((*bb->di->Th)(stack));
+            //if (Thbf != Thu) return false;
+            cout << " ************* test axel " << endl;return Thbf;
+        }
+    }
+}
+template<>
+const Mesh* integrationMesh<Mesh>(const list<C_F0> & largs,Stack stack);
+template<>
+const Mesh3* integrationMesh<Mesh3>(const list<C_F0> & largs,Stack stack);
+template<>
+const MeshS* integrationMesh<MeshS>(const list<C_F0> & largs,Stack stack);
+template<>
+const MeshL* integrationMesh<MeshL>(const list<C_F0> & largs,Stack stack);
+*/
 template<class R,class MMesh,class v_fes1,class v_fes2>
 AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
 {
-    
   typedef typename  MMesh::Element Element;
   typedef typename  MMesh::Vertex Vertex;
   typedef typename  MMesh::RdHat RdHat;
@@ -1263,20 +1298,11 @@ AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stac
   typedef typename  v_fes1::FESpace FESpace1;
   typedef typename  FESpace1::Mesh Mesh1;
   typedef typename  FESpace1::FElement FElement1;
-  typedef typename  Mesh1::Element Element1;
-  typedef typename  Mesh1::Vertex Vertex1;
-  typedef typename  Mesh1::RdHat RdHat1;
-  typedef typename  Mesh1::Rd Rd1;
     
   typedef typename  v_fes2::pfes pfes2;
   typedef typename  v_fes2::FESpace FESpace2;
   typedef typename  FESpace2::Mesh Mesh2;
   typedef typename  FESpace2::FElement FElement2;
-  typedef typename  Mesh2::Element Element2;
-  typedef typename  Mesh2::Vertex Vertex2;
-  typedef typename  Mesh2::RdHat RdHat2;
-  typedef typename  Mesh2::Rd Rd2;
- 
   assert(b && b->nargs);// *GetAny<pfes * >
   pfes1  * pUh= GetAny<pfes1 *>((*b->euh)(stack));
   pfes2  * pVh= GetAny<pfes2 *>((*b->evh)(stack));
@@ -1300,11 +1326,10 @@ AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stac
   Matrice_Creuse<R> & A( * GetAny<Matrice_Creuse<R>*>((*a)(stack)));
   if(init) A.init(); //
   if( ! PUh || ! PVh) return SetAny<Matrice_Creuse<R>  *>(&A);
-    const FESpace1 & Uh =  *PUh ;
-    const FESpace2 & Vh =  *PVh ;
-
-
-  const Mesh1 & Th = Uh.Th;
+  const FESpace1 & Uh =  *PUh ;
+  const FESpace2 & Vh =  *PVh ;
+  const MMesh* pTh = (is_same< Mesh1, Mesh2 >::value) ? (MMesh*)&PUh->Th : 0;
+  const MMesh &Th= *pTh ;    // integration Th
   bool same=isSameMesh(b->largs,&Uh.Th,&Vh.Th,stack);
   if ( same)
    {
