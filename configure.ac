@@ -2056,8 +2056,12 @@ AC_SUBST(DYLIB_SUFFIX,$ff_suffix_dylib)
 #  the doc is now in https://github.com/FreeFem/FreeFem-doc-pdf/blob/master/freefem%2B%2Bdoc.pdf
 # Checking wether we can generate some documentation
 # --------------------------------------------------
+case "$F77" in 
+*gfortran*)
 CHECK_COMPILE_FLAG(Fortran 77,[-fallow-argument-mismatch],FFLAGS)
-CHECK_COMPILE_FLAG(Fortran,[-fallow-argument-mismatch],FCFLAGS)
+CHECK_COMPILE_FLAG(Fortran,[-fallow-argument-mismatch],FCFLAGS) 
+;;
+esac
 
 dnl
 dnl AC_CHECK_PROG(ff_latex,latex,yes,no)
