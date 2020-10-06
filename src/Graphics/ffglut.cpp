@@ -3740,6 +3740,9 @@ void Display(void)
 static void Mouse( int button,int state,int x,int y )
 {
     // state up or down
+    x *= kscreenscale;
+    y *= kscreenscale;
+
     OneWindow * win=CurrentWin();
     keyact = glutGetModifiers();
     switch(button)
@@ -3767,6 +3770,8 @@ static void Mouse( int button,int state,int x,int y )
 static void MotionMouse(int x,int y )
 {
     OneWindow * win=CurrentWin();
+    x *= kscreenscale;
+    y *= kscreenscale;
     switch(casemouse)
     {
         case GLUT_LEFT_BUTTON:
@@ -3810,6 +3815,8 @@ static void MotionMouse(int x,int y )
 
 static void Key( unsigned char key, int x, int y )
 {
+    x *= kscreenscale;
+    y *= kscreenscale;
     OneWindow * win=CurrentWin();
     if(!win->theplot)return;
     if(debug>1) cout << "Key winnum:  " <<win->theplot->winnum << endl;
