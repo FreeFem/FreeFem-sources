@@ -121,6 +121,18 @@ struct set_Inv_pKN_longI: public binary_function<A,B,A> {
   }
 };
 
+long findall(const  KN_<long> & a,  const long &v,  KN<long> * const &  pI)
+{
+    long nn=0,k=0;;
+    KN<long> & I=*pI;
+    for(int i=0; i<a.N();++i)
+       if( a[i]==v) nn++;
+    I.resize(nn);
+    for(int i=0; i<a.N();++i)
+    if( a[i]==v) I[k++]=i;
+    return nn;
+}
+
 
 
 void initArrayOperatorlong()
@@ -129,6 +141,8 @@ void initArrayOperatorlong()
   Dcl_Type< Eye > ();// OK this is the fist array def ..
   Global.Add("eye","(",new OneOperator1<Eye,long>(fEye));
   Global.Add("eye","(",new OneOperator2<Eye,long>(fEye));
+  Global.Add("findall", "(", new OneOperator3_< long, KN_<long>, long ,KN<long>*>(findall));// oct 2020 FH.
+
   ArrayOperator<long, long>();
   // to define inverse permutation // Add FH mars 2005
   TheOperators->Add("^", new OneBinaryOperatorInv_KN_long(atype<KN_<long> >()));
