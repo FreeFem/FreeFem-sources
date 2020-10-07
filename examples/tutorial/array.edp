@@ -471,6 +471,7 @@ cout << vh.n <<endl;
 	cout << I << endl;
 	cout  << " max "<< I.max << " min  " << I.min << " sum " << I.sum << " " << I.n << endl;
 	//assert(I.n==0);// attention I.sum bug before v 4.7.1
+	verbosity=10; 
 	I=findall(XX,1,I);
 	cout << I << " " << I.sum << endl;
 	assert(I.sum==0+3+4);
