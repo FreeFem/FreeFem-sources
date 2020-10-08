@@ -46,7 +46,7 @@ using namespace std;
 #include "Mesh3dn.hpp"
 
 #include "PlotStream.hpp"
-double kccc = 1; // to solve  bug on MacOS Catalina , wrong value in resize
+double kscreenscale = 1; // to solve  bug on MacOS Catalina , wrong value in resize
 extern long verbosity;
 int glutscreenscale=1;//  High Resolution Explained: Features and Benefit
 // add for the gestion of the endianness of the file.
@@ -399,7 +399,7 @@ void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot
         {
             lok[kk]=1;
             glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
-            glLineWidth(2);
+            glLineWidth(2*kscreenscale);
             glBegin(GL_LINES);
             for (int i=0;i<Th.nbBrdElmts();i++)
             {
@@ -411,7 +411,7 @@ void Plot(const Mesh & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plot
 
             }
             glEnd();
-            glLineWidth(1);
+            glLineWidth(kscreenscale);
             glEndList();  // fin de la list
         }
         else ;
@@ -511,7 +511,7 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
         {
             lok[kk]=1;
             glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
-            glLineWidth(1);
+            glLineWidth(kscreenscale);
             glAlphaFunc ( GL_GREATER, 0.1 ) ;
             glEnable(GL_ALPHA_TEST) ;
             if(!plotmesh)
@@ -533,7 +533,7 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
             }
             glEnd();
             glDisable(GL_LINE_STIPPLE);
-            glLineWidth(1);
+            glLineWidth(kscreenscale);
             glDisable(GL_ALPHA_TEST) ;
 
             glEndList();  // fin de la list
@@ -547,7 +547,7 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
         {
             lok[kk]=1;
             glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
-            glLineWidth(1);
+            glLineWidth(kscreenscale);
             glPolygonMode(GL_FRONT,GL_FILL);//GL_FILL
             glBegin(GL_TRIANGLES);
             for (int i=0;i<Th.nbe;i++)
@@ -563,7 +563,7 @@ void Plot(const Mesh3 & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
             }
             glEnd();
             glDisable(GL_LINE_STIPPLE);
-            glLineWidth(1);
+            glLineWidth(kscreenscale);
             glDisable(GL_ALPHA_TEST) ;
 
             glEndList();  // fin de la list
@@ -598,7 +598,7 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & pl
         {
             lok[kk]=1;
             glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
-            glLineWidth(2);
+            glLineWidth(2*kscreenscale);
             glBegin(GL_LINES);
             for (int i=0;i<Th.nbBrdElmts();i++)
             {
@@ -610,7 +610,7 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & pl
 
             }
             glEnd();
-            glLineWidth(1);
+            glLineWidth(kscreenscale);
             glEndList();  // fin de la list
         }
         else ;
@@ -668,7 +668,7 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & pl
        if (debug>5) cout << " plot Normal element at triangles " << pNormalT << endl;
             R h = 8*win->hpixel;
             coef = coef*sqrt(Th.mes/Th.nt);
-            glLineWidth(0.5);
+            glLineWidth(0.5*kscreenscale);
             glColor3f(1,0,0);
 
             for (int i=0;i<Th.nt; i = 0 ? i++ : i+=nbN) {
@@ -693,7 +693,7 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & pl
                 dny *= -coef/dny.norme()/5;
                 dnz *= -coef/dnz.norme()/5;
 
-                glLineWidth(1);
+                glLineWidth(kscreenscale);
                 glBegin(GL_LINES);
                 win->Seg3(NN,NN+dd+dnx);
                 win->Seg3(NN,NN+dd-dnx);
@@ -703,7 +703,7 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & pl
                 win->Seg3(NN,NN+dd-dnz);
                 glEnd();
             }
-            glLineWidth(1);
+            glLineWidth(kscreenscale);
         }
   
 
@@ -758,7 +758,7 @@ void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
         else {
             lok[kk]=1;
             glNewList(gllists+kk,GL_COMPILE_AND_EXECUTE ); // save  la list sans affichage
-            glLineWidth(2);
+            glLineWidth(2*kscreenscale);
             //glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);//GL_FILL
             glBegin(GL_LINES);
             for (int i=0;i<Th.nt;i++) {
@@ -769,7 +769,7 @@ void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
                 
             }
             glEnd();
-            glLineWidth(1);
+            glLineWidth(kscreenscale);
             glEndList();
         }
     }
@@ -795,7 +795,7 @@ void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
     }
     if (pNormalT) {
         coef = coef*(Th.mes/Th.nt);
-        glLineWidth(0.5);
+        glLineWidth(0.5*kscreenscale);
         glColor3f(1,0,0);
 
         for (int i=0;i<Th.nt; i = 0 ? i++ : i+=nbN) {
@@ -820,7 +820,7 @@ void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
             dny *= -coef/dny.norme()/5;
             dnz *= -coef/dnz.norme()/5;
 
-            glLineWidth(1);
+            glLineWidth(kscreenscale);
             glBegin(GL_LINES);
             win->Seg3(NN,NN+dd+dnx);
             win->Seg3(NN,NN+dd-dnx);
@@ -830,7 +830,7 @@ void Plot(const MeshL & Th,bool fill,bool plotmesh,bool plotborder,ThePlot & plo
             win->Seg3(NN,NN+dd-dnz);
             glEnd();
         }
-        glLineWidth(1);
+        glLineWidth(kscreenscale);
     }
     ShowGlerror("end MeshL plot");
     
@@ -1700,12 +1700,12 @@ void OnePlotBorder::Draw(OneWindow *win)
             R3 dd = uv*(-h/l);
             R3 dnx = (dd^nx)*0.7, dny = (dd^ny)*0.7, dnz = (dd^nz)*0.7;
             
-            glLineWidth(2);
+            glLineWidth(2*kscreenscale);
             glBegin(GL_LINES);
             win->Seg3(Po,Pn);
             glEnd();
 
-            glLineWidth(1);
+            glLineWidth(kscreenscale);
             glBegin(GL_LINES);
             if(j!=1) {
               win->Seg3(Po,Po+dd+dnx);
@@ -1744,12 +1744,12 @@ void OnePlotBorder::Draw(OneWindow *win)
 
             R2 dd = uv*(-h/l);
             R2 dn = dd.perp()*0.5;
-            glLineWidth(2);
+            glLineWidth(2*kscreenscale);
             glBegin(GL_LINES);
             win->Seg(Po,Pn);
             glEnd();
 
-            glLineWidth(1);
+            glLineWidth(kscreenscale);
             glBegin(GL_LINES);
             if(j!=1)
             {
@@ -1921,7 +1921,7 @@ void OnePlotHMatrix::Draw(OneWindow *win)
     glEnd();
   }
 
-  glLineWidth(1);
+  glLineWidth(kscreenscale);
   glColor3f(0,0,0);
   glBegin(GL_LINES);
 
@@ -3195,14 +3195,15 @@ void OneWindow::PlotValue(const KN_<double> & Viso,int  k0,const char * cmm)
 {
 
     ShowGlerror("PlotValue b");
-    if((debug > 10)) cout << "PlotValue:" << cmm << " " << k0 << " " << width << " " <<height << endl;
+    if((debug > 10)) cout << "PlotValue:" << cmm << " " << k0 << " " << width << " " <<height << " " << kscreenscale << endl;
     R xmin=0,xmax=width,ymin=0,ymax=height;
     if((debug > 10)) cout << "PlotValue " << Viso << endl;
 
     R dx=(xmax-xmin);
     R dy=(ymax-ymin);
     //  10 points
-    R h=10;
+    R h=10*kscreenscale;
+    if( kscreenscale==2) h = 24;// BofBof F.H
     R ho=h*1.1;
     R x0=xmin+dx*0.85;
     R y= ymin+dy*0.97;
@@ -3243,7 +3244,8 @@ void  plot(double xx,double yy,const char *cmm,int font)
     float x[4];
     glGetFloatv(GL_CURRENT_RASTER_POSITION,x);
     if((debug > 10)) cout<<"avant x : "<<x[0]<<" y : "<<x[1]<<" z : "<<x[2]<< " " << xx <<" " << yy << endl;
-    void * glut_font=GLUT_BITMAP_TIMES_ROMAN_10;
+    void * glut_font=GLUT_BITMAP_HELVETICA_18;
+    if(kscreenscale==2) glut_font=GLUT_BITMAP_TIMES_ROMAN_24;
     switch (font)
     {
         case  0: glut_font=GLUT_STROKE_ROMAN;break;
@@ -3602,7 +3604,7 @@ void ThePlot::DrawIsoEfill(const R3 Pt[2],const R ff[2],const R3 Nt[2],const R *
                 else if(viewdim==2)
                     P[i]= R3(PQ[i].x,PQ[i].y,rapz*z[i]);
       
-            glLineWidth(3);
+            glLineWidth(3*kscreenscale);
             glPolygonMode(GL_FRONT,GL_LINE);
            
             glBegin(GL_LINES);
@@ -3611,7 +3613,7 @@ void ThePlot::DrawIsoEfill(const R3 Pt[2],const R ff[2],const R3 Nt[2],const R *
                 glVertex3f(P[i].x, P[i].y, P[i].z);
             }
             glEnd();
-            glLineWidth(1);
+            glLineWidth(kscreenscale);
         }
     }
 }
@@ -3670,8 +3672,8 @@ static void Reshape( int width, int height )
 {
      GLint pView[4];
  
-    width*= kccc;
-    height*= kccc;
+    width*= kscreenscale;
+    height*= kscreenscale;
   //  cout << " width " << width << " "<<height << endl;
     OneWindow * win=CurrentWin();
     if(win)
@@ -3738,6 +3740,9 @@ void Display(void)
 static void Mouse( int button,int state,int x,int y )
 {
     // state up or down
+    x *= kscreenscale;
+    y *= kscreenscale;
+
     OneWindow * win=CurrentWin();
     keyact = glutGetModifiers();
     switch(button)
@@ -3765,6 +3770,8 @@ static void Mouse( int button,int state,int x,int y )
 static void MotionMouse(int x,int y )
 {
     OneWindow * win=CurrentWin();
+    x *= kscreenscale;
+    y *= kscreenscale;
     switch(casemouse)
     {
         case GLUT_LEFT_BUTTON:
@@ -3808,6 +3815,8 @@ static void MotionMouse(int x,int y )
 
 static void Key( unsigned char key, int x, int y )
 {
+    x *= kscreenscale;
+    y *= kscreenscale;
     OneWindow * win=CurrentWin();
     if(!win->theplot)return;
     if(debug>1) cout << "Key winnum:  " <<win->theplot->winnum << endl;
@@ -4249,11 +4258,11 @@ int main(int argc,  char** argv)
     GLint pView[4];
     glGetIntegerv(GL_VIEWPORT, pView);
  // hack to correct bug in Catalina , incompatibility Width and pView (glutscreenscale???)
-    kccc = (double) ( pView[2]- pView[0])/ (double) (Width+1) ;
-    if (kccc < 0.1) kccc= 1;
-    if(kccc > 10.) kccc=1;
+    kscreenscale = (double) ( pView[2]- pView[0])/ (double) (Width+1) ;
+    if (kscreenscale < 0.1) kscreenscale= 1;
+    if(kscreenscale > 10.) kscreenscale=1;
     if( debug>1 )
-    cout << "pView " << pView[0]<< " "<< pView[1]<< " "<< pView[2]<< " "<< pView[3]<< " kccc=  " << kccc << endl;
+    cout << "pView " << pView[0]<< " "<< pView[1]<< " "<< pView[2]<< " "<< pView[3]<< " kscreenscale=  " << kscreenscale << endl;
     
     Num2Windows[0]=iw0;
     glDisable(GL_DEPTH_TEST);

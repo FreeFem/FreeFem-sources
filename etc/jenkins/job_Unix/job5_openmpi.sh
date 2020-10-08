@@ -28,7 +28,7 @@ test -f "$change_compiler" && source "$change_compiler"
 # configuration & build
 autoreconf -i \
   && ./configure  --enable-download --enable-debug --prefix=/builds/workspace/freefem --enable-bemtool=no \
-  && ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,ARPACK,Gmm++,MMG3D,mshmet,MUMPS,htool \
+  && ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS,htool \
   && ./etc/jenkins/blob/build_PETSc.sh \
   && ./etc/jenkins/blob/build.sh
 

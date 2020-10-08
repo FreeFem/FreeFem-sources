@@ -34,7 +34,7 @@ border beb(tt=0, 1) {real t=tt^1.2; x=t*L; y=-R; label=1;}
 border beu(tt=1, 0) {real t=tt^1.2; x=t*L; y=R; label=1;}
 border beo(t=-R, R) {x=L; y=t; label=0;}
 border bei(t=-R/4, R/4) {x=L/2; y=t; label=0;}
-mesh Th = buildmesh(cc(-50) + ce(30) + beb(20) + beu(20) + beo(10) + bei(10));
+mesh Th = buildmesh(cc(-40) + ce(20) + beb(15) + beu(15) + beo(8) + bei(10));
 plot(Th);
 
 // Macro
@@ -112,3 +112,4 @@ while(1) {
 		p = pp;
 	}
 }
+cout << " CPU "<< clock()<< " s " << endl;

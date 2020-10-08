@@ -238,7 +238,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
                     PMMG_ARG_dim,3,PMMG_ARG_MPIComm,comm,
                     PMMG_ARG_end);
 
-  KN< KN< long > >* communicators = nargs[31] ? GetAny< KN< KN< long > >* >((*nargs[31])(stack)) : 0;
+  KN< KN< long > >* communicators = nargs[32] ? GetAny< KN< KN< long > >* >((*nargs[32])(stack)) : 0;
   ffmesh_to_PMMG_pParMesh(Th, mesh, communicators != NULL);
 
   int root = mesh->info.root;

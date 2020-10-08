@@ -154,7 +154,7 @@ pacman -S autoconf automake-wrapper bash bash-completion \
     mingw-w64-x86_64-openblas mintty msys2-keyring msys2-launcher-git \
     msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
     perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
-    mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-arpack mingw-w64-x86_64-cmake
+    mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-cmake
 pacman -R mingw-w64-x86_64-gcc-ada mingw-w64-x86_64-gcc-objc mingw-w64-x86_64-gdb mingw-w64-x86_64-python
 ```
 [MSMPI 10.1.2](https://www.microsoft.com/en-us/download/details.aspx?id=100593)
