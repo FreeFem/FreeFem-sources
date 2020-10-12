@@ -1215,29 +1215,33 @@ void GenericDataFindBoundary<Mesh>::gnuplot(const string & fn)
             }}
     }
 }
-inline void Plambla(int dhat,const Fem2D::R2 *Q,Fem2D::R2 &P,double *l)
+inline double Plambla(int dhat,const Fem2D::R2 *Q,Fem2D::R2 &P,double *l)
 {
     ffassert(0); //  to do
 }
-inline void Plambla(int dhat,const Fem2D::R1 *Q,Fem2D::R1 &P,double *l)
+inline double Plambla(int dhat,const Fem2D::R1 *Q,Fem2D::R1 &P,double *l)
 {
     ffassert(0); //  to do
 }
 
-inline void Plambla(int dhat,const Fem2D::R3 *Q,Fem2D::R3 &P,double *l)
+inline double  Plambla(int dhat,const Fem2D::R3 *Q,Fem2D::R3 &P,double *l)
 {
     using Fem2D::R3 ;
+    double dd=0;
     if(dhat==1)
     {
         R3 AB(Q[0],Q[1]), AP(Q[0],P);
-        l[1] = (AP,AB)/(AB,AB);
+        double ab2=(AB,AB);
+        l[1] = (AP,AB)/ab2;
         l[0] = 1- l[1];
+        dd= ab2;
     }
     else if(dhat==2)
     {
         R3 AB(Q[0],Q[1]), AC(Q[0],Q[2]);
         R3 N = AB^AC ;
         double N2 = (N,N);
+        dd = N2;
         l[0] = det(Q[1]-P   ,Q[2]-P   ,N)/N2;
         l[1] = det(P   -Q[0],Q[2]-Q[0],N)/N2;
         l[2] = 1-l[0]-l[1];
@@ -1245,12 +1249,14 @@ inline void Plambla(int dhat,const Fem2D::R3 *Q,Fem2D::R3 &P,double *l)
     else if( dhat==3)
     {
         double d=det(Q[0],Q[1],Q[2],Q[3]);
+        dd = d;
         l[0]=det(P,Q[1],Q[2],Q[3])/d;
         l[1]=det(Q[0],P,Q[2],Q[3])/d;
         l[2]=det(Q[0],Q[1],P,Q[3])/d;
         l[3]= 1- l[0]-l[1]-l[2];
     }
     else assert(0);
+    return dd;
 }
 inline double dist2(int dhat,const Fem2D::R2 *Q,Fem2D::R2 &P,double *l,double *dl)
 {
@@ -1398,14 +1404,20 @@ int GenericDataFindBoundary<Mesh>::Find(typename Mesh::Rd PP,double *l,int & out
             for(int i=0; i< nI;++i)
                 I[i]=Element::nvadj[e][i];
         }
+        
+        
         for(int i=0; i< nI;++i)
             Q[i]=K[I[i]];
         
-        Plambla(nI-1,Q,PP,ll);
+        double ddeps=Plambla(nI-1,Q,PP,ll);//  return une taille ^2, ^4, ^3 suivant la dim  nI-1
         R d2 = dist2(nI-1,Q,PP,ll,lpj);
          if( dnu > d2)
         {
-            deps = K.mesure()/100.;
+            if( nI==2)
+                deps =ddeps/10000.;
+            else if (nI==3)
+                deps = sqrt(ddeps)/10000.; // epaisseur de l'objet au carre 1.100 de
+            else ffassert(0);
             nu = k;
             ne= e;
             dnu=d2;
