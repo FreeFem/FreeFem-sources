@@ -108,7 +108,7 @@ int PMMG_pParMesh_to_ffmesh(const PMMG_pParMesh& mesh, Mesh3 *&T_TH3, bool distr
         bb++->set(v, iv, lab);
       }
 
-      T_TH3 = new Mesh3(nVertices, nTetrahedra, nTriangles, v, t, b, 1);
+      T_TH3 = new Mesh3(nVertices, nTetrahedra, nTriangles, v, t, b, 1, 1);
 
       if (verbosity > 1) {
         cout << "transformation maillage --> mesh3 " << endl;
