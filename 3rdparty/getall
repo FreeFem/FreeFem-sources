@@ -174,14 +174,14 @@ download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
 	'http://www.tetgen.org/1.5/src/',
 	'tetgen1.5.1-beta1.tar.gz',
 	'3d55c197bcbfc611b7ced6f343643756');
-download('mmg','https://github.com/MmgTools/mmg/archive/647ca97dea53051c2beb5e138358bae62f8370a7.zip',
+download('mmg','https://github.com/MmgTools/mmg/archive/d422182c8118124b15aba1b1f2e6fb38e85fd6ba.zip',
         'https://github.com/MmgTools',
         'mmg.zip',
-        '2029415e8a235bff63784f4abe16b8c9');
-download('parmmg','https://github.com/MmgTools/ParMmg/archive/f9e4cd6e8d8179814e0b5b0040323c1095550d2d.zip',
+        'fb901db738e0fcbec6e3c4ab6d67e8cc');
+download('parmmg','https://github.com/MmgTools/ParMmg/archive/9dfc99b9a1b06fd12acb72e298ddb78d64c9c229.zip',
         'https://github.com/MmgTools',
         'parmmg.zip',
-        'c2cefba927fad156bc6e143eb1623891');
+        'f6d4fb00e4c92799008c4b05db5b7f47');
 download('PETSc','https://www.mcs.anl.gov/petsc/mirror/release-snapshots/petsc-lite-3.14.0.tar.gz',
 	'https://www.mcs.anl.gov/petsc/mirror/release-snapshots/',
 	'petsc-lite-3.14.0.tar.gz',
