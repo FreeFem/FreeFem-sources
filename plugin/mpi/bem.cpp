@@ -2,6 +2,8 @@
 //ff-c++-cpp-dep:
 // for def  M_PI under windows in <cmath>
 #define _USE_MATH_DEFINES
+
+#define BOOST_NO_CXX17_IF_CONSTEXPR
 #include <ff++.hpp>
 #include <AFunction_ext.hpp>
 #include <lgfem.hpp>
