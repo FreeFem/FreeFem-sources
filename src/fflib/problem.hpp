@@ -1250,42 +1250,7 @@ struct CGMatVirtPreco : CGMatVirt<int,R>
     }
 };
 
-/*template<class MMesh>
-const MMesh* integrationMesh(const list<C_F0> & largs,Stack stack)
-{
-    list<C_F0>::const_iterator ii,ib=largs.begin(),
-    ie=largs.end();
-    //Mesh Thbf;
-    // bool VVF =false;
-    for (ii=ib;ii != ie;ii++)
-    {
-        Expression e=ii->LeftValue();
-        aType r = ii->left();
-        if (r==atype<const  FormBilinear *>())
-        {
-            const  FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
-            const MMesh* Thbf = GetAny<const Mesh *>((*bb->di->Th)(stack));
-            //if (Thbf != Thu) return false;
-            cout << " ************* test axel " << endl;return Thbf;
-        }
-        else if (r==atype<const  FormLinear *>())
-        {
-            const  FormLinear * bb=dynamic_cast<const  FormLinear *>(e);
-            const MMesh* Thbf = GetAny<const Mesh *>((*bb->di->Th)(stack));
-            //if (Thbf != Thu) return false;
-            cout << " ************* test axel " << endl;return Thbf;
-        }
-    }
-}
-template<>
-const Mesh* integrationMesh<Mesh>(const list<C_F0> & largs,Stack stack);
-template<>
-const Mesh3* integrationMesh<Mesh3>(const list<C_F0> & largs,Stack stack);
-template<>
-const MeshS* integrationMesh<MeshS>(const list<C_F0> & largs,Stack stack);
-template<>
-const MeshL* integrationMesh<MeshL>(const list<C_F0> & largs,Stack stack);
-*/
+
 template<class R,class MMesh,class v_fes1,class v_fes2>
 AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
 {

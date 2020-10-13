@@ -5794,13 +5794,14 @@ void init_lgfem( ) {
   Dcl_Type< const Call_FormLinear< MeshL, v_fesL > * >( );      //   to set Vector 3D curve
   Dcl_Type< const Call_FormBilinear< MeshL, v_fesL, v_fesL > * >( );    // to set Matrix 3D curve
   // bem integration space/target space must be review Axel 08/2020
-  Dcl_Type< const Call_FormBilinear< MeshL, v_fesL, v_fesS > * >( );
   Dcl_Type< const Call_FormBilinear< MeshS, v_fesS, v_fesL > * >( );
   Dcl_Type< const Call_FormBilinear< MeshL, v_fesL, v_fes> * >( );   // 3D curve / 2D on meshL
   Dcl_Type< const Call_FormBilinear< MeshL, v_fes, v_fesL> * >( );   // 2D / 3D curve on meshL
   Dcl_Type< const Call_FormBilinear< MeshS, v_fesS, v_fes3> * >( );   // 3D Surf / 3D volume on meshS
   Dcl_Type< const Call_FormBilinear< MeshS, v_fes3, v_fesS> * >( );   // 3D volume / 3D Surf on meshS
-
+  Dcl_Type< const Call_FormBilinear< MeshL, v_fesL, v_fesS> * >( );   // 3D curve / 3D Surf on meshL
+  Dcl_Type< const Call_FormBilinear< MeshL, v_fesS, v_fesL> * >( );   // 3D Surf / 3D curve on meshL and bem
+        
   Dcl_Type< const Call_FormBilinear< MeshS, v_fesS, v_fes> * >( );
         
   Dcl_Type< interpolate_f_X_1< double >::type >( );      // to make  interpolation x=f o X^1 ;
@@ -6127,7 +6128,9 @@ void init_lgfem( ) {
                     new OpMatrixtoBilinearForm< double, MeshL, v_fesL, v_fes >,       // 3D curve / 2D on meshL
                     new OpMatrixtoBilinearForm< double, MeshL, v_fes, v_fesL >,       // 2D / 3D curve on meshL
                     new OpMatrixtoBilinearForm< double, MeshS, v_fesS, v_fes3 >,      // 3D Surf / 3D volume on meshS
-                    new OpMatrixtoBilinearForm< double, MeshS, v_fes3, v_fesS >);     // 3D volume / 3D Surf on meshS
+                    new OpMatrixtoBilinearForm< double, MeshS, v_fes3, v_fesS >,     // 3D volume / 3D Surf on meshS
+                    new OpMatrixtoBilinearForm< double, MeshL, v_fesL, v_fesS >,       // 3D curve / 3D Surf on meshL
+                    new OpMatrixtoBilinearForm< double, MeshL, v_fesS, v_fesL >);       // 3D Surf / 3D curve on meshL
 
   TheOperators->Add(
     "<-", new OpArraytoLinearForm< double, Mesh, v_fes >(atype< KN< double > * >( ), true, true),
@@ -6163,7 +6166,9 @@ void init_lgfem( ) {
                     new OpMatrixtoBilinearForm< Complex, MeshL, v_fesL, v_fes >,       // 3D curve / 2D on meshL
                     new OpMatrixtoBilinearForm< Complex, MeshL, v_fes, v_fesL >,       // 2D / 3D curve on meshL
                     new OpMatrixtoBilinearForm< Complex, MeshS, v_fesS, v_fes3 >,      // 3D Surf / 3D volume on meshS
-                    new OpMatrixtoBilinearForm< Complex, MeshS, v_fes3, v_fesS >);     // 3D volume / 3D Surf on meshS
+                    new OpMatrixtoBilinearForm< Complex, MeshS, v_fes3, v_fesS >,     // 3D volume / 3D Surf on meshS
+                    new OpMatrixtoBilinearForm< Complex, MeshL, v_fesS, v_fesL >,      // 3D Surf / 3D curve on meshL
+                    new OpMatrixtoBilinearForm< Complex, MeshL, v_fesL, v_fesS >);     // 3D curve / 3D Surf on meshL
   // add august 2007
   TheOperators->Add(
     "<-",
@@ -6284,6 +6289,10 @@ void init_lgfem( ) {
   TheOperators->Add("<-", new OpMatrixtoBilinearForm< Complex, MeshS, v_fesS, v_fes3 >(1));    // 3D Surf / 3D volume on meshS
   TheOperators->Add("<-", new OpMatrixtoBilinearForm< double, MeshS, v_fes3, v_fesS >(1));     // 3D volume / 3D Surf on meshS
   TheOperators->Add("<-", new OpMatrixtoBilinearForm< Complex, MeshS, v_fes3, v_fesS >(1));    // 3D volume / 3D Surf on meshS
+  TheOperators->Add("<-", new OpMatrixtoBilinearForm< double, MeshL, v_fesL, v_fesS >(1));     // 3D curve / 3D Surf on meshL
+  TheOperators->Add("<-", new OpMatrixtoBilinearForm< Complex, MeshL, v_fesL, v_fesS >(1));    // 3D curve / 3D Surf on meshL
+  TheOperators->Add("<-", new OpMatrixtoBilinearForm< double, MeshL, v_fesS, v_fesL >(1));     // 3D Surf / 3D curve on meshL
+  TheOperators->Add("<-", new OpMatrixtoBilinearForm< Complex, MeshL, v_fesS, v_fesL >(1));    // 3D Surf / 3D curve on meshL
         
   Add< const FormLinear * >("(", "", new OpCall_FormLinear< FormLinear, Mesh, v_fes >);
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, Mesh, v_fes, v_fes >);
@@ -6310,21 +6319,23 @@ void init_lgfem( ) {
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, MeshL, v_fesL, v_fesL >);      // 3D curve
   
   // bem integration space/target space must be review Axel 08/2020
-  Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, MeshS, v_fesS, v_fesL >);
-  Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, MeshL, v_fesL, v_fesS >);
+  Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, MeshS, v_fesS, v_fesL >); // bem int2dx1d
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, MeshL, v_fesL, v_fes >); // 3D curve / 2D on meshL
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, MeshL, v_fes, v_fesL>); // 2D / 3D curve on meshL
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, MeshS, v_fesS, v_fes >);
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, MeshS, v_fesS, v_fes3 >); // 3D Surf / 3D volume on meshS
   Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, MeshS, v_fes3, v_fesS >); // 3D volume / 3D Surf on meshS
+  Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, MeshL, v_fesL, v_fesS >); // 3D curve / 3D Surf on meshL
+  Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, MeshL, v_fesS, v_fesL>); // 3D Surf / 3D curve on meshL
         
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, MeshS, v_fesS, v_fesL >);
-  Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, MeshL, v_fesL, v_fesS >);
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, MeshL, v_fesL, v_fes >); // 3D curve / 2D on meshL
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, MeshL, v_fes, v_fesL >); // 2D / 3D curve on meshL
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, MeshS, v_fesS, v_fes >);
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, MeshS, v_fesS, v_fes3 >); // 3D Surf / 3D volume on meshS
   Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, MeshS, v_fes3, v_fesS >); // 3D volume / 3D Surf on meshS
+  Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, MeshL, v_fesL, v_fesS >); // 3D curve / 3D Surf on meshL
+  Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, MeshL, v_fesS, v_fesL >); // 3D Surf / 3D curve on meshL
         
   //  correction du bug morale
   //  Attention il y a moralement un bug
