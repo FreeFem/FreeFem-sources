@@ -11284,9 +11284,9 @@ Expression IsFebaseArray(Expression f)
     }
     return febase;
 }
-template<class MMesh, class VFES1, class VFES2>
-Call_FormBilinear<MMesh, VFES1, VFES2>::Call_FormBilinear(int dd,Expression * na,Expression  BB,Expression fi, Expression fj)
-: d(dd),nargs(na),largs(),N(fi->nbitem()),M(fj->nbitem()),
+template<class VFES1, class VFES2>
+Call_FormBilinear< VFES1, VFES2>::Call_FormBilinear(Expression * na,Expression  BB,Expression fi, Expression fj)
+: nargs(na),largs(),N(fi->nbitem()),M(fj->nbitem()),
 euh(fi), evh(fj)
 {
     assert(nargs );
@@ -11295,9 +11295,9 @@ euh(fi), evh(fj)
     CompileError("Sorry the variationnal form (varf)  is not a the variationnal form (type const C_args *)");
     largs=LLL->largs;
 }
-template<class MMesh,class VFES>
-Call_FormLinear<MMesh,VFES>::Call_FormLinear(int dd,Expression *na,Expression  LL, Expression ft)
-: d(dd),largs(),nargs(na),N(ft->nbitem()),
+template<class VFES>
+Call_FormLinear<VFES>::Call_FormLinear(Expression *na,Expression  LL, Expression ft)
+:largs(),nargs(na),N(ft->nbitem()),
 ppfes(ft)//IsFebaseArray(ft))
 {
     const C_args * LLL=dynamic_cast<const C_args *>(LL);
@@ -11726,20 +11726,19 @@ namespace Fem2D {
   
 }
 
-template class Call_FormLinear<Mesh,v_fes>;
-template class Call_FormLinear<Mesh3,v_fes3>;
-template class Call_FormLinear<MeshS,v_fesS>;
-template class Call_FormLinear<MeshL,v_fesL>;
-template class Call_FormBilinear<Mesh,v_fes,v_fes>;
-template class Call_FormBilinear<Mesh3,v_fes3,v_fes3>;
-template class Call_FormBilinear<MeshS,v_fesS,v_fesS>;
-template class Call_FormBilinear<MeshL,v_fesL,v_fesL>;
-// bem integration space/target space must be review Axel 08/2020
-template class Call_FormBilinear<MeshS, v_fesS, v_fesL>;
-template class Call_FormBilinear<MeshL, v_fesL, v_fesS>; //  3D curve / 3D Surf on meshL and bem
-template class Call_FormBilinear<MeshL, v_fesS, v_fesL>; //  3D Surf / 3D curve on meshL
-template class Call_FormBilinear<MeshL, v_fesL, v_fes>;  //  3D curve / 2D on meshL
-template class Call_FormBilinear<MeshL, v_fes, v_fesL>;  //  2D / 3D curve on meshL
-template class Call_FormBilinear<MeshS, v_fesS, v_fes3>;  //  3D Surf / 3D volume on meshS
-template class Call_FormBilinear<MeshS, v_fes3, v_fesS>;  //  3D volume / 3D Surf on meshS
-template class Call_FormBilinear<MeshS, v_fesS, v_fes>;
+template class Call_FormLinear<v_fes>;
+template class Call_FormLinear<v_fes3>;
+template class Call_FormLinear<v_fesS>;
+template class Call_FormLinear<v_fesL>;
+template class Call_FormBilinear<v_fes,v_fes>;
+template class Call_FormBilinear<v_fes3,v_fes3>;
+template class Call_FormBilinear<v_fesS,v_fesS>;
+template class Call_FormBilinear<v_fesL,v_fesL>;
+
+template class Call_FormBilinear<v_fesL, v_fesS>; //  3D curve / 3D Surf on meshL and bem
+template class Call_FormBilinear<v_fesS, v_fesL>; //  3D Surf / 3D curve on meshL
+template class Call_FormBilinear<v_fesL, v_fes>;  //  3D curve / 2D on meshL
+template class Call_FormBilinear<v_fes, v_fesL>;  //  2D / 3D curve on meshL
+template class Call_FormBilinear<v_fesS, v_fes3>;  //  3D Surf / 3D volume on meshS
+template class Call_FormBilinear<v_fes3, v_fesS>;  //  3D volume / 3D Surf on meshS
+template class Call_FormBilinear<v_fesS, v_fes>;

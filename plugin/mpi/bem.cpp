@@ -1449,17 +1449,17 @@ template<class R, class MMesh, class v_fes1, class v_fes2>
 struct OpHMatrixtoBEMForm
 : public OneOperator
 {
-    typedef typename Call_FormBilinear<MMesh,v_fes1,v_fes2>::const_iterator const_iterator;
+    typedef typename Call_FormBilinear<v_fes1,v_fes2>::const_iterator const_iterator;
     int init;
     class Op : public E_F0mps {
     public:
-        Call_FormBilinear<MMesh,v_fes1,v_fes2> *b;
+        Call_FormBilinear<v_fes1,v_fes2> *b;
         Expression a;
         int init;
         AnyType operator()(Stack s)  const ;
         
         Op(Expression aa,Expression  bb,int initt)
-        : b(new Call_FormBilinear<MMesh,v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<MMesh,v_fes1,v_fes2> *>(bb))),a(aa),init(initt)
+        : b(new Call_FormBilinear<v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<v_fes1,v_fes2> *>(bb))),a(aa),init(initt)
         { assert(b && b->nargs);
         }
         operator aType () const { return atype<HMatrixVirt<R> **>();}
@@ -1469,11 +1469,11 @@ struct OpHMatrixtoBEMForm
     E_F0 * code(const basicAC_F0 & args) const
     {
         Expression p=args[1];
-        Call_FormBilinear<MMesh,v_fes1,v_fes2> *t( new Call_FormBilinear<MMesh,v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<MMesh,v_fes1,v_fes2> *>(p))) ;
+        Call_FormBilinear<v_fes1,v_fes2> *t( new Call_FormBilinear<v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<v_fes1,v_fes2> *>(p))) ;
         return  new Op(to<HMatrixVirt<R> **>(args[0]),args[1],init);}
   
      OpHMatrixtoBEMForm(int initt=0) :
-     OneOperator(atype<HMatrixVirt<R> **>(),atype<HMatrixVirt<R> **>(),atype<const Call_FormBilinear<MMesh,v_fes1,v_fes2>*>()),
+     OneOperator(atype<HMatrixVirt<R> **>(),atype<HMatrixVirt<R> **>(),atype<const Call_FormBilinear<v_fes1,v_fes2>*>()),
         init(initt)
         {}
     

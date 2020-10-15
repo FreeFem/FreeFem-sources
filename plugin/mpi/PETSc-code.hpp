@@ -14,11 +14,11 @@ namespace PETSc {
   struct varfToMat : public OneOperator {
     class Op : public E_F0mps {
     public:
-      Call_FormBilinear<MMesh,fes1,fes2>* b;
+      Call_FormBilinear<fes1,fes2>* b;
       Expression a;
       AnyType operator()(Stack s) const;
 
-      Op(Expression x, Expression  y) : b(new Call_FormBilinear<MMesh,fes1,fes2>(*dynamic_cast<const Call_FormBilinear<MMesh,fes1,fes2>*>(y))), a(x) {
+      Op(Expression x, Expression  y) : b(new Call_FormBilinear<fes1,fes2>(*dynamic_cast<const Call_FormBilinear<fes1,fes2>*>(y))), a(x) {
           assert(b && b->nargs);
           ffassert(FieldOfForm(b->largs, IsComplexType<HPDDM::upscaled_type<K>>::value) == IsComplexType<HPDDM::upscaled_type<K>>::value);
       }
@@ -27,7 +27,7 @@ namespace PETSc {
     E_F0* code(const basicAC_F0& args) const {
         return new Op(to<Dmat*>(args[0]), args[1]);
     }
-    varfToMat() : OneOperator(atype<Dmat*>(), atype<Dmat*>(), atype<const Call_FormBilinear<MMesh,fes1,fes2>*>()) {}
+    varfToMat() : OneOperator(atype<Dmat*>(), atype<Dmat*>(), atype<const Call_FormBilinear<fes1,fes2>*>()) {}
   };
   template<class K, class MMesh, class fes1, class fes2>
   AnyType varfToMat<K, MMesh, fes1, fes2>::Op::operator()(Stack stack) const {

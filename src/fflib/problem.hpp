@@ -609,36 +609,34 @@ class FormLinear : public E_F0mps { public:
 
 };
 
-template<class MMesh,class VFES>
+template<class VFES>
 class Call_FormLinear: public E_F0mps
 {
 public:
-  const int d;
   list<C_F0> largs;
   Expression *nargs;
   typedef list<C_F0>::const_iterator const_iterator;
   const int N;
   Expression ppfes;
 
-  Call_FormLinear(int dd,Expression * na,Expression  LL, Expression ft) ;
+  Call_FormLinear(Expression * na,Expression  LL, Expression ft) ;
   AnyType operator()(Stack stack) const
   { InternalError(" bug: no eval of Call_FormLinear ");}
    operator aType () const { return atype<void>();}
 
 };
 
-template<class MMesh,class VFES1,class VFES2>
+template<class VFES1,class VFES2>
 class Call_FormBilinear: public E_F0mps
 {
 public:
-  const int d;
   Expression *nargs;
   list<C_F0> largs;
   typedef list<C_F0>::const_iterator const_iterator;
 
   const int N,M;
   Expression euh,evh;
-  Call_FormBilinear(int dd,Expression * na,Expression  LL, Expression fi,Expression fj) ;
+  Call_FormBilinear(Expression * na,Expression  LL, Expression fi,Expression fj) ;
   AnyType operator()(Stack stack) const
   { InternalError(" bug: no eval of Call_FormBilinear ");}
    operator aType () const { return atype<void>();}
@@ -657,7 +655,7 @@ struct OpCall_FormBilinear_np {
     static const int n_name_param =1+NB_NAME_PARM_MAT+NB_NAME_PARM_HMAT; // 9-> 11 FH 31/10/2005  11->12 nbiter 02/2007  // 12->22 MUMPS+ Autre Solveur 02/08  // 34->40 param bem solver
 };
 
-template<class T,class MMesh,class v_fes>
+template<class T,class v_fes>
 struct OpCall_FormLinear
   : public OneOperator,
     public OpCall_FormLinear_np
@@ -668,18 +666,17 @@ struct OpCall_FormLinear
     Expression * nargs = new Expression[n_name_param];
     args.SetNameParam(n_name_param,name_param,nargs);
 
-    return  new Call_FormLinear<MMesh,v_fes>(v_fes::dHat,nargs,to<const C_args*>(args[0]),to<pfes*>(args[1]));}
+    return  new Call_FormLinear<v_fes>(nargs,to<const C_args*>(args[0]),to<pfes*>(args[1]));}
   OpCall_FormLinear() :
-    OneOperator(atype<const Call_FormLinear<MMesh,v_fes>*>(),atype<const T*>(),atype<pfes*>()) {}
+    OneOperator(atype<const Call_FormLinear<v_fes>*>(),atype<const T*>(),atype<pfes*>()) {}
 };
 
 
-template<class T,class MMesh,class v_fes>
+template<class T,class v_fes>
 struct OpCall_FormLinear2
   : public OneOperator,
     public OpCall_FormLinear_np
 {
-  static const int d=MMesh::RdHat::d;
   typedef v_fes *pfes;
   E_F0 * code(const basicAC_F0 & args) const
   {
@@ -692,26 +689,25 @@ struct OpCall_FormLinear2
     long pv = GetAny<long>((*p)(NullStack));
     if ( pv )
       { CompileError("  a(long,Vh) , The long  must be a constant == 0, sorry");}
-    return  new Call_FormLinear<MMesh,v_fes>(d,nargs,to<const C_args*>(args[0]),to<pfes*>(args[2]));}
+    return  new Call_FormLinear<v_fes>(nargs,to<const C_args*>(args[0]),to<pfes*>(args[2]));}
   OpCall_FormLinear2() :
-    OneOperator(atype<const Call_FormLinear<MMesh,v_fes>*>(),atype<const T*>(),atype<long>(),atype<pfes*>()) {}
+    OneOperator(atype<const Call_FormLinear<v_fes>*>(),atype<const T*>(),atype<long>(),atype<pfes*>()) {}
 };
 
-template<class T,class MMesh,class v_fes1, class v_fes2>
+template<class T,class v_fes1, class v_fes2>
 struct OpCall_FormBilinear
   : public OneOperator ,
   OpCall_FormBilinear_np
 {
   typedef v_fes1 *pfes1; typedef v_fes2 *pfes2;
-  static const int d=MMesh::RdHat::d;
 
   E_F0 * code(const basicAC_F0 & args) const
   { Expression * nargs = new Expression[n_name_param];
     args.SetNameParam(n_name_param,name_param,nargs);
     // cout << " OpCall_FormBilinear " << *args[0].left() << " " << args[0].LeftValue() << endl;
-    return  new Call_FormBilinear<MMesh, v_fes1, v_fes2>(d,nargs,to<const C_args*>(args[0]),to<pfes1*>(args[1]),to<pfes2*>(args[2]));}
+    return  new Call_FormBilinear<v_fes1, v_fes2>(nargs,to<const C_args*>(args[0]),to<pfes1*>(args[1]),to<pfes2*>(args[2]));}
   OpCall_FormBilinear() :
-    OneOperator(atype<const Call_FormBilinear<MMesh, v_fes1,v_fes2>*>(),atype<const T *>(),atype<pfes1*>(),atype<pfes2*>()) {}
+    OneOperator(atype<const Call_FormBilinear<v_fes1,v_fes2>*>(),atype<const T *>(),atype<pfes1*>(),atype<pfes2*>()) {}
 };
 
 
@@ -726,21 +722,21 @@ template<class R,class MMesh,class v_fes>  //  to make   x=linearform(x)
 struct OpArraytoLinearForm
   : public OneOperator
 {
-  typedef typename Call_FormLinear<MMesh,v_fes>::const_iterator const_iterator;
+  typedef typename Call_FormLinear<v_fes>::const_iterator const_iterator;
   const bool isptr;
   const bool init;
   const bool zero;
   class Op : public E_F0mps
   {
   public:
-    Call_FormLinear<MMesh,v_fes> *l;
+    Call_FormLinear<v_fes> *l;
     Expression x;
     const  bool isptr;
     const  bool init;
     const  bool zero;
     AnyType operator()(Stack s)  const ;
     Op(Expression xx,Expression  ll,bool isptrr,bool initt,bool zzero)
-      : l(new Call_FormLinear<MMesh,v_fes>(*dynamic_cast<const Call_FormLinear<MMesh,v_fes> *>(ll))),
+      : l(new Call_FormLinear<v_fes>(*dynamic_cast<const Call_FormLinear<v_fes> *>(ll))),
         x(xx),
         isptr(isptrr),init(initt),zero(zzero)
         {assert(l);
@@ -761,7 +757,7 @@ struct OpArraytoLinearForm
   //    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear*>()),init(false),isptr(false) {}
 
   OpArraytoLinearForm(const basicForEachType * tt,bool isptrr, bool initt,bool zzero=1) :
-    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear<MMesh,v_fes>*>()),
+    OneOperator(atype<KN_<R> >(),tt,atype<const Call_FormLinear<v_fes>*>()),
     isptr(isptrr), init(initt),zero(zzero) {}
 
 };
@@ -771,17 +767,17 @@ template<class R,class MMesh,class v_fes1,class v_fes2>  //  to make   A=linearf
 struct OpMatrixtoBilinearForm
   : public OneOperator
 {
-  typedef typename Call_FormBilinear<MMesh,v_fes1,v_fes2>::const_iterator const_iterator;
+  typedef typename Call_FormBilinear<v_fes1,v_fes2>::const_iterator const_iterator;
   int init;
   class Op : public E_F0mps {
   public:
-    Call_FormBilinear<MMesh,v_fes1,v_fes2> *b;
+    Call_FormBilinear<v_fes1,v_fes2> *b;
     Expression a;
     int init;
     AnyType operator()(Stack s)  const ;
 
     Op(Expression aa,Expression  bb,int initt)
-      : b(new Call_FormBilinear<MMesh,v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<MMesh,v_fes1,v_fes2> *>(bb))),a(aa),init(initt)
+      : b(new Call_FormBilinear<v_fes1,v_fes2>(* dynamic_cast<const Call_FormBilinear<v_fes1,v_fes2> *>(bb))),a(aa),init(initt)
   { assert(b && b->nargs);
     bool iscmplx=FieldOfForm(b->largs,IsComplexType<R>::value)  ;
      // cout<< "FieldOfForm:iscmplx " << iscmplx << " " << IsComplexType<R>::value << " " << ((iscmplx) == IsComplexType<R>::value) << endl;
@@ -793,7 +789,7 @@ struct OpMatrixtoBilinearForm
   E_F0 * code(const basicAC_F0 & args) const
   { return  new Op(to<Matrice_Creuse<R>*>(args[0]),args[1],init);}
   OpMatrixtoBilinearForm(int initt=0) :
-    OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_FormBilinear<MMesh,v_fes1,v_fes2>*>()),
+    OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_FormBilinear<v_fes1,v_fes2>*>()),
     init(initt)
  {}
 };
