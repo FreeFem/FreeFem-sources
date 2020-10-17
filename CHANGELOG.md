@@ -23,21 +23,19 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
-### Added
-
+## [4.7.1]
 ### Changed
-- change the language definition to use tyep as a construction function with named arguments for bem plugin
+- change the language definition to use type as a construction function with named arguments for bem plugin
 - PETSc version 3.14.0
 - ARPACK compiled by SLEPc
-
-### Deprecated
+- Mmg version 5.5.0
+- -std=c++14 instead of -std=c++11 when possible
 
 ### Removed
 - plugins thresholdings, symmetrizeCSR, and fflapack and associed example
 
 ### Fixed
-- problem compilation with gfortran-10 of arpack and mumps (add -fallow-argument-mismatch flags- 
+- problem compilation with gfortran-10 of arpack and mumps (add -fallow-argument-mismatch flags)
 
 ## [4.7]
 ### Added
@@ -342,14 +340,15 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7..develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7.1..develop
+[4.7.1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7...v4.7.1
 [4.7]: https://github.com/FreeFem/FreeFem-sources/compare/v4.6...v4.7
 [4.6]: https://github.com/FreeFem/FreeFem-sources/compare/v4.5...v4.6
 [4.5]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-3...v4.5
 [4.4-3]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-2...v4.4-3
 [4.4-2]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4...v4.4-2
 [4.4]: https://github.com/FreeFem/FreeFem-sources/compare/v4.2.1...v4.4
-[4.2.1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.0...v4.2.1
+[4.2.1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.1...v4.2.1
 [4.1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.0...v4.1
 [4.0]: https://github.com/FreeFem/FreeFem-sources/compare/3.62...v4.0
 [3.62]: https://github.com/FreeFem/FreeFem-sources/compare/3.61...3.62
