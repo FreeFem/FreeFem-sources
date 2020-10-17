@@ -23,7 +23,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [4.7.1]
+## [4.7-1]
 ### Changed
 - change the language definition to use type as a construction function with named arguments for bem plugin
 - PETSc version 3.14.0
@@ -340,8 +340,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7.1..develop
-[4.7.1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7...v4.7.1
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7-1..develop
+[4.7-1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7...v4.7-1
 [4.7]: https://github.com/FreeFem/FreeFem-sources/compare/v4.6...v4.7
 [4.6]: https://github.com/FreeFem/FreeFem-sources/compare/v4.5...v4.6
 [4.5]: https://github.com/FreeFem/FreeFem-sources/compare/v4.4-3...v4.5
