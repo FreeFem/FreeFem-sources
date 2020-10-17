@@ -23,6 +23,19 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [4.7-1]
 ### Changed
 - change the language definition to use type as a construction function with named arguments for bem plugin
