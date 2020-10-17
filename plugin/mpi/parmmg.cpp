@@ -108,7 +108,7 @@ int PMMG_pParMesh_to_ffmesh(const PMMG_pParMesh& mesh, Mesh3 *&T_TH3, bool distr
         bb++->set(v, iv, lab);
       }
 
-      T_TH3 = new Mesh3(nVertices, nTetrahedra, nTriangles, v, t, b, 1);
+      T_TH3 = new Mesh3(nVertices, nTetrahedra, nTriangles, v, t, b, 1, 1);
 
       if (verbosity > 1) {
         cout << "transformation maillage --> mesh3 " << endl;
@@ -124,7 +124,7 @@ int PMMG_pParMesh_to_ffmesh(const PMMG_pParMesh& mesh, Mesh3 *&T_TH3, bool distr
 class parmmg_Op : public E_F0mps {
  public:
   Expression eTh, xx, yy, zz;
-  static const int n_name_param = 32;
+  static const int n_name_param = 33;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
 
@@ -167,6 +167,7 @@ basicAC_F0::name_and_type parmmg_Op::name_param[] = {
 {"angle"             , &typeid(bool)},/*!< [1/0], Turn on/off angle detection */
 {"iso"               , &typeid(bool)},/*!< [1/0], Level-set meshing */
 {"lag"               , &typeid(long)},/*!< [-1/0/1/2], Lagrangian option */
+{"opnbdy"            , &typeid(bool)},/*!< [0/1], Enable preservation of open boundaries */
 {"optim"             , &typeid(bool)},/*!< [1/0], Optimize mesh keeping its initial edge sizes */
 {"optimLES"          , &typeid(bool)},/*!< [1/0], Strong mesh optimization for Les computations */
 {"noinsert"          , &typeid(bool)},/*!< [1/0], Avoid/allow point insertion */
@@ -237,7 +238,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
                     PMMG_ARG_dim,3,PMMG_ARG_MPIComm,comm,
                     PMMG_ARG_end);
 
-  KN< KN< long > >* communicators = nargs[31] ? GetAny< KN< KN< long > >* >((*nargs[31])(stack)) : 0;
+  KN< KN< long > >* communicators = nargs[32] ? GetAny< KN< KN< long > >* >((*nargs[32])(stack)) : 0;
   ffmesh_to_PMMG_pParMesh(Th, mesh, communicators != NULL);
 
   int root = mesh->info.root;
@@ -286,6 +287,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_angle,         arg(i,stack,0L)); i++;   /*!< [1/0], Turn on/off angle detection */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_iso,           arg(i,stack,0L)); i++;   /*!< [1/0], Level-set meshing */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_lag,           arg(i,stack,0L)); i++;   /*!< [-1/0/1/2], Lagrangian option */
+  if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_opnbdy,        arg(i,stack,0L)); i++;   /*!< [0/1], Enable preservation of open boundaries */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_optim,         arg(i,stack,0L)); i++;   /*!< [1/0], Optimize mesh keeping its initial edge sizes */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_optimLES,      arg(i,stack,0L)); i++;   /*!< [1/0], Strong mesh optimization for Les computations */
   if (nargs[i]) PMMG_Set_iparameter(mesh,PMMG_IPARAM_noinsert,      arg(i,stack,0L)); i++;   /*!< [1/0], Avoid/allow point insertion */

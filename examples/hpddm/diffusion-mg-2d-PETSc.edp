@@ -19,7 +19,6 @@ border e(t=0,2*pi) { x = r*cos(t); y = -r*sin(t); label = 0; };
 mesh Th0, Th1, Th2;
 macro buildMesh(Th, i) {
     Th#i = buildmesh(a(getARGV("-global", 60) / (f^i)) + b(getARGV("-global", 60) / (f^i)) + c(getARGV("-global", 60) / (f^i)) + d(getARGV("-global", 60) / (f^i)) + e(getARGV("-global", 60)));
-    broadcast(processor(0), Th#i);
 } //
 
 for(int i = 0; i < 2; ++i) {

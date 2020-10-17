@@ -218,6 +218,7 @@ void signalCPUHandler( int signum ) {
 %type <cexp>   primary
 %type <oper>   unop
 %type <args>  parameters
+%type <args>  parameterstype
 %type <args>  array
 %type <args>  parameters_list
 %type  <cexp> begin
@@ -704,7 +705,11 @@ sub_script_expr:
     ;
 
 /* only used in [[primary:]] */
-
+parameterstype:
+  sub_script_expr ',' parameters {
+      $$ = $1;
+      $$ += $3; }
+  
 parameters: /* returns [[YYSTYPE_args]] */                  {$$ = 0;} /* <<no_parameter>> */
   | FESPACE                                                 {$$ = Find($1);} /*[[file:../fflib/AFunction2.cpp::Find]]*/
   | FESPACE1                                                {$$ = Find($1);}
@@ -779,7 +784,7 @@ primary: /* returns a [[YYSTYPE_cexp]] */
   |        FESPACEL '(' parameters ')'     { $$=C_F0(Find($1),$2,$3) ;}
   |        primary PLUSPLUS      {$$=C_F0(TheRightOperators,$2,$1);}
   |        primary MOINSMOINS    {$$=C_F0(TheRightOperators,$2,$1);}
-  |        TYPE '('  Expr ')' {
+  |        TYPE '('  sub_script_expr ')' {
              if ($1->right()->CastingFrom($3.left()) )
                 $$=$1->right()->CastTo($3)  ;
              else { $$=$1->right()->Find("<--",basicAC_F0_wa($3));
@@ -788,6 +793,14 @@ primary: /* returns a [[YYSTYPE_cexp]] */
                                 CompileError(" Error in type(exp) "); }
              }
             }
+  |        TYPE '('  parameterstype ')' {
+           { $$=$1->right()->Find("<--",basicAC_F0_wa($3));
+           if (!$$.left()) { cerr << " no wait to change (args) in " <<
+                                      $1->right()->name() << endl;
+                              CompileError(" Error in type(exp) "); }
+           }
+          }
+
   |        '(' Expr ')' {$$=$2;}
   |        '[' array  ']' { $$=C_F0(TheOperators,"[]",$2);}
 

@@ -226,15 +226,15 @@ inline R  operator,(const conj_KN_<const_R> & u,const KN<const_R> & vc) {  retur
 
 template<class R>
 R  KN_<R>::min() const {
-    R minv = v[index(0)];
-    for (long i=1;i<n;i++)
+    R minv = numeric_limits<R>::max();
+    for (long i=0;i<n;i++)
       minv = RNM::Min(minv, v[index(i)]) ;
     return minv;
   }
 template<class R>
 R  KN_<R>::max() const {
-    R maxv = v[index(0)];
-    for (long i=1;i<n;i++)
+    R maxv = numeric_limits<R>::min();
+    for (long i=0;i<n;i++)
       maxv = RNM::Max(maxv ,v[index(i)]);
     return maxv;
   }
@@ -243,8 +243,8 @@ R  KN_<R>::max() const {
   
 template<class R>
 R  KN_<R>::sum() const {
-    R s = v[index(0)];
-    for (long i=1;i<n;i++)
+    R s = R(); //v[index(0)];
+    for (long i=0;i<n;i++)
       s +=  v[index(i)];
     //    cout << " sum = " << s << endl;
     return s;

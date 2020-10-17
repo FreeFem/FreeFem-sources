@@ -2172,20 +2172,15 @@ AnyType pfSr2R(Stack s,const AnyType &a)
   pair< FEbase<R,v_fes> *  ,int> ppfe=GetAny<pair< FEbase<R,v_fes> *,int> >(a);
   FEbase<R,v_fes> & fe( *ppfe.first);
   int componante=ppfe.second;
-  if ( !fe.x()) {
-    if ( !fe.x()){
-      return   SetAny<R>(0.0);
-    }
-  }
-
+  if ( !fe.x()) return   SetAny<R>(0.0);
   const FESpace & Vh(*fe.Vh);
   const Mesh & Th(Vh.Th);
   MeshPoint & mp = *MeshPointStack(s);
   const Element *K;
-  R2 PHat;
+  RdHat PHat;
   bool outside=false;
   bool qnu=true;
-  if (mp.ThS && mp.ThS->elements == Th.elements && mp.T)
+  if (mp.ThS && mp.ThS->elements == Th.elements && mp.TS)
    {
      qnu=false;
      K=mp.TS;
@@ -2219,12 +2214,12 @@ AnyType pfSr2R(Stack s,const AnyType &a)
     return   SetAny<R>(0.0);
   }
 #ifndef NDEBUG
-  if (!outside)
+  if (!outside) 
     {
-      if ( Norme2_2( (*K)(PHat) - mp.P ) > 1e-12 )
+      if ( Norme2_2( (*K)(PHat) - mp.P ) > K->mesure()/1000 )
       {
         cout << "bug ??  " << Norme2_2( (*K)(PHat) - mp.P ) << " " << mp.P << " " << (*K)(PHat) << endl;
-        ffassert(0);
+       // ffassert(0);
       }
     }
 #endif

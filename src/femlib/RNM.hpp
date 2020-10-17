@@ -40,6 +40,7 @@
 #include <iomanip>
 #include <cmath>
 #include <cassert>
+#include <limits>
 
 
 using namespace std;
@@ -556,7 +557,7 @@ public:
  //  KN_& operator =(const MatriceCreuseMulKN_<R> & ) ;
  //  KN_& operator +=(const MatriceCreuseMulKN_<R> & ) ;
    KN_& operator =(const typename RNM_VirtualMatrix<R>::plusAx & Ax)
-    { if(Ax.A) { ffassert(&Ax.x[0] != &this->operator[](0));*this=R(); Ax.A->addMatMul(Ax.x,*this); } return *this;}
+    { if(Ax.A) { ffassert((!this->N() || !this->M()) || &Ax.x[0] != &this->operator[](0));*this=R(); Ax.A->addMatMul(Ax.x,*this); } return *this;}
    KN_& operator =(const typename RNM_VirtualMatrix<R>::plusAtx & Ax)
     { if(Ax.A) { ffassert(&Ax.x[0] != &this->operator[](0));*this=R(); Ax.A->addMatTransMul(Ax.x,*this); } return *this;}
    KN_& operator +=(const typename RNM_VirtualMatrix<R>::plusAx & Ax)

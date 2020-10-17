@@ -20,8 +20,7 @@ meshL ThL = buildmeshL(circle(n));
 ThL = OrientNormal(ThL, unbounded = 1);
 
 fespace Uh(ThL, P1);
-BemKernel ker("SL", 1, k);
-varf vk(u, v) = int1dx1d(ThL)(ThL)(BEM(ker, u, v));
+varf vk(u, v) = int1dx1d(ThL)(ThL)(BEM(BemKernel("SL", k=k), u, v));
 HMatrix<complex> A = vk(Uh, Uh, sym = 1);
 Mat<complex> H = A;
 
@@ -50,8 +49,7 @@ if(!NoGraphicWindow) {
 
     mesh ThOut = buildmesh(b1(np) + b2(np) + b3(np) + b4(np) + circle(-np*pi/R));
     fespace UhOut(ThOut, P1);
-    BemPotential Pot("SL", k);
-    varf vp(u, v) = int1d(ThL)(POT(Pot, u, v));
+    varf vp(u, v) = int1d(ThL)(POT(BemPotential("SL", k=k), u, v));
     HMatrix<complex> B = vp(Uh, UhOut);
     UhOut<complex> v, vinc;
     vinc = finc;

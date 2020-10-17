@@ -86,7 +86,6 @@ seq/ff-NLopt.cpp \
 seq/ff-cmaes.cpp \
 seq/ff-mmap-semaphore.cpp \
 seq/ff_gsl_awk.hpp \
-seq/fflapack.cpp \
 seq/ffnewuoa.cpp \
 seq/ffrandom.cpp \
 seq/fortan_master.f90 \
@@ -133,9 +132,7 @@ seq/splitmesh12.cpp \
 seq/splitmesh3.cpp \
 seq/splitmesh4.cpp \
 seq/splitmesh6.cpp \
-seq/symmetrizeCSR.cpp \
 seq/tetgen.cpp \
-seq/thresholdings.cpp \
 seq/newuoa.f \
 seq/ffmaster.c \
 seq/libff-mmap-semaphore.c \

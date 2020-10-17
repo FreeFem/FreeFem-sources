@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFEM,4.7,frederic.hecht@sorbonne-universite.fr,FreeFEM)
+AC_INIT(FreeFEM,4.7-1,frederic.hecht@sorbonne-universite.fr,FreeFEM)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -392,13 +392,13 @@ then
     if test "$ff_err" = "ok" ; then  AC_MSG_ERROR([ Fatal FLIBS: $FLIBS is incorrect. ],1); fi
     LIBS="$ff_libs"
     echo "F77 LD $ff_libs" >config_LIB_INFO
-
+  AC_LANG_PUSH([Fortran 77])
+  
+  
     AC_MSG_CHECKING([ Size of fortran 77 integer ])
-
-
-
-##   AC_LANG(fortran);
-    AC_LANG_PUSH([Fortran 77])
+   
+     
+    
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
 		program test
 		integer  p,i
@@ -431,6 +431,7 @@ then
 	"upper case, underscore, extra underscore")           ff_cfagsf77="-DUPPER -DAdd__";;
 	*) ;;
     esac
+    ff_cfagsf77="$ff_cfagsf77 $ff_allow_mismatch"
     AC_SUBST(CFLAGSF77,$ff_cfagsf77)
     if test $ff_f77intsize -ne  4
     then
@@ -727,18 +728,21 @@ m4_include(etc/config/m4/ax_lib_gsl.m4)
 # do not compile all with c++11 version to much
 # probleme to day (frev 2015) with g++ 4.8.1
 ff_cxx_save=$CXXFLAGS
-CHECK_COMPILE_FLAG(C++,[-std=c++11],CXXFLAGS,ff_cxx11)
-dnl CXXFLAGS="$CXX11FLAGS $CXXFLAGS"
-dnlff_cxx11="no"
-dnl if test -n "$CXX11FLAGS" ; then ff_cxx11="yes" ; fi
+##  for  bem.cpp  need c++14 for intel compiler 
+CHECK_COMPILE_FLAG(C++,[-std=c++14],CXXFLAGS,ff_cxx11)
 if test "$ff_cxx11" = yes ; then
-    CXX11FLAGS="-std=c++11";
-##	CXXFLAGS="$CXXFLAGS -std=c++11"
-    AC_FF_ADDWHERELIB(cxx11,$CXX11FLAGS,$CXX11FLAGS)
+   CXX11FLAGS="-std=c++14";
+   AC_FF_ADDWHERELIB(cxx11,$CXX11FLAGS,$CXX11FLAGS)
 else
-  AC_MSG_NOTICE( [ fatal error : c++ compiler ! ] );
-  AC_MSG_ERROR([ Sorry no c++ compiler !])
-  AC_MSG_ERROR([ Fatal error c++11  ],1);
+   CHECK_COMPILE_FLAG(C++,[-std=c++11],CXXFLAGS,ff_cxx11)
+   if test "$ff_cxx11" = yes ; then
+      CXX11FLAGS="-std=c++11";
+      AC_FF_ADDWHERELIB(cxx11,$CXX11FLAGS,$CXX11FLAGS)
+   else
+     AC_MSG_NOTICE( [ fatal error : c++ compiler ! ] );
+     AC_MSG_ERROR([ Sorry no c++ compiler !])
+     AC_MSG_ERROR([ Fatal error no  c++11 or  c++14  ],1);
+   fi
 fi
 ##CXXFLAGS="$ff_cxx_save"
 AC_SUBST(WITH_CXX11,$ff_cxx11)
@@ -1025,10 +1029,18 @@ if test "$with_petsc" != no; then
  dnl                   ff_where_lib_suitesparse="$ff_METIS_LIB $ff_SUITESPARSE_LIB"
  dnl               fi
 			AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetsc)
+            if test -n "$ff_BLASLAPACK_LIB"; then
+                ff_where_lib_blaslapack="`echo $ff_BLASLAPACK_LIB | sed -e 's/@<:@^ @:>@*scalapack@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*blacs@<:@^ @:>@*//g'`"
+            fi
                         if test -f $d/libslepc.$ff_suffix_dylib -o -f $d/libslepc.a ; then
 			   ff_slepc_ok=yes
                            ff_SLEPC_LIB="-Wl,-rpath,$d -L$d -lslepc"
 			   AC_FF_ADDWHERELIB(slepc,$ff_SLEPC_LIB,$ff_where_inc_petsc)
+                        if test -f $d/libarpack.$ff_suffix_dylib -o -f $d/libarpack.a ; then
+                            ff_arpack_ok=yes
+                            ff_arpack_libs="-Wl,-rpath,$d -L$d -larpack"
+                            AC_FF_ADDWHERELIB(arpack,$ff_arpack_libs,)
+                        fi
 		        fi
             if test "$ff_slepc_ok" != yes ;   then
                 AC_ARG_WITH(slepc_include,AC_HELP_STRING([--with-slepc-include=],[Include directives for slepc instead of automatic download]))
@@ -1104,10 +1116,20 @@ if test "$with_petsc_complex" != no; then
             AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetscc)
+            if test -n "$ff_BLASLAPACK_LIB"; then
+                ff_where_lib_blaslapack="`echo $ff_BLASLAPACK_LIB | sed -e 's/@<:@^ @:>@*scalapack@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*blacs@<:@^ @:>@*//g'`"
+            fi
             if test -f $d/libslepc.$ff_suffix_dylib -o -f $d/libslepc.a ; then
 				   ff_slepccomplex_ok=yes
                    ff_SLEPCCOMPLEX_LIB="-Wl,-rpath,$d -L$d -lslepc"
 			       AC_FF_ADDWHERELIB(slepccomplex,$ff_SLEPCCOMPLEX_LIB,$ff_where_inc_petsccomplex)
+                   if test -z "$ff_arpack_ok"; then
+                       if test -f $d/libarpack.$ff_suffix_dylib -o -f $d/libarpack.a ; then
+                           ff_arpack_ok=yes
+                           ff_arpack_libs="-Wl,-rpath,$d -L$d -larpack"
+                           AC_FF_ADDWHERELIB(arpack,$ff_arpack_libs,)
+                       fi
+                   fi
 			fi
             if test "$ff_slepccomplex_ok" != yes ;   then
                 AC_ARG_WITH(slepccomplex_include,AC_HELP_STRING([--with-slepccomplex-include=],[Include directives for slepccomplex instead of automatic download]))
@@ -1636,6 +1658,7 @@ fi
 AC_ARG_ENABLE(download-arpack,AC_HELP_STRING([--enable-download_arpack],[force the use  download of arpack]))
 #echo "****** enable_download_arpack=$enable_download_arpack"
 
+if test -z "$ff_arpack_ok"; then
 ff_arpack_ok=no
 ff_save_libs="$LIBS"
 ff_arpack_libs=
@@ -1702,6 +1725,7 @@ then
 	ff_arpack_ok=yes
     fi
     fi
+fi
 fi
 if test  "$ff_arpack_ok" != yes
  then
@@ -2034,6 +2058,13 @@ AC_SUBST(DYLIB_SUFFIX,$ff_suffix_dylib)
 #  the doc is now in https://github.com/FreeFem/FreeFem-doc-pdf/blob/master/freefem%2B%2Bdoc.pdf
 # Checking wether we can generate some documentation
 # --------------------------------------------------
+case "$F77" in 
+*gfortran*)
+CHECK_COMPILE_FLAG(Fortran 77,[-fallow-argument-mismatch],FFLAGS)
+CHECK_COMPILE_FLAG(Fortran,[-fallow-argument-mismatch],FCFLAGS) 
+;;
+esac
+
 dnl
 dnl AC_CHECK_PROG(ff_latex,latex,yes,no)
 dnl AC_CHECK_PROG(ff_makeindex,makeindex,yes,no)
@@ -2136,7 +2167,7 @@ dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],
 ## before try
 
 TOOL_DISABLE(tetgen,tetgen.$DYLIB_SUFFIX)
-TOOL_DISABLE(lapack,"lapack.$DYLIB_SUFFIX fflapack.$DYLIB_SUFFIX")
+TOOL_DISABLE(lapack,lapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
 TOOL_DISABLE(parmetis,parmetis.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
