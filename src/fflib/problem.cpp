@@ -1490,10 +1490,38 @@ namespace Fem2D {
     template<class R>
     void AssembleBilinearForm(Stack stack,const MeshL & Th,const FESpace & Uh,const FESpaceL & Vh,bool sym,
                          MatriceCreuse<R>  & A, const  FormBilinear * b  )
-
     {
       ffassert(0);
     }
+
+    // 3D Surf / 3D volume on meshS
+    template<class R>
+    void AssembleBilinearForm(Stack stack,const MeshS & Th,const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
+                         MatriceCreuse<R>  & A, const  FormBilinear * b  )
+    {
+      ffassert(0);
+    }
+   // 3D volume / 3D Surf on meshS
+   template<class R>
+   void AssembleBilinearForm(Stack stack,const MeshS & Th,const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
+                        MatriceCreuse<R>  & A, const  FormBilinear * b  )
+   {
+     ffassert(0);
+   }
+   // 3D Surf / 3D curve on meshL
+   template<class R>
+   void AssembleBilinearForm(Stack stack,const MeshL & Th,const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
+                        MatriceCreuse<R>  & A, const  FormBilinear * b  )
+   {
+     ffassert(0);
+   }
+   // 3D curve / 3D Surf on meshL
+   template<class R>
+   void AssembleBilinearForm(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
+                        MatriceCreuse<R>  & A, const  FormBilinear * b  )
+   {
+     ffassert(0);
+   }
 
 // end 3d
 
@@ -2827,7 +2855,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
             const Triangle * tu;
             const EdgeL *tv;
             if(abs(P.z)>epsP) {outsidev=true;tu=0;}
-            tu= Thu.Find(PP,Ptu,outsideu);
+            else tu= Thu.Find(PP,Ptu,outsideu);
               if( !tu ||  outsideu) {
                 if(verbosity>100) cout << " On a pas trouver (u) " << P << " " << endl;
                 continue;
@@ -2837,7 +2865,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
               tv =&T;
               Ptv=Pt;
             }
-            else { // condition sur y ???
+            else {
               tv= Thv.Find(P,Ptv,outsideu);
               if( !tv ||  outsideu) {
                 if(verbosity>100) cout << " On a pas trouver (u) " << P << " " << endl;
@@ -2893,7 +2921,409 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
     *MeshPointStack(stack) = mp;
 }
 
+// 3D Surf / 3D volume on meshS
+template<class R>
+void  AddMatElem(MatriceMap<R> & A,const MeshS & Th,const BilinearOperator & Op,bool sym,int it,int ie,int label,
+                 const FESpaceS & Uh,const FESpace3 & Vh,const QuadratureFormular & FI,const QuadratureFormular1d & FIb,
+                 double *p,void *vstack, bool intmortar=false)
+{
 
+    Stack stack=pvoid2Stack(vstack);
+    MeshPoint mp= *MeshPointStack(stack);
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+    const MeshS & Thu(Uh.Th);
+    const Mesh3 & Thv(Vh.Th);
+
+    bool same = false;
+    const TriangleS &T = Th[it];
+    long npi;
+    long i,j;
+    bool classoptm = copt && Op.optiexpK;
+    assert(Op.MaxOp() <last_operatortype);
+
+    int lastop=0;
+    What_d Dop = Op.DiffOp(lastop);
+    double epsP=1e-6; // must be choose
+    
+    if (ie<0)
+    {
+        for (npi=0;npi<FI.n;npi++) // loop on the integration point
+        {
+            QuadraturePoint pi(FI[npi]);
+            double coef = T.mesure()*pi.a;
+            R2 Pt(pi),Ptu;
+            R3 Ptv;
+            R3 P(T(Pt));
+            R2 PP(P.p2());
+            bool outsideu,outsidev;
+            // ici trouve le T
+            int iut=0,ivt=0;
+            const TriangleS * tu;
+            const Tet *tv;
+            if(&Th == & Thu) {
+                tu =&T;
+                Ptu=Pt;
+            }
+            else {
+                tu= Thu.Find(P,Ptu,outsideu);
+                if( !tu ||  outsideu) {
+                    if(verbosity>100) cout << " On a pas trouver (u) " << P << " " << endl;
+                    continue;
+                }
+            }
+            tv= Thv.Find(PP,Ptv,outsidev);
+            if( !tv || outsidev) {
+                if(verbosity>100) cout << " On a pas trouver (v) " << P << " " << endl;
+                continue;
+            }
+            iut = Thu(tu);
+            ivt = Thv(tv);
+            if( verbosity>1000) cout << " T " << it  << "  iut " << iut << " ivt " << ivt  <<  endl ;
+            FElementS Ku(Uh[iut]);
+            FElement3 Kv(Vh[ivt]);
+            long n= Kv.NbDoF() ,m=Ku.NbDoF();
+            long N= Kv.N, M= Ku.N;
+            RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
+            RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction     // lastop
+          //  cout << " same ?0:n*N*lastop " << same ?0:n*N*lastop << endl;
+
+            Ku.BF(Dop,Ptu,fu);
+            MeshPointStack(stack)->set(Th,P,Pt,T,label);
+            if (classoptm) (*Op.optiexpK)(stack); // call optim version
+            if (!same) Kv.BF(Dop,Ptv,fv);
+            for ( i=0;  i<n;   i++ ) {
+                // attention la fonction test donne la ligne
+                //  et la fonction test est en second
+                int ig = Kv(i);
+                RNM_ wi(fv(i,'.','.'));
+                for ( j=0;  j<m;   j++ ) {
+                    RNM_ wj(fu(j,'.','.'));
+                    int il=0;
+                    int jg(Ku(j));
+                    if ( !sym ||  ig <= jg )
+                        for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++) {
+                            // attention la fonction test donne la ligne
+                            //  et la fonction test est en second
+                            BilinearOperator::K ll(*l);
+                            pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                            double w_i =  wi(ii.first,ii.second);
+                            double w_j =  wj(jj.first,jj.second);
+                            R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                            if( verbosity>1000) cout << ig << " " << jg << " "  <<  " " << ccc << " " <<  coef * ccc * w_i*w_j << " T \n"   ;
+                            double wij =  w_i*w_j;
+                            if (abs(wij)>= 1e-10)
+                                A[make_pair(ig,jg)] += coef * ccc * wij;
+                        }
+                }
+            }
+        }
+    }
+    else // int on point ie
+        ffassert(0);
+ 
+    *MeshPointStack(stack) = mp;
+}
+// 3D volume / 3D Surf on meshS
+template<class R>
+void  AddMatElem(MatriceMap<R> & A,const MeshS & Th,const BilinearOperator & Op,bool sym,int it,int ie,int label,
+                 const FESpace3 & Uh,const FESpaceS & Vh,const QuadratureFormular & FI,const QuadratureFormular1d & FIb,
+                 double *p,void *vstack, bool intmortar=false)
+{
+
+    Stack stack=pvoid2Stack(vstack);
+    MeshPoint mp= *MeshPointStack(stack);
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+    const Mesh3 & Thu(Uh.Th);
+    const MeshS & Thv(Vh.Th);
+
+    bool same = false;
+    const TriangleS &T = Th[it];
+    long npi;
+    long i,j;
+    bool classoptm = copt && Op.optiexpK;
+    assert(Op.MaxOp() <last_operatortype);
+
+    int lastop=0;
+    What_d Dop = Op.DiffOp(lastop);
+    
+    if (ie<0)
+    {
+        for (npi=0;npi<FI.n;npi++) // loop on the integration point
+        {
+            QuadraturePoint pi(FI[npi]);
+            double coef = T.mesure()*pi.a;
+            R2 Pt(pi),Ptv;
+            R3 Ptu;
+            R3 P(T(Pt));
+            R2 PP(P.p2());
+            bool outsideu,outsidev;
+            // ici trouve le T
+            int iut=0,ivt=0;
+            const Tet * tu;
+            const TriangleS *tv;
+            tu= Thu.Find(P,Ptu,outsideu);
+              if( !tu ||  outsideu) {
+                if(verbosity>100) cout << " On a pas trouver (u) " << P << " " << endl;
+                continue;
+              }
+                        
+            if(&Th == & Thv ) {
+              tv =&T;
+              Ptv=Pt;
+            }
+            else {
+              tv= Thv.Find(PP,Ptv,outsidev);
+              if( !tv ||  outsidev) {
+                if(verbosity>100) cout << " On a pas trouver (u) " << P << " " << endl;
+                continue;}
+            }
+            iut = Thu(tu);
+            ivt = Thv(tv);
+            if( verbosity>1000) cout << " T " << it  << "  iut " << iut << " ivt " << ivt  <<  endl ;
+            FElement3 Ku(Uh[iut]);
+            FElementS Kv(Vh[ivt]);
+            long n= Kv.NbDoF() ,m=Ku.NbDoF();
+            long N= Kv.N, M= Ku.N;
+            RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
+            RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction     // lastop
+
+            Ku.BF(Dop,Ptu,fu);
+            MeshPointStack(stack)->set(Th,P,Pt,T,label);
+            if (classoptm) (*Op.optiexpK)(stack);  // call optim version
+            if (!same) Kv.BF(Dop,Ptv,fv);
+            for ( i=0;  i<n;   i++ ) {
+                // attention la fonction test donne la ligne
+                //  et la fonction test est en second
+                int ig = Kv(i);
+                RNM_ wi(fv(i,'.','.'));
+                for ( j=0;  j<m;   j++ ) {
+                    RNM_ wj(fu(j,'.','.'));
+                    int il=0;
+                    int jg(Ku(j));
+                    if ( !sym ||  ig <= jg )
+                        for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++) {
+                            // attention la fonction test donne la ligne
+                            //  et la fonction test est en second
+                            BilinearOperator::K ll(*l);
+                            pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                            double w_i =  wi(ii.first,ii.second);
+                            double w_j =  wj(jj.first,jj.second);
+                            R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                            if( verbosity>1000) cout << ig << " " << jg << " "  <<  " " << ccc << " " <<  coef * ccc * w_i*w_j << " T \n"   ;
+                            double wij =  w_i*w_j;
+                            if (abs(wij)>= 1e-10)
+                                A[make_pair(ig,jg)] += coef * ccc * wij;
+                        }
+                }
+            }
+        }
+    }
+    else // int on point ie
+        ffassert(0);
+ 
+    *MeshPointStack(stack) = mp;
+}
+
+
+// 3D curve / 3D Surf on meshL
+template<class R>
+void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,bool sym,int it,int ie,int label,
+                 const FESpaceL & Uh,const FESpaceS & Vh,const GQuadratureFormular<R1> & FI,const QuadratureFormular1d & FIb,
+                 double *p,void *vstack, bool intmortar=false)
+{
+
+    Stack stack=pvoid2Stack(vstack);
+    MeshPoint mp= *MeshPointStack(stack);
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+    const MeshL & Thu(Uh.Th);
+    const MeshS & Thv(Vh.Th);
+
+    bool same = false;
+    const EdgeL &T = Th[it];
+    long npi;
+    long i,j;
+    bool classoptm = copt && Op.optiexpK;
+    assert(Op.MaxOp() <last_operatortype);
+
+    int lastop=0;
+    What_d Dop = Op.DiffOp(lastop);
+    if (ie<0) {
+        for (npi=0;npi<FI.n;npi++) {
+           GQuadraturePoint<R1> pi(FI[npi]);
+            double coef = T.mesure()*pi.a;
+            R1 Pt(pi),Ptu;
+            R2 Ptv;
+            R3 P(T(Pt));
+            bool outsideu,outsidev;
+            // ici trouve le T
+            int iut=0,ivt=0;
+            const EdgeL * tu;
+            const TriangleS *tv;
+            if(&Th == & Thu) {
+                tu =&T;
+                Ptu=Pt;
+            }
+            else {
+                tu= Thu.Find(P,Ptu,outsideu);
+                if( !tu ||  outsideu) {
+                    if(verbosity>100) cout << " On a pas trouver (u) " << P << " " << endl;
+                    continue;
+                }
+            }
+            
+           tv= Thv.Find(P,Ptv,outsidev);
+           if( !tv || outsidev) {
+                if(verbosity>100) cout << " On a pas trouver (v) " << P << " " << endl;
+                continue;
+            }
+            iut = Thu(tu);
+            ivt = Thv(tv);
+            if( verbosity>1000) cout << " T " << it  << "  iut " << iut << " ivt " << ivt  <<  endl ;
+            FElementL Ku(Uh[iut]);
+            FElementS Kv(Vh[ivt]);
+            long n= Kv.NbDoF() ,m=Ku.NbDoF();
+            long N= Kv.N, M= Ku.N;
+            RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
+            RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction     // lastop
+
+            Ku.BF(Dop,Ptu,fu);
+            MeshPointStack(stack)->set(Th,P,Pt,T,label);
+            
+            if (classoptm) (*Op.optiexpK)(stack);   // call optim version
+            if (!same) Kv.BF(Dop,Ptv,fv);
+            for ( i=0;  i<n;   i++ ) {
+                // attention la fonction test donne la ligne
+                //  et la fonction test est en second
+                int ig = Kv(i);
+                RNM_ wi(fv(i,'.','.'));
+                for ( j=0;  j<m;   j++ ) {
+                    RNM_ wj(fu(j,'.','.'));
+                    int il=0;
+                    int jg(Ku(j));
+                    if ( !sym ||  ig <= jg )
+                        for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++) {
+                            // attention la fonction test donne la ligne
+                            //  et la fonction test est en second
+                            BilinearOperator::K ll(*l);
+                            pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                            double w_i =  wi(ii.first,ii.second);
+                            double w_j =  wj(jj.first,jj.second);
+                            R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                            if( verbosity>1000) cout << ig << " " << jg << " "  <<  " " << ccc << " " <<  coef * ccc * w_i*w_j << " T \n"   ;
+                            double wij =  w_i*w_j;
+                            if (abs(wij)>= 1e-10)
+                                A[make_pair(ig,jg)] += coef * ccc * wij;
+                        }
+                }
+            }
+        }
+    }
+    else // int on point ie
+        ffassert(0);
+ 
+    *MeshPointStack(stack) = mp;
+}
+
+// 3D Surf / 3D curve on meshL
+template<class R>
+void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,bool sym,int it,int ie,int label,
+                 const FESpaceS & Uh,const FESpaceL & Vh,const GQuadratureFormular<R1> & FI,const QuadratureFormular1d & FIb,
+                 double *p,void *vstack, bool intmortar=false)
+{
+
+    Stack stack=pvoid2Stack(vstack);
+    MeshPoint mp= *MeshPointStack(stack);
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+    const MeshS & Thu(Uh.Th);
+    const MeshL & Thv(Vh.Th);
+
+    bool same = false;
+    const EdgeL &T = Th[it];
+    long npi;
+    long i,j;
+    bool classoptm = copt && Op.optiexpK;
+    assert(Op.MaxOp() <last_operatortype);
+
+    int lastop=0;
+    What_d Dop = Op.DiffOp(lastop);
+    double epsP=1e-6; // must be choose
+    
+    if (ie<0) {
+        for (npi=0;npi<FI.n;npi++) {
+            GQuadraturePoint<R1> pi(FI[npi]);
+            double coef = T.mesure()*pi.a;
+            R1 Pt(pi),Ptv;
+            R2 Ptu;
+            R3 P(T(Pt));
+            R2 PP(P.p2());
+            bool outsideu,outsidev;
+            // ici trouve le T
+            int iut=0,ivt=0;
+            const TriangleS * tu;
+            const EdgeL *tv;
+            if(abs(P.z)>epsP) {outsidev=true;tu=0;}
+            else tu= Thu.Find(PP,Ptu,outsideu);
+              if( !tu ||  outsideu) {
+                if(verbosity>100) cout << " On a pas trouver (u) " << P << " " << endl;
+                continue;
+              }
+            if(&Th == & Thv ) {
+              tv =&T;
+              Ptv=Pt;
+            }
+            else {
+              tv= Thv.Find(P,Ptv,outsideu);
+              if( !tv ||  outsideu) {
+                if(verbosity>100) cout << " On a pas trouver (u) " << P << " " << endl;
+                continue;}
+            }
+            
+            iut = Thu(tu);
+            ivt = Thv(tv);
+            if( verbosity>1000) cout << " T " << it  << "  iut " << iut << " ivt " << ivt  <<  endl ;
+            FElementS Ku(Uh[iut]);
+            FElementL Kv(Vh[ivt]);
+            long n= Kv.NbDoF() ,m=Ku.NbDoF();
+            long N= Kv.N, M= Ku.N;
+            RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
+            RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction     // lastop
+
+            Ku.BF(Dop,Ptu,fu);
+            MeshPointStack(stack)->set(Th,P,Pt,T,label);
+            if (classoptm) (*Op.optiexpK)(stack); // call optim version
+            if (!same) Kv.BF(Dop,Ptv,fv);
+            for ( i=0;  i<n;   i++ ) {
+                // attention la fonction test donne la ligne
+                //  et la fonction test est en second
+                int ig = Kv(i);
+                RNM_ wi(fv(i,'.','.'));
+                for ( j=0;  j<m;   j++ ) {
+                    RNM_ wj(fu(j,'.','.'));
+                    int il=0;
+                    int jg(Ku(j));
+                    if ( !sym ||  ig <= jg )
+                        for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++) {
+                            // attention la fonction test donne la ligne
+                            //  et la fonction test est en second
+                            BilinearOperator::K ll(*l);
+                            pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                            double w_i =  wi(ii.first,ii.second);
+                            double w_j =  wj(jj.first,jj.second);
+                            R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                            if( verbosity>1000) cout << ig << " " << jg << " "  <<  " " << ccc << " " <<  coef * ccc * w_i*w_j << " T \n"   ;
+                            double wij =  w_i*w_j;
+                            if (abs(wij)>= 1e-10)
+                                A[make_pair(ig,jg)] += coef * ccc * wij;
+                        }
+                }
+            }
+        }
+    }
+    else // int on point ie
+        ffassert(0);
+ 
+    *MeshPointStack(stack) = mp;
+}
 
    ////////////////////////////////////////////////
    // AssembleBilinearForm
@@ -4033,6 +4463,803 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
        }
        if (where_in_stack) delete [] where_in_stack;
    }
+
+// case 3D Surf / 3D volume on meshS
+ template<class R>
+ void AssembleBilinearForm(Stack stack,const MeshS & Th,const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
+                           MatriceMap<R>  & A, const  FormBilinear * b  )
+
+{
+ StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
+ bool sptrclean=true;
+ //     sptr->clean(); // modif FH mars 2006  clean Ptr
+
+ const CDomainOfIntegration & di= *b->di;
+ ///typedef typename Trait_MESHO<FESpaceS>::MeshO * pmeshO;
+// pmeshO  ThbfO = GetAny<pmeshO>((*b->di->Th)(stack)); // case 3D surface ThbfO =
+ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack)); //Trait_MESHO<FESpaceS>::topmesh(ThbfO);  //
+
+ SHOWVERB(cout << " FormBilinear () " << endl);
+ //MatriceElementaireSymetrique<R> *mates =0;
+ // MatriceElementairePleine<R> *matep =0;
+ const int useopt=di.UseOpt(stack);
+ //double binside=di.binside(stack);
+ const bool intmortar=di.intmortar(stack);
+ if ( verbosity >1)
+ {
+     cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+     cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
+     cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
+     cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
+ }
+ Expression  const * const mapt=*di.mapt?di.mapt:0 ;
+ Expression  const * const mapu=*di.mapu?di.mapu:0 ;
+ bool withmap =di.withmap();
+ //   ExecError(" no map  in the case (4) ??");}
+ assert(pThdi == & Th);
+ //const vector<Expression>  & what(di.what);
+ CDomainOfIntegration::typeofkind  kind = di.kind;
+ set<int> setoflab;
+ bool all=true;
+ const QuadratureFormular1d & FIE = di.FIE(stack);
+ const QuadratureFormular & FITo = di.FIT(stack);
+ QuadratureFormular FIT(FITo,3);
+ bool VF=b->VF();  // finite Volume or discontinous Galerkin
+ if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+ if (verbosity>3)
+ {
+     if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
+     else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
+     else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
+     else cout << "  --  int 2d   (nQP: "<< FIT.n << " ) in "  ;
+ }
+ // if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (1)");
+ if(di.islevelset() && (CDomainOfIntegration::int1d!=kind) &&  (CDomainOfIntegration::int2d!=kind) )
+     InternalError("Sorry no levelset integration type on no int1d case");
+
+ /*
+  if (verbosity>3)
+  if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border  " ;
+  else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges, "   ;
+  else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges, "   ;
+  else cout << "  --  int  in  " ; */
+ Expandsetoflab(stack,di, setoflab,all);
+ /*
+  for (size_t i=0;i<what.size();i++)
+  {long  lab  = GetAny<long>( (*what[i])(stack));
+  setoflab.insert(lab);
+  if ( verbosity>3) cout << lab << " ";
+  all=false;
+  }*/
+ if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
+ const E_F0 * poptiexp0=b->b->optiexp0;
+ // const E_F0 & optiexpK=*b->b->optiexpK;
+ int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
+ R** where_in_stack =0;
+ if (n_where_in_stack_opt && useopt)
+     where_in_stack = new R * [n_where_in_stack_opt];
+ if (where_in_stack)
+ {
+     assert(b->b->v.size()==(size_t) n_where_in_stack_opt);
+     for (int i=0;i<n_where_in_stack_opt;i++)
+     {
+         int offset=b->b->where_in_stack_opt[i];
+         assert(offset>10);
+         where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
+         *(where_in_stack[i])=0;
+     }
+
+
+     if(poptiexp0)
+         (*poptiexp0)(stack);
+     KN<bool> ok(b->b->v.size());
+     {  //   remove the zero coef in the liste
+         // R zero=R();
+         int il=0;
+         for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
+             ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( std::norm(*(where_in_stack[il])) < 1e-100 ) );
+     }
+     BilinearOperator b_nozer(*b->b,ok);
+     if (verbosity % 10 > 3 )
+         cout << "   -- nb term in bilinear form  (!0) : " << b_nozer.v.size()
+         << "  total " << n_where_in_stack_opt << endl;
+
+     if ( (verbosity/100) % 10 >= 2)
+     {
+         int il=0;
+
+         for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
+             cout << il << " coef (" << l->first << ") = " << *(where_in_stack[il])
+             << " offset=" << b->b->where_in_stack_opt[il]
+             << " dep mesh " << l->second.MeshIndependent() << b->b->mesh_indep_stack_opt[il] << endl;
+     }
+ }
+ Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
+
+ KN<double>  p(Vh.esize()+ Uh.esize() );
+
+
+ if (verbosity >3)
+ {
+     if (all) cout << " all " << endl ;
+     else cout << endl;
+ }
+
+ if (di.kind == CDomainOfIntegration::int1d )
+ {
+
+     if(di.islevelset())
+     {
+         double uset = HUGE_VAL;
+         R2 Q[2];
+         double vol6[2];
+         KN<double> phi(Th.nv);phi=uset;
+         double f[3], ll=0;
+         for(int t=0; t< Th.nt;++t)
+         {
+             if ( all || setoflab.find(Th[t].lab) != setoflab.end())
+             {
+                 double umx=-HUGE_VAL,umn=HUGE_VAL;
+                 for(int i=0;i<3;++i)
+                 {
+                     int j= Th(t,i);
+                     if( phi[j]==uset)
+                     {
+                         MeshPointStack(stack)->setP(&Th,t,i);
+                         phi[j]= di.levelset(stack);//zzzz
+                     }
+                     f[i]=phi[j];
+                     umx = std::max(umx,phi[j]);
+                     umn = std::min(umn,phi[j]);
+
+                 }
+                 int ntp= IsoLineK(f,Q,1e-10);
+                 if(verbosity>999 && ntp==2)
+                 {
+                     const TriangleS &T = Th[t];
+                     R3 E(T(Q[0]),T(Q[1]));
+                     double le=sqrt((E,E));
+                     ll += le;
+                     cout << "\t\t" << ntp <<" :  " << Q[0] << " " << Q[1] << " ;  "
+                     << f[0] << " " << f[1] << " " << f[2] << "  " << le << " / " << ll<<endl;
+                 }
+                 if( ntp==2)
+                 { //if( withmap)
+                    // AddMatElem(mapu,mapt,A,Th,*b->b,sym,t,10,Th[t].lab,Uh,Vh,FIT,FIE,p,stack,intmortar);
+                 //else
+                     AddMatElem(A,Th,*b->b,sym,t,10,Th[t].lab,Uh,Vh,FIT,FIE,p,stack,intmortar);
+                     if(sptrclean) sptrclean=sptr->clean();
+                 }
+             }
+         }
+         FIT =FITo;
+     }
+
+
+     else
+     {
+         for( int e=0;e<Th.nbe;e++)
+         {
+             if (all || setoflab.find(Th.be(e).lab) != setoflab.end())
+             {
+                 int ie,i =Th.BoundaryElement(e,ie);
+                 //if( withmap)
+                 //    AddMatElem(mapu,mapt,A,Th,*b->b,sym,i,ie,Th.be(e).lab,Uh,Vh,FIT,FIE,p,stack,intmortar);
+                 //else
+                     AddMatElem(A,Th,*b->b,sym,i,ie,Th.be(e).lab,Uh,Vh,FIT,FIE,p,stack,intmortar);
+                 if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+             }
+         }
+     }}
+ /*else if (di.kind == CDomainOfIntegration::intalledges)
+ {
+     cerr << " Sorry no implement to hard  "<< endl;
+     ExecError("FH: no intalledges on diff mesh ???");
+     ffassert(0); // a faire
+     if(withmap)
+         for (int i=0;i< Th.nt; i++)
+         {
+             if ( all || setoflab.find(Th[i].lab) != setoflab.end())
+                 for (int ie=0;ie<3;ie++)
+                     AddMatElem(mapu,mapt,A,Th,*b->b,sym,i,ie,Th[i].lab,Uh,Vh,FIT,FIE,p,stack,intmortar);
+             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+
+
+         }
+
+     else
+         for (int i=0;i< Th.nt; i++)
+         {
+             if ( all || setoflab.find(Th[i].lab) != setoflab.end())
+                 for (int ie=0;ie<3;ie++)
+                     AddMatElem(A,Th,*b->b,sym,i,ie,Th[i].lab,Uh,Vh,FIT,FIE,p,stack,intmortar);
+             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+
+
+         }
+
+ }*/
+ else if (di.kind == CDomainOfIntegration::intallVFedges)
+ {
+
+     cerr << " a faire intallVFedges " << endl;
+     ffassert(0);
+
+ }
+ else if (di.kind == CDomainOfIntegration::int2d ) {
+     // cerr << " a faire CDomainOfIntegration::int2d  " << endl;
+     if(di.islevelset())
+     {
+         double uset = HUGE_VAL;
+         R2 Q[2][3];
+         double vol6[2];
+         KN<double> phi(Th.nv);phi=uset;
+         double f[3];
+         for(int t=0; t< Th.nt;++t)
+         {
+             if ( all || setoflab.find(Th[t].lab) != setoflab.end())
+             {
+                 double umx=-HUGE_VAL,umn=HUGE_VAL;
+                 for(int i=0;i<3;++i)
+                 {
+                     int j= Th(t,i);
+                     if( phi[j]==uset)
+                     {
+                         MeshPointStack(stack)->setP(&Th,t,i);
+                         phi[j]= di.levelset(stack);//zzzz
+                     }
+                     f[i]=phi[j];
+                     umx = std::max(umx,phi[j]);
+                     umn = std::min(umn,phi[j]);
+
+                 }
+                 int nt= UnderIso(f,Q, vol6,1e-14);
+                 setQF<R2>(FIT,FITo,QuadratureFormular_T_1, Q,vol6,nt);
+                 if(FIT.n)
+                 {
+                     //if(withmap)
+                      //   AddMatElem(mapu,mapt,A,Th,*b->b,sym,t,-1,Th[t].lab,Uh,Vh,FIT,FIE,p,stack);
+                     //else
+                         AddMatElem(A,Th,*b->b,sym,t,-1,Th[t].lab,Uh,Vh,FIT,FIE,p,stack);
+                 }
+                 if(sptrclean) sptrclean=sptr->clean();
+             }
+         }
+         FIT =FITo;
+     }
+     else
+
+     {
+         //if(withmap)
+          //   for (int i=0;i< Th.nt; i++)
+           //  {
+            //     if ( all || setoflab.find(Th[i].lab) != setoflab.end())
+             //        AddMatElem(mapu,mapt,A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,FIE,p,stack);
+             //    if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+            // }
+
+         //else
+             for (int i=0;i< Th.nt; i++)
+             {
+                 if ( all || setoflab.find(Th[i].lab) != setoflab.end())
+                     AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,FIE,p,stack);
+                 if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+             }
+
+     }
+
+ }
+ else
+     InternalError(" kind of CDomainOfIntegration unkown");
+
+ if (where_in_stack) delete [] where_in_stack;
+     }
+
+
+
+
+
+// case 3D volume / 3D Surf on meshS
+ template<class R>
+ void AssembleBilinearForm(Stack stack,const MeshS & Th,const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
+                           MatriceMap<R>  & A, const  FormBilinear * b  )
+
+{
+ StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
+ bool sptrclean=true;
+ //     sptr->clean(); // modif FH mars 2006  clean Ptr
+
+ const CDomainOfIntegration & di= *b->di;
+pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
+
+ SHOWVERB(cout << " FormBilinear () " << endl);
+ const int useopt=di.UseOpt(stack);
+ //double binside=di.binside(stack);
+ const bool intmortar=di.intmortar(stack);
+ if ( verbosity >1)
+ {
+     cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+     cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
+     cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
+     cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
+ }
+ Expression  const * const mapt=*di.mapt?di.mapt:0 ;
+ Expression  const * const mapu=*di.mapu?di.mapu:0 ;
+ bool withmap =di.withmap();
+ //   ExecError(" no map  in the case (4) ??");}
+ assert(pThdi == & Th);
+ //const vector<Expression>  & what(di.what);
+ CDomainOfIntegration::typeofkind  kind = di.kind;
+ set<int> setoflab;
+ bool all=true;
+ const QuadratureFormular1d & FIE = di.FIE(stack);
+ const QuadratureFormular & FITo = di.FIT(stack);
+ QuadratureFormular FIT(FITo,3);
+ bool VF=b->VF();  // finite Volume or discontinous Galerkin
+ if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+ if (verbosity>3)
+ {
+     if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
+     else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges ( nQP: "<< FIE.n << "),"  ;
+     else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges nQP: ("<< FIE.n << ")," ;
+     else cout << "  --  int 2d   (nQP: "<< FIT.n << " ) in "  ;
+ }
+ // if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (1)");
+ if(di.islevelset() && (CDomainOfIntegration::int1d!=kind) &&  (CDomainOfIntegration::int2d!=kind) )
+     InternalError("Sorry no levelset integration type on no int1d case");
+
+ /*
+  if (verbosity>3)
+  if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border  " ;
+  else  if (CDomainOfIntegration::intalledges==kind) cout << "  -- boundary int all edges, "   ;
+  else  if (CDomainOfIntegration::intallVFedges==kind) cout << "  -- boundary int all VF edges, "   ;
+  else cout << "  --  int  in  " ; */
+ Expandsetoflab(stack,di, setoflab,all);
+ /*
+  for (size_t i=0;i<what.size();i++)
+  {long  lab  = GetAny<long>( (*what[i])(stack));
+  setoflab.insert(lab);
+  if ( verbosity>3) cout << lab << " ";
+  all=false;
+  }*/
+ if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
+ const E_F0 * poptiexp0=b->b->optiexp0;
+ // const E_F0 & optiexpK=*b->b->optiexpK;
+ int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
+ R** where_in_stack =0;
+ if (n_where_in_stack_opt && useopt)
+     where_in_stack = new R * [n_where_in_stack_opt];
+ if (where_in_stack)
+ {
+     assert(b->b->v.size()==(size_t) n_where_in_stack_opt);
+     for (int i=0;i<n_where_in_stack_opt;i++)
+     {
+         int offset=b->b->where_in_stack_opt[i];
+         assert(offset>10);
+         where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
+         *(where_in_stack[i])=0;
+     }
+
+
+     if(poptiexp0)
+         (*poptiexp0)(stack);
+     KN<bool> ok(b->b->v.size());
+     {  //   remove the zero coef in the liste
+         // R zero=R();
+         int il=0;
+         for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
+             ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( std::norm(*(where_in_stack[il])) < 1e-100 ) );
+     }
+     BilinearOperator b_nozer(*b->b,ok);
+     if (verbosity % 10 > 3 )
+         cout << "   -- nb term in bilinear form  (!0) : " << b_nozer.v.size()
+         << "  total " << n_where_in_stack_opt << endl;
+
+     if ( (verbosity/100) % 10 >= 2)
+     {
+         int il=0;
+
+         for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
+             cout << il << " coef (" << l->first << ") = " << *(where_in_stack[il])
+             << " offset=" << b->b->where_in_stack_opt[il]
+             << " dep mesh " << l->second.MeshIndependent() << b->b->mesh_indep_stack_opt[il] << endl;
+     }
+ }
+ Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
+
+ KN<double>  p(Vh.esize()+ Uh.esize() );
+
+
+ if (verbosity >3)
+ {
+     if (all) cout << " all " << endl ;
+     else cout << endl;
+ }
+
+ if (di.kind == CDomainOfIntegration::int1d )
+ {
+
+     if(di.islevelset())
+     {
+         double uset = HUGE_VAL;
+         R2 Q[2];
+         double vol6[2];
+         KN<double> phi(Th.nv);phi=uset;
+         double f[3], ll=0;
+         for(int t=0; t< Th.nt;++t)
+         {
+             if ( all || setoflab.find(Th[t].lab) != setoflab.end())
+             {
+                 double umx=-HUGE_VAL,umn=HUGE_VAL;
+                 for(int i=0;i<3;++i)
+                 {
+                     int j= Th(t,i);
+                     if( phi[j]==uset)
+                     {
+                         MeshPointStack(stack)->setP(&Th,t,i);
+                         phi[j]= di.levelset(stack);//zzzz
+                     }
+                     f[i]=phi[j];
+                     umx = std::max(umx,phi[j]);
+                     umn = std::min(umn,phi[j]);
+
+                 }
+                 int ntp= IsoLineK(f,Q,1e-10);
+                 if(verbosity>999 && ntp==2)
+                 {
+                     const TriangleS &T = Th[t];
+                     R3 E(T(Q[0]),T(Q[1]));
+                     double le=sqrt((E,E));
+                     ll += le;
+                     cout << "\t\t" << ntp <<" :  " << Q[0] << " " << Q[1] << " ;  "
+                     << f[0] << " " << f[1] << " " << f[2] << "  " << le << " / " << ll<<endl;
+                 }
+                 if( ntp==2)
+                 { //if( withmap)
+                    // AddMatElem(mapu,mapt,A,Th,*b->b,sym,t,10,Th[t].lab,Uh,Vh,FIT,FIE,p,stack,intmortar);
+                 //else
+                     AddMatElem(A,Th,*b->b,sym,t,10,Th[t].lab,Uh,Vh,FIT,FIE,p,stack,intmortar);
+                     if(sptrclean) sptrclean=sptr->clean();
+                 }
+             }
+         }
+         FIT =FITo;
+     }
+
+
+     else
+     {
+         for( int e=0;e<Th.nbe;e++)
+         {
+             if (all || setoflab.find(Th.be(e).lab) != setoflab.end())
+             {
+                 int ie,i =Th.BoundaryElement(e,ie);
+                 //if( withmap)
+                 //    AddMatElem(mapu,mapt,A,Th,*b->b,sym,i,ie,Th.be(e).lab,Uh,Vh,FIT,FIE,p,stack,intmortar);
+                 //else
+                     AddMatElem(A,Th,*b->b,sym,i,ie,Th.be(e).lab,Uh,Vh,FIT,FIE,p,stack,intmortar);
+                 if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+             }
+         }
+     }}
+ /*else if (di.kind == CDomainOfIntegration::intalledges)
+ {
+     cerr << " Sorry no implement to hard  "<< endl;
+     ExecError("FH: no intalledges on diff mesh ???");
+     ffassert(0); // a faire
+     if(withmap)
+         for (int i=0;i< Th.nt; i++)
+         {
+             if ( all || setoflab.find(Th[i].lab) != setoflab.end())
+                 for (int ie=0;ie<3;ie++)
+                     AddMatElem(mapu,mapt,A,Th,*b->b,sym,i,ie,Th[i].lab,Uh,Vh,FIT,FIE,p,stack,intmortar);
+             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+
+
+         }
+
+     else
+         for (int i=0;i< Th.nt; i++)
+         {
+             if ( all || setoflab.find(Th[i].lab) != setoflab.end())
+                 for (int ie=0;ie<3;ie++)
+                     AddMatElem(A,Th,*b->b,sym,i,ie,Th[i].lab,Uh,Vh,FIT,FIE,p,stack,intmortar);
+             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+
+
+         }
+
+ }*/
+ else if (di.kind == CDomainOfIntegration::intallVFedges)
+ {
+
+     cerr << " a faire intallVFedges " << endl;
+     ffassert(0);
+
+ }
+ else if (di.kind == CDomainOfIntegration::int2d ) {
+     // cerr << " a faire CDomainOfIntegration::int2d  " << endl;
+     if(di.islevelset())
+     {
+         double uset = HUGE_VAL;
+         R2 Q[2][3];
+         double vol6[2];
+         KN<double> phi(Th.nv);phi=uset;
+         double f[3];
+         for(int t=0; t< Th.nt;++t)
+         {
+             if ( all || setoflab.find(Th[t].lab) != setoflab.end())
+             {
+                 double umx=-HUGE_VAL,umn=HUGE_VAL;
+                 for(int i=0;i<3;++i)
+                 {
+                     int j= Th(t,i);
+                     if( phi[j]==uset)
+                     {
+                         MeshPointStack(stack)->setP(&Th,t,i);
+                         phi[j]= di.levelset(stack);//zzzz
+                     }
+                     f[i]=phi[j];
+                     umx = std::max(umx,phi[j]);
+                     umn = std::min(umn,phi[j]);
+
+                 }
+                 int nt= UnderIso(f,Q, vol6,1e-14);
+                 setQF<R2>(FIT,FITo,QuadratureFormular_T_1, Q,vol6,nt);
+                 if(FIT.n)
+                 {
+                     //if(withmap)
+                      //   AddMatElem(mapu,mapt,A,Th,*b->b,sym,t,-1,Th[t].lab,Uh,Vh,FIT,FIE,p,stack);
+                     //else
+                         AddMatElem(A,Th,*b->b,sym,t,-1,Th[t].lab,Uh,Vh,FIT,FIE,p,stack);
+                 }
+                 if(sptrclean) sptrclean=sptr->clean();
+             }
+         }
+         FIT =FITo;
+     }
+     else
+
+     {
+         //if(withmap)
+          //   for (int i=0;i< Th.nt; i++)
+           //  {
+            //     if ( all || setoflab.find(Th[i].lab) != setoflab.end())
+             //        AddMatElem(mapu,mapt,A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,FIE,p,stack);
+             //    if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+            // }
+
+         //else
+             for (int i=0;i< Th.nt; i++)
+             {
+                 if ( all || setoflab.find(Th[i].lab) != setoflab.end())
+                     AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,FIE,p,stack);
+                 if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+             }
+
+     }
+
+ }
+ else
+     InternalError(" kind of CDomainOfIntegration unkown");
+
+ if (where_in_stack) delete [] where_in_stack;
+     }
+
+
+// 3D Surf / 3D curve on meshL
+ template<class R>
+ void AssembleBilinearForm(Stack stack,const MeshL & Th,const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
+                           MatriceMap<R>  & A, const  FormBilinear * b  )
+
+{
+    StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
+    bool sptrclean=true;
+
+    const CDomainOfIntegration & di= *b->di;
+    pmeshL  pThdi = GetAny<pmeshL>((*b->di->Th)(stack));
+
+    SHOWVERB(cout << " FormBilinear () " << endl);
+
+    const int useopt=di.UseOpt(stack);
+    //double binside=di.binside(stack);
+    const bool intmortar=di.intmortar(stack);
+    if ( verbosity >1) {
+     cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+     cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
+     cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
+     cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
+    }
+    Expression  const * const mapt=*di.mapt?di.mapt:0 ;
+    Expression  const * const mapu=*di.mapu?di.mapu:0 ;
+    bool withmap =di.withmap();
+    assert(pThdi == & Th);
+    CDomainOfIntegration::typeofkind  kind = di.kind;
+    set<int> setoflab;
+    bool all=true;
+
+    const GQuadratureFormular<R1> & FITo = di.FIE(stack);
+    GQuadratureFormular<R1> FIT(FITo,3);
+
+    bool VF=b->VF();  // finite Volume or discontinous Galerkin
+    if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+
+    // if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (1)");
+    if(di.islevelset() && (CDomainOfIntegration::int1d!=kind))
+      InternalError("Sorry no levelset integration type on no int1d case");
+
+    Expandsetoflab(stack,di, setoflab,all);
+
+    if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
+    const E_F0 * poptiexp0=b->b->optiexp0;
+ // const E_F0 & optiexpK=*b->b->optiexpK;
+    int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
+    R** where_in_stack =0;
+    if (n_where_in_stack_opt && useopt)
+      where_in_stack = new R * [n_where_in_stack_opt];
+    if (where_in_stack) {
+      assert(b->b->v.size()==(size_t) n_where_in_stack_opt);
+      for (int i=0;i<n_where_in_stack_opt;i++) {
+        int offset=b->b->where_in_stack_opt[i];
+        assert(offset>10);
+        where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
+        *(where_in_stack[i])=0;
+      }
+      if(poptiexp0)
+        (*poptiexp0)(stack);
+      KN<bool> ok(b->b->v.size());
+      int il=0;
+      for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
+        ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( std::norm(*(where_in_stack[il])) < 1e-100 ) );
+     
+      BilinearOperator b_nozer(*b->b,ok);
+      if (verbosity % 10 > 3 ) cout << "   -- nb term in bilinear form  (!0) : " << b_nozer.v.size() << "  total " << n_where_in_stack_opt << endl;
+
+      if ( (verbosity/100) % 10 >= 2) {
+        int il=0;
+        for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
+           cout << il << " coef (" << l->first << ") = " << *(where_in_stack[il]) << " offset=" << b->b->where_in_stack_opt[il]
+           << " dep mesh " << l->second.MeshIndependent() << b->b->mesh_indep_stack_opt[il] << endl;
+      }
+    }
+    Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
+    KN<double>  p(Vh.esize()+ Uh.esize() );
+
+    if (verbosity >3) {
+      if (all) cout << " all " << endl ;
+      else cout << endl;
+    }
+
+    if (di.kind == CDomainOfIntegration::int1d ) {
+      if(di.islevelset())
+        ffassert(0);
+      else {
+        for (int i=0;i< Th.nt; i++) {
+          if ( all || setoflab.find(Th[i].lab) != setoflab.end())
+            AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,0,p,stack);
+          if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+         }
+       }
+    }
+    else { cout << " di.kind " << di.kind << endl;
+      InternalError(" kind of CDomainOfIntegration unkown");
+    }
+    if (where_in_stack) delete [] where_in_stack;
+}
+
+
+
+
+
+// 3D curve / 3D Surf on meshL
+  template<class R>
+  void AssembleBilinearForm(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
+                            MatriceMap<R>  & A, const  FormBilinear * b  )
+
+  {
+      StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
+      bool sptrclean=true;
+
+      const CDomainOfIntegration & di= *b->di;
+      pmeshL  pThdi = GetAny<pmeshL>((*b->di->Th)(stack));
+
+      SHOWVERB(cout << " FormBilinear () " << endl);
+
+      const int useopt=di.UseOpt(stack);
+      //double binside=di.binside(stack);
+      const bool intmortar=di.intmortar(stack);
+      if ( verbosity >1)
+      {
+          cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+          cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
+          cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
+          cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
+      }
+      Expression  const * const mapt=*di.mapt?di.mapt:0 ;
+      Expression  const * const mapu=*di.mapu?di.mapu:0 ;
+      bool withmap =di.withmap();
+      assert(pThdi == & Th);
+      CDomainOfIntegration::typeofkind  kind = di.kind;
+      set<int> setoflab;
+      bool all=true;
+
+      const GQuadratureFormular<R1> & FITo = di.FIE(stack);
+      GQuadratureFormular<R1> FIT(FITo,3);
+
+      bool VF=b->VF();  // finite Volume or discontinous Galerkin
+      if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+
+      // if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (1)");
+      if(di.islevelset() && (CDomainOfIntegration::int1d!=kind))
+          InternalError("Sorry no levelset integration type on no int1d case");
+
+      Expandsetoflab(stack,di, setoflab,all);
+
+      if (verbosity>3) cout <<" Optimized = "<< useopt << ", ";
+      const E_F0 * poptiexp0=b->b->optiexp0;
+      // const E_F0 & optiexpK=*b->b->optiexpK;
+      int n_where_in_stack_opt=b->b->where_in_stack_opt.size();
+      R** where_in_stack =0;
+      if (n_where_in_stack_opt && useopt)
+          where_in_stack = new R * [n_where_in_stack_opt];
+      if (where_in_stack) {
+          assert(b->b->v.size()==(size_t) n_where_in_stack_opt);
+          for (int i=0;i<n_where_in_stack_opt;i++) {
+              int offset=b->b->where_in_stack_opt[i];
+              assert(offset>10);
+              where_in_stack[i]= static_cast<R *>(static_cast<void *>((char*)stack+offset));
+              *(where_in_stack[i])=0;
+          }
+
+
+          if(poptiexp0)
+              (*poptiexp0)(stack);
+          KN<bool> ok(b->b->v.size());
+          int il=0;
+          for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
+            ok[il] =  ! (b->b->mesh_indep_stack_opt[il] && ( std::norm(*(where_in_stack[il])) < 1e-100 ) );
+          
+          BilinearOperator b_nozer(*b->b,ok);
+          if (verbosity % 10 > 3 )
+              cout << "   -- nb term in bilinear form  (!0) : " << b_nozer.v.size()
+              << "  total " << n_where_in_stack_opt << endl;
+
+          if ( (verbosity/100) % 10 >= 2) {
+              int il=0;
+
+              for (BilinearOperator::const_iterator l=b->b->v.begin();l!=b->b->v.end();l++,il++)
+                  cout << il << " coef (" << l->first << ") = " << *(where_in_stack[il])
+                  << " offset=" << b->b->where_in_stack_opt[il]
+                  << " dep mesh " << l->second.MeshIndependent() << b->b->mesh_indep_stack_opt[il] << endl;
+          }
+      }
+      Stack_Ptr<R*>(stack,ElemMatPtrOffset) =where_in_stack;
+
+      KN<double>  p(Vh.esize()+ Uh.esize() );
+
+
+      if (verbosity >3) {
+          if (all) cout << " all " << endl ;
+          else cout << endl;
+      }
+
+      if (di.kind == CDomainOfIntegration::int1d ) {
+          if(di.islevelset())
+              ffassert(0);
+          else {
+               for (int i=0;i< Th.nt; i++) {
+                  if ( all || setoflab.find(Th[i].lab) != setoflab.end())
+                      AddMatElem(A,Th,*b->b,sym,i,-1,Th[i].lab,Uh,Vh,FIT,0,p,stack);
+                  if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+              }
+            }
+      }
+      else { cout << " di.kind " << di.kind << endl;
+          InternalError(" kind of CDomainOfIntegration unkown");
+      }
+      if (where_in_stack) delete [] where_in_stack;
+  }
+
 
 
     // --------- FH 170605
@@ -8065,6 +9292,34 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
    {
        ffassert(0);
    }
+    // case 3D Surf / 3D volume on meshS
+    template<class R>
+    void AssembleBC(Stack stack,const MeshS & Th,const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
+                   MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const  BC_set * bc, double tgv  )
+    {
+       ffassert(0);
+    }
+    // case 3D volume / 3D Surf on meshS
+    template<class R>
+    void AssembleBC(Stack stack,const MeshS & Th,const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
+                   MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const  BC_set * bc, double tgv  )
+    {
+       ffassert(0);
+    }
+    // case 3D curve / 3D Surf on meshL
+    template<class R>
+    void AssembleBC(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
+                   MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const  BC_set * bc, double tgv  )
+    {
+       ffassert(0);
+    }
+    // case 3D Surf / 3D curve on meshL
+    template<class R>
+    void AssembleBC(Stack stack,const MeshL & Th,const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
+                   MatriceCreuse<R>  * A,KN_<R> * B,KN_<R> * X, const  BC_set * bc, double tgv  )
+    {
+       ffassert(0);
+    }
 
     void  Expandsetoflab(Stack stack,const BC_set & bc,set<long> & setoflab);
     void  Expandsetoflab(Stack stack,const CDomainOfIntegration & di,set<int> & setoflab,bool &all);
@@ -9178,12 +10433,25 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
     }
 
 
-// creating an instance of AssembleLinearForm 3D curve / 2D on meshL
+   // creating an instance of AssembleLinearForm
+   // 3D curve / 2D on meshL
    template<class R>
    void AssembleLinearForm(Stack stack,const MeshL & Th,const FESpace & Vh,KN_<R> * B,const  FormLinear * l )
    {
        ffassert(0);
-       
+   }
+   // creating an instance of AssembleLinearForm
+   // 3D Surf / 3D volume on meshS
+   template<class R>
+   void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpace3 & Vh,KN_<R> * B,const  FormLinear * l )
+   {
+       ffassert(0);
+   }
+   // 3D curve / 3D Surf on meshL
+   template<class R>
+   void AssembleLinearForm(Stack stack,const MeshL & Th,const FESpaceS & Vh,KN_<R> * B,const  FormLinear * l )
+   {
+       ffassert(0);
    }
 
 }// END of NameSpace Fem2D
@@ -10016,9 +11284,9 @@ Expression IsFebaseArray(Expression f)
     }
     return febase;
 }
-template<class MMesh, class VFES1, class VFES2>
-Call_FormBilinear<MMesh, VFES1, VFES2>::Call_FormBilinear(int dd,Expression * na,Expression  BB,Expression fi, Expression fj)
-: d(dd),nargs(na),largs(),N(fi->nbitem()),M(fj->nbitem()),
+template<class VFES1, class VFES2>
+Call_FormBilinear< VFES1, VFES2>::Call_FormBilinear(Expression * na,Expression  BB,Expression fi, Expression fj)
+: nargs(na),largs(),N(fi->nbitem()),M(fj->nbitem()),
 euh(fi), evh(fj)
 {
     assert(nargs );
@@ -10027,9 +11295,9 @@ euh(fi), evh(fj)
     CompileError("Sorry the variationnal form (varf)  is not a the variationnal form (type const C_args *)");
     largs=LLL->largs;
 }
-template<class MMesh,class VFES>
-Call_FormLinear<MMesh,VFES>::Call_FormLinear(int dd,Expression *na,Expression  LL, Expression ft)
-: d(dd),largs(),nargs(na),N(ft->nbitem()),
+template<class VFES>
+Call_FormLinear<VFES>::Call_FormLinear(Expression *na,Expression  LL, Expression ft)
+:largs(),nargs(na),N(ft->nbitem()),
 ppfes(ft)//IsFebaseArray(ft))
 {
     const C_args * LLL=dynamic_cast<const C_args *>(LL);
@@ -10368,23 +11636,109 @@ namespace Fem2D {
                                                                         const FESpace & Uh,const FESpaceL & Vh,bool sym,
                                                                         MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
     template void AssembleBC<Complex,MeshL,FESpace,FESpaceL>(Stack stack,const MeshL & Th,const FESpace & Uh,const FESpaceL & Vh,bool sym,
-                                               MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv
-                                               );
+                                               MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv );
+   /////// 3D Surf / 3D volume on meshS
+   // instantation for type double
 
+   template bool AssembleVarForm<double,MatriceCreuse<double>,MeshS,FESpaceS,FESpace3>(Stack stack,const MeshS & Th,
+                                                                           const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
+                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+   template bool AssembleVarForm<double,MatriceMap<double>,MeshS,FESpaceS,FESpace3>(Stack stack,const MeshS & Th,
+                                                                         const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
+                                                                         MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+   template void AssembleBC<double,MeshS,FESpaceS,FESpace3>(Stack stack,const MeshS & Th,const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
+                                                MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
 
+   // instantation for type complex
+   template bool AssembleVarForm<Complex,MatriceCreuse<Complex>,MeshS,FESpaceS,FESpace3>(Stack stack,const MeshS & Th,
+                                                                            const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
+                                                                            MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
+   template bool AssembleVarForm<Complex,MatriceMap<Complex>,MeshS,FESpaceS,FESpace3>(Stack stack,const MeshS & Th,
+                                                                       const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
+                                                                       MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
+   template void AssembleBC<Complex,MeshS,FESpaceS,FESpace3>(Stack stack,const MeshS & Th,const FESpaceS & Uh,const FESpace3 & Vh,bool sym,
+                                              MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv );
+   /////// 3D volume / 3D Surf on meshS
+   // instantation for type double
+
+   template bool AssembleVarForm<double,MatriceCreuse<double>,MeshS,FESpace3,FESpaceS>(Stack stack,const MeshS & Th,
+                                                                           const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
+                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+   template bool AssembleVarForm<double,MatriceMap<double>,MeshS,FESpace3,FESpaceS>(Stack stack,const MeshS & Th,
+                                                                         const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
+                                                                         MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+   template void AssembleBC<double,MeshS,FESpace3,FESpaceS>(Stack stack,const MeshS & Th,const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
+                                                MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
+
+   // instantation for type complex
+   template bool AssembleVarForm<Complex,MatriceCreuse<Complex>,MeshS,FESpace3,FESpaceS>(Stack stack,const MeshS & Th,
+                                                                            const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
+                                                                            MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
+   template bool AssembleVarForm<Complex,MatriceMap<Complex>,MeshS,FESpace3,FESpaceS>(Stack stack,const MeshS & Th,
+                                                                       const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
+                                                                       MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
+   template void AssembleBC<Complex,MeshS,FESpace3,FESpaceS>(Stack stack,const MeshS & Th,const FESpace3 & Uh,const FESpaceS & Vh,bool sym,
+                                              MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv );
+
+   /////// 3D  curve / 3D Surf on meshL
+   // instantation for type double
+
+   template bool AssembleVarForm<double,MatriceCreuse<double>,MeshL,FESpaceL,FESpaceS>(Stack stack,const MeshL & Th,
+                                                                          const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
+                                                                          MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+   template bool AssembleVarForm<double,MatriceMap<double>,MeshL,FESpaceL,FESpaceS>(Stack stack,const MeshL & Th,
+                                                                       const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
+                                                                       MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+   template void AssembleBC<double,MeshL,FESpaceL,FESpaceS>(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
+                                               MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
+
+   // instantation for type complex
+   template bool AssembleVarForm<Complex,MatriceCreuse<Complex>,MeshL,FESpaceL,FESpaceS>(Stack stack,const MeshL & Th,
+                                                                            const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
+                                                                            MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
+   template bool AssembleVarForm<Complex,MatriceMap<Complex>,MeshL,FESpaceL,FESpaceS>(Stack stack,const MeshL & Th,
+                                                                         const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
+                                                                         MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
+   template void AssembleBC<Complex,MeshL,FESpaceL,FESpaceS>(Stack stack,const MeshL & Th,const FESpaceL & Uh,const FESpaceS & Vh,bool sym,
+                                                MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv
+                                                );
+   /////// 3D Surf / 3D  curve on meshL
+   // instantation for type double
+
+   template bool AssembleVarForm<double,MatriceCreuse<double>,MeshL,FESpaceS,FESpaceL>(Stack stack,const MeshL & Th,
+                                                                           const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
+                                                                           MatriceCreuse<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+   template bool AssembleVarForm<double,MatriceMap<double>,MeshL,FESpaceS,FESpaceL>(Stack stack,const MeshL & Th,
+                                                                         const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
+                                                                         MatriceMap<double>  * A,KN_<double> * B,const list<C_F0> &largs );
+   template void AssembleBC<double,MeshL,FESpaceS,FESpaceL>(Stack stack,const MeshL & Th,const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
+                                                MatriceCreuse<double>  * A,KN_<double> * B,KN_<double> * X, const list<C_F0> &largs , double tgv  );
+
+   // instantation for type complex
+   template bool AssembleVarForm<Complex,MatriceCreuse<Complex>,MeshL,FESpaceS,FESpaceL>(Stack stack,const MeshL & Th,
+                                                                            const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
+                                                                            MatriceCreuse<Complex>  * A,KN_<Complex> * B,const list<C_F0> &largs );
+   template bool AssembleVarForm<Complex,MatriceMap<Complex>,MeshL,FESpaceS,FESpaceL>(Stack stack,const MeshL & Th,
+                                                                       const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
+                                                                       MatriceMap<Complex> * A,KN_<Complex> * B,const list<C_F0> &largs );
+   template void AssembleBC<Complex,MeshL,FESpaceS,FESpaceL>(Stack stack,const MeshL & Th,const FESpaceS & Uh,const FESpaceL & Vh,bool sym,
+                                              MatriceCreuse<Complex>  * A,KN_<Complex> * B,KN_<Complex> * X, const list<C_F0> &largs , double tgv );
+  
 }
 
-template class Call_FormLinear<Mesh,v_fes>;
-template class Call_FormLinear<Mesh3,v_fes3>;
-template class Call_FormLinear<MeshS,v_fesS>;
-template class Call_FormLinear<MeshL,v_fesL>;
-template class Call_FormBilinear<Mesh,v_fes,v_fes>;
-template class Call_FormBilinear<Mesh3,v_fes3,v_fes3>;
-template class Call_FormBilinear<MeshS,v_fesS,v_fesS>;
-template class Call_FormBilinear<MeshL,v_fesL,v_fesL>;
-// bem integration space/target space must be review Axel 08/2020
-template class Call_FormBilinear<MeshS, v_fesS, v_fesL>;
-template class Call_FormBilinear<MeshL, v_fesL, v_fesS>;
-template class Call_FormBilinear<MeshL, v_fesL, v_fes>;  //  3D curve / 2D on meshL
-template class Call_FormBilinear<MeshL, v_fes, v_fesL>;  //  2D / 3D curve on meshL
-template class Call_FormBilinear<MeshS, v_fesS, v_fes>;
+template class Call_FormLinear<v_fes>;
+template class Call_FormLinear<v_fes3>;
+template class Call_FormLinear<v_fesS>;
+template class Call_FormLinear<v_fesL>;
+template class Call_FormBilinear<v_fes,v_fes>;
+template class Call_FormBilinear<v_fes3,v_fes3>;
+template class Call_FormBilinear<v_fesS,v_fesS>;
+template class Call_FormBilinear<v_fesL,v_fesL>;
+
+template class Call_FormBilinear<v_fesL, v_fesS>; //  3D curve / 3D Surf on meshL and bem
+template class Call_FormBilinear<v_fesS, v_fesL>; //  3D Surf / 3D curve on meshL
+template class Call_FormBilinear<v_fesL, v_fes>;  //  3D curve / 2D on meshL
+template class Call_FormBilinear<v_fes, v_fesL>;  //  2D / 3D curve on meshL
+template class Call_FormBilinear<v_fesS, v_fes3>;  //  3D Surf / 3D volume on meshS
+template class Call_FormBilinear<v_fes3, v_fesS>;  //  3D volume / 3D Surf on meshS
+template class Call_FormBilinear<v_fesS, v_fes>;

@@ -1635,6 +1635,9 @@ template<int init>
 AnyType SetMatrixInterpolationLS(Stack stack,Expression emat,Expression einter)
 { return SetMatrixInterpolationT1<pfesL,FESpaceL,pfesS,FESpaceS>(stack,emat,einter,init);}
 template<int init>
+AnyType SetMatrixInterpolationSL(Stack stack,Expression emat,Expression einter)
+{ return SetMatrixInterpolationT1<pfesS,FESpaceS,pfesL,FESpaceL>(stack,emat,einter,init);}
+template<int init>
 AnyType SetMatrixInterpolationS2(Stack stack,Expression emat,Expression einter)
 { return SetMatrixInterpolationT1<pfesS,FESpaceS,pfes,FESpace>(stack,emat,einter,init);}
 template<int init>
@@ -3707,6 +3710,7 @@ void  init_lgmat()
   Dcl_Type<const  MatrixInterpolation<pfesS,pfes3>::Op *>();
   Dcl_Type<const  MatrixInterpolation<pfesL,pfes>::Op *>();
   Dcl_Type<const  MatrixInterpolation<pfesL,pfesS>::Op *>();
+  Dcl_Type<const  MatrixInterpolation<pfesS,pfesL>::Op *>();
   Dcl_Type<const  MatrixInterpolation<pfesS,pfes>::Op *>();
   Dcl_Type<const  MatrixInterpolation<pfes,pfesL>::Op *>();
   Dcl_Type<const  MatrixInterpolation<pfes,pfesS>::Op *>();
@@ -3731,6 +3735,8 @@ void  init_lgmat()
   Add<const MatrixInterpolation<pfes,pfes>::Op *>("<-","(", new MatrixInterpolation<pfesL,pfes>(1,1));
   Add<const MatrixInterpolation<pfes,pfes>::Op *>("<-","(", new MatrixInterpolation<pfesL,pfesS>);
   Add<const MatrixInterpolation<pfes,pfes>::Op *>("<-","(", new MatrixInterpolation<pfesL,pfesS>(1,1));
+  Add<const MatrixInterpolation<pfes,pfes>::Op *>("<-","(", new MatrixInterpolation<pfesS,pfesL>);
+  Add<const MatrixInterpolation<pfes,pfes>::Op *>("<-","(", new MatrixInterpolation<pfesS,pfesL>(1,1));
   Add<const MatrixInterpolation<pfes,pfes>::Op *>("<-","(", new MatrixInterpolation<pfesS,pfes>);
   Add<const MatrixInterpolation<pfes,pfes>::Op *>("<-","(", new MatrixInterpolation<pfesS,pfes>(1,1));
  
@@ -3781,6 +3787,8 @@ void  init_lgmat()
   Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfes>(1,1));
   Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfesS>);
   Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfesS>(1,1));
+  Global.Add("interpolate","(",new MatrixInterpolation<pfesS,pfesL>);
+  Global.Add("interpolate","(",new MatrixInterpolation<pfesS,pfesL>(1,1));
   Global.Add("interpolate","(",new MatrixInterpolation<pfesS,pfes>);
   Global.Add("interpolate","(",new MatrixInterpolation<pfesL,pfes>(1,1));
   
@@ -3814,6 +3822,7 @@ void  init_lgmat()
            new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesL,pfesL>::Op*,E_F_StackF0F0>(SetMatrixInterpolationL<1>),
            new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesL,pfes>::Op*,E_F_StackF0F0>(SetMatrixInterpolationL2<1>),
            new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesL,pfesS>::Op*,E_F_StackF0F0>(SetMatrixInterpolationLS<1>),
+           new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesS,pfesL>::Op*,E_F_StackF0F0>(SetMatrixInterpolationSL<1>),
            new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesS,pfes3>::Op*,E_F_StackF0F0>(SetMatrixInterpolationS3<1>),
            new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesS,pfes>::Op*,E_F_StackF0F0>(SetMatrixInterpolationS2<1>),
            new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfes,pfesL>::Op*,E_F_StackF0F0>(SetMatrixInterpolation2L<1>),
@@ -3828,6 +3837,7 @@ void  init_lgmat()
            new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesS,pfesS>::Op*,E_F_StackF0F0>(SetMatrixInterpolationS<0>),
 		   new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesL,pfesL>::Op*,E_F_StackF0F0>(SetMatrixInterpolationL<0>),
            new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesL,pfesS>::Op*,E_F_StackF0F0>(SetMatrixInterpolationLS<0>),
+           new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesS,pfesL>::Op*,E_F_StackF0F0>(SetMatrixInterpolationSL<0>),
            new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesL,pfes>::Op*,E_F_StackF0F0>(SetMatrixInterpolationL2<0>),
            new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesS,pfes3>::Op*,E_F_StackF0F0>(SetMatrixInterpolationS3<0>),
            new OneOperator2_<Matrice_Creuse<R>*,Matrice_Creuse<R>*,const MatrixInterpolation<pfesS,pfes>::Op*,E_F_StackF0F0>(SetMatrixInterpolationS2<0>),
