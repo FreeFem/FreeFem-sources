@@ -27,7 +27,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 ### Changed
-- change the language definition to use tyep as a construction function with named arguments for bem plugin
+- change the language definition to use type as a construction function with named arguments for bem plugin
 - PETSc version 3.14.0
 - ARPACK compiled by SLEPc
 
@@ -71,7 +71,7 @@ All notable changes to this project will be documented in this file.
 
 ### Deprecated
 - rename `changeNumbering`, `globalNumbering`, `originalNumbering`, `changeOperator`, `destroyRecycling`, and `attachCoarseOperator` to respectively `ChangeNumbering`, `GlobalNumbering`, `OriginalNumbering`, `ChangeOperator`, `DestroyRecycling`, and `AttachCoarseOperator`
-- `Nt` the normal vector of the current (wrong on meshL) use `Ns` pr `Tl` 
+- `Nt` the normal vector of the current (wrong on meshL) use `Ns` or `Tl` 
 ### Removed
 - `augmentation` routine from the PETSc plugin
 - `MPIF77` variable
