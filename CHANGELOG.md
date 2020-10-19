@@ -27,12 +27,6 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 ### Changed
-<<<<<<< HEAD
-- change the language definition to use type as a construction function with named arguments for bem plugin
-- PETSc version 3.14.0
-- ARPACK compiled by SLEPc
-=======
->>>>>>> 7c0f9760ab4f90b703f5833a235eeedb9b0e7426
 
 ### Deprecated
 
