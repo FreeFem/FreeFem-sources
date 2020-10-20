@@ -6197,9 +6197,10 @@ Mesh3 *truncmesh(const Mesh3 &Th, const long &kksplit, int *split, bool kk, cons
           break;
         } else if(j == 2) {
           ffassert(0);
-        } else if(verbosity > 1) {
+        } else {
           heps /= 10.0;
-          cout << " Problem with vertex #" << i << ", need to refine h to " << heps << endl;
+          if(verbosity > 1)
+            cout << " Problem with vertex #" << i << ", need to refine h to " << heps << endl;
         }
       }
     }
