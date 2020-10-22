@@ -65,7 +65,6 @@ func meshS Ellipsoide (real RX,real RY,real RZ,real h,int L,real Ox,real Oy,real
   func m22=f1y^2+f2y^2+f3y^2;
   
   func perio=[[4,y],[2,y],[1,x],[3,x]];  // to store the periodic condition 
-  
   real hh=h;// hh  mesh size on unite sphere
   real vv= 1/square(hh);
   Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
@@ -73,7 +72,6 @@ func meshS Ellipsoide (real RX,real RY,real RZ,real h,int L,real Ox,real Oy,real
   Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
   Th=adaptmesh(Th,m11*vv,m21*vv,m22*vv,IsMetric=1,periodic=perio);
   int[int] ref=[0,L];  
-  
   meshS  ThS= movemesh23(Th,transfo=[f1,f2,f3],orientation=orientation,reftri=ref);
   ThS=mmgs(ThS,hmin=h,hmax=h,hgrad=2.);
   return ThS;
@@ -90,10 +88,10 @@ func meshS Sphere(real R,real h,int L,int orientation)
   return Ellipsoide(R,R,R,h,L,orientation);
 }
 
-func meshS Sphere(real R,real Ox,real Oy,real Oz,real h,int L,int orientation)
+func meshS Sphere(real R,real h,int L,real Ox,real Oy,real Oz,int orientation)
 {
 
-  return Ellipsoide(R,R,R,Ox,Oy,Oz,h,L,orientation);
+  return Ellipsoide(R,R,R,h,L,Ox,Oy,Oz,orientation);
 }
 
 
