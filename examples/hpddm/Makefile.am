@@ -93,6 +93,7 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	diffusion-mg-3d-PETSc.edp \
 	save-load-Dmesh.edp \
 	navier-stokes-2d-PETSc.edp \
+	oseen-2d-PETSc.edp \
 	transfer.edp \
 	DMPlex-PETSc.edp \
 	PtAP-2d-PETSc.edp \
@@ -191,4 +192,4 @@ freefem++.pref: Makefile
 	echo includepath = \"../../idp/\" >> freefem++.pref
 
 clean-local:
-	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_* createPartition_* helmholtz-3d-surf.vtu helmholtz-3d-line.vtu dump-2d_* dump-3d_* navier-stokes-2d_* laplace-adapt-dist-3d_* transfer_2d_* transfer_3d_* stokes-mat-* stokes-rhs-*
+	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_* createPartition_* helmholtz-3d-surf.vtu helmholtz-3d-line.vtu dump-2d_* dump-3d_* navier-stokes-2d_* laplace-adapt-dist-3d_* transfer_2d_* transfer_3d_* stokes-mat-* stokes-rhs-* oseen-2d_*

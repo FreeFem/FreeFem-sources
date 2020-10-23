@@ -120,7 +120,7 @@ HMatrix<complex> TDL, SL;
         ChangeNumbering(ASurf, glob2loc[], perm);
     }
 
-    varf varfTDL(u,v) = int1dx1d(ThG)(ThG)(BEM(BemKernel("TDL",k=k),u,v)) + int1d(ThG)(0.5*u*v);  
+    varf varfTDL(u,v) = int1dx1d(ThG)(ThG)(BEM(BemKernel("TDL",k=k),u,v)) + int1d(ThG)(0.5*u*v);
 
     TDL = varfTDL(UhG, UhG);
     varf varfSL(u,v) = int1dx1d(ThG)(ThG)(BEM(BemKernel("SL",k=k),u,v));

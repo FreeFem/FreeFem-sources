@@ -1,0 +1,136 @@
+// NBPROC 4
+/***********************************************************************
+  > File Name: oseen-2d-PETSc.edp
+  > Author: Zhao Gang
+  > Mail: zhaog6@lsec.cc.ac.cn
+  > Created Time: 2020/10/22 Thursday 10:43:34
+  > Run with mpi: ff-mpirun -np 4 script.edp -v 0 (# of Procs: 4)
+ ***********************************************************************/
+
+load "PETSc"
+include "macro_ddm.idp"
+
+//-----------------
+//   Parameters
+//-----------------
+int n = getARGV("-global", 64);
+int[int] labs = [1, 2, 4, 3];
+int s = getARGV("-split", 0); // refinement index of mesh
+real Re = getARGV("-Re", 100.);
+real nu = 1./Re;
+
+//-------------------------
+//   Analytic Functions
+//-------------------------
+func b1 = 2 * (2*y - 1) * (1 - (2*x - 1)^2);
+func b2 = -2 * (2*x - 1) * (1 - (2*y - 1)^2);
+
+//--------------------
+//   mesh
+//--------------------
+mesh Th = square(n, n);
+buildDmesh(Th);
+fespace Ph(Th, P0);
+Ph part;
+createPartition(Th, part[], P0);
+mesh ThNo = trunc(Th, abs(part-1.0)<1e-1, split=2^s, label=-111111, renum=1);
+if(s > 0) {
+    Th = ThNo;
+    reconstructDmesh(Th);
+}
+
+//------------------------
+//   fespace
+//------------------------
+macro feV [P2, P2] //
+macro feQ P1 //
+fespace Vh(Th, feV), Qh(Th, feQ);
+Vh [uh, vh];
+Qh ph;
+
+//------------------------
+//   varf
+//------------------------
+macro grad(u) [dx(u), dy(u)] //
+macro Grad(u, v) [dx(u),dy(u), dx(v),dy(v)] //
+macro Ugradv(u1, u2, v) ( u1*dx(v) + u2*dy(v) ) //
+macro UgradV(u1, u2, v1, v2) [u1*dx(v1) + u2*dy(v1), u1*dx(v2) + u2*dy(v2)] //
+macro div(u, v) ( dx(u) + dy(v) ) //
+varf vF([u, v], [uu, vv]) = int2d(Th) ( nu*Grad(u, v)'*Grad(uu, vv) + UgradV(b1, b2, u, v)' * [uu, vv] ) + on(labs[3], u=1, v=0) + on(labs(0:2), u=0, v=0);
+varf vB([p], [uu, vv]) = int2d(Th) ( - p * div(uu, vv) );
+varf vC(p, pp) = int2d(Th) (0.0 * p * pp);  // pressure stabilization
+
+//------------------------
+//   Solving Equations
+//------------------------
+Mat dF, dC;
+{
+    macro def(u) [u, u#B] // for velocity
+    macro init(u) [u, u] // for velocity
+    createMat(Th, dF, feV);
+}
+createMat(Th, dC, feQ);
+dF = vF(Vh, Vh, tgv=-1);
+dC = vC(Qh, Qh);
+matrix B = vB(Qh, Vh);
+Mat dB(dF, dC, B);
+{ // for Dirichlet BC on dF
+    varf vonBorder([u, v], [uu, vv]) = on(labs, u=1, v=1);
+    real[int] onBorder = vonBorder(0, Vh, tgv=-1);
+    real[int] onBorderPETSc;
+    ChangeNumbering(dF, onBorder, onBorderPETSc);
+    MatZeroRows(dB, onBorderPETSc);
+}
+Mat dA = [[dF,  dB],
+          [dB', dC]];
+real[int] rhsV = vF(0, Vh, tgv=-1);
+real[int] rhsP(Qh.ndof);
+rhsP = 0;
+real[int] rhsPETSc;
+ChangeNumbering([dF, dC], [rhsV, rhsP], rhsPETSc);
+
+// Defining names of velocity and pressure fields
+real[int] list(rhsPETSc.n);
+real[int] nVPETSc;
+ChangeNumbering(dF, rhsV, nVPETSc);
+list(0 : nVPETSc.n-1) = 1;
+list(nVPETSc.n : list.n-1) = 2;
+string[int] names(2);
+names[0] = "velocity";
+names[1] = "pressure";
+
+// Building PCD preconditioner
+varf vAp(p, q) = int2d(Th) (nu * grad(p)' * grad(q));
+varf vFp(p, q) = int2d(Th) (nu * grad(p)' * grad(q) + Ugradv(b1, b2, p)' * q);
+varf vMp(p, q) = int2d(Th) (p * q);
+Mat dAp(dC), dFp(dC), dMp(dC); // all Mat share the same distribution of the pressure space
+dAp = vAp(Qh, Qh);
+dFp = vFp(Qh, Qh);
+dMp = vMp(Qh, Qh, sym = 1);
+set(dAp, sparams="-prefix_push stiffness_ -ksp_constant_null_space -pc_type gamg -ksp_type cg -ksp_max_it 5 -prefix_pop", prefix="stiffness_");
+set(dMp, sparams="-prefix_push mass_ -pc_type jacobi -ksp_type cg -ksp_max_it 5 -prefix_pop", prefix="mass_");
+func real[int] PCD(real[int]& in) {
+    real[int] out(in.n);
+    KSPSolve(dAp, in, out);
+    MatMult(dFp, out, in);
+    KSPSolve(dMp, in, out);
+    return out;
+}
+
+set(dA, sparams="-pc_type fieldsplit -prefix_push fieldsplit_velocity_ -pc_type hypre -ksp_type gmres -prefix_pop " + "-ksp_type fgmres -ksp_gmres_restart 200 -ksp_converged_reason -ksp_view -ksp_monitor", fields=list, names=names);
+set(dC, parent=dA, precon=PCD, sparams="-prefix_push fieldsplit_pressure_ -pc_type shell -prefix_pop");
+
+// Solving Oseen problem
+real[int] uhPETSc(rhsPETSc.n);
+KSPSolve(dA, rhsPETSc, uhPETSc);
+ChangeNumbering([dF, dC], [uh[], ph[]], uhPETSc, inverse=1, exchange=1);
+
+// Normalizing pressure
+real[int] dpAverage(2), pAverage(2);
+dpAverage[0] = int2d(ThNo) ( ph );
+dpAverage[1] = ThNo.measure;
+mpiAllReduce(dpAverage, pAverage, mpiCommWorld, mpiSUM);
+ph = ph - pAverage[0]/pAverage[1];
+
+int[int] fforder = [1, 1];
+savevtk("oseen-2d.vtu", Th, [uh, vh], ph, dataname="velocity pressure", order=fforder);
