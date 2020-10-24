@@ -114,6 +114,7 @@ func real[int] PCD(real[int]& in) {
     KSPSolve(dAp, in, out);
     MatMult(dFp, out, in);
     KSPSolve(dMp, in, out);
+    out *= -1.0;
     return out;
 }
 
