@@ -1115,9 +1115,11 @@ if test "$with_petsc_complex" != no; then
             AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetscc)
+            if test -z "$ff_BLASLAPACK_LIB"; then
             AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetscc)
             if test -n "$ff_BLASLAPACK_LIB"; then
                 ff_where_lib_blaslapack="`echo $ff_BLASLAPACK_LIB | sed -e 's/@<:@^ @:>@*scalapack@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*blacs@<:@^ @:>@*//g'`"
+            fi
             fi
             if test -f $d/libslepc.$ff_suffix_dylib -o -f $d/libslepc.a ; then
 				   ff_slepccomplex_ok=yes
@@ -1548,6 +1550,11 @@ then
     ff_cblas_libs=yes
 fi
 
+if test -n "$ff_BLASLAPACK_LIB"; then
+    AC_SUBST(BLACSLIBS,$ff_BLASLAPACK_LIB)
+else
+    AC_SUBST(BLACSLIBS,$ff_blas_libs)
+fi
 AC_SUBST(BLASLIBS,$ff_blas_libs)
 AC_SUBST(BLASINC,$ff_blas_inc)
 
