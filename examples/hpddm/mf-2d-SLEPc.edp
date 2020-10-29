@@ -57,4 +57,4 @@ ObjectView(MF, format = "info");
 real[int] valuesMF;
 SVDSolve(MF, sparams = "-svd_largest -svd_view_values -svd_type cyclic -svd_nsv 10", values = valuesMF);
 values -= valuesMF;
-assert(values.linfty < 1.0e-6);
+assert(values.linfty < 1.0e-4);
