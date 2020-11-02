@@ -21,7 +21,7 @@ INSTALL=../..
 tetgen: FAIRE 
 
 
-FAIRE:install.done $(SRCDIR)/FAIT cxxflags WHERE.done
+FAIRE:install.done fait-tags.done cxxflags WHERE.done
 	touch FAIRE
 
 
@@ -29,12 +29,12 @@ FAIRE:install.done $(SRCDIR)/FAIT cxxflags WHERE.done
 
 # FFCS - 30/11/10 - need ranlib on Win64. The PATH is setup so that mingw/ranlib is called
 
-$(SRCDIR)/FAIT: $(SRCDIR)/tags  cxxflags 
+fait-tags.done: tar-tags.done  cxxflags 
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -O3 -fPIC -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c tetgen.cxx
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -O0 -fPIC -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c predicates.cxx
-	touch $(SRCDIR)/FAIT
+	touch fait-tags.done
 WHERE:WHERE.done
-WHERE.done: $(SRCDIR)/FAIT
+WHERE.done: fait-tags.done
 	echo tetgen LD -L@DIR@/lib -ltet  >$(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
 	echo tetgen  INCLUDE -I@DIR@/include >> $(SRCDIR)/$(INSTALL)/lib/WHERE.tetgen
 	touch $@
@@ -42,7 +42,7 @@ clean-local::
 	-rm WHERE.done
 
 # FFCS - avoid remaking install every time
-install.done:$(SRCDIR)/FAIT
+install.done:fait-tags.done
 	cd $(SRCDIR);$(AR) $(ARFLAGS)  $(INSTALL)/lib/libtet.a tetgen.o predicates.o
 	ranlib $(SRCDIR)/$(INSTALL)/lib/libtet.a
 	cp $(SRCDIR)/tetgen.h $(SRCDIR)/$(INSTALL)/include 
@@ -51,23 +51,23 @@ clean-local::
 	-rm install.done
 
 
-$(SRCDIR)/tags: $(PACKAGE)
+tar-tags.done: $(PACKAGE)
 	gunzip -c  $(PACKAGE)|tar zxf - 
 #       FFCS: needs to patch tetgen because mingw64 has 4-byte longs
-	touch $(SRCDIR)/tags
+	touch tar-tags.done
 #	cd tetgen1.4.2;patch -p1 <../tetgen1.4.2.patch 
 
 $(PACKAGE):
 	../getall -o TetGen -a
 
 clean-local::
-	-rm -rf tetgen1.?.*  FAIT FAIRE 
+	-rm -rf tetgen1.?.*  *.done
 clean:
-	-rm $(SRCDIR)/$(INSTALL)/lib/libtet.a
-	-rm $(SRCDIR)/$(INSTALL)/include/tetgen.h
-	-rm FAIT *.done
-	-rm -rf tetgen1.4.?
-cxxflags: ../Makefile  Makefile
+	-rm $(SRCDIR)
+	-rm *.done
+	-rm -rf tetgen1.?.* cxxflags
+cxxflags: ../Makefile  Makefile ../getall 
+	-mv -f cxxflags cxxflags.old
 	grep 'CXX *=' ../Makefile >cxxflags
 	grep 'CC *=' ../Makefile >>cxxflags
 #	FFCS - 10/5/12 - bug under Windows if -O3 is specified tetgen never returns. It could also be the case under
@@ -76,4 +76,7 @@ cxxflags: ../Makefile  Makefile
 	grep 'WGET *=' ../Makefile >>cxxflags
 	grep 'AR *=' ../Makefile >>cxxflags
 	grep 'ARFLAGS *=' ../Makefile >>cxxflags
+	../../bin/ff-md5 $(PACKAGE) >> cxxflags	
+	if diff -q cxxflags cxxflags.old ; then echo No Modif skip compile of tetgen ; mv -f cxxflags.old cxxflags; else touch tar-tags.done; fi
+	
 .PHONY:$(SRCDIR)/$(INSTALL)

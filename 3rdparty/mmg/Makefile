@@ -38,8 +38,6 @@ install.done:FAIT.done
 	cp -r build/include/mmg ../include/mmg
 	cp build/lib/libmmg.a ../lib
 	touch $@
-clean::
-	-rm install.done FAIT.done
 
 mmg:$(PACKAGE)
 
@@ -67,14 +65,15 @@ $(PACKAGE): FORCE
 FORCE:
 
 clean::
-	-rm ff-flags
+	-rm ff-flags *.done 
 	-rm FAIT* 
 	-rm -rf mmg-* build
 	-rm flags-* tag-tar*
 	-rm -rf ../include/mmg
 	-rm ../lib/libmmg.a
 
-ff-flags: ../Makefile Makefile
+ff-flags: ../Makefile Makefile ../getall
+	-cp -f ff-flags ff-flags.old
 	grep 'abs_top_builddir *=' ../Makefile > ff-flags
 	grep 'CC *=' ../Makefile >> ff-flags
 	grep 'CFLAGS *=' ../Makefile >> ff-flags
@@ -92,5 +91,7 @@ ff-flags: ../Makefile Makefile
 	grep 'FF_prefix_petsc_real *=' ../Makefile >> ff-flags
 	-awk '/^scotch LD /&&/petsc/ {print "scotch_dir=$$(FF_prefix_petsc_real)" }' ../../plugin/seq/WHERE_LIBRARY-config >> ff-flags
 	-awk '/^scotch LD /{print "scotch_dir=../../../3rdparty/" }' ../lib/WHERE.scotch >> ff-flags
+	$(abs_top_builddir)/bin/ff-md5 $(PACKAGE) >> ff-flags	
+	if diff -q ff-flags ff-flags.old ; then echo No Modif skip compile of mmg ; else touch tag-tar; fi
 
 .PHONY:$(SRCDIR)/$(INSTALL)

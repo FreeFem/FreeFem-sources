@@ -82,7 +82,8 @@ clean::
 	-rm -rf ../include/parmmg
 	-rm ../lib/libparmmg.a
 
-ff-flags: ../Makefile Makefile
+ff-flags: ../Makefile Makefile ../getall
+	-cp -f ff-flags ff-flags.old
 	grep 'abs_top_builddir *=' ../Makefile > ff-flags
 	grep 'CC *=' ../Makefile >> ff-flags
 	grep 'FC *=' ../Makefile >> ff-flags
@@ -107,5 +108,7 @@ ff-flags: ../Makefile Makefile
 	-awk '/^scotch LD /{print "scotch_dir=../../../3rdparty/" }' ../lib/WHERE.scotch >> ff-flags
 	-awk '/^metis LD /&&/petsc/ {print "metis_dir=$$(FF_prefix_petsc_real)" }' ../../plugin/seq/WHERE_LIBRARY-config >> ff-flags
 	-awk '/^metis LD /{print "metis_dir=../../../3rdparty/" }' ../lib/WHERE.metis >> ff-flags
+	$(abs_top_builddir)/bin/ff-md5 $(PACKAGE) >> ff-flags	
+	if diff -q ff-flags ff-flags.old ; then echo No Modif skip compile of parmmg ; else touch tag-tar; fi
 	
 .PHONY:$(SRCDIR)/$(INSTALL)
