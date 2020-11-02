@@ -21,7 +21,7 @@ INSTALL=../..
 tetgen: FAIRE 
 
 
-FAIRE:install.done fait-tags.done cxxflags WHERE.done
+FAIRE:install.done 
 	touch FAIRE
 
 
@@ -29,7 +29,7 @@ FAIRE:install.done fait-tags.done cxxflags WHERE.done
 
 # FFCS - 30/11/10 - need ranlib on Win64. The PATH is setup so that mingw/ranlib is called
 
-fait-tags.done: tar-tags.done  cxxflags 
+fait-tags.done:tar-tags.done cxxflags 
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -O3 -fPIC -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c tetgen.cxx
 	cd $(SRCDIR);$(CXX) $(CXXFLAGS) -O0 -fPIC -DSELF_CHECK  -DNDEBUG -DTETLIBRARY -c predicates.cxx
 	touch fait-tags.done
@@ -77,6 +77,6 @@ cxxflags: ../Makefile  Makefile ../getall
 	grep 'AR *=' ../Makefile >>cxxflags
 	grep 'ARFLAGS *=' ../Makefile >>cxxflags
 	../../bin/ff-md5 $(PACKAGE) >> cxxflags	
-	if diff -q cxxflags cxxflags.old ; then echo No Modif skip compile of tetgen ; mv -f cxxflags.old cxxflags; else touch tar-tags.done; fi
+	if diff -q cxxflags cxxflags.old ; then echo No Modif skip compile of tetgen ; mv -f cxxflags.old cxxflags; else touch -c tar-tags.done; fi
 	
 .PHONY:$(SRCDIR)/$(INSTALL)
