@@ -110,6 +110,6 @@ ff-flags: ../Makefile Makefile ../getall
 	-awk '/^metis LD /&&/petsc/ {print "metis_dir=$$(FF_prefix_petsc_real)" }' ../../plugin/seq/WHERE_LIBRARY-config >> ff-flags
 	-awk '/^metis LD /{print "metis_dir=../../../3rdparty/" }' ../lib/WHERE.metis >> ff-flags
 	../../bin/ff-md5 $(PACKAGE) >> ff-flags	
-	if diff -q ff-flags ff-flags.old ; then echo No Modif skip compile of parmmg ; else touch tag-tar; fi
+	if diff -q ff-flags ff-flags.old ; then echo No Modif skip compile of parmmg ; else touch -c tag-tar; fi
 	
 .PHONY:$(SRCDIR)/$(INSTALL)
