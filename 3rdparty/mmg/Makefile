@@ -91,7 +91,7 @@ ff-flags: ../Makefile Makefile ../getall
 	grep 'FF_prefix_petsc_real *=' ../Makefile >> ff-flags
 	-awk '/^scotch LD /&&/petsc/ {print "scotch_dir=$$(FF_prefix_petsc_real)" }' ../../plugin/seq/WHERE_LIBRARY-config >> ff-flags
 	-awk '/^scotch LD /{print "scotch_dir=../../../3rdparty/" }' ../lib/WHERE.scotch >> ff-flags
-	$(abs_top_builddir)/bin/ff-md5 $(PACKAGE) >> ff-flags	
+	../../bin/ff-md5 $(PACKAGE) >> ff-flags	
 	if diff -q ff-flags ff-flags.old ; then echo No Modif skip compile of mmg ; else touch tag-tar; fi
 
 .PHONY:$(SRCDIR)/$(INSTALL)

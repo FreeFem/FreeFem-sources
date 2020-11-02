@@ -14,7 +14,7 @@ func nose = sqrt((x-0.5)^2+0.006*(y-0.9)^2+(z-0.5)^2)-0.03;
 fespace Uh(Th3,P1);
 Uh Pinocchio = min(min(min(head,ear1),ear2),nose);
 
-Th3 = mmg3d(Th3,metric=Pinocchio[],iso=1,ls=0,hausd=0.008,hgrad=2.3,verbose=10);
+Th3 = mmg3d(Th3,metric=Pinocchio[],iso=1,ls=0,hausd=0.008,hgrad=2.3,verbose=10,mem=100);
 Th3 = buildBdMesh(Th3);
 //medit("Th3",Th3);
 
