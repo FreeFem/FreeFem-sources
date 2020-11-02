@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+use Digest::MD5 qw(md5_hex);
+$num_args = $#ARGV + 1;
+if ($num_args != 1) {
+    print "Usage: ff-md5  filename\n";
+    exit 1;
+}
+$filename = $ARGV[0];
+
+if (-e $filename) {
+print "# md5  $filename : ", md5_hex($filename), "\n";
+}
+else
+{
+	print " ff-md5 Error : $filename do not exist \n";
+	 exit 1;
+}
