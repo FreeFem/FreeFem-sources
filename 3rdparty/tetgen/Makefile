@@ -67,6 +67,7 @@ clean:
 	-rm *.done
 	-rm -rf tetgen1.?.* cxxflags
 cxxflags: ../Makefile  Makefile ../getall 
+	../getall -o TetGen -a
 	-mv -f cxxflags cxxflags.old
 	grep 'CXX *=' ../Makefile >cxxflags
 	grep 'CC *=' ../Makefile >>cxxflags

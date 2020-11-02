@@ -73,6 +73,7 @@ clean::
 	-rm ../lib/libmmg.a
 
 ff-flags: ../Makefile Makefile ../getall
+	../getall -o mmg -a
 	-cp -f ff-flags ff-flags.old
 	grep 'abs_top_builddir *=' ../Makefile > ff-flags
 	grep 'CC *=' ../Makefile >> ff-flags
