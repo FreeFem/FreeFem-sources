@@ -567,6 +567,13 @@ IFMACRO(!ThName#Comm)
 NewMacro ThName#Comm()mpiCommWorld EndMacro
 ENDIFMACRO
 if(ThName#Comm) {
+IFMACRO(!dimension)
+    NewMacro dimension()2 EndMacro
+ENDIFMACRO
+IFMACRO(!meshN)
+    NewMacro meshN()mesh EndMacro
+    NewMacro intN()int2d EndMacro
+ENDIFMACRO
     int[int] neighbors;
     {
         real[int] bb(2 * dimension);

@@ -43,7 +43,7 @@ FreeFem___mpi_SOURCES = /ffapi.cpp \
 	../lglib/lg.tab.cpp \
 	parallelempi.cpp
 FreeFem___mpi_DEPENDENCIES = ../fflib/libff.a
-LDADD = ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLASLIBS@ @MPI_LIB@
+LDADD = ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLACSLIBS@ @MPI_LIB@
 
 AM_CXXFLAGS = -DPARALLELE
 AM_CPPFLAGS = -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib @MPI_INCLUDE@ $(HDF5_CPPFLAGS) $(UMFPACK_CPPFLAGS)
