@@ -1551,7 +1551,7 @@ then
 fi
 
 if test -n "$ff_BLASLAPACK_LIB"; then
-    AC_SUBST(BLACSLIBS,"$ff_BLASLAPACK_LIB $ff_SCALAPACK_LIB")
+    AC_SUBST(BLACSLIBS,"$ff_SCALAPACK_LIB $ff_BLASLAPACK_LIB")
 else
     AC_SUBST(BLACSLIBS,$ff_blas_libs)
 fi
