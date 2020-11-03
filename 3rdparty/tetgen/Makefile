@@ -21,7 +21,7 @@ INSTALL=../..
 tetgen: FAIRE 
 
 
-FAIRE:install.done 
+FAIRE:install.done WHERE.done
 	touch FAIRE
 
 
