@@ -321,7 +321,7 @@ void setCompositePC(PC pc, const std::vector<Mat>* S) {
 }
 bool insertOptions(std::string* const& options) {
     bool fieldsplit = false;
-    if(options) {
+    if(options && !options->empty()) {
         std::vector<std::string> elems;
         std::stringstream ss(*options);
         std::string item;
