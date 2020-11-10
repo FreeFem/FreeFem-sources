@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 releaseVersionffpetsc=$(grep "VERSION=" 3rdparty/ff-petsc/Makefile | cut -c9-15)
 echo "release Version ffpetsc" $releaseVersionffpetsc

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ##  fist tentavie to create un mac installer 
 #  first 
 #  create dir for install

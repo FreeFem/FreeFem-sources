@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Runs all regression tests on all compiled FreeFem++ versions
 # ------------------------------------------------------------
 MPIRUN=`awk  '$1 =="MPIRUN" {print $3}' Makefile`

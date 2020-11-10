@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # The purpose of this custom AppRun script is
 # to allow symlinking the AppImage and invoking
