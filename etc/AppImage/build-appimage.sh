@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # This script configures, compiles and package FreeFem into AppImage
 #

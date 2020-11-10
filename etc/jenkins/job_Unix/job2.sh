@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ## This job must be executed on VM1 machines
 ## See ./README.md

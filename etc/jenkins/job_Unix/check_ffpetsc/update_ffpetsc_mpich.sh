@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ## This script allows to install PETSc on vm2-2
 ## See ./README.md

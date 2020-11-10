@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # You need to prepare this docker container if you want to buitd AppImage locally.
 # Normally it should be built with TravisCI (see .travis.yml)
