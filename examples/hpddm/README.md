@@ -36,6 +36,7 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [helmholtz-coupled-2d-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-coupled-2d-PETSc-complex.edp)     | FEM coupled with BEM in a MatNest using a block preconditioner (fieldsplit)       |
 | [PtAP-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/PtAP-2d-PETSc.edp)                                               | Parallel interpolation on non-matching grids + P' A P operation                   |
 | [restriction-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/restriction-2d-PETSc.edp)                                 | Coupled problems with one being defined on a restriction of the mesh of the other |
+| [bilaplace-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/bilaplace-2d-PETSc.edp)                                     | Bilaplacian using Morley finite element                                           |
 
 ### Nonlinear problems
 | Filename                                                                                                                                                          | Comments (preconditioners, numerical schemes)                                 |
