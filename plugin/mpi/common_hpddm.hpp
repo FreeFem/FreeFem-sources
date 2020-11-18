@@ -9,7 +9,7 @@
 #include <unordered_map>
 #define GENERATE_DEPRECATED_FUNCTIONS
 
-#ifdef WITH_mkl
+#if defined(WITH_mkl) && !defined(HTOOL_HTOOL_HPP)
 #define HPDDM_MKL 1
 #define MKL_Complex8 std::complex<float>
 #define MKL_Complex16 std::complex<double>

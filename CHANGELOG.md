@@ -30,6 +30,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - PETSc version 3.14.1
+- Mmg version 5.5.2
 
 ### Deprecated
 
