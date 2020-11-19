@@ -204,8 +204,7 @@ struct Op_ReadKN : public binary_function<istream*,KN<A>*,istream*> {
         ExecError("Fatal Error: incompatible length in read array (Op_ReadKN)");
        assert(n==a->N());
        }
-       double value=std::numeric_limits<double>::min();
-     while (f->get(c) && (c!='\n' && c!='\r' ) ) ((void) 0); // eat until control (new line
+      while (f->get(c) && (c!='\n' && c!='\r' ) ) ((void) 0); // eat until control (new line
 
        // buffer problem if reading value are out range
        for (int i=0;i<n;i++) {

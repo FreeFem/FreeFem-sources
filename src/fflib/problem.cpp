@@ -954,7 +954,7 @@ namespace Fem2D {
                     if ( all || setoflab.find(Th[t].lab) != setoflab.end())
 
                     {
-                        double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
+                        double umx=std::numeric_limits<double>::lowest(),umn=std::numeric_limits<double>::max();
                         for(int i=0;i<4;++i)
                         {
                             int j= Th(t,i);
@@ -3802,7 +3802,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
                     if (all || setoflab.find(Th[t].lab) != setoflab.end())
 
                     {
-                        double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
+                        double umx=std::numeric_limits<double>::lowest(),umn=std::numeric_limits<double>::max();
                         for(int i=0;i<4;++i)
                         {
                             int j= Th(t,i);
@@ -9926,7 +9926,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
                     if (all || setoflab.find(ThI[t].lab) != setoflab.end())
 
                     {
-                        double umx=std::numeric_limits<double>::min(),umn=std::numeric_limits<double>::max();
+                        double umx=std::numeric_limits<double>::lowest(),umn=std::numeric_limits<double>::max();
                         for(int i=0;i<4;++i)
                         {
                             int j= ThI(t,i);

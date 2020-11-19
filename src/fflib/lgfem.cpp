@@ -3365,7 +3365,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
         double f[4];
 
         for (int t = 0; t < Th.nt; ++t) {
-          double umx = std::numeric_limits< double >::min( ),
+          double umx = std::numeric_limits< double >::lowest( ),
                  umn = std::numeric_limits< double >::max( );
           for (int i = 0; i < 4; ++i) {
             int j = Th(t, i);
@@ -3454,7 +3454,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
         for (int t = 0; t < Th.nt; t++) {
           const Mesh3::Element &K(Th[t]);
           if (all || setoflab.find(K.lab) != setoflab.end( )) {
-            double umx = std::numeric_limits< double >::min( ),
+            double umx = std::numeric_limits< double >::lowest( ),
                    umn = std::numeric_limits< double >::max( );
             for (int i = 0; i < 4; ++i) {
               int j = Th(t, i);
