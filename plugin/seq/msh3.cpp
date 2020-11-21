@@ -8831,7 +8831,7 @@ template< class MMesh >
 class CheckMesh_Op : public E_F0mps {
  public:
   Expression eTh;
-  static const int n_name_param = 2;
+  static const int n_name_param = 3;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   bool arg(int i, Stack stack, bool a) const {
@@ -8852,42 +8852,56 @@ class CheckMesh_Op : public E_F0mps {
 template<>
 basicAC_F0::name_and_type CheckMesh_Op< Mesh3 >::name_param[] = {
   {"precisvertice", &typeid(double)},
-  {"removeduplicate", &typeid(bool)}
-  //{"rebuildboundary", &typeid(bool)}
+  {"removeduplicate", &typeid(bool)},
+  {"rebuildboundary", &typeid(bool)}
 
 };
 
 template<>
 basicAC_F0::name_and_type CheckMesh_Op< MeshS >::name_param[] = {
   {"precisvertice", &typeid(double)},
-  {"removeduplicate", &typeid(bool)}
-  //{"rebuildboundary", &typeid(bool)}
+  {"removeduplicate", &typeid(bool)},
+  {"rebuildboundary", &typeid(bool)}
 
 };
 
 template<>
 basicAC_F0::name_and_type CheckMesh_Op< MeshL >::name_param[] = {
    {"precisvertice", &typeid(double)},
-   {"removeduplicate", &typeid(bool)}
-        //{"rebuildboundary", &typeid(bool)}
+   {"removeduplicate", &typeid(bool)},
+   {"rebuildboundary", &typeid(bool)}
  };
       
 template< class MMesh >
 AnyType CheckMesh_Op< MMesh >::operator( )(Stack stack) const {
   MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
-
+  typedef typename MMesh::Element T;
   MMesh *pTh = GetAny< MMesh * >((*eTh)(stack));
   MMesh &Th = *pTh;
   ffassert(pTh);
 
   double precis_mesh(arg(0, stack, 1e-6));
   bool removeduplicate(arg(1, stack, false));
-  bool rebuildboundary = false;    // (arg(2, stack, false));
+      bool rebuildboundary=false;//(arg(2, stack, false));
   int orientation = 1;
   if (verbosity > 10)
     cout << "call cleanmesh function, precis_mesh:" << precis_mesh
          << " removeduplicate:" << removeduplicate << endl;
-
+  // compute number of border elements
+  int nbet=0;
+  for (int i = 0; i < Th.nt; ++i) {
+    for (int j = 0; j < T::nea; ++j) {
+      int jt = j, it = Th.ElementAdj(i, jt);
+      if (it == i || it < 0)
+        nbet++;
+    }
+  }
+  if(verbosity>10) cout << "number of true border elements: " << nbet << " number of given border elements: " << Th.nbe << endl;
+    if(Th.nbe!=nbet) {
+      if(!rebuildboundary) cout << " WARNING: incomplete list of true border elements, use argument rebuildboundary=true " << endl;
+      else {Th.nbe=0;Th.borderelements=0;
+      if(verbosity>10) cout << "rebuild true border elements: " << endl;}
+  }
   Th.clean_mesh(precis_mesh, Th.nv, Th.nt, Th.nbe, Th.vertices, Th.elements, Th.borderelements,
                 removeduplicate, rebuildboundary, orientation);
 
