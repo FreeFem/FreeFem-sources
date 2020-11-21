@@ -8882,7 +8882,7 @@ AnyType CheckMesh_Op< MMesh >::operator( )(Stack stack) const {
 
   double precis_mesh(arg(0, stack, 1e-6));
   bool removeduplicate(arg(1, stack, false));
-      bool rebuildboundary=false;//(arg(2, stack, false));
+  bool rebuildboundary(arg(2, stack, false));
   int orientation = 1;
   if (verbosity > 10)
     cout << "call cleanmesh function, precis_mesh:" << precis_mesh
