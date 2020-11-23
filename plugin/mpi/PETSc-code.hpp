@@ -4635,6 +4635,10 @@ namespace PETSc {
 static void Init_PETSc( ) {
   if (verbosity > 1 && mpirank == 0)
     cout << " PETSc (" << typeid(PetscScalar).name( ) << ")" << endl;
+  if (exist_type< DmatC* >( )) {
+    if(mpirank == 0) cout << "Cannot load both \"PETSc\"/\"SLEPc\" and \"PETSc-complex\"/\"SLEPc-complex\", please pick a single one" << endl;
+    ffassert(0);
+  }
   int argc = pkarg->n;
   char** argv = new char*[argc];
   for (int i = 0; i < argc; ++i) argv[i] = const_cast< char* >((*(*pkarg)[i].getap( ))->c_str( ));
@@ -4651,15 +4655,11 @@ static void Init_PETSc( ) {
 #endif
   delete[] argv;
   ff_atend(PETSc::finalizePETSc);
-  if (!exist_type< DmatR* >( )) {
-    Dcl_Type< DmatR* >(Initialize< DmatR >, DeleteDTOR< DmatR >);
-    zzzfff->Add("Mat", atype< DmatR* >( ));
-  }
+  Dcl_Type< DmatR* >(Initialize< DmatR >, DeleteDTOR< DmatR >);
+  zzzfff->Add("Mat", atype< DmatR* >( ));
   if (!exist_type< DmatC* >( )) Dcl_Type< DmatC* >(Initialize< DmatC >, DeleteDTOR< DmatC >);
-  if (!exist_type< DbddcR* >( )) {
-    Dcl_Type< DbddcR* >(Initialize< DbddcR >, DeleteDTOR< DbddcR >);
-    zzzfff->Add("MatIS", atype< DbddcR* >( ));
-  }
+  Dcl_Type< DbddcR* >(Initialize< DbddcR >, DeleteDTOR< DbddcR >);
+  zzzfff->Add("MatIS", atype< DbddcR* >( ));
   if (!exist_type< DbddcC* >( )) Dcl_Type< DbddcC* >(Initialize< DbddcC >, DeleteDTOR< DbddcC >);
   map_type_of_map[make_pair(atype< DmatR* >( ), atype< Complex* >( ))] = atype< DmatC* >( );
   map_type_of_map[make_pair(atype< DmatR* >( ), atype< double* >( ))] = atype< DmatR* >( );

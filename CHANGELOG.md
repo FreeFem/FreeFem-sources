@@ -27,6 +27,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Bilaplacian example using Morley FE with PETSc, see `examples/hpddm/bilaplacian-2d-PETSc.edp`
 - Oseen problem preconditioned by PCD, see `examples/hpddm/oseen-2d-PETSc.edp`
+- SLEPc polynomial eigenvalue solver `PEPSolve()`
 
 ### Changed
 - PETSc version 3.14.1
