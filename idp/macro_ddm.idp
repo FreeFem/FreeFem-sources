@@ -1,3 +1,5 @@
+IFMACRO(!macroDDMidp)
+macro macroDDMidp()1// EOM
 include "getARGV.idp"
 IFMACRO(!partitioner)
 macro partitioner()metis// EOM
@@ -1909,3 +1911,4 @@ ENDIFMACRO
     }
 }
 // EOM
+ENDIFMACRO
