@@ -770,7 +770,10 @@ IFMACRO(ThName#Restriction)
 ENDIFMACRO
 ENDIFMACRO
 ENDIFMACRO
-    partition(ThTab, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, mpiRank(ThName#Comm), mpiSize(ThName#Comm), 1, 1, 1, privateCreateMat, DTab, PkName, intersection, ThName#Comm, -111111, PkName, def, init, 1)
+IFMACRO(!ThName#PkPart)
+NewMacro ThName#PkPart()PkName EndMacro
+ENDIFMACRO
+    partition(ThTab, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, mpiRank(ThName#Comm), mpiSize(ThName#Comm), 1, 1, 1, privateCreateMat, DTab, PkName, intersection, ThName#Comm, -111111, ThName#PkPart, def, init, 1)
 }
 else {
     fespace WhGlobalPrivate(ThName, PkName);
