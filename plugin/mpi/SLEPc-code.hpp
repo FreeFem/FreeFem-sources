@@ -106,24 +106,29 @@ class eigensolver : public OneOperator {
                 Expression nargs[n_name_param];
                 E_eigensolver(const basicAC_F0& args, int d) : A(0), B(0), codeA(0), codeB(0), c(d) {
                     args.SetNameParam(n_name_param, name_param, nargs);
-                    A = to<Type*>(args[0]);
-                    if(c == 1 || c == 3) {
-                        const Polymorphic* op = dynamic_cast<const Polymorphic*>(args[1].LeftValue());
-                        ffassert(op);
-                        if(c == 3) {
-                            codeA = op->Find("(", ArrayOfaType(atype<PetscScalar>(), false));
-                            ffassert(codeA);
-                            B = to<Type*>(args[2]);
-                            op = dynamic_cast<const Polymorphic*>(args[3].LeftValue());
+                    if(c != 4) {
+                        A = to<Type*>(args[0]);
+                        if(c == 1 || c == 3) {
+                            const Polymorphic* op = dynamic_cast<const Polymorphic*>(args[1].LeftValue());
                             ffassert(op);
-                            codeB = op->Find("(", ArrayOfaType(atype<PetscScalar>(), false));
-                            ffassert(codeB);
+                            if(c == 3) {
+                                codeA = op->Find("(", ArrayOfaType(atype<PetscScalar>(), false));
+                                ffassert(codeA);
+                                B = to<Type*>(args[2]);
+                                op = dynamic_cast<const Polymorphic*>(args[3].LeftValue());
+                                ffassert(op);
+                                codeB = op->Find("(", ArrayOfaType(atype<PetscScalar>(), false));
+                                ffassert(codeB);
+                            }
+                            else
+                                codeA = op->Find("(", ArrayOfaType(atype<KN<PetscScalar>*>(), false));
                         }
-                        else
-                            codeA = op->Find("(", ArrayOfaType(atype<KN<PetscScalar>*>(), false));
+                        else if(c == 0) {
+                            B = to<Type*>(args[1]);
+                        }
                     }
-                    else if(c == 0) {
-                        B = to<Type*>(args[1]);
+                    else {
+                        A = to<KN<Type>*>(args[0]);
                     }
                 }
 
@@ -135,6 +140,7 @@ class eigensolver : public OneOperator {
         eigensolver(int) : OneOperator(atype<long>(), atype<Type*>(), atype<Polymorphic*>()), c(1) { }
         eigensolver(int, int) : OneOperator(atype<long>(), atype<Type*>()), c(2) { }
         eigensolver(int, int, int) : OneOperator(atype<long>(), atype<Type*>(), atype<Polymorphic*>(), atype<Type*>(), atype<Polymorphic*>()), c(3) { }
+        eigensolver(int, int, int, int) : OneOperator(atype<long>(), atype<KN<Type>*>()), c(4) { }
 };
 template<class Type, class K, class SType>
 basicAC_F0::name_and_type eigensolver<Type, K, SType>::E_eigensolver::name_param[] = {
@@ -182,18 +188,29 @@ PetscErrorCode FormJac(NEP nep, PetscScalar lambda, Mat J, void* ctx) {
 }
 template<class Type, class K, class SType>
 AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) const {
-    if(A && (c == 2 || B || codeA)) {
-        Type* ptA = GetAny<Type*>((*A)(stack));
+    if(A && (c == 2 || c == 4 || B || codeA)) {
+        KN<Type>* ptTab;
+        Type* ptA;
+        if(c != 4)
+            ptA = GetAny<Type*>((*A)(stack));
+        else {
+            ptTab = GetAny<KN<Type>*>((*A)(stack));
+            ffassert(ptTab && ptTab->N());
+            ptA = &(ptTab->operator[](0));
+        }
         if(ptA->_petsc) {
             EPS eps;
             SVD svd;
             NEP nep;
+            PEP pep;
             if(std::is_same<SType, EPS>::value)
                 EPSCreate(PetscObjectComm((PetscObject)ptA->_petsc), &eps);
             else if(std::is_same<SType, SVD>::value)
                 SVDCreate(PetscObjectComm((PetscObject)ptA->_petsc), &svd);
-            else
+            else if(std::is_same<SType, NEP>::value)
                 NEPCreate(PetscObjectComm((PetscObject)ptA->_petsc), &nep);
+            else
+                PEPCreate(PetscObjectComm((PetscObject)ptA->_petsc), &pep);
             Mat S;
             User<Type, K, typename std::conditional<std::is_same<SType, NEP>::value, EPS, SType>::type> user = nullptr;
             User<Type, K, NEP> func = nullptr;
@@ -208,6 +225,13 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                     EPSSetOperators(eps, ptA->_petsc, c == 0 && ptB ? ptB->_petsc : NULL);
                 else if(std::is_same<SType, SVD>::value)
                     SVDSetOperator(svd, ptA->_petsc);
+                else if(std::is_same<SType, PEP>::value) {
+                    Mat* tab = new Mat[ptTab->N()];
+                    for(int i = 0; i < ptTab->N(); ++i)
+                        tab[i] = ptTab->operator[](i)._petsc;
+                    PEPSetOperators(pep, ptTab->N(), tab);
+                    delete [] tab;
+                }
                 if(!ptA->_A)
                     MatGetLocalSize(ptA->_petsc, &m, NULL);
             }
@@ -241,8 +265,10 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                     EPSSetOptionsPrefix(eps, GetAny<std::string*>((*nargs[1])(stack))->c_str());
                 else if(std::is_same<SType, SVD>::value)
                     SVDSetOptionsPrefix(svd, GetAny<std::string*>((*nargs[1])(stack))->c_str());
-                else
+                else if(std::is_same<SType, NEP>::value)
                     NEPSetOptionsPrefix(nep, GetAny<std::string*>((*nargs[1])(stack))->c_str());
+                else
+                    PEPSetOptionsPrefix(pep, GetAny<std::string*>((*nargs[1])(stack))->c_str());
             }
             if(std::is_same<SType, EPS>::value) {
                 EPSSetFromOptions(eps);
@@ -274,9 +300,13 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 SVDSetFromOptions(svd);
                 SVDSetUp(svd);
             }
-            else {
+            else if(std::is_same<SType, NEP>::value) {
                 NEPSetFromOptions(nep);
                 NEPSetUp(nep);
+            }
+            else {
+                PEPSetFromOptions(pep);
+                PEPSetUp(pep);
             }
             FEbaseArrayKn<K>* eigenvectors = nargs[3] ? GetAny<FEbaseArrayKn<K>*>((*nargs[3])(stack)) : nullptr;
             Vec* basis = nullptr;
@@ -320,10 +350,15 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                     SVDSetInitialSpaces(svd, n, basis, 0, NULL);
                 SVDSolve(svd);
             }
-            else {
+            else if(std::is_same<SType, NEP>::value) {
                 if(n)
                     NEPSetInitialSpace(nep, n, basis);
                 NEPSolve(nep);
+            }
+            else {
+                if(n)
+                    PEPSetInitialSpace(pep, n, basis);
+                PEPSolve(pep);
             }
             for(int i = 0; i < n; ++i)
                 VecDestroy(&basis[i]);
@@ -333,8 +368,10 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 EPSGetConverged(eps, &nconv);
             else if(std::is_same<SType, SVD>::value)
                 SVDGetConverged(svd, &nconv);
-            else
+            else if(std::is_same<SType, NEP>::value)
                 NEPGetConverged(nep, &nconv);
+            else
+                PEPGetConverged(pep, &nconv);
             if(nconv > 0 && ((nargs[2] || nargs[3] || nargs[4]) || (std::is_same<SType, SVD>::value && (nargs[7] || nargs[8])))) {
                 KN<typename std::conditional<!std::is_same<SType, SVD>::value, K, PetscReal>::type>* eigenvalues = nargs[2] ? GetAny<KN<typename std::conditional<!std::is_same<SType, SVD>::value, K, PetscReal>::type>*>((*nargs[2])(stack)) : nullptr;
                 KNM<K>* array = nargs[4] ? GetAny<KNM<K>*>((*nargs[4])(stack)) : nullptr;
@@ -363,8 +400,10 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         EPSGetEigenpair(eps, i, &kr, &ki, (eigenvectors || array) ? xr : NULL, (eigenvectors || array) && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value ? xi : NULL);
                     else if(std::is_same<SType, SVD>::value)
                         SVDGetSingularTriplet(svd, i, &sigma, xr, xi);
-                    else
+                    else if(std::is_same<SType, NEP>::value)
                         NEPGetEigenpair(nep, i, &kr, &ki, (eigenvectors || array) ? xr : NULL, (eigenvectors || array) && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value ? xi : NULL);
+                    else
+                        PEPGetEigenpair(pep, i, &kr, &ki, (eigenvectors || array) ? xr : NULL, (eigenvectors || array) && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value ? xi : NULL);
                     if(eigenvectors || array || rvectors || rarray) {
                         PetscScalar* tmpr;
                         PetscScalar* tmpi;
@@ -439,8 +478,10 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 EPSDestroy(&eps);
             else if(std::is_same<SType, SVD>::value)
                 SVDDestroy(&svd);
-            else
+            else if(std::is_same<SType, NEP>::value)
                 NEPDestroy(&nep);
+            else
+                PEPDestroy(&pep);
             return static_cast<long>(nconv);
         }
         else
@@ -512,6 +553,7 @@ static void Init() {
         Global.Add("EPSSolve", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, PetscScalar, EPS>(1, 1));
         Global.Add("SVDSolve", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, PetscScalar, SVD>(1, 1));
         Global.Add("NEPSolve", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, PetscScalar, NEP>(1, 1, 1));
+        Global.Add("PEPSolve", "(", new SLEPc::eigensolver<PETSc::DistributedCSR<HpSchwarz<PetscScalar>>, PetscScalar, PEP>(1, 1, 1, 1));
         if(verbosity>1)cout << "*** End:: load PETSc & SELPc "<< typeid(PetscScalar).name() <<"\n\n"<<endl;
         zzzfff->Add(mmmm, atype<Dmat*>());
     }

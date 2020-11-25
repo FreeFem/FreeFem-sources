@@ -28,8 +28,9 @@ int[int] n2o;
 macro ThN2O()n2o// EOM
 buildDmesh(Th)
 {
-    macro def(i)[i, i#y, i#z]// EOM // vector field definition
-    macro init(i)[i, i, i]// EOM    // vector field initialization
+    macro def(i)i// EOM
+    macro init(i)i// EOM
+    macro ThPkPart()Edge03ds0// EOM special FE for the domain partitioning
     createMat(Th, A, Pk)
 }
 
