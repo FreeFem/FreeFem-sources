@@ -23,7 +23,7 @@ Vh [uu,vv], [w,s];
 cout << "lambda,mu,gravity ="<<lambda<< " " << mu << " " << gravity << endl;
 // deformation of a beam under its own weight 
 
-real shift = 0;  // value of the shift 
+real shift = -1;  // value of the shift 
 
 varf a([uu,vv],[w,s])=
 	int2d(Th)(  
@@ -56,7 +56,7 @@ real[int] ev(nev); // to store nev eigein value
 Vh[int] [eV,eW](nev);   // to store nev eigen vector
 
 
-int k=EigenValue(A,B,sym=true,sigma=sigma,value=ev,vector=eV,tol=1e-10,maxit=0,ncv=0);
+int k=EigenValue(A,B,sym=true,sigma=shift,value=ev,vector=eV,tol=1e-10,maxit=0,ncv=0);
 //   tol= the tolerace
 //   maxit= the maximal iteration see arpack doc.
 //   ncv   see arpack doc.
@@ -67,6 +67,7 @@ k=min(k,nev); //  some time the number of converged eigen value
 for (int i=0;i<k;i++)
 {
   [uu,vv]=[eV[i],eW[i]];
+  cout << ev[i] << endl; 
   plot([uu,vv],cmm="Eigen  Vector "+i+" valeur =" + ev[i]  ,wait=1,value=1,ps="eigen"+i+".eps");
 }
 

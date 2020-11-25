@@ -2299,9 +2299,9 @@ AX_LIB_HDF5()
 if test "$with_hdf5" = "yes"; then
   ff_save_cppflags="$CPPFLAGS";
   CPPFLAGS="$CPPFLAGS $HDF5_CPPFLAGS"
-  AC_CHECK_HEADER([H5Cpp.h],[],[with_hdf=no])
+  AC_CHECK_HEADER([H5Cpp.h],[],[with_hdf5=no])
   CPPFLAGS="$ff_save_cppflags"
-  #if test "$with_hdf5" = "yes"; then
+  if test "$with_hdf5" = "yes"; then
   AC_FF_ADDWHERELIB(hdf5,$HDF5_LDFLAGS  $HDF5_LIBS,$HDF5_CPPFLAGS)
   LIBS="$LIBS $HDF5_LDFLAGS  $HDF5_LIBS"
   # hack, if enable_download=no
@@ -2309,7 +2309,7 @@ if test "$with_hdf5" = "yes"; then
   AC_SUBST([TOOL_DYLIB_iohdf5],iohdf5.$DYLIB_SUFFIX)
   ifelse(nodownload,,[ff_download_lib="iohdf5 $ff_download_lib"])
   ifelse(nodownload,,[enable_iohdf5_download=yes])
-  #fi
+  fi
 else
   enable_iohdf5=no
 fi
