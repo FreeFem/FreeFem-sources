@@ -4530,6 +4530,7 @@ AnyType Plot::operator( )(Stack s) const {
     for (size_t ii = 0; ii < ll.size( ); ii++) {
       int i = ll[ii].i;
       long what = ll[ii].what;
+        if(verbosity>99) cout << " plot " << ii << " "<< what << endl;
       R2 P1(1e100,1e100), P2(-1e100,-1e100);
   //    R3 P11(1e100,1e100,1e100), P22(-1e100,-1e100,-1e100);
       if (what == 1 || what == 2) {
@@ -4650,8 +4651,8 @@ AnyType Plot::operator( )(Stack s) const {
     bool thfill = fill;
     for (size_t ii = 0; ii < ll.size( ); ii++) {
       int i = ll[ii].i;
-      long what = ll[i].what;
-
+      long what = ll[ii].what;//  correction FH 20201208 i->ii (wrong what)
+        if (verbosity > 99) cout << " plot " << ii << " i " << i << " " << what << endl;
       if (l[i].what == 0)
         if (fill)
           ll[ii].th( )->Draw(0, thfill);

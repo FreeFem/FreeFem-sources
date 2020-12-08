@@ -1,9 +1,12 @@
-assert(version>=2.23);
+assert(version>=4.7);
+//   Change empty mesh in meshL form version 4.5
+//  warning missing  operator a(Vh,Lh) 
+
 //  Mortar  (4 sub domain) 
 //  with matrix -et Precon Conjugade Gradient --
 //    Neuman -> Dirichlet . 
 //  -------------------------------
-
+load "msh3"
 func f=1+x+y;
 real g=1; 
 int withprecon=1; 
@@ -14,21 +17,54 @@ macro Psd(U) U[0],U[1],U[2],U[3] //
 int labext= nbsd+1;
 real meshsize=0.025; 
 real meshsizem=meshsize*1.5; 
-bool noconforme=0;
-include "mortar-msh.idp"
-cout << "mortar : " << endl;
-mesh Thm=Tha;
-Thm=adaptmesh(Thm,meshsizem,IsMetric=1,thetamax=60,nbvx=100000);
-Thm=adaptmesh(Thm,meshsizem,IsMetric=1,thetamax=60,nbvx=1000000);
+bool noconforme=0;// conforme ok ..
 
-Thm=emptymesh(Thm);
-mesh Thmm=Thm;
-if(noconforme)
-  {  //  need a find mesh to integrate on Thm. 
-    Thmm=trunc(Thm,split=4,1); // for fine integration
-    Thmm=emptymesh(Thmm);
+// --- begin  meshes  building --------------
+real[int] theta(nbsd+1),cost(nbsd),sint(nbsd);
+
+for (int i=0;i<nbsd;i++)
+ {
+  real t=i*2*pi/nbsd;
+  theta[i]= t;
+  theta[i+1]= (i+1)*2*pi/nbsd;
+  cost[i]=cos(t);
+  sint[i]=sin(t);
+ }
+
+
+border gi(t=0,1;i){x=cost[i]*t;y=sint[i]*t;label=1;};
+
+border ei(tt=0,1;i){ real t = theta[i]+ tt*(theta[i+1]-theta[i]);
+	 x=cos(t);y=sin(t);label=labext;};
+
+ int[int]  Ng(nbsd), Ne(nbsd);
+  Ne = 2*pi/nbsd/meshsize ;
+  Ng = 1./meshsize ;
+
+plot(gi(Ng)+ei(Ne) ,wait=1);
+
+mesh Tha = buildmesh( gi(Ng)+ei(Ne) , splitpbedge=1);
+
+int [int] regi(4);
+for (int i=0;i<4;i++)
+  {
+    real tt = (theta[i]+theta[i+1])*0.5;
+    regi[i]=Tha(0.5*cos(tt),0.5*sin(tt)).region;
   }
-plot(Thm,wait=0);
+
+Ng = 1./meshsize;
+cout << "mortar : " << endl;
+meshL Thm=buildmeshL(gi(Ng));
+Thm=trunc(Thm,1,split=4); //
+meshL Thmm=Thm;
+if(noconforme)
+  { ; //  need a find mesh to integrate on Thm. 
+  //  Thmm=trunc(Thm,split=4,1); // for fine integration
+  //  Thmm=emptymesh(Thmm);
+   Ng *= 4;
+   Thmm=buildmeshL(gi(Ng));
+  }
+plot(Thm,wait=1);
 
 verbosity=1;
 
@@ -44,14 +80,13 @@ for(int sd=0;sd<nbsd;++sd)
  Thsd[sd]=adaptmesh(Thsd[sd],meshsize*(1+sd*0.05),IsMetric=1,nbvx=100000,thetamax=60);// les sous domaines
 
 }
-plot(Thsd,Thm);
-// a faire : plot(Thsd,Thm,wait=1); 
+plot(Thsd,Thm,dim=2,wait=1);   // axel: ok
 
-fespace Lh(Thm,P1);
-fespace RTh(Thm,[P0edge,P0edge]);
+fespace Lh(Thm,P0);// 
+fespace RTh(Thm,[P0,P0]);
  RTh [Nmx,Nmy]; // ne marche pas car la normal 
-//                             n'est definie que une un bord
-varf  vNN([ux,uy],[nx,ny]) = int1d(Thm,1)(( nx*N.x + ny*N.y)/lenEdge);
+// Warning now only the tangent is defined on meshL because le line is in R3 not in R2 generaly
+varf  vNN([ux,uy],[nx,ny]) = int1d(Thm,1)(( -nx*Tl.y + ny*Tl.x)/lenEdge);  // axel: N 2D -> Nt 3D curve 
 Nmx[]= vNN(0,RTh);
 
 // les joint P0 sur le squelette 
@@ -73,9 +108,12 @@ Ehi[int] epssd(nbsd);
 real tgv=1e30;
 for(int sd=0;sd<nbsd;++sd)
 {
-
+  Thi=Thsd[sd];
+  usd[sd]=0;
+  vsd[sd]=0;
+   
   varf cci([l],[u]) = int1d(Thmm,1,qforder=3)(l*u*epssd[sd]);
-  varf vepsi(u,v)= int1d(Thi,1,qforder=10)( (Nmx*N.x + Nmy*N.y)*v/lenEdge);
+  varf vepsi(u,v)= int1d(Thi,1,qforder=10)( (Nmx*N.x + Nmy*N.y)*v/lenEdge);    
   
   varf vLapMi([ui],[vi],tgv=tgv) =
          int2d(Thi)(  Grad(ui)'*Grad(vi)  )
@@ -90,9 +128,6 @@ for(int sd=0;sd<nbsd;++sd)
 
    varf  vrhsMi(ui,vi) =   on(labext,ui=g);
 
-   Thi=Thsd[sd];
-   usd[sd]=0;
-   vsd[sd]=0;
    epssd[sd][]= vepsi(0,Ehi);
    epssd[sd] = -real(epssd[sd] <-0.00001) + real(epssd[sd] >0.00001);
    
@@ -125,8 +160,8 @@ plot(epssd,cmm="eps 0,1,2,3",wait=0,value=1);
 
 
 lh[]=0;
-varf  vDD(u,v) = int2d(Thm)(u*v*1e-10);
-varf  vML(u,v) = int2d(Thm)(u*v*1e-10)+int1d(Thm,1)(u*v);
+varf  vDD(u,v) = int1d(Thm)(u*v*1e-10);  // axel: int2d -> int1d
+varf  vML(u,v) = int1d(Thm)(u*v*1e-10)+int1d(Thm,1)(u*v);   // axel: int2d -> int1d
 matrix ML=vML(Lh,Lh);
 
 
