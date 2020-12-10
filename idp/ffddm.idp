@@ -249,7 +249,7 @@ IFMACRO(preffe#K,complex)
 real[int] pr#hpddmDk = preffe#Dk[mpiRank(preffe#prmesh#commddm)].re;
 schwarz<preffe#K> pr#hpddmOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, pr#hpddmDk, scaled = false, communicator = preffe#prmesh#commddm);
 ENDIFMACRO
-set(pr#hpddmOP,sparams="-hpddm_"+Stringification(pr)+"_schwarz_method " +ffddmprecond, prefix=Stringification(pr)+"_");
+set(pr#hpddmOP,sparams="-hpddm_"+Stringification(pr)+"_verbosity "+pr#verbosity+" -hpddm_"+Stringification(pr)+"_schwarz_method " +ffddmprecond, prefix=Stringification(pr)+"_");
 if (preffe#prmesh#inexactCSsplit == 1)
   set(pr#hpddmOP,sparams="-hpddm_"+Stringification(pr)+"_reuse_preconditioner 1", prefix=Stringification(pr)+"_");
 ENDIFMACRO
