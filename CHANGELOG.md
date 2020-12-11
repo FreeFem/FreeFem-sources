@@ -30,7 +30,7 @@ All notable changes to this project will be documented in this file.
 - SLEPc polynomial eigenvalue solver `PEPSolve()`
 
 ### Changed
-- PETSc version 3.14.1
+- PETSc version 3.14.2
 - Mmg version 5.5.2
 
 ### Deprecated

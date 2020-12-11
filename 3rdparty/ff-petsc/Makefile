@@ -146,7 +146,7 @@ all-local:
 	@echo "	make petsc-slepc "
 
 DIRPKG=../pkg
-VERSION=3.14.1
+VERSION=3.14.2
 VERSION_SLEPC=3.14.0
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)

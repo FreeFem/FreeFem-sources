@@ -112,21 +112,61 @@ A = varfA(Vh, Vh, tgv = -1);
     renumbering(Mass, RVtoS, R = IdV);
 }
 Mat<complex> ASurf(Mass.m, R, D, restriction = RVtoS);
+Mat<complex> BDense, StoVDense; // for densifying the HMatrix
 HMatrix<complex> TDL, SL;
 {
     fespace UhG(ThG, P1);
+    int[int] permGlobal, permLocal;
+    int[int] range = ASurf.range;
     {
         UhG<complex> numbering;
         numbering[] = 0:UhG.ndof - 1;
         VhS<complex> glob2loc = numbering;
         ChangeNumbering(ASurf, glob2loc[], perm);
+        if(usedARGV("-aij") != -1) {
+            int[int] permReduce(UhG.ndof);
+            permLocal.resize(VhS.ndof);
+            for[i, v : glob2loc[]] permLocal[i] = real(v);
+            permReduce = 0;
+            permReduce(range[0]:range[1] - 1) = perm;
+            permGlobal.resize(UhG.ndof);
+            mpiAllReduce(permReduce, permGlobal, mpiCommWorld, mpiSUM);
+        }
     }
-
     varf varfTDL(u,v) = int1dx1d(ThG)(ThG)(BEM(BemKernel("TDL",k=k),u,v)) + int1d(ThG)(0.5*u*v);
-
     TDL = varfTDL(UhG, UhG);
     varf varfSL(u,v) = int1dx1d(ThG)(ThG)(BEM(BemKernel("SL",k=k),u,v));
     SL = varfSL(UhG, UhG);
+    if(usedARGV("-aij") != -1) {
+        complex[int, int] tmpB(ThG.nv, ThG.nv), tmpA(ThG.nv, ThG.nv);
+        tmpA = SL;
+        mpiAllReduce(tmpA, tmpB, mpiCommWorld, mpiSUM);
+        tmpB *= -1.0;
+        real[int] D(tmpB.m);
+        D = 0.0;
+        D(range[0]:range[1] - 1) = 1.0;
+        int[int][int] intersection(mpisize);
+        intersection[0].resize(mpisize - 1);
+        int j = 0;
+        for(int i = 0; i < mpisize - 1; ++i) {
+            if(j == mpirank)
+                j++;
+            intersection[0][i] = j++;
+            intersection[i + 1].resize(tmpB.m);
+            intersection[i + 1] = 0:tmpB.m - 1;
+        }
+        matrix<complex> BLoc = tmpB(permGlobal, permGlobal);
+        Mat<complex> myB(BLoc, intersection, D);
+        BDense = myB;
+        tmpB = 0;
+        tmpB = TDL;
+        mpiAllReduce(tmpB, tmpA, mpiCommWorld, mpiSUM);
+        matrix<complex> RVtoSc = RVtoS;
+        BLoc = tmpA(permLocal, permGlobal);
+        BLoc = RVtoSc' * BLoc;
+        Mat<complex> myC(A, BDense, BLoc);
+        StoVDense = myC;
+    }
 }
 func complex[int] opSurf(complex[int]& in) {
     complex[int] u(ThG.nt), v(ThG.nt);
@@ -137,7 +177,7 @@ func complex[int] opSurf(complex[int]& in) {
     return in;
 }
 complex[int,int] dense(1, 1);
-{
+if(usedARGV("-aij") == -1) {
     varf varfSL(u,v) = int1dx1d(ThL)(ThL)(BEM(BemKernel("SL",k=k),u,v));
     HMatrix<complex> A = varfSL(VhS, VhS, commworld=mpiCommSelf);
     dense.resize(VhS.ndof, VhS.ndof);
@@ -156,8 +196,8 @@ func complex[int] opStoV(complex[int]& in) {
     ChangeNumbering(A, outV, out);
     return out;
 }
-Mat<complex> VtoS(ASurf, A, Mass);
 Mat<complex> B(ASurf, opSurf);
+Mat<complex> VtoS(B, A, Mass);
 func complex[int] precondSurf(complex[int]& in) {
     complex[int] u, out(in.n);
     ChangeNumbering(B, u, in, inverse = true);
@@ -165,27 +205,35 @@ func complex[int] precondSurf(complex[int]& in) {
     ChangeNumbering(B, v, out);
     return out;
 }
-Mat<complex> StoV(A, ASurf, opStoV);
-Mat<complex> N = [[A,    StoV],
-                  [VtoS, B   ]];
+Mat<complex> StoV(A, B, opStoV);
 complex[int] rhsV(Vh.ndof), rhsS(VhS.ndof);
 complex[int] xV(Vh.ndof), xS(VhS.ndof);
 varf varfRHS(u,v) = int2d(Th)(finc*v) + on(waveguide,u=0);
 rhsV = varfRHS(0, Vh, tgv = -1);
 complex[int] rhs, x;
 ChangeNumbering([A, B], [rhsV, rhsS], rhs);
-{
+x.resize(rhs.n);
+if(usedARGV("-aij") == -1) {
     real[int] list(rhs.n);
     complex[int] nV;
     ChangeNumbering(A, rhsV, nV);
     list(0:nV.n-1) = 1.0;
     list(nV.n:list.n-1) = 2.0;
     complex[int] test(list.n - nV.n);
+    Mat<complex> N = [[A,    StoV],
+                      [VtoS, B   ]];
     set(N, sparams = "-ksp_view -ksp_monitor -ksp_type fgmres -ksp_view_final_residual -fieldsplit_1_ksp_max_it 2000 -ksp_gmres_restart 200 -pc_type fieldsplit "+" -fieldsplit_0_pc_type asm -fieldsplit_0_sub_pc_type lu -fieldsplit_0_ksp_type gmres -fieldsplit_1_ksp_type gmres -fieldsplit_1_ksp_gmres_restart 2000 "+" -fieldsplit_1_pc_type none", fields = list);
     set(B, parent = N, sparams = "-prefix_push fieldsplit_1_ -pc_type shell -ksp_pc_side right -ksp_max_it 20 -prefix_pop", precon = precondSurf);
+    KSPSolve(N, rhs, x);
 }
-x.resize(rhs.n);
-KSPSolve(N, rhs, x);
+else {
+    Mat<complex> N = [[A,    StoVDense],
+                      [VtoS, BDense   ]];
+    Mat<complex> AIJ;
+    MatConvert(N, AIJ);
+    set(AIJ, sparams = "-pc_type lu");
+    KSPSolve(AIJ, rhs, x);
+}
 ChangeNumbering([A, B], [xV, xS], x, inverse = true, exchange = true);
 Vh<complex> plt;
 plt[] = xV;
