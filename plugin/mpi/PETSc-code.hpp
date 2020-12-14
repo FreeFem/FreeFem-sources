@@ -44,9 +44,7 @@ namespace PETSc {
     pfes2* pVh = GetAny<pfes2*>((*b->evh)(stack));
     const FESpace1* PUh = (FESpace1*)**pUh;
     const FESpace2* PVh = (FESpace2*)**pVh;
-    bool is_square = PUh == PVh || PUh->NbOfDF == PVh->NbOfDF;
 
-    bool VF = isVF(b->largs);
     Data_Sparse_Solver ds;
     ds.factorize = 0;
     ds.initmat = true;
@@ -3864,9 +3862,7 @@ namespace PETSc {
       Mat** mat;
       PetscInt M, N;
       MatNestGetSubMats(nest, &M, &N, &mat);
-      PetscInt m = in->n;
       Dmat** cast = reinterpret_cast<Dmat**>(exchange);
-      int n = 0;
       PetscScalar* ptr = reinterpret_cast<PetscScalar*>(in->operator HPDDM::upscaled_type<PetscScalar>*());
       MatType type;
       PetscBool isType;

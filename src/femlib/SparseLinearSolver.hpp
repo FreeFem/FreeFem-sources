@@ -104,6 +104,11 @@ template<class TS> void addsolver(const char *nm,int p,int setsp=0)
 template<class Z,class K> void changesolver(const string & n,const string & f)
 { TheFFSolver<Z,K>::changesolver(n,f); }
 
+template<class Z,class K>
+void DestroySolver( )
+{
+    for(auto& p : TheFFSolver<Z, K>::ffsolver) delete p.second;
+}
 template<class Z, class K> void InitSolver()
 {
  
@@ -116,6 +121,7 @@ template<class Z, class K> void InitSolver()
    addsolver<VirtualSolverUMFPACK<Z,K>>("UMFPACK",100, 1);// add set SparseSolver
    addsolver<VirtualSolverCHOLMOD<Z,K>>("CHOLMOD",99,  2);// add set SparseSolverSym
 #endif
+    ff_atend(DestroySolver<Z,K>);
 }
 template<class Z, class K>
 typename VirtualMatrix<Z,K>::VSolver * NewVSolver(HashMatrix<Z,K> &A, const Data_Sparse_Solver & ds,Stack stack )
