@@ -83,7 +83,22 @@ func ind = region == -1 ? 1 : 2./(1+((x-nsx[region-1])^2+(y-nsy[region-1])^2)); 
 plot(ThG);
 int[int][int] R;
 real[int] D;
-buildMinimalist(Th, R, D, P1)
+if(usedARGV("-user_partitioning") == -1) {
+    buildMinimalist(Th, R, D, P1)
+}
+else {
+    int[int] n2o;
+    mesh withBEM = trunc(Th, (x-3.2)^2+y^2 > 0.6, new2old = n2o);
+    fespace PhPart(withBEM, P0);
+    PhPart partWithBEM;
+    partitionerSeq(partWithBEM[], withBEM, mpisize - 1);
+    partitionerPar(partWithBEM[], withBEM, mpiCommWorld, mpisize - 1);
+    Ph part;
+    part[] = mpisize - 1;        // last rank has no BEM unknown
+    part[](n2o) = partWithBEM[]; // no need for restrict since using P0
+    plot(part);
+    buildWithPartitioning(Th, part[], 1, R, D, P1, mpiCommWorld)
+}
 meshL ThL;
 {
     int[int] labels=labels(Th);
@@ -94,20 +109,25 @@ meshL ThL;
             trueLabels[trueLabels.n-1] = labels[i];
         }
     }
-    ThL = extract(Th,label=trueLabels);
-    ThL = trunc(ThL,region==interface);
+    if(trueLabels.n) {
+        ThL = extract(Th,label=trueLabels);
+        ThL = trunc(ThL,region==interface);
+    }
 }
 int[int] perm;
 fespace Vh(Th, P1);
 fespace VhS(ThL, P1);
-matrix RVtoS = interpolate(VhS, Vh);
-varf varfMass(u,v) = int1d(Th,interface)(u*v) + on(waveguide,u=0);
-matrix<complex> Mass = varfMass(Vh, Vh, tgv = -10);
+matrix RVtoS;
+if(ThL.nt)
+    RVtoS = interpolate(VhS, Vh);
 macro Grad(u) [dx(u),dy(u)] // EOM
 Mat<complex> A(Vh.ndof, R, D);
 varf varfA(u,v) = int2d(Th)(-ind*k^2*u*v+Grad(u)'*Grad(v)) + on(waveguide,u=0);
 A = varfA(Vh, Vh, tgv = -1);
-{
+matrix<complex> Mass;
+if(ThL.nt) {
+    varf varfMass(u,v) = int1d(Th,interface)(u*v) + on(waveguide,u=0);
+    Mass = varfMass(Vh, Vh, tgv = -10);
     matrix IdV = eye(Vh.ndof);
     renumbering(Mass, RVtoS, R = IdV);
 }
@@ -121,14 +141,19 @@ HMatrix<complex> TDL, SL;
     {
         UhG<complex> numbering;
         numbering[] = 0:UhG.ndof - 1;
-        VhS<complex> glob2loc = numbering;
-        ChangeNumbering(ASurf, glob2loc[], perm);
-        if(usedARGV("-aij") != -1) {
-            int[int] permReduce(UhG.ndof);
-            permLocal.resize(VhS.ndof);
+        int[int] permReduce(UhG.ndof);
+        permLocal.resize(VhS.ndof);
+        if(ThL.nt) {
+            VhS<complex> glob2loc = numbering;
+            ChangeNumbering(ASurf, glob2loc[], perm);
             for[i, v : glob2loc[]] permLocal[i] = real(v);
+        }
+        else
+            perm.resize(0);
+        if(usedARGV("-aij") != -1) {
             permReduce = 0;
-            permReduce(range[0]:range[1] - 1) = perm;
+            if(range[0] != range[1])
+                permReduce(range[0]:range[1] - 1) = perm;
             permGlobal.resize(UhG.ndof);
             mpiAllReduce(permReduce, permGlobal, mpiCommWorld, mpiSUM);
         }
@@ -144,7 +169,8 @@ HMatrix<complex> TDL, SL;
         tmpB *= -1.0;
         real[int] D(tmpB.m);
         D = 0.0;
-        D(range[0]:range[1] - 1) = 1.0;
+        if(range[0] != range[1])
+            D(range[0]:range[1] - 1) = 1.0;
         int[int][int] intersection(mpisize);
         intersection[0].resize(mpisize - 1);
         int j = 0;
@@ -158,12 +184,15 @@ HMatrix<complex> TDL, SL;
         matrix<complex> BLoc = tmpB(permGlobal, permGlobal);
         Mat<complex> myB(BLoc, intersection, D);
         BDense = myB;
-        tmpB = 0;
+        tmpB = 0.0;
         tmpB = TDL;
         mpiAllReduce(tmpB, tmpA, mpiCommWorld, mpiSUM);
         matrix<complex> RVtoSc = RVtoS;
         BLoc = tmpA(permLocal, permGlobal);
-        BLoc = RVtoSc' * BLoc;
+        if(ThL.nt)
+            BLoc = RVtoSc' * BLoc;
+        else
+            BLoc.resize(Vh.ndof, 0);
         Mat<complex> myC(A, BDense, BLoc);
         StoVDense = myC;
     }
@@ -177,7 +206,7 @@ func complex[int] opSurf(complex[int]& in) {
     return in;
 }
 complex[int,int] dense(1, 1);
-if(usedARGV("-aij") == -1) {
+if(usedARGV("-aij") == -1 && ThL.nt) {
     varf varfSL(u,v) = int1dx1d(ThL)(ThL)(BEM(BemKernel("SL",k=k),u,v));
     HMatrix<complex> A = varfSL(VhS, VhS, commworld=mpiCommSelf);
     dense.resize(VhS.ndof, VhS.ndof);
@@ -190,10 +219,13 @@ func complex[int] opStoV(complex[int]& in) {
     mpiAllReduce(u, v, mpiCommWorld, mpiSUM);
     u = TDL * v;
     for[i, p : perm] out[i] = u[p];
-    complex[int] outS, outV(RVtoS.m);
+    complex[int] outS, outV(Vh.ndof);
     ChangeNumbering(ASurf, outS, out, inverse = true, exchange = true);
-    renumbering(RVtoS', outS, outV);
-    ChangeNumbering(A, outV, out);
+    if(ThL.nt)
+        renumbering(RVtoS', outS, outV);
+    else
+        outV = 0.0;
+    ChangeNumbering(A, outV, out, exchange = true);
     return out;
 }
 Mat<complex> B(ASurf, opSurf);
@@ -201,7 +233,11 @@ Mat<complex> VtoS(B, A, Mass);
 func complex[int] precondSurf(complex[int]& in) {
     complex[int] u, out(in.n);
     ChangeNumbering(B, u, in, inverse = true);
-    complex[int] v = dense * u;
+    complex[int] v(u.n);
+    if(ThL.nt)
+        v = dense * u;
+    else
+        v = 0.0;
     ChangeNumbering(B, v, out);
     return out;
 }
@@ -218,7 +254,8 @@ if(usedARGV("-aij") == -1) {
     complex[int] nV;
     ChangeNumbering(A, rhsV, nV);
     list(0:nV.n-1) = 1.0;
-    list(nV.n:list.n-1) = 2.0;
+    if(ThL.nt)
+        list(nV.n:list.n-1) = 2.0;
     complex[int] test(list.n - nV.n);
     Mat<complex> N = [[A,    StoV],
                       [VtoS, B   ]];
