@@ -2007,7 +2007,7 @@ pmeshL pfLr_Th(pair<FEbase<K,v_fesL> *,int> p)
 //3D volume
 long pVh3_ndof(pfes3 * p)
  { throwassert(p && *p);
-   FESpace3 *fes=**p; ;  return fes->NbOfDF ;}
+   FESpace3 *fes=**p; ;  return fes ? fes->NbOfDF : 0;}
 long pVh3_nt(pfes3 * p)
  { throwassert(p && *p);
    FESpace3 *fes=**p; ;  return fes->NbOfElements ;}
@@ -2021,7 +2021,7 @@ pmesh3 pVh3_Th(pfes3 * p)
 //3D surface
 long pVhS_ndof(pfesS * p)
 { throwassert(p && *p);
-    FESpaceS *fes=**p; ;  return fes->NbOfDF ;}
+    FESpaceS *fes=**p; ;  return fes ? fes->NbOfDF : 0;}
 long pVhS_nt(pfesS * p)
 { throwassert(p && *p);
     FESpaceS *fes=**p; ;  return fes->NbOfElements ;}
@@ -2035,7 +2035,7 @@ pmeshS pVhS_Th(pfesS * p)
 //3D curve
 long pVhL_ndof(pfesL * p)
 { throwassert(p && *p);
-    FESpaceL *fes=**p; ;  return fes->NbOfDF ;}
+    FESpaceL *fes=**p; ;  return fes ? fes->NbOfDF : 0;}
 long pVhL_nt(pfesL * p)
 { throwassert(p && *p);
     FESpaceL *fes=**p; ;  return fes->NbOfElements ;}
