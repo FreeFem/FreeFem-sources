@@ -1062,6 +1062,7 @@ class OP_MakeBemKernelFunc {
       Complex alpha=1.;//(arg(0, s, 1));
       Complex k(arg(0, s, Complex(0.,0.)));
       A bemker = new BemKernel(type,alpha,k);
+      Add2StackOfPtr2Free(s,bemker);
       return SetAny< A >(bemker);
     }
   };
