@@ -38,9 +38,15 @@ class DistributedCSR {
         }
         void dtor() {
             if(_petsc) {
+                MatType type;
+                PetscBool isType;
+                MatGetType(_petsc, &type);
+                PetscStrcmp(type, MATNEST, &isType);
+                if(isType) {
+                    delete [] reinterpret_cast<decltype(this)*>(_exchange);
+                    _exchange = nullptr;
+                }
                 MatDestroy(&_petsc);
-                delete [] reinterpret_cast<decltype(this)*>(_exchange);
-                _exchange = nullptr;
             }
             if(_vS) {
                 for(int i = 0; i < _vS->size(); ++i)

@@ -69,7 +69,7 @@ namespace PETSc {
         A.Uh = Uh;
         A.Vh = Vh;
         if(ds.sym) {
-          A.A.master(new MatriceMorse<HPDDM::upscaled_type<K>>(Vh.NbOfDF,Vh.NbOfDF,0,ds.sym));
+          A.A.master(new MatriceMorse<HPDDM::upscaled_type<K>>(Vh.NbOfDF, Vh.NbOfDF, 0, ds.sym));
           ffassert(&Uh == &Vh);
         }
         else
@@ -1157,7 +1157,7 @@ namespace PETSc {
          ? GetAny< KN< typename std::conditional<
              std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value, double, long >::type >* >(
              (*D)(stack))
-         : nullptr);
+         : nullptr), *empty = nullptr;
     PetscInt bs = nargs[1] ? GetAny< long >((*nargs[1])(stack)) : 1;
     int dof = 0;
     MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA = nullptr;
@@ -1207,7 +1207,8 @@ namespace PETSc {
           for (int i = 0; i < n; ++i) ptA->_D->operator[](i) = ptD->operator[](mList->j[i]);
         } else {
           dL = new HPDDM::MatrixCSR< void >(0, mA ? mA->n : dof, 0, nullptr, nullptr, false);
-          ptD->destroy( );
+          empty = new KN< typename std::conditional< std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value,
+                                   double, long >::type >(0);
         }
       }
       ptA->_A->HPDDM::template Subdomain< PetscScalar >::initialize(
@@ -1216,7 +1217,8 @@ namespace PETSc {
       delete dL;
       ptA->_num = new PetscInt[ptA->_A->getMatrix( )->_n];
       initPETScStructure<C>(ptA, bs,
-        nargs[3] && GetAny< bool >((*nargs[3])(stack)) ? PETSC_TRUE : PETSC_FALSE, ptD);
+        nargs[3] && GetAny< bool >((*nargs[3])(stack)) ? PETSC_TRUE : PETSC_FALSE, empty ? empty : ptD);
+      delete empty;
       if (!std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value) {
         mA->p = ptA->_A->getMatrix( )->_ia;
       }
@@ -1596,7 +1598,8 @@ namespace PETSc {
         std::copy_n(ptIn->operator PetscScalar*(), ptIn->N() * ptOut->M(), out);
     } else {
       resize(ptIn, n, ptOut->M());
-      *ptIn = PetscScalar( );
+      if(ptIn->N())
+          *ptIn = PetscScalar( );
       out = ptOut->operator PetscScalar*();
       if (num) {
         for(int i = 0; i < ptIn->M(); ++i) {
@@ -1686,7 +1689,18 @@ namespace PETSc {
     } else VecCopy(x, y);
     PetscFunctionReturn(0);
   }
-  template< class Type >
+  template< class Type, typename std::enable_if<!std::is_same<Type, ShellInjection>::value>::type* = nullptr  >
+  static PetscErrorCode ShellDestroy(Mat A) {
+    User< Type > user;
+    PetscErrorCode ierr;
+
+    PetscFunctionBegin;
+    ierr = MatShellGetContext(A, &user);CHKERRQ(ierr);
+    delete user->op;
+    ierr = PetscFree(user);CHKERRQ(ierr);
+    PetscFunctionReturn(0);
+  }
+  template< class Type, typename std::enable_if<std::is_same<Type, ShellInjection>::value>::type* = nullptr  >
   static PetscErrorCode ShellDestroy(Mat A) {
     User< Type > user;
     PetscErrorCode ierr;
@@ -1703,6 +1717,7 @@ namespace PETSc {
 
     PetscFunctionBegin;
     ierr = PCShellGetContext(pc, (void**)&user);CHKERRQ(ierr);
+    delete user->op;
     ierr = PetscFree(user);CHKERRQ(ierr);
     PetscFunctionReturn(0);
   }
