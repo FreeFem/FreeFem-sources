@@ -117,9 +117,7 @@ meshL ThL;
 int[int] perm;
 fespace Vh(Th, P1);
 fespace VhS(ThL, P1);
-matrix RVtoS;
-if(ThL.nt)
-    RVtoS = interpolate(VhS, Vh);
+matrix RVtoS = interpolate(VhS, Vh);
 macro Grad(u) [dx(u),dy(u)] // EOM
 Mat<complex> A(Vh.ndof, R, D);
 varf varfA(u,v) = int2d(Th)(-ind*k^2*u*v+Grad(u)'*Grad(v)) + on(waveguide,u=0);
@@ -225,7 +223,7 @@ func complex[int] opStoV(complex[int]& in) {
         renumbering(RVtoS', outS, outV);
     else
         outV = 0.0;
-    ChangeNumbering(A, outV, out, exchange = true);
+    ChangeNumbering(A, outV, out);
     return out;
 }
 Mat<complex> B(ASurf, opSurf);
