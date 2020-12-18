@@ -28,6 +28,9 @@ All notable changes to this project will be documented in this file.
 - Bilaplacian example using Morley FE with PETSc, see `examples/hpddm/bilaplacian-2d-PETSc.edp`
 - Oseen problem preconditioned by PCD, see `examples/hpddm/oseen-2d-PETSc.edp`
 - SLEPc polynomial eigenvalue solver `PEPSolve()`
+- add trivail example to check periodic boundary condition on meshS , meshL  , mesh3 
+    examples/3d/periodic3.edp	examples/3dSurf/periodicS.edp
+    examples/3dCurve/periodicL.edp	
 
 ### Changed
 - PETSc version 3.14.2
@@ -39,6 +42,12 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - some memory leaks
+- the periodic boundary condition have wrong before first a sementic level of MeshS and MeshL case.
+     the new syntexe is for example: 
+     meshL Tl=segment(10);   fespace Vl(Tl,P1,periodic=[[1],[2]]); 
+     meshS Th=square3(10,10,[x*2*pi,y*2*pi]); fespace Vh2(Th,P1,periodic=[[1,x],[3,x],[2,y],[4,y]]);
+     
+  
 
 ### Security
 

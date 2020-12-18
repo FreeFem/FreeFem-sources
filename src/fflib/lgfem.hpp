@@ -225,7 +225,7 @@ namespace {
 
 void GetPeriodic(const int d, Expression perio, int &nbcperiodic, Expression *&periodic);
 
-bool BuildPeriodic(int nbcperiodic, Expression *periodic, const Mesh &Th, Stack stack, int &nbdfv,
+bool BuildPeriodic2(int nbcperiodic, Expression *periodic, const Mesh &Th, Stack stack, int &nbdfv,
                    KN< int > &ndfv, int &nbdfe, KN< int > &ndfe);
 
 // <<v_fes>> uses [[file:~/ff/src/femlib/RefCounter.hpp::RefCounter]]
@@ -707,8 +707,9 @@ class FEbaseArray : public FEbaseArrayKn< K > {
 };
 
 void GetPeriodic(const int d, Expression perio, int &nbcperiodic, Expression *&periodic);
-int GetPeriodic(Expression bb, Expression &b, Expression &f);
-int GetPeriodic(Expression bb, Expression &b, Expression &f1, Expression &f2);
+int GetPeriodic(Expression bb, Expression &b);// 1dhat
+int GetPeriodic(Expression bb, Expression &b, Expression &f);//2dhat
+int GetPeriodic(Expression bb, Expression &b, Expression &f1, Expression &f2);//3dhat
 
 C_F0 NewFEarray(const char *id, Block *currentblock, C_F0 &fespacetype, CC_F0 init, bool cplx,
                 int dim);

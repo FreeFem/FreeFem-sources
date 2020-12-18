@@ -1,0 +1,16 @@
+load "msh3"
+
+meshS Th=square3(20,20,[x*2*pi,y*2*pi]);
+fespace Vh(Th,P1,periodic=[[1,x],[3,x],[2,y],[4,y]]);
+
+func u2e =(sin(x+1)*sin(y+2));
+Vh u2,v2,u2h=u2e;
+func f2= 2.*u2e;
+macro grad3(u) [dx(u),dy(u),dz(u)]//
+solve PP2(u2,v2) = int2d(Th)(grad3(u2)'*grad3(v2)+1e-6*u2*v2) - int2d(Th)(f2*v2) ;
+plot(u2,u2h,wait=1);
+u2[]-=u2h[];
+
+cout << " err 2 = " << u2[].linfty << endl;
+
+assert(u2[].linfty< 0.05);

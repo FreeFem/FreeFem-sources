@@ -788,7 +788,7 @@ AnyType Adaptation::operator()(Stack stack) const
     KN<int> ndfv(Thh->nv);
     KN<int> ndfe(Thh->neb);
     int nbdfv=0,nbdfe=0;
-    BuildPeriodic(nbcperiodic,periodic,*Thh,stack,nbdfv,ndfv,nbdfe,ndfe);
+    BuildPeriodic2(nbcperiodic,periodic,*Thh,stack,nbdfv,ndfv,nbdfe,ndfe);
      oTh = msh2bamg(*Thh,cutoffradian,nbdfv,ndfv,nbdfe,ndfe,reqedges,reqedges.N());
 
   }

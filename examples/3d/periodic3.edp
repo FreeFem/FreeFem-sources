@@ -1,0 +1,17 @@
+load "msh3"
+
+mesh3 Th3 = cube(10,10,10,[x*2*pi,y*2*pi,z*2*pi]);
+
+verbosity=10;
+fespace Vh3(Th3,P1, periodic=[[1,x,z],[3,x,z],[2,y,z],[4,y,z],[5,x,y],[6,x,y]]);
+macro grad3(u) [dx(u),dy(u),dz(u)]//
+cout << " Vh3 ndof " << Vh3.ndof << endl; 
+func u3e =(sin(x+1)*sin(y+2)*sin(z+3));
+Vh3 u3,v3,u3h=u3e;
+func f3= 3.*u3e;
+solve P3(u3,v3) = int3d(Th3)(grad3(u3)'*grad3(v3)+1e-6*u3*v3) - int3d(Th3)(f3*v3) ;
+//plot(u3,u3h,cmm=1);
+//plot(u3h,cmm=1);
+u3[]-=u3h[];
+cout << " err3  = " << u3[].linfty << endl;
+assert(u3[].linfty < 0.07);

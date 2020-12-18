@@ -29,8 +29,8 @@ TESTS_OTHER = buildParametricMeshL.edp \
 	LaplacianCurve.edp \
 	extractMeshes.edp \
 	elasticstring.edp \
-	tutomesh1d.edp 
-
+	tutomesh1d.edp \
+	periodicL.edp 
 
 
 

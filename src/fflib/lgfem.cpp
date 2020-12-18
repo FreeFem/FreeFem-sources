@@ -926,7 +926,7 @@ bool InCircularList(const int *p, int i, int k) {
   return false;
 }
 
-bool BuildPeriodic(int nbcperiodic, Expression *periodic, const Mesh &Th, Stack stack, int &nbdfv,
+bool BuildPeriodic2(int nbcperiodic, Expression *periodic, const Mesh &Th, Stack stack, int &nbdfv,
                    KN< int > &ndfv, int &nbdfe, KN< int > &ndfe) {
   /*
     build numbering of vertex form 0 to nbdfv-1
@@ -1157,7 +1157,7 @@ bool BuildPeriodic(int nbcperiodic, Expression *periodic, const Mesh &Th, Stack 
 }
 
 bool v_fes::buildperiodic(Stack stack, int &nbdfv, KN< int > &ndfv, int &nbdfe, KN< int > &ndfe) {
-  return BuildPeriodic(nbcperiodic, periodic, **ppTh, stack, nbdfv, ndfv, nbdfe, ndfe);
+  return BuildPeriodic2(nbcperiodic, periodic, **ppTh, stack, nbdfv, ndfv, nbdfe, ndfe);
 }
 #ifdef ZZZZZZZZ
 FESpace *pfes_tef::update( ) {
@@ -1285,11 +1285,14 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
     Expression nargs[n_name_param];
 
     args.SetNameParam(n_name_param, name_param, nargs);
-    GetPeriodic(Mesh::Rd::d, nargs[0], nbcperiodic, periodic);
+      const int d = TypeOfFE::RdHat::d;
+    GetPeriodic(Mesh::RdHat::d, nargs[0], nbcperiodic, periodic);
     aType t_tfe = atype< TypeOfFE * >( );
     aType t_tfe2 = atype< TypeOfFE2 * >( );
-    int d = TypeOfFE::Rd::d;
-    string sdim = d ? " 2d : " : " 3d : ";
+    ffassert(d>0 && d < 4);
+    char  cdim[10];
+      sprintf(cdim,"%dd",d);
+    string sdim = cdim ;
     const E_Array *a2(dynamic_cast< const E_Array * >(args[2].LeftValue( )));
     ffassert(a2);
     int N = a2->size( );
@@ -1463,9 +1466,9 @@ class OP_MakePtrL {
 };
 
 void GetPeriodic(const int d, Expression perio, int &nbcperiodic, Expression *&periodic) {
-  ffassert(d == 2 || d == 3);
+  ffassert(d==1 || d == 2 || d == 3);
   if (perio) {
-    if (verbosity > 1) cout << "  -- Periodical Condition to do" << endl;
+    if (verbosity > 1) cout << "  -- Periodical Condition to do d==" <<  d << endl;
     const E_Array *a = dynamic_cast< const E_Array * >(perio);
     ffassert(a);
     int n = a->size( );
@@ -1473,8 +1476,15 @@ void GetPeriodic(const int d, Expression perio, int &nbcperiodic, Expression *&p
     if (verbosity > 1) cout << "    the number of periodicBC " << n << endl;
     if (2 * nbcperiodic != n) CompileError(" Sorry the number of periodicBC must by even");
     periodic = new Expression[n * d];
+      
     for (int i = 0, j = 0; i < n; i++, j += d)
-      if (d == 2) {
+      {
+      if(verbosity>9)    cout<< " GetPeriodic"<<d << " " <<  i << ": " << j << endl; 
+      if (d == 1) {
+        if (GetPeriodic((*a)[i], periodic[j]) == 0)
+          CompileError(" a sub array of periodic BC must be [label ]");
+      }
+      else if (d == 2) {
         if (GetPeriodic((*a)[i], periodic[j], periodic[j + 1]) == 0)
           CompileError(" a sub array of periodic BC must be [label, realfunction ]");
       } else if (d == 3) {
@@ -1482,6 +1492,7 @@ void GetPeriodic(const int d, Expression perio, int &nbcperiodic, Expression *&p
           CompileError(" a sub array of periodic BC must be [label, realfunction , realfunction]");
       } else
         ffassert(0);
+      }
   }
 }
 
@@ -1506,7 +1517,7 @@ OP_MakePtrS::Op::Op(const basicAC_F0 &args)
   nbcperiodic = 0;
   periodic = 0;
   args.SetNameParam(n_name_param, name_param, nargs);
-  GetPeriodic(3, nargs[0], nbcperiodic, periodic);
+  GetPeriodic(2, nargs[0], nbcperiodic, periodic);
 }
 // 3D curve
 OP_MakePtrL::Op::Op(const basicAC_F0 &args)
@@ -1514,9 +1525,16 @@ OP_MakePtrL::Op::Op(const basicAC_F0 &args)
   nbcperiodic = 0;
   periodic = 0;
   args.SetNameParam(n_name_param, name_param, nargs);
-  GetPeriodic(3, nargs[0], nbcperiodic, periodic);
+  GetPeriodic(1, nargs[0], nbcperiodic, periodic);
 }
-
+int GetPeriodic(Expression bb, Expression &b) {
+  const E_Array *a = dynamic_cast< const E_Array * >(bb);
+  if (a && a->size( ) == 1) {
+    b = to< long >((*a)[0]);
+    return 1;
+  } else
+    return 0;
+}
 int GetPeriodic(Expression bb, Expression &b, Expression &f) {
   const E_Array *a = dynamic_cast< const E_Array * >(bb);
   if (a && a->size( ) == 2) {
