@@ -1682,7 +1682,7 @@ void OnePlotBorder::Draw(OneWindow *win)
 
     glDisable(GL_DEPTH_TEST);
     ThePlot & plot= *win->theplot;
-    R h = 8*win->hpixel;
+    R h = 10*win->hpixel*kscreenscale;
     double z = plot.z0;
     plot.SetColorTable(16) ;
 
@@ -3161,9 +3161,10 @@ void ThePlot::SetDefIsoV(int niso,int narr,double fmn,double fmx,double vmn,doub
 void OneWindow::Show(const char *str,int i)
 {
     int hx= 15;
+    if(kscreenscale==2) hx = 25; // OK ...
     int ix= width/20;
     int iy= height-hx*i;
-    plot(ix,iy,str,3);
+    plot(ix,iy,str);
 }
 
 void  FillRectRasterPos(R x0,R y0,R x1,R y1)
