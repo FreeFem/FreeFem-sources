@@ -1048,7 +1048,7 @@ class FINDLOCALMIN_P1 : public OneOperator {
 
 R3 *Curve2(Stack stack, const KNM_< double > &b, const long &li0, const long &li1, const double &ss,
           long *const &pi) {
-  assert(b.N( ) =2);
+  assert(b.N( ) ==2 );
   int i0 = li0, i1 = li1, im;
   if (i0 < 0) {
     i0 = 0;
