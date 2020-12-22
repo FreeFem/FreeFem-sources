@@ -3184,8 +3184,8 @@ namespace bamg {
     VerticesOnGeomVertex = new VertexOnGeom[NbVerticesOnGeomVertex];
     VertexOnBThVertex = new VertexOnVertex[NbVerticesOnGeomVertex];
     //
-    if (NbVerticesOnGeomVertex >= nbvx) {
-      cerr << " Too many vertices on geometry " << NbVerticesOnGeomVertex << " >= " << nbvx << endl;
+    if (NbVerticesOnGeomVertex > nbvx) {
+      cerr << " Too many vertices on geometry " << NbVerticesOnGeomVertex << " > " << nbvx << endl;
       MeshError(1, this);
     }
     assert(vertices);

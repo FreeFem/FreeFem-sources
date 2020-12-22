@@ -21,7 +21,7 @@
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
 /* clang-format off */
-//ff-c++-LIBRARY-dep:
+//ff-c++-LIBRARY-dep: f77
 //ff-c++-cpp-dep: newuoa.f
 /* clang-format on */
 

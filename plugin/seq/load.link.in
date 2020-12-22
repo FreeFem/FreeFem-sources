@@ -288,7 +288,7 @@ if [ -n "$ffiles$files$fileso" ] ; then
 	echo
     fi
     if [ "$CONLY" != yes ]; then
-	echo $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $SUF $DLL $OTHER $WMPI_LIB 
+	echo $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS  $DLL $OTHER $WMPI_LIB 
 	if [  $do = yes ] ; then
 	   eval $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $WMPI_LIB 
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi
