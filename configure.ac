@@ -2339,6 +2339,8 @@ fi
 TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX",,nodownload)
 TOOL_DISABLE(mkl,"PARDISO.$DYLIB_SUFFIX",,nodownload)
 
+AC_SUBST([FF_LIBS],$LIBS)
+LIBS=
 # echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 test "$enable_download" != "yes" -a "$enable_download_hpddm" != "yes" -a \( "$enable_hpddm" != "yes" -o "$ff_hpddm_ok" != "yes" \) && enable_hpddm=no
 test "$enable_download" != "yes" -a "$enable_htool" != yes && enable_htool=no
@@ -2434,6 +2436,7 @@ AM_CONDITIONAL([SLEPCCOMPLEX], [test "$ff_slepccomplex_ok" = yes])
 AM_CONDITIONAL([SUPERLU], [test "$ff_superlu_ok" = yes])
 AM_CONDITIONAL([TETGEN], [test "$ff_tetgen_" = yes])
 AM_CONDITIONAL([UMFPACK], [test "$ff_umfpack_" = yes])
+
 
 ##
 # All makefiles

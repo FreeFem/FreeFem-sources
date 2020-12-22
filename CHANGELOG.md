@@ -35,7 +35,9 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - PETSc version 3.14.2
 - Mmg version 5.5.2
-
+- link of ffglut so change in configure.ac and Makefile.am  LIBS -> FF_LIBS and LIBS become empty 
+    to remove default libs 
+- change number of save plot in ffglut from 10 to 20 for O. Pironneau
 ### Deprecated
 
 ### Removed
@@ -46,6 +48,7 @@ All notable changes to this project will be documented in this file.
      the new syntexe is for example: 
      meshL Tl=segment(10);   fespace Vl(Tl,P1,periodic=[[1],[2]]); 
      meshS Th=square3(10,10,[x*2*pi,y*2*pi]); fespace Vh2(Th,P1,periodic=[[1,x],[3,x],[2,y],[4,y]]);
+- fixed '*' keyboard trick,  to keep  the viewpoint in ffglut or not. 
      
   
 

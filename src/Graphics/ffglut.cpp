@@ -2020,8 +2020,9 @@ void OneWindow::set(ThePlot *p)
     theplot=p;
     if(p)
     {
+        if( debug) cout << "OneWindow:: set "<< p->keepPV << " -> "<< keepPV << endl;
         plotdim=p->plotdim;
-        keepPV=p->keepPV;
+        if(!keepPV)keepPV=p->keepPV;
         pNormalT=p->pNormalT;
         rapz0 = p->ZScale;
     }
@@ -2037,7 +2038,8 @@ void OneWindow::set(ThePlot *p)
 void OneWindow::add(ThePlot *p)
 {
     if(p) {
-        keepPV=p->keepPV;
+        if( debug) cout << "OneWindow:: add "<< p->keepPV << " -> "<< keepPV << endl;
+        if(!keepPV) keepPV=p->keepPV;
         lplots.push_back(p);
         lplotssize++;
         ++icurrentPlot;
@@ -2045,7 +2047,7 @@ void OneWindow::add(ThePlot *p)
             --icurrentPlot;// the previous
         if(icurrentPlot != lplots.end())
             set(*icurrentPlot);
-        if( lplotssize>10)
+        if( lplotssize>20)// pass 10 -> 20 for O. Pironneau 21/12/2020 FH.
         {
             bool isfirst = theplot == *lplots.begin();
             if(debug >1)
@@ -3870,6 +3872,7 @@ static void Key( unsigned char key, int x, int y )
             break;
         case '*': // add FH  mars 2013 ..
             win->keepPV = ! win->keepPV;
+            if(debug) cout << "  ... win->keepPV "<< win->keepPV << endl;
             break;
         case 'k':
             if(win->theplot->NextCase())
