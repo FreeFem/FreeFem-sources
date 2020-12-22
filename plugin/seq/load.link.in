@@ -7,7 +7,7 @@ dircommand=`dirname "$0"`
 FFVERSION='@VERSION@'
 FFCXXFLAGS='@CXXFLAGS@ @CPPFLAGS@ @UMFPACK_CPPFLAGS@ @HDF5_CPPFLAGS@'
 FFFFLAGS='@FFLAGS@'
-FFFLIBS='@FF_LIBS@'
+FFFLIBS='@FFLIBS@'
 FFCXX11FLAGS='@CXX11FLAGS@'
 INCFF=
 if [ "@ENABLE_FFCS@" != "yes" ] ;then ffcs=0; else ffcs=1;fi
@@ -20,7 +20,7 @@ if [ "$MPICXX" = '@'MPICXX'@' ] ; then MPICXX=""; fi
 if [ "$F77" = '@'F77'@' ] ; then F77=""; fi
 if [ "$FFCXXFLAGS" = '@'CXXFLAGS'@' ] ; then FFCXXFLAGS=""; fi
 if [ "$FFFFLAGS" = '@'FFLAGS'@' ] ; then FFFFLAGS=""; fi
-if [ "$FFFLIBS" = '@'FF_LIBS'@' ] ; then FFFLIBS=""; fi
+if [ "$FFFLIBS" = '@'FFLIBS'@' ] ; then FFFLIBS=""; fi
 if [ "$FFVERSION" = '@'VERSION'@' ] ; then FFVERSION=""; fi
 if [ -z "$INCFF" ] ; then
     if [ -f "@INCFF@/ff++.hpp" ] ; then
