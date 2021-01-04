@@ -312,8 +312,13 @@ void setCompositePC(PC pc, const std::vector<Mat>* S) {
             PCSetType(pcS, PCCOMPOSITE);
             PetscInt j;
             PCCompositeGetNumberPC(pcS, &j);
-            for(int i = j; i < S->size(); ++i)
+            for(int i = j; i < S->size(); ++i) {
+#if PETSC_VERSION_GE(3,15,0)
+                PCCompositeAddPCType(pcS, PCNONE);
+#else
                 PCCompositeAddPC(pcS, PCNONE);
+#endif
+            }
             PCSetUp(pcS);
             for(int i = 0; i < S->size(); ++i) {
                 PC subpc;
