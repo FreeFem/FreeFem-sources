@@ -1083,30 +1083,65 @@ R* HashMatrix<I,R>::addMatMul(R *x,R*Ax,bool Transpose,I sx,I sAx) const {
     R *aa=aij;
     double t0= CPUsecond();
     //   if(Transpose != trans) {std::swap(ii,jj);}
+    const bool do_conj  = ((std::is_same<R,complex<double> >::value || std::is_same<R,complex<float> >::value )) && Transpose;
     if(Transpose ) {std::swap(ii,jj);}
     if(fortran) {aa++;}
+    if(do_conj)// complex and transpose => hermitian
+    {
     if(sx==1 && sAx==1)
     {
         if( half)
-            for(int k=0; k<nnz;++k)
+            for(size_t k=0; k<nnz;++k)
             {
-                Ax[ii[k]] += aa[k]*x[jj[k]];
-                if( ii[k] != jj[k]) Ax[jj[k]] += (half == 1?conj(aa[k]):aa[k]) *x[ii[k]];
+                R aak=aa[k],caak=conj(aa[k]);
+                Ax[ii[k]] += caak*x[jj[k]];
+                if( ii[k] != jj[k])
+                    Ax[jj[k]] += caak*x[ii[k]];
             }
         else
-            for(int k=0; k<nnz;++k)
+            for(size_t k=0; k<nnz;++k)
+                Ax[ii[k]] += conj(aa[k])*x[jj[k]];
+    }
+    else
+    if( half)
+        for(size_t k=0; k<nnz;++k)
+        {
+            R aak=aa[k],caak=conj(aa[k]);
+            Ax[ii[k]*sAx] += caak*x[jj[k]*sx];
+            if( ii[k] != jj[k])
+                Ax[jj[k]*sAx] += aak*x[ii[k]*sx];
+        }
+    else
+        for(size_t k=0; k<nnz;++k)
+            Ax[ii[k]*sAx] += conj(aa[k])*x[jj[k]*sx];
+    }
+    else // no transp or no complex =>  (no conj)
+    {
+    if(sx==1 && sAx==1)
+    {
+        if( half)
+            for(size_t k=0; k<nnz;++k)
+            {    
+                Ax[ii[k]] += aa[k]*x[jj[k]];
+                if( ii[k] != jj[k])
+                    Ax[jj[k]] += aa[k] *x[ii[k]];
+            }
+        else
+            for(size_t k=0; k<nnz;++k)
                 Ax[ii[k]] += aa[k]*x[jj[k]];
     }
     else
     if( half)
-        for(int k=0; k<nnz;++k)
+        for(size_t k=0; k<nnz;++k)
         {
             Ax[ii[k]*sAx] += aa[k]*x[jj[k]*sx];
-            if( ii[k] != jj[k]) Ax[jj[k]*sAx] += (half == 1?conj(aa[k]):aa[k])*x[ii[k]*sx];
+            if( ii[k] != jj[k])
+                Ax[jj[k]*sAx] += aa[k]*x[ii[k]*sx];
         }
     else
-        for(int k=0; k<nnz;++k)
+        for(size_t k=0; k<nnz;++k)
             Ax[ii[k]*sAx] += aa[k]*x[jj[k]*sx];
+    }
     matmulcpu+=  CPUsecond()-t0;
     return Ax;}
 
