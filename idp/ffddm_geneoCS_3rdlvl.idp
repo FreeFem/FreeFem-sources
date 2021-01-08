@@ -60,8 +60,8 @@ procsuper[i] = i*pr#superchunksize;
 mpiGroup grpsuper(procsuper);
 mpiComm pr#commsuper(mpiCommWorld,grpsuper);
 
-fespace Phglob(Th,P0);
-Phglob partsuper, part;
+fespace pr#Phglob(Th,P0);
+pr#Phglob partsuper, part;
 
 int[int] lpart(Th.nt);
 if (mpirank == 0)
@@ -106,8 +106,8 @@ if (pr#issuper){
   for(int i=0;i<mylpart.n;++i)
   partsuper[][i]=pr#insuperinterior[mylpart[i]];
   
-  matrix Rsuper = interpolate(Phsuper,Phglob);
-  Phglob tmp;
+  matrix Rsuper = interpolate(Phsuper,pr#Phglob);
+  pr#Phglob tmp;
   tmp[] = Rsuper'*partsuper[];
   mpiReduce(tmp[], part[], processor(0,pr#commsuper), mpiSUM);
 }
