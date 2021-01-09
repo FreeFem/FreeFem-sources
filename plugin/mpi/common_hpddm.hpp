@@ -527,6 +527,13 @@ namespace PETSc {
   }
 }
 #endif
+#if defined(MU_SLEPC)
+namespace PETSc {
+  void finalizeSLEPc( ) {
+    SlepcFinalize( );
+  }
+}
+#endif
 
 static void Init_Common() {
     if(!Global.Find("savevtk").NotNull()) {
@@ -547,7 +554,10 @@ static void Init_Common() {
         for(int i = 0; i < argc; ++i)
             argv[i] = (*((*pkarg)[i].getap()))->data();
         HPDDM::Option::get()->parse(argc, argv, mpirank == 0);
-#ifdef PETSCSUB
+#if defined(MU_SLEPC)
+        SlepcInitialize(&argc, const_cast<char***>(&argv), 0, "");
+        ff_atend(PETSc::finalizeSLEPc);
+#elif defined(PETSCSUB)
         PetscInitialize(&argc, const_cast<char***>(&argv), 0, "");
         ff_atend(PETSc::finalizePETSc);
 #endif
