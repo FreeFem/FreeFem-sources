@@ -1018,7 +1018,7 @@ static void Init_Schwarz() {
 #else
     typedef float real;
 #endif
-#ifndef PETSCSUB
+#if !defined(PETSCSUB) && !defined(MU_SLEPC)
     Schwarz::add<HpSchwarz, real, ds>();
 #ifndef DHYPRE
     Schwarz::add<HpSchwarz, std::complex<real>, zs, ds>();
@@ -1026,7 +1026,7 @@ static void Init_Schwarz() {
     // Schwarz::add<HpSchwarz, std::complex<float>, zs>();
 #endif
 #else
-    Schwarz::add<HpSchwarz, PetscScalar, ds>();
+    Schwarz::add<HpSchwarz, PetscScalar, std::is_same<PetscScalar, PetscReal>::value ? ds : zs>();
 #endif
 }
 
