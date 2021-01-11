@@ -942,11 +942,11 @@ Type* changeOperatorSimple(Type* const& A, Type* const& B) {
 template<template<class, char> class Type, class K, char S, char U = S>
 void add() {
     Dcl_Type<Type<K, S>*>(Initialize<Type<K, S>>, DeleteDTOR<Type<K, S>>);
-#ifndef PETSCSUB
+#if !defined(PETSCSUB) && !defined(MU_SLEPC)
     if(std::is_same<K, HPDDM::underlying_type<K>>::value)
 #endif
         zzzfff->Add("schwarz", atype<HpSchwarz<K, S>*>());
-#ifndef PETSCSUB
+#if !defined(PETSCSUB) && !defined(MU_SLEPC)
     map_type_of_map[make_pair(atype<Type<HPDDM::underlying_type<K>, U>*>(), atype<HPDDM::upscaled_type<K>*>())] = atype<Type<K, S>*>();
 #else
     map_type_of_map[make_pair(atype<Type<K, U>*>(), atype<HPDDM::upscaled_type<K>*>())] = atype<Type<K, S>*>();
@@ -985,7 +985,7 @@ void add() {
 
     if(!exist_type<Pair<K>*>()) {
         Dcl_Type<Pair<K>*>(InitP<Pair<K>>, Destroy<Pair<K>>);
-#ifndef PETSCSUB
+#if !defined(PETSCSUB) && !defined(MU_SLEPC)
         map_type_of_map[make_pair(atype<Pair<HPDDM::underlying_type<K>>*>(), atype<HPDDM::upscaled_type<K>*>())] = atype<Pair<K>*>();
 #else
         map_type_of_map[make_pair(atype<Pair<K>*>(), atype<HPDDM::upscaled_type<K>*>())] = atype<Pair<K>*>();
