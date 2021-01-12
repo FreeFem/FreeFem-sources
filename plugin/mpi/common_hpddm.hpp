@@ -39,6 +39,7 @@
 #define MU_ARPACK
 #endif
 #endif
+#endif
 
 #define HPDDM_NUMBERING 'C'
 #undef CBLAS_H
