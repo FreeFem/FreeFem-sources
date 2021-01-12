@@ -32,7 +32,10 @@
 #undef HPDDM_INEXACT_COARSE_OPERATOR
 #define HPDDM_INEXACT_COARSE_OPERATOR 0
 #endif
-#if HPDDM_PRECISION == 2 && defined(HAVE_LIBARPACK)
+#if HPDDM_PRECISION == 2
+#if defined(WITH_slepc) || defined(WITH_slepccomplex)
+#define MU_SLEPC
+#elif defined(HAVE_LIBARPACK)
 #define MU_ARPACK
 #endif
 #endif
