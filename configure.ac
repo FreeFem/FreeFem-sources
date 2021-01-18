@@ -333,7 +333,8 @@ then
 	    AC_MSG_WARN([  get dir of -lg2c  FLIBS :  $FLIBS ])
 	    ;;
 # add FH sep 2006 / modif  2009
-        *gfortran)
+#  remove FH jan 2021 (Idea of P. Jolivet)
+        *gfortran-obsolete)
 	    ff_okkk=0
             for i in $FLIBS; do
 		case $i in
