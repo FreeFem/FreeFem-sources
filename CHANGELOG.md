@@ -1,6 +1,6 @@
 <!--USE THIS TEMPLATE TO COMPLETE THE CHANGELOG-->
 <!--
-## [Version number] - YYYY-MM-DD
+## [Version number]
 ### Added
 -
 
@@ -23,7 +23,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [4.8]
 ### Added
 - Bilaplacian example using Morley FE with PETSc, see `examples/hpddm/bilaplacian-2d-PETSc.edp`
 - Oseen problem preconditioned by PCD, see `examples/hpddm/oseen-2d-PETSc.edp`
@@ -38,9 +38,6 @@ All notable changes to this project will be documented in this file.
 - link of ffglut so change in configure.ac and Makefile.am  LIBS -> FF_LIBS and LIBS become empty 
     to remove default libs 
 - change number of save plot in ffglut from 10 to 20 for O. Pironneau
-### Deprecated
-
-### Removed
 
 ### Fixed
 - some memory leaks
@@ -49,10 +46,6 @@ All notable changes to this project will be documented in this file.
      meshL Tl=segment(10);   fespace Vl(Tl,P1,periodic=[[1],[2]]); 
      meshS Th=square3(10,10,[x*2*pi,y*2*pi]); fespace Vh2(Th,P1,periodic=[[1,x],[3,x],[2,y],[4,y]]);
 - fixed '*' keyboard trick,  to keep  the viewpoint in ffglut or not. 
-     
-  
-
-### Security
 
 ## [4.7-1]
 ### Changed
@@ -371,7 +364,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7-1..develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.8..develop
+[4.8]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7-1..v4.8
 [4.7-1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7...v4.7-1
 [4.7]: https://github.com/FreeFem/FreeFem-sources/compare/v4.6...v4.7
 [4.6]: https://github.com/FreeFem/FreeFem-sources/compare/v4.5...v4.6
