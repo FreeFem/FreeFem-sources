@@ -47,24 +47,24 @@ All notable changes to this project will be documented in this file.
 - Bilaplacian example using Morley FE with PETSc, see `examples/hpddm/bilaplacian-2d-PETSc.edp`
 - Oseen problem preconditioned by PCD, see `examples/hpddm/oseen-2d-PETSc.edp`
 - SLEPc polynomial eigenvalue solver `PEPSolve()`
-- add trivail example to check periodic boundary condition on meshS , meshL  , mesh3 
+- add trivail example to check periodic boundary condition on meshS , meshL  , mesh3
     examples/3d/periodic3.edp	examples/3dSurf/periodicS.edp
-    examples/3dCurve/periodicL.edp	
+    examples/3dCurve/periodicL.edp
 
 ### Changed
 - PETSc version 3.14.2
 - Mmg version 5.5.2
-- link of ffglut so change in configure.ac and Makefile.am  LIBS -> FF_LIBS and LIBS become empty 
-    to remove default libs 
+- link of ffglut so change in configure.ac and Makefile.am  LIBS -> FF_LIBS and LIBS become empty
+    to remove default libs
 - change number of save plot in ffglut from 10 to 20 for O. Pironneau
 
 ### Fixed
 - some memory leaks
 - the periodic boundary condition have wrong before first a sementic level of MeshS and MeshL case.
-     the new syntexe is for example: 
-     meshL Tl=segment(10);   fespace Vl(Tl,P1,periodic=[[1],[2]]); 
+     the new syntexe is for example:
+     meshL Tl=segment(10);   fespace Vl(Tl,P1,periodic=[[1],[2]]);
      meshS Th=square3(10,10,[x*2*pi,y*2*pi]); fespace Vh2(Th,P1,periodic=[[1,x],[3,x],[2,y],[4,y]]);
-- fixed '*' keyboard trick,  to keep  the viewpoint in ffglut or not. 
+- fixed '*' keyboard trick,  to keep  the viewpoint in ffglut or not.
 
 ## [4.7-1]
 ### Changed
@@ -84,8 +84,8 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - new way to build matrix beetween 2d Finite element 2d and Curve finite element to do mortar (Thank to Axel ) , see first example `examples/tutorial/mortar-DN-4-v4.5.edp`
-- add `Ns` normal vector  in R^3 on meshS (normal of the surface) of current point (to day Ns of [x,y,0] plan  is [0,0,-1])  no be compatibe to exterior normal. 
-- add `Tl` tangent vector in R^3 on meshL (tangent vector of the line/curve) of current point 
+- add `Ns` normal vector  in R^3 on meshS (normal of the surface) of current point (to day Ns of [x,y,0] plan  is [0,0,-1])  no be compatible to exterior normal.
+- add `Tl` tangent vector in R^3 on meshL (tangent vector of the line/curve) of current point
 - compile ffmaster / ffslave example under windows (thanks to johann@ifado.de)
 - Boolean parameter `spiltpbedge` in `buildmesh` to split in to edge with two boundary vertices
 - interface to PETSc DMPlex, see `examples/hpddm/DMPlex-PETSc.edp`
@@ -112,25 +112,25 @@ All notable changes to this project will be documented in this file.
 
 ### Deprecated
 - rename `changeNumbering`, `globalNumbering`, `originalNumbering`, `changeOperator`, `destroyRecycling`, and `attachCoarseOperator` to respectively `ChangeNumbering`, `GlobalNumbering`, `OriginalNumbering`, `ChangeOperator`, `DestroyRecycling`, and `AttachCoarseOperator`
-- `Nt` the normal vector of the current (wrong on meshL) use `Ns` or `Tl` 
+- `Nt` the normal vector of the current (wrong on meshL) use `Ns` or `Tl`
 ### Removed
 - `augmentation` routine from the PETSc plugin
 - `MPIF77` variable
 
 ### Fixed
-- lot of mistake in MeshL element add a example o ckeck lot of thing `tutomesh1d.edp`
-- fixed problem of change of mesh when rebuild 2d mesh with builmesh, .... (Thank to P. Jovilet to points this problem)
+- lot of mistake in MeshL element add a example o check lot of thing `tutomesh1d.edp`
+- fixed problem of change of mesh when rebuild 2d mesh with buildmesh, .... (Thank to P. Jovilet to points this problem)
 - missing METIS library when using SuiteSparse compiled by PETSc
 - missing `-fno-stack-protector` when building PETSc on Windows, see https://community.freefem.org/t/error-loading-complex-petsc-slepc-library/370
 - fixed ffglut for the plotting of FE array solution
 - fixed  ffglut bug on MacOS Catalina , draw inn only half windows screen (Apple Bug ???)
-- correct P0VF  finite element 
+- correct P0VF  finite element
 - `abs` function of array
 
 ## [4.6]
 
 ### Added
-- new algorithm for searching element contening a point (more safe) in mesh of type mesh3, meshS, or meshL.
+- new search algorithm for the element containing a point (more safe) in mesh of type mesh3, meshS, or meshL.
 - new function `hasType` to know if a PETSc component has been installed, e.g., `hasType("PC", "hypre")`
 - eigenvalue problems on linear elements, cf. `examples/eigen/LapEigen1DBeltrami.edp` or `examples/hpddm/laplace-beltrami-3d-line-SLEPc.edp`
 - `--download-cmake` in PETSc configure if there is no CMake available
@@ -162,13 +162,13 @@ All notable changes to this project will be documented in this file.
 - correct detection problem in FE type when use a vectorial FE
 - macro concatenation with spaces in arguments
 - correct bug in `plugin/seq/Schur-Complement.cpp`
-- correct ambigity bug in `plugin/seq/bfstream.cpp` (reading real or integer)
-- compilation fo  plugin libff-mmap-semaphore.c under windows
+- correct ambiguity bug in `plugin/seq/bfstream.cpp` (reading real or integer)
+- compilation of plugin libff-mmap-semaphore.c under windows
 
 ## [4.5]
 
 ### Added
-- for windows version: rename under mpi `MUMPS` in `MUMPS_mpi` and in sequentiel in `MUMPS_seq` due to confict between seq. and mpi version so all MUMPS load become `MUMPS_seq` or `MUMPS_mpi`in all examples
+- for windows version: rename under mpi `MUMPS` in `MUMPS_mpi` and in sequentiel in `MUMPS_seq` due to conflict between seq. and mpi version so all MUMPS load become `MUMPS_seq` or `MUMPS_mpi`in all examples
 - correct link edition with fortran mpi under windows juste use the msmpi (just use `libmsmpi.dll` )
 - new `mmg` and `parmmg` (parallel mmg) plugins interfacing mmg5 and parmmg libraries, to replace `mmg3d-v4.0` and `freeyams` (Thanks to P-H Tournier)
 - a true 3d anisotropic mesh adaptation `examples/3d/Laplace-Adapt-aniso-3d.edp`
@@ -229,7 +229,7 @@ All notable changes to this project will be documented in this file.
 - plotMPI function for plotting 3D solutions, problem with serialize
 - variable mes in clean_mesh function
 - correct bug verflow in plugin iohdf5
-- correct problem with buffer iostrean function (buffer must be out of range )
+- correct problem with buffer iostream function (buffer must be out of range )
 - correct i/o vtk and by defaut write at binary format
 - fix an overflow in RT13d FE
 - problem with auto-build of border mesh
