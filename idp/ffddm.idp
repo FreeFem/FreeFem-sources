@@ -27,7 +27,7 @@ macro ffddmsetupPrecondinit(pr)
 IFMACRO(!pr#setupprecondinit)
 
 IFMACRO(pr#localmacroaug,1)
-matrix<pr#prfe#K> pr#CSinterp;
+matrix pr#CSinterp;
 ENDIFMACRO
 
 matrix<pr#prfe#K> pr#AglobEprec;
@@ -41,6 +41,7 @@ int pr#bCM = 0;
 string pr#corr = "none";
 
 matrix<pr#prfe#K> pr#E;
+pr#prfe#K[int,int] pr#E0(1,1);
 matrix<pr#prfe#K> pr#ZCM,pr#ZCMi,pr#ECM;
 
 int pr#si;
@@ -249,7 +250,7 @@ IFMACRO(preffe#K,complex)
 real[int] pr#hpddmDk = preffe#Dk[mpiRank(preffe#prmesh#commddm)].re;
 schwarz<preffe#K> pr#hpddmOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, pr#hpddmDk, scaled = false, communicator = preffe#prmesh#commddm);
 ENDIFMACRO
-set(pr#hpddmOP,sparams="-hpddm_"+Stringification(pr)+"_schwarz_method " +ffddmprecond, prefix=Stringification(pr)+"_");
+set(pr#hpddmOP,sparams="-hpddm_"+Stringification(pr)+"_verbosity "+pr#verbosity+" -hpddm_"+Stringification(pr)+"_schwarz_method " +ffddmprecond, prefix=Stringification(pr)+"_");
 if (preffe#prmesh#inexactCSsplit == 1)
   set(pr#hpddmOP,sparams="-hpddm_"+Stringification(pr)+"_reuse_preconditioner 1", prefix=Stringification(pr)+"_");
 ENDIFMACRO
@@ -268,12 +269,14 @@ ENDIFMACRO
 
 NewMacro pr#localmacrominoverlap() preffe#prmesh#mminoverlap EndMacro
 
+IFMACRO(!pr#prfegeneo)
 IFMACRO(pr#localmacrominoverlap,0)
 NewMacro pr#prfegeneo() preffe EndMacro
 ENDIFMACRO
 
 IFMACRO(pr#localmacrominoverlap,1)
 NewMacro pr#prfegeneo() preffe#Aug EndMacro
+ENDIFMACRO
 ENDIFMACRO
 
 ffddmgenerateOperatorfunctions(pr,preffe)
@@ -311,8 +314,13 @@ if (preffe#prmesh#isincomm)
 
 	IFMACRO(!pr#bem)
   if (pr#bdirect || bseq) {
+    IFMACRO(pr#myOperator)
+    pr#myOperator(pr#Aglobal, preffe#prmesh#Thglob, preffe#Vhglob)
+    ENDIFMACRO
+    IFMACRO(!pr#myOperator)
     Varf(vaglobal,preffe#prmesh#Thglob,preffe#Vhglob)
     pr#Aglobal = vaglobal(preffe#Vhglob,preffe2#Vhglob,sym=vsym*(!pr#isrect),tgv=vtgvelim);
+    ENDIFMACRO
   }
   
   preffe#K[int] rhsFull(1), rhs(1);
@@ -345,10 +353,15 @@ if (preffe#prmesh#isincomm)
         Varf(vPb, preffe#prmesh#AugThi, preffe#AugVhi)
 
         if (!pr#isrect) {
+          IFMACRO(pr#myOperator)
+          pr#myOperator(pr#aRd[i], preffe#prmesh#AugThi, preffe#AugVhi)
+          ENDIFMACRO
+          IFMACRO(!pr#myOperator)
           if (preffe#prmesh#inexactCSsplit > 1)
             pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi,sym=vsym,tgv=vtgvelim);
           else
             pr#aRd[i] = vPb(preffe#AugVhi, preffe#AugVhi,sym=vsym,tgv=vtgv);
+          ENDIFMACRO
           renumbering(pr#aRd[i], preffe#Auginterp, eps=-1);
         }
         else {
@@ -431,33 +444,18 @@ if (pr#prfe#prmesh#isincomm)
 		pr#prfe#prmesh#Thi = pr#prfe#prmesh#aTh[i];
 
 		if (pr#prfe#prmesh#Thi.nt > 0) {
-		  NewMacro localmacroaug pr#prfe#prmesh#buildAug EndMacro
-		  IFMACRO(localmacroaug,1)
-		  pr#prfe#prmesh#AugThi = pr#prfe#prmesh#AugaTh[i];
-		  ENDIFMACRO
-		  IFMACRO(localmacroaug,0)
-		  pr#prfe#prmesh#meshN pr#prfe#prmesh#AugThi = pr#prfe#prmesh#Thi + pr#prfe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
-		  fespace pr#prfe#AugVhi(pr#prfe#prmesh#AugThi, pr#prfe#fPk);
-		  int[int] n2o = (0:pr#prfe#prmesh#Thi.nt-1);
-		  int[int] renum = restrict(pr#prfe#Vhi, pr#prfe#AugVhi,n2o);
-		  int[int] Ic = (0:pr#prfe#Vhi.ndof-1);
-		  real[int] Kc(pr#prfe#Vhi.ndof);
-		  Kc = 1;
-		  matrix pr#prfe#Auginterp = [Ic,renum,Kc];
-		  pr#prfe#Auginterp.resize(pr#prfe#Vhi.ndof, pr#prfe#AugVhi.ndof);
-		  ENDIFMACRO
-
-		  rhsFull.resize(pr#prfe#AugVhi.ndof);
-		  rhs.resize(pr#prfe#Vhi.ndof);
-
 		  if (pr#prec == "oras" || pr#prec == "soras"){
 		    IFMACRO(!pr#bem)
 		    VarfPrec(RobinInt,pr#prfe#prmesh#Thi,pr#prfe#Vhi)
-
+		    IFMACRO(pr#myPrecond)
+		    pr#myPrecond(pr#aR[i], pr#prfe#prmesh#Thi, pr#prfe#Vhi)
+		    ENDIFMACRO
+		    IFMACRO(!pr#myPrecond)
 		    if (pr#prfe#prmesh#inexactCSsplit > 1)
 		      pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,sym=vsym,tgv=vtgvelim);
 		    else
 		      pr#aR[i] = RobinInt(pr#prfe#Vhi,pr#prfe#Vhi,sym=vsym,tgv=vtgv);
+		    ENDIFMACRO
 		    ENDIFMACRO
 		    IFMACRO(pr#bem,1)
 		    cout << "TODO" << endl;
@@ -465,12 +463,33 @@ if (pr#prfe#prmesh#isincomm)
 		    ENDIFMACRO
 		  }
 		  else if (pr#prec == "ras" || pr#prec == "asm") {
+		    NewMacro localmacroaug pr#prfe#prmesh#buildAug EndMacro
+		    IFMACRO(localmacroaug,1)
+		    pr#prfe#prmesh#AugThi = pr#prfe#prmesh#AugaTh[i];
+		    ENDIFMACRO
+		    IFMACRO(localmacroaug,0)
+		    pr#prfe#prmesh#meshN pr#prfe#prmesh#AugThi = pr#prfe#prmesh#Thi + pr#prfe#prmesh#aThborder[i]; /* local mesh augmented of one layer to define local Dirichlet matrices without the global matrix*/
+		    fespace pr#prfe#AugVhi(pr#prfe#prmesh#AugThi, pr#prfe#fPk);
+		    int[int] n2o = (0:pr#prfe#prmesh#Thi.nt-1);
+		    int[int] renum = restrict(pr#prfe#Vhi, pr#prfe#AugVhi,n2o);
+		    int[int] Ic = (0:pr#prfe#Vhi.ndof-1);
+		    real[int] Kc(pr#prfe#Vhi.ndof);
+		    Kc = 1;
+		    matrix pr#prfe#Auginterp = [Ic,renum,Kc];
+		    pr#prfe#Auginterp.resize(pr#prfe#Vhi.ndof, pr#prfe#AugVhi.ndof);
+		    ENDIFMACRO
+
 		    IFMACRO(!pr#bem)
 		    VarfPrec(vPb, pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)
+		    IFMACRO(pr#myPrecond)
+		    pr#myPrecond(pr#aR[i], pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)
+		    ENDIFMACRO
+		    IFMACRO(!pr#myPrecond)
 		    if (pr#prfe#prmesh#inexactCSsplit > 1)
 		      pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi,sym=vsym,tgv=vtgvelim);
 		    else
 		      pr#aR[i] = vPb(pr#prfe#AugVhi, pr#prfe#AugVhi,sym=vsym,tgv=vtgv);
+		    ENDIFMACRO
 		    ENDIFMACRO
 		    IFMACRO(pr#bem,1)
 		    VarfPrec(vPb, pr#prfe#prmesh#AugThi, pr#prfe#AugVhi)
@@ -480,7 +499,7 @@ if (pr#prfe#prmesh#isincomm)
 		    pr#aR[i] = mdense;
 		    ENDIFMACRO
 
-		    renumbering(pr#aR[i], pr#prfe#Auginterp, rhsFull, rhs, eps=-1);
+		    renumbering(pr#aR[i], pr#prfe#Auginterp, eps=-1);
 		  }
 		  else if (pr#prec != "none")
 		    assert(0);

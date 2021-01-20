@@ -1477,9 +1477,13 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
     v=vv;
     t=tt;
     b=bb;
-    if(gtree) delete gtree;
-    gtree=0;
-//    BuildGTree();
+    // rebuild all
+    BuildBound();
+    delete TheAdjacencesLink; TheAdjacencesLink=0; BuildAdj();
+    delete bnormalv; bnormalv=0; Buildbnormalv();
+    delete ElementConteningVertex; ElementConteningVertex=0; BuildjElementConteningVertex();
+    delete gtree; gtree=0; BuildGTree();
+
     delete []ind_nv;
     delete []ind_nt;
     delete []ind_nbe;

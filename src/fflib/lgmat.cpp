@@ -558,14 +558,6 @@ AnyType SetMatrix_Op<R>::operator()(Stack stack)  const
 }
 
 
-/*
-template<int init>
-AnyType SetMatrixInterpolation(Stack,Expression ,Expression);
-template<int init>
-AnyType SetMatrixInterpolation3(Stack,Expression ,Expression);
-template<int init>
-AnyType SetMatrixInterpolationS(Stack,Expression ,Expression);
-*/
 template<class R>
 void BuildCombMat(MatriceMorse<R> & mij,const KNM_<R> & A, int ii00=0,int jj00=0,R coef=R(1.),bool cnj=false)
 {
@@ -1559,56 +1551,55 @@ AnyType SetMatrixInterpolationT1(Stack stack,Expression emat,Expression einter,i
   ffassert(einter);
   pfesT1 * pUh = GetAny< pfesT1 * >((* mi->a)(stack));
   FESpaceT1 * Uh = **pUh;
-  int NUh =Uh->N;
-    
-  int* data = new int[4 + NUh];
-  data[0]=mi->arg(0,stack,false); // transpose not
-  data[1]=mi->arg(1,stack,(long) op_id); ; // get just value
-  data[2]=mi->arg(2,stack,false); ; // get just value
-  data[3]=mi->arg(3,stack,0L); ; // get just value
-  KN<long> U2Vc;
-  U2Vc= mi->arg(4,stack,U2Vc); ;
-  if( mi->c==0)
-  { // old cas
-    pfesT2 * pVh = GetAny<  pfesT2 * >((* mi->b)(stack));
-    FESpaceT2 * Vh = **pVh;
-    int NVh =Vh->N;
-
-    for(int i=0;i<NUh;++i)
-    data[4+i]=i;//
-    for(int i=0;i<min(NUh,(int) U2Vc.size());++i)
-    data[4+i]= U2Vc[i];//
-    if(verbosity>3)
-    for(int i=0;i<NUh;++i)
-    {
-      cout << "The Uh componante " << i << " -> " << data[4+i] << "  Componante of Vh  " <<endl;
+  if(Uh) {
+    int NUh =Uh->N;
+    int* data = new int[4 + NUh];
+    data[0]=mi->arg(0,stack,false); // transpose not
+    data[1]=mi->arg(1,stack,(long) op_id); ; // get just value
+    data[2]=mi->arg(2,stack,false); ; // get just value
+    data[3]=mi->arg(3,stack,0L); ; // get just value
+    KN<long> U2Vc;
+    U2Vc= mi->arg(4,stack,U2Vc); ;
+    if( mi->c==0)
+    { // old cas
+      pfesT2 * pVh = GetAny<  pfesT2 * >((* mi->b)(stack));
+      FESpaceT2 * Vh = **pVh;
+      if(Vh) {
+        int NVh =Vh->N;
+        for(int i=0;i<NUh;++i)
+        data[4+i]=i;//
+        for(int i=0;i<min(NUh,(int) U2Vc.size());++i)
+        data[4+i]= U2Vc[i];//
+        if(verbosity>3)
+        for(int i=0;i<NUh;++i)
+        {
+          cout << "The Uh componante " << i << " -> " << data[4+i] << "  Componante of Vh  " <<endl;
+        }
+        for(int i=0;i<NUh;++i)
+        if(data[4+i]>=NVh)
+        {
+          cout << "The Uh componante " << i << " -> " << data[4+i] << " >= " << NVh << " number of Vh Componante " <<endl;
+          ExecError("Interpolation incompability beetween componante ");
+        }
+        if(!init) sparse_mat->init();
+        sparse_mat->typemat=0;//(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+        sparse_mat->A.master(buildInterpolationMatrixT<FESpaceT1,FESpaceT2>(*Uh,*Vh,data));	  //  sparse_mat->A.master(new MatriceMorse<R>(*Uh,*Vh,buildInterpolationMatrix,data));
+      }
     }
-    for(int i=0;i<NUh;++i)
-    if(data[4+i]>=NVh)
-    {
-      cout << "The Uh componante " << i << " -> " << data[4+i] << " >= " << NVh << " number of Vh Componante " <<endl;
-      ExecError("Interpolation incompability beetween componante ");
+    else
+    {  // new cas mars 2006
+      KN_<double>  xx = GetAny<  KN_<double>  >((* mi->b)(stack));
+      KN_<double>  yy = GetAny<  KN_<double>  >((* mi->c)(stack));
+      KN_<double>  zz = GetAny<  KN_<double>  >((* mi->d)(stack));
+      ffassert( xx.N() == yy.N());
+      ffassert( xx.N() == zz.N());
+      ffassert(Uh);
+      if(!init) sparse_mat->init();
+      sparse_mat->typemat=0;//(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
+      sparse_mat->A.master(buildInterpolationMatrixT1<FESpaceT1>(*Uh,xx,yy,zz,data));
     }
-
-    ffassert(Vh);
-    ffassert(Uh);
-    if(!init) sparse_mat->init();
-    sparse_mat->typemat=0;//(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
-    sparse_mat->A.master(buildInterpolationMatrixT<FESpaceT1,FESpaceT2>(*Uh,*Vh,data));	  //  sparse_mat->A.master(new MatriceMorse<R>(*Uh,*Vh,buildInterpolationMatrix,data));
+    delete [] data;
   }
-  else
-  {  // new cas mars 2006
-    KN_<double>  xx = GetAny<  KN_<double>  >((* mi->b)(stack));
-    KN_<double>  yy = GetAny<  KN_<double>  >((* mi->c)(stack));
-    KN_<double>  zz = GetAny<  KN_<double>  >((* mi->d)(stack));
-    ffassert( xx.N() == yy.N());
-    ffassert( xx.N() == zz.N());
-    ffassert(Uh);
-    if(!init) sparse_mat->init();
-    sparse_mat->typemat=0;//(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
-    sparse_mat->A.master(buildInterpolationMatrixT1<FESpaceT1>(*Uh,xx,yy,zz,data));
-  }
-  delete [] data;
   return sparse_mat;
 }
 

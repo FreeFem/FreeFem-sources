@@ -27,6 +27,7 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [stokes-block-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/stokes-block-2d-PETSc.edp)                               | Stokes equation defined as a block system with four matrices (fieldsplit)         |
 | [stokes-fieldsplit-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/stokes-fieldsplit-2d-PETSc.edp)                     | Block preconditioner (fieldsplit)                                                 |
 | [stokes-fieldsplit-3d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/stokes-fieldsplit-3d-PETSc.edp)                     | &nbsp;                                                                            |
+| [oseen-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/oseen-2d-PETSc.edp)                                             | Oseen problem preconditioned by Pressure Convection--Diffusion (PCD)              |
 | [maxwell-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/maxwell-2d-PETSc.edp)                                         | Direct LU/Cholesky                                                                |
 | [maxwell-3d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/maxwell-3d-PETSc.edp)                                         | Multigrid method                                                                  |
 | [maxwell-mg-3d-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/maxwell-mg-3d-PETSc-complex.edp)                   | Two-grid preconditioner                                                           |
@@ -35,6 +36,7 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [helmholtz-coupled-2d-PETSc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-coupled-2d-PETSc-complex.edp)     | FEM coupled with BEM in a MatNest using a block preconditioner (fieldsplit)       |
 | [PtAP-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/PtAP-2d-PETSc.edp)                                               | Parallel interpolation on non-matching grids + P' A P operation                   |
 | [restriction-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/restriction-2d-PETSc.edp)                                 | Coupled problems with one being defined on a restriction of the mesh of the other |
+| [bilaplace-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/bilaplace-2d-PETSc.edp)                                     | Bilaplacian using Morley finite element                                           |
 
 ### Nonlinear problems
 | Filename                                                                                                                                                          | Comments (preconditioners, numerical schemes)                                 |

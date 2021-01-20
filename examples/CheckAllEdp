@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
   red='[0;31m' # Red.
   grn='[0;32m' # Green.
   lgn='[1;32m' # Light green.

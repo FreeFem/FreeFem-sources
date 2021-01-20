@@ -1046,8 +1046,39 @@ class FINDLOCALMIN_P1 : public OneOperator {
   }
 };
 
+R3 *Curve2(Stack stack, const KNM_< double > &b, const long &li0, const long &li1, const double &ss,
+          long *const &pi) {
+  assert(b.N( ) ==2 );
+  int i0 = li0, i1 = li1, im;
+  if (i0 < 0) {
+    i0 = 0;
+  }
+
+  if (i1 < 0) {
+    i1 = b.M( ) - 1;
+  }
+
+  double lg =  (i1-i0);
+  R3 Q;
+  double s = ss * lg;
+  i1 = min(i1, i0+1+(int) s );
+  i0 = i1-1;
+  R2 A(b(0, i0), b(1, i0));
+  R2 B(b(0, i1), b(1, i1));
+  double l1 =  i1 - s;
+  double l0 =  s - i0;
+  Q = (l1 * A + l0 * B) / (l1 + l0);
+
+  if (pi) {
+    *pi = i0;
+  }
+
+  R3 *pQ = Add2StackOfPtr2Free(stack, new R3(Q));
+  return pQ;
+}
 R3 *Curve(Stack stack, const KNM_< double > &b, const long &li0, const long &li1, const double &ss,
           long *const &pi) {
+  if(b.N( )==2) return Curve2(stack,b,li0,li1,ss,pi);
   assert(b.N( ) >= 3);
   int i0 = li0, i1 = li1, im;
   if (i0 < 0) {

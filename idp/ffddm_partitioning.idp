@@ -13,7 +13,7 @@ if (prmesh#isincomm)
     int ssplit = max(prmesh#inexactCSsplit,1);
 
     prmesh#overlap = sizeoverlaps*ssplit;
-    
+
     if (prmesh#npart == 1) {
       if (ffddmsplit*ssplit == 1)
         prmesh#Thi = Th;
@@ -176,7 +176,8 @@ if (prmesh#isincomm)
 
         IFMACRO(!prmesh#partcubes)
         prmesh#Thi = trunc(prmesh#Thi, suppSmooth> 0.501, label = ffddminterfacelabel);
-        borderName = trunc(overlapName, (suppSmooth > (sizeoverlaps - 0.999) / (2 * sizeoverlaps)) && (suppSmooth < 0.501), label = (abs(ffddminterfacelabel) + 1) * 100);
+        if (prmesh#Thi.nt != overlapName.nt)
+          borderName = trunc(overlapName, (suppSmooth > (sizeoverlaps - 0.999) / (2 * sizeoverlaps)) && (suppSmooth < 0.501), label = (abs(ffddminterfacelabel) + 1) * 100);
         ENDIFMACRO
       }
       else {
@@ -656,6 +657,39 @@ func int prfe#updatematrix(matrix<scalar>& m, bool scale)
   return 0;
 }
 
+func int prfe#updatematrix(scalar[int,int]& m, bool scale)
+{
+  if (!prmsh#excluded)
+  {
+    scalar[int,int][int] rest(prmsh#arrayIntersection.n);
+    scalar[int,int][int] restSend(prmsh#arrayIntersection.n);
+
+    mpiRequest[int] rq(prmsh#numberIntersection*2);
+    for(int jj=0;jj<prmsh#numberIntersection;++jj) {
+      int[int] tI(1), tJ(1);
+      scalar[int] tK(1);
+      [tI,tJ,tK] = prfe#restrictionIntersection[jj];
+      if (tK[tK.n-1] == 0) tJ.resize(tJ.n-1);
+      restSend[jj].resize(tJ.n, tJ.n);
+      rest[jj].resize(tJ.n, tJ.n);
+      for [i,j,aij : restSend[jj]] aij = m(tJ[i],tJ[j]);
+      Isend(processor(prmsh#arrayIntersection[jj],prmsh#commddm,rq[jj*2]),restSend[jj]);
+    }
+    for(int jj=0;jj<prmsh#numberIntersection;++jj)
+      Irecv(processor(prmsh#arrayIntersection[jj],prmsh#commddm,rq[jj*2+1]),rest[jj]);
+    for(int jj=0;jj<prmsh#numberIntersection*2;++jj)
+      int k = mpiWaitAny(rq);
+    for(int jj=0;jj<prmsh#numberIntersection;++jj) {
+      int[int] tI(1), tJ(1);
+      scalar[int] tK(1);
+      [tI,tJ,tK] = prfe#restrictionIntersection[jj];
+      if (tK[tK.n-1] == 0) tJ.resize(tJ.n-1);
+      for [i,j,aij : rest[jj]] m(tJ[i],tJ[j]) += aij;
+    }
+  }
+  return 0;
+}
+
 IFMACRO (prfe#myscalprod)
 prfe#myscalprod
 ENDIFMACRO
@@ -721,7 +755,7 @@ if (!bpara && ffddmverbosity)
 cout << "["+Stringification(prfe)+"] (seqddm) ndof = " << prfe#Ndofglobal << endl;
 
 if (prmsh#isincomm && !prmsh#excluded)
-{	
+{
   for(int ii=0;ii<prmsh#npart;++ii)
   if ((!bpara) || (ii == mpiRank(prmsh#commddm))) {
     prmsh#Thi = prmsh#aTh[ii];
@@ -1029,7 +1063,12 @@ int prmesh#AugbinexactCS = 0;
 int prmesh#AugbinexactgeneoCS = 0;
 int prmesh#AugpCS = ffddmpCS;
 int prmesh#Augexclude = ffddmexclude;
+IFMACRO(!prmesh#Augmminoverlap)
+NewMacro prmesh#Augmminoverlap()0 EndMacro
+ENDIFMACRO
 ffddminitDmeshf(prmesh#Aug,Th,comm)
+
+prmesh#AugThglob = prmesh#Thglob;
 IFMACRO (!prmesh#AugbuildAug)
 NewMacro prmesh#AugbuildAug()0 EndMacro
 ENDIFMACRO

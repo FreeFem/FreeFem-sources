@@ -49,7 +49,7 @@ $(SRCDIR)/FAIT: $(SRCDIR)/tag-tar
 	  CC='$(CC)' CFLAGS='$(CFLAGS) -I$(INCMUMPS)' \
 	  F77='$(FC)' FFLAGS='$(FCFLAGS)' \
 	  FLIBS='$(FLIBS)' \
-	  CXXCPP='$(CXXCPP)'  CPP='$(CXXCPP)' \
+	  CXXCPP='$(CXXCPP)'  CPP='$(CXXCPP)' MPICC='' MPICXX='' MPIFC='' \
 	 --with-blas-lib='$(LIBBLAS)' --with-lapack='$(LIBLAPACK)' --prefix='$(DOWNLOADFF)'
 	 -rm -rf ../include/coin
 	touch $(SRCDIR)/FAIT	

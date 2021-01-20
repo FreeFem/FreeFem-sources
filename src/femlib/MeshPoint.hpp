@@ -728,7 +728,6 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         N=R3();
         Nt = TL->TangenteUnitaire();
         VF=0;
-        int ll[3],kk(0);
         if ( P_Hat.x<1.e-6) label=0;
         else
             label=-1;// to say

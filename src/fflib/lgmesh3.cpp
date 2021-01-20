@@ -65,14 +65,19 @@ map<pair<int,int>,int>::iterator closeto(map<pair<int,int>,int> & m, pair<int,in
     S[2]=3-S[0]-S[1];
     assert(I[2]==J[3-S[0]-S[1]]);
 }
+
 template<class Mesh>
-bool BuildPeriodic( 
+bool BuildPeriodic3(
 		   int nbcperiodic ,
 		   Expression *periodic,
 		   const Mesh &Th,Stack stack,
 		   KN<int> & ndfe) 
-{ 
-    typedef typename Mesh::BorderElement BE;
+{
+   // typedef Mesh3 Mesh;
+    typedef  typename Mesh::BorderElement BE;
+    const int dhat = BE::RdHat::d; // Nb parametre ..
+    const int dhat1 = dhat+1, dhat2= dhat1*2;
+    const int benv=BE::nv;
     /*
      build numbering of vertex form 0 to nbdfv-1
      and build numbering  of  edge form 0 to nbdfe-1
@@ -94,7 +99,7 @@ bool BuildPeriodic(
 	MeshPoint *mp=MeshPointStack(stack),smp=*mp;   
 	int n= nbcperiodic;
 	if (verbosity >2)
-	    cout << " Nb of pair of periodic conditions (3d) : = " << n <<  endl;
+	    cout << " Nb of pair of periodic conditions (3d) : = " << n << " dhat: " << dhat << " BE::nv:  " << BE::nv<< endl;
 	int * link1=0;
 	int * link2=0;
 	KN<int*> plk1(n),plk2(n);
@@ -111,13 +116,13 @@ bool BuildPeriodic(
 	  {
 	      nblink1=0,     nblink2=0;
 	      plink1=link1,  plink2=link2;
-	      for (int ip=0, k=0;ip<n;ip++,k+=6)
+	      for (int ip=0, k=0;ip<n;ip++,k+=dhat2)
 		{
 		    int label1=GetAny<long>((*periodic[k+0])(stack));
-		    int label2=GetAny<long>((*periodic[k+3])(stack));
+		    int label2=GetAny<long>((*periodic[k+dhat1])(stack));
 		    lab1[ip]=label1;
 		    lab2[ip]=label2;
-		    
+                    if(verbosity>9)cout << " Periodic3 : "<<label1 << " " << label2 << " " << k << endl;
 		    int l1=nblink1;
 		    int l2=nblink2;
 		    plk1[ip]= plink1;
@@ -152,45 +157,49 @@ bool BuildPeriodic(
         if ( nblink1 >0) 
 	  {
 	      int indfe=0;
-	      for (int ip=0, k=0;ip<n;ip++,k+=6)
+	      for (int ip=0, k=0;ip<n;ip++,k+=dhat2)
 		{
 		    map<pair<int,int>,int> m;
-		    const int kkx1=1,kky1=2,kkx2=4,kky2=5;
+		    const int kkx1=1,kky1=2,kkx2=dhat1+1,kky2=dhat1+2;
 		    int label1=lab1[ip],label2=lab2[ip];
 		    int n1=nlk1[ip],n2=nlk2[ip];
 		    int *pke1=plk1[ip], *pke2=plk2[ip];
 		    //int oip=pke1-link1;
-		    typedef HashTable<SortArray<int,3>,int> HTable;
-		    typedef HTable::iterator HTiterator;
-		    HashTable<SortArray<int,3>,int> table1(n1,Th.nv); //  Table of face lab 1
-		    R2 P[3];
+		    typedef HashTable<SortArray<int,BE::nv>,int> HTable;
+		    typedef typename HTable::iterator HTiterator;
+		    HashTable<SortArray<int,BE::nv>,int> table1(n1,Th.nv); //  Table of face lab 1
+		    R2 P[BE::nv];
 		    R2 Pmin(infty,infty),Pmax(-infty,-infty);
 		    double hmn=infty;
-		    int iface[3];
+		    int iface[BE::nv];
 		    if (verbosity >1)
 			cout << "  --Update: periodic  couple label1= " << label1 
 			     << ", n faces= " << n1 << "; "
-			<< ", label2= " << label2<<  ", n faces= " << n2 <<endl; 
+			<< ", label2= " << label2<<  ", n BC= " << n2 <<endl;
 		    if (n1 != n2) 
-		      ExecError("periodic 3D BC:  the number of set of faces is not the same ");
-		    //  compute the hmn size to find common point 
+		      ExecError("periodic BC:  the number of set of BE is not the same ");
+		    //  compute the hmn size to find common point
+                    int nvbe = BE::nv;
+                    ffassert(nvbe == dhat+1);
 		    for (int i1=0;i1<n1;i1++)
 		      {
 			  const BE & e =Th.be(pke1[i1]);
 			  
 			  assert(e.lab==label1) ;
 			  {   
-			      for(int ee=0;ee<3;++ee)
+			      for(int ee=0;ee<nvbe;++ee)
 				{
 				    iface[ee]=Th(e[ee]);
 				    mp->set(e[ee].x,e[ee].y,e[ee].z);
-				    P[ee].x=GetAny<double>((*periodic[k+kkx1])(stack));
-				    P[ee].y=GetAny<double>((*periodic[k+kky1])(stack));
+                                    P[ee].x=0;
+                                    P[ee].y=0;
+                                    if(dhat>=1) P[ee].x=GetAny<double>((*periodic[k+kkx1])(stack));
+				    if(dhat==2) P[ee].y=GetAny<double>((*periodic[k+kky1])(stack));
 				}
 			      
-			      HTiterator hte=table1.add(SortArray<int,3>(iface),pke1[i1]);
+                              HTiterator hte=table1.add(SortArray<int, BE::nv>(iface),pke1[i1]);
 			      ffassert(hte-table1.begin() == i1);
-			      for(int ee=0,eo=2;ee<3;eo=ee++)
+                              for(int ee=0,eo=BE::nv-1;ee< BE::nv;eo=ee++)
 				{
 				    double l = (P[ee]-P[eo]).norme2();
 				    Pmin=Minc(Pmin,P[ee]);
@@ -202,14 +211,15 @@ bool BuildPeriodic(
 			  }                                
 		      }
 		    hmn=sqrt(hmn);
-		    ffassert(hmn>1.0e-20);
+                    if(!dhat) hmn = 8; // all point a same ..
+		    ffassert( hmn>1.0e-20);
 		    double coef = 8/hmn;
 		    double x0 = Pmin.x;
 		    double y0 = Pmin.y;
-		    if (verbosity > 2)
+		    if (verbosity > 2 )
 			cout << "  --Update: periodic " << Pmin << " " << Pmax << " " << " h=" << hmn 
 			<< " ,  coef = "<< coef << " / " << (Pmax-Pmin).norme2()*coef*coef << endl;
-		    ffassert(!n1 || (coef>1e-10 && (Pmax-Pmin).norme2()*coef*coef < 1.e14 )); // correct  FH mars 2013 
+		    ffassert(!n1 || (coef>1e-10 && (Pmax-Pmin).norme2()*coef*coef < 1.e14 )); // correct  FH mars 2013
 		    
 		    //  map construction ----
 		    for (int i1=0;i1<n1;i1++)
@@ -217,14 +227,15 @@ bool BuildPeriodic(
 			  int ie=pke1[i1];
 			  const BE & e =Th.be(ie);
 			  assert (e.lab==label1);
-			  for (int ne=0;ne<3;ne++)
+                          for (int ne=0;ne< BE::nv;ne++)
 			    {
 				int kv=Th(e[ne]);
 				
 				// cout << ne << " " << kv << " " << " " << e[ne] << " ";
 				mp->set(e[ne].x,e[ne].y,e[ne].z);
-				double xx=GetAny<double>((*periodic[k+kkx1])(stack));
-				double yy=GetAny<double>((*periodic[k+kky1])(stack));
+                                double xx=0, yy=0;
+                                if(dhat>=1) xx=GetAny<double>((*periodic[k+kkx1])(stack));
+                                if(dhat==2) yy=GetAny<double>((*periodic[k+kky1])(stack));
 				pair<int,int> ij((int) ((xx-x0)*coef),(int) ((yy-y0)*coef));				    
 				map<pair<int,int>,int>::iterator im=closeto(m,ij);
 				if (im==m.end())
@@ -251,17 +262,18 @@ bool BuildPeriodic(
 			{
 			    if (verbosity >50)
 				cout << ie2 << " : " <<Th(e[0]) << " " << Th(e[1]) << " " << Th(e[2]) << ":: ";
-			    R2 P[3];
-			    pair<int,int> I[3];
+			    R2 P[BE::nv];
+			    pair<int,int> I[BE::nv];
 			    map<pair<int,int>,int>::iterator im;
-			    int i2to1[3];
+			    int i2to1[BE::nv];
 			    
-			    for(int ee=0;ee<3;++ee)
+			    for(int ee=0;ee<BE::nv;++ee)
 			      {
 				  mp->set(e[ee].x,e[ee].y,e[ee].z);
-				  
-				  P[ee].x=GetAny<double>((*periodic[k+kkx2])(stack));
-				  P[ee].y=GetAny<double>((*periodic[k+kky2])(stack));
+                                  P[ee].x =0;
+                                  P[ee].y =0;
+                                  if(dhat>=1) P[ee].x=GetAny<double>((*periodic[k+kkx2])(stack));
+                                  if(dhat>=2) P[ee].y=GetAny<double>((*periodic[k+kky2])(stack));
 				  I[ee].first = int((P[ee].x-x0)*coef);
 				  I[ee].second= int((P[ee].y-y0)*coef);
 				  im=closeto(m,I[ee]);
@@ -276,11 +288,11 @@ bool BuildPeriodic(
 			      }
 			    
 			    //int ie1=-1;
-			    SortArray<int,3> sf(i2to1);
+			    SortArray<int,BE::nv> sf(i2to1);
 			    HTiterator ht=table1.find(sf);
 			    if( ! ht ) {
 				err++;
-				cerr << " missing face " << ie2 << " " << sf <<  endl;
+				cerr << " missing Border element : " << ie2 << " " << sf <<  endl;
 			    }
 			    else
 			      {
@@ -288,15 +300,17 @@ bool BuildPeriodic(
 				  int ie1 = ht->v; 
 				  assert(ie1>=0  );
 				  const BE & eo =Th.be(ie1);
-				  int fo[3]={Th(eo[0]),Th(eo[1]),Th(eo[2])};
+                                  int fo[BE::nv];
+                                  for(int i=0;i<BE::nv;++i)
+                                    fo[i]=Th(eo[i]);;
 				  
-				  int np1= NumPerm1<3>(fo); //  number of 
-				  int np2= NumPerm1<3>(i2to1);
-				  ndfe[indfe++]=ie1*8+np1; 
+				  int np1= NumPerm1<BE::nv>(fo); //  number of
+				  int np2= NumPerm1<BE::nv>(i2to1);
+				  ndfe[indfe++]=ie1*8+np1; // 8 c'est quoi !!!!! a verifier F. Hecht ... 18/12/2020 ...
 				  ndfe[indfe++]=ie2*8+np2; 
-				  int p1[3],p2[3];
-				  SetNumPerm<3>(np1,p1);
-				  SetNumPerm<3>(np2,p2);
+				  int p1[BE::nv],p2[BE::nv];
+				  SetNumPerm<BE::nv>(np1,p1);
+				  SetNumPerm<BE::nv>(np2,p2);
 				  if(verbosity>50)
 				      cout <<"  " << ie1 << " ==  " << ie2  << ":  " <<  fo[p1[0]] << " " << fo[p1[1]] << " " << fo[p1[2]] << " == " 
 				       << i2to1[p2[0]] << " " << i2to1[p2[1]] << " " << i2to1[p2[2]]  << "  e ="
@@ -318,64 +332,10 @@ bool BuildPeriodic(
 	      *mp = smp;
 	      ffassert(indfe==ndfe.size());
 
-	      /*  rm  FH :
-	      for (int i=0;i<Th.nbe;i++)
-		  ndfe[i]=i;// circular link
-	      for (int i=0;i<Th.nv;i++)
-		  ndfv[i]=i;// circular link
-	      for (int i=0;i<nblink1;i++)
-		{
-		    int ie1=-link1[i]/8;
-		    int ie2=link2[i];
-		    int np=-link1[i]%8;
-		    int p[3]={np%3,np/3,3-np%3-np/3};
-		    if (verbosity >50)
-			cout << " face " << ie1 << " <==> " << ie2 << endl;
-		    ffassert(ie1!=ie2);
-		    if(!InCircularList(ndfe,ie1,ie2))   // merge of two list 
-			Exchange(ndfe[ie1],ndfe[ie2]);
-		    int kv1[3],kv2[3];
-		    // kv1 == kv2 (p) 
-		    const BE & e1=Th.be(ie1), &e2=Th.be(ie2);
-		    for (int ee=0;ee<3;ee++)
-		      {
-			  kv1[ee] =Th(e1[ee]);
-			  kv2[ee] =Th(e2[ee]);		           
-		      }
-		    for (int ee=0;ee<3;ee++)
-		      {
-			  int iv1=kv1[ee];
-			  int iv2=kv2[p[ee]];
-			  //  l'orientation de la face 2 / face 1  est  dans p.
-			  
-			  if (!InCircularList(ndfv,iv1,iv2)) {  // merge of two list 
-			      Exchange(ndfv[iv2],ndfv[iv1]);
-			      
-			      if (verbosity >50)
-				{ 
-				    int ii=iv1,l=1;
-				    while ( (ii=ndfv[ii]) != iv1 && l++<10) (void) 0;
-				    if( (verbosity >50) || ( l > 2 && verbosity >40)) 
-				     cout << l << "  vertex " << iv1 <<  "<==> " << iv2 << " list : " << iv1 << " " << Th(iv1) << " <=> " << Th(iv2);
-				    int i=iv1,k=0;
-				    while ( (i=ndfv[i]) != iv1 && k++<10)
-					cout << ", "<< i ; 
-				    cout << endl;
-				    
-				}}                  
-		      }
-		    
-		} 
-	      // generation de numero de dlt
-	      
-	      nbdfv = numeroteclink(ndfv) ; 
-	      nbdfe = numeroteclink(ndfe) ; 
-	      if (verbosity>2) 
-		  cout << "  -- nb df on vertices " << nbdfv << endl;
-	      */
+
 	      delete [] link1;
 	      delete [] link2;
-	      return true; //new FESpace(**ppTh,*tef,nbdfv,ndfv,nbdfe,ndfe);
+	      return true;
 	  }
         else {
 	      delete [] link1;
@@ -385,20 +345,42 @@ bool BuildPeriodic(
     }
     return false;   
 }
+//template<class Mesh>
+bool BuildPeriodic2(
+           int nbcperiodic ,
+           Expression *periodic,
+           const MeshS &Th,Stack stack,
+           KN<int> & ndfe)
+{
+    return BuildPeriodic3(nbcperiodic , periodic,Th, stack, ndfe);
+    cerr << " To Do FH.. " << endl;
+    ffassert(0);
+}
+bool BuildPeriodic1(
+           int nbcperiodic ,
+           Expression *periodic,
+           const MeshL &Th,Stack stack,
+           KN<int> & ndfe)
+{
+    return BuildPeriodic3(nbcperiodic , periodic,Th, stack, ndfe);
 
+    typedef MeshS Mesh;
+    cerr << " To Do FH.. " << endl;
+    ffassert(0);
+}
 
 bool  v_fes3::buildperiodic(Stack stack, KN<int> & ndfe) { 
-    return BuildPeriodic(nbcperiodic,periodic,**ppTh,stack,ndfe);
+    return BuildPeriodic3(nbcperiodic,periodic,**ppTh,stack,ndfe);
     
 }
 
 bool  v_fesS::buildperiodic(Stack stack, KN<int> & ndfe) {
-    return BuildPeriodic(nbcperiodic,periodic,**ppTh,stack,ndfe);
+    return BuildPeriodic2(nbcperiodic,periodic,**ppTh,stack,ndfe);
     
 }
 
 bool  v_fesL::buildperiodic(Stack stack, KN<int> & ndfe) {
-    return BuildPeriodic(nbcperiodic,periodic,**ppTh,stack,ndfe);
+    return BuildPeriodic1(nbcperiodic,periodic,**ppTh,stack,ndfe);
     
 }
 
@@ -2007,7 +1989,7 @@ pmeshL pfLr_Th(pair<FEbase<K,v_fesL> *,int> p)
 //3D volume
 long pVh3_ndof(pfes3 * p)
  { throwassert(p && *p);
-   FESpace3 *fes=**p; ;  return fes->NbOfDF ;}
+   FESpace3 *fes=**p; ;  return fes ? fes->NbOfDF : 0;}
 long pVh3_nt(pfes3 * p)
  { throwassert(p && *p);
    FESpace3 *fes=**p; ;  return fes->NbOfElements ;}
@@ -2021,7 +2003,7 @@ pmesh3 pVh3_Th(pfes3 * p)
 //3D surface
 long pVhS_ndof(pfesS * p)
 { throwassert(p && *p);
-    FESpaceS *fes=**p; ;  return fes->NbOfDF ;}
+    FESpaceS *fes=**p; ;  return fes ? fes->NbOfDF : 0;}
 long pVhS_nt(pfesS * p)
 { throwassert(p && *p);
     FESpaceS *fes=**p; ;  return fes->NbOfElements ;}
@@ -2035,7 +2017,7 @@ pmeshS pVhS_Th(pfesS * p)
 //3D curve
 long pVhL_ndof(pfesL * p)
 { throwassert(p && *p);
-    FESpaceL *fes=**p; ;  return fes->NbOfDF ;}
+    FESpaceL *fes=**p; ;  return fes ? fes->NbOfDF : 0;}
 long pVhL_nt(pfesL * p)
 { throwassert(p && *p);
     FESpaceL *fes=**p; ;  return fes->NbOfElements ;}

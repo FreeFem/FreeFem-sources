@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ./etc/jenkins/job_Unix/check_ffpetsc/job_ffpetsc.sh
 

@@ -1,3 +1,5 @@
+IFMACRO(!macroDDMidp)
+macro macroDDMidp()1// EOM
 include "getARGV.idp"
 IFMACRO(!partitioner)
 macro partitioner()metis// EOM
@@ -126,7 +128,13 @@ IFMACRO(!privateCreateMat)
         for[i, v : supp[]] v = abs(part[][i] - constant) < 0.1;
         AddLayers(globalName, supp[], 2 * overlap, suppSmooth[]);
         int[int] n2o;
-        meshN neighbors = trunc(globalName, suppSmooth > 0.001 && suppSmooth < 0.999, new2old = n2o);
+        meshN neighbors;
+        bool connected = false;
+        for[i, v : suppSmooth[]] if(abs(v - 0.5) < 0.5) connected = true;
+        if(!connected)
+            n2o.resize(0);
+        else
+            neighbors = trunc(globalName, suppSmooth > 0.001 && suppSmooth < 0.999, new2old = n2o);
         int[int] partOverlap(n2o.n);
         for[i, v : n2o] partOverlap[i] = part[][v];
         Unique(partOverlap, intersection[0], remove = constant);
@@ -567,6 +575,13 @@ IFMACRO(!ThName#Comm)
 NewMacro ThName#Comm()mpiCommWorld EndMacro
 ENDIFMACRO
 if(ThName#Comm) {
+IFMACRO(!dimension)
+    NewMacro dimension()2 EndMacro
+ENDIFMACRO
+IFMACRO(!meshN)
+    NewMacro meshN()mesh EndMacro
+    NewMacro intN()int2d EndMacro
+ENDIFMACRO
     int[int] neighbors;
     {
         real[int] bb(2 * dimension);
@@ -761,7 +776,10 @@ IFMACRO(ThName#Restriction)
 ENDIFMACRO
 ENDIFMACRO
 ENDIFMACRO
-    partition(ThTab, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, mpiRank(ThName#Comm), mpiSize(ThName#Comm), 1, 1, 1, privateCreateMat, DTab, PkName, intersection, ThName#Comm, -111111, PkName, def, init, 1)
+IFMACRO(!ThName#PkPart)
+NewMacro ThName#PkPart()PkName EndMacro
+ENDIFMACRO
+    partition(ThTab, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, mpiRank(ThName#Comm), mpiSize(ThName#Comm), 1, 1, 1, privateCreateMat, DTab, PkName, intersection, ThName#Comm, -111111, ThName#PkPart, def, init, 1)
 }
 else {
     fespace WhGlobalPrivate(ThName, PkName);
@@ -1902,3 +1920,4 @@ ENDIFMACRO
     }
 }
 // EOM
+ENDIFMACRO

@@ -175,8 +175,10 @@ CXXFLAGS="`echo $CXXFLAGS | sed 's/-O2//g'`"
 	    ff_fast="-O3 $ff_fast";;
 	  x86_64*)
 	  ff_fast="-O3 $ff_fast";;
+	  arm64*)
+	  ff_fast="-O3 $ff_fast";;
 	  *)
-	    AC_MSG_ERROR(cannot determine apple cpu type )
+	    AC_MSG_WARN(cannot determine apple cpu type )
 	    ff_fast="-O3";;
 	 esac
 

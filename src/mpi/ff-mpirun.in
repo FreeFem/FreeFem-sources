@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # 	./config.status  --file=ff-mpirun:ff-mpirun.in
 mpirun=mpirun
 dir=`dirname $0`

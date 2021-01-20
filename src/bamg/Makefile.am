@@ -16,5 +16,6 @@ cvmsh2_DEPENDENCIES=../bamglib/Mesh2.o ../bamglib/MeshDraw.o ../bamglib/MeshGeom
 #drawbdmesh_SOURCES= drawbdmesh.cpp
 #drawbdmesh_LDADD = @STD_GRAPH_OBJ@ $(LDADD)  @STD_LIBS@ @LIBSNOCONSOLE@
 
-LDADD= ../bamglib/Mesh2.o ../bamglib/MeshDraw.o ../bamglib/MeshGeom.o ../bamglib/MeshQuad.o ../bamglib/MeshRead.o ../bamglib/MeshWrite.o  ../bamglib/Meshio.o ../bamglib/Metric.o ../bamglib/QuadTree.o ../bamglib/R2.o ../bamglib/SetOfE4.o ../bamglib/write_hdf5.o	../bamglib/write_xdmf.o
-AM_CPPFLAGS=-I$(srcdir)/../fflib -I$(srcdir)/../bamglib -I$(srcdir)/../Graphics $(HDF5_CPPFLAGS)
+LDADD = ../bamglib/Mesh2.o ../bamglib/MeshDraw.o ../bamglib/MeshGeom.o ../bamglib/MeshQuad.o ../bamglib/MeshRead.o ../bamglib/MeshWrite.o  ../bamglib/Meshio.o ../bamglib/Metric.o ../bamglib/QuadTree.o ../bamglib/R2.o ../bamglib/SetOfE4.o ../bamglib/write_hdf5.o	../bamglib/write_xdmf.o $(HDF5_LDFLAGS) $(HDF5_LIBS)
+AM_CPPFLAGS=-I$(srcdir)/../fflib -I$(srcdir)/../bamglib -I$(srcdir)/../Graphics $(HDF5_CPPFLAGS) 
+

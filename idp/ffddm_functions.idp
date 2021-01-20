@@ -794,7 +794,7 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
           IFMACRO(preffe#defplot)
           preffe#Vhi<preffe#K> def(unih);
           unih[] = uni;
-          preffe#plot(preffe#defplot(unih), "["+Stringification(pr)+"] Approximate solution at step " + pr#nbiter)
+          preffe#mplot(preffe#defplot(unih), "["+Stringification(pr)+"] Approximate solution at step " + pr#nbiter)
           ENDIFMACRO
           ;
         }

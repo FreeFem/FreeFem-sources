@@ -9,7 +9,7 @@
 #include <unordered_map>
 #define GENERATE_DEPRECATED_FUNCTIONS
 
-#ifdef WITH_mkl
+#if defined(WITH_mkl) && !defined(HTOOL_HTOOL_HPP)
 #define HPDDM_MKL 1
 #define MKL_Complex8 std::complex<float>
 #define MKL_Complex16 std::complex<double>
@@ -32,8 +32,12 @@
 #undef HPDDM_INEXACT_COARSE_OPERATOR
 #define HPDDM_INEXACT_COARSE_OPERATOR 0
 #endif
-#if HPDDM_PRECISION == 2 && defined(HAVE_LIBARPACK)
+#if HPDDM_PRECISION == 2
+#if defined(WITH_slepc) || defined(WITH_slepccomplex)
+#define MU_SLEPC
+#elif defined(HAVE_LIBARPACK)
 #define MU_ARPACK
+#endif
 #endif
 #endif
 
@@ -527,6 +531,13 @@ namespace PETSc {
   }
 }
 #endif
+#if defined(MU_SLEPC)
+namespace PETSc {
+  void finalizeSLEPc( ) {
+    SlepcFinalize( );
+  }
+}
+#endif
 
 static void Init_Common() {
     if(!Global.Find("savevtk").NotNull()) {
@@ -547,7 +558,10 @@ static void Init_Common() {
         for(int i = 0; i < argc; ++i)
             argv[i] = (*((*pkarg)[i].getap()))->data();
         HPDDM::Option::get()->parse(argc, argv, mpirank == 0);
-#ifdef PETSCSUB
+#if defined(MU_SLEPC)
+        SlepcInitialize(&argc, const_cast<char***>(&argv), 0, "");
+        ff_atend(PETSc::finalizeSLEPc);
+#elif defined(PETSCSUB)
         PetscInitialize(&argc, const_cast<char***>(&argv), 0, "");
         ff_atend(PETSc::finalizePETSc);
 #endif

@@ -48,7 +48,7 @@ on freefem(edpfile)
 		if not (exists window 1) then reopen
 		activate
 		try
-			do shell script "/bin/bash -c 'export PATH=\"$PATH:$(cat /etc/paths.d/FreeFem++)\";cd \"" & edpdir & "\";FreeFem++-CoCoa  \"" & edppath & "\"'"
+			do shell script "/usr/bin/env bash -c 'export PATH=\"$PATH:$(cat /etc/paths.d/FreeFem++)\";cd \"" & edpdir & "\";FreeFem++-CoCoa  \"" & edppath & "\"'"
 		end try
 	end tell
 end freefem

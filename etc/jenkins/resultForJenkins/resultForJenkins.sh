@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
  
 # script to generate a xml report, make a visualization with the Test Results Analyser plugin 
 

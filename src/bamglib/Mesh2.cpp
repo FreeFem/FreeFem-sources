@@ -3184,8 +3184,8 @@ namespace bamg {
     VerticesOnGeomVertex = new VertexOnGeom[NbVerticesOnGeomVertex];
     VertexOnBThVertex = new VertexOnVertex[NbVerticesOnGeomVertex];
     //
-    if (NbVerticesOnGeomVertex >= nbvx) {
-      cerr << " Too many vertices on geometry " << NbVerticesOnGeomVertex << " >= " << nbvx << endl;
+    if (NbVerticesOnGeomVertex > nbvx) {
+      cerr << " Too many vertices on geometry " << NbVerticesOnGeomVertex << " > " << nbvx << endl;
       MeshError(1, this);
     }
     assert(vertices);
@@ -3556,8 +3556,8 @@ namespace bamg {
       if (Gh[i].Required( ) && Gh[i].IsThe( )) NbVerticesOnGeomVertex++;
     VerticesOnGeomVertex = new VertexOnGeom[NbVerticesOnGeomVertex];
     //
-    if (NbVerticesOnGeomVertex >= nbvx) {
-      cerr << " Too many vertices on geometry " << NbVerticesOnGeomVertex << " >= " << nbvx << endl;
+    if (NbVerticesOnGeomVertex > nbvx) {
+      cerr << " Too many vertices on geometry " << NbVerticesOnGeomVertex << " > " << nbvx << endl;
       MeshError(1, this);
     }
     for (i = 0; i < Gh.nbv; i++)

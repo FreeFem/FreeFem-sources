@@ -973,7 +973,6 @@ template< class MMesh >
 void VTU_WRITE_MESHT(FILE *fp, const MMesh &Th, bool binary, int datasize, bool surface) {
   typedef typename MMesh::Element T;
   typedef typename MMesh::BorderElement B;
-  typedef typename MMesh::Vertex V;
 
   int nv, nconnex;
   int nc = surface ? Th.nt + Th.nbe : Th.nt;
@@ -4512,7 +4511,6 @@ void VTK_WRITE_MESH3(const string &filename, FILE *fp, const Mesh3 &Th, bool bin
 
   fprintf(fp, "CELL_DATA %d\n", numElements);
   int cell_fd = 1;
-  int cell_lab = 1;
   fprintf(fp, "Scalars  Label int %d\n", cell_fd);
   fprintf(fp, "LOOKUP_TABLE FreeFempp_table\n");
   // Determination des labels
@@ -4820,8 +4818,6 @@ AnyType VTK_WriteMesh3_Op::operator( )(Stack stack) const {
       }
     }
   } else if (VTK_FILE == 2) {
-    int nc, nv;
-
     VTU_WRITE_MESH(fp, Th, binary, datasize, surface);
     // Solution Order
     // order 0
@@ -6154,7 +6150,6 @@ MMesh *VTK_LoadT(const string &filename, bool bigEndian, bool cleanmesh, bool re
   typedef typename MMesh::Vertex V;
 
   int nv, nt = 0, nbe = 0;
-  int nerr = 0;
   char *res;
   // Reading Mesh in vtk formats
 
@@ -6617,9 +6612,7 @@ template< class MMesh >
 AnyType VTK_LoadMeshT_Op< MMesh >::operator( )(Stack stack) const {
   string *pffname = GetAny< string * >((*filename)(stack));
 
-  int reftri(arg(0, stack, 1));
   bool swap(arg(1, stack, false));
-  int refedges(arg(2, stack, 1));
   string *DataLabel;
   if (nargs[3]) {
     DataLabel = GetAny< string * >((*nargs[3])(stack));

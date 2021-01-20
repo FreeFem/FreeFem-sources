@@ -217,7 +217,7 @@ AnyType To(Stack stack,Expression emat,Expression einter,int init)
         MatCreate(H.get_comm(), &dense->_petsc);
         MatSetType(dense->_petsc, MATMPIDENSE);
         MatSetSizes(dense->_petsc, H.get_local_size(), PETSC_DECIDE, H.nb_rows(), H.nb_cols());
-        MatMPIDenseSetPreallocation(dense->_petsc, PETSC_NULL);
+        MatMPIDenseSetPreallocation(dense->_petsc, NULL);
         PetscScalar* array;
         MatDenseGetArray(dense->_petsc, &array);
         const bool sym = H.get_symmetry_type() != 'N';
@@ -1062,6 +1062,7 @@ class OP_MakeBemKernelFunc {
       Complex alpha=1.;//(arg(0, s, 1));
       Complex k(arg(0, s, Complex(0.,0.)));
       A bemker = new BemKernel(type,alpha,k);
+      Add2StackOfPtr2Free(s,bemker);
       return SetAny< A >(bemker);
     }
   };

@@ -233,7 +233,7 @@ R  KN_<R>::min() const {
   }
 template<class R>
 R  KN_<R>::max() const {
-    R maxv = numeric_limits<R>::min();
+    R maxv = numeric_limits<R>::lowest();// correction nov 2020 FH.. 
     for (long i=0;i<n;i++)
       maxv = RNM::Max(maxv ,v[index(i)]);
     return maxv;

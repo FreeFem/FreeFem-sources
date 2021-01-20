@@ -38,9 +38,15 @@ class DistributedCSR {
         }
         void dtor() {
             if(_petsc) {
+                MatType type;
+                PetscBool isType;
+                MatGetType(_petsc, &type);
+                PetscStrcmp(type, MATNEST, &isType);
+                if(isType) {
+                    delete [] reinterpret_cast<decltype(this)*>(_exchange);
+                    _exchange = nullptr;
+                }
                 MatDestroy(&_petsc);
-                delete [] reinterpret_cast<decltype(this)*>(_exchange);
-                _exchange = nullptr;
             }
             if(_vS) {
                 for(int i = 0; i < _vS->size(); ++i)
@@ -306,8 +312,13 @@ void setCompositePC(PC pc, const std::vector<Mat>* S) {
             PCSetType(pcS, PCCOMPOSITE);
             PetscInt j;
             PCCompositeGetNumberPC(pcS, &j);
-            for(int i = j; i < S->size(); ++i)
+            for(int i = j; i < S->size(); ++i) {
+#if PETSC_VERSION_GE(3,15,0)
+                PCCompositeAddPCType(pcS, PCNONE);
+#else
                 PCCompositeAddPC(pcS, PCNONE);
+#endif
+            }
             PCSetUp(pcS);
             for(int i = 0; i < S->size(); ++i) {
                 PC subpc;
@@ -321,7 +332,7 @@ void setCompositePC(PC pc, const std::vector<Mat>* S) {
 }
 bool insertOptions(std::string* const& options) {
     bool fieldsplit = false;
-    if(options) {
+    if(options && !options->empty()) {
         std::vector<std::string> elems;
         std::stringstream ss(*options);
         std::string item;

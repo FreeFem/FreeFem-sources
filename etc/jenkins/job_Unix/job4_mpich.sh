@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ## This job must be executed on VM2-2 machines
 ## See ./README.md
@@ -33,7 +33,7 @@ autoreconf -i \
   && ./configure --enable-download --prefix=/builds/workspace/freefem \
   --with-petsc=$PETSC_DIR/r/lib \
   --with-petsc_complex=$PETSC_DIR/c/lib \
-  && ./3rdparty/getall -a -o Ipopt,NLopt,freeYams,FFTW,ARPACK,Gmm++,MMG3D,mshmet,MUMPS,htool \
+  && ./3rdparty/getall -a -o Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS,htool \
   && ./etc/jenkins/blob/build.sh
 
 if [ $? -eq 0 ]

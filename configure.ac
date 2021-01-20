@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFEM,4.7-1,frederic.hecht@sorbonne-universite.fr,FreeFEM)
+AC_INIT(FreeFEM,4.8,frederic.hecht@sorbonne-universite.fr,FreeFEM)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -333,7 +333,8 @@ then
 	    AC_MSG_WARN([  get dir of -lg2c  FLIBS :  $FLIBS ])
 	    ;;
 # add FH sep 2006 / modif  2009
-        *gfortran)
+#  remove FH jan 2021 (Idea of P. Jolivet)
+        *gfortran-obsolete)
 	    ff_okkk=0
             for i in $FLIBS; do
 		case $i in
@@ -1115,9 +1116,11 @@ if test "$with_petsc_complex" != no; then
             AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetscc)
+            if test -z "$ff_BLASLAPACK_LIB"; then
             AC_FF_PETSC_WHERELIB(blaslapack,BLASLAPACK_LIB,BLASLAPACK_INCLUDE,$ffconfpetscc)
             if test -n "$ff_BLASLAPACK_LIB"; then
                 ff_where_lib_blaslapack="`echo $ff_BLASLAPACK_LIB | sed -e 's/@<:@^ @:>@*scalapack@<:@^ @:>@*//g' | sed -e 's/@<:@^ @:>@*blacs@<:@^ @:>@*//g'`"
+            fi
             fi
             if test -f $d/libslepc.$ff_suffix_dylib -o -f $d/libslepc.a ; then
 				   ff_slepccomplex_ok=yes
@@ -1548,6 +1551,11 @@ then
     ff_cblas_libs=yes
 fi
 
+if test -n "$ff_BLASLAPACK_LIB"; then
+    AC_SUBST(BLACSLIBS,"$ff_SCALAPACK_LIB $ff_BLASLAPACK_LIB")
+else
+    AC_SUBST(BLACSLIBS,$ff_blas_libs)
+fi
 AC_SUBST(BLASLIBS,$ff_blas_libs)
 AC_SUBST(BLASINC,$ff_blas_inc)
 
@@ -2292,9 +2300,9 @@ AX_LIB_HDF5()
 if test "$with_hdf5" = "yes"; then
   ff_save_cppflags="$CPPFLAGS";
   CPPFLAGS="$CPPFLAGS $HDF5_CPPFLAGS"
-  AC_CHECK_HEADER([H5Cpp.h],[],[with_hdf=no])
+  AC_CHECK_HEADER([H5Cpp.h],[],[with_hdf5=no])
   CPPFLAGS="$ff_save_cppflags"
-  #if test "$with_hdf5" = "yes"; then
+  if test "$with_hdf5" = "yes"; then
   AC_FF_ADDWHERELIB(hdf5,$HDF5_LDFLAGS  $HDF5_LIBS,$HDF5_CPPFLAGS)
   LIBS="$LIBS $HDF5_LDFLAGS  $HDF5_LIBS"
   # hack, if enable_download=no
@@ -2302,7 +2310,7 @@ if test "$with_hdf5" = "yes"; then
   AC_SUBST([TOOL_DYLIB_iohdf5],iohdf5.$DYLIB_SUFFIX)
   ifelse(nodownload,,[ff_download_lib="iohdf5 $ff_download_lib"])
   ifelse(nodownload,,[enable_iohdf5_download=yes])
-  #fi
+  fi
 else
   enable_iohdf5=no
 fi
@@ -2332,6 +2340,8 @@ fi
 TOOL_DISABLE(NewSolver,"NewSolver.$DYLIB_SUFFIX",,nodownload)
 TOOL_DISABLE(mkl,"PARDISO.$DYLIB_SUFFIX",,nodownload)
 
+AC_SUBST([FF_LIBS],$LIBS)
+LIBS=
 # echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 test "$enable_download" != "yes" -a "$enable_download_hpddm" != "yes" -a \( "$enable_hpddm" != "yes" -o "$ff_hpddm_ok" != "yes" \) && enable_hpddm=no
 test "$enable_download" != "yes" -a "$enable_htool" != yes && enable_htool=no
@@ -2427,6 +2437,7 @@ AM_CONDITIONAL([SLEPCCOMPLEX], [test "$ff_slepccomplex_ok" = yes])
 AM_CONDITIONAL([SUPERLU], [test "$ff_superlu_ok" = yes])
 AM_CONDITIONAL([TETGEN], [test "$ff_tetgen_" = yes])
 AM_CONDITIONAL([UMFPACK], [test "$ff_umfpack_" = yes])
+
 
 ##
 # All makefiles

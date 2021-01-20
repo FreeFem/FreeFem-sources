@@ -7,7 +7,8 @@ dircommand=`dirname "$0"`
 FFVERSION='@VERSION@'
 FFCXXFLAGS='@CXXFLAGS@ @CPPFLAGS@ @UMFPACK_CPPFLAGS@ @HDF5_CPPFLAGS@'
 FFFFLAGS='@FFLAGS@'
-FFFLIBS='@FLIBS@'
+# change FH 22/12/20202  
+FFFLIBS='@FF_LIBS@'
 FFCXX11FLAGS='@CXX11FLAGS@'
 INCFF=
 if [ "@ENABLE_FFCS@" != "yes" ] ;then ffcs=0; else ffcs=1;fi
@@ -19,7 +20,7 @@ if [ "$CXX" = '@'CXX'@' ] ; then CXX=""; fi
 if [ "$MPICXX" = '@'MPICXX'@' ] ; then MPICXX=""; fi
 if [ "$F77" = '@'F77'@' ] ; then F77=""; fi
 if [ "$FFCXXFLAGS" = '@'CXXFLAGS'@' ] ; then FFCXXFLAGS=""; fi
-if [ "$FFFFLAGS" = '@'FFLAGS'@' ] ; then FFFFLAGS=""; fi
+if [ "$FFFFLAGS" = '@'FF_FLAGS'@' ] ; then FFFFLAGS=""; fi
 if [ "$FFFLIBS" = '@'FLIBS'@' ] ; then FFFLIBS=""; fi
 if [ "$FFVERSION" = '@'VERSION'@' ] ; then FFVERSION=""; fi
 if [ -z "$INCFF" ] ; then
@@ -288,7 +289,7 @@ if [ -n "$ffiles$files$fileso" ] ; then
 	echo
     fi
     if [ "$CONLY" != yes ]; then
-	echo $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $WMPI_LIB 
+	echo $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS  $DLL $OTHER $WMPI_LIB 
 	if [  $do = yes ] ; then
 	   eval $CXX $SHARED $FLAGS $CXXFLAGS $FFCXXFLAGS $fileso -o $out.$SUF $LIBS $DLL $OTHER $WMPI_LIB 
 	    ret=$?; if [ $ret -ne 0 ] ; then exit $ret ;fi

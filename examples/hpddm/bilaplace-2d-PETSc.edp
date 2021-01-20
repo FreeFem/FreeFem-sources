@@ -1,0 +1,39 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
+load "Morley"
+include "macro_ddm.idp"
+load "PETSc"
+
+real f = 1;
+
+mesh Th = square(40, 40);
+
+fespace Wh(Th, P2);
+fespace Vh(Th, P2Morley);
+
+macro bilaplacian(u, v)(dxx(u)*dxx(v) + dyy(u)*dyy(v) + 2.0*dxy(u)*dxy(v))// EOM
+
+varf vPb([u, ux, uy], [v, vx, vy]) = int2d(Th)(bilaplacian(u, v))
+                                   + int2d(Th)(f*v)
+                                   + on(1, 2, 3, 4, u=0, ux=0, uy=0);
+
+Mat A;
+createMat(Th, A, P2) // trick => use P2, not P2Morley!
+A = vPb(Vh, Vh, tgv = -2);
+real[int] rhs = vPb(0, Vh, tgv = -2);
+Vh [u, ux, uy];
+set(A, sparams = "-pc_type cholesky");
+u[] = A^-1 * rhs;
+
+macro def1(i)i// EOM
+plotMPI(Th, u , P2, def1, real, wait = 1)
+plotMPI(Th, ux, P2, def1, real, wait = 1)
+plotMPI(Th, uy, P2, def1, real, wait = 1)
+
+Wh v = u;
+real loc = v[].max;
+real glob;
+mpiAllReduce(loc, glob, mpiCommWorld, mpiMAX);
+int err = (abs(glob-0.0012782) > 1.0e-4);
+assert(err == 0);

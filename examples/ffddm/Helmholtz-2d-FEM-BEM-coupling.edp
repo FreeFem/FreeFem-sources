@@ -57,6 +57,8 @@ mesh Thwaveguide = buildmesh(a(nloc*(2*L+2*dd))+b(nloc*(2*l+2*dd))+c(nloc*(2*L+2
                          +ga(nloc*2*L)+gc(nloc*2*L)+gd(nloc*2*l));
 
 mesh Thlenses = buildmesh(circle(nsl));
+// we do not want any region with label 0 for the lenses, as 0 is the waveguide region in Thwaveguide :
+Thlenses = change(Thlenses,fregion=region+1);
 
 mesh Th = Thwaveguide + Thlenses; // FEM mesh
 
