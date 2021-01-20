@@ -711,9 +711,7 @@ int nev = ffddmnu;
 
 IFMACRO(pr#withhpddm)
 string prefix = Stringification(pr)+"_";
-set(pr#hpddmOP,sparams="-hpddm_"+prefix+"geneo_nu "+nev, prefix=prefix);
-if (ffddmtau != 0)
-  set(pr#hpddmOP,sparams="-hpddm_"+prefix+"geneo_threshold "+ffddmtau, prefix=prefix);
+set(pr#hpddmOP,sparams="-hpddm_"+prefix+"geneo_threshold "+ffddmtau+" -hpddm_"+prefix+"geneo_nu "+nev, prefix=prefix);
 
 pr#prfe#prmesh#tic(pr#tloc)
 
@@ -831,9 +829,7 @@ int nev = ffddmnu; /* Maximum number of eigenvectors per subdomain */
 
 IFMACRO(pr#withhpddm)
 string prefix = Stringification(pr)+"_";
-set(pr#hpddmOP,sparams="-hpddm_"+prefix+"geneo_nu "+nev, prefix=prefix);
-if (ffddmtau != 0)
-  set(pr#hpddmOP,sparams="-hpddm_"+prefix+"geneo_threshold "+ffddmtau, prefix=prefix);
+set(pr#hpddmOP,sparams="-hpddm_"+prefix+"geneo_threshold "+ffddmtau+" -hpddm_"+prefix+"geneo_nu "+nev, prefix=prefix);
 
 pr#prfe#prmesh#tic(pr#tloc)
 
