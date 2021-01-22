@@ -102,7 +102,8 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [MatLoad-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/MatLoad-PETSc.edp)                     | Loading a distributed matrix/vector with various formats                 |
 
 ### Reproducible science
-| Article                                                                                                                                                       | Source code                                                   |
-|---------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
-| [Augmented Lagrangian Preconditioner for Large-Scale Hydrodynamic Stability Analysis](https://www.sciencedirect.com/science/article/pii/S0045782519301914)    | [GitHub repository](https://github.com/prj-/moulin2019al)     |
-| [A Multilevel Schwarz Preconditioner Based on a Hierarchy of Robust Coarse Spaces](https://hal.archives-ouvertes.fr/hal-02151184/document)                    | [GitHub repository](https://github.com/prj-/aldaas2019multi)  |
+| Article                                                                                                                                                                                             | Source code                                                   |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
+| [Augmented Lagrangian preconditioner for large-scale hydrodynamic stability analysis](https://www.sciencedirect.com/science/article/pii/S0045782519301914)                                          | [GitHub repository](https://github.com/prj-/moulin2019al)     |
+| [A multilevel Schwarz preconditioner based on a hierarchy of robust coarse spaces](https://hal.archives-ouvertes.fr/hal-02151184/document)                                                          | [GitHub repository](https://github.com/prj-/aldaas2019multi)  |
+| [KSPHPDDM and PCHPDDM: extending PETSc with advanced Krylov methods and robust multilevel overlapping Schwarz preconditioners](https://www.sciencedirect.com/science/article/pii/S0898122121000055) | [GitHub repository](https://github.com/prj-/jolivet2020petsc) |
