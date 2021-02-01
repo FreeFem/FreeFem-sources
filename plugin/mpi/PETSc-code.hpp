@@ -1773,8 +1773,10 @@ namespace PETSc {
       ptA = reinterpret_cast< Type* >(&tabA->operator[](level));
       level = tabA->N( ) - level - 1;
     }
-    std::string* options = nargs[0] ? GetAny< std::string* >((*nargs[0])(stack)) : NULL;
-    bool isFieldSplit = insertOptions(options);
+    if (nargs[0]) {
+      std::string* options = GetAny< std::string* >((*nargs[0])(stack));
+      PetscOptionsInsertString(NULL, options->c_str());
+    }
     long FS = nargs[9] ? GetAny< long >((*nargs[9])(stack)) : -1;
     KSP ksp = nullptr;
     if (ptA && ptA->_petsc) {
@@ -1835,28 +1837,37 @@ namespace PETSc {
         PC pc;
         KSPGetPC(tabA->operator[](0)._ksp, &pc);
         PCMGGetSmoother(pc, level, &ksp);
-      } else if (std::is_same< Type, Dmat >::value && isFieldSplit) {
+      } else if (std::is_same< Type, Dmat >::value) {
+        PC pc;
         if (FS < 0)
           ksp = ptA->_ksp;
         else {
-          PC pc;
           KSPGetPC(ptA->_ksp, &pc);
           PetscInt nsplits;
           KSP* subksp;
           PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
           if (FS < nsplits) ksp = subksp[FS];
+          else ffassert(0);
           PetscFree(subksp);
         }
-        KN< double >* fields = nargs[2] ? GetAny< KN< double >* >((*nargs[2])(stack)) : 0;
-        KN< String >* names = nargs[3] ? GetAny< KN< String >* >((*nargs[3])(stack)) : 0;
-        KN< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> > >* mS =
-          nargs[5] ? GetAny< KN< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> > >* >((*nargs[5])(stack)) : 0;
-        KN< double >* pL = nargs[6] ? GetAny< KN< double >* >((*nargs[6])(stack)) : 0;
-        KN< Dmat >* mdS = nargs[11] ? GetAny< KN< Dmat >* >((*nargs[11])(stack)) : 0;
-        if (mdS)
-          setFieldSplitPC(ptA, ksp, fields, names, mdS);
-        else
-          setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
+        KSPGetPC(ksp, &pc);
+        PCSetFromOptions(pc);
+        PCType type;
+        PCGetType(pc, &type);
+        PetscBool isFieldSplit;
+        PetscStrcmp(type, PCFIELDSPLIT, &isFieldSplit);
+        if (isFieldSplit) {
+          KN< double >* fields = nargs[2] ? GetAny< KN< double >* >((*nargs[2])(stack)) : 0;
+          KN< String >* names = nargs[3] ? GetAny< KN< String >* >((*nargs[3])(stack)) : 0;
+          KN< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> > >* mS =
+            nargs[5] ? GetAny< KN< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> > >* >((*nargs[5])(stack)) : 0;
+          KN< double >* pL = nargs[6] ? GetAny< KN< double >* >((*nargs[6])(stack)) : 0;
+          KN< Dmat >* mdS = nargs[11] ? GetAny< KN< Dmat >* >((*nargs[11])(stack)) : 0;
+          if (mdS)
+            setFieldSplitPC(ptA, ksp, fields, names, mdS);
+          else
+            setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
+        }
       }
       else ksp = ptA->_ksp;
       if (nargs[4] && c != 2)
@@ -2744,8 +2755,10 @@ namespace PETSc {
         KSP ksp;
         KSPCreate(PETSC_COMM_WORLD, &ksp);
         KSPSetOperators(ksp, S, S);
-        std::string* options = nargs[1] ? GetAny< std::string* >((*nargs[1])(stack)) : NULL;
-        insertOptions(options);
+        if (nargs[1]) {
+          std::string* options = GetAny< std::string* >((*nargs[1])(stack));
+          PetscOptionsInsertString(NULL, options->c_str());
+        }
         PC pc;
         KSPGetPC(ksp, &pc);
         User< LinearSolver< Type > > userPC = nullptr;
@@ -3582,9 +3595,10 @@ namespace PETSc {
       if (!ptA->_num) MatGetOwnershipRange(ptA->_petsc, &first, &last);
       ffassert(in->n == 0 || in->n == last - first);
       if (in->n == 0) in->resize(last - first);
-
-      std::string* options = nargs[0] ? GetAny< std::string* >((*nargs[0])(stack)) : NULL;
-      insertOptions(options);
+      if(nargs[0]) {
+        std::string* options = GetAny< std::string* >((*nargs[0])(stack));
+        PetscOptionsInsertString(NULL, options->c_str());
+      }
       Vec r, x;
       MatCreateVecs(ptA->_petsc, &r, NULL);
       {
@@ -4308,12 +4322,13 @@ namespace PETSc {
   AnyType initDM_Op::operator()(Stack stack) const {
       DMPlex* pA = GetAny<DMPlex*>((*A)(stack));
       std::string* pB = GetAny<std::string*>((*B)(stack));
-      std::string* options = nargs[3] ? GetAny< std::string* >((*nargs[3])(stack)) : NULL;
       std::string* prefix = nargs[5] ? GetAny< std::string* >((*nargs[5])(stack)) : NULL;
       KN<long>* part = nargs[4] ? GetAny< KN<long>* >((*nargs[4])(stack)) : NULL;
       KN<long>* neighbors = nargs[2] ? GetAny< KN<long>* >((*nargs[2])(stack)) : NULL;
-      if(options)
-          insertOptions(options);
+      if(nargs[3]) {
+          std::string* options = GetAny< std::string* >((*nargs[3])(stack));
+          PetscOptionsInsertString(NULL, options->c_str());
+      }
       PetscInt overlap = nargs[1] ? GetAny< long >((*nargs[1])(stack)) : 0;
       MPI_Comm comm = nargs[0] ? *static_cast< MPI_Comm* >(GetAny< pcommworld >((*nargs[0])(stack))) : PETSC_COMM_WORLD;
       int size;

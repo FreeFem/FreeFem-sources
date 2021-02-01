@@ -258,8 +258,10 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                     NEPSetJacobian(nep, ptB->_petsc, FormJac, &func);
                 }
             }
-            std::string* options = nargs[0] ? GetAny<std::string*>((*nargs[0])(stack)) : NULL;
-            bool fieldsplit = PETSc::insertOptions(options);
+            if (nargs[0]) {
+                std::string* options = GetAny< std::string* >((*nargs[0])(stack));
+                PetscOptionsInsertString(NULL, options->c_str());
+            }
             if(nargs[1]) {
                 if(std::is_same<SType, EPS>::value)
                     EPSSetOptionsPrefix(eps, GetAny<std::string*>((*nargs[1])(stack))->c_str());
@@ -276,22 +278,33 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 EPSGetST(eps, &st);
                 if(ptA->_ksp)
                     STSetKSP(st, ptA->_ksp);
-                else if(fieldsplit) {
-                    KN<double>* fields = nargs[5] ? GetAny<KN<double>*>((*nargs[5])(stack)) : 0;
-                    KN<String>* names = nargs[6] ? GetAny<KN<String>*>((*nargs[6])(stack)) : 0;
-                    KN<Matrice_Creuse<HPDDM::upscaled_type<PetscScalar>>>* mS = nargs[7] ? GetAny<KN<Matrice_Creuse<HPDDM::upscaled_type<PetscScalar>>>*>((*nargs[7])(stack)) : 0;
-                    KN<double>* pL = nargs[8] ? GetAny<KN<double>*>((*nargs[8])(stack)) : 0;
-                    if(fields && names) {
-                        KSP ksp;
-                        STGetKSP(st, &ksp);
-                        KSPSetOperators(ksp, ptA->_petsc, ptA->_petsc);
-                        setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
-                        EPSSetUp(eps);
-                        if(ptA->_vS && !ptA->_vS->empty()) {
-                            PC pc;
-                            KSPGetPC(ksp, &pc);
-                            PCSetUp(pc);
-                            PETSc::setCompositePC(pc, ptA->_vS);
+                else {
+                    KSP ksp;
+                    PC pc;
+                    STGetKSP(st, &ksp);
+                    KSPGetPC(ksp, &pc);
+                    PCSetFromOptions(pc);
+                    PCType type;
+                    PCGetType(pc, &type);
+                    PetscBool isFieldSplit;
+                    PetscStrcmp(type, PCFIELDSPLIT, &isFieldSplit);
+                    if(isFieldSplit) {
+                        KN<double>* fields = nargs[5] ? GetAny<KN<double>*>((*nargs[5])(stack)) : 0;
+                        KN<String>* names = nargs[6] ? GetAny<KN<String>*>((*nargs[6])(stack)) : 0;
+                        KN<Matrice_Creuse<HPDDM::upscaled_type<PetscScalar>>>* mS = nargs[7] ? GetAny<KN<Matrice_Creuse<HPDDM::upscaled_type<PetscScalar>>>*>((*nargs[7])(stack)) : 0;
+                        KN<double>* pL = nargs[8] ? GetAny<KN<double>*>((*nargs[8])(stack)) : 0;
+                        if(fields && names) {
+                            KSP ksp;
+                            STGetKSP(st, &ksp);
+                            KSPSetOperators(ksp, ptA->_petsc, ptA->_petsc);
+                            setFieldSplitPC(ptA, ksp, fields, names, mS, pL);
+                            EPSSetUp(eps);
+                            if(ptA->_vS && !ptA->_vS->empty()) {
+                                PC pc;
+                                KSPGetPC(ksp, &pc);
+                                PCSetUp(pc);
+                                PETSc::setCompositePC(pc, ptA->_vS);
+                            }
                         }
                     }
                 }
