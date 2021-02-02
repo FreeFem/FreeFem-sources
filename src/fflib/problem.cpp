@@ -8611,13 +8611,34 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
         {
             Expression e=ii->LeftValue();
             aType r = ii->left();
-            //  if(A)        cout << "AssembleVarForm " <<  * r << " " <<  (*A)(0,3) << endl;
+        //    if(verbosity > 99)   cout <<  << "AssembleVarForm " <<  << " " <<  (*A)(0,3) << endl;
             if (r==  tvf->tFB)
             { if (A)
                 {
                     const  FormBilinear * bf =dynamic_cast<const  FormBilinear *>(e);
+                    if(bf->di->d != MMesh::Rd::d )
+                    {
+                      
+                      if( bf->di->isMeshS)
+                    {
+                        cout << " int on MeshS ( Bilinear Form ) toDo  " << endl;
+                        ffassert(0);
+                        
+                    }
+                    else  if( bf->di->isMeshL)
+                    {
+                        cout << " int on MeshL ( Bilinear Form ) toDo  " << endl;
+                        ffassert(0);
+                            
+                    }
+                    else if(bf->di->d != MMesh::Rd::d ){
+                        cout << " int 2d case ( Bilinear Form ) on Mesh"<< MMesh::Rd::d <<" debile !!!!! "<< endl;
+                        ffassert(0);}
+                    }
+                    else {
                     pmesh  Thbf= GetAny<pmesh>((*bf->di->Th)(stack));
                     if(Thbf) AssembleBilinearForm<R>( stack,*Thbf,Uh,Vh,sym,*A,bf);
+                    }
                 }
             }
             else if (r==tvf->tMat)
@@ -8629,9 +8650,31 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
             {
                 if (B) {
                     const  FormLinear * bf =dynamic_cast<const  FormLinear *>(e);
+                    if(bf->di->d != MMesh::Rd::d )
+                    {
+                      
+                      if( bf->di->isMeshS)
+                    {
+                        cout << " int on MeshS toDo  ( Linear Form )" << endl;
+                        ffassert(0);
+                        
+                    }
+                    else  if( bf->di->isMeshL)
+                    {
+                        cout << " int on MeshL toDo  ( Linear Form )" << endl;
+                        ffassert(0);
+                            
+                    }
+                    else if(bf->di->d != MMesh::Rd::d ){
+                        cout << " int 2d case  on Mesh ( Linear Form )"<< MMesh::Rd::d <<" debile !!!!! "<< endl;
+                        ffassert(0);}
+                    }
+
+                    else
+                {
                     pmesh  Thbf= GetAny<pmesh>((*bf->di->Th)(stack));
                     if(Thbf) AssembleLinearForm<R>( stack,*Thbf, Vh, B,bf);
-                }
+                }}
             }
             else if (r==tvf->tTab)
             {

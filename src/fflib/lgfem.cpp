@@ -2258,7 +2258,7 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
       const void *cv[4];    //  for
     };
     pmesh th( ) {
-      assert(v[0] && what == 0);
+     // assert(v[0] && what == 0);
       return static_cast< pmesh >(cv[0]);
     }
     pmesh3 th3( ) {
@@ -4570,8 +4570,9 @@ AnyType Plot::operator( )(Stack s) const {
               cerr << " On ne sait tracer que de vecteur sur un meme type element finite. " << endl;
           }
         }
-      } else if (l[i].what == 0) {
+      } else if (l[i].what == 0 && ll[ii].th( ) ) {
         if (!uaspectratio) aspectratio = true;
+          
         const Mesh &Th = *ll[ii].th( );
         Th.BoundingBox(P1, P2);
         cTh = &Th;
@@ -4671,7 +4672,7 @@ AnyType Plot::operator( )(Stack s) const {
       int i = ll[ii].i;
       long what = ll[ii].what;//  correction FH 20201208 i->ii (wrong what)
         if (verbosity > 99) cout << " plot " << ii << " i " << i << " " << what << endl;
-      if (l[i].what == 0)
+      if (l[i].what == 0 &&  ll[ii].th( ))
         if (fill)
           ll[ii].th( )->Draw(0, thfill);
         else
