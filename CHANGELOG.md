@@ -25,7 +25,6 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
--
 
 ### Changed
 -
@@ -37,7 +36,10 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
--
+  set CFLAGS=-Wno-implicit-function-declaration to complie with Apple clang version 12.0.0 (clang-1200.0.32.29)
+  to remove following error: implicit declaration of function 
+
+  
 
 ### Security
 -

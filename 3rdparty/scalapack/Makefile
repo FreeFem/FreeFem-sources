@@ -12,8 +12,8 @@ all-local: scalapack
 # http://www.netlib.org/scalapack/
 # Hips information
 DIRPKG=../pkg
-SRCDIR=scalapack-2.0.2
-PACKAGE1=$(DIRPKG)/scalapack-2.0.2.tgz
+SRCDIR=scalapack-2.1.0
+PACKAGE1=$(DIRPKG)/scalapack-2.1.0.tgz
 SERVER=http://www.netlib.org/scalapack/
 INSTALL=../..
 
@@ -63,7 +63,7 @@ SLmake.inc: ../../config.status	Makefile SLmake-scalapack.inc
 $(SRCDIR)/tag-tar: $(PACKAGE1)
 	gunzip -c $(PACKAGE1) | tar xf -
 	#  fto pach 
-	patch -p0 <scalapack.patch
+	#patch -p0 <scalapack.patch
 	touch $(SRCDIR)/tag-tar
 
 $(PACKAGE1):

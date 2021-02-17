@@ -33,7 +33,7 @@ NOOPT         = -O0 @CNOFLAGS@
 # FFCS - some return statements without value cause trouble on MacOS
 # FFCS - add path to mpi.h (required for MacOS 10.8 + MacPorts OpenMPI)
 # FFCS - added @CNOFLAGS@ according to upstream changes
-CCFLAGS       = -O3 -Wreturn-type @CFLAGS@ -I'@MPI_INC_DIR@' @CNOFLAGS@
+CCFLAGS       = -O3 -Wreturn-type @CFLAGS@ -I'@MPI_INC_DIR@' @CNOFLAGS@ -Wno-implicit-function-declaration
 FCFLAGS       = -O3 @CNOFLAGS@
 FCLOADER      = $(FC)
 CCLOADER      = $(CC)
