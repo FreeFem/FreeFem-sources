@@ -557,8 +557,13 @@ ENDIFMACRO
 IFMACRO(ThName#UserPartitioning)
 buildWithPartitioning(ThName, ThName#UserPartitioning, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm);
 ENDIFMACRO
+IFMACRO(ThName#Periodicity)
+buildPeriodic(ThName, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm, ThName#Periodicity);
+ENDIFMACRO
 IFMACRO(!ThName#UserPartitioning)
+IFMACRO(!ThName#Periodicity)
 build(ThName, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm);
+ENDIFMACRO
 ENDIFMACRO
 }
 EndMacro
