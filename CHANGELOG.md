@@ -30,6 +30,7 @@ All notable changes to this project will be documented in this file.
   secondly on the closure of the mesh (see `examples/hpddm/bConnectedComponents.edp` )
  - add in plugin `bfstream` to to read binary int (4 bytes) to read fortran file and try to pull tools to share the endiannes
   in progress
+ - add gluemesh of array of MeshL and MeshS type 
 ### Changed
 -
 

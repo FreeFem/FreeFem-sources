@@ -12,3 +12,12 @@ Th=rebuildBorder(Th, angle=pi/2.+0.0001);
 cout << "rebuildBorder test nv: " << Th.nv << " nt: " << Th.nt << " nbe: "<< Th.nbe << endl;
 
 plot(Th);
+
+meshL[int] Thglue(4);
+Thglue[0] = Th1;
+Thglue[1] = Th2;
+Thglue[2] = Th3;
+Thglue[3] = Th4;
+plot(Thglue[0],Thglue[1],Thglue[2],Thglue[3]);
+meshL Thglued = gluemesh(Thglue);
+plot(Thglued,cmm="2");
