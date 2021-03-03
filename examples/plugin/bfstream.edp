@@ -11,19 +11,21 @@ int kk=100;
 	f.write(1.346888);
 	f.write(b);
 	f.write(kk);
+	writeint(f,10);
 }
 b = 0;
 
 {
 	real r;
-	int i,kk;
+	int i,kk,i4;
 	ifstream f("bfstreamExample.dt");
 	f.read(i);
 	f.read(r);
 	f.read(bb);
 	f.read(kk);
+	readint(f,i4);
 	
-	cout << i << " " << r << endl;
+	cout << i << " " << r << " "<< i4 <<  endl;
 	cout << bb << endl;
 	//cout << b << endl;
 }
