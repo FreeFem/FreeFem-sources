@@ -1,0 +1,30 @@
+load  "meshtools" 
+load "msh3"
+mesh Th= square(10,10)+ square(10,10,[x+1,y+1]);
+mesh3 Th3= cube(2,2,2)+ cube(3,3,3,[x+2,y+3,z+1]);
+int[int] cc;
+int nbc; 
+nbc =ConnectedComponents(Th,cc); //  data on element of the open  set  
+cout << " nb cmp cnx = " << nbc << " size of data " << cc.n <<endl; 
+nbc =ConnectedComponents(Th,cc,closure=1); //  data on element of the closure set   
+cout << " nb cmp cnx = " << nbc << " size of data " << cc.n <<endl; 
+nbc =ConnectedComponents(Th,cc,vertices=1); //  data on vertices  
+cout << " nb cmp cnx = " << nbc << " size of data " << cc.n << endl; 
+
+
+fespace Vh(Th,P1);
+fespace Ph(Th,P0);
+Vh c;
+Ph p;
+nbc =ConnectedComponents(Th,c[],vertices=1);
+ cout << " vertex/ nb cmp cnx = " << nbc << endl; 
+ nbc =ConnectedComponents(Th,p[]);
+  
+plot(c,wait=1,fill=1,cmm="per vertex");
+plot(p,wait=1,fill=1,cmm="per adj");
+
+
+fespace Vh3(Th3,P0);
+Vh3 d;
+ nbc =ConnectedComponents(Th3,d[]);
+ cout << " nb cmp cnx = " << nbc << endl; 
