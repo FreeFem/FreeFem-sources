@@ -11,7 +11,7 @@ load "msh3"
 // parameters
 real density = 1.1, young = 0.75e6, poisson = 0.5, thickness = 0.1;
 real alpha = 0., beta = 0; //(coeff rayleigh)
-real dt = 0.0001, iMax = 500.;
+real dt = 0.0001, iMax = 100.;
 //real tgv = 1e30; // a hude value of exact penalisation of boundary condition
 
 func h= sin(pi*x);

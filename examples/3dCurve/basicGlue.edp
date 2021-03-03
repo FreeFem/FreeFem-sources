@@ -8,7 +8,7 @@ meshL Th4 = segment(n,[0,0,x],orientation=-1);
 
 meshL Th = Th1+Th2+Th3+Th4;
 cout << "test nv: " << Th.nv << " nt: " << Th.nt << " nbe: "<< Th.nbe << endl;
-Th=rebuildBorder(Th, ridgeangledetection=pi/2.+0.0001);
+Th=rebuildBorder(Th, angle=pi/2.+0.0001);
 cout << "rebuildBorder test nv: " << Th.nv << " nt: " << Th.nt << " nbe: "<< Th.nbe << endl;
 
 plot(Th);

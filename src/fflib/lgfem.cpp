@@ -4724,7 +4724,8 @@ AnyType Plot::operator( )(Stack s) const {
         couleur(2 + i);
         for (int i = 1; i < k; i++) rlineto(x[i], y[i]);
       } else {
-        if (verbosity)
+          static int kerr=0; 
+        if (verbosity && kerr++< 10)
           cout << "  Plot::  Sorry no ps version for this type of plot " << l[i].what << endl;
       }
       thfill = false;

@@ -30,7 +30,11 @@ TESTS_OTHER = buildParametricMeshL.edp \
 	extractMeshes.edp \
 	elasticstring.edp \
 	tutomesh1d.edp \
-	periodicL.edp 
+	periodicL.edp \
+	basicGlue.edp \
+	WaveEquation-new1d.edp \
+	periodicL.edp \
+	QMoscillator-new1d.edp
 
 
 
