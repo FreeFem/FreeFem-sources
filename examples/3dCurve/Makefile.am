@@ -33,19 +33,23 @@ TESTS_OTHER = buildParametricMeshL.edp \
 	periodicL.edp \
 	basicGlue.edp \
 	WaveEquation-new1d.edp \
-	periodicL.edp \
-	QMoscillator-new1d.edp
+	periodicL.edp 
+	
+
+TESTS_ARPACK = QMoscillator-new1d.edp
 
 
+TESTS = $(TESTS_OTHER) $(TESTS_ARPACK)
 
-TESTS = $(TESTS_OTHER) \
-	$(TESTS_TETGEN)
+if ARPACK
+CONDITIONAL_ARPACK = $(TESTS_ARPACK)
+endif ARPACK
 
 LIST_CONDITIONAL = $(TESTS_OTHER) \
-	$(CONDITIONAL_TETGEN)
+	$(CONDITIONAL_ARPACK)
 
 
-XFAIL_TESTS = buildParametricMeshL.edp
+XFAIL_TESTS = $(TESTS)
 
 EXTRA_DIST = *.edp all.edp
 
