@@ -25,14 +25,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
- - add new plugin `meshtool`to add tool to compute the number of connected components of a all kind of mesh 
+ - add new plugin `meshtool`to add tool to compute the number of connected components of a all kind of mesh
   (mesh,mesh3,meshS,meshL) with 2 kind of connected components ones on interior part of the mesh (default) ans
   secondly on the closure of the mesh (see `examples/hpddm/bConnectedComponents.edp` )
  - add in plugin `bfstream` to to read binary int (4 bytes) to read fortran file and try to pull tools to share the endiannes
   in progress
- - add gluemesh of array of MeshL and MeshS type 
+ - add gluemesh of array of MeshL and MeshS type
 ### Changed
--
+  - Now the order to find MPI in configure is first if you have PETSC then take MPI from PETSc
+    otherwise use previous method
 
 ### Deprecated
 -
@@ -42,9 +43,9 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
   set CFLAGS=-Wno-implicit-function-declaration to complie with Apple clang version 12.0.0 (clang-1200.0.32.29)
-  to remove following error: implicit declaration of function 
-  correct `3dCurve/basicGlue.edp`and add missing test 
-  
+  to remove following error: implicit declaration of function
+  correct `3dCurve/basicGlue.edp`and add missing test
+
 
 ### Security
 -

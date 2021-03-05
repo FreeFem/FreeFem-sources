@@ -901,8 +901,9 @@ fi
 
 if test $enable_ffcs = no
 then
-    # FF case
-    m4_include(etc/config/m4/acmpi.m4)
+    # FF case  conf with PETSC or after 
+dnl     m4_include(etc/config/m4/acmpi.m4)
+    ff_mpi=no
 else
     # FFCS - use the same MPI configuration choices as FFCS
     if test -z "$MPICXX"
@@ -987,7 +988,7 @@ if test "$with_petsc" != no; then
 	    ffconfpetsc="$d$dd"
 		ffconfslepc="$d/slepc/conf/slepcvariables"
 
-		 echo " petsc ... $ffconfpetsc"
+		# echo " petsc ... $ffconfpetsc"
 	    if test -f "$ffconfpetsc" ; then
 		if test  "$ff_petsc_ok" = no ; then
 		    PETSC_PREFIXDIR=`awk -F' *= *' '"PREFIXDIR"==$1 {print $2}' "$ffconfpetsc"`
@@ -996,6 +997,7 @@ if test "$with_petsc" != no; then
 		    PETSC_MPIRUN=`echo "$PETSC_MPIRUN" | awk '{gsub(" --oversubscribe", ""); print}'`	#remove --oversubscribe
 		    AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]);
             if test "$ff_mpi" != yes; then
+		AC_MSG_NOTICE([ choose MPI from petsc  : $PETSC_MPIRUN ]);    
                 MPIRUN=`echo $PETSC_MPIRUN`
                 MPICC=`awk -F' *= *' '"CC"==$1 {print $2}' "$ffconfpetsc"`
                 MPICXX=`awk -F' *= *' '"CXX"==$1 {print $2}' "$ffconfpetsc"`
@@ -1162,6 +1164,10 @@ fi
 ##  slepc
 
 ### end petsc ....
+#  chech MPI after petsc ... 
+if test "$ff_mpi" != yes; then
+  m4_include(etc/config/m4/acmpi.m4)
+fi
 
 # FFCS needs to change some of the FF makefiles to compile without MPI
 AM_CONDITIONAL([FFCS_MPIOK],[test $ff_mpi = yes])
