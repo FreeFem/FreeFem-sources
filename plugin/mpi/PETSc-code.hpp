@@ -4333,7 +4333,7 @@ namespace PETSc {
       MPI_Comm comm = nargs[0] ? *static_cast< MPI_Comm* >(GetAny< pcommworld >((*nargs[0])(stack))) : PETSC_COMM_WORLD;
       int size;
       MPI_Comm_size(comm, &size);
-      DMPlexCreateFromFile(comm, pB->c_str(), overlap > 0 || size == 1 ? PETSC_TRUE : PETSC_FALSE, &pA->_dm);
+      DMPlexCreateFromFile(comm, pB->c_str(), PETSC_TRUE, &pA->_dm);
       if(prefix)
           DMSetOptionsPrefix(pA->_dm, prefix->c_str());
       DMSetFromOptions(pA->_dm);
@@ -4341,14 +4341,8 @@ namespace PETSc {
       DMPlexGetPartitioner(pA->_dm, &partitioner);
       PetscPartitionerSetFromOptions(partitioner);
       DM pdm;
-      DMPlexDistribute(pA->_dm, 0, NULL, &pdm);
+      DMPlexDistribute(pA->_dm, overlap, NULL, &pdm);
       if (pdm) {
-          if(overlap == 0) {
-              DM idm;
-              DMPlexInterpolate(pdm, &idm);
-              DMDestroy(&pdm);
-              pdm = idm;
-          }
           DMLabel label;
           DMGetLabel(pdm, "Face Sets", &label);
           if (!label) {
