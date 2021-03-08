@@ -2093,8 +2093,17 @@ namespace PETSc {
                 Mat aux = ff_to_PETSc(&dO);
                 IS perm;
                 ISSortPermutation(is, PETSC_TRUE, &perm);
+#if PETSC_VERSION_LT(3, 15, 0)
+                if (dO._sym) MatConvert(aux, MATSEQAIJ, MAT_INPLACE_MATRIX, &aux);
+#endif
                 O = new Mat;
                 MatPermute(aux, perm, perm, O);
+#if PETSC_VERSION_LT(3, 15, 0)
+                if (dO._sym) {
+                    MatSetOption(*O, MAT_SYMMETRIC, PETSC_TRUE);
+                    MatConvert(*O, MATSEQSBAIJ, MAT_INPLACE_MATRIX, O);
+                }
+#endif
                 ISDestroy(&perm);
                 MatDestroy(&aux);
               }
@@ -4459,6 +4468,7 @@ namespace PETSc {
           DMPlexMarkBoundaryFaces(pdm, 111111, label);
           DMDestroy(&pA->_dm);
           pA->_dm = pdm;
+#if PETSC_VERSION_GE(3, 15, 0)
           if(neighbors) {
               PetscInt nranks;
               const PetscMPIInt *ranks;
@@ -4466,6 +4476,7 @@ namespace PETSc {
               neighbors->resize(nranks);
               std::copy_n(ranks, nranks, neighbors->operator long*());
           }
+#endif
       } else if(neighbors) neighbors->resize(0);
       if(part) {
           PetscSection rootSection, leafSection;
@@ -4594,8 +4605,13 @@ namespace PETSc {
           DMLabelGetNumValues(label, &numValues);
           DMLabelGetValueIS(label, &valueIS);
           ISGetIndices(valueIS, &values);
-          int nt = 0;
+          PetscInt interface = -1;
+          std::unordered_set<PetscInt> set;
           for (PetscInt v = 0; v < numValues; ++v) {
+              if (values[v] == 111111) {
+                  interface = v;
+                  continue;
+              }
               IS face;
               PetscInt size;
               const PetscInt* indices;
@@ -4603,12 +4619,30 @@ namespace PETSc {
               DMLabelGetStratumIS(label, values[v], &face);
               ISGetLocalSize(face, &size);
               ISGetIndices(face, &indices);
+              for(PetscInt i = 0; i < size;++i)
+                  set.insert(indices[i]);
+              ISRestoreIndices(face, &indices);
               ISDestroy(&face);
-              nt += size;
           }
-          Triangle3 *b = new Triangle3[nt];
+          PetscInt size = set.size();
+          if (interface != -1) {
+              IS face;
+              PetscInt iss;
+              const PetscInt* indices;
+
+              DMLabelGetStratumIS(label, values[interface], &face);
+              ISGetLocalSize(face, &iss);
+              ISGetIndices(face, &indices);
+              for(PetscInt i = 0; i < iss;++i) {
+                  if (set.find(indices[i]) == set.end())
+                      ++size;
+              }
+              ISRestoreIndices(face, &indices);
+              ISDestroy(&face);
+          }
+          Triangle3 *b = new Triangle3[size];
           Triangle3 *bb = b;
-          for (PetscInt j = numValues - 1; j >= 0; --j) {
+          for (PetscInt j = 0; j < numValues; ++j) {
               IS face;
               PetscInt size;
               const PetscInt* indices;
@@ -4617,6 +4651,7 @@ namespace PETSc {
               ISGetLocalSize(face, &size);
               ISGetIndices(face, &indices);
               for (PetscInt c = 0; c < size; ++c) {
+                  if (set.find(indices[c]) != set.end() && j == interface) continue;
                   const PetscInt *points, *orientations;
                   PetscInt       size, i;
 
@@ -4666,7 +4701,7 @@ namespace PETSc {
               tt++->set(v, pivt, lab);
               DMPlexRestoreTransitiveClosure(p->_dm, c, PETSC_TRUE, &closureSize, &closure);
           }
-          *pA = new Mesh3(vEnd - vStart, cEnd - cStart, nt, v, t, b);
+          *pA = new Mesh3(vEnd - vStart, cEnd - cStart, size, v, t, b);
           (*pA)->BuildGTree();
           return pA;
       }
@@ -4688,8 +4723,13 @@ namespace PETSc {
           DMLabelGetNumValues(label, &numValues);
           DMLabelGetValueIS(label, &valueIS);
           ISGetIndices(valueIS, &values);
-          int nt = 0;
+          PetscInt interface = -1;
+          std::unordered_set<PetscInt> set;
           for (PetscInt v = 0; v < numValues; ++v) {
+              if (values[v] == 111111) {
+                  interface = v;
+                  continue;
+              }
               IS face;
               PetscInt size;
               const PetscInt* indices;
@@ -4697,12 +4737,30 @@ namespace PETSc {
               DMLabelGetStratumIS(label, values[v], &face);
               ISGetLocalSize(face, &size);
               ISGetIndices(face, &indices);
+              for(PetscInt i = 0; i < size;++i)
+                  set.insert(indices[i]);
+              ISRestoreIndices(face, &indices);
               ISDestroy(&face);
-              nt += size;
           }
-          BoundaryEdge *b = new BoundaryEdge[nt];
+          PetscInt size = set.size();
+          if (interface != -1) {
+              IS face;
+              PetscInt iss;
+              const PetscInt* indices;
+
+              DMLabelGetStratumIS(label, values[interface], &face);
+              ISGetLocalSize(face, &iss);
+              ISGetIndices(face, &indices);
+              for(PetscInt i = 0; i < iss;++i) {
+                  if (set.find(indices[i]) == set.end())
+                      ++size;
+              }
+              ISRestoreIndices(face, &indices);
+              ISDestroy(&face);
+          }
+          BoundaryEdge *b = new BoundaryEdge[size];
           BoundaryEdge *bb = b;
-          for (PetscInt j = numValues - 1; j >= 0; --j) {
+          for (PetscInt j = 0; j < numValues; ++j) {
               IS face;
               PetscInt size;
               const PetscInt* indices;
@@ -4711,6 +4769,7 @@ namespace PETSc {
               ISGetLocalSize(face, &size);
               ISGetIndices(face, &indices);
               for (PetscInt c = 0; c < size; ++c) {
+                  if (set.find(indices[c]) != set.end() && j == interface) continue;
                   const PetscInt *points, *orientations;
                   PetscInt       size, i;
 
@@ -4749,7 +4808,7 @@ namespace PETSc {
               tt++->set(v, pivt[0], pivt[1], pivt[2], lab);
               DMPlexRestoreTransitiveClosure(p->_dm, c, PETSC_TRUE, &closureSize, &closure);
           }
-          Mesh* m = new Mesh(vEnd - vStart, cEnd - cStart, nt, v, t, b);
+          Mesh* m = new Mesh(vEnd - vStart, cEnd - cStart, size, v, t, b);
           R2 Pn, Px;
           m->BoundingBox(Pn, Px);
           m->quadtree = new Fem2D::FQuadTree(m, Pn, Px, m->nv);

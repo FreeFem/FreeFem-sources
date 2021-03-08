@@ -3,6 +3,7 @@
 
 load "PETSc"
 load "msh3"
+load "medit"
 
 int[int] out;
 int[int] part;
@@ -12,8 +13,18 @@ int[int] part;
     macro dimension()2//
     include "macro_ddm.idp"
     plotDmesh(localMesh2D, cmm = "Distributed 2D mesh");
+    reconstructDmesh(localMesh2D)
+    fespace Vh(localMesh2D, P1);
+    Vh u;
+    createPartition(localMesh2D, u[], P1);
+    plotD(localMesh2D, u, cmm = "Reconstructed 2D partition of unity");
 }
-DM dm("cube.msh", communicator = mpiCommWorld, overlap = 0, neighbors = out, partition = part);
+if(mpirank == 0) {
+    DM dm("cube_5tets.cas", communicator = mpiCommSelf);
+    mesh3 Th = dm;
+    medit("Fluent .cas", Th);
+}
+DM dm("cube.msh", overlap = 0, neighbors = out, partition = part);
 mesh3 localMesh3D = dm;
 fespace Ph(localMesh3D, P0);
 Ph plt;
@@ -23,4 +34,12 @@ localMesh3D = Th;
 localMesh3D = dm;
 macro dimension()3//
 include "macro_ddm.idp"
+plotDmesh(localMesh3D, cmm = "Distributed 3D mesh");
+reconstructDmesh(localMesh3D)
+fespace Vh(localMesh3D, P1);
+Vh u;
+createPartition(localMesh3D, u[], P1);
+plotD(localMesh3D, u, cmm = "Reconstructed 3D partition of unity");
+DM overlap("cube.msh", overlap = 1, prefix = "with_overlap_", sparams = "-petscpartitioner_type ptscotch");
+localMesh3D = overlap;
 plotDmesh(localMesh3D, cmm = "Distributed 3D mesh");
