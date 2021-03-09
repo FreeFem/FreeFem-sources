@@ -113,7 +113,7 @@ ENDIFMACRO
     }
 }// EOM
 
-macro partition(meshName, borderName, globalName, PhGlobalPrivate, VhGlobalPrivate, part, rank, size, s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs) {
+macro partitionPrivate(meshName, borderName, globalName, PhGlobalPrivate, VhGlobalPrivate, part, rank, size, s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs) {
     int backupSM = searchMethod;
     searchMethod = 1;
     assert(level >= 1);
@@ -146,11 +146,13 @@ IFMACRO(!privateCreateMat)
         }
     }
     int[int] n2oNeighbor;
+IFMACRO(!privateDmesh#CartesianPartitioning)
     globalName = trunc(globalName, suppSmooth > 0.001, label = 9999
 IFMACRO(privateDmesh#N2O)
             , new2old = n2oNeighbor
 ENDIFMACRO
                            );
+ENDIFMACRO
     real eps = globalName.measure;
     real[int] epsTab(intersection[0].n);
     mpiRequest[int] rq(2 * intersection[0].n);
@@ -165,9 +167,32 @@ ENDIFMACRO
     suppSmooth = suppSmooth;
 IFMACRO(!privateDmesh#N2O)
     meshName[level - 1] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface, new2old = n2oNeighbor);
+IFMACRO(privateDmesh#CartesianPartitioning)
+    real[int] bb(2 * dimension);
+    boundingbox(meshName[level - 1], bb);
+    meshName[level - 1] = trunc(globalName, x > bb[0] && x < bb[1] && y > bb[2] && y < bb[3]
+IFMACRO(dimension, 3)
+                                                                                             && z > bb[4] && z < bb[5]
+ENDIFMACRO
+                                                                                                                      , label = fakeInterface);
+    globalName = meshName[level - 1];
+    n2oNeighbor = 0:globalName.nt - 1;
+ENDIFMACRO
 ENDIFMACRO
 IFMACRO(privateDmesh#N2O)
     meshName[level - 1] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface, new2old = privateDmesh#N2O);
+IFMACRO(privateDmesh#CartesianPartitioning)
+    real[int] bb(2 * dimension);
+    boundingbox(meshName[level - 1], bb);
+    meshName[level - 1] = trunc(globalName, x > bb[0] && x < bb[1] && y > bb[2] && y < bb[3]
+IFMACRO(dimension, 3)
+                                                                                             && z > bb[4] && z < bb[5]
+ENDIFMACRO
+                                                                                                                      , label = fakeInterface, new2old = privateDmesh#N2O);
+    globalName = meshName[level - 1];
+    n2oNeighbor = 0:globalName.nt - 1;
+ENDIFMACRO
+IFMACRO(!privateDmesh#CartesianPartitioning)
     {
         int[int] backup = privateDmesh#N2O;
         int[int] new = n2oNeighbor(privateDmesh#N2O);
@@ -176,6 +201,7 @@ IFMACRO(privateDmesh#N2O)
         n2oNeighbor.resize(backup.n);
         n2oNeighbor = backup;
     }
+ENDIFMACRO
 ENDIFMACRO
     if(level > 1) {
         prolongation.resize(level - 1);
@@ -278,6 +304,15 @@ ENDIFMACRO
         for(int i = 0; i < numberIntersection; ++i) {
             int[int] n2o;
             meshIntersection[i] = trunc(meshName[j], partitionIntersection[i] > 1.0e-6, new2old = n2o, label = 9999);
+IFMACRO(privateDmesh#CartesianPartitioning)
+            real[int] bb(2 * dimension);
+            boundingbox(meshIntersection[i], bb);
+            meshIntersection[i] = trunc(meshName[j], x > bb[0] && x < bb[1] && y > bb[2] && y < bb[3]
+IFMACRO(dimension, 3)
+                                                                                                      && z > bb[4] && z < bb[5]
+ENDIFMACRO
+                                                                                                                               , new2old = n2o, label = 9999);
+ENDIFMACRO
 IFMACRO(!privateCreateMat)
             if(!removeZeros)
 ENDIFMACRO
@@ -562,6 +597,9 @@ buildPeriodic(ThName, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Co
 ENDIFMACRO
 IFMACRO(!ThName#UserPartitioning)
 IFMACRO(!ThName#Periodicity)
+IFMACRO(ThName#CartesianPartitioning)
+NewMacro privateDmesh#CartesianPartitioning() EndMacro
+ENDIFMACRO
 build(ThName, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm);
 ENDIFMACRO
 ENDIFMACRO
@@ -782,9 +820,12 @@ ENDIFMACRO
 ENDIFMACRO
 ENDIFMACRO
 IFMACRO(!ThName#PkPart)
-NewMacro ThName#PkPart()PkName EndMacro
+    NewMacro ThName#PkPart()PkName EndMacro
 ENDIFMACRO
-    partition(ThTab, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, mpiRank(ThName#Comm), mpiSize(ThName#Comm), 1, 1, 1, privateCreateMat, DTab, PkName, intersection, ThName#Comm, -111111, ThName#PkPart, def, init, 1)
+IFMACRO(ThName#CartesianPartitioning)
+    NewMacro privateDmesh#CartesianPartitioning() EndMacro
+ENDIFMACRO
+    partitionPrivate(ThTab, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, mpiRank(ThName#Comm), mpiSize(ThName#Comm), 1, 1, 1, privateCreateMat, DTab, PkName, intersection, ThName#Comm, -111111, ThName#PkPart, def, init, 1)
 }
 else {
     fespace WhGlobalPrivate(ThName, PkName);
@@ -849,6 +890,34 @@ ENDIFMACRO
         fespace VhGlobalPrivate(ThGlobal, P1);
         PhGlobalPrivate partGlobal;
 IFMACRO(!privateReconstructDmesh)
+IFMACRO(privateDmesh#CartesianPartitioning)
+        {
+            real[int] bb(2 * dimension);
+            boundingbox(ThGlobal, bb);
+            PhGlobalPrivate xx = x / (bb[1] - bb[0]), yy = y / (bb[3] - bb[2])
+IFMACRO(dimension, 2)
+                                                                              ;
+            int i = int(sqrt(mpiSize(comm)));
+            while(mpiSize(comm) % i != 0)
+                --i;
+            int j = mpiSize(comm) / i;
+            partGlobal = int(j * xx) + int(i * yy) * j;
+ENDIFMACRO
+IFMACRO(dimension, 3)
+                                                                              , zz = z / (bb[5] - bb[4]);
+            i = int(mpiSize(comm)^(0.333333333333333));
+            while(mpiSize(comm) % i != 0)
+                --i;
+            real p = mpiSize(comm) / i;
+            j = int(sqrt(p));
+            while(p % j != 0)
+                --j;
+            real k = int(p / j);
+            partGlobal = int(i * zz) * k * j + int(j * yy) * k + int(k * xx);
+ENDIFMACRO
+        }
+ENDIFMACRO
+IFMACRO(!privateDmesh#CartesianPartitioning)
         if(userPartitioning.n != PhGlobalPrivate.ndof || labPeriodic.n > 0) {
             timerPartition = mpiWtime();
             meshN ThGlobalPeriodic;
@@ -906,6 +975,7 @@ IFMACRO(!privateReconstructDmesh)
             partGlobal[] = userPartitioning;
         }
 ENDIFMACRO
+ENDIFMACRO
 IFMACRO(privateReconstructDmesh)
         partGlobal[] = userPartitioning;
 ENDIFMACRO
@@ -922,10 +992,10 @@ ENDIFMACRO
 IFMACRO(privateBuildDmesh)
         NewMacro defP1(i)i EndMacro
         NewMacro initP1(i)i EndMacro
-        partition(Th, ThBorder, ThGlobal, PhGlobalPrivate, VhGlobalPrivate, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, DTab, P, intersection, comm, fakeInterface, PkPart, defP1, initP1, bs)
+        partitionPrivate(Th, ThBorder, ThGlobal, PhGlobalPrivate, VhGlobalPrivate, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, DTab, P, intersection, comm, fakeInterface, PkPart, defP1, initP1, bs)
 ENDIFMACRO
 IFMACRO(!privateBuildDmesh)
-        partition(Th, ThBorder, ThGlobal, PhGlobalPrivate, VhGlobalPrivate, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, DTab, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs)
+        partitionPrivate(Th, ThBorder, ThGlobal, PhGlobalPrivate, VhGlobalPrivate, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, DTab, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs)
 ENDIFMACRO
     }
     else if(mpiSize(comm) == 1) {
@@ -1257,17 +1327,11 @@ else {
     searchMethod = 0;
     real[int] bb(2 * dimension);
     boundingbox(ThName, bb);
-IFMACRO(dimension, 2)
     bb(0) -= safety * ThName.hmax;
     bb(1) += safety * ThName.hmax;
     bb(2) -= safety * ThName.hmax;
     bb(3) += safety * ThName.hmax;
-ENDIFMACRO
 IFMACRO(dimension, 3)
-    bb(0) -= safety * ThName.hmax;
-    bb(1) += safety * ThName.hmax;
-    bb(2) -= safety * ThName.hmax;
-    bb(3) += safety * ThName.hmax;
     bb(4) -= safety * ThName.hmax;
     bb(5) += safety * ThName.hmax;
 ENDIFMACRO
@@ -1492,7 +1556,6 @@ ENDIFMACRO
         bb(0:2 * dimension - 1) = tmp;
         boundingbox(ThNew, tmp);
         bb(2 * dimension:4 * dimension - 1) = tmp;
-IFMACRO(dimension, 2)
         bb(0) -= max(ThName.hmax, ThNew.hmax);
         bb(1) += max(ThName.hmax, ThNew.hmax);
         bb(2) -= max(ThName.hmax, ThNew.hmax);
@@ -1501,16 +1564,7 @@ IFMACRO(dimension, 2)
         bb(5) += max(ThName.hmax, ThNew.hmax);
         bb(6) -= max(ThName.hmax, ThNew.hmax);
         bb(7) += max(ThName.hmax, ThNew.hmax);
-ENDIFMACRO
 IFMACRO(dimension, 3)
-        bb(0) -= max(ThName.hmax, ThNew.hmax);
-        bb(1) += max(ThName.hmax, ThNew.hmax);
-        bb(2) -= max(ThName.hmax, ThNew.hmax);
-        bb(3) += max(ThName.hmax, ThNew.hmax);
-        bb(4) -= max(ThName.hmax, ThNew.hmax);
-        bb(5) += max(ThName.hmax, ThNew.hmax);
-        bb(6) -= max(ThName.hmax, ThNew.hmax);
-        bb(7) += max(ThName.hmax, ThNew.hmax);
         bb(8) -= max(ThName.hmax, ThNew.hmax);
         bb(9) += max(ThName.hmax, ThNew.hmax);
         bb(10) -= max(ThName.hmax, ThNew.hmax);
