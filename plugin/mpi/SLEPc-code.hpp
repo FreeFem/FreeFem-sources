@@ -461,7 +461,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                             }
                             if(rarray) {
                                 KN<K> cpy(m, pti);
-                                (*array)(':', i) = cpy;
+                                (*rarray)(':', i) = cpy;
                             }
                         }
                         if(!std::is_same<SType, SVD>::value && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value)
