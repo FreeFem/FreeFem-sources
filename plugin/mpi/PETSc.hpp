@@ -48,8 +48,7 @@ class DistributedCSR {
                 delete _vS;
                 _vS = nullptr;
             }
-            if(_ksp)
-                KSPDestroy(&_ksp);
+            KSPDestroy(&_ksp);
             if(_exchange) {
                 _exchange[0]->clearBuffer();
                 delete _exchange[0];

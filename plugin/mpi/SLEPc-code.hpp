@@ -398,12 +398,13 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                     rvectors->resize(nconv);
                 if(array)
                     array->resize(!codeA && !isType && ptA->_A ? ptA->_A->getDof() : m, nconv);
-                if(rarray)
-                    rarray->resize(!codeA && !isType && ptA->_A ? ptA->_A->getDof() : m, nconv);
                 Vec xr, xi;
-                PetscInt n;
+                PetscInt n, nr;
                 if(eigenvectors || array || rvectors || rarray) {
                     MatCreateVecs(ptA->_petsc, &xi, &xr);
+                    VecGetLocalSize(xi, &nr);
+                    if(rarray)
+                        rarray->resize(nr, nconv);
                     VecGetLocalSize(xr, &n);
                 } else xr = xi = NULL;
                 for(PetscInt i = 0; i < nconv; ++i) {
@@ -435,23 +436,35 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                             pt = reinterpret_cast<K*>(tmpr);
                             VecGetArray(xi, reinterpret_cast<PetscScalar**>(&pti));
                         }
-                        if(!isType && ptA->_A) {
-                            KN<K> cpy(ptA->_A->getDof());
+                        if(!isType && (ptA->_A || ptA->_exchange)) {
+                            KN<K> cpy(ptA->_A ? ptA->_A->getDof() : ptA->_exchange[0]->getDof());
                             cpy = K(0.0);
                             HPDDM::Subdomain<K>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(cpy), pt, static_cast<PetscInt>(cpy.n), 1);
-                            ptA->_A->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<K*>(cpy));
+                            if(ptA->_A)
+                                ptA->_A->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<K*>(cpy));
+                            else
+                                ptA->_exchange[0]->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<K*>(cpy));
                             if(eigenvectors)
                                 eigenvectors->set(i, cpy);
-                            if(array && !codeA)
+                            if(array && !codeA) {
+                                KN<K> cpy(m, pt);
                                 (*array)(':', i) = cpy;
+                            }
                             if(std::is_same<SType, SVD>::value) {
-                                /* TODO FIXME: handle rectangular case */
-                                HPDDM::Subdomain<K>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(cpy), pti, static_cast<PetscInt>(cpy.n), 1);
-                                ptA->_A->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<K*>(cpy));
-                                if(rvectors)
-                                    rvectors->set(i, cpy);
-                                if(rarray && !codeA)
-                                    (*rarray)(':', i) = cpy;
+                                if(ptA->_cnum && ptA->_exchange[1]) {
+                                    KN<K> cpy(ptA->_exchange[1]->getDof());
+                                    cpy = K(0.0);
+                                    HPDDM::Subdomain<K>::template distributedVec<1>(ptA->_cnum, ptA->_cfirst, ptA->_clast, static_cast<K*>(cpy), pti, static_cast<PetscInt>(cpy.n), 1);
+                                    ptA->_exchange[1]->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<K*>(cpy));
+                                    if(rvectors)
+                                        rvectors->set(i, cpy);
+                                    if(rarray && !codeA) {
+                                        KN<K> cpy(nr, pti);
+                                        (*rarray)(':', i) = cpy;
+                                    }
+                                }
+                                else
+                                    ffassert(0);
                             }
                         }
                         if(codeA || isType || !ptA->_A) {
@@ -460,7 +473,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                                 (*array)(':', i) = cpy;
                             }
                             if(rarray) {
-                                KN<K> cpy(m, pti);
+                                KN<K> cpy(nr, pti);
                                 (*rarray)(':', i) = cpy;
                             }
                         }
