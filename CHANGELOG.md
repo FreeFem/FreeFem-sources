@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file.
 - add in plugin `bfstream` to to read binary int (4 bytes) to read fortran file and try to pull tools to share the endiannes
   in progress
 - add gluemesh of array of MeshL and MeshS type
+- interface to `PC_MG_GALERKIN_BOTH`
 ### Changed
 - Now the order to find MPI in configure is first if you have PETSC then take MPI from PETSc
   otherwise use previous method

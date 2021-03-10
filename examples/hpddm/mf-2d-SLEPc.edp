@@ -33,7 +33,9 @@ if(bb[0] < 0.5) { // careful because some subdomains may not satisfy this condit
 Mat B(A, restriction = R); // if the above condition is not met,
 Mat C(A, B, prod);         // these two distributed matrices won't have any local unknowns
 real[int] values;
-SVDSolve(C, sparams = "-svd_largest -svd_view_values -svd_type cyclic -svd_nsv 10", values = values);
+Vh[int] lvec(10);
+VhTrunc[int] rvec(10);
+int nsv = SVDSolve(C, sparams = "-svd_largest -svd_view_values -svd_type cyclic -svd_nsv 10", values = values, lvectors = lvec, rvectors = rvec);
 func real[int] prodFunc(real[int]& up) {
     real[int] u;
     ChangeNumbering(B, u, up, inverse = true, exchange = true); // from PETSc to FreeFEM numbering + need to exchange ghost values
@@ -52,9 +54,43 @@ func real[int] prodFuncTranspose(real[int]& utp) {
     ChangeNumbering(B, ut, utp); // from FreeFEM to PETSc numbering
     return utp;
 }
-Mat MF(A, B, prodFunc, transpose = prodFuncTranspose);
+Mat MF(A, B, prodFunc, transpose = prodFuncTranspose); // defines a "rectangular" operator (I = A.size and J = B.size)
 ObjectView(MF, format = "info");
 real[int] valuesMF;
-SVDSolve(MF, sparams = "-svd_largest -svd_view_values -svd_type cyclic -svd_nsv 10", values = valuesMF);
+real[int, int] lvecMF(A.n, 10);
+real[int, int] rvecMF(B.n, 10);
+int nsvMF = SVDSolve(MF, sparams = "-svd_largest -svd_type cyclic -svd_nsv 10", values = valuesMF, larray = lvecMF, rarray = rvecMF);
 values -= valuesMF;
-assert(values.linfty < 1.0e-4);
+assert(values.linfty < 1.0e-4 && nsv == nsvMF);
+
+Vh u, uMF, du;
+VhTrunc v, vMF, dv;
+for (int idSV = 0; idSV < nsv; ++idSV)
+{
+  // check same (or opposite) left vectors
+  ChangeNumbering(A, uMF[], lvecMF(:,idSV), inverse = true, exchange = true);
+  du[] = lvec[idSV][] - uMF[];
+  if(du[].linfty >= 1.0e-6) { // sign flip?
+      du[] = lvec[idSV][];
+      du[] *= -1.0;
+      du[] -= uMF[];
+  }
+  assert(du[].linfty < 1.0e-4);
+
+  // check same (or opposite) right vectors
+  ChangeNumbering(B, vMF[], rvecMF(:,idSV), inverse = true, exchange = true);
+  dv[] = rvec[idSV][] - vMF[];
+  if(dv[].linfty >= 1.0e-6) {
+      dv[] = rvec[idSV][];
+      dv[] *= -1.0;
+      dv[] -= vMF[];
+  }
+  assert(dv[].linfty < 1.0e-4);
+
+  // check C v = sigma u
+  real[int] temp1(A.n), temp2(lvecMF.n);
+  MatMult(MF, rvecMF(:,idSV), temp1); // rectangular MF, so use vectors un PETSc numbering + MatMult
+  temp2 = valuesMF[idSV] * lvecMF(:,idSV);
+  temp2 -= temp1;
+  assert(temp2.linfty < 1.0e-4);
+}

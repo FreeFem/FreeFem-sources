@@ -1748,11 +1748,7 @@ namespace PETSc {
           ffassert(M == N);
           for (int i = 0; i < M; ++i) {
             if (mat[i][i] == ptA->_petsc) {
-              Mat A;
-              KSPGetOperators(subksp[i], &A, NULL);
-              if (ptA->_ksp) {
-                KSPDestroy(&ptA->_ksp);
-              }
+              KSPDestroy(&ptA->_ksp);
               ptA->_ksp = subksp[i];
               PetscObjectReference((PetscObject)subksp[i]);
               KSPSetOperators(subksp[i], ptA->_petsc, ptA->_petsc);
@@ -1794,21 +1790,26 @@ namespace PETSc {
       if (c == 1 || c == 3) {
         KN< Matrice_Creuse< double > >* mP = (c == 1 ? GetAny< KN< Matrice_Creuse< double > >* >((*P)(stack)) : nullptr);
         KN< Dmat >* mD = (c == 3 ? GetAny< KN< Dmat >* >((*P)(stack)) : nullptr);
-        ffassert((c == 1 && mP->N( ) + 1 == tabA->N( )) || (c == 3 && mD->N( ) + 1 == tabA->N( )));
+        ffassert((c == 1 && mP->N( ) + 1 == tabA->N( )) || (c == 3 && (mD->N( ) + 1 == tabA->N( ) || tabA->N( ) == 1)));
         ksp = ptA->_ksp;
         PC pc;
         KSPSetFromOptions(ksp);
         KSPGetPC(ksp, &pc);
         PCSetType(pc, PCMG);
-        PCMGSetLevels(pc, tabA->N( ), NULL);
-        PCMGSetGalerkin(pc, PC_MG_GALERKIN_NONE);
+        const PetscInt level = (c == 3 ? mD->N( ) + 1 : tabA->N( ));
+        PCMGSetLevels(pc, level, NULL);
+        if (c == 3 && tabA->N( ) == 1)
+          PCMGSetGalerkin(pc, PC_MG_GALERKIN_BOTH);
+        else
+          PCMGSetGalerkin(pc, PC_MG_GALERKIN_NONE);
         PCSetFromOptions(pc);
-        for (int i = 0; i < tabA->N( ); ++i) {
+        for (int i = 0; i < level; ++i) {
           KSP smoother;
-          PCMGGetSmoother(pc, tabA->N( ) - i - 1, &smoother);
-          KSPSetOperators(smoother, tabA->operator[](i)._petsc,
-                          tabA->operator[](i)._petsc);
-          if (i < tabA->N( ) - 1) {
+          PCMGGetSmoother(pc, level - i - 1, &smoother);
+          if (c != 3 || tabA->N( ) > 1)
+            KSPSetOperators(smoother, tabA->operator[](i)._petsc,
+                            tabA->operator[](i)._petsc);
+          if (i < level - 1) {
             if (c == 1) {
                 User< ShellInjection > user = nullptr;
                 PetscNew(&user);
@@ -1825,10 +1826,10 @@ namespace PETSc {
                 MatShellSetOperation(P, MATOP_MULT, (void (*)(void))ShellInjectionOp< false >);
                 MatShellSetOperation(P, MATOP_MULT_TRANSPOSE, (void (*)(void))ShellInjectionOp< true >);
                 MatShellSetOperation(P, MATOP_DESTROY, (void (*)(void))ShellDestroy< ShellInjection >);
-                PCMGSetInterpolation(pc, tabA->N( ) - i - 1, P);
+                PCMGSetInterpolation(pc, level - i - 1, P);
                 MatDestroy(&P);
             } else {
-                PCMGSetInterpolation(pc, tabA->N( ) - i - 1, mD->operator[](i)._petsc);
+                PCMGSetInterpolation(pc, level - i - 1, mD->operator[](i)._petsc);
                 MatDestroy(&(mD->operator[](i)._petsc));
             }
           }
@@ -2025,7 +2026,7 @@ namespace PETSc {
             KNM< PetscScalar >* pS = GetAny< KNM< PetscScalar >* >((*nargs[10])(stack));
             for (int i = 0; i < pL->n; ++i)
               if (std::abs((*pL)[i]) > 1.0e-12) idx.emplace_back(i);
-            ISCreateGeneral(PETSC_COMM_WORLD, idx.size( ), idx.data( ), PETSC_COPY_VALUES, &is);
+            ISCreateGeneral(PetscObjectComm((PetscObject)ptA->_ksp), idx.size( ), idx.data( ), PETSC_COPY_VALUES, &is);
             PC pc;
             KSPGetPC(ptA->_ksp, &pc);
             PCFactorSetUpMatSolverType(pc);

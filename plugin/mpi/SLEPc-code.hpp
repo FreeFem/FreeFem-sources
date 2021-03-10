@@ -451,20 +451,24 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                                 (*array)(':', i) = cpy;
                             }
                             if(std::is_same<SType, SVD>::value) {
+                                KN<K> cpy(ptA->_cnum && ptA->_exchange[1] ? ptA->_exchange[1]->getDof() : (ptA->_A ? ptA->_A->getDof() : 0));
+                                cpy = K(0.0);
                                 if(ptA->_cnum && ptA->_exchange[1]) {
-                                    KN<K> cpy(ptA->_exchange[1]->getDof());
-                                    cpy = K(0.0);
                                     HPDDM::Subdomain<K>::template distributedVec<1>(ptA->_cnum, ptA->_cfirst, ptA->_clast, static_cast<K*>(cpy), pti, static_cast<PetscInt>(cpy.n), 1);
                                     ptA->_exchange[1]->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<K*>(cpy));
-                                    if(rvectors)
-                                        rvectors->set(i, cpy);
-                                    if(rarray && !codeA) {
-                                        KN<K> cpy(nr, pti);
-                                        (*rarray)(':', i) = cpy;
-                                    }
+                                }
+                                else if(ptA->_A) {
+                                    HPDDM::Subdomain<K>::template distributedVec<1>(ptA->_num, ptA->_first, ptA->_last, static_cast<K*>(cpy), pti, static_cast<PetscInt>(cpy.n), 1);
+                                    ptA->_A->HPDDM::template Subdomain<PetscScalar>::exchange(static_cast<K*>(cpy));
                                 }
                                 else
                                     ffassert(0);
+                                if(rvectors)
+                                    rvectors->set(i, cpy);
+                                if(rarray && !codeA) {
+                                    KN<K> cpy(nr, pti);
+                                    (*rarray)(':', i) = cpy;
+                                }
                             }
                         }
                         if(codeA || isType || !ptA->_A) {
