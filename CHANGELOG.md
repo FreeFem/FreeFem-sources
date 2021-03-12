@@ -28,6 +28,8 @@ All notable changes to this project will be documented in this file.
 - add new plugin `meshtool`to add tool to compute the number of connected components of a all kind of mesh
   (mesh,mesh3,meshS,meshL) with 2 kind of connected components ones on interior part of the mesh (default) ans
   secondly on the closure of the mesh (see `examples/hpddm/bConnectedComponents.edp` )
+  add functions  int[int] In=iminP1K(Th,u) or int[int] Ix=imaxP1K(Th,u)  get the array min/max of value u[i]  
+  where i is vertex number on  each element k, so we have  u[Im[k]] = min u[i]/ i in k; 
 - add in plugin `bfstream` to to read binary int (4 bytes) to read fortran file and try to pull tools to share the endiannes
   in progress
 - add gluemesh of array of MeshL and MeshS type
@@ -35,6 +37,9 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Now the order to find MPI in configure is first if you have PETSC then take MPI from PETSc
   otherwise use previous method
+- on MeshL defined with buildmeshL now the default label are 2*k-1  (resp. 2*k)  for the begin (resp. end) of curve 
+  where k is the order of curve use in buildmeshL. So if you have one curve the  labels are 1  and 2.
+  And new  the element label are te region number not the label.
 
 ### Deprecated
 -

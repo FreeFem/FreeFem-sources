@@ -1200,10 +1200,11 @@ const MeshL* BuildMeshCurve3(Stack stack, E_BorderN const * const & b)   //  ,bo
     double lmin=0.;
 
     //  generation des points et des lignes
-    long i=0,n=0;
+    long i=0,n=0,nboo=0;
     for (E_BorderN const * k=b;k;k=k->next) {
         int nbd = k->NbBorder(stack);
-        for(int index=0; index<nbd; ++index ) {
+        for(int index=0; index<nbd; ++index,nboo++ ) {
+            
             assert(k->b->xfrom);
             double & t = *  k->var(stack),tt;
             double a(k->from(stack)),b(k->to(stack));
@@ -1216,8 +1217,13 @@ const MeshL* BuildMeshCurve3(Stack stack, E_BorderN const * const & b)   //  ,bo
             for ( int nn=0;nn<=n;++nn,++i, tt += delta) {
                 t = tt;
                 if (nn==n) t=b; // to remove roundoff error
-                mp->label = k->label();
+                long lab = 0;
+                if(nn==0) lab = nboo*2+1;
+                else if  (nn==n) lab = nboo*2+2;
+                mp->label = lab;//k->label();
+                mp->region  = 0;//k->label();
                 k->code(stack); // compute x,y,z label
+                if(nn>0 && nn< n) mp->label =0; //
                 vertices[i].x=mp->P.x;
                 vertices[i].y=mp->P.y;
                 vertices[i].z=mp->P.z;
@@ -1327,10 +1333,11 @@ const MeshL* BuildMeshCurve3(Stack stack, E_BorderN const * const & b)   //  ,bo
    i=0;
     
    Th->elements = new EdgeL[Gnbt];
-    
+   int nbo=0;
    for (E_BorderN const * k=b;k;k=k->next) {
        int nbd = k->NbBorder(stack);
-       for(int index=0; index<nbd; ++index ) {
+       for(int index=0; index<nbd; ++index,nbo++ ) {
+           
            double & t = *  k->var(stack);
            double a(k->from(stack)),b(k->to(stack));
            n=Max(Abs(k->Nbseg(stack,index)),1L);
@@ -1341,14 +1348,18 @@ const MeshL* BuildMeshCurve3(Stack stack, E_BorderN const * const & b)   //  ,bo
                ffassert(index==0);
            double delta = (b-a)/n;
            t=a+delta/2;
-           for (int nn=0;nn<n;nn++,i++, t += delta) {
-               
-               mp->label = k->label();
+           for (int nn=0;nn<n;nn++,i++, t += delta)
+            {
+               long lab=0;
+               if(nn==0) lab = 2*nbo+1;
+               else if( nn== n-1) lab =2*nbo+2;
+               mp->label =  lab ;
+               mp->region=0;
                k->code(stack);
                int iv[2];
                iv[0]=old2new[nnn];
                iv[1]=old2new[++nnn];
-               Th->elements[i].set(Th->vertices,iv,mp->label);
+               Th->elements[i].set(Th->vertices,iv,mp->region);
            }
            nnn++;
        }

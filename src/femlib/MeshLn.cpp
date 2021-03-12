@@ -741,8 +741,8 @@ namespace Fem2D
                    int iv[1];
                        iv[0] = this->operator () (K [EdgeL::nvedge[0][j]]);
                    if(verbosity>15)
-                       cout << " the edge " << iv[0] << " is a boundary " << endl;
-                   be(nbeL++).set(vertices,iv,K.lab);
+                       cout << " the edge " << iv[0] << " is a boundary, lab = " << vertices[iv[0]].lab <<endl;
+                   be(nbeL++).set(vertices,iv,vertices[iv[0]].lab);
                    
                }
                // internal point -- check angular and no manifold
@@ -770,7 +770,7 @@ namespace Fem2D
                        if(pdt >= angle) {
                            if(verbosity>15)
                                cout << " the border point " <<nbeL <<": [" << iv[0] << " " << "] is a boundary with the angular criteria " << angle << endl;
-                           int lab = min(K.lab, K_adj.lab);
+                           int lab = vertices[iv[0]].lab; //min(K.lab, K_adj.lab);
                            be(nbeL).set(vertices,iv,lab);
                            pointI.add(key, nbeL++);
                        }
@@ -778,7 +778,7 @@ namespace Fem2D
                            if(verbosity>15)
                              cout << " the border point " <<nbeL <<": [" << iv[0] << " " << "] is a boundary with labeled boundary criteria" << endl;
             
-                           be(nbeL).set(vertices,iv,K.lab);
+                           be(nbeL).set(vertices,iv,vertices[iv[0]].lab);//K.lab);
                            pointI.add(key, nbeL++);
                        }
                    }

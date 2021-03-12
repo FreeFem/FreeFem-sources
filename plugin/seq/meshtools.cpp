@@ -29,6 +29,7 @@
 // WARNING: do not compile under windows
 
 #include "ff++.hpp"
+#include "AFunction_ext.hpp"
 
 template<class Mesh> struct nbvertexElement { static const  int value = Mesh::Element::nv; };
 template<> struct nbvertexElement<Mesh> { static const  int value = Mesh::Element::NbV; };
@@ -207,6 +208,36 @@ public:
   operator aType () const { return atype<pmesh>();}
 };
 
+template<class Mesh,class Cmp=std::less<double> >
+KN_<long> iminKP1(Stack stack,const Mesh * const & pTh,KN<double> * const & pu)
+{
+    const Cmp cmp;
+    if(verbosity>9) cout << "iminKP1:  cmp(1.,2.) =" << cmp(1.,2.)<< endl;
+    const int d= Mesh::RdHat::d;
+    const int nbvK = d+1;
+    ffassert(pu);
+    const Mesh & Th=*pTh;
+    KN<double> &u=*pu;
+    ffassert(u.N()== Th.nv); // P1 ...
+    long *pi = Add2StackOfPtr2FreeA(stack,new long[Th.nt]);
+   if(verbosity>1) cout<< " i[min|max]KP1: nbvk ="<< nbvK << " nv " << Th.nv << " nt :" << Th.nt << " cmp: " << cmp(1.,2.) <<  endl;
+    for (long k=0;k<Th.nt;++k)
+    {
+        long im=Th(k,0);
+        for (int i=1;i<nbvK;++i)
+        {
+          long jm = Th(k,i);
+ //           if( u[im] > u[jm] ) im =jm;
+            if( cmp(u[jm], u[im]) ) im =jm;
+         }
+        pi[k]=im;
+    }
+    return KN_<long>(pi,Th.nt);
+}
+template<class Mesh >
+KN_<long> imaxKP1(Stack stack,const Mesh * const & pTh,KN<double> * const & pu)
+{ return iminKP1<Mesh,greater<double> >(stack,pTh,pu);}
+
 template<class Mesh,class K>
 basicAC_F0::name_and_type  ConnectedComponents<Mesh,K>::name_param[]= {
     {  "closure", &typeid(long) },
@@ -222,6 +253,14 @@ static void inittt( ) {
     Global.Add("ConnectedComponents", "(",new OneOperatorCode<ConnectedComponents<MeshL,long> > );
     Global.Add("ConnectedComponents", "(",new OneOperatorCode<ConnectedComponents<MeshS,double> > );
     Global.Add("ConnectedComponents", "(",new OneOperatorCode<ConnectedComponents<MeshS,long> > );
+    Global.Add("iminKP1", "(",new OneOperator2s_<KN_<long>,pmesh3,KN<double> * >(iminKP1));
+    Global.Add("iminKP1", "(",new OneOperator2s_<KN_<long>,pmesh,KN<double> * >(iminKP1));
+    Global.Add("iminKP1", "(",new OneOperator2s_<KN_<long>,pmeshL,KN<double> * >(iminKP1));
+    Global.Add("iminKP1", "(",new OneOperator2s_<KN_<long>,pmeshS,KN<double> * >(iminKP1));
+    Global.Add("imaxKP1", "(",new OneOperator2s_<KN_<long>,pmesh3,KN<double> * >(imaxKP1));
+    Global.Add("imaxKP1", "(",new OneOperator2s_<KN_<long>,pmesh,KN<double> * >(imaxKP1));
+    Global.Add("imaxKP1", "(",new OneOperator2s_<KN_<long>,pmeshL,KN<double> * >(imaxKP1));
+    Global.Add("imaxKP1", "(",new OneOperator2s_<KN_<long>,pmeshS,KN<double> * >(imaxKP1));
 /*
   Global.Add("connexecomponantev", "(",
              new OneOperator2<long,pmesh,KN<long>* >(connexecomponantev));
