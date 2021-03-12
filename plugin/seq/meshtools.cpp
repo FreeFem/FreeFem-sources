@@ -211,7 +211,7 @@ public:
 template<class Mesh,class Cmp=std::less<double> >
 KN_<long> iminKP1(Stack stack,const Mesh * const & pTh,KN<double> * const & pu)
 {
-    const Cmp cmp;
+    const Cmp cmp=Cmp();
     if(verbosity>9) cout << "iminKP1:  cmp(1.,2.) =" << cmp(1.,2.)<< endl;
     const int d= Mesh::RdHat::d;
     const int nbvK = d+1;
