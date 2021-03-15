@@ -244,7 +244,7 @@ namespace PETSc {
   template< class Type, class K >
   long globalNumbering(Type* const& A, KN< K >* const& numbering) {
     if (A) {
-      numbering->resize(A->_A->getMatrix( )->_n);
+      numbering->resize(A->_A->getDof( ));
       if (A->_num)
         for (int i = 0; i < numbering->n; ++i) numbering->operator[](i) = A->_num[i];
     }
@@ -1170,59 +1170,76 @@ namespace PETSc {
         MPI_Comm& rval = self;
         comm = &rval;
     }
-    ptA->_A = new HpddmType;
-    if ((ptR || c == 2 || c == 3) && (mA || (c != 0 && c != 2))) {
-      HPDDM::MatrixCSR< PetscScalar >* dA;
-      if (mA)
-        dA = new_HPDDM_MatrixCSR< PetscScalar >(mA);
-      else
-        dA = new HPDDM::MatrixCSR< PetscScalar >(dof, dof, 0, nullptr, nullptr, nullptr, false);
-      Matrice_Creuse< double >* pList =
-        nargs[4] ? GetAny< Matrice_Creuse< double >* >((*nargs[4])(stack)) : 0;
-      HPDDM::MatrixCSR< void >* dL = nullptr;
-      int level = nargs[5] ? std::abs(GetAny< long >((*nargs[5])(stack))) : 0;
-      KN_< KN< long > > sub((c == 0 || c == 1) && ptR->n > 0 && ptR->operator[](0).n > 0
-                              ? (*ptR)(FromTo(1 + level * ptR->operator[](0).n,
-                                              1 + (level + 1) * ptR->operator[](0).n - 1))
-                              : KN< KN< long > >( ));
-      if (std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value && pList &&
-          (mA || (c != 0 && c != 2))) {
-        int n = 0;
-        ptA->_exchange = new HPDDM::template Subdomain< PetscScalar >*[2]( );
-        ptA->_exchange[0] = new HPDDM::template Subdomain< PetscScalar >( );
-        ptA->_exchange[0]->initialize(
-          dA, STL< long >((c == 0 || c == 1) && ptR->n > 0 ? ptR->operator[](0) : KN< long >( )),
-          sub, comm);
-        ptA->_exchange[0]->setBuffer( );
-        if (pList->A) {
-          MatriceMorse< double >* mList = static_cast< MatriceMorse< double >* >(&*(pList->A));
-          mList->CSR( );
-          ffassert(mList->n == mList->nnz);
-          ffassert(mList->m == (mA ? mA->n : dof));
-          n = mList->n;
-          dL = new HPDDM::MatrixCSR< void >(n, mA ? mA->n : dof, n, mList->p, mList->j, false);
-          ptA->_D = new KN<PetscReal>(n);
-          for (int i = 0; i < n; ++i) ptA->_D->operator[](i) = ptD->operator[](mList->j[i]);
-        } else {
-          dL = new HPDDM::MatrixCSR< void >(0, mA ? mA->n : dof, 0, nullptr, nullptr, false);
-          empty = new KN< typename std::conditional< std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value,
-                                   double, long >::type >(0);
+    if (c == 2 && mA->n != mA->m) {
+      ptA->_first = 0;
+      ptA->_last = mA->n;
+      ptA->_cfirst = 0;
+      ptA->_clast = mA->m;
+      MatCreate(*comm, &ptA->_petsc);
+      MatSetSizes(ptA->_petsc, mA->n, mA->m, PETSC_DECIDE, PETSC_DECIDE);
+      MatSetType(ptA->_petsc, MATMPIAIJ);
+      ff_HPDDM_MatrixCSR< PetscScalar > dA(mA);
+      ptA->_num = new PetscInt[mA->n + mA->m];
+      ptA->_cnum = ptA->_num + mA->n;
+      std::iota(ptA->_num, ptA->_num + mA->n, 0);
+      std::iota(ptA->_cnum, ptA->_cnum + mA->m, 0);
+      MatMPIAIJSetPreallocationCSR(ptA->_petsc, dA._ia, dA._ja, dA._a);
+    }
+    else {
+      ptA->_A = new HpddmType;
+      if ((ptR || c == 2 || c == 3) && (mA || (c != 0 && c != 2))) {
+        HPDDM::MatrixCSR< PetscScalar >* dA;
+        if (mA)
+          dA = new_HPDDM_MatrixCSR< PetscScalar >(mA);
+        else
+          dA = new HPDDM::MatrixCSR< PetscScalar >(dof, dof, 0, nullptr, nullptr, nullptr, false);
+        Matrice_Creuse< double >* pList =
+          nargs[4] ? GetAny< Matrice_Creuse< double >* >((*nargs[4])(stack)) : 0;
+        HPDDM::MatrixCSR< void >* dL = nullptr;
+        int level = nargs[5] ? std::abs(GetAny< long >((*nargs[5])(stack))) : 0;
+        KN_< KN< long > > sub((c == 0 || c == 1) && ptR->n > 0 && ptR->operator[](0).n > 0
+                                ? (*ptR)(FromTo(1 + level * ptR->operator[](0).n,
+                                                1 + (level + 1) * ptR->operator[](0).n - 1))
+                                : KN< KN< long > >( ));
+        if (std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value && pList &&
+            (mA || (c != 0 && c != 2))) {
+          int n = 0;
+          ptA->_exchange = new HPDDM::template Subdomain< PetscScalar >*[2]( );
+          ptA->_exchange[0] = new HPDDM::template Subdomain< PetscScalar >( );
+          ptA->_exchange[0]->initialize(
+            dA, STL< long >((c == 0 || c == 1) && ptR->n > 0 ? ptR->operator[](0) : KN< long >( )),
+            sub, comm);
+          ptA->_exchange[0]->setBuffer( );
+          if (pList->A) {
+            MatriceMorse< double >* mList = static_cast< MatriceMorse< double >* >(&*(pList->A));
+            mList->CSR( );
+            ffassert(mList->n == mList->nnz);
+            ffassert(mList->m == (mA ? mA->n : dof));
+            n = mList->n;
+            dL = new HPDDM::MatrixCSR< void >(n, mA ? mA->n : dof, n, mList->p, mList->j, false);
+            ptA->_D = new KN<PetscReal>(n);
+            for (int i = 0; i < n; ++i) ptA->_D->operator[](i) = ptD->operator[](mList->j[i]);
+          } else {
+            dL = new HPDDM::MatrixCSR< void >(0, mA ? mA->n : dof, 0, nullptr, nullptr, false);
+            empty = new KN< typename std::conditional< std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value,
+                                     double, long >::type >(0);
+          }
         }
-      }
-      ptA->_A->HPDDM::template Subdomain< PetscScalar >::initialize(
-        dA, STL< long >((c == 0 || c == 1) && ptR->n > 0 ? ptR->operator[](0) : KN< long >( )), sub,
-        comm, dL);
-      delete dL;
-      ptA->_num = new PetscInt[ptA->_A->getMatrix( )->_n];
-      initPETScStructure<C>(ptA, bs,
-        nargs[3] && GetAny< bool >((*nargs[3])(stack)) ? PETSC_TRUE : PETSC_FALSE, empty ? empty : ptD);
-      delete empty;
-      if (!std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value) {
-        mA->p = ptA->_A->getMatrix( )->_ia;
-      }
-      if (nargs[2] && GetAny< bool >((*nargs[2])(stack))) {
-        if (ptR) ptR->resize(0);
-        if (c == 0 || c == 2) GetAny< Matrice_Creuse< PetscScalar >* >((*K)(stack))->destroy( );
+        ptA->_A->HPDDM::template Subdomain< PetscScalar >::initialize(
+          dA, STL< long >((c == 0 || c == 1) && ptR->n > 0 ? ptR->operator[](0) : KN< long >( )), sub,
+          comm, dL);
+        delete dL;
+        ptA->_num = new PetscInt[ptA->_A->getMatrix( )->_n];
+        initPETScStructure<C>(ptA, bs,
+          nargs[3] && GetAny< bool >((*nargs[3])(stack)) ? PETSC_TRUE : PETSC_FALSE, empty ? empty : ptD);
+        delete empty;
+        if (!std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value) {
+          mA->p = ptA->_A->getMatrix( )->_ia;
+        }
+        if (nargs[2] && GetAny< bool >((*nargs[2])(stack))) {
+          if (ptR) ptR->resize(0);
+          if (c == 0 || c == 2) GetAny< Matrice_Creuse< PetscScalar >* >((*K)(stack))->destroy( );
+        }
       }
     }
     return ptA;
@@ -1719,6 +1736,35 @@ namespace PETSc {
     ierr = PetscFree(user);CHKERRQ(ierr);
     PetscFunctionReturn(0);
   }
+  struct WrapperSubKSP {
+    IS  is;
+    KSP *ksp;
+  };
+  static PetscErrorCode WrapperApply(PC pc, Vec in, Vec out) {
+    WrapperSubKSP *ctx;
+    PetscFunctionBeginUser;
+    VecCopy(in, out);
+    PCShellGetContext(pc, (void**)&ctx);
+    VecPermute(out, ctx->is, PETSC_FALSE);
+    KSPSolve(*ctx->ksp, out, out);
+    VecPermute(out, ctx->is, PETSC_TRUE);
+    PetscFunctionReturn(0);
+  }
+  static PetscErrorCode WrapperDestroy(PC pc) {
+    WrapperSubKSP *ctx;
+    PetscFunctionBeginUser;
+    PCShellGetContext(pc, (void**)&ctx);
+    ISDestroy(&ctx->is);
+    PetscFree(ctx);
+    PetscFunctionReturn(0);
+  }
+  static PetscErrorCode WrapperView(PC pc, PetscViewer viewer) {
+    WrapperSubKSP *ctx;
+    PetscFunctionBeginUser;
+    PCShellGetContext(pc, (void**)&ctx);
+    KSPView(*ctx->ksp, viewer);
+    PetscFunctionReturn(0);
+  }
   template< class, class Container, char N = 'N' >
   static PetscErrorCode Op_User(Container, Vec, Vec);
   template< class Type >
@@ -1726,39 +1772,7 @@ namespace PETSc {
     Type *ptA, *ptParent;
     KN< Dmat >* tabA;
     int level = 0;
-    if (c == 0) {
-      ptA = GetAny< Type* >((*A)(stack));
-      ptParent = nargs[7] ? GetAny< Type* >((*nargs[7])(stack)) : 0;
-      if (ptParent && ptParent->_ksp) {
-        PC pc;
-        KSPGetPC(ptParent->_ksp, &pc);
-        PCType type;
-        PCGetType(pc, &type);
-        PetscBool isFieldSplit;
-        PetscStrcmp(type, PCFIELDSPLIT, &isFieldSplit);
-        if (!isFieldSplit)
-          return 0L;
-        else {
-          PetscInt nsplits;
-          KSP* subksp;
-          PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
-          Mat** mat;
-          PetscInt M, N;
-          MatNestGetSubMats(ptParent->_petsc, &M, &N, &mat);
-          ffassert(M == N);
-          for (int i = 0; i < M; ++i) {
-            if (mat[i][i] == ptA->_petsc) {
-              KSPDestroy(&ptA->_ksp);
-              ptA->_ksp = subksp[i];
-              PetscObjectReference((PetscObject)subksp[i]);
-              KSPSetOperators(subksp[i], ptA->_petsc, ptA->_petsc);
-              break;
-            }
-          }
-          PetscFree(subksp);
-        }
-      }
-    } else {
+    if (c != 0) {
       tabA = GetAny< KN< Dmat >* >((*A)(stack));
       assert(tabA->N( ) > 0);
       if (c == 2) {
@@ -1768,6 +1782,90 @@ namespace PETSc {
       }
       ptA = reinterpret_cast< Type* >(&tabA->operator[](level));
       level = tabA->N( ) - level - 1;
+    }
+    else
+      ptA = GetAny< Type* >((*A)(stack));
+    ptParent = nargs[7] ? GetAny< Type* >((*nargs[7])(stack)) : 0;
+    if (ptParent && ptParent->_ksp) {
+      KSP* subksp;
+      PetscInt n;
+      PC pc;
+      KSPGetPC(ptParent->_ksp, &pc);
+      PCType type;
+      PCGetType(pc, &type);
+      PetscBool isType;
+      PetscStrcmp(type, PCFIELDSPLIT, &isType);
+      if (!isType) {
+        PetscStrcmp(type, PCASM, &isType);
+        if (!isType)
+          return 0L;
+        else {
+          PCASMGetSubKSP(pc, &n, NULL, &subksp);
+          ffassert(n == 1);
+          KSPSetOptionsPrefix(subksp[0], NULL);
+          KSPSetType(subksp[0], KSPPREONLY);
+          PC subpc;
+          KSPGetPC(subksp[0], &subpc);
+          PCSetType(subpc, PCSHELL);
+          WrapperSubKSP* wrapper = nullptr;
+          PetscNew(&wrapper);
+          PCShellSetContext(subpc, wrapper);
+          PCShellSetApply(subpc, WrapperApply);
+          PCShellSetDestroy(subpc, WrapperDestroy);
+          PCShellSetView(subpc, WrapperView);
+          KSPSetSkipPCSetFromOptions(subksp[0], PETSC_TRUE);
+          PetscInt* idx;
+          PetscMalloc1(ptA->_A->getDof(), &idx);
+          std::map<int, int> map;
+          ffassert(ptA->_A->getDof() == ptParent->_A->getDof());
+          for(int i = 0; i < ptA->_A->getDof(); ++i)
+              map[ptParent->_num[i]] = i;
+          int i = 0;
+          for(const std::pair<const int, int>& v : map)
+              idx[i++] = v.second;
+          IS perm;
+          ISCreateGeneral(PETSC_COMM_SELF, ptA->_A->getDof(), idx, PETSC_OWN_POINTER, &perm);
+          ISInvertPermutation(perm, PETSC_DECIDE, &wrapper->is);
+          ISDestroy(&perm);
+          wrapper->ksp = &ptA->_ksp;
+          PetscBool assembled = PETSC_FALSE;
+          if (ptA->_petsc)
+            MatAssembled(ptA->_petsc, &assembled);
+          if (!assembled) {
+            Mat A;
+            MatType type;
+            KSPGetOperators(subksp[0], &A, NULL);
+            MatGetType(A, &type);
+            PetscBool convert;
+            PetscStrcmp(type, MATSEQSBAIJ, &convert);
+            if(convert)
+                MatConvert(A, MATSEQAIJ, MAT_INPLACE_MATRIX, &A);
+            MatDestroy(&ptA->_petsc);
+            MatPermute(A, wrapper->is, wrapper->is, &ptA->_petsc);
+            if(convert)
+                MatConvert(ptA->_petsc, MATMPISBAIJ, MAT_INPLACE_MATRIX, &ptA->_petsc);
+            else
+                MatConvert(ptA->_petsc, MATMPIAIJ, MAT_INPLACE_MATRIX, &ptA->_petsc);
+          }
+        }
+      }
+      else {
+        PCFieldSplitGetSubKSP(pc, &n, &subksp);
+        Mat** mat;
+        PetscInt M, N;
+        MatNestGetSubMats(ptParent->_petsc, &M, &N, &mat);
+        ffassert(M == N);
+        for (int i = 0; i < M; ++i) {
+          if (mat[i][i] == ptA->_petsc) {
+            KSPDestroy(&ptA->_ksp);
+            ptA->_ksp = subksp[i];
+            PetscObjectReference((PetscObject)subksp[i]);
+            KSPSetOperators(subksp[i], ptA->_petsc, ptA->_petsc);
+            break;
+          }
+        }
+        PetscFree(subksp);
+      }
     }
     if (nargs[0]) {
       std::string* options = GetAny< std::string* >((*nargs[0])(stack));
@@ -1788,12 +1886,13 @@ namespace PETSc {
         KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
       }
       if (c == 1 || c == 3) {
+        if (nargs[4])
+            KSPSetOptionsPrefix(ptA->_ksp, GetAny< std::string* >((*nargs[4])(stack))->c_str( ));
         KN< Matrice_Creuse< double > >* mP = (c == 1 ? GetAny< KN< Matrice_Creuse< double > >* >((*P)(stack)) : nullptr);
         KN< Dmat >* mD = (c == 3 ? GetAny< KN< Dmat >* >((*P)(stack)) : nullptr);
         ffassert((c == 1 && mP->N( ) + 1 == tabA->N( )) || (c == 3 && (mD->N( ) + 1 == tabA->N( ) || tabA->N( ) == 1)));
         ksp = ptA->_ksp;
         PC pc;
-        KSPSetFromOptions(ksp);
         KSPGetPC(ksp, &pc);
         PCSetType(pc, PCMG);
         const PetscInt level = (c == 3 ? mD->N( ) + 1 : tabA->N( ));
@@ -1871,7 +1970,7 @@ namespace PETSc {
         }
       }
       else ksp = ptA->_ksp;
-      if (nargs[4] && c != 2)
+      if (nargs[4] && c != 1 && c != 2 || c == 3)
         KSPSetOptionsPrefix(ptA->_ksp, GetAny< std::string* >((*nargs[4])(stack))->c_str( ));
       KSPSetFromOptions(ksp);
       if (c != 1) {
@@ -1943,17 +2042,17 @@ namespace PETSc {
             if (isType) PCHYPRESetDiscreteGradient(pc, G->_petsc);
           }
 #endif
-          if (assembled && ptA->_A && ptA->_A->getMatrix( ) && ptA->_num) {
-            const HPDDM::MatrixCSR< PetscScalar >* const A = ptA->_A->getMatrix( );
+          if (assembled && ptA->_A && ptA->_num) {
             PetscInt* idx;
-            PetscMalloc1(A->_n, &idx);
-            std::copy_n(ptA->_num, A->_n, idx);
+            PetscMalloc1(ptA->_A->getDof(), &idx);
+            std::copy_n(ptA->_num, ptA->_A->getDof(), idx);
             IS is;
-            ISCreateGeneral(PETSC_COMM_SELF, ptA->_A->getMatrix( )->_n, idx, PETSC_OWN_POINTER,
+            ISCreateGeneral(PETSC_COMM_SELF, ptA->_A->getDof(), idx, PETSC_OWN_POINTER,
                             &is);
 #if defined(PCHPDDM) && defined(PETSC_USE_SHARED_LIBRARIES)
             PetscStrcmp(type, PCHPDDM, &isType);
-            if (isType) {
+            const HPDDM::MatrixCSR< PetscScalar >* const A = ptA->_A->getMatrix( );
+            if (isType && A) {
               Mat aux = ff_to_PETSc(A);
               PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
               MatDestroy(&aux);
@@ -1985,25 +2084,26 @@ namespace PETSc {
               n -= first;
               ISCreateStride(PETSC_COMM_SELF, n, first, 1, &loc);
               PCASMSetLocalSubdomains(pc, 1, &is, &loc);
+              int nnz = dO._nnz;
+              MPI_Allreduce(MPI_IN_PLACE, &nnz, 1, MPI_INT, MPI_MAX, PetscObjectComm((PetscObject)ptA->_petsc));
               PetscErrorCode (*CreateSubMatrices)(Mat,PetscInt,const IS*,const IS*,MatReuse,Mat**);
-              MatGetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(**)(void))&CreateSubMatrices);
-              MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(*)(void))CustomCreateSubMatrices);
-              Mat aux = ff_to_PETSc(&dO);
-              IS perm;
-              ISSortPermutation(is, PETSC_TRUE, &perm);
-              if (dO._sym) MatConvert(aux, MATSEQAIJ, MAT_INPLACE_MATRIX, &aux);
-              O = new Mat;
-              MatPermute(aux, perm, perm, O);
-              if (dO._sym) {
-                MatSetOption(*O, MAT_SYMMETRIC, PETSC_TRUE);
-                MatConvert(*O, MATSEQSBAIJ, MAT_INPLACE_MATRIX, O);
+              if (nnz) {
+                MatGetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(**)(void))&CreateSubMatrices);
+                MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(*)(void))CustomCreateSubMatrices);
+                Mat aux = ff_to_PETSc(&dO);
+                IS perm;
+                ISSortPermutation(is, PETSC_TRUE, &perm);
+                O = new Mat;
+                MatPermute(aux, perm, perm, O);
+                ISDestroy(&perm);
+                MatDestroy(&aux);
               }
-              ISDestroy(&perm);
-              MatDestroy(&aux);
               PCSetUp(pc);
               ISDestroy(&loc);
-              MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(*)(void))CreateSubMatrices);
-              delete O;
+              if (nnz) {
+                MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(*)(void))CreateSubMatrices);
+                delete O;
+              }
               O = nullptr;
             }
             ISDestroy(&is);
@@ -4712,8 +4812,8 @@ static void Init_PETSc( ) {
   TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar >, 1 >);
   TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >(1));
   TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >);
+  TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar >, 1 >);
   TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >(1));
-  TheOperators->Add("<-", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar >, 1 >());
   Global.Add("constructor", "(", new PETSc::initRectangularCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >(1, 1));
   TheOperators->Add(
     "<-", new OneOperatorCode< PETSc::initCSRfromBlockMatrix< HpSchwarz< PetscScalar > > >( ));
