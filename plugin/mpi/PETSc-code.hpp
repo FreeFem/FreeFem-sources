@@ -1970,7 +1970,7 @@ namespace PETSc {
         }
       }
       else ksp = ptA->_ksp;
-      if (nargs[4] && c != 1 && c != 2 || c == 3)
+      if (nargs[4] && c != 1 && c != 2 && c != 3)
         KSPSetOptionsPrefix(ptA->_ksp, GetAny< std::string* >((*nargs[4])(stack))->c_str( ));
       KSPSetFromOptions(ksp);
       if (c != 1) {
