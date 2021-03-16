@@ -219,6 +219,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
             MatGetType(ptA->_petsc, &type);
             PetscStrcmp(type, MATNEST, &isType);
             PetscInt m;
+            MatGetLocalSize(ptA->_petsc, &m, NULL);
             if(!codeA) {
                 Type* ptB = (c == 0 ? GetAny<Type*>((*B)(stack)) : NULL);
                 if(std::is_same<SType, EPS>::value)
@@ -232,11 +233,8 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                     PEPSetOperators(pep, ptTab->N(), tab);
                     delete [] tab;
                 }
-                if(!ptA->_A)
-                    MatGetLocalSize(ptA->_petsc, &m, NULL);
             }
             else {
-                MatGetLocalSize(ptA->_petsc, &m, NULL);
                 PetscInt M;
                 MatGetSize(ptA->_petsc, &M, NULL);
                 if(!std::is_same<SType, NEP>::value) {
@@ -397,7 +395,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 if(rvectors && !isType)
                     rvectors->resize(nconv);
                 if(array)
-                    array->resize(!codeA && !isType && ptA->_A ? ptA->_A->getDof() : m, nconv);
+                    array->resize(m, nconv);
                 Vec xr, xi;
                 PetscInt n, nr;
                 if(eigenvectors || array || rvectors || rarray) {
