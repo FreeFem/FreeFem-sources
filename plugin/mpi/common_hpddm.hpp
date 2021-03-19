@@ -539,6 +539,38 @@ namespace PETSc {
 }
 #endif
 
+template<class K>
+MatriceMorse<K>* kron_impl(Matrice_Creuse<K>* const& A, Matrice_Creuse<K>* const& B) {
+    ffassert(A->A && B->A);
+    MatriceMorse<K>* mA = static_cast<MatriceMorse<K>*>(&(*A->A));
+    MatriceMorse<K>* mB = static_cast<MatriceMorse<K>*>(&(*B->A));
+    MatriceMorse<K>& C = *new MatriceMorse<K>(A->A->n * B->A->n, A->A->m * B->A->m, mA->nnz * mB->nnz, 0);
+    mA->CSR();
+    mB->CSR();
+    C.CSR();
+    C.p[0] = 0;
+    for(int i = 0; i < mA->n; ++i)
+        for(int j = 0; j < mB->n; ++j)
+            C.p[i * mB->n + j + 1] = C.p[i * mB->n + j] + (mA->p[i + 1] - mA->p[i]) * (mB->p[j + 1] - mB->p[j]);
+    C.nnz = mA->nnz * mB->nnz;
+    int k = 0;
+    for(int i = 0; i < mA->n; ++i)
+        for(int p = 0; p < mB->n; ++p) {
+            for(int j = mA->p[i]; j < mA->p[i + 1]; ++j) {
+                for(int q = mB->p[p]; q < mB->p[p + 1]; ++q) {
+                    C.j[k] = mA->j[j] * mB->m + mB->j[q];
+                    C.aij[k] = mA->aij[j] * mB->aij[q];
+                    ++k;
+                }
+            }
+        }
+    return &C;
+}
+template<class K>
+newpMatrice_Creuse<K> kron(Stack stack, Matrice_Creuse<K>* const& A, Matrice_Creuse<K>* const& B) {
+    return newpMatrice_Creuse<K>(stack, kron_impl(A, B));
+}
+
 static void Init_Common() {
     if(!Global.Find("savevtk").NotNull()) {
         Global.Add("savevtk", "(", new OneOperatorCode<VTK_WriteMesh_Op> );
@@ -546,6 +578,8 @@ static void Init_Common() {
     }
     if(!Global.Find("periodicity").NotNull()) {
         Global.Add("periodicity", "(", new OneOperator3_<long, Matrice_Creuse<double>*, KN< KN< long > >*, KN< double >*>(periodicity));
+        Global.Add("kron", "(", new OneOperator2s_<newpMatrice_Creuse<double>, Matrice_Creuse<double>*, Matrice_Creuse<double>*>(kron));
+        Global.Add("kron", "(", new OneOperator2s_<newpMatrice_Creuse<std::complex<double>>, Matrice_Creuse<std::complex<double>>*, Matrice_Creuse<std::complex<double>>*>(kron));
     }
 #if HPDDM_SCHWARZ || HPDDM_FETI || HPDDM_BDD
     aType t;
