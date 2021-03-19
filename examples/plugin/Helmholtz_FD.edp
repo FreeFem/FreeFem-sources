@@ -1,0 +1,97 @@
+/* solves the 3D Helmholtz equation with finite-differences using the
+   27-point stencil from Operto, S., Virieux, J., Amestoy, P., L’Excellent,
+   J. Y., Giraud, L., & Ali, H. B. H. (2007). 3D finite-difference
+   frequency-domain modeling of visco-acoustic wave propagation using a 
+   massively parallel direct solver: A feasibility study.
+   Geophysics, 72(5), SM195-SM211. */
+
+// for the make check:
+// PARAM -nppwl 4 -npml 4
+
+load "Helmholtz_FD"
+
+include "cube.idp"
+include "getARGV.idp"
+
+load "medit"
+load "MUMPS"
+
+real freq = getARGV("-frequency",1.); // frequency
+int nppwl = getARGV("-nppwl",8); // number of points per wavelength
+int npml = getARGV("-npml",8); // number of points in pml
+
+real omega = 2.*pi*freq;
+real c = 1;
+real mu = c^2;
+real k = omega/c;
+
+real lambda = (1./freq)*c;
+real h = lambda/nppwl;
+
+cout << "lambda = " << lambda << ", h = " << h << endl;
+
+real lengthpml = npml*lambda/nppwl;
+
+/* dimensions of the domain */
+real lengthx = 6;
+real lengthy = 2;
+real depth = 10;
+
+/* point source coordinates */
+real xs = lengthx/2.;
+real ys = lengthy/2.;
+real zs = -depth/2.;
+
+real nloc = nppwl*lengthx/lambda;
+
+int nplx = nloc*(lengthx+2*lengthpml)/lengthx;
+int nply = nloc*(lengthy+2*lengthpml)/lengthx;
+int npd = nloc*(depth+2*lengthpml)/lengthx;
+nplx = nplx+nplx%2;
+nply = nply+nply%2;
+npd = npd+npd%2;
+
+int[int] N=[nplx,nply,npd];
+real [int,int] B=[[-lengthpml,lengthx+lengthpml],[-lengthpml,lengthy+lengthpml],[-depth-lengthpml,lengthpml]];
+int [int,int] L=[[11,12],[13,14],[15,16]];
+
+mesh3 Th=Cube(N,B,L);
+
+/* tag the source node: */
+real disti, dist = 1e+30;
+real idist = -1;
+for (int i=0; i<Th.nv; i++) {
+  disti =(Th(i).x-xs)^2+(Th(i).y-ys)^2+(Th(i).z-zs)^2;
+  if (disti < dist){
+    dist = disti; 
+    idist = i;
+  }
+}
+
+func supp = sqrt((x-xs)^2+(y-ys)^2+(z-zs)^2) > lambda;
+func pml = (x>=lengthx)+(x<=0)+(y>=lengthy)+(y<=0)+(z>=0)+(z<=-depth);
+
+func exact = exp(1i*k*sqrt((x-xs)^2+(y-ys)^2+(z-zs)^2))/(1e-20+4*pi*sqrt((x-xs)^2+(y-ys)^2+(z-zs)^2));
+
+fespace Uh(Th,P1);
+
+Uh<complex> rhs = 0;
+rhs[][idist] = -1./(h^3);
+
+int[int] pmlsides=[1,1,1,1,1,1];
+matrix<complex> A = HelmholtzFD(Th,omega,mu,npml=npml,pmlsides=pmlsides,scheme="G4810");
+set(A,solver=sparsesolver);
+
+Uh<complex> u, uexact = exact*supp;
+
+u[] = A^-1*rhs[];
+
+Th = trunc(Th,pml==0);
+
+u = u*supp;
+
+real err = sqrt(abs(int3d(Th,qfV=qfV1lump)(supp*(u-exact)^2))) / sqrt(abs(int3d(Th,qfV=qfV1lump)(supp*exact^2)));
+
+cout << "relative L2 error = " << err << endl;
+
+medit("u.re uexact.re",Th,real(u),real(uexact));

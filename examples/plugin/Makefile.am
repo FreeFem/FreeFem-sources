@@ -100,7 +100,8 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	testFEMorley.edp \
 	testp1dcnc.edp \
 	iovtk.edp \
-	ConnectedComponents.edp
+	ConnectedComponents.edp \
+	Helmholtz_FD.edp
 
 TESTS_FFTW3 = dfft.edp
 
