@@ -34,6 +34,8 @@ All notable changes to this project will be documented in this file.
   in progress
 - add gluemesh of array of MeshL and MeshS type
 - interface to `PC_MG_GALERKIN_BOTH`
+- Kronecker product of two sparse matrices `matrix C = kron(A, B)`
+
 ### Changed
 - Now the order to find MPI in configure is first if you have PETSC then take MPI from PETSc
   otherwise use previous method

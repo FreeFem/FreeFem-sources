@@ -1,10 +1,6 @@
 #ifndef PETSC_HPP_
 #define PETSC_HPP_
 
-#if PETSC_VERSION_LT(3,6,0)
-#define MatCreateVecs MatGetVecs
-#endif
-
 #define HPDDM_PETSC   1
 
 #include "common_hpddm.hpp"
