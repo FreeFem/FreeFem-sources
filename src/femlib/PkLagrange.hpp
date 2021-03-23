@@ -32,14 +32,21 @@
 #include "FESpacen.hpp"
 #include <vector>
 namespace Fem2D {
+
+
 template<class Rd,class E>
 static void SetPtPk(Rd *Pt, const int *dfon, int nn) {
     // P0, P1, P1b & P2
     typedef typename E::RdHat RdHat;
     const int dHat = E::RdHat::d;
-    const RdHat *KHat=RdHat::KHat;
+    //const RdHat *KHat=RdHat::KHat;
+    // sorry on some arch this is unset so rebuild ... FH 
+    RdHat KHat[dHat+1];
+    for(int i=0; i<=dHat;++i)
+    KHat[i+1][i]=1. ;
     int k = 0;
     if (dfon[0]) {
+        
         for (int i = 0; i <= dHat; ++i)
          Pt[k++] = KHat[i];
         
@@ -64,7 +71,11 @@ static void SetPtPkDc(int kk,Rd *Pt, const int *dfon, int nn)
 {
     typedef typename E::RdHat RdHat;
     const int dHat = E::RdHat::d;
-    const RdHat *KHat=RdHat::KHat;
+    RdHat KHat[dHat+1];
+    // sorry on some arch this is unset so rebuild ... FH
+    for(int i=0; i<=dHat;++i)
+    KHat[i+1][i]=1. ;
+
     int k=0;
     if (kk>0) {
         int n= dfon[dHat];
