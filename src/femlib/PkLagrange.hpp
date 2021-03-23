@@ -41,7 +41,7 @@ static void SetPtPk(Rd *Pt, const int *dfon, int nn) {
     const int dHat = E::RdHat::d;
     //const RdHat *KHat=RdHat::KHat;
     // sorry on some arch this is unset so rebuild ... FH 
-    RdHat KHat[dHat+1];
+    static RdHat KHat[dHat+1]; // Bug if no static on ubuntu ??? FH
     for(int i=0; i<=dHat;++i)
     KHat[i+1][i]=1. ;
     int k = 0;
@@ -71,7 +71,7 @@ static void SetPtPkDc(int kk,Rd *Pt, const int *dfon, int nn)
 {
     typedef typename E::RdHat RdHat;
     const int dHat = E::RdHat::d;
-    RdHat KHat[dHat+1];
+    static RdHat KHat[dHat+1]; // Bug if no static on ubunti ??? FH
     // sorry on some arch this is unset so rebuild ... FH
     for(int i=0; i<=dHat;++i)
     KHat[i+1][i]=1. ;
