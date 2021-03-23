@@ -35,14 +35,20 @@ All notable changes to this project will be documented in this file.
 - add gluemesh of array of MeshL and MeshS type
 - interface to `PC_MG_GALERKIN_BOTH`
 - Kronecker product of two sparse matrices `matrix C = kron(A, B)`
-
+- add lot of finite element on Mesh3, MeshS, MeshL of Discontinous Galerling Element
+  in 3d       : P1dc3d, P2dc3d, P3dc3d, P4dc3d , P0edge3d ,P0edgedc3d ,  P0face3d ,P0facedc3d , P0VF3d ,P0VFdc3d , 
+  on Surface  : P1dcS, P2dcS, P3dcS, P4dcS , P0edgeS ,P0edgedcS , P0VFS ,P0VFdcS, 
+  on Curve   : P1dcL, P2dcL, P3dcL, P4dcL ,  P0VFL ,P0VFdcL
+  remark; the associated generic name existe of P1dc, P2dc, P0edge, P0VF and all  dc finite element corresponding to
+  no continuity across element. 
+- add code of intallfaces to  do Discontinous Galerkin  formulation in 3d (in test FH.) 
 ### Changed
 - Now the order to find MPI in configure is first if you have PETSC then take MPI from PETSc
   otherwise use previous method
 - on MeshL defined with buildmeshL now the default label are 2*k-1  (resp. 2*k)  for the begin (resp. end) of curve 
   where k is the order of curve use in buildmeshL. So if you have one curve the  labels are 1  and 2.
   And new  the element label are te region number not the label.
-
+  This element are not really test so be carfull. 
 ### Deprecated
 -
 
@@ -54,6 +60,7 @@ All notable changes to this project will be documented in this file.
   to remove following error: implicit declaration of function
   correct `3dCurve/basicGlue.edp`and add missing test
 - bugs in SLEPc `SVDSolve()` with a rectangular `Mat`
+- bugs in nElementonB for DG 3d formulation.
 
 ### Security
 -

@@ -695,7 +695,15 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
       try {
 	  Th =new Triangles( nbtx ,*Gh);
           if(SplitEdgeWith2Boundary)
-              Th->SplitInternalEdgeWithBorderVertices();
+          {
+              long nbs=1,nbc=0;
+              while (nbs >0 && nbc++ <2 && Th->nbt < nbtx-1 )
+              {
+                nbs=  Th->SplitInternalEdgeWithBorderVertices();
+                if(verbosity>1)  cout << "BuildMesh: SplitInternalEdgeWithBorderVertices:  count ="<< nbc << " " << nbs << endl;
+              }
+              
+          }
 
           if(alea) //  Add F. Hecht Juin 2018 for J-M Sac Epee:  jean-marc.sac-epee@univ-lorraine.fr
           {

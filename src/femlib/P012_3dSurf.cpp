@@ -518,6 +518,28 @@
         
   }
   
+  // add 22 march 2021 FH ..
+  static TypeOfFE_LagrangeDC<MeshS>  P1dc_S(1,0.001);
+  static TypeOfFE_LagrangeDC<MeshS>   P2dc_S(2,0.001);
+  static TypeOfFE_LagrangeDC<MeshS>   P3dc_S(3,0.001);
+  static TypeOfFE_LagrangeDC<MeshS>   P4dc_S(4,0.001);
+
+  
+  
+  static TypeOfFE_ConstDC<MeshS>  P0Edge_S(1,2);
+  static TypeOfFE_ConstDC<MeshS>  P0Edgedc_S(1,1);
+  static TypeOfFE_ConstDC<MeshS>  P0VF_S(3,2);
+  static TypeOfFE_ConstDC<MeshS>  P0VFdc_S(3,1);
+  
+  GTypeOfFE<MeshS> & G_P1dc_S(P1dc_S);
+  GTypeOfFE<MeshS> & G_P2dc_S(P2dc_S);
+  GTypeOfFE<MeshS> & G_P3dc_S(P3dc_S);
+  GTypeOfFE<MeshS> & G_P4dc_S(P4dc_S);
+  GTypeOfFE<MeshS> & G_P0Edge_S (P0Edge_S);
+  GTypeOfFE<MeshS> & G_P0Edgedc_S (P0Edgedc_S);
+  GTypeOfFE<MeshS> & G_P0VF_S (P0VF_S);
+  GTypeOfFE<MeshS> & G_P0VFdc_S (P0VFdc_S);
+  
    static TypeOfFE_P0Lagrange_surf P0_surf;
    GTypeOfFE<MeshS> & P0Lagrange_surf(P0_surf);
    static TypeOfFE_P1Lagrange_surf P1_surf;

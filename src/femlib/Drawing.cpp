@@ -414,7 +414,9 @@ void FElement::Draw(const RN_& U,const RN_& V,const RN_ & Viso,R coef,int i0,int
         R  l = Max(sqrt((uv,uv)),1e-30) ;
         
          {
-          couleur(2+dichotomie(Viso,l));
+             int col = 4+dichotomie(Viso,l);
+             if(verbosity>99) cout << " color vect " << l << " " << col << endl; 
+          couleur(col);
           uv = coef*uv;
           l *= coef;
           R2 dd = uv*(-kk/l);// modif F.H size of arraow 08/14 FH.l

@@ -81,6 +81,34 @@ namespace Fem2D {
   extern GTypeOfFE< MeshS > &P1bLagrange_surf;
   extern GTypeOfFE< MeshS > &P2bLagrange_surf;
   extern GTypeOfFE< MeshS > &RT0surf;
+// add 22 march 2021 FH.
+  extern GTypeOfFE< Mesh3 > &G_P1dc_3d;
+  extern GTypeOfFE< Mesh3 > &G_P2dc_3d;
+  extern GTypeOfFE< Mesh3 > &G_P3dc_3d;
+  extern GTypeOfFE< Mesh3 > &G_P4dc_3d;
+  extern GTypeOfFE<Mesh3> & G_P0Edge_3d ;
+  extern GTypeOfFE<Mesh3> & G_P0Edgedc_3d ;
+  extern GTypeOfFE<Mesh3> & G_P0Face_3d ;
+  extern GTypeOfFE<Mesh3> & G_P0Facedc_3d ;
+  extern GTypeOfFE<Mesh3> & G_P0VF_3d ;
+  extern GTypeOfFE<Mesh3> & G_P0VFdc_3d ;
+
+  extern GTypeOfFE< MeshS > &G_P1dc_S;
+  extern GTypeOfFE< MeshS > &G_P2dc_S;
+  extern GTypeOfFE< MeshS > &G_P3dc_S;
+  extern GTypeOfFE< MeshS > &G_P4dc_S;
+  extern GTypeOfFE<MeshS> & G_P0Edge_S ;
+  extern GTypeOfFE<MeshS> & G_P0Edgedc_S ;
+  extern GTypeOfFE<MeshS> & G_P0VF_S ;
+  extern GTypeOfFE<MeshS> & G_P0VFdc_S ;
+
+extern GTypeOfFE< MeshL > &G_P1dc_L;
+extern GTypeOfFE< MeshL > &G_P2dc_L;
+extern GTypeOfFE< MeshL > &G_P3dc_L;
+extern GTypeOfFE< MeshL > &G_P4dc_L;
+extern GTypeOfFE<MeshL> & G_P0VF_L ;
+extern GTypeOfFE<MeshL> & G_P0VFdc_L ;
+
   void Expandsetoflab(Stack stack, const CDomainOfIntegration &di, set< int > &setoflab, bool &all);
 }    // namespace Fem2D
 
@@ -6595,7 +6623,41 @@ void init_lgfem( ) {
   Global.New("RT03d", CConstantTFE3(&RT03d));
   Global.New("Edge03d", CConstantTFE3(&Edge03d));
   Global.New("P1b3d", CConstantTFE3(&P1bLagrange3d));
+    
+    // add FH 22 march 2021
 
+  AddNewFE3("P1dc3d", &G_P1dc_3d,"P1dc");// deja code dans
+  AddNewFE3("P2dc3d", &G_P2dc_3d,"P2dc");// deja code dans
+  AddNewFE3("P3dc3d", &G_P3dc_3d);// deja code dans
+  AddNewFE3("P4dc3d", &G_P4dc_3d);// deja code dans
+ 
+  AddNewFE3("P0edge3d", &G_P0Edge_3d,"P0edge");// deja code dans
+  AddNewFE3("P0edgedc3d", &G_P0Edgedc_3d);// deja code dans
+  AddNewFE3("P0VF3d", &G_P0VF_3d,"P0VF");
+  AddNewFE3("P0VFdc3d", &G_P0VF_3d);
+
+  AddNewFE3("P0face3d", &G_P0Face_3d);
+  AddNewFE3("P0facedc3d", &G_P0Facedc_3d);
+
+
+    AddNewFES("P1dcS", &G_P1dc_S,"P1dc");// deja code dans
+    AddNewFES("P2dcS", &G_P2dc_S,"P2dc");// deja code dans
+    AddNewFES("P3dcS", &G_P3dc_S);// deja code dans
+    AddNewFES("P4dcS", &G_P4dc_S);// deja code dans
+   
+    AddNewFES("P0edgeS", &G_P0Edge_S,"P0edge");// deja code dans
+    AddNewFES("P0edgedcS", &G_P0Edgedc_S);// deja code dans
+    AddNewFES("P0VF3S", &G_P0VF_S,"P0VF");
+    AddNewFES("P0VFdc3S", &G_P0VFdc_S);
+
+    AddNewFEL("P1dcL", &G_P1dc_L,"P1dc");//
+    AddNewFEL("P2dcL", &G_P2dc_L,"P2dc");//
+    AddNewFEL("P3dcL", &G_P3dc_L);//
+    AddNewFEL("P4dcL", &G_P4dc_L);//
+    AddNewFEL("P0VF3L", &G_P0VF_L,"P0VF");
+    AddNewFEL("P0VF3dcL", &G_P0VFdc_L);
+    
+  // end  add ..
   Global.New("RT0S",CConstantTFES(&RT0surf));
   Global.New("P2S", CConstantTFES(&DataFE< MeshS >::P2));
   Global.New("P1S", CConstantTFES(&DataFE< MeshS >::P1));
@@ -6613,7 +6675,6 @@ void init_lgfem( ) {
   TEF2dtoS[FindFE2("P1b")] = &P1bLagrange_surf;
   TEF2dtoS[FindFE2("P2b")] = &P2bLagrange_surf;
   TEF2dtoS[FindFE2("RT0")] = &RT0surf;
- // TEF2dtoS[FindFE2("P1dc")] = &DataFE< MeshS >::RT0;
         
   TEF2dtoL[FindFE2("P0")] = &DataFE< MeshL >::P0;
   TEF2dtoL[FindFE2("P1")] = &DataFE< MeshL >::P1;

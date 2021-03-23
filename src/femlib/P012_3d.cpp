@@ -84,8 +84,13 @@ public:
   
 } ;
 
+ class TypeOfFE_PkdcLagrange3d : public  TypeOfFE_LagrangeDC<Mesh3>  {
+ public:
+     TypeOfFE_PkdcLagrange3d(int k,double skrink=0.0001): TypeOfFE_LagrangeDC<Mesh3>(k,skrink) {  }
 
-
+ };
+ 
+ 
 R TypeOfFE_P1Lagrange3d::operator()(const FElement & K,const  RdHat & PHat,const KN_<R> & u,int componante,int op) const
 { 
   R u0(u(K(0))), u1(u(K(1))), u2(u(K(2))),u3(u(K(3)));
@@ -825,7 +830,14 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 	       }	 
 	 
      }     
-     
+ class TypeOfFE_P0Face : public TypeOfFE_Lagrange<Mesh3>  {
+ public:
+   typedef Mesh3 Mesh;
+   typedef GFElement<Mesh3> FElement;
+     TypeOfFE_P0Face(): TypeOfFE_Lagrange<Mesh3>(2) {  }
+   void FB(const What_d whatd,const Mesh & Th,const Mesh3::Element & K,const RdHat &PHat, RNMK_ & val) const;
+ } ;
+
 static TypeOfFE_P0Lagrange3d  P0_3d;
 GTypeOfFE<Mesh3> & P0Lagrange3d(P0_3d);
 
@@ -843,7 +855,34 @@ GTypeOfFE<Mesh3> & RT03d(RT0_3d);
 
 static TypeOfFE_Edge0_3d  Edge0_3d;
 GTypeOfFE<Mesh3> & Edge03d(Edge0_3d);
-     
+
+ // add 22 march 2021 FH ..
+ static TypeOfFE_PkdcLagrange3d  P1dc_3d(1);
+ static TypeOfFE_PkdcLagrange3d  P2dc_3d(2);
+ static TypeOfFE_PkdcLagrange3d  P3dc_3d(3);
+ static TypeOfFE_PkdcLagrange3d  P4dc_3d(4);
+
+ 
+ 
+ static TypeOfFE_ConstDC<Mesh3>  P0Edge_3d(1,2);
+ static TypeOfFE_ConstDC<Mesh3>  P0Edgedc_3d(1,1);
+ static TypeOfFE_ConstDC<Mesh3>  P0Face_3d(2,2);
+ static TypeOfFE_ConstDC<Mesh3>  P0Facedc_3d(2,1);
+ static TypeOfFE_ConstDC<Mesh3>  P0VF_3d(3,2);
+ static TypeOfFE_ConstDC<Mesh3>  P0VFdc_3d(3,1);
+ 
+ GTypeOfFE<Mesh3> & G_P1dc_3d(P1dc_3d);
+ GTypeOfFE<Mesh3> & G_P2dc_3d(P2dc_3d);
+ GTypeOfFE<Mesh3> & G_P3dc_3d(P3dc_3d);
+ GTypeOfFE<Mesh3> & G_P4dc_3d(P4dc_3d);
+ GTypeOfFE<Mesh3> & G_P0Edge_3d (P0Edge_3d);
+ GTypeOfFE<Mesh3> & G_P0Edgedc_3d (P0Edgedc_3d);
+ GTypeOfFE<Mesh3> & G_P0Face_3d (P0Face_3d);
+ GTypeOfFE<Mesh3> & G_P0Facedc_3d (P0Facedc_3d);
+ GTypeOfFE<Mesh3> & G_P0VF_3d (P0VF_3d);
+ GTypeOfFE<Mesh3> & G_P0VFdc_3d (P0VFdc_3d);
+
+ 
 template<> GTypeOfFE<Mesh3> & DataFE<Mesh3>::P0=P0_3d;
 template<> GTypeOfFE<Mesh3> & DataFE<Mesh3>::P1=P1_3d; 
 template<> GTypeOfFE<Mesh3> & DataFE<Mesh3>::P2=P2_3d; 

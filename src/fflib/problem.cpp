@@ -192,13 +192,204 @@ namespace Fem2D {
     }
 
     //---------------------------------------------------------------------------------------
-    template<class R>
+/*  just fo debug ...
+  long bbnElementonB(Stack s)  {
+    throwassert(*((long *)s));
+    MeshPoint *mp = MeshPointStack(s);
+    long l = 0;
+    if ((mp->T) && (mp->e > -1) && (mp->d == 2))
+      l = mp->Th->nTonEdge(mp->t, mp->e);
+    else if (mp->d == 3 && mp->dHat == 3 && mp->T3 && (mp->f >= 0))
+    {  cout << mp->t <<" .. " << mp->f << " ";
+      l = mp->Th3->nElementonB(mp->t, mp->f);
+    }
+    else if (mp->d == 3 && mp->dHat == 2 && mp->TS && (mp->e >= 0))
+      l = mp->ThS->nElementonB(mp->t, mp->e);
+    return l;
+  }
+*/
+template<class R>
     void  Element_OpVF(MatriceElementairePleine<R,FESpace3> & mat,
                        const FElement3 & Ku,const FElement3 & KKu,
                        const FElement3 & Kv,const FElement3 & KKv,
                        double * p,int ie,int iie, int label,void *bstack,R3 *B)
     {
-        ffassert(0);
+        typedef typename FElement3::Element Element;
+        ffassert(B==0);
+        pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);
+        Stack stack= bs->first;
+        double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
+        ffassert(mat.onFace); //   Finite Volume or discontinous Galerkine
+        ffassert(ie>=0 && ie < 4); //  int on Face
+        MeshPoint mp= *MeshPointStack(stack);
+        R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+
+        bool same = &Ku == & Kv;
+        const Element & T  = Ku.T;
+        const Element & TT  = KKu.T;
+        bool sameT = &Ku == & KKu;
+        int nTonEdge =  &Ku == &KKu ? 1 : 2;
+        double cmean = 1./nTonEdge;
+
+        throwassert(&T == &Kv.T);
+        // const QuadratureFormular & FI = mat.FIT;
+        const QuadratureFormular & FIb = mat.FIE;
+        long npi;
+        R *a=mat.a;
+        R *pa=a;
+        long i,j;
+        long n= mat.n,m=mat.m,nx=n*m;
+        assert(nx<=mat.lga);
+        long N= Kv.N;
+        long M= Ku.N;
+
+        long mu=Ku.NbDoF();
+        long mmu=KKu.NbDoF();
+        long nv=Kv.NbDoF();
+        long nnv=Kv.NbDoF();
+        assert(mu==mmu && nv == nnv) ;
+
+
+
+        const Opera &Op(*mat.bilinearform);
+        bool classoptm = copt && Op.optiexpK;
+        //  if (Ku.number<1 && verbosity/100 && verbosity % 10 == 2)
+        if (Ku.number<1 && ( verbosity > 1 ) )
+        cout << "Element_OpVF 3d P: copt = " << copt << " " << classoptm << " binside (For FH) =" << binside << " opt: " << mat.optim << endl;
+
+         bool oldopt=1;  // juin 2007 FH ???? a voir
+        int  iloop=0;
+        KN<bool> unvarexp(classoptm ? Op.optiexpK->sizevar() : 1);
+        if (Ku.number<1 && verbosity/100 && verbosity % 10 == 2)
+        cout << "Element_Op 3d P: copt = " << copt << " " << classoptm << " opt: " << mat.optim << endl;
+         //
+        int lastop=0;
+        lastop = 0;
+        What_d Dop = Op.DiffOp(lastop);
+  
+        long lffv = sameT ? 0  : nv*N*lastop;
+        long lffu = sameT ? 0  : mu*M*lastop;
+        long loffset =  same ? 0 :  (nv+nnv)*N*lastop;
+
+        RNMK_ fv(p,nv,N,lastop); //  the value for basic fonction in K
+        RNMK_ ffv(p + lffv ,nnv,N,lastop); //  the value for basic fonction in KK
+        RNMK_ fu(  (double*) fv   + loffset  ,mu,M,lastop); //  the value for basic fonction
+        RNMK_ ffu( (double*) fu  + lffu  ,mmu,M,lastop); //  the value for basic fonction
+        
+        
+
+
+        R3 NN= T.N(ie);
+        double mes=NN.norme();
+        NN/=mes;
+ 
+        for (npi=0;npi<FIb.n;npi++) // loop on the integration point
+        {
+            pa =a;
+            GQuadraturePoint<R2> pi( FIb[npi]);
+
+            double coef = 0.5*mes*pi.a; // correction 0.5 050109 FH
+            R3 Pt(T.PBord(ie,pi));
+            R3 PP_t(TT.PBord(iie,pi));
+            Ku.BF(Dop,Pt,fu);
+            if(!sameT) KKu.BF(Dop,PP_t,ffu);
+            if (!same) {
+                Kv.BF(Dop,Pt,fv);
+                if(!sameT) KKv.BF(Dop,PP_t,ffv);
+            }
+            if(verbosity==99999 &&( Ku.number == 3 || KKu.number == 2)) {
+                cout << "intallfaces " << Ku.number << " " << fu << endl;
+                cout << "intallfaces " << KKu.number << " " << ffu << endl;
+            }
+            MeshPointStack(stack)->set(T(Pt),Pt,Ku,label,NN,ie);
+            if (classoptm) (*Op.optiexpK)(stack); // call optim version
+
+ 
+            
+ 
+
+
+            for ( i=0;  i<n;   i++ )
+            {
+                int ik= mat.nik[i];
+                int ikk=mat.nikk[i];
+
+                RNM_ wi(fv(Max(ik,0),'.','.'));
+                RNM_ wwi(ffv(Max(ikk,0),'.','.'));
+
+                for ( j=0;  j<m;   j++,pa++ )
+                {
+                    int jk= mat.njk[j];
+                    int jkk=mat.njkk[j];
+
+                    RNM_ wj(fu(Max(jk,0),'.','.'));
+                    RNM_ wwj(ffu(Max(jkk,0),'.','.'));
+
+                    int il=0;
+                    for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                    {
+                        BilinearOperator::K ll(*l);
+                        pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                        int iis = ii.second, jjs=jj.second;
+
+                        int iicase  = iis / last_operatortype;
+                        int jjcase  = jjs / last_operatortype;
+
+                        iis %= last_operatortype;
+                        jjs %= last_operatortype;
+                        double w_i=0,w_j=0,ww_i=0,ww_j=0;
+
+                        if(ik>=0) w_i =   wi(ii.first,iis );
+                        if(jk>=0) w_j =   wj(jj.first,jjs );
+
+                        if( iicase>0 && ikk>=0) ww_i =  wwi(ii.first,iis );
+                        if( jjcase>0 && jkk>=0) ww_j =  wwj(jj.first,jjs );
+
+
+                        if       (iicase==Code_Jump) w_i = ww_i-w_i; // jump
+                        else  if (iicase==Code_Mean) {
+
+                            w_i = cmean*  (w_i + ww_i );} // average
+                        else  if (iicase==Code_OtherSide) w_i = ww_i;  // valeur de autre cote
+
+                        if      (jjcase==Code_Jump) w_j = ww_j-w_j; // jump
+                        else if (jjcase==Code_Mean) w_j = cmean*  (w_j +ww_j ); // average
+                        else if (jjcase==Code_OtherSide) w_j = ww_j;  //  valeur de l'autre cote
+
+                        // R ccc = GetAny<R>(ll.second.eval(stack));
+
+                        R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                        if ( copt && ( mat.optim==1) && Kv.number <1)
+                        {
+                            R cc  =  GetAny<R>(ll.second.eval(stack));
+                            CheckErrorOptimisation(cc,ccc,"Sorry error in Optimization Element_OpVF3d  (face) add:   intallface(Th,optimize=0)(...)");
+                         }
+                        if(verbosity==99999)
+                            cout << ie << " / " << i << " " << j << "/  (" << mat.ni[i] << " "<< mat.nj[j] << ")  pi " << npi << " : " << coef << " c= " << ccc << " " << w_i << " " << w_j << " = " << coef * ccc * w_i*w_j
+                            << " k/kk  " << Ku.number << " "<< KKu.number << " :: " << ik << " " << ikk  << ",  "<< jk << " " << jkk  << " ii/jj2= " << ii.second << " " << jj.second  // << " // " << bbnElementonB(stack)
+                            << endl;
+                        *pa += coef * ccc * w_i*w_j;
+                    }
+                }
+            }
+            // else pa += m;
+        }
+
+
+        pa=a;
+        if ( (verbosity > 9999) ||( (verbosity > 55) && (Ku.number <=0 || KKu.number <=0 )))  {
+            cout <<endl  << " face between " << Ku.number << " , " <<  KKu.number   << " =  "<<  T[0] << ", " << T[1] << ", " << T[2] << " " << nx << endl;
+            cout << " K u, uu =  " << Ku.number << " " << KKu.number << " " <<  " K v, vv =  " << Kv.number << " " << KKv.number << " " <<endl;
+            for (int i=0;i<n;i++)
+            {
+                cout << setw(2) << i << setw(4) << mat.ni[i] <<  setw(4) << mat.nik[i] << setw(4) << mat.nikk[i]  <<  " :";
+                for (int j=0;j<m;j++)
+                cout << setw(5)  << (*pa++) << " ";
+                cout << endl;
+            } }
+
+        *MeshPointStack(stack) = mp;
+        
     }
 
     template<class R>
@@ -913,7 +1104,7 @@ namespace Fem2D {
             for (int i=0;i< Th.nt; i++)
             {
                 if ( all || setoflab.find(Th[i].lab) != setoflab.end())
-                for (int ie=0;ie<3;ie++)
+                for (int ie=0;ie<4;ie++)
                 A += mate(i,ie,Th[i].lab,paramate);
                 if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
 
