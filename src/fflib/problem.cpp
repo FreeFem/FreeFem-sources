@@ -283,14 +283,43 @@ template<class R>
         double mes=NN.norme();
         NN/=mes;
  
+        // compute the permutaion face ie to iie ...
+        // a little tricky
+        int fpe= T.facePermutation(ie);
+        int fpee= TT.facePermutation(iie);
+        int pr[3],ppr[3];
+        SetNumPerm<3>(fpe,pr);
+        SetNumPerm1<3>(fpee,ppr);
+ 
         for (npi=0;npi<FIb.n;npi++) // loop on the integration point
         {
             pa =a;
             GQuadraturePoint<R2> pi( FIb[npi]);
-
+            double lpi[3];
+            pi.toBary(lpi);
+            double llpi[]={lpi[pr[ppr[0]]], lpi[pr[ppr[1]]], lpi[pr[ppr[2]]]};
             double coef = 0.5*mes*pi.a; // correction 0.5 050109 FH
             R3 Pt(T.PBord(ie,pi));
-            R3 PP_t(TT.PBord(iie,pi));
+            R2 pii(llpi+1);
+            R3 PP_t(TT.PBord(iie,pii));
+            {
+                static int err=0;
+                R3 P(T(Pt)),PP(TT(PP_t)),D(P,PP);
+               if(  D.norme2() > 1e-5)
+               {
+                   const Mesh3 & Th=Ku.Vh.Th;
+                   cout << " pr "<< pr[0] << pr[1]<< pr[2] << " prr " << ppr[0] << ppr[1]<< ppr[2]<<" "
+                   << ppr[pr[0]] <<  ppr[pr[1]] << ppr[pr[2]]  << "   " <<  pr[ppr[0]] <<  pr[ppr[1]] << pr[ppr[2]]<< endl;
+                   cout << ie << " " << iie << endl;
+                   cout << " T = " << Th(T[0]) << " " <<Th(T[1]) << " " << Th(T[2]) << " " << Th(T[3]) << endl;
+                   cout << " TT = " << Th(TT[0]) << " " <<Th(TT[1]) << " " << Th(TT[2]) << " " << Th(TT[3]) << endl;
+                   cout << fpe << " " << fpee << endl;
+                   cout << P << " " << PP << " diff=D.norme2() " << D.norme2()  << endl;
+                   err++;
+                   ffassert(err<10);
+               }
+                
+            }
             Ku.BF(Dop,Pt,fu);
             if(!sameT) KKu.BF(Dop,PP_t,ffu);
             if (!same) {
@@ -460,7 +489,7 @@ template<class R>
 
         KN<bool> Dop(last_operatortype); //  sinon ca plate bizarre
         Op.DiffOp(Dop);
-        int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+        int lastop=1+Dop.last([](bool x){return x;});
         //assert(lastop<=3);
         int lffv = nv*N*last_operatortype;
         int lffu = mu*M*last_operatortype;
@@ -1750,7 +1779,7 @@ template<class R>
 
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
-        int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+        int lastop=1+Dop.last([](bool x){return x;});
         //assert(lastop<=3);
 
         if (ie<0)
@@ -1992,7 +2021,7 @@ template<class R>
 
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
-        int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+        int lastop=1+Dop.last([](bool x){return x;});
         //assert(lastop<=3);
 
         if (ie<0)
@@ -5499,7 +5528,8 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
 
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
-        int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+  //      int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true);
+        int lastop=1+Dop.last([](bool x){return x;});
         //assert(lastop<=3);
         RNMK_ fv(p,n,N,lastop); //  the value for basic fonction
         RNMK_ fu(p+ (same ?0:n*N*lastop) ,m,M,lastop); //  the value for basic fonction
@@ -6404,7 +6434,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
 
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
-        int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+        int lastop=1+Dop.last([](bool x){return x;});
         // assert(lastop<=3);
 
         RNMK_ fu(p,n,N,lastop); //  the value for basic fonction
@@ -7263,7 +7293,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
 
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
-        int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+        int lastop=1+Dop.last([](bool x){return x;});
         assert(Op.MaxOp() <last_operatortype);
 
         //  assert(lastop<=3);
@@ -7540,7 +7570,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
 
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
-        int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+        int lastop=1+Dop.last([](bool x){return x;});
         assert(Op.MaxOp() <last_operatortype);
 
         // assert(lastop<=3);
@@ -7727,7 +7757,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
 
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
-        int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+        int lastop=1+Dop.last([](bool x){return x;});
         assert(Op.MaxOp() <last_operatortype);
 
         // assert(lastop<=3);
@@ -7905,7 +7935,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
         cout << "Element_rhs S: copt = " << copt << " " << classoptm << "opt " << optim << endl;
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
-        int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+        int lastop=1+Dop.last([](bool x){return x;});
         assert(Op.MaxOp() <last_operatortype);
         // assert(lastop<=3);
 
@@ -8232,7 +8262,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
         cout << "Element_rhs(levelset) S: copt = " << copt << " " << classoptm <<" opt " << optim << endl;
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
-        int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+        int lastop=1+Dop.last([](bool x){return x;});
         assert(Op.MaxOp() <last_operatortype);
         // assert(lastop<=3);
 
@@ -8339,7 +8369,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
         cout << "Element_rhs S: copt = " << copt << " " << classoptm << " opt " << optim << endl;
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
-        int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+        int lastop=1+Dop.last([](bool x){return x;});
         //assert(Op.MaxOp() <last_operatortype);
         // assert(lastop<=3);
         int lffv = nv*N*last_operatortype;
@@ -8579,7 +8609,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
         cout << "Element_rhs S: copt = " << copt << " " << classoptm << " opt " << optim << endl;
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
-        int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+        int lastop=1+Dop.last([](bool x){return x;});
         assert(Op.MaxOp() <last_operatortype);
         // assert(lastop<=3);
         const Triangle & T  = KI;
@@ -8677,7 +8707,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
         cout << "Element_rhs S: copt = " << copt << " " << classoptm << " opt " << optim << endl;
         KN<bool> Dop(last_operatortype);
         Op.DiffOp(Dop);
-        int lastop=1+Dop.last(binder1st<equal_to<bool> >(equal_to<bool>(),true));
+        int lastop=1+Dop.last([](bool x){return x;});
         assert(Op.MaxOp() <last_operatortype);
         // assert(lastop<=3);
         const Triangle & T  = KI;

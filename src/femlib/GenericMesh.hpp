@@ -386,13 +386,30 @@ public:
     }
 
   int facePermutation(int i) const
-  {// def the permutatution of orient the face
+    { // change not return number in [0,6[ 24 march 2020 
+      // def the permutatution of orient the face
+      /*
+    
+       // change to be compatible to SetNumPerm code ..
     int fo =0;
     const Vertex * f[3]={&at(nvface[i][0]), &at(nvface[i][1]), &at(nvface[i][2])};
     if(f[0]>f[1]) fo+=1,Exchange(f[0],f[1]);
     if(f[1]>f[2]) { fo+=2,Exchange(f[1],f[2]);
     if(f[0]>f[1]) fo+=4,Exchange(f[0],f[1]); }
-    return fo;
+       return fo;
+      */
+      const Vertex * p[3]={&at(nvface[i][0]), &at(nvface[i][1]), &at(nvface[i][2])};
+
+      // signe + depart*2
+      int k=0,i0=0,i1=1,i2=2,j[3];
+      if(p[i0]> p[i1]) swap(i0,i1),k +=1;
+      if(p[i1]> p[i2]) swap(i1,i2),k +=1;
+      if(p[i0]> p[i1]) swap(i0,i1),k +=1;
+      assert(p[i0] < p[i1] && p[i1] < p[i2]);
+      return (k%2)+i0*2; // signe + depart*2
+
+      
+    
   }
 
   int   EdgeOrientation(int i) const
