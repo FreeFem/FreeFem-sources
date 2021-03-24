@@ -1002,6 +1002,12 @@ if test "$with_petsc" != no; then
                 MPICC=`awk -F' *= *' '"CC"==$1 {print $2}' "$ffconfpetsc"`
                 MPICXX=`awk -F' *= *' '"CXX"==$1 {print $2}' "$ffconfpetsc"`
                 MPIFC=`awk -F' *= *' '"FC"==$1 {print $2}' "$ffconfpetsc"`
+case $ff_uname in
+CYGWIN*|MINGW*|MSYS_NT*)
+                MPICC=$MPICC" "`awk -F' *= *' '"MPI_INCLUDE"==$1 {print $2}' "$ffconfpetsc"`
+                MPICXX=$MPICXX" "`awk -F' *= *' '"MPI_INCLUDE"==$1 {print $2}' "$ffconfpetsc"`
+                MPIFC=$MPIFC" "`awk -F' *= *' '"MPI_INCLUDE"==$1 {print $2}' "$ffconfpetsc"`
+esac
                 m4_include(etc/config/m4/acmpi.m4)
             fi
             if test "$ff_mpi" = yes; then
@@ -1093,6 +1099,12 @@ if test "$with_petsc_complex" != no; then
                 MPICC=`awk -F' *= *' '"CC"==$1 {print $2}' "$ffconfpetscc"`
                 MPICXX=`awk -F' *= *' '"CXX"==$1 {print $2}' "$ffconfpetscc"`
                 MPIFC=`awk -F' *= *' '"FC"==$1 {print $2}' "$ffconfpetscc"`
+case $ff_uname in
+CYGWIN*|MINGW*|MSYS_NT*)
+                MPICC=$MPICC" "`awk -F' *= *' '"MPI_INCLUDE"==$1 {print $2}' "$ffconfpetscc"`
+                MPICXX=$MPICXX" "`awk -F' *= *' '"MPI_INCLUDE"==$1 {print $2}' "$ffconfpetscc"`
+                MPIFC=$MPIFC" "`awk -F' *= *' '"MPI_INCLUDE"==$1 {print $2}' "$ffconfpetscc"`
+esac
                 m4_include(etc/config/m4/acmpi.m4)
             fi
             if test "$ff_mpi" = yes; then

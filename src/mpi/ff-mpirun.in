@@ -17,7 +17,7 @@ if [ -x "$0" -a -x "$dir/$ffmpi" ]; then
  fi    
 fi
 if [ -d "$bindir" ]  ;then export PATH="@bindir@:$PATH"  ; fi
-a[0]="'$mpirun'"
+a[0]="$mpirun"
 j=1;
 test -n "$mpi_run_option" && a[((j++))]="$mpi_run_option"
 #echo $1 ---
