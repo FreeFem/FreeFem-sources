@@ -197,8 +197,8 @@ public:
         operator const int * () const {return dfon;}
     };
     
-    RdHat *Pt;
-    static const RdHat G;
+    //RdHat *Pt;
+    const RdHat G;
     R cshrink;
     R cshrink1;
 
@@ -207,7 +207,7 @@ public:
     
     TypeOfFE_Lagrange(int k,int ttdc=0,R ccshrink=0):
     GTypeOfFE<Mesh>(A4(k,ttdc), 1, k == -1 ? -1 : Max(k, 1), k <= 2, (k == 0)|| ttdc ),
-    cshrink(1.-ccshrink),cshrink1(1./cshrink) {
+    cshrink(1.-ccshrink),cshrink1(1./cshrink),G(RdHat::diag(1./(RdHat::d+1))) {
         int n = this->NbDoF;
         if (verbosity > 9)
             cout << "\n +++ P" << k << ": ndof = " << n << " " << ttdc << " schrk: " << ccshrink << endl;
@@ -235,10 +235,10 @@ private:
     TypeOfFE_Lagrange(const TypeOfFE_Lagrange &);
     void operator = (const TypeOfFE_Lagrange &);
 };
-
+/*
 template<class Mesh>
 const typename Mesh::Element::RdHat TypeOfFE_Lagrange<Mesh>::G=Mesh::Element::RdHat::diag(1./(Mesh::Element::RdHat::d+1)) ;
-
+*/
 template<class Mesh>
 class TypeOfFE_LagrangeDC : public  TypeOfFE_Lagrange<Mesh> {
 public:
