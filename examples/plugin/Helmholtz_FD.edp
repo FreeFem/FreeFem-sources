@@ -14,7 +14,7 @@ include "cube.idp"
 include "getARGV.idp"
 
 load "medit"
-load "MUMPS"
+load "MUMPS_seq"
 
 real freq = getARGV("-frequency",1.); // frequency
 int nppwl = getARGV("-nppwl",8); // number of points per wavelength

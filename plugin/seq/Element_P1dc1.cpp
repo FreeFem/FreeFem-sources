@@ -682,13 +682,13 @@ static void finit( ) {
   static AddNewFE P2dcLagrange("P2dc1", &P2dc1LagrangeP2dc1);
   
   static AddNewFE3 P1dttLagrange3d("P1dc3d2", &TypeOfFE_LagrangeDC3dtt);// deja code 
-  static AddNewFE3 P1dttLagrange3d1("P1dc3d3", &TypeOfFE_LagrangeDC3dtt1);
+  static AddNewFE3 P1dttLagrange3d1("P1dc3d1", &TypeOfFE_LagrangeDC3dtt1);
   
   static AddNewFES P1dttLagrange3dS("P1dcS2", &TypeOfFE_LagrangeDC3dStt);
-  static AddNewFES P1dttLagrange3dS1("P1dcS3", &TypeOfFE_LagrangeDC3dStt1);
+  static AddNewFES P1dttLagrange3dS1("P1dcS1", &TypeOfFE_LagrangeDC3dStt1);
   
   static AddNewFEL P1dttLagrange3dL("P1dcL2", &TypeOfFE_LagrangeDC3dLtt);
-  static AddNewFEL P1dttLagrange3dL1("P1dcL3", &TypeOfFE_LagrangeDC3dLtt1);
+  static AddNewFEL P1dttLagrange3dL1("P1dcL1", &TypeOfFE_LagrangeDC3dLtt1);
    
 }
 

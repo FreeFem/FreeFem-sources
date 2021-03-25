@@ -100,8 +100,7 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	testFEMorley.edp \
 	testp1dcnc.edp \
 	iovtk.edp \
-	ConnectedComponents.edp \
-	Helmholtz_FD.edp
+	ConnectedComponents.edp 
 
 TESTS_FFTW3 = dfft.edp
 
@@ -130,7 +129,8 @@ TESTS_MKL = PARDISO.edp
 
 TESTS_MSHMET = aniso.edp
 
-TESTS_MUMPS_seq = LapMUMPS_seq.edp
+TESTS_MUMPS_seq = LapMUMPS_seq.edp \
+	Helmholtz_FD.edp
 
 TESTS_MUMPS_SUPERLU = lap-solvers.edp
 
