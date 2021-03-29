@@ -39,7 +39,10 @@ PETSC_OPENBLAS_C = $(PETSC_OPENBLAS)
 endif
 PETSC_DOWNLOAD_C := --with-metis-dir=$(DIR_INSTALL_REAL) \
 		--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
-		--with-suitesparse-include='$(SUITESPARSE_INCLUDE)' --with-suitesparse-lib='$(SUITESPARSE_LIB)' \
+		--with-mmg-dir=$(DIR_INSTALL_REAL) \
+		--with-parmmg-dir=$(DIR_INSTALL_REAL) \
+		--with-superlu-dir=$(DIR_INSTALL_REAL) \
+		--with-suitesparse-dir=$(DIR_INSTALL_REAL) \
 		--with-parmetis-dir=$(DIR_INSTALL_REAL) \
 		--with-tetgen-dir=$(DIR_INSTALL_REAL)
 ifeq ($(PETSC_PKG),yes)
@@ -66,16 +69,13 @@ endif
 else
 PETSC_DOWNLOAD := --download-metis --download-ptscotch \
 		--download-hypre --download-parmetis \
+		--download-mmg --download-parmmg \
 		--download-superlu --download-suitesparse --download-tetgen \
-		--download-slepc
+		--download-slepc --download-hpddm
 ifeq ($(FFCMAKE),no)
 PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
 endif
-PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-slepc
-ifeq ($(WIN32DLLTARGET),)
-PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-hpddm
-PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-hpddm
-endif
+PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-slepc --download-hpddm
 endif
 ifeq ($(FF_generic_petsc), yes)
 FLAGS_MTUNE := -mtune=generic
@@ -89,7 +89,7 @@ ifeq ($(MPICC)$(MPICXX)$(MPIFC),)
 PETSC_DOWNLOAD += --with-cc='$(CC)' --with-cxx='$(CXX)' --download-mpich
 PETSC_DOWNLOAD_C += --with-mpi-dir=$(DIR_INSTALL_REAL)
 ifneq ($(FC),)
-PETSC_DOWNLOAD += --with-fc='$(FC)' --download-scalapack --download-mumps --download-slepc-configure-arguments="--download-arpack=https://github.com/prj-/arpack-ng/archive/6d11c37b2dc9110f3f6a434029353ae1c5112227.tar.gz"
+PETSC_DOWNLOAD += --with-fc='$(FC)' --download-scalapack --download-mumps --download-slepc-configure-arguments="--download-arpack=https://github.com/prj-/arpack-ng/archive/b64dccb.tar.gz"
 PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL) # --download-slepc-configure-arguments="--with-arpack-dir=$(DIR_INSTALL_REAL)"
 else
 COMMON_FLAGS += --with-fc=0
@@ -98,7 +98,7 @@ else
 COMMON_FLAGS += --with-cc='$(MPICC)' --with-cxx='$(MPICXX)'
 ifneq ($(MPIFC),)
 COMMON_FLAGS += --with-fc='$(MPIFC)'
-PETSC_DOWNLOAD += --download-scalapack --download-mumps --download-slepc-configure-arguments="--download-arpack=https://github.com/prj-/arpack-ng/archive/6d11c37b2dc9110f3f6a434029353ae1c5112227.tar.gz"
+PETSC_DOWNLOAD += --download-scalapack --download-mumps --download-slepc-configure-arguments="--download-arpack=https://github.com/prj-/arpack-ng/archive/b64dccb.tar.gz"
 PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL) # --download-slepc-configure-arguments="--with-arpack-dir=$(DIR_INSTALL_REAL)"
 else
 COMMON_FLAGS += --with-fc=0
@@ -118,6 +118,8 @@ COMMON_FLAGS += --with-shared-libraries=0 \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'
 PETSC_DOWNLOAD += '--download-metis-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-parmetis-cmake-arguments=-G "MSYS Makefiles"' \
+	'--download-mmg-cmake-arguments=-G "MSYS Makefiles"' \
+	'--download-parmmg-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles"' \
 	'--download-superlu-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu'
 ifneq ($(FC),)
@@ -146,8 +148,8 @@ all-local:
 	@echo "	make petsc-slepc "
 
 DIRPKG=../pkg
-VERSION=3.14.2
-VERSION_SLEPC=3.14.0
+VERSION=3.15.0
+VERSION_SLEPC=3.14.2
 PACKAGE=../pkg/petsc-lite-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
@@ -223,7 +225,7 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 	touch $@
 Make-petsc-download.mk:$(SRCDIR)/tag-install-real 
 	test -e $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
-	egrep 'PETSC_LIB_BASIC|SCALAPACK_|METIS_|MUMPS_|HPDDM_|TETGEN_|SUPERLU_|PTSCOTCH_|SUITESPARSE_' $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables | sed 's/-I/ /g'|sort >$@
+	egrep 'PETSC_LIB_BASIC|SCALAPACK_|METIS_|MUMPS_|HPDDM_|TETGEN_|SUPERLU_|MMG_|PTSCOTCH_|SUITESPARSE_' $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables | sed 's/-I/ /g'|sort >$@
 ifdef 	COMPLEX_CASE
 #  version COMPLEX.....
 $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
@@ -266,6 +268,10 @@ WHERE-all:Makefile WHERE WHERE-complex
 	test -z '$(MUMPS_INCLUDE)' || echo mumps INCLUDE -I$(MUMPS_INCLUDE) >>$@
 	test -z '$(SUPERLU_LIB)' || echo superlu LD $(SUPERLU_LIB) >>$@
 	test -z '$(SUPERLU_INCLUDE)' || echo superlu INCLUDE -I$(SUPERLU_INCLUDE) >>$@
+	test -z '$(MMG_LIB)' || echo mmg LD $(MMG_LIB) >>$@
+	test -z '$(MMG_INCLUDE)' || echo mmg INCLUDE -I$(MMG_INCLUDE) >>$@
+	test -z '$(PARMMG_LIB)' || echo parmmg LD $(PARMMG_LIB) >>$@
+	test -z '$(PARMMG_INCLUDE)' || echo parmmg INCLUDE -I$(PARMMG_INCLUDE) >>$@
 	test -z '$(PTSCOTCH_LIB)' || echo ptscotch LD $(PTSCOTCH_LIB) >>$@
 	test -z '$(PTSCOTCH_INCLUDE)' || echo ptscotch INCLUDE -I$(PTSCOTCH_INCLUDE) >>$@
 	test -z '$(TETGEN_LIB)' || echo tetgen LD $(TETGEN_LIB) >>$@

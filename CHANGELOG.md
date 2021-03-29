@@ -45,10 +45,12 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Now the order to find MPI in configure is first if you have PETSC then take MPI from PETSc
   otherwise use previous method
-- on MeshL defined with buildmeshL now the default label are 2*k-1  (resp. 2*k)  for the begin (resp. end) of curve 
+- on MeshL defined with buildmeshL now the default label are 2*k-1  (resp. 2*k)  for the begin (resp. end) of curve
   where k is the order of curve use in buildmeshL. So if you have one curve the  labels are 1  and 2.
   And new  the element label are te region number not the label.
   This element are not really test so be carfull. 
+- PETSc 3.15.0
+
 ### Deprecated
 -
 
