@@ -17,7 +17,7 @@
 load "msh3"
 macro grad(u) [dx(u),dy(u),dz(u)] //
 macro dn(u) (N'*grad(u) ) //  def the normal derivative 
-int nn=7;
+int nn=5;
 mesh3 Th = cube(nn,nn,nn); // unite square 
 //savemesh(Th,"cube10.mesh");
 //mesh3 Th("cube10.mesh");

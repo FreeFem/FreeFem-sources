@@ -372,7 +372,7 @@ KN<double>*OrderVF(Stack stack,const Mesh *const &pTh, KN<double>*const &pkb , c
     //   KN_<double> kb(pkb,Th.nt);
     ffassert(kb.N()==Th.nt);// verif size
     kb = double(order);
-    if( order == 3 || order ==4 )
+    if( order >= 3)
     {
         //  search vexter on true boundaty
         KN<int> vb(Th.nv,0);
@@ -386,15 +386,13 @@ KN<double>*OrderVF(Stack stack,const Mesh *const &pTh, KN<double>*const &pkb , c
                     vb[Th(k,(e+2)%3)]=1;
                 }
             }
-        if(order==3)
-        {
         double oo[]={2.,1.,1.,2.};
-        for (int k=0; k<Th.nt; k++)
-            kb[k] =oo[vb[Th(k,0)]+ vb[Th(k,1)]+vb[Th(k,2)]];
+        for (int k=0; k<Th.nt; k++){
+            kb[k] = oo[vb[Th(k,0)]+ vb[Th(k,1)]+vb[Th(k,2)]];
+            if((order == 4) && (vb[Th(k,0)]+ vb[Th(k,1)]+vb[Th(k,2)] >0)){
+                kb[k] = 1. ;
+            }
         }
-        else if(order==4)
-         for (int k=0; k<Th.nt; k++)
-          kb[k] = (vb[Th(k,0)]+ vb[Th(k,1)]+vb[Th(k,2)])>0;
     }
     return pkb;
 }
