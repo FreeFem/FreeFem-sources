@@ -2431,11 +2431,11 @@ template< class MMesh >
 class SetMesh_Op : public E_F0mps {
  public:
   Expression a;
-  static const int n_name_param = 8;
+  static const int n_name_param = 9;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   KN_< long > arg(int i, Stack stack, KN_< long > a) const {
-    ffassert(!(nargs[i] && nargs[i + 2]));
+    ffassert(!(nargs[i] && nargs[i + 2]) || i == 8);
     i = nargs[i] ? i : i + 2;
     return nargs[i] ? GetAny< KN_< long > >((*nargs[i])(stack)) : a;
   }
@@ -2467,7 +2467,8 @@ basicAC_F0::name_and_type SetMesh_Op< Mesh3 >::name_param[] = {
   {"reftet", &typeid(KN_< long >)}, {"refface", &typeid(KN_< long >)},
   {"region", &typeid(KN_< long >)}, {"label", &typeid(KN_< long >)},
   {"fregion", &typeid(long)},       {"flabel", &typeid(long)},
-  {"rmlfaces", &typeid(long)},      {"rmInternalFaces", &typeid(bool)}};
+  {"rmlfaces", &typeid(long)},      {"rmInternalFaces", &typeid(bool)},
+  {"renumv", &typeid(KN_<long>)}};
 
 // special instance, list arguments for meshS
 template<>
@@ -2475,7 +2476,8 @@ basicAC_F0::name_and_type SetMesh_Op< MeshS >::name_param[] = {
   {"reftri", &typeid(KN_< long >)}, {"refedge", &typeid(KN_< long >)},
   {"region", &typeid(KN_< long >)}, {"label", &typeid(KN_< long >)},
   {"fregion", &typeid(long)},       {"flabel", &typeid(long)},
-  {"rmledge", &typeid(long)},       {"rmInternalEdges", &typeid(bool)}};
+  {"rmledge", &typeid(long)},       {"rmInternalEdges", &typeid(bool)},
+  {"renumv", &typeid(KN_<long>)}};
 
 // special instance, list arguments for meshL
 template<>
@@ -2483,7 +2485,8 @@ basicAC_F0::name_and_type SetMesh_Op< MeshL >::name_param[] = {
   {"refedge", &typeid(KN_< long >)}, {"refpoint", &typeid(KN_< long >)},
   {"region", &typeid(KN_< long >)}, {"label", &typeid(KN_< long >)},
   {"fregion", &typeid(long)},       {"flabel", &typeid(long)},
-  {"rmlpoint", &typeid(long)},       {"rmInternalPoints", &typeid(bool)}};
+  {"rmlpoint", &typeid(long)},       {"rmInternalPoints", &typeid(bool)},
+  {"renumv", &typeid(KN_<long>)}};
 
 // function to apply the change of label with the map
 int ChangeLab(const map< int, int > &m, int lab) {
@@ -2537,11 +2540,13 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
   bool rm_faces = nargs[6];
   long rmlabfaces(arg(6, stack, 0L));
   bool rm_i_faces(arg(7, stack, false));
+  KN<long> rv (arg(8,stack,zz));
+  bool rV =  (rv.size()== nbv);
 
   if (rm_i_faces && (is_same< MMesh, MeshS >::value || is_same< MMesh, MeshL >::value) )
     cout << " Warning: remove internal border isn't implemented " << endl;
 
-  if (nrB.N( ) <= 0 && nrT.N( ) <= 0 && (!freg) && (!flab) && !rmlabfaces && !rm_i_faces)
+  if (nrB.N( ) <= 0 && nrT.N( ) <= 0 && (!freg) && (!flab) && !rmlabfaces && !rm_i_faces && !rV)
     return pTh;
 
   ffassert(nrT.N( ) % 2 == 0);
@@ -2567,12 +2572,13 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
   V *v = new V[nbv];
   V *vv = v;
   for (int i = 0; i < nbv; i++) {
+    const int ii=rV? rv(i): i;
+    vv = v + ii;
     const V &V(Th.vertices[i]);
     vv->x = V.x;
     vv->y = V.y;
     vv->z = V.z;
     vv->lab = V.lab;
-    vv++;
   }
 
   // new elements
@@ -2586,6 +2592,9 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
     const T &K(Th.elements[i]);
     int iv[T::nv];
     for (int j = 0; j < k; j++) iv[j] = Th.operator( )(K[j]);
+    if(rV) {
+      for (int j = 0; j < k; j++) iv[j] = rv(iv[j]);
+    }
     tt->set(v, iv, ChangeLab(mapTref, K.lab));
     if (freg) {
       mp->set(Th, K(PtHat), PtHat, K, 0);
@@ -2619,6 +2628,9 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
     TRdHat B = KE.PBord(fk, PtHat2);
     int iv[B::nv];
     for (int j = 0; j < k; j++) iv[j] = Th.operator( )(K[j]);
+    if(rV) {
+      for (int j = 0; j < k; j++) iv[j] = rv(iv[j]);
+    }
     bool rmf = rm_i_faces && !onborder;
 
     int l0, l1 = ChangeLab(mapBref, l0 = K.lab);
