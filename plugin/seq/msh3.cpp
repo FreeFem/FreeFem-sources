@@ -2435,8 +2435,10 @@ class SetMesh_Op : public E_F0mps {
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   KN_< long > arg(int i, Stack stack, KN_< long > a) const {
-    ffassert(!(nargs[i] && nargs[i + 2]) || i == 8);
-    i = nargs[i] ? i : i + 2;
+    if (i != 8) {
+      ffassert(!(nargs[i] && nargs[i + 2]));
+      i = nargs[i] ? i : i + 2;
+    }
     return nargs[i] ? GetAny< KN_< long > >((*nargs[i])(stack)) : a;
   }
   long arg(int i, Stack stack, long a) const {

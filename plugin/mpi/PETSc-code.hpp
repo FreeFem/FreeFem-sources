@@ -4863,6 +4863,7 @@ static void Init_PETSc( ) {
   Global.Add("constructor", "(", new PETSc::initCSR< HpSchwarz< PetscScalar >, true >(1, 1));
   Global.Add("constructor", "(", new PETSc::initCSR< HpSchwarz< PetscScalar >, true >(1, 1, 1));
   Global.Add("MatDestroy", "(", new OneOperator1< long, Dmat* >(PETSc::destroyCSR));
+  zzzfff->Add("PetscScalar", atype<std::conditional<std::is_same<PetscScalar, PetscReal>::value, double, Complex>::type*>());
   Add< Dmat* >("D", ".", new OneOperator1< KN_<double>, Dmat* >(PETSc::Dmat_D));
   Add< Dmat* >("n", ".", new OneOperator1< long, Dmat* >(PETSc::Dmat_n));
   Add< Dmat* >("range", ".", new OneOperator1s_< KN_<long>, Dmat* >(PETSc::Dmat_range));

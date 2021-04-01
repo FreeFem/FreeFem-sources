@@ -246,7 +246,7 @@ ENDIFMACRO
     part = part;
     int numberIntersection = 0;
     {
-        int[int] rest = restrict(VhLocalPrivate, VhGlobalPrivate, n2oNeighbor);
+        int[int] restriction = restrict(VhLocalPrivate, VhGlobalPrivate, n2oNeighbor);
         n2oNeighbor.resize(0);
         mpiWaitAll(rq);
         for(int i = 0; i < intersection[0].n; ++i) {
@@ -254,7 +254,7 @@ ENDIFMACRO
             AddLayers(globalName, suppPartition[], overlap, phi[]);
             if(min(eps, epsTab[i]) > 0.0) {
                 if(intN(globalName)(phi) / min(eps, epsTab[i]) > 1.0e-10) {
-                    partitionIntersection[numberIntersection][] = phi[](rest);
+                    partitionIntersection[numberIntersection][] = phi[](restriction);
                     if(!trueRestrict)
                         sum[] += partitionIntersection[numberIntersection][];
                     intersection[0][numberIntersection++] = intersection[0][i];
@@ -1531,7 +1531,8 @@ IFMACRO(transfer#Q)
     fespace VhLocalOldPrivate(ThName, Pk);
     fespace VhLocalNewPrivate(ThNew, PkNew);
     matrix loc = interpolate(VhLocalNewPrivate, VhLocalOldPrivate);
-    constructor(P, uANew, uA, loc);
+    matrix<PetscScalar> locPetscScalar = loc;
+    constructor(P, uANew, uA, locPetscScalar);
 ENDIFMACRO
 }
 else {
@@ -1697,7 +1698,7 @@ ENDIFMACRO
     }
     meshN interpolateExchange;
     fespace VhExchangePrivate(gluedExchange, Pk);
-    VhExchangePrivate def(uExchange);
+    VhExchangePrivate<PetscScalar> def(uExchange);
     for[i, v : rankRecv] {
         int index = mpiWaitAny(rqRecvU);
         if(index != mpiUndefined) {
@@ -1718,7 +1719,8 @@ IFMACRO(!transfer#Q)
 ENDIFMACRO
 IFMACRO(transfer#Q)
     matrix loc = interpolate(VhLocalNewPrivate, VhExchangePrivate);
-    constructor(P, uANew, uA, loc, numbering = uExchange[]);
+    matrix<PetscScalar> locPetscScalar = loc;
+    constructor(P, uANew, uA, locPetscScalar, numbering = uExchange[]);
 ENDIFMACRO
     ThName = change(ThName, fregion = backupRegion[nuTriangle]);
     mpiWaitAll(rqSendTh);
@@ -1761,8 +1763,8 @@ ENDIFMACRO
     real[int] gamma(ThParMmgName.nv);
     gamma = vG(0, VhWithoutOverlapPrivate, tgv = -1);
     fespace VhWithOverlapPrivate(ThName, P1);
-    int[int] rest = restrict(VhWithoutOverlapPrivate, VhWithOverlapPrivate, ThN2O);
-    ParMmgCommunicators(A, gamma, rest, ThCommunicators);
+    int[int] restriction = restrict(VhWithoutOverlapPrivate, VhWithOverlapPrivate, ThN2O);
+    ParMmgCommunicators(A, gamma, restriction, ThCommunicators);
 }// EOM
 
 macro gatherDmesh(ThName, comm, ThGatherName) {
