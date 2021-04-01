@@ -78,8 +78,10 @@ fespace Uh(Th,P1);
 Uh<complex> rhs = 0;
 rhs[][idist] = -1./(h^3);
 
-int[int] pmlsides=[1,1,1,1,1,1];
-matrix<complex> A = HelmholtzFD(Th,omega,mu,npml=npml,pmlsides=pmlsides,scheme="G4810");
+int[int] pmlsides(6), npmls(6);
+pmlsides = 1;
+npmls = npml;
+matrix<complex> A = HelmholtzFD(Th,omega,mu,npml=npmls,pmlsides=pmlsides);
 set(A,solver=sparsesolver);
 
 Uh<complex> u, uexact = exact*supp;
