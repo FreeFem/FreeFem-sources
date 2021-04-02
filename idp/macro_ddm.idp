@@ -1616,7 +1616,7 @@ ENDIFMACRO
         }
     }
     real[int] D, backupRegion(ThName.nt);
-    VhLocalOldPrivate def(scaledU);
+    VhLocalOldPrivate<PetscScalar> def(scaledU);
 IFMACRO(!transfer#Q)
     createPartition(ThName, D, Pk)
     scaledU[] = uA[];
@@ -1626,7 +1626,7 @@ IFMACRO(transfer#Q)
     D.resize(scaledU[].n);
     D = uA.D;
 ENDIFMACRO
-    scaledU[] .*= D;
+    for[i, v : D] scaledU[][i] *= v;
     fespace PhPartPrivate(ThName, P0);
     {
         PhPartPrivate backup = region;
@@ -1638,7 +1638,7 @@ ENDIFMACRO
     }
     meshN[int] recvTh(rankRecv.n);
     meshN[int] sendTh(rankSend.n);
-    real[int][int] exchangeU(rankSend.n + rankRecv.n);
+    PetscScalar[int][int] exchangeU(rankSend.n + rankRecv.n);
     mpiRequest[int] rqSendTh(rankSend.n);
     mpiRequest[int] rqSendU(rankSend.n);
     mpiRequest[int] rqRecvTh(rankRecv.n);
@@ -1889,7 +1889,7 @@ ENDIFMACRO
     real timerGather = mpiWtime();
     if(ThGatherName#Comm) {
         meshN[int] recvTh(mpiSize(comm) - 1);
-        real[int][int] recvU(mpiSize(comm) - 1);
+        PetscScalar[int][int] recvU(mpiSize(comm) - 1);
         mpiRequest[int] rqRecvTh(mpiSize(comm) - 1);
         mpiRequest[int] rqRecvU(mpiSize(comm) - 1);
         for(int i = 0; i < mpiSize(comm) - 1; ++i)
@@ -1901,29 +1901,29 @@ ENDIFMACRO
             Irecv(processor(index + 1, comm, rqRecvU[index]), recvU[index]);
         }
         fespace VhGlobalGatherPrivate(ThGatherName, Pk);
-        real[int] visited(VhGlobalGatherPrivate.ndof);
+        PetscScalar[int] visited(VhGlobalGatherPrivate.ndof);
         visited = 1.0;
         {
             fespace VhRestrictionPrivate(ThName, Pk);
             matrix R = interpolate(VhRestrictionPrivate, VhGlobalGatherPrivate);
-            real[int] buffer = R' * u[];
+            PetscScalar[int] buffer = R' * u[];
             buffer .*= visited;
-            real[int] ones(VhRestrictionPrivate.ndof);
+            PetscScalar[int] ones(VhRestrictionPrivate.ndof);
             ones = -1.0;
             visited += R' * ones;
-            for[j, v : visited] v = max(v, 0.0);
+            for[j, v : visited] v = max(abs(v), 0.0);
             uNew[] += buffer;
         }
         for(int i = 0; i < mpiSize(comm) - 1; ++i) {
             int index = mpiWaitAny(rqRecvU);
             fespace VhRestrictionPrivate(recvTh[index], Pk);
             matrix R = interpolate(VhRestrictionPrivate, VhGlobalGatherPrivate);
-            real[int] buffer = R' * recvU[index];
+            PetscScalar[int] buffer = R' * recvU[index];
             buffer .*= visited;
-            real[int] ones(VhRestrictionPrivate.ndof);
+            PetscScalar[int] ones(VhRestrictionPrivate.ndof);
             ones = -1.0;
             visited += R' * ones;
-            for[j, v : visited] v = max(v, 0.0);
+            for[j, v : visited] v = max(abs(v), 0.0);
             uNew[] += buffer;
         }
     }
@@ -1970,7 +1970,7 @@ ENDIFMACRO
         meshN ThGlobalScatter;
         broadcast(processor(0, comm), ThGlobalScatter);
         fespace VhGlobalScatterPrivate(ThGlobalScatter, Pk);
-        VhGlobalScatterPrivate def(uGlobalScatter);
+        VhGlobalScatterPrivate<PetscScalar> def(uGlobalScatter);
         broadcast(processor(0, comm), uGlobalScatter[]);
         def(uNew) = def(uGlobalScatter);
     }
