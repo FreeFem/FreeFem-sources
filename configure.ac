@@ -1297,9 +1297,9 @@ fi
 if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
 then
     AC_FF_ADDWHERELIB(fftw3,-lfftw3,)
-    fftw_download=
 else
-    if test "$enable_download" = yes
+    AC_ARG_ENABLE(download-fftw,AC_HELP_STRING([--enable-download_fftw],[force the download of fftw]))
+    if test "$enable_download_fftw" != no -a "$enable_download" = yes
     then
         ff_DOWNLOAD_FFTW=fftw
     fi
@@ -2201,8 +2201,10 @@ TOOL_DISABLE(lapack,lapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
 TOOL_DISABLE(parmetis,parmetis.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
-if test "$ff_cmake" = yes; then
+if test "$ff_cmake" = yes -o \( "$ff_mmg_ok" = yes -a -z "$TOOL_COMPILE_mmg" \); then
      TOOL_DISABLE(mmg,mmg.$DYLIB_SUFFIX)
+fi
+if test "$ff_cmake" = yes -o \( "$ff_parmmg_ok" = yes -a -z "$TOOL_COMPILE_parmmg" \); then
      TOOL_DISABLE(parmmg,parmmg.$DYLIB_SUFFIX)
 fi
 TOOL_DISABLE(mshmet,"mshmet.$DYLIB_SUFFIX aniso.$DYLIB_SUFFIX")
@@ -2404,7 +2406,7 @@ if test "$ff_mkl_ok" = yes ; then
     AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
 fi
 
-## Condtional for check
+## Conditional for check
 test "$ff_fftw_ok" = yes -o -n "$ff_DOWNLOAD_FFTW" && ff_fftw_=yes || ff_fftw_=no
 test "$ff_ipopt_ok" = yes -o -n "$TOOL_COMPILE_ipopt" && ff_ipopt_=yes || ff_ipopt_=no
 test "$ff_metis_ok" = yes -o -n "$TOOL_COMPILE_metis" && ff_metis_=yes || ff_metis_=no
