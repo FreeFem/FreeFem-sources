@@ -41,7 +41,7 @@ problem A(u,v,solver=sparsesolver) =
 - int2d(Th)(g*dn(v)  + pena*g*v) 
 
 ;
-problem A1(uu,vv,solver=CG) 
+problem A1(uu,vv,solver=sparsesolver) 
 = 
  int3d(Th)(grad(uu)'*grad(vv)) - int3d(Th)(f*vv) + on(labs,uu=g);
  

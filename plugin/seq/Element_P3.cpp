@@ -631,7 +631,252 @@ public:
 }
 };
   
+class TypeOfFE_P3_S : public GTypeOfFE< MeshS > {
+ public:
+  typedef MeshS Mesh;
+  typedef MeshS::Element Element;
+  typedef GFElement< MeshS > FElement;
+  typedef Mesh::RdHat RdHat;
+  typedef Mesh::Rd Rd;
+   
+  static const int kp = 3;    // P3
+  static const int ndof =  (kp + 2) * (kp + 1) / 2;//  10
+  constexpr static int dfon[]= {1, 2, 1, 0};
   
+constexpr static int  nn[10][3] = {{0, 0, 0}, {1, 1, 1}, {2, 2, 2}, {1, 1, 2}, {1, 2, 2},
+                                            {0, 2, 2}, {0, 0, 2}, {0, 0, 1}, {0, 1, 1}, {0, 1, 2}};
+constexpr static int  aa[10][3] = {{0, 1, 2}, {0, 1, 2}, {0, 1, 2}, {0, 1, 0}, {0, 0, 1},
+                                            {0, 0, 1}, {0, 1, 0}, {0, 1, 0}, {0, 0, 1}, {0, 0, 0}};
+
+  constexpr static int pp[3][ndof] =
+    {{3, 0, 0, 0, 0, 1, 2, 2, 1, 1},
+     {0, 3, 0, 2, 1, 0, 0, 1, 2, 1},
+     {0, 0, 3, 1, 2, 2, 1, 0, 0, 1} };
+    
+    constexpr static int  ff[10] = {6, 6, 6, 2, 2, 2, 2, 2, 2, 1};
+
+
+  static const int d = Rd::d;
+    constexpr static const int dHat = RdHat::d;
+
+  TypeOfFE_P3_S( );    // constructor
+  void FB(const What_d whatd, const MeshS &Th, const MeshS::Element &K, const RdHat &PHat,
+          RNMK_ &val) const;
+  void set(const MeshS &Th, const Element &K, InterpolationMatrix< RdHat > &M, int ocoef, int odf,
+           int *nump) const;
+};
+TypeOfFE_P3_S::TypeOfFE_P3_S( ) : GTypeOfFE< MeshS >(TypeOfFE_P3_3d::dfon, 1, 3, false, false)
+{
+  typedef Element E;
+  int n = this->NbDoF;
+  bool dd = verbosity > 5;
+  if (dd) {
+    cout << "\n +++ P3  : ndof : " << n << " " << this->PtInterpolation.N( ) << endl;
+  }
+
+  RdHat *Pt = this->PtInterpolation;
+  // construction of interpolation ppoint
+
+  {
+    double cc = 1. / 3.;
+
+    for (int i = 0; i < ndof; ++i)
+      Pt[i] = RdHat::KHat[0] * cc * pp[0][i] + RdHat::KHat[1] * cc * pp[1][i] + RdHat::KHat[2] * cc * pp[2][i] ;
+    
+
+    if (dd) {
+      cout << this->PtInterpolation << endl;
+    }
+  }
+
+  for (int i = 0; i < n; i++) {
+    this->pInterpolation[i] = i;
+    this->cInterpolation[i] = 0;
+    this->dofInterpolation[i] = i;
+    this->coefInterpolation[i] = 1.;
+  }
+}
+
+void TypeOfFE_P3_S::set(const MeshS &Th, const TypeOfFE_P3_S::Element &K, InterpolationMatrix< TypeOfFE_P3_S::RdHat > &M,
+                         int ocoef, int odf, int *nump) const {
+    //  faux nump don la numerotation des p -> local
+    // ne marche que le cas scalaire ??? FH...
+    /*
+     for (int k=0;k<M.ncoef;++k)
+     vdf[M.dofe[k]] += M.coef[k]*vpt(M.p[k],M.comp[k]);
+     */
+  int Np=M.p.N();
+  int n = this->NbDoF;
+  int *p = M.p;
+  
+  if (verbosity > 9) {
+      cout << " P3_S  set:" << odf << " : ";
+  }
+
+  int dof = 3+odf;
+
+  for (int e = 0; e < 3; ++e) {
+    int oe = K.EdgeOrientation(e);
+      int i1=dof;
+      int i2=dof+1;
+      //cout << e <<"  "<< i1 << " " << i2 << "  , " << oe <<"  p: " <<  p[i1] << " " <<  p[i2] <<" " << Np << endl;
+      ffassert( i1>=0 && i2 >=0);
+      ffassert( i1<Np && i2 <Np );
+      
+    if ((oe < 0) && (p[i1] < p[i2])) {
+      swap(p[i1], p[i2]);
+    } else if ((oe > 0) && (p[i1] > p[i2])) {
+        swap(p[i1], p[i2]);
+    }
+
+    dof += 2;
+  }
+    if (verbosity > 99) {
+        cout << " " << M.p << endl;  ;
+    }
+
+}
+
+void TypeOfFE_P3_S::FB(const What_d whatd, const TypeOfFE_P3_S::Mesh &Th, const TypeOfFE_P3_S::Element &K,
+                        const TypeOfFE_P3_S::RdHat &PHat, RNMK_ &val) const {
+  assert(val.N( ) >= 10);    // 10 degrees of freedom
+  assert(val.M( ) == 1);     // 1 components
+  // int n = this->NbDoF;
+  // -------------
+  // perm: the permutation for which the 4 tetrahedron vertices are listed with increasing GLOBAL
+  // number (i.e. perm[0] is the local number of the vertex with the smallest global number, ...
+  // perm[3] is the local number of the vertex with the biggest global number.)
+  // -------------
+    const int ndf=10;
+  R L[3];
+  PHat.toBary(L);
+  L[0] *= 3.;
+  L[1] *= 3.;
+  L[2] *= 3.;
+
+
+    throwassert(val.N( ) >= 10);
+    throwassert(val.M( ) == 1);
+    // Attention il faut renumeroter les fonction de bases
+    // car dans freefem++, il y a un node par sommet, arete or element
+    // et la numerotation naturelle  mais 2 noud pas arete
+    // donc p est la perumation
+    // echange de numerotation si les arete sont dans le mauvais sens
+    int p[10] = {};
+
+    for (int i = 0; i < 10; ++i) {
+      p[i] = i;
+    }
+
+    if (K.EdgeOrientation(0) < 0) {
+      Exchange(p[3], p[4]);    // 3,4
+    }
+
+    if (K.EdgeOrientation(1) < 0) {
+      Exchange(p[5], p[6]);    // 5,6
+    }
+
+    if (K.EdgeOrientation(2) < 0) {
+      Exchange(p[7], p[8]);    // 7,8
+    }
+
+    val = 0;
+
+    if (whatd & Fop_D0) {
+      RN_ f0(val('.', 0, op_id));
+
+      for (int df = 0; df < ndf; df++) {
+        int pdf = p[df];
+        R f = 1. / ff[df];
+
+        for (int i = 0; i < kp; ++i) {
+          f *= L[nn[df][i]] - aa[df][i];
+        }
+
+        f0[pdf] = f;
+      }
+    }
+
+    else if(whatd & (Fop_D1|Fop_D2))
+    {
+  
+        R3 D[3] ;
+        K.Gradlambda(D);
+        D[0]*= kp;
+        D[1]*= kp;
+        D[2]*= kp;
+     if (whatd & (Fop_D1|Fop_D2)) {
+        for (int df = 0; df < ndf; df++) {
+          int pdf = p[df];
+          R fx = 0., fy = 0.,fz = 0., f = 1. / ff[df];
+
+          for (int i = 0; i < kp; ++i) {
+            int n = nn[df][i];
+            R Ln = L[n] - aa[df][i];
+            fx = fx * Ln + f * D[n].x;
+            fy = fy * Ln + f * D[n].y;
+            fz = fz * Ln + f * D[n].z;
+            f = f * Ln;
+          }
+
+          if (whatd & Fop_dx) {
+            val(pdf, 0, op_dx) = fx;
+          }
+
+          if (whatd & Fop_dy) {
+            val(pdf, 0, op_dy) = fy;
+          }
+            if (whatd & Fop_dz) {
+              val(pdf, 0, op_dz) = fz;
+            }
+        }
+      }
+
+        if (whatd &Fop_D2) {
+        for (int df = 0; df < ndf; df++) {
+          int pdf = p[df];
+          R fx = 0., fy = 0.,fz=0., f = 1. / ff[df];
+          R fxx = 0., fyy = 0., fzz=0.,  fxy = 0., fxz = 0., fyz = 0. ;
+
+          for (int i = 0; i < kp; ++i) {
+            int n = nn[df][i];
+            R Ln = L[n] - aa[df][i];
+            fxx = fxx * Ln + 2. * fx * D[n].x;
+            fyy = fyy * Ln + 2. * fy * D[n].y;
+            fzz = fzz * Ln + 2. * fz * D[n].z;
+            fxy = fxy * Ln + fx * D[n].y + fy * D[n].x;
+            fxz = fxz * Ln + fx * D[n].z + fz * D[n].x;
+            fyz = fyz * Ln + fy * D[n].z + fz * D[n].y;
+            fx = fx * Ln + f * D[n].x;
+            fy = fy * Ln + f * D[n].y;
+            fz = fz * Ln + f * D[n].z;
+            f = f * Ln;
+          }
+
+          if (whatd & Fop_dxx) {
+            val(pdf, 0, op_dxx) = fxx;
+          }
+
+          if (whatd & Fop_dyy) {
+            val(pdf, 0, op_dyy) = fyy;
+          }
+            if (whatd & Fop_dzz) {
+              val(pdf, 0, op_dzz) = fzz;
+            }
+
+          if (whatd & Fop_dxy) {
+            val(pdf, 0, op_dxy) = fxy;
+          }
+            if (whatd & Fop_dxz) {
+              val(pdf, 0, op_dxz) = fxz;
+            }
+            if (whatd & Fop_dyz) {
+              val(pdf, 0, op_dyz) = fyz;
+            }
+          }
+      }
+    }
+  }
 
 
   // link with FreeFem++
@@ -639,14 +884,17 @@ public:
   // a static variable to add the finite element to freefem++
   static TypeOfFE_P3_3d P3_3d;
   static TypeOfFE_Pk_L P3_L(3);
+  static TypeOfFE_P3_S P3_S;
   GTypeOfFE< Mesh3 > &Elm_P3_3d(P3_3d);
   GTypeOfFE< MeshL > &Elm_P3_L(P3_L);
+  GTypeOfFE< MeshS > &Elm_P3_S(P3_S);
 
   static void init( ) {
     AddNewFE("P3", &P3LagrangeP3);
     static ListOfTFE FE_P3("P3", &P3LagrangeP3); // to add P3 in list of Common FE
     AddNewFE3("P33d", &Elm_P3_3d,"P3");
     AddNewFEL("P3L", &Elm_P3_L,"P3");
+    AddNewFES("P3S", &Elm_P3_S,"P3");
   }
 }    // namespace Fem2D
 LOADFUNC(Fem2D::init);

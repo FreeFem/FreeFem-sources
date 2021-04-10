@@ -82,4 +82,18 @@ for (int i=0;i<Vh.ndofK;++i)
  assert(err < 1e-6);	
 	
 }
+{
+	meshS Th=square3(10,10);
+	fespace Vh(Th,P3S);
+	func f = 3*x^3+2*x^2+x + 1+x*y+y^3;
+	Vh u = f;
+	Vh v=0;
+	v[][0] = 1.; 
+	real err = sqrt(int1d(Th)( sqr(f-u)));
+	cout << "err L " << err << endl;
+	
+	
+ assert(err < 1e-6);	
+	
+}
 

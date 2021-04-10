@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- add P3 lagrange finite element on meshS and meshS 
 - add new plugin `meshtool`to add tool to compute the number of connected components of a all kind of mesh
   (mesh,mesh3,meshS,meshL) with 2 kind of connected components ones on interior part of the mesh (default) ans
   secondly on the closure of the mesh (see `examples/hpddm/bConnectedComponents.edp` )
