@@ -71,7 +71,7 @@ class R2close {
     if (verbosity > 10) {
       cout << "     bounding box ClosePoints  Pmin=[" << x0 << ", " << y0 << "], Pmax=[ " << x1
            << " " << y1 << "] "
-           << "eps= " << EPSILON << endl;
+           << "eps= " << EPSILON << " offset:" << offset <<endl;
     }
 
     N = max(sqrt(nx), 10.);
@@ -378,7 +378,7 @@ KN< long > *CloseTo(Stack stack, double const &eps, KNM_< double > const &P,
   double y0 = P(1, ':').min( );
   double x1 = P(0, ':').max( );
   double y1 = P(1, ':').max( );
-
+  if(verbosity>4) cout << " ClosePoints bb:  x " << x0 << " " << x1 << " y " << y0 << " " << y1 << endl;
   // add cc
   double dd = max(x1 - x0, y1 - y0) * 0.01;
   double data[] = {x0 - dd, y0 - dd, x1 + dd, y1 + dd};
@@ -431,7 +431,7 @@ KN< long > *CloseTo(Stack stack, double const &eps, KNM_< double > const &P,
   }
 
   if (verbosity > 2) {
-    cout << "  - ClosePoint: nb of common points " << m0 - S.n;
+    cout << "  - ClosePoint: nb of common points " << m0 - S.n << endl;
   }
 
   return Add2StackOfPtr2FreeRC(stack, pr);
@@ -514,7 +514,7 @@ KN< long > *CloseTo(Stack stack, double const &eps, pmesh const &pTh, KNM< doubl
   Th.BoundingBox(Pmin, Pmax);
   int nv = b.sum( );
   if (verbosity > 9) {
-    cout << " Th.nv " << Th.nv << " " << nv << "/ " << Pmin << " " << Pmax << endl;
+    cout << " CloseTo (border): Th.nv " << Th.nv << " " << nv<< " "<< b.sum()  << "/ " << Pmin << " " << Pmax << endl;
   }
 
   FQuadTree *quadtree =
@@ -528,12 +528,13 @@ KN< long > *CloseTo(Stack stack, double const &eps, pmesh const &pTh, KNM< doubl
     }
   }
 
-  cout << " After quadterr" << endl;
-
+  cout << " After quadterr pr=" << pr << endl;
+  int kk=0;
   for (int j = 0; j < np; ++j) {
     R2 P(Q(j, 0), Q(j, 1));
     Vertex *pV = quadtree->ToClose(P, eps);
     if (pV) {
+      kk++;
       pV = quadtree->NearestVertex(P);
       long k = Th(pV);
       if (inv) {
@@ -543,7 +544,7 @@ KN< long > *CloseTo(Stack stack, double const &eps, pmesh const &pTh, KNM< doubl
       }
     }
   }
-
+    cout << " nb point to close "<< kk << endl;
   delete quadtree;
 
   return Add2StackOfPtr2FreeRC(stack, pr);

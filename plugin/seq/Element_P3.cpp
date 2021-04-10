@@ -264,7 +264,8 @@ namespace Fem2D {
     {0, 1, 1, 1} /* 16 */, {1, 0, 1, 1} /* 17 */, {1, 1, 0, 1} /* 18 */, {1, 1, 1, 0} /* 19 */};
   int TypeOfFE_P3_3d::dfon[] = {1, 2, 1, 0};    // 2 dofs on each edge, 2 dofs on each face
 
-  TypeOfFE_P3_3d::TypeOfFE_P3_3d( ) : GTypeOfFE< Mesh >(TypeOfFE_P3_3d::dfon, 1, 3, false, false) {
+  TypeOfFE_P3_3d::TypeOfFE_P3_3d( ) : GTypeOfFE< Mesh >(TypeOfFE_P3_3d::dfon, 1, 3, false, false)
+{
     typedef Element E;
     int n = this->NbDoF;
     bool dd = verbosity > 5;
@@ -444,16 +445,208 @@ namespace Fem2D {
     }
   }
 
+
+class TypeOfFE_Pk_L : public GTypeOfFE< MeshL > {
+public:
+ typedef MeshL Mesh;
+ typedef MeshL::Element Element;
+ typedef GFElement< MeshL > FElement;
+ typedef R1 RdHat;
+ typedef R3 Rd;
+ static const int d = 1;
+    const int kp ;
+  KN<int> mi ;
+  KN<double> ml,mc;
+ 
+  struct A4 {
+        int dfon[4];
+        A4(int k) {
+            dfon[0] = dfon[1] = dfon[2] = dfon[3] = 0;
+            ffassert(k>0);
+            dfon[0] = 1;
+            dfon[1] = k-1;
+        }
+        operator const int * () const {return dfon;}
+    };
+ TypeOfFE_Pk_L( int kk)
+    :  GTypeOfFE< Mesh >(A4(kk), 1, kk, true, false), kp(kk), mi((kk+1)*kk), ml((kk+1)*kk), mc((kk+1)*kk)
+    {
+        typedef Element E;
+        int n = this->NbDoF;
+        bool dd = verbosity > 5;
+        if (dd) {
+          cout << "\n +++ P"<< kp <<" L  : ndof : " << n << " " << this->PtInterpolation.N( ) << endl;
+        }
+        ffassert( n == kp+1);
+        ffassert(this->PtInterpolation.N( )==kp+1);
+        RdHat *Pt = this->PtInterpolation;
+        KN<int> pdof(n);
+        // construction of interpolation ppoint
+        {
+          double cc = 1. / kp;
+          Pt[0] = R1(0);
+          Pt[1] = R1(1.);
+            pdof[0] = 0;
+            pdof[1]= kp;
+            
+          for(int i=1; i<kp; ++i)
+            {
+            Pt[i+1] = R1(cc*i);
+            pdof[i+1]= i;
+            }
+  
+          if (dd) {
+            cout << this->PtInterpolation << endl;
+          }
+        }
+
+        for (int i = 0; i < n; i++) {
+          this->pInterpolation[i] = i;
+          this->cInterpolation[i] = 0;
+          this->dofInterpolation[i] = i;
+          this->coefInterpolation[i] = 1.;
+        }
+        // constructon de
+        //                     //  (k*l[li]-i)/(ii-i);;
+        int km =0;
+        for(int dof=0; dof<n;++dof)
+        {
+            int ii = pdof[dof]; // point associaed to dof
+            // cout << " dof " << dof << "km=" <<km << " ii = " << ii << endl;
+
+            for(int i=0; i<= kp; ++i)
+            {
+                if( i != ii)
+                {
+                    mi[km]=1;// x 
+                    ml[km] = double(kp)/(ii-i);
+                    mc[km] = -double(i)/(ii-i);
+                    km++;
+                }
+            }
+        }
+        if(verbosity>9)
+        {
+        cout << " km == " << km << "kp = " << kp << " " << n << endl;
+          
+            for(int dof=0,m=0; dof<n;++dof)
+            {
+                cout.setf(ios::showpos);
+                cout << dof << " : " ;
+                for(int l=0; l<kp;++l,++m)
+                cout << "("<< ml[m]<< " l_" << mi[m] << " +"<<  mc[m] <<")" ;
+                cout << endl;
+                cout.unsetf(ios::showpos);
+            }
+        }
+            ffassert(km == kp*n);
+
+        
+        
+
+      }
+ void FB(const What_d whatd, const Mesh &Th, const Element &K, const RdHat &PHat, RNMK_ &val) const
+    {
+    const int k =kp;
+    double l[d+1];
+    PHat.toBary(l);
+    // l = 0 en i/k , 1 en ii/k  => monome : ( k*l - i )/( ii-i) ok..
+    RN_ f0(val('.',0,op_id));
+    if (whatd & Fop_D0)
+    {  double s=0.;
+        for( int dof = 0,m=0; dof < this->NbDoF; ++dof)
+        {
+        double f=1.;
+        for(int i=0; i<k;++i,++m)
+        f *= (ml[m]*l[mi[m]]+mc[m]);
+        f0[dof]= f;
+            s+= f;
+        }
+        
+        ffassert( abs( s-1.)< 1e-7);
+    }
+    else if(whatd & (Fop_D1|Fop_D2))
+      {
+        bool d2= Fop_D2 && k>1;//  calcul de
+        const unsigned int fop[3]={Fop_dx,Fop_dy,Fop_dz};
+        const  int op[3]={op_dx,op_dy,op_dz};
+          const  int dop[9]={op_dxx,op_dxy,op_dxz, op_dyx,op_dyy,op_dyz, op_dzx,op_dzy,op_dzz};
+
+        Rd Dl[d+1];
+        Rd DDl[d+1][d];
+        K.Gradlambda(Dl);
+        KN<Rd> df(this->NbDoF),ddf(this->NbDoF*d);
+        
+        for( int dof = 0,m=0; dof < this->NbDoF; ++dof)
+            {
+            double f=1.;
+            Rd Df;
+            Rd DDf[d] ;
+            for(int i=0; i<k;++i,++m)
+                { // f = f*b // df = df*b+db*f; ddf  = ddf*b + 2*df*db + f * ddb
+                 int im=mi[m];
+                 double b =(ml[m]*l[im]+mc[m]);
+                 Rd Db=ml[m]*Dl[im];
+                 if(d2)
+                    for(int l=0; l<d;++l)
+                       DDf[l] = b*DDf[l]+ Db[l]*Df + Db*Df[l] ;
+                 Df = b*Df+ (f*Db);
+                 f *= b;
+                }
+              df[dof] = Df;
+              if(d2)
+              {
+                  for(int l=0; l<d;++l)
+                   ddf[dof*3+l] = DDf[l];
+              }
+            }
+        // copy data d  D
+        for (int dd=0; dd< Rd::d;++dd)
+            {
+                if (whatd & fop[dd])
+                {
+                    RN_ dfdd(val('.',0,op[dd]));
+                    for(int i=0;i<this->NbDoF;++i)
+                    dfdd[i]= df[i][dd];
+                }
+            }
+        // copy data  DD
+        if(d2)
+            {
+               for (int id=0; id< Rd::d;++id)
+                for (int jd=0; jd<= id;++jd)
+                {
+                    int op = dop[id*3+jd];
+                    const unsigned int fopij= 1<< op;
+                    if (whatd & fopij)
+                    {
+                      RN_ dfdd(val('.',0,op));
+                      for(int i=0;i<this->NbDoF;++i)
+                       dfdd[i]= ddf[i*3+id][jd];
+                    }
+                }
+            }
+        
+     }
+}
+};
+  
+  
+
+
   // link with FreeFem++
   static TypeOfFE_P3Lagrange P3LagrangeP3;
   // a static variable to add the finite element to freefem++
-  static AddNewFE P3Lagrange("P3", &P3LagrangeP3);
   static TypeOfFE_P3_3d P3_3d;
+  static TypeOfFE_Pk_L P3_L(3);
   GTypeOfFE< Mesh3 > &Elm_P3_3d(P3_3d);
+  GTypeOfFE< MeshL > &Elm_P3_L(P3_L);
 
-  static AddNewFE3 TFE_P3_3d("P33d", &Elm_P3_3d);
   static void init( ) {
-    TEF2dto3d[&P3LagrangeP3] = &Elm_P3_3d;    // P3 -> P33d
+    AddNewFE("P3", &P3LagrangeP3);
+    static ListOfTFE FE_P3("P3", &P3LagrangeP3); // to add P3 in list of Common FE
+    AddNewFE3("P33d", &Elm_P3_3d,"P3");
+    AddNewFEL("P3L", &Elm_P3_L,"P3");
   }
 }    // namespace Fem2D
 LOADFUNC(Fem2D::init);
