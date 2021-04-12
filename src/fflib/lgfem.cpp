@@ -1288,7 +1288,7 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
       AnyType r = (*eppfes)(s);
       const TypeOfFE **tef = new const TypeOfFE *[atef.size( )];
         for (int i = 0; i < atef.size( ); i++)
-        if (tedim[i] == d)
+        if (tedim[i] == dHat)
           tef[i] = GetAny< TypeOfFE * >(atef[i].eval(s));
         else if (tedim[i] == 2 && d==3 && dHat == 3)
           tef[i] = GetAny< TypeOfFE * >(TypeOfFE3to2(s, atef[i].eval(s)));
