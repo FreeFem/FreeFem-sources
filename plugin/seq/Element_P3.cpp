@@ -453,7 +453,8 @@ public:
     typedef GFElement< MeshL > FElement;
     typedef R1 RdHat;
     typedef R3 Rd;
-    static const int d = 1;
+    static const int dHat = 1;
+    static const int d = 3;
     const int kp ;
     KN<int> mi ;
     KN<double> ml,mc;
@@ -548,7 +549,7 @@ public:
     void FB(const What_d whatd, const Mesh &Th, const Element &K, const RdHat &PHat, RNMK_ &val) const
     {
         const int k =kp;
-        double l[d+1];
+        double l[dHat+1];
         PHat.toBary(l);
         // l = 0 en i/k , 1 en ii/k  => monome : ( k*l - i )/( ii-i) ok..
         RN_ f0(val('.',0,op_id));
@@ -572,8 +573,8 @@ public:
             const  int op[3]={op_dx,op_dy,op_dz};
             const  int dop[9]={op_dxx,op_dxy,op_dxz, op_dyx,op_dyy,op_dyz, op_dzx,op_dzy,op_dzz};
             
-            Rd Dl[d+1];
-            Rd DDl[d+1][d];
+            Rd Dl[dHat+1];
+            Rd DDl[dHat+1][d];
             K.Gradlambda(Dl);
             KN<Rd> df(this->NbDoF),ddf(this->NbDoF*d);
             
@@ -589,7 +590,7 @@ public:
                     Rd Db=ml[m]*Dl[im];
                     if(d2)
                         for(int l=0; l<d;++l)
-                    DDf[l] = b*DDf[l]+ Db[l]*Df + Db*Df[l] ;
+                          DDf[l] = b*DDf[l]+ Db[l]*Df + Db*Df[l] ;
                     Df = b*Df+ (f*Db);
                     f *= b;
                 }
@@ -597,7 +598,7 @@ public:
                 if(d2)
                 {
                     for(int l=0; l<d;++l)
-                    ddf[dof*3+l] = DDf[l];
+                      ddf[dof*3+l] = DDf[l];
                 }
             }
             // copy data d  D
@@ -607,7 +608,7 @@ public:
                 {
                     RN_ dfdd(val('.',0,op[dd]));
                     for(int i=0;i<this->NbDoF;++i)
-                    dfdd[i]= df[i][dd];
+                      dfdd[i]= df[i][dd];
                 }
             }
             // copy data  DD
@@ -646,6 +647,7 @@ public:
     
     
     static const int d = Rd::d;
+    
     constexpr static const int dHat = RdHat::d;
     
     TypeOfFE_P3_S( );    // constructor

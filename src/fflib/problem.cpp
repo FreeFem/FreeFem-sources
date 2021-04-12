@@ -11415,6 +11415,34 @@ bool GetBilinearParam(const ListOfId &l,basicAC_F0::name_and_type *name_param,in
  }
  }
  }*/
+bool CheckSizeOfForm( list<C_F0> & largs ,int N,int M)
+{
+    list<C_F0>::iterator ii,ib=largs.begin(),
+    ie=largs.end();
+    for (ii=ib;ii != ie;ii++)
+    {
+        Expression e=ii->LeftValue();
+        aType r = ii->left();
+        if (r==atype<const  FormBilinear *>())
+        {
+            const  FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
+            const Foperator * b=const_cast<  Foperator *>(bb->b);
+            //  verif
+         }
+        else if (r==atype<const  FormLinear *>())
+        {
+            const FormLinear * ll=dynamic_cast<const  FormLinear *>(e);
+            const Ftest * l= const_cast<Ftest *>(ll->l);
+        }
+        else if (r==atype<const  BC_set *>())
+        {// modif FH  mai 2007  A FAIRE il y a un bug ici XXXXXXXXXXXXX
+
+            const BC_set * bc= dynamic_cast<const  BC_set *>(e);
+         }
+
+    }
+}
+
 bool FieldOfForm( list<C_F0> & largs ,bool complextype)  // true => complex problem
 {
     //  bool   iscomplextype=complextype;

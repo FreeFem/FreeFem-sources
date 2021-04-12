@@ -154,26 +154,25 @@ public:
             }
             else if(ttdc==1)
             {
-              const int d = dHat;
               if (k == -1 )  // P0edge
-                     dfon[d] = Element::ne;
+                     dfon[dHat] = Element::ne;
                else if (k == -2 )  // P0face
-                     dfon[d] = Element::nf;
+                     dfon[dHat] = Element::nf;
                else if (k == -3 )  // P0vertex
-                     dfon[d] = Element::nv;
+                     dfon[dHat] = Element::nv;
                else if(k>0) {
                 
                 int fd =1, nd=1;
-                for(int i=0; i< d; ++i)
+                for(int i=0; i< dHat; ++i)
                 {
-                    fd *= i+1;// d!
-                    nd *= (k+i+1); // (k+1)  .. (k+d)
+                    fd *= i+1;// dHat!
+                    nd *= (k+i+1); // (k+1)  .. (k+dHat)
                 }
-                //  ndof =  (k+1)  .. (k+d) / d! :
+                //  ndof =  (k+1)  .. (k+dHat) / dHat! :
                 //  d=3,  dim :P1 = 4, dim P2 10, dim P3 : 20
-                dfon[d] =  nd/fd;
+                dfon[dHat] =  nd/fd;
                 if(verbosity>9)
-                    cout << " TypeOfFE_Lagrange dim=" << d << " P_"<< k << " " << ttdc  << " = " <<  dfon[d] << " !!" << fd << " " << nd <<  endl;
+                    cout << " TypeOfFE_Lagrange dim=" << dHat << " P_"<< k << " " << ttdc  << " = " <<  dfon[dHat] << " !!" << fd << " " << nd <<  endl;
                 ffassert( nd % fd ==0);
                }
                 
@@ -247,7 +246,8 @@ public:
     typedef typename Element::RdHat RdHat;
     typedef typename Element::Rd Rd;
     typedef GFElement<Mesh> FElement;
-    constexpr static int  d =  RdHat::d;
+    constexpr static int  dHat =  RdHat::d;
+    constexpr static int  d =  Rd::d;
     const int k;
     
     vector<double> ml,mc;
@@ -266,11 +266,11 @@ public:
         for(int dof=0; dof<n;++dof)
         {
             RdHat P;
-            int ijk[d+1];
+            int ijk[dHat+1];
           
             invNumSimplex(dof,P);
             long l, s=0;
-            for(int j=0; j<d;++j)
+            for(int j=0; j<dHat;++j)
             {
                 l = lround(P[j]);
                 s+=l;
@@ -279,7 +279,7 @@ public:
             ijk[0]=k-s;
             // construction of the monome
             int m=0;
-            for(int li=0;li<=d;++li)
+            for(int li=0;li<=dHat;++li)
             {
                 int ii=ijk[m++];
                 for(int i=0; i<ii; ++i)
@@ -312,7 +312,7 @@ public:
     void FB(const What_d whatd,const Mesh & Th,const Element & K,const RdHat &PHat1, RNMK_ & val) const
     {
         RdHat PHat= TypeOfFE_Lagrange<Mesh>::Shrink1(PHat1);
-        double l[d+1];
+        double l[dHat+1];
         PHat.toBary(l);
         // l = 0 en i/k , 1 en ii/k  => monome : ( k*l - i )/( ii-i) ok..
         RN_ f0(val('.',0,op_id));
@@ -331,10 +331,10 @@ public:
             const  int op[3]={op_dx,op_dy,op_dz};
               const  int dop[9]={op_dxx,op_dxy,op_dxz, op_dyx,op_dyy,op_dyz, op_dzx,op_dzy,op_dzz};
 
-            Rd Dl[d+1];
-            Rd DDl[d+1][d];
+            Rd Dl[dHat+1];
+            Rd DDl[dHat+1][d];
             K.Gradlambda(Dl);
-            KN<Rd> df(this->NbDoF),ddf(this->NbDoF*d);
+            KN<Rd> df(this->NbDoF),ddf(this->NbDoF*dHat);
             
             for( int dof = 0,m=0; dof < this->NbDoF; ++dof)
                 {
@@ -356,7 +356,7 @@ public:
                   if(d2)
                   {
                       for(int l=0; l<d;++l)
-                       ddf[dof*3+l] = DDf[l];
+                         ddf[dof*3+l] = DDf[l];
                   }
                 }
             // copy data d  D
@@ -366,7 +366,7 @@ public:
                     {
                         RN_ dfdd(val('.',0,op[dd]));
                         for(int i=0;i<this->NbDoF;++i)
-                        dfdd[i]= df[i][dd];
+                          dfdd[i]= df[i][dd];
                     }
                 }
             // copy data  DD
@@ -399,7 +399,8 @@ public:
     typedef typename Element::RdHat RdHat;
     typedef typename Element::Rd Rd;
     typedef GFElement<Mesh> FElement;
-    constexpr static int  d =  RdHat::d;
+    constexpr static int  dHat =  RdHat::d;
+    constexpr static int  d =  Rd::d;
     const int k;
     //  dc == 2 : some continuite, dc ==1 : just on element
     TypeOfFE_ConstDC(int kk,int dc):
