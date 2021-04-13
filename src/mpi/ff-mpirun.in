@@ -6,7 +6,7 @@ prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 bindir="@bindir@"
 nw=1
-if [ -n "@MPIRUN@"  ] ;then mpirun="@MPIRUN@"  ; fi
+if [ -n "@MPIRUN@"  ] ;then eval mpirun="@MPIRUN@"  ; fi
 if [ -n "@MPI_RUN_OPTION@"  ] ;then mpi_run_option="@MPI_RUN_OPTION@"  ; fi	
 ffmpi=FreeFem++-mpi
 if [ -x "$0" -a -x "$dir/$ffmpi" ]; then 
