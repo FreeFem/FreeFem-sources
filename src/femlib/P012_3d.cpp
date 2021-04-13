@@ -567,7 +567,7 @@ void TypeOfFE_P2Lagrange3d::FB(const What_d whatd,const Mesh & ,const Element & 
 		   
 	       }
 	   }
-	 else if (whatd & Fop_D2)
+	  if (whatd & Fop_D2)
 	     ffassert(0); // a faire ...
 	 //  cout << val << endl;
      }

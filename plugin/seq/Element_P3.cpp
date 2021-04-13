@@ -566,7 +566,7 @@ public:
             
             ffassert( abs( s-1.)< 1e-7);
         }
-        else if(whatd & (Fop_D1|Fop_D2))
+        if(whatd & (Fop_D1|Fop_D2))
         {
             bool d2= Fop_D2 && k>1;//  calcul de
             const unsigned int fop[3]={Fop_dx,Fop_dy,Fop_dz};
@@ -802,7 +802,7 @@ void TypeOfFE_P3_S::FB(const What_d whatd, const TypeOfFE_P3_S::Mesh &Th, const 
         }
     }
     
-    else if(whatd & (Fop_D1|Fop_D2))
+    if(whatd & (Fop_D1|Fop_D2))
     {
         
         R3 D[3] ;

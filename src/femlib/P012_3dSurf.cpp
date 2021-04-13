@@ -148,8 +148,6 @@
 	   f0z[2] = Dl[2].z;
 	 }
    }
-   else if (whatd & Fop_D2)
-     ffassert(0);
          
    }
      
@@ -246,7 +244,7 @@
 	     assert(k==6);
 	   }
      }
-    else if (whatd & Fop_D2)
+     if (whatd & Fop_D2)
        ffassert(0);
    }
      
@@ -367,9 +365,7 @@
            }
          }
      }
-     else if (whatd & Fop_D2)
-       ffassert(0);
-          
+           
    }
 
   class TypeOfFE_P1bLagrange_surf : public TypeOfFE_Lagrange<MeshS>  {
@@ -439,7 +435,7 @@
 		   
  	       }
  	   }
- 	 else if (whatd & Fop_D2)
+ 	  if (whatd & Fop_D2)
  	     ffassert(0);
       }
 
@@ -513,7 +509,7 @@
       }
 
     }
-    else if (whatd & Fop_D2)
+     if (whatd & Fop_D2)
       ffassert(0);
         
   }

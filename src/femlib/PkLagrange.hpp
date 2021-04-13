@@ -324,7 +324,7 @@ public:
             f *= (ml[m]*l[mi[m]]+mc[m]);
             f0[dof]= f;
             }
-        else if(whatd & (Fop_D1|Fop_D2))
+        if(whatd & (Fop_D1|Fop_D2))
           {
             bool d2= Fop_D2 && k>1;//  calcul de
             const unsigned int fop[3]={Fop_dx,Fop_dy,Fop_dz};
