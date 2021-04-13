@@ -17,7 +17,7 @@ if [ -x "$0" -a -x "$dir/$ffmpi" ]; then
  fi    
 fi
 if [ -d "$bindir" ]  ;then export PATH="@bindir@:$PATH"  ; fi
-a[0]="$mpirun"
+a[0]="'$mpirun'"
 j=1;
 test -n "$mpi_run_option" && a[((j++))]="$mpi_run_option"
 #echo $1 ---
@@ -29,7 +29,7 @@ case "$1" in
 "-win") nw=0;;
 *.edp) a[$j]="${ffmpi}";
 if [ "$nw" -eq 1 ]; then ((j=$j+1));a[$j]="-nw"; fi
-((j++));a[$j]="$1";;
+((j++));a[$j]="'$1'";;
 #if[ ! -f "$1" ]; then echo error file no found "$1"; dry=2; fi;;
 -dry) dry=1;; 
 *)  a[$j]="$1";;
