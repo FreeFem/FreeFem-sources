@@ -70,7 +70,7 @@ else
 PETSC_DOWNLOAD := --download-metis --download-ptscotch \
 		--download-hypre --download-parmetis \
 		--download-mmg --download-parmmg \
-		--download-superlu --download-suitesparse --download-suitesparse-commit=v5.7.2 --download-tetgen \
+		--download-superlu --download-suitesparse --download-tetgen \
 		--download-slepc --download-hpddm
 ifeq ($(FFCMAKE),no)
 PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
@@ -304,6 +304,7 @@ $(SRCDIR)/tag-tar:$(PACKAGE)
 ifeq ($(WIN32DLLTARGET),)
 	cd petsc-$(VERSION) && patch -p1 < ../petsc-metis.patch && cd -
 endif
+	cd petsc-$(VERSION) && patch -p1 < ../petsc-suitesparse.patch && cd -
 	touch $@
 $(PACKAGE):
 	../getall -o PETSc -a
