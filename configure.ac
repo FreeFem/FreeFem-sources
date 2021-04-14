@@ -1891,7 +1891,7 @@ then
 	ff_umfpack_incs="-I/usr/include/$ff_umfpack_dir"
 	UMFPACK_CPPFLAGS="$ff_umfpack_incs"
 fi
-if test "$ff_umfpack_ok" = no -a "$enable_download" = yes
+if test "$ff_umfpack_ok" = no -a "$enable_download" = yes -a "$enable_umfpack" != no
 then
     AC_MSG_NOTICE(using downloaded UMFPACK)
     AC_SUBST(DOWNLOAD_UMFPACK,"umfpack")

@@ -41,7 +41,7 @@ else
 fi
 
 # check
-./etc/jenkins/blob/check.sh
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/builds/workspace/freefem/ff-petsc/r/lib && ./etc/jenkins/blob/check.sh
 
 if [ $? -eq 0 ]
 then
