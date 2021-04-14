@@ -9,24 +9,32 @@ macro PLOTMPIALL(mesh,Pk, Th, u, plotparm)
       mesh[int] ath(mpisize);
       fespace Xh(Thi,Pk);
       Xh[int] uh(mpisize);
+      if(Xh.ndof != u.n)
+      {
+      cout << " BUG : ndof " <<  Xh.ndof << " size u " << u.n << endl ;
+      assert(Xh.ndof == u.n);
+       }
       uh[0][]=u;
       ath[0]=Th;
-      mpiRequest[int] rq(mpisize);
+      mpiRequest[int] rq(mpisize-1),rq1(mpisize-1);
       for(int i= 1; i <mpisize;++i)
-	   Irecv(processor(i,rq[i]),ath[i]);
+	   Irecv(processor(i,rq[i-1]),ath[i]);
       for (int i=1;i<mpisize;++i)
        	int k= mpiWaitAny(rq);
       for (int i=1;i<mpisize;++i)
 	   { Thi=ath[i];
-	     Irecv(processor(i,rq[i]),uh[i][]);}
+	     Irecv(processor(i,rq1[i-1]),uh[i][]);}
       for (int i=1;i<mpisize;++i)
-       	int k= mpiWaitAny(rq); 
+       	int k= mpiWaitAny(rq1); 
       plot(uh,plotparm);
     }
   else
     {
-      processor(0)<<Th;
-      processor(0)<<u;
+     mpiRequest rq;   
+     Isend(processor(0,rq),Th); 
+     mpiWait(rq);
+     Isend(processor(0,rq),u); 
+     mpiWait(rq); 
     }
   mpiBarrier(mpiCommWorld);
   }

@@ -59,6 +59,9 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
+- bug in Find triangle contening point in 2d (border case), 
+   `int Mesh::DataFindBoundary::Find(R2 PP,R *l,int & outside) const`
+   the parameter l not correclty return due to local variable. 
 - set CFLAGS=-Wno-implicit-function-declaration to complie with Apple clang version 12.0.0 (clang-1200.0.32.29)
   to remove following error: implicit declaration of function
   correct `3dCurve/basicGlue.edp`and add missing test
