@@ -4,7 +4,7 @@
 
 
 inline size_t rotl(size_t value, int shift) {
-    return (value << shift) | (value >> (sizeof(value) * CHAR_BIT - shift));
+    return (value << shift) | (value >> (sizeof(value) * 8 - shift));
 }
 template<typename T,int N>
 struct SortArray {
