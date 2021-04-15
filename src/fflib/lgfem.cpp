@@ -5465,6 +5465,7 @@ AnyType ClearReturn(Stack stack, const AnyType &a) {
   Add2StackOfPtr2FreeRC(stack, m);
   return m;
 }
+template<class K> long get_n(KN<K> * p){ return p->N();}//
 
 template< class R >
 void DclTypeMatrix( ) {
@@ -5505,6 +5506,7 @@ void DclTypeMatrix( ) {
   Add< AMat * >("resize", ".", new OneOperator1< Resize< AMat >, AMat * >(to_Resize));
   Add< Resize< AMat > >("(", "",
                         new OneOperator2_< AMat *, Resize< AMat >, long >(resizeandclean2));
+    Add<AMat *>("n",".",new OneOperator1<long,AMat *>(get_n));
 
   // to declare matrix[int]
   map_type_of_map[make_pair(atype< long >( ), atype< PMat >( ))] = atype< AMat * >( );
