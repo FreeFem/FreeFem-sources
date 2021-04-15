@@ -1416,7 +1416,7 @@ then
 		 mkl_blas=rt
 		 mkl_lapack=rt
 		 ff_mkl_mlt="$mkl_l -lmkl_rt -lmkl_intel_thread -lmkl_core  $ff_iomp5 $ff_pthread"
-		 ff_mkl_blas="$mkl_l -lmkl_rt -lmkl_sequential -lmkl_core   $ff_iomp5 $ff_pthread"
+		 ff_mkl_blas="$mkl_l -lmkl_rt -lmkl_sequential -lmkl_core $ff_pthread"
 		 ff_mkl_lapack="$ff_mkl_blas"
 	    elif test -f "$ff_mkl_libpath/libmkl_lapack.$ff_suffix_dylib" ; then
 		 ff_mkl_mlt="$mkl_l -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"

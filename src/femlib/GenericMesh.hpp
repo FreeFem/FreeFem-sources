@@ -1496,9 +1496,9 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
     b=bb;
     // rebuild all
     BuildBound();
-    delete TheAdjacencesLink; TheAdjacencesLink=0; BuildAdj();
-    delete bnormalv; bnormalv=0; Buildbnormalv();
-    delete ElementConteningVertex; ElementConteningVertex=0; BuildjElementConteningVertex();
+    delete [] TheAdjacencesLink; TheAdjacencesLink=0; BuildAdj();
+    delete [] bnormalv; bnormalv=0; Buildbnormalv();
+    delete [] ElementConteningVertex; ElementConteningVertex=0; BuildjElementConteningVertex();
     delete gtree; gtree=0; BuildGTree();
 
     delete []ind_nv;
