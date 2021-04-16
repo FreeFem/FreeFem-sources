@@ -2827,8 +2827,13 @@ namespace PETSc {
           } else {
             A = to< Type* >(args[0]);
           }
-          x = to< KN< PetscScalar >* >(args[1]);
-          y = to< KN< PetscScalar >* >(args[2]);
+          if (c != 4) {
+            x = to< KN< PetscScalar >* >(args[1]);
+            y = to< KN< PetscScalar >* >(args[2]);
+          } else {
+            x = to< Type* >(args[1]);
+            y = to< Type* >(args[2]);
+          }
         } else {
           A = to< Type* >(args[0]);
           x = to< KNM< PetscScalar >* >(args[1]);
@@ -2856,6 +2861,10 @@ namespace PETSc {
       : OneOperator(atype< long >( ), atype< Type* >( ), atype< KN< PetscScalar >* >( ),
                     atype< KN< PetscScalar >* >( )),
         c(3) {}
+    LinearSolver(int, int, int, int)
+      : OneOperator(atype< long >( ), atype< Type* >( ), atype< Type* >( ),
+                    atype< Type* >( )),
+        c(4) {}
   };
   template< class Type >
   basicAC_F0::name_and_type LinearSolver< Type >::E_LinearSolver::name_param[] = {
@@ -2863,63 +2872,81 @@ namespace PETSc {
   template< class Type >
   AnyType LinearSolver< Type >::E_LinearSolver::operator( )(Stack stack) const {
     if (c != 2) {
-      KN< PetscScalar >* in = GetAny< KN< PetscScalar >* >((*x)(stack));
-      KN< PetscScalar >* out = GetAny< KN< PetscScalar >* >((*y)(stack));
+      KN< PetscScalar >* in, *out;
+      if (c != 4) {
+        in = GetAny< KN< PetscScalar >* >((*x)(stack));
+        out = GetAny< KN< PetscScalar >* >((*y)(stack));
+      }
       if (A) {
         Type* ptA = GetAny< Type* >((*A)(stack));
-        Vec x, y;
-        MatCreateVecs(ptA->_petsc, &x, &y);
-        PetscInt size;
-        VecGetLocalSize(y, &size);
-        ffassert(in->n == size);
-        if (out->n != size) {
-          out->resize(size);
-          *out = PetscScalar( );
-        }
-        VecPlaceArray(x, *in);
-        VecPlaceArray(y, *out);
         if (!ptA->_ksp) {
           KSPCreate(PetscObjectComm((PetscObject)ptA->_petsc), &ptA->_ksp);
           KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
         }
-        PetscInt N, rbegin;
-        PetscScalar* tmpIn, *tmpOut;
-        PetscContainer ctx;
-        PetscErrorCode (*s2c)(PetscContainer, PetscScalar*, PetscScalar*), (*c2s)(PetscContainer, PetscScalar*, PetscScalar*);
-        PetscObjectQuery((PetscObject)ptA->_petsc, "Hmat", (PetscObject*)&ctx);
-        if(ctx) {
-            PetscObjectQueryFunction((PetscObject)ctx, "s2c_C", &s2c);
-            PetscObjectQueryFunction((PetscObject)ctx, "c2s_C", &c2s);
-            MatGetSize(ptA->_petsc, &N, nullptr);
-            MatGetOwnershipRange(ptA->_petsc, &rbegin, nullptr);
-            tmpIn = new PetscScalar[N]();
-            tmpOut = new PetscScalar[N]();
-            std::copy_n(in->operator PetscScalar*(), in->n, tmpIn + rbegin);
-            MPI_Allreduce(MPI_IN_PLACE, tmpIn, N, HPDDM::Wrapper<PetscScalar>::mpi_type(), MPI_SUM, PetscObjectComm((PetscObject)ptA->_petsc));
-            (*s2c)(ctx, tmpIn, tmpOut);
-            std::copy_n(tmpOut + rbegin, in->n, in->operator PetscScalar*());
+        if (c != 4) {
+          Vec x, y;
+          MatCreateVecs(ptA->_petsc, &x, &y);
+          PetscInt size;
+          VecGetLocalSize(y, &size);
+          ffassert(in->n == size);
+          if (out->n != size) {
+            out->resize(size);
+            *out = PetscScalar( );
+          }
+          VecPlaceArray(x, *in);
+          VecPlaceArray(y, *out);
+          PetscInt N, rbegin;
+          PetscScalar* tmpIn, *tmpOut;
+          PetscContainer ctx;
+          PetscErrorCode (*s2c)(PetscContainer, PetscScalar*, PetscScalar*), (*c2s)(PetscContainer, PetscScalar*, PetscScalar*);
+          PetscObjectQuery((PetscObject)ptA->_petsc, "Hmat", (PetscObject*)&ctx);
+          if(ctx) {
+              PetscObjectQueryFunction((PetscObject)ctx, "s2c_C", &s2c);
+              PetscObjectQueryFunction((PetscObject)ctx, "c2s_C", &c2s);
+              MatGetSize(ptA->_petsc, &N, nullptr);
+              MatGetOwnershipRange(ptA->_petsc, &rbegin, nullptr);
+              tmpIn = new PetscScalar[N]();
+              tmpOut = new PetscScalar[N]();
+              std::copy_n(in->operator PetscScalar*(), in->n, tmpIn + rbegin);
+              MPI_Allreduce(MPI_IN_PLACE, tmpIn, N, HPDDM::Wrapper<PetscScalar>::mpi_type(), MPI_SUM, PetscObjectComm((PetscObject)ptA->_petsc));
+              (*s2c)(ctx, tmpIn, tmpOut);
+              std::copy_n(tmpOut + rbegin, in->n, in->operator PetscScalar*());
+          }
+          if (c != 3)
+            KSPSolve(ptA->_ksp, x, y);
+          else {
+            VecConjugate(x);
+            KSPSolveTranspose(ptA->_ksp, x, y);
+            VecConjugate(y);
+          }
+          if(ctx) {
+              std::fill_n(tmpIn, N, PetscScalar());
+              std::fill_n(tmpOut, N, PetscScalar());
+              std::copy_n(out->operator PetscScalar*(), out->n, tmpIn + rbegin);
+              MPI_Allreduce(MPI_IN_PLACE, tmpIn, N, HPDDM::Wrapper<PetscScalar>::mpi_type(), MPI_SUM, PetscObjectComm((PetscObject)ptA->_petsc));
+              (*c2s)(ctx, tmpIn, tmpOut);
+              std::copy_n(tmpOut + rbegin, out->n, out->operator PetscScalar*());
+              delete [] tmpIn;
+              delete [] tmpOut;
+          }
+          VecResetArray(y);
+          VecResetArray(x);
+          VecDestroy(&y);
+          VecDestroy(&x);
+        } else {
+          Dmat* X = GetAny< Dmat* >((*x)(stack));
+          Dmat* Y = GetAny< Dmat* >((*y)(stack));
+          ffassert(X && Y);
+          PetscBool isDense;
+          PetscObjectTypeCompareAny((PetscObject)X->_petsc, &isDense, MATMPIDENSE, MATSEQDENSE, "");
+          Mat XD;
+          if (!isDense) {
+            MatConvert(X->_petsc, MATMPIDENSE, MAT_INITIAL_MATRIX, &XD);
+          } else XD = X->_petsc;
+          if (!Y->_petsc) MatDuplicate(XD, MAT_DO_NOT_COPY_VALUES, &Y->_petsc);
+          KSPMatSolve(ptA->_ksp, XD, Y->_petsc);
+          if (!isDense) MatDestroy(&XD);
         }
-        if (c != 3)
-          KSPSolve(ptA->_ksp, x, y);
-        else {
-          VecConjugate(x);
-          KSPSolveTranspose(ptA->_ksp, x, y);
-          VecConjugate(y);
-        }
-        if(ctx) {
-            std::fill_n(tmpIn, N, PetscScalar());
-            std::fill_n(tmpOut, N, PetscScalar());
-            std::copy_n(out->operator PetscScalar*(), out->n, tmpIn + rbegin);
-            MPI_Allreduce(MPI_IN_PLACE, tmpIn, N, HPDDM::Wrapper<PetscScalar>::mpi_type(), MPI_SUM, PetscObjectComm((PetscObject)ptA->_petsc));
-            (*c2s)(ctx, tmpIn, tmpOut);
-            std::copy_n(tmpOut + rbegin, out->n, out->operator PetscScalar*());
-            delete [] tmpIn;
-            delete [] tmpOut;
-        }
-        VecResetArray(y);
-        VecResetArray(x);
-        VecDestroy(&y);
-        VecDestroy(&x);
       } else {
         User< LinearSolver< Type > > user = nullptr;
         PetscNew(&user);
@@ -4437,6 +4464,7 @@ namespace PETSc {
     Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >(1, 1));
     if (!std::is_same< PetscScalar, PetscReal >::value)
       Global.Add("KSPSolveHermitianTranspose", "(", new PETSc::LinearSolver< Dmat >(1, 1, 1));
+    Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >(1, 1, 1, 1));
     Global.Add("KSPGetConvergedReason", "(", new OneOperator1_< long, Dmat* >(PETSc::GetConvergedReason< Dmat >));
     Global.Add("KSPGetIterationNumber", "(", new OneOperator1_< long, Dmat* >(PETSc::GetIterationNumber< Dmat >));
     Global.Add("KSPSetResidualHistory", "(", new OneOperator2_< long, Dmat*, KN< double >* >(PETSc::SetResidualHistory< Dmat >));
