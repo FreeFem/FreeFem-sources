@@ -6,7 +6,12 @@ prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 bindir="@bindir@"
 nw=1
-if [ -n "@MPIRUN@"  ] ;then mpirun="@MPIRUN@"  ; fi
+if [ -n "@MPIRUN@"  ] ;then 
+case "@MPIRUN@" in
+[A-Z]:*) mpirun="@MPIRUN@"  ;;
+*) eval mpirun="@MPIRUN@"  ;; 
+esac
+fi
 if [ -n "@MPI_RUN_OPTION@"  ] ;then mpi_run_option="@MPI_RUN_OPTION@"  ; fi	
 ffmpi=FreeFem++-mpi
 if [ -x "$0" -a -x "$dir/$ffmpi" ]; then 
@@ -29,7 +34,7 @@ case "$1" in
 "-win") nw=0;;
 *.edp) a[$j]="${ffmpi}";
 if [ "$nw" -eq 1 ]; then ((j=$j+1));a[$j]="-nw"; fi
-((j++));a[$j]="$1";;
+((j++));a[$j]="'$1'";;
 #if[ ! -f "$1" ]; then echo error file no found "$1"; dry=2; fi;;
 -dry) dry=1;; 
 *)  a[$j]="$1";;

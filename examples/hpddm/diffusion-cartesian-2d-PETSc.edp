@@ -1,0 +1,57 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+// PARAM -DCartesianPartitioning=1
+
+load "PETSc"                        // PETSc plugin
+macro dimension()2// EOM            // 2D or 3D
+include "macro_ddm.idp"             // additional DDM functions
+
+macro simple2d(Ph, function, comm, deltaX, deltaY)
+    Ph xx = x / deltaX, yy = y / deltaY;
+    int i = int(sqrt(mpiSize(comm)));
+    while(mpiSize(comm) % i != 0)
+        --i;
+    int j = mpiSize(comm) / i;
+    function = int(j * xx) + int(i * yy) * j;// EOM
+
+macro grad(u)[dx(u), dy(u)]// EOM   // two-dimensional gradient
+func Pk = P2;                       // finite element space
+
+mesh Th = square(getARGV("-global", 13), getARGV("-global", 13)); // global mesh
+Mat A;
+fespace Ph(Th, P0);
+IFMACRO(!CartesianPartitioning)
+Ph part;
+{
+    simple2d(Ph, part, mpiCommWorld, 1.0, 1.0)
+    plot(part, fill = 1, wait = 1);
+}
+macro ThUserPartitioning()part[]// EOM
+ENDIFMACRO
+IFMACRO(CartesianPartitioning)
+macro ThCartesianPartitioning()// EOM
+ENDIFMACRO
+
+buildDmesh(Th)
+createMat(Th, A, Pk)
+
+fespace Wh(Th, Pk);                 // local finite element space
+varf vPb(u, v) = int2d(Th)(grad(u)' * grad(v)) + int2d(Th)(v) + on(1, u = 0.0);
+real[int] rhs = vPb(0, Wh, tgv = -2);
+matrix unassembled(Wh.ndof);
+Wh<real> u;                         // local solution
+A = vPb(Wh, Wh, sym = 0, tgv = -2);
+set(A, sparams = "-pc_type asm -sub_pc_type cholesky", O = unassembled);
+Mat[int] Q(1);
+Mat[int] Z(1);
+{
+    Mat P(Wh.ndof);
+    Q[0] = P;
+    matrix one(Wh.ndof, 1);
+    for(int i = 0; i < Wh.ndof; ++i) one(i, 0) = 1.0;
+    Mat Wn(one);
+    Z[0] = Wn;
+}
+set(Q, Z, parent = A, sparams = "-custom_sub_" + mpirank + "_pc_type mg -custom_sub_0_ksp_converged_reason", prefix = "custom_sub_" + mpirank + "_");
+u[] = A^-1 * rhs;
+plotMPI(Th, u, Pk, def, real, cmm = "Global solution")

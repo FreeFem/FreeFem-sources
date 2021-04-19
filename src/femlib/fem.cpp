@@ -1048,7 +1048,7 @@ int Walk(const Mesh & Th,int& it, R *l,
             const Triangle & K=(*pTh)[k];
             int nl[3],n=0;
             R2 & A(K[0]), & B(K[1]), & C(K[2]);
-            R l[3]={0,0,0};
+            // R l[3]={0,0,0};  modif  FH Debile car return value 
             R area2= K.area*2;
             R eps =  -area2*1e-6;
             l[0] = Area2(PP,B,C);

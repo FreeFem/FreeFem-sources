@@ -24,3 +24,18 @@ meshS Th = Th1+Th2+Th11+Th22+Th5+Th6;
 plot(Th,wait=1);
 assert(Th.nbnomanifold==40);
 
+meshS[int] Thglue(6);
+Thglue[0] = Th1;
+Thglue[1] = Th2;
+Thglue[2] = Th11;
+Thglue[3] = Th22;
+Thglue[4] = Th5;
+Thglue[5] = Th6;
+
+
+meshS Thglued = gluemesh(Thglue);
+assert(Thglued.nbnomanifold==40);
+
+plot(Thglued,cmm="2");
+
+

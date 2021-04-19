@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFEM,4.8,frederic.hecht@sorbonne-universite.fr,FreeFEM)
+AC_INIT(FreeFEM,4.9,frederic.hecht@sorbonne-universite.fr,FreeFEM)
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -901,8 +901,9 @@ fi
 
 if test $enable_ffcs = no
 then
-    # FF case
-    m4_include(etc/config/m4/acmpi.m4)
+    # FF case  conf with PETSC or after 
+dnl     m4_include(etc/config/m4/acmpi.m4)
+    ff_mpi=no
 else
     # FFCS - use the same MPI configuration choices as FFCS
     if test -z "$MPICXX"
@@ -987,7 +988,7 @@ if test "$with_petsc" != no; then
 	    ffconfpetsc="$d$dd"
 		ffconfslepc="$d/slepc/conf/slepcvariables"
 
-		 echo " petsc ... $ffconfpetsc"
+		# echo " petsc ... $ffconfpetsc"
 	    if test -f "$ffconfpetsc" ; then
 		if test  "$ff_petsc_ok" = no ; then
 		    PETSC_PREFIXDIR=`awk -F' *= *' '"PREFIXDIR"==$1 {print $2}' "$ffconfpetsc"`
@@ -996,10 +997,17 @@ if test "$with_petsc" != no; then
 		    PETSC_MPIRUN=`echo "$PETSC_MPIRUN" | awk '{gsub(" --oversubscribe", ""); print}'`	#remove --oversubscribe
 		    AC_MSG_NOTICE([ find real ( $PETSC_SCALAR )  petsc in $ffconfpetsc]);
             if test "$ff_mpi" != yes; then
+		AC_MSG_NOTICE([ choose MPI from petsc  : $PETSC_MPIRUN ]);    
                 MPIRUN=`echo $PETSC_MPIRUN`
                 MPICC=`awk -F' *= *' '"CC"==$1 {print $2}' "$ffconfpetsc"`
                 MPICXX=`awk -F' *= *' '"CXX"==$1 {print $2}' "$ffconfpetsc"`
                 MPIFC=`awk -F' *= *' '"FC"==$1 {print $2}' "$ffconfpetsc"`
+case $ff_uname in
+CYGWIN*|MINGW*|MSYS_NT*)
+                MPICC=$MPICC" "`awk -F' *= *' '"MPI_INCLUDE"==$1 {print $2}' "$ffconfpetsc"`
+                MPICXX=$MPICXX" "`awk -F' *= *' '"MPI_INCLUDE"==$1 {print $2}' "$ffconfpetsc"`
+                MPIFC=$MPIFC" "`awk -F' *= *' '"MPI_INCLUDE"==$1 {print $2}' "$ffconfpetsc"`
+esac
                 m4_include(etc/config/m4/acmpi.m4)
             fi
             if test "$ff_mpi" = yes; then
@@ -1024,6 +1032,8 @@ if test "$with_petsc" != no; then
                         AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetsc)
+                        AC_FF_PETSC_WHERELIB(mmg,MMG_LIB,MMG_INCLUDE,$ffconfpetsc)
+                        AC_FF_PETSC_WHERELIB(parmmg,PARMMG_LIB,PARMMG_INCLUDE,$ffconfpetsc)
 		        AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetsc)
   		        AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetsc,$ff_METIS_LIB)
  dnl               if test -n "$ff_SUITESPARSE_LIB" -a -n "$ff_METIS_LIB"; then
@@ -1091,6 +1101,12 @@ if test "$with_petsc_complex" != no; then
                 MPICC=`awk -F' *= *' '"CC"==$1 {print $2}' "$ffconfpetscc"`
                 MPICXX=`awk -F' *= *' '"CXX"==$1 {print $2}' "$ffconfpetscc"`
                 MPIFC=`awk -F' *= *' '"FC"==$1 {print $2}' "$ffconfpetscc"`
+case $ff_uname in
+CYGWIN*|MINGW*|MSYS_NT*)
+                MPICC=$MPICC" "`awk -F' *= *' '"MPI_INCLUDE"==$1 {print $2}' "$ffconfpetscc"`
+                MPICXX=$MPICXX" "`awk -F' *= *' '"MPI_INCLUDE"==$1 {print $2}' "$ffconfpetscc"`
+                MPIFC=$MPIFC" "`awk -F' *= *' '"MPI_INCLUDE"==$1 {print $2}' "$ffconfpetscc"`
+esac
                 m4_include(etc/config/m4/acmpi.m4)
             fi
             if test "$ff_mpi" = yes; then
@@ -1114,6 +1130,8 @@ if test "$with_petsc_complex" != no; then
             AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(mmg,MMG_LIB,MMG_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(parmmg,PARMMG_LIB,PARMMG_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(scalapack,SCALAPACK_LIB,SCALAPACK_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(suitesparse,SUITESPARSE_LIB,SUITESPARSE_INCLUDE,$ffconfpetscc)
             if test -z "$ff_BLASLAPACK_LIB"; then
@@ -1162,6 +1180,10 @@ fi
 ##  slepc
 
 ### end petsc ....
+#  chech MPI after petsc ... 
+if test "$ff_mpi" != yes; then
+  m4_include(etc/config/m4/acmpi.m4)
+fi
 
 # FFCS needs to change some of the FF makefiles to compile without MPI
 AM_CONDITIONAL([FFCS_MPIOK],[test $ff_mpi = yes])
@@ -1275,9 +1297,9 @@ fi
 if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
 then
     AC_FF_ADDWHERELIB(fftw3,-lfftw3,)
-    fftw_download=
 else
-    if test "$enable_download" = yes
+    AC_ARG_ENABLE(download-fftw,AC_HELP_STRING([--enable-download_fftw],[force the download of fftw]))
+    if test "$enable_download_fftw" != no -a "$enable_download" = yes
     then
         ff_DOWNLOAD_FFTW=fftw
     fi
@@ -1394,7 +1416,7 @@ then
 		 mkl_blas=rt
 		 mkl_lapack=rt
 		 ff_mkl_mlt="$mkl_l -lmkl_rt -lmkl_intel_thread -lmkl_core  $ff_iomp5 $ff_pthread"
-		 ff_mkl_blas="$mkl_l -lmkl_rt -lmkl_sequential -lmkl_core   $ff_iomp5 $ff_pthread"
+		 ff_mkl_blas="$mkl_l -lmkl_rt -lmkl_sequential -lmkl_core $ff_pthread"
 		 ff_mkl_lapack="$ff_mkl_blas"
 	    elif test -f "$ff_mkl_libpath/libmkl_lapack.$ff_suffix_dylib" ; then
 		 ff_mkl_mlt="$mkl_l -lmkl_${ff_mkl_cc}${ff_mkl_lp} -lmkl_lapack -lmkl_intel${ff_mkl_lp} -lmkl_intel_thread  -lmkl_core -lguide  -lm -lpthread"
@@ -1869,7 +1891,7 @@ then
 	ff_umfpack_incs="-I/usr/include/$ff_umfpack_dir"
 	UMFPACK_CPPFLAGS="$ff_umfpack_incs"
 fi
-if test "$ff_umfpack_ok" = no -a "$enable_download" = yes
+if test "$ff_umfpack_ok" = no -a "$enable_download" = yes -a "$enable_umfpack" != no
 then
     AC_MSG_NOTICE(using downloaded UMFPACK)
     AC_SUBST(DOWNLOAD_UMFPACK,"umfpack")
@@ -2179,8 +2201,10 @@ TOOL_DISABLE(lapack,lapack.$DYLIB_SUFFIX)
 TOOL_DISABLE(metis,metis.$DYLIB_SUFFIX)
 TOOL_DISABLE(parmetis,parmetis.$DYLIB_SUFFIX)
 TOOL_DISABLE(mmg3d,mmg3d-v4.0.$DYLIB_SUFFIX)
-if test "$ff_cmake" = yes; then
+if test "$ff_cmake" = yes -o \( "$ff_mmg_ok" = yes -a -z "$TOOL_COMPILE_mmg" \); then
      TOOL_DISABLE(mmg,mmg.$DYLIB_SUFFIX)
+fi
+if test "$ff_cmake" = yes -o \( "$ff_parmmg_ok" = yes -a -z "$TOOL_COMPILE_parmmg" \); then
      TOOL_DISABLE(parmmg,parmmg.$DYLIB_SUFFIX)
 fi
 TOOL_DISABLE(mshmet,"mshmet.$DYLIB_SUFFIX aniso.$DYLIB_SUFFIX")
@@ -2382,7 +2406,7 @@ if test "$ff_mkl_ok" = yes ; then
     AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and LAPACK  )
 fi
 
-## Condtional for check
+## Conditional for check
 test "$ff_fftw_ok" = yes -o -n "$ff_DOWNLOAD_FFTW" && ff_fftw_=yes || ff_fftw_=no
 test "$ff_ipopt_ok" = yes -o -n "$TOOL_COMPILE_ipopt" && ff_ipopt_=yes || ff_ipopt_=no
 test "$ff_metis_ok" = yes -o -n "$TOOL_COMPILE_metis" && ff_metis_=yes || ff_metis_=no

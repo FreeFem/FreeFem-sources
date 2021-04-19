@@ -10,12 +10,12 @@ all-local: superlu
 #http://crd.lbl.gov/~xiaoye/SuperLU/superlu_4.0.tar.gz
 DIRPKG=../pkg
 SRCDIR=superlu-sources
-PACKAGE=superlu.zip
+PACKAGE=superlu-5.2.2.zip
 PACKAGE_PATH=$(DIRPKG)/$(PACKAGE)
 SERVER=https://github.com/xiaoyeli/superlu/
 # http://crd-legacy.lbl.gov/~xiaoye/SuperLU/superlu_4.3.tar.gz
 INSTALL=../..
-SUPERLU_VERSION=5.2.1
+SUPERLU_VERSION=5.2.2
 SUPERLULIB=../$(INSTALL)/lib/libsuperlu_$(SUPERLU_VERSION).a
 include  ff-FLAGS
 ### return machine parameters
@@ -133,6 +133,7 @@ $(SRCDIR)/$(INSTALL):
 
 $(SRCDIR): $(PACKAGE_PATH)
 	unzip -q $(PACKAGE_PATH) && mv superlu-* superlu-sources
+	patch -p0 <patch-superlu-5.2.2
 	touch $(SRCDIR)
 
 $(PACKAGE_PATH):
@@ -142,7 +143,7 @@ $(PACKAGE_PATH):
 # compilation dependencies control there (see [[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])
 
 clean:
-	-rm -rf superlu-sources ff-FLAGS
+	-rm -rf superlu-sources ff-FLAGS superlu-*
 	-rm -rf FAIT FAIRE
 
 

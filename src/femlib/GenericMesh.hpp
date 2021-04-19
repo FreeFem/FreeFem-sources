@@ -386,13 +386,30 @@ public:
     }
 
   int facePermutation(int i) const
-  {// def the permutatution of orient the face
+    { // change not return number in [0,6[ 24 march 2020 
+      // def the permutatution of orient the face
+      /*
+    
+       // change to be compatible to SetNumPerm code ..
     int fo =0;
     const Vertex * f[3]={&at(nvface[i][0]), &at(nvface[i][1]), &at(nvface[i][2])};
     if(f[0]>f[1]) fo+=1,Exchange(f[0],f[1]);
     if(f[1]>f[2]) { fo+=2,Exchange(f[1],f[2]);
     if(f[0]>f[1]) fo+=4,Exchange(f[0],f[1]); }
-    return fo;
+       return fo;
+      */
+      const Vertex * p[3]={&at(nvface[i][0]), &at(nvface[i][1]), &at(nvface[i][2])};
+
+      // signe + depart*2
+      int k=0,i0=0,i1=1,i2=2,j[3];
+      if(p[i0]> p[i1]) swap(i0,i1),k +=1;
+      if(p[i1]> p[i2]) swap(i1,i2),k +=1;
+      if(p[i0]> p[i1]) swap(i0,i1),k +=1;
+      assert(p[i0] < p[i1] && p[i1] < p[i2]);
+      return (k%2)+i0*2; // signe + depart*2
+
+      
+    
   }
 
   int   EdgeOrientation(int i) const
@@ -581,7 +598,7 @@ public:
     return  BuildDFNumbering(dfon,nbequibe,equibe);
   }
   int nElementonB(int k,int j) const // add v4 F.H 12/2018 (not sure for internal boundary !!!)
-    { int kk= TheAdjacencesLink[nea*k+j]; return (kk>=0) && (kk%nea  != k) ? 2 : 1;}
+    { int kk= TheAdjacencesLink[nea*k+j]; return (kk>=0) && (kk/nea  != k) ? 2 : 1;}// correct FH 23 mrch 2012
 
   int ElementAdj(int k,int &j) const  {
     int p=TheAdjacencesLink[nea*k+j];
@@ -1479,9 +1496,9 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
     b=bb;
     // rebuild all
     BuildBound();
-    delete TheAdjacencesLink; TheAdjacencesLink=0; BuildAdj();
-    delete bnormalv; bnormalv=0; Buildbnormalv();
-    delete ElementConteningVertex; ElementConteningVertex=0; BuildjElementConteningVertex();
+    delete [] TheAdjacencesLink; TheAdjacencesLink=0; BuildAdj();
+    delete [] bnormalv; bnormalv=0; Buildbnormalv();
+    delete [] ElementConteningVertex; ElementConteningVertex=0; BuildjElementConteningVertex();
     delete gtree; gtree=0; BuildGTree();
 
     delete []ind_nv;

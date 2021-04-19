@@ -32,7 +32,7 @@ uold0=u0(x);// Step cero
 uold1=uold0; // Step one
 
 real dt=0.01;
-real T=10; // tempo di uscita
+real T=1; // tempo di uscita
 real t=0;  // velocita iniziale
 real c=1400; // Speed of propagation
 real L=1000; // Speed of propagation
@@ -55,7 +55,7 @@ real maximum=0.0;
 for (t=0;t<T; t+=dt) { 
 
 S[]=A^-1*b;
-meshL Thmv=movemesh(Th,[x,y+S]);
+meshL Thmv=movemesh(Th,[x,y+S*0.3]);
 plot(Thmv,OX(1),OY(1),wait=0,prev=1,dim=2, cmm="Time "+t+" max "+S[].max);
 
 //

@@ -3,6 +3,7 @@
 // PARAM -sizeComm 2 -Dpartitioner=scotch
 
 include "getARGV.idp"
+macro PetscScalar()real//
 
 int sizeComm = max(1, min(mpisize, getARGV("-sizeComm", mpisize)));
 int div = mpisize / sizeComm;
@@ -26,10 +27,10 @@ macro init(u)[u, u]//
     fespace Vh(Th, Pk);
     fespace VhGather(ThGather, Pk);
     fespace VhScatter(ThScatter, Pk);
-    Vh def(u);
-    VhGather def(uGather);
-    VhScatter def(uScatter);
-    VhScatter def(uTransfer);
+    Vh<PetscScalar> def(u);
+    VhGather<PetscScalar> def(uGather);
+    VhScatter<PetscScalar> def(uScatter);
+    VhScatter<PetscScalar> def(uTransfer);
     def(u) = [cos(2*pi*x)*sin(pi*y), sin(2*pi*y)];
     plotD(Th, u, cmm = "Original solution")
     gatherSolution(Th, comm, ThGather, Pk, u, uGather)
@@ -57,10 +58,10 @@ macro init(u)[u, u]//
     fespace Vh(Th, Pk);
     fespace VhGather(ThGather, Pk);
     fespace VhScatter(ThScatter, Pk);
-    Vh def(u);
-    VhGather def(uGather);
-    VhScatter def(uScatter);
-    VhScatter def(uTransfer);
+    Vh<PetscScalar> def(u);
+    VhGather<PetscScalar> def(uGather);
+    VhScatter<PetscScalar> def(uScatter);
+    VhScatter<PetscScalar> def(uTransfer);
     def(u) = [cos(2*pi*x)*sin(2*pi*y), sin(2*pi*y)*cos(2*pi*z)];
     plotD(Th, u, cmm = "Original solution")
     gatherSolution(Th, comm, ThGather, Pk, u, uGather)

@@ -63,7 +63,7 @@ border d(t=1,0){x=0; y=t;label=1;};
 int n = 20;
 plot(a(2*n)+b(n)+c(2*n)+d(n),wait=1,ps="squarebb.eps");
 mesh th= buildmesh(a(2*n)+b(n)+c(2*n)+d(n),splitpbedge=1); 
-plot(th,ps="squareb.eps");
+plot(th,ps="squareb.eps",wait=1,cmm=" with splitpbedge=1");
 }
 // ------------------------------------------------------------
 // bug before version 2.24

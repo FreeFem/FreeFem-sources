@@ -6,6 +6,7 @@
 
 load "msh3"
 load "medit"
+load "mmg"
 load "parmmg"
 
 int nn = 40;

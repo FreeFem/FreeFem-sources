@@ -1022,7 +1022,9 @@ KNM< R > *Solve(KNM< R > *a, Inverse< KNM< R > * > b) {
 
   dgesv_(&n, &n, B, &n, p, *a, &n, &info);
   if (info) {
-    cerr << " error:  dgesv_ " << info << endl;
+    cerr << " error:  dgesv_  (not invertible ??) " << info << endl;
+      ErrorExec("dgesv_",1);
+      std::abort();
   }
 
   return a;

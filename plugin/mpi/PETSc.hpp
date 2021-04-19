@@ -1,16 +1,6 @@
 #ifndef PETSC_HPP_
 #define PETSC_HPP_
 
-#if PETSC_VERSION_LT(3,7,0)
-#define FFPetscOptionsInsert(a,b,c) PetscOptionsInsert(a,b,c)
-#else
-#define FFPetscOptionsInsert(a,b,c) PetscOptionsInsert(NULL,a,b,c)
-#endif
-
-#if PETSC_VERSION_LT(3,6,0)
-#define MatCreateVecs MatGetVecs
-#endif
-
 #define HPDDM_PETSC   1
 
 #include "common_hpddm.hpp"
@@ -54,8 +44,7 @@ class DistributedCSR {
                 delete _vS;
                 _vS = nullptr;
             }
-            if(_ksp)
-                KSPDestroy(&_ksp);
+            KSPDestroy(&_ksp);
             if(_exchange) {
                 _exchange[0]->clearBuffer();
                 delete _exchange[0];
@@ -329,31 +318,6 @@ void setCompositePC(PC pc, const std::vector<Mat>* S) {
         }
         PetscFree(subksp);
     }
-}
-bool insertOptions(std::string* const& options) {
-    bool fieldsplit = false;
-    if(options && !options->empty()) {
-        std::vector<std::string> elems;
-        std::stringstream ss(*options);
-        std::string item;
-        while (std::getline(ss, item, ' '))
-            elems.push_back(item);
-        int argc = elems.size() + 1;
-        char** data = new char*[argc];
-        data[0] = new char[options->size() + argc]();
-        data[1] = data[0] + 1;
-        for(int i = 0; i < argc - 1; ++i) {
-            if(i > 0)
-                data[i + 1] = data[i] + elems[i - 1].size() + 1;
-            strcpy(data[i + 1], elems[i].c_str());
-            if(!fieldsplit)
-                fieldsplit = (elems[i].compare("fieldsplit") == 0);
-        }
-        FFPetscOptionsInsert(&argc, &data, NULL);
-        delete [] *data;
-        delete [] data;
-    }
-    return fieldsplit;
 }
 }
 #endif

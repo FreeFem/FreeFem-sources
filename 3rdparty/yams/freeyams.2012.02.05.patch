@@ -362,3 +362,36 @@ diff -u freeyams.2012.02.05/sourceslib/outqua_a.c  freeyams.2011.09.23-orig/sour
  #define  EPSD2          1.e-200
  #define  EPS6           5.e-06
  #define  EPS            1.e-06
+--- freeyams.2012.02.05/sourceslib/sproto.h	2021-02-17 11:09:34.000000000 +0100
++++ freeyams.2012.02.05-orig/sourceslib/sproto.h	2009-05-13 20:56:39.000000000 +0200
+@@ -161,3 +161,19 @@
+ int   outmsh_q(pSurfMesh ,char *);
+ int   updtop_q(pSurfMesh );
+ int   qualfa_q(float *,float *,float *,float *,float *,float *);
++
++int hippop(pTriangle tria);
++int updqua_a(pSurfMesh sm);
++int loptia3(pSurfMesh sm,ubyte fechk,float declic) ;
++int angdef(pSurfMesh sm);
++int boulep2(pSurfMesh sm,int depart,int i,Ball *b);
++int simred_a(double m1[6],double m2[6],double m[6]);
++int typelt(pSurfMesh sm,int k);
++int taspoi(pSurfMesh sm);
++int yams6(pSurfMesh sm);
++int yamsq(pSurfMesh sm);
++int yams22(pSurfMesh sm);
++int optedg(pSurfMesh sm) ;
++void primem(int np);
++#include "eigenv.h"
++#include <ctype.h>
+--- freeyams.2012.02.05/sourceslib/error.c	2006-07-12 18:32:35.000000000 +0200
++++ freeyams.2012.02.05-orig/sourceslib/error.c	2021-02-17 10:58:12.000000000 +0100
+@@ -10,7 +10,7 @@
+ #endif
+ 
+ #include <stdio.h>
+-/*#include <ctype.h>*/
++#include <ctype.h>
+ #include "string.h"
+ 
+ #define MAXLEV   25

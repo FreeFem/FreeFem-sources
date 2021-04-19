@@ -1,0 +1,64 @@
+diff -ur OO-superlu-sources-origin/SRC/csnode_bmod.c superlu-sources/SRC/csnode_bmod.c
+--- OO-superlu-sources-origin/SRC/csnode_bmod.c	2020-10-18 00:23:21.000000000 +0200
++++ superlu-sources/SRC/csnode_bmod.c	2021-02-17 09:02:06.000000000 +0100
+@@ -33,6 +33,12 @@
+ 
+ 
+ #include "slu_cdefs.h"
++/* 
++ * Function prototypes 
++ */
++void cusolve(int, int, complex*, complex*);
++void clsolve(int, int, complex*, complex*);
++void cmatvec(int, int, int, complex*, complex*, complex*);
+ 
+ 
+ /*! \brief Performs numeric block updates within the relaxed snode. 
+diff -ur OO-superlu-sources-origin/SRC/dsnode_bmod.c superlu-sources/SRC/dsnode_bmod.c
+--- OO-superlu-sources-origin/SRC/dsnode_bmod.c	2020-10-18 00:23:21.000000000 +0200
++++ superlu-sources/SRC/dsnode_bmod.c	2021-02-17 09:00:45.000000000 +0100
+@@ -33,6 +33,12 @@
+ 
+ 
+ #include "slu_ddefs.h"
++/* 
++ * Function prototypes 
++ */
++void dusolve(int, int, double*, double*);
++void dlsolve(int, int, double*, double*);
++void dmatvec(int, int, int, double*, double*, double*);
+ 
+ 
+ /*! \brief Performs numeric block updates within the relaxed snode. 
+diff -ur OO-superlu-sources-origin/SRC/ssnode_bmod.c superlu-sources/SRC/ssnode_bmod.c
+--- OO-superlu-sources-origin/SRC/ssnode_bmod.c	2020-10-18 00:23:21.000000000 +0200
++++ superlu-sources/SRC/ssnode_bmod.c	2021-02-17 08:58:12.000000000 +0100
+@@ -33,6 +33,12 @@
+ 
+ 
+ #include "slu_sdefs.h"
++/* 
++ * Function prototypes 
++ */
++void susolve(int, int, float*, float*);
++void slsolve(int, int, float*, float*);
++void smatvec(int, int, int, float*, float*, float*);
+ 
+ 
+ /*! \brief Performs numeric block updates within the relaxed snode. 
+diff -ur OO-superlu-sources-origin/SRC/zsnode_bmod.c superlu-sources/SRC/zsnode_bmod.c
+--- OO-superlu-sources-origin/SRC/zsnode_bmod.c	2020-10-18 00:23:21.000000000 +0200
++++ superlu-sources/SRC/zsnode_bmod.c	2021-02-17 09:04:15.000000000 +0100
+@@ -33,6 +33,12 @@
+ 
+ 
+ #include "slu_zdefs.h"
++/* 
++ * Function prototypes 
++ */
++void zusolve(int, int, doublecomplex*, doublecomplex*);
++void zlsolve(int, int, doublecomplex*, doublecomplex*);
++void zmatvec(int, int, int, doublecomplex*, doublecomplex*, doublecomplex*);
+ 
+ 
+ /*! \brief Performs numeric block updates within the relaxed snode. 

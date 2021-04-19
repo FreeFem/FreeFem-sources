@@ -14,40 +14,45 @@
 //   nonsymetric bilinear form
 //   ------------------------
 //  solve $ -\Delta u = f$ on $\Omega$ and $u= g$ on $\Gamma$
+//  on intalledges :
+// the edge are see nTonEdge times so we / nTonEdge
+// remark: nTonEdge =1 on border edge and =2 on internal 
+// we are in a triangle normal is the exterior normal
+// def: jump = external - internal value,     on border extern  - internal value
+//      mean = (external + internal value)/2, on border just mean internal value
+
 macro dn(u) (N.x*dx(u)+N.y*dy(u) ) //  def the normal derivative 
 
 mesh Th = square(10,10); // unite square 
 fespace Vh(Th,P2dc);     // Discontinous P2 finite element
 fespace Xh(Th,P2);
-//  if param = 0 => Vh must be P2 otherwise we need some penalisation  
-real pena=0; // a paramater to add penalisation 
-varf Ans(u,v)= 
-   int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v)  )
- + intalledges(Th)(//  loop on all  edge of all triangle 
-       // the edge are see nTonEdge times so we / nTonEdge
-       // remark: nTonEdge =1 on border edge and =2 on internal 
-       // we are in a triangle normal is the exterior normal
-       // def: jump = external - internal value,     on border extern  - internal value
-       //      mean = (external + internal value)/2, on border just mean internal value
-          ( jump(v)*mean(dn(u)) -  jump(u)*mean(dn(v)) 
-          + pena*jump(u)*jump(v) ) / nTonEdge 
-)
- + int1d(Th,3)(pena*0.*v)
-;
-func f=1;
-func g=0;
+//  if pena = 0 => Vh must be P2 otherwise we need some penalisation  
+real pena=100; // a paramater to add penalisation 
+
+func f=x+2*y;
+func g=x-y;
 Vh u,v;
 Xh uu,vv;
-problem A(u,v,solver=sparsesolver) = Ans 
+solve A(u,v,solver=sparsesolver) = 
+   int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v)  )
+ + intalledges(Th)(//  loop on all  edge of all triangle 
+          ( jump(v)*mean(dn(u)) -  jump(u)*mean(dn(v)) 
+          + pena*jump(u)*jump(v) ) / nTonEdge 
+          ) 
 - int2d(Th)(f*v) 
 - int1d(Th)(g*dn(v)  + pena*g*v) 
 ;
-problem A1(uu,vv,solver=CG) 
+
+solve A1(uu,vv,solver=CG) 
 = 
  int2d(Th)(dx(uu)*dx(vv)+dy(uu)*dy(vv)) - int2d(Th)(f*vv) + on(1,2,3,4,uu=g);
  
- A; // solve  DG
- A1; // solve continuous
 
-plot(u,uu,cmm="Discontinue Galerkin",wait=1,value=1);
+plot(u,uu,cmm="Continuous and Discontinue Galerkin",wait=1,value=1);
 plot(u,cmm="Discontinue Galerkin",wait=1,value=1,fill=1);
+Vh eh= u-uu;
+real err =eh[].linfty/u[].linfty; 
+cout << " ||err|| relative: " << err << " " <<uu[].linfty  <<  endl;
+
+assert( err < 1e-2);
+

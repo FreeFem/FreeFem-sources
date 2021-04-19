@@ -113,7 +113,7 @@ ENDIFMACRO
     }
 }// EOM
 
-macro partition(meshName, borderName, globalName, PhGlobalPrivate, VhGlobalPrivate, part, rank, size, s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs) {
+macro partitionPrivate(meshName, borderName, globalName, PhGlobalPrivate, VhGlobalPrivate, part, rank, size, s, overlap, level, prolongation, D, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs) {
     int backupSM = searchMethod;
     searchMethod = 1;
     assert(level >= 1);
@@ -146,11 +146,13 @@ IFMACRO(!privateCreateMat)
         }
     }
     int[int] n2oNeighbor;
+IFMACRO(!privateDmesh#CartesianPartitioning)
     globalName = trunc(globalName, suppSmooth > 0.001, label = 9999
 IFMACRO(privateDmesh#N2O)
             , new2old = n2oNeighbor
 ENDIFMACRO
                            );
+ENDIFMACRO
     real eps = globalName.measure;
     real[int] epsTab(intersection[0].n);
     mpiRequest[int] rq(2 * intersection[0].n);
@@ -165,9 +167,32 @@ ENDIFMACRO
     suppSmooth = suppSmooth;
 IFMACRO(!privateDmesh#N2O)
     meshName[level - 1] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface, new2old = n2oNeighbor);
+IFMACRO(privateDmesh#CartesianPartitioning)
+    real[int] bb(2 * dimension);
+    boundingbox(meshName[level - 1], bb);
+    meshName[level - 1] = trunc(globalName, x > bb[0] && x < bb[1] && y > bb[2] && y < bb[3]
+IFMACRO(dimension,3)
+                                                                                             && z > bb[4] && z < bb[5]
+ENDIFMACRO
+                                                                                                                      , label = fakeInterface);
+    globalName = meshName[level - 1];
+    n2oNeighbor = 0:globalName.nt - 1;
+ENDIFMACRO
 ENDIFMACRO
 IFMACRO(privateDmesh#N2O)
     meshName[level - 1] = trunc(globalName, suppSmooth > 0.501, label = fakeInterface, new2old = privateDmesh#N2O);
+IFMACRO(privateDmesh#CartesianPartitioning)
+    real[int] bb(2 * dimension);
+    boundingbox(meshName[level - 1], bb);
+    meshName[level - 1] = trunc(globalName, x > bb[0] && x < bb[1] && y > bb[2] && y < bb[3]
+IFMACRO(dimension,3)
+                                                                                             && z > bb[4] && z < bb[5]
+ENDIFMACRO
+                                                                                                                      , label = fakeInterface, new2old = privateDmesh#N2O);
+    globalName = meshName[level - 1];
+    n2oNeighbor = 0:globalName.nt - 1;
+ENDIFMACRO
+IFMACRO(!privateDmesh#CartesianPartitioning)
     {
         int[int] backup = privateDmesh#N2O;
         int[int] new = n2oNeighbor(privateDmesh#N2O);
@@ -176,6 +201,7 @@ IFMACRO(privateDmesh#N2O)
         n2oNeighbor.resize(backup.n);
         n2oNeighbor = backup;
     }
+ENDIFMACRO
 ENDIFMACRO
     if(level > 1) {
         prolongation.resize(level - 1);
@@ -220,7 +246,7 @@ ENDIFMACRO
     part = part;
     int numberIntersection = 0;
     {
-        int[int] rest = restrict(VhLocalPrivate, VhGlobalPrivate, n2oNeighbor);
+        int[int] restriction = restrict(VhLocalPrivate, VhGlobalPrivate, n2oNeighbor);
         n2oNeighbor.resize(0);
         mpiWaitAll(rq);
         for(int i = 0; i < intersection[0].n; ++i) {
@@ -228,7 +254,7 @@ ENDIFMACRO
             AddLayers(globalName, suppPartition[], overlap, phi[]);
             if(min(eps, epsTab[i]) > 0.0) {
                 if(intN(globalName)(phi) / min(eps, epsTab[i]) > 1.0e-10) {
-                    partitionIntersection[numberIntersection][] = phi[](rest);
+                    partitionIntersection[numberIntersection][] = phi[](restriction);
                     if(!trueRestrict)
                         sum[] += partitionIntersection[numberIntersection][];
                     intersection[0][numberIntersection++] = intersection[0][i];
@@ -278,6 +304,15 @@ ENDIFMACRO
         for(int i = 0; i < numberIntersection; ++i) {
             int[int] n2o;
             meshIntersection[i] = trunc(meshName[j], partitionIntersection[i] > 1.0e-6, new2old = n2o, label = 9999);
+IFMACRO(privateDmesh#CartesianPartitioning)
+            real[int] bb(2 * dimension);
+            boundingbox(meshIntersection[i], bb);
+            meshIntersection[i] = trunc(meshName[j], x > bb[0] && x < bb[1] && y > bb[2] && y < bb[3]
+IFMACRO(dimension,3)
+                                                                                                      && z > bb[4] && z < bb[5]
+ENDIFMACRO
+                                                                                                                               , new2old = n2o, label = 9999);
+ENDIFMACRO
 IFMACRO(!privateCreateMat)
             if(!removeZeros)
 ENDIFMACRO
@@ -540,8 +575,22 @@ real[int][int] privateDmesh#ThName#intersection;
 ENDIFMACRO
 {
 IFMACRO(!meshN)
-NewMacro meshN()mesh EndMacro
-NewMacro intN()int2d EndMacro
+IFMACRO(dimension,3)
+NewMacro meshN()mesh3 EndMacro     /* three-dimensional problem             */
+NewMacro intN()int3d EndMacro      /* three-dimensional integral            */
+ENDIFMACRO
+IFMACRO(dimension,3S)
+NewMacro meshN()meshS EndMacro     /* three-dimensional surface problem     */
+NewMacro intN()int2d EndMacro      /* two-dimensional integral              */
+ENDIFMACRO
+IFMACRO(dimension,3L)
+NewMacro meshN()meshL EndMacro     /* three-dimensional line problem        */
+NewMacro intN()int1d EndMacro      /* one-dimensional integral              */
+ENDIFMACRO
+IFMACRO(!meshN)
+NewMacro meshN()mesh EndMacro      /* two-dimensional problem               */
+NewMacro intN()int2d EndMacro      /* two-dimensional integral              */
+ENDIFMACRO
 ENDIFMACRO
 IFMACRO(!ThName#Comm)
 NewMacro ThName#Comm()mpiCommWorld EndMacro
@@ -557,8 +606,16 @@ ENDIFMACRO
 IFMACRO(ThName#UserPartitioning)
 buildWithPartitioning(ThName, ThName#UserPartitioning, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm);
 ENDIFMACRO
+IFMACRO(ThName#Periodicity)
+buildPeriodic(ThName, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm, ThName#Periodicity);
+ENDIFMACRO
 IFMACRO(!ThName#UserPartitioning)
+IFMACRO(!ThName#Periodicity)
+IFMACRO(ThName#CartesianPartitioning)
+NewMacro privateDmesh#CartesianPartitioning() EndMacro
+ENDIFMACRO
 build(ThName, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm);
+ENDIFMACRO
 ENDIFMACRO
 }
 EndMacro
@@ -596,13 +653,13 @@ ENDIFMACRO
         int between = 0;
         for(int i = 0; i < mpiSize(ThName#Comm); ++i) {
             if(i != mpiRank(ThName#Comm) &&
-IFMACRO(dimension, 2)
+IFMACRO(dimension,2)
             !(bbAll[1 + 4 * i] < bb[0] - hmax
               || bbAll[0 + 4 * i] > bb[1] + hmax
               || bbAll[3 + 4 * i] < bb[2] - hmax
               || bbAll[2 + 4 * i] > bb[3] + hmax)
 ENDIFMACRO
-IFMACRO(dimension, 3)
+IFMACRO(dimension,3)
             !(bbAll[1 + 6 * i] < bb[0] - hmax
               || bbAll[0 + 6 * i] > bb[1] + hmax
               || bbAll[3 + 6 * i] < bb[2] - hmax
@@ -678,10 +735,10 @@ ENDIFMACRO
         ThTab.resize(neighborsName.n + 2);
         ThTab[neighborsName.n + 1] = ThLocalInitInterior;
         ThName = gluemesh(ThTab);
-IFMACRO(dimension, 3)
+IFMACRO(dimension,3)
         ThName = change(ThName, rmlfaces = -111112);
 ENDIFMACRO
-IFMACRO(dimension, 2)
+IFMACRO(dimension,2)
         ThName = change(ThName, rmledges = -111112);
 ENDIFMACRO
         part.resize(ThName.nt);
@@ -741,8 +798,22 @@ macro createMat(ThName, MatName, PkName)
 IFMACRO(privateDmesh#ThName)
 {
 IFMACRO(!meshN)
-NewMacro meshN()mesh EndMacro
-NewMacro intN()int2d EndMacro
+IFMACRO(dimension,3)
+NewMacro meshN()mesh3 EndMacro     /* three-dimensional problem             */
+NewMacro intN()int3d EndMacro      /* three-dimensional integral            */
+ENDIFMACRO
+IFMACRO(dimension,3S)
+NewMacro meshN()meshS EndMacro     /* three-dimensional surface problem     */
+NewMacro intN()int2d EndMacro      /* two-dimensional integral              */
+ENDIFMACRO
+IFMACRO(dimension,3L)
+NewMacro meshN()meshL EndMacro     /* three-dimensional line problem        */
+NewMacro intN()int1d EndMacro      /* one-dimensional integral              */
+ENDIFMACRO
+IFMACRO(!meshN)
+NewMacro meshN()mesh EndMacro      /* two-dimensional problem               */
+NewMacro intN()int2d EndMacro      /* two-dimensional integral              */
+ENDIFMACRO
 ENDIFMACRO
 IFMACRO(!ThName#Comm)
 NewMacro ThName#Comm()mpiCommWorld EndMacro
@@ -777,9 +848,12 @@ ENDIFMACRO
 ENDIFMACRO
 ENDIFMACRO
 IFMACRO(!ThName#PkPart)
-NewMacro ThName#PkPart()PkName EndMacro
+    NewMacro ThName#PkPart()PkName EndMacro
 ENDIFMACRO
-    partition(ThTab, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, mpiRank(ThName#Comm), mpiSize(ThName#Comm), 1, 1, 1, privateCreateMat, DTab, PkName, intersection, ThName#Comm, -111111, ThName#PkPart, def, init, 1)
+IFMACRO(ThName#CartesianPartitioning)
+    NewMacro privateDmesh#CartesianPartitioning() EndMacro
+ENDIFMACRO
+    partitionPrivate(ThTab, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, mpiRank(ThName#Comm), mpiSize(ThName#Comm), 1, 1, 1, privateCreateMat, DTab, PkName, intersection, ThName#Comm, -111111, ThName#PkPart, def, init, 1)
 }
 else {
     fespace WhGlobalPrivate(ThName, PkName);
@@ -808,7 +882,22 @@ IFMACRO(!privateDmesh#ThName)
 buildDmesh(ThName)
 {
 IFMACRO(!meshN)
-    NewMacro meshN()mesh EndMacro
+IFMACRO(dimension,3)
+    NewMacro meshN()mesh3 EndMacro     /* three-dimensional problem             */
+    NewMacro intN()int3d EndMacro      /* three-dimensional integral            */
+ENDIFMACRO
+IFMACRO(dimension,3S)
+    NewMacro meshN()meshS EndMacro     /* three-dimensional surface problem     */
+    NewMacro intN()int2d EndMacro      /* two-dimensional integral              */
+ENDIFMACRO
+IFMACRO(dimension,3L)
+    NewMacro meshN()meshL EndMacro     /* three-dimensional line problem        */
+    NewMacro intN()int1d EndMacro      /* one-dimensional integral              */
+ENDIFMACRO
+IFMACRO(!meshN)
+    NewMacro meshN()mesh EndMacro      /* two-dimensional problem               */
+    NewMacro intN()int2d EndMacro      /* two-dimensional integral              */
+ENDIFMACRO
 ENDIFMACRO
     NewMacro privateCreateMatCheckDmesh()1 EndMacro
     createMat(ThName, MatName, PkName)
@@ -844,6 +933,34 @@ ENDIFMACRO
         fespace VhGlobalPrivate(ThGlobal, P1);
         PhGlobalPrivate partGlobal;
 IFMACRO(!privateReconstructDmesh)
+IFMACRO(privateDmesh#CartesianPartitioning)
+        {
+            real[int] bb(2 * dimension);
+            boundingbox(ThGlobal, bb);
+            PhGlobalPrivate xx = x / (bb[1] - bb[0]), yy = y / (bb[3] - bb[2])
+IFMACRO(dimension,2)
+                                                                              ;
+            int i = int(sqrt(mpiSize(comm)));
+            while(mpiSize(comm) % i != 0)
+                --i;
+            int j = mpiSize(comm) / i;
+            partGlobal = int(j * xx) + int(i * yy) * j;
+ENDIFMACRO
+IFMACRO(dimension,3)
+                                                                              , zz = z / (bb[5] - bb[4]);
+            i = int(mpiSize(comm)^(0.333333333333333));
+            while(mpiSize(comm) % i != 0)
+                --i;
+            real p = mpiSize(comm) / i;
+            j = int(sqrt(p));
+            while(p % j != 0)
+                --j;
+            real k = int(p / j);
+            partGlobal = int(i * zz) * k * j + int(j * yy) * k + int(k * xx);
+ENDIFMACRO
+        }
+ENDIFMACRO
+IFMACRO(!privateDmesh#CartesianPartitioning)
         if(userPartitioning.n != PhGlobalPrivate.ndof || labPeriodic.n > 0) {
             timerPartition = mpiWtime();
             meshN ThGlobalPeriodic;
@@ -901,6 +1018,7 @@ IFMACRO(!privateReconstructDmesh)
             partGlobal[] = userPartitioning;
         }
 ENDIFMACRO
+ENDIFMACRO
 IFMACRO(privateReconstructDmesh)
         partGlobal[] = userPartitioning;
 ENDIFMACRO
@@ -917,10 +1035,10 @@ ENDIFMACRO
 IFMACRO(privateBuildDmesh)
         NewMacro defP1(i)i EndMacro
         NewMacro initP1(i)i EndMacro
-        partition(Th, ThBorder, ThGlobal, PhGlobalPrivate, VhGlobalPrivate, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, DTab, P, intersection, comm, fakeInterface, PkPart, defP1, initP1, bs)
+        partitionPrivate(Th, ThBorder, ThGlobal, PhGlobalPrivate, VhGlobalPrivate, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, DTab, P, intersection, comm, fakeInterface, PkPart, defP1, initP1, bs)
 ENDIFMACRO
 IFMACRO(!privateBuildDmesh)
-        partition(Th, ThBorder, ThGlobal, PhGlobalPrivate, VhGlobalPrivate, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, DTab, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs)
+        partitionPrivate(Th, ThBorder, ThGlobal, PhGlobalPrivate, VhGlobalPrivate, partGlobal, mpiRank(comm), mpiSize(comm), s, overlap, level, prolongation, DTab, P, intersection, comm, fakeInterface, PkPart, defPart, initPart, bs)
 ENDIFMACRO
     }
     else if(mpiSize(comm) == 1) {
@@ -1252,17 +1370,11 @@ else {
     searchMethod = 0;
     real[int] bb(2 * dimension);
     boundingbox(ThName, bb);
-IFMACRO(dimension, 2)
     bb(0) -= safety * ThName.hmax;
     bb(1) += safety * ThName.hmax;
     bb(2) -= safety * ThName.hmax;
     bb(3) += safety * ThName.hmax;
-ENDIFMACRO
-IFMACRO(dimension, 3)
-    bb(0) -= safety * ThName.hmax;
-    bb(1) += safety * ThName.hmax;
-    bb(2) -= safety * ThName.hmax;
-    bb(3) += safety * ThName.hmax;
+IFMACRO(dimension,3)
     bb(4) -= safety * ThName.hmax;
     bb(5) += safety * ThName.hmax;
 ENDIFMACRO
@@ -1271,13 +1383,13 @@ ENDIFMACRO
     mpiAllgather(bb, bbAll, ThName#Comm);
     int[int] rankExchange(0);
     for(int i = 0; i < size; ++i) {
-IFMACRO(dimension, 2)
+IFMACRO(dimension,2)
         if(!(bbAll[1 + 4 * i] < bb[0]
           || bbAll[0 + 4 * i] > bb[1]
           || bbAll[3 + 4 * i] < bb[2]
           || bbAll[2 + 4 * i] > bb[3]))
 ENDIFMACRO
-IFMACRO(dimension, 3)
+IFMACRO(dimension,3)
         if(!(bbAll[1 + 6 * i] < bb[0]
           || bbAll[0 + 6 * i] > bb[1]
           || bbAll[3 + 6 * i] < bb[2]
@@ -1292,10 +1404,10 @@ ENDIFMACRO
     }
     real[int] D, backupRegion(ThName.nt);
     real[int] buffer(ThName.nt * (dimension + 1));
-IFMACRO(dimension, 2)
+IFMACRO(dimension,2)
     func PkVel = [P1, P1];
 ENDIFMACRO
-IFMACRO(dimension, 3)
+IFMACRO(dimension,3)
     func PkVel = [P1, P1, P1];
 ENDIFMACRO
     fespace VhVelPrivate(ThName, PkVel);
@@ -1324,13 +1436,13 @@ ENDIFMACRO
         Irecv(processor(v, rqRecvTh[i]), recvTh[i]);
     for[i, v : rankExchange] {
         PhPartPrivate part;
-IFMACRO(dimension, 2)
+IFMACRO(dimension,2)
         part = (bbAll[0 + 4 * v] < x
              && bbAll[1 + 4 * v] > x
              && bbAll[2 + 4 * v] < y
              && bbAll[3 + 4 * v] > y) ? 1.0 : 0.0;
 ENDIFMACRO
-IFMACRO(dimension, 3)
+IFMACRO(dimension,3)
         part = (bbAll[0 + 6 * v] < x
              && bbAll[1 + 6 * v] > x
              && bbAll[2 + 6 * v] < y
@@ -1348,7 +1460,7 @@ ENDIFMACRO
             for[j, w : map] {
                 exchangeU[rankExchange.n + i][dimension * j] = buffer[dimension * w];
                 exchangeU[rankExchange.n + i][dimension * j + 1] = buffer[dimension * w + 1];
-IFMACRO(dimension, 3)
+IFMACRO(dimension,3)
                 exchangeU[rankExchange.n + i][dimension * j + 2] = buffer[dimension * w + 2];
 ENDIFMACRO
                 exchangeU[rankExchange.n + i][VhRestrictionPrivate.ndof * dimension + j] = buffer[VhChiPrivate.ndof * dimension + w];
@@ -1398,7 +1510,7 @@ ENDIFMACRO
                 for[i, j, v : R] {
                     uVelExchange[][dimension * j] += exchangeU[index][dimension * i];
                     uVelExchange[][dimension * j + 1] += exchangeU[index][dimension * i + 1];
-IFMACRO(dimension, 3)
+IFMACRO(dimension,3)
                     uVelExchange[][dimension * j + 2] += exchangeU[index][dimension * i + 2];
 ENDIFMACRO
                     uChiExchange[][j] += exchangeU[index][dimension * VhRestrictionPrivate.ndof + i];
@@ -1423,7 +1535,7 @@ ENDIFMACRO
     for[j, w : map] {
         uVelExchangeSafety[][dimension * j] = uVelExchange[][dimension * w];
         uVelExchangeSafety[][dimension * j + 1] = uVelExchange[][dimension * w + 1];
-IFMACRO(dimension, 3)
+IFMACRO(dimension,3)
         uVelExchangeSafety[][dimension * j + 2] = uVelExchange[][dimension * w + 2];
 ENDIFMACRO
     }
@@ -1462,7 +1574,8 @@ IFMACRO(transfer#Q)
     fespace VhLocalOldPrivate(ThName, Pk);
     fespace VhLocalNewPrivate(ThNew, PkNew);
     matrix loc = interpolate(VhLocalNewPrivate, VhLocalOldPrivate);
-    constructor(P, uANew, uA, loc);
+    matrix<PetscScalar> locPetscScalar = loc;
+    constructor(P, uANew, uA, locPetscScalar);
 ENDIFMACRO
 }
 else {
@@ -1487,7 +1600,6 @@ ENDIFMACRO
         bb(0:2 * dimension - 1) = tmp;
         boundingbox(ThNew, tmp);
         bb(2 * dimension:4 * dimension - 1) = tmp;
-IFMACRO(dimension, 2)
         bb(0) -= max(ThName.hmax, ThNew.hmax);
         bb(1) += max(ThName.hmax, ThNew.hmax);
         bb(2) -= max(ThName.hmax, ThNew.hmax);
@@ -1496,16 +1608,7 @@ IFMACRO(dimension, 2)
         bb(5) += max(ThName.hmax, ThNew.hmax);
         bb(6) -= max(ThName.hmax, ThNew.hmax);
         bb(7) += max(ThName.hmax, ThNew.hmax);
-ENDIFMACRO
-IFMACRO(dimension, 3)
-        bb(0) -= max(ThName.hmax, ThNew.hmax);
-        bb(1) += max(ThName.hmax, ThNew.hmax);
-        bb(2) -= max(ThName.hmax, ThNew.hmax);
-        bb(3) += max(ThName.hmax, ThNew.hmax);
-        bb(4) -= max(ThName.hmax, ThNew.hmax);
-        bb(5) += max(ThName.hmax, ThNew.hmax);
-        bb(6) -= max(ThName.hmax, ThNew.hmax);
-        bb(7) += max(ThName.hmax, ThNew.hmax);
+IFMACRO(dimension,3)
         bb(8) -= max(ThName.hmax, ThNew.hmax);
         bb(9) += max(ThName.hmax, ThNew.hmax);
         bb(10) -= max(ThName.hmax, ThNew.hmax);
@@ -1518,13 +1621,13 @@ ENDIFMACRO
     int[int] rankSend(0);
     int[int] rankRecv(0);
     for(int i = 0; i < size; ++i) {
-IFMACRO(dimension, 2)
+IFMACRO(dimension,2)
         if(!(bbAll[1 + 8 * i] < bb[4]
           || bbAll[0 + 8 * i] > bb[5]
           || bbAll[3 + 8 * i] < bb[6]
           || bbAll[2 + 8 * i] > bb[7]))
 ENDIFMACRO
-IFMACRO(dimension, 3)
+IFMACRO(dimension,3)
         if(!(bbAll[1 + 12 * i] < bb[6]
           || bbAll[0 + 12 * i] > bb[7]
           || bbAll[3 + 12 * i] < bb[8]
@@ -1536,13 +1639,13 @@ ENDIFMACRO
             rankRecv.resize(rankRecv.n + 1);
             rankRecv[rankRecv.n - 1] = i;
         }
-IFMACRO(dimension, 2)
+IFMACRO(dimension,2)
         if(!(bbAll[5 + 8 * i] < bb[0]
           || bbAll[4 + 8 * i] > bb[1]
           || bbAll[7 + 8 * i] < bb[2]
           || bbAll[6 + 8 * i] > bb[3]))
 ENDIFMACRO
-IFMACRO(dimension, 3)
+IFMACRO(dimension,3)
         if(!(bbAll[7 + 12 * i] < bb[0]
           || bbAll[6 + 12 * i] > bb[1]
           || bbAll[9 + 12 * i] < bb[2]
@@ -1556,7 +1659,7 @@ ENDIFMACRO
         }
     }
     real[int] D, backupRegion(ThName.nt);
-    VhLocalOldPrivate def(scaledU);
+    VhLocalOldPrivate<PetscScalar> def(scaledU);
 IFMACRO(!transfer#Q)
     createPartition(ThName, D, Pk)
     scaledU[] = uA[];
@@ -1566,7 +1669,7 @@ IFMACRO(transfer#Q)
     D.resize(scaledU[].n);
     D = uA.D;
 ENDIFMACRO
-    scaledU[] .*= D;
+    for[i, v : D] scaledU[][i] *= v;
     fespace PhPartPrivate(ThName, P0);
     {
         PhPartPrivate backup = region;
@@ -1578,7 +1681,7 @@ ENDIFMACRO
     }
     meshN[int] recvTh(rankRecv.n);
     meshN[int] sendTh(rankSend.n);
-    real[int][int] exchangeU(rankSend.n + rankRecv.n);
+    PetscScalar[int][int] exchangeU(rankSend.n + rankRecv.n);
     mpiRequest[int] rqSendTh(rankSend.n);
     mpiRequest[int] rqSendU(rankSend.n);
     mpiRequest[int] rqRecvTh(rankRecv.n);
@@ -1587,13 +1690,13 @@ ENDIFMACRO
         Irecv(processor(v, rqRecvTh[i]), recvTh[i]);
     for[i, v : rankSend] {
         PhPartPrivate part;
-IFMACRO(dimension, 2)
+IFMACRO(dimension,2)
         part = (bbAll[4 + 8 * v] < x
              && bbAll[5 + 8 * v] > x
              && bbAll[6 + 8 * v] < y
              && bbAll[7 + 8 * v] > y) ? 1.0 : 0.0;
 ENDIFMACRO
-IFMACRO(dimension, 3)
+IFMACRO(dimension,3)
         part = (bbAll[6 + 12 * v] < x
              && bbAll[7 + 12 * v] > x
              && bbAll[8 + 12 * v] < y
@@ -1638,7 +1741,7 @@ ENDIFMACRO
     }
     meshN interpolateExchange;
     fespace VhExchangePrivate(gluedExchange, Pk);
-    VhExchangePrivate def(uExchange);
+    VhExchangePrivate<PetscScalar> def(uExchange);
     for[i, v : rankRecv] {
         int index = mpiWaitAny(rqRecvU);
         if(index != mpiUndefined) {
@@ -1659,7 +1762,8 @@ IFMACRO(!transfer#Q)
 ENDIFMACRO
 IFMACRO(transfer#Q)
     matrix loc = interpolate(VhLocalNewPrivate, VhExchangePrivate);
-    constructor(P, uANew, uA, loc, numbering = uExchange[]);
+    matrix<PetscScalar> locPetscScalar = loc;
+    constructor(P, uANew, uA, locPetscScalar, numbering = uExchange[]);
 ENDIFMACRO
     ThName = change(ThName, fregion = backupRegion[nuTriangle]);
     mpiWaitAll(rqSendTh);
@@ -1702,8 +1806,8 @@ ENDIFMACRO
     real[int] gamma(ThParMmgName.nv);
     gamma = vG(0, VhWithoutOverlapPrivate, tgv = -1);
     fespace VhWithOverlapPrivate(ThName, P1);
-    int[int] rest = restrict(VhWithoutOverlapPrivate, VhWithOverlapPrivate, ThN2O);
-    ParMmgCommunicators(A, gamma, rest, ThCommunicators);
+    int[int] restriction = restrict(VhWithoutOverlapPrivate, VhWithOverlapPrivate, ThN2O);
+    ParMmgCommunicators(A, gamma, restriction, ThCommunicators);
 }// EOM
 
 macro gatherDmesh(ThName, comm, ThGatherName) {
@@ -1828,7 +1932,7 @@ ENDIFMACRO
     real timerGather = mpiWtime();
     if(ThGatherName#Comm) {
         meshN[int] recvTh(mpiSize(comm) - 1);
-        real[int][int] recvU(mpiSize(comm) - 1);
+        PetscScalar[int][int] recvU(mpiSize(comm) - 1);
         mpiRequest[int] rqRecvTh(mpiSize(comm) - 1);
         mpiRequest[int] rqRecvU(mpiSize(comm) - 1);
         for(int i = 0; i < mpiSize(comm) - 1; ++i)
@@ -1840,29 +1944,29 @@ ENDIFMACRO
             Irecv(processor(index + 1, comm, rqRecvU[index]), recvU[index]);
         }
         fespace VhGlobalGatherPrivate(ThGatherName, Pk);
-        real[int] visited(VhGlobalGatherPrivate.ndof);
+        PetscScalar[int] visited(VhGlobalGatherPrivate.ndof);
         visited = 1.0;
         {
             fespace VhRestrictionPrivate(ThName, Pk);
             matrix R = interpolate(VhRestrictionPrivate, VhGlobalGatherPrivate);
-            real[int] buffer = R' * u[];
+            PetscScalar[int] buffer = R' * u[];
             buffer .*= visited;
-            real[int] ones(VhRestrictionPrivate.ndof);
+            PetscScalar[int] ones(VhRestrictionPrivate.ndof);
             ones = -1.0;
             visited += R' * ones;
-            for[j, v : visited] v = max(v, 0.0);
+            for[j, v : visited] v = max(abs(v), 0.0);
             uNew[] += buffer;
         }
         for(int i = 0; i < mpiSize(comm) - 1; ++i) {
             int index = mpiWaitAny(rqRecvU);
             fespace VhRestrictionPrivate(recvTh[index], Pk);
             matrix R = interpolate(VhRestrictionPrivate, VhGlobalGatherPrivate);
-            real[int] buffer = R' * recvU[index];
+            PetscScalar[int] buffer = R' * recvU[index];
             buffer .*= visited;
-            real[int] ones(VhRestrictionPrivate.ndof);
+            PetscScalar[int] ones(VhRestrictionPrivate.ndof);
             ones = -1.0;
             visited += R' * ones;
-            for[j, v : visited] v = max(v, 0.0);
+            for[j, v : visited] v = max(abs(v), 0.0);
             uNew[] += buffer;
         }
     }
@@ -1909,7 +2013,7 @@ ENDIFMACRO
         meshN ThGlobalScatter;
         broadcast(processor(0, comm), ThGlobalScatter);
         fespace VhGlobalScatterPrivate(ThGlobalScatter, Pk);
-        VhGlobalScatterPrivate def(uGlobalScatter);
+        VhGlobalScatterPrivate<PetscScalar> def(uGlobalScatter);
         broadcast(processor(0, comm), uGlobalScatter[]);
         def(uNew) = def(uGlobalScatter);
     }
@@ -1921,3 +2025,42 @@ ENDIFMACRO
 }
 // EOM
 ENDIFMACRO
+
+macro CoherentGlobalMesh(A, ThName, ThGlobal)
+{
+IFMACRO(!ThName#Comm)
+    NewMacro ThName#Comm()mpiCommWorld EndMacro
+ENDIFMACRO
+    int[int] numbering;
+    GlobalNumbering(A, numbering);
+    fespace VhLocalPrivate(ThName, P1);
+    fespace VhGlobalPrivate(ThGlobal, P1);
+    PetscScalar[int] numberingScalar(numbering.n), global, reduce(ThGlobal.nv);
+    for[i, v : numbering] numberingScalar[i] = v;
+    ChangeNumbering(A, numberingScalar, global);
+    if (ThName.nt) {
+        ChangeNumbering(A, numberingScalar, global, inverse = true);
+IFMACRO(ThName#N2O)
+        int[int] restriction = restrict(VhLocalPrivate, VhGlobalPrivate, ThName#N2O);
+ENDIFMACRO
+IFMACRO(!ThName#N2O)
+        int[int] restriction;
+        {
+            fespace PhGlobalPrivate(ThGlobal, P0);
+            fespace PhLocalPrivate(ThName, P0);
+            matrix R = interpolate(PhLocalPrivate, PhGlobalPrivate);
+            int[int] I, J;
+            real[int] C;
+            [I, J, C] = R;
+            restriction = restrict(VhLocalPrivate, VhGlobalPrivate, J);
+        }
+ENDIFMACRO
+        for[i, v : restriction] reduce[v] = numberingScalar[i];
+    }
+    global.resize(ThGlobal.nv);
+    mpiAllReduce(reduce, global, ThName#Comm, mpiSUM);
+    int[int] globalInt(global.n);
+    for[i, v : global] globalInt[i] = abs(v);
+    ThGlobal = change(ThGlobal, renumv = globalInt);
+}
+// EOM

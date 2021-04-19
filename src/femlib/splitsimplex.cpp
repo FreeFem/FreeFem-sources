@@ -119,7 +119,7 @@ inline int NumSimplex2(int i,int j) { return j+NumSimplex2(i+j);}
 inline int NumSimplex3(int i,int j,int k) { return NumSimplex3(i+j+k)+NumSimplex2(j+k)+k;}
 
 
-inline void  invNumSimplex2(int n,int &i,int &j) 
+ void  invNumSimplex2(int n,int &i,int &j)
 {
   int k= invNumSimplex2(n); //( i+j) 
   j=n-NumSimplex2(k);
@@ -127,7 +127,7 @@ inline void  invNumSimplex2(int n,int &i,int &j)
   //  cout << n << " " << k << " -> " << i << " " << j << endl;
   assert( n == NumSimplex2(i,j));
 }
-inline void  invNumSimplex3(int n,int &i,int &j,int &k) 
+ void  invNumSimplex3(int n,int &i,int &j,int &k) 
 {
   int l= invNumSimplex3(n); //=( i+j+k) 
   invNumSimplex2(n-NumSimplex3(l),j,k);
@@ -136,7 +136,6 @@ inline void  invNumSimplex3(int n,int &i,int &j,int &k)
   // cout << n << "   " << l << "-> " << i << " " << j << " " << k <<endl;
   assert( n == NumSimplex3(i,j,k)) ;
 }
-
 
 // d = 2
 void SplitSimplex(int N,R2 *P,int *K,int op=0,R2 *ABC=0)

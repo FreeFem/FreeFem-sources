@@ -3,8 +3,8 @@
 
 load "msh3"
 load "mshmet"
-load "parmmg"
 load "PETSc"
+load "parmmg"
 macro dimension()3// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 

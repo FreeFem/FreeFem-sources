@@ -3,7 +3,9 @@
 
 
 
-
+inline size_t rotl(size_t value, int shift) {
+    return (value << shift) | (value >> (sizeof(value) * 8 - shift));
+}
 template<typename T,int N>
 struct SortArray {
 };
@@ -54,7 +56,7 @@ struct SortArray<T,2> {
   {  return v[0] == t.v[0] && v[1] == t.v[1] ;}
     bool operator<(const SortArray<T,2> & t)  const 
     {  return v[0] != t.v[0] ? v[0] < t.v[0] : v[1] < t.v[1] ;}  
-  size_t hash() const {return (size_t) v[0];}
+  size_t hash() const {return (size_t) v[0]  * rotl(v[1],7) ;}
 };
 
 
@@ -83,8 +85,9 @@ struct SortArray<T,3> {
   bool operator<(const SortArray<T,3> & t)  const 
     {  return v[0] != t.v[0] ? v[0] < t.v[0] :
            ( v[1] != t.v[1] ? v[1] < t.v[1] :  v[2] < t.v[2] );}  
-  
-  size_t hash() const {return (size_t) v[0];}
+ size_t hash() const {return (size_t) v[0] * rotl(v[1],7) * rotl(v[2],14) ;}
+
+ // size_t hash() const {return (size_t) v[0];}
 };
 
 template<typename T>
@@ -121,7 +124,10 @@ struct SortArray<T,4> {
     {  return v[0] != t.v[0] ? v[0] < t.v[0] :
         ( v[1] != t.v[1] ? v[1] < t.v[1] :
         ( v[2] !=  t.v[2] ? v[2] < t.v[2]: v[3] < t.v[3] ));}
-    size_t hash() const {return (size_t) v[0]+((size_t) v[1] << 8 ) + ((size_t) v[2] << 16 ) + ((size_t) v[3] << 24);}
+ 
+   size_t hash() const {return (size_t) v[0] * rotl(v[1],7) * rotl(v[2],14) * rotl(v[3],21);}
+
+  
 };
 template<typename T,int N>
 ostream & operator<<(ostream & f,const SortArray<T,N> & item)

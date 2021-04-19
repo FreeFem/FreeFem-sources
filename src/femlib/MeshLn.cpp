@@ -736,13 +736,16 @@ namespace Fem2D
            for (int j = 0; j < 2; j++) {
                int jt = j, it = ElementAdj(i, jt);
                EdgeL &K(elements[i]);  // current element
+               if(verbosity>19)
+                   cout << i << " : " << it << " " << jt << " /  " << this->operator () (K[0])
+                        << " " << this->operator () (K[1]) <<endl;
                // True border point -> no adjacence / on domain border
                if ((it == i || it < 0)) {
                    int iv[1];
                        iv[0] = this->operator () (K [EdgeL::nvedge[0][j]]);
                    if(verbosity>15)
-                       cout << " the edge " << iv[0] << " is a boundary " << endl;
-                   be(nbeL++).set(vertices,iv,K.lab);
+                       cout << " the edge " << iv[0] << " is a boundary, lab = " << vertices[iv[0]].lab <<endl;
+                   be(nbeL++).set(vertices,iv,vertices[iv[0]].lab);
                    
                }
                // internal point -- check angular and no manifold
@@ -762,23 +765,23 @@ namespace Fem2D
                        R3 E_adj(B_adj-A_adj);
                           E_adj/=E_adj.norme();
                        
-                       R pdt = (E,E_adj); // scalar product
+                       R pdt = max(-1.,min(1.,(E,E_adj))); // scalar product to remove NaN
                        pdt = acos(pdt); // radian angle (Normal,Normal_adj)
                        if(verbosity>15)
-                           cout << "Element num: " << i << " N " << E << " Element adjacent num: " << it << " E_adj " << E_adj << " angle between N N_adj = " << pdt <<endl;
+                           cout << "Element num: " << i << " N " << E << " Element adjacent num: " << it << " E_adj " << E_adj << " angle between N N_adj = " << pdt << " " << (E,E_adj) << endl;
                         
                        if(pdt >= angle) {
                            if(verbosity>15)
-                               cout << " the border point " <<nbeL <<": [" << iv[0] << " " << "] is a boundary with the angular criteria " << angle << endl;
-                           int lab = min(K.lab, K_adj.lab);
+                               cout << " the border point " <<nbeL <<": [" << iv[0] << " " << "] is a boundary with the angular criteria " << angle << " " << vertices[iv[0]].lab << endl;
+                           int lab = vertices[iv[0]].lab; //min(K.lab, K_adj.lab);
                            be(nbeL).set(vertices,iv,lab);
                            pointI.add(key, nbeL++);
                        }
                        else if(labeledBoundary && K.lab != K_adj.lab ) {
                            if(verbosity>15)
-                             cout << " the border point " <<nbeL <<": [" << iv[0] << " " << "] is a boundary with labeled boundary criteria" << endl;
+                             cout << " the border point " <<nbeL <<": [" << iv[0] << " " << "] is a boundary with labeled boundary criteria" << vertices[iv[0]].lab <<endl;
             
-                           be(nbeL).set(vertices,iv,K.lab);
+                           be(nbeL).set(vertices,iv,vertices[iv[0]].lab);//K.lab);
                            pointI.add(key, nbeL++);
                        }
                    }

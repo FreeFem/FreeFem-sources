@@ -250,7 +250,7 @@ Mesh *GMSH_Load(const string &filename) {
                 // ignore any other tags for now
               }
 
-              assert(type >= 1 && type <= 31);
+              ffassert(type >= 1 && type <= 31);
               if ((numVertices = nvElemGmsh[type - 1]) == 0) {
                 cerr << "Element of type " << type << " is not considered in Freefem++" << endl;
                 exit(1);

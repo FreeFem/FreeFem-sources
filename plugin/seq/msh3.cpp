@@ -2002,32 +2002,41 @@ class listMeshS {
   }
 };
 
-class listMeshL {
+template<class MeshT>
+class listMeshT {
 public:
-    list< const MeshL * > *lth;
-    void init( ) { lth = new list< const MeshL * >; }
+    typedef MeshT Mesh;
+    typedef const MeshT *pmeshT;
+    typedef list< const MeshT * > List;
+    list< const MeshT * > *lth;
+    void init( ) { lth = new list< const MeshT * >; }
     
     void destroy( ) { delete lth; }
     
-    listMeshL(Stack s, const MeshL *th) : lth(Add2StackOfPtr2Free(s, new list< const MeshL * >)) {
+    listMeshT(Stack s, const MeshT *th) : lth(Add2StackOfPtr2Free(s, new list< const MeshT * >)) {
         lth->push_back(th);
     }
     
-    listMeshL(Stack s, const MeshL *tha, const MeshL *thb)
-    : lth(Add2StackOfPtr2Free(s, new list< const MeshL * >)) {
+    listMeshT(Stack s, const MeshT *tha, const MeshT *thb)
+    : lth(Add2StackOfPtr2Free(s, new list< const MeshT * >)) {
         lth->push_back(tha);
         lth->push_back(thb);
     }
     
-    listMeshL(Stack s, const listMeshL &l, const MeshL *th)
-    : lth(Add2StackOfPtr2Free(s, new list< const MeshL * >(*l.lth))) {
+    listMeshT(Stack s, const listMeshT &l, const MeshT *th)
+    : lth(Add2StackOfPtr2Free(s, new list< const MeshT * >(*l.lth))) {
         lth->push_back(th);
+    }
+    listMeshT(Stack s, KN< pmeshT > *const &tab)
+    : lth(Add2StackOfPtr2Free(s, new list< const MeshT * >)) {
+        for(int i=0; i<tab->N();++i)
+          lth->push_back((*tab)[i]);
     }
 };
 
 
 
-MeshS *GluMeshS(listMeshS const &lst) {
+MeshS *GluMesh(listMeshT<MeshS> const &lst) {
     typedef typename MeshS::Element T;
     typedef typename MeshS::BorderElement B;
     typedef typename MeshS::Vertex V;
@@ -2177,7 +2186,7 @@ MeshS *GluMeshS(listMeshS const &lst) {
     
 
 
-MeshL *GluMeshL(listMeshL const &lst) {
+MeshL *GluMesh(listMeshT<MeshL> const &lst) {
     typedef typename MeshL::Element T;
     typedef typename MeshL::BorderElement B;
     typedef typename MeshL::Vertex V;
@@ -2338,7 +2347,7 @@ template< bool INIT, class RR, class AA = RR, class BB = AA >
 struct Op3_setmeshS : public binary_function< AA, BB, RR > {
   static RR f(Stack stack, const AA &a, const BB &b) {
     ffassert(a);
-    const pmeshS p = GluMeshS(b);
+    const pmeshS p = GluMesh(b);
 
     if (!INIT && *a)
       (**a).destroy( );
@@ -2357,7 +2366,7 @@ template< bool INIT, class RR, class AA = RR, class BB = AA >
 struct Op3_setmeshL : public binary_function< AA, BB, RR > {
     static RR f(Stack stack, const AA &a, const BB &b) {
         ffassert(a);
-        const pmeshL p = GluMeshL(b);
+        const pmeshL p = GluMesh(b);
         
         if (!INIT && *a)
             (**a).destroy( );
@@ -2422,12 +2431,14 @@ template< class MMesh >
 class SetMesh_Op : public E_F0mps {
  public:
   Expression a;
-  static const int n_name_param = 8;
+  static const int n_name_param = 9;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   KN_< long > arg(int i, Stack stack, KN_< long > a) const {
-    ffassert(!(nargs[i] && nargs[i + 2]));
-    i = nargs[i] ? i : i + 2;
+    if (i != 8) {
+      ffassert(!(nargs[i] && nargs[i + 2]));
+      i = nargs[i] ? i : i + 2;
+    }
     return nargs[i] ? GetAny< KN_< long > >((*nargs[i])(stack)) : a;
   }
   long arg(int i, Stack stack, long a) const {
@@ -2458,7 +2469,8 @@ basicAC_F0::name_and_type SetMesh_Op< Mesh3 >::name_param[] = {
   {"reftet", &typeid(KN_< long >)}, {"refface", &typeid(KN_< long >)},
   {"region", &typeid(KN_< long >)}, {"label", &typeid(KN_< long >)},
   {"fregion", &typeid(long)},       {"flabel", &typeid(long)},
-  {"rmlfaces", &typeid(long)},      {"rmInternalFaces", &typeid(bool)}};
+  {"rmlfaces", &typeid(long)},      {"rmInternalFaces", &typeid(bool)},
+  {"renumv", &typeid(KN_<long>)}};
 
 // special instance, list arguments for meshS
 template<>
@@ -2466,7 +2478,8 @@ basicAC_F0::name_and_type SetMesh_Op< MeshS >::name_param[] = {
   {"reftri", &typeid(KN_< long >)}, {"refedge", &typeid(KN_< long >)},
   {"region", &typeid(KN_< long >)}, {"label", &typeid(KN_< long >)},
   {"fregion", &typeid(long)},       {"flabel", &typeid(long)},
-  {"rmledge", &typeid(long)},       {"rmInternalEdges", &typeid(bool)}};
+  {"rmledge", &typeid(long)},       {"rmInternalEdges", &typeid(bool)},
+  {"renumv", &typeid(KN_<long>)}};
 
 // special instance, list arguments for meshL
 template<>
@@ -2474,7 +2487,8 @@ basicAC_F0::name_and_type SetMesh_Op< MeshL >::name_param[] = {
   {"refedge", &typeid(KN_< long >)}, {"refpoint", &typeid(KN_< long >)},
   {"region", &typeid(KN_< long >)}, {"label", &typeid(KN_< long >)},
   {"fregion", &typeid(long)},       {"flabel", &typeid(long)},
-  {"rmlpoint", &typeid(long)},       {"rmInternalPoints", &typeid(bool)}};
+  {"rmlpoint", &typeid(long)},       {"rmInternalPoints", &typeid(bool)},
+  {"renumv", &typeid(KN_<long>)}};
 
 // function to apply the change of label with the map
 int ChangeLab(const map< int, int > &m, int lab) {
@@ -2528,11 +2542,13 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
   bool rm_faces = nargs[6];
   long rmlabfaces(arg(6, stack, 0L));
   bool rm_i_faces(arg(7, stack, false));
+  KN<long> rv (arg(8,stack,zz));
+  bool rV =  (rv.size()== nbv);
 
   if (rm_i_faces && (is_same< MMesh, MeshS >::value || is_same< MMesh, MeshL >::value) )
     cout << " Warning: remove internal border isn't implemented " << endl;
 
-  if (nrB.N( ) <= 0 && nrT.N( ) <= 0 && (!freg) && (!flab) && !rmlabfaces && !rm_i_faces)
+  if (nrB.N( ) <= 0 && nrT.N( ) <= 0 && (!freg) && (!flab) && !rmlabfaces && !rm_i_faces && !rV)
     return pTh;
 
   ffassert(nrT.N( ) % 2 == 0);
@@ -2558,12 +2574,13 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
   V *v = new V[nbv];
   V *vv = v;
   for (int i = 0; i < nbv; i++) {
+    const int ii=rV? rv(i): i;
+    vv = v + ii;
     const V &V(Th.vertices[i]);
     vv->x = V.x;
     vv->y = V.y;
     vv->z = V.z;
     vv->lab = V.lab;
-    vv++;
   }
 
   // new elements
@@ -2577,6 +2594,9 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
     const T &K(Th.elements[i]);
     int iv[T::nv];
     for (int j = 0; j < k; j++) iv[j] = Th.operator( )(K[j]);
+    if(rV) {
+      for (int j = 0; j < k; j++) iv[j] = rv(iv[j]);
+    }
     tt->set(v, iv, ChangeLab(mapTref, K.lab));
     if (freg) {
       mp->set(Th, K(PtHat), PtHat, K, 0);
@@ -2610,6 +2630,9 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
     TRdHat B = KE.PBord(fk, PtHat2);
     int iv[B::nv];
     for (int j = 0; j < k; j++) iv[j] = Th.operator( )(K[j]);
+    if(rV) {
+      for (int j = 0; j < k; j++) iv[j] = rv(iv[j]);
+    }
     bool rmf = rm_i_faces && !onborder;
 
     int l0, l1 = ChangeLab(mapBref, l0 = K.lab);
@@ -7382,6 +7405,40 @@ struct Op_GluMesh3tab : public OneOperator {
 
   Op_GluMesh3tab( ) : OneOperator(atype< const pmesh3 >( ), atype< KN< pmesh3 > * >( )){};
 };
+
+template<class MeshT>
+struct Op_GluMeshTtab : public OneOperator {
+
+  typedef const MeshT *pmeshT;
+  class Op : public E_F0mps {
+   public:
+    //static basicAC_F0::name_and_type name_param[];
+    static const int n_name_param = 0;
+    Expression nargs[1];//  use
+    Expression getmeshtab;
+    long arg(int i, Stack stack, long a) const {
+      return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a;
+    }
+
+    Op(const basicAC_F0 &args, Expression t) : getmeshtab(t) {
+      args.SetNameParam(n_name_param);
+    }
+
+    AnyType operator( )(Stack s) const {
+        KN< const MeshT * > *tab = GetAny< KN< const MeshT * > * >((*getmeshtab)(s));
+        listMeshT<MeshT> lst(s,tab);
+        MeshT *Tht = GluMesh(lst);
+        Add2StackOfPtr2FreeRC(s, Tht);
+        return Tht;
+      }
+  };
+
+  E_F0 *code(const basicAC_F0 &args) const { return new Op(args, t[0]->CastTo(args[0])); }
+
+    Op_GluMeshTtab( ) : OneOperator(atype< const pmeshT >( ), atype< KN< pmeshT > * >( )){};
+};
+
+
 basicAC_F0::name_and_type Op_GluMesh3tab::Op::name_param[Op_GluMesh3tab::Op::n_name_param] = {
   {"labtodel", &typeid(long)}};
 AnyType Op_GluMesh3tab::Op::operator( )(Stack stack) const {
@@ -7392,6 +7449,8 @@ AnyType Op_GluMesh3tab::Op::operator( )(Stack stack) const {
   Add2StackOfPtr2FreeRC(stack, Tht);
   return Tht;
 }
+
+
 
 // return nbc the number of conex componants
 long BuildBoundaryElementAdj(const MeshS &Th, bool check = 0, KN< long > *pborder = 0) {
@@ -9422,6 +9481,9 @@ class OrientNormal : public OneOperator {
 // <<dynamic_loading>>
 
 static void Load_Init( ) {
+ typedef listMeshT<MeshL> listMeshL;
+ typedef listMeshT<MeshS> listMeshS;
+
   Dcl_Type< listMesh3 >( );
   Dcl_Type< listMeshS >( );
   Dcl_Type< listMeshL >( );
@@ -9449,11 +9511,13 @@ static void Load_Init( ) {
 
   Global.Add("trunc", "(", new Op_trunc_mesh3);
   Global.Add("gluemesh", "(", new Op_GluMesh3tab);
+  Global.Add("gluemesh", "(", new Op_GluMeshTtab<MeshL>);
+  Global.Add("gluemesh", "(", new Op_GluMeshTtab<MeshS>);
   Global.Add("extract", "(",new ExtractMesh< Mesh3, MeshS >);    // take a Mesh3 in arg and return a part of MeshS
 
   // for a mesh3 Th3, if Th3->meshS=NULL, build the meshS associated
   Global.Add("buildBdMesh", "(", new BuildMeshSFromMesh3);
-
+    
   Global.Add(
     "AddLayers", "(",
     new OneOperator4_< bool, const Mesh3 *, KN< double > *, long, KN< double > * >(AddLayers));

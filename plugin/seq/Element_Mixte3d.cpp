@@ -4420,7 +4420,7 @@ namespace Fem2D {
             }
           }
         }
-        else if (whatd & Fop_D2)
+        if (whatd & Fop_D2)
           ffassert(0);
       
     }

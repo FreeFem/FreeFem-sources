@@ -52,7 +52,7 @@ if test -z "$MPIRUN" ; then
   if test -n "$MSMPI_BIN" -a -x "$MSMPI_BIN/mpiexec.exe" ;  then
      MPIRUN="$MSMPI_BIN"\mpiexec.exe
   else
-    AC_PATH_PROGS(MPIRUN,mpirun mpiexec mpiexec.exe,no)   
+    AC_PATH_PROGS(MPIRUN,mpiexec mpirun mpiexec.exe,no)   
   fi
   if test "$MPIRUN" = no
     then
@@ -63,7 +63,7 @@ AC_MSG_RESULT($MPIRUN)
 if test "ff_mpi" != "no" ; then 
  AC_MSG_CHECKING(for MPIRUN option: )
  ff_mpi_option=""
- ff_okkk=`"$MPIRUN"  -np 2 --oversubscribe echo ff__okkk| grep ff__okkk |wc -l`
+ ff_okkk=`"$MPIRUN"  -np 2 --oversubscribe echo ff__okkk 2>/dev/null| grep ff__okkk |wc -l`
  if test "$ff_okkk" -eq 2 ; then ff_mpi_option="--oversubscribe" ; fi 
  AC_MSG_RESULT($ff_mpi_option)
 fi
@@ -296,7 +296,7 @@ fi
            test -n "$MPICC" && ff_mpicshow=`$MPICC -show` 2>/dev/null
            test -n "$MPIFC" && ff_mpifcshow=`$MPIFC -show` 2>/dev/null
 	    if test "$with_mpilibs" = no -o -z "$with_mpilibs" ; then
-		[ff_MPI_INCLUDE=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^[-/][^WLlOgp]|^-Wp,'|tr '\n' ' '`]
+		[ff_MPI_INCLUDE=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^[-/][^WLlOgpf]|^-Wp,'|tr '\n' ' '`]
 		ff_MPI_LIB_DIRS=""
 		[ff_MPI_LIB=`echo $ff_mpishow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
 		[ff_MPI_LIBC=`echo $ff_mpicshow|tr ' ' '\n'| grep -E '^-[Llp]|^-Wl,'|tr '\n' ' '`]
@@ -314,10 +314,12 @@ fi
 		done
 	    fi
 	    for i in $ff_mpi_ldir; do
+	      if test -d $i ; then
 		ff_tmp=`ls $i/libmpi.*|head -1`
 		if test  -f "$ff_tmp"  -a -z "$ff_MPI_LIB_DIRS"  ;then
 		    ff_MPI_LIB_DIRS=$i
 		fi
+	      fi
 	    done
 	fi
 	AC_SUBST(MPICXX,$MPICXX)

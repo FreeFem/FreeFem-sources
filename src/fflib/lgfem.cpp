@@ -81,6 +81,34 @@ namespace Fem2D {
   extern GTypeOfFE< MeshS > &P1bLagrange_surf;
   extern GTypeOfFE< MeshS > &P2bLagrange_surf;
   extern GTypeOfFE< MeshS > &RT0surf;
+// add 22 march 2021 FH.
+  extern GTypeOfFE< Mesh3 > &G_P1dc_3d;
+  extern GTypeOfFE< Mesh3 > &G_P2dc_3d;
+  extern GTypeOfFE< Mesh3 > &G_P3dc_3d;
+  extern GTypeOfFE< Mesh3 > &G_P4dc_3d;
+  extern GTypeOfFE<Mesh3> & G_P0Edge_3d ;
+  extern GTypeOfFE<Mesh3> & G_P0Edgedc_3d ;
+  extern GTypeOfFE<Mesh3> & G_P0Face_3d ;
+  extern GTypeOfFE<Mesh3> & G_P0Facedc_3d ;
+  extern GTypeOfFE<Mesh3> & G_P0VF_3d ;
+  extern GTypeOfFE<Mesh3> & G_P0VFdc_3d ;
+
+  extern GTypeOfFE< MeshS > &G_P1dc_S;
+  extern GTypeOfFE< MeshS > &G_P2dc_S;
+  extern GTypeOfFE< MeshS > &G_P3dc_S;
+  extern GTypeOfFE< MeshS > &G_P4dc_S;
+  extern GTypeOfFE<MeshS> & G_P0Edge_S ;
+  extern GTypeOfFE<MeshS> & G_P0Edgedc_S ;
+  extern GTypeOfFE<MeshS> & G_P0VF_S ;
+  extern GTypeOfFE<MeshS> & G_P0VFdc_S ;
+
+extern GTypeOfFE< MeshL > &G_P1dc_L;
+extern GTypeOfFE< MeshL > &G_P2dc_L;
+extern GTypeOfFE< MeshL > &G_P3dc_L;
+extern GTypeOfFE< MeshL > &G_P4dc_L;
+extern GTypeOfFE<MeshL> & G_P0VF_L ;
+extern GTypeOfFE<MeshL> & G_P0VFdc_L ;
+
   void Expandsetoflab(Stack stack, const CDomainOfIntegration &di, set< int > &setoflab, bool &all);
 }    // namespace Fem2D
 
@@ -1260,7 +1288,7 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
       AnyType r = (*eppfes)(s);
       const TypeOfFE **tef = new const TypeOfFE *[atef.size( )];
         for (int i = 0; i < atef.size( ); i++)
-        if (tedim[i] == d)
+        if (tedim[i] == dHat)
           tef[i] = GetAny< TypeOfFE * >(atef[i].eval(s));
         else if (tedim[i] == 2 && d==3 && dHat == 3)
           tef[i] = GetAny< TypeOfFE * >(TypeOfFE3to2(s, atef[i].eval(s)));
@@ -2258,7 +2286,7 @@ class Plot : public E_F0mps /* [[file:AFunction.hpp::E_F0mps]] */ {
       const void *cv[4];    //  for
     };
     pmesh th( ) {
-      assert(v[0] && what == 0);
+     // assert(v[0] && what == 0);
       return static_cast< pmesh >(cv[0]);
     }
     pmesh3 th3( ) {
@@ -4570,8 +4598,9 @@ AnyType Plot::operator( )(Stack s) const {
               cerr << " On ne sait tracer que de vecteur sur un meme type element finite. " << endl;
           }
         }
-      } else if (l[i].what == 0) {
+      } else if (l[i].what == 0 && ll[ii].th( ) ) {
         if (!uaspectratio) aspectratio = true;
+          
         const Mesh &Th = *ll[ii].th( );
         Th.BoundingBox(P1, P2);
         cTh = &Th;
@@ -4671,7 +4700,7 @@ AnyType Plot::operator( )(Stack s) const {
       int i = ll[ii].i;
       long what = ll[ii].what;//  correction FH 20201208 i->ii (wrong what)
         if (verbosity > 99) cout << " plot " << ii << " i " << i << " " << what << endl;
-      if (l[i].what == 0)
+      if (l[i].what == 0 &&  ll[ii].th( ))
         if (fill)
           ll[ii].th( )->Draw(0, thfill);
         else
@@ -4723,7 +4752,8 @@ AnyType Plot::operator( )(Stack s) const {
         couleur(2 + i);
         for (int i = 1; i < k; i++) rlineto(x[i], y[i]);
       } else {
-        if (verbosity)
+          static int kerr=0; 
+        if (verbosity && kerr++< 10)
           cout << "  Plot::  Sorry no ps version for this type of plot " << l[i].what << endl;
       }
       thfill = false;
@@ -5435,6 +5465,7 @@ AnyType ClearReturn(Stack stack, const AnyType &a) {
   Add2StackOfPtr2FreeRC(stack, m);
   return m;
 }
+template<class K> long get_n(KN<K> * p){ return p->N();}//
 
 template< class R >
 void DclTypeMatrix( ) {
@@ -5475,6 +5506,7 @@ void DclTypeMatrix( ) {
   Add< AMat * >("resize", ".", new OneOperator1< Resize< AMat >, AMat * >(to_Resize));
   Add< Resize< AMat > >("(", "",
                         new OneOperator2_< AMat *, Resize< AMat >, long >(resizeandclean2));
+    Add<AMat *>("n",".",new OneOperator1<long,AMat *>(get_n));
 
   // to declare matrix[int]
   map_type_of_map[make_pair(atype< long >( ), atype< PMat >( ))] = atype< AMat * >( );
@@ -6593,7 +6625,41 @@ void init_lgfem( ) {
   Global.New("RT03d", CConstantTFE3(&RT03d));
   Global.New("Edge03d", CConstantTFE3(&Edge03d));
   Global.New("P1b3d", CConstantTFE3(&P1bLagrange3d));
+    
+    // add FH 22 march 2021
 
+  AddNewFE3("P1dc3d", &G_P1dc_3d,"P1dc");// deja code dans
+  AddNewFE3("P2dc3d", &G_P2dc_3d,"P2dc");// deja code dans
+  AddNewFE3("P3dc3d", &G_P3dc_3d);// deja code dans
+  AddNewFE3("P4dc3d", &G_P4dc_3d);// deja code dans
+ 
+  AddNewFE3("P0edge3d", &G_P0Edge_3d,"P0edge");// deja code dans
+  AddNewFE3("P0edgedc3d", &G_P0Edgedc_3d);// deja code dans
+  AddNewFE3("P0VF3d", &G_P0VF_3d,"P0VF");
+  AddNewFE3("P0VFdc3d", &G_P0VF_3d);
+
+  AddNewFE3("P0face3d", &G_P0Face_3d);
+  AddNewFE3("P0facedc3d", &G_P0Facedc_3d);
+
+
+    AddNewFES("P1dcS", &G_P1dc_S,"P1dc");// deja code dans
+    AddNewFES("P2dcS", &G_P2dc_S,"P2dc");// deja code dans
+    AddNewFES("P3dcS", &G_P3dc_S);// deja code dans
+    AddNewFES("P4dcS", &G_P4dc_S);// deja code dans
+   
+    AddNewFES("P0edgeS", &G_P0Edge_S,"P0edge");// deja code dans
+    AddNewFES("P0edgedcS", &G_P0Edgedc_S);// deja code dans
+    AddNewFES("P0VF3S", &G_P0VF_S,"P0VF");
+    AddNewFES("P0VFdc3S", &G_P0VFdc_S);
+
+    AddNewFEL("P1dcL", &G_P1dc_L,"P1dc");//
+    AddNewFEL("P2dcL", &G_P2dc_L,"P2dc");//
+    AddNewFEL("P3dcL", &G_P3dc_L);//
+    AddNewFEL("P4dcL", &G_P4dc_L);//
+    AddNewFEL("P0VF3L", &G_P0VF_L,"P0VF");
+    AddNewFEL("P0VF3dcL", &G_P0VFdc_L);
+    
+  // end  add ..
   Global.New("RT0S",CConstantTFES(&RT0surf));
   Global.New("P2S", CConstantTFES(&DataFE< MeshS >::P2));
   Global.New("P1S", CConstantTFES(&DataFE< MeshS >::P1));
@@ -6611,7 +6677,6 @@ void init_lgfem( ) {
   TEF2dtoS[FindFE2("P1b")] = &P1bLagrange_surf;
   TEF2dtoS[FindFE2("P2b")] = &P2bLagrange_surf;
   TEF2dtoS[FindFE2("RT0")] = &RT0surf;
- // TEF2dtoS[FindFE2("P1dc")] = &DataFE< MeshS >::RT0;
         
   TEF2dtoL[FindFE2("P0")] = &DataFE< MeshL >::P0;
   TEF2dtoL[FindFE2("P1")] = &DataFE< MeshL >::P1;

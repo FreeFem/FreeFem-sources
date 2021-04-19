@@ -262,7 +262,22 @@
    template<> GTypeOfFE<MeshL> & DataFE<MeshL>::P1=P1_curve;
    template<> GTypeOfFE<MeshL> & DataFE<MeshL>::P2=P2_curve;
      
-     
+  static TypeOfFE_LagrangeDC<MeshL>  P1dc_L(1,0.001);
+  static TypeOfFE_LagrangeDC<MeshL>   P2dc_L(2,0.001);
+  static TypeOfFE_LagrangeDC<MeshL>   P3dc_L(3,0.001);
+  static TypeOfFE_LagrangeDC<MeshL>   P4dc_L(4,0.001);
+
+  
+  static TypeOfFE_ConstDC<MeshL>  P0VF_L(3,2);
+  static TypeOfFE_ConstDC<MeshL>  P0VFdc_L(3,1);
+  
+  GTypeOfFE<MeshL> & G_P1dc_L(P1dc_L);
+  GTypeOfFE<MeshL> & G_P2dc_L(P2dc_L);
+  GTypeOfFE<MeshL> & G_P3dc_L(P3dc_L);
+  GTypeOfFE<MeshL> & G_P4dc_L(P4dc_L);
+  GTypeOfFE<MeshL> & G_P0VF_L (P0VF_L);
+  GTypeOfFE<MeshL> & G_P0VFdc_L (P0VFdc_L);
+
      
      
      

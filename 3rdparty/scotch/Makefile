@@ -34,14 +34,14 @@ all-local: scotch
 # http://gforge.inria.fr/frs/download.php/23391/scotch_5.1.7_esmumps.tar.gz
 # Scotch information
 DIRPKG=../pkg
-SRCDIR=scotch_$(scotch_VERSION)
-PACKAGE=$(DIRPKG)/scotch_$(scotch_VERSION_LOCAL).tar.gz
+SRCDIR=scotch-v$(scotch_VERSION)
+PACKAGE=$(DIRPKG)/scotch-v$(scotch_VERSION_LOCAL).tar.gz
 SERVER=https://gforge.inria.fr/frs/download.php/file/34099
 #https://gforge.inria.fr/frs/download.php/file/34099/scotch_6.0.4.tar.gz
 #https://gforge.inria.fr/frs/download.php/23391
 INSTALL=../..
-scotch_VERSION=6.0.4
-scotch_VERSION_LOCAL=6.0.4
+scotch_VERSION=6.1.0
+scotch_VERSION_LOCAL=6.1.0
 #  trick to no in MPI on NOT .. 
 NOTESTMPI= test -z "$(CCP)"
 scotch: FAIRE
@@ -97,9 +97,6 @@ WHERE-mpi:$(SRCDIR)/FAIT-mpi
 
 $(SRCDIR): $(PACKAGE)
 	tar xzf $(PACKAGE)
-	patch -p1 <scotch_6.0.4.patch
-	#cd $(SRCDIR)/src/libscotch/; patch -p1 < ../../../scotch_5.1_esmumps.patch
-	#cd $(SRCDIR)/src/esmumps/; patch -p1 < ../../../Makefile.patch
 	touch $(SRCDIR)
 
 $(PACKAGE):

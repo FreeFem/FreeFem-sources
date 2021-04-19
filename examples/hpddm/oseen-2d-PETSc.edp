@@ -91,10 +91,8 @@ ChangeNumbering([dF, dC], [rhsV, rhsP], rhsPETSc);
 
 // Defining names of velocity and pressure fields
 real[int] list(rhsPETSc.n);
-real[int] nVPETSc;
-ChangeNumbering(dF, rhsV, nVPETSc);
-list(0 : nVPETSc.n-1) = 1;
-list(nVPETSc.n : list.n-1) = 2;
+list(0 : dF.n-1) = 1;
+list(dF.n : list.n-1) = 2;
 string[int] names(2);
 names[0] = "velocity";
 names[1] = "pressure";
