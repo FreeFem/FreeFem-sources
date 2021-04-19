@@ -23,7 +23,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [4.9]
 ### Added
 - add P3 lagrange finite element on meshS and meshS 
 - add new plugin `meshtool`to add tool to compute the number of connected components of a all kind of mesh
@@ -412,7 +412,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.8..develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.9..develop
+[4.9]: https://github.com/FreeFem/FreeFem-sources/compare/v4.8..v4.9
 [4.8]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7-1..v4.8
 [4.7-1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7...v4.7-1
 [4.7]: https://github.com/FreeFem/FreeFem-sources/compare/v4.6...v4.7
