@@ -67,7 +67,7 @@ void WriteXdmf::WriteXdmfMeshFile2D( ) {
   xdmf_file << "</Xdmf>\n";
   xdmf_file.close( );
 
-  cout << "save xdmf file mesh : " << xdmf_filename << endl;
+  //cout << "save xdmf file mesh : " << xdmf_filename << endl;
 }
 
 // void WriteXdmf::WriteXdmfMeshFile3D()
