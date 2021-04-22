@@ -56,7 +56,7 @@ struct SortArray<T,2> {
   {  return v[0] == t.v[0] && v[1] == t.v[1] ;}
     bool operator<(const SortArray<T,2> & t)  const 
     {  return v[0] != t.v[0] ? v[0] < t.v[0] : v[1] < t.v[1] ;}  
-  size_t hash() const {return (size_t) v[0]  * rotl(v[1],7) ;}
+  size_t hash() const {return (size_t) v[0]  +  rotl(v[1],2) ;}
 };
 
 
@@ -85,7 +85,7 @@ struct SortArray<T,3> {
   bool operator<(const SortArray<T,3> & t)  const 
     {  return v[0] != t.v[0] ? v[0] < t.v[0] :
            ( v[1] != t.v[1] ? v[1] < t.v[1] :  v[2] < t.v[2] );}  
- size_t hash() const {return (size_t) v[0] * rotl(v[1],7) * rotl(v[2],14) ;}
+ size_t hash() const {return (size_t) v[0] + rotl(v[1],2) * rotl(v[2],4) ;}
 
  // size_t hash() const {return (size_t) v[0];}
 };
@@ -125,7 +125,7 @@ struct SortArray<T,4> {
         ( v[1] != t.v[1] ? v[1] < t.v[1] :
         ( v[2] !=  t.v[2] ? v[2] < t.v[2]: v[3] < t.v[3] ));}
  
-   size_t hash() const {return (size_t) v[0] * rotl(v[1],7) * rotl(v[2],14) * rotl(v[3],21);}
+   size_t hash() const {return (size_t) v[0] + rotl(v[1],2) + rotl(v[2],4) + rotl(v[3],6);}
 
   
 };
