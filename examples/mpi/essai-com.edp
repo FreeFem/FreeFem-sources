@@ -36,6 +36,8 @@ if (mpirank==1)
 cout << " mpirank = " << " A =  " <<  A << endl;
 
 cout << " " <<  norm(A(1,1) - 2-1i) << endl;
-
-int[int] procs=[1,4,8];
+if( mpisize>4)
+{
+int[int] procs=[1,0,3];
 mpiGroup group(procs);
+}

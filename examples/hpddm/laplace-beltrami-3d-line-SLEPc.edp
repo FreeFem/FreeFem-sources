@@ -1,3 +1,6 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
 load "PETSc"
 load "msh3"
 load "medit"

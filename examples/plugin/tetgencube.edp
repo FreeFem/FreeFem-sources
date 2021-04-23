@@ -15,8 +15,8 @@ func YY1 = y;
 int[int] ref31h = [0,12];
 int[int] ref31b = [0,11];
 
-mesh3 Th31h = movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1max],region=ref31h,orientation=1);
-mesh3 Th31b = movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1min],region=ref31b,orientation=-1);   
+meshS Th31h = movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1max],region=ref31h,orientation=1);
+meshS Th31b = movemesh23(Thsq1,transfo=[XX1,YY1,ZZ1min],region=ref31b,orientation=-1);   
 
 //medit("haut",Th31h);
 //medit("bas",Th31b);
@@ -33,8 +33,8 @@ func YY2max = 2*pi;
 int[int] ref32h = [0,13];
 int[int] ref32b = [0,14];
 
-mesh3 Th32h = movemesh23(Thsq2,transfo=[XX2,YY2max,ZZ2],region=ref32h,orientation=-1);  
-mesh3 Th32b = movemesh23(Thsq2,transfo=[XX2,YY2min,ZZ2],region=ref32b,orientation=1);
+meshS Th32h = movemesh23(Thsq2,transfo=[XX2,YY2max,ZZ2],region=ref32h,orientation=-1);  
+meshS Th32b = movemesh23(Thsq2,transfo=[XX2,YY2min,ZZ2],region=ref32b,orientation=1);
 
 /////////////////////////////////
 x0=0.; x1=2*pi; y0=0.; y1=1.5;
@@ -48,11 +48,11 @@ func ZZ3 = y;
 int[int] ref33h = [0,15];
 int[int] ref33b = [0,16];
 
-mesh3 Th33h = movemesh23(Thsq3,transfo=[XX3max,YY3,ZZ3],region=ref33h,orientation=1);  
-mesh3 Th33b = movemesh23(Thsq3,transfo=[XX3min,YY3,ZZ3],region=ref33b,orientation=-1); 
+meshS Th33h = movemesh23(Thsq3,transfo=[XX3max,YY3,ZZ3],region=ref33h,orientation=1);  
+meshS Th33b = movemesh23(Thsq3,transfo=[XX3min,YY3,ZZ3],region=ref33b,orientation=-1); 
 
 ////////////////////////////////
-mesh3 Th33 = Th31h+Th31b+Th32h+Th32b+Th33h+Th33b; // "gluing" surface meshs to obtain the surface of cube
+meshS Th33 = Th31h+Th31b+Th32h+Th32b+Th33h+Th33b; // "gluing" surface meshs to obtain the surface of cube
 //medit("glumesh",Th33);
 savemesh(Th33,"Th33.mesh");
 
@@ -70,7 +70,7 @@ func mv2z = z;
 //mesh3 Thmv2 = movemesh3(Thfinal, transfo=[mv2x,mv2y,mv2z]);
 //savemesh(Thmv2,"halfcylindricalshell.mesh");
 verbosity=2;
-mesh3 Thmv2surf = movemesh(Th33, [mv2x,mv2y,mv2z], facemerge=0);
+meshS Thmv2surf = movemesh(Th33, [mv2x,mv2y,mv2z], removeduplicate=0);
 cout << "\b\b Thmv2surf.measure=" << Thmv2surf.measure << endl;
 cout << " Thmv2surf.bordermeasure=" << Thmv2surf.bordermeasure << endl;
 

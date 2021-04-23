@@ -5,7 +5,7 @@
 inline void MATERROR(int i,const char *cmm)
 {
     std::cerr << " MATERROR " << i << " : " << cmm << std::endl;
-    ErrorExec("MATERROR",1);
+    throw(ErrorExec("MATERROR",1));
     std::abort();
 }
 template<class Z,class R> class HashMatrix ;
