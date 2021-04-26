@@ -1284,11 +1284,15 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
     AnyType operator( )(Stack s) const {
       const int d = Mesh::Rd::d;
       const int dHat = Mesh::RdHat::d;
+      const  int dHatfe = TypeOfFE::RdHat::d;
+        const int dfe = TypeOfFE::RdHat::d;
+       
+
       const Mesh **ppTh = GetAny< const Mesh ** >((*eppTh)(s));
       AnyType r = (*eppfes)(s);
       const TypeOfFE **tef = new const TypeOfFE *[atef.size( )];
         for (int i = 0; i < atef.size( ); i++)
-        if (tedim[i] == dHat && d==2)
+        if (tedim[i] == dHat && d==dfe)
           tef[i] = GetAny< TypeOfFE * >(atef[i].eval(s));
         else if (tedim[i] == 2 && d==3 && dHat == 3)
           tef[i] = GetAny< TypeOfFE * >(TypeOfFE3to2(s, atef[i].eval(s)));
