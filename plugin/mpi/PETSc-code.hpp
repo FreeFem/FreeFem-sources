@@ -1346,6 +1346,9 @@ namespace PETSc {
           } else if (atype< PetscScalar >( )->CastingFrom(r)) {
             e_M[i][j] = to< PetscScalar >(c_M);
             t_M[i][j] = 7;
+          } else if (atype< std::pair<Dmat*, Dmat*>* >( )->CastingFrom(r)) {
+            e_M[i][j] = to< std::pair<Dmat*, Dmat*>* >(c_M);
+            t_M[i][j] = 8;
           } else
             CompileError("Unsupported type in submatrix");
         }
@@ -1439,6 +1442,16 @@ namespace PETSc {
                 MatDestroy(&B);
                 a[i * M + j] = C;
               }
+              destroy.emplace_back(i, j);
+            } else if (t == 8) {
+              std::pair<Dmat*, Dmat*>* p = GetAny<std::pair<Dmat*, Dmat*>*>(e_ij);
+              ffassert(p && p->first->_petsc && p->second->_petsc);
+              Mat mats[2] = { p->second->_petsc, p->first->_petsc };
+              Mat C;
+              MatCreateComposite(PetscObjectComm((PetscObject)p->first->_petsc), 2, mats, &C);
+              MatCompositeSetType(C, MAT_COMPOSITE_MULTIPLICATIVE);
+              a[i * M + j] = C;
+              delete p;
               destroy.emplace_back(i, j);
             } else {
               ExecError("Unknown type in submatrix");
@@ -5017,10 +5030,12 @@ static void Init_PETSc( ) {
   TheOperators->Add("=", new OneOperator2_< Dmat*, Dmat*, Dmat* >(PETSc::changeOperatorSimple));
   TheOperators->Add("*=", new OneBinaryOperator< PETSc::scale<Dmat*, PetscScalar> >);
   Dcl_Type< std::pair<PetscScalar, Dmat*>* >();
+  Dcl_Type< std::pair<Dmat*, Dmat*>* >();
   atype<std::pair<PetscScalar, Dmat*>*>()->AddCast(new E_F1_funcT<std::pair<PetscScalar, Dmat*>*, Dmat*>(PETSc::M2P));
   TheOperators->Add("+=", new OneBinaryOperator< PETSc::AXPY<Dmat*, Dmat*> >,
                           new OneOperator2_< Dmat*, Dmat*, std::pair<PetscScalar, Dmat*>*, E_F_StackF0F0>(PETSc::AddCombDmat<PetscScalar>));
   TheOperators->Add("*", new OneBinaryOperator<PETSc::Op2<PetscScalar>>);
+  TheOperators->Add("*", new OneBinaryOperator<PETSc::Op2<Dmat*>>);
   Global.Add("PetscLogStagePush", "(", new OneOperator1_< long, string* >(PETSc::stagePush));
   Global.Add("PetscLogStagePop", "(", new OneOperator0< long >(PETSc::stagePop));
   Global.Add("PetscMemoryGetCurrentUsage", "(", new OneOperator0< double >(PETSc::memoryGetCurrentUsage));
