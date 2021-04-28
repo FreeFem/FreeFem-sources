@@ -333,7 +333,7 @@ public:
       vertices[i]=v0+iv[i];
     mes=(mss!=UnSetMesure) ? mss : Data::mesure(vertices);
     lab=r;
-    assert( mes>0);
+    assert( (RdHat::d != Rd::d )|| mes>0 );
     return *this;
   }
 
