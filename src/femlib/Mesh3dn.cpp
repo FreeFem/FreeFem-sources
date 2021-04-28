@@ -1432,21 +1432,35 @@ namespace Fem2D
       
         mes=0.;
         mesb=0.;
-        
+        int err = 0;
         for (int i=0;i<nt;i++)
-            mes += this->elements[i].mesure();
+        {
+            double mese =this->elements[i].mesure();
+            if( mese <=0 ) {
+                
+                if( verbosity<2 && err < verbosity)
+                    cerr << " Bad orientation of tet  before cleanmesh "<< i << " mes = "<< mese << endl;
+                    err++;
+            }
+            mes += mese;
+        }
         
         for (int i=0;i<nbe;i++)
             mesb += this->be(i).mesure();
         
         if (cleanmesh){
+            err=0;
             if(verbosity>5)
             cout << "before clean mesh3, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
             clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
             if(verbosity>5)
                 cout << "after clean mesh3, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
         }
-        
+        if(err)
+        {
+            cerr << " erreur read  mesh " << err << " negative  tet";
+            ErrorExec(" mesh with negative Tets",1);
+        }
         //  Add FH to be consitant we all constructor ...  July 09
         BuildBound();
         if(nt && nbe) {

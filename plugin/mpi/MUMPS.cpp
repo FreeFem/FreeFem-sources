@@ -122,6 +122,15 @@ public:
         delete [] id.irn;
         delete [] id.jcn;
         delete [] id.a;
+
+        delete [] id.irn_loc;
+        delete [] id.jcn_loc;
+        delete [] id.a_loc;
+
+        id.irn_loc = 0;
+        id.jcn_loc = 0;
+        id.a_loc = 0;
+
         id.irn=0;
         id.jcn=0;
         id.a =0;
