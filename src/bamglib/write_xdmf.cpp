@@ -1,3 +1,4 @@
+extern long verbosity;
 #include "write_xdmf.hpp"
 #ifdef DEBUG
 int debug_w = 1;
