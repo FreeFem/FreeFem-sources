@@ -1242,9 +1242,7 @@ void Init_map_type()
 
      TheOperators->Add("%",
        new OneBinaryOperator<Op2_mod<long,long,long> >,
-       new OneOperator2<double,double,double>(fmod),
-       new OneOperator2<double,long,double>(fmod),
-       new OneOperator2<double,double,long>(fmod)
+       new OneOperator2<double,double,double>(fmod)
        );
 
 
