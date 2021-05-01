@@ -31,7 +31,7 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Deprecated
--
+- SLEPc and SLEPc-complex have been part of PETSc and PETSc-complex for multiple releases and are now deprecated
 
 ### Removed
 -

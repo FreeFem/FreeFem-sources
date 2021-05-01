@@ -4945,7 +4945,7 @@ static void Init_PETSc( ) {
   if (verbosity > 1 && mpirank == 0)
     cout << " PETSc (" << typeid(PetscScalar).name( ) << ")" << endl;
   if (exist_type< DmatC* >( )) {
-    if(mpirank == 0) cout << "Cannot load both \"PETSc\"/\"SLEPc\" and \"PETSc-complex\"/\"SLEPc-complex\", please pick a single one" << endl;
+    if(mpirank == 0) cout << "Cannot load both \"PETSc\" and \"PETSc-complex\", please pick a single one" << endl;
     ffassert(0);
   }
   int argc = pkarg->n;

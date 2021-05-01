@@ -2,7 +2,7 @@
 // NBPROC 4
 
 include "macro_ddm.idp"
-load "SLEPc"
+load "PETSc"
 
 mesh Th = square(40, 40);
 func Pk = P1;
