@@ -302,7 +302,7 @@ endif
 $(SRCDIR)/tag-tar:$(PACKAGE)
 	-tar xzf $(PACKAGE)
 ifeq ($(WIN32DLLTARGET),)
-	cd petsc-$(VERSION) && patch -p1 < ../petsc-metis.patch && cd -
+	cd petsc-$(VERSION) && patch -p1 < ../petsc-cmake-seq.patch && cd -
 endif
 	cd petsc-$(VERSION) && patch -p1 < ../petsc-suitesparse.patch && cd -
 	touch $@

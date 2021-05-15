@@ -15,3 +15,20 @@ index 136526da05..2d1c4d3271 100644
      return args
 
    def configureLibrary(self):
+diff --git a/config/BuildSystem/config/packages/mmg.py b/config/BuildSystem/config/packages/mmg.py
+index 1cc9122f41..4affbce3b3 100644
+--- a/config/BuildSystem/config/packages/mmg.py
++++ b/config/BuildSystem/config/packages/mmg.py
+@@ -27,6 +27,12 @@ class Configure(config.package.CMakePackage):
+     args.append('-DUSE_ELAS=OFF')
+     args.append('-DUSE_VTK=OFF')
+     args.append('-DSCOTCH_DIR:STRING="'+self.ptscotch.directory+'"')
++    mpicc = self.framework.getMakeMacro('MPICC_SHOW')
++    mpicxx = self.framework.getMakeMacro('MPICXX_SHOW')
++    if mpicc and mpicxx:
++        args = self.rmArgsStartsWith(args,['-DCMAKE_CXX_COMPILER','-DCMAKE_C_COMPILER'])
++        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
++        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
+     return args
+
+   def configureLibrary(self):
