@@ -32,7 +32,7 @@ for (int i=0;i<nbsd;i++)
  }
 
 
-border gi(t=0,1;i){x=cost[i]*t;y=sint[i]*t;label=1;};
+border gi(t=0,1;i){x=cost[i]*t;y=sint[i]*t;label=1;region=1;};// correct Bug  mai 2021 FH. region = 
 
 border ei(tt=0,1;i){ real t = theta[i]+ tt*(theta[i+1]-theta[i]);
 	 x=cos(t);y=sin(t);label=labext;};
@@ -260,7 +260,12 @@ solve vLapMM([uah],[vah]) =
     +  on(labext,uah=g)
    ;
 verbosity =3;
-plot(uah,usd,cmm="uah",wait=1); 
+real errL2=0;
+for(int sd=0;sd<nbsd;++sd)
+  errL2 += int2d(Thsd[sd])( sqr(uah-usd[sd]));
+  errL2 = sqrt(errL2);
+plot(uah,usd,cmm="uah err="+errL2,wait=1); 
+assert(errL2<1e-4); 
 regtest=uah[]'*uah[];
 }
 

@@ -3576,7 +3576,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
         if ( verbosity >1)
         {
-            cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+            cout << " Integral(1)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
             cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
             cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
             cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -3870,7 +3870,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
         const bool intmortar=di.intmortar(stack);
         if ( verbosity >1)
         {
-            cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+            cout << " Integral(2)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
             cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
             cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
             cout << "        suppose in mortar " << intmortar << endl;
@@ -4091,7 +4091,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
         const bool intmortar=di.intmortar(stack);
         if ( verbosity >1)
         {
-            cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+            cout << " Integral(3)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
             cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
             cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
             cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -4382,7 +4382,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
         const bool intmortar=di.intmortar(stack);
         if ( verbosity >1)
         {
-            cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+            cout << " Integral(4)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
             cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
             cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
             cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -4494,7 +4494,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
        const bool intmortar=di.intmortar(stack);
        if ( verbosity >1)
        {
-           cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+           cout << " Integral(5)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
            cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
            cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
            cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -4602,7 +4602,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
        //double binside=di.binside(stack);
        const bool intmortar=di.intmortar(stack);
        if ( verbosity >1) {
-        cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+        cout << " Integral(6)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
         cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
         cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
         cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -4707,7 +4707,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
  const bool intmortar=di.intmortar(stack);
  if ( verbosity >1)
  {
-     cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+     cout << " Integral(7)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
      cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
      cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
      cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -4998,7 +4998,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
  const bool intmortar=di.intmortar(stack);
  if ( verbosity >1)
  {
-     cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+     cout << " Integral(8)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
      cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
      cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
      cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -5285,7 +5285,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
     //double binside=di.binside(stack);
     const bool intmortar=di.intmortar(stack);
     if ( verbosity >1) {
-     cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+     cout << " Integral(9)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
      cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
      cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
      cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -5390,7 +5390,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
       const bool intmortar=di.intmortar(stack);
       if ( verbosity >1)
       {
-          cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+          cout << " Integral(10)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
           cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
           cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
           cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;

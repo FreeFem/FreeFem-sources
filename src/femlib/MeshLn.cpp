@@ -771,14 +771,14 @@ namespace Fem2D
                            cout << "Element num: " << i << " N " << E << " Element adjacent num: " << it << " E_adj " << E_adj << " angle between N N_adj = " << pdt << " " << (E,E_adj) << endl;
                         
                        if(pdt >= angle) {
-                           if(verbosity>15)
+                           if(verbosity>1)
                                cout << " the border point " <<nbeL <<": [" << iv[0] << " " << "] is a boundary with the angular criteria " << angle << " " << vertices[iv[0]].lab << endl;
                            int lab = vertices[iv[0]].lab; //min(K.lab, K_adj.lab);
                            be(nbeL).set(vertices,iv,lab);
                            pointI.add(key, nbeL++);
                        }
                        else if(labeledBoundary && K.lab != K_adj.lab ) {
-                           if(verbosity>15)
+                           if(verbosity>1)
                              cout << " the border point " <<nbeL <<": [" << iv[0] << " " << "] is a boundary with labeled boundary criteria" << vertices[iv[0]].lab <<endl;
             
                            be(nbeL).set(vertices,iv,vertices[iv[0]].lab);//K.lab);

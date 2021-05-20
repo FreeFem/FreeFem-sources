@@ -929,6 +929,24 @@ void ArrayDCL()
     atype<KN_<K> >()->SetTypeLoop(atype<K*>(),atype<long*>());
     atype<KNM_<K> >()->SetTypeLoop(atype<K*>(),atype<long*>(),atype<long*>());
 
+      // map string  of array ..  Test FH Mai 2022 ...
+  
+    map_type[typeid(MyMap<String,K>*).name()] = new ForEachType<MyMap<String,K>*>(Initialize<MyMap<String,K> >,Delete<MyMap<String,K> >) ;
+
+    map_type_of_map[make_pair(atype<string*>(),atype<K>())]=atype<MyMap<String,K>*>();
+
+
+    typedef MyMap<String,KN<K> > MyMapofArray;
+    map_type[typeid(MyMapofArray*).name()] = new ForEachType<MyMap<String,K>*>(Initialize<MyMapofArray >,Delete<MyMapofArray >) ;
+    ffassert(TypeArray(atype<K>(),atype<string*>()));
+    map_type_of_map[make_pair(TypeArray(atype<K>(),atype<string*>()),atype<KN_<K> >())]=atype<MyMapofArray*>();
+    ;// map of   tableau
+    /*
+    atype<MyMap<String,K>*>()->Add("[","",new OneOperator2_<K*,MyMap<String,K>*,string*>(get_element<K>));
+    TheOperators->Add("&",new OneOperator2_<bool,MyMap<String,K>*,string*>(exist_element<K>));
+   TheOperators->Add("<<",new OneBinaryOperator<PrintP<MyMap<String,K>*> >);
+   Add<MyMap<String,K>* >("n",".",new OneOperator1<Z,MyMap<String,K> *>(get_MyMap_n));*/
+
 }
 
 
@@ -1825,11 +1843,6 @@ void ArrayOperator()
         new OneBinaryOperator<Op_ReadKN<K> >,
         new OneBinaryOperator<Op_ReadKNM<K> >
       );
-
-     map_type[typeid(MyMap<String,K>*).name()] = new ForEachType<MyMap<String,K>*>(Initialize<MyMap<String,K> >,Delete<MyMap<String,K> >) ;
-
-     map_type_of_map[make_pair(atype<string*>(),atype<K>())]=atype<MyMap<String,K>*>();
-
      atype<MyMap<String,K>*>()->Add("[","",new OneOperator2_<K*,MyMap<String,K>*,string*>(get_element<K>));
      TheOperators->Add("&",new OneOperator2_<bool,MyMap<String,K>*,string*>(exist_element<K>));
     TheOperators->Add("<<",new OneBinaryOperator<PrintP<MyMap<String,K>*> >);

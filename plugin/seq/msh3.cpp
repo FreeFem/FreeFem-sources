@@ -6881,7 +6881,7 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
 class ExtractMeshLfromMesh_Op : public E_F0mps {
 public:
 	Expression eTh;
-	static const int n_name_param = 7;    //
+	static const int n_name_param = 8;    //
 	static basicAC_F0::name_and_type name_param[];
 	Expression nargs[n_name_param], xx, yy, zz;
       
@@ -6924,7 +6924,10 @@ basicAC_F0::name_and_type ExtractMeshLfromMesh_Op::name_param[] = {
 {"cleanmesh", &typeid(bool)}, 
 {"removeduplicate", &typeid(bool)},
 {"precismesh", &typeid(double)},
-{"orientation", &typeid(long)}
+{"orientation", &typeid(long)},
+{"ridgeangle", &typeid(double)}
+
+    
 };
             
  
@@ -6978,6 +6981,7 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 	bool rebuildboundary=false;//(arg(7, stack, false));
 	double precis_mesh(arg(5, stack, 1e-7));
 	long orientation(arg(6, stack, 1L));
+        double ridgeangle(arg(7, stack, Pi/4.));
 	
     if(!labelface.N( ) && verbosity)
       cout << " empty list label, extract all boundaries" << endl;
@@ -7054,7 +7058,7 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
       ffassert(nvL>0);
     
 	// build the moved mesh and apply option
-	MeshL *T_Th = new MeshL(nvL, nbeLab, 0, v, b, 0, cleanmesh, removeduplicate, rebuildboundary, orientation, precis_mesh);
+	MeshL *T_Th = new MeshL(nvL, nbeLab, 0, v, b, 0, cleanmesh, removeduplicate, rebuildboundary, orientation, precis_mesh,false,ridgeangle);
 
 
 	T_Th->BuildGTree( );
