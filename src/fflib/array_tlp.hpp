@@ -939,13 +939,15 @@ void ArrayDCL()
     typedef MyMap<String,KN<K> > MyMapofArray;
     map_type[typeid(MyMapofArray*).name()] = new ForEachType<MyMap<String,K>*>(Initialize<MyMapofArray >,Delete<MyMapofArray >) ;
     ffassert(TypeArray(atype<K>(),atype<string*>()));
+    // make_pair(atype<string*>(),atype<KN_<K> >())
     map_type_of_map[make_pair(TypeArray(atype<K>(),atype<string*>()),atype<KN_<K> >())]=atype<MyMapofArray*>();
     ;// map of   tableau
-    /*
+  /*
     atype<MyMap<String,K>*>()->Add("[","",new OneOperator2_<K*,MyMap<String,K>*,string*>(get_element<K>));
     TheOperators->Add("&",new OneOperator2_<bool,MyMap<String,K>*,string*>(exist_element<K>));
    TheOperators->Add("<<",new OneBinaryOperator<PrintP<MyMap<String,K>*> >);
-   Add<MyMap<String,K>* >("n",".",new OneOperator1<Z,MyMap<String,K> *>(get_MyMap_n));*/
+   Add<MyMap<String,K>* >("n",".",new OneOperator1<long,MyMap<String,K> *>(get_MyMap_n));
+   */
 
 }
 

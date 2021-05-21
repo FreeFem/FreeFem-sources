@@ -25,7 +25,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
--
+-,ridgeangle named parameter in ExtractMeshL in msh3 plugin 
 
 ### Changed
 -
@@ -37,7 +37,8 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
--
+- examples/potential.edp coorect problem in times loops and BC
+- tutorial/mortar-DN-4.edp correct problem of region number in meshL 
 
 ### Security
 -

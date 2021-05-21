@@ -4160,6 +4160,7 @@ void     SetDefWin(const char *p,int & iii0,int & jjj0,int & Width,int &Height)
 }
 int main(int argc,  char** argv)
 {
+    lockOrientation=0;// to get bad mesh !! FH mai 2021 
     ffapi::init();
     glutInit(&argc, argv);
     bool stereo=false;
