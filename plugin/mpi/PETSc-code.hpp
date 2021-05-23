@@ -1930,9 +1930,9 @@ namespace PETSc {
         KSPCreate(PetscObjectComm((PetscObject)ptA->_petsc), &ptA->_ksp);
         KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
       }
+      if (nargs[4] && c != 2)
+        KSPSetOptionsPrefix(ptA->_ksp, GetAny< std::string* >((*nargs[4])(stack))->c_str( ));
       if (c == 1 || c == 3) {
-        if (nargs[4])
-            KSPSetOptionsPrefix(ptA->_ksp, GetAny< std::string* >((*nargs[4])(stack))->c_str( ));
         KN< Matrice_Creuse< double > >* mP = (c == 1 ? GetAny< KN< Matrice_Creuse< double > >* >((*P)(stack)) : nullptr);
         KN< Dmat >* mD = (c == 3 ? GetAny< KN< Dmat >* >((*P)(stack)) : nullptr);
         ffassert((c == 1 && mP->N( ) + 1 == tabA->N( )) || (c == 3 && (mD->N( ) + 1 == tabA->N( ) || tabA->N( ) == 1)));
@@ -2015,8 +2015,6 @@ namespace PETSc {
         }
       }
       else ksp = ptA->_ksp;
-      if (nargs[4] && c != 1 && c != 2 && c != 3)
-        KSPSetOptionsPrefix(ptA->_ksp, GetAny< std::string* >((*nargs[4])(stack))->c_str( ));
       KSPSetFromOptions(ksp);
       if (c != 1) {
         if (std::is_same< Type, Dmat >::value) {
