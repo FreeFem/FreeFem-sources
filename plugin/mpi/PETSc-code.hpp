@@ -1930,9 +1930,9 @@ namespace PETSc {
         KSPCreate(PetscObjectComm((PetscObject)ptA->_petsc), &ptA->_ksp);
         KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
       }
+      if (nargs[4] && c != 2)
+        KSPSetOptionsPrefix(ptA->_ksp, GetAny< std::string* >((*nargs[4])(stack))->c_str( ));
       if (c == 1 || c == 3) {
-        if (nargs[4])
-            KSPSetOptionsPrefix(ptA->_ksp, GetAny< std::string* >((*nargs[4])(stack))->c_str( ));
         KN< Matrice_Creuse< double > >* mP = (c == 1 ? GetAny< KN< Matrice_Creuse< double > >* >((*P)(stack)) : nullptr);
         KN< Dmat >* mD = (c == 3 ? GetAny< KN< Dmat >* >((*P)(stack)) : nullptr);
         ffassert((c == 1 && mP->N( ) + 1 == tabA->N( )) || (c == 3 && (mD->N( ) + 1 == tabA->N( ) || tabA->N( ) == 1)));
@@ -2015,8 +2015,6 @@ namespace PETSc {
         }
       }
       else ksp = ptA->_ksp;
-      if (nargs[4] && c != 1 && c != 2 && c != 3)
-        KSPSetOptionsPrefix(ptA->_ksp, GetAny< std::string* >((*nargs[4])(stack))->c_str( ));
       KSPSetFromOptions(ksp);
       if (c != 1) {
         if (std::is_same< Type, Dmat >::value) {
@@ -2147,9 +2145,7 @@ namespace PETSc {
                 PCASMSetLocalSubdomains(pc, 1, &is, &loc);
                 int nnz = dO._nnz;
                 MPI_Allreduce(MPI_IN_PLACE, &nnz, 1, MPI_INT, MPI_MAX, PetscObjectComm((PetscObject)ptA->_petsc));
-                PetscErrorCode (*CreateSubMatrices)(Mat,PetscInt,const IS*,const IS*,MatReuse,Mat**);
                 if (nnz) {
-                  MatGetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(**)(void))&CreateSubMatrices);
                   MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(*)(void))CustomCreateSubMatrices);
                   Mat aux = ff_to_PETSc(&dO);
                   IS perm;
@@ -2171,7 +2167,7 @@ namespace PETSc {
                 PCSetUp(pc);
                 ISDestroy(&loc);
                 if (nnz) {
-                  MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(*)(void))CreateSubMatrices);
+                  MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(*)(void))MatCreateSubMatrices);
                   delete O;
                 }
                 O = nullptr;
