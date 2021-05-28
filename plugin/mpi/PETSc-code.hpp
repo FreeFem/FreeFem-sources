@@ -2145,9 +2145,7 @@ namespace PETSc {
                 PCASMSetLocalSubdomains(pc, 1, &is, &loc);
                 int nnz = dO._nnz;
                 MPI_Allreduce(MPI_IN_PLACE, &nnz, 1, MPI_INT, MPI_MAX, PetscObjectComm((PetscObject)ptA->_petsc));
-                PetscErrorCode (*CreateSubMatrices)(Mat,PetscInt,const IS*,const IS*,MatReuse,Mat**);
                 if (nnz) {
-                  MatGetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(**)(void))&CreateSubMatrices);
                   MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(*)(void))CustomCreateSubMatrices);
                   Mat aux = ff_to_PETSc(&dO);
                   IS perm;
@@ -2169,7 +2167,7 @@ namespace PETSc {
                 PCSetUp(pc);
                 ISDestroy(&loc);
                 if (nnz) {
-                  MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(*)(void))CreateSubMatrices);
+                  MatSetOperation(ptA->_petsc, MATOP_CREATE_SUBMATRICES, (void(*)(void))MatCreateSubMatrices);
                   delete O;
                 }
                 O = nullptr;
