@@ -210,7 +210,7 @@ make -j4 install
 
 ```
 
-Jenkins projets are [here](https://ci.inria.fr/freefem-dev/) and [here](https://ci.inria.fr/freefem-dev-2/) 
+Jenkins projects are [here](https://ci.inria.fr/freefem-dev/) and [here](https://ci.inria.fr/freefem-dev-2/) 
 
 
 # Job 1
