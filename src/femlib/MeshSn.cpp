@@ -497,7 +497,8 @@ namespace Fem2D
         }
         if (cleanmesh) {
             if(verbosity>3)
-                cout << "before clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+                cout << "before clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe
+                     << " orientation " << orientation << endl;
             clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
             if(verbosity>3)
                 cout << "after clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;

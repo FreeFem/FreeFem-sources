@@ -881,7 +881,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
             }
             
         }
-        if(verbosity&& nadjnomanifold) cerr << "  --- Warning manifold obj nb:" << nbordnomanifold<< " adj "<< nadjnomanifold << " of  dim =" << T::RdHat::d << endl;
+        if(verbosity&& nadjnomanifold) cerr << "  --- Warning no manifold obj nb:" << nbordnomanifold<< " adj "<< nadjnomanifold << " of  dim =" << T::RdHat::d << endl;
         int kerr=0,kerrf=0,nbei=0,fwarn=0;
         map<pair<int,int>,pair<int,int> > mapfs;
         int uncorrect =0, nbchangeorient=0;
@@ -1401,7 +1401,7 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
         vv[i].lab=v[iv].lab;
     }
   
-  
+    int nbort=0, nborb=0;
     double mes=0., mesb=0.;
     nt=new_nt;
     T *tt=new T[nt];
@@ -1414,9 +1414,9 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
             assert(iv[j] >= 0 && iv[j] < nv);
         }
         if (orientation<0 && T::nv>2 )
-            swap(iv[1], iv[2]);
+            nbort++,swap(iv[1], iv[2]);
         else if (orientation<0 && T::nv==2 )
-            swap(iv[0], iv[1]);
+            nbort++,swap(iv[0], iv[1]);
         
         tt[i].set(vv, iv, K.lab);
         mes+=tt[i].mesure();
@@ -1473,14 +1473,16 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
             iv[j] =  old2new[ &(K[j]) - v];
             assert(iv[j] >= 0 && iv[j] < nv);
         }
-        if (orientation<0 && T::nv>2 )
-            swap(iv[(B::nv)-2], iv[(B::nv)-1]);
+        if (orientation<0 && T::nv>=2 )//  modif FH 25 may 2021 do also on B edge (nv==2)
+            nborb++,swap(iv[(B::nv)-2], iv[(B::nv)-1]);
         bb[i].set(vv, iv, K.lab);
         mesb+=bb[i].mesure();
     }
     }
     if(verbosity>2)
-        cout << "after clean mesh, nv = " << nv << " nt = " << nt << " nbe = " << nbe << endl;
+        cout << "   after clean mesh, nv = " << nv << " nt = " << nt << " nbe = " << nbe
+             << "\n      nb swap orient element" << nbort
+             <<  "\n     nb swap orient border element" << nborb << endl;
    
     if (mes<0) {
         cerr << " Error of mesh orientation , current orientation = " << orientation << endl;

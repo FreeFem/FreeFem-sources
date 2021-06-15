@@ -3137,6 +3137,8 @@ TheOperators->Add("=",
  Add<pfesS*>("ndof",".",new OneOperator1<long,pfesS*>(pVhS_ndof));
  Add<pfesS*>("nt",".",new OneOperator1<long,pfesS*>(pVhS_nt));
  Add<pfesS*>("ndofK",".",new OneOperator1<long,pfesS*>(pVhS_ndofK));
+ Add<pfesS*>("Th",".",new OneOperator1<pmeshS,pfesS*>(pVhS_Th));//ADD JUIN 2021 FH.
+
 // Add<pfesS*>("Th",".",new OneOperator1<pmesh3,pfesS*>(pVhS_Th));
  
 // 3d curve FE
@@ -3147,7 +3149,8 @@ Add<pfLc>("Th",".",new OneOperator1<pmeshL,pfLc>(pfLr_Th<Complex>));
 Add<pfesL*>("ndof",".",new OneOperator1<long,pfesL*>(pVhL_ndof));
 Add<pfesL*>("nt",".",new OneOperator1<long,pfesL*>(pVhL_nt));
 Add<pfesL*>("ndofK",".",new OneOperator1<long,pfesL*>(pVhL_ndofK));
-    
+Add<pfesL*>("Th",".",new OneOperator1<pmeshL,pfesL*>(pVhL_Th));//ADD JUIN 2021 FH.
+
     
  //Add<pf3rbasearray*>("[","",new OneOperator2_<pf3rbase*,pf3rbasearray*,long>(get_element));
  //Add<pf3rarray>("[","",new OneOperator2_<pf3r,pf3rarray,long>(get_element));

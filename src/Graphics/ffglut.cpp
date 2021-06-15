@@ -665,11 +665,41 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & pl
         }
     }
     if (pNormalT) {
-       if (debug>5) cout << " plot Normal element at triangles " << pNormalT << endl;
+       if (debug>5) cout << " plot Normal element at triangles and the tangent to border " << pNormalT << endl;
             R h = 8*win->hpixel;
             coef = coef*sqrt(Th.mes/Th.nt);
             glLineWidth(0.5*kscreenscale);
             glColor3f(1,0,0);
+            for (int i=0;i<Th.nbe;  i++ ) {
+                typedef MeshS::BorderElement BE;
+                typedef BE::Rd Rd;
+                typedef BE::RdHat RdHat;
+                const MeshS::BorderElement & K(Th.be(i));
+                RdHat g(0.5);
+                Rd G(K(g));
+                Rd dd(K[0],K[1]);
+                dd /= dd.norme();
+                // fleche ou cone / orientation ???
+                R3 nx(1.,0.,0.), ny(0.,1.,0.), nz(0.,0.,1.);
+                // R3 dd = uv*(-h/l);
+                R3 dnx = (dd^nx)*0.5, dny = (dd^ny)*0.5, dnz = (dd^nz)*0.5;
+                dd *= -coef/dd.norme()/5;
+                dnx *= -coef/dnx.norme()/5;
+                dny *= -coef/dny.norme()/5;
+                dnz *= -coef/dnz.norme()/5;
+
+                glLineWidth(kscreenscale);
+                glBegin(GL_LINES);
+                win->Seg3(G,G+dd+dnx);
+                win->Seg3(G,G+dd-dnx);
+                win->Seg3(G,G+dd+dny);
+                win->Seg3(G,G+dd-dny);
+                win->Seg3(G,G+dd+dnz);
+                win->Seg3(G,G+dd-dnz);
+                glEnd();
+
+                
+            }
 
             for (int i=0;i<Th.nt; i = 0 ? i++ : i+=nbN) {
                 const MeshS::Element & K(Th[i]);

@@ -10822,7 +10822,7 @@ void InitProblem( int Nb, const FESpace & Uh,
         { //  copy the previous soluton to initialize CG, GMRES, etc ...
             if (Nb==1)
             {  // modif  FH 0701/2005 + april 2006
-                if(u_h[0]->x()->N() != X->N() )
+                if(u_h[0]->x() && u_h[0]->x()->N() != X->N() )// correction juin FH 2021 .. 
                 cout << " bug ???? " << endl;
                 if (u_h[0]->x() && u_h[0]->x()->N() == X->N() )
                 *X= * u_h[0]->x();

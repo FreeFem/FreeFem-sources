@@ -2053,13 +2053,13 @@ template <class R>
 template<class R>
 R get_trace_mat(Matrice_Creuse<R> * p)
 {
-    return p ? p->A->trace():0.;
+    return p && p->A  ? p->A->trace():0.;
 
 }
 template<class R>
 bool clear_mat(Matrice_Creuse<R> * p)
 {
-   if(p)  p->A->clear();
+   if(p && p->A )  p->A->clear();
    return true;
 }
 
