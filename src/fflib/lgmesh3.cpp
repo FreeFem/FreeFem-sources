@@ -311,7 +311,7 @@ bool BuildPeriodic3(
 				  int p1[BE::nv],p2[BE::nv];
 				  SetNumPerm<BE::nv>(np1,p1);
 				  SetNumPerm<BE::nv>(np2,p2);
-				  if(verbosity>50)
+				  if(verbosity>50 && BE::nv>2)
 				      cout <<"  " << ie1 << " ==  " << ie2  << ":  " <<  fo[p1[0]] << " " << fo[p1[1]] << " " << fo[p1[2]] << " == " 
 				       << i2to1[p2[0]] << " " << i2to1[p2[1]] << " " << i2to1[p2[2]]  << "  e ="
 				       << Th(e[p2[0]]) << " " << Th(e[p2[1]]) << " " << Th(e[p2[2]])  << " "

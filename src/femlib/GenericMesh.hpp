@@ -1473,7 +1473,7 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
             iv[j] =  old2new[ &(K[j]) - v];
             assert(iv[j] >= 0 && iv[j] < nv);
         }
-        if (orientation<0 && T::nv>=2 )//  modif FH 25 may 2021 do also on B edge (nv==2)
+        if (orientation<0 && B::nv>=2 )//  correct  FH  juin  2021 do also on B edge (nv==2)
             nborb++,swap(iv[(B::nv)-2], iv[(B::nv)-1]);
         bb[i].set(vv, iv, K.lab);
         mesb+=bb[i].mesure();
