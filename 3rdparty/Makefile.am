@@ -101,7 +101,8 @@ install-other: tag-install-other
 
 tag-install-other:
 	if test -n "$(TOOL_COMPILE_hpddm)" ; then  $(MAKE) install-hpddm; else true; fi
-	if test -n "$(TOOL_COMPILE_bem)" ; then  $(MAKE) install-htool install-boost install-bemtool; else true; fi
+	if test -n "$(TOOL_COMPILE_htool)" ; then  $(MAKE) install-htool; else true; fi
+	if test -n "$(TOOL_COMPILE_bem)" ; then  $(MAKE) install-boost install-bemtool; else true; fi
 	touch tag-install-other
 
 WHERE-OTHER: lib/WHERE.hpddm lib/WHERE.htool lib/WHERE.bemtool lib/WHERE.boost
@@ -133,12 +134,12 @@ lib/WHERE.hpddm: ./getall
 
 # begin HTOOL
 install-htool: ./getall
-	 if test -n "$(TOOL_COMPILE_bem)"; then   ./getall -o htool -a;  $(MAKE) include/htool/done.tag  lib/WHERE.htool; else true;fi
+	 if test -n "$(TOOL_COMPILE_htool)"; then   ./getall -o htool -a;  $(MAKE) include/htool/done.tag  lib/WHERE.htool; else true;fi
 reinstall-htool:./getall
 	-rm lib/WHERE.htool
 	-rm ./pkg/htool.zip
 	-rm -rf include/htool
-	-test -n "$(TOOL_COMPILE_bem)" && $(MAKE) install-htool || true
+	-test -n "$(TOOL_COMPILE_htool)" && $(MAKE) install-htool || true
 include/htool/done.tag:./pkg/htool.zip
 	-if test -f ./pkg/htool.zip ; then \
           cd include;rm -rf htool htool-*;  unzip -q ../pkg/htool.zip ; mv  htool-* htool ; touch htool/done.tag; \
