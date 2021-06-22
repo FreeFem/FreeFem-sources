@@ -224,6 +224,7 @@ class SolveMUMPS_seq : public VirtualSolver< int, R > {
     }
     ICNTL(9) = trans == 0;    // 1: A x = b, !1 : tA x = b  during slove phase
     id.nrhs = N;
+    id.lrhs = id.n;
     myscopy(id.n, b, x);
     id.rhs = (MR *)(void *)(R *)x;
     id.job = JOB_SOLVE;    // performs the analysis. and performs the factorization.

@@ -82,7 +82,7 @@ public:
         return ax;}
     void addMatMul(const KN_<R> &  x, KN_<R> & y) const { ffassert(Checknm(y.N(),x.N())); addMatMul(x,y,0,x.step,y.step);}
     void addMatTransMul(const KN_<R> & x , KN_<R> & y ) const {ffassert(Checknm(x.N(),y.N())); addMatMul(x,y,1,x.step,y.step);}
-    void Solve(KN_<R> & x,const KN_<R> & b) const  {solve(x,b);}
+    void Solve(KN_<R> & x,const KN_<R> & b) const  {solve(x,b,b.n/m);}
     void SolveT(KN_<R> & x,const KN_<R> & b) const  {solve(x,b,1,1);}
                                                     
     bool ChecknbLine(int nn) const { return this->n==nn;}

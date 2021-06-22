@@ -315,9 +315,11 @@ public:
         }
         ICNTL(9) = trans == 0;    // 1: A x = b, !1 : tA x = b  during slove phase
         id.nrhs = N;
+        id.lrhs = id.n;
         // x = b;
         if(distributed)
         {
+            ffassert(id.nrhs==1);
             MPI_Reduce( (void *) b,(void *)  x  , nN , MPI_TYPE<R>::TYPE(),MPI_SUM,0,comm);
         }
         else if(mpirank==0)  std::copy(b,b+nN,x);
