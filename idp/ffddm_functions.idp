@@ -567,7 +567,7 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
     
     IFMACRO(pr#withhpddm)
     uni = x0;
-    real[int] timings(0);
+    real[int] timings(1);
     string prefix = Stringification(pr)+"_";
     set(pr#hpddmOP, sparams = "-hpddm_"+prefix+"schwarz_method "+pr#prec+" -hpddm_"+prefix+"tol "+eps+" -hpddm_"+prefix+"variant "+(preffe#prmesh#binexactCS ? "flexible" : sprec)+" -hpddm_"+prefix+"gmres_restart "+dim+" -hpddm_"+prefix+"max_it "+maxit+" -hpddm_"+prefix+"verbosity "+pr#verbosity+" -hpddm_"+prefix+"orthogonalization mgs", prefix=prefix);
     if (pr#corr == "AD")

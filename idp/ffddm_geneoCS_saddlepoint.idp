@@ -1,0 +1,172 @@
+macro ffddmgeneofullsetup(pr,fgeneoA1,fgeneoB)
+
+pr#bCM = 0;
+
+if (pr#prfe#prmesh#isincomm)
+{
+NewMacro pr#geneofullpattern()1 EndMacro
+func pr#geneofullpatternOP = fgeneoB;
+
+pr#corr = ffddmcorrection;
+
+int nev = ffddmnu;
+
+IFMACRO(!pr#withhpddm)
+
+if (!bpara)
+  pr#Z.resize(nev*pr#prfe#prmesh#npart);
+else if (!pr#prfe#prmesh#excluded)
+  pr#Z.resize(nev);
+
+pr#si=0;
+pr#prfe#prmesh#tic(pr#tloc)
+
+int[int] sizel(pr#prfe#prmesh#npart);
+int[int] sizelT(pr#prfe#prmesh#npart);
+
+for(int i=0;i<pr#prfe#prmesh#npart;++i)
+if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#commddm)))) {
+	pr#prfe#prmesh#Thi=pr#prfe#prmesh#aTh[i];
+
+  pr#prfe#K[int,int] eV(pr#prfe#Dk[i].n,nev);
+	pr#prfe#K[int] ev(nev);
+
+  int[int] done(pr#prfe#prmesh#numberIntersection);
+  done = 0;
+
+  pr#prfe#K[int] buffi((1+pr#prfe#prmesh#numberIntersection)*pr#prfe#Dk[i].n);
+  pr#prfe#K[int] buffo((1+pr#prfe#prmesh#numberIntersection)*pr#prfe#Dk[i].n);
+
+  int cptB = 0;
+  func pr#prfe#K[int] ffullgeneoB(pr#prfe#K[int] &u) {
+    cptB++;
+    pr#prfe#K[int] Du = pr#prfe#Dk[i] .* u;
+    mpiRequest[int] rq(2*pr#prfe#prmesh#numberIntersection);
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+      pr#prfe#snd[j] = pr#prfe#restrictionIntersection[j]*Du;
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+      Isend(processor(pr#prfe#prmesh#arrayIntersection[j],pr#prfe#prmesh#commddm,rq[j*2]),pr#prfe#snd[j]);    
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+    if (!done[j])
+      Irecv(processor(pr#prfe#prmesh#arrayIntersection[j],pr#prfe#prmesh#commddm,rq[j*2+1]),pr#prfe#rcv[j]);
+
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection*2;++j)
+      int k = mpiWaitAny(rq);
+
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+    if (!done[j] && pr#prfe#rcv[j][0] == 1e+30)
+      done[j] = 1;
+
+    mpiRequest[int] rq2(2*pr#prfe#prmesh#numberIntersection);
+
+    int cpt = 1;
+    buffi(0:pr#prfe#Dk[i].n-1) = Du;
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+    if (!done[j]) {
+      buffi(cpt*pr#prfe#Dk[i].n:(cpt+1)*pr#prfe#Dk[i].n-1) = pr#prfe#restrictionIntersection[j]'*pr#prfe#rcv[j];
+      cpt++;
+    }
+
+    buffo = fgeneoB(buffi, cpt);
+
+    cpt = 1;
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+    if (!done[j]) {
+      pr#prfe#snd[j] = pr#prfe#restrictionIntersection[j]*buffo(cpt*pr#prfe#Dk[i].n:(cpt+1)*pr#prfe#Dk[i].n-1);
+      cpt++;
+    }
+
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+    if (!done[j])
+      Isend(processor(pr#prfe#prmesh#arrayIntersection[j],pr#prfe#prmesh#commddm,rq2[j*2]),pr#prfe#snd[j]);    
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+      Irecv(processor(pr#prfe#prmesh#arrayIntersection[j],pr#prfe#prmesh#commddm,rq2[j*2+1]),pr#prfe#rcv[j]);
+
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection*2;++j)
+      int k = mpiWaitAny(rq2);
+
+    pr#prfe#K[int] res = buffo(0:pr#prfe#Dk[i].n-1);
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+      res += pr#prfe#restrictionIntersection[j]'*pr#prfe#rcv[j];
+    res = pr#prfe#Dk[i] .* res;
+    return res;
+  }
+
+  NewMacro localmacroK pr#prfe#K EndMacro
+  IFMACRO(localmacroK,real)
+  int kk = EigenValue(pr#prfe#Dk[i].n, A1=fgeneoA1, B=ffullgeneoB, mode=3, sym=1, tol=1e-1,sigma=0,value=ev,rawvector=eV,ncv=max(20,2*nev));
+  ENDIFMACRO
+  IFMACRO(localmacroK,complex)
+  int kk = complexEigenValue(pr#prfe#Dk[i].n, A1=fgeneoA1, B=ffullgeneoB, mode=3, tol=1e-3,sigma=0,value=ev,rawvector=eV,ncv=max(20,3*nev));
+  ENDIFMACRO
+
+  int nok = 0;
+
+  for(int j=0;j<nev;++j) {
+    if (j == 0 || ffddmtau == 0 || real(ev[j]) < ffddmtau) {
+      /*if (mpirank == 0) cout <<  i << " " << pr#si << " " << ev[j] << endl;*/
+      pr#Z[pr#si].resize(pr#prfe#Dk[i].n);
+      pr#Z[pr#si] = pr#prfe#Dk[i].*eV(:,j);
+      if (pr#Z[pr#si].sum < 0) pr#Z[pr#si] *= -1;
+      pr#si+=1;
+      nok+=1;
+    }
+  }
+
+  sizel[i] = nok;	/* number of ev for subdomain i */
+  
+  mpiRequest[int] rqd(pr#prfe#prmesh#numberIntersection);
+
+  for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+    pr#prfe#snd[j][0] = 1e+30;
+  for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+    Isend(processor(pr#prfe#prmesh#arrayIntersection[j],pr#prfe#prmesh#commddm,rqd[j]),pr#prfe#snd[j]);
+  for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+    int k = mpiWaitAny(rqd);
+
+  while (done.min == 0) {
+    mpiRequest[int] rq(pr#prfe#prmesh#numberIntersection);  
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+    if (!done[j])
+      Irecv(processor(pr#prfe#prmesh#arrayIntersection[j],pr#prfe#prmesh#commddm,rq[j]),pr#prfe#rcv[j]);
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+      int k = mpiWaitAny(rq);
+
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+    if (!done[j] && pr#prfe#rcv[j][0] == 1e+30)
+      done[j] = 1;
+
+    int cpt = 0;
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+    if (!done[j]) {
+      buffi(cpt*pr#prfe#Dk[i].n:(cpt+1)*pr#prfe#Dk[i].n-1) = pr#prfe#restrictionIntersection[j]'*pr#prfe#rcv[j];
+      cpt++;
+    }
+
+    if (cpt) buffo = fgeneoB(buffi,cpt);
+
+    cpt = 0;
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+    if (!done[j]) {
+      pr#prfe#snd[j] = pr#prfe#restrictionIntersection[j]*buffo(cpt*pr#prfe#Dk[i].n:(cpt+1)*pr#prfe#Dk[i].n-1);
+      cpt++;
+    }
+
+    mpiRequest[int] rq2(pr#prfe#prmesh#numberIntersection);
+
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+    if (!done[j])
+      Isend(processor(pr#prfe#prmesh#arrayIntersection[j],pr#prfe#prmesh#commddm,rq2[j]),pr#prfe#snd[j]);    
+
+    for(int j=0;j<pr#prfe#prmesh#numberIntersection;++j)
+      int k = mpiWaitAny(rq2);
+  }
+}
+
+pr#prfe#prmesh#toc(pr#tloc,"local eigenvalue problems",pr#teigenv)
+
+ffddmbuildZTAZ(pr,pr,null)
+
+ENDIFMACRO
+}
+// EOM

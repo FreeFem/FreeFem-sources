@@ -604,7 +604,7 @@ ENDIFMACRO
 /* Update u_i = R_i sum_j (R_j' u_j)
    if (scale) u_i = R_i sum_j (R_j' D_j u_j)
    using communication buffers in the overlap */
-func int prfe#update(scalar[int]& vv, bool scale)
+func int prfe#update(scalar[int] vv, bool scale)
 {
   if (!prmsh#excluded)
   {
@@ -1007,6 +1007,7 @@ if (bseq)
   prfe#Auginterp = interpolate(prfe#AugVhi,prfe#Vhglob);
 else if (bpara)
   prfe#Auginterp = interpolate(prfe#Vhi,prfe#AugVhi);
+prfe#Auginterp.thresholding(1e-10);
 ENDIFMACRO
 // EOM
 
