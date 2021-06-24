@@ -68,7 +68,6 @@ public:
     virtual double get_epsilon() const                            = 0;
     virtual double get_eta() const                                = 0;
     virtual int get_ndofperelt() const                            = 0;
-    virtual int get_minclustersize() const                        = 0;
     virtual int get_minsourcedepth() const                        = 0;
     virtual int get_mintargetdepth() const                        = 0;
     virtual int get_maxblocksize() const                          = 0;
@@ -119,7 +118,6 @@ public:
     double get_epsilon() const  {return H.get_epsilon();}                          
     double get_eta() const    {return H.get_epsilon();}                            
     int get_ndofperelt() const     {return H.get_ndofperelt();}                       
-    int get_minclustersize() const {return H.get_minclustersize();}                  
     int get_minsourcedepth() const {return H.get_minsourcedepth();}              
     int get_mintargetdepth() const {return H.get_mintargetdepth();}            
     int get_maxblocksize() const   {return H.get_maxblocksize();}              
