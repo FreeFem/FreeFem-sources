@@ -108,14 +108,21 @@ public:
   static const R3 * setKHat() {
            static  R3 lKHat[d+1];
            static int count=0;
-           if(count++==0)
-           {
-             assert(d==3);
-             for(int i=0; i<=d;++i)
-                lKHat[i+1][i]=1. ;
-           }
-        KHat =lKHat;
-           return lKHat;
+      if(count++==0)
+      {
+          assert(d==3);
+          //cout <<lKHat[0] << "; ";
+          for(int i=1; i<=d;++i)
+          {
+           lKHat[i][i-1]=1. ;
+          // cout << lKHat[i]<< "; ";
+          }
+         // cout << endl;
+          KHat =lKHat;
+      }
+
+      KHat =lKHat;
+    return lKHat;
        }
 
   R2 p2() const { return R2(x,y);}

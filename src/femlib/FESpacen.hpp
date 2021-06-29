@@ -198,12 +198,12 @@ private: // copie interdit ...
 
 template <class RdHat>
 ostream & operator<<(ostream& f,const InterpolationMatrix<RdHat> &M)
-{ f<< M.N << " "<< M.k << " "<< M.np << " "<< M.ncoef << endl;
-  f<< " = " << M.P ;
-  f << "coef=" <<M.coef ;
-  f << "comp " << M.comp;
-  f << "p = " << M.p;
-  f << "dofe = " << M.dofe;
+{ f<< M.N << " k "<< M.k << " np "<< M.np << "  nc "<< M.ncoef << endl;
+  f<< " = P = " << M.P ;
+  f << "\ncoef=" <<M.coef ;
+  f << "\ncomp " << M.comp;
+  f << "\np = " << M.p;
+  f << "\ndofe = " << M.dofe;
   return f;
 }
 
@@ -472,7 +472,7 @@ public:
     for (int k=0;k<M.ncoef;++k)
     {
       vdf[M.dofe[k]] += M.coef[k]*vpt(M.p[k],M.comp[k]);
-      if(verbosity>99) cout << " ...    " <<  vdf[M.dofe[k]] << " " << k <<" " <<M.dofe[k] << " +=  " <<  M.coef[k] << " " <<  M.p[k] << " " << M.comp[k] <<" " << vpt(M.p[k],M.comp[k]) << endl;
+      if(verbosity>99) cout << " ...    " <<  vdf[M.dofe[k]] << " " << k <<" " <<M.dofe[k] << " +=  " <<  M.coef[k] << " " <<  M.p[k] << " " << M.comp[k] <<" " << vpt(M.p[k],M.comp[k]) <<  endl;
 
     }
     return  vdf;     

@@ -116,17 +116,22 @@ friend  std::istream& operator >>(std::istream& f,  R2 & P)
        { f >>  P.x >>  P.y  ; return f; }
   static const R2 * KHat;
     
-    static  const R2 * setKHat() {
+  static  const R2 * setKHat() {
            static  R2 lKHat[d+1];
            static int count=0;
-           if(count++==0)
-           {
-               assert(d==2);
+        if(count++==0)
+        {
+            assert(d==2);
+           // cout <<lKHat[0] << "; ";
+            for(int i=1; i<=d;++i)
+            {
+             lKHat[i][i-1]=1. ;
+            // cout << lKHat[i]<< "; ";
+            }
+            //cout << endl;
+            KHat =lKHat;
+        }
 
-               for(int i=0; i<=d;++i)
-                lKHat[i+1][i]=1. ;
-               KHat =lKHat;
-           }
            return lKHat;
        }
 
