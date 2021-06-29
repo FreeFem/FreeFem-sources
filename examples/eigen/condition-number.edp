@@ -1,4 +1,4 @@
-mesh Th=square(100,100,[x*pi,y*pi]);
+mesh Th=square(50,50,[x*pi,y*pi]);
 macro grad(u) [dx(u),dy(u)]//
 int[int] L=[1,2,3,4];
 varf vlapWithBC(u,v)= int2d(Th)(grad(u)'*grad(v))+ on(L,u=0);
@@ -8,7 +8,7 @@ fespace Vh(Th,P1);
 Vh u,v;
 u=1; 
 matrix Id=u[]; // vMass(Vh,Vh,solver=CG) ;
-set(Id,solver=CG);
+set(Id,solver=CG,verb=0);
 matrix Abc= vlapWithBC(Vh,Vh,solver=sparsesolver);
 matrix Ancl= vlapWithoutBC(Vh,Vh,solver=CG);
 real[int] aevmin(2),aevmax(2);

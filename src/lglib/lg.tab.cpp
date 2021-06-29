@@ -3680,7 +3680,9 @@ int mainff (int  argc, char **argv)
 
   if(verbosity && (mpirank==0)) {
       cout << "-- FreeFem++ v" << StrVersionNumber() << endl;
-      if(verbosity>1) cout << "   file :" << cc << " " << " verbosity= " << verbosity << endl;
+      cout << "   file : " << cc ;
+      if(verbosity>1) cout << " " << " verbosity= " << verbosity ;
+      cout  << endl;
   }
 
     KN<String> karg(argc);

@@ -22,11 +22,21 @@
 
 # Changelog
 All notable changes to this project will be documented in this file.
-
 ## [Unreleased]
 ### Added
--,ridgeangle named parameter in ExtractMeshL in msh3 plugin 
+- ridgeangle named parameter in ExtractMeshL in msh3 plugin
+- DG formulation in 1d :
+  add integral of all border of element : `intallBE(ThL)` and unified the notation by adding
+   `intallBE(ThS)` , `intallBE(Th2)`, `intallBE(Th3)`
 
+  `nuVertex` of now the vertex number of element in intallBE0d integral
+  `BoundaryBE`, `InternalBE` to know if border element (BE) is on true boundary of not.
+  update `nElementonB` in case on no manifold data (value greater > 2) in meshL, MeshS case ..
+  add code to use jump, mean of test functuon on MeshL case. ( not in mesh3 ) to compute RHS. 
+
+- add getcwd() function in shell plugin to ghet the current working dir 
+- add nuVertex to get the vextex on element in some int?
+ 
 ### Changed
 -
 
@@ -37,39 +47,40 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
-- examples/potential.edp coorect problem in times loops and BC
-- tutorial/mortar-DN-4.edp correct problem of region number in meshL 
+- examples/potential.edp correct problem in times loops and BC
+- tutorial/mortar-DN-4.edp correct problem of region number in meshL
+- fixe problem in Curve mesh and intallBE , vertex number is wrong 
 
 ### Security
 -
 
 ## [4.9]
 ### Added
-- add P3 lagrange finite element on meshS and meshS 
+- add P3 lagrange finite element on meshS and meshS
 - add new plugin `meshtool`to add tool to compute the number of connected components of a all kind of mesh
   (mesh,mesh3,meshS,meshL) with 2 kind of connected components ones on interior part of the mesh (default) ans
   secondly on the closure of the mesh (see `examples/hpddm/bConnectedComponents.edp` )
   add functions  int[int] In=iminP1K(Th,u) or int[int] Ix=imaxP1K(Th,u)  get the array min/max of value u[i]  
-  where i is vertex number on  each element k, so we have  u[Im[k]] = min u[i]/ i in k; 
+  where i is vertex number on  each element k, so we have  u[Im[k]] = min u[i]/ i in k;
 - add in plugin `bfstream` to to read binary int (4 bytes) to read fortran file and try to pull tools to share the endiannes
   in progress
 - add gluemesh of array of MeshL and MeshS type
 - interface to `PC_MG_GALERKIN_BOTH`
 - Kronecker product of two sparse matrices `matrix C = kron(A, B)`
 - add lot of finite element on Mesh3, MeshS, MeshL of Discontinous Galerling Element
-  in 3d       : P1dc3d, P2dc3d, P3dc3d, P4dc3d , P0edge3d ,P0edgedc3d ,  P0face3d ,P0facedc3d , P0VF3d ,P0VFdc3d , 
-  on Surface  : P1dcS, P2dcS, P3dcS, P4dcS , P0edgeS ,P0edgedcS , P0VFS ,P0VFdcS, 
+  in 3d       : P1dc3d, P2dc3d, P3dc3d, P4dc3d , P0edge3d ,P0edgedc3d ,  P0face3d ,P0facedc3d , P0VF3d ,P0VFdc3d ,
+  on Surface  : P1dcS, P2dcS, P3dcS, P4dcS , P0edgeS ,P0edgedcS , P0VFS ,P0VFdcS,
   on Curve   : P1dcL, P2dcL, P3dcL, P4dcL ,  P0VFL ,P0VFdcL
   remark; the associated generic name existe of P1dc, P2dc, P0edge, P0VF and all  dc finite element corresponding to
-  no continuity across element. 
-- add code of intallfaces to  do Discontinous Galerkin  formulation in 3d (in test FH.) 
+  no continuity across element.
+- add code of intallfaces to  do Discontinous Galerkin  formulation in 3d (in test FH.)
 ### Changed
 - Now the order to find MPI in configure is first if you have PETSC then take MPI from PETSc
   otherwise use previous method
 - on MeshL defined with buildmeshL now the default label are 2*k-1  (resp. 2*k)  for the begin (resp. end) of curve
   where k is the order of curve use in buildmeshL. So if you have one curve the  labels are 1  and 2.
   And new  the element label are te region number not the label.
-  This element are not really test so be carfull. 
+  This element are not really test so be carfull.
 - PETSc 3.15.0
 
 ### Deprecated
@@ -79,9 +90,9 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
-- bug in Find triangle contening point in 2d (border case), 
+- bug in Find triangle contening point in 2d (border case),
    `int Mesh::DataFindBoundary::Find(R2 PP,R *l,int & outside) const`
-   the parameter l not correclty return due to local variable. 
+   the parameter l not correclty return due to local variable.
 - set CFLAGS=-Wno-implicit-function-declaration to complie with Apple clang version 12.0.0 (clang-1200.0.32.29)
   to remove following error: implicit declaration of function
   correct `3dCurve/basicGlue.edp`and add missing test

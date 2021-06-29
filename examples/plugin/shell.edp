@@ -1,4 +1,5 @@
 load "shell"
+cout << "pwd = " << getcwd()<< endl;// add version 4.9.1
 Directory  c=".";
 string ttoto="/tmp/toto";
 while(1)

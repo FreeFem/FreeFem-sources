@@ -39,11 +39,12 @@ static void SetPtPk(Rd *Pt, const int *dfon, int nn) {
     // P0, P1, P1b & P2
     typedef typename E::RdHat RdHat;
     const int dHat = E::RdHat::d;
-    //const RdHat *KHat=RdHat::KHat;
-    // sorry on some arch this is unset so rebuild ... FH 
-    static RdHat KHat[dHat+1]; // Bug if no static on ubuntu ??? FH
-    for(int i=0; i<=dHat;++i)
-    KHat[i+1][i]=1. ;
+    RdHat::setKHat();
+    const RdHat *KHat= RdHat::KHat;
+   // sorry on some arch this is unset so rebuild ... FH 
+//    static RdHat KHat[dHat+1]; // Bug if no static on ubuntu ??? FH
+//    for(int i=0; i<=dHat;++i) 
+//    KHat[i+1][i]=1. ;
     int k = 0;
     if (dfon[0]) {
         
@@ -71,10 +72,12 @@ static void SetPtPkDc(int kk,Rd *Pt, const int *dfon, int nn)
 {
     typedef typename E::RdHat RdHat;
     const int dHat = E::RdHat::d;
-    static RdHat KHat[dHat+1]; // Bug if no static on ubunti ??? FH
+    RdHat::setKHat();
+   const RdHat *KHat = RdHat::KHat;
+//  static RdHat KHat[dHat+1]; // Bug if no static on ubunti ??? FH
     // sorry on some arch this is unset so rebuild ... FH
-    for(int i=0; i<=dHat;++i)
-    KHat[i+1][i]=1. ;
+//    for(int i=0; i<=dHat;++i)
+//    KHat[i+1][i]=1. ;
 
     int k=0;
     if (kk>0) {

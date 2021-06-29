@@ -597,8 +597,29 @@ public:
   { int dfon[NbTypeItemElement]={ndfv,ndfe,ndff,ndft};
     return  BuildDFNumbering(dfon,nbequibe,equibe);
   }
-  int nElementonB(int k,int j) const // add v4 F.H 12/2018 (not sure for internal boundary !!!)
-    { int kk= TheAdjacencesLink[nea*k+j]; return (kk>=0) && (kk/nea  != k) ? 2 : 1;}// correct FH 23 mrch 2012
+  int nElementonB(int k,int j) const // Correct  v4.10 FH 06/2021  in case of no manifold mesh !!
+    { int kk0=nea*k+j,kk= TheAdjacencesLink[kk0];
+        int n =1;
+        // add case of no manifold Juin 2021 FH..  value >2
+        while ( kk!=kk0 && kk >=0)
+        {   kk = TheAdjacencesLink[kk];
+            n++;
+            ffassert(n<1000); // remove loop !!!!
+        }
+        return n;
+    }
+    double uniqueBE(int k,int j) const // add to have  unique BE
+    { int kk0=nea*k+j,kk= TheAdjacencesLink[kk0],kkm=kk0;
+          int n =1;
+          // add case of no manifold Juin 2021 FH..  value >2
+          while ( kk!=kk0 && kk >=0)
+          {   kk = TheAdjacencesLink[kk];
+              kkm = min(kk,kkm);
+              n++;
+              ffassert(n<1000); // remove loop !!!!
+          }
+          return kk0==kk;
+      }
 
   int ElementAdj(int k,int &j) const  {
     int p=TheAdjacencesLink[nea*k+j];

@@ -133,7 +133,7 @@ check_plugin=0; // no pluging to check ..
     for (int i = 1; i < argc; i++) {
       if (verbosity > 3) cout << " ARGV " << i << " " << argv[i] << " " << fn << endl;
       if (ret == 0 && strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
-        strcpy(fn, argv[i + 1]);
+        strncpy(fn, argv[i + 1],1024);
         i++;
         edpfilenamearg = argv[i];
         ret = 1;
@@ -213,13 +213,13 @@ check_plugin=0; // no pluging to check ..
       else if (strcmp(argv[i], "-?") == 0)
         ret = 2;
       else if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
-        strcpy(fn, argv[++i]);
+        strncpy(fn, argv[++i],1024);
         ret = 1;
         edpfilenamearg = argv[i];
         if (verbosity > 4) cout << " fn: " << fn << endl;
       }
       else if (ret == 0) {
-        strcpy(fn, argv[i]);
+        strncpy(fn, argv[i],1024);
         edpfilenamearg = argv[i];
         ret = 1;
         if (verbosity > 4) cout << " fn: " << fn << endl;

@@ -3103,7 +3103,9 @@ TheOperators->Add("=",
  Global.Add("int3d","(",new OneOperatorCode<CDomainOfIntegration3d>);
  Global.Add("int2d","(",new OneOperatorCode<CDomainOfIntegrationBorder3d>);
  Global.Add("intallfaces","(",new OneOperatorCode<CDomainOfIntegrationAllFaces>);
-
+ Global.Add("intallBE","(",new OneOperatorCode<CDomainOfIntegrationAllFaces>);
+ Global.Add("intallBE","(",new OneOperatorCode<CDomainOfIntegrationAllEdgesS>);
+ Global.Add("intallBE","(",new OneOperatorCode<CDomainOfIntegrationAll0d>);
  // 3d surface
  Global.Add("int2d","(",new OneOperatorCode<CDomainOfIntegrationS>);
  Global.Add("int1d","(",new OneOperatorCode<CDomainOfIntegrationBorderS>);
