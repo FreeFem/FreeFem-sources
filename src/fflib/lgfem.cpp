@@ -3174,8 +3174,8 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
   SHOWVERB(cout << " int " << endl);
   const vector< Expression > &what(di->what);
   const int dim = di->d;
-  const bool surface = di->isMeshS;
-  const bool curve = di->isMeshL;
+  const bool surface = di->dHat==2 && di->d==3;
+  const bool curve = di->dHat==1 && di->d==3;
   const GQuadratureFormular< R1 > &FIE = di->FIE(stack);
   const GQuadratureFormular< R2 > &FIT = di->FIT(stack);
   const GQuadratureFormular< R3 > &FIV = di->FIV(stack);

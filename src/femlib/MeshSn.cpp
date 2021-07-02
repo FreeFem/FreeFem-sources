@@ -833,7 +833,7 @@ namespace Fem2D
             cerr <<"  -- MeshS**::Save  UNABLE TO OPEN  :"<< filename << endl;
             return(1);
         }
-        float fx,fy,fz;
+        double fx,fy,fz;
         // write vertice (meshS)
         GmfSetKwd(outm,GmfVertices,nv);
         for (int k=0; k<nv; k++) {

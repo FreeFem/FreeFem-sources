@@ -9135,13 +9135,13 @@ void  Element_rhsVF(const FElementL & Kv,const FElementL & KKv,int ie,int iie,in
                     if(bf->di->d != MMesh::Rd::d )
                     {
                       
-                      if( bf->di->isMeshS)
+                      if( bf->di->dHat==2)
                     {
                         cout << " int on MeshS ( Bilinear Form ) toDo  " << endl;
                         ffassert(0);
                         
                     }
-                    else  if( bf->di->isMeshL)
+                    else  if( bf->di->dHat==1)
                     {
                         cout << " int on MeshL ( Bilinear Form ) toDo  " << endl;
                         ffassert(0);
@@ -9169,13 +9169,13 @@ void  Element_rhsVF(const FElementL & Kv,const FElementL & KKv,int ie,int iie,in
                     if(bf->di->d != MMesh::Rd::d )
                     {
                       
-                      if( bf->di->isMeshS)
+                      if( bf->di->dHat==2)
                     {
                         cout << " int on MeshS toDo  ( Linear Form )" << endl;
                         ffassert(0);
                         
                     }
-                    else  if( bf->di->isMeshL)
+                    else  if( bf->di->dHat==1)
                     {
                         cout << " int on MeshL toDo  ( Linear Form )" << endl;
                         ffassert(0);

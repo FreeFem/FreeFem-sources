@@ -1509,7 +1509,7 @@ pair<BemKernel*,double> getBemKernel(Stack stack, const list<C_F0> & largs)  {
             const  FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
             const CDomainOfIntegration & di= *bb->di;
             // check the integration (keyword)
-            ffassert( (di.kind == CDomainOfIntegration::int1d && di.isMeshL) || (di.kind == CDomainOfIntegration::int2d && di.isMeshS) );  //check only necessary in surface case
+            ffassert( (di.kind == CDomainOfIntegration::int1d && di.dHat==1) || (di.kind == CDomainOfIntegration::int2d && di.dHat==2) );  //check only necessary in surface case
             
             BilinearOperator * Op=const_cast<  BilinearOperator *>(bb->b);
             if (Op == NULL) {
