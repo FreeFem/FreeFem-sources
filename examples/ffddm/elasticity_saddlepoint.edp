@@ -1,5 +1,11 @@
 //ff-mpirun -np 4 elasticity_saddlepoint.edp -wg -ns -ffddm_schwarz_coarse_correction BNN -ffddm_geneo_threshold_A 0.1 -ffddm_geneo_threshold_S 0.3 -ffddm_geneo_nu 40 -Dmdim=2 -global 10 -nlayers 10
 
+/* 3D heterogenous elasticity problem with nearly incompressible
+   material solved with the GenEO saddle point solver from
+   Nataf, F., & Tournier, P. H. (2021). A GenEO Domain Decomposition
+   method for Saddle Point problems.
+   arXiv preprint available at https://arxiv.org/abs/1911.01858 */
+
 include "getARGV.idp"
 int global = getARGV("-global", 10); // discretization parameter
 int nlayers = getARGV("-nlayers", global); // number of alternating material layers in the y direction
@@ -268,37 +274,17 @@ func real[int] NStildeA(real[int] &u) {
 
   real[int] BTu = BTmatvec(u); /* B^T */
 
-  /* R_0 */
-  real[int] tmp2(Asi);
-  for (int i=0;i<Asi;i++)
-    tmp2[i]=AZ[i]'*BTu;
-  real[int] R0BTu(Ancoarsespace);
-  mpiGatherv(tmp2,R0BTu,processor(0),Asizelgworld,Aoffsetiworld);
+  real[int] R0TA01R0BTu = AQ(BTu); /* Q = R_0^T (R_0 A R_0^T)^-1 R_0 */
 
-  /* (R_0 A R_0^T)^-1 */
-  real[int] A01R0BTu(Ancoarsespace);
-  if (mpirank < ffddmpCS) {
-    Mtic(Atcsi)
-    A01R0BTu = AE^-1*R0BTu;
-    Mtoccomm(Atcsi,"",Atcs,McommCS)
+  /* extend from AFEVhi to AFEAugVhi : */
+  real[int] El(AFEAugVhi.ndof);
+  if (!Mexcluded) {
+    real[int] Dl = AFEDk[mpiRank(Mcommddm)].*R0TA01R0BTu; /* multiplty by PoU */
+    El = AFEAuginterp'*Dl; /* extend */
+    AFEAugupdate(El,false); /* sum */
   }
 
-  real[int] R0TA01Y(AFEVhi.ndof);
-  real[int] BR0TA01Y(CFEAugVhi.ndof);
-
-  /* R_0^T */
-  mpiScatterv(A01R0BTu,tmp2,processor(0),Asizelgworld,Aoffsetiworld);
-  real[int] R0TA01R0BTu(AFEVhi.ndof);
-  for (int i=0;i<Asi;i++)
-    R0TA01R0BTu += tmp2[i]*AZ[i];
-
-  /* extend from AFEVhi to AFEAugVhi */
-  /* no PoU here, need to sum contributions */
-  real[int] tmp3(AFEAugVhi.ndof);
-  if (!Mexcluded) tmp3 = AFEAuginterp'*R0TA01R0BTu;
-  AFEAugupdate(tmp3,false);
-
-  real[int] BR0TA01R0BTu = BtildeA(tmp3); /* B */
+  real[int] BR0TA01R0BTu = BtildeA(El); /* B */
 
   real[int] MS11 = S1tildePREC(BR0TA01R0BTu); /* M_{S_1}^-1 */
   res = u + MS11;
@@ -419,7 +405,7 @@ Ux[] = AfGMRES(Ux[], Gx[], gtol, 100, "right");
 
 ffddmplot(CFEAug,UxB,"Uy");
 
-/******************* Block version (prefix 'Block') with preconditioner P eq. (15) *******************/
+/******************* Block version (prefix 'Block') with preconditioner P eq. (28) *******************/
 macro Blockmyscalprod
 func real Blockscalprod(real[int]& va, real[int]& vb) 
 {
@@ -489,7 +475,7 @@ func real[int] BlockPREC1(real[int] &u)
 ffddmsetupinit(Block,Block);
 Blockprec = "ras";
 
-/* Block solve with preconditioner P of eq. (15) */
+/* Block solve with preconditioner P of eq. (28) */
 real[int] rhs(AFEVhi.ndof+CFEAugVhi.ndof);
 rhs(0:AFEVhi.ndof-1) = Fx[];
 rhs(AFEVhi.ndof:rhs.n-1) = Fp[];
