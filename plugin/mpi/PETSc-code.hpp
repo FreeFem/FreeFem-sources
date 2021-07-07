@@ -1354,7 +1354,16 @@ namespace PETSc {
         }
       }
     }
-    ~initCSRfromBlockMatrix( ) { }
+    ~initCSRfromBlockMatrix( ) {
+      if (e_M) {
+        for (int i = 0; i < N; ++i) {
+          delete[] e_M[i];
+          delete[] t_M[i];
+        }
+        delete[] e_M;
+        delete[] t_M;
+      }
+    }
     static ArrayOfaType typeargs( ) {
       return ArrayOfaType(atype< Result >( ), atype< E_Array >( ));
     }
@@ -1490,14 +1499,6 @@ namespace PETSc {
           MatDestroy(a + p.first * M + p.second);
       sparse_mat->_exchange = reinterpret_cast<HPDDM::Subdomain<PetscScalar>**>(exchange);
       delete[] a;
-      if (e_M) {
-        for (int i = 0; i < N; ++i) {
-          delete[] e_M[i];
-          delete[] t_M[i];
-        }
-        delete[] e_M;
-        delete[] t_M;
-      }
       return sparse_mat;
     }
   };
