@@ -1776,6 +1776,9 @@ if(verbosity > 0) {
 }
 }
 ENDIFMACRO
+IFMACRO(!privateDmesh#ThName)
+assert(0);
+ENDIFMACRO
 // EOM
 
 macro transferMat(ThName, Pk, A, ThNew, PkNew, ANew, P) {
