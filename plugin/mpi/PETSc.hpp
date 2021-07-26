@@ -180,9 +180,13 @@ void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
                 PCFieldSplitGetSubKSP(pc, &nsplits, &subksp);
                 PC pcS;
                 KSPGetPC(subksp[nsplits - 1], &pcS);
-                PC subpc;
-                PCCompositeGetPC(pcS, k, &subpc);
-                PCSetOperators(subpc, S, S);
+                if (mT->n > 1) {
+                    PC subpc;
+                    PCCompositeGetPC(pcS, k, &subpc);
+                    PCSetOperators(subpc, S, S);
+                } else {
+                    PCSetOperators(pcS, S, S);
+                }
                 (*ptA->_vS)[k] = S;
             }
         }
