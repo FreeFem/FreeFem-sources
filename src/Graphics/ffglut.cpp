@@ -2513,14 +2513,14 @@ void ThePlot::DrawHelp(OneWindow *win)
     win->Show("+) -)   zoom in/out  around the cursor 3/2 times ",i++);
     win->Show("=)   reset vue ",i++);
     win->Show("r)   refresh plot ",i++);
-    win->Show("up, down, left, right) special keys  to  tanslate   ",i++);
+    win->Show("up, down, left, right) special keys  to  translate   ",i++);
     win->Show("3)   switch 3d/2d plot (in test)  keys : ",i++);
     win->Show(" z) Z) (focal zoom unzoom)  ",i++);
     win->Show(" H) h) switch increase or decrease the Z scale of the plot ",i++);
     win->Show("mouse motion)    ",i++);
     win->Show("   - left button)  rotate    ",i++);
     win->Show("   - right button)       zoom        (ctrl+button on mac) ",i++);
-    win->Show("   - right button +alt)  tanslate    (alt+ctrl+button on mac)",i++);
+    win->Show("   - right button +alt)  translate    (alt+ctrl+button on mac)",i++);
 
     win->Show("a) A) increase or decrease the arrow size",i++);
     win->Show("B)  switch between show  border meshes or not",i++);
@@ -2703,7 +2703,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
                 case 19: fin >> keepPV; break;
                 case 20: fin >> echelle;break;
                 default:
-                    cout << "Fatal error: Unknow  case  : " << cas <<endl;
+                    cout << "Fatal error: Unknown  case  : " << cas <<endl;
                     ffassert(0);
                     break;
             }
@@ -2761,7 +2761,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
                 default:
                     static int nccc=0;
                     if(nccc++<5)
-                        cout << " Skip Unknow case " << cas <<" (ffglut is too old ?)\n";
+                        cout << " Skip Unknown case " << cas <<" (ffglut is too old ?)\n";
                     fin.SkipData();
                     break;
             }
@@ -3074,7 +3074,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
         }
         else
         {
-            cout << "Bizarre unkown what :  " << what<< endl;
+            cout << "Bizarre unknown what :  " << what<< endl;
             ffassert(0);
         }
         ffassert(p);

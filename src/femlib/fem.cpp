@@ -214,7 +214,7 @@ public:
 			k = j0+j1; // code of current edge
 			int jm = Min(j0,j1), NbAdj=0, He=-1;
 			int *pm=Head+k;
-			while (*pm>=0) // be carefull
+			while (*pm>=0) // be careful
 			{
 			    int m=*pm,jj=m%3,ii=m/3, jj0,jj1;
 			    VerticesNumberOfEdge(triangles[ii],jj,jj0,jj1);
@@ -789,7 +789,7 @@ int  WalkInTriangle(const Mesh & Th,int it, double *lambda,
 
 	if (k==2) // 2
 	{
-	    // let j be the vertex beetween the 2 edges
+	    // let j be the vertex between the 2 edges
 	    int j = 3-neg[0]-neg[1];
 	    R S = Area2(P,PF,Q[j]);
 
@@ -1487,7 +1487,7 @@ int  WalkInTriangle(const Mesh & Th,int it, double *lambda,
 
 	if (k==2) // 2
 	{
-	    // let j be the vertex beetween the 2 edges
+	    // let j be the vertex between the 2 edges
 	    int j = 3-neg[0]-neg[1];
 	    R S = Area2(P,PF,Q[j]);
 

@@ -1010,7 +1010,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         {
             if( p->second.first && p->second.second)
             {
-                if(verbosity>2 && step==0)  cout << " error in orientation of internal face beetwen region "
+                if(verbosity>2 && step==0)  cout << " error in orientation of internal face between region "
                     << p->first.first << " , " << p->first.second << " to no zero value "
                     << p->second.first << "  " << p->second.second << endl;
                 uncorrect++;

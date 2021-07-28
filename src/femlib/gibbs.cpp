@@ -1155,7 +1155,7 @@ int FESpace::renum()
        delete [] w2;
      }
     else
-      cerr << " Not enought memory (bug)" <<  nbvoisin << " " << nbvoisin/NbOfElements <<  endl;
+      cerr << " Not enough memory (bug)" <<  nbvoisin << " " << nbvoisin/NbOfElements <<  endl;
   delete [] vois;
   delete [] ptvois;
   if (err==0 && verbosity>1)

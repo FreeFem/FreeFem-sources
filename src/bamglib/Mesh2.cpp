@@ -1115,7 +1115,7 @@ namespace bamg {
 #endif
         while ((ks = SwapForForcingEdge(va, vb, tc, detss, det1, det2, NbSwap)))
           if (l++ > 10000000) {
-            cerr << " Loop in forcing Egde AB "
+            cerr << " Loop in forcing Edge AB "
                  << "\n vertex A " << a << "\n vertex B " << b << "\n nb de swap " << NbSwap
                  << "\n nb of try swap too big = " << l << " greater than " << 1000000 << endl;
 
@@ -1703,7 +1703,7 @@ namespace bamg {
         ordre[i] = vertices + j;
         ordre[i]->ReferenceNumber = i;
       }
-      // be carefull
+      // be careful
       Int4 iv = nbvold;
       for (i = nbvold; i < nbv; i++) {    // for all the new point
         Vertex &vi = *ordre[i];
@@ -2750,7 +2750,7 @@ namespace bamg {
         GeometricalEdge &eg = *Gh.subdomains[i].edge;
         subdomains[i].ref = Gh.subdomains[i].ref;
         int ssdlab = subdomains[i].ref;
-        // by carefull is not easy to find a edge create from a GeometricalEdge
+        // by careful is not easy to find a edge create from a GeometricalEdge
         // see routine MakeGeometricalEdgeToEdge
         Edge &e = *GeometricalEdgetoEdge[Gh.Number(eg)];
         assert(&e);
@@ -2889,7 +2889,7 @@ namespace bamg {
     }
 
     // move the Vertices without a copy of the array
-    // be carefull not trivial code
+    // be careful not trivial code
     Int4 j;
     for (it = 0; it < nbv; it++)    // for all sub cycles of the permutation renu
       if (renu[it] >= 0)            // a new sub cycle
@@ -2944,7 +2944,7 @@ namespace bamg {
       subdomains[i].head = triangles + renu[Number(subdomains[i].head)];
 
     // move the Triangles  without a copy of the array
-    // be carefull not trivial code
+    // be careful not trivial code
     for (it = 0; it < nbt; it++)    // for all sub cycles of the permutation renu
       if (renu[it] >= 0)            // a new sub cycle
       {
@@ -4547,7 +4547,7 @@ namespace bamg {
     area *= 3;
     gammamn = sqrt(gammamn);
     gammamx = sqrt(gammamx);
-    cout << "  -- adaptmesh Regulary:  Nb triangles " << nt << " , h  min " << hmin << " , h max "
+    cout << "  -- adaptmesh Regularly:  Nb triangles " << nt << " , h  min " << hmin << " , h max "
          << hmax << endl;
     cout << "     area =  " << area << " , M area = " << Marea << " , M area/( |Khat| nt) "
          << Marea / (aireKh * nt) << endl;

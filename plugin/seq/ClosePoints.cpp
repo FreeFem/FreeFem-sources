@@ -773,7 +773,7 @@ int WalkInTriangle(const Mesh &Th, int it, double *lambda, R2 PF) {
 
     if (k == 2)    // 2
     {
-      // let j be the vertex beetween the 2 edges
+      // let j be the vertex between the 2 edges
       int j = 3 - neg[0] - neg[1];
       R S = Area2(P, PF, Q[j]);
 

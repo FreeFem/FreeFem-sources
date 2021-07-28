@@ -296,7 +296,7 @@ template<class I,class R> void CheckPtrHashMatrix(const HashMatrix<I,R> *p,const
             cout << " n = " << p->n << " == " << p->N
                   << " , m= " << p->m << " "<< p->M
             << " nzz "<< p->nnz << endl;
-        cerr << " Fatal Error " << where << "  invalide HashMatrix Ptr "<< gm << " "<< p << endl;
+        cerr << " Fatal Error " << where << "  invalid HashMatrix Ptr "<< gm << " "<< p << endl;
         ffassert(0);
     }
 }

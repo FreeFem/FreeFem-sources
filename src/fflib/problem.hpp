@@ -219,7 +219,7 @@ class BC_set : public E_F0mps { public:
       { //
         C_F0 x=Find(ii->first);
         if (x.left() != atype<const finconnue *>())
-          CompileError("We expected an unkown  u=... of the problem");
+          CompileError("We expected an unknown  u=... of the problem");
         const finconnue * uu = dynamic_cast<const finconnue *>(x.LeftValue());
         ffassert(uu);
         const MGauche *ui=uu->simple();

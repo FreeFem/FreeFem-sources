@@ -408,7 +408,7 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
         if((pintern->M() != 2 ) && ( pintern->M()!=3))
         {
             cout << " point m = " <<pintern->M()<<endl;
-            ExecError("Errror: BuildMesh number of column of internal point (point=)  must be 2 or 3!");
+            ExecError("Error: BuildMesh number of column of internal point (point=)  must be 2 or 3!");
         }
     }
     int brefintp= -2000000000;
@@ -932,7 +932,7 @@ const Fem2D::Mesh *  ReadTriangulate( string  * const & s) {
       nv=0;
       ifstream f(s->c_str());
       if(!f) {cerr <<" Error opening file " << *s << endl;
-      ExecError("Openning file ");}
+      ExecError("Opening file ");}
       while (f.good())
         {
           R2 P;

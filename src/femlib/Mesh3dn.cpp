@@ -502,7 +502,7 @@ namespace Fem2D
                         iv[jj] = this->operator()(K[jj]);
                     }
                     for (int eh=0;eh<6;eh++){
-                        if(verbosity>2) cout << "tetrahedra: " << k << " edge : " << eh << " lenght "<<  this->elements[k].lenEdge(eh) << endl;
+                        if(verbosity>2) cout << "tetrahedra: " << k << " edge : " << eh << " length "<<  this->elements[k].lenEdge(eh) << endl;
                     }
                     if(verbosity>2) cout << " A tetrahedra with a very small edge was created " << endl;
                     return 1;
@@ -516,7 +516,7 @@ namespace Fem2D
                 if( this->be(k).lenEdge(e) < Norme2(Psup-Pinf)/1e9 )
                 {
                     for (int eh=0;eh<3;e++){
-                        cout << "triangles: " << k << " edge : " << eh << " lenght "<<  this->be(k).lenEdge(e) << endl;
+                        cout << "triangles: " << k << " edge : " << eh << " length "<<  this->be(k).lenEdge(e) << endl;
                     }
                     cout << " A triangle with a very small edges was created " << endl;
                     return 1;
@@ -1047,7 +1047,7 @@ namespace Fem2D
            cerr << " WARNING!!! The mesh file just contains a set of vertices" << endl;
            
         if(nt==0 && nbe) {
-            cerr << " ERROR!!! The old SURFACE mesh3 is obselete, please use meshS type" << endl;
+            cerr << " ERROR!!! The old SURFACE mesh3 is obsolete, please use meshS type" << endl;
          ffassert(0);
         }
         
@@ -1100,7 +1100,7 @@ namespace Fem2D
             cerr << " WARNING!!! The mesh file just contains a set of vertices" << endl;
         
         if(nt==0 && nbe) {
-            cerr << " ERROR!!! The old SURFACE mesh3 is obselete, please use meshS type" << endl;
+            cerr << " ERROR!!! The old SURFACE mesh3 is obsolete, please use meshS type" << endl;
             ffassert(0);
         }
         

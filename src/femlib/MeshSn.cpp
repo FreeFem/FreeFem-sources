@@ -588,7 +588,7 @@ namespace Fem2D
                     for(int jj=0; jj <3; jj++)
                         iv[jj] = this->operator()(K[jj]);
                     if(verbosity>2) for (int eh=0;eh<3;eh++)
-                        cout << "TriangleS: " << k << " edge : " << eh << " lenght "<<  this->elements[k].lenEdge(eh) << endl;
+                        cout << "TriangleS: " << k << " edge : " << eh << " length "<<  this->elements[k].lenEdge(eh) << endl;
                     if(verbosity>2) cout << " A triangleS with a very small edge was created " << endl;
                     return 1;
                 }

@@ -1514,7 +1514,7 @@ AnyType SetMatrixInterpolation1(Stack stack,Expression emat,Expression einter,in
 	if(data[4+i]>=NVh)
 	  {
 	      cout << "The Uh componante " << i << " -> " << data[4+i] << " >= " << NVh << " number of Vh Componante " <<endl;
-	      ExecError("Interpolation incompability beetween componante ");
+	      ExecError("Interpolation incompability between componante ");
 	  }
 
   ffassert(Vh);
@@ -1579,7 +1579,7 @@ AnyType SetMatrixInterpolationT1(Stack stack,Expression emat,Expression einter,i
         if(data[4+i]>=NVh)
         {
           cout << "The Uh componante " << i << " -> " << data[4+i] << " >= " << NVh << " number of Vh Componante " <<endl;
-          ExecError("Interpolation incompability beetween componante ");
+          ExecError("Interpolation incompability between componante ");
         }
         if(!init) sparse_mat->init();
         sparse_mat->typemat=0;//(TypeSolveMat::NONESQUARE); //  none square matrice (morse)
@@ -1879,7 +1879,7 @@ R * get_elementp2mc(Matrice_Creuse<R> * const  & ac,const long & b,const long & 
      cerr << ac << " " << a << endl;
      ExecError("Out of bound in operator Matrice_Creuse<R> (,)");}
    R *  p =a->npij(b,c);
-   if( !p) { if(verbosity) cerr << "Error: the coef a(" << b << ","   << c << ")  do'nt exist in sparse matrix "
+   if( !p) { if(verbosity) cerr << "Error: the coef a(" << b << ","   << c << ")  doesn't exist in sparse matrix "
            << " Matrix  type = " << typeid(ac).name() << endl;
        ExecError("Use of unexisting coef in sparse matrix operator a(i,j) ");}
     return  p;}
@@ -2818,7 +2818,7 @@ template<typename R>  AnyType BlockMatrix<R>::operator()(Stack s) const
     //  gestion of zero block ????
 
     for (int j=0;j<M;++j)
-    {  if(verbosity>99) cout << j << " colum size" << Oj(j+1) << endl;
+    {  if(verbosity>99) cout << j << " column size" << Oj(j+1) << endl;
         if   ( Oj(j+1) ==0) {
             Oj(j+1)=1;
             if( Oj(j+1) !=1)  err++;}

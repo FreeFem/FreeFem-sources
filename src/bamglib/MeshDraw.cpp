@@ -302,7 +302,7 @@ namespace bamg {
         for (int i = 0; i < nbt; i++)
           if (triangles[i].det == 0) {
             triangles[i].Draw( );
-            cout << " Bizzare " << i << endl;
+            cout << " Bizarre " << i << endl;
           }
         couleur(1);
       }
