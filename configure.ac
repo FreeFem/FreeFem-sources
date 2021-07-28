@@ -185,7 +185,9 @@ m4_define([TOOL_DISABLE_NO],
     TOOL_PARAMETERS($1,$2,$3)
 ])
 
-echo "#  Build with FreeFEM with ./configure " `date`  >$ff_where_lib_conf
+BUILD_DATE="$(date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d)"
+
+echo "#  Build with FreeFEM with ./configure $BUILD_DATE" >$ff_where_lib_conf
 # To allow anonymous CVS version to contain a "./configure" and
 # Makefiles
 
@@ -667,7 +669,7 @@ ff_prefix_dir="${prefix}/lib/ff++/$VERSION"
 AC_MSG_CHECKING(prefix dir freefem++  )
 AC_MSG_RESULT($ff_prefix_dir)
 
-FF_DATE=`date`
+FF_DATE="$BUILD_DATE"
 AC_DEFINE_UNQUOTED(VersionFreeFemDate,"$FF_DATE",FreeFEM build date)
 AC_DEFINE_UNQUOTED(FF_PREFIX_DIR,"${ff_prefix_dir}",FreeFem prefix  dir)
 AC_SUBST(ff_prefix_dir,$ff_prefix_dir)
