@@ -47,7 +47,7 @@ EXTRA_DIST=*.edp all.edp regtests.edp regtests.m4 ref.edp torture.msh speedtest.
 
 all.edp:
 	(echo "NoUseOfWait=true;int verbosityy=verbosity;"; \
-	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$'` ; do \
+	for i in *`ls *.edp|grep -v -E '^(all|regtests|makeref|ref)\.edp$$' | LC_ALL=C sort` ; do \
 		echo ' cout << "--------- file : '$$i' --------------------------------------------------------" << endl;' ;\
 		echo "verbosity=verbosityy;" ; \
 		echo \{ include \"$$i\"\;\}\; ;\
