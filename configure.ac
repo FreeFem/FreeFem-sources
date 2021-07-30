@@ -988,7 +988,7 @@ if test "$with_petsc" != no; then
 	    ffconfpetsc="$d$dd"
 		ffconfslepc="$d/slepc/conf/slepcvariables"
 
-		echo " petsc ... $ffconfpetsc"
+		# echo " petsc ... $ffconfpetsc"
 	    if test -f "$ffconfpetsc" ; then
 		if test  "$ff_petsc_ok" = no ; then
 		    PETSC_PREFIXDIR=`awk -F' *= *' '"PREFIXDIR"==$1 {print $2}' "$ffconfpetsc"`
