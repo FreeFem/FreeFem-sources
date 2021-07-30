@@ -983,7 +983,7 @@ AC_SUBST([FF_generic_petsc],"$enable_generic")
 ff_petsc_ok=no
 ff_slepc_ok=no
 if test "$with_petsc" != no; then
-    for d in "$with_petsc" "${prefix_petsc}/r/lib" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local ;do
+    for d in "$with_petsc" "${prefix_petsc}/r/lib" /usr/local/ff++/petsc/lib  /usr /usr/local /opt/usr  /opt/local /usr/lib/petsc ;do
 	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc/conf/petscvariables" ; do
 	    ffconfpetsc="$d$dd"
 		ffconfslepc="$d/slepc/conf/slepcvariables"
@@ -1086,7 +1086,7 @@ AC_ARG_WITH(petsc_complex,[  --with-petsc_complex=/usr/local/petsc/conf/petscvar
 ff_petsccomplex_ok=no
 ff_slepccomplex_ok=no
 if test "$with_petsc_complex" != no; then
-    for d in "$with_petsc_complex" "${prefix_petsc}/c/lib" /usr/local/ff++/petsc/c/lib ;do
+    for d in "$with_petsc_complex" "${prefix_petsc}/c/lib" /usr/local/ff++/petsc/c/lib /usr/lib/petsc ;do
 	for dd in "" "/petsc/conf/petscvariables" "/lib/petsc/conf/petscvariables" ; do
 	    ffconfpetscc="$d$dd"
 	    if test -f "$ffconfpetscc" -a  "$ff_petsccomplex_ok" = no ; then
