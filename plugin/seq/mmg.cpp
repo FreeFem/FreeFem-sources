@@ -571,7 +571,7 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
 }
 
 static void Load_Init( ) {
-  if (verbosity) {
+  if (verbosity && mpirank == 0) {
     cout << " load: mmg " << endl;
   }
 
