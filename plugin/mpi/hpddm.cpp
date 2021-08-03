@@ -974,12 +974,16 @@ void add() {
     Global.Add("statistics", "(", new OneOperator1_<bool, Type<K, S>*>(statistics<Type<K, S>>));
     Global.Add("exchange", "(", new exchangeIn<Type<K, S>, K>);
     Global.Add("exchange", "(", new exchangeInOut<Type<K, S>, K>);
+#if !(defined(PETSCSUB) && defined(PETSC_USE_REAL_SINGLE))
     Global.Add("IterativeMethod","(",new IterativeMethod<HPDDM::upscaled_type<K>, S>());
     Global.Add("IterativeMethod","(",new IterativeMethod<HPDDM::upscaled_type<K>, S>(1, 1));
+#endif
     if(std::is_same<K, HPDDM::upscaled_type<K>>::value) {
         addScalarProduct< Type<K, S>, K >( );
+#if !(defined(PETSCSUB) && defined(PETSC_USE_REAL_SINGLE))
         Global.Add("IterativeMethod","(",new IterativeMethod<HPDDM::upscaled_type<K>, S>(1));
         Global.Add("IterativeMethod","(",new IterativeMethod<HPDDM::upscaled_type<K>, S>(1, 1, 1));
+#endif
     }
     Global.Add("GlobalNumbering", "(", new OneOperator2_<long, Type<K, S>*, KN<long>*>(globalNumbering<Type<K, S>>));
 
