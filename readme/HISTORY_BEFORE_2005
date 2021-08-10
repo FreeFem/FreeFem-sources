@@ -432,7 +432,7 @@ Make Version 1.38
      
  16/04/2004 
   - add matrix tools 
-    bluid interpolation interpolation matric from a FEspace VH  to another FEspace Vh
+    bluid interpolation interpolation matric from a FEspace VH  to an other FEspace Vh
        matrix Ih=matrix B= interplotematrix(VH,Vh); 
 	// where  Vh correspond to  line and Vh to column 
        the named parameters can be 
