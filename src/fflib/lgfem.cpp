@@ -1157,7 +1157,7 @@ bool BuildPeriodic2(int nbcperiodic, Expression *periodic, const Mesh &Th, Stack
             else {
               cout << ie2 << " ~ " << im0->second[0] << " " << im0->second[1] << ", "
                    << im1->second[0] << " " << im1->second[1] << endl;
-              ExecError("periodic: Sorry one edge is losted ");
+              ExecError("periodic: Sorry one edge is lost");
             }
             if (verbosity > 50) cout << " ( " << im0->second << " , " << im1->second << " ) .. ";
             ffassert(ie1 >= 0 && ie1 < Th.neb);

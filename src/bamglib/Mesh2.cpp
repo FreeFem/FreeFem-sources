@@ -4547,7 +4547,7 @@ namespace bamg {
     area *= 3;
     gammamn = sqrt(gammamn);
     gammamx = sqrt(gammamx);
-    cout << "  -- adaptmesh Regularly:  Nb triangles " << nt << " , h  min " << hmin << " , h max "
+    cout << "  -- adaptmesh statistics:  Nb triangles " << nt << " , h  min " << hmin << " , h max "
          << hmax << endl;
     cout << "     area =  " << area << " , M area = " << Marea << " , M area/( |Khat| nt) "
          << Marea / (aireKh * nt) << endl;
