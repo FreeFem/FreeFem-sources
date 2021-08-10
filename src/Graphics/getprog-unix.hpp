@@ -326,7 +326,7 @@ check_plugin=0; // no pluging to check ..
     cout << "FreeFEM modules: https://modules.freefem.org/" << endl;
 
     cout << endl;
-    cout << "Please cite us in your research papers and add a link to FreeFEM on your personnal website" << endl;
+    cout << "Please cite us in your research papers and add a link to FreeFEM on your personal website" << endl;
     cout << "@article{FreeFEM," << endl;
     cout << "\tAUTHOR = {Hecht, F.}," << endl;
     cout << "\tTITLE = {New development in FreeFem++}," << endl;

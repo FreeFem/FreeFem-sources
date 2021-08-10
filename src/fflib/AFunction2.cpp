@@ -194,7 +194,7 @@ const  OneOperator * Polymorphic::FindWithOutCast(const char *op, const  ArrayOf
 void Polymorphic::Show(const char *op,const ArrayOfaType & at,ostream &f)  const
     {
     const_iterator i=m.find(op);
-    if (i==m.end()) f << " unknow " << op << " operator " << endl;
+    if (i==m.end()) f << " unknown " << op << " operator " << endl;
     else i->second->Show(at,f);
   }
 

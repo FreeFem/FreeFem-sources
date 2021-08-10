@@ -85,7 +85,7 @@ public:
         if(whichfac==FactorizationLU) LU(eps);
         else if (whichfac==FactorizationCholesky) cholesky(eps);
         else if (whichfac==FactorizationCrout) crout(eps);
-        else MATERROR(1,"UNKNOW FACTORIZATION type SkyLineMatrix");
+        else MATERROR(1,"UNKNOWN FACTORIZATION type SkyLineMatrix");
     }
 
   
@@ -440,8 +440,8 @@ R* SkyLineMatrix<Z,R>::solve(R*x,int trans) const
           }
             break;
         default:
-            std::cerr << "  (operator /=(SkyLineMatrix, Error unkown type of Factorization  =" << typefac<< std::endl;
-            MATERROR(1,"unkown type of Factorization");
+            std::cerr << "  (operator /=(SkyLineMatrix, Error unknown type of Factorization  =" << typefac<< std::endl;
+            MATERROR(1,"unknown type of Factorization");
     }
     return x;
 }

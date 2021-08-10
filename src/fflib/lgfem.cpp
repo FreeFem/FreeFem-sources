@@ -1157,7 +1157,7 @@ bool BuildPeriodic2(int nbcperiodic, Expression *periodic, const Mesh &Th, Stack
             else {
               cout << ie2 << " ~ " << im0->second[0] << " " << im0->second[1] << ", "
                    << im1->second[0] << " " << im1->second[1] << endl;
-              ExecError("periodic: Sorry one egde is losted ");
+              ExecError("periodic: Sorry one edge is lost");
             }
             if (verbosity > 50) cout << " ( " << im0->second << " , " << im1->second << " ) .. ";
             ffassert(ie1 >= 0 && ie1 < Th.neb);
@@ -3280,7 +3280,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
           }
           wsptr2free->clean(swsptr2free);    // ADD FH 11/2017
         }
-        if (verbosity > 5) cout << " Lenght level set = " << llevelset << endl;
+        if (verbosity > 5) cout << " Length level set = " << llevelset << endl;
 
       }
 
@@ -3432,7 +3432,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
           wsptr2free->clean(swsptr2free);    // ADD FH 11/2017
         }
     } else {
-      InternalError("CDomainOfIntegration kind unkown");
+      InternalError("CDomainOfIntegration kind unknown");
     }
   }
 
@@ -3698,7 +3698,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
  
           wsptr2free->clean(swsptr2free);    // ADD FH 11/2017
         }
-        if (verbosity > 5) cout << " Lenght level set = " << llevelset << endl;
+        if (verbosity > 5) cout << " Length level set = " << llevelset << endl;
 
       }
 
@@ -3814,7 +3814,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
     } else if (kind == CDomainOfIntegration::intallVFedges) {
       ffassert(0);    // TODO AXEL
     } else {
-      InternalError("CDomainOfIntegration kind unkown");
+      InternalError("CDomainOfIntegration kind unknown");
     }
   } else if (dim == 3 && !surface && curve)
   {
@@ -3862,12 +3862,12 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
     }
     else
     {
-        InternalError("int Curve CDomainOfIntegration kind unkown");
+        InternalError("int Curve CDomainOfIntegration kind unknown");
     }
       
       
   } else {
-    InternalError("CDomainOfIntegration dim unkown");
+    InternalError("CDomainOfIntegration dim unknown");
   }
 
   *MeshPointStack(stack) = mp;
@@ -4955,7 +4955,7 @@ AnyType Plot::operator( )(Stack s) const {
           Show("v)  switch between show  the numerical value of iso or not", i++);
           Show("p)   save  plot in a Postscprit file", i++);
           Show("m)  switch between show  meshes or not", i++);
-          Show("p)  switch between show  quadtree or not (for debuging)", i++);
+          Show("p)  switch between show  quadtree or not (for debugging)", i++);
           Show("t)  find  Triangle ", i++);
           Show("?)  show this help window", i++);
           Show("any other key : continue ", ++i);
@@ -6953,7 +6953,7 @@ C_F0 NewFEvariableT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F
   ffassert(n > 0);
   if (fes->nbitem( ) != (size_t)n) {
     cerr << " the array size must be " << fes->nbitem( ) << " not " << n << endl;
-    CompileError("Invalide array size  for  vectorial fespace function");
+    CompileError("Invalid array size  for  vectorial fespace function");
   }
   for (int i = 0; i < n; i++) {
     str += ids[i].id;
@@ -6991,7 +6991,7 @@ C_F0 NewFEvariable(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F0
   else if (dim == 5)
     return NewFEvariableT< v_fesL, 5 >(pids, currentblock, fespacetype, init, cplx, dim);
   else
-    CompileError("Invalide fespace on Rd  ( d != 2 or 3) ");
+    CompileError("Invalid fespace on Rd  ( d != 2 or 3) ");
   return C_F0( );
 }
 C_F0 NewFEvariable(const char *id, Block *currentblock, C_F0 &fespacetype, CC_F0 init, bool cplx,

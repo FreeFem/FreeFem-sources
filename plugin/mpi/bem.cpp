@@ -935,7 +935,7 @@ public:
         else if(!tkernel->compare("CST"))
             typeKernel[0] = 5;
         else
-            ExecError("unknow BEM kernel type ");
+            ExecError("unknown BEM kernel type ");
         
         if(mpirank==0 && verbosity>5)
             cout << "type BEM kernel " << *tkernel <<": " << typeKernel[0] << " coeff combi " << coeffcombi[0] << " wave number "<< wavenum[0] << endl;
@@ -1113,7 +1113,7 @@ public:
         else if(!tpotential->compare("CST"))
             typePotential = 3;
         else
-            ExecError("unknow BEM Potential type ");
+            ExecError("unknown BEM Potential type ");
         
         if(mpirank==0 && verbosity>5)
             cout << "type BEM Potential " << *tpotential <<": "<< tpotential <<": " << typePotential << " wave number "<< wavenum << endl;
@@ -1526,7 +1526,7 @@ pair<BemKernel*,double> getBemKernel(Stack stack, const list<C_F0> & largs)  {
             if(mpirank == 0 && verbosity>5) cout << " test coeff mass matrix " << alpha << endl;
           
             if(mpirank == 0 && verbosity>5) {
-                cout << "FormBilinear: number of unknow finc=" << finc.first << " ,ftest= " << ftest.first << endl;
+                cout << "FormBilinear: number of unknown finc=" << finc.first << " ,ftest= " << ftest.first << endl;
                 cout << "FormBilinear: operator order finc=" << finc.second << " ,ftest= " << ftest.second << endl;      // ordre   only op_id=0
             }
             ffassert(finc.first==0 && ftest.first==0);

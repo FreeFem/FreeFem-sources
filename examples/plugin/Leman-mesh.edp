@@ -7,7 +7,7 @@ int[int] be(1);
 int nc;// nb of curve
 {
   real[int,int] ff1(leman); // read  image and set to an rect. array
-  int nx = ff1.n, ny=ff1.m; // grey value beetween 0 to 1 (dark)
+  int nx = ff1.n, ny=ff1.m; // grey value between 0 to 1 (dark)
   // build a Cartesian mesh such that the origne is qt the right place.
   mesh Th=square(nx-1,ny-1,[(nx-1)*(x),(ny-1)*(1-y)]);
    // warning  the numbering is of the vertices (x,y) is

@@ -49,7 +49,7 @@ bool withrgraphique = false;
 int initgraph = 0;
 void NewHandler( );
 void NewHandler( ) {
-  cerr << " Not enought memory " << endl;
+  cerr << " Not enough memory " << endl;
   exit(1);
 }
 

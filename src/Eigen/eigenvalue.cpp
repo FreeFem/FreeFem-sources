@@ -525,16 +525,16 @@ AnyType EigenValue::E_EV::operator () (Stack stack) const {
   // 2 <= NCV-NEV and NCV <= N
 
   if (!(ncv <= n) && sym)
-    serr[err++] = "   ( ncv <= n) (symetric case) ";
+    serr[err++] = "   ( ncv <= n) (symmetric case) ";
   if (!((ncv <= n) && 2 <= (ncv-nbev )) && !sym )
-    serr[err++] = "   ( ncv <= n) 2 <= (ncv-nev ) (non-symetric case) ";
+    serr[err++] = "   ( ncv <= n) 2 <= (ncv-nev ) (non-symmetric case) ";
 
   if (n != OP1.M)
     serr[err++] = " the first matrix in EigneValue is not square.";
   if (n != B.N)
     serr[err++] = "Sorry the row's number of the secand matrix in EigneValue is wrong.";
   if (n != B.M)
-    serr[err++] = "Sorry the colum's number of the secand matrix in EigneValue is wrong.";
+    serr[err++] = "Sorry the column's number of the secand matrix in EigneValue is wrong.";
 
   if (verbosity && mpirank == 0) {
     if(sym)
@@ -665,7 +665,7 @@ AnyType EigenValue::E_EV::operator () (Stack stack) const {
       }
     }
   } else {
-    // non symetric case ,
+    // non symmetric case ,
     // Finding an Arnoldi basis.
     //int mode = 3; // Shift invert
     int ido = 0;
@@ -906,7 +906,7 @@ AnyType EigenValueC::E_EV::operator () (Stack stack) const {
   if (n != B.N)
     serr[err++] = "Sorry the row's number of the secand matrix in EigneValue is wrong.";
   if (n != B.M)
-    serr[err++] = "Sorry the colum's number of the secand matrix in EigneValue is wrong.";
+    serr[err++] = "Sorry the column's number of the secand matrix in EigneValue is wrong.";
   if (verbosity)
     cout << "Complex eigenvalue problem: A*x - B*x*lambda" << endl;
   if (verbosity > 9 || err)

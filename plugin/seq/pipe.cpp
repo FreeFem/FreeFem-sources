@@ -114,7 +114,7 @@ static pstream **pstream_init(pstream **const &p, string *const &a, string *cons
   } else if (mode == "r") {
     om = ios_base::in;
   } else {
-    ExecError("Invalide mode pstream r,r+,w ");
+    ExecError("Invalid mode pstream r,r+,w ");
   }
 
   if (verbosity > 10) {
@@ -216,7 +216,7 @@ static pstream **pstream_init(pstream **const &p, string *const &a, string *cons
   } else if (mode == "r") {
     om = ios_base::in;
   } else {
-    ExecError("Invalide mode pstream r,r+,w ");
+    ExecError("Invalid mode pstream r,r+,w ");
   }
 
   if (verbosity > 10) {

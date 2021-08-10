@@ -206,7 +206,7 @@ re_do_numerics(0),re_do_symbolic(0)
         
     }
     else {
-        cerr << " Unkown matrix type" << endl << endl;
+        cerr << " Unknown matrix type" << endl << endl;
         ffassert(0);
     }
     

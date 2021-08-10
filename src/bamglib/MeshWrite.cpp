@@ -128,7 +128,7 @@ namespace bamg {
           //-----------------------------ajout format hdf5-----------------------------//
         default:
           cerr << endl
-               << " Unkown type mesh file " << (int)type << " for Writing " << filename << endl;
+               << " Unknown type mesh file " << (int)type << " for Writing " << filename << endl;
           MeshError(1);
       }
       Int4 NbOfTria = nbt - 2 * NbOfQuad - NbOutT;
@@ -182,7 +182,7 @@ namespace bamg {
           break;
           //-----------------------------ajout format hdf5-----------------------------//
         default:
-          cerr << " Unkown type mesh file " << (int)type << " for Writing " << filename << endl;
+          cerr << " Unknown type mesh file " << (int)type << " for Writing " << filename << endl;
           MeshError(1);
       }
     else {
@@ -660,7 +660,7 @@ namespace bamg {
         f << "# BEGIN of the include geometry file because geometry is not on the disk" << Th.Gh
           << endl;
         f << "End" << endl
-          << "# END of the include geometrie file because geometry is not on the disk" << endl;
+          << "# END of the include geometry file because geometry is not on the disk" << endl;
       }
     }
     {

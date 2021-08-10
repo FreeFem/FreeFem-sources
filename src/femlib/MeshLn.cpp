@@ -519,7 +519,7 @@ namespace Fem2D
             for(int jj=0; jj <2; jj++)
                 iv[jj] = this->operator()(K[jj]);
             if(verbosity>2)
-                cout << "EdgeL: " << k << " lenght "<<  this->elements[k].mesure() << endl;
+                cout << "EdgeL: " << k << " length "<<  this->elements[k].mesure() << endl;
             if(verbosity>2) cout << " A triangleS with a very small edge was created " << endl;
             return 1;
         }

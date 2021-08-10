@@ -259,7 +259,7 @@ int TestElementMesh3(const Mesh3 &Th3) {
         }
 
         for (int eh = 0; eh < 6; eh++) {
-          cout << "tetrahedra: " << k << " edge : " << eh << " lenght " << Th3[k].lenEdge(eh)
+          cout << "tetrahedra: " << k << " edge : " << eh << " length " << Th3[k].lenEdge(eh)
                << endl;
           cout << " Tet vertices : " << iv[0] << " " << iv[1] << " " << iv[2] << " " << iv[3] << " "
                << endl;
@@ -278,7 +278,7 @@ int TestElementMesh3(const Mesh3 &Th3) {
     for (int e = 0; e < 3; e++) {
       if (Th3.be(k).lenEdge(e) < Norme2(Psup - Pinf) / 1e9) {
         for (int eh = 0; eh < 3; eh++) {
-          cout << "triangles: " << k << " edge : " << eh << " lenght " << Th3.be(k).lenEdge(e)
+          cout << "triangles: " << k << " edge : " << eh << " length " << Th3.be(k).lenEdge(e)
                << endl;
         }
 
@@ -6716,7 +6716,7 @@ class ExtractMesh_Op : public E_F0mps {
 
     if (nargs[1] || nargs[3])
       CompileError(
-        "obselete function, to extract a region of the mesh3, use trunc function...this function "
+        "obsolete function, to extract a region of the mesh3, use trunc function...this function "
         "returns a part of boundary 3D mesh  ->  a meshS type");
 
     if (nargs[0] && nargs[2]) CompileError("uncompatible extractmesh (Th, label= , refface=  ");
@@ -6966,7 +6966,7 @@ public:
 			Expression Z=0 ; if(a->size( )>2) Z= to< double >((*a)[2]);
 			return new ExtractMeshLfromMesh_Op(args, t[0]->CastTo(args[0]), X, Y, Z);
 		} 
-		CompileError("ExtractMeshLfromMesh case unknow  ");		
+		CompileError("ExtractMeshLfromMesh case unknown  ");
 		return 0; 
 	}
 };

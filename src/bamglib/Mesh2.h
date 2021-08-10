@@ -111,7 +111,7 @@ namespace bamg {
 
   Int4 AGoodNumberPrimeWith(Int4 n);
 
-  // remark all the angle are in radian beetwen [-Pi,Pi]
+  // remark all the angle are in radian between [-Pi,Pi]
 
   class Geometry;
   // static Geometry *NULLGeometry=0;
@@ -1417,7 +1417,7 @@ namespace bamg {
          ((*t1).ns[VerticesOfTriangularEdge[a1][1]] !=
           (*t2).ns[VerticesOfTriangularEdge[a2][0]]))) {
       if (CurrentTh)
-        cerr << " In Triangles beetween Triangle " << CurrentTh->Number(t1) << " and "
+        cerr << " In Triangles between Triangle " << CurrentTh->Number(t1) << " and "
              << CurrentTh->Number(t2) << endl;
       cerr << "---- t1=" << t1 << " " << a1 << ",  t2=" << t2 << " " << a2 << endl;
       cerr << "t1=" << t1 << " " << a1 << " " << t1->ns[VerticesOfTriangularEdge[a1][0]] << " "

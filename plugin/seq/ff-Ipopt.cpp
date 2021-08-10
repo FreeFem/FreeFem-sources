@@ -1092,7 +1092,7 @@ class ConstraintFunctionDatas : public GenericConstraintFunctionDatas {
 
 /*****************************************************************************************************************************
  *	OptimIpopt & OptimIpopt::E_Ipopt - The interface class
- *  Do the link beetween freefem and Ipopt
+ *  Do the link between freefem and Ipopt
  *****************************************************************************************************************************/
 class OptimIpopt : public OneOperator {
  public:
