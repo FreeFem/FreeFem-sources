@@ -1,7 +1,8 @@
 /* ################################################################################## */
 /* 
     Solution of the Blasius boundary layer local spatial stability eigenproblem 
-    The eigenvalues exported int he "Blasius_EV.dat" file match those in figure 7.3a, Chapter 7, in 
+    The eigenvalues exported in the "Blasius_EV.dat" file match those in figure 7.3a, Chapter 7, in 
+
     Schmid, Peter & Henningson, Dan. (2001). Stability and Transition in Shear Flows. 10.1007/978-1-4613-0185-1. 
 */
 /* ################################################################################## */
