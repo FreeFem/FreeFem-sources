@@ -1,0 +1,169 @@
+/* ################################################################################## */
+/* 
+    Solution of the Blasius boundary layer local spatial stability eigenproblem 
+    The eigenvalues exported int he "Blasius_EV.dat" file match those in figure 7.3a, Chapter 7, in 
+    Schmid, Peter & Henningson, Dan. (2001). Stability and Transition in Shear Flows. 10.1007/978-1-4613-0185-1. 
+*/
+/* ################################################################################## */
+
+load "PETSc-complex"                            
+
+load "msh3" 
+macro dimension()3L//
+include "macro_ddm.idp"
+
+func Pb2 = [P2, P2];
+func Pc = [P2, P2, P1];
+ 
+real ymin = 0.;
+real ymax = 15.;
+border yline(t=ymin,log(ymax+1)){x=0.;y=exp(t)-1;}
+int np = 1000;
+
+meshL thL=buildmeshL(yline(np));
+meshL thLzero = thL;
+fespace VhC(thL,Pc);  
+fespace VhBzero(thLzero,Pb2);  
+VhBzero<complex> [fG1,fG2];
+
+/* ################################################################################## */
+/* ######################## Solution of the Blasius equation ######################## */
+/* ################################################################################## */
+{
+    meshL thL2 = thL;
+    fespace VhB(thL2,Pb2);    
+    VhB<complex> [f1, f2];
+
+    varf Resid([u1, u2], [v1, v2]) = int1d(thL2)(
+          -dy(f1)*v1 + f2*v1  
+           +0.5*dy(f2)*f1*v2 - dy(f2)*dy(v2))
+    + on(1, u1 = f1-0.)     /*  wall */ 
+    + on(2, u2 = f2-1.)     /*  free stream  */ 
+    + on(1, u2 = f2-0.);     /*  wall */ 
+    varf Jacob([u1, u2], [v1, v2]) = int1d(thL2)( 
+          -1.*dy(u1)*v1 + u2*v1  
+           +0.5*dy(f2)*u1*v2 - dy(u2)*dy(v2) +0.5*dy(u2)*f1*v2)
+    + on(1, u1 = f1-0.)     /*  wall */ 
+    + on(2, u2 = f2-1.)     /*  free stream  */ 
+    + on(1, u2 = f2-0.);    /*  wall */ 
+    
+    int[int] n2othL2;                                        
+    macro thL2N2O()n2othL2//
+    Mat<complex> dJ;
+    {
+        macro def(u)[u, u#B]//EOM
+        macro init(i)[i, i]//EOM
+        createMat(thL2, dJ, Pb2)
+    }
+    set(dJ, sparams = "-ksp_type preonly -pc_type lu" ); 
+    
+    [f1, f2] = [y, 1]; 
+
+    func complex[int] funcRes(complex[int]& inPETSc) {
+        changeNumbering(dJ, f1[], inPETSc, inverse = true, exchange = true);
+        complex[int] out(VhB.ndof);
+        out = Resid(0, VhB, tgv = -1);
+        complex[int] outPETSc;
+        changeNumbering(dJ, out, outPETSc);
+        return outPETSc;
+    }
+    func int funcJ(complex[int]& inPETSc) {
+        changeNumbering(dJ, f1[], inPETSc, inverse = true, exchange = true);
+        matrix<complex> J = Jacob(VhB, VhB, tgv = -1);
+        dJ = J;
+        //dJ = Jacob(VhB, VhB, tgv = -1);
+        return 0;
+    }
+
+    complex[int] xPETSc;
+    
+    changeNumbering(dJ, f1[], xPETSc); 
+    SNESSolve(dJ, funcJ, funcRes, xPETSc, sparams =  "-snes_monitor  -snes_max_it 20 -snes_linesearch_monitor -snes_linesearch_order 2 -snes_atol 1e-10 -snes_rtol 1e-10 -snes_stol 1e-10 -snes_converged_reason"); 
+    changeNumbering(dJ, f1[], xPETSc, inverse = true, exchange = true); 
+              
+    int[int] rest = restrict(VhB, VhBzero, n2othL2);
+    f1[].re .*= dJ.D;   
+    f1[].im .*= dJ.D;   
+    VhBzero<complex> [fReduce1,fReduce2];
+    for[i, v : rest] fReduce1[][v] = f1[][i];
+    mpiAllReduce(fReduce1[], fG1[], mpiCommWorld, mpiSUM);
+    
+    /* scaling: displacement thickness */
+    real Cm = 1.72089;
+    [fG1, fG2] = [fG1(x,Cm*y,z), fG2(x,Cm*y,z)];
+    
+}
+
+/* ################################################################################## */
+/* ########################## Solution of the Eigenproblem ########################## */
+/* ################################################################################## */
+
+real Rey = getARGV("-Rey", 1000.);
+real omega = getARGV("-omega", 0.26);
+real shiftr = getARGV("-shiftr", 0.4);
+real shifti = getARGV("-shifti", 0.1);
+complex shift = shiftr + 1i*shifti;
+int nEV = getARGV("-nEV", 100);
+int nKryl = getARGV("-nKryl", 300);
+
+real nu = 1./Rey;
+
+varf A0mat([u1, u2, p], [v1, v2, q]) = int1d(thL)(
+    -1i*omega*u1*v1 + nu*(dx(u1)*dx(v1) + dy(u1)*dy(v1)) + dy(fG2)*u2*v1 
+    -1i*omega*u2*v2 + nu*(dx(u2)*dx(v2) + dy(u2)*dy(v2)) + dy(p)*v2 + 
+    dy(u2)*q)
++ on(1, u1 = 0., u2 = 0.)                              /*  bot wall */ 
++ on(2, u1 = 0., u2 = 0.);                             /*  Free-strem */ 
+
+varf A1mat([u1, u2, p], [v1, v2, q]) = int1d(thL)(
+    1i*fG2*u1*v1 + 1i*p*v1 +                                    
+    1i*fG2*u2*v2 +                                              
+    1i*u1*q)
++ on(1, u1 = 0., u2 = 0.)                              /*  bot wall */ 
++ on(2, u1 = 0., u2 = 0.);                             /*  Free-strem */ 
+
+varf A2mat([u1, u2, p], [v1, v2, q]) = int1d(thL)(
+    nu*u1*v1 +                                         
+    nu*u2*v2)                                       
++ on(1, u1 = 0., u2 = 0.)                             /*  Free-strem */ 
++ on(2, u1 = 0., u2 = 0.);                             /*  Free-strem */ 
+
+Mat<complex>[int] Apep(3);
+macro def(u)[u, u#B, u#C]//EOM
+macro init(i)[i, i, i]//EOM
+{
+	createMat(thL, Apep[0], Pc)
+	createMat(thL, Apep[1], Pc)
+	createMat(thL, Apep[2], Pc)
+}
+
+{
+    matrix<complex> Amat = A2mat(VhC,VhC,tgv=-1);
+    Apep[2] = Amat;
+    Amat = A1mat(VhC,VhC,tgv=-1);
+    Apep[1] = Amat;
+    Amat = A0mat(VhC,VhC,tgv=-1);
+    Apep[0] = Amat;
+}
+
+VhC<complex>[int] def(eigenvecVec)(nEV);
+complex[int]  eigvalVec(nEV);   
+string PEPParamsbase =   
+  " -pep_basis monomial " + 
+  " -pep_general " +
+  " -st_type sinvert "     +
+  " -st_pc_type lu "       +
+  " -pep_monitor_all"      ;
+    
+string PEPspar = PEPParamsbase + " -pep_target " + shift +    
+  " -pep_nev " + nEV       + 
+  " -pep_ncv " + nKryl + " ";
+
+int nEvalConv = PEPSolve(Apep, vectors = eigenvecVec, values = eigvalVec, sparams = PEPspar); 
+
+{
+    ofstream ofile("Blasius_EV.dat");
+    ofile.precision(16);
+    ofile << eigvalVec << endl;
+}
+
