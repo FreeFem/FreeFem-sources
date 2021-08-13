@@ -95,7 +95,7 @@ int main(int argc, const char **argv) {
                 "..\\examples\\plugin\\ffslave.edp",
                 "-nw", "-ns", "-v", ff, NULL );
 #else
-  sprintf(ff, "FreeFem++.exe C:\\Users\\t1m\\FreeFem++\\examples\\plugin\\ffslave.edp -nw -ns -v %d&", debug);
+  sprintf(ff, "FreeFem++ /usr/share/doc/freefem++/examples/plugin/ffslave.edp -nw -ns -v %d&", debug);
   ret = system(ff);    // Lauch FF++ in batch no graphique
 #endif
   if (ret == -1) printf("system function error\n");
