@@ -81,6 +81,7 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [helmholtz-2d-SLEPc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/helmholtz-2d-SLEPc-complex.edp)                               | SVD of the discretized Helmholtz equation                                                       |
 | [mf-2d-SLEPc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/mf-2d-SLEPc.edp)                                                              | Matrix-free SVD with user-provided matrix--vector and matrix transpose--vector multiplications |
 | [nonlinear-2d-SLEPc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/nonlinear-2d-SLEPc-complex.edp)                                | Nonlinear eigenvalue problem Ax = sqrt(lambda)x                                                |
+| [blasius-stability-1d-SLEPc-complex.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/blasius-stability-1d-SLEPc-complex.edp)                | Polynomial eigenvalue problem (A2 lambda^2 x + A1 lambda + A0)x = 0                            |
 
 ### Miscellaneous
 | Filename                                                                                                                          | Comments (preconditioners, numerical schemes) |
