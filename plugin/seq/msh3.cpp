@@ -7069,6 +7069,9 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 		const B &K(Th.be(ibe));
 		int ivv[2];
 		for (int jj = 0; jj < 2; jj++) ivv[jj] = takevertex[Th.operator( )(K[jj])];
+		int ie, i = Th.BoundaryElement(ibe, ie);
+		if (&(Th[i].Edge(0,ie)) != &(K[0]))
+		  swap(ivv[0],ivv[1]);
 		(bb++)->set(v, ivv, K.lab);
 	}
       ffassert(nvL>0);
