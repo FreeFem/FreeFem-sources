@@ -98,6 +98,73 @@ long read_pcm(string *const &filename, KNM< double > *const &u, KNM< double > *c
   return (long)pcm.width * pcm.height;
 }
 
+template<class T> inline T max (const T &a,const T & b,const T & c){return max(max(a,b),c);}
+template<class T> inline T min (const T &a,const T & b,const T & c){return min(min(a,b),c);}
+
+void rgb2hsv( double  r,double g, double b,double & h,double &s, double &v )
+{
+
+    double vmax = max(r, g, b);
+    double vmin = min(r, g, b);
+    double delta =vmax - vmin;
+    v = vmax;
+    
+
+    if (vmax == 0.0) {
+        s = 0;
+        h = 0;
+    }
+    else if (delta < 1e-4) {
+        s = 0;
+        h = 0;
+    }
+    else {
+        s = delta / vmax;
+
+        if (vmax == r) {
+            h =  ((g - b) / delta) + 0.;
+        }
+        else if (vmax == g) {
+            h =  ((b - r) / delta) + 2.;
+        }
+        else {
+            h =  ((r - g) / delta) + 4.;
+        }
+    }
+
+    if (h < 0) h += 6.;
+    h /= 6. ;
+
+}
+/*
+void hsv2rgb(const unsigned char &src_h, const unsigned char &src_s, const unsigned char &src_v, unsigned char &dst_r, unsigned char &dst_g, unsigned char &dst_b)
+{
+    double h = src_h *   2.0f; // 0-360
+    double s = src_s / 255.0f; // 0.0-1.0
+    double v = src_v / 255.0f; // 0.0-1.0
+
+    double r, g, b; // 0.0-1.0
+
+    int   hi = (int)(h / 60.0f) % 6;
+    double f  = (h / 60.0f) - hi;
+    double p  = v * (1.0f - s);
+    double q  = v * (1.0f - s * f);
+    double t  = v * (1.0f - s * (1.0f - f));
+
+    switch(hi) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+
+    dst_r = (unsigned char)(r * 255); // dst_r : 0-255
+    dst_g = (unsigned char)(g * 255); // dst_r : 0-255
+    dst_b = (unsigned char)(b * 255); // dst_r : 0-255
+}
+ */
 static void Load_Init( ) {
   cout << " load: init pcm2rmn  " << endl;
 

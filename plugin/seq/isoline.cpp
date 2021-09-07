@@ -1076,6 +1076,26 @@ R3 *Curve2(Stack stack, const KNM_< double > &b, const long &li0, const long &li
   R3 *pQ = Add2StackOfPtr2Free(stack, new R3(Q));
   return pQ;
 }
+long Dichotomy( const KN_< double >  &b,const double  & v)
+{
+    long i0 = 0, i1 = b.N()-1, im,k=0, k1 = i1;
+    if( v < b[i0] ) return -1L;
+    else if( v > b[i1] ) return -2L;
+    
+    while (i0 < i1 - 1) {
+      ffassert(k++ < k1);
+      im = (i0 + i1) / 2;
+      if (v < b(im)) {
+        i1 = im;
+      } else if (v > b(im)) {
+        i0 = im;
+      } else {
+        i0 = i1 = im;
+        break;
+      }
+    }
+    return i0;
+}
 R3 *Curve(Stack stack, const KNM_< double > &b, const long &li0, const long &li1, const double &ss,
           long *const &pi) {
   if(b.N( )==2) return Curve2(stack,b,li0,li1,ss,pi);
@@ -1225,7 +1245,8 @@ static void finit( ) {
              new OneOperator5s_< R3 *, KNM_< double >, long, long, double, long * >(Curve));
 
   Global.Add("Area", "(", new OneOperator2s_< double, KNM_< double >, KN_< long > >(mesure));
-  Global.Add("findalllocalmin", "(", new FINDLOCALMIN_P1);
+    Global.Add("findalllocalmin", "(", new FINDLOCALMIN_P1);
+    Global.Add("Dichotomy", "(", new OneOperator2_< long ,KN_< double > , double > (Dichotomy));
 }
 
 LOADFUNC(finit);    // une variable globale qui serat construite  au chargement dynamique
