@@ -1,12 +1,10 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
 
-load "PETSc-complex"
-load "lapack"
-macro dimension()2//
-include "macro_ddm.idp"
 load "bem"
+load "PETSc-complex"
 load "msh3"
+include "macro_ddm.idp"
 
 complex k = 10; // wavenumber
 
@@ -81,10 +79,10 @@ Th = change(Th,region=regs);
 func ind = region == -1 ? 1 : 2./(1+((x-nsx[region-1])^2+(y-nsy[region-1])^2)); // gradient index in lenses
 
 plot(ThG);
-int[int][int] R;
-real[int] D;
+Mat<complex> A, T;
 if(usedARGV("-user_partitioning") == -1) {
-    buildMinimalist(Th, R, D, P1)
+    createMat(Th, A, P1);
+    createMat(Th, T, P0);
 }
 else {
     int[int] n2o;
@@ -97,31 +95,33 @@ else {
     part[] = mpisize - 1;        // last rank has no BEM unknown
     part[](n2o) = partWithBEM[]; // no need for restrict since using P0
     plot(part);
-    buildWithPartitioning(Th, part[], 1, R, D, P1, mpiCommWorld)
+    macro ThUserPartitioning()part[]//
+    createMat(Th, A, P1);
+    createMat(Th, T, P0);
 }
 meshL ThL;
 {
     int[int] labels=labels(Th);
-    int[int] trueLabels;
-    for(int i = 0; i < labels.n; ++i) {
-        if(labels[i] >= 0) {
-            trueLabels.resize(trueLabels.n+1);
-            trueLabels[trueLabels.n-1] = labels[i];
-        }
-    }
-    if(trueLabels.n) {
-        ThL = extract(Th,label=trueLabels);
-        ThL = trunc(ThL,region==interface);
+    if(labels.max > 0) {
+        fespace PhL(ThG, P0);
+        PhL u = (region==interface)*chi(Th);
+        ThL = trunc(ThG,abs(u-1.0)<1.0e-2);
     }
 }
-int[int] perm;
 fespace Vh(Th, P1);
-fespace VhS(ThL, P1);
-matrix RVtoS = interpolate(VhS, Vh);
 macro Grad(u) [dx(u),dy(u)] // EOM
-Mat<complex> A(Vh.ndof, R, D);
 varf varfA(u,v) = int2d(Th)(-ind*k^2*u*v+Grad(u)'*Grad(v)) + on(waveguide,u=0);
 A = varfA(Vh, Vh, tgv = -1);
+fespace VhS(ThL, P1);
+matrix RVtoS = interpolate(VhS, Vh);
+Mat<complex> ASurf(A, restriction = RVtoS);
+{
+    fespace PhS(ThL, P0);
+    matrix PVtoS = interpolate(PhS, Ph);
+    Mat<complex> TSurf(T, restriction = PVtoS);
+    CoherentGlobalMesh(TSurf, ASurf, ThL, ThG);
+    MatDestroy(T);
+}
 matrix<complex> Mass;
 if(ThL.nt) {
     varf varfMass(u,v) = int1d(Th,interface)(u*v) + on(waveguide,u=0);
@@ -129,148 +129,46 @@ if(ThL.nt) {
     matrix IdV = eye(Vh.ndof);
     renumbering(Mass, RVtoS, R = IdV);
 }
-Mat<complex> ASurf(Mass.m, R, D, restriction = RVtoS);
-Mat<complex> BDense, StoVDense; // for densifying the HMatrix
-HMatrix<complex> TDL, SL;
+Mat<complex> TDL(ASurf);
 {
     fespace UhG(ThG, P1);
-    int[int] permGlobal, permLocal;
-    int[int] range = ASurf.range;
-    {
-        UhG<complex> numbering;
-        numbering[] = 0:UhG.ndof - 1;
-        int[int] permReduce(UhG.ndof);
-        permLocal.resize(VhS.ndof);
-        if(ThL.nt) {
-            VhS<complex> glob2loc = numbering;
-            ChangeNumbering(ASurf, glob2loc[], perm);
-            for[i, v : glob2loc[]] permLocal[i] = real(v);
-        }
-        else
-            perm.resize(0);
-        if(usedARGV("-aij") != -1) {
-            permReduce = 0;
-            if(range[0] != range[1])
-                permReduce(range[0]:range[1] - 1) = perm;
-            permGlobal.resize(UhG.ndof);
-            mpiAllReduce(permReduce, permGlobal, mpiCommWorld, mpiSUM);
-        }
-    }
     varf varfTDL(u,v) = int1dx1d(ThG)(ThG)(BEM(BemKernel("TDL",k=k),u,v)) + int1d(ThG)(0.5*u*v);
     TDL = varfTDL(UhG, UhG);
     varf varfSL(u,v) = int1dx1d(ThG)(ThG)(BEM(BemKernel("SL",k=k),u,v));
-    SL = varfSL(UhG, UhG);
-    if(usedARGV("-aij") != -1) {
-        complex[int, int] tmpB(ThG.nv, ThG.nv), tmpA(ThG.nv, ThG.nv);
-        tmpA = SL;
-        mpiAllReduce(tmpA, tmpB, mpiCommWorld, mpiSUM);
-        tmpB *= -1.0;
-        real[int] D(tmpB.m);
-        D = 0.0;
-        if(range[0] != range[1])
-            D(range[0]:range[1] - 1) = 1.0;
-        int[int][int] intersection(mpisize);
-        intersection[0].resize(mpisize - 1);
-        int j = 0;
-        for(int i = 0; i < mpisize - 1; ++i) {
-            if(j == mpirank)
-                j++;
-            intersection[0][i] = j++;
-            intersection[i + 1].resize(tmpB.m);
-            intersection[i + 1] = 0:tmpB.m - 1;
-        }
-        matrix<complex> BLoc = tmpB(permGlobal, permGlobal);
-        Mat<complex> myB(BLoc, intersection, D);
-        BDense = myB;
-        tmpB = 0.0;
-        tmpB = TDL;
-        mpiAllReduce(tmpB, tmpA, mpiCommWorld, mpiSUM);
-        matrix<complex> RVtoSc = RVtoS;
-        BLoc = tmpA(permLocal, permGlobal);
-        if(ThL.nt)
-            BLoc = RVtoSc' * BLoc;
-        else
-            BLoc.resize(Vh.ndof, 0);
-        Mat<complex> myC(A, BDense, BLoc);
-        StoVDense = myC;
-    }
+    ASurf = varfSL(UhG, UhG, sym = 1, sparams = "-mat_htool_epsilon 1.0e-3");
+    ASurf *= -1.0;
 }
-func complex[int] opSurf(complex[int]& in) {
-    complex[int] u(ThG.nt), v(ThG.nt);
-    for[i, p : perm] u[p] = in[i];
-    mpiAllReduce(u, v, mpiCommWorld, mpiSUM);
-    u = SL * v;
-    for[i, p : perm] in[i] = -u[p];
-    return in;
+Mat<complex> VtoS(ASurf, A, Mass);
+Mat<complex> StoV(A, ASurf);
+{
+    matrix<complex> PStoV = RVtoS;
+    PStoV = PStoV';
+    StoV = PStoV;
 }
-complex[int,int] dense(1, 1);
-if(usedARGV("-aij") == -1 && ThL.nt) {
-    varf varfSL(u,v) = int1dx1d(ThL)(ThL)(BEM(BemKernel("SL",k=k),u,v));
-    HMatrix<complex> A = varfSL(VhS, VhS, commworld=mpiCommSelf);
-    dense.resize(VhS.ndof, VhS.ndof);
-    dense = A;
-    dense = dense^-1;
-}
-func complex[int] opStoV(complex[int]& in) {
-    complex[int] out(in.n), u(ThG.nt), v(ThG.nt);
-    for[i, p : perm] u[p] = in[i];
-    mpiAllReduce(u, v, mpiCommWorld, mpiSUM);
-    u = TDL * v;
-    for[i, p : perm] out[i] = u[p];
-    complex[int] outS, outV(Vh.ndof);
-    ChangeNumbering(ASurf, outS, out, inverse = true, exchange = true);
-    if(ThL.nt)
-        renumbering(RVtoS', outS, outV);
-    else
-        outV = 0.0;
-    ChangeNumbering(A, outV, out);
-    return out;
-}
-Mat<complex> B(ASurf, opSurf);
-Mat<complex> VtoS(B, A, Mass);
-func complex[int] precondSurf(complex[int]& in) {
-    complex[int] u, out(in.n);
-    ChangeNumbering(B, u, in, inverse = true);
-    complex[int] v(u.n);
-    if(ThL.nt)
-        v = dense * u;
-    else
-        v = 0.0;
-    ChangeNumbering(B, v, out);
-    return out;
-}
-Mat<complex> StoV(A, B, opStoV);
-complex[int] rhsV(Vh.ndof), rhsS(VhS.ndof);
-complex[int] xV(Vh.ndof), xS(VhS.ndof);
+complex[int] rhs(Vh.ndof + VhS.ndof);
 varf varfRHS(u,v) = int2d(Th)(finc*v) + on(waveguide,u=0);
-rhsV = varfRHS(0, Vh, tgv = -1);
-complex[int] rhs, x;
-ChangeNumbering([A, B], [rhsV, rhsS], rhs);
-x.resize(rhs.n);
+rhs(0:Vh.ndof - 1) = varfRHS(0, Vh, tgv = -1);
+Mat<complex> N;
 if(usedARGV("-aij") == -1) {
-    real[int] list(rhs.n);
-    complex[int] nV;
-    ChangeNumbering(A, rhsV, nV);
-    list(0:nV.n-1) = 1.0;
+    N = [[A,    StoV*TDL],
+         [VtoS, ASurf   ]];
+    real[int] list(N.n);
+    list(0:A.n-1) = 1.0;
     if(ThL.nt)
-        list(nV.n:list.n-1) = 2.0;
-    complex[int] test(list.n - nV.n);
-    Mat<complex> N = [[A,    StoV],
-                      [VtoS, B   ]];
-    set(N, sparams = "-ksp_view -ksp_monitor -ksp_type fgmres -ksp_view_final_residual -fieldsplit_1_ksp_max_it 2000 -ksp_gmres_restart 200 -pc_type fieldsplit "+" -fieldsplit_0_pc_type asm -fieldsplit_0_sub_pc_type lu -fieldsplit_0_ksp_type gmres -fieldsplit_1_ksp_type gmres -fieldsplit_1_ksp_gmres_restart 2000 "+" -fieldsplit_1_pc_type none", fields = list);
-    set(B, parent = N, sparams = "-prefix_push fieldsplit_1_ -pc_type shell -ksp_pc_side right -ksp_max_it 20 -prefix_pop", precon = precondSurf);
-    KSPSolve(N, rhs, x);
+        list(A.n:list.n-1) = 2.0;
+    set(N, sparams = "-ksp_view -ksp_monitor -ksp_type fgmres -ksp_view_final_residual -fieldsplit_1_ksp_max_it 2000 -ksp_gmres_restart 200 -pc_type fieldsplit "+" -fieldsplit_0_pc_type asm -fieldsplit_0_sub_pc_type lu -fieldsplit_0_ksp_type gmres -fieldsplit_1_ksp_type gmres -fieldsplit_1_ksp_gmres_restart 2000 "+" -prefix_push fieldsplit_1_ -ksp_pc_side right -ksp_max_it 20 -prefix_pop", fields = list);
 }
 else {
-    Mat<complex> N = [[A,    StoVDense],
-                      [VtoS, BDense   ]];
-    Mat<complex> AIJ;
-    MatConvert(N, AIJ);
-    set(AIJ, sparams = "-pc_type lu");
-    KSPSolve(AIJ, rhs, x);
+    Mat<complex> DTDL;
+    MatConvert(TDL, DTDL);
+    Mat<complex> R;
+    MatMatMult(StoV, DTDL, R);
+    N = [[A,    R    ],
+         [VtoS, ASurf]];
+    set(N, sparams = "-pc_type lu");
 }
-ChangeNumbering([A, B], [xV, xS], x, inverse = true, exchange = true);
+complex[int] x = N^-1 * rhs;
 Vh<complex> plt;
-plt[] = xV;
+plt[] = x(0:Vh.ndof-1);
 macro def(u)u//
 plotMPI(Th, real(plt), P1, def, real, cmm = "FEM solution")

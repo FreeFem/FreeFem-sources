@@ -36,6 +36,9 @@ class DistributedCSR {
                     delete [] reinterpret_cast<decltype(this)*>(_exchange);
                     _exchange = nullptr;
                 }
+                PetscContainer ptr;
+                PetscObjectQuery((PetscObject)_petsc, "HtoolCtx", (PetscObject*)&ptr);
+                PetscContainerDestroy(&ptr);
                 MatDestroy(&_petsc);
             }
             if(_vS) {

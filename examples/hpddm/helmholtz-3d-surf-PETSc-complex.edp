@@ -2,13 +2,10 @@
 // NBPROC 4
 // PARAM -freq 1e+9
 
-load "iovtk"
+load "bem"
 load "PETSc-complex"
-load "lapack"
 macro dimension()3S// EOM
 include "macro_ddm.idp"
-load "bem"
-
 include "cobrameshcavity.idp"
 
 real sec1   = 0.01;
@@ -43,6 +40,10 @@ func finc       = exp(1i*k*(dir[0]*x + dir[1]*y + dir[2]*z));
 int nloc        = 10.0*sec3/lambda;
 
 meshS ThS, ThG;
+fespace Uh(ThS, P1);
+fespace UhG(ThG, P1);
+varf vk(u, v) = int2dx2d(ThG)(ThG)(BEM(BemKernel("SL", k=k), u, v));
+Mat<complex> H;
 {
     mesh3 Th3;
     buildcobramesh(Th3);
@@ -51,95 +52,60 @@ meshS ThS, ThG;
     ThS = Th3.Gamma;
     ThS = trunc(ThS, region == labmetal);
     ThG = ThS;
+    int[int] n2o;
+    macro ThSN2O()n2o//
+    createMat(ThS, H, P1);
+    Mat<complex> T;
+    createMat(ThS, T, P0);
+    CoherentGlobalMesh(T, H, ThS, ThG);
 }
-
-fespace Uh(ThS, P1);
-varf vk(u, v) = int2dx2d(ThS)(ThS)(BEM(BemKernel("SL", k=k), u, v));
-HMatrix<complex> A = vk(Uh, Uh);
-Mat<complex> H;
-createMat(ThS, H, P1);
+H = vk(UhG, UhG, sparams = "-mat_htool_epsilon 1.0e-4");
 plotDmesh(ThS, cmm = "Partitioning");
 bool mass = usedARGV("-mass") != -1;
+matrix<complex> M;
 if(mass) {
     varf vM(u, v) = int2d(ThS)(u * v);
-    H = vM(Uh, Uh);
-    set(H, sparams = "-mass_ksp_converged_reason", prefix = "mass_");
-}
-int[int] perm;
-{
-    fespace UhG(ThG, P1);
-    UhG<complex> numbering;
-    numbering[] = 0:UhG.ndof - 1;
-    Uh<complex> glob2loc = numbering;
-    ChangeNumbering(H, glob2loc[], perm);
-}
-
-func complex[int] op(complex[int]& in) {
-    complex[int] out(in.n), u(ThG.nt), v(ThG.nt);
-    for[i, p : perm] u[p] = in[i];
-    mpiAllReduce(u, v, mpiCommWorld, mpiSUM);
-    u = A * v;
-    for[i, p : perm] out[i] = u[p];
-    return out;
-}
-complex[int,int] dense(1, 1);
-func complex[int] prec(complex[int]& in) {
-    complex[int] out(in.n);
-    if(!mass) {
-        if(dense.n == 1 && dense.m == 1) {
-            HMatrix<complex> A = vk(Uh, Uh, commworld=mpiCommSelf);
-            dense.resize(Uh.ndof, Uh.ndof);
-            dense = A;
-            dense = dense^-1;
-        }
-        complex[int] u(Uh.ndof), v(Uh.ndof);
-        ChangeNumbering(H, u, in, inverse = true);
-        v = dense * u;
-        ChangeNumbering(H, v, out);
-    }
-    else {
-        KSPSolve(H, in, out);
-    }
-    return out;
+    M = vM(Uh, Uh);
 }
 
 varf vRHS(u, v) = -int2d(ThS)(finc*v);
 
 Uh<complex> bf;
 bf[] = vRHS(0, Uh);
-complex[int] b, u;
-ChangeNumbering(H, bf[], b);
-u.resize(b.n);
-KSPSolve(op, b, u, precon = prec, sparams = "-ksp_type fgmres -ksp_view_singularvalues -ksp_converged_reason -ksp_gmres_restart 1000 -pc_type shell");
+if(mass) {
+    set(H, sparams = "-ksp_type fgmres -ksp_view_singularvalues -ksp_converged_reason -ksp_gmres_restart 1000 -pc_type asm", O = M);
+}
+complex[int] u = H^-1 * bf[];
 // visualization
 if(!NoGraphicWindow) {
-    ThS = ThG;
-    Uh<complex> uf;
-    bf = 0;
-    for[i, p : perm] bf[][p] = u[i];
-    mpiAllReduce(bf[], uf[], mpiCommWorld, mpiSUM);
-
     distx = 2*lambda;
     disty = distx;
     distz = distx;
 
     int np = 100;
-    meshS ThOut = square3(np,np,
+    meshS ThOutG = square3(np,np,
                          [(sec1+(radius-height)*sin(angle)+sec2*cos(angle)+radius*sin(angle)+sec3+2*distx)*x-distx,
                           (height+disty-((radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty))*y
                           +(radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty,
                           width/2]);
-    fespace UhOut(ThOut, P1);
+    meshS ThOutS = ThOutG;
+    int[int] n2o;//
+    macro ThOutSN2O()n2o//
+    Mat<complex> B, T;
+    createMat(ThOutS, B, P1)
+    createMat(ThOutS, T, P0);
+    CoherentGlobalMesh(T, B, ThOutS, ThOutG);
+    MatDestroy(T);
+    fespace UhOutG(ThOutG, P1);
+    fespace UhOutS(ThOutS, P1);
     varf vp(u, v) = int2d(ThS)(POT(BemPotential("SL", k=k), u, v));
-    HMatrix<complex> B = vp(Uh, UhOut);
-    UhOut<complex> v, vinc;
+    Mat<complex> HPot(B, H);
+    HPot = vp(UhG, UhOutG, sparams = "-mat_htool_epsilon 1.0e-4");
+    ObjectView(HPot, format = "ascii_info_detail");
+    UhOutS<complex> v, vinc;
     vinc = finc;
-    v[] = B*uf[];
+    v[] = HPot*u;
     v[] += vinc[];
-    UhOut vr = real(v);
-    plot(vr, dim=2, fill=1, nbiso=20, cmm = "Solution");
-    if(mpirank == 0) {
-        int[int] fforder = [1, 1];
-        savevtk("helmholtz-3d-surf.vtu", ThOut, real(v), imag(v), dataname = "u.re u.im", order = fforder, bin = 1);
-    }
+    UhOutS vr = real(v);
+    plotMPI(ThOutS, vr, P1, def, real, cmm = "Global first kind solution")
 }

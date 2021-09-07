@@ -1031,6 +1031,7 @@ esac
 		        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetsc)
+                        AC_FF_PETSC_WHERELIB(htool,HTOOL_LIB,HTOOL_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(mmg,MMG_LIB,MMG_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(parmmg,PARMMG_LIB,PARMMG_INCLUDE,$ffconfpetsc)
@@ -1129,6 +1130,7 @@ esac
             AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetscc)
+            AC_FF_PETSC_WHERELIB(htool,HTOOL_LIB,HTOOL_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(mmg,MMG_LIB,MMG_INCLUDE,$ffconfpetscc)
             AC_FF_PETSC_WHERELIB(parmmg,PARMMG_LIB,PARMMG_INCLUDE,$ffconfpetscc)
@@ -2368,13 +2370,13 @@ AC_SUBST([FF_LIBS],$LIBS)
 LIBS=
 # echo "debug cxxx11: $ff_cxx11 mpi: $ff_mpi petsc: $ff_petsc_ok "
 test "$enable_download" != "yes" -a "$enable_download_hpddm" != "yes" -a \( "$enable_hpddm" != "yes" -o "$ff_hpddm_ok" != "yes" \) && enable_hpddm=no
-test "$enable_download" != "yes" -a "$enable_htool" != yes && enable_htool=no
+test "$enable_download" != "yes" -a "$enable_download_htool" != "yes" -a \( "$enable_htool" != "yes" -o "$ff_htool_ok" != "yes" \) && enable_htool=no
 
 test "$enable_download" != "yes" -a "$enable_bemtool" != yes && enable_bemtool=no
 test "$enable_download" != "yes" -a "$enable_boost" != yes && enable_boost=no
 
 test \( \( "$enable_download" = "yes" -o "$enable_download_hpddm" = "yes" \) -a "$enable_hpddm" != "no" \) -o "$ff_hpddm_ok" = "yes" && enable_hpddm=yes
-test "$enable_download" = yes -a "$enable_htool" != no && enable_htool=yes
+test \( \( "$enable_download" = "yes" -o "$enable_download_htool" = "yes" \) -a "$enable_htool" != "no" \) -o "$ff_htool_ok" = "yes" && enable_htool=yes
 
 test "$enable_download" = yes  -a "$enable_bemtool" != no && enable_bemtool=yes
 test "$enable_download" = yes -a "$enable_boost" != no && enable_boost=yes
@@ -2400,6 +2402,9 @@ fi
 ##echo @@@@@@@@@@@@ $ff_petsc_ok @@ "hpddm.$DYLIB_SUFFIX $FF_PETCS_DYLIB"
 TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_PETSC_DYLIB"])
 TOOL_DISABLE(bem,["bem.$DYLIB_SUFFIX"])
+if test -n "$TOOL_COMPILE_bem" -a -z "$ff_HTOOL_INCLUDE"; then
+  TOOL_COMPILE_htool="htool"
+fi
 
 ##
 if test "$ff_mkl_ok" = yes ; then

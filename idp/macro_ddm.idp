@@ -2029,25 +2029,34 @@ ENDIFMACRO
 // EOM
 ENDIFMACRO
 
-macro CoherentGlobalMesh(A, ThName, ThGlobal)
+macro CoherentGlobalMesh(MatT, MatV, ThName, ThGlobal)
 {
 IFMACRO(!ThName#Comm)
     NewMacro ThName#Comm()mpiCommWorld EndMacro
 ENDIFMACRO
-    int[int] numbering;
-    GlobalNumbering(A, numbering);
-    fespace VhLocalPrivate(ThName, P1);
-    fespace VhGlobalPrivate(ThGlobal, P1);
-    PetscScalar[int] numberingScalar(numbering.n), global, reduce(ThGlobal.nv);
-    for[i, v : numbering] numberingScalar[i] = v;
-    ChangeNumbering(A, numberingScalar, global);
-    if (ThName.nt) {
-        ChangeNumbering(A, numberingScalar, global, inverse = true);
+    int[int] numberingT;
+    int[int] numberingV;
+    GlobalNumbering(MatT, numberingT);
+    GlobalNumbering(MatV, numberingV);
+    fespace VhLocalPrivateT(ThName, P0);
+    fespace VhGlobalPrivateT(ThGlobal, P0);
+    fespace VhLocalPrivateV(ThName, P1);
+    fespace VhGlobalPrivateV(ThGlobal, P1);
+    PetscScalar[int] numberingScalarT(numberingT.n), globalT, reduceT(ThGlobal.nt);
+    PetscScalar[int] numberingScalarV(numberingV.n), globalV, reduceV(ThGlobal.nv);
+    for[i, v : numberingT] numberingScalarT[i] = v;
+    for[i, v : numberingV] numberingScalarV[i] = v;
+    ChangeNumbering(MatT, numberingScalarT, globalT);
+    ChangeNumbering(MatV, numberingScalarV, globalV);
+    if (ThName.nv) {
+        ChangeNumbering(MatT, numberingScalarT, globalT, inverse = true);
+        ChangeNumbering(MatV, numberingScalarV, globalV, inverse = true);
 IFMACRO(ThName#N2O)
-        int[int] restriction = restrict(VhLocalPrivate, VhGlobalPrivate, ThName#N2O);
+        int[int] restrictionT = restrict(VhLocalPrivateT, VhGlobalPrivateT, ThName#N2O);
+        int[int] restrictionV = restrict(VhLocalPrivateV, VhGlobalPrivateV, ThName#N2O);
 ENDIFMACRO
 IFMACRO(!ThName#N2O)
-        int[int] restriction;
+        int[int] restrictionT, restrictionV;
         {
             fespace PhGlobalPrivate(ThGlobal, P0);
             fespace PhLocalPrivate(ThName, P0);
@@ -2055,15 +2064,21 @@ IFMACRO(!ThName#N2O)
             int[int] I, J;
             real[int] C;
             [I, J, C] = R;
-            restriction = restrict(VhLocalPrivate, VhGlobalPrivate, J);
+            restrictionT = restrict(VhLocalPrivateT, VhGlobalPrivateT, J);
+            restrictionV = restrict(VhLocalPrivateV, VhGlobalPrivateV, J);
         }
 ENDIFMACRO
-        for[i, v : restriction] reduce[v] = numberingScalar[i];
+        for[i, v : restrictionT] reduceT[v] = numberingScalarT[i];
+        for[i, v : restrictionV] reduceV[v] = numberingScalarV[i];
     }
-    global.resize(ThGlobal.nv);
-    mpiAllReduce(reduce, global, ThName#Comm, mpiSUM);
-    int[int] globalInt(global.n);
-    for[i, v : global] globalInt[i] = abs(v);
-    ThGlobal = change(ThGlobal, renumv = globalInt);
+    globalT.resize(ThGlobal.nt);
+    globalV.resize(ThGlobal.nv);
+    mpiAllReduce(reduceT, globalT, ThName#Comm, mpiSUM);
+    mpiAllReduce(reduceV, globalV, ThName#Comm, mpiSUM);
+    int[int] globalIntT(globalT.n);
+    int[int] globalIntV(globalV.n);
+    for[i, v : globalT] globalIntT[i] = abs(v);
+    for[i, v : globalV] globalIntV[i] = abs(v);
+    ThGlobal = change(ThGlobal, renumt = globalIntT, renumv = globalIntV);
 }
 // EOM
