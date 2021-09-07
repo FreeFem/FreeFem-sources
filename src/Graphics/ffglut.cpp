@@ -3620,7 +3620,7 @@ void ThePlot::DrawIsoEfill(const R3 Pt[2],const R ff[2],const R3 Nt[2],const R *
                 }
             }
         }
-        else {
+        else if (xfb-eps <=fj  && fj <= xfh+eps) {
             PQ[im] = Pt[0]; NQ[im] = Nt[0]; z[im++] =fi;
             PQ[im] = Pt[1]; NQ[im] = Nt[1]; z[im++] =fj;
         }
