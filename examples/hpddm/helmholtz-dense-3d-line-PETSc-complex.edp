@@ -2,11 +2,10 @@
 // NBPROC 4
 // PARAM
 
-load "iovtk"
-load "PETSc-complex"
-macro dimension()3L// EOM
-include "macro_ddm.idp"
+load "msh3"
 load "bem"
+load "PETSc-complex"
+include "macro_ddm.idp"
 
 complex k     = getARGV("-k", 10.0);
 
@@ -16,51 +15,67 @@ func finc     = exp(1i*k*(dir[0]*x + dir[1]*y));
 int n         = 1000;
 
 border circle(t=0, 2*pi) { x=cos(t); y=sin(t); z=0; }
-meshL ThL = buildmeshL(circle(n));
+meshL ThG, ThL = buildmeshL(circle(n));
 ThL = OrientNormal(ThL, unbounded = 1);
+ThG = ThL;
+int[int] n2o;
+macro ThLN2O()n2o//
+Mat<complex> A;
+{
+    macro dimension()3L// EOM
+    createMat(ThL, A, P1);
+    Mat<complex> T;
+    createMat(ThL, T, P0);
+    CoherentGlobalMesh(T, A, ThL, ThG);
+}
 
 fespace Uh(ThL, P1);
-varf vk(u, v) = int1dx1d(ThL)(ThL)(BEM(BemKernel("SL", k=k), u, v));
-HMatrix<complex> A = vk(Uh, Uh, sym = 1);
-if(HasType("PC", "hpddm")) { // this test fails on Windows, deactivate it by checking for PCHPDDM
-    Mat<complex> H = A;
+fespace UhG(ThG, P1);
+varf vk(u, v) = int1dx1d(ThG)(ThG)(BEM(BemKernel("SL", k=k), u, v));
+A = vk(UhG, UhG);
 
-    varf vRHS(u, v) = -int1d(ThL)(finc*v);
-    Uh<complex> b, u;
-    b[] = vRHS(0, Uh);
-    u[] = 0;
-    {
-        int[int] range = H.range;
-        set(H, sparams = "-ksp_view -ksp_monitor -pc_type cholesky");
-        complex[int] tmp(range[1] - range[0]);
-        KSPSolve(H, b[](range[0]:range[1] - 1), tmp);
-        u[](range[0]:range[1] - 1) = tmp;
-    }
-    // visualization
-    if(!NoGraphicWindow) {
-        b[] = u[];
-        mpiAllReduce(b[], u[], mpiCommWorld, mpiSUM);
-        int np = 200;
-        int R = 4;
+varf vRHS(u, v) = -int1d(ThL)(finc*v);
+Uh<complex> b, u;
+b[] = vRHS(0, Uh);
+Mat<complex> E, D;
+MatConvert(A, E);
+MatConvert(E, D);
+set(D, sparams = "-ksp_view -ksp_monitor -pc_type cholesky");
+ObjectView(D, format = "info");
+complex[int] uP, bP;
+ChangeNumbering(A, b[], bP);
+uP.resize(bP.n);
+KSPSolve(D, bP, uP);
+ChangeNumbering(A, u[], uP, inverse = true, exchange = true);
+// visualization
+if(!NoGraphicWindow) {
+    macro dimension()2// EOM
+    int np = 200;
+    int R = 4;
 
-        border b1(t=-R, R) { x = t ; y = -R; }
-        border b2(t=-R, R) { x = R ; y = t; }
-        border b3(t=-R, R) { x = -t; y = R; }
-        border b4(t=-R, R) { x = -R; y = -t; }
+    border b1(t=-R, R) { x = t ; y = -R; }
+    border b2(t=-R, R) { x = R ; y = t; }
+    border b3(t=-R, R) { x = -t; y = R; }
+    border b4(t=-R, R) { x = -R; y = -t; }
 
-        mesh ThOut = buildmesh(b1(np) + b2(np) + b3(np) + b4(np) + circle(-np*pi/R));
-        fespace UhOut(ThOut, P1);
-        varf vp(u, v) = int1d(ThL)(POT(BemPotential("SL", k=k), u, v));
-        HMatrix<complex> B = vp(Uh, UhOut);
-        UhOut<complex> v, vinc;
-        vinc = finc;
-        v[] = B*u[];
-        v[] += vinc[];
-        UhOut vr = abs(v);
-        plot(vr, dim = 2, fill = 1, nbiso = 20, cmm = "Solution");
-        if(mpirank == 0) {
-            int[int] fforder = [1, 1];
-            savevtk("helmholtz-3d-line.vtu", ThOut, real(v), imag(v), dataname = "u.re u.im", order = fforder, bin = 1);
-        }
-    }
+    mesh ThOutG, ThOutL = buildmesh(b1(np) + b2(np) + b3(np) + b4(np) + circle(-np*pi/R));
+    fespace UhOut(ThOutL, P1);
+    int[int] n2o;//
+    macro ThOutLN2O()n2o//
+    Mat<complex> B, T;
+    ThOutG = ThOutL;
+    createMat(ThOutL, B, P1)
+    createMat(ThOutL, T, P0);
+    CoherentGlobalMesh(T, B, ThOutL, ThOutG);
+    MatDestroy(T);
+    varf vp(u, v) = int1d(ThL)(POT(BemPotential("SL", k=k), u, v));
+    Mat<complex> HPot(B, A);
+    fespace UhOutG(ThOutG, P1);
+    HPot = vp(UhG, UhOutG);
+    UhOut<complex> v, vinc;
+    vinc = finc;
+    v[] = HPot*u[];
+    v[] += vinc[];
+    UhOut vr = abs(v);
+    plotMPI(ThOutL, vr, P1, def, real, cmm = "Global first kind solution")
 }

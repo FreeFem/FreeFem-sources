@@ -9,6 +9,14 @@
 #include <unordered_map>
 #define GENERATE_DEPRECATED_FUNCTIONS
 
+#if defined(WITH_bemtool) && defined(PETSC_HAVE_HTOOL)
+#include <bemtool/tools.hpp>
+#include <bemtool/fem/dof.hpp>
+#include <bemtool/operator/operator.hpp>
+#include <bemtool/miscellaneous/htool_wrap.hpp>
+#include "bem.hpp"
+#endif
+
 #if defined(WITH_mkl) && !defined(HTOOL_HTOOL_HPP)
 #define HPDDM_MKL 1
 #define MKL_Complex8 std::complex<float>

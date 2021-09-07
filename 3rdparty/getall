@@ -163,34 +163,34 @@ download('TetGen','http://www.tetgen.org/1.5/src/tetgen1.5.1-beta1.tar.gz',
 	'http://www.tetgen.org/1.5/src/',
 	'tetgen1.5.1-beta1.tar.gz',
 	'3d55c197bcbfc611b7ced6f343643756');
-download('mmg','https://github.com/MmgTools/mmg/archive/a90b665e909a3921490d3e281f7afa2d243a5ba0.zip',
-        'https://github.com/MmgTools',
+download('mmg','https://github.com/prj-/mmg/archive/1e26c551fdb969b38da46389bb0d95a35eb70d9d.zip',
+        'https://github.com/prj-',
         'mmg.zip',
-        'd824d08dac0544caff20a915194da0fe');
-download('parmmg','https://github.com/MmgTools/ParMmg/archive/f78f4e3e1019137787588aab7a8052fbc60dada2.zip',
-        'https://github.com/MmgTools',
+        'dc4c1e2afc3570f2d6aca106c9ea2829');
+download('parmmg','https://github.com/prj-/ParMmg/archive/9cb2f7a22ef590d196d028970f462889bf610c53.zip',
+        'https://github.com/prj-',
         'parmmg.zip',
-        '9a76fef6be1ab66af3a813409a0388c9');
-download('PETSc','https://www.mcs.anl.gov/petsc/mirror/release-snapshots/petsc-3.15.1.tar.gz',
+        '32035de70272121137c0869e8c49e4bd');
+download('PETSc','https://www.mcs.anl.gov/petsc/mirror/release-snapshots/petsc-3.16.0.tar.gz',
 	'https://www.mcs.anl.gov/petsc/mirror/release-snapshots/',
-	'petsc-3.15.1.tar.gz',
-	'af0d1b5c5a01a5f35636773661a025dd');
+	'petsc-3.16.0.tar.gz',
+	'a892196e0d3e2846e977365d8458b053');
 
-download('htool','https://github.com/htool-ddm/htool/archive/e008e87bded5626d73fa7655487aee48268e2149.zip',
+download('htool','https://github.com/htool-ddm/htool/archive/f0a1542a8c408e1da02478a9843bb12815a680ae.zip',
 		'https://github.com/htool-ddm/',
 		'htool.zip',
-		'7ee614df188cf501c03c5f27d1569b1c');
+		'3b57a0ec38144522de393490662bc66a');
 
 	
-download('hpddm','https://codeload.github.com/hpddm/hpddm/zip/01bd3df5a5dcb657a257ee118af98ef15a78b816',
+download('hpddm','https://codeload.github.com/hpddm/hpddm/zip/7113b9a6b77fceee3f52490cb27941a87b96542f',
 	'https://codeload.github.com/hpddm',
 	'hpddm.zip',
-	'48dac6ddbcad86ba62a29d71e3460846');
+	'6910b7b974f0b60d9c247c666e7f3862');
 
-download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/d327ef63c5abe88b13197c433a019e0db10eb426.zip',
+download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/11a65453bef0f1893a314517063984eaa7d05828.zip',
 	'https://github.com/PierreMarchand20/BemTool',
 	'bemtool.zip',
-	'70fcbea1f1bd2e8c8d9c44f59626f934');
+	'f749de914ac8def4ef466d7c33c10bbd');
 
 download('Boost','https://www.ljll.math.upmc.fr/~tournier/boost_for_bemtool.tar.gz',
 	'https://www.boost.org',
