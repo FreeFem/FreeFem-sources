@@ -124,7 +124,7 @@ PETSC_DOWNLOAD += '--download-metis-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu'
 ifneq ($(FC),)
 COMMON_FLAGS += --with-fc='$(FC)'
-PETSC_DOWNLOAD += --download-scalapack --download-mumps --download-slepc-configure-arguments="--download-arpack=https://github.com/prj-/arpack-ng/archive/6d11c37b2dc9110f3f6a434029353ae1c5112227.tar.gz"
+PETSC_DOWNLOAD += --download-scalapack --download-mumps --download-slepc-configure-arguments="--download-arpack=https://github.com/prj-/arpack-ng/archive/b64dccb.tar.gz"
 PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL) # --download-slepc-configure-arguments="--with-arpack-dir=$(DIR_INSTALL_REAL)"
 else
 COMMON_FLAGS += --with-fc=0
