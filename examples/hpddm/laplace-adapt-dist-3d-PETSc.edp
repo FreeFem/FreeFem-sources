@@ -11,11 +11,11 @@ include "macro_ddm.idp"             // additional DDM functions
 int n = 12;
 int[int] L=[1,1,1,1], LU=[0,2], LD=[1,1], LR=[0,1];
 mesh3 Th3 = buildlayers(square(n, n, region=0, label=L), n, zbound=[0,1], labelmid=LD, labelup=LU, labeldown=LR);
-Th3 = trunc(Th3, x < 0.5 || y < 0.5 || z < 0.5, label=1);
+Th3 = trunc(Th3, x < 0.5 || y < 0.5 || z < 0.5, label=3);
 
 macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
 
-varf vPoisson(u, v) = int3d(Th3)(grad(u)' * grad(v)) + int3d(Th3)(v) + on(1,2, u=0);
+varf vPoisson(u, v) = int3d(Th3)(grad(u)' * grad(v)) + int3d(Th3)(v) + on(1,2,3, u=0);
 
 Mat A;
 buildDmesh(Th3);
@@ -30,7 +30,7 @@ int niter = getARGV("-niter", 3);
 int verbose = getARGV("-verbose", 1);
 bool isotropic = (usedARGV("-isotropic") != -1);
 int[int] rt(2);
-rt = [1, 2];
+rt = [1,2];
 for(int i = 0; i < iMax; ++i) {
     A = vPoisson(Vh, Vh, tgv = -2);
     set(A, sparams = "-ksp_monitor -pc_type hypre");
@@ -58,7 +58,7 @@ for(int i = 0; i < iMax; ++i) {
         rest = restrict(VhParMmg, VhMet, n2o);
     }
     for[i, v : rest] metParMmg[i] = met[v];
-    ThParMmg = parmmg3d(ThParMmg, metric = metParMmg, hausd = 0.01/*, requiredTriangle = rt*/, nodeCommunicators = communicators, niter = niter, verbose = verbose);
+    ThParMmg = parmmg3d(ThParMmg, metric = metParMmg, hausd = 0.01, requiredTriangle = rt, nodeCommunicators = communicators, niter = niter, verbose = verbose);
     reconstructDmesh(ThParMmg)
     int[int] fforder = [1];
     savevtk("laplace-adapt-dist-3d.vtu", Th3, u, bin = 1, order = fforder, append = i ? true : false);
