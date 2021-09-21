@@ -283,19 +283,23 @@ namespace PETSc {
     } else if(std::is_same<decltype(A->_ia), PetscInt>::value)
       MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, A->_n, A->_m, reinterpret_cast<PetscInt*>(A->_ia), reinterpret_cast<PetscInt*>(A->_ja), A->_a, &aux);
     else {
+      MatCreate(PETSC_COMM_SELF, &aux);
+      MatSetSizes(aux, A->_n, A->_n, A->_n, A->_n);
+      MatSetType(aux, MATSEQAIJ);
+#if defined(PETSC_USE_64BIT_INDICES)
       PetscInt* ia = new PetscInt[A->_n + 1];
       std::copy_n(A->_ia, A->_n + 1, ia);
       PetscInt* ja = new PetscInt[A->_nnz];
       std::copy_n(A->_ja, A->_nnz, ja);
       PetscScalar* c = new PetscScalar[A->_nnz];
       std::copy_n(A->_a, A->_nnz, c);
-      MatCreate(PETSC_COMM_SELF, &aux);
-      MatSetSizes(aux, A->_n, A->_n, A->_n, A->_n);
-      MatSetType(aux, MATSEQAIJ);
       MatSeqAIJSetPreallocationCSR(aux, ia, ja, c);
       delete[] c;
       delete[] ja;
       delete[] ia;
+#else
+      MatSeqAIJSetPreallocationCSR(aux, A->_ia, A->_ja, A->_a);
+#endif
     }
     return aux;
   }
@@ -1222,7 +1226,20 @@ namespace PETSc {
       ptA->_cnum = ptA->_num + mA->n;
       std::iota(ptA->_num, ptA->_num + mA->n, 0);
       std::iota(ptA->_cnum, ptA->_cnum + mA->m, 0);
+#if defined(PETSC_USE_64BIT_INDICES)
+      PetscInt* ia = new PetscInt[dA._n + 1];
+      std::copy_n(dA._ia, dA._n + 1, ia);
+      PetscInt* ja = new PetscInt[dA._nnz];
+      std::copy_n(dA._ja, dA._nnz, ja);
+      PetscScalar* c = new PetscScalar[dA._nnz];
+      std::copy_n(dA._a, dA._nnz, c);
+      MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
+      delete[] c;
+      delete[] ja;
+      delete[] ia;
+#else
       MatMPIAIJSetPreallocationCSR(ptA->_petsc, dA._ia, dA._ja, dA._a);
+#endif
     }
     else {
       ptA->_A = new HpddmType;
