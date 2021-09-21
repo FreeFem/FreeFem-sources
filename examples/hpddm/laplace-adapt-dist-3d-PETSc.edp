@@ -29,8 +29,8 @@ int noTransfer = (getARGV("-transfer", 1) == 0);
 int niter = getARGV("-niter", 3);
 int verbose = getARGV("-verbose", 1);
 bool isotropic = (usedARGV("-isotropic") != -1);
-int[int] rt(2);
-rt = [1, 2];
+int[int] rt(1);
+rt = [2];
 for(int i = 0; i < iMax; ++i) {
     A = vPoisson(Vh, Vh, tgv = -2);
     set(A, sparams = "-ksp_monitor -pc_type hypre");
@@ -59,7 +59,7 @@ for(int i = 0; i < iMax; ++i) {
     }
     for[i, v : rest] metParMmg[i] = met[v];
     verbosity = 1;
-    ThParMmg = parmmg3d(ThParMmg, metric = metParMmg, hausd = 0.01/*, requiredTriangle = rt*/, nodeCommunicators = communicators, niter = niter, verbose = verbose);
+    ThParMmg = parmmg3d(ThParMmg, metric = metParMmg, hausd = 0.01, requiredTriangle = rt, nodeCommunicators = communicators, niter = niter, verbose = verbose);
     verbosity = 0;
     reconstructDmesh(ThParMmg)
     int[int] fforder = [1];
