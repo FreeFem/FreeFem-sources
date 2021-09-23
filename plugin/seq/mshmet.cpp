@@ -807,7 +807,7 @@ AnyType mshmet2d_Op::operator( )(Stack stack) const {
 }
 
 static void Load_Init( ) {    // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
-  if (verbosity) {
+  if (verbosity && mpirank == 0) {
     cout << " load: mshmet  " << endl;
   }
 
