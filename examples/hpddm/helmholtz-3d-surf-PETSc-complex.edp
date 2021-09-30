@@ -8,6 +8,8 @@ macro dimension()3S// EOM
 include "macro_ddm.idp"
 include "cobrameshcavity.idp"
 
+if(!HasType("Mat", "Htool")) exit(0);
+
 real sec1   = 0.01;
 real angle  = 2*pi*35/360;
 real radius = 0.186;

@@ -6,6 +6,8 @@ load "PETSc-complex"
 load "msh3"
 include "macro_ddm.idp"
 
+if(!HasType("Mat", "Htool")) exit(0);
+
 complex k = 10; // wavenumber
 
 real lambda = 2*pi/real(k);

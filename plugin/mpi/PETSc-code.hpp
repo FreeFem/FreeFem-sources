@@ -9,7 +9,7 @@ typedef PETSc::DistributedCSR< HpSchur< PetscScalar > > Dbddc;
 typedef PETSc::DistributedCSR< HpSchur< PetscReal > > DbddcR;
 typedef PETSc::DistributedCSR< HpSchur< PetscComplex > > DbddcC;
 
-#if defined(WITH_bemtool) && defined(PETSC_HAVE_HTOOL)
+#if defined(WITH_bemtool) && defined(WITH_htool)
 namespace PETSc {
 
 template<typename P, typename MeshBemtool>
@@ -55,6 +55,7 @@ htool::VirtualGenerator<PetscScalar>* get_gen(Gen<P, MeshBemtool>* generator) {
 
 template<class Matrix, template<typename P, typename MeshBemtool> class Gen, typename P, typename MeshBemtool, class R = PetscScalar, typename std::enable_if< std::is_same< Matrix, Dmat >::value >::type* = nullptr>
 void Assembly(Matrix* A, Gen<P, MeshBemtool>* generator, string compressor,vector<double> &p1,vector<double> &p2,MPI_Comm comm,int dim,bool sym = false) {
+#if defined(PETSC_HAVE_HTOOL)
     PetscInt m, M;
     KSPDestroy(&A->_ksp);
     if(A->_vS) {
@@ -89,6 +90,9 @@ void Assembly(Matrix* A, Gen<P, MeshBemtool>* generator, string compressor,vecto
     if(std::is_same<HtoolCtx<P, MeshBemtool>, Gen<P, MeshBemtool>>::value) {
         MatHtoolSetKernel(A->_petsc, GenEntriesFromCtx<P, MeshBemtool>, generator);
     }
+#else
+    ffassert(0);
+#endif
 }
 
 template<class fes1, class fes2, typename std::enable_if< (fes1::FESpace::Mesh::RdHat::d >= 3) || std::is_same<typename fes1::FESpace::Mesh, Mesh>::value >::type* = nullptr >
@@ -302,7 +306,7 @@ namespace PETSc {
     const FESpace2& Vh = *PVh;
     const Mesh1& Th = Uh.Th;
     bool same = isSameMesh(b->largs, &Uh.Th, &Vh.Th, stack);
-#if defined(WITH_bemtool) && defined(PETSC_HAVE_HTOOL)
+#if defined(WITH_bemtool) && defined(WITH_htool)
     int VFBEM = typeVFBEM(b->largs, stack);
 #else
     int VFBEM = -1;
@@ -336,7 +340,7 @@ namespace PETSc {
       changeOperatorSimple(&B, &A);
       B._A->setMatrix(nullptr);
     }
-#if defined(WITH_bemtool) && defined(PETSC_HAVE_HTOOL)
+#if defined(WITH_bemtool) && defined(WITH_htool)
     else {
         varfBem<fes1, fes2>(PUh, PVh, same, VFBEM, stack, b->largs, ds, &B);
     }
@@ -1009,6 +1013,12 @@ namespace PETSc {
               PetscErrorCode (*ksp)(KSP*);
               PetscFunctionListFind(KSPList, t.c_str(), &ksp);
               if(ksp)
+                  return 1L;
+          }
+          else if (o.compare("MAT") == 0) {
+              PetscErrorCode (*mat)(Mat*);
+              PetscFunctionListFind(MatList, t.c_str(), &mat);
+              if(mat)
                   return 1L;
           }
       }
@@ -5282,14 +5292,14 @@ static void Init_PETSc( ) {
          new PETSc::varfToMat< PetscScalar, Mesh3, v_fes3, v_fes3 >,
          new PETSc::varfToMat< PetscScalar, MeshS, v_fesS, v_fesS >,
          new PETSc::varfToMat< PetscScalar, MeshL, v_fesL, v_fesL >
-#if defined(WITH_bemtool) && defined(PETSC_HAVE_HTOOL)
+#if defined(WITH_bemtool) && defined(WITH_htool)
                                                                    ,
          new PETSc::varfToMat< PetscScalar, MeshL, v_fesL, v_fes  >,
          new PETSc::varfToMat< PetscScalar, MeshL, v_fesL, v_fesS >,
          new PETSc::varfToMat< PetscScalar, MeshS, v_fesS, v_fes  >
 #endif
                                                                    );
-#if defined(WITH_bemtool) && defined(PETSC_HAVE_HTOOL)
+#if defined(WITH_bemtool) && defined(WITH_htool)
   typedef const BemKernel fkernel;
   if (!exist_type< fkernel* >( )) map_type[typeid(const BemFormBilinear *).name( )] = new TypeFormBEM;
 #endif
