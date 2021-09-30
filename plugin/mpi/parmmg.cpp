@@ -305,6 +305,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
     if (plocalParameter && plocalParameter->M( ) > 0) {
       const KNM< double > &localParameter = *plocalParameter;
       ffassert(localParameter.N() == 4);
+#if 0
       if ( PMMG_Set_iparameter(mesh,/*sol,*/PMMG_IPARAM_numberOfLocalParam,localParameter.M()) != 1 ) {
         exit(EXIT_FAILURE);
       }
@@ -313,6 +314,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
           exit(EXIT_FAILURE);
         }
       }
+#endif
     }
   }
 
