@@ -559,7 +559,7 @@ AnyType SetCompressMat(Stack stack,Expression emat,Expression einter,int init)
 
   std::shared_ptr<Cluster<PCARegularClustering>> t = std::make_shared<Cluster<PCARegularClustering>>();
   t->set_minclustersize(minclustersize);
-  t->build(xx.n,p.data(),2);
+  t->build(xx.n,p.data(),2,comm);
 
   //cout << M.N() << " " << xx.M() << " " << yy.n << " " << zz.n<< endl;
   if (init) delete *Hmat;
@@ -776,8 +776,8 @@ void builHmat(HMatrixVirt<R>** Hmat, VirtualGenerator<R>* generatorP,const Data_
     std::shared_ptr<Cluster<PCARegularClustering>> s =std::make_shared<Cluster<PCARegularClustering>>();
     t->set_minclustersize(data.minclustersize);
     s->set_minclustersize(data.minclustersize);
-    t->build(generatorP->nb_rows(),p2.data(),2);
-    s->build(generatorP->nb_cols(),p1.data(),2);
+    t->build(generatorP->nb_rows(),p2.data(),2,comm);
+    s->build(generatorP->nb_cols(),p1.data(),2,comm);
 
     *Hmat = new HMatrixImpl<R>(t,s,data.epsilon,data.eta,data.sym?'S':'N',data.sym?'U':'N',-1,comm);
     std::shared_ptr<htool::VirtualLowRankGenerator<R>> LowRankGenerator = nullptr;
@@ -921,7 +921,7 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
     std::shared_ptr<Cluster<PCARegularClustering>> s = make_shared<Cluster<PCARegularClustering>>();
     t->set_minclustersize(ds.minclustersize);
     s->set_minclustersize(ds.minclustersize);
-    t->build(n,p1.data(),2);
+    t->build(n,p1.data(),2,comm);
     
 
     if(!samemesh) {
@@ -939,7 +939,7 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
             p2[3*i+2] = pp.z;
         }
 
-        s->build(m,p2.data(),2);
+        s->build(m,p2.data(),2,comm);
     }
     else{
         p2=p1;
