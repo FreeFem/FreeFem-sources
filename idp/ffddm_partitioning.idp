@@ -752,20 +752,21 @@ EndMacro
 NewMacro prfe#transferfromVhi(ui,VhName,Pknew,res)
 if (prmsh#isincomm)
 {
+NewMacro PetscScalar prfe#K EndMacro
 include "macro_ddm.idp"
 assert(!bnopartloc);
 fespace prfe#Phtransfer(prmsh#Thi,P0);
-prfe#Phtransfer part;
-part[] = prmsh#partloc;
-prmsh#meshN Tht = trunc(prmsh#Thi, abs(part - mpirank) < 1e-2);
+prfe#Phtransfer partkP0;
+partkP0[] = prmsh#partloc;
+prmsh#meshN Tht = trunc(prmsh#Thi, abs(partkP0 - mpirank) < 1e-2);
 reconstructDmesh(Tht)
 fespace prfe#Vhitransfer(Tht,prfe#fPk);
 matrix R = interpolate(prfe#Vhitransfer,prfe#Vhi);
 matrix<prfe#K> Rc = R;
-prfe#Vhitransfer<prfe#K> prfe#mdef(ut);
-ut[] = Rc*ui[];
+prfe#Vhitransfer<prfe#K> prfe#mdef(uinterpt);
+uinterpt[] = Rc*ui[];
 prmsh#meshN Thtarget = VhName.Th;
-transfer(Tht, prfe#fPk, ut, Thtarget, Pknew, res)
+transfer(Tht, prfe#fPk, uinterpt, Thtarget, Pknew, res)
 }
 EndMacro
 
