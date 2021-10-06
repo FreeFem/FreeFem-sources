@@ -10,7 +10,14 @@ if (!bpara) {
   if (mpiRank(pr#prfe#prmesh#mpicomm) == 0)
     cout << "["+Stringification(pr)+"] CS size = " << pr#ncoarsespace << endl;
   pr#sizelg = sizel;	/* sizelg stores the number of ev for every subdomain */
+}
+else {
+  pr#ncoarsespace = 0; /* coarse space dimension */
+  mpiAllReduce(pr#si,pr#ncoarsespace,pr#prfe#prmesh#mpicomm,mpiSUM);
+}
 
+if (pr#ncoarsespace > 0)
+if (!bpara) {
   pr#prfe#K[int,int] Zm(pr#prfe#Ndofglobal,pr#ncoarsespace);
   int cpt = 0;
   /* the 2 fors loop over the columns of Z subdomainwise */
@@ -27,9 +34,6 @@ if (!bpara) {
   set(pr#E,solver=sparsesolver,commworld=pr#prfe#prmesh#commself,factorize=3);
 }
 else {
-  pr#ncoarsespace = 0; /* coarse space dimension */
-  mpiAllReduce(pr#si,pr#ncoarsespace,pr#prfe#prmesh#mpicomm,mpiSUM); 
-    
   /* Assemble E on proc 0
      see PhD thesis of P.Jolivet pag 46 and following */
   	
@@ -746,9 +750,6 @@ for(int i=0;i<pr#prfe#prmesh#npart;++i)
 if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#commddm)))) {
 	pr#prfe#prmesh#Thi=pr#prfe#prmesh#aTh[i];
 
-  pr#prfe#K[int,int] eV(pr#prfe#Dk[i].n,nev);
-	pr#prfe#K[int] ev(nev);
-
 	matrix<pr#prfe#K> weightedTmp;
 
 	weightedTmp=pr#aR[i]*pr#prfe#Dih[i];
@@ -777,7 +778,21 @@ if ((!pr#prfe#prmesh#excluded) && ((!bpara) || (i == mpiRank(pr#prfe#prmesh#comm
     }
   }
   ENDIFMACRO
+
+  if (ffddminertia) {
+    matrix<pr#prfe#K> NA = pr#matN-ffddmtau*weighted;
+    int[int] info(40);
+    set(NA,solver = sparsesolver,sym=1,commworld=pr#prfe#prmesh#commself,factorize=3,info=info);
+    int ninertia = info[11];
+    if (pr#verbosity >= 1 && ninertia > nev) cout << "["+Stringification(pr)+"] " << nev << " Warning: inertia = " << ninertia << ", maximum number of eigenvectors too low (" << nev << ", from -ffddm_geneo_nu) in subdomain " << i << endl;
+    nev = min(nev,ninertia);
+    if (pr#verbosity >= 10) cout << "["+Stringification(pr)+"] " << nev << " eigenvectors will be computed in subdomain " << i << endl;
+  }
+
   set(pr#matN,solver = sparsesolver,commworld=pr#prfe#prmesh#commself);
+
+  pr#prfe#K[int,int] eV(pr#prfe#Dk[i].n,nev);
+  pr#prfe#K[int] ev(nev);
 
   int kk = EigenValue(pr#matN,weighted,sym=1,value=ev,rawvector=eV,ncv=max(20,3*nev));
 

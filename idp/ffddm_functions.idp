@@ -144,7 +144,7 @@ macro ffddmgeneratePrecondfunctions(pr,preffe)
   {
     preffe#K[int] res(l.n);
     res=0.;
-    if (preffe#prmesh#isincomm) {
+    if (preffe#prmesh#isincomm && pr#ncoarsespace > 0) {
       if(pr#bCM){
         preffe#K[int] vaux(1), tmp(1), zaux(1);
         

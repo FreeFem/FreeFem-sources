@@ -13,8 +13,11 @@ real ffddmtol = getARGV("-ffddm_tol", 1.e-6);
 real ffddminexactCStol = getARGV("-ffddm_inexactCS_tol", 1.e-1);
 int ffddmnu = getARGV("-ffddm_geneo_nu", 20); // number of local eigenvectors to compute for DtN CS (choice criterion 4.3 of Lea's paper is applied to these computed eigenvectors unless -noLea is activated)
 real ffddmtau = getARGV("-ffddm_geneo_threshold",0.5);
-if ( usedARGV("-ffddm_geneo_nu") > -1 && usedARGV("-ffddm_geneo_threshold") <= -1)
+if (usedARGV("-ffddm_geneo_nu") > -1 && usedARGV("-ffddm_geneo_threshold") <= -1)
   ffddmtau = 0;
+int ffddminertia = usedARGV("-ffddm_geneo_threshold") > -1 && usedARGV("-ffddm_geneo_no_inertia") <= -1;
+if (ffddminertia && usedARGV("-ffddm_geneo_nu") <= -1)
+  ffddmnu = 500;
 
 string ffddmcorrection = getARGV("-ffddm_schwarz_coarse_correction", "ADEF1"); // for 2 level preconditioner
 
