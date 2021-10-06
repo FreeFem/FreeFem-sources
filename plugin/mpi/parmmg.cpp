@@ -124,7 +124,7 @@ int PMMG_pParMesh_to_ffmesh(const PMMG_pParMesh& mesh, Mesh3 *&T_TH3, bool distr
 class parmmg_Op : public E_F0mps {
  public:
   Expression eTh, xx, yy, zz;
-  static const int n_name_param = 35;
+  static const int n_name_param = 36;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
 
@@ -191,7 +191,8 @@ basicAC_F0::name_and_type parmmg_Op::name_param[] = {
 {"ls"                , &typeid(double)},/*!< [val], Value of level-set */
 {"requiredTriangle"  , &typeid(KN<long>*)},/*!< [val], References of surfaces with required triangles */
 {"localParameter"    , &typeid(KNM<double>*)},/*!< [val], Local parameters on given surfaces */
-{"nodeCommunicators" , &typeid(KN<KN<long>>*)}
+{"nodeCommunicators" , &typeid(KN<KN<long>>*)},
+{"neighbors"         , &typeid(KN<long>*)}
 };
 
 class parmmg_ff : public OneOperator {
@@ -305,7 +306,6 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
     if (plocalParameter && plocalParameter->M( ) > 0) {
       const KNM< double > &localParameter = *plocalParameter;
       ffassert(localParameter.N() == 4);
-#if 0
       if ( PMMG_Set_iparameter(mesh,/*sol,*/PMMG_IPARAM_numberOfLocalParam,localParameter.M()) != 1 ) {
         exit(EXIT_FAILURE);
       }
@@ -314,7 +314,6 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
           exit(EXIT_FAILURE);
         }
       }
-#endif
     }
   }
 
@@ -388,7 +387,26 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
 
   int ier = communicators == NULL ? PMMG_parmmglib_centralized(mesh) : PMMG_parmmglib_distributed(mesh);
   if( ier == PMMG_STRONGFAILURE ) exit(EXIT_FAILURE);
+  KN< long > *pneighbors = 0;
+  if (nargs[35]) {
+    pneighbors = GetAny< KN< long > * >((*nargs[35])(stack));
+    int icomm,i;
+    int n_node_comm_out;
+    int nitem_node_comm_out;
+    int color_node_out;
 
+    /* Get number of node interfaces */
+    ier = PMMG_Get_numberOfNodeCommunicators(mesh,&n_node_comm_out);
+    pneighbors->resize(n_node_comm_out);
+
+    /* Get outward proc rank and number of nodes on each interface */
+    for( icomm = 0; icomm < n_node_comm_out; icomm++ ) {
+      ier = PMMG_Get_ithNodeCommunicatorSize(mesh, icomm,
+                                             &color_node_out,
+                                             &nitem_node_comm_out);
+      pneighbors->operator[](icomm) = color_node_out;
+    }
+  }
   Mesh3 *Th_T = nullptr;
 
   PMMG_pParMesh_to_ffmesh(mesh, Th_T, communicators != NULL);

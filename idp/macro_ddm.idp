@@ -685,6 +685,9 @@ real[int][int] privateDmesh#ThName#khi(2);
 real[int][int] privateDmesh#ThName#intersection;
 ENDIFMACRO
 {
+IFMACRO(!ThName#Comm)
+    NewMacro ThName#Comm()mpiCommWorld EndMacro
+ENDIFMACRO
     real[int] part;
     {
         if(verbosity > 0)
