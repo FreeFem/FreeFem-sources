@@ -60,7 +60,7 @@ for(int i = 0; i < iMax; ++i) {
     for[i, v : rest] metParMmg[i] = met[v];
     int[int] neighbors;
     ThParMmg = parmmg3d(ThParMmg, metric = metParMmg, hausd = 0.01, requiredTriangle = rt, nodeCommunicators = communicators, niter = niter, verbose = verbose, neighbors = neighbors);
-    reconstructDmeshWithNeighbors(ThParMmg, neighbors)
+    reconstructDmesh(ThParMmg)
     int[int] fforder = [1];
     savevtk("laplace-adapt-dist-3d.vtu", Th3, u, bin = 1, order = fforder, append = i ? true : false);
     if(!noTransfer) {
