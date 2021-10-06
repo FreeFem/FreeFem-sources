@@ -57,6 +57,9 @@ if (ffddmnpart <= 0) {
 }
 
 int bnoGlob = usedARGV("-noGlob") > -1 ? 1 : 0;
+int bnoGlobwithpartloc = usedARGV("-noGlobwithpartloc") > -1 ? 1 : 0;
+int bnopartloc = bnoGlob;
+bnoGlob = bnoGlob || bnoGlobwithpartloc;
 
 //if (abs(ffddmsplit)>1) bnoGlob = 1;
 if (bseq || ffddmbplot || ffddmbdirect)
