@@ -90,7 +90,7 @@ struct Data_Sparse_Solver {
     info(0),
     kerneln(0), kernelt(0), kerneldim(0),verb(verbosity) ,x0(true),veps(0),
     rightprecon(true),
-    sym(false),
+    sym(0),
     positive(false),
     getnbiter(0) // add Mars 201
     {epsilon=1e-6;}

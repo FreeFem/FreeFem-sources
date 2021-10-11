@@ -159,7 +159,7 @@ if (!Mexcluded) {
   Btildei = BtildeaRd[mpiRank(Mcommddm)]*AFEAuginterp'; // Btilde_i of eq. (9)
 
   VarfC(vC, MAugThi, null)
-  Ctildei = vC(CFEAugVhi,CFEAugVhi,solver=CG); // Ctilde_i from Remark 3.2
+  Ctildei = vC(CFEAugVhi,CFEAugVhi,solver=CG,sym=1); // Ctilde_i from Remark 3.2
 }
 
 /* matrix-vector product with local Schur complement */
@@ -176,8 +176,8 @@ matrix localBlocki;
 
 if (!Mexcluded) {
   matrix mC = -Ctildei;
-  localBlocki = [[AaR[mpiRank(Mcommddm)]',Btildei'],[0,mC]];
-  set(localBlocki,solver=sparsesolver,sym=2,factorize=3,commworld=mpiCommSelf);
+  localBlocki = [[AaR[mpiRank(Mcommddm)],0],[Btildei,mC]];
+  set(localBlocki,solver=sparsesolver,sym=1,factorize=3,commworld=mpiCommSelf);
 }
 
 /* inverse of local Schur complement through the solution of the augmented sparse local saddle point system */ 

@@ -3571,8 +3571,8 @@ bool Have_UMFPACK() { return Have_UMFPACK_;}
 MatriceMorse<R> * removeHalf(MatriceMorse<R> & A,long half,double tol)
 {
 
-    // half < 0 => L
-    // half > 0 => U
+    // half < 0 => keep U
+    // half > 0 => keep L
     // half = 0 => L and the result will be sym
     int nnz =0;
 

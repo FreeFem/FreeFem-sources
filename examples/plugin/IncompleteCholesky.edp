@@ -53,10 +53,10 @@ if(1)
 	
 	real[int] b = va(0,Vh);
 	
-	L=removeHalf(AI,-1);  // build the structure of L
+	L=removeHalf(AI,1);  // build the structure of L
 		if(nn<10)
     	  cout << " L " <<  L << endl; 
-	U=removeHalf(AI,1); // build the structure of Ut ( transpose of )
+	U=removeHalf(AI,-1); // build the structure of Ut ( transpose of )
 	    if(nn<10)	
 		  cout << " U " <<  U << endl; 
 		

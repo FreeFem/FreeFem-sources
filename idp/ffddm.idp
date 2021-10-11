@@ -517,7 +517,7 @@ if (pr#prfe#prmesh#isincomm)
 		}
 		ENDIFMACRO
 		IFMACRO((!pr#withhpddm)&(!pr#withpetsc))
-		set(pr#aR[i],solver = sparsesolver,commworld=pr#prfe#prmesh#commself,factorize=3);
+		set(pr#aR[i],solver = sparsesolver,sym=vsym,commworld=pr#prfe#prmesh#commself,factorize=3);
 		ENDIFMACRO
   }
   if (bseq)

@@ -622,7 +622,6 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
         int kk = n_name_param-NB_NAME_PARM_MAT-1;
         if (nargs[++kk]) ds.initmat= ! GetAny<bool>((*nargs[kk])(stack));
 	if (nargs[++kk]) ds.solver= * GetAny<string*>((*nargs[kk])(stack));
-        ds.Init_sym_positive_var<R>(syma);//  set def value of sym and posi
 	if (nargs[++kk]) ds.epsilon= GetAny<double>((*nargs[kk])(stack)),unset_eps=false;
 	if (nargs[++kk])
 	{// modif FH fev 2010 ...
@@ -668,11 +667,13 @@ inline void SetEnd_Data_Sparse_Solver(Stack stack,Data_Sparse_Solver & ds,Expres
         if (nargs[++kk]) ds.veps= GetAny<double*>((*nargs[kk])(stack));
         if( unset_eps && ds.veps) ds.epsilon = *ds.veps;//  if veps  and no def value  => veps def value of epsilon.
         if (nargs[++kk]) ds.rightprecon= GetAny<bool>((*nargs[kk])(stack));
+        ds.sym = syma;
         if (nargs[++kk]) ds.sym= GetAny<long>((*nargs[kk])(stack));
         if (nargs[++kk]) ds.positive= GetAny<bool>((*nargs[kk])(stack));
         if (nargs[++kk])  { ds.getnbiter= GetAny<long*>((*nargs[kk])(stack));
             if( ds.getnbiter) *ds.getnbiter=-1; //undef 
         }
+        ds.Init_sym_positive_var<R>(ds.sym);//  set def value of sym and posi
         if(ds.solver == "")
         { // SET DEFAULT SOLVER TO HRE ... 
             if( ds.sym && ds.positive ) ds.solver=*def_solver_sym_dp;

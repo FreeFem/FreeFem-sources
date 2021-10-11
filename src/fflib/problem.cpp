@@ -11462,6 +11462,9 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
     }
     else
     *B = - *B;
+
+    dynamic_cast<HashMatrix<int,R> *>(&A)->half = ds.sym;
+
     MatriceCreuse<R_st>  * ACadna = 0;
 
 

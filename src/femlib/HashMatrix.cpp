@@ -320,12 +320,11 @@ void HashMatrix<I,R>::setp(I sp)
 template<class I,class R>
 void  HashMatrix<I,R>::RemoveHalf(int cas,double tol)
 {
-    
     size_t kk=0;
-    if( cas <=0) // L cas
+    if( cas <=0) // remove L, keep U case
     {
     for(size_t k=0; k <nnz ;++k)
-        if(  abs(aij[k])> tol && ( i[k] >= j[k] ) )
+        if(  abs(aij[k])> tol && ( i[k] <= j[k] ) ) // fix PHT Oct 2021 -- not used for now
         {
             i[kk] = i[k];
             j[kk] = j[k];
@@ -336,7 +335,7 @@ void  HashMatrix<I,R>::RemoveHalf(int cas,double tol)
     else
     {
      for(size_t k=0; k <nnz ;++k)
-        if(  abs(aij[k])> tol && ( i[k] <= j[k] ) )
+        if(  abs(aij[k])> tol && ( i[k] >= j[k] ) ) // fix PHT Oct 2021 -- not used for now
         {
             i[kk] = i[k];
             j[kk] = j[k];
@@ -359,26 +358,29 @@ void  HashMatrix<I,R>::RemoveHalf(int cas,double tol)
 template<class I,class R>
 void  HashMatrix<I,R>::resize(I nn, I mm,size_t nnnz, double tol , int sym )
 {
-    
+    bool goodsym = sym*half > 0 || (!sym && !half);
+    bool conjug = (half*sym < 0);
     mm= mm ? mm : nn;
-    if( nn == this->n && mm == this->m && nnz == nnnz && sym == half && tol <0) return ;
+    if( nn == this->n && mm == this->m && nnz == nnnz && goodsym && tol <0) return ;
+    ffassert(half >= 0 && sym >= 0); // TODO
     this->m=mm;
     this->n=nn;
     this->N=nn;
     this->M=mm;
     R mxt =0;
     size_t kk=0;
-    if( (nn>0) && (mm >0))
-    for(size_t k=0; k <nnz ;++k)
-    {
-        double t =abs(aij[k]);
-        if( i[k] < this->n && j[k] < this->m && t > tol && (!sym || i[k] <= j[k] ) )
-        {
-            i[kk] = i[k];
-            j[kk] = j[k];
-            aij[kk] = aij[k];
-            ++kk;
+    if( (nn>0) && (mm >0)) {
+        for(size_t k=0; k <nnz ;++k) {
+            double t =abs(aij[k]);
+            if( i[k] < this->n && j[k] < this->m && t > tol && (!sym || i[k] >= j[k] ) )
+            {
+                i[kk] = i[k];
+                j[kk] = j[k];
+                aij[kk] = (i[k]!=j[k] && conjug ?conj(aij[k]) : aij[k]);
+                ++kk;
+            }
         }
+        if (sym < 0) swap(i,j);
     }
     if(verbosity>9 ) cout << "HashMatrix<I,R>::resize: new nnz  = " << kk << " " << nnz << " " << " sym " << sym << " "<< tol << " " << nn << " " << mm << endl;
     half = (half ? half : sym);
@@ -1082,6 +1084,7 @@ R* HashMatrix<I,R>::addMatMul(R *x,R*Ax,bool Transpose,I sx,I sAx) const {
     I *ii=i,*jj=j;
     R *aa=aij;
     double t0= CPUsecond();
+    ffassert(half >= 0); // half < 0 TODO
     //   if(Transpose != trans) {std::swap(ii,jj);}
     const bool do_conj  = ((std::is_same<R,complex<double> >::value || std::is_same<R,complex<float> >::value )) && Transpose;
     if(Transpose ) {std::swap(ii,jj);}
@@ -1361,24 +1364,21 @@ double HashMatrix<I,R>::gettgv(I * pntgv,double ratio) const
 template<class I,class R>
 void HashMatrix<I,R>::setsdp(int sym,bool dp) // sym dpos para
 {
-    this->symetric=(sym > 0);
-    this->positive_definite=dp;
-    if( (half>0) != sym)
-    {
-        if( sym)
-            Half(sym);//  remove half part
+    this->symetric=(sym != 0); // not used -- defined in VirtualMatrix
+    this->positive_definite=dp; // not used -- defined in VirtualMatrix
+    if ((half*sym > 0) || (!sym && !half))
+        half = sym;
+    else {
+        if (sym)
+            Half(sym); //  remove half part -- sym > 0 --> keep L, sym < 0 --> keep U
         else
             UnHalf();
-    }
-    else {
-      half = sym;
     }
 }
 
 template<class I,class R>
 void HashMatrix<I,R>::UnHalf()
 {
-    
     if (half==0) return;
     HM();
     size_t nnz0=nnz,err=0;

@@ -1340,6 +1340,7 @@ AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stac
            AssembleBC<R>( stack,Th,Uh,Vh,ds.sym>0,A.A,0,0,b->largs,ds.tgv);
 
    }
+   A.pHM()->half = ds.sym;
    if (A_is_square)
         SetSolver(stack,VF,*A.A,ds);
 
