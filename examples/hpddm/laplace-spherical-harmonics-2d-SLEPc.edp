@@ -40,7 +40,7 @@ macro Pk() P1, periodic=[[Labels[0],x],[Labels[2],x]]//EOM
 /***************************************/
 int s      = getARGV("-split", 1)   ; // Refinement factor
 //
-int Npts   = getARGV("-npts" , 400) ; // Number of points on the perimeter
+int Npts   = getARGV("-npts" , 200) ; // Number of points on the perimeter
 //
 int nEV    = getARGV("-nev"  ,  5)  ; // Number of eigenvalues
 real sigma = getARGV("-sigma", 0.0) ; // Shift
