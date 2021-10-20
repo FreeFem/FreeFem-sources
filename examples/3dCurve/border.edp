@@ -1,0 +1,8 @@
+load "msh3"
+verbosity=3;
+border C(t=0, 2*pi){ x= cos(t); y=sin(t); region=1;}
+meshL Lh=buildmeshL(C(20));
+plot(Lh,dim=2, wait=1);
+mesh Th = buildmesh(Lh);
+
+plot(Th,dim=2, wait=1);

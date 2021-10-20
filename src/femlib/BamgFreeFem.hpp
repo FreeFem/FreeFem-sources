@@ -45,6 +45,9 @@ bamg::Triangles *msh2bamg(const Fem2D::Mesh &Th, double cutoffradian, int nbdfv,
 
 const Fem2D::Mesh *BuildMesh(Stack stack, E_BorderN const *const &b, bool justboundary, int nbvmax=0, bool Requiredboundary=true,
                              KNM<double> *pintern=0, double alea=0,bool SplitEdgeWith2Boundary=false);
+const Fem2D::Mesh *BuildMesh(Stack stack, const  Fem2D::MeshL *pmshL , bool justboundary, int nbvmax=0, bool Requiredboundary=true,
+                             KNM<double> *pintern=0, double alea=0,bool SplitEdgeWith2Boundary=false);
+const Fem2D::Mesh *BuildMesh(Stack stack, E_BorderN const *const &b, bool Requiredboundary);
 const Fem2D::Mesh *BuildMesh(Stack stack, E_BorderN const *const &b, bool Requiredboundary);
 const Fem2D::Mesh *BuildMeshBorder(Stack stack, E_BorderN const *const &b);
 const Fem2D::Mesh *MoveTheMesh(const Fem2D::Mesh &Th, const KN_<double> &u, const KN_<double> &v);

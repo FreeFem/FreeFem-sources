@@ -1384,7 +1384,9 @@ void GenericMesh<T,B,V>::SameVertex(const double precis_mesh, V *vertice, T *ele
     
     
 template<typename T,typename B,typename V>
-void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &nbe, V *(&v), T *(&t), B *(&b), bool removeduplicate, bool rebuildboundary, int orientation) {
+void GenericMesh<T,B,V>::
+
+clean_mesh(double precis_mesh, int &nv, int &nt, int &nbe, V *(&v), T *(&t), B *(&b), bool removeduplicate, bool rebuildboundary, int orientation) {
 
   
     // array for the index of new vertices, element, borderelement in the old numbering

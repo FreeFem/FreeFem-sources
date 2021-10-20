@@ -37,9 +37,10 @@
 func int usedARGV(string after)
 {
   int ret=-1;
-  for(int i=ARGV.n-1;i>=0;--i)        
-       if(ARGV[i]==after) { ret=++i; break;}
-  if(ARGV.n<ret) ret=-1;
+  for(int i=ARGV.n-2;i>=0;--i)        
+       if(ARGV[i]==after) { ret=++i; i=-1;}
+ // if(ARGV.n<ret) ret=-1
+ cout << "usedARGV " <<  after <<" " << ret << endl;  
   return ret;
 }
 
