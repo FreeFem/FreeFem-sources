@@ -74,6 +74,9 @@ All notable changes to this project will be documented in this file.
   remark; the associated generic name existe of P1dc, P2dc, P0edge, P0VF and all  dc finite element corresponding to
   no continuity across element.
 - add code of intallfaces to  do Discontinous Galerkin  formulation in 3d (in test FH.)
+- add dist function to a mesh , meshL, MeshS or  mesh3 
+- signeddistfunction to a meshL or  meshS 
+- add buildmesh functon to build a 2d mesh from a meshL (same as buildmesh see examples/3dCurve/border.edp) 
 ### Changed
 - Now the order to find MPI in configure is first if you have PETSC then take MPI from PETSc
   otherwise use previous method
