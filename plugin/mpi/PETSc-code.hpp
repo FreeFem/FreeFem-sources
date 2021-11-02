@@ -954,18 +954,16 @@ namespace PETSc {
     VecCreateMPIWithArray(PETSC_COMM_WORLD, 1, in->n, PETSC_DECIDE,
                           out->operator PetscScalar*(), &y);
 
-    IS from, to;
+    IS to;
     PetscInt* idx = new PetscInt[in->n];
     for (int i = 0; i < in->n; ++i) idx[i] = numbering->operator[](i);
     ISCreateGeneral(PETSC_COMM_SELF, in->n, idx, PETSC_USE_POINTER, &to);
-    ISCreateStride(PETSC_COMM_SELF, in->n, low, 1, &from);
     VecScatter scatter;
     VecScatterCreate(x, NULL, y, to, &scatter);
     VecScatterBegin(scatter, x, y, INSERT_VALUES, SCATTER_FORWARD);
     VecScatterEnd(scatter, x, y, INSERT_VALUES, SCATTER_FORWARD);
     VecScatterDestroy(&scatter);
     ISDestroy(&to);
-    ISDestroy(&from);
     delete[] idx;
     VecDestroy(&x);
     VecDestroy(&y);
