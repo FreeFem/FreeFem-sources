@@ -30,40 +30,18 @@ index 43fe0c8981..a574b06fe3 100644
 +        args.append('-DCMAKE_C_COMPILER="'+mpicc.split(None, 1)[0]+'"')
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
-diff --git a/config/BuildSystem/config/packages/htool.py b/config/BuildSystem/config/packages/htool.py
-index e6d07d15e0..705af13287 100644
---- a/config/BuildSystem/config/packages/htool.py
-+++ b/config/BuildSystem/config/packages/htool.py
-@@ -3,7 +3,7 @@ import config.package
- class Configure(config.package.Package):
-   def __init__(self,framework):
-     config.package.Package.__init__(self,framework)
--    self.gitcommit              = 'f0a1542a8c408e1da02478a9843bb12815a680ae' # main sep-21-2021
-+    self.gitcommit              = '9381c9202197cb3235fa55fcd3f72c173c428188' # main oct-19-2021
-     self.download               = ['git://https://github.com/htool-ddm/htool','https://github.com/htool-ddm/htool/archive/'+self.gitcommit+'.tar.gz']
-     self.minversion             = '0.7.0'
-     self.versionname            = 'HTOOL_VERSION'
-@@ -11,7 +11,7 @@ class Configure(config.package.Package):
-     self.minCxxVersion          = 'c++11'
-     self.cxx                    = 1
-     self.functions              = []
--    self.includes               = ['htool/htool.hpp']
-+    self.includes               = ['htool/misc/define.hpp'] # no C++11 in this header
-     self.skippackagewithoptions = 1
-     self.precisions             = ['double'] # coordinates are stored in double precision, other scalars are templated, just enforce PetscReal == double during ./configure, for now
-     self.usesopenmp             = 'yes'
 diff --git a/src/mat/impls/aij/mpi/mumps/mumps.c b/src/mat/impls/aij/mpi/mumps/mumps.c
-index 9e0a1138df..692fdada37 100644
+index 3226ffb961..95f38a899f 100644
 --- a/src/mat/impls/aij/mpi/mumps/mumps.c
 +++ b/src/mat/impls/aij/mpi/mumps/mumps.c
-@@ -1789,11 +1789,7 @@ PetscErrorCode PetscSetMUMPSFromOptions(Mat F, Mat A)
-      So we turn off distributed RHS for MPICH. See https://bitbucket.org/mpi4py/mpi4py/issues/162/mpi4py-initialization-breaks-fortran
-      and a petsc-maint mailing list thread with subject 'MUMPS segfaults in parallel because of ...'
+@@ -1792,11 +1792,7 @@ PetscErrorCode PetscSetMUMPSFromOptions(Mat F, Mat A)
+      see https://github.com/pmodels/mpich/issues/5589. This bug was fixed by https://github.com/pmodels/mpich/pull/5590.
+      In short, we could not use distributed RHS with MPICH until v4.0b1.
     */
--#if PETSC_PKG_MUMPS_VERSION_GE(5,3,0) && defined(PETSC_HAVE_OMPI_MAJOR_VERSION)
--  mumps->ICNTL20 = 10; /* Distributed dense RHS*/
--#else
+-#if PETSC_PKG_MUMPS_VERSION_LT(5,3,0) || (defined(PETSC_HAVE_MPICH_NUMVERSION) && (PETSC_HAVE_MPICH_NUMVERSION < 40000101))
    mumps->ICNTL20 = 0;  /* Centralized dense RHS*/
+-#else
+-  mumps->ICNTL20 = 10; /* Distributed dense RHS*/
 -#endif
    ierr = PetscOptionsMUMPSInt("-mat_mumps_icntl_20","ICNTL(20): give mumps centralized (0) or distributed (10) dense right-hand sides","None",mumps->ICNTL20,&mumps->ICNTL20,&flg);CHKERRQ(ierr);
    if (flg && mumps->ICNTL20 != 10 && mumps->ICNTL20 != 0) SETERRQ1(PETSC_COMM_SELF,PETSC_ERR_SUP,"ICNTL(20)=%d is not supported by the PETSc/MUMPS interface. Allowed values are 0, 10\n",(int)mumps->ICNTL20);
