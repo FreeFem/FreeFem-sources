@@ -15,9 +15,6 @@
 
 ### Fixed
 -
-
-### Security
--
 -->
 
 # Changelog
@@ -33,12 +30,11 @@ All notable changes to this project will be documented in this file.
   `BoundaryBE`, `InternalBE` to know if border element (BE) is on true boundary of not.
   update `nElementonB` in case on no manifold data (value greater > 2) in meshL, MeshS case ..
   add code to use jump, mean of test functuon on MeshL case. ( not in mesh3 ) to compute RHS. 
-
 - add getcwd() function in shell plugin to ghet the current working dir 
 - add nuVertex to get the vextex on element in some int?
- 
+
 ### Changed
--
+- PETSc 3.16.1
 
 ### Deprecated
 - SLEPc and SLEPc-complex have been part of PETSc and PETSc-complex for multiple releases and are now deprecated
@@ -50,9 +46,7 @@ All notable changes to this project will be documented in this file.
 - examples/potential.edp correct problem in times loops and BC
 - tutorial/mortar-DN-4.edp correct problem of region number in meshL
 - fixe problem in Curve mesh and intallBE , vertex number is wrong 
-
-### Security
--
+- portability issue on arm64-apple with `make petsc-slepc`
 
 ## [4.9]
 ### Added
@@ -101,9 +95,6 @@ All notable changes to this project will be documented in this file.
   correct `3dCurve/basicGlue.edp`and add missing test
 - bugs in SLEPc `SVDSolve()` with a rectangular `Mat`
 - bugs in nElementonB for DG 3d formulation.
-
-### Security
--
 
 ## [4.8]
 ### Added
@@ -332,8 +323,6 @@ All notable changes to this project will be documented in this file.
 - spurious output in PARDISO
 - fix problem in ffglut (AF)
 - detect hdf5 and gsl if no enable-download
-
-### Security
 
 ## [4.4]
 ### Added
