@@ -1743,19 +1743,25 @@ ENDIFMACRO
         gluedExchange = gluemesh(toGlue);
     }
     meshN interpolateExchange;
+    fespace PhExchangePrivate(gluedExchange, P0);
     fespace VhExchangePrivate(gluedExchange, Pk);
     VhExchangePrivate<PetscScalar> def(uExchange);
     for[i, v : rankRecv] {
         int index = mpiWaitAny(rqRecvU);
         if(index != mpiUndefined) {
             if(recvTh[index].nt) {
-                fespace VhRestrictionPrivate(recvTh[index], Pk);
-                matrix R = interpolate(VhRestrictionPrivate, VhExchangePrivate);
+                fespace PhRestrictionPrivate(recvTh[index], P0);
+                matrix R = interpolate(PhRestrictionPrivate, PhExchangePrivate);
                 if(R.nnz != R.n) {
                     R.thresholding(1.0e-2);
                     assert(R.nnz == R.n);
                 }
-                for[i, j, v : R] uExchange[][j] += exchangeU[index][i];
+                int[int] I, J;
+                real[int] C;
+                [I, J, C] = R;
+                fespace VhRestrictionPrivate(recvTh[index], Pk);
+                int[int] restriction = restrict(VhRestrictionPrivate, VhExchangePrivate, J);
+                for[i, v : restriction] uExchange[][v] += exchangeU[index][i];
             }
         }
     }

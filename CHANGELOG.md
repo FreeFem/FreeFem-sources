@@ -45,8 +45,9 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - examples/potential.edp correct problem in times loops and BC
 - tutorial/mortar-DN-4.edp correct problem of region number in meshL
-- fixe problem in Curve mesh and intallBE , vertex number is wrong 
+- fix problem in Curve mesh and intallBE , vertex number is wrong 
 - portability issue on arm64-apple with `make petsc-slepc`
+- fix assertion failure with `transfer` and `transferMat` with some finite elements
 
 ## [4.9]
 ### Added
