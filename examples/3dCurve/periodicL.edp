@@ -2,8 +2,12 @@ load "msh3"
 
 meshL Th=segment(10,[x*pi*2]);
 fespace Vh(Th,P1,periodic=[[1],[2]]);
+meshL ThVh = Vh.Th; // check code ..
 func u1e =(sin(x+1));
 Vh u,v,uh=u1e;
+
+meshL Thu = u.Th; // check code ..
+u.n; // check code ..  
 func f1= 1*u1e;
 macro grad3(u) [dx(u),dy(u),dz(u)]//
 solve PP2(u,v) = int1d(Th)(grad3(u)'*grad3(v)+1e-6*u*v) - int1d(Th)(f1*v) ;

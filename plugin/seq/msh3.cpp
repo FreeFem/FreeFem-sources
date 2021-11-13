@@ -259,7 +259,7 @@ int TestElementMesh3(const Mesh3 &Th3) {
         }
 
         for (int eh = 0; eh < 6; eh++) {
-          cout << "tetrahedra: " << k << " edge : " << eh << " lenght " << Th3[k].lenEdge(eh)
+          cout << "tetrahedra: " << k << " edge : " << eh << " length " << Th3[k].lenEdge(eh)
                << endl;
           cout << " Tet vertices : " << iv[0] << " " << iv[1] << " " << iv[2] << " " << iv[3] << " "
                << endl;
@@ -278,7 +278,7 @@ int TestElementMesh3(const Mesh3 &Th3) {
     for (int e = 0; e < 3; e++) {
       if (Th3.be(k).lenEdge(e) < Norme2(Psup - Pinf) / 1e9) {
         for (int eh = 0; eh < 3; eh++) {
-          cout << "triangles: " << k << " edge : " << eh << " lenght " << Th3.be(k).lenEdge(e)
+          cout << "triangles: " << k << " edge : " << eh << " length " << Th3.be(k).lenEdge(e)
                << endl;
         }
 
@@ -2431,11 +2431,11 @@ template< class MMesh >
 class SetMesh_Op : public E_F0mps {
  public:
   Expression a;
-  static const int n_name_param = 9;
+  static const int n_name_param = 9+1;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   KN_< long > arg(int i, Stack stack, KN_< long > a) const {
-    if (i != 8) {
+    if (i < n_name_param-2) {
       ffassert(!(nargs[i] && nargs[i + 2]));
       i = nargs[i] ? i : i + 2;
     }
@@ -2470,7 +2470,7 @@ basicAC_F0::name_and_type SetMesh_Op< Mesh3 >::name_param[] = {
   {"region", &typeid(KN_< long >)}, {"label", &typeid(KN_< long >)},
   {"fregion", &typeid(long)},       {"flabel", &typeid(long)},
   {"rmlfaces", &typeid(long)},      {"rmInternalFaces", &typeid(bool)},
-  {"renumv", &typeid(KN_<long>)}};
+  {"renumv", &typeid(KN_<long>)},   {"renumt", &typeid(KN_<long>)}};
 
 // special instance, list arguments for meshS
 template<>
@@ -2479,16 +2479,16 @@ basicAC_F0::name_and_type SetMesh_Op< MeshS >::name_param[] = {
   {"region", &typeid(KN_< long >)}, {"label", &typeid(KN_< long >)},
   {"fregion", &typeid(long)},       {"flabel", &typeid(long)},
   {"rmledge", &typeid(long)},       {"rmInternalEdges", &typeid(bool)},
-  {"renumv", &typeid(KN_<long>)}};
+  {"renumv", &typeid(KN_<long>)},   {"renumt", &typeid(KN_<long>)}};
 
 // special instance, list arguments for meshL
 template<>
 basicAC_F0::name_and_type SetMesh_Op< MeshL >::name_param[] = {
   {"refedge", &typeid(KN_< long >)}, {"refpoint", &typeid(KN_< long >)},
-  {"region", &typeid(KN_< long >)}, {"label", &typeid(KN_< long >)},
-  {"fregion", &typeid(long)},       {"flabel", &typeid(long)},
+  {"region", &typeid(KN_< long >)},  {"label", &typeid(KN_< long >)},
+  {"fregion", &typeid(long)},        {"flabel", &typeid(long)},
   {"rmlpoint", &typeid(long)},       {"rmInternalPoints", &typeid(bool)},
-  {"renumv", &typeid(KN_<long>)}};
+  {"renumv", &typeid(KN_<long>)},    {"renumt", &typeid(KN_<long>)}};
 
 // function to apply the change of label with the map
 int ChangeLab(const map< int, int > &m, int lab) {
@@ -2543,7 +2543,9 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
   long rmlabfaces(arg(6, stack, 0L));
   bool rm_i_faces(arg(7, stack, false));
   KN<long> rv (arg(8,stack,zz));
+  KN<long> rt (arg(9,stack,zz));
   bool rV =  (rv.size()== nbv);
+  bool rT =  (rt.size()== nbv);
 
   if (rm_i_faces && (is_same< MMesh, MeshS >::value || is_same< MMesh, MeshL >::value) )
     cout << " Warning: remove internal border isn't implemented " << endl;
@@ -2584,29 +2586,43 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
   }
 
   // new elements
+   int unsetlab = std::numeric_limits<int>::max()-2;
   T *t = new T[nbt];
-  T *tt = t;
+  for (int i = 0; i < nbt; i++)
+    t[i].lab = unsetlab;
+ // T *tt = t;
+  
   int lmn = 2000000000;
   int lmx = -2000000000;
   double k = T::nv;
   TRdHat PtHat = TRdHat::diag(1. / k);
   for (int i = 0; i < nbt; i++) {
+      
+   int itt = rT ? rt[i] : i;
+    
     const T &K(Th.elements[i]);
     int iv[T::nv];
     for (int j = 0; j < k; j++) iv[j] = Th.operator( )(K[j]);
     if(rV) {
       for (int j = 0; j < k; j++) iv[j] = rv(iv[j]);
     }
-    tt->set(v, iv, ChangeLab(mapTref, K.lab));
+    t[itt].set(v, iv, ChangeLab(mapTref, K.lab));
     if (freg) {
       mp->set(Th, K(PtHat), PtHat, K, 0);
-      tt->lab = GetAny< long >((*freg)(stack));
-      lmn = min(lmn, tt->lab);
-      lmx = max(lmx, tt->lab);
+     t[itt].lab = GetAny< long >((*freg)(stack));
+      lmn = min(lmn, t[itt].lab );
+      lmx = max(lmx, t[itt].lab );
     }
-    tt++;
+   // tt++;
   }
-
+    int err=0;
+    for (int i = 0; i < nbt; i++)
+    err += t[i].lab == unsetlab;
+   if(err )
+   {
+       cout << " nb error in renumbering element "<< err << endl;
+       ffassert(0);
+   }
   if (freg && verbosity > 1)
     cout << "    -- Change : new region number bound : " << lmn << " " << lmx << endl;
 
@@ -6700,7 +6716,7 @@ class ExtractMesh_Op : public E_F0mps {
 
     if (nargs[1] || nargs[3])
       CompileError(
-        "obselete function, to extract a region of the mesh3, use trunc function...this function "
+        "obsolete function, to extract a region of the mesh3, use trunc function...this function "
         "returns a part of boundary 3D mesh  ->  a meshS type");
 
     if (nargs[0] && nargs[2]) CompileError("uncompatible extractmesh (Th, label= , refface=  ");
@@ -6881,7 +6897,7 @@ AnyType ExtractMesh_Op< MMesh, MMeshO >::operator( )(Stack stack) const {
 class ExtractMeshLfromMesh_Op : public E_F0mps {
 public:
 	Expression eTh;
-	static const int n_name_param = 7;    //
+	static const int n_name_param = 8;    //
 	static basicAC_F0::name_and_type name_param[];
 	Expression nargs[n_name_param], xx, yy, zz;
       
@@ -6924,7 +6940,10 @@ basicAC_F0::name_and_type ExtractMeshLfromMesh_Op::name_param[] = {
 {"cleanmesh", &typeid(bool)}, 
 {"removeduplicate", &typeid(bool)},
 {"precismesh", &typeid(double)},
-{"orientation", &typeid(long)}
+{"orientation", &typeid(long)},
+{"ridgeangle", &typeid(double)}
+
+    
 };
             
  
@@ -6947,7 +6966,7 @@ public:
 			Expression Z=0 ; if(a->size( )>2) Z= to< double >((*a)[2]);
 			return new ExtractMeshLfromMesh_Op(args, t[0]->CastTo(args[0]), X, Y, Z);
 		} 
-		CompileError("ExtractMeshLfromMesh case unknow  ");		
+		CompileError("ExtractMeshLfromMesh case unknown  ");
 		return 0; 
 	}
 };
@@ -6978,6 +6997,7 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 	bool rebuildboundary=false;//(arg(7, stack, false));
 	double precis_mesh(arg(5, stack, 1e-7));
 	long orientation(arg(6, stack, 1L));
+        double ridgeangle(arg(7, stack, Pi/4.));
 	
     if(!labelface.N( ) && verbosity)
       cout << " empty list label, extract all boundaries" << endl;
@@ -7049,12 +7069,15 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 		const B &K(Th.be(ibe));
 		int ivv[2];
 		for (int jj = 0; jj < 2; jj++) ivv[jj] = takevertex[Th.operator( )(K[jj])];
+		int ie, i = Th.BoundaryElement(ibe, ie);
+		if (&(Th[i].Edge(0,ie)) != &(K[0]))
+		  swap(ivv[0],ivv[1]);
 		(bb++)->set(v, ivv, K.lab);
 	}
       ffassert(nvL>0);
     
 	// build the moved mesh and apply option
-	MeshL *T_Th = new MeshL(nvL, nbeLab, 0, v, b, 0, cleanmesh, removeduplicate, rebuildboundary, orientation, precis_mesh);
+	MeshL *T_Th = new MeshL(nvL, nbeLab, 0, v, b, 0, cleanmesh, removeduplicate, rebuildboundary, orientation, precis_mesh,false,ridgeangle);
 
 
 	T_Th->BuildGTree( );

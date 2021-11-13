@@ -76,7 +76,7 @@ inline int access(char *fileName, int mode) { return _access(fileName, mode); }
 
 void NewHandler( );
 void NewHandler( ) {
-  cerr << " Not enought memory" << endl;
+  cerr << " Not enough memory" << endl;
   exit(1);
 }
 void forDebug( );
@@ -305,7 +305,7 @@ int main(int argc, char **argv) {
       cout << "     -thetamax (double)   change the angular limit for a corner in degre " << endl;
       cout << "                       the angle is defined from 2 normals of 2 concecutives edges "
            << endl;
-      cout << "                       if no geomtry cf reading an  am_fmt, amdba, nopo .. file "
+      cout << "                       if no geometry cf reading an  am_fmt, amdba, nopo .. file "
            << endl;
 
       cout << "" << endl;

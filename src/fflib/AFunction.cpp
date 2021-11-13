@@ -300,8 +300,10 @@ AnyType TTry(Stack s ,Expression ins,Expression ccatch,Expression fin,Expression
 {
   assert(notused == 0);
   AnyType a;
+    if(verbosity> 2) cerr << "Try " << endl;
      try  {a=(*ins)(s);}
      catch ( E_exception & e) {
+         if(verbosity> 2) cerr << "Try:: catch ( E_exception )" << endl;
         throw e;
        }
      catch(...) {
@@ -1241,7 +1243,8 @@ void Init_map_type()
        );
 
      TheOperators->Add("%",
-       new OneBinaryOperator<Op2_mod<long,long,long> >
+       new OneBinaryOperator<Op2_mod<long,long,long> >,
+       new OneOperator2<double,double,double>(fmod)
        );
 
 

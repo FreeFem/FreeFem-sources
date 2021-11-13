@@ -107,7 +107,25 @@ friend  std::ostream& operator <<(std::ostream& f, const R1 & P )
        { f << P.x   ; return f; }
 friend  std::istream& operator >>(std::istream& f,  R1 & P)
        { f >>  P.x  ; return f; }
-  static const R1 KHat[d+1];
+ static const R1 *KHat;
+ static  const R1 * setKHat() {
+        static  R1 lKHat[d+1];
+        static int count=0;
+     if(count++==0)
+     {
+         assert(d==1);
+       //  cout <<lKHat[0] << "; ";
+         for(int i=1; i<=d;++i)
+         {
+          lKHat[i][i-1]=1. ;
+       //   cout << lKHat[i]<< "; ";
+         }
+       //  cout << endl;
+         KHat =lKHat;
+     }
+
+        return lKHat;
+    }
 };
 
 inline R1 Minc(const R1 & A,const R1 &B){ return R1(min(A.x,B.x));}

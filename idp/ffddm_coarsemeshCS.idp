@@ -103,7 +103,7 @@ if (!pr#prfe#prmesh#binexactCS) {
     VarfEprec(cvaglobalEprec,pr#ThCoarse,pr#VhCoarse)
     /*if (mpirank < pr#prfe#prmesh#pCS || !bpara)*/
     if (mpirank == 0 || !bpara) {
-      pr#ECM = cvaglobalEprec(pr#VhCoarse,pr#VhCoarse,solver=(vsym ? CG : GMRES),tgv=vtgv);  /* this is A_{eps,0} of Euan paper */
+      pr#ECM = cvaglobalEprec(pr#VhCoarse,pr#VhCoarse,sym=vsym,tgv=vtgv,solver=GMRES);  /* this is A_{eps,0} of Euan paper */
       /*pr#ECM.thresholding(1.e-10);*/
     }
     ENDIFMACRO
@@ -118,8 +118,7 @@ if (!pr#prfe#prmesh#binexactCS) {
   }
 
   if (bseq || mpirank < pr#prfe#prmesh#pCS) {
-  	set(pr#ECM,solver=GMRES);
-    set(pr#ECM,solver=sparsesolver,commworld=pr#prfe#prmesh#commCS,master=0,factorize=3); /* -1 */
+    set(pr#ECM,solver=sparsesolver,sym=vsym,commworld=pr#prfe#prmesh#commCS,master=0,factorize=3); /* -1 */
   }
 }
 	

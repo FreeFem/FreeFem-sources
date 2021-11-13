@@ -19,7 +19,7 @@ test -f "$change_compiler" && source "$change_compiler"
 # configuration & build
 autoreconf -i \
   && ./configure --enable-download --without-mpi --prefix=/builds/workspace/freefem \
-  && ./3rdparty/getall -a \
+  && ./3rdparty/getall -a -o ARPACK,METIS,ParMETIS,ScaLAPACK,Scotch,SuiteSparse,SuperLU,mmg,parmmg,hpddm,bemtool,Boost,libpthread-google,TetGen,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS,htool \
   && ./etc/jenkins/blob/build.sh
 
 if [ $? -eq 0 ]

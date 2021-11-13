@@ -104,8 +104,27 @@ public:
   }
   
   friend R  det(const R3 &A,const R3 &B, const R3 &C, const R3 &D) { return det(R3(A,B),R3(A,C),R3(A,D));}
-  static const R3 KHat[d+1];
-  
+  static const R3 * KHat;
+  static const R3 * setKHat() {
+           static  R3 lKHat[d+1];
+           static int count=0;
+      if(count++==0)
+      {
+          assert(d==3);
+          //cout <<lKHat[0] << "; ";
+          for(int i=1; i<=d;++i)
+          {
+           lKHat[i][i-1]=1. ;
+          // cout << lKHat[i]<< "; ";
+          }
+         // cout << endl;
+          KHat =lKHat;
+      }
+
+      KHat =lKHat;
+    return lKHat;
+       }
+
   R2 p2() const { return R2(x,y);}
 };
 

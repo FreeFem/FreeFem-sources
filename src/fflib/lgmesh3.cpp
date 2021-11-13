@@ -311,7 +311,7 @@ bool BuildPeriodic3(
 				  int p1[BE::nv],p2[BE::nv];
 				  SetNumPerm<BE::nv>(np1,p1);
 				  SetNumPerm<BE::nv>(np2,p2);
-				  if(verbosity>50)
+				  if(verbosity>50 && BE::nv>2)
 				      cout <<"  " << ie1 << " ==  " << ie2  << ":  " <<  fo[p1[0]] << " " << fo[p1[1]] << " " << fo[p1[2]] << " == " 
 				       << i2to1[p2[0]] << " " << i2to1[p2[1]] << " " << i2to1[p2[2]]  << "  e ="
 				       << Th(e[p2[0]]) << " " << Th(e[p2[1]]) << " " << Th(e[p2[2]])  << " "
@@ -3103,7 +3103,9 @@ TheOperators->Add("=",
  Global.Add("int3d","(",new OneOperatorCode<CDomainOfIntegration3d>);
  Global.Add("int2d","(",new OneOperatorCode<CDomainOfIntegrationBorder3d>);
  Global.Add("intallfaces","(",new OneOperatorCode<CDomainOfIntegrationAllFaces>);
-
+ Global.Add("intallBE","(",new OneOperatorCode<CDomainOfIntegrationAllFaces>);
+ Global.Add("intallBE","(",new OneOperatorCode<CDomainOfIntegrationAllEdgesS>);
+ Global.Add("intallBE","(",new OneOperatorCode<CDomainOfIntegrationAll0d>);
  // 3d surface
  Global.Add("int2d","(",new OneOperatorCode<CDomainOfIntegrationS>);
  Global.Add("int1d","(",new OneOperatorCode<CDomainOfIntegrationBorderS>);
@@ -3137,6 +3139,8 @@ TheOperators->Add("=",
  Add<pfesS*>("ndof",".",new OneOperator1<long,pfesS*>(pVhS_ndof));
  Add<pfesS*>("nt",".",new OneOperator1<long,pfesS*>(pVhS_nt));
  Add<pfesS*>("ndofK",".",new OneOperator1<long,pfesS*>(pVhS_ndofK));
+ Add<pfesS*>("Th",".",new OneOperator1<pmeshS,pfesS*>(pVhS_Th));//ADD JUIN 2021 FH.
+
 // Add<pfesS*>("Th",".",new OneOperator1<pmesh3,pfesS*>(pVhS_Th));
  
 // 3d curve FE
@@ -3147,7 +3151,8 @@ Add<pfLc>("Th",".",new OneOperator1<pmeshL,pfLc>(pfLr_Th<Complex>));
 Add<pfesL*>("ndof",".",new OneOperator1<long,pfesL*>(pVhL_ndof));
 Add<pfesL*>("nt",".",new OneOperator1<long,pfesL*>(pVhL_nt));
 Add<pfesL*>("ndofK",".",new OneOperator1<long,pfesL*>(pVhL_ndofK));
-    
+Add<pfesL*>("Th",".",new OneOperator1<pmeshL,pfesL*>(pVhL_Th));//ADD JUIN 2021 FH.
+
     
  //Add<pf3rbasearray*>("[","",new OneOperator2_<pf3rbase*,pf3rbasearray*,long>(get_element));
  //Add<pf3rarray>("[","",new OneOperator2_<pf3r,pf3rarray,long>(get_element));

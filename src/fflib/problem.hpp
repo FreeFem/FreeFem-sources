@@ -219,7 +219,7 @@ class BC_set : public E_F0mps { public:
       { //
         C_F0 x=Find(ii->first);
         if (x.left() != atype<const finconnue *>())
-          CompileError("We expected an unkown  u=... of the problem");
+          CompileError("We expected an unknown  u=... of the problem");
         const finconnue * uu = dynamic_cast<const finconnue *>(x.LeftValue());
         ffassert(uu);
         const MGauche *ui=uu->simple();
@@ -282,31 +282,33 @@ public:
   static const int n_name_param =12;
   static basicAC_F0::name_and_type name_param[] ;
   Expression nargs[n_name_param];
-  enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3, int3d = 4, intallfaces= 5,intallVFfaces=6,int0d=7 } ; //3d
+  enum typeofkind  { int2d=0, int1d=1, intalledges=2,intallVFedges=3, int3d = 4, intallfaces= 5,intallVFfaces=6,int0d=7,intall0d=8 } ; //3d
   typeofkind  kind; //  0
   int d; // 3d
-  bool isMeshS,isMeshL;
+  int dHat;//
+//  bool isMeshS,isMeshL;
   typedef const CDomainOfIntegration* Result;
   Expression Th;
   Expression mapt[3],mapu[3];
   vector<Expression> what;
   vector<int> whatis; // 0 -> long , 1 -> array ???
-  CDomainOfIntegration( const basicAC_F0 & args,typeofkind b=int2d,int ddim=2,bool surface=false, bool curve=false) // 3d
-    :kind(b),d(ddim), Th(0), what(args.size()-1),whatis(args.size()-1)
+  CDomainOfIntegration( const basicAC_F0 & args,typeofkind b=int2d,int ddim=2,int ddHat=0) // 3d
+    :kind(b),d(ddim),dHat(ddHat==0 ? d : ddHat), Th(0), what(args.size()-1),whatis(args.size()-1)
 
   {
-    isMeshS=surface;
-    isMeshL=curve;
+      
+  //  isMeshS=surface;
+ //   isMeshL=curve;
     mapt[0]=mapt[1]=mapt[2]=0; // no map of intergration points for test function
     mapu[0]=mapu[1]=mapu[2]=0; // no map of intergration points for unknows function
     args.SetNameParam(n_name_param,name_param,nargs);
     if(d==2) // 3d
       Th=CastTo<pmesh>(args[0]);
-    else if(d==3 && !surface && !curve){
+    else if(d==3 && dHat==3){
         Th=CastTo<pmesh3>(args[0]);}
-    else if(d==3 && surface && !curve){
+    else if(d==3 && dHat==2){
         Th=CastTo<pmeshS>(args[0]);}
-    else if(d==3 && !surface && curve){
+    else if(d==3 && dHat==1){
         Th=CastTo<pmeshL>(args[0]);}
     else ffassert(0); // a faire
     int n=args.size();
@@ -355,6 +357,7 @@ public:
   bool withmap() const {return mapu[0] || mapt[0]; }
 };
 
+
 class CDomainOfIntegrationBorder: public CDomainOfIntegration {
 public:
   CDomainOfIntegrationBorder( const basicAC_F0 & args) :CDomainOfIntegration(args,int1d) {}
@@ -394,27 +397,34 @@ public:
   static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,intallfaces,3);}
   static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmesh3>(), true);} // all type
 };
+//  MeshL 
+class CDomainOfIntegrationAll0d: public CDomainOfIntegration {
+public:
+    CDomainOfIntegrationAll0d( const basicAC_F0 & args) :CDomainOfIntegration(args,intall0d,3) {}
+  static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,intall0d,3,1);}
+  static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshL>(), true);} // all type
+};
 
 // 3D surface
 
 class CDomainOfIntegrationS: public CDomainOfIntegration {
 public:
-    CDomainOfIntegrationS( const basicAC_F0 & args) :CDomainOfIntegration(args,int2d,3,true) {}
-    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int2d,3,true);}
+    CDomainOfIntegrationS( const basicAC_F0 & args) :CDomainOfIntegration(args,int2d,3,2) {}
+    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int2d,3,2);}
     static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshS>(), true);} // all type
 };
 
 class CDomainOfIntegrationBorderS: public CDomainOfIntegration {
 public:
-    CDomainOfIntegrationBorderS( const basicAC_F0 & args) :CDomainOfIntegration(args,int1d,3,true) {}
-    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int1d,3,true);}
+    CDomainOfIntegrationBorderS( const basicAC_F0 & args) :CDomainOfIntegration(args,int1d,3,2) {}
+    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int1d,3,2);}
     static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshS>(), true);} // all type
 };
 
 class CDomainOfIntegrationAllEdgesS: public CDomainOfIntegration {
 public:
-    CDomainOfIntegrationAllEdgesS( const basicAC_F0 & args) :CDomainOfIntegration(args,intalledges,3,true) {}
-    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,intalledges,3,true);}
+    CDomainOfIntegrationAllEdgesS( const basicAC_F0 & args) :CDomainOfIntegration(args,intalledges,3,2) {}
+    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,intalledges,3,2);}
     static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshS>(), true);} // all type
 };
 
@@ -423,15 +433,15 @@ public:
 
 class CDomainOfIntegrationL: public CDomainOfIntegration {
 public:
-    CDomainOfIntegrationL( const basicAC_F0 & args) :CDomainOfIntegration(args,int1d,3,false,true) {}
-    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int1d,3,false,true);}
+    CDomainOfIntegrationL( const basicAC_F0 & args) :CDomainOfIntegration(args,int1d,3,1) {}
+    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int1d,3,1);}
     static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshL>(), true);} // all type
 };
 
 class CDomainOfIntegrationBorderL: public CDomainOfIntegration {
 public:
-    CDomainOfIntegrationBorderL( const basicAC_F0 & args) :CDomainOfIntegration(args,int0d,3,false,true) {}
-    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int0d,3,false,true);}
+    CDomainOfIntegrationBorderL( const basicAC_F0 & args) :CDomainOfIntegration(args,int0d,3,1) {}
+    static  E_F0 * f(const basicAC_F0 & args) { return new CDomainOfIntegration(args,int0d,3,1);}
     static  ArrayOfaType  typeargs() {  return ArrayOfaType(atype<pmeshL>(), true);} // all type
 };
 
@@ -1330,6 +1340,7 @@ AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stac
            AssembleBC<R>( stack,Th,Uh,Vh,ds.sym>0,A.A,0,0,b->largs,ds.tgv);
 
    }
+   A.pHM()->half = ds.sym;
    if (A_is_square)
         SetSolver(stack,VF,*A.A,ds);
 

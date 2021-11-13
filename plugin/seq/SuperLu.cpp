@@ -21,7 +21,7 @@
 // E-MAIL  : ...
 
 /* clang-format off */
-//ff-c++-LIBRARY-dep: superlu blas
+//ff-c++-LIBRARY-dep: superlu blas [fc]
 //ff-c++-cpp-dep:
 /* clang-format on */
 

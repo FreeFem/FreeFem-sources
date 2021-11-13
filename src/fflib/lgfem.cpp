@@ -221,6 +221,7 @@ class LinkToInterpreter {
   Type_Expr nu_triangle;
   Type_Expr nu_face;
   Type_Expr nu_edge;
+  Type_Expr nu_vertex;
   Type_Expr lenEdge;
   Type_Expr hTriangle;
   Type_Expr area;
@@ -438,8 +439,7 @@ class E_P_Stack_hTriangle : public E_F0mps {
       assert(mp->TS);
       l = mp->TS->lenEdgesmax( );}
     else if (mp->d == 3 && mp->dHat == 1){
-      cerr << " Unkown operator for curve 3D" << endl;
-      ffassert(0);
+        l = mp->TS->mesure();// add  FH juin 2021
     }
     return SetAny< double >(l);
   }
@@ -472,21 +472,58 @@ class E_P_Stack_nElementonB : public E_F0mps {
       l = mp->Th3->nElementonB(mp->t, mp->f);
     else if (mp->d == 3 && mp->dHat == 2 && mp->TS && (mp->e >= 0))
       l = mp->ThS->nElementonB(mp->t, mp->e);
+    else if (mp->d == 3 && mp->dHat == 1 && mp->TL && (mp->v >= 0))
+      l = mp->ThL->nElementonB(mp->t, mp->v);
     return SetAny< long >(l);
   }
 
   operator aType( ) const { return atype< long >( ); }
 };
 
-template< int NBT >
-class E_P_Stack_TypeEdge : public E_F0mps {
+class E_P_Stack_uniqueBE : public E_F0mps {
  public:
   AnyType operator( )(Stack s) const {
     throwassert(*((long *)s));
     MeshPoint *mp = MeshPointStack(s);
-    assert(mp->T && mp->e > -1 && mp->d == 2);
-    long l = mp->Th->nTonEdge(mp->t, mp->e) == NBT;
-    return SetAny< long >(l);
+    double l = 0;
+    if ((mp->T) && (mp->e > -1) && (mp->d == 2))
+    {
+        int it = mp->t,ie=mp->e;
+        int iee=ie,itt=mp->Th->ElementAdj(it,iee);
+        l = it*3+ie <= itt*3+iee;
+    }
+    else if (mp->d == 3 && mp->dHat == 3 && mp->T3 && (mp->f >= 0))
+      l = mp->Th3->uniqueBE(mp->t, mp->f);
+    else if (mp->d == 3 && mp->dHat == 2 && mp->TS && (mp->e >= 0))
+      l = mp->ThS->uniqueBE(mp->t, mp->e);
+    else if (mp->d == 3 && mp->dHat == 1 && mp->TL && (mp->v >= 0))
+      l = mp->ThL->uniqueBE(mp->t, mp->v);
+    return SetAny< double >(l);
+  }
+
+  operator aType( ) const { return atype< long >( ); }
+};
+
+
+template< int NBT > // modif FH juin 2021 to be generic ...
+class E_P_Stack_TypeBE : public E_F0mps {
+ public:
+  AnyType operator( )(Stack s) const {
+    throwassert(*((long *)s));
+    MeshPoint *mp = MeshPointStack(s);
+      long l = 0;
+      if ((mp->T) && (mp->e > -1) && (mp->d == 2))
+        l = mp->Th->nTonEdge(mp->t, mp->e);
+      else if (mp->d == 3 && mp->dHat == 3 && mp->T3 && (mp->f >= 0))
+        l = mp->Th3->nElementonB(mp->t, mp->f);
+      else if (mp->d == 3 && mp->dHat == 2 && mp->TS && (mp->e >= 0))
+        l = mp->ThS->nElementonB(mp->t, mp->e);
+      else if (mp->d == 3 && mp->dHat == 1 && mp->TL && (mp->v >= 0))
+        l = mp->ThL->nElementonB(mp->t, mp->v);
+
+    ffassert(l);
+    long ll = min(l,2l) == NBT;// NBT  2 => internal but  l > =2 if no manifold ase
+    return SetAny< long >(ll);
   }
 
   operator aType( ) const { return atype< long >( ); }
@@ -527,8 +564,9 @@ class E_P_Stack_EdgeOrient : public E_F0mps {
     } else if (mp.d == 3 && mp.dHat == 3) {
       if (mp.T3 && mp.f >= 0) r = mp.T3->faceOrient(mp.f);
     } else if (mp.d == 3 && mp.dHat == 2) {
-      if (mp.TS && mp.e >= 0) r = mp.T3->EdgeOrientation(mp.e);
+      if (mp.TS && mp.e >= 0) r = mp.TS->EdgeOrientation(mp.e);
     }
+    else ffassert(0); // debile on meshL  FH juin 2021 ..
     return r;
   }
 
@@ -1119,7 +1157,7 @@ bool BuildPeriodic2(int nbcperiodic, Expression *periodic, const Mesh &Th, Stack
             else {
               cout << ie2 << " ~ " << im0->second[0] << " " << im0->second[1] << ", "
                    << im1->second[0] << " " << im1->second[1] << endl;
-              ExecError("periodic: Sorry one egde is losted ");
+              ExecError("periodic: Sorry one edge is lost");
             }
             if (verbosity > 50) cout << " ( " << im0->second << " , " << im1->second << " ) .. ";
             ffassert(ie1 >= 0 && ie1 < Th.neb);
@@ -1284,11 +1322,15 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
     AnyType operator( )(Stack s) const {
       const int d = Mesh::Rd::d;
       const int dHat = Mesh::RdHat::d;
+      const  int dHatfe = TypeOfFE::RdHat::d;
+        const int dfe = TypeOfFE::RdHat::d;
+       
+
       const Mesh **ppTh = GetAny< const Mesh ** >((*eppTh)(s));
       AnyType r = (*eppfes)(s);
       const TypeOfFE **tef = new const TypeOfFE *[atef.size( )];
         for (int i = 0; i < atef.size( ); i++)
-        if (tedim[i] == dHat)
+        if (tedim[i] == dHat && d==dfe)
           tef[i] = GetAny< TypeOfFE * >(atef[i].eval(s));
         else if (tedim[i] == 2 && d==3 && dHat == 3)
           tef[i] = GetAny< TypeOfFE * >(TypeOfFE3to2(s, atef[i].eval(s)));
@@ -3055,6 +3097,7 @@ LinkToInterpreter::LinkToInterpreter( ) {
   region = make_Type_Expr(new E_P_Stack_Region, atype< long * >( ));
   label = make_Type_Expr(new E_P_Stack_Label, atype< long * >( ));
   nu_triangle = make_Type_Expr(atype< long >( ), new E_P_Stack_Nu_Triangle);
+  nu_vertex = make_Type_Expr(atype< long >( ), new E_P_Stack_Nu_Vertex);
   nu_edge = make_Type_Expr(atype< long >( ), new E_P_Stack_Nu_Edge);
   nu_face = make_Type_Expr(atype< long >( ), new E_P_Stack_Nu_Face);
   lenEdge = make_Type_Expr(atype< R >( ), new E_P_Stack_lenEdge);
@@ -3072,6 +3115,8 @@ LinkToInterpreter::LinkToInterpreter( ) {
   Global.New("nuTet", nu_triangle);
   Global.New("nuEdge", nu_edge);
   Global.New("nuFace", nu_face);
+  Global.New("nuVertex", nu_vertex);
+
   Global.New("P", P);
   Global.New("N", N);
   Global.New("Nt", Nt);
@@ -3082,14 +3127,20 @@ LinkToInterpreter::LinkToInterpreter( ) {
   Global.New("volume", volume);
   Global.New("hTriangle", hTriangle);
   Global.New("inside", inside);
-  Global.New("nTonEdge", make_Type_Expr(atype< long >( ), new E_P_Stack_nTonEdge));
+  Global.New("nTonEdge", make_Type_Expr(atype< long >( ), new E_P_Stack_nElementonB));
   Global.New("nElementonB", make_Type_Expr(atype< long >( ), new E_P_Stack_nElementonB));
   Global.New("edgeOrientation",
              make_Type_Expr(atype< R >( ), new E_P_Stack_EdgeOrient));    // Add FH jan 2018
   Global.New("BoundaryEdge",
-             make_Type_Expr(atype< long >( ), new E_P_Stack_TypeEdge< 1 >));    // Add FH jan 2018
+             make_Type_Expr(atype< long >( ), new E_P_Stack_TypeBE< 1 >));    // Add FH jan 2018
   Global.New("InternalEdge",
-             make_Type_Expr(atype< long >( ), new E_P_Stack_TypeEdge< 2 >));    // Add FH jan 2018
+             make_Type_Expr(atype< long >( ), new E_P_Stack_TypeBE< 2 >));    // Add FH jan 2018
+    Global.New("BoundaryBE",
+               make_Type_Expr(atype< long >( ), new E_P_Stack_TypeBE< 1 >));    // Add FH jan 2018
+    Global.New("InternalBE",
+               make_Type_Expr(atype< long >( ), new E_P_Stack_TypeBE< 2 >));    // Add FH jan 2018
+    Global.New("uniqueBE",
+               make_Type_Expr(atype< double >( ), new E_P_Stack_uniqueBE));    // Add FH juin 2012 
 }
 
 template< class K >
@@ -3123,8 +3174,8 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
   SHOWVERB(cout << " int " << endl);
   const vector< Expression > &what(di->what);
   const int dim = di->d;
-  const bool surface = di->isMeshS;
-  const bool curve = di->isMeshL;
+  const bool surface = di->dHat==2 && di->d==3;
+  const bool curve = di->dHat==1 && di->d==3;
   const GQuadratureFormular< R1 > &FIE = di->FIE(stack);
   const GQuadratureFormular< R2 > &FIT = di->FIT(stack);
   const GQuadratureFormular< R3 > &FIV = di->FIV(stack);
@@ -3229,7 +3280,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
           }
           wsptr2free->clean(swsptr2free);    // ADD FH 11/2017
         }
-        if (verbosity > 5) cout << " Lenght level set = " << llevelset << endl;
+        if (verbosity > 5) cout << " Length level set = " << llevelset << endl;
 
       }
 
@@ -3381,7 +3432,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
           wsptr2free->clean(swsptr2free);    // ADD FH 11/2017
         }
     } else {
-      InternalError("CDomainOfIntegration kind unkown");
+      InternalError("CDomainOfIntegration kind unknown");
     }
   }
 
@@ -3647,7 +3698,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
  
           wsptr2free->clean(swsptr2free);    // ADD FH 11/2017
         }
-        if (verbosity > 5) cout << " Lenght level set = " << llevelset << endl;
+        if (verbosity > 5) cout << " Length level set = " << llevelset << endl;
 
       }
 
@@ -3763,7 +3814,7 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
     } else if (kind == CDomainOfIntegration::intallVFedges) {
       ffassert(0);    // TODO AXEL
     } else {
-      InternalError("CDomainOfIntegration kind unkown");
+      InternalError("CDomainOfIntegration kind unknown");
     }
   } else if (dim == 3 && !surface && curve)
   {
@@ -3811,12 +3862,12 @@ AnyType IntFunction< R >::operator( )(Stack stack) const {
     }
     else
     {
-        InternalError("int Curve CDomainOfIntegration kind unkown");
+        InternalError("int Curve CDomainOfIntegration kind unknown");
     }
       
       
   } else {
-    InternalError("CDomainOfIntegration dim unkown");
+    InternalError("CDomainOfIntegration dim unknown");
   }
 
   *MeshPointStack(stack) = mp;
@@ -4904,7 +4955,7 @@ AnyType Plot::operator( )(Stack s) const {
           Show("v)  switch between show  the numerical value of iso or not", i++);
           Show("p)   save  plot in a Postscprit file", i++);
           Show("m)  switch between show  meshes or not", i++);
-          Show("p)  switch between show  quadtree or not (for debuging)", i++);
+          Show("p)  switch between show  quadtree or not (for debugging)", i++);
           Show("t)  find  Triangle ", i++);
           Show("?)  show this help window", i++);
           Show("any other key : continue ", ++i);
@@ -6437,7 +6488,8 @@ void init_lgfem( ) {
   Global.Add("int2d", "(", new OneOperatorCode< CDomainOfIntegration >);
   Global.Add("int1d", "(", new OneOperatorCode< CDomainOfIntegrationBorder >);
   Global.Add("intalledges", "(", new OneOperatorCode< CDomainOfIntegrationAllEdges >);
-  Global.Add("intallVFedges", "(", new OneOperatorCode< CDomainOfIntegrationVFEdges >);
+  Global.Add("intallBE", "(", new OneOperatorCode< CDomainOfIntegrationAllEdges >);
+    Global.Add("intallVFedges", "(", new OneOperatorCode< CDomainOfIntegrationVFEdges >);
   Global.Add("jump", "(", new OneUnaryOperator< JumpOp< R >, JumpOp< R > >);
   Global.Add("mean", "(", new OneUnaryOperator< MeanOp< R >, MeanOp< R > >);
   Global.Add("average", "(", new OneUnaryOperator< MeanOp< R >, MeanOp< R > >);
@@ -6901,7 +6953,7 @@ C_F0 NewFEvariableT(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F
   ffassert(n > 0);
   if (fes->nbitem( ) != (size_t)n) {
     cerr << " the array size must be " << fes->nbitem( ) << " not " << n << endl;
-    CompileError("Invalide array size  for  vectorial fespace function");
+    CompileError("Invalid array size  for  vectorial fespace function");
   }
   for (int i = 0; i < n; i++) {
     str += ids[i].id;
@@ -6939,7 +6991,7 @@ C_F0 NewFEvariable(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F0
   else if (dim == 5)
     return NewFEvariableT< v_fesL, 5 >(pids, currentblock, fespacetype, init, cplx, dim);
   else
-    CompileError("Invalide fespace on Rd  ( d != 2 or 3) ");
+    CompileError("Invalid fespace on Rd  ( d != 2 or 3) ");
   return C_F0( );
 }
 C_F0 NewFEvariable(const char *id, Block *currentblock, C_F0 &fespacetype, CC_F0 init, bool cplx,

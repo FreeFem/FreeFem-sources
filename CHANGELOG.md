@@ -15,41 +15,87 @@
 
 ### Fixed
 -
-
-### Security
--
 -->
 
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+-
+
+### Changed
+-
+
+### Deprecated
+-
+
+### Removed
+-
+
+### Fixed
+-
+
+## [4.10]
+### Added
+- ridgeangle named parameter in ExtractMeshL in msh3 plugin
+- DG formulation in 1d :
+  add integral of all border of element : `intallBE(ThL)` and unified the notation by adding
+   `intallBE(ThS)` , `intallBE(Th2)`, `intallBE(Th3)`
+
+  `nuVertex` of now the vertex number of element in intallBE0d integral
+  `BoundaryBE`, `InternalBE` to know if border element (BE) is on true boundary of not.
+  update `nElementonB` in case on no manifold data (value greater > 2) in meshL, MeshS case ..
+  add code to use jump, mean of test functuon on MeshL case. ( not in mesh3 ) to compute RHS. 
+- add getcwd() function in shell plugin to ghet the current working dir 
+- add nuVertex to get the vextex on element in some int?
+
+### Changed
+- PETSc 3.16.1
+
+### Deprecated
+- SLEPc and SLEPc-complex have been part of PETSc and PETSc-complex for multiple releases and are now deprecated
+
+### Removed
+-
+
+### Fixed
+- examples/potential.edp correct problem in times loops and BC
+- tutorial/mortar-DN-4.edp correct problem of region number in meshL
+- fix problem in Curve mesh and intallBE , vertex number is wrong 
+- portability issue on arm64-apple with `make petsc-slepc`
+- fix assertion failure with `transfer` and `transferMat` with some finite elements
+
 ## [4.9]
 ### Added
-- add P3 lagrange finite element on meshS and meshS 
+- add P3 lagrange finite element on meshS and meshS
 - add new plugin `meshtool`to add tool to compute the number of connected components of a all kind of mesh
   (mesh,mesh3,meshS,meshL) with 2 kind of connected components ones on interior part of the mesh (default) ans
   secondly on the closure of the mesh (see `examples/hpddm/bConnectedComponents.edp` )
   add functions  int[int] In=iminP1K(Th,u) or int[int] Ix=imaxP1K(Th,u)  get the array min/max of value u[i]  
-  where i is vertex number on  each element k, so we have  u[Im[k]] = min u[i]/ i in k; 
+  where i is vertex number on  each element k, so we have  u[Im[k]] = min u[i]/ i in k;
 - add in plugin `bfstream` to to read binary int (4 bytes) to read fortran file and try to pull tools to share the endiannes
   in progress
 - add gluemesh of array of MeshL and MeshS type
 - interface to `PC_MG_GALERKIN_BOTH`
 - Kronecker product of two sparse matrices `matrix C = kron(A, B)`
 - add lot of finite element on Mesh3, MeshS, MeshL of Discontinous Galerling Element
-  in 3d       : P1dc3d, P2dc3d, P3dc3d, P4dc3d , P0edge3d ,P0edgedc3d ,  P0face3d ,P0facedc3d , P0VF3d ,P0VFdc3d , 
-  on Surface  : P1dcS, P2dcS, P3dcS, P4dcS , P0edgeS ,P0edgedcS , P0VFS ,P0VFdcS, 
+  in 3d       : P1dc3d, P2dc3d, P3dc3d, P4dc3d , P0edge3d ,P0edgedc3d ,  P0face3d ,P0facedc3d , P0VF3d ,P0VFdc3d ,
+  on Surface  : P1dcS, P2dcS, P3dcS, P4dcS , P0edgeS ,P0edgedcS , P0VFS ,P0VFdcS,
   on Curve   : P1dcL, P2dcL, P3dcL, P4dcL ,  P0VFL ,P0VFdcL
   remark; the associated generic name existe of P1dc, P2dc, P0edge, P0VF and all  dc finite element corresponding to
-  no continuity across element. 
-- add code of intallfaces to  do Discontinous Galerkin  formulation in 3d (in test FH.) 
+  no continuity across element.
+- add code of intallfaces to  do Discontinous Galerkin  formulation in 3d (in test FH.)
+- add dist function to a mesh , meshL, MeshS or  mesh3 
+- signeddistfunction to a meshL or  meshS 
+- add buildmesh functon to build a 2d mesh from a meshL (same as buildmesh see examples/3dCurve/border.edp) 
 ### Changed
 - Now the order to find MPI in configure is first if you have PETSC then take MPI from PETSc
   otherwise use previous method
 - on MeshL defined with buildmeshL now the default label are 2*k-1  (resp. 2*k)  for the begin (resp. end) of curve
   where k is the order of curve use in buildmeshL. So if you have one curve the  labels are 1  and 2.
   And new  the element label are te region number not the label.
-  This element are not really test so be carfull. 
+  This element are not really test so be carfull.
 - PETSc 3.15.0
 
 ### Deprecated
@@ -59,17 +105,14 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
-- bug in Find triangle contening point in 2d (border case), 
+- bug in Find triangle contening point in 2d (border case),
    `int Mesh::DataFindBoundary::Find(R2 PP,R *l,int & outside) const`
-   the parameter l not correclty return due to local variable. 
+   the parameter l not correclty return due to local variable.
 - set CFLAGS=-Wno-implicit-function-declaration to complie with Apple clang version 12.0.0 (clang-1200.0.32.29)
   to remove following error: implicit declaration of function
   correct `3dCurve/basicGlue.edp`and add missing test
 - bugs in SLEPc `SVDSolve()` with a rectangular `Mat`
 - bugs in nElementonB for DG 3d formulation.
-
-### Security
--
 
 ## [4.8]
 ### Added
@@ -112,7 +155,7 @@ All notable changes to this project will be documented in this file.
 ## [4.7]
 ### Added
 
-- new way to build matrix beetween 2d Finite element 2d and Curve finite element to do mortar (Thank to Axel ) , see first example `examples/tutorial/mortar-DN-4-v4.5.edp`
+- new way to build matrix between 2d Finite element 2d and Curve finite element to do mortar (Thank to Axel ) , see first example `examples/tutorial/mortar-DN-4-v4.5.edp`
 - add `Ns` normal vector  in R^3 on meshS (normal of the surface) of current point (to day Ns of [x,y,0] plan  is [0,0,-1])  no be compatible to exterior normal.
 - add `Tl` tangent vector in R^3 on meshL (tangent vector of the line/curve) of current point
 - compile ffmaster / ffslave example under windows (thanks to johann@ifado.de)
@@ -181,8 +224,6 @@ All notable changes to this project will be documented in this file.
 - BEM examples are now in `examples/mpi`
 - plot border type is now in 3d (border 2d and 3d)
 - PETSc version 3.13.0
-
-### Deprecated
 
 ### Fixed
 - `--enable-download_package` may now be used to download a single package, e.g., `--enable-download_metis`
@@ -299,8 +340,6 @@ All notable changes to this project will be documented in this file.
 - fix problem in ffglut (AF)
 - detect hdf5 and gsl if no enable-download
 
-### Security
-
 ## [4.4]
 ### Added
 - interface to `TSSolve`, DAE/ODE solvers from PETSc
@@ -412,7 +451,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.9..develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.10..develop
+[4.10]: https://github.com/FreeFem/FreeFem-sources/compare/v4.9..v4.10
 [4.9]: https://github.com/FreeFem/FreeFem-sources/compare/v4.8..v4.9
 [4.8]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7-1..v4.8
 [4.7-1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7...v4.7-1

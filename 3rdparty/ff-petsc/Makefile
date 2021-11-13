@@ -75,7 +75,7 @@ PETSC_DOWNLOAD := --download-metis --download-ptscotch \
 ifeq ($(FFCMAKE),no)
 PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
 endif
-PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-slepc --download-hpddm
+PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-slepc --download-hpddm --download-htool
 endif
 ifeq ($(FF_generic_petsc), yes)
 FLAGS_MTUNE := -mtune=generic
@@ -124,7 +124,7 @@ PETSC_DOWNLOAD += '--download-metis-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu'
 ifneq ($(FC),)
 COMMON_FLAGS += --with-fc='$(FC)'
-PETSC_DOWNLOAD += --download-scalapack --download-mumps --download-slepc-configure-arguments="--download-arpack=https://github.com/prj-/arpack-ng/archive/6d11c37b2dc9110f3f6a434029353ae1c5112227.tar.gz"
+PETSC_DOWNLOAD += --download-scalapack --download-mumps --download-slepc-configure-arguments="--download-arpack=https://github.com/prj-/arpack-ng/archive/b64dccb.tar.gz"
 PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL) # --download-slepc-configure-arguments="--with-arpack-dir=$(DIR_INSTALL_REAL)"
 else
 COMMON_FLAGS += --with-fc=0
@@ -148,8 +148,8 @@ all-local:
 	@echo "	make petsc-slepc "
 
 DIRPKG=../pkg
-VERSION=3.15.0
-VERSION_SLEPC=3.014.2
+VERSION=3.16.1
+VERSION_SLEPC=3.16.0
 PACKAGE=../pkg/petsc-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
@@ -225,7 +225,7 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 	touch $@
 Make-petsc-download.mk:$(SRCDIR)/tag-install-real 
 	test -e $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
-	egrep 'PETSC_LIB_BASIC|SCALAPACK_|METIS_|MUMPS_|HPDDM_|TETGEN_|SUPERLU_|MMG_|PTSCOTCH_|SUITESPARSE_' $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables | sed 's/-I/ /g'|sort >$@
+	egrep 'PETSC_LIB_BASIC|SCALAPACK_|METIS_|MUMPS_|HPDDM_|HTOOL_|TETGEN_|SUPERLU_|MMG_|PTSCOTCH_|SUITESPARSE_' $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables | sed 's/-I/ /g'|sort >$@
 ifdef 	COMPLEX_CASE
 #  version COMPLEX.....
 $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
@@ -280,6 +280,8 @@ WHERE-all:Makefile WHERE WHERE-complex
 	test -z '$(PARMETIS_INCLUDE)' || echo parmetis INCLUDE -I$(PARMETIS_INCLUDE) >>$@
 	test -z '$(HPDDM_LIB)' || echo hpddm LD $(HPDDM_LIB) >>$@
 	test -z '$(HPDDM_INCLUDE)' || echo hpddm INCLUDE -I$(HPDDM_INCLUDE) >>$@
+	test -z '$(HTOOL_LIB)' || echo htool LD $(HTOOL_LIB) >>$@
+	test -z '$(HTOOL_INCLUDE)' || echo htool INCLUDE -I$(HTOOL_INCLUDE) >>$@
 	echo 'petsc LD -Wl,-rpath,"$(DIR_INSTALL_REAL)/lib" -L"$(DIR_INSTALL_REAL)/lib" -lpetsc' >>$@
 	echo 'petsc INCLUDE -I"$(DIR_INSTALL_REAL)/include"' >>$@
 	echo 'petsccomplex LD -Wl,-rpath,"$(DIR_INSTALL_COMPLEX)/lib" -L"$(DIR_INSTALL_COMPLEX)/lib" -lpetsc' >>$@
@@ -300,11 +302,11 @@ WHERE-all:Makefile Make-petsc-download.mk
 	 $(MAKE) -f Makefile.complex $@
 endif
 $(SRCDIR)/tag-tar:$(PACKAGE)
-	-tar xzf $(PACKAGE)
+	-mkdir petsc-$(VERSION) 2>/dev/null
+	-tar xzf $(PACKAGE) -C petsc-$(VERSION) --strip-components 1
 ifeq ($(WIN32DLLTARGET),)
-	cd petsc-$(VERSION) && patch -p1 < ../petsc-metis.patch && cd -
+	cd petsc-$(VERSION) && patch -p1 < ../petsc-cmake-seq.patch && cd -
 endif
-	cd petsc-$(VERSION) && patch -p1 < ../petsc-suitesparse.patch && cd -
 	touch $@
 $(PACKAGE):
 	../getall -o PETSc -a

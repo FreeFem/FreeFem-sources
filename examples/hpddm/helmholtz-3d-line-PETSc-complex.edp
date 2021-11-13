@@ -2,12 +2,12 @@
 // NBPROC 4
 // PARAM
 
-load "iovtk"
-load "PETSc-complex"
-load "lapack"
-macro dimension()3L// EOM
-include "macro_ddm.idp"
 load "bem"
+load "PETSc-complex"
+load "msh3"
+include "macro_ddm.idp"
+
+if(!HasType("Mat", "Htool")) exit(0);
 
 complex k     = getARGV("-k", 10.0);
 
@@ -15,78 +15,48 @@ complex k     = getARGV("-k", 10.0);
 real[int] dir = [1,0];
 func finc     = exp(1i*k*(dir[0]*x + dir[1]*y));
 int n         = 1000;
+func Pk       = P1;
+func Qk       = P1;
 
 border circle(t=0, 2*pi) { x=cos(t); y=sin(t); z=0; }
 meshL ThL = buildmeshL(circle(n));
 ThL = OrientNormal(ThL, unbounded = 1);
 meshL ThG = ThL;
+int[int] n2o;
+macro ThLN2O()n2o//
 
-fespace Uh(ThL, P1);
-varf vk(u, v) = int1dx1d(ThL)(ThL)(BEM(BemKernel("SL",k=k), u, v));
-HMatrix<complex> A = vk(Uh, Uh);
-Mat<complex> H;
-createMat(ThL, H, P1);
+fespace UhL(ThL, Pk);
+fespace UhG(ThG, Pk);
+varf vk(u, v) = int1dx1d(ThG)(ThG)(BEM(BemKernel("SL",k=k), u, v));
+Mat<complex> H, MatT, MatV;
+{
+macro dimension()3L// EOM
+createMat(ThL, H, Pk);
+createMat(ThL, MatT, P0)
+createMat(ThL, MatV, P1);
+}
+CoherentGlobalMesh(MatT, MatV, ThL, ThG);
+MatDestroy(MatT);
+MatDestroy(MatV);
+H = vk(UhG, UhG, sparams = "-mat_htool_epsilon 1.0e-2", sym = 1);
 bool mass = usedARGV("-mass") != -1;
+matrix<complex> M;
 if(mass) {
     varf vM(u, v) = int1d(ThL)(u * v);
-    matrix<complex> Loc = vM(Uh, Uh);
-    H = Loc;
-    set(H, sparams = "-mass_ksp_converged_reason", prefix = "mass_");
-}
-int[int] perm;
-{
-    fespace UhG(ThG, P1);
-    UhG<complex> numbering;
-    numbering[] = 0:UhG.ndof - 1;
-    Uh<complex> glob2loc = numbering;
-    ChangeNumbering(H, glob2loc[], perm);
-}
-
-func complex[int] op(complex[int]& in) {
-    complex[int] out(in.n), u(ThG.nt), v(ThG.nt);
-    for[i, p : perm] u[p] = in[i];
-    mpiAllReduce(u, v, mpiCommWorld, mpiSUM);
-    u = A * v;
-    for[i, p : perm] out[i] = u[p];
-    return out;
-}
-complex[int,int] dense(1, 1);
-func complex[int] prec(complex[int]& in) {
-    complex[int] out(in.n);
-    if(!mass) {
-        if(dense.n == 1 && dense.m == 1) {
-            HMatrix<complex> A = vk(Uh, Uh, commworld=mpiCommSelf);
-            dense.resize(Uh.ndof, Uh.ndof);
-            dense = A;
-            dense = dense^-1;
-        }
-        complex[int] u(Uh.ndof), v(Uh.ndof);
-        ChangeNumbering(H, u, in, inverse = true);
-        v = dense * u;
-        ChangeNumbering(H, v, out);
-    }
-    else {
-        KSPSolve(H, in, out);
-    }
-    return out;
+    M = vM(UhL, UhL);
 }
 
 varf vRHS(u, v) = -int1d(ThL)(finc*v);
 
-Uh<complex> bf;
-bf[] = vRHS(0, Uh);
-complex[int] b, u;
-ChangeNumbering(H, bf[], b);
-u.resize(b.n);
-KSPSolve(op, b, u, precon = prec, sparams = "-ksp_type fgmres -ksp_view_singularvalues -ksp_converged_reason -ksp_gmres_restart 1000 -pc_type shell");
+UhL<complex> bf;
+bf[] = vRHS(0, UhL);
+if(mass) {
+    set(H, sparams = "-ksp_view_singularvalues -ksp_converged_reason -ksp_gmres_restart 1000 -pc_type asm", O = M);
+}
+complex[int] u = H^-1 * bf[];
 // visualization
 if(!NoGraphicWindow) {
-    ThL = OrientNormal(ThG, unbounded = 1);
-    Uh<complex> uf;
-    bf = 0;
-    for[i, p : perm] bf[][p] = u[i];
-    mpiAllReduce(bf[], uf[], mpiCommWorld, mpiSUM);
-
+    macro dimension()2// EOM
     int np = 200;
     int R = 4;
 
@@ -94,19 +64,29 @@ if(!NoGraphicWindow) {
     border b2(t=-R, R) { x = R ; y = t; }
     border b3(t=-R, R) { x = -t; y = R; }
     border b4(t=-R, R) { x = -R; y = -t; }
+    border circleout(t=0, 2*pi){x=1.1*cos(t); y=1.1*sin(t); z=0;}
 
-    mesh ThOut = buildmesh(b1(np) + b2(np) + b3(np) + b4(np) + circle(-np*pi/R));
-    fespace UhOut(ThOut, P1);
-    varf vp(u, v) = int1d(ThL)(POT(BemPotential("SL", k=k), u, v));
-    HMatrix<complex> B = vp(Uh, UhOut);
-    UhOut<complex> v, vinc;
+    mesh ThOutG = buildmesh(b1(np) + b2(np) + b3(np) + b4(np) + circleout(-np*pi/R));
+    mesh ThOutL = ThOutG;
+    int[int] n2o;//
+    macro ThOutLN2O()n2o//
+    Mat<complex> B;
+    createMat(ThOutL, B, Qk)
+    createMat(ThOutL, MatT, P0)
+    createMat(ThOutL, MatV, P1)
+    CoherentGlobalMesh(MatT, MatV, ThOutL, ThOutG);
+    MatDestroy(MatT);
+    MatDestroy(MatV);
+    fespace UhOutG(ThOutG, Qk);
+    fespace UhOutL(ThOutL, Qk);
+    varf vp(u, v) = int1d(ThG)(POT(BemPotential("SL", k=k), u, v));
+    Mat<complex> HPot(B, H);
+    HPot = vp(UhG, UhOutG, sparams = "-mat_htool_epsilon 1.0e-4");
+    ObjectView(HPot);
+    UhOutL<complex> v, vinc;
     vinc = finc;
-    v[] = B*uf[];
+    v[] = HPot*u;
     v[] += vinc[];
-    UhOut vr = abs(v);
-    plot(vr, dim = 2, fill = 1, nbiso = 20, cmm = "Solution");
-    if(mpirank == 0) {
-        int[int] fforder = [1, 1];
-        savevtk("helmholtz-3d-line.vtu", ThOut, real(v), imag(v), dataname = "u.re u.im", order = fforder, bin = 1);
-    }
+    UhOutL vr = abs(v);
+    plotMPI(ThOutL, vr, P1, def, real, cmm = "Global first kind solution")
 }

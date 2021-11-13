@@ -1,4 +1,4 @@
-load "BernadiRaugel"
+load "BernardiRaugel"
 // remark: the sign of p is correct
 real s0=clock();
 mesh Th=square(2,2);

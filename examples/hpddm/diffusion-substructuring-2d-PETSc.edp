@@ -1,3 +1,6 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+
 load "PETSc"
 load "hpddm_substructuring"         // HPDDM plugin
 macro dimension()2// EOM            // 2D or 3D
@@ -37,6 +40,7 @@ Wh<real> def(u) = 0.0;    // local solution
 
 int[int] numbering;
 GlobalNumbering(A, numbering);
+cout << "GlobalNumbering  " <<  numbering.n << " " << u[].n <<  endl; 
 for(int i = 0; i < u[].n; ++i)
     u[][i] = numbering[i];
 OriginalNumbering(A, u[], interfaceNb);

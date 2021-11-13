@@ -627,12 +627,7 @@ long Voisinage(KNM_< double > const &P, KNM_< double > const &Q, double const &e
 
   IJ->resize(nq);
 
-  for (int i = 0; i < nq; i++) {
-    (*IJ)[i].resize(2);
-    (*IJ)[i][0] = -1;
-    (*IJ)[i][1] = -1;
-  }
-
+ 
   if (verbosity > 99) {
     cout << " offset01 " << offset01 << " " << offset10 << " p" << p << " " << np << " " << P.M( )
          << endl;
@@ -664,19 +659,16 @@ long Voisinage(KNM_< double > const &P, KNM_< double > const &Q, double const &e
 
   for (int j = 0; j < nq; ++j) {
     int nlp = SP.FindAll(Q(j, 0), Q(j, 1), lp);
+    (*IJ)[j].resize(nlp);
+    if (verbosity > 99)
+        cout << " Add to j=" << j << " "<< nlp << " : ";
 
     for (int k = 0; k < nlp; ++k) {
       int i = lp[k];
-      if (verbosity > 99) {
-        cout << " Add to i=" << i << " -> j " << j << endl;
-      }
-
-      Add((*IJ)[i], j);
+        if (verbosity > 99) cout << i<< " ";
+        (*IJ)[j][k]=i;
     }
-  }
-
-  for (int j = 0; j < nq; ++j) {
-    Clean((*IJ)[j]);
+    if (verbosity > 99) cout << endl;
   }
 
   debug = 0;
@@ -773,7 +765,7 @@ int WalkInTriangle(const Mesh &Th, int it, double *lambda, R2 PF) {
 
     if (k == 2)    // 2
     {
-      // let j be the vertex beetween the 2 edges
+      // let j be the vertex between the 2 edges
       int j = 3 - neg[0] - neg[1];
       R S = Area2(P, PF, Q[j]);
 

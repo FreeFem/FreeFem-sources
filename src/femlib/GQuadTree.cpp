@@ -851,7 +851,7 @@ RESTART:
 	  nl[n++]=i;
 	}
         if(verbosity>19 && nbdeja >1) {
-           cout << " Bizzare loop in search "<< nbdeja << "       tet it=" << it ;
+           cout << " Bizarre loop in search "<< nbdeja << "       tet it=" << it ;
            cout << "  K.mesure=" << K.mesure() ;
            cout << " eps=" << eps << " : " ;
            for(int i=0;i<nkv;++i)

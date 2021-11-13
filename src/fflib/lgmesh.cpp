@@ -40,6 +40,7 @@ extern bool NoWait;
 
 typedef Mesh const * pmesh;
 
+template<class TP=E_BorderN>
 class classBuildMesh :  public E_F0mps { public:
 
    typedef pmesh  Result;
@@ -59,10 +60,10 @@ class classBuildMesh :  public E_F0mps { public:
     classBuildMesh(const basicAC_F0 & args)
     {
       args.SetNameParam(n_name_param,name_param,nargs);
-      getborders=to<const E_BorderN *>(args[0]);
+      getborders=to<const TP *>(args[0]);
      }
 
-    static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<const E_BorderN *>());}
+    static ArrayOfaType  typeargs() { return  ArrayOfaType(atype<const TP *>());}
     static  E_F0 * f(const basicAC_F0 & args){ return new classBuildMesh(args);}
     AnyType operator()(Stack s) const ;
     operator aType () const { return atype<Result>();}
@@ -156,14 +157,23 @@ class classBuildMeshArray :  public E_F0mps { public:
 
 };
 
-
-basicAC_F0::name_and_type  classBuildMesh::name_param[]= {
+template<>
+basicAC_F0::name_and_type  classBuildMesh<E_BorderN>::name_param[]= {
     {  "nbvx", &typeid(long)} ,
     {"fixeborder", &typeid(bool)},// obsolete
     {"points", &typeid(KNM<double>*)},
     {"fixedborder", &typeid(bool)},
      {"alea", &typeid(double)},
     {"splitpbedge", &typeid(bool)} // add april 20 FH 
+};
+template<>
+basicAC_F0::name_and_type  classBuildMesh<MeshL>::name_param[]= {
+    {  "nbvx", &typeid(long)} ,
+    {"fixeborder", &typeid(bool)},// obsolete
+    {"points", &typeid(KNM<double>*)},
+    {"fixedborder", &typeid(bool)},
+     {"alea", &typeid(double)},
+    {"splitpbedge", &typeid(bool)} // add april 20 FH
 };
 // modif aout 2007
 class BuildMeshFile :  public E_F0mps { public:
@@ -449,16 +459,18 @@ basicAC_F0::name_and_type Op_trunc_mesh::Op::name_param[Op_trunc_mesh::Op::n_nam
      {  "flabel", &typeid(long)},
      {  "fregion", &typeid(long)},
  };
-
-AnyType classBuildMesh::operator()(Stack stack)  const {
-    const E_BorderN * borders = GetAny<const E_BorderN *>((*getborders)(stack));
+template<class TP>
+AnyType classBuildMesh<TP>::operator()(Stack stack)  const {
+    const TP * borders = GetAny<const TP *>((*getborders)(stack));
    long  nbvx         = arg(0,stack,0L);
-   bool  requireborder= arg(3,stack,arg(1,stack,false));
+   int defrb = is_same<MeshL, TP>::value ;
+   bool  requireborder= arg(3,stack,arg(defrb,stack,false));
     KNM<double> * p=0;  p=arg(2,stack,p);
     double alea = arg(4,stack,0.);
     bool SplitEdgeWith2Boundary=arg(5,stack,false);
    ffassert(   nbvx >= 0);
-   return SetAny<pmesh>(Add2StackOfPtr2FreeRC(stack,BuildMesh(stack,borders,false,nbvx,requireborder,p,alea,SplitEdgeWith2Boundary)));
+   return SetAny<pmesh>(Add2StackOfPtr2FreeRC(stack,
+                BuildMesh(stack,borders,false,nbvx,requireborder,p,alea,SplitEdgeWith2Boundary)));
 
 }
 
@@ -1727,6 +1739,7 @@ double Chi(Stack stack,pmesh const &pTh)
     else return 0.;
     return 1.;
 }
+
 double Chi(Stack stack,pmesh3 const &pTh)
 { // version 3d oct 2017 FH.
     if(pTh == 0) return 0.;
@@ -1742,6 +1755,92 @@ double Chi(Stack stack,pmesh3 const &pTh)
     else return 0.;
     return 1.;
 }
+/*  old code .. now template ...  FH 9/9/21
+ // distance to a mesh .. meshn,MeshS, Mesh3, MeshL ..
+double dist(Stack stack,pmesh const &pTh)
+{  // version 2d  sep  2021 FH.
+    if(pTh == 0) return 0.;
+    R2 PHat;
+    bool outside;
+    MeshPoint & mp = *MeshPointStack(stack);
+    if(pTh == mp.Th) return 1.;// point of mesh
+    const Triangle * K=pTh->Find(mp.P.p2(),PHat,outside);
+    if (!outside)
+        mp.set(*pTh,mp.P.p2(),PHat,*K,K->lab);
+    else {
+        R2 Pb = (*K)(PHat),P=mp.P.p2();
+        return (P-Pb).norme();
+    }
+    return 0;
+}
+double dist(Stack stack,pmesh3 const &pTh)
+{ // version 3d sep 2021
+    if(pTh == 0) return 0.;
+    R3 PHat;
+    bool outside;
+
+    MeshPoint & mp = *MeshPointStack(stack);
+
+    if(pTh == mp.Th3) return 1.;
+    const Tet * K=pTh->Find(mp.P,PHat,outside);
+    if (!outside)
+        mp.set(*pTh,mp.P,PHat,*K,K->lab);
+    else {
+        R3 Pb = (*K)(PHat),P=mp.P;
+        return (P-Pb).norme();
+    }
+    return 0.;
+}*/
+template<class Mesh>
+double dist(Stack stack,Mesh * const &pTh)
+{ // version 3d sep 2021
+    typedef typename Mesh::RdHat RdHat;
+    typedef typename Mesh::Rd Rd;
+    typedef typename Mesh::Element Element;
+    if(pTh == 0) return 0.;
+    RdHat PHat;
+    bool outside;
+
+    MeshPoint & mp = *MeshPointStack(stack);
+
+    if((const void *) pTh == (const void *) mp.Th) return 0.;
+    Rd P(&mp.P.x);
+    const Element  * K=pTh->Find(P,PHat,outside);
+    if (!outside)
+        mp.set(*pTh,P,PHat,*K,K->lab);
+    else {
+        Rd Pb = (*K)(PHat);
+        return (P-Pb).norme();
+    }
+    return 0.;
+}
+template<class Mesh>
+double signeddist(Stack stack,Mesh * const &pTh)
+{ // version 3d sep 2021
+    typedef typename Mesh::RdHat RdHat;
+    typedef typename Mesh::Rd Rd;
+    typedef typename Mesh::Element Element;
+    if(pTh == 0) return 0.;
+    RdHat PHat;
+    bool outside;
+
+    MeshPoint & mp = *MeshPointStack(stack);
+
+    if((const void *) pTh == (const void *) mp.Th) return 0.;
+    Rd P(&mp.P.x);
+    const Element  * K=pTh->Find(P,PHat,outside);
+    if (!outside)
+        mp.set(*pTh,P,PHat,*K,K->lab);
+    else {
+        // normal to K ???
+        Rd Pb = (*K)(PHat);
+        Rd e =P-Pb, Nt=K->NormalTUnitaire();
+        double en = e.norme();
+        return (e,Nt) >0 ? en : -en;
+    }
+    return 0.;
+}
+
 long savegnuplot(pmesh pTh,string* pgp)
     {
         const  Mesh &Th(*pTh);
@@ -1773,7 +1872,8 @@ extern void init_glumesh2D();
 void init_lgmesh() {
   if(verbosity&&(mpirank==0) )  cout <<"lg_mesh ";
   bamg::MeshIstreamErrorHandler = MeshErrorIO;
-  Global.Add("buildmesh","(",new OneOperatorCode<classBuildMesh>);
+  Global.Add("buildmesh","(",new OneOperatorCode<classBuildMesh<E_BorderN>>);
+ Global.Add("buildmesh","(",new OneOperatorCode<classBuildMesh<MeshL>>);
   Global.Add("buildmesh","(",new OneOperatorCode<classBuildMeshArray>);
   Global.Add("buildmesh","(",new OneOperatorCode<BuildMeshFile>);
 
@@ -1814,6 +1914,13 @@ void init_lgmesh() {
     Global.Add("boundingbox", "(", new OneOperator2_<long, pmeshS,KN<double>*>(Boundingbox));
     Global.Add("boundingbox", "(", new OneOperator2_<long, pmeshL,KN<double>*>(Boundingbox));
     Global.Add("chi", "(", new OneOperator1s_<double,pmesh,E_F_F0s_<double,pmesh,E_F0mps> >(Chi)); // oct 2017 FH function characteristic
+    Global.Add("dist", "(", new OneOperator1s_<double,pmeshL,E_F_F0s_<double,pmeshL,E_F0mps> >(dist));// sep 2021  FH function distance to mesh
+      Global.Add("dist", "(", new OneOperator1s_<double,pmeshS,E_F_F0s_<double,pmeshS,E_F0mps> >(dist));// sep 2021  FH function distance to mesh
+    Global.Add("signeddist", "(", new OneOperator1s_<double,pmeshL,E_F_F0s_<double,pmeshL,E_F0mps> >(signeddist));// sep 2021  FH function distance to mesh
+      Global.Add("signeddist", "(", new OneOperator1s_<double,pmeshS,E_F_F0s_<double,pmeshS,E_F0mps> >(signeddist));// sep 2021  FH function distance to mesh
+
+    Global.Add("dist", "(", new OneOperator1s_<double,pmesh3,E_F_F0s_<double,pmesh3,E_F0mps> >(dist));// sep 2021  FH function distance to mesh
+    Global.Add("dist", "(", new OneOperator1s_<double,pmesh,E_F_F0s_<double,pmesh,E_F0mps> >(dist)); // oct 2017 FH  FH function distance to mesh
     Global.Add("chi", "(", new OneOperator1s_<double,pmesh3,E_F_F0s_<double,pmesh3,E_F0mps> >(Chi));// oct 2017 FH function characteristic
     Global.Add("savegnuplot","(",new OneOperator2<long,pmesh,string*>(savegnuplot));
 

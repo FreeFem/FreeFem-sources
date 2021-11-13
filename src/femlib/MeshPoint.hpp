@@ -630,8 +630,8 @@ class MeshPointBase { public:
         ThL=&K.Vh.Th;
         region = TL->lab;
         label = ll;
-        v=f=-1;
-        e=ipoint;
+        v=f=e=-1;
+        v=ipoint;
         t=(*ThL)(TL);
         throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
         N=NN;
@@ -649,8 +649,8 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
        ThL=&K.Vh.Th;
        region = TL->lab;
        label = ll;
-       v=f=-1;
-       e=ipoint;
+       v=f=e=-1;
+       v=ipoint;// Correction F.H Juin 2021
        t=(*ThL)(TL);
        throwassert( ipoint <0 ||  Abs( (NN,NN) -1.0) < 1e-5 );
        N=NN;
@@ -669,9 +669,9 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         ThL=&aTh;
         region = TS->lab;
         label = ll;
-        v=f=-1;
+        v=f=e=-1;
         t=(*Th)(T);
-        e=ipoint;
+        v=ipoint;// correction FH juin 2021
         throwassert( Abs( (NN,NN) -1.0) < 1e-5 );
         N=NN;
         Nt = TL->TangenteUnitaire();
@@ -688,9 +688,9 @@ void set(const R3 &P2,const R1 & P_Hat,const baseFElementL & K,int ll,const R3 &
         ThL=&aTh;
         region = TS->lab;
         label = ll;
-        v=f=-1;
+        v=f=e=-1;
         t=(*Th)(T);
-        e=ipoint;
+        v=ipoint;// correction FH juin 2021
         throwassert( ipoint <0 || Abs( (NN,NN) -1.0) < 1e-5 );
         N=NN;
         throwassert( Abs( (NNt,NNt) -1.0) < 1e-5 );

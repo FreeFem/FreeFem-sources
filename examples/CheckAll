@@ -8,7 +8,7 @@ rm CheckAll-out
 for i in */.; do
     cd $i;
     case $i in
-	*mpi/.|*hpddm/.)  ;;
+	*mpi/.|*hpddm/.|*ffddm/)  ;;
 	*)      echo  ----  $i  ---
      ../CheckAllEdp "$ff -nw" *.edp | tee -a ../CheckAll-out ;;
     esac;
@@ -19,7 +19,7 @@ if [ -n "$ffmpi" ] ; then
     for i in */.; do
 	cd $i;
 	case $i in
-	    *mpi/.|*hpddm/.)
+	    *mpi/.|*hpddm/.|*ffddm/.)
 		echo  MPI ----  $i  ---
 		../CheckAllEdp "$ffmpi -np 4" *.edp | tee -a ../CheckAll-out;;
 	esac;

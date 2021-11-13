@@ -33,7 +33,7 @@ buildDmesh(Th);
 fespace Ph(Th, P0);
 Ph part;
 createPartition(Th, part[], P0);
-mesh ThNo = trunc(Th, abs(part-1.0)<1e-1, split=2^s, label=-111111, renum=1);
+mesh ThNo = trunc(Th, abs(part-1.0)<1e-1, split=2^s, label=-111111, renum=true);
 if(s > 0) {
     Th = ThNo;
     reconstructDmesh(Th);
@@ -108,7 +108,7 @@ dMp = vMp(Qh, Qh, sym = 1);
 set(dAp, sparams="-prefix_push stiffness_ -ksp_constant_null_space -pc_type gamg -ksp_type cg -ksp_max_it 5 -prefix_pop", prefix="stiffness_");
 set(dMp, sparams="-prefix_push mass_ -pc_type jacobi -ksp_type cg -ksp_max_it 5 -prefix_pop", prefix="mass_");
 func real[int] PCD(real[int]& in) {
-    real[int] out(in.n);
+    real[int] out;
     KSPSolve(dAp, in, out);
     MatMult(dFp, out, in);
     KSPSolve(dMp, in, out);
@@ -120,9 +120,9 @@ set(dA, sparams="-pc_type fieldsplit -prefix_push fieldsplit_velocity_ -pc_type 
 set(dC, parent=dA, precon=PCD, sparams="-prefix_push fieldsplit_pressure_ -pc_type shell -prefix_pop");
 
 // Solving Oseen problem
-real[int] uhPETSc(rhsPETSc.n);
+real[int] uhPETSc;
 KSPSolve(dA, rhsPETSc, uhPETSc);
-ChangeNumbering([dF, dC], [uh[], ph[]], uhPETSc, inverse=1, exchange=1);
+ChangeNumbering([dF, dC], [uh[], ph[]], uhPETSc, inverse=true, exchange=true);
 
 // Normalizing pressure
 real[int] dpAverage(2), pAverage(2);

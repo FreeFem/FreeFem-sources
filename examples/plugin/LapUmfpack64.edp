@@ -9,7 +9,7 @@ verbosity=10;
  func f=1;                 //  right hand side function
  func g=0;                 //  boundary condition function
 
- problem laplace(uh,vh) =                    //  Definion of  the problem
+ problem laplace(uh,vh,solver="UMFPACK64") =                    //  Definion of  the problem
     int2d(Th,qft=qf7pT)( dx(uh)*dx(vh) + dy(uh)*dy(vh) ) //  bilinear form
   - int2d(Th,qft=qf7pT)( f*vh )                          //  linear form
   + on(1,2,3,4,uh=g) ;                      //  boundary condition form

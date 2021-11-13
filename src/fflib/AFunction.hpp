@@ -2489,7 +2489,7 @@ class  OneBinaryOperatorBug : public OneOperator{
 public:
     E_F0 * code(const basicAC_F0 & args) const
     {  //cout << "A op B \n" ;
-        cout << " Error expression impossible beetween "<< typeid(A).name() << " ,  "<<typeid(B).name() <<endl;
+        cout << " Error expression impossible between "<< typeid(A).name() << " ,  "<<typeid(B).name() <<endl;
         CompileError( "  Expression must return bad type!!!");
         return  0;}
     OneBinaryOperatorBug():

@@ -630,7 +630,7 @@ class yams_Op_meshS : public E_F0mps {
             break;
           default:
             CompileError(
-              " 3D solution for yams is a scalar (1 comp) or a symetric tensor (6 comp)");
+              " 3D solution for yams is a scalar (1 comp) or a symmetric tensor (6 comp)");
             break;
         }
       } else {
@@ -989,7 +989,7 @@ class yams_Op_mesh3 : public E_F0mps {
             break;
           default:
             CompileError(
-              " 3D solution for yams is a scalar (1 comp) or a symetric tensor (6 comp)");
+              " 3D solution for yams is a scalar (1 comp) or a symmetric tensor (6 comp)");
             break;
         }
       } else {

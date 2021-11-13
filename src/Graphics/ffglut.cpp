@@ -665,11 +665,41 @@ void Plot(const MeshS & Th,bool fill,bool plotmesh,bool plotborder, ThePlot & pl
         }
     }
     if (pNormalT) {
-       if (debug>5) cout << " plot Normal element at triangles " << pNormalT << endl;
+       if (debug>5) cout << " plot Normal element at triangles and the tangent to border " << pNormalT << endl;
             R h = 8*win->hpixel;
             coef = coef*sqrt(Th.mes/Th.nt);
             glLineWidth(0.5*kscreenscale);
             glColor3f(1,0,0);
+            for (int i=0;i<Th.nbe;  i++ ) {
+                typedef MeshS::BorderElement BE;
+                typedef BE::Rd Rd;
+                typedef BE::RdHat RdHat;
+                const MeshS::BorderElement & K(Th.be(i));
+                RdHat g(0.5);
+                Rd G(K(g));
+                Rd dd(K[0],K[1]);
+                dd /= dd.norme();
+                // fleche ou cone / orientation ???
+                R3 nx(1.,0.,0.), ny(0.,1.,0.), nz(0.,0.,1.);
+                // R3 dd = uv*(-h/l);
+                R3 dnx = (dd^nx)*0.5, dny = (dd^ny)*0.5, dnz = (dd^nz)*0.5;
+                dd *= -coef/dd.norme()/5;
+                dnx *= -coef/dnx.norme()/5;
+                dny *= -coef/dny.norme()/5;
+                dnz *= -coef/dnz.norme()/5;
+
+                glLineWidth(kscreenscale);
+                glBegin(GL_LINES);
+                win->Seg3(G,G+dd+dnx);
+                win->Seg3(G,G+dd-dnx);
+                win->Seg3(G,G+dd+dny);
+                win->Seg3(G,G+dd-dny);
+                win->Seg3(G,G+dd+dnz);
+                win->Seg3(G,G+dd-dnz);
+                glEnd();
+
+                
+            }
 
             for (int i=0;i<Th.nt; i = 0 ? i++ : i+=nbN) {
                 const MeshS::Element & K(Th[i]);
@@ -2483,14 +2513,14 @@ void ThePlot::DrawHelp(OneWindow *win)
     win->Show("+) -)   zoom in/out  around the cursor 3/2 times ",i++);
     win->Show("=)   reset vue ",i++);
     win->Show("r)   refresh plot ",i++);
-    win->Show("up, down, left, right) special keys  to  tanslate   ",i++);
+    win->Show("up, down, left, right) special keys  to  translate   ",i++);
     win->Show("3)   switch 3d/2d plot (in test)  keys : ",i++);
     win->Show(" z) Z) (focal zoom unzoom)  ",i++);
     win->Show(" H) h) switch increase or decrease the Z scale of the plot ",i++);
     win->Show("mouse motion)    ",i++);
     win->Show("   - left button)  rotate    ",i++);
     win->Show("   - right button)       zoom        (ctrl+button on mac) ",i++);
-    win->Show("   - right button +alt)  tanslate    (alt+ctrl+button on mac)",i++);
+    win->Show("   - right button +alt)  translate    (alt+ctrl+button on mac)",i++);
 
     win->Show("a) A) increase or decrease the arrow size",i++);
     win->Show("B)  switch between show  border meshes or not",i++);
@@ -2673,7 +2703,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
                 case 19: fin >> keepPV; break;
                 case 20: fin >> echelle;break;
                 default:
-                    cout << "Fatal error: Unknow  case  : " << cas <<endl;
+                    cout << "Fatal error: Unknown  case  : " << cas <<endl;
                     ffassert(0);
                     break;
             }
@@ -2731,7 +2761,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
                 default:
                     static int nccc=0;
                     if(nccc++<5)
-                        cout << " Skip Unknow case " << cas <<" (ffglut is too old ?)\n";
+                        cout << " Skip Unknown case " << cas <<" (ffglut is too old ?)\n";
                     fin.SkipData();
                     break;
             }
@@ -3044,7 +3074,7 @@ case 20+index: {type dummy; fin >= dummy;} break;
         }
         else
         {
-            cout << "Bizarre unkown what :  " << what<< endl;
+            cout << "Bizarre unknown what :  " << what<< endl;
             ffassert(0);
         }
         ffassert(p);
@@ -3590,7 +3620,7 @@ void ThePlot::DrawIsoEfill(const R3 Pt[2],const R ff[2],const R3 Nt[2],const R *
                 }
             }
         }
-        else {
+        else if (xfb-eps <=fj  && fj <= xfh+eps) {
             PQ[im] = Pt[0]; NQ[im] = Nt[0]; z[im++] =fi;
             PQ[im] = Pt[1]; NQ[im] = Nt[1]; z[im++] =fj;
         }
@@ -4160,6 +4190,7 @@ void     SetDefWin(const char *p,int & iii0,int & jjj0,int & Width,int &Height)
 }
 int main(int argc,  char** argv)
 {
+    lockOrientation=0;// to get bad mesh !! FH mai 2021 
     ffapi::init();
     glutInit(&argc, argv);
     bool stereo=false;

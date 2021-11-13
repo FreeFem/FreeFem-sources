@@ -151,11 +151,11 @@ pacman -S autoconf automake-wrapper bash bash-completion \
     bison bsdcpio bsdtar bzip2 coreutils curl dash file filesystem \
     findutils flex gawk gcc gcc-fortran gcc-libs grep gzip inetutils info less lndir \
     make man-db git mingw-w64-x86_64-freeglut mingw-w64-x86_64-toolchain mingw-w64-x86_64-gsl mingw-w64-x86_64-hdf5 \
-    mingw-w64-x86_64-openblas mintty msys2-keyring msys2-launcher-git \
+    mingw-w64-x86_64-openblas mintty msys2-keyring \
     msys2-runtime ncurses pacman pacman-mirrors pactoys-git patch pax-git python \
     perl pkg-config pkgfile rebase sed tar tftp-hpa time tzcode unzip util-linux which \
     mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-cmake
-pacman -R mingw-w64-x86_64-gcc-ada mingw-w64-x86_64-gcc-objc mingw-w64-x86_64-gdb mingw-w64-x86_64-python
+pacman -R mingw-w64-x86_64-gcc-ada mingw-w64-x86_64-gcc-objc mingw-w64-x86_64-gdb mingw-w64-x86_64-gdb-multiarch mingw-w64-x86_64-python
 ```
 [MSMPI 10.1.2](https://www.microsoft.com/en-us/download/details.aspx?id=100593)
 
@@ -210,7 +210,7 @@ make -j4 install
 
 ```
 
-Jenkins projets are [here](https://ci.inria.fr/freefem-dev/) and [here](https://ci.inria.fr/freefem-dev-2/) 
+Jenkins projects are [here](https://ci.inria.fr/freefem-dev/) and [here](https://ci.inria.fr/freefem-dev-2/) 
 
 
 # Job 1

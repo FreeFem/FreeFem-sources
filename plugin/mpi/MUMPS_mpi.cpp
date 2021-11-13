@@ -122,6 +122,15 @@ public:
         delete [] id.irn;
         delete [] id.jcn;
         delete [] id.a;
+
+        delete [] id.irn_loc;
+        delete [] id.jcn_loc;
+        delete [] id.a_loc;
+
+        id.irn_loc = 0;
+        id.jcn_loc = 0;
+        id.a_loc = 0;
+
         id.irn=0;
         id.jcn=0;
         id.a =0;
@@ -306,9 +315,11 @@ public:
         }
         ICNTL(9) = trans == 0;    // 1: A x = b, !1 : tA x = b  during slove phase
         id.nrhs = N;
+        id.lrhs = id.n;
         // x = b;
         if(distributed)
         {
+            ffassert(id.nrhs==1);
             MPI_Reduce( (void *) b,(void *)  x  , nN , MPI_TYPE<R>::TYPE(),MPI_SUM,0,comm);
         }
         else if(mpirank==0)  std::copy(b,b+nN,x);

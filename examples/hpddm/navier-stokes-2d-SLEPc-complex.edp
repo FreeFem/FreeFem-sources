@@ -1,7 +1,7 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
 
-load "SLEPc-complex"
+load "PETSc-complex"
 
 macro dimension()2//
 include "macro_ddm.idp"

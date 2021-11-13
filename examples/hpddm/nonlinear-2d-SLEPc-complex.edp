@@ -1,7 +1,7 @@
 //  run with MPI:  ff-mpirun -np 4 script.edp
 // NBPROC 4
 
-load "SLEPc-complex"                // SLEPc plugin
+load "PETSc-complex"                // SLEPc plugin
 macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 

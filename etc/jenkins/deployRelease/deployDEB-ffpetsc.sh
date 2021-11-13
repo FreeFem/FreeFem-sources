@@ -14,8 +14,8 @@ distrib=`uname -s`-`uname -r`
 
 DISTRIB="Ubuntu"
 
-DEB_NAME="freefem_${VERSION}_withPETSc_amd64"
-GH_DEB_NAME="FreeFEM_${VERSION}_${DISTRIB}_withPETSc_amd64.deb"
+DEB_NAME="freefem-${VERSION}-amd64"
+GH_DEB_NAME="FreeFEM-${VERSION}-amd64.deb"
 
 ## DEB build
 autoreconf -i

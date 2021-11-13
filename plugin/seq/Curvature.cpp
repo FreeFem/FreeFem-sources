@@ -82,14 +82,14 @@ R3 *courbe(Stack stack, const KNM_< double > &b, const long &li0, const long &li
 
   double lg = b(2, i1);
   R3 Q;
-  ffassert(lg > 0 && b(2, 0) == 0.);
+  ffassert(lg > 0 && b(2, i0) == 0.);
   double s = ss * lg;
   int k = 0, k1 = i1;
 
   while (i0 < i1 - 1) {
     int im;
 
-    ffassert(k++ < k1);
+    ffassert(k++ < k1 && (b(2,i0) < b(2,i1-1)));
     im = (i0 + i1) / 2;
     if (s < b(2, im)) {
       i1 = im;
@@ -265,14 +265,15 @@ KN< double > *courbureaxi(Stack stack, pmesh const &pTh, const long &lab) {
   return courbure(stack, pTh, &ll, 1);
 }
 
-double reparametrage(Stack stack, const KNM_< double > &bb) {
+double reparametrage(Stack stack, const KNM_< double > &bb,const long &l0,const long &l1) {
+  int i0=l0, i1=l1; 
   KNM_< double > b = bb;
   ffassert(b.N( ) >= 3);
-  R2 P(b(0, 0), b(1, 0));
+  R2 P(b(0, i0), b(1, i0));
   double s = 0;
   b(2, 0) = s;
 
-  for (int i = 1; i < b.M( ); ++i) {
+  for (int i = i0+1; i <= i1 ; ++i) {
     R2 Q(b(0, i), b(1, i));
     s += R2(P, Q).norme( );
     b(2, i) = s;
@@ -280,6 +281,9 @@ double reparametrage(Stack stack, const KNM_< double > &bb) {
   }
 
   return s;
+}
+double reparametrage(Stack stack, const KNM_< double > &bb) {
+	return reparametrage(stack,bb,0,bb.M()-1);
 }
 
 KNM< double > *equiparametre(Stack stack, const KNM_< double > &bb, const long &n) {
@@ -373,7 +377,7 @@ double ExtractBorder(Stack stack, pmesh const &pTh, KN_< long > const &lab,
     nee[0] = -1;    // on ouvre 
   } else {
     if ((nbg != 1) || (verbosity > 4)) {
-      cout << " error (no connexe boundary be carefull with internal boundary (pb of sens) ) : nb "
+      cout << " error (no connexe boundary be careful with internal boundary (pb of sens) ) : nb "
               "start = "
            << nbg << endl;
     }
@@ -508,6 +512,7 @@ static void finit( ) {
   Global.Add("raxicurvature", "(", new OneOperator2s_< KN< double > *, pmesh, long >(courbureaxi));
   Global.Add("curves", "(", new OneOperator2s_< R3 *, KNM_< double >, double >(courbe));
   Global.Add("setcurveabcisse", "(", new OneOperator1s_< double, KNM_< double > >(reparametrage));
+  Global.Add("setcurveabcisse", "(", new OneOperator3s_< double, KNM_< double > , long , long >(reparametrage));
   Global.Add("equiparameter", "(",
              new OneOperator2s_< KNM< double > *, KNM_< double >, long >(equiparametre));
   Global.Add("Tresca", "(", new OneOperator3_< double, double >(Tresca));

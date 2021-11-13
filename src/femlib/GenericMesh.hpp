@@ -333,7 +333,7 @@ public:
       vertices[i]=v0+iv[i];
     mes=(mss!=UnSetMesure) ? mss : Data::mesure(vertices);
     lab=r;
-    ASSERTION(mss==UnSetMesure && mes>0);
+    assert( (RdHat::d != Rd::d )|| mes>0 );
     return *this;
   }
 
@@ -597,8 +597,29 @@ public:
   { int dfon[NbTypeItemElement]={ndfv,ndfe,ndff,ndft};
     return  BuildDFNumbering(dfon,nbequibe,equibe);
   }
-  int nElementonB(int k,int j) const // add v4 F.H 12/2018 (not sure for internal boundary !!!)
-    { int kk= TheAdjacencesLink[nea*k+j]; return (kk>=0) && (kk/nea  != k) ? 2 : 1;}// correct FH 23 mrch 2012
+  int nElementonB(int k,int j) const // Correct  v4.10 FH 06/2021  in case of no manifold mesh !!
+    { int kk0=nea*k+j,kk= TheAdjacencesLink[kk0];
+        int n =1;
+        // add case of no manifold Juin 2021 FH..  value >2
+        while ( kk!=kk0 && kk >=0)
+        {   kk = TheAdjacencesLink[kk];
+            n++;
+            ffassert(n<1000); // remove loop !!!!
+        }
+        return n;
+    }
+    double uniqueBE(int k,int j) const // add to have  unique BE
+    { int kk0=nea*k+j,kk= TheAdjacencesLink[kk0],kkm=kk0;
+          int n =1;
+          // add case of no manifold Juin 2021 FH..  value >2
+          while ( kk!=kk0 && kk >=0)
+          {   kk = TheAdjacencesLink[kk];
+              kkm = min(kk,kkm);
+              n++;
+              ffassert(n<1000); // remove loop !!!!
+          }
+          return kk0==kk;
+      }
 
   int ElementAdj(int k,int &j) const  {
     int p=TheAdjacencesLink[nea*k+j];
@@ -881,7 +902,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
             }
             
         }
-        if(verbosity&& nadjnomanifold) cerr << "  --- Warning manifold obj nb:" << nbordnomanifold<< " adj "<< nadjnomanifold << " of  dim =" << T::RdHat::d << endl;
+        if(verbosity&& nadjnomanifold) cerr << "  --- Warning no manifold obj nb:" << nbordnomanifold<< " adj "<< nadjnomanifold << " of  dim =" << T::RdHat::d << endl;
         int kerr=0,kerrf=0,nbei=0,fwarn=0;
         map<pair<int,int>,pair<int,int> > mapfs;
         int uncorrect =0, nbchangeorient=0;
@@ -989,7 +1010,7 @@ void GenericMesh<T,B,V>::BuildjElementConteningVertex()
         {
             if( p->second.first && p->second.second)
             {
-                if(verbosity>2 && step==0)  cout << " error in orientation of internal face beetwen region "
+                if(verbosity>2 && step==0)  cout << " error in orientation of internal face between region "
                     << p->first.first << " , " << p->first.second << " to no zero value "
                     << p->second.first << "  " << p->second.second << endl;
                 uncorrect++;
@@ -1363,7 +1384,9 @@ void GenericMesh<T,B,V>::SameVertex(const double precis_mesh, V *vertice, T *ele
     
     
 template<typename T,typename B,typename V>
-void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &nbe, V *(&v), T *(&t), B *(&b), bool removeduplicate, bool rebuildboundary, int orientation) {
+void GenericMesh<T,B,V>::
+
+clean_mesh(double precis_mesh, int &nv, int &nt, int &nbe, V *(&v), T *(&t), B *(&b), bool removeduplicate, bool rebuildboundary, int orientation) {
 
   
     // array for the index of new vertices, element, borderelement in the old numbering
@@ -1401,7 +1424,7 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
         vv[i].lab=v[iv].lab;
     }
   
-  
+    int nbort=0, nborb=0;
     double mes=0., mesb=0.;
     nt=new_nt;
     T *tt=new T[nt];
@@ -1414,9 +1437,9 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
             assert(iv[j] >= 0 && iv[j] < nv);
         }
         if (orientation<0 && T::nv>2 )
-            swap(iv[1], iv[2]);
+            nbort++,swap(iv[1], iv[2]);
         else if (orientation<0 && T::nv==2 )
-            swap(iv[0], iv[1]);
+            nbort++,swap(iv[0], iv[1]);
         
         tt[i].set(vv, iv, K.lab);
         mes+=tt[i].mesure();
@@ -1473,14 +1496,16 @@ void GenericMesh<T,B,V>::clean_mesh(double precis_mesh, int &nv, int &nt, int &n
             iv[j] =  old2new[ &(K[j]) - v];
             assert(iv[j] >= 0 && iv[j] < nv);
         }
-        if (orientation<0 && T::nv>2 )
-            swap(iv[(B::nv)-2], iv[(B::nv)-1]);
+        if (orientation<0 && B::nv>=2 )//  correct  FH  juin  2021 do also on B edge (nv==2)
+            nborb++,swap(iv[(B::nv)-2], iv[(B::nv)-1]);
         bb[i].set(vv, iv, K.lab);
         mesb+=bb[i].mesure();
     }
     }
     if(verbosity>2)
-        cout << "after clean mesh, nv = " << nv << " nt = " << nt << " nbe = " << nbe << endl;
+        cout << "   after clean mesh, nv = " << nv << " nt = " << nt << " nbe = " << nbe
+             << "\n      nb swap orient element" << nbort
+             <<  "\n     nb swap orient border element" << nborb << endl;
    
     if (mes<0) {
         cerr << " Error of mesh orientation , current orientation = " << orientation << endl;

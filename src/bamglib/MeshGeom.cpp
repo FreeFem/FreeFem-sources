@@ -806,7 +806,7 @@ namespace bamg {
       R2 v10 = edges[i].v[1]->r - edges[i].v[0]->r;
       Real8 lv10 = Norme2(v10);
       if (lv10 == 0) {
-        cerr << "The length  of " << i << "th Egde is 0 " << endl;
+        cerr << "The length  of " << i << "th Edge is 0 " << endl;
         MeshError(1);
       }
       eangle[i] = atan2(v10.y, v10.x);    // angle in [ -Pi,Pi ]

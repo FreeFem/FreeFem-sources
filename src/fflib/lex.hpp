@@ -132,7 +132,7 @@ class mylex : public CodeAlloc {
   const char * filename() const { 
     if ( level >=0 ) 
       return  pilesource[level].filename ? pilesource[level].filename->c_str() : " -- in macro -- ";
-    return "-- unkown --";}
+    return "-- unknown --";}
     
   void input(const char *  filename) ;
   void input(const string &str,const string *name=0,int lg=0);

@@ -36,7 +36,11 @@
 #include "PkLagrange.hpp"
 
  namespace Fem2D {
-// P0 
+// P0
+ 
+ const R1 *R1::KHat=R1::setKHat();
+ const R2 *R2::KHat=R2::setKHat();
+ const  R3 *R3::KHat=R3::setKHat();
 
 
 class TypeOfFE_P0Lagrange3d : public  TypeOfFE_Lagrange<Mesh3> { 

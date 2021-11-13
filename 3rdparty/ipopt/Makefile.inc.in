@@ -9,7 +9,6 @@ FCFLAGS      = @FCFLAGS@
 LIBBLAS =  @BLASLIBS@ -lm
 LIBLAPACK =@LAPACKLIBS@ -lm
 WGET=@WGET@
-CXXCPP=@CXXCPP@
 host_os = @host_os@
 TOOL_COMPILE_mumps_seq = @TOOL_COMPILE_mumps_seq@
 # <<FLIBS>> ALH - 6/1/14 - Ipopt fails to guess FLIBS correctly on Windows+Cygwin+Mingw64

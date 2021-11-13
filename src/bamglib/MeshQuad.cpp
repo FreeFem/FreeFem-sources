@@ -173,7 +173,7 @@ namespace bamg {
     }
     Edge *e = &BhAB;
     assert(pA && pB && e);
-    // be carefull the back ground edge e is on same geom edge
+    // be careful the back ground edge e is on same geom edge
     // of the initiale edge def by the 2 vertex A B;
     assert(e >= BTh.edges && e < BTh.edges + BTh.nbe);    // Is a background Mesh;
     // walk on BTh edge

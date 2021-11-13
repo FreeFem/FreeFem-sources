@@ -145,7 +145,7 @@ class SolveMUMPS_seq : public VirtualSolver< int, R > {
     id.jcn = jcn;
     id.a = (MR *)(void *)a;
     id.rhs = 0;
-    ffassert(A.half == id.sym);    //
+    ffassert(A.half == (id.sym != 0));    //
     ICNTL(5) = 0;                         // input matrix type
     ICNTL(7) = 7;                         // NUMBERING ...
 

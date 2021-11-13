@@ -1,3 +1,4 @@
+extern long verbosity;
 #include "write_xdmf.hpp"
 #ifdef DEBUG
 int debug_w = 1;
@@ -67,7 +68,7 @@ void WriteXdmf::WriteXdmfMeshFile2D( ) {
   xdmf_file << "</Xdmf>\n";
   xdmf_file.close( );
 
-  cout << "save xdmf file mesh : " << xdmf_filename << endl;
+  if (verbosity > 2) cout << "save xdmf file mesh : " << xdmf_filename << endl;
 }
 
 // void WriteXdmf::WriteXdmfMeshFile3D()
@@ -106,7 +107,7 @@ void WriteXdmf::WriteXdmfMeshFile2D( ) {
 //   xdmf_file << "</Xdmf>\n";
 //   xdmf_file.close();
 //
-//   cout <<"save xdmf file mesh : "<< xdmf_filename << endl;
+//   if (verbosity > 2) cout << "save xdmf file mesh : " << xdmf_filename << endl;
 // }
 
 void WriteXdmf::WriteXdmfSolFile2DInit( ) {
@@ -183,7 +184,7 @@ void WriteXdmf::WriteXdmfSolFile2DFinalize( ) {
   xdmf_file << "  </Domain>\n";
   xdmf_file << "</Xdmf>\n";
   xdmf_file.close( );
-  cout << "save xdmf file solution : " << xdmf_filename << endl;
+  if (verbosity > 2) cout << "save xdmf file solution : " << xdmf_filename << endl;
 }
 
 void WriteXdmf::WriteXdmfSolFile3DInit( ) {
@@ -259,5 +260,5 @@ void WriteXdmf::WriteXdmfSolFile3DFinalize( ) {
   xdmf_file << "  </Domain>\n";
   xdmf_file << "</Xdmf>\n";
   xdmf_file.close( );
-  cout << "save xdmf file solution : " << xdmf_filename << endl;
+  if (verbosity > 2) cout << "save xdmf file solution : " << xdmf_filename << endl;
 }

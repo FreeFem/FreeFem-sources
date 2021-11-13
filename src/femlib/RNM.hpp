@@ -278,7 +278,7 @@ struct  RNM_VirtualMatrix { public:
 
   struct  solveAxeqb { const RNM_VirtualMatrix * A; const KN_<R>   b;
    solveAxeqb( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),b(y)
-    { if(B) { ffassert(B->ChecknbColumn(y.N())); } } };
+    { if(B) {int mu=y.N()/B->M; ffassert(mu>0 && y.N()%mu==0);} } };
 
     struct  solveAtxeqb { const RNM_VirtualMatrix * A; const KN_<R>   b;
         solveAtxeqb( const RNM_VirtualMatrix * B,const KN_<R> &  y) :A(B),b(y)

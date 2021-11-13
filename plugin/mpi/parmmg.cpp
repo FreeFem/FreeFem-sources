@@ -124,7 +124,7 @@ int PMMG_pParMesh_to_ffmesh(const PMMG_pParMesh& mesh, Mesh3 *&T_TH3, bool distr
 class parmmg_Op : public E_F0mps {
  public:
   Expression eTh, xx, yy, zz;
-  static const int n_name_param = 33;
+  static const int n_name_param = 36;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
 
@@ -189,7 +189,10 @@ basicAC_F0::name_and_type parmmg_Op::name_param[] = {
 {"hgrad"             , &typeid(double)},/*!< [val], Control gradation */
 {"hgradreq"          , &typeid(double)},/*!< [val], Control gradation from required entities */
 {"ls"                , &typeid(double)},/*!< [val], Value of level-set */
-{"nodeCommunicators" , &typeid(KN<KN<long>>*)}
+{"requiredTriangle"  , &typeid(KN<long>*)},/*!< [val], References of surfaces with required triangles */
+{"localParameter"    , &typeid(KNM<double>*)},/*!< [val], Local parameters on given surfaces */
+{"nodeCommunicators" , &typeid(KN<KN<long>>*)},
+{"neighbors"         , &typeid(KN<long>*)}
 };
 
 class parmmg_ff : public OneOperator {
@@ -238,7 +241,7 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
                     PMMG_ARG_dim,3,PMMG_ARG_MPIComm,comm,
                     PMMG_ARG_end);
 
-  KN< KN< long > >* communicators = nargs[32] ? GetAny< KN< KN< long > >* >((*nargs[32])(stack)) : 0;
+  KN< KN< long > >* communicators = nargs[34] ? GetAny< KN< KN< long > >* >((*nargs[34])(stack)) : 0;
   ffmesh_to_PMMG_pParMesh(Th, mesh, communicators != NULL);
 
   int root = mesh->info.root;
@@ -269,6 +272,46 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
             printf("Unable to set metric.\n");
             exit(EXIT_FAILURE);
           }
+        }
+      }
+    }
+  KN< long > *prequiredTriangle = 0;
+  KNM< double > *plocalParameter = 0;
+  if (nargs[32]) {
+    prequiredTriangle = GetAny< KN< long > * >((*nargs[32])(stack));
+  }
+  if (nargs[33]) {
+    plocalParameter = GetAny< KNM< double > * >((*nargs[33])(stack));
+  }
+    if (prequiredTriangle && prequiredTriangle->N( ) > 0) {
+      const KN< long > &requiredTriangle = *prequiredTriangle;
+      std::sort(requiredTriangle + 0, requiredTriangle + requiredTriangle.N());
+      int nt;
+      if ( PMMG_Get_meshSize(mesh,NULL,NULL,NULL,&nt,NULL,NULL) !=1 ) {
+        exit(EXIT_FAILURE);
+      }
+      for (int k=1; k<=nt; k++) {
+        int ref, dummy;
+        if ( PMMG_Get_triangle(mesh,&dummy,&dummy,&dummy,
+                    &ref,NULL) != 1 ) {
+          exit(EXIT_FAILURE);
+        }
+        if (std::binary_search(requiredTriangle + 0, requiredTriangle + requiredTriangle.N(), ref)) {
+          if ( PMMG_Set_requiredTriangle(mesh,k) != 1 ) {
+            exit(EXIT_FAILURE);
+          }
+        }
+      }
+    }
+    if (plocalParameter && plocalParameter->M( ) > 0) {
+      const KNM< double > &localParameter = *plocalParameter;
+      ffassert(localParameter.N() == 4);
+      if ( PMMG_Set_iparameter(mesh,/*sol,*/PMMG_IPARAM_numberOfLocalParam,localParameter.M()) != 1 ) {
+        exit(EXIT_FAILURE);
+      }
+      for(int j = 0; j < localParameter.M(); ++j) {
+        if ( PMMG_Set_localParameter(mesh,/*sol,*/MMG5_Triangle,localParameter(0,j),localParameter(1,j),localParameter(2,j),localParameter(3,j)) != 1 ) {
+          exit(EXIT_FAILURE);
         }
       }
     }
@@ -344,7 +387,26 @@ AnyType parmmg_Op::operator( )(Stack stack) const {
 
   int ier = communicators == NULL ? PMMG_parmmglib_centralized(mesh) : PMMG_parmmglib_distributed(mesh);
   if( ier == PMMG_STRONGFAILURE ) exit(EXIT_FAILURE);
+  KN< long > *pneighbors = 0;
+  if (nargs[35]) {
+    pneighbors = GetAny< KN< long > * >((*nargs[35])(stack));
+    int icomm,i;
+    int n_node_comm_out;
+    int nitem_node_comm_out;
+    int color_node_out;
 
+    /* Get number of node interfaces */
+    ier = PMMG_Get_numberOfNodeCommunicators(mesh,&n_node_comm_out);
+    pneighbors->resize(n_node_comm_out);
+
+    /* Get outward proc rank and number of nodes on each interface */
+    for( icomm = 0; icomm < n_node_comm_out; icomm++ ) {
+      ier = PMMG_Get_ithNodeCommunicatorSize(mesh, icomm,
+                                             &color_node_out,
+                                             &nitem_node_comm_out);
+      pneighbors->operator[](icomm) = color_node_out;
+    }
+  }
   Mesh3 *Th_T = nullptr;
 
   PMMG_pParMesh_to_ffmesh(mesh, Th_T, communicators != NULL);

@@ -28,7 +28,6 @@ int[int] labPeriodic = [Labels[0],Labels[2]];
 /*     Load PETSc & SLEPc macros      */
 /**************************************/
 load "PETSc"                             // PETSc plugin
-load "SLEPc"                             // SLEPc plugin
 macro dimension(      )2// End Of Macro  // 2D or 3D
 include "macro_ddm.idp"                  // Additional DDM functions
 macro def(i)i// EOM
@@ -41,7 +40,7 @@ macro Pk() P1, periodic=[[Labels[0],x],[Labels[2],x]]//EOM
 /***************************************/
 int s      = getARGV("-split", 1)   ; // Refinement factor
 //
-int Npts   = getARGV("-npts" , 400) ; // Number of points on the perimeter
+int Npts   = getARGV("-npts" , 200) ; // Number of points on the perimeter
 //
 int nEV    = getARGV("-nev"  ,  5)  ; // Number of eigenvalues
 real sigma = getARGV("-sigma", 0.0) ; // Shift

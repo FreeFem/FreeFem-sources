@@ -164,7 +164,7 @@ AnyType readsol_Op::operator( )(Stack stack) const {
       nbsol = nsol * dim * (dim + 1) / 2;
       offsettab = dim * (dim + 1) / 2;
     } else {
-      cerr << "bug in the definition of type of solution: 1 scalar, 2 vector, 3 symetric tensor"
+      cerr << "bug in the definition of type of solution: 1 scalar, 2 vector, 3 symmetric tensor"
            << endl;
       exit(1);
     }
@@ -178,7 +178,7 @@ AnyType readsol_Op::operator( )(Stack stack) const {
         firstelem = firstelem + dim * (dim + 1) / 2;
         ;
       } else {
-        cerr << "bug in the definition of type of solution: 1 scalar, 2 vector, 3 symetric tensor"
+        cerr << "bug in the definition of type of solution: 1 scalar, 2 vector, 3 symmetric tensor"
              << endl;
         exit(1);
       }

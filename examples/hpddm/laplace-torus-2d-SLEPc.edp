@@ -31,7 +31,6 @@ int[int] labPeriodic = [Labels[0],Labels[2],Labels[1],Labels[3]];
 /*     Load PETSc & SLEPc macros      */
 /**************************************/
 load "PETSc"                             // PETSc plugin
-load "SLEPc"                             // SLEPc plugin
 macro dimension(      )2// End Of Macro  // 2D or 3D
 include "macro_ddm.idp"                  // Additional DDM functions
 macro def(i)i// EOM

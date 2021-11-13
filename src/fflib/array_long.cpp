@@ -160,7 +160,7 @@ void initArrayOperatorlong()
   Dcl_TypeandPtr_<KN_<String>, KN<String> *>(0, 0, 0, ::Destroy<KN<String> >, ::ClearReturnKK_<K,KN<String>, KN_<String> >, ::ClearReturnpKK<String, KN<String> >);
   atype<KN<String>* >()->Add("[", "", new OneOperator2_<string**, KN<String>*, long >(get_elements));
   TheOperators->Add("<-", new OneOperator2_<KN<String> *, KN<String> *, long>(&set_init_init), new InitArrayfromArray<string*, KN<String>*, true>);
-  map_type_of_map[make_pair(atype<long>(), atype<string*>())] = atype<KN<String>*>(); // vector
+  map_type_of_map[make_pair(atype<long>(), atype<string*>())] = atype<KN<String>*>(); // vector [string] 
   Add<KN<String> *>("n", ".", new OneOperator1<long, KN<String> *>(get_n));
   extern KN<String> *pkarg;
   Global.New("ARGV", CPValue<KN<String> >(*pkarg));// add FH mars 2010

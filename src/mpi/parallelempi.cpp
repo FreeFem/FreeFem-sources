@@ -794,7 +794,7 @@ public:
     if(lsz)
         DeSerialize(this, ppTh);
     if (verbosity > 100)
-      cout << "    " << mpirank << " recived from " << who << " serialized " << what << ", l="
+      cout << "    " << mpirank << " received from " << who << " serialized " << what << ", l="
            << lsz << ", tag=" << tag << " rq = " << rq << " " << *ppTh << endl;
     return false; // OK
   }
@@ -1043,7 +1043,7 @@ Serialize::Serialize(const MPIrank & rank,const char * wht,long tag,const void *
     }
 
   if(verbosity>100)
-    cout << "    " << mpirank << " recived from " << rank << " serialized " << what <<   ", l="
+    cout << "    " << mpirank << " received from " << rank << " serialized " << what <<   ", l="
 	 << l << ", tag=" << tag << endl;
   delete [] buf;
   p=pp+sizeof(long);

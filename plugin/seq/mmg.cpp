@@ -288,8 +288,8 @@ basicAC_F0::name_and_type mmg_Op<Mesh3>::name_param[] = {
 {"hgrad"             , &typeid(double)},/*!< [val], Control gradation */
 {"ls"                , &typeid(double)},/*!< [val], Value of level-set */
 //{"rmc"               , &typeid(double)},/*!< [-1/val], Remove small connex componants in level-set mode */
-{"requiredTriangle"  , &typeid(KN<long>*)},/*!< [val], Value of level-set */
-{"localParameter"    , &typeid(KNM<double>*)}/*!< [val], Value of level-set */
+{"requiredTriangle"  , &typeid(KN<long>*)},/*!< [val], References of surfaces with required triangles */
+{"localParameter"    , &typeid(KNM<double>*)}/*!< [val], Local parameters on given surfaces */
 };
 
 template<>
@@ -571,7 +571,7 @@ AnyType mmg_Op<MeshS>::operator( )(Stack stack) const {
 }
 
 static void Load_Init( ) {
-  if (verbosity) {
+  if (verbosity && mpirank == 0) {
     cout << " load: mmg " << endl;
   }
 

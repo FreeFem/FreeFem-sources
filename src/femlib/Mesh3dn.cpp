@@ -502,7 +502,7 @@ namespace Fem2D
                         iv[jj] = this->operator()(K[jj]);
                     }
                     for (int eh=0;eh<6;eh++){
-                        if(verbosity>2) cout << "tetrahedra: " << k << " edge : " << eh << " lenght "<<  this->elements[k].lenEdge(eh) << endl;
+                        if(verbosity>2) cout << "tetrahedra: " << k << " edge : " << eh << " length "<<  this->elements[k].lenEdge(eh) << endl;
                     }
                     if(verbosity>2) cout << " A tetrahedra with a very small edge was created " << endl;
                     return 1;
@@ -516,7 +516,7 @@ namespace Fem2D
                 if( this->be(k).lenEdge(e) < Norme2(Psup-Pinf)/1e9 )
                 {
                     for (int eh=0;eh<3;e++){
-                        cout << "triangles: " << k << " edge : " << eh << " lenght "<<  this->be(k).lenEdge(e) << endl;
+                        cout << "triangles: " << k << " edge : " << eh << " length "<<  this->be(k).lenEdge(e) << endl;
                     }
                     cout << " A triangle with a very small edges was created " << endl;
                     return 1;
@@ -1047,7 +1047,7 @@ namespace Fem2D
            cerr << " WARNING!!! The mesh file just contains a set of vertices" << endl;
            
         if(nt==0 && nbe) {
-            cerr << " ERROR!!! The old SURFACE mesh3 is obselete, please use meshS type" << endl;
+            cerr << " ERROR!!! The old SURFACE mesh3 is obsolete, please use meshS type" << endl;
          ffassert(0);
         }
         
@@ -1100,7 +1100,7 @@ namespace Fem2D
             cerr << " WARNING!!! The mesh file just contains a set of vertices" << endl;
         
         if(nt==0 && nbe) {
-            cerr << " ERROR!!! The old SURFACE mesh3 is obselete, please use meshS type" << endl;
+            cerr << " ERROR!!! The old SURFACE mesh3 is obsolete, please use meshS type" << endl;
             ffassert(0);
         }
         
@@ -1432,21 +1432,35 @@ namespace Fem2D
       
         mes=0.;
         mesb=0.;
-        
+        int err = 0;
         for (int i=0;i<nt;i++)
-            mes += this->elements[i].mesure();
+        {
+            double mese =this->elements[i].mesure();
+            if( mese <=0 ) {
+                
+                if( verbosity<2 && err < verbosity)
+                    cerr << " Bad orientation of tet  before cleanmesh "<< i << " mes = "<< mese << endl;
+                    err++;
+            }
+            mes += mese;
+        }
         
         for (int i=0;i<nbe;i++)
             mesb += this->be(i).mesure();
         
         if (cleanmesh){
+            err=0;
             if(verbosity>5)
             cout << "before clean mesh3, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
             clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
             if(verbosity>5)
                 cout << "after clean mesh3, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
         }
-        
+        if(err)
+        {
+            cerr << " erreur read  mesh " << err << " negative  tet";
+            ErrorExec(" mesh with negative Tets",1);
+        }
         //  Add FH to be consitant we all constructor ...  July 09
         BuildBound();
         if(nt && nbe) {

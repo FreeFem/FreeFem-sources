@@ -20,6 +20,7 @@ void Data_Sparse_Solver::Init_sym_positive_var(int syma)
         //  1 unsym , 2 herm, 4 sym, 8 pos , 16 nopos, 32  seq, 64  ompi, 128 mpi ,
         int ts = i->second->orTypeSol ;
         sym = syma;
+
         // first verification: is the solver compatible with previous syma value ?
         if ((syma == 0) && ((ts & 1) != 1)) // unsym
           sym = -1;
@@ -31,10 +32,10 @@ void Data_Sparse_Solver::Init_sym_positive_var(int syma)
         if (sym == -1) {
           if ((ts & 1) == 1)
             sym = 0;
-          else if ((ts & 2) == 2) {
+          else if (syma == -1 && (ts & 2) == 2) {
             sym = 1;
           }
-          else if ((ts & 4) == 4) {
+          else if (syma == -1 && (ts & 4) == 4) {
             sym = 2;
           }
           else {
@@ -49,6 +50,7 @@ void Data_Sparse_Solver::Init_sym_positive_var(int syma)
     }
     else
     {
+        sym = 0;
         if( solver == "CHOLESKY") {sym = 1; positive = true;}
         if( solver == "CROUT") {sym = 1;}
         if( solver == "CG") {sym = 1;positive=true;}

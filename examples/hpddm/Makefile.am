@@ -124,7 +124,7 @@ TESTS_PETSCCOMPLEX = diffusion-2d-PETSc-complex.edp \
 
 TESTS_PETSCCOMPLEX_SLEPCCOMPLEX = laplace-2d-SLEPc-complex.edp \
 	navier-stokes-2d-SLEPc-complex.edp helmholtz-2d-SLEPc-complex.edp \
-	nonlinear-2d-SLEPc-complex.edp
+	nonlinear-2d-SLEPc-complex.edp blasius-stability-1d-SLEPc-complex.edp
 
 TESTS_PETSCCOMPLEX_BEMTOOL_BOOST_HTOOL = helmholtz-3d-surf-PETSc-complex.edp helmholtz-3d-line-PETSc-complex.edp helmholtz-coupled-2d-PETSc-complex.edp helmholtz-dense-3d-line-PETSc-complex.edp
 
@@ -194,4 +194,4 @@ freefem++.pref: Makefile
 	echo includepath = \"../../idp/\" >> freefem++.pref
 
 clean-local:
-	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_* createPartition_* helmholtz-3d-surf.vtu helmholtz-3d-line.vtu dump-2d_* dump-3d_* navier-stokes-2d_* laplace-adapt-dist-3d_* transfer_2d_* transfer_3d_* stokes-mat-* stokes-rhs-* oseen-2d_*
+	rm -rf heat-io-2d_* stokes-io-3d_* laplace-adapt-3d_* diffusion-mg-3d_* maxwell-mg-3d_* createPartition_* dump-2d_* dump-3d_* navier-stokes-2d_* laplace-adapt-dist-3d_* transfer_2d_* transfer_3d_* stokes-mat-* stokes-rhs-* oseen-2d_* Blasius_EV.dat

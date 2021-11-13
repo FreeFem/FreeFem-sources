@@ -541,6 +541,9 @@ AnyType datasolHDF5Mesh3_Op< v_fes >::operator( )(Stack stack) const {
     XdmfSolFile3D->WriteXdmfSolFile3DAddField(datafieldname, (l[i].what - 1), resultorder, trans);
   }
 
+  if (verbosity > 2) {
+    cout << "save xdmf file solution : " << ffname << endl;
+  }
   XdmfSolFile3D->WriteXdmfSolFile3DFinalize( );
   delete XdmfSolFile3D;
 

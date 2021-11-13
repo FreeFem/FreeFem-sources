@@ -370,7 +370,7 @@ class mshmet3d_Op : public E_F0mps {
 
             break;
           default:
-            CompileError(" 3D solution for mshmest is vector (3 comp) or symetric tensor (6 comp)");
+            CompileError(" 3D solution for mshmest is vector (3 comp) or symmetric tensor (6 comp)");
             break;
         }
       } else {
@@ -657,7 +657,7 @@ class mshmet2d_Op : public E_F0mps {
 
             break;
           default:
-            CompileError(" 2D solution for mshmest is vector (2 comp) or symetric tensor (3 comp)");
+            CompileError(" 2D solution for mshmest is vector (2 comp) or symmetric tensor (3 comp)");
             break;
         }
       } else {
@@ -807,7 +807,7 @@ AnyType mshmet2d_Op::operator( )(Stack stack) const {
 }
 
 static void Load_Init( ) {    // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
-  if (verbosity) {
+  if (verbosity && mpirank == 0) {
     cout << " load: mshmet  " << endl;
   }
 

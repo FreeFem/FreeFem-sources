@@ -145,7 +145,7 @@ namespace Fem2D {
             }
         }
         if (err)
-        ExecError("Incompatibility beetwen  boundary condition  and FE space");
+        ExecError("Incompatibility between  boundary condition  and FE space");
     }
 
     void Check(const  Ftest * fl,int N)
@@ -165,7 +165,7 @@ namespace Fem2D {
             }
         }
         if (err)
-        ExecError("Incompatibility beetwen linear varf  and FE space");
+        ExecError("Incompatibility between linear varf  and FE space");
     }
   template<class R>
   inline void  CheckErrorOptimisation(const R& ccc,const R& cc,const char * cmm)
@@ -175,7 +175,7 @@ namespace Fem2D {
                  || (cc !=cc) ||  (ccc !=ccc) ) {// test for NaN
                 cerr << cc << " != " << ccc <<  " diff "<< cc-ccc <<" => ";
                 cerr << cmm << endl;
-                 cerr << " remark if you add  (..  ,   optimize=2) then  you remove this check (be carefull); "<< endl;
+                 cerr << " remark if you add  (..  ,   optimize=2) then  you remove this check (be careful); "<< endl;
                 ExecError("In Optimized version "); }}
    }
     inline void  CheckErrorOptimisation(const Complex ccc,const Complex& cc,const char * cmm)
@@ -186,7 +186,7 @@ namespace Fem2D {
             {
                 cerr << cc << " != " << ccc <<  " diff "<< cc-ccc <<" => ";
                 cerr << cmm << endl;
-                cerr << " remark if you add  (..  ,   optimize=2) then  you remove this check (be carefull); " <<endl;
+                cerr << " remark if you add  (..  ,   optimize=2) then  you remove this check (be careful); " <<endl;
 
                 ExecError("In Optimized version "); }}
     }
@@ -219,7 +219,7 @@ template<class R>
         pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);
         Stack stack= bs->first;
         double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
-        ffassert(mat.onFace); //   Finite Volume or discontinous Galerkine
+        ffassert(mat.onFace); //   Finite Volume or discontinuous Galerkine
         ffassert(ie>=0 && ie < 4); //  int on Face
         MeshPoint mp= *MeshPointStack(stack);
         R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
@@ -436,7 +436,166 @@ template<class R>
                        const FElementL & Kv,const FElementL & KKv,
                        double * p,int ie,int iie, int label,void *bstack,R3 *B)
     {
-        ffassert(0);
+        typedef typename FElementL::E Element;
+        ffassert(B==0);
+        pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);
+        Stack stack= bs->first;
+        double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
+        assert(mat.onFace); //   Finite Volume or discontinuous Galerkine
+        assert(ie>=0 && ie < 3); //  int on edge
+        MeshPoint mp= *MeshPointStack(stack);
+        R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+
+        bool same = &Ku == & Kv;
+        assert(same);
+        const Element & T  = Ku.T;
+        R3 NNt=T.TangenteUnitaire();
+        double s = ie;
+        double ss = iie;
+        GQuadraturePoint<R1> pi(1.,s);
+        R mes = 1.;
+        R3 NN=NNt;
+        if(ie==0) NN=-NN;
+        R coef = 1.;
+         R1 Pt(pi);
+        int nTonEdge =  &Ku == &KKu ? 1 : 2;
+        double cmean = 1./nTonEdge;
+
+        throwassert(&T == &Kv.T);
+        long npi=1;
+        R *a=mat.a;
+        R *pa=a;
+        long i,j;
+        long n= mat.n,m=mat.m,nx=n*m;
+        assert(nx<=mat.lga);
+        long N= Kv.N;
+        long M= Ku.N;
+
+        long mu=Ku.NbDoF();
+        long mmu=KKu.NbDoF();
+        long nv=Kv.NbDoF();
+        long nnv=Kv.NbDoF();
+        assert(mu==mmu && nv == nnv) ;
+
+
+
+        const Opera &Op(*mat.bilinearform);
+        bool classoptm = copt && Op.optiexpK;
+        //  if (Ku.number<1 && verbosity/100 && verbosity % 10 == 2)
+        if (Ku.number<1 && ( verbosity > 1 ) )
+        cout << "Element_OpVF 0d P: copt = " << copt << " " << classoptm << " binside (For FH) =" << binside << " opt: " << mat.optim << endl;
+
+
+        int lastop;
+        lastop = 0;
+        What_d Dop = Op.DiffOp(lastop);
+        //assert(lastop<=3);
+        int lffv = nv*N*last_operatortype;
+        int lffu = mu*M*last_operatortype;
+        int loffset =  same ? 0 :  (nv+nnv)*N*last_operatortype;
+
+        RNMK_ fv(p,nv,N,lastop); //  the value for basic fonction in K
+        RNMK_ ffv(p + lffv ,nnv,N,lastop); //  the value for basic fonction in KK
+        RNMK_ fu(  (double*) fv   + loffset  ,mu,M,lastop); //  the value for basic fonction
+        RNMK_ ffu( (double*) fu  + lffu  ,mmu,M,lastop); //  the value for basic fonction
+
+
+       
+        {
+            pa =a;
+            double coef = 1.;
+            
+            R1 Pt=s; //
+            R1 PP_t=ss;
+            assert (!binside);
+            Ku.BF(Dop,Pt,fu);
+            KKu.BF(Dop,PP_t,ffu);
+            if (!same) { Kv.BF(Dop,Pt,fv); KKv.BF(Dop,PP_t,ffv); }
+            // int label=-999999; // a passer en argument
+            MeshPointStack(stack)->set(T(Pt),Pt,Kv,label,NN,NNt,ie);//   Axel
+           // MeshPointStack(stack)->set(T(Pt),Pt,Kv,label, Normal,ie);
+            if (classoptm) (*Op.optiexpK)(stack); // call optim version
+
+
+            for ( i=0;  i<n;   i++ )
+            {
+                int ik= mat.nik[i];
+                int ikk=mat.nikk[i];
+
+                RNM_ wi(fv(Max(ik,0),'.','.'));
+                RNM_ wwi(ffv(Max(ikk,0),'.','.'));
+
+                for ( j=0;  j<m;   j++,pa++ )
+                {
+                    int jk= mat.njk[j];
+                    int jkk=mat.njkk[j];
+
+                    RNM_ wj(fu(Max(jk,0),'.','.'));
+                    RNM_ wwj(ffu(Max(jkk,0),'.','.'));
+
+                    int il=0;
+                    for (BilinearOperator::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+                    {
+                        BilinearOperator::K ll(*l);
+                        pair<int,int> jj(ll.first.first),ii(ll.first.second);
+                        int iis = ii.second, jjs=jj.second;
+
+                        int iicase  = iis / last_operatortype;
+                        int jjcase  = jjs / last_operatortype;
+
+                        iis %= last_operatortype;
+                        jjs %= last_operatortype;
+                        double w_i=0,w_j=0,ww_i=0,ww_j=0;
+
+                        if(ik>=0) w_i =   wi(ii.first,iis );
+                        if(jk>=0) w_j =   wj(jj.first,jjs );
+
+                        if( iicase>0 && ikk>=0) ww_i =  wwi(ii.first,iis );
+                        if( jjcase>0 && jkk>=0) ww_j =  wwj(jj.first,jjs );
+
+
+                        if       (iicase==Code_Jump) w_i = ww_i-w_i; // jump
+                        else  if (iicase==Code_Mean) {
+
+                            w_i = cmean*  (w_i + ww_i );} // average
+                        else  if (iicase==Code_OtherSide) w_i = ww_i;  // valeur de autre cote
+
+                        if      (jjcase==Code_Jump) w_j = ww_j-w_j; // jump
+                        else if (jjcase==Code_Mean) w_j = cmean*  (w_j +ww_j ); // average
+                        else if (jjcase==Code_OtherSide) w_j = ww_j;  //  valeur de l'autre cote
+
+                        // R ccc = GetAny<R>(ll.second.eval(stack));
+
+                        R ccc = copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+                        if ( copt && ( mat.optim==1) && Kv.number <1)
+                        {
+                            R cc  =  GetAny<R>(ll.second.eval(stack));
+                            CheckErrorOptimisation(cc,ccc,"Sorry error in Optimization Element_OpVF0d  (b) add:   int2d(Th,optimize=0)(...)");
+                           }
+                        *pa += coef * ccc * w_i*w_j;
+                    }
+                }
+            }
+            // else pa += m;
+        }
+
+
+        pa=a;
+        if ( (verbosity > 9999) ||( (verbosity > 55) && (Ku.number <=0 || KKu.number <=0 )))  {
+            cout <<endl  << " vertex between " << Ku.number << " , " <<  KKu.number   << " =  "<<  T[0] << ", " << T[1] << ", " << T[2] << " " << nx << endl;
+            cout << " K u, uu =  " << Ku.number << " " << KKu.number << " " <<  " K v, vv =  " << Kv.number << " " << KKv.number << " " <<endl;
+            for (int i=0;i<n;i++)
+            {
+                cout << setw(2) << i << setw(4) << mat.ni[i] <<  setw(4) << mat.nik[i] << setw(4) << mat.nikk[i]  <<  " :";
+                for (int j=0;j<m;j++)
+                cout << setw(5)  << (*pa++) << " ";
+                cout << endl;
+            } }
+
+        *MeshPointStack(stack) = mp;
+        
+        
+        
     }
 
     template<class R>
@@ -635,7 +794,7 @@ template<class R>
         if ( pThdi != &Th || &Uh.Th !=&Th || &Vh.Th !=&Th) {
             cout << " --Use matrix formulation ---" << endl;
             ExecError("No way to compute bilinear form with integrale of on mesh \n"
-                      "  test  or unkown function  defined on an other mesh! sorry to hard.   ");
+                      "  test  or unknown function  defined on another mesh! sorry to hard.   ");
         }
         SHOWVERB(cout << " FormBilinear " << endl);
         double CPU0 = CPUtime();
@@ -662,8 +821,8 @@ template<class R>
         QuadratureFormular FIT(FITo,3);
         // GQuadratureFormular<R3>  FIV(FIVo,3);
 
-        bool VF=b->VF();  // finite Volume or discontinous Galerkin
-        if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+        bool VF=b->VF();  // finite Volume or discontinuous Galerkin
+        if (verbosity>2) cout << "  -- discontinuous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
         if (verbosity>3)
         {
             if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
@@ -741,8 +900,8 @@ template<class R>
         }
         if(VF) {
             if(&Uh != &Vh || sym)
-            cout << ("To Day in bilinear form with discontinous Galerkin (2d):   \n"
-                     "  test or unkown function must be  defined on the same FEspace, \n"
+            cout << ("To Day in bilinear form with discontinuous Galerkin (2d):   \n"
+                     "  test or unknown function must be  defined on the same FEspace, \n"
                      "  and the matrix is not symmetric. \n"
                      " To do other case in a future (F. Hecht) dec. 2003 ");
             if(&Uh == &Vh)
@@ -913,7 +1072,7 @@ template<class R>
             }
         }
         else
-        InternalError(" kind of CDomainOfIntegration unkown");
+        InternalError(" kind of CDomainOfIntegration unknown");
 
         if (where_in_stack) delete [] where_in_stack;
         delete &mate;
@@ -947,7 +1106,7 @@ template<class R>
         if ( pThdi != &Th || &Uh.Th !=&Th || &Vh.Th !=&Th) {
             cout << " Use matrix formulation .... " << endl;
             ExecError("No way to compute bilinear form with integrale of on mesh \n"
-                      "  test  or unkown function  defined on an other mesh! sorry to hard.   ");
+                      "  test  or unknown function  defined on another mesh! sorry to hard.   ");
         }
         SHOWVERB(cout << " FormBilinear " << endl);
         MatriceElementaireSymetrique<R,FESpace> *mates =0;
@@ -968,8 +1127,8 @@ template<class R>
         QuadratureFormular FIT(FITo,3);
         GQuadratureFormular<R3>  FIV(FIVo,3);
 
-        bool VF=b->VF();  // finite Volume or discontinous Galerkin
-        if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+        bool VF=b->VF();  // finite Volume or discontinuous Galerkin
+        if (verbosity>2) cout << "  -- discontinuous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
         if (verbosity>3)
         {
             if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") ,"  ;
@@ -1047,8 +1206,8 @@ template<class R>
         }
         if(VF) {
             if(&Uh != &Vh || sym)
-            cout <<  ("To Day in bilinear form with discontinous Galerkin (3d):   \n"
-                      "  test or unkown function must be  defined on the same FEspace, \n"
+            cout <<  ("To Day in bilinear form with discontinuous Galerkin (3d):   \n"
+                      "  test or unknown function must be  defined on the same FEspace, \n"
                       "  and the matrix is not symmetric. \n"
                       " To do other case in a future (F. Hecht) dec. 2014 ");
             if(&Uh == &Vh)
@@ -1210,8 +1369,8 @@ template<class R>
         }
         else
         {
-            cerr << " kind of CDomainOfIntegration unkown ?? " << di.kind << endl;
-            InternalError(" kind of CDomainOfIntegration unkown");
+            cerr << " kind of CDomainOfIntegration unknown ?? " << di.kind << endl;
+            InternalError(" kind of CDomainOfIntegration unknown");
         }
 
         if (where_in_stack) delete [] where_in_stack;
@@ -1285,8 +1444,8 @@ template<class R>
         QuadratureFormular FIT(FITo,3);
         // GQuadratureFormular<R3>  FIV(FIVo,3);
 
-        bool VF=b->VF();  // finite Volume or discontinous Galerkin
-        if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+        bool VF=b->VF();  // finite Volume or discontinuous Galerkin
+        if (verbosity>2) cout << "  -- discontinuous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
         if (verbosity>3)
         {
             if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
@@ -1364,8 +1523,8 @@ template<class R>
         }
         if(VF) {
             if(&Uh != &Vh || sym)
-            cout << ("To Day in bilinear form with discontinous Galerkin (2d):   \n"
-                     "  test or unkown function must be  defined on the same FEspace, \n"
+            cout << ("To Day in bilinear form with discontinuous Galerkin (2d):   \n"
+                     "  test or unknown function must be  defined on the same FEspace, \n"
                      "  and the matrix is not symmetric. \n"
                      " To do other case in a future (F. Hecht) dec. 2003 ");
             if(&Uh == &Vh)
@@ -1537,7 +1696,7 @@ template<class R>
             }
         }
         else
-        InternalError(" kind of CDomainOfIntegration unkown");
+        InternalError(" kind of CDomainOfIntegration unknown");
 
         if (where_in_stack) delete [] where_in_stack;
         delete &mate;
@@ -1577,8 +1736,8 @@ template<class R>
         const GQuadratureFormular<R1> & FITo = di.FIE(stack);
         GQuadratureFormular<R1>  FIT(FITo,3);
 
-        bool VF=b->VF();  // finite Volume or discontinous Galerkin
-        if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+        bool VF=b->VF();  // finite Volume or discontinuous Galerkin
+        if (verbosity>2) cout << "  -- discontinuous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
 
         if( di.withmap()) { ExecError(" no map  in the case (2)??");}
         if(di.islevelset() && ( (CDomainOfIntegration::int1d!=kind) && (CDomainOfIntegration::int2d!=kind) )  )
@@ -1642,8 +1801,8 @@ template<class R>
         }
         if(VF) {
             if(&Uh != &Vh || sym)
-                cout << ("To Day in bilinear form with discontinous Galerkin (2d):   \n"
-                         "  test or unkown function must be  defined on the same FEspace, \n"
+                cout << ("To Day in bilinear form with discontinuous Galerkin (2d):   \n"
+                         "  test or unknown function must be  defined on the same FEspace, \n"
                          "  and the matrix is not symmetric. \n"
                          " To do other case in a future (F. Hecht) dec. 2003 ");
             if(&Uh == &Vh)
@@ -1687,10 +1846,19 @@ template<class R>
                 }
             }
         }
-        
+        else if (di.kind == CDomainOfIntegration::intall0d ) {// add FH juin 2021 
+            for( int k=0;k<Th.nt;k++) {
+                if (all || setoflab.find(Th[k].lab) != setoflab.end()) {
+                    for( int ie=0;ie<2;ie++)
+                    A += mate(k,ie,Th[k].lab,&parammatElement_OpVF);
+                    if(sptrclean) sptrclean=sptr->clean();
+                }
+            }
+        }
+
         
         else
-            InternalError(" kind of CDomainOfIntegration unkown");
+            InternalError(" kind of CDomainOfIntegration unknown");
 
         if (where_in_stack) delete [] where_in_stack;
         delete &mate;
@@ -3576,7 +3744,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
         if ( verbosity >1)
         {
-            cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+            cout << " Integral(1)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
             cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
             cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
             cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -3593,8 +3761,8 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
         const QuadratureFormular1d & FIE = di.FIE(stack);
         const QuadratureFormular & FITo = di.FIT(stack);
         QuadratureFormular FIT(FITo,3);
-        bool VF=b->VF();  // finite Volume or discontinous Galerkin
-        if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+        bool VF=b->VF();  // finite Volume or discontinuous Galerkin
+        if (verbosity>2) cout << "  -- discontinuous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
         if (verbosity>3)
         {
             if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
@@ -3838,7 +4006,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
             }}
         else
-        InternalError(" kind of CDomainOfIntegration unkown");
+        InternalError(" kind of CDomainOfIntegration unknown");
 
         if (where_in_stack) delete [] where_in_stack;
     }
@@ -3870,7 +4038,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
         const bool intmortar=di.intmortar(stack);
         if ( verbosity >1)
         {
-            cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+            cout << " Integral(2)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
             cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
             cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
             cout << "        suppose in mortar " << intmortar << endl;
@@ -3893,8 +4061,8 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
         //    const QuadratureFormular & FIT = di.FIT(stack);
         //    const Fem2D::GQuadratureFormular<R3> & FIV = di.FIV(stack);
-        bool VF=b->VF();  // finite Volume or discontinous Galerkin
-        if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+        bool VF=b->VF();  // finite Volume or discontinuous Galerkin
+        if (verbosity>2) cout << "  -- discontinuous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
         if (verbosity>3)
         {
             if (CDomainOfIntegration::int2d==kind) cout << "  -- boundary int border ( nQP: "<< FIT.n << ") ,"  ;
@@ -4060,7 +4228,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
             } }
         else
-        InternalError(" kind of CDomainOfIntegration unkown");
+        InternalError(" kind of CDomainOfIntegration unknown");
 
         if (where_in_stack) delete [] where_in_stack;
         mp=mps;// restore x,y,z
@@ -4091,7 +4259,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
         const bool intmortar=di.intmortar(stack);
         if ( verbosity >1)
         {
-            cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+            cout << " Integral(3)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
             cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
             cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
             cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -4108,8 +4276,8 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
         const QuadratureFormular1d & FIE = di.FIE(stack);
         const QuadratureFormular & FITo = di.FIT(stack);
         QuadratureFormular FIT(FITo,3);
-        bool VF=b->VF();  // finite Volume or discontinous Galerkin
-        if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+        bool VF=b->VF();  // finite Volume or discontinuous Galerkin
+        if (verbosity>2) cout << "  -- discontinuous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
         if (verbosity>3)
         {
             if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
@@ -4354,7 +4522,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
         }
         else
-            InternalError(" kind of CDomainOfIntegration unkown");
+            InternalError(" kind of CDomainOfIntegration unknown");
 
         if (where_in_stack) delete [] where_in_stack;
             }
@@ -4382,7 +4550,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
         const bool intmortar=di.intmortar(stack);
         if ( verbosity >1)
         {
-            cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+            cout << " Integral(4)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
             cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
             cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
             cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -4398,8 +4566,8 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
         const GQuadratureFormular<R1> & FITo = di.FIE(stack);
         GQuadratureFormular<R1> FIT(FITo,3);
 
-        bool VF=b->VF();  // finite Volume or discontinous Galerkin
-        if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+        bool VF=b->VF();  // finite Volume or discontinuous Galerkin
+        if (verbosity>2) cout << "  -- discontinuous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
 
         // if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (1)");
         if(di.islevelset() && (CDomainOfIntegration::int1d!=kind))
@@ -4469,7 +4637,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
               }
         }
         else { cout << " di.kind " << di.kind << endl;
-            InternalError(" kind of CDomainOfIntegration unkown");
+            InternalError(" kind of CDomainOfIntegration unknown");
         }
         if (where_in_stack) delete [] where_in_stack;
     }
@@ -4494,7 +4662,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
        const bool intmortar=di.intmortar(stack);
        if ( verbosity >1)
        {
-           cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+           cout << " Integral(5)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
            cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
            cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
            cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -4510,8 +4678,8 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
        const GQuadratureFormular<R1> & FITo = di.FIE(stack);
        GQuadratureFormular<R1> FIT(FITo,3);
 
-       bool VF=b->VF();  // finite Volume or discontinous Galerkin
-       if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+       bool VF=b->VF();  // finite Volume or discontinuous Galerkin
+       if (verbosity>2) cout << "  -- discontinuous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
 
        // if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (1)");
        if(di.islevelset() && (CDomainOfIntegration::int1d!=kind))
@@ -4579,7 +4747,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
              }
        }
        else { cout << " di.kind " << di.kind << endl;
-           InternalError(" kind of CDomainOfIntegration unkown");
+           InternalError(" kind of CDomainOfIntegration unknown");
        }
        if (where_in_stack) delete [] where_in_stack;
    }
@@ -4602,7 +4770,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
        //double binside=di.binside(stack);
        const bool intmortar=di.intmortar(stack);
        if ( verbosity >1) {
-        cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+        cout << " Integral(6)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
         cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
         cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
         cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -4618,8 +4786,8 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
        const GQuadratureFormular<R1> & FITo = di.FIE(stack);
        GQuadratureFormular<R1> FIT(FITo,3);
 
-       bool VF=b->VF();  // finite Volume or discontinous Galerkin
-       if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+       bool VF=b->VF();  // finite Volume or discontinuous Galerkin
+       if (verbosity>2) cout << "  -- discontinuous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
 
        // if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (1)");
        if(di.islevelset() && (CDomainOfIntegration::int1d!=kind))
@@ -4679,7 +4847,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
           }
        }
        else { cout << " di.kind " << di.kind << endl;
-         InternalError(" kind of CDomainOfIntegration unkown");
+         InternalError(" kind of CDomainOfIntegration unknown");
        }
        if (where_in_stack) delete [] where_in_stack;
    }
@@ -4707,7 +4875,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
  const bool intmortar=di.intmortar(stack);
  if ( verbosity >1)
  {
-     cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+     cout << " Integral(7)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
      cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
      cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
      cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -4724,8 +4892,8 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
  const QuadratureFormular1d & FIE = di.FIE(stack);
  const QuadratureFormular & FITo = di.FIT(stack);
  QuadratureFormular FIT(FITo,3);
- bool VF=b->VF();  // finite Volume or discontinous Galerkin
- if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+ bool VF=b->VF();  // finite Volume or discontinuous Galerkin
+ if (verbosity>2) cout << "  -- discontinuous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
  if (verbosity>3)
  {
      if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
@@ -4970,7 +5138,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshL & Th,const BilinearOperator & Op,
 
  }
  else
-     InternalError(" kind of CDomainOfIntegration unkown");
+     InternalError(" kind of CDomainOfIntegration unknown");
 
  if (where_in_stack) delete [] where_in_stack;
      }
@@ -4998,7 +5166,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
  const bool intmortar=di.intmortar(stack);
  if ( verbosity >1)
  {
-     cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+     cout << " Integral(8)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
      cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
      cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
      cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -5015,8 +5183,8 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
  const QuadratureFormular1d & FIE = di.FIE(stack);
  const QuadratureFormular & FITo = di.FIT(stack);
  QuadratureFormular FIT(FITo,3);
- bool VF=b->VF();  // finite Volume or discontinous Galerkin
- if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+ bool VF=b->VF();  // finite Volume or discontinuous Galerkin
+ if (verbosity>2) cout << "  -- discontinuous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
  if (verbosity>3)
  {
      if (CDomainOfIntegration::int1d==kind) cout << "  -- boundary int border ( nQP: "<< FIE.n << ") ,"  ;
@@ -5261,7 +5429,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
 
  }
  else
-     InternalError(" kind of CDomainOfIntegration unkown");
+     InternalError(" kind of CDomainOfIntegration unknown");
 
  if (where_in_stack) delete [] where_in_stack;
      }
@@ -5285,7 +5453,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
     //double binside=di.binside(stack);
     const bool intmortar=di.intmortar(stack);
     if ( verbosity >1) {
-     cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+     cout << " Integral(9)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
      cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
      cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
      cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -5301,8 +5469,8 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
     const GQuadratureFormular<R1> & FITo = di.FIE(stack);
     GQuadratureFormular<R1> FIT(FITo,3);
 
-    bool VF=b->VF();  // finite Volume or discontinous Galerkin
-    if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+    bool VF=b->VF();  // finite Volume or discontinuous Galerkin
+    if (verbosity>2) cout << "  -- discontinuous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
 
     // if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (1)");
     if(di.islevelset() && (CDomainOfIntegration::int1d!=kind))
@@ -5362,7 +5530,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
        }
     }
     else { cout << " di.kind " << di.kind << endl;
-      InternalError(" kind of CDomainOfIntegration unkown");
+      InternalError(" kind of CDomainOfIntegration unknown");
     }
     if (where_in_stack) delete [] where_in_stack;
 }
@@ -5390,7 +5558,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
       const bool intmortar=di.intmortar(stack);
       if ( verbosity >1)
       {
-          cout << " Integral   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
+          cout << " Integral(10)   on Th "<< &Th << " nv :  " << Th.nv << " nt : " << Th.nt << endl;
           cout << "        Th/ u "<< &Uh.Th << " nv : " << Uh.Th.nv << "   nt : " << Uh.Th.nt << endl;
           cout << "        Th/ v "<< &Vh.Th << " nv : " << Vh.Th.nv << "   nt : " << Vh.Th.nt << endl;
           cout << "        suppose in mortar " << intmortar << "   levelset=  " << di.islevelset() << " withmap: " << di.withmap() << endl;
@@ -5406,8 +5574,8 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
       const GQuadratureFormular<R1> & FITo = di.FIE(stack);
       GQuadratureFormular<R1> FIT(FITo,3);
 
-      bool VF=b->VF();  // finite Volume or discontinous Galerkin
-      if (verbosity>2) cout << "  -- discontinous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
+      bool VF=b->VF();  // finite Volume or discontinuous Galerkin
+      if (verbosity>2) cout << "  -- discontinuous Galerkin  =" << VF << " size of Mat =" << A.size()<< " Bytes\n";
 
       // if(di.islevelset()) InternalError("Sorry no levelset integration type on this case (1)");
       if(di.islevelset() && (CDomainOfIntegration::int1d!=kind))
@@ -5475,7 +5643,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
             }
       }
       else { cout << " di.kind " << di.kind << endl;
-          InternalError(" kind of CDomainOfIntegration unkown");
+          InternalError(" kind of CDomainOfIntegration unknown");
       }
       if (where_in_stack) delete [] where_in_stack;
   }
@@ -7490,7 +7658,134 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
         *MeshPointStack(stack) = mp;
     }
 
-    // case 3D curve
+    // case 3D curve YYYY
+
+template<class R>
+void  Element_rhsVF(const FElementL & Kv,const FElementL & KKv,int ie,int iie,int label,const LOperaD &Op,double * p,int *ip,void  * bstack,KN_<R> & B,
+                    int optim=1)
+{
+    
+    
+    typedef typename FElementL::E Element;
+    pair_stack_double * bs=static_cast<pair_stack_double *>(bstack);
+    Stack stack= bs->first;
+    double binside = *bs->second; // truc FH pour fluide de grad2 (decentrage bizard)
+    assert(ie>=0 && ie < 2); //  int verter
+    MeshPoint mp= *MeshPointStack(stack);
+    R ** copt = Stack_Ptr<R*>(stack,ElemMatPtrOffset);
+    
+    const Element & T  = Kv.T;
+    R3 NNt=T.TangenteUnitaire();
+    double s = ie;
+    double ss = iie;
+    GQuadraturePoint<R1> pi(1.,s);
+    R mes = 1.;
+    R3 NN=NNt;
+    if(ie==0) NN=-NN;
+    R coef = 1.;
+  
+    int nTonEdge =  &Kv == &KKv ? 1 : 2;
+    double cmean = 1./nTonEdge;
+    
+    throwassert(&T == &Kv.T);
+    long npi=1;
+    long i,j;
+    long N= Kv.N;
+    
+    long nv=Kv.NbDoF();
+    long nnv=KKv.NbDoF();
+    assert(nv == nnv) ;
+    
+    int lp =nv*2;
+    KN_<int> pp(ip,lp),pk(ip+lp,lp),pkk(ip+2*lp,lp);
+    int n = BuildMEK_KK(lp,pp,pk,pkk,&Kv,&KKv);
+    
+    
+    bool classoptm = copt && Op.optiexpK;
+    //  if (Ku.number<1 && verbosity/100 && verbosity % 10 == 2)
+    if (Kv.number<1 && ( verbosity > 1 ) )
+        cout << "Element_rhsVF 0d P: copt = " << copt << " " << classoptm << " binside (For FH) =" << binside  << endl;
+    
+    
+    int lastop;
+    lastop = 0;
+    What_d Dop = Op.DiffOp(lastop);
+    //assert(lastop<=3);
+    int lffv = nv*N*last_operatortype;
+    int loffset =  0 ;
+    
+    RNMK_ fv(p,nv,N,lastop); //  the value for basic fonction in K
+    RNMK_ ffv(p + lffv ,nnv,N,lastop); //  the value for basic fonction in KK
+    
+    
+    
+    
+ 
+    
+    R1 Pt=s; //
+    R1 PP_t=ss;
+    assert (!binside);
+    Kv.BF(Dop,Pt,fv);
+    KKv.BF(Dop,PP_t,ffv);
+    MeshPointStack(stack)->set(T(Pt),Pt,Kv,label,NN,NNt,ie);//   Axel
+    if (classoptm) (*Op.optiexpK)(stack); // call optim version
+    
+    
+    for ( i=0;  i<nv;   i++ )
+    {
+        
+        int ik= pk[i];
+        int ikk=pkk[i];
+        int dofik=ik>=0? Kv(ik):-1;
+        int dofikk=ikk>=0? KKv(ikk):-1;
+        
+        RNM_ wi(fv(Max(ik,0),'.','.'));
+        RNM_ wwi(ffv(Max(ikk,0),'.','.'));
+        
+        
+        int il=0;
+        if(dofik >=0 || dofikk>=0 )
+            for (LinearOperatorD::const_iterator l=Op.v.begin();l!=Op.v.end();l++,il++)
+        {
+            LOperaD::K ll(*l);
+            pair<int,int> ii(ll.first);
+            int iis = ii.second;
+            int iicase  = iis / last_operatortype;
+            iis %= last_operatortype;
+            double w_i=0,ww_i=0;
+            if(ik>=0) w_i =   wi(ii.first,iis );
+            if( iicase>0 )
+            {
+                if( ikk>=0) ww_i =  wwi(ii.first,iis );
+                if       (iicase==Code_Jump)      w_i = -w_i; ///(w_i = ww_i-w_i); // jump
+                else  if (iicase==Code_Mean)      ww_i=w_i = cmean*  (w_i + ww_i ); // average
+                else  if (iicase==Code_OtherSide) std::swap(w_i,ww_i);  // valeur de autre cote
+                else ffassert(0);
+            }
+            R c =copt ? *(copt[il]) : GetAny<R>(ll.second.eval(stack));
+            // FFCS - removing what is probably a small glitch
+            if ( copt && ( optim==1) && Kv.number<1)
+            {
+                R cc  =  GetAny<R>(ll.second.eval(stack));
+                if ( c != cc) {
+                    cerr << c << " =! " << cc << endl;
+                    cerr << "Sorry error in Optimization (x) add:  int0d(Th,optimize=0)(...)" << endl;
+                    ExecError("In Optimized version "); }
+            }
+            
+            
+            if(dofik>=0) B[dofik] += coef * c * w_i;
+            if(dofikk>=0) B[dofikk] += coef * c * ww_i;
+            
+        }
+    }
+    
+    
+    
+    
+    *MeshPointStack(stack) = mp;
+    
+}
     template<class R>
     void  Element_rhs(const FElementL & Kv,const LOperaD &Op,double * p,void * vstack,KN_<R> & B,
                       const GQuadratureFormular<R1> & FI = QF_GaussLegendre2,int optim=1)
@@ -8840,13 +9135,13 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
                     if(bf->di->d != MMesh::Rd::d )
                     {
                       
-                      if( bf->di->isMeshS)
+                      if( bf->di->dHat==2)
                     {
                         cout << " int on MeshS ( Bilinear Form ) toDo  " << endl;
                         ffassert(0);
                         
                     }
-                    else  if( bf->di->isMeshL)
+                    else  if( bf->di->dHat==1)
                     {
                         cout << " int on MeshL ( Bilinear Form ) toDo  " << endl;
                         ffassert(0);
@@ -8874,13 +9169,13 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
                     if(bf->di->d != MMesh::Rd::d )
                     {
                       
-                      if( bf->di->isMeshS)
+                      if( bf->di->dHat==2)
                     {
                         cout << " int on MeshS toDo  ( Linear Form )" << endl;
                         ffassert(0);
                         
                     }
-                    else  if( bf->di->isMeshL)
+                    else  if( bf->di->dHat==1)
                     {
                         cout << " int on MeshL toDo  ( Linear Form )" << endl;
                         ffassert(0);
@@ -9622,8 +9917,8 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
         //  cout << "AssembleLinearForm " << l->l->v.size() << endl;
         set<int> setoflab;
         bool all=true;
-        bool VF=l->VF();  // finite Volume or discontinous Galerkin
-        if (verbosity>2) cout << "  -- AssembleLinearForm 2, discontinous Galerkin  =" << VF << " binside = "<< binside
+        bool VF=l->VF();  // finite Volume or discontinuous Galerkin
+        if (verbosity>2) cout << "  -- AssembleLinearForm 2, discontinuous Galerkin  =" << VF << " binside = "<< binside
         << " levelset integration " <<di.islevelset()<< " withmap: "<<  di.withmap() << "\n";
         //  if( di.withmap()) { ExecError(" no map  in the case (6)??");}
         Expression  const * const mapt=di.mapt[0] ? di.mapt:0;
@@ -9912,7 +10207,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
         typedef FESpace3 FESpace;
         typedef FESpace3::Mesh Mesh;
         typedef Mesh *pmesh ;
-
+        typedef Mesh::BorderElement BorderElement;
         StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
         bool sptrclean=true;
         //     sptr->clean(); // modif FH mars 2006  clean Ptr
@@ -9950,8 +10245,8 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
         //  cout << "AssembleLinearForm " << l->l->v.size() << endl;
         set<int> setoflab;
         bool all=true;
-        bool VF=l->VF();  // finite Volume or discontinous Galerkin
-        if (verbosity>2) cout << "  -- AssembleLinearForm 1,  discontinous Galerkin  =" << VF << " binside = "<< binside <<"\n";
+        bool VF=l->VF();  // finite Volume or discontinuous Galerkin
+        if (verbosity>2) cout << "  -- AssembleLinearForm 1,  discontinuous Galerkin  =" << VF << " binside = "<< binside <<"\n";
 
         if (verbosity>3)
         {
@@ -10033,7 +10328,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
             else cout << endl;
         }
         if (kind==CDomainOfIntegration::int2d)
-        { //AFAIRE("3D Elment RHS CDomainOfIntegration::int2d");
+        { //AFAIRE("3D Element RHS CDomainOfIntegration::int2d");
             double  ss =0;
             if(VF) InternalError(" no jump or average in int1d of RHS");
             if(di.islevelset()) // init on level set (of RHS)
@@ -10112,63 +10407,15 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
             }
         }
         else if (kind==CDomainOfIntegration::intalledges)
-        {     AFAIRE("3D Elment RHS CDomainOfIntegration::intalledges");
-            /*
-             if(VF)
-             {
-             pair_stack_double bstack;
-
-             bstack.first = stack;
-             bstack.second= & binside;
-
-             //InternalError(" Today no jump or average in intalledges of RHS ");
-             for (int i=0;i< ThI.nt; i++)
-             if (all || setoflab.find(ThI[i].lab) != setoflab.end())
-             {
-
-             for (int ie=0;ie<3;ie++)
-             if ( sameMesh)
-             {
-             int iie=ie,ii=Th.ElementAdj(i,iie);
-             if(ii<0) ii=i;//  sur le bord
-             Element_rhsVF<R>(Vh[i],Vh[ii],ie,iie,Th[i].lab,*l->l,buf,ip,&bstack,*B,FIE);
-             }
-             else
-             InternalError("To Do") ;
-             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
-             }
-
-             }
-             else
-             for (int i=0;i< ThI.nt; i++)
-             if (all || setoflab.find(ThI[i].lab) != setoflab.end())
-             {
-             for (int ie=0;ie<3;ie++)
-             if ( sameMesh)
-             Element_rhs<R>(Vh[i],ie,Th[i].lab,*l->l,buf,stack,*B,FIE,true);
-             else
-             InternalError("To Do") ;
-             if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
-             }*/
+        {     InternalError("3D Element RHS CDomainOfIntegration::intalledges :  stupide !!!");
         }
         else if (kind==CDomainOfIntegration::intallVFedges)
         {
             cerr << " intallVFedges a faire" << endl;
 
-            InternalError(" intallVFedges a faire ");
+            InternalError(" intallVFedges a stupide!!! ");
 
-            ffassert(0);/*
-                         for (int i=0;i< ThI.nt; i++)
-                         {
-                         if (all || setoflab.find(ThI[i].lab) != setoflab.end())
-                         for (int ie=0;ie<3;ie++)
-                         if ( sameMesh)
-                         Element_rhs<R>(Vh[i],ie,Th[i].lab,*l->l,buf,stack,*B,FIE,true);
-                         else
-                         InternalError("To Do") ;
-                         if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
-
-                         }*/
+            ffassert(0);
         }
 
         else if(kind==CDomainOfIntegration::int3d) {
@@ -10231,11 +10478,42 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
         }
         else  if(kind==CDomainOfIntegration::intallfaces    ) {
 
-            if(VF) InternalError(" no jump or average in intallfaces of RHS");
-
-            for(int i=0;i<ThI.nt; i++)
-            for(int ie=0;ie<Mesh3::nea; ie++)
+            if(VF)
             {
+                if ( !sameMesh) InternalError(" no jump or average in intallfaces for RHS in not samemesh");
+                InternalError(" no jump or average in intallfaces for RHS");
+                pair_stack_double bstack(stack,& binside);
+
+                //bstack.first = stack;
+                //bstack.second= & binside;
+
+                //InternalError(" Today no jump or average in intalledges of RHS ");
+                for (int i=0;i< ThI.nt; i++)
+                if (all || setoflab.find(ThI[i].lab) != setoflab.end())
+                {
+
+                    for (int ie=0;ie<4;ie++)
+                   
+                    {
+                        int iie=ie,ii=Th.ElementAdj(i,iie);
+                        if(ii<0) ii=i;//  sur le bord
+                        const Tet & K(ThI[i]);
+                        BorderElement * be = 0; // FIND BOUNDARY ELEMENT !!!
+                        int lab = be ? be->lab :  notalabel;
+                        ffassert(0); //
+                      //  Element_rhsVF<R>(Vh[i],Vh[ii],ie,iie,lab,*l->l,buf,ip,&bstack,*B,FIE,useopt);
+                    }
+                    
+                    if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+    
+                }
+                
+            }
+            else
+            {
+            for(int i=0;i<ThI.nt; i++)
+              for(int ie=0;ie<Mesh3::nea; ie++)
+               {
                 int lab=0;
                 // if face on bord get the lab ???
                 if ( sameMesh)
@@ -10244,6 +10522,7 @@ pmeshS  pThdi = GetAny<pmeshS>((*b->di->Th)(stack));
                 Element_rhs<R>(ThI,ThI[i],Vh,ie,lab,*l->l,buf,stack,*B,FIT,false,useopt);
                 if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
 
+               }
             }
         }
         else
@@ -10295,9 +10574,9 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
         //  cout << "AssembleLinearForm " << l->l->v.size() << endl;
         set<int> setoflab;
         bool all=true;
-        bool VF=l->VF();  // finite Volume or discontinous Galerkin
+        bool VF=l->VF();  // finite Volume or discontinuous Galerkin
 
-        if (verbosity>2) cout << "  -- AssembleLinearForm S, discontinous Galerkin  =" << VF << " binside = "<< binside
+        if (verbosity>2) cout << "  -- AssembleLinearForm S, discontinuous Galerkin  =" << VF << " binside = "<< binside
             << " levelset integration " <<di.islevelset()<< " withmap: "<<  di.withmap() << "\n";
         //  if( di.withmap()) { ExecError(" no map  in the case (6)??");}
         Expression  const * const mapt=di.mapt[0] ? di.mapt:0;
@@ -10570,6 +10849,8 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
     template<class R>
     void AssembleLinearForm(Stack stack,const MeshL & Th,const FESpaceL & Vh,KN_<R> * B,const  FormLinear * l )
     {
+        typedef typename MeshL::Element Element;
+        typedef typename MeshL::BorderElement BorderElement;
 
         StackOfPtr2Free * sptr = WhereStackOfPtr2Free(stack);
         bool sptrclean=true;
@@ -10597,9 +10878,9 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
         //  cout << "AssembleLinearForm " << l->l->v.size() << endl;
         set<int> setoflab;
         bool all=true;
-        bool VF=l->VF();  // finite Volume or discontinous Galerkin
+        bool VF=l->VF();  // finite Volume or discontinuous Galerkin
 
-        if (verbosity>2) cout << "  -- AssembleLinearForm L, discontinous Galerkin  =" << VF << " binside = "<< binside
+        if (verbosity>2) cout << "  -- AssembleLinearForm L, discontinuous Galerkin  =" << VF << " binside = "<< binside
             << " levelset integration " <<di.islevelset()<< " withmap: "<<  di.withmap() << " kind int: " << kind<< "\n";
         //  if( di.withmap()) { ExecError(" no map  in the case (6)??");}
         Expression  const * const mapt=di.mapt[0] ? di.mapt:0;
@@ -10686,9 +10967,60 @@ void AssembleLinearForm(Stack stack,const MeshS & Th,const FESpaceS & Vh,KN_<R> 
             }
 
         }
+        else if(kind==CDomainOfIntegration::intall0d){ // to
+            // wrong to day ...
+            
+            ffassert(mapt==0);
+            if(VF)
+            { // Add juin 2021 ...
+                pair_stack_double bstack(stack,& binside);
+
+                 for (int i=0;i< ThI.nt; i++)
+                if (all || setoflab.find(ThI[i].lab) != setoflab.end())
+                {
+
+                    for (int ie=0;ie<2;ie++)
+                    if ( sameMesh)
+                    {
+                        int iie=ie,ii=Th.ElementAdj(i,iie);
+                        if(ii<0) ii=i;//  sur le bord
+                        const Element & K(ThI[i]);
+                        BorderElement * be=0; // to def
+                        int lab = be ? be->lab :  notalabel;
+
+                        Element_rhsVF<R>(Vh[i],Vh[ii],ie,iie,lab,*l->l,buf,ip,&bstack,*B,useopt);
+                    }
+                    else
+                    InternalError("To Do") ;
+                    if(sptrclean) sptrclean=sptr->clean();
+                }
+
+            }
+            else
+                
+            for( int i=0;i<ThI.nt;i++)
+            {
+                if (all || setoflab.find(ThI[i].lab) != setoflab.end())
+                {
+                    for(int ie=0; ie<2; ++ie)
+                    {
+                  
+                    if ( sameMesh )
+                      Element_rhs<R>(Vh[i],ie,Th[i].lab,*l->l,buf,stack,*B,FIT,false,useopt);
+                    else if(!mapt)
+                      Element_rhs<R>(ThI,ThI[i],Vh,ie,Th[i].lab,*l->l,buf,stack,*B,FIT,false,intmortar,0,useopt);
+                    else
+                        ffassert(0);//Element_rhs<R>(mapt,ThI,ThI[i],Vh,ie,Th.be(e).lab,*l->l,buf,stack,*B,FIE,false,intmortar,0,useopt);
+                    if(sptrclean) sptrclean=sptr->clean(); // modif FH mars 2006  clean Ptr
+                    }
+                }
+            }
+
+        }
+
         else
         {
-            cerr << " Error integration on MeshL unknow  kind " << kind << endl;
+            cerr << " Error integration on MeshL unknown  kind " << kind << endl;
             ffassert(0);
             
         }
@@ -10738,8 +11070,10 @@ bool isVF(const list<C_F0> & largs)  // true => VF type of Matrix
         {
             const  FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
             bool vvf  = bb->VF();
-            if( vvf &&  (bb->di->kind != CDomainOfIntegration::intalledges && bb->di->kind != CDomainOfIntegration::intallVFedges  )
-               &&  (bb->di->kind != CDomainOfIntegration::intallfaces ))
+            if( vvf && (bb->di->kind != CDomainOfIntegration::intalledges)
+                    && (bb->di->kind != CDomainOfIntegration::intallVFedges)
+                    && (bb->di->kind != CDomainOfIntegration::intallfaces)
+                    && (bb->di->kind != CDomainOfIntegration::intall0d)) // Add 15 juin 2021 FH?
             {
                 if(err==0) cerr << "\n\n"; 
                 cerr << " ** Fatal error in term "<< kk << " of the varf form (integral, on , ... ) " << endl;
@@ -10822,7 +11156,7 @@ void InitProblem( int Nb, const FESpace & Uh,
         { //  copy the previous soluton to initialize CG, GMRES, etc ...
             if (Nb==1)
             {  // modif  FH 0701/2005 + april 2006
-                if(u_h[0]->x()->N() != X->N() )
+                if(u_h[0]->x() && u_h[0]->x()->N() != X->N() )// correction juin FH 2021 .. 
                 cout << " bug ???? " << endl;
                 if (u_h[0]->x() && u_h[0]->x()->N() == X->N() )
                 *X= * u_h[0]->x();
@@ -11128,6 +11462,9 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
     }
     else
     *B = - *B;
+
+    dynamic_cast<HashMatrix<int,R> *>(&A)->half = ds.sym;
+
     MatriceCreuse<R_st>  * ACadna = 0;
 
 
@@ -11332,14 +11669,14 @@ bool GetBilinearParam(const ListOfId &l,basicAC_F0::name_and_type *name_param,in
             for (int k=0;k<n_name_param;k++)
             cerr << name_param[k].name << " ";
             cerr << endl;
-            CompileError("Unkown name argument or two times same name argument ");
+            CompileError("Unknown name argument or two times same name argument ");
         }
     }
 
     if (nbarray)
     { // new version ok
         if(nbarray!=2)
-        CompileError(" Must have 2 array, one for unknow functions, one for test functions");
+        CompileError(" Must have 2 array, one for unknown functions, one for test functions");
         N = array[0]->size();
         M = array[1]->size();
         var.resize(N+M);
@@ -11659,7 +11996,7 @@ void SetArgsFormLinear(const ListOfId *lid,int ordre)
 
         if(nbarray!=ordre)
         { cerr << " form " << ordre << " == " << nbarray << " Nb of Array "<<endl;
-            CompileError(" Must have 1 or 2 array, one for unknow functions, one for test functions");
+            CompileError(" Must have 1 or 2 array, one for unknown functions, one for test functions");
         }
         for (int k=0;k<ordre;k++)
         for  (int i=0,iend=array[k]->size();i<iend;i++)

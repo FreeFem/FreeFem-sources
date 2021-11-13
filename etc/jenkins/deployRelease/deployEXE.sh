@@ -12,7 +12,7 @@ REPOSITORY="FreeFem-sources"
 VERSION=`grep AC_INIT configure.ac | cut -d"," -f2`
 RELEASE_TAG_NAME="v$VERSION"
 EXE_NAME="FreeFem++-${VERSION}-win64.exe"
-GH_EXE_NAME="FreeFEM-${VERSION}-win7-64.exe"
+GH_EXE_NAME="FreeFEM-${VERSION}-win64.exe"
 
 ## EXE build
 autoreconf -i

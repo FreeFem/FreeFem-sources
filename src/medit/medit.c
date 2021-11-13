@@ -93,7 +93,7 @@ static void grInfo(void) {
   if (b) fprintf(stdout, "  Stereo\n");
 
   glGetIntegerv(GL_AUX_BUFFERS, &i);
-  if (i) fprintf(stdout, "  Auxilary Buffers\t%2d\n", (int)i);
+  if (i) fprintf(stdout, "  Auxiliary Buffers\t%2d\n", (int)i);
 
   glGetIntegerv(GL_INDEX_BITS, &i);
   if (i) fprintf(stdout, "  Index Bits\t\t%2d\n", (int)i);

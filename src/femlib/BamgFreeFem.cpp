@@ -46,12 +46,13 @@ using namespace std;
 #include "rgraph.hpp"
 #include "fem.hpp"
 #include "AFunction.hpp"
-#include "BamgFreeFem.hpp"
+
 #include "FESpace.hpp"
 #include "Mesh2dn.hpp"
 #include "Mesh3dn.hpp"
 #include "MeshPoint.hpp"
 #include "PlotStream.hpp"
+#include "BamgFreeFem.hpp"
 #include <set>
 const Fem2D::Mesh *bamg2msh( bamg::Triangles* tTh,bool renumbering)
 {
@@ -398,6 +399,446 @@ double NormalDistrib(double sigma)
     const double TWOPI = 3.14159265358979323846264338328*2.;
     return  sigma*sqrt(-2.0*log(rand))*cos(TWOPI*rand);
 }    // (stack,b,true,0,true); bool Requiredboundary=true, KNM<double> *pintern=0, double alea=0)
+
+const Fem2D::Mesh *  BuildMesh(Stack stack,const  Fem2D::MeshL **ppmshL , int nbmshL, bool justboundary,int nbvmax,bool Requiredboundary,KNM<double> *pintern,double alea,bool SplitEdgeWith2Boundary)
+{
+    if(alea) Requiredboundary=1;
+    int nbvinter=0;
+    if( pintern)
+    {
+        nbvinter=pintern->N();
+        if((pintern->M() != 2 ) && ( pintern->M()!=3))
+        {
+            cout << " point m = " <<pintern->M()<<endl;
+            ExecError("Error: BuildMesh number of column of internal point (point=)  must be 2 or 3!");
+        }
+    }
+    int brefintp= -2000000000;
+  using namespace bamg;
+  using bamg::Abs;
+  using bamg::Max;
+  using bamg::Min;
+  using bamg::Pi;
+  using Fem2D::MeshL;
+  Fem2D::MeshPoint & mp (*Fem2D::MeshPointStack(stack)), mps = mp;
+
+  int nbvx=nbvinter,nbe=0,nbsd=0;
+    for (int k=0; k<nbmshL; ++k)
+  {
+      const MeshL *pmshL= ppmshL[k];
+      nbvx += pmshL->nv;
+      nbe += pmshL->nt;;
+     // nbsd++;
+  }
+  Geometry * Gh =  new Geometry;
+
+  if(verbosity>2)
+    cout <<"\t\t"  << "  Begin: ConstGeometry from nb Mesh L  "  << nbsd << " Requiredboundary " << Requiredboundary << endl;
+  const char * filename = "FREEFEM.gh";
+  Gh->name=new char [strlen(filename)+1];
+  strcpy(Gh->name,filename);
+  Real8 Hmin = HUGE_VAL;// the infinie value
+  Int4 hvertices =0;
+  Int4 i,nn,n;
+  Gh->MaximalAngleOfCorner =30.00*Pi/180.0;
+  Gh->nbv = 0;
+  Gh->nbvx = nbvx;
+
+  Gh->nbe = nbe;
+  Gh->edges = new GeometricalEdge[Gh->nbe];
+  bamg::Vertex *vertices =  new Vertex[Gh->nbvx];// correction 2009/07/03
+  double lmin= HUGE_VAL;
+  //  generation des points et des lignes
+  i=0;
+    double zmin = HUGE_VAL, zmax = -HUGE_VAL;
+    for (int k=0; k<nbmshL; ++k)
+  {
+      const MeshL *pmshL= ppmshL[k];
+      const MeshL & Tl = *pmshL;
+      for(int v=0; v<Tl.nv;++v,i++)
+      {
+          vertices[i].r.x=Tl.vertices[v].x;
+          vertices[i].r.y=Tl.vertices[v].y;
+          zmin = min(zmin,Tl.vertices[v].z);
+          zmax = max(zmax,Tl.vertices[v].z);
+          vertices[i].ReferenceNumber=  Tl.vertices[v].lab;
+          vertices[i].color = i;
+      }
+      for(int e=0; e<Tl.nt;++e)
+      lmin = min(lmin,Tl[e].mesure() );
+  }
+    if( verbosity>1)  cout<< " buildmesh MeshL:  zmin "<< zmin << " zmax  "<< zmax << endl;
+   /*
+  for (E_BorderN const * k=b;k;k=k->next)
+    {
+    int nbd = k->NbBorder(stack);
+    for(int index=0; index<nbd; ++index )
+    {
+      assert(k->b->xfrom); // a faire
+      double & t = *  k->var(stack),tt;
+      double a(k->from(stack)),b(k->to(stack));
+      long * indx = k->index(stack);
+      if(indx) *indx = index;
+      else ffassert(index==0);
+      n=Max(Abs(k->Nbseg(stack,index)),1L);
+      tt=t=a;
+      double delta = (b-a)/n;
+      for ( nn=0;nn<=n;nn++,i++, tt += delta)
+        {
+          t = tt;
+          if (nn==n) t=b; // to remove roundoff error
+            if( nn >0 && nn < n) { t += NormalDistrib(alea); } // Add F. Hecht Juin 2018 for J-M Sac Epee:  jean-marc.sac-epee@univ-lorraine.fr
+          mp.label = k->label();
+          k->code(stack); // compute x,y, label
+          vertices[i].r.x=mp.P.x;
+          vertices[i].r.y=mp.P.y;
+          vertices[i].ReferenceNumber=  mp.label;
+          vertices[i].color = i;
+          if (nn>0) {
+            lmin=min(lmin,Norme2_2( vertices[i].r-vertices[i-1].r));
+          }
+        }
+    }
+}
+    */
+ // add interna point
+    if(pintern)
+    {
+        for(int k=0; k<nbvinter; ++k)
+        {
+            ffassert(i <= nbvx);
+            vertices[i].r.x=(*pintern)((long) k,0L);
+            vertices[i].r.y=(*pintern)((long) k,1L);
+            vertices[i].ReferenceNumber=  brefintp + k ;// code internal point ..
+            vertices[i].color = i;
+            i++;
+                    }
+    }
+  lmin = (lmin);
+  double eps = (lmin)/16.;
+  int nbvprev = i;
+  long nbv=0;
+  Gh->pmin =  vertices[0].r;
+  Gh->pmax =  vertices[0].r;
+  // recherche des extrema des vertices pmin,pmax
+  for (i=0;i<nbvprev;i++)
+    {
+      Gh->pmin.x = Min(Gh->pmin.x,vertices[i].r.x);
+      Gh->pmin.y = Min(Gh->pmin.y,vertices[i].r.y);
+      Gh->pmax.x = Max(Gh->pmax.x,vertices[i].r.x);
+      Gh->pmax.y = Max(Gh->pmax.y,vertices[i].r.y);
+    }
+
+  double diameter=Max(Gh->pmax.x-Gh->pmin.x,Gh->pmax.y-Gh->pmin.y);
+  Gh->coefIcoor= (MaxICoor)/diameter;
+  Icoor1 epsI = (Icoor1) (Gh->coefIcoor*eps);
+  ffassert(Gh->coefIcoor >0);
+
+ if(lmin<diameter*1e-7) {
+    ExecError(" Error points  border points to close < diameter*1e-7 ");}
+
+  if (verbosity>2)
+    {
+      cout <<"\t\t"  << "     Geom: min="<< Gh->pmin << "max ="<< Gh->pmax
+           << " hmin = " << Gh->MinimalHmin() <<  endl;
+    }
+  nbv = 0;
+  {  // find common point
+    QuadTree quadtree;
+    Metric Id(1.);
+    for ( i=0;i<nbvprev;i++)
+      {
+        vertices[i].i = Gh->toI2(vertices[i].r);
+        vertices[i].m = Id;
+        Vertex *v= quadtree.ToClose(vertices[i],eps,epsI,epsI) ;
+        // quadtree.NearestVertex(vertices[i].i.x,vertices[i].i.y);
+        if( v && Norme1(v->r - vertices[i]) < eps )
+          { vertices[i].color=v->color; }
+        else  {quadtree.Add(vertices[i]);
+        vertices[i].color = nbv++;}
+      }
+  } // to delete quadtree
+  if (verbosity>1)
+  cout << " Nb of common points " << nbvprev-nbv <<endl;
+
+  Gh->nbvx = nbv;
+  Gh->nbv = nbv;
+
+  Gh->vertices = new GeometricalVertex[nbv];
+  throwassert(Gh->nbvx >= Gh->nbv);
+  Gh->nbiv = Gh->nbv;
+  const Direction NoDirOfSearch;
+  //  compression of points
+  int kkk;
+  for ( i=0,kkk=0;kkk<nbvprev;kkk++)
+    {
+      if (vertices[kkk].color == i) // if new points
+        {
+          Gh->vertices[i].r.x = vertices[kkk].r.x ;
+          Gh->vertices[i].r.y = vertices[kkk].r.y;
+          throwassert(Gh->vertices[i].IsThe());
+          Gh->vertices[i].ReferenceNumber = vertices[kkk].ReferenceNumber  ;
+          Gh->vertices[i].DirOfSearch = NoDirOfSearch;
+          Gh->vertices[i].color =0;
+          Gh->vertices[i].Set();
+          if(Requiredboundary)
+           Gh->vertices[i].SetRequired();
+
+          if(Gh->vertices[i].ReferenceNumber < 0)
+            Gh->vertices[i].SetRequired();
+
+          i++;
+        }
+    }
+  throwassert(i==nbv);
+  R2 zero2(0,0);
+  if(verbosity>5)
+    cout <<"\t\t"  << "     Record Edges: Nb of Edge " << Gh->nbe <<endl;
+  throwassert(Gh->edges);
+  throwassert (Gh->nbv >0);
+  Real4 *len =0;
+  if (!hvertices)
+    {
+      len = new Real4[Gh->nbv];
+      for(i=0;i<Gh->nbv;i++)
+        len[i]=0;
+    }
+  int nnn=0;
+  i=0;
+    for (int k=0; k<nbmshL; ++k)
+  {
+      const MeshL *pmshL= ppmshL[k];
+      const MeshL & Tl = *pmshL;
+ 
+      for(int e=0; e<Tl.nt;++e,++i)
+      {
+          
+      // PB retrouve i1, i2 avant compression ...
+          int i1 = Tl(e,0)+nnn;
+          int i2 = Tl(e,1)+nnn;
+      //  apres compression
+          i1 = vertices[i1].color;
+          i2 = vertices[i2].color;
+
+      throwassert(i1 >= 0 && i1 < nbv);
+      throwassert(i2 >= 0 && i2 < nbv);
+      Gh->edges[i].ref = Tl[e].lab;
+      Gh->edges[i].v[0]=  Gh->vertices + i1;
+      Gh->edges[i].v[1]=  Gh->vertices + i2;
+      R2 x12 = Gh->vertices[i2].r-Gh->vertices[i1].r;
+      Real8 l12=Norme2(x12);
+      Gh->edges[i].tg[0]=zero2;
+      Gh->edges[i].tg[1]=zero2;
+      Gh->edges[i].SensAdj[0] = Gh->edges[i].SensAdj[1] = -1;
+      Gh->edges[i].Adj[0] = Gh->edges[i].Adj[1] = 0;
+      Gh->edges[i].flag = 0;
+      Gh->edges[i].link=0;
+
+  if(Requiredboundary)
+  Gh->edges[i].SetRequired();
+
+      if (!hvertices)
+        {
+          Gh->vertices[i1].color++;
+          Gh->vertices[i2].color++;
+          len[i1] += l12;
+          len[i2] += l12;
+        }
+
+      Hmin = Min(Hmin,l12);
+    }
+  nnn += Tl.nv;
+  }
+   /*
+  for (E_BorderN const * k=b;k;k=k->next)
+
+  {    int nbd = k->NbBorder(stack);
+      for(int index=0; index<nbd; ++index )
+      {
+      double & t = *  k->var(stack);
+      double a(k->from(stack)),b(k->to(stack));
+      n=Max(Abs(k->Nbseg(stack,index)),1L);
+      long * indx = (k->index(stack));
+      if(indx) *indx = index;
+      else ffassert(index==0);
+
+      double delta = (b-a)/n;
+      t=a+delta/2;
+      for ( nn=0;nn<n;nn++,i++, t += delta)
+        {
+
+          mp.label = k->label();
+          k->code(stack);
+          Int4 i1 =  vertices[nnn].color, i2 =  vertices[++nnn].color;
+          throwassert(i1 >= 0 && i1 < nbv);
+          throwassert(i2 >= 0 && i2 < nbv);
+          Gh->edges[i].ref = mp.label;
+          Gh->edges[i].v[0]=  Gh->vertices + i1;
+          Gh->edges[i].v[1]=  Gh->vertices + i2;
+          R2 x12 = Gh->vertices[i2].r-Gh->vertices[i1].r;
+          Real8 l12=Norme2(x12);
+          Gh->edges[i].tg[0]=zero2;
+          Gh->edges[i].tg[1]=zero2;
+          Gh->edges[i].SensAdj[0] = Gh->edges[i].SensAdj[1] = -1;
+          Gh->edges[i].Adj[0] = Gh->edges[i].Adj[1] = 0;
+          Gh->edges[i].flag = 0;
+          Gh->edges[i].link=0;
+      if(Requiredboundary)
+      Gh->edges[i].SetRequired();
+
+          if (!hvertices)
+            {
+              Gh->vertices[i1].color++;
+              Gh->vertices[i2].color++;
+              len[i1] += l12;
+              len[i2] += l12;
+            }
+
+          Hmin = Min(Hmin,l12);
+        }
+      nnn++;
+      }}
+*/
+  delete [] vertices; vertices=0;
+
+  throwassert(nnn+nbvinter==nbvprev);
+  throwassert(i==Gh->nbe);
+  // definition  the default of the given mesh size
+  if (!hvertices)
+    {
+        bool hvint = pintern ? pintern->M() ==3 : 0;
+      for (i=0;i<Gh->nbv;i++)
+      {
+        if(hvint &&Gh->vertices[i].ReferenceNumber <brefintp +nbvinter)
+        {
+            long k =Gh->vertices[i].ReferenceNumber-brefintp;
+            Gh->vertices[i].m=Metric( (*pintern)(k ,2L));
+            Gh->vertices[i].ReferenceNumber = -1; //++ bof bof FH ..
+
+        }
+        else if (Gh->vertices[i].color > 0)
+          Gh->vertices[i].m=  Metric(len[i] /(Real4) Gh->vertices[i].color);
+        else
+          Gh->vertices[i].m=  Metric(Hmin);
+      }
+      delete [] len;
+
+      if(verbosity>3)
+        cout <<"\t\t"  << "     Geom Hmin " << Hmin << endl;
+    }
+
+  Gh->NbSubDomains=nbsd;
+  if (Gh->NbSubDomains>0)
+    {
+        Gh->subdomains = new GeometricalSubDomain[  Gh->NbSubDomains];
+        Int4 i1=0;
+        i=0;
+        for (int k=0; k<nbmshL; ++k)
+      {
+          const MeshL *pmshL= ppmshL[k];
+
+    /*    for (E_BorderN const * k=b;k;k=k->next)
+        {
+            int nbd = k->NbBorder(stack);
+            for(int index=0; index<nbd; ++index,i++)
+            {
+     */
+                //long Nbseg =k->Nbseg(stack,index);
+                //long n=  Max(1L,Abs(Nbseg));
+                Gh->subdomains[i].sens = 1; //Nbseg >0 ? 1 : -1;
+                Gh->subdomains[i].edge=Gh->edges + i1;
+                Gh->subdomains[i].ref = i;
+                i1 += pmshL->nt;
+            }
+    }
+  Gh->NbEquiEdges=0;
+  Gh->NbCrackedEdges=0;
+  const Fem2D::Mesh * m=0;
+  if (justboundary)
+    m=bamg2msh(*Gh);
+  else
+  {
+      Gh->AfterRead();
+      int nbtx= nbvmax ? nbvmax :  (Gh->nbv*Gh->nbv)/9 +1000;
+      if(verbosity> 99) cout << " ** Gh = " << endl << *Gh << endl << " *** " <<endl; ;
+      Triangles *Th = 0;
+      try {
+      Th =new Triangles( nbtx ,*Gh);
+          if(SplitEdgeWith2Boundary)
+          {
+              long nbs=1,nbc=0;
+              while (nbs >0 && nbc++ <2 && Th->nbt < nbtx-1 )
+              {
+                nbs=  Th->SplitInternalEdgeWithBorderVertices();
+                if(verbosity>1)  cout << "BuildMesh: SplitInternalEdgeWithBorderVertices:  count ="<< nbc << " " << nbs << endl;
+              }
+              
+          }
+
+          if(alea) //  Add F. Hecht Juin 2018 for J-M Sac Epee:  jean-marc.sac-epee@univ-lorraine.fr
+          {
+              Th->SetVertexFieldOn();
+              for( int i=0;i<Th->nbv;++i)
+              {
+                  VertexOnGeom *on=0;
+                  if( !(Th->vertices[i].on) ) // we are non on geometry
+                  {
+                      // move a little the  points
+                      Th->vertices[i].r.x += NormalDistrib(alea);
+                      Th->vertices[i].r.y += NormalDistrib(alea);
+
+                  }
+              }
+
+          }
+
+      if(0)
+        {
+
+
+          Th->SetVertexFieldOn();
+          for( int i=0;i<Th->nbv;++i)
+        {
+          VertexOnGeom *on=0;
+          if( (on =Th->vertices[i].on) ) // we are on geometrie
+            {
+              if(on->abscisse <0) {
+              bamg::GeometricalVertex * gv= on->gv;
+              }
+              else {// erreur car un point est sur un arete en non un sommet
+              bamg::GeometricalEdge * ge= on->ge;
+              }
+            }
+        }
+        }
+          m=bamg2msh(Th,true);
+
+      }
+      catch(...)
+      {
+      Gh->NbRef=0;
+      delete Gh;
+          if(m) delete m;
+          if(Th) delete Th;// clean memory ???
+      cout << " catch Err bamg "  << endl;
+      throw ;
+     }
+      delete Th;
+  }
+
+  delete Gh;
+  /* deja fait  dans bamg2msh
+     Fem2D::R2 Pn,Px;
+     m->BoundingBox(Pn,Px);
+     m->quadtree=new Fem2D::FQuadTree(m,Pn,Px,m->nv);
+  ---------- */
+  mp=mps;
+  return m;
+}
+const Fem2D::Mesh *  BuildMesh(Stack stack,const  Fem2D::MeshL *pmshL ,  bool justboundary,int nbvmax,bool Requiredboundary,KNM<double> *pintern,double alea,bool SplitEdgeWith2Boundary)
+{
+    return BuildMesh(stack,&pmshL,1,justboundary,nbvmax,Requiredboundary,pintern,alea, SplitEdgeWith2Boundary);
+}
 const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool justboundary,int nbvmax,bool Requiredboundary,KNM<double> *pintern,double alea,bool SplitEdgeWith2Boundary)
 {
     if(alea) Requiredboundary=1;
@@ -408,7 +849,7 @@ const Fem2D::Mesh *  BuildMesh(Stack stack, E_BorderN const * const & b,bool jus
         if((pintern->M() != 2 ) && ( pintern->M()!=3))
         {
             cout << " point m = " <<pintern->M()<<endl;
-            ExecError("Errror: BuildMesh number of column of internal point (point=)  must be 2 or 3!");
+            ExecError("Error: BuildMesh number of column of internal point (point=)  must be 2 or 3!");
         }
     }
     int brefintp= -2000000000;
@@ -932,7 +1373,7 @@ const Fem2D::Mesh *  ReadTriangulate( string  * const & s) {
       nv=0;
       ifstream f(s->c_str());
       if(!f) {cerr <<" Error opening file " << *s << endl;
-      ExecError("Openning file ");}
+      ExecError("Opening file ");}
       while (f.good())
         {
           R2 P;

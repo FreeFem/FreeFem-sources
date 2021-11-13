@@ -497,7 +497,8 @@ namespace Fem2D
         }
         if (cleanmesh) {
             if(verbosity>3)
-                cout << "before clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
+                cout << "before clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe
+                     << " orientation " << orientation << endl;
             clean_mesh(precis_mesh, nv, nt, nbe, vertices, elements, borderelements, removeduplicate, rebuildboundary, orientation);
             if(verbosity>3)
                 cout << "after clean meshS, nv: " <<nv << " nt:" << nt << " nbe:" << nbe << endl;
@@ -587,7 +588,7 @@ namespace Fem2D
                     for(int jj=0; jj <3; jj++)
                         iv[jj] = this->operator()(K[jj]);
                     if(verbosity>2) for (int eh=0;eh<3;eh++)
-                        cout << "TriangleS: " << k << " edge : " << eh << " lenght "<<  this->elements[k].lenEdge(eh) << endl;
+                        cout << "TriangleS: " << k << " edge : " << eh << " length "<<  this->elements[k].lenEdge(eh) << endl;
                     if(verbosity>2) cout << " A triangleS with a very small edge was created " << endl;
                     return 1;
                 }
@@ -832,7 +833,7 @@ namespace Fem2D
             cerr <<"  -- MeshS**::Save  UNABLE TO OPEN  :"<< filename << endl;
             return(1);
         }
-        float fx,fy,fz;
+        double fx,fy,fz;
         // write vertice (meshS)
         GmfSetKwd(outm,GmfVertices,nv);
         for (int k=0; k<nv; k++) {
