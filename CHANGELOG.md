@@ -19,7 +19,24 @@
 
 # Changelog
 All notable changes to this project will be documented in this file.
+
 ## [Unreleased]
+### Added
+-
+
+### Changed
+-
+
+### Deprecated
+-
+
+### Removed
+-
+
+### Fixed
+-
+
+## [4.10]
 ### Added
 - ridgeangle named parameter in ExtractMeshL in msh3 plugin
 - DG formulation in 1d :
@@ -207,8 +224,6 @@ All notable changes to this project will be documented in this file.
 - BEM examples are now in `examples/mpi`
 - plot border type is now in 3d (border 2d and 3d)
 - PETSc version 3.13.0
-
-### Deprecated
 
 ### Fixed
 - `--enable-download_package` may now be used to download a single package, e.g., `--enable-download_metis`
@@ -436,7 +451,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.9..develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.10..develop
+[4.10]: https://github.com/FreeFem/FreeFem-sources/compare/v4.9..v4.10
 [4.9]: https://github.com/FreeFem/FreeFem-sources/compare/v4.8..v4.9
 [4.8]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7-1..v4.8
 [4.7-1]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7...v4.7-1
