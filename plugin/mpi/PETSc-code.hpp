@@ -4844,7 +4844,11 @@ namespace PETSc {
       MPI_Comm comm = nargs[0] ? *static_cast< MPI_Comm* >(GetAny< pcommworld >((*nargs[0])(stack))) : PETSC_COMM_WORLD;
       int size;
       MPI_Comm_size(comm, &size);
+#if PETSC_VERSION_GE(3, 17, 0)
+      DMPlexCreateFromFile(comm, pB->c_str(), NULL, overlap > 0 || size == 1 ? PETSC_TRUE : PETSC_FALSE, &pA->_dm);
+#else
       DMPlexCreateFromFile(comm, pB->c_str(), overlap > 0 || size == 1 ? PETSC_TRUE : PETSC_FALSE, &pA->_dm);
+#endif
       if(prefix)
           DMSetOptionsPrefix(pA->_dm, prefix->c_str());
       DMSetFromOptions(pA->_dm);
