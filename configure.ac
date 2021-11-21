@@ -2094,6 +2094,9 @@ case "$F77" in
 *gfortran*)
 CHECK_COMPILE_FLAG(Fortran 77,[-fallow-argument-mismatch],FFLAGS)
 CHECK_COMPILE_FLAG(Fortran,[-fallow-argument-mismatch],FCFLAGS) 
+# -fallow-invalid-boz
+CHECK_COMPILE_FLAG(Fortran 77,[-fallow-invalid-boz],FFLAGS)
+CHECK_COMPILE_FLAG(Fortran,[-fallow-invalid-boz],FCFLAGS)
 ;;
 esac
 
