@@ -324,6 +324,99 @@ void VTU_PIECE(FILE *fp, const int &nv, const int &nc) {
   fprintf(fp, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", nv, nc);
 }
 
+//---------------------------------------------------------------------------------//
+// A function to output a .pvtu file for ParaView usage when PETSc or HPDDM is used
+//---------------------------------------------------------------------------------//
+void PvtuWriter(string*& pffname, const int size, const int time, const string base_filename, const string CellDataArrayForPvtu, const string PointDataArrayForPvtu) {
+  std::ostringstream marker;
+  marker << std::setw(to_string(size).length()) << std::setfill('0') << "0";
+  std::string zero;
+  if (size > 1)
+    zero = "_" + marker.str() + ".vtu";
+  else
+    zero = ".vtu";
+  std::string full_filename(*pffname);
+  std::size_t found = full_filename.find(zero);
+  if (found != std::string::npos) {
+    std::string file_without_extension;
+    if (size > 1)
+      file_without_extension = full_filename.substr(0, found - 6 - string(to_string(size)).length());
+    else
+      file_without_extension = full_filename.substr(0, found - 5);
+    std::string T = std::string(4 - string(to_string(time)).length(), '0') + to_string(time);
+    ofstream pvtu;
+    pvtu.open(file_without_extension + (size > 1 ? "_" + to_string(size) : "") + "_" + T + ".pvtu");
+    pvtu << "<?xml version=\"1.0\"?>\n"
+            "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n"
+            "  <PUnstructuredGrid GhostLevel=\"0\">\n"
+            "    <PPointData>\n"
+            "" + PointDataArrayForPvtu + ""
+            "    </PPointData>\n"
+            "    <PCellData>\n"
+            "      <PDataArray type=\"Int32\" Name=\"Label\"/>\n"
+            "" + CellDataArrayForPvtu + ""
+            "    </PCellData>\n"
+            "    <PPoints>\n"
+            "      <PDataArray type=\"Float32\" NumberOfComponents=\"3\" Name=\"Points\"/>\n"
+            "    </PPoints>\n";
+    for (int i = 0; i < size; ++i) {
+      pvtu << "    <Piece Source=\"";
+      pvtu << base_filename << "_";
+      if (size > 1)
+        pvtu << to_string(size) + "_";
+      pvtu << std::setw(4) << std::setfill('0') << time;
+      if (size > 1)
+        pvtu << "_" << std::setw(to_string(size).length()) << std::setfill('0') << i;
+      pvtu << ".vtu\"/>\n";
+    }
+    pvtu << "  </PUnstructuredGrid>\n"
+            "</VTKFile>\n";
+  }
+}
+
+//--------------------------------------------------------------------------------//
+// A function to output a .pvd file for ParaView usage when PETSc or HPDDM is used
+//--------------------------------------------------------------------------------//
+void PvdWriter(string*& pffname, const int size, const int time, const string base_filename, const string CellDataArrayForPvtu, const string PointDataArrayForPvtu) {
+  std::ostringstream marker;
+  marker << std::setw(to_string(size).length()) << std::setfill('0') << "0";
+  std::string zero;
+  if (size > 1)
+    zero = "_" + marker.str() + ".vtu";
+  else
+    zero = ".vtu";
+  std::string full_filename(*pffname);
+  std::size_t found = full_filename.find(zero);
+  if (found != std::string::npos) {
+    std::string file_without_extension;
+    if (size > 1)
+      file_without_extension = full_filename.substr(0, found - 6 - string(to_string(size)).length());
+    else
+      file_without_extension = full_filename.substr(0, found - 5);
+    ofstream pvd;
+    pvd.open(file_without_extension + (size > 1 ? "_" + to_string(size) : "") + ".pvd");
+    pvd << "<?xml version=\"1.0\"?>\n"
+           "<VTKFile T=\""
+           "" + to_string(time) + ""
+           "\" type=\"Collection\" version=\"0.1\"\n"
+           "         byte_order=\"LittleEndian\"\n"
+           "         compressor=\"vtkZLibDataCompressor\">\n"
+           "  <Collection>\n";
+    for (int t = 0; t < time + 1; ++t) {
+      pvd << "    <DataSet timestep=\"" << t << "\" group=\"\" part=\"1\"\n"
+             "             file=\""
+             "" + base_filename + ""
+             "_";
+      if(size > 1)
+        pvd << to_string(size) + "_";
+      pvd << std::setw(4) << std::setfill('0') << t;
+      pvd << ".pvtu\"/>\n";
+    }
+    pvd << "  </Collection>\n"
+           "</VTKFile>\n";
+  }
+}
+
 void VTU_DATA_ARRAY(FILE *fp, const string &type, const string &name, bool binary) {
   fprintf(fp, "<DataArray type=\"%s\"", type.c_str( ));
   fprintf(fp, " Name=\"%s\"", name.c_str( ));
@@ -2726,8 +2819,12 @@ AnyType VTK_WriteMesh_Op::operator( )(Stack stack) const {
     swap = GetAny< bool >((*nargs[6])(stack));
   }
 #ifdef COMMON_HPDDM_PARALLEL_IO
+  int time, size;
+  string base_filename;
+  std::string CellDataArrayForPvtu  = "";
+  std::string PointDataArrayForPvtu = "";
   parallelIO(pffname, nargs[7] ? (MPI_Comm *)GetAny< pcommworld >((*nargs[7])(stack)) : 0,
-             nargs[8] && GetAny< bool >((*nargs[8])(stack)));
+             nargs[8] && GetAny< bool >((*nargs[8])(stack)), time, size, base_filename);
 #endif
 
   int datasize = floatmesh ? sizeof(float) : sizeof(double);
@@ -2946,9 +3043,15 @@ AnyType VTK_WriteMesh_Op::operator( )(Stack stack) const {
       for (int ii = 0; ii < nbofsol; ii++) {
         if (order[ii] == 0) {
           if (datasize == sizeof(float)) {
+#ifdef COMMON_HPDDM_PARALLEL_IO
+            CellDataArrayForPvtu = CellDataArrayForPvtu + "      <PDataArray type=\"Float32\" NumberOfComponents=\"" + to_string(l[ii].nbfloat) + "\" Name=\"" + nameofuser[ii] + "\"/>\n";
+#endif
             VTU_DATA_ARRAY(fp, "Float32", nameofuser[ii], l[ii].nbfloat, binary);
             l[ii].writesolutionP0_float(fp, Th, stack, surface, binary, swap, 1);
           } else if (datasize == sizeof(double)) {
+#ifdef COMMON_HPDDM_PARALLEL_IO
+            CellDataArrayForPvtu = CellDataArrayForPvtu + "      <PDataArray type=\"Float64\" NumberOfComponents=\"" + to_string(l[ii].nbfloat) + "\" Name=\""  + nameofuser[ii] + "\"/>\n";
+#endif
             VTU_DATA_ARRAY(fp, "Float64", nameofuser[ii], l[ii].nbfloat, binary);
             l[ii].writesolutionP0_double(fp, Th, stack, surface, binary, swap, 1);
           }
@@ -2965,9 +3068,15 @@ AnyType VTK_WriteMesh_Op::operator( )(Stack stack) const {
       for (int ii = 0; ii < nbofsol; ii++) {
         if (order[ii] == 1) {
           if (datasize == sizeof(float)) {
+#ifdef COMMON_HPDDM_PARALLEL_IO
+            PointDataArrayForPvtu = PointDataArrayForPvtu + "      <PDataArray type=\"Float32\" NumberOfComponents=\"" + to_string(l[ii].nbfloat) + "\" Name=\"" + nameofuser[ii] + "\"/>\n";
+#endif
             VTU_DATA_ARRAY(fp, "Float32", nameofuser[ii], l[ii].nbfloat, binary);
             l[ii].writesolutionP1_float(fp, Th, stack, binary, swap, 1);
           } else if (datasize == sizeof(double)) {
+#ifdef COMMON_HPDDM_PARALLEL_IO
+            PointDataArrayForPvtu = PointDataArrayForPvtu + "      <PDataArray type=\"Float64\" NumberOfComponents=\"" + to_string(l[ii].nbfloat) + "\" Name=\"" + nameofuser[ii] + "\"/>\n";
+#endif
             VTU_DATA_ARRAY(fp, "Float64", nameofuser[ii], l[ii].nbfloat, binary);
             l[ii].writesolutionP1_double(fp, Th, stack, binary, swap, 1);
           }
@@ -2982,6 +3091,10 @@ AnyType VTK_WriteMesh_Op::operator( )(Stack stack) const {
     fprintf(fp, "</Piece>\n");
     fprintf(fp, "</UnstructuredGrid>\n");
     fprintf(fp, "</VTKFile>\n");
+#ifdef COMMON_HPDDM_PARALLEL_IO
+    PvtuWriter(pffname, size, time, base_filename, CellDataArrayForPvtu, PointDataArrayForPvtu);
+    PvdWriter(pffname, size, time, base_filename, CellDataArrayForPvtu, PointDataArrayForPvtu);
+#endif
   } else {
     cout << " iovtk extension file is not correct (" << VTK_FILE << " != 1 or 2 ) " << endl;
     ExecError(" iovtk : extension file");
@@ -4647,8 +4760,12 @@ AnyType VTK_WriteMesh3_Op::operator( )(Stack stack) const {
     swap = GetAny< bool >((*nargs[6])(stack));
   }
 #ifdef COMMON_HPDDM_PARALLEL_IO
+  int time, size;
+  std::string base_filename;
+  std::string CellDataArrayForPvtu  = "";
+  std::string PointDataArrayForPvtu = "";
   parallelIO(pffname, nargs[7] ? (MPI_Comm *)GetAny< pcommworld >((*nargs[7])(stack)) : 0,
-             nargs[8] && GetAny< bool >((*nargs[8])(stack)));
+             nargs[8] && GetAny< bool >((*nargs[8])(stack)), time, size, base_filename);
 #endif
 
   int datasize = floatmesh ? sizeof(float) : sizeof(double);
@@ -4825,10 +4942,16 @@ AnyType VTK_WriteMesh3_Op::operator( )(Stack stack) const {
       for (int ii = 0; ii < nbofsol; ii++) {
         if (order[ii] == 0) {
           if (datasize == sizeof(float)) {
+#ifdef COMMON_HPDDM_PARALLEL_IO
+            CellDataArrayForPvtu = CellDataArrayForPvtu + "      <PDataArray type=\"Float32\" NumberOfComponents=\"" + to_string(l[ii].nbfloat) + "\" Name=\"" + nameofuser[ii] + "\"/>\n";
+#endif
             VTU_DATA_ARRAY(fp, "Float32", nameofuser[ii], l[ii].nbfloat, binary);
             l[ii].writesolutionP0_float(fp, Th, stack, surface, binary, swap, 1);
           } else if (datasize == sizeof(double)) {
             VTU_DATA_ARRAY(fp, "Float64", nameofuser[ii], l[ii].nbfloat, binary);
+#ifdef COMMON_HPDDM_PARALLEL_IO
+            CellDataArrayForPvtu = CellDataArrayForPvtu + "      <PDataArray type=\"Float64\" NumberOfComponents=\"" + to_string(l[ii].nbfloat) + "\" Name=\"" + nameofuser[ii] + "\"/>\n";
+#endif
             l[ii].writesolutionP0_double(fp, Th, stack, surface, binary, swap, 1);
           }
 
@@ -4844,9 +4967,15 @@ AnyType VTK_WriteMesh3_Op::operator( )(Stack stack) const {
       for (int ii = 0; ii < nbofsol; ii++) {
         if (order[ii] == 1) {
           if (datasize == sizeof(float)) {
+#ifdef COMMON_HPDDM_PARALLEL_IO
+            PointDataArrayForPvtu = PointDataArrayForPvtu + "      <PDataArray type=\"Float32\" NumberOfComponents=\"" + to_string(l[ii].nbfloat) + "\" Name=\"" + nameofuser[ii] + "\"/>\n";
+#endif
             VTU_DATA_ARRAY(fp, "Float32", nameofuser[ii], l[ii].nbfloat, binary);
             l[ii].writesolutionP1_float(fp, Th, stack, binary, swap, 1);
           } else if (datasize == sizeof(double)) {
+#ifdef COMMON_HPDDM_PARALLEL_IO
+            PointDataArrayForPvtu = PointDataArrayForPvtu + "      <PDataArray type=\"Float64\" NumberOfComponents=\"" + to_string(l[ii].nbfloat) + "\" Name=\"" + nameofuser[ii] + "\"/>\n";
+#endif
             VTU_DATA_ARRAY(fp, "Float64", nameofuser[ii], l[ii].nbfloat, binary);
             l[ii].writesolutionP1_double(fp, Th, stack, binary, swap, 1);
           }
@@ -4860,6 +4989,10 @@ AnyType VTK_WriteMesh3_Op::operator( )(Stack stack) const {
     ENDTYPE_VTU(fp, "Piece");
     ENDTYPE_VTU(fp, "UnstructuredGrid");
     ENDTYPE_VTU(fp, "VTKFile");
+#ifdef COMMON_HPDDM_PARALLEL_IO
+    PvtuWriter(pffname, size, time, base_filename, CellDataArrayForPvtu, PointDataArrayForPvtu);
+    PvdWriter(pffname, size, time, base_filename, CellDataArrayForPvtu, PointDataArrayForPvtu);
+#endif
   } else {
     cout << "extension file of VTK is not correct" << endl;
     exit(1);
