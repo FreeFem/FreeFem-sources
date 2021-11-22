@@ -334,7 +334,8 @@ namespace PETSc {
           AssembleBC<HPDDM::upscaled_type<K>>(stack, Th, Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
       }
       changeOperatorSimple(&B, &A);
-      B._A->setMatrix(nullptr);
+      if(B._A)
+          B._A->setMatrix(nullptr);
     }
 #if defined(WITH_bemtool) && defined(WITH_htool) && defined(PETSC_HAVE_HTOOL)
     else {
