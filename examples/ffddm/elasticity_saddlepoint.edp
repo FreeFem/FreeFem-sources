@@ -17,7 +17,7 @@ int nlayers = getARGV("-nlayers", global); // number of alternating material lay
 real nu1 = 0.4999;
 real nu2 = 0.35;
 real E1 = 1e+7;
-real E2 = 2e+9;
+real E2 = 200e+9;
 
 // heterogeneous material distribution:
 func fE = int(y*nlayers)%2 == 0 ?  E1 :  E2;
@@ -45,13 +45,14 @@ fespace Ph0(meshName,P0);
 Ph0  E = fE, nu = fnu;
 func mu = E/(2*(1+nu));
 func lambda = E*nu/((1+nu)*(1-2*nu));
-
 varf varfName([u, uB], [v, vB]) = int2d(meshName)(2.0 * mu * (epsilon(u)' * epsilon(v)))
                                  +on(4, u = 0, uB = 0)
-                                 -int2d(meshName)(100*vB); //
+                                 -int2d(meshName)(100*vB);
+ // EOM
 
 macro VarfB(varfName, meshName, PhName)
-varf varfName([u, uB], [q]) = int2d(meshName)(div(u) * q); //
+varf varfName([u, uB], [q]) = int2d(meshName)(div(u) * q);
+// EOM
 
 macro VarfC(varfName, meshName, PhName)
 fespace Ph0(meshName,P0);
@@ -59,7 +60,8 @@ Ph0  E = fE, nu = fnu;
 func mu = E/(2*(1+nu));
 func lambda = E*nu/((1+nu)*(1-2*nu));
 
-varf varfName([p], [q]) = int2d(meshName)(1./lambda * p * q); //
+varf varfName([p], [q]) = int2d(meshName)(1./lambda * p * q);
+// EOM
 
 macro defA(i)[i, i#B] // EOM
 macro initA(i)[i, i] // EOM
@@ -89,13 +91,14 @@ fespace Ph0(meshName,P0);
 Ph0  E = fE, nu = fnu;
 func mu = E/(2*(1+nu));
 func lambda = E*nu/((1+nu)*(1-2*nu));
-
 varf varfName([u, uB, uC], [v, vB, vC]) = int3d(meshName)(2.0 * mu * (epsilon(u)' * epsilon(v)))
                                  +on(1, u = 0, uB = 0, uC = 0)
-                                 -int3d(meshName)(100*vB); //
+                                 -int3d(meshName)(100*vB);
+// EOM
 
 macro VarfB(varfName, meshName, PhName)
-varf varfName([u, uB, uC], [q]) = int3d(meshName)(div(u) * q); //
+varf varfName([u, uB, uC], [q]) = int3d(meshName)(div(u) * q);
+// EOM
 
 macro VarfC(varfName, meshName, PhName)
 fespace Ph0(meshName,P0);
@@ -103,7 +106,8 @@ Ph0  E = fE, nu = fnu;
 func mu = E/(2*(1+nu));
 func lambda = E*nu/((1+nu)*(1-2*nu));
 
-varf varfName([p], [q]) = int3d(meshName)(1./lambda * p * q); //
+varf varfName([p], [q]) = int3d(meshName)(1./lambda * p * q);
+// EOM
 
 macro defA(i)[i, i#B, i#C] // EOM
 macro initA(i)[i, i, i] // EOM
@@ -115,7 +119,7 @@ ENDIFMACRO
 /* build mesh decomposition with minimal overlap size 1*2 (prefix M) and also the Augmented decomposition
    with overlap size 2*2 (prefix MAug) */
 ffddmbuildDmeshAug(M,ThGlobal,mpiCommWorld)
-	
+
 func Pk = [Pku,Pkp];
 
 /* build Dfespace for A on distributed mesh M (prefix AFE) ; this also builds Dfespace tilde with larger overlap
