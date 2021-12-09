@@ -1,0 +1,189 @@
+load "msh3"
+load "geophysics"
+
+include "getARGV.idp"
+
+real gtol = getARGV("-tol",1e-4);
+
+func Pk = P2;
+
+real freq = getARGV("-frequency",10.); // frequency
+real nppwl = getARGV("-nppwl",5.); // number of points per wavelength
+
+macro dimension 2// EOM            // 2D or 3D
+include "ffddm.idp"
+
+real c0 = 2;
+
+//Marmousi marm("marmousi.bin");
+func c = c0;//marm(x,y);
+
+func k = 2*pi*freq/c;
+
+real k0 = 2*pi*freq/c0;
+
+real lambda = c0/freq;
+
+int Robin = 2;
+int[int] lab = [Robin,Robin,Robin,Robin];
+
+real length = 9.2;
+real depth = 3;
+
+mesh Th = square(nppwl*length/lambda,nppwl*depth/lambda,[x*length,-y*depth],label=lab);
+
+fespace Uh(Th,P1);
+Uh met = c/freq/nppwl;
+Th = adaptmesh(Th,met,IsMetric=1,nbvx=1000000);
+
+func source = exp(-((x-6)^2+y^2)*50*k0);
+
+ffddmoverlap = 0;
+macro mminoverlap()1//
+ffddmbuildDmesh(,Th,mpiCommWorld)
+
+macro def(i)i// EOM
+macro init(i)i// EOM
+ffddmbuildDfespace( , ,complex,def,init,Pk)
+
+macro Grad(u) [dx(u),dy(u)] // EOM
+
+varf vAi(u,v) = int2d(Thi)(-k^2*u*v+Grad(u)'*Grad(v))
+				      - int1d(Thi,Robin)(1i*k*u*v);
+
+varf vrhs(u,v) = int2d(Thi)(source*v);
+
+matrix<complex> Ai = vAi(Vhi,Vhi);
+
+int[int] labG=[ffddminterfacelabel];
+meshL Gammai = extract(Thi,label=labG);
+
+fespace GammaVhi(Gammai,Pk);
+
+matrix<complex> Ric;
+{
+  matrix Ri = interpolate(GammaVhi,Vhi);
+  Ric = Ri;
+}
+
+matrix<complex> Ti;
+/*
+{
+varf vTi(u,v) = int1d(Gammai)(k*u*v);
+Ti = vTi(GammaVhi,GammaVhi);
+}
+*/
+{
+load "bem"
+varf vH(u,v) = int1dx1d(Gammai)(Gammai)(BEM(BemKernel("HS",k=1i*k0),u,v));  
+HMatrix<complex> H = vH(GammaVhi,GammaVhi,commworld=mpiCommSelf,compressor="SVD");
+display(H);
+complex[int,int] mdense(GammaVhi.ndof, GammaVhi.ndof);
+mdense = H;
+Ti = mdense;
+if (mpirank == 0) cout << H.infos << endl;
+}
+
+matrix<complex> GTi = Ric'*Ti;
+GTi = GTi*Ric;
+
+matrix<complex> Li = Ai - 1i*GTi;
+set(Li,solver=sparsesolver,commworld=mpiCommSelf,factorize=3);
+
+matrix<complex> mat;
+
+complex[int] GammaDk = Ric*Dk[mpirank];
+{
+  complex[int] Diinv = 1./GammaDk;
+  matrix<complex> mDiinv = Diinv;
+  mat = mDiinv*Ti;
+}
+
+int[int][int] petscintersection(1 + numberIntersection);
+{
+  petscintersection[0].resize(arrayIntersection.n);
+  petscintersection[0] = arrayIntersection;
+  complex[int] CC;
+  int[int] II;
+  for (int j=0; j<numberIntersection;j++) {
+    matrix<complex> RR = restrictionIntersection[j]*Ric';
+    [II, petscintersection[1 + j], CC] = RR;
+    if (CC[CC.n-1] == 0) petscintersection[1 + j].resize(CC.n-1);
+  }
+}
+
+real[int] petscD = GammaDk.re;
+
+load "PETSc-complex"
+Mat<complex> Tpetsc(mat, petscintersection, petscD, communicator = mpiCommWorld);
+
+set(Tpetsc,sparams="-ksp_converged_reason -pc_type lu -ksp_rtol "+gtol);
+
+complex[int] ti(GammaVhi.ndof), qi(GammaVhi.ndof), di(GammaVhi.ndof), gi(GammaVhi.ndof), Tg(GammaVhi.ndof);
+complex[int] ui(Vhi.ndof), vti(Vhi.ndof);
+
+func complex[int] OP(complex[int] &pi)
+{
+  ti = Ti*pi;
+  vti = Ric'*ti;
+  ui = Li^-1*vti;
+
+  qi = Ric*ui;
+  qi *= -2i;
+
+  di = pi - qi;
+
+  gi = Ti*di;
+
+  exchange(Tpetsc,gi,scaled=false);
+
+  Tg = 0;
+  Tg = Tpetsc^-1*gi;
+
+  complex[int] res = qi + 2*Tg;
+
+  return res;
+}
+
+complex[int] rhsi = vrhs(0,Vhi);
+update(rhsi,true);
+
+GammaVhi<complex> soli, bi;
+{
+  complex[int] vi = Li^-1*rhsi;
+
+  bi[] = Ric*vi;
+  bi[] *= 2i;
+
+  complex[int] tmp = Ric * vi;
+  complex[int] gi = Ti*tmp;
+  gi *= 2i;
+  
+  exchange(Tpetsc,gi,scaled=false);
+
+  complex[int] ri(gi.n);
+  ri = Tpetsc^-1*gi;
+  bi[] -= 2*ri;
+}
+
+int[int][int] dummyintersection(0);
+real[int] dummyD (GammaVhi.ndof);
+dummyD = 1;
+Mat<complex> OPshell(GammaVhi.ndof, dummyintersection, dummyD, communicator = mpiCommWorld);
+Mat<complex> OPpetsc(OPshell,OP);
+set(OPpetsc,sparams = "-ksp_monitor -pc_type none -ksp_rtol "+gtol);
+
+soli[] = OPpetsc^-1*bi[];
+
+complex[int] si = Ti*soli[];
+complex[int] wi = Ric'*si;
+wi += rhsi;
+
+Vhi<complex> vi;
+
+vi[] = Li^-1*wi;
+
+ffddmplot(,real(vi), "Global solution");
+
+
+
