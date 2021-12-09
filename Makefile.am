@@ -281,8 +281,8 @@ bin/script/PostInstall.sh:./Makefile bin/script/PostInstall.m4
 FreeFEM-documentation.pdf:Makefile
 if DOWNLOAD
 	-rm FreeFEM-documentation.pdf.md5
-	-$(WGET) https://doc.freefem.org/pdf/FreeFEM-documentation.pdf.md5
-	-md5sum -c FreeFEM-documentation.pdf.md5 || (rm FreeFEM-documentation.pdf ; $(WGET) https://doc.freefem.org/pdf/FreeFEM-documentation.pdf)
+	-$(WGET) https://github.com/FreeFem/FreeFem-doc/raw/pdf/FreeFEM-documentation.pdf.md5
+	-md5sum -c FreeFEM-documentation.pdf.md5 || (rm FreeFEM-documentation.pdf ; $(WGET) https://github.com/FreeFem/FreeFem-doc/raw/pdf/FreeFEM-documentation.pdf)
 else
 	touch FreeFEM-documentation.pdf
 	echo "no downloaded documentation"
