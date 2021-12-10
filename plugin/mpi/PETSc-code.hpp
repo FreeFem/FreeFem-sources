@@ -5090,7 +5090,10 @@ namespace PETSc {
               PetscInt *closure = NULL;
               PetscInt  closureSize, cl;
               DMPlexGetTransitiveClosure(p->_dm, c, PETSC_TRUE, &closureSize, &closure);
-              int iv[4], lab = 0;
+              int iv[4];
+              PetscInt lab;
+              DMGetLabelValue(p->_dm, "Cell Sets", c, &lab);
+              if (lab == -1) lab = 0;
               int* ivv = iv;
               for (cl = 0; cl < 2 * closureSize; cl += 2) {
                   PetscInt point = closure[cl], dof, off, d, p;
