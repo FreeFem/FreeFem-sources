@@ -394,7 +394,7 @@ void VTU_WRITE_MESH(FILE *fp, const Mesh &Th, bool binary, int datasize, bool su
   }
 
   fprintf(fp, "<UnstructuredGrid>\n");
-  fprintf(fp, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\" %d\">\n", Th.nv, nc);
+  fprintf(fp, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", Th.nv, nc);
 
   fprintf(fp, "<Points>\n");
   fprintf(fp, "<DataArray type=\"Float32\" NumberOfComponents=\"3\"");
@@ -688,7 +688,7 @@ void VTU_WRITE_MESH(FILE *fp, const Mesh3 &Th, bool binary, int datasize, bool s
   }
 
   fprintf(fp, "<UnstructuredGrid>\n");
-  fprintf(fp, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\" %d\">\n", Th.nv, nc);
+  fprintf(fp, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", Th.nv, nc);
 
   fprintf(fp, "<Points>\n");
   fprintf(fp, "<DataArray type=\"Float32\" NumberOfComponents=\"3\"");
@@ -990,7 +990,7 @@ void VTU_WRITE_MESHT(FILE *fp, const MMesh &Th, bool binary, int datasize, bool 
     fprintf(fp, " byte_order=\"LittleEndian\">\n");
 
   fprintf(fp, "<UnstructuredGrid>\n");
-  fprintf(fp, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\" %d\">\n", Th.nv, nc);
+  fprintf(fp, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", Th.nv, nc);
 
   fprintf(fp, "<Points>\n");
   fprintf(fp, "<DataArray type=\"Float32\" NumberOfComponents=\"3\"");
@@ -2223,7 +2223,7 @@ class VTK_WriteMesh_Op : public E_F0mps {
     int ddim = 2;
     int stsize = 3;
     int sca = 0, vec = 0, ten = 0;
-    string scas("scalaire");
+    string scas("scalar");
     string vecs("vector");
     string tens("tensor");
 
@@ -4144,7 +4144,7 @@ class VTK_WriteMesh3_Op : public E_F0mps {
     int ddim = 3;
     int stsize = 6;
     int sca = 0, vec = 0, ten = 0;
-    string scas("scalaire");
+    string scas("scalar");
     string vecs("vector");
     string tens("tensor");
 
@@ -4182,7 +4182,7 @@ class VTK_WriteMesh3_Op : public E_F0mps {
         // cout << "taille" << a0->size() << endl;
         if (a0->size( ) != ddim && a0->size( ) != stsize) {
           CompileError(
-            "savesol in 3D: vector solution is 3 composant, tensor solution is 6 composant");
+            "savesol in 3D: vector solution is 3 components, tensor solution is 6 components");
         }
 
         if (a0->size( ) == ddim) {
@@ -5442,7 +5442,7 @@ class VTK_WriteMeshT_Op : public E_F0mps {
     int ddim = 3;
     int stsize = 3;
     int sca = 0, vec = 0, ten = 0;
-    string scas("scalaire");
+    string scas("scalar");
     string vecs("vector");
     string tens("tensor");
 
@@ -5477,7 +5477,7 @@ class VTK_WriteMeshT_Op : public E_F0mps {
         // cout << "taille" << a0->size() << endl;
         if (a0->size( ) != ddim && a0->size( ) != stsize) {
           CompileError(
-            "savesol in 3D: vector solution is 3 composant, tensor solution is 3 composant");
+            "savesol in 3D: vector solution is 3 components, tensor solution is 3 components");
         }
 
         if (a0->size( ) == ddim) {
@@ -6720,7 +6720,7 @@ void saveTecplot(const string &file, const Mesh &Th) {
  * $1 */
 
 #ifndef COMMON_HPDDM_PARALLEL_IO
-static void Load_Init( ) {    // le constructeur qui ajoute la fonction "splitmesh3"  a freefem++
+static void Load_Init( ) {
   typedef Mesh *pmesh;
   typedef Mesh3 *pmesh3;
   typedef MeshS *pmeshS;
