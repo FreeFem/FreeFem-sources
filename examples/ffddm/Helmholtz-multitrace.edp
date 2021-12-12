@@ -166,10 +166,7 @@ GammaVhi<complex> soli, bi;
   bi[] -= 2*ri;
 }
 
-int[int][int] dummyintersection(0);
-real[int] dummyD (GammaVhi.ndof);
-dummyD = 1;
-Mat<complex> OPshell(GammaVhi.ndof, dummyintersection, dummyD, communicator = mpiCommWorld);
+Mat<complex> OPshell(GammaVhi.ndof);
 Mat<complex> OPpetsc(OPshell,OP);
 set(OPpetsc,sparams = "-ksp_monitor -pc_type none -ksp_rtol "+gtol);
 
