@@ -850,12 +850,12 @@ namespace PETSc {
             PetscBool assembled;
             MatAssembled(ptB->_petsc, &assembled);
             if (assembled) MatConvert(ptB->_petsc, MATSAME, MAT_INITIAL_MATRIX, &ptA->_petsc);
+            else MatDuplicate(ptB->_petsc, MAT_DO_NOT_COPY_VALUES, &ptA->_petsc);
             MatDestroy(&ptB->_petsc);
           }
-        } else {
+        } else
           MatHeaderReplace(ptA->_petsc, &ptB->_petsc);
-        }
-        if (ptB->_ksp) KSPDestroy(&ptB->_ksp);
+        KSPDestroy(&ptB->_ksp);
         ptA->_A = ptB->_A;
         ptB->_A = nullptr;
         ptA->_num = ptB->_num;
@@ -2763,6 +2763,7 @@ namespace PETSc {
         Type* ptA = GetAny< Type* >((*(E[j].first))(stack));
         if (ptA && (ptA->_last - ptA->_first || (inverse && ptA->_num))) {
           PetscInt m;
+          ffassert(ptA->_petsc);
           MatGetLocalSize(ptA->_petsc, &m, NULL);
           Storage< PetscScalar >* ptIn = GetAny< Storage< PetscScalar >* >((*(E[j].second))(stack));
           if (!inverse) ffassert(ptIn->N() == ptA->_A->getDof());
