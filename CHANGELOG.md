@@ -22,7 +22,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
--
+- add computation scalar product of R3 example :  ( N'*Tl)
 
 ### Changed
 -
@@ -34,7 +34,8 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
--
+- correct the normal the N implicite variable   on meshL case 
+
 
 ## [4.10]
 ### Added
@@ -46,7 +47,7 @@ All notable changes to this project will be documented in this file.
   `BoundaryBE`, `InternalBE` to know if border element (BE) is on true boundary of not.
   update `nElementonB` in case on no manifold data (value greater > 2) in meshL, MeshS case ..
   add code to use jump, mean of test functuon on MeshL case. ( not in mesh3 ) to compute RHS.
-- add getcwd() function in shell plugin to ghet the current working dir
+- add getcwd() function in shell plugin to get the current working dir
 - add nuVertex to get the vextex on element in some int?
 
 ### Changed
@@ -118,7 +119,7 @@ All notable changes to this project will be documented in this file.
 - Bilaplacian example using Morley FE with PETSc, see `examples/hpddm/bilaplacian-2d-PETSc.edp`
 - Oseen problem preconditioned by PCD, see `examples/hpddm/oseen-2d-PETSc.edp`
 - SLEPc polynomial eigenvalue solver `PEPSolve()`
-- add trivail example to check periodic boundary condition on meshS , meshL  , mesh3
+- add trivial example to check periodic boundary condition on meshS , meshL  , mesh3
     examples/3d/periodic3.edp	examples/3dSurf/periodicS.edp
     examples/3dCurve/periodicL.edp
 

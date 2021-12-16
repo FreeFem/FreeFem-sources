@@ -464,7 +464,7 @@ AnyType classBuildMesh<TP>::operator()(Stack stack)  const {
     const TP * borders = GetAny<const TP *>((*getborders)(stack));
    long  nbvx         = arg(0,stack,0L);
    int defrb = is_same<MeshL, TP>::value ;
-   bool  requireborder= arg(3,stack,arg(defrb,stack,false));
+   bool  requireborder= arg(3,stack,arg(1,stack,false));// correct 23 nov. 2021 FH
     KNM<double> * p=0;  p=arg(2,stack,p);
     double alea = arg(4,stack,0.);
     bool SplitEdgeWith2Boundary=arg(5,stack,false);
@@ -796,8 +796,9 @@ AnyType Adaptation::operator()(Stack stack) const
   const  Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
   ffassert(Thh);
    Triangles * oTh =0;
+   KN<int> ndfv(Thh->nv);
+    for(int i=0; i<ndfv.N();++i) ndfv[i]=i;
   if (nbcperiodic) {
-    KN<int> ndfv(Thh->nv);
     KN<int> ndfe(Thh->neb);
     int nbdfv=0,nbdfe=0;
     BuildPeriodic2(nbcperiodic,periodic,*Thh,stack,nbdfv,ndfv,nbdfe,ndfe);
@@ -924,6 +925,30 @@ AnyType Adaptation::operator()(Stack stack) const
   Th.SmoothMetric(raison);
   Th.MaxSubDivision(maxsubdiv);
   Th.BoundAnisotropy(anisomax);
+   if(nbcperiodic && 0 ) // in test
+       // to be sure that the metric is ok with periotic BC
+   {  // bof Bof ...
+       if(verbosity>1) cout << "  inforce de periodic BC on Metric" << endl;
+       KN<double> m(3*ndfv.N()), c(ndfv.N());
+       c=0.;
+       m=0.;
+      for ( iv=0;iv<Th.nbv;iv++)
+       {
+           int jv = ndfv[iv];
+           c[jv] += 1.;
+           m[jv*3  ] += Th[iv].m.a11;
+           m[jv*3+1] += Th[iv].m.a22;
+           m[jv*3+2] += Th[iv].m.a21;
+       }
+       for ( iv=0;iv<Th.nbv;iv++)
+       {
+           int jv = ndfv[iv];
+           Th[iv].m.a11 = m[jv*3  ] /c[jv]  ;
+           Th[iv].m.a22 = m[jv*3+1] /c[jv];
+           Th[iv].m.a21 = m[jv*3+2] /c[jv];
+
+       }
+   }
   // end of metric's computation
    if (mtx)
     for ( iv=0;iv<Th.nbv;iv++)

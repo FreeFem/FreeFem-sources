@@ -5686,7 +5686,12 @@ template<  class A >
             }
             OneOperator_trans_Ptr_o_R(ptr pp) : OneOperator(atype< Result * >( ), atype< Transpose<A *> >( )), p(pp) {}
         };
-        
+template <class R,class A, class B> 
+struct OpR3dot: public binary_function<A,B,R> {
+  static R f(const A & a,const B & b)  {
+      B pu = a;
+      return (*pu,*b);} };
+
 void init_lgfem( ) {
   if (verbosity && (mpirank == 0)) cout << "lg_fem ";
 #ifdef HAVE_CADNA
@@ -5851,6 +5856,9 @@ void init_lgfem( ) {
   Dcl_Type< const GQuadratureFormular< R3 > * >( );
   TheOperators->Add("\'",   new OneOperator1<Transpose<R3* >,R3* >(&Build<Transpose<R3* >,R3* >));
   TheOperators->Add("*",new opDotR3(atype<TransE_Array >(),atype< R3* >() )   );  // "N" a faire mais dur
+    // R3dot
+  TheOperators->Add("*",new OneBinaryOperator< OpR3dot<double,Transpose<R3* >, R3* >> () );  // "N" a faire mais dur
+
   TheOperators->Add("*",new opDotR3(atype< Transpose<R3* > >(),atype<E_Array >() )   );  // "N" a faire mais dur
 
   Global.New("qf1pT", CConstant< const QuadratureFormular * >(&QuadratureFormular_T_1));

@@ -2656,7 +2656,7 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
       R3 NN = KE.N(fk);
       double mes = NN.norme( );
       NN /= mes;		  
-      mp->set(Th, KE(B), B, KE, K.lab, NN, fk);    // problem
+      mp->set(Th, KE(B), B, KE, K.lab, NN, fk);    //  ok after version 4.10
       l1 = GetAny< long >((*flab)(stack));
       lmn = min(lmn, bb->lab);
       lmx = max(lmx, bb->lab);
