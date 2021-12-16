@@ -216,7 +216,7 @@ string dirname(const string *ppath) {
   } else if (i == 1) {
     return "/";
   } else {
-    return path.substr(0, i - 1);
+    return path.substr(0, i);
   }
 }
 
