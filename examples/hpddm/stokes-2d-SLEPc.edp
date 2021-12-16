@@ -42,8 +42,7 @@ M = vPbM(VhP, VhP);
 Mat B(A, M);
 Mat Z(A);
 {
-    matrix BLoc = vPbB(VhP, VhV);
-    B = BLoc;
+    B = vPbB(VhP, VhV);
     real[int] diag(VhV.ndof);
     matrix zeros = diag;
     Z = zeros;

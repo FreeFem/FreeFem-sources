@@ -6,6 +6,9 @@
    method for Saddle Point problems.
    arXiv preprint available at https://arxiv.org/abs/1911.01858 */
 
+// the command line parameter '-Dmdim' sets the value of the macro 'mdim' in the script;
+// '-Dmdim=2' or '-Dmdim=3' switches between the 2D and 3D test case
+
 include "getARGV.idp"
 int global = getARGV("-global", 10); // discretization parameter
 int nlayers = getARGV("-nlayers", global); // number of alternating material layers in the y direction
@@ -14,7 +17,7 @@ int nlayers = getARGV("-nlayers", global); // number of alternating material lay
 real nu1 = 0.4999;
 real nu2 = 0.35;
 real E1 = 1e+7;
-real E2 = 2e+9;
+real E2 = 200e+9;
 
 // heterogeneous material distribution:
 func fE = int(y*nlayers)%2 == 0 ?  E1 :  E2;
@@ -42,13 +45,14 @@ fespace Ph0(meshName,P0);
 Ph0  E = fE, nu = fnu;
 func mu = E/(2*(1+nu));
 func lambda = E*nu/((1+nu)*(1-2*nu));
-
 varf varfName([u, uB], [v, vB]) = int2d(meshName)(2.0 * mu * (epsilon(u)' * epsilon(v)))
                                  +on(4, u = 0, uB = 0)
-                                 -int2d(meshName)(100*vB); //
+                                 -int2d(meshName)(100*vB);
+ // EOM
 
 macro VarfB(varfName, meshName, PhName)
-varf varfName([u, uB], [q]) = int2d(meshName)(div(u) * q); //
+varf varfName([u, uB], [q]) = int2d(meshName)(div(u) * q);
+// EOM
 
 macro VarfC(varfName, meshName, PhName)
 fespace Ph0(meshName,P0);
@@ -56,7 +60,8 @@ Ph0  E = fE, nu = fnu;
 func mu = E/(2*(1+nu));
 func lambda = E*nu/((1+nu)*(1-2*nu));
 
-varf varfName([p], [q]) = int2d(meshName)(1./lambda * p * q); //
+varf varfName([p], [q]) = int2d(meshName)(1./lambda * p * q);
+// EOM
 
 macro defA(i)[i, i#B] // EOM
 macro initA(i)[i, i] // EOM
@@ -86,13 +91,14 @@ fespace Ph0(meshName,P0);
 Ph0  E = fE, nu = fnu;
 func mu = E/(2*(1+nu));
 func lambda = E*nu/((1+nu)*(1-2*nu));
-
 varf varfName([u, uB, uC], [v, vB, vC]) = int3d(meshName)(2.0 * mu * (epsilon(u)' * epsilon(v)))
                                  +on(1, u = 0, uB = 0, uC = 0)
-                                 -int3d(meshName)(100*vB); //
+                                 -int3d(meshName)(100*vB);
+// EOM
 
 macro VarfB(varfName, meshName, PhName)
-varf varfName([u, uB, uC], [q]) = int3d(meshName)(div(u) * q); //
+varf varfName([u, uB, uC], [q]) = int3d(meshName)(div(u) * q);
+// EOM
 
 macro VarfC(varfName, meshName, PhName)
 fespace Ph0(meshName,P0);
@@ -100,7 +106,8 @@ Ph0  E = fE, nu = fnu;
 func mu = E/(2*(1+nu));
 func lambda = E*nu/((1+nu)*(1-2*nu));
 
-varf varfName([p], [q]) = int3d(meshName)(1./lambda * p * q); //
+varf varfName([p], [q]) = int3d(meshName)(1./lambda * p * q);
+// EOM
 
 macro defA(i)[i, i#B, i#C] // EOM
 macro initA(i)[i, i, i] // EOM
@@ -109,12 +116,10 @@ macro defB(i)[i] // EOM
 macro initB(i)[i] // EOM
 ENDIFMACRO
 
-real setuptime = mpiWtime();
-
 /* build mesh decomposition with minimal overlap size 1*2 (prefix M) and also the Augmented decomposition
    with overlap size 2*2 (prefix MAug) */
 ffddmbuildDmeshAug(M,ThGlobal,mpiCommWorld)
-	
+
 func Pk = [Pku,Pkp];
 
 /* build Dfespace for A on distributed mesh M (prefix AFE) ; this also builds Dfespace tilde with larger overlap
@@ -128,22 +133,32 @@ vsym=1;
 vtgvelim=1e+30;
 vtgv=1e+30;
 
-ffddmsetupOperator(A,AFE,VarfA); // Operator A
-ffddmsetupPrecond(A,null); // one level preconditioner for A
-ffddmtau = getARGV("-ffddm_geneo_threshold_A", 0.3);
+ffddmsetupOperator(A,AFE,VarfA); /* Operator A */
+ffddmsetupPrecond(A,null); /* one level preconditioner for A */
 
-ffddmgeneosetup(A,VarfA); // second level for A
+ffddmtau = getARGV("-ffddm_geneo_threshold_A", 0.3);
+ffddmgeneosetup(A,VarfA); /* second level for A */
 
 Acorr == "ADEF1";
 
-ffddmsetupOperatorRect(Btilde,AFEAug,CFEAug,VarfB) // Operator B on tilde decomposition
+ffddmsetupOperatorRect(Btilde,AFEAug,CFEAug,VarfB) /* Operator B on tilde decomposition */
 
-ffddmsetupOperator(Ctilde,CFEAug,VarfC) // Operator C on tilde decomposition
+ffddmsetupOperator(Ctilde,CFEAug,VarfC) /* Operator C on tilde decomposition */
+
+matrix Ctildei;
+{
+  VarfC(vC, MAugThi, null)
+  Ctildei = vC(CFEAugVhi,CFEAugVhi,sym=1); /* Ctilde_i from Remark 3.2 */
+}
+
+/* define and build all necessary operators for the application of N_S^-1 */
+ffddmtau = getARGV("-ffddm_geneo_threshold_S", 0.1);
+ffddmSPsetup(SP,A,Btilde,Ctilde,Ctildei)
 
 AFEVhi defA(Fx);
-ffddmbuildrhs(A,VarfA,Fx[]) // Build F_u
+ffddmbuildrhs(A,VarfA,Fx[]) /* Build F_u */
 
-CFEAugVhi [Fp] = [0]; // Build F_p
+CFEAugVhi [Fp] = [0]; /* Build F_p */
 
 AFEVhi defA(Gx);
 
@@ -151,252 +166,24 @@ Averbosity = 1;
 /* Solve A G_u = F_u with M_A^-1 as a preconditioner, step 1 of Algorithm 2 */
 Gx[] = AfGMRES(Gx[], Fx[], gtol, 100, "right");
 
-/* build some of the matrices : */
-matrix  Btildei, Ctildei, Si;
-
-real timea = mpiWtime();
-if (!Mexcluded) {
-  Btildei = BtildeaRd[mpiRank(Mcommddm)]*AFEAuginterp'; // Btilde_i of eq. (9)
-
-  VarfC(vC, MAugThi, null)
-  Ctildei = vC(CFEAugVhi,CFEAugVhi,solver=CG,sym=1); // Ctilde_i from Remark 3.2
-}
-
-/* matrix-vector product with local Schur complement */
-func real[int] Simatvec(real[int] &l) {
-  real[int] t1 = Btildei'*l;
-  real[int] t2 = AaR[mpiRank(Mcommddm)]^-1*t1;
-  real[int] t3 = Btildei*t2;
-  real[int] t4 = Ctildei * l;
-  t3 += t4;
-  return t3;
-}
-
-matrix localBlocki;
-
-if (!Mexcluded) {
-  matrix mC = -Ctildei;
-  localBlocki = [[AaR[mpiRank(Mcommddm)],0],[Btildei,mC]];
-  set(localBlocki,solver=sparsesolver,sym=1,factorize=3,commworld=mpiCommSelf);
-}
-
-/* inverse of local Schur complement through the solution of the augmented sparse local saddle point system */ 
-func real[int] Sisolve(real[int] &l) {
-  real[int] bi(AFEVhi.ndof+CFEAugVhi.ndof);
-  bi(AFEVhi.ndof:bi.n-1) = -l; 
-  real[int] ui = localBlocki^-1*bi;
-  return ui(AFEVhi.ndof:bi.n-1);
-}
-
-/* distributed matrix-vector product with B from AFEVhi to CFEAugVhi */
-func real[int] Bmatvec(real[int] &l) {
-  real[int] Dltilde(AFEAugVhi.ndof);
-  /* go from AFEVhi to AFEAugVhi: */
-  if (!Mexcluded) {
-    real[int] Dl = AFEDk[mpiRank(Mcommddm)].*l; // multiplty by PoU
-    Dltilde = AFEAuginterp'*Dl; // extend
-    AFEAugupdate(Dltilde,false); // sum
-  }
-  real[int] res = BtildeA(Dltilde);
-  return res;
-}
-
-/* distributed matrix-vector product with B^T from CFEAugVhi to AFEVhi */
-func real[int] BTmatvec(real[int] &l) {
-  real[int] BTtilde = BtildeAT(l); // B^T
-  real[int] res(AFEVhi.ndof);
-  if (!Mexcluded) res = AFEAuginterp*BTtilde; // restrict from AFEAugVhi to AFEVhi
-  return res;
-}
-
 /* Compute G_p = F_p - B G_u, step 2 of Algorithm 2 */
 CFEAugVhi [Gp];
-Gp[] = Fp[] - Bmatvec(Gx[]);
-
-/* matrix-vector product with S_1 defined as custom operator for prefix S1tilde */
-macro S1tildemyA
-func real[int] S1tildeA(real[int] &l)
-{ 
-  real[int] s(l.n);
-  s = 0;
-  
-  MAugtic(S1tildetmvi)
-  
-  if (!MAugexcluded){ 
-    s = Simatvec(l);
-    CFEAugupdate(s,false);
-    CFEAugupdate(s,true);
-  }
-  MAugtoc(S1tildetmvi,"",S1tildetmv)
-  
-  return s;
-}
-//
-
-/* one-level preconditioner M_{S_1,1}^-1 defined as custom preconditioner for prefix S1tilde */
-macro S1tildemyPREC1
-func real[int] S1tildePREC1(real[int] &l)
-{
-  real[int] s(l.n);
-  s = 0;
-
-  MAugtic(S1tildetpreci)
-
-  if (!MAugexcluded){
-  	real[int] aux = l;
-    if(S1tildeprec == "soras")
-    aux = aux .* CFEAugDk[mpiRank(MAugcommddm)];
-
-    s = Sisolve(aux);
-
-    if(S1tildeprec != "asm"){
-      CFEAugupdate(s,true);
-    }
-    else{
-			CFEAugupdate(s,false);
-			CFEAugupdate(s,true);
-    }
-  }
-  MAugtoc(S1tildetpreci,"",S1tildetprec)
-
-  return s;
-}
-//
-
-/* operator (I + M_{S_1}^-1 S_0) for the solution of eq. (25) to apply N_S^-1
-   defined as custom operator for prefix NStilde */
-macro NStildemyA
-func real[int] NStildeA(real[int] &u) {
-  MAugtic(NStildetmvi)
-  real[int] res(u.n);
-
-  /* recall that S_0 = B R_0^T (R_0 A R_0^T)^-1 R_0 B^T */
-
-  real[int] BTu = BTmatvec(u); /* B^T */
-
-  real[int] R0TA01R0BTu = AQ(BTu); /* Q = R_0^T (R_0 A R_0^T)^-1 R_0 */
-
-  /* extend from AFEVhi to AFEAugVhi : */
-  real[int] El(AFEAugVhi.ndof);
-  if (!Mexcluded) {
-    real[int] Dl = AFEDk[mpiRank(Mcommddm)].*R0TA01R0BTu; /* multiplty by PoU */
-    El = AFEAuginterp'*Dl; /* extend */
-    AFEAugupdate(El,false); /* sum */
-  }
-
-  real[int] BR0TA01R0BTu = BtildeA(El); /* B */
-
-  real[int] MS11 = S1tildePREC(BR0TA01R0BTu); /* M_{S_1}^-1 */
-  res = u + MS11;
-  MAugtoc(NStildetmvi,"",NStildetmv)
-  return res;
-}
-//
-
-/* matrix-vector product with Schur complement S = C + B A^-1 B^T for step 3 of Algorithm 2
-   defined as custom operator for prefix Stilde */
-macro StildemyA
-func real[int] StildeA(real[int] &l) 
-{
-  MAugtic(Stildetmvi)
-  real[int] BTl(AFEVhi.ndof), s(AFEVhi.ndof), x0(AFEVhi.ndof);
-
-  BTl = BTmatvec(l); /* B^T */
-
-  x0 = 0;
-  s = AfGMRES(x0, BTl, gtol, 100, "right"); /* A^-1 */
-
-  real[int] res = Bmatvec(s); /* B */
-
-  res += CtildeA(l); /* + C */
-
-  MAugtoc(Stildetmvi,"",Stildetmv)
-  return res;
-}
-//
-
-/* matrix-vector product with N_S^-1 (Algorithm 1, i.e. solve eq. (25))
-   defined as custom preconditioner for prefix Stilde */
-macro StildemyPREC
-func real[int] StildePREC(real[int] &G) {
-  MAugtic(Stildetpreci)
-  real[int] Gprime(G.n), res(G.n);
-
-  /* solve (I + M_{S_1}^-1 S_0) P = M_{S_1}^-1 G */
-  Gprime = S1tildePREC(G);
-  res = NStildefGMRES(res, Gprime, 1.e-2, 100, "right");
-
-  MAugtoc(Stildetpreci,"",Stildetprec)
-  return res;
-}
-//
-
-ffddmsetupinit(S1tilde,CFEAug); // define Operator for S_1 (S1tildeA with one-level preconditioner S1tildePREC1)
-S1tildeprec = "soras";
-
-ffddmsetupinit(NStilde,CFEAug); // define operator for N_S (NStildeA = I + M_{S_1}^-1 S_0, no preconditioner)
-NStildeprec = "none";
-NStildeverbosity = 1;
-
-ffddmsetupinit(Stilde,CFEAug); // define Operator for S (StildeA = S := C + B A^-1 B^T with preconditioner StildePREC = N_S^-1)
-
-/* local contribution to lhs sum of eigenvalue problem (18) for Arpack ;
-   blocking forward-backward substitutions for A_i^{-1} for mu right-hand sides to accelerate computations,
-   as we will also have input vectors from neighboring subdomains */
-func real[int] Simatvecblock(real[int] &l, int mu) {
-  real[int] res(l.n);
-  real[int] buffi(AFEVhi.ndof * mu), buffo(AFEVhi.ndof * mu);
-  for (int i=0; i < mu; i++)
-    buffi(i*AFEVhi.ndof:(i+1)*AFEVhi.ndof-1) = Btildei'*l(i*CFEAugVhi.ndof:(i+1)*CFEAugVhi.ndof-1);
-
-  buffo = AaR[mpiRank(Mcommddm)]^-1*buffi;
-
-  for (int i=0; i < mu; i++) {
-    real[int] t1 = Btildei*buffo(i*AFEVhi.ndof:(i+1)*AFEVhi.ndof-1);
-    /*
-    real[int] t2 = CFEAugDk[mpiRank(Mcommddm)].*l(i*CFEAugVhi.ndof:(i+1)*CFEAugVhi.ndof-1);
-    real[int] t3 = CtildeaRd[mpiRank(Mcommddm)]*t2;
-    res(i*CFEAugVhi.ndof:(i+1)*CFEAugVhi.ndof-1) = t1 + t3;
-    */
-    real[int] t2 = Ctildei*l(i*CFEAugVhi.ndof:(i+1)*CFEAugVhi.ndof-1);
-    res(i*CFEAugVhi.ndof:(i+1)*CFEAugVhi.ndof-1) = t1 + t2;
-    
-  }
-  return res;
-}
-
-ffddmtau = getARGV("-ffddm_geneo_threshold_S", 0.1);
-
-/* build the second level of M_{S_1}^-1 (section 3.2.2) ;
-   Sisolve corresponds to the inverse of rhs of eigenvalue problem (18) for Arpack ;
-   Simatvecblock corresponds to the local Schur complement, i.e. the local contribution
-   to the S_1 sum -- and to the lhs sum of (18) */
-ffddmgeneofullsetup(S1tilde,Sisolve,Simatvecblock);
-
-S1tildecorr = "BNN";
-
-mpiBarrier(mpiCommWorld);
-if (mpirank == 0) cout << "total setup time = " << mpiWtime() - setuptime << endl;
+Gp[] = Fp[] - SPBmatvec(Gx[]);
 
 /* Step 3 of Algorithm 2: solve (C + B A^-1 B^T) P = -G_p with N_S^-1 as a preconditioner */
 Gp[] *= -1;
 
 CFEAugVhi [P];
 P[] = 0;
-P[] = StildefGMRES(P[], Gp[], gtol, 100, "right");
+P[] = SPfGMRES(P[], Gp[], gtol, 100, "right");
 
 Awritesummary
-S1tildewritesummary
-NStildewritesummary
-Stildewritesummary
+SPwritesummary
 
 ffddmplot(CFEAug,P,"P");
 
 // Step 4 of Algorithm 2: compute G_u = F_u - B^T P
-real[int] tmp = BtildeAT(P[]);
-Gx[] = AFEAuginterp*tmp;
-
-Gx[] = -Gx[] + Fx[];
+Gx[] = Fx[] - SPBTmatvec(P[]);
 
 // Step 5 of Algorithm 2: solve A U = G_u with M_A^-1 as a preconditioner
 AFEVhi defA(Ux);
@@ -405,76 +192,7 @@ Ux[] = AfGMRES(Ux[], Gx[], gtol, 100, "right");
 
 ffddmplot(CFEAug,UxB,"Uy");
 
-/******************* Block version (prefix 'Block') with preconditioner P eq. (28) *******************/
-macro Blockmyscalprod
-func real Blockscalprod(real[int]& va, real[int]& vb) 
-{
-  real resf = AFEscalprod(va(0:AFEVhi.ndof-1),vb(0:AFEVhi.ndof-1));
-  real resb = CFEAugscalprod(va(AFEVhi.ndof:va.n-1),vb(AFEVhi.ndof:va.n-1));
-  return resf+resb;
-}
-//
-
-ffddminitDfespacef(Block, MAug, real, def, init, P1, def, init, P1)
-
-macro BlockmyA
-func real[int] BlockA(real[int] &u) 
-{
-  real[int] res(u.n);
-  res(0:AFEVhi.ndof-1) = AA(u(0:AFEVhi.ndof-1));
-  res(AFEVhi.ndof:u.n-1) = -CtildeA(u(AFEVhi.ndof:u.n-1));
-
-  real[int] r1 = BTmatvec(u(AFEVhi.ndof:u.n-1));
-
-  res(0:AFEVhi.ndof-1) += r1;
-  
-  real[int] r2 = Bmatvec(u(0:AFEVhi.ndof-1));
-  
-  res(AFEVhi.ndof:u.n-1) += r2;
-
-  return res;
-}
-//
-
-macro BlockmyPREC1
-func real[int] BlockPREC1(real[int] &u) 
-{
-  real[int] res(u.n), resb(u.n);
-
-  /*resb(0:AFEVhi.ndof-1) = AfGMRES(resb(0:AFEVhi.ndof-1), u(0:AFEVhi.ndof-1), 1e-2, 200, "right");*/
-  resb(0:AFEVhi.ndof-1) = APREC(u(0:AFEVhi.ndof-1));
-
-  /*resb(AFEVhi.ndof:u.n-1) = -StildefGMRES(resb(AFEVhi.ndof:u.n-1) , u(AFEVhi.ndof:u.n-1), 1e-2, 100, "right");*/
-
-  resb(AFEVhi.ndof:u.n-1) = -StildePREC(u(AFEVhi.ndof:u.n-1));
-
-  real[int] r2 = Bmatvec(resb(0:AFEVhi.ndof-1));
-
-  real[int] s2(r2.n);
-  /*s2 = StildefGMRES(s2, r2, 1e-2, 100, "right");*/
-
-  s2 = StildePREC(r2);
-
-  resb(AFEVhi.ndof:u.n-1) += s2;
-
-  res(0:AFEVhi.ndof-1) = (resb(0:AFEVhi.ndof-1));
-  res(AFEVhi.ndof:u.n-1) = (resb(AFEVhi.ndof:u.n-1));
-
-  real[int] r1 = BTmatvec(resb(AFEVhi.ndof:u.n-1));
-
-  real[int] s1(r1.n);
-  /*s1 = AfGMRES(s1, r1, 1e-2, 200, "right");*/
-  s1 = APREC(r1);
-
-  res(0:AFEVhi.ndof-1) -= s1;
-
-  return res;
-}
-//
-
-ffddmsetupinit(Block,Block);
-Blockprec = "ras";
-
+IFMACRO(BLOCK)
 /* Block solve with preconditioner P of eq. (28) */
 real[int] rhs(AFEVhi.ndof+CFEAugVhi.ndof);
 rhs(0:AFEVhi.ndof-1) = Fx[];
@@ -482,9 +200,9 @@ rhs(AFEVhi.ndof:rhs.n-1) = Fp[];
 
 real[int] x0(rhs.n), u(rhs.n);
 
-u = BlockfGMRES(x0, rhs, gtol, 100, "right");
+u = SPBlockfGMRES(x0, rhs, gtol, 100, "right");
 
-Blockwritesummary
+SPBlockwritesummary
 
 real[int] Us = Ux[];
 
@@ -495,4 +213,4 @@ ffddmplot(CFEAug,UxB,"UxB block");
 Ux[] -= Us;
 
 ffddmplot(CFEAug,UxB,"difference");
-
+ENDIFMACRO

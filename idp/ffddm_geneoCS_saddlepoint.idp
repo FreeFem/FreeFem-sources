@@ -170,3 +170,284 @@ ffddmbuildZTAZ(pr,pr,null)
 ENDIFMACRO
 }
 // EOM
+
+macro ffddmSPsetup(SP,prA,prBtilde,prCtilde,Ctildei)
+
+matrix SP#Btildei, SP#localBlocki;
+
+/* matrix-vector product with local Schur complement */
+func real[int] SP#Simatvec(real[int] &l) {
+  real[int] t1 = SP#Btildei'*l;
+  real[int] t2 = prA#aR[mpiRank(prA#prfe#prmesh#commddm)]^-1*t1;
+  real[int] t3 = SP#Btildei*t2;
+  real[int] t4 = Ctildei * l;
+  t3 += t4;
+  return t3;
+}
+
+/* inverse of local Schur complement through the solution of the augmented sparse local saddle point system */ 
+func real[int] SP#Sisolve(real[int] &l) {
+  real[int] bi(prA#prfe#Vhi.ndof + prCtilde#prfe#Vhi.ndof);
+  bi(prA#prfe#Vhi.ndof:bi.n-1) = -l; 
+  real[int] ui = SP#localBlocki^-1*bi;
+  return ui(prA#prfe#Vhi.ndof:bi.n-1);
+}
+
+/* distributed matrix-vector product with B from prA#prfe#Vhi to prCtilde#prfe#Vhi */
+func real[int] SP#Bmatvec(real[int] &l) {
+  real[int] Dltilde(prA#prfe#AugVhi.ndof);
+  /* go from prA#prfe#Vhi to prA#prfe#AugVhi: */
+  if (!prA#prfe#prmesh#excluded) {
+    real[int] Dl = prA#prfe#Dk[mpiRank(prA#prfe#prmesh#commddm)].*l; /* multiplty by PoU */
+    Dltilde = prA#prfe#Auginterp'*Dl; /* extend */
+    prA#prfe#Augupdate(Dltilde,false); /* sum */
+  }
+  real[int] res = prBtilde#A(Dltilde);
+  return res;
+}
+
+/* distributed matrix-vector product with B^T from prCtilde#prfe#Vhi to prA#prfe#Vhi */
+func real[int] SP#BTmatvec(real[int] &l) {
+  real[int] BTtilde = prBtilde#AT(l); /* B^T */
+  real[int] res(prA#prfe#Vhi.ndof);
+  if (!prA#prfe#prmesh#excluded) res = prA#prfe#Auginterp*BTtilde; /* restrict from prA#prfe#AugVhi to prA#prfe#Vhi */
+  return res;
+}
+
+/* matrix-vector product with S_1 defined as custom operator for prefix S1tilde */
+NewMacro SP#S1tildemyA
+func real[int] SP#S1tildeA(real[int] &l)
+{ 
+  real[int] s(l.n);
+  s = 0;
+  
+  prA#prfe#prmesh#Augtic(SP#S1tildetmvi)
+  
+  if (!prA#prfe#prmesh#Augexcluded){ 
+    s = SP#Simatvec(l);
+    prCtilde#prfe#update(s,false);
+    prCtilde#prfe#update(s,true);
+  }
+  prA#prfe#prmesh#Augtoc(SP#S1tildetmvi,"",SP#S1tildetmv)
+  
+  return s;
+}
+EndMacro
+
+/* one-level preconditioner M_{S_1,1}^-1 defined as custom preconditioner for prefix S1tilde */
+NewMacro SP#S1tildemyPREC1
+func real[int] SP#S1tildePREC1(real[int] &l)
+{
+  real[int] s(l.n);
+  s = 0;
+
+  prA#prfe#prmesh#Augtic(SP#S1tildetpreci)
+
+  if (!prA#prfe#prmesh#Augexcluded){
+  	real[int] aux = l;
+    if(SP#S1tildeprec == "soras")
+    aux = aux .* prCtilde#prfe#Dk[mpiRank(prA#prfe#prmesh#Augcommddm)];
+
+    s = SP#Sisolve(aux);
+
+    if(SP#S1tildeprec != "asm"){
+      prCtilde#prfe#update(s,true);
+    }
+    else{
+			prCtilde#prfe#update(s,false);
+			prCtilde#prfe#update(s,true);
+    }
+  }
+  prA#prfe#prmesh#Augtoc(SP#S1tildetpreci,"",SP#S1tildetprec)
+
+  return s;
+}
+EndMacro
+
+/* operator (I + M_{S_1}^-1 S_0) for the solution of eq. (25) to apply N_S^-1
+   defined as custom operator for prefix NStilde */
+NewMacro SP#NStildemyA
+func real[int] SP#NStildeA(real[int] &u) {
+  prA#prfe#prmesh#Augtic(SP#NStildetmvi)
+  real[int] res(u.n);
+
+  /* recall that S_0 = B R_0^T (R_0 A R_0^T)^-1 R_0 B^T */
+
+  real[int] BTu = SP#BTmatvec(u); /* B^T */
+
+  real[int] R0TA01R0BTu = prA#Q(BTu); /* Q = R_0^T (R_0 A R_0^T)^-1 R_0 */
+
+  /* extend from prA#prfe#Vhi to prA#prfe#AugVhi : */
+  real[int] El(prA#prfe#AugVhi.ndof);
+  if (!prA#prfe#prmesh#excluded) {
+    real[int] Dl = prA#prfe#Dk[mpiRank(prA#prfe#prmesh#commddm)].*R0TA01R0BTu; /* multiplty by PoU */
+    El = prA#prfe#Auginterp'*Dl; /* extend */
+    prA#prfe#Augupdate(El,false); /* sum */
+  }
+
+  real[int] BR0TA01R0BTu = prBtilde#A(El); /* B */
+
+  real[int] MS11 = SP#S1tildePREC(BR0TA01R0BTu); /* M_{S_1}^-1 */
+  res = u + MS11;
+  prA#prfe#prmesh#Augtoc(SP#NStildetmvi,"",SP#NStildetmv)
+  return res;
+}
+EndMacro
+
+/* matrix-vector product with Schur complement S = C + B A^-1 B^T for step 3 of Algorithm 2
+   defined as custom operator for prefix SP */
+NewMacro SP#myA
+func real[int] SP#A(real[int] &l) 
+{
+  prA#prfe#prmesh#Augtic(SP#tmvi)
+  real[int] BTl(prA#prfe#Vhi.ndof), s(prA#prfe#Vhi.ndof), x0(prA#prfe#Vhi.ndof);
+
+  BTl = SP#BTmatvec(l); /* B^T */
+
+  x0 = 0;
+  s = prA#fGMRES(x0, BTl, gtol, 100, "right"); /* A^-1 */
+
+  real[int] res = SP#Bmatvec(s); /* B */
+
+  res += prCtilde#A(l); /* + C */
+
+  prA#prfe#prmesh#Augtoc(SP#tmvi,"",SP#tmv)
+  return res;
+}
+EndMacro
+
+/* matrix-vector product with N_S^-1 (Algorithm 1, i.e. solve eq. (25))
+   defined as custom preconditioner for prefix SP */
+NewMacro SP#myPREC
+func real[int] SP#PREC(real[int] &G) {
+  prA#prfe#prmesh#Augtic(SP#tpreci)
+  real[int] Gprime(G.n), res(G.n);
+
+  /* solve (I + M_{S_1}^-1 S_0) P = M_{S_1}^-1 G */
+  Gprime = SP#S1tildePREC(G);
+  res = SP#NStildefGMRES(res, Gprime, 1.e-2, 100, "right");
+
+  prA#prfe#prmesh#Augtoc(SP#tpreci,"",SP#tprec)
+  return res;
+}
+EndMacro
+
+ffddmsetupinit(SP#S1tilde,prCtilde#prfe); /* define Operator for S_1 (S1tildeA with one-level preconditioner S1tildePREC1) */
+SP#S1tildeprec = "soras";
+
+ffddmsetupinit(SP#NStilde,prCtilde#prfe); /* define operator for N_S (NStildeA = I + M_{S_1}^-1 S_0, no preconditioner) */
+SP#NStildeprec = "none";
+SP#NStildeverbosity = 1;
+
+ffddmsetupinit(SP,prCtilde#prfe); /* define Operator for S (SPA = S := C + B A^-1 B^T with preconditioner SPPREC = N_S^-1) */
+
+/* build Btildei and localBlocki : */
+prA#prfe#prmesh#Augtic(SP#tfactoi)
+if (!prA#prfe#prmesh#excluded) {
+  SP#Btildei = prBtilde#aRd[mpiRank(prA#prfe#prmesh#commddm)]*prA#prfe#Auginterp'; /* Btilde_i of eq. (9) */
+
+  matrix mC = -Ctildei;
+  SP#localBlocki = [[prA#aR[mpiRank(prA#prfe#prmesh#commddm)],0],[SP#Btildei,mC]];
+  set(SP#localBlocki,solver=sparsesolver,sym=1,factorize=3,commworld=mpiCommSelf);
+}
+prA#prfe#prmesh#Augtoc(SP#tfactoi,"",SP#tfacto)
+
+/* local contribution to lhs sum of eigenvalue problem (18) for Arpack ;
+   blocking forward-backward substitutions for A_i^{-1} for mu right-hand sides to accelerate computations,
+   as we will also have input vectors from neighboring subdomains */
+func real[int] SP#Simatvecblock(real[int] &l, int mu) {
+  real[int] res(l.n);
+  real[int] buffi(prA#prfe#Vhi.ndof * mu), buffo(prA#prfe#Vhi.ndof * mu);
+  for (int i=0; i < mu; i++)
+    buffi(i*prA#prfe#Vhi.ndof:(i+1)*prA#prfe#Vhi.ndof-1) = SP#Btildei'*l(i*prCtilde#prfe#Vhi.ndof:(i+1)*prCtilde#prfe#Vhi.ndof-1);
+
+  buffo = prA#aR[mpiRank(prA#prfe#prmesh#commddm)]^-1*buffi;
+
+  for (int i=0; i < mu; i++) {
+    real[int] t1 = SP#Btildei*buffo(i*prA#prfe#Vhi.ndof:(i+1)*prA#prfe#Vhi.ndof-1);
+    /*
+    real[int] t2 = prCtilde#prfe#Dk[mpiRank(prA#prfe#prmesh#commddm)].*l(i*prCtilde#prfe#Vhi.ndof:(i+1)*prCtilde#prfe#Vhi.ndof-1);
+    real[int] t3 = CtildeaRd[mpiRank(prA#prfe#prmesh#commddm)]*t2;
+    res(i*prCtilde#prfe#Vhi.ndof:(i+1)*prCtilde#prfe#Vhi.ndof-1) = t1 + t3;
+    */
+    real[int] t2 = Ctildei*l(i*prCtilde#prfe#Vhi.ndof:(i+1)*prCtilde#prfe#Vhi.ndof-1);
+    res(i*prCtilde#prfe#Vhi.ndof:(i+1)*prCtilde#prfe#Vhi.ndof-1) = t1 + t2;
+    
+  }
+  return res;
+}
+
+/* build the second level of M_{S_1}^-1 (section 3.2.2) ;
+   Sisolve corresponds to the inverse of rhs of eigenvalue problem (18) for Arpack ;
+   Simatvecblock corresponds to the local Schur complement, i.e. the local contribution
+   to the S_1 sum -- and to the lhs sum of (18) */
+ffddmgeneofullsetup(SP#S1tilde,SP#Sisolve,SP#Simatvecblock);
+
+SP#S1tildecorr = "BNN";
+
+/******************* Block version (prefix 'Block') with preconditioner P eq. (28) *******************/
+NewMacro SP#Blockmyscalprod
+func real SP#Blockscalprod(real[int]& va, real[int]& vb) 
+{
+  real resf = prA#prfe#scalprod(va(0:prA#prfe#Vhi.ndof-1),vb(0:prA#prfe#Vhi.ndof-1));
+  real resb = prCtilde#prfe#scalprod(va(prA#prfe#Vhi.ndof:va.n-1),vb(prA#prfe#Vhi.ndof:va.n-1));
+  return resf+resb;
+}
+EndMacro
+
+ffddminitDfespacef(SP#Block, prA#prfe#prmesh#Aug, real, def, init, P1, def, init, P1)
+
+NewMacro SP#BlockmyA
+func real[int] SP#BlockA(real[int] &u) 
+{
+  real[int] res(u.n);
+  res(0:prA#prfe#Vhi.ndof-1) = prA#A(u(0:prA#prfe#Vhi.ndof-1));
+  res(prA#prfe#Vhi.ndof:u.n-1) = -prCtilde#A(u(prA#prfe#Vhi.ndof:u.n-1));
+
+  real[int] r1 = SP#BTmatvec(u(prA#prfe#Vhi.ndof:u.n-1));
+
+  res(0:prA#prfe#Vhi.ndof-1) += r1;
+  
+  real[int] r2 = SP#Bmatvec(u(0:prA#prfe#Vhi.ndof-1));
+  
+  res(prA#prfe#Vhi.ndof:u.n-1) += r2;
+
+  return res;
+}
+EndMacro
+
+NewMacro SP#BlockmyPREC1
+func real[int] SP#BlockPREC1(real[int] &u) 
+{
+  real[int] res(u.n), resb(u.n);
+
+  resb(0:prA#prfe#Vhi.ndof-1) = prA#PREC(u(0:prA#prfe#Vhi.ndof-1));
+
+  resb(prA#prfe#Vhi.ndof:u.n-1) = -SP#PREC(u(prA#prfe#Vhi.ndof:u.n-1));
+
+  real[int] r2 = SP#Bmatvec(resb(0:prA#prfe#Vhi.ndof-1));
+
+  real[int] s2(r2.n);
+
+  s2 = SP#PREC(r2);
+
+  resb(prA#prfe#Vhi.ndof:u.n-1) += s2;
+
+  res(0:prA#prfe#Vhi.ndof-1) = (resb(0:prA#prfe#Vhi.ndof-1));
+  res(prA#prfe#Vhi.ndof:u.n-1) = (resb(prA#prfe#Vhi.ndof:u.n-1));
+
+  real[int] r1 = SP#BTmatvec(resb(prA#prfe#Vhi.ndof:u.n-1));
+
+  real[int] s1(r1.n);
+
+  s1 = prA#PREC(r1);
+
+  res(0:prA#prfe#Vhi.ndof-1) -= s1;
+
+  return res;
+}
+EndMacro
+
+ffddmsetupinit(SP#Block,SP#Block);
+SP#Blockprec = "ras";
+//

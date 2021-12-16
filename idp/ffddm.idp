@@ -259,6 +259,7 @@ if (preffe#prmesh#inexactCSsplit == 1)
 ENDIFMACRO
 
 IFMACRO(pr#withpetsc)
+pr#aRd[mpiRank(preffe#prmesh#commddm)].resize(preffe#Dk[mpiRank(preffe#prmesh#commddm)].n, preffe#Dk[mpiRank(preffe#prmesh#commddm)].n);
 IFMACRO(preffe#K,real)
 load "PETSc"
 Mat<preffe#K> pr#petscOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, preffe#Dk[mpiRank(preffe#prmesh#commddm)], communicator = preffe#prmesh#commddm);
@@ -266,7 +267,7 @@ ENDIFMACRO
 IFMACRO(preffe#K,complex)
 load "PETSc-complex"
 real[int] pr#petscDk = preffe#Dk[mpiRank(preffe#prmesh#commddm)].re;
-Mat<preffe#K> pr#petscOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, pr#petscDk, scaled = false, communicator = preffe#prmesh#commddm);
+Mat<preffe#K> pr#petscOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, pr#petscDk, communicator = preffe#prmesh#commddm);
 ENDIFMACRO
 ENDIFMACRO
 
@@ -332,8 +333,8 @@ if (preffe#prmesh#isincomm)
   if ((!preffe#prmesh#excluded) && ((!bpara) || (i == mpiRank(preffe#prmesh#commddm)))) {
   	     
     preffe#prmesh#Thi = preffe#prmesh#aTh[i];
-  
-	  NewMacro localmacroaug preffe#prmesh#buildAug EndMacro
+
+	NewMacro localmacroaug preffe#prmesh#buildAug EndMacro
   	IFMACRO(localmacroaug,1)
   	preffe#prmesh#AugThi = preffe#prmesh#AugaTh[i];
   	ENDIFMACRO
@@ -394,13 +395,7 @@ if (preffe#prmesh#isincomm)
         ChangeOperator(pr#hpddmOP,pr#aRd[mpiRank(preffe#prmesh#commddm)]);
         ENDIFMACRO
         IFMACRO(pr#withpetsc)
-        IFMACRO(preffe#K,real)
-        Mat<preffe#K> mat(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, preffe#Dk[mpiRank(preffe#prmesh#commddm)], communicator = preffe#prmesh#commddm);
-        ENDIFMACRO
-        IFMACRO(preffe#K,complex)
-        real[int] pr#hpddmDk = preffe#Dk[mpiRank(preffe#prmesh#commddm)].re;
-        schwarz<preffe#K> mat(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, pr#hpddmDk, scaled = false, communicator = preffe#prmesh#commddm);
-        ENDIFMACRO
+        Mat<preffe#K> mat(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, pr#petscDk, communicator = preffe#prmesh#commddm);
         pr#petscOP = mat;
         ENDIFMACRO
       }
@@ -409,6 +404,16 @@ if (preffe#prmesh#isincomm)
         IFMACRO(!pr#myOperator)
         Varf(vN,preffe#prmesh#Thi,preffe#Vhi)
         pr#matN = vN(preffe#Vhi,preffe2#Vhi,sym=vsym*(!pr#isrect),tgv=vtgv,solver=GMRES);
+        ENDIFMACRO
+        IFMACRO(pr#myOperator)
+        pr#myOperator(pr#matN, preffe#prmesh#Thi, preffe#Vhi)
+        ENDIFMACRO
+        IFMACRO(pr#withhpddm)
+        ChangeOperator(pr#hpddmOP,pr#matN);
+        ENDIFMACRO
+        IFMACRO(pr#withpetsc)
+        Mat<preffe#K> mat(pr#matN, pr#intersectionhpddm, pr#petscDk, communicator = preffe#prmesh#commddm);
+        pr#petscOP = mat;
         ENDIFMACRO
       }
     }

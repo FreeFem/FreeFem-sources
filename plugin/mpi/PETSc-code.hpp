@@ -334,7 +334,8 @@ namespace PETSc {
           AssembleBC<HPDDM::upscaled_type<K>>(stack, Th, Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
       }
       changeOperatorSimple(&B, &A);
-      B._A->setMatrix(nullptr);
+      if(B._A)
+          B._A->setMatrix(nullptr);
     }
 #if defined(WITH_bemtool) && defined(WITH_htool) && defined(PETSC_HAVE_HTOOL)
     else {
@@ -849,12 +850,12 @@ namespace PETSc {
             PetscBool assembled;
             MatAssembled(ptB->_petsc, &assembled);
             if (assembled) MatConvert(ptB->_petsc, MATSAME, MAT_INITIAL_MATRIX, &ptA->_petsc);
+            else MatDuplicate(ptB->_petsc, MAT_DO_NOT_COPY_VALUES, &ptA->_petsc);
             MatDestroy(&ptB->_petsc);
           }
-        } else {
+        } else
           MatHeaderReplace(ptA->_petsc, &ptB->_petsc);
-        }
-        if (ptB->_ksp) KSPDestroy(&ptB->_ksp);
+        KSPDestroy(&ptB->_ksp);
         ptA->_A = ptB->_A;
         ptB->_A = nullptr;
         ptA->_num = ptB->_num;
@@ -2762,6 +2763,7 @@ namespace PETSc {
         Type* ptA = GetAny< Type* >((*(E[j].first))(stack));
         if (ptA && (ptA->_last - ptA->_first || (inverse && ptA->_num))) {
           PetscInt m;
+          ffassert(ptA->_petsc);
           MatGetLocalSize(ptA->_petsc, &m, NULL);
           Storage< PetscScalar >* ptIn = GetAny< Storage< PetscScalar >* >((*(E[j].second))(stack));
           if (!inverse) ffassert(ptIn->N() == ptA->_A->getDof());
@@ -5089,7 +5091,10 @@ namespace PETSc {
               PetscInt *closure = NULL;
               PetscInt  closureSize, cl;
               DMPlexGetTransitiveClosure(p->_dm, c, PETSC_TRUE, &closureSize, &closure);
-              int iv[4], lab = 0;
+              int iv[4];
+              PetscInt lab;
+              DMGetLabelValue(p->_dm, "Cell Sets", c, &lab);
+              if (lab == -1) lab = 0;
               int* ivv = iv;
               for (cl = 0; cl < 2 * closureSize; cl += 2) {
                   PetscInt point = closure[cl], dof, off, d, p;
