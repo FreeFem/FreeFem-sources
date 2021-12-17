@@ -1,0 +1,5 @@
+//  run with MPI:  ff-mpirun -np 4 script.edp
+// NBPROC 4
+// PARAM -sizeComm 2 -Dpartitioner=scotch
+
+include "redistributeDmesh.idp"

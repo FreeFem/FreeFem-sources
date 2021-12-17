@@ -1965,9 +1965,22 @@ ENDIFMACRO
 IFMACRO(!meshN)
 NewMacro meshN()mesh EndMacro
 ENDIFMACRO
+IFMACRO(!intN)
+NewMacro intN()int2d EndMacro
+ENDIFMACRO
     if(verbosity > 0 && ThName#Comm)
         mpiBarrier(ThName#Comm);
     real timerGather = mpiWtime();
+IFMACRO(with,PETSc)
+    PetscScalar[int] v(u[]);
+    {
+        Mat<PetscScalar> gather;
+        createMat(ThName, gather, Pk)
+        PetscScalar[int] trash;
+        ChangeNumbering(gather, v, trash);
+        ChangeNumbering(gather, v, trash, inverse = true, exchange = false);
+    }
+ENDIFMACRO
     if(ThGatherName#Comm) {
         meshN[int] recvTh(mpiSize(comm) - 1);
         PetscScalar[int][int] recvU(mpiSize(comm) - 1);
@@ -1982,11 +1995,17 @@ ENDIFMACRO
             Irecv(processor(index + 1, comm, rqRecvU[index]), recvU[index]);
         }
         fespace VhGlobalGatherPrivate(ThGatherName, Pk);
+IFMACRO(!with)
         PetscScalar[int] visited(VhGlobalGatherPrivate.ndof);
         visited = 1.0;
+ENDIFMACRO
         {
             fespace VhRestrictionPrivate(ThName, Pk);
             matrix R = interpolate(VhRestrictionPrivate, VhGlobalGatherPrivate);
+IFMACRO(with,PETSc)
+            uNew[] += R' * v;
+ENDIFMACRO
+IFMACRO(!with)
             PetscScalar[int] buffer = R' * u[];
             buffer .*= visited;
             PetscScalar[int] ones(VhRestrictionPrivate.ndof);
@@ -1994,11 +2013,16 @@ ENDIFMACRO
             visited += R' * ones;
             for[j, v : visited] v = max(abs(v), 0.0);
             uNew[] += buffer;
+ENDIFMACRO
         }
         for(int i = 0; i < mpiSize(comm) - 1; ++i) {
             int index = mpiWaitAny(rqRecvU);
             fespace VhRestrictionPrivate(recvTh[index], Pk);
             matrix R = interpolate(VhRestrictionPrivate, VhGlobalGatherPrivate);
+IFMACRO(with,PETSc)
+            uNew[] += R' * recvU[index];
+ENDIFMACRO
+IFMACRO(!with)
             PetscScalar[int] buffer = R' * recvU[index];
             buffer .*= visited;
             PetscScalar[int] ones(VhRestrictionPrivate.ndof);
@@ -2006,14 +2030,25 @@ ENDIFMACRO
             visited += R' * ones;
             for[j, v : visited] v = max(abs(v), 0.0);
             uNew[] += buffer;
+ENDIFMACRO
         }
+IFMACRO(with,PETSc)
+        Mat<PetscScalar> gather;
+        createMat(ThGatherName, gather, Pk)
+        exchange(gather, uNew[], scaled = false);
+ENDIFMACRO
     }
     else {
         mpiRequest[int] rqSend(2);
         Isend(processor(0, comm, rqSend[0]), ThName);
         fespace VhLocalGatherPrivate(ThName, Pk);
         assert(u[].n == VhLocalGatherPrivate.ndof);
+IFMACRO(with,PETSc)
+        Isend(processor(0, comm, rqSend[1]), v);
+ENDIFMACRO
+IFMACRO(!with)
         Isend(processor(0, comm, rqSend[1]), u[]);
+ENDIFMACRO
         mpiWaitAll(rqSend);
     }
     if(verbosity > 0 && ThName#Comm) {
