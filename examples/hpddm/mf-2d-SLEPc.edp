@@ -93,4 +93,10 @@ for (int idSV = 0; idSV < nsv; ++idSV)
   temp2 = valuesMF[idSV] * lvecMF(:,idSV);
   temp2 -= temp1;
   assert(temp2.linfty < 1.0e-4);
+  MatMult(MF, rvecMF(:,idSV), temp2);
+  ChangeNumbering(A, temp1, temp2, inverse = true, exchange = true);
+  temp2.resize(uMF[].n);
+  temp2 = MF * vMF[];
+  temp2 -= temp1;
+  assert(temp2.linfty < 1.e-4);
 }

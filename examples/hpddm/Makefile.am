@@ -25,7 +25,7 @@ TESTS_ENVIRONMENT = TEST_FFPP=$(TEST_FFPPMPI) FLAGS_FFPP="-np 4 -nw" LIST_CONDIT
 
 all-local: freefem++.pref
 
-TESTS_MPI = withPartitioning.edp buildRecursive.edp createPartition.edp reconstructDmesh.edp redistributeDmesh.edp convect.edp
+TESTS_MPI = withPartitioning.edp buildRecursive.edp createPartition.edp reconstructDmesh.edp redistributeDmesh_wo_PETSc.edp convect.edp
 
 TESTS_HPDDM = diffusion-substructuring-2d.edp \
 	diffusion-substructuring-withPartitioning-2d.edp \
@@ -100,7 +100,8 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	PtAP-2d-PETSc.edp \
 	restriction-2d-PETSc.edp \
 	function-PETSc.edp \
-	bilaplace-2d-PETSc.edp
+	bilaplace-2d-PETSc.edp \
+	redistributeDmesh_w_PETSc.edp
 # diffusion-substructuring-2d-PETSc.edp <- broken, problem with BDDC
 
 TESTS_PETSC_PARMMG = distributed-parmmg.edp laplace-adapt-dist-3d-PETSc.edp
