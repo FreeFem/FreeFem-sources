@@ -23,7 +23,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - add computation scalar product of R3 example :  ( N'*Tl)
-
+- add tools to do compution with R3 vector see tutorial/calculus.edp
 ### Changed
 -
 
@@ -35,6 +35,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - correct the normal the N implicite variable   on meshL case 
+- correct version dump in banner FreeFem++ - version 4.10 (V ...
+- coorect  in CPU time on big mesh due to do bad HCode in HashTable.hpp
 
 
 ## [4.10]

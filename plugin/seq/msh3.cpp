@@ -4286,7 +4286,7 @@ class cubeMesh_Op : public E_F0mps {
 };
 
 basicAC_F0::name_and_type cubeMesh_Op::name_param[] = {
-  {"region", &typeid(long)}, {"label", &typeid(KN_< long >)}, {"flags", &typeid(long)}};
+    {"region", &typeid(long)}, {"label", &typeid(KN_< long >)}, {"flags", &typeid(long)} };
 
 class cubeMesh : public OneOperator {
  public:
@@ -4321,8 +4321,7 @@ AnyType cubeMesh_Op::operator( )(Stack stack) const {
   MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
   long flags = arg(2, stack, 0L);
 
-  ;
-
+  double cpu0 = ((double) clock())/CLOCKS_PER_SEC;
   KN< long > label2;
   long ll3[] = {1, 2, 3, 4, 5, 6};
   KN_< long > l3_(ll3, 6);
@@ -4331,6 +4330,7 @@ AnyType cubeMesh_Op::operator( )(Stack stack) const {
   long region = arg(0, stack, 0L);
   Mesh *pTh = Carre_(n1, n2, 0, 0, stack, flags, label2,
                      0L);    // WARNING no clean of teh stack in this case (durdur)
+  double cpu1 = ((double) clock())/CLOCKS_PER_SEC;
   ffassert(pTh && nlayer > 0);
   Mesh &Th = *pTh;
   int nbv = Th.nv;     // nombre de sommet
@@ -4436,6 +4436,7 @@ AnyType cubeMesh_Op::operator( )(Stack stack) const {
       exit(1);
     }
   }
+  double cpu2 = ((double) clock())/CLOCKS_PER_SEC;
 
   // cas maillage volumique + surfacique
   Mesh3 *Th3 = build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin,
@@ -4444,6 +4445,7 @@ AnyType cubeMesh_Op::operator( )(Stack stack) const {
   // l'on veut pas creer � l'int�rieure
 
   delete pTh;
+  double cpu3 = ((double) clock())/CLOCKS_PER_SEC, cpu4=cpu3;
 
   if (xx && yy && zz) {
     // Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax);
@@ -4473,18 +4475,25 @@ AnyType cubeMesh_Op::operator( )(Stack stack) const {
       recollement_border = 0;
       point_confondus_ok = 1;
     }
-
+  
     Mesh3 *T_Th3 = Transfo_Mesh3(precis_mesh, *Th3, txx, tyy, tzz, border_only, recollement_elem,
                                  recollement_border, point_confondus_ok, 1);
+    
     delete Th3;
     Th3 = T_Th3;
   }
-
+    cpu4 = ((double) clock())/CLOCKS_PER_SEC;
   Th3->BuildGTree( );    // A decommenter
   if (verbosity > 10) {
     cout << " Cube %%% " << Th3 << endl;
   }
-
+    double cpu5 = ((double) clock())/CLOCKS_PER_SEC;
+   if(verbosity>1)
+   {
+       cout<< " Cube timers  2d" << cpu1-cpu0 << " ?? "<< cpu2-cpu1 << endl <<
+              "    buildlayer: " << cpu3-cpu2
+       << "   Transfo " <<  cpu4-cpu3 << " Gtree " << cpu5-cpu4 << " " << endl;
+   }
   Add2StackOfPtr2FreeRC(stack, Th3);
   *mp = mps;
   return Th3;
@@ -7859,6 +7868,8 @@ Mesh3 *BuildCube(long nx, long ny, long nz, long region, long *label, long kind,
   int debug =  verbosity / 10;
   int codesb[64], kcode[20];
   int kstable = 0;
+  double cpu0 = ((double) clock())/CLOCKS_PER_SEC;
+
   if (debug) {
     cout << "  Enter: BuildCube: " << kind << endl;
   }
@@ -8017,6 +8028,7 @@ Mesh3 *BuildCube(long nx, long ny, long nz, long region, long *label, long kind,
       }
     }
   }
+   double cpu1 = ((double) clock())/CLOCKS_PER_SEC;
 
   Tet *tff = new Tet[nt];
   Triangle3 *bff = new Triangle3[nbe];
@@ -8095,8 +8107,14 @@ Mesh3 *BuildCube(long nx, long ny, long nz, long region, long *label, long kind,
   if (debug) {
     cout << "  Out:  BuildCube" << endl;
   }
+  double cpu2 = ((double) clock())/CLOCKS_PER_SEC;
 
-  return new Mesh3(nv, nt, nbe, vff, tff, bff);
+  Mesh3 * Th3= new Mesh3(nv, nt, nbe, vff, tff, bff);
+    double cpu3 = ((double) clock())/CLOCKS_PER_SEC;
+    if(verbosity>1)
+        cout << " cube timers "<< cpu1-cpu0 << " " <<cpu2-cpu1 
+        << "   Mesh3  " <<cpu3-cpu2  << endl;
+   return Th3;
 }
 
 AnyType Cube_Op::operator( )(Stack stack) const {

@@ -1417,7 +1417,8 @@ namespace Fem2D
         vertices = vv;
         elements = tt;
         borderelements = bb;
-        
+        double cpu0 = ((double) clock())/CLOCKS_PER_SEC;
+     
         // check the input mesh file format
         if(verbosity && nv==0) {
             cerr << " WARNING! The mesh file doesn't contain any vertex" << endl;
@@ -1463,16 +1464,24 @@ namespace Fem2D
         }
         //  Add FH to be consitant we all constructor ...  July 09
         BuildBound();
+        double cpu1 = ((double) clock())/CLOCKS_PER_SEC;
+        double cpu2=cpu1,cpu3=cpu1,cpu4=cpu1,cpu5=cpu1;
         if(nt && nbe) {
             BuildAdj();
+            cpu2 = ((double) clock())/CLOCKS_PER_SEC;
             Buildbnormalv();
+            cpu3 = ((double) clock())/CLOCKS_PER_SEC;
             BuildjElementConteningVertex();
+            cpu4 = ((double) clock())/CLOCKS_PER_SEC;
             BuildGTree();
+            cpu5 = ((double) clock())/CLOCKS_PER_SEC;
         }
         //  end add
         if(verbosity>1)
             cout << "  -- End of read: mesure = " << mes << " border mesure " << mesb << endl;
-        
+        if(verbosity>3)
+            cout << "      timers Mesh3 :"<< cpu1-cpu0 << " "<< cpu2-cpu1
+                  << " " << cpu3-cpu2 <<     " " << cpu4-cpu3 <<  " " << cpu5-cpu4 <<endl;
         assert(mes>=0.);
     }
     

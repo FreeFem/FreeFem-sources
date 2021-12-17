@@ -36,6 +36,7 @@
 
 #include "error.hpp"
 #include "AFunction.hpp"
+#include "AFunction_ext.hpp"
 #include "rgraph.hpp"
 #include <cstdio>
 #include "fem.hpp"
@@ -5505,7 +5506,11 @@ T *resizeandclean2(const Resize< T > &t, const long &n) {    // resizeandclean1
   }
   return t.v;
 }
-
+/*R3 *init_R3(double x,double y,double z)
+{
+    
+    return (R3 *) &any;
+}*/
 template< class PMat >
 AnyType ClearReturn(Stack stack, const AnyType &a) {
   // a ne faire que pour les variables local au return...
@@ -5545,6 +5550,8 @@ void DclTypeMatrix( ) {
   typedef Mat *PMat;
   typedef KN< Mat > AMat;
   Dcl_Type< AMat * >(0, ::DestroyKNmat< Mat >);
+
+  //  TheOperators->Add("<-", new OneOperator3< R3 *, double>(init_R3);
 
   // init array
   TheOperators->Add("<-", new OneOperator2_< AMat *, AMat *, long >(&set_initmat));
@@ -5691,7 +5698,10 @@ struct OpR3dot: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  {
       B pu = a;
       return (*pu,*b);} };
-
+R3 CrossProduct(const R3 & A,const R3 & B){ return A^B;}
+R Det(const R3 & A,const R3 & B,const R3 & C){ return det(A,B,C);}
+R3* initR3(R3  *const & p,const  R& a,const  R& b,const  R &c){*p = R3(a,b,c);; return p;}
+R3 toR3(const  R& a,const  R& b,const  R &c){return R3(a,b,c);}
 void init_lgfem( ) {
   if (verbosity && (mpirank == 0)) cout << "lg_fem ";
 #ifdef HAVE_CADNA
@@ -5700,8 +5710,8 @@ void init_lgfem( ) {
 #endif
 
   Dcl_Type< MeshPoint * >( );
-  Dcl_Type< R3 * >(::Initialize< R3 >);
-  Dcl_Type< R2 * >(::Initialize< R2 >);
+    Dcl_TypeandPtr< R3  >(0,0,::InitializeDef<R3>,0);
+    Dcl_TypeandPtr< R2  >(0,0,::InitializeDef<R2>,0);
   Dcl_Type< Transpose<R3 *> >();
 
   map_type[typeid(R3 *).name( )] = new ForEachType< R3 * >(Initialize< R3 >);
@@ -6032,6 +6042,36 @@ void init_lgfem( ) {
   Add< R2 * >("y", ".", new OneOperator_Ptr_o_R< R, R2 >(&R2::y));
 
   Add< R3 * >("[", "", new OneOperator2< double, R3 *, long >(get_R3));
+// ADD dec 2021 to R3 computation ...
+    map_type[typeid(R3).name()]->AddCast(
+                                         new E_F1_funcT<R3,R3*>(UnRef<R3>)); 
+    TheOperators->Add("<-",new OneOperator4_<R3*,R3*,R,R,R>(initR3));
+    TheOperators->Add("=",
+                      new OneBinaryOperator<set_eq<R3> ,OneBinaryOperatorMIWO >,
+                      new OneBinaryOperator<set_eq<R2> ,OneBinaryOperatorMIWO >);
+    TheOperators->Add("<-",
+                      new OneOperator2_<R3*,R3*,R3>(&set_copyp),
+                      new OneOperator2_<R2*,R2*,R2>(&set_copyp)); //
+    TheOperators->Add("^", new OneOperator2_<R3,R3,R3>(CrossProduct));
+    Global.Add("det", "(",new OneOperator3_<R,R3,R3,R3>(Det));
+    TheOperators->Add("+", new OneBinaryOperator<Op2_add<R3,R3,R3> >);
+    TheOperators->Add("-", new OneBinaryOperator<Op2_sub<R3,R3,R3> >);
+    TheOperators->Add("*", new OneBinaryOperator<Op2_mull<R3,R,R3> >);
+    TheOperators->Add("/", new OneBinaryOperator<Op2_divv<R3,R3,R> >);
+    TheOperators->Add("*", new OneBinaryOperator<Op2_mull<R3,R2,R> >);
+     TheOperators->Add("+=", new OneBinaryOperator<set_eq_add<R3>,OneBinaryOperatorMIWO >);
+    TheOperators->Add("-=", new OneBinaryOperator<set_eq_sub<R3>,OneBinaryOperatorMIWO >);
+    TheOperators->Add("*=", new OneBinaryOperator<set_eq_mul<R3,R>,OneBinaryOperatorMIWO >);
+    TheOperators->Add("/=", new OneBinaryOperator<set_eq_div<R3,R>,OneBinaryOperatorMIWO >);
+    TheOperators->Add("<<", new OneBinaryOperator<Print<R3> >);
+    Add<R3*>("<--","(",new OneOperator3_<R3,R,R,R>(toR3));
+    Add<R3*>("norm",".",new OneOperator1_<R,R3>(Norme2));
+    Add<R3*>("l2",".",new OneOperator1_<R,R3>(Norme2));
+    Add<R3*>("linfty",".",new OneOperator1_<R,R3>(Norme_infty));
+
+
+
+// end add
 
   Add< pmesh >("[", "", new OneOperator2_< lgElement, pmesh, long >(get_element));
   Add< pmesh * >("be", ".", new OneOperator1_< lgBoundaryEdge::BE, pmesh * >(Build));

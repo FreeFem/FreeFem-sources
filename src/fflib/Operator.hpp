@@ -54,19 +54,32 @@ template<class R,class A=R,class B=A>
 struct Op2_sub: public binary_function<A,B,R> { 
   static R f(const A & a,const B & b)  { return ((R)a - (R)b);} }; 
 
-template<class R,class A=R,class B=A> 
-struct Op2_mul: public binary_function<A,B,R> { 
-  static R f(const A & a,const B & b)  { 
+template<class R,class A=R,class B=A>
+struct Op2_mul: public binary_function<A,B,R> {
+  static R f(const A & a,const B & b)  {
   // cout << a << " * " << b <<" => "  << ((R)a * (R)b) << endl;
   return ((R)a * (R)b);} }; 
-
-template<class R,class A=R,class B=A> 
-struct Op2_div: public binary_function<A,B,R> { 
+template<class R,class A,class B>
+struct Op2_mull: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  {
-     if (b == B()) 
+  // cout << a << " * " << b <<" => "  << ((R)a * (R)b) << endl;
+  return (a * b);} };
+
+template<class R,class A=R,class B=A>
+struct Op2_div: public binary_function<A,B,R> {
+  static R f(const A & a,const B & b)  {
+     if (b == B())
        {cerr <<  a << "/" << b << " : " <<  typeid(A).name()  << " " << typeid(B).name() 
              << " " << typeid(R).name() << endl;ExecError(" Div by 0");}
-     return ((R)a / (R)b);} }; 
+     return ((R)a / (R)b);} };
+
+template<class R,class A,class B >
+struct Op2_divv: public binary_function<A,B,R> {
+  static R f(const A & a,const B & b)  {
+     if (b == B())
+       {cerr <<  a << "/" << b << " : " <<  typeid(A).name()  << " " << typeid(B).name()
+             << " " << typeid(R).name() << endl;ExecError(" Div by 0");}
+     return (a / b);} };
 
 template<class R>
 struct Op2_pipe: public binary_function<R,R,R> {
@@ -326,14 +339,14 @@ struct set_eq_sub: public binary_function<A*,A,A*> {
   static A* f(A* const  & a,const A & b)  { *a -= b; return a;}
 };
 
-template<class A>
-struct set_eq_mul: public binary_function<A*,A,A*> {
-  static A* f(A* const  & a,const A & b)  { *a *= b; return a;}
+template<class A,class B=A>
+struct set_eq_mul: public binary_function<A*,B,A*> {
+  static A* f(A* const  & a,const B & b)  { *a *= b; return a;}
 };
 
-template<class A>
-struct set_eq_div: public binary_function<A*,A,A*> {
-  static A* f(A* const  & a,const A & b)  { *a /= b; return a;}
+template<class A,class B=A>
+struct set_eq_div: public binary_function<A*,B,A*> {
+  static A* f(A* const  & a,const B & b)  { *a /= b; return a;}
 };
 
 

@@ -60,3 +60,17 @@ cout << "str = " << str << " == abc++abcddddd+2;\n";
 	string ss = "\z\a\b\f\\--\\";
 	cout << "\"" << ss << "\"" << endl;
 }
+
+// Add basic operation on R3 
+
+R3 A(1.,2.,3.);
+R3 B(3.,1.,0.);
+R3 C = A^B; 
+R3 Q= A+B;
+cout << Q.x << " " << Q.y << " "<< Q. z << endl; 
+Q.x =1;
+P=Q;// Current pojnt 
+cout << P.x << " " << P.y << " "<< P. z << endl; 
+cout <<"P=" <<  P << " " << det(A,B,C) << endl;
+cout << R3(1,3,6) << endl; 
+cout << C.l2 << " " << C.norm << " " << C.linfty  << " " << C <<  " dot product:  " << C'*C <<  endl;
