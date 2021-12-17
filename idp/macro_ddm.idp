@@ -1596,6 +1596,7 @@ ENDIFMACRO
 IFMACRO(!meshN)
 NewMacro meshN()mesh EndMacro
 ENDIFMACRO
+IFMACRO(!ThName#NestedIn#ThNew)
     real[int] bb(4 * dimension);
     {
         real[int] tmp(2 * dimension);
@@ -1777,6 +1778,22 @@ ENDIFMACRO
     ThName = change(ThName, fregion = backupRegion[nuTriangle]);
     mpiWaitAll(rqSendTh);
     mpiWaitAll(rqSendU);
+ENDIFMACRO
+IFMACRO(ThName#NestedIn#ThNew)
+IFMACRO(!transfer#Q)
+    def(uANew) = def(uA);
+    Mat<PetscScalar> exchange;
+    createMat(ThNew, exchange, PkNew)
+    PetscScalar[int] tmp;
+    ChangeNumbering(exchange, uANew[], tmp);
+    ChangeNumbering(exchange, uANew[], tmp, inverse = true, exchange = true);
+ENDIFMACRO
+IFMACRO(transfer#Q)
+    matrix loc = interpolate(VhLocalNewPrivate, VhLocalOldPrivate);
+    matrix<PetscScalar> locPetscScalar = loc;
+    constructor(P, uANew, uA, locPetscScalar);
+ENDIFMACRO
+ENDIFMACRO
 }
 if(verbosity > 0) {
     mpiBarrier(ThName#Comm);
