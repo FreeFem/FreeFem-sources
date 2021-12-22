@@ -1822,7 +1822,7 @@ macro createParMmgCommunicators(ThName, ThParMmgName, ThN2O, ThCommunicators) {
 IFMACRO(!privateDmesh#ThName)
 assert(0);
 ENDIFMACRO
-    Mat A;
+    Mat<PetscScalar> A;
     createMat(ThName, A, P1);
     real[int] D(ThName.nt);
     createPartition(ThName, D, P0);

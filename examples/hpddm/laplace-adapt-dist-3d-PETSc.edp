@@ -17,11 +17,11 @@ macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
 
 varf vPoisson(u, v) = int3d(Th3)(grad(u)' * grad(v)) + int3d(Th3)(v) + on(1,2,3, u=0);
 
-Mat A;
+Mat<PetscScalar> A;
 buildDmesh(Th3);
 createMat(Th3, A, P1);
 fespace Vh(Th3, P1);
-Vh u;
+Vh<PetscScalar> u;
 real err = 8.0e-3;
 
 int iMax = getARGV("-iMax", 1);
@@ -33,10 +33,10 @@ int[int] rt(2);
 rt = [1,2];
 for(int i = 0; i < iMax; ++i) {
     A = vPoisson(Vh, Vh, tgv = -2);
-    set(A, sparams = "-ksp_monitor -pc_type hypre");
-    real[int] rhs = vPoisson(0, Vh, tgv = -1);
+    set(A, sparams = "-ksp_monitor -pc_type gamg");
+    PetscScalar[int] rhs = vPoisson(0, Vh, tgv = -1);
     u[] = A^-1 * rhs;
-    real[int] met = mshmet(Th3, u, aniso = !isotropic, hmin = 1.0e-3, hmax = 1.0e-1, err = err);
+    real[int] met = mshmet(Th3, abs(u), aniso = !isotropic, hmin = 1.0e-3, hmax = 1.0e-1, err = err);
     mesh3 ThParMmg;
     int[int] n2o;
     int[int][int] communicators;
@@ -62,15 +62,15 @@ for(int i = 0; i < iMax; ++i) {
     ThParMmg = parmmg3d(ThParMmg, metric = metParMmg, hausd = 0.01, requiredTriangle = rt, nodeCommunicators = communicators, niter = niter, verbose = verbose, neighbors = neighbors);
     reconstructDmesh(ThParMmg)
     int[int] fforder = [1];
-    savevtk("laplace-adapt-dist-3d.vtu", Th3, u, bin = 1, order = fforder, append = i ? true : false);
+    savevtk("laplace-adapt-dist-3d.vtu", Th3, abs(u), bin = 1, order = fforder, append = i ? true : false);
     if(!noTransfer) {
         fespace VhAdapt(ThParMmg, P1);
-        VhAdapt uAdapt;
+        VhAdapt<PetscScalar> uAdapt;
         transfer(Th3, P1, u, ThParMmg, P1, uAdapt)
-        savevtk("laplace-adapt-dist-3d.vtu", ThParMmg, uAdapt, bin = 1, order = fforder, append = true);
+        savevtk("laplace-adapt-dist-3d.vtu", ThParMmg, abs(uAdapt), bin = 1, order = fforder, append = true);
     }
     copyDmesh(ThParMmg, Th3)
-    Mat Adapt;
+    Mat<PetscScalar> Adapt;
     createMat(Th3, Adapt, P1);
     A = Adapt;
     u = 0.0;
