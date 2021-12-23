@@ -76,7 +76,6 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	stokes-block-2d-PETSc.edp \
 	MatLoad-PETSc.edp \
 	stokes-3d-PETSc.edp \
-	stokes-fieldsplit-3d-PETSc.edp \
 	transpose-solve-PETSc.edp \
 	bratu-hpddm-2d-PETSc.edp \
 	vi-2d-PETSc.edp \
@@ -84,9 +83,7 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	heat-TS-2d-PETSc.edp \
 	heat-TS-RHS-2d-PETSc.edp \
 	advection-TS-2d-PETSc.edp \
-	toy-Tao-PETSc.edp \
 	minimal-surface-Tao-2d-PETSc.edp \
-	Schur-complement-PETSc.edp \
 	maxwell-2d-PETSc.edp \
 	maxwell-3d-PETSc.edp \
 	laplace-adapt-3d-PETSc.edp \
@@ -104,6 +101,10 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	redistributeDmesh_w_PETSc.edp
 # diffusion-substructuring-2d-PETSc.edp <- broken, problem with BDDC
 
+TESTS_PETSC_MUMPS = Schur-complement-PETSc.edp \
+	stokes-fieldsplit-3d-PETSc.edp \
+	toy-Tao-PETSc.edp
+
 TESTS_PETSC_PARMMG = distributed-parmmg.edp laplace-adapt-dist-3d-PETSc.edp
 
 TESTS_PETSC_SLEPC = laplace-2d-SLEPc.edp \
@@ -120,8 +121,9 @@ TESTS_PETSC_SLEPC = laplace-2d-SLEPc.edp \
 
 TESTS_PETSCCOMPLEX = diffusion-2d-PETSc-complex.edp \
 	helmholtz-2d-PETSc-complex.edp \
-	helmholtz-mg-2d-PETSc-complex.edp \
-	maxwell-mg-3d-PETSc-complex.edp
+	helmholtz-mg-2d-PETSc-complex.edp
+
+TESTS_PETSCCOMPLEX_MUMPS = maxwell-mg-3d-PETSc-complex.edp
 
 TESTS_PETSCCOMPLEX_SLEPCCOMPLEX = laplace-2d-SLEPc-complex.edp \
 	navier-stokes-2d-SLEPc-complex.edp helmholtz-2d-SLEPc-complex.edp \
@@ -141,6 +143,9 @@ endif HPDDM
 
 if PETSC
 CONDITIONAL_PETSC = $(TESTS_PETSC)
+if MUMPS
+CONDITIONAL_PETSC_MUMPS = $(TESTS_PETSC_MUMPS)
+endif
 if PARMMG
 CONDITIONAL_PETSC_PARMMG = $(TESTS_PETSC_PARMMG)
 endif PARMMG
@@ -151,6 +156,9 @@ endif PETSC
 
 if PETSCCOMPLEX
 CONDITIONAL_PETSCCOMPLEX = $(TESTS_PETSCCOMPLEX)
+if MUMPS
+CONDITIONAL_PETSCCOMPLEX_MUMPS = $(TESTS_PETSCCOMPLEX_MUMPS)
+endif
 if SLEPCCOMPLEX
 CONDITIONAL_PETSCCOMPLEX_SLEPCCOMPLEX = $(TESTS_PETSCCOMPLEX_SLEPCCOMPLEX)
 endif SLEPCCOMPLEX
@@ -169,9 +177,11 @@ TESTS = $(TESTS_MPI) \
 	$(TESTS_HPDDM) \
 	$(TESTS_HPDDM_ARPACK) \
 	$(TESTS_PETSC) \
+	$(TESTS_PETSC_MUMPS) \
 	$(TESTS_PETSC_PARMMG) \
 	$(TESTS_PETSC_SLEPC) \
 	$(TESTS_PETSCCOMPLEX) \
+	$(TESTS_PETSCCOMPLEX_MUMPS) \
 	$(TESTS_PETSCCOMPLEX_SLEPCCOMPLEX) \
 	$(TESTS_PETSCCOMPLEX_BEMTOOL_BOOST_HTOOL)
 
@@ -179,9 +189,11 @@ LIST_CONDITIONAL = $(CONDITIONAL_MPI) \
 	$(CONDITIONAL_HPDDM) \
 	$(CONDITIONAL_HPDDM_ARPACK) \
 	$(CONDITIONAL_PETSC) \
+	$(CONDITIONAL_PETSC_MUMPS) \
 	$(CONDITIONAL_PETSC_PARMMG) \
 	$(CONDITIONAL_PETSC_SLEPC) \
 	$(CONDITIONAL_PETSCCOMPLEX) \
+	$(CONDITIONAL_PETSCCOMPLEX_MUMPS) \
 	$(CONDITIONAL_PETSCCOMPLEX_SLEPCCOMPLEX) \
 	$(CONDITIONAL_PETSCCOMPLEX_BEMTOOL_BOOST_HTOOL)
 
