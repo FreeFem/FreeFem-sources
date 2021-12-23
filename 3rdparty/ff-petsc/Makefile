@@ -83,16 +83,21 @@ else
 FLAGS_MTUNE := -mtune=native
 endif
 COMMON_FLAGS := MAKEFLAGS='' --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-cxx-dialect=C++11 --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-cudac=0
+
+ifeq ($(FC),)
+COMMON_FLAGS += --with-fc=0
+PETSC_DOWNLOAD += --download-superlu_dist
+PETSC_DOWNLOAD_C += --with-superlu_dist-dir=$(DIR_INSTALL_REAL)
+endif
+
 ifeq ($(WIN32DLLTARGET),)
 ##  Not on windows....
-ifeq ($(MPICC)$(MPICXX)$(MPIFC),)
+ifeq ($(MPICC)$(MPICXX),)
 PETSC_DOWNLOAD += --with-cc='$(CC)' --with-cxx='$(CXX)' --download-mpich
 PETSC_DOWNLOAD_C += --with-mpi-dir=$(DIR_INSTALL_REAL)
 ifneq ($(FC),)
 PETSC_DOWNLOAD += --with-fc='$(FC)' --download-scalapack --download-mumps --download-slepc-configure-arguments="--download-arpack=https://github.com/prj-/arpack-ng/archive/b64dccb.tar.gz"
 PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL) # --download-slepc-configure-arguments="--with-arpack-dir=$(DIR_INSTALL_REAL)"
-else
-COMMON_FLAGS += --with-fc=0
 endif
 else
 COMMON_FLAGS += --with-cc='$(MPICC)' --with-cxx='$(MPICXX)'
@@ -100,10 +105,6 @@ ifneq ($(MPIFC),)
 COMMON_FLAGS += --with-fc='$(MPIFC)'
 PETSC_DOWNLOAD += --download-scalapack --download-mumps --download-slepc-configure-arguments="--download-arpack=https://github.com/prj-/arpack-ng/archive/b64dccb.tar.gz"
 PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL) # --download-slepc-configure-arguments="--with-arpack-dir=$(DIR_INSTALL_REAL)"
-else
-COMMON_FLAGS += --with-fc=0
-PETSC_DOWNLOAD += --download-superlu_dist
-PETSC_DOWNLOAD_C += --with-superlu_dist-dir=$(DIR_INSTALL_REAL)
 endif
 endif
 else
@@ -115,6 +116,7 @@ COMMON_FLAGS += --with-shared-libraries=0 \
 	FFLAGS='$(FCFLAGS)' \
 	--with-mpi-lib='$(MPI_LIB)' \
 	--with-mpi-include='$(MPI_INC_DIR)' \
+	CXXPPFLAGS='-I$(MPI_INC_DIR)' \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'
 PETSC_DOWNLOAD += '--download-metis-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-parmetis-cmake-arguments=-G "MSYS Makefiles"' \
@@ -127,7 +129,7 @@ COMMON_FLAGS += --with-fc='$(FC)'
 PETSC_DOWNLOAD += --download-scalapack --download-mumps --download-slepc-configure-arguments="--download-arpack=https://github.com/prj-/arpack-ng/archive/b64dccb.tar.gz"
 PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL) # --download-slepc-configure-arguments="--with-arpack-dir=$(DIR_INSTALL_REAL)"
 else
-COMMON_FLAGS += --with-fc=0
+PETSC_DOWNLOAD += '--download-superlu_dist-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles"'
 endif
 endif
 
@@ -148,8 +150,8 @@ all-local:
 	@echo "	make petsc-slepc "
 
 DIRPKG=../pkg
-VERSION=3.16.2
-VERSION_SLEPC=3.16.0
+VERSION=3.16.3
+VERSION_SLEPC=3.16.1
 PACKAGE=../pkg/petsc-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
 MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
@@ -309,6 +311,8 @@ $(SRCDIR)/tag-tar:$(PACKAGE)
 	cd petsc-$(VERSION) && patch -p1 < ../petsc-rpath.patch && cd -
 ifeq ($(WIN32DLLTARGET),)
 	cd petsc-$(VERSION) && patch -p1 < ../petsc-cmake-seq.patch && cd -
+else
+	cd petsc-$(VERSION) && patch -p1 < ../petsc-cmake-superlu_dist.patch && cd -
 endif
 	touch $@
 $(PACKAGE):
