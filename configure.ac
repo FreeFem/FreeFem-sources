@@ -621,7 +621,7 @@ CYGWIN*|MINGW*|MSYS_NT*)
 		    if test -z "$ff_glut" ; then
 			ff_glutname="freeglut"
 			if test -x  /usr/bin/pkg-config.exe ; then
-			ff_glut="-lglu32 "`/usr/bin/pkg-config.exe --libs freeglut`
+			ff_glut="-lglu32 "`/usr/bin/pkg-config.exe --libs --static freeglut`
 			else
 			ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32"
 			fi
