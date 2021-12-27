@@ -2386,7 +2386,7 @@ test "$enable_download" = yes -a "$enable_boost" != no && enable_boost=yes
 
 test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o \( "$ff_umfpack_ok" != "yes" -a "$ff_mumps_ok" != "yes" \) &&  enable_hpddm=no
 test "$ff_cxx11" != yes -o  "$ff_mpi" != yes   &&  enable_htool=no
-test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o \( "$enable_bemtool" != "yes" -a "$enable_boost" != "yes" \) &&  enable_bemtool=no 
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o \( "$enable_bemtool" != "yes" -a "$enable_boost" != "yes" \) &&  enable_bemtool=no
 
 FF_PETSC_DYLIB=""
 if test "$ff_petsc_ok" != no ;   then
@@ -2407,6 +2407,9 @@ TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_
 TOOL_DISABLE(bem,["bem.$DYLIB_SUFFIX"])
 if test -n "$TOOL_COMPILE_bem" -a -z "$ff_HTOOL_INCLUDE"; then
   TOOL_COMPILE_htool="htool"
+fi
+if test -z "$TOOL_COMPILE_bem"; then
+    enable_bemtool=no
 fi
 
 ##
