@@ -308,7 +308,6 @@ endif
 $(SRCDIR)/tag-tar:$(PACKAGE)
 	-mkdir petsc-$(VERSION) 2>/dev/null
 	-tar xzf $(PACKAGE) -C petsc-$(VERSION) --strip-components 1
-	cd petsc-$(VERSION) && patch -p1 < ../petsc-rpath.patch && cd -
 ifeq ($(WIN32DLLTARGET),)
 	cd petsc-$(VERSION) && patch -p1 < ../petsc-cmake-seq.patch && cd -
 else
