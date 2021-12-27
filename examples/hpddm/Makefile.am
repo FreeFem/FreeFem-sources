@@ -79,7 +79,7 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	transpose-solve-PETSc.edp \
 	bratu-hpddm-2d-PETSc.edp \
 	vi-2d-PETSc.edp \
-	orego-Tao-PETSc.edp \
+	orego-TS-PETSc.edp \
 	heat-TS-2d-PETSc.edp \
 	heat-TS-RHS-2d-PETSc.edp \
 	advection-TS-2d-PETSc.edp \
