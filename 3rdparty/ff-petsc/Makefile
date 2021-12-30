@@ -222,8 +222,10 @@ $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
 	cd $(SRCDIR) && ./configure --prefix=$(DIR_INSTALL_REAL) \
 		$(FLAGS_CONF_PETSC_REAL) PETSC_ARCH=fr
 	test -f $(SRCDIR)/fr/lib/petsc/conf/petscvariables
+	mkdir -p $(SRCDIR)/fc/externalpackages || true
+	cp -r $(SRCDIR)/fr/externalpackages/git.slepc $(SRCDIR)/fr/externalpackages/git.hpddm $(SRCDIR)/fc/externalpackages || true
 	touch $@
-Make-petsc-download.mk:$(SRCDIR)/tag-install-real 
+Make-petsc-download.mk:$(SRCDIR)/tag-install-real
 	test -e $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
 	egrep 'PETSC_LIB_BASIC|SCALAPACK_|METIS_|MUMPS_|HPDDM_|HTOOL_|TETGEN_|SUPERLU_|MMG_|PTSCOTCH_|SUITESPARSE_' $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables | sed 's/-I/ /g'|sort >$@
 ifdef 	COMPLEX_CASE
