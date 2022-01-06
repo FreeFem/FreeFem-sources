@@ -1566,7 +1566,10 @@ void Init_map_type()
      Global.Add("exp","(",new OneOperator1<double>(exp));
      Global.Add("log","(",new OneOperator1<double>(log));
      Global.Add("log10","(",new OneOperator1<double>(log10));
-     Global.Add("pow","(",new OneOperator2<double,double>(pow));
+//     Global.Add("pow","(",new OneOperator2<double,double>(pow));
+    Global.Add("pow","(",new OneBinaryOperator<Op2_pow<double,double,double> >);
+    Global.Add("pow","(",new OneBinaryOperator<Op2_pow<long,long,long> >);
+
 //     Global.Add("pow","(",new OneOperator2<double,double,long>(pow));
      Global.Add("max","(",new OneOperator2_<double,double>(Max<double> ));
      Global.Add("min","(",new OneOperator2_<double,double>(Min<double> ));

@@ -24,6 +24,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - add computation scalar product of R3 example :  ( N'*Tl)
 - add tools to do compution with R3 vector see tutorial/calculus.edp
+- add an example tutorial/tgv-test.edp see see what tgv do on matrix build. 
 ### Changed
 -
 
