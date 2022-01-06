@@ -1,5 +1,4 @@
 load "msh3"
-load "MUMPS_seq"
 meshL Th = segment(3);
 real [int] vtgv = [ -20,-10,-2,-1,0, tgv]; 
 real [int] vsym = [ 0,1]; 

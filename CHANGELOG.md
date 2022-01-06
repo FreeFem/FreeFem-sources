@@ -35,6 +35,7 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
+- pow(int,int) now call int version not complex version..
 - correct the normal the N implicite variable   on meshL case 
 - correct version dump in banner FreeFem++ - version 4.10 (V ...
 - coorect  in CPU time on big mesh due to do bad HCode in HashTable.hpp
