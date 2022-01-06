@@ -25,6 +25,7 @@ int ffddmexclude = getARGV("-ffddm_master_exclude", 0);
 int ffddmpCS = getARGV("-ffddm_master_p", 1);
 
 int ffddminterfacelabel = 10;
+int[int] ffddmcubelabels = [10,10,10,10,10,10];
 
 /*
 int binexactCS = usedARGV("-inexactCS") > -1 ? 1 : 0;
