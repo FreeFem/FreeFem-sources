@@ -81,7 +81,18 @@ if (prmesh#isincomm)
         int[int] labs(6), labsi(6);
         labs = 0;
 
+        for (int ii=0; ii<prmesh#Thi.nbe; ii++) {
+          for (int jj=0; jj < dimension; jj++){
+            lx = min(lx,prmesh#Thi.be(ii)[jj].x); ux = max(ux,prmesh#Thi.be(ii)[jj].x);
+            ly = min(ly,prmesh#Thi.be(ii)[jj].y); uy = max(uy,prmesh#Thi.be(ii)[jj].y);
+            IFMACRO(dimension,3)
+            lz = min(lz,prmesh#Thi.be(ii)[jj].z); uz = max(uz,prmesh#Thi.be(ii)[jj].z);
+            ENDIFMACRO
+          }
+        }
+
         int samex, samey, samez;
+
         for (int ii=0; ii<prmesh#Thi.nbe; ii++) {
           IFMACRO(dimension,2)
           samex = (prmesh#Thi.be(ii)[0].x == prmesh#Thi.be(ii)[1].x);
@@ -92,13 +103,6 @@ if (prmesh#isincomm)
           samey = (prmesh#Thi.be(ii)[0].y == prmesh#Thi.be(ii)[1].y) && (prmesh#Thi.be(ii)[1].y == prmesh#Thi.be(ii)[2].y);
           samez = (prmesh#Thi.be(ii)[0].z == prmesh#Thi.be(ii)[1].z) && (prmesh#Thi.be(ii)[1].z == prmesh#Thi.be(ii)[2].z);
           ENDIFMACRO
-          for (int jj=0; jj < dimension; jj++){
-            lx = min(lx,prmesh#Thi.be(ii)[jj].x); ux = max(ux,prmesh#Thi.be(ii)[jj].x);
-            ly = min(ly,prmesh#Thi.be(ii)[jj].y); uy = max(uy,prmesh#Thi.be(ii)[jj].y);
-            IFMACRO(dimension,3)
-            lz = min(lz,prmesh#Thi.be(ii)[jj].z); uz = max(uz,prmesh#Thi.be(ii)[jj].z);
-            ENDIFMACRO
-          }
           if (prmesh#Thi.be(ii).label != 9999) {
                  if (samex && prmesh#Thi.be(ii)[0].x == lx) labs[0] = prmesh#Thi.be(ii).label;
             else if (samex && prmesh#Thi.be(ii)[0].x == ux) labs[1] = prmesh#Thi.be(ii).label;
