@@ -39,7 +39,74 @@ extern "C" {
 #include "VirtualSolver.hpp"
 #include <complex>
 
+inline void CheckUmfpackStatus(int status)
+{
+    if(verbosity>4) cout << " CheckUmfpackStatus "<< status << endl;
+    if( status==0) return;
+    else if( status>0)// warning ..
 
+    {
+        if(verbosity)
+            switch (status) {
+                case 1:
+                    cout << status<< " UMFPACK WARNING singular matrix " <<endl;
+                    break;
+                case 2:
+                    cout << status<< " UMFPACK WARNING singular matrix " <<endl;
+                    break;
+                case 3:
+                    cout << status<< " UMFPACK WARNING singular matrix " <<endl;
+                    break;
+
+                default:
+                    cout << status<< " UMFPACK WARNING unknow" <<endl;
+                    break;
+            }
+        
+        return ;
+    }
+    else // error status < 0
+    {
+        stringstream ferr;
+         ferr << " Error Umfpack " << status << " : ";
+        switch (status) {
+               
+            case -1:
+                ferr << " out_of_memory " ;
+                break;
+            case -3:
+                ferr << status<< " invalid_Numeric_object " ;
+                break;
+            case -4:
+                ferr << status<< " invalid_Symbolic_object " ;
+                break;
+            case -5:
+                ferr << status<< " argument_missing " ;
+                break;
+            case -6:
+                ferr << status<< " n_nonpositive " ;
+                break;
+            case -8:
+                ferr << status<< " invalid_matrix " ;
+                break;
+            case -11:
+                ferr << status<< " different_pattern  " ;
+                break;
+            case -911:
+                ferr << status<< " Internal ERROR???? " ;
+                break;
+
+            default:
+                ferr << status<< "  unknow error (SEE umfpack) file" <<endl;
+                break;
+        }
+        ferr << ends;
+        cerr << ferr.str();
+        ExecError(ferr.str().c_str());
+
+
+    }
+}
 template<class Z=int,class K=double>
 class VirtualSolverUMFPACK: public VirtualSolver<Z,K> {
 public:
@@ -104,7 +171,7 @@ public:
         {
 
         status= umfpack_di_solve (TS, Ap, Ai, Ax, x+oo, b+oo, Numeric,Control,Info) ;
-        if(status) cout << " Error umfpack_di_solve  status  " << status << endl;
+        CheckUmfpackStatus(status);
         if(verbosity>3)     (void)  umfpack_di_report_info(Control,Info);
         }
 
@@ -123,14 +190,14 @@ public:
         A->CSC(Ap,Ai,Ax);
         if(Symbolic)  umfpack_di_free_symbolic (&Symbolic) ;
         status = umfpack_di_symbolic (A->n, A->m, Ap, Ai, Ax, &Symbolic,Control,Info) ;
-        if(status) cout << " Error umpfack umfpack_di_symbolic  status  " << status << endl;
+        CheckUmfpackStatus(status);
       }
     void fac_numeric(){
         if(Numeric)   umfpack_di_free_numeric (&Numeric) ;
          if(verb>2 || verbosity> 9) cout << "fac_numeric UMFPACK R: nnz U " << " nnz= "  << A->nnz << endl;
 
         status = umfpack_di_numeric (Ap, Ai, Ax, Symbolic, &Numeric, Control,Info) ;
-        if(status) cout << " Error umpfack umfpack_di_numeric  status  " << status << endl;
+        CheckUmfpackStatus(status);
 
     }
     ~VirtualSolverUMFPACK()
@@ -186,7 +253,7 @@ public:
         {
             double * xx = (double *) (void*) x+oo,  *bb = (double *) (void*) b+oo, *zx=0;;
             status= umfpack_zi_solve (ts, Ap, Ai, Ax,Az, xx,zx, bb, zx , Numeric, 0, 0) ;
-            if(status) cout << " Error umfpack_di_solve  status  " << status << endl;
+            CheckUmfpackStatus(status);
         }
 
     }
@@ -205,13 +272,13 @@ public:
          if(verb>2 || verbosity> 9) cout << "fac_symbolic UMFPACK C:  nnz= "  << A->nnz << endl;
         if(Symbolic)  umfpack_zi_free_symbolic (&Symbolic) ;
         status = umfpack_zi_symbolic (A->n, A->m, Ap, Ai, Ax,Az, &Symbolic, 0, 0) ;
-        if(status) cout << " Error umpfack umfpack_zi_symbolic  status  " << status << endl;
+        CheckUmfpackStatus(status);
     }
     void fac_numeric(){
         if(Numeric)   umfpack_zi_free_numeric (&Numeric) ;
          if(verb>2 || verbosity> 9) cout << "fac_numeric UMFPACK C:  nnz= "  << A->nnz << endl;
         status = umfpack_zi_numeric (Ap, Ai, Ax,Az, Symbolic, &Numeric, 0, 0) ;
-        if(status) cout << " Error umpfack umfpack_zi_numeric  status  " << status << endl;
+        CheckUmfpackStatus(status);
 
     }
     ~VirtualSolverUMFPACK()
@@ -221,7 +288,19 @@ public:
     }
 };
 
-
+static inline void handler_ff_cholmod (int status, const char *file, int line,
+    const char *message)
+{
+   
+    char  serr[256];
+    sprintf (serr,"cholmod error: file: %s line: %d status: %d: %s\n",
+        file, line, status, message) ;
+    if(verbosity) cout << serr << endl;
+    if (status < 0)
+    {
+        ExecError(serr);
+    }
+}
 template<class Z=int,class K=double>
 class VirtualSolverCHOLMOD: public VirtualSolver<Z,K> {
 public:
@@ -285,6 +364,7 @@ public:
     {
 
         cholmod_start (&c) ;
+        c.error_handler = &handler_ff_cholmod ;
         //CHOLMOD_FUNCTION_DEFAULTS (&c) ;
         AA.nrow=n;
         AA.ncol=n;
@@ -391,6 +471,7 @@ public:
     {
 
         cholmod_start (&c) ;
+        c.error_handler = &handler_ff_cholmod ;
        // CHOLMOD_FUNCTION_DEFAULTS (&c) ;
         AA.nrow=n;
         AA.ncol=n;
@@ -491,7 +572,8 @@ public:
         for(int k=0,oo=0; k<N;++k, oo+= A->n)
         {
             status= umfpack_dl_solve (ts, Ap, Ai, Ax, x+oo, b+oo, Numeric,Control,Info) ;
-            if(status) cout << " Error umfpack_di_solve  status  " << status << endl;
+            CheckUmfpackStatus(status);
+           // if(status) cout << " Error umfpack_di_solve  status  " << status << endl;
             if(verbosity>3)     (void)  umfpack_di_report_info(Control,Info);
         }
 
@@ -510,14 +592,16 @@ public:
 
         if(Symbolic)  umfpack_di_free_symbolic (&Symbolic) ;
         status = umfpack_dl_symbolic (A->n, A->m, Ap, Ai, Ax, &Symbolic,Control,Info) ;
-        if(status) cout << " Error umpfack umfpack_di_symbolic  status  " << status << endl;
+        CheckUmfpackStatus(status);
+        //if(status) cout << " Error umpfack umfpack_di_symbolic  status  " << status << endl;
     }
     void fac_numeric(){
         if(Numeric)   umfpack_dl_free_numeric (&Numeric) ;
         if(verb>2 || verbosity> 9) cout << " fac_numeric UMFPACK double/long " << endl;
 
         status = umfpack_dl_numeric (Ap, Ai, Ax, Symbolic, &Numeric, Control,Info) ;
-        if(status) cout << " Error umpfack umfpack_di_numeric  status  " << status << endl;
+        CheckUmfpackStatus(status);
+        //if(status) cout << " Error umpfack umfpack_di_numeric  status  " << status << endl;
     }
     ~VirtualSolverUMFPACK()
     {
@@ -571,7 +655,8 @@ public:
         {
             double * xx = (double *) (void*) x+oo,  *bb = (double *) (void*) b+oo, *zx=0;;
             status= umfpack_zl_solve (UMFPACK_A, Ap, Ai, Ax,Az, xx,zx, bb, zx , Numeric, 0, 0) ;
-            if(status) cout << " Error umfpack_di_solve  status  " << status << endl;
+            CheckUmfpackStatus(status);
+            //if(status) cout << " Error umfpack_di_solve  status  " << status << endl;
         }
 
     }
@@ -591,14 +676,15 @@ public:
 
         if(Symbolic)  umfpack_zl_free_symbolic (&Symbolic) ;
         status = umfpack_zl_symbolic (A->n, A->m, Ap, Ai, Ax,Az, &Symbolic, 0, 0) ;
-        if(status) cout << " Error umpfack umfpack_zl_symbolic  status  " << status << endl;
+        CheckUmfpackStatus(status);
+        //if(status) cout << " Error umpfack umfpack_zl_symbolic  status  " << status << endl;
     }
     void fac_numeric(){
         if(Numeric)   umfpack_zl_free_numeric (&Numeric) ;
         if(verb>2 || verbosity> 9) cout << " fac_numeric UMFPACK C/long " << endl;
 
         status = umfpack_zl_numeric (Ap, Ai, Ax,Az, Symbolic, &Numeric, 0, 0) ;
-        if(status) cout << " Error umpfack umfpack_zl_numeric  status  " << status << endl;
+        CheckUmfpackStatus(status);//if(status) cout << " Error umpfack umfpack_zl_numeric  status  " << status << endl;
 
     }
     ~VirtualSolverUMFPACK()
@@ -648,6 +734,7 @@ public:
     {
 
         cholmod_start (&c) ;
+        c.error_handler = &handler_ff_cholmod ;
         //CHOLMOD_FUNCTION_DEFAULTS (&c) ;
         AA.nrow=n;
         AA.ncol=n;
@@ -750,6 +837,7 @@ public:
     :HA(&HAA),n(HAA.n),L(0),A(&AA),Ai(0),Ap(0),Ax(0),Ywork(0),Ework(0),cs(0),cn(0),verb(ds.verb)
     {
         cholmod_start (&c) ;
+        c.error_handler = &handler_ff_cholmod ;
         // CHOLMOD_FUNCTION_DEFAULTS (&c) ;
         AA.nrow=n;
         AA.ncol=n;

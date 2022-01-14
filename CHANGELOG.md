@@ -26,7 +26,7 @@ All notable changes to this project will be documented in this file.
 - add tools to do compution with R3 vector see tutorial/calculus.edp
 - add an example tutorial/tgv-test.edp see see what tgv do on matrix build. 
 ### Changed
--
+- the beaviour of linear solver UMFPACK, CHOLMOD in case of error , now FreeFEm exit on ExecError like in MUMPS
 
 ### Deprecated
 -
@@ -38,7 +38,7 @@ All notable changes to this project will be documented in this file.
 - pow(int,int) now call int version not complex version..
 - correct the normal the N implicite variable   on meshL case 
 - correct version dump in banner FreeFem++ - version 4.10 (V ...
-- coorect  in CPU time on big mesh due to do bad HCode in HashTable.hpp
+- correct  in CPU time on big mesh due to do bad HCode in HashTable.hpp
 
 
 ## [4.10]
