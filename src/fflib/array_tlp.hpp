@@ -56,7 +56,9 @@
 #include <queue>
 #include "array_resize.hpp"
 #include "HeapSort.hpp"
-
+namespace Fem2D {
+#include "R3.hpp"
+}
 template <class T>
 struct affectation: binary_function<T, T, T>
 {
@@ -1363,6 +1365,7 @@ KNM<K> * set_Eye(KNM<K> *pA,const  Eye eye)
     return  pA;
 }
 extern aType aaaa_knlp;
+
 template<class K,class Z>
 void ArrayOperator()
 {
@@ -1474,6 +1477,9 @@ void ArrayOperator()
 
 
      TheOperators->Add("<-",
+ //      new OneOperator2_<KN<K> *,KN<K> *,R3>(&set_initR3),
+ //      new OneOperator2_<KN<K> *,KN<K> *,R3*>(&set_initR3),
+
        new OneOperator2_<KN<K> *,KN<K> *,Z>(&set_init),
        new InitArrayfromArray<K,KN<K>*,true>
     //   new OneOperator2_<KN<K> *,KN<K> *,KN<K> >(&set_init),

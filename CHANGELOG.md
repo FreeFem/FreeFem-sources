@@ -27,7 +27,7 @@ All notable changes to this project will be documented in this file.
 - add an example tutorial/tgv-test.edp see see what tgv do on matrix build. 
 - add R3 Th.be(k).N ( get the normal of boundary element (in all mesh type)
 - add projection  function to a mesh , meshL, MeshS or  mesh3 with return a R3 point 
-   see new example dist-projection.edp example in exemples 
+- see new example dist-projection.edp example in exemples 
 
 
 ### Changed

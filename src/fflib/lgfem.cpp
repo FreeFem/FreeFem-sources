@@ -5694,10 +5694,17 @@ template<  class A >
             OneOperator_trans_Ptr_o_R(ptr pp) : OneOperator(atype< Result * >( ), atype< Transpose<A *> >( )), p(pp) {}
         };
 template <class R,class A, class B> 
-struct OpR3dot: public binary_function<A,B,R> {
+struct OppR3dot: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  {
       B pu = a;
       return (*pu,*b);} };
+
+template <class R,class A, class B>
+struct OpR3dot: public binary_function<A,B,R> {
+  static R f(const A & a,const B & b)  {
+      B pu = a;
+      return (pu,b);} };
+
 R3 CrossProduct(const R3 & A,const R3 & B){ return A^B;}
 R Det(const R3 & A,const R3 & B,const R3 & C){ return det(A,B,C);}
 R3* initR3(R3  *const & p,const  R& a,const  R& b,const  R &c){*p = R3(a,b,c);; return p;}
@@ -5714,7 +5721,8 @@ void init_lgfem( ) {
   Dcl_Type< MeshPoint * >( );
     Dcl_TypeandPtr< R3  >(0,0,::InitializeDef<R3>,0);
     Dcl_TypeandPtr< R2  >(0,0,::InitializeDef<R2>,0);
-  Dcl_Type< Transpose<R3 *> >();
+   Dcl_Type< Transpose<R3 *> >();
+   Dcl_Type< Transpose<R3> >();
 
   map_type[typeid(R3 *).name( )] = new ForEachType< R3 * >(Initialize< R3 >);
   Dcl_TypeandPtr< pmesh >(0, 0, ::InitializePtr< pmesh >, ::DestroyPtr< pmesh >,
@@ -5867,9 +5875,13 @@ void init_lgfem( ) {
   Dcl_Type< const QuadratureFormular1d * >( );
   Dcl_Type< const GQuadratureFormular< R3 > * >( );
   TheOperators->Add("\'",   new OneOperator1<Transpose<R3* >,R3* >(&Build<Transpose<R3* >,R3* >));
-  TheOperators->Add("*",new opDotR3(atype<TransE_Array >(),atype< R3* >() )   );  // "N" a faire mais dur
+    TheOperators->Add("\'",   new OneOperator1<Transpose<R3>,R3>(&Build<Transpose<R3 >,R3>));
+  TheOperators->Add("*",new opDotR3(atype<TransE_Array >(),atype< R3* >() )   );
+  TheOperators->Add("*",new opDotR3(atype<TransE_Array >(),atype< R3 >() )   );  // 
+    // "N" a faire mais dur
     // R3dot
-  TheOperators->Add("*",new OneBinaryOperator< OpR3dot<double,Transpose<R3* >, R3* >> () );  // "N" a faire mais dur
+  TheOperators->Add("*",new OneBinaryOperator< OppR3dot<double,Transpose<R3* >, R3* >> () );  // "N" a faire mais dur
+  TheOperators->Add("*",new OneBinaryOperator< OpR3dot<double,Transpose<R3>, R3>> () );  // "N" a faire mais dur
 
   TheOperators->Add("*",new opDotR3(atype< Transpose<R3* > >(),atype<E_Array >() )   );  // "N" a faire mais dur
 

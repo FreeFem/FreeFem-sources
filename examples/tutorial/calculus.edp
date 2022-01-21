@@ -65,12 +65,20 @@ cout << "str = " << str << " == abc++abcddddd+2;\n";
 
 R3 A(1.,2.,3.);
 R3 B(3.,1.,0.);
-R3 C = A^B; 
-R3 Q= A+B;
+R3 C = A^B; // cross product ..
+R3 Q= A+3*B+C-B;
+cout << "det= " << det(A,B,C) << " == " << (A^B)'*C << endl; 
 cout << Q.x << " " << Q.y << " "<< Q. z << endl; 
 Q.x =1;
 P=Q;// Current pojnt 
 cout << P.x << " " << P.y << " "<< P. z << endl; 
-cout <<"P=" <<  P << " " << det(A,B,C) << endl;
+cout <<"P=" <<  P << " det " << det(A,B,C) << endl;
 cout << R3(1,3,6) << endl; 
 cout << C.l2 << " " << C.norm << " " << C.linfty  << " " << C <<  " dot product:  " << C'*C <<  endl;
+real[int] E=A; // def array from R3*
+real[int] E2=A+A; // def array from R3
+R3 E3=E; // def R3 from array
+E3=E; // set R3 from array 
+E3+=E;
+
+// R3 F=[1,2,3]; // not

@@ -2712,6 +2712,33 @@ void init_lgmesh1()
    Add<pmesh3*>("nbnomanifold",".",new OneOperator1<long,pmesh3*>(pmesh_nadjnomanifold));
      
 }
+//using Fem2D::R3;
+KN<double> * set_initR3( KN<double>  *a, R3  b){
+    SHOWVERB( cout << " set_init array R3"  << " " << &b << endl);
+    a->init(3); (*a)[0]=b.x;(*a)[1]=b.y;(*a)[2]=b.z; return a;}
+
+ KN<double> * set_initR3( KN<double> *a, R3 * b){
+    SHOWVERB( cout << " set_init array R3" << " " << &b << endl);
+     a->init(3);   (*a)[0]=b->x;(*a)[1]=b->y;(*a)[2]=b->z; return a;}
+KN_<double>  copy_R3( KN_<double>  a, R3  b){
+    SHOWVERB( cout << " set_init array R3"  << " " << &b << endl);
+    ffassert(a.N()==3); (a)[0]=b.x;(a)[1]=b.y;(a)[2]=b.z; return a;}
+KN_<double>  copy_R3( KN_<double>  a, R3  *b){
+    SHOWVERB( cout << " set_init array R3"  << " " << &b << endl);
+    ffassert(a.N()==3); (a)[0]=b->x;(a)[1]=b->y;(a)[2]=b->z; return a;}
+
+
+
+AnyType Array2R3(Stack,const AnyType &b) {
+    KN_<double> a = GetAny<KN_<double>> (b);
+    ffassert(a.N()>=3);
+    R3 P((double*)a);
+    return   SetAny<R3>(P);}
+AnyType pArray2R3(Stack,const AnyType &b) {
+    KN_<double> a = *GetAny<KN<double>*> (b);
+    ffassert(a.N()>=3);
+    R3 P((double*)a);
+    return   SetAny<R3>(P);}
 
 void init_lgmesh3() {
   if(verbosity&&(mpirank==0))  cout <<"lg_mesh3 ";
@@ -2878,7 +2905,15 @@ TheOperators->Add("=",
     Add< pfLr >("(", "", new OneQuadOperator< Op4_pfeK< R,v_fesL >, Op4_pfeK< R,v_fesL >::Op >);
     Add< pfLc >("(", "", new OneQuadOperator< Op4_pfeK< Complex, v_fesL>, Op4_pfeK< Complex,v_fesL >::Op >);
 */
-    
+ 
+ TheOperators->Add("<-",
+      new OneOperator2<KN<double> *,KN<double> *,R3>(set_initR3)
+   ,  new OneOperator2<KN<double> *,KN<double> *,R3*>(set_initR3)
+    );
+TheOperators->Add("=",
+         new OneOperator2<KN_<double> ,KN_<double> ,R3>(copy_R3)
+      ,  new OneOperator2<KN_<double> ,KN_<double> ,R3*>(copy_R3)
+       );
  map_type[typeid(double).name()]->AddCast(
    new E_F1_funcT<double,pf3r>(pf3r2R<R,0,v_fes3>)
    );
@@ -3103,7 +3138,11 @@ Add<pfesL*>("Th",".",new OneOperator1<pmeshL,pfesL*>(pVhL_Th));//ADD JUIN 2021 F
  Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmesh3>(listofregion));
  Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmesh>(listofregion));
   
-    
+  atype<R3>()->AddCast(
+            new E_F1_funcT<R3,KN_<double> >(Array2R3)
+         //   new E_F1_funcT<R3,KN<double>* >(pArray2R3)
+     //       new E_F1_funcT<long,GlgBoundaryElement<Mesh3> >(Cast<long,GlgBoundaryElement<Mesh3> >
+                       );
 }
 
 //#include "InitFunct.hpp"
