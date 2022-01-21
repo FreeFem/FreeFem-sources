@@ -1817,6 +1817,31 @@ double dist(Stack stack,pmesh3 const &pTh)
     return 0.;
 }*/
 template<class Mesh>
+R3 Projection(Stack stack,Mesh * const &pTh)
+{ // version 3d sep 2021
+    R3 UnSet(doublenotset,doublenotset,doublenotset);
+    typedef typename Mesh::RdHat RdHat;
+    typedef typename Mesh::Rd Rd;
+    typedef typename Mesh::Element Element;
+    
+    if(pTh == 0) return UnSet;
+    RdHat PHat;
+    bool outside;
+
+    MeshPoint & mp = *MeshPointStack(stack);
+
+    if((const void *) pTh == (const void *) mp.Th) return UnSet;
+    Rd P(&mp.P.x);
+    const Element  * K=pTh->Find(P,PHat,outside);
+    if (!outside)
+        return P;
+    else {
+        Rd Pb = (*K)(PHat);
+        return Pb;
+    }
+    return UnSet;
+}
+template<class Mesh>
 double dist(Stack stack,Mesh * const &pTh)
 { // version 3d sep 2021
     typedef typename Mesh::RdHat RdHat;
@@ -1942,7 +1967,12 @@ void init_lgmesh() {
     Global.Add("dist", "(", new OneOperator1s_<double,pmeshL,E_F_F0s_<double,pmeshL,E_F0mps> >(dist));// sep 2021  FH function distance to mesh
       Global.Add("dist", "(", new OneOperator1s_<double,pmeshS,E_F_F0s_<double,pmeshS,E_F0mps> >(dist));// sep 2021  FH function distance to mesh
     Global.Add("signeddist", "(", new OneOperator1s_<double,pmeshL,E_F_F0s_<double,pmeshL,E_F0mps> >(signeddist));// sep 2021  FH function distance to mesh
-      Global.Add("signeddist", "(", new OneOperator1s_<double,pmeshS,E_F_F0s_<double,pmeshS,E_F0mps> >(signeddist));// sep 2021  FH function distance to mesh
+    Global.Add("signeddist", "(", new OneOperator1s_<double,pmeshS,E_F_F0s_<double,pmeshS,E_F0mps> >(signeddist));// sep 2021  FH function distance to mesh
+    Global.Add("projection", "(", new OneOperator1s_<R3,pmeshL,E_F_F0s_<R3,pmeshL,E_F0mps> >(Projection));// jan 2022  FH function Projection to mesh
+    Global.Add("projection", "(", new OneOperator1s_<R3,pmeshS,E_F_F0s_<R3,pmeshS,E_F0mps> >(Projection));// jan 2022  FH function Projection to mesh
+
+    Global.Add("projection", "(", new OneOperator1s_<R3,pmesh3,E_F_F0s_<R3,pmesh3,E_F0mps> >(Projection));// Jan 2022  FH function distance to mesh
+    Global.Add("projection", "(", new OneOperator1s_<R3,pmesh,E_F_F0s_<R3,pmesh,E_F0mps> >(Projection)); // Jan 2022 FH  FH function Projection to mesh
 
     Global.Add("dist", "(", new OneOperator1s_<double,pmesh3,E_F_F0s_<double,pmesh3,E_F0mps> >(dist));// sep 2021  FH function distance to mesh
     Global.Add("dist", "(", new OneOperator1s_<double,pmesh,E_F_F0s_<double,pmesh,E_F0mps> >(dist)); // oct 2017 FH  FH function distance to mesh

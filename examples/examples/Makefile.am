@@ -42,7 +42,8 @@ TESTS_OTHER = BlackScholes2D.edp \
 	stokes.edp \
 	test1.edp \
 	thermal.edp \
-	thermic.edp
+	thermic.edp \
+	dist-projection.edp  
 
 TESTS_ARPARCK = sound.edp
 

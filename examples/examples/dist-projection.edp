@@ -1,0 +1,12 @@
+// test dist and projection on meshL
+
+border C(t=0,2*pi){ x= cos(t); y=sin(t); label=1; region =1;}
+meshL Lh =buildmeshL(C(20));
+mesh Th= square(20,20,[(x-0.5)*3,(y-0.5)*3]);
+fespace Vh(Th,P1);
+Vh d=dist(Lh);
+Vh Ux = projection(Lh).x-x;
+Vh Uy = projection(Lh).y-y;
+
+plot(d, [Ux,Uy], wait=1);
+

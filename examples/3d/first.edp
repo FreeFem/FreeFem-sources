@@ -37,6 +37,7 @@ if(1) {
   // the corresponding face in the adjacent tet
   Th[k] == Th[k].adj(e) ;// non adjacent tet return the same 
   Th[k] != Th[k].adj(e) ;// true adjacent tet 
+  Th.be(k).N;   // return the Normal  of  boundary element k \hfilll
   
   cout << " print mesh connectivity " << endl;
   int nbelement = Th.nt; 
@@ -61,7 +62,7 @@ if(1) {
   Th.be;
     for (int k=0;k<nbboundaryelement;++k)
       cout << k << " : " <<  Th.be(k)[0] << " " << Th.be(k)[1] << " , label " << Th.be(k).label 
-	   <<  " tet  " << int(Th.be(k).Element) << " " << Th.be(k).whoinElement <<  endl; 
+	   <<  " tet  " << int(Th.be(k).Element) << " " << Th.be(k).whoinElement <<  " N=" << Th.be(k).N << endl; 
     
 	  
 savemesh(Th,"dd.meshb");
