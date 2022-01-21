@@ -144,6 +144,11 @@ namespace Fem2D {
        R3 N = V;
        return N/N.norme();
    }
+   R3 n(int i) const// Add jan 2022 FH
+      {
+          R3 Tg = TangenteUnitaire();
+          if( i==0) Tg = -Tg;
+          return Tg;} //  exterior normal
 
   };
     

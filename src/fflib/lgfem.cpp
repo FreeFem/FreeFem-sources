@@ -5702,6 +5702,8 @@ R3 CrossProduct(const R3 & A,const R3 & B){ return A^B;}
 R Det(const R3 & A,const R3 & B,const R3 & C){ return det(A,B,C);}
 R3* initR3(R3  *const & p,const  R& a,const  R& b,const  R &c){*p = R3(a,b,c);; return p;}
 R3 toR3(const  R& a,const  R& b,const  R &c){return R3(a,b,c);}
+R3 NElement(lgBoundaryEdge const & a) {  return R3(a.NBoundaryElement()); }//  add Jan 2022
+
 void init_lgfem( ) {
   if (verbosity && (mpirank == 0)) cout << "lg_fem ";
 #ifdef HAVE_CADNA
@@ -6079,6 +6081,9 @@ void init_lgfem( ) {
   Add< lgBoundaryEdge::BE >(
     "(", "", new OneOperator2_< lgBoundaryEdge, lgBoundaryEdge::BE, long >(get_belement));
   Add< lgElement::Adj >("(", "", new OneOperator2_< lgElement, lgElement::Adj, long * >(get_adj));
+
+    Add<lgBoundaryEdge>("N",".",new OneOperator1_<R3,lgBoundaryEdge >(NElement));
+
   TheOperators->Add("==", new OneBinaryOperator< Op2_eq< lgElement, lgElement > >);
   TheOperators->Add("!=", new OneBinaryOperator< Op2_ne< lgElement, lgElement > >);
   TheOperators->Add("<", new OneBinaryOperator< Op2_lt< lgElement, lgElement > >);

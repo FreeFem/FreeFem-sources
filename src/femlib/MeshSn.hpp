@@ -96,7 +96,12 @@ typedef GenericVertex<R3> Vertex3;
             for(int i=0 ; i<3 ; i++)
                 GradL[i]= (Edge(i)^Normal) / N;
         }
-        
+        R3 n(int i) const // add Jan 2022 
+        {
+            R3 Normal = Edge(2)^Edge(1);
+            R3 Gi= (Edge(i)^Normal);
+            return Gi/Gi.norme();} //  exterior normal
+
         R3 NormalT() const {
             ASSERTION(i>=0 && i <3);
             return R3( Edge(2)^Edge(1) );

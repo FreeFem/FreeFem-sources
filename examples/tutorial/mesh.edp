@@ -251,7 +251,9 @@ plot(rh,ps="lshape.eps");
   Th.be(k)[l];   // return the vertices l $\in \{0,1\}$ of  boundary element k \hfilll
   Th.be(k).Element ;   // return the triangle contening the  boundary element k \hfilll
   Th.be(k).whoinElement ;   // return the egde number of triangle contening the  boundary element k \hfilll
+  Th.be(k).N ;   // return the Normal to be(k)   version 4.10.1
   Th[k].adj(e) ; // return adjacent triangle to k by edge e, and change the value of e to \hfilll
+  
   // the corresponding edge in the adjacent triangle
   Th[k] == Th[k].adj(e) ;// non adjacent triangle return the same 
   Th[k] != Th[k].adj(e) ;// true adjacent triangle 
@@ -278,7 +280,7 @@ plot(rh,ps="lshape.eps");
   Th.be;
     for (int k=0;k<nbboundaryelement;++k)
       cout << k << " : " <<  Th.be(k)[0] << " " << Th.be(k)[1] << " , label " << Th.be(k).label 
-	   <<  " tria  " << int(Th.be(k).Element) << " " << Th.be(k).whoinElement <<  endl; 
+	   <<  " tria  " << int(Th.be(k).Element) << " " << Th.be(k).whoinElement <<  " N " << Th.be(k).N << endl; 
 	
 	real[int] bb(4);
 	boundingbox(Th,bb); // bb[0] = xmin, bb[1] = xmax, bb[2] = ymin, bb[3] =ymax 
