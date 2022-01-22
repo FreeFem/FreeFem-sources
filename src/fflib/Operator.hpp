@@ -55,6 +55,15 @@ struct Op2_sub: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  { return ((R)a - (R)b);} }; 
 
 template<class R,class A=R,class B=A>
+struct Op2_DotDiv: public binary_function<A,B,R> {
+  static R f(const A & a,const B & b)  { return DotDiv((R)a, (R)b);} };
+
+template<class R,class A=R,class B=A>
+struct Op2_DotStar: public binary_function<A,B,R> {
+  static R f(const A & a,const B & b)  { return DotStar((R)a, (R)b);} };
+
+
+template<class R,class A=R,class B=A>
 struct Op2_mul: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  {
   // cout << a << " * " << b <<" => "  << ((R)a * (R)b) << endl;

@@ -506,7 +506,8 @@ long NuElement(GlgBoundaryElement<Mesh3> const & a)
 template<class Mesh>
 R3 NElement(GlgBoundaryElement<Mesh> const & a)
 {    return a.NBoundaryElement(); }
-
+template<class Mesh>
+R3 getP(GlgVertex<Mesh> const & a){  return R3(*a.v);}
 R getx(GlgVertex<Mesh3> const & a){  return a.x();}
 R gety(GlgVertex<Mesh3> const & a){  return a.y();}
 R getz(GlgVertex<Mesh3> const & a){  return a.z();}
@@ -2690,6 +2691,8 @@ void init_lgmesh1()
    Add<GlgElement<Mesh3> >("[","",new OneOperator2_<GlgVertex<Mesh3> ,GlgElement<Mesh3> ,long>(get_element));
    Add<GlgBoundaryElement<Mesh3> >("[","",new OneOperator2_<GlgVertex<Mesh3>,GlgBoundaryElement<Mesh3>,long>(get_element));
    
+    Add<GlgVertex<Mesh3> >("P",".",new OneOperator1_<R3,GlgVertex<Mesh3> >(getP));
+
    Add<GlgVertex<Mesh3> >("x",".",new OneOperator1_<R,GlgVertex<Mesh3> >(getx));
    Add<GlgVertex<Mesh3> >("y",".",new OneOperator1_<R,GlgVertex<Mesh3> >(gety));
    Add<GlgVertex<Mesh3> >("z",".",new OneOperator1_<R,GlgVertex<Mesh3> >(getz));

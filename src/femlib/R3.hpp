@@ -127,6 +127,8 @@ public:
 
   R2 p2() const { return R2(x,y);}
 };
+inline R3 DotStar(const R3 &A,const R3 &B){return R3(A.x*B.x,A.y*B.y,A.y*B.y);}
+inline R3 DotDiv(const R3 &A,const R3 &B){return R3(A.x/B.x,A.y/B.y,A.y/B.y);}
 
 inline R3 Minc(const R3 & A,const R3 &B){ return R3(min(A.x,B.x),min(A.y,B.y),min(A.z,B.z));}
 inline R3 Maxc(const R3 & A,const R3 &B){ return R3(max(A.x,B.x),max(A.y,B.y),max(A.z,B.z));}

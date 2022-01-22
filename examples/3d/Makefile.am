@@ -53,7 +53,7 @@ TESTS_OTHER = 3d-Leman.edp \
 	crack-3d.edp \
 	periodic3.edp \
 	LapDG3d1.edp \
-	LapDG3d.edp
+	LapDG3d.edp Connectivite-3d.edp	
 
 TESTS_METIS = schwarz-nm-3d.edp
 

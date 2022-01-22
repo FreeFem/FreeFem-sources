@@ -61,11 +61,13 @@ cout << "str = " << str << " == abc++abcddddd+2;\n";
 	cout << "\"" << ss << "\"" << endl;
 }
 
-// Add basic operation on R3 
+// Add basic operation on R3 version 4.10.1 jan 2022 
 
 R3 A(1.,2.,3.);
 R3 B(3.,1.,0.);
 R3 C = A^B; // cross product ..
+R3 AB = A.*B ; //  product by componant by componant
+R3 AB1 = A./B ; //  div by componant by componant
 R3 Q= A+3*B+C-B;
 cout << "det= " << det(A,B,C) << " == " << (A^B)'*C << endl; 
 cout << Q.x << " " << Q.y << " "<< Q. z << endl; 
@@ -81,4 +83,4 @@ R3 E3=E; // def R3 from array
 E3=E; // set R3 from array 
 E3+=E;
 
-// R3 F=[1,2,3]; // not
+

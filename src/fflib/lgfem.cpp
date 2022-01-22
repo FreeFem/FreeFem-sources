@@ -5413,6 +5413,8 @@ lgVertex get_vertex(pmesh *const &a, long const &n) { return lgVertex(*a, n); }
 lgVertex get_element(lgElement const &a, long const &n) { return a[n]; }
 lgVertex get_belement(lgBoundaryEdge const &a, long const &n) { return a[n]; }
 
+R3 getP(lgVertex const &a) { return R3(*a.v); }
+
 R getx(lgVertex const &a) { return a.x( ); }
 
 R gety(lgVertex const &a) { return a.y( ); }
@@ -6069,6 +6071,8 @@ void init_lgfem( ) {
     TheOperators->Add("^", new OneOperator2_<R3,R3,R3>(CrossProduct));
     Global.Add("det", "(",new OneOperator3_<R,R3,R3,R3>(Det));
     TheOperators->Add("+", new OneBinaryOperator<Op2_add<R3,R3,R3> >);
+    TheOperators->Add(".*", new OneBinaryOperator<Op2_DotStar<R3,R3,R3> >);
+    TheOperators->Add("./", new OneBinaryOperator<Op2_DotDiv<R3,R3,R3> >);
     TheOperators->Add("-", new OneBinaryOperator<Op2_sub<R3,R3,R3> >);
     TheOperators->Add("*", new OneBinaryOperator<Op2_mull<R3,R,R3> >);
     TheOperators->Add("/", new OneBinaryOperator<Op2_divv<R3,R3,R> >);
@@ -6080,6 +6084,7 @@ void init_lgfem( ) {
     TheOperators->Add("<<", new OneBinaryOperator<Print<R3> >);
     Add<R3*>("<--","(",new OneOperator3_<R3,R,R,R>(toR3));
     Add<R3*>("norm",".",new OneOperator1_<R,R3>(Norme2));
+    Add<R3*>("norm2",".",new OneOperator1_<R,R3>(Norme2_2));
     Add<R3*>("l2",".",new OneOperator1_<R,R3>(Norme2));
     Add<R3*>("linfty",".",new OneOperator1_<R,R3>(Norme_infty));
 
@@ -6108,6 +6113,7 @@ void init_lgfem( ) {
   Add< lgElement >("[", "", new OneOperator2_< lgVertex, lgElement, long >(get_element));
   Add< lgBoundaryEdge >("[", "", new OneOperator2_< lgVertex, lgBoundaryEdge, long >(get_belement));
 
+  Add< lgVertex >("P", ".", new OneOperator1_< R3, lgVertex >(getP));// Jan 2022 FH
   Add< lgVertex >("x", ".", new OneOperator1_< R, lgVertex >(getx));
   Add< lgVertex >("y", ".", new OneOperator1_< R, lgVertex >(gety));
   Add< lgVertex >("label", ".", new OneOperator1_< long, lgVertex >(getlab));

@@ -25,7 +25,8 @@ All notable changes to this project will be documented in this file.
 - add computation scalar product of R3 example :  ( N'*Tl)
 - add tools to do compution with R3 vector see tutorial/calculus.edp
 - add an example tutorial/tgv-test.edp see see what tgv do on matrix build. 
-- add R3 Th.be(k).N ( get the normal of boundary element (in all mesh type)
+- add R3 Th.be(k).N to  get the normal of boundary element (in all mesh type)
+- add R3 Th.be(k)[i].P  to  get the point (R3)  of boundary vertices
 - add projection  function to a mesh , meshL, MeshS or  mesh3 with return a R3 point 
 - see new example dist-projection.edp example in exemples 
 
