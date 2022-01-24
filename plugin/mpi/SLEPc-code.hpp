@@ -274,12 +274,16 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 else
                     PEPSetOptionsPrefix(pep, GetAny<std::string*>((*nargs[1])(stack))->c_str());
             }
+            KSP empty = NULL;
             if(std::is_same<SType, EPS>::value) {
                 EPSSetFromOptions(eps);
                 ST st;
                 EPSGetST(eps, &st);
-                if(ptA->_ksp)
+                if(ptA->_ksp) {
+                    STGetKSP(st, &empty);
+                    PetscObjectReference((PetscObject)empty);
                     STSetKSP(st, ptA->_ksp);
+                }
                 else {
                     KSP ksp;
                     PC pc;
@@ -506,8 +510,15 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 delete user->mat;
                 PetscFree(user);
             }
-            if(std::is_same<SType, EPS>::value)
+            if(std::is_same<SType, EPS>::value) {
+                if(empty) {
+                    ST st;
+                    EPSGetST(eps, &st);
+                    STSetKSP(st, empty);
+                    PetscObjectDereference((PetscObject)empty);
+                }
                 EPSDestroy(&eps);
+            }
             else if(std::is_same<SType, SVD>::value)
                 SVDDestroy(&svd);
             else if(std::is_same<SType, NEP>::value)
