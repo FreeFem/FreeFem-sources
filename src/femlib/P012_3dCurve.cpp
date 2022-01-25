@@ -242,11 +242,112 @@
                assert(k==3);
            }
            if( whatd & Fop_D2)
-               ffassert(0); // to DO FH. sorry
-       }
+           {
+               
+               //cout << " D2 " << endl;
+               if (whatd & Fop_dxx){
+                 RN_ f0xx(val('.',0,op_dxx));
+               
+                 int k=0;
+                 for(int i=0;i<E::nv;++i,++k)
+                   {
+                     f0xx[k] = 4.*Dl[i].x*Dl[i].x;
+                   }
+                 for(int i=0;i<E::ne;++i,++k)
+                   {
+                     int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+                     f0xx[k] = 8.*Dl[i0].x*Dl[i1].x;
+                   }
+                   assert(k==3);
+               }
+               //cout << " D2 " << endl;
+               if (whatd & Fop_dyy){
+                 RN_ f0yy(val('.',0,op_dyy));
+               
+                 int k=0;
+                 for(int i=0;i<E::nv;++i,++k)
+                   {
+                     f0yy[k] = 4.*Dl[i].y*Dl[i].y;
+                   }
+                 for(int i=0;i<E::ne;++i,++k)
+                   {
+                     int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+                     f0yy[k] = 8.*Dl[i0].y*Dl[i1].y;
+                   }
+                   assert(k==3);
+               }
+               //cout << " D2 " << endl;
+               if (whatd & Fop_dzz){
+                 RN_ f0zz(val('.',0,op_dzz));
+                 
+                 int k=0;
+                 for(int i=0;i<E::nv;++i,++k)
+                   {
+                     f0zz[k] = 4.*Dl[i].z*Dl[i].z;
+                   }
+                 for(int i=0;i<E::ne;++i,++k)
+                   {
+                     int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+                     f0zz[k] = 8.*Dl[i0].z*Dl[i1].z;
+                     
+                   }
+                   assert(k==3);
+               }
+               //cout << " D2 " << endl;
+               if (whatd & Fop_dxy){
+                 RN_ f0xy(val('.',0,op_dxy));
+                
+                 int k=0;
+                 for(int i=0;i<E::nv;++i,++k)
+                   {
+                     f0xy[k] = 4.*Dl[i].x*Dl[i].y;
+                   }
+                 for(int i=0;i<E::ne;++i,++k)
+                   {
+                     int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+                     f0xy[k] = 4.*(Dl[i0].x*Dl[i1].y+ Dl[i1].x*Dl[i0].y);
+                   }
+                   assert(k==3);
+               }
+
+               //cout << " D2 " << endl;
+               if (whatd & Fop_dxz){
+                 RN_ f0xz(val('.',0,op_dxz));
+                
+                 int k=0;
+                 for(int i=0;i<E::nv;++i,++k)
+                   {
+                     f0xz[k] = 4.*Dl[i].x*Dl[i].z;
+                   }
+                 for(int i=0;i<E::ne;++i,++k)
+                   {
+                     int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+                     f0xz[k] = 4.*(Dl[i0].x*Dl[i1].z+ Dl[i1].x*Dl[i0].z);
+                   }
+                   assert(k==3);
+               }
+               //cout << " D2 " << endl;
+               if (whatd & Fop_dyz){
+
+                 RN_ f0yz(val('.',0,op_dyz));
+                 
+                 int k=0;
+                 for(int i=0;i<E::nv;++i,++k)
+                   {
+                     f0yz[k] = 4.*Dl[i].y*Dl[i].z;
+                   }
+                 for(int i=0;i<E::ne;++i,++k)
+                   {
+                     int i0=E::nvedge[i][0],i1=E::nvedge[i][1];
+                     f0yz[k] = 4.*(Dl[i0].y*Dl[i1].z+ Dl[i1].y*Dl[i0].z);
+                   }
+                   assert(k==3);
+               }
+              // ffassert(0); // to DO FH. sorry
+           }
        
+       }
    }
-     
  
  
    static TypeOfFE_P0Lagrange_curve P0_curve;

@@ -29,6 +29,7 @@ All notable changes to this project will be documented in this file.
 - add R3 Th.be(k)[i].P  to  get the point (R3)  of boundary vertices
 - add projection  function to a mesh , meshL, MeshS or  mesh3 with return a R3 point 
 - see new example dist-projection.edp example in exemples 
+- add dxx, dyy, dzz, dxy,  .. on P2L finite element 
 
 
 ### Changed
