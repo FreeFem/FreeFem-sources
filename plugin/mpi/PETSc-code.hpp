@@ -2524,12 +2524,22 @@ namespace PETSc {
         if (std::is_same< Type, Dmat >::value && ptA->_petsc && nargs[17]) {
             PC pc;
             KSPGetPC(ksp, &pc);
+            PetscBool isType;
+            PetscObjectTypeCompare((PetscObject)pc, PCSHELL, &isType);
+            User< LinearSolver< Type > > userPC = nullptr;
+            if(isType) {
+                PCShellGetContext(pc, &userPC);
+                if(userPC)
+                    delete userPC->op;
+            }
+            else {
+                PCSetType(pc, PCSHELL);
+            }
+            if(!userPC)
+                PetscNew(&userPC);
             const Polymorphic* op = dynamic_cast< const Polymorphic* >(nargs[17]);
             ffassert(op);
             const OneOperator* codeA = op->Find("(", ArrayOfaType(atype< KN< PetscScalar >* >( ), false));
-            PCSetType(pc, PCSHELL);
-            User< LinearSolver< Type > > userPC = nullptr;
-            PetscNew(&userPC);
             PetscInt n;
             MatGetLocalSize(ptA->_petsc, &n, NULL);
             userPC->op = new typename LinearSolver< Type >::MatF_O(n, stack, codeA);
