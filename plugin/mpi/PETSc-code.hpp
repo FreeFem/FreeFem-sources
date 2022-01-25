@@ -1824,7 +1824,7 @@ namespace PETSc {
       Expression A;
       Expression P;
       const int c;
-      static const int n_name_param = 19;
+      static const int n_name_param = 20;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       setOptions_Op(const basicAC_F0& args, int d) : A(0), P(0), c(d) {
@@ -1876,7 +1876,8 @@ namespace PETSc {
     {"O", &typeid(Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >*)},                         // 15
     {"bs", &typeid(long)},                                                                        // 16
     {"precon", &typeid(Polymorphic*)},                                                            // 17
-    {"setup", &typeid(bool)}                                                                      // 18
+    {"setup", &typeid(bool)},                                                                     // 18
+    {"monitor", &typeid(Polymorphic*)}                                                            // 19
   };
   class ShellInjection;
   template< class Type >
@@ -2086,6 +2087,12 @@ namespace PETSc {
     ierr = PetscFree(user);CHKERRQ(ierr);
     PetscFunctionReturn(0);
   }
+  template< class Type >
+  static PetscErrorCode MonitorDestroy(void** ctx) {
+    PetscFunctionBeginUser;
+    delete reinterpret_cast< typename LinearSolver< Type >::MonF_O* >(*ctx);
+    PetscFunctionReturn(0);
+  }
   struct WrapperSubKSP {
     IS  is;
     KSP *ksp;
@@ -2117,6 +2124,14 @@ namespace PETSc {
   }
   template< class, class Container, char N = 'N' >
   static PetscErrorCode Op_User(Container, Vec, Vec);
+  template< class Type >
+  PetscErrorCode Monitor(KSP ksp, PetscInt it, PetscReal rnorm, void* ctx) {
+    PetscFunctionBeginUser;
+    typename LinearSolver< Type >::MonF_O* mat =
+      reinterpret_cast< typename LinearSolver< Type >::MonF_O* >(ctx);
+    mat->apply(it, rnorm);
+    PetscFunctionReturn(0);
+  }
   template< class Type >
   AnyType setOptions< Type >::setOptions_Op::operator( )(Stack stack) const {
     Type *ptA, *ptParent;
@@ -2546,6 +2561,14 @@ namespace PETSc {
             PCShellSetContext(pc, userPC);
             PCShellSetApply(pc, Op_User< LinearSolver< Type >, PC >);
             PCShellSetDestroy(pc, PCShellDestroy< LinearSolver< Dmat >  >);
+        }
+        const Polymorphic* op = nargs[19] ? dynamic_cast< const Polymorphic* >(nargs[19]) : nullptr;
+        if (op) {
+          ffassert(op);
+          const OneOperator* codeM = op->Find(
+            "(", ArrayOfaType(atype< long >( ), atype< double >( ), false));
+          typename LinearSolver< Type >::MonF_O* mon = new typename LinearSolver< Type >::MonF_O(stack, codeM);
+          KSPMonitorSet(ksp, Monitor< LinearSolver< Type > >, mon, MonitorDestroy< Type >);
         }
       }
     }
@@ -3131,6 +3154,34 @@ namespace PETSc {
         ffassert(matT);
         Ax += GetAny< Kn_ >((*matT)(stack));
         WhereStackOfPtr2Free(stack)->clean( );
+      }
+    };
+    class MonF_O {
+     public:
+      Stack stack;
+      mutable long s;
+      C_F0 c_s;
+      mutable double t;
+      C_F0 c_t;
+      Expression mat;
+      MonF_O(Stack stk, const OneOperator* op)
+        : stack(stk), s(0), c_s(CPValue(s)), t(0), c_t(CPValue(t)),
+          mat(op ? CastTo< long >(C_F0(op->code(basicAC_F0_wa({c_s, c_t})), (aType)*op)) : 0) {
+      }
+      ~MonF_O( ) {
+        delete mat;
+        Expression zzz = c_s;
+        delete zzz;
+        zzz = c_t;
+        delete zzz;
+      }
+      long apply(const long& ss, const double& tt) const {
+        s = ss;
+        t = tt;
+        ffassert(mat);
+        long ret = GetAny< long >((*mat)(stack));
+        WhereStackOfPtr2Free(stack)->clean( );
+        return ret;
       }
     };
     const int c;
@@ -5274,6 +5325,50 @@ namespace PETSc {
           return pA;
       }
   }
+  class buildSolution : public OneOperator {
+   public:
+    class buildSolution_Op : public E_F0mps {
+     public:
+      Expression A;
+      Expression B;
+      static const int n_name_param = 0;
+      static basicAC_F0::name_and_type name_param[];
+      Expression nargs[n_name_param];
+      buildSolution_Op(const basicAC_F0& args) : A(0), B(0) {
+        args.SetNameParam(n_name_param, name_param, nargs);
+        A = to<Dmat*>(args[0]);
+        B = to<KN<HPDDM::upscaled_type<PetscScalar>>*>(args[1]);
+      }
+
+      AnyType operator( )(Stack stack) const;
+      operator aType( ) const { return atype< long >( ); }
+    };
+    E_F0* code(const basicAC_F0& args) const { return new buildSolution_Op(args); }
+    buildSolution( )
+      : OneOperator(atype<long>( ), atype<Dmat*>( ), atype<KN<HPDDM::upscaled_type<PetscScalar>>*>( )) {}
+  };
+  basicAC_F0::name_and_type buildSolution::buildSolution_Op::name_param[] = { };
+  AnyType buildSolution::buildSolution_Op::operator( )(Stack stack) const {
+      Dmat* ptA = GetAny<Dmat*>((*A)(stack));
+      KN<HPDDM::upscaled_type<PetscScalar>>* ptKN = GetAny<KN<HPDDM::upscaled_type<PetscScalar>>*>((*B)(stack));
+      ffassert(ptA->_ksp);
+      Mat A;
+      KSPGetOperators(ptA->_ksp, &A, NULL);
+      PetscInt n, N;
+      MatGetLocalSize(A, &n, NULL);
+      MatGetSize(A, &N, NULL);
+      ptKN->resize(n);
+      Vec v;
+      PetscScalar* p = reinterpret_cast<PetscScalar*>(ptKN->operator HPDDM::upscaled_type<PetscScalar>*());
+      VecCreateMPIWithArray(PetscObjectComm((PetscObject)A), 1, n, N, p, &v);
+      KSPBuildSolution(ptA->_ksp, v, NULL);
+      if(!std::is_same<HPDDM::upscaled_type<PetscReal>, PetscReal>::value) {
+        for(int i = n - 1; i >= 0; --i)
+          ptKN->operator[](i) = p[i];
+      }
+      VecDestroy(&v);
+      return 0L;
+  }
 } // namespace PETSc
 
 static void Init_PETSc( ) {
@@ -5381,6 +5476,7 @@ static void Init_PETSc( ) {
   Global.Add("PetscLogStagePop", "(", new OneOperator0< long >(PETSc::stagePop));
   Global.Add("PetscMemoryGetCurrentUsage", "(", new OneOperator0< double >(PETSc::memoryGetCurrentUsage));
   Global.Add("HasType", "(", new OneOperator2_< long, string*, string* >(PETSc::hasType));
+  Global.Add("KSPBuildSolution", "(", new PETSc::buildSolution());
   Init_Common( );
   Dcl_Type< PETSc::DMPlex* >(Initialize< PETSc::DMPlex >, DeleteDTOR< PETSc::DMPlex >);
   zzzfff->Add("DM", atype< PETSc::DMPlex* >( ));
