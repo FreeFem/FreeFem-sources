@@ -10,7 +10,9 @@ mesh3 Th=cube(1,1,1);
   Th.be(k).Element ;   // return the triangle contening the  boundary element k \hfilll
   Th.be(k).whoinElement ;   // return the egde number of triangle contening the  boundary element k \hfilll
   Th.be(k).N ;   // return the Normal to be(k)   version 4.10.1
+  Th.be(k).mesure ;   // return the mesure of be(k)   version 4.10.1
   Th[k].adj(e) ; // return adjacent triangle to k by edge e, and change the value of e to \hfilll
+  Th[k].mesure ; // return  the mesure of element k \hfilll
   
   // the corresponding edge in the adjacent triangle
   Th[k] == Th[k].adj(e) ;// non adjacent triangle return the same 
