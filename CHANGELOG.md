@@ -27,7 +27,7 @@ All notable changes to this project will be documented in this file.
 - add an example tutorial/tgv-test.edp see see what tgv do on matrix build. 
 - add R3 Th.be(k).N to  get the normal of boundary element (in all mesh type)
 - add R3 Th.be(k)[i].P  to  get the point (R3)  of boundary vertices
-- add R3 Th.be(k).mesure to  get the mesure of the boundary elment 
+- add R3 Th.be(k).measure to  get the measure of the boundary elment 
 - add projection  function to a mesh , meshL, MeshS or  mesh3 with return a R3 point 
 - see new example dist-projection.edp example in exemples 
 - add dxx, dyy, dzz, dxy,  .. on P2L finite element 

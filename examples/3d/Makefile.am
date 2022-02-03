@@ -53,7 +53,8 @@ TESTS_OTHER = 3d-Leman.edp \
 	crack-3d.edp \
 	periodic3.edp \
 	LapDG3d1.edp \
-	LapDG3d.edp Connectivite-3d.edp	
+	LapDG3d.edp \
+	Connectivite-3d.edp
 
 TESTS_METIS = schwarz-nm-3d.edp
 
@@ -155,5 +156,8 @@ freefem++.pref:Makefile
 # To check the scripts against their reference values
 regtests.edp: regtests.m4 ../../etc/config/m4/regtests.m4
 	m4 -DASSERT regtests.m4 > regtests.edp
-
+echo:
+	echo $(LIST_CONDITIONAL)
+	echo $(LIST)
+	
 FORCE:

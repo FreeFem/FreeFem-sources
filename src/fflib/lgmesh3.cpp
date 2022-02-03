@@ -2688,7 +2688,7 @@ void init_lgmesh1()
    TheOperators->Add("<=", new OneBinaryOperator<Op2_le<GlgElement<Mesh3>,GlgElement<Mesh3> > >);
 
    Add<GlgBoundaryElement<Mesh3> >("label",".",new OneOperator1_<long,GlgBoundaryElement<Mesh3> >(getlab));
-  Add<GlgBoundaryElement<Mesh3> >("mesure",".",new OneOperator1_<double,GlgBoundaryElement<Mesh3> >(getmesb));
+  Add<GlgBoundaryElement<Mesh3> >("measure",".",new OneOperator1_<double,GlgBoundaryElement<Mesh3> >(getmesb));
   Add<GlgBoundaryElement<Mesh3> >("Element",".",new OneOperator1_<GlgElement<Mesh3> ,GlgBoundaryElement<Mesh3> >(getElement));
    Add<GlgBoundaryElement<Mesh3> >("whoinElement",".",new OneOperator1_<long,GlgBoundaryElement<Mesh3> >(NuElement));
    Add<GlgBoundaryElement<Mesh3> >("N",".",new OneOperator1_<R3,GlgBoundaryElement<Mesh3> >(NElement));
