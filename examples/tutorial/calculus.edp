@@ -61,13 +61,14 @@ cout << "str = " << str << " == abc++abcddddd+2;\n";
 	cout << "\"" << ss << "\"" << endl;
 }
 
-// Add basic operation on R3 version 4.10.1 jan 2022 
-
+// Add basic operation on R3 version 4.10.1 feb. 2022 
+// to speed up compuatution 
 R3 A(1.,2.,3.);
 R3 B(3.,1.,0.);
+R3 AB(A,B); // bipoint affine construction ..
 R3 C = A^B; // cross product ..
-R3 AB = A.*B ; //  product by componant by componant
-R3 AB1 = A./B ; //  div by componant by componant
+R3 AB1 = A.*B ; //  product by componant by componant
+R3 AB2 = A./B ; //  div by componant by componant
 R3 Q= A+3*B+C-B;
 cout << "det= " << det(A,B,C) << " == " << (A^B)'*C << endl; 
 cout << Q.x << " " << Q.y << " "<< Q. z << endl; 
@@ -75,12 +76,13 @@ Q.x =1;
 P=Q;// Current pojnt 
 cout << P.x << " " << P.y << " "<< P. z << endl; 
 cout <<"P=" <<  P << " det " << det(A,B,C) << endl;
-cout << R3(1,3,6) << endl; 
+cout << "R3" << R3(1,3,6) << " R3(A,) =" << R3(A,B) << endl; 
 cout << C.l2 << " " << C.norm << " " << C.linfty  << " " << C <<  " dot product:  " << C'*C <<  endl;
 real[int] E=A; // def array from R3*
-real[int] E2=A+A; // def array from R3
-R3 E3=E; // def R3 from array
-E3=E; // set R3 from array 
-E3+=E;
-
+real[int] F2=A+A; // def array from R3
+R3 F3=E; // def R3 from array
+F3=E; // set R3 from array 
+F3+=E;
+R3 O(0,0,0),E1(1,0,0),E2(0,1,0),E3(0,0,1); 
+cout << " solidangle " << solidangle(O,E1,E2,E3) << " == " << pi/2 << endl;
 

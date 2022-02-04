@@ -520,6 +520,42 @@ long getlab(GlgElement<Mesh3> const & a){  return a.lab();}
 long getlab(GlgBoundaryElement<Mesh3> const & a){  return a.lab();}
 R getmes(GlgElement<Mesh3> const & a){  return a.mes();}
 R getmesb(GlgBoundaryElement<Mesh3> const & a){  return a.mes();}
+R SolidAngle(const R3 & O,const R3 & AA,const R3 & BB,const R3 & CC )
+{
+    R3 A(O,AA),B(O,BB),C(O,CC);
+    R a=A.norme(),b=B.norme(),c=C.norme();
+    R abc  =abs(((A^B),C));
+    R ab = (A,B), ac=(A,C), bc = (B,C);
+    R tg2 = abc/(a*b*c+ab*c+ac*b+bc*a);
+    ffassert(tg2>=0);
+    return 2*atan(tg2);
+}
+R SolidAngle(const R3 & O, GlgBoundaryElement<Mesh3> const & gbe)
+{
+    gbe.Check(); // verif ..
+    const Mesh3 &Th= *gbe.pTh;
+    const Mesh3::BorderElement & be = * gbe.k;
+    return SolidAngle(O,be[0],be[1],be[2]);}
+
+   R SolidAngle(const R3 & O, GlgElement<MeshS> const & gbe)
+{
+    gbe.Check(); // verif ..
+    const MeshS &Th= *gbe.pTh;
+    const MeshS::Element & be = * gbe.k;
+    
+    return SolidAngle(O,be[0],be[1],be[2]);}
+
+R SolidAngle(const R3 & O, GlgElement<Mesh3> const & gbe,const long & nf)
+{
+ gbe.Check(); // verif ..
+ ffassert(nf>=0 && nf < 4); 
+ const Mesh3::Element & be = * gbe.k;
+  static int nvface[4][3]=  {{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}};
+  int i0=nvface[nf][0];
+  int i1=nvface[nf][1];
+  int i2=nvface[nf][2];
+
+ return SolidAngle(O,be[i0],be[i1],be[i2]);}
 
 double pmesh_mes(pmesh3 * p) { ffassert(p) ;  return *p ? (**p).mes : 0.0;}
 double pmesh_mesb(pmesh3 * p) { ffassert(p) ;  return *p ? (**p).mesb : 0.0;}
@@ -2834,7 +2870,12 @@ void init_lgmesh3() {
   Add<pmesh3*>("Gamma",".",new OneOperator1s_<pmeshS,pmesh3*>(pmesh3_gamma));
   Add<pmeshS*>("Gamma",".",new OneOperator1s_<pmeshL,pmeshS*>(pmeshS_gamma));
 
-    
+  Global.Add("solidangle","(",new  OneOperator4_<R,R3,R3,R3,R3>(SolidAngle));
+  Global.Add("solidangle","(",new  OneOperator2_<R,R3,GlgBoundaryElement<Mesh3> >(SolidAngle));
+  Global.Add("solidangle","(",new  OneOperator2_<R,R3,GlgElement<MeshS> >(SolidAngle));
+    Global.Add("solidangle","(",new  OneOperator3_<R,R3,GlgElement<Mesh3>,long >(SolidAngle));
+
+    //GlgElement<Mesh3>
     
     
  // 3D volume

@@ -48,4 +48,15 @@ meshS Th=square3(2,2);
 	   cout << " boundingbox  xmin: " << bb[0] << " xmax: " << bb[1] 
 	                     << " ymin: " << bb[2] << " ymax: " << bb[3] << endl; 
 
-
+    R3 O(0.5,0.5,0.5);
+    real ss =0;
+    for (int k=0;k<Th.nt;++k)
+       ss += solidangle(O,Th[k]);
+     cout << " solid angle = " << ss << " == 4*pi/6 == " << 4*pi/6 << endl;
+    assert( abs(ss-4*pi/6) < 1e-9);
+    func real f(R3 A)
+    {
+	    cout << "P "<< P << " " << nuTriangle << " A = "<< A << endl;
+	    return solidangle(A,Th[nuTriangle])/area;
+    }
+    cout << int2d(Th,qforder=1)(f(O) )<< endl; 

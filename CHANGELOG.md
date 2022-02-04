@@ -31,7 +31,14 @@ All notable changes to this project will be documented in this file.
 - add projection  function to a mesh , meshL, MeshS or  mesh3 with return a R3 point 
 - see new example dist-projection.edp example in exemples 
 - add dxx, dyy, dzz, dxy,  .. on P2L finite element 
-
+- add tools to compute solid angle :  let R3 O; a given point, Th3 a mesh3 and ThS a meshS. 
+     solidangle(O,Th3.be(ke)) // triangular face is the boundary face 
+     solidangle(O,Th3[k],nuface) // triangular face is face nuface of tet Th3[k]
+     solidangle(O,ThS[k]) // triangular face is ThS[k]
+     solidangle(O,A,B,C) // triangular face i (A,B,C) 
+   see examples/3d/Connectivite-3d.edp or /3dSurf/Connectivite-S.edp of test. 
+     
+     
 ### Changed
 - the beaviour of linear solver UMFPACK, CHOLMOD in case of error , now FreeFEm exit on ExecError like in MUMPS
 

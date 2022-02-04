@@ -5709,8 +5709,12 @@ struct OpR3dot: public binary_function<A,B,R> {
 
 R3 CrossProduct(const R3 & A,const R3 & B){ return A^B;}
 R Det(const R3 & A,const R3 & B,const R3 & C){ return det(A,B,C);}
-R3* initR3(R3  *const & p,const  R& a,const  R& b,const  R &c){*p = R3(a,b,c);; return p;}
+R3* initR3(R3  *const & p,const  R& a,const  R& b,const  R &c){*p = R3(a,b,c); return p;}
+R3* initR3(R3  *const & p,const  R3& a,const  R3& b){*p = R3(a,b); return p;}
+
 R3 toR3(const  R& a,const  R& b,const  R &c){return R3(a,b,c);}
+R3 toR3(const  R3& a,const  R3& b){return R3(a,b);}
+
 R3 NElement(lgBoundaryEdge const & a) {  return R3(a.NBoundaryElement()); }//  add Jan 2022
 
 void init_lgfem( ) {
@@ -6062,6 +6066,8 @@ void init_lgfem( ) {
     map_type[typeid(R3).name()]->AddCast(
                                          new E_F1_funcT<R3,R3*>(UnRef<R3>)); 
     TheOperators->Add("<-",new OneOperator4_<R3*,R3*,R,R,R>(initR3));
+    TheOperators->Add("<-",new OneOperator3_<R3*,R3*,R3,R3>(initR3));
+
     TheOperators->Add("=",
                       new OneBinaryOperator<set_eq<R3> ,OneBinaryOperatorMIWO >,
                       new OneBinaryOperator<set_eq<R2> ,OneBinaryOperatorMIWO >);
@@ -6083,7 +6089,8 @@ void init_lgfem( ) {
     TheOperators->Add("/=", new OneBinaryOperator<set_eq_div<R3,R>,OneBinaryOperatorMIWO >);
     TheOperators->Add("<<", new OneBinaryOperator<Print<R3> >);
     Add<R3*>("<--","(",new OneOperator3_<R3,R,R,R>(toR3));
-    Add<R3*>("norm",".",new OneOperator1_<R,R3>(Norme2));
+    Add<R3*>("<--","(",new OneOperator2_<R3,R3,R3>(toR3));
+     Add<R3*>("norm",".",new OneOperator1_<R,R3>(Norme2));
     Add<R3*>("norm2",".",new OneOperator1_<R,R3>(Norme2_2));
     Add<R3*>("l2",".",new OneOperator1_<R,R3>(Norme2));
     Add<R3*>("linfty",".",new OneOperator1_<R,R3>(Norme_infty));
@@ -6123,6 +6130,7 @@ void init_lgfem( ) {
   Add< lgElement >("mesure", ".", new OneOperator1_< double, lgElement >(getarea));
   Add< lgElement >("measure", ".", new OneOperator1_< double, lgElement >(getarea));
   Add< lgBoundaryEdge >("length", ".", new OneOperator1_< double, lgBoundaryEdge >(getlength));
+  Add< lgBoundaryEdge >("measure", ".", new OneOperator1_< double, lgBoundaryEdge >(getlength));
   Add< lgBoundaryEdge >("label", ".", new OneOperator1_< long, lgBoundaryEdge >(getlab));
   Add< lgBoundaryEdge >("Element", ".", new OneOperator1_< lgElement, lgBoundaryEdge >(getElement));
   Add< lgBoundaryEdge >("whoinElement", ".", new OneOperator1_< long, lgBoundaryEdge >(EdgeElement));
