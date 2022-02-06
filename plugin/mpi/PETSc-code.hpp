@@ -1399,6 +1399,65 @@ namespace PETSc {
     }
     return ptA;
   }
+  template< class HpddmType >
+  class initKAIJ_Op : public E_F0mps {
+   public:
+    Expression B;
+    Expression A;
+    Expression S;
+    Expression T;
+    static const int n_name_param = 1;
+    static basicAC_F0::name_and_type name_param[];
+    Expression nargs[n_name_param];
+    initKAIJ_Op(const basicAC_F0& args, Expression param1, Expression param2, Expression param3, Expression param4)
+      : B(param1), A(param2), S(param3), T(param4) {
+      args.SetNameParam(n_name_param, name_param, nargs);
+    }
+
+    AnyType operator( )(Stack stack) const;
+  };
+  template< class HpddmType >
+  basicAC_F0::name_and_type initKAIJ_Op< HpddmType >::name_param[] = {
+    {"symmetric", &typeid(bool)}};
+  template< class HpddmType >
+  class initKAIJ : public OneOperator {
+   public:
+    initKAIJ( )
+      : OneOperator(atype< DistributedCSR< HpddmType >* >( ),
+                    atype< DistributedCSR< HpddmType >* >( ),
+                    atype< DistributedCSR< HpddmType >* >( ),
+                    atype< KNM< PetscScalar >* >( ),
+                    atype< KNM< PetscScalar >* >( )) {}
+
+    E_F0* code(const basicAC_F0& args) const {
+      return new initKAIJ_Op< HpddmType >(args, t[0]->CastTo(args[0]),
+                                                t[1]->CastTo(args[1]),
+                                                t[2]->CastTo(args[2]),
+                                                t[3]->CastTo(args[3]));
+    }
+  };
+  template< class HpddmType >
+  AnyType initKAIJ_Op< HpddmType >::operator( )(Stack stack) const {
+    DistributedCSR< HpddmType >* ptB = GetAny< DistributedCSR< HpddmType >* >((*B)(stack));
+    DistributedCSR< HpddmType >* ptA = GetAny< DistributedCSR< HpddmType >* >((*A)(stack));
+    ffassert(ptA->_petsc);
+    KNM< PetscScalar >* ptS = GetAny< KNM< PetscScalar >* >((*S)(stack));
+    KNM< PetscScalar >* ptT = GetAny< KNM< PetscScalar >* >((*T)(stack));
+    PetscInt p, q;
+    if (ptS->N() && ptS->M()) {
+      p = ptS->N();
+      q = ptS->M();
+    } else if (ptT->N() && ptT->M()) {
+      p = ptT->N();
+      q = ptT->M();
+    }
+    MatCreateKAIJ(ptA->_petsc, p, q, ptS->N() && ptS->M() ? ptS->operator PetscScalar*() : NULL, ptT->N() && ptT->M() ? ptT->operator PetscScalar*() : NULL, &ptB->_petsc);
+    if (nargs[0])
+      MatSetOption(
+        ptB->_petsc, MAT_SYMMETRIC,
+        GetAny< bool >((*nargs[0])(stack)) ? PETSC_TRUE : PETSC_FALSE);
+    return ptB;
+  }
 #endif
 
   template< class HpddmType, bool C = false >
@@ -2643,6 +2702,13 @@ namespace PETSc {
               if(name) PetscViewerASCIIOpen(!O ? PetscObjectComm((PetscObject)ptA->_petsc) : comm, name->c_str(), &viewer);
               else viewer = PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_petsc));
               PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_INFO);
+              pop = true;
+          }
+          else if(type->compare("impl") == 0) {
+              ffassert(!O);
+              if(name) PetscViewerASCIIOpen(!O ? PetscObjectComm((PetscObject)ptA->_petsc) : comm, name->c_str(), &viewer);
+              else viewer = PETSC_VIEWER_STDOUT_(PetscObjectComm((PetscObject)ptA->_petsc));
+              PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_IMPL);
               pop = true;
           }
           else if(type->compare("binary") == 0) {
@@ -5425,6 +5491,7 @@ static void Init_PETSc( ) {
   Add< Dmat* >("range", ".", new OneOperator1s_< KN_<long>, Dmat* >(PETSc::Dmat_range));
 #if !defined(PETSC_USE_REAL_SINGLE)
   TheOperators->Add("<-", new PETSc::initCSRfromArray< HpSchwarz< PetscScalar > >);
+  TheOperators->Add("<-", new PETSc::initKAIJ< HpSchwarz< PetscScalar > >);
 #endif
   TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar >, 0 >);
   TheOperators->Add("<-", new PETSc::initCSRfromDMatrix< HpSchwarz< PetscScalar >, 1 >);
