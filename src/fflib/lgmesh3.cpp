@@ -520,15 +520,77 @@ long getlab(GlgElement<Mesh3> const & a){  return a.lab();}
 long getlab(GlgBoundaryElement<Mesh3> const & a){  return a.lab();}
 R getmes(GlgElement<Mesh3> const & a){  return a.mes();}
 R getmesb(GlgBoundaryElement<Mesh3> const & a){  return a.mes();}
+R Volume(const R3 & O,const R3 & AA,const R3 & BB,const R3 & CC )
+{
+    R3 A(O,AA),B(O,BB),C(O,CC);
+    return det(A,B,C)/6.;
+}
+
+R Volume(const R3 & O, GlgBoundaryElement<Mesh3> const & gbe)
+{
+    gbe.Check(); // verif ..
+    const Mesh3::BorderElement & be = * gbe.k;
+    return Volume(O,be[0],be[1],be[2]);}
+
+R Volume(const R3 & O, GlgElement<MeshS> const & gbe)
+{
+    gbe.Check(); // verif ..
+    const MeshS::Element & be = * gbe.k;
+    return Volume(O,be[0],be[1],be[2]);}
+R Volume(const R3 & O, GlgElement<Mesh3> const & gbe,const long & nf)
+{
+ gbe.Check(); // verif ..
+ ffassert(nf>=0 && nf < 4);
+ const Mesh3::Element & be = * gbe.k;
+  static int nvface[4][3]=  {{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}};
+  int i0=nvface[nf][0];
+  int i1=nvface[nf][1];
+  int i2=nvface[nf][2];
+ return Volume(O,be[i0],be[i1],be[i2]);}
+
 R SolidAngle(const R3 & O,const R3 & AA,const R3 & BB,const R3 & CC )
 {
     R3 A(O,AA),B(O,BB),C(O,CC);
     R a=A.norme(),b=B.norme(),c=C.norme();
-    R abc  =abs(((A^B),C));
+    R ref = max(max(a,b),max(c,1e-20));
+    R epsA = 1e-10;
+    R eps = ref*ref*ref*epsA;//????
+    R abc  =abs(det(A,B,C));
     R ab = (A,B), ac=(A,C), bc = (B,C);
-    R tg2 = abc/(a*b*c+ab*c+ac*b+bc*a);
-    ffassert(tg2>=0);
-    return 2*atan(tg2);
+    R abc1 = a*b*c;
+    R q = (abc1+ab*c+ac*b+bc*a);
+    R theta =0;
+
+    if(  abs(q)>eps || abc > eps )// OK
+    {   theta=atan2(abc,q);// y = abc , x = q
+        
+        //  x > 0 => -pi/2 , pi/2
+        if( theta<0) {
+            
+           if(verbosity) cout << " Bug ??? SolidAngle ::: " << abc << " " << q << " =>  " << theta << " == " << atan(abc/q) << endl;
+            theta+= 2*Pi;
+        }
+       theta*=2;
+    }
+    else // sur le bord et dans le plan
+    {
+        R p = (a+b+c)/2;
+        R area = sqrt(p*(p-a)*(p-b)*(p-c)); // Formule de Heron
+        R epsp = eps*p;
+        if(area < epsp)
+            theta = 0; // bof bof
+        else if( a< epsp )
+            theta=acos((B,C)/(b*c));
+        else if (b < epsp)
+            theta=acos((A,C)/(a*c));
+        else if (c < epsp)
+            theta=acos((A,B)/(a*b));
+        else
+            theta = Pi;
+    }
+    if(verbosity>99) cout << a << " " << b << " " << c << " theta "<< theta << " " << (abs(q)>eps || abc > eps) << " q= " << q << " abc=" << abc  << " eps " << eps  << endl;
+    ffassert(theta>=0);
+    return theta;
 }
 R SolidAngle(const R3 & O, GlgBoundaryElement<Mesh3> const & gbe)
 {
@@ -2874,6 +2936,11 @@ void init_lgmesh3() {
   Global.Add("solidangle","(",new  OneOperator2_<R,R3,GlgBoundaryElement<Mesh3> >(SolidAngle));
   Global.Add("solidangle","(",new  OneOperator2_<R,R3,GlgElement<MeshS> >(SolidAngle));
     Global.Add("solidangle","(",new  OneOperator3_<R,R3,GlgElement<Mesh3>,long >(SolidAngle));
+    // Volume with a Capital because volume is the set in integral
+    Global.Add("Volume","(",new  OneOperator4_<R,R3,R3,R3,R3>(Volume));
+    Global.Add("Volume","(",new  OneOperator2_<R,R3,GlgBoundaryElement<Mesh3> >(Volume));
+    Global.Add("Volume","(",new  OneOperator2_<R,R3,GlgElement<MeshS> >(Volume));
+      Global.Add("Volume","(",new  OneOperator3_<R,R3,GlgElement<Mesh3>,long >(Volume));
 
     //GlgElement<Mesh3>
     

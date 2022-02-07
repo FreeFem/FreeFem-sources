@@ -36,6 +36,12 @@ All notable changes to this project will be documented in this file.
      solidangle(O,Th3[k],nuface) // triangular face is face nuface of tet Th3[k]
      solidangle(O,ThS[k]) // triangular face is ThS[k]
      solidangle(O,A,B,C) // triangular face i (A,B,C) 
+     Volume(O,Th3.be(ke)) // O, triangular face is the boundary face 
+     Volume(O,Th3[k],nuface) // O, triangular face is face nuface of tet Th3[k]
+     Volume(O,ThS[k]) // O, triangular face is ThS[k]
+     Volume(O,A,B,C) // (O,A,B,C) tet ..
+     
+     
    see examples/3d/Connectivite-3d.edp or /3dSurf/Connectivite-S.edp of test. 
      
      
