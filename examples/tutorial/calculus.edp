@@ -85,4 +85,6 @@ F3=E; // set R3 from array
 F3+=E;
 R3 O(0,0,0),E1(1,0,0),E2(0,1,0),E3(0,0,1); 
 cout << " solidangle " << solidangle(O,E1,E2,E3) << " == " << pi/2 << endl;
+cout << A'*R3(1,1,1) << endl; 
+cout << R3(1,2,3).norm << " == " << sqrt(14.) << endl; 
 

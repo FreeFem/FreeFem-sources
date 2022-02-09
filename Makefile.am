@@ -136,7 +136,8 @@ idp/ffddm_functions.idp \
 idp/macro_ddm_substructuring.idp \
 idp/ffddm_parameters.idp \
 idp/macro_ddm.idp \
-idp/CC.idp
+idp/CC.idp \
+idp/ElasticLaw2d.idp
 
 
 

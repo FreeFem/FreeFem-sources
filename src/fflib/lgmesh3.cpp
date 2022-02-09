@@ -2824,16 +2824,18 @@ KN<double> * set_initR3( KN<double>  *a, R3  b){
     SHOWVERB( cout << " set_init array R3"  << " " << &b << endl);
     a->init(3); (*a)[0]=b.x;(*a)[1]=b.y;(*a)[2]=b.z; return a;}
 
- KN<double> * set_initR3( KN<double> *a, R3 * b){
+/* KN<double> * set_initR3( KN<double> *a, R3 * b){
     SHOWVERB( cout << " set_init array R3" << " " << &b << endl);
      a->init(3);   (*a)[0]=b->x;(*a)[1]=b->y;(*a)[2]=b->z; return a;}
+*/
+
 KN_<double>  copy_R3( KN_<double>  a, R3  b){
     SHOWVERB( cout << " set_init array R3"  << " " << &b << endl);
     ffassert(a.N()==3); (a)[0]=b.x;(a)[1]=b.y;(a)[2]=b.z; return a;}
-KN_<double>  copy_R3( KN_<double>  a, R3  *b){
+/*KN_<double>  copy_R3( KN_<double>  a, R3  *b){
     SHOWVERB( cout << " set_init array R3"  << " " << &b << endl);
     ffassert(a.N()==3); (a)[0]=b->x;(a)[1]=b->y;(a)[2]=b->z; return a;}
-
+*/
 
 
 AnyType Array2R3(Stack,const AnyType &b) {
@@ -3025,11 +3027,11 @@ TheOperators->Add("=",
  
  TheOperators->Add("<-",
       new OneOperator2<KN<double> *,KN<double> *,R3>(set_initR3)
-   ,  new OneOperator2<KN<double> *,KN<double> *,R3*>(set_initR3)
+//   ,  new OneOperator2<KN<double> *,KN<double> *,R3*>(set_initR3)
     );
 TheOperators->Add("=",
          new OneOperator2<KN_<double> ,KN_<double> ,R3>(copy_R3)
-      ,  new OneOperator2<KN_<double> ,KN_<double> ,R3*>(copy_R3)
+ //     ,  new OneOperator2<KN_<double> ,KN_<double> ,R3*>(copy_R3)
        );
  map_type[typeid(double).name()]->AddCast(
    new E_F1_funcT<double,pf3r>(pf3r2R<R,0,v_fes3>)

@@ -5535,7 +5535,7 @@ void DclTypeMatrix( ) {
   Dcl_Type< newpMatrice_Creuse< R > >( );          // to def new Matrice_Creuse
   Dcl_Type< Matrice_Creuse_Transpose< R > >( );    // matrice^t   (A')
 
-  Dcl_Type< Matrice_Creuse_Transpose< R > >( );                   // matrice^t   (A')
+ 
   Dcl_Type< Matrice_Creuse_inv< R > >( );                         // matrice^-1   A^{-1}
   Dcl_Type< Matrice_Creuse_inv_trans< R > >( );                   // matrice^-1   A'^{-1}
   Dcl_Type< typename RNM_VirtualMatrix< R >::plusAx >( );         // A*x (A'*x)
@@ -5702,6 +5702,12 @@ struct OppR3dot: public binary_function<A,B,R> {
       return (*pu,*b);} };
 
 template <class R,class A, class B>
+struct OppqR3dot: public binary_function<A,B,R> {
+  static R f(const A & a,const B & b)  {
+      B* pu = a;
+      return (*pu,b);} };
+
+template <class R,class A, class B>
 struct OpR3dot: public binary_function<A,B,R> {
   static R f(const A & a,const B & b)  {
       B pu = a;
@@ -5730,8 +5736,7 @@ void init_lgfem( ) {
    Dcl_Type< Transpose<R3 *> >();
    Dcl_Type< Transpose<R3> >();
 
-  map_type[typeid(R3 *).name( )] = new ForEachType< R3 * >(Initialize< R3 >);
-  Dcl_TypeandPtr< pmesh >(0, 0, ::InitializePtr< pmesh >, ::DestroyPtr< pmesh >,
+   Dcl_TypeandPtr< pmesh >(0, 0, ::InitializePtr< pmesh >, ::DestroyPtr< pmesh >,
                           AddIncrement< pmesh >, NotReturnOfthisType);
   Dcl_TypeandPtr< pmesh3 >(0, 0, ::InitializePtr< pmesh3 >, ::DestroyPtr< pmesh3 >,
                            AddIncrement< pmesh3 >, NotReturnOfthisType);
@@ -5768,7 +5773,7 @@ void init_lgfem( ) {
   Dcl_TypeandPtr< pferbasearray >( );    // il faut le 2 pour pourvoir initialiser
   Dcl_Type< pfer >( );
   Dcl_Type< pferarray >( );
-  Dcl_Type< pferarray >( );
+ // Dcl_Type< pferarray >( );
 
   //  pour des Func FE complex   // FH  v 1.43
   Dcl_TypeandPtr< pfecbase >( );         // il faut le 2 pour pourvoir initialiser
@@ -5880,14 +5885,16 @@ void init_lgfem( ) {
   Dcl_Type< const QuadratureFormular * >( );
   Dcl_Type< const QuadratureFormular1d * >( );
   Dcl_Type< const GQuadratureFormular< R3 > * >( );
-  TheOperators->Add("\'",   new OneOperator1<Transpose<R3* >,R3* >(&Build<Transpose<R3* >,R3* >));
-    TheOperators->Add("\'",   new OneOperator1<Transpose<R3>,R3>(&Build<Transpose<R3 >,R3>));
-  TheOperators->Add("*",new opDotR3(atype<TransE_Array >(),atype< R3* >() )   );
+  TheOperators->Add("\'",   new OneOperator1<Transpose<R3* >,R3* >(&Build<Transpose<R3* >,R3* >,2));
+  TheOperators->Add("\'",   new OneOperator1<Transpose<R3>,R3>(&Build<Transpose<R3 >,R3>,1));
+  //TheOperators->Add("*",new opDotR3(atype<TransE_Array >(),atype< R3* >() )   );
   TheOperators->Add("*",new opDotR3(atype<TransE_Array >(),atype< R3 >() )   );  // 
     // "N" a faire mais dur
     // R3dot
-  TheOperators->Add("*",new OneBinaryOperator< OppR3dot<double,Transpose<R3* >, R3* >> () );  // "N" a faire mais dur
+  //TheOperators->Add("*",new OneBinaryOperator< OppR3dot<double,Transpose<R3* >, R3* >> () );  // "N" a faire mais dur
   TheOperators->Add("*",new OneBinaryOperator< OpR3dot<double,Transpose<R3>, R3>> () );  // "N" a faire mais dur
+
+  TheOperators->Add("*",new OneBinaryOperator< OppqR3dot<double,Transpose<R3* >, R3 >> () );  // "N" a faire mais dur  TheOperators->Add("*",new OneBinaryOperator< OpR3dot<double,Transpose<R3>, R3>> () );  // "N" a faire mais dur
 
   TheOperators->Add("*",new opDotR3(atype< Transpose<R3* > >(),atype<E_Array >() )   );  // "N" a faire mais dur
 
@@ -5919,7 +5926,7 @@ void init_lgfem( ) {
   Global.New("NoUseOfWait", CConstant< bool * >(&NoWait));
   Global.New("NoGraphicWindow", CConstant< bool * >(&NoGraphicWindow));
 
-  Dcl_Type< MeshPoint * >( );
+  //Dcl_Type< MeshPoint * >( );
   Dcl_Type< finconnue * >( );
   Dcl_Type< ftest * >( );
     
@@ -6047,7 +6054,7 @@ void init_lgfem( ) {
     new OpMake_pfes< pfes3, Mesh3, TypeOfFE3, pfes3_tefk >,
     new OpMake_pfes< pfesS, MeshS, TypeOfFES, pfesS_tefk >,    // add for 3D surface  FEspace
     new OpMake_pfes< pfesL, MeshL, TypeOfFEL, pfesL_tefk >);
-  TheOperators->Add("=", new OneOperator2< R3 *, R3 *, R3 * >(&set_eqp));
+  TheOperators->Add("=", new OneOperator2< R3 *, R3 *, R3 * >(&set_eqp,2));
 
   Add< MeshPoint * >("P", ".", new OneOperator_Ptr_o_R< R3, MeshPoint >(&MeshPoint::P));
   Add< MeshPoint * >("N", ".", new OneOperator_Ptr_o_R< R3, MeshPoint >(&MeshPoint::N));
@@ -6090,10 +6097,16 @@ void init_lgfem( ) {
     TheOperators->Add("<<", new OneBinaryOperator<Print<R3> >);
     Add<R3*>("<--","(",new OneOperator3_<R3,R,R,R>(toR3));
     Add<R3*>("<--","(",new OneOperator2_<R3,R3,R3>(toR3));
-     Add<R3*>("norm",".",new OneOperator1_<R,R3>(Norme2));
+    Add<R3*>("norm",".",new OneOperator1_<R,R3>(Norme2));
     Add<R3*>("norm2",".",new OneOperator1_<R,R3>(Norme2_2));
     Add<R3*>("l2",".",new OneOperator1_<R,R3>(Norme2));
     Add<R3*>("linfty",".",new OneOperator1_<R,R3>(Norme_infty));
+    Add<R3>("norm",".",new OneOperator1_<R,R3>(Norme2));
+    Add<R3>("norm2",".",new OneOperator1_<R,R3>(Norme2_2));
+    Add<R3>("l2",".",new OneOperator1_<R,R3>(Norme2));
+    Add<R3>("linfty",".",new OneOperator1_<R,R3>(Norme_infty));
+    Add<R3>("<--","(",new OneOperator3_<R3,R,R,R>(toR3));
+    Add<R3>("<--","(",new OneOperator2_<R3,R3,R3>(toR3));
 
 
 
@@ -6553,7 +6566,7 @@ void init_lgfem( ) {
 
   TheOperators->Add("<-", new OneOperator2_< pfes *, pfes *, pfes >(&set_copy_incr));
 
-  TheOperators->Add("<<", new OneBinaryOperator< PrintPnd< R3 * > >,
+  TheOperators->Add("<<" ,// new OneBinaryOperator< PrintPnd< R3 * > >,
                     new OneBinaryOperator< PrintPnd< Matrice_Creuse< R > * > >,
                     new OneBinaryOperator< PrintPnd< Matrice_Creuse< Complex > * > >
 
