@@ -1,0 +1,50 @@
+// Example of dynamic function load
+// --------------------------------
+// $Id$
+//   Discret Fast Fourier Transform 
+// -------------------------------
+ load "dfft"
+ load "msh3"
+int nx=32,ny=32,nz=32,N=nx*ny*nz;
+// warning the fourier space is not exactly the unite square due to periodic condition
+mesh3 Th=cube(nx-1,ny-1,nz-1,[(nx-1)*x/nx, (ny-1)*y/ny, (nz-1)*z/nz ]);
+// warring  the numbering is of the vertices (x,y) is 
+// given by $  i = round(x*nx) + nx* round(y*ny) +  nx*ny* round(z*nz);
+int nerr=0; 
+for(int v=0; v<Th.nv;++v)
+{
+	P=Th(v).P;
+	int i =  round(x*nx) + nx* round(y*ny) +  nx*ny* round(z*nz);
+	if( i != v) cout << nerr++ << " err "<< i<< " != "<< v << " "<< P << endl;
+	
+}
+cout << " nerr " << nerr<<endl;
+assert(nerr==0);
+fespace Vh(Th,P1); 
+Vh<complex> u;
+ // Lapacien en FFT \hfilll
+ // $ -\Delta u = f $ with full periodic condition \hfilll
+func f = cos(3*2*pi*x)*cos(2*2*pi*y)*sin(2*pi*z); // 
+func ue =  +(1./(square(2*pi)*14.))*cos(3*2*pi*x)*cos(2*2*pi*y)*sin(2*pi*z);  // the exact solution 
+Vh<complex> ff = f;
+Vh<complex> fhat;
+fhat[] = dfft(ff[],ny,nz,-1);
+
+Vh<complex> wij;
+// warning in fact we take mode between -nx/2, nx/2 and -ny/2,ny/2
+//  thank to the operator ?: \label{?:} 
+wij = square(2.*pi)*(  square((x<0.5?x*nx:(x-1)*nx)) 
+                     + square((y<0.5?y*ny:(y-1)*ny))
+		     + square((z<0.5?z*nz:(z-1)*nz)) );
+wij[][0] = 1e-5; // to remove div / 0
+fhat[] = fhat[]./ wij[];  // 
+u[]=dfft(fhat[],ny,nz,1);
+u[] /= complex(N);
+Vh ur,w;
+ur = real(u); // the solution
+w = real(ue); // the exact solution 
+plot(ur,value=1 ,cmm=" ue   ", wait=1); 
+w[] -= ur[]; // array sub
+real err= abs(w[].max)+abs(w[].min) ;
+cout << " err = " << err << endl;
+assert( err  < 1e-6);

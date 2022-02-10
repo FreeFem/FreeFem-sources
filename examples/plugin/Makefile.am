@@ -102,7 +102,7 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	iovtk.edp \
 	ConnectedComponents.edp 
 
-TESTS_FFTW3 = dfft.edp
+TESTS_FFTW3 = dfft.edp dfft-3d.edp
 
 TESTS_FORTRAN = ffnewuoa.edp
 
