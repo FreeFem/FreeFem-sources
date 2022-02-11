@@ -41,7 +41,7 @@ Vh<complex> ff = f;
 Vh<complex> fhat;
 fhat[] = dfft(ff[],ny,-1);
 
-Vh<complex> wij;
+Vh<complex> wij,wijm;
 // warning in fact we take mode between -nx/2, nx/2 and -ny/2,ny/2
 //  thank to the operator ?: \label{?:} 
 wij = square(2.*pi)*(square(( x<0.5?x*nx:(x-1)*nx)) + square((y<0.5?y*ny:(y-1)*ny)));
@@ -61,7 +61,11 @@ assert( err  < 1e-6);
 
 fftwplan p1=plandfft(u[],v[],ny,-1);
 fftwplan p2=plandfft(u[],v[],ny,1);
-real ccc = square(2.*pi);
-cout << " ny = " << ny << endl; 
-map(wij[],ny,ccc*(x*x+y*y)); 
-wij[][0] = 1e-5;
+//mapkk(wijm[],ny,cccx*(x*x)+cccy*(y*y));
+mapkk(wijm[],P,ny,sqr(2*pi*x)+sqr(2*pi*y)); 
+wijm[][0] = 1e-5;
+plot(wij,wait=1);
+plot(wijm,wait=1);
+wij[]-=wijm[];
+cout << " err = " << wij[].linfty << endl;
+assert( wij[].linfty < 1e-8);

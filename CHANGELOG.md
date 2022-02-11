@@ -43,7 +43,14 @@ All notable changes to this project will be documented in this file.
      
      
    see examples/3d/Connectivite-3d.edp or /3dSurf/Connectivite-S.edp of test. 
-     
+ add 3 function mapk, mapkk, mapkk to set a function in fourier space with k parametre 
+   R3 K; // le fourier variable allway 3d (sorry)
+   int n1=16,n2=8, n3=4; 
+   real[int] tab1(nx,tab2(nx*ny),tab3(nx*ny*nz);
+   mapk(tab1,K,sqr(K.x));
+   mapkk(tab2,ny,K,K.norm2);
+   mapkkk(tab3,ny,nz,K,K.norm2);
+  //  Remark you can change K pas P (current point)     
      
 ### Changed
 - the beaviour of linear solver UMFPACK, CHOLMOD in case of error , now FreeFEm exit on ExecError like in MUMPS
@@ -52,7 +59,7 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Removed
--
+-map function  in plugin dfft 
 
 ### Fixed
 - pow(int,int) now call int version not complex version..

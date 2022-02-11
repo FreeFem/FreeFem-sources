@@ -36,7 +36,13 @@ Vh<complex> wij;
 wij = square(2.*pi)*(  square((x<0.5?x*nx:(x-1)*nx)) 
                      + square((y<0.5?y*ny:(y-1)*ny))
 		     + square((z<0.5?z*nz:(z-1)*nz)) );
-wij[][0] = 1e-5; // to remove div / 0
+		    
+real c2 = sqr(2*pi);	
+//  New wait to set fourier function more simpile 	   
+mapkkk(wij[],P,ny,nz,c2*P.norm2);		     
+wij[][0] = 1e-5; // to remove constante ..
+
+plot(wij,wait=1);
 fhat[] = fhat[]./ wij[];  // 
 u[]=dfft(fhat[],ny,nz,1);
 u[] /= complex(N);
@@ -48,3 +54,42 @@ w[] -= ur[]; // array sub
 real err= abs(w[].max)+abs(w[].min) ;
 cout << " err = " << err << endl;
 assert( err  < 1e-6);
+
+// test in all dimention ...
+ {
+int n1=32,n2=32;
+mesh Th= square(n1-1,n2-1);
+fespace Vh(Th,P1);
+Vh<complex> u;
+//verbosity=29; 
+R3 K; 
+mapkk(u[],K,n2,K.norm2);
+cout << u[] << endl; 
+plot(u,wait=1);
+
+}
+{ load "msh3"
+int n1=32,n2=32,n3=32;
+mesh3 Th= cube(n1-1,n2-1,n3-1);
+fespace Vh(Th,P1);
+Vh<complex> u;
+//verbosity=29; 
+R3 K; 
+mapkkk(u[],K,n2,n3,K.norm2);
+//cout << u[] << endl; 
+plot(u,wait=1);
+
+}
+{ 
+int n1=32;
+meshL Th= segment(n1-1);
+fespace Vh(Th,P1);
+Vh<complex> u;
+//verbosity=29; 
+R3 K; 
+mapk(u[],K,K.norm2);
+//cout << u[] << endl; 
+plot(u,wait=1);
+
+}
+
