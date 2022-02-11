@@ -5,6 +5,7 @@
 // -------------------------------
  load "dfft"
  load "msh3"
+ {
 int nx=32,ny=32,nz=32,N=nx*ny*nz;
 // warning the fourier space is not exactly the unite square due to periodic condition
 mesh3 Th=cube(nx-1,ny-1,nz-1,[(nx-1)*x/nx, (ny-1)*y/ny, (nz-1)*z/nz ]);
@@ -54,7 +55,7 @@ w[] -= ur[]; // array sub
 real err= abs(w[].max)+abs(w[].min) ;
 cout << " err = " << err << endl;
 assert( err  < 1e-6);
-
+}
 // test in all dimention ...
  {
 int n1=32,n2=32;
@@ -64,7 +65,7 @@ Vh<complex> u;
 //verbosity=29; 
 R3 K; 
 mapkk(u[],K,n2,K.norm2);
-cout << u[] << endl; 
+//cout << u[] << endl; 
 plot(u,wait=1);
 
 }
