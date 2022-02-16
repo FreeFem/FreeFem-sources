@@ -5,8 +5,11 @@ meshL Lh =buildmeshL(C(20));
 mesh Th= square(20,20,[(x-0.5)*3,(y-0.5)*3]);
 fespace Vh(Th,P1);
 Vh d=dist(Lh);
-Vh Ux = projection(Lh).x-x;
+int nu;
+R3 ph; 
+Vh Ux = projection(Lh,nu=nu,Phat=ph).x-x;
 Vh Uy = projection(Lh).y-y;
-
-plot(d, [Ux,Uy], wait=1);
+cout << nu << " " << ph << endl; 
+//cout << Lh[nu](ph) << endl; 
+plot(d, [Ux,Uy],Lh, wait=1);
 
