@@ -4946,7 +4946,7 @@ namespace PETSc {
       int size;
       MPI_Comm_size(comm, &size);
 #if PETSC_VERSION_GE(3, 17, 0)
-      DMPlexCreateFromFile(comm, pB->c_str(), NULL, overlap > 0 || size == 1 ? PETSC_TRUE : PETSC_FALSE, &pA->_dm);
+      DMPlexCreateFromFile(comm, pB->c_str(), NULL, PETSC_TRUE, &pA->_dm);
 #else
       DMPlexCreateFromFile(comm, pB->c_str(), overlap > 0 || size == 1 ? PETSC_TRUE : PETSC_FALSE, &pA->_dm);
 #endif
