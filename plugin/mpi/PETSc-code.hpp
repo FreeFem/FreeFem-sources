@@ -4218,10 +4218,19 @@ namespace PETSc {
           user->r = new typename LinearSolver< Type >::MatF_O(in->n, stack, codeR);
           Tao tao;
           TaoCreate(PETSC_COMM_WORLD, &tao);
+#if PETSC_VERSION_GE(3, 17, 0)
+          TaoSetObjective(tao, FormObjectiveRoutine< TaoSolver< Type > >, &user);
+          TaoSetGradient(tao, NULL, FormFunction< Tao, TaoSolver< Type > >, &user);
+#else
           TaoSetObjectiveRoutine(tao, FormObjectiveRoutine< TaoSolver< Type > >, &user);
           TaoSetGradientRoutine(tao, FormFunction< Tao, TaoSolver< Type > >, &user);
+#endif
           if (setXl || setXu) TaoSetVariableBounds(tao, xl, xu);
+#if PETSC_VERSION_GE(3, 17, 0)
+          TaoSetSolution(tao, x);
+#else
           TaoSetInitialVector(tao, x);
+#endif
           PetscInt sizeE, sizeI;
           Vec ce = nullptr, ci = nullptr;
           const Polymorphic* op = nargs[5] ? dynamic_cast< const Polymorphic* >(nargs[5]) : nullptr;
@@ -4272,25 +4281,45 @@ namespace PETSc {
               const OneOperator* codeH = op->Find(
                 "(", ArrayOfaType(atype< Kn* >( ), atype< Kn* >( ), atype< Kn* >( ), false));
               user->op = new NonlinearSolver< Type >::VecF_O(in->n, stack, codeH, 2, sizeI, sizeE);
+#if PETSC_VERSION_GE(3, 17, 0)
+              TaoSetHessian(tao, ptA->_petsc, ptA->_petsc,
+                            FormJacobianTao< TaoSolver< Type >, 5 >, &user);
+#else
               TaoSetHessianRoutine(tao, ptA->_petsc, ptA->_petsc,
                                    FormJacobianTao< TaoSolver< Type >, 5 >, &user);
+#endif
             } else if (user->icJ) {
               const OneOperator* codeH =
                 op->Find("(", ArrayOfaType(atype< Kn* >( ), atype< Kn* >( ), false));
               user->op = new NonlinearSolver< Type >::VecF_O(in->n, stack, codeH, 2, sizeI, -1);
+#if PETSC_VERSION_GE(3, 17, 0)
+              TaoSetHessian(tao, ptA->_petsc, ptA->_petsc,
+                            FormJacobianTao< TaoSolver< Type >, 3 >, &user);
+#else
               TaoSetHessianRoutine(tao, ptA->_petsc, ptA->_petsc,
                                    FormJacobianTao< TaoSolver< Type >, 3 >, &user);
+#endif
             } else if (user->ecJ) {
               const OneOperator* codeH =
                 op->Find("(", ArrayOfaType(atype< Kn* >( ), atype< Kn* >( ), false));
               user->op = new NonlinearSolver< Type >::VecF_O(in->n, stack, codeH, 2, -1, sizeE);
+#if PETSC_VERSION_GE(3, 17, 0)
+              TaoSetHessian(tao, ptA->_petsc, ptA->_petsc,
+                            FormJacobianTao< TaoSolver< Type >, 4 >, &user);
+#else
               TaoSetHessianRoutine(tao, ptA->_petsc, ptA->_petsc,
                                    FormJacobianTao< TaoSolver< Type >, 4 >, &user);
+#endif
             } else {
               const OneOperator* codeH = op->Find("(", ArrayOfaType(atype< Kn* >( ), false));
               user->op = new NonlinearSolver< Type >::VecF_O(in->n, stack, codeH);
+#if PETSC_VERSION_GE(3, 17, 0)
+              TaoSetHessian(tao, ptA->_petsc, ptA->_petsc,
+                            FormJacobianTao< TaoSolver< Type >, 2 >, &user);
+#else
               TaoSetHessianRoutine(tao, ptA->_petsc, ptA->_petsc,
                                    FormJacobianTao< TaoSolver< Type >, 2 >, &user);
+#endif
             }
           }
           TaoSetFromOptions(tao);
