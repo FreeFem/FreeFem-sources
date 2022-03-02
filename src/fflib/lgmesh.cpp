@@ -1614,7 +1614,7 @@ bool AddLayers(Mesh const * const & pTh, KN<double> * const & psupp, long const 
 
         supp += s;
     }
-    phi *= (1./nlayer);
+    if (nlayer > 1) phi *= (1./nlayer);
     return true;
 }
 

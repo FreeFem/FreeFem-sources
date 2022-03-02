@@ -7097,11 +7097,12 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 }
 
 
-bool AddLayers(Mesh3 const *const &pTh, KN< double > *const &psupp, long const &nlayer,
+template<class MT>
+bool AddLayers(MT const *const &pTh, KN< double > *const &psupp, long const &nlayer,
                KN< double > *const &pphi) {
   ffassert(pTh && psupp && pphi);
-  const int nve = Mesh3::Element::nv;
-  const Mesh3 &Th = *pTh;
+  const int nve = MT::Element::nv;
+  const MT &Th = *pTh;
   const int nt = Th.nt;
   const int nv = Th.nv;
 
@@ -7119,16 +7120,10 @@ bool AddLayers(Mesh3 const *const &pTh, KN< double > *const &psupp, long const &
     u = 0.;
 
     for (int k = 0; k < nt; ++k) {
-      for (int i = 0; i < nve; ++i) {
-        u[Th(k, i)] += s[k];
-      }
+      if(s[k] > 0.0)
+        for (int i = 0; i < nve; ++i)
+          u[Th(k, i)] = 1.0;
     }
-
-    for (int v = 0; v < nv; ++v) {
-      u[v] = u[v] > 0.;
-    }
-
-    // cout << " u  " << u << endl;
 
     phi += u;
 
@@ -7136,12 +7131,9 @@ bool AddLayers(Mesh3 const *const &pTh, KN< double > *const &psupp, long const &
 
     for (int k = 0; k < nt; ++k) {
       for (int i = 0; i < nve; ++i) {
-        s[k] += u[Th(k, i)];
+        if(u[Th(k,i)] > 0.0)
+          s[k] = 1.0;
       }
-    }
-
-    for (int k = 0; k < nt; ++k) {
-      s[k] = s[k] > 0.;
     }
 
     supp += s;
@@ -7149,90 +7141,9 @@ bool AddLayers(Mesh3 const *const &pTh, KN< double > *const &psupp, long const &
   }
 
   // cout << " phi  " << phi << endl;
-  phi *= (1. / nlayer);
+  if (nlayer > 1) phi *= (1. / nlayer);
   // supp =s;
   return true;
-}
-
-bool AddLayers(MeshS const *const &pTh, KN< double > *const &psupp, long const &nlayer,
-               KN< double > *const &pphi) {
-  ffassert(pTh && psupp && pphi);
-  const int nve = MeshS::Element::nv;
-  const MeshS &Th = *pTh;
-  const int nt = Th.nt;
-  const int nv = Th.nv;
-
-  KN< double > &supp(*psupp);
-  KN< double > u(nv), s(nt);
-  KN< double > &phi(*pphi);
-  ffassert(supp.N( ) == nt);    // P0
-  ffassert(phi.N( ) == nv);     // P1
-  s = supp;
-  phi = 0.;
-
-  for (int step = 0; step < nlayer; ++step) {
-    u = 0.;
-
-    for (int k = 0; k < nt; ++k)
-      for (int i = 0; i < nve; ++i) u[Th(k, i)] += s[k];
-
-    for (int v = 0; v < nv; ++v) u[v] = u[v] > 0.;
-
-    phi += u;
-    s = 0.;
-
-    for (int k = 0; k < nt; ++k)
-      for (int i = 0; i < nve; ++i) s[k] += u[Th(k, i)];
-
-    for (int k = 0; k < nt; ++k) s[k] = s[k] > 0.;
-
-    supp += s;
-  }
-
-  phi *= (1. / nlayer);
-  return true;
-}
-      
-      
-bool AddLayers(MeshL const *const &pTh, KN< double > *const &psupp, long const &nlayer,
-                KN< double > *const &pphi) {
-    ffassert(pTh && psupp && pphi);
-    const int nve = MeshL::Element::nv;
-    const MeshL &Th = *pTh;
-    const int nt = Th.nt;
-    const int nv = Th.nv;
-    
-    KN< double > &supp(*psupp);
-    KN< double > u(nv), s(nt);
-    KN< double > &phi(*pphi);
-    ffassert(supp.N( ) == nt);    // P0
-    ffassert(phi.N( ) == nv);     // P1
-    s = supp;
-    phi = 0.;
-    
-    for (int step = 0; step < nlayer; ++step) {
-        u = 0.;
-        
-        for (int k = 0; k < nt; ++k)
-            for (int i = 0; i < nve; ++i) u[Th(k, i)] += s[k];
-        
-        for (int v = 0; v < nv; ++v) u[v] = u[v] > 0.;
-        
-        phi += u;
-        s = 0.;
-              
-        for (int k = 0; k < nt; ++k)
-            for (int i = 0; i < nve; ++i)
-                s[k] += u[Th(k, i)];
-        
-        for (int k = 0; k < nt; ++k)
-            s[k] = s[k] > 0.;
-        
-        supp += s;
-    }
-          
-    phi *= (1. / nlayer);
-    return true;
 }
       
       
@@ -9561,7 +9472,7 @@ static void Load_Init( ) {
     
   Global.Add(
     "AddLayers", "(",
-    new OneOperator4_< bool, const Mesh3 *, KN< double > *, long, KN< double > * >(AddLayers));
+    new OneOperator4_< bool, const Mesh3 *, KN< double > *, long, KN< double > * >(AddLayers<Mesh3>));
 
   Global.Add("bcube", "(", new cubeMesh);
   Global.Add("bcube", "(", new cubeMesh(1));
@@ -9586,8 +9497,8 @@ static void Load_Init( ) {
   Global.Add("showborder", "(", new OneOperator1< long, const MeshS * >(ShowBorder));
   Global.Add("getborder", "(", new OneOperator2< long, const MeshS *, KN< long > * >(GetBorder));
 
-  Global.Add("AddLayers", "(", new OneOperator4_< bool, const MeshS *, KN< double > *, long, KN< double > * >(AddLayers));
-  Global.Add("AddLayers", "(", new OneOperator4_< bool, const MeshL *, KN< double > *, long, KN< double > * >(AddLayers));
+  Global.Add("AddLayers", "(", new OneOperator4_< bool, const MeshS *, KN< double > *, long, KN< double > * >(AddLayers<MeshS>));
+  Global.Add("AddLayers", "(", new OneOperator4_< bool, const MeshL *, KN< double > *, long, KN< double > * >(AddLayers<MeshL>));
     
   Global.Add("square3", "(", new Square);
   Global.Add("square3", "(", new Square(1));
