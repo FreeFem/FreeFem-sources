@@ -2659,5 +2659,5 @@ if test "$enable_summary" = yes; then
 fi
 if test "${prefix_petsc}" != no -a   ! \( -d "${prefix_petsc}/real/lib"  -o  -d "${prefix_petsc}/r/lib" \) ; then
   AC_MSG_NOTICE([ PETSc directories do not exist, to build do:])
-  AC_MSG_NOTICE([cd 3rdparty/ff-petsc && make])
+  AC_MSG_NOTICE([cd 3rdparty/ff-petsc && make petsc-slepc])
 fi
