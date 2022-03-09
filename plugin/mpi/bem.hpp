@@ -1196,6 +1196,54 @@ void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKer
     
 }
 
+/*
+template<int d>
+struct is_dim_2{static constexpr bool value = false;};
+template<>
+struct is_dim_2<2>{static constexpr bool value = true;};
+
+template<int d>
+struct is_dim_1{static constexpr bool value = false;};
+template<>
+struct is_dim_1<1>{static constexpr bool value = true;};
+
+template <class K, class mesh, typename std::enable_if_t<is_dim_1<mesh::dim>::value>* = nullptr>
+void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, mesh& m, double alpha) {
+    return;
+}
+*/
+
+template <class K, class mesh>
+void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, mesh& m, double alpha) {
+    cout << " mettre un msg d erreur pour dire que cette combi n existe pas" << endl;
+    return;
+}
+
+template <class K>
+void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, Mesh2D& m, double alpha) {
+
+    bemtool::BIOpKernelEnum ker1 = whatTypeEnum(typeKernel,0), ker2 = whatTypeEnum(typeKernel,1);;
+    double kappaRe1 = typeKernel->wavenum[0].real(), kappaRe2 = typeKernel->wavenum[1].real();
+    double kappaIm1 = typeKernel->wavenum[0].imag(), kappaIm2 = typeKernel->wavenum[1].imag();
+
+    bool iscombined = iscombinedKernel(typeKernel);
+    if(iscombined) ffassert( (kappaRe1==kappaRe2) && (kappaIm1==kappaIm2) );
+    std::complex<double> coeff1=typeKernel->coeffcombi[0], coeff2=typeKernel->coeffcombi[1];
+
+    bemtool::Dof<RT0_2D> dof(m);
+
+    // BIO_Generator -> single kernel
+    // Equ Helmholtz kappa1.real() > 0 et kappa1.imag() == 0
+    if ( (kappaRe1 && !kappaIm1) && !iscombined && (!kappaRe2 && !kappaIm2) && !alpha ) {
+        switch (ker1) {
+            case bemtool::SL_OP : generator=new bemtool::BIO_Generator<bemtool::BIOpKernel<MA,bemtool::SL_OP,3,RT0_2D,RT0_2D>,RT0_2D>(dof,kappaRe1);
+                if(mpirank == 0 && verbosity>5) cout << " call bemtool func BIOpKernel<HE,SL_OP ..." << endl; break;
+        }
+    }
+    else {
+        if(mpirank == 0) cout << "kernel definition error" << endl; ffassert(0);}
+}
+
 template <class R, typename P, typename MeshBemtool, class MMesh>
 void ff_POT_Generator(htool::VirtualGenerator<R>*& generator,BemPotential *typePot, bemtool::Dof<P> &dof, MeshBemtool &mesh, bemtool::Geometry &node_output) {
     

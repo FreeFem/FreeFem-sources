@@ -27,6 +27,7 @@ using namespace std;
 using namespace htool;
 using namespace bemtool;
 
+#include <type_traits>
 #include "bem.hpp"
   
 double ff_htoolEta=10., ff_htoolEpsilon=1e-3;
@@ -824,7 +825,7 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
     typedef typename std::conditional<SMesh::RdHat::d==1,P0_1D,P0_2D>::type P0;
     typedef typename std::conditional<SMesh::RdHat::d==1,P1_1D,P1_2D>::type P1;
     typedef typename std::conditional<SMesh::RdHat::d==1,P2_1D,P2_2D>::type P2;
-    
+
     assert(b && b->nargs);
     const list<C_F0> & largs=b->largs;
     
@@ -878,6 +879,16 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
     Geometry node; MeshBemtool mesh;
     Mesh2Bemtool(ThU, node, mesh);
 
+/*
+    for (int i=0; i<ThU.nt;i++) {
+        auto &K = ThU[i];
+        for (int e=0;e<3;e++) {
+            R signe = K.EdgeOrientation(e) ;
+            cout << i << " " << e << " " << signe << endl;
+        }
+    }
+*/
+
     vector<double> p1(3*n);
     vector<double> p2(3*m);
     Fem2D::R3 pp;
@@ -891,9 +902,20 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
     bool SP0 = SRdHat::d == 1 ? (Snbv == 0) && (Snbe == 1) && (Snbt == 0) : (Snbv == 0) && (Snbe == 0) && (Snbt == 1);
     bool SP1 = (Snbv == 1) && (Snbe == 0) && (Snbt == 0);
     bool SP2 = (Snbv == 1) && (Snbe == 1) && (Snbt == 0);
+    bool SRT0 = (SRdHat::d == 2) && (Snbv == 0) && (Snbe == 1) && (Snbt == 0);
 
     if (SP2) {
         Dof<P2> dof(mesh,true);
+        for (int i=0; i<n; i++) {
+            const std::vector<N2>& jj = dof.ToElt(i);
+            p = dof(jj[0][0])[jj[0][1]];
+            p1[3*i+0] = p[0];
+            p1[3*i+1] = p[1];
+            p1[3*i+2] = p[2];
+        }
+    }
+    else if (SRT0) {
+        Dof<RT0_2D> dof(mesh);
         for (int i=0; i<n; i++) {
             const std::vector<N2>& jj = dof.ToElt(i);
             p = dof(jj[0][0])[jj[0][1]];
@@ -974,6 +996,9 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
         else if (SP2) {
             Dof<P2> dof(mesh,true);
             ff_BIO_Generator<R,P2,SMesh>(generator,Ker,dof,alpha);
+        }
+        else if (SRT0 && SRdHat::d == 2) {
+            ff_BIO_Generator_Maxwell<R>(generator,Ker,mesh,alpha);
         }
         else
             ffassert(0);
