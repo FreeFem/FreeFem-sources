@@ -1,6 +1,7 @@
 load "Element_Mixte3d"
 load "msh3"
 load "Element_P1dc1"
+// never tested ......
 
 /*
    Solving the following Poisson problem
@@ -27,8 +28,17 @@ macro divS(u1,u2,u3) (dx(u1)+dy(u2)+dz(u3)) //EOM
 
 real theta = pi/2;
 meshS ThS = square3(10,10, [x, cos(theta)*y-sin(theta)*z, sin(theta)*y+cos(theta)*z]);
-fespace VhS(ThS,[RT1S,P1dc]);
-
+plot(ThS,wait=1);
+verbosity=1000;
+fespace WhS(ThS,RT0S);// bug !!!!!
+fespace PhS(ThS,P1);// bug !!!!!
+WhS [u1,u2,u3]=[x,y,z];
+PhS un = dist(u1,u2,u3);
+plot(un,wait=1,cmm="un");
+plot([u1,u2,u3],wait=1,cmm="u1u2,u3");
+exit(0); 
+fespace VhS(ThS,[RT0S,P0]);// bug !!!!!
+verbosity=1;
 
 func gd = 1.;
 func g1n = 1.;
@@ -53,3 +63,4 @@ uS1[] = AS^-1*bS1[];
 
 plot([uS1,uS2,uS3], coef=0.1,cmm="u", value=true, wait=1);
 plot(pS,fill=1,wait=1,value=true);   
+

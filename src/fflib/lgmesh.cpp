@@ -1926,7 +1926,7 @@ long savegnuplot(pmesh pTh,string* pgp)
     }
 extern void init_glumesh2D();
 static basicAC_F0::name_and_type OneOperator1s_np_name_param[2] = {
-  {"nu", &typeid(long)},
+  {"nu", &typeid(long*)},
   {"Phat", &typeid(R3 *)} };
 
 template<class R,class A0,class E=E_F0>
