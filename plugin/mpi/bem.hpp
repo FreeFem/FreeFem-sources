@@ -1220,7 +1220,7 @@ void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel 
 }
 
 template <class K>
-void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, Mesh2D& m, double alpha) {
+void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel *typeKernel, bemtool::Mesh2D& m, double alpha) {
 
     bemtool::BIOpKernelEnum ker1 = whatTypeEnum(typeKernel,0), ker2 = whatTypeEnum(typeKernel,1);;
     double kappaRe1 = typeKernel->wavenum[0].real(), kappaRe2 = typeKernel->wavenum[1].real();
@@ -1230,13 +1230,13 @@ void ff_BIO_Generator_Maxwell(htool::VirtualGenerator<K>*& generator, BemKernel 
     if(iscombined) ffassert( (kappaRe1==kappaRe2) && (kappaIm1==kappaIm2) );
     std::complex<double> coeff1=typeKernel->coeffcombi[0], coeff2=typeKernel->coeffcombi[1];
 
-    bemtool::Dof<RT0_2D> dof(m);
+    bemtool::Dof<bemtool::RT0_2D> dof(m);
 
     // BIO_Generator -> single kernel
     // Equ Helmholtz kappa1.real() > 0 et kappa1.imag() == 0
     if ( (kappaRe1 && !kappaIm1) && !iscombined && (!kappaRe2 && !kappaIm2) && !alpha ) {
         switch (ker1) {
-            case bemtool::SL_OP : generator=new bemtool::BIO_Generator<bemtool::BIOpKernel<MA,bemtool::SL_OP,3,RT0_2D,RT0_2D>,RT0_2D>(dof,kappaRe1);
+            case bemtool::SL_OP : generator=new bemtool::BIO_Generator<bemtool::BIOpKernel<MA,bemtool::SL_OP,3,bemtool::RT0_2D,bemtool::RT0_2D>,bemtool::RT0_2D>(dof,kappaRe1);
                 if(mpirank == 0 && verbosity>5) cout << " call bemtool func BIOpKernel<HE,SL_OP ..." << endl; break;
         }
     }
