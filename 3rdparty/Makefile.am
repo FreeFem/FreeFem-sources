@@ -152,7 +152,7 @@ lib/WHERE.htool: ./getall
 # end HTOOL
 # begin BEMTOOL
 install-bemtool: ./getall
-	 if test -n "$(TOOL_COMPILE_bem)"; then   ./getall -o bemtool -a;  $(MAKE) include/bemtool/done.tag  lib/WHERE.bemtool; else true;fi
+	 if test -n "$(TOOL_COMPILE_bem)"; then   ./getall -o bemtool -a;  $(MAKE) include/BemTool/done.tag  lib/WHERE.bemtool; else true;fi
 reinstall-bemtool:./getall
 	-rm lib/WHERE.bemtool
 	-rm ./pkg/bemtool.zip
