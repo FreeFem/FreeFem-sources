@@ -1273,7 +1273,9 @@ AnyType TypeOfFESto2(Stack, const AnyType &b) {
   if (i != TEF2dtoS.end( )) tS = i->second;
 
   if (tS == 0) {
-    cerr << " sorry no cast to this surface finite element " << endl;
+    cerr << " sorry no cast to this surface finite element " << t2 << endl;
+ //     for( map< TypeOfFE *, TypeOfFES * >::const_iterator i=TEF2dtoS.begin(); i != TEF2dtoS.end(); ++i )
+ //     {  cout << i->first << " -> " << i->second <<endl; }
     ExecError(" sorry no cast to this surface finite element ");
   }
   return tS;
@@ -1321,6 +1323,10 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
       if (periodic) delete[] periodic;
     }
     AnyType operator( )(Stack s) const {
+        
+        aType t_tfe = atype< TypeOfFE * >( );// 
+        aType t_tfe2 = atype< TypeOfFE2 * >( );
+
       const int d = Mesh::Rd::d;
       const int dHat = Mesh::RdHat::d;
       const  int dHatfe = TypeOfFE::RdHat::d;
@@ -1331,7 +1337,15 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
       AnyType r = (*eppfes)(s);
       const TypeOfFE **tef = new const TypeOfFE *[atef.size( )];
         for (int i = 0; i < atef.size( ); i++)
-        if (tedim[i] == dHat && d==dfe)
+        {
+         // verif  type atef[i]  coorection mars 2022 ..
+         aType  ttfe =atef[i].left();
+         ffassert( ttfe == t_tfe || t_tfe2) ;
+         if(verbosity>9) cout << "OpMake_pfes_np :: " << i << " " << (tedim[i] == dHat && d==dfe) << " " << tedim[i]
+                                                                        << dHat << d << dfe
+                << " " << typeid(TypeOfFE).name() << endl;
+
+        if (ttfe == t_tfe) // good  type no converstion
           tef[i] = GetAny< TypeOfFE * >(atef[i].eval(s));
         else if (tedim[i] == 2 && d==3 && dHat == 3)
           tef[i] = GetAny< TypeOfFE * >(TypeOfFE3to2(s, atef[i].eval(s)));
@@ -1341,6 +1355,7 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
           tef[i] = GetAny< TypeOfFE * >(TypeOfFELto2(s, atef[i].eval(s)));
         else
           ffassert(0);
+        }
       
       pfes *ppfes = GetAny< pfes * >(r);
       bool same = true;
