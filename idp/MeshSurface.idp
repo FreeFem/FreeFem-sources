@@ -94,6 +94,98 @@ func meshS Sphere(real R,real h,int L,real Ox,real Oy,real Oz,int orientation)
   return Ellipsoide(R,R,R,h,L,Ox,Oy,Oz,orientation);
 }
 
+func meshS Icosahedron (int orientation,int wplot)
+{
+	
+//===================================================================================
+//Angles utiles
+//===================================================================================
+real tan3pi10 = sqrt(25.+10.*sqrt(5.))/5.;//3pi/10 angle entre deux aretes du pentagone
+real sin3pi10 = (sqrt(5)+1)/4;//3pi/10 angle entre deux aretes du pentagone
+real cos3pi10 = sqrt(10-2*sqrt(5))/4;//3pi/10 angle entre deux aretes du pentagone
+
+real cosdiedre = sqrt(5)/3; //angle diedre de l'icosaedre -pi/2
+real sindiedre = 2./3; //angle diedre de l'icosaedre -pi/2
+
+real cosico = tan3pi10/sqrt(3); //angle entre une face de la pyramide pentagonale par rapport à l'horizontale
+real sinico = sqrt(1-square(cosico)); //angle entre une face de la pyramide pentagonale par rapport à l'horizontale
+
+real sin2pi5 = sqrt(10+2*sqrt(5))/4; //2pi/5 angle pour la rotation des aretes du pentagone
+real cos2pi5 = (sqrt(5)-1)/4; //2pi/5 angle pour la rotation des aretes du pentagone
+
+real cosicod = cosdiedre*cosico+sindiedre*sinico;//angle diedre -pi/2 - ico
+real sinicod = sindiedre*cosico-cosdiedre*sinico;//angle diedre -pi/2 - ico
+
+
+real sinpi3 = sqrt(3)/2; //angle du triangle equilateral
+
+int n = 1;
+
+real sinpi5 = cos3pi10;//pi/5 angle de décalage entre deux demi icosaedre
+real cospi5 = sin3pi10;//pi/5 angle de décalage entre deux demi icosaedre
+
+real tanpi10 = sqrt(25.-10.*sqrt(5.))/5.;//pi/10 
+real h = 0.5*sqrt(3-square(tanpi10));//hauteur du prisme d'ordre 5;
+
+//=================================================================================
+//Construction du triangle equilateral en 2D
+//=================================================================================
+border a(t=0,1){x=t; y=0; label =1;};
+border b(t=1,0.5){x=t; y=sqrt(3)*(1-t); label =2;};
+border c(t=0.5,0){x=t; y=sqrt(3)*(t); label =3;};
+mesh Triangle= buildmesh(a(n)+b(n)+c(n)); //traingle equilateral
+if(wplot>2) plot (cmm="Triangle",Triangle,wait=1);
+
+func f = 1;
+
+
+meshS Triangle3 = movemesh23(Triangle,transfo=[x,0,y]);//trianglesup
+if(wplot>2) plot (cmm="Triangle3",Triangle3,wait=1); 
+
+meshS TriangleS = change(fregion=1,movemeshS(Triangle3,transfo=[x,sinico*y+cosico*z,-cosico*y+sinico*z]));//rotation de -(pi - diedre) par rapport à l'axe des x pour former une face de la pyramide pentagonale
+if(wplot>2) plot (cmm="TriangleS",TriangleS,wait=1);
+//medit("face pyramide pentagonale",TriangleS);
+
+meshS TriangleI = change(fregion=2,movemeshS(TriangleS,transfo=[x,-cosdiedre*y+sindiedre*z,-sindiedre*y-cosdiedre*z],orientation=-1));//triangle inf rotation de l'angle diedre par rapport au triangle sup
+if(wplot>2) plot (cmm="TriangleI",TriangleI,wait=1);
+
+meshS Triangles = TriangleI+TriangleS;
+
+if(wplot>1) plot (cmm="Triangles",Triangles,wait=1);
+//medit("face pyramide pentagonale + face antiprisme d'ordre 5",Triangles);
+
+meshS T1 = change(movemeshS(Triangles,transfo=[x-0.5,y-sinpi3*cosico,z],orientation=1),fregion = region);//translation pour que la figure soit sur le bord du pentagone
+meshS T2 = change(movemeshS(T1,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z],orientation=1),fregion = region+2);;
+meshS T3 = change(movemeshS(T2,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z]),fregion = region+2);;
+meshS T4 = change(movemeshS(T3,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z]),fregion = region+2);;
+meshS T5 = change(movemeshS(T4,transfo=[cos2pi5*x-sin2pi5*y,sin2pi5*x+cos2pi5*y,z]),fregion = region+2);;
+
+meshS Tdemi= T1+T2+T3+T4+T5;//moitié de l'icosaedre
+meshS Tdemi0 = movemeshS(Tdemi,transfo=[x,y,z+0.5*h]);//moitié supérieure
+meshS Tdemi1 = movemeshS(Tdemi0,transfo=[x,y,-z]);//moitié inférieure
+meshS Tdemi1rot = change(movemeshS(Tdemi1,transfo=[cospi5*x-sinpi5*y,sinpi5*x+cospi5*y,z],orientation=-1),fregion = region+10);//rotation de la moitié inférieure pour les emboiter
+meshS Ticosaedre = Tdemi0+Tdemi1rot;
+//Ticosaedre=trunc(Ticosaedre,1,split=5);
+if(wplot) plot(Ticosaedre,wait=1);
+//cout << regions(Ticosaedre) << endl; 
+return Ticosaedre;
+}
+
+
+func meshS Sphere20 (real R,int N,int orientation,int wplot)
+{// Isocaedre regulier !!!!  Thank G. Vergez ..
+meshS Ticosaedre = Icosahedron(orientation,wplot);
+Ticosaedre=trunc(Ticosaedre,1,split=N);
+if(wplot) plot(cmm="Icosaedre",Ticosaedre,wait=1);
+
+//=================================================================================
+//Construction de la sphere 3D
+//=================================================================================
+func metric =dist(x,y,z)/R;
+meshS Th = movemeshS(Ticosaedre,transfo=[x/metric,y/metric,z/metric]); 
+if(wplot) plot (cmm="Th",Th,wait=1);
+return Th;
+}
 
 /*  test: 
  load "tetgen" 

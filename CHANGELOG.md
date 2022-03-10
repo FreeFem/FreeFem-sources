@@ -51,6 +51,7 @@ All notable changes to this project will be documented in this file.
    mapkk(tab2,ny,K,K.norm2);
    mapkkk(tab3,ny,nz,K,K.norm2);
   //  Remark you can change K pas P (current point)     
+  add in SurfaceMesh.ipd fonction to build a Isocaedron and a Sphere from this Isocaedron
      
 ### Changed
 - the beaviour of linear solver UMFPACK, CHOLMOD in case of error , now FreeFEm exit on ExecError like in MUMPS
@@ -66,6 +67,7 @@ All notable changes to this project will be documented in this file.
 - correct the normal the N implicite variable   on meshL case 
 - correct version dump in banner FreeFem++ - version 4.10 (V ...
 - correct  in CPU time on big mesh due to do bad HCode in HashTable.hpp
+- bug in array of finite element on meshhS, meshL (ie.  `fespace Vh(ThS,[P1,P1]);` ) 
 
 
 ## [4.10]
