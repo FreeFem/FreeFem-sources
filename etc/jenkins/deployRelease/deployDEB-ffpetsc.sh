@@ -20,7 +20,7 @@ GH_DEB_NAME="FreeFEM-${VERSION}-amd64.deb"
 ## DEB build
 autoreconf -i
 ./configure --enable-download --enable-optim --enable-generic
-./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS,htool
+./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS
 ## compile and install ff-petsc
 cd 3rdparty/ff-petsc && make petsc-slepc && cd -
 ./reconfigure

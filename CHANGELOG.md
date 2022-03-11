@@ -65,6 +65,7 @@ All notable changes to this project will be documented in this file.
   
 ### Changed
 - the beaviour of linear solver UMFPACK, CHOLMOD in case of error , now FreeFEm exit on ExecError like in MUMPS
+- PETSc 3.17.0
 
 ### Deprecated
 -

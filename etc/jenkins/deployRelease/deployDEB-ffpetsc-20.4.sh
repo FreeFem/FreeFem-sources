@@ -20,7 +20,7 @@ if $1 = "no" ; then
 ## DEB build
 autoreconf -i
 ./configure --enable-download --enable-optim --enable-generic
-./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS,htool
+./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS
 ## compile and install f, libhdf5-dev (>=1.10.4)f-petsc
 cd 3rdparty/ff-petsc && make petsc-slepc && cd -
 ./reconfigure
