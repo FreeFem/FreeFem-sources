@@ -659,8 +659,10 @@ ENDIFMACRO
             mpiAllReduce(tmp, hmax, ThName#Comm, mpiMAX);
         }
         int between = 0;
-        for(int i = 0; i < mpiSize(ThName#Comm); ++i) {
-            if(i != mpiRank(ThName#Comm) &&
+        int size = mpiSize(ThName#Comm);
+        int rank = mpiRank(ThName#Comm);
+        for(int i = 0; i < size; ++i) {
+            if(i != rank &&
 IFMACRO(dimension,2)
             !(bbAll[1 + 4 * i] < bb[0] - hmax
               || bbAll[0 + 4 * i] > bb[1] + hmax
@@ -1688,7 +1690,7 @@ ENDIFMACRO
         backupRegion = backup[];
         int[int] newRegion(ThName.nt);
         int rank = mpiRank(ThName#Comm);
-        for[i, v : privateDmesh#ThName#khiDef[1]] newRegion[i] = abs(v - rank) < 1.0e-2 ? 1 : 0;
+        for[i, v : privateDmesh#ThName#khiDef[1]] newRegion[i] = abs(v - rank) < 1.0e-2;
         ThName = change(ThName, fregion = newRegion[nuTriangle]);
     }
     meshN[int] recvTh(rankRecv.n);
@@ -1720,10 +1722,9 @@ ENDIFMACRO
             int[int] n2o;
             sendTh[i] = trunc(ThName, part > 1.0e-2, new2old = n2o);
             fespace VhRestrictionPrivate(sendTh[i], Pk);
-            int[int] map;
-            map = restrict(VhRestrictionPrivate, VhLocalOldPrivate, n2o);
+            int[int] map = restrict(VhRestrictionPrivate, VhLocalOldPrivate, n2o);
             exchangeU[rankRecv.n + i].resize(VhRestrictionPrivate.ndof);
-            for[j, w : map] exchangeU[rankRecv.n + i][j] = scaledU[][w];
+            exchangeU[rankRecv.n + i] = scaledU[](map);
             Isend(processor(v, rqSendTh[i]), sendTh[i]);
             Isend(processor(v, rqSendU[i]), exchangeU[rankRecv.n + i]);
         }
@@ -1770,7 +1771,7 @@ ENDIFMACRO
                 [I, J, C] = R;
                 fespace VhRestrictionPrivate(recvTh[index], Pk);
                 int[int] restriction = restrict(VhRestrictionPrivate, VhExchangePrivate, J);
-                for[i, v : restriction] uExchange[][v] += exchangeU[index][i];
+                uExchange[](restriction) += exchangeU[index];
             }
         }
     }

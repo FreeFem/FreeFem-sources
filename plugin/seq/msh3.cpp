@@ -2663,10 +2663,8 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
     int fk, ke = Th.BoundaryElement(i, fk);
     int fkk, kke = Th.ElementAdj(ke, fkk = fk);
     bool onborder = (kke == ke) || (kke < 0);
-    const T &KE(Th[ke]);
   
       
-    TRdHat B = KE.PBord(fk, PtHat2);
     int iv[B::nv];
     for (int j = 0; j < k; j++) iv[j] = Th.operator( )(K[j]);
     if(rV) {
@@ -2676,6 +2674,8 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
 
     int l0, l1 = ChangeLab(mapBref, l0 = K.lab);
     if (flab) {
+      const T &KE(Th[ke]);
+      TRdHat B = KE.PBord(fk, PtHat2);
       R3 NN = KE.N(fk);
       double mes = NN.norme( );
       NN /= mes;		  
