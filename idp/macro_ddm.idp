@@ -705,48 +705,29 @@ ENDIFMACRO
         real timerReconstruction = mpiWtime();
         varf vG(u, v) = on(labels(ThName), u = 1.0);
         fespace VhGammaPrivate(ThName, P1);
-        fespace PhGammaPrivate(ThName, P0);
         VhGammaPrivate gamma;
         gamma[] = vG(0, VhGammaPrivate, tgv = -1);
-        PhGammaPrivate gammaElt = gamma > 0.1;
-        meshN ThLocalInit = trunc(ThName, gammaElt > 0.1, label = -111112);
-        meshN ThLocalInitInterior = trunc(ThName, gammaElt < 0.1, label = -111112);
+        meshN[int] ThTab(neighborsName.n + 2);
         neighborsName.sort;
         int between = 0;
+        int rank = mpiRank(ThName#Comm);
         for(int i = 0; i < neighborsName.n; ++i)
-            if(neighborsName[i] > mpiRank(ThName#Comm)) {
+            if(neighborsName[i] > rank) {
                 between = i;
                 break;
             }
         if(neighborsName.n)
-            if(neighborsName[neighborsName.n - 1] < mpiRank(ThName#Comm))
+            if(neighborsName[neighborsName.n - 1] < rank)
                 between = neighborsName.n;
-        meshN[int] ThTab(neighborsName.n + 1);
-        ThTab[between] = ThLocalInit;
         mpiRequest[int] rqRecv(neighborsName.n);
+        for[i, v : neighborsName]
+            Irecv(processor(v, ThName#Comm, rqRecv[i]), ThTab[i + (i >= between)]);
+        ThTab[between] = trunc(ThName, gamma > 0.01, label = -111112);
         mpiRequest[int] rqSend(neighborsName.n);
-        for(int i = 0; i < neighborsName.n; ++i)
-            Isend(processor(neighborsName[i], ThName#Comm, rqSend[i]), ThLocalInit);
-        for(int i = 0; i < between; ++i)
-            Irecv(processor(neighborsName[i], ThName#Comm, rqRecv[i]), ThTab[i]);
-        for(int i = between; i < neighborsName.n; ++i)
-            Irecv(processor(neighborsName[i], ThName#Comm, rqRecv[i]), ThTab[i + 1]);
+        for[i, v : neighborsName]
+            Isend(processor(v, ThName#Comm, rqSend[i]), ThTab[between]);
+        ThTab[neighborsName.n + 1] = trunc(ThName, gamma < 0.01, label = -111112);
         mpiWaitAll(rqRecv);
-        meshN ThLocalNew = gluemesh(ThTab);
-        int m = 0;
-        for(int i = 0; i < between; ++i)
-            m += ThTab[i].nt;
-        ThTab[between] = trunc(ThLocalNew, nuTriangle >= m && nuTriangle < m + ThTab[between].nt, label = -111111);
-        mpiWaitAll(rqSend);
-        for(int i = 0; i < neighborsName.n; ++i)
-            Isend(processor(neighborsName[i], ThName#Comm, rqSend[i]), ThTab[between]);
-        for(int i = 0; i < between; ++i)
-            Irecv(processor(neighborsName[i], ThName#Comm, rqRecv[i]), ThTab[i]);
-        for(int i = between; i < neighborsName.n; ++i)
-            Irecv(processor(neighborsName[i], ThName#Comm, rqRecv[i]), ThTab[i + 1]);
-        mpiWaitAll(rqRecv);
-        ThTab.resize(neighborsName.n + 2);
-        ThTab[neighborsName.n + 1] = ThLocalInitInterior;
 IFMACRO(dimension,3)
         ThName = gluemesh(ThTab);
         ThName = change(ThName, rmlfaces = -111112);
@@ -755,18 +736,18 @@ IFMACRO(dimension,2)
         ThName = gluemesh(ThTab, labtodel = -111112);
 ENDIFMACRO
         part.resize(ThName.nt);
-        m = 0;
+        int m = 0;
         for(int i = 0; i < between; ++i) {
             part(m:m + ThTab[i].nt - 1) = neighborsName[i];
             m += ThTab[i].nt;
         }
-        part(m:m + ThTab[between].nt - 1) = mpiRank(ThName#Comm);
+        part(m:m + ThTab[between].nt - 1) = rank;
         m += ThTab[between].nt;
         for(int i = between; i < neighborsName.n; ++i) {
             part(m:m + ThTab[i + 1].nt - 1) = neighborsName[i];
             m += ThTab[i + 1].nt;
         }
-        part(part.n - ThLocalInitInterior.nt:ThName.nt - 1) = mpiRank(ThName#Comm);
+        part(m:ThName.nt - 1) = rank;
         mpiWaitAll(rqSend);
         if(verbosity > 0) {
             mpiBarrier(ThName#Comm);
