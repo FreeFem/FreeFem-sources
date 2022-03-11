@@ -162,7 +162,8 @@ void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
         if(!(*ptA->_vS)[k]) {
             MatCreate(ptA->_A->getCommunicator(), &(*ptA->_vS)[k]);
             MatSetSizes((*ptA->_vS)[k], end - start, end - start, global, global);
-            MatSetType((*ptA->_vS)[k], MATMPIAIJ);
+            MatSetType((*ptA->_vS)[k], MATAIJ);
+            MatSeqAIJSetPreallocationCSR((*ptA->_vS)[k], reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
             MatMPIAIJSetPreallocationCSR((*ptA->_vS)[k], reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
             MatSetOption((*ptA->_vS)[k], MAT_NO_OFF_PROC_ENTRIES, PETSC_TRUE);
         }
@@ -173,7 +174,8 @@ void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
                 Mat S;
                 MatCreate(PetscObjectComm((PetscObject)ptA->_ksp), &S);
                 MatSetSizes(S, end - start, end - start, global, global);
-                MatSetType(S, MATMPIAIJ);
+                MatSetType(S, MATAIJ);
+                MatSeqAIJSetPreallocationCSR(S, reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
                 MatMPIAIJSetPreallocationCSR(S, reinterpret_cast<PetscInt*>(ia), reinterpret_cast<PetscInt*>(ja), c);
                 MatDestroy(&((*ptA->_vS)[k]));
                 PetscInt nsplits;
