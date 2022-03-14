@@ -52,7 +52,10 @@ All notable changes to this project will be documented in this file.
    mapkkk(tab3,ny,nz,K,K.norm2);
   //  Remark you can change K pas P (current point)     
   add in SurfaceMesh.ipd fonction to build a Isocaedron and a Sphere from this Isocaedron
-     
+  
+ Add new finiet element on MeshS  the Edge0S infinite element (the ortogonal of RT0 on surface,
+  or Nelelec Finite Element on triangle ) with one DoF per mesh edge and where the DoF is the 
+   current on  Edge in orientate edge by number of vertices.      
 ### Changed
 - the beaviour of linear solver UMFPACK, CHOLMOD in case of error , now FreeFEm exit on ExecError like in MUMPS
 

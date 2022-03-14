@@ -292,7 +292,7 @@
      int i=ocoef;
      for (int e=0;e<3;e++) {
        R signe = K.EdgeOrientation(e) ;
-       R a=signe/(2.*K.mesure());
+       R a=signe/(2.*K.mesure());// OK ..... cf  N == ExtNormal =>  modul == 2*le*area 
        R3 N=K.N(e)*a;
        for (int c=0;c<3;c++,i++)
          M.coef[i]=N[c];
@@ -310,12 +310,16 @@
      R la=1-PHat.sum(),lb=PHat.x,lc=PHat.y;
      R3 D[3];
      K.Gradlambda(D);
+     // x = A la + B * lb + C lc
+     // x = AB lb + AC lc
      //loc basis
      R3 AB(A,B),AC(A,C),BA(B,A),BC(B,C),CA(C,A),CB(C,B);
+     R divxyz_tK =((AB,D[1]) + (AC,D[2]))*K.mesure();
      R c[3];
-     c[0] = 1./(((AB,D[1]) + (AC,D[2])) *K.mesure()) ; c[0]*= K.EdgeOrientation(0) ;
-     c[1] = 1./(((BA,D[0]) + (BC,D[2])) *K.mesure()) ; c[1]*= K.EdgeOrientation(1);
-     c[2] = 1./(((CA,D[0]) + (CB,D[1])) *K.mesure()) ; c[2]*= K.EdgeOrientation(2);
+       
+     c[0] = K.EdgeOrientation(0)/divxyz_tK ;
+     c[1] = K.EdgeOrientation(1)/divxyz_tK ;
+     c[2] = K.EdgeOrientation(2)/divxyz_tK ;
 
      R3 f[3];
      f[0] = AB*(lb*c[0]) + AC*(lc*c[0]);
@@ -439,6 +443,124 @@
  	     ffassert(0);
       }
 
+  class TypeOfFE_RT0ortho_surf : public GTypeOfFE<MeshS>  {
+    public:
+      typedef MeshS Mesh;
+         typedef MeshS::Element  Element;
+         typedef GFElement<MeshS> FElement;
+         static int dfon[];
+         static const int d=Mesh::Rd::d;
+
+      TypeOfFE_RT0ortho_surf();
+         void FB(const What_d whatd,const Mesh & Th,const Element & K,const RdHat &PHat, RNMK_ & val) const;
+         void set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M,int ocoef,int odf,int *nump) const;
+   } ;
+     
+   int TypeOfFE_RT0ortho_surf::dfon[]={0,1,0,0};   // dofs per vertice, edge, face, volume
+     
+     
+  TypeOfFE_RT0ortho_surf::TypeOfFE_RT0ortho_surf(): GTypeOfFE<MeshS>(dfon,d,1,3*3,3,false,true) {
+       
+       R2 Pt[]={ R2(0.5,0.5), R2(0.0,0.5), R2(0.5,0.0) };
+        
+         for (int i=0;i<3;++i)
+             this->PtInterpolation[i]=Pt[i];
+        int i=0;
+         for (int e=0;e<3;e++) //loop on edge
+             for (int c=0;c<3;c++,i++) {
+                 this->pInterpolation[i]=e;
+                 this->cInterpolation[i]=c;
+                 this->dofInterpolation[i]=e;
+                 this->coefInterpolation[i]=0.;
+             }
+            
+     }
+     
+     
+     
+     
+  void TypeOfFE_RT0ortho_surf::set(const Mesh & Th,const Element & K,InterpolationMatrix<RdHat> & M ,int ocoef,int odf,int *nump) const
+  {
+        
+    int i=ocoef;
+    for (int e=0;e<3;e++) {
+      R3 Ee=K.Edge(e)*K.EdgeOrientation(e) ;
+      for (int c=0;c<3;c++,i++)
+        M.coef[i]=Ee[c];
+    }
+  }
+ 
+     
+  void  TypeOfFE_RT0ortho_surf::FB(const What_d whatd,const Mesh & Th,const MeshS::Element & K,const RdHat &PHat, RNMK_ & val) const
+  {
+    assert(val.N()>=Element::ne);
+    assert(val.M()==3 );
+    val=0;
+
+    R3 A(K[0]),B(K[1]),C(K[2]);
+    R l0=1-PHat.sum(),l1=PHat.x,l2=PHat.y;
+    R3 D[3];
+    K.Gradlambda(D);
+
+    R3 AB(A,B),AC(A,C),BA(B,A),BC(B,C),CA(C,A),CB(C,B);
+    R divxyz_tK =((AB,D[1]) + (AC,D[2]))*K.mesure();
+    R c[3];
+      
+    c[0] = K.EdgeOrientation(0) ;
+    c[1] = K.EdgeOrientation(1) ;
+    c[2] = K.EdgeOrientation(2) ;
+
+    R3 f[3];
+    f[0] = (D[1]*l2 - D[2]*l1)*c[0];// 1 2
+    f[1] = (D[0]*l2 - D[2]*l0)*c[1]; // 2 0
+    f[2] = (D[0]*l1 - D[1]*l0)*c[2]; // 0 1
+
+      
+    if (whatd & Fop_D0)
+      for(int i=0;i<3;i++){
+        val(i,0,op_id) = f[i].x;
+        val(i,1,op_id) = f[i].y;
+        val(i,2,op_id) = f[i].z;
+      }
+
+    if (whatd & Fop_D1) {
+      if (whatd & Fop_dx){
+        R3 fx[3];
+          fx[0] = (D[1]*D[2].x - D[2]*D[1].x)*c[0];// 1 2
+          fx[1] = (D[0]*D[2].x - D[2]*D[0].x)*c[1]; // 2 0
+          fx[2] = (D[0]*D[1].x - D[1]*D[0].x)*c[2]; // 0 1
+        for(int i=0;i<3;i++){
+          val(i,0,op_dx) = fx[i].x;
+          val(i,1,op_dx) = fx[i].y;
+          val(i,2,op_dx) = fx[i].z;
+        }
+      }
+      if (whatd & Fop_dy) {
+        R3 fy[3];
+          fy[0] = (D[1]*D[2].y - D[2]*D[1].y)*c[0];// 1 2
+          fy[1] = (D[0]*D[2].y - D[2]*D[0].y)*c[1]; // 2 0
+          fy[2] = (D[0]*D[1].y - D[1]*D[0].y)*c[2]; // 0 1
+        for(int i=0;i<3;i++){
+          val(i,0,op_dy) = fy[i].x;
+          val(i,1,op_dy) = fy[i].y;
+          val(i,2,op_dy) = fy[i].z;
+        }
+      }
+        if (whatd & Fop_dz) {
+          R3 fz[3];
+            fz[0] = (D[1]*D[2].z - D[2]*D[1].z)*c[0];// 1 2
+            fz[1] = (D[0]*D[2].z - D[2]*D[0].z)*c[1]; // 2 0
+            fz[2] = (D[0]*D[1].z - D[1]*D[0].z)*c[2]; // 0 1
+          for(int i=0;i<3;i++){
+            val(i,0,op_dz) = fz[i].x;
+            val(i,1,op_dz) = fz[i].y;
+            val(i,2,op_dz) = fz[i].z;
+          }
+        }
+    }
+          
+  }
+
   
   class TypeOfFE_P2bLagrange_surf : public TypeOfFE_Lagrange<MeshS>  {
           public:
@@ -544,6 +666,8 @@
    GTypeOfFE<MeshS> & P2Lagrange_surf(P2_surf);
    static TypeOfFE_RT0_surf  RT0_surf;
    GTypeOfFE<MeshS> & RT0surf(RT0_surf);
+  static TypeOfFE_RT0ortho_surf  RT0ortho_surf;
+  GTypeOfFE<MeshS> & RT0orthosurf(RT0ortho_surf);
    static TypeOfFE_P1bLagrange_surf P1b_surf;
    GTypeOfFE<MeshS> & P1bLagrange_surf(P1b_surf);
    static TypeOfFE_P2bLagrange_surf P2b_surf;

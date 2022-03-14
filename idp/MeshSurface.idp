@@ -19,6 +19,15 @@ load "mmg"
      L is the label the the sphere
      orient the global orientation of the surface 1 extern (-1 intern
 
+  func  meshS Icosahedron (int orientation)
+   -- build a Icosahedron meshS with given orientation.
+      with a region number go from 1  to 20 corresponding to the 20 faces
+
+  func meshS Sphere20(real R,int N,int orient);
+  -- build a sphere  mesh form a Isocaedron with each traingle subdivide by N^2
+      with a region number go from 1  to 20 corresponding to the 20 faces
+     orient the global orientation of the surface 1 extern (-1 intern
+
 */
 func meshS SurfaceHex(int[int] & N,real[int,int] &B ,int[int,int] & L,int orientation)
 {
@@ -171,7 +180,10 @@ if(wplot) plot(Ticosaedre,wait=1);
 return Ticosaedre;
 }
 
-
+func  meshS Icosahedron (int orientation)
+{
+ return Icosahedron(orientation,0);
+}
 func meshS Sphere20 (real R,int N,int orientation,int wplot)
 {// Isocaedre regulier !!!!  Thank G. Vergez ..
 meshS Ticosaedre = Icosahedron(orientation,wplot);
@@ -185,6 +197,11 @@ func metric =dist(x,y,z)/R;
 meshS Th = movemeshS(Ticosaedre,transfo=[x/metric,y/metric,z/metric]); 
 if(wplot) plot (cmm="Th",Th,wait=1);
 return Th;
+}
+
+func meshS Sphere20 (real R,int N,int orientation)
+{
+  return Sphere20(R,N,orientation,0);
 }
 
 /*  test: 
@@ -212,4 +229,5 @@ return Th;
     mesh3 Th = tetg(ThHS,switch="pqaAAYYQ",nbofregions=2,regionlist=domaine);    
     medit("Cube-With-Ball",Th);
   }
+
 */

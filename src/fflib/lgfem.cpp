@@ -82,6 +82,7 @@ namespace Fem2D {
   extern GTypeOfFE< MeshS > &P1bLagrange_surf;
   extern GTypeOfFE< MeshS > &P2bLagrange_surf;
   extern GTypeOfFE< MeshS > &RT0surf;
+  extern GTypeOfFE< MeshS > &RT0orthosurf;
 // add 22 march 2021 FH.
   extern GTypeOfFE< Mesh3 > &G_P1dc_3d;
   extern GTypeOfFE< Mesh3 > &G_P2dc_3d;
@@ -6819,6 +6820,8 @@ void init_lgfem( ) {
     AddNewFEL("P0VF3dcL", &G_P0VFdc_L);
     
   // end  add ..
+  Global.New("Edge0S",CConstantTFES(&RT0orthosurf));
+  Global.New("RT0orthoS",CConstantTFES(&RT0orthosurf));
   Global.New("RT0S",CConstantTFES(&RT0surf));
   Global.New("P2S", CConstantTFES(&DataFE< MeshS >::P2));
   Global.New("P1S", CConstantTFES(&DataFE< MeshS >::P1));
