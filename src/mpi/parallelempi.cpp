@@ -2297,7 +2297,6 @@ AnyType DeleteGroup(Stack stack,const AnyType &x){
 AnyType InitializeComm(Stack stack,const AnyType &x){
     MPI_Comm *comm= *PGetAny<fMPI_Comm>(x);
     *comm=MPI_COMM_NULL;
-    MPI_Comm_dup(MPI_COMM_WORLD, comm);
     return  comm;
 }
 AnyType DeleteComm(Stack stack,const AnyType &x){

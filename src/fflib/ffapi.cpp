@@ -265,9 +265,6 @@ static  void ffapi_mpi_init(int &argc, char** &argv){
         if(provided == 0)
             std::cout << "MPI_THREAD_SERIALIZED not supported !" << std::endl;
     }
-#ifdef WITH_PETSCxxxxx
-    PetscInitialize(&argc, &argv, 0, "");
-#endif
 
 #endif
 #endif
@@ -276,9 +273,6 @@ static  void ffapi_mpi_init(int &argc, char** &argv){
  static void ffapi_mpi_finalize(){
 #ifndef FFLANG
 #ifdef PARALLELE
-#ifdef WITH_PETSCxxxxxxxx
-    PetscFinalize();
-#endif
     MPI_Finalize();
 #endif
 #endif
