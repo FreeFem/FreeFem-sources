@@ -620,6 +620,9 @@ ENDIFMACRO
 IFMACRO(!ThName#UserPartitioning)
 IFMACRO(!ThName#Periodicity)
 IFMACRO(ThName#CartesianPartitioning)
+IFMACRO(!dimension)
+NewMacro dimension()2 EndMacro
+ENDIFMACRO
 NewMacro privateDmesh#CartesianPartitioning() EndMacro
 ENDIFMACRO
 build(ThName, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm);
@@ -846,6 +849,9 @@ IFMACRO(!ThName#PkPart)
 ENDIFMACRO
 IFMACRO(ThName#CartesianPartitioning)
     NewMacro privateDmesh#CartesianPartitioning() EndMacro
+IFMACRO(!dimension)
+    NewMacro dimension()2 EndMacro
+ENDIFMACRO
 ENDIFMACRO
     partitionPrivate(ThTab, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, privateCreateMat, mpiRank(ThName#Comm), mpiSize(ThName#Comm), 1, 1, 1, privateCreateMat, DTab, PkName, intersection, ThName#Comm, -111111, ThName#PkPart, def, init, 1)
 }
