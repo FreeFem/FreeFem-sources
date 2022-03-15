@@ -314,7 +314,8 @@
      // x = AB lb + AC lc
      //loc basis
      R3 AB(A,B),AC(A,C),BA(B,A),BC(B,C),CA(C,A),CB(C,B);
-     R divxyz_tK =((AB,D[1]) + (AC,D[2]))*K.mesure();
+     ffassert( abs((AB,D[1]) + (AC,D[2]) -2. ) < 1e-6) ; //  verif ...
+     R divxyz_tK =2.*K.mesure();
      R c[3];
        
      c[0] = K.EdgeOrientation(0)/divxyz_tK ;

@@ -1813,10 +1813,16 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 	nv =0;
 	quadtree = new FQuadTree(this,Pmin,Pmax,nv); // build empty the quadtree
         long iseuil =(long) (quadtree->coef*seuil);
-        if(verbosity>5)
-         cout << " seuil = " <<  seuil << " hmin = " << hm << " iseuil/ quadtree: " << iseuil <<  endl;
+        long iseuilhm = (long) (quadtree->coef*hm*0.8);
+        if( iseuilhm ==0)
+        {
+            cerr << " The generatated 2d mesh is to fine :  hmin = " << hm << " to to small < "<< 1./quadtree->coef  << endl;
+            ffassert(0); 
+        }
+        if(verbosity>5 || ! iseuil )
+         cout << " seuil = " <<  seuil << " hmin = " << hm << " iseuil/ quadtree: " << iseuil << " coef quadtree " <<  quadtree->coef << endl;
 
-       ffassert(iseuil); //  zero => too smal
+       //      ffassert(iseuil); //  zero => too smal
         {  // to keep the order of old vertices to have no problem in
              // interpolation on sub grid of RT finite element for example (Feb. 2016 F. Hecht)
         KN<bool> setofv(Th.nv,false);
@@ -1975,8 +1981,7 @@ Mesh::Mesh(const Mesh & Th,int * split,bool WithMortar,int label)
 		    R2 B=vertices[vt[1]];
 		    R2 C=vertices[vt[2]];
 		    R a = (( B-A)^(C-A))*0.5;
-                    if( a<0) nwarm++;
-                    if( nwarm<10 && verbosity>9) cout << " warning: bad oriantiation in trunc " << kt << " " << a << endl  ;
+                    if(a <0 &&  nwarm++ <10 && verbosity>9) cout << " warning: bad oriantiation in trunc " << kt << " " << a << endl  ;
 		    if (a>0)
 			triangles[kt].set(vertices,vt[0],vt[1],vt[2],T.lab);
 		    else
