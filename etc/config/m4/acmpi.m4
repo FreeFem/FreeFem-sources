@@ -118,6 +118,7 @@ esac
 		   mkdir -p 3rdparty/lib/msmpi
 		   
 		   cp "$MSMPI_INC"/*.h 3rdparty/include/msmpi
+		   sed 's/MPI_Status array_of_statuses\[[\]]/MPI_Status\* array_of_statuses/' < "$MSMPI_INC"/mpi.h > 3rdparty/include/msmpi/mpi.h ;
 		   grep -v INT_PTR_KIND "$MSMPI_INC"/mpif.h >3rdparty/include/msmpi/mpif.h
 		   test "$ff_ptrbit" -eq 64 && cp "$MSMPI_INC"/x64/*.h 3rdparty/include/msmpi
 		   test "$ff_ptrbit" -eq 32 && cp "$MSMPI_INC"/x86/*.h 3rdparty/include/msmpi
