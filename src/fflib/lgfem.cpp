@@ -4821,7 +4821,7 @@ AnyType Plot::operator( )(Stack s) const {
         for (int i = 1; i < k; i++) rlineto(x[i], y[i]);
       } else {
           static int kerr=0; 
-        if (verbosity && kerr++< 10)
+        if (verbosity && kerr++< 5 && mpirank==0)
           cout << "  Plot::  Sorry no ps version for this type of plot " << l[i].what << endl;
       }
       thfill = false;

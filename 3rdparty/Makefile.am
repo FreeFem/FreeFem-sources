@@ -232,7 +232,10 @@ install-exec-local:
 	cp -rp lib $(DESTDIR)$(ff_prefix_dir)
 	cp -rp include  $(DESTDIR)$(ff_prefix_dir)
 	cp -rp bin  $(DESTDIR)$(ff_prefix_dir)
-
+	-if test -f boost/done.tag ; then \
+	  $(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/boost ; \
+	  cp -rp boost   $(DESTDIR)$(ff_prefix_dir) ; \
+	fi
 clean-local:
 	-rm -rf	 tag-* include lib bin WHERE-LD
 	-mkdir   include lib bin

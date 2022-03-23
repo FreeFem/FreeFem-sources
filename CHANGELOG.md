@@ -40,7 +40,7 @@ All notable changes to this project will be documented in this file.
      Volume(O,Th3[k],nuface) // O, triangular face is face nuface of tet Th3[k]
      Volume(O,ThS[k]) // O, triangular face is ThS[k]
      Volume(O,A,B,C) // (O,A,B,C) tet ..
-     
+- in bem pluging add array of HMatrix 
      
    see examples/3d/Connectivite-3d.edp or /3dSurf/Connectivite-S.edp of test. 
  add 3 function mapk, mapkk, mapkk to set a function in fourier space with k parametre 

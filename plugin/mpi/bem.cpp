@@ -587,7 +587,7 @@ AnyType SetCompressMat(Stack stack,Expression emat,Expression einter,int init)
 
 template<class K>
 void addHmat() {
-    Dcl_Type<HMatrixVirt<K>**>(Initialize<HMatrixVirt<K>*>, Delete<HMatrixVirt<K>*>);
+   // Dcl_Type<HMatrixVirt<K>**>(Initialize<HMatrixVirt<K>*>, Delete<HMatrixVirt<K>*>);
     Dcl_TypeandPtr<HMatrixVirt<K>*>(0,0,::InitializePtr<HMatrixVirt<K>*>,::DeletePtr<HMatrixVirt<K>*>);
     //atype<HMatrix<LR ,K>**>()->Add("(","",new OneOperator2_<string*, HMatrix<LR ,K>**, string*>(get_infos<LR,K>));
     
@@ -1078,10 +1078,65 @@ EquationEnum whatEquationEnum(BemKernel *K,int i) {
     return equEnum;
     
 }
+//  Begin Array of HMatrix[int]
+template< class A >
+inline AnyType DestroyKNmat(Stack, const AnyType &x) {
+  KN< A > *a = GetAny< KN< A > * >(x);
+  for (int i = 0; i < a->N( ); i++)
+    if ((*a)[i]) delete (*a)[i];
+  a->destroy( );
+  return Nothing;
+}
 
+template< class RR, class A, class B >
+RR *get_elementp_(const A &a, const B &b) {
+  if (b < 0 || a->N( ) <= b) {
+    cerr << " Out of bound  0 <=" << b << " < " << a->N( ) << " array type = " << typeid(A).name( )
+         << endl;
+    ExecError("Out of bound in operator []");
+  }
+  return &((*a)[b]);
+}
 
+template< class R >
+R *set_initinit(R *const &a, const long &n) {
+  SHOWVERB(cout << " set_init " << typeid(R).name( ) << " " << n << endl);
+  a->init(n);
+  for (int i = 0; i < n; i++) (*a)[i] = 0;
+  return a;
+}
+
+template<class R>
+void ArrayofHmat()
+{
+    typedef HMatrixVirt< R > *Mat;
+    typedef Mat *PMat;
+    typedef KN< Mat > AMat;
+
+    Dcl_Type< AMat * >(0, ::DestroyKNmat< Mat >);
+    // to declare HMatrix[int]
+    cout << "ArrayofHmat " << atype< AMat * >( ) << endl;
+    cout << "    " << *atype< long >( ) << endl;
+    cout << "    " << *atype< PMat >( ) << endl;
+    map_type_of_map[make_pair(atype< long >( ), atype< PMat >( )->right())] = atype< AMat * >( );
+    atype<  AMat * >( )->Add(
+      "[", "",
+      new OneOperator2_<  PMat, AMat *, long >(get_elementp_< Mat, AMat *, long >));
+
+    TheOperators->Add("<-", new OneOperator2_< AMat*, AMat* , long >(&set_initinit));
+  
+
+    // resize mars 2006 v2.4-1
+    Dcl_Type< Resize< AMat > >( );
+    Add< AMat *>("resize", ".",
+                         new OneOperator1< Resize< AMat >, AMat * >(to_Resize));
+    Add< Resize< AMat > >(
+      "(", "", new OneOperator2_< AMat*, Resize< AMat >, long >(resizeandclean1));
+
+}
+//  End Array of HMatrix[int]
 static void Init_Bem() {
-    
+    if(mpirank==0) cout << "\nInit_Bem\n";
     map_type[typeid(const BemFormBilinear *).name( )] = new TypeFormBEM;
     
     map_type[typeid(const BemKFormBilinear *).name( )] = new ForEachType< BemKFormBilinear >;
@@ -1101,8 +1156,8 @@ static void Init_Bem() {
     typedef const BemPotential *pBemPotential;
     
     
-    Dcl_Type< fkernel * >( );  // a bem kernel
-    Dcl_Type< fpotential * >( ); // a bem potential
+   // Dcl_Type< fkernel * >( );  // a bem kernel
+   // Dcl_Type< fpotential * >( ); // a bem potential
     Dcl_Type< const OP_MakeBemKernelFunc::Op * >( );
     Dcl_Type< const OP_MakeBemPotentialFunc::Op * >( );
     
@@ -1192,7 +1247,8 @@ static void Init_Bem() {
     Global.New("htoolMaxblocksize",CPValue<long>(ff_htoolMaxblocksize));
     Global.New("htoolMintargetdepth",CPValue<long>(ff_htoolMintargetdepth));
     Global.New("htoolMinsourcedepth",CPValue<long>(ff_htoolMinsourcedepth));
-    
+    ArrayofHmat<double>();
+    ArrayofHmat<complex<double>>();
 }
 
 LOADFUNC(Init_Bem)
