@@ -433,7 +433,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         if(errorestimate)
                             NEPGetErrorEstimate(nep, i, &errest);
                     }
-                    else{
+                    else {
                         PEPGetEigenpair(pep, i, &kr, &ki, (eigenvectors || array) ? xr : NULL, (eigenvectors || array) && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value ? xi : NULL);
                         if(errorestimate)
                             PEPGetErrorEstimate(pep, i, &errest);
