@@ -98,12 +98,12 @@ TESTS_PETSC = bratu-2d-PETSc.edp \
 	restriction-2d-PETSc.edp \
 	function-PETSc.edp \
 	bilaplace-2d-PETSc.edp \
-	redistributeDmesh_w_PETSc.edp
+	redistributeDmesh_w_PETSc.edp \
+	toy-Tao-PETSc.edp
 # diffusion-substructuring-2d-PETSc.edp <- broken, problem with BDDC
 
 TESTS_PETSC_MUMPS = Schur-complement-PETSc.edp \
-	stokes-fieldsplit-3d-PETSc.edp \
-	toy-Tao-PETSc.edp
+	stokes-fieldsplit-3d-PETSc.edp
 
 TESTS_PETSC_PARMMG = distributed-parmmg.edp laplace-adapt-dist-3d-PETSc.edp
 

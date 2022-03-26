@@ -1021,6 +1021,12 @@ namespace PETSc {
               if(mat)
                   return 1L;
           }
+          else if (o.compare("MATSOLVER") == 0) {
+              PetscBool foundtype;
+              MatSolverTypeGet(t.c_str(), MATAIJ, MAT_FACTOR_LU, &foundtype, NULL, NULL);
+              if(foundtype)
+                  return 1L;
+          }
       }
       return 0L;
   }
