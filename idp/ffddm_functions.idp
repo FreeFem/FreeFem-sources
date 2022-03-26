@@ -578,9 +578,9 @@ func preffe#K[int] pr#fGMRES(preffe#K[int]& x0, preffe#K[int]& rhs, real eps, in
       set(pr#hpddmOP, sparams = "-hpddm_"+prefix+"schwarz_coarse_correction deflated", prefix=prefix);
     
     if (pr#prec == "oras" || pr#prec == "soras")
-      DDM(pr#hpddmOP,rhs,uni,O=pr#aR[mpiRank(preffe#prmesh#commddm)],timing=timings);
+      DDM(pr#hpddmOP,rhs,uni,O=pr#aR[mpiRank(preffe#prmesh#commddm)],communicator=preffe#prmesh#commddm,timing=timings);
     else
-      DDM(pr#hpddmOP,rhs,uni,timing=timings);
+      DDM(pr#hpddmOP,rhs,uni,communicator=preffe#prmesh#commddm,timing=timings);
     
     /*
     real[int] timingsg(timings.n);
