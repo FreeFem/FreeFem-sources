@@ -421,7 +421,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                     PetscScalar kr, ki = 0;
                     PetscReal sigma;
                     PetscReal errest;
-                    if(std::is_same<SType, EPS>::value){
+                    if(std::is_same<SType, EPS>::value) {
                         EPSGetEigenpair(eps, i, &kr, &ki, (eigenvectors || array) ? xr : NULL, (eigenvectors || array) && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value ? xi : NULL);
                         if(errorestimate)
                             EPSGetErrorEstimate(eps, i, &errest);
