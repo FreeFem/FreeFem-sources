@@ -115,20 +115,20 @@ varf A0mat([u1, u2, p], [v1, v2, q]) = int1d(thL)(
     -1i*omega*u2*v2 + nu*(dx(u2)*dx(v2) + dy(u2)*dy(v2)) + dy(p)*v2 +
     dy(u2)*q)
 + on(1, u1 = 0., u2 = 0.)                              /*  bot wall */
-+ on(2, u1 = 0., u2 = 0.);                             /*  Free-strem */
++ on(2, u1 = 0., u2 = 0.);                             /*  Free-stream */
 
 varf A1mat([u1, u2, p], [v1, v2, q]) = int1d(thL)(
     1i*fG2*u1*v1 + 1i*p*v1 +
     1i*fG2*u2*v2 +
     1i*u1*q)
 + on(1, u1 = 0., u2 = 0.)                              /*  bot wall */
-+ on(2, u1 = 0., u2 = 0.);                             /*  Free-strem */
++ on(2, u1 = 0., u2 = 0.);                             /*  Free-stream */
 
 varf A2mat([u1, u2, p], [v1, v2, q]) = int1d(thL)(
     nu*u1*v1 +
     nu*u2*v2)
-+ on(1, u1 = 0., u2 = 0.)                              /*  Free-strem */
-+ on(2, u1 = 0., u2 = 0.);                             /*  Free-strem */
++ on(1, u1 = 0., u2 = 0.)                              /*  bot wall */
++ on(2, u1 = 0., u2 = 0.);                             /*  Free-stream */
 
 Mat<complex>[int] Apep(3);
 macro def(u)[u, u#B, u#C]//EOM
@@ -145,6 +145,7 @@ Apep[0] = A0mat(VhC,VhC,tgv=-1);
 
 VhC<complex>[int] def(eigenvecVec)(nEV);
 complex[int]  eigvalVec(nEV);
+real[int]  errestVec(nEV);  
 string PEPParamsbase =
   " -pep_basis monomial " +
   " -pep_general " +
@@ -156,10 +157,69 @@ string PEPspar = PEPParamsbase + " -pep_target " + shift +
   " -pep_nev " + nEV       +
   " -pep_ncv " + nKryl + " ";
 
-int nEvalConv = PEPSolve(Apep, vectors = eigenvecVec, values = eigvalVec, sparams = PEPspar);
+int nEvalConv = PEPSolve(Apep, vectors = eigenvecVec, values = eigvalVec, sparams = PEPspar, errorestimate = errestVec);
+
+if(mpirank==0){
+    cout << "Same output manually" << endl;
+    cout <<  "    PEP nconv=" << nEvalConv << " Values (Errors)";
+    for(int i=0; i<nEvalConv; i++){
+        cout << " " << real(eigvalVec[i]) << "+" << imag(eigvalVec[i]) << "i (" << errestVec[i] << ")";
+    }
+    cout << endl;
+}
 
 if(mpirank == 0) {
     ofstream ofile("Blasius_EV.dat");
     ofile.precision(16);
     ofile << eigvalVec << endl;
 }
+
+/* ------------------------------------------------------------ */
+/*                same problem solution with EPS                */
+/* ------------------------------------------------------------ */
+ 
+Mat<complex> dA, dB;
+
+/* -1 factor for the companion matrix */
+Apep[0] *= -1;
+Apep[1] *= -1;
+
+{
+    matrix<complex> Id = eye(VhC.ndof);
+    Mat<complex> IMat(Apep[0], Id);
+    Mat<complex> dAux;
+    dAux = [[IMat, 0],
+            [0, Apep[2]]];
+    MatConvert(dAux, dB);
+    dAux = [[0, IMat],
+            [Apep[0], Apep[1]]];
+    MatConvert(dAux, dA); 
+}
+
+VhC<complex>[int] def(eigenvecCompVec)(nEV);
+complex[int]  eigvalCompVec(nEV);  
+real[int]  errestCompVec(nEV);  
+
+string EPSParamsbase =            
+  " -eps_type krylovschur" +
+  " -st_type sinvert "     +
+  " -st_pc_type lu "       +
+  " -eps_monitor_all"      +
+  " -eps_gen_non_hermitian ";
+
+string EPSpar = EPSParamsbase + " -eps_target " + shift +    
+  " -eps_nev " + nEV       + 
+  " -eps_ncv " + nKryl 	   + " "; 
+
+
+int nEvalCompConv = EPSSolve(dA, dB, vectors = eigenvecCompVec, values = eigvalCompVec, sparams = EPSpar, errorestimate = errestCompVec); 
+
+if(mpirank==0){
+    cout << "Same output manually" << endl;
+    cout <<  "    EPS nconv=" << nEvalCompConv << " Values (Errors)";
+    for(int i=0; i<nEvalCompConv; i++){
+        cout << " " << real(eigvalCompVec[i]) << "+" << imag(eigvalCompVec[i]) << "i (" << errestCompVec[i] << ")";
+    }
+    cout << endl;
+}
+
