@@ -94,7 +94,7 @@ varf vNS ([u1, u2, p], [v1, v2, q])	// DF(u)u - F(u)
 	;
 
 for (real re = reyini ; re <= reymax; re *= 2) {
-	real lerr = 0.5; 
+	real lerr = 1; 
 	nu = 1./re;
 
 	if (re > 8000) lerr = 0.2;
