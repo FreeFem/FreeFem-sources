@@ -40,12 +40,14 @@ varf  Lame([u1,u2,u3],[v1,v2,v3])=
   
   ;
 
-  matrix A = Lame(Wh,Wh);
+  matrix A = Lame(Wh,Wh,sym=1,positive=1,solver="CG");
+  cout << " half "<< A.half << " nnz "<< A.nnz << endl; 
   real[int] b= Lame(0,Wh); 
   //  put tgv = -2 on matrix A 
   setBC(A,au1[],-2);   // 1 on diagonal and  0 on row  i et column i if  au1[][i] !=0  
   b =  au1[] ? 0 : b;
-  set(A,solver= UMFPACK); 
+  set(A,solver= "CHOLMOD"); 
+  cout << A.nnz << endl; 
    u1[] = A^-1*b;
  cout << " || u|| =" << u1[].linfty << endl;
  real cc = 0.5/u1[].linfty;
