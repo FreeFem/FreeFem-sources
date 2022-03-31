@@ -60,7 +60,8 @@ All notable changes to this project will be documented in this file.
       examples/plugin/cavityNewtowP3pnc.edp examples/plugin/testFE-P3pnc.edp
 - function to set dirichlet Boundary conditon on matrix A (real ou compex) trought  an real[int] 
     (if none zero => set BC ) 
-  setBC(A,au1[],-2);
+  setBC(A,au1[],-2); and the example 
+      examples/3d/Elasticity-simple-support-BC.edp
   
 ### Changed
 - the beaviour of linear solver UMFPACK, CHOLMOD in case of error , now FreeFEm exit on ExecError like in MUMPS
