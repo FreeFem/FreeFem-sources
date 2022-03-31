@@ -42,20 +42,26 @@ All notable changes to this project will be documented in this file.
      Volume(O,A,B,C) // (O,A,B,C) tet ..
 - in bem pluging add array of HMatrix 
      
-   see examples/3d/Connectivite-3d.edp or /3dSurf/Connectivite-S.edp of test. 
- add 3 function mapk, mapkk, mapkk to set a function in fourier space with k parametre 
+-  examples/3d/Connectivite-3d.edp or /3dSurf/Connectivite-S.edp of test. 
+- 3 function mapk, mapkk, mapkk to set a function in fourier space with k parametre 
    R3 K; // le fourier variable allway 3d (sorry)
    int n1=16,n2=8, n3=4; 
    real[int] tab1(nx,tab2(nx*ny),tab3(nx*ny*nz);
    mapk(tab1,K,sqr(K.x));
    mapkk(tab2,ny,K,K.norm2);
    mapkkk(tab3,ny,nz,K,K.norm2);
-  //  Remark you can change K pas P (current point)     
-  add in SurfaceMesh.ipd fonction to build a Isocaedron and a Sphere from this Isocaedron
-  
- Add new finite element on MeshS  this  finite element is the ortogonal of RT0 on surface, or 
+   //  Remark you can change K by P (current point)     
+- in SurfaceMesh.ipd fonction to build a Isocaedron and a Sphere from this Isocaedron
+- new finite element on MeshS  this  finite element is the ortogonal of RT0 on surface, or 
    Nelelec Finite Element on triangle with one DoF per mesh edge and where the DoF is the 
-   current on  Edge in orientate edge by number of vertices.      
+   current on  Edge in orientate edge by number of vertices.  
+-  plugin Element_P3pnc for new 2d finite element P3pnc (P3 + 2 bulles)  noncoforming  (continuite of P2 mod)   
+   and add 2 examples with this new finite element 
+      examples/plugin/cavityNewtowP3pnc.edp examples/plugin/testFE-P3pnc.edp
+- function to set dirichlet Boundary conditon on matrix A (real ou compex) trought  an real[int] 
+    (if none zero => set BC ) 
+  setBC(A,au1[],-2);
+  
 ### Changed
 - the beaviour of linear solver UMFPACK, CHOLMOD in case of error , now FreeFEm exit on ExecError like in MUMPS
 

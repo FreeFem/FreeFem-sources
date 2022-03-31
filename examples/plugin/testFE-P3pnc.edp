@@ -1,0 +1,172 @@
+
+load "Element_P4dc"
+load "Element_P4"
+load "Element_P3pnc"
+func real cc(real aa) {real a=aa; if(abs(a)<1e-10) a=0; return a;} 
+int[int] ne1=[1,2,0];
+int[int] ne2=[2,0,1];
+
+// the ref triangle 
+int[int] ll=[2,0,0,1];
+mesh Th=square(1,1,flags=2,label=ll);
+
+Th = trunc(Th,x<0.5,label=0);
+
+
+//Th = movemesh(Th,[x+0.1*y,y-0.2*x]);
+//Th = movemesh(Th,[x*2,y*2]);
+
+mesh Thg = trunc(Th,1,split=2,label=-1);
+plot(Th, wait=1);
+
+int it0=0; 
+
+fespace Lh(Th,P1);
+Lh[int] l(3);
+l[0][][0]=1;
+l[1][][1]=1;
+l[2][][2]=1;
+
+
+fespace Wh(Th,P4dc);
+fespace Vh(Th,P3pnc);
+Wh[int] mn(12);
+int k=0;
+real cc7 = 3*4*5*6*7;
+func bk = (l[0] - l[1]) * (l[1] - l[2]) * (l[2] - l[0]);
+func l0 =l[0];
+func l1 =l[1];
+func l2 =l[2];
+
+mn[k++]=      l0 * l0 * l0;
+mn[k++]=  l1 * l1 * l1;
+mn[k++]=  l2 * l2 * l2;                                            //3
+mn[k++]=        l0 * l0 * l1;
+mn[k++]=   l0 * l0 * l2;
+mn[k++]=   l1 * l1 * l0;
+mn[k++]=   l1 * l1 * l2;
+mn[k++]=   l2 * l2 * l0;
+mn[k++]=   l2 * l2 * l1;
+  //6
+mn[k++]=        l0 * l1 * l2;                                                                       //2
+mn[k++]=        bk * l0;
+mn[k++]=   bk * l1 ;                                                                    // P4 element
+
+
+/*
+      l0 * l0 * l0, l1 * l1 * l1, l2 * l2 * l2,                                            //3
+      l0 * l0 * l1, l0 * l0 * l2, l1 * l1 * l0, l1 * l1 * l2, l2 * l2 * l0, l2 * l2 * l1,  //6
+      l0 * l1 * l2,                                                                        //2
+      bk * l0, bk * l1                                                                     // P4 element
+
+*/
+/*
+for(int i=0; i<3;++i)
+{
+	int i1 = (i+1)%3, i2=(i+3)%3;
+	mn[k++]= l[i];
+	mn[k++]= l[i1]*l[i2];
+	mn[k++]= l[i]*l[i]*l[i];
+	
+}
+mn[k++]= l[0]*l[1]*l[2];
+mn[k++]= l[0]*bk;
+mn[k++]= l[1]*bk;
+*/
+Vh u,v;
+real[int,int] CC(12,12),C1(12,12);
+for (int j=0;j<Vh.ndofK;++j)
+{
+	Wh u=mn[j];
+	int i=0;
+	for(int k=0; k<3;k++)
+	{
+		int i1= (k+1)%3, i2=(k+2)%3;
+		CC(j,i++)= cc(int1d(Th,k,qforder=9)(u*l[i1]/lenEdge));
+		CC(j,i++)=  cc(int1d(Th,k,qforder=9)(u*l[i2]/lenEdge));
+		CC(j,i++)= cc(int1d(Th,k,qforder=9)(u*l[i2]*l[i1]/lenEdge)) ; 
+	}
+	CC(j,i++)= cc(int2d(Th,qforder=9)( l[0]*u/area)) ;
+	CC(j,i++)= cc(int2d(Th,qforder=9)( l[1]*u/area)) ;
+	CC(j,i++)= cc(int2d(Th,qforder=9)( l[2]*u/area)) ;
+}
+C1=CC		;
+CC *=cc7;
+cout << " CC =" << CC << endl;
+real[int,int] DD =[
+  [  -1.2,    -1.2,      1.2,      1.2,         6.,        -15.6,       6.,        1.2,       -15.6,      -9.6,     4.8,      4.8     ], //dof 1
+  [   6.,     1.2,      -15.6,     -1.2,        -1.2,       1.2,        1.2,       6.,        -15.6,      4.8,      -9.6,     4.8     ], //dof 2
+  [   1.2,    6.,       -15.6,      6.,         1.2,       -15.6,      -1.2,      -1.2,       1.2,        4.8 ,     4.8,      -9.6    ], //dof 3
+  [  -8.4,    -73.2,    298.8,      73.2,       10.8,      -306.,      -46.8,      20.4,      97.2,      189.6,    -192.,      2.4    ],  //dof 4
+  [  10.8,    75.6,     -205.2,     -63.6,      -46.8,     349.2,      10.8,      -10.8,      -54.,      21.6,      86.4,     -108.   ], //dof 5
+  [  10.8,    73.2,     -306.,      -73.2,      -8.4,      298.8,      20.4,      -46.8,      97.2,      -192.,     189.6,    2.4     ], //dof 6
+  [ -46.8,    -63.6,    349.2,      75.6,       10.8,      -205.2,     -10.8,     10.8,      -54.,       86.4 ,     21.6,    -108.    ], //dof 7
+  [ -10.8,    -73.2,    198.,       37.2,       20.4,      -154.8,     -8.4,      10.8,      46.8,       -24. ,     -81.6,    105.6   ], //dof 8
+  [  20.4,    37.2,     -154.8,    -73.2,       -10.8,     198.,       10.8,      -8.4,      46.8,       -81.6 ,    -24.,     105.6   ], //dof 9
+  [  12.,     12.,      -180.,      12.,        12.,       -180.,      12.,       12.,       -180.,      60. ,      60.,      60.     ], //dof 10
+  [   0.,     -84.,     252.,       84.,        84.,       -504.,     -84.,       0.,        252.,       84.,      -168.,     84.     ], //dof 11
+  [ -84.,     -84.,     504.,       84.,        0.,        -252.,     -0.,        84.,      -252.,       168.,     -84.,     -84.     ] //dof 12
+   ];
+  load "lapack"
+inv(C1); 
+real[int,int]   Ct =  C1';
+cout << " C1 " << C1 << " DD = " << DD << endl; 
+   DD -= Ct;
+   cout << DD << endl; 
+   cout << DD.linfty << endl; 
+
+
+cout << " C1 =" << C1 << endl;
+
+for (int j=0;j<Vh.ndofK;++j)
+{
+	int i = Vh(0,j);
+	cout << j << " -> " <<  i << " : " ;
+    u=0;
+	u[][i]=1;
+	for(int k=0; k<3;k++)
+	{
+		int i1= (k+1)%3, i2=(k+2)%3;
+		if ( i2 < i1) swap(i1,i2); 
+		cout << " " << cc(int1d(Th,k,qforder=9)(u*l[i1]/lenEdge)) << " " << cc(int1d(Th,k,qforder=9)(u*l[i2]/lenEdge)) << " " << cc(int1d(Th,k,qforder=9)(u*l[i2]*l[i1]/lenEdge)) ; 
+	}
+	cout << " " << cc(int2d(Th,qforder=9)( l[0]*u/area)) << " " << cc(int2d(Th,qforder=9)( l[1]*u/area)) <<" " << cc(int2d(Th,qforder=9)( l[2]*u/area)) << endl; 
+	//plot(u,wait=1);
+	v=u;
+	for (int j=0;j<Vh.ndofK;++j)
+	cout << cc(v[][Vh(0,j)]) << " " ;
+	cout << endl;
+
+}
+ Th=square(5,5);
+ u=x*x*y;
+ v = u;
+ cout << " err = " << sqrt(int2d(Th)(square((u)-(u))));
+ solve PL2(u,v)=int2d(Th,qforder=7)(u*v)-int2d(Th,qforder=9)(x*x*y*v);
+ // verification  !!!!!
+ plot(u,wait=1);
+ real err=0,err1=0,err2=0; 
+for (int i=0;i<Vh.ndof;++i)
+{
+    u=0;
+
+	u[][i]=1;
+	Wh u3=u;
+	v=u;
+	v[]-=u[];
+	real e  = v[].linfty;
+	real e1 = sqrt(int2d(Th)(square(dx(u)-dx(u3))));
+	real e2 = sqrt(int2d(Th)(square(dy(u)-dy(u3))));
+	Wh dxu=dx(u), dxu3=dx(u3);
+	Wh dyu=dy(u), dyu3=dy(u3);
+	//plot(dxu,cmm=" dxu ", wait=1);
+	//plot(dxu3,cmm=" dxu3 ", wait=1);
+	dxu [] -= dxu3[];
+	dyu [] -= dyu3[];
+	real ee =  dxu []. linfty +  dyu []. linfty + e1 + e2;
+	if( ee > 1e-6)
+	  cout << i << " " << e << " " << e1 << " " << e2 << " :: " << dxu []. linfty << " " << dyu []. linfty << endl;
+	err+= ee;
+}
+cout << " err=" << err  << endl; ; 
+assert( err < 1e-6);

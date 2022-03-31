@@ -1115,9 +1115,6 @@ void ArrayofHmat()
 
     Dcl_Type< AMat * >(0, ::DestroyKNmat< Mat >);
     // to declare HMatrix[int]
-    cout << "ArrayofHmat " << atype< AMat * >( ) << endl;
-    cout << "    " << *atype< long >( ) << endl;
-    cout << "    " << *atype< PMat >( ) << endl;
     map_type_of_map[make_pair(atype< long >( ), atype< PMat >( )->right())] = atype< AMat * >( );
     atype<  AMat * >( )->Add(
       "[", "",

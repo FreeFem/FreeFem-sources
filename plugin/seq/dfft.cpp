@@ -271,7 +271,7 @@ AnyType Mapkk<NP>::operator( )(Stack s) const {
 static void Load_Init( ) {
     typedef DFFT_1d2dor3d< Complex > DFFT_C;
     typedef DFFT_1d2dor3d< double > DFFT_R;
-    
+    if(mpirank==0)
     cout << " load: init dfft " << endl;
     Dcl_Type< DFFT_C >( );
     Dcl_Type< DFFT_R >( );
