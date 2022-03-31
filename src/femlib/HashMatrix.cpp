@@ -1214,7 +1214,7 @@ void HashMatrix<I,R>::SetBC(char *wbc,double ttgv)
             else
                 operator()(ii,ii)=ttgv;
         }
-    if(!half && std::abs(ttgv+2.0) < 1.0e-10 || std::abs(ttgv+20.0) < 1.0e-10) //  remove also columm tgv == -2 .....
+    if( std::abs(ttgv+2.0) < 1.0e-10 || std::abs(ttgv+20.0) < 1.0e-10) //  remove also columm tgv == -2 .....
     {
         CSC();
         for(I jj=0; jj< this->n; ++jj)
