@@ -62,7 +62,7 @@ namespace Fem2D {
         R2 A = Ph[(i + 1) % 3], B = Ph[(i + 2) % 3];
         for (int j = 0; j < QFE.n; j++) {
           R l0 = QFE[j].x, l1 = 1 - l0;
-          cout << "k = " << k << " AND pij = " <<  pij_alpha.N( ) << endl;
+          if(verbosity>4) cout << "k = " << k << " AND pij = " <<  pij_alpha.N( ) << endl;
           pij_alpha[k++] = IPJ(3 * i, p, 0);
           pij_alpha[k++] = IPJ(3 * i + 1, p, 0);
           pij_alpha[k++] = IPJ(3 * i + 2, p, 0);
@@ -71,16 +71,19 @@ namespace Fem2D {
       }
 
       for (int i = 0; i < QFK.n; i++) {
-        cout << "k = " << k << " AND pij = " <<  pij_alpha.N( ) << endl;
+        if(verbosity>4) cout << "k = " << k << " AND pij = " <<  pij_alpha.N( ) << endl;
         pij_alpha[k++] = IPJ(9, p, 0);
         pij_alpha[k++] = IPJ(10, p, 0);
         pij_alpha[k++] = IPJ(11, p, 0);
         P_Pi_h[p++] = QFK[i];
       }
+      if(verbosity>4)
+      {
       cout << " QFE.n " << QFE.n << endl;
       cout << " QFK.n " << QFK.n << endl;
       cout << "k = " << k << " AND pij = " <<  pij_alpha.N( ) << endl;
       cout << "p = " << p << " AND P_Pi_h = " <<  P_Pi_h.N( )<< endl;
+}
       ffassert(k == this->pij_alpha.N( ));
       ffassert(p == this->P_Pi_h.N( ));
     }

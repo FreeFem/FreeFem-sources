@@ -15,6 +15,8 @@ func BCu1 = 4*x*(1-x);
 real epsr=1e-6;
 
 // Mesh
+if (!HaveUMFPACK)
+ DefaultSolver="LU";
 mesh Th = square(8, 8);
 func PkX = P3pnc;
 func PkM = P2dc;
