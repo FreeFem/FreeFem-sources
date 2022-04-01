@@ -16,11 +16,11 @@ GH_EXE_NAME="FreeFEM-${VERSION}-win64.exe"
 
 ## EXE build
 autoreconf -i
-./configure --enable-download --enable-optim --enable-generic
+./configure --enable-download --enable-optim --enable-generic --disable-scalapack --disable-mumps
 ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS
 ## compile and install ff-petsc
 cd 3rdparty/ff-petsc && make petsc-slepc && cd -
-./reconfigure
+./configure --enable-download --enable-optim --enable-generic
 
 make
 cp AUTHORS readme/AUTHORS
