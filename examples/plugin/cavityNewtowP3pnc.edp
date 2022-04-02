@@ -5,6 +5,8 @@
  * continuation on Reynols Number
  * Mesh adaptation
 */
+if (HaveUMFPACK)
+{//  just do with UMPACK fgmres do not converge !!!
 load "Element_P3pnc"
 
 // Parameters
@@ -15,8 +17,8 @@ func BCu1 = 4*x*(1-x);
 real epsr=1e-6;
 
 // Mesh
-if (!HaveUMFPACK)
- DefaultSolver="LU";
+
+
 mesh Th = square(8, 8);
 func PkX = P3pnc;
 func PkM = P2dc;
@@ -133,4 +135,5 @@ for (real re = reyini ; re <= reymax; re *= 2) {
 	uu2 = u2;
 	streamlines;
 	plot(coef=0.2, cmm="rey="+re+" [u1, u2] and p", psi, [uu1, uu2], wait=0, nbiso=20);
+}
 }
