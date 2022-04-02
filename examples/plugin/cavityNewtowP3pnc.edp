@@ -11,7 +11,7 @@ load "Element_P3pnc"
 
 // Parameters
 real reyini= 500; 
-real reymax = 2000;	// ok < 125000
+real reymax = 1000;	// ok < 125000
 
 func BCu1 = 4*x*(1-x);
 real epsr=1e-6;
