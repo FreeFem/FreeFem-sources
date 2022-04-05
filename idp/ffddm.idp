@@ -194,7 +194,7 @@ real pr#ttotalelapsed = mpiWtime();
 NewMacro pr#writesummary
 if (preffe#prmesh#isincomm)
 {
-  real[int] timings = [preffe#prmesh#tdecomp,pr#tfacto,pr#tbuildE,pr#tgmres,pr#tmv,pr#tprec,pr#tcs,pr#teigenv];
+  real[int] timings = [preffe#prmesh#tdecomp,pr#tfacto,pr#tbuildE,pr#tgmres,pr#tmv,pr#tprec,pr#tcs,pr#teigenv,pr#tdirect];
   real[int] timingsg(timings.n);
   timingsg = 0;
   mpiAllReduce(timings,timingsg,preffe#prmesh#mpicomm,mpiMAX);
@@ -207,7 +207,7 @@ if (preffe#prmesh#isincomm)
     cout << "["+Stringification(pr)+"] timings - PREC : " << timingsg[5] << endl;
     cout << "["+Stringification(pr)+"] timings - COARSE SOLVE : " << timingsg[6] << endl;
     /*cout << "timings - scalprod : " << timingsg[7] << endl;*/
-    cout << "["+Stringification(pr)+"] timings - total_sum : " << timingsg[3]+timingsg[0]+timingsg[1]+timingsg[2]+timingsg[7] << endl;
+    cout << "["+Stringification(pr)+"] timings - total_sum : " << timingsg[3]+timingsg[0]+timingsg[1]+timingsg[2]+timingsg[7]+timingsg[8] << endl;
     cout << "["+Stringification(pr)+"] timings - total elapsed wall time : " << mpiWtime()-pr#ttotalelapsed << endl;
   }
   pr#tgmres = 0; pr#tmv = 0; pr#tprec = 0; pr#tcs = 0; pr#tscalprod = 0;
@@ -262,13 +262,13 @@ IFMACRO(pr#withpetsc)
 pr#aRd[mpiRank(preffe#prmesh#commddm)].resize(preffe#Dk[mpiRank(preffe#prmesh#commddm)].n, preffe#Dk[mpiRank(preffe#prmesh#commddm)].n);
 IFMACRO(preffe#K,real)
 load "PETSc"
-Mat<preffe#K> pr#petscOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, preffe#Dk[mpiRank(preffe#prmesh#commddm)], communicator = preffe#prmesh#commddm);
+real[int] pr#petscDk = preffe#Dk[mpiRank(preffe#prmesh#commddm)];
 ENDIFMACRO
 IFMACRO(preffe#K,complex)
 load "PETSc-complex"
 real[int] pr#petscDk = preffe#Dk[mpiRank(preffe#prmesh#commddm)].re;
-Mat<preffe#K> pr#petscOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, pr#petscDk, communicator = preffe#prmesh#commddm);
 ENDIFMACRO
+Mat<preffe#K> pr#petscOP(pr#aRd[mpiRank(preffe#prmesh#commddm)], pr#intersectionhpddm, pr#petscDk, communicator = preffe#prmesh#commddm);
 ENDIFMACRO
 
 NewMacro pr#localmacrominoverlap() preffe#prmesh#mminoverlap EndMacro
