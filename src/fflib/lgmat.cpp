@@ -3086,12 +3086,33 @@ Matrice_Creuse<K>* set_H_Eye(Matrice_Creuse<K> *pA,const  Eye eye)
     if( init) pA->init();
     pA->resize(n,m);
     HashMatrix<int,K> * pH= pA->pHM();
+    
     ffassert(pH);
     pH->clear();
     pH->resize(n,m,nn);
     for(int i=0; i< n; ++i)
         (*pH)(i,i)=1.;
     return  pA;
+}
+template <class K> long Set_BC(Matrice_Creuse<K> * const & pA,KN_<double>  const & bc,double const & tgv)
+{
+    long nbc=0;
+    if( pA ==0 && pA->A) return nbc;
+    MatriceCreuse<K> A = pA->A;
+    HashMatrix<int,K> * pH= pA->pHM();
+    ffassert(pH);
+    int n = bc.N();
+    KN<char> cbc(n);
+    for(int i=0; i< n;++i )
+        if (bc[i])
+           ++nbc,cbc[i] = char(1);
+        else
+            cbc[i]=char(0);
+    pH->SetBC(cbc,tgv);
+    return nbc;
+}
+template <class K> long Set_BC(Matrice_Creuse<K> * const & pA,KN_<double>  const & bc)
+{ return Set_BC(pA,bc,ff_tgv);
 }
 template <class R>
 void AddSparseMat()
@@ -3214,6 +3235,8 @@ TheOperators->Add("+",
  TheOperators->Add("=", new OneOperator2<TheCoefMat<R>,TheCoefMat<R>,R>(set_mat_coef<R>) );
 
  Global.Add("set","(",new SetMatrix<R>);
+ Global.Add("setBC","(",new OneOperator3_<long,Matrice_Creuse<R> *,KN_<double>,double>(Set_BC));
+    Global.Add("setBC","(",new OneOperator2_<long,Matrice_Creuse<R> *,KN_<double>>(Set_BC));
  Add<Matrice_Creuse<R> *>("linfty",".",new OneOperator1<double,Matrice_Creuse<R> *>(get_norme_linfty));
  Add<Matrice_Creuse<R> *>("l2",".",new OneOperator1<double,Matrice_Creuse<R> *>(get_norme_l2));
  Add<Matrice_Creuse<R> *>("l1",".",new OneOperator1<double,Matrice_Creuse<R> *>(get_norme_l1));

@@ -5,6 +5,11 @@ real[int] bb(6);
 boundingbox(ThL3,bb);
 cout << bb << endl; 
 fespace Vh(ThL3,P2);
+Vh p2=x*x+2*x*z+3*z*(z-1);
+cout << " dxx "<< dxx(p2)(0.5,0,0.5) << endl; 
+cout << " dxz "<< dxz(p2)(0.5,0,0.5) << endl; 
+cout << " dzz "<< dzz(p2)(0.5,0,0.5) << endl; 
+
 func f = 1 ;
 macro Grad3(uh) [dx(uh),dy(uh),dz(uh)]  // EOM
 

@@ -1,0 +1,111 @@
+include "ElasticLaw2d.idp"
+
+// ================================================================
+
+//  I[0] = trace(C) +1 
+//  I[1] = (trace(C)^2 - trace(C^2) )/2
+//  I[2] = det(C) 
+//  Model from wiki https://en.wikipedia.org/wiki/Neo-Hookean_solid
+// the  materail coef ..
+real mu = 5.e2; //  kg/cm^2
+real lambda= 2e3;
+real C1 = mu/2;
+real D1 = lambda/2;
+// log(sqrt(a)*sqrt(a)) = log(sqrt(a))+log(sqrt(a)) 
+// 2 log(sqrt(a)) = log(a)
+// J=sqrt(I3) =>   (sqrt(I3)-1)^2 ' =  sqrt(I3)' (sqrt(I3)-1) = 0.5 I3' (1-1/sqrt(I3))
+// -1/sqrt(I3)'  = 0.5 I3''/(sqrt(I3)*I3)
+// the enarge ... 
+macro W(I) ( 
+	C1*(I[0] - 4. - log(I[2]) ) 
+      + D1 *sqr(1.-sqrt(I[2])) )   //EOM  (J-1)^2 
+          
+macro dW(I,dI)  ( 
+	  C1*    (dI[0] - dI[2]/I[2] )
+	+ 0.5*D1*dI[2]*(1.-1/sqrt(I[2])  )
+	)    //EOM
+// EOM
+macro ddW(I,dI,ddI) ( 
+	+C1/sqr(I[2])*ddI[2]*dI[2] 
+	+ 0.25*D1* dI[2]*ddI[2]/(sqrt(I[2])*I[2])
+	)   //EOM
+ // EOM
+
+// ************************************************
+// THE (BIO)MECHANICAL PARAMETERS: Begin
+
+//  Elastic coefficients
+
+
+//  Stress loads
+real Pa = -3.e2;
+
+
+// THE (BIO)MECHANICAL PARAMETERS: End
+// ************************************************
+
+
+// ************************************************
+// THE COMPUTATIONAL PARAMETERS: Begin
+
+//  The wound radius
+real InnerRadius = 1.e0;
+
+//  The outer (truncated) radius
+real OuterRadius = 4.e0;
+
+//  Tolerance (L^2)
+real tol = 1.e-4;
+
+//  Extension of the inner ellipse ((major axis) - (minor axis))
+real InnerEllipseExtension = 1.e0;
+
+int m = 100, n = 50;
+
+border InnerEdge(t = 0, 2.0*pi) {x = (1.0 + InnerEllipseExtension) * InnerRadius * cos(t); y = InnerRadius * sin(t); label = 1;}
+
+border OuterEdge(t = 0, 2.0*pi) {x = (1.0 + 0.0 * InnerEllipseExtension) * OuterRadius * cos(t); y = OuterRadius * sin(t); label = 2;}
+
+mesh Th = buildmesh(InnerEdge(-m) + OuterEdge(n));
+plot(Th,wait=1);
+int bottom=1, right=2,upper=3,left=4;
+
+int Nnewton     = 20;
+real epsNewton  = 1.e-10;
+
+fespace Wh(Th,[P2,P2]);
+
+// methode de Newton ..
+
+ Wh [d1,d2]=[0,0/100]; // Ok CL sirichlet homogene . 
+ Wh [w1,w2],[v1,v2];
+ 
+    cout << 0  << "  Energie  = " << int2d(Th)(W2d([d1,d2])) - int1d(Th,1)( Pa * ([d1,d2]'*[N.x,N.y]) )  << endl;
+    
+ for(int i=0;i<Nnewton;++i)
+ {
+  
+    solve dWW([w1,w2],[v1,v2]) = 
+         int2d(Th)( ddW2d([d1,d2],[w1,w2],[v1,v2]) ) 
+       - int2d(Th)( dW2d([d1,d2],[v1,v2]) )
+       - int1d(Th,1)( Pa * (N'*[v1,v2]) ) 
+       
+       // -[v1,v2]'*[f1,f2] ) 
+      + on(2,w1=0,w2=0); 
+      
+     d1[] -= w1[];
+     plot([d1,d2],coef=1/d1[].linfty, cmm=d1[].linfty);
+     real err = w1[].linfty;
+     cout << i << " err Nw = " << err << " d max = " << d1[].linfty 
+          << "  Energie  = " << int2d(Th)(W2d([d1,d2]))  - int1d(Th,1)( Pa * ([d1,d2]'*[N.x,N.y]) )  << endl;
+     if(err< epsNewton) break;
+     assert(err < 1e5);  
+ 
+  }
+{
+       real amplify= 0.3/d1[].linfty;
+       mesh Thm=movemesh(Th,[x+d1*amplify,y+d2*amplify]);
+       plot(Thm,wait=1,[d1,d2],coef=amplify);
+}
+  
+ 

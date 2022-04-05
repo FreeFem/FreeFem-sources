@@ -36,18 +36,78 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 -
 
+## [4.11]
+### Added
+- add computation scalar product of R3 example :  ( N'*Tl)
+- add tools to do compution with R3 vector see tutorial/calculus.edp
+- add an example tutorial/tgv-test.edp see see what tgv do on matrix build. 
+- add R3 Th.be(k).N to  get the normal of boundary element (in all mesh type)
+- add R3 Th.be(k)[i].P  to  get the point (R3)  of boundary vertices
+- add R3 Th.be(k).measure to  get the measure of the boundary elment 
+- add projection  function to a mesh , meshL, MeshS or  mesh3 with return a R3 point 
+- see new example dist-projection.edp example in exemples 
+- add dxx, dyy, dzz, dxy,  .. on P2L finite element 
+- add tools to compute solid angle :  let R3 O; a given point, Th3 a mesh3 and ThS a meshS. 
+     solidangle(O,Th3.be(ke)) // triangular face is the boundary face 
+     solidangle(O,Th3[k],nuface) // triangular face is face nuface of tet Th3[k]
+     solidangle(O,ThS[k]) // triangular face is ThS[k]
+     solidangle(O,A,B,C) // triangular face i (A,B,C) 
+     Volume(O,Th3.be(ke)) // O, triangular face is the boundary face 
+     Volume(O,Th3[k],nuface) // O, triangular face is face nuface of tet Th3[k]
+     Volume(O,ThS[k]) // O, triangular face is ThS[k]
+     Volume(O,A,B,C) // (O,A,B,C) tet ..
+- in bem pluging add array of HMatrix 
+     
+-  examples/3d/Connectivite-3d.edp or /3dSurf/Connectivite-S.edp of test. 
+- 3 function mapk, mapkk, mapkk to set a function in fourier space with k parametre 
+   R3 K; // le fourier variable allway 3d (sorry)
+   int n1=16,n2=8, n3=4; 
+   real[int] tab1(nx,tab2(nx*ny),tab3(nx*ny*nz);
+   mapk(tab1,K,sqr(K.x));
+   mapkk(tab2,ny,K,K.norm2);
+   mapkkk(tab3,ny,nz,K,K.norm2);
+   //  Remark you can change K by P (current point)     
+- in SurfaceMesh.ipd fonction to build a Isocaedron and a Sphere from this Isocaedron
+- new finite element on MeshS  this  finite element is the ortogonal of RT0 on surface, or 
+   Nelelec Finite Element on triangle with one DoF per mesh edge and where the DoF is the 
+   current on  Edge in orientate edge by number of vertices.  
+-  plugin Element_P3pnc for new 2d finite element P3pnc (P3 + 2 bulles)  noncoforming  (continuite of P2 mod)   
+   and add 2 examples with this new finite element 
+      examples/plugin/cavityNewtowP3pnc.edp examples/plugin/testFE-P3pnc.edp
+- function to set dirichlet Boundary conditon on matrix A (real ou compex) trought  an real[int] 
+    (if none zero => set BC ) 
+  setBC(A,au1[],-2); and the example 
+      examples/3d/Elasticity-simple-support-BC.edp
+  
+### Changed
+- the beaviour of linear solver UMFPACK, CHOLMOD in case of error , now FreeFEm exit on ExecError like in MUMPS
+- PETSc 3.17.0
+
+### Deprecated
+-
+
+### Removed
+-map function  in plugin dfft 
+
+### Fixed
+- pow(int,int) now call int version not complex version..
+- correct the normal the N implicite variable   on meshL case 
+- correct version dump in banner FreeFem++ - version 4.10 (V ...
+- correct  in CPU time on big mesh due to do bad HCode in HashTable.hpp
+- bug in array of finite element on meshhS, meshL (ie.  `fespace Vh(ThS,[P1,P1]);` ) 
+
+
 ## [4.10]
 ### Added
 - ridgeangle named parameter in ExtractMeshL in msh3 plugin
 - DG formulation in 1d :
   add integral of all border of element : `intallBE(ThL)` and unified the notation by adding
-   `intallBE(ThS)` , `intallBE(Th2)`, `intallBE(Th3)`
-
+  `intallBE(ThS)` , `intallBE(Th2)`, `intallBE(Th3)`
   `nuVertex` of now the vertex number of element in intallBE0d integral
   `BoundaryBE`, `InternalBE` to know if border element (BE) is on true boundary of not.
   update `nElementonB` in case on no manifold data (value greater > 2) in meshL, MeshS case ..
-  add code to use jump, mean of test functuon on MeshL case. ( not in mesh3 ) to compute RHS. 
-- add getcwd() function in shell plugin to ghet the current working dir 
+  add code to use jump, mean of test functuon on MeshL case. ( not in mesh3 ) to compute RHS.
+- add getcwd() function in shell plugin to get the current working dir
 - add nuVertex to get the vextex on element in some int?
 
 ### Changed
@@ -119,7 +179,7 @@ All notable changes to this project will be documented in this file.
 - Bilaplacian example using Morley FE with PETSc, see `examples/hpddm/bilaplacian-2d-PETSc.edp`
 - Oseen problem preconditioned by PCD, see `examples/hpddm/oseen-2d-PETSc.edp`
 - SLEPc polynomial eigenvalue solver `PEPSolve()`
-- add trivail example to check periodic boundary condition on meshS , meshL  , mesh3
+- add trivial example to check periodic boundary condition on meshS , meshL  , mesh3
     examples/3d/periodic3.edp	examples/3dSurf/periodicS.edp
     examples/3dCurve/periodicL.edp
 
@@ -451,7 +511,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.10..develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.11..develop
+[4.11]: https://github.com/FreeFem/FreeFem-sources/compare/v4.10..v4.11
 [4.10]: https://github.com/FreeFem/FreeFem-sources/compare/v4.9..v4.10
 [4.9]: https://github.com/FreeFem/FreeFem-sources/compare/v4.8..v4.9
 [4.8]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7-1..v4.8

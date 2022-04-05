@@ -9,8 +9,8 @@
 #	  egrep '.dylib$'| sort -u \
 #|awk -F/ '{ if (f[$NF]!=1 ) print $0;  f[$NF]=1;}'
 (
-(echo export DYLD_PRINT_LIBRARIES=1;ls plugin/seq/*.dylib|grep -v fflapack| awk '{print "src/nw/FreeFem++ -check_plugin ",$0}' )|sh 2>&1|awk '/dyld: loaded:/ {print $3}'| sort -u
-(echo export DYLD_PRINT_LIBRARIES=1;ls plugin/mpi/*.dylib|grep -v fflapack| awk '{print "src/mpi/FreeFem++-mpi -check_plugin ",$0}' )|sh 2>&1|awk '/dyld: loaded:/ {print $3}'| sort -u
+(echo export DYLD_PRINT_LIBRARIES=1;ls plugin/seq/*.dylib|grep -v fflapack| awk '{print "src/nw/FreeFem++ -check_plugin ",$0}' )|sh 2>&1|awk '$1 ~ /dyld\[[0-9]*\]/ {print $3}'| sort -u
+(echo export DYLD_PRINT_LIBRARIES=1;ls plugin/mpi/*.dylib|grep -v fflapack| awk '{print "src/mpi/FreeFem++-mpi -check_plugin ",$0}' )|sh 2>&1|awk '$1 ~ /dyld\[[0-9]*\]/  {print $3}'| sort -u
 )| sort -u | grep .dylib > etc/list-dylib
 
 egrep -v '/usr/lib/|/System/|./plugin/' etc/list-dylib >etc/list-dylib-no-os

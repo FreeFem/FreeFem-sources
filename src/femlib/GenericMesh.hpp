@@ -275,8 +275,9 @@ private: // pas de copie pour ne pas prendre l'adresse
   template<>
   inline  R3 ExtNormal<1>( GenericVertex<R3> *const v[2],int const f[1])  {
       R3 Nn;
-      if(f[0]==0) Nn=R3(*v[1],*v[0])-R3(*v[0]);
-      else if(f[0]==1) Nn=R3(*v[0],*v[1])+R3(*v[1]);
+      if(f[0]==0) Nn=R3(*v[1],*v[0]);//-R3(*v[0]);
+      else if(f[0]==1) Nn=R3(*v[0],*v[1]);//+R3(*v[1]);
+      if (verbosity>99)       cout << "\n( ExtNormal<1> " << Nn << " v0 " << *v[0] << " v1  " << *v[1]<< " 0/1: " << f[0] << ")" << endl;
       return Nn;
   }
     // Clever the orientation in case of only 1 vertex april 2019 (Hard to find !!!!! FH and PHT)

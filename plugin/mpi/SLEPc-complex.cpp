@@ -1,4 +1,4 @@
-//ff-c++-LIBRARY-dep: cxx11 slepccomplex petsccomplex [mkl|blas] hpddm mpi
+//ff-c++-LIBRARY-dep: cxx11
 //ff-c++-cpp-dep:
 
 #include "ff++.hpp"

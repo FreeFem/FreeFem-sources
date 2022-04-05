@@ -9,7 +9,7 @@
 # number in debian/changelog.
 
 
-AC_INIT(FreeFEM,4.10,frederic.hecht@sorbonne-universite.fr,FreeFEM)
+AC_INIT([FreeFEM],[4.11],[frederic.hecht@sorbonne-universite.fr],[FreeFEM])
 dnl : ${CFLAGS=""}
 dnl : ${CXXFLAGS=""}
 dnl : ${FCFLAGS=""}
@@ -23,7 +23,7 @@ ff_TEST_FFPP_MPI="../../src/mpi/FreeFem++-mpi"
 ff_uncompile_plugin=""
 ff_unlib_plugin=""
 ff_download_lib=""
-AC_PREREQ(2.63) dnl for AC_LANG_CASE and check stuff
+AC_PREREQ([2.69]) dnl for AC_LANG_CASE and check stuff
 dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.11 is too old for check ...
@@ -115,9 +115,9 @@ m4_define([AC_FF_PETSC_WHERELIB_BASIC],# PETSC_WITH_EXTERNAL_LIB,PETSC_CC_INCLUD
 
 m4_define([TOOL_PARAMETERS],
     [
-	AC_ARG_WITH($1_include,AC_HELP_STRING([--with-$1-include=],[Include directives for $1 instead of automatic download]))
-    AC_ARG_WITH($1_ldflags,AC_HELP_STRING([--with-$1-ldflags=],[Link-time directives for $1 instead of automatic download]))
-	AC_ARG_ENABLE(download-$1,AC_HELP_STRING([--enable-download_$1],[force the download of $1]))
+	AC_ARG_WITH($1_include,AS_HELP_STRING([--with-$1-include=],[Include directives for $1 instead of automatic download]))
+    AC_ARG_WITH($1_ldflags,AS_HELP_STRING([--with-$1-ldflags=],[Link-time directives for $1 instead of automatic download]))
+	AC_ARG_ENABLE(download-$1,AS_HELP_STRING([--enable-download_$1],[force the download of $1]))
 
     if test "$with_$1_include" != "" || test "$with_$1_ldflags" != ""
     then
@@ -131,7 +131,7 @@ m4_define([TOOL_PARAMETERS],
    ])
 
 m4_define([TOOL_DISABLE],
-    [AC_ARG_ENABLE($1,AC_HELP_STRING([--disable-$1],[Do not use $1]))
+    [AC_ARG_ENABLE($1,AS_HELP_STRING([--disable-$1],[Do not use $1]))
     if test "$enable_$1" = "no"
     then
         AC_SUBST([TOOL_COMPILE_$1],"")
@@ -164,7 +164,7 @@ m4_define([TOOL_DISABLE],
 ])
 m4_define([TOOL_DISABLE_NO],
     [
-	AC_ARG_ENABLE($1,AC_HELP_STRING([--disable-$1],[Do not use $1]))
+	AC_ARG_ENABLE($1,AS_HELP_STRING([--disable-$1],[Do not use $1]))
     if test "$enable_$1" = "no" -o "$enable_$1" = ""
     then
 	    enable_$1=no
@@ -265,7 +265,7 @@ else
 fi
 
 # FFCS - build the code for FreeFem++-cs
-AC_ARG_ENABLE(ffcs,AC_HELP_STRING([--enable-ffcs],[build FreeFEM for use by FreeFem++-cs]))
+AC_ARG_ENABLE(ffcs,AS_HELP_STRING([--enable-ffcs],[build FreeFEM for use by FreeFem++-cs]))
 if test "$enable_ffcs" = yes
 then
 	AC_DEFINE_UNQUOTED(ENABLE_FFCS,$enable_ffcs,[build FreeFEM for use by FreeFem++-cs])
@@ -279,7 +279,7 @@ AM_CONDITIONAL([ENABLE_FFCS],[test $enable_ffcs = yes])
 ff_AR="ar"
 ff_ARFLAGS="rv"
 ff_RANLIB="ranlib"
-AC_ARG_ENABLE(fortran,AC_HELP_STRING([--disable-fortran],[No Fortran compiler available ( ARPACK need it)]))
+AC_ARG_ENABLE(fortran,AS_HELP_STRING([--disable-fortran],[No Fortran compiler available ( ARPACK need it)]))
 
 ff_g2c_lib="";
 if test "$enable_fortran" != no
@@ -446,7 +446,7 @@ fi
 #  fin test FORTRAN ..........
 # ----------------------------
 
-AC_ARG_ENABLE(c,AC_HELP_STRING([--disable-c],[No C compiler available (C BLAS need it)]))
+AC_ARG_ENABLE(c,AS_HELP_STRING([--disable-c],[No C compiler available (C BLAS need it)]))
 if test "$enable_c" != no
 then
     AC_PROG_CC
@@ -621,7 +621,7 @@ CYGWIN*|MINGW*|MSYS_NT*)
 		    if test -z "$ff_glut" ; then
 			ff_glutname="freeglut"
 			if test -x  /usr/bin/pkg-config.exe ; then
-			ff_glut="-lglu32 "`/usr/bin/pkg-config.exe --libs freeglut`
+			ff_glut="-lglu32 "`/usr/bin/pkg-config.exe --libs --static freeglut`
 			else
 			ff_glut="-l$ff_glutname -mthreads -lglu32 -lopengl32"
 			fi
@@ -967,9 +967,9 @@ fi
 # Looking for useful configuration utilities
 # ------------------------------------------
 
-AC_ARG_ENABLE(summary,AC_HELP_STRING([--enable-summary],[Display activated libraries list at the end of the configure process]))
+AC_ARG_ENABLE(summary,AS_HELP_STRING([--enable-summary],[Display activated libraries list at the end of the configure process]))
 
-AC_ARG_ENABLE(download,AC_HELP_STRING([--enable-download],[Download missing libraries (BLAS,ARPACK,UMFPACK,...)]))
+AC_ARG_ENABLE(download,AS_HELP_STRING([--enable-download],[Download missing libraries (BLAS,ARPACK,UMFPACK,...)]))
 ## PETSc
 AC_ARG_WITH(petsc,[ --with-petsc=/usr/local/petsc/conf/petscvariables --without-petsc])
 AC_ARG_WITH(prefix_petsc,[ --prefix_petsc=directory where all PETSc/SLEPc will be installed if you download ])
@@ -1031,7 +1031,6 @@ esac
 		        AC_FF_PETSC_WHERELIB(mumps,MUMPS_LIB,MUMPS_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(tetgen,TETGEN_LIB,TETGEN_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(hpddm,HPDDM_LIB,HPDDM_INCLUDE,$ffconfpetsc)
-                        AC_FF_PETSC_WHERELIB(htool,HTOOL_LIB,HTOOL_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(superlu,SUPERLU_LIB,SUPERLU_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(mmg,MMG_LIB,MMG_INCLUDE,$ffconfpetsc)
                         AC_FF_PETSC_WHERELIB(parmmg,PARMMG_LIB,PARMMG_INCLUDE,$ffconfpetsc)
@@ -1055,8 +1054,8 @@ esac
                         fi
 		        fi
             if test "$ff_slepc_ok" != yes ;   then
-                AC_ARG_WITH(slepc_include,AC_HELP_STRING([--with-slepc-include=],[Include directives for slepc instead of automatic download]))
-                AC_ARG_WITH(slepc_ldflags,AC_HELP_STRING([--with-slepc-ldflags=],[Link-time directives for slepc instead of automatic download]))
+                AC_ARG_WITH(slepc_include,AS_HELP_STRING([--with-slepc-include=],[Include directives for slepc instead of automatic download]))
+                AC_ARG_WITH(slepc_ldflags,AS_HELP_STRING([--with-slepc-ldflags=],[Link-time directives for slepc instead of automatic download]))
                 if test "$with_slepc_include" != "" || test "$with_slepc_ldflags" != ""
                 then
                     # some directives have been specified, use them instead of downloading
@@ -1155,8 +1154,8 @@ esac
                    fi
 			fi
             if test "$ff_slepccomplex_ok" != yes ;   then
-                AC_ARG_WITH(slepccomplex_include,AC_HELP_STRING([--with-slepccomplex-include=],[Include directives for slepccomplex instead of automatic download]))
-                AC_ARG_WITH(slepccomplex_ldflags,AC_HELP_STRING([--with-slepccomplex-ldflags=],[Link-time directives for slepccomplex instead of automatic download]))
+                AC_ARG_WITH(slepccomplex_include,AS_HELP_STRING([--with-slepccomplex-include=],[Include directives for slepccomplex instead of automatic download]))
+                AC_ARG_WITH(slepccomplex_ldflags,AS_HELP_STRING([--with-slepccomplex-ldflags=],[Link-time directives for slepccomplex instead of automatic download]))
                 if test "$with_slepccomplex_include" != "" || test "$with_slepccomplex_ldflags" != ""
                 then
                     # some directives have been specified, use them instead of downloading
@@ -1286,7 +1285,7 @@ fi
 # ----------------
 
 # ALH - 18/9/13 - deactivates FFTW detection for testing purposes
-AC_ARG_ENABLE(system_fftw,AC_HELP_STRING([--disable-system-fftw],[Disable the automatic detection of FFTW]))
+AC_ARG_ENABLE(system_fftw,AS_HELP_STRING([--disable-system-fftw],[Disable the automatic detection of FFTW]))
 if test "$enable_system_fftw" != no
 then
 
@@ -1300,7 +1299,7 @@ if test "$ff_fftw_ok" = yes -a "$ff_fftw_h" = yes
 then
     AC_FF_ADDWHERELIB(fftw3,-lfftw3,)
 else
-    AC_ARG_ENABLE(download-fftw,AC_HELP_STRING([--enable-download_fftw],[force the download of fftw]))
+    AC_ARG_ENABLE(download-fftw,AS_HELP_STRING([--enable-download_fftw],[force the download of fftw]))
     if test "$enable_download_fftw" != no -a "$enable_download" = yes
     then
         ff_DOWNLOAD_FFTW=fftw
@@ -1331,7 +1330,7 @@ ff_blas_ok=no
 ff_blas_inc=""
 
 # ALH - 18/9/13 - give the option to deactivate system blas for testing purposes
-AC_ARG_ENABLE(system-blas,AC_HELP_STRING([--disable-system-blas],[Disable the search for a system-wide BLAS library]))
+AC_ARG_ENABLE(system-blas,AS_HELP_STRING([--disable-system-blas],[Disable the search for a system-wide BLAS library]))
 if test "$ff_where_lib_conf_blaslapack" = 1  ; then
   echo " use BLAS/Lapack of petsc "
 #  echo "  lib: $ff_where_lib_blaslapack inc: $ff_where_inc_blaslapack"
@@ -1440,7 +1439,7 @@ then
 	    # handle threads when FF is connected to AS' solver. So we need an option to configure FF with the
 	    # multithreaded MKL by default.
 
-	    AC_ARG_ENABLE(mkl_mlt,AC_HELP_STRING([--enable-mkl-mlt],[Link with the multithreaded instead of the monothreaded version of the MKL]))
+	    AC_ARG_ENABLE(mkl_mlt,AS_HELP_STRING([--enable-mkl-mlt],[Link with the multithreaded instead of the monothreaded version of the MKL]))
 
 	    if test "$enable_mkl_mlt" = yes
 	    then
@@ -1472,7 +1471,7 @@ dnl            AC_DEFINE(HAVE_MKL,1, the MKL intel lib is present for BLAS and L
     AC_MSG_RESULT( [ $ff_warm  root: $ff_mkl_root , arch: $ff_mkl_arch , $ff_mkl_lp ...  ])
 
     AC_ARG_WITH(blas,
-	AC_HELP_STRING([--with-blas=library],[Use a specific version of the Blas]),
+	AS_HELP_STRING([--with-blas=library],[Use a specific version of the Blas]),
 	ff_blas_ok=yes
 	ff_blas_libs="${withval}")
 
@@ -1519,7 +1518,7 @@ fi
 
 # <<OpenBLAS>> ALH - 18/9/13 - option to compile the OpenBLAS moved from the FFCS tree to FF tree
 
-AC_ARG_ENABLE(openblas,AC_HELP_STRING([--disable-openblas],[Disable the automatic download of OpenBLAS]))
+AC_ARG_ENABLE(openblas,AS_HELP_STRING([--disable-openblas],[Disable the automatic download of OpenBLAS]))
 if  test "$ff_blas_ok" = no && test "$enable_openblas" != no && test "$enable_download" = yes
 then
     AC_CHECK_PROG(ff_git,git,yes,no)
@@ -1665,7 +1664,7 @@ AC_MSG_CHECKING([for lapack in $LIBS, $ff_blas_libs and -llapack] )
 
 if test "$ff_lapack_ok" = no; then
     AC_ARG_WITH(lapack,
-	AC_HELP_STRING([--with-lapack=library],[Use a specific version of Lapack]),
+	AS_HELP_STRING([--with-lapack=library],[Use a specific version of Lapack]),
 	ff_lapack_ok=yes
 	ff_lapack_lib="${withval}"
 	LIBS="$ff_lapack_lib $LIBS")
@@ -1687,7 +1686,7 @@ else
 fi
 
 # Arpack itself
-AC_ARG_ENABLE(download-arpack,AC_HELP_STRING([--enable-download_arpack],[force the use  download of arpack]))
+AC_ARG_ENABLE(download-arpack,AS_HELP_STRING([--enable-download_arpack],[force the use  download of arpack]))
 #echo "****** enable_download_arpack=$enable_download_arpack"
 
 if test -z "$ff_arpack_ok"; then
@@ -1812,18 +1811,18 @@ if test "$ff_where_lib_conf_suitesparse" = "1"  ; then
 fi
 #echo "@@@@@@@"
 ff_save_libs="$LIBS"
-AC_ARG_ENABLE(system_umfpack,AC_HELP_STRING([--disable-system-umfpack],[Disable the automatic detection of umfpack, colmod, amd, ....]))
+AC_ARG_ENABLE(system_umfpack,AS_HELP_STRING([--disable-system-umfpack],[Disable the automatic detection of umfpack, colmod, amd, ....]))
 if test "$ff_umfpack_ok"  = no -a "$enable_system_umfpack" != no -a  "$ff_blas_ok" = yes;
 then
 #    echo "@@@@@@@qqqq"
     # User-specified location
     AC_ARG_WITH(amd,
-	AC_HELP_STRING([--with-amd=library],[Use a specific version of AMD]),
+	AS_HELP_STRING([--with-amd=library],[Use a specific version of AMD]),
         ff_amd_ok=yes
 	ff_umfpack_libs="${withval}")
 
     AC_ARG_WITH(umfpack,
-        AC_HELP_STRING([--with-umfpack=library],[Use a specific version of Umfpack]),
+        AS_HELP_STRING([--with-umfpack=library],[Use a specific version of Umfpack]),
         ff_umfpack_ok=yes
         ff_umfpack_libs="${withval} $ff_umfpack_libs")
 
@@ -2094,6 +2093,9 @@ case "$F77" in
 *gfortran*)
 CHECK_COMPILE_FLAG(Fortran 77,[-fallow-argument-mismatch],FFLAGS)
 CHECK_COMPILE_FLAG(Fortran,[-fallow-argument-mismatch],FCFLAGS) 
+# -fallow-invalid-boz
+CHECK_COMPILE_FLAG(Fortran 77,[-fallow-invalid-boz],FFLAGS)
+CHECK_COMPILE_FLAG(Fortran,[-fallow-invalid-boz],FCFLAGS)
 ;;
 esac
 
@@ -2383,7 +2385,7 @@ test "$enable_download" = yes -a "$enable_boost" != no && enable_boost=yes
 
 test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o \( "$ff_umfpack_ok" != "yes" -a "$ff_mumps_ok" != "yes" \) &&  enable_hpddm=no
 test "$ff_cxx11" != yes -o  "$ff_mpi" != yes   &&  enable_htool=no
-test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o \( "$enable_bemtool" != "yes" -a "$enable_boost" != "yes" \) &&  enable_bemtool=no 
+test "$ff_cxx11" != yes -o  "$ff_mpi" != yes  -o \( "$enable_bemtool" != "yes" -a "$enable_boost" != "yes" \) &&  enable_bemtool=no
 
 FF_PETSC_DYLIB=""
 if test "$ff_petsc_ok" != no ;   then
@@ -2404,6 +2406,9 @@ TOOL_DISABLE(hpddm,["hpddm.$DYLIB_SUFFIX hpddm_substructuring.$DYLIB_SUFFIX $FF_
 TOOL_DISABLE(bem,["bem.$DYLIB_SUFFIX"])
 if test -n "$TOOL_COMPILE_bem" -a -z "$ff_HTOOL_INCLUDE"; then
   TOOL_COMPILE_htool="htool"
+fi
+if test -z "$TOOL_COMPILE_bem"; then
+    enable_bemtool=no
 fi
 
 ##
@@ -2470,8 +2475,7 @@ AM_CONDITIONAL([UMFPACK], [test "$ff_umfpack_" = yes])
 
 ##
 # All makefiles
-AC_OUTPUT(
-    Makefile
+AC_CONFIG_FILES([Makefile
     3rdparty/Makefile
     3rdparty/blas/Makefile
     3rdparty/arpack/Makefile
@@ -2509,7 +2513,8 @@ AC_OUTPUT(
     examples/3d/Makefile
     examples/3dSurf/Makefile
     examples/3dCurve/Makefile
-)
+])
+AC_OUTPUT
 
 AC_MSG_NOTICE([  FreeFEM used download: $enable_download ])
 AC_MSG_NOTICE([  --  Dynamic load facility: $ff_dynload ])

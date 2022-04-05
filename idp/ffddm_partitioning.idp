@@ -81,7 +81,18 @@ if (prmesh#isincomm)
         int[int] labs(6), labsi(6);
         labs = 0;
 
+        for (int ii=0; ii<prmesh#Thi.nbe; ii++) {
+          for (int jj=0; jj < dimension; jj++){
+            lx = min(lx,prmesh#Thi.be(ii)[jj].x); ux = max(ux,prmesh#Thi.be(ii)[jj].x);
+            ly = min(ly,prmesh#Thi.be(ii)[jj].y); uy = max(uy,prmesh#Thi.be(ii)[jj].y);
+            IFMACRO(dimension,3)
+            lz = min(lz,prmesh#Thi.be(ii)[jj].z); uz = max(uz,prmesh#Thi.be(ii)[jj].z);
+            ENDIFMACRO
+          }
+        }
+
         int samex, samey, samez;
+
         for (int ii=0; ii<prmesh#Thi.nbe; ii++) {
           IFMACRO(dimension,2)
           samex = (prmesh#Thi.be(ii)[0].x == prmesh#Thi.be(ii)[1].x);
@@ -92,13 +103,6 @@ if (prmesh#isincomm)
           samey = (prmesh#Thi.be(ii)[0].y == prmesh#Thi.be(ii)[1].y) && (prmesh#Thi.be(ii)[1].y == prmesh#Thi.be(ii)[2].y);
           samez = (prmesh#Thi.be(ii)[0].z == prmesh#Thi.be(ii)[1].z) && (prmesh#Thi.be(ii)[1].z == prmesh#Thi.be(ii)[2].z);
           ENDIFMACRO
-          for (int jj=0; jj < dimension; jj++){
-            lx = min(lx,prmesh#Thi.be(ii)[jj].x); ux = max(ux,prmesh#Thi.be(ii)[jj].x);
-            ly = min(ly,prmesh#Thi.be(ii)[jj].y); uy = max(uy,prmesh#Thi.be(ii)[jj].y);
-            IFMACRO(dimension,3)
-            lz = min(lz,prmesh#Thi.be(ii)[jj].z); uz = max(uz,prmesh#Thi.be(ii)[jj].z);
-            ENDIFMACRO
-          }
           if (prmesh#Thi.be(ii).label != 9999) {
                  if (samex && prmesh#Thi.be(ii)[0].x == lx) labs[0] = prmesh#Thi.be(ii).label;
             else if (samex && prmesh#Thi.be(ii)[0].x == ux) labs[1] = prmesh#Thi.be(ii).label;
@@ -111,9 +115,10 @@ if (prmesh#isincomm)
           }
         }
         IFMACRO(dimension,2)
-        real p0x = prmesh#Thi(prmesh#Thi.be(0)[0]).x, p0y = prmesh#Thi(prmesh#Thi.be(0)[0]).y;
-        real p1x = prmesh#Thi(prmesh#Thi.be(0)[1]).x, p1y = prmesh#Thi(prmesh#Thi.be(0)[1]).y;
-        real h = sqrt((p1x-p0x)^2+(p1y-p0y)^2);
+        real p0x = prmesh#Thi(prmesh#Thi[0][0]).x, p0y = prmesh#Thi(prmesh#Thi[0][0]).y;
+        real p1x = prmesh#Thi(prmesh#Thi[0][1]).x, p1y = prmesh#Thi(prmesh#Thi[0][1]).y;
+        real p2x = prmesh#Thi(prmesh#Thi[0][2]).x, p2y = prmesh#Thi(prmesh#Thi[0][2]).y;
+        real h = min(sqrt((p1x-p0x)^2+(p1y-p0y)^2),sqrt((p2x-p0x)^2+(p2y-p0y)^2));
         ENDIFMACRO
         IFMACRO(dimension,3)
         real p0x = prmesh#Thi(prmesh#Thi.be(0)[0]).x, p0y = prmesh#Thi(prmesh#Thi.be(0)[0]).y, p0z = prmesh#Thi(prmesh#Thi.be(0)[0]).z;
@@ -127,7 +132,7 @@ if (prmesh#isincomm)
         lx -= h*sizeoverlaps*(!labs[0]); ly -= h*sizeoverlaps*(!labs[2]); lz -= h*sizeoverlaps*(!labs[4]);
         ux += h*sizeoverlaps*(!labs[1]); uy += h*sizeoverlaps*(!labs[3]); uz += h*sizeoverlaps*(!labs[5]);
 
-        labsi = labs ? labs : ffddminterfacelabel;
+        labsi = labs ? labs : ffddmcubelabels;
 
         IFMACRO(dimension,2)
         int[int] L = [labsi[2],labsi[1],labsi[3],labsi[0]];
@@ -826,9 +831,10 @@ if (prmsh#isincomm && !prmsh#excluded)
             }
 
             IFMACRO(dimension,2)
-            real p0x = prmsh#Thi(prmsh#Thi.be(0)[0]).x, p0y = prmsh#Thi(prmsh#Thi.be(0)[0]).y;
-            real p1x = prmsh#Thi(prmsh#Thi.be(0)[1]).x, p1y = prmsh#Thi(prmsh#Thi.be(0)[1]).y;
-            real h = sqrt((p1x-p0x)^2+(p1y-p0y)^2);
+            real p0x = prmsh#Thi(prmsh#Thi[0][0]).x, p0y = prmsh#Thi(prmsh#Thi[0][0]).y;
+            real p1x = prmsh#Thi(prmsh#Thi[0][1]).x, p1y = prmsh#Thi(prmsh#Thi[0][1]).y;
+            real p2x = prmsh#Thi(prmsh#Thi[0][2]).x, p2y = prmsh#Thi(prmsh#Thi[0][2]).y;
+            real h = min(sqrt((p1x-p0x)^2+(p1y-p0y)^2),sqrt((p2x-p0x)^2+(p2y-p0y)^2));
             lx -= h*prmsh#overlap; ly -= h*prmsh#overlap;
             ux += h*prmsh#overlap; uy += h*prmsh#overlap;
             meshIntersection = trunc(prmsh#Thi, (x>=lx)&&(x<=ux)&&(y>=ly)&&(y<=uy), new2old = n2o, label=9999);

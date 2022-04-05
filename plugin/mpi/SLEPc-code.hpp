@@ -105,7 +105,7 @@ class eigensolver : public OneOperator {
                 Expression B;
                 const OneOperator* codeA, *codeB;
                 const int c;
-                static const int n_name_param = 10;
+                static const int n_name_param = 11;
                 static basicAC_F0::name_and_type name_param[];
                 Expression nargs[n_name_param];
                 E_eigensolver(const basicAC_F0& args, int d) : A(0), B(0), codeA(0), codeB(0), c(d) {
@@ -158,6 +158,7 @@ basicAC_F0::name_and_type eigensolver<Type, K, SType>::E_eigensolver::name_param
     {!std::is_same<SType, SVD>::value ? "schurPreconditioner" : "rvectors", !std::is_same<SType, SVD>::value ? &typeid(KN<Matrice_Creuse<HPDDM::upscaled_type<PetscScalar>>>*) : &typeid(FEbaseArrayKn<K>*)},
     {!std::is_same<SType, SVD>::value ? "schurList" : "rarray", !std::is_same<SType, SVD>::value ? &typeid(KN<double>*) : &typeid(KNM<K>*)},
     {"deflation", &typeid(KNM<PetscScalar>*)},
+    {"errorestimate", &typeid(KN<PetscReal>*)},
 };
 template<class Type, class K, class SType>
 struct _n_User {
@@ -274,12 +275,16 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 else
                     PEPSetOptionsPrefix(pep, GetAny<std::string*>((*nargs[1])(stack))->c_str());
             }
+            KSP empty = NULL;
             if(std::is_same<SType, EPS>::value) {
                 EPSSetFromOptions(eps);
                 ST st;
                 EPSGetST(eps, &st);
-                if(ptA->_ksp)
+                if(ptA->_ksp) {
+                    STGetKSP(st, &empty);
+                    PetscObjectReference((PetscObject)empty);
                     STSetKSP(st, ptA->_ksp);
+                }
                 else {
                     KSP ksp;
                     PC pc;
@@ -389,6 +394,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 PEPGetConverged(pep, &nconv);
             if(nconv > 0 && ((nargs[2] || nargs[3] || nargs[4]) || (std::is_same<SType, SVD>::value && (nargs[7] || nargs[8])))) {
                 KN<typename std::conditional<!std::is_same<SType, SVD>::value, K, PetscReal>::type>* eigenvalues = nargs[2] ? GetAny<KN<typename std::conditional<!std::is_same<SType, SVD>::value, K, PetscReal>::type>*>((*nargs[2])(stack)) : nullptr;
+                KN<PetscReal>* errorestimate = nargs[10] ? GetAny<KN<PetscReal>*>((*nargs[10])(stack)) : nullptr;
                 KNM<K>* array = nargs[4] ? GetAny<KNM<K>*>((*nargs[4])(stack)) : nullptr;
                 FEbaseArrayKn<K>* rvectors = std::is_same<SType, SVD>::value && nargs[7] ? GetAny<FEbaseArrayKn<K>*>((*nargs[7])(stack)) : nullptr;
                 KNM<K>* rarray = std::is_same<SType, SVD>::value && nargs[8] ? GetAny<KNM<K>*>((*nargs[8])(stack)) : nullptr;
@@ -398,6 +404,8 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                     eigenvectors->resize(nconv);
                 if(rvectors && !isType)
                     rvectors->resize(nconv);
+                if(errorestimate)
+                    errorestimate->resize(nconv);
                 if(array)
                     array->resize(m, nconv);
                 Vec xr, xi;
@@ -412,14 +420,24 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 for(PetscInt i = 0; i < nconv; ++i) {
                     PetscScalar kr, ki = 0;
                     PetscReal sigma;
-                    if(std::is_same<SType, EPS>::value)
+                    PetscReal errest;
+                    if(std::is_same<SType, EPS>::value) {
                         EPSGetEigenpair(eps, i, &kr, &ki, (eigenvectors || array) ? xr : NULL, (eigenvectors || array) && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value ? xi : NULL);
+                        if(errorestimate)
+                            EPSGetErrorEstimate(eps, i, &errest);
+                    }
                     else if(std::is_same<SType, SVD>::value)
                         SVDGetSingularTriplet(svd, i, &sigma, xr, xi);
-                    else if(std::is_same<SType, NEP>::value)
+                    else if(std::is_same<SType, NEP>::value) {
                         NEPGetEigenpair(nep, i, &kr, &ki, (eigenvectors || array) ? xr : NULL, (eigenvectors || array) && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value ? xi : NULL);
-                    else
+                        if(errorestimate)
+                            NEPGetErrorEstimate(nep, i, &errest);
+                    }
+                    else {
                         PEPGetEigenpair(pep, i, &kr, &ki, (eigenvectors || array) ? xr : NULL, (eigenvectors || array) && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value ? xi : NULL);
+                        if(errorestimate)
+                            PEPGetErrorEstimate(pep, i, &errest);
+                    }
                     if(eigenvectors || array || rvectors || rarray) {
                         PetscScalar* tmpr;
                         PetscScalar* tmpi;
@@ -495,6 +513,8 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         else
                             eigenvalues->operator[](i) = sigma;
                     }
+                    if(errorestimate)
+                        errorestimate->operator[](i) = errest;
                 }
                 if(eigenvectors || array || rvectors || rarray) {
                     VecDestroy(&xr);
@@ -506,8 +526,15 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                 delete user->mat;
                 PetscFree(user);
             }
-            if(std::is_same<SType, EPS>::value)
+            if(std::is_same<SType, EPS>::value) {
+                if(empty) {
+                    ST st;
+                    EPSGetST(eps, &st);
+                    STSetKSP(st, empty);
+                    PetscObjectDereference((PetscObject)empty);
+                }
                 EPSDestroy(&eps);
+            }
             else if(std::is_same<SType, SVD>::value)
                 SVDDestroy(&svd);
             else if(std::is_same<SType, NEP>::value)

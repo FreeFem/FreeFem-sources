@@ -5,7 +5,6 @@ func Pk = P2;
 
 macro def(u)u//
 {
-    macro dimension()2// EOM
     include "macro_ddm.idp"
 
     mesh ThGlobal = square(getARGV("-global_2d", 40), getARGV("-global_2d", 40));
@@ -15,7 +14,7 @@ macro def(u)u//
         partitionerSeq(part[], ThGlobal, mpisize);
     }
     partitionerPar(part[], ThGlobal, mpiCommWorld, mpisize);
-    mesh Th = trunc(ThGlobal, abs(part - mpirank) < 1.0e-2, renum = 1);
+    mesh Th = trunc(ThGlobal, abs(part - mpirank) < 1.0e-2, renum = 1, label = -111112);
     reconstructDmesh(Th)
     fespace Wh(Th, Pk);
     Wh<real> u;
@@ -33,7 +32,7 @@ macro def(u)u//
         partitionerSeq(part[], ThGlobal, mpisize);
     }
     partitionerPar(part[], ThGlobal, mpiCommWorld, mpisize);
-    mesh3 Th = trunc(ThGlobal, abs(part - mpirank) < 1.0e-2, renum = 1);
+    mesh3 Th = trunc(ThGlobal, abs(part - mpirank) < 1.0e-2, renum = 1, label = -111112);
     reconstructDmesh(Th)
     fespace Wh(Th, Pk);
     Wh<real> u;

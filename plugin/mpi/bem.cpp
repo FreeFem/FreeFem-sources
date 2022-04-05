@@ -587,7 +587,7 @@ AnyType SetCompressMat(Stack stack,Expression emat,Expression einter,int init)
 
 template<class K>
 void addHmat() {
-    Dcl_Type<HMatrixVirt<K>**>(Initialize<HMatrixVirt<K>*>, Delete<HMatrixVirt<K>*>);
+   // Dcl_Type<HMatrixVirt<K>**>(Initialize<HMatrixVirt<K>*>, Delete<HMatrixVirt<K>*>);
     Dcl_TypeandPtr<HMatrixVirt<K>*>(0,0,::InitializePtr<HMatrixVirt<K>*>,::DeletePtr<HMatrixVirt<K>*>);
     //atype<HMatrix<LR ,K>**>()->Add("(","",new OneOperator2_<string*, HMatrix<LR ,K>**, string*>(get_infos<LR,K>));
     
@@ -1078,10 +1078,234 @@ EquationEnum whatEquationEnum(BemKernel *K,int i) {
     return equEnum;
     
 }
+//  Begin Array of HMatrix[int]
+template< class A >
+inline AnyType DestroyKNmat(Stack, const AnyType &x) {
+  KN< A > *a = GetAny< KN< A > * >(x);
+  for (int i = 0; i < a->N( ); i++)
+    if ((*a)[i]) delete (*a)[i];
+  a->destroy( );
+  return Nothing;
+}
 
+template< class RR, class A, class B >
+RR *get_elementp_(const A &a, const B &b) {
+  if (b < 0 || a->N( ) <= b) {
+    cerr << " Out of bound  0 <=" << b << " < " << a->N( ) << " array type = " << typeid(A).name( )
+         << endl;
+    ExecError("Out of bound in operator []");
+  }
+  return &((*a)[b]);
+}
+
+template< class R >
+R *set_initinit(R *const &a, const long &n) {
+  SHOWVERB(cout << " set_init " << typeid(R).name( ) << " " << n << endl);
+  a->init(n);
+  for (int i = 0; i < n; i++) (*a)[i] = 0;
+  return a;
+}
+
+template<class R>
+void ArrayofHmat()
+{
+    typedef HMatrixVirt< R > *Mat;
+    typedef Mat *PMat;
+    typedef KN< Mat > AMat;
+
+    Dcl_Type< AMat * >(0, ::DestroyKNmat< Mat >);
+    // to declare HMatrix[int]
+    map_type_of_map[make_pair(atype< long >( ), atype< PMat >( )->right())] = atype< AMat * >( );
+    atype<  AMat * >( )->Add(
+      "[", "",
+      new OneOperator2_<  PMat, AMat *, long >(get_elementp_< Mat, AMat *, long >));
+
+    TheOperators->Add("<-", new OneOperator2_< AMat*, AMat* , long >(&set_initinit));
+  
+
+    // resize mars 2006 v2.4-1
+    Dcl_Type< Resize< AMat > >( );
+    Add< AMat *>("resize", ".",
+                         new OneOperator1< Resize< AMat >, AMat * >(to_Resize));
+    Add< Resize< AMat > >(
+      "(", "", new OneOperator2_< AMat*, Resize< AMat >, long >(resizeandclean1));
+
+}
+//  End Array of HMatrix[int]
+
+template<class R, class v_fes1, class v_fes2>
+class OpHMatrixUser : public OneOperator
+{
+    public:
+        typedef typename v_fes1::pfes pfes1;
+        typedef typename v_fes2::pfes pfes2;
+        class Op : public E_F0info {
+            public:
+                Expression g, uh1, uh2;
+                static const int n_name_param = 8;
+                static basicAC_F0::name_and_type name_param[] ;
+                Expression nargs[n_name_param];
+                long argl(int i,Stack stack,long a) const{ return nargs[i] ? GetAny<long>( (*nargs[i])(stack) ): a;}
+                string* args(int i,Stack stack,string* a) const{ return nargs[i] ? GetAny<string*>( (*nargs[i])(stack) ): a;}
+                double arg(int i,Stack stack,double a) const{ return nargs[i] ? GetAny<double>( (*nargs[i])(stack) ): a;}
+                pcommworld argc(int i,Stack stack,pcommworld a ) const{ return nargs[i] ? GetAny<pcommworld>( (*nargs[i])(stack) ): a;}
+                Op(const basicAC_F0 &  args, Expression  bb, Expression  cc, Expression  dd) : g(bb),uh1(cc), uh2(dd) {
+                    args.SetNameParam(n_name_param,name_param,nargs);
+                }
+        };
+
+        E_F0 * code(const basicAC_F0 & args) const {
+            return  new Op(args,t[0]->CastTo(args[0]),t[1]->CastTo(args[1]),t[2]->CastTo(args[2]));
+        }
+
+        OpHMatrixUser() :
+        OneOperator(atype<const typename OpHMatrixUser<R,v_fes1,v_fes2>::Op*>(),atype<VirtualGenerator<R>**>(),atype<pfes1*>(),atype<pfes2*>()) {}
+};
+
+template<class K, class v_fes1, class v_fes2>
+basicAC_F0::name_and_type  OpHMatrixUser<K,v_fes1,v_fes2>::Op::name_param[]= {
+  {  "eps", &typeid(double)},
+  {  "commworld", &typeid(pcommworld)},
+  {  "eta", &typeid(double)},
+  {  "minclustersize", &typeid(long)},
+  {  "maxblocksize", &typeid(long)},
+  {  "mintargetdepth", &typeid(long)},
+  {  "minsourcedepth", &typeid(long)},
+  {  "compressor", &typeid(string*)}
+};
+
+template<class R, class v_fes1,class v_fes2, int init>
+AnyType SetOpHMatrixUser(Stack stack,Expression emat, Expression eop)
+{
+    typedef typename v_fes1::pfes pfes1;
+    typedef typename v_fes2::pfes pfes2;
+    typedef typename v_fes1::FESpace FESpace1;
+    typedef typename v_fes2::FESpace FESpace2;
+    typedef typename FESpace1::Mesh SMesh;
+    typedef typename FESpace2::Mesh TMesh;
+    typedef typename SMesh::RdHat SRdHat;
+    typedef typename TMesh::RdHat TRdHat;
+
+    typedef typename OpHMatrixUser<R,v_fes1,v_fes2>::Op UOp;
+    const UOp * op(dynamic_cast<const UOp *>(eop));
+    pfes1  * pUh= GetAny<pfes1 *>((*op->uh1)(stack));
+    FESpace1 * Uh = **pUh;
+    int NUh =Uh->N;
+    pfes2  * pVh= GetAny<pfes2 *>((*op->uh2)(stack));
+    FESpace2 * Vh = **pVh;
+    int NVh =Vh->N;
+    ffassert(Vh);
+    ffassert(Uh);
+
+    int n=Uh->NbOfDF;
+    int m=Vh->NbOfDF;
+
+    HMatrixVirt<R>** Hmat =GetAny<HMatrixVirt<R>** >((*emat)(stack));
+
+    Data_Bem_Solver ds;
+    ds.factorize=0;
+    ds.initmat=true;
+
+    ds.epsilon = op->arg(0,stack,ds.epsilon);
+    ds.commworld = op->argc(1,stack,ds.commworld);
+    ds.eta = op->arg(2,stack,ds.eta);
+    ds.minclustersize = op->argl(3,stack,ds.minclustersize);
+    ds.maxblocksize = op->argl(4,stack,ds.maxblocksize);
+    ds.mintargetdepth = op->argl(5,stack,ds.mintargetdepth);
+    ds.minsourcedepth = op->argl(6,stack,ds.minsourcedepth);
+    ds.compressor = *(op->args(7,stack,&ds.compressor));
+
+    const SMesh & ThU =Uh->Th;
+    const TMesh & ThV =Vh->Th;
+    bool samemesh = (void*)&Uh->Th == (void*)&Vh->Th;
+
+     if(init)
+        *Hmat =0;
+      *Hmat =0;
+    if( *Hmat)
+            delete *Hmat;
+
+    *Hmat =0;
+
+    vector<double> p1(3*n);
+    vector<double> p2(3*m);
+    Fem2D::R3 pp;
+    bemtool::R3 p;
+    SRdHat pbs;
+    TRdHat pbt;
+    pbs[0] = 1./(SRdHat::d+1);
+    pbs[1] = 1./(SRdHat::d+1);
+    if (SRdHat::d == 2) pbs[2] = 1./(SRdHat::d+1);
+    pbt[0] = 1./(TRdHat::d+1);
+    pbt[1] = 1./(TRdHat::d+1);
+    if (TRdHat::d == 2) pbt[2] = 1./(TRdHat::d+1);
+
+    int Snbv = Uh->TFE[0]->ndfonVertex;
+    int Snbe = Uh->TFE[0]->ndfonEdge;
+    int Snbt = Uh->TFE[0]->ndfonFace;
+    bool SP0 = SRdHat::d == 1 ? (Snbv == 0) && (Snbe == 1) && (Snbt == 0) : (Snbv == 0) && (Snbe == 0) && (Snbt == 1);
+    bool SP1 = (Snbv == 1) && (Snbe == 0) && (Snbt == 0);
+
+    int Tnbv = Vh->TFE[0]->ndfonVertex;
+    int Tnbe = Vh->TFE[0]->ndfonEdge;
+    int Tnbt = Vh->TFE[0]->ndfonFace;
+    bool TP0 = TRdHat::d == 1 ? (Tnbv == 0) && (Tnbe == 1) && (Tnbt == 0) : (Tnbv == 0) && (Tnbe == 0) && (Tnbt == 1);
+    bool TP1 = (Tnbv == 1) && (Tnbe == 0) && (Tnbt == 0);
+
+    for (int i=0; i<n; i++) {
+        if (SP1)
+            pp = ThU.vertices[i];
+        else if (SP0)
+            pp = ThU[i](pbs);
+        else {
+            if (mpirank == 0) std::cerr << "ff-Htool error: only P0 and P1 discretizations are available for now." << std::endl;
+            ffassert(0);
+        }
+        p1[3*i+0] = pp.x;
+        p1[3*i+1] = pp.y;
+        p1[3*i+2] = pp.z;
+    }
+
+    if(!samemesh) {
+        for (int i=0; i<m; i++) {
+            if (TP1)
+                pp = ThV.vertices[i];
+            else if (TP0)
+                pp = ThV[i](pbt);
+            else {
+                if (mpirank == 0) std::cerr << "ff-Htool error: only P0 and P1 discretizations are available for now." << std::endl;
+                ffassert(0);
+            }
+            p2[3*i+0] = pp.x;
+            p2[3*i+1] = pp.y;
+            p2[3*i+2] = pp.z;
+        }
+    }
+    else{
+        p2=p1;
+    }
+
+    VirtualGenerator<R>** generator = GetAny<VirtualGenerator<R>**>((*op->g)(stack));
+
+    MPI_Comm comm = ds.commworld ? *(MPI_Comm*)ds.commworld : MPI_COMM_WORLD;
+    builHmat<R>(Hmat,*generator,ds,p1,p2,comm);
+
+    return Hmat;
+}
+
+template<class R, class v_fes1, class v_fes2>
+void AddHMatrixUser() {
+    typedef typename OpHMatrixUser< R, v_fes1, v_fes2 >::Op OpT;
+    Dcl_Type<const OpT*>();
+    Global.Add("Build","(", new OpHMatrixUser< R, v_fes1, v_fes2 >);
+    Add<const OpT*>("<-","(", new OpHMatrixUser< R, v_fes1, v_fes2 >);
+    TheOperators->Add("<-", new OneOperator2_<HMatrixVirt<R>**,HMatrixVirt<R>**,const OpT*,E_F_StackF0F0>(SetOpHMatrixUser<R,v_fes1,v_fes2,0>));
+    TheOperators->Add("=", new OneOperator2_<HMatrixVirt<R>**,HMatrixVirt<R>**,const OpT*,E_F_StackF0F0>(SetOpHMatrixUser<R,v_fes1,v_fes2,1>));
+}
 
 static void Init_Bem() {
-    
+    if(mpirank==0) cout << "\nInit_Bem\n";
+
     map_type[typeid(const BemFormBilinear *).name( )] = new TypeFormBEM;
     
     map_type[typeid(const BemKFormBilinear *).name( )] = new ForEachType< BemKFormBilinear >;
@@ -1101,8 +1325,8 @@ static void Init_Bem() {
     typedef const BemPotential *pBemPotential;
     
     
-    Dcl_Type< fkernel * >( );  // a bem kernel
-    Dcl_Type< fpotential * >( ); // a bem potential
+   // Dcl_Type< fkernel * >( );  // a bem kernel
+   // Dcl_Type< fpotential * >( ); // a bem potential
     Dcl_Type< const OP_MakeBemKernelFunc::Op * >( );
     Dcl_Type< const OP_MakeBemPotentialFunc::Op * >( );
     
@@ -1192,7 +1416,26 @@ static void Init_Bem() {
     Global.New("htoolMaxblocksize",CPValue<long>(ff_htoolMaxblocksize));
     Global.New("htoolMintargetdepth",CPValue<long>(ff_htoolMintargetdepth));
     Global.New("htoolMinsourcedepth",CPValue<long>(ff_htoolMinsourcedepth));
-    
+    ArrayofHmat<double>();
+    ArrayofHmat<complex<double>>();
+
+    // Build HMatrix from custom user generator
+    Dcl_TypeandPtr< VirtualGenerator<double>* >(0, 0,::InitializePtr< VirtualGenerator<double>* >, ::DeletePtr< VirtualGenerator<double>*> );
+    Dcl_TypeandPtr< VirtualGenerator<std::complex<double>>* >(0, 0,::InitializePtr< VirtualGenerator<std::complex<double>>* >, ::DeletePtr< VirtualGenerator<std::complex<double>>*> );
+    zzzfff->Add("Generator", atype<VirtualGenerator<double>** >( ));
+    map_type_of_map[make_pair(atype<VirtualGenerator<double>**>(), atype<double*>())] = atype<VirtualGenerator<double>**>();
+    map_type_of_map[make_pair(atype<VirtualGenerator<double>**>(), atype<Complex*>())] = atype<VirtualGenerator<std::complex<double> >**>();
+
+    AddHMatrixUser<double,v_fesL, v_fesL>();
+    AddHMatrixUser<double,v_fesS, v_fesS>();
+    AddHMatrixUser<double,v_fes3, v_fes3>();
+    AddHMatrixUser<std::complex<double>,v_fesL, v_fesL>();
+    AddHMatrixUser<std::complex<double>,v_fesS, v_fesS>();
+    AddHMatrixUser<std::complex<double>,v_fes3, v_fes3>();
+    AddHMatrixUser<double,v_fesL, v_fesS>();
+    AddHMatrixUser<double,v_fesS, v_fes3>();
+    AddHMatrixUser<std::complex<double>,v_fesL, v_fesS>();
+    AddHMatrixUser<std::complex<double>,v_fesS, v_fes3>();
 }
 
 LOADFUNC(Init_Bem)

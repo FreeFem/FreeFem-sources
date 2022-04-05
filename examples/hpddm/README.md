@@ -60,7 +60,7 @@ You can find the PETSc and SLEPc documentation [here](https://doc.freefem.org/do
 | [heat-TS-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/heat-TS-2d-PETSc.edp)                           | &nbsp;                                        |
 | [heat-TS-RHS-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/heat-TS-RHS-2d-PETSc.edp)                   | &nbsp;                                        |
 | [minimal-surface-Tao-2d-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/minimal-surface-Tao-2d-PETSc.edp)   | Minimal surface problem                       |
-| [orego-Tao-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/orego-Tao-PETSc.edp)                             | &nbsp;                                        |
+| [orego-TS-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/orego-TS-PETSc.edp)                               | &nbsp;                                        |
 | [toy-Tao-PETSc.edp](https://github.com/FreeFem/FreeFem-sources/tree/develop/examples/hpddm/toy-Tao-PETSc.edp)                                 | &nbsp;                                        |
 
 ### Eigenvalue problems

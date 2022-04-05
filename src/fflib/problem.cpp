@@ -2760,13 +2760,14 @@ template<class R>
             }
         }
         else // int on edge ie
-        //{
-            ffassert(0);
-            /*R2 PA,PB;
+        {
+          //  ffassert(0);
+            R2 PA,PB;
             PA=TriangleHat[VerticesOfTriangularEdge[ie][0]];
             PB=TriangleHat[VerticesOfTriangularEdge[ie][1]];
             R3 E=T.Edge(ie);
             double le = sqrt((E,E));
+        
             for (npi=0;npi<FIb.n;npi++) // loop on the integration point
             {
                 QuadratureFormular1dPoint pi( FIb[npi]);
@@ -2865,7 +2866,7 @@ template<class R>
                             }
                     }
                 }}
-            }*/
+            }
 
 
         *MeshPointStack(stack) = mp;

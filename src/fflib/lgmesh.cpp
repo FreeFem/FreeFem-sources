@@ -464,7 +464,7 @@ AnyType classBuildMesh<TP>::operator()(Stack stack)  const {
     const TP * borders = GetAny<const TP *>((*getborders)(stack));
    long  nbvx         = arg(0,stack,0L);
    int defrb = is_same<MeshL, TP>::value ;
-   bool  requireborder= arg(3,stack,arg(defrb,stack,false));
+   bool  requireborder= arg(3,stack,arg(1,stack,false));// correct 23 nov. 2021 FH
     KNM<double> * p=0;  p=arg(2,stack,p);
     double alea = arg(4,stack,0.);
     bool SplitEdgeWith2Boundary=arg(5,stack,false);
@@ -796,8 +796,9 @@ AnyType Adaptation::operator()(Stack stack) const
   const  Mesh * Thh = GetAny<pmesh>((*getmesh)(stack));
   ffassert(Thh);
    Triangles * oTh =0;
+   KN<int> ndfv(Thh->nv);
+    for(int i=0; i<ndfv.N();++i) ndfv[i]=i;
   if (nbcperiodic) {
-    KN<int> ndfv(Thh->nv);
     KN<int> ndfe(Thh->neb);
     int nbdfv=0,nbdfe=0;
     BuildPeriodic2(nbcperiodic,periodic,*Thh,stack,nbdfv,ndfv,nbdfe,ndfe);
@@ -924,6 +925,30 @@ AnyType Adaptation::operator()(Stack stack) const
   Th.SmoothMetric(raison);
   Th.MaxSubDivision(maxsubdiv);
   Th.BoundAnisotropy(anisomax);
+   if(nbcperiodic && 0 ) // in test
+       // to be sure that the metric is ok with periotic BC
+   {  // bof Bof ...
+       if(verbosity>1) cout << "  inforce de periodic BC on Metric" << endl;
+       KN<double> m(3*ndfv.N()), c(ndfv.N());
+       c=0.;
+       m=0.;
+      for ( iv=0;iv<Th.nbv;iv++)
+       {
+           int jv = ndfv[iv];
+           c[jv] += 1.;
+           m[jv*3  ] += Th[iv].m.a11;
+           m[jv*3+1] += Th[iv].m.a22;
+           m[jv*3+2] += Th[iv].m.a21;
+       }
+       for ( iv=0;iv<Th.nbv;iv++)
+       {
+           int jv = ndfv[iv];
+           Th[iv].m.a11 = m[jv*3  ] /c[jv]  ;
+           Th[iv].m.a22 = m[jv*3+1] /c[jv];
+           Th[iv].m.a21 = m[jv*3+2] /c[jv];
+
+       }
+   }
   // end of metric's computation
    if (mtx)
     for ( iv=0;iv<Th.nbv;iv++)
@@ -1589,7 +1614,7 @@ bool AddLayers(Mesh const * const & pTh, KN<double> * const & psupp, long const 
 
         supp += s;
     }
-    phi *= (1./nlayer);
+    if (nlayer > 1) phi *= (1./nlayer);
     return true;
 }
 
@@ -1792,6 +1817,40 @@ double dist(Stack stack,pmesh3 const &pTh)
     return 0.;
 }*/
 template<class Mesh>
+R3 Projection(Stack stack,Mesh * const &pTh,long *pnu,R3 *phat,bool *poutside)
+{ // version 3d sep 2021
+    R3 UnSet(doublenotset,doublenotset,doublenotset);
+    typedef typename Mesh::RdHat RdHat;
+    typedef typename Mesh::Rd Rd;
+    typedef typename Mesh::Element Element;
+    
+    if(pTh == 0) return UnSet;
+    RdHat PHat;
+    bool outside;
+
+    MeshPoint & mp = *MeshPointStack(stack);
+
+    if((const void *) pTh == (const void *) mp.Th) return UnSet;
+    Rd P(&mp.P.x);
+    const Element  * K=pTh->Find(P,PHat,outside);
+    if(phat) *phat=PHat;
+    if(pnu )  *pnu = (*pTh)(K);
+    if(poutside )  *poutside = outside;
+   // if (!outside)
+   //     return P;
+   //  else
+    {
+        Rd Pb = (*K)(PHat);
+        return Pb;
+    }
+    return UnSet;
+}
+template<class Mesh>
+R3 Projection(Stack stack,Mesh * const &pTh)
+{
+    return Projection(stack,pTh,0,0,0);
+}
+template<class Mesh>
 double dist(Stack stack,Mesh * const &pTh)
 { // version 3d sep 2021
     typedef typename Mesh::RdHat RdHat;
@@ -1868,7 +1927,44 @@ long savegnuplot(pmesh pTh,string* pgp)
         return 0;
     }
 extern void init_glumesh2D();
+static basicAC_F0::name_and_type OneOperator1s_np_name_param[3] = {
+  {"nu", &typeid(long*)},
+  {"Phat", &typeid(R3 *)},
+  {"outside", &typeid(bool *)}
+};
 
+template<class R,class A0,class E=E_F0>
+ class E_F_F0s_np :public  E { public:
+  typedef  R (*func)(Stack stack,const   A0&, long *nu,R3 *Phat,bool * poutside ) ;
+  func f;
+  Expression a,b,c,d;
+  E_F_F0s_np(func ff,Expression aa,Expression bb,Expression cc,Expression dd) : f(ff),a(aa),b(bb),c(cc),d(dd) {}
+  AnyType operator()(Stack s)  const
+     {   long *nu=0;
+         R3 *Phat=0;
+         bool *poutside=0;
+         if( b) nu=GetAny<long*>( (*b)(s) );
+         if( c) Phat=GetAny<R3*>( (*c)(s) );
+         if( d) poutside=GetAny<bool*>( (*d)(s) );
+        return SetAny<R>(f(s,GetAny<A0>( (*a)(s) ),nu,Phat,poutside));}
+     
+    operator aType () const { return atype<R>();}
+    
+};
+
+
+template<class R,class A=R,class CODE=E_F_F0s_np<R,A> >
+class  OneOperator1s_np : public OneOperator {
+    typedef  R (*func)(Stack stack, const A &,long *,R3 *,bool *) ;
+    func  f;
+    public:
+    E_F0 * code(const basicAC_F0 & args) const
+    { Expression nargs[]={0,0,0};
+      args.SetNameParam(3, OneOperator1s_np_name_param, nargs);
+     return  new CODE(f,t[0]->CastTo(args[0]),nargs[0],nargs[1],nargs[2]);}
+    OneOperator1s_np(func  ff):
+      OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()]),f(ff){}
+};
 void init_lgmesh() {
   if(verbosity&&(mpirank==0) )  cout <<"lg_mesh ";
   bamg::MeshIstreamErrorHandler = MeshErrorIO;
@@ -1917,7 +2013,12 @@ void init_lgmesh() {
     Global.Add("dist", "(", new OneOperator1s_<double,pmeshL,E_F_F0s_<double,pmeshL,E_F0mps> >(dist));// sep 2021  FH function distance to mesh
       Global.Add("dist", "(", new OneOperator1s_<double,pmeshS,E_F_F0s_<double,pmeshS,E_F0mps> >(dist));// sep 2021  FH function distance to mesh
     Global.Add("signeddist", "(", new OneOperator1s_<double,pmeshL,E_F_F0s_<double,pmeshL,E_F0mps> >(signeddist));// sep 2021  FH function distance to mesh
-      Global.Add("signeddist", "(", new OneOperator1s_<double,pmeshS,E_F_F0s_<double,pmeshS,E_F0mps> >(signeddist));// sep 2021  FH function distance to mesh
+    Global.Add("signeddist", "(", new OneOperator1s_<double,pmeshS,E_F_F0s_<double,pmeshS,E_F0mps> >(signeddist));// sep 2021  FH function distance to mesh
+    Global.Add("projection", "(", new OneOperator1s_np<R3,pmeshL,E_F_F0s_np<R3,pmeshL,E_F0mps> >(Projection));// jan 2022  FH function Projection to mesh
+    Global.Add("projection", "(", new OneOperator1s_np<R3,pmeshS,E_F_F0s_np<R3,pmeshS,E_F0mps> >(Projection));// jan 2022  FH function Projection to mesh
+
+    Global.Add("projection", "(", new OneOperator1s_np<R3,pmesh3,E_F_F0s_np<R3,pmesh3,E_F0mps> >(Projection));// Jan 2022  FH function distance to mesh
+    Global.Add("projection", "(", new OneOperator1s_np<R3,pmesh,E_F_F0s_np<R3,pmesh,E_F0mps> >(Projection)); // Jan 2022 FH  FH function Projection to mesh
 
     Global.Add("dist", "(", new OneOperator1s_<double,pmesh3,E_F_F0s_<double,pmesh3,E_F0mps> >(dist));// sep 2021  FH function distance to mesh
     Global.Add("dist", "(", new OneOperator1s_<double,pmesh,E_F_F0s_<double,pmesh,E_F0mps> >(dist)); // oct 2017 FH  FH function distance to mesh

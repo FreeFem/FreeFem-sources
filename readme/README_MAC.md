@@ -3,23 +3,98 @@
 <!--- Laboratoire Jacques-Louis Lions                                             --->
 <!--- Sorbonne Université, UMR 7598, Paris, F-75005 France                        --->
 <!---                                                                             --->
-<!--- Foobar is free software: you can redistribute it and/or modify              --->
+<!--- FreeFEM is free software: you can redistribute it and/or modify             --->
 <!--- it under the terms of the GNU Lesser General Public License as published by --->
 <!--- the Free Software Foundation, either version 3 of the License, or           --->
 <!--- (at your option) any later version.                                         --->
 <!---                                                                             --->
-<!--- Foobar is distributed in the hope that it will be useful,                   --->
+<!--- FreeFEM is distributed in the hope that it will be useful,                  --->
 <!--- but WITHOUT ANY WARRANTY; without even the implied warranty of              --->
 <!--- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               --->
 <!--- GNU Lesser General Public License for more details.                         --->
 <!---                                                                             --->
 <!--- You should have received a copy of the GNU Lesser General Public License    --->
-<!--- along with Foobar.  If not, see <http://www.gnu.org/licenses/>.             --->
+<!--- along with FreeFEM.  If not, see <http://www.gnu.org/licenses/>.            --->
 <!----------------------------------------------------------------------------------->
 
 # How to compile FreeFem++ on MacOSX
 
-_october 2015_
+## Feb 2022
+
+The Version 4.10 is compiled Under Monteray (Apple M1: arm64e) and on (Apple : x86 )
+
+### for Apple M1 (arm64e)
+
+Add with home brew 
+1) install brew  see
+[install Homebrew]{https://brew.sh/index_fr}
+
+    
+2) install this brew package to compile FreeFEM++
+
+```bash
+brew install \
+aom				gettext			jpeg			libx11			pango \
+autoconf		giflib			jpeg-xl			libxau			pcre \
+automake		glib			libavif			libxcb			pixman \
+bdw-gc			gmp				libcerf			libxdmcp		pkg-config \
+bison			gnuplot			libevent		libxext			python@3.9 \
+brotli			gnutls			libffi			libxrender		qt@5 \
+ca-certificates		gobject-introspection		libidn2			lua			readline \
+cairo			graphite2		libmpc			lzo			sqlite \
+emacs			gsl				libnghttp2		m4			szip \
+flex			guile			libpng			make			unbound \
+fontconfig		harfbuzz		libpthread-stubs	mpdecimal		webp \
+freetype		hdf5			libtasn1		mpfr			wget \
+fribidi			icu4c			libtiff			nettle			xorgproto \
+gcc				imath			libtool			openexr			xz \
+gd				isl				libunistring	openssl@1.1		zip \
+gdbm			jansson			libvmaf			p11-kit			zstd 
+```
+
+3) download the sources of  FreeFEM++ with git 
+
+	```bash
+	git clone git@github.com:FreeFem/FreeFem-sources.git ff++
+	```
+or the develop version 
+
+	```bash
+	git clone -b develop   git@github.com:FreeFem/FreeFem-sources.git ff++
+	```
+4) Compile FreeFem++ without petsc and MPI
+
+	```bash
+	cd ff++ 
+	autoreconf -i 
+	./configure --enable-summary --enable-download_arpack --prefix=/Applications/FreeFem++.app/Contents/ff-4.10/ --enable-download --enable-optim --enable-m64 F77=gfortran FC=gfortran CXXFLAGS=-Wno-undefined-var-template --enable-maintainer-mode
+	make
+	sudo make install
+    ```
+	
+4) Compile FreeFem++ with PETSc and MPI
+
+```bash
+	cd ff++ 
+	autoreconf -i 
+	./configure --enable-summary --enable-download_arpack --prefix=/Applications/FreeFem++.app/Contents/ff-4.10/ --enable-download --enable-optim --enable-m64 F77=gfortran FC=gfortran CXXFLAGS=-Wno-undefined-var-template --enable-maintainer-mode
+    cd 3rdparty/ff-petsc
+	make 
+```
+    follow the output 
+```bash
+	cd - 
+	./reconfigure 
+	make -j 20 
+	# check your version ...
+	make -j 20  check
+	# to install in /Applications/FreeFem++.app/Contents/ff-4.10/
+	sudo make install -j 20 
+
+```
+
+
+## _october 2015_ (oldies)
 
 The version 3.41 is compiled Under Yosemite (10.10.5),
 xcode 7.0.1 + previous install of latex and with other brew install

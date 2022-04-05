@@ -52,11 +52,34 @@ using namespace std;
 // rajout global
 #include <climits>
 #include <set>
+#include <unordered_set>
+#include <array>
 #include <vector>
 #include "msh3.hpp"            // [[file:msh3.hpp]]
 #include "splitsimplex.hpp"    // [[file:../src/femlib/splitsimplex.hpp]]
 #include "renumb.hpp"
 #include <cmath>
+
+namespace std
+{
+    template<typename T, size_t N>
+    struct hash<array<T, N> >
+    {
+        typedef array<T, N> argument_type;
+        typedef size_t result_type;
+
+        result_type operator()(const argument_type& a) const
+        {
+            hash<T> hasher;
+            result_type h = 0;
+            for (result_type i = 0; i < N; ++i)
+            {
+                h = h * 31 + hasher(a[i]);
+            }
+            return h;
+        }
+    };
+}
 
 using namespace Fem2D;
 
@@ -2640,10 +2663,8 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
     int fk, ke = Th.BoundaryElement(i, fk);
     int fkk, kke = Th.ElementAdj(ke, fkk = fk);
     bool onborder = (kke == ke) || (kke < 0);
-    const T &KE(Th[ke]);
   
       
-    TRdHat B = KE.PBord(fk, PtHat2);
     int iv[B::nv];
     for (int j = 0; j < k; j++) iv[j] = Th.operator( )(K[j]);
     if(rV) {
@@ -2653,10 +2674,12 @@ AnyType SetMesh_Op< MMesh >::operator( )(Stack stack) const {
 
     int l0, l1 = ChangeLab(mapBref, l0 = K.lab);
     if (flab) {
+      const T &KE(Th[ke]);
+      TRdHat B = KE.PBord(fk, PtHat2);
       R3 NN = KE.N(fk);
       double mes = NN.norme( );
       NN /= mes;		  
-      mp->set(Th, KE(B), B, KE, K.lab, NN, fk);    // problem
+      mp->set(Th, KE(B), B, KE, K.lab, NN, fk);    //  ok after version 4.10
       l1 = GetAny< long >((*flab)(stack));
       lmn = min(lmn, bb->lab);
       lmx = max(lmx, bb->lab);
@@ -4286,7 +4309,7 @@ class cubeMesh_Op : public E_F0mps {
 };
 
 basicAC_F0::name_and_type cubeMesh_Op::name_param[] = {
-  {"region", &typeid(long)}, {"label", &typeid(KN_< long >)}, {"flags", &typeid(long)}};
+    {"region", &typeid(long)}, {"label", &typeid(KN_< long >)}, {"flags", &typeid(long)} };
 
 class cubeMesh : public OneOperator {
  public:
@@ -4321,8 +4344,7 @@ AnyType cubeMesh_Op::operator( )(Stack stack) const {
   MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
   long flags = arg(2, stack, 0L);
 
-  ;
-
+  double cpu0 = ((double) clock())/CLOCKS_PER_SEC;
   KN< long > label2;
   long ll3[] = {1, 2, 3, 4, 5, 6};
   KN_< long > l3_(ll3, 6);
@@ -4331,6 +4353,7 @@ AnyType cubeMesh_Op::operator( )(Stack stack) const {
   long region = arg(0, stack, 0L);
   Mesh *pTh = Carre_(n1, n2, 0, 0, stack, flags, label2,
                      0L);    // WARNING no clean of teh stack in this case (durdur)
+  double cpu1 = ((double) clock())/CLOCKS_PER_SEC;
   ffassert(pTh && nlayer > 0);
   Mesh &Th = *pTh;
   int nbv = Th.nv;     // nombre de sommet
@@ -4436,6 +4459,7 @@ AnyType cubeMesh_Op::operator( )(Stack stack) const {
       exit(1);
     }
   }
+  double cpu2 = ((double) clock())/CLOCKS_PER_SEC;
 
   // cas maillage volumique + surfacique
   Mesh3 *Th3 = build_layer(Th, nlayer, ni, zmin, zmax, maptet, maptrimil, maptrizmax, maptrizmin,
@@ -4444,6 +4468,7 @@ AnyType cubeMesh_Op::operator( )(Stack stack) const {
   // l'on veut pas creer � l'int�rieure
 
   delete pTh;
+  double cpu3 = ((double) clock())/CLOCKS_PER_SEC, cpu4=cpu3;
 
   if (xx && yy && zz) {
     // Mesh3 *Th3= build_layer(Th, nlayer, ni, zmin, zmax);
@@ -4473,18 +4498,25 @@ AnyType cubeMesh_Op::operator( )(Stack stack) const {
       recollement_border = 0;
       point_confondus_ok = 1;
     }
-
+  
     Mesh3 *T_Th3 = Transfo_Mesh3(precis_mesh, *Th3, txx, tyy, tzz, border_only, recollement_elem,
                                  recollement_border, point_confondus_ok, 1);
+    
     delete Th3;
     Th3 = T_Th3;
   }
-
+    cpu4 = ((double) clock())/CLOCKS_PER_SEC;
   Th3->BuildGTree( );    // A decommenter
   if (verbosity > 10) {
     cout << " Cube %%% " << Th3 << endl;
   }
-
+    double cpu5 = ((double) clock())/CLOCKS_PER_SEC;
+   if(verbosity>1)
+   {
+       cout<< " Cube timers  2d" << cpu1-cpu0 << " ?? "<< cpu2-cpu1 << endl <<
+              "    buildlayer: " << cpu3-cpu2
+       << "   Transfo " <<  cpu4-cpu3 << " Gtree " << cpu5-cpu4 << " " << endl;
+   }
   Add2StackOfPtr2FreeRC(stack, Th3);
   *mp = mps;
   return Th3;
@@ -7088,11 +7120,12 @@ AnyType ExtractMeshLfromMesh_Op::operator( )(Stack stack) const {
 }
 
 
-bool AddLayers(Mesh3 const *const &pTh, KN< double > *const &psupp, long const &nlayer,
+template<class MT>
+bool AddLayers(MT const *const &pTh, KN< double > *const &psupp, long const &nlayer,
                KN< double > *const &pphi) {
   ffassert(pTh && psupp && pphi);
-  const int nve = Mesh3::Element::nv;
-  const Mesh3 &Th = *pTh;
+  const int nve = MT::Element::nv;
+  const MT &Th = *pTh;
   const int nt = Th.nt;
   const int nv = Th.nv;
 
@@ -7110,16 +7143,10 @@ bool AddLayers(Mesh3 const *const &pTh, KN< double > *const &psupp, long const &
     u = 0.;
 
     for (int k = 0; k < nt; ++k) {
-      for (int i = 0; i < nve; ++i) {
-        u[Th(k, i)] += s[k];
-      }
+      if(s[k] > 0.0)
+        for (int i = 0; i < nve; ++i)
+          u[Th(k, i)] = 1.0;
     }
-
-    for (int v = 0; v < nv; ++v) {
-      u[v] = u[v] > 0.;
-    }
-
-    // cout << " u  " << u << endl;
 
     phi += u;
 
@@ -7127,12 +7154,9 @@ bool AddLayers(Mesh3 const *const &pTh, KN< double > *const &psupp, long const &
 
     for (int k = 0; k < nt; ++k) {
       for (int i = 0; i < nve; ++i) {
-        s[k] += u[Th(k, i)];
+        if(u[Th(k,i)] > 0.0)
+          s[k] = 1.0;
       }
-    }
-
-    for (int k = 0; k < nt; ++k) {
-      s[k] = s[k] > 0.;
     }
 
     supp += s;
@@ -7140,96 +7164,15 @@ bool AddLayers(Mesh3 const *const &pTh, KN< double > *const &psupp, long const &
   }
 
   // cout << " phi  " << phi << endl;
-  phi *= (1. / nlayer);
+  if (nlayer > 1) phi *= (1. / nlayer);
   // supp =s;
   return true;
 }
-
-bool AddLayers(MeshS const *const &pTh, KN< double > *const &psupp, long const &nlayer,
-               KN< double > *const &pphi) {
-  ffassert(pTh && psupp && pphi);
-  const int nve = MeshS::Element::nv;
-  const MeshS &Th = *pTh;
-  const int nt = Th.nt;
-  const int nv = Th.nv;
-
-  KN< double > &supp(*psupp);
-  KN< double > u(nv), s(nt);
-  KN< double > &phi(*pphi);
-  ffassert(supp.N( ) == nt);    // P0
-  ffassert(phi.N( ) == nv);     // P1
-  s = supp;
-  phi = 0.;
-
-  for (int step = 0; step < nlayer; ++step) {
-    u = 0.;
-
-    for (int k = 0; k < nt; ++k)
-      for (int i = 0; i < nve; ++i) u[Th(k, i)] += s[k];
-
-    for (int v = 0; v < nv; ++v) u[v] = u[v] > 0.;
-
-    phi += u;
-    s = 0.;
-
-    for (int k = 0; k < nt; ++k)
-      for (int i = 0; i < nve; ++i) s[k] += u[Th(k, i)];
-
-    for (int k = 0; k < nt; ++k) s[k] = s[k] > 0.;
-
-    supp += s;
-  }
-
-  phi *= (1. / nlayer);
-  return true;
-}
-      
-      
-bool AddLayers(MeshL const *const &pTh, KN< double > *const &psupp, long const &nlayer,
-                KN< double > *const &pphi) {
-    ffassert(pTh && psupp && pphi);
-    const int nve = MeshL::Element::nv;
-    const MeshL &Th = *pTh;
-    const int nt = Th.nt;
-    const int nv = Th.nv;
-    
-    KN< double > &supp(*psupp);
-    KN< double > u(nv), s(nt);
-    KN< double > &phi(*pphi);
-    ffassert(supp.N( ) == nt);    // P0
-    ffassert(phi.N( ) == nv);     // P1
-    s = supp;
-    phi = 0.;
-    
-    for (int step = 0; step < nlayer; ++step) {
-        u = 0.;
-        
-        for (int k = 0; k < nt; ++k)
-            for (int i = 0; i < nve; ++i) u[Th(k, i)] += s[k];
-        
-        for (int v = 0; v < nv; ++v) u[v] = u[v] > 0.;
-        
-        phi += u;
-        s = 0.;
-              
-        for (int k = 0; k < nt; ++k)
-            for (int i = 0; i < nve; ++i)
-                s[k] += u[Th(k, i)];
-        
-        for (int k = 0; k < nt; ++k)
-            s[k] = s[k] > 0.;
-        
-        supp += s;
-    }
-          
-    phi *= (1. / nlayer);
-    return true;
-}
       
       
       
 
-Mesh3 *GluMesh3tab(KN< pmesh3 > *const &tab, long const &lab_delete) {
+Mesh3 *GluMesh3tab(KN< pmesh3 > *const &tab, long const &lab_delete, bool const &legacy) {
   int flagsurfaceall = 0;
   // variables for mesh3 (volume)
   int nbt = 0;
@@ -7269,11 +7212,12 @@ Mesh3 *GluMesh3tab(KN< pmesh3 > *const &tab, long const &lab_delete) {
       }
     }
 
-    for (int k = 0; k < Th3.nbe; k++) {
-      for (int e = 0; e < 3; e++) {
-        hmin = min(hmin, Th3.be(k).lenEdge(e));    // calcul de .lenEdge pour un Mesh3
+    if (legacy)
+      for (int k = 0; k < Th3.nbe; k++) {
+        for (int e = 0; e < 3; e++) {
+          hmin = min(hmin, Th3.be(k).lenEdge(e));    // calcul de .lenEdge pour un Mesh3
+        }
       }
-    }
 
     for (int ii = 0; ii < Th3.nv; ii++) {
       R3 P(Th3.vertices[ii].x, Th3.vertices[ii].y, Th3.vertices[ii].z);
@@ -7286,117 +7230,172 @@ Mesh3 *GluMesh3tab(KN< pmesh3 > *const &tab, long const &lab_delete) {
     cout << "      - hmin =" << hmin << " ,  Bounding Box: " << Pn << " " << Px << endl;
   }
 
-  // probleme memoire
   Vertex3 *v = new Vertex3[nbvx];
-  Tet *t;
-  if (nbt != 0) {
-    t = new Tet[nbt];
-  }
-
-  Tet *tt = t;
+  Tet *t = new Tet[nbt];
   Triangle3 *b = new Triangle3[nbex];
   Triangle3 *bb = b;
 
   ffassert(hmin > Norme2(Pn - Px) / 1e9);
   double hseuil = hmin / 10.;
-
-  // int *NumSom= new int[nbvx];
-
-  // VERSION morice
-  if (verbosity > 4) {
-    cout << " creation of : BuildGTree" << endl;
-  }
-
   EF23::GTree< Vertex3 > *gtree = new EF23::GTree< Vertex3 >(v, Pn, Px, 0);
-
   nbv = 0;
-  for (int i = 0; i < tab->n; i++) {
-    const Mesh3 &Th3(*tab->operator[](i));
 
-    if (verbosity > 4) {
-      cout << " loop over mesh for create new mesh " << endl;
-    }
+  if (legacy) {
+    // probleme memoire
+    for (int i = 0; i < tab->n; i++) {
+      const Mesh3 &Th3(*tab->operator[](i));
 
-    if (verbosity > 1) {
-      cout << " -- GluMesh3D + " << Th3.nv << " " << Th3.nt << " " << Th3.nbe << endl;
-    }
+      if (verbosity > 4) {
+        cout << " loop over mesh for create new mesh " << endl;
+      }
 
-    for (int ii = 0; ii < Th3.nv; ii++) {
-      const Vertex3 &vi(Th3.vertices[ii]);
-      Vertex3 *pvi = gtree->ToClose(vi, hseuil);
+      if (verbosity > 1) {
+        cout << " -- GluMesh3D + " << Th3.nv << " " << Th3.nt << " " << Th3.nbe << endl;
+      }
 
-      if (!pvi) {
-        v[nbv].x = vi.x;
-        v[nbv].y = vi.y;
-        v[nbv].z = vi.z;
-        v[nbv].lab = vi.lab;
-        gtree->Add(v[nbv]);
-        nbv++;
+      for (int ii = 0; ii < Th3.nv; ii++) {
+        const Vertex3 &vi(Th3.vertices[ii]);
+        Vertex3 *pvi = gtree->ToClose(vi, hseuil);
+
+        if (!pvi) {
+          v[nbv].x = vi.x;
+          v[nbv].y = vi.y;
+          v[nbv].z = vi.z;
+          v[nbv].lab = vi.lab;
+          gtree->Add(v[nbv]);
+          nbv++;
+        }
+      }
+
+      for (int k = 0; k < Th3.nt; k++) {
+        const Tet &K(Th3.elements[k]);
+        int iv[Tet::nea];
+        for (int iea = 0; iea < Tet::nea; iea++) iv[iea] = gtree->ToClose(K[iea], hseuil) - v;
+
+        (t++)->set(v, iv, K.lab);
       }
     }
 
-    for (int k = 0; k < Th3.nt; k++) {
-      const Tet &K(Th3.elements[k]);
-      int iv[Tet::nea];
-      for (int iea = 0; iea < Tet::nea; iea++) iv[iea] = gtree->ToClose(K[iea], hseuil) - v;
-
-      (tt++)->set(v, iv, K.lab);
+    if (verbosity > 4) {
+      cout << " creation of : BuildGTree for border elements" << endl;
     }
-  }
 
-  if (verbosity > 4) {
-    cout << " creation of : BuildGTree for border elements" << endl;
-  }
+    Vertex3 *becog = new Vertex3[nbex];
 
-  Vertex3 *becog = new Vertex3[nbex];
+    EF23::GTree< Vertex3 > *gtree_be = new EF23::GTree< Vertex3 >(becog, Pn, Px, 0);
+    double hseuil_border = hseuil / 3;
 
-  EF23::GTree< Vertex3 > *gtree_be = new EF23::GTree< Vertex3 >(becog, Pn, Px, 0);
-  double hseuil_border = hseuil / 3;
+    for (int i = 0; i < tab->n; i++) {
+      const Mesh3 &Th3(*tab->operator[](i));
+      R2 PtHat(1. / 3., 1. / 3.);
+      for (int k = 0; k < Th3.nbe; k++) {
+        const Triangle3 &K(Th3.be(k));
+        if ((K.lab != lab_delete)) {
+          int iv[3];
+          for (int ii = 0; ii < 3; ii++) iv[ii] = Th3.operator( )(K[ii]);
 
-  for (int i = 0; i < tab->n; i++) {
-    const Mesh3 &Th3(*tab->operator[](i));
-    R2 PtHat(1. / 3., 1. / 3.);
-    for (int k = 0; k < Th3.nbe; k++) {
-      const Triangle3 &K(Th3.be(k));
-      if ((K.lab != lab_delete)) {
-        int iv[3];
-        for (int ii = 0; ii < 3; ii++) iv[ii] = Th3.operator( )(K[ii]);
+          const Vertex3 &vi(K(PtHat));
+          Vertex3 *pvi = gtree_be->ToClose(vi, hseuil_border);
+          if (!pvi) {
+            becog[nbe].x = vi.x;
+            becog[nbe].y = vi.y;
+            becog[nbe].z = vi.z;
+            becog[nbe].lab = vi.lab;
+            gtree_be->Add(becog[nbe++]);
 
-        const Vertex3 &vi(K(PtHat));
-        Vertex3 *pvi = gtree_be->ToClose(vi, hseuil_border);
-        if (!pvi) {
-          becog[nbe].x = vi.x;
-          becog[nbe].y = vi.y;
-          becog[nbe].z = vi.z;
-          becog[nbe].lab = vi.lab;
-          gtree_be->Add(becog[nbe++]);
+            int igluv[3];
+            for (int i = 0; i < 3; i++) igluv[i] = gtree->ToClose(K[i], hseuil) - v;
 
-          int igluv[3];
-          for (int i = 0; i < 3; i++) igluv[i] = gtree->ToClose(K[i], hseuil) - v;
-
-          (bb++)->set(v, igluv, K.lab);
+            (bb++)->set(v, igluv, K.lab);
+          }
         }
       }
     }
+
+    delete gtree;
+    delete gtree_be;
+    delete[] becog;
+
+    if (verbosity > 4) {
+      cout << "     nbv=" << nbv << endl;
+      cout << "     nbvx=" << nbvx << endl;
+      cout << "     nbt=" << nbt << endl;
+      cout << "     nbe=" << nbe << endl;
+      cout << "     nbex=" << nbex << endl;
+    }
+
+    if (verbosity > 1) {
+      cout << "     Nb of glu3D  point " << nbvx - nbv;
+      cout << "     Nb of glu3D  Boundary faces " << nbex - nbe << endl;
+    }
   }
-
-  delete gtree;
-  delete gtree_be;
-  delete[] becog;
-
-  if (verbosity > 4) {
-    cout << "     nbv=" << nbv << endl;
-    cout << "     nbvx=" << nbvx << endl;
-    cout << "     nbt=" << nbt << endl;
-    cout << "     nbe=" << nbe << endl;
-    cout << "     nbex=" << nbex << endl;
+  else {
+    int** idx;
+    idx = new int*[tab->n + 1];
+    *idx = new int[nbvx];
+    std::fill_n(*idx, nbvx, -1);
+    nbvx = 0;
+    for (int i = 0; i < tab->n; i++) {
+      const Mesh3& Th3(*tab->operator[](i));
+      idx[i+1] = idx[i] + Th3.nv;
+      for (int k = 0; k < Th3.nbe; k++) {
+        const Triangle3& K(Th3.be(k));
+        for (int p = 0; p < 3; p++) {
+          const int iv = Th3.operator()(K[p]);
+          const Vertex3 &vi(Th3.vertices[iv]);
+          Vertex3 *pvi = gtree->ToClose(vi, hseuil);
+          if (!pvi) {
+            v[nbv].x = vi.x;
+            v[nbv].y = vi.y;
+            v[nbv].z = vi.z;
+            v[nbv].lab = vi.lab;
+            gtree->Add(v[nbv]);
+            idx[i][iv] = nbv++;
+          } else idx[i][iv] = pvi - v;
+        }
+      }
+    }
+    std::unordered_set<std::array<int, 3>> boundary;
+    boundary.reserve(nbex);
+    for (int i = 0; i < tab->n; i++) {
+      const Mesh3& Th3(*tab->operator[](i));
+      for (int j = 0; j < Th3.nv; j++) {
+        if (idx[i][j] == -1) {
+          const Vertex3 &vi(Th3.vertices[j]);
+          v[nbv].x = vi.x;
+          v[nbv].y = vi.y;
+          v[nbv].z = vi.z;
+          v[nbv].lab = vi.lab;
+          gtree->Add(v[nbv]);
+          idx[i][j] = nbv++;
+        }
+      }
+      for (int k = 0; k < Th3.nt; k++) {
+        const Tet& K(Th3.elements[k]);
+        int iv[4];
+        for (int iea = 0; iea < 4; iea++) iv[iea] = idx[i][Th3.operator()(K[iea])];
+        (t++)->set(v, iv, K.lab);
+      }
+      for (int k = 0; k < Th3.nbe; k++) {
+        const Triangle3& K(Th3.be(k));
+        if (K.lab != lab_delete) {
+          int iv[3];
+          for (int p = 0; p < 3; p++) iv[p] = idx[i][Th3.operator()(K[p])];
+          std::array<int, 3> sort;
+          std::copy_n(iv, 3, sort.begin());
+          std::sort(sort.begin(), sort.end());
+          if(boundary.find(sort) == boundary.end()) {
+            (bb++)->set(v, iv, K.lab);
+            boundary.insert(sort);
+          }
+        }
+      }
+    }
+    nbe = bb - b;
+    delete[] *idx;
+    delete[] idx;
   }
-
-  if (verbosity > 1) {
-    cout << "     Nb of glu3D  point " << nbvx - nbv;
-    cout << "     Nb of glu3D  Boundary faces " << nbex - nbe << endl;
-  }
-
+  t -= nbt;
   Mesh3 *mpq = new Mesh3(nbv, nbt, nbe, v, t, b);
   mpq->BuildGTree( );
 
@@ -7410,11 +7409,14 @@ struct Op_GluMesh3tab : public OneOperator {
   class Op : public E_F0mps {
    public:
     static basicAC_F0::name_and_type name_param[];
-    static const int n_name_param = 1;
+    static const int n_name_param = 2;
     Expression nargs[n_name_param];
     Expression getmeshtab;
     long arg(int i, Stack stack, long a) const {
       return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a;
+    }
+    bool arg(int i, Stack stack, bool a) const {
+      return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
     }
 
     Op(const basicAC_F0 &args, Expression t) : getmeshtab(t) {
@@ -7463,11 +7465,13 @@ struct Op_GluMeshTtab : public OneOperator {
 
 
 basicAC_F0::name_and_type Op_GluMesh3tab::Op::name_param[Op_GluMesh3tab::Op::n_name_param] = {
-  {"labtodel", &typeid(long)}};
+  {"labtodel", &typeid(long)},
+  {"legacy", &typeid(bool)}};
 AnyType Op_GluMesh3tab::Op::operator( )(Stack stack) const {
   KN< const Mesh3 * > *tab = GetAny< KN< const Mesh3 * > * >((*getmeshtab)(stack));
   long labtodel = arg(0, stack, LONG_MIN);
-  Mesh3 *Tht = GluMesh3tab(tab, labtodel);
+  bool legacy = arg(1, stack, false);
+  Mesh3 *Tht = GluMesh3tab(tab, labtodel, legacy);
 
   Add2StackOfPtr2FreeRC(stack, Tht);
   return Tht;
@@ -7859,6 +7863,8 @@ Mesh3 *BuildCube(long nx, long ny, long nz, long region, long *label, long kind,
   int debug =  verbosity / 10;
   int codesb[64], kcode[20];
   int kstable = 0;
+  double cpu0 = ((double) clock())/CLOCKS_PER_SEC;
+
   if (debug) {
     cout << "  Enter: BuildCube: " << kind << endl;
   }
@@ -8017,6 +8023,7 @@ Mesh3 *BuildCube(long nx, long ny, long nz, long region, long *label, long kind,
       }
     }
   }
+   double cpu1 = ((double) clock())/CLOCKS_PER_SEC;
 
   Tet *tff = new Tet[nt];
   Triangle3 *bff = new Triangle3[nbe];
@@ -8095,8 +8102,14 @@ Mesh3 *BuildCube(long nx, long ny, long nz, long region, long *label, long kind,
   if (debug) {
     cout << "  Out:  BuildCube" << endl;
   }
+  double cpu2 = ((double) clock())/CLOCKS_PER_SEC;
 
-  return new Mesh3(nv, nt, nbe, vff, tff, bff);
+  Mesh3 * Th3= new Mesh3(nv, nt, nbe, vff, tff, bff);
+    double cpu3 = ((double) clock())/CLOCKS_PER_SEC;
+    if(verbosity>1)
+        cout << " cube timers "<< cpu1-cpu0 << " " <<cpu2-cpu1 
+        << "   Mesh3  " <<cpu3-cpu2  << endl;
+   return Th3;
 }
 
 AnyType Cube_Op::operator( )(Stack stack) const {
@@ -9543,7 +9556,7 @@ static void Load_Init( ) {
     
   Global.Add(
     "AddLayers", "(",
-    new OneOperator4_< bool, const Mesh3 *, KN< double > *, long, KN< double > * >(AddLayers));
+    new OneOperator4_< bool, const Mesh3 *, KN< double > *, long, KN< double > * >(AddLayers<Mesh3>));
 
   Global.Add("bcube", "(", new cubeMesh);
   Global.Add("bcube", "(", new cubeMesh(1));
@@ -9568,8 +9581,8 @@ static void Load_Init( ) {
   Global.Add("showborder", "(", new OneOperator1< long, const MeshS * >(ShowBorder));
   Global.Add("getborder", "(", new OneOperator2< long, const MeshS *, KN< long > * >(GetBorder));
 
-  Global.Add("AddLayers", "(", new OneOperator4_< bool, const MeshS *, KN< double > *, long, KN< double > * >(AddLayers));
-  Global.Add("AddLayers", "(", new OneOperator4_< bool, const MeshL *, KN< double > *, long, KN< double > * >(AddLayers));
+  Global.Add("AddLayers", "(", new OneOperator4_< bool, const MeshS *, KN< double > *, long, KN< double > * >(AddLayers<MeshS>));
+  Global.Add("AddLayers", "(", new OneOperator4_< bool, const MeshL *, KN< double > *, long, KN< double > * >(AddLayers<MeshL>));
     
   Global.Add("square3", "(", new Square);
   Global.Add("square3", "(", new Square(1));

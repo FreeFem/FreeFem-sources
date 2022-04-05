@@ -3,15 +3,15 @@ source shell mingw64
 
 echo "Job 5"
 
-autoreconf -i \
-&& ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
-        CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
-        --prefix=/builds/workspace/freefem FCFLAGS=-fallow-invalid-boz \
-  && ./3rdparty/getall -a -o PETSc \
-  && cd 3rdparty/ff-petsc && make petsc-slepc \
-  && cd ../.. \
-  && ./reconfigure \
-  && make
+autoreconf -i
+./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
+        --prefix=/builds/workspace/freefem --disable-scalapack --disable-mumps
+./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS
+cd 3rdparty/ff-petsc && make petsc-slepc
+cd ../..
+./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
+        --prefix=/builds/workspace/freefem
+make
 
 if [ $? -eq 0 ]
 then

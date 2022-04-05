@@ -2238,9 +2238,11 @@ class  OneOperator2 : public OneOperator {
     E_F0 * code(const basicAC_F0 & args) const 
      { return  new CODE(f,t0->CastTo(args[0]),t1->CastTo(args[1]));} 
 
-    OneOperator2(func  ff): 
+    OneOperator2(func  ff,int ppref=0):
       OneOperator(map_type[typeid(R).name()],map_type[typeid(A).name()],map_type[typeid(B).name()]),
-      t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {}
+      t0( map_type[typeid(A).name()] ),t1(map_type[typeid(B).name()] ), f(ff) {
+          pref=ppref;
+      }
       
     OneOperator2(func  ff,aType tt0,aType tt1): 
       OneOperator(map_type[typeid(R).name()],tt0,tt1),
@@ -2979,16 +2981,26 @@ inline C_F0 & operator+=(C_F0 & a,C_F0 &b)
    return a;
 }
 */
-
+template<typename T>
+void CheckDclTypeEmpty() {
+    if(map_type.find(typeid(T).name())!=map_type.end())
+        cout << " Erreur  fftype dcl twist "<< typeid(T).name() << endl; 
+        }
+                            
 template<typename T,typename PT>
 void Dcl_TypeandPtr_ (Function1 i,Function1 d,Function1 pi,Function1 pd,Function1 OnReturn=0,Function1 pOnReturn=0)
    {
-      map_type[typeid(T).name()] = new ForEachType<T>(i,d,OnReturn); 
+    CheckDclTypeEmpty<T>();
+    CheckDclTypeEmpty<PT>();
+      map_type[typeid(T).name()] = new ForEachType<T>(i,d,OnReturn);
       map_type[typeid(PT).name()] = new ForEachTypePtr<T,PT>(pi,pd,pOnReturn); 
    }
 template<class T>
 void Dcl_TypeandPtr (Function1 i,Function1 d,Function1 pi,Function1 pd,Function1 OnReturn=0,Function1 pOnReturn=0)
 {
+    CheckDclTypeEmpty<T>();
+    CheckDclTypeEmpty<T*>();
+
 map_type[typeid(T).name()] = new ForEachType<T>(i,d,OnReturn); 
 map_type[typeid(T*).name()] = new ForEachTypePtr<T>(pi,pd,pOnReturn); 
 }
@@ -2997,21 +3009,27 @@ map_type[typeid(T*).name()] = new ForEachTypePtr<T>(pi,pd,pOnReturn);
 template<class T>
   void Dcl_TypeandPtr (Function1 pi,Function1 pd)
    {
-      map_type[typeid(T).name()] = new ForEachType<T>(); 
+    CheckDclTypeEmpty<T>();
+    CheckDclTypeEmpty<T*>();
+      map_type[typeid(T).name()] = new ForEachType<T>();
       map_type[typeid(T*).name()] = new ForEachTypePtr<T>(pi,pd); 
    }
    
 template<class T>
   void Dcl_TypeandPtr (Function1 pd)
    {
-      map_type[typeid(T).name()] = new ForEachType<T>(); 
+    CheckDclTypeEmpty<T>();
+    CheckDclTypeEmpty<T*>();
+      map_type[typeid(T).name()] = new ForEachType<T>();
       map_type[typeid(T*).name()] = new ForEachTypePtr<T>(pd); 
    }
    
 template<class T>
   void Dcl_TypeandPtr ()
    {
-      map_type[typeid(T).name()] = new ForEachType<T>(); 
+    CheckDclTypeEmpty<T>();
+    CheckDclTypeEmpty<T*>();
+      map_type[typeid(T).name()] = new ForEachType<T>();
       map_type[typeid(T*).name()] = new ForEachTypePtr<T>(); 
    }
    
@@ -3021,6 +3039,8 @@ template<class T>
      if (sizeof(T) >sizeof(AnyData)) {
        cerr << " the type   " << typeid(T).name() << " is too large " << sizeof(AnyData) <<  endl;
        throwassert(sizeof(T) <=sizeof(AnyData));}
+    CheckDclTypeEmpty<T>();
+ 
      return map_type[typeid(T).name()] = new ForEachType<T>(iv,id,Onreturn); 
     
    }

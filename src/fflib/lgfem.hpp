@@ -219,6 +219,10 @@ namespace {
       (*pTh).BoundaryElement((*pTh)(k), ee);
       return ee;
     }
+    R2 NBoundaryElement() const {Check() ;int ee;
+          int kk=(*pTh).BoundaryElement((*pTh)(k),ee);
+          return (*pTh)[kk].n(ee);}
+
   };
 
 }    // namespace

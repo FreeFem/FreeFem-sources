@@ -431,8 +431,8 @@ void addArray() {
     map_type_of_map[make_pair(atype<long>(), atype<Op*>())] = atype<KN<Op>*>();
 }
 
-void parallelIO(string*& name, MPI_Comm* const& comm, bool const& append) {
-    std::string base_filename(*name);
+void parallelIO(string*& name, MPI_Comm* const& comm, bool const& append, int& T, int& size, std::string& base_filename) {
+    base_filename = *name;
     std::string::size_type p(base_filename.find_last_of('.'));
     std::string file_without_extension = base_filename.substr(0, p);
     std::string extension;
@@ -446,14 +446,13 @@ void parallelIO(string*& name, MPI_Comm* const& comm, bool const& append) {
     else
         base_filename = file_without_extension.substr(p + 1, std::string::npos);
     int rank;
-    int size;
     MPI_Comm_rank(comm ? *comm : MPI_COMM_WORLD, &rank);
     MPI_Comm_size(comm ? *comm : MPI_COMM_WORLD, &size);
     std::ostringstream str[3];
     str[2] << size;
     str[1] << std::setw(str[2].str().length()) << std::setfill('0') << rank;
     ofstream pvd;
-    int T = 0;
+    T = 0;
     if(append) {
         if(rank == 0) {
             ifstream input;
@@ -473,26 +472,6 @@ void parallelIO(string*& name, MPI_Comm* const& comm, bool const& append) {
     }
     str[0] << std::setw(4) << std::setfill('0') << T;
     *name = file_without_extension + "_" + (size > 1 ? str[2].str() + "_" : "") + str[0].str() + (size > 1 ? "_" + str[1].str() : "") + "." + extension;
-    if(rank == 0) {
-        pvd.open(file_without_extension + (size > 1 ? "_" + str[2].str() : "") + ".pvd");
-        pvd << "<?xml version=\"1.0\"?>\n";
-        pvd << "<VTKFile T=\"" << T << "\" type=\"Collection\" version=\"0.1\"\n";
-        pvd << "         byte_order=\"LittleEndian\"\n";
-        pvd << "         compressor=\"vtkZLibDataCompressor\">\n";
-        pvd << "  <Collection>\n";
-        for(int t = 0; t < T + 1; ++t)
-            for(int i = 0; i < size; ++i) {
-                pvd << "    <DataSet timestep=\"" << t << "\" group=\"\" part=\"" << i << "\"\n";
-                pvd << "             file=\"";
-                pvd << base_filename << "_";
-                if(size > 1) pvd << str[2].str() + "_";
-                pvd << std::setw(4) << std::setfill('0') << t;
-                if(size > 1) pvd << "_" << std::setw(str[2].str().length()) << std::setfill('0') << i;
-                pvd << "." << std::setw(0) << extension << "\"/>\n";
-            }
-        pvd << "  </Collection>\n";
-        pvd << "</VTKFile>\n";
-    }
 }
 
 long periodicity(Matrice_Creuse<double>* const& R, KN< KN< long > >* const& interaction, KN< double >* const& D) {

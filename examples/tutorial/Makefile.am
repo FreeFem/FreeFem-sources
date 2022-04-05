@@ -25,7 +25,14 @@ TESTS_ENVIRONMENT=TEST_FFPP=$(TEST_FFPP) FLAGS_FFPP=-nw
 
 all-local: all.edp regtests.edp freefem++.pref
 
-TESTS=forall.edp adapt.edp adaptindicatorP1.edp adaptindicatorP2.edp algo.edp array.edp a_tutorial.edp beam.edp  calculus.edp cavity.edp convect2.edp convect-apt.edp convect.edp dumptable.edp ex-vf.edp FE.edp fluidStructAdapt.edp fluidStruct.edp freeboundary.edp freeboundary-weak.edp LapDG2.edp Laplace.edp LaplaceP1bis.edp LaplaceP1.edp LaplaceP1P2h.edp LaplaceRT.edp mesh.edp movemesh.edp nolinear-elas.edp NSUzawaCahouetChabart.edp onde.edp periodic4.edp Periodic.edp plot.edp readmesh.edp region.edp saverestore.edp schwarz-gc.edp schwarz-no-overlap.edp schwarz-overlap.edp sparse-matrix.edp sparse-cmatrix.edp StokesUzawa.edp tablefunction.edp intlevelset.edp mesh-internal.edp minlenedge.edp AdjointSolve.edp
+TESTS=forall.edp adapt.edp adaptindicatorP1.edp adaptindicatorP2.edp algo.edp array.edp a_tutorial.edp \
+beam.edp  calculus.edp cavity.edp convect2.edp convect-apt.edp convect.edp dumptable.edp ex-vf.edp FE.edp \
+fluidStructAdapt.edp fluidStruct.edp freeboundary.edp freeboundary-weak.edp LapDG2.edp Laplace.edp \
+LaplaceP1bis.edp LaplaceP1.edp LaplaceP1P2h.edp LaplaceRT.edp mesh.edp movemesh.edp nolinear-elas.edp \
+NSUzawaCahouetChabart.edp onde.edp periodic4.edp Periodic.edp plot.edp readmesh.edp region.edp saverestore.edp \
+schwarz-gc.edp schwarz-no-overlap.edp schwarz-overlap.edp sparse-matrix.edp sparse-cmatrix.edp StokesUzawa.edp \
+tablefunction.edp intlevelset.edp mesh-internal.edp minlenedge.edp AdjointSolve.edp tgv-test.edp \
+nl-elas-neo-Hookean.edp	
 
 EXTRA_DIST=*.edp aile.msh xyf all.edp regtests.edp regtests.m4 ref.edp
 

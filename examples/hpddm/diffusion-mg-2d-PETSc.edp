@@ -54,6 +54,8 @@ for(int i = 0; i < 2; ++i) {
         createMat(Th2, A[2], Pk)
         createMat(Th1, A[1], Pk)
         createMat(Th0, A[0], Pk)
+        macro Th1NestedInTh0()//
+        macro Th2NestedInTh1()//
         transferMat(Th1, Pk, A[1], Th0, Pk, A[0], P[0])
         transferMat(Th2, Pk, A[2], Th1, Pk, A[1], P[1])
     }

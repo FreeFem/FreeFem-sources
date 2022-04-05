@@ -1,9 +1,10 @@
-//  run with MPI:  ff-mpirun -np 4 script.edp
-// NBPROC 4
-// PARAM -sizeComm 2 -Dpartitioner=scotch
-
 include "getARGV.idp"
+IFMACRO(with,PETSc)
+load "PETSc"
+ENDIFMACRO
+IFMACRO(!with)
 macro PetscScalar()real//
+ENDIFMACRO
 
 int sizeComm = max(1, min(mpisize, getARGV("-sizeComm", mpisize)));
 int div = mpisize / sizeComm;
@@ -14,7 +15,6 @@ func Pk = [P2, P2];
 macro def(u)[u, u#B]//
 macro init(u)[u, u]//
 {
-    macro dimension()2// EOM            // 2D or 3D
     include "macro_ddm.idp"             // additional DDM functions
     mesh Th = square(getARGV("-global_2d", 20), getARGV("-global_2d", 20)); // global mesh
     buildDmesh(Th)

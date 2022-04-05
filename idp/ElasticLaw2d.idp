@@ -1,0 +1,88 @@
+// --------------------------------------------------------------------------
+// Definition of Kinematics Operators
+// --------------------------------------------------------------------------
+// notation ...\hfilll
+//
+// all 2x2 symetric matrix [[a11,a12], [a21,a22]  are see as an array \hfilll
+// [a11,a22,a12] .. \hfilll
+//  the strain(d) = $ \varepsilon(d) =  (\nabla d + {}^t(\nabla d)/2 $  matrix is \hfilll
+//  we always use the differential notation \hfilll
+// so   $F(y)$ is a fonction ; when $ dy \mapsto dF(y,dy)$ is the Frechet differentiel \hfilll
+// add  second Frechet differentiel is $ (dy,ddy)  \mapsto ddF(y,dy,ddy)$ \hfilll
+
+// --------------------------------------------------------------------------
+// the vector displacement parameter d = [d1,d2] \hfilll
+macro Strain2(d) 
+[ 
+dx(d[0]), 
+dy(d[1]), 
+dy(d[0])+dx(d[1])  
+] //EOM 
+
+// --------------------------------------------------------------------------
+// definition of C(d)  = $ {}^t F F$   and 2 differentiel
+// with  , with $F = Id + \nabla d$ where $Id$ is the identity matrix 
+macro C2(d)
+[
+1. + 2.*dx(d[0]) + dx(d[0])*dx(d[0]) + dx(d[1])*dx(d[1]) ,
+1. + 2.*dy(d[1]) + dy(d[0])*dy(d[0]) + dy(d[1])*dy(d[1]) , 
+ dy(d[0]) + dx(d[1])  + dx(d[0])*dy(d[0]) + dx(d[1])*dy(d[1]) 
+] //
+macro dC2(d,dd)
+[
+ 2.*dx((dd)[0]) + 2.*dx((dd)[0])*dx(d[0]) + 2.*dx((dd)[1])*dx(d[1]) ,
+ 2.*dy((dd)[1]) + 2.*dy((dd)[0])*dy(d[0]) + 2.*dy((dd)[1])*dy(d[1]) , 
+ dy((dd)[0]) + dx((dd)[1])  + dx((dd)[0])*dy(d[0]) + dx((dd)[1])*dy(d[1]) 
+                        + dx(d[0])*dy((dd)[0]) + dx(d[1])*dy((dd)[1]) 
+] //
+macro ddC2(dd,ddd)
+[
+  2.*dx((dd)[0])*dx((ddd)[0]) + 2.*dx((dd)[1])*dx((ddd)[1]) ,
+  2.*dy((dd)[0])*dy((ddd)[0]) + 2.*dy((dd)[1])*dy((ddd)[1]) , 
+    dx((dd)[0])*dy((ddd)[0]) + dx((dd)[1])*dy((ddd)[1]) 
+  + dx((ddd)[0])*dy((dd)[0]) + dx((ddd)[1])*dy((dd)[1]) 
+] //
+
+// --------------------------------------------------------------------------
+// definition of the 3 invariant I[0], I[1], I[2]in 2d 
+// so the value is an array size 3 . 
+// I2C (I (C) 2d ..) 
+// 
+//  I[0] = trace(C) +1 
+//  I[1] = (trace(C)^2 - trace(C^2) )/2
+//  I[2] = det(C) 
+//   ************** BIZARRE FH ***********************
+
+macro I2C(C) 
+[
+  C[0] + C[1] + 1., 
+  C[0]*C[1] + C[1] + C[0] - C[2]*C[2],
+  C[0]*C[1] - C[2]*C[2]
+] //EOM
+
+macro dI2C(C,dC) 
+ [ 
+   dC[0] + dC[1] , 
+   dC[0]*C[1] + dC[1] + dC[0] - 2.*dC[2]*C[2] + C[0]*dC[1], 
+   dC[0]*C[1] + C[0]*dC[1] - 2.*C[2]*dC[2]
+ ] // 
+
+macro  ddI2C(dC,ddC) 
+[ 
+   0.*dC[0]*ddC[0] , 
+   dC[0]*ddC[1]  - 2.*dC[2]*ddC[2] + ddC[0]*dC[1], 
+   dC[0]*ddC[1] + ddC[0]*dC[1] - 2.*ddC[2]*dC[2] 
+ ] // 
+ 
+
+macro I2d(d) I2C(C2(d))  //
+macro dI2d(d,dd)  dI2C( C2(d) , dC2(d,(dd)) ) //
+macro ddI2d(d,dd,ddd)  ( ddI2C( dC2(d,(dd)),dC2(d,(ddd))  ) + dI2C( C2(d) , ddC2((dd),(ddd)) ) ) //
+macro W2d(d) W(I2d(d)) //
+macro dW2d(d,dd)  dW( I2d(d) , dI2d(d,(dd))  ) //
+macro ddW2d(d,dd,ddd)  
+(  ddW( I2d(d) , dI2d(d,(dd)) ,dI2d(d,(ddd)) )  + dW( I2d(d) , ddI2d(d,(dd),(ddd)) ) ) //
+
+
+
+ 

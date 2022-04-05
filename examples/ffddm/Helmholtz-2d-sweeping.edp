@@ -1,0 +1,328 @@
+//ff-mpirun -np 4 Helmholtz-2d-sweeping.edp -ns -wg -raspart -ffddm_overlap 4 -nppwl 4 -frequency 10
+
+macro dimension 2// EOM
+include "ffddm.idp"
+
+ffddmprecond = "oras";
+
+macro def(i)i// EOM // scalar field definition
+macro init(i)i// EOM // scalar field initialization
+
+real freq = getARGV("-frequency",10.); // frequency
+int nppwl = getARGV("-nppwl",4); // number of points per wavelength
+int npml = getARGV("-npml",4); // number of points for global PML
+
+load "msh3"
+load "geophysics"
+
+int Dirichlet = 1;
+int Robin = 2;
+int Neumann = 7;
+int PML = 8;
+
+///*** Waveguide : ***///
+
+real c0 = 1;
+real k0 = 2*pi*freq/c0;
+real lambda = c0/freq;
+func Pk = P2;
+int[int] lab = [Dirichlet,Robin,Dirichlet,Robin];
+real length = mpisize;
+real depth = 1;
+func c = 1;
+func source = 0;
+func sourceGamma = (x < 1e-10)*exp(-120*(y+0.5)^2)*sin(-pi*y);
+
+///*** Marmousi : ***///
+/*
+real c0 = 2;
+real k0 = 2*pi*freq/c0;
+real lambda = c0/freq;
+func Pk = P2;
+int[int] lab = [PML,PML,Neumann,PML];
+real length = 9.2;
+real depth = 3;
+Marmousi marm("marmousi.bin");
+func c = marm(x,y);
+real xs = 6;
+real ys = 0;
+func source = exp(-((x-xs)^2+(y-ys)^2)*50*k0);
+func sourceGamma = 0;
+*/
+
+if (mpirank == 0) cout << "lambda = " << lambda << ", h = " << lambda/nppwl << endl;
+
+func k = 2*pi*freq/c;
+
+int[int] npmlg(4);
+
+npmlg[0] = npml*(lab[3] == PML); npmlg[1] = npml*(lab[1] == PML);
+npmlg[2] = npml*(lab[0] == PML); npmlg[3] = npml*(lab[2] == PML);
+
+real[int] lengthpml(4); // length of global PML
+for (int i=0; i<4; i++) lengthpml[i] = npmlg[i]*lambda/nppwl;
+
+int npmli = ffddmoverlap == 2 ? 1 : 2; // number of points in subdomain PML
+real lpml = npmli*lambda/nppwl; // length of subdomain PML
+
+real nloc = nppwl/ffddmsplit*length/lambda;
+
+int nx = rint(nloc*(length+lengthpml[0]+lengthpml[1])/length);
+int ny = rint(nloc*(depth+lengthpml[2]+lengthpml[3])/length);
+
+mesh Th = square(nx,ny,[-lengthpml[0]+x*(length+lengthpml[0]+lengthpml[1]),-depth-lengthpml[2]+y*(depth+lengthpml[2]+lengthpml[3])],label=lab);
+
+real epst = 1e-10;
+func sigmax = (npmlg[0]>0)*(x>=length)/max(epst,(length+lengthpml[1]-x)*real(k))  +  (npmlg[1]>0)*(x<=0)/max(epst,(x + lengthpml[0])*real(k));
+func sigmay = (npmlg[3]>0)*(y>=0)/max(epst,(lengthpml[3]-y)*real(k))  +  (npmlg[2]>0)*(y<=-depth)/max(epst,(y+depth + lengthpml[2])*real(k));
+
+macro Grad(u) [dx(u),dy(u)] // EOM
+macro Gradpml(u) [(1.+1i*sigmay)/(1.+1i*sigmax)*dx(u),
+                  (1.+1i*sigmax)/(1.+1i*sigmay)*dy(u)] // EOM
+
+macro Varf(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  int2d(meshName)(-k^2*(1-1i*sigmax)*(1-1i*sigmay)*u*v+Gradpml(u)'*Grad(v))
+				+ int1d(meshName,Robin)(1i*k*(1-1i*sigmax)*(1-1i*sigmay)*u*v)
+				+ on(Dirichlet,PML,u=0); // EOM
+
+// for the preconditioner
+macro VarfOptRobin(varfName, meshName, PhName)
+    varf varfName(u,v) =
+  int2d(meshName)(-k^2*(1-1i*sigmax)*(1-1i*sigmay)*u*v+Gradpml(u)'*Grad(v))
+				+ int1d(meshName,Robin,10)(1i*k*(1-1i*sigmax)*(1-1i*sigmay)*u*v)
+				+ on(Dirichlet,PML,u=0); // EOM
+
+// for the preconditioner with PMLs
+macro VarfOpt(varfName, meshName, PhName)
+    /* change definition of sigmax to take subdomain PMLs into account
+       d is the distance to the subdomain interface */
+    func sigmax = (npmlg[0]>0)*(x>=length)/max(epst,(length+lengthpml[1]-x)*real(k))  +  (npmlg[1]>0)*(x<=0)/max(epst,(x + lengthpml[0])*real(k))
+                + (d<=lpml)/max(epst,d*real(k));
+    varf varfName(u,v) =
+  int2d(meshName)(-k^2*(1-1i*sigmax)*(1-1i*sigmay)*u*v+Gradpml(u)'*Grad(v))
+				+ int1d(meshName,Robin)(1i*k*(1-1i*sigmax)*(1-1i*sigmay)*u*v)
+				+ on(Dirichlet,PML,10,u=0); // EOM
+
+macro Varfrhs(varfName, meshName, PhName)
+    varf varfName(u,v) =
+                int2d(meshName)(source*v)
+                +int1d(meshName,Robin)(sourceGamma*v)
+                + on(Dirichlet,PML,u=0); // EOM
+
+vsym = 2; // symmetric, not hermitian
+vtgv = -2;
+vtgvelim = -2;
+
+/****** ORAS METIS ******/
+{
+ffddmpartitioner = 1;
+ffddmbuildDmesh(Hmesh,Th,mpiCommWorld)
+
+ffddmbuildDfespace(HFE,Hmesh,complex,def,init,Pk)
+
+HFEVhi<complex> uoras, x0, rhs;
+x0[] = 0;
+
+ffddmsetup(ORASMETIS,HFE,Varf,VarfOptRobin)
+
+ffddmbuildrhs(ORASMETIS,Varfrhs,rhs[])
+
+uoras[] = ORASMETISfGMRES(x0[], rhs[], 1.e-6, 2000, "right");
+
+ORASMETISwritesummary
+
+ffddmplot(HFE,real(uoras), "ORASMETIS solution");
+}
+
+/****** BAND DECOMPOSITION ******/
+macro Hmeshsimple(PhGlobal, part, comm)
+int cx = 0, ii = 0;
+int zx = mpisize - (nx%mpisize);
+int px = nx/mpisize;
+int[int] partcube(nx*ny);
+for (int i=0; i<nx; i++) {
+  for (int j=0; j<ny; j++)
+    partcube[j+i*ny] = cx;
+  ii++; if (cx < zx) { if (ii == px) {ii = 0; cx++;} } else { if (ii == px+1) {ii=0; cx++;} }
+}
+part = partcube[int((x+lengthpml[0])/(length+lengthpml[0]+lengthpml[1])*nx)*ny+int(-(y-lengthpml[3])/(depth+lengthpml[2]+lengthpml[3])*ny)];
+// EOM
+
+ffddmpartitioner = 0;
+ffddmbuildDmeshpartcubes(Hmesh,Th,mpiCommWorld)
+
+ffddmbuildDfespace(HFE,Hmesh,complex,def,init,Pk)
+
+HFEVhi<complex> uoras, u, x0, rhs;
+x0[] = 0;
+
+int[int] labi = [ffddminterfacelabel];
+meshL ThGamma = extract(HmeshThi,label=labi); // extract subdomain interface as meshL
+
+real[int] bounds(6);
+boundingbox(ThGamma,bounds);
+
+func d = min(abs(x-bounds[0]), abs(x-bounds[1])); // distance to subdomain interface to define subdomain PMLs
+
+NewMacro Generate(pr)
+/****** ORAS BAND ******/
+IFMACRO(!PMLI)
+ffddmsetup(pr#ORAS,HFE,Varf,VarfOptRobin)
+ENDIFMACRO
+IFMACRO(PMLI)
+ffddmsetup(pr#ORAS,HFE,Varf,VarfOpt)
+ENDIFMACRO
+
+ffddmbuildrhs(pr#ORAS,Varfrhs,rhs[])
+
+uoras[] = pr#ORASfGMRES(x0[], rhs[], 1.e-6, 2000, "right");
+
+pr#ORASwritesummary
+
+ffddmplot(HFE,real(uoras), Stringification(pr)+"ORAS solution");
+
+/****** OSDS ******/
+IFMACRO(!PMLI)
+varf vGamma(u, v) = on(ffddminterfacelabel, u=1);
+complex[int] onGamma = vGamma(0,HFEVhi,tgv=1); // tag interface dofs
+ENDIFMACRO
+
+IFMACRO(PMLI)
+complex[int] onGamma(HFEVhi.ndof);
+{
+  onGamma = 0;
+  HFEVhi dg = (d <= lpml*(1+1e-10));
+  onGamma.re = dg[]; // tag interface PML dofs
+}
+ENDIFMACRO
+
+complex[int] notonGamma(onGamma.n);
+notonGamma = 1;
+notonGamma -= onGamma; // tag interior dofs
+
+complex[int] l1(HFEVhi.ndof), trsf(HFEVhi.ndof), rhsi(HFEVhi.ndof);
+complex[int] wi(HFEVhi.ndof), vil(HFEVhi.ndof), vir(HFEVhi.ndof);
+
+macro pr#OSDSmyPREC1
+func complex[int] pr#OSDSPREC1(complex[int] &l)
+{
+  l1 = notonGamma.*l; /* restrict to interior */
+
+  wi = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*l1; /* local solve */
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    /* left to right sweep */
+    /* transfer from left neighbor i-1 to i */
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == i-1 && i-1 >= 0)
+      trsf = wi + vil;
+    HFEupdate(trsf,false);
+
+    if (mpiRank(Hmeshcommddm) == i && i > 0) {
+      /* apply interface operator */
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      rhsi = onGamma.*rhsi; /* restrict to interface */
+      vil = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*rhsi;
+    }
+
+    /* perform right to left sweep simultaneously */
+    int j = Hmeshnpart-i-1;
+    /* transfer from right neighbor j+1 to j */
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == j+1 && j+1 < Hmeshnpart)
+      trsf = wi + vir;
+    HFEupdate(trsf,false);
+
+    if (mpiRank(Hmeshcommddm) == j && j < Hmeshnpart-1) {
+      /* apply interface operator */
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      rhsi = onGamma.*rhsi; /* restrict to interface */
+      vir = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*rhsi;
+    }
+  }
+
+  wi += vil + vir;
+
+  HFEupdate(wi,true);
+
+  return wi;
+}
+//
+
+macro pr#DSAmyPREC1
+func complex[int] pr#DSAPREC1(complex[int] &l)
+{
+  l1 = notonGamma.*l;
+
+  wi = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*l1;
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == i-1 && i-1 >= 0)
+      trsf = wi + vil;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == i && i > 0) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      rhsi = onGamma.*rhsi;
+      vil = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*rhsi;
+    }
+  }
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    int j = Hmeshnpart-i-1;
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == j-1 && j-1 >= 0)
+      trsf = wi + vil;
+    if (mpiRank(Hmeshcommddm) == j+1 && j+1 < Hmeshnpart)
+      trsf = wi + vir;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == j && j < Hmeshnpart-1) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      rhsi = onGamma.*rhsi;
+      vir = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*rhsi;
+    }
+  }
+
+  wi += vil + vir;
+
+  HFEupdate(wi,true);
+
+  return wi;
+}
+//
+
+macro pr#OSDSmyA
+func complex[int] pr#OSDSA(complex[int] &l) {complex[int] res = pr#ORASA(l); return res;}
+//
+
+ffddmsetupinit(pr#OSDS,HFE)
+
+u[] = pr#OSDSfGMRES(x0[], rhs[], 1.e-6, 2000, "right");
+
+pr#OSDSwritesummary
+
+ffddmplot(HFE,real(u), Stringification(pr)+"OSDS solution");
+
+macro pr#DSAmyA
+func complex[int] pr#DSAA(complex[int] &l) {complex[int] res = pr#ORASA(l); return res;}
+//
+ffddmsetupinit(pr#DSA,HFE)
+
+u[] = pr#DSAfGMRES(x0[], rhs[], 1.e-6, 2000, "right");
+
+pr#DSAwritesummary
+
+ffddmplot(HFE,real(u), Stringification(pr)+"DSA solution");
+EndMacro
+
+/* with PML interface conditions */
+{
+macro PMLI()1//
+Generate(PML)
+}
+
+/* with Robin interface conditions */
+{
+Generate(ROBIN)
+}

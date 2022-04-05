@@ -191,12 +191,13 @@ lib/WHERE.boost: ./getall
 #  to reinstall mpi under window afer clean 
 reinstall-msmpi:
 	-if test -f "$$MSMPI_INC"/mpif.h   ; then \
-		echo " copy msmpi  in 3rdparty form $$MSMPI_INC and $$MSMPI_LIB64 or $$MSMPI_LIB32" ; \
+		echo " copy msmpi  in 3rdparty form $$MSMPI_INC and $$MSMPI_LIB64 or $$MSMPI_LIB32" ;\
 		mkdir -p include/msmpi ;\
 		mkdir -p lib/msmpi ;\
 		cp "$$MSMPI_INC"/*.h include/msmpi ;\
-		sed  's/INT_PTR_KIND()/@SIZEOF_PTR@/' <"$$MSMPI_INC"/mpif.h >include/msmpi/mpif.h ;\
-		grep KIND include/msmpi/mpif.h; \
+		sed 's/INT_PTR_KIND()/@SIZEOF_PTR@/' <"$$MSMPI_INC"/mpif.h >include/msmpi/mpif.h ;\
+		sed 's/MPI_Status array_of_statuses\[\]/MPI_Status\* array_of_statuses/' < "$$MSMPI_INC"/mpi.h > include/msmpi/mpi.h ;\
+		grep KIND include/msmpi/mpif.h;\
 		test "@SIZEOF_PTR@" -eq 8 && cp "$$MSMPI_INC"/x64/*.h include/msmpi &&  cp "$$MSMPI_LIB64"/*.lib lib/msmpi ;\
 		test "@SIZEOF_PTR@" -eq 4 && cp "$$MSMPI_INC"/x86/*.h include/msmpi &&  cp "$$MSMPI_LIB32"/*.lib lib/msmpi ;\
 	fi
@@ -232,7 +233,10 @@ install-exec-local:
 	cp -rp lib $(DESTDIR)$(ff_prefix_dir)
 	cp -rp include  $(DESTDIR)$(ff_prefix_dir)
 	cp -rp bin  $(DESTDIR)$(ff_prefix_dir)
-
+	-if test -f boost/done.tag ; then \
+	  $(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/boost ; \
+	  cp -rp boost   $(DESTDIR)$(ff_prefix_dir) ; \
+	fi
 clean-local:
 	-rm -rf	 tag-* include lib bin WHERE-LD
 	-mkdir   include lib bin

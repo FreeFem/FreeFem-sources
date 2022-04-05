@@ -216,7 +216,8 @@ plot(rh,ps="lshape.eps");
   for (int i=0;i<nbvertices;i++)
 	cout << "Th(" <<i  << ") : "   // << endl;	
 	     << Th(i).x << " " << Th(i).y  << " " << Th(i).label // version 2.19 
-	     << "       old method: " << Thx[][i] << " " << Thy[][i] << endl;
+	     << "       old method: " << Thx[][i] << " " << Thy[][i] << " == R3  "  
+	     << Th(i).P << endl; // version 4.10.1  jan 2022
 
 // method to find information of point (0.55,0.6) 
   int it00 = Th(0.55,0.6).nuTriangle;// then triangle numbe 
@@ -245,13 +246,16 @@ plot(rh,ps="lshape.eps");
  
   // version >3.4-1
   // --------- new stuff -----------------
-  int k=0,l=1,e=1;
+  int k=0,l=1,e=1,v=1;
   Th.nbe ; // return the number of boundary element \hfilll
+  Th(v).P; // coordinate of vetices v in R3 ::  22 jan 2022
   Th.be(k);   // return the boundary element k $\in \{0,...,Th.nbe-1\}$ \hfilll
   Th.be(k)[l];   // return the vertices l $\in \{0,1\}$ of  boundary element k \hfilll
   Th.be(k).Element ;   // return the triangle contening the  boundary element k \hfilll
   Th.be(k).whoinElement ;   // return the egde number of triangle contening the  boundary element k \hfilll
+  Th.be(k).N ;   // return the Normal to be(k)   version 4.10.1
   Th[k].adj(e) ; // return adjacent triangle to k by edge e, and change the value of e to \hfilll
+  
   // the corresponding edge in the adjacent triangle
   Th[k] == Th[k].adj(e) ;// non adjacent triangle return the same 
   Th[k] != Th[k].adj(e) ;// true adjacent triangle 
@@ -278,7 +282,7 @@ plot(rh,ps="lshape.eps");
   Th.be;
     for (int k=0;k<nbboundaryelement;++k)
       cout << k << " : " <<  Th.be(k)[0] << " " << Th.be(k)[1] << " , label " << Th.be(k).label 
-	   <<  " tria  " << int(Th.be(k).Element) << " " << Th.be(k).whoinElement <<  endl; 
+	   <<  " tria  " << int(Th.be(k).Element) << " " << Th.be(k).whoinElement <<  " N " << Th.be(k).N << endl; 
 	
 	real[int] bb(4);
 	boundingbox(Th,bb); // bb[0] = xmin, bb[1] = xmax, bb[2] = ymin, bb[3] =ymax 

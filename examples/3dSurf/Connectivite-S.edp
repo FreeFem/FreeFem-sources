@@ -1,0 +1,62 @@
+load "msh3"
+
+meshS Th=square3(2,2);
+
+  // --------- new stuff -----------------
+  int k=0,l=1,e=1;
+  Th.nbe ; // return the number of boundary element \hfilll
+  Th.be(k);   // return the boundary element k $\in \{0,...,Th.nbe-1\}$ \hfilll
+  Th.be(k)[l];   // return the vertices l $\in \{0,1\}$ of  boundary element k \hfilll
+  Th.be(k).Element ;   // return the triangle contening the  boundary element k \hfilll
+  Th.be(k).whoinElement ;   // return the egde number of triangle contening the  boundary element k \hfilll
+  Th.be(k).N ;   // return the Normal to be(k)   version 4.10.1
+  Th[k].adj(e) ; // return adjacent triangle to k by edge e, and change the value of e to \hfilll
+  
+  // the corresponding edge in the adjacent triangle
+  Th[k] == Th[k].adj(e) ;// non adjacent triangle return the same 
+  Th[k] != Th[k].adj(e) ;// true adjacent triangle 
+  
+  cout << " print mesh connectivity " << endl;
+  int nbelement = Th.nt; 
+  for (int i=0;i<Th.nv;++i)
+  cout << i << " : "  << Th(i).x << " "<< Th(i).y << " " << Th(i).z  << endl; 
+ 
+  for (int k=0;k<nbelement;++k)
+    cout << k << " :  " << int(Th[k][0]) << " " << int(Th[k][1]) << " " <<  int(Th[k][2])
+	 << " , label/ region  " << Th[k].label << endl; 
+  //  
+  
+  for (int k=0;k<nbelement;++k)
+    for (int e=0,ee;e<3;++e) 
+      //  remark FH hack:  set ee to e, and ee is change by method adj, 
+      //  in () to make difference with  named parameters. 
+      {
+	    cout << k <<  " " << e << " <=>  " << int(Th[k].adj((ee=e))) << " " << ee  
+	     << "  adj: " << ( Th[k].adj((ee=e)) != Th[k]) << endl;  
+      }
+      // note :     if k == int(Th[k].adj(ee=e)) not adjacent element 
+
+
+  int nbboundaryelement = Th.nbe; 
+  Th.be;
+    for (int k=0;k<nbboundaryelement;++k)
+      cout << k << " : " <<  Th.be(k)[0] << " " << Th.be(k)[1]   << " , label " << Th.be(k).label 
+	   <<  " tet  " << int(Th.be(k).Element) << " " << Th.be(k).whoinElement <<  " N " << Th.be(k).N << endl; 
+	
+	real[int] bb(4);
+	boundingbox(Th,bb); // bb[0] = xmin, bb[1] = xmax, bb[2] = ymin, bb[3] =ymax 
+	   cout << " boundingbox  xmin: " << bb[0] << " xmax: " << bb[1] 
+	                     << " ymin: " << bb[2] << " ymax: " << bb[3] << endl; 
+
+    R3 O(0.5,0.5,0.5);
+    real ss =0;
+    for (int k=0;k<Th.nt;++k)
+       ss += solidangle(O,Th[k]);
+     cout << " solid angle = " << ss << " == 4*pi/6 == " << 4*pi/6 << endl;
+    assert( abs(ss-4*pi/6) < 1e-9);
+    func real f(R3 A)
+    {
+	    cout << "P "<< P << " " << nuTriangle << " A = "<< A << endl;
+	    return solidangle(A,Th[nuTriangle])/area;
+    }
+    cout << int2d(Th,qforder=1)(f(O) )<< endl; 

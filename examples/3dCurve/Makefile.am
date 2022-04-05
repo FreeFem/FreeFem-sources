@@ -34,7 +34,7 @@ TESTS_OTHER = buildParametricMeshL.edp \
 	basicGlue.edp \
 	WaveEquation-new1d.edp \
 	periodicL.edp \
-	border.edp
+	border.edp Connectivite-L.edp
 	
 
 TESTS_ARPACK = QMoscillator-new1d.edp

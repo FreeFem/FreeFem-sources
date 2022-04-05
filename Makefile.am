@@ -136,7 +136,8 @@ idp/ffddm_functions.idp \
 idp/macro_ddm_substructuring.idp \
 idp/ffddm_parameters.idp \
 idp/macro_ddm.idp \
-idp/CC.idp
+idp/CC.idp \
+idp/ElasticLaw2d.idp
 
 
 
@@ -281,8 +282,8 @@ bin/script/PostInstall.sh:./Makefile bin/script/PostInstall.m4
 FreeFEM-documentation.pdf:Makefile
 if DOWNLOAD
 	-rm FreeFEM-documentation.pdf.md5
-	-$(WGET) https://doc.freefem.org/pdf/FreeFEM-documentation.pdf.md5
-	-md5sum -c FreeFEM-documentation.pdf.md5 || (rm FreeFEM-documentation.pdf ; $(WGET) https://doc.freefem.org/pdf/FreeFEM-documentation.pdf)
+	-$(WGET) https://github.com/FreeFem/FreeFem-doc/raw/pdf/FreeFEM-documentation.pdf.md5
+	-md5sum -c FreeFEM-documentation.pdf.md5 || (rm FreeFEM-documentation.pdf ; $(WGET) https://github.com/FreeFem/FreeFem-doc/raw/pdf/FreeFEM-documentation.pdf)
 else
 	touch FreeFEM-documentation.pdf
 	echo "no downloaded documentation"

@@ -20,6 +20,10 @@
 // AUTHORS : Frederic Hecht
 // E-MAIL  : frederic.hecht@sorbonne-universite.fr
 
+#define NOMINMAX 1
+#define byte win_byte_override
+#include <windows.h>
+
 #include <direct.h>
 #include <cstring>
 #include <cstdlib>
@@ -28,7 +32,6 @@
 #include <iostream>
 #include <cassert>
 using namespace std;
-#include <windows.h>
 
 const char C = '"';
 

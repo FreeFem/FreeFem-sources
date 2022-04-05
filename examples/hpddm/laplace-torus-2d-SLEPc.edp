@@ -164,7 +164,6 @@ string ssparams =            // Parameters for the distributed EigenValue solver
   " -st_type sinvert "     +
   " -st_pc_type cholesky "       +
   " -st_matstructure same "       +
-  " -st_pc_factor_mat_solver_type mumps" +
   " -eps_view"             +
   " -eps_gen_hermitian"      // The problem is symmetric
   ;

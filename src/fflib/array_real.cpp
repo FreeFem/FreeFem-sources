@@ -34,6 +34,8 @@ void initArrayDCLdouble() {
         if(abs(p.v[i]) < eps) p.v[i]=0;
     return p.v;}//
 //template<class A, class B>  A Build(B b) { return A(b); }
+
+
 void initArrayOperatordouble() {
   Dcl_Type< KN_rmeps<double> > ();
   ArrayOperator<double, long>();
@@ -82,6 +84,8 @@ void initArrayOperatordouble() {
 
   Global.Add("Unique", "(", new Unique<K, K>);
   Global.Add("Unique", "(", new Unique<K, long>);
+
+
 
   //     ArrayDCL<long>();
 }

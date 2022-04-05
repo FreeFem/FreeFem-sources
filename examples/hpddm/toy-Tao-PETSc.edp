@@ -43,6 +43,11 @@ func int funcJE(real[int]& in) {
     JE = sp;
     return 0;
 }
+string solver;
+if(!HasType("MATSOLVER", "mumps") && !HasType("MATSOLVER", "superlu"))
+    exit(0);
+else
+    solver = (HasType("MATSOLVER", "mumps") ? "mumps" : "superlu");
 {
     func int funcH(real[int]& in) {
         real[int] diag(n);
@@ -54,9 +59,9 @@ func int funcJE(real[int]& in) {
     for(int i = 0; i < 2; ++i) {
         real[int] x = [0, 0];
         if(i == 0)
-            TaoSolve(H, J, DJ, x, xl = xl, xu = xu, sparams = "-tao_monitor -tao_type bqnls -pc_type lu -pc_factor_mat_solver_type mumps");
+            TaoSolve(H, J, DJ, x, xl = xl, xu = xu, sparams = "-tao_monitor -tao_type bqnls -pc_type lu -pc_factor_mat_solver_type " + solver);
         else
-            TaoSolve(H, J, DJ, x, xl = xl, xu = xu, sparams = "-tao_monitor -tao_type bnls -pc_type lu -pc_factor_mat_solver_type mumps", HessianRoutine = funcH);
+            TaoSolve(H, J, DJ, x, xl = xl, xu = xu, sparams = "-tao_monitor -tao_type bnls -pc_type lu -pc_factor_mat_solver_type " + solver, HessianRoutine = funcH);
         cout << "J([" << x[0] << ", " << x[1] << "]) = " << J(x) << endl;
     }
 }
@@ -70,7 +75,7 @@ func int funcJE(real[int]& in) {
         return 0;
     }
     real[int] x = [0, 0];
-    TaoSolve(H, J, DJ, x, xl = xl, xu = xu, sparams = "-tao_monitor -tao_type ipm -pc_type lu -pc_factor_mat_solver_type mumps", HessianRoutine = funcH, EqualityConstraints = funcE, JacobianEquality = funcJE, JE = JE);
+    TaoSolve(H, J, DJ, x, xl = xl, xu = xu, sparams = "-tao_monitor -tao_type ipm -pc_type lu -pc_factor_mat_solver_type " + solver, HessianRoutine = funcH, EqualityConstraints = funcE, JacobianEquality = funcJE, JE = JE);
     cout << "J([" << x[0] << ", " << x[1] << "]) = " << J(x) << ", E(x) = " << funcE(x)[0] << " (= 0)" << endl;
 }
 {
@@ -115,9 +120,9 @@ func int funcJE(real[int]& in) {
         return 0;
     }
     real[int] x = [0, 0];
-    TaoSolve(H, J, DJ, x, xl = xl, xu = xu, sparams = "-tao_monitor -tao_type ipm -pc_type lu -pc_factor_mat_solver_type mumps", HessianRoutine = funcHnoE, InequalityConstraints = funcI, JacobianInequality = funcJI, JI = JI);
+    TaoSolve(H, J, DJ, x, xl = xl, xu = xu, sparams = "-tao_monitor -tao_type ipm -pc_type lu -pc_factor_mat_solver_type " + solver, HessianRoutine = funcHnoE, InequalityConstraints = funcI, JacobianInequality = funcJI, JI = JI);
     cout << "J([" << x[0] << ", " << x[1] << "]) = " << J(x) << ", I(x) = [" << funcI(x)[0] << ", " << funcI(x)[0] << "] (>= [0, 0])" << endl;
     x = [0, 0];
-    TaoSolve(H, J, DJ, x, xl = xl, xu = xu, sparams = "-tao_monitor -tao_type ipm -pc_type lu -pc_factor_mat_solver_type mumps", HessianRoutine = funcH, EqualityConstraints = funcE, JacobianEquality = funcJE, JE = JE, InequalityConstraints = funcI, JacobianInequality = funcJI, JI = JI);
+    TaoSolve(H, J, DJ, x, xl = xl, xu = xu, sparams = "-tao_monitor -tao_type ipm -pc_type lu -pc_factor_mat_solver_type " + solver, HessianRoutine = funcH, EqualityConstraints = funcE, JacobianEquality = funcJE, JE = JE, InequalityConstraints = funcI, JacobianInequality = funcJI, JI = JI);
     cout << "J([" << x[0] << ", " << x[1] << "]) = " << J(x) << ", E(x) = " << funcE(x)[0] << " (= 0), I(x) = [" << funcI(x)[0] << ", " << funcI(x)[0] << "] (>= [0, 0])" << endl;
 }

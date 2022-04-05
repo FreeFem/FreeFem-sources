@@ -450,7 +450,8 @@ class GlgBoundaryElement { public:
     
     typedef typename Mesh::Element Element;
     typedef typename Mesh::BorderElement BorderElement;
-    
+    typedef typename Mesh::Rd Rd;
+
     struct BE {
 	const Mesh * p;
 	BE(const Mesh *pp) : p(pp) {}
@@ -472,11 +473,15 @@ class GlgBoundaryElement { public:
     operator int() const { Check(); return (* pTh)(k);} 
     GlgVertex<Mesh> operator [](const long & i) const { Check(); return GlgVertex<Mesh>(pTh,&(*k)[i]);}   
     long lab() const {Check() ; return k ? k->lab : 0;}
+    double mes() const {Check() ; return k ? k->mesure() : 0;}
     double length() const {Check() ; return k->length()  ;}
     long n() const { return k ? BorderElement::nv : 0 ;}
     GlgElement<Mesh> element() const {Check() ;int ee; return GlgElement<Mesh>(pTh,(*pTh).BoundaryElement((*pTh)(k),ee));}
     long nuBoundaryElement() const {Check() ;int ee;  (*pTh).BoundaryElement((*pTh)(k),ee);return ee;}
-    
+    Rd NBoundaryElement() const {Check() ;int ee;
+        int kk=(*pTh).BoundaryElement((*pTh)(k),ee);
+        return (*pTh)[kk].n(ee);}
+
 };
 
 
@@ -499,13 +504,120 @@ GlgElement<Mesh3> getElement(GlgBoundaryElement<Mesh3> const & a)
 long NuElement(GlgBoundaryElement<Mesh3> const & a)
 {    return a.nuBoundaryElement(); }
 
+template<class Mesh>
+R3 NElement(GlgBoundaryElement<Mesh> const & a)
+{    return a.NBoundaryElement(); }
+template<class Mesh>
+R3 getP(GlgVertex<Mesh> const & a){  return R3(*a.v);}
 R getx(GlgVertex<Mesh3> const & a){  return a.x();}
 R gety(GlgVertex<Mesh3> const & a){  return a.y();}
 R getz(GlgVertex<Mesh3> const & a){  return a.z();}
+R getx(R3 const & a){  return a.x;}
+R gety(R3 const & a){  return a.y;}
+R getz(R3 const & a){  return a.z;}
 long  getlab(GlgVertex<Mesh3> const & a){  return a.lab();}
 long getlab(GlgElement<Mesh3> const & a){  return a.lab();}
 long getlab(GlgBoundaryElement<Mesh3> const & a){  return a.lab();}
 R getmes(GlgElement<Mesh3> const & a){  return a.mes();}
+R getmesb(GlgBoundaryElement<Mesh3> const & a){  return a.mes();}
+R Volume(const R3 & O,const R3 & AA,const R3 & BB,const R3 & CC )
+{
+    R3 A(O,AA),B(O,BB),C(O,CC);
+    return det(A,B,C)/6.;
+}
+
+R Volume(const R3 & O, GlgBoundaryElement<Mesh3> const & gbe)
+{
+    gbe.Check(); // verif ..
+    const Mesh3::BorderElement & be = * gbe.k;
+    return Volume(O,be[0],be[1],be[2]);}
+
+R Volume(const R3 & O, GlgElement<MeshS> const & gbe)
+{
+    gbe.Check(); // verif ..
+    const MeshS::Element & be = * gbe.k;
+    return Volume(O,be[0],be[1],be[2]);}
+R Volume(const R3 & O, GlgElement<Mesh3> const & gbe,const long & nf)
+{
+ gbe.Check(); // verif ..
+ ffassert(nf>=0 && nf < 4);
+ const Mesh3::Element & be = * gbe.k;
+  static int nvface[4][3]=  {{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}};
+  int i0=nvface[nf][0];
+  int i1=nvface[nf][1];
+  int i2=nvface[nf][2];
+ return Volume(O,be[i0],be[i1],be[i2]);}
+
+R SolidAngle(const R3 & O,const R3 & AA,const R3 & BB,const R3 & CC )
+{
+    R3 A(O,AA),B(O,BB),C(O,CC);
+    R a=A.norme(),b=B.norme(),c=C.norme();
+    R ref = max(max(a,b),max(c,1e-20));
+    R epsA = 1e-10;
+    R eps = ref*ref*ref*epsA;//????
+    R abc  =abs(det(A,B,C));
+    R ab = (A,B), ac=(A,C), bc = (B,C);
+    R abc1 = a*b*c;
+    R q = (abc1+ab*c+ac*b+bc*a);
+    R theta =0;
+
+    if(  abs(q)>eps || abc > eps )// OK
+    {   theta=atan2(abc,q);// y = abc , x = q
+        
+        //  x > 0 => -pi/2 , pi/2
+        if( theta<0) {
+            
+           if(verbosity) cout << " Bug ??? SolidAngle ::: " << abc << " " << q << " =>  " << theta << " == " << atan(abc/q) << endl;
+            theta+= 2*Pi;
+        }
+       theta*=2;
+    }
+    else // sur le bord et dans le plan
+    {
+        R p = (a+b+c)/2;
+        R area = sqrt(p*(p-a)*(p-b)*(p-c)); // Formule de Heron
+        R epsp = eps*p;
+        if(area < epsp)
+            theta = 0; // bof bof
+        else if( a< epsp )
+            theta=acos((B,C)/(b*c));
+        else if (b < epsp)
+            theta=acos((A,C)/(a*c));
+        else if (c < epsp)
+            theta=acos((A,B)/(a*b));
+        else
+            theta = Pi;
+    }
+    if(verbosity>99) cout << a << " " << b << " " << c << " theta "<< theta << " " << (abs(q)>eps || abc > eps) << " q= " << q << " abc=" << abc  << " eps " << eps  << endl;
+    ffassert(theta>=0);
+    return theta;
+}
+R SolidAngle(const R3 & O, GlgBoundaryElement<Mesh3> const & gbe)
+{
+    gbe.Check(); // verif ..
+    const Mesh3 &Th= *gbe.pTh;
+    const Mesh3::BorderElement & be = * gbe.k;
+    return SolidAngle(O,be[0],be[1],be[2]);}
+
+   R SolidAngle(const R3 & O, GlgElement<MeshS> const & gbe)
+{
+    gbe.Check(); // verif ..
+    const MeshS &Th= *gbe.pTh;
+    const MeshS::Element & be = * gbe.k;
+    
+    return SolidAngle(O,be[0],be[1],be[2]);}
+
+R SolidAngle(const R3 & O, GlgElement<Mesh3> const & gbe,const long & nf)
+{
+ gbe.Check(); // verif ..
+ ffassert(nf>=0 && nf < 4); 
+ const Mesh3::Element & be = * gbe.k;
+  static int nvface[4][3]=  {{3,2,1}, {0,2,3},{ 3,1,0},{ 0,1,2}};
+  int i0=nvface[nf][0];
+  int i1=nvface[nf][1];
+  int i2=nvface[nf][2];
+
+ return SolidAngle(O,be[i0],be[i1],be[i2]);}
 
 double pmesh_mes(pmesh3 * p) { ffassert(p) ;  return *p ? (**p).mes : 0.0;}
 double pmesh_mesb(pmesh3 * p) { ffassert(p) ;  return *p ? (**p).mesb : 0.0;}
@@ -554,6 +666,7 @@ pmeshL pmeshS_gamma(Stack stack, pmeshS * const & p)
 long pmesh_nadjnomanifold(pmesh3 * p) { ffassert(p) ;  return *p ? ((**p).meshS)->nadjnomanifold : 0;}
 
 long pmesh_nadjnomanifold(pmeshS * p) { ffassert(p) ;  return *p ? (**p).nadjnomanifold : 0;}
+long pmesh_nadjnomanifold(pmeshL * p) { ffassert(p) ;  return *p ? (**p).nadjnomanifold : 0;}
 
 
 // Tools for 3D surface mesh
@@ -582,6 +695,7 @@ long  getlab(GlgVertex<MeshS> const & a){  return a.lab();}
 long getlab(GlgElement<MeshS> const & a){  return a.lab();}
 long getlab(GlgBoundaryElement<MeshS> const & a){  return a.lab();}
 R getmes(GlgElement<MeshS> const & a){  return a.mes();}
+R getmesb(GlgBoundaryElement<MeshS> const & a){  return a.mes();}
 
 double pmesh_mes(pmeshS * p) { ffassert(p) ;  return *p ? (**p).mes : 0.0;}
 double pmesh_mesb(pmeshS * p) { ffassert(p) ;  return *p ? (**p).mesb : 0.0;}
@@ -660,6 +774,8 @@ long  getlab(GlgVertex<MeshL> const & a){  return a.lab();}
 long getlab(GlgElement<MeshL> const & a){  return a.lab();}
 long getlab(GlgBoundaryElement<MeshL> const & a){  return a.lab();}
 R getmes(GlgElement<MeshL> const & a){  return a.mes();}
+R getmesb(GlgBoundaryElement<MeshL> const & a){  return a.mes();}
+
 
 double pmesh_mes(pmeshL * p) { ffassert(p) ;  return *p ? (**p).mes : 0.0;}
 double pmesh_mesb(pmeshL * p) { ffassert(p) ;  return *p ? (**p).mesb : 0.0;}
@@ -2634,6 +2750,104 @@ public:
     };
 };
 */
+template<class Mesh3>
+void init_lgmesh1()
+{
+    typedef const Mesh3 * pmesh3; 
+    // 3D volume
+    Dcl_Type<GlgVertex<Mesh3> >();
+    Dcl_Type<GlgElement<Mesh3> >( );
+    Dcl_Type<typename GlgElement<Mesh3>::Adj>( );
+      
+    Dcl_Type<typename GlgBoundaryElement<Mesh3>::BE >( );
+    Dcl_Type<GlgBoundaryElement<Mesh3> >( );
+      
+    atype<long>()->AddCast(
+            new E_F1_funcT<long,GlgVertex<Mesh3> >(Cast<long,GlgVertex<Mesh3> >),
+            new E_F1_funcT<long,GlgElement<Mesh3> >(Cast<long,GlgElement<Mesh3> >),
+            new E_F1_funcT<long,GlgBoundaryElement<Mesh3> >(Cast<long,GlgBoundaryElement<Mesh3> >)
+
+    );
+
+   Add<pmesh3>("[","",new OneOperator2_<GlgElement<Mesh3>,pmesh3,long>(get_element));
+   Add<pmesh3*>("[","",new OneOperator2_<GlgElement<Mesh3>,pmesh3*,long>(get_element));
+   Add<pmesh3>("(","",new OneOperator2_<GlgVertex<Mesh3>,pmesh3,long>(get_vertex));
+   Add<pmesh3*>("(","",new OneOperator2_<GlgVertex<Mesh3>,pmesh3*,long>(get_vertex));
+  //   second case of Th(x,y,z) ???? FH  attention deja fait dans Op4_Mesh32mp now remove
+   Add<pmesh3* >("(", "", new OneQuadOperator< Op3_MeshDmp<Mesh3>,typename  Op3_MeshDmp<Mesh3>::Op >);
+      
+   Add<pmesh3*>("be",".",new OneOperator1_<typename GlgBoundaryElement<Mesh3>::BE,pmesh3*>(Build));
+   Add<GlgElement<Mesh3> >("adj",".",new OneOperator1_<typename GlgElement<Mesh3>::Adj,GlgElement<Mesh3> >(Build));
+   Add<typename GlgBoundaryElement<Mesh3>::BE>("(","",new OneOperator2_<GlgBoundaryElement<Mesh3>,typename GlgBoundaryElement<Mesh3>::BE,long>(get_element));
+   Add<typename GlgElement<Mesh3>::Adj>("(","",new OneOperator2_<GlgElement<Mesh3>,typename GlgElement<Mesh3>::Adj,long*>(get_adj));
+   TheOperators->Add("==", new OneBinaryOperator<Op2_eq<GlgElement<Mesh3>,GlgElement<Mesh3> > >);
+   TheOperators->Add("!=", new OneBinaryOperator<Op2_ne<GlgElement<Mesh3>,GlgElement<Mesh3> > >);
+   TheOperators->Add("<", new OneBinaryOperator<Op2_lt<GlgElement<Mesh3>,GlgElement<Mesh3> > >);
+   TheOperators->Add("<=", new OneBinaryOperator<Op2_le<GlgElement<Mesh3>,GlgElement<Mesh3> > >);
+
+   Add<GlgBoundaryElement<Mesh3> >("label",".",new OneOperator1_<long,GlgBoundaryElement<Mesh3> >(getlab));
+  Add<GlgBoundaryElement<Mesh3> >("measure",".",new OneOperator1_<double,GlgBoundaryElement<Mesh3> >(getmesb));
+  Add<GlgBoundaryElement<Mesh3> >("Element",".",new OneOperator1_<GlgElement<Mesh3> ,GlgBoundaryElement<Mesh3> >(getElement));
+   Add<GlgBoundaryElement<Mesh3> >("whoinElement",".",new OneOperator1_<long,GlgBoundaryElement<Mesh3> >(NuElement));
+   Add<GlgBoundaryElement<Mesh3> >("N",".",new OneOperator1_<R3,GlgBoundaryElement<Mesh3> >(NElement));
+
+
+   Add<GlgElement<Mesh3> >("[","",new OneOperator2_<GlgVertex<Mesh3> ,GlgElement<Mesh3> ,long>(get_element));
+   Add<GlgBoundaryElement<Mesh3> >("[","",new OneOperator2_<GlgVertex<Mesh3>,GlgBoundaryElement<Mesh3>,long>(get_element));
+   
+    Add<GlgVertex<Mesh3> >("P",".",new OneOperator1_<R3,GlgVertex<Mesh3> >(getP));
+
+   Add<GlgVertex<Mesh3> >("x",".",new OneOperator1_<R,GlgVertex<Mesh3> >(getx));
+   Add<GlgVertex<Mesh3> >("y",".",new OneOperator1_<R,GlgVertex<Mesh3> >(gety));
+   Add<GlgVertex<Mesh3> >("z",".",new OneOperator1_<R,GlgVertex<Mesh3> >(getz));
+
+   Add<GlgVertex<Mesh3> >("label",".",new OneOperator1_<long,GlgVertex<Mesh3> >(getlab));
+   Add<GlgElement<Mesh3> >("label",".",new OneOperator1_<long,GlgElement<Mesh3> >(getlab));
+   Add<GlgElement<Mesh3> >("region",".",new OneOperator1_<long,GlgElement<Mesh3> >(getlab));
+   Add<GlgElement<Mesh3> >("mesure",".",new OneOperator1_<double,GlgElement<Mesh3> >(getmes));
+   Add<GlgElement<Mesh3> >("measure",".",new OneOperator1_<double,GlgElement<Mesh3> >(getmes));
+   Add<pmesh3*>("mesure",".",new OneOperator1<double,pmesh3*>(pmesh_mes));
+   Add<pmesh3*>("measure",".",new OneOperator1<double,pmesh3*>(pmesh_mes));
+   Add<pmesh3*>("bordermesure",".",new OneOperator1<double,pmesh3*>(pmesh_mesb));
+   Add<pmesh3*>("bordermeasure",".",new OneOperator1<double,pmesh3*>(pmesh_mesb));
+   Add<pmesh3*>("nt",".",new OneOperator1<long,pmesh3*>(pmesh_nt));
+   Add<pmesh3*>("nv",".",new OneOperator1<long,pmesh3*>(pmesh_nv));
+   Add<pmesh3*>("nbe",".",new OneOperator1<long,pmesh3*>(pmesh_nbe));
+   Add<pmesh3*>("hmax",".",new OneOperator1<double,pmesh3*>(pmesh_hmax));
+   Add<pmesh3*>("hmin",".",new OneOperator1<double,pmesh3*>(pmesh_hmin));
+
+   Add<pmesh3*>("nbnomanifold",".",new OneOperator1<long,pmesh3*>(pmesh_nadjnomanifold));
+     
+}
+//using Fem2D::R3;
+KN<double> * set_initR3( KN<double>  *a, R3  b){
+    SHOWVERB( cout << " set_init array R3"  << " " << &b << endl);
+    a->init(3); (*a)[0]=b.x;(*a)[1]=b.y;(*a)[2]=b.z; return a;}
+
+/* KN<double> * set_initR3( KN<double> *a, R3 * b){
+    SHOWVERB( cout << " set_init array R3" << " " << &b << endl);
+     a->init(3);   (*a)[0]=b->x;(*a)[1]=b->y;(*a)[2]=b->z; return a;}
+*/
+
+KN_<double>  copy_R3( KN_<double>  a, R3  b){
+    SHOWVERB( cout << " set_init array R3"  << " " << &b << endl);
+    ffassert(a.N()==3); (a)[0]=b.x;(a)[1]=b.y;(a)[2]=b.z; return a;}
+/*KN_<double>  copy_R3( KN_<double>  a, R3  *b){
+    SHOWVERB( cout << " set_init array R3"  << " " << &b << endl);
+    ffassert(a.N()==3); (a)[0]=b->x;(a)[1]=b->y;(a)[2]=b->z; return a;}
+*/
+
+
+AnyType Array2R3(Stack,const AnyType &b) {
+    KN_<double> a = GetAny<KN_<double>> (b);
+    ffassert(a.N()>=3);
+    R3 P((double*)a);
+    return   SetAny<R3>(P);}
+AnyType pArray2R3(Stack,const AnyType &b) {
+    KN_<double> a = *GetAny<KN<double>*> (b);
+    ffassert(a.N()>=3);
+    R3 P((double*)a);
+    return   SetAny<R3>(P);}
 
 void init_lgmesh3() {
   if(verbosity&&(mpirank==0))  cout <<"lg_mesh3 ";
@@ -2709,185 +2923,28 @@ void init_lgmesh3() {
     
   Global.Add("buildmeshL","(",new OneOperator1s_<pmeshL,const E_BorderN *>(BuildMeshCurve3));
 
-    
-  // 3D volume
-  Dcl_Type<GlgVertex<Mesh3> >();
-  Dcl_Type<GlgElement<Mesh3> >( );
-  Dcl_Type<GlgElement<Mesh3>::Adj>( );
-    
-  Dcl_Type<GlgBoundaryElement<Mesh3>::BE >( );
-  Dcl_Type<GlgBoundaryElement<Mesh3> >( );
-    
-  atype<long>()->AddCast(
-		  new E_F1_funcT<long,GlgVertex<Mesh3> >(Cast<long,GlgVertex<Mesh3> >),
-		  new E_F1_funcT<long,GlgElement<Mesh3> >(Cast<long,GlgElement<Mesh3> >),
-		  new E_F1_funcT<long,GlgBoundaryElement<Mesh3> >(Cast<long,GlgBoundaryElement<Mesh3> >)
-
-  );
-
- Add<pmesh3>("[","",new OneOperator2_<GlgElement<Mesh3>,pmesh3,long>(get_element));
- Add<pmesh3*>("[","",new OneOperator2_<GlgElement<Mesh3>,pmesh3*,long>(get_element));
- Add<pmesh3>("(","",new OneOperator2_<GlgVertex<Mesh3>,pmesh3,long>(get_vertex));
- Add<pmesh3*>("(","",new OneOperator2_<GlgVertex<Mesh3>,pmesh3*,long>(get_vertex));
-//   second case of Th(x,y,z) ???? FH  attention deja fait dans Op4_Mesh32mp now remove
- Add<pmesh3* >("(", "", new OneQuadOperator< Op3_MeshDmp<Mesh3>, Op3_MeshDmp<Mesh3>::Op >);
-    
- Add<pmesh3*>("be",".",new OneOperator1_<GlgBoundaryElement<Mesh3>::BE,pmesh3*>(Build));
- Add<GlgElement<Mesh3> >("adj",".",new OneOperator1_<GlgElement<Mesh3>::Adj,GlgElement<Mesh3> >(Build));
- Add<GlgBoundaryElement<Mesh3>::BE>("(","",new OneOperator2_<GlgBoundaryElement<Mesh3>,GlgBoundaryElement<Mesh3>::BE,long>(get_element));
- Add<GlgElement<Mesh3>::Adj>("(","",new OneOperator2_<GlgElement<Mesh3>,GlgElement<Mesh3>::Adj,long*>(get_adj));
- TheOperators->Add("==", new OneBinaryOperator<Op2_eq<GlgElement<Mesh3>,GlgElement<Mesh3> > >);
- TheOperators->Add("!=", new OneBinaryOperator<Op2_ne<GlgElement<Mesh3>,GlgElement<Mesh3> > >);
- TheOperators->Add("<", new OneBinaryOperator<Op2_lt<GlgElement<Mesh3>,GlgElement<Mesh3> > >);
- TheOperators->Add("<=", new OneBinaryOperator<Op2_le<GlgElement<Mesh3>,GlgElement<Mesh3> > >);
-
- Add<GlgBoundaryElement<Mesh3> >("label",".",new OneOperator1_<long,GlgBoundaryElement<Mesh3> >(getlab));
- Add<GlgBoundaryElement<Mesh3> >("Element",".",new OneOperator1_<GlgElement<Mesh3> ,GlgBoundaryElement<Mesh3> >(getElement));
- Add<GlgBoundaryElement<Mesh3> >("whoinElement",".",new OneOperator1_<long,GlgBoundaryElement<Mesh3> >(NuElement));
+  Add<R3 >("x",".",new OneOperator1_<R,R3 >(getx));
+  Add<R3 >("y",".",new OneOperator1_<R,R3 >(gety));
+  Add<R3 >("z",".",new OneOperator1_<R,R3 >(getz));
    
+  init_lgmesh1<Mesh3>();
+  init_lgmesh1<MeshS>();
+  init_lgmesh1<MeshL>();
 
- Add<GlgElement<Mesh3> >("[","",new OneOperator2_<GlgVertex<Mesh3> ,GlgElement<Mesh3> ,long>(get_element));
- Add<GlgBoundaryElement<Mesh3> >("[","",new OneOperator2_<GlgVertex<Mesh3>,GlgBoundaryElement<Mesh3>,long>(get_element));
- 
- Add<GlgVertex<Mesh3> >("x",".",new OneOperator1_<R,GlgVertex<Mesh3> >(getx));
- Add<GlgVertex<Mesh3> >("y",".",new OneOperator1_<R,GlgVertex<Mesh3> >(gety));
- Add<GlgVertex<Mesh3> >("z",".",new OneOperator1_<R,GlgVertex<Mesh3> >(getz));
- Add<GlgVertex<Mesh3> >("label",".",new OneOperator1_<long,GlgVertex<Mesh3> >(getlab));
- Add<GlgElement<Mesh3> >("label",".",new OneOperator1_<long,GlgElement<Mesh3> >(getlab));
- Add<GlgElement<Mesh3> >("region",".",new OneOperator1_<long,GlgElement<Mesh3> >(getlab));
- Add<GlgElement<Mesh3> >("mesure",".",new OneOperator1_<double,GlgElement<Mesh3> >(getmes));
- Add<GlgElement<Mesh3> >("measure",".",new OneOperator1_<double,GlgElement<Mesh3> >(getmes));
- Add<pmesh3*>("mesure",".",new OneOperator1<double,pmesh3*>(pmesh_mes));
- Add<pmesh3*>("measure",".",new OneOperator1<double,pmesh3*>(pmesh_mes));
- Add<pmesh3*>("bordermesure",".",new OneOperator1<double,pmesh3*>(pmesh_mesb));
- Add<pmesh3*>("bordermeasure",".",new OneOperator1<double,pmesh3*>(pmesh_mesb));
- Add<pmesh3*>("nt",".",new OneOperator1<long,pmesh3*>(pmesh_nt));
- Add<pmesh3*>("nv",".",new OneOperator1<long,pmesh3*>(pmesh_nv));
- Add<pmesh3*>("nbe",".",new OneOperator1<long,pmesh3*>(pmesh_nbe));
- Add<pmesh3*>("hmax",".",new OneOperator1<double,pmesh3*>(pmesh_hmax));
- Add<pmesh3*>("hmin",".",new OneOperator1<double,pmesh3*>(pmesh_hmin));
+  Add<pmesh3*>("Gamma",".",new OneOperator1s_<pmeshS,pmesh3*>(pmesh3_gamma));
+  Add<pmeshS*>("Gamma",".",new OneOperator1s_<pmeshL,pmeshS*>(pmeshS_gamma));
 
- Add<pmesh3*>("Gamma",".",new OneOperator1s_<pmeshS,pmesh3*>(pmesh3_gamma));
- Add<pmesh3*>("nbnomanifold",".",new OneOperator1<long,pmesh3*>(pmesh_nadjnomanifold));
- 
- Add<pmeshS*>("Gamma",".",new OneOperator1s_<pmeshL,pmeshS*>(pmeshS_gamma));
-    
- //3D surface
- Dcl_Type<GlgVertex<MeshS> >();
- Dcl_Type<GlgElement<MeshS> >( );
- Dcl_Type<GlgElement<MeshS>::Adj>( );
-    
- Dcl_Type<GlgBoundaryElement<MeshS>::BE >( );
- Dcl_Type<GlgBoundaryElement<MeshS> >( );
-    
- atype<long>()->AddCast(
-                        new E_F1_funcT<long,GlgVertex<MeshS> >(Cast<long,GlgVertex<MeshS> >),
-                        new E_F1_funcT<long,GlgElement<MeshS> >(Cast<long,GlgElement<MeshS> >),
-                        new E_F1_funcT<long,GlgBoundaryElement<MeshS> >(Cast<long,GlgBoundaryElement<MeshS> >)
-                       );
-    
- Add<pmeshS>("[","",new OneOperator2_<GlgElement<MeshS>,pmeshS,long>(get_element));
- Add<pmeshS*>("[","",new OneOperator2_<GlgElement<MeshS>,pmeshS*,long>(get_element));
- Add<pmeshS>("(","",new OneOperator2_<GlgVertex<MeshS>,pmeshS,long>(get_vertex));
- Add<pmeshS*>("(","",new OneOperator2_<GlgVertex<MeshS>,pmeshS*,long>(get_vertex));
- Add<pmeshS* >("(", "", new OneQuadOperator< Op3_MeshDmp<MeshS>, Op3_MeshDmp<MeshS>::Op >);
-    
- Add<pmeshS*>("be",".",new OneOperator1_<GlgBoundaryElement<MeshS>::BE,pmeshS*>(Build));
- Add<GlgElement<MeshS> >("adj",".",new OneOperator1_<GlgElement<MeshS>::Adj,GlgElement<MeshS> >(Build));
- Add<GlgBoundaryElement<MeshS>::BE>("(","",new OneOperator2_<GlgBoundaryElement<MeshS>,GlgBoundaryElement<MeshS>::BE,long>(get_element));
- Add<GlgElement<MeshS>::Adj>("(","",new OneOperator2_<GlgElement<MeshS>,GlgElement<MeshS>::Adj,long*>(get_adj));
- TheOperators->Add("==", new OneBinaryOperator<Op2_eq<GlgElement<MeshS>,GlgElement<MeshS> > >);
- TheOperators->Add("!=", new OneBinaryOperator<Op2_ne<GlgElement<MeshS>,GlgElement<MeshS> > >);
- TheOperators->Add("<", new OneBinaryOperator<Op2_lt<GlgElement<MeshS>,GlgElement<MeshS> > >);
- TheOperators->Add("<=", new OneBinaryOperator<Op2_le<GlgElement<MeshS>,GlgElement<MeshS> > >);
- 
- Add<GlgBoundaryElement<MeshS> >("label",".",new OneOperator1_<long,GlgBoundaryElement<MeshS> >(getlab));
- Add<GlgBoundaryElement<MeshS> >("Element",".",new OneOperator1_<GlgElement<MeshS> ,GlgBoundaryElement<MeshS> >(getElement));
- Add<GlgBoundaryElement<MeshS> >("whoinElement",".",new OneOperator1_<long,GlgBoundaryElement<MeshS> >(NuElement));
-  
- Add<GlgElement<MeshS> >("[","",new OneOperator2_<GlgVertex<MeshS> ,GlgElement<MeshS> ,long>(get_element));
- Add<GlgBoundaryElement<MeshS> >("[","",new OneOperator2_<GlgVertex<MeshS>,GlgBoundaryElement<MeshS>,long>(get_element));
-  
- Add<GlgVertex<MeshS> >("x",".",new OneOperator1_<R,GlgVertex<MeshS> >(getx));
- Add<GlgVertex<MeshS> >("y",".",new OneOperator1_<R,GlgVertex<MeshS> >(gety));
- Add<GlgVertex<MeshS> >("z",".",new OneOperator1_<R,GlgVertex<MeshS> >(getz));
- Add<GlgVertex<MeshS> >("label",".",new OneOperator1_<long,GlgVertex<MeshS> >(getlab));
- Add<GlgElement<MeshS> >("label",".",new OneOperator1_<long,GlgElement<MeshS> >(getlab));
- Add<GlgElement<MeshS> >("region",".",new OneOperator1_<long,GlgElement<MeshS> >(getlab));
- Add<GlgElement<MeshS> >("mesure",".",new OneOperator1_<double,GlgElement<MeshS> >(getmes));
- Add<GlgElement<MeshS> >("measure",".",new OneOperator1_<double,GlgElement<MeshS> >(getmes));
- Add<pmeshS*>("mesure",".",new OneOperator1<double,pmeshS*>(pmesh_mes));
- Add<pmeshS*>("measure",".",new OneOperator1<double,pmeshS*>(pmesh_mes));
- Add<pmeshS*>("bordermesure",".",new OneOperator1<double,pmeshS*>(pmesh_mesb));
- Add<pmeshS*>("bordermeasure",".",new OneOperator1<double,pmeshS*>(pmesh_mesb));
- Add<pmeshS*>("nt",".",new OneOperator1<long,pmeshS*>(pmesh_nt));
- Add<pmeshS*>("nv",".",new OneOperator1<long,pmeshS*>(pmesh_nv));
- Add<pmeshS*>("nbe",".",new OneOperator1<long,pmeshS*>(pmesh_nbe));
- Add<pmeshS*>("hmax",".",new OneOperator1<double,pmeshS*>(pmesh_hmax));
- Add<pmeshS*>("hmin",".",new OneOperator1<double,pmeshS*>(pmesh_hmin));
- Add<pmeshS*>("nbnomanifold",".",new OneOperator1<long,pmeshS*>(pmesh_nadjnomanifold));
-  
-    
- //3D line
- Dcl_Type<GlgVertex<MeshL> >();
- Dcl_Type<GlgElement<MeshL> >( );
- Dcl_Type<GlgElement<MeshL>::Adj>( );
-    
- Dcl_Type<GlgBoundaryElement<MeshL>::BE >( );
- Dcl_Type<GlgBoundaryElement<MeshL> >( );
-    
- atype<long>()->AddCast(
-                        new E_F1_funcT<long,GlgVertex<MeshL> >(Cast<long,GlgVertex<MeshL> >),
-                        new E_F1_funcT<long,GlgElement<MeshL> >(Cast<long,GlgElement<MeshL> >),
-                        new E_F1_funcT<long,GlgBoundaryElement<MeshL> >(Cast<long,GlgBoundaryElement<MeshL> >)
-                        );
-    
- Add<pmeshL>("[","",new OneOperator2_<GlgElement<MeshL>,pmeshL,long>(get_element));
- Add<pmeshL*>("[","",new OneOperator2_<GlgElement<MeshL>,pmeshL*,long>(get_element));
- Add<pmeshL>("(","",new OneOperator2_<GlgVertex<MeshL>,pmeshL,long>(get_vertex));
- Add<pmeshL*>("(","",new OneOperator2_<GlgVertex<MeshL>,pmeshL*,long>(get_vertex));
- Add<pmeshL* >("(", "", new OneQuadOperator< Op3_MeshDmp<MeshL>, Op3_MeshDmp<MeshL>::Op >);
-    
- Add<pmeshL*>("be",".",new OneOperator1_<GlgBoundaryElement<MeshL>::BE,pmeshL*>(Build));
- Add<GlgElement<MeshL> >("adj",".",new OneOperator1_<GlgElement<MeshL>::Adj,GlgElement<MeshL> >(Build));
- Add<GlgBoundaryElement<MeshL>::BE>("(","",new OneOperator2_<GlgBoundaryElement<MeshL>,GlgBoundaryElement<MeshL>::BE,long>(get_element));
- Add<GlgElement<MeshL>::Adj>("(","",new OneOperator2_<GlgElement<MeshL>,GlgElement<MeshL>::Adj,long*>(get_adj));
- 
- TheOperators->Add("==", new OneBinaryOperator<Op2_eq<GlgElement<MeshL>,GlgElement<MeshL> > >);
- TheOperators->Add("!=", new OneBinaryOperator<Op2_ne<GlgElement<MeshL>,GlgElement<MeshL> > >);
- TheOperators->Add("<", new OneBinaryOperator<Op2_lt<GlgElement<MeshL>,GlgElement<MeshL> > >);
- TheOperators->Add("<=", new OneBinaryOperator<Op2_le<GlgElement<MeshL>,GlgElement<MeshL> > >);
-    
- Add<GlgBoundaryElement<MeshL> >("label",".",new OneOperator1_<long,GlgBoundaryElement<MeshL> >(getlab));
- Add<GlgBoundaryElement<MeshL> >("Element",".",new OneOperator1_<GlgElement<MeshL> ,GlgBoundaryElement<MeshL> >(getElement));
- Add<GlgBoundaryElement<MeshL> >("whoinElement",".",new OneOperator1_<long,GlgBoundaryElement<MeshL> >(NuElement));
- Add<GlgElement<MeshL> >("[","",new OneOperator2_<GlgVertex<MeshL> ,GlgElement<MeshL> ,long>(get_element));
- Add<GlgBoundaryElement<MeshL> >("[","",new OneOperator2_<GlgVertex<MeshL>,GlgBoundaryElement<MeshL>,long>(get_element));
- 
- Add<GlgVertex<MeshL> >("x",".",new OneOperator1_<R,GlgVertex<MeshL> >(getx));
- Add<GlgVertex<MeshL> >("y",".",new OneOperator1_<R,GlgVertex<MeshL> >(gety));
- Add<GlgVertex<MeshL> >("z",".",new OneOperator1_<R,GlgVertex<MeshL> >(getz));
- Add<GlgVertex<MeshL> >("label",".",new OneOperator1_<long,GlgVertex<MeshL> >(getlab));
- Add<GlgElement<MeshL> >("label",".",new OneOperator1_<long,GlgElement<MeshL> >(getlab));
- Add<GlgElement<MeshL> >("region",".",new OneOperator1_<long,GlgElement<MeshL> >(getlab));
- Add<GlgElement<MeshL> >("mesure",".",new OneOperator1_<double,GlgElement<MeshL> >(getmes));
- Add<GlgElement<MeshL> >("measure",".",new OneOperator1_<double,GlgElement<MeshL> >(getmes));
- 
- Add<pmeshL*>("mesure",".",new OneOperator1<double,pmeshL*>(pmesh_mes));
- Add<pmeshL*>("measure",".",new OneOperator1<double,pmeshL*>(pmesh_mes));
- Add<pmeshL*>("bordermesure",".",new OneOperator1<double,pmeshL*>(pmesh_mesb));
- Add<pmeshL*>("bordermeasure",".",new OneOperator1<double,pmeshL*>(pmesh_mesb));
- Add<pmeshL*>("nt",".",new OneOperator1<long,pmeshL*>(pmesh_nt));
- Add<pmeshL*>("nv",".",new OneOperator1<long,pmeshL*>(pmesh_nv));
- Add<pmeshL*>("nbe",".",new OneOperator1<long,pmeshL*>(pmesh_nbe));
- Add<pmeshL*>("hmax",".",new OneOperator1<double,pmeshL*>(pmesh_hmax));
- Add<pmeshL*>("hmin",".",new OneOperator1<double,pmeshL*>(pmesh_hmin));
- //Add<pmeshL*>("nbnomanifold",".",new OneOperator1<long,pmeshL*>(pmesh_nadjnomanifold));
+  Global.Add("solidangle","(",new  OneOperator4_<R,R3,R3,R3,R3>(SolidAngle));
+  Global.Add("solidangle","(",new  OneOperator2_<R,R3,GlgBoundaryElement<Mesh3> >(SolidAngle));
+  Global.Add("solidangle","(",new  OneOperator2_<R,R3,GlgElement<MeshS> >(SolidAngle));
+    Global.Add("solidangle","(",new  OneOperator3_<R,R3,GlgElement<Mesh3>,long >(SolidAngle));
+    // Volume with a Capital because volume is the set in integral
+    Global.Add("Volume","(",new  OneOperator4_<R,R3,R3,R3,R3>(Volume));
+    Global.Add("Volume","(",new  OneOperator2_<R,R3,GlgBoundaryElement<Mesh3> >(Volume));
+    Global.Add("Volume","(",new  OneOperator2_<R,R3,GlgElement<MeshS> >(Volume));
+      Global.Add("Volume","(",new  OneOperator3_<R,R3,GlgElement<Mesh3>,long >(Volume));
 
-    
-    
-    
-    
+    //GlgElement<Mesh3>
     
     
  // 3D volume
@@ -2967,7 +3024,15 @@ TheOperators->Add("=",
     Add< pfLr >("(", "", new OneQuadOperator< Op4_pfeK< R,v_fesL >, Op4_pfeK< R,v_fesL >::Op >);
     Add< pfLc >("(", "", new OneQuadOperator< Op4_pfeK< Complex, v_fesL>, Op4_pfeK< Complex,v_fesL >::Op >);
 */
-    
+ 
+ TheOperators->Add("<-",
+      new OneOperator2<KN<double> *,KN<double> *,R3>(set_initR3)
+//   ,  new OneOperator2<KN<double> *,KN<double> *,R3*>(set_initR3)
+    );
+TheOperators->Add("=",
+         new OneOperator2<KN_<double> ,KN_<double> ,R3>(copy_R3)
+ //     ,  new OneOperator2<KN_<double> ,KN_<double> ,R3*>(copy_R3)
+       );
  map_type[typeid(double).name()]->AddCast(
    new E_F1_funcT<double,pf3r>(pf3r2R<R,0,v_fes3>)
    );
@@ -3192,7 +3257,11 @@ Add<pfesL*>("Th",".",new OneOperator1<pmeshL,pfesL*>(pVhL_Th));//ADD JUIN 2021 F
  Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmesh3>(listofregion));
  Global.Add("regions","(",new OneOperator1s_<KN_<long>,pmesh>(listofregion));
   
-    
+  atype<R3>()->AddCast(
+            new E_F1_funcT<R3,KN_<double> >(Array2R3)
+         //   new E_F1_funcT<R3,KN<double>* >(pArray2R3)
+     //       new E_F1_funcT<long,GlgBoundaryElement<Mesh3> >(Cast<long,GlgBoundaryElement<Mesh3> >
+                       );
 }
 
 //#include "InitFunct.hpp"

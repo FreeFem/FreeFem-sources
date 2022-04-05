@@ -36,6 +36,7 @@
 
 #include "error.hpp"
 #include "AFunction.hpp"
+#include "AFunction_ext.hpp"
 #include "rgraph.hpp"
 #include <cstdio>
 #include "fem.hpp"
@@ -81,6 +82,7 @@ namespace Fem2D {
   extern GTypeOfFE< MeshS > &P1bLagrange_surf;
   extern GTypeOfFE< MeshS > &P2bLagrange_surf;
   extern GTypeOfFE< MeshS > &RT0surf;
+  extern GTypeOfFE< MeshS > &RT0orthosurf;
 // add 22 march 2021 FH.
   extern GTypeOfFE< Mesh3 > &G_P1dc_3d;
   extern GTypeOfFE< Mesh3 > &G_P2dc_3d;
@@ -1272,7 +1274,9 @@ AnyType TypeOfFESto2(Stack, const AnyType &b) {
   if (i != TEF2dtoS.end( )) tS = i->second;
 
   if (tS == 0) {
-    cerr << " sorry no cast to this surface finite element " << endl;
+    cerr << " sorry no cast to this surface finite element " << t2 << endl;
+ //     for( map< TypeOfFE *, TypeOfFES * >::const_iterator i=TEF2dtoS.begin(); i != TEF2dtoS.end(); ++i )
+ //     {  cout << i->first << " -> " << i->second <<endl; }
     ExecError(" sorry no cast to this surface finite element ");
   }
   return tS;
@@ -1320,6 +1324,10 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
       if (periodic) delete[] periodic;
     }
     AnyType operator( )(Stack s) const {
+        
+        aType t_tfe = atype< TypeOfFE * >( );// 
+        aType t_tfe2 = atype< TypeOfFE2 * >( );
+
       const int d = Mesh::Rd::d;
       const int dHat = Mesh::RdHat::d;
       const  int dHatfe = TypeOfFE::RdHat::d;
@@ -1330,7 +1338,15 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
       AnyType r = (*eppfes)(s);
       const TypeOfFE **tef = new const TypeOfFE *[atef.size( )];
         for (int i = 0; i < atef.size( ); i++)
-        if (tedim[i] == dHat && d==dfe)
+        {
+         // verif  type atef[i]  coorection mars 2022 ..
+         aType  ttfe =atef[i].left();
+         ffassert( ttfe == t_tfe || t_tfe2) ;
+         if(verbosity>9) cout << "OpMake_pfes_np :: " << i << " " << (tedim[i] == dHat && d==dfe) << " " << tedim[i]
+                                                                        << dHat << d << dfe
+                << " " << typeid(TypeOfFE).name() << endl;
+
+        if (ttfe == t_tfe) // good  type no converstion
           tef[i] = GetAny< TypeOfFE * >(atef[i].eval(s));
         else if (tedim[i] == 2 && d==3 && dHat == 3)
           tef[i] = GetAny< TypeOfFE * >(TypeOfFE3to2(s, atef[i].eval(s)));
@@ -1340,6 +1356,7 @@ struct OpMake_pfes : public OneOperator, public OpMake_pfes_np {
           tef[i] = GetAny< TypeOfFE * >(TypeOfFELto2(s, atef[i].eval(s)));
         else
           ffassert(0);
+        }
       
       pfes *ppfes = GetAny< pfes * >(r);
       bool same = true;
@@ -4804,7 +4821,7 @@ AnyType Plot::operator( )(Stack s) const {
         for (int i = 1; i < k; i++) rlineto(x[i], y[i]);
       } else {
           static int kerr=0; 
-        if (verbosity && kerr++< 10)
+        if (verbosity && kerr++< 5 && mpirank==0)
           cout << "  Plot::  Sorry no ps version for this type of plot " << l[i].what << endl;
       }
       thfill = false;
@@ -5412,6 +5429,8 @@ lgVertex get_vertex(pmesh *const &a, long const &n) { return lgVertex(*a, n); }
 lgVertex get_element(lgElement const &a, long const &n) { return a[n]; }
 lgVertex get_belement(lgBoundaryEdge const &a, long const &n) { return a[n]; }
 
+R3 getP(lgVertex const &a) { return R3(*a.v); }
+
 R getx(lgVertex const &a) { return a.x( ); }
 
 R gety(lgVertex const &a) { return a.y( ); }
@@ -5505,7 +5524,11 @@ T *resizeandclean2(const Resize< T > &t, const long &n) {    // resizeandclean1
   }
   return t.v;
 }
-
+/*R3 *init_R3(double x,double y,double z)
+{
+    
+    return (R3 *) &any;
+}*/
 template< class PMat >
 AnyType ClearReturn(Stack stack, const AnyType &a) {
   // a ne faire que pour les variables local au return...
@@ -5528,7 +5551,7 @@ void DclTypeMatrix( ) {
   Dcl_Type< newpMatrice_Creuse< R > >( );          // to def new Matrice_Creuse
   Dcl_Type< Matrice_Creuse_Transpose< R > >( );    // matrice^t   (A')
 
-  Dcl_Type< Matrice_Creuse_Transpose< R > >( );                   // matrice^t   (A')
+ 
   Dcl_Type< Matrice_Creuse_inv< R > >( );                         // matrice^-1   A^{-1}
   Dcl_Type< Matrice_Creuse_inv_trans< R > >( );                   // matrice^-1   A'^{-1}
   Dcl_Type< typename RNM_VirtualMatrix< R >::plusAx >( );         // A*x (A'*x)
@@ -5545,6 +5568,8 @@ void DclTypeMatrix( ) {
   typedef Mat *PMat;
   typedef KN< Mat > AMat;
   Dcl_Type< AMat * >(0, ::DestroyKNmat< Mat >);
+
+  //  TheOperators->Add("<-", new OneOperator3< R3 *, double>(init_R3);
 
   // init array
   TheOperators->Add("<-", new OneOperator2_< AMat *, AMat *, long >(&set_initmat));
@@ -5686,7 +5711,34 @@ template<  class A >
             }
             OneOperator_trans_Ptr_o_R(ptr pp) : OneOperator(atype< Result * >( ), atype< Transpose<A *> >( )), p(pp) {}
         };
-        
+template <class R,class A, class B> 
+struct OppR3dot: public binary_function<A,B,R> {
+  static R f(const A & a,const B & b)  {
+      B pu = a;
+      return (*pu,*b);} };
+
+template <class R,class A, class B>
+struct OppqR3dot: public binary_function<A,B,R> {
+  static R f(const A & a,const B & b)  {
+      B* pu = a;
+      return (*pu,b);} };
+
+template <class R,class A, class B>
+struct OpR3dot: public binary_function<A,B,R> {
+  static R f(const A & a,const B & b)  {
+      B pu = a;
+      return (pu,b);} };
+
+R3 CrossProduct(const R3 & A,const R3 & B){ return A^B;}
+R Det(const R3 & A,const R3 & B,const R3 & C){ return det(A,B,C);}
+R3* initR3(R3  *const & p,const  R& a,const  R& b,const  R &c){*p = R3(a,b,c); return p;}
+R3* initR3(R3  *const & p,const  R3& a,const  R3& b){*p = R3(a,b); return p;}
+
+R3 toR3(const  R& a,const  R& b,const  R &c){return R3(a,b,c);}
+R3 toR3(const  R3& a,const  R3& b){return R3(a,b);}
+
+R3 NElement(lgBoundaryEdge const & a) {  return R3(a.NBoundaryElement()); }//  add Jan 2022
+
 void init_lgfem( ) {
   if (verbosity && (mpirank == 0)) cout << "lg_fem ";
 #ifdef HAVE_CADNA
@@ -5695,12 +5747,12 @@ void init_lgfem( ) {
 #endif
 
   Dcl_Type< MeshPoint * >( );
-  Dcl_Type< R3 * >(::Initialize< R3 >);
-  Dcl_Type< R2 * >(::Initialize< R2 >);
-  Dcl_Type< Transpose<R3 *> >();
+    Dcl_TypeandPtr< R3  >(0,0,::InitializeDef<R3>,0);
+    Dcl_TypeandPtr< R2  >(0,0,::InitializeDef<R2>,0);
+   Dcl_Type< Transpose<R3 *> >();
+   Dcl_Type< Transpose<R3> >();
 
-  map_type[typeid(R3 *).name( )] = new ForEachType< R3 * >(Initialize< R3 >);
-  Dcl_TypeandPtr< pmesh >(0, 0, ::InitializePtr< pmesh >, ::DestroyPtr< pmesh >,
+   Dcl_TypeandPtr< pmesh >(0, 0, ::InitializePtr< pmesh >, ::DestroyPtr< pmesh >,
                           AddIncrement< pmesh >, NotReturnOfthisType);
   Dcl_TypeandPtr< pmesh3 >(0, 0, ::InitializePtr< pmesh3 >, ::DestroyPtr< pmesh3 >,
                            AddIncrement< pmesh3 >, NotReturnOfthisType);
@@ -5737,7 +5789,7 @@ void init_lgfem( ) {
   Dcl_TypeandPtr< pferbasearray >( );    // il faut le 2 pour pourvoir initialiser
   Dcl_Type< pfer >( );
   Dcl_Type< pferarray >( );
-  Dcl_Type< pferarray >( );
+ // Dcl_Type< pferarray >( );
 
   //  pour des Func FE complex   // FH  v 1.43
   Dcl_TypeandPtr< pfecbase >( );         // il faut le 2 pour pourvoir initialiser
@@ -5849,8 +5901,17 @@ void init_lgfem( ) {
   Dcl_Type< const QuadratureFormular * >( );
   Dcl_Type< const QuadratureFormular1d * >( );
   Dcl_Type< const GQuadratureFormular< R3 > * >( );
-  TheOperators->Add("\'",   new OneOperator1<Transpose<R3* >,R3* >(&Build<Transpose<R3* >,R3* >));
-  TheOperators->Add("*",new opDotR3(atype<TransE_Array >(),atype< R3* >() )   );  // "N" a faire mais dur
+  TheOperators->Add("\'",   new OneOperator1<Transpose<R3* >,R3* >(&Build<Transpose<R3* >,R3* >,2));
+  TheOperators->Add("\'",   new OneOperator1<Transpose<R3>,R3>(&Build<Transpose<R3 >,R3>,1));
+  //TheOperators->Add("*",new opDotR3(atype<TransE_Array >(),atype< R3* >() )   );
+  TheOperators->Add("*",new opDotR3(atype<TransE_Array >(),atype< R3 >() )   );  // 
+    // "N" a faire mais dur
+    // R3dot
+  //TheOperators->Add("*",new OneBinaryOperator< OppR3dot<double,Transpose<R3* >, R3* >> () );  // "N" a faire mais dur
+  TheOperators->Add("*",new OneBinaryOperator< OpR3dot<double,Transpose<R3>, R3>> () );  // "N" a faire mais dur
+
+  TheOperators->Add("*",new OneBinaryOperator< OppqR3dot<double,Transpose<R3* >, R3 >> () );  // "N" a faire mais dur  TheOperators->Add("*",new OneBinaryOperator< OpR3dot<double,Transpose<R3>, R3>> () );  // "N" a faire mais dur
+
   TheOperators->Add("*",new opDotR3(atype< Transpose<R3* > >(),atype<E_Array >() )   );  // "N" a faire mais dur
 
   Global.New("qf1pT", CConstant< const QuadratureFormular * >(&QuadratureFormular_T_1));
@@ -5881,7 +5942,7 @@ void init_lgfem( ) {
   Global.New("NoUseOfWait", CConstant< bool * >(&NoWait));
   Global.New("NoGraphicWindow", CConstant< bool * >(&NoGraphicWindow));
 
-  Dcl_Type< MeshPoint * >( );
+  //Dcl_Type< MeshPoint * >( );
   Dcl_Type< finconnue * >( );
   Dcl_Type< ftest * >( );
     
@@ -6009,7 +6070,7 @@ void init_lgfem( ) {
     new OpMake_pfes< pfes3, Mesh3, TypeOfFE3, pfes3_tefk >,
     new OpMake_pfes< pfesS, MeshS, TypeOfFES, pfesS_tefk >,    // add for 3D surface  FEspace
     new OpMake_pfes< pfesL, MeshL, TypeOfFEL, pfesL_tefk >);
-  TheOperators->Add("=", new OneOperator2< R3 *, R3 *, R3 * >(&set_eqp));
+  TheOperators->Add("=", new OneOperator2< R3 *, R3 *, R3 * >(&set_eqp,2));
 
   Add< MeshPoint * >("P", ".", new OneOperator_Ptr_o_R< R3, MeshPoint >(&MeshPoint::P));
   Add< MeshPoint * >("N", ".", new OneOperator_Ptr_o_R< R3, MeshPoint >(&MeshPoint::N));
@@ -6024,6 +6085,48 @@ void init_lgfem( ) {
   Add< R2 * >("y", ".", new OneOperator_Ptr_o_R< R, R2 >(&R2::y));
 
   Add< R3 * >("[", "", new OneOperator2< double, R3 *, long >(get_R3));
+// ADD dec 2021 to R3 computation ...
+    map_type[typeid(R3).name()]->AddCast(
+                                         new E_F1_funcT<R3,R3*>(UnRef<R3>)); 
+    TheOperators->Add("<-",new OneOperator4_<R3*,R3*,R,R,R>(initR3));
+    TheOperators->Add("<-",new OneOperator3_<R3*,R3*,R3,R3>(initR3));
+
+    TheOperators->Add("=",
+                      new OneBinaryOperator<set_eq<R3> ,OneBinaryOperatorMIWO >,
+                      new OneBinaryOperator<set_eq<R2> ,OneBinaryOperatorMIWO >);
+    TheOperators->Add("<-",
+                      new OneOperator2_<R3*,R3*,R3>(&set_copyp),
+                      new OneOperator2_<R2*,R2*,R2>(&set_copyp)); //
+    TheOperators->Add("^", new OneOperator2_<R3,R3,R3>(CrossProduct));
+    Global.Add("det", "(",new OneOperator3_<R,R3,R3,R3>(Det));
+    TheOperators->Add("+", new OneBinaryOperator<Op2_add<R3,R3,R3> >);
+    TheOperators->Add(".*", new OneBinaryOperator<Op2_DotStar<R3,R3,R3> >);
+    TheOperators->Add("./", new OneBinaryOperator<Op2_DotDiv<R3,R3,R3> >);
+    TheOperators->Add("-", new OneBinaryOperator<Op2_sub<R3,R3,R3> >);
+    TheOperators->Add("*", new OneBinaryOperator<Op2_mull<R3,R,R3> >);
+    TheOperators->Add("/", new OneBinaryOperator<Op2_divv<R3,R3,R> >);
+    TheOperators->Add("*", new OneBinaryOperator<Op2_mull<R3,R2,R> >);
+     TheOperators->Add("+=", new OneBinaryOperator<set_eq_add<R3>,OneBinaryOperatorMIWO >);
+    TheOperators->Add("-=", new OneBinaryOperator<set_eq_sub<R3>,OneBinaryOperatorMIWO >);
+    TheOperators->Add("*=", new OneBinaryOperator<set_eq_mul<R3,R>,OneBinaryOperatorMIWO >);
+    TheOperators->Add("/=", new OneBinaryOperator<set_eq_div<R3,R>,OneBinaryOperatorMIWO >);
+    TheOperators->Add("<<", new OneBinaryOperator<Print<R3> >);
+    Add<R3*>("<--","(",new OneOperator3_<R3,R,R,R>(toR3));
+    Add<R3*>("<--","(",new OneOperator2_<R3,R3,R3>(toR3));
+    Add<R3*>("norm",".",new OneOperator1_<R,R3>(Norme2));
+    Add<R3*>("norm2",".",new OneOperator1_<R,R3>(Norme2_2));
+    Add<R3*>("l2",".",new OneOperator1_<R,R3>(Norme2));
+    Add<R3*>("linfty",".",new OneOperator1_<R,R3>(Norme_infty));
+    Add<R3>("norm",".",new OneOperator1_<R,R3>(Norme2));
+    Add<R3>("norm2",".",new OneOperator1_<R,R3>(Norme2_2));
+    Add<R3>("l2",".",new OneOperator1_<R,R3>(Norme2));
+    Add<R3>("linfty",".",new OneOperator1_<R,R3>(Norme_infty));
+    Add<R3>("<--","(",new OneOperator3_<R3,R,R,R>(toR3));
+    Add<R3>("<--","(",new OneOperator2_<R3,R3,R3>(toR3));
+
+
+
+// end add
 
   Add< pmesh >("[", "", new OneOperator2_< lgElement, pmesh, long >(get_element));
   Add< pmesh * >("be", ".", new OneOperator1_< lgBoundaryEdge::BE, pmesh * >(Build));
@@ -6031,6 +6134,9 @@ void init_lgfem( ) {
   Add< lgBoundaryEdge::BE >(
     "(", "", new OneOperator2_< lgBoundaryEdge, lgBoundaryEdge::BE, long >(get_belement));
   Add< lgElement::Adj >("(", "", new OneOperator2_< lgElement, lgElement::Adj, long * >(get_adj));
+
+    Add<lgBoundaryEdge>("N",".",new OneOperator1_<R3,lgBoundaryEdge >(NElement));
+
   TheOperators->Add("==", new OneBinaryOperator< Op2_eq< lgElement, lgElement > >);
   TheOperators->Add("!=", new OneBinaryOperator< Op2_ne< lgElement, lgElement > >);
   TheOperators->Add("<", new OneBinaryOperator< Op2_lt< lgElement, lgElement > >);
@@ -6043,6 +6149,7 @@ void init_lgfem( ) {
   Add< lgElement >("[", "", new OneOperator2_< lgVertex, lgElement, long >(get_element));
   Add< lgBoundaryEdge >("[", "", new OneOperator2_< lgVertex, lgBoundaryEdge, long >(get_belement));
 
+  Add< lgVertex >("P", ".", new OneOperator1_< R3, lgVertex >(getP));// Jan 2022 FH
   Add< lgVertex >("x", ".", new OneOperator1_< R, lgVertex >(getx));
   Add< lgVertex >("y", ".", new OneOperator1_< R, lgVertex >(gety));
   Add< lgVertex >("label", ".", new OneOperator1_< long, lgVertex >(getlab));
@@ -6052,6 +6159,7 @@ void init_lgfem( ) {
   Add< lgElement >("mesure", ".", new OneOperator1_< double, lgElement >(getarea));
   Add< lgElement >("measure", ".", new OneOperator1_< double, lgElement >(getarea));
   Add< lgBoundaryEdge >("length", ".", new OneOperator1_< double, lgBoundaryEdge >(getlength));
+  Add< lgBoundaryEdge >("measure", ".", new OneOperator1_< double, lgBoundaryEdge >(getlength));
   Add< lgBoundaryEdge >("label", ".", new OneOperator1_< long, lgBoundaryEdge >(getlab));
   Add< lgBoundaryEdge >("Element", ".", new OneOperator1_< lgElement, lgBoundaryEdge >(getElement));
   Add< lgBoundaryEdge >("whoinElement", ".", new OneOperator1_< long, lgBoundaryEdge >(EdgeElement));
@@ -6474,7 +6582,7 @@ void init_lgfem( ) {
 
   TheOperators->Add("<-", new OneOperator2_< pfes *, pfes *, pfes >(&set_copy_incr));
 
-  TheOperators->Add("<<", new OneBinaryOperator< PrintPnd< R3 * > >,
+  TheOperators->Add("<<" ,// new OneBinaryOperator< PrintPnd< R3 * > >,
                     new OneBinaryOperator< PrintPnd< Matrice_Creuse< R > * > >,
                     new OneBinaryOperator< PrintPnd< Matrice_Creuse< Complex > * > >
 
@@ -6712,6 +6820,8 @@ void init_lgfem( ) {
     AddNewFEL("P0VF3dcL", &G_P0VFdc_L);
     
   // end  add ..
+  Global.New("Edge0S",CConstantTFES(&RT0orthosurf));
+  Global.New("RT0orthoS",CConstantTFES(&RT0orthosurf));
   Global.New("RT0S",CConstantTFES(&RT0surf));
   Global.New("P2S", CConstantTFES(&DataFE< MeshS >::P2));
   Global.New("P1S", CConstantTFES(&DataFE< MeshS >::P1));

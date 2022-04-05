@@ -3,6 +3,9 @@
 #include <sstream>
 using namespace std;
 
+#define xstrg(s) strg(s)
+#define strg(s) #s
+
 double VersionNumber() {
   return VersionFreeFem;
 }
@@ -10,7 +13,7 @@ double VersionNumber() {
 string StrVersionNumber() {
   ostringstream version;
   version.precision(8);
-  version << VersionNumber()
+  version << xstrg(VersionFreeFem)
           << " (VersionFreeFemDate - git GitVersion)";
   return version.str();
 }
