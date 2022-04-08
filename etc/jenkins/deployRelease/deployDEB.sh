@@ -12,7 +12,7 @@ VERSION=$(grep AC_INIT configure.ac | cut -d"," -f2 | cut -d"[" -f2 | cut -d"]" 
 RELEASE_TAG_NAME="v$VERSION"
 OSRELEASE=$(lsb_release -r|awk '{print $2}')
 
-BUILD_DIR="/builds/FreeFEM"
+BUILD_DIR="/usr/local"
 
 DEB_NAME="freefem_${VERSION}-amd64-${OSRELEASE}"
 GH_DEB_NAME="FreeFEM_${VERSION}-amd64-${OSRELEASE}.deb"
@@ -62,12 +62,6 @@ cp -r "$BUILD_DIR/bin/ffmaster" "$DEB_NAME/usr/local/bin/ffmaster"
 cp -r "$BUILD_DIR/bin/ffmedit" "$DEB_NAME/usr/local/bin/ffmedit"
 cp AUTHORS "$DEB_NAME/usr/share/doc/freefem/AUTHOR"
 cp README.md "$DEB_NAME/usr/share/doc/freefem/README.md"
-
-{
-	echo "loadpath += \"./\"";
-	echo "loadpath += \"/usr/local/lib/ff++/$VERSION/lib\"";
-	echo "includepath += \"/usr/local/lib/ff++/$VERSION/idp\"";
-}
 
 dpkg-deb --build "$DEB_NAME/"
 mv "$DEB_NAME.deb" "$GH_DEB_NAME"
