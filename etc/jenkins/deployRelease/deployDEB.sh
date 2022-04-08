@@ -14,8 +14,8 @@ OSRELEASE=$(lsb_release -r|awk '{print $2}')
 
 BUILD_DIR="/usr/local"
 
-DEB_NAME="freefem_${VERSION}-amd64-${OSRELEASE}"
-GH_DEB_NAME="FreeFEM_${VERSION}-amd64-${OSRELEASE}.deb"
+DEB_NAME="freefem-${VERSION}-amd64-ubuntu${OSRELEASE}"
+GH_DEB_NAME="FreeFEM-${VERSION}-amd64-ubnutu${OSRELEASE}.deb"
 
 ## DEB build
 autoreconf -i
@@ -82,5 +82,6 @@ fi
 
 # clean the VM
 rm -rf "$DEB_NAME"
-rm -rf "$BUILD_DIR"
+rm -rf "$BUILD_DIR/ff++"
+rm -rf "$BUILD_DIR/ff-petsc"
 rm "$GH_DEB_NAME"
