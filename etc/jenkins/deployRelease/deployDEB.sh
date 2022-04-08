@@ -82,6 +82,6 @@ fi
 
 # clean the VM
 rm -rf "$DEB_NAME"
-rm -rf "$BUILD_DIR/ff++"
-rm -rf "$BUILD_DIR/ff-petsc"
 rm "$GH_DEB_NAME"
+
+./bin/uninstall-ff++
