@@ -25,6 +25,11 @@ include Makefile.inc
 
 DIR_INSTALL_REAL:=$(FF_prefix_petsc)/r
 DIR_INSTALL_COMPLEX:=$(FF_prefix_petsc)/c
+VERSION=3.17.0
+VERSION_SLEPC=3.016.2
+PACKAGE=../pkg/petsc-$(VERSION).tar.gz
+SRCDIR=petsc-$(VERSION)
+PETSC_DIR:=$(shell pwd)/$(SRCDIR)
 
 W_SUDO:=$(SHELL mkdir -p "$(DESTDIR)$(FF_prefix_petsc)" && test -w "$(DESTDIR)$(FF_prefix_petsc) || echo sudo)
 ifeq ($(COMPILE_OPENBLAS),openblas)
@@ -46,21 +51,22 @@ PETSC_DOWNLOAD_C := --with-metis-dir=$(DIR_INSTALL_REAL) \
 PETSC_DOWNLOAD := --download-metis --download-ptscotch \
 		--download-hypre --download-parmetis \
 		--download-mmg --download-parmmg \
-		--download-superlu --download-suitesparse --download-tetgen \
-		--download-slepc --download-hpddm
+		--download-superlu --download-suitesparse --download-tetgen
 ifeq ($(FFCMAKE),no)
 PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
 endif
-PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-slepc --download-hpddm --download-htool
+PETSC_DOWNLOAD_C := $(PETSC_DOWNLOAD_C) --download-htool
 ifeq ($(FF_generic_petsc), yes)
 FLAGS_MTUNE := -mtune=generic
 else
 FLAGS_MTUNE := -mtune=native
 endif
-COMMON_FLAGS := MAKEFLAGS='' --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-cxx-dialect=11 --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-cudac=0
+unexport MAKEFLAGS
+COMMON_FLAGS := --with-debugging=0 COPTFLAGS='-O3 $(FLAGS_MTUNE)' CXXOPTFLAGS='-O3 $(FLAGS_MTUNE)' FOPTFLAGS='-O3 $(FLAGS_MTUNE)' --with-cxx-dialect=11 --with-ssl=0 --with-x=0 --with-fortran-bindings=0 --with-cudac=0 \
+		--download-slepc --download-hpddm
 
 ifneq ($(wildcard ~/.petsc_pkg),)
-  COMMON_FLAGS += --with-packages-download-dir=~/.petsc_pkg
+COMMON_FLAGS += --with-packages-download-dir=~/.petsc_pkg
 endif
 
 ifeq ($(FC),)
@@ -69,46 +75,42 @@ PETSC_DOWNLOAD += --download-superlu_dist
 PETSC_DOWNLOAD_C += --with-superlu_dist-dir=$(DIR_INSTALL_REAL)
 endif
 
-ifeq ($(WIN32DLLTARGET),)
-##  Not on windows....
 ifeq ($(MPICC)$(MPICXX),)
+ifeq ($(WIN32DLLTARGET),)
 PETSC_DOWNLOAD += --with-cc='$(CC)' --with-cxx='$(CXX)' --download-mpich
 PETSC_DOWNLOAD_C += --with-mpi-dir=$(DIR_INSTALL_REAL)
 ifneq ($(FC),)
 PETSC_DOWNLOAD += --with-fc='$(FC)'
-ifneq ($(wildcard ~/.petsc_pkg),)
-PETSC_DOWNLOAD += --download-slepc-configure-arguments="--download-arpack --with-packages-download-dir=~/.petsc_pkg"
-else
-PETSC_DOWNLOAD += --download-slepc-configure-arguments="--download-arpack=https://github.com/prj-/arpack-ng/archive/9fc0c71.tar.gz"
-endif
-ifneq ($(TOOL_DYLIB_scalapack)$(TOOL_DYLIB_mumps),)
-PETSC_DOWNLOAD += --download-scalapack --download-mumps
-PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL) # --download-slepc-configure-arguments="--with-arpack-dir=$(DIR_INSTALL_REAL)"
-else
-PETSC_DOWNLOAD += --download-superlu_dist
-PETSC_DOWNLOAD_C += --with-superlu_dist-dir=$(DIR_INSTALL_REAL)
 endif
 endif
 else
 COMMON_FLAGS += --with-cc='$(MPICC)' --with-cxx='$(MPICXX)'
 ifneq ($(MPIFC),)
 COMMON_FLAGS += --with-fc='$(MPIFC)'
+endif
+endif
+
+ifeq ($(WIN32DLLTARGET),)
+ifneq ($(FC),)
 ifneq ($(wildcard ~/.petsc_pkg),)
 PETSC_DOWNLOAD += --download-slepc-configure-arguments="--download-arpack --with-packages-download-dir=~/.petsc_pkg"
 else
 PETSC_DOWNLOAD += --download-slepc-configure-arguments="--download-arpack=https://github.com/prj-/arpack-ng/archive/9fc0c71.tar.gz"
 endif
+endif
+endif
+
+ifneq ($(FC),)
 ifneq ($(TOOL_DYLIB_scalapack)$(TOOL_DYLIB_mumps),)
 PETSC_DOWNLOAD += --download-scalapack --download-mumps
-PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL) # --download-slepc-configure-arguments="--with-arpack-dir=$(DIR_INSTALL_REAL)"
+PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL)
 else
 PETSC_DOWNLOAD += --download-superlu_dist
 PETSC_DOWNLOAD_C += --with-superlu_dist-dir=$(DIR_INSTALL_REAL)
 endif
 endif
-endif
-else
-##   On windows....
+
+ifneq ($(WIN32DLLTARGET),)
 COMMON_FLAGS += --with-shared-libraries=0 \
 	--with-cc='$(CC)' --with-cxx='$(CXX)' \
 	CXXFLAGS='-fno-stack-protector' \
@@ -124,22 +126,18 @@ PETSC_DOWNLOAD += '--download-metis-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-parmmg-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles"' \
 	'--download-superlu-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu'
-ifneq ($(FC),)
+ifeq ($(FC),)
+PETSC_DOWNLOAD += '--download-superlu_dist-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles" -DXSDK_ENABLE_Fortran=OFF'
+else
 COMMON_FLAGS += --with-fc='$(FC)'
+ifeq ($(TOOL_DYLIB_scalapack)$(TOOL_DYLIB_mumps),)
+PETSC_DOWNLOAD += '--download-superlu_dist-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles" -DXSDK_ENABLE_Fortran=OFF'
+endif
 ifneq ($(wildcard ~/.petsc_pkg),)
-PETSC_DOWNLOAD += --download-slepc-configure-arguments="--download-arpack --with-packages-download-dir=~/.petsc_pkg"
+PETSC_DOWNLOAD += '--download-slepc-configure-arguments=--with-packages-build-dir=$(PETSC_DIR)/fr/externalpackages --download-arpack --download-arpack-cmake-arguments=-G"MSYS\ Makefiles" --with-packages-download-dir=~/.petsc_pkg'
 else
-PETSC_DOWNLOAD += --download-slepc-configure-arguments="--download-arpack=https://github.com/prj-/arpack-ng/archive/9fc0c71.tar.gz"
+PETSC_DOWNLOAD += '--download-slepc-configure-arguments=--with-packages-build-dir=$(PETSC_DIR)/fr/externalpackages --download-arpack=https://github.com/prj-/arpack-ng/archive/9fc0c71.tar.gz --download-arpack-cmake-arguments=-G"MSYS\ Makefiles"'
 endif
-ifneq ($(TOOL_DYLIB_scalapack)$(TOOL_DYLIB_mumps),)
-PETSC_DOWNLOAD += --download-scalapack --download-mumps
-PETSC_DOWNLOAD_C += --with-scalapack-dir=$(DIR_INSTALL_REAL) --with-mumps-dir=$(DIR_INSTALL_REAL) # --download-slepc-configure-arguments="--with-arpack-dir=$(DIR_INSTALL_REAL)"
-else
-PETSC_DOWNLOAD += --download-superlu_dist '--download-superlu_dist-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles" -DXSDK_ENABLE_Fortran=OFF'
-PETSC_DOWNLOAD_C += --with-superlu_dist-dir=$(DIR_INSTALL_REAL)
-endif
-else
-PETSC_DOWNLOAD += '--download-superlu_dist-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles"'
 endif
 endif
 
@@ -159,11 +157,6 @@ all-local:
 	@echo "	sudo chown -R $(LOGNAME) $(DESTDIR)$(FF_prefix_petsc)"
 	@echo "	make petsc-slepc "
 
-DIRPKG=../pkg
-VERSION=3.17.0
-VERSION_SLEPC=3.016.2
-PACKAGE=../pkg/petsc-$(VERSION).tar.gz
-SRCDIR=petsc-$(VERSION)
 MPI_DIR:=$(shell dirname "$(MPI_INC_DIR)")
 W_MPICC:=$(strip $(shell which mpicc))
 SUDO_WITH_ENV=$(if $(SUDO), $(SUDO) -E)
@@ -173,7 +166,6 @@ else
   BLAS_LAPACK_LIBS=$(LAPACKLIBS) $(BLASLIBS)
 endif
 
-PETSC_DIR:=$(shell pwd)/$(SRCDIR)
 petsc-slepc: Makefile.inc dir-install WHERE-all
 recompile: recompile-real recompile-complex
 recompile-real:
@@ -318,9 +310,8 @@ endif
 $(SRCDIR)/tag-tar:$(PACKAGE)
 	-mkdir petsc-$(VERSION) 2>/dev/null
 	-tar xzf $(PACKAGE) -C petsc-$(VERSION) --strip-components 1
-ifeq ($(WIN32DLLTARGET),)
 	cd petsc-$(VERSION) && patch -p1 < ../petsc-cmake-seq.patch && cd -
-else
+ifneq ($(WIN32DLLTARGET),)
 	cd petsc-$(VERSION) && patch -p1 < ../petsc-scalapack.patch && cd -
 endif
 	touch $@
@@ -373,7 +364,6 @@ echo:
 	@echo " do-sudo auto ???:" $(SHELL cat do-sudo)
 	@echo " BLAS_LAPACK_LIBS: $(BLAS_LAPACK_LIBS)"
 	@echo " # need sudo if '$(W_SUDO)' == 'sudo' .."
-	@echo " dir3rdparty: $(dir3rdparty)"
 	-@otool -L $(DIR_INSTALL_COMPLEX)/lib/libslepc.$(VERSION_SLEPC).dylib | awk '/3rdparty/ {print $$1}'
 	-@otool -L $(DIR_INSTALL_REAL)/lib/libslepc.$(VERSION_SLEPC).dylib | awk '/3rdparty/ {print $$1}'
 
