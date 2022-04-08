@@ -18,24 +18,25 @@ GH_EXE_NAME="FreeFEM-${VERSION}-win64.exe"
 autoreconf -i
 ./configure --enable-download --enable-optim --enable-generic --disable-scalapack --disable-mumps
 ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS
-## compile and install ff-petsc
 cd 3rdparty/ff-petsc && make petsc-slepc && cd -
 ./configure --enable-download --enable-optim --enable-generic
+make -j"$(nproc)"
 
-make
 cp AUTHORS readme/AUTHORS
-touch readme/COPYING
 make win32
 
-## Deploy in GitHub release
-RELEASE=`curl 'https://api.github.com/repos/'$ORGANIZATION'/'$REPOSITORY'/releases/tags/'$RELEASE_TAG_NAME`
-UPLOAD_URL=`printf "%s" "$RELEASE" | jq -r '.upload_url'`
+mv "Output/$EXE_NAME" "$GH_EXE_NAME"
 
-if [ -x $UPLOAD_URL ]
+## Deploy in GitHub release
+RELEASE=$(curl "https://api.github.com/repos/$ORGANIZATION/$REPOSITORY/releases/tags/$RELEASE_TAG_NAME")
+UPLOAD_URL=$(printf "%s" "$RELEASE" | jq -r '.upload_url')
+
+if [ -x "$UPLOAD_URL" ]
 then
     echo "Release does not exists"
     exit 1
 else
-    mv Output/$EXE_NAME $GH_EXE_NAME
-    RESPONSE=`curl --data-binary "@$GH_EXE_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_EXE_NAME"`
+    RESPONSE=$(curl --data-binary "@$GH_EXE_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_EXE_NAME")
+    echo "Github response:"
+    echo "$RESPONSE"
 fi
