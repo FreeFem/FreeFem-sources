@@ -15,7 +15,7 @@ OSRELEASE=$(lsb_release -r|awk '{print $2}')
 BUILD_DIR="/usr/local"
 
 DEB_NAME="freefem-${VERSION}-amd64-ubuntu${OSRELEASE}"
-GH_DEB_NAME="FreeFEM-${VERSION}-amd64-ubnutu${OSRELEASE}.deb"
+GH_DEB_NAME="FreeFEM-${VERSION}-amd64-ubuntu${OSRELEASE}.deb"
 
 ## DEB build
 autoreconf -i
