@@ -40,7 +40,6 @@ touch "$DEB_NAME/DEBIAN/control"
 	echo "Description: FreeFEM, Finite Element Language software";
 	echo "Homepage: https://freefem.org";
 } >> "$DEB_NAME/DEBIAN/control"
-mkdir -p "$DEB_NAME/usr/local"
 mkdir -p "$DEB_NAME/usr/local/share/FreeFEM"
 mkdir -p "$DEB_NAME/usr/local/bin"
 mkdir -p "$DEB_NAME/usr/local/lib/ff++"
@@ -63,6 +62,12 @@ cp -r "$BUILD_DIR/bin/ffmaster" "$DEB_NAME/usr/local/bin/ffmaster"
 cp -r "$BUILD_DIR/bin/ffmedit" "$DEB_NAME/usr/local/bin/ffmedit"
 cp AUTHORS "$DEB_NAME/usr/share/doc/freefem/AUTHOR"
 cp README.md "$DEB_NAME/usr/share/doc/freefem/README.md"
+
+{
+	echo "loadpath += \"./\"";
+	echo "loadpath += \"/usr/local/lib/ff++/$VERSION/lib\"";
+	echo "includepath += \"/usr/local/lib/ff++/$VERSION/idp\"";
+}
 
 dpkg-deb --build "$DEB_NAME/"
 mv "$DEB_NAME.deb" "$GH_DEB_NAME"
