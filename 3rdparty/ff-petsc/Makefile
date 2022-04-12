@@ -116,13 +116,9 @@ endif
 
 ifneq ($(WIN32DLLTARGET),)
 COMMON_FLAGS += --with-shared-libraries=0 \
-	--with-cc='$(CC)' --with-cxx='$(CXX)' \
-	CXXFLAGS='-fno-stack-protector' \
-	CFLAGS='-fno-stack-protector' \
+	CXXFLAGS='-fno-stack-protector -Wno-stringop-overflow' \
+	CFLAGS='-fno-stack-protector -Wno-stringop-overflow' \
 	FFLAGS='$(FCFLAGS)' \
-	--with-mpi-lib='$(MPI_LIB)' \
-	--with-mpi-include='$(MPI_INC_DIR)' \
-	CXXPPFLAGS='-I$(MPI_INC_DIR)' \
 	--with-mpiexec='/C/Program\ Files/Microsoft\ MPI/Bin/mpiexec'
 PETSC_DOWNLOAD += '--download-metis-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-parmetis-cmake-arguments=-G "MSYS Makefiles"' \
@@ -133,7 +129,6 @@ PETSC_DOWNLOAD += '--download-metis-cmake-arguments=-G "MSYS Makefiles"' \
 ifeq ($(FC),)
 PETSC_DOWNLOAD += '--download-superlu_dist-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles" -DXSDK_ENABLE_Fortran=OFF'
 else
-COMMON_FLAGS += --with-fc='$(FC)'
 ifeq ($(TOOL_DYLIB_scalapack)$(TOOL_DYLIB_mumps),)
 PETSC_DOWNLOAD += '--download-superlu_dist-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles" -DXSDK_ENABLE_Fortran=OFF'
 endif
