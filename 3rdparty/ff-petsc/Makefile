@@ -41,16 +41,21 @@ PETSC_OPENBLAS_C = $(PETSC_OPENBLAS)
 endif
 PETSC_DOWNLOAD_C := --with-metis-dir=$(DIR_INSTALL_REAL) \
 		--with-ptscotch-dir=$(DIR_INSTALL_REAL) \
-		--with-mmg-dir=$(DIR_INSTALL_REAL) \
-		--with-parmmg-dir=$(DIR_INSTALL_REAL) \
 		--with-superlu-dir=$(DIR_INSTALL_REAL) \
 		--with-suitesparse-dir=$(DIR_INSTALL_REAL) \
 		--with-parmetis-dir=$(DIR_INSTALL_REAL) \
 		--with-tetgen-dir=$(DIR_INSTALL_REAL)
 PETSC_DOWNLOAD := --download-metis --download-ptscotch \
 		--download-hypre --download-parmetis \
-		--download-mmg --download-parmmg \
 		--download-superlu --download-suitesparse --download-tetgen
+ifneq ($(TOOL_DYLIB_mmg),)
+PETSC_DOWNLOAD += --download-mmg
+PETSC_DOWNLOAD_C += --with-mmg-dir=$(DIR_INSTALL_REAL)
+ifneq ($(TOOL_DYLIB_parmmg),)
+PETSC_DOWNLOAD += --download-parmmg
+PETSC_DOWNLOAD_C += --with-parmmg-dir=$(DIR_INSTALL_REAL)
+endif
+endif
 ifeq ($(FFCMAKE),no)
 PETSC_DOWNLOAD := $(PETSC_DOWNLOAD) --download-cmake
 endif
