@@ -4,7 +4,9 @@
 load "msh3"
 load "mshmet"
 load "PETSc"
+macro with()PETSc//
 load "parmmg"
+load "mmg"
 macro dimension()3// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
@@ -14,6 +16,7 @@ mesh3 Th3 = buildlayers(square(n, n, region=0, label=L), n, zbound=[0,1], labelm
 Th3 = trunc(Th3, x < 0.5 || y < 0.5 || z < 0.5, label=3);
 
 macro grad(u)[dx(u), dy(u), dz(u)]// EOM    // three-dimensional gradient
+macro MmgParameters(ThGather, met, rt, verbose)ThGather, metric = met, hgrad = 2.3, requiredTriangle = rt, verbose = verbose// EOM
 
 varf vPoisson(u, v) = int3d(Th3)(grad(u)' * grad(v)) + int3d(Th3)(v) + on(1,2,3, u=0);
 
@@ -29,6 +32,8 @@ int noTransfer = (getARGV("-transfer", 1) == 0);
 int niter = getARGV("-niter", 3);
 int verbose = getARGV("-verbose", 1);
 bool isotropic = (usedARGV("-isotropic") != -1);
+int elementsPerProcess = max(getARGV("-elements_per_process", 1), 8000);
+int maxP = max(min(getARGV("-max_P", 1), mpisize), 1);
 int[int] rt(2);
 rt = [1,2];
 for(int i = 0; i < iMax; ++i) {
@@ -36,31 +41,89 @@ for(int i = 0; i < iMax; ++i) {
     set(A, sparams = "-ksp_monitor -pc_type gamg");
     PetscScalar[int] rhs = vPoisson(0, Vh, tgv = -1);
     u[] = A^-1 * rhs;
-    real[int] met = mshmet(Th3, abs(u), aniso = !isotropic, hmin = 1.0e-3, hmax = 1.0e-1, err = err);
     mesh3 ThParMmg;
-    int[int] n2o;
-    int[int][int] communicators;
-    createParMmgCommunicators(Th3, ThParMmg, n2o, communicators)
-    real[int] metParMmg;
-    int[int] rest;
-    if(!isotropic) {
-        fespace VhMet(Th3, [P1, P1, P1, P1, P1, P1]);
-        fespace VhParMmg(ThParMmg, [P1, P1, P1, P1, P1, P1]);
-        metParMmg.resize(VhParMmg.ndof);
-        rest.resize(VhParMmg.ndof);
-        rest = restrict(VhParMmg, VhMet, n2o);
+    initializeDmesh(ThParMmg);
+    bool gather = false;
+    int P;
+    {
+        fespace Ph(Th3, P0);
+        Ph part;
+        createPartition(Th3, part[], P0);
+        mesh3 ThNo = trunc(Th3, abs(part - 1.0) < 1e-1);
+        int nt, ntLocal = ThNo.nt;
+        mpiAllReduce(ntLocal, nt, mpiCommWorld, mpiSUM);
+        P = min(maxP, min(mpisize, max(1, nt / elementsPerProcess)));
+    }
+    if(P != mpisize) {
+        int div = mpisize / P;
+        mpiComm commThGather(mpiCommWorld, (mpirank % div == 0 && mpirank / div < P) ? 0 : mpiUndefined, mpirank / div);
+        mpiComm comm(mpiCommWorld, min(mpirank / div, P - 1), mpirank - div * min(mpirank / div, P - 1));
+        macro ThGatherComm()commThGather//
+        mesh3 ThGather;
+        gatherDmesh(Th3, comm, ThGather);
+        fespace VhGather(ThGather, P1);
+        VhGather<PetscScalar> uGather;
+        gatherSolution(Th3, comm, ThGather, P1, u, uGather);
+        macro ThGatherParMmgComm()commThGather//
+        mesh3 ThGatherParMmg;
+        initializeDmesh(ThGatherParMmg);
+        if((mpirank % div == 0 && mpirank / div < P) != 0) {
+            real[int] met = mshmet(ThGather, abs(uGather), aniso = !isotropic, hmin = 1.0e-3, hmax = 1.0e-1, err = err);
+            if(mpiSize(commThGather) > 1) {
+                int[int] n2o;
+                int[int][int] communicators;
+                createParMmgCommunicators(ThGather, ThGatherParMmg, n2o, communicators);
+                real[int] metParMmg;
+                int[int] rest;
+                if(!isotropic) {
+                    fespace VhMet(ThGather, [P1, P1, P1, P1, P1, P1]);
+                    fespace VhParMmg(ThGatherParMmg, [P1, P1, P1, P1, P1, P1]);
+                    metParMmg.resize(VhParMmg.ndof);
+                    rest.resize(VhParMmg.ndof);
+                    rest = restrict(VhParMmg, VhMet, n2o);
+                }
+                else {
+                    fespace VhMet(ThGather, P1);
+                    fespace VhParMmg(ThGatherParMmg, P1);
+                    metParMmg.resize(VhParMmg.ndof);
+                    rest.resize(VhParMmg.ndof);
+                    rest = restrict(VhParMmg, VhMet, n2o);
+                }
+                metParMmg = met(rest);
+                int[int] neighbors;
+                ThGatherParMmg = parmmg3d(MmgParameters(ThGatherParMmg, metParMmg, rt, verbose), nodeCommunicators = communicators, niter = niter, neighbors = neighbors, comm = commThGather);
+            }
+            else
+                ThGatherParMmg = mmg3d(MmgParameters(ThGather, met, rt, verbose));
+        }
+        scatterDmesh(ThGatherParMmg, comm, ThParMmg);
     }
     else {
-        fespace VhMet(Th3, P1);
-        fespace VhParMmg(ThParMmg, P1);
-        metParMmg.resize(VhParMmg.ndof);
-        rest.resize(VhParMmg.ndof);
-        rest = restrict(VhParMmg, VhMet, n2o);
+        real[int] met = mshmet(Th3, abs(u), aniso = !isotropic, hmin = 1.0e-3, hmax = 1.0e-1, err = err);
+        int[int] n2o;
+        int[int][int] communicators;
+        createParMmgCommunicators(Th3, ThParMmg, n2o, communicators);
+        real[int] metParMmg;
+        int[int] rest;
+        if(!isotropic) {
+            fespace VhMet(Th3, [P1, P1, P1, P1, P1, P1]);
+            fespace VhParMmg(ThParMmg, [P1, P1, P1, P1, P1, P1]);
+            metParMmg.resize(VhParMmg.ndof);
+            rest.resize(VhParMmg.ndof);
+            rest = restrict(VhParMmg, VhMet, n2o);
+        }
+        else {
+            fespace VhMet(Th3, P1);
+            fespace VhParMmg(ThParMmg, P1);
+            metParMmg.resize(VhParMmg.ndof);
+            rest.resize(VhParMmg.ndof);
+            rest = restrict(VhParMmg, VhMet, n2o);
+        }
+        metParMmg = met(rest);
+        int[int] neighbors;
+        ThParMmg = parmmg3d(MmgParameters(ThParMmg, metParMmg, rt, verbose), nodeCommunicators = communicators, niter = niter, neighbors = neighbors);
+        reconstructDmesh(ThParMmg);
     }
-    for[i, v : rest] metParMmg[i] = met[v];
-    int[int] neighbors;
-    ThParMmg = parmmg3d(ThParMmg, metric = metParMmg, hausd = 0.01, requiredTriangle = rt, nodeCommunicators = communicators, niter = niter, verbose = verbose, neighbors = neighbors);
-    reconstructDmesh(ThParMmg)
     int[int] fforder = [1];
     savevtk("laplace-adapt-dist-3d.vtu", Th3, abs(u), bin = 1, order = fforder, append = i ? true : false);
     if(!noTransfer) {

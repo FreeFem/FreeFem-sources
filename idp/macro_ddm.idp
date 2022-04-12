@@ -770,7 +770,7 @@ ENDIFMACRO
     buildWithPartitioning(ThName, part, 1, intersection, privateDmesh#ThName#khi[0], P1, ThName#Comm)
 }
 EndMacro
-macro copyDmesh(OldName, NewName)
+macro initializeDmesh(NewName)
 IFMACRO(!privateDmesh#NewName)
 NewMacro privateDmesh#NewName()privateDmesh#NewName EndMacro
 NewMacro privateDmesh#NewName#khi()privateDmesh#NewName#khiDef EndMacro
@@ -778,6 +778,9 @@ NewMacro privateDmesh#NewName#intersection()privateDmesh#NewName#intersectionDef
 real[int][int] privateDmesh#NewName#khi(2);
 real[int][int] privateDmesh#NewName#intersection;
 ENDIFMACRO
+EndMacro
+macro copyDmesh(OldName, NewName)
+initializeDmesh(NewName)
 IFMACRO(privateDmesh#OldName)
 NewName = OldName;
 privateDmesh#NewName#khi[0].resize(privateDmesh#OldName#khi[0].n);
@@ -1914,7 +1917,7 @@ ENDIFMACRO
     assert(reduce == mpiSize(ThScatterName#Comm));
     if(ThName#Comm) {
         meshN ThNoOverlap;
-        if(mpiSize(ThName#Comm) == 1)
+        if(mpiSize(ThName#Comm) == 1 || (privateDmesh#ThName#intersectionDef.n == 0 && privateDmesh#ThName#khiDef[0].n == 0 && privateDmesh#ThName#khiDef[1].n == 0))
             ThNoOverlap = ThName;
         else
             ThNoOverlap = trunc(ThName, abs(privateDmesh#ThName#khiDef[1][nuTriangle] - mpiRank(ThName#Comm)) < 1.0e-2, label = -111112);
