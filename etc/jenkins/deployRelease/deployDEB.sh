@@ -81,6 +81,7 @@ else
 fi
 
 # clean the VM
+rm -rf "$BUILD_DIR/ff-petsc"
 rm -rf "$DEB_NAME"
 rm "$GH_DEB_NAME"
 
