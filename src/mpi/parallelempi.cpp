@@ -875,7 +875,7 @@ public:
   bool Do(MPI_Request *rrq) {
       if(rqSecond != MPI_REQUEST_NULL)
         MPI_Wait(&rqSecond, MPI_STATUS_IGNORE);
-      return true;// Fini
+      return false;// Fini
   }
 
   ~SendWMeshd() {count()=0;}

@@ -7391,6 +7391,7 @@ Mesh3 *GluMesh3tab(KN< pmesh3 > *const &tab, long const &lab_delete, bool const 
         }
       }
     }
+    delete gtree;
     nbe = bb - b;
     delete[] *idx;
     delete[] idx;
