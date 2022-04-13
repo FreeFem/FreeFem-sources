@@ -5299,11 +5299,15 @@ namespace PETSc {
           }
           ISRestoreIndices(valueIS, &values);
           ISDestroy(&valueIS);
+          DMGetLabel(p->_dm, "Cell Sets", &label);
+          DMLabelSetDefaultValue(label, 0);
           for (PetscInt c = cStart; c < cEnd; ++c) {
               PetscInt *closure = NULL;
               PetscInt  closureSize, cl;
               DMPlexGetTransitiveClosure(p->_dm, c, PETSC_TRUE, &closureSize, &closure);
               int iv[3], lab = 0;
+              DMLabelGetValue(label, c, &cl);
+              lab = cl;
               int* ivv = iv;
               for (cl = 0; cl < 2 * closureSize; cl += 2) {
                   PetscInt point = closure[cl], dof, off, d, p;
