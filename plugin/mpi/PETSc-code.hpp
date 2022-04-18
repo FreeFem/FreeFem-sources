@@ -1847,7 +1847,7 @@ namespace PETSc {
       Expression A;
       Expression P;
       const int c;
-      static const int n_name_param = 20;
+      static const int n_name_param = 21;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       setOptions_Op(const basicAC_F0& args, int d) : A(0), P(0), c(d) {
@@ -1900,7 +1900,8 @@ namespace PETSc {
     {"bs", &typeid(long)},                                                                        // 16
     {"precon", &typeid(Polymorphic*)},                                                            // 17
     {"setup", &typeid(bool)},                                                                     // 18
-    {"monitor", &typeid(Polymorphic*)}                                                            // 19
+    {"monitor", &typeid(Polymorphic*)},                                                           // 19
+    {"deflation", &typeid(FEbaseArrayKn<HPDDM::upscaled_type<PetscScalar>>*)}                     // 20
   };
   class ShellInjection;
   template< class Type >
@@ -2436,37 +2437,55 @@ namespace PETSc {
 #if defined(PETSC_HAVE_HPDDM) && defined(PETSC_USE_SHARED_LIBRARIES)
             PetscStrcmp(type, PCHPDDM, &isType);
             const HPDDM::MatrixCSR< PetscScalar >* const A = ptA->_A->getMatrix( );
-            if (isType && A) {
-              if (!A->_ia) {
-                Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK =
-                  nargs[15] ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*nargs[15])(stack)) : nullptr;
-                if (ptK && ptK->A) {
-                  MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA =
-                    static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
-                  HPDDM::MatrixCSR< PetscScalar >* B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
-                  Mat aux = ff_to_PETSc(B);
+            if (isType) {
+              if(nargs[20]) {
+#if PETSC_VERSION_GE(3, 18, 0)
+                  Mat Z;
+                  FEbaseArrayKn<HPDDM::upscaled_type<PetscScalar>>* deflation = GetAny<FEbaseArrayKn<HPDDM::upscaled_type<PetscScalar>>*>((*nargs[20])(stack));
+                  MatCreateSeqDense(PETSC_COMM_SELF, ptA->_A->getDof(), deflation->N, NULL, &Z);
+                  PetscScalar* data;
+                  MatDenseGetArrayWrite(Z, &data);
+                  for(int i = 0; i < deflation->N; ++i)
+                    std::copy_n(&(*deflation->get(i))[0], deflation->get(0)->n, data + i * deflation->get(0)->n);
+                  MatDenseRestoreArrayWrite(Z, &data);
+                  PCHPDDMSetDeflationMat(pc, is, Z);
+                  MatDestroy(&Z);
+#else
+                  ffassert(0);
+#endif
+              }
+              else if(A) {
+                if (!A->_ia) {
+                  Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK =
+                    nargs[15] ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*nargs[15])(stack)) : nullptr;
+                  if (ptK && ptK->A) {
+                    MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA =
+                      static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
+                    HPDDM::MatrixCSR< PetscScalar >* B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
+                    Mat aux = ff_to_PETSc(B);
+                    PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
+                    MatDestroy(&aux);
+                    delete B;
+                  }
+                }
+                else {
+                  Mat aux = ff_to_PETSc(A);
                   PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
                   MatDestroy(&aux);
-                  delete B;
-                }
-              }
-              else {
-                Mat aux = ff_to_PETSc(A);
-                PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
-                MatDestroy(&aux);
-                Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK =
-                  nargs[12] ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*nargs[12])(stack)) : nullptr;
+                  Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK =
+                    nargs[12] ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*nargs[12])(stack)) : nullptr;
 #if PETSC_VERSION_GE(3, 13, 0)
-                if (ptK && ptK->A) {
-                  MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA =
-                    static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
-                  HPDDM::MatrixCSR< PetscScalar >* B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
-                  aux = ff_to_PETSc(B);
-                  PCHPDDMSetRHSMat(pc, aux);
-                  MatDestroy(&aux);
-                  delete B;
-                }
+                  if (ptK && ptK->A) {
+                    MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA =
+                      static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
+                    HPDDM::MatrixCSR< PetscScalar >* B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
+                    aux = ff_to_PETSc(B);
+                    PCHPDDMSetRHSMat(pc, aux);
+                    MatDestroy(&aux);
+                    delete B;
+                  }
 #endif
+                }
               }
             }
             else {
