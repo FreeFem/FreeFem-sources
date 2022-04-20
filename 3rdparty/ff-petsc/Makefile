@@ -26,7 +26,6 @@ include Makefile.inc
 DIR_INSTALL_REAL:=$(FF_prefix_petsc)/r
 DIR_INSTALL_COMPLEX:=$(FF_prefix_petsc)/c
 VERSION=3.17.0
-VERSION_SLEPC=3.016.2
 PACKAGE=../pkg/petsc-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
 PETSC_DIR:=$(shell pwd)/$(SRCDIR)
@@ -213,7 +212,6 @@ $(SRCDIR)/tag-make-real:$(SRCDIR)/tag-conf-real
 
 $(SRCDIR)/tag-install-real :$(SRCDIR)/tag-make-real
 	cd $(SRCDIR) && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=fr install
-	-test -x "`type -p otool`" && make changer
 	cd $(SRCDIR) && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=fr check
 	test -e $(DIR_INSTALL_REAL)/include/petsc.h
 	test -e $(DIR_INSTALL_REAL)/lib/petsc/conf/petscvariables
@@ -246,7 +244,6 @@ $(SRCDIR)/tag-make-complex:$(SRCDIR)/tag-conf-complex Make-petsc-download.mk
 
 $(SRCDIR)/tag-install-complex :$(SRCDIR)/tag-make-complex
 	cd $(SRCDIR) && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=fc install
-	-test -x "`type -p otool`" && make changec
 	test -e $(DIR_INSTALL_COMPLEX)/include/petsc.h
 	touch $@
 WHERE-complex:../lib/WHERE.PETSc-complex ../lib/WHERE.SLEPc-complex
@@ -318,25 +315,6 @@ endif
 $(PACKAGE):
 	../getall -o PETSc -a
 
-changec:
-	diri=$(DIR_INSTALL_COMPLEX)/lib ; \
-	libpp=$$diri/libslepc.$(VERSION_SLEPC).dylib ; \
-	opblibpp=`otool -L $$libpp | awk '/3rdparty/ {print $$1}'` ; \
-	npblibpp=$$diri/`basename $$opblibpp` ; \
-	echo -- $$opblibpp ; \
-	echo -- $$npblibpp ; \
-	test -n "$$opblibpp" && install_name_tool -change $$opblibpp $$npblibpp $$libpp ; \
-	otool -L $$libpp | awk '/libpetsc/ {print "**",$$1}'
-changer:
-	diri=$(DIR_INSTALL_REAL)/lib ; \
-	libpp=$$diri/libslepc.$(VERSION_SLEPC).dylib ; \
-	opblibpp=`otool -L $$libpp | awk '/3rdparty/ {print $$1}'` ; \
-	npblibpp=$$diri/`basename $$opblibpp` ; \
-	echo -- $$opblibpp ; \
-	echo -- $$npblibpp ; \
-	test -n "$$opblibpp" && install_name_tool -change $$opblibpp $$npblibpp $$libpp ; \
-	otool -L $$libpp | awk '/libpetsc/ {print "**",$$1}'
-
 ../lib/WHERE.SLEPc:
 	-mkdir ../lib
 	test -e $(DIR_INSTALL_REAL)/include/slepc.h
@@ -364,8 +342,6 @@ echo:
 	@echo " do-sudo auto ???:" $(SHELL cat do-sudo)
 	@echo " BLAS_LAPACK_LIBS: $(BLAS_LAPACK_LIBS)"
 	@echo " # need sudo if '$(W_SUDO)' == 'sudo' .."
-	-@otool -L $(DIR_INSTALL_COMPLEX)/lib/libslepc.$(VERSION_SLEPC).dylib | awk '/3rdparty/ {print $$1}'
-	-@otool -L $(DIR_INSTALL_REAL)/lib/libslepc.$(VERSION_SLEPC).dylib | awk '/3rdparty/ {print $$1}'
 
 install-destdir:
 	cd $(SRCDIR) && $(MAKE) PETSC_DIR=$(PETSC_DIR) PETSC_ARCH=fr install DESTDIR=$(DESTDIR)
