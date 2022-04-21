@@ -1,0 +1,225 @@
+//ff-mpirun -np 4 Helmholtz_Cobracavity.edp -wg
+
+// for the make check:
+// NBPROC 4
+// PARAM
+
+load "../../plugin/mpi/bem"
+load "../../plugin/seq/gmsh"
+load "msh3"
+load "medit"
+
+include "getARGV.idp"
+
+include "cobrameshcavity.idp"
+
+real sec1 = 0.01;
+real angle = 2*pi*35/360;
+real radius = 0.186;
+real sec2 = 0.08;
+real sec3 = 0.1;
+real height = 0.084;
+real width = 0.11;
+
+int npangler = 4;
+int npangleR = radius/(radius-height)*npangler;
+
+real c0= 299792458;
+//real f = getARGV("-frequency",5.e+9);//17.5e+9;
+real f = getARGV("-frequency",3.e+8);//17.5e+9;
+real k = 2*pi*f/c0;
+real lambda = c0/f;
+
+cout << "Longueur d'onde   = " <<lambda << endl;
+//cout << "Impedance du vide = " <<Z0 << endl;
+cout << "frequence = " << f << endl;
+
+// the computational domain is a box around the cavity. Distance between artificial boundaries and the cavity in each direction:
+real distx = 0.02*lambda;
+real disty = distx;
+real distz = distx;
+
+int labtomerge = 7;
+
+int labmetal = 1;
+int labi = 2; // label in : entrance (n=(-1,0,0))
+int labo = labmetal; // label out
+// Cavity: labo is also a metallic border
+
+int labextxm = 11;
+int labextxM = 12;
+int labextym = 13;
+int labextyM = 14;
+int labextzm = 15;
+int labextzM = 16;
+
+//int[int] labsext = [labextxm,labextxM,labextym,labextyM,labextzm,labextzM];
+
+int regint = 4;
+int regext = 5;
+
+
+// incident wave
+//real[int] dir=[1,0,0];
+real thetaI =  2.*pi*180./360.;
+real[int] dir=[cos(thetaI),0,sin(thetaI)]; // 180 or 150
+dir  = [-1,0,0];  // normal
+func finc = exp(1i*k*(x*dir[0]+y*dir[1]+z*dir[2]));
+
+//plane wave polarisation y
+func fincx = 0;
+func fincy = exp(1i*k*(x*dir[0]+y*dir[1]+z*dir[2]));
+func fincz = 0;
+
+int nloc = 4.*sec3/lambda;
+
+mesh3 Th3;
+buildcobramesh(Th3);
+Th3 = buildBdMesh(Th3);
+
+meshS ThS = Th3.Gamma;
+ThS = trunc(ThS, region==labmetal);
+
+//include "MeshSurface.idp"
+//ThS =Sphere(0.3,0.04,7,1);
+
+//ThS = trunc(ThS,nuTriangle==0);
+
+plot(ThS);
+
+// definition of the macro
+macro def(u)[u,u#2,u#3]//
+macro Curl(ux,uy,uz) [dy(uz)-dz(uy),dz(ux)-dx(uz),dx(uy)-dy(ux)] // EOM
+macro CrossN(ux,uy,uz) [uy*N.z-uz*N.y,uz*N.x-ux*N.z,ux*N.y-uy*N.x] // EOM
+
+fespace Uh(ThS,RT0S);
+Uh<complex> def(uc), def(b), def(uinc);
+cout << "ndof = " << Uh.ndof << endl;
+
+// construction of
+varf vk(u,v)=int2dx2d(ThS)(ThS)(BEM(BemKernel("SL",k=k),u,v));   
+HMatrix<complex> H = vk(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000,nbiter=4000);
+
+if (mpirank == 0) cout << H.infos << endl;
+display(H);
+
+// definition of the rhs
+complex[int,int] MA(Uh.ndof,Uh.ndof);
+
+MA = H;
+matrix<complex> mA = MA;
+int[int] I(1),J(1);
+complex[int] K(1);
+
+load "MUMPS_mpi"
+set(mA,solver=sparsesolver,master=-1,factorize=3);
+
+varf vrhs(def(u),def(v)) = int2d(ThS)(def(v)'*[-fincx,-fincy,-fincz]);
+
+
+
+
+b[] = vrhs(0,Uh);
+
+if (mpirank != 0) b[] = 0;
+
+// resolution of the courant J
+uc[] = mA^-1*b[];
+
+savegmsh(ThS,"./CobraBEM/cobraMesh-frequence-"+string(f));
+
+{
+     ofstream f("./CobraBEM/J_Max_Cobra_RT0dof-"+string(Uh.ndof)+"-frequence-"+string(f)+".txt");
+     for( int i =0; i< Uh.ndof; i++){
+        f << uc[][i] << endl;
+    }
+} 
+
+
+// computation of the potentiel
+distx = 2*lambda;
+disty = distx;
+distz = distx;
+
+int np = 100;
+meshS ThOut = square3(np,np,[(sec1+(radius-height)*sin(angle)+sec2*cos(angle)+radius*sin(angle)+sec3+2*distx)*x
+                               -distx,
+                               (height+disty-((radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty))*y
+                               +(radius-height)*cos(angle)-(radius-height)-sec2*sin(angle)-radius+radius*cos(angle)-disty,
+                               width/2]);
+
+
+fespace UhOut(ThOut,P1);
+ 
+varf vpMa1(u,v)=int2d(ThS)(POT(BemPotential("SL",k=k,compo=0),u,v)) ; 
+HMatrix<complex> B0 = vpMa1(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+
+if (mpirank == 0) cout << B0.infos << endl;
+display(B0);
+
+varf vpMa2(u,v)=int2d(ThS)(POT(BemPotential("SL",k=k,compo=1),u,v)) ; 
+HMatrix<complex> B1 = vpMa2(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+
+if (mpirank == 0) cout << B1.infos << endl;
+display(B1);
+
+varf vpMa3(u,v)=int2d(ThS)(POT(BemPotential("SL",k=k,compo=2),u,v)) ; 
+HMatrix<complex> B2 = vpMa3(Uh,UhOut,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+
+if (mpirank == 0) cout << B2.infos << endl;
+display(B2);
+
+UhOut<complex> Ex, Ey, Ez;
+UhOut<complex> vincx, vincy, vincz;
+
+// E total in the x direction
+
+vincx = fincx;
+Ex[]  = B0*uc[];
+Ex[] += vincx[]; // add po
+
+// E total in the y direction
+vincy = fincy;
+Ey[]  = B1*uc[];
+Ey[] += vincy[]; 
+
+// E total in the z direction
+vincz = fincz;
+Ez[]  = B2*uc[];
+Ez[] += vincz[]; 
+
+
+UhOut vr = sqrt(real(Ex)^2+ real(Ey)^2 + real(Ez)^2 );
+
+plot(vr, dim=2, fill=1, value=1, nbiso=20, cmm="|E-real|_L2");
+
+
+{
+     ofstream f("./CobraBEM/Ex_Max_Cobra_"+string(UhOut.ndof)+"-frequence-"+string(f)+".txt");
+     for( int i =0; i< UhOut.ndof; i++){
+        f << Ex[][i] << endl;
+    }
+} 
+
+{
+     ofstream f("./CobraBEM/Ey_Max_Cobra_"+string(UhOut.ndof)+"-frequence-"+string(f)+".txt");
+     for( int i =0; i< UhOut.ndof; i++){
+        f << Ey[][i] << endl;
+     }
+ } 
+
+{
+     ofstream f("./CobraBEM/Ez_Max_Cobra_"+string(UhOut.ndof)+"-frequence-"+string(f)+".txt");
+     for( int i =0; i< UhOut.ndof; i++){
+        f << Ez[][i] << endl;
+     }
+} 
+savegmsh(ThOut,"./CobraBEM/cutCobra-"+string(UhOut.ndof)+"-middle-frequence-"+string(f));
+
+/*
+UhOut vi = abs(imag(Ey));
+
+plot(vi, dim=2, fill=1, value=1, nbiso=20, cmm="Ey-abs(imag)");
+
+plot(Ey, dim=2, fill=1, value=1, nbiso=20, cmm="Ey");
+*/

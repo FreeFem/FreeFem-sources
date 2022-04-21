@@ -430,8 +430,9 @@ public:
         HMatVirt A(t);
         HMatVirtPrec P(t);
         double eps =1e-6;
-        int niterx=2000;
-        bool res=fgmres(A,P,1,(K*)*u,(K*)*out,eps,niterx,200,(mpirank==0)*verbosity);
+        int niterx=3000;
+        bool res=fgmres(A,P,1,(K*)*u,(K*)*out,eps,niterx,niterx,(mpirank==0)*verbosity);
+        //bool res=fgmres(A,P,1,(K*)*u,(K*)*out,eps,niterx,200,(mpirank==0)*verbosity);
     }
     
     static U inv(U Ax, HMatrixInv<T, U, K, trans> A) {
@@ -1053,6 +1054,16 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
         else if (SP2) {
             Dof<P2> dof(mesh,true);
             ff_POT_Generator<R,P2,MeshBemtool,SMesh>(generator,Pot,dof,mesh,node_output);
+        }
+        else if (SRT0 && SRdHat::d == 2) {
+            cout<< "composant dans le Pot kernel" << Pot->composant << endl;
+            int composant = (int) Pot->composant;
+            cout << "composant =" << composant << endl;
+            if( composant < 0 || composant > 2){
+                cerr << "error in the Pot kernel compo:: compo must be 0,1,2" << endl;
+                exit(0);
+            } 
+            ff_POT_Generator_Maxwell<R,bemtool::RT0_2D>(generator,Pot,mesh,node_output,composant);
         }
         else
             ffassert(0);
