@@ -831,6 +831,8 @@ namespace PETSc {
               MatSetValues(ptA->_petsc, 1, &row, ia[i + 1] - ia[i],
                            ja + ia[i], c + ia[i], INSERT_VALUES);
             }
+            MatAssemblyBegin(ptA->_petsc, MAT_FINAL_ASSEMBLY);
+            MatAssemblyEnd(ptA->_petsc, MAT_FINAL_ASSEMBLY);
           } else {
             if (!ptA->_petsc) {
               MatCreate(PETSC_COMM_WORLD, &ptA->_petsc);
@@ -859,9 +861,10 @@ namespace PETSc {
           MatSeqAIJSetPreallocationCSR(ptA->_petsc, ia, NULL, NULL);
           MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, NULL, NULL);
           delete[] ia;
+        } else {
+          MatAssemblyBegin(ptA->_petsc, MAT_FINAL_ASSEMBLY);
+          MatAssemblyEnd(ptA->_petsc, MAT_FINAL_ASSEMBLY);
         }
-        MatAssemblyBegin(ptA->_petsc, MAT_FINAL_ASSEMBLY);
-        MatAssemblyEnd(ptA->_petsc, MAT_FINAL_ASSEMBLY);
         if (ptParent) {
           PetscBool assembled;
           MatAssembled(ptParent->_petsc, &assembled);
@@ -1831,14 +1834,10 @@ namespace PETSc {
               if (std::abs(r) > 1.0e-16) {
                 Mat B;
                 MatCreateDense(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, 1, 1, NULL, &B);
-                MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
-                MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
                 PetscScalar* array;
                 MatDenseGetArray(B, &array);
                 if (array) array[0] = r;
                 MatDenseRestoreArray(B, &array);
-                MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
-                MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
                 a[i * M + j] = B;
                 destroy.emplace_back(i, j);
               } else if (i == j)
@@ -1849,14 +1848,10 @@ namespace PETSc {
               if (t == 3) x = GetAny< KN_< PetscScalar > >(e_ij);
               else x = GetAny< Transpose< KN_< PetscScalar > > >(e_ij);
               MatCreateDense(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, x.n, PETSC_DECIDE, PETSC_DECIDE, 1, NULL, &B);
-              MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
-              MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
               PetscScalar* array;
               MatDenseGetArray(B, &array);
               if (array) std::copy_n(static_cast< PetscScalar* >(x), x.n, array);
               MatDenseRestoreArray(B, &array);
-              MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
-              MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
               if (t == 3) {
                 a[i * M + j] = B;
               }
