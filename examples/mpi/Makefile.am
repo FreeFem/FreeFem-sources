@@ -42,7 +42,7 @@ TESTS_MPI_METIS = DDM-Schwarz-Lame-2d.edp \
 TESTS_MPI_METIS_PARMETIS = parmetis-3d.edp \
 	parmetis.edp
 
-TESTS_MPI_MUMPS = cavityNewtow-MUMPS.edp \
+TESTS_MPI_MUMPS = cavityNewton-MUMPS.edp \
 	LaplaceRT-3d-matrix-mumps.edp \
 	MUMPS.edp \
 	NSI3d-carac-mumps.edp \

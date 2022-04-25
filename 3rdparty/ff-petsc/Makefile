@@ -164,7 +164,7 @@ VERSION=3.17.0
 VERSION_SLEPC=3.016.2
 PACKAGE=../pkg/petsc-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
-MPI_DIR:=$(shell dirname $(MPI_INC_DIR))
+MPI_DIR:=$(shell dirname "$(MPI_INC_DIR)")
 W_MPICC:=$(strip $(shell which mpicc))
 SUDO_WITH_ENV=$(if $(SUDO), $(SUDO) -E)
 ifeq ($(LAPACKLIBS), $(BLASLIBS))

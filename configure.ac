@@ -23,7 +23,7 @@ ff_TEST_FFPP_MPI="../../src/mpi/FreeFem++-mpi"
 ff_uncompile_plugin=""
 ff_unlib_plugin=""
 ff_download_lib=""
-AC_PREREQ([2.69]) dnl for AC_LANG_CASE and check stuff
+AC_PREREQ([2.71]) dnl for AC_LANG_CASE and check stuff
 dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.11 is too old for check ...
@@ -1969,7 +1969,20 @@ AC_SUBST(FF_HAVE_REGEX_H,$ff_regex_h)
 AC_CHECK_HEADERS([unistd.h])
 # asinh acosh atanh are not in Mingw yet gettimeofday
 ff_malloc_h=""
-AC_HEADER_TIME
+m4_warn([obsolete],
+[Update your code to rely only on HAVE_SYS_TIME_H,
+then remove this warning and the obsolete code below it.
+All current systems provide time.h; it need not be checked for.
+Not all systems provide sys/time.h, but those that do, all allow
+you to include it and time.h simultaneously.])dnl
+AC_CHECK_HEADERS_ONCE([sys/time.h])
+# Obsolete code to be removed.
+if test $ac_cv_header_sys_time_h = yes; then
+  AC_DEFINE([TIME_WITH_SYS_TIME],[1],[Define to 1 if you can safely include both <sys/time.h>
+	     and <time.h>.  This macro is obsolete.])
+fi
+# End of obsolete code.
+
 AC_CHECK_HEADERS(malloc.h,ff_malloc_h=1)
 AC_SUBST(FF_MALLOC_H,$ff_malloc_h)
 
