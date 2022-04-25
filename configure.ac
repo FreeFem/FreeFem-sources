@@ -23,7 +23,7 @@ ff_TEST_FFPP_MPI="../../src/mpi/FreeFem++-mpi"
 ff_uncompile_plugin=""
 ff_unlib_plugin=""
 ff_download_lib=""
-AC_PREREQ([2.71]) dnl for AC_LANG_CASE and check stuff
+AC_PREREQ([2.69]) dnl for AC_LANG_CASE and check stuff (bug avec 2.71)
 dnl AC_CONFIG_SRCDIR(src/FreeFem++-CoCoa)
 
 # Automake 1.11 is too old for check ...
