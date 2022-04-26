@@ -137,11 +137,6 @@ COMMON_FLAGS += --with-fc='$(FC)'
 ifeq ($(TOOL_DYLIB_scalapack)$(TOOL_DYLIB_mumps),)
 PETSC_DOWNLOAD += '--download-superlu_dist-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles" -DXSDK_ENABLE_Fortran=OFF'
 endif
-ifneq ($(wildcard ~/.petsc_pkg),)
-PETSC_DOWNLOAD += '--download-slepc-configure-arguments=--with-packages-build-dir=$(PETSC_DIR)/fr/externalpackages --download-arpack --download-arpack-cmake-arguments=-G"MSYS\ Makefiles" --with-packages-download-dir=~/.petsc_pkg'
-else
-PETSC_DOWNLOAD += '--download-slepc-configure-arguments=--with-packages-build-dir=$(PETSC_DIR)/fr/externalpackages --download-arpack=https://github.com/prj-/arpack-ng/archive/9fc0c71.tar.gz --download-arpack-cmake-arguments=-G"MSYS\ Makefiles"'
-endif
 endif
 endif
 
