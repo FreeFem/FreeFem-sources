@@ -7,7 +7,9 @@
 MSYS2 packages:
 
 ```
-pacman -S autoconf automake-wrapper bison bsdcpio make git mingw-w64-x86_64-toolchain mingw-w64-x86_64-freeglut patch python  flex pkg-config pkgfile tar unzip mingw-w64-x86_64-cmake mingw-w64-x86_64-msmpi mingw-w64-x86_64-gsl
+pacman -S autoconf automake-wrapper bison bsdcpio make git mingw-w64-x86_64-toolchain mingw-w64-x86_64-freeglut patch python \
+    flex pkg-config pkgfile tar unzip mingw-w64-x86_64-cmake mingw-w64-x86_64-msmpi mingw-w64-x86_64-gsl \
+    mingw-w64-x86_64-hdf5 mingw-w64-x86_64-openblas
 pacman -R mingw-w64-x86_64-python mingw-w64-x86_64-gdb mingw-w64-x86_64-gdb-multiarch
 
 ```
