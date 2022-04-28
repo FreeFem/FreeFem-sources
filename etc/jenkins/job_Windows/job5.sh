@@ -3,15 +3,15 @@ source shell mingw64
 
 echo "Job 5"
 
+# configuration & build
 autoreconf -i
 ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
-        --prefix=/builds/workspace/freefem --disable-scalapack --disable-mumps
+  --prefix=/e/builds/workspace/freefem-5 --disable-scalapack --disable-mumps
 ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS
-cd 3rdparty/ff-petsc && make petsc-slepc
-cd ../..
+cd 3rdparty/ff-petsc && make petsc-slepc && cd -
 ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
-        --prefix=/builds/workspace/freefem
-make
+  --prefix=/builds/workspace/freefem
+make -j4
 
 if [ $? -eq 0 ]
 then

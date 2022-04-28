@@ -4,12 +4,13 @@ source shell mingw64
 echo "Job 3"
 set -e
 
-autoreconf -i \
-&& ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
-        CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
-        --prefix=/builds/workspace/freefem \
-  && ./3rdparty/getall -a \
-  && make
+# configuration & build
+autoreconf -i
+./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
+  CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
+  --prefix=/e/builds/workspace/freefem-3 \
+./3rdparty/getall -a \
+make -j4
 
 if [ $? -eq 0 ]
 then

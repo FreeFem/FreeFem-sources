@@ -1,151 +1,205 @@
+# Windows 10
+
+- [MSYS2](https://www.msys2.org/)
+- [git](https://git-scm.com/downloads)
+- [Microsoft MPI](https://www.microsoft.com/en-us/download/details.aspx?id=100593)
+
+MSYS2 packages:
+
+```
+pacman -S autoconf automake-wrapper bison bsdcpio make git mingw-w64-x86_64-toolchain mingw-w64-x86_64-freeglut patch python  flex pkg-config pkgfile tar unzip mingw-w64-x86_64-cmake mingw-w64-x86_64-msmpi mingw-w64-x86_64-gsl
+pacman -R mingw-w64-x86_64-python mingw-w64-x86_64-gdb mingw-w64-x86_64-gdb-multiarch
+
+```
+
 # Ubuntu 16.04 - VM0
+
 ```
 sudo apt install gcc g++ gfortran m4 patch git liblapack-dev flex bison
 ```
 
 # Ubuntu 16.04 - VM1
+
 ```
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libopenmpi-dev libhdf5-dev libgsl-dev flex bison
 ```
 
 # Ubuntu 16.04 - VM2
+
 ```
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
 ```
+
 [OpenMPI compilation](#openmpi)4.0.2
 [MPICH compilation](#mpich)3.3.2
 
 # Ubuntu 16.04 - VM2-2
+
 ```
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
 local Petsc 3.12.4 installed on /Users/Shared (mpich and openmpi version)
 ```
+
 [OpenMPI compilation](#openmpi)4.0.2
 [MPICH compilation](#mpich)3.3.2
 
 # Ubuntu 18.04 - VM0
+
 ```
 sudo apt install gcc g++ gfortran m4 patch git liblapack-dev flex bison
 ```
 
 # Ubuntu 18.04 - VM1
+
 ```
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libopenmpi-dev libhdf5-dev libgsl-dev flex bison
 ```
 
 # Ubuntu 18.04 - VM2
+
 ```
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
 ```
+
 [OpenMPI compilation](#openmpi)4.0.2
 [MPICH compilation](#mpich)3.3.2
 
 # Ubuntu 18.04 - VM2-2
+
 ```
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
 local Petsc 3.12.4 installed on /Users/Shared (mpich and openmpi version)
 ```
+
 [OpenMPI compilation](#openmpi)4.0.3
 [MPICH compilation](#mpich)3.3.2
 
 # Ubuntu 19.10 - VM0
+
 ```
 sudo apt install gcc g++ gfortran m4 patch git liblapack-dev flex bison
 ```
 
 # Ubuntu 19.10 - VM1
+
 ```
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libopenmpi-dev libhdf5-dev libgsl-dev flex bison
 ```
 
 # Ubuntu 19.10 - VM2
+
 ```
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
 ```
+
 [OpenMPI compilation](#openmpi)4.0.2
 [MPICH compilation](#mpich)3.3.2
 
 # Ubuntu 19.10 - VM2-2
+
 ```
 sudo apt install gcc g++ gfortran m4 patch git libblas-dev liblapack-dev libsuitesparse-dev libhdf5-dev libgsl-dev flex bison wget cmake autoconf automake autotools-dev
 local Petsc 3.12.4 installed on /builds/Shared/ (mpich and openmpi version)
 ```
+
 [OpenMPI compilation](#openmpi)4.0.2
 [MPICH compilation](#mpich)3.3.2
+
 # MacOS 10.10.5 - VM0 (Xcode 7.2.1, gcc g++ gfortran 5.1)
+
 ```
 brew install gcc@4.9 m4 git flex bison
 ```
 
 # MacOS 10.10.5 - VM1 (Xcode 7.2.1, gcc g++ gfortran 5.1)
+
 ```
 brew install gcc@4.9 m4 git flex bison suitesparse-4.5.4 hdf5
 ```
 
 # MacOS 10.10.5 - VM2 (Xcode 7.2.1, gcc g++ gfortran 5.1)
+
 ```
 brew install gcc@4.9 m4 git flex bison suitesparse-4.5.4 hdf5 cmake wget autoconf automake
 ```
+
 [OpenMPI compilation](#openmpi) 2.1.6
 [MPICH compilation](#mpich)3.3.2
+
 # MacOS 10.10.5 - VM2-2 (Xcode 7.2.1, gcc g++ gfortran 5.1)
+
 ```
 brew install gcc@4.9 m4 git flex bison suitesparse-4.5.4 hdf5 cmake wget autoconf automake
 local Petsc 3.12.4 installed on /Users/Shared (mpich and openmpi version)
 ```
+
 [OpenMPI compilation](#openmpi) 2.1.6
 [MPICH compilation](#mpich)3.3.2
+
 # MacOS 10.13 - VM0
+
 ```
 brew install gcc m4 git flex bison
 ```
 
 # MacOS 10.13 - VM1
+
 ```
 brew install gcc m4 git flex bison suitesparse hdf5
 ```
 
 # MacOS 10.13 - VM2
+
 ```
 brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake
 ```
+
 [OpenMPI compilation](#openmpi) 4.0.1
 [MPICH compilation](#mpich)3.3.2
 
 # MacOS 10.13 - VM2-2
+
 ```
 brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake
 local Petsc 3.12.4 installed on /Users/Shared (mpich and openmpi version)
 ```
+
 [OpenMPI compilation](#openmpi)4.0.1
 [MPICH compilation](#mpich)3.3.2
 
 # MacOS 10.14 - VM0
+
 ```
 brew install gcc m4 git flex bison
 ```
 
 # MacOS 10.14 - VM1
+
 ```
 brew install gcc m4 git flex bison suitesparse hdf5
 ```
 
 # MacOS 10.14 - VM2
+
 ```
 brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake
 ```
+
 [OpenMPI compilation](#openmpi) 4.0.3
 [MPICH compilation](#mpich)3.3.2
 
 # MacOS 10.14 - VM2-2
+
 ```
 brew install gcc m4 git flex bison suitesparse hdf5 cmake wget autoconf automake
 local Petsc 3.12.4 installed on /Users/Shared (mpich and openmpi version)
 ```
+
 [OpenMPI compilation](#openmpi)4.0.3
 [MPICH compilation](#mpich)3.3.2
 
 # Windows 7 and 10 - all VM
+
 ```
 pacman -S autoconf automake-wrapper bash bash-completion \
     bison bsdcpio bsdtar bzip2 coreutils curl dash file filesystem \
@@ -157,8 +211,8 @@ pacman -S autoconf automake-wrapper bash bash-completion \
     mingw-w64-x86_64-libmicroutils mingw-w64-x86_64-cmake
 pacman -R mingw-w64-x86_64-gcc-ada mingw-w64-x86_64-gcc-objc mingw-w64-x86_64-gdb mingw-w64-x86_64-gdb-multiarch mingw-w64-x86_64-python
 ```
-[MSMPI 10.1.2](https://www.microsoft.com/en-us/download/details.aspx?id=100593)
 
+[MSMPI 10.1.2](https://www.microsoft.com/en-us/download/details.aspx?id=100593)
 
 # OpenMPI
 
@@ -167,7 +221,7 @@ pacman -R mingw-w64-x86_64-gcc-ada mingw-w64-x86_64-gcc-objc mingw-w64-x86_64-gd
 curl -L https://download.open-mpi.org/release/open-mpi/v2.1/openmpi-2.1.6.tar.gz--output openmpi-2.1.6.tar.gz
 tar xf openmpi-2.1.6.tar.gz
 cd openmpi-2.1.6/
-./configure CC=clang CXX=clang++ --prefix=/usr/local  VM2 
+./configure CC=clang CXX=clang++ --prefix=/usr/local  VM2
 ./configure CC=gcc CXX=g++ --prefix=/usr/local (gcc g++ version5.1)  VM2-2
 #MacOS 10.13.5
 curl -L https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.1.tar.gz --output openmpi-4.0.1.tar.gz
@@ -178,12 +232,13 @@ cd openmpi-4.0.1/
 make -j4 all
 make check
 sudo make install
-#Ubuntu 16.04 - Ubuntu 18.04 
+#Ubuntu 16.04 - Ubuntu 18.04
 openmpi 4.0.2 installed
 # Ubuntu 19.10
 openmpi 4.0.3 installed
 
 ```
+
 # MPICH
 
 ```
@@ -210,32 +265,39 @@ make -j4 install
 
 ```
 
-Jenkins projects are [here](https://ci.inria.fr/freefem-dev/) and [here](https://ci.inria.fr/freefem-dev-2/) 
-
+Jenkins projects are [here](https://ci.inria.fr/freefem-dev/) and [here](https://ci.inria.fr/freefem-dev-2/)
 
 # Job 1
-without mpi  (for macOS, compiled with gcc)
+
+without mpi (for macOS, compiled with gcc)
 runs on VM0
-# Job 2 
-without-mpi  (for macOS, compiled with clang)
+
+# Job 2
+
+without-mpi (for macOS, compiled with clang)
 runs on VM1
+
 # Job 3 sequential version of FreeFEM
-with 3dparty, without-mpi  (for macOS, compiled with clang)
+
+with 3dparty, without-mpi (for macOS, compiled with clang)
 runs on VM2
+
 # Job 4_openmpi Full version of FreeFEM compiled in release mode
-with 3dparty, compilation in release mode (for macOS, compiled with gcc), uses a PETSc installed (curent version 3.12.4) 
+
+with 3dparty, compilation in release mode (for macOS, compiled with gcc), uses a PETSc installed (curent version 3.12.4)
 runs on VM2-2
+
 # Job 4_mpich Full version of FreeFEM compiled in release mode
-with 3dparty, compilation in release mode (for macOS, compiled with gcc), uses a PETSc installed (curent version 3.12.42) 
+
+with 3dparty, compilation in release mode (for macOS, compiled with gcc), uses a PETSc installed (curent version 3.12.42)
 runs on VM2-2
+
 # Job 5_openmpi Full version of FreeFEM compiled in debug mode
+
 with mpi with 3dparty,, compilation in debug mode (for macOS, compiled with clang) download and install PETSc at each build
 runs on VM2
+
 # Job 5_mpich Full version of FreeFEM compiled in debug mode
+
 with mpi with 3dparty,, compilation in debug mode (for macOS, compiled with clang) download and install PETSc at each build
 runs on VM2
-
-
-
-
-

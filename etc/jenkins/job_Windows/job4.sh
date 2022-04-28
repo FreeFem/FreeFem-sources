@@ -5,14 +5,15 @@ echo "Job 4"
 
 PETSC_DIR=' '
 
-autoreconf -i \
-&& ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
-        CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
-        --prefix=/builds/workspace/freefem \
-        --with-petsc=$PETSC_DIR/real/lib \
-        --with-petsc_complex=$PETSC_DIR/complex/lib \
-  && ./3rdparty/getall -a \
-  && make -j2
+# configuration & build
+autoreconf -i
+./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
+  CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
+  --prefix=/e/builds/workspace/freefem-4 \
+  --with-petsc=$PETSC_DIR/real/lib \
+  --with-petsc_complex=$PETSC_DIR/complex/lib
+./3rdparty/getall -a
+make -j4
 
 if [ $? -eq 0 ]
 then
