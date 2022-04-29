@@ -25,7 +25,7 @@ include Makefile.inc
 
 DIR_INSTALL_REAL:=$(FF_prefix_petsc)/r
 DIR_INSTALL_COMPLEX:=$(FF_prefix_petsc)/c
-VERSION=3.17.0
+VERSION=$(shell grep "'petsc-" ../getall | perl -pe '($$_)=/([0-9]+([.][0-9]+)+)/')
 PACKAGE=../pkg/petsc-$(VERSION).tar.gz
 SRCDIR=petsc-$(VERSION)
 PETSC_DIR:=$(shell pwd)/$(SRCDIR)
@@ -305,11 +305,11 @@ WHERE-all:Makefile Make-petsc-download.mk
 	 $(MAKE) -f Makefile.complex $@
 endif
 $(SRCDIR)/tag-tar:$(PACKAGE)
-	-mkdir petsc-$(VERSION) 2>/dev/null
-	-tar xzf $(PACKAGE) -C petsc-$(VERSION) --strip-components 1
-	cd petsc-$(VERSION) && patch -p1 < ../petsc-cmake-seq.patch && cd -
+	-mkdir $(SRCDIR) 2>/dev/null
+	-tar xzf $(PACKAGE) -C $(SRCDIR) --strip-components 1
+	cd $(SRCDIR) && patch -p1 < ../petsc-cmake-seq.patch && cd -
 ifneq ($(WIN32DLLTARGET),)
-	cd petsc-$(VERSION) && patch -p1 < ../petsc-scalapack.patch && cd -
+	cd $(SRCDIR) && patch -p1 < ../petsc-scalapack.patch && cd -
 endif
 	touch $@
 $(PACKAGE):
