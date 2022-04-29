@@ -63,3 +63,29 @@ index 8dc6b3fa3e..6d2f3f9bb2 100644
    PetscCall(PetscOptionsMUMPSInt("-mat_mumps_icntl_20","ICNTL(20): give mumps centralized (0) or distributed (10) dense right-hand sides","None",mumps->ICNTL20,&mumps->ICNTL20,&flg));
    PetscCheckFalse(flg && mumps->ICNTL20 != 10 && mumps->ICNTL20 != 0,PETSC_COMM_SELF,PETSC_ERR_SUP,"ICNTL(20)=%d is not supported by the PETSc/MUMPS interface. Allowed values are 0, 10",(int)mumps->ICNTL20);
  #if PETSC_PKG_MUMPS_VERSION_LT(5,3,0)
+diff --git a/config/PETSc/Configure.py b/config/PETSc/Configure.py
+index 4510adb912b..2ccc9962d37 100644
+--- a/config/PETSc/Configure.py
++++ b/config/PETSc/Configure.py
+@@ -135,7 +135,7 @@ class Configure(config.base.Configure):
+                  'uname','snprintf','_snprintf','lseek','_lseek','time','fork','stricmp',
+                  'strcasecmp','bzero','dlopen','dlsym','dlclose','dlerror',
+                  '_set_output_format','_mkdir','socket','gethostbyname','_pipe','fpresetsticky',
+-                 'fpsetsticky','__gcov_dump']
++                 'fpsetsticky','__gcov_dump','fstatat']
+     libraries = [(['fpe'],'handle_sigfpes')]
+     librariessock = [(['socket','nsl'],'socket')]
+     self.headers.headers.extend(headersC)
+diff --git a/src/sys/fileio/fdir.c b/src/sys/fileio/fdir.c
+index 44d251144fc..d1b621b1852 100644
+--- a/src/sys/fileio/fdir.c
++++ b/src/sys/fileio/fdir.c
+@@ -44,7 +44,7 @@ PetscErrorCode PetscMkdir(const char dir[])
+   PetscFunctionReturn(0);
+ }
+ 
+-#if defined(PETSC_USING_DARWIN)
++#if defined(PETSC_USING_DARWIN) && defined(PETSC_HAVE_FSTATAT)
+ /*
+     Apple's mkdtemp() crashes under Valgrind so this replaces it with a version that does not crash under valgrind
+ */
