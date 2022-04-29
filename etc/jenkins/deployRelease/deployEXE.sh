@@ -20,7 +20,7 @@ autoreconf -i
 ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS
 cd 3rdparty/ff-petsc && make petsc-slepc && cd -
 ./reconfigure
-make -j"$(nproc)"
+make -j4
 
 cp AUTHORS readme/AUTHORS
 make win32
