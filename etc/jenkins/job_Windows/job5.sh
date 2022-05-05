@@ -5,13 +5,11 @@ echo "Job 5"
 
 autoreconf -i
 ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
-        --prefix=/builds/workspace/freefem --disable-scalapack --disable-mumps
+  --prefix="$WORKSPACE/$JOB_NAME/install"
 ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS
-cd 3rdparty/ff-petsc && make petsc-slepc
-cd ../..
-./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
-        --prefix=/builds/workspace/freefem
-make
+cd 3rdparty/ff-petsc && make petsc-slepc && cd -
+./reconfigure
+make -j4
 
 if [ $? -eq 0 ]
 then
@@ -29,7 +27,6 @@ then
   echo "Check process complete"
 else
   echo "Check process failed"
-  exit 1
 fi
 
 # install
@@ -51,8 +48,15 @@ then
   echo "Uninstall process complete"
 else
   echo "Uninstall process failed"
-exit 1
+  exit 1
 fi
 
-# visu for jenkins tests results analyser
+# Jenkins tests results analyser
 ./etc/jenkins/resultForJenkins/resultForJenkins.sh
+
+if [ $? -eq 0 ]
+then
+  echo "Jenkins process complete"
+else
+  echo "Jenkins process failed"
+fi
