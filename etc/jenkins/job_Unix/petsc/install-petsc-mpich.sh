@@ -3,6 +3,7 @@
 if [ "$(uname)" = "Darwin" ]
 then
     # TODO
+    :
 elif [ "$(uname)" = "Linux" ]
 then
     PETSC_INSTALL_DIR='/media/builds/shared/mpich'
