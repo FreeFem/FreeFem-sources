@@ -34,5 +34,5 @@ LIST_IDP=cobrameshcavity.idp cube.idp \
 	MPIplot.idp
 
 install-exec-local:
-	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/idp
-	$(INSTALL) -m 555 $(LIST_IDP) $(DESTDIR)$(ff_prefix_dir)/idp
+	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/idp"
+	$(INSTALL) -m 555 $(LIST_IDP) "$(DESTDIR)$(ff_prefix_dir)/idp"
