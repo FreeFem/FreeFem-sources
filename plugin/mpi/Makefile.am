@@ -53,11 +53,11 @@ $(LIST_COMPILE): ../seq/ff-c++ ../seq/WHERE_LIBRARY-download
 	../seq/ff-c++ -auto -mpi $<
 
 install-exec-local::
-	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib/mpi
-	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
-	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
+	$(mkinstalldirs) -m 755 '$(DESTDIR)$(ff_prefix_dir)/lib/mpi'
+	$(mkinstalldirs) -m 755 '$(DESTDIR)$(ff_prefix_dir)/include'
+	$(mkinstalldirs) -m 755 '$(DESTDIR)$(ff_prefix_dir)/etc'
 	-for i in $(LIST_COMPILE); do \
-	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i $(DESTDIR)$(ff_prefix_dir)/lib/mpi; fi; done
+	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i '$(DESTDIR)$(ff_prefix_dir)/lib/mpi'; fi; done
 
 
 # force the build for freefem++.pref  FH..

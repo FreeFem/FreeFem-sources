@@ -113,8 +113,8 @@ ff-c++:../../plugin/seq/load.link.in
 install-exec-local:: install-exec-local--$(WIN32DLLTARGET)
 
 install-exec-local--win32-dll-target::
-	$(INSTALL_SCRIPT) launchff++.exe FreeFem++.exe FreeFem++-nw.exe bamg.exe cvmsh2.exe ff-c++ $(MPIPROG) "$(DESTDIR)${bindir}"
-	$(INSTALL_SCRIPT) *.dll "$(DESTDIR)${bindir}"
+	$(INSTALL_SCRIPT) launchff++.exe FreeFem++.exe FreeFem++-nw.exe bamg.exe cvmsh2.exe ff-c++ $(MPIPROG) '$(DESTDIR)${bindir}'
+	$(INSTALL_SCRIPT) *.dll '$(DESTDIR)${bindir}'
 install-exec-local--::
 
 # FFCS: automake does not clean the exes automatically because they are not built automatically.
