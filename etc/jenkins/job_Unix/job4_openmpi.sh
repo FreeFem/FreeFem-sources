@@ -13,7 +13,7 @@ then
 elif [ "$(uname)" = "Linux" ]
 then
   # Linux
-  PETSC_DIR='/builds/Shared/openmpi/ff-petsc'
+  PETSC_DIR='/media/builds/shared/openmpi/ff-petsc'
 
   export MPIRUN=/usr/bin/mpirun.openmpi
   export MPICXX=/usr/bin/mpicxx.openmpi
