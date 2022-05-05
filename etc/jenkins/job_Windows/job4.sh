@@ -5,7 +5,7 @@ echo "Job 4"
 
 WORKSPACEunix=$(echo "/$WORKSPACE" | sed -e 's/\\/\//g' -e 's/://')
 
-PETSC_DIR=' '
+PETSC_DIR='/c/builds/shared/ff-petsc'
 
 # configuration & build
 autoreconf -i 
