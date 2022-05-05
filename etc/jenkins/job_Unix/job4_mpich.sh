@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 echo "Job 4 (mpich)"
-set -e
 
 casejob=4_mpich
 
@@ -11,15 +10,18 @@ then
   # MacOS
   PETSC_DIR='/Users/Shared/mpich/ff-petsc'
   change_compiler=etc/jenkins/change_compiler/change_compiler-$(uname -s)-$(uname -r)-$casejob.sh
-  petscVersion=$(grep "VERSION_GIT" /Users/Shared/mpich/ff-petsc/c/include/petscversion.h | cut -c36-42 | cut -f1 -d "\"" )
 elif [ "$(uname)" = "Linux" ]
 then
   # Linux
   PETSC_DIR='/builds/Shared/mpich/ff-petsc'
-  change_compiler=etc/jenkins/change_compiler/change_compiler-$(uname -s)-$casejob.sh
-  petscVersion=$(grep "VERSION_GIT" /builds/Shared/mpich/ff-petsc/c/include/petscversion.h | cut -c36-42 | cut -f1 -d "\"" )
+
+  export MPIRUN=/usr/bin/mpirun.mpich
+  export MPICXX=/usr/bin/mpicxx.mpich
+  export MPIFC=/usr/bin/mpif90.mpich
+  export MPICC=/usr/bin/mpicc.mpich
 fi
 
+petscVersion=$(grep "VERSION_GIT" "$PETSC_DIR/c/include/petscversion.h" | cut -c36-42 | cut -f1 -d "\"" )
 echo "Installed PETSc version: $petscVersion"
 echo "Try to source file $change_compiler"
 test -f "$change_compiler" && echo "Source file $change_compiler"

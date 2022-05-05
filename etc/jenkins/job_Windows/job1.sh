@@ -2,7 +2,6 @@
 source shell mingw64
 
 echo "Job 1 Windows"
-set -e
 
 # configuration & build
 

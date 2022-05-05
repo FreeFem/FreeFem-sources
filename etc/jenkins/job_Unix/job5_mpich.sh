@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 echo "Job 5 (mpich)"
-set -e
 
 casejob=5_mpich
 
@@ -13,7 +12,10 @@ then
 elif [ "$(uname)" = "Linux" ]
 then
   # Linux
-  change_compiler=etc/jenkins/change_compiler/change_compiler-$(uname -s)-$casejob.sh
+  export MPIRUN=/usr/bin/mpirun.mpich
+  export MPICXX=/usr/bin/mpicxx.mpich
+  export MPIFC=/usr/bin/mpif90.mpich
+  export MPICC=/usr/bin/mpicc.mpich
 fi
 
 echo "Try to source file $change_compiler"

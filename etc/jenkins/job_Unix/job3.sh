@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
 
 echo "Job 3"
-set -e
-
-casejob=3
 
 # change default compiler
-change_compiler=etc/jenkins/change_compiler/change_compiler-$(uname -s)-$(uname -r)-$casejob.sh
-echo "Try to source file $change_compiler"
-test -f "$change_compiler" && echo "Source file $change_compiler"
-test -f "$change_compiler" && cat "$change_compiler"
-test -f "$change_compiler" && source "$change_compiler"
-
+if [ "$(uname)" = "Darwin" ]
+then
+  export CC=clang
+  export CXX=clang++
+  export FC=gfortran
+  export F77=gfortran
+fi
 
 # configuration & build
 autoreconf -i

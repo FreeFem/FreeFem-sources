@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 echo "Job 4 (openmpi)"
-set -e
 
 casejob=4_openmpi
 
@@ -11,15 +10,18 @@ then
   # MacOS
   PETSC_DIR='/Users/Shared/openmpi/ff-petsc'
   change_compiler=etc/jenkins/change_compiler/change_compiler-$(uname -s)-$(uname -r)-$casejob.sh
-  petscVersion=$(grep "VERSION_GIT" /Users/Shared/openmpi/ff-petsc/c/include/petscversion.h | cut -c36-42 | cut -f1 -d "\"" )
 elif [ "$(uname)" = "Linux" ]
 then
   # Linux
   PETSC_DIR='/builds/Shared/openmpi/ff-petsc'
-  change_compiler=etc/jenkins/change_compiler/change_compiler-$(uname -s)-$casejob.sh
-  petscVersion=$(grep "VERSION_GIT" /builds/Shared/openmpi/ff-petsc/c/include/petscversion.h | cut -c36-42 | cut -f1 -d "\"" )
+
+  export MPIRUN=/usr/bin/mpirun.openmpi
+  export MPICXX=/usr/bin/mpicxx.openmpi
+  export MPIFC=/usr/bin/mpif90.openmpi
+  export MPICC=/usr/bin/mpicc.openmpi
 fi
 
+petscVersion=$(grep "VERSION_GIT" "$PETSC_DIR/c/include/petscversion.h" | cut -c36-42 | cut -f1 -d "\"" )
 echo "Installed PETSc version: $petscVersion"
 echo "Try to source file $change_compiler"
 test -f "$change_compiler" && echo "Source file $change_compiler"
