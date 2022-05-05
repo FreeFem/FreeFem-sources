@@ -3,12 +3,15 @@ source shell mingw64
 
 echo "Job 4"
 
+WORKSPACEunix=$(echo "/$WORKSPACE" | sed -e 's/\\/\//g' -e 's/://')
+
 PETSC_DIR=' '
 
+# configuration & build
 autoreconf -i 
 ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
   CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
-  --prefix="$WORKSPACE/$JOB_NAME/install" \
+  --prefix="$WORKSPACEunix/install" \
   --with-petsc=$PETSC_DIR/real/lib \
   --with-petsc_complex=$PETSC_DIR/complex/lib
 ./3rdparty/getall -a

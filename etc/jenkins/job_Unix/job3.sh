@@ -13,7 +13,7 @@ fi
 
 # configuration & build
 autoreconf -i
-./configure --enable-download --without-mpi --prefix="$WORKSPACE/$JOB_NAME/install"
+./configure --enable-download --without-mpi --prefix="$WORKSPACE/install"
 ./3rdparty/getall -a -o ARPACK,METIS,ParMETIS,ScaLAPACK,Scotch,SuiteSparse,SuperLU,mmg,parmmg,hpddm,bemtool,Boost,libpthread-google,TetGen,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS,htool
 ./etc/jenkins/blob/build.sh
 

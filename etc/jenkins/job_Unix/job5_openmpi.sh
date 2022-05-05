@@ -25,7 +25,7 @@ test -f "$change_compiler" && source "$change_compiler"
 
 # configuration & build
 autoreconf -i
-./configure --enable-download --enable-debug --prefix="$WORKSPACE/$JOB_NAME/install"
+./configure --enable-download --enable-debug --prefix="$WORKSPACE/install"
 ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS
 ./etc/jenkins/blob/build_PETSc.sh
 ./etc/jenkins/blob/build.sh

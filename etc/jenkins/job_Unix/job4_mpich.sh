@@ -30,7 +30,7 @@ test -f "$change_compiler" && source "$change_compiler"
 
 # configuration & build
 autoreconf -i
-./configure --enable-download --prefix="$WORKSPACE/$JOB_NAME/install" \
+./configure --enable-download --prefix="$WORKSPACE/install" \
   --with-petsc=$PETSC_DIR/r/lib \
   --with-petsc_complex=$PETSC_DIR/c/lib
 ./3rdparty/getall -a -o Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS

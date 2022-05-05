@@ -3,9 +3,12 @@ source shell mingw64
 
 echo "Job 5"
 
+WORKSPACEunix=$(echo "/$WORKSPACE" | sed -e 's/\\/\//g' -e 's/://')
+
+# configuration & build
 autoreconf -i
 ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
-  --prefix="$WORKSPACE/$JOB_NAME/install"
+  --prefix="$WORKSPACEunix/install"
 ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS
 cd 3rdparty/ff-petsc && make petsc-slepc && cd -
 ./reconfigure
