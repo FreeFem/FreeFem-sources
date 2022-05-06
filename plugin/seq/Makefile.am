@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License #
 # along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          #
 ############################################################################
-# SUMMARY : Makefile for FreeFem++
+# SUMMARY : Makefile for FreeFEM
 # LICENSE : LGPLv3
 # ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
 # AUTHORS : ...
@@ -124,25 +124,22 @@ allheaders=../../src/fflib/AddNewFE.h ../../src/fflib/AFunction_ext.hpp ../../sr
 	../../src/femlib/DataFindBoundary.hpp
 
 if ENABLE_FFCS
-
 include.done: $(allheaders)
 	-rm -rf include
 	mkdir -p include
 	cp $^ include
 	touch $@
-
 else
 include.done: $(allheaders)
 	-rm -rf include
-	mkdir -p  include
-	for i in $(allheaders); do  ln -s ../$$i include/. ; done
+	mkdir -p include
+	for i in $(allheaders); do ln -s ../$$i include/. ; done
 	touch $@
 endif
 
 clean-local::
 	-rm -r include
 	-rm include.done
-
 
 # FFCS - 27/2/13 - remove dependency on Makefile to avoid recompiling everything everytime something is changed in the
 # configuration step
@@ -154,61 +151,61 @@ clean-local::
 	  $(LIST_COMPILE) $(LIST_COMPILE_PKG)
 	-rm -rf include include.done
 ff-c++:load.link.in load.link WHERE_LIBRARY-download ff-get-dep ../../config.status
-	../../config.status  --file=ff-c++:load.link.in
+	../../config.status --file=ff-c++:load.link.in
 	chmod a+x ff-c++
 load.link:load.link.in ../../config.status
-	../../config.status  --file=load.link:load.link.in
+	../../config.status --file=load.link:load.link.in
 	chmod a+x load.link
 ff-pkg-download:ff-pkg-download.in ../../config.status
-	../../config.status  --file=$@:$@.in
+	../../config.status --file=$@:$@.in
 	chmod a+x $@
 	cp $@ ../../3rdparty/bin
 ff-get-dep:ff-get-dep.in ../../config.status
-	../../config.status  --file=$@:$@.in
+	../../config.status --file=$@:$@.in
 	chmod a+x $@
 	-if [ -d ../../3rdparty/bin ] ;then cp $@ ../../3rdparty/bin; fi
-WHERE_LIBRARY-download:ff-pkg-download FORCE  WHERE_LIBRARY-config WHERE_LIBRARY
+WHERE_LIBRARY-download:ff-pkg-download FORCE WHERE_LIBRARY-config WHERE_LIBRARY
 	@./ff-pkg-download >$@-new
-	@diff $@-new $@  || (mv $@-new $@ ;touch WHERE_LIBRARY)
+	@diff $@-new $@ || (mv $@-new $@ ;touch WHERE_LIBRARY)
 WHERE_LIBRARY:
 	touch $@
 FORCE: ;
 
 install-exec-local:: load_compile WHERE_LIBRARY
 	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/lib"
-	test -n "$(MPIPROG)" && "$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib/mpi" || true
+	test -n "$(MPIPROG)" && $(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/lib/mpi" || true
 	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/include"
 	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/etc"
-	$(INSTALL_DATA)  renumb.hpp  clapack.h ppmimg.h  bmo.hpp msh3.hpp pcm.hpp  include/*   "$(DESTDIR)$(ff_prefix_dir)/include"
-	$(INSTALL)  -m 555 $(LIST_COMPILE) "$(DESTDIR)$(ff_prefix_dir)/lib"
-	$(INSTALL)  -m 555 ff-get-dep.awk  WHERE_LIBRARY-config WHERE_LIBRARY  "$(DESTDIR)$(ff_prefix_dir)/lib"
-	for i in  WHERE_LIBRARY-config WHERE_LIBRARY WHERE_LIBRARY-download; do \
-	  sed <$$i >"$(DESTDIR)$(ff_prefix_dir)/lib/$$i" 's#$(abs_top_builddir)/3rdparty#$(ff_prefix_dir)#' ;\
-	 done
-	echo loadpath += \"./\"  >"$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref"
-	echo loadpath += \"$(ff_prefix_dir)/lib\"  >>"$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref"
-	echo includepath += \"$(ff_prefix_dir)/idp\"  >>"$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref"
-	$(INSTALL_SCRIPT) ff-c++  "$(DESTDIR)${bindir}"
-	$(INSTALL_SCRIPT) ff-pkg-download  "$(DESTDIR)${bindir}"
-	$(INSTALL_SCRIPT) ff-get-dep   "$(DESTDIR)${bindir}"
+	$(INSTALL_DATA) renumb.hpp clapack.h ppmimg.h bmo.hpp msh3.hpp pcm.hpp include/* "$(DESTDIR)$(ff_prefix_dir)/include"
+	$(INSTALL) -m 555 $(LIST_COMPILE) "$(DESTDIR)$(ff_prefix_dir)/lib"
+	$(INSTALL) -m 555 ff-get-dep.awk WHERE_LIBRARY-config WHERE_LIBRARY "$(DESTDIR)$(ff_prefix_dir)/lib"
+	for i in WHERE_LIBRARY-config WHERE_LIBRARY WHERE_LIBRARY-download; do \
+		sed <$$i >"$(DESTDIR)$(ff_prefix_dir)/lib/$$i" 's#$(abs_top_builddir)/3rdparty#$(ff_prefix_dir)#' ;\
+	done
+	echo loadpath += \"./\" >"$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref"
+	echo loadpath += \"$(ff_prefix_dir)/lib\" >>"$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref"
+	echo includepath += \"$(ff_prefix_dir)/idp\" >>"$(DESTDIR)$(ff_prefix_dir)/etc/freefem++.pref"
+	$(INSTALL_SCRIPT) ff-c++ "$(DESTDIR)${bindir}"
+	$(INSTALL_SCRIPT) ff-pkg-download "$(DESTDIR)${bindir}"
+	$(INSTALL_SCRIPT) ff-get-dep "$(DESTDIR)${bindir}"
 ##	$(DESTDIR)${bindir}/ff-pkg-download $(DESTDIR) >$(DESTDIR)$(ff_prefix_dir)/lib/WHERE_LIBRARY-download
 	-for i in $(LIST_COMPILE_PKG); do \
-	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i "$(DESTDIR)$(ff_prefix_dir)/lib"; fi; done
-	- if [ -n "$(MPIPROG)" ] ; then \
+	 if [ -f $$i ]; then $(INSTALL) -m 555 $$i "$(DESTDIR)$(ff_prefix_dir)/lib"; fi; done
+	- if [ -n "$(MPIPROG)" ]; then \
 		for i in $(LIST_COMPILE_PKG) $(LIST_COMPILE); do \
-		 if [ -f ../mpi/$$i ] ; then \
-	    	    $(INSTALL)  -m 555 ../mpi/$$i "$(DESTDIR)$(ff_prefix_dir)/lib/mpi"; \
-	        else echo missing install mpi version ???  ../mpi/$$i ;\
-	         fi;  \
-	        done ; \
+			if [ -f ../mpi/$$i ]; then \
+				$(INSTALL) -m 555 ../mpi/$$i "$(DESTDIR)$(ff_prefix_dir)/lib/mpi"; \
+			else echo missing install mpi version ??? ../mpi/$$i ;\
+			fi;\
+		done ; \
 	fi
 
 ffmaster$(EXEEXT): libff-mmap-semaphore.o ffmaster.c libff-mmap-semaphore.h WHERE_LIBRARY-download 
 	$(CC) $(CFLAGS) ffmaster.c libff-mmap-semaphore.o -o ffmaster \
-	`awk -f ff-get-dep.awk -v libs="[pthread-google|pthread]" WHERE_LIBRARY-download  WHERE_LIBRARY-config`
+	`awk -f ff-get-dep.awk -v libs="[pthread-google|pthread]" WHERE_LIBRARY-download WHERE_LIBRARY-config`
 
 clean-local::
-	-rm *.fg *.eps *~ *.ps  *.mesh *.mesh.gmsh ListOfAllocPtr-8.bin ffglut*.ppm Th.o.meshb	Th3.d.meshb	dep.sol.meshbgh \
+	-rm *.fg *.eps *~ *.ps *.mesh *.mesh.gmsh ListOfAllocPtr-8.bin ffglut*.ppm Th.o.meshb	Th3.d.meshb	dep.sol.meshbgh \
 ipopt.out	mmg.out xxxx ThFF.txt		TriQA.txt		cavidadTT.txt		mass.txt		xy.txt \
 ThFF_Metric.txt		TriQA_Metric.txt	datanc.txt		u100m8.txt \
 TTh.sol		Th.o.sol	Th3.sol		dep.o.sol	dep.sol		gradient.sol	hessien.sol pippo.data pippo.dx testsavemedit.solb med.gp bidule.vtk	disque.vtk g-iso

@@ -23,21 +23,20 @@
 
 
 if FFCS_MPIOK
-#  compile nothing if no mpi ... 
-LIST_COMPILE=@TOOL_DYLIB_mumps@ MPICG.$(DYLIB_SUFFIX)	\
-mpi-cmaes.$(DYLIB_SUFFIX) @TOOL_DYLIB_parmetis@ @TOOL_DYLIB_parmmg@  @TOOL_DYLIB_hpddm@ @TOOL_DYLIB_bem@
+# compile nothing if no mpi ... 
+LIST_COMPILE=@TOOL_DYLIB_mumps@ MPICG.$(DYLIB_SUFFIX) \
+mpi-cmaes.$(DYLIB_SUFFIX) @TOOL_DYLIB_parmetis@ @TOOL_DYLIB_parmmg@ @TOOL_DYLIB_hpddm@ @TOOL_DYLIB_bem@
 
 # FFCS - do not set loadpath to be able to run an external version of FF on the examples in this directory with
 # [[../../mkffref]]
 
 all-local:$(LIST_COMPILE)
-	@echo Warning missing mpi plugin: `for i in $(LIST_COMPILE); do if test ! -s $i ; then j=1; echo "$i," ;fi; done`
+	@echo Warning missing mpi plugin: `for i in $(LIST_COMPILE); do if test ! -s $i ; then j=1; echo "$i,"; fi; done`
 	@echo "finish compile load mpi solver !"
 else
 all-local:$(LIST_COMPILE)
-	@echo Warning missing mpi plugin: `for i in $(LIST_COMPILE); do if test ! -s $i ; then j=1; echo "$i," ;fi; done`
+	@echo Warning missing mpi plugin: `for i in $(LIST_COMPILE); do if test ! -s $i ; then j=1; echo "$i,"; fi; done`
 	@echo "finish compile load mpi solver !"
-
 endif
 
 #to force the recompile if change ... FH
@@ -49,18 +48,18 @@ $(LIST_COMPILE): ../seq/ff-c++ ../seq/WHERE_LIBRARY-download
 #	FFCS on Windows inserts all MPI options (include, lib, ...) in the $MPICXX compiler script, instead of "$CXX $MPI_xxx",
 #	but it needs '-mpi' to do that
 #
-###	-../seq/ff-c++ -auto  $<
+###	-../seq/ff-c++ -auto $<
 	../seq/ff-c++ -auto -mpi $<
 
 install-exec-local::
-	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib/mpi
-	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
-	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/etc
+	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/lib/mpi"
+	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/include"
+	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/etc"
 	-for i in $(LIST_COMPILE); do \
-	 if [ -f $$i ] ; then 	$(INSTALL)  -m 555 $$i "$(DESTDIR)$(ff_prefix_dir)/lib/mpi"; fi; done
+		if [ -f $$i ]; then $(INSTALL) -m 555 $$i "$(DESTDIR)$(ff_prefix_dir)/lib/mpi"; fi; done
 
 
-# force the build for freefem++.pref  FH..
+# force the build for freefem++.pref FH..
 # DDM-Schwarz-Lame-2d.edp:freefem++.pref
 # FFCS - cleaning is useful sometimes
 clean-local::
