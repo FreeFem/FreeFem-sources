@@ -9109,68 +9109,58 @@ void  Element_rhsVF(const FElementL & Kv,const FElementL & KKv,int ie,int iie,in
         ffassert(0);
     }
 
-    // generic template for AssembleVarForm
-    template<class R,typename MC,class MMesh,class FESpace1,class FESpace2>
-    bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
-                         MC  * A,KN_<R> * B,const list<C_F0> &largs)
-    { // return true if BC
-        
-        typedef MMesh * pmesh; // integration mesh type
-        bool ret=false;
-        typedef DotStar_KN_<R> DotStar;
-        typedef DotSlash_KN_<R> DotSlash;
-        list<C_F0>::const_iterator ii,ib=largs.begin(),
-        ie=largs.end();
-        using namespace FreeFempp;
-        TypeVarForm<R> *tvf=TypeVarForm<R>::Global;
-        assert( tvf);
-        for (ii=ib;ii != ie;ii++)
-        {
-            Expression e=ii->LeftValue();
-            aType r = ii->left();
+// generic template for AssembleVarForm
+template<class R,typename MC,class MMesh,class FESpace1,class FESpace2>
+bool AssembleVarForm(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
+                     MC  * A,KN_<R> * B,const list<C_F0> &largs)
+{ // return true if BC
+    
+    typedef MMesh * pmesh; // integration mesh type
+    bool ret=false;
+    typedef DotStar_KN_<R> DotStar;
+    typedef DotSlash_KN_<R> DotSlash;
+    list<C_F0>::const_iterator ii,ib=largs.begin(),
+    ie=largs.end();
+    using namespace FreeFempp;
+    TypeVarForm<R> *tvf=TypeVarForm<R>::Global;
+    assert( tvf);
+    for (ii=ib;ii != ie;ii++)
+    {
+        Expression e=ii->LeftValue();
+        aType r = ii->left();
         //    if(verbosity > 99)   cout <<  << "AssembleVarForm " <<  << " " <<  (*A)(0,3) << endl;
-            if (r==  tvf->tFB)
-            { if (A)
+        if (r==  tvf->tFB)
+        {
+            if (A)
+            {
+                const  FormBilinear * bf =dynamic_cast<const  FormBilinear *>(e);
+                if((bf->di->d != MMesh::Rd::d) || (bf->di->dHat != MMesh::RdHat::d) )
                 {
-                    const  FormBilinear * bf =dynamic_cast<const  FormBilinear *>(e);
-                    if(bf->di->d != MMesh::Rd::d )
-                    {
-                      
-                      if( bf->di->dHat==2)
-                    {
-                        cout << " int on MeshS ( Bilinear Form ) toDo  " << endl;
-                        ffassert(0);
-                        
-                    }
-                    else  if( bf->di->dHat==1)
-                    {
-                        cout << " int on MeshL ( Bilinear Form ) toDo  " << endl;
-                        ffassert(0);
-                            
-                    }
-                    else if(bf->di->d != MMesh::Rd::d ){
-                        cout << " int 2d case ( Bilinear Form ) on Mesh"<< MMesh::Rd::d <<" debile !!!!! "<< endl;
-                        ffassert(0);}
-                    }
-                    else {
+                    cout << " Errer: int "<< bf->di->dHat << "d case ( Bilinear Form ) on Mesh"<< MMesh::RdHat::d <<" Bizarre  !!!!! "<< endl;
+                    cout << "    dim coord (template) "<<MMesh::Rd::d << " mesh : " << bf->di->d << endl;
+
+                  ffassert(0);        
+          
+                }
+                else {
                     pmesh  Thbf= GetAny<pmesh>((*bf->di->Th)(stack));
                     if(Thbf) AssembleBilinearForm<R>( stack,*Thbf,Uh,Vh,sym,*A,bf);
-                    }
                 }
             }
-            else if (r==tvf->tMat)
-            {
-                if (A)
+        }
+        else if (r==tvf->tMat)
+        {
+            if (A)
                 InternalError(" Add sparse matrice; to do, sorry");
-            }
-            else if (r==tvf->tFL)
-            {
-                if (B) {
-                    const  FormLinear * bf =dynamic_cast<const  FormLinear *>(e);
-                    if(bf->di->d != MMesh::Rd::d )
-                    {
-                      
-                      if( bf->di->dHat==2)
+        }
+        else if (r==tvf->tFL)
+        {
+            if (B) {
+                const  FormLinear * bf =dynamic_cast<const  FormLinear *>(e);
+                if(bf->di->d != MMesh::Rd::d )
+                {
+                    
+                    if( bf->di->dHat==2)
                     {
                         cout << " int on MeshS toDo  ( Linear Form )" << endl;
                         ffassert(0);
@@ -9180,56 +9170,56 @@ void  Element_rhsVF(const FElementL & Kv,const FElementL & KKv,int ie,int iie,in
                     {
                         cout << " int on MeshL toDo  ( Linear Form )" << endl;
                         ffassert(0);
-                            
+                        
                     }
                     else if(bf->di->d != MMesh::Rd::d ){
                         cout << " int 2d case  on Mesh ( Linear Form )"<< MMesh::Rd::d <<" debile !!!!! "<< endl;
                         ffassert(0);}
-                    }
-
-                    else
+                }
+                
+                else
                 {
                     pmesh  Thbf= GetAny<pmesh>((*bf->di->Th)(stack));
                     if(Thbf) AssembleLinearForm<R>( stack,*Thbf, Vh, B,bf);
                 }}
-            }
-            else if (r==tvf->tTab)
-            {
-                if ( B)
+        }
+        else if (r==tvf->tTab)
+        {
+            if ( B)
                 *B += *GetAny<KN<R> *>( (*e)(stack) );
-            }
-            else if (r==tvf->tDotStar)
+        }
+        else if (r==tvf->tDotStar)
+        {
+            if ( B)
             {
-                if ( B)
-                {
-                    DotStar ab=GetAny<DotStar>( (*e)(stack) );
-                    *B += ab;
-                }
-            }
-            else if (r==tvf->tMatX)
-            {
-                if ( B)
-                {
-                    *B += GetAny<typename RNM_VirtualMatrix<R>::plusAx >( (*e)(stack) )  ;
-                }
-            }
-            else if (r==tvf->tMatTX)
-            {
-                if ( B)
-                {
-                    *B += GetAny<typename RNM_VirtualMatrix<R>::plusAtx >( (*e)(stack) )  ;
-                }
-            }
-            else if (r== tvf->tBC)
-            ret=true;
-            else
-            {
-                cerr << "AssembleVarForm  invalid type : " << * r <<  endl;
-                throw(ErrorExec("AssembleVarForm invalid type in varf",1));
+                DotStar ab=GetAny<DotStar>( (*e)(stack) );
+                *B += ab;
             }
         }
-        return ret;
+        else if (r==tvf->tMatX)
+        {
+            if ( B)
+            {
+                *B += GetAny<typename RNM_VirtualMatrix<R>::plusAx >( (*e)(stack) )  ;
+            }
+        }
+        else if (r==tvf->tMatTX)
+        {
+            if ( B)
+            {
+                *B += GetAny<typename RNM_VirtualMatrix<R>::plusAtx >( (*e)(stack) )  ;
+            }
+        }
+        else if (r== tvf->tBC)
+            ret=true;
+        else
+        {
+            cerr << "AssembleVarForm  invalid type : " << * r <<  endl;
+            throw(ErrorExec("AssembleVarForm invalid type in varf",1));
+        }
     }
+    return ret;
+}
 
     template<class R,class MMesh,class FESpace1,class FESpace2>
     void AssembleBC(Stack stack,const MMesh & Th,const FESpace1 & Uh,const FESpace2 & Vh,bool sym,
