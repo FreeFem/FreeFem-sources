@@ -658,7 +658,8 @@ namespace Fem2D
         {
             double l[3];
             int loutside;// 0 inside, 1 out close, 2, out fare, , -1 inside
-            int itt =gdfb->Find(P,l,loutside);
+            long old = tstart ? tstart-elements  : -1;
+            int itt =gdfb->Find(P,l,loutside,old);
             outside=loutside;
             Phat=R2(l+1);
             Element &K=(this->elements)[itt];

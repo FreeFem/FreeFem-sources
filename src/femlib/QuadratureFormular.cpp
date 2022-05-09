@@ -71,12 +71,14 @@ using namespace std;
 namespace Fem2D {
   
 template<class QF,int ON> 
-  QF  * QF_exact(int exact,QF * p=0)
+  QF  * QF_exact(int exactpm,QF * p=0)
   {
+    int exact = abs(exactpm);
     exact=max(0,exact);
     const int N=100;
     assert(exact<N&& exact>=0);
     static QF ** a=0;
+      static int M=0;
     if(a==0)
       { //    
 	a = new  QF*[N];
@@ -88,6 +90,7 @@ template<class QF,int ON>
     if ( p  )
       {
 	//cout << endl << " QF " << exact << " " << p->exact << " " << p->n << endl;;
+        M = max(M,exact);
 	for( int i=0;i<=exact;++i)
 	  {
 	    if( a[i]== 0 || a[i]->n > p->n)
@@ -95,6 +98,8 @@ template<class QF,int ON>
 	    //  cout << " QF: on " << ON << " exact P_" << i << " : "<< a[i]->n << endl;
 	  }
       }
+    else if(exactpm<0)
+      p=a[min(exact,M)];
     else
       p=a[exact];
     return p;

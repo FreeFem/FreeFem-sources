@@ -1316,7 +1316,8 @@ inline double dist2(int dhat,const Fem2D::R3 *Q,Fem2D::R3 &P,double *l,double *d
     return d2;
 }
 template<typename Mesh>
-int GenericDataFindBoundary<Mesh>::Find(typename Mesh::Rd PP,double *l,int & outside) const
+int GenericDataFindBoundary<Mesh>::Find(typename Mesh::Rd PP,double *l,int & outside,long old) const
+//  old :add FH et PHT mai 2022
 {  // FH: outside : 0 inside, 1 out close, 2, out fare, , -1 inside
     // warning l
     nbfind++;
@@ -1330,6 +1331,30 @@ int GenericDataFindBoundary<Mesh>::Find(typename Mesh::Rd PP,double *l,int & out
     int ip = p-P;
     Rd Q[dHat+1];
     R ll[dHat+1],lpj[dHat+1];
+    if( old >=0 &&   !bborder)
+    { // check if old is correct element
+        int k =old;
+        const Element & K=(*pTh)[k];
+        int nI =dHat+1;
+        for(int i=0; i< nI;++i)
+            Q[i]=K[i];
+        double ddeps=Plambla(nI-1,Q,PP,ll);//  return une taille ^2, ^4, ^3 suivant la dim  nI-1
+        R d2 = dist2(nI-1,Q,PP,ll,lpj);
+        if( nI==2)
+                ddeps =ddeps/10000.;
+        else if (nI==3)
+                ddeps = sqrt(ddeps)/10000.; // epaisseur de l'objet au carre 1.100 de
+        else ffassert(0);
+        if( d2 < ddeps/1000.) // pour etre sur
+        {
+
+            for(int i=0;i<=dHat;++i)
+                l[i]=lpj[i];
+            outside=0;
+            return k;
+        }
+    }
+
 //#define DEBUGGING
 #ifdef DEBUGGING
     int err=0;

@@ -29,7 +29,7 @@ struct GenericDataFindBoundary
     long debug ;
     GenericDataFindBoundary(Mesh const * pTh,int ddebug=0);
     ~GenericDataFindBoundary() ;//{delete tree;}
-    int Find(Rd P,double *l,int & outside) const ;
+    int Find(Rd P,double *l,int & outside,long  old=-1) const ;//  old :add FH et PHT mai 2022
     void gnuplot(const string & fn);
 };
 
