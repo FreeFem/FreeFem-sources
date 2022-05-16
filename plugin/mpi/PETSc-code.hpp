@@ -5075,11 +5075,7 @@ namespace PETSc {
       Expression A;
       Expression B;
       const int c;
-      static const int n_name_param = 0;
-      static basicAC_F0::name_and_type name_param[];
-      Expression nargs[n_name_param];
       DMPlexToFF_Op(const basicAC_F0& args, int d) : A(0), B(0), c(d) {
-        args.SetNameParam(n_name_param, name_param, nargs);
         B = to<DMPlex*>(args[1]);
         if(c == 0)
             A = to< Mesh const** >(args[0]);
@@ -5096,7 +5092,6 @@ namespace PETSc {
     DMPlexToFF(int)
       : OneOperator(atype< Mesh3 const** >( ), atype< Mesh3 const** >( ), atype< DMPlex* >( )), c(1) {}
   };
-  basicAC_F0::name_and_type DMPlexToFF::DMPlexToFF_Op::name_param[] = { };
   AnyType DMPlexToFF::DMPlexToFF_Op::operator( )(Stack stack) const {
       DMPlex* p = GetAny<DMPlex*>((*B)(stack));
       PetscSection      coordSection;
@@ -5359,11 +5354,7 @@ namespace PETSc {
      public:
       Expression A;
       Expression B;
-      static const int n_name_param = 0;
-      static basicAC_F0::name_and_type name_param[];
-      Expression nargs[n_name_param];
       buildSolution_Op(const basicAC_F0& args) : A(0), B(0) {
-        args.SetNameParam(n_name_param, name_param, nargs);
         A = to<Dmat*>(args[0]);
         B = to<KN<HPDDM::upscaled_type<PetscScalar>>*>(args[1]);
       }
@@ -5375,7 +5366,6 @@ namespace PETSc {
     buildSolution( )
       : OneOperator(atype<long>( ), atype<Dmat*>( ), atype<KN<HPDDM::upscaled_type<PetscScalar>>*>( )) {}
   };
-  basicAC_F0::name_and_type buildSolution::buildSolution_Op::name_param[] = { };
   AnyType buildSolution::buildSolution_Op::operator( )(Stack stack) const {
       Dmat* ptA = GetAny<Dmat*>((*A)(stack));
       KN<HPDDM::upscaled_type<PetscScalar>>* ptKN = GetAny<KN<HPDDM::upscaled_type<PetscScalar>>*>((*B)(stack));
