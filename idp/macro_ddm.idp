@@ -248,7 +248,7 @@ ENDIFMACRO
     VhLocalPrivate sum;
     sum[] = khi[];
     VhGlobalPrivate phi;
-    if(n2oGlobal.n == globalName.nt) {
+    if(n2oGlobal.n == globalName.nt && s == 1) {
         real[int] restrictionPart(n2oGlobal.n);
         restrictionPart = part[](n2oGlobal);
         part = 0.0;
