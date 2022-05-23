@@ -23,8 +23,8 @@ autoreconf -i
 ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS
 cd 3rdparty/ff-petsc && make petsc-slepc && cd -
 ./reconfigure
-make -j"$(nproc)"
-make -j"$(nproc)" install
+make -j4
+make -j install
 
 ## Create FreeFEM Debian package
 mkdir "$DEB_NAME"
@@ -81,6 +81,7 @@ else
 fi
 
 # clean the VM
+rm -rf "$BUILD_DIR/ff-petsc"
 rm -rf "$DEB_NAME"
 rm "$GH_DEB_NAME"
 

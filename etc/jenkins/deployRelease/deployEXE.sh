@@ -16,16 +16,14 @@ GH_EXE_NAME="FreeFEM-${VERSION}-win64.exe"
 
 ## EXE build
 autoreconf -i
-./configure --enable-download --enable-optim --enable-generic --disable-scalapack --disable-mumps
+./configure --enable-download --enable-optim --enable-generic
 ./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS
 cd 3rdparty/ff-petsc && make petsc-slepc && cd -
-./configure --enable-download --enable-optim --enable-generic
-make -j"$(nproc)"
+./reconfigure
+make -j4
 
 cp AUTHORS readme/AUTHORS
 make win32
-
-mv "Output/$EXE_NAME" "$GH_EXE_NAME"
 
 ## Deploy in GitHub release
 RELEASE=$(curl "https://api.github.com/repos/$ORGANIZATION/$REPOSITORY/releases/tags/$RELEASE_TAG_NAME")
@@ -36,6 +34,7 @@ then
     echo "Release does not exists"
     exit 1
 else
+    mv "Output/$EXE_NAME" "$GH_EXE_NAME"
     RESPONSE=$(curl --data-binary "@$GH_EXE_NAME" -H "Authorization: token $TOKEN" -H "Content-Type: application/octet-stream" "$UPLOAD_URL=$GH_EXE_NAME")
     echo "Github response:"
     echo "$RESPONSE"
