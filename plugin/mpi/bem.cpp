@@ -882,8 +882,14 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
     vector<double> p2(3*m);
     Fem2D::R3 pp;
     bemtool::R3 p;
-    SRdHat pbs(1./(SRdHat::d+1),1./(SRdHat::d+1));
-    TRdHat pbt(1./(TRdHat::d+1),1./(TRdHat::d+1));
+    SRdHat pbs;
+    TRdHat pbt;
+    pbs[0] = 1./(SRdHat::d+1);
+    pbs[1] = 1./(SRdHat::d+1);
+    if (SRdHat::d == 2) pbs[2] = 1./(SRdHat::d+1);
+    pbt[0] = 1./(TRdHat::d+1);
+    pbt[1] = 1./(TRdHat::d+1);
+    if (TRdHat::d == 2) pbt[2] = 1./(TRdHat::d+1);
 
     int Snbv = Uh->TFE[0]->ndfonVertex;
     int Snbe = Uh->TFE[0]->ndfonEdge;
@@ -1368,6 +1374,8 @@ static void Init_Bem() {
     // bem integration space/target space must be review Axel 08/2020    
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fesS > (1) );
     TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fesS > );
+    TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fes3 > (1) );
+    TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshS, v_fesS, v_fes3 > );
     TheOperators->Add("<-", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fesL > (1) );
     TheOperators->Add("=", new OpHMatrixtoBEMForm< std::complex<double>, MeshL, v_fesL, v_fesL > );
        
