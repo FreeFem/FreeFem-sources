@@ -905,6 +905,13 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
     bool SP2 = (Snbv == 1) && (Snbe == 1) && (Snbt == 0);
     bool SRT0 = (SRdHat::d == 2) && (Snbv == 0) && (Snbe == 1) && (Snbt == 0);
 
+    if(mpirank == 0){
+        cout << "Vh->TFE[0]->N=" << Vh->TFE[0]->N << endl;
+        //cout << "Vh->TFE[0].N=" << Vh->TFE[0].N << endl;
+        cout << "Vh->TFE.N()=" << Vh->TFE.N() << endl;
+        cout << "Vh->MaxNbNodePerElement=" << Vh->MaxNbNodePerElement << endl;
+    }
+
     if (SP2) {
         Dof<P2> dof(mesh,true);
         for (int i=0; i<n; i++) {
@@ -945,24 +952,69 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
     t->set_minclustersize(ds.minclustersize);
     s->set_minclustersize(ds.minclustersize);
     t->build(n,p1.data(),2,comm);
-    
+    // 
+    // In this method :OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator() 
+    // be careful version du 30 mai 2022: - s : correponding to target
+    //                                    - t : corresponding to source
+    //     
 
     if(!samemesh) {
-        for (int i=0; i<m; i++) {
-            if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
-                pp = ThV.vertices[i];
-            else if (Vh->MaxNbNodePerElement == 1)
-                pp = ThV[i](pbt);
-            else {
-                if (mpirank == 0) std::cerr << "ff-BemTool error: only P0 and P1 FEspaces are available for reconstructions." << std::endl;
-                ffassert(0);
+        if( Vh->TFE[0]->N == 1){
+            // case the targer FE is scalar
+            for (int i=0; i<m; i++) {
+                if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
+                    pp = ThV.vertices[i];
+                else if (Vh->MaxNbNodePerElement == 1)
+                    pp = ThV[i](pbt);
+                else {
+                    if (mpirank == 0) std::cerr << "ff-BemTool error: only P0 and P1 FEspaces are available for reconstructions." << std::endl;
+                    ffassert(0);
+                }
+                p2[3*i+0] = pp.x;
+                p2[3*i+1] = pp.y;
+                p2[3*i+2] = pp.z;
             }
-            p2[3*i+0] = pp.x;
-            p2[3*i+1] = pp.y;
-            p2[3*i+2] = pp.z;
         }
+        else{
+            // hack for Maxwell case to have one Hmatrix to avoid one Hmatrix by direction
+            ffassert(SRT0 && SRdHat::d == 2 && VFBEM==2);
 
-        s->build(m,p2.data(),2,comm);
+            // Dans un espace verctoriel, [P1,P1,P1] pour les targets, on a:
+            //        m correspond au nombre de dof du FEM space
+            // Or dans ce cas, on veut que m = mesh_Target.nv 
+            // 
+            // ==> on n'a pas besoin de resize les points p2
+            int nnn= Vh->TFE[0]->N;
+            cout << "nnn=" << nnn << endl;
+            cout << "p2.size= " << p2.size() << endl; 
+            cout << "p2.resize :"<< nnn*3*m << " "<< 3*m << endl;
+            cout << "m=" << m << endl; 
+            cout << "n=" << n << endl;
+
+            int mDofScalar = m/nnn; // computation of the dof of one component 
+
+            for (int i=0; i<mDofScalar; i++) {
+                if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
+                    pp = ThV.vertices[i];
+                else if (Vh->MaxNbNodePerElement == 1)
+                    pp = ThV[i](pbt);
+                else {
+                    if (mpirank == 0) std::cerr << "ff-BemTool error: only P0 and P1 FEspaces are available for reconstructions." << std::endl;
+                    ffassert(0);
+                }
+                //if( i%2 ==0) cout << i << ",  pp.x =" << pp.x << endl;
+                for(int iii=0; iii<nnn; iii++){
+                    ffassert( nnn*3*i+3*iii+2 < nnn*3*m );
+                    //if(i== m-1) cout << "pp.x =" << pp.x << endl;
+                    p2[nnn*3*i+3*iii+0] = pp.x;
+                    p2[nnn*3*i+3*iii+1] = pp.y;
+                    p2[nnn*3*i+3*iii+2] = pp.z;
+                }
+
+            }
+        }
+        cout << "call s->build( (Vh->TFE[0]->N)*m,p2.data(),2,comm);" << endl;
+        s->build( m,p2.data(),2,comm);  
     }
     else{
         p2=p1;
@@ -1028,6 +1080,7 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
         delete generator;
     }
     else if (VFBEM==2) {
+        cout << "VFBEM==2"<< endl;
         BemPotential *Pot = getBemPotential(stack,largs);
         Geometry node_output;
         if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
@@ -1056,14 +1109,8 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
             ff_POT_Generator<R,P2,MeshBemtool,SMesh>(generator,Pot,dof,mesh,node_output);
         }
         else if (SRT0 && SRdHat::d == 2) {
-            cout<< "composant dans le Pot kernel" << Pot->composant << endl;
-            int composant = (int) Pot->composant;
-            cout << "composant =" << composant << endl;
-            if( composant < 0 || composant > 2){
-                cerr << "error in the Pot kernel compo:: compo must be 0,1,2" << endl;
-                exit(0);
-            } 
-            ff_POT_Generator_Maxwell<R,bemtool::RT0_2D>(generator,Pot,mesh,node_output,composant);
+            
+            ff_POT_Generator_Maxwell<R,bemtool::RT0_2D>(generator,Pot,mesh,node_output);
         }
         else
             ffassert(0);

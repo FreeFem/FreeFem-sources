@@ -458,11 +458,9 @@ public:
     int typePotential;  // Laplace, Helmholtz, Yukawa
     // typePotential ={SL=0, DL=1, HS=2, TDL=3} and determine equation Laplace, Helmholtz if k==0 or not
     std::complex<double> wavenum; // parameter to Helmholtz
-    int composant; // J.Morice composant for Maxwell 
 
     BemPotential(){}
-    /*
-    // Ancienne version avant d'ajout du composant
+    
     BemPotential(string *tpotential, Complex k) : typePotential(-1), wavenum(k) {
         
         if(!tpotential->compare("SL"))
@@ -477,41 +475,6 @@ public:
         if(mpirank==0 && verbosity>5)
             cout << "type BEM Potential " << *tpotential <<": "<< tpotential <<": " << typePotential << " wave number "<< wavenum << endl;
     }
-    */
-
-    BemPotential(string *tpotential, Complex k) : typePotential(-1), wavenum(k), composant(-1) {
-        
-        if(!tpotential->compare("SL"))
-            typePotential = 1;
-        else if(!tpotential->compare("DL"))
-            typePotential = 2;
-        else if(!tpotential->compare("CST"))
-            typePotential = 3;
-        else
-            ExecError("unknown BEM Potential type ");
-        
-        if(mpirank==0 && verbosity>5)
-            cout << "type BEM Potential " << *tpotential <<": "<< tpotential <<": " << typePotential << " wave number "<< wavenum << endl;
-    }
-    
-    BemPotential(string *tpotential, Complex k, int compo) : typePotential(-1), wavenum(k), composant(compo) {
-        
-        if(!tpotential->compare("SL"))
-            typePotential = 1;
-        else if(!tpotential->compare("DL"))
-            typePotential = 2;
-        else if(!tpotential->compare("CST"))
-            typePotential = 3;
-        else
-            ExecError("unknown BEM Potential type ");
-        
-        if(mpirank==0 && verbosity>5)
-            cout << "type BEM Potential " << *tpotential <<": "<< tpotential <<": " << typePotential << " wave number "<< wavenum << endl;
-        if(mpirank==0){
-            cout << "type BEM Potential " << *tpotential <<": "<< tpotential <<": " << typePotential << " wave number "<< wavenum << endl;
-        }
-    }
-    
 
     ~BemPotential() {}
     
@@ -525,12 +488,12 @@ class OP_MakeBemPotential {
  public:
   class Op : public E_F0mps {
    public:
-    //static const int n_name_param = 1;
-    static const int n_name_param = 2;  // J. Morice composant for Maxwell
+    static const int n_name_param = 1;
+    
     static basicAC_F0::name_and_type name_param[];
     Expression nargs[n_name_param];
     Complex arg(int i, Stack stack, Complex a) const { return nargs[i] ? GetAny< Complex >((*nargs[i])(stack)) : a; }
-    long arg(int i, Stack stack, long a) const { return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a; } // J.Morice composant for Maxwell 
+    
     typedef pBemPotential *R;
     typedef pBemPotential *A;
     typedef string *B;
@@ -541,8 +504,7 @@ class OP_MakeBemPotential {
       A bempot = GetAny< A >((*a)(s));
       B type = GetAny< B >((*b)(s));
       Complex k(arg(0, s, Complex(0.0,0.0)));
-      long composant(arg(1,s,-1)); // J.Morice composant for Maxwell 
-      *bempot = new BemPotential(type,k,composant); // J.Morice composant for Maxwell 
+      *bempot = new BemPotential(type,k); 
       return SetAny< R >(bempot);
     }
   };    // end Op class
@@ -559,20 +521,17 @@ OP_MakeBemPotential::Op::Op(const basicAC_F0 &args)
   args.SetNameParam(n_name_param, name_param, nargs);
 }
 
-// basicAC_F0::name_and_type OP_MakeBemPotential::Op::name_param[] = { {"k", &typeid(Complex)} };
-basicAC_F0::name_and_type OP_MakeBemPotential::Op::name_param[] = { {"k", &typeid(Complex)}, {"compo", &typeid(long)} }; // J.Morice composant for Maxwell 
+basicAC_F0::name_and_type OP_MakeBemPotential::Op::name_param[] = { {"k", &typeid(Complex)} };
 
 class OP_MakeBemPotentialFunc {
  public:
   
   class Op : public E_F0mps {
    public:
-    //static const int n_name_param = 1;
-    static const int n_name_param = 2;  // J. Morice composant for Maxwell
+    static const int n_name_param = 1;
     static basicAC_F0::name_and_type name_param[];
     Expression nargs[n_name_param];
     Complex arg(int i, Stack stack, Complex a) const { return nargs[i] ? GetAny< Complex >((*nargs[i])(stack)) : a; }
-    long arg(int i, Stack stack, long a) const { return nargs[i] ? GetAny< long >((*nargs[i])(stack)) : a; } // J.Morice composant for Maxwell 
     typedef pBemPotential A;
     typedef string *B;
     Expression b;
@@ -582,9 +541,7 @@ class OP_MakeBemPotentialFunc {
     AnyType operator( )(Stack s) const {
       B type = GetAny< B >((*b)(s));
       Complex k(arg(0, s, Complex(0.0,0.0)));
-      long composant(arg(1,s,-1)); // J.Morice composant for Maxwell 
-      // A bempot = new BemPotential(type,k); 
-      A bempot = new BemPotential(type,k,composant); // J.Morice composant for Maxwell 
+      A bempot = new BemPotential(type,k);
       return SetAny< A >(bempot);
     }
   };
@@ -601,8 +558,7 @@ OP_MakeBemPotentialFunc::Op::Op(const basicAC_F0 &args)
   args.SetNameParam(n_name_param, name_param, nargs);
 }
 
-// basicAC_F0::name_and_type OP_MakeBemPotentialFunc::Op::name_param[] = { {"k", &typeid(Complex)} };
-basicAC_F0::name_and_type OP_MakeBemPotentialFunc::Op::name_param[] = { {"k", &typeid(Complex)} , {"compo", &typeid(long)}}; // J.Morice composant for Maxwell 
+basicAC_F0::name_and_type OP_MakeBemPotentialFunc::Op::name_param[] = { {"k", &typeid(Complex)} };
 
 
 class FormalBemPotential : public OneOperator{
@@ -1341,26 +1297,29 @@ void ff_POT_Generator(htool::VirtualGenerator<R>*& generator,BemPotential *typeP
 }
 
 template <class R, typename P, typename MeshBemtool >
-void ff_POT_Generator_Maxwell(htool::VirtualGenerator<R>*& generator,BemPotential *typePot, MeshBemtool &mesh, bemtool::Geometry &node_output,const int composant ){
+void ff_POT_Generator_Maxwell(htool::VirtualGenerator<R>*& generator,BemPotential *typePot, MeshBemtool &mesh, bemtool::Geometry &node_output ){
     cout << " mettre un msg d erreur pour dire que cette combi n existe pas" << endl;
     return;
 }
 
 template <class R, typename P>
-void ff_POT_Generator_Maxwell(htool::VirtualGenerator<R>*& generator,BemPotential *typePot, bemtool::Mesh2D &mesh, bemtool::Geometry &node_output,const int composant) {
+void ff_POT_Generator_Maxwell(htool::VirtualGenerator<R>*& generator,BemPotential *typePot, bemtool::Mesh2D &mesh, bemtool::Geometry &node_output ) {
     
     bemtool::PotKernelEnum pot = whatTypeEnum(typePot);
     double kappaRe = typePot->wavenum.real(),kappaIm = typePot->wavenum.imag();
-    if(verbosity > 5) cout << "typePot->wavenum=" << typePot->wavenum << endl;
+    if(mpirank == 0 && verbosity > 5) cout << "typePot->wavenum=" << typePot->wavenum << endl;
     
     bemtool::Dof<P> dof(mesh);
     switch (pot) {
         case bemtool::SL_POT :
             if (kappaRe && !kappaIm) {
-                generator = new bemtool::POT_Generator<bemtool::PotKernel<MA,bemtool::SL_POT,3,bemtool::RT0_2D>,bemtool::RT0_2D>(dof,node_output,kappaRe,composant);
+                
+                generator = new bemtool::POT_Generator<bemtool::PotKernel<MA,bemtool::SL_POT,3,bemtool::RT0_2D>,bemtool::RT0_2D>(dof,node_output,kappaRe);
+
                 if(mpirank == 0 && verbosity>5) cout << "call bemtool func POT_Generator<MA,SL_POT ..." << endl;
             }
             break;    
         
     }
 }
+
