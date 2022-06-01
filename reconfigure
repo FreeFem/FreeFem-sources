@@ -1,13 +1,34 @@
 #!/bin/sh
 
-if [ -f ./config.param ]; then 
-	test -s  ./config.path && eval export PATH="'`cat ./config.path`:$PATH'"
-	##  remove dup
-	export PATH=`echo $PATH|awk -F: ' {p=""; for(i=1; i<= NF; i++) {  ok =0; for(j=1; j<i; j++) {ok +=  ( $i == $j)} ; if(!ok) {if( p) p =p  ":";p = p  $i;}} print p;   } '`
-	echo PATH=$PATH 
-	cat ./config.param | xargs echo "$@"
-	cat ./config.param | xargs  ./configure "$@"
+## Check config.param
+if [ -f ./config.param ]
+then
+	## Set PATH
+	if [ -f ./config.path ]
+	then
+		PATHCONTENT=$(cat ./config.path)
+		PATHS=$(echo "$PATHCONTENT" | tr ":" "\n")
+		
+		## Exclude duplicate
+		for path in $PATHS
+		do
+			[ "${PATH#*$path}" = "$PATH" ] && eval export PATH="$path:$PATH"
+		done
+	fi
+
+	## Print PATH
+	echo "INFO - PATH:"
+	echo "PATH=$PATH"
+	echo ""
+
+	## Print config.param
+	echo "INFO - config.param:"
+	cat ./config.param
+	echo ""
+
+	## Run ./configure
+	< ./config.param xargs ./configure "$@"
 else
 	echo "No config.param file found"
-	echo "Please read the README file"
+	echo "Please run ./configure or read the readme/README_COMPILATION.md file"
 fi

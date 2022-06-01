@@ -54,7 +54,8 @@ TESTS_OTHER = 3d-Leman.edp \
 	periodic3.edp \
 	LapDG3d1.edp \
 	LapDG3d.edp \
-	Connectivite-3d.edp
+	Connectivite-3d.edp \
+	Elasticity-simple-support-BC.edp
 
 TESTS_METIS = schwarz-nm-3d.edp
 

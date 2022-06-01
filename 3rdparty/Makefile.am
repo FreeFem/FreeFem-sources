@@ -1,7 +1,24 @@
-# Downloading and compiling extra libraries
-# -----------------------------------------
-
-# $Id: Makefile.am,v 1.16 2010/05/06 21:20:38 hecht Exp $
+############################################################################
+# This file is part of FreeFEM.                                            #
+#                                                                          #
+# FreeFEM is free software: you can redistribute it and/or modify          #
+# it under the terms of the GNU Lesser General Public License as           #
+# published by the Free Software Foundation, either version 3 of           #
+# the License, or (at your option) any later version.                      #
+#                                                                          #
+# FreeFEM is distributed in the hope that it will be useful,               #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of           #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
+# GNU Lesser General Public License for more details.                      #
+#                                                                          #
+# You should have received a copy of the GNU Lesser General Public License #
+# along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          #
+############################################################################
+# SUMMARY : Downloading and compiling extra libraries
+# LICENSE : LGPLv3
+# ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
+# AUTHORS : ...
+# E-MAIL  : ...
 
 SUBDIRS=blas arpack umfpack
 EXTRA_DIST= \
@@ -55,7 +72,7 @@ EXTRA_DIST= \
 ./yams/yamslib_internal.h \
 ipopt/Makefile	\
 ipopt/Makefile.inc.in \
-ipopt/patch-IpBlas  \
+ipopt/patch-IpBlas \
 ff-petsc/Makefile \
 ff-petsc/Makefile-PETSc.inc \
 ff-petsc/Makefile.complex \
@@ -63,7 +80,6 @@ ff-petsc/petsc-3.11.2.patch \
 getall
 
 # FFCS: See [[file:../../../configure.ac::tools_problems_all_platforms]] for reasons why some tools may be deactivated
-
 
 MPI_SOFT= @TOOL_COMPILE_scalapack@ @TOOL_COMPILE_parmetis@ @TOOL_COMPILE_parmmg@ @TOOL_COMPILE_mumps@
 
@@ -90,66 +106,67 @@ lib/libMesh.a:lib include
 	cd ../src/libMesh && $(MAKE) $(AM_MAKEFLAGS)
 	test -f ../src/libMesh/libMesh.a
 	mkdir -p include/libMesh
-	cp ../src/libMesh/*h  include/libMesh
-	echo libMesh  LD -L@DIR@/lib -lMesh  > lib/WHERE.libMesh
+	cp ../src/libMesh/*h include/libMesh
+	echo libMesh LD -L@DIR@/lib -lMesh > lib/WHERE.libMesh
 	echo libMesh INCLUDE -I@DIR@/include/libMesh >> lib/WHERE.libMesh
 	cp ../src/libMesh/libMesh.a lib/libMesh.a
 
-all-local:bin lib include lib/libMesh.a  pkg  $(DOWNLOADCOMPILE)  install-other
+all-local:bin lib include lib/libMesh.a pkg $(DOWNLOADCOMPILE) install-other
 
 install-other: tag-install-other
 
 tag-install-other:
-	if test -n "$(TOOL_COMPILE_hpddm)" ; then  $(MAKE) install-hpddm; else true; fi
-	if test -n "$(TOOL_COMPILE_htool)" ; then  $(MAKE) install-htool; else true; fi
-	if test -n "$(TOOL_COMPILE_bem)" ; then  $(MAKE) install-boost install-bemtool; else true; fi
+	if test -n "$(TOOL_COMPILE_hpddm)"; then $(MAKE) install-hpddm; else true; fi
+	if test -n "$(TOOL_COMPILE_htool)"; then $(MAKE) install-htool; else true; fi
+	if test -n "$(TOOL_COMPILE_bem)"; then $(MAKE) install-boost install-bemtool; else true; fi
 	touch tag-install-other
 
 WHERE-OTHER: lib/WHERE.hpddm lib/WHERE.htool lib/WHERE.bemtool lib/WHERE.boost
-WHERE-LD: tag-compile-pkg  WHERE-OTHER
+WHERE-LD: tag-compile-pkg WHERE-OTHER
 	touch ../plugin/seq/WHERE_LIBRARY-config ../plugin/seq/WHERE_LIBRARY
 	-grep LD ../plugin/seq/WHERE_LIBRARY ../plugin/seq/WHERE_LIBRARY-config >WHERE-LD
 
 # BEGIN HPDDM
 install-hpddm: ./getall
-	 if test -n "$(TOOL_COMPILE_hpddm)"; then   ./getall -o hpddm -a;  $(MAKE) include/hpddm/done.tag  lib/WHERE.hpddm; else true;fi
-reinstall-hpddm:./getall
+	 if test -n "$(TOOL_COMPILE_hpddm)"; then ./getall -o hpddm -a; $(MAKE) include/hpddm/done.tag lib/WHERE.hpddm; else true; fi
+reinstall-hpddm: ./getall
 	-rm lib/WHERE.hpddm
 	-rm ./pkg/hpddm.zip
 	-rm -rf include/hpddm
 	-test -n "$(TOOL_COMPILE_hpddm)" && $(MAKE) install-hpddm || true
-include/hpddm/done.tag:./pkg/hpddm.zip
+include/hpddm/done.tag: ./pkg/hpddm.zip
 	-if test -f ./pkg/hpddm.zip ; then \
-          cd include;rm -rf hpddm hpddm-*;  unzip -q ../pkg/hpddm.zip ; mv  hpddm-* hpddm ; touch hpddm/done.tag; \
-         else true;  fi
+		cd include; rm -rf hpddm hpddm-*; unzip -q ../pkg/hpddm.zip; mv hpddm-* hpddm; touch hpddm/done.tag; \
+	else true; fi
 lib/WHERE.hpddm: ./getall
-	if test -d include/hpddm/include ; then \
-	echo hpddm LD -L@DIR@/lib > $@ ;\
-	echo hpddm  INCLUDE -I@DIR@/include/hpddm/include >> $@ ;\
-	elif test -d include/hpddm/src ; then \
-	echo hpddm LD -L@DIR@/lib > $@ ;\
-	echo hpddm  INCLUDE -I@DIR@/include/hpddm/src >> $@ ;\
-	else true; 	fi
+	if test -d include/hpddm/include; then \
+		echo hpddm LD -L@DIR@/lib > $@; \
+		echo hpddm INCLUDE -I@DIR@/include/hpddm/include >> $@; \
+	elif test -d include/hpddm/src; then \
+		echo hpddm LD -L@DIR@/lib > $@; \
+		echo hpddm INCLUDE -I@DIR@/include/hpddm/src >> $@; \
+	else true; fi
 #end HPDDM
 
 # begin HTOOL
 install-htool: ./getall
-	 if test -n "$(TOOL_COMPILE_htool)"; then   ./getall -o htool -a;  $(MAKE) include/htool/done.tag  lib/WHERE.htool; else true;fi
-reinstall-htool:./getall
+	 if test -n "$(TOOL_COMPILE_htool)"; then ./getall -o htool -a; $(MAKE) include/htool/done.tag lib/WHERE.htool; else true; fi
+reinstall-htool: ./getall
 	-rm lib/WHERE.htool
 	-rm ./pkg/htool.zip
 	-rm -rf include/htool
 	-test -n "$(TOOL_COMPILE_htool)" && $(MAKE) install-htool || true
-include/htool/done.tag:./pkg/htool.zip
-	-if test -f ./pkg/htool.zip ; then \
-          cd include;rm -rf htool htool-*;  unzip -q ../pkg/htool.zip ; mv  htool-* htool ; touch htool/done.tag; \
-         else true;  fi
+include/htool/done.tag: ./pkg/htool.zip
+	-if test -f ./pkg/htool.zip; then \
+		cd include; rm -rf htool htool-*; unzip -q ../pkg/htool.zip; mv htool-* htool; touch htool/done.tag; \
+	else true; fi
 lib/WHERE.htool: ./getall
-	if test -d include/htool/include ; then \
-	echo htool LD -L@DIR@/lib > $@ ;\
-	echo htool  INCLUDE -I@DIR@/include/htool/include >> $@ ;\
-	else true; 	fi
+	if test -d include/htool/include; then \
+	echo htool LD -L@DIR@/lib > $@; \
+	echo htool INCLUDE -I@DIR@/include/htool/include >> $@; \
+	else true; fi
 # end HTOOL
+
 # begin BEMTOOL
 install-bemtool: ./getall
 	 if test -n "$(TOOL_COMPILE_bem)"; then   ./getall -o bemtool -a;  $(MAKE) include/BemTool/done.tag  lib/WHERE.bemtool; else true;fi
@@ -158,65 +175,67 @@ reinstall-bemtool:./getall
 	-rm ./pkg/bemtool.zip
 	-rm -rf include/BemTool
 	-test -n "$(TOOL_COMPILE_bem)" && $(MAKE) install-bemtool || true
-include/BemTool/done.tag:./pkg/bemtool.zip
-	-if test -f ./pkg/bemtool.zip ; then \
-          cd include;rm -rf BemTool BemTool-*;  unzip -q ../pkg/bemtool.zip ; mv BemTool-* BemTool ; touch BemTool/done.tag; \
-         else true;  fi
+include/bemtool/done.tag: ./pkg/bemtool.zip
+	-if test -f ./pkg/bemtool.zip; then \
+		cd include; rm -rf BemTool BemTool-*; unzip -q ../pkg/bemtool.zip; mv BemTool-* BemTool; touch BemTool/done.tag; \
+	else true; fi
 lib/WHERE.bemtool: ./getall
-	if test -d include/BemTool/ ; then \
-	echo bemtool LD -L@DIR@/lib > $@ ;\
-	echo bemtool  INCLUDE -I@DIR@/include/BemTool/ >> $@ ;\
-	else true; 	fi
+	if test -d include/BemTool/; then \
+	echo bemtool LD -L@DIR@/lib > $@; \
+	echo bemtool INCLUDE -I@DIR@/include/BemTool/ >> $@ ; \
+	else true; fi
 # end BEMTOOL
 
 # begin BOOST
 install-boost: ./getall
-	 if test -n "$(TOOL_COMPILE_bem)"; then   ./getall -o Boost -a;  $(MAKE) boost/done.tag  lib/WHERE.boost; else true;fi
-reinstall-boost:./getall
+	 if test -n "$(TOOL_COMPILE_bem)"; then ./getall -o Boost -a; $(MAKE) boost/done.tag lib/WHERE.boost; else true; fi
+reinstall-boost: ./getall
 	-rm lib/WHERE.boost
 	-rm ./pkg/boost_for_bemtool.tar.gz
 	-rm -rf boost
 	-test -n "$(TOOL_COMPILE_bem)" && $(MAKE) install-boost || true
-boost/done.tag:./pkg/boost_for_bemtool.tar.gz
-	if test -f ./pkg/boost_for_bemtool.tar.gz ; then \
-	rm -rf boost boost_*; tar xzf pkg/boost_for_bemtool.tar.gz ; mv boost_for_bemtool boost; \
+boost/done.tag: ./pkg/boost_for_bemtool.tar.gz
+	if test -f ./pkg/boost_for_bemtool.tar.gz; then \
+	rm -rf boost boost_*; tar xzf pkg/boost_for_bemtool.tar.gz; mv boost_for_bemtool boost; \
 	else true; fi	
 	touch boost/done.tag
 lib/WHERE.boost: ./getall
-	if test -d boost/include ; then \
-	echo boost  INCLUDE -I@DIR@/boost/include >> $@ ;\
-	else true; 	fi
+	if test -d boost/include; then \
+	echo boost INCLUDE -I@DIR@/boost/include >> $@ ; \
+	else true; fi
 # end BOOST
 
-#  to reinstall mpi under window afer clean 
+# to reinstall mpi under window afer clean
 reinstall-msmpi:
-	-if test -f "$$MSMPI_INC"/mpif.h   ; then \
-		echo " copy msmpi  in 3rdparty form $$MSMPI_INC and $$MSMPI_LIB64 or $$MSMPI_LIB32" ; \
-		mkdir -p include/msmpi ;\
-		mkdir -p lib/msmpi ;\
-		cp "$$MSMPI_INC"/*.h include/msmpi ;\
-		sed  's/INT_PTR_KIND()/@SIZEOF_PTR@/' <"$$MSMPI_INC"/mpif.h >include/msmpi/mpif.h ;\
+	-if test -f "$$MSMPI_INC"/mpif.h; then \
+		echo " copy msmpi in 3rdparty form $$MSMPI_INC and $$MSMPI_LIB64 or $$MSMPI_LIB32"; \
+		mkdir -p include/msmpi; \
+		mkdir -p lib/msmpi; \
+		cp "$$MSMPI_INC"/*.h include/msmpi; \
+		sed 's/INT_PTR_KIND()/@SIZEOF_PTR@/' <"$$MSMPI_INC"/mpif.h > include/msmpi/mpif.h; \
+		sed 's/MPI_Status array_of_statuses\[\]/MPI_Status\* array_of_statuses/' < "$$MSMPI_INC"/mpi.h > include/msmpi/mpi.h; \
 		grep KIND include/msmpi/mpif.h; \
-		test "@SIZEOF_PTR@" -eq 8 && cp "$$MSMPI_INC"/x64/*.h include/msmpi &&  cp "$$MSMPI_LIB64"/*.lib lib/msmpi ;\
-		test "@SIZEOF_PTR@" -eq 4 && cp "$$MSMPI_INC"/x86/*.h include/msmpi &&  cp "$$MSMPI_LIB32"/*.lib lib/msmpi ;\
+		test "@SIZEOF_PTR@" -eq 8 && cp "$$MSMPI_INC"/x64/*.h include/msmpi && cp "$$MSMPI_LIB64"/*.lib lib/msmpi; \
+		test "@SIZEOF_PTR@" -eq 4 && cp "$$MSMPI_INC"/x86/*.h include/msmpi && cp "$$MSMPI_LIB32"/*.lib lib/msmpi; \
 	fi
 # FFCS: need to stop at the first error to make sure that all libraries are correctly compiled
 compile-dir:
 	@echo "\n\n ****** $(COMPILEDIR) ****** \n\n";
-	@if [ 0 -eq `egrep ':$(COMPILEDIR) *LD' WHERE-LD | wc -l` ] ;then \
-	  cd $(COMPILEDIR) && $(MAKE) $(DIRTARGET) ; \
+	@if [ 0 -eq `egrep ':$(COMPILEDIR) *LD' WHERE-LD | wc -l` ]; then \
+		cd $(COMPILEDIR) && $(MAKE) $(DIRTARGET); \
 	else \
-	 echo $(COMPILEDIR) is in WHERE- files ;\
+		echo $(COMPILEDIR) is in WHERE- files; \
 	fi
 compile-pkg: tag-compile-pkg WHERE-LD
 
 # FFCS: need to stop at the first error to make sure that all libraries are correctly compiled
 tag-compile-pkg: bin lib include pkg FORCE
-	@if [ -n "$(WGET)" ] ; then \
-	for d in $(LIST_SOFT) ; do $(MAKE) compile-dir COMPILEDIR=$$d || exit 1;done ;\
-	if [ -n "$(MPICC)" ] ; then \
-	for d in $(MPI_SOFT) ; do 	$(MAKE) compile-dir COMPILEDIR=$$d || exit 1; done;\
-	fi;fi
+	@if [ -n "$(WGET)" ]; then \
+		for d in $(LIST_SOFT); do $(MAKE) compile-dir COMPILEDIR=$$d || exit 1; done; \
+		if [ -n "$(MPICC)" ]; then \
+			for d in $(MPI_SOFT); do $(MAKE) compile-dir COMPILEDIR=$$d || exit 1; done; \
+		fi; \
+	fi
 	$(MAKE) install-hpddm install-htool install-bemtool install-boost
 	touch tag-compile-pkg
 FORCE:
@@ -226,18 +245,21 @@ re-install:
 WHERE:
 	$(MAKE) compile-pkg DIRTARGET=WHERE
 install-exec-local:
-	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/lib
-	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/bin
-	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/include
-	cp -rp lib $(DESTDIR)$(ff_prefix_dir)
-	cp -rp include  $(DESTDIR)$(ff_prefix_dir)
-	cp -rp bin  $(DESTDIR)$(ff_prefix_dir)
-
+	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/lib"
+	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/bin"
+	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/include"
+	cp -rp lib "$(DESTDIR)$(ff_prefix_dir)"
+	cp -rp include "$(DESTDIR)$(ff_prefix_dir)"
+	cp -rp bin "$(DESTDIR)$(ff_prefix_dir)"
+	-if test -f boost/done.tag; then \
+		$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/boost"; \
+		cp -rp boost "$(DESTDIR)$(ff_prefix_dir)"; \
+	fi
 clean-local:
 	-rm -rf	 tag-* include lib bin WHERE-LD
-	-mkdir   include lib bin
+	-mkdir include lib bin
 	-rm */FAIT */FAIRE
 # 	FFCS - make sure that all directories are cleaned. Thisis especially important under Windows because there is no
 # 	compilation dependencies control there (see
 # 	[[file:c:/cygwin/home/alh/ffcs/dist/configure.ac::dependency_tracking]])
-	for d in $(LIST_SOFT) $(MPI_SOFT) ; do $(MAKE) clean -C $$d ; done
+	for d in $(LIST_SOFT) $(MPI_SOFT); do $(MAKE) clean -C $$d; done

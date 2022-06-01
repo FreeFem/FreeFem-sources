@@ -286,8 +286,17 @@ AnyType SetMesh_Op::operator()(Stack stack)  const
   ffassert( nrt.N() %2 ==0);
   map<int,int> mape,mapt;
   int z00 = false;
+    int err=0;
   for(int i=0;i<nre.N();i+=2)
-    { z00 = z00 || ( nre[i]==0 && nre[i+1]==0);
+    {
+        ffassert(i+1 < nre.N());
+        z00 = z00 || ( nre[i]==0 && nre[i+1]==0);
+      if(  mape.find(nre[i]) != mape.end())
+      {
+          err++;
+          if(err<10 && verbosity )
+              cerr << " Warning Err label the change of label " << nre[i] << " in " << nre[i] << "  is previouly set to "<<mape[nre[i]] << endl;
+      }
       if(nre[i] != nre[i+1])
 	mape[nre[i]]=nre[i+1];
     }

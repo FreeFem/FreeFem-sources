@@ -109,6 +109,7 @@ AppDir/
 3rdparty/blas/blas.tgz
 3rdparty/blas/blas_xerbla.f
 3rdparty/blas/cblas.tgz
+3rdparty/boost
 3rdparty/fftw/FAIRE
 3rdparty/fftw/FAIT
 3rdparty/fftw/cxxflags
@@ -125,6 +126,11 @@ AppDir/
 3rdparty/lib/pkgconfig/ipopt.pc
 3rdparty/metis/FAIRE
 3rdparty/metis/metis-*
+3rdparty/mmg/build
+3rdparty/mmg/mmg-sources
+3rdparty/mmg/ff-flags
+3rdparty/mmg/ff-flags.old
+3rdparty/mmg/tag-tar
 3rdparty/mmg3d/ff-flags
 3rdparty/mmg3d/mmg3d4/
 3rdparty/mmg3d/tag-tar-158547
@@ -139,7 +145,13 @@ AppDir/
 3rdparty/nlopt/Make.defs
 3rdparty/nlopt/nlopt-2.2.4/
 3rdparty/parmetis/FAIRE
+3rdparty/parmetis/FAIRE-mpi
 3rdparty/parmetis/parmetis-*
+3rdparty/parmmg/build
+3rdparty/parmmg/parmmg-sources
+3rdparty/parmmg/ff-flags
+3rdparty/parmmg/ff-flags.old
+3rdparty/parmmg/tag-tar
 3rdparty/pkg/
 3rdparty/pkg/blacstester.tgz
 3rdparty/pkg/freeyams.2010.02.22.tgz
@@ -148,10 +160,10 @@ AppDir/
 3rdparty/pkg/scalapack-1.8.0.tgz
 3rdparty/scalapack/FAIRE
 3rdparty/scalapack/SLmake.inc
-3rdparty/scalapack/scalapack-
+3rdparty/scalapack/scalapack-*
 3rdparty/scotch/FAIRE
 3rdparty/scotch/Makefile.inc
-3rdparty/scotch/scotch_.*/
+3rdparty/scotch/scotch-v*/
 3rdparty/share/coin/doc/Ipopt/AUTHORS
 3rdparty/share/coin/doc/Ipopt/LICENSE
 3rdparty/share/coin/doc/Ipopt/README
@@ -167,6 +179,7 @@ AppDir/
 3rdparty/share/man/man3/nlopt.3
 3rdparty/superlu/FAIRE
 3rdparty/superlu/FAIT
+3rdparty/superlu/superlu-sources
 3rdparty/superlu/SuperLU_
 3rdparty/superlu/ff-FLAGS
 3rdparty/tag-compile-pkg
@@ -184,6 +197,7 @@ AppDir/
 3rdparty/yams/freeyams.*/
 3rdparty/ff-petsc/petsc-*/
 FreeFEM-documentation.pdf
+FreeFEM-documentation.pdf.md5
 bin/script/PostInstall.sh
 *ex.*.eps
 *ex.*.out
@@ -330,7 +344,7 @@ config.path
 3rdparty/ff-petsc/Make-petsc-download.mk
 3rdparty/ff-petsc/Makefile.inc
 3rdparty/ff-petsc/do-sudo
-3rdparty/fftw/fftw-3.3.2/
+3rdparty/fftw/fftw-*/
 3rdparty/gmm/gmm-4.2/
 3rdparty/ipopt/Ipopt-3.12.4/
 3rdparty/scalapack/scalapack-2.0.2/

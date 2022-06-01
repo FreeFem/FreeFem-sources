@@ -395,15 +395,17 @@ namespace PETSc {
     bool sym = ptA->_A->getMatrix( )->_sym;
     if (ia) {
       if (sym) {
-        MatSetType(ptA->_petsc, MATMPISBAIJ);
+        MatSetType(ptA->_petsc, MATSBAIJ);
+        MatSeqSBAIJSetPreallocationCSR(ptA->_petsc, 1, ia, ja, c);
         MatMPISBAIJSetPreallocationCSR(ptA->_petsc, 1, ia, ja, c);
       } else {
-        MatSetType(ptA->_petsc, MATMPIAIJ);
+        MatSetType(ptA->_petsc, MATAIJ);
+        MatSeqAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
         MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
         MatSetOption(ptA->_petsc, MAT_SYMMETRIC, symmetric);
       }
     } else {
-      MatSetType(ptA->_petsc, MATMPIAIJ);
+      MatSetType(ptA->_petsc, MATAIJ);
       MatSetUp(ptA->_petsc);
     }
     if (free) {
@@ -483,7 +485,7 @@ namespace PETSc {
     MatCreateVecs(ptA->_petsc, &rglobal, NULL);
     Vec isVec;
     VecCreate(PETSC_COMM_SELF, &isVec);
-    VecSetType(isVec, VECMPI);
+    VecSetType(isVec, VECSTANDARD);
     VecSetSizes(isVec, PETSC_DECIDE, nr);
     VecScatterCreate(rglobal, from, isVec, to, &ptA->_scatter);
     VecDestroy(&isVec);
@@ -745,10 +747,12 @@ namespace PETSc {
                           PETSC_DECIDE, PETSC_DECIDE);
             }
             if (ptA->_A && ptA->_A->getMatrix( )->_sym) {
-              MatSetType(ptA->_petsc, MATMPISBAIJ);
+              MatSetType(ptA->_petsc, MATSBAIJ);
+              MatSeqSBAIJSetPreallocationCSR(ptA->_petsc, 1, ia, ja, c);
               MatMPISBAIJSetPreallocationCSR(ptA->_petsc, 1, ia, ja, c);
             } else {
-              MatSetType(ptA->_petsc, MATMPIAIJ);
+              MatSetType(ptA->_petsc, MATAIJ);
+              MatSeqAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
               MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
             }
           }
@@ -761,6 +765,7 @@ namespace PETSc {
           PetscInt m;
           MatGetLocalSize(ptA->_petsc, &m, NULL);
           PetscInt* ia = new PetscInt[m + 1]( );
+          MatSeqAIJSetPreallocationCSR(ptA->_petsc, ia, NULL, NULL);
           MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, NULL, NULL);
           delete[] ia;
         }
@@ -845,8 +850,12 @@ namespace PETSc {
           if (ptB->_petsc) {
             PetscBool assembled;
             MatAssembled(ptB->_petsc, &assembled);
-            if (assembled) MatConvert(ptB->_petsc, MATSAME, MAT_INITIAL_MATRIX, &ptA->_petsc);
-            else MatDuplicate(ptB->_petsc, MAT_DO_NOT_COPY_VALUES, &ptA->_petsc);
+#if PETSC_VERSION_GE(3, 17, 0)
+            MatDuplicate(ptB->_petsc, assembled ? MAT_COPY_VALUES : MAT_DO_NOT_COPY_VALUES, &ptA->_petsc);
+#else
+            if (assembled) MatDuplicate(ptB->_petsc, MAT_COPY_VALUES, &ptA->_petsc);
+            else ffassert(0);
+#endif
             MatDestroy(&ptB->_petsc);
           }
         } else
@@ -1010,6 +1019,12 @@ namespace PETSc {
               PetscErrorCode (*mat)(Mat*);
               PetscFunctionListFind(MatList, t.c_str(), &mat);
               if(mat)
+                  return 1L;
+          }
+          else if (o.compare("MATSOLVER") == 0) {
+              PetscBool foundtype;
+              MatSolverTypeGet(t.c_str(), MATAIJ, MAT_FACTOR_LU, &foundtype, NULL, NULL);
+              if(foundtype)
                   return 1L;
           }
       }
@@ -1202,14 +1217,20 @@ namespace PETSc {
     }
     bool clean = nargs[3] && GetAny< bool >((*nargs[3])(stack));
     if (clean) ptSize->resize(0);
-    MatSetType(ptA->_petsc, bsr ? MATMPIBAIJ : MATMPIAIJ);
+    MatSetType(ptA->_petsc, bsr ? MATBAIJ : MATAIJ);
     mK->CSR( );
-    if (bsr)
+    if (bsr) {
+      MatSeqBAIJSetPreallocationCSR(ptA->_petsc, bs, reinterpret_cast< PetscInt* >(mK->p),
+                                    reinterpret_cast< PetscInt* >(mK->j), mK->aij);
       MatMPIBAIJSetPreallocationCSR(ptA->_petsc, bs, reinterpret_cast< PetscInt* >(mK->p),
                                     reinterpret_cast< PetscInt* >(mK->j), mK->aij);
-    else
+    }
+    else {
+      MatSeqAIJSetPreallocationCSR(ptA->_petsc, reinterpret_cast< PetscInt* >(mK->p),
+                                   reinterpret_cast< PetscInt* >(mK->j), mK->aij);
       MatMPIAIJSetPreallocationCSR(ptA->_petsc, reinterpret_cast< PetscInt* >(mK->p),
                                    reinterpret_cast< PetscInt* >(mK->j), mK->aij);
+    }
     if (prune) {
       ffassert(0);
     }
@@ -1363,7 +1384,8 @@ namespace PETSc {
         }
         ptK->resize(0);
       }
-      MatSetType(ptA->_petsc, MATMPIAIJ);
+      MatSetType(ptA->_petsc, MATAIJ);
+      MatSeqAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
       MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
       MatSetOption(
         ptA->_petsc, MAT_SYMMETRIC,
@@ -1485,7 +1507,7 @@ namespace PETSc {
       }
       MatCreate(comm ? *comm : PETSC_COMM_WORLD, &ptA->_petsc);
       MatSetSizes(ptA->_petsc, ptA->_last, ptA->_clast, PETSC_DECIDE, PETSC_DECIDE);
-      MatSetType(ptA->_petsc, MATMPIAIJ);
+      MatSetType(ptA->_petsc, MATAIJ);
       MatSetUp(ptA->_petsc);
       ptA->_num = new PetscInt[ptA->_last + ptA->_clast];
       ptA->_cnum = ptA->_num + ptA->_last;
@@ -1510,11 +1532,13 @@ namespace PETSc {
         std::copy_n(dA._ja, dA._nnz, ja);
         PetscScalar* c = new PetscScalar[dA._nnz];
         std::copy_n(dA._a, dA._nnz, c);
+        MatSeqAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
         MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, ja, c);
         delete[] c;
         delete[] ja;
         delete[] ia;
 #else
+        MatSeqAIJSetPreallocationCSR(ptA->_petsc, dA._ia, dA._ja, dA._a);
         MatMPIAIJSetPreallocationCSR(ptA->_petsc, dA._ia, dA._ja, dA._a);
 #endif
         if(cbegin)
@@ -1703,10 +1727,9 @@ namespace PETSc {
               PetscScalar r = GetAny< PetscScalar >(e_ij);
               if (std::abs(r) > 1.0e-16) {
                 Mat B;
-                MatCreate(PETSC_COMM_WORLD, &B);
-                MatSetSizes(B, PETSC_DECIDE, PETSC_DECIDE, 1, 1);
-                MatSetType(B, MATMPIDENSE);
-                MatMPIDenseSetPreallocation(B, PETSC_NULL);
+                MatCreateDense(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, 1, 1, NULL, &B);
+                MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
+                MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
                 PetscScalar* array;
                 MatDenseGetArray(B, &array);
                 if (array) array[0] = r;
@@ -1720,12 +1743,11 @@ namespace PETSc {
             } else if (t == 3 || t == 4) {
               KN< PetscScalar > x;
               Mat B;
-              MatCreate(PETSC_COMM_WORLD, &B);
               if (t == 3) x = GetAny< KN_< PetscScalar > >(e_ij);
               else x = GetAny< Transpose< KN_< PetscScalar > > >(e_ij);
-              MatSetSizes(B, x.n, PETSC_DECIDE, PETSC_DECIDE, 1);
-              MatSetType(B, MATMPIDENSE);
-              MatMPIDenseSetPreallocation(B, PETSC_NULL);
+              MatCreateDense(PETSC_COMM_WORLD, x.n, PETSC_DECIDE, PETSC_DECIDE, 1, NULL, &B);
+              MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
+              MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
               PetscScalar* array;
               MatDenseGetArray(B, &array);
               if (array) std::copy_n(static_cast< PetscScalar* >(x), x.n, array);
@@ -1789,7 +1811,8 @@ namespace PETSc {
           }
           MatCreate(PETSC_COMM_WORLD, a + zeros[i] * M + zeros[i]);
           MatSetSizes(a[zeros[i] * M + zeros[i]], x, y, X, Y);
-          MatSetType(a[zeros[i] * M + zeros[i]], MATMPIAIJ);
+          MatSetType(a[zeros[i] * M + zeros[i]], MATAIJ);
+          MatSeqAIJSetPreallocation(a[zeros[i] * M + zeros[i]], 0, NULL);
           MatMPIAIJSetPreallocation(a[zeros[i] * M + zeros[i]], 0, NULL, 0, NULL);
           MatAssemblyBegin(a[zeros[i] * M + zeros[i]], MAT_FINAL_ASSEMBLY);
           MatAssemblyEnd(a[zeros[i] * M + zeros[i]], MAT_FINAL_ASSEMBLY);
@@ -1824,7 +1847,7 @@ namespace PETSc {
       Expression A;
       Expression P;
       const int c;
-      static const int n_name_param = 20;
+      static const int n_name_param = 21;
       static basicAC_F0::name_and_type name_param[];
       Expression nargs[n_name_param];
       setOptions_Op(const basicAC_F0& args, int d) : A(0), P(0), c(d) {
@@ -1877,7 +1900,8 @@ namespace PETSc {
     {"bs", &typeid(long)},                                                                        // 16
     {"precon", &typeid(Polymorphic*)},                                                            // 17
     {"setup", &typeid(bool)},                                                                     // 18
-    {"monitor", &typeid(Polymorphic*)}                                                            // 19
+    {"monitor", &typeid(Polymorphic*)},                                                           // 19
+    {"deflation", &typeid(FEbaseArrayKn<HPDDM::upscaled_type<PetscScalar>>*)}                     // 20
   };
   class ShellInjection;
   template< class Type >
@@ -2208,9 +2232,7 @@ namespace PETSc {
             MatDestroy(&ptA->_petsc);
             MatPermute(A, wrapper->is, wrapper->is, &ptA->_petsc);
             if(convert)
-                MatConvert(ptA->_petsc, MATMPISBAIJ, MAT_INPLACE_MATRIX, &ptA->_petsc);
-            else
-                MatConvert(ptA->_petsc, MATMPIAIJ, MAT_INPLACE_MATRIX, &ptA->_petsc);
+                MatConvert(ptA->_petsc, MATSBAIJ, MAT_INPLACE_MATRIX, &ptA->_petsc);
           }
         }
       }
@@ -2415,37 +2437,55 @@ namespace PETSc {
 #if defined(PETSC_HAVE_HPDDM) && defined(PETSC_USE_SHARED_LIBRARIES)
             PetscStrcmp(type, PCHPDDM, &isType);
             const HPDDM::MatrixCSR< PetscScalar >* const A = ptA->_A->getMatrix( );
-            if (isType && A) {
-              if (!A->_ia) {
-                Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK =
-                  nargs[15] ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*nargs[15])(stack)) : nullptr;
-                if (ptK && ptK->A) {
-                  MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA =
-                    static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
-                  HPDDM::MatrixCSR< PetscScalar >* B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
-                  Mat aux = ff_to_PETSc(B);
+            if (isType) {
+              if(nargs[20]) {
+#if PETSC_VERSION_GE(3, 18, 0)
+                  Mat Z;
+                  FEbaseArrayKn<HPDDM::upscaled_type<PetscScalar>>* deflation = GetAny<FEbaseArrayKn<HPDDM::upscaled_type<PetscScalar>>*>((*nargs[20])(stack));
+                  MatCreateSeqDense(PETSC_COMM_SELF, ptA->_A->getDof(), deflation->N, NULL, &Z);
+                  PetscScalar* data;
+                  MatDenseGetArrayWrite(Z, &data);
+                  for(int i = 0; i < deflation->N; ++i)
+                    std::copy_n(&(*deflation->get(i))[0], deflation->get(0)->n, data + i * deflation->get(0)->n);
+                  MatDenseRestoreArrayWrite(Z, &data);
+                  PCHPDDMSetDeflationMat(pc, is, Z);
+                  MatDestroy(&Z);
+#else
+                  ffassert(0);
+#endif
+              }
+              else if(A) {
+                if (!A->_ia) {
+                  Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK =
+                    nargs[15] ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*nargs[15])(stack)) : nullptr;
+                  if (ptK && ptK->A) {
+                    MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA =
+                      static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
+                    HPDDM::MatrixCSR< PetscScalar >* B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
+                    Mat aux = ff_to_PETSc(B);
+                    PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
+                    MatDestroy(&aux);
+                    delete B;
+                  }
+                }
+                else {
+                  Mat aux = ff_to_PETSc(A);
                   PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
                   MatDestroy(&aux);
-                  delete B;
-                }
-              }
-              else {
-                Mat aux = ff_to_PETSc(A);
-                PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
-                MatDestroy(&aux);
-                Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK =
-                  nargs[12] ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*nargs[12])(stack)) : nullptr;
+                  Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK =
+                    nargs[12] ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*nargs[12])(stack)) : nullptr;
 #if PETSC_VERSION_GE(3, 13, 0)
-                if (ptK && ptK->A) {
-                  MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA =
-                    static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
-                  HPDDM::MatrixCSR< PetscScalar >* B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
-                  aux = ff_to_PETSc(B);
-                  PCHPDDMSetRHSMat(pc, aux);
-                  MatDestroy(&aux);
-                  delete B;
-                }
+                  if (ptK && ptK->A) {
+                    MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA =
+                      static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
+                    HPDDM::MatrixCSR< PetscScalar >* B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
+                    aux = ff_to_PETSc(B);
+                    PCHPDDMSetRHSMat(pc, aux);
+                    MatDestroy(&aux);
+                    delete B;
+                  }
 #endif
+                }
               }
             }
             else {
@@ -2911,45 +2951,22 @@ namespace PETSc {
   template< char P, class Type, class Storage, typename std::enable_if< std::is_same< Storage, KNM< PetscScalar > >::value >::type* = nullptr  >
   long MatMatMult(Type* const& A, Storage* const& in, Storage* const& out) {
     if (A->_petsc) {
-      Mat C;
-      MatType type;
-      MatGetType(A->_petsc, &type);
-      PetscBool isType;
-      PetscStrcmp(type, MATMPIAIJ, &isType);
-      int size;
-      MPI_Comm_size(PetscObjectComm((PetscObject)A->_petsc), &size);
-      if (size == 1 && isType)
-        MatMPIAIJGetLocalMat(A->_petsc, MAT_INITIAL_MATRIX, &C);
-      else
-        C = A->_petsc;
       Mat x, y;
       PetscInt n, m, N, M;
       MatGetLocalSize(A->_petsc, &n, &m);
       MatGetSize(A->_petsc, &N, &M);
-      MatCreate(PetscObjectComm((PetscObject)A->_petsc), &x);
-      MatSetSizes(x, P == 'T' || P == 'H' ? n : m, PETSC_DECIDE,
-                  P == 'T' || P == 'H' ? N : M, in->M( ));
-      MatSetType(x, MATDENSE);
-      {
-        int size;
-        MPI_Comm_size(PetscObjectComm((PetscObject)A->_petsc), &size);
-        if (size == 1)
-          MatSeqDenseSetPreallocation(x, &(in->operator( )(0, 0)));
-        else
-          MatMPIDenseSetPreallocation(x, &(in->operator( )(0, 0)));
-      }
-      MatAssemblyBegin(x, MAT_FINAL_ASSEMBLY);
-      MatAssemblyEnd(x, MAT_FINAL_ASSEMBLY);
+      MatCreateDense(PetscObjectComm((PetscObject)A->_petsc), P == 'T' || P == 'H' ? n : m, PETSC_DECIDE,
+                     P == 'T' || P == 'H' ? N : M, in->M( ), &(in->operator( )(0, 0)), &x);
       if (P == 'T' || P == 'H') {
         ffassert(in->N( ) == n);
         out->resize(m, in->M( ));
         if (P == 'T')
-          MatTransposeMatMult(C, x, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &y);
+          MatTransposeMatMult(A->_petsc, x, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &y);
         else {
           Mat w;
           MatDuplicate(x, MAT_COPY_VALUES, &w);
           MatConjugate(w);
-          MatTransposeMatMult(C, w, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &y);
+          MatTransposeMatMult(A->_petsc, w, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &y);
           MatDestroy(&w);
           MatConjugate(y);
         }
@@ -2960,23 +2977,12 @@ namespace PETSc {
       } else {
         ffassert(in->N( ) == m);
         out->resize(n, in->M( ));
-        MatCreate(PetscObjectComm((PetscObject)A->_petsc), &y);
-        MatSetSizes(y, P == 'T' || P == 'H' ? m : n, PETSC_DECIDE,
-                    P == 'T' || P == 'H' ? M : N, in->M( ));
-        MatSetType(y, MATDENSE);
-        int size;
-        MPI_Comm_size(PetscObjectComm((PetscObject)A->_petsc), &size);
-        if (size == 1)
-          MatSeqDenseSetPreallocation(y, &(out->operator( )(0, 0)));
-        else
-          MatMPIDenseSetPreallocation(y, &(out->operator( )(0, 0)));
-        MatAssemblyBegin(y, MAT_FINAL_ASSEMBLY);
-        MatAssemblyEnd(y, MAT_FINAL_ASSEMBLY);
-        MatMatMult(C, x, MAT_REUSE_MATRIX, PETSC_DEFAULT, &y);
+        MatCreateDense(PetscObjectComm((PetscObject)A->_petsc), P == 'T' || P == 'H' ? m : n, PETSC_DECIDE,
+                       P == 'T' || P == 'H' ? M : N, in->M( ), &(out->operator( )(0, 0)), &y);
+        MatMatMult(A->_petsc, x, MAT_REUSE_MATRIX, PETSC_DEFAULT, &y);
       }
       MatDestroy(&y);
       MatDestroy(&x);
-      if (C != A->_petsc) MatDestroy(&C);
     }
     return 0L;
   }
@@ -3037,7 +3043,7 @@ namespace PETSc {
         }
       }
     }
-    MatConvert(A, MATMPIAIJ, MAT_INITIAL_MATRIX, B);
+    MatConvert(A, MATAIJ, MAT_INITIAL_MATRIX, B);
     for (std::pair< std::pair< PetscInt, PetscInt >, Mat > p : b) {
       Mat C;
       if (std::is_same< PetscScalar, PetscReal >::value)
@@ -3069,7 +3075,7 @@ namespace PETSc {
         }
 #endif
         if (!isType) {
-          MatConvert(A->_petsc, MATMPIAIJ, MAT_INITIAL_MATRIX, &B->_petsc);
+          MatConvert(A->_petsc, MATAIJ, MAT_INITIAL_MATRIX, &B->_petsc);
         }
       }
     }
@@ -3300,7 +3306,7 @@ namespace PETSc {
           PetscObjectTypeCompareAny((PetscObject)X->_petsc, &isDense, MATMPIDENSE, MATSEQDENSE, "");
           Mat XD;
           if (!isDense) {
-            MatConvert(X->_petsc, MATMPIDENSE, MAT_INITIAL_MATRIX, &XD);
+            MatConvert(X->_petsc, MATDENSE, MAT_INITIAL_MATRIX, &XD);
           } else XD = X->_petsc;
           if (!Y->_petsc) MatDuplicate(XD, MAT_DO_NOT_COPY_VALUES, &Y->_petsc);
           KSPMatSolve(ptA->_ksp, XD, Y->_petsc);
@@ -3387,19 +3393,6 @@ namespace PETSc {
           Mat B, C;
           MatCreateDense(PetscObjectComm((PetscObject)ptA->_ksp), in->N( ), PETSC_DECIDE, M, in->M(), &in->operator( )(0, 0), &B);
           MatCreateDense(PetscObjectComm((PetscObject)ptA->_ksp), out->N( ), PETSC_DECIDE, M, out->M(), &out->operator( )(0, 0), &C);
-          int size;
-          MPI_Comm_size(PetscObjectComm((PetscObject)ptA->_ksp), &size);
-          if(size == 1) {
-              MatType type;
-              MatGetType(ptA->_petsc, &type);
-              PetscStrcmp(type, MATMPIAIJ, &isType);
-              if(isType) {
-                  Mat Ad, Ac;
-                  MatMPIAIJGetSeqAIJ(ptA->_petsc, &Ad, NULL, NULL);
-                  MatConvert(Ad, MATSAME, MAT_INITIAL_MATRIX, &Ac);
-                  MatHeaderReplace(ptA->_petsc, &Ac);
-              }
-          }
 #if PETSC_VERSION_GE(3, 14, 0)
           KSPMatSolve(ptA->_ksp, B, C);
 #else
@@ -3542,7 +3535,7 @@ namespace PETSc {
       MatCreate(PetscObjectComm((PetscObject)ptB->_petsc), &ptA->_petsc);
       if (bsB == bsC && bsB > 1) MatSetBlockSize(ptA->_petsc, bsB);
       MatSetSizes(ptA->_petsc, ptB->_last - ptB->_first, ptC->_last - ptC->_first, PETSC_DECIDE, PETSC_DECIDE);
-      MatSetType(ptA->_petsc, MATMPIAIJ);
+      MatSetType(ptA->_petsc, MATAIJ);
       if (c == 0 || c == 3) {
         PetscInt* ia = nullptr;
         PetscInt* ja = nullptr;
@@ -3569,6 +3562,7 @@ namespace PETSc {
           }
         } else
           ia = new PetscInt[ptB->_last - ptB->_first + 1]( );
+        MatSeqAIJSetPreallocationCSR(ptA->_petsc, ia, ja, a);
         MatMPIAIJSetPreallocationCSR(ptA->_petsc, ia, ja, a);
         if (free) {
           delete[] ia;
@@ -4494,7 +4488,7 @@ namespace PETSc {
               for(PetscInt j = 0; j < N; ++j) {
                   if(mat[i][j]) {
                       MatGetType(mat[i][j], &type);
-                      PetscStrcmp(type, MATMPIDENSE, &isType);
+                      PetscObjectTypeCompareAny((PetscObject)mat[i][j], &isType, MATMPIDENSE, MATSEQDENSE, "");
                       PetscInt n = 0, m = 0;
                       if(!isType) {
                           PetscStrcmp(type, MATTRANSPOSEMAT, &isType);
@@ -4502,8 +4496,7 @@ namespace PETSc {
                               Mat C;
                               if (std::is_same< PetscScalar, PetscReal >::value) MatTransposeGetMat(mat[i][j], &C);
                               else MatHermitianTransposeGetMat(mat[i][j], &C);
-                              MatGetType(C, &type);
-                              PetscStrcmp(type, MATMPIDENSE, &isType);
+                              PetscObjectTypeCompareAny((PetscObject)C, &isType, MATMPIDENSE, MATSEQDENSE, "");
                               if(isType) MatGetSize(C, &m, &n);
                               type = MATTRANSPOSEMAT;
                           }
@@ -5082,11 +5075,7 @@ namespace PETSc {
       Expression A;
       Expression B;
       const int c;
-      static const int n_name_param = 0;
-      static basicAC_F0::name_and_type name_param[];
-      Expression nargs[n_name_param];
       DMPlexToFF_Op(const basicAC_F0& args, int d) : A(0), B(0), c(d) {
-        args.SetNameParam(n_name_param, name_param, nargs);
         B = to<DMPlex*>(args[1]);
         if(c == 0)
             A = to< Mesh const** >(args[0]);
@@ -5103,7 +5092,6 @@ namespace PETSc {
     DMPlexToFF(int)
       : OneOperator(atype< Mesh3 const** >( ), atype< Mesh3 const** >( ), atype< DMPlex* >( )), c(1) {}
   };
-  basicAC_F0::name_and_type DMPlexToFF::DMPlexToFF_Op::name_param[] = { };
   AnyType DMPlexToFF::DMPlexToFF_Op::operator( )(Stack stack) const {
       DMPlex* p = GetAny<DMPlex*>((*B)(stack));
       PetscSection      coordSection;
@@ -5325,11 +5313,17 @@ namespace PETSc {
           }
           ISRestoreIndices(valueIS, &values);
           ISDestroy(&valueIS);
+          DMGetLabel(p->_dm, "Cell Sets", &label);
+          if (label) DMLabelSetDefaultValue(label, 0);
           for (PetscInt c = cStart; c < cEnd; ++c) {
               PetscInt *closure = NULL;
               PetscInt  closureSize, cl;
               DMPlexGetTransitiveClosure(p->_dm, c, PETSC_TRUE, &closureSize, &closure);
               int iv[3], lab = 0;
+              if (label) {
+                DMLabelGetValue(label, c, &cl);
+                lab = cl;
+              }
               int* ivv = iv;
               for (cl = 0; cl < 2 * closureSize; cl += 2) {
                   PetscInt point = closure[cl], dof, off, d, p;
@@ -5360,11 +5354,7 @@ namespace PETSc {
      public:
       Expression A;
       Expression B;
-      static const int n_name_param = 0;
-      static basicAC_F0::name_and_type name_param[];
-      Expression nargs[n_name_param];
       buildSolution_Op(const basicAC_F0& args) : A(0), B(0) {
-        args.SetNameParam(n_name_param, name_param, nargs);
         A = to<Dmat*>(args[0]);
         B = to<KN<HPDDM::upscaled_type<PetscScalar>>*>(args[1]);
       }
@@ -5376,7 +5366,6 @@ namespace PETSc {
     buildSolution( )
       : OneOperator(atype<long>( ), atype<Dmat*>( ), atype<KN<HPDDM::upscaled_type<PetscScalar>>*>( )) {}
   };
-  basicAC_F0::name_and_type buildSolution::buildSolution_Op::name_param[] = { };
   AnyType buildSolution::buildSolution_Op::operator( )(Stack stack) const {
       Dmat* ptA = GetAny<Dmat*>((*A)(stack));
       KN<HPDDM::upscaled_type<PetscScalar>>* ptKN = GetAny<KN<HPDDM::upscaled_type<PetscScalar>>*>((*B)(stack));

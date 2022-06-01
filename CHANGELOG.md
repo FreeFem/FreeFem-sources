@@ -22,6 +22,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+-
+
+### Changed
+-
+
+### Deprecated
+-
+
+### Removed
+-
+
+### Fixed
+-
+
+## [4.11]
+### Added
 - add computation scalar product of R3 example :  ( N'*Tl)
 - add tools to do compution with R3 vector see tutorial/calculus.edp
 - add an example tutorial/tgv-test.edp see see what tgv do on matrix build. 
@@ -40,20 +56,32 @@ All notable changes to this project will be documented in this file.
      Volume(O,Th3[k],nuface) // O, triangular face is face nuface of tet Th3[k]
      Volume(O,ThS[k]) // O, triangular face is ThS[k]
      Volume(O,A,B,C) // (O,A,B,C) tet ..
+- in bem pluging add array of HMatrix 
      
-     
-   see examples/3d/Connectivite-3d.edp or /3dSurf/Connectivite-S.edp of test. 
- add 3 function mapk, mapkk, mapkk to set a function in fourier space with k parametre 
+-  examples/3d/Connectivite-3d.edp or /3dSurf/Connectivite-S.edp of test. 
+- 3 function mapk, mapkk, mapkk to set a function in fourier space with k parametre 
    R3 K; // le fourier variable allway 3d (sorry)
    int n1=16,n2=8, n3=4; 
    real[int] tab1(nx,tab2(nx*ny),tab3(nx*ny*nz);
    mapk(tab1,K,sqr(K.x));
    mapkk(tab2,ny,K,K.norm2);
    mapkkk(tab3,ny,nz,K,K.norm2);
-  //  Remark you can change K pas P (current point)     
-     
+   //  Remark you can change K by P (current point)     
+- in SurfaceMesh.ipd fonction to build a Isocaedron and a Sphere from this Isocaedron
+- new finite element on MeshS  this  finite element is the ortogonal of RT0 on surface, or 
+   Nelelec Finite Element on triangle with one DoF per mesh edge and where the DoF is the 
+   current on  Edge in orientate edge by number of vertices.  
+-  plugin Element_P3pnc for new 2d finite element P3pnc (P3 + 2 bulles)  noncoforming  (continuite of P2 mod)   
+   and add 2 examples with this new finite element 
+      examples/plugin/cavityNewtowP3pnc.edp examples/plugin/testFE-P3pnc.edp
+- function to set dirichlet Boundary conditon on matrix A (real ou compex) trought  an real[int] 
+    (if none zero => set BC ) 
+  setBC(A,au1[],-2); and the example 
+      examples/3d/Elasticity-simple-support-BC.edp
+  
 ### Changed
 - the beaviour of linear solver UMFPACK, CHOLMOD in case of error , now FreeFEm exit on ExecError like in MUMPS
+- PETSc 3.17.0
 
 ### Deprecated
 -
@@ -66,6 +94,7 @@ All notable changes to this project will be documented in this file.
 - correct the normal the N implicite variable   on meshL case 
 - correct version dump in banner FreeFem++ - version 4.10 (V ...
 - correct  in CPU time on big mesh due to do bad HCode in HashTable.hpp
+- bug in array of finite element on meshhS, meshL (ie.  `fespace Vh(ThS,[P1,P1]);` ) 
 
 
 ## [4.10]
@@ -482,7 +511,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - The main distribution is now on Github
 
-[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.10..develop
+[Unreleased]: https://github.com/FreeFem/FreeFem-sources/compare/v4.11..develop
+[4.11]: https://github.com/FreeFem/FreeFem-sources/compare/v4.10..v4.11
 [4.10]: https://github.com/FreeFem/FreeFem-sources/compare/v4.9..v4.10
 [4.9]: https://github.com/FreeFem/FreeFem-sources/compare/v4.8..v4.9
 [4.8]: https://github.com/FreeFem/FreeFem-sources/compare/v4.7-1..v4.8

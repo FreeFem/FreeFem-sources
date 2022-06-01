@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License #
 # along with FreeFEM. If not, see <http://www.gnu.org/licenses/>.          #
 ############################################################################
-# SUMMARY : Makefile for FreeFem++
+# SUMMARY : Makefile for FreeFEM
 # LICENSE : LGPLv3
 # ORG     : LJLL Universite Pierre et Marie Curie, Paris, FRANCE
 # AUTHORS : ...
@@ -34,5 +34,5 @@ LIST_IDP=cobrameshcavity.idp cube.idp \
 	MPIplot.idp
 
 install-exec-local:
-	$(mkinstalldirs) -m 755 $(DESTDIR)$(ff_prefix_dir)/idp
-	$(INSTALL) -m 555 $(LIST_IDP) $(DESTDIR)$(ff_prefix_dir)/idp
+	$(mkinstalldirs) -m 755 "$(DESTDIR)$(ff_prefix_dir)/idp"
+	$(INSTALL) -m 555 $(LIST_IDP) "$(DESTDIR)$(ff_prefix_dir)/idp"

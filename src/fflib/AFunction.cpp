@@ -334,8 +334,8 @@ aType TypeArray(aType b,aType a)
 { // type of  b[a]
    aType r=map_type_of_map[make_pair(a->right(),b->right())];
    if (!r) {
-      cerr << "Sorry is not possible to make a map "<< *b->right() << " [" << *a->right() << "]" << endl;
-      cerr << " list: " << endl;
+      cerr << "\nSorry is not possible to make a map "<< *b->right() << " [" << *a->right() << "]" << endl;
+      cerr << "in map_type_of_map ,  list: " << endl;
       Map_type_of_map::const_iterator i;
       for(i=map_type_of_map.begin();i!=map_type_of_map.end();i++)
         cerr << "\t " << *i->first.second << " [" << *i->first.first << "]" << "=" << *i->second << endl;

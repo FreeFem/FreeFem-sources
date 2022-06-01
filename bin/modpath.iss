@@ -136,7 +136,7 @@ end;
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
 	appdir:			String;
-	selectedTasks:	String;
+	selectedTasks:	AnsiString;
 begin
 	appdir := ExpandConstant('{app}')
 	if CurUninstallStep = usUninstall then begin

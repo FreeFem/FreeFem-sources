@@ -1,0 +1,279 @@
+/* solves the 3D Helmholtz equation with finite-differences using the
+   27-point stencil from Operto, S., Virieux, J., Amestoy, P., L’Excellent,
+   J. Y., Giraud, L., & Ali, H. B. H. (2007). 3D finite-difference
+   frequency-domain modeling of visco-acoustic wave propagation using a 
+   massively parallel direct solver: A feasibility study.
+   Geophysics, 72(5), SM195-SM211.
+
+  Details about the GO_3D_OBS crustal geomodel can be found at https://www.geoazur.fr/WIND/bin/view/Main/Data/GO3DOBS
+  The velocity grid can be downloaded at https://www.geoazur.fr/WIND/pub/nfs/FWI-DATA/GO_3D_OBS/TARGET_PAPERS/v.bin
+  File 'Helmholtz_geophysics_rhs_pos.txt' contains the coordinates of the 130 right-hand sides representing a seabed node acquisition
+
+For a simple test run at low frequency, run:
+
+ff-mpirun -np 4 Helmholtz_geophysics.edp -ns -nw -frequency 0.2 -nppwl 4 -npml 8 -raspart -noGlob -ffddm_overlap 3 -npmlprec 2 -tol 1e-4 -maxit 150 -ffddm_gmres_restart 150 -murhs 20 -maxrhs 20 -ffddm_verbosity 3 -hpddm_H_reuse_preconditioner 1 -hpddm_H_orthogonalization cgs -hpddm_H_krylov_method gmres -hpddm_H_mumps_icntl_35 2 -hpddm_H_mumps_cntl_7 1e-3 -hpddm_H_mumps_icntl_37 0 -hpddm_H_mumps_icntl_36 1
+
+For a large-scale 3.75 Hz frequency simulation, run:
+
+ff-mpirun -np 660 Helmholtz_geophysics.edp -ns -nw -frequency 3.75 -nppwl 4 -npml 8 -raspart -noGlob -ffddm_overlap 3 -npmlprec 2 -tol 1e-4 -maxit 150 -ffddm_gmres_restart 150 -murhs 20 -maxrhs 130 -ffddm_verbosity 3 -hpddm_H_reuse_preconditioner 1 -hpddm_H_orthogonalization cgs -hpddm_H_krylov_method gmres -hpddm_H_mumps_icntl_35 2 -hpddm_H_mumps_cntl_7 1e-3 -hpddm_H_mumps_icntl_37 0 -hpddm_H_mumps_icntl_36 1
+*/
+
+load "Helmholtz_FD" // plugin implementing the 27-point FD stencil
+load "geophysics" // for loading velocity grids of the geomodels
+
+include "cube.idp"
+include "getARGV.idp"
+
+macro dimension 3//EOM
+include "ffddm.idp"
+
+real lengthx = 102; //the metric unit is the kilometer
+real lengthy = 20;
+real depth = 28.3;
+
+int[int] npmlg(6);
+
+real freq = getARGV("-frequency",1.); // frequency
+real nppwl = getARGV("-nppwl",4.); // number of points per wavelength
+npmlg = getARGV("-npml",8); // number of points in the global PMLs
+int npmli = getARGV("-npmlprec",2); // number of points in local PMLs for the preconditioner
+
+int maxit = getARGV("-maxit",400); // maximum number of GMRES iterations
+real gmrestol = getARGV("-tol",1e-4); // GMRES relative stopping criterion
+
+int maxrhs = getARGV("-maxrhs",130); // total number of RHSs to treat
+int murhs = getARGV("-murhs",20); // RHSs are treated by blocks of nrhs
+
+// point source coordinates for the single RHS case
+real xs = 12.3;
+real ys = 10.5;
+real zs = -0.9;
+
+// file containing the positions of the 130 RHSs mimicking a sparse seabed node acquisition
+ifstream f("Helmholtz_geophysics_rhs_pos.txt");
+
+complex omega = 2.*pi*freq;
+real c0 = 1.5; // reference (minimum) velocity
+real lambda = (1./freq)*c0;
+real h = lambda/nppwl;
+
+if (mpirank == 0) cout << "lambda = " << lambda << ", h = " << h << endl;
+
+// dimensions must be multiples of h
+lengthx = h*floor(lengthx/h);
+lengthy = h*floor(lengthy/h);
+depth = h*floor(depth/h);
+
+if (mpirank == 0) cout << lengthx << " " << lengthy << " " << depth << endl;
+
+real Q = 100000;
+
+real[int]bounds = [0,lengthx,0,lengthy,-depth,0];
+Crustal crust("v.bin",bounds); // load the GO_3D_OBS crustal geomodel
+func c = 1./((1./(crust(x,y,z)/1000))*(1+1i*0.5/Q));
+func mu = c^2;
+
+real[int] lengthpml(6); // length of the global PMLs
+for (int i=0; i<6; i++) lengthpml[i] = npmlg[i]*lambda/nppwl;
+
+real nloc = nppwl/ffddmsplit*lengthx/lambda;
+
+int nplx = rint(nloc*(lengthx+lengthpml[0]+lengthpml[1])/lengthx);
+int nply = rint(nloc*(lengthy+lengthpml[2]+lengthpml[3])/lengthx);
+int npd = rint(nloc*(depth+lengthpml[4]+lengthpml[5])/lengthx);
+
+if (mpirank == 0) cout << "grid size " << nplx+1 << " x " << nply+1 << " x " << npd+1 << endl;
+
+//////////// *********** MESH PARTITIONING *********** ////////////
+int p = mpisize;
+
+real nnx = pow(p * nplx^2 / nply / npd, 1./3.);
+real nny = nnx * nply / nplx;
+real nnz = nnx * npd / nplx;
+nnx = ceil(nnx); nny = ceil(nny); nnz = ceil(nnz);
+
+int nx=0, ny=0, nz=0;
+
+/* try to find the best cuboid partitioning for this number of cores : */
+for (int ii=0; ii<4; ii++)
+for (int jj=0; jj<4; jj++)
+for (int kk=0; kk<4; kk++) {
+  int ni = nnx-ii, nj = nny-jj, nk = nnz-kk;
+  if (ni*nj*nk <= p && ni*nj*nk > nx*ny*nz) {
+    nx = ni; ny = nj; nz = nk;
+  }
+}
+p = nx*ny*nz;
+
+if (mpirank == 0) cout << "The domain will be decomposed in " << nx << " x " << ny << " x " << nz << " subdomains" << endl;
+if (mpirank==0 && (p != mpisize))
+  cout << "WARNING: the cuboid decomposition will only use " << p << " of the " << mpisize << " available cores" << endl;
+
+int zx = nx - (nplx%nx), zy = ny - (nply%ny), zz = nz - (npd%nz);
+int px = ceil(1.*nplx/nx), py = ceil(1.*nply/ny), pz = ceil(1.*npd/nz);
+
+if (mpirank == 0) cout << "Subdomain size " << px+1 << " x " << py+1 << " x " << pz+1 << endl;
+
+int rank = mpirank;
+
+int boundzl = rank / ( nx * ny ) ;
+int nr = rank - boundzl * nx * ny ;
+int boundyl = nr / nx ;
+int boundxl = nr % nx ;
+
+boundxl *= px; boundyl *= py; boundzl *= pz;
+
+int boundzu = (rank / ( nx * ny ) < nz - 1 ? boundzl + pz - 1 : npd-1);
+int boundyu = (nr / nx < ny - 1 ? boundyl + py - 1 : nply - 1);
+int boundxu = (nr % nx < nx - 1 ? boundxl + px - 1 : nplx - 1);
+
+boundxl = max(0,boundxl-3*ffddmoverlap); boundxu = min(nplx-1,boundxu+3*ffddmoverlap);
+boundyl = max(0,boundyl-3*ffddmoverlap); boundyu = min(nply-1,boundyu+3*ffddmoverlap);
+boundzl = max(0,boundzl-3*ffddmoverlap); boundzu = min(npd-1,boundzu+3*ffddmoverlap);
+
+int nbnx = boundxu-boundxl+1;
+int nbny = boundyu-boundyl+1;
+int nbnz = boundzu-boundzl+1;
+
+/* truncate global grid around the subdomain before partitioning to avoid defining the full grid */
+int[int] NN=[nbnx,nbny,nbnz];
+real [int,int] BB=[[(boundxl-npmlg[0])*h,(boundxu+1-npmlg[0]+0)*h],[(boundyl-npmlg[2])*h,(boundyu+1-npmlg[2]+0)*h],[-depth+(boundzl-npmlg[4])*h,-depth+(boundzu+1-npmlg[4]+0)*h]];
+int [int,int] LL=[[11+100*(boundxl!=0),12+100*(boundxu!=nplx-1)],[13+100*(boundyl!=0),14+100*(boundyu!=nply-1)],[15+100*(boundzl!=0),16+100*(boundzu!=npd-1)]];
+
+mesh3 Th=Cube(NN,BB,LL);
+
+func int partcube(int ii, int jj, int kk) {
+  return min(kk / pz, int(nz-1))*nx*ny + min(jj / py, int(ny-1))*nx + min(ii / px, int(nx-1));	
+}
+
+fespace Phg(Th,P0);
+Phg partglob;
+
+/* define the regular partitioning as a P0 function on Th */
+partglob=partcube(floor((x+lengthpml[0])/(lengthx+lengthpml[0]+lengthpml[1])*nplx),
+                  floor((y+lengthpml[2])/(lengthy+lengthpml[2]+lengthpml[3])*nply),
+                  floor((z+depth+lengthpml[4])/(depth+lengthpml[4]+lengthpml[5])*npd));
+
+/* user-defined custom partitioning for mesh prefix H */
+ffddmpartitioner = 0;
+macro Hsimple(PhGlobal, part, comm)
+part=partglob;
+//EOM
+
+/* define sub-communicator if we are not using all cores */
+int[int] Iddm = (0:p-1);
+mpiGroup grpddm(Iddm);
+mpiComm commddm(mpiCommWorld,grpddm);
+
+ffddmnpart = p;
+/* partition the domain into overlapping subdomains */
+ffddmbuildDmeshpartcubes(H,Th,commddm)
+
+/* clear memory */
+Th = cube(1,1,1);
+partglob = 0;
+
+/* define the distributed nodal discretization space */
+macro def(u)u//EOM
+macro init(u)u//EOM
+ffddmbuildDfespace(H,H,complex,def,init,P1)
+
+//////////// *********** BUILD LOCAL MATRICES *********** ////////////
+
+macro HmyOperator(matName, meshName, VhName)
+/* build local matrices A_i for the matrix-vector product */
+int[int] labs = labels(meshName);
+
+int[int] pmls(6);
+pmls = -1; /* Dirichlet BC */
+
+for (int i=0; i<labs.n; i++)
+if (labs[i] >= 11 && labs[i] <= 16)
+  pmls[labs[i]-11] = npmlg[labs[i]-11]; /* global PML boundaries */
+matName = HelmholtzFD(meshName,omega,mu,npml=pmls);
+//EOM
+
+macro HmyPrecond(matName, meshName, VhName)
+/* build local matrices B_i for the preconditioner */
+int[int] labs = labels(meshName);
+
+int[int] pmls(6);
+pmls = npmli; /* local PMLs */
+
+for (int i=0; i<labs.n; i++)
+if (labs[i] >= 11 && labs[i] <= 16)
+  pmls[labs[i]-11] = npmlg[labs[i]-11]; /* global PML boundaries */
+matName = HelmholtzFD(meshName,omega,mu,npml=pmls);
+//EOM
+
+macro Hwithhpddm()1//EOM
+
+ffddmprecond = "oras";
+/* define operator (build A_i) */
+ffddmsetupOperator(H,H,null)
+/* define preconditioner (build B_i) */
+ffddmsetupPrecond(H,null)
+
+//////////// ***********  BUILD RIGHT-HAND SIDES  *********** ////////////
+//////////// *********** SOLVE THE LINEAR SYSTEMS *********** ////////////
+
+HVhi<complex> u, rhs;
+
+int irhs = 0;
+
+if (Hisincomm)
+while (irhs < maxrhs) {
+  int mu = min(murhs, maxrhs-irhs); // number of treated RHSs for this block
+
+  complex[int] brhs(HVhi.ndof*mu); // local RHSs
+
+  /* assemble the mu RHSs */
+  for (int i = 0; i < mu; i++) {
+    if (murhs > 1) { // read RHS position in the file
+      f >> zs; zs /= -1000;
+      f >> xs; xs /= 1000;
+      f >> ys; ys /= 1000;
+    }
+    irhs++;
+
+    /* tag the source node closest to the RHS position */
+    real disti, dist = 1e+30;
+    real idist = -1;
+    for (int i=0; i<HThi.nv; i++) {
+      disti = (HThi(i).x-xs)^2+(HThi(i).y-ys)^2+(HThi(i).z-zs)^2;
+      if (disti < dist){
+        dist = disti;
+        idist = i;
+      }
+    }
+    real distg = 1e+30;
+    mpiAllReduce(dist, distg, commddm, mpiMIN);
+    if (abs(dist-distg) > 1e-10)
+      idist = -1;
+
+    rhs = 0;
+    if (idist != -1) rhs[][idist] = 1;
+    brhs(i*HVhi.ndof:(i+1)*HVhi.ndof-1) = rhs[];
+  }
+
+  complex[int] bu(HVhi.ndof*mu); // local solutions
+  bu = 0; // 0 initial guess
+
+  /* solve the linear systems */
+  bu = HfGMRES(bu, brhs, gmrestol, maxit, "right");
+
+  u[] = bu(0:HVhi.ndof-1); // save the first solution for export
+}
+
+Hwritesummary
+
+/* export a solution to parallel vtu format */
+if (Hisincomm) {
+  load "PETSc-complex"
+  func pml = (x>=lengthx)+(x<=0)+(y>=lengthy)+(y<=0)+(z>=0)+(z<=-depth);
+  HThi = trunc(HThi,pml==0); // remove PML region
+  HVhi ur = real(u), ui = imag(u);
+  int[int] fforder = [1,1];
+  savevtk("GO_3D_OBS.vtu", HThi, ur, ui, dataname = "u ui", order=fforder, communicator=commddm);
+  if (mpirank == 0) cout << "Solution saved: " << "GO_3D_OBS_"+p+".pvd" << endl;
+}

@@ -3,15 +3,16 @@ source shell mingw64
 
 echo "Job 5"
 
-autoreconf -i \
-&& ./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
-        CXXFLAGS=-mtune=generic CFLAGS=-mtune=generic FFLAGS=-mtune=generic \
-        --prefix=/builds/workspace/freefem FCFLAGS=-fallow-invalid-boz \
-  && ./3rdparty/getall -a -o PETSc \
-  && cd 3rdparty/ff-petsc && make petsc-slepc \
-  && cd ../.. \
-  && ./reconfigure \
-  && make
+WORKSPACEunix=$(echo "/$WORKSPACE" | sed -e 's/\\/\//g' -e 's/://')
+
+# configuration & build
+autoreconf -i
+./configure --enable-generic --enable-optim --enable-download --enable-maintainer-mode \
+  --prefix="$WORKSPACEunix/install"
+./3rdparty/getall -a -o PETSc,Ipopt,NLopt,freeYams,FFTW,Gmm++,MMG3D,mshmet,MUMPS
+cd 3rdparty/ff-petsc && make petsc-slepc && cd -
+./reconfigure
+make -j4
 
 if [ $? -eq 0 ]
 then
@@ -29,7 +30,6 @@ then
   echo "Check process complete"
 else
   echo "Check process failed"
-  exit 1
 fi
 
 # install
@@ -51,8 +51,15 @@ then
   echo "Uninstall process complete"
 else
   echo "Uninstall process failed"
-exit 1
+  exit 1
 fi
 
-# visu for jenkins tests results analyser
+# Jenkins tests results analyser
 ./etc/jenkins/resultForJenkins/resultForJenkins.sh
+
+if [ $? -eq 0 ]
+then
+  echo "Jenkins process complete"
+else
+  echo "Jenkins process failed"
+fi

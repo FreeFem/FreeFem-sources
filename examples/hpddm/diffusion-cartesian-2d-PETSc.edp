@@ -3,7 +3,6 @@
 // PARAM -DCartesianPartitioning=1
 
 load "PETSc"                        // PETSc plugin
-macro dimension()2// EOM            // 2D or 3D
 include "macro_ddm.idp"             // additional DDM functions
 
 macro simple2d(Ph, function, comm, deltaX, deltaY)

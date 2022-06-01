@@ -9,7 +9,7 @@ case "$1" in
 	;;
     -dcpp)
 	shift
-	awk -F:  '/^[\/]+ff-c[+][+]-cpp-dep:/  { printf("%s",$2); exit 0;}' $@
+	awk -F:  '/^[\/]+ff-c[+][+]-cpp-dep:/  { if( $2 ~ /[ \n\r]*/) printf("%s",$2); exit 0;}' $@
 	exit 0; 
 	;;
     -ff)

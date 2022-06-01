@@ -43,6 +43,8 @@ Name: "{app}\idp"; Permissions: everyone-full
 IFMPI Name: "{app}\examples\mpi"; Permissions: everyone-full
 IFMPI Name: "{app}\examples\hpddm"; Permissions: everyone-full
 
+; PETSc
+IFMPI Name: "{app}\ff-petsc"; Permissions: everyone-full
 
 [Files]
 ; README
@@ -145,7 +147,8 @@ IFMPI Source: "examples\hpddm\*.edp"; DestDir: "{app}\examples\hpddm"
 ;Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\misc"
 ;Source: "0ldUserReadMe.txt"; DestDir: "{app}\examples\eigen"
 
-
+;PETSc
+Source: "C:\msys64\mingw64\ff-petsc\*"; DestDir: "{app}\ff-petsc"; Flags: recursesubdirs
 
 ; Documentation files may need to be copied from another machine if
 ; Cygwin refuses to build them.
