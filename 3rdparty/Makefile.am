@@ -175,7 +175,7 @@ reinstall-bemtool:./getall
 	-rm ./pkg/bemtool.zip
 	-rm -rf include/BemTool
 	-test -n "$(TOOL_COMPILE_bem)" && $(MAKE) install-bemtool || true
-include/bemtool/done.tag: ./pkg/bemtool.zip
+include/BemTool/done.tag: ./pkg/bemtool.zip
 	-if test -f ./pkg/bemtool.zip; then \
 		cd include; rm -rf BemTool BemTool-*; unzip -q ../pkg/bemtool.zip; mv BemTool-* BemTool; touch BemTool/done.tag; \
 	else true; fi
