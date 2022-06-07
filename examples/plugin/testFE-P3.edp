@@ -96,4 +96,71 @@ for (int i=0;i<Vh.ndofK;++i)
  assert(err < 1e-6);	
 	
 }
+{ // P3HL
+       real L = 1;
+	meshL Th=segment(1,[x*L,0,0]);
+	fespace Vh(Th,P3HL);
+	fespace Wh(Th,P3L);
+	fespace Whdc(Th,P3dcL);
+	func f = 3*(x^3) +2*(x^2)+x + 1;
+	func fxx = 18*x+4. ;//+ 4.;
+	Wh fh = f;
+	cout << " 0 = "<< f(0,0) << " " << dx(fh)(0,0) << " "<< dxx(fh)(0,0) <<" "<< fxx(0,0) << endl; 
+	cout << " L = "<< f(L,0) << " " << dx(fh)(L,0) << " " << dxx(fh)(L,0) <<" "<< fxx(L,0) << endl; 
+	
+	Vh [u,ux] = [f,dx(fh)];
+	cout << " u[]"<< u[] << endl; 
+	Vh [v,vx]; v[]=0;
+	// function de base OK ...
+	// interpolation ok ...
+	real err = 0; 
+	for(int i=0; i<4;++i)
+	{ 
+	v[]=0;
+	v[][Vh(0,i)] = 1.; 
+	Wh vv=v,dvv=dx(vv);
+	cout << i << " " << Vh(0,i) << " " << dxx(vv)(0,0,0) << " " <<  dxx(vv)(L,0,0) << " " << dxx(dvv)(L/2,0,0)  <<endl;
+	cout << "    v 0: "<< v(0,0,0) << " " << vx(0,0,0) << endl; 
+	cout << "    v 1: "<< v(L,0,0) << " " << vx(L,0,0) << endl; 
+	cout << "    dx(v) 0: "<< dx(v)(0,0,0) << " " << dx(vx)(0,0,0) << endl; 
+	cout << "    dx(v) 1: "<< dx(v)(L,0,0) << " " << dx(vx)(L,0,0) << endl; 
+	cout << "    dxx(v) 0: "<< dxx(v)(0,0,0) << " " << dxx(vx)(0,0,0) << endl; 
+	cout << "    dxx(v) 1: "<< dxx(v)(L,0,0) << " " << dxx(vx)(L,0,0) << endl; 
+
+	Vh [w,wx]=[v,vx]; 
+	v[] -= w[]; 
+	err += v[].linfty ;
+	cout << " w[]"<< w[] <<" err " << err <<  endl; 
+        }
+        err+= sqrt(int1d(Th)( sqr(f-u)));
+	 cout << "err L " << err << endl;	
+        err+= sqrt(int1d(Th)( sqr(dx(fh)-dx(u))));
+	 cout << "err L " << err << endl;	
+         err+= sqrt(int1d(Th)( sqr(dx(fh)-ux)));
+ 	 cout << "err L " << err << endl;	
+        err+= sqrt(int1d(Th)( sqr(fxx-dxx(u))));
+	//Whdc d=dxx(fh)-dxx(u);
+	//cout << d[] << endl;
+        cout << "err L " << err << endl;	
+	
+	
+      {  // BiLap 1d ..
+	      real cc = 16.;
+	      func ue = cc*(1-x)*(1-x)*x*x;
+	      func fe = cc*24.0;
+	      int nn=50;
+	      Th = segment(nn);
+	      meshL Thg=segment(nn*40);
+	      fespace Ph(Thg,P1);
+	      Vh  [u,ux] ,  [v,vx] ;
+	      solve BiLap([u,ux],[v,vx]) = int1d(Th)(dx(ux)*dx(vx))- int1d(Th)(fe*v)+on(1,2,u=0,ux=0);
+	      Ph U=u, X=x,Ux=ux, F=ue;
+	      //cout << U[] << endl;
+	      plot([X[],U[]],[X[],F[]],wait=1);
+	      err += sqrt(int1d(Th)(sqr(ue-u)));;
+	      cout << " err = " << err << endl; 
+      }	
+ assert(err < 1e-6);	
+	
+}
 

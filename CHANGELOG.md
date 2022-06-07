@@ -22,8 +22,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
--
-
+- New 1d finite element P3 hermite (C1) finite element in plugin `Element_P3` 
+	meshL Th=segment(1,[x*L,0,0]); fespace Vh(Th,P3HL);
+	see exemple end of exemple plugin/testFE-P3
+- missing new 1d finite element P4 in plugin `Elemnt_P4`
 ### Changed
 -
 
@@ -71,9 +73,12 @@ All notable changes to this project will be documented in this file.
 - new finite element on MeshS  this  finite element is the ortogonal of RT0 on surface, or 
    Nelelec Finite Element on triangle with one DoF per mesh edge and where the DoF is the 
    current on  Edge in orientate edge by number of vertices.  
--  plugin Element_P3pnc for new 2d finite element P3pnc (P3 + 2 bulles)  noncoforming  (continuite of P2 mod)   
+-  plugin Element_P3pnc for new 2d finite element P3pnc (P3 + 2 bulles)  nonconforming  (continuite of P2 mod)   
    and add 2 examples with this new finite element 
       examples/plugin/cavityNewtowP3pnc.edp examples/plugin/testFE-P3pnc.edp
+-  plugin Element_P3nc for new 2d finite element P3pnc (P3 )  nonconforming  (continuite of P2 mod)   
+   and add  examples with this new finite element 
+      examples/plugin/testFE-P3pnc.edp
 - function to set dirichlet Boundary conditon on matrix A (real ou compex) trought  an real[int] 
     (if none zero => set BC ) 
   setBC(A,au1[],-2); and the example 

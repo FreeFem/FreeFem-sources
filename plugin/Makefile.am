@@ -41,6 +41,7 @@ seq/Element_P4.hpp \
 seq/Element_P4dc.cpp \
 seq/Element_P4dc.hpp \
 seq/Element_PkEdge.cpp \
+seq/Element_PkL.hpp \
 seq/Element_QF.cpp \
 seq/ExampleMetrics.h \
 seq/FreeFemQA.cpp \
