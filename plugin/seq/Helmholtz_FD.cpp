@@ -2,10 +2,10 @@
 /*  This plugin implements the 3D 27-point finite-difference stencil with     */
 /*  optimized weights for the discretization of the Helmholtz equation from   */
 /*                                                                            */
-/*  Operto, S., Virieux, J., Amestoy, P., L’Excellent, J. Y., Giraud, L.,     */
-/*  & Ali, H. B. H. (2007). 3D finite-difference frequency-domain modeling of */
-/*  visco-acoustic wave propagation using a massively parallel direct solver: */
-/*  A feasibility study. Geophysics, 72(5), SM195-SM211.                      */
+/*  Aghamiry, H. S., Gholami, A., Combe, L., & Operto, S. (2022). Accurate 3D */
+/*  frequency-domain seismic wave modeling with the wavelength-adaptive       */
+/*  27-point finite-difference stencil: A tool for full-waveform inversion.   */
+/*  Geophysics, 87(3), R305-R324.                                             */
 /******************************************************************************/
 
 #include "ff++.hpp"
