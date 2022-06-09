@@ -58,7 +58,7 @@ TESTS_MPI_METIS_PARMMG = parmmg.edp
 TESTS_MPI_BEMTOOL = Helmholtz_Cobracavity.edp \
 	Helmholtz_circle_Dirichlet.edp\
 	Helmholtz_circle_Neumann.edp\
-	Maxwell_cube_BEM.edp
+	Maxwell_cube_EFIE.edp
 
 if MPI
 CONDITIONAL_MPI =  $(TESTS_MPI)

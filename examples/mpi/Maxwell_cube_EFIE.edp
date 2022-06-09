@@ -1,4 +1,4 @@
-//ff-mpirun -np 4 Maxwell_cube_BEM.edp  -wg
+//ff-mpirun -np 4 Maxwell_cube_EFIE.edp -wg
 
 // for the make check:
 // NBPROC 4
