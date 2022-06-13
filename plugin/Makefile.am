@@ -66,6 +66,7 @@ seq/TensorK.hpp \
 seq/TransfoMesh_v2.cpp \
 seq/TransfoMesh_v2.hpp \
 seq/UMFPACK64.cpp \
+seq/vortextools.cpp \
 seq/VTK_writer.cpp \
 seq/VTK_writer_3d.cpp \
 seq/addNewType.cpp \
