@@ -10,7 +10,7 @@
 
   For a simple test run at low frequency, run:
 
-  ff-mpirun -np 8 Helmholtz_geophysics.edp -ns -nw -frequency 0.3 -nppwl 4 -npml 4 -raspart -noGlob -ffddm_overlap 3 -npmlprec 2 -tol 1e-4 -murhs 20 -maxrhs 20 -ffddm_verbosity 3
+  ff-mpirun -np 8 Helmholtz_geophysics.edp -ns -nw -frequency 0.3 -nppwl 4 -npml 4 -raspart -ffddm_overlap 3 -npmlprec 2 -tol 1e-4 -murhs 20 -maxrhs 20 -ffddm_verbosity 3
 
   For a large-scale 3.75 Hz frequency simulation, run:
 
@@ -18,7 +18,7 @@
 */
 
 macro FDsimulation()1//
-//macro FEsimulation()1// uncomment to perform FE simulation
+macro FEsimulation()1// uncomment to perform FE simulation
 
 load "Helmholtz_FD" // plugin implementing the 27-point FD stencil
 load "geophysics" // for loading velocity grids of the geomodels
@@ -42,6 +42,7 @@ int[int] npmlg(6);
 real freq = getARGV("-frequency",1.); // frequency
 real nppwl = getARGV("-nppwl",4.); // number of points per wavelength
 npmlg = getARGV("-npml",8); // number of points in the global PMLs
+
 int npmli = getARGV("-npmlprec",2); // number of points in local PMLs for the preconditioner
 
 int maxit = getARGV("-maxit",400); // maximum number of GMRES iterations for finite differences
@@ -76,8 +77,6 @@ lengthx = h*floor(lengthx/h);
 lengthy = h*floor(lengthy/h);
 depth = h*floor(depth/h);
 
-real Q = 100000;
-
 real[int]bounds = [0,lengthx,0,lengthy,-depth,0];
 Crustal crust("v.bin",bounds); // load the GO_3D_OBS crustal geomodel
 func c = crust(x,y,z)/1000;
@@ -100,99 +99,17 @@ int nplx = rint(nloc*(lengthx+lengthpml[0]+lengthpml[1])/lengthx);
 int nply = rint(nloc*(lengthy+lengthpml[2]+lengthpml[3])/lengthx);
 int npd = rint(nloc*(depth+lengthpml[4]+lengthpml[5])/lengthx);
 
+int[int] N = [nplx,nply,npd];
+real[int,int] Bounds = [[-lengthpml[0],lengthx+lengthpml[1]], [-lengthpml[2],lengthy+lengthpml[3]], [-depth-lengthpml[4],lengthpml[5]]];
+int[int,int] Labels = [[11,12],[13,14],[15,16]];
+
+/* partition the domain into overlapping cubic subdomains */
+ffddmbuildDmeshpartcubesauto(FDmesh,N,Bounds,Labels,mpiCommWorld)
+
 if (mpirank == 0) cout << "grid size " << nplx+1 << " x " << nply+1 << " x " << npd+1 << endl;
 
-//////////// *********** MESH PARTITIONING *********** ////////////
-int p = mpisize;
-
-real nnx = pow(p * nplx^2 / nply / npd, 1./3.);
-real nny = nnx * nply / nplx;
-real nnz = nnx * npd / nplx;
-nnx = ceil(nnx); nny = ceil(nny); nnz = ceil(nnz);
-
-int nx=0, ny=0, nz=0;
-
-/* try to find the best cuboid partitioning for this number of cores : */
-for (int ii=0; ii<4; ii++)
-for (int jj=0; jj<4; jj++)
-for (int kk=0; kk<4; kk++) {
-  int ni = nnx-ii, nj = nny-jj, nk = nnz-kk;
-  if (ni*nj*nk <= p && ni*nj*nk > nx*ny*nz) {
-    nx = ni; ny = nj; nz = nk;
-  }
-}
-p = nx*ny*nz;
-
-if (mpirank == 0) cout << "The domain will be decomposed in " << nx << " x " << ny << " x " << nz << " subdomains" << endl;
-if (mpirank==0 && (p != mpisize))
-  cout << "WARNING: the cuboid decomposition will only use " << p << " of the " << mpisize << " available cores" << endl;
-
-int zx = nx - (nplx%nx), zy = ny - (nply%ny), zz = nz - (npd%nz);
-int px = ceil(1.*nplx/nx), py = ceil(1.*nply/ny), pz = ceil(1.*npd/nz);
-
-if (mpirank == 0) cout << "Subdomain size " << px+1 << " x " << py+1 << " x " << pz+1 << endl;
-
-int rank = mpirank;
-
-int boundzl = rank / ( nx * ny ) ;
-int nr = rank - boundzl * nx * ny ;
-int boundyl = nr / nx ;
-int boundxl = nr % nx ;
-
-boundxl *= px; boundyl *= py; boundzl *= pz;
-
-int boundzu = (rank / ( nx * ny ) < nz - 1 ? boundzl + pz - 1 : npd-1);
-int boundyu = (nr / nx < ny - 1 ? boundyl + py - 1 : nply - 1);
-int boundxu = (nr % nx < nx - 1 ? boundxl + px - 1 : nplx - 1);
-
-boundxl = max(0,boundxl-3*ffddmoverlap); boundxu = min(nplx-1,boundxu+3*ffddmoverlap);
-boundyl = max(0,boundyl-3*ffddmoverlap); boundyu = min(nply-1,boundyu+3*ffddmoverlap);
-boundzl = max(0,boundzl-3*ffddmoverlap); boundzu = min(npd-1,boundzu+3*ffddmoverlap);
-
-int nbnx = boundxu-boundxl+1;
-int nbny = boundyu-boundyl+1;
-int nbnz = boundzu-boundzl+1;
-
-/* truncate global grid around the subdomain before partitioning to avoid defining the full grid */
-int[int] NN=[nbnx,nbny,nbnz];
-real [int,int] BB=[[(boundxl-npmlg[0])*h,(boundxu+1-npmlg[0]+0)*h],[(boundyl-npmlg[2])*h,(boundyu+1-npmlg[2]+0)*h],[-depth+(boundzl-npmlg[4])*h,-depth+(boundzu+1-npmlg[4]+0)*h]];
-int [int,int] LL=[[11+100*(boundxl!=0),12+100*(boundxu!=nplx-1)],[13+100*(boundyl!=0),14+100*(boundyu!=nply-1)],[15+100*(boundzl!=0),16+100*(boundzu!=npd-1)]];
-
-mesh3 Th=Cube(NN,BB,LL);
-
-func int partcube(int ii, int jj, int kk) {
-  return min(kk / pz, int(nz-1))*nx*ny + min(jj / py, int(ny-1))*nx + min(ii / px, int(nx-1));	
-}
-
-fespace Phg(Th,P0);
-Phg partglob;
-
-/* define the regular partitioning as a P0 function on Th */
-partglob=partcube(floor((x+lengthpml[0])/(lengthx+lengthpml[0]+lengthpml[1])*nplx),
-                  floor((y+lengthpml[2])/(lengthy+lengthpml[2]+lengthpml[3])*nply),
-                  floor((z+depth+lengthpml[4])/(depth+lengthpml[4]+lengthpml[5])*npd));
-
-/* user-defined custom partitioning for mesh prefix H */
-ffddmpartitioner = 0;
-macro FDsimple(PhGlobal, part, comm)
-part=partglob;
-//EOM
-
-/* define sub-communicator if we are not using all cores */
-int[int] Iddm = (0:p-1);
-mpiGroup grpddm(Iddm);
-mpiComm commddm(mpiCommWorld,grpddm);
-
-ffddmnpart = p;
-/* partition the domain into overlapping subdomains */
-ffddmbuildDmeshpartcubes(FD,Th,commddm)
-
-/* clear memory */
-Th = cube(1,1,1);
-partglob = 0;
-
 /* define the distributed nodal discretization space */
-ffddmbuildDfespace(FD,FD,complex,def,init,P1)
+ffddmbuildDfespace(FDspace,FDmesh,complex,def,init,P1)
 
 //////////// *********** BUILD LOCAL MATRICES *********** ////////////
 
@@ -226,7 +143,7 @@ macro FDwithhpddm()1//EOM
 
 ffddmprecond = "oras";
 /* define operator (build A_i) */
-ffddmsetupOperator(FD,FD,null)
+ffddmsetupOperator(FD,FDspace,null)
 /* define preconditioner (build B_i) */
 ffddmsetupPrecond(FD,null)
 
@@ -239,15 +156,15 @@ set(FDhpddmOP,sparams="-hpddm_FD_reuse_preconditioner 1 -hpddm_FD_orthogonalizat
 //////////// ***********  BUILD RIGHT-HAND SIDES  *********** ////////////
 //////////// *********** SOLVE THE LINEAR SYSTEMS *********** ////////////
 
-FDVhi<complex> u, rhs;
+FDspaceVhi<complex> u, rhs;
 
 int irhs = 0;
 
-if (FDisincomm)
+if (FDmeshisincomm)
 while (irhs < maxrhs) {
   int mu = min(murhs, maxrhs-irhs); // number of treated RHSs for this block
 
-  complex[int] brhs(FDVhi.ndof*mu); // local RHSs
+  complex[int] brhs(FDspaceVhi.ndof*mu); // local RHSs
 
   /* assemble the mu RHSs */
   for (int i = 0; i < mu; i++) {
@@ -260,33 +177,34 @@ while (irhs < maxrhs) {
 
     /* tag the source node */
     rhs = 0;
-    for (int i=0; i<FDThi.nv; i++)
-    if ((FDThi(i).x-xs)^2+(FDThi(i).y-ys)^2+(FDThi(i).z-zs)^2 < 1e-3*h)
+    for (int i=0; i<FDmeshThi.nv; i++)
+    if ((FDmeshThi(i).x-xs)^2+(FDmeshThi(i).y-ys)^2+(FDmeshThi(i).z-zs)^2 < 1e-3*h)
       rhs[][i] = -1./h^2;
 
-    brhs(i*FDVhi.ndof:(i+1)*FDVhi.ndof-1) = rhs[];
+    brhs(i*FDspaceVhi.ndof:(i+1)*FDspaceVhi.ndof-1) = rhs[];
   }
 
-  complex[int] bu(FDVhi.ndof*mu); // local solutions
+  complex[int] bu(FDspaceVhi.ndof*mu); // local solutions
   bu = 0; // 0 initial guess
 
   /* solve the linear systems */
   bu = FDfGMRES(bu, brhs, gmrestol, maxit, "right");
 
-  u[] = bu(0:FDVhi.ndof-1); // save the first solution for export
+  u[] = bu(0:FDspaceVhi.ndof-1); // save the first solution for export
+  u = u*sqrt((x-xs)^2+(y-ys)^2+(z-zs)^2); // scale with distance to source for visualization
 }
 
 FDwritesummary
 
 /* export a solution to parallel vtu format */
-if (FDisincomm) {
+if (FDmeshisincomm) {
   load "PETSc-complex"
   func pml = (x>=lengthx)+(x<=0)+(y>=lengthy)+(y<=0)+(z>=0)+(z<=-depth);
-  //HThi = trunc(HThi,pml==0); // remove PML region
-  FDVhi ur = (!pml)*real(u), ui = (!pml)*imag(u);
+  //FDmeshThi = trunc(FDmeshThi,pml==0); // remove PML region
+  FDspaceVhi ur = (!pml)*real(u), ui = (!pml)*imag(u);
   int[int] fforder = [1,1];
-  savevtk("GO_3D_OBS_FD.vtu", FDThi, ur, ui, dataname = "u ui", order=fforder, communicator=commddm);
-  if (mpirank == 0) cout << "Solution saved: " << "GO_3D_OBS_FD_"+p+".pvd" << endl;
+  savevtk("GO_3D_OBS_FD.vtu", FDmeshThi, ur, ui, dataname = "u ui", order=fforder, communicator=FDmeshcommddm);
+  if (mpirank == 0) cout << "Solution saved: " << "GO_3D_OBS_FD_"+mpiSize(FDmeshcommddm)+".pvd" << endl;
 }
 ENDIFMACRO
 
@@ -316,8 +234,7 @@ for (int i=0; i<3; i++) {
   Th = parmmg3d(Th,metric=met[],hgrad=3,verbose=1,mem=16000);
 }
 
-ffddmpartitioner = 1;
-ffddmbuildDmeshNested(FE,Th,split,mpiCommWorld)
+ffddmbuildDmeshNested(FEmesh,Th,split,mpiCommWorld)
 
 /* clear memory */
 Th = cube(1,1,1);
@@ -352,8 +269,8 @@ macro Varfrhs(varfName, meshName, PhName)
                      + on(11,12,13,14,15,16,u=0);
 //EOM
 
-ffddmbuildDfespace(FE,FE,complex,def,init,PkFE)
-ffddmbuildDfespace(FECoarse,FECoarse,complex,def,init,PkFE)
+ffddmbuildDfespace(FEs,FEmesh,complex,def,init,PkFE)
+ffddmbuildDfespace(FEsCoarse,FEmeshCoarse,complex,def,init,PkFE)
 
 vsym = 2; // matrices are symmetric, not hermitian
 vtgv = vtgvelim = -2;
@@ -363,9 +280,9 @@ ffddmprecond = "oras";
 macro FEwithhpddm()1//
 macro FECoarsewithhpddm()1//
 
-ffddmsetupOperator(FECoarse,FECoarse,Varf)
+ffddmsetupOperator(FECoarse,FEsCoarse,Varf)
 
-ffddmsetupOperator(FE,FE,Varf)
+ffddmsetupOperator(FE,FEs,Varf)
 
 ffddmset(FE,verbosity,3)
 ffddmset(FECoarse,verbosity,1)
@@ -386,13 +303,13 @@ set(FEhpddmOP,sparams="-hpddm_FE_reuse_preconditioner 1 -hpddm_FE_orthogonalizat
 
 int irhs = 0;
 
-FEVhi<complex> u, rhs;
+FEsVhi<complex> u, rhs;
 
 ifstream f("Helmholtz_geophysics_rhs_pos.txt");
 while (irhs < maxrhs) {
   int mu = min(murhs, maxrhs-irhs); // number of treated RHSs for this block
 
-  complex[int] brhs(FEVhi.ndof*mu); // local RHSs
+  complex[int] brhs(FEsVhi.ndof*mu); // local RHSs
 
   /* assemble the mu RHSs */
   for (int i = 0; i < mu; i++) {
@@ -404,16 +321,17 @@ while (irhs < maxrhs) {
     irhs++;
 
     ffddmbuildrhs(FE,Varfrhs,rhs[])
-    brhs(i*FEVhi.ndof:(i+1)*FEVhi.ndof-1) = rhs[];
+    brhs(i*FEsVhi.ndof:(i+1)*FEsVhi.ndof-1) = rhs[];
   }
 
-  complex[int] bu(FEVhi.ndof*mu); // local solutions
+  complex[int] bu(FEsVhi.ndof*mu); // local solutions
   bu = 0; // 0 initial guess
 
   /* solve the linear systems */
   bu = FEfGMRES(bu, brhs, gmrestol, maxitFE, "right");
 
-  u[] = bu(0:FEVhi.ndof-1); // save the first solution for export
+  u[] = bu(0:FEsVhi.ndof-1); // save the first solution for export
+  u = u*sqrt((x-xs)^2+(y-ys)^2+(z-zs)^2); // scale with distance to source for visualization
 }
 
 FECoarsewritesummary
@@ -422,11 +340,11 @@ FEwritesummary
 /* export a solution to parallel vtu format */
 load "PETSc-complex"
 func pml = (x>=lengthx)+(x<=0)+(y>=lengthy)+(y<=0)+(z>=0)+(z<=-depth);
-//FEThi = trunc(FEThi,pml==0); // remove PML region
-FEThi = trunc(FEThi,1,split=2);
-FEVhi ur = (!pml)*real(u), ui = (!pml)*imag(u);
+//FEmeshThi = trunc(FEmeshThi,pml==0); // remove PML region
+FEmeshThi = trunc(FEmeshThi,1,split=2);
+FEsVhi ur = (!pml)*real(u), ui = (!pml)*imag(u);
 int[int] fforder = [1,1];
-savevtk("GO_3D_OBS_FE.vtu", FEThi, ur, ui, dataname = "u ui", order=fforder);
+savevtk("GO_3D_OBS_FE.vtu", FEmeshThi, ur, ui, dataname = "u ui", order=fforder);
 if (mpirank == 0) cout << "Solution saved: " << "GO_3D_OBS_FE_"+mpisize+".pvd" << endl;
 }
 ENDIFMACRO

@@ -369,7 +369,7 @@ if (prmesh#isincomm)
 } 
 //EOM
 
-macro ffddminitDmeshf(prmesh,Th,comm)
+macro ffddminitDmeshf(prmesh,comm)
 IFMACRO(!prmesh#meshinit)
 
 IFMACRO(((!prmesh#dim)&(dimension,2))|(prmesh#dim,2))
@@ -1067,7 +1067,7 @@ int prmesh#binexactCS = 0;
 int prmesh#binexactgeneoCS = 0;
 int prmesh#pCS = ffddmpCS;
 int prmesh#exclude = ffddmexclude;
-ffddminitDmeshf(prmesh,Th,comm)
+ffddminitDmeshf(prmesh,comm)
 
 if (!bnoGlob)
 if  (prmesh#inexactCSsplit <= 1) {
@@ -1102,7 +1102,7 @@ int prmesh#Augexclude = ffddmexclude;
 IFMACRO(!prmesh#Augmminoverlap)
 NewMacro prmesh#Augmminoverlap()0 EndMacro
 ENDIFMACRO
-ffddminitDmeshf(prmesh#Aug,Th,comm)
+ffddminitDmeshf(prmesh#Aug,comm)
 
 prmesh#AugThglob = prmesh#Thglob;
 IFMACRO (!prmesh#AugbuildAug)
@@ -1142,7 +1142,7 @@ int prmesh#CoarsebinexactgeneoCS = 0;
 int prmesh#CoarsepCS = ffddmpCS;
 int prmesh#Coarseexclude = ffddmexclude;
 
-ffddminitDmeshf(prmesh,Thc,comm)
+ffddminitDmeshf(prmesh,comm)
 
 if (!bnoGlob)
 if  (prmesh#inexactCSsplit <= 1) {
@@ -1154,7 +1154,7 @@ if  (prmesh#inexactCSsplit <= 1) {
 else 
   prmesh#Thglob = trunc(Thc,1,split=prmesh#inexactCSsplit*ffddmsplit);
 
-ffddminitDmeshf(prmesh#Coarse,Thc,comm)
+ffddminitDmeshf(prmesh#Coarse,comm)
 
 IFMACRO(!prmesh#mminoverlap)
 NewMacro prmesh#mminoverlap()0 EndMacro
@@ -1191,6 +1191,132 @@ IFMACRO(!prmesh#buildAug)
 NewMacro prmesh#partcubes()1 EndMacro
 ENDIFMACRO
 ffddmbuildDmesh(prmesh,Th,comm)
+// EOM
+
+macro ffddmbuildDmeshpartcubesauto(prmesh,N,B,L,comm)
+IFMACRO(!prmesh#buildAug)
+NewMacro prmesh#partcubes()1 EndMacro
+ENDIFMACRO
+
+int prmesh#inexactCSsplit = 0;
+int prmesh#binexactCS = 0;
+int prmesh#binexactgeneoCS = 0;
+int prmesh#pCS = ffddmpCS;
+int prmesh#exclude = ffddmexclude;
+
+int prmesh#cubesnpart, prmesh#cubesnx=0, prmesh#cubesny=0, prmesh#cubesnz=0;
+
+{
+  int p = mpiSize(comm);
+
+  real nnx = pow(p * N[0]^2 / N[1] / N[2], 1./3.);
+  real nny = nnx * N[1] / N[0];
+  real nnz = nnx * N[2] / N[0];
+  nnx = ceil(nnx); nny = ceil(nny); nnz = ceil(nnz);
+
+  /* try to find the best cuboid partitioning for this number of cores : */
+  for (int ii=0; ii<4; ii++)
+  for (int jj=0; jj<4; jj++)
+  for (int kk=0; kk<4; kk++) {
+    int ni = nnx-ii, nj = nny-jj, nk = nnz-kk;
+    if (ni*nj*nk <= p && ni*nj*nk > prmesh#cubesnx * prmesh#cubesny * prmesh#cubesnz) {
+      prmesh#cubesnx = ni; prmesh#cubesny = nj; prmesh#cubesnz = nk;
+    }
+  }
+  p = prmesh#cubesnx * prmesh#cubesny * prmesh#cubesnz;
+
+  if (mpiRank(comm) == 0) cout << "The domain will be decomposed in " << prmesh#cubesnx << " x " << prmesh#cubesny << " x " << prmesh#cubesnz << " cubic subdomains" << endl;
+  if (mpiRank(comm) == 0 && (p != mpiSize(comm)))
+    cout << "WARNING: the cuboid decomposition will only use " << p << " of the " << mpiSize(comm) << " available cores" << endl;
+  prmesh#cubesnpart = p;
+}
+
+/* define sub-communicator if we are not using all cores */
+int[int] prmesh#Icubesauto = (0:prmesh#cubesnpart-1);
+mpiGroup prmesh#grpcubesauto(prmesh#Icubesauto);
+mpiComm prmesh#commcubesauto(comm,prmesh#grpcubesauto);
+
+ffddminitDmeshf(prmesh,prmesh#commcubesauto)
+
+IFMACRO(!prmesh#mminoverlap)
+NewMacro prmesh#mminoverlap()0 EndMacro
+ENDIFMACRO
+
+IFMACRO(!prmesh#buildAug)
+IFMACRO(prmesh#mminoverlap,1)
+NewMacro prmesh#buildAug()1 EndMacro
+ENDIFMACRO
+ENDIFMACRO
+
+IFMACRO(!prmesh#buildAug)
+NewMacro prmesh#buildAug()0 EndMacro
+ENDIFMACRO
+
+IFMACRO(prmesh#buildAug,1)
+int prmesh#AuginexactCSsplit = 0;
+int prmesh#AugbinexactCS = 0;
+int prmesh#AugbinexactgeneoCS = 0;
+int prmesh#AugpCS = ffddmpCS;
+int prmesh#Augexclude = ffddmexclude;
+IFMACRO(!prmesh#Augmminoverlap)
+NewMacro prmesh#Augmminoverlap()0 EndMacro
+ENDIFMACRO
+ffddminitDmeshf(prmesh#Aug,prmesh#commcubesauto)
+
+prmesh#AugThglob = prmesh#Thglob;
+IFMACRO (!prmesh#AugbuildAug)
+NewMacro prmesh#AugbuildAug()0 EndMacro
+ENDIFMACRO
+ENDIFMACRO
+
+if (prmesh#isincomm)
+{
+  int nx = prmesh#cubesnx, ny = prmesh#cubesny, nz = prmesh#cubesnz;
+  int zx = nx - (N[0]%nx), zy = ny - (N[1]%ny), zz = nz - (N[2]%nz);
+  int px = ceil(1.*N[0]/nx), py = ceil(1.*N[1]/ny), pz = ceil(1.*N[2]/nz);
+
+  if (mpiRank(prmesh#commcubesauto) == 0) cout << "Subdomain size " << px+1 << " x " << py+1 << " x " << pz+1 << endl;
+
+  int boundzl = mpiRank(prmesh#commcubesauto) / ( nx * ny );
+  int nr = mpiRank(prmesh#commcubesauto) - boundzl * nx * ny;
+  int boundyl = nr / nx;
+  int boundxl = nr % nx;
+
+  boundxl *= px; boundyl *= py; boundzl *= pz;
+
+  int boundzu = (mpiRank(prmesh#commcubesauto) / ( nx * ny ) < nz - 1 ? boundzl + pz - 1 : N[2]-1);
+  int boundyu = (nr / nx < ny - 1 ? boundyl + py - 1 : N[1] - 1);
+  int boundxu = (nr % nx < nx - 1 ? boundxl + px - 1 : N[0] - 1);
+
+  boundxl = max(0,boundxl-3*ffddmoverlap); boundxu = min(N[0]-1,boundxu+3*ffddmoverlap);
+  boundyl = max(0,boundyl-3*ffddmoverlap); boundyu = min(N[1]-1,boundyu+3*ffddmoverlap);
+  boundzl = max(0,boundzl-3*ffddmoverlap); boundzu = min(N[2]-1,boundzu+3*ffddmoverlap);
+
+  int nbnx = boundxu-boundxl+1;
+  int nbny = boundyu-boundyl+1;
+  int nbnz = boundzu-boundzl+1;
+
+  /* truncate global grid around the subdomain before partitioning to avoid defining the full grid */
+  real h = (B(0,1)-B(0,0))/N[0];
+  int[int] NN=[nbnx,nbny,nbnz];
+
+  real [int,int] BB=[[B(0,0)+boundxl*h,B(0,0)+(boundxu+1)*h],[B(1,0)+boundyl*h,B(1,0)+(boundyu+1)*h],[B(2,0)+boundzl*h,B(2,0)+(boundzu+1)*h]];
+  int [int,int] LL=[[L(0,0)+100*(boundxl!=0),L(0,1)+100*(boundxu!=N[0]-1)],[L(1,0)+100*(boundyl!=0),L(1,1)+100*(boundyu!=N[1]-1)],[L(2,0)+100*(boundzl!=0),L(2,1)+100*(boundzu!=N[2]-1)]];
+
+  mesh3 Thtcube = Cube(NN,BB,LL);
+
+  func int partcube(int ii, int jj, int kk) {
+    return min(kk / pz, int(nz-1))*nx*ny + min(jj / py, int(ny-1))*nx + min(ii / px, int(nx-1));
+  }
+
+  fespace prmesh#Phgcube(Thtcube,P0);
+  prmesh#Phgcube partglob;
+
+  /* define the regular partitioning as a P0 function on Th */
+  partglob=partcube(floor((x-B(0,0))/(B(0,1)-B(0,0))*N[0]), floor((y-B(1,0))/(B(1,1)-B(1,0))*N[1]), floor((z-B(2,0))/(B(2,1)-B(2,0))*N[2]));
+
+  ffddmbuildDmeshf(prmesh,Thtcube,partglob[],ffddmoverlap)
+}
 // EOM
 
 macro ffddmbuildDfespaceEdgeNested(prfe,prmesh,scalar,def,init,Pk,defpart,initpart,Pkpart)
