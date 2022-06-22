@@ -1582,9 +1582,14 @@ class AC_F0: public basicAC_F0 { //  a Array of [[C_F0]]
         for(int j=0; j<c.size();++j)
          a[nb++]=c[j];
       // add named parameter ..
-      ffassert( named_parameter==0);
+   //   ffassert( named_parameter==0); // modif FH & JM June 2022
       if(c.named_parameter)
-      named_parameter=new maptype(*c.named_parameter);// copy la map   !!!!!
+      {  if(!named_parameter)
+          named_parameter=new maptype(); // map vide
+          named_parameter->insert(c.named_parameter->begin(),c.named_parameter->end()); // insert named parameter
+      // named_parameter=new maptype(*c.named_parameter);// old code :copy la map   !!!!!
+      }
+      // end modif June 2022
      
         return *this;}
   AC_F0 & Add(const char * nm,const C_F0 &c)  {
