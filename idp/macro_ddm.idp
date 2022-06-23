@@ -569,6 +569,10 @@ ENDIFMACRO
 else {
     privateDmesh#ThName#khi[0] = 1.0;
     privateDmesh#ThName#khi[1] = 1.0;
+IFMACRO(ThName#N2O)
+    ThName#N2O.resize(ThName.nt);
+    ThName#N2O = 0:ThName.nt - 1;
+ENDIFMACRO
 }
 }
 EndMacro
