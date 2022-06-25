@@ -1703,6 +1703,7 @@ namespace PETSc {
       zeros.reserve(std::min(N, M));
       std::vector<std::pair<int, int>> destroy;
       destroy.reserve(N * M);
+      MPI_Comm comm1 = MPI_COMM_NULL, comm2 = MPI_COMM_NULL;
       for (int i = 0; i < N; ++i) {
         for (int j = 0; j < M; ++j) {
           Expression e = e_M[i][j];
@@ -1712,6 +1713,13 @@ namespace PETSc {
             if (t == 1) {
               DistributedCSR< HpddmType >* pt = GetAny< DistributedCSR< HpddmType >* >(e_ij);
               a[i * M + j] = pt->_petsc;
+              PetscObjectGetComm((PetscObject)pt->_petsc, &comm2);
+              if (comm1 != MPI_COMM_NULL) {
+                int flag;
+                MPI_Comm_compare(comm1, comm2, &flag);
+                ffassert(flag == MPI_CONGRUENT || flag == MPI_IDENT);
+              }
+              comm1 = comm2;
               exchange[i * M + j] = pt;
             } else if (t == 2) {
               DistributedCSR< HpddmType >* pt = GetAny< DistributedCSR< HpddmType >* >(e_ij);
@@ -1723,11 +1731,18 @@ namespace PETSc {
               a[i * M + j] = B;
               destroy.emplace_back(i, j);
               exchange[i * M + j] = pt;
+              PetscObjectGetComm((PetscObject)pt->_petsc, &comm2);
+              if (comm1 != MPI_COMM_NULL) {
+                int flag;
+                MPI_Comm_compare(comm1, comm2, &flag);
+                ffassert(flag == MPI_CONGRUENT || flag == MPI_IDENT);
+              }
+              comm1 = comm2;
             } else if (t == 7) {
               PetscScalar r = GetAny< PetscScalar >(e_ij);
               if (std::abs(r) > 1.0e-16) {
                 Mat B;
-                MatCreateDense(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, 1, 1, NULL, &B);
+                MatCreateDense(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, 1, 1, NULL, &B);
                 MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
                 MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
                 PetscScalar* array;
@@ -1745,7 +1760,7 @@ namespace PETSc {
               Mat B;
               if (t == 3) x = GetAny< KN_< PetscScalar > >(e_ij);
               else x = GetAny< Transpose< KN_< PetscScalar > > >(e_ij);
-              MatCreateDense(PETSC_COMM_WORLD, x.n, PETSC_DECIDE, PETSC_DECIDE, 1, NULL, &B);
+              MatCreateDense(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, x.n, PETSC_DECIDE, PETSC_DECIDE, 1, NULL, &B);
               MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
               MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
               PetscScalar* array;
@@ -1809,7 +1824,7 @@ namespace PETSc {
             y = x;
             Y = X;
           }
-          MatCreate(PETSC_COMM_WORLD, a + zeros[i] * M + zeros[i]);
+          MatCreate(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, a + zeros[i] * M + zeros[i]);
           MatSetSizes(a[zeros[i] * M + zeros[i]], x, y, X, Y);
           MatSetType(a[zeros[i] * M + zeros[i]], MATAIJ);
           MatSeqAIJSetPreallocation(a[zeros[i] * M + zeros[i]], 0, NULL);
@@ -1821,7 +1836,7 @@ namespace PETSc {
       }
       Result sparse_mat = GetAny< Result >((*emat)(s));
       if (sparse_mat->_petsc) sparse_mat->dtor( );
-      MatCreateNest(PETSC_COMM_WORLD, N, NULL, M, NULL, a, &sparse_mat->_petsc);
+      MatCreateNest(comm1 != MPI_COMM_NULL ? comm1 : PETSC_COMM_WORLD, N, NULL, M, NULL, a, &sparse_mat->_petsc);
       for(std::pair<int, int> p : destroy)
           MatDestroy(a + p.first * M + p.second);
       sparse_mat->_exchange = reinterpret_cast<HPDDM::Subdomain<PetscScalar>**>(exchange);
