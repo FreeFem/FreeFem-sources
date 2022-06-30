@@ -1199,6 +1199,15 @@ macro buildMatEdgeRecursive(Th, s, nlevel, prolongation, A, P, comm, PkPart, def
     for(int i = 0; i < nlevel; ++i)
         constructor(A[i], DTab[i].n, intersectionMat, DTab[i], bs = bsMat, communicator = comm, level = i);
 }// EOM
+macro buildMatEdgeRecursiveWithPartitioning(Th, part, s, nlevel, prolongation, A, P, comm, PkPart, defPart, initPart, bsMat) {
+    int[int] emptyArray(0);
+    meshN[int] ThBorderTab(nlevel);
+    int[int][int] intersectionMat;
+    real[int][int] DTab(nlevel);
+    buildOverlapEdgePeriodicRecursive(Th, ThBorderTab, -111111, s, 1, nlevel, prolongation, intersectionMat, DTab, P, comm, false, PkPart, defPart, initPart, emptyArray, part, bsMat)
+    for(int i = 0; i < nlevel; ++i)
+        constructor(A[i], DTab[i].n, intersectionMat, DTab[i], bs = bsMat, communicator = comm, level = i);
+}// EOM
 macro buildMatEdgeWithPartitioning(Th, part, s, A, P, comm, PkPart, defPart, initPart, bsMat) {
     real[int] DMat;
     int[int][int] intersectionMat;
@@ -1325,6 +1334,15 @@ macro buildMatEdgeRecursive(Th, s, nlevel, prolongation, A, P, comm, PkPart, def
     int[int][int] intersectionMat;
     real[int][int] DTab(nlevel);
     buildOverlapEdgePeriodicRecursive(Th, ThBorderTab, -111111, s, 1, nlevel, prolongation, intersectionMat, DTab, P, comm, false, PkPart, defPart, initPart, emptyArray, emptyRealArray, 1)
+    for(int i = 0; i < nlevel; ++i)
+        constructor(A[i], DTab[i].n, intersectionMat, DTab[i], communicator = comm, level = i);
+}// EOM
+macro buildMatEdgeRecursiveWithPartitioning(Th, part, s, nlevel, prolongation, A, P, comm, PkPart, defPart, initPart) {
+    int[int] emptyArray(0);
+    meshN[int] ThBorderTab(nlevel);
+    int[int][int] intersectionMat;
+    real[int][int] DTab(nlevel);
+    buildOverlapEdgePeriodicRecursive(Th, ThBorderTab, -111111, s, 1, nlevel, prolongation, intersectionMat, DTab, P, comm, false, PkPart, defPart, initPart, emptyArray, part, 1)
     for(int i = 0; i < nlevel; ++i)
         constructor(A[i], DTab[i].n, intersectionMat, DTab[i], communicator = comm, level = i);
 }// EOM
