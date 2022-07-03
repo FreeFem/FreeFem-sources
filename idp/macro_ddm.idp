@@ -1584,8 +1584,8 @@ IFMACRO(dimension,3)
         uVelExchangeSafety[][dimension * j + 2] = uVelExchange[][dimension * w + 2];
 ENDIFMACRO
     }
-    uChiExchangeSafety = convect(defVel(uVelExchangeSafety), dt, uChiExchangeSafety);
-    uChi = uChiExchangeSafety;
+    uKhiExchangeSafety = convect(defVel(uVelExchangeSafety), dt, uKhiExchangeSafety);
+    uKhi = uKhiExchangeSafety;
     ThName = change(ThName, fregion = backupRegion[nuTriangle]);
     mpiWaitAll(rqSendTh);
     mpiWaitAll(rqSendU);
