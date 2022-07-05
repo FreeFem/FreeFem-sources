@@ -111,7 +111,7 @@ All notable changes to this project will be documented in this file.
   `nuVertex` of now the vertex number of element in intallBE0d integral
   `BoundaryBE`, `InternalBE` to know if border element (BE) is on true boundary of not.
   update `nElementonB` in case on no manifold data (value greater > 2) in meshL, MeshS case ..
-  add code to use jump, mean of test functuon on MeshL case. ( not in mesh3 ) to compute RHS.
+  add code to use jump, mean, otherside of test function on MeshL case. ( not in mesh3 ) to compute RHS.
 - add getcwd() function in shell plugin to get the current working dir
 - add nuVertex to get the vextex on element in some int?
 
