@@ -3071,26 +3071,64 @@ namespace PETSc {
     }
   }
   template< class Type >
-  long MatConvert(Type* const& A, Type* const& B) {
-    if (A->_petsc) {
+  class convert_Op : public E_F0mps {
+   public:
+    Expression A;
+    Expression B;
+    static const int n_name_param = 1;
+    static basicAC_F0::name_and_type name_param[];
+    Expression nargs[n_name_param];
+    convert_Op(const basicAC_F0& args, Expression param1, Expression param2) : A(param1), B(param2) {
+      args.SetNameParam(n_name_param, name_param, nargs);
+    }
+
+    AnyType operator( )(Stack stack) const;
+  };
+  template< class Type >
+  basicAC_F0::name_and_type convert_Op< Type >::name_param[] = {
+    {"type", &typeid(std::string*)}
+  };
+  template< class Type >
+  class convert : public OneOperator {
+   public:
+    convert( ) : OneOperator(atype< long >( ), atype< Type* >( ), atype< Type* >( )) {}
+
+    E_F0* code(const basicAC_F0& args) const {
+      return new convert_Op< Type >(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
+    }
+  };
+  template< class Type >
+  AnyType convert_Op< Type >::operator( )(Stack stack) const {
+    Type* ptA = GetAny< Type* >((*A)(stack));
+    Type* ptB = GetAny< Type* >((*B)(stack));
+    std::string stype = nargs[0] ? *GetAny< std::string* >((*nargs[0])(stack)) : "aij";
+    if (nargs[0]) std::transform(stype.begin(), stype.end(), stype.begin(), ::tolower);
+    if (ptA->_petsc) {
+      if (ptB->_petsc) ptB->dtor( );
       MatType type;
       PetscBool isType;
-      MatGetType(A->_petsc, &type);
+      MatGetType(ptA->_petsc, &type);
       PetscStrcmp(type, MATNEST, &isType);
       if (isType) {
-        if (B->_petsc) B->dtor( );
-        prepareConvert(A->_petsc, &B->_petsc);
+        prepareConvert(ptA->_petsc, &ptB->_petsc);
       }
       else {
+        Mat C = ptA->_petsc;
 #if defined(PETSC_HAVE_HTOOL)
         PetscStrcmp(type, MATHTOOL, &isType);
         if (isType) {
-          if (B->_petsc) B->dtor( );
-          MatConvert(A->_petsc, MATDENSE, MAT_INITIAL_MATRIX, &B->_petsc);
+          MatConvert(ptA->_petsc, MATDENSE, MAT_INITIAL_MATRIX, &ptB->_petsc);
+          if (nargs[0] && stype.compare("dense") != 0) {
+            C = ptB->_petsc;
+            isType = PETSC_FALSE;
+          }
         }
 #endif
         if (!isType) {
-          MatConvert(A->_petsc, MATAIJ, MAT_INITIAL_MATRIX, &B->_petsc);
+          MatType mtype(stype.c_str());
+          MatConvert(C, mtype, MAT_INITIAL_MATRIX, &ptB->_petsc);
+          if (C != ptA->_petsc)
+              MatDestroy(&C);
         }
       }
     }
@@ -4888,7 +4926,7 @@ namespace PETSc {
     }
     Global.Add("MatPtAP", "(",
                new OneOperator3_< long, Dmat*, Dmat*, Dmat* >(PETSc::MatPtAP));
-    Global.Add("MatConvert", "(", new OneOperator2_< long, Dmat*, Dmat* >(PETSc::MatConvert));
+    Global.Add("MatConvert", "(", new PETSc::convert< Dmat >);
     Global.Add("MatZeroRows", "(",
                new OneOperator2_< long, Dmat*, KN< double >* >(PETSc::MatZeroRows));
     Global.Add("KSPSolve", "(", new PETSc::LinearSolver< Dmat >( ));
