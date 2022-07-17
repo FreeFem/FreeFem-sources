@@ -96,17 +96,64 @@ void varfBem(const typename fes1::FESpace*& PUh, const typename fes2::FESpace*& 
     ffassert(VFBEM == -1);
 }
 
-template<typename P, typename MeshBemtool, typename std::enable_if< std::is_same<P, bemtool::P0_1D>::value || std::is_same<P, bemtool::P0_2D>::value >::type* = nullptr >
+template<typename P, typename MeshBemtool, typename std::enable_if< std::is_same<P, bemtool::RT0_2D>::value || std::is_same<P, bemtool::P0_1D>::value || std::is_same<P, bemtool::P0_2D>::value >::type* = nullptr >
 bemtool::Dof<P>* new_dof(MeshBemtool *mesh) {
     return new bemtool::Dof<P>(*mesh);
 }
 
-template<typename P, typename MeshBemtool, typename std::enable_if< !std::is_same<P, bemtool::P0_1D>::value && !std::is_same<P, bemtool::P0_2D>::value >::type* = nullptr >
+template<typename P, typename MeshBemtool, typename std::enable_if< !std::is_same<P, bemtool::RT0_2D>::value && !std::is_same<P, bemtool::P0_1D>::value && !std::is_same<P, bemtool::P0_2D>::value >::type* = nullptr >
 bemtool::Dof<P>* new_dof(MeshBemtool *mesh) {
     return new bemtool::Dof<P>(*mesh, true);
 }
 
-template<typename P, typename MeshBemtool, typename Mesh1, typename Mesh2, typename FESpace2>
+template<typename P, typename MeshBemtool, typename Mesh1, bool T, typename Mesh2, typename FESpace2, typename std::enable_if< !T >::type* = nullptr >
+void dispatch(MeshBemtool *mesh, bemtool::Geometry *node, int VFBEM, Stack stack, const list<C_F0>& bargs, const Data_Sparse_Solver& ds, Dmat* B, const Mesh2& ThV, std::vector<double>& p1, std::vector<double>& p2, bool same, const FESpace2& Vh) {
+    HtoolCtx<P,MeshBemtool>* ctx = new HtoolCtx<P,MeshBemtool>;
+    ctx->dof = new_dof<P>(mesh);
+    ctx->mesh = mesh;
+    ctx->node = node;
+    bemtool::Geometry node_output;
+    if (VFBEM == 1) {
+        pair<BemKernel*, double> kernel = getBemKernel(stack, bargs);
+        BemKernel *Ker = kernel.first;
+        double alpha = kernel.second;
+        ff_BIO_Generator_Maxwell<PetscScalar>(ctx->generator,Ker,*ctx->dof,alpha);
+    }
+    else if (VFBEM == 2) {
+        BemPotential *Pot = getBemPotential(stack, bargs);
+        if (Vh.MaxNbNodePerElement == Mesh2::RdHat::d+1)
+            Mesh2Bemtool(ThV,node_output);
+        else if (Vh.MaxNbNodePerElement == 1) {
+            int m = Vh.NbOfDF;
+            typename Mesh2::RdHat pbt(1./(Mesh2::RdHat::d+1),1./(Mesh2::RdHat::d+1));
+            for (int i=0; i<m; i++) {
+                Fem2D::R3 p = ThV[i](pbt);
+                bemtool::R3 q;
+                q[0]=p.x; q[1]=p.y; q[2]=p.z;
+                node_output.setnodes(q);
+            }
+        }
+        else
+            ffassert(0);
+        ff_POT_Generator_Maxwell<PetscScalar,P>(ctx->generator,Pot,*ctx->dof,*mesh,node_output);
+    }
+    if (same) {
+        PetscContainer ptr;
+        PetscObjectQuery((PetscObject)B->_petsc, "HtoolCtx", (PetscObject*)&ptr);
+        PetscContainerDestroy(&ptr);
+        Assembly(B,ctx,ds.sparams,p1,p1,MPI_COMM_NULL,Mesh1::RdHat::d+1,ds.sym);
+        PetscContainerCreate(PetscObjectComm((PetscObject)B->_petsc), &ptr);
+        PetscContainerSetPointer(ptr, ctx);
+        PetscContainerSetUserDestroy(ptr, DestroyHtoolCtx<P,MeshBemtool>);
+        PetscObjectCompose((PetscObject)B->_petsc, "HtoolCtx", (PetscObject)ptr);
+    }
+    else {
+        Assembly(B,ctx,ds.sparams,p1,p2,MPI_COMM_NULL,Mesh1::RdHat::d+1,ds.sym);
+        delete ctx;
+    }
+}
+
+template<typename P, typename MeshBemtool, typename Mesh1, bool T, typename Mesh2, typename FESpace2, typename std::enable_if< T >::type* = nullptr >
 void dispatch(MeshBemtool *mesh, bemtool::Geometry *node, int VFBEM, Stack stack, const list<C_F0>& bargs, const Data_Sparse_Solver& ds, Dmat* B, const Mesh2& ThV, std::vector<double>& p1, std::vector<double>& p2, bool same, const FESpace2& Vh) {
     HtoolCtx<P,MeshBemtool>* ctx = new HtoolCtx<P,MeshBemtool>;
     ctx->dof = new_dof<P>(mesh);
@@ -190,6 +237,7 @@ void varfBem(const typename fes1::FESpace*& PUh, const typename fes2::FESpace*& 
     bool SP0 = Mesh1::RdHat::d == 1 ? (Snbv == 0) && (Snbe == 1) && (Snbt == 0) : (Snbv == 0) && (Snbe == 0) && (Snbt == 1);
     bool SP1 = (Snbv == 1) && (Snbe == 0) && (Snbt == 0);
     bool SP2 = (Snbv == 1) && (Snbe == 1) && (Snbt == 0);
+    bool SRT0 = (Mesh1::RdHat::d == 2) && (Snbv == 0) && (Snbe == 1) && (Snbt == 0);
     if (SP2) {
         bemtool::Dof<P2> dof(*mesh,true);
         for (int i=0; i<n; i++) {
@@ -200,7 +248,17 @@ void varfBem(const typename fes1::FESpace*& PUh, const typename fes2::FESpace*& 
             p1.emplace_back(p[2]);
         }
     }
-    else
+    else if (SRT0) {
+        bemtool::Dof<bemtool::RT0_2D> dof(*mesh);
+        for (int i=0; i<n; i++) {
+            const std::vector<bemtool::N2>& j = dof.ToElt(i);
+            bemtool::R3 p = dof(j[0][0])[j[0][1]];
+            p1.emplace_back(p[0]);
+            p1.emplace_back(p[1]);
+            p1.emplace_back(p[2]);
+        }
+    }
+    else {
         for (int i=0; i<n; i++) {
             Fem2D::R3 p;
             if (SP1)
@@ -215,30 +273,63 @@ void varfBem(const typename fes1::FESpace*& PUh, const typename fes2::FESpace*& 
             p1.emplace_back(p.y);
             p1.emplace_back(p.z);
         }
+    }
     if (!same) {
-        typename Mesh2::RdHat pbt(1./(Mesh2::RdHat::d+1),1./(Mesh2::RdHat::d+1));
-        p2.reserve(3*m);
-        for (int i=0; i<m; i++) {
-            Fem2D::R3 p;
-            if (Vh.MaxNbNodePerElement == Mesh2::RdHat::d+1)
-                p = ThV.vertices[i];
-            else if (Vh.MaxNbNodePerElement == 1)
-                p = ThV[i](pbt);
-            else {
-                if (mpirank == 0) std::cerr << "ff-BemTool error: only P0 and P1 FEspaces are available for reconstructions." << std::endl;
-                ffassert(0);
+        if(Vh.TFE[0]->N == 1) {
+            typename Mesh2::RdHat pbt(1./(Mesh2::RdHat::d+1),1./(Mesh2::RdHat::d+1));
+            p2.reserve(3*m);
+            for (int i=0; i<m; i++) {
+                Fem2D::R3 p;
+                if (Vh.MaxNbNodePerElement == Mesh2::RdHat::d+1)
+                    p = ThV.vertices[i];
+                else if (Vh.MaxNbNodePerElement == 1)
+                    p = ThV[i](pbt);
+                else {
+                    if (mpirank == 0) std::cerr << "ff-BemTool error: only P0 and P1 FEspaces are available for reconstructions." << std::endl;
+                    ffassert(0);
+                }
+                p2.emplace_back(p.x);
+                p2.emplace_back(p.y);
+                p2.emplace_back(p.z);
             }
-            p2.emplace_back(p.x);
-            p2.emplace_back(p.y);
-            p2.emplace_back(p.z);
+        }
+        else {
+            ffassert(SRT0 && Mesh1::RdHat::d == 2 && VFBEM == 2);
+            int nnn = Vh.TFE[0]->N;
+
+            typename Mesh2::RdHat pbt(1./(Mesh2::RdHat::d+1),1./(Mesh2::RdHat::d+1));
+            p2.reserve(3*m);
+
+            int mDofScalar = m/nnn; // computation of the dof of one component 
+
+            for (int i=0; i<mDofScalar; i++) {
+                Fem2D::R3 p;
+                if (Vh.MaxNbNodePerElement == Mesh2::RdHat::d + 1)
+                    p = ThV.vertices[i];
+                else if (Vh.MaxNbNodePerElement == 1)
+                    p = ThV[i](pbt);
+                else {
+                    if (mpirank == 0) std::cerr << "ff-BemTool error: only P0 and P1 FEspaces are available for reconstructions." << std::endl;
+                    ffassert(0);
+                }
+                for(int iii=0; iii<nnn; iii++){
+                    ffassert( nnn*3*i+3*iii+2 < nnn*3*m );
+                    p2.emplace_back(p.x);
+                    p2.emplace_back(p.y);
+                    p2.emplace_back(p.z);
+                }
+            }
         }
     }
     if (SP1)
-        dispatch<P1,MeshBemtool,Mesh1>(mesh, node, VFBEM, stack, bargs, ds, B, ThV, p1, p2, same, Vh);
+        dispatch<P1,MeshBemtool,Mesh1,true>(mesh, node, VFBEM, stack, bargs, ds, B, ThV, p1, p2, same, Vh);
     else if (SP0)
-        dispatch<P0,MeshBemtool,Mesh1>(mesh, node, VFBEM, stack, bargs, ds, B, ThV, p1, p2, same, Vh);
+        dispatch<P0,MeshBemtool,Mesh1,true>(mesh, node, VFBEM, stack, bargs, ds, B, ThV, p1, p2, same, Vh);
     else if (SP2)
-        dispatch<P2,MeshBemtool,Mesh1>(mesh, node, VFBEM, stack, bargs, ds, B, ThV, p1, p2, same, Vh);
+        dispatch<P2,MeshBemtool,Mesh1,true>(mesh, node, VFBEM, stack, bargs, ds, B, ThV, p1, p2, same, Vh);
+    else if (SRT0 && Mesh1::RdHat::d == 2) {
+        dispatch<bemtool::RT0_2D,MeshBemtool,Mesh1,false>(mesh, node, VFBEM, stack, bargs, ds, B, ThV, p1, p2, same, Vh);
+    }
     else
         ffassert(0);
 }

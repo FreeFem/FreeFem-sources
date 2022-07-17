@@ -1044,7 +1044,8 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
             ff_BIO_Generator<R,P2,SMesh>(generator,Ker,dof,alpha);
         }
         else if (SRT0 && SRdHat::d == 2) {
-            ff_BIO_Generator_Maxwell<R>(generator,Ker,mesh,alpha);
+            bemtool::Dof<bemtool::RT0_2D> dof(mesh);
+            ff_BIO_Generator_Maxwell<R>(generator,Ker,dof,alpha);
         }
         else
             ffassert(0);
@@ -1101,8 +1102,8 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
             ff_POT_Generator<R,P2,MeshBemtool,SMesh>(generator,Pot,dof,mesh,node_output);
         }
         else if (SRT0 && SRdHat::d == 2) {
-            
-            ff_POT_Generator_Maxwell<R,bemtool::RT0_2D>(generator,Pot,mesh,node_output);
+            bemtool::Dof<bemtool::RT0_2D> dof(mesh);
+            ff_POT_Generator_Maxwell<R,bemtool::RT0_2D>(generator,Pot,dof,mesh,node_output);
         }
         else
             ffassert(0);
