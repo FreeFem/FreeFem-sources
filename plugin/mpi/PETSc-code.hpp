@@ -3289,8 +3289,8 @@ namespace PETSc {
           KSPSetOperators(ptA->_ksp, ptA->_petsc, ptA->_petsc);
         }
         if (c != 4) {
-          Vec x, y;
-          MatCreateVecs(ptA->_petsc, &x, &y);
+          Vec x = NULL, y;
+          MatCreateVecs(ptA->_petsc, in == out ? NULL : &x, &y);
           PetscInt size;
           VecGetLocalSize(y, &size);
           ffassert(in->n == size);
@@ -3298,25 +3298,33 @@ namespace PETSc {
             out->resize(size);
             *out = PetscScalar( );
           }
-          VecPlaceArray(x, *in);
+          if (x)
+            VecPlaceArray(x, *in);
+          else {
+            x = y;
+            PetscObjectReference((PetscObject)y);
+          }
           VecPlaceArray(y, *out);
           PetscInt N, rbegin;
           PetscScalar* tmpIn, *tmpOut;
           if (c != 3)
             KSPSolve(ptA->_ksp, x, y);
           else {
+            ffassert(in != out);
             VecConjugate(x);
             KSPSolveTranspose(ptA->_ksp, x, y);
             VecConjugate(y);
           }
           VecResetArray(y);
-          VecResetArray(x);
           VecDestroy(&y);
-          VecDestroy(&x);
+          if (x != y) {
+            VecResetArray(x);
+            VecDestroy(&x);
+          }
         } else {
           Dmat* X = GetAny< Dmat* >((*x)(stack));
           Dmat* Y = GetAny< Dmat* >((*y)(stack));
-          ffassert(X && Y);
+          ffassert(X && Y && X != Y);
           PetscBool isDense;
           PetscObjectTypeCompareAny((PetscObject)X->_petsc, &isDense, MATMPIDENSE, MATSEQDENSE, "");
           Mat XD;
