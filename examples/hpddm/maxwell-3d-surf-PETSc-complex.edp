@@ -57,16 +57,13 @@ varf vRHS([ux, uy, uz], [vx, vy, vz]) = int2d(ThG)([vx, vy, vz]' * [-fincx, -fin
 UhG<complex> [bx, by, bz], [ux, uy, uz];
 bx[] = vRHS(0, UhG);
 Mat<complex> C;
-string type = "aij";
+string type = HasType("Mat", "ScaLAPACK") ? "scalapack" : "aij";
 MatConvert(A, C, type = type);
 set(C, sparams = "-pc_type lu");
 int[int] range = C.range;
 complex[int] rhs(C.n);
 rhs = bx[](range(0):range(1)-1);
 KSPSolve(C, rhs, rhs);
-UhS<complex> [solx, soly, solz];
-if(1)
-    ChangeNumbering(A, solx[], rhs, inverse = 1, exchange = 1);
 if(!NoGraphicWindow) {
     if (type == "scalapack") {
         complex[int] before(UhG.ndof), after(UhG.ndof);
@@ -76,6 +73,10 @@ if(!NoGraphicWindow) {
         range = A.range;
         rhs = after(range(0):range(1)-1);
     }
+    UhS<complex> [solx, soly, solz];
+    bool flg = true;
+    if(!flg)
+        ChangeNumbering(A, solx[], rhs, inverse = 1, exchange = 1);
     nloc *= 15;
     nloc -= nloc%8;
     meshS ThOutG = square3(nloc, nloc, [4*(x-0.5), 4*(y-0.5), 0]);
@@ -104,7 +105,7 @@ if(!NoGraphicWindow) {
     ObjectView(P, format = "info");
 
     UhOutS<complex> [Ex, Ey, Ez];
-    if(0) {
+    if(flg) {
         complex[int] E(B.n);
         MatMult(P, rhs, E);
         ChangeNumbering(B, Ex[], E, inverse = 1, exchange = 1);
