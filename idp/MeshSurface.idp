@@ -56,7 +56,7 @@ func meshS SurfaceHex(int[int] & N,real[int,int] &B ,int[int,int] & L,int orient
 }
 func meshS Ellipsoide (real RX,real RY,real RZ,real h,int L,real Ox,real Oy,real Oz,int orientation)
 {
-  mesh  Th=square(10,20,[(x+Ox)*pi-pi/2,2*(y+Oy)*pi]);  //  $]\frac{-pi}{2},frac{-pi}{2}[\times]0,2\pi[ $
+  mesh  Th=square(10,20,[x*pi-pi/2,2*y*pi]);  //  $]\frac{-pi}{2},frac{-pi}{2}[\times]0,2\pi[ $
   //  a parametrization of a sphere 
   func f1 =RX*cos(x)*cos(y)+Ox;
   func f2 =RY*cos(x)*sin(y)+Oy;
