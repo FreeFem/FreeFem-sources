@@ -176,10 +176,10 @@ download('PETSc','https://www.mcs.anl.gov/petsc/mirror/release-snapshots/petsc-3
 	'petsc-3.17.3.tar.gz',
 	'c27cd0b1f42ad408babda354de6bbb95');
 
-download('htool','https://github.com/htool-ddm/htool/archive/f0a1542a8c408e1da02478a9843bb12815a680ae.zip',
+download('htool','https://github.com/htool-ddm/htool/archive/b6e91690f8d7c20d67dfb3b8db2e7ea674405a37.zip',
 		'https://github.com/htool-ddm/',
 		'htool.zip',
-		'3b57a0ec38144522de393490662bc66a');
+		'ca726483c442a3eca6522c1c69cee76f');
 
 	
 download('hpddm','https://codeload.github.com/hpddm/hpddm/zip/7113b9a6b77fceee3f52490cb27941a87b96542f',
