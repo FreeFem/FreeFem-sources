@@ -1815,10 +1815,7 @@ namespace PETSc {
             } else if (t == 2) {
               DistributedCSR< HpddmType >* pt = GetAny< DistributedCSR< HpddmType >* >(e_ij);
               Mat B;
-              if (std::is_same< PetscScalar, PetscReal >::value)
-                MatCreateTranspose(pt->_petsc, &B);
-              else
-                MatCreateHermitianTranspose(pt->_petsc, &B);
+              MatCreateHermitianTranspose(pt->_petsc, &B);
               a[i * M + j] = B;
               destroy.emplace_back(i, j);
               exchange[i * M + j] = pt;
@@ -1865,8 +1862,7 @@ namespace PETSc {
               }
               else {
                 Mat C;
-                if (std::is_same< PetscScalar, PetscReal >::value) MatCreateTranspose(B, &C);
-                else MatCreateHermitianTranspose(B, &C);
+                MatCreateHermitianTranspose(B, &C);
                 MatDestroy(&B);
                 a[i * M + j] = C;
               }
@@ -3135,13 +3131,8 @@ namespace PETSc {
             b.emplace_back(std::make_pair(std::make_pair(i, j), Mat( )));
             Mat D = mat[i][j];
             Mat C;
-            if (std::is_same< PetscScalar, PetscReal >::value) {
-              MatTransposeGetMat(D, &b.back( ).second);
-              MatTranspose(b.back( ).second, MAT_INITIAL_MATRIX, &C);
-            } else {
-              MatHermitianTransposeGetMat(D, &b.back( ).second);
-              MatHermitianTranspose(b.back( ).second, MAT_INITIAL_MATRIX, &C);
-            }
+            MatHermitianTransposeGetMat(D, &b.back( ).second);
+            MatHermitianTranspose(b.back( ).second, MAT_INITIAL_MATRIX, &C);
             PetscObjectReference((PetscObject)b.back().second);
             MatNestSetSubMat(A, i, j, C);
             MatDestroy(&C);
@@ -3152,10 +3143,7 @@ namespace PETSc {
     MatConvert(A, MATAIJ, MAT_INITIAL_MATRIX, B);
     for (std::pair< std::pair< PetscInt, PetscInt >, Mat > p : b) {
       Mat C;
-      if (std::is_same< PetscScalar, PetscReal >::value)
-        MatCreateTranspose(p.second, &C);
-      else
-        MatCreateHermitianTranspose(p.second, &C);
+      MatCreateHermitianTranspose(p.second, &C);
       MatDestroy(&p.second);
       MatNestSetSubMat(A, p.first.first, p.first.second, C);
       MatDestroy(&C);
@@ -4646,8 +4634,7 @@ namespace PETSc {
                           PetscStrcmp(type, MATTRANSPOSEMAT, &isType);
                           if(isType) {
                               Mat C;
-                              if (std::is_same< PetscScalar, PetscReal >::value) MatTransposeGetMat(mat[i][j], &C);
-                              else MatHermitianTransposeGetMat(mat[i][j], &C);
+                              MatHermitianTransposeGetMat(mat[i][j], &C);
                               PetscObjectTypeCompareAny((PetscObject)C, &isType, MATMPIDENSE, MATSEQDENSE, "");
                               if(isType) MatGetSize(C, &m, &n);
                               type = MATTRANSPOSEMAT;
