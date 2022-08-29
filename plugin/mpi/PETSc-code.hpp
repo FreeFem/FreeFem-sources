@@ -347,7 +347,7 @@ namespace PETSc {
 
       Op(Expression x, Expression y) : b(new Call_FormBilinear<fes1, fes2>(*dynamic_cast<const Call_FormBilinear<fes1, fes2>*>(y))), a(x) {
           assert(b && b->nargs);
-          ffassert(FieldOfForm(b->largs, IsComplexType<HPDDM::upscaled_type<K>>::value) == IsComplexType<HPDDM::upscaled_type<K>>::value);
+          ffassert(FieldOfForm(b->largs, IsComplexType<upscaled_type<K>>::value) == IsComplexType<upscaled_type<K>>::value);
       }
       operator aType () const { return atype<Dmat*>(); }
     };
@@ -382,7 +382,7 @@ namespace PETSc {
     ds.factorize = 0;
     ds.initmat = true;
     int np = OpCall_FormBilinear_np::n_name_param - NB_NAME_PARM_HMAT;
-    SetEnd_Data_Sparse_Solver<HPDDM::upscaled_type<K>>(stack, ds, b->nargs, np);
+    SetEnd_Data_Sparse_Solver<upscaled_type<K>>(stack, ds, b->nargs, np);
 
     WhereStackOfPtr2Free(stack) = new StackOfPtr2Free(stack);
 
@@ -400,29 +400,29 @@ namespace PETSc {
 #endif
     if (VFBEM == -1) {
       ffassert((std::is_same< fes1, fes2 >::value));
-      Matrice_Creuse<HPDDM::upscaled_type<K>> A;
+      Matrice_Creuse<upscaled_type<K>> A;
       A.init();
       if(same) {
         if(A.Uh != Uh || A.Vh != Vh) {
           A.Uh = Uh;
           A.Vh = Vh;
           if(ds.sym) {
-            A.A.master(new MatriceMorse<HPDDM::upscaled_type<K>>(Vh.NbOfDF, Vh.NbOfDF, 0, ds.sym));
+            A.A.master(new MatriceMorse<upscaled_type<K>>(Vh.NbOfDF, Vh.NbOfDF, 0, ds.sym));
             assert_ptr(&Uh, &Vh);
           }
           else
-            A.A.master(new MatriceMorse<HPDDM::upscaled_type<K>>(Vh.NbOfDF, Uh.NbOfDF, 2 * Vh.NbOfDF, 0));
+            A.A.master(new MatriceMorse<upscaled_type<K>>(Vh.NbOfDF, Uh.NbOfDF, 2 * Vh.NbOfDF, 0));
         }
-        if(AssembleVarForm<HPDDM::upscaled_type<K>, MatriceCreuse<HPDDM::upscaled_type<K>>, MMesh, FESpace1,FESpace2>(stack, Th, Uh, Vh, ds.sym, A.A, 0, b->largs))
-          AssembleBC<HPDDM::upscaled_type<K>, MMesh,FESpace1, FESpace2>(stack, Th, Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
+        if(AssembleVarForm<upscaled_type<K>, MatriceCreuse<upscaled_type<K>>, MMesh, FESpace1,FESpace2>(stack, Th, Uh, Vh, ds.sym, A.A, 0, b->largs))
+          AssembleBC<upscaled_type<K>, MMesh,FESpace1, FESpace2>(stack, Th, Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
       }
       else {
-        MatriceMorse<HPDDM::upscaled_type<K>> *pMA = new MatriceMorse<HPDDM::upscaled_type<K>>(Vh.NbOfDF, Uh.NbOfDF, 0, ds.sym);
-        MatriceMap<HPDDM::upscaled_type<K>>& D = *pMA;
-        bool bc = AssembleVarForm<HPDDM::upscaled_type<K>, MatriceMap<HPDDM::upscaled_type<K>>, MMesh, FESpace1,FESpace2>(stack, Th, Uh, Vh, ds.sym, &D, 0, b->largs);
+        MatriceMorse<upscaled_type<K>> *pMA = new MatriceMorse<upscaled_type<K>>(Vh.NbOfDF, Uh.NbOfDF, 0, ds.sym);
+        MatriceMap<upscaled_type<K>>& D = *pMA;
+        bool bc = AssembleVarForm<upscaled_type<K>, MatriceMap<upscaled_type<K>>, MMesh, FESpace1,FESpace2>(stack, Th, Uh, Vh, ds.sym, &D, 0, b->largs);
         A.A.master(pMA);
         if(bc)
-          AssembleBC<HPDDM::upscaled_type<K>>(stack, Th, Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
+          AssembleBC<upscaled_type<K>>(stack, Th, Uh, Vh, ds.sym, A.A, 0, 0, b->largs, ds.tgv);
       }
       changeOperatorSimple(&B, &A);
       if(B._A)
@@ -452,7 +452,7 @@ namespace PETSc {
     if (ptD) {
       if(!ptA->_D) {
         PetscReal* d = reinterpret_cast<PetscReal*>(ptD->operator double*());
-        if(!std::is_same<HPDDM::upscaled_type<PetscReal>, PetscReal>::value) {
+        if(!std::is_same<upscaled_type<PetscReal>, PetscReal>::value) {
             for(int i = 0; i < ptD->n; ++i)
                 d[i] = ptD->operator[](i);
         }
@@ -712,7 +712,7 @@ namespace PETSc {
         args.SetNameParam(n_name_param, name_param, nargs);
         A = to< Type* >(args[0]);
         if (c == 0)
-          B = to< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >(args[1]);
+          B = to< Matrice_Creuse< upscaled_type<PetscScalar> >* >(args[1]);
         else
           B = to< Type* >(args[1]);
       }
@@ -723,7 +723,7 @@ namespace PETSc {
     E_F0* code(const basicAC_F0& args) const { return new changeOperator_Op(args, c); }
     changeOperator( )
       : OneOperator(atype< long >( ), atype< Type* >( ),
-                    atype< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >( )),
+                    atype< Matrice_Creuse< upscaled_type<PetscScalar> >* >( )),
         c(0) {}
     changeOperator(int)
       : OneOperator(atype< long >( ), atype< Type* >( ), atype< Type* >( )), c(1) {}
@@ -732,12 +732,12 @@ namespace PETSc {
   basicAC_F0::name_and_type changeOperator< Type >::changeOperator_Op::name_param[] = {
     {"restriction", &typeid(Matrice_Creuse< double >*)}, {"parent", &typeid(Type*)}};
   template< class Type >
-  void change(Type* const& ptA, Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* const& mat, Type* const& ptB,
+  void change(Type* const& ptA, Matrice_Creuse< upscaled_type<PetscScalar> >* const& mat, Type* const& ptB,
               Matrice_Creuse< double >* const& pList, Type* const& ptParent) {
     if (mat) {
       if (ptA) {
-        MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mN = nullptr;
-        if (mat->A) mN = static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&*(mat->A));
+        MatriceMorse< upscaled_type<PetscScalar> >* mN = nullptr;
+        if (mat->A) mN = static_cast< MatriceMorse< upscaled_type<PetscScalar> >* >(&*(mat->A));
         PetscBool assembled = PETSC_FALSE;
         if (ptA->_petsc) MatAssembled(ptA->_petsc, &assembled);
         if (mN) {
@@ -974,8 +974,8 @@ namespace PETSc {
   template< class Type >
   AnyType changeOperator< Type >::changeOperator_Op::operator( )(Stack stack) const {
     Type* ptA = GetAny< Type* >((*A)(stack));
-    Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* mat =
-      c == 0 ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*B)(stack)) : nullptr;
+    Matrice_Creuse< upscaled_type<PetscScalar> >* mat =
+      c == 0 ? GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*B)(stack)) : nullptr;
     Type* ptB = c != 0 ? GetAny< Type* >((*B)(stack)) : nullptr;
     Matrice_Creuse< double >* pList =
       nargs[0] ? GetAny< Matrice_Creuse< double >* >((*nargs[0])(stack)) : nullptr;
@@ -988,7 +988,7 @@ namespace PETSc {
     change(dA, nullptr, A, nullptr, null);
     return dA;
   }
-  Dmat* changeOperatorSimple(Dmat* const& dA, Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* const& A) {
+  Dmat* changeOperatorSimple(Dmat* const& dA, Matrice_Creuse< upscaled_type<PetscScalar> >* const& A) {
     Dmat* const null = nullptr;
     change(dA, A, null, nullptr, null);
     return dA;
@@ -1017,7 +1017,7 @@ namespace PETSc {
   AnyType AddCombDmat(Stack stack, Expression emat, Expression combMat) {
     Dmat* A = GetAny<Dmat*>((*emat)(stack));
     ffassert(A && A->_petsc);
-    std::pair<HPDDM::upscaled_type<PetscScalar>, Dmat*>* p = GetAny<std::pair<HPDDM::upscaled_type<PetscScalar>, Dmat*>*>((*combMat)(stack));
+    std::pair<upscaled_type<PetscScalar>, Dmat*>* p = GetAny<std::pair<upscaled_type<PetscScalar>, Dmat*>*>((*combMat)(stack));
     ffassert(p && p->second && p->second->_petsc);
     MatAXPY(A->_petsc, PetscScalar(p->first), p->second->_petsc, DIFFERENT_NONZERO_PATTERN);
     delete p;
@@ -1030,7 +1030,7 @@ namespace PETSc {
       return new P{a, b};
     }
   };
-  long changeSchur(Dmat* const& dA, KN< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> > >* const& schurPreconditioner,
+  long changeSchur(Dmat* const& dA, KN< Matrice_Creuse< upscaled_type<PetscScalar> > >* const& schurPreconditioner,
                    KN< double >* const& schurList) {
     setVectorSchur(dA, schurPreconditioner, schurList);
     return 0L;
@@ -1141,11 +1141,11 @@ namespace PETSc {
         args.SetNameParam(n_name_param, name_param, nargs);
         A = to< DistributedCSR< HpddmType >* >(args[0]);
         B = to< DistributedCSR< HpddmType >* >(args[1]);
-        if (c == 0) K = to< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >(args[2]);
+        if (c == 0) K = to< Matrice_Creuse< upscaled_type<PetscScalar> >* >(args[2]);
         else if (c == 1) {
           const Polymorphic* op = dynamic_cast< const Polymorphic* >(args[2].LeftValue( ));
           ffassert(op);
-          codeA = op->Find("(", ArrayOfaType(atype< KN< HPDDM::upscaled_type<PetscScalar> >* >( ), false));
+          codeA = op->Find("(", ArrayOfaType(atype< KN< upscaled_type<PetscScalar> >* >( ), false));
         }
       }
 
@@ -1158,7 +1158,7 @@ namespace PETSc {
     initCSRfromDMatrix( )
       : OneOperator(
           atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
-          atype< DistributedCSR< HpddmType >* >( ), atype< typename std::conditional<C == 0, Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >*, Polymorphic*>::type >( )),
+          atype< DistributedCSR< HpddmType >* >( ), atype< typename std::conditional<C == 0, Matrice_Creuse< upscaled_type<PetscScalar> >*, Polymorphic*>::type >( )),
         c(C) {}
     initCSRfromDMatrix(int)
       : OneOperator(
@@ -1194,11 +1194,11 @@ namespace PETSc {
         A = to< DistributedCSR< HpddmType >* >(args[0]);
         B = to< DistributedCSR< HpddmType >* >(args[1]);
         C = to< DistributedCSR< HpddmType >* >(args[2]);
-        if (c == 0 || c == 3) K = to< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >(args[3]);
+        if (c == 0 || c == 3) K = to< Matrice_Creuse< upscaled_type<PetscScalar> >* >(args[3]);
         if (c == 2) {
           const Polymorphic* op = dynamic_cast< const Polymorphic* >(args[3].LeftValue( ));
           ffassert(op);
-          codeA = op->Find("(", ArrayOfaType(atype< KN< HPDDM::upscaled_type<PetscScalar> >* >( ), false));
+          codeA = op->Find("(", ArrayOfaType(atype< KN< upscaled_type<PetscScalar> >* >( ), false));
         }
       }
 
@@ -1212,7 +1212,7 @@ namespace PETSc {
       : OneOperator(
           atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
           atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
-          atype< typename std::conditional<D == 0, Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >*, Polymorphic* >::type >( )),
+          atype< typename std::conditional<D == 0, Matrice_Creuse< upscaled_type<PetscScalar> >*, Polymorphic* >::type >( )),
         c(D ? 2 : 0) {}
     initRectangularCSRfromDMatrix(int)
       : OneOperator(
@@ -1223,14 +1223,14 @@ namespace PETSc {
       : OneOperator(
           atype< long >( ), atype< DistributedCSR< HpddmType >* >( ),
           atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
-          atype< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >( )),
+          atype< Matrice_Creuse< upscaled_type<PetscScalar> >* >( )),
         c(3) {}
   };
   template< class HpddmType, int D >
   basicAC_F0::name_and_type
     initRectangularCSRfromDMatrix< HpddmType, D >::initRectangularCSRfromDMatrix_Op::name_param[] = {
       {D == 1 ? "transpose" : "clean", D == 1 ? &typeid(Polymorphic*) : &typeid(bool)},
-      {"numbering", &typeid(KN<HPDDM::upscaled_type<PetscScalar>>*)}};
+      {"numbering", &typeid(KN<upscaled_type<PetscScalar>>*)}};
 
 #if !defined(PETSC_USE_REAL_SINGLE)
   template< class HpddmType >
@@ -1512,7 +1512,7 @@ namespace PETSc {
         if (c == 1 || c == 3 || c == 4)
           K = to< long >(args[1]);
         else
-          K = to< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >(args[1]);
+          K = to< Matrice_Creuse< upscaled_type<PetscScalar> >* >(args[1]);
         if (c == 0 || c == 1) {
           R = to< KN< KN< long > >* >(args[2]);
           D = to< KN< typename std::conditional<
@@ -1530,7 +1530,7 @@ namespace PETSc {
     initCSR( )
       : OneOperator(
           atype< DistributedCSR< HpddmType >* >( ), atype< DistributedCSR< HpddmType >* >( ),
-          atype< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >( ), atype< KN< KN< long > >* >( ),
+          atype< Matrice_Creuse< upscaled_type<PetscScalar> >* >( ), atype< KN< KN< long > >* >( ),
           atype< KN<
             typename std::conditional< std::is_same< HpddmType, HpSchwarz< PetscScalar > >::value,
                                        double, long >::type >* >( )),
@@ -1546,7 +1546,7 @@ namespace PETSc {
     initCSR(int, int)
       : OneOperator(atype< DistributedCSR< HpddmType >* >( ),
                     atype< DistributedCSR< HpddmType >* >( ),
-                    atype< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >( )),
+                    atype< Matrice_Creuse< upscaled_type<PetscScalar> >* >( )),
         c(2) {}
     initCSR(int, int, int)
       : OneOperator(atype< DistributedCSR< HpddmType >* >( ),
@@ -1578,10 +1578,10 @@ namespace PETSc {
          : nullptr), *empty = nullptr;
     PetscInt bs = nargs[1] ? GetAny< long >((*nargs[1])(stack)) : 1;
     int dof = 0;
-    MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA = nullptr;
+    MatriceMorse< upscaled_type<PetscScalar> >* mA = nullptr;
     if (c == 0 || c == 2)
-      mA = static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(
-        &(*GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*K)(stack))->A));
+      mA = static_cast< MatriceMorse< upscaled_type<PetscScalar> >* >(
+        &(*GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*K)(stack))->A));
     else
       dof = GetAny< long >((*K)(stack));
     MPI_Comm* comm = nargs[0] ? (MPI_Comm*)GetAny< pcommworld >((*nargs[0])(stack)) : 0;
@@ -1984,26 +1984,26 @@ namespace PETSc {
   template< class Type >
   basicAC_F0::name_and_type setOptions< Type >::setOptions_Op::name_param[] = {
     {"sparams", &typeid(std::string*)},                                                           // 0
-    {"nearnullspace", &typeid(FEbaseArrayKn< HPDDM::upscaled_type<PetscScalar> >*)},              // 1
+    {"nearnullspace", &typeid(FEbaseArrayKn< upscaled_type<PetscScalar> >*)},                     // 1
     {"fields", &typeid(KN< double >*)},                                                           // 2
     {"names", &typeid(KN< String >*)},                                                            // 3
     {"prefix", &typeid(std::string*)},                                                            // 4
-    {"schurPreconditioner", &typeid(KN< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> > >*)}, // 5
+    {"schurPreconditioner", &typeid(KN< Matrice_Creuse< upscaled_type<PetscScalar> > >*)},        // 5
     {"schurList", &typeid(KN< double >*)},                                                        // 6
     {"parent", &typeid(Type*)},                                                                   // 7
-    {"MatNullSpace", &typeid(KNM< HPDDM::upscaled_type<PetscScalar> >*)},                         // 8
+    {"MatNullSpace", &typeid(KNM< upscaled_type<PetscScalar> >*)},                                // 8
     {"fieldsplit", &typeid(long)},                                                                // 9
-    {"schurComplement", &typeid(KNM< HPDDM::upscaled_type<PetscScalar> >*)},                      // 10
+    {"schurComplement", &typeid(KNM< upscaled_type<PetscScalar> >*)},                             // 10
     {"schur", &typeid(KN< Dmat >*)},                                                              // 11
-    {"aux", &typeid(Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >*)},                       // 12
+    {"aux", &typeid(Matrice_Creuse< upscaled_type<PetscScalar> >*)},                              // 12
     {"coordinates", &typeid(KNM< double >*)},                                                     // 13
     {"gradient", &typeid(Dmat*)},                                                                 // 14
-    {"O", &typeid(Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >*)},                         // 15
+    {"O", &typeid(Matrice_Creuse< upscaled_type<PetscScalar> >*)},                                // 15
     {"bs", &typeid(long)},                                                                        // 16
     {"precon", &typeid(Polymorphic*)},                                                            // 17
     {"setup", &typeid(bool)},                                                                     // 18
     {"monitor", &typeid(Polymorphic*)},                                                           // 19
-    {"deflation", &typeid(FEbaseArrayKn<HPDDM::upscaled_type<PetscScalar>>*)}                     // 20
+    {"deflation", &typeid(FEbaseArrayKn<upscaled_type<PetscScalar>>*)}                            // 20
   };
   class ShellInjection;
   template< class Type >
@@ -2104,13 +2104,13 @@ namespace PETSc {
         std::copy_n(out, ptIn->N() * ptOut->M(), ptIn->operator PetscScalar*());
     }
   }
-  template< bool T, class K, class U, typename std::enable_if< std::is_same< K, HPDDM::upscaled_type<PetscScalar> >::value && std::is_same< U, HPDDM::upscaled_type<U>>::value >::type* = nullptr >
+  template< bool T, class K, class U, typename std::enable_if< std::is_same< K, upscaled_type<PetscScalar> >::value && std::is_same< U, upscaled_type<U>>::value >::type* = nullptr >
   void MatMult(MatriceMorse<K>* const& A, KN_<U>& in, KN_<U>& out) {
     A->addMatMul(in, out, T, in.step, out.step);
   }
-  template< bool T, class K, class U, typename std::enable_if< !std::is_same< K, HPDDM::upscaled_type<PetscScalar> >::value && std::is_same< U, HPDDM::upscaled_type<U>>::value >::type* = nullptr >
+  template< bool T, class K, class U, typename std::enable_if< !std::is_same< K, upscaled_type<PetscScalar> >::value && std::is_same< U, upscaled_type<U>>::value >::type* = nullptr >
   void MatMult(MatriceMorse<K>* const& A, KN_<U>& in, KN_<U>& out) {
-    HPDDM::upscaled_type<PetscScalar>* pc = in;
+    upscaled_type<PetscScalar>* pc = in;
     double* pr = reinterpret_cast<double*>(pc);
     KN_< K > realIn(pr + 0, in.N(), 2 * in.step);
     KN_< K > imagIn(pr + 1, in.N(), 2 * in.step);
@@ -2121,10 +2121,10 @@ namespace PETSc {
     A->addMatMul(realIn, realOut, T, 2 * in.step, 2 * out.step);
     A->addMatMul(imagIn, imagOut, T, 2 * in.step, 2 * out.step);
   }
-  template< bool T, class K, class U, typename std::enable_if< !std::is_same< U, HPDDM::upscaled_type<U>>::value >::type* = nullptr >
+  template< bool T, class K, class U, typename std::enable_if< !std::is_same< U, upscaled_type<U>>::value >::type* = nullptr >
   void MatMult(MatriceMorse<K>* const& A, KN_<U>& in, KN_<U>& out) {
-    KN< HPDDM::upscaled_type<PetscScalar> > inUp(in.N());
-    KN< HPDDM::upscaled_type<PetscScalar> > outUp(out.N());
+    KN< upscaled_type<PetscScalar> > inUp(in.N());
+    KN< upscaled_type<PetscScalar> > outUp(out.N());
     for(int j = 0; j < in.N(); ++j)
         inUp[j] = in[j];
     MatMult<T>(A, inUp, outUp);
@@ -2448,8 +2448,8 @@ namespace PETSc {
         if (isFieldSplit) {
           KN< double >* fields = nargs[2] ? GetAny< KN< double >* >((*nargs[2])(stack)) : 0;
           KN< String >* names = nargs[3] ? GetAny< KN< String >* >((*nargs[3])(stack)) : 0;
-          KN< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> > >* mS =
-            nargs[5] ? GetAny< KN< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> > >* >((*nargs[5])(stack)) : 0;
+          KN< Matrice_Creuse< upscaled_type<PetscScalar> > >* mS =
+            nargs[5] ? GetAny< KN< Matrice_Creuse< upscaled_type<PetscScalar> > >* >((*nargs[5])(stack)) : 0;
           KN< double >* pL = nargs[6] ? GetAny< KN< double >* >((*nargs[6])(stack)) : 0;
           KN< Dmat >* mdS = nargs[11] ? GetAny< KN< Dmat >* >((*nargs[11])(stack)) : 0;
           if (mdS)
@@ -2462,10 +2462,10 @@ namespace PETSc {
       KSPSetFromOptions(ksp);
       if (c != 1) {
         if (std::is_same< Type, Dmat >::value) {
-          FEbaseArrayKn< HPDDM::upscaled_type<PetscScalar> >* ptNS =
-            nargs[1] ? GetAny< FEbaseArrayKn< HPDDM::upscaled_type<PetscScalar> >* >((*nargs[1])(stack)) : 0;
-          KNM< HPDDM::upscaled_type<PetscScalar> >* ptPETScNS =
-            nargs[8] ? GetAny< KNM< HPDDM::upscaled_type<PetscScalar> >* >((*nargs[8])(stack)) : 0;
+          FEbaseArrayKn< upscaled_type<PetscScalar> >* ptNS =
+            nargs[1] ? GetAny< FEbaseArrayKn< upscaled_type<PetscScalar> >* >((*nargs[1])(stack)) : 0;
+          KNM< upscaled_type<PetscScalar> >* ptPETScNS =
+            nargs[8] ? GetAny< KNM< upscaled_type<PetscScalar> >* >((*nargs[8])(stack)) : 0;
           int dim = ptNS ? ptNS->N : 0;
           int dimPETSc = ptPETScNS ? ptPETScNS->M( ) : 0;
           if (dim || dimPETSc) {
@@ -2487,9 +2487,9 @@ namespace PETSc {
               for (unsigned short i = 0; i < dim; ++i) {
                 PetscScalar* x;
                 VecGetArray(ns[i], &x);
-                HPDDM::upscaled_type<PetscScalar>* get = *ptNS->get(i);
+                upscaled_type<PetscScalar>* get = *ptNS->get(i);
                 PetscScalar* base = reinterpret_cast<PetscScalar*>(get);
-                if(!std::is_same<HPDDM::upscaled_type<PetscReal>, PetscReal>::value) {
+                if(!std::is_same<upscaled_type<PetscReal>, PetscReal>::value) {
                     for(int j = 0; j < ptNS->get(i)->n; ++j)
                         base[j] = get[j];
                 }
@@ -2519,10 +2519,10 @@ namespace PETSc {
           PCType type;
           PCGetType(pc, &type);
           PetscBool isType;
-          KNM< HPDDM::upscaled_type<PetscReal> >* coordinates =
-            nargs[13] ? GetAny< KNM< HPDDM::upscaled_type<PetscReal> >* >((*nargs[13])(stack)) : nullptr;
+          KNM< upscaled_type<PetscReal> >* coordinates =
+            nargs[13] ? GetAny< KNM< upscaled_type<PetscReal> >* >((*nargs[13])(stack)) : nullptr;
           Dmat* G = nargs[14] ? GetAny< Dmat* >((*nargs[14])(stack)) : nullptr;
-          if (coordinates && std::is_same<PetscReal, HPDDM::upscaled_type<PetscReal>>::value) PCSetCoordinates(pc, coordinates->N( ), coordinates->M( ), reinterpret_cast<PetscReal*>(coordinates->operator double*()));
+          if (coordinates && std::is_same<PetscReal, upscaled_type<PetscReal>>::value) PCSetCoordinates(pc, coordinates->N( ), coordinates->M( ), reinterpret_cast<PetscReal*>(coordinates->operator double*()));
 #if defined(PETSC_HAVE_HYPRE)
           if (G) {
             PetscStrcmp(type, PCHYPRE, &isType);
@@ -2543,7 +2543,7 @@ namespace PETSc {
               if(nargs[20]) {
 #if PETSC_VERSION_GE(3, 18, 0)
                   Mat Z;
-                  FEbaseArrayKn<HPDDM::upscaled_type<PetscScalar>>* deflation = GetAny<FEbaseArrayKn<HPDDM::upscaled_type<PetscScalar>>*>((*nargs[20])(stack));
+                  FEbaseArrayKn<upscaled_type<PetscScalar>>* deflation = GetAny<FEbaseArrayKn<upscaled_type<PetscScalar>>*>((*nargs[20])(stack));
                   MatCreateSeqDense(PETSC_COMM_SELF, ptA->_A->getDof(), deflation->N, NULL, &Z);
                   PetscScalar* data;
                   MatDenseGetArrayWrite(Z, &data);
@@ -2558,11 +2558,11 @@ namespace PETSc {
               }
               else if(A) {
                 if (!A->_ia) {
-                  Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK =
-                    nargs[15] ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*nargs[15])(stack)) : nullptr;
+                  Matrice_Creuse< upscaled_type<PetscScalar> >* ptK =
+                    nargs[15] ? GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*nargs[15])(stack)) : nullptr;
                   if (ptK && ptK->A) {
-                    MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA =
-                      static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
+                    MatriceMorse< upscaled_type<PetscScalar> >* mA =
+                      static_cast< MatriceMorse< upscaled_type<PetscScalar> >* >(&(*ptK->A));
                     HPDDM::MatrixCSR< PetscScalar >* B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
                     Mat aux = ff_to_PETSc(B);
                     PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
@@ -2574,12 +2574,12 @@ namespace PETSc {
                   Mat aux = ff_to_PETSc(A);
                   PCHPDDMSetAuxiliaryMat(pc, is, aux, NULL, NULL);
                   MatDestroy(&aux);
-                  Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK =
-                    nargs[12] ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*nargs[12])(stack)) : nullptr;
+                  Matrice_Creuse< upscaled_type<PetscScalar> >* ptK =
+                    nargs[12] ? GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*nargs[12])(stack)) : nullptr;
 #if PETSC_VERSION_GE(3, 13, 0)
                   if (ptK && ptK->A) {
-                    MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA =
-                      static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
+                    MatriceMorse< upscaled_type<PetscScalar> >* mA =
+                      static_cast< MatriceMorse< upscaled_type<PetscScalar> >* >(&(*ptK->A));
                     HPDDM::MatrixCSR< PetscScalar >* B = new_HPDDM_MatrixCSR< PetscScalar >(mA);
                     aux = ff_to_PETSc(B);
                     PCHPDDMSetRHSMat(pc, aux);
@@ -2592,11 +2592,11 @@ namespace PETSc {
             }
             else {
 #endif
-              Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptO =
-                nargs[15] ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*nargs[15])(stack)) : nullptr;
+              Matrice_Creuse< upscaled_type<PetscScalar> >* ptO =
+                nargs[15] ? GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*nargs[15])(stack)) : nullptr;
               if (ptO && ptO->A) {
-                MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mO =
-                  static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptO->A));
+                MatriceMorse< upscaled_type<PetscScalar> >* mO =
+                  static_cast< MatriceMorse< upscaled_type<PetscScalar> >* >(&(*ptO->A));
                 ff_HPDDM_MatrixCSR< PetscScalar > dO(mO);
                 PCSetType(pc, PCASM);
                 IS loc;
@@ -3566,11 +3566,11 @@ namespace PETSc {
     ffassert((C == 0 && (c == 0 || c == 2)) || (C == c && C == 1));
     DistributedCSR< HpddmType >* ptA = GetAny< DistributedCSR< HpddmType >* >((*A)(stack));
     DistributedCSR< HpddmType >* ptB = GetAny< DistributedCSR< HpddmType >* >((*B)(stack));
-    Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK = (c == 0 ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*K)(stack)) : nullptr);
+    Matrice_Creuse< upscaled_type<PetscScalar> >* ptK = (c == 0 ? GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*K)(stack)) : nullptr);
     if (ptB->_A) {
       HPDDM::MatrixCSR< PetscScalar >* dA;
       if (c == 0 && ptK->A) {
-        MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA = static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
+        MatriceMorse< upscaled_type<PetscScalar> >* mA = static_cast< MatriceMorse< upscaled_type<PetscScalar> >* >(&(*ptK->A));
         dA = new_HPDDM_MatrixCSR< PetscScalar >(mA);
       } else {
         if (c == 0) {
@@ -3667,8 +3667,8 @@ namespace PETSc {
     DistributedCSR< HpddmType >* ptA = GetAny< DistributedCSR< HpddmType >* >((*A)(stack));
     DistributedCSR< HpddmType >* ptB = GetAny< DistributedCSR< HpddmType >* >((*B)(stack));
     DistributedCSR< HpddmType >* ptC = GetAny< DistributedCSR< HpddmType >* >((*C)(stack));
-    Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* ptK =
-      (c == 0 || c == 3 ? GetAny< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >((*K)(stack)) : nullptr);
+    Matrice_Creuse< upscaled_type<PetscScalar> >* ptK =
+      (c == 0 || c == 3 ? GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*K)(stack)) : nullptr);
     if (ptB->_A && ptC->_A) {
       ptA->_first = ptB->_first;
       ptA->_last = ptB->_last;
@@ -3687,7 +3687,7 @@ namespace PETSc {
         PetscScalar* a = nullptr;
         bool free = true;
         if (ptK->A) {
-          MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* mA = static_cast< MatriceMorse< HPDDM::upscaled_type<PetscScalar> >* >(&(*ptK->A));
+          MatriceMorse< upscaled_type<PetscScalar> >* mA = static_cast< MatriceMorse< upscaled_type<PetscScalar> >* >(&(*ptK->A));
           ff_HPDDM_MatrixCSR< PetscScalar > dA(mA);
           ptA->_num = new PetscInt[mA->n + (ptC->_A && ptC->_A->getMatrix() ? ptC->_A->getMatrix()->_m : mA->m)];
           ptA->_cnum = ptA->_num + mA->n;
@@ -4620,12 +4620,12 @@ namespace PETSc {
   }
 
   template< bool U, char T, class K >
-  void loopDistributedVec(Mat nest, HPDDM::Subdomain<PetscScalar>** exchange, KN_<HPDDM::upscaled_type<K>>* const& in, K* out) {
+  void loopDistributedVec(Mat nest, HPDDM::Subdomain<PetscScalar>** exchange, KN_<upscaled_type<K>>* const& in, K* out) {
       Mat** mat;
       PetscInt M, N;
       MatNestGetSubMats(nest, &M, &N, &mat);
       Dmat** cast = reinterpret_cast<Dmat**>(exchange);
-      PetscScalar* ptr = reinterpret_cast<PetscScalar*>(in->operator HPDDM::upscaled_type<PetscScalar>*());
+      PetscScalar* ptr = reinterpret_cast<PetscScalar*>(in->operator upscaled_type<PetscScalar>*());
       MatType type;
       PetscBool isType;
       if(T == 'N') {
@@ -4715,14 +4715,14 @@ namespace PETSc {
         PetscBool isType;
         MatGetType((*t)._petsc, &type);
         PetscStrcmp(type, MATNEST, &isType);
-        PetscScalar* p = reinterpret_cast<PetscScalar*>(u->operator HPDDM::upscaled_type<PetscScalar>*());
+        PetscScalar* p = reinterpret_cast<PetscScalar*>(u->operator upscaled_type<PetscScalar>*());
         if (std::is_same< typename std::remove_reference< decltype(*t.A->_A) >::type,
                           HpSchwarz< PetscScalar > >::value) {
           VecGetArray(x, &ptr);
           for(int i = 0; i < u->n; ++i)
               p[i] = u->operator[](i);
           if(isType) {
-            ffassert((std::is_same<PetscReal, HPDDM::upscaled_type<PetscReal>>::value));
+            ffassert((std::is_same<PetscReal, upscaled_type<PetscReal>>::value));
             loopDistributedVec<0, 'N'>((*t)._petsc, (*t)._exchange, u, ptr);
           }
           else
@@ -4735,7 +4735,7 @@ namespace PETSc {
             KSPGetInitialGuessNonzero((*t)._ksp, &nonZero);
             if (nonZero) {
               VecGetArray(y, &ptr);
-              p = reinterpret_cast<PetscScalar*>(out->operator HPDDM::upscaled_type<PetscScalar>*());
+              p = reinterpret_cast<PetscScalar*>(out->operator upscaled_type<PetscScalar>*());
               for(int i = 0; i < out->n; ++i)
                   p[i] = out->operator[](i);
               if(isType)
@@ -4747,7 +4747,7 @@ namespace PETSc {
               VecRestoreArray(y, &ptr);
             }
           }
-          if (t.A->_A) std::fill_n(out->operator HPDDM::upscaled_type<PetscScalar>*(), out->n, 0.0);
+          if (t.A->_A) std::fill_n(out->operator upscaled_type<PetscScalar>*(), out->n, 0.0);
         } else {
           VecSet(x, PetscScalar( ));
           Vec isVec;
@@ -4786,7 +4786,7 @@ namespace PETSc {
         }
         if (verbosity > 0 && mpirank == 0)
           cout << " --- system solved with PETSc (in " << MPI_Wtime( ) - timing << ")" << endl;
-        p = reinterpret_cast<PetscScalar*>(out->operator HPDDM::upscaled_type<PetscScalar>*());
+        p = reinterpret_cast<PetscScalar*>(out->operator upscaled_type<PetscScalar>*());
         if (std::is_same< typename std::remove_reference< decltype(*t.A->_A) >::type,
                           HpSchwarz< PetscScalar > >::value) {
           VecGetArray(y, &ptr);
@@ -4810,10 +4810,10 @@ namespace PETSc {
                           HpSchwarz< PetscScalar > >::value &&
             t.A->_A)
           (*t)._A->exchange(p);
-        if(!std::is_same<PetscReal, HPDDM::upscaled_type<PetscReal>>::value) {
+        if(!std::is_same<PetscReal, upscaled_type<PetscReal>>::value) {
           for(int i = out->n - 1; i >= 0; --i)
             out->operator[](i) = p[i];
-          p = reinterpret_cast<PetscScalar*>(u->operator HPDDM::upscaled_type<PetscScalar>*());
+          p = reinterpret_cast<PetscScalar*>(u->operator upscaled_type<PetscScalar>*());
           for(int i = u->n - 1; i >= 0; --i)
             u->operator[](i) = p[i];
         }
@@ -4855,10 +4855,10 @@ namespace PETSc {
           MatType type;
           MatGetType((*t)._petsc, &type);
           PetscBool isType;
-          PetscScalar* p = reinterpret_cast<PetscScalar*>(u->operator HPDDM::upscaled_type<PetscScalar>*());
+          PetscScalar* p = reinterpret_cast<PetscScalar*>(u->operator upscaled_type<PetscScalar>*());
           PetscStrcmp(type, MATNEST, &isType);
           if (isType) {
-            ffassert((std::is_same<PetscReal, HPDDM::upscaled_type<PetscReal>>::value));
+            ffassert((std::is_same<PetscReal, upscaled_type<PetscReal>>::value));
             loopDistributedVec<0, N>(t->_petsc, t->_exchange, u, ptr);
           } else {
             if(t->_A)
@@ -4887,11 +4887,11 @@ namespace PETSc {
             MatMult(t->_petsc, x, y);
           VecDestroy(&x);
           VecGetArray(y, &ptr);
-          if (!t->_A) std::fill_n(out->operator HPDDM::upscaled_type<PetscScalar>*(), out->n, 0.0);
+          if (!t->_A) std::fill_n(out->operator upscaled_type<PetscScalar>*(), out->n, 0.0);
           if (isType) {
             loopDistributedVec<1, N>(t->_petsc, t->_exchange, out, ptr);
           } else {
-            p = reinterpret_cast<PetscScalar*>(out->operator HPDDM::upscaled_type<PetscScalar>*());
+            p = reinterpret_cast<PetscScalar*>(out->operator upscaled_type<PetscScalar>*());
             if (!t->_cnum || N == 'N') {
               if (t->_num)
                 HPDDM::Subdomain< K >::template distributedVec< 1 >(t->_num, t->_first, t->_last, p,
@@ -4909,8 +4909,8 @@ namespace PETSc {
             }
             for(int i = out->n - 1; i >= 0; --i)
                 out->operator[](i) = p[i];
-            if(!std::is_same<PetscReal, HPDDM::upscaled_type<PetscReal>>::value) {
-                p = reinterpret_cast<PetscScalar*>(u->operator HPDDM::upscaled_type<PetscScalar>*());
+            if(!std::is_same<PetscReal, upscaled_type<PetscReal>>::value) {
+                p = reinterpret_cast<PetscScalar*>(u->operator upscaled_type<PetscScalar>*());
                 for(int i = u->n - 1; i >= 0; --i)
                     u->operator[](i) = p[i];
             }
@@ -4946,7 +4946,7 @@ namespace PETSc {
   }
   KN_<double> Dmat_D(Dmat* p) {
     throwassert(p && p->_A);
-    KN_<double> D(reinterpret_cast<HPDDM::upscaled_type<PetscReal>*>(const_cast<PetscReal*>(p->_A->getScaling())), p->_A->getDof());
+    KN_<double> D(reinterpret_cast<upscaled_type<PetscReal>*>(const_cast<PetscReal*>(p->_A->getScaling())), p->_A->getDof());
     return D;
   }
   long Dmat_n(Dmat* p) {
@@ -4968,7 +4968,7 @@ namespace PETSc {
     }
     return ret;
   }
-  template<class K, typename std::enable_if<std::is_same<K, HPDDM::upscaled_type<K>>::value>::type* = nullptr>
+  template<class K, typename std::enable_if<std::is_same<K, upscaled_type<K>>::value>::type* = nullptr>
   static void init() {
 #if !defined(PETSC_USE_REAL_SINGLE)
     if (std::is_same< PetscInt, int >::value) {
@@ -5035,7 +5035,7 @@ namespace PETSc {
     Global.Add("ParMmgCommunicators", "(",
                new OneOperator4_< long, Dmat*, KN< double >*, KN< long >*, KN< KN< long >>*>(PETSc::ParMmgCommunicators< Dmat >));
     Global.Add("ChangeSchur", "(",
-               new OneOperator3_< long, Dmat*, KN< Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> > >*, KN< double >* >(
+               new OneOperator3_< long, Dmat*, KN< Matrice_Creuse< upscaled_type<PetscScalar> > >*, KN< double >* >(
                  PETSc::changeSchur));
     Global.Add("ObjectView", "(", new PETSc::view< Dmat, 0 >);
     Global.Add("ObjectView", "(", new PETSc::view< KNM<PetscScalar>, 0 >);
@@ -5066,7 +5066,7 @@ namespace PETSc {
       new OneOperator3_< long, Dbddc*, KN< PetscScalar >*, KN< long >* >(PETSc::originalNumbering));
 #endif
   }
-  template<class K, typename std::enable_if<!std::is_same<K, HPDDM::upscaled_type<K>>::value>::type* = nullptr>
+  template<class K, typename std::enable_if<!std::is_same<K, upscaled_type<K>>::value>::type* = nullptr>
   static void init() { }
   class initDM_Op : public E_F0mps {
       public:
@@ -5500,7 +5500,7 @@ namespace PETSc {
       Expression B;
       buildSolution_Op(const basicAC_F0& args) : A(0), B(0) {
         A = to<Dmat*>(args[0]);
-        B = to<KN<HPDDM::upscaled_type<PetscScalar>>*>(args[1]);
+        B = to<KN<upscaled_type<PetscScalar>>*>(args[1]);
       }
 
       AnyType operator( )(Stack stack) const;
@@ -5508,11 +5508,11 @@ namespace PETSc {
     };
     E_F0* code(const basicAC_F0& args) const { return new buildSolution_Op(args); }
     buildSolution( )
-      : OneOperator(atype<long>( ), atype<Dmat*>( ), atype<KN<HPDDM::upscaled_type<PetscScalar>>*>( )) {}
+      : OneOperator(atype<long>( ), atype<Dmat*>( ), atype<KN<upscaled_type<PetscScalar>>*>( )) {}
   };
   AnyType buildSolution::buildSolution_Op::operator( )(Stack stack) const {
       Dmat* ptA = GetAny<Dmat*>((*A)(stack));
-      KN<HPDDM::upscaled_type<PetscScalar>>* ptKN = GetAny<KN<HPDDM::upscaled_type<PetscScalar>>*>((*B)(stack));
+      KN<upscaled_type<PetscScalar>>* ptKN = GetAny<KN<upscaled_type<PetscScalar>>*>((*B)(stack));
       ffassert(ptA->_ksp);
       Mat A;
       KSPGetOperators(ptA->_ksp, &A, NULL);
@@ -5521,10 +5521,10 @@ namespace PETSc {
       MatGetSize(A, &N, NULL);
       ptKN->resize(n);
       Vec v;
-      PetscScalar* p = reinterpret_cast<PetscScalar*>(ptKN->operator HPDDM::upscaled_type<PetscScalar>*());
+      PetscScalar* p = reinterpret_cast<PetscScalar*>(ptKN->operator upscaled_type<PetscScalar>*());
       VecCreateMPIWithArray(PetscObjectComm((PetscObject)A), 1, n, N, p, &v);
       KSPBuildSolution(ptA->_ksp, v, NULL);
-      if(!std::is_same<HPDDM::upscaled_type<PetscReal>, PetscReal>::value) {
+      if(!std::is_same<upscaled_type<PetscReal>, PetscReal>::value) {
         for(int i = n - 1; i >= 0; --i)
           ptKN->operator[](i) = p[i];
       }
@@ -5611,10 +5611,10 @@ static void Init_PETSc( ) {
   typedef const BemKernel fkernel;
   if (!exist_type< fkernel* >( )) map_type[typeid(const BemFormBilinear *).name( )] = new TypeFormBEM;
 #endif
-  addProd< Dmat, PETSc::ProdPETSc, KN< HPDDM::upscaled_type<PetscScalar> >, PetscScalar, 'N' >( );
-  addProd< Dmat, PETSc::ProdPETSc, KN< HPDDM::upscaled_type<PetscScalar> >, PetscScalar, 'T' >( );
-  addInv< Dmat, PETSc::InvPETSc, KN< HPDDM::upscaled_type<PetscScalar> >, PetscScalar, 'N' >( );
-  addInv< Dmat, PETSc::InvPETSc, KN< HPDDM::upscaled_type<PetscScalar> >, PetscScalar, 'T' >( );
+  addProd< Dmat, PETSc::ProdPETSc, KN< upscaled_type<PetscScalar> >, PetscScalar, 'N' >( );
+  addProd< Dmat, PETSc::ProdPETSc, KN< upscaled_type<PetscScalar> >, PetscScalar, 'T' >( );
+  addInv< Dmat, PETSc::InvPETSc, KN< upscaled_type<PetscScalar> >, PetscScalar, 'N' >( );
+  addInv< Dmat, PETSc::InvPETSc, KN< upscaled_type<PetscScalar> >, PetscScalar, 'T' >( );
   Global.Add("set", "(", new PETSc::setOptions< Dmat >( ));
   Global.Add("set", "(", new PETSc::setOptions< Dmat >(1));
   Global.Add("set", "(", new PETSc::setOptions< Dmat >(1, 1));
@@ -5624,15 +5624,15 @@ static void Init_PETSc( ) {
   PETSc::init<PetscReal>();
   Global.Add("ChangeOperator", "(", new PETSc::changeOperator< Dmat >( ));
   Global.Add("ChangeOperator", "(", new PETSc::changeOperator< Dmat >(1));
-  TheOperators->Add("=", new OneOperator2_< Dmat*, Dmat*, Matrice_Creuse< HPDDM::upscaled_type<PetscScalar> >* >(PETSc::changeOperatorSimple));
+  TheOperators->Add("=", new OneOperator2_< Dmat*, Dmat*, Matrice_Creuse< upscaled_type<PetscScalar> >* >(PETSc::changeOperatorSimple));
   TheOperators->Add("=", new OneOperator2_< Dmat*, Dmat*, Dmat* >(PETSc::changeOperatorSimple));
-  TheOperators->Add("*=", new OneBinaryOperator< PETSc::scale<Dmat*, HPDDM::upscaled_type<PetscScalar>> >);
-  Dcl_Type< std::pair<HPDDM::upscaled_type<PetscScalar>, Dmat*>* >();
+  TheOperators->Add("*=", new OneBinaryOperator< PETSc::scale<Dmat*, upscaled_type<PetscScalar>> >);
+  Dcl_Type< std::pair<upscaled_type<PetscScalar>, Dmat*>* >();
   Dcl_Type< std::pair<Dmat*, Dmat*>* >();
-  atype<std::pair<HPDDM::upscaled_type<PetscScalar>, Dmat*>*>()->AddCast(new E_F1_funcT<std::pair<HPDDM::upscaled_type<PetscScalar>, Dmat*>*, Dmat*>(PETSc::M2P));
+  atype<std::pair<upscaled_type<PetscScalar>, Dmat*>*>()->AddCast(new E_F1_funcT<std::pair<upscaled_type<PetscScalar>, Dmat*>*, Dmat*>(PETSc::M2P));
   TheOperators->Add("+=", new OneBinaryOperator< PETSc::AXPY<Dmat*, Dmat*> >,
-                          new OneOperator2_< Dmat*, Dmat*, std::pair<HPDDM::upscaled_type<PetscScalar>, Dmat*>*, E_F_StackF0F0>(PETSc::AddCombDmat<PetscScalar>));
-  TheOperators->Add("*", new OneBinaryOperator<PETSc::Op2<HPDDM::upscaled_type<PetscScalar>>>);
+                          new OneOperator2_< Dmat*, Dmat*, std::pair<upscaled_type<PetscScalar>, Dmat*>*, E_F_StackF0F0>(PETSc::AddCombDmat<PetscScalar>));
+  TheOperators->Add("*", new OneBinaryOperator<PETSc::Op2<upscaled_type<PetscScalar>>>);
   TheOperators->Add("*", new OneBinaryOperator<PETSc::Op2<Dmat*>>);
   Global.Add("PetscLogStagePush", "(", new OneOperator1_< long, string* >(PETSc::stagePush));
   Global.Add("PetscLogStagePop", "(", new OneOperator0< long >(PETSc::stagePop));
