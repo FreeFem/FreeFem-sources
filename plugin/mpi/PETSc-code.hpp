@@ -3126,7 +3126,7 @@ namespace PETSc {
       for (PetscInt j = 0; j < N; ++j) {
         if (mat[i][j]) {
           MatGetType(mat[i][j], &type);
-          PetscStrcmp(type, MATTRANSPOSEMAT, &isType);
+          PetscStrcmp(type, MATHERMITIANTRANSPOSEVIRTUAL, &isType);
           if (isType) {
             b.emplace_back(std::make_pair(std::make_pair(i, j), Mat( )));
             Mat D = mat[i][j];
@@ -4636,13 +4636,13 @@ namespace PETSc {
                       PetscObjectTypeCompareAny((PetscObject)mat[i][j], &isType, MATMPIDENSE, MATSEQDENSE, "");
                       PetscInt n = 0, m = 0;
                       if(!isType) {
-                          PetscStrcmp(type, MATTRANSPOSEMAT, &isType);
+                          PetscStrcmp(type, MATHERMITIANTRANSPOSEVIRTUAL, &isType);
                           if(isType) {
                               Mat C;
                               MatHermitianTransposeGetMat(mat[i][j], &C);
                               PetscObjectTypeCompareAny((PetscObject)C, &isType, MATMPIDENSE, MATSEQDENSE, "");
                               if(isType) MatGetSize(C, &m, &n);
-                              type = MATTRANSPOSEMAT;
+                              type = MATHERMITIANTRANSPOSEVIRTUAL;
                           }
                       } else MatGetSize(mat[i][j], &n, &m);
                       if(isType && (m > 1 || n == 1)) {
@@ -4655,7 +4655,7 @@ namespace PETSc {
                           break;
                       }
                       else if(cast[i * N + j]) {
-                          PetscStrcmp(type, MATTRANSPOSEMAT, &isType);
+                          PetscStrcmp(type, MATHERMITIANTRANSPOSEVIRTUAL, &isType);
                           PetscInt* num = nullptr, first, last, n;
                           const HPDDM::Subdomain<PetscScalar>* A = nullptr;
                           if(cast[i * N + j]->_cnum) {
