@@ -46,6 +46,8 @@ extern const basicForEachType *aatypeknlongp; //// for  compilation error with g
 
 extern FILE *ThePlotStream;
 
+//#include "lgmat.hpp"
+
 
 // Debut FH Houston -------- avril 2004 ---------
 //  class for operator on sparse matrix

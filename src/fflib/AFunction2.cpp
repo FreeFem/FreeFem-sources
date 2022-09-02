@@ -366,8 +366,11 @@ void Polymorphic::Add(const char * op,Value *pp) const
       {
       TableOfIdentifier * ti=*i;
       r = ti->Find(name);
-      if (r.NotNull()) return r.TYPEOFID();
-    }
+      if (r.NotNull()){ 
+        //cout << "r.TYPEOFID()= " << r.TYPEOFID() << endl;  // Morice
+        return r.TYPEOFID();
+      }
+      }
      return 0;
    }
 

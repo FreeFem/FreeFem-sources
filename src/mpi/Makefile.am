@@ -41,12 +41,15 @@ FreeFem___mpi_SOURCES = /ffapi.cpp \
 	../Graphics/sansrgraph.cpp \
 	../lglib/mymain.cpp \
 	../lglib/lg.tab.cpp \
+	/lgfem.cpp \
 	parallelempi.cpp
 FreeFem___mpi_DEPENDENCIES = ../fflib/libff.a
 LDADD = ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLACSLIBS@ @MPI_LIB@ @FF_LIBS@ @FF_ZLIB@
 
-AM_CXXFLAGS = -DPARALLELE 
-AM_CPPFLAGS = -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib @MPI_INCLUDE@ $(HDF5_CPPFLAGS) $(UMFPACK_CPPFLAGS)
+ff_bem_include = -I$(srcdir)/../../3rdparty/include/htool/include -I$(srcdir)/../../3rdparty/include/BemTool/ -I$(srcdir)/../../3rdparty/boost/include -I../../plugin/seq/include -I../../plugin/mpi
+
+AM_CXXFLAGS = -DPARALLELE -DHAVE_ZLIB
+AM_CPPFLAGS = -DPARALLELE -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib @MPI_INCLUDE@ $(HDF5_CPPFLAGS) $(UMFPACK_CPPFLAGS) $(ff_bem_include)
 ff-mpirun: ff-mpirun.in Makefile
 	../../config.status  --file=ff-mpirun:ff-mpirun.in
 	chmod a+x ff-mpirun
@@ -56,4 +59,7 @@ ff-mpirun: ff-mpirun.in Makefile
 ## TODO: same compilation process for *Nix and Windows ?
 # copy this file because we use different FLAGS (-DPARALLELE)
 ffapi.cpp: ../fflib/ffapi.cpp
+	cp $^ .
+
+lgfem.cpp: ../fflib/lgfem.cpp
 	cp $^ .

@@ -5,6 +5,7 @@
 
 #define BOOST_NO_CXX17_IF_CONSTEXPR
 #include <ff++.hpp>
+#include <problem.hpp>
 #include <AFunction_ext.hpp>
 #include <lgfem.hpp>
 #include <R3.hpp>
@@ -29,10 +30,10 @@ using namespace bemtool;
 
 #include <type_traits>
 #include "bem.hpp"
-  
+/*
 double ff_htoolEta=10., ff_htoolEpsilon=1e-3;
 long ff_htoolMinclustersize=10, ff_htoolMaxblocksize=1000000, ff_htoolMintargetdepth=0, ff_htoolMinsourcedepth=0;
-
+*/
 template< class K >
 AnyType AddIncrement(Stack stack, const AnyType &a) {
     K m = GetAny< K >(a);
@@ -42,7 +43,7 @@ AnyType AddIncrement(Stack stack, const AnyType &a) {
     return a;
 }
 
-
+/*
 template<class K>
 class HMatrixVirt {
 public:
@@ -133,7 +134,7 @@ public:
     void build(VirtualGenerator<K> &mat, double* xt, double* xs) {H.build(mat,xt,xs);}
     void build(VirtualGenerator<K> &mat, double* xt) {H.build(mat,xt);}                       
 };
-
+*/
 
 template<class Type, class K>
 AnyType To(Stack stack,Expression emat,Expression einter,int init)
@@ -658,7 +659,7 @@ struct OpHMatrixtoBEMForm
 };
 
 
-
+/*
 struct Data_Bem_Solver
 : public Data_Sparse_Solver {
     double eta;
@@ -683,8 +684,8 @@ struct Data_Bem_Solver
         Data_Bem_Solver(const Data_Bem_Solver& ); // pas de copie
         
     };
-
-
+*/
+/*
 template<class R>
 void Data_Bem_Solver::Init_sym_positive_var()
 {
@@ -692,8 +693,8 @@ void Data_Bem_Solver::Init_sym_positive_var()
     Data_Sparse_Solver::Init_sym_positive_var<R>(-1);
     
 }
-
-
+*/
+/*
 template<class R>
 inline void SetEnd_Data_Bem_Solver(Stack stack,Data_Bem_Solver & ds,Expression const *nargs ,int n_name_param)
 {
@@ -772,13 +773,13 @@ inline void SetEnd_Data_Bem_Solver(Stack stack,Data_Bem_Solver & ds,Expression c
     
     
 }
+*/
 
-
-
+/*
 template <class R>
-void builHmat(HMatrixVirt<R>** Hmat, VirtualGenerator<R>* generatorP,const Data_Bem_Solver& data,vector<double> &p1,vector<double> &p2,MPI_Comm comm)  {
-    std::shared_ptr<Cluster<PCARegularClustering>> t =std::make_shared<Cluster<PCARegularClustering>>();
-    std::shared_ptr<Cluster<PCARegularClustering>> s =std::make_shared<Cluster<PCARegularClustering>>();
+void builHmat(HMatrixVirt<R>** Hmat, htool::VirtualGenerator<R>* generatorP,const Data_Bem_Solver& data,vector<double> &p1,vector<double> &p2,MPI_Comm comm)  {
+    std::shared_ptr<htool::Cluster<htool::PCARegularClustering>> t =std::make_shared<htool::Cluster<htool::PCARegularClustering>>();
+    std::shared_ptr<htool::Cluster<htool::PCARegularClustering>> s =std::make_shared<htool::Cluster<htool::PCARegularClustering>>();
     t->set_minclustersize(data.minclustersize);
     s->set_minclustersize(data.minclustersize);
     t->build(generatorP->nb_rows(),p2.data(),2,comm);
@@ -805,62 +806,36 @@ void builHmat(HMatrixVirt<R>** Hmat, VirtualGenerator<R>* generatorP,const Data_
     (*Hmat)->build(*generatorP,p2.data(),p1.data());
 
 }
-
+*/
+/*
 template<class Matrix, class R, typename std::enable_if< std::is_same< Matrix, HMatrixVirt<R>* >::value >::type* = nullptr>
 void Assembly(Matrix* A, htool::VirtualGenerator<R>* generator, const Data_Bem_Solver& data,vector<double> &p1,vector<double> &p2,MPI_Comm comm,int dim,bool = false) {
     builHmat<R>(A,generator,data,p1,p2,comm);
 }
+*/
+/*
+template<class R, class MMesh, class FESpace1, class FESpace2> 
+void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const int & VFBEM, 
+                             const list<C_F0> & largs, Stack stack, const Data_Bem_Solver &ds, HMatrixVirt<R>** Hmat){
 
-// the operator
-template<class R,class MMesh, class v_fes1,class v_fes2>
-AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
-{
-    typedef typename v_fes1::pfes pfes1;
-    typedef typename v_fes2::pfes pfes2;
-    typedef typename v_fes1::FESpace FESpace1;
-    typedef typename v_fes2::FESpace FESpace2;
+
+
     typedef typename FESpace1::Mesh SMesh;
     typedef typename FESpace2::Mesh TMesh;
     typedef typename SMesh::RdHat SRdHat;
     typedef typename TMesh::RdHat TRdHat;
-    
-    
+
     typedef typename std::conditional<SMesh::RdHat::d==1,Mesh1D,Mesh2D>::type MeshBemtool;
     typedef typename std::conditional<SMesh::RdHat::d==1,P0_1D,P0_2D>::type P0;
     typedef typename std::conditional<SMesh::RdHat::d==1,P1_1D,P1_2D>::type P1;
     typedef typename std::conditional<SMesh::RdHat::d==1,P2_1D,P2_2D>::type P2;
 
-    assert(b && b->nargs);
-    const list<C_F0> & largs=b->largs;
-    
-    // FE space
-    pfes1  * pUh= GetAny<pfes1 *>((*b->euh)(stack));
-    FESpace1 * Uh = **pUh;
-    int NUh =Uh->N;
-    pfes2  * pVh= GetAny<pfes2 *>((*b->evh)(stack));
-    FESpace2 * Vh = **pVh;
-    int NVh =Vh->N;
-    ffassert(Vh);
-    ffassert(Uh);
-    
+    // size of the matrix
     int n=Uh->NbOfDF;
     int m=Vh->NbOfDF;
+
     
-    // VFBEM =1 kernel VF   =2 Potential VF
-    int VFBEM = typeVFBEM(largs,stack);
-    if (mpirank == 0 && verbosity>5)
-        cout << "test VFBEM type (1 kernel / 2 potential) "  << VFBEM << endl;
-    
- 
-    HMatrixVirt<R>** Hmat =GetAny<HMatrixVirt<R>** >((*a)(stack));
-    
-    // info about HMatrix and type solver
-    Data_Bem_Solver ds;
-    ds.factorize=0;
-    ds.initmat=true;
-    SetEnd_Data_Bem_Solver<R>(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);  // LIST_NAME_PARM_HMAT
-    WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);
-    
+
     // compression infogfg
     
     MPI_Comm comm = ds.commworld ? *(MPI_Comm*)ds.commworld : MPI_COMM_WORLD;
@@ -870,28 +845,9 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
     const TMesh & ThV =Vh->Th; // colunm
     bool samemesh = (void*)&Uh->Th == (void*)&Vh->Th;  // same Fem2D::Mesh     +++ pot or kernel
  
-    if (VFBEM==1)
-        ffassert (samemesh);
-     if(init)
-        *Hmat =0;
-      *Hmat =0;
-    if( *Hmat)
-            delete *Hmat;
-    
-    *Hmat =0;
-
     Geometry node; MeshBemtool mesh;
     Mesh2Bemtool(ThU, node, mesh);
 
-/*
-    for (int i=0; i<ThU.nt;i++) {
-        auto &K = ThU[i];
-        for (int e=0;e<3;e++) {
-            R signe = K.EdgeOrientation(e) ;
-            cout << i << " " << e << " " << signe << endl;
-        }
-    }
-*/
 
     vector<double> p1(3*n);
     vector<double> p2(3*m);
@@ -950,6 +906,347 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
     }
 
     std::shared_ptr<Cluster<PCARegularClustering>> t =std::make_shared<Cluster<PCARegularClustering>>();
+    std::shared_ptr<Cluster<PCARegularClustering>> s = make_shared<Cluster<PCARegularClustering>>();
+    t->set_minclustersize(ds.minclustersize);
+    s->set_minclustersize(ds.minclustersize);
+    t->build(n,p1.data(),2,comm);
+
+    if(!samemesh) {
+        if( Vh->TFE[0]->N == 1){
+            // case the targer FE is scalar
+            for (int i=0; i<m; i++) {
+                if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
+                    pp = ThV.vertices[i];
+                else if (Vh->MaxNbNodePerElement == 1)
+                    pp = ThV[i](pbt);
+                else {
+                    if (mpirank == 0) std::cerr << "ff-BemTool error: only P0 and P1 FEspaces are available for reconstructions." << std::endl;
+                    ffassert(0);
+                }
+                p2[3*i+0] = pp.x;
+                p2[3*i+1] = pp.y;
+                p2[3*i+2] = pp.z;
+            }
+        }
+        else{
+            // hack for Maxwell case to have one Hmatrix to avoid one Hmatrix by direction
+            ffassert(SRT0 && SRdHat::d == 2 && VFBEM==2);
+
+            // Dans un espace verctoriel, [P1,P1,P1] pour les targets, on a:
+            //        m correspond au nombre de dof du FEM space
+            // Or dans ce cas, on veut que m = mesh_Target.nv 
+            // 
+            // ==> on n'a pas besoin de resize les points p2
+            int nnn= Vh->TFE[0]->N;
+            cout << "nnn=" << nnn << endl;
+            cout << "p2.size= " << p2.size() << endl; 
+            cout << "p2.resize :"<< nnn*3*m << " "<< 3*m << endl;
+            cout << "m=" << m << endl; 
+            cout << "n=" << n << endl;
+
+            int mDofScalar = m/nnn; // computation of the dof of one component 
+
+            for (int i=0; i<mDofScalar; i++) {
+                if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
+                    pp = ThV.vertices[i];
+                else if (Vh->MaxNbNodePerElement == 1)
+                    pp = ThV[i](pbt);
+                else {
+                    if (mpirank == 0) std::cerr << "ff-BemTool error: only P0 and P1 FEspaces are available for reconstructions." << std::endl;
+                    ffassert(0);
+                }
+                //if( i%2 ==0) cout << i << ",  pp.x =" << pp.x << endl;
+                for(int iii=0; iii<nnn; iii++){
+                    ffassert( nnn*3*i+3*iii+2 < nnn*3*m );
+                    //if(i== m-1) cout << "pp.x =" << pp.x << endl;
+                    p2[nnn*3*i+3*iii+0] = pp.x;
+                    p2[nnn*3*i+3*iii+1] = pp.y;
+                    p2[nnn*3*i+3*iii+2] = pp.z;
+                }
+
+            }
+        }
+        cout << "call s->build( (Vh->TFE[0]->N)*m,p2.data(),2,comm);" << endl;
+        s->build( m,p2.data(),2,comm);  
+    }
+    else{
+        p2=p1;
+        s=t;
+    }
+
+
+    // creation of the generator for htool and creation the matrix
+
+    if (VFBEM==1) {
+        // info kernel
+        pair<BemKernel*,double> kernel = getBemKernel(stack,largs);
+        BemKernel *Ker = kernel.first;
+        double alpha = kernel.second;
+        
+        if(mpirank == 0 && verbosity >5) {
+            int nk=-1;
+            iscombinedKernel(Ker) ? nk=2 : nk=1;
+            for(int i=0;i<nk;i++)
+                cout << " kernel info... i: " << i << " typeKernel: " << Ker->typeKernel[i] << " wave number: " << Ker->wavenum[i]  << " coeffcombi: " << Ker->coeffcombi[i] <<endl;
+        }
+        VirtualGenerator<R>* generator;
+
+        if(mpirank == 0 && verbosity>5)
+            std::cout << "Creating dof" << std::endl;
+
+        if (SP0) {
+            Dof<P0> dof(mesh);
+            ff_BIO_Generator<R,P0,SMesh>(generator,Ker,dof,alpha);
+        }
+        else if (SP1) {
+            Dof<P1> dof(mesh,true);
+            ff_BIO_Generator<R,P1,SMesh>(generator,Ker,dof,alpha);
+        }
+        else if (SP2) {
+            Dof<P2> dof(mesh,true);
+            ff_BIO_Generator<R,P2,SMesh>(generator,Ker,dof,alpha);
+        }
+        else if (SRT0 && SRdHat::d == 2) {
+            ff_BIO_Generator_Maxwell<R>(generator,Ker,mesh,alpha);
+        }
+        else
+            ffassert(0);
+
+        // build the Hmat
+        *Hmat = new HMatrixImpl<R>(t,s,ds.epsilon,ds.eta,ds.sym?'S':'N',ds.sym?'U':'N',-1,comm);
+        std::shared_ptr<htool::VirtualLowRankGenerator<R>> compressor = nullptr;
+        if ( ds.compressor == "" || ds.compressor == "partialACA")
+            compressor = std::make_shared<htool::partialACA<R>>();
+        else if (ds.compressor == "fullACA")
+            compressor = std::make_shared<htool::fullACA<R>>();
+        else if (ds.compressor == "SVD")
+            compressor = std::make_shared<htool::SVD<R>>();
+        else {
+            cerr << "Error: unknown htool compressor \""+ds.compressor+"\"" << endl;
+            ffassert(0);
+        }
+
+        (*Hmat)->set_compression(compressor);
+        (*Hmat)->set_maxblocksize(ds.maxblocksize);
+        (*Hmat)->set_mintargetdepth(ds.mintargetdepth);
+        (*Hmat)->set_minsourcedepth(ds.minsourcedepth);
+        (*Hmat)->build(*generator,p1.data());
+
+
+        delete generator;
+    }
+    else if (VFBEM==2) {
+        cout << "VFBEM==2"<< endl;
+        BemPotential *Pot = getBemPotential(stack,largs);
+        Geometry node_output;
+        if (Vh->MaxNbNodePerElement == TRdHat::d + 1)
+            Mesh2Bemtool(ThV,node_output);
+        else if (Vh->MaxNbNodePerElement == 1) {
+            for (int i=0; i<m; i++) {
+                pp = ThV[i](pbt);
+                p[0]=pp.x; p[1]=pp.y; p[2]=pp.z;
+                node_output.setnodes(p);
+            }
+        }
+        else
+            ffassert(0);
+
+        VirtualGenerator<R>* generator;
+        if (SP0) {
+            Dof<P0> dof(mesh);
+            ff_POT_Generator<R,P0,MeshBemtool,SMesh>(generator,Pot,dof,mesh,node_output);
+        }
+        else if (SP1) {
+            Dof<P1> dof(mesh,true);
+            ff_POT_Generator<R,P1,MeshBemtool,SMesh>(generator,Pot,dof,mesh,node_output);
+        }
+        else if (SP2) {
+            Dof<P2> dof(mesh,true);
+            ff_POT_Generator<R,P2,MeshBemtool,SMesh>(generator,Pot,dof,mesh,node_output);
+        }
+        else if (SRT0 && SRdHat::d == 2) {
+            
+            ff_POT_Generator_Maxwell<R,bemtool::RT0_2D>(generator,Pot,mesh,node_output);
+        }
+        else
+            ffassert(0);
+        Assembly(Hmat,generator,ds,p1,p2,comm,MMesh::RdHat::d+1);
+        delete generator;
+    }
+    //return Hmat;
+}
+*/
+
+// the operator
+template<class R,class MMesh, class v_fes1,class v_fes2>
+AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  const
+{
+    typedef typename v_fes1::pfes pfes1;
+    typedef typename v_fes2::pfes pfes2;
+    typedef typename v_fes1::FESpace FESpace1;
+    typedef typename v_fes2::FESpace FESpace2;
+    typedef typename FESpace1::Mesh SMesh;
+    typedef typename FESpace2::Mesh TMesh;
+    typedef typename SMesh::RdHat SRdHat;
+    typedef typename TMesh::RdHat TRdHat;
+    
+    
+    typedef typename std::conditional<SMesh::RdHat::d==1,Mesh1D,Mesh2D>::type MeshBemtool;
+    typedef typename std::conditional<SMesh::RdHat::d==1,P0_1D,P0_2D>::type P0;
+    typedef typename std::conditional<SMesh::RdHat::d==1,P1_1D,P1_2D>::type P1;
+    typedef typename std::conditional<SMesh::RdHat::d==1,P2_1D,P2_2D>::type P2;
+
+    assert(b && b->nargs);
+    const list<C_F0> & largs=b->largs;
+    
+    // FE space
+    pfes1  * pUh= GetAny<pfes1 *>((*b->euh)(stack));
+    FESpace1 * Uh = **pUh;
+    
+    pfes2  * pVh= GetAny<pfes2 *>((*b->evh)(stack));
+    FESpace2 * Vh = **pVh;
+
+    int NUh =Uh->N;
+    int NVh =Vh->N;
+
+    ffassert(Vh);
+    ffassert(Uh);
+    
+    int n=Uh->NbOfDF;
+    int m=Vh->NbOfDF;
+    
+    // VFBEM =1 kernel VF   =2 Potential VF
+    int VFBEM = typeVFBEM(largs,stack);
+    if (mpirank == 0 && verbosity>5)
+        cout << "test VFBEM type (1 kernel / 2 potential) "  << VFBEM << endl;
+    
+ 
+    HMatrixVirt<R>** Hmat =GetAny<HMatrixVirt<R>** >((*a)(stack));
+    
+    // info about HMatrix and type solver
+    Data_Bem_Solver ds;
+    ds.factorize=0;
+    ds.initmat=true;
+    SetEnd_Data_Bem_Solver<R>(stack,ds, b->nargs,OpCall_FormBilinear_np::n_name_param);  // LIST_NAME_PARM_HMAT
+    WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);
+
+    bool samemesh = (void*)&Uh->Th == (void*)&Vh->Th;  // same Fem2D::Mesh     +++ pot or kernel
+    if (VFBEM==1)
+        ffassert (samemesh);
+     if(init)
+        *Hmat =0;
+      *Hmat =0;
+    if( *Hmat)
+        delete *Hmat;
+    *Hmat =0;
+
+    creationHMatrixtoBEMForm<R,MMesh,FESpace1,FESpace2>( Uh, Vh, VFBEM, largs, stack, ds, Hmat);
+
+    
+    /*
+    // compression infogfg
+    
+    MPI_Comm comm = ds.commworld ? *(MPI_Comm*)ds.commworld : MPI_COMM_WORLD;
+
+
+
+    
+    // source/target meshes
+    const SMesh & ThU =Uh->Th; // line
+    const TMesh & ThV =Vh->Th; // colunm
+    bool samemesh = (void*)&Uh->Th == (void*)&Vh->Th;  // same Fem2D::Mesh     +++ pot or kernel
+ 
+    if (VFBEM==1)
+        ffassert (samemesh);
+     if(init)
+        *Hmat =0;
+      *Hmat =0;
+    if( *Hmat)
+            delete *Hmat;
+    
+    *Hmat =0;
+
+    Geometry node; MeshBemtool mesh;
+    Mesh2Bemtool(ThU, node, mesh);
+    */
+
+
+
+/*
+    for (int i=0; i<ThU.nt;i++) {
+        auto &K = ThU[i];
+        for (int e=0;e<3;e++) {
+            R signe = K.EdgeOrientation(e) ;
+            cout << i << " " << e << " " << signe << endl;
+        }
+    }
+*/
+
+    /*
+    vector<double> p1(3*n);
+    vector<double> p2(3*m);
+    Fem2D::R3 pp;
+    bemtool::R3 p;
+    SRdHat pbs;
+    TRdHat pbt;
+    pbs[0] = 1./(SRdHat::d+1);
+    pbs[1] = 1./(SRdHat::d+1);
+    if (SRdHat::d == 2) pbs[2] = 1./(SRdHat::d+1);
+    pbt[0] = 1./(TRdHat::d+1);
+    pbt[1] = 1./(TRdHat::d+1);
+    if (TRdHat::d == 2) pbt[2] = 1./(TRdHat::d+1);
+
+    int Snbv = Uh->TFE[0]->ndfonVertex;
+    int Snbe = Uh->TFE[0]->ndfonEdge;
+    int Snbt = Uh->TFE[0]->ndfonFace;
+    bool SP0 = SRdHat::d == 1 ? (Snbv == 0) && (Snbe == 1) && (Snbt == 0) : (Snbv == 0) && (Snbe == 0) && (Snbt == 1);
+    bool SP1 = (Snbv == 1) && (Snbe == 0) && (Snbt == 0);
+    bool SP2 = (Snbv == 1) && (Snbe == 1) && (Snbt == 0);
+    bool SRT0 = (SRdHat::d == 2) && (Snbv == 0) && (Snbe == 1) && (Snbt == 0);
+
+    if(mpirank == 0){
+        cout << "Vh->TFE[0]->N=" << Vh->TFE[0]->N << endl;
+        //cout << "Vh->TFE[0].N=" << Vh->TFE[0].N << endl;
+        cout << "Vh->TFE.N()=" << Vh->TFE.N() << endl;
+        cout << "Vh->MaxNbNodePerElement=" << Vh->MaxNbNodePerElement << endl;
+    }
+
+    if (SP2) {
+        Dof<P2> dof(mesh,true);
+        for (int i=0; i<n; i++) {
+            const std::vector<N2>& jj = dof.ToElt(i);
+            p = dof(jj[0][0])[jj[0][1]];
+            p1[3*i+0] = p[0];
+            p1[3*i+1] = p[1];
+            p1[3*i+2] = p[2];
+        }
+    }
+    else if (SRT0) {
+        Dof<RT0_2D> dof(mesh);
+        for (int i=0; i<n; i++) {
+            const std::vector<N2>& jj = dof.ToElt(i);
+            p = dof(jj[0][0])[jj[0][1]];
+            p1[3*i+0] = p[0];
+            p1[3*i+1] = p[1];
+            p1[3*i+2] = p[2];
+        }
+    }
+    else
+    for (int i=0; i<n; i++) {
+        if (SP1)
+            pp = ThU.vertices[i];
+        else if (SP0)
+            pp = ThU[i](pbs);
+        else {
+            if (mpirank == 0) std::cerr << "ff-BemTool error: only P0, P1 and P2 discretizations are available for now." << std::endl;
+            ffassert(0);
+        }
+        p1[3*i+0] = pp.x;
+        p1[3*i+1] = pp.y;
+        p1[3*i+2] = pp.z;
+    }
+
+    std::shared_ptr<Cluster<PCARe gularClustering>> t =std::make_shared<Cluster<PCARegularClustering>>();
     std::shared_ptr<Cluster<PCARegularClustering>> s = make_shared<Cluster<PCARegularClustering>>();
     t->set_minclustersize(ds.minclustersize);
     s->set_minclustersize(ds.minclustersize);
@@ -1113,6 +1410,7 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
         Assembly(Hmat,generator,ds,p1,p2,comm,MMesh::RdHat::d+1);
         delete generator;
     }
+    */
     return Hmat;
     
 }
@@ -1392,10 +1690,8 @@ static void Init_Bem() {
     
     basicForEachType *t_BEM = atype< const C_args * >( ); //atype< const BemFormBilinear * >( );
     basicForEachType *t_fbem = atype< const BemFormBilinear * >( );
-    
     aType t_C_args = map_type[typeid(const C_args *).name( )];
     atype< const C_args * >( )->AddCast(new OneOperatorCode< C_args >(t_C_args, t_fbem) );    // bad
-    
     
     typedef  const BemKernel fkernel;
     typedef  const BemPotential fpotential;
