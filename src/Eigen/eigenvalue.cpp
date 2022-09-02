@@ -833,7 +833,7 @@ AnyType EigenValueC::E_EV::operator () (Stack stack) const {
   // pfecarray evector2;
   FEbaseArrayKn<Complex> *evector = 0;
   tol = arg<double>(0, stack, 0);
-  nbev = arg<long>(1, stack, 2);
+  nbev = arg<long>(1, stack, 10);
   sigma = arg<K>(2, stack, 0.0);
   evalue = arg<KN<K>*>(3, stack, 0);
   // evector2 =arg<pfecarray>(4,stack,make_pair<pfecbasearray,int>(0,0));
@@ -853,7 +853,7 @@ AnyType EigenValueC::E_EV::operator () (Stack stack) const {
   // Matrice_Creuse<K> *pOP1 = GetAny<Matrice_Creuse<K> *>((*expOP1)(stack));
   // Matrice_Creuse<K> *pB = GetAny<Matrice_Creuse<K> *>((*expB)(stack));
 
-  if (evalue) nbev = Max((long)evalue->N()-2, nbev);
+  if (evalue) nbev = Max((long)evalue->N(), nbev);
   if (!maxit) maxit = 100*nbev;
 
   //const MatriceCreuse<K> & OP1 = pOP1->A;
