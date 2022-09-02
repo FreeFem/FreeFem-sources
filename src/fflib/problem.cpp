@@ -11763,12 +11763,13 @@ bool CheckSizeOfForm( list<C_F0> & largs ,int N,int M)
             const Ftest * l= const_cast<Ftest *>(ll->l);
         }
         else if (r==atype<const  BC_set *>())
-        {// modif FH  mai 2007  A FAIRE il y a un bug ici XXXXXXXXXXXXX
+        {
 
             const BC_set * bc= dynamic_cast<const  BC_set *>(e);
          }
 
     }
+    return true;
 }
 
 bool FieldOfForm( list<C_F0> & largs ,bool complextype)  // true => complex problem

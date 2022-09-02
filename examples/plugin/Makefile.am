@@ -103,7 +103,8 @@ TESTS_OTHER = APk-AdaptEpsDeltaPk.edp \
 	testp1dcnc.edp \
 	iovtk.edp \
 	ConnectedComponents.edp \
-	 cavityNewtonP3pnc.edp
+	 cavityNewtonP3pnc.edp \
+	 .$(DYLIB_SUFFIX)
 
 TESTS_FFTW3 = dfft.edp dfft-3d.edp
 

@@ -1,0 +1,59 @@
+load "MatrixMarket" 
+// small interf	ce to read en small matrix in matrixmarket format 
+//and add a binary  version (no ckeck of the endianness to day )
+mesh Th=square(1,1);
+fespace Vh(Th,P1); 
+varf va(u,v)= int2d(Th)(u*v)+on(1,u=0);
+
+{
+matrix<complex> A = va(Vh,Vh);
+savemtx("/tmp/a.mtx",A);
+savemtx("/tmp/a.mtxb",A,1);
+
+matrix<complex> AA , AB ;
+
+{
+readmtx("/tmp/a.mtx",AA);
+AA.COO;
+cout << "A " << A << endl; 
+cout << "AA " << AA << endl; 
+AA = AA - A;
+AA.COO;
+cout <<" diff AA -A "<<  AA << endl;
+cout << " diff AA"<< AA.linfty << endl;
+assert(AA.linfty < 1e-10);
+}
+readmtx("/tmp/a.mtxb",AB,1);
+
+AB = AB - A;
+cout << " AB"<< AB.linfty << endl;
+assert(AB.linfty < 1e-10);
+
+}
+
+{
+matrix<real> A = va(Vh,Vh);
+savemtx("/tmp/a.mtx",A); //  formatted  form A
+savemtx("/tmp/a.mtxb",A,1);//  binary  form 
+
+matrix<real> AA , AB ;
+
+{
+readmtx("/tmp/a.mtx",AA);
+AA.COO;
+cout << "A " << A << endl; 
+cout << "AA " << AA << endl; 
+AA = AA - A;
+AA.COO;
+cout <<" diff AA -A "<<  AA << endl;
+cout << " diff AA"<< AA.linfty << endl;
+assert(AA.linfty < 1e-10);
+}
+
+readmtx("/tmp/a.mtxb",AB);
+
+AB = AB - A;
+cout << " AB"<< AB.linfty << endl;
+assert(AB.linfty < 1e-10);
+
+}

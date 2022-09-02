@@ -27,7 +27,7 @@
 
 // the Polynomial space is P2, an the degree of freedom are
 // the 3 values a the 3 vertices and the three
-// normal derivative at the middle at the tree the edges
+// normal derivative at the middle at the three the edges
 // remark;
 // to compute the interpolante, we need
 // the value , plus the value of the normal derivative
@@ -41,11 +41,15 @@
 // to check  and validate: testFEMorlay.edp
 // to get a real example: bilapMorley.edp
 
+//  Add version 3D on tet
+// Dof  mean value on edge
+// value on normal derivative on barycenter of face
+
 #include "ff++.hpp"
 #include "AddNewFE.h"
 
 namespace Fem2D {
-  // ------ P2 Morley
+  // ------ P2 Morley 2d
   class TypeOfFE_P2Morley : public TypeOfFE {
    public:
     static int Data[];
@@ -287,8 +291,123 @@ namespace Fem2D {
     }
   }
 
+//Morley 3d
+
+class TypeOfFE_Morley_3d : public GTypeOfFE< Mesh3 > {
+ public:
+  typedef Mesh3 Mesh;
+  typedef Mesh3::Element Element;
+  typedef GFElement< Mesh3 > FElement;
+
+  static int dfon[];
+  static const int d = Mesh::Rd::d;
+  static const GQuadratureFormular< R1 > QFe;    // quadrature formula on an edge
+  static const GQuadratureFormular< R2 > QFf;    // quadrature formula on a face
+  TypeOfFE_Morley_3d( );                          // constructor
+  void FB(const What_d whatd, const Mesh &Th, const Mesh3::Element &K, const RdHat &PHat,
+          RNMK_ &val) const;
+  void set(const Mesh &Th, const Element &K, InterpolationMatrix< RdHat > &M, int ocoef, int odf,
+           int *nump) const;
+};
+
+int TypeOfFE_Morley_3d::dfon[] = {0, 1, 1, 0};    // 1 dofs on each edge, 1 dofs on each face
+
+// Quadrature formula on an edge, exact for degree 2 (ok: int_e (deg2*t *lambda))
+const GQuadratureFormular< R1 > TypeOfFE_Morley_3d::QFe(-1 + 2 * 2, 2, GaussLegendre(2), true);
+// arguments: exact, num of integration pts, integration pts, clean (~GQuadratureFormular()
+// {if(clean) delete [] p;}) GaussLegendre defined in QuadratureFormular.cpp
+
+// Quadrature formula on a face, exact for degree 2 (ok: int_f (deg2*t)), internal quadrature
+// points
+static GQuadraturePoint< R2 > P_QuadratureFormular_T_2_intp[3] = {
+  GQuadraturePoint< R2 >(1. / 3., R2(1. / 6., 4. / 6.)),
+  GQuadraturePoint< R2 >(1. / 3., R2(4. / 6., 1. / 6.)),
+  GQuadraturePoint< R2 >(1. / 3., R2(1. / 6., 1. / 6.))};
+const GQuadratureFormular< R2 > TypeOfFE_Morley_3d::QFf(2, 3, P_QuadratureFormular_T_2_intp);
+
+TypeOfFE_Morley_3d::TypeOfFE_Morley_3d( )
+  : GTypeOfFE< Mesh3 >(TypeOfFE_Morley_3d::dfon, d+1, 1,
+                       Element::ne *  QFe.n + Element::nf * 3 * QFf.n,
+                       Element::ne * QFe.n + Element::nf * QFf.n, false, true) {
+  assert(QFe.n);
+  assert(QFf.n);
+  R3 Pt[] = {R3(0., 0., 0.), R3(1., 0., 0.), R3(0., 1., 0.),
+             R3(0., 0., 1.)};    // 4 ref tetrahedron vertices
+
+  {
+    // We build the interpolation pts on the edges of the reference tetrahedron:
+    int i;
+    i = 0;
+
+    for (int e = 0; e < Element::ne; ++e) {
+      for (int q = 0; q < QFe.n; ++q, ++i) {
+        double x = QFe[q].x;
+        this->PtInterpolation[i] =
+          Pt[Element::nvedge[e][0]] * (1. - x) + Pt[Element::nvedge[e][1]] * (x);
+      }
+    }
+
+    // We build the interpolation pts on the faces of the reference tetrahedron:
+    // (the index i mustn't be reinitialised!)
+    for (int f = 0; f < Element::nf; ++f) {
+      for (int q = 0; q < QFf.n; ++q, ++i) {
+        double x = QFf[q].x;
+        double y = QFf[q].y;
+        this->PtInterpolation[i] = Pt[Element::nvface[f][0]] * (1. - x - y) +
+                                   Pt[Element::nvface[f][1]] * x + Pt[Element::nvface[f][2]] * y;
+      }
+    }
+  }
+  {
+    // We build the indices in (13.1) : edge dofs
+    int i = 0, p = 0;    // i is the k in (13.1) (chapter 13 ff++doc)
+    int e;               // we will need e also below, in the part referred to faces
+
+    for (e = 0; e < (Element::ne); e++) {    // loop on the 6 dofs
+
+      for (int q = 0; q < QFe.n; ++q, ++p) {    // loop on the 2 edge quadrature pts
+        {      // loop on the 3 components
+          this->pInterpolation[i] = p;          // pk in (13.1)
+          this->cInterpolation[i] = 0;          // jk in (13.1)
+          this->dofInterpolation[i] = e;        // ik in (13.1)
+          this->coefInterpolation[i] = 0.;      // alfak: we will fill them with 'set' (below)
+                                                // because they depend on the tetrahedron
+        }
+      }
+    }
+
+    // We build the indices in (13.1) : face dofs
+    // (the indices i and p mustn't be reinitialised)
+    for (int f = 0; f < (Element::nf); f++) {    // loop on the 4 dofs
+
+      for (int q = 0; q < QFf.n; ++q, ++p) {    // loop on the 3 face quadrature pts
+        for (int c = 0; c < 3; c++, i++) {      // loop on the 3 components
+          this->pInterpolation[i] = p;          // pk in (13.1)
+          this->cInterpolation[i] = 1+c;          // jk in (13.1)
+          this->dofInterpolation[i] = e + f;    // ik in (13.1)
+          this->coefInterpolation[i] = 0.;      // alphak: we will fill them with 'set' (below)
+                                                // because they depend on the tetrahedron
+        }
+      }
+    }
+  }
+}
+void TypeOfFE_Morley_3d::set(const Mesh &Th, const Element &K, InterpolationMatrix< RdHat > &M,
+                            int ocoef, int odf, int *nump) const {
+    ffassert(0); // to do  F. Hecht
+}
+void TypeOfFE_Morley_3d::FB(const What_d whatd, const Mesh &Th, const Mesh3::Element &K,
+                           const RdHat &PHat, RNMK_ &val) const {
+    ffassert(0); // to do  F. Hecht
+}
+
   // a static variable to add the finite element to freefem++
   static TypeOfFE_P2Morley P2LagrangeP2Morley;
   static AddNewFE P2Morley("P2Morley", &P2LagrangeP2Morley);
+
+static TypeOfFE_Morley_3d Morley_3d;    // TypeOfFE_Edge1_3d is the name of the class we defined
+GTypeOfFE< Mesh3 > &GMorley3d(Morley_3d);    // GTypeOfFE<Mesh3> is the mother class
+static AddNewFE3 AddGMorley3d("Morley3d", &GMorley3d);    // Edge13d will be the name used by the user
+
 }    // namespace Fem2D
      // --- fin --

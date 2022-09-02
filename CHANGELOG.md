@@ -26,6 +26,12 @@ All notable changes to this project will be documented in this file.
 	meshL Th=segment(1,[x*L,0,0]); fespace Vh(Th,P3HL);
 	see exemple end of exemple plugin/testFE-P3
 - missing new 1d finite element P4 in plugin `Elemnt_P4`
+- plugin `plugin/seq/MatrixMarket.cpp`  to read and save matrix in MatrixMarket and add also a binary form 
+     (see examples/plugin/MatrixMarket.edp test)
+- add ILU on complex matrix in plugin IncompleteCholesky 
+    remark:the IncompleteCholesky is writen but not tested
+- add test of functionnal interface of complex eigen value problem in 
+    `examples/eigen/LapEigenValueFuncComplex.edp`
 ### Changed
 -
 

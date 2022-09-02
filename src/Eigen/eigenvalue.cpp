@@ -232,7 +232,12 @@ const OneOperator *ToCode(Expression e) {
     const Polymorphic *op = dynamic_cast<const Polymorphic*>(e);
     ffassert(op);
     code = op->Find("(", ArrayOfaType(atype<KN<K>* >(), false));
-    ffassert(code);
+      if(code == 0)
+      {
+          cerr << " Erreur we are in Eigen "<< typeid(K).name() << " "<< endl;
+          cout << " bad type of function : Maybe we need to use  complexEigenValue or EigenValue" << endl;
+          ffassert(code);
+      }
   }
   return code;
 }
@@ -416,7 +421,7 @@ basicAC_F0::name_and_type EigenValue::E_EV::name_param[] = {
 basicAC_F0::name_and_type EigenValueC::E_EV::name_param[] = {
   {"tol", &typeid(double)},
   {"nev", &typeid(long)},
-  {"sigma", &typeid(K)},
+  {"sigma", &typeid(Complex)},
   {"value", &typeid(KN<Complex> *)},
   {"vector", &typeid(FEbaseArrayKn<Complex> *)}, // pfecarray
   {"ncv", &typeid(long)}, // the number of Arnoldi vectors generated
@@ -828,7 +833,7 @@ AnyType EigenValueC::E_EV::operator () (Stack stack) const {
   // pfecarray evector2;
   FEbaseArrayKn<Complex> *evector = 0;
   tol = arg<double>(0, stack, 0);
-  nbev = arg<long>(1, stack, 0);
+  nbev = arg<long>(1, stack, 2);
   sigma = arg<K>(2, stack, 0.0);
   evalue = arg<KN<K>*>(3, stack, 0);
   // evector2 =arg<pfecarray>(4,stack,make_pair<pfecbasearray,int>(0,0));
@@ -848,7 +853,7 @@ AnyType EigenValueC::E_EV::operator () (Stack stack) const {
   // Matrice_Creuse<K> *pOP1 = GetAny<Matrice_Creuse<K> *>((*expOP1)(stack));
   // Matrice_Creuse<K> *pB = GetAny<Matrice_Creuse<K> *>((*expB)(stack));
 
-  if (evalue) nbev = Max((long)evalue->N(), nbev);
+  if (evalue) nbev = Max((long)evalue->N()-2, nbev);
   if (!maxit) maxit = 100*nbev;
 
   //const MatriceCreuse<K> & OP1 = pOP1->A;
@@ -871,7 +876,6 @@ AnyType EigenValueC::E_EV::operator () (Stack stack) const {
     n = GetAny<long>((*expn)(stack));
   }
 
-  if (evalue) nbev = Max((long)evalue->N(), nbev);
 
   const RNM_VirtualMatrix<K> *ptOP1, *ptB;
   if (pOP1)
@@ -900,7 +904,7 @@ AnyType EigenValueC::E_EV::operator () (Stack stack) const {
     serr[err++] = "  the driver = 1 ,2 ,4 ";
   // 2 <= NCV-NEV and NCV <= N
   if (!(2 <= nbev && ncv <= n))
-    serr[err++] = "   ( 2 <= nbve && nvc <= n) ";
+    serr[err++] = "   ( 2 <= nbev && nvc <= n) ";
   if (n != OP1.N)
     serr[err++] = " the first matrix in EigneValue is not Hermitien.";
   if (n != B.N)
