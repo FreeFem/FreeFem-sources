@@ -502,12 +502,12 @@ template<class I,class R>   int HashMatrix<I,R>::IsTrianglulare() const
     return 2*!nL +  !nU ;
 }
 template<class I,class R>
-void HashMatrix<I,R>::dotranspose()
+void HashMatrix<I,R>::dotranspose(bool doconj)
 {
     swap(i,j);
     swap(this->n,this->m);
     swap(this->N,this->M);
-    conj(aij,this->nnz);
+    if(doconj) conj(aij,this->nnz);
     ReHash();
     state=unsorted;
 }

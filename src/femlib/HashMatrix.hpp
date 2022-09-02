@@ -172,7 +172,8 @@ public:
     template<typename T,typename TT>     static void HMcopy( T *dst,const TT *from, size_t nn, T (*ff)(TT) );
 
     bool do2Triangular(bool lower) ; //  put half tp lower or upper
-    void dotranspose();
+    void dotranspose(bool doconj=1);
+    void conj(){ conj(aij,this->nnz);} // add F.H sep 2022
     void Increaze(size_t nnznew=0,size_t newnnz=0);// newnnz<0 => newnnz is set to nnz (change value of nnz)
     void ReHash();
     size_t size() const { return nnz;}

@@ -139,7 +139,7 @@ template<typename R>
 long iLU(MatriceMorse< R > &A, MatriceMorse< R > &L, MatriceMorse< R > &Ut, double tgv) {
   A.CSR( );
   L.CSR( );
-  Ut.dotranspose( );
+  Ut.dotranspose( 0 );
   Ut.CSR( );
   if (verbosity > 4) cout << "   - ILU fact:   tgv " << tgv << endl;
   ffassert(A.n == L.n);
@@ -206,7 +206,7 @@ long iLU(MatriceMorse< R > &A, MatriceMorse< R > &L, MatriceMorse< R > &Ut, doub
   }
   if (verbosity > 2 || err)
     cout << "   - ILU: Nb BC = " << BC << "nb err =" << err << " main Uii " << mUii << endl;
-  Ut.dotranspose( );
+  Ut.dotranspose( 0);// warning do conj by default (0=> no conj)
   Ut.CSC( );
   L.CSR( );
   return err;
@@ -259,7 +259,8 @@ long iLUB(int nb, int *b, MatriceMorse< R > &A, MatriceMorse< R > &L, MatriceMor
 
   A.CSR( );
   L.CSR( );
-  Ut.dotranspose( );
+  Ut.dotranspose( 0);// no conj ..
+ 
   Ut.CSR( );
   if (verbosity > 4) cout << "   - ILU fact:   tgv " << tgv << endl;
   ffassert(A.n == L.n);
@@ -383,7 +384,7 @@ long iLUB(int nb, int *b, MatriceMorse< R > &A, MatriceMorse< R > &L, MatriceMor
 
   if (verbosity > 2 || err)
     cout << "   - ILU: Nb BC = " << BC << "nb err =" << err << " main Uii " << mUii << endl;
-  Ut.dotranspose( );
+  Ut.dotranspose(0 );// no conj
   Ut.CSC( );
   L.CSR( );
   return err;
