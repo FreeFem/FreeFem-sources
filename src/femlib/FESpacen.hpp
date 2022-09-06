@@ -37,7 +37,7 @@
  *  FEspacen.hpp
  *  EF23n
  *
- *  Created by Frédéric Hecht on 04/12/07.
+ *  Created by Frï¿½dï¿½ric Hecht on 04/12/07.
  *  Copyright 2007 Universite Pierre et marie Curie  All rights reserved.
  *
  */

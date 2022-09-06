@@ -945,6 +945,8 @@ void ff_BIO_Generator(htool::VirtualGenerator<K>*& generator, BemKernel *typeKer
     if(iscombined) ffassert( (kappaRe1==kappaRe2) && (kappaIm1==kappaIm2) );
     std::complex<double> coeff1=typeKernel->coeffcombi[0], coeff2=typeKernel->coeffcombi[1];
     
+    if(mpirank == 0) cout << "ff_BIO::LaplaceHelmoltz:: alpha=" << alpha << ", coeff1=" << coeff1 << endl;
+    
     // BIO_Generator -> single kernel
     // Equ Helmholtz kappa1.real() > 0 et kappa1.imag() == 0
     if ( (kappaRe1 && !kappaIm1) && !iscombined && (!kappaRe2 && !kappaIm2) && alpha == 0. ) {

@@ -726,6 +726,24 @@ public:
   { InternalError(" bug: no eval of Call_FormBilinear ");}
   
 operator aType () const { return atype<void>();}
+};
+
+template<class VFES1,class VFES2>
+class Call_CompositeFormBilinear: public E_F0mps
+{
+public:
+  Expression *nargs;
+  list<C_F0> varflargs;
+  list<C_F0> largs;
+  typedef list<C_F0>::const_iterator const_iterator;
+
+  const int N,M;
+  Expression euh,evh;
+  Call_CompositeFormBilinear(Expression * na,Expression  LL, Expression fi,Expression fj) ;
+  AnyType operator()(Stack stack) const
+  { InternalError(" bug: no eval of Call_CompositeFormBilinear ");}
+  
+operator aType () const { return atype<void>();}
 
 };
 
@@ -796,7 +814,53 @@ struct OpCall_FormBilinear
     OneOperator(atype<const Call_FormBilinear<v_fes1,v_fes2>*>(),atype<const T *>(),atype<pfes1*>(),atype<pfes2*>()) {}
 };
 
+template<class T,class v_fes1, class v_fes2>
+struct OpCall_CompositeFormBilinear
+  : public OneOperator ,
+  OpCall_FormBilinear_np
+{
+  typedef v_fes1 *pfes1; typedef v_fes2 *pfes2;
+  /*
+  class Op : public E_F0mps
+  {
+  public:
+    Expression *nargs;
+    list<C_F0> varflargs;
+    list<C_F0> largs;
+    typedef list<C_F0>::const_iterator const_iterator;
 
+    const int N,M;
+    Expression euh,evh;
+
+    AnyType operator()(Stack s)  const {
+      Call_CompositeFormBilinear<v_fes1, v_fes2> * bb = new Call_CompositeFormBilinear<v_fes1, v_fes2>(nargs,to<const C_args*>(args[0]),euh,evh);}
+    };
+
+    Op(Expression * na,Expression  BB, Expression fi,Expression fj)
+      : nargs(na),varflargs(),largs(),N(fi->nbitem()),M(fj->nbitem()), euh(fi), evh(fj)
+      {
+          assert(nargs );
+          const C_args * LLL=dynamic_cast<const C_args *>(BB);
+          if (!LLL)
+          CompileError("Sorry the variationnal form (varf)  is not a the variationnal form (type const C_args *)");
+          varflargs = LLL->largs;
+          largs     = LLL->largs;
+      }
+
+    }
+  
+    operator aType () const { return atype< call_CompositeFormBilinear<v_fes1,v_fes2>*>();}
+
+  };
+  */
+  E_F0 * code(const basicAC_F0 & args) const
+  { Expression * nargs = new Expression[n_name_param];
+    args.SetNameParam(n_name_param,name_param,nargs);
+    // cout << " OpCall_CompositeFormBilinear " << *args[0].left() << " " << args[0].LeftValue() << endl;
+    return  new Call_CompositeFormBilinear<v_fes1, v_fes2>(nargs,to<const C_args*>(args[0]),to<pfes1*>(args[1]),to<pfes2*>(args[2]));}
+  OpCall_CompositeFormBilinear() :
+    OneOperator(atype<const Call_CompositeFormBilinear<v_fes1,v_fes2>*>(),atype<const T *>(),atype<pfes1*>(),atype<pfes2*>()) {}
+};
 
 
 
@@ -2560,7 +2624,7 @@ AnyType OpMatrixtoBilinearFormVG<R>::Op::operator()(Stack stack)  const
         ffassert( indexOfBlockUh == indexBlockUh(finc.first) );
         ffassert( indexOfBlockVh == indexBlockVh(ftest.first) );
       }
-
+      
     ffassert( indexOfBlockUh >= 0 && indexOfBlockVh >= 0);
     
     // A faire :: recuperation des éléments pour chacun des blocs

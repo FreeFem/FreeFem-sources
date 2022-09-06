@@ -6138,7 +6138,7 @@ void init_lgfem( ) {
   // Morice: composite FESpace / vect FESpace 
   Dcl_Type< const Call_FormLinear< vect_generic_v_fes > * >( );      //   to set Vector 3D curve
   Dcl_Type< const Call_FormBilinear<vect_generic_v_fes, vect_generic_v_fes> * >( );  
-
+  Dcl_Type< const Call_CompositeFormBilinear<vect_generic_v_fes, vect_generic_v_fes> * >( );  
         
   Dcl_Type< interpolate_f_X_1< double >::type >( );      // to make  interpolation x=f o X^1 ;
 
@@ -6741,10 +6741,10 @@ void init_lgfem( ) {
 
   // Morice: composite FESpace / composite FESpace ( A quoi cela sert ?????) 
   Add< const FormLinear * >("(", "", new OpCall_FormLinear< FormLinear, vect_generic_v_fes >);    
-  Add< const FormBilinear * >("(", "", new OpCall_FormBilinear< FormBilinear, vect_generic_v_fes , vect_generic_v_fes >);    
+  Add< const FormBilinear * >("(", "", new OpCall_CompositeFormBilinear< FormBilinear, vect_generic_v_fes , vect_generic_v_fes >);    
   Add< const FormBilinear * >("(", "", new OpCall_FormLinear2< FormBilinear, vect_generic_v_fes  >);    
   Add< const C_args * >("(", "", new OpCall_FormLinear2< C_args, vect_generic_v_fes  >);      
-  Add< const C_args * >("(", "", new OpCall_FormBilinear< C_args, vect_generic_v_fes, vect_generic_v_fes >);   
+  Add< const C_args * >("(", "", new OpCall_CompositeFormBilinear< C_args, vect_generic_v_fes, vect_generic_v_fes >);   
 
 
   //  correction du bug morale

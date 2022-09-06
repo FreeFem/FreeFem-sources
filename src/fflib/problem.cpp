@@ -12137,6 +12137,157 @@ euh(fi), evh(fj)
     CompileError("Sorry the variationnal form (varf)  is not a the variationnal form (type const C_args *)");
     largs=LLL->largs;
 }
+
+
+template<class VFES1, class VFES2>
+Call_CompositeFormBilinear< VFES1, VFES2>::Call_CompositeFormBilinear(Expression * na,Expression  BB,Expression fi, Expression fj)
+: nargs(na),varflargs(),largs(),N(fi->nbitem()),M(fj->nbitem()), 
+euh(fi), evh(fj)
+{
+    assert(nargs );
+    const C_args * LLL=dynamic_cast<const C_args *>(BB);
+    if (!LLL)
+    CompileError("Sorry the variationnal form (varf)  is not a the variationnal form (type const C_args *)");
+    varflargs = LLL->largs;
+    largs     = LLL->largs;
+
+
+    /*
+    pvectgenericfes  * pUh= GetAny<pvectgenericfes *>((*euh)(stack));
+    pvectgenericfes  * pVh= GetAny<pvectgenericfes *>((*evh)(stack));
+    ffassert( *pUh && *pVh ); 
+
+    if( verbosity > 5){
+        (*pUh)->printPointer();
+        (*pVh)->printPointer();
+    }
+    int NpUh = (*pUh)->N; // number of fespace in pUh
+    int NpVh = (*pVh)->N; // number of fespace in pVh
+
+    KN<int> UhNbOfDf = (*pUh)->vectOfNbOfDF();
+    KN<int> VhNbOfDf = (*pVh)->vectOfNbOfDF();
+
+    KN<int> UhNbItem = (*pUh)->vectOfNbitem();
+    KN<int> VhNbItem = (*pVh)->vectOfNbitem();
+
+    KN<int> beginBlockUh(NpUh); // index of the first elment of a block
+    KN<int> beginBlockVh(NpVh);
+
+    // loop over the index 
+    int UhtotalNbItem=0;
+    if(verbosity>5) cout << "finc: FESpace" << endl;
+    for(int i=0; i< NpUh; i++){
+        if(verbosity>5) cout << "component i=" << i << ", NbItem["<<i<<"]=" <<  UhNbItem[i] << ", NbDof["<<i<<"]=" << UhNbOfDf[i] << endl;
+        beginBlockUh[i] = UhtotalNbItem;
+        UhtotalNbItem += UhNbItem[i];
+        ffassert( UhNbItem[i] > 0 && UhNbOfDf[i] > 0);
+    }
+
+    int VhtotalNbItem=0;
+    if(verbosity>5) cout << "ftest: FESpace" << endl;
+    for(int i=0; i< NpVh; i++){
+        if(verbosity>5) cout << "component i=" << i << ", NbItem["<<i<<"]=" <<  VhNbItem[i] << ", NbDof["<<i<<"]=" << VhNbOfDf[i] << endl;
+        beginBlockVh[i] = VhtotalNbItem;
+        VhtotalNbItem += VhNbItem[i];
+        ffassert( VhNbItem[i] > 0 && VhNbOfDf[i] > 0);
+    }
+    
+    // index for the construction of the block
+    KN<int> indexBlockUh(UhtotalNbItem);
+    KN<int> localIndexInTheBlockUh(UhtotalNbItem);
+    { 
+        // ========================
+        //
+        // varf([u0,u1,...,u4], ... ) 
+        // varf([ [u0_blk1,u1_blk1],[u0_blk2,u1_blk2,u2_blk2] ], ... ) 
+
+        // u4 correspond to u2_blk2 in the block varf
+        // ============================================
+        // For u4, on a :: current_index = 4
+        //              :: indexBlockUh = 2
+        //              :: localIndexInThBlock = 3
+        int current_index=0;
+        for(int i=0; i<NpUh; i++){
+        for(int j=0; j<UhNbItem[i]; j++){
+            indexBlockUh[current_index] = i;
+            localIndexInTheBlockUh[current_index] = j;
+            current_index++;
+        }
+        }
+        ffassert(current_index==UhtotalNbItem);
+    }
+
+    KN<int> indexBlockVh(VhtotalNbItem);
+    KN<int> localIndexInTheBlockVh(VhtotalNbItem);
+    { 
+        int current_index=0;
+        for(int i=0; i<NpVh; i++){
+        for(int j=0; j<VhNbItem[i]; j++){
+            indexBlockVh[current_index] = i;
+            localIndexInTheBlockVh[current_index] = j;
+            current_index++;
+        }
+        }
+        ffassert(current_index==VhtotalNbItem);
+    }
+    cout <<"========================================================" << endl;
+    cout <<"=                                                      =" << endl;
+    cout <<"= indexBlockUh=                                        =" << endl;
+    cout << indexBlockUh << endl;
+    cout <<"=                                                      =" << endl;
+    cout <<"= localIndexInTheBlockUh=                              =" << endl;
+    cout << localIndexInTheBlockUh << endl;
+
+    cout <<"========================================================" << endl;
+    cout <<"=                                                      =" << endl;
+    cout <<"= indexBlockVh=                                        =" << endl;
+    cout << indexBlockVh << endl;
+    cout <<"=                                                      =" << endl;
+    cout <<"= localIndexInTheBlockVh=                              =" << endl;
+    cout << localIndexInTheBlockVh << endl;
+
+    //
+    list<C_F0>  largs = creationLargsForCompositeFESpace( varflargs, NpUh, NpVh, indexBlockUh, indexBlockVh ); 
+    */
+
+    /*
+    cout << " je suis entrain de creer un CompositeFormBilinear" << endl;
+    list<C_F0>::const_iterator b_ii,b_ib=varflargs.begin(),b_ie=varflargs.end(); 
+    for (b_ii=b_ib;b_ii != b_ie;b_ii++){
+        Expression e=b_ii->LeftValue();
+        aType r = b_ii->left();
+
+        // bilinear case
+        if (r==atype<const  FormBilinear *>() ){
+            const FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
+            const CDomainOfIntegration & di= *bb->di;
+
+            BilinearOperator * Op=const_cast<  BilinearOperator *>(bb->b);
+            if (Op == NULL) {
+                if(mpirank == 0) cout << "dynamic_cast error" << endl; 
+            ffassert(0);
+            }
+        
+            size_t Opsize= Op->v.size();
+
+            BilinearOperator * OpBloc= new BilinearOperator();
+        
+            for(size_t jj=0; jj<Opsize; jj++){
+                OpBloc->add(Op->v[jj].first, Op->v[jj].second); // Add the billinearOperator to bloc (ibloc,jbloc).
+            }
+            for(size_t jj=0; jj<Opsize; jj++){
+                OpBloc->v[jj].first.first.first = 21;
+                OpBloc->v[jj].first.second.first = 41;
+            }
+
+            largs.push_back( C_F0( new FormBilinear( &di, OpBloc ), r ) ); 
+            delete OpBloc;
+        }   
+    }*/
+    
+
+}
+
 template<class VFES>
 Call_FormLinear<VFES>::Call_FormLinear(Expression *na,Expression  LL, Expression ft)
 :largs(),nargs(na),N(ft->nbitem()),
@@ -12587,7 +12738,7 @@ template class Call_FormBilinear<v_fesS, v_fes3>;  //  3D Surf / 3D volume on me
 template class Call_FormBilinear<v_fes3, v_fesS>;  //  3D volume / 3D Surf on meshS
 template class Call_FormBilinear<v_fesS, v_fes>;
 
-template class Call_FormBilinear<vect_generic_v_fes, vect_generic_v_fes>; // Morice: added vector FESpace (composite FESpace)
+template class Call_CompositeFormBilinear<vect_generic_v_fes, vect_generic_v_fes>; // Morice: added vector FESpace (composite FESpace)
 /*
 
 #ifndef FFLANG

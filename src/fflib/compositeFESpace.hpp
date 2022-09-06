@@ -50,18 +50,18 @@ template<class R>  //  to make   A=linearform(x)
 struct OpMatrixtoBilinearFormVG
   : public OneOperator
 {
-  typedef typename Call_FormBilinear<vect_generic_v_fes,vect_generic_v_fes>::const_iterator const_iterator;
+  typedef typename Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes>::const_iterator const_iterator;
   int init;
   
   class Op : public E_F0mps {
     public:
-      Call_FormBilinear<vect_generic_v_fes,vect_generic_v_fes> *b;
+      Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes> *b;
       Expression a;
       int init;
       //AnyType operator()(Stack s)  const;
       
       Op(Expression aa,Expression  bb,int initt)
-        : b(new Call_FormBilinear<vect_generic_v_fes,vect_generic_v_fes>(* dynamic_cast<const Call_FormBilinear<vect_generic_v_fes,vect_generic_v_fes> *>(bb))),a(aa),init(initt)
+        : b(new Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes>(* dynamic_cast<const Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes> *>(bb))),a(aa),init(initt)
     { 
       assert(b && b->nargs);
       bool iscmplx=FieldOfForm(b->largs,IsComplexType<R>::value)  ;
@@ -76,7 +76,7 @@ struct OpMatrixtoBilinearFormVG
   E_F0 * code(const basicAC_F0 & args) const
   { return  new Op(to<Matrice_Creuse<R>*>(args[0]),args[1],init); }
   OpMatrixtoBilinearFormVG(int initt=0) :
-    OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_FormBilinear<vect_generic_v_fes,vect_generic_v_fes>*>()),
+    OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_CompositeFormBilinear<vect_generic_v_fes,vect_generic_v_fes>*>()),
     init(initt){};
 
 };
