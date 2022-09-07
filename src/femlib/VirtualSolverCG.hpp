@@ -235,7 +235,7 @@ public:
     
     void dosolver(K *x,K*b,int N=0,int trans=1)
     {
-        if(verbosity>9 || verb> 2)
+        if(verbosity>9 || verb> 3)
             std::cout <<" ##  SolverGMRES::dosolver" << N<< " "<< eps << " "<< itermax << " "<< verb << std::endl;
         HMatVirt AA(A,trans);
         //HMatVirtPreconDiag CC(A);

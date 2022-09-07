@@ -3343,7 +3343,7 @@ void  AddMatElem(MatriceMap<R> & A,const MeshS & Th,const BilinearOperator & Op,
             R2 Pt(pi),Ptu;
             R3 Ptv;
             R3 P(T(Pt));
-            R2 PP(P.p2());
+            R3 PP(P); // correction FH. Sep 2022.. 
             bool outsideu,outsidev;
             // ici trouve le T
             int iut=0,ivt=0;

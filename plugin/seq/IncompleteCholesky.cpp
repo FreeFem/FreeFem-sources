@@ -53,6 +53,26 @@ typedef void VOID;
 #undef real
 #undef complex
 
+// warning code duplicated from lgmat.cpp
+template<class R>
+MatriceMorse<R> * removeHalf(MatriceMorse<R> & A,long half,double tol)
+{
+
+    // half < 0 => keep U
+    // half > 0 => keep L
+    // half = 0 => L and the result will be sym
+    int nnz =0;
+
+    if( A.half )
+        return &A;//  copy
+    // do alloc
+    MatriceMorse<R> *r=new MatriceMorse<R>(A);
+    r->RemoveHalf(half,tol);
+    if(verbosity )
+        cout << "  removeHalf: new nnz = "<< r->nnz << " "<< r->half << endl;
+
+    return r;
+}
 template<typename R>
 long ichol(MatriceMorse< R > &A, MatriceMorse< R > &L, double tgv) {
   // cf https://en.wikipedia.org/wiki/Incomplete_Cholesky_factorization
@@ -396,6 +416,23 @@ long ff_ilu(Matrice_Creuse< R > *const &pcA, Matrice_Creuse< R > *const &pcL,
   MatriceCreuse< R > *pa = pcA->A;
   MatriceCreuse< R > *pl = pcL->A;
   MatriceCreuse< R > *pu = pcU->A;
+  if(pl==0)
+    {
+        MatriceMorse<R> *pma= dynamic_cast<MatriceMorse<R>* > (pa);
+        MatriceCreuse<R> * pr= removeHalf(*pma,1,-1.);// L
+        pcL->A.master(pr);
+        pl = pcL->A;
+
+    }
+    if(pu==0)
+      {
+          MatriceMorse<R> *pma= dynamic_cast<MatriceMorse<R>* > (pa);
+          MatriceCreuse<R> * pr= removeHalf(*pma,-1,-1.);// L
+          pcU->A.master(pr);
+          pu = pcU->A;
+
+      }
+
   ffassert(pa && pl && pu);
   MatriceMorse< R > *pA = dynamic_cast< MatriceMorse< R > * >(pa);
   MatriceMorse< R > *pL = dynamic_cast< MatriceMorse< R > * >(pl);
@@ -408,6 +445,14 @@ template<typename R>
 long ff_ichol(Matrice_Creuse< R > *const &pcA, Matrice_Creuse< R > *const &pcL, double const &tgv) {
   MatriceCreuse< R > *pa = pcA->A;
   MatriceCreuse< R > *pl = pcL->A;
+  if(pl==0)
+  {
+      MatriceMorse<R> *pma= dynamic_cast<MatriceMorse<R>* > (pa);
+      MatriceCreuse<R> * pr= removeHalf(*pma,1,-1.);// L
+      pcL->A.master(pr);
+      pl = pcL->A;
+
+  }
   ffassert(pa && pl);
   MatriceMorse< R > *pA = dynamic_cast< MatriceMorse< R > * >(pa);
   MatriceMorse< R > *pL = dynamic_cast< MatriceMorse< R > * >(pl);
