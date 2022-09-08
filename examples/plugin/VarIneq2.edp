@@ -144,13 +144,14 @@ for(int i=0;i<Vh.ndof;++i)
 }
 
 //Uncomment this to use ub and lb
-/*
-real[int] diff1 = start - lo , diff2 = up - start;
-for(int i=0;i<diff1.n;++i) 
-{
+if(kas<3){
+  real[int] diff1 = start - lo , diff2 = up - start;
+  for(int i=0;i<diff1.n;++i) 
+   {
 	if(diff1[i]<0) start[i]=lo[i];
 	if(diff2[i]<0) start[i]=up[i]; 
-}*/
+   }
+}
 
 real mini=1e100;
 if(kas==1)

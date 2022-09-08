@@ -6,7 +6,7 @@
 */
 load "IncompleteCholesky"
 
-int nn=50	;
+int nn=50;
 mesh Th=square(nn,nn);
 fespace Vh(Th,P1); 
 macro grad(u) [dx(u),dy(u)]//
@@ -25,8 +25,7 @@ if(1)
 	
 	matrix AI = va(Vh,Vh,solver=CG,precon=PreconIcho);
 	matrix A = va(Vh,Vh,solver=CG,sym=1);
-	L=A; // sym ok 
-	ichol(A,L);
+	ichol(A,L);//  take the stucture OF a FOR l; 
 
 	real[int] b = va(0,Vh);
 	Vh u,ui;
@@ -54,15 +53,7 @@ if(1)
 	matrix A = va(Vh,Vh,solver=GMRES);
 	
 	real[int] b = va(0,Vh);
-	
-	L=removeHalf(AI,1);  // build the structure of L
-		if(nn<10)
-    	  cout << " L " <<  L << endl; 
-	U=removeHalf(AI,-1); // build the structure of Ut ( transpose of )
-	    if(nn<10)	
-		  cout << " U " <<  U << endl; 
-		
-	iLU(AI,L,U);// do the incomplet LU  
+	iLU(AI,L,U);// do the incomplet LU  with sturct of A.
 	
     if(nn<10)	
 	  cout << "\n\n **L=" << L <<"\n\n  **U " <<  U << endl; 
@@ -78,6 +69,7 @@ if(1)
 }
 
 { // test ILU complex ...
+	cout << " Complex \n\n" <<endl;
     kconv =50;
     
 	int n = Vh.ndof;
@@ -92,7 +84,6 @@ if(1)
 	matrix<complex> A = vac(Vh,Vh,solver=GMRES);
 	
 	complex[int] b = vac(0,Vh);
-	
 	L=removeHalf(AI,1);  // build the structure of L
 		if(nn<10)
     	  cout << " L " <<  L << endl; 
