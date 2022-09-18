@@ -306,6 +306,7 @@ $(SRCDIR)/tag-tar:$(PACKAGE)
 ifneq ($(WIN32DLLTARGET),)
 	cd $(SRCDIR) && patch -p1 < ../petsc-scalapack.patch && cd -
 endif
+	cd $(SRCDIR) && patch -p1 < ../petsc-clang.patch && cd -
 	touch $@
 $(PACKAGE):
 	../getall -o PETSc -a
