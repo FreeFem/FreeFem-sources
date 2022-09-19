@@ -14,6 +14,7 @@ mpi/generaldefs.h \
 mpi/hpddm.cpp \
 mpi/hpddm_substructuring.cpp \
 mpi/bem.cpp \
+mpi/RadiativeTransfer_htool.cpp \
 mpi/mpi-cmaes.cpp \
 mpi/parmetis.cpp \
 seq/BEC.cpp \
