@@ -13,7 +13,8 @@
 
 	To launch:  ff-mpirun -np 8 chamonixgridheatgridpara.edp -ns -wg -Kmax 9
 
-	In order to run the test cases from the paper, you can download the original mesh at [.../chamonix_100K_surf.meshb], change the file in the readmesh command, and run with argument '-fullmesh':
+	In order to run the test cases from the paper, you can download the original mesh at https://freefem.org/misc/chamonix_100K_surf.meshb , change the file in the readmesh command, and run with argument '-fullmesh':
+	wget https://freefem.org/misc/chamonix_100K_surf.meshb
 	ff-mpirun -np 8 chamonixgridheatgridpara.edp -ns -wg -Kmax 9 -fullmesh -n 15
 */
 
@@ -65,8 +66,8 @@ mesh3 Th3;
 if (mpirank == 0)
 {
 	// read the surface mesh of the Chamonix valley:
-	meshS Thf = readmeshS("chamonix_surf.meshb");
-	//meshS Thf = readmeshS("chamonix_100K_surf.meshb"); // uncomment to use the original fine mesh ; you can download it at [.../chamonix_100K_surf.meshb]
+	//meshS Thf = readmeshS("chamonix_surf.meshb");
+	meshS Thf = readmeshS("chamonix_100K_surf.meshb"); // uncomment to use the original fine mesh ; you can download it at https://freefem.org/misc/chamonix_100K_surf.meshb 
 	// build the volume mesh above the valley:
 	real[int] bb(6);
 	boundingbox(Thf, bb);

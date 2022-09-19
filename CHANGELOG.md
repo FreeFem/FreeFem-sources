@@ -22,6 +22,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- add in examples/mpi/chamonix.edp : radiative transfer (use new plugin 
+     plugin/mpi/RadiativeTransfer_htool.cpp, illustrates the use of htool for compression
+     of user defined matrix operator)
+- transform a surface meshS in 2d mesh (warning with overloaping, no test) with movemesh:
+ 
+    meshS Ths = square3(10,10,[x,y,square(2*x-1)+square(2*y-1)]); 
+    real[int] gzz;
+    mesh Th2 = movemesh(Ths,transfo=[x,y,z],getZ=gzz);//  get flat 2d mesh form meshS 
+
 - New 1d finite element P3 hermite (C1) finite element in plugin `Element_P3` 
 	meshL Th=segment(1,[x*L,0,0]); fespace Vh(Th,P3HL);
 	see exemple end of exemple plugin/testFE-P3

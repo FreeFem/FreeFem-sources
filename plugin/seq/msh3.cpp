@@ -8890,7 +8890,7 @@ AnyType Movemesh_Op< Mesh >::operator( )(Stack stack) const {
   return T_Th;
 }
 
-const Mesh * MoveTheMesh(const MeshS &Th,const KN_<double> & U,const KN_<double> &V)
+const Mesh * MoveTheMesh(const MeshS &Th,const KN_<double> & U,const KN_<double> &V,bool orientation)
 {
   using  Fem2D::Triangle;
   using  Fem2D::Vertex;
@@ -8918,17 +8918,27 @@ const Mesh * MoveTheMesh(const MeshS &Th,const KN_<double> & U,const KN_<double>
   int nberr=0;
   double atotal=0,atotal0=0;
   double amax=-1e100,amin=1e100;
+    int ineg=0, ipos =0;
   for (int i=0;i<nbt;i++)
     {
        atotal0 += Th[i].mesure();
       int i0=Th(i,0), i1=Th(i,1),i2=Th(i,2);
       double a= Area2(v[i0],v[i1],v[i2])/2;
+        if( a<0 ) ineg++;
+        else if (a>0) ipos++;
       atotal +=  a;
       amax=max(a,amax);
       amin=min(a,amin);
     }
   double  eps = 1e-6 * max(abs(atotal),1e-100)/atotal0;
   bool rev=(atotal<0);
+  if(ipos + ineg != nbt || (ipos >0 && ineg >0))
+  {
+      cout << " Error " << ipos << " triangle positif " << endl;
+      cout << " Error " << ineg << " triangle negatif " << endl;
+      cout << " Error " << nbt-ineg-ipos << " triangle nulle " << endl;
+      nberr++;
+  }
   if(verbosity>2 && rev) cout <<  "  -- movemesh negatif tranfomation => reverse all triangle (old area " << atotal0 << ") ( new area  " << atotal << ") "<< endl;
   for (int i=0;i<nbt;i++)
     {
@@ -8988,12 +8998,15 @@ class Movemesh_OpS2 : public E_F0mps {
   Expression eTh;
   Expression X, Y , Z;
   // Expression  lab,reg;
-  static const int n_name_param = 2;
+  static const int n_name_param = 3;
   static basicAC_F0::name_and_type name_param[];
   Expression nargs[n_name_param];
   KN< double >* arg(int i, Stack stack, KN< double > *a) const {
     return nargs[i] ? GetAny< KN< double >* >((*nargs[i])(stack)) : a;
   }
+  bool arg(int i, Stack stack, bool a) const {
+      return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
+    }
 
  public:
     Movemesh_OpS2(const basicAC_F0 &args, Expression tth, Expression xxx = 0, Expression yyy = 0, Expression zzz = 0)
@@ -9002,7 +9015,7 @@ class Movemesh_OpS2 : public E_F0mps {
   //      int size;
          
     args.SetNameParam(n_name_param, name_param, nargs);
-    if( nargs[0]){
+     if( nargs[0]){
         
         const E_Array *a = dynamic_cast< const E_Array * >(nargs[0]);
         ffassert(a);
@@ -9040,6 +9053,8 @@ AnyType Movemesh_OpS2::operator( )(Stack stack) const {
 
   MeshPoint *mp(MeshPointStack(stack)), mps = *mp;
   MeshS *pTh = GetAny< MeshS * >((*eTh)(stack));
+  bool orientation= arg(2,stack,true);
+
   ffassert(pTh);
   MeshPoint *mpp(MeshPointStack(stack));
 
@@ -9080,7 +9095,7 @@ AnyType Movemesh_OpS2::operator( )(Stack stack) const {
             }
         }
 
-  const Mesh *pThr= MoveTheMesh(Th,U,V);
+  const Mesh *pThr= MoveTheMesh(Th,U,V,orientation);
   *mp=mps;
   Add2StackOfPtr2FreeRC(stack,pThr);
   return SetAny<pmesh>(pThr);
@@ -9090,7 +9105,8 @@ AnyType Movemesh_OpS2::operator( )(Stack stack) const {
 
 basicAC_F0::name_and_type Movemesh_OpS2::name_param[] = {
   {"transfo", &typeid(E_Array)},       // 0
-  {"getZ", &typeid(KN< double >*)}     // 1
+  {"getZ", &typeid(KN< double >*)},     // 1
+  {"orientation", &typeid(bool)}    // 2
 };
 
 template<>
