@@ -25,7 +25,7 @@
 if FFCS_MPIOK
 # compile nothing if no mpi ... 
 LIST_COMPILE=@TOOL_DYLIB_mumps@ MPICG.$(DYLIB_SUFFIX) \
-mpi-cmaes.$(DYLIB_SUFFIX) @TOOL_DYLIB_parmetis@ @TOOL_DYLIB_parmmg@ @TOOL_DYLIB_hpddm@ @TOOL_DYLIB_bem@
+mpi-cmaes.$(DYLIB_SUFFIX) @TOOL_DYLIB_parmetis@ @TOOL_DYLIB_parmmg@ @TOOL_DYLIB_hpddm@ @TOOL_DYLIB_bem@ @TOOL_DYLIB_RadiativeTransfer_htool@
 
 # FFCS - do not set loadpath to be able to run an external version of FF on the examples in this directory with
 # [[../../mkffref]]
