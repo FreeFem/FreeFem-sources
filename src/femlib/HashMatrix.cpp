@@ -1089,6 +1089,7 @@ R* HashMatrix<I,R>::addMatMul(R *x,R*Ax,bool Transpose,I sx,I sAx) const {
     const bool do_conj  = ((std::is_same<R,complex<double> >::value || std::is_same<R,complex<float> >::value )) && Transpose;
     if(Transpose ) {std::swap(ii,jj);}
     if(fortran) {aa++;}
+    if( verbosity>99) cout << " addMatMul "<< sx << " "<< sAx << " " << half << " " << do_conj << endl;
     if(do_conj)// complex and transpose => hermitian
     {
     if(sx==1 && sAx==1)

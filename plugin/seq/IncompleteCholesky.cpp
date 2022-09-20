@@ -64,7 +64,7 @@ MatriceMorse<R> * removeHalf(MatriceMorse<R> & A,long half,double tol)
     int nnz =0;
 
     if( A.half )
-        return &A;//  copy
+        return new MatriceMorse<R>(A);//  copy
     // do alloc
     MatriceMorse<R> *r=new MatriceMorse<R>(A);
     r->RemoveHalf(half,tol);
@@ -86,6 +86,8 @@ long ichol(MatriceMorse< R > &A, MatriceMorse< R > &L, double tgv) {
   for (int k = 0; k < L.nnz; ++k) L.aij[k] = nan;
   int BC = 0;
   long err = 0;
+  if(verbosity>9)   cout << "    ichol: &L, &A "  << &L << " " << &A << endl
+      << "      ||L|| " << L.norminfty() << " ||A|| " <<  A.norminfty() << endl;
   A.CSR( );
   L.CSR( );
   for (int i = 0; i < n; ++i) {
@@ -128,7 +130,7 @@ long ichol(MatriceMorse< R > &A, MatriceMorse< R > &L, double tgv) {
       L.aij[li1] = Lii;
     }
   }
-  if (verbosity > 2) cout << "  -- ichol:  N BC = " << BC << " nberr " << err << endl;
+  if (verbosity > 2) cout << "  -- ichol:  N BC = " << BC << " nberr " << err << " A.half " << A.half << " ||L|| " << L.norminfty() << " ||A|| " <<  A.norminfty() << endl;
   return err;
 }
 
@@ -445,6 +447,8 @@ template<typename R>
 long ff_ichol(Matrice_Creuse< R > *const &pcA, Matrice_Creuse< R > *const &pcL, double const &tgv) {
   MatriceCreuse< R > *pa = pcA->A;
   MatriceCreuse< R > *pl = pcL->A;
+  if(verbosity>9 )  cout << "ff_ichol " << pa << " " << pl << endl;
+
   if(pl==0)
   {
       MatriceMorse<R> *pma= dynamic_cast<MatriceMorse<R>* > (pa);
@@ -457,7 +461,7 @@ long ff_ichol(Matrice_Creuse< R > *const &pcA, Matrice_Creuse< R > *const &pcL, 
   MatriceMorse< R > *pA = dynamic_cast< MatriceMorse< R > * >(pa);
   MatriceMorse< R > *pL = dynamic_cast< MatriceMorse< R > * >(pl);
   ffassert(pL && pA);
-
+  if(verbosity>9 )  cout << "ff_ichol " << pA << " " << pL << endl;
   return ichol(*pA, *pL, tgv);
 }
 template<typename R>

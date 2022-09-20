@@ -3601,7 +3601,7 @@ MatriceMorse<R> * removeHalf(MatriceMorse<R> & A,long half,double tol)
     int nnz =0;
 
     if( A.half )
-        return &A;//  copy
+        return new MatriceMorse<R>(A);//  copy
     // do alloc
     MatriceMorse<R> *r=new MatriceMorse<R>(A);
     r->RemoveHalf(half,tol);

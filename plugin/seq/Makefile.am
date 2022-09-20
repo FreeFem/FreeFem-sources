@@ -51,7 +51,7 @@ LIST_COMPILE=myfunction.$(DYLIB_SUFFIX) BernardiRaugel.$(DYLIB_SUFFIX) \
 	Schur-Complement.$(DYLIB_SUFFIX) biofunc.$(DYLIB_SUFFIX) mat_edgeP1.$(DYLIB_SUFFIX) \
 	geophysics.$(DYLIB_SUFFIX) CircumCenter.$(DYLIB_SUFFIX) MatD-VFP0.$(DYLIB_SUFFIX) \
 	meshtools.$(DYLIB_SUFFIX) Helmholtz_FD.$(DYLIB_SUFFIX)  Element_P3pnc.$(DYLIB_SUFFIX) \
-	vortextools.$(DYLIB_SUFFIX)  MatrixMarket.$(DYLIB_SUFFIX)
+	vortextools.$(DYLIB_SUFFIX)  MatrixMarket.$(DYLIB_SUFFIX) Element_P3nc.$(DYLIB_SUFFIX)
 
 # FFCS - some libraries are skipped because the corresponding tool is deactivated.
 
