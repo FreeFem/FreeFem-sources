@@ -11402,6 +11402,56 @@ void InitProblem( int Nb, const FESpace & Uh,
 
 }
 
+// version InitProblem epurer pour les FESpace composite
+template< class R, class FESpace, class v_fes>
+void InitProblem( int Nb, const FESpace & Uh,
+                 KN<R> *&B,KN<R> *&X,
+                 FEbase<R,v_fes> * &u_h,bool initx )
+{
+    typedef typename  FESpace::Mesh Mesh;
+    typedef typename  FESpace::FElement FElement;
+    typedef typename  Mesh::Element Element;
+    typedef typename  Mesh::Vertex Vertex;
+    typedef typename  Mesh::RdHat RdHat;
+    typedef typename  Mesh::Rd Rd;
+
+    ffassert(Nb==1);
+
+    *B=R();
+
+    //  bool initx = typemat->t==TypeSolveMat::GC;
+
+    const  Mesh & Th(Uh.Th);
+
+    if (initx)
+    {
+        if (!X || (X =B) )
+        X=new KN<R>(B->N());
+        const FEbase<R,v_fes> & u_h0 = *(u_h);
+        const FESpace  * u_Vh = u_h0.Vh ;
+
+        if ( u_Vh==0  || &((u_h)->Vh->Th) != &Th )
+        {
+            *X=R();
+            if(verbosity>1)
+            cout << "   -- Change of Mesh " << (u_Vh ? & (*(u_h)).Vh->Th: 0 )
+            << "  " << &Th <<  endl;
+        }
+        else
+        { //  copy the previous soluton to initialize CG, GMRES, etc ...
+            if (Nb==1)
+            {  // modif  FH 0701/2005 + april 2006
+                if( u_h->x() && u_h->x()->N() != X->N() )// correction juin FH 2021 .. 
+                    cout << " bug ???? " << endl;
+                if( u_h->x() && u_h->x()->N() == X->N() )
+                    *X = * u_h->x();
+                else
+                    *X = R();
+            }
+        }
+    }
+}
+
 
 
 template<class R>
@@ -11496,6 +11546,71 @@ void   DispatchSolution(const typename FESpace::Mesh & Th,int Nb, vector<  FEbas
         delete B;
     }
 }
+
+// version dispatch solution for composite FESpace
+template<class R,class v_fes>
+void  DispatchSolution(FEbase<R,v_fes> * & u_h,KN<R> * X)
+{
+    *(u_h)=X;
+}
+
+template<class R>
+void  DispatchSolution( const KN<int> &typeUh, const KN<int> &offsetUh,  
+                        const vector<void *> &LLUh,  vector< void *>  &u_h, KN<R> * X,KN<R> * B)
+{
+// Dispatch solution
+    //  Need to do a function ::  NbUh, LLUh, u_h, offsetUh, typeUh, 
+
+    const int NbUh = typeUh.size();
+
+    for(int I=0; I<NbUh; I++ ){
+        if( typeUh[I] == 2){
+
+            const FESpace * PUh = (FESpace *) LLUh[I];
+            const FESpace & Uh= *PUh;
+            FEbase<R,v_fes> * u_h_loc = (FEbase<R,v_fes> *) u_h[I];
+
+            KN<R> *Xbloc=new KN<R>(PUh->NbOfDF); // local X
+            for(int i=0; i<PUh->NbOfDF; i++){ (*Xbloc)[i] = (*X)[i+offsetUh[I]]; } 
+            (*u_h_loc)=Xbloc;
+        }       
+        else if( typeUh[I] == 3){
+
+            const FESpace3 * PUh = (FESpace3 *) LLUh[I];
+            const FESpace3 & Uh= *PUh;
+            FEbase<R,v_fes3> * u_h_loc = (FEbase<R,v_fes3> *) u_h[I];
+
+            KN<R> *Xbloc=new KN<R>(PUh->NbOfDF); // local X
+            for(int i=0; i<PUh->NbOfDF; i++){ (*Xbloc)[i] = (*X)[i+offsetUh[I]]; } 
+            (*u_h_loc)=Xbloc;   
+        }
+        else if( typeUh[I] == 4){
+
+            const FESpaceS * PUh = (FESpaceS *) LLUh[I];
+            const FESpaceS & Uh= *PUh;
+            FEbase<R,v_fesS> * u_h_loc = (FEbase<R,v_fesS> *) u_h[I];
+
+            KN<R> *Xbloc=new KN<R>(PUh->NbOfDF); // local X
+            for(int i=0; i<PUh->NbOfDF; i++){ (*Xbloc)[i] = (*X)[i+offsetUh[I]]; } 
+            (*u_h_loc)=Xbloc;           
+        }
+        else if( typeUh[I] == 5){
+
+            const FESpaceL * PUh = (FESpaceL *) LLUh[I];
+            const FESpaceL & Uh= *PUh;
+            FEbase<R,v_fesL> * u_h_loc = (FEbase<R,v_fesL> *) u_h[I];
+
+            KN<R> *Xbloc=new KN<R>(PUh->NbOfDF); // local X
+            for(int i=0; i<PUh->NbOfDF; i++){ (*Xbloc)[i] = (*X)[i+offsetUh[I]]; } 
+            (*u_h_loc)=Xbloc;
+        }  
+        else{
+            cerr << "error int the Type of FESpace" << endl;
+            ffassert(0);
+        }
+    }
+    if (X != B ) delete B; 
+}
 /*
 #ifdef HAVE_LIBUMFPACK
 TypeSolveMat::TSolveMat  TypeSolveMat::defaultvalue=TypeSolveMat::SparseSolver;
@@ -11537,15 +11652,14 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
 
     bool sym = ds.sym;
 
-    list<C_F0>::const_iterator ii,ib=op->largs.begin(),
-    ie=op->largs.end();
+    //list<C_F0>::const_iterator ii,ib=op->largs.begin(), ie=op->largs.end(); // delete unused variable
     int Nbcomp2=var.size(),Nbcomp=Nbcomp2/2; // nb de composante
     throwassert(Nbcomp2==2*Nbcomp);
     //  Data *data= dataptr(stack);
     //   data->init();
     KN<int>  which_comp(Nbcomp2),which_uh(Nbcomp2);
 
-    TabFuncArg tabexp(stack,Nbcomp);
+    //TabFuncArg tabexp(stack,Nbcomp); // delete unused variable
     typedef pair< FEbase<R,v_fes> *,int> pfer;
     vector< pair< FEbase<R,v_fes> *,int> > u_hh(Nbcomp2);
     // u_hh.first --> FEbase *
@@ -11554,15 +11668,14 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
     for (size_t i=0;i<var.size();i++)
     u_hh[i] = GetAny< pfer  >( (*(var[i]))(stack));
     for (size_t i=0;i<var.size();i++)
-    u_hh[i].first->newVh();
+    u_hh[i].first->newVh(); // get FESpace, FESpace3, ...
     //   compression pour les cas vectoriel
     int kkk=0;
     for (int i=0;i<Nbcomp2;i++)
     {
         if ( u_hh[i].second==0)
-        kkk++;
-        else {
-            throwassert(u_hh[i].second==(u_hh[i-1].second+1));} // verificationd que les composantes des vectorial FESpace sont dans le bon ordre
+            kkk++;
+        else {throwassert(u_hh[i].second==(u_hh[i-1].second+1));} // verification que les composantes des vectorial FESpace sont dans le bon ordre
         which_uh[i]=kkk-1;               // set the numero of the FESpace
         which_comp[i]=u_hh[i].second;    // set the component of the FESpace (=0 for scalar FESpace by definition)
     }
@@ -11579,8 +11692,6 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
     for (int i=0;i<Nb2;i++)
     LL[i]= (*(u_h[i])).newVh();
     SHOWVERB(cout << "Problem  " << Nb << endl);
-
-    //   const de
 
     //  const FESpace * Uhh , *Vhh;
     // check we have same Th for each FESpace
@@ -11766,6 +11877,753 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
     return SetAny<const Problem *>(this);
 }
 
+/**
+       *  @brief  Function to transform a list of FEbase into information of a composite FESpace
+       * input
+       * @param  u_h vector of pointer to an FEbase element.
+       * @param  type_varFE type of FESpace of the FEbase
+       * @param  first_component of the FEbase corresponding to the composite FESpace 
+       * @param  size_component number of FEbase corresponding to the composite FESpace
+       * output
+       * @param LLUh vector of pointer of the FESpace of the composite FESpace Uh
+       * @param typeUh vector of the type of FESpace: FESpace, FESpace3, FESpaceS and FESpaceL.
+       * @param sizeUh vector of NbOfDF of each FESpace of the composite FESpace Uh
+       * @param offsetUh offset of each FESpace in the vector of all dof of the composite FESpace Uh
+       * @param UhNbItem vector of the number of item of each FESpace
+       */
+
+void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_component, const vector<void *> &u_h, const vector<int> &type_varFE, 
+                                    vector<void *> & LLUh, vector<int> &typeUh, vector<long> &sizeUh, vector<long> & offsetUh,
+                                    vector<int> &UhNbItem){
+
+
+    ffassert( (size_component == LLUh.size()) );
+    ffassert( (size_component == sizeUh.size()) );
+    ffassert( (size_component+1 == offsetUh.size()) );
+
+    int kkk = 0;
+    int min_i = first_component;
+    int max_i = min_i+size_component;
+    for (int i=min_i; i<max_i; i++){
+        //
+        if( type_varFE[i]== 2){
+            FEbase<R, v_fes> * tyty = (FEbase<R, v_fes> *) u_h[i];
+            LLUh[kkk] = (void *) tyty->newVh(); // get FESpace
+            sizeUh[kkk] = tyty->newVh()->NbOfDF;
+            UhNbItem[kkk] = tyty->newVh()->N;
+            typeUh[kkk] = type_varFE[i];
+        }
+        else if( type_varFE[i]== 3){
+            FEbase<R, v_fes3> * tyty = (FEbase<R, v_fes3> *) u_h[i];
+            LLUh[kkk] = (void *) tyty->newVh(); // get FESpace3
+            sizeUh[kkk] = tyty->newVh()->NbOfDF;
+            UhNbItem[kkk] = tyty->newVh()->N;
+            typeUh[kkk] = type_varFE[i];
+        }
+        else if( type_varFE[i]== 4){
+            FEbase<R, v_fesS> * tyty = (FEbase<R, v_fesS> *) u_h[i];
+            LLUh[kkk] = (void *) tyty->newVh(); // get 
+            sizeUh[kkk] = tyty->newVh()->NbOfDF;
+            UhNbItem[kkk] = tyty->newVh()->N;
+            typeUh[kkk] = type_varFE[i];
+        }
+        else if( type_varFE[i]== 5){
+            FEbase<R, v_fesL> * tyty = (FEbase<R, v_fesL> *) u_h[i];
+            LLUh[kkk] = (void *) tyty->newVh(); // get
+            sizeUh[kkk] = tyty->newVh()->NbOfDF;
+            UhNbItem[kkk] = tyty->newVh()->N;
+            typeUh[kkk] = type_varFE[i];
+        }
+        else{
+            cerr << "error in the type of FESpace" <<endl;
+            ffassert(0);
+        } 
+        cout <<"UhNbItem[kkk] =" << UhNbItem[kkk] << endl;
+        kkk++;
+    }
+    
+    // computation of offset 
+    offsetUh[0] = 0; 
+    for (int i=0; i<size_component; i++){
+        offsetUh[i+1] = offsetUh[i] + sizeUh[i];
+    }
+}
+
+template<class R>    // TODO if coupling FE wit problem
+AnyType Problem::evalComposite(Stack stack /*, CountPointer<MatriceCreuse<R> > & dataA */) const
+{
+    //
+    // Hypothesis: we have a square problem (Uh == Vh).
+    //
+
+    using namespace Fem2D;
+    /*
+    typedef typename CadnaType<R>::Scalaire R_st;
+    */
+    MeshPoint *mps= MeshPointStack(stack),mp=*mps;
+    Data_Sparse_Solver ds;
+    /// long NbSpace = 50;
+    // long itmax=0;
+    // double epsilon=1e-6;
+    string save;
+
+    KN<double>* cadna=0;
+
+    if (nargs[0]) save = *GetAny<string*>((*nargs[0])(stack));
+    if (nargs[1]) cadna= GetAny<KN<double>* >((*nargs[1])(stack));
+
+    SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
+
+    //  for the gestion of the PTR.
+    WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007
+
+    bool sym = ds.sym;
+
+    //list<C_F0>::const_iterator ii,ib=op->largs.begin(), ie=op->largs.end(); // delete unused variable
+    int Nbcomp2=var.size(),Nbcomp=Nbcomp2/2; // nb de composante
+    throwassert(Nbcomp2==2*Nbcomp);
+    //  Data *data= dataptr(stack);
+    //   data->init();
+    KN<int>  which_comp(Nbcomp2),which_uh(Nbcomp2);
+
+    //TabFuncArg tabexp(stack,Nbcomp); // delete unused variable
+    typedef pair< void *,int> pfer;
+    vector< pair< void *,int> > u_hh(Nbcomp2);
+    // u_hh.first --> FEbase *
+    // u_hh.second --> numero de la composante dans le cas d'un vectorial FESpace (ex: pfes*_tefk)
+
+    for (size_t i=0;i<var.size();i++)
+        u_hh[i] = GetAny< pfer  >( (*(var[i]))(stack));
+    
+    //   compression pour les cas vectoriel
+    int kkk=0;
+    for (int i=0;i<Nbcomp2;i++)
+    {
+        if ( u_hh[i].second==0){
+            kkk++;
+            
+            if( i>0 ){
+                // verifies that we have all component of a given FESpace
+                if( which_comp[i-1] >0){
+                    // check if the vectorial FESpace have exactly the good dimension
+                    if( type_var[i-1]== 2){
+                        FEbase<R, v_fes> * tyty = (FEbase<R, v_fes> *) u_hh[i-1].first;
+                        ffassert( (tyty->newVh()->N == u_hh[i-1].second+1) );
+                        //tyty->newVh(); // get pfes, pfes3,...
+                    }
+                    else if( type_var[i-1]== 3){
+                        FEbase<R, v_fes3> * tyty = (FEbase<R, v_fes3> *) u_hh[i-1].first;
+                        ffassert( (tyty->newVh()->N == u_hh[i-1].second+1) );
+                        //tyty->newVh(); // get pfes, pfes3,.
+                        //cout << "tyty="<< tyty << " check pointer diff= " << u_hh[i].first << endl;
+                    }
+                    else if( type_var[i-1]== 4){
+                        FEbase<R, v_fesS> * tyty = (FEbase<R, v_fesS> *) u_hh[i-1].first;
+                        ffassert( (tyty->newVh()->N == u_hh[i-1].second+1) );
+                        //tyty->newVh(); // get pfes, pfes3,.
+                        //cout << "tyty="<< tyty << " check pointer diff= " << u_hh[i].first << endl;
+                    }
+                    else if( type_var[i-1]== 5){
+                        FEbase<R, v_fesL> * tyty = (FEbase<R, v_fesL> *) u_hh[i-1].first;
+                        ffassert( (tyty->newVh()->N == u_hh[i-1].second+1) );
+                        //tyty->newVh(); // get pfes, pfes3,.
+                        //cout << "tyty="<< tyty << " check pointer diff= " << u_hh[i].first << endl;
+                    }
+                    else{
+                        //cerr << "type_var["<<i<<"]=" << type_var[i] << endl;
+                        ffassert(0);
+                    }
+                }
+            }   
+        }
+        else {
+            if( i== 0 ){
+                cerr << " IN problem a(u1,u2,... ) or solve a(u1,u2,...). "<< endl;
+                cerr << " The first component u1 belong to a vectorial FESpace and doesn't correspond to the first component." << endl;
+                ffassert(0);
+            }
+            else{
+                throwassert( ( u_hh[i].first==u_hh[i-1].first) );  // verification que les composantes des vectorial FESpace sont dans le meme FESpace
+                throwassert(u_hh[i].second==(u_hh[i-1].second+1) ); // verification que les composantes des vectorial FESpace sont dans le bon ordre
+                }
+        } 
+        which_uh[i]=kkk-1;               // set the numero of the FESpace
+        which_comp[i]=u_hh[i].second;    // set the component of the FESpace (=0 for scalar FESpace by definition)
+    }
+    
+    vector< void * > u_h(kkk);     // the list of the true pointer to FEbase
+    vector< int > type_varFE(kkk); // the list of the true type var 
+    kkk= 0;
+    for (int i=0;i<Nbcomp2;i++)
+        if ( u_hh[i].second==0){ 
+            u_h[kkk]=u_hh[i].first; 
+            type_varFE[kkk++] = type_var[i];
+        }
+    const int  Nb2 = kkk, Nb=Nb2/2; // nb of FESpace
+    throwassert(Nb2==2*Nb);
+
+    // creation of inconnue FESpace and test FESpace
+
+    vector< void  *> LLUh(Nb);    // creation de la liste des FESpace" Nb2 <= var.size() "
+    vector< int > typeUh(Nb);
+    vector< long > sizeUh(Nb);
+    vector< long > offsetUh(Nb+1,(long)0);
+    vector< int> UhNbItem(Nb);
+
+    int first_component= 0;
+    int size_component = Nb;
+    FEbaseToCompositeFESpaceInfo(first_component, size_component, u_h, type_varFE, LLUh, typeUh, sizeUh, offsetUh, UhNbItem);
+
+    vector< void  *> LLVh(Nb);    // creation de la liste des FESpace" Nb2 <= var.size() "
+    vector< int > typeVh(Nb);
+    vector< long > sizeVh(Nb);
+    vector< long > offsetVh(Nb+1,(long)0);
+    vector< int> VhNbItem(Nb);
+
+    first_component= Nb;
+    size_component = Nb;
+    FEbaseToCompositeFESpaceInfo(first_component, size_component, u_h, type_varFE, LLVh, typeVh, sizeVh, offsetVh, VhNbItem);
+
+    // check if we have the same FESpace for inconnue and test.
+    bool sameCompositeFESpace;
+    {
+        // If is not true, problem in the use of AssembleBC (Morice))
+        bool same=true;
+        for (int i=0;i<Nb;i++)
+            if ( LLUh[i] != LLVh[i] ){
+                same = false;
+                break;
+            }
+        if(!same)
+            InternalError("Methode de Galerkine (a faire)");
+        sameCompositeFESpace=same;
+    }
+    
+    SHOWVERB(cout << "Problem  " << Nb << endl);
+    
+    // recuperation de la taille des FESpaces 
+    int totalItem=0;
+    for(int ii=0; ii<Nb; ii++){ totalItem += UhNbItem[ii]; }
+    cout <<  "totalItem=" << totalItem << endl;
+    
+    int NpUh = (int) UhNbItem.size(); 
+    int NpVh = (int) VhNbItem.size(); 
+
+    KN<int> indexBlockUh( totalItem );
+    KN<int> indexBlockVh( totalItem );
+    KN<int> localIndexInTheBlockUh( totalItem );
+    KN<int> localIndexInTheBlockVh( totalItem );
+
+    // index for the construction of the block of Uh
+    {
+        // ===========================================
+        //
+        // varf([u0,u1,...,u4], ... ) 
+        // varf([ [u0_blk1,u1_blk1],[u0_blk2,u1_blk2,u2_blk2] ], ... ) 
+
+        // u4 correspond to u2_blk2 in the block varf
+        // ============================================
+        // For u4, on a :: current_index = 4
+        //              :: indexBlockUh = 2
+        //              :: localIndexInThBlock = 3
+        int current_index=0;
+        for(int i=0; i<NpUh; i++){
+        for(int j=0; j<UhNbItem[i]; j++){
+            indexBlockUh[current_index] = i;
+            localIndexInTheBlockUh[current_index] = j;
+            current_index++;
+        }
+        }
+        ffassert(current_index==totalItem);
+    }
+
+    // index for the construction of the block of Vh
+    {
+        int current_index=0;
+        for(int i=0; i<NpVh; i++){
+        for(int j=0; j<VhNbItem[i]; j++){
+            indexBlockVh[current_index] = i;
+            localIndexInTheBlockVh[current_index] = j;
+            current_index++;
+        }
+        }
+        ffassert(current_index==totalItem);
+    }
+    
+
+    
+    list<C_F0> largs = creationLargsForCompositeFESpace( op->largs, NpUh, NpVh, indexBlockUh, indexBlockVh );
+    KNM< list<C_F0> > block_largs = computeBlockLargs( largs, NpUh, NpVh, indexBlockUh, indexBlockVh );
+    changeComponentFormCompositeFESpace( localIndexInTheBlockUh, localIndexInTheBlockVh, block_largs );
+    
+    
+
+    // construction of the data composite structure
+    /*
+    DataComposite *data = dataCompositeptr( Nb, Nb, LLUh, typeUh, sizeUh, offsetUh, 
+                                                    LLVh, typeVh, sizeVh, offsetVh);
+    */
+
+    ds.initmat=true; // on initialise à true. 
+    /*
+    // ??? A voir comment faire ???
+    for(int i=0; i<Nb; i++){
+        // if one mesh have changed, we recompute all the matrix
+        if ( &LL[i]->Th != data->pTh[i] ) ds.initmat=true;
+    }
+    
+    if( ds.initmat ){
+        for(int i=0; i<Nb2; i++){
+            if ( &LL[i]->Th != data->var[i]->pTh ){
+                data->var[i]->pTh = &LL[i]->Th ; 
+            }
+        }
+    }
+    */
+
+    // *************************************************************************************************
+    //
+    // InitProblem c'est une loop sur les vect_generic_fes + offset pour construire le bon X et le bon B
+    //             et on prend les bonnes "var" correpondant au bon generic_fes pour bien initialiser
+    //
+
+    // On a besoin ici que des les FESpace de Uh
+    int NbUh = Nb;
+    int NbVh = Nb;
+    long VhNbOfDF = offsetVh[NbVh];
+    bool initx = true; // make x and b different in all case
+    // more safe for the future ( 4 days lose with is optimization FH )
+
+    KN<R> *B=new KN<R>(offsetUh[NbVh]); // 
+    KN<R> *X=B; //
+    for(int I=0; I<NbUh; I++ ){
+        if( typeUh[I] == 2){
+
+            const FESpace * PUh = (FESpace *) LLUh[I];
+            const FESpace & Uh= *PUh;
+            FEbase<R,v_fes> * u_h_loc = (FEbase<R,v_fes> *) u_h[I];
+            
+            KN<R> *Bbloc=new KN<R>(PUh->NbOfDF); // local B
+            KN<R> *Xbloc=Bbloc;                  // local X
+            
+            InitProblem<R,FESpace,v_fes>(  1,  Uh, Bbloc, Xbloc, u_h_loc, initx);
+
+            for(int i=0; i<PUh->NbOfDF; i++){
+                (*X)[i+offsetUh[I]] = (*Xbloc)[i];
+            } 
+        }       
+        else if( typeUh[I] == 3){
+
+            const FESpace3 * PUh = (FESpace3 *) LLUh[I];
+            const FESpace3 & Uh= *PUh;
+            FEbase<R,v_fes3> * u_h_loc = (FEbase<R,v_fes3> *) u_h[I];
+            KN<R> *Bbloc=new KN<R>(PUh->NbOfDF); // local B
+            KN<R> *Xbloc=Bbloc;                  // local X
+            
+            InitProblem<R,FESpace3,v_fes3>(  1,  Uh, Bbloc, Xbloc, u_h_loc, initx);
+
+            for(int i=0; i<PUh->NbOfDF; i++){
+                (*X)[i+offsetUh[I]] = (*Xbloc)[i];
+            } 
+        }
+        else if( typeUh[I] == 4){
+
+            const FESpaceS * PUh = (FESpaceS *) LLUh[I];
+            const FESpaceS & Uh= *PUh;
+            FEbase<R,v_fesS> * u_h_loc = (FEbase<R,v_fesS> *) u_h[I];
+
+            KN<R> *Bbloc=new KN<R>(PUh->NbOfDF); // local B
+            KN<R> *Xbloc=Bbloc;                  // local X
+            
+            InitProblem<R,FESpaceS,v_fesS>(  1,  Uh, Bbloc, Xbloc, u_h_loc, initx);
+
+            for(int i=0; i<PUh->NbOfDF; i++){
+                (*X)[i+offsetUh[I]] = (*Xbloc)[i];
+            } 
+        }
+        else if( typeUh[I] == 5){
+            const FESpaceL * PUh = (FESpaceL *) LLUh[I];
+            const FESpaceL & Uh= *PUh;
+            FEbase<R,v_fesL> * u_h_loc = (FEbase<R,v_fesL> *) u_h[I];
+
+            KN<R> *Bbloc=new KN<R>(PUh->NbOfDF); // local B
+            KN<R> *Xbloc=Bbloc;                  // local X
+
+            
+            InitProblem<R,FESpaceL,v_fesL>(  1,  Uh, Bbloc, Xbloc, u_h_loc, initx);
+
+            for(int i=0; i<PUh->NbOfDF; i++)
+                (*X)[i+offsetUh[I]] = (*Xbloc)[i];
+            
+        }  
+        else{
+            cerr << "error int the Type of FESpace" << endl;
+            ffassert(0);
+        }
+    }
+
+    // ===================================================================
+    // Appel de la fonction pour la construction de la matrice générique
+    //
+
+    if(verbosity>2) cout << "   Problem(): initmat " << ds.initmat << " VF (discontinuous Galerkin) = " << VF << endl;
+
+    
+    /*
+    // Dans le cas composite, j'ai besoin des << vec_generic_v_fes >> et "largs" + Call_FormBilinear
+    if (ds.initmat)
+     {
+       {
+          if ( sameCompositeFESpace )
+            dataA.master(new MatriceMorse<R>( offsetVh[NpVh], offsetUh[NpUh], sym));
+          else
+            dataA.master(new MatriceMorse<R>( offsetVh[NpVh], offsetUh[NpUh], false));
+        }
+        MatriceCreuse<R>  & AA(dataA);
+       if(verbosity>1) cout <<  "   -- size of Matrix " << AA.size()<< " Bytes" << endl;
+      } // fin ds.initmat
+
+    MatriceCreuse<R>  & A(dataA); // A is the global matrix
+    */
+    /*
+    int maxJVh=NpVh;
+    int offsetMatrixUh = 0;   
+    for( int i=0; i<NpUh; i++){
+        int offsetMatrixVh = 0;
+        if( sym ){ maxJVh=(i+1); ffassert(maxJVh<NpVh);}
+        for( int j=0; j<maxJVh; j++){
+            cout << "offsetMatrixUh= " << offsetMatrixUh << ", offsetMatrixVh= " << offsetMatrixVh << endl;
+      
+
+
+            creationBlockOfLinearSystem( ds.initmat, initx, PUh, PVh, sym, ds.tgv, largs_block, stack, 
+                              B_block, X_block, &A_block);
+
+
+        }
+    }
+    */
+    // if  (AssembleVarForm( stack,Th,Uh,Vh,sym, ds.initmat ? &A:0 , B, op->largs))
+    // {
+    //     *B = - *B;
+    //     // hach FH
+    //     for (int i=0, n= B->N(); i< n; i++)
+    //     if( abs((*B)[i]) < 1.e-60 ) (*B)[i]=0;
+
+    //     AssembleBC<R,MeshT,FESpace,FESpace>     ( stack,Th,Uh,Vh,sym, ds.initmat ? &A:0 , B, initx ? X:0,  op->largs, ds.tgv );   // TODO with problem
+    // }
+    // else
+    // *B = - *B;
+
+
+
+/*
+    dynamic_cast<HashMatrix<int,R> *>(&A)->half = ds.sym;
+
+    
+    // Resolution du systeme
+
+    try {
+
+        if (ds.initmat)
+        {
+         //   if(cadna)
+         //   ACadna = DefSolverCadna( stack,A, ds);
+         //   else
+            DefSolver(stack,  A, ds);
+        }
+
+        // if(verbosity>3) cout << "   B  min " << B->min() << " ,  max = " << B->max() << endl;
+        if( save.length() )
+        {
+            string savem=save+".matrix";
+            string saveb=save+".b";
+            {
+                ofstream outmtx( savem.c_str());
+                A.dump(outmtx)  << endl;
+            }
+            {
+                ofstream outb(saveb.c_str());
+                outb<< *B << endl;
+            }
+
+        }
+        if (verbosity>99)
+        {
+            cout << " X= " << *X << endl;
+            cout << " B= " << *B << endl;
+        }
+
+//         if(ACadna)
+//         {
+//             KN<R_st> XX(*X);
+//             KN<R_st> BB(*B);
+//             ACadna->Solve(XX,BB);
+//             *X=XX;
+//             *cadna =-1.;
+
+// #ifdef HAVE_CADNA
+//             R_st xxmin = XX.min();
+//             R_st xxmax = XX.max();
+//             cout  << "    cadna:      min " <<  xxmin << "/ nd " << cestac(xxmin)
+//             << " ,   max " << xxmax << " / nd " << cestac(xxmax)   << endl ;
+//             int nn= XX.N();
+//             if ( cadna->N() == nn )
+//             for (int i=0;i<nn;++i)
+//             (*cadna)[i] = cestac(XX[i]);
+//             else
+//             cerr << "Warning: Sorry array is incorrect size to store cestac "
+//             << nn << " != " << cadna->N() << endl;
+// #endif
+//         }
+//         else{
+//             A.Solve(*X,*B);
+//         }
+
+        A.Solve(*X,*B); // version sans CADNA
+        if (verbosity>99)
+        {
+            cout << " X= " << *X << endl;
+        }
+    }// fin try
+    catch (...)
+    {
+        if(verbosity) cout << " catch an erreur in  solve  =>  set  sol = 0 !!!!!!! "   <<  endl;
+        *X=R(); // erreur set the sol of zero ????
+        //DispatchSolution<R,FESpace,v_fes>(Th,Nb,u_h,X,B,LL,Uh);
+        throw ;
+    }
+*/
+    // Dispatch solution
+    //  Need to do a function ::  NbUh, LLUh, u_h, offsetUh, typeUh, 
+
+    for(int I=0; I<NbUh; I++ ){
+        if( typeUh[I] == 2){
+
+            const FESpace * PUh = (FESpace *) LLUh[I];
+            const FESpace & Uh= *PUh;
+            FEbase<R,v_fes> * u_h_loc = (FEbase<R,v_fes> *) u_h[I];
+
+            KN<R> *Xbloc=new KN<R>(PUh->NbOfDF); // local X
+            for(int i=0; i<PUh->NbOfDF; i++){ (*Xbloc)[i] = (*X)[i+offsetUh[I]]; } 
+            (*u_h_loc)=Xbloc;
+        }       
+        else if( typeUh[I] == 3){
+
+            const FESpace3 * PUh = (FESpace3 *) LLUh[I];
+            const FESpace3 & Uh= *PUh;
+            FEbase<R,v_fes3> * u_h_loc = (FEbase<R,v_fes3> *) u_h[I];
+
+            KN<R> *Xbloc=new KN<R>(PUh->NbOfDF); // local X
+            for(int i=0; i<PUh->NbOfDF; i++){ (*Xbloc)[i] = (*X)[i+offsetUh[I]]; } 
+            (*u_h_loc)=Xbloc;   
+        }
+        else if( typeUh[I] == 4){
+
+            const FESpaceS * PUh = (FESpaceS *) LLUh[I];
+            const FESpaceS & Uh= *PUh;
+            FEbase<R,v_fesS> * u_h_loc = (FEbase<R,v_fesS> *) u_h[I];
+
+            KN<R> *Xbloc=new KN<R>(PUh->NbOfDF); // local X
+            for(int i=0; i<PUh->NbOfDF; i++){ (*Xbloc)[i] = (*X)[i+offsetUh[I]]; } 
+            (*u_h_loc)=Xbloc;           
+        }
+        else if( typeUh[I] == 5){
+
+            const FESpaceL * PUh = (FESpaceL *) LLUh[I];
+            const FESpaceL & Uh= *PUh;
+            FEbase<R,v_fesL> * u_h_loc = (FEbase<R,v_fesL> *) u_h[I];
+
+            KN<R> *Xbloc=new KN<R>(PUh->NbOfDF); // local X
+            for(int i=0; i<PUh->NbOfDF; i++){ (*Xbloc)[i] = (*X)[i+offsetUh[I]]; } 
+            (*u_h_loc)=Xbloc;
+        }  
+        else{
+            cerr << "error int the Type of FESpace" << endl;
+            ffassert(0);
+        }
+    }
+    if (X != B ) delete B; 
+    // ====   End DispatchSolution   ====
+
+    // A faire un cast ici aussi
+    if (verbosity)
+    {cout << "  -- Solve : \n" ;
+        for (int i=0;i<Nb;i++){
+            if( typeUh[i] == 2){          
+                FEbase<R,v_fes> * u_h_loc = (FEbase<R,v_fes> *) u_h[i];
+                cout  << "          min " << (u_h_loc)->x()->min() << "  max " << (u_h_loc)->x()->max() << endl ;
+            }
+            else if( typeUh[i] == 3){          
+                FEbase<R,v_fes3> * u_h_loc = (FEbase<R,v_fes3> *) u_h[i];
+                cout  << "          min " << (u_h_loc)->x()->min() << "  max " << (u_h_loc)->x()->max() << endl ;
+            }
+            else if( typeUh[i] == 4){          
+                FEbase<R,v_fesS> * u_h_loc = (FEbase<R,v_fesS> *) u_h[i];
+                cout  << "          min " << (u_h_loc)->x()->min() << "  max " << (u_h_loc)->x()->max() << endl ;
+            }
+            else if( typeUh[i] == 5){          
+                FEbase<R,v_fesL> * u_h_loc = (FEbase<R,v_fesL> *) u_h[i];
+                cout  << "          min " << (u_h_loc)->x()->min() << "  max " << (u_h_loc)->x()->max() << endl ;
+            }
+            else{
+                cerr << "Error in the type of FESpace" << endl;
+                ffassert(0);
+            }
+        }
+    }
+    
+
+    // delete [] LL;
+    // if (save) delete save; // clean memory
+    *mps=mp;
+    
+    return SetAny<const Problem *>(this);
+}
+
+
+// read the arguments of problem ex: problem a(u,v) or a([u1,u2], [v1,v2])
+// First Argument: samedim
+// If return true if all argument are in the same type of FESpace : pfes, pfes3, ...
+// else return false 
+// Second Argument : complextype
+// 
+// Remark: This function check that all FEbase are complex or real;
+std::pair< bool,bool> isSameDimAndComplexTypeProblem(const ListOfId &l){
+    bool return_samedim=true;
+    bool complextype = false;
+    bool realtype    = false;
+    int dim=0;
+    int nb=l.size();//,nbarray=0;//,n=0,
+    //const UnId *p1;
+    for(int i=0; i<nb; ++i)
+    {
+        if(l[i].e ==0)// to miss name parameter solver=ddd
+        {
+        if (l[i].array)
+        {
+            ListOfId * array=l[i].array;
+            for(int j=0; j<array->size(); ++j)
+            {
+                const UnId & idi( (*array)[j]);
+                if (idi.r == 0 && idi.re  == 0 && idi.array==0 )
+                {
+                    C_F0 c=::Find( idi.id);
+                    // mesh
+                    if(BCastTo<pfec>(c) ){
+                        complextype = true;
+                        if(dim==0 || dim==2){ dim=2;}
+                        else{ return_samedim = false;  }
+                    }
+                    if(BCastTo<pfer>(c) ){
+                        realtype = true;
+                        if(dim==0 || dim==2){ dim=2;}
+                        else{ return_samedim = false; }
+                    }
+                    // mesh3
+                    if(BCastTo<pf3c>(c) ){ 
+                        complextype = true;
+                        if(dim==0 || dim==3){ dim=3;}
+                        else{ return_samedim = false; }
+                    }
+                    if(BCastTo<pf3r>(c) ){
+                        realtype = true;
+                        if(dim==0 || dim==3){ dim=3;}
+                        else{ return_samedim = false; }
+                    }
+                    // meshS
+                    if(BCastTo<pfSc>(c) ){
+                        complextype = true;
+                        if(dim==0 || dim==4){ dim=4;}
+                        else{ return_samedim = false; }
+                    }
+                    if(BCastTo<pfSr>(c) ){
+                        realtype = true;
+                        if(dim==0 || dim==4){ dim=4;}
+                        else{ return_samedim = false; }
+                    }
+                    // meshL
+                    if(BCastTo<pfLc>(c) ){
+                        complextype = true;
+                        if(dim==0 || dim==5){ dim=5;}
+                        else{ return_samedim = false; }
+                    }
+                    if(BCastTo<pfLr>(c) ){
+                        realtype = true;
+                        if(dim==0 || dim==5){ dim=5;}
+                        else{ return_samedim = false; }
+                    }
+                    
+                }
+            }
+
+        }
+        else
+        {
+            C_F0 c=::Find(l[i].id);
+            // mesh
+            if(BCastTo<pfec>(c) ){
+                complextype = true;
+                if(dim==0 || dim==2){ dim=2;}
+                else{ return_samedim = false;  }
+            }
+            if(BCastTo<pfer>(c) ){
+                realtype = true;
+                if(dim==0 || dim==2){ dim=2;}
+                else{ return_samedim = false; }
+            }
+            // mesh3
+            if(BCastTo<pf3c>(c) ){ 
+                complextype = true;
+                if(dim==0 || dim==3){ dim=3;}
+                else{ return_samedim = false; }
+            }
+            if(BCastTo<pf3r>(c) ){
+                realtype = true;
+                if(dim==0 || dim==3){ dim=3;}
+                else{ return_samedim = false; }
+            }
+            // meshS
+            if(BCastTo<pfSc>(c) ){
+                complextype = true;
+                if(dim==0 || dim==4){ dim=4;}
+                else{ return_samedim = false; }
+            }
+            if(BCastTo<pfSr>(c) ){
+                realtype = true;
+                if(dim==0 || dim==4){ dim=4;}
+                else{ return_samedim = false; }
+            }
+            // meshL
+            if(BCastTo<pfLc>(c) ){
+                complextype = true;
+                if(dim==0 || dim==5){ dim=5;}
+                else{ return_samedim = false; }
+            }
+            if(BCastTo<pfLr>(c) ){
+                realtype = true;
+                if(dim==0 || dim==5){ dim=5;}
+                else{ return_samedim = false; }
+            }
+        }
+        }
+    }
+    ffassert(dim);
+    cout << "realtype= " << realtype << ", complextype=" << complextype << endl; 
+    if( realtype == complextype ){
+        if( realtype ){
+            cerr << "In problem or solve, we used complex and real FESpace. This is not allowed in Freefem." << endl;
+            ffassert(0);
+        }
+        else{
+            cerr << "In problem or solve, error in casting FEbase." << endl;
+            ffassert(0);
+        }
+    }
+    
+    return std::pair<bool,bool>(return_samedim, complextype);
+}
+
 
 // dimProblem read the number of arguments of problem ex: problem a(u,v) or a([u1,u2], [v1,v2])
 int dimProblem(const ListOfId &l)
@@ -11846,6 +12704,12 @@ AnyType Problem::operator()(Stack stack) const
             return eval<Complex,FESpaceL,v_fesL>(stack,data,data->AC,data->AcadnaC);
         else
             return eval<double,FESpaceL,v_fesL>(stack,data,data->AR,data->AcadnaR);
+    }
+    else if(dim==6){
+        if (complextype)
+            return evalComposite<Complex>(stack); //,data->AC);
+        else
+            return evalComposite<double>(stack); //,data->AR);
     }
 
     else ffassert(0);
@@ -11933,6 +12797,104 @@ bool GetBilinearParam(const ListOfId &l,basicAC_F0::name_and_type *name_param,in
 }
 
 
+// var expression
+void GetBilinearParamCompositeFESpace(const ListOfId &l,basicAC_F0::name_and_type *name_param,int n_name_param,
+                      Expression *nargs,int & N,int & M,  vector<Expression> & var, vector<int> & type_var )
+{
+    bool unset=true,complextype=false;
+
+    for (int i=0;i<n_name_param;i++)
+    nargs[i]=0;
+    int nb=l.size(),n=0,nbarray=0;
+    ListOfId * array[2];
+    for (int i=0;i<nb;i++)
+    if (l[i].r == 0 && l[i].re  == 0 && l[i].array == 0)
+    n++;
+    else if (l[i].array) array[Min(nbarray++,1)] = l[i].array;
+    else
+    {
+        bool ok=false;
+        for (int j=0;j<n_name_param;j++)
+        if (!strcmp(l[i].id,name_param[j].name))
+        {
+            ok = !nargs[j];
+            nargs[j]= map_type[name_param[j].type->name()]->CastTo(C_F0(l[i].e,l[i].re));
+            break;
+        }
+        if (!ok)
+        {
+            cerr << " Error name argument " << l[i].id << " the kown arg : ";
+            for (int k=0;k<n_name_param;k++)
+            cerr << name_param[k].name << " ";
+            cerr << endl;
+            CompileError("Unknown name argument or two times same name argument ");
+        }
+    }
+
+    if (nbarray)
+    { // new version ok
+        if(nbarray!=2)
+        CompileError(" Must have 2 array, one for unknown functions, one for test functions");
+        N = array[0]->size();
+        M = array[1]->size();
+        var.resize(N+M);
+        type_var.resize(N+M);
+        for (size_t k=0,j=0;k<2;k++)
+        for  (size_t i=0;i<array[k]->size();i++)
+        {
+            const UnId & idi((*array[k])[i]);
+            if (idi.r == 0 && idi.re  == 0 && idi.array==0 )
+            { C_F0 c=::Find( idi.id);
+            
+                if(BCastTo<pfec>(c) )       var[j]=CastTo<pfec>(c),type_var[j++]=2;
+                else if(BCastTo<pfer>(c) )  var[j]=CastTo<pfer>(c),type_var[j++]=2;
+
+                else if(BCastTo<pf3c>(c) )  var[j]=CastTo<pf3c>(c),type_var[j++]=3;
+                else if(BCastTo<pf3r>(c) )  var[j]=CastTo<pf3r>(c),type_var[j++]=3;
+
+                else if(BCastTo<pfSc>(c) )  var[j]=CastTo<pfSc>(c),type_var[j++]=4;
+                else if(BCastTo<pfSr>(c) )  var[j]=CastTo<pfSr>(c),type_var[j++]=4;
+
+                else if(BCastTo<pfLc>(c) )  var[j]=CastTo<pfLc>(c),type_var[j++]=5;
+                else if(BCastTo<pfLr>(c) )  var[j]=CastTo<pfLr>(c),type_var[j++]=5;
+                else CompileError(" Casting error of type of FEbase.");
+            }
+            else
+            CompileError(" Just Variable in array parameter ");
+        }
+    }
+    else
+    { // old version
+        assert(n%2==0);
+        N=n/2;
+        M=N;
+        var.resize(N+M);
+        type_var.resize(N+M);
+        for  (size_t i=0,j=0;i<l.size();i++)
+        if (l[i].r == 0 && l[i].re  == 0 && l[i].array==0 )
+        {
+            C_F0 c=::Find(l[i].id);
+
+            if(BCastTo<pfec>(c) )       var[j]=CastTo<pfec>(c),type_var[j++]=2;
+            else if(BCastTo<pfer>(c) )  var[j]=CastTo<pfer>(c),type_var[j++]=2;
+
+            else if(BCastTo<pf3c>(c) )  var[j]=CastTo<pf3c>(c),type_var[j++]=3;
+            else if(BCastTo<pf3r>(c) )  var[j]=CastTo<pf3r>(c),type_var[j++]=3;
+
+            else if(BCastTo<pfSc>(c) )  var[j]=CastTo<pfSc>(c),type_var[j++]=4;
+            else if(BCastTo<pfSr>(c) )  var[j]=CastTo<pfSr>(c),type_var[j++]=4;
+
+            else if(BCastTo<pfLc>(c) )  var[j]=CastTo<pfLc>(c),type_var[j++]=5;
+            else if(BCastTo<pfLr>(c) )  var[j]=CastTo<pfLr>(c),type_var[j++]=5;
+            else CompileError(" Casting error of type of FEbase.");
+            
+        }
+
+    }
+}
+
+
+
 /*
  int DimForm( list<C_F0> & largs)
  {
@@ -11964,6 +12926,8 @@ bool GetBilinearParam(const ListOfId &l,basicAC_F0::name_and_type *name_param,in
  }
  }
  }*/
+/*
+// not used
 bool CheckSizeOfForm( list<C_F0> & largs ,int N,int M)
 {
     list<C_F0>::iterator ii,ib=largs.begin(),
@@ -11992,6 +12956,7 @@ bool CheckSizeOfForm( list<C_F0> & largs ,int N,int M)
     }
     return true;
 }
+*/
 
 bool FieldOfForm( list<C_F0> & largs ,bool complextype)  // true => complex problem
 {
@@ -12072,22 +13037,35 @@ bool FieldOfForm( list<C_F0> & largs ,bool complextype)  // true => complex prob
 Problem::Problem(const C_args * ca,const ListOfId &l,size_t & top) :
 op(new C_args(*ca)),
 var(l.size()),
+type_var(),
 VF(false),
 offset(align8(top)),
-dim(dimProblem(l))
+dim( isSameDimAndComplexTypeProblem(l).first  ? dimProblem(l) : 6 )
 {
     if( verbosity > 999)  cout << "Problem : ----------------------------- " << top << " dim = " << dim<<" " << nargs <<  endl;
-    top = offset + max(sizeof(Data<FESpace>),sizeof(Data<FESpace>));
+    
+    if(dim==6){
+        top = offset;
+    }
+    else{
+        top = offset + max(sizeof(Data<FESpace>),sizeof(Data<FESpace>));
+    }
+    bool iscomplex=isSameDimAndComplexTypeProblem(l).second; // iscomplex of the type of argument u1,u2, ... of : problem myproblem([u1,u2],[v1,v2]), ...
 
-    bool iscomplex;
     if(dim==2)
-    iscomplex=GetBilinearParam<pfer,pfec>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
+        iscomplex=GetBilinearParam<pfer,pfec>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
     else if (dim==3)
-    iscomplex=GetBilinearParam<pf3r,pf3c>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
+        iscomplex=GetBilinearParam<pf3r,pf3c>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
     else if (dim==4)  // dim = 4 for a 3D surface problem
-    iscomplex=GetBilinearParam<pfSr,pfSc>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
+        iscomplex=GetBilinearParam<pfSr,pfSc>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
     else if (dim==5)  // dim = 5 for a 3D curve problem
         iscomplex=GetBilinearParam<pfLr,pfLc>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
+    else if (dim==6){
+        GetBilinearParamCompositeFESpace(l,name_param,n_name_param,nargs, Nitem,Mitem,var,type_var);
+        // en construction
+        //ffassert(0);
+        //iscomplex=GetBilinearParam<pfLr,pfLc>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
+    }
     else ffassert(0); // bug
 
     precon = 0; //  a changer
@@ -12141,62 +13119,30 @@ euh(fi), evh(fj)
 
 template<class VFES1, class VFES2>
 Call_CompositeFormBilinear< VFES1, VFES2>::Call_CompositeFormBilinear(Expression * na,Expression  BB,Expression fi, Expression fj)
-: nargs(na),varflargs(),largs(),N(fi->nbitem()),M(fj->nbitem()), 
-euh(fi), evh(fj)
-{
+: nargs(na),block_largs( (long) fi->componentNbitem().size(),(long) fj->componentNbitem().size() ),N(fi->nbitem()),M(fj->nbitem()), 
+ euh(fi), evh(fj){
+
     assert(nargs );
     const C_args * LLL=dynamic_cast<const C_args *>(BB);
     if (!LLL)
     CompileError("Sorry the variationnal form (varf)  is not a the variationnal form (type const C_args *)");
-    varflargs = LLL->largs;
-    largs     = LLL->largs;
 
 
-    /*
-    pvectgenericfes  * pUh= GetAny<pvectgenericfes *>((*euh)(stack));
-    pvectgenericfes  * pVh= GetAny<pvectgenericfes *>((*evh)(stack));
-    ffassert( *pUh && *pVh ); 
+    // recuperation de la taille des FESpaces 
+    KN<size_t> UhNbItem = fi->componentNbitem();
+    KN<size_t> VhNbItem = fj->componentNbitem();
 
-    if( verbosity > 5){
-        (*pUh)->printPointer();
-        (*pVh)->printPointer();
-    }
-    int NpUh = (*pUh)->N; // number of fespace in pUh
-    int NpVh = (*pVh)->N; // number of fespace in pVh
+    int NpUh = (int) UhNbItem.size(); 
+    int NpVh = (int) VhNbItem.size(); 
 
-    KN<int> UhNbOfDf = (*pUh)->vectOfNbOfDF();
-    KN<int> VhNbOfDf = (*pVh)->vectOfNbOfDF();
+    KN<int> indexBlockUh(fi->nbitem());
+    KN<int> indexBlockVh(fj->nbitem());
+    KN<int> localIndexInTheBlockUh(fi->nbitem());
+    KN<int> localIndexInTheBlockVh(fj->nbitem());
 
-    KN<int> UhNbItem = (*pUh)->vectOfNbitem();
-    KN<int> VhNbItem = (*pVh)->vectOfNbitem();
-
-    KN<int> beginBlockUh(NpUh); // index of the first elment of a block
-    KN<int> beginBlockVh(NpVh);
-
-    // loop over the index 
-    int UhtotalNbItem=0;
-    if(verbosity>5) cout << "finc: FESpace" << endl;
-    for(int i=0; i< NpUh; i++){
-        if(verbosity>5) cout << "component i=" << i << ", NbItem["<<i<<"]=" <<  UhNbItem[i] << ", NbDof["<<i<<"]=" << UhNbOfDf[i] << endl;
-        beginBlockUh[i] = UhtotalNbItem;
-        UhtotalNbItem += UhNbItem[i];
-        ffassert( UhNbItem[i] > 0 && UhNbOfDf[i] > 0);
-    }
-
-    int VhtotalNbItem=0;
-    if(verbosity>5) cout << "ftest: FESpace" << endl;
-    for(int i=0; i< NpVh; i++){
-        if(verbosity>5) cout << "component i=" << i << ", NbItem["<<i<<"]=" <<  VhNbItem[i] << ", NbDof["<<i<<"]=" << VhNbOfDf[i] << endl;
-        beginBlockVh[i] = VhtotalNbItem;
-        VhtotalNbItem += VhNbItem[i];
-        ffassert( VhNbItem[i] > 0 && VhNbOfDf[i] > 0);
-    }
-    
-    // index for the construction of the block
-    KN<int> indexBlockUh(UhtotalNbItem);
-    KN<int> localIndexInTheBlockUh(UhtotalNbItem);
-    { 
-        // ========================
+    // index for the construction of the block of Uh
+    {
+        // ===========================================
         //
         // varf([u0,u1,...,u4], ... ) 
         // varf([ [u0_blk1,u1_blk1],[u0_blk2,u1_blk2,u2_blk2] ], ... ) 
@@ -12214,12 +13160,11 @@ euh(fi), evh(fj)
             current_index++;
         }
         }
-        ffassert(current_index==UhtotalNbItem);
+        ffassert(current_index==fi->nbitem());
     }
 
-    KN<int> indexBlockVh(VhtotalNbItem);
-    KN<int> localIndexInTheBlockVh(VhtotalNbItem);
-    { 
+    // index for the construction of the block of Vh
+    {
         int current_index=0;
         for(int i=0; i<NpVh; i++){
         for(int j=0; j<VhNbItem[i]; j++){
@@ -12228,64 +13173,12 @@ euh(fi), evh(fj)
             current_index++;
         }
         }
-        ffassert(current_index==VhtotalNbItem);
+        ffassert(current_index==fj->nbitem());
     }
-    cout <<"========================================================" << endl;
-    cout <<"=                                                      =" << endl;
-    cout <<"= indexBlockUh=                                        =" << endl;
-    cout << indexBlockUh << endl;
-    cout <<"=                                                      =" << endl;
-    cout <<"= localIndexInTheBlockUh=                              =" << endl;
-    cout << localIndexInTheBlockUh << endl;
 
-    cout <<"========================================================" << endl;
-    cout <<"=                                                      =" << endl;
-    cout <<"= indexBlockVh=                                        =" << endl;
-    cout << indexBlockVh << endl;
-    cout <<"=                                                      =" << endl;
-    cout <<"= localIndexInTheBlockVh=                              =" << endl;
-    cout << localIndexInTheBlockVh << endl;
-
-    //
-    list<C_F0>  largs = creationLargsForCompositeFESpace( varflargs, NpUh, NpVh, indexBlockUh, indexBlockVh ); 
-    */
-
-    /*
-    cout << " je suis entrain de creer un CompositeFormBilinear" << endl;
-    list<C_F0>::const_iterator b_ii,b_ib=varflargs.begin(),b_ie=varflargs.end(); 
-    for (b_ii=b_ib;b_ii != b_ie;b_ii++){
-        Expression e=b_ii->LeftValue();
-        aType r = b_ii->left();
-
-        // bilinear case
-        if (r==atype<const  FormBilinear *>() ){
-            const FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
-            const CDomainOfIntegration & di= *bb->di;
-
-            BilinearOperator * Op=const_cast<  BilinearOperator *>(bb->b);
-            if (Op == NULL) {
-                if(mpirank == 0) cout << "dynamic_cast error" << endl; 
-            ffassert(0);
-            }
-        
-            size_t Opsize= Op->v.size();
-
-            BilinearOperator * OpBloc= new BilinearOperator();
-        
-            for(size_t jj=0; jj<Opsize; jj++){
-                OpBloc->add(Op->v[jj].first, Op->v[jj].second); // Add the billinearOperator to bloc (ibloc,jbloc).
-            }
-            for(size_t jj=0; jj<Opsize; jj++){
-                OpBloc->v[jj].first.first.first = 21;
-                OpBloc->v[jj].first.second.first = 41;
-            }
-
-            largs.push_back( C_F0( new FormBilinear( &di, OpBloc ), r ) ); 
-            delete OpBloc;
-        }   
-    }*/
-    
-
+    list<C_F0> tmp_largs = creationLargsForCompositeFESpace( LLL->largs, NpUh, NpVh, indexBlockUh, indexBlockVh );
+    block_largs = computeBlockLargs( tmp_largs, NpUh, NpVh, indexBlockUh, indexBlockVh );
+    changeComponentFormCompositeFESpace( localIndexInTheBlockUh, localIndexInTheBlockVh, block_largs );
 }
 
 template<class VFES>
@@ -12739,918 +13632,3 @@ template class Call_FormBilinear<v_fes3, v_fesS>;  //  3D volume / 3D Surf on me
 template class Call_FormBilinear<v_fesS, v_fes>;
 
 template class Call_CompositeFormBilinear<vect_generic_v_fes, vect_generic_v_fes>; // Morice: added vector FESpace (composite FESpace)
-/*
-
-#ifndef FFLANG
-#ifdef PARALLELE
-
-#define BOOST_NO_CXX17_IF_CONSTEXPR
-#include <ff++.hpp>
-#include <AFunction_ext.hpp>
-#include <lgfem.hpp>
-#include <R3.hpp>
-
-#include <htool/htool.hpp>
-
-// include the bemtool library .... path define in where library
-//#include <bemtool/operator/block_op.hpp>
-#include <bemtool/tools.hpp>
-#include <bemtool/fem/dof.hpp>
-#include <bemtool/operator/operator.hpp>
-#include <bemtool/miscellaneous/htool_wrap.hpp>
-// #include "PlotStream.hpp"
-
-#include "common.hpp"
-
-// extern FILE *ThePlotStream;
-
-using namespace std;
-//using namespace htool;
-//using namespace bemtool;
-
-#include <type_traits>
-/*
-typedef   LinearComb<MGauche,C_F0> Finconnue;
-typedef   LinearComb<MDroit,C_F0> Ftest;
-typedef  const Finconnue  finconnue;
-typedef  const Ftest ftest;
-class CDomainOfIntegration;
-class FormBilinear;
-*/
-/*
-#include "bem.hpp"
-
-#endif
-#endif
-*/
-/*
-template<class R>
-AnyType OpMatrixtoBilinearFormVG<R>::Op::operator()(Stack stack)  const
-{
-  assert(b && b->nargs);
-
-  pvectgenericfes  * pUh= GetAny<pvectgenericfes *>((*b->euh)(stack));
-  pvectgenericfes  * pVh= GetAny<pvectgenericfes *>((*b->evh)(stack));
-  ffassert( *pUh && *pVh ); 
-
-  int NpUh = (*pUh)->N; // number of fespace in pUh
-  int NpVh = (*pVh)->N; // number of fespace in pVh
-
-  KN<int> UhNbOfDf = (*pUh)->vectOfNbOfDF();
-  KN<int> VhNbOfDf = (*pVh)->vectOfNbOfDF();
-
-  KN<int> UhNbItem = (*pUh)->vectOfNbitem();
-  KN<int> VhNbItem = (*pVh)->vectOfNbitem();
-
-  KN<int> beginBlockUh(NpUh); // index of the first elment of a block
-  KN<int> beginBlockVh(NpVh);
-
-  // loop over the index 
-  int UhtotalNbItem=0;
-  cout << "finc: FESpace" << endl;
-  for(int i=0; i< NpUh; i++){
-    cout << "component i=" << i << ", NbItem["<<i<<"]=" <<  UhNbItem[i] << ", NbDof["<<i<<"]=" << UhNbOfDf[i] << endl;
-    beginBlockUh[i] = UhtotalNbItem;
-    UhtotalNbItem += UhNbItem[i];
-    ffassert( UhNbItem[i] > 0 && UhNbOfDf[i] > 0);
-  }
-
-  int VhtotalNbItem=0;
-  cout << "ftest: FESpace" << endl;
-  for(int i=0; i< NpVh; i++){
-    cout << "component i=" << i << ", NbItem["<<i<<"]=" <<  VhNbItem[i] << ", NbDof["<<i<<"]=" << VhNbOfDf[i] << endl;
-    beginBlockVh[i] = VhtotalNbItem;
-    VhtotalNbItem += VhNbItem[i];
-    ffassert( VhNbItem[i] > 0 && VhNbOfDf[i] > 0);
-  }
-  
-  // index for the construction of the block
-  KN<int> indexBlockUh(UhtotalNbItem);
-  KN<int> localIndexInTheBlockUh(UhtotalNbItem);
-  { 
-    // ========================
-    //
-    // varf([u0,u1,...,u4], ... ) 
-    // varf([ [u0_blk1,u1_blk1],[u0_blk2,u1_blk2,u2_blk2] ], ... ) 
-
-    // For u4, on a :: current_index = 4
-    //              :: indexBlockUh = 2
-    //              :: localIndexInThBlock = 3
-    int current_index=0;
-    for(int i=0; i<NpUh; i++){
-      for(int j=0; j<UhNbItem[i]; j++){
-        indexBlockUh[current_index] = i;
-        localIndexInTheBlockUh[current_index] = j;
-        current_index++;
-      }
-    }
-    ffassert(current_index==UhtotalNbItem);
-  }
-
-  KN<int> indexBlockVh(VhtotalNbItem);
-  KN<int> localIndexInTheBlockVh(VhtotalNbItem);
-  { 
-    int current_index=0;
-    for(int i=0; i<NpVh; i++){
-      for(int j=0; j<VhNbItem[i]; j++){
-        indexBlockVh[current_index] = i;
-        localIndexInTheBlockVh[current_index] = j;
-        current_index++;
-      }
-    }
-    ffassert(current_index==VhtotalNbItem);
-  }
-  cout <<"========================================================" << endl;
-  cout <<"=                                                      =" << endl;
-  cout <<"= indexBlockUh=                                        =" << endl;
-  cout << indexBlockUh << endl;
-  cout <<"=                                                      =" << endl;
-  cout <<"= localIndexInTheBlockUh=                              =" << endl;
-  cout << localIndexInTheBlockUh << endl;
-
-  cout <<"========================================================" << endl;
-  cout <<"=                                                      =" << endl;
-  cout <<"= indexBlockVh=                                        =" << endl;
-  cout << indexBlockVh << endl;
-  cout <<"=                                                      =" << endl;
-  cout <<"= localIndexInTheBlockVh=                              =" << endl;
-  cout << localIndexInTheBlockVh << endl;
-
-
-  #ifndef FFLANG
-  #ifdef PARALLELE
-  cout << "====    define parallele  =====" << endl;
-  exit(0);
-  #endif
-  #endif
-  
-
-
-  //
-  const list<C_F0> & largs=b->largs; 
-
-  KNM< list<C_F0> > block_largs( (long)NpUh, (long)NpVh );
-
-  // impression des information de la composition largs
-  list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end(); 
-
-
-  // necessaire :: UhtotalNbItem, indexBlockUh
-
-  // Loop to put each term of the varf in each correct block
-
-  // loop over largs information 
-  cout << "loop over the integral" << endl;
-
-  int count_integral = 0;
-  for (ii=ib;ii != ie;ii++) {
-    count_integral++;
-    cout <<"========================================================" << endl;
-    cout <<"=                                                      =" << endl;
-    cout << "reading the " << count_integral << "-th term of the variational form used to define the matrix" << endl;
-    Expression e=ii->LeftValue();
-    aType r = ii->left();
-    cout << "e=" << e << ", " << "r=" << r << endl;
-    cout <<"=                                                      =" << endl;
-
-    // ***************************************
-    // Case FormBillinear
-    // ***************************************
-    if (r==atype<const  FormBilinear *>() ){
-      const FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
-      const CDomainOfIntegration & di= *bb->di;
-
-      cout << "di.kind=" << di.kind << endl;
-      cout << "di.dHat=" << di.dHat << endl;
-      cout << "di.d=" << di.d << endl;
-      cout << "di.Th=" << di.Th << endl;
-
-      int    d = di.d;
-      int dHat = di.dHat;
-
-      // Sert a verifier que "*bb->di->Th" est du bon type ==> A enlever
-      
-      // Recuperation du pointeur sur le maillage de l'integrale
-      //if(d==2){ // 3d
-      //  pmesh Thtest=GetAny<pmesh >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else if(d==3 && dHat==3){
-      //  pmesh3 Thtest=GetAny<pmesh3 >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else if(d==3 && dHat==2){
-      //  pmeshS Thtest=GetAny<pmeshS >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else if(d==3 && dHat==1){
-      //  pmeshL Thtest=GetAny<pmeshL >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else{ ffassert(0); }// a faire
-      
-      BilinearOperator * Op=const_cast<  BilinearOperator *>(bb->b);
-      if (Op == NULL) {
-        if(mpirank == 0) cout << "dynamic_cast error" << endl; 
-        ffassert(0);
-      }
-      
-      size_t Opsize= Op->v.size();
-      cout << " loop over the term inside the integral" << endl;
-      cout << " Number of term in the integral:: Op->v.size()=" << Op->v.size() << endl;
-
-    
-      // index to check if a integral is defined on multi block
-      int indexOfBlockUh = -1; // A changer de nom
-      int indexOfBlockVh = -1; // A changer de nom
-      for(size_t jj=0; jj<Opsize; jj++){
-        // attention la fonction test donne la ligne
-        //  et la fonction test est en second
-        BilinearOperator::K ll = Op->v[jj];
-        pair<int,int> finc(ll.first.first), ftest(ll.first.second);
-        cout << " operateur jj= " << jj << endl;
-        cout << " FormBilinear: number of unknown finc=" <<  finc.first << " ,ftest= " << ftest.first << endl;
-        cout << " FormBilinear: operator order finc   =" << finc.second << " ,ftest= " << ftest.second << endl; // ordre   only op_id=0
-        
-        // Fred fait peut être un message après ????
-        // verification que la taille des tableaux des fonctions tests et de la fonction inconnue``
-        // sont correctes.  
-        ffassert( -1  < finc.first  && finc.first < UhtotalNbItem);
-        ffassert( -1  < ftest.first && ftest.first < VhtotalNbItem);
-
-        // finc.first : index de component de la fonction inconnue
-        // ftest.first: index de component de la fonction test
-        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // finc.second : renvoie l'index du type de l'operateur: Id, dx(), dy(), dz(), dxx(), dxy(), ...
-        //
-        // la liste des index des operateurs est definis dans [[????]].
-        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // exemple vf([u1,u2,..,u30],[v1,v2,...,v30]) = int2d(Th)(dx(u20)*v15)
-        //      finc.first  = 20 , ftest.first = 15
-        //      finc.second = 1 , ftest.second = 0
-
-        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        if( jj== 0 ){
-          indexOfBlockUh = indexBlockUh[finc.first];
-          indexOfBlockVh = indexBlockVh[ftest.first];
-        }
-        else if( indexOfBlockUh != indexBlockUh[finc.first] ){
-          cerr << "The " << count_integral <<"-th integral(s) contains the constribution of two different blocks:" << endl;
-          cerr << "the first term correspond to block (" << indexOfBlockUh << " , " <<  indexOfBlockVh << ")" << endl;
-          cerr << "the "<<jj <<"-th term correspond to block (" << indexBlockUh(finc.first) << " " <<  indexBlockVh(ftest.first) << ")" << endl;
-          cerr << "You need to separate the integral in individual part." << endl;
-          cerr << "Remark: scalar product in N dimension correspond to N terms inside the integral" << endl;
-          cerr << "A ameliorer Jacques." << endl;
-          ffassert(0);
-        }
-        else if( indexOfBlockVh != indexBlockVh[ftest.first] ){
-          cerr << "The " << count_integral <<"-th integral(s) contains the constribution of two different blocks:" << endl;
-          cerr << "the first term correspond to block (" << indexOfBlockUh << " , " <<  indexOfBlockVh << ")" <<endl;
-          cerr << "the "<<jj <<"-th term correspond to block (" << indexBlockUh(finc.first) << ", " <<  indexBlockVh(ftest.first) << ")" << endl;
-          cerr << "You need to separate the integral in individual part." << endl;
-          cerr << "Remark: scalar product in N dimension correspond to N terms inside the integral" << endl;
-          cerr << "A ameliorer Jacques." << endl;
-          ffassert(0);
-        }
-
-        ffassert( indexOfBlockUh == indexBlockUh(finc.first) );
-        ffassert( indexOfBlockVh == indexBlockVh(ftest.first) );
-      }
-
-    ffassert( indexOfBlockUh >= 0 && indexOfBlockVh >= 0);
-    
-    // A faire :: recuperation des éléments pour chacun des blocs
-    // Actuellement, on associe une intégrale par block ==> 
-    
-    // change the index of the block
-
-    //changeIndexFunctionInconnue(*Op, index_operator_finc, new_index_funct_finc );
-  
-    //changeIndexFunctionTest(*Op, index_operator_ftest, new_index_funct_ftest  );
-    
-    block_largs(indexOfBlockUh,indexOfBlockVh).push_back(*ii);
-
-    cout << "The " << count_integral <<"-th integral(s) is added to the block (" << indexOfBlockUh << " , " <<  indexOfBlockVh << ")" <<endl;
-
-    }
-#ifndef FFLANG
-#ifdef PARALLELE
-    // ******************************************
-    // Case BemKFormBilinear (KERNEL FORM ONLY)
-    // ******************************************
-    else if (r==atype<const BemFormBilinear *>() ){
-      BemFormBilinear * bbtmp= dynamic_cast< BemFormBilinear *>(e);
-      int VVFBEM = bbtmp->type;
-
-      if(VVFBEM ==1){
-        BemKFormBilinear * bb=new BemKFormBilinear(*dynamic_cast<const BemKFormBilinear *>(e));
-        FoperatorKBEM * b=const_cast<  FoperatorKBEM *>(bb->b);
-        if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; exit(0);}
-
-        int indexOfBlockUh = -1; // A changer de nom
-        int indexOfBlockVh = -1; // A changer de nom
-
-
-        // loop over the index of finconnue
-        LOperaG * OpG = const_cast<LOperaG *>(b->fi);
-        ffassert( OpG->v.size() == 1);
-        size_t jj =0;
-        for (LOperaG::const_iterator lop=OpG->v.begin();lop!=OpG->v.end();lop++){
-
-          LOperaG::K lf(*lop);
-          pair<int,int> finc(lf.first);
-          cout << " operateur jj= " << jj << endl;
-          cout << " BemFormLinear: number of unknown finc= " << finc.first << endl;
-          ffassert( -1  < finc.first && finc.first < UhtotalNbItem);     // check the index 
-
-          if( jj== 0 ){
-            indexOfBlockUh = indexBlockUh[finc.first];
-          }
-          else if( indexOfBlockUh != indexBlockUh[finc.first] ){
-            cerr << "The " << count_integral <<"-th term of the varitional form contains the constribution of two different FESpace:" << endl;
-            cerr << "This terms correspond to a BEM integral terms" << endl;
-            cerr << "the first term correspond to element " << indexOfBlockUh << " of the Composite FESpace (Finconnu)." << endl;
-            cerr << "the "<< jj <<"-th term correspond to element " << indexBlockUh(finc.first) << endl;
-            cerr << "In a composite FESpace, you need to define a BEM integral for each FESpace individually." << endl;
-            cerr << "A ameliorer Jacques." << endl;
-            ffassert(0);
-          }
-          jj+=1;
-        }
-
-
-        // Loop over the index of ftest
-        LOperaD * OpD = const_cast<LOperaD *>(b->ft);
-        ffassert( OpD->v.size() == 1);
-        jj =0; // reinitialisation ton zero
-        for (LOperaD::const_iterator lop=OpD->v.begin();lop!=OpD->v.end();lop++){
-          
-          LOperaD::K lf(*lop);
-          pair<int,int> ftest(lf.first);
-          cout << " operateur jj= " << jj << endl;
-          cout << " BemFormLinear: number of unknown ftest= " << ftest.first << endl;
-          ffassert( -1  < ftest.first && ftest.first < VhtotalNbItem);    // check the index 
-
-          if( jj== 0 ){
-            indexOfBlockVh = indexBlockVh[ftest.first];
-          }
-          else if( indexOfBlockVh != indexBlockVh[ftest.first] ){
-            cerr << "The " << count_integral <<"-th term of the varitional form contains the constribution of two different FESpace:" << endl;
-            cerr << "This terms correspond to a BEM integral terms" << endl;
-            cerr << "the first term correspond to element " << indexOfBlockVh << " of the Composite FESpace (Ftest)." << endl;
-            cerr << "the "<< jj <<"-th term correspond to element " << indexBlockVh(ftest.first) << endl;
-            cerr << "In a composite FESpace, you need to define a BEM integral term for each FESpace individually." << endl;
-            cerr << "A ameliorer Jacques." << endl;
-            ffassert(0);
-          }
-          jj+=1;
-        }
-        block_largs(indexOfBlockUh,indexOfBlockVh).push_back(*ii); 
-
-      }else if(VVFBEM == 2){
-        BemPFormBilinear * bb=new BemPFormBilinear(*dynamic_cast<const BemPFormBilinear *>(e));
-        FoperatorPBEM * b=const_cast<  FoperatorPBEM *>(bb->b);
-        if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; }
-
-        cerr << " BEM Potential in composite FESpace in construction " << endl;
-        ffassert(0);
-      }
-
-    }
-#endif
-#endif
-    else if(r == atype<const  BC_set  *>()){
-      cout << " BC in variational form " << endl;
-      
-      const BC_set * bc=dynamic_cast<const  BC_set *>(e);
-      
-      // index to check if a integral is defined on multi block
-      int indexOfBlockUh = -1;
-    
-      int kk=bc->bc.size();
-      for (int k=0;k<kk;k++)
-      {
-          pair<int,Expression> xx=bc->bc[k];
-          ffassert( -1  < xx.first  && xx.first < UhtotalNbItem); // check the value of index of the component of the varf
-        
-          if( k == 0) indexOfBlockUh = indexBlockUh[xx.first]; // index of the block Uh
-          else if( indexOfBlockUh != indexBlockUh[xx.first] ){
-            cerr << "The " << count_integral <<"-th term of the varitional form contains the constribution of two different FESpace:" << endl;
-            cerr << "This terms correspond to Boundary condition" << endl;
-            cerr << "the first term correspond to element " << indexOfBlockUh << " of the Composite FESpace " << endl;
-            cerr << "the "<<kk <<"-th term correspond to element " << indexBlockUh(xx.first) << endl;
-            cerr << "In a composite FESpace, you need to define a BC for each FESpace individually." << endl;
-            cerr << "A ameliorer Jacques." << endl;
-            ffassert(0);
-          }
-      }
-      // Added the boundary condition in the largs block
-      block_largs(indexOfBlockUh,indexOfBlockUh).push_back(*ii); 
-        
-      //ffassert(0);
-    }
-    else{
-      #ifndef FFLANG
-      #ifdef PARALLELE
-      cout << "r=" << r << ", " << atype<const BemFormBilinear *>() << endl;
-      #endif
-      #endif
-      cerr << "Composite FESpace :: bilinear form only " << endl;
-      cerr << "      uniquement terme bilineaire + BC " << endl;
-      ffassert(0);
-    }
-  }
-
-  // check the list of <<largs>> for each block
-  cout <<"========================================================" << endl;
-  cout <<"=                                                      =" << endl;
-  cout <<"= check the list of largs of each block                =" << endl;
-  cout <<"=                                                      =" << endl;
-  for( int i=0; i<NpUh; i++){
-    for( int j=0; j<NpVh; j++){
-      cout<< " block ( "<< i << " , " << j <<  " ) " ;
-      const list<C_F0> & b_largs=block_largs(i,j); 
-      cout<< ", size of the list=" << b_largs.size() << endl;
-      // impression des information de la composition largs
-      list<C_F0>::const_iterator b_ii,b_ib=b_largs.begin(),b_ie=b_largs.end(); 
-      for (b_ii=b_ib;b_ii != b_ie;b_ii++){
-        Expression e=b_ii->LeftValue();
-        aType r = b_ii->left();
-        cout << "e=" << e << ", r=" << r << endl;
-      }
-    }
-  }
-  
-  // Info necessaire :: " block_largs, localIndexInTheBlockUh, localIndexInTheBlockVh, NpUh, NpVh  
-
-  // put the right number of each component of each block
-  for( int i=0; i<NpUh; i++){
-      for( int j=0; j<NpVh; j++){
-        
-        const list<C_F0> *b_largs=&block_largs(i,j); 
-        list<C_F0>::const_iterator b_ii,b_ib=b_largs->begin(),b_ie=b_largs->end(); 
-        for (b_ii=b_ib;b_ii != b_ie;b_ii++){
-          Expression e=b_ii->LeftValue();
-          aType r = b_ii->left();
-          // Case FormBilinear
-          if (r==atype<const  FormBilinear *>() ){
-            const FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
-      
-            BilinearOperator * Op=const_cast<  BilinearOperator *>(bb->b);
-            if (Op == NULL) {
-              if(mpirank == 0) cout << "dynamic_cast error" << endl; 
-            ffassert(0);
-            }
-      
-            size_t Opsize= Op->v.size();
-            cout << " loop over the term inside the integral" << endl;
-            cout << " Number of term in the integral:: Op->v.size()=" << Op->v.size() << endl;
-
-        
-            KN<size_t> index_operator_finc(Opsize);
-            KN<int>    new_index_funct_finc(Opsize);
-
-            KN<size_t> index_operator_ftest(Opsize);
-            KN<int>    new_index_funct_ftest(Opsize);
-
-            // index to check if a integral is defined on multi block
-            for(size_t jj=0; jj<Opsize; jj++){
-              // attention la fonction test donne la ligne
-              //  et la fonction test est en second
-              BilinearOperator::K ll = Op->v[jj];
-              pair<int,int> finc(ll.first.first), ftest(ll.first.second);
-
-              long jj2= jj;
-
-              index_operator_finc[ jj2] = jj;
-              new_index_funct_finc[ jj2] = localIndexInTheBlockUh(finc.first);
-            
-              index_operator_ftest[ jj2]  = jj;
-              new_index_funct_ftest[ jj2] = localIndexInTheBlockVh(ftest.first);
-
-            }
-            changeIndexFunctionInconnue(*Op, index_operator_finc, new_index_funct_finc );
-      
-            changeIndexFunctionTest(*Op, index_operator_ftest, new_index_funct_ftest  );          
-          }  
-
-          #ifndef FFLANG
-          #ifdef PARALLELE
-          // ******************************************
-          // Case BemKFormBilinear (KERNEL FORM ONLY)
-          // ******************************************
-          else if (r==atype<const BemFormBilinear *>() ){
-            BemFormBilinear * bbtmp= dynamic_cast< BemFormBilinear *>(e);
-            int VVFBEM = bbtmp->type;
-
-            if(VVFBEM ==1){
-              BemKFormBilinear * bb=new BemKFormBilinear(*dynamic_cast<const BemKFormBilinear *>(e));
-              FoperatorKBEM * b=const_cast<  FoperatorKBEM *>(bb->b);
-              if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; exit(0);}
-
-              // loop over the index of finconnue
-              LOperaG * OpG = const_cast<LOperaG *>(b->fi);
-              ffassert( OpG->v.size() == 1);
-              size_t Opsize= OpG->v.size();
-
-              for(size_t jjj=0; jjj<Opsize; jjj++){
-                LOperaG::K *lf=&(OpG->v[jjj]);
-                OpG->v[jjj].first.first = localIndexInTheBlockUh( OpG->v[jjj].first.first );
-              
-                pair<int,int> finc(lf->first);
-                cout << " new value :: block i,j=" << i << ","<< j << ", operateur jj= " << jjj << endl;
-                cout << " BemormBilinear: number of unknown finc = " << finc.first << endl;
-                cout << " BemFormBilinear: operator order   finc = " << finc.second << endl; 
-              }
-
-
-              // Loop over the index of ftest
-              LOperaD * OpD = const_cast<LOperaD *>(b->ft);
-              ffassert( OpD->v.size() == 1);
-              Opsize= OpD->v.size();
-              for(size_t jjj=0; jjj<Opsize; jjj++){
-                LOperaD::K *lf=&(OpD->v[jjj]);
-                OpD->v[jjj].first.first = localIndexInTheBlockVh( OpD->v[jjj].first.first );
-              
-                pair<int,int> ftest(lf->first);
-                cout << " new value :: block i,j=" << i << ","<< j << ", operateur jj= " << jjj << endl;
-                cout << " BemormBilinear: number of unknown ftest = " << ftest.first << endl;
-                cout << " BemFormBilinear: operator order   ftest = " << ftest.second << endl; 
-              }
-            }
-            else if(VVFBEM == 2){
-              BemPFormBilinear * bb=new BemPFormBilinear(*dynamic_cast<const BemPFormBilinear *>(e));
-              FoperatorPBEM * b=const_cast<  FoperatorPBEM *>(bb->b);
-              if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; }
-
-              cerr << " BEM Potential in composite FESpace in construction " << endl;
-              ffassert(0);
-            }
-
-          }
-          #endif
-          #endif
-
-          // case BC_set 
-          else if(r == atype<const  BC_set  *>()){
-            ffassert( i == j ); // diagonal block 
-            BC_set * bc=dynamic_cast< BC_set *>(e); // on ne peut pas utiliser " const BC_set * " ou autrement erreur ce ompilation:  Morice
-
-            //KN<int>  new_index_funct_finc( bc.size() );
-            int kk=bc->bc.size();
-            //pair<int,Expression>  &bc_ib(bc->bc.begin());
-            
-            for (int k=0;k<kk;k++)
-            {
-              pair<int,Expression> &xx2= bc->bc[k];
-              //new_index_funct_finc[k] = localIndexInTheBlockUh(bc[k].first);
-              // change the index of the component to correspond to the index in the block
-              xx2.first = localIndexInTheBlockUh(xx2.first);
-              //bc->changeNumberOfComponent(k,localIndexInTheBlockUh(xx.first));
-              //bc->bc[k].first = localIndexInTheBlockUh( bc->bc[k].first );
-            }
-          }
-        }
-        // listOfComponentBilinearForm(*b_largs);
-      }
-  }
-  
-  cout <<"========================================================" << endl;
-  cout <<"=                                                      =" << endl;
-  cout <<"= check the component of Bilinear Form                 =" << endl;
-  cout <<"=                                                      =" << endl;
-  listOfComponentBilinearForm(largs);
-  cout <<"=                                                      =" << endl;
-  cout <<"========================================================" << endl;
-
-  //===   Information of the global matrix    ===// 
-
-  // check if we have a square matrix
-  bool A_is_square= (void*)pUh == (void*)pVh || ((*pUh)->totalNbOfDF()) == ( (*pVh)->totalNbOfDF()) ;
-  cout << "A_is_square=" << A_is_square << endl;
-
-  // === simple check if A is symetrical === // 
-  // voir avec les autres.
-  bool A_is_maybe_sym = (void*)pUh == (void*)pVh; 
-
-  // VF == true => VF type of Matrix
-  bool VF=isVF(b->largs);    //=== used to set the solver ??? block matrix ??? ===/
-
-  // set parameteer of the matrix :: 
-  Data_Sparse_Solver ds;
-  ds.factorize=0;
-  ds.initmat=true;
-  int np = OpCall_FormBilinear_np::n_name_param - NB_NAME_PARM_HMAT;
-  SetEnd_Data_Sparse_Solver<R>(stack,ds, b->nargs,np);
-
-  // set ds.sym = 0 
-  ds.sym = 0;
-  if(verbosity)
-    cout << " we consider the block matrix as a non symetric matrix " << endl; 
-
-  // J'ai repris ce qu'il y avait. 
-  // PAC(e)     :: Attention peut être pas compatible avec les matrices bloques.
-  // A repenser :: surtout pour le parametre symetrique? on le met ce parametre à zéro pour l'instant.
-  // set ds.sym = 0 
-
-  ds.sym = 0;
-  if(verbosity)
-    cout << " === we consider the block matrix as a non symetric matrix === (to be change in the future)" << endl; 
-
-  if (! A_is_square )
-   {
-     if(verbosity>3) cout << " -- the solver  is un set  on rectangular matrix  " << endl;
-    }
-
-  // A quoi cela correspond?? Gestion du stack + autre
-  WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007
-
-  Matrice_Creuse<R> & A( * GetAny<Matrice_Creuse<R>*>((*a)(stack)));
-  if(init) A.init();                                            //
-  cout << " A.N=" <<  A.N() << endl;
-  cout << " A.M=" <<  A.M() << endl;
-  if( ! pUh || ! pVh) return SetAny<Matrice_Creuse<R>  *>(&A);  //
-
-  // need to define the size of the entire matrix here
-  A.resize( (*pVh)->totalNbOfDF(), (*pUh)->totalNbOfDF() ); 
-  // test function (Vh) are the line
-  // inconnu function (Uh) are the column
-
-  
-  // Assemble the variationnal form
-  int maxJVh=NpVh;
-  
-  int offsetMatrixUh = 0;
-  // loop over the block
-  for( int i=0; i<NpUh; i++){
-    int offsetMatrixVh = 0;
-    if( ds.sym > 0 ){ maxJVh=(i+1); ffassert(maxJVh<NpVh);}
-    for( int j=0; j<maxJVh; j++){
-      cout << "offsetMatrixUh= " << offsetMatrixUh << ", offsetMatrixVh= " << offsetMatrixVh << endl;
-      
-      // construction du block (i,j)
-      const list<C_F0> & b_largs=block_largs(i,j); 
-
-      //const void * PUh = (void *) (*pUh)->vect[i]->getpVh();
-      //const void * PVh = (void *) (*pVh)->vect[j]->getpVh();
-
-      // size of the block
-      int N_block = UhNbOfDf[i];
-      int M_block = VhNbOfDf[j];
-      
-      Matrice_Creuse<R> *CCC = new Matrice_Creuse<R>() ;
-      CCC->resize(M_block,N_block); // test function (Vh) are the line and inconnu function (Uh) are the column
-      cout << "block:  i=" << i << "j=" << j <<  " (N,M)=" << M_block << " " << N_block << endl;
-      //cout << "CCC=" << CCC<< endl;
-      Matrice_Creuse<R> &BBB(*CCC); 
-      //cout << "BBB=" << BBB<< endl;       
-      // Faire les cast ici + tester ce soir ou demain
-
-      // cas ::  Mesh, v_fes, v_fes
-      if( (*pUh)->typeFE[i] == 2 && (*pVh)->typeFE[j] == 2 ){
-
-        // ==== FESpace 2d : inconnue et test  ===
-        const FESpace * PUh = (FESpace *) (*pUh)->vect[i]->getpVh();
-        const FESpace * PVh = (FESpace *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm< R, Mesh, FESpace,FESpace>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      // cas ::  Mesh3, v_fes3, v_fes3 
-      else if( (*pUh)->typeFE[i] == 3 && (*pVh)->typeFE[j] == 3 ){
-
-        // ==== FESpace 3d : inconnue et test ===
-        const FESpace3 * PUh = (FESpace3 *) (*pUh)->vect[i]->getpVh();
-        const FESpace3 * PVh = (FESpace3 *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,Mesh3,FESpace3,FESpace3>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      // cas :: MeshS, v_fesS, v_fesS 
-      else if( (*pUh)->typeFE[i] == 4 && (*pVh)->typeFE[j] == 4 ){
-
-        // ==== FESpace 3d Surf: inconnue et test ===
-        const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
-        const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshS,FESpaceS,FESpaceS>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      // cas :: MeshL, v_fesL, v_fesL
-      else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 5 ){
-
-        // ==== FESpace 3d Curve: inconnue et test ===
-        const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
-        const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceL,FESpaceL>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      // cas :: MeshL, v_fesL, v_fes
-      else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 2 ){
-
-        // ==== FESpace 3d Curve: inconnue et 2d : test ===
-        const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
-        const FESpace * PVh = (FESpace *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceL,FESpace>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      // cas :: MeshL, v_fes, v_fesL
-      else if( (*pUh)->typeFE[i] == 2 && (*pVh)->typeFE[j] == 5 ){
-
-        // ==== FESpace 2d: inconnue et 3d Curve: test ===
-        const FESpace * PUh = (FESpace *) (*pUh)->vect[i]->getpVh();
-        const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshL,FESpace,FESpaceL>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      // cas :: new OpMatrixtoBilinearForm< double, MeshS, v_fesS, v_fes3 >,      // 3D Surf / 3D volume on meshS
-      else if( (*pUh)->typeFE[i] == 4 && (*pVh)->typeFE[j] == 3 ){
-
-        // ==== FESpace 3d Surf: inconnue et 3d : test ===
-        const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
-        const FESpace3 * PVh = (FESpace3 *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshS,FESpaceS,FESpace3>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      } 
-      // cas :: new OpMatrixtoBilinearForm< double, MeshS, v_fes3, v_fesS >,     // 3D volume / 3D Surf on meshS
-      else if( (*pUh)->typeFE[i] == 3 && (*pVh)->typeFE[j] == 4 ){
-
-        // ==== FESpace 3d : inconnue et 3d Surf : test ===
-        const FESpace3 * PUh = (FESpace3 *) (*pUh)->vect[i]->getpVh();
-        const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshS,FESpace3,FESpaceS>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      } 
-      // cas :: new OpMatrixtoBilinearForm< double, MeshL, v_fesL, v_fesS >,       // 3D curve / 3D Surf on meshL
-      else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 4 ){
-
-        // ====  FESpace 3d Curve : inconnue et 3d Surf : test ===
-        const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
-        const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceL,FESpaceS>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      // cas :: new OpMatrixtoBilinearForm< double, MeshL, v_fesS, v_fesL >);       // 3D Surf / 3D curve on meshL
-        else if( (*pUh)->typeFE[i] == 4 && (*pVh)->typeFE[j] == 5 ){
-
-        // ====  FESpace 3d Surf : inconnue et 3d Curve : test ===
-        const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
-        const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceS,FESpaceL>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      else{
-        cerr << " =: Pas prise en compte des FESpace inconnue de type := "<< typeFEtoString( (*pUh)->typeFE[i] ) << endl;
-        cerr << " =:                 avec des FESpace test de type    := "<< typeFEtoString( (*pVh)->typeFE[j] ) << endl;
-        ffassert(0);
-      }
-      //cout << "BBB=" << BBB<< endl;
-      A.pHM()->Add( BBB.pHM(), R(1), false, offsetMatrixVh, offsetMatrixUh ); // test function (Vh) are the line and inconnu function (Uh) are the column
-      //cout << "BBB=" << BBB<< endl;
-      //cout << "A=" << A << endl;
-      delete CCC;
-    offsetMatrixVh += VhNbOfDf[j];
-    }
-    offsetMatrixUh += UhNbOfDf[i];
-  }
-  
-  A.pHM()->half = ds.sym;
-  if (A_is_square)
-    SetSolver(stack,VF,*A.A,ds);
-
-  // === re-szet the original value of number of the component in the 
-  //          - BilinearForm 
-  //          - BC_set. 
-  // ===
-
-  // bilinear Form
-
-  
-  // Info necessaire :: " block_largs, beginBlockUh, beginBlockVh, NpUh, NpVh  
-
-  // put the right number of component of each block
-  for( int i=0; i<NpUh; i++){
-      for( int j=0; j<NpVh; j++){
-        
-        const list<C_F0> *b_largs=&block_largs(i,j); 
-        list<C_F0>::const_iterator b_ii,b_ib=b_largs->begin(),b_ie=b_largs->end(); 
-        for (b_ii=b_ib;b_ii != b_ie;b_ii++){
-          Expression e=b_ii->LeftValue();
-          aType r = b_ii->left();
-
-          // bilinear case
-          if (r==atype<const  FormBilinear *>() ){
-            const FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
-      
-            BilinearOperator * Op=const_cast<  BilinearOperator *>(bb->b);
-            if (Op == NULL) {
-              if(mpirank == 0) cout << "dynamic_cast error" << endl; 
-            ffassert(0);
-            }
-      
-            size_t Opsize= Op->v.size();
-      
-            KN<size_t> index_operator_finc(Opsize);
-            KN<int>    new_index_funct_finc(Opsize);
-
-            KN<size_t> index_operator_ftest(Opsize);
-            KN<int>    new_index_funct_ftest(Opsize);
-
-            // index to check if a integral is defined on multi block
-            for(size_t jj=0; jj<Opsize; jj++){
-              // attention la fonction test donne la ligne
-              //  et la fonction test est en second
-              BilinearOperator::K ll = Op->v[jj];
-              pair<int,int> finc(ll.first.first), ftest(ll.first.second);
-
-              long jj2= jj;
-
-              index_operator_finc[ jj2] = jj;
-              new_index_funct_finc[ jj2] = beginBlockUh[i]+finc.first;
-            
-              index_operator_ftest[ jj2]  = jj;
-              new_index_funct_ftest[ jj2] = beginBlockVh[i]+ftest.first; 
-            }
-            changeIndexFunctionInconnue(*Op, index_operator_finc, new_index_funct_finc );
-      
-            changeIndexFunctionTest(*Op, index_operator_ftest, new_index_funct_ftest  );          
-          }  
-      
-#ifndef FFLANG
-#ifdef PARALLELE
-          // ******************************************
-          // Case BemKFormBilinear (KERNEL FORM ONLY)
-          // ******************************************
-          else if (r==atype<const BemFormBilinear *>() ){
-            BemFormBilinear * bbtmp= dynamic_cast< BemFormBilinear *>(e);
-            int VVFBEM = bbtmp->type;
-
-            if(VVFBEM ==1){
-              BemKFormBilinear * bb=new BemKFormBilinear(*dynamic_cast<const BemKFormBilinear *>(e));
-              FoperatorKBEM * b=const_cast<  FoperatorKBEM *>(bb->b);
-              if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; exit(0);}
-
-              // loop over the index of finconnue
-              LOperaG * OpG = const_cast<LOperaG *>(b->fi);
-              ffassert( OpG->v.size() == 1);
-              size_t Opsize= OpG->v.size();
-
-              for(size_t jjj=0; jjj<Opsize; jjj++){
-                LOperaG::K *lf=&(OpG->v[jjj]);
-                OpG->v[jjj].first.first += beginBlockUh[i];
-                
-                //pair<int,int> finc(lf->first);
-                //cout << " new value :: block i,j=" << i << ","<< j << ", operateur jj= " << jjj << endl;
-                //cout << " BemormBilinear: number of unknown finc = " << finc.first << endl;
-                //cout << " BemFormBilinear: operator order   finc = " << finc.second << endl; 
-                
-              }
-
-
-              // Loop over the index of ftest
-              LOperaD * OpD = const_cast<LOperaD *>(b->ft);
-              ffassert( OpD->v.size() == 1);
-              Opsize= OpD->v.size();
-              for(size_t jjj=0; jjj<Opsize; jjj++){
-                LOperaD::K *lf=&(OpD->v[jjj]);
-                OpD->v[jjj].first.first += beginBlockVh[j]; 
-                
-                //pair<int,int> finc(lf->first);
-                //cout << " new value :: block i,j=" << i << ","<< j << ", operateur jj= " << jjj << endl;
-                //cout << " BemormBilinear: number of unknown ftest = " << ftest.first << endl;
-                //cout << " BemFormBilinear: operator order   ftest = " << ftest.second << endl;
-                
-              }
-            }
-            else if(VVFBEM == 2){
-              BemPFormBilinear * bb=new BemPFormBilinear(*dynamic_cast<const BemPFormBilinear *>(e));
-              FoperatorPBEM * b=const_cast<  FoperatorPBEM *>(bb->b);
-              if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; }
-
-              cerr << " BEM Potential in composite FESpace in construction " << endl;
-              ffassert(0);
-            }
-
-          }
-#endif
-#endif  
-          // BC_set
-          // case BC_set 
-          else if(r == atype<const  BC_set  *>()){
-            ffassert( i == j ); // diagonal block 
-            BC_set * bc=dynamic_cast<BC_set *>(e);
-        
-            //KN<int>  new_index_funct_finc( bc.size() );
-            int kk=bc->bc.size();
-            for (int k=0;k<kk;k++)
-            {
-              //bc->bc[k].first += beginBlockUh[i];
-              pair<int,Expression> &xx=bc->bc[k];
-              xx.first += beginBlockUh[i];
-            }
-          }
-        }
-      }
-  }
-
-
-  cout <<"========================================================" << endl;
-  cout <<"=                                                      =" << endl;
-  cout <<"= check the component of Bilinear Form                 =" << endl;
-  cout <<"=                                                      =" << endl;
-  listOfComponentBilinearForm(largs);
-  cout <<"=                                                      =" << endl;
-  cout <<"========================================================" << endl;
-  
-  return SetAny<Matrice_Creuse<R>  *>(&A);
-}
-
-*/

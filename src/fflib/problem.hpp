@@ -536,6 +536,18 @@ inline int cestac(const complex<double_st> & z)
 {return min(cestac(z.real()),cestac(z.imag()));}
 #endif
 
+/*
+// A construire
+class CompositeOperator{
+vector<BlockOperator> block_op; 
+};
+class BlockOperator{
+  long offsetI;
+  long offsetJ;
+  vector<VirtualMatrix *> pBlockMatrix;
+};
+*/
+
 class Problem  : public Polymorphic {
   //  typedef double R;
   static basicAC_F0::name_and_type name_param[] ;
@@ -568,10 +580,36 @@ public:
       if(AcadnaC) AcadnaC->destroy();
       }
   } ;
+  /*
+  struct DataComposite{
+    const int Nfe; // number of FESpace in Vh
+    const int Mfe; // number of FESpace in Uh
+    vector< void * > *pFESpaceUh; // pointer to FESpace 
+    vector< void * > *pFESpaceVh; // pointer to FESpace 
+
+    vector< int > *typeUh; // int of the type of Vh
+    vector< int > *typeVh; // int of the type of Vh
+
+    vector< void * > *pThU; 
+    vector< void * > *pThV; 
+
+    vector<long> *sizeUh;
+    vector<long> *sizeVh;
+
+    vector<long> *offsetUh;
+    vector<long> *offsetVh; 
+    
+    CountPointer<MatriceCreuse<double> > ARglobal;
+    CountPointer<MatriceCreuse<Complex> > ACglobal;
+  };
+  */
+
+
   const OneOperator *precon;
 
   C_args *op; // the list of all operator
   mutable vector<Expression> var; // list des var pour les solutions et test
+  mutable vector<int> type_var;   // list des type des FESpace for each var pour les solutions et test (used only different type of FESpace)
   bool complextype,VF;
 
   //   Expression noinit,type,epsilon;
@@ -588,7 +626,7 @@ public:
 
     
   void init(Stack stack) const  {
-      // cout << " init  " << (char *) dataptr(stack) - (char*) stack  << " " << offset <<  endl;
+      //cout << " init  " << (char *) dataptr(stack) - (char*) stack  << " " << offset <<  endl;
       if(dim==2)
       dataptr(stack)->init();
       else if(dim==3)
@@ -597,17 +635,23 @@ public:
       dataptrS(stack)->init();
       else if(dim==5)
       dataptrL(stack)->init();
+
+      //else if(dim==6) dataptr(stack)->init(); // allocation pour que les offset soit correct
   }
   void destroy(Stack stack)  const  {
       if(dim==2) dataptr(stack)->destroy();
       else if(dim==3) dataptr3(stack)->destroy();
       else if(dim==4) dataptrS(stack)->destroy();
       else if(dim==5) dataptrL(stack)->destroy();
+
+      //else if(dim==6) dataptr(stack)->destroy(); // allocation pour que les offset soit correct
   }
 
   template<class R,class FESpace,class v_fes>
   AnyType eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<R> > & dataA,
   MatriceCreuse< typename CadnaType<R>::Scalaire >  * & dataCadna) const;
+  template<class R>    // TODO if coupling FE wit problem
+  AnyType evalComposite(Stack stack) const;
   AnyType operator()(Stack stack) const; // move in Problem.cpp  dec. 2018 FH
 
   bool Empty() const {return false;}
@@ -735,6 +779,8 @@ public:
   Expression *nargs;
   list<C_F0> varflargs;
   list<C_F0> largs;
+  KNM<list<C_F0>> block_largs;
+
   typedef list<C_F0>::const_iterator const_iterator;
 
   const int N,M;
@@ -820,44 +866,15 @@ struct OpCall_CompositeFormBilinear
   OpCall_FormBilinear_np
 {
   typedef v_fes1 *pfes1; typedef v_fes2 *pfes2;
-  /*
-  class Op : public E_F0mps
-  {
-  public:
-    Expression *nargs;
-    list<C_F0> varflargs;
-    list<C_F0> largs;
-    typedef list<C_F0>::const_iterator const_iterator;
-
-    const int N,M;
-    Expression euh,evh;
-
-    AnyType operator()(Stack s)  const {
-      Call_CompositeFormBilinear<v_fes1, v_fes2> * bb = new Call_CompositeFormBilinear<v_fes1, v_fes2>(nargs,to<const C_args*>(args[0]),euh,evh);}
-    };
-
-    Op(Expression * na,Expression  BB, Expression fi,Expression fj)
-      : nargs(na),varflargs(),largs(),N(fi->nbitem()),M(fj->nbitem()), euh(fi), evh(fj)
-      {
-          assert(nargs );
-          const C_args * LLL=dynamic_cast<const C_args *>(BB);
-          if (!LLL)
-          CompileError("Sorry the variationnal form (varf)  is not a the variationnal form (type const C_args *)");
-          varflargs = LLL->largs;
-          largs     = LLL->largs;
-      }
-
-    }
   
-    operator aType () const { return atype< call_CompositeFormBilinear<v_fes1,v_fes2>*>();}
-
-  };
-  */
   E_F0 * code(const basicAC_F0 & args) const
   { Expression * nargs = new Expression[n_name_param];
     args.SetNameParam(n_name_param,name_param,nargs);
-    // cout << " OpCall_CompositeFormBilinear " << *args[0].left() << " " << args[0].LeftValue() << endl;
-    return  new Call_CompositeFormBilinear<v_fes1, v_fes2>(nargs,to<const C_args*>(args[0]),to<pfes1*>(args[1]),to<pfes2*>(args[2]));}
+
+    return  new Call_CompositeFormBilinear<v_fes1, v_fes2>(nargs,to<const C_args*>(args[0]),to<pfes1*>(args[1]),to<pfes2*>(args[2]));
+
+  }
+  
   OpCall_CompositeFormBilinear() :
     OneOperator(atype<const Call_CompositeFormBilinear<v_fes1,v_fes2>*>(),atype<const T *>(),atype<pfes1*>(),atype<pfes2*>()) {}
 };
@@ -1321,6 +1338,7 @@ template<class K> class Matrice_Creuse_inv_trans  { public:// add aug 2018 FH.
     operator Matrice_Creuse<K> * () const {return A;}
 };
 /*
+//==== PAS TESTER A ENLEVER MORICE  ====//
 class qOperateurMatrice{
   public:
   // classe operateur quelquonque pour la construction d'une matrice
@@ -1514,22 +1532,27 @@ AnyType OpArraytoLinearForm<R,MMesh,v_fes>::Op::operator()(Stack stack)  const
   return SetAny<KN_<R> >(xx);
 }
 
+/**
+       *  @brief  Builds a new largs  whit each element are included in one block
+       *  @param  largs list of argument of the initial Forms 
+       *  @param  NpVh  number of FESpace in Vh 
+       *  @param  indexBlockVh give the index of the block for a given component of FESpace Vh  
+       * 
+       */
 
-inline list<C_F0>  creationLinearFormCompoFESpace( const list<C_F0> & largs, 
-                                        //const KN<int> & localIndexInTheBlockUh,
-                                        const KN<int> & localIndexInTheBlockVh )
-{
-  //int UhtotalNbItem = localIndexInTheBlockUh.size();
-  int VhtotalNbItem = localIndexInTheBlockVh.size();
-
+// 
+inline KN< list<C_F0> > creationLinearFormCompositeFESpace( const list<C_F0> & largs, const int& NpVh, const KN<int> & indexBlockVh
+                                                           ,const KN<int> &localIndexInTheBlockVh )
+{ 
+  // Vh is the FESpace
   // ================================================
 
   list<C_F0> newlargs; // creation de la nouvelle list largs
-   
+  KN< list<C_F0> > block_largs( (long)NpVh ); 
+
   list<C_F0>::const_iterator b_ii,b_ib=largs.begin(),b_ie=largs.end(); 
   int count=0;
   for (b_ii=b_ib;b_ii != b_ie;b_ii++){
-    cout << " block " << count << endl;
     Expression e=b_ii->LeftValue();
     aType r = b_ii->left();
     // Case FormLinear
@@ -1541,47 +1564,105 @@ inline list<C_F0>  creationLinearFormCompoFESpace( const list<C_F0> & largs,
         ffassert(0);
       }
 
-      // creation of the new bilinear operator 
-      LOperaD * OpChange= new LOperaD(*Op); // do a copy of the true BilinearOperator
-
-      size_t Opsize= OpChange->v.size();
-      size_t jj =0;
-      for(size_t jjj=0; jjj<Opsize; jjj++){
-        LOperaD::K *lf=&(Op->v[jjj]);
+      size_t Opsize= Op->v.size();
       
-        OpChange->v[jjj].first.first = 45+jj; //localIndexInTheBlockVh( OpChange->v[jjj].first.first );
+      // creation the vector of the indexBlock for each element OpChange
+      std::vector< int > indexBlock(Opsize);
 
-        pair<int,int> ftest(lf->first);
-        cout << " new value :: operateur jj= " << jj << endl;
-        cout << " FormLinear: number of unknown ftest= " << ftest.first << endl;
-        cout << " FormLinear: operator order    ftest= " << ftest.second << endl; 
-        jj+=1;
+      for(size_t jj=0; jj<Opsize; jj++){
+        indexBlock[jj] = indexBlockVh[ Op->v[jj].first.first ];
       }
-      newlargs.push_back( C_F0( new FormLinear( (ll->di), OpChange ), r ) ); 
+
+      LOperaD * OpBloc= new LOperaD();
+
+      // put the term inside OpChange in the good block
+      for(int jbloc=0; jbloc<NpVh; jbloc++){
+        int countOP=0;
+        //LOperaD * OpBloc= new LOperaD();
+        for(size_t jj=0; jj<Opsize; jj++){
+          if( indexBlock[jj] == jbloc ){
+              if (countOP == 0){
+                ffassert( OpBloc->v.empty() );
+              } 
+              OpBloc->add(Op->v[jj].first,Op->v[jj].second); // Add the LinearOperator to bloc (ibloc,jbloc).
+              countOP += 1;
+          }
+        }
+        if( countOP > 0 ){   
+          // <<  countOP << " voila titi " << "OpBloc->v.size()= " << OpBloc->v.size() << endl; 
+          ffassert( OpBloc->v.size() > 0);     
+          for(size_t jj=0; jj<OpBloc->v.size(); jj++){
+            OpBloc->v[jj].first.first = localIndexInTheBlockVh( OpBloc->v[jj].first.first );
+          }
+
+          newlargs.push_back( C_F0( new FormLinear( (ll->di), OpBloc ), r ) );
+          block_largs(jbloc).push_back( C_F0( new FormLinear( (ll->di), OpBloc ), r ) );
+
+          // cout << "OpBloc->v.size()=" << OpBloc->v.size() << ", OpBloc->v.empty()" << OpBloc->v.empty() << endl;
+          // cout << "clear v" << endl;
+          OpBloc->v.clear(); 
+          // cout << "OpBloc->v.size()=" << OpBloc->v.size() << ", OpBloc->v.empty()" << OpBloc->v.empty() << endl;
+          ffassert( ( OpBloc->v.empty() == true)  ); // check if OpBloc is empty after clear();
+        }
+      }
+      delete OpBloc;
     }      
     // case BC_set 
     else if(r == atype<const  BC_set  *>()){
-      BC_set * oldbc=dynamic_cast< BC_set *>(e); // on ne peut pas utiliser " const BC_set * " ou autrement erreur ce ompilation:  Morice
-
+      const BC_set * oldbc=dynamic_cast< const BC_set *>(e); // on ne peut pas utiliser " const BC_set * " ou autrement erreur ce ompilation:  Morice
+      
       BC_set * bc = new BC_set(*oldbc);
     
-      int kk=bc->bc.size();
+      int sizebc=bc->bc.size();
      
-      for (int k=0;k<kk;k++)
+      std::vector< int > indexBlock(sizebc);
+      // calculate the index of the componenent where the bloc
+      for (int k=0; k<sizebc; k++)
       {
-        pair<int,Expression> &xx2= bc->bc[k];
-        xx2.first = localIndexInTheBlockVh(xx2.first);
+        pair<int,Expression> &xx=bc->bc[k];
+        indexBlock[k] = indexBlockVh[xx.first]; 
+        xx.first = localIndexInTheBlockVh(xx.first);
       }
-      newlargs.push_back( C_F0( bc, r ) ); 
+      
+      for (int k=0; k<sizebc; k++)
+      {
+        cout << "bc["<<k<<"]="<< bc->bc[k].first << endl;
+      }
+      
+      // Add the bc too the correct block
+      bool addBC = false;
+      bool *okBC =new bool[NpVh];
+      for(int ibloc=0; ibloc<NpVh; ibloc++){
+        addBC = false;
+        // construction of okBC for ibloc 
+        for (int k=0; k<sizebc; k++){
+          if(indexBlock[k] == ibloc){
+            okBC[k] = true;
+            addBC = true;
+          }
+          else{
+            okBC[k] = false;
+          }
+        }
+        if(addBC){
+          cout << "addBC to block: " << ibloc << endl; 
+          for(int jj=0; jj<NpVh; jj++ ){ cout << "okBC["<<jj<<"]=: " << okBC[jj] << endl;}
+        }
+        // add the BC_set correspond to the ibloc of the composite FESpace 
+        if(addBC) newlargs.push_back( C_F0( new BC_set(*bc,okBC), r) ); 
+        if(addBC) block_largs(ibloc).push_back( C_F0( new BC_set(*bc,okBC), r) );
+      }
+      delete [] okBC;
     }
   }
-  return newlargs;
+  //return newlargs;
+  return block_largs;
 }
 
 template<class R>
 AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
 {
-  typedef typename  v_fes::FESpace FESpaceT;
+  // typedef typename  v_fes::FESpace FESpaceT;
   // get tgv value 
   double tgv= ff_tgv;
   if (l->nargs[0]) tgv= GetAny<double>((*l->nargs[0])(stack));
@@ -1589,7 +1670,12 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
   // get the composite FESpace
   pvectgenericfes  *  pCompoVh= GetAny<pvectgenericfes * >((*l->ppfes)(stack));
   ffassert( *pCompoVh );
+  (*pCompoVh)->update();
 
+// get info the composite FESpace
+  int  NpVh = (*pCompoVh)->N;
+  KN<int> VhNbItem = (*pCompoVh)->vectOfNbitem();
+  KN<int> VhNbOfDf = (*pCompoVh)->vectOfNbOfDF();
   // get x from the stack 
   long totalNbOfDF =  (*pCompoVh) ? (*pCompoVh)->totalNbOfDF(): 0;
   KN<R> *px=0;
@@ -1601,8 +1687,8 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
 
      if(px->N() != totalNbOfDF) //add Dec 2009
      {
-         if(!zero ) ExecError("Error in OpArraytoLinearForm   += not correct size:  n != NbOfDF !");
-	 px->resize(totalNbOfDF);
+        if(!zero ) ExecError("Error in OpArraytoLinearForm   += not correct size:  n != NbOfDF !");
+	      px->resize(totalNbOfDF);
      }
      ffassert(px->N() == totalNbOfDF);
    }
@@ -1612,10 +1698,11 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
    xx=R();
 
   // get info the composite FESpace
+  /*
   int  NpVh = (*pCompoVh)->N;
   KN<int> VhNbItem = (*pCompoVh)->vectOfNbitem();
   KN<int> VhNbOfDf = (*pCompoVh)->vectOfNbOfDF();
-
+  */
   int VhtotalNbItem=0;
   for(int i=0; i< NpVh; i++) VhtotalNbItem += VhNbItem[i];
 
@@ -1638,14 +1725,17 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
 
 
   // creation of the LinearForm corresponding to each block
-  const list<C_F0> & largs=l->largs; 
+  // const list<C_F0> & largs=l->largs; 
 
-  list<C_F0> newlargs=creationLinearFormCompoFESpace( largs, localIndexInTheBlockVh );
+  //list<C_F0> newlargs=creationLinearFormCompositeFESpace( l->largs, NpVh, indexBlockVh);
 
+  //const list<C_F0> & largs=newlargs; 
   //    ( block_largs , VhtotalNbItem)
 
-  KN< list<C_F0> > block_largs( (long)NpVh );
+  // const list<C_F0> & largs=l->largs; 
+  KN< list<C_F0> > block_largs = creationLinearFormCompositeFESpace( l->largs, NpVh, indexBlockVh, localIndexInTheBlockVh);
   // impression des information de la composition largs
+  /*
   list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end(); 
   cout << "loop over the linear form" << endl;
 
@@ -1659,8 +1749,6 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
     cout << "reading the " << count_integral << "-th term of the variational form used to define the matrix" << endl;
     Expression e=ii->LeftValue();
     aType r = ii->left();
-    cout << "e=" << e << ", " << "r=" << r << endl;
-    cout <<"=                                                      =" << endl;
 
     // ***********************************************
     // check the terms correspond to only one block
@@ -1738,13 +1826,13 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
       ffassert(0); 
     }
   } 
-  
+  */
   // %%%% change the index %%%% //
 
   // put the right number of each component of each block
-
+/*
   cout << " put the right number of each component of each block " << endl;  
-
+  
   for( int j=0; j<NpVh; j++){
     const list<C_F0> *b_largs=&block_largs(j); 
     list<C_F0>::const_iterator b_ii,b_ib=b_largs->begin(),b_ie=b_largs->end(); 
@@ -1765,23 +1853,8 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
         size_t jj =0;
         for(size_t jjj=0; jjj<Opsize; jjj++){
           LOperaD::K *lf=&(Op->v[jjj]);
-        //}
         
-        //for (LOperaD::iterator lop=Op->v.begin();lop!=Op->v.end();lop++)
-        //{          
-          //LOperaD::K lf(*lop);
-          /*
-          pair<int,int> ftest(lf->first);
-
-          cout << " block j=" << j << ", operateur jj= " << jj << endl;
-          cout << " FormLinear: number of unknown ftest= " << ftest.first << endl;
-          cout << " FormLinear: operator order    ftest= " << ftest.second << endl; 
-
-          ftest.first = localIndexInTheBlockVh(ftest.first);
-
-          ftest.first = localIndexInTheBlockVh(ftest.first);
-          */
-          Op->v[jjj].first.first = localIndexInTheBlockVh( Op->v[jjj].first.first );
+          //Op->v[jjj].first.first = localIndexInTheBlockVh( Op->v[jjj].first.first );
 
           pair<int,int> ftest(lf->first);
           cout << " new value :: block j=" << j << ", operateur jj= " << jj << endl;
@@ -1801,17 +1874,19 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
         for (int k=0;k<kk;k++)
         {
           pair<int,Expression> &xx2= bc->bc[k];
+          cout << "bc->bc["<< k << "].first= " << bc->bc[k].first << endl; 
           //new_index_funct_finc[k] = localIndexInTheBlockUh(bc[k].first);
           // change the index of the component to correspond to the index in the block
-          xx2.first = localIndexInTheBlockVh(xx2.first);
+          //xx2.first = localIndexInTheBlockVh(xx2.first);
           //bc->changeNumberOfComponent(k,localIndexInTheBlockUh(xx.first));
           //bc->bc[k].first = localIndexInTheBlockUh( bc->bc[k].first );
+          cout << "bc->bc["<< k << "].first= " << bc->bc[k].first << endl; 
         }
       }
     }
     // listOfComponentBilinearForm(*b_largs);
   }
-
+*/
   // verification value in b_largs
  /*
  //== new largs plot  ===// 
@@ -1858,6 +1933,7 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
           pair<int,Expression> &xx2= bc->bc[k];
           //new_index_funct_finc[k] = localIndexInTheBlockUh(bc[k].first);
           // change the index of the component to correspond to the index in the block
+          cout << " bc["<<k<<"]="<< xx2.first <<endl;
           xx2.first = localIndexInTheBlockVh(xx2.first);
           //bc->changeNumberOfComponent(k,localIndexInTheBlockUh(xx.first));
           //bc->bc[k].first = localIndexInTheBlockUh( bc->bc[k].first );
@@ -1866,7 +1942,8 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
     }
     // listOfComponentBilinearForm(*b_largs);
   //}
-  
+  */
+ /*
   cout << "=============  largs =================" << endl;
   const list<C_F0> *bbb_largs=&largs; 
     list<C_F0>::const_iterator bb_ii,bb_ib=bbb_largs->begin(),bb_ie=bbb_largs->end(); 
@@ -1909,9 +1986,10 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
           pair<int,Expression> &xx2= bc->bc[k];
           //new_index_funct_finc[k] = localIndexInTheBlockUh(bc[k].first);
           // change the index of the component to correspond to the index in the block
-          xx2.first = localIndexInTheBlockVh(xx2.first);
+          xx2.first = xx2.first;
           //bc->changeNumberOfComponent(k,localIndexInTheBlockUh(xx.first));
           //bc->bc[k].first = localIndexInTheBlockUh( bc->bc[k].first );
+          cout << "bc->bc["<< k << "].first= " << bc->bc[k].first << endl; 
         }
       }
     }
@@ -1967,8 +2045,10 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
           AssembleBC<R,MeshL,FESpaceL,FESpaceL>(stack,Vh.Th,Vh,Vh,false,0,&xxblock2,0,b_largs,tgv);
 
       }
-
-      cout << " value of xxblock=" << xxblock2[80] << " " << offsetVh << endl;
+      else{
+        cerr << "Error in the definition in the type of FESpace."  << endl;
+        ffassert(0);
+      }
       for(int indexJ=0; indexJ<M_block; indexJ++){
         xx[indexJ+offsetVh] += xxblock2[indexJ]; 
       }
@@ -1978,7 +2058,7 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
   }
 
   // %%%% change the index %%%%% //
-
+  /*
   cout << " reinitialisation of the index " << endl;
   for( int j=0; j<NpVh; j++){
     const list<C_F0> *b_largs=&block_largs(j); 
@@ -2008,17 +2088,73 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
         int kk=bc->bc.size();
       
         for (int k=0;k<kk;k++)
+        { cout << "before change:: bc->bc["<< k << "].first= " << bc->bc[k].first << endl; }
+
+        for (int k=0;k<kk;k++)
         {
           pair<int,Expression> &xx2= bc->bc[k];
           
-          xx2.first += beginBlockVh[j];  
+          xx2.first += beginBlockVh[j];   
         }
+
+        for (int k=0;k<kk;k++)
+        { cout << " change:: bc->bc["<< k << "].first= " << bc->bc[k].first << endl; }
       }
     }
     // listOfComponentBilinearForm(*b_largs);
   }
+  */
+  /*
+  cout << "=============  largs =================" << endl;
+  const list<C_F0> *bbbb_largs=&largs; 
+    list<C_F0>::const_iterator bbb_ii,bbb_ib=bbbb_largs->begin(),bbb_ie=bbbb_largs->end(); 
+    for (bbb_ii=bb_ib;bbb_ii != bb_ie;bbb_ii++){
+      Expression e=bbb_ii->LeftValue();
+      aType r = bbb_ii->left();
+      // Case FormLinear
+      if (r==atype<const  FormLinear *>() ){
+        const FormLinear * ll=dynamic_cast<const  FormLinear *>(e);
+        LOperaD * Op = const_cast<LOperaD *>(ll->l);
+        if (Op == NULL) {
+          if(mpirank == 0) cout << "dynamic_cast error" << endl; 
+          ffassert(0);
+        }
 
+        int indexOfBlock = -1;
+        //size_t Opsize= Op->v.size();
+        size_t jj =0;
+        for (LOperaD::const_iterator lop=Op->v.begin();lop!=Op->v.end();lop++)
+        {          
+          LOperaD::K lf(*lop);
+          pair<int,int> ftest(lf.first);
 
+          cout << " block operateur jj= " << jj << endl;
+          cout << " FormLinear: number of unknown ftest= " << ftest.first << endl;
+          cout << " FormLinear: operator order    ftest= " << ftest.second << endl; 
+
+       }
+      }      
+      // case BC_set 
+      else if(r == atype<const  BC_set  *>()){
+        BC_set * bc=dynamic_cast< BC_set *>(e); // on ne peut pas utiliser " const BC_set * " ou autrement erreur ce ompilation:  Morice
+
+        //KN<int>  new_index_funct_finc( bc.size() );
+        int kk=bc->bc.size();
+        //pair<int,Expression>  &bc_ib(bc->bc.begin());
+        
+        for (int k=0;k<kk;k++)
+        {
+          pair<int,Expression> &xx2= bc->bc[k];
+          //new_index_funct_finc[k] = localIndexInTheBlockUh(bc[k].first);
+          // change the index of the component to correspond to the index in the block
+          xx2.first = xx2.first;
+          //bc->changeNumberOfComponent(k,localIndexInTheBlockUh(xx.first));
+          //bc->bc[k].first = localIndexInTheBlockUh( bc->bc[k].first );
+          cout << "bc->bc["<< k << "].first= " << bc->bc[k].first << endl; 
+        }
+      }
+    }
+  */
   return SetAny<KN_<R> >(xx);
 }
 
@@ -2160,47 +2296,15 @@ AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stac
   return SetAny<Matrice_Creuse<R>  *>(&A);
 
 }
-/*
-#ifndef FFLANG
-#ifdef PARALLELE
 
-#define BOOST_NO_CXX17_IF_CONSTEXPR
-#include <ff++.hpp>
-#include <AFunction_ext.hpp>
-#include <lgfem.hpp>
-#include <R3.hpp>
+list<C_F0>  creationLargsForCompositeFESpace( const list<C_F0> & largs, const int &NpUh, const int &NpVh, 
+                                            const KN<int> &indexBlockUh, const KN<int> &indexBlockVh );
 
-#include <htool/htool.hpp>
+KNM< list<C_F0> > computeBlockLargs( const list<C_F0> & largs, const int &NpUh, const int &NpVh, 
+                                    const KN<int> &indexBlockUh, const KN<int> &indexBlockVh );
 
-// include the bemtool library .... path define in where library
-//#include <bemtool/operator/block_op.hpp>
-#include <bemtool/tools.hpp>
-#include <bemtool/fem/dof.hpp>
-#include <bemtool/operator/operator.hpp>
-#include <bemtool/miscellaneous/htool_wrap.hpp>
-#include "PlotStream.hpp"
-
-#include "common.hpp"
-
-extern FILE *ThePlotStream;
-
-using namespace std;
-//using namespace htool;
-//using namespace bemtool;
-
-#include <type_traits>
-
-typedef   LinearComb<MGauche,C_F0> Finconnue;
-typedef   LinearComb<MDroit,C_F0> Ftest;
-typedef  const Finconnue  finconnue;
-typedef  const Ftest ftest;
-class CDomainOfIntegration;
-class FormBilinear;
-#include "bem.hpp"
-
-#endif
-#endif
-*/
+void changeComponentFormCompositeFESpace( const KN<int> &localIndexInTheBlockUh, const KN<int> &localIndexInTheBlockVh, 
+        KNM< list<C_F0> > & block_largs );
 
 template<class R,class MMesh, class FESpace1, class FESpace2>
 void creationBlockOfMatrixToBilinearForm( const FESpace1 * PUh, const FESpace2 * PVh, const int &sym, const double &tgv, 
@@ -2208,13 +2312,14 @@ void creationBlockOfMatrixToBilinearForm( const FESpace1 * PUh, const FESpace2 *
   typedef typename  FESpace1::Mesh Mesh1;
   typedef typename  FESpace2::Mesh Mesh2;
 
-  // if(init) A.init(); //
+  // this lines must be defined outside this function
+  // if(init) A.init();
   // if( ! PUh || ! PVh) return SetAny<Matrice_Creuse<R>  *>(&A);
   const FESpace1 & Uh =  *PUh ;
   const FESpace2 & Vh =  *PVh ;
   const MMesh* pTh = (is_same< Mesh1, Mesh2 >::value) ? (MMesh*)&PUh->Th : 0;
   const MMesh &Th= *pTh ;    // integration Th
-  bool same=isSameMesh(largs,&Uh.Th,&Vh.Th,stack);
+  bool same=isSameMesh( largs, &Uh.Th, &Vh.Th, stack);
   if ( same)
    {
      if ( A.Uh != Uh  || A.Vh != Vh )
@@ -2256,1010 +2361,41 @@ void creationBlockOfMatrixToBilinearForm( const FESpace1 * PUh, const FESpace2 *
    }
 
 }
-/*
-inline string typeFEtoString(int typeFE)
-{
-  string toto="";
-  if(typeFE == 2){
-    toto= "FESpace2D Vol";
-  }else if(typeFE == 3){
-    toto= "FESpace3D Vol";
-  }else if(typeFE == 4){
-    toto= "FESpace3D Surf";
-  }else if(typeFE == 5){
-    toto= "FESpace3D Curve";
+
+//
+template<class R,class MMesh, class FESpace1, class FESpace2>
+void creationBlockOfLinearSystem( bool initmat, bool initx, const FESpace1 * PUh, const FESpace2 * PVh, 
+                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
+                              KN_<R> *B, KN_<R> *X, CountPointer< MatriceCreuse<R> > &A){
+  typedef typename  FESpace1::Mesh Mesh1;
+  typedef typename  FESpace2::Mesh Mesh2;
+
+  // this lines must be defined outside this function
+  // if(init) A.init();
+  // if( ! PUh || ! PVh) return SetAny<Matrice_Creuse<R>  *>(&A);
+  const FESpace1 & Uh =  *PUh ;
+  const FESpace2 & Vh =  *PVh ;
+  const MMesh* pTh = (is_same< Mesh1, Mesh2 >::value) ? (MMesh*)&PUh->Th : 0;
+  const MMesh &Th= *pTh ;    // integration Th
+ 
+  // PAC(e) :  on retourne lme type MatriceCreuse Ici et non Matrice_Creuse<R> dans creationBlockOfMatrixToBilinearForm.
+  // Attention pour la gene
+
+  if  (AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpace1,FESpace2 >( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, largs))
+  {
+      *B = - *B;
+      // hach FH
+      for (int i=0, n= B->N(); i< n; i++)
+      if( abs((*B)[i]) < 1.e-60 ) (*B)[i]=0;
+
+      // AssembleBC<R,MMesh,FESpace1,FESpace2> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv );   // TODO with problem
+      AssembleBC<R> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv );   // TODO with problem
   }
-  else{
-    cerr << "func typeFEtoString ::  error in the type of FESpace " << endl;
-    ffassert(0);
-  }
-  return toto;
-}
-*/
-/*
-// A enlever ??
-inline void listOfComponentBilinearForm(const list<C_F0> & largs){
-
-  list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end(); 
-
-  // loop over largs information 
-  cout << "loop over the integral" << endl;
-
-  int count_integral = 0;
-  for (ii=ib;ii != ie;ii++) {
-    count_integral++;
-    cout <<"========================================================" << endl;
-    cout <<"=                                                      =" << endl;
-    cout << "reading the " << count_integral << "-th integral" << endl;
-    Expression e=ii->LeftValue();
-    aType r = ii->left();
-    cout << "e=" << e << ", " << "r=" << r << endl;
-    cout <<"=                                                      =" << endl;
-
-    // ***************************************
-    // Case FormBillinear
-    // ***************************************
-    if (r==atype<const  FormBilinear *>() ){
-      const FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
-      const CDomainOfIntegration & di= *bb->di;
-
-      cout << "di.kind=" << di.kind << endl;
-      cout << "di.dHat=" << di.dHat << endl;
-      cout << "di.d=" << di.d << endl;
-      cout << "di.Th=" << di.Th << endl;
-
-      int    d = di.d;
-      int dHat = di.dHat;
-
-
-      // Sert a verifier que "*bb->di->Th" est du bon type ==> A enlever
-      
-      // Recuperation du pointeur sur le maillage de l'integrale
-      //if(d==2){ // 3d
-      //  pmesh Thtest=GetAny<pmesh >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else if(d==3 && dHat==3){
-      //  pmesh3 Thtest=GetAny<pmesh3 >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else if(d==3 && dHat==2){
-      //  pmeshS Thtest=GetAny<pmeshS >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else if(d==3 && dHat==1){
-      //  pmeshL Thtest=GetAny<pmeshL >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else{ ffassert(0); }// a faire
-      
-      BilinearOperator * Op=const_cast<  BilinearOperator *>(bb->b);
-      if (Op == NULL) {
-        if(mpirank == 0) cout << "dynamic_cast error" << endl; 
-        ffassert(0);
-      }
-      
-      size_t Opsize= Op->v.size();
-      cout << " loop over the term inside the integral" << endl;
-      cout << " Number of term in the integral:: Op->v.size()=" << Op->v.size() << endl;
-
-      // index to check if a integral is defined on multi block
-
-      for(size_t jj=0; jj<Opsize; jj++){
-        // attention la fonction test donne la ligne
-        //  et la fonction test est en second
-        BilinearOperator::K ll = Op->v[jj];
-        pair<int,int> finc(ll.first.first), ftest(ll.first.second);
-        cout << " operateur jj= " << jj << endl;
-        cout << " FormBilinear: number of unknown finc=" <<  finc.first << " ,ftest= " << ftest.first << endl;
-        cout << " FormBilinear: operator order finc   =" << finc.second << " ,ftest= " << ftest.second << endl; // ordre   only op_id=0
-        
-        // finc.first : index de component de la fonction inconnue
-        // ftest.first: index de component de la fonction test
-        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // finc.second : renvoie l'index du type de l'operateur: Id, dx(), dy(), dz(), dxx(), dxy(), ...
-        //
-        // la liste des index des operateurs est definis dans [[????]].
-        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // exemple vf([u1,u2,..,u30],[v1,v2,...,v30]) = int2d(Th)(dx(u20)*v15)
-        //      finc.first  = 20 , ftest.first = 15
-        //      finc.second = 1 , ftest.second = 0
-
-        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%       
-      }
-    }
-    else if(r == atype<const  BC_set  *>()){
-      cout << " BC in variational form " << endl;
-      const BC_set * bc=dynamic_cast<const  BC_set *>(e);
-  
-      //KN<int>  new_index_funct_finc( bc.size() );
-      int kk=bc->bc.size();
-      for (int k=0;k<kk;k++)
-      {
-        //new_index_funct_finc[k] = localIndexInTheBlockUh(bc[k].first);
-        // change the index of the component to correspond to the index in the block
-        cout << "bc->bc["<< k << "].first= " << bc->bc[k].first << endl; 
-      }
-      //ffassert(0);
-    }
-    else{
-      cerr << "listOfComponentBilinearForm :: vectorial FESpace :: bilinear form only " << endl;
-      cerr << "      uniquement terme bilineaire + BC " << endl;
-      ffassert(0);
-    }
-  }
+  else
+    *B = - *B;
 
 }
-*/
-/*
-template<class R>
-AnyType OpMatrixtoBilinearFormVG<R>::Op::operator()(Stack stack)  const
-{
-  assert(b && b->nargs);
 
-  pvectgenericfes  * pUh= GetAny<pvectgenericfes *>((*b->euh)(stack));
-  pvectgenericfes  * pVh= GetAny<pvectgenericfes *>((*b->evh)(stack));
-  ffassert( *pUh && *pVh ); 
-
-  int NpUh = (*pUh)->N; // number of fespace in pUh
-  int NpVh = (*pVh)->N; // number of fespace in pVh
-
-  KN<int> UhNbOfDf = (*pUh)->vectOfNbOfDF();
-  KN<int> VhNbOfDf = (*pVh)->vectOfNbOfDF();
-
-  KN<int> UhNbItem = (*pUh)->vectOfNbitem();
-  KN<int> VhNbItem = (*pVh)->vectOfNbitem();
-
-  KN<int> beginBlockUh(NpUh); // index of the first elment of a block
-  KN<int> beginBlockVh(NpVh);
-
-  // loop over the index 
-  int UhtotalNbItem=0;
-  cout << "finc: FESpace" << endl;
-  for(int i=0; i< NpUh; i++){
-    cout << "component i=" << i << ", NbItem["<<i<<"]=" <<  UhNbItem[i] << ", NbDof["<<i<<"]=" << UhNbOfDf[i] << endl;
-    beginBlockUh[i] = UhtotalNbItem;
-    UhtotalNbItem += UhNbItem[i];
-    ffassert( UhNbItem[i] > 0 && UhNbOfDf[i] > 0);
-  }
-
-  int VhtotalNbItem=0;
-  cout << "ftest: FESpace" << endl;
-  for(int i=0; i< NpVh; i++){
-    cout << "component i=" << i << ", NbItem["<<i<<"]=" <<  VhNbItem[i] << ", NbDof["<<i<<"]=" << VhNbOfDf[i] << endl;
-    beginBlockVh[i] = VhtotalNbItem;
-    VhtotalNbItem += VhNbItem[i];
-    ffassert( VhNbItem[i] > 0 && VhNbOfDf[i] > 0);
-  }
-  
-  // index for the construction of the block
-  KN<int> indexBlockUh(UhtotalNbItem);
-  KN<int> localIndexInTheBlockUh(UhtotalNbItem);
-  { 
-    // ========================
-    //
-    // varf([u0,u1,...,u4], ... ) 
-    // varf([ [u0_blk1,u1_blk1],[u0_blk2,u1_blk2,u2_blk2] ], ... ) 
-
-    // For u4, on a :: current_index = 4
-    //              :: indexBlockUh = 2
-    //              :: localIndexInThBlock = 3
-    int current_index=0;
-    for(int i=0; i<NpUh; i++){
-      for(int j=0; j<UhNbItem[i]; j++){
-        indexBlockUh[current_index] = i;
-        localIndexInTheBlockUh[current_index] = j;
-        current_index++;
-      }
-    }
-    ffassert(current_index==UhtotalNbItem);
-  }
-
-  KN<int> indexBlockVh(VhtotalNbItem);
-  KN<int> localIndexInTheBlockVh(VhtotalNbItem);
-  { 
-    int current_index=0;
-    for(int i=0; i<NpVh; i++){
-      for(int j=0; j<VhNbItem[i]; j++){
-        indexBlockVh[current_index] = i;
-        localIndexInTheBlockVh[current_index] = j;
-        current_index++;
-      }
-    }
-    ffassert(current_index==VhtotalNbItem);
-  }
-  cout <<"========================================================" << endl;
-  cout <<"=                                                      =" << endl;
-  cout <<"= indexBlockUh=                                        =" << endl;
-  cout << indexBlockUh << endl;
-  cout <<"=                                                      =" << endl;
-  cout <<"= localIndexInTheBlockUh=                              =" << endl;
-  cout << localIndexInTheBlockUh << endl;
-
-  cout <<"========================================================" << endl;
-  cout <<"=                                                      =" << endl;
-  cout <<"= indexBlockVh=                                        =" << endl;
-  cout << indexBlockVh << endl;
-  cout <<"=                                                      =" << endl;
-  cout <<"= localIndexInTheBlockVh=                              =" << endl;
-  cout << localIndexInTheBlockVh << endl;
-
-
-  
-  #ifdef PARALLELE
-  cout << "====    define parallele  =====" << endl;
-  exit(0);
-  #endif
-  
-
-
-  //
-  const list<C_F0> & largs=b->largs; 
-
-  KNM< list<C_F0> > block_largs( (long)NpUh, (long)NpVh );
-
-  // impression des information de la composition largs
-  list<C_F0>::const_iterator ii,ib=largs.begin(),ie=largs.end(); 
-
-
-  // necessaire :: UhtotalNbItem, indexBlockUh
-
-  // Loop to put each term of the varf in each correct block
-
-  // loop over largs information 
-  cout << "loop over the integral" << endl;
-
-  int count_integral = 0;
-  for (ii=ib;ii != ie;ii++) {
-    count_integral++;
-    cout <<"========================================================" << endl;
-    cout <<"=                                                      =" << endl;
-    cout << "reading the " << count_integral << "-th term of the variational form used to define the matrix" << endl;
-    Expression e=ii->LeftValue();
-    aType r = ii->left();
-    cout << "e=" << e << ", " << "r=" << r << endl;
-    cout <<"=                                                      =" << endl;
-
-    // ***************************************
-    // Case FormBillinear
-    // ***************************************
-    if (r==atype<const  FormBilinear *>() ){
-      const FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
-      const CDomainOfIntegration & di= *bb->di;
-
-      cout << "di.kind=" << di.kind << endl;
-      cout << "di.dHat=" << di.dHat << endl;
-      cout << "di.d=" << di.d << endl;
-      cout << "di.Th=" << di.Th << endl;
-
-      int    d = di.d;
-      int dHat = di.dHat;
-
-      // Sert a verifier que "*bb->di->Th" est du bon type ==> A enlever
-      
-      // Recuperation du pointeur sur le maillage de l'integrale
-      //if(d==2){ // 3d
-      //  pmesh Thtest=GetAny<pmesh >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else if(d==3 && dHat==3){
-      //  pmesh3 Thtest=GetAny<pmesh3 >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else if(d==3 && dHat==2){
-      //  pmeshS Thtest=GetAny<pmeshS >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else if(d==3 && dHat==1){
-      //  pmeshL Thtest=GetAny<pmeshL >((*bb->di->Th)(stack));
-      //  cout << "pointeur du Th de l'integrale =" << Thtest << endl;
-      //}
-      //else{ ffassert(0); }// a faire
-      
-      BilinearOperator * Op=const_cast<  BilinearOperator *>(bb->b);
-      if (Op == NULL) {
-        if(mpirank == 0) cout << "dynamic_cast error" << endl; 
-        ffassert(0);
-      }
-      
-      size_t Opsize= Op->v.size();
-      cout << " loop over the term inside the integral" << endl;
-      cout << " Number of term in the integral:: Op->v.size()=" << Op->v.size() << endl;
-
-    
-      // index to check if a integral is defined on multi block
-      int indexOfBlockUh = -1; // A changer de nom
-      int indexOfBlockVh = -1; // A changer de nom
-      for(size_t jj=0; jj<Opsize; jj++){
-        // attention la fonction test donne la ligne
-        //  et la fonction test est en second
-        BilinearOperator::K ll = Op->v[jj];
-        pair<int,int> finc(ll.first.first), ftest(ll.first.second);
-        cout << " operateur jj= " << jj << endl;
-        cout << " FormBilinear: number of unknown finc=" <<  finc.first << " ,ftest= " << ftest.first << endl;
-        cout << " FormBilinear: operator order finc   =" << finc.second << " ,ftest= " << ftest.second << endl; // ordre   only op_id=0
-        
-        // Fred fait peut être un message après ????
-        // verification que la taille des tableaux des fonctions tests et de la fonction inconnue``
-        // sont correctes.  
-        ffassert( -1  < finc.first  && finc.first < UhtotalNbItem);
-        ffassert( -1  < ftest.first && ftest.first < VhtotalNbItem);
-
-        // finc.first : index de component de la fonction inconnue
-        // ftest.first: index de component de la fonction test
-        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // finc.second : renvoie l'index du type de l'operateur: Id, dx(), dy(), dz(), dxx(), dxy(), ...
-        //
-        // la liste des index des operateurs est definis dans [[????]].
-        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // exemple vf([u1,u2,..,u30],[v1,v2,...,v30]) = int2d(Th)(dx(u20)*v15)
-        //      finc.first  = 20 , ftest.first = 15
-        //      finc.second = 1 , ftest.second = 0
-
-        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        if( jj== 0 ){
-          indexOfBlockUh = indexBlockUh[finc.first];
-          indexOfBlockVh = indexBlockVh[ftest.first];
-        }
-        else if( indexOfBlockUh != indexBlockUh[finc.first] ){
-          cerr << "The " << count_integral <<"-th integral(s) contains the constribution of two different blocks:" << endl;
-          cerr << "the first term correspond to block (" << indexOfBlockUh << " , " <<  indexOfBlockVh << ")" << endl;
-          cerr << "the "<<jj <<"-th term correspond to block (" << indexBlockUh(finc.first) << " " <<  indexBlockVh(ftest.first) << ")" << endl;
-          cerr << "You need to separate the integral in individual part." << endl;
-          cerr << "Remark: scalar product in N dimension correspond to N terms inside the integral" << endl;
-          cerr << "A ameliorer Jacques." << endl;
-          ffassert(0);
-        }
-        else if( indexOfBlockVh != indexBlockVh[ftest.first] ){
-          cerr << "The " << count_integral <<"-th integral(s) contains the constribution of two different blocks:" << endl;
-          cerr << "the first term correspond to block (" << indexOfBlockUh << " , " <<  indexOfBlockVh << ")" <<endl;
-          cerr << "the "<<jj <<"-th term correspond to block (" << indexBlockUh(finc.first) << ", " <<  indexBlockVh(ftest.first) << ")" << endl;
-          cerr << "You need to separate the integral in individual part." << endl;
-          cerr << "Remark: scalar product in N dimension correspond to N terms inside the integral" << endl;
-          cerr << "A ameliorer Jacques." << endl;
-          ffassert(0);
-        }
-
-        ffassert( indexOfBlockUh == indexBlockUh(finc.first) );
-        ffassert( indexOfBlockVh == indexBlockVh(ftest.first) );
-      }
-      
-    ffassert( indexOfBlockUh >= 0 && indexOfBlockVh >= 0);
-    
-    // A faire :: recuperation des éléments pour chacun des blocs
-    // Actuellement, on associe une intégrale par block ==> 
-    
-    // change the index of the block
-
-    //changeIndexFunctionInconnue(*Op, index_operator_finc, new_index_funct_finc );
-  
-    //changeIndexFunctionTest(*Op, index_operator_ftest, new_index_funct_ftest  );
-    
-    block_largs(indexOfBlockUh,indexOfBlockVh).push_back(*ii);
-
-    cout << "The " << count_integral <<"-th integral(s) is added to the block (" << indexOfBlockUh << " , " <<  indexOfBlockVh << ")" <<endl;
-
-    }
-#ifndef FFLANG
-#ifdef PARALLELE
-    // ******************************************
-    // Case BemKFormBilinear (KERNEL FORM ONLY)
-    // ******************************************
-    else if (r==atype<const BemFormBilinear *>() ){
-      BemFormBilinear * bbtmp= dynamic_cast< BemFormBilinear *>(e);
-      int VVFBEM = bbtmp->type;
-
-      if(VVFBEM ==1){
-        BemKFormBilinear * bb=new BemKFormBilinear(*dynamic_cast<const BemKFormBilinear *>(e));
-        FoperatorKBEM * b=const_cast<  FoperatorKBEM *>(bb->b);
-        if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; exit(0);}
-
-        int indexOfBlockUh = -1; // A changer de nom
-        int indexOfBlockVh = -1; // A changer de nom
-
-
-        // loop over the index of finconnue
-        LOperaG * OpG = const_cast<LOperaG *>(b->fi);
-        ffassert( OpG->v.size() == 1);
-        size_t jj =0;
-        for (LOperaG::const_iterator lop=OpG->v.begin();lop!=OpG->v.end();lop++){
-
-          LOperaG::K lf(*lop);
-          pair<int,int> finc(lf.first);
-          cout << " operateur jj= " << jj << endl;
-          cout << " BemFormLinear: number of unknown finc= " << finc.first << endl;
-          ffassert( -1  < finc.first && finc.first < UhtotalNbItem);     // check the index 
-
-          if( jj== 0 ){
-            indexOfBlockUh = indexBlockUh[finc.first];
-          }
-          else if( indexOfBlockUh != indexBlockUh[finc.first] ){
-            cerr << "The " << count_integral <<"-th term of the varitional form contains the constribution of two different FESpace:" << endl;
-            cerr << "This terms correspond to a BEM integral terms" << endl;
-            cerr << "the first term correspond to element " << indexOfBlockUh << " of the Composite FESpace (Finconnu)." << endl;
-            cerr << "the "<< jj <<"-th term correspond to element " << indexBlockUh(finc.first) << endl;
-            cerr << "In a composite FESpace, you need to define a BEM integral for each FESpace individually." << endl;
-            cerr << "A ameliorer Jacques." << endl;
-            ffassert(0);
-          }
-          jj+=1;
-        }
-
-
-        // Loop over the index of ftest
-        LOperaD * OpD = const_cast<LOperaD *>(b->ft);
-        ffassert( OpD->v.size() == 1);
-        jj =0; // reinitialisation ton zero
-        for (LOperaD::const_iterator lop=OpD->v.begin();lop!=OpD->v.end();lop++){
-          
-          LOperaD::K lf(*lop);
-          pair<int,int> ftest(lf.first);
-          cout << " operateur jj= " << jj << endl;
-          cout << " BemFormLinear: number of unknown ftest= " << ftest.first << endl;
-          ffassert( -1  < ftest.first && ftest.first < VhtotalNbItem);    // check the index 
-
-          if( jj== 0 ){
-            indexOfBlockVh = indexBlockVh[ftest.first];
-          }
-          else if( indexOfBlockVh != indexBlockVh[ftest.first] ){
-            cerr << "The " << count_integral <<"-th term of the varitional form contains the constribution of two different FESpace:" << endl;
-            cerr << "This terms correspond to a BEM integral terms" << endl;
-            cerr << "the first term correspond to element " << indexOfBlockVh << " of the Composite FESpace (Ftest)." << endl;
-            cerr << "the "<< jj <<"-th term correspond to element " << indexBlockVh(ftest.first) << endl;
-            cerr << "In a composite FESpace, you need to define a BEM integral term for each FESpace individually." << endl;
-            cerr << "A ameliorer Jacques." << endl;
-            ffassert(0);
-          }
-          jj+=1;
-        }
-        block_largs(indexOfBlockUh,indexOfBlockVh).push_back(*ii); 
-
-      }else if(VVFBEM == 2){
-        BemPFormBilinear * bb=new BemPFormBilinear(*dynamic_cast<const BemPFormBilinear *>(e));
-        FoperatorPBEM * b=const_cast<  FoperatorPBEM *>(bb->b);
-        if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; }
-
-        cerr << " BEM Potential in composite FESpace in construction " << endl;
-        ffassert(0);
-      }
-
-    }
-#endif
-#endif
-    else if(r == atype<const  BC_set  *>()){
-      cout << " BC in variational form " << endl;
-      
-      const BC_set * bc=dynamic_cast<const  BC_set *>(e);
-      
-      // index to check if a integral is defined on multi block
-      int indexOfBlockUh = -1;
-    
-      int kk=bc->bc.size();
-      for (int k=0;k<kk;k++)
-      {
-          pair<int,Expression> xx=bc->bc[k];
-          ffassert( -1  < xx.first  && xx.first < UhtotalNbItem); // check the value of index of the component of the varf
-        
-          if( k == 0) indexOfBlockUh = indexBlockUh[xx.first]; // index of the block Uh
-          else if( indexOfBlockUh != indexBlockUh[xx.first] ){
-            cerr << "The " << count_integral <<"-th term of the varitional form contains the constribution of two different FESpace:" << endl;
-            cerr << "This terms correspond to Boundary condition" << endl;
-            cerr << "the first term correspond to element " << indexOfBlockUh << " of the Composite FESpace " << endl;
-            cerr << "the "<<kk <<"-th term correspond to element " << indexBlockUh(xx.first) << endl;
-            cerr << "In a composite FESpace, you need to define a BC for each FESpace individually." << endl;
-            cerr << "A ameliorer Jacques." << endl;
-            ffassert(0);
-          }
-      }
-      // Added the boundary condition in the largs block
-      block_largs(indexOfBlockUh,indexOfBlockUh).push_back(*ii); 
-        
-      //ffassert(0);
-    }
-    else{
-      #ifndef FFLANG
-      #ifdef PARALLELE
-      cout << "r=" << r << ", " << atype<const BemFormBilinear *>() << endl;
-      #endif
-      #endif
-      cerr << "Composite FESpace :: bilinear form only " << endl;
-      cerr << "      uniquement terme bilineaire + BC " << endl;
-      ffassert(0);
-    }
-  }
-
-  // check the list of <<largs>> for each block
-  cout <<"========================================================" << endl;
-  cout <<"=                                                      =" << endl;
-  cout <<"= check the list of largs of each block                =" << endl;
-  cout <<"=                                                      =" << endl;
-  for( int i=0; i<NpUh; i++){
-    for( int j=0; j<NpVh; j++){
-      cout<< " block ( "<< i << " , " << j <<  " ) " ;
-      const list<C_F0> & b_largs=block_largs(i,j); 
-      cout<< ", size of the list=" << b_largs.size() << endl;
-      // impression des information de la composition largs
-      list<C_F0>::const_iterator b_ii,b_ib=b_largs.begin(),b_ie=b_largs.end(); 
-      for (b_ii=b_ib;b_ii != b_ie;b_ii++){
-        Expression e=b_ii->LeftValue();
-        aType r = b_ii->left();
-        cout << "e=" << e << ", r=" << r << endl;
-      }
-    }
-  }
-  
-  // Info necessaire :: " block_largs, localIndexInTheBlockUh, localIndexInTheBlockVh, NpUh, NpVh  
-
-  // put the right number of each component of each block
-  for( int i=0; i<NpUh; i++){
-      for( int j=0; j<NpVh; j++){
-        
-        const list<C_F0> *b_largs=&block_largs(i,j); 
-        list<C_F0>::const_iterator b_ii,b_ib=b_largs->begin(),b_ie=b_largs->end(); 
-        for (b_ii=b_ib;b_ii != b_ie;b_ii++){
-          Expression e=b_ii->LeftValue();
-          aType r = b_ii->left();
-          // Case FormBilinear
-          if (r==atype<const  FormBilinear *>() ){
-            const FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
-      
-            BilinearOperator * Op=const_cast<  BilinearOperator *>(bb->b);
-            if (Op == NULL) {
-              if(mpirank == 0) cout << "dynamic_cast error" << endl; 
-            ffassert(0);
-            }
-      
-            size_t Opsize= Op->v.size();
-            cout << " loop over the term inside the integral" << endl;
-            cout << " Number of term in the integral:: Op->v.size()=" << Op->v.size() << endl;
-
-        
-            KN<size_t> index_operator_finc(Opsize);
-            KN<int>    new_index_funct_finc(Opsize);
-
-            KN<size_t> index_operator_ftest(Opsize);
-            KN<int>    new_index_funct_ftest(Opsize);
-
-            // index to check if a integral is defined on multi block
-            for(size_t jj=0; jj<Opsize; jj++){
-              // attention la fonction test donne la ligne
-              //  et la fonction test est en second
-              BilinearOperator::K ll = Op->v[jj];
-              pair<int,int> finc(ll.first.first), ftest(ll.first.second);
-
-              long jj2= jj;
-
-              index_operator_finc[ jj2] = jj;
-              new_index_funct_finc[ jj2] = localIndexInTheBlockUh(finc.first);
-            
-              index_operator_ftest[ jj2]  = jj;
-              new_index_funct_ftest[ jj2] = localIndexInTheBlockVh(ftest.first);
-
-            }
-            changeIndexFunctionInconnue(*Op, index_operator_finc, new_index_funct_finc );
-      
-            changeIndexFunctionTest(*Op, index_operator_ftest, new_index_funct_ftest  );          
-          }  
-
-          #ifndef FFLANG
-          #ifdef PARALLELE
-          // ******************************************
-          // Case BemKFormBilinear (KERNEL FORM ONLY)
-          // ******************************************
-          else if (r==atype<const BemFormBilinear *>() ){
-            BemFormBilinear * bbtmp= dynamic_cast< BemFormBilinear *>(e);
-            int VVFBEM = bbtmp->type;
-
-            if(VVFBEM ==1){
-              BemKFormBilinear * bb=new BemKFormBilinear(*dynamic_cast<const BemKFormBilinear *>(e));
-              FoperatorKBEM * b=const_cast<  FoperatorKBEM *>(bb->b);
-              if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; exit(0);}
-
-              // loop over the index of finconnue
-              LOperaG * OpG = const_cast<LOperaG *>(b->fi);
-              ffassert( OpG->v.size() == 1);
-              size_t Opsize= OpG->v.size();
-
-              for(size_t jjj=0; jjj<Opsize; jjj++){
-                LOperaG::K *lf=&(OpG->v[jjj]);
-                OpG->v[jjj].first.first = localIndexInTheBlockUh( OpG->v[jjj].first.first );
-              
-                pair<int,int> finc(lf->first);
-                cout << " new value :: block i,j=" << i << ","<< j << ", operateur jj= " << jjj << endl;
-                cout << " BemormBilinear: number of unknown finc = " << finc.first << endl;
-                cout << " BemFormBilinear: operator order   finc = " << finc.second << endl; 
-              }
-
-
-              // Loop over the index of ftest
-              LOperaD * OpD = const_cast<LOperaD *>(b->ft);
-              ffassert( OpD->v.size() == 1);
-              Opsize= OpD->v.size();
-              for(size_t jjj=0; jjj<Opsize; jjj++){
-                LOperaD::K *lf=&(OpD->v[jjj]);
-                OpD->v[jjj].first.first = localIndexInTheBlockVh( OpD->v[jjj].first.first );
-              
-                pair<int,int> ftest(lf->first);
-                cout << " new value :: block i,j=" << i << ","<< j << ", operateur jj= " << jjj << endl;
-                cout << " BemormBilinear: number of unknown ftest = " << ftest.first << endl;
-                cout << " BemFormBilinear: operator order   ftest = " << ftest.second << endl; 
-              }
-            }
-            else if(VVFBEM == 2){
-              BemPFormBilinear * bb=new BemPFormBilinear(*dynamic_cast<const BemPFormBilinear *>(e));
-              FoperatorPBEM * b=const_cast<  FoperatorPBEM *>(bb->b);
-              if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; }
-
-              cerr << " BEM Potential in composite FESpace in construction " << endl;
-              ffassert(0);
-            }
-
-          }
-          #endif
-          #endif
-
-          // case BC_set 
-          else if(r == atype<const  BC_set  *>()){
-            ffassert( i == j ); // diagonal block 
-            BC_set * bc=dynamic_cast< BC_set *>(e); // on ne peut pas utiliser " const BC_set * " ou autrement erreur ce ompilation:  Morice
-
-            //KN<int>  new_index_funct_finc( bc.size() );
-            int kk=bc->bc.size();
-            //pair<int,Expression>  &bc_ib(bc->bc.begin());
-            
-            for (int k=0;k<kk;k++)
-            {
-              pair<int,Expression> &xx2= bc->bc[k];
-              //new_index_funct_finc[k] = localIndexInTheBlockUh(bc[k].first);
-              // change the index of the component to correspond to the index in the block
-              xx2.first = localIndexInTheBlockUh(xx2.first);
-              //bc->changeNumberOfComponent(k,localIndexInTheBlockUh(xx.first));
-              //bc->bc[k].first = localIndexInTheBlockUh( bc->bc[k].first );
-            }
-          }
-        }
-        // listOfComponentBilinearForm(*b_largs);
-      }
-  }
-  
-  cout <<"========================================================" << endl;
-  cout <<"=                                                      =" << endl;
-  cout <<"= check the component of Bilinear Form                 =" << endl;
-  cout <<"=                                                      =" << endl;
-  listOfComponentBilinearForm(largs);
-  cout <<"=                                                      =" << endl;
-  cout <<"========================================================" << endl;
-
-  //===   Information of the global matrix    ===// 
-
-  // check if we have a square matrix
-  bool A_is_square= (void*)pUh == (void*)pVh || ((*pUh)->totalNbOfDF()) == ( (*pVh)->totalNbOfDF()) ;
-  cout << "A_is_square=" << A_is_square << endl;
-
-  // === simple check if A is symetrical === // 
-  // voir avec les autres.
-  bool A_is_maybe_sym = (void*)pUh == (void*)pVh; 
-
-  // VF == true => VF type of Matrix
-  bool VF=isVF(b->largs);    //=== used to set the solver ??? block matrix ??? ===/
-
-  // set parameteer of the matrix :: 
-  Data_Sparse_Solver ds;
-  ds.factorize=0;
-  ds.initmat=true;
-  int np = OpCall_FormBilinear_np::n_name_param - NB_NAME_PARM_HMAT;
-  SetEnd_Data_Sparse_Solver<R>(stack,ds, b->nargs,np);
-
-  // set ds.sym = 0 
-  ds.sym = 0;
-  if(verbosity)
-    cout << " we consider the block matrix as a non symetric matrix " << endl; 
-
-  // J'ai repris ce qu'il y avait. 
-  // PAC(e)     :: Attention peut être pas compatible avec les matrices bloques.
-  // A repenser :: surtout pour le parametre symetrique? on le met ce parametre à zéro pour l'instant.
-  // set ds.sym = 0 
-
-  ds.sym = 0;
-  if(verbosity)
-    cout << " === we consider the block matrix as a non symetric matrix === (to be change in the future)" << endl; 
-
-  if (! A_is_square )
-   {
-     if(verbosity>3) cout << " -- the solver  is un set  on rectangular matrix  " << endl;
-    }
-
-  // A quoi cela correspond?? Gestion du stack + autre
-  WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007
-
-  Matrice_Creuse<R> & A( * GetAny<Matrice_Creuse<R>*>((*a)(stack)));
-  if(init) A.init();                                            //
-  cout << " A.N=" <<  A.N() << endl;
-  cout << " A.M=" <<  A.M() << endl;
-  if( ! pUh || ! pVh) return SetAny<Matrice_Creuse<R>  *>(&A);  //
-
-  // need to define the size of the entire matrix here
-  A.resize( (*pVh)->totalNbOfDF(), (*pUh)->totalNbOfDF() ); 
-  // test function (Vh) are the line
-  // inconnu function (Uh) are the column
-
-  
-  // Assemble the variationnal form
-  int maxJVh=NpVh;
-  
-  int offsetMatrixUh = 0;
-  // loop over the block
-  for( int i=0; i<NpUh; i++){
-    int offsetMatrixVh = 0;
-    if( ds.sym > 0 ){ maxJVh=(i+1); ffassert(maxJVh<NpVh);}
-    for( int j=0; j<maxJVh; j++){
-      cout << "offsetMatrixUh= " << offsetMatrixUh << ", offsetMatrixVh= " << offsetMatrixVh << endl;
-      
-      // construction du block (i,j)
-      const list<C_F0> & b_largs=block_largs(i,j); 
-
-      //const void * PUh = (void *) (*pUh)->vect[i]->getpVh();
-      //const void * PVh = (void *) (*pVh)->vect[j]->getpVh();
-
-      // size of the block
-      int N_block = UhNbOfDf[i];
-      int M_block = VhNbOfDf[j];
-      
-      Matrice_Creuse<R> *CCC = new Matrice_Creuse<R>() ;
-      CCC->resize(M_block,N_block); // test function (Vh) are the line and inconnu function (Uh) are the column
-      cout << "block:  i=" << i << "j=" << j <<  " (N,M)=" << M_block << " " << N_block << endl;
-      //cout << "CCC=" << CCC<< endl;
-      Matrice_Creuse<R> &BBB(*CCC); 
-      //cout << "BBB=" << BBB<< endl;       
-      // Faire les cast ici + tester ce soir ou demain
-
-      // cas ::  Mesh, v_fes, v_fes
-      if( (*pUh)->typeFE[i] == 2 && (*pVh)->typeFE[j] == 2 ){
-
-        // ==== FESpace 2d : inconnue et test  ===
-        const FESpace * PUh = (FESpace *) (*pUh)->vect[i]->getpVh();
-        const FESpace * PVh = (FESpace *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm< R, Mesh, FESpace,FESpace>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      // cas ::  Mesh3, v_fes3, v_fes3 
-      else if( (*pUh)->typeFE[i] == 3 && (*pVh)->typeFE[j] == 3 ){
-
-        // ==== FESpace 3d : inconnue et test ===
-        const FESpace3 * PUh = (FESpace3 *) (*pUh)->vect[i]->getpVh();
-        const FESpace3 * PVh = (FESpace3 *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,Mesh3,FESpace3,FESpace3>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      // cas :: MeshS, v_fesS, v_fesS 
-      else if( (*pUh)->typeFE[i] == 4 && (*pVh)->typeFE[j] == 4 ){
-
-        // ==== FESpace 3d Surf: inconnue et test ===
-        const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
-        const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshS,FESpaceS,FESpaceS>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      // cas :: MeshL, v_fesL, v_fesL
-      else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 5 ){
-
-        // ==== FESpace 3d Curve: inconnue et test ===
-        const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
-        const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceL,FESpaceL>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      // cas :: MeshL, v_fesL, v_fes
-      else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 2 ){
-
-        // ==== FESpace 3d Curve: inconnue et 2d : test ===
-        const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
-        const FESpace * PVh = (FESpace *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceL,FESpace>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      // cas :: MeshL, v_fes, v_fesL
-      else if( (*pUh)->typeFE[i] == 2 && (*pVh)->typeFE[j] == 5 ){
-
-        // ==== FESpace 2d: inconnue et 3d Curve: test ===
-        const FESpace * PUh = (FESpace *) (*pUh)->vect[i]->getpVh();
-        const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshL,FESpace,FESpaceL>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      // cas :: new OpMatrixtoBilinearForm< double, MeshS, v_fesS, v_fes3 >,      // 3D Surf / 3D volume on meshS
-      else if( (*pUh)->typeFE[i] == 4 && (*pVh)->typeFE[j] == 3 ){
-
-        // ==== FESpace 3d Surf: inconnue et 3d : test ===
-        const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
-        const FESpace3 * PVh = (FESpace3 *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshS,FESpaceS,FESpace3>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      } 
-      // cas :: new OpMatrixtoBilinearForm< double, MeshS, v_fes3, v_fesS >,     // 3D volume / 3D Surf on meshS
-      else if( (*pUh)->typeFE[i] == 3 && (*pVh)->typeFE[j] == 4 ){
-
-        // ==== FESpace 3d : inconnue et 3d Surf : test ===
-        const FESpace3 * PUh = (FESpace3 *) (*pUh)->vect[i]->getpVh();
-        const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshS,FESpace3,FESpaceS>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      } 
-      // cas :: new OpMatrixtoBilinearForm< double, MeshL, v_fesL, v_fesS >,       // 3D curve / 3D Surf on meshL
-      else if( (*pUh)->typeFE[i] == 5 && (*pVh)->typeFE[j] == 4 ){
-
-        // ====  FESpace 3d Curve : inconnue et 3d Surf : test ===
-        const FESpaceL * PUh = (FESpaceL *) (*pUh)->vect[i]->getpVh();
-        const FESpaceS * PVh = (FESpaceS *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceL,FESpaceS>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      // cas :: new OpMatrixtoBilinearForm< double, MeshL, v_fesS, v_fesL >);       // 3D Surf / 3D curve on meshL
-        else if( (*pUh)->typeFE[i] == 4 && (*pVh)->typeFE[j] == 5 ){
-
-        // ====  FESpace 3d Surf : inconnue et 3d Curve : test ===
-        const FESpaceS * PUh = (FESpaceS *) (*pUh)->vect[i]->getpVh();
-        const FESpaceL * PVh = (FESpaceL *) (*pVh)->vect[j]->getpVh();
-        creationBlockOfMatrixToBilinearForm<R,MeshL,FESpaceS,FESpaceL>( PUh, PVh, ds.sym, ds.tgv, b_largs, stack, BBB);
-      }
-      else{
-        cerr << " =: Pas prise en compte des FESpace inconnue de type := "<< typeFEtoString( (*pUh)->typeFE[i] ) << endl;
-        cerr << " =:                 avec des FESpace test de type    := "<< typeFEtoString( (*pVh)->typeFE[j] ) << endl;
-        ffassert(0);
-      }
-      //cout << "BBB=" << BBB<< endl;
-      A.pHM()->Add( BBB.pHM(), R(1), false, offsetMatrixVh, offsetMatrixUh ); // test function (Vh) are the line and inconnu function (Uh) are the column
-      //cout << "BBB=" << BBB<< endl;
-      //cout << "A=" << A << endl;
-      delete CCC;
-    offsetMatrixVh += VhNbOfDf[j];
-    }
-    offsetMatrixUh += UhNbOfDf[i];
-  }
-  
-  A.pHM()->half = ds.sym;
-  if (A_is_square)
-    SetSolver(stack,VF,*A.A,ds);
-
-  // === re-szet the original value of number of the component in the 
-  //          - BilinearForm 
-  //          - BC_set. 
-  // ===
-
-  // bilinear Form
-
-  
-  // Info necessaire :: " block_largs, beginBlockUh, beginBlockVh, NpUh, NpVh  
-
-  // put the right number of component of each block
-  for( int i=0; i<NpUh; i++){
-      for( int j=0; j<NpVh; j++){
-        
-        const list<C_F0> *b_largs=&block_largs(i,j); 
-        list<C_F0>::const_iterator b_ii,b_ib=b_largs->begin(),b_ie=b_largs->end(); 
-        for (b_ii=b_ib;b_ii != b_ie;b_ii++){
-          Expression e=b_ii->LeftValue();
-          aType r = b_ii->left();
-
-          // bilinear case
-          if (r==atype<const  FormBilinear *>() ){
-            const FormBilinear * bb=dynamic_cast<const  FormBilinear *>(e);
-      
-            BilinearOperator * Op=const_cast<  BilinearOperator *>(bb->b);
-            if (Op == NULL) {
-              if(mpirank == 0) cout << "dynamic_cast error" << endl; 
-            ffassert(0);
-            }
-      
-            size_t Opsize= Op->v.size();
-      
-            KN<size_t> index_operator_finc(Opsize);
-            KN<int>    new_index_funct_finc(Opsize);
-
-            KN<size_t> index_operator_ftest(Opsize);
-            KN<int>    new_index_funct_ftest(Opsize);
-
-            // index to check if a integral is defined on multi block
-            for(size_t jj=0; jj<Opsize; jj++){
-              // attention la fonction test donne la ligne
-              //  et la fonction test est en second
-              BilinearOperator::K ll = Op->v[jj];
-              pair<int,int> finc(ll.first.first), ftest(ll.first.second);
-
-              long jj2= jj;
-
-              index_operator_finc[ jj2] = jj;
-              new_index_funct_finc[ jj2] = beginBlockUh[i]+finc.first;
-            
-              index_operator_ftest[ jj2]  = jj;
-              new_index_funct_ftest[ jj2] = beginBlockVh[i]+ftest.first; 
-            }
-            changeIndexFunctionInconnue(*Op, index_operator_finc, new_index_funct_finc );
-      
-            changeIndexFunctionTest(*Op, index_operator_ftest, new_index_funct_ftest  );          
-          }  
-      
-#ifndef FFLANG
-#ifdef PARALLELE
-          // ******************************************
-          // Case BemKFormBilinear (KERNEL FORM ONLY)
-          // ******************************************
-          else if (r==atype<const BemFormBilinear *>() ){
-            BemFormBilinear * bbtmp= dynamic_cast< BemFormBilinear *>(e);
-            int VVFBEM = bbtmp->type;
-
-            if(VVFBEM ==1){
-              BemKFormBilinear * bb=new BemKFormBilinear(*dynamic_cast<const BemKFormBilinear *>(e));
-              FoperatorKBEM * b=const_cast<  FoperatorKBEM *>(bb->b);
-              if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; exit(0);}
-
-              // loop over the index of finconnue
-              LOperaG * OpG = const_cast<LOperaG *>(b->fi);
-              ffassert( OpG->v.size() == 1);
-              size_t Opsize= OpG->v.size();
-
-              for(size_t jjj=0; jjj<Opsize; jjj++){
-                LOperaG::K *lf=&(OpG->v[jjj]);
-                OpG->v[jjj].first.first += beginBlockUh[i];
-                
-                //pair<int,int> finc(lf->first);
-                //cout << " new value :: block i,j=" << i << ","<< j << ", operateur jj= " << jjj << endl;
-                //cout << " BemormBilinear: number of unknown finc = " << finc.first << endl;
-                //cout << " BemFormBilinear: operator order   finc = " << finc.second << endl; 
-                
-              }
-
-
-              // Loop over the index of ftest
-              LOperaD * OpD = const_cast<LOperaD *>(b->ft);
-              ffassert( OpD->v.size() == 1);
-              Opsize= OpD->v.size();
-              for(size_t jjj=0; jjj<Opsize; jjj++){
-                LOperaD::K *lf=&(OpD->v[jjj]);
-                OpD->v[jjj].first.first += beginBlockVh[j]; 
-                
-                //pair<int,int> finc(lf->first);
-                //cout << " new value :: block i,j=" << i << ","<< j << ", operateur jj= " << jjj << endl;
-                //cout << " BemormBilinear: number of unknown ftest = " << ftest.first << endl;
-                //cout << " BemFormBilinear: operator order   ftest = " << ftest.second << endl;
-                
-              }
-            }
-            else if(VVFBEM == 2){
-              BemPFormBilinear * bb=new BemPFormBilinear(*dynamic_cast<const BemPFormBilinear *>(e));
-              FoperatorPBEM * b=const_cast<  FoperatorPBEM *>(bb->b);
-              if (b == NULL) { if(mpirank == 0) cout << "dynamic_cast error" << endl; }
-
-              cerr << " BEM Potential in composite FESpace in construction " << endl;
-              ffassert(0);
-            }
-
-          }
-#endif
-#endif  
-          // BC_set
-          // case BC_set 
-          else if(r == atype<const  BC_set  *>()){
-            ffassert( i == j ); // diagonal block 
-            BC_set * bc=dynamic_cast<BC_set *>(e);
-        
-            //KN<int>  new_index_funct_finc( bc.size() );
-            int kk=bc->bc.size();
-            for (int k=0;k<kk;k++)
-            {
-              //bc->bc[k].first += beginBlockUh[i];
-              pair<int,Expression> &xx=bc->bc[k];
-              xx.first += beginBlockUh[i];
-            }
-          }
-        }
-      }
-  }
-
-
-  cout <<"========================================================" << endl;
-  cout <<"=                                                      =" << endl;
-  cout <<"= check the component of Bilinear Form                 =" << endl;
-  cout <<"=                                                      =" << endl;
-  listOfComponentBilinearForm(largs);
-  cout <<"=                                                      =" << endl;
-  cout <<"========================================================" << endl;
-  
-  return SetAny<Matrice_Creuse<R>  *>(&A);
-}
-*/
 
 //bool SetGMRES();
 //bool SetCG();
