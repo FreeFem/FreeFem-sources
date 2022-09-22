@@ -46,9 +46,6 @@ class v_fes3;
 class v_fesS;
 class v_fesL;
 
-class v_fesVect; // J. Morice : class pour les FE vectoriel : correspond à une liste v_fes, v_fes3, ...
-
-
 typedef generic_v_fes *pgenericfes;           // J. Morice : Added in 06/22
 typedef vect_generic_v_fes *pvectgenericfes;  // J. Morice : Added in 06/22
 
@@ -618,14 +615,12 @@ struct infoBlockCompositeFESpace{
 
 class vect_generic_v_fes {  //: public RefCounter{
   public:
-  //typedef pvectgenericfes pfes;
-  //typedef Fem2D::GVFESpace FESpace;
 
   typedef pgenericfes A;
 
   public:
   int N;            // size of the vector ( the number of FESpace )
-  A *vect;          // the vector containing the adress of generic_v_fes // demander à Fred
+  A *vect;          // the vector containing the adress of generic_v_fes 
   KN<int> typeFE;   // ===== type of FE ====
                  // The value of a type correspond to the second parameter of << forEachTypePtrfspace >>
                  // in for pfes, pfes3, pfesS, pfesL in [[ fflib/lgfem.cpp ]].
@@ -633,13 +628,16 @@ class vect_generic_v_fes {  //: public RefCounter{
   //CountPointer< FESpace > pVh;  // A voir avec Frederic pour savoir si il faut rajouter un 
                                   // un CountPointer
 
-  //Expression a;
-
-  Stack stack;    // the stack is use whith periodique expression
+  
+  Stack stack; // the stack is use whith periodique expression
 
   
   // constructor
   vect_generic_v_fes(const E_FEarray &args, Stack s): N( args.size() ), typeFE( args.size() ), stack(s){ 
+  
+ 
+  // constructor
+  //vect_generic_v_fes(const E_FEarray &args, Stack s=NullStack): N( args.size() ), typeFE( args.size() ){ 
     // == PAC(e) == //
     // Morice :: attention <<pfes>> est redéfinis pour cette classe.
     //           Il faut faire appel au type de <<pfes>> associé à v_fes:
@@ -649,41 +647,40 @@ class vect_generic_v_fes {  //: public RefCounter{
 
     aType atfs[] = {atype< ::pfes * >( ), atype< pfes3 * >( ), atype< pfesS * >( ), atype< pfesL * >( )};
     vect = new A[N];
-
-    update();
-    /*
-    cout << " reference of variable " << &args << endl;
-    for( int i=0; i<args.size(); i++ ){
-      cout << "i= " << i << "; " << args[i].left() << endl;
+    
+    for(int i=0; i<args.size(); i++){
+      cout << "info FESpace["<<i<<"] === " << endl;
+      cout << "nbitem= " << args[i].nbitem() << endl;
     }
-    for(int i=0; i<4; i++){
-      cout << "i= " << i << "; " << atfs[i] << endl; 
-    }
-    */
+    
     for( int i=0; i<args.size(); i++ ){
         cout << "i=" << i << endl;
         if( atype< ::pfes * >() == args[i].left( ) ){
           //a = to< atfs[iii] >(args[i]);
           pfesTrue * tmp = GetAny< pfesTrue *> ( args[i].eval(stack)) ;
           vect[i] = *tmp;
+          //vect[i] = args[i].f;
           typeFE[i] = args[i].TYPEOFID();
         }
         else if( atype< pfes3 * >() == args[i].left( ) ){
           //a = to< atfs[iii] >(args[i]);
           pfes3 * tmp = GetAny< pfes3*> ( args[i].eval(stack)) ;
           vect[i] = *tmp;
+          //vect[i] = args[i].RightValue();
           typeFE[i] = args[i].TYPEOFID();
         }
         else if( atype< pfesS * >() == args[i].left( ) ){
           //a = to< atfs[iii] >(args[i]);
           pfesS * tmp = GetAny< pfesS*> ( args[i].eval(stack)) ;
           vect[i] = *tmp;
+          //vect[i] = args[i].RightValue();
           typeFE[i] = args[i].TYPEOFID();
         }
         else if( atype< pfesL * >() == args[i].left( ) ){
           //a = to< atfs[iii] >(args[i]);
           pfesL *tmp = GetAny< pfesL* > ( args[i].eval(stack)) ;
           vect[i] = *tmp;
+          //vect[i] = args[i].RightValue();
           typeFE[i] = args[i].TYPEOFID();
         }
         else{
@@ -702,21 +699,8 @@ class vect_generic_v_fes {  //: public RefCounter{
       cout << "getpVh(), i= " << i << "; " << vect[i]->getpVh() << endl;
     }
     */
+    update();
   }
-  /*
-  operator FESpace *( ) {
-    bool different_mesh=false; // boolean to know if one component of the vectorial FESpace change
-    for( int i=0; i<N; i++){
-      //if( vect[i]->ppTh != &pVh[i]->Th) different_mesh=true; 
-      if( (vect[i])->differentMesh() ) different_mesh=true; 
-    }
-    
-    if (!pVh || different_mesh ) pVh = CountPointer< FESpace >(update( ), true);
-    return pVh;
-  }
-
-  FESpace *update( ){ ffassert(0);}; // A construire 
-  */
 
   // destructor
   void destroy( ) {
@@ -737,25 +721,30 @@ class vect_generic_v_fes {  //: public RefCounter{
     for(int i=0; i<N; i++){
       int tt = typeFE[i];
       if(tt == 2){
+        pfes pFES = dynamic_cast<pfes>( vect[i] );
+        ffassert(pFES);
+        // cout << "est ce que je vais  :"<< (!mac->pVh || *(mac->ppTh) != &mac->pVh->Th) << endl;
         pmesh* ppTh = (pmesh *) vect[i]->getppTh();
-        FESpace * pVh =  (FESpace*) vect[i]->getpVh(); 
-        const pfes pFES = dynamic_cast<const pfes>( vect[i] );
-        if (!pVh || *ppTh != &pVh->Th) pVh = CountPointer< FESpace >(pFES->update( ), true);
+        FESpace * pVh = (FESpace *) vect[i]->getpVh(); 
+        // pfes pFES = dynamic_cast<pfes>( vect[i] );
+        // cout << &pVh->Th << " "<< &mac->pVh->Th << endl;
+        // cout << "est ce que je vais 2: "<< (!pVh || *(ppTh) != &pVh->Th) << endl;
+        if (!pVh || *ppTh != &pVh->Th) pFES->pVh = CountPointer< FESpace >(pFES->update( ), true);
       }
       else if(tt == 3){
         pmesh3* ppTh = (pmesh3 *) vect[i]->getppTh();
         const pfes3 pFES = dynamic_cast<const pfes3>( vect[i] );
         ffassert(pFES); 
         FESpace3 * pVh =  (FESpace3*) vect[i]->getpVh();
-        if (!pVh || *ppTh != &pVh->Th) pVh = CountPointer< FESpace3 >(pFES->update( ), true);
-
+        if (!pVh || *ppTh != &pVh->Th) pFES->pVh = CountPointer< FESpace3 >(pFES->update( ), true);
+  
       }
       else if(tt == 4){
         pmeshS* ppTh = (pmeshS *) vect[i]->getppTh();
         const pfesS pFES = dynamic_cast<const pfesS>( vect[i] );
         ffassert(pFES); 
         FESpaceS * pVh =  (FESpaceS*) vect[i]->getpVh();
-        if (!pVh || *ppTh != &pVh->Th) pVh = CountPointer< FESpaceS >(pFES->update( ), true);
+        if (!pVh || *ppTh != &pVh->Th) pFES->pVh = CountPointer< FESpaceS >(pFES->update( ), true);
         
       }
       else if(tt == 5){
@@ -763,8 +752,13 @@ class vect_generic_v_fes {  //: public RefCounter{
         const pfesL pFES = dynamic_cast<const pfesL>( vect[i] );
         ffassert(pFES);
         FESpaceL * pVh =  (FESpaceL*) vect[i]->getpVh();
-        if (!pVh || *ppTh != &pVh->Th) pVh = CountPointer< FESpaceL >(pFES->update( ), true);
+        if (!pVh || *ppTh != &pVh->Th) pFES->pVh = CountPointer< FESpaceL >(pFES->update( ), true);
       }
+      /*else{
+        cerr << "== error in the type of FESpace ===" << endl;
+        ffassert(0);
+      }
+      */
     }
   }
 
@@ -960,6 +954,71 @@ class FEbase {
   operator FESpace &( ) {
     throwassert(Vh);
     return *Vh;
+  }
+
+ private:    // rule of programming
+  FEbase(const FEbase &);
+  void operator=(const FEbase &);
+};
+
+// utile ????
+template< class K>
+class FEbase<K,generic_v_fes> {
+ public:
+  typedef generic_v_fes * pgenericfes;
+
+  generic_v_fes *const *pVh;     // pointeur sur la variable stockant FESpace;
+  KN< K > *xx;                   // value
+
+  KN< K > *x( ) { return xx; }
+
+  FEbase(const pgenericfes *ppVh) : pVh(ppVh), xx(0) {}
+
+  ~FEbase( ) { delete xx; }
+  void destroy( ) {    // cout << "~FEbase  destroy " << this << endl;
+    delete this;
+  }
+
+  void operator=(KN< K > *y) {
+    ffassert(0);
+    /*
+    Vh = **pVh;
+    throwassert((bool)Vh);
+    if (xx) delete xx;
+    xx = y;
+    ffassert(y->N( ) == Vh->NbOfDF);
+    */
+  }
+
+  void operator=(KN_< K > &y) {
+    ffassert(0);
+    /*
+    Vh = **pVh;
+    throwassert((bool)Vh);
+    if (xx) {    // resize if need
+      if (xx->N( ) != Vh->NbOfDF) delete xx;
+      xx = 0;
+    }
+    if (!xx) xx = new KN< K >(Vh->NbOfDF);
+    ffassert(SameShape(y, *xx));
+    *xx = y;
+    */
+  }
+
+  void *newVh() {
+    ffassert(0);
+    /*
+    throwassert(pVh);
+    const pfes pp = *pVh;
+    // cout << pVh << " " << *pVh << endl;
+    return *pp;
+    */
+  }
+
+  operator FESpace &( ) {
+    ffassert(0);
+    //throwassert(Vh);
+    //return *Vh;
   }
 
  private:    // rule of programming

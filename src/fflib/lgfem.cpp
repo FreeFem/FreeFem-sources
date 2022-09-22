@@ -1418,7 +1418,6 @@ struct OpMake_pvectgenericfes : public OneOperator {
     AnyType operator( )(Stack s) const {
         
       AnyType r = (*eppfes)(s);
-      
       pvectgenericfes *ppfes = GetAny< pvectgenericfes * >(r);
 
       /*
@@ -1437,9 +1436,8 @@ struct OpMake_pvectgenericfes : public OneOperator {
     
     const E_FEarray *a2(dynamic_cast< const E_FEarray * >(args[1].LeftValue( )));
     ffassert(a2);
-    int N = a2->size( );
-    
-    //cout << "N=" << N << endl;
+    // int N = a2->size( );
+    // cout << "N=" << N << endl;
     return new Op(args[0], *a2 );
   }
   OpMake_pvectgenericfes( )
@@ -7068,7 +7066,6 @@ void clean_lgfem( ) {
 }
 template< class K, class v_fes >
 Expression IsFEcomp(const C_F0 &c, int i, Expression &rrr, Expression &iii) {
-  //cout << "test IsFEComp" << endl; // Morice
   Expression r = 0;
   if (!i) rrr = 0, iii = 0;
   if (atype< typename E_FEcomp< K, v_fes >::Result >( ) == c.left( )) {
@@ -7402,6 +7399,7 @@ C_F0 NewFEvariable(ListOfId *pids, Block *currentblock, C_F0 &fespacetype, CC_F0
   //else if (dim == 7)
   //  return NewFEvariableT< generic_v_fes, 7 >(pids, currentblock, fespacetype, init, cplx, dim); // Morice Fonction non tester
   else
+    cerr << "value dim=" << dim << endl;
     CompileError("Invalid fespace on Rd  ( d != 2 or 3) ");
   return C_F0( );
 }
@@ -7568,12 +7566,19 @@ aType typeFESpace(const basicAC_F0 &args) {
     cout << "args.size()=" << args.size() << endl;
   }
   
-  // J. Morice : actuellement, on fait cette hypothèse car je ne veux pas gérér pour l'instant les paramétres 
-  //             en même temps les fespace et les autres (Th,P1,[P1,P1],nb_periodic)
+  // J. Morice : actuellement, on fait cette hypothèse car je ne veux pas gérér pour l'instant les paramétres Uh
+  //             en même temps avec les fespace et les autres (Th,P1,[P1,P1],nb_periodic)
+  if( !(  ( numberOfpfes == size_efea  && size_efea > 0 && args.size() == 1 ) ||  numberOfpfes == 0 ) ){
+    cerr << "you try to define a compositeFESpace with " << endl;
+    cerr << " fespace  Wh(<U1h,...,Unh>, Th,[P1],...) or Wh(Th,[P1],..., <U1h,...,Unh>) is not allowed." << endl;
+    cerr << " fespace  Wh(<U1h,...,Unh>, <X1h,...,Xnh>) is not allowed." << endl;
+    cerr << " Only possiblity is : " << endl;
+    cerr << " fespace  Wh(<U1h,...,Uhn>) where Uhi is a FESpace." << endl;
+  }
   ffassert( ( numberOfpfes == size_efea  && size_efea > 0 && args.size() == 1 ) ||  numberOfpfes == 0); 
 
   if( numberOfpfes == 0){
-    // case without fespace as parameter
+    // case without fespace in the arguments
     for (int i = 0; i < args.size( ); i++) {
       tl = args[i].left( );
       if (tl == t_m2) {
