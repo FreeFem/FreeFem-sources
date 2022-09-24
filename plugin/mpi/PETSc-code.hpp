@@ -3407,10 +3407,15 @@ namespace PETSc {
         }
         if (c != 4) {
           Vec x = NULL, y;
-          MatCreateVecs(ptA->_petsc, in == out ? NULL : &x, &y);
+          MatCreateVecs(ptA->_petsc, &y, in == out ? NULL : &x);
           PetscInt size;
+          if (x) {
+            VecGetLocalSize(x, &size);
+            ffassert(in->n == size);
+          }
           VecGetLocalSize(y, &size);
-          ffassert(in->n == size);
+          if (!x)
+            ffassert(in->n == size);
           if (out->n != size) {
             out->resize(size);
             *out = PetscScalar( );
