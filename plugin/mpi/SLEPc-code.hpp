@@ -455,6 +455,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         else {
                             pt = reinterpret_cast<K*>(tmpr);
                             VecGetArray(xi, reinterpret_cast<PetscScalar**>(&pti));
+                            tmpi = reinterpret_cast<PetscScalar*>(pti);
                         }
                         if(!isType && (ptA->_A || ptA->_exchange)) {
                             KN<K> cpy(ptA->_A ? ptA->_A->getDof() : ptA->_exchange[0]->getDof());
@@ -503,7 +504,7 @@ AnyType eigensolver<Type, K, SType>::E_eigensolver::operator()(Stack stack) cons
                         }
                         if(!std::is_same<SType, SVD>::value && std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value)
                             delete [] pt;
-                        else
+                        if(std::is_same<SType, SVD>::value || (std::is_same<PetscScalar, double>::value && std::is_same<K, std::complex<double>>::value))
                             VecRestoreArray(xi, &tmpi);
                         VecRestoreArray(xr, &tmpr);
                     }
