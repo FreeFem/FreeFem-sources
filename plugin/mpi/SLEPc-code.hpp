@@ -9,10 +9,6 @@
 
 #ifdef WITH_SLEPC
 
-#if PETSC_VERSION_LT(3, 15, 0)
-#define SVDSetOperators(a, b, c) SVDSetOperator(a, b)
-#endif
-
 #include "slepc.h"
 
 namespace SLEPc {

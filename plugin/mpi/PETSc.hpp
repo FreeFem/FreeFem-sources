@@ -5,6 +5,10 @@
 
 #include "common_hpddm.hpp"
 
+#if PETSC_VERSION_LT(3, 18, 0)
+#define MATHERMITIANTRANSPOSEVIRTUAL MATTRANSPOSEMAT
+#endif
+
 namespace PETSc {
 template<class HpddmType>
 class DistributedCSR {

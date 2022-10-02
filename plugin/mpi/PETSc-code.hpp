@@ -944,12 +944,7 @@ namespace PETSc {
           if (ptB->_petsc) {
             PetscBool assembled;
             MatAssembled(ptB->_petsc, &assembled);
-#if PETSC_VERSION_GE(3, 17, 0)
             MatDuplicate(ptB->_petsc, assembled ? MAT_COPY_VALUES : MAT_DO_NOT_COPY_VALUES, &ptA->_petsc);
-#else
-            if (assembled) MatDuplicate(ptB->_petsc, MAT_COPY_VALUES, &ptA->_petsc);
-            else ffassert(0);
-#endif
             MatDestroy(&ptB->_petsc);
           }
         } else
@@ -2571,7 +2566,6 @@ namespace PETSc {
                   MatDestroy(&aux);
                   Matrice_Creuse< upscaled_type<PetscScalar> >* ptK =
                     nargs[12] ? GetAny< Matrice_Creuse< upscaled_type<PetscScalar> >* >((*nargs[12])(stack)) : nullptr;
-#if PETSC_VERSION_GE(3, 13, 0)
                   if (ptK && ptK->A) {
                     MatriceMorse< upscaled_type<PetscScalar> >* mA =
                       static_cast< MatriceMorse< upscaled_type<PetscScalar> >* >(&(*ptK->A));
@@ -2581,7 +2575,6 @@ namespace PETSc {
                     MatDestroy(&aux);
                     delete B;
                   }
-#endif
                 }
               }
             }
@@ -2607,17 +2600,8 @@ namespace PETSc {
                   Mat aux = ff_to_PETSc(&dO);
                   IS perm;
                   ISSortPermutation(is, PETSC_TRUE, &perm);
-#if PETSC_VERSION_LT(3, 15, 0)
-                  if (dO._sym) MatConvert(aux, MATSEQAIJ, MAT_INPLACE_MATRIX, &aux);
-#endif
                   O = new Mat;
                   MatPermute(aux, perm, perm, O);
-#if PETSC_VERSION_LT(3, 15, 0)
-                  if (dO._sym) {
-                      MatSetOption(*O, MAT_SYMMETRIC, PETSC_TRUE);
-                      MatConvert(*O, MATSEQSBAIJ, MAT_INPLACE_MATRIX, O);
-                  }
-#endif
                   ISDestroy(&perm);
                   MatDestroy(&aux);
                 }
@@ -3524,31 +3508,21 @@ namespace PETSc {
           isType = PETSC_FALSE;
 #endif
         }
-#if PETSC_VERSION_GE(3, 14, 0)
         isType = PETSC_TRUE;
-#endif
-#if PETSC_VERSION_GT(3, 13, 1) && defined(PETSC_HAVE_HPDDM)
+#if defined(PETSC_HAVE_HPDDM)
         if(isType) {
           MatGetSize(ptA->_petsc, &M, NULL);
           Mat B, C;
           MatCreateDense(PetscObjectComm((PetscObject)ptA->_ksp), in->N( ), PETSC_DECIDE, M, in->M(), &in->operator( )(0, 0), &B);
           MatCreateDense(PetscObjectComm((PetscObject)ptA->_ksp), out->N( ), PETSC_DECIDE, M, out->M(), &out->operator( )(0, 0), &C);
-#if PETSC_VERSION_GE(3, 14, 0)
           KSPMatSolve(ptA->_ksp, B, C);
-#else
-          KSPHPDDMMatSolve(ptA->_ksp, B, C);
-#endif
           MatDestroy(&C);
           MatDestroy(&B);
         }
         else
             ffassert(0);
 #else
-        HPDDM::PETScOperator op(ptA->_ksp, m
-#if PETSC_VERSION_LT(3, 13, 2)
-                                                 , 1
-#endif
-                                                      );
+        HPDDM::PETScOperator op(ptA->_ksp, m);
         op.apply(&in->operator( )(0, 0), &out->operator( )(0, 0), in->M( ));
 #endif
       }
@@ -4352,19 +4326,10 @@ namespace PETSc {
           user->r = new typename LinearSolver< Type >::MatF_O(in->n, stack, codeR);
           Tao tao;
           TaoCreate(PETSC_COMM_WORLD, &tao);
-#if PETSC_VERSION_GE(3, 17, 0)
           TaoSetObjective(tao, FormObjectiveRoutine< TaoSolver< Type > >, &user);
           TaoSetGradient(tao, NULL, FormFunction< Tao, TaoSolver< Type > >, &user);
-#else
-          TaoSetObjectiveRoutine(tao, FormObjectiveRoutine< TaoSolver< Type > >, &user);
-          TaoSetGradientRoutine(tao, FormFunction< Tao, TaoSolver< Type > >, &user);
-#endif
           if (setXl || setXu) TaoSetVariableBounds(tao, xl, xu);
-#if PETSC_VERSION_GE(3, 17, 0)
           TaoSetSolution(tao, x);
-#else
-          TaoSetInitialVector(tao, x);
-#endif
           PetscInt sizeE, sizeI;
           Vec ce = nullptr, ci = nullptr;
           const Polymorphic* op = nargs[5] ? dynamic_cast< const Polymorphic* >(nargs[5]) : nullptr;
@@ -4415,45 +4380,25 @@ namespace PETSc {
               const OneOperator* codeH = op->Find(
                 "(", ArrayOfaType(atype< Kn* >( ), atype< Kn* >( ), atype< Kn* >( ), false));
               user->op = new NonlinearSolver< Type >::VecF_O(in->n, stack, codeH, 2, sizeI, sizeE);
-#if PETSC_VERSION_GE(3, 17, 0)
               TaoSetHessian(tao, ptA->_petsc, ptA->_petsc,
                             FormJacobianTao< TaoSolver< Type >, 5 >, &user);
-#else
-              TaoSetHessianRoutine(tao, ptA->_petsc, ptA->_petsc,
-                                   FormJacobianTao< TaoSolver< Type >, 5 >, &user);
-#endif
             } else if (user->icJ) {
               const OneOperator* codeH =
                 op->Find("(", ArrayOfaType(atype< Kn* >( ), atype< Kn* >( ), false));
               user->op = new NonlinearSolver< Type >::VecF_O(in->n, stack, codeH, 2, sizeI, -1);
-#if PETSC_VERSION_GE(3, 17, 0)
               TaoSetHessian(tao, ptA->_petsc, ptA->_petsc,
                             FormJacobianTao< TaoSolver< Type >, 3 >, &user);
-#else
-              TaoSetHessianRoutine(tao, ptA->_petsc, ptA->_petsc,
-                                   FormJacobianTao< TaoSolver< Type >, 3 >, &user);
-#endif
             } else if (user->ecJ) {
               const OneOperator* codeH =
                 op->Find("(", ArrayOfaType(atype< Kn* >( ), atype< Kn* >( ), false));
               user->op = new NonlinearSolver< Type >::VecF_O(in->n, stack, codeH, 2, -1, sizeE);
-#if PETSC_VERSION_GE(3, 17, 0)
               TaoSetHessian(tao, ptA->_petsc, ptA->_petsc,
                             FormJacobianTao< TaoSolver< Type >, 4 >, &user);
-#else
-              TaoSetHessianRoutine(tao, ptA->_petsc, ptA->_petsc,
-                                   FormJacobianTao< TaoSolver< Type >, 4 >, &user);
-#endif
             } else {
               const OneOperator* codeH = op->Find("(", ArrayOfaType(atype< Kn* >( ), false));
               user->op = new NonlinearSolver< Type >::VecF_O(in->n, stack, codeH);
-#if PETSC_VERSION_GE(3, 17, 0)
               TaoSetHessian(tao, ptA->_petsc, ptA->_petsc,
                             FormJacobianTao< TaoSolver< Type >, 2 >, &user);
-#else
-              TaoSetHessianRoutine(tao, ptA->_petsc, ptA->_petsc,
-                                   FormJacobianTao< TaoSolver< Type >, 2 >, &user);
-#endif
             }
           }
           TaoSetFromOptions(tao);
@@ -5106,11 +5051,7 @@ namespace PETSc {
       MPI_Comm comm = nargs[0] ? *static_cast< MPI_Comm* >(GetAny< pcommworld >((*nargs[0])(stack))) : PETSC_COMM_WORLD;
       int size;
       MPI_Comm_size(comm, &size);
-#if PETSC_VERSION_GE(3, 17, 0)
       DMPlexCreateFromFile(comm, pB->c_str(), NULL, PETSC_TRUE, &pA->_dm);
-#else
-      DMPlexCreateFromFile(comm, pB->c_str(), overlap > 0 || size == 1 ? PETSC_TRUE : PETSC_FALSE, &pA->_dm);
-#endif
       if(prefix)
           DMSetOptionsPrefix(pA->_dm, prefix->c_str());
       DMSetFromOptions(pA->_dm);
@@ -5135,7 +5076,6 @@ namespace PETSc {
           DMPlexMarkBoundaryFaces(pdm, 111111, label);
           DMDestroy(&pA->_dm);
           pA->_dm = pdm;
-#if PETSC_VERSION_GE(3, 15, 0)
           if(neighbors) {
               PetscInt nranks;
               const PetscMPIInt *ranks;
@@ -5143,7 +5083,6 @@ namespace PETSc {
               neighbors->resize(nranks);
               std::copy_n(ranks, nranks, neighbors->operator long*());
           }
-#endif
       } else if(neighbors) neighbors->resize(0);
       if(part) {
           PetscSection rootSection, leafSection;
@@ -5158,13 +5097,8 @@ namespace PETSc {
                   PetscSectionSetDof(rootSection, c, 1);
               PetscSectionSetUp(rootSection);
               PetscSectionCopy(rootSection, leafSection);
-#if PETSC_VERSION_GE(3, 12, 0)
               DMSetLocalSection(pA->_dm, rootSection);
               DMSetLocalSection(pA->_dm, leafSection);
-#else
-              DMLocalSection(pA->_dm, rootSection);
-              DMLocalSection(pA->_dm, leafSection);
-#endif
           }
           Vec ranks, local;
           DMPlexCreateRankField(pA->_dm, &ranks);
