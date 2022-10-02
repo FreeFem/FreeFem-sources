@@ -56,6 +56,9 @@
 
 #include "common.hpp"
 
+template<class T>
+using upscaled_type = typename std::conditional<!HPDDM::Wrapper<T>::is_complex, double, std::complex<double>>::type;
+
 template<class K> K* newCopy(bool mfree,K *p,int n)
 {  if( !mfree) return p;
 	K *q= new K[n];
@@ -67,13 +70,13 @@ template<class K>  using MatriceMorse=HashMatrix<int,K>;
 template<class K>
 struct ff_HPDDM_MatrixCSR : public HPDDM::MatrixCSR<K>
 {
-    ff_HPDDM_MatrixCSR(MatriceMorse<HPDDM::upscaled_type<K>>* mA) :
+    ff_HPDDM_MatrixCSR(MatriceMorse<upscaled_type<K>>* mA) :
     HPDDM::MatrixCSR<K>(mA->n, mA->m, mA->nnz, nullptr, mA->p, mA->j, mA->half > 0) {
         mA->CSR();
         HPDDM::MatrixCSR<K>::_ia=mA->p;
         K* a = reinterpret_cast<K*>(mA->aij);
         HPDDM::MatrixCSR<K>::_a=a;
-        if(!std::is_same<HPDDM::upscaled_type<K>, K>::value) {
+        if(!std::is_same<upscaled_type<K>, K>::value) {
             for(int i = 0; i < mA->nnz; ++i)
                 a[i] = mA->aij[i];
         }
@@ -81,14 +84,14 @@ struct ff_HPDDM_MatrixCSR : public HPDDM::MatrixCSR<K>
 };
 
 template<class K>
-HPDDM::MatrixCSR<K> * new_HPDDM_MatrixCSR(MatriceMorse<HPDDM::upscaled_type<K>>* mA, bool mfree = false, K* s = nullptr, int* is = nullptr, int* js = nullptr) {
+HPDDM::MatrixCSR<K> * new_HPDDM_MatrixCSR(MatriceMorse<upscaled_type<K>>* mA, bool mfree = false, K* s = nullptr, int* is = nullptr, int* js = nullptr) {
     if(mA) {
         int nnz = mA->nnz, n = mA->n;
         mA->CSR();
         K* a;
         if(!s) a = reinterpret_cast<K*>(newCopy(mfree, mA->aij, nnz));
         else a = reinterpret_cast<K*>(s);
-        if(!std::is_same<HPDDM::upscaled_type<K>, K>::value) {
+        if(!std::is_same<upscaled_type<K>, K>::value) {
             for(int i = 0; i < nnz; ++i)
                 a[i] = mA->aij[i];
         }
@@ -114,7 +117,7 @@ else
 }
 
 template<class K>
-void set_ff_matrix(MatriceMorse<HPDDM::upscaled_type<K>>* mA,const HPDDM::MatrixCSR<K> &dA)
+void set_ff_matrix(MatriceMorse<upscaled_type<K>>* mA,const HPDDM::MatrixCSR<K> &dA)
 {
     //void HashMatrix<I,R>::set(I nn,I mm,int hhalf,size_t nnnz, I *ii, I*jj, R *aa,,int f77,int tcsr)
     if(verbosity>99) cout << " set_ff_matrix " <<endl;
@@ -123,7 +126,7 @@ void set_ff_matrix(MatriceMorse<HPDDM::upscaled_type<K>>* mA,const HPDDM::Matrix
     mA->p=0;
     mA->aij=0;
     
-    mA->set(dA._n,dA._m,dA._sym,dA._nnz,dA._ia,dA._ja,reinterpret_cast<HPDDM::upscaled_type<K>*>(dA._a),0,1);
+    mA->set(dA._n,dA._m,dA._sym,dA._nnz,dA._ia,dA._ja,reinterpret_cast<upscaled_type<K>*>(dA._a),0,1);
 }
 
 template<typename T>
@@ -189,8 +192,8 @@ void exchange_dispatched(Type* const& pA, KN<K>* pin, bool scaled) {
         unsigned short mu = pA->getDof() ? pin->n / pA->getDof() : 1;
         const auto& map = pA->getMap();
         bool allocate = map.size() > 0 && pA->getBuffer()[0] == nullptr ? pA->setBuffer() : false;
-        U* x = reinterpret_cast<U*>((HPDDM::upscaled_type<U>*)*pin);
-        if(!std::is_same<HPDDM::upscaled_type<U>, U>::value) {
+        U* x = reinterpret_cast<U*>((upscaled_type<U>*)*pin);
+        if(!std::is_same<upscaled_type<U>, U>::value) {
             for(int i = 0; i < pin->n; ++i)
                 x[i] = pin->operator[](i);
         }
@@ -199,7 +202,7 @@ void exchange_dispatched(Type* const& pA, KN<K>* pin, bool scaled) {
         else
             pA->HPDDM::template Subdomain<U>::exchange(x, mu);
         pA->clearBuffer(allocate);
-        if(!std::is_same<HPDDM::upscaled_type<U>, U>::value) {
+        if(!std::is_same<upscaled_type<U>, U>::value) {
             for(int i = pin->n - 1; i >= 0; --i)
                 pin->operator[](i) = x[i];
         }
@@ -258,7 +261,7 @@ basicAC_F0::name_and_type exchangeIn_Op<Type, K>::name_param[] = {
 template<class Type, class K>
 class exchangeIn : public OneOperator {
     public:
-        exchangeIn() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<HPDDM::upscaled_type<K>>*>()) { }
+        exchangeIn() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<upscaled_type<K>>*>()) { }
 
         E_F0* code(const basicAC_F0& args) const {
             return new exchangeIn_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]));
@@ -267,7 +270,7 @@ class exchangeIn : public OneOperator {
 template<class Type, class K>
 AnyType exchangeIn_Op<Type, K>::operator()(Stack stack) const {
     Type* pA = GetAny<Type*>((*A)(stack));
-    KN<HPDDM::upscaled_type<K>>* pin = GetAny<KN<HPDDM::upscaled_type<K>>*>((*in)(stack));
+    KN<upscaled_type<K>>* pin = GetAny<KN<upscaled_type<K>>*>((*in)(stack));
     const bool scaled = mpisize > 1 && nargs[0] && GetAny<bool>((*nargs[0])(stack));
     exchange<K>(pA, pin, scaled);
     return 0L;
@@ -295,7 +298,7 @@ basicAC_F0::name_and_type exchangeInOut_Op<Type, K>::name_param[] = {
 template<class Type, class K>
 class exchangeInOut : public OneOperator {
     public:
-        exchangeInOut() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<HPDDM::upscaled_type<K>>*>(), atype<KN<HPDDM::upscaled_type<K>>*>()) { }
+        exchangeInOut() : OneOperator(atype<long>(), atype<Type*>(), atype<KN<upscaled_type<K>>*>(), atype<KN<upscaled_type<K>>*>()) { }
 
         E_F0* code(const basicAC_F0& args) const {
             return new exchangeInOut_Op<Type, K>(args, t[0]->CastTo(args[0]), t[1]->CastTo(args[1]), t[2]->CastTo(args[2]));
@@ -304,8 +307,8 @@ class exchangeInOut : public OneOperator {
 template<class Type, class K>
 AnyType exchangeInOut_Op<Type, K>::operator()(Stack stack) const {
     Type* pA = GetAny<Type*>((*A)(stack));
-    KN<HPDDM::upscaled_type<K>>* pin = GetAny<KN<HPDDM::upscaled_type<K>>*>((*in)(stack));
-    KN<HPDDM::upscaled_type<K>>* pout = GetAny<KN<HPDDM::upscaled_type<K>>*>((*out)(stack));
+    KN<upscaled_type<K>>* pin = GetAny<KN<upscaled_type<K>>*>((*in)(stack));
+    KN<upscaled_type<K>>* pout = GetAny<KN<upscaled_type<K>>*>((*out)(stack));
     const bool scaled = mpisize > 1 && nargs[0] && GetAny<bool>((*nargs[0])(stack));
     Matrice_Creuse<double>* pR = nargs[1] ? GetAny<Matrice_Creuse<double>*>((*nargs[1])(stack)) : nullptr;
     MatriceMorse<double>* mR = pR ? static_cast<MatriceMorse<double>*>(&(*pR->A)) : nullptr;

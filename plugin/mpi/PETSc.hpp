@@ -5,6 +5,10 @@
 
 #include "common_hpddm.hpp"
 
+#if PETSC_VERSION_LT(3, 18, 0)
+#define MATHERMITIANTRANSPOSEVIRTUAL MATTRANSPOSEMAT
+#endif
+
 namespace PETSc {
 template<class HpddmType>
 class DistributedCSR {
@@ -121,7 +125,7 @@ void setVectorSchur(Type* ptA, KN<Tab>* const& mT, KN<double>* const& pL) {
     numSchur -= nbSchur;
     delete [] num;
     for(int k = 0; k < mT->n; ++k) {
-        MatriceMorse<HPDDM::upscaled_type<PetscScalar>>* mS = (mT->operator[](k)).A ? static_cast<MatriceMorse<HPDDM::upscaled_type<PetscScalar>>*>(&(*(mT->operator[](k)).A)) : nullptr;
+        MatriceMorse<upscaled_type<PetscScalar>>* mS = (mT->operator[](k)).A ? static_cast<MatriceMorse<upscaled_type<PetscScalar>>*>(&(*(mT->operator[](k)).A)) : nullptr;
         int n = mS ? mS->n : 0;
         std::vector<std::vector<std::pair<int, PetscScalar>>> tmp(n);
         if(mS) {

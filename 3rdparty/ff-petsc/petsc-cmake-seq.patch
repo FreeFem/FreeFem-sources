@@ -48,18 +48,49 @@ index dc8ce9817f..4ba1aec2f6 100644
 +        args.append('-DCMAKE_CXX_COMPILER="'+mpicxx.split(None, 1)[0]+'"')
      return args
 diff --git a/src/mat/impls/aij/mpi/mumps/mumps.c b/src/mat/impls/aij/mpi/mumps/mumps.c
-index 8dc6b3fa3e..6d2f3f9bb2 100644
+index 01bbe45a39b..6b050057ccf 100644
 --- a/src/mat/impls/aij/mpi/mumps/mumps.c
 +++ b/src/mat/impls/aij/mpi/mumps/mumps.c
-@@ -1770,11 +1770,7 @@ PetscErrorCode PetscSetMUMPSFromOptions(Mat F, Mat A)
+@@ -1860,11 +1860,7 @@ PetscErrorCode MatSetFromOptions_MUMPS(Mat F, Mat A) {
       see https://github.com/pmodels/mpich/issues/5589. This bug was fixed by https://github.com/pmodels/mpich/pull/5590.
       In short, we could not use distributed RHS with MPICH until v4.0b1.
     */
--#if PETSC_PKG_MUMPS_VERSION_LT(5,3,0) || (defined(PETSC_HAVE_MPICH_NUMVERSION) && (PETSC_HAVE_MPICH_NUMVERSION < 40000101))
-   mumps->ICNTL20 = 0;  /* Centralized dense RHS*/
+-#if PETSC_PKG_MUMPS_VERSION_LT(5, 3, 0) || (defined(PETSC_HAVE_MPICH_NUMVERSION) && (PETSC_HAVE_MPICH_NUMVERSION < 40000101))
+   mumps->ICNTL20 = 0; /* Centralized dense RHS*/
 -#else
--  mumps->ICNTL20 = 10; /* Distributed dense RHS*/
+-  mumps->ICNTL20     = 10; /* Distributed dense RHS*/
 -#endif
-   PetscCall(PetscOptionsMUMPSInt("-mat_mumps_icntl_20","ICNTL(20): give mumps centralized (0) or distributed (10) dense right-hand sides","None",mumps->ICNTL20,&mumps->ICNTL20,&flg));
-   PetscCheckFalse(flg && mumps->ICNTL20 != 10 && mumps->ICNTL20 != 0,PETSC_COMM_SELF,PETSC_ERR_SUP,"ICNTL(20)=%d is not supported by the PETSc/MUMPS interface. Allowed values are 0, 10",(int)mumps->ICNTL20);
- #if PETSC_PKG_MUMPS_VERSION_LT(5,3,0)
+   PetscCall(PetscOptionsMUMPSInt("-mat_mumps_icntl_20", "ICNTL(20): give mumps centralized (0) or distributed (10) dense right-hand sides", "None", mumps->ICNTL20, &mumps->ICNTL20, &flg));
+   PetscCheck(!flg || mumps->ICNTL20 == 10 || mumps->ICNTL20 == 0, PETSC_COMM_SELF, PETSC_ERR_SUP, "ICNTL(20)=%d is not supported by the PETSc/MUMPS interface. Allowed values are 0, 10", (int)mumps->ICNTL20);
+ #if PETSC_PKG_MUMPS_VERSION_LT(5, 3, 0)
+diff --git a/config/BuildSystem/config/packages/PTScotch.py b/config/BuildSystem/config/packages/PTScotch.py
+index 5a46e581fd2..bc7535eb449 100644
+--- a/config/BuildSystem/config/packages/PTScotch.py
++++ b/config/BuildSystem/config/packages/PTScotch.py
+@@ -32,12 +32,16 @@ class Configure(config.package.Package):
+     self.odeps          = [self.pthread,self.zlib]
+     return
+ 
++  def configureLibrary(self):
++    if not self.bison.haveBison3plus:
++      self.download = self.download_mingw
++    config.package.Package.configureLibrary(self)
++
+   def Install(self):
+     import os
+ 
+     self.programs.getExecutable('flex', getFullPath = 1)
+     if not hasattr(self.programs, 'flex'): raise RuntimeError('PTScotch needs flex installed')
+-    if not self.bison.haveBison3plus: raise RuntimeError('PTScotch needs Bison version 3.0 or above, use --download-bison')
+ 
+     self.log.write('Creating PTScotch '+os.path.join(os.path.join(self.packageDir,'src'),'Makefile.inc')+'\n')
+ 
+@@ -94,7 +98,7 @@ class Configure(config.package.Package):
+     g.write('MKDIR    = '+self.programs.mkdir+'\n')
+     g.write('MV       = '+self.programs.mv+'\n')
+     g.write('RANLIB   = '+self.setCompilers.RANLIB+'\n')
+-    if self.setCompilers.isMINGW(self.framework.getCompiler(), self.log):
++    if self.setCompilers.isMINGW(self.framework.getCompiler(), self.log) or not self.bison.haveBison3plus:
+       g.write('LEX      = '+self.programs.flex+'\n')
+       g.write('YACC     = '+getattr(self.bison,self.bison.executablename)+' -y\n')
+     else:

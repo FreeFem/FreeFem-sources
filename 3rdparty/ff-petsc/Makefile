@@ -99,7 +99,7 @@ ifneq ($(FC),)
 ifneq ($(wildcard ~/.petsc_pkg),)
 PETSC_DOWNLOAD += --download-slepc-configure-arguments="--download-arpack --with-packages-download-dir=~/.petsc_pkg"
 else
-PETSC_DOWNLOAD += --download-slepc-configure-arguments="--download-arpack=https://github.com/prj-/arpack-ng/archive/9fc0c71.tar.gz"
+PETSC_DOWNLOAD += --download-slepc-configure-arguments="--download-arpack"
 endif
 endif
 endif
@@ -125,12 +125,18 @@ PETSC_DOWNLOAD += '--download-metis-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-mmg-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-parmmg-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles"' \
 	'--download-superlu-cmake-arguments=-G "MSYS Makefiles"' \
+	'--download-scalapack-cmake-arguments=-G "MSYS Makefiles"' \
 	'--download-hypre-configure-arguments=--build=x86_64-linux-gnu --host=x86_64-linux-gnu'
 ifeq ($(FC),)
 PETSC_DOWNLOAD += '--download-superlu_dist-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles" -DXSDK_ENABLE_Fortran=OFF'
 else
 ifeq ($(TOOL_DYLIB_scalapack)$(TOOL_DYLIB_mumps),)
 PETSC_DOWNLOAD += '--download-superlu_dist-cmake-arguments=-DMPI_GUESS_LIBRARY_NAME=MSMPI -G "MSYS Makefiles" -DXSDK_ENABLE_Fortran=OFF'
+endif
+ifneq ($(wildcard ~/.petsc_pkg),)
+PETSC_DOWNLOAD += '--download-slepc-configure-arguments=--with-packages-build-dir=$(PETSC_DIR)/fr/externalpackages --download-arpack --download-arpack-cmake-arguments=-G"MSYS\ Makefiles" --with-packages-download-dir=~/.petsc_pkg'
+else
+PETSC_DOWNLOAD += '--download-slepc-configure-arguments=--with-packages-build-dir=$(PETSC_DIR)/fr/externalpackages --download-arpack --download-arpack-cmake-arguments=-G"MSYS\ Makefiles"'
 endif
 endif
 endif
@@ -303,10 +309,6 @@ $(SRCDIR)/tag-tar:$(PACKAGE)
 	-mkdir $(SRCDIR) 2>/dev/null
 	-tar xzf $(PACKAGE) -C $(SRCDIR) --strip-components 1
 	cd $(SRCDIR) && patch -p1 < ../petsc-cmake-seq.patch && cd -
-ifneq ($(WIN32DLLTARGET),)
-	cd $(SRCDIR) && patch -p1 < ../petsc-scalapack.patch && cd -
-endif
-	cd $(SRCDIR) && patch -p1 < ../petsc-clang.patch && cd -
 	touch $@
 $(PACKAGE):
 	../getall -o PETSc -a
