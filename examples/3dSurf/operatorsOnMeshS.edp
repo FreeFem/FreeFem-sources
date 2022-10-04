@@ -31,3 +31,12 @@ medit("ThSmv",ThSmv);
 
 meshS ThS2=plyloadS("plane.ply");
 plot(ThS2);
+//  version 4.11-1.. 13 sep 2022
+meshS Ths = square3(10,10,[x,y,square(2*x-1)+square(2*y-1)]); 
+plot(Ths,wait=1);
+real[int] gzz;
+mesh Th2 = movemesh(Ths,transfo=[x,y,z],getZ=gzz);//  get flat 2d mesh ...
+fespace Vh2(Th2,P1);
+Vh2 gz; gz[]=gzz;
+plot(gz,wait=1);
+

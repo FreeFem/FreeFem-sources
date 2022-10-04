@@ -22,6 +22,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- add missing code for Discontinous Galerkin in 3d for RHS 
+   ( see [problem-in-3d-discontinuous-galerkin-computation][https://community.freefem.org/t/problem-in-3d-discontinuous-galerkin-computation/2015/6] )
 - add in examples/mpi/chamonix.edp : radiative transfer (use new plugin 
      plugin/mpi/RadiativeTransfer_htool.cpp, illustrates the use of htool for compression
      of user defined matrix operator)
@@ -51,7 +53,7 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Fixed
--
+-  fixe in A.RemoveHalf (alway return a new matrix)
 
 ## [4.11]
 ### Added
