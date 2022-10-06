@@ -1679,10 +1679,10 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
     TRdHat pbt;
     pbs[0] = 1./(SRdHat::d+1);
     pbs[1] = 1./(SRdHat::d+1);
-    if (SRdHat::d == 2) pbs[2] = 1./(SRdHat::d+1);
+    if (SRdHat::d == 3) pbs[2] = 1./(SRdHat::d+1);
     pbt[0] = 1./(TRdHat::d+1);
     pbt[1] = 1./(TRdHat::d+1);
-    if (TRdHat::d == 2) pbt[2] = 1./(TRdHat::d+1);
+    if (TRdHat::d == 3) pbt[2] = 1./(TRdHat::d+1);
 
     int Snbv = Uh->TFE[0]->ndfonVertex;
     int Snbe = Uh->TFE[0]->ndfonEdge;

@@ -777,8 +777,8 @@ class Call_CompositeFormBilinear: public E_F0mps
 {
 public:
   Expression *nargs;
-  list<C_F0> varflargs;
-  list<C_F0> largs;
+  //list<C_F0> varflargs;
+  //list<C_F0> largs;
   KNM<list<C_F0>> block_largs;
 
   typedef list<C_F0>::const_iterator const_iterator;
@@ -2243,8 +2243,8 @@ AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stac
   if(init) A.init(); //
   if( ! PUh || ! PVh) return SetAny<Matrice_Creuse<R>  *>(&A);
 
-  //creationBlockOfMatrixToBilinearForm<R,MMesh,FESpace1,FESpace2>( PUh, PVh, ds.sym, ds.tgv, b->largs, stack, A);
-  
+  creationBlockOfMatrixToBilinearForm<R,MMesh,FESpace1,FESpace2>( PUh, PVh, ds.sym, ds.tgv, b->largs, stack, A);
+  /*
   const FESpace1 & Uh =  *PUh ;
   const FESpace2 & Vh =  *PVh ;
   const MMesh* pTh = (is_same< Mesh1, Mesh2 >::value) ? (MMesh*)&PUh->Th : 0;
@@ -2292,7 +2292,7 @@ AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stac
    A.pHM()->half = ds.sym;
    if (A_is_square)
         SetSolver(stack,VF,*A.A,ds);
-
+   */ 
   return SetAny<Matrice_Creuse<R>  *>(&A);
 
 }
@@ -2336,7 +2336,6 @@ void creationBlockOfMatrixToBilinearForm( const FESpace1 * PUh, const FESpace2 *
           // reset the solver ...
       }
      *A.A=R(); // reset value of the matrix
-
      if ( AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpace1,FESpace2 >( stack,Th,Uh,Vh,sym>0,A.A,0,largs) )
        AssembleBC<R,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,sym>0,A.A,0,0,largs,tgv);
    }
@@ -2359,7 +2358,6 @@ void creationBlockOfMatrixToBilinearForm( const FESpace1 * PUh, const FESpace2 *
            AssembleBC<R>( stack,Th,Uh,Vh,sym>0,A.A,0,0,largs,tgv);
 
    }
-
 }
 
 //

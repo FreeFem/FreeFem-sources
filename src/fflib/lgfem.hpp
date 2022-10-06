@@ -648,13 +648,15 @@ class vect_generic_v_fes {  //: public RefCounter{
     aType atfs[] = {atype< ::pfes * >( ), atype< pfes3 * >( ), atype< pfesS * >( ), atype< pfesL * >( )};
     vect = new A[N];
     
-    for(int i=0; i<args.size(); i++){
-      cout << "info FESpace["<<i<<"] === " << endl;
-      cout << "nbitem= " << args[i].nbitem() << endl;
+    if(verbosity>3){
+      for(int i=0; i<args.size(); i++){
+        cout << "info FESpace["<<i<<"] === " << endl;
+        cout << "nbitem= " << args[i].nbitem() << endl;
+      }
     }
     
     for( int i=0; i<args.size(); i++ ){
-        cout << "i=" << i << endl;
+        //cout << "i=" << i << endl;
         if( atype< ::pfes * >() == args[i].left( ) ){
           //a = to< atfs[iii] >(args[i]);
           pfesTrue * tmp = GetAny< pfesTrue *> ( args[i].eval(stack)) ;
@@ -798,7 +800,7 @@ class vect_generic_v_fes {  //: public RefCounter{
         result[i] = PUh->NbOfDF;
       }
     }
-    cout << "vectOfNbOfDF=" << result << endl;
+    //cout << "vectOfNbOfDF=" << result << endl;
     return result;    
   }
 
@@ -808,7 +810,7 @@ class vect_generic_v_fes {  //: public RefCounter{
     for(int i=0; i< N; i++){
         tNbOfDF += arrayNbOfDF[i];
     }
-    cout << "total NbOfDF=" << tNbOfDF << endl;
+    //cout << "total NbOfDF=" << tNbOfDF << endl;
     return tNbOfDF;
   }
 
@@ -818,7 +820,7 @@ class vect_generic_v_fes {  //: public RefCounter{
       // get the number of item of i-th component of the composite vector of FESpace
       result[i] = vect[i]->getN(); 
     }
-    cout << "vectOfNbitem=" << result << endl;
+    //cout << "vectOfNbitem=" << result << endl;
     return result;
   }
 
@@ -830,46 +832,6 @@ class vect_generic_v_fes {  //: public RefCounter{
     }
     return tNbItem;
   }
-  /*
-  infoBlockCompositeFESpace getInfoBlock(){
-
-    // A verifier si cela fonctionne
-    KN<int> arrayNbItem = vectOfNbitem();
-    KN<int> arrayNbOfDF = vectOfNbOfDF();
-
-    int tNbItem=0;
-    int tNbOfDF=0;
-    for(int i=0; i< N; i++){
-        tNbItem += arrayNbItem[i];
-        tNbOfDF += arrayNbOfDF[i];
-    }
-
-
-    KN<int> beginBlockVh(N);
-    KN<int> indexBlockVh(tNbItem);
-    KN<int> localIndexInTheBlockVh(tNbItem);
-
-    int current_index=0;
-    for(int i=0; i<N; i++){
-      beginBlockVh[i] = current_index;
-      for(int j=0; j< arrayNbItem[i]; j++){
-        indexBlockVh[current_index] = i;
-        localIndexInTheBlockVh[current_index] = j;
-        current_index++;
-      }
-
-    }
-    ffassert( current_index== totalNbitem() );
-  
-    return infoBlockCompositeFESpace( beginBlockVh, indexBlockVh, localIndexInTheBlockVh);
-  }
-  */ 
- 
-  /*
-  void *update( );
-  void buildperiodic(Stack stack, KN< int > &ndfe);
-  void *buildupdate();
-  */
 };
 
 class pfes_fes : public v_fes {

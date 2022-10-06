@@ -1511,7 +1511,6 @@ class OP_MakePtr2 {
     Op(const basicAC_F0 &args);
 
     AnyType operator( )(Stack s) const {
-      cout << "creation OP_MakePtr2 " << endl; // Morice
       A p = GetAny< A >((*a)(s));
       B th = GetAny< B >((*b)(s));
       C tef = GetAny< C >((*c)(s));
