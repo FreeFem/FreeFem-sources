@@ -41,6 +41,7 @@ FreeFem___mpi_SOURCES = /ffapi.cpp \
 	../Graphics/sansrgraph.cpp \
 	../lglib/mymain.cpp \
 	../lglib/lg.tab.cpp \
+	/compositeFESpace.cpp \
 	/lgfem.cpp \
 	parallelempi.cpp
 FreeFem___mpi_DEPENDENCIES = ../fflib/libff.a
@@ -62,4 +63,7 @@ ffapi.cpp: ../fflib/ffapi.cpp
 	cp $^ .
 
 lgfem.cpp: ../fflib/lgfem.cpp
+	cp $^ .
+
+compositeFESpace.cpp: ../fflib/compositeFESpace.cpp
 	cp $^ .

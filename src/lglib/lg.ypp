@@ -431,8 +431,13 @@ list_of_id_args: /* returns [[YYSTYPE_clist_id]] */
   | type_of_dcl id                             { $$ = new ListOfId(); $$->push_back(UnId($2,C_F0(),$1->right()));}
   | type_of_dcl '&' id                         { $$ = new ListOfId(); $$->push_back(UnId($3,C_F0(),$1,true));}
   | '[' list_of_id_args ']'                    { $$ = new ListOfId(); $$->push_back(UnId($2));}
+  | '<' '[' list_of_id_args ']' '>'            { $$ = new ListOfId(); $$->push_back(UnId($3,true,true));}
+  | '<' '[' list_of_id_args ']'                { $$ = new ListOfId(); $$->push_back(UnId($3,true,false));}
   | list_of_id_args ',' id                     { $$ = $1; $$->push_back(UnId($3));}
-  | list_of_id_args ',''[' list_of_id_args ']' { $$ = $1; $$->push_back(UnId($4));}
+  | list_of_id_args ',' '[' list_of_id_args ']' { $$ = $1; $$->push_back(UnId($4));}
+  | list_of_id_args ',' '[' list_of_id_args ']' '>' { $$ = $1; $$->push_back(UnId($4,false,true));}
+  | list_of_id_args ',' '<' '[' list_of_id_args ']' '>' { $$ = $1; $$->push_back(UnId($5,true,true));}
+  | list_of_id_args ',' '<' '[' list_of_id_args ']'  { $$ = $1; $$->push_back(UnId($5,true,false));}
   | list_of_id_args ',' id '=' no_comma_expr   { $$ = $1; $$->push_back(UnId($3,$5));}
   | list_of_id_args ',' FESPACE id             { $$ = $1; $$->push_back(UnId($4,Find($3),atype<FE<double,2> **>()));}
   | list_of_id_args ',' FESPACE '&' id         { $$ = $1; $$->push_back(UnId($5,Find($3),atype<FE<double,2> **>(),true));}

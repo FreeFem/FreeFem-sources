@@ -1656,17 +1656,6 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
     const TMesh & ThV =Vh->Th; // colunm
     bool samemesh = (void*)&Uh->Th == (void*)&Vh->Th;  // same Fem2D::Mesh     +++ pot or kernel
  
-    /*
-    if (VFBEM==1)
-        ffassert (samemesh);
-        if(init)
-            *Hmat =0;
-        *Hmat =0;
-    if(*Hmat)
-        delete *Hmat;
-    *Hmat =0;
-    */
-
     bemtool::Geometry node; MeshBemtool mesh;
     Mesh2Bemtool(ThU, node, mesh);
 
@@ -1692,13 +1681,13 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
     bool SP2 = (Snbv == 1) && (Snbe == 1) && (Snbt == 0);
     bool SRT0 = (SRdHat::d == 2) && (Snbv == 0) && (Snbe == 1) && (Snbt == 0);
 
-    if(mpirank == 0){
-        cout << "Vh->TFE[0]->N=" << Vh->TFE[0]->N << endl;
-        //cout << "Vh->TFE[0].N=" << Vh->TFE[0].N << endl;
-        cout << "Vh->TFE.N()=" << Vh->TFE.N() << endl;
-        cout << "Vh->MaxNbNodePerElement=" << Vh->MaxNbNodePerElement << endl;
-        cout << "SRT0=" << SRT0 << endl;
-    }
+    // if(mpirank == 0){
+    //     cout << "Vh->TFE[0]->N=" << Vh->TFE[0]->N << endl;
+    //     //cout << "Vh->TFE[0].N=" << Vh->TFE[0].N << endl;
+    //     cout << "Vh->TFE.N()=" << Vh->TFE.N() << endl;
+    //     cout << "Vh->MaxNbNodePerElement=" << Vh->MaxNbNodePerElement << endl;
+    //     cout << "SRT0=" << SRT0 << endl;
+    // }
 
     if (SP2) {
         bemtool::Dof<P2> dof(mesh,true);
@@ -1768,13 +1757,13 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
             // 
             // ==> on n'a pas besoin de resize les points p2
             int nnn= Vh->TFE[0]->N; // the size of the vector FESpace. For [P1,P1,P1], nnn=3;
-            if(verbosity){
-                cout << "nnn=" << nnn << endl;
-                cout << "p2.size= " << p2.size() << endl; 
-                cout << "p2.resize :"<< nnn*3*m << " "<< 3*m << endl;
-                cout << "m=" << m << endl; 
-                cout << "n=" << n << endl;
-            }
+            // if(verbosity){
+            //     cout << "nnn=" << nnn << endl;
+            //     cout << "p2.size= " << p2.size() << endl; 
+            //     cout << "p2.resize :"<< nnn*3*m << " "<< 3*m << endl;
+            //     cout << "m=" << m << endl; 
+            //     cout << "n=" << n << endl;
+            // }
             int mDofScalar = m/nnn; // computation of the dof of one component 
 
             for (int i=0; i<mDofScalar; i++) {
@@ -1905,18 +1894,8 @@ void creationHMatrixtoBEMForm(const FESpace1 * Uh, const FESpace2 * Vh, const in
         Assembly(Hmat,generator,ds,p1,p2,comm,MMesh::RdHat::d+1);
         delete generator;
     }
-    //return Hmat;
 }
 
-
-
-/*
-template void creationHMatrixtoBEMForm<Complex, MeshL, FESpaceL, FESpaceL>(const FESpaceL * Uh, const FESpaceL * Vh, const int & VFBEM, 
-                             const std::list<C_F0> & largs, Stack stack, const Data_Bem_Solver &ds, HMatrixVirt<Complex> **Hmat);
-
-template void creationHMatrixtoBEMForm<Complex, MeshS, FESpaceS, FESpaceS>(const FESpaceS * Uh, const FESpaceS * Vh, const int & VFBEM, 
-                             const std::list<C_F0> & largs, Stack stack, const Data_Bem_Solver &ds, HMatrixVirt<Complex> **Hmat);
-*/
 
 template<> void creationHMatrixtoBEMForm<double, MeshS, FESpaceS, FESpaceS>(const FESpaceS * Uh, const FESpaceS * Vh, const int & VFBEM, 
                              const std::list<C_F0> & largs, Stack stack, const Data_Bem_Solver &ds, HMatrixVirt<double> **Hmat){

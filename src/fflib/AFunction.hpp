@@ -123,22 +123,26 @@ struct UnId {
   Expression  e; 
   deque<UnId> * array; //  to store a array 
   aType re; 
-  bool ref; // a ref or non 
-  UnId() :id(0),r(0),e(0),array(0),re(0),ref(false) {}
-  UnId(const char * idd) :id(idd),r(0),e(0),array(0),re(0),ref(false) {}
+  bool ref; // a ref or non
+  bool compo_begin; // used in problem/solve to know if we have a composite Problem  //===  Modif 4/10/2022 Morice
+  bool compo_end;  // used in problem/solve to know if we have a composite Problem  //===  Modif 4/10/2022 Morice
+  UnId() :id(0),r(0),e(0),array(0),re(0),ref(false),compo_begin(false),compo_end(false) {}
+  UnId(const char * idd) :id(idd),r(0),e(0),array(0),re(0),ref(false), compo_begin(false), compo_end(false) {}
   UnId(const char * idd,const C_F0 & ee,aType rr,bool reff) ;  
-  UnId(deque<UnId>  * d) : id(0),r(0),e(0),array(d?new deque<UnId>(*d):0),re(0),ref(false) {}
+  UnId(deque<UnId>  * d, bool cc_b=false, bool cc_e=false) : id(0),r(0),e(0),array(d?new deque<UnId>(*d):0),re(0),ref(false),compo_begin(cc_b),compo_end(cc_e) { cout << "call UnId(deque<UnId>  * d) : id(0),r(0),e(0),array(d?new deque<UnId>(*d):0),re(0),ref(false)" << endl;}
   UnId(const UnId & u) : 
     id(u.id),r(u.r),e(u.e),
     array(u.array?new deque<UnId>(*u.array):0),
-    re(u.re),ref(u.ref) {}
-   // Modif 24032005  
+    re(u.re),ref(u.ref),compo_begin(u.compo_begin),compo_end(u.compo_end) {}
+   // Modif 24032005 
   void  operator= (const UnId & u) {
     id=u.id;
     r=u.r;
     e=u.e;
     re=u.re;
     ref=u.ref;
+    compo_begin=u.compo_begin;
+    compo_end=u.compo_end;
     if(array) delete array;
     array=0;
     if(u.array) array= new deque<UnId>(*u.array);
@@ -3246,7 +3250,7 @@ inline Expression basicForEachType::OnReturn(Expression f) const {
 inline  void CC_F0::operator=(const AC_F0& a) {  f=new E_Array(a); r= atype<E_Array>();};
 
 inline  UnId::UnId(const char * idd,const C_F0 & ee,aType rr=0,bool reff=false) 
-  :id(idd),r(rr),e(ee),array(0),re(ee.left()) ,ref(reff){}
+  :id(idd),r(rr),e(ee),array(0),re(ee.left()) ,ref(reff), compo_begin(false), compo_end(false){};
 
 
 class E_exception : public exception { public:

@@ -1420,14 +1420,7 @@ struct OpMake_pvectgenericfes : public OneOperator {
       AnyType r = (*eppfes)(s);
       pvectgenericfes *ppfes = GetAny< pvectgenericfes * >(r);
 
-      /*
-      bool same = true;
-      for (int i = 1; i < atef.size( ); i++) same &= atef[i].LeftValue( ) == atef[1].LeftValue( );
-      *ppfes = new pfes_tefk(ppTh, tef, atef.size( ), s, nbcperiodic, periodic);
-      */
       *ppfes = new vect_generic_v_fes(atef,s);
-      //cerr << "in construction" << endl;
-      //exit(0);
       return r;
     }
   };
@@ -1464,34 +1457,6 @@ inline pfesL *MakePtrL(pfesL *const &p, pmeshL *const &a, TypeOfFEL *const &tef)
   *p = new pfesL_tef(a, tef);
   return p;
 }
-/*
-class OP_MakePtrGeneric {
- public:
-  class Op : public E_F0mps {
-   public:
-    //  static int GetPeriodic(Expression  bb, Expression & b,Expression & f);
-    typedef pvectgenericfes *R;
-    typedef pvectgenericfes *A;
-    const E_FEarray &atef;
-    Expression a, b;
-   
-    Op(const basicAC_F0 &args) : a(to< A >(args[0])), b(to< E_FEarray >(args[1]))  {cout << args.size() << endl;};
-
-    AnyType operator( )(Stack s) const {
-      cout << "creation OP_MakePtrGeneric " << endl; // Morice
-      A p = GetAny< A >((*a)(s)); 
-      atef = GetAny< E_FEarray >((*b)(s)); 
-      return SetAny< R >(p);
-    }
-  };    // end Op class
-
-  typedef Op::R Result;
-  static E_F0 *f(const basicAC_F0 &args) { return new Op(args); }
-  static ArrayOfaType typeargs( ) {
-    return ArrayOfaType(atype< Op::A >( ), atype< E_FEarray  >( ), false);
-  }
-};
-*/
 
 class OP_MakePtr2 {
  public:
@@ -1657,7 +1622,7 @@ void GetPeriodic(const int d, Expression perio, int &nbcperiodic, Expression *&p
 
 OP_MakePtr2::Op::Op(const basicAC_F0 &args)
   : a(to< A >(args[0])), b(to< B >(args[1])), c(to< C >(args[2])) {
-  cout << "call du constructeur OP_MakePtr2::Op::Op" << endl; // Morice
+  //cout << "call du constructeur OP_MakePtr2::Op::Op" << endl; // Morice
   nbcperiodic = 0;
   periodic = 0;
   args.SetNameParam(n_name_param, name_param, nargs);
