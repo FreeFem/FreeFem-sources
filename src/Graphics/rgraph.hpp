@@ -90,12 +90,18 @@ EXTERNFF(	float ,GetHeigthFont,()) ;
 
 EXTERNFF(	void ,openPS,(const char * )) ;
 EXTERNFF(	void ,closePS,(void)) ;
+EXTERNFF(	void ,openPDF,(const char * )) ; // add by fujiwara
+EXTERNFF(	void ,closePDF,(void)) ; // add by fujiwara
+EXTERNFF(	void ,openSVG,(const char * )) ; // add by fujiwara
+EXTERNFF(	void ,closeSVG,(void)) ; // add by fujiwara
 EXTERNFF(	void ,coutmode,(short i)) ;
 EXTERNFF(	void ,myexit,(int err)) ; // err=0 ??
 EXTERNFF(	void ,viderbuff,()) ;
 EXTERNFF(	void ,Commentaire,(const char *)) ;
 EXTERNFF(	void ,NoirEtBlanc,(int NB)) ;
 EXTERNFF(	void ,MettreDansPostScript,(int in)) ;//  oui=1 ou non=0
+EXTERNFF(	void ,MettreDansPDF,(int in)) ;//  oui=1 ou non=0 // add by fujiwara
+EXTERNFF(	void ,MettreDansSVG,(int in)) ;//  oui=1 ou non=0 // add by fujiwara
 EXTERNFF(    int ,getprog,(char* fn,int , char** argvptr)) ;
 EXTERNFF(    void ,setgrey,(bool )) ;
 EXTERNFF(    int ,getgrey,(    )) ;
@@ -135,12 +141,18 @@ static int init_ff_graph_ptr_func()
 	//compileString=compileString_;
 	openPS=openPS_;
 	closePS=closePS_;
+	openPDF=openPDF_; // add by fujiwara
+	closePDF=closePDF_; // add by fujiwara
+	openSVG=openSVG_; // add by fujiwara
+	closeSVG=closeSVG_; // add by fujiwara
 	coutmode=coutmode_;
 	myexit=myexit_;
 	viderbuff=viderbuff_;
 	Commentaire=Commentaire_;
 	NoirEtBlanc=NoirEtBlanc_;
 	MettreDansPostScript=MettreDansPostScript_;
+	MettreDansPDF=MettreDansPDF_; // add by fujiwara
+	MettreDansSVG=MettreDansSVG_; // add by fujiwara
 	getprog=getprog_;
 	setgrey=setgrey_;
 	getgrey=getgrey_;
@@ -179,12 +191,18 @@ static int init_ff_graph_ptr_func_call = init_ff_graph_ptr_func();
 //#define compileString compileString_
 #define openPS openPS_
 #define closePS closePS_
+#define openPDF openPDF_ // add by fujiwara
+#define closePDF closePDF_ // add by fujiwara
+#define openSVG openSVG_ // add by fujiwara
+#define closeSVG closeSVG_ // add by fujiwara
 #define coutmode coutmode_
 #define myexit myexit_
 #define viderbuff viderbuff_
 #define Commentaire Commentaire_
 #define NoirEtBlanc NoirEtBlanc_
 #define MettreDansPostScript MettreDansPostScript_
+#define MettreDansPDF MettreDansPDF_ // add by fujiwara
+#define MettreDansSVG MettreDansSVG_ // add by fujiwara
 #define getprog getprog_
 #define setgrey setgrey_
 #define getgrey getgrey_

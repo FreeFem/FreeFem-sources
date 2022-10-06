@@ -1,0 +1,138 @@
+// -*- FreeFEM -*-
+// Time-stamp: "2022-10-04 18:08:35 fujiwara"
+//
+// Example from FreeFEM document
+//
+//----------------------------------------------------------------------
+// Domain
+//----------------------------------------------------------------------
+border ba(t=0,1.0) { x=t;   y=0;   label=1; };
+border bb(t=0,0.5) { x=1;   y=t;   label=2; };
+border bc(t=0,0.5) { x=1-t; y=0.5; label=3; };
+border bd(t=0.5,1) { x=0.5; y=t;   label=3; };
+border be(t=0.5,1) { x=1-t; y=1;   label=2; };
+border bf(t=0.0,1) { x=0;   y=1-t; label=1; };
+
+mesh Th = buildmesh( ba(6)+bb(4)+bc(4)+bd(4)+be(4)+bf(6) );
+
+//----------------------------------------------------------------------
+// P1 approximation
+//----------------------------------------------------------------------
+fespace Vh1(Th,P1);
+Vh1 u,v;
+func f = -1;
+solve Poisson(u,v)
+  = int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v))
+    - int2d(Th)(f*v) + on(1,u=0) + on(2,u=0) + on(3,u=0);
+
+plot(u,ps="LshapeP1.ps"); // default output
+
+load "plotPDF"  // without semicolon
+
+bool ret = plotPDF( "LshapeP1", Th, u );
+
+assert( ret == true );  // Error check.
+
+plotPDF( "LshapeP1contour", Th, u, gray=true, value=false, meshpage=false, index=false, belabel=false, fill=false ); // only contour (without legend : value=false), monochrome
+
+//------------------------------
+// output with options
+//------------------------------
+plotPDF( "LshapeWithMesh", Th, u, withmesh=0.75 );
+plotPDF( "LshapeP1op1", Th, u, index=true, nbiso=36, nbfill=128 );
+
+real[int] contour = [ -0.03,-0.025,-0.020,-0.015,-0.010 ];
+real[int] range = [ -0.03, -0.01 ];
+plotPDF( "LshapeP1op2", Th, u, index=true, viso=contour, frange=range );
+
+//----------------------------------------------------------------------
+// P0 approximation
+//----------------------------------------------------------------------
+fespace Vh0(Th,P0);
+Vh0 u0 = u;
+plotPDF( "LshapeP0", Th, u0, fetype="P0" );
+
+//----------------------------------------------------------------------
+// P1nc approximation
+//----------------------------------------------------------------------
+fespace Vh1nc(Th,P1nc);
+Vh1nc u1nc,v1nc;
+solve PoissonP1nc(u1nc,v1nc)
+  = int2d(Th)(dx(u1nc)*dx(v1nc)+dy(u1nc)*dy(v1nc))
+    - int2d(Th)(f*v1nc) + on(1,u1nc=0) + on(2,u1nc=0) + on(3,u1nc=0);
+
+plotPDF( "LshapeP1nc", Th, u1nc );
+
+//----------------------------------------------------------------------
+// P2 approximation
+//----------------------------------------------------------------------
+fespace Vh2(Th,P2);
+Vh2 u2,v2;
+solve PoissonP2(u2,v2)
+  = int2d(Th)(dx(u2)*dx(v2)+dy(u2)*dy(v2))
+    - int2d(Th)(f*v2) + on(1,u2=0) + on(2,u2=0) + on(3,u2=0);
+
+plotPDF( "LshapeP2", Th, u2, fetype="P2" );
+
+plotPDF( "LshapeP2asP1", Th, u2 ); // u2 is interpreted as P1-approx.
+
+//----------------------------------------------------------------------
+// color palette example
+//----------------------------------------------------------------------
+// Proposed by Paul Tol
+// Each triplet is [R,G,B]
+// The 1st and the final are colors for minimum and maximum values.
+// Between them, RGB is linearly interpolated
+
+real[int,int] BuRd = [
+  [ 33,102,172],
+  [ 67,147,195],
+  [146,197,222],
+  [209,229,240],
+  [247,247,247],
+  [253,219,199],
+  [244,165,130],
+  [214,96, 77],
+  [178,24, 43]
+];
+plotPDF( "LshapeP2-BuRd", Th, u2, fetype="P2", meshpage=false, palette=BuRd );
+
+//----------------------------------------------------------------------
+// vector fields
+//----------------------------------------------------------------------
+border c(t=0,2*pi) { x=cos(t); y=sin(t); }
+//border a(t=0,2*pi) { x=0.3+0.3*cos(t); y=0.3*sin(t); }
+
+int m = 30;
+Th = buildmesh( c(m) );
+//Th = buildmesh( c(m)+a(m) );
+
+fespace P1h(Th,P1);
+P1h uc=x*x+y*y, vc=x*x-y*y;
+
+//verbosity=99;
+
+// plot([uc,vc],Th,ps="vector.eps",wait=1); // default in FreeFem++
+plotPDF("vector.pdf",Th,[uc,vc], withmesh=0.2, meshpage=false );
+plotPDF("vector-unitarrow.pdf",Th,[uc,vc], unitarrow=true, isoline=false, withmesh=0.2, meshpage=false );
+
+//----------------------------------------------------------------------
+// complex-valued functions
+//----------------------------------------------------------------------
+
+border recta(t=-pi,pi) { x=t;  y=-1; label=1; };
+border rectb(t=-1,1) { x=pi;  y=t;  label=2; };
+border rectc(t=-pi,pi) { x=-t; y=1;  label=3; };
+border rectd(t=-1,1) { x=-pi; y=-t; label=4; };
+
+int r=20;
+mesh Thr = buildmesh( recta(3*r) + rectb(r) + rectc(3*r) + rectd(r) );
+fespace Vhr(Thr,P1);
+
+Vhr<complex> sinz = sin( x + y*1i );
+
+plotPDF( "complex.pdf", Thr, sinz, cmm="sin(z)", meshpage=false, zabs=true, zreal=true, zimag=true, zarg=true,fill=false );
+
+//----------------------------------------------------------------------
+// End of file
+//----------------------------------------------------------------------

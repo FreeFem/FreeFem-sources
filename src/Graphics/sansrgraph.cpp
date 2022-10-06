@@ -43,6 +43,9 @@
 using namespace std;
 #include "rgraph.hpp"
 
+#include <sstream> // add by fujiwara
+#include "pdf.h" // add by fujiwara
+
 #include "error.hpp"
 #ifdef macintoshxx
 #include <ConditionalMacros.h>
@@ -127,6 +130,17 @@ static  long grey6[2][3] ={ {65534,65534,65534},{0,0,0} };
 static bool grey=false;
 static FILE *psfile = 0;
 static FILE *psfile_save = 0;
+static bool pdffile = false; // add by fujiwara
+static char *pdffile_name = nullptr; // add by fujiwara
+static float pdf_s = 1; // add by fujiwara
+static std::stringstream pdffile_content; // add by fujiwara
+static FILE *svgfile = 0; // add by fujiwara
+static FILE *svgfile_save = 0; // add by fujiwara
+static float svg_s = 1; // add by fujiwara
+static int svg_r = 0; // add by fujiwara
+static int svg_g = 0; // add by fujiwara
+static int svg_b = 0; // add by fujiwara
+static int svg_lw = 1; // add by fujiwara
 static int LastColor=2;  //  pour est en couleur par defaut
 
 const float fMinPixel = -32000;
@@ -277,6 +291,17 @@ void couleur(int c)
       r=g=b=0;
     if(psfile)
     fprintf(psfile,"%.3f %.3f %.3f C\n",r,g,b);
+
+    // add by fujiwara
+    if( pdffile ){
+	pdffile_content << r << ' ' << g << ' ' << b << " RG" << std::endl;
+	pdffile_content << r << ' ' << g << ' ' << b << " rg" << std::endl;
+    }
+    if( svgfile ){
+	svg_r = static_cast<int>(r*256);
+	svg_g = static_cast<int>(g*256);
+	svg_b = static_cast<int>(b*256);
+    }
 
 #ifdef FFJS_GRAPH
     // ALH - <<ffjs_couleur>> javascript graph [[file:~/ffjs/main.js::ffjs_couleur]]
@@ -488,6 +513,16 @@ void rlineto(reel x, reel y)
   int newx = scalx(x), newy = scaly(y);
   if (psfile)
     fprintf(psfile,"%d %d %d %d L\n",currx, height-curry, newx, height-newy);
+  // add by fujiwara
+  if ( pdffile ){
+      pdffile_content << currx*pdf_s << ' ' << (height-curry)*pdf_s << " m "
+      		      << newx*pdf_s << ' ' << (height-newy)*pdf_s << " l S" << std::endl;
+  }
+  if ( svgfile ){
+    fprintf(svgfile,"<line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" stroke=\"rgb(%d,%d,%d)\" stroke-width=\"%d\" />\n",
+	    currx*svg_s, curry*svg_s, newx*svg_s, newy*svg_s, svg_r, svg_g, svg_b, svg_lw);
+  }
+  // add by fujiwara
   currx = newx; curry = newy;
 
 #ifdef FFJS_GRAPH
@@ -521,6 +556,17 @@ void plotstring (const char *  string)
 { //int l = strlen(string);
   if(psfile) fprintf(psfile,"(%s) %d %d  S\n",string,currx,height-curry);
  
+  // add by fujiwara
+  if( pdffile ){
+      pdffile_content << "BT /F1 " << 9 << " Tf" << std::endl; // 9*pdf_s : text font size
+      pdffile_content << "1 0 0 1 " << currx*pdf_s << ' ' << (height-curry)*pdf_s << " Tm" << std::endl;
+      pdffile_content << "(" << string << ") Tj ET" << std::endl;
+  }
+  if( svgfile ){
+      fprintf(svgfile,"<text x=\"%.2f\" y=\"%.2f\">%s</text>\n",currx*svg_s,curry*svg_s,string);
+  }
+  // add by fujiwara
+ 
 #ifdef FFJS_GRAPH
   // ALH - <<ffjs_plotstring>> javascript graph - Send the string character by character to
   // [[file:~/ffjs/main.js::ffjs_plotstring]] because there is no string parameter at the moment
@@ -538,6 +584,14 @@ void showgraphic()
 void penthickness(int pepais)
 {
   if (psfile) fprintf(psfile,"%d setlinewidth\n",pepais*2);
+  // add by fujiwara
+  if ( pdffile ){
+      pdffile_content << pepais << " w" << std::endl;
+  }
+  if ( svgfile ){
+      svg_lw = pepais;
+  }
+  // add bu fujiwara
 
 #ifdef FFJS_GRAPH
   // ALH - <<ffjs_penthickness>> javascript graph [[file:~/ffjs/main.js::ffjs_penthickness]]
@@ -579,6 +633,24 @@ void fillpoly(int n, float *poly)
 	fprintf(psfile,"%d %d ", scalx(poly[2*i]),height-scaly( poly[2*i+1]));
       fprintf(psfile,"eF\n");
     }
+  // add by fujiwara
+  if ( pdffile ) {
+
+      i=0;
+      pdffile_content << scalx(poly[2*i])*pdf_s << ' ' << (height-scaly( poly[2*i+1]))*pdf_s << " m ";
+      for (i=1;i<n;i++)
+	  pdffile_content << scalx(poly[2*i])*pdf_s << ' ' << (height-scaly( poly[2*i+1]))*pdf_s << " l ";
+      pdffile_content << "f" << std::endl;
+  }
+  if ( svgfile ) 
+    {
+      fprintf(svgfile, "<polygon points=\"");
+      for (i=0;i<n;i++)
+	fprintf(svgfile,"%.2f,%.2f ", scalx(poly[2*i])*svg_s,scaly( poly[2*i+1])*svg_s);
+      fprintf(svgfile,"\" stroke=\"rgb(%d,%d,%d)\" stroke-width=\"%d\" fill=\"rgb(%d,%d,%d)\" />\n",
+	      svg_r,svg_g,svg_b, svg_lw, svg_r,svg_g,svg_b);
+    }
+  // add by fujiwara
    
 #ifdef FFJS_GRAPH
   // ALH - <<ffjs_fillpoly>> javascript graph [[file:~/ffjs/main.js::ffjs_fillpoly]]
@@ -587,6 +659,116 @@ void fillpoly(int n, float *poly)
   EM_ASM(ffjs_fillpoly_close());
 #endif
 }
+
+//----------------------------------------------------------------------
+// add by fujiwara
+//----------------------------------------------------------------------
+void openPDF(const char *filename )
+{
+  if(pdffile) closePDF();
+
+  if( pdffile_name != nullptr ){
+      delete [] pdffile_name;
+      pdffile_name = nullptr;
+  }
+
+  pdffile_name = new char [ strlen(filename)+1 ];
+  strcpy( pdffile_name, filename );
+
+  pdffile_content.str(""); // clear
+  pdffile_content.clear( std::stringstream::goodbit );
+
+  pdffile_content.setf( std::ios::fixed );
+  pdffile_content.precision( 3 );
+
+  const int widthA4PDF = 596;
+  pdf_s = static_cast<float>(widthA4PDF) / width;
+
+  pdffile = true;
+  pdffile_content << "q" << std::endl; // gsave
+  
+  return;
+}
+void closePDF(void)
+{
+  if(pdffile) {
+
+      std::string PDFTitle = "plot() by FreeFem++";
+      std::string AppName = "FreeFem++ v" + StrVersionNumber();
+
+      SimplePDF_FF pdf( pdffile_name, PDFTitle.c_str(), AppName.c_str() );
+
+      const int widthPDF  = static_cast<int>( width * pdf_s );
+      const int heightPDF = static_cast<int>( height * pdf_s );
+
+      pdffile_content << "Q" << std::endl;
+
+      pdf.addPage( pdffile_content, widthPDF, heightPDF );
+
+      pdffile = false;
+  }
+
+  if( pdffile_name != nullptr ){
+      delete [] pdffile_name;
+      pdffile_name = nullptr;
+  }
+
+  return;
+}
+void openSVG(const char *filename )
+{
+  if(svgfile_save) closeSVG();
+
+  const int  widthA4PS = 596;
+  //const int heightA4PS = 842;
+  svg_s = static_cast<double>(widthA4PS)/width;
+
+  char ffff[32];
+  int count = 0;
+  if(!filename){
+    bool notfound;
+    do {
+      struct stat buf;
+      sprintf(ffff,"rgraph_%.3d.svg",count++);
+      volatile int r = stat(ffff,&buf) ;
+      notfound = (r != 0);
+      if( count > 1000 ) break;
+    } while ( !notfound );
+  }   
+
+  const char *fsvg (filename?filename:ffff);
+
+  svgfile=fopen(fsvg,"w");
+
+  if(svgfile) {
+    svgfile_save=svgfile;
+    fprintf(svgfile,"<?xml version=\"1.0\" standalone=\"yes\"?>\n\n");
+    fprintf(svgfile,"<!-- Creator: FreeFem++ v%s -->\n\n", StrVersionNumber().c_str());
+    fprintf(svgfile,"<svg xmlns=\"http://www.w3.org/2000/svg\"\n");
+    fprintf(svgfile,"\txmlns:xlink=\"http://www.w3.org/1999/xlink\"\n");
+    fprintf(svgfile,"\twidth=\"%dpx\" height=\"%dpx\">\n",
+	    static_cast<int>(width*svg_s), static_cast<int>(height*svg_s));
+  }
+  else
+  {
+    cerr << " Err openning SVG file " << fsvg << endl;
+  }
+  return;
+}
+void closeSVG(void)
+{
+  if(svgfile_save) {
+    fprintf(svgfile_save,"</svg>\n");
+    fclose(svgfile_save);
+  }
+  svgfile_save=0;
+  svgfile=0;
+
+  return;
+}
+//----------------------------------------------------------------------
+// add by fujiwara end
+//----------------------------------------------------------------------
 
 
 int  execute (const char * str)
@@ -720,6 +902,14 @@ void closePS(void)
   if(psfile)   {
     fprintf(psfile,"%% %s\n",c);
    }
+  // add by fujiwara
+  if( pdffile ) {
+      //fprintf(pdffile,"%% %s\n",c);
+   }
+  if( svgfile ) {
+    fprintf(svgfile,"%% %s\n",c);
+   }
+  // add by fujiwara
   }
   void NoirEtBlanc(int NB)
   {
@@ -732,6 +922,18 @@ void closePS(void)
      if(in)  psfile=psfile_save;     
      else   psfile=0;
    }
+  // add by fujiwara
+   void MettreDansPDF(int in) // put into PDF
+   {
+     if(in)  pdffile=true;
+     else   pdffile=false;
+   }
+   void MettreDansSVG(int in) // put into SVG
+   {
+     if(in)  svgfile=svgfile_save;
+     else   svgfile=0;
+   }
+   // add by fujiwara
 
 static void     FillRect(float x0,float y0, float x1, float y1)
  {
@@ -767,12 +969,16 @@ int PutLevel(int lineno, float xf, int col)
 {
   if(k) {
     MettreDansPostScript(0);
+    MettreDansPDF(0); // add by fujiwara
+    MettreDansSVG(0); // add by fujiwara
     couleur(1);
     float xmin,xmax,ymin,ymax;
     getcadre(xmin,xmax,ymin,ymax);
     rmoveto(xmin+(xmax-xmin)/100,ymax-(k)*(ymax-ymin)/30);
     plotstring(s);
     MettreDansPostScript(1);
+    MettreDansPDF(1); // add by fujiwara
+    MettreDansSVG(1); // add by fujiwara
        //  couleur(1);	
   }
 }
