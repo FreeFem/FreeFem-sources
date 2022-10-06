@@ -2338,7 +2338,7 @@ Matrixmapp2mapIJ1 (Stack s,Matrice_Creuse<R> *const &  mcB,const Inv_KN_long & i
      ffassert(B);
 
     int N=ii.N(),M=jj.N();
-    int nn = ii.max(), mm= jj.max();
+    int nn = ii.max()+1, mm= jj.max()+1;// missing +1 FH oct 2022 
     HashMatrix<int,R> *pA= new  HashMatrix<int,R>(nn,mm,0,0);
     HashMatrix<int,R> & A =*pA;
 
