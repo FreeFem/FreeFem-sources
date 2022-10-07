@@ -275,14 +275,13 @@ namespace
 #include <ctime>
 #include <cstring> // strlen
 #include <cstdlib> // exit
-
+// Change F. Hecht 
+//#define HAVE_ZLIB   // need zlib : CC src.cpp -lz
+//#if !defined(NO_ZLIB) && !defined(DISABLE_ZLIB) && !defined(WITHOUT_ZLIB) 
+//#define HAVE_ZLIB
+//#endif
 #if defined(WITH_zlib)
 #define HAVE_ZLIB
-#else
-//#define HAVE_ZLIB   // need zlib : CC src.cpp -lz
-#if !defined(NO_ZLIB) && !defined(DISABLE_ZLIB) && !defined(WITHOUT_ZLIB) 
-#define HAVE_ZLIB
-#endif
 #endif
 
 class SimplePDFModule
