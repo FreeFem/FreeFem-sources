@@ -467,10 +467,15 @@ AC_LANG(C++)
 
 
 # Some useful libraries
-
+AC_CHECK_LIB(z,deflate,ff_zlib="-lz",ff_zlib="")
 AC_CHECK_LIB(pthread,pthread_create,ff_pthread="-lpthread",ff_pthread="")
 AC_CHECK_LIB(iomp5,omp_get_wtime,ff_iomp5="-liomp5",ff_iomp5="")
 AC_CHECK_LIB([rt],[clock_gettime])
+AC_CHECK_HEADERS(zlib.h, 
+        ff_zlib_ok=yes
+        ,
+        ff_zlib_ok=no
+);  
 
 if test -n "$ff_pthread"  ; then
     AC_FF_ADDWHERELIB(pthread,$ff_pthread,)
@@ -864,7 +869,7 @@ then
 fi
 fi
 AC_SUBST(LIBSPTHREAD,$ff_pthread)
-
+AC_SUBST(FF_ZLIB,$ff_zlib)
 # ALH - 16/9/13 - at the moment the requirements for medit (glut) are not compatible with FFCS so medit is
 # only compiled with FF.
 
@@ -1263,7 +1268,7 @@ if test "$with_cadna" != no
     LDFLAGS="$LDFLAGS -L$ff_cadna_dir"
     AC_CHECK_LIB(cadnafree,arit_zero,
 	ff_cadna_ok=yes)
-    AC_CHECK_HEADERS(${ff_cadna_dir}/cadnafree.h,
+    AC_CHECK_HEADERS([${ff_cadna_dir}/cadnafree.h],
 	ff_cadna_h=yes, ff_cadna_h=no)
 
     LIBS="$ff_libs_old"
@@ -2204,6 +2209,7 @@ m4_map([AC_FF_WHERELIB],[
 	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
 	[[mmg3d],[-lmmg3d-v4],[libmmg3d.h],[]],
         [[mmg],[-lmmg],[libmmg.h],[]],
+        [[zlib],[-lz],[zlib.h],[]],
         [[parmmg],[-lparmmg],[libparmmg.h],[]],
 	[[mshmet],[-lmshmet],[mshmetlib.h],[]],
 dnl	[[gsl],[-lgsl -lgslcblas -lm],[gsl/gsl_sf.h],[]],

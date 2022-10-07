@@ -9,6 +9,7 @@
 // The newest version is avalilable at:
 // http://www-an.acs.i.kyoto-u.ac.jp/~fujiwara/ff
 //
+//ff-c++-LIBRARY-dep: [zlib]
 //----------------------------------------------------------------------
 // Usage:
 //
@@ -275,9 +276,13 @@ namespace
 #include <cstring> // strlen
 #include <cstdlib> // exit
 
-//#define HAVE_ZLIB   // need zlib : CC src.cpp -lz
-#if !defined(NO_ZLIB) && !defined(DISABLE_ZLIB) && !defined(WITHOUT_ZLIB)
+#if defined(WITH_zlib)
 #define HAVE_ZLIB
+#else
+//#define HAVE_ZLIB   // need zlib : CC src.cpp -lz
+#if !defined(NO_ZLIB) && !defined(DISABLE_ZLIB) && !defined(WITHOUT_ZLIB) 
+#define HAVE_ZLIB
+#endif
 #endif
 
 class SimplePDFModule
