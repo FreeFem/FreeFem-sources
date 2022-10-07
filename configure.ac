@@ -1949,6 +1949,7 @@ then
 fi
 
 # Checking for some functions that may not appear everywhere
+#  for libff-mmap-semaphore.c plugin and test ... 
 # ----------------------------------------------------------
 AC_CHECK_HEADERS(cstddef)
 AC_CHECK_HEADERS(stddef.h)

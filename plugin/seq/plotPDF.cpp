@@ -2104,6 +2104,7 @@ void drawCubicBeziers( std::stringstream &Content,
 
 bool isInsideTriangle( const double px, const double py, const double *const vx, const double *const vy )
 {
+    const double EPS = 1e-10;	
     // Find a, b \in \Real such that [px;py]-v0 =  a (v1-v0) + b (v2-v0).
     // if (0 < a < 1) && (0 < b < 1) && (0 < a+b < 1), then p is inside triangle v0--v1--v2
 
@@ -2317,7 +2318,7 @@ void trackEllipse( std::vector< std::vector<double> > &Cx, std::vector< std::vec
 		   const double *const Vx, const double *const Vy )
 {
     const int INTERVALS = DEFAULT_P2_INERVALS;
-    
+    const double EPS = 1e-10;    
     const double &lambda1 = PHI[0]; const double &lambda2 = PHI[1];
     const double &D = PHI[6]; const double &E = PHI[7]; const double &F = PHI[8];
 
@@ -2357,8 +2358,7 @@ void trackEllipse( std::vector< std::vector<double> > &Cx, std::vector< std::vec
 
     std::sort( theta.begin(), theta.end() );
 
-    const double EPS = 1e-10;
-
+ 
     const double PI = atan(static_cast<double>(1))*4;
     theta.push_back( theta[0] + 2*PI );
 
@@ -2503,6 +2503,7 @@ void trackHyperbola( std::vector< std::vector<double> > &Cx, std::vector< std::v
 		     const double *const PHI, const std::vector<double> &zx, const std::vector<double> &zy,
 		     const double *const Vx, const double *const Vy )
 {
+    const double EPS = 1e-10;
     const double &lambda1 = PHI[0]; const double &lambda2 = PHI[1];
     const double &D = PHI[6]; const double &E = PHI[7]; const double &F = PHI[8];
 
@@ -2921,7 +2922,7 @@ void splitByBorder( std::vector< std::vector<double> > &partition_x, std::vector
 		    const std::vector< std::vector<double> > &cxs, const std::vector< std::vector<double> > &cys )
 {
     assert( partition_x.size() == partition_y.size() );
-    assert( cxs.size() == cy.size() );
+    assert( cxs.size() == cys.size() );
 
     for(size_t i = 0; i < cxs.size(); i++){
 
