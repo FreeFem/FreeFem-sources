@@ -45,7 +45,7 @@ FreeFem___mpi_SOURCES = /ffapi.cpp \
 FreeFem___mpi_DEPENDENCIES = ../fflib/libff.a
 LDADD = ../fflib/libff.a @UMFPACKLIBS@ @ARPACKLIBS@ @BLACSLIBS@ @MPI_LIB@ @FF_LIBS@ -lz
 
-AM_CXXFLAGS = -DPARALLELE -DHAVE_ZLIB
+AM_CXXFLAGS = -DPARALLELE 
 AM_CPPFLAGS = -I$(srcdir)/../fflib -I$(srcdir)/../Graphics -I$(srcdir)/../femlib @MPI_INCLUDE@ $(HDF5_CPPFLAGS) $(UMFPACK_CPPFLAGS)
 ff-mpirun: ff-mpirun.in Makefile
 	../../config.status  --file=ff-mpirun:ff-mpirun.in
