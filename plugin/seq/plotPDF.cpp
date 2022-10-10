@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// Time-stamp: "2022-10-04 18:04:46 fujiwara"
+// Time-stamp: "2022-10-08 22:54:00 fujiwara"
 //
 // SUMMARY : Plot 2D Numerical Results, Mesh, and Indices into PDF file
 // ORG     : Graduate School of Informatics, Kyoto University, Japan
@@ -9,8 +9,9 @@
 // The newest version is avalilable at:
 // http://www-an.acs.i.kyoto-u.ac.jp/~fujiwara/ff
 //
-//ff-c++-LIBRARY-dep: [zlib]
 //----------------------------------------------------------------------
+//ff-c++-LIBRARY-dep: [zlib]
+
 // Usage:
 //
 // (1) bool plotPDF( PDFfilename, mesh Th [, options] );
@@ -88,7 +89,7 @@
 //  -------------------------
 //  vector field (vector-valued function)
 //  -------------------------
-//   real ArrowSize   = 1.0 : scale for arrow head size
+//   real arrowsize   = 1.0 : scale for arrow head size
 //   real coef        = 1.0 : scale for arrow length
 //   bool unitarrow   = false : true if draw arrows with same length
 //
@@ -102,7 +103,6 @@
 //   bool zabs  = false : true if show modulus (absolue value)
 //   bool zarg  = false : true if show argument
 //
-//  * fetype is ignored (isoline, fill are interpolated as P1 type).
 //----------------------------------------------------------------------
 // Examples:
 //
@@ -139,7 +139,7 @@
 //
 // Vh v;
 // plotPDF("vector_field",Th,[u,v], isoline=false, withmesh=0.25); // draw vector field [u,v]
-// plotPDF("vector_field",Th,[u,v], isoline=false, withmesh=0.25,coef=2.0,ArrowSize=0.8);
+// plotPDF("vector_field",Th,[u,v], isoline=false, withmesh=0.25,coef=2.0,arrowsize=0.8);
 //
 // fespace Vh0(Th,P0);
 // Vh0 u0;
@@ -156,11 +156,11 @@
 //  (1) fetype : RT0(Raviart-Thomas), P1b, P2b, P1dc, P2dc
 //  (2) append to existing PDF file (e.g., for time evolutional problem)
 //  (3) brush up source using pair in <utility> and tuple in <tuple>
-//  (4) Vector field options:
+//  (4) brush up source; delete duplicate procedures
+//  (5) Vector field options:
 //        int nbarrow      = 0   : number of colors (0 : unlimited)
 //        real[int] varrow = []  : value of colors
-//  (5) Symbol font
-//  (6) paper size, axes
+//  (6) Symbol font
 //  (7) Non-triangle element
 //----------------------------------------------------------------------
 
@@ -177,13 +177,14 @@
 
 //----------------------------------------------------------------------
 
-namespace
+namespace PLOTPDFVAR
 {
     const long   DEFAULT_PAGESIZE    = 512;
     const double DEFAULT_ASPECTRATIO = 0; // "0" means auto
     const char   AppName[] = "FreeFEM plotPDF module";
+    const char   SHOW_VERSION[] = "(Ver Oct 8, 2022)";
 
-    const int PLOTPDF_NOPTIONS = 34;
+    const int NOPTIONS = 34;
 
     const double PADDING = 20;
     const int DEFAULT_MARGIN[4] = { 0, 0, 0, 0 }; // left, bottom, right, top
@@ -196,7 +197,9 @@ namespace
     const int  NUM_LABELS = 12; // number of labels (values) in fill-style
     const long DEFAULT_ISOLINES    = 12;
     const long DEFAULT_FILL_COLORS = 32;
-    const double DEFAULT_LINEWIDTH = 1;
+    const double DEFAULT_LINEWIDTH = 1; // for contours, arrows
+    const double EDGE_WIDTH = 1;
+    const double MESH_WIDTH = 0.5;
 
     const bool DEFAULT_MONOCHROME    = false;
     const bool DEFAULT_SHOW_LEGEND   = true;
@@ -215,7 +218,7 @@ namespace
     const bool   DEFAULT_UNIT_ARROW = false; // draw arrow with its length
     const long   DEFAULT_ARROW_COLORS  = 0; // 0 : unlimited
     const double MAX_ARROW_LENGTH     = 50;   // [pixel]
-    const double DEF_ARROW_HEAD_SIZE  = 8;    // [pixel]
+    const double DEFAULT_ARROW_HEAD_SIZE  = 8;    // [pixel]
     const double ARROW_HEAD_ANGLE     = 0.23; // 13/180*PI = 0.226893 [rad]
 
     const bool DEFAULT_SHOW_MESH    = true;
@@ -235,7 +238,7 @@ namespace
     const float DEFAULT_IDEDGE_RGB[] = { 255.0/255.0, 75.0/255.0, 0.0/25.0 }; // RGB : red
 
     const long DEFAULT_PRECISION_LEGEND = 3; // #digits in legend
-    const double LEGEND_FONTWIDTH = static_cast<double>(PADDING)/DEFAULT_PRECISION_LEGEND;    // depend on font family and size
+    const double LEGEND_FONTWIDTH = static_cast<double>(PLOTPDFVAR::PADDING)/DEFAULT_PRECISION_LEGEND;    // depend on font family and size
 
     const char DEFAULT_FETYPE[] = "P1";
     const int DEFAULT_P2_INERVALS = 5;
@@ -275,6 +278,7 @@ namespace
 #include <ctime>
 #include <cstring> // strlen
 #include <cstdlib> // exit
+
 // Change F. Hecht 
 //#define HAVE_ZLIB   // need zlib : CC src.cpp -lz
 //#if !defined(NO_ZLIB) && !defined(DISABLE_ZLIB) && !defined(WITHOUT_ZLIB) 
@@ -283,6 +287,7 @@ namespace
 #if defined(WITH_zlib)
 #define HAVE_ZLIB
 #endif
+
 
 class SimplePDFModule
 {
@@ -372,7 +377,7 @@ SimplePDFModule::SimplePDFModule( const char *const PDFfilename, const char *con
     if( strlen( DocumentTitle.c_str() ) > 0 )
 	strDocumentInfo << "  /Title (" << DocumentTitle << ")\n";
 
-    strDocumentInfo << "  /Creator (" << AppName << ")\n"
+    strDocumentInfo << "  /Creator (" << PLOTPDFVAR::AppName << ")\n"
 		    << "  /CreationDate (D:" << get_datetime() << ")\n"
 		    << ">>\n"
 		    << "endobj\n";
@@ -887,17 +892,242 @@ void addComment( std::stringstream &Content,
     std::stringstream &st = Content;
 
     st << "q\n";
-    st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm\n";
-    //st << "1 w\n"; // setlinewidth
+    st << "1 0 0 1 " << PLOTPDFVAR::PADDING+marginl << " " << PLOTPDFVAR::PADDING+marginb << " cm\n";
     st << "0 0 0 RG\n"; // black
 
     const int posx = 0;
 
     st << "BT\n";
-    st << "/F1 " << DEFAULT_COMMENT_FONTSIZE*fontscale << " Tf\n";
-    st << "1 0 0 1 " << posx << ' ' << posy+DEFAULT_COMMENT_BASE << " Tm "
+    st << "/F1 " << PLOTPDFVAR::DEFAULT_COMMENT_FONTSIZE*fontscale << " Tf\n";
+    st << "1 0 0 1 " << posx << ' ' << posy+PLOTPDFVAR::DEFAULT_COMMENT_BASE << " Tm "
        << "(" << comment << ") Tj\n";
     st << "ET\n";
+    st << "Q\n";
+
+    return;
+}
+
+void overlayMesh( std::stringstream &Content, const Fem2D::Mesh &Th,
+		  const double withmesh,
+		  const double scale, const double ar, const double x0, const double y0,
+		  const double marginl, const double marginb )
+{
+    std::stringstream &st = Content;
+
+    st << "q\n";
+    st << "1 0 0 1 " << PLOTPDFVAR::PADDING+marginl << " " << PLOTPDFVAR::PADDING+marginb << " cm ";
+    st << PLOTPDFVAR::MESH_WIDTH << " w\n"; // setlinewidth
+
+    const double grayscale1 = (withmesh < 1)? withmesh: 1;
+    const double grayscale = 1-grayscale1;
+    st << grayscale << ' ' << grayscale << ' ' << grayscale << " RG\n";
+
+    for(int k = 0; k < Th.nt; k++){
+
+	const int &v0 = Th(k,0);
+	const int &v1 = Th(k,1);
+	const int &v2 = Th(k,2);
+
+	st << scale*ar*(Th(v0).x-x0) << ' ' << scale*(Th(v0).y-y0) << " m ";
+	st << scale*ar*(Th(v1).x-x0) << ' ' << scale*(Th(v1).y-y0) << " l ";
+	st << scale*ar*(Th(v2).x-x0) << ' ' << scale*(Th(v2).y-y0) << " l ";
+	st << "s" << std::endl;
+    }
+
+    st << "Q\n";
+
+    return;
+}
+
+void drawBoundary( std::stringstream &Content, const Fem2D::Mesh &Th,
+		   const double scale, const double ar, const double x0, const double y0,
+		   const double marginl, const double marginb )
+{
+    std::stringstream &st = Content;
+
+    const int &nEdges = Th.neb;
+
+    st << "q\n";
+    st << PLOTPDFVAR::EDGE_WIDTH << " w\n"; // setlinewidth
+    st << "1 0 0 1 " << PLOTPDFVAR::PADDING+marginl << " " << PLOTPDFVAR::PADDING+marginb << " cm\n";
+    st << "0 0 0 RG\n";
+
+    for(int k = 0; k < nEdges; k++){
+
+	const int &v0 = Th( Th.bedges[k][0] );
+	const int &v1 = Th( Th.bedges[k][1] );
+
+	// S : stroke, without closepath, s : closepath and stroke
+	st << scale*ar*(Th(v0).x-x0) << ' ' << scale*(Th(v0).y-y0) << " m "
+	   << scale*ar*(Th(v1).x-x0) << ' ' << scale*(Th(v1).y-y0) << " l S" << std::endl;
+    }
+
+    st << "Q\n";
+
+    return;
+}
+
+void find_isoline_values( std::vector<double> &isoline_val, const double fmax, const double fmin,
+			  const int NISOLINES, const KN<double>*const viso, const bool logscale )
+{
+    if( viso ){
+
+	for(int m = 0; m < viso->size(); m++)
+	    isoline_val.push_back( (*viso)[m] );
+
+    } else if( logscale && (fmin > 0) ) {
+
+	// fmin * step^N = fmax <=> step^N = fmax/fmin
+	// <=> N = log_{step}(fmax/fmin) = (log(fmax/fmin))/log(step)
+	// <=> log(step) = (1/N)(log(fmax/fmin))
+	// <=> step = exp( (1/N)(log(fmax/fmin)) )
+	const double df = exp( (static_cast<double>(1)/NISOLINES)*(log(fmax/fmin)) );
+
+	isoline_val.push_back( fmin*sqrt(df) );
+	for(int m = 1; m < NISOLINES; m++)
+	    isoline_val.push_back( isoline_val[m-1] * df );
+
+    } else {
+	
+	if( logscale )
+	    std::cout << "plotPDF(): logscale for non-positive values.\n";
+
+#if 1
+	const double df = (fmax - fmin) / NISOLINES;
+	for(int m = 0; m < NISOLINES; m++)
+	    isoline_val.push_back( fmin + df/2 + m*df );
+#else
+	const double df = (fmax - fmin) / (NISOLINES+1);
+	for(int m = 0; m < NISOLINES; m++)
+	    isoline_val.push_back( fmin + (m+1)*df );
+#endif
+    }
+
+    return;
+}
+
+void drawLegend_contour( std::stringstream &Content, const vector<double> &isoline_val,
+			 const int prec, const KNM<double> &palette,
+			 const double cmin, const double cmax,
+			 const bool monochrome, const bool logscale,
+			 const double sizex, const double textfontsize,
+			 const double scale, const double y1, const double y0,
+			 const double marginl, const double marginb )
+{
+    std::stringstream &st = Content;
+
+    st << "q\n";
+    st << "1 w\n"; // setlinewidth
+    st << "1 0 0 1 " << PLOTPDFVAR::PADDING+marginl << " " << PLOTPDFVAR::PADDING+marginb << " cm\n";
+
+    for(size_t m = 0; m < isoline_val.size(); m++){
+
+	const double &f = isoline_val[m];
+
+	setrgbcolor(st, f, palette, cmin, cmax, monochrome, logscale);
+	st << "rg\n";
+
+	st << "BT /F1 " << textfontsize << " Tf "
+	   << "1 0 0 1 " << sizex-PLOTPDFVAR::PADDING << " " << (m+1)*(scale*(y1-y0)-textfontsize)/(isoline_val.size()+1) << " Tm "
+	   << "(" << ((f >= 0)? "\\ ": "");
+
+	if( (fabs(f) > 1e-3) || (fabs(f) < 1e-12) ){
+	    st << std::setprecision(prec) << std::setfill('0') << f << ") Tj ET\n";
+	} else {
+	    st << std::resetiosflags(std::ios::fixed) << std::setiosflags(std::ios::scientific)
+	       << std::setprecision(prec) << f << resetiosflags(std::ios::scientific)
+	       << std::setiosflags(std::ios::fixed) << ") Tj ET\n";
+	}
+    }
+
+    st << "Q\n";
+
+    return;
+}
+
+void drawLegend_fill( std::stringstream &Content, const int nbfill, const double df,
+		      const int prec, const KNM<double> &palette,
+		      const double fmin, const double fmax,
+		      const bool monochrome, const bool logscale,
+		      const double sizex, const double textfontsize,
+		      const double scale, const double y1, const double y0,
+		      const double marginl, const double marginb )
+{
+    std::stringstream &st = Content;
+    st << "q\n";
+    st << "1 w\n"; // setlinewidth
+    st << "1 0 0 1 " << PLOTPDFVAR::PADDING+marginl << " " << PLOTPDFVAR::PADDING+marginb << " cm\n";
+
+    const double dy = scale*(y1-y0)/nbfill;
+
+    for(int m = 0; m < nbfill; m++){
+
+	if( m == 0 ){
+	    setrgbcolor(st, fmin, palette, fmin, fmax, monochrome, logscale);
+	} else if( m == nbfill-1 ){
+	    setrgbcolor(st, fmax, palette, fmin, fmax, monochrome, logscale);
+	} else {
+	    const double f = (logscale)? fmin * pow(df,m+0.5): fmin + (m+0.5)*df;
+	    setrgbcolor(st, f, palette, fmin, fmax, monochrome, logscale);
+	}
+	st << "rg\n";
+
+	st << sizex-PLOTPDFVAR::PADDING   << " " << m*dy << " m "
+	   << sizex-PLOTPDFVAR::PADDING/2 << " " << m*dy << " l "
+	   << sizex-PLOTPDFVAR::PADDING/2 << " " << (m+1)*dy << " l "
+	   << sizex-PLOTPDFVAR::PADDING   << " " << (m+1)*dy << " l f\n";
+    }
+
+    const double EPS = 1e-10;
+    const double dl = (logscale)?
+	pow( fmax/fmin, static_cast<double>(1)/(PLOTPDFVAR::NUM_LABELS-1) ):
+	(fmax-fmin)/(PLOTPDFVAR::NUM_LABELS-1);
+
+    for(int m = 0; m < PLOTPDFVAR::NUM_LABELS; m++){
+
+	const double f = (logscale)? fmin * pow(dl,m): fmin + m*dl;
+
+	if( logscale ){
+
+	    if( f <= fmin*df ){
+		setrgbcolor(st, fmin, palette, fmin, fmax, monochrome, logscale);
+	    } else if( f >= fmax/df ){
+		setrgbcolor(st, fmax, palette, fmin, fmax, monochrome, logscale);
+	    } else {
+		const double dc = pow( fmax/fmin, static_cast<double>(1)/nbfill );
+		const int mc = static_cast<int>( log(f/fmin) / log(dc) );
+		const double c = fmin * pow(dc, mc+0.5);
+		setrgbcolor(st, c, palette, fmin, fmax, monochrome, logscale);
+	    }
+
+	} else {
+
+	    if( f <= fmin+df ){
+		setrgbcolor(st, fmin, palette, fmin, fmax, monochrome, logscale);
+	    } else if( f >= fmax-df ){
+		setrgbcolor(st, fmax, palette, fmin, fmax, monochrome, logscale);
+	    } else {
+		const double dc = (fmax-fmin) / nbfill;
+		const int mc = static_cast<int>( (f-fmin)/dc );
+		const double c = fmin + (mc+0.5)*dc;
+		setrgbcolor(st, c, palette, fmin, fmax, monochrome, logscale);
+	    }
+	}
+	st << " rg\n";
+
+	st << "BT /F1 " << textfontsize << " Tf "
+	   << "1 0 0 1 " << sizex << " " << m*(scale*(y1-y0)-textfontsize)/(PLOTPDFVAR::NUM_LABELS-1) << " Tm "
+	   << "(" << ((f >= 0)? "\\ ": "");
+
+	if( (fabs(f) > 1e-3) || (fabs(f) < 1e-12) ){
+	    st << std::setprecision(prec) << std::setfill('0') << f << ") Tj ET\n";
+	} else {
+	    st << std::resetiosflags(std::ios::fixed) << std::setiosflags(std::ios::scientific)
+	       << std::setprecision(prec) << f << resetiosflags(std::ios::scientific)
+	       << std::setiosflags(std::ios::fixed) << ") Tj ET\n";
+	}
+    }
+
     st << "Q\n";
 
     return;
@@ -927,7 +1157,7 @@ void plot_mesh( std::stringstream &Content, const Fem2D::Mesh &Th,
     st.str("");
 
     st << "q\n";
-    st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm\n";
+    st << "1 0 0 1 " << PLOTPDFVAR::PADDING+marginl << " " << PLOTPDFVAR::PADDING+marginb << " cm\n";
     st << linewidth << " w\n"; // setlinewidth
     
     //------------------------------
@@ -936,11 +1166,11 @@ void plot_mesh( std::stringstream &Content, const Fem2D::Mesh &Th,
     if( (mode == MODE_INDEX) && idvert ){
 
 	if(monochrome)
-	    st << DEFAULT_IDVERT_MONO[0] << ' ' << DEFAULT_IDVERT_MONO[1] << ' '
-	       << DEFAULT_IDVERT_MONO[2] << " rg\n" << std::endl;
+	    st << PLOTPDFVAR::DEFAULT_IDVERT_MONO[0] << ' ' << PLOTPDFVAR::DEFAULT_IDVERT_MONO[1] << ' '
+	       << PLOTPDFVAR::DEFAULT_IDVERT_MONO[2] << " rg\n" << std::endl;
 	else
-	    st << DEFAULT_IDVERT_RGB[0] << ' ' << DEFAULT_IDVERT_RGB[1] << ' '
-	       << DEFAULT_IDVERT_RGB[2] << " rg\n" << std::endl;
+	    st << PLOTPDFVAR::DEFAULT_IDVERT_RGB[0] << ' ' << PLOTPDFVAR::DEFAULT_IDVERT_RGB[1] << ' '
+	       << PLOTPDFVAR::DEFAULT_IDVERT_RGB[2] << " rg\n" << std::endl;
 
 	int id = mode;
 
@@ -984,11 +1214,11 @@ void plot_mesh( std::stringstream &Content, const Fem2D::Mesh &Th,
     if( (mode == MODE_INDEX) && idcell ){
 	
 	if(monochrome)
-	    st << DEFAULT_IDCELL_MONO[0] << ' ' << DEFAULT_IDCELL_MONO[1] << ' '
-	       << DEFAULT_IDCELL_MONO[2] << " rg\n" << std::endl;
+	    st << PLOTPDFVAR::DEFAULT_IDCELL_MONO[0] << ' ' << PLOTPDFVAR::DEFAULT_IDCELL_MONO[1] << ' '
+	       << PLOTPDFVAR::DEFAULT_IDCELL_MONO[2] << " rg\n" << std::endl;
 	else
-	    st << DEFAULT_IDCELL_RGB[0] << ' ' << DEFAULT_IDCELL_RGB[1] << ' '
-	       << DEFAULT_IDCELL_RGB[2] << " rg\n" << std::endl;
+	    st << PLOTPDFVAR::DEFAULT_IDCELL_RGB[0] << ' ' << PLOTPDFVAR::DEFAULT_IDCELL_RGB[1] << ' '
+	       << PLOTPDFVAR::DEFAULT_IDCELL_RGB[2] << " rg\n" << std::endl;
 
 	int id = mode;
 	st << "BT\n";
@@ -1012,11 +1242,11 @@ void plot_mesh( std::stringstream &Content, const Fem2D::Mesh &Th,
     if( (mode == MODE_INDEX) || (mode == MODE_BELABEL) ){
 
 	if(monochrome)
-	    st << DEFAULT_IDEDGE_MONO[0] << ' ' << DEFAULT_IDEDGE_MONO[1] << ' '
-	       << DEFAULT_IDEDGE_MONO[2] << " RG\n" << std::endl;
+	    st << PLOTPDFVAR::DEFAULT_IDEDGE_MONO[0] << ' ' << PLOTPDFVAR::DEFAULT_IDEDGE_MONO[1] << ' '
+	       << PLOTPDFVAR::DEFAULT_IDEDGE_MONO[2] << " RG\n" << std::endl;
 	else
-	    st << DEFAULT_IDEDGE_RGB[0] << ' ' << DEFAULT_IDEDGE_RGB[1] << ' '
-	       << DEFAULT_IDEDGE_RGB[2] << " RG\n" << std::endl;
+	    st << PLOTPDFVAR::DEFAULT_IDEDGE_RGB[0] << ' ' << PLOTPDFVAR::DEFAULT_IDEDGE_RGB[1] << ' '
+	       << PLOTPDFVAR::DEFAULT_IDEDGE_RGB[2] << " RG\n" << std::endl;
     }
 
     for(int n = 0; n < nEdges; n++){
@@ -1031,11 +1261,11 @@ void plot_mesh( std::stringstream &Content, const Fem2D::Mesh &Th,
     if( ((mode == MODE_INDEX) && idedge) || (mode == MODE_BELABEL) ){
 
 	if(monochrome)
-	    st << DEFAULT_IDEDGE_MONO[0] << ' ' << DEFAULT_IDEDGE_MONO[1] << ' '
-	       << DEFAULT_IDEDGE_MONO[2] << " rg\n" << std::endl;
+	    st << PLOTPDFVAR::DEFAULT_IDEDGE_MONO[0] << ' ' << PLOTPDFVAR::DEFAULT_IDEDGE_MONO[1] << ' '
+	       << PLOTPDFVAR::DEFAULT_IDEDGE_MONO[2] << " rg\n" << std::endl;
 	else
-	    st << DEFAULT_IDEDGE_RGB[0] << ' ' << DEFAULT_IDEDGE_RGB[1] << ' '
-	       << DEFAULT_IDEDGE_RGB[2] << " rg\n" << std::endl;
+	    st << PLOTPDFVAR::DEFAULT_IDEDGE_RGB[0] << ' ' << PLOTPDFVAR::DEFAULT_IDEDGE_RGB[1] << ' '
+	       << PLOTPDFVAR::DEFAULT_IDEDGE_RGB[2] << " rg\n" << std::endl;
 
 	int id = mode;
 
@@ -1127,109 +1357,20 @@ void trackP1isoline( std::vector<double> &px, std::vector<double> &py,
     return;
 }
 
-void plot_P1_isoline( std::stringstream &Content, const Fem2D::Mesh &Th, const KN<double> &f_P1,
-		      const KNM<double> &palette,
-		      const int sizex, const int sizey, const double scale, const double ar,
-		      const double x0, const double y0, const double y1,
-		      const int marginl, const int marginb,
-		      const double textfontsize, const bool monochrome,
-		      const bool legend, const int prec, const bool logscale,
-		      const double withmesh,
-		      const int NISOLINES, const KN<double>*const viso,
-		      const double linewidth )
+void plot_P1_isoline_body( std::stringstream &Content, const Fem2D::Mesh &Th, const KN<double> &f_P1,
+			   const std::vector<double> &isoline_val, const double cmin, const double cmax,
+			   const KNM<double> &palette, const double scale, const double ar,
+			   const double x0, const double y0,
+			   const int marginl, const int marginb,
+			   const bool monochrome, const bool logscale,
+			   const int NISOLINES, const double linewidth )
 {
-    const double EPS = 1e-10;
-
-    //------------------------------
-    // values in plot
-    //------------------------------
-    const double fmax = (viso)? viso->max(): f_P1.max();
-    const double fmin = (viso)? viso->min(): f_P1.min();
-    std::vector<double> isoline_val;
-
-    if( viso ){
-
-	for(int m = 0; m < viso->size(); m++)
-	    isoline_val.push_back( (*viso)[m] );
-
-    } else if( logscale && (fmin > 0) ) {
-
-	// fmin * step^N = fmax <=> step^N = fmax/fmin
-	// <=> N = log_{step}(fmax/fmin) = (log(fmax/fmin))/log(step)
-	// <=> log(step) = (1/N)(log(fmax/fmin))
-	// <=> step = exp( (1/N)(log(fmax/fmin)) )
-	const double df = exp( (static_cast<double>(1)/NISOLINES)*(log(fmax/fmin)) );
-
-	isoline_val.push_back( fmin*sqrt(df) );
-	for(int m = 1; m < NISOLINES; m++)
-	    isoline_val.push_back( isoline_val[m-1] * df );
-
-    } else {
-	
-	if( logscale )
-	    std::cout << "plotPDF(): logscale for non-positive values.\n";
-
-#if 1
-	const double df = (fmax - fmin) / NISOLINES;
-	for(int m = 0; m < NISOLINES; m++)
-	    isoline_val.push_back( fmin + df/2 + m*df );
-#else
-	const double df = (fmax - fmin) / (NISOLINES+1);
-	for(int m = 0; m < NISOLINES; m++)
-	    isoline_val.push_back( fmin + (m+1)*df );
-#endif
-    }
-
-    // color/gray-scale range to plot
-#if 1
-    // If user specifies an irrelevant color range (in viso array),
-    const double cmax = *max_element( isoline_val.begin(), isoline_val.end() );
-    const double cmin = *min_element( isoline_val.begin(), isoline_val.end() );
-#else
-    // map color/grayscale range to function values
-    const double cmax = fmax;
-    const double cmin = fmin;
-#endif
-
     std::stringstream &st = Content;
-    st.str("");
 
-    //------------------------------
-    // element (triangle)
-    //------------------------------
-    if( 0 < withmesh ){
-
-	st << "q\n";
-	st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm ";
-	st << "1 w\n"; // setlinewidth
-
-	const double grayscale1 = (withmesh < 1)? withmesh: 1;
-	const double grayscale = 1-grayscale1;
-	st << grayscale << ' ' << grayscale << ' ' << grayscale << " RG\n";
-
-	for(int k = 0; k < Th.nt; k++){
-
-	    const int &v0 = Th(k,0);
-	    const int &v1 = Th(k,1);
-	    const int &v2 = Th(k,2);
-
-	    st << scale*ar*(Th(v0).x-x0) << ' ' << scale*(Th(v0).y-y0) << " m ";
-	    st << scale*ar*(Th(v1).x-x0) << ' ' << scale*(Th(v1).y-y0) << " l ";
-	    st << scale*ar*(Th(v2).x-x0) << ' ' << scale*(Th(v2).y-y0) << " l ";
-	    st << "s" << std::endl;
-	}
-
-	st << "Q\n";
-
-    } // withmesh
-
-    //------------------------------
-    // main routine
-    //------------------------------
     st << "q\n";
     st << linewidth << " w\n"; // setlinewidth
-    st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm\n";
-	
+    st << "1 0 0 1 " << PLOTPDFVAR::PADDING+marginl << " " << PLOTPDFVAR::PADDING+marginb << " cm\n";
+
     const int &nTriangles = Th.nt;
     for(int k = 0; k < nTriangles; k++){
 
@@ -1272,60 +1413,58 @@ void plot_P1_isoline( std::stringstream &Content, const Fem2D::Mesh &Th, const K
 	    }
 	}
     }
-
     st << "Q\n";
 
-    if( legend ){
+    return;
+}
 
-	st << "q\n";
-	st << "1 w\n"; // setlinewidth
-	st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm\n";
-
-	for(size_t m = 0; m < isoline_val.size(); m++){
-
-	    const double &f = isoline_val[m];
-
-	    setrgbcolor(st, f, palette, cmin, cmax, monochrome, logscale);
-	    st << "rg\n";
-
-	    st << "BT /F1 " << textfontsize << " Tf "
-	       << "1 0 0 1 " << sizex-PADDING << " " << (m+1)*(scale*(y1-y0)-textfontsize)/(isoline_val.size()+1) << " Tm "
-	       << "(" << ((f >= 0)? "\\ ": "");
-
-	    if( (fabs(f) > 1e-3) || (fabs(f) < 1e-12) ){
-		st << std::setprecision(prec) << std::setfill('0') << f << ") Tj ET\n";
-	    } else {
-		st << std::resetiosflags(std::ios::fixed) << std::setiosflags(std::ios::scientific)
-		   << std::setprecision(prec) << f << resetiosflags(std::ios::scientific)
-		   << std::setiosflags(std::ios::fixed) << ") Tj ET\n";
-	    }
-	    // debug: st << std::setiosflags(std::ios::fixed)
-	}
-
-	st << "Q\n";
-
-    } // legend
-
+void plot_P1_isoline( std::stringstream &Content, const Fem2D::Mesh &Th, const KN<double> &f_P1,
+		      const KNM<double> &palette,
+		      const int sizex, const int sizey, const double scale, const double ar,
+		      const double x0, const double y0, const double y1,
+		      const int marginl, const int marginb,
+		      const double textfontsize, const bool monochrome,
+		      const bool legend, const int prec, const bool logscale,
+		      const double withmesh,
+		      const int NISOLINES, const KN<double>*const viso,
+		      const double linewidth )
+{
     //------------------------------
-    // edges
+    // values in plot
     //------------------------------
-    const int &nEdges = Th.neb;
+    const double fmax = (viso)? viso->max(): f_P1.max();
+    const double fmin = (viso)? viso->min(): f_P1.min();
+    std::vector<double> isoline_val;
 
-    st << "q\n";
-    st << "1 w\n"; // setlinewidth
-    st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm\n";
-    st << "0 0 0 RG\n";
+    find_isoline_values( isoline_val, fmax, fmin, NISOLINES, viso, logscale );
 
-    for(int k = 0; k < nEdges; k++){
+    // color/gray-scale range to plot
+#if 0
+    // If user specifies an irrelevant color range (in viso array),
+    const double cmax = *max_element( isoline_val.begin(), isoline_val.end() );
+    const double cmin = *min_element( isoline_val.begin(), isoline_val.end() );
+#else
+    // map color/grayscale range to function values
+    const double cmax = fmax;
+    const double cmin = fmin;
+#endif
 
-	const int &v0 = Th( Th.bedges[k][0] );
-	const int &v1 = Th( Th.bedges[k][1] );
+    std::stringstream &st = Content;
+    st.str("");
 
-	st << scale*ar*(Th(v0).x-x0) << ' ' << scale*(Th(v0).y-y0) << " m ";
-	st << scale*ar*(Th(v1).x-x0) << ' ' << scale*(Th(v1).y-y0) << " l s" << std::endl;
-    }
+    if( 0 < withmesh )
+	overlayMesh( st, Th, withmesh, scale, ar, x0, y0, marginl, marginb );
 
-    st << "Q\n";
+    plot_P1_isoline_body( st, Th, f_P1, isoline_val, cmin, cmax, palette, scale, ar, x0, y0,
+			  marginl, marginb, monochrome, logscale, NISOLINES, linewidth );
+
+    if( legend )
+	drawLegend_contour( st, isoline_val, prec, palette, cmin, cmax,
+			    monochrome, logscale, sizex, textfontsize, scale,
+			    y1, y0, marginl, marginb);
+
+    drawBoundary( st, Th, scale, ar, x0, y0, marginl, marginb );
+
     return;
 }
 
@@ -1341,8 +1480,6 @@ void plot_P1_fill( std::stringstream &Content, const Fem2D::Mesh &Th, const KN<d
 		   const double withmesh,
 		   const long nbfill, const KN<double> *const frange )
 {
-    const double EPS = 1e-10;
-
     const int &nVertices  = Th.nv;
     const int &nTriangles = Th.nt;
     const int &nEdges     = Th.neb;
@@ -1357,12 +1494,12 @@ void plot_P1_fill( std::stringstream &Content, const Fem2D::Mesh &Th, const KN<d
     std::stringstream &st = Content;
     st.str("");
 
-    st << "q\n";
-    st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm\n";
-
     //------------------------------
     // element(triangle)-wise process
     //------------------------------
+    st << "q\n";
+    st << "1 0 0 1 " << PLOTPDFVAR::PADDING+marginl << " " << PLOTPDFVAR::PADDING+marginb << " cm\n";
+
     double *const f_P1 = new double [ Th.nv ];
     for(int k = 0; k < nTriangles; k++){
 
@@ -1511,119 +1648,17 @@ void plot_P1_fill( std::stringstream &Content, const Fem2D::Mesh &Th, const KN<d
 
     delete [] f_P1;
 
-    //------------------------------
-    // legend
-    //------------------------------
-    if( legend ){
-
-	const double dy = r*(y1-y0)/nbfill;
-
-	for(int m = 0; m < nbfill; m++){
-
-	    if( m == 0 ){
-		setrgbcolor(st, fmin, palette, fmin, fmax, monochrome, logscale);
-	    } else if( m == nbfill-1 ){
-		setrgbcolor(st, fmax, palette, fmin, fmax, monochrome, logscale);
-	    } else {
-		const double f = (logscale)? fmin * pow(df,m+0.5): fmin + (m+0.5)*df;
-		setrgbcolor(st, f, palette, fmin, fmax, monochrome, logscale);
-	    }
-	    st << "rg\n";
-
-	    st << sizex-PADDING   << " " << m*dy << " m "
-               << sizex-PADDING/2 << " " << m*dy << " l "
-               << sizex-PADDING/2 << " " << (m+1)*dy << " l "
-	       << sizex-PADDING   << " " << (m+1)*dy << " l f\n";
-	}
-
-	const double EPS = 1e-10;
-        const double dl = (logscale)?
-	    pow( fmax/fmin, static_cast<double>(1)/(NUM_LABELS-1) ):
-	    (fmax-fmin)/(NUM_LABELS-1);
-
-        for(int m = 0; m < NUM_LABELS; m++){
-
-	    const double f = (logscale)? fmin * pow(dl,m): fmin + m*dl;
-
-	    if( logscale ){
-
-		if( f <= fmin*df ){
-		    setrgbcolor(st, fmin, palette, fmin, fmax, monochrome, logscale);
-		} else if( f >= fmax/df ){
-		    setrgbcolor(st, fmax, palette, fmin, fmax, monochrome, logscale);
-		} else {
-		    const double dc = pow( fmax/fmin, static_cast<double>(1)/nbfill );
-		    const int mc = static_cast<int>( log(f/fmin) / log(dc) );
-		    const double c = fmin * pow(dc, mc+0.5);
-		    setrgbcolor(st, c, palette, fmin, fmax, monochrome, logscale);
-		}
-
-	    } else {
-
-		if( f <= fmin+df ){
-		    setrgbcolor(st, fmin, palette, fmin, fmax, monochrome, logscale);
-		} else if( f >= fmax-df ){
-		    setrgbcolor(st, fmax, palette, fmin, fmax, monochrome, logscale);
-		} else {
-		    const double dc = (fmax-fmin) / nbfill;
-		    const int mc = static_cast<int>( (f-fmin)/dc );
-		    const double c = fmin + (mc+0.5)*dc;
-		    setrgbcolor(st, c, palette, fmin, fmax, monochrome, logscale);
-		}
-	    }
-	    st << " rg\n";
-
-            st << "BT /F1 " << textfontsize << " Tf "
-	       << "1 0 0 1 " << sizex << " " << m*(r*(y1-y0)-textfontsize)/(NUM_LABELS-1) << " Tm "
-	       << "(" << ((f >= 0)? "\\ ": "");
-
-	    if( (fabs(f) > 1e-3) || (fabs(f) < 1e-12) ){
-		st << std::setprecision(prec) << std::setfill('0') << f << ") Tj ET\n";
-	    } else {
-		st << std::resetiosflags(std::ios::fixed) << std::setiosflags(std::ios::scientific)
-		   << std::setprecision(prec) << f << resetiosflags(std::ios::scientific)
-		   << std::setiosflags(std::ios::fixed) << ") Tj ET\n";
-	    }
-	    // debug: st << std::setiosflags(std::ios::fixed)
-        }
-    } // legend
-
-    //------------------------------
-    // element (triangle)
-    //------------------------------
-    if( 0 < withmesh ){
-
-	const double grayscale1 = (withmesh < 1)? withmesh: 1;
-	const double grayscale = 1-grayscale1;
-	st << grayscale << ' ' << grayscale << ' ' << grayscale << " RG\n";
-
-	for(int n = 0; n < Th.nt; n++){
-
-	    const int &v0 = Th(n,0);
-	    const int &v1 = Th(n,1);
-	    const int &v2 = Th(n,2);
-
-	    st << r*ar*(Th(v0).x-x0) << ' ' << r*(Th(v0).y-y0) << " m ";
-	    st << r*ar*(Th(v1).x-x0) << ' ' << r*(Th(v1).y-y0) << " l ";
-	    st << r*ar*(Th(v2).x-x0) << ' ' << r*(Th(v2).y-y0) << " l ";
-	    st << "s" << std::endl;
-	}
-    } // withmesh
-
-    //------------------------------
-    // edges
-    //------------------------------
-    st << "0 0 0 RG\n";
-    for(int k = 0; k < nEdges; k++){
-
-	const int &v0 = Th( Th.bedges[k][0] );
-	const int &v1 = Th( Th.bedges[k][1] );
-
-	st << r*ar*(Th(v0).x-x0) << ' ' << r*(Th(v0).y-y0) << " m "
-	   << r*ar*(Th(v1).x-x0) << ' ' << r*(Th(v1).y-y0) << " l S\n";
-    }
-
     st << "Q\n";
+
+    if( legend )
+	drawLegend_fill( st, nbfill, df, prec, palette, fmin, fmax, monochrome, logscale,
+			 sizex, textfontsize, scale, y1, y0, marginl, marginb );
+
+    if( 0 < withmesh )
+	overlayMesh( st, Th, withmesh, scale, ar, x0, y0, marginl, marginb );
+
+    drawBoundary( st, Th, scale, ar, x0, y0, marginl, marginb );
+
     return;
 } //
 
@@ -1641,8 +1676,6 @@ void plot_P0_fill( std::stringstream &Content, const Fem2D::Mesh &Th, const KN<d
 		   const double withmesh,
 		   const long nbfill, const KN<double> *const frange )
 {
-    const double EPS = 1e-10;
-
     const int &nVertices  = Th.nv;
     const int &nTriangles = Th.nt;
     const int &nEdges     = Th.neb;
@@ -1657,12 +1690,12 @@ void plot_P0_fill( std::stringstream &Content, const Fem2D::Mesh &Th, const KN<d
     std::stringstream &st = Content;
     st.str("");
 
-    st << "q\n";
-    st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm\n";
-
     //------------------------------
     // element(triangle)-wise process
     //------------------------------
+    st << "q\n";
+    st << "1 0 0 1 " << PLOTPDFVAR::PADDING+marginl << " " << PLOTPDFVAR::PADDING+marginb << " cm\n";
+
     for(int k = 0; k < nTriangles; k++){
 
 	const int &v0 = Th(k,0);
@@ -1696,126 +1729,26 @@ void plot_P0_fill( std::stringstream &Content, const Fem2D::Mesh &Th, const KN<d
 
     } // element(triangle)-wise process
 
-    //------------------------------
-    // legend
-    //------------------------------
-    if( legend ){
-
-	const int &LEVELS  = nbfill;
-	const double dy = r*(y1-y0)/LEVELS;
-
-	for(int m = 0; m < LEVELS; m++){
-
-	    if( m == 0 ){
-		setrgbcolor(st, fmin, palette, fmin, fmax, monochrome, logscale);
-	    } else if( m == LEVELS-1 ){
-		setrgbcolor(st, fmax, palette, fmin, fmax, monochrome, logscale);
-	    } else {
-		const double f = (logscale)? fmin * pow(df,m+0.5): fmin + (m+0.5)*df;
-		setrgbcolor(st, f, palette, fmin, fmax, monochrome, logscale);
-	    }
-	    st << "rg\n";
-
-	    st << sizex-PADDING   << " " << m*dy << " m "
-	       << sizex-PADDING/2 << " " << m*dy << " l "
-	       << sizex-PADDING/2 << " " << (m+1)*dy << " l "
-	       << sizex-PADDING   << " " << (m+1)*dy << " l f\n";
-	}
-
-	const double EPS = 1e-10;
-        const double dl = (logscale)?
-	    pow( fmax/fmin, static_cast<double>(1)/(NUM_LABELS-1) ):
-	    (fmax-fmin)/(NUM_LABELS-1);
-
-	for(int m = 0; m < NUM_LABELS; m++){
-
-	    const double f = (logscale)? fmin*pow(dl,m): fmin + m*dl;
-
-	    if( logscale ){
-
-		if( f <= fmin*df ){
-		    setrgbcolor(st, fmin, palette, fmin, fmax, monochrome, logscale);
-		} else if( f >= fmax/df ){
-		    setrgbcolor(st, fmax, palette, fmin, fmax, monochrome, logscale);
-		} else {
-		    const double dc = pow( fmax/fmin, static_cast<double>(1)/LEVELS );
-		    const int mc = static_cast<int>( log(f/fmin) / log(dc) );
-		    const double c = fmin * pow(dc, mc+0.5);
-		    setrgbcolor(st, c, palette, fmin, fmax, monochrome, logscale);
-		}
-
-	    } else {
-
-		if( f <= fmin+df ){
-		    setrgbcolor(st, fmin, palette, fmin, fmax, monochrome, logscale);
-		} else if( f >= fmax-df ){
-		    setrgbcolor(st, fmax, palette, fmin, fmax, monochrome, logscale);
-		} else {
-		    const double dc = (fmax-fmin) / LEVELS;
-		    const int mc = static_cast<int>( (f-fmin)/dc );
-		    const double c = fmin + (mc+0.5)*dc;
-		    setrgbcolor(st, c, palette, fmin, fmax, monochrome, logscale);
-		}
-	    }
-	    st << " rg\n";
-	    
-	    st << "BT /F1 " << textfontsize << " Tf "
-	       << "1 0 0 1 " << sizex << " " << m*(r*(y1-y0)-textfontsize)/(NUM_LABELS-1) << " Tm "
-	       << "(" << ((f >= 0)? "\\ ": "");
-
-	    if( (fabs(f) > 1e-3) || (fabs(f) < 1e-12) ){
-		st << std::setprecision(prec) << std::setfill('0') << f << ") Tj ET\n";
-	    } else {
-		st << std::resetiosflags(std::ios::fixed) << std::setiosflags(std::ios::scientific)
-		   << std::setprecision(prec) << f << resetiosflags(std::ios::scientific)
-		   << std::setiosflags(std::ios::fixed) << ") Tj ET\n";
-	    }
-	    // debug: st << std::setiosflags(std::ios::fixed)
-	}
-    } // legend
-
-    //------------------------------
-    // element (triangle)
-    //------------------------------
-    if( 0 < withmesh ){
-
-	const double grayscale1 = (withmesh < 1)? withmesh: 1;
-	const double grayscale = 1-grayscale1;
-	st << grayscale << ' ' << grayscale << ' ' << grayscale << " RG\n";
-
-	for(int n = 0; n < Th.nt; n++){
-	    
-	    const int &v0 = Th(n,0);
-	    const int &v1 = Th(n,1);
-	    const int &v2 = Th(n,2);
-
-	    st << r*ar*(Th(v0).x-x0) << ' ' << r*(Th(v0).y-y0) << " m ";
-	    st << r*ar*(Th(v1).x-x0) << ' ' << r*(Th(v1).y-y0) << " l ";
-	    st << r*ar*(Th(v2).x-x0) << ' ' << r*(Th(v2).y-y0) << " l ";
-	    st << "s" << std::endl;
-	}
-    } // withmesh
-
-    //------------------------------
-    // edges
-    //------------------------------
-    st << "0 0 0 RG\n";
-    for(int k = 0; k < nEdges; k++){
-
-	const int &v0 = Th( Th.bedges[k][0] );
-	const int &v1 = Th( Th.bedges[k][1] );
-
-	st << r*ar*(Th(v0).x-x0) << ' ' << r*(Th(v0).y-y0) << " m "
-	   << r*ar*(Th(v1).x-x0) << ' ' << r*(Th(v1).y-y0) << " l S\n";
-    }
-
     st << "Q\n";
+
+    if( legend )
+	drawLegend_fill( st, nbfill, df, prec, palette, fmin, fmax, monochrome, logscale,
+			 sizex, textfontsize, scale, y1, y0, marginl, marginb );
+
+    if( 0 < withmesh )
+	overlayMesh( st, Th, withmesh, scale, ar, x0, y0, marginl, marginb );
+
+    drawBoundary( st, Th, scale, ar, x0, y0, marginl, marginb );
+
     return;
 } //
 
 //----------------------------------------------------------------------
 // P2 Finite Element
 //----------------------------------------------------------------------
+
+#define P2_BARYCENTER
+#define P2_EDGE
 
 void findQuadraticPolynomial(double *const phi, const double *const vx, const double *const vy, const double *const f_P2)
 {
@@ -1826,12 +1759,26 @@ void findQuadraticPolynomial(double *const phi, const double *const vx, const do
     for(int i = 1; i < NQ; i++)
 	a[i] = a[i-1] + (NQ+1);
 
+#ifdef P2_BARYCENTER
+    const double cx = (vx[0]+vx[1]+vx[2]) / 3;
+    const double cy = (vy[0]+vy[1]+vy[2]) / 3;
+#endif
+
+#if defined(P2_BARYCENTER) && defined(P2_EDGE)
+    const double mx[] = { (vx[1]+vx[2])/2, (vx[2]+vx[0])/2, (vx[0]+vx[1])/2 };
+    const double my[] = { (vy[1]+vy[2])/2, (vy[2]+vy[0])/2, (vy[0]+vy[1])/2 };
+    const double ex[] = { 0.99*mx[0]+0.01*cx, 0.99*mx[1]+0.01*cx, 0.99*mx[2]+0.01*cx };
+    const double ey[] = { 0.99*my[0]+0.01*cy, 0.99*my[1]+0.01*cy, 0.99*my[2]+0.01*cy };
+#elif defined(P2_BARYCENTER)
+    const double ex[] = { (vx[0]+cx)/2, (vx[1]+cx)/2, (vx[2]+cx)/2 };
+    const double ey[] = { (vy[0]+cy)/2, (vy[1]+cy)/2, (vy[2]+cy)/2 };
+#elif defined(P2_EDGE)
     const double ex[] = { (vx[1]+vx[2])/2, (vx[2]+vx[0])/2, (vx[0]+vx[1])/2 };
     const double ey[] = { (vy[1]+vy[2])/2, (vy[2]+vy[0])/2, (vy[0]+vy[1])/2 };
+#endif
 
     const double x[] = { vx[0], vx[1], vx[2], ex[0], ex[1], ex[2] };
     const double y[] = { vy[0], vy[1], vy[2], ey[0], ey[1], ey[2] };
-
 
     for(int i = 0; i < NQ; i++){
 	a[i][0] = x[i] * x[i];
@@ -2108,7 +2055,6 @@ void drawCubicBeziers( std::stringstream &Content,
 
 bool isInsideTriangle( const double px, const double py, const double *const vx, const double *const vy )
 {
-    const double EPS = 1e-10;	
     // Find a, b \in \Real such that [px;py]-v0 =  a (v1-v0) + b (v2-v0).
     // if (0 < a < 1) && (0 < b < 1) && (0 < a+b < 1), then p is inside triangle v0--v1--v2
 
@@ -2321,8 +2267,8 @@ void trackEllipse( std::vector< std::vector<double> > &Cx, std::vector< std::vec
 		   const double *const PHI, const std::vector<double> &zx, const std::vector<double> &zy,
 		   const double *const Vx, const double *const Vy )
 {
-    const int INTERVALS = DEFAULT_P2_INERVALS;
-    const double EPS = 1e-10;    
+    const int INTERVALS = PLOTPDFVAR::DEFAULT_P2_INERVALS;
+    
     const double &lambda1 = PHI[0]; const double &lambda2 = PHI[1];
     const double &D = PHI[6]; const double &E = PHI[7]; const double &F = PHI[8];
 
@@ -2362,11 +2308,12 @@ void trackEllipse( std::vector< std::vector<double> > &Cx, std::vector< std::vec
 
     std::sort( theta.begin(), theta.end() );
 
- 
+    const double EPS = 1e-10;
+
     const double PI = atan(static_cast<double>(1))*4;
     theta.push_back( theta[0] + 2*PI );
 
-    for(size_t i = 0; i < theta.size(); i++){
+    for(size_t i = 0; i < theta.size()-1; i++){ // bug fix, Oct 08, 2022
 
 	const double &t0 = theta[i];
 	const double &t1 = theta[i+1];
@@ -2435,7 +2382,7 @@ void trackHyperbolaCore( std::vector< std::vector<double> > &Cx, std::vector< st
 			 const double sign, const double a, const double b, std::vector<double> &x,
 			 const double *const Vx, const double *const Vy )
 {
-    const int INTERVALS = DEFAULT_P2_INERVALS;
+    const int INTERVALS = PLOTPDFVAR::DEFAULT_P2_INERVALS;
 
     // y = sign * sqrt( a * x^2 + b )
 
@@ -2507,7 +2454,6 @@ void trackHyperbola( std::vector< std::vector<double> > &Cx, std::vector< std::v
 		     const double *const PHI, const std::vector<double> &zx, const std::vector<double> &zy,
 		     const double *const Vx, const double *const Vy )
 {
-    const double EPS = 1e-10;
     const double &lambda1 = PHI[0]; const double &lambda2 = PHI[1];
     const double &D = PHI[6]; const double &E = PHI[7]; const double &F = PHI[8];
 
@@ -2576,111 +2522,27 @@ void trackHyperbola( std::vector< std::vector<double> > &Cx, std::vector< std::v
     return;
 }
 
-void plot_P2_isoline( std::stringstream &Content, const Fem2D::Mesh &Th, const KN<double> &f_P2_,
-		      const KNM<double> &palette,
-		      const int sizex, const int sizey, const double scale, const double ar,
-		      const double x0, const double y0, const double y1,
-		      const int marginl, const int marginb,
-		      const double textfontsize, const bool monochrome,
-		      const bool legend, const int prec, const bool logscale,
-		      const double withmesh,
-		      const int NISOLINES, const KN<double>*const viso,
-		      const double linewidth )
+void plot_P2_isoline_body( std::stringstream &Content, const Fem2D::Mesh &Th, const KN<double> &f_P2_,
+			   const std::vector<double> &isoline_val, const double cmin, const double cmax,
+			   const KNM<double> &palette, const double scale, const double ar,
+			   const double x0, const double y0,
+			   const int marginl, const int marginb,
+			   const bool monochrome, const bool logscale,
+			   const int NISOLINES, const double linewidth )
 {
     const double EPS = 1e-10;
 
-    //------------------------------
-    // values to plot
-    //------------------------------
-    const double fmax = (viso)? viso->max(): f_P2_.max();
-    const double fmin = (viso)? viso->min(): f_P2_.min();
-    std::vector<double> isoline_val;
-
-    if( viso ){
-
-	for(int m = 0; m < viso->size(); m++)
-	    isoline_val.push_back( (*viso)[m] );
-
-    } else if( logscale && (fmin > 0) ) {
-	
-	const double df = exp( (static_cast<double>(1)/NISOLINES)*(log(fmax/fmin)) );
-
-	isoline_val.push_back( fmin*sqrt(df) );
-	for(int m = 1; m < NISOLINES; m++)
-	    isoline_val.push_back( isoline_val[m-1] * df );
-
-    } else {
-
-	if( logscale )
-	    std::cout << "plotPDF(): logscale for non-positive values.\n";
-
-#if 1
-	const double df = (fmax - fmin) / NISOLINES;
-	for(int m = 0; m < NISOLINES; m++)
-	    isoline_val.push_back( fmin + df/2 + m*df );
-#else
-	const double df = (fmax - fmin) / (NISOLINES+1);
-	for(int m = 0; m < NISOLINES; m++)
-	    isoline_val.push_back( fmin + (m+1)*df );
-#endif
-    }
-
     std::stringstream &st = Content;
-    st.str("");
 
-    st << "q\n";
-    st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm\n";
-    st << "1 w\n"; // setlinewidth
-
-    //------------------------------
-    // element (triangle)
-    //------------------------------
-    if( 0 < withmesh ){
-
-	const double grayscale1 = (withmesh < 1)? withmesh: 1;
-	const double grayscale = 1-grayscale1;
-	st << grayscale << ' ' << grayscale << ' ' << grayscale << " RG\n";
-
-	for(int n = 0; n < Th.nt; n++){
-
-	    const int &v0 = Th(n,0);
-	    const int &v1 = Th(n,1);
-	    const int &v2 = Th(n,2);
-
-	    st << scale*ar*(Th(v0).x-x0) << ' ' << scale*(Th(v0).y-y0) << " m ";
-	    st << scale*ar*(Th(v1).x-x0) << ' ' << scale*(Th(v1).y-y0) << " l ";
-	    st << scale*ar*(Th(v2).x-x0) << ' ' << scale*(Th(v2).y-y0) << " l ";
-	    st << "s" << std::endl;
-	}
-
-    } // withmesh
-    
-    st << "Q\n";
-
-    // color/gray-scale range to plot
-#if 1
-    // If user specifies an irrelevant color range (in viso array),
-    // we do not take care of it.
-    const double cmax = *max_element( isoline_val.begin(), isoline_val.end() );
-    const double cmin = *min_element( isoline_val.begin(), isoline_val.end() );
-#else
-    // map color/grayscale range to function values
-    const double cmax = fmax;
-    const double cmin = fmin;
-#endif
-
-    //------------------------------
-    // main routine
-    //------------------------------
     const int NQ = 6; // number of coefficients in quadratic polynomial
     const int &nTriangles = Th.nt;
 
+    st << "q\n";
+    st << linewidth << " w\n"; // setlinewidth
+    st << "1 0 0 1 " << PLOTPDFVAR::PADDING+marginl << " " << PLOTPDFVAR::PADDING+marginb << " cm\n";
+	
     for(int k = 0; k < nTriangles; k++){
 
-	st << "q\n";
-	st << linewidth << " w\n"; // setlinewidth
-	st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm\n";
-	
 	const int &v0 = Th(k,0); const int &v1 = Th(k,1); const int &v2 = Th(k,2);
 
 	const double vx[] = { Th(v0).x,  Th(v1).x,  Th(v2).x };
@@ -2688,6 +2550,8 @@ void plot_P2_isoline( std::stringstream &Content, const Fem2D::Mesh &Th, const K
 
 	// f_P2[i] = phi(v[i]), f_P2[i+3] = phi(e[i]), i=0,1,2.
 	const double *const f_P2 = f_P2_ + k*NQ;
+	// in vector2flow
+	//const double f_P2[NQ] = { f2[3*k], f2[3*k+1], f2[3*k+2], f2m[3*k], f2m[3*k+1], f2m[3*k+2] };
 
 	// quadratic polynomials : ax^2 + bxy + cy^2 + dx + ey + f
 	double phi[ NQ ];
@@ -2748,7 +2612,6 @@ void plot_P2_isoline( std::stringstream &Content, const Fem2D::Mesh &Th, const K
 		}
 	    }
 
-	    st << "Q\n";
 	    continue; // goto next Triangle
 	}
 
@@ -2764,7 +2627,7 @@ void plot_P2_isoline( std::stringstream &Content, const Fem2D::Mesh &Th, const K
 	const double p[2][2] = { { ev1x, ev2x }, { ev1y, ev2y } };
 
 	for(size_t m = 0; m < isoline_val.size(); m++){
-
+	    
 	    const double &value = isoline_val[m];
 
 	    // examine values of phi at all vertices
@@ -2800,8 +2663,11 @@ void plot_P2_isoline( std::stringstream &Content, const Fem2D::Mesh &Th, const K
 	    } else if( isElliptic ){
 
 		if( zx.size() >= 2 ){
+
 		    trackEllipse(Cx, Cy, PHI, zx, zy, Vx, Vy);
+
 		} else {
+
 		    // Ellipse is included inside triangle (might tangent to an edge)
 		    // draw whole ellipse
 		    trackEllipse(Cx, Cy, PHI, Vx, Vy);
@@ -2813,6 +2679,7 @@ void plot_P2_isoline( std::stringstream &Content, const Fem2D::Mesh &Th, const K
 	    }
 
 	    if( Cx.size() > 0 ) {
+
 		invTransformCubicBzeirs( Cx, Cy, PHI );
 		drawCubicBeziers( st, Cx, Cy, scale, ar, x0, y0 );
 	    }
@@ -2821,54 +2688,63 @@ void plot_P2_isoline( std::stringstream &Content, const Fem2D::Mesh &Th, const K
 
 	} // for isoline_val
 	
-	st << "Q\n";
-
     } // for triangle
 
-    st << "q\n";
-    st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm\n";
-
-    if( legend ){
-
-	for(size_t m = 0; m < isoline_val.size(); m++){
-
-	    const double &f = isoline_val[m];
-
-	    setrgbcolor(st, f, palette, cmin, cmax, monochrome, logscale);
-	    st << "rg\n";
-
-	    st << "BT /F1 " << textfontsize << " Tf "
-	       << "1 0 0 1 " << sizex-PADDING << " " << (m+1)*(scale*(y1-y0)-textfontsize)/(isoline_val.size()+1) << " Tm "
-	       << "(" << ((f >= 0)? "\\ ": "");
-
-	    if( (fabs(f) > 1e-3) || (fabs(f) < 1e-12) ){
-		st << std::setprecision(prec) << std::setfill('0') << f << ") Tj ET\n";
-	    } else {
-		st << std::resetiosflags(std::ios::fixed) << std::setiosflags(std::ios::scientific)
-		   << std::setprecision(prec) << f << resetiosflags(std::ios::scientific)
-		   << std::setiosflags(std::ios::fixed) << ") Tj ET\n";
-	    }
-	    // debug: st << std::setiosflags(std::ios::fixed)
-	}
-    } // legend
-
-    //------------------------------
-    // edges
-    //------------------------------
-    const int &nEdges = Th.neb;
-
-    st << "0 0 0 RG\n";
-
-    for(int k = 0; k < nEdges; k++){
-
-	const int &v0 = Th( Th.bedges[k][0] );
-	const int &v1 = Th( Th.bedges[k][1] );
-
-	st << scale*ar*(Th(v0).x-x0) << ' ' << scale*(Th(v0).y-y0) << " m ";
-	st << scale*ar*(Th(v1).x-x0) << ' ' << scale*(Th(v1).y-y0) << " l s" << std::endl;
-    }
-
     st << "Q\n";
+
+    return;
+}
+
+void plot_P2_isoline( std::stringstream &Content, const Fem2D::Mesh &Th, const KN<double> &f_P2_,
+		      const KNM<double> &palette,
+		      const int sizex, const int sizey, const double scale, const double ar,
+		      const double x0, const double y0, const double y1,
+		      const int marginl, const int marginb,
+		      const double textfontsize, const bool monochrome,
+		      const bool legend, const int prec, const bool logscale,
+		      const double withmesh,
+		      const int NISOLINES, const KN<double>*const viso,
+		      const double linewidth )
+{
+    const double EPS = 1e-10;
+
+    //------------------------------
+    // values to plot
+    //------------------------------
+    const double fmax = (viso)? viso->max(): f_P2_.max();
+    const double fmin = (viso)? viso->min(): f_P2_.min();
+    std::vector<double> isoline_val;
+
+    find_isoline_values( isoline_val, fmax, fmin, NISOLINES, viso, logscale );
+
+    // color/gray-scale range to plot
+#if 1
+    // If user specifies an irrelevant color range (in viso array),
+    // we do not take care of it.
+    const double cmax = *max_element( isoline_val.begin(), isoline_val.end() );
+    const double cmin = *min_element( isoline_val.begin(), isoline_val.end() );
+#else
+    // map color/grayscale range to function values
+    const double cmax = fmax;
+    const double cmin = fmin;
+#endif
+
+    std::stringstream &st = Content;
+    st.str("");
+
+    if( 0 < withmesh )
+	overlayMesh( st, Th, withmesh, scale, ar, x0, y0, marginl, marginb );
+    
+    plot_P2_isoline_body( st, Th, f_P2_, isoline_val, cmin, cmax, palette, scale, ar, x0, y0,
+			  marginl, marginb, monochrome, logscale, NISOLINES, linewidth );
+
+    if( legend )
+	drawLegend_contour( st, isoline_val, prec, palette, cmin, cmax,
+			    monochrome, logscale, sizex, textfontsize, scale,
+			    y1, y0, marginl, marginb);
+
+    drawBoundary( st, Th, scale, ar, x0, y0, marginl, marginb );
+
     return;
 } //
 
@@ -2926,7 +2802,7 @@ void splitByBorder( std::vector< std::vector<double> > &partition_x, std::vector
 		    const std::vector< std::vector<double> > &cxs, const std::vector< std::vector<double> > &cys )
 {
     assert( partition_x.size() == partition_y.size() );
-    assert( cxs.size() == cys.size() );
+    assert( cxs.size() == cy.size() );
 
     for(size_t i = 0; i < cxs.size(); i++){
 
@@ -3266,12 +3142,12 @@ void plot_P2_fill( std::stringstream &Content, const Fem2D::Mesh &Th, const KN<d
     std::stringstream &st = Content;
     st.str("");
 
-    st << "q\n";
-    st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm\n";
-
     //------------------------------
     // element(triangle)-wise process
     //------------------------------
+    st << "q\n";
+    st << "1 0 0 1 " << PLOTPDFVAR::PADDING+marginl << " " << PLOTPDFVAR::PADDING+marginb << " cm\n";
+
     const int NQ = 6; // number of unknowns in quadratic polynomial
     const int &nTriangles = Th.nt;
     
@@ -3480,140 +3356,17 @@ void plot_P2_fill( std::stringstream &Content, const Fem2D::Mesh &Th, const KN<d
 
     } // element(triangle)-wise process
 
-    //------------------------------
-    // legend
-    //------------------------------
-    if( legend ){
-
-	const double dy = scale*(y1-y0)/nbfill;
-
-	for(int m = 0; m < border_val.size()-1; m++){
-#if 0
-	    const double f = (logscale)?
-		sqrt( border_val[m] * border_val[m+1] ):
-		(border_val[m] + border_val[m+1]) / 2;
-
-	    setrgbcolor(st, f, palette, fmin, fmax, monochrome, logscale);
-#else
-	    if( m == 0 ){
-		setrgbcolor(st, tmp_fmin, palette, tmp_fmin, tmp_fmax, monochrome, logscale);
-	    } else if( m == nbfill-1 ){
-		setrgbcolor(st, tmp_fmax, palette, tmp_fmin, tmp_fmax, monochrome, logscale);
-	    } else {
-		const double f = (logscale)? tmp_fmin * pow(tmp_df,m+0.5): tmp_fmin + (m+0.5)*tmp_df;
-		setrgbcolor(st, f, palette, tmp_fmin, tmp_fmax, monochrome, logscale);
-	    }
-#endif
-	    st << "rg\n";
-
-	    st << sizex-PADDING   << " " << m*dy << " m "
-               << sizex-PADDING/2 << " " << m*dy << " l "
-               << sizex-PADDING/2 << " " << (m+1)*dy << " l "
-	       << sizex-PADDING   << " " << (m+1)*dy << " l f\n";
-	}
-
-	const double EPS = 1e-10;
-
-        const double dl = (logscale)?
-	    pow( tmp_fmax/tmp_fmin, static_cast<double>(1)/(NUM_LABELS-1) ):
-	    (tmp_fmax-tmp_fmin)/(NUM_LABELS-1);
-
-        for(int m = 0; m < NUM_LABELS; m++){
-#if 0
-            const double f = (logscale)? tmp_fmin * pow(dl,m): tmp_fmin + m*dl;
-	    if( nbfill < NUM_LABELS ){
-		const double ff = (logscale)?
-		    tmp_fmin * pow(tmp_df, static_cast<int>(log(f/tmp_fmin)/log(tmp_df)) ):
-		    static_cast<int>((f-tmp_fmin)/tmp_df) * tmp_df + tmp_fmin;
-		setrgbcolor(st, ff, palette, fmin, fmax, monochrome, logscale);
-	    } else {
-		setrgbcolor(st, f, palette, fmin, fmax, monochrome, logscale);
-	    }
-#else
-	    const double f = (logscale)? tmp_fmin * pow(dl,m): tmp_fmin + m*dl;
-	    if( logscale ){
-
-		if( f <= tmp_fmin*tmp_df ){
-		    setrgbcolor(st, tmp_fmin, palette, tmp_fmin, tmp_fmax, monochrome, logscale);
-		} else if( f >= tmp_fmax/tmp_df ){
-		    setrgbcolor(st, tmp_fmax, palette, tmp_fmin, tmp_fmax, monochrome, logscale);
-		} else {
-		    const double dc = pow( tmp_fmax/tmp_fmin, static_cast<double>(1)/nbfill );
-		    const int mc = static_cast<int>( log(f/tmp_fmin) / log(dc) );
-		    const double c = tmp_fmin * pow(dc, mc+0.5);
-		    setrgbcolor(st, c, palette, tmp_fmin, tmp_fmax, monochrome, logscale);
-		}
-
-	    } else {
-
-		if( f <= tmp_fmin+tmp_df ){
-		    setrgbcolor(st, tmp_fmin, palette, tmp_fmin, tmp_fmax, monochrome, logscale);
-		} else if( f >= tmp_fmax-tmp_df ){
-		    setrgbcolor(st, tmp_fmax, palette, tmp_fmin, tmp_fmax, monochrome, logscale);
-		} else {
-		    const double dc = (tmp_fmax-tmp_fmin) / nbfill;
-		    const int mc = static_cast<int>( (f-tmp_fmin)/dc );
-		    const double c = tmp_fmin + (mc+0.5)*dc;
-		    setrgbcolor(st, c, palette, tmp_fmin, tmp_fmax, monochrome, logscale);
-		}
-	    }
-#endif
-            st << " rg\n";
-
-            st << "BT /F1 " << textfontsize << " Tf "
-	       << "1 0 0 1 " << sizex << " " << m*(scale*(y1-y0)-textfontsize)/(NUM_LABELS-1) << " Tm "
-	       << "(" << ((f >= 0)? "\\ ": "");
-
-	    if( (fabs(f) > 1e-3) || (fabs(f) < 1e-12) ){
-		st << std::setprecision(prec) << std::setfill('0') << f << ") Tj ET\n";
-	    } else {
-		st << std::resetiosflags(std::ios::fixed) << std::setiosflags(std::ios::scientific)
-		   << std::setprecision(prec) << f << resetiosflags(std::ios::scientific)
-		   << std::setiosflags(std::ios::fixed) << ") Tj ET\n";
-	    }
-	    // debug: st << std::setiosflags(std::ios::fixed)
-        }
-    } // legend
-
-    //------------------------------
-    // element (triangle)
-    //------------------------------
-    if( 0 < withmesh ){
-
-	const double grayscale1 = (withmesh < 1)? withmesh: 1;
-	const double grayscale = 1-grayscale1;
-	st << grayscale << ' ' << grayscale << ' ' << grayscale << " RG\n";
-
-	for(int n = 0; n < Th.nt; n++){
-
-	    const int &v0 = Th(n,0);
-	    const int &v1 = Th(n,1);
-	    const int &v2 = Th(n,2);
-
-	    st << scale*ar*(Th(v0).x-x0) << ' ' << scale*(Th(v0).y-y0) << " m ";
-	    st << scale*ar*(Th(v1).x-x0) << ' ' << scale*(Th(v1).y-y0) << " l ";
-	    st << scale*ar*(Th(v2).x-x0) << ' ' << scale*(Th(v2).y-y0) << " l ";
-	    st << "s" << std::endl;
-	}
-    } // withmesh
-
-    //------------------------------
-    // edges
-    //------------------------------
-    const int &nEdges = Th.neb;
-
-    st << "0 0 0 RG\n";
-
-    for(int k = 0; k < nEdges; k++){
-
-	const int &v0 = Th( Th.bedges[k][0] );
-	const int &v1 = Th( Th.bedges[k][1] );
-
-	st << scale*ar*(Th(v0).x-x0) << ' ' << scale*(Th(v0).y-y0) << " m "
-	   << scale*ar*(Th(v1).x-x0) << ' ' << scale*(Th(v1).y-y0) << " l S\n";
-    }
-
     st << "Q\n";
+
+    if( legend )
+	drawLegend_fill( st, nbfill, tmp_df, prec, palette, tmp_fmin, tmp_fmax, monochrome, logscale,
+			 sizex, textfontsize, scale, y1, y0, marginl, marginb );
+
+    if( 0 < withmesh )
+	overlayMesh( st, Th, withmesh, scale, ar, x0, y0, marginl, marginb );
+
+    drawBoundary( st, Th, scale, ar, x0, y0, marginl, marginb );
+
     return;
 } //
 
@@ -3636,19 +3389,19 @@ void plot_vector( std::stringstream &Content,
     const double &ox = arrow_origin_x;
     const double &oy = arrow_origin_y;
 
-    const double AH_SIZE = (alength_scale > 0)? (DEF_ARROW_HEAD_SIZE * ahead_scale): (DEF_ARROW_HEAD_SIZE * (-ahead_scale));
-    const double &AH_ANGLE = ARROW_HEAD_ANGLE;
+    const double AH_SIZE = (alength_scale > 0)? (PLOTPDFVAR::DEFAULT_ARROW_HEAD_SIZE * ahead_scale): (PLOTPDFVAR::DEFAULT_ARROW_HEAD_SIZE * (-ahead_scale));
+    const double &AH_ANGLE = PLOTPDFVAR::ARROW_HEAD_ANGLE;
 
     // what happen if (fmin == 0) && logscale ?
     const double favg = logscale? (sqrt(fmax*fmin)): (fmax+fmin)/2;
 
     // scaled arrow length is arrow_scale * cf2, which is truncated if greater than fmax
     const double &as = alength_scale;
-    const double alength = (unit_arrow)? (as*favg)/fmax*MAX_ARROW_LENGTH:
-	( (logscale)? as*(log(vector_norm2/fmin))/(log(fmax/fmin))*MAX_ARROW_LENGTH: as*vector_norm2/fmax*MAX_ARROW_LENGTH);
+    const double alength = (unit_arrow)? (as*favg)/fmax*PLOTPDFVAR::MAX_ARROW_LENGTH:
+	( (logscale)? as*(log(vector_norm2/fmin))/(log(fmax/fmin))*PLOTPDFVAR::MAX_ARROW_LENGTH: as*vector_norm2/fmax*PLOTPDFVAR::MAX_ARROW_LENGTH);
 
     // In logscale, vector_norm2 = fmin*(fmax/fmin)^r <=> r = (log(vector_norm2)-log(fmin))/(log(fmax)-log(fmin))
-    // Then, alength = alength_scale * r * MAX_ARROW_LENGTH.
+    // Then, alength = alength_scale * r * PLOTPDFVAR::MAX_ARROW_LENGTH.
 
     const double arrow_head_x = r*ar*(ox-x0) + alength * ar*vector_x/vector_norm2;
     const double arrow_head_y = r*(oy-y0) + alength * vector_y/vector_norm2;
@@ -3672,7 +3425,8 @@ void plot_vector( std::stringstream &Content,
 }
 
 void plot_vector2flow( std::stringstream &Content, const Fem2D::Mesh &Th,
-		       const KN<double> &fx, const KN<double> &fy, const KN<double> &f2, 
+		       const KN<double> &fx, const KN<double> &fy,
+		       const KN<double> &f2, const KN<double> &f2m, const bool isolineP2,
 		       const bool fromVertex, const KNM<double> &palette,
 		       const double alength_scale, const bool unit_arrow,
 		       const double linewidth, const double ahead_scale,
@@ -3708,125 +3462,20 @@ void plot_vector2flow( std::stringstream &Content, const Fem2D::Mesh &Th,
     std::stringstream &st = Content;
     st.str("");
 
-    //------------------------------
-    // element (triangle)
-    //------------------------------
-    if( 0 < withmesh ){
+    if( 0 < withmesh )
+	overlayMesh( st, Th, withmesh, scale, ar, x0, y0, marginl, marginb );
 
-	st << "q\n";
-	st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm\n";
+    drawBoundary( st, Th, scale, ar, x0, y0, marginl, marginb );
 
-	const double grayscale1 = (withmesh < 1)? withmesh: 1;
-	const double grayscale = 1-grayscale1;
-	st << grayscale << ' ' << grayscale << ' ' << grayscale << " RG\n";
-
-	for(int n = 0; n < Th.nt; n++){
-
-	    const int &v0 = Th(n,0);
-	    const int &v1 = Th(n,1);
-	    const int &v2 = Th(n,2);
-
-	    st << r*ar*(Th(v0).x-x0) << ' ' << r*(Th(v0).y-y0) << " m ";
-	    st << r*ar*(Th(v1).x-x0) << ' ' << r*(Th(v1).y-y0) << " l ";
-	    st << r*ar*(Th(v2).x-x0) << ' ' << r*(Th(v2).y-y0) << " l ";
-	    st << "s" << std::endl;
-	}
-
-	st << "Q\n";
-
-    } // withmesh
+    if( legend )
+	drawLegend_fill( st, nbfill, df, prec, palette, fmin, fmax, monochrome, logscale,
+			 sizex, textfontsize, scale, y1, y0, marginl, marginb );
 
     //------------------------------
-    // edges
+    // isoline
     //------------------------------
-    st << "q\n";
-    st << "1 w\n"; // setlinewidth
-    st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm\n";
-    st << "0 0 0 RG\n";
-    for(int k = 0; k < nEdges; k++){
-
-	const int &v0 = Th( Th.bedges[k][0] );
-	const int &v1 = Th( Th.bedges[k][1] );
-
-	st << r*ar*(Th(v0).x-x0) << ' ' << r*(Th(v0).y-y0) << " m "
-	   << r*ar*(Th(v1).x-x0) << ' ' << r*(Th(v1).y-y0) << " l S\n";
-    }
-
-    st << "Q\n";
-
-
-    //------------------------------
-    // legend
-    //------------------------------
-    if( legend ){
-
-	st << "q\n";
-	st << "1 w\n"; // setlinewidth
-	st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm\n";
-
-	const double dy = r*(y1-y0)/nbfill;
-
-	for(int m = 0; m < nbfill; m++){
-
-	    const double f = (logscale)? fmin*pow(df,m): fmin + m*df;
-
-	    setrgbcolor(st, f, palette, fmin, fmax, monochrome, logscale);
-	    st << "rg\n";
-
-	    st << sizex-PADDING   << " " << m*dy << " m "
-               << sizex-PADDING/2 << " " << m*dy << " l "
-               << sizex-PADDING/2 << " " << (m+1)*dy << " l "
-	       << sizex-PADDING   << " " << (m+1)*dy << " l f\n";
-	}
-
-	const double EPS = 1e-10;
-        const double dl = (logscale)?
-	    exp( static_cast<double>(1)/(NUM_LABELS-1)*log(fmax/fmin) ):
-	    (fmax-fmin)/(NUM_LABELS-1);
-        for(int m = 0; m < NUM_LABELS; m++){
-
-            const double f = (logscale)? fmin*pow(dl,m): fmin + m*dl;
-
-	    if( nbfill < NUM_LABELS ){
-		const double ff = (logscale)?
-		    fmin * pow(df, static_cast<int>(log(f*0.999)/log(df)) ):
-		    static_cast<int>((f*0.999-fmin)/df) * df + fmin;
-		setrgbcolor(st, ff, palette, fmin, fmax, monochrome, logscale);
-	    } else {
-		setrgbcolor(st, f, palette, fmin, fmax, monochrome, logscale);
-	    }
-	    st << " rg\n";
-
-            st << "BT /F1 " << textfontsize << " Tf "
-	       << "1 0 0 1 " << sizex << " " << m*(r*(y1-y0)-textfontsize)/(NUM_LABELS-1) << " Tm "
-	       << "(" << ((f >= 0)? "\\ ": "");
-
-	    if( (fabs(f) > 1e-3) || (fabs(f) < 1e-12) ){
-		st << std::setprecision(prec) << std::setfill('0') << f << ") Tj ET\n";
-	    } else {
-		st << std::resetiosflags(std::ios::fixed) << std::setiosflags(std::ios::scientific)
-		   << std::setprecision(prec) << f << resetiosflags(std::ios::scientific)
-		   << std::setiosflags(std::ios::fixed) << ") Tj ET\n";
-	    }
-	    // debug: st << std::setiosflags(std::ios::fixed)
-        }
-
-	st << "Q\n";
-
-    } // legend
-
-    //------------------------------
-    // isoline (main routine in plot_P1_isoline)
-    //------------------------------
-    st << "q\n";
-    st << linewidth << " w\n"; // setlinewidth
-    st << "1 0 0 1 " << PADDING+marginl << " " << PADDING+marginb << " cm\n";
 
     if( isoline ){
-
-	if( (fetype != "P1") && (fetype != "P1nc") ){
-	    std::cout << "plotPDF() : isoline for vector filed is interpolated as P1 type" << std::endl;
-	}
 
 	std::vector<double> isoline_val;
 
@@ -3856,56 +3505,52 @@ void plot_vector2flow( std::stringstream &Content, const Fem2D::Mesh &Th,
 	    for(int m = 0; m < NISOLINES; m++)
 		isoline_val.push_back( fmin + df/2 + m*df );
 	}
+	// end : making plot values
 
-	const KN<double> &f_P1 = f2;
+	if( isolineP2 ){
 
-	for(int k = 0; k < nTriangles; k++){
+	    // If user specifies an irrelevant color range (in viso array),
+	    // we do not take care of it.
+	    const double cmax = *max_element( isoline_val.begin(), isoline_val.end() );
+	    const double cmin = *min_element( isoline_val.begin(), isoline_val.end() );
 
-	    const int &v0 = Th(k,0);
-	    const int &v1 = Th(k,1);
-	    const int &v2 = Th(k,2);
+	    KN<double> f_P2( 6*nTriangles );
+	    for(int it = 0; it < nTriangles; it++){
+		f_P2[6*it+0] = f2[3*it+0];
+		f_P2[6*it+1] = f2[3*it+1];
+		f_P2[6*it+2] = f2[3*it+2];
 
-	    const double vx[] = { Th(v0).x,     Th(v1).x,     Th(v2).x };
-	    const double vy[] = { Th(v0).y,     Th(v1).y,     Th(v2).y };
-	    const double vf[] = { f_P1[3*k+0],  f_P1[3*k+1],  f_P1[3*k+2] };
-
-	    for(size_t m = 0; m < isoline_val.size(); m++){
-
-		const double &value = isoline_val[m];
-
-		std::vector<double> px, py;
-		trackP1isoline( px, py, vx, vy, value, vf );
-
-		assert( px.size() == py.size() );
-
-		if( px.size() == 0 ) continue; // goto next isoline_val
-
-		setrgbcolor(st, value, palette, fmin, fmax, monochrome, logscale);
-
-		if( px.size() > 3 ){ 
-
-		    // f(x,y)==value on all vertices, i.e. f(x,y) \equiv value on the triangle
-		    st << "rg\n";
-		    st << scale*ar*(vx[0] - x0) << ' ' << scale*(vy[0] - y0) << " m "
-		       << scale*ar*(vx[1] - x0) << ' ' << scale*(vy[1] - y0) << " l "
-		       << scale*ar*(vx[2] - x0) << ' ' << scale*(vy[2] - y0) << " l f\n";
-		
-		} else {
-
-		    // assert( (px.size() == 2) || (px.size() == 3) );
-		    st << "RG\n";
-		    st << scale*ar*(px[0] - x0) << ' ' << scale*(py[0] - y0) << " m "
-		       << scale*ar*(px[1] - x0) << ' ' << scale*(py[1] - y0) << " l\n";
-		    st << "S\n";
-		}
+		f_P2[6*it+3] = f2m[3*it+0];
+		f_P2[6*it+4] = f2m[3*it+1];
+		f_P2[6*it+5] = f2m[3*it+2];
 	    }
+
+	    plot_P2_isoline_body( st, Th, f_P2, isoline_val, cmin, cmax, palette, scale, ar, x0, y0,
+				  marginl, marginb, monochrome, logscale, NISOLINES, linewidth );
+	    
+	} else {
+
+	    // copy from main routine in plot_P1_isoline
+
+	    if( (fetype != "P1") && (fetype != "P1nc") && (fetype != "P0") ){
+		std::cout << "plotPDF() : isoline for vector filed is interpolated as P1 type" << std::endl;
+	    }
+
+	    plot_P1_isoline_body( st, Th, f2, isoline_val, fmin, fmax, palette, scale, ar, x0, y0,
+				  marginl, marginb, monochrome, logscale, NISOLINES, linewidth );
+
 	}
-    }
+
+    } // isoline
 
     //------------------------------
     // element(triangle)-wise process
     // This is final so that the legend does not hide arrows.
     //------------------------------
+    st << "q\n";
+    st << linewidth << " w\n"; // setlinewidth
+    st << "1 0 0 1 " << PLOTPDFVAR::PADDING+marginl << " " << PLOTPDFVAR::PADDING+marginb << " cm\n";
+
     for(int k = 0; k < nTriangles; k++){
 
 	const int &v0 = Th(k,0);
@@ -3964,7 +3609,7 @@ class PLOTPDF_Op : public E_F0mps
 {
 public:
     Expression eTh, ef, efilename, efx, efy, ez;
-    static const int n_name_param = PLOTPDF_NOPTIONS;
+    static const int n_name_param = PLOTPDFVAR::NOPTIONS;
     static basicAC_F0::name_and_type name_param[];
     Expression nargs[n_name_param];
     
@@ -4034,7 +3679,7 @@ basicAC_F0::name_and_type PLOTPDF_Op::name_param[] =
     {  "zimag",     &typeid(bool)},
     {  "zarg",      &typeid(bool)},
     {  "coef",      &typeid(double)}, // arrow length scale
-    {  "ArrowSize", &typeid(double)},
+    {  "arrowsize", &typeid(double)},
     {  "unitarrow", &typeid(bool)},
     {  "idcell",    &typeid(bool)},
     {  "idvert",    &typeid(bool)},
@@ -4051,45 +3696,45 @@ basicAC_F0::name_and_type PLOTPDF_Op::name_param[] =
 AnyType PLOTPDF_Op::operator()(Stack stack) const
 {
     // options
-    const long draw_pane_size = arg(0,stack,DEFAULT_PAGESIZE);
-    const double aspectratio = arg(1,stack,DEFAULT_ASPECTRATIO);
+    const long draw_pane_size = arg(0,stack,PLOTPDFVAR::DEFAULT_PAGESIZE);
+    const double aspectratio = arg(1,stack,PLOTPDFVAR::DEFAULT_ASPECTRATIO);
     const double fontscale = arg(2,stack,1.0);
     const KN<double> *const viso = arg(3,stack,reinterpret_cast<KN<double>*>(0));
-    const long nbiso    = arg(4,stack,DEFAULT_ISOLINES);
-    const long nbfill   = arg(5,stack,DEFAULT_FILL_COLORS);
+    const long nbiso    = arg(4,stack,PLOTPDFVAR::DEFAULT_ISOLINES);
+    const long nbfill   = arg(5,stack,PLOTPDFVAR::DEFAULT_FILL_COLORS);
     const KN<double> *const frange = arg(6,stack,reinterpret_cast<KN<double>*>(0));
-    const bool gray     = arg(7,stack,DEFAULT_MONOCHROME);
-    const bool bw       = arg(8,stack,DEFAULT_MONOCHROME);
-    const bool legend   = arg(9,stack,DEFAULT_SHOW_LEGEND);
-    const double withmesh = arg(10,stack,DEFAULT_WITHMESH);
-    const bool mesh     = arg(11,stack,DEFAULT_SHOW_MESH);
-    const bool index    = arg(12,stack,DEFAULT_SHOW_INDEX);
-    const bool belabel  = arg(13,stack,DEFAULT_SHOW_BELABEL);
-    const bool isoline  = arg(14,stack,DEFAULT_SHOW_ISOLINE);
-    const bool fill     = arg(15,stack,DEFAULT_SHOW_FILL);
-    const std::string fetype  = get_string(stack,nargs[16],DEFAULT_FETYPE);
-    const std::string title   = get_string(stack,nargs[17],AppName);
+    const bool gray     = arg(7,stack,PLOTPDFVAR::DEFAULT_MONOCHROME);
+    const bool bw       = arg(8,stack,PLOTPDFVAR::DEFAULT_MONOCHROME);
+    const bool legend   = arg(9,stack,PLOTPDFVAR::DEFAULT_SHOW_LEGEND);
+    const double withmesh = arg(10,stack,PLOTPDFVAR::DEFAULT_WITHMESH);
+    const bool mesh     = arg(11,stack,PLOTPDFVAR::DEFAULT_SHOW_MESH);
+    const bool index    = arg(12,stack,PLOTPDFVAR::DEFAULT_SHOW_INDEX);
+    const bool belabel  = arg(13,stack,PLOTPDFVAR::DEFAULT_SHOW_BELABEL);
+    const bool isoline  = arg(14,stack,PLOTPDFVAR::DEFAULT_SHOW_ISOLINE);
+    const bool fill     = arg(15,stack,PLOTPDFVAR::DEFAULT_SHOW_FILL);
+    const std::string fetype  = get_string(stack,nargs[16],PLOTPDFVAR::DEFAULT_FETYPE);
+    const std::string title   = get_string(stack,nargs[17],PLOTPDFVAR::AppName);
     const std::string comment = get_string(stack,nargs[18],"");
     const KN<double> *const fmargin = arg(19,stack,reinterpret_cast<KN<double>*>(0));
-    const long prec     = arg(20,stack,DEFAULT_PRECISION_LEGEND);
-    const bool logscale = arg(21,stack,DEFAULT_LOGSCALE);
-    const bool zabs = arg(22,stack,DEFAULT_ZABS);
-    const bool zreal = arg(23,stack,DEFAULT_ZREAL);
-    const bool zimag = arg(24,stack,DEFAULT_ZIMAG);
-    const bool zarg = arg(25,stack,DEFAULT_ZARG);
-    const double arrow_scale = arg(26,stack,DEFAULT_ARROW_SCALE);
-    const double ahead_scale = arg(27,stack,DEFAULT_AHEAD_SCALE);
-    const bool unit_arrow = arg(28,stack,DEFAULT_UNIT_ARROW);
-    const bool idcell = arg(29,stack,DEFAULT_SHOW_IDCELL);
-    const bool idvert = arg(30,stack,DEFAULT_SHOW_IDVERT);
-    const bool idedge = arg(31,stack,DEFAULT_SHOW_IDEDGE);
-    const double linewidth = arg(32,stack,DEFAULT_LINEWIDTH);
+    const long prec     = arg(20,stack,PLOTPDFVAR::DEFAULT_PRECISION_LEGEND);
+    const bool logscale = arg(21,stack,PLOTPDFVAR::DEFAULT_LOGSCALE);
+    const bool zabs = arg(22,stack,PLOTPDFVAR::DEFAULT_ZABS);
+    const bool zreal = arg(23,stack,PLOTPDFVAR::DEFAULT_ZREAL);
+    const bool zimag = arg(24,stack,PLOTPDFVAR::DEFAULT_ZIMAG);
+    const bool zarg = arg(25,stack,PLOTPDFVAR::DEFAULT_ZARG);
+    const double arrow_scale = arg(26,stack,PLOTPDFVAR::DEFAULT_ARROW_SCALE);
+    const double ahead_scale = arg(27,stack,PLOTPDFVAR::DEFAULT_AHEAD_SCALE);
+    const bool unit_arrow = arg(28,stack,PLOTPDFVAR::DEFAULT_UNIT_ARROW);
+    const bool idcell = arg(29,stack,PLOTPDFVAR::DEFAULT_SHOW_IDCELL);
+    const bool idvert = arg(30,stack,PLOTPDFVAR::DEFAULT_SHOW_IDVERT);
+    const bool idedge = arg(31,stack,PLOTPDFVAR::DEFAULT_SHOW_IDEDGE);
+    const double linewidth = arg(32,stack,PLOTPDFVAR::DEFAULT_LINEWIDTH);
     //const KNM<double> *const RGBpalette = arg(33,stack,reinterpret_cast<KNM<double>*>(nullptr));
     const KNM<double> *const RGBpalette = nargs[33]?
 	GetAny<KNM<double>*>((*nargs[33])(stack)): nullptr;
-    //const long nbarrow = arg(34,stack,DEFAULT_ARROW_COLORS);
+    //const long nbarrow = arg(34,stack,PLOTPDFVAR::DEFAULT_ARROW_COLORS);
     //const KN<double> *const varrow = arg(35,stack,reinterpret_cast<KN<double>*>(0));
-    const long nbarrow = DEFAULT_ARROW_COLORS;
+    const long nbarrow = PLOTPDFVAR::DEFAULT_ARROW_COLORS;
     const KN<double> *const varrow = reinterpret_cast<KN<double>*>(0);
 
     if( verbosity >= 90 ){
@@ -4137,7 +3782,7 @@ AnyType PLOTPDF_Op::operator()(Stack stack) const
 	std::cout << "plotPDF:option: zimag=" << zimag << std::endl;
 	std::cout << "plotPDF:option: zarg=" << zarg << std::endl;
 	std::cout << "plotPDF:option: coef=" << arrow_scale << std::endl;
-	std::cout << "plotPDF:option: ArrowSize=" << ahead_scale << std::endl;
+	std::cout << "plotPDF:option: arrowsize=" << ahead_scale << std::endl;
 	std::cout << "plotPDF:option: unitarrow=" << unit_arrow << std::endl;
 #if 0
 	// not implemented yet
@@ -4230,23 +3875,23 @@ AnyType PLOTPDF_Op::operator()(Stack stack) const
     // comment
     //--------------------------------------------------
     const int comment_height
-	= (comment.length() == 0)? 0: (DEFAULT_COMMENT_FONTSIZE + DEFAULT_COMMENT_BASE);
+	= (comment.length() == 0)? 0: (PLOTPDFVAR::DEFAULT_COMMENT_FONTSIZE + PLOTPDFVAR::DEFAULT_COMMENT_BASE);
 
     //----------------------------------------
     // user specific margin (by option)
     //----------------------------------------
     const int margin[] = {
-	( (fmargin) && (fmargin->size() >= 1) )? static_cast<int>((*fmargin)[0]): DEFAULT_MARGIN[0], // left
-	( (fmargin) && (fmargin->size() >= 2) )? static_cast<int>((*fmargin)[1]): DEFAULT_MARGIN[1], // bottom
-	( (fmargin) && (fmargin->size() >= 3) )? static_cast<int>((*fmargin)[2]): DEFAULT_MARGIN[2], // right
-	( (fmargin) && (fmargin->size() >= 4) )? static_cast<int>((*fmargin)[3]): DEFAULT_MARGIN[3]  // top
+	( (fmargin) && (fmargin->size() >= 1) )? static_cast<int>((*fmargin)[0]): PLOTPDFVAR::DEFAULT_MARGIN[0], // left
+	( (fmargin) && (fmargin->size() >= 2) )? static_cast<int>((*fmargin)[1]): PLOTPDFVAR::DEFAULT_MARGIN[1], // bottom
+	( (fmargin) && (fmargin->size() >= 3) )? static_cast<int>((*fmargin)[2]): PLOTPDFVAR::DEFAULT_MARGIN[2], // right
+	( (fmargin) && (fmargin->size() >= 4) )? static_cast<int>((*fmargin)[3]): PLOTPDFVAR::DEFAULT_MARGIN[3]  // top
     };
     const int &marginl = margin[0];
     const int &marginb = margin[1];
     const int &marginr = margin[2];
     const int &margint = margin[3];
 
-    const int legend_width = 3*PADDING + static_cast<int>(LEGEND_FONTWIDTH*prec);
+    const int legend_width = 3*PLOTPDFVAR::PADDING + static_cast<int>(PLOTPDFVAR::LEGEND_FONTWIDTH*prec);
 
     //--------------------------------------------------
     // scaling factor, [x0,x1]*[y0,y1] -> [0,PAGESIZE]^2
@@ -4259,24 +3904,24 @@ AnyType PLOTPDF_Op::operator()(Stack stack) const
     const double ry = draw_pane_size / (y1 - y0);
     const double scale = (rx < ry)? rx: ry;   // min(rx,ry)
 
-    const int sizex = static_cast<int>(2*PADDING + scale*(x1-x0)*ar);
-    const int sizey = static_cast<int>(2*PADDING + scale*(y1-y0)) + comment_height;
+    const int sizex = static_cast<int>(2*PLOTPDFVAR::PADDING + scale*(x1-x0)*ar);
+    const int sizey = static_cast<int>(2*PLOTPDFVAR::PADDING + scale*(y1-y0)) + comment_height;
 
-    const double index_fontsize = DEFAULT_INDEX_FONTSIZE * fontscale;
+    const double index_fontsize = PLOTPDFVAR::DEFAULT_INDEX_FONTSIZE * fontscale;
 
     //------------------------------
     // color palette
     //------------------------------
     // compile error
     // KNM<double> default_palette_array
-    //  = KNM_<double>(DEFAULT_PALETTE, DEFAULT_PALETTE_NCOLORS, 3);
+    //  = KNM_<double>(PLOTPDFVAR::DEFAULT_PALETTE, PLOTPDFVAR::DEFAULT_PALETTE_NCOLORS, 3);
 
-    const KNM<double> default_palette_array( DEFAULT_PALETTE_NCOLORS, 3 );
+    const KNM<double> default_palette_array( PLOTPDFVAR::DEFAULT_PALETTE_NCOLORS, 3 );
 
     // why can we modify const KNM<double> ?
-    for(int i = 0; i < DEFAULT_PALETTE_NCOLORS; i++)
+    for(int i = 0; i < PLOTPDFVAR::DEFAULT_PALETTE_NCOLORS; i++)
 	for(int j = 0; j < 3; j++)
-	    default_palette_array(i,j) = DEFAULT_PALETTE[i][j];
+	    default_palette_array(i,j) = PLOTPDFVAR::DEFAULT_PALETTE[i][j];
 
     bool validPalette = RGBpalette;
     if( RGBpalette && ((RGBpalette->N() == 0) || (RGBpalette->M() < 3)) ){
@@ -4327,35 +3972,65 @@ AnyType PLOTPDF_Op::operator()(Stack stack) const
     //----------------------------------------------------------------------
     // vector-valued function
     //----------------------------------------------------------------------
-    const double legend_fontsize = DEFAULT_LEGEND_FONTSIZE;
+    const double legend_fontsize = PLOTPDFVAR::DEFAULT_LEGEND_FONTSIZE;
 
     if( efx && efy ){
 
-	if( verbosity >= 5 )
-	    std::cout << "plotPDF() : Vector filed is interpolated as P1 type." << std::endl;
-
+	const bool isolineP2 = (fetype == "P2");
 	const bool fromVertex = (fetype == "P1") || (fetype == "P2");
 
 	const int &nTriangles = Th.nt;
-	KN<double> fx( 3*nTriangles ), fy( 3*nTriangles ), f2( 3*nTriangles );
+	KN<double> fx( 3*nTriangles ), fy( 3*nTriangles ), f2( 3*nTriangles ), f2mid( 3*nTriangles );
 
 	// find function values on vertices
 	for(int it = 0; it < nTriangles; it++){
 	
+	    const int &v0 = Th(it,0);
+	    const int &v1 = Th(it,1);
+	    const int &v2 = Th(it,2);
+
+	    const double x[] = { Th(v0).x, Th(v1).x, Th(v2).x };
+	    const double y[] = { Th(v0).y, Th(v1).y, Th(v2).y };
+#ifdef P2_BARYCENTER
+	    const double cx = ( x[0] + x[1] + x[2] ) / 3; // barycenter, used in P2
+	    const double cy = ( y[0] + y[1] + y[2] ) / 3; // barycenter, used in P2
+#endif
+
 	    for(int iv = 0; iv < 3; iv++){
 		MeshPointStack(stack)->setP(pTh,it,iv); // at the iv-th vertex
 		fx[3*it+iv] = GetAny<double>( (*efx)(stack) ); // Expression ef is atype<double>()
 		fy[3*it+iv] = GetAny<double>( (*efy)(stack) ); // Expression ef is atype<double>()
-		f2[3*it+iv] = sqrt( fx[3*it+iv]*fx[3*it+iv] + fy[3*it+iv]*fy[3*it+iv] ); // Euclid norm
+		f2[3*it+iv] = sqrt( fx[3*it+iv]*fx[3*it+iv] + fy[3*it+iv]*fy[3*it+iv] ); // Euclidean norm
+
+		if( isolineP2 ){
+#if defined(P2_BARYCENTER) && defined(P2_EDGE)
+		    const double mx = (x[(iv+1)%3]+x[(iv+2)%3]) / 2;  // mid-point of iv-th edge
+		    const double my = (y[(iv+1)%3]+y[(iv+2)%3]) / 2;
+		    const double ex = 0.99*mx+0.01*cx;
+		    const double ey = 0.99*my+0.01*cy;
+#elif defined(P2_BARYCENTER)
+		    const double ex = (x[iv] + cx) / 2; // mid-point of barycenter and iv-th vertex
+		    const double ey = (y[iv] + cy) / 2; // mid-point of barycenter and iv-th vertex
+#elif defined(P2_EDGE)
+		    const double ex = (x[(iv+1)%3]+x[(iv+2)%3]) / 2;  // mid-point of iv-th edge
+		    const double ey = (y[(iv+1)%3]+y[(iv+2)%3]) / 2;
+#endif
+		    MeshPointStack(stack)->set( ex, ey );
+		    const double ffx = GetAny<double>( (*efx)(stack) ); // Expression ef is atype<double>()
+		    const double ffy = GetAny<double>( (*efy)(stack) ); // Expression ef is atype<double>()
+		    f2mid[3*it+iv] = sqrt( ffx*ffx + ffy*ffy ); // Euclidean norm
+		}
 	    }
 	}
 
         mesh_figure.addBookmark( "Profile : Vector-valued Function" );
-	plot_vector2flow( Content, Th, fx, fy, f2, fromVertex, palette, arrow_scale, unit_arrow, 
+
+	plot_vector2flow( Content, Th, fx, fy, f2, f2mid, isolineP2, fromVertex, palette, arrow_scale, unit_arrow, 
 			  linewidth, ahead_scale, nbarrow, varrow,
 			  sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
 			  legend_fontsize, monochrome, legend, prec, logscale,
 			  withmesh, nbfill, frange, fetype, isoline, nbiso, viso );
+
 	if( comment.length() > 0 )
 	    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
 	mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
@@ -4367,124 +4042,338 @@ AnyType PLOTPDF_Op::operator()(Stack stack) const
     //----------------------------------------------------------------------
     if( ez ){
 
-	if( verbosity >= 5 )
-	    std::cout << "plotPDF() : Complex-valued function is interpolated as P1 type." << std::endl;
+	if( fetype == "P0" ){
 
-	if( (fetype != "P1") && (fetype != "P1nc") ){
-	    std::cout << "plotPDF() : Unknown fetype : " << fetype << std::endl;
-	    std::cout << "plotPDF() : Interpolated as piecewise-linear" << std::endl;
-	}
+	    const int &nTriangles = Th.nt;
+	    KN<Complex> fz( nTriangles );
+	    KN<double> fr( nTriangles ), fi( nTriangles ), fm( nTriangles ), fa( nTriangles );
+	    
+	    for(int it = 0; it < nTriangles; it++){
 
-	const int &nTriangles = Th.nt;
-	KN< Complex > fz( 3*nTriangles );
-	KN<double> fr( 3*nTriangles ), fi( 3*nTriangles ), fm( 3*nTriangles ), fa( 3*nTriangles );
+		const int &v0 = Th(it,0);
+		const int &v1 = Th(it,1);
+		const int &v2 = Th(it,2);
 
-	// find function values on vertices
-	for(int it = 0; it < nTriangles; it++){
-	
-	    for(int iv = 0; iv < 3; iv++){
-		MeshPointStack(stack)->setP(pTh,it,iv); // at the iv-th vertex
-		fz[3*it+iv] = GetAny<Complex>( (*ez)(stack) ); // Expression ez is atype<Complex>()
-		fr[3*it+iv] = fz[3*it+iv].real();
-		fi[3*it+iv] = fz[3*it+iv].imag();
-		fm[3*it+iv] = abs( fz[3*it+iv] );
-		fa[3*it+iv] = atan2( fi[3*it+iv], fr[3*it+iv] );
+		const double x = (Th(v0).x+Th(v1).x+Th(v2).x)/3;
+		const double y = (Th(v0).y+Th(v1).y+Th(v2).y)/3;
+		MeshPointStack(stack)->set( x, y ); // barycenter
+
+		fz[it] = GetAny<Complex>( (*ez)(stack) ); // Expression ez is atype<Complex>()
+		fr[it] = fz[it].real();
+		fi[it] = fz[it].imag();
+		fm[it] = abs( fz[it] );
+		fa[it] = atan2( fi[it], fr[it] );
 	    }
-	}
 
-	// P1, P1nc and Other Interpolated Functions
-	//------------------------------
-	// isoline
-	//------------------------------
-	if( isoline && (nbiso > 0) && zreal ){
-	    mesh_figure.addBookmark( "Isoline : Real Part" );
-	    plot_P1_isoline( Content, Th, fr, // real part
-			     palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
-			     legend_fontsize, monochrome, legend, prec, logscale,
-			     withmesh, nbiso, viso, linewidth );
-	    if( comment.length() > 0 )
-		addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
-	    mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
-	}
+	    //------------------------------
+	    // fill-style for P0, complex-valued function
+	    //------------------------------
+	    if( fill && (nbfill > 0) && zreal ){
+		mesh_figure.addBookmark( "Fill : Real Part" );
+		plot_P0_fill( Content, Th, fr, // real part
+			      palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+			      legend_fontsize, monochrome, legend, prec, logscale,
+			      withmesh, nbfill, frange );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
 
-	if( isoline && (nbiso > 0) && zimag ){
-	    mesh_figure.addBookmark( "Isoline : Imaginary Part" );
-	    plot_P1_isoline( Content, Th, fi, // imaginary part
-			     palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
-			     legend_fontsize, monochrome, legend, prec, logscale,
-			     withmesh, nbiso, viso, linewidth );
-	    if( comment.length() > 0 )
-		addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
-	    mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
-	}
+	    if( fill && (nbfill > 0) && zimag ){
+		mesh_figure.addBookmark( "Fill : Imaginary Part" );
+		plot_P0_fill( Content, Th, fi, // imaginary part
+			      palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+			      legend_fontsize, monochrome, legend, prec, logscale,
+			      withmesh, nbfill, frange );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+
+	    if( fill && (nbfill > 0) && zabs ){
+		mesh_figure.addBookmark( "Fill : Modulus" );
+		plot_P0_fill( Content, Th, fm, // modulus
+			      palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+			      legend_fontsize, monochrome, legend, prec, logscale,
+			      withmesh, nbfill, frange );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+
+	    if( fill && (nbfill > 0) && zarg ){
+		mesh_figure.addBookmark( "Fill : Argument" );
+		plot_P0_fill( Content, Th, fa, // argument
+			      palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+			      legend_fontsize, monochrome, legend, prec, logscale,
+			      withmesh, nbfill, frange );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+
+	} else if( fetype == "P2" ) {
+
+	    // Can this implementation treat P1, P1nc, other types as P2 ?
+	    
+	    const int &nTriangles = Th.nt;
+	    KN<Complex> fz( 6*nTriangles );
+	    KN<double>  fr( 6*nTriangles ), fi( 6*nTriangles ), fm( 6*nTriangles ), fa( 6*nTriangles );
+	    
+	    // find function values on vertices
+	    for(int it = 0; it < nTriangles; it++){
 	
-	if( isoline && (nbiso > 0) && zabs ){
-	    mesh_figure.addBookmark( "Isoline : Modulus of Complex-valued Function" );
-	    plot_P1_isoline( Content, Th, fm, // modulus
-			     palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
-			     legend_fontsize, monochrome, legend, prec, logscale,
-			     withmesh, nbiso, viso, linewidth );
-	    if( comment.length() > 0 )
-		addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
-	    mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
-	}
+		const int &v0 = Th(it,0);
+		const int &v1 = Th(it,1);
+		const int &v2 = Th(it,2);
 
-	if( isoline && (nbiso > 0) && zarg ){
-	    mesh_figure.addBookmark( "Isoline : Argument" );
-	    plot_P1_isoline( Content, Th, fa, // argument
-			     palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
-			     legend_fontsize, monochrome, legend, prec, logscale,
-			     withmesh, nbiso, viso, linewidth );
-	    if( comment.length() > 0 )
-		addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
-	    mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
-	}
+		const double x[] = { Th(v0).x, Th(v1).x, Th(v2).x };
+		const double y[] = { Th(v0).y, Th(v1).y, Th(v2).y };
+#ifdef P2_BARYCENTER
+		const double cx = ( x[0] + x[1] + x[2] ) / 3; // barycenter, used in P2
+		const double cy = ( y[0] + y[1] + y[2] ) / 3; // barycenter, used in P2
+#endif
+		for(int iv = 0; iv < 3; iv++){
+
+		    MeshPointStack(stack)->setP(pTh,it,iv); // at the iv-th vertex
+		    fz[6*it+iv] = GetAny<Complex>( (*ez)(stack) ); // Expression ez is atype<Complex>()
 	
-	//------------------------------
-	// fill-style
-	//------------------------------
-	if( fill && (nbfill > 0) && zreal ){
-	    mesh_figure.addBookmark( "Real Part of Complex-valued Function" );
-	    plot_P1_fill( Content, Th, fr, // real part
-			  palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
-			  legend_fontsize, monochrome, legend, prec, logscale,
-			  withmesh, nbfill, frange );
-	    if( comment.length() > 0 )
-		addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
-	    mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
-	}
+#if defined(P2_BARYCENTER) && defined(P2_EDGE)
+		    const double mx = (x[(iv+1)%3]+x[(iv+2)%3]) / 2;  // mid-point of iv-th edge
+		    const double my = (y[(iv+1)%3]+y[(iv+2)%3]) / 2;
+		    const double ex = 0.99*mx+0.01*cx;
+		    const double ey = 0.99*my+0.01*cy;
+#elif defined(P2_BARYCENTER)
+		    const double ex = (x[iv] + cx) / 2; // mid-point of barycenter and iv-th vertex
+		    const double ey = (y[iv] + cy) / 2; // mid-point of barycenter and iv-th vertex
+#elif defined(P2_EDGE)
+		    const double ex = (x[(iv+1)%3]+x[(iv+2)%3]) / 2;  // mid-point of iv-th edge
+		    const double ey = (y[(iv+1)%3]+y[(iv+2)%3]) / 2;
+#endif
+		    MeshPointStack(stack)->set( ex, ey );
+		    fz[ 6*it + 3 + iv ] = GetAny<Complex>( (*ez)(stack) ); // Expression ef is atype<double>()
+		}
 
-	if( fill && (nbfill > 0) && zimag ){
-	    mesh_figure.addBookmark( "Imaginary Part of Complex-valued Function" );
-	    plot_P1_fill( Content, Th, fi, // imaginary part
-			  palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
-			  legend_fontsize, monochrome, legend, prec, logscale,
-			  withmesh, nbfill, frange );
-	    if( comment.length() > 0 )
-		addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
-	    mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
-	}
+		for(int i = 0; i < 6; i++){
+		    fr[6*it+i] = fz[6*it+i].real();
+		    fi[6*it+i] = fz[6*it+i].imag();
+		    fm[6*it+i] = abs( fz[6*it+i] );
+		    fa[6*it+i] = atan2( fi[6*it+i], fr[6*it+i] );
+		}
+	    }
 
-	if( fill && (nbfill > 0) && zabs ){
-	    mesh_figure.addBookmark( "Modulus of Complex-valued Function" );
-	    plot_P1_fill( Content, Th, fm, // modulus
-			  palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
-			  legend_fontsize, monochrome, legend, prec, logscale,
-			  withmesh, nbfill, frange );
-	    if( comment.length() > 0 )
-		addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
-	    mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
-	}
+	    //------------------------------
+	    // isoline for P2
+	    //------------------------------
+	    if( isoline && (nbiso > 0) && zreal ){
+		mesh_figure.addBookmark( "Isoline : Real Part" );
+		plot_P2_isoline( Content, Th, fr, // real part
+				 palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+				 legend_fontsize, monochrome, legend, prec, logscale,
+				 withmesh, nbiso, viso, linewidth );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
 
-	if( fill && (nbfill > 0) && zarg ){
-	    mesh_figure.addBookmark( "Argument of Complex-valued Function" );
-	    plot_P1_fill( Content, Th, fa, // argument
-			  palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
-			  legend_fontsize, monochrome, legend, prec, logscale,
-			  withmesh, nbfill, frange );
-	    if( comment.length() > 0 )
-		addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
-	    mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    if( isoline && (nbiso > 0) && zimag ){
+		mesh_figure.addBookmark( "Isoline : Imaginary Part" );
+		plot_P2_isoline( Content, Th, fi, // imaginary part
+				 palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+				 legend_fontsize, monochrome, legend, prec, logscale,
+				 withmesh, nbiso, viso, linewidth );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+	
+	    if( isoline && (nbiso > 0) && zabs ){
+		mesh_figure.addBookmark( "Isoline : Modulus" );
+		plot_P2_isoline( Content, Th, fm, // modulus
+				 palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+				 legend_fontsize, monochrome, legend, prec, logscale,
+				 withmesh, nbiso, viso, linewidth );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+
+	    if( isoline && (nbiso > 0) && zarg ){
+		mesh_figure.addBookmark( "Isoline : Argument" );
+		plot_P2_isoline( Content, Th, fa, // argument
+				 palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+				 legend_fontsize, monochrome, legend, prec, logscale,
+				 withmesh, nbiso, viso, linewidth );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+	
+	    //------------------------------
+	    // fill-style for P2
+	    //------------------------------
+	    if( fill && (nbfill > 0) && zreal ){
+		mesh_figure.addBookmark( "Fill : Real Part" );
+		plot_P2_fill( Content, Th, fr, // real part
+			      palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+			      legend_fontsize, monochrome, legend, prec, logscale,
+			      withmesh, nbfill, frange );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+
+	    if( fill && (nbfill > 0) && zimag ){
+		mesh_figure.addBookmark( "Fill : Imaginary Part" );
+		plot_P2_fill( Content, Th, fi, // imaginary part
+			      palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+			      legend_fontsize, monochrome, legend, prec, logscale,
+			      withmesh, nbfill, frange );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+
+	    if( fill && (nbfill > 0) && zabs ){
+		mesh_figure.addBookmark( "Fill : Modulus" );
+		plot_P2_fill( Content, Th, fm, // modulus
+			      palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+			      legend_fontsize, monochrome, legend, prec, logscale,
+			      withmesh, nbfill, frange );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+
+	    if( fill && (nbfill > 0) && zarg ){
+		mesh_figure.addBookmark( "Fill : Argument" );
+		plot_P2_fill( Content, Th, fa, // argument
+			      palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+			      legend_fontsize, monochrome, legend, prec, logscale,
+			      withmesh, nbfill, frange );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+
+	} else {
+	    
+	    if( (fetype != "P1") && (fetype != "P1nc") ){
+		std::cout << "plotPDF() : Unknown fetype : " << fetype << std::endl;
+		std::cout << "plotPDF() : Interpolated as piecewise-linear" << std::endl;
+	    }
+
+	    const int &nTriangles = Th.nt;
+	    KN<Complex> fz( 3*nTriangles );
+	    KN<double> fr( 3*nTriangles ), fi( 3*nTriangles ), fm( 3*nTriangles ), fa( 3*nTriangles );
+
+	    // find function values on vertices
+	    for(int it = 0; it < nTriangles; it++){
+	
+		for(int iv = 0; iv < 3; iv++){
+		    MeshPointStack(stack)->setP(pTh,it,iv); // at the iv-th vertex
+		    fz[3*it+iv] = GetAny<Complex>( (*ez)(stack) ); // Expression ez is atype<Complex>()
+		    fr[3*it+iv] = fz[3*it+iv].real();
+		    fi[3*it+iv] = fz[3*it+iv].imag();
+		    fm[3*it+iv] = abs( fz[3*it+iv] );
+		    fa[3*it+iv] = atan2( fi[3*it+iv], fr[3*it+iv] );
+		}
+	    }
+
+	    // P1, P1nc and Other Interpolated Functions
+	    //------------------------------
+	    // isoline for P1
+	    //------------------------------
+	    if( isoline && (nbiso > 0) && zreal ){
+		mesh_figure.addBookmark( "Isoline : Real Part" );
+		plot_P1_isoline( Content, Th, fr, // real part
+				 palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+				 legend_fontsize, monochrome, legend, prec, logscale,
+				 withmesh, nbiso, viso, linewidth );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+
+	    if( isoline && (nbiso > 0) && zimag ){
+		mesh_figure.addBookmark( "Isoline : Imaginary Part" );
+		plot_P1_isoline( Content, Th, fi, // imaginary part
+				 palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+				 legend_fontsize, monochrome, legend, prec, logscale,
+				 withmesh, nbiso, viso, linewidth );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+	
+	    if( isoline && (nbiso > 0) && zabs ){
+		mesh_figure.addBookmark( "Isoline : Modulus" );
+		plot_P1_isoline( Content, Th, fm, // modulus
+				 palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+				 legend_fontsize, monochrome, legend, prec, logscale,
+				 withmesh, nbiso, viso, linewidth );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+
+	    if( isoline && (nbiso > 0) && zarg ){
+		mesh_figure.addBookmark( "Isoline : Argument" );
+		plot_P1_isoline( Content, Th, fa, // argument
+				 palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+				 legend_fontsize, monochrome, legend, prec, logscale,
+				 withmesh, nbiso, viso, linewidth );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+	
+	    //------------------------------
+	    // fill-style for P1
+	    //------------------------------
+	    if( fill && (nbfill > 0) && zreal ){
+		mesh_figure.addBookmark( "Fill : Real Part" );
+		plot_P1_fill( Content, Th, fr, // real part
+			      palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+			      legend_fontsize, monochrome, legend, prec, logscale,
+			      withmesh, nbfill, frange );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+
+	    if( fill && (nbfill > 0) && zimag ){
+		mesh_figure.addBookmark( "Fill : Imaginary Part" );
+		plot_P1_fill( Content, Th, fi, // imaginary part
+			      palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+			      legend_fontsize, monochrome, legend, prec, logscale,
+			      withmesh, nbfill, frange );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+
+	    if( fill && (nbfill > 0) && zabs ){
+		mesh_figure.addBookmark( "Fill : Modulus" );
+		plot_P1_fill( Content, Th, fm, // modulus
+			      palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+			      legend_fontsize, monochrome, legend, prec, logscale,
+			      withmesh, nbfill, frange );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
+
+	    if( fill && (nbfill > 0) && zarg ){
+		mesh_figure.addBookmark( "Fill : Argument" );
+		plot_P1_fill( Content, Th, fa, // argument
+			      palette, sizex, sizey, scale, ar, x0, y0, y1, marginl, marginb,
+			      legend_fontsize, monochrome, legend, prec, logscale,
+			      withmesh, nbfill, frange );
+		if( comment.length() > 0 )
+		    addComment( Content, scale*(y1-y0), marginl, marginb, fontscale, comment );
+		mesh_figure.addPage( Content, (legend? (sizex+legend_width): sizex), sizey, margin );
+	    }
 	}
 
 	return true;
@@ -4506,7 +4395,7 @@ AnyType PLOTPDF_Op::operator()(Stack stack) const
 
 	    const double x = (Th(v0).x+Th(v1).x+Th(v2).x)/3;
 	    const double y = (Th(v0).y+Th(v1).y+Th(v2).y)/3;
-	    MeshPointStack(stack)->set(x,y); // barycenter
+	    MeshPointStack(stack)->set( x, y ); // barycenter
 
 	    f_FE[it] = GetAny<double>( (*ef)(stack) ); // Expression ef is atype<double>()
 	}
@@ -4535,16 +4424,28 @@ AnyType PLOTPDF_Op::operator()(Stack stack) const
 
 	    const double x[] = { Th(v0).x, Th(v1).x, Th(v2).x };
 	    const double y[] = { Th(v0).y, Th(v1).y, Th(v2).y };
-
+#ifdef P2_BARYCENTER
+	    const double cx = ( x[0] + x[1] + x[2] ) / 3; // barycenter, used in P2
+	    const double cy = ( y[0] + y[1] + y[2] ) / 3; // barycenter, used in P2
+#endif
 	    // f_FE[i] = func(v[i]), f_FE[i+3] = func(e[i]), i=0,1,2.
 	    for(int iv = 0; iv < 3; iv++){
 		
 		MeshPointStack(stack)->setP(pTh,it,iv); // at the iv-th vertex
 		f_FE[ 6*it + iv ] = GetAny<double>( (*ef)(stack) ); // Expression ef is atype<double>()
 
+#if defined(P2_BARYCENTER) && defined(P2_EDGE)
+		const double mx = (x[(iv+1)%3]+x[(iv+2)%3]) / 2;  // mid-point of iv-th edge
+		const double my = (y[(iv+1)%3]+y[(iv+2)%3]) / 2;
+		const double ex = 0.99*mx+0.01*cx;
+		const double ey = 0.99*my+0.01*cy;
+#elif defined(P2_BARYCENTER)
+		const double ex = (x[iv] + cx) / 2; // mid-point of barycenter and iv-th vertex
+		const double ey = (y[iv] + cy) / 2; // mid-point of barycenter and iv-th vertex
+#elif defined(P2_EDGE)
 		const double ex = (x[(iv+1)%3]+x[(iv+2)%3]) / 2;  // mid-point of iv-th edge
 		const double ey = (y[(iv+1)%3]+y[(iv+2)%3]) / 2;
-
+#endif
 		MeshPointStack(stack)->set( ex, ey );
 		f_FE[ 6*it + 3 + iv ] = GetAny<double>( (*ef)(stack) ); // Expression ef is atype<double>()
 	    }
@@ -4654,7 +4555,7 @@ public:
     PLOTPDF(int,int) : OneOperator( atype<long>(), atype<std::string*>(), atype<const Mesh*>(), atype<E_Array>() ), argc(3) {}
 
     // complex-valued function
-    PLOTPDF(int,int,int) : OneOperator( atype<long>(), atype<std::string*>(), atype<const Mesh*>(), atype< Complex >() ), argc(5) {}
+    PLOTPDF(int,int,int) : OneOperator( atype<long>(), atype<std::string*>(), atype<const Mesh*>(), atype<Complex>() ), argc(5) {}
     
     E_F0 * code(const basicAC_F0 & args) const
     {
@@ -4698,7 +4599,13 @@ public:
 
 static void Load_Init()
 {
-    if ( verbosity && (mpirank == 0) ) { std::cout << " load: plotPDF " << std::endl; }
+    if( verbosity && (mpirank == 0) ){
+	std::cout << " load: plotPDF " << PLOTPDFVAR::SHOW_VERSION << std::endl;
+    }
+
+    if( verbosity >= 10 ){
+	std::cout << "plotPDF: The manual and latest version are found at http://www-an.acs.i.kyoto-u.ac.jp/~fujiwara/ff" << std::endl;
+    }
 
     Global.Add("plotPDF", "(", new PLOTPDF);        // mesh only
     Global.Add("plotPDF", "(", new PLOTPDF(0));     // real valued
