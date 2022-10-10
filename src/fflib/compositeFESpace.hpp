@@ -171,6 +171,16 @@ void varfBemToCompositeBlockLinearSystem(const int& i, const int &j,
                 const list<C_F0> & b_largs_zz, Stack stack, Expression const * nargs,
                 HashMatrix<int,R> *hm_A);
 #endif
+/*
+template<class R> 
+void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j, 
+                const int &typeUh, const int &typeVh,
+                const vector< long> &offsetUh, const vector< long> &offsetVh,
+                const generic_v_fes * &pfesUh, const generic_v_fes * &pfesVh,
+                bool initmat, bool initx, const int &sym, const double &tgv, 
+                const list<C_F0> & b_largs_zz, Stack stack, 
+                KN_<R> *B, KN_<R> *X, HashMatrix<int,R> *hm_A);
+*/
 
 template<class R> 
 void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &j, 

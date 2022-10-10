@@ -715,7 +715,7 @@ class vect_generic_v_fes {  //: public RefCounter{
   ~vect_generic_v_fes(){
   }
   /**
-    * @brief update the composant of the FESpace if the mesh have changed
+    * @brief update the composant of the composite FESpace if a mesh have changed
     * 
     */
   void update( ){
@@ -916,71 +916,6 @@ class FEbase {
   operator FESpace &( ) {
     throwassert(Vh);
     return *Vh;
-  }
-
- private:    // rule of programming
-  FEbase(const FEbase &);
-  void operator=(const FEbase &);
-};
-
-// utile ????
-template< class K>
-class FEbase<K,generic_v_fes> {
- public:
-  typedef generic_v_fes * pgenericfes;
-
-  generic_v_fes *const *pVh;     // pointeur sur la variable stockant FESpace;
-  KN< K > *xx;                   // value
-
-  KN< K > *x( ) { return xx; }
-
-  FEbase(const pgenericfes *ppVh) : pVh(ppVh), xx(0) {}
-
-  ~FEbase( ) { delete xx; }
-  void destroy( ) {    // cout << "~FEbase  destroy " << this << endl;
-    delete this;
-  }
-
-  void operator=(KN< K > *y) {
-    ffassert(0);
-    /*
-    Vh = **pVh;
-    throwassert((bool)Vh);
-    if (xx) delete xx;
-    xx = y;
-    ffassert(y->N( ) == Vh->NbOfDF);
-    */
-  }
-
-  void operator=(KN_< K > &y) {
-    ffassert(0);
-    /*
-    Vh = **pVh;
-    throwassert((bool)Vh);
-    if (xx) {    // resize if need
-      if (xx->N( ) != Vh->NbOfDF) delete xx;
-      xx = 0;
-    }
-    if (!xx) xx = new KN< K >(Vh->NbOfDF);
-    ffassert(SameShape(y, *xx));
-    *xx = y;
-    */
-  }
-
-  void *newVh() {
-    ffassert(0);
-    /*
-    throwassert(pVh);
-    const pfes pp = *pVh;
-    // cout << pVh << " " << *pVh << endl;
-    return *pp;
-    */
-  }
-
-  operator FESpace &( ) {
-    ffassert(0);
-    //throwassert(Vh);
-    //return *Vh;
   }
 
  private:    // rule of programming

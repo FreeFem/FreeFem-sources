@@ -2223,9 +2223,9 @@ class OneOperatorMakePtrFE : public OneOperator {
     E_set_fev< K > *e_set_fev;
     const E_Array *v;
     CODE(const basicAC_F0 &args) : fer(to< R >(args[0])), fes(to< B >(args[1])), e_set_fev(0) {
-      cout << "call CODE(const basicAC_F0 &args) in OneOperatorMakePtrFE::CODE" << endl; // Morice
-      cout << "*args[2].left=" << *args[2].left() << endl;  // Morice
-      cout << "*args[2].LeftValue( )=" << *args[2].LeftValue( ) << endl;  // Morice
+      //cout << "call CODE(const basicAC_F0 &args) in OneOperatorMakePtrFE::CODE" << endl; // Morice
+      //cout << "*args[2].left=" << *args[2].left() << endl;  // Morice
+      //cout << "*args[2].LeftValue( )=" << *args[2].LeftValue( ) << endl;  // Morice
       if (BCastTo< K >(args[2]))
         v = new E_Array(basicAC_F0_wa(to< K >(args[2])));
       else
@@ -2239,7 +2239,7 @@ class OneOperatorMakePtrFE : public OneOperator {
     }
 
     AnyType operator( )(Stack stack) const {
-      cout << "call operator() in OneOperatorMakePtrFE::CODE" << endl; // Morice
+      // cout << "call operator() in OneOperatorMakePtrFE::CODE" << endl; // Morice
       R p = GetAny< R >((*fer)(stack));
       B a = GetAny< B >((*fes)(stack));
       *p = new FEbase< K, v_fes >(a);
@@ -2249,7 +2249,7 @@ class OneOperatorMakePtrFE : public OneOperator {
     operator aType( ) const { return atype< R >( ); }
   };
 
-  E_F0 *code(const basicAC_F0 &args) const { cout << "E_F0 *code(const basicAC_F0 &args) in E_F0 *code(const basicAC_F0 &args)" << endl; // Morice
+  E_F0 *code(const basicAC_F0 &args) const { /* cout << "E_F0 *code(const basicAC_F0 &args) in E_F0 *code(const basicAC_F0 &args)" << endl; // Morice */
   return new CODE(args); }
   OneOperatorMakePtrFE(aType tt)
     :    // tt= aType<double>() or aType<E_Array>()

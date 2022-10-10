@@ -11559,11 +11559,11 @@ void  DispatchSolution( const KN<int> &typeUh, const KN<int> &offsetUh,
                         const vector<void *> &LLUh,  vector< void *>  &u_h, KN<R> * X,KN<R> * B)
 {
 // Dispatch solution
-    //  Need to do a function ::  NbUh, LLUh, u_h, offsetUh, typeUh, 
+    //  Need to do a function ::  NpUh, LLUh, u_h, offsetUh, typeUh, 
 
-    const int NbUh = typeUh.size();
+    const int NpUh = typeUh.size();
 
-    for(int I=0; I<NbUh; I++ ){
+    for(int I=0; I<NpUh; I++ ){
         if( typeUh[I] == 2){
 
             const FESpace * PUh = (FESpace *) LLUh[I];
@@ -11894,12 +11894,13 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
 
 void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_component, const vector<void *> &u_h, const vector<int> &type_varFE, 
                                     vector<void *> & LLUh, vector<int> &typeUh, vector<long> &sizeUh, vector<long> & offsetUh,
-                                    vector<int> &UhNbItem){
+                                    vector<int> &UhNbItem,vector<generic_v_fes *> pfesUh){
 
 
     ffassert( (size_component == LLUh.size()) );
     ffassert( (size_component == sizeUh.size()) );
     ffassert( (size_component+1 == offsetUh.size()) );
+    ffassert( (size_component == pfesUh.size()));
 
     int kkk = 0;
     int min_i = first_component;
@@ -11912,6 +11913,7 @@ void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_co
             sizeUh[kkk] = tyty->newVh()->NbOfDF;
             UhNbItem[kkk] = tyty->newVh()->N;
             typeUh[kkk] = type_varFE[i];
+            pfesUh[kkk] = *(tyty->pVh);
         }
         else if( type_varFE[i]== 3){
             FEbase<R, v_fes3> * tyty = (FEbase<R, v_fes3> *) u_h[i];
@@ -11919,6 +11921,7 @@ void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_co
             sizeUh[kkk] = tyty->newVh()->NbOfDF;
             UhNbItem[kkk] = tyty->newVh()->N;
             typeUh[kkk] = type_varFE[i];
+            pfesUh[kkk] = *(tyty->pVh);
         }
         else if( type_varFE[i]== 4){
             FEbase<R, v_fesS> * tyty = (FEbase<R, v_fesS> *) u_h[i];
@@ -11926,6 +11929,7 @@ void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_co
             sizeUh[kkk] = tyty->newVh()->NbOfDF;
             UhNbItem[kkk] = tyty->newVh()->N;
             typeUh[kkk] = type_varFE[i];
+            pfesUh[kkk] = *(tyty->pVh);
         }
         else if( type_varFE[i]== 5){
             FEbase<R, v_fesL> * tyty = (FEbase<R, v_fesL> *) u_h[i];
@@ -11933,6 +11937,7 @@ void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_co
             sizeUh[kkk] = tyty->newVh()->NbOfDF;
             UhNbItem[kkk] = tyty->newVh()->N;
             typeUh[kkk] = type_varFE[i];
+            pfesUh[kkk] = *(tyty->pVh);
         }
         else{
             cerr << "error in the type of FESpace" <<endl;
@@ -11951,7 +11956,7 @@ void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_co
 bool FieldOfForm( list<C_F0> & largs ,bool complextype);
 
 template<class R>    // TODO if coupling FE wit problem
-AnyType Problem::evalComposite(Stack stack, CountPointer<MatriceCreuse<R> > & dataA ) const
+AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<MatriceCreuse<R> > & dataA ) const
 {
     //
     // Hypothesis: we have a square problem (Uh == Vh).
@@ -11974,6 +11979,7 @@ AnyType Problem::evalComposite(Stack stack, CountPointer<MatriceCreuse<R> > & da
     if (nargs[1]) cadna= GetAny<KN<double>* >((*nargs[1])(stack));
 
     SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
+    cout << " Apres lecture :: ds.initmat=" << ds.initmat << endl;
 
     //  for the gestion of the PTR.
     WhereStackOfPtr2Free(stack)=new StackOfPtr2Free(stack);// FH aout 2007
@@ -11983,8 +11989,6 @@ AnyType Problem::evalComposite(Stack stack, CountPointer<MatriceCreuse<R> > & da
     //list<C_F0>::const_iterator ii,ib=op->largs.begin(), ie=op->largs.end(); // delete unused variable
     int Nbcomp2=var.size(),Nbcomp=Nbcomp2/2; // nb de composante
     throwassert(Nbcomp2==2*Nbcomp);
-    //  Data *data= dataptr(stack);
-    //   data->init();
     KN<int>  which_comp(Nbcomp2),which_uh(Nbcomp2);
 
     //TabFuncArg tabexp(stack,Nbcomp); // delete unused variable
@@ -12046,7 +12050,7 @@ AnyType Problem::evalComposite(Stack stack, CountPointer<MatriceCreuse<R> > & da
             else{
                 throwassert( ( u_hh[i].first==u_hh[i-1].first) );  // verification que les composantes des vectorial FESpace sont dans le meme FESpace
                 throwassert(u_hh[i].second==(u_hh[i-1].second+1) ); // verification que les composantes des vectorial FESpace sont dans le bon ordre
-                }
+            }
         } 
         which_uh[i]=kkk-1;               // set the numero of the FESpace
         which_comp[i]=u_hh[i].second;    // set the component of the FESpace (=0 for scalar FESpace by definition)
@@ -12066,6 +12070,7 @@ AnyType Problem::evalComposite(Stack stack, CountPointer<MatriceCreuse<R> > & da
     // creation of inconnue FESpace and test FESpace
 
     vector< void  *> LLUh(Nb);    // creation de la liste des FESpace" Nb2 <= var.size() "
+    vector< generic_v_fes * > pfesUh(Nb);
     vector< int > typeUh(Nb);
     vector< long > sizeUh(Nb);
     vector< long > offsetUh(Nb+1,(long)0);
@@ -12073,9 +12078,10 @@ AnyType Problem::evalComposite(Stack stack, CountPointer<MatriceCreuse<R> > & da
 
     int first_component= 0;
     int size_component = Nb;
-    FEbaseToCompositeFESpaceInfo(first_component, size_component, u_h, type_varFE, LLUh, typeUh, sizeUh, offsetUh, UhNbItem);
+    FEbaseToCompositeFESpaceInfo(first_component, size_component, u_h, type_varFE, LLUh, typeUh, sizeUh, offsetUh, UhNbItem,pfesUh);
 
     vector< void  *> LLVh(Nb);    // creation de la liste des FESpace" Nb2 <= var.size() "
+    vector< generic_v_fes * > pfesVh(Nb);
     vector< int > typeVh(Nb);
     vector< long > sizeVh(Nb);
     vector< long > offsetVh(Nb+1,(long)0);
@@ -12083,7 +12089,7 @@ AnyType Problem::evalComposite(Stack stack, CountPointer<MatriceCreuse<R> > & da
 
     first_component= Nb;
     size_component = Nb;
-    FEbaseToCompositeFESpaceInfo(first_component, size_component, u_h, type_varFE, LLVh, typeVh, sizeVh, offsetVh, VhNbItem);
+    FEbaseToCompositeFESpaceInfo(first_component, size_component, u_h, type_varFE, LLVh, typeVh, sizeVh, offsetVh, VhNbItem, pfesVh);
 
     // check if we have the same FESpace for inconnue and test.
     bool sameCompositeFESpace;
@@ -12102,96 +12108,99 @@ AnyType Problem::evalComposite(Stack stack, CountPointer<MatriceCreuse<R> > & da
     
     SHOWVERB(cout << "Problem  " << Nb << endl);
     
-    // recuperation de la taille des FESpaces 
-    int totalItem=0;
-    for(int ii=0; ii<Nb; ii++){ totalItem += UhNbItem[ii]; }
-    cout <<  "totalItem = " << totalItem << endl;
-    
     int NpUh = (int) UhNbItem.size(); 
     int NpVh = (int) VhNbItem.size(); 
 
-    KN<int> indexBlockUh( totalItem );
-    KN<int> indexBlockVh( totalItem );
-    KN<int> localIndexInTheBlockUh( totalItem );
-    KN<int> localIndexInTheBlockVh( totalItem );
+    ffassert(Nb == NpUh);
+    ffassert(Nb == NpVh);
 
-    // index for the construction of the block of Uh
-    {
-        // ===========================================
-        //
-        // varf([u0,u1,...,u4], ... ) 
-        // varf([ [u0_blk1,u1_blk1],[u0_blk2,u1_blk2,u2_blk2] ], ... ) 
 
-        // u4 correspond to u2_blk2 in the block varf
-        // ============================================
-        // For u4, on a :: current_index = 4
-        //              :: indexBlockUh = 2
-        //              :: localIndexInThBlock = 3
-        int current_index=0;
-        for(int i=0; i<NpUh; i++){
-        for(int j=0; j<UhNbItem[i]; j++){
-            indexBlockUh[current_index] = i;
-            localIndexInTheBlockUh[current_index] = j;
-            current_index++;
-        }
-        }
-        ffassert(current_index==totalItem);
-    }
+    //cout << " avant test :: ds.initmat=" << ds.initmat << endl;
 
-    // index for the construction of the block of Vh
-    {
-        int current_index=0;
-        for(int i=0; i<NpVh; i++){
-        for(int j=0; j<VhNbItem[i]; j++){
-            indexBlockVh[current_index] = i;
-            localIndexInTheBlockVh[current_index] = j;
-            current_index++;
-        }
-        }
-        ffassert(current_index==totalItem);
-    }
-    /*
-    list<C_F0> largs = creationLargsForCompositeFESpace( op->largs, NpUh, NpVh, indexBlockUh, indexBlockVh );
-    KNM<list<C_F0>> block_largs = computeBlockLargs( largs, NpUh, NpVh, indexBlockUh, indexBlockVh );
-    changeComponentFormCompositeFESpace( localIndexInTheBlockUh, localIndexInTheBlockVh, block_largs );
-    */
-    /*
-    // change operator for the optimization option
-    bool total_iscmplx=false;
-    // loop over block
-    for(int i=0; i<NpUh; i++){
-    for(int j=0; j<NpVh; j++){
-        // FieldOfForm : optimize the terms (flags -O3) of the variational form and verifies the type of the variational form
-        bool iscmplx=FieldOfForm(block_largs(i,j),IsComplexType<R>::value)  ;
-        // cout<< "FieldOfForm:iscmplx " << iscmplx << " " << IsComplexType<R>::value << " " << ((iscmplx) == IsComplexType<R>::value) << endl;
-        ffassert( (iscmplx) == IsComplexType<R>::value);
-        if( !total_iscmplx ) total_iscmplx=iscmplx;
-    }
-    }
-    */
-
+    // recuperation de la taille des FESpaces   
     // construction of the data composite structure
-    /*
-    DataComposite *data = dataCompositeptr( Nb, Nb, LLUh, typeUh, sizeUh, offsetUh, 
-                                                    LLVh, typeVh, sizeVh, offsetVh);
-    */
-
-    ds.initmat=true; // on initialise à true. 
-    /*
-    // ??? A voir comment faire ???
-    for(int i=0; i<Nb; i++){
-        // if one mesh have changed, we recompute all the matrix
-        if ( &LL[i]->Th != data->pTh[i] ) ds.initmat=true;
+    // initialisation des vecteurs de data->pThU 
+    if( !data->pThU ){
+        data->pThU = new vector<void*>(NpUh);
+        //data->pThU->resize(NpUh);
+        for(int i=0; i<NpUh; i++){ (*data->pThU)[i]=nullptr; }
+        ds.initmat=true;
     }
+
+    for(int i=0; i<NpUh; i++){
+        // if one mesh have changed, we recompute all the matrix
+        //cout << "NpUh :: i=" << i << " == " << data->pThU->size() <<  endl;
+        if( typeUh[i]== 2){ 
+            FESpace * fes = (FESpace *) LLUh[i];
+            //cout << "fes->Th" << &(fes->Th) << " " << (*data->pThU)[i] << endl;
+            if ( &(fes->Th) != (Mesh*) (*data->pThU)[i] ){ ds.initmat=true; (*data->pThU)[i]=(void*) &fes->Th; }
+        }
+        else if(typeUh[i]== 3){
+            FESpace3 * fes = (FESpace3 *) LLUh[i];
+            if ( &(fes->Th) != (Mesh3*) (*data->pThU)[i] ){ ds.initmat=true; (*data->pThU)[i]=(void*) &fes->Th; }
+        }
+        else if(typeUh[i]== 4){
+            FESpaceS * fes = (FESpaceS *) LLUh[i];
+            if ( &(fes->Th) != (MeshS*) (*data->pThU)[i] ){ ds.initmat=true; (*data->pThU)[i]=(void*) &fes->Th; }
+        }
+        else if(typeUh[i]== 5){
+            FESpaceL * fes = (FESpaceL *) LLUh[i];
+            if ( &(fes->Th) != (MeshL*) (*data->pThU)[i] ){ ds.initmat=true; (*data->pThU)[i]=(void*) &fes->Th; }
+            
+        }
+        else{
+            cerr<< "error in the type of FESpace." << endl;
+            ffassert(0);
+
+        }
+        //cout << "value of the Mesh" << (*data->pThU)[i] << endl;
+    }
+    //cout << "ds.initmat=" << ds.initmat << endl;
     
-    if( ds.initmat ){
-        for(int i=0; i<Nb2; i++){
-            if ( &LL[i]->Th != data->var[i]->pTh ){
-                data->var[i]->pTh = &LL[i]->Th ; 
-            }
+
+    // initialisation des vecteurs de data->pThV 
+    if( !data->pThV ){
+        data->pThV = new vector<void*>(NpVh);
+        //data->pThV->resize(NpVh);
+        //data->pThV = new (void*)[NpVh];
+        for(int i=0; i<NpVh; i++){ (*data->pThV)[i]=nullptr; }
+        ds.initmat=true;
+    }
+
+    // ??? A voir comment faire ???
+    for(int i=0; i<NpVh; i++){
+        // if one mesh have changed, we recompute all the matrix
+        if( typeVh[i]== 2){ 
+            FESpace * fes = (FESpace *) LLVh[i];
+            if ( &(fes->Th) != (Mesh*) (*data->pThV)[i] ){ ds.initmat=true; (*data->pThV)[i]=(void*) &(fes->Th); }
+        }
+        else if( typeVh[i]== 3){ 
+            FESpace3 * fes = (FESpace3 *) LLVh[i];
+            if ( &(fes->Th) != (Mesh3*) (*data->pThV)[i] ){ ds.initmat=true; (*data->pThV)[i]=(void*) &(fes->Th); }
+        }
+        else if( typeVh[i]== 4){ 
+            FESpaceS * fes = (FESpaceS *) LLVh[i];
+            if ( &(fes->Th) != (MeshS*) (*data->pThV)[i] ){ ds.initmat=true; (*data->pThV)[i]=(void*) &(fes->Th); }
+        }
+        else if( typeVh[i]== 5){ 
+            FESpaceL *fes = (FESpaceL *) LLVh[i];
+            if ( &(fes->Th) != (MeshL*) (*data->pThV)[i] ){ ds.initmat=true; (*data->pThV)[i]=(void*) &(fes->Th); }
+        }
+        else{
+            cerr<< "error in the type of FESpace. type="<< typeVh[i] << endl;
+            ffassert(0);
+
         }
     }
-    */
+
+    // ================================================= //
+    // if( ds.initmat ){
+    //     for(int i=0; i<NpUh; i++){
+    //         if ( &LL[i]->Th != data->var[i]->pTh ){
+    //             data->var[i]->pTh = &LL[i]->Th ; 
+    //         }
+    //     }
+    // }
 
     // *************************************************************************************************
     //
@@ -12200,22 +12209,20 @@ AnyType Problem::evalComposite(Stack stack, CountPointer<MatriceCreuse<R> > & da
     //
 
     // On a besoin ici que des les FESpace de Uh
-    int NbUh = Nb;
-    int NbVh = Nb;
-    long VhNbOfDF = offsetVh[NbVh];
+    long VhNbOfDF = offsetVh[NpVh];
     bool initx = true; // make x and b different in all case
     // more safe for the future ( 4 days lose with is optimization FH )
 
-    KN<R> *B=new KN<R>(offsetUh[NbUh]); //  hypothese system carre
+    KN<R> *B=new KN<R>(offsetUh[NpUh]); //  hypothese system carre
     KN<R> *X=B; //
 
     *B=R(0);
 
     if(initx){
         if( !X || (X=B) ){
-            X = new KN<R>(offsetUh[NbUh]);
+            X = new KN<R>(offsetUh[NpUh]);
         }
-        for(int I=0; I<NbUh; I++ ){
+        for(int I=0; I<NpUh; I++ ){
             if( typeUh[I] == 2){
 
                 const FESpace * PUh = (FESpace *) LLUh[I];
@@ -12347,6 +12354,12 @@ AnyType Problem::evalComposite(Stack stack, CountPointer<MatriceCreuse<R> > & da
                                                         ds.initmat, initx, sym, ds.tgv, 
                                                         b_largs_zz, stack, 
                                                         B, X, hm_A);
+                /*
+                varfToCompositeBlockLinearSystemALLCASE_pfes( i, j, offsetUh, offsetVh, pfesUh, pfesVh,
+                                                        ds.initmat, initx, sym, ds.tgv, 
+                                                        b_largs_zz, stack, 
+                                                        B, X, hm_A);
+                */
                 //deleteNewLargs(largs_FEM);
             }
 
@@ -12458,7 +12471,7 @@ AnyType Problem::evalComposite(Stack stack, CountPointer<MatriceCreuse<R> > & da
         *X=R(); // erreur set the sol of zero ????
         //DispatchSolution<R,FESpace,v_fes>(Th,Nb,u_h,X,B,LL,Uh);
 
-        for(int I=0; I<NbUh; I++ ){
+        for(int I=0; I<NpUh; I++ ){
         if( typeUh[I] == 2){
 
             const FESpace * PUh = (FESpace *) LLUh[I];
@@ -12527,9 +12540,9 @@ AnyType Problem::evalComposite(Stack stack, CountPointer<MatriceCreuse<R> > & da
 
 
     // Dispatch solution
-    //  Need to do a function ::  NbUh, LLUh, u_h, offsetUh, typeUh, 
+    //  Need to do a function ::  NpUh, LLUh, u_h, offsetUh, typeUh, 
 
-    for(int I=0; I<NbUh; I++ ){
+    for(int I=0; I<NpUh; I++ ){
         if( typeUh[I] == 2){
 
             const FESpace * PUh = (FESpace *) LLUh[I];
@@ -12876,9 +12889,9 @@ AnyType Problem::operator()(Stack stack) const
     else if(dim==6){
         DataComposite *dataComposite= dataptrCompo(stack);
         if (complextype)
-            return evalComposite<Complex>(stack,dataComposite->ACglobal);
+            return evalComposite<Complex>( stack, dataComposite, dataComposite->ACglobal);
         else
-            return evalComposite<double>(stack,dataComposite->ARglobal);
+            return evalComposite<double>( stack, dataComposite, dataComposite->ARglobal);
     }
 
     else ffassert(0);
@@ -13176,6 +13189,10 @@ void GetBilinearParamCompositeFESpace(const ListOfId &l,basicAC_F0::name_and_typ
                 verified_E_FEcompo_ForProblem<Complex,v_fesL>( typeFEbase, k, NbLocalitem, local_var, local_type_var );
             else
                 verified_E_FEcompo_ForProblem<double,v_fesL>( typeFEbase, k, NbLocalitem, local_var, local_type_var );
+        }
+        else{
+            cerr << "error in typeFEbase." << endl;
+            ffassert(0);
         }
     }
 }

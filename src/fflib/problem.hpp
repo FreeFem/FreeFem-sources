@@ -566,8 +566,16 @@ public:
 
     CountPointer<MatriceCreuse<double> > ARglobal;
     CountPointer<MatriceCreuse<Complex> > ACglobal;
-    void init()  {ARglobal.init();ACglobal.init();}
+    void init()  {  pThU=0; pThV=0; ARglobal.init(); ACglobal.init();}
     void destroy() {
+      for( int i=0;i<pThU->size(); i++) (*pThU)[i] = nullptr;
+      for( int i=0;i<pThV->size(); i++) (*pThV)[i] = nullptr;
+      //for( int i=0;i<pThU->size(); i++) delete (*pThU)[i];
+      //for( int i=0;i<pThV->size(); i++) delete (*pThV)[i];
+      pThU->clear();
+      pThV->clear();
+      delete pThU;
+      delete pThV;
       if(ARglobal){ ARglobal->SetSolver(); ARglobal.destroy(); }
       if(ACglobal){ ACglobal->SetSolver(); ACglobal.destroy(); }
     }
@@ -589,7 +597,7 @@ public:
   Problem(const C_args * ca,const ListOfId &l,size_t & top) ;
   static ArrayOfaType  typeargs() { return ArrayOfaType(true);}// all type
 
-  Data<FESpace> * dataptr (Stack stack) const {return   (Data<FESpace> *) (void *) (((char *) stack)+offset);}
+  Data<FESpace> * dataptr (Stack stack) const   {return   (Data<FESpace> *) (void *) (((char *) stack)+offset);}
   Data<FESpace3> * dataptr3 (Stack stack) const {return   (Data<FESpace3> *) (void *) (((char *) stack)+offset);}
   Data<FESpaceS> * dataptrS (Stack stack) const {return   (Data<FESpaceS> *) (void *) (((char *) stack)+offset);}
   Data<FESpaceL> * dataptrL (Stack stack) const {return   (Data<FESpaceL> *) (void *) (((char *) stack)+offset);}
@@ -620,7 +628,7 @@ public:
   AnyType eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreuse<R> > & dataA,
   MatriceCreuse< typename CadnaType<R>::Scalaire >  * & dataCadna) const;
   template<class R>    // TODO if coupling FE wit problem
-  AnyType evalComposite(Stack stack,CountPointer<MatriceCreuse<R> > & dataA) const;
+  AnyType evalComposite(Stack stack,DataComposite *data, CountPointer<MatriceCreuse<R> > & dataA) const;
   AnyType operator()(Stack stack) const; // move in Problem.cpp  dec. 2018 FH
 
   bool Empty() const {return false;}
@@ -1961,131 +1969,6 @@ void creationBlockOfMatrixToBilinearForm( const FESpace1 * PUh, const FESpace2 *
    }
 }
 #include "compositeFESpace.hpp"
-/*
-template<class R,class MMesh, class FESpace1, class FESpace2>
-void varfToCompositeBlockLinearSystem(bool initmat, bool initx, const FESpace1 * PUh, const FESpace2 * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<R> *B, KN_<R> *X, MatriceCreuse<R> &A);
-
-
-// Mesh - Mesh
-template void varfToCompositeBlockLinearSystem< double, Mesh, FESpace, FESpace>
-                              (bool initmat, bool initx, const FESpace * PUh, const FESpace * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A);
-
-template void varfToCompositeBlockLinearSystem< Complex, Mesh, FESpace, FESpace>
-                              (bool initmat, bool initx, const FESpace * PUh, const FESpace * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A);
-// MeshL - MeshL
-template void varfToCompositeBlockLinearSystem< double, MeshL, FESpaceL, FESpaceL>
-                              (bool initmat, bool initx, const FESpaceL * PUh, const FESpaceL * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A);
-
-template void varfToCompositeBlockLinearSystem< Complex, MeshL, FESpaceL, FESpaceL>
-                              (bool initmat, bool initx, const FESpaceL * PUh, const FESpaceL * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A);
-
-// Mesh - MeshL
-template void varfToCompositeBlockLinearSystem< double, MeshL, FESpace, FESpaceL>
-                              (bool initmat, bool initx, const FESpace * PUh, const FESpaceL * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A);
-
-template void varfToCompositeBlockLinearSystem< Complex, MeshL, FESpace, FESpaceL>
-                              (bool initmat, bool initx, const FESpace * PUh, const FESpaceL * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A);
-
-// MeshL - Mesh
-template void varfToCompositeBlockLinearSystem< double, MeshL, FESpaceL, FESpace>
-                              (bool initmat, bool initx, const FESpaceL * PUh, const FESpace * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<double> *B, KN_<double> *X, MatriceCreuse<double> &A);
-
-template void varfToCompositeBlockLinearSystem< Complex, MeshL, FESpaceL, FESpace>
-                              (bool initmat, bool initx, const FESpaceL * PUh, const FESpace * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A);
-                              */
-/*
-// MeshL - MeshL
-template void varfToCompositeBlockLinearSystem<class complex,class MMesh, class FESpace1, class FESpace2>(bool initmat, bool initx, const FESpace1 * PUh, const FESpace2 * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<R> *B, KN_<R> *X, MatriceCreuse<R> &A);
-*/
-
-
-/*
-template<class R,class MMesh, class FESpace1, class FESpace2>
-void varfToCompositeBlockLinearSystem(bool initmat, bool initx, const FESpace1 * PUh, const FESpace2 * PVh, 
-                              const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-                              KN_<R> *B, KN_<R> *X, MatriceCreuse<R> &A)
-                              {
-  typedef typename  FESpace1::Mesh Mesh1;
-  typedef typename  FESpace2::Mesh Mesh2;
-
-  // this lines must be defined outside this function
-  // if(init) A.init();
-  // if( ! PUh || ! PVh) return SetAny<Matrice_Creuse<R>  *>(&A);
-  const FESpace1 & Uh =  *PUh ;
-  const FESpace2 & Vh =  *PVh ;
-  const MMesh* pTh = (is_same< Mesh1, Mesh2 >::value) ? (MMesh*)&PUh->Th : 0;
-  const MMesh &Th= *pTh ;    // integration Th
-  bool same=isSameMesh( largs, &Uh.Th, &Vh.Th, stack);
-
-  // PAC(e) :  on retourne le type MatriceCreuse Ici et non Matrice_Creuse<R> dans creationBlockOfMatrixToBilinearForm.
-  // Attention pour la generalisation
-  if(same){
-    if  (AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpace1,FESpace2 >( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, largs))
-    {
-      if( B ){
-        *B = - *B;
-        // hach FH
-        for (int i=0, n= B->N(); i< n; i++)
-        if( abs((*B)[i]) < 1.e-60 ) (*B)[i]=0;
-      }
-      // AssembleBC<R,MMesh,FESpace1,FESpace2> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv );   // TODO with problem
-      AssembleBC<R> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv );   // TODO with problem
-    }
-    else{
-      if( B ) *B = - *B;
-    }
-  }else{
-#ifdef V3__CODE
-    MatriceMap<R>   AAA;
-    cout << "V3__CODE=" << AAA.size() << endl;
-    ffassert(0); // code a faire
-    MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA.size(),sym>0);
-    bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,sym>0,initmat ? &AAA:0,B,largs);
-    pMA->addMap(1.,AAA);
-#else
-    MatriceMorse<R> *pMA =  dynamic_cast< HashMatrix<int,R>*>(&A);// new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,0,sym);
-    MatriceMap<R>  &  AAA = *pMA;
-    bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,sym>0,initmat ? &AAA:0,B,largs);
-#endif
-    //cout << "AAA == matrice map=" << AAA << endl;
-    //(*pMA) = AAA;
-    //cout << "  *pMA == matrice map=" <<  *pMA << endl;
-    //cout << "     A == matrice map=" <<  *dynamic_cast< HashMatrix<int,R>*>(&A) << endl;
-    if (bc){
-      if( B ){
-        *B = - *B;
-        // hach FH
-        for (int i=0, n= B->N(); i< n; i++)
-        if( abs((*B)[i]) < 1.e-60 ) (*B)[i]=0;
-      }
-      AssembleBC<R> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv );   // TODO with problem
-    }
-    else{
-      if( B ) *B = - *B;
-    }
-  }
-}
-*/
 
 //bool SetGMRES();
 //bool SetCG();
