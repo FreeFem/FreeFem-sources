@@ -2060,7 +2060,7 @@ bool isInsideTriangle( const double px, const double py, const double *const vx,
 
     // solve (v1x-v0x) * a + (v2x-v0x) * b = px-v0x
     //       (v1y-v0y) * a + (v2y-v0y) * b = py-v0y
-
+    const double EPS = 1e-10;
     const double m00 = vx[1] - vx[0];
     const double m01 = vx[2] - vx[0];
     const double rhs0 = px - vx[0];
@@ -2267,6 +2267,7 @@ void trackEllipse( std::vector< std::vector<double> > &Cx, std::vector< std::vec
 		   const double *const PHI, const std::vector<double> &zx, const std::vector<double> &zy,
 		   const double *const Vx, const double *const Vy )
 {
+    const double EPS = 1e-10;
     const int INTERVALS = PLOTPDFVAR::DEFAULT_P2_INERVALS;
     
     const double &lambda1 = PHI[0]; const double &lambda2 = PHI[1];
@@ -2308,7 +2309,6 @@ void trackEllipse( std::vector< std::vector<double> > &Cx, std::vector< std::vec
 
     std::sort( theta.begin(), theta.end() );
 
-    const double EPS = 1e-10;
 
     const double PI = atan(static_cast<double>(1))*4;
     theta.push_back( theta[0] + 2*PI );
@@ -2454,6 +2454,7 @@ void trackHyperbola( std::vector< std::vector<double> > &Cx, std::vector< std::v
 		     const double *const PHI, const std::vector<double> &zx, const std::vector<double> &zy,
 		     const double *const Vx, const double *const Vy )
 {
+    const double EPS = 1e-10;
     const double &lambda1 = PHI[0]; const double &lambda2 = PHI[1];
     const double &D = PHI[6]; const double &E = PHI[7]; const double &F = PHI[8];
 
@@ -2802,7 +2803,7 @@ void splitByBorder( std::vector< std::vector<double> > &partition_x, std::vector
 		    const std::vector< std::vector<double> > &cxs, const std::vector< std::vector<double> > &cys )
 {
     assert( partition_x.size() == partition_y.size() );
-    assert( cxs.size() == cy.size() );
+    assert( cxs.size() == cys.size() );
 
     for(size_t i = 0; i < cxs.size(); i++){
 
