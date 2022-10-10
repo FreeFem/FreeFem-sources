@@ -467,13 +467,12 @@ AC_LANG(C++)
 
 
 # Some useful libraries
+AC_CHECK_LIB(z,deflate,ff_zlib="-lz",ff_zlib="")   
 AC_ARG_WITH(zlib,[--with-zlib= the z library ])
 if test "$with_zlib" != no -a  -n "$with_glut" ; then
     ff_zlib="$with_zlib";
 elif test "$with_zlib" = no ; then
     ff_zlib=""
-elif test "$with_zlib" = "" ; then
-   AC_CHECK_LIB(z,deflate,ff_zlib="-lz",ff_zlib="")   
 fi
 
 AC_CHECK_LIB(pthread,pthread_create,ff_pthread="-lpthread",ff_pthread="")
