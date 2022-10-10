@@ -482,7 +482,7 @@ AC_CHECK_HEADERS(zlib.h,
         ff_zlib_ok=yes
         ,
         ff_zlib_ok=no
-);  
+) 
 
 if test -n "$ff_pthread"  ; then
     AC_FF_ADDWHERELIB(pthread,$ff_pthread,)
