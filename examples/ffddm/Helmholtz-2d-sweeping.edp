@@ -33,6 +33,21 @@ func c = 1;
 func source = 0;
 func sourceGamma = (x < 1e-10)*exp(-120*(y+0.5)^2)*sin(-pi*y);
 
+
+///*** Cavity : ***///
+/*
+real c0 = 1;
+real k0 = 2*pi*freq/c0;
+real lambda = c0/freq;
+func Pk = P2;
+int[int] lab = [Dirichlet,Robin,Dirichlet,Dirichlet];
+real length = mpisize;
+real depth = 1;
+func c = 1;
+func source = 0;
+real theta = pi/8;
+func sourceGamma = (x > length-1e-10)*exp(-1i*k0*(x*cos(theta)+y*sin(theta)));
+*/
 ///*** Marmousi : ***///
 /*
 real c0 = 2;
@@ -182,7 +197,7 @@ pr#ORASwritesummary
 
 ffddmplot(HFE,real(uoras), Stringification(pr)+"ORAS solution");
 
-/****** OSDS ******/
+/****** BJS ******/
 IFMACRO(!PMLI)
 varf vGamma(u, v) = on(ffddminterfacelabel, u=1);
 complex[int] onGamma = vGamma(0,HFEVhi,tgv=1); // tag interface dofs
@@ -202,10 +217,10 @@ notonGamma = 1;
 notonGamma -= onGamma; // tag interior dofs
 
 complex[int] l1(HFEVhi.ndof), trsf(HFEVhi.ndof), rhsi(HFEVhi.ndof);
-complex[int] wi(HFEVhi.ndof), vil(HFEVhi.ndof), vir(HFEVhi.ndof);
+complex[int] wi(HFEVhi.ndof), vil(HFEVhi.ndof), vir(HFEVhi.ndof), hil(HFEVhi.ndof), hir(HFEVhi.ndof), vhil(HFEVhi.ndof), vhir(HFEVhi.ndof), wi2(HFEVhi.ndof);
 
-macro pr#OSDSmyPREC1
-func complex[int] pr#OSDSPREC1(complex[int] &l)
+macro pr#BJSmyPREC1
+func complex[int] pr#BJSPREC1(complex[int] &l)
 {
   l1 = notonGamma.*l; /* restrict to interior */
 
@@ -250,37 +265,50 @@ func complex[int] pr#OSDSPREC1(complex[int] &l)
 }
 //
 
-macro pr#DSAmyPREC1
-func complex[int] pr#DSAPREC1(complex[int] &l)
+macro pr#GSSmyPREC1
+func complex[int] pr#GSSPREC1(complex[int] &l)
 {
   l1 = notonGamma.*l;
 
   wi = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*l1;
 
+  vil = 0;
+  vir = 0;
+
+ /* G(f) */
   for (int i=0; i<Hmeshnpart; i++) {
     trsf = 0;
     if (mpiRank(Hmeshcommddm) == i-1 && i-1 >= 0)
-      trsf = wi + vil;
+      trsf = wi;
     HFEupdate(trsf,false);
     if (mpiRank(Hmeshcommddm) == i && i > 0) {
       rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
-      rhsi = onGamma.*rhsi;
-      vil = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*rhsi;
+      hil = onGamma.*rhsi;
     }
   }
 
   for (int i=0; i<Hmeshnpart; i++) {
     int j = Hmeshnpart-i-1;
     trsf = 0;
-    if (mpiRank(Hmeshcommddm) == j-1 && j-1 >= 0)
-      trsf = wi + vil;
     if (mpiRank(Hmeshcommddm) == j+1 && j+1 < Hmeshnpart)
-      trsf = wi + vir;
+      trsf = wi;
     HFEupdate(trsf,false);
     if (mpiRank(Hmeshcommddm) == j && j < Hmeshnpart-1) {
       rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
-      rhsi = onGamma.*rhsi;
-      vir = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*rhsi;
+      hir = onGamma.*rhsi;
+      vir = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hir;
+    }
+  }
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == i-1 && i-1 >= 0)
+      trsf = vil + vir;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == i) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hil += onGamma.*rhsi;
+      vil = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hil;
     }
   }
 
@@ -292,28 +320,402 @@ func complex[int] pr#DSAPREC1(complex[int] &l)
 }
 //
 
-macro pr#OSDSmyA
-func complex[int] pr#OSDSA(complex[int] &l) {complex[int] res = pr#ORASA(l); return res;}
+macro pr#SGSSmyPREC1
+func complex[int] pr#SGSSPREC1(complex[int] &l)
+{
+  l1 = notonGamma.*l;
+
+  wi = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*l1;
+
+  vil = 0;
+  vir = 0;
+
+ /* G(f) */
+  for (int i=0; i<Hmeshnpart; i++) {
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == i-1 && i-1 >= 0)
+      trsf = wi;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == i && i > 0) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hil = onGamma.*rhsi;
+    }
+  }
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    int j = Hmeshnpart-i-1;
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == j+1 && j+1 < Hmeshnpart)
+      trsf = wi;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == j && j < Hmeshnpart-1) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hir = onGamma.*rhsi;
+      vir = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hir;
+    }
+  }
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == i-1 && i-1 >= 0)
+      trsf = vil + vir;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == i) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hil += onGamma.*rhsi;
+      vil = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hil;
+    }
+  }
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    int j = Hmeshnpart-i-1;
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == j+1 && j+1 < Hmeshnpart)
+      trsf = vil + vir;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == j) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hir += onGamma.*rhsi;
+      vir = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hir;
+    }
+  }
+
+  wi += vil + vir;
+
+  HFEupdate(wi,true);
+
+  return wi;
+}
 //
 
-ffddmsetupinit(pr#OSDS,HFE)
+macro pr#JSmyPREC1
+func complex[int] pr#JSPREC1(complex[int] &l)
+{
+  l1 = notonGamma.*l;
 
-u[] = pr#OSDSfGMRES(x0[], rhs[], 1.e-6, 2000, "right");
+  wi = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*l1;
 
-pr#OSDSwritesummary
+  vil = 0;
+  vir = 0;
 
-ffddmplot(HFE,real(u), Stringification(pr)+"OSDS solution");
+ /* G(f) */
+  for (int i=0; i<Hmeshnpart; i++) {
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == i-1 && i-1 >= 0)
+      trsf = wi;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == i && i > 0) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hil = onGamma.*rhsi;
+      vil = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hil;
+    }
+  }
 
-macro pr#DSAmyA
-func complex[int] pr#DSAA(complex[int] &l) {complex[int] res = pr#ORASA(l); return res;}
+  for (int i=0; i<Hmeshnpart; i++) {
+    int j = Hmeshnpart-i-1;
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == j+1 && j+1 < Hmeshnpart)
+      trsf = wi;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == j && j < Hmeshnpart-1) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hir = onGamma.*rhsi;
+      vir = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hir;
+    }
+  }
+
+  wi += vil + vir;
+
+  HFEupdate(wi,true);
+
+  return wi;
+}
 //
-ffddmsetupinit(pr#DSA,HFE)
 
-u[] = pr#DSAfGMRES(x0[], rhs[], 1.e-6, 2000, "right");
+macro pr#BSGSSmyPREC1
+func complex[int] pr#BSGSSPREC1(complex[int] &ll)
+{
+  complex[int] l = ll;
 
-pr#DSAwritesummary
+  /* STEP 1 */
+  l1 = notonGamma.*l;
 
-ffddmplot(HFE,real(u), Stringification(pr)+"DSA solution");
+  wi = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*l1;
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == i-1 && i-1 >= 0)
+      trsf = wi + vil;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == i && i > 0) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hil = onGamma.*rhsi;
+      vil = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hil;
+    }
+  }
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    int j = Hmeshnpart-i-1;
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == j+1 && j+1 < Hmeshnpart) {
+      trsf = wi + vir;
+      trsf += vil;
+    }
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == j && j < Hmeshnpart-1) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hir = onGamma.*rhsi;
+      vir = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hir;
+    }
+  }
+
+  /* STEP 2 */
+  vil = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hil;
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == i-1 && i-1 >= 0)
+      trsf = vil;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == i && i > 0) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hil -= onGamma.*rhsi;
+    }
+  }
+
+  vir = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hir;
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    int j = Hmeshnpart-i-1;
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == j+1 && j+1 < Hmeshnpart)
+      trsf = vir;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == j && j < Hmeshnpart-1) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hir -= onGamma.*rhsi;
+    }
+  }
+
+ /* STEP 3 */
+  for (int i=0; i<Hmeshnpart; i++) {
+    int j = Hmeshnpart-i-1;
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == j+1 && j+1 < Hmeshnpart)
+      trsf = vir;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == j && j < Hmeshnpart-1) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hir += onGamma.*rhsi;
+      vir = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hir;
+    }
+  }
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == i-1 && i-1 >= 0)
+      trsf = vil + vir;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == i && i > 0) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hil += onGamma.*rhsi;
+      vil = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hil;
+    }
+  }
+
+  l = wi;
+  l+= vil + vir;
+
+  HFEupdate(l,true);
+  return l;
+}
+//
+
+macro pr#BGSSmyPREC1
+func complex[int] pr#BGSSPREC1(complex[int] &ll)
+{
+  complex[int] l = ll;
+
+  l1 = notonGamma.*l;
+
+  wi = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*l1;
+
+  /* G(f) */
+  for (int i=0; i<Hmeshnpart; i++) {
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == i-1 && i-1 >= 0)
+      trsf = wi;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == i && i > 0) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hil = onGamma.*rhsi;
+    }
+  }
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    int j = Hmeshnpart-i-1;
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == j+1 && j+1 < Hmeshnpart)
+      trsf = wi;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == j && j < Hmeshnpart-1) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hir = onGamma.*rhsi;
+    }
+  }
+
+  vil = 0;
+  vir = 0;
+  for (int i=0; i<Hmeshnpart; i++) {
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == i-1 && i-1 >= 0)
+      trsf = vil;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == i) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hil += onGamma.*rhsi;
+      vil = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hil;
+    }
+  }
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    int j = Hmeshnpart-i-1;
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == j+1 && j+1 < Hmeshnpart)
+      trsf = vil + vir;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == j) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hir += onGamma.*rhsi;
+      vir = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hir;
+    }
+  }
+
+  l = wi;
+  l+= vil + vir;
+
+  HFEupdate(l,true);
+
+  return l;
+
+  /* STEP 2 */
+  vil = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hil;
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == i-1 && i-1 >= 0)
+      trsf = vil;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == i && i > 0) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hil -= onGamma.*rhsi;
+    }
+  }
+
+  vir = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hir;
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    int j = Hmeshnpart-i-1;
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == j+1 && j+1 < Hmeshnpart)
+      trsf = vir;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == j && j < Hmeshnpart-1) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hir -= onGamma.*rhsi;
+    }
+  }
+
+ /* STEP 3 */
+
+  vhir = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hir;
+  vhil = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hil;
+  wi2 = vhil + vhir;
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    int j = Hmeshnpart-i-1;
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == j+1 && j+1 < Hmeshnpart)
+      trsf = vhir + vir;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == j && j < Hmeshnpart-1) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hir = onGamma.*rhsi;
+      vir = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hir;
+    }
+  }
+
+  for (int i=0; i<Hmeshnpart; i++) {
+    trsf = 0;
+    if (mpiRank(Hmeshcommddm) == i-1 && i-1 >= 0)
+      trsf = vhil + vil;
+    if (mpiRank(Hmeshcommddm) == i+1 && i+1 < Hmeshnpart)
+      trsf = vhir + vir;
+    HFEupdate(trsf,false);
+    if (mpiRank(Hmeshcommddm) == i && i > 0) {
+      rhsi = pr#ORASaR[mpiRank(Hmeshcommddm)]*trsf;
+      hil = onGamma.*rhsi;
+      vil = pr#ORASaR[mpiRank(Hmeshcommddm)]^-1*hil;
+    }
+  }
+
+  l = wi;
+  l+= vil + vir;
+
+  HFEupdate(l,true);
+  return l;
+}
+//
+
+/* BJS */
+macro pr#BJSmyA
+func complex[int] pr#BJSA(complex[int] &l) {complex[int] res = pr#ORASA(l); return res;}
+//
+
+ffddmsetupinit(pr#BJS,HFE)
+
+u[] = pr#BJSfGMRES(x0[], rhs[], 1.e-6, 400, "right");
+
+pr#BJSwritesummary
+
+ffddmplot(HFE,real(u), Stringification(pr)+"BJS solution");
+
+/* BGSS */
+macro pr#BGSSmyA
+func complex[int] pr#BGSSA(complex[int] &l) {complex[int] res = pr#ORASA(l); return res;}
+//
+ffddmsetupinit(pr#BGSS,HFE)
+
+u[] = pr#BGSSfGMRES(x0[], rhs[], 1.e-6, 400, "right");
+
+pr#BGSSwritesummary
+
+ffddmplot(HFE,real(u), Stringification(pr)+"BGSS solution");
+
+/* BSGSS */
+macro pr#BSGSSmyA
+func complex[int] pr#BSGSSA(complex[int] &l) {complex[int] res = pr#ORASA(l); return res;}
+//
+ffddmsetupinit(pr#BSGSS,HFE)
+
+u[] = pr#BSGSSfGMRES(x0[], rhs[], 1.e-6, 400, "right");
+
+pr#BSGSSwritesummary
+
+ffddmplot(HFE,real(u), Stringification(pr)+"BSGSS solution");
+
+/* SGSS */
+macro pr#SGSSmyA
+func complex[int] pr#SGSSA(complex[int] &l) {complex[int] res = pr#ORASA(l); return res;}
+//
+ffddmsetupinit(pr#SGSS,HFE)
+
+u[] = pr#SGSSfGMRES(x0[], rhs[], 1.e-6, 400, "right");
+
+pr#SGSSwritesummary
+
+ffddmplot(HFE,real(u), Stringification(pr)+"SGSS solution");
+
 EndMacro
 
 /* with PML interface conditions */
