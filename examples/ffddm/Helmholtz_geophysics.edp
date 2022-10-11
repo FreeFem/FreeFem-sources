@@ -18,7 +18,7 @@
 */
 
 macro FDsimulation()1//
-macro FEsimulation()1// uncomment to perform FE simulation
+//macro FEsimulation()1// uncomment to perform FE simulation
 
 load "Helmholtz_FD" // plugin implementing the 27-point FD stencil
 load "geophysics" // for loading velocity grids of the geomodels
