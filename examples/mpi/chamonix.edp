@@ -168,7 +168,7 @@ u2 = 1*z; u1 = 0; u3 = 0;
 
 /********************* Light is x cos(angle with normal)^-. Stored in seeface *********************/
 VhS Q0S = Q0*(beta+(1-beta)*(z<sal)); // snow
-varf vseeface(u,v) = int2d(ThS,qft=qf1pTlump)(Q0S*(Ns.z+gamma*(Ns.x-0.2*Ns.y))*v/sqrt(Ns.z^2+abs(gamma)*(0.04*Ns.y^2+Ns.x^2)));
+varf vseeface(u,v) = int2d(ThS,qft=qf1pTlump)(Q0S*(Ns.z+gamma*(Ns.x-0.2*Ns.y))*v/sqrt(Ns.z^2+gamma^2*(0.04*Ns.y^2+Ns.x^2)));
 real[int] seeface = vseeface(0,VhS);
 varf vlump(u,v) = int2d(ThS,qft=qf1pTlump)(v);
 real[int] blump = vlump(0,VhS);
