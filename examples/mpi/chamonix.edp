@@ -3,13 +3,13 @@
 
 	This script also illustrates the use of the Htool Hierarchical Matrix library to compress a dense matrix stemming from a custom user-defined operator defined in a user C++ FreeFEM plugin.
 
-	This can be done by defining and interfacing a Generator class deriving from the virtual class VirtualGenerator of Htool. This is done here in the C++ plugin "RadiativeTransfer_htool.cpp". The Generator object can then be created in the FreeFEM script through the user-defined constructor, for example here taking a mesh3, a meshS, two vectors and a new user-defined type KappaGrid (also defined in the plugin) as parameters:
+	This can be done by defining and interfacing a Generator class deriving from the virtual class VirtualGenerator of Htool. This is done here in the C++ plugin "RadiativeTransfer_htool.cpp". The Generator object can then be created in the FreeFEM script through the user-defined constructor, for example here taking a mesh3, a meshS, one vector and a new user-defined type KappaGrid (also defined in the plugin) as parameters:
 
-	Generator GenSE(Th3,onGamma,ThS,seeface,kappag);
+	Generator GenSE(Th3t,ThS,seeface,kappag);
 	
 	The Generator can then be passed to Htool through the Build() function, which returns the compressed H-Matrix built by Htool from the user-defined copy_submatrix (or get_coef) routine of the Generator computing the matrix coefficients:
 
-	HMatrix HSE = Build(GenSE,VhS,Vh,eta=100,eps=1e-2,minclustersize=10,maxblocksize=1000000
+	HMatrix HSE = Build(GenSE,VhS,Vht,eta=100,eps=1e-2,minclustersize=10,maxblocksize=1000000
 
 	To launch:  ff-mpirun -np 8 chamonixgridheatgridpara.edp -ns -wg -Kmax 9
 
@@ -168,7 +168,7 @@ u2 = 1*z; u1 = 0; u3 = 0;
 
 /********************* Light is x cos(angle with normal)^-. Stored in seeface *********************/
 VhS Q0S = Q0*(beta+(1-beta)*(z<sal)); // snow
-varf vseeface(u,v) = int2d(ThS,qft=qf1pTlump)(Q0S*(Ns.z+gamma*(Ns.x-0.2*Ns.y))*v/sqrt(Ns.z^2+gamma*(0.04*Ns.y^2+Ns.x^2)));
+varf vseeface(u,v) = int2d(ThS,qft=qf1pTlump)(Q0S*(Ns.z+gamma*(Ns.x-0.2*Ns.y))*v/sqrt(Ns.z^2+abs(gamma)*(0.04*Ns.y^2+Ns.x^2)));
 real[int] seeface = vseeface(0,VhS);
 varf vlump(u,v) = int2d(ThS,qft=qf1pTlump)(v);
 real[int] blump = vlump(0,VhS);
@@ -176,32 +176,54 @@ seeface ./= blump;
 for [i, bi : seeface] bi = -min(bi,0.);
 
 /********************* Interpolation operator from Th3 to ThS *********************/
-real[int] onGamma(Vh.ndof);
+Vh onGamma;
 {
-	onGamma = -1;
-	matrix R = interpolate(VhS,Vh);
-	int[int] I(1),J(1);
-	real[int] K(1);
-	[I,J,K] = R;
-	for (int i=0; i<I.n; i++)
-		if (K[i] > 0.5) onGamma[J[i]] = I[i];
+       onGamma[] = -1;
+       matrix R = interpolate(VhS,Vh);
+       int[int] I(1),J(1);
+       real[int] K(1);
+       [I,J,K] = R;
+       for (int i=0; i<I.n; i++)
+               if (K[i] > 0.5) onGamma[][J[i]] = I[i];
 }
+
+/********************* Define truncated volume mesh Th3t (without the surface) *********************/
+// Th3t will be used to remove surface-surface interactions from the boundary operator,
+// as they will be treated separately.
+
+fespace Ph0(Th3,P0);
+varf vGamma(u,v) = int3d(Th3)(u*v);
+matrix RGamma = vGamma(Vh, Ph0);
+Ph0 tGamma;
+Vh onG = (onGamma == -1 ? 0 : 1);
+tGamma[] = RGamma*onG[];
+mesh3 Th3t = trunc(Th3, tGamma == 0);
+fespace Vht(Th3t,P1);
+
+matrix Rt = interpolate(Vht,Vh); // restriction matrix from Th3 to Th3t
 
 /********************* BUILD H-Matrices *********************/
 verbosity = 1;
 HMatrix[int] HVolume(Kmax); // The Volume integral matrices
 Vh[int] SE(Kmax); // The surface integral vector operator
 
+Vht SEt;
+VhS ones = 1;
+
 for (int K=min(Kmax-1,1); K<Kmax; K++)
 if (kappaInK[K]) {
 	KappaGrid kappag(bounds,0.01,kappaApprox[K-(K>0)]*rhof);
 
-	Generator GenSE(Th3,onGamma,ThS,seeface,kappag);
-	HMatrix HSE = Build(GenSE,VhS,Vh,eta=100,eps=1e-2,minclustersize=10,maxblocksize=1000000);
+	// We use the truncated volume mesh Th3t (without the surface) for the boundary operator,
+	// as we use a simpler formula for surface-surface interactions
+	Generator GenSE(Th3t,ThS,seeface,kappag);
+	HMatrix HSE = Build(GenSE,VhS,Vht,eta=100,eps=1e-2,minclustersize=10,maxblocksize=1000000);
 	if (mpirank == 0) cout << HSE.infos << endl; 
 	display(HSE);
-	VhS<real> ones = 1;
-	SE[K][] = HSE*ones[]; // SE = \int_∑ ((x-x').n) exp(-\int_(x,x')kappa(nu,x'))/|x-x'|^3
+	SEt[] = HSE*ones[]; // SE = \int_∑ ((x-x').n) exp(-\int_(x,x')kappa(nu,x'))/|x-x'|^3
+	SE[K][] = Rt'*SEt[]; // extend the result from truncated Vht to Vh
+	// use a simpler formula for surface-surface interactions:
+	for [i,bi:SE[K][]] if (onGamma[][i] > -0.5) bi = 0.25*seeface[int(onGamma[][i]+0.5)];
 
 	Generator GenVolume(Th3,kappag);
 	HVolume[K] = Build(GenVolume,Vh,Vh,eta=100,eps=1e-2,minclustersize=10,maxblocksize=1000000);

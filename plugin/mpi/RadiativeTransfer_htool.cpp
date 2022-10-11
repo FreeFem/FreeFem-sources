@@ -87,14 +87,14 @@ public:
     const int e2[10][2] = {{ 0,0},{ 0,1},{ 0,2},{ 0,3}, {1,1}, {1,2}, {1,3}, {2,2},{2,3}, {3,3}};
 
     Generator_Volume(pmesh3 pth3, KappaGrid* k):
-	VirtualGenerator<double>(pth3->nv,pth3->nv), Th(*pth3), kappa0(k),
+    VirtualGenerator<double>(pth3->nv,pth3->nv), Th(*pth3), kappa0(k),
         edges(pth3->nt*3+pth3->nv,pth3->nv), heade(), nexte(pth3->nt*10) {
         // pour i,j -> liste de tet de sommet i,j
         // i,j -> liste des tet contenant i et j  ??
         // k, e ->  i,j -> numero d'arete
         // inverse tableau i,j -> e ->
         int ne=0;
-		for(int k=0; k<Th.nt; ++k)
+        for(int k=0; k<Th.nt; ++k)
         for(int e=0; e<10; ++e) {
             int i = Th(k,e2[e][0]);
             int j = Th(k,e2[e][1]);
@@ -107,7 +107,7 @@ public:
         heade.resize(ne);
         heade = -1;
         // build change
-		for(int k=0; k<Th.nt; ++k)
+        for(int k=0; k<Th.nt; ++k)
         for(int e=0; e<10; ++e) {
             int i = Th(k,e2[e][0]);
             int j = Th(k,e2[e][1]);
@@ -120,7 +120,7 @@ public:
             nexte[ke] = h;
             heade[ie] = ke;
         }
-  	}
+    }
 
     double get_coef(const int& i, const int& j) const {
         using Fem2D::R3;
@@ -143,28 +143,21 @@ public:
         const GQuadratureFormular<R3> * pQF = QF_Simplex<R3> (exact), QF = *pQF;
         int ie = nKV->v;
 
-        double kappa_i; // kappa at vertex i
         double kappa_ij = 0; // mean value of kappa on the (i,j) line segment
 
-		if (i == j) {
-		    kappa_i = KappaGrid_eval(kappa0, I[0], I[1], I[2]);
-			kappa_ij = kappa_i;
-		}
-		else {
+        if (i == j) {
+            kappa_ij = KappaGrid_eval(kappa0, I[0], I[1], I[2]);
+        }
+        else {
             int cpt = 0;
             // quadrature over segment IJ with step size dic to compute kappa_ij
-			for(double ic = 0; ic<lIJ; ic+=dic, cpt++) {
-				R3 aux = I + ic/lIJ*IJ;
-				if(ic == 0) {
-                    kappa_i = KappaGrid_eval(kappa0, aux[0], aux[1], aux[2]);
-                    kappa_ij += kappa_i;
-                }
-				else
-			    	kappa_ij += KappaGrid_eval(kappa0, aux[0], aux[1], aux[2]);
-			}
-			kappa_ij /= cpt;
-		}
-		
+            for(double ic = 0; ic<lIJ; ic+=dic, cpt++) {
+                R3 aux = I + ic/lIJ*IJ;
+                kappa_ij += KappaGrid_eval(kappa0, aux[0], aux[1], aux[2]);
+            }
+            kappa_ij /= cpt;
+        }
+
         double a_ij = 0;
 
         // loop over all elements in the support of basis function j to compute the integral
@@ -185,7 +178,8 @@ public:
                 double lIQ2 = IQ.norme2();
                 double lIQ = sqrt(lIQ2);
                 double wj = l3[jk];
-                a_ij += cc * wj * kappa_i * exp(-kappa_ij*lIQ)/(lIQ2);
+                double kappa_j = KappaGrid_eval(kappa0, Qp[0], Qp[1], Qp[2]);
+                a_ij += cc * wj * kappa_j * exp(-kappa_ij*lIQ)/(lIQ2);
             }
         }
 
@@ -213,12 +207,12 @@ class Generator_Boundary: public VirtualGenerator<double>{
 public:
     const Mesh3 & Th3;
     const MeshS & ThS;
-    KN_<double> onGamma, seeface;
-	KappaGrid * kappa0;
+    KN_<double> seeface;
+    KappaGrid * kappa0;
     KN<int> headv, nextv;
 
-    Generator_Boundary(pmesh3 pth3, KN_<double> onG, pmeshS pthS, KN_<double> see, KappaGrid* k):
-	VirtualGenerator<double>(pth3->nv,pthS->nv), Th3(*pth3), onGamma(onG), ThS(*pthS), seeface(see),
+    Generator_Boundary(pmesh3 pth3, pmeshS pthS, KN_<double> see, KappaGrid* k):
+    VirtualGenerator<double>(pth3->nv,pthS->nv), Th3(*pth3), ThS(*pthS), seeface(see),
         kappa0(k), headv(pthS->nv,-1), nextv(pthS->nt*3) {
 
         for(int k=0; k<ThS.nt; ++k)
@@ -237,7 +231,6 @@ public:
 
         R3 I = Th3(i);
         R3 J = ThS(j);
-        if (onGamma[i] > -0.5) return 0.25*seeface[int(onGamma[i]+0.5)]/ThS.nv; // simpler formula when i is on the surface
         R3 IJ = R3(I,J);
         //if ((IJ,N) <= 0) return 0.;
         double lIJ2 = IJ.norme2();
@@ -274,10 +267,10 @@ public:
                 QF[p].toBary(l3); // barycentric coordinates of the quadrature point
                 R3 IQ = R3(I,Qp);
                 double lIQ2 = IQ.norme2();
-                double lIQ = sqrt(lIQ2);				
+                double lIQ = sqrt(lIQ2);
                 double wj = l3[v];
                 a_ij += cc * wj * seeface[j] * pow(min((IQ,-1*K.NormalTUnitaire()),0.)/lIQ2, 2)
-						* exp(-kappa_ij*lIQ);
+                        * exp(-kappa_ij*lIQ);
             }
         }
 
@@ -295,15 +288,15 @@ public:
 };
 
 VirtualGenerator<double> **init_Generator_Boundary(VirtualGenerator<double>** const &  ppf,
-	pmesh3 const & pth3, KN<double>* const & onGamma, pmeshS const & pthS, KN<double>* const & seeface,
-	KappaGrid * const & kappa0) {
-    *ppf = dynamic_cast<VirtualGenerator<double>*> (new Generator_Boundary(pth3,*onGamma,pthS,*seeface,kappa0));
+    pmesh3 const & pth3, pmeshS const & pthS, KN<double>* const & seeface,
+    KappaGrid * const & kappa0) {
+    *ppf = dynamic_cast<VirtualGenerator<double>*> (new Generator_Boundary(pth3,pthS,*seeface,kappa0));
     return ppf;
 }
 
 template<class R, class A0, class A1, class A2, class A3, class E=E_F0> // extend (4th arg.)
 class E_F_F0F0F0es_ : public E { 
-	public:
+    public:
     typedef R (*func)(Stack, const A0 &, const A1 &, const A2 &, Expression); // extend (4th arg.)
     func f;
     Expression a0,a1,a2,a3; // extend
@@ -323,7 +316,7 @@ class E_F_F0F0F0es_ : public E {
     virtual size_t nbitem() const {return a3->nbitem();} // modif
     bool MeshIndependent() const {
         return E::MeshIndependent() && a0->MeshIndependent() && a1->MeshIndependent() && a2->MeshIndependent()
-		    && a3->MeshIndependent();
+            && a3->MeshIndependent();
     } 
 };
 
@@ -353,7 +346,7 @@ class OneOperator3es_ : public OneOperator { // 3->4
 };
 
 double Bnu(double nu, double T) {
-	return nu*nu*nu/(exp(nu/T)-1);
+    return nu*nu*nu/(exp(nu/T)-1);
 }
 
 static void Init_RT() {
@@ -362,10 +355,10 @@ static void Init_RT() {
     Dcl_Type< KappaGrid * >(InitP< KappaGrid >, Destroy< KappaGrid >);
     zzzfff->Add("KappaGrid", atype< KappaGrid * >( ));
 
-	TheOperators->Add("<-", new OneOperator3_<VirtualGenerator<double> **, VirtualGenerator<double> **,
-	pmesh3, KappaGrid *>(init_Generator_Volume));
-    TheOperators->Add("<-", new OneOperator6_<VirtualGenerator<double> **, VirtualGenerator<double> **,
-	pmesh3, KN<double>*, pmeshS, KN<double>*, KappaGrid *>(init_Generator_Boundary));
+    TheOperators->Add("<-", new OneOperator3_<VirtualGenerator<double> **, VirtualGenerator<double> **,
+    pmesh3, KappaGrid *>(init_Generator_Volume));
+    TheOperators->Add("<-", new OneOperator5_<VirtualGenerator<double> **, VirtualGenerator<double> **,
+    pmesh3, pmeshS, KN<double>*, KappaGrid *>(init_Generator_Boundary));
 
     TheOperators->Add(
         "<-", new OneOperator3es_<KappaGrid *, KappaGrid *, KN<double>*, double, double>(init_KappaGrid));
@@ -374,3 +367,4 @@ static void Init_RT() {
 }
 
 LOADFUNC(Init_RT)
+
