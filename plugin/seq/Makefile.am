@@ -61,7 +61,7 @@ LIST_COMPILE_PKG=@TOOL_DYLIB_tetgen@ @TOOL_DYLIB_superlu@ dfft.$(DYLIB_SUFFIX) \
 	@TOOL_DYLIB_ffnewuoa@ @TOOL_DYLIB_gmm@ @TOOL_DYLIB_yams@ @TOOL_DYLIB_mmg3d@ @TOOL_DYLIB_mmg@ @TOOL_DYLIB_mshmet@ \
 	@TOOL_DYLIB_gsl@ @TOOL_DYLIB_mumps_seq@ @TOOL_DYLIB_ipopt@ @TOOL_DYLIB_nlopt@ ff-cmaes.$(DYLIB_SUFFIX) \
 	@TOOL_DYLIB_scotch@ @TOOL_DYLIB_metis@ @TOOL_DYLIB_mkl@ @TOOL_DYLIB_MMAP@ @TOOL_DYLIB_iohdf5@
-	
+
 
 EXTRA_PROGRAMS= ffmaster
 bin_PROGRAMS= @BIN_ffmaster@
@@ -111,7 +111,7 @@ allheaders=../../src/fflib/AddNewFE.h ../../src/fflib/AFunction_ext.hpp ../../sr
 	../../src/fflib/showverb.hpp ../../src/femlib/splitsimplex.hpp ../../src/fflib/String.hpp				\
 	../../src/fflib/strversionnumber.hpp ../../src/fflib/throwassert.hpp ../../src/femlib/ufunction.hpp			\
 	../../src/fflib/versionnumber.hpp ../../src/bamglib/write_hdf5.hpp	../../src/bamglib/write_xdmf.hpp                   \
-	../../src/fflib/P1IsoValue.hpp \
+	../../src/fflib/P1IsoValue.hpp ../../src/fflib/compositeFESpace.hpp\
 	../../src/femlib/SkyLineSolver.hpp \
 	../../src/femlib/SolverSkyLine.hpp \
 	../../src/femlib/SparseLinearSolver.hpp \
