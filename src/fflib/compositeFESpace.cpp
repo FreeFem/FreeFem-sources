@@ -1632,10 +1632,11 @@ void varfToCompositeBlockMatrix( const int &i_Uh, const int &j_Vh, pvectgenericf
 
 /* ATTENTION CETTE FONCTION SUPPOSE QUE L'ALLOCATION DE LA MATRICE EST FAIT AVANT */
 template<class K,class MMesh, class v_fes1, class v_fes2>
-void varfToCompositeBlockLinearSystem(bool initmat, bool initx, 
-        const typename v_fes1::pfes &pUh, const typename v_fes2::pfes &pVh, 
+void varfToCompositeBlockLinearSystem_fes(bool initmat, bool initx, 
+        /*const typename v_fes1::pfes &pUh, const typename v_fes2::pfes &pVh,*/
+        const typename v_fes1::FESpace*& PUh, const typename v_fes2::FESpace*& PVh,
         const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
-        KN_<K> *B, KN_<K> *X, MatriceCreuse<R> &A){
+        KN_<K> *B, KN_<K> *X, MatriceCreuse<K> &A){
 
   typedef typename  v_fes1::pfes pfes1;
   typedef typename  v_fes2::pfes pfes2;
@@ -1644,67 +1645,8 @@ void varfToCompositeBlockLinearSystem(bool initmat, bool initx,
   typedef typename  FESpace1::Mesh Mesh1;
   typedef typename  FESpace2::Mesh Mesh2;
 
-  const FESpace1 * PUh = (FESpace1*) *pUh;
-  const FESpace1 * PVh = (FESpace1*) *pUh;
-
   varfToCompositeBlockLinearSystem<K,MMesh, FESpace1, FESpace2>( initmat, initx, PUh, PVh, sym, tgv, largs, stack, B, X, A);
 
-  /*
-  const FESpace1 & Uh = (FESpace1*) *PUh;
-  const FESpace2 & Vh = (FESpace2*) *PVh;
-
-  const MMesh* pTh = (is_same< Mesh1, Mesh2 >::value) ? (MMesh*)&PUh->Th : 0;
-  const MMesh &Th= *pTh ;    // integration Th
-  bool same=isSameMesh( largs, &Uh.Th, &Vh.Th, stack);
-
-  // PAC(e) :  on retourne le type MatriceCreuse Ici et non Matrice_Creuse<R> dans creationBlockOfMatrixToBilinearForm.
-  // Attention pour la generalisation
-  if(same){
-    if  (AssembleVarForm<R,MatriceCreuse<R>,MMesh,FESpace1,FESpace2 >( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, largs))
-    {
-      if( B ){
-        *B = - *B;
-        // hach FH
-        for (int i=0, n= B->N(); i< n; i++)
-        if( abs((*B)[i]) < 1.e-60 ) (*B)[i]=0;
-      }
-      // AssembleBC<R,MMesh,FESpace1,FESpace2> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv );   // TODO with problem
-      AssembleBC<R> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv );   // TODO with problem
-    }
-    else{
-      if( B ) *B = - *B;
-    }
-  }else{
-#ifdef V3__CODE
-    MatriceMap<R>   AAA;
-    cout << "V3__CODE=" << AAA.size() << endl;
-    ffassert(0); // code a faire
-    MatriceMorse<R> *pMA =   new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,AAA.size(),sym>0);
-    bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,sym>0,initmat ? &AAA:0,B,largs);
-    pMA->addMap(1.,AAA);
-#else
-    MatriceMorse<R> *pMA =  dynamic_cast< HashMatrix<int,R>*>(&A);// new  MatriceMorse<R>(Vh.NbOfDF,Uh.NbOfDF,0,sym);
-    MatriceMap<R>  &  AAA = *pMA;
-    bool bc=AssembleVarForm<R,MatriceMap<R>,MMesh,FESpace1,FESpace2>( stack,Th,Uh,Vh,sym>0,initmat ? &AAA:0,B,largs);
-#endif
-    //cout << "AAA == matrice map=" << AAA << endl;
-    //(*pMA) = AAA;
-    //cout << "  *pMA == matrice map=" <<  *pMA << endl;
-    //cout << "     A == matrice map=" <<  *dynamic_cast< HashMatrix<int,R>*>(&A) << endl;
-    if (bc){
-      if( B ){
-        *B = - *B;
-        // hach FH
-        for (int i=0, n= B->N(); i< n; i++)
-        if( abs((*B)[i]) < 1.e-60 ) (*B)[i]=0;
-      }
-      AssembleBC<R> ( stack,Th,Uh,Vh,sym, initmat ? &A:0 , B, initx ? X:0,  largs, tgv );   // TODO with problem
-    }
-    else{
-      if( B ) *B = - *B;
-    }
-  }
-  */
 }
 
 
@@ -1975,53 +1917,35 @@ void varfBemToCompositeBlockLinearSystem(const int& i, const int &j,
                 }
 #endif
 
-/*
-void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j, 
-                const int &typeUh, const int &typeVh, 
+
+template<class K,class MMesh,class v_fes1, class v_fes2> 
+void varfToCompositeBlockLinearSystemALLCASE_pfesT( const int& i, const int &j, 
                 const vector< long> &offsetUh, const vector< long> &offsetVh,
-                const generic_v_fes * &pfesUh, const generic_v_fes * &pfesVh,
+                const typename  v_fes1::FESpace * &PUh, const typename v_fes2::FESpace * &PVh,
                 bool initmat, bool initx, const int &sym, const double &tgv, 
                 const list<C_F0> & b_largs_zz, Stack stack, 
-                KN_<R> *B, KN_<R> *X, HashMatrix<int,R> *hm_A){
-
-      if(typeUh == 2 && typeVh == 2){
-                  varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j, 
-                const vector< long> &offsetUh, const vector< long> &offsetVh,
-                const typename v_fes1::pfes &pfesUh, const typename v_fes3::pfes &pfesVh,
-                bool initmat, bool initx, const int &sym, const double &tgv, 
-                const list<C_F0> & b_largs_zz, Stack stack, 
-                KN_<R> *B, KN_<R> *X, HashMatrix<int,R> *hm_A)
-
-
-}
-*/
-template<class R,class v_fes1, class v_fes2> 
-void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j, 
-                const vector< long> &offsetUh, const vector< long> &offsetVh,
-                const typename v_fes1::pfes &pfesUh, const typename v_fes3::pfes &pfesVh,
-                bool initmat, bool initx, const int &sym, const double &tgv, 
-                const list<C_F0> & b_largs_zz, Stack stack, 
-                KN_<R> *B, KN_<R> *X, HashMatrix<int,R> *hm_A){
+                KN_<K> *B, KN_<K> *X, HashMatrix<int,K> *hm_A){
      
+
     typedef typename  v_fes1::pfes pfes1;
     typedef typename  v_fes2::pfes pfes2;
     typedef typename  v_fes1::FESpace FESpace1;
     typedef typename  v_fes2::FESpace FESpace2;
 
-    const FESpace1 * PUh = (FESpace1*) *pfesUh; // update the FESpace1
-    const FESpace2 * PVh = (FESpace1*) *pfesUh; // update the FESpace2
+    //const FESpace1 * PUh = (FESpace1*) pfesUh->getpVh(); // update the FESpace1
+    //const FESpace2 * PVh = (FESpace2*) pfesVh->getpVh(); // update the FESpace2
 
-    MatriceCreuse<R> * A_block = new MatriceMorse<R>( PVh->NbOfDF, PUh->NbOfDF, 0, sym );
-    MatriceCreuse<R>  & BBB(*A_block);
+    MatriceCreuse<K> * A_block = new MatriceMorse<K>( PVh->NbOfDF, PUh->NbOfDF, 0, sym );
+    MatriceCreuse<K>  & BBB(*A_block);
 
     long N = PVh->NbOfDF;
     long M = PUh->NbOfDF;
 
-    KN<R> x_block(N);
-    x_block=R(0.0);   // initiallise the block to zero ??? 
+    KN<K> x_block(N);
+    x_block=K(0.0);   // initiallise the block to zero ??? 
 
-    KN<R> b_block(M);
-    b_block=R(0.0);   // initiallise the block to zero ??? 
+    KN<K> b_block(M);
+    b_block=K(0.0);   // initiallise the block to zero ??? 
 
     if( i == j ){
         ffassert( PUh->NbOfDF == PVh->NbOfDF); // not coding yet : voir comment prendre les conditions aux limites.
@@ -2037,7 +1961,7 @@ void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j,
         for(int ii=0; ii<PVh->NbOfDF; ii++)
             b_block[ii] = (*B)[ii+offsetVh[j]];
 
-        varfToCompositeBlockLinearSystem<R, Mesh, v_fes1, v_fes2>( initmat, initx, pfesUh, pfesVh, sym, tgv, b_largs_zz, stack, 
+        varfToCompositeBlockLinearSystem_fes<K, MMesh, v_fes1, v_fes2>( initmat, initx, PUh, PVh, sym, tgv, b_largs_zz, stack, 
                         &b_block, &x_block, BBB);
 
         // update X: if necessary
@@ -2052,21 +1976,64 @@ void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j,
     }
     else{
         // non diagonal block
-        varfToCompositeBlockLinearSystem<R, Mesh, v_fes1, v_fes2>( initmat, false, pfesUh, pfesVh, sym, tgv, b_largs_zz, stack, 
+        varfToCompositeBlockLinearSystem_fes<K, MMesh, v_fes1, v_fes2>( initmat, false, PUh, PVh, sym, tgv, b_largs_zz, stack, 
                         0, 0, BBB);
     }
    
-    const HashMatrix<int,R> * hm_block = dynamic_cast<HashMatrix<int,R> *>( &BBB );
+    const HashMatrix<int,K> * hm_block = dynamic_cast<HashMatrix<int,K> *>( &BBB );
     //cout << "---- Add block --- offset I=" << (int) offsetVh[j] << ", J="<< (int) offsetUh[i] << endl;
     //cout << " hm_block=" << *hm_block << endl;
-    hm_A->Add(hm_block, R(1.0), false, (int) offsetVh[j],(int) offsetUh[i]); // test function (Vh) are the line and inconnu function (Uh) are the column
+    hm_A->Add(hm_block, K(1.0), false, (int) offsetVh[j],(int) offsetUh[i]); // test function (Vh) are the line and inconnu function (Uh) are the column
    
     //A_block->destroy();
     delete A_block;
 }
 
+template<class R>
+void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j, 
+                const int &typeUh, const int &typeVh, 
+                const vector< long> &offsetUh, const vector< long> &offsetVh,
+                const generic_v_fes * pfesUh, const generic_v_fes * pfesVh,
+                bool initmat, bool initx, const int &sym, const double &tgv, 
+                const list<C_F0> & b_largs_zz, Stack stack, 
+                KN_<R> *B, KN_<R> *X, HashMatrix<int,R> *hm_A){
 
+  if(typeUh == 2 && typeVh == 2){
+    const FESpace * PUh = (FESpace*) pfesUh->getpVh(); // update the FESpace1
+    const FESpace * PVh = (FESpace*) pfesVh->getpVh(); // update the FESpace2
 
+    varfToCompositeBlockLinearSystemALLCASE_pfesT<R,Mesh,v_fes,v_fes>( i, j, offsetUh, offsetVh, PUh, PVh,
+                initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A);
+      
+  }else if(typeUh == 5 && typeVh == 2){
+    const FESpaceL * PUh = (FESpaceL*) pfesUh->getpVh(); // update the FESpace1
+    const FESpace * PVh = (FESpace*) pfesVh->getpVh(); // update the FESpace2
+
+    varfToCompositeBlockLinearSystemALLCASE_pfesT<R,MeshL,v_fesL,v_fes>( i, j, offsetUh, offsetVh, PUh, PVh,
+                initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A);
+      
+  }
+  else if(typeUh == 2 && typeVh == 5){
+    const FESpace * PUh = (FESpace*) pfesUh->getpVh(); // update the FESpace1
+    const FESpaceL * PVh = (FESpaceL*) pfesVh->getpVh(); // update the FESpace2
+
+    varfToCompositeBlockLinearSystemALLCASE_pfesT<R,MeshL,v_fes,v_fesL>( i, j, offsetUh, offsetVh, PUh, PVh, 
+                initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A);
+      
+  }
+  else if(typeUh == 5 && typeVh == 5){
+    const FESpaceL * PUh = (FESpaceL*) pfesUh->getpVh(); // update the FESpace1
+    const FESpaceL * PVh = (FESpaceL*) pfesVh->getpVh(); // update the FESpace2
+
+    varfToCompositeBlockLinearSystemALLCASE_pfesT<R,MeshL,v_fesL,v_fesL>( i, j, offsetUh, offsetVh, PUh, PVh, 
+                initmat, initx, sym, tgv, b_largs_zz, stack, B, X, hm_A);
+      
+  }
+  else{
+    cerr << "Other type for FESpace in construction, in construction ..." << endl;
+    ffassert(0);
+  }
+}
 
 template<class R> 
 void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &j, 
@@ -2683,6 +2650,23 @@ template void varfToCompositeBlockLinearSystem< Complex, MeshL, FESpaceL, FESpac
                               (bool initmat, bool initx, const FESpaceL * PUh, const FESpace * PVh, 
                               const int &sym, const double &tgv, const list<C_F0> & largs, Stack stack, 
                               KN_<Complex> *B, KN_<Complex> *X, MatriceCreuse<Complex> &A);
+
+template void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j, 
+                const int &typeUh, const int &typeVh, 
+                const vector< long> &offsetUh, const vector< long> &offsetVh,
+                const generic_v_fes * pfesUh, const generic_v_fes * pfesVh,
+                bool initmat, bool initx, const int &sym, const double &tgv, 
+                const list<C_F0> & b_largs_zz, Stack stack, 
+                KN_<double> *B, KN_<double> *X, HashMatrix<int,double> *hm_A);
+
+template void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j, 
+                const int &typeUh, const int &typeVh, 
+                const vector< long> &offsetUh, const vector< long> &offsetVh,
+                const generic_v_fes * pfesUh, const generic_v_fes * pfesVh,
+                bool initmat, bool initx, const int &sym, const double &tgv, 
+                const list<C_F0> & b_largs_zz, Stack stack, 
+                KN_<Complex> *B, KN_<Complex> *X, HashMatrix<int,Complex> *hm_A);
+
 
 template void varfToCompositeBlockLinearSystemALLCASE( const int& i, const int &j, 
                 const vector< int> &typeUh, const vector< int> &typeVh,

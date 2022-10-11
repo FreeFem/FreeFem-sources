@@ -254,6 +254,7 @@ class generic_v_fes : public RefCounter {
   // declaration avec les virtuelles pure
   // function for vect_generic_v_fes
   virtual void *getpVh()=0;         // get the pointer of FESpace
+  virtual void *getpVh()const=0;         // get the pointer of FESpace
   virtual const void *getppTh()=0;  // get the pointer on the pointer of the mesh
   virtual int getN()=0;             // get the number of item of the FESpace
 };
@@ -300,6 +301,7 @@ class v_fes : public generic_v_fes{ //: public RefCounter {
   // Added to return the pointer to FESpace 
   const void *getppTh(){ return ppTh; }; // Morice : get the pointer on the pointer of the mesh
   void *getpVh(){ return pVh; };         // Morice : get the pointer of FESpace
+  void *getpVh()const{ return pVh; };         // Morice : get the pointer of FESpace
   int getN(){ return N;};                // Morice : get the number of item of the FESpace
 };
 
@@ -339,6 +341,7 @@ class v_fes3 : public generic_v_fes { //: public RefCounter {
 
   const void * getppTh(){ return ppTh; }; // Morice : get the pointer on the pointer of the mesh
   void * getpVh(){ return pVh; };         // Morice : get the pointer of FESpace
+  void * getpVh()const{ return pVh; };         // Morice : get the pointer of FESpace
   int getN(){ return N;};                // Morice : get the number of item of the FESpace
 };
 
@@ -380,6 +383,7 @@ class v_fesS : public generic_v_fes { //: public RefCounter {
 
   const void * getppTh(){ return ppTh; }; // Morice : get the pointer on the pointer of the mesh
   void * getpVh(){ return pVh; };         // Morice : get the pointer of FESpace
+  void * getpVh()const{ return pVh; };         // Morice : get the pointer of FESpac
   int getN(){ return N;};                // Morice : get the number of item of the FESpace
 };
 
@@ -421,6 +425,7 @@ class v_fesL : public generic_v_fes { //: public RefCounter {
 
   const void *getppTh(){ return ppTh; }; // Morice : get the pointer on the pointer of the mesh
   void *getpVh(){ return pVh; };         // Morice : get the pointer of FESpace
+  void * getpVh()const{ return pVh; };         // Morice : get the pointer of FESpac
   int getN(){ return N;};                // Morice : get the number of item of the FESpace
 };
 

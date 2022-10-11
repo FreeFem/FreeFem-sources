@@ -732,6 +732,24 @@ public:
 
 };
 
+// specification of Linear Form in the case of composite
+template<>
+class Call_FormLinear< vect_generic_v_fes>: public E_F0mps
+{
+public:
+  KN<list<C_F0>> block_largs;
+  Expression *nargs;
+  typedef list<C_F0>::const_iterator const_iterator;
+  const int N;
+  Expression ppfes;
+
+  Call_FormLinear(Expression * na,Expression  LL, Expression ft);
+  AnyType operator()(Stack stack) const
+  { InternalError(" bug: no eval of Call_FormLinear ");}
+   operator aType () const { return atype<void>();}
+
+};
+
 template<class VFES1,class VFES2>
 class Call_FormBilinear: public E_F0mps
 {
@@ -754,8 +772,6 @@ class Call_CompositeFormBilinear: public E_F0mps
 {
 public:
   Expression *nargs;
-  //list<C_F0> varflargs;
-  //list<C_F0> largs;
   KNM<list<C_F0>> block_largs;
 
   typedef list<C_F0>::const_iterator const_iterator;
@@ -963,9 +979,21 @@ struct OpArraytoLinearFormVG
         {
           assert(l);
 
-        	bool iscmplx=FieldOfForm(l->largs,IsComplexType<R>::value);
-	        //cout<< "FieldOfForm:iscmplx " << iscmplx << " " << IsComplexType<R>::value << " " <<( (iscmplx) == IsComplexType<R>::value) << endl;
-	        ffassert( (iscmplx) == IsComplexType<R>::value);
+          int NN = (int) l->ppfes->componentNbitem().size();
+      
+          bool total_iscmplx=false;
+          // loop over block
+          for(int i=0; i<NN; i++){
+              // FieldOfForm : optimize the terms (flags -O3) of the variational form and verifies the type of the variational form
+              bool iscmplx=FieldOfForm(l->block_largs(i),IsComplexType<R>::value)  ;
+              // cout<< "FieldOfForm:iscmplx " << iscmplx << " " << IsComplexType<R>::value << " " << ((iscmplx) == IsComplexType<R>::value) << endl;
+              ffassert( (iscmplx) == IsComplexType<R>::value);
+              if( !total_iscmplx ) total_iscmplx=iscmplx;
+          }
+
+        	// bool iscmplx=FieldOfForm(l->largs,IsComplexType<R>::value);
+	        // //cout<< "FieldOfForm:iscmplx " << iscmplx << " " << IsComplexType<R>::value << " " <<( (iscmplx) == IsComplexType<R>::value) << endl;
+	        // ffassert( (iscmplx) == IsComplexType<R>::value);
 
         }
     operator aType () const { return atype<KN<R> *>();}
@@ -985,42 +1013,6 @@ struct OpArraytoLinearFormVG
 
 };
 
-/*
-template<class R>  //  to make   A=linearform(x)
-struct OpMatrixtoBilinearFormVG
-  : public OneOperator
-{
-  typedef typename Call_FormBilinear<vect_generic_v_fes,vect_generic_v_fes>::const_iterator const_iterator;
-  int init;
-  
-  class Op : public E_F0mps {
-    public:
-      Call_FormBilinear<vect_generic_v_fes,vect_generic_v_fes> *b;
-      Expression a;
-      int init;
-      //AnyType operator()(Stack s)  const;
-      
-      Op(Expression aa,Expression  bb,int initt)
-        : b(new Call_FormBilinear<vect_generic_v_fes,vect_generic_v_fes>(* dynamic_cast<const Call_FormBilinear<vect_generic_v_fes,vect_generic_v_fes> *>(bb))),a(aa),init(initt)
-    { 
-      assert(b && b->nargs);
-      bool iscmplx=FieldOfForm(b->largs,IsComplexType<R>::value)  ;
-        // cout<< "FieldOfForm:iscmplx " << iscmplx << " " << IsComplexType<R>::value << " " << ((iscmplx) == IsComplexType<R>::value) << endl;
-      ffassert( (iscmplx) == IsComplexType<R>::value);
-    }
-    operator aType () const { return atype<Matrice_Creuse<R>  *>();}
-
-    AnyType operator()(Stack s)  const;
-  };
-
-  E_F0 * code(const basicAC_F0 & args) const
-  { return  new Op(to<Matrice_Creuse<R>*>(args[0]),args[1],init); }
-  OpMatrixtoBilinearFormVG(int initt=0) :
-    OneOperator(atype<Matrice_Creuse<R>*>(),atype<Matrice_Creuse<R>*>(),atype<const Call_FormBilinear<vect_generic_v_fes,vect_generic_v_fes>*>()),
-    init(initt){};
-
-};
-*/
 template<class R>
 class IntFunction  : public E_F0mps { public:
   typedef R Result;
@@ -1509,6 +1501,8 @@ AnyType OpArraytoLinearForm<R,MMesh,v_fes>::Op::operator()(Stack stack)  const
   return SetAny<KN_<R> >(xx);
 }
 
+#include "compositeFESpace.hpp"
+
 /**
        *  @brief  Builds a new largs  whit each element are included in one block
        *  @param  largs list of argument of the initial Forms 
@@ -1518,9 +1512,42 @@ AnyType OpArraytoLinearForm<R,MMesh,v_fes>::Op::operator()(Stack stack)  const
        */
 
 // 
-inline KN< list<C_F0> > creationLinearFormCompositeFESpace( const list<C_F0> & largs, const int& NpVh, const KN<int> & indexBlockVh
+inline KN< list<C_F0> >  creationLinearFormCompositeFESpace( const list<C_F0> & largs, const int& NpVh, const KN<int> & indexBlockVh
                                                            ,const KN<int> &localIndexInTheBlockVh )
 { 
+  // hypothesis ::                   NpUh =                   NpVh
+  //            ::           indexBlockUh =           indexBlockVh
+  //            :: localIndexInTheBlockUh = localIndexInTheBlockVh
+  //
+  KNM< list<C_F0> > block_largs;
+  block_largs.resize( (long) NpVh, (long) NpVh );
+  
+  list<C_F0> tmp_largs = creationLargsForCompositeFESpace( largs, NpVh, NpVh, indexBlockVh, indexBlockVh );
+  block_largs = computeBlockLargs( tmp_largs, NpVh, NpVh, indexBlockVh, indexBlockVh );
+  changeComponentFormCompositeFESpace( localIndexInTheBlockVh, localIndexInTheBlockVh, block_largs );
+
+  // verifies that we don't have non diagonal block
+  for( int i=0; i<NpVh; i++){
+    for(int j=0; j<NpVh; j++){
+      if( i!=j && block_largs(i,j).size() > 0 ){
+        cerr << " Error non diagonal block for creationLinearFormCompositeFESpace." << endl;
+        ffassert(0);
+      }
+    }
+  }
+
+  KN< list<C_F0> > block_diag_largs( (long) NpVh);
+  for( int i=0; i<NpVh; i++){
+    const list<C_F0> & tp_largs = block_largs(i,i);
+    list<C_F0>::const_iterator ii,ib=tp_largs.begin(),ie=tp_largs.end(); 
+    for (ii=ib;ii != ie;ii++) {
+      block_diag_largs(i).push_back(*ii);
+    }
+  }
+
+  return block_diag_largs; 
+
+  /*
   // Vh is the FESpace
   // ================================================
 
@@ -1634,6 +1661,7 @@ inline KN< list<C_F0> > creationLinearFormCompositeFESpace( const list<C_F0> & l
   }
   //return newlargs;
   return block_largs;
+  */
 }
 
 template<class R>
@@ -1674,12 +1702,6 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
   if(zero && totalNbOfDF )
    xx=R();
 
-  // get info the composite FESpace
-  /*
-  int  NpVh = (*pCompoVh)->N;
-  KN<int> VhNbItem = (*pCompoVh)->vectOfNbitem();
-  KN<int> VhNbOfDf = (*pCompoVh)->vectOfNbOfDF();
-  */
   int VhtotalNbItem=0;
   for(int i=0; i< NpVh; i++) VhtotalNbItem += VhNbItem[i];
 
@@ -1702,20 +1724,17 @@ AnyType OpArraytoLinearFormVG<R>::Op::operator()(Stack stack)  const
 
 
   // creation of the LinearForm corresponding to each block
-  KN< list<C_F0> > block_largs = creationLinearFormCompositeFESpace( l->largs, NpVh, indexBlockVh, localIndexInTheBlockVh);
+  //KN< list<C_F0> > block_largs = creationLinearFormCompositeFESpace( l->largs, NpVh, indexBlockVh, localIndexInTheBlockVh);
   
   // ===  loop over the block ===//
   int offsetVh = 0;
   for( int j=0; j<NpVh; j++){
     // get the information of the block
-    const list<C_F0> & b_largs=block_largs(j); 
+    const list<C_F0> & b_largs=l->block_largs(j); 
     int M_block = VhNbOfDf[j];
 
     if( b_largs.size() > 0 ){
-      cout << "construction of the block "<< j <<" of the varf" << endl;
-      //KN<R> * xxblock = new KN<R>(M_block);
-      //KN_<R> &xxblock2 = *(KN_<R> *) xxblock;
-
+      // cout << "construction of the block "<< j <<" of the varf" << endl;
       KN<R> xxblock2(M_block);
       xxblock2=R();   // initiallise the block to zero ??? (get previous value of xxblock2).
 
@@ -1968,7 +1987,7 @@ void creationBlockOfMatrixToBilinearForm( const FESpace1 * PUh, const FESpace2 *
 
    }
 }
-#include "compositeFESpace.hpp"
+//#include "compositeFESpace.hpp"
 
 //bool SetGMRES();
 //bool SetCG();

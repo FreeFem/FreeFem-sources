@@ -11894,7 +11894,7 @@ AnyType Problem::eval(Stack stack,Data<FESpace> * data,CountPointer<MatriceCreus
 
 void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_component, const vector<void *> &u_h, const vector<int> &type_varFE, 
                                     vector<void *> & LLUh, vector<int> &typeUh, vector<long> &sizeUh, vector<long> & offsetUh,
-                                    vector<int> &UhNbItem,vector<generic_v_fes *> pfesUh){
+                                    vector<int> &UhNbItem,vector<generic_v_fes *> &pfesUh){
 
 
     ffassert( (size_component == LLUh.size()) );
@@ -11913,7 +11913,7 @@ void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_co
             sizeUh[kkk] = tyty->newVh()->NbOfDF;
             UhNbItem[kkk] = tyty->newVh()->N;
             typeUh[kkk] = type_varFE[i];
-            pfesUh[kkk] = *(tyty->pVh);
+            pfesUh[kkk] = (pfes) *(tyty->pVh);
         }
         else if( type_varFE[i]== 3){
             FEbase<R, v_fes3> * tyty = (FEbase<R, v_fes3> *) u_h[i];
@@ -11921,7 +11921,7 @@ void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_co
             sizeUh[kkk] = tyty->newVh()->NbOfDF;
             UhNbItem[kkk] = tyty->newVh()->N;
             typeUh[kkk] = type_varFE[i];
-            pfesUh[kkk] = *(tyty->pVh);
+            pfesUh[kkk] = (pfes3) *(tyty->pVh);
         }
         else if( type_varFE[i]== 4){
             FEbase<R, v_fesS> * tyty = (FEbase<R, v_fesS> *) u_h[i];
@@ -11929,7 +11929,7 @@ void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_co
             sizeUh[kkk] = tyty->newVh()->NbOfDF;
             UhNbItem[kkk] = tyty->newVh()->N;
             typeUh[kkk] = type_varFE[i];
-            pfesUh[kkk] = *(tyty->pVh);
+            pfesUh[kkk] = (pfesS) *(tyty->pVh);
         }
         else if( type_varFE[i]== 5){
             FEbase<R, v_fesL> * tyty = (FEbase<R, v_fesL> *) u_h[i];
@@ -11937,7 +11937,7 @@ void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_co
             sizeUh[kkk] = tyty->newVh()->NbOfDF;
             UhNbItem[kkk] = tyty->newVh()->N;
             typeUh[kkk] = type_varFE[i];
-            pfesUh[kkk] = *(tyty->pVh);
+            pfesUh[kkk] = (pfesL) *(tyty->pVh);
         }
         else{
             cerr << "error in the type of FESpace" <<endl;
@@ -11951,6 +11951,7 @@ void FEbaseToCompositeFESpaceInfo(const int &first_component,const int & size_co
     offsetUh[0] = 0; 
     for (int i=0; i<size_component; i++){
         offsetUh[i+1] = offsetUh[i] + sizeUh[i];
+        cout << "pfesUh=" << pfesUh[i] << endl;
     }
 }
 bool FieldOfForm( list<C_F0> & largs ,bool complextype);
@@ -12211,6 +12212,7 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
     // On a besoin ici que des les FESpace de Uh
     long VhNbOfDF = offsetVh[NpVh];
     bool initx = true; // make x and b different in all case
+    // PAC(e) : 
     // more safe for the future ( 4 days lose with is optimization FH )
 
     KN<R> *B=new KN<R>(offsetUh[NpUh]); //  hypothese system carre
@@ -12348,18 +12350,20 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
             if( largs_FEM.size() >0 ){
                 // computation of the matrix
                 const list<C_F0> & b_largs_zz = largs_FEM;
-                
+                /*
                 varfToCompositeBlockLinearSystemALLCASE( i, j, typeUh, typeVh, sizeUh, sizeVh, 
                                                         offsetUh, offsetVh, LLUh, LLVh,
                                                         ds.initmat, initx, sym, ds.tgv, 
                                                         b_largs_zz, stack, 
                                                         B, X, hm_A);
-                /*
-                varfToCompositeBlockLinearSystemALLCASE_pfes( i, j, offsetUh, offsetVh, pfesUh, pfesVh,
+                */
+                
+                varfToCompositeBlockLinearSystemALLCASE_pfes<R>( i, j, typeUh[i], typeVh[j], 
+                                                        offsetUh, offsetVh, pfesUh[i], pfesVh[j],
                                                         ds.initmat, initx, sym, ds.tgv, 
                                                         b_largs_zz, stack, 
                                                         B, X, hm_A);
-                */
+                
                 //deleteNewLargs(largs_FEM);
             }
 
@@ -13342,7 +13346,7 @@ var(l.size()),
 type_var(),
 VF(false),
 offset(align8(top)),
-dim( isCompositeProblem(l) ? 6 :  ( isSameDimAndComplexTypeProblem(l).second ? dimProblem(l) : 0 ) )
+dim( isCompositeProblem(l) ? 6 :  ( isSameDimAndComplexTypeProblem(l).first ? dimProblem(l) : 6 ) )
 {
     if( verbosity > 999)  cout << "Problem : ----------------------------- " << top << " dim = " << dim<<" " << nargs <<  endl;
     
@@ -13363,7 +13367,12 @@ dim( isCompositeProblem(l) ? 6 :  ( isSameDimAndComplexTypeProblem(l).second ? d
     else if (dim==5)  // dim = 5 for a 3D curve problem
         iscomplex=GetBilinearParam<pfLr,pfLc>(l,name_param,n_name_param,nargs, Nitem,Mitem,var);
     else if (dim==6){
-        ffassert( (isCompositeProblem(l) == true) );
+        if(! isCompositeProblem(l) ){
+            cerr << "write our problem/solve in composite form." << endl;
+            cerr << "problem pb(<[u1,u2],[u3]>,<[v1,v2],[v3]>) = " << endl;
+            ffassert(0);
+        }
+        ffassert( (isCompositeProblem(l) == true) ); // ???
         Nitem = 0; // initialize value to zero
         Mitem = 0; // initialize value
         
@@ -13429,7 +13438,7 @@ dim( isCompositeProblem(l) ? 6 :  ( isSameDimAndComplexTypeProblem(l).second ? d
             for(int j=0; j<NpVh; j++){
                 // FieldOfForm : optimize the terms (flags -O3) of the variational form and verifies the type of the variational form
                 bool iscmplx=FieldOfForm(block_largs(i,j),iscomplex)  ;
-                cout<< "(i,j)=" << i << ',' << j <<"; FieldOfForm:iscmplx " << iscmplx << " iscomplex " << iscomplex << endl;
+                // cout<< "(i,j)=" << i << ',' << j <<"; FieldOfForm:iscmplx " << iscmplx << " iscomplex " << iscomplex << endl;
 
                 if( iscmplx ){ total_iscmplx =true;}
             }
@@ -13561,13 +13570,43 @@ Call_CompositeFormBilinear< VFES1, VFES2>::Call_CompositeFormBilinear(Expression
 
 template<class VFES>
 Call_FormLinear<VFES>::Call_FormLinear(Expression *na,Expression  LL, Expression ft)
-:largs(),nargs(na),N(ft->nbitem()),
-ppfes(ft)//IsFebaseArray(ft))
+: largs(), nargs(na), N(ft->nbitem()), ppfes(ft)//IsFebaseArray(ft))
 {
     const C_args * LLL=dynamic_cast<const C_args *>(LL);
     if ( !LLL) CompileError("The parameter of a LinearForm must be a array of all componate of FE function");
     largs=LLL->largs;
 }
+
+// version for composite case
+Call_FormLinear<vect_generic_v_fes>::Call_FormLinear(Expression *na,Expression  LL, Expression ft)
+: block_largs(), nargs(na), N(ft->nbitem()), ppfes(ft)//IsFebaseArray(ft))
+{
+    const C_args * LLL=dynamic_cast<const C_args *>(LL);
+    if ( !LLL) CompileError("The parameter of a LinearForm must be a array of all componate of FE function");
+
+    // recuperation de la taille des FESpaces 
+    KN<size_t> VhNbItem = ft->componentNbitem();
+    int NpVh = (int) VhNbItem.size(); 
+    KN<int> indexBlockVh(ft->nbitem());
+    KN<int> localIndexInTheBlockVh(ft->nbitem());
+
+    // index for the construction of the block of Vh
+    {
+        int current_index=0;
+        for(int i=0; i<NpVh; i++){
+        for(int j=0; j<VhNbItem[i]; j++){
+            indexBlockVh[current_index] = i;
+            localIndexInTheBlockVh[current_index] = j;
+            current_index++;
+        }
+        }
+        ffassert(current_index==ft->nbitem());
+    }
+
+    block_largs.resize( (long) NpVh);
+    block_largs = creationLinearFormCompositeFESpace( LLL->largs, NpVh, indexBlockVh, localIndexInTheBlockVh );
+}
+
 bool C_args::IsLinearOperator() const {
     //  int n=largs.size();
     aType tRn =atype<KN<R>* >();
@@ -13702,7 +13741,7 @@ void SetArgsFormLinear(const ListOfId *lid,int ordre)
                             counter_index_FEbase++;
                         }
                         else
-                        CompileError(" Just Variable in array parameter ");
+                            CompileError(" Just Variable in array parameter ");
                     }
                 }
             }
