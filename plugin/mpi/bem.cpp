@@ -1016,9 +1016,9 @@ AnyType OpHMatrixtoBEMForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stack)  
     
     if (VFBEM==1) {
         // info kernel
-        pair<BemKernel*,double> kernel = getBemKernel(stack,largs);
+        pair<BemKernel*,Complex> kernel = getBemKernel(stack,largs);
         BemKernel *Ker = kernel.first;
-        double alpha = kernel.second;
+        Complex alpha = kernel.second;
         
         if(mpirank == 0 && verbosity >5) {
             int nk=-1;

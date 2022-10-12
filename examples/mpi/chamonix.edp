@@ -215,14 +215,14 @@ if (kappaInK[K]) {
 	KappaGrid kappag(bounds,0.01,kappaApprox[K-(K>0)]*rhof);
 
 	// We use the truncated volume mesh Th3t (without the surface) for the boundary operator,
-	// as we use a simpler formula for surface-surface interactions
+	// as we use an analytic formula for surface-surface interactions
 	Generator GenSE(Th3t,ThS,seeface,kappag);
 	HMatrix HSE = Build(GenSE,VhS,Vht,eta=100,eps=1e-2,minclustersize=10,maxblocksize=1000000);
 	if (mpirank == 0) cout << HSE.infos << endl; 
 	display(HSE);
 	SEt[] = HSE*ones[]; // SE = \int_∑ ((x-x').n) exp(-\int_(x,x')kappa(nu,x'))/|x-x'|^3
 	SE[K][] = Rt'*SEt[]; // extend the result from truncated Vht to Vh
-	// use a simpler formula for surface-surface interactions:
+	// use an analytic formula for surface-surface interactions:
 	for [i,bi:SE[K][]] if (onGamma[][i] > -0.5) bi = 0.25*seeface[int(onGamma[][i]+0.5)];
 
 	Generator GenVolume(Th3,kappag);
