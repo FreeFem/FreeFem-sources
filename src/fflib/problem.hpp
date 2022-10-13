@@ -257,6 +257,7 @@ class BC_set : public E_F0mps { public:
 
   // operator by copy : used for FESpace composite to renum block index of finconnue et ftest.
   // Remark: it used also in other part of Freefem
+  //         In this, we loose the optimal information
   BC_set(  const BC_set & bcold ): complextype(bcold.complextype), on(bcold.on), 
                                   onis(bcold.onis), bc(bcold.bc){} 
   int nbtrue(bool *ok) const 
@@ -496,22 +497,57 @@ inline int cestac(const complex<double_st> & z)
 {return min(cestac(z.real()),cestac(z.imag()));}
 #endif
 
-/*
+
 // A construire
-class CompositeOperator{
-vector<BlockOperator> block_op; 
-};
+// template<class K>
+// class CompositeOperator{
+// vector<BlockOperator> block_op; 
+// };
+template<class K>
 class BlockOperator{
+  /*
   long offsetI;
   long offsetJ;
-  vector<VirtualMatrix *> pBlockMatrix;
+  */
+                      // defintion type_matrix
+  int type_matrix[2]; // index 0: left + index 1: right
+                      // 0:  
+                      // 1:
+
+
+                      // definition : type_operator
+                      // -1: 
+  int type_operator;  //  0: K*MatrixLeft     assert(pMatrixRight = 0) 
+                      //  1: (sum of matrix) MatrixLeft + MatrixRight
+                      //  2: (matrix multiplication) MatrixLeft * MatrixRight 
+
+  BlockOperator *pMatrixLeft;
+  BlockOperator *pMatrixRight;
+  K coeff;  
+
+  BlockOperator(){};
+
+  bool isSum(){
+    if(type_operator == 1){
+      if( !pMatrixLeft && !pMatrixRight ){
+        cerr << "error we need a Left and Right matrix for multiplication" << endl;
+        ffassert(0);
+      }  
+      return true;
+    } 
+    else{
+      return false;
+    }
+  }
+  bool isMatrixMultiplication(){return false;};
+  bool isCoeffMulltiplication(){return false;};
+  bool isNoOperator(){return false;};
 };
-*/
 
 class Problem  : public Polymorphic {
   //  typedef double R;
   static basicAC_F0::name_and_type name_param[] ;
-  static const int n_name_param =3+NB_NAME_PARM_MAT; // modi FH oct 2005 add tol_pivot 02/ 2007 add nbiter
+  static const int n_name_param =3+NB_NAME_PARM_MAT + NB_NAME_PARM_HMAT; // modi FH oct 2005 add tol_pivot 02/ 2007 add nbiter
   int Nitem,Mitem;
   const int dim;
 public:
@@ -542,40 +578,27 @@ public:
   } ;
   
   struct DataComposite{
-    /*
-    const int Nfe; // number of FESpace in Vh
-    const int Mfe; // number of FESpace in Uh
-    vector< void * > *pFESpaceUh; // pointer to FESpace 
-    vector< void * > *pFESpaceVh; // pointer to FESpace 
-
-    vector< int > *typeUh; // int of the type of Vh
-    vector< int > *typeVh; // int of the type of Vh
-
-    vector< void * > *pThU; 
-    vector< void * > *pThV; 
-
-    vector<long> *sizeUh;
-    vector<long> *sizeVh;
-
-    vector<long> *offsetUh;
-    vector<long> *offsetVh; 
-    */
-
     vector< void * > *pThU; 
     vector< void * > *pThV; 
 
     CountPointer<MatriceCreuse<double> > ARglobal;
     CountPointer<MatriceCreuse<Complex> > ACglobal;
-    void init()  {  pThU=0; pThV=0; ARglobal.init(); ACglobal.init();}
+    void init()  { cout << "j'appelle init" << endl; pThU=0; pThV=0; ARglobal.init(); ACglobal.init();}
     void destroy() {
-      for( int i=0;i<pThU->size(); i++) (*pThU)[i] = nullptr;
-      for( int i=0;i<pThV->size(); i++) (*pThV)[i] = nullptr;
-      //for( int i=0;i<pThU->size(); i++) delete (*pThU)[i];
-      //for( int i=0;i<pThV->size(); i++) delete (*pThV)[i];
-      pThU->clear();
-      pThV->clear();
-      delete pThU;
-      delete pThV;
+      if(pThU){
+        if(! pThU->empty()){
+          for( int i=0;i<pThU->size(); i++) (*pThU)[i] = nullptr;
+          pThU->clear();
+        }
+        delete pThU;
+      }
+      if(pThV){
+        if(! pThV->empty()){
+          for( int i=0;i<pThV->size(); i++) (*pThV)[i] = nullptr;
+          pThV->clear();
+        }
+        delete pThV;
+      }
       if(ARglobal){ ARglobal->SetSolver(); ARglobal.destroy(); }
       if(ACglobal){ ACglobal->SetSolver(); ACglobal.destroy(); }
     }
@@ -1306,82 +1329,6 @@ template<class K> class Matrice_Creuse_inv_trans  { public:// add aug 2018 FH.
     operator MatriceCreuse<K> & () const {return *A->A;}
     operator Matrice_Creuse<K> * () const {return A;}
 };
-/*
-//==== PAS TESTER A ENLEVER MORICE  ====//
-class qOperateurMatrice{
-  public:
-  // classe operateur quelquonque pour la construction d'une matrice
-  void * mat;
-  // mat : pointer on a HMatrix or a Matrice_Creuse
-  void * get_mat(){return mat;};
-};
-
-// structure for composite Matrix or block  matrix
-template<class R>
-class BlockCompositeMatrice {
-  int nbb; // number of blocks
-  
-  void ** data; // point to list of array of matrix
-  // Matrix can be a HMatrix or a Matrice_Creuse
-  
-  KN<int> offsetI;
-  KN<int> offsetJ;
-
-  BlockCompositeMatrice(int n_nbb, KN<int> n_offsetI, KN<int> n_offsetJ, void ** m_data ) :
-    nbb(n_nbb), offsetI(n_offsetI), offsetJ(n_offsetJ), data(m_data)
-  {
-    // check type of the composite matrix
-  }
-
-  ~BlockCompositeMatrice(){ 
-    // on ne peut pas dealllouer les matrices car dans certain cas on en aurra besoin.
-    data=nullptr;   
-  }
-
-  Matrice_Creuse<R> * getGlobalMatrix(){
-    // construct the globel matrix correspond to the block matrix
-
-    Matrice_Creuse<R> *A = new Matrice_Creuse<R>() ;
-    A->resize( offsetJ.sum(), offsetI.sum() ); // test function (Vh) are the line and inconnu function (Uh) are the column
-
-    A->init();                           
-    cout << " A.N=" <<  A->N() << endl;
-    cout << " A.M=" <<  A->M() << endl;
-
-    // loop over the block
-    for( int i=0; i<nbb; i++){
-        if( data[i] == atype < Matrice_Creuse<R>* > ){
-          A->pHM()->Add( data[i]->pHM(), R(1), false, offsetJ[j], offsetI[i] );
-        }
-#ifndef FFLANG
-#ifdef PARALLELE
-        if( data[i] == atype < HMatrixVirt<R> ** Hmat>  ){
-          // creation de la matrice dense 
-          KNM<R>* M= HMatrixVirtToDense< KNM<R>, R >( data[i] );
-
-          HashMatrix<int,R> *phm= new HashMatrix<int,R>(*M);
-          MatriceCreuse<R> *pmc(phm);
-
-          Matrice_Creuse<R> BBB;
-          BBB.A=0;
-          BBB.A.master(pmc);
-          A->pHM()->Add( BBB.pHM(), R(1), false, offsetJ[j], offsetI[i] );
-        }
-        else{
-#endif // PARALLELE
-#endif // FFLANG
-        else{
-          cerr << "Global Matrix Construction :: error of the type of one block of the matrix" << endl;
-          ffassert(0);
-        }
-      
-    }
-    return A;
-  }
-
-};
-*/
-
 
 namespace Fem2D {
 
@@ -1917,10 +1864,11 @@ AnyType OpMatrixtoBilinearForm<R,MMesh,v_fes1,v_fes2>::Op::operator()(Stack stac
            AssembleBC<R>( stack,Th,Uh,Vh,ds.sym>0,A.A,0,0,b->largs,ds.tgv);
 
    }
+   */
    A.pHM()->half = ds.sym;
    if (A_is_square)
         SetSolver(stack,VF,*A.A,ds);
-   */ 
+    
   return SetAny<Matrice_Creuse<R>  *>(&A);
 
 }

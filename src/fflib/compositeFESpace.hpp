@@ -150,32 +150,19 @@ void varfToCompositeBlockLinearSystem(bool initmat, bool initx, const FESpace1 *
                               KN_<R> *B, KN_<R> *X, MatriceCreuse<R> &A);
 
 
-#ifdef PARALLELE
-
 template< class R>
 void varfBemToCompositeBlockLinearSystem(const int& i, const int &j, 
-                const vector< int> &typeUh, const vector< int> &typeVh,
-                const vector< long> &sizeUh, const vector< long> &sizeVh,
-                const vector< long> &offsetUh, const vector< long> &offsetVh,
-                const vector< void *> &LLUh, const vector< void *> &LLVh,
+                const int &typeUh, const  int &typeVh,
+                const long &sizeUh, const long &sizeVh,
+                const long &offsetUh, const long &offsetVh,
+                const generic_v_fes *LLUh, const generic_v_fes * LLVh,
                 const list<C_F0> & b_largs_zz, Stack stack, Expression const * nargs,
-                HashMatrix<int,R> *hm_A);
-#endif
-#ifndef PARALLELE
-template< class R>
-void varfBemToCompositeBlockLinearSystem(const int& i, const int &j, 
-                const vector< int> &typeUh, const vector< int> &typeVh,
-                const vector< long> &sizeUh, const vector< long> &sizeVh,
-                const vector< long> &offsetUh, const vector< long> &offsetVh,
-                const vector< void *> &LLUh, const vector< void *> &LLVh,
-                const list<C_F0> & b_largs_zz, Stack stack, Expression const * nargs,
-                HashMatrix<int,R> *hm_A);
-#endif
+                HashMatrix<int,R> *hm_A, const int &n_name_param);
 
 template<class K> 
 void varfToCompositeBlockLinearSystemALLCASE_pfes( const int& i, const int &j, 
                 const int &typeUh, const int &typeVh,
-                const vector< long> &offsetUh, const vector< long> &offsetVh,
+                const long &offsetUh, const long &offsetVh,
                 const generic_v_fes *pfesUh, const generic_v_fes *pfesVh,
                 bool initmat, bool initx, const int &sym, const double &tgv, 
                 const list<C_F0> & b_largs_zz, Stack stack, 

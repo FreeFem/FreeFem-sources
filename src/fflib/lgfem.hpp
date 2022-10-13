@@ -712,7 +712,7 @@ class vect_generic_v_fes {  //: public RefCounter{
   // destructor
   void destroy( ) {
     // pVh = 0;
-    delete [] vect;  // A demander à PH pour la memoire
+    if( vect ) delete [] vect;  // A demander à PH pour la memoire
     //vect = 0;
     delete this;
   }

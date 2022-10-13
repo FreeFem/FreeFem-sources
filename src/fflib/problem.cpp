@@ -11979,6 +11979,8 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
     if (nargs[0]) save = *GetAny<string*>((*nargs[0])(stack));
     if (nargs[1]) cadna= GetAny<KN<double>* >((*nargs[1])(stack));
 
+    int np_bem = n_name_param;
+    int np = np_bem - NB_NAME_PARM_HMAT;
     SetEnd_Data_Sparse_Solver<R>(stack,ds,nargs,n_name_param);
     cout << " Apres lecture :: ds.initmat=" << ds.initmat << endl;
 
@@ -12350,29 +12352,29 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
             if( largs_FEM.size() >0 ){
                 // computation of the matrix
                 const list<C_F0> & b_largs_zz = largs_FEM;
-                /*
+                
                 varfToCompositeBlockLinearSystemALLCASE( i, j, typeUh, typeVh, sizeUh, sizeVh, 
                                                         offsetUh, offsetVh, LLUh, LLVh,
                                                         ds.initmat, initx, sym, ds.tgv, 
                                                         b_largs_zz, stack, 
                                                         B, X, hm_A);
-                */
                 
+                /*
                 varfToCompositeBlockLinearSystemALLCASE_pfes<R>( i, j, typeUh[i], typeVh[j], 
-                                                        offsetUh, offsetVh, pfesUh[i], pfesVh[j],
+                                                        offsetUh[i], offsetVh[j], pfesUh[i], pfesVh[j],
                                                         ds.initmat, initx, sym, ds.tgv, 
                                                         b_largs_zz, stack, 
                                                         B, X, hm_A);
-                
+                */
                 //deleteNewLargs(largs_FEM);
             }
 
             if( largs_BEM.size() >0 ){
                 // computation of the matrix
                 // ffassert( largs_BEM.size() <3 ); 
-                varfBemToCompositeBlockLinearSystem( i, j, typeUh, typeVh, sizeUh, sizeVh,
-                                        offsetUh, offsetVh, LLUh, LLVh,
-                                        largs_BEM, stack, nargs, hm_A);
+                varfBemToCompositeBlockLinearSystem( i, j, typeUh[i], typeVh[j], sizeUh[i], sizeVh[j],
+                                        offsetUh[i], offsetVh[j], pfesUh[i], pfesVh[j],
+                                        largs_BEM, stack, nargs, hm_A,np_bem);
                 //deleteNewLargs(largs_BEM);
             }
 
@@ -12621,11 +12623,15 @@ AnyType Problem::evalComposite(Stack stack, DataComposite  * data, CountPointer<
             }
         }
     }
-    for(int i=0; i<NpUh; i++)
+    for(int i=0; i<NpUh; i++){
         LLUh[i] = nullptr;
-    for(int i=0; i<NpVh; i++)
+        pfesUh[i] = nullptr;
+    }
+    for(int i=0; i<NpVh; i++){
         LLVh[i] = nullptr;
-    // delete[] LL;
+        pfesVh[i] = nullptr;
+    }
+
     // if (save) delete save; // clean memory
     *mps=mp;
     
@@ -13011,7 +13017,7 @@ void verified_E_FEcompo_ForProblem( const int &typeFEbase, const int &k, const s
             ffassert(0);
         }
         // check the size of nbitem in FESpace      
-        if( ( (i-1)== Nbitem) ){    
+        if( ((i-1) == Nbitem) ){    
             if( !( FEbase_comp->N == Nbitem) ){
                 cerr << "Error in the definition of "<< k <<"-th FESpace."<< endl;
                 cerr << "The size of t " << endl;
@@ -13058,8 +13064,8 @@ void GetBilinearParamCompositeFESpace(const ListOfId &l,basicAC_F0::name_and_typ
     int nbcompo_end=0;
 
     ffassert( nbarray >1 );
-    ListOfId * array[nbarray];
-    
+    ListOfId * array[nbarray]; // ??? 
+     
     for (int i=0;i<nb;i++){
         if( l[i].compo_begin == true ) nbcompo_begin++;
         if(   l[i].compo_end == true )   nbcompo_end++;
@@ -13157,7 +13163,7 @@ void GetBilinearParamCompositeFESpace(const ListOfId &l,basicAC_F0::name_and_typ
     for (size_t k=0,j=0;k<nbarray;k++){
         typeFEbase=type_var[counter]; 
 
-        vector< Expression> local_var(array[k]->size());
+        vector< Expression> local_var(array[k]->size());      // ?????? bug en memoire
         vector< int> local_type_var(array[k]->size());
         for (size_t i=0;i<array[k]->size();i++){
             local_var[i] = var[counter];
@@ -13351,11 +13357,13 @@ dim( isCompositeProblem(l) ? 6 :  ( isSameDimAndComplexTypeProblem(l).first ? di
     if( verbosity > 999)  cout << "Problem : ----------------------------- " << top << " dim = " << dim<<" " << nargs <<  endl;
     
     if(dim==6){
-        top = offset + sizeof( DataComposite );
+        top = offset + 4*sizeof( DataComposite );
     }
     else{
         top = offset + max(sizeof(Data<FESpace>),sizeof(Data<FESpace>));
     }
+    cout << "sizeof(DataComposite )=" << sizeof(DataComposite) << " === " <<  sizeof(Data<FESpace>) << endl;
+
     bool iscomplex=isSameDimAndComplexTypeProblem(l).second; // iscomplex of the type of argument u1,u2, ... of : problem myproblem([u1,u2],[v1,v2]), ...
 
     if(dim==2)
@@ -13439,7 +13447,6 @@ dim( isCompositeProblem(l) ? 6 :  ( isSameDimAndComplexTypeProblem(l).first ? di
                 // FieldOfForm : optimize the terms (flags -O3) of the variational form and verifies the type of the variational form
                 bool iscmplx=FieldOfForm(block_largs(i,j),iscomplex)  ;
                 // cout<< "(i,j)=" << i << ',' << j <<"; FieldOfForm:iscmplx " << iscmplx << " iscomplex " << iscomplex << endl;
-
                 if( iscmplx ){ total_iscmplx =true;}
             }
         }
