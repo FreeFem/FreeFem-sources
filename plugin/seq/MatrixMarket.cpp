@@ -163,7 +163,7 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
     double *val;
     int *I, *J;
  
-    if ((f = fopen(fname, "r")) == NULL)
+    if ((f = fopen(fname, "rb")) == NULL)
             return -1;
  
  
@@ -546,7 +546,7 @@ int mm_read_mtx_crd(const char *fname, int *M, int *N, int *nz, int **I, int **J
 
     if (strcmp(fname, "stdin") == 0) f=stdin;
     else
-    if ((f = fopen(fname, "r")) == NULL)
+    if ((f = fopen(fname, "rb")) == NULL)
         return MM_COULD_NOT_READ_FILE;
 
 
@@ -614,7 +614,7 @@ int mm_write_mtx_crd(const char fname[], int M, int N, int nz, int I[], int J[],
     if (strcmp(fname, "stdout") == 0)
         f = stdout;
     else
-    if ((f = fopen(fname, "w")) == NULL)
+    if ((f = fopen(fname, "wb")) == NULL)
         return MM_COULD_NOT_WRITE_FILE;
     
     /* print banner followed by typecode */
@@ -805,7 +805,7 @@ long readmtx(const char *fname, MatriceMorse<R> *&pA,bool  bin)
     
     if (strcmp(fname, "stdin") == 0) f=stdin;
     else
-    if ((f = fopen(fname, "r")) == NULL)
+    if ((f = fopen(fname, "rw")) == NULL)
         return MM_COULD_NOT_READ_FILE;
 
 

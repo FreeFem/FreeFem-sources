@@ -63,7 +63,7 @@ libff_a_SOURCES2=  UMFPack_Solver.cpp \
 	../femlib/MeshSn.cpp \
 	../femlib/MeshLn.cpp \
 	../femlib/GQuadTree.cpp \
-	../femlib/libmesh7b.c \
+	../femlib/libmeshb7.c \
 	glumesh2D.cpp \
 	PlotStream.hpp \
 	endian.hpp \
