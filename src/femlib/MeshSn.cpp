@@ -33,7 +33,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstring>
-#include "libmesh5.h"
+#include "libmeshb7.h"
 #include "ufunction.hpp"
 #include "error.hpp"
 #include "RNM.hpp"
@@ -271,7 +271,9 @@ namespace Fem2D
     int MeshS::load(const string & filename)
     {
         int bin;
-        int ver,inm,dim;
+        int ver;
+        int64_t inm;
+        int dim;
         int lf=filename.size()+20;
         KN<char>  fileb(lf),filef(lf);
         char *data = new char[filename.size()+1];

@@ -58,7 +58,7 @@ using namespace std;
 #include "MeshSn.hpp"
 #include "Operator.hpp"
 #include "lex.hpp"
-#include "libmesh5.h"
+#include "libmeshb7.h"
 #include "lgfem.hpp"
 #include "lgmesh3.hpp"
 #include "lgsolver.hpp"

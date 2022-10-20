@@ -38,8 +38,8 @@ GenericMesh.hpp \
 GQuadTree.hpp \
 GQuadTree.cpp \
 HeapSort.hpp \
-libmesh5.c \
-libmesh5.h  \
+libmeshb7.c \
+libmeshb7.h  \
 ufunction.hpp  \
 splitsimplex.cpp InvIntFunc.cpp splitsimplex.hpp \
 HashMatrix.hpp \

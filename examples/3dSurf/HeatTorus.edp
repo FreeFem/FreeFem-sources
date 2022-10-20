@@ -1,30 +1,47 @@
 load "msh3" 
-load "tetgen"
+//Validation of Laplace Equation on Torus (Thanks to I. Danaila and G. Sadaka)
+
+
 
 real R = 3, r=1; 
 real h = 0.2; // 
 int nx = R*2*pi/h;
 int ny = r*2*pi/h;
-func torex= (R+r*cos(y*pi*2))*cos(x*pi*2);
-func torey= (R+r*cos(y*pi*2))*sin(x*pi*2);
-func torez= r*sin(y*pi*2);
-
-
-meshS ThS=square3(nx,ny,[torex,torey,torez],removeduplicate=true) ;
-cout << "test" << ThS.nv << " " <<ThS.nt << " " << ThS.nbe << endl;
-mesh3 Th3=tetg(ThS,switch="paAAQYY"); //,nbofregions=1,regionlist=domain);
-
-plot(Th3);
-
-fespace VhS(ThS,P1);
-VhS u,v;
+func Tx= (R+r*cos(y))*cos(x);
+func Ty= (R+r*cos(y))*sin(x);
+func Tz= r*sin(y);
+macro grad(U) [dx(U)/(R+r*cos(y)),dy(U)/r]//
 macro grad3(u) [dx(u),dy(u),dz(u)]  // EOM
 
-solve Lap(u,v) = int2d(ThS)( u*v+grad3(u)'*grad3(v)) -int2d(ThS)((x+y)*v);
+// inverse tranformation (Tx,Ty,Tz)
+func T1x= atan2(y,x);
+func T1y= atan2(z,dist(x,y)-R);
+func Jtore = (R+r*cos(y));
+// verif transfo inverse : 
+cout << " T1x "<< T1x(Tx(0.5,1),Ty(0.5,1),Tz(0.5,1)) << " T1y " << T1y(Tx(0.5,1),Ty(0.5,1),Tz(0.5,1)) << endl;
+mesh Th=square(nx,ny,[2*pi*x,2*pi*y]) ;
 
+meshS ThS=movemesh23(Th,transfo=[Tx,Ty,Tz],removeduplicate=1) ;
+
+fespace Vh(Th,P1,periodic=[[1,x],[3,x],[2,y],[4,y]]);
+fespace VhS(ThS,P1);
+// 
+VhS fs = x+y+z;
+Vh fh=fs(Tx,Ty,Tz); //  fs on Th 
+VhS u,v;
+Vh uh;
+
+solve Lap(u,v) = int2d(ThS)( u*v+grad3(u)'*grad3(v)) -int2d(ThS)(fs*v);
 plot(u,wait=1,nbiso=20,fill=1);
-savemesh(ThS, "totoS.mesh");
-real uP=u(4.,0.,0.);
+uh=u(Tx,Ty,Tz);
+plot(uh,wait=1);
 
-VhS uex = cos(x) * cosh(y) + sin(x) * sinh(y);
-//VhS vn = (1 - x) * uex(0,1,0) + x * uex(1,1,0);    pb with find
+Vh U,V;
+
+solve Laph(U,V) = int2d(Th)( (U*V+grad(U)'*grad(V))*r*(R+r*cos(y))) -int2d(Th)(fh*V*r*(R+r*cos(y)));
+
+plot(U,uh,wait=1,cmm=" 2 ");
+U[] -= uh[];
+cout << U[].linfty << endl; 
+assert(U[].linfty < 1e-2 );
+

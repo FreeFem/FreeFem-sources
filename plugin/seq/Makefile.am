@@ -97,7 +97,7 @@ allheaders=../../src/fflib/AddNewFE.h ../../src/fflib/AFunction_ext.hpp ../../sr
 	../../src/Graphics/getprog-unix.hpp ../../src/Graphics/glrgraph.hpp ../../src/femlib/gmres.hpp				\
 	../../src/femlib/GQuadTree.hpp ../../src/femlib/HashTable.hpp ../../src/femlib/HeapSort.hpp ../../src/fflib/InitFunct.hpp	\
 	../../src/fflib/ffapi.hpp ../../src/femlib/Label.hpp ../../src/fflib/lex.hpp ../../src/fflib/lgfem.hpp			\
-	../../src/fflib/lgmesh3.hpp ../../src/fflib/lgsolver.hpp ../../src/lglib/lg.tab.hpp ../../src/femlib/libmesh5.h		\
+	../../src/fflib/lgmesh3.hpp ../../src/fflib/lgsolver.hpp ../../src/lglib/lg.tab.hpp ../../src/femlib/libmeshb7.h		\
 	../../src/Algo/LineSearch.hpp ../../src/femlib/MatriceCreuse.hpp ../../src/femlib/MatriceCreuse_tpl.hpp			\
 	../../src/femlib/Mesh1dn.hpp ../../src/femlib/Mesh2dn.hpp ../../src/bamglib/Mesh2.h ../../src/femlib/Mesh3dn.hpp		\
 	../../src/femlib/MeshSn.hpp ../../src/femlib/MeshLn.hpp   												\
