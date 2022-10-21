@@ -522,8 +522,8 @@ template<class Vertex> ostream& operator <<(ostream& f, const  GTree<Vertex> & q
   f << " NbTreeBox = " << qt.NbQuadTreeBox 
     << " Nb Vertices = " <<  qt.NbVertices << endl;
   f << " NbTreeBoxSearch " << qt.NbQuadTreeBoxSearch  
-    << " NbVerticesSearch " << qt.NbVerticesSearch << " NbSearch " << qt.NbSearch << " ratio: " <<
-    qt.NbVerticesSearch/qt.NbSearch << endl;
+    << " NbVerticesSearch " << qt.NbVerticesSearch << " NbSearch " << qt.NbSearch << " ratio: "
+    <<  qt.NbVerticesSearch/max(1L,qt.NbSearch) << endl;
   f << " SizeOf QuadTree" << qt.SizeOf() << endl;
   //     return  dump(f,*qt.root);
   return  f;
