@@ -29,7 +29,9 @@ $(EXEDIR)/$(prog):$(DIRDIR) $(objs)
 	#$(CC) $(LDFLAGS) $(OPT64) $(LDLDIR) $(objs) -o $@ -lm
 	$(AR) $(ARFLAGS) $(lib) $(objs)
 	$(RANLIB) $(lib)
-
+$(SRCDIR)/mshmetlib.c:$(SRCDIR)/compil.date
+	echo "#define COMPIL " '"' `date` '"' > $(SRCDIR)/compil.date
+	
 $(objs):$(header)
 
 $(DIRDIR):
