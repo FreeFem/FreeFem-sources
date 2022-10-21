@@ -30,6 +30,8 @@ $(EXEDIR)/$(prog):$(DIRDIR) $(objs)
 	$(AR) $(ARFLAGS) $(lib) $(objs)
 	$(RANLIB) $(lib)
 $(SRCDIR)/mshmetlib.c:$(SRCDIR)/compil.date
+
+$(SRCDIR)/compil.date:	
 	echo "#define COMPIL " '"' `date` '"' > $(SRCDIR)/compil.date
 	
 $(objs):$(header)
