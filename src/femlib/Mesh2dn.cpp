@@ -222,7 +222,8 @@ int Mesh2::load(const string & filename)
 
 int Mesh2::Save(const string & filename)
 {
-  int ver = GmfDouble, outm;
+    int ver = GmfDouble;
+    int64_t outm;
   if ( !(outm = GmfOpenMesh(filename.c_str(),GmfWrite,ver,2)) ) {
     cerr <<"  -- Mesh2::Save  UNABLE TO OPEN  :"<< filename << endl;
     return(1);
