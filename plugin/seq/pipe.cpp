@@ -280,23 +280,26 @@ inline istream_good to_istream_good(pstream **f) {
 inline bool get_eof(pstream **p) { return (**p).is ? (**p).is->eof( ) : EOF; }
 
 static void inittt( ) {
-  Dcl_TypeandPtr< pstream * >(0, 0, ::InitializePtr< pstream * >, ::DeletePtr< pstream * >);
-  atype< istream * >( )->AddCast(new E_F1_funcT< istream *, pstream ** >(pstream2i));
-  atype< ostream * >( )->AddCast(new E_F1_funcT< ostream *, pstream ** >(pstream2o));
-  TheOperators->Add("<-", new OneOperator2_< pstream **, pstream **, string * >(pstream_init));
-  TheOperators->Add("<-",
-                    new OneOperator3_< pstream **, pstream **, string *, string * >(pstream_init));
-  zzzfff->Add("pstream", atype< pstream ** >( ));
-  Add< pstream ** >("good", ".", new OneOperator1< istream_good, pstream ** >(to_istream_good));
-  Add< pstream ** >("eof", ".", new OneOperator1< bool, pstream ** >(get_eof));
-  Global.Add("flush", "(", new OneOperator1< long, pstream ** >(cflush));
-  Global.Add("sleep", "(", new OneOperator1< long, long >(ffsleep));
-  Global.Add("usleep", "(", new OneOperator1< long, long >(ffusleep));
+    Dcl_TypeandPtr< pstream * >(0, 0, ::InitializePtr< pstream * >, ::DeletePtr< pstream * >);
+    atype< istream * >( )->AddCast(new E_F1_funcT< istream *, pstream ** >(pstream2i));
+    atype< ostream * >( )->AddCast(new E_F1_funcT< ostream *, pstream ** >(pstream2o));
+    TheOperators->Add("<-", new OneOperator2_< pstream **, pstream **, string * >(pstream_init));
+    TheOperators->Add("<-",
+                      new OneOperator3_< pstream **, pstream **, string *, string * >(pstream_init));
+    zzzfff->Add("pstream", atype< pstream ** >( ));
+    Add< pstream ** >("good", ".", new OneOperator1< istream_good, pstream ** >(to_istream_good));
+    Add< pstream ** >("eof", ".", new OneOperator1< bool, pstream ** >(get_eof));
+    Global.Add("flush", "(", new OneOperator1< long, pstream ** >(cflush));
+    Global.Add("sleep", "(", new OneOperator1< long, long >(ffsleep));
+    Global.Add("usleep", "(", new OneOperator1< long, long >(ffusleep));
+    if (!Global.Find("onWIN32").NotNull( ))
+    {
 #ifdef _WIN32
-  Global.New("onWIN32", CConstant< bool >(true));
+        Global.New("onWIN32", CConstant< bool >(true));
 #else
-  Global.New("onWIN32", CConstant< bool >(false));
+        Global.New("onWIN32", CConstant< bool >(false));
 #endif
+    }
 }
 
 LOADFUNC(inittt);

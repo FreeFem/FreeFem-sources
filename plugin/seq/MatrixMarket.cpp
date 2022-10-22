@@ -805,7 +805,7 @@ long readmtx(const char *fname, MatriceMorse<R> *&pA,bool  bin)
     
     if (strcmp(fname, "stdin") == 0) f=stdin;
     else
-    if ((f = fopen(fname, "rw")) == NULL)
+    if ((f = fopen(fname, "rb")) == NULL)
         return MM_COULD_NOT_READ_FILE;
 
 

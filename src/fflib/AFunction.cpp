@@ -1694,7 +1694,12 @@ void Init_map_type()
   // add setw feb 2015 FH
   Global.Add("setw","(",new OneOperator1<OP_setw,long>(defOP_setw));
   TheOperators->Add("<<", new OneBinaryOperator<Print<OP_setw> >);
-
+// Add FH oct 2022 and remove form plugin pipe 
+#ifdef _WIN32
+  Global.New("onWIN32", CConstant< bool >(true));
+#else
+  Global.New("onWIN32", CConstant< bool >(false));
+#endif
 }
 
 
