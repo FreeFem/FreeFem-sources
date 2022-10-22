@@ -23,6 +23,8 @@
 
 include Makefile.inc
 
+PYTHON ?=
+
 DIR_INSTALL_REAL:=$(FF_prefix_petsc)/r
 DIR_INSTALL_COMPLEX:=$(FF_prefix_petsc)/c
 VERSION=$(shell grep "'petsc-" ../getall | perl -pe '($$_)=/([0-9]+([.][0-9]+)+)/')
@@ -222,7 +224,7 @@ Makefile.inc:../../config.status Makefile Makefile-PETSc.inc
 	../../config.status --file="Makefile.inc:Makefile-PETSc.inc"
 
 $(SRCDIR)/tag-conf-real:$(SRCDIR)/tag-tar
-	cd $(SRCDIR) && ./configure --prefix=$(DIR_INSTALL_REAL) \
+	cd $(SRCDIR) && $(PYTHON) ./configure --prefix=$(DIR_INSTALL_REAL) \
 		$(FLAGS_CONF_PETSC_REAL) PETSC_ARCH=fr
 	test -f $(SRCDIR)/fr/lib/petsc/conf/petscvariables
 	mkdir -p $(SRCDIR)/fc/externalpackages || true
@@ -234,7 +236,7 @@ Make-petsc-download.mk:$(SRCDIR)/tag-install-real
 ifdef 	COMPLEX_CASE
 #  version COMPLEX.....
 $(SRCDIR)/tag-conf-complex:$(SRCDIR)/tag-tar Make-petsc-download.mk
-	cd $(SRCDIR) && ./configure --prefix=$(DIR_INSTALL_COMPLEX) \
+	cd $(SRCDIR) && $(PYTHON) ./configure --prefix=$(DIR_INSTALL_COMPLEX) \
 		$(FLAGS_CONF_PETSC_COMPLEX) PETSC_ARCH=fc
 	test -f $(SRCDIR)/fc/lib/petsc/conf/petscvariables
 	touch $@
